@@ -272,17 +272,18 @@ function renderShell(me) {
 
       /* Hero progression globale */
       .pc3-hero{padding:24px 18px 14px;text-align:center}
-      .pc3-hero .greet{font-size:11.5px;font-weight:700;color:var(--mu);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
-      .pc3-hero h1{font-family:var(--fd);font-weight:800;font-size:24px;letter-spacing:-.02em;margin:0 0 14px}
+      .pc3-hero .greet{font-size:12px;font-weight:700;color:var(--mu);letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px;opacity:.85}
+      .pc3-hero h1{font-family:var(--fd);font-weight:800;font-size:28px;letter-spacing:-.028em;line-height:1.1;margin:0 0 16px;text-wrap:balance}
       .pc3-hero .pbar{height:8px;background:var(--bo2);border-radius:99px;overflow:hidden;margin:0 auto 6px;max-width:300px}
       .pc3-hero .pbar i{display:block;height:100%;background:linear-gradient(90deg,#10b981,#8b5cf6,#f59e0b,#0ea5e9);border-radius:99px;transition:width 1s cubic-bezier(.2,.7,.3,1)}
-      .pc3-hero .pmeta{font-size:11.5px;color:var(--mu);font-weight:600;font-family:var(--fn)}
+      .pc3-hero .pmeta{font-size:12.5px;color:var(--mu);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.005em}
+      .pc3-hero .pmeta b{color:var(--ink);font-weight:700}
       .pc3-hero .pmeta b{color:var(--ink);font-weight:800}
 
       /* Légende des états */
-      .pc3-legend{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:6px 14px 14px;font-size:10.5px;color:var(--mu);font-weight:700}
-      .pc3-legend span{display:inline-flex;align-items:center;gap:5px}
-      .pc3-legend i{width:8px;height:8px;border-radius:50%}
+      .pc3-legend{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;padding:8px 14px 16px;font-size:11.5px;color:var(--mu);font-weight:600;letter-spacing:-.005em}
+      .pc3-legend span{display:inline-flex;align-items:center;gap:6px}
+      .pc3-legend i{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.7)}
 
       /* ─── WORLD section IMMERSIF avec image décor ─── */
       .pc3-world{position:relative;padding:0 0 80px;margin:0;overflow:hidden;background:var(--w-sky-mid)}
