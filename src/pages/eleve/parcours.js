@@ -32,6 +32,7 @@ import { renderPermitCard, wirePermitCard, ensurePermitStyles } from '@/componen
 import { detectAndPlayUnlock } from '@/components/world-unlock-cinematic.js';
 
 let STATE = []; // remc_entries Supabase
+let REVIEWS = []; // lesson_reviews (historique commentaires moniteur par leçon)
 let EVENTS = []; // events leçons (pour heures faites)
 let ME = null;
 let _cosmos = null;
@@ -85,16 +86,18 @@ export async function mount(root) {
 
   root.innerHTML = `<div style="padding:32px"><div class="skel skel-card"></div><div class="skel skel-card"></div></div>`;
 
-  // Fetch en parallèle : REMC + profil complet (dob/neph) + events (heures faites)
-  const [remcRes, profileRes, eventsRes] = await Promise.allSettled([
+  // Fetch en parallèle : REMC + profil + events + reviews (historique notes moniteur par leçon)
+  const [remcRes, profileRes, eventsRes, reviewsRes] = await Promise.allSettled([
     sb.from('remc_entries').select('comp_id, lv, note, validated_at').eq('eleve_id', me.id),
     sb.from('profiles').select('id, nom, email, dob, neph, forfait_h, created_at, code_statut').eq('id', me.id).maybeSingle(),
     sb.from('events').select('dur, t, date_event').eq('eleve_id', me.id).eq('is_deleted', false),
+    sb.from('lesson_reviews').select('id, note, commentaire, comp_ids, created_at, moniteur_id').eq('eleve_id', me.id).order('created_at', { ascending: false }),
   ]);
 
   if (remcRes.value?.error) console.warn('[parcours] err', remcRes.value.error);
   STATE = remcRes.value?.data || [];
   EVENTS = eventsRes.value?.data || [];
+  REVIEWS = reviewsRes.value?.data || [];
   // Merge profil fresh dans ME
   if (profileRes.value?.data) ME = { ...me, ...profileRes.value.data };
 
@@ -430,9 +433,34 @@ function renderShell(me) {
       .fiche-hero .id{text-align:center;font-family:var(--fn);font-size:11px;opacity:.75;margin-top:4px;letter-spacing:1px}
       .fiche-hero .stt{text-align:center;margin-top:12px}
       .fiche-body{padding:14px;margin-top:-18px}
-      .fiche-section{background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);padding:14px;margin-bottom:10px;box-shadow:var(--s1)}
-      .fiche-section .lbl{font-size:10px;font-weight:800;color:var(--mu);letter-spacing:1px;margin-bottom:8px}
-      .fiche-section .txt{font-size:13.5px;color:var(--ink);line-height:1.5}
+      .fiche-section{background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);padding:16px;margin-bottom:12px;box-shadow:var(--s1)}
+      .fiche-section .lbl{font-size:10.5px;font-weight:800;color:var(--mu);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+      .fiche-section .lbl .dot{width:8px;height:8px;border-radius:50%;background:var(--gr);box-shadow:0 0 0 3px rgba(16,185,129,.18);display:inline-block}
+      .fiche-section .txt{font-size:14.5px;color:var(--ink);line-height:1.55;letter-spacing:-.005em}
+
+      /* Bloc retour moniteur — mis en avant */
+      .fiche-feedback{background:linear-gradient(135deg,rgba(16,185,129,.06),var(--su));border-color:var(--gr)}
+      .fiche-feedback .txt{font-style:italic;font-weight:500;font-size:15px;color:var(--ink)}
+      .fiche-feedback .fb-date{margin-top:10px;font-size:11.5px;color:var(--mu);font-weight:600}
+      .fiche-feedback-empty{text-align:center;padding:20px 14px;background:var(--bg2);border:1px dashed var(--bo)}
+      .fiche-feedback-empty .em{font-size:32px;line-height:1;margin-bottom:8px;opacity:.5}
+      .fiche-feedback-empty .txt{color:var(--mu);font-size:13px;font-style:italic}
+
+      /* Historique des reviews par leçon */
+      .fb-item{padding:12px 0;border-top:1px solid var(--bo2)}
+      .fb-item:first-of-type{border-top:0;padding-top:0}
+      .fb-item-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:11.5px;color:var(--mu);font-weight:600}
+      .fb-item-date{font-variant-numeric:tabular-nums;letter-spacing:-.005em}
+      .fb-item-stars{color:#f59e0b;letter-spacing:1px;font-size:12px}
+      .fb-item-txt{font-size:13.5px;color:var(--ink);line-height:1.5;font-style:italic;letter-spacing:-.005em}
+
+      /* Meta rows — détails */
+      .fiche-section .meta-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid var(--bo2);font-size:13px;letter-spacing:-.005em}
+      .fiche-section .meta-row:first-of-type{border-top:0;padding-top:0}
+      .fiche-section .meta-row .l{color:var(--mu);font-weight:500}
+      .fiche-section .meta-row .v{color:var(--ink);font-weight:700}
+      .fiche-section .meta-row .v.mono{font-family:var(--fn);font-size:12.5px;font-variant-numeric:tabular-nums}
+      .fiche-section .meta-row .v.xp-v{color:var(--am);font-weight:800}
       .meta-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--bo2);font-size:13px}
       .meta-row:last-child{border-bottom:0}
       .meta-row .l{color:var(--mu);font-weight:600}
@@ -1092,22 +1120,61 @@ function openFiche(root, compId, worldIdxStr) {
       <div class="stt"><span class="stt-pill ${st}">${stEmoji} ${stLabel}</span></div>
     </div>
     <div class="fiche-body">
+      ${e && e.note ? `
+        <div class="fiche-section fiche-feedback fiche-feedback-current">
+          <div class="lbl"><span class="dot"></span> RETOUR DE TON MONITEUR · validation</div>
+          <div class="txt">« ${esc(e.note)} »</div>
+          ${e.validated_at ? `<div class="fb-date">${new Date(e.validated_at).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' })}</div>` : ''}
+        </div>
+      ` : st === 'done' ? `
+        <div class="fiche-section fiche-feedback-empty">
+          <div class="em">💬</div>
+          <div class="txt">Compétence validée sans commentaire écrit.</div>
+        </div>
+      ` : st === 'locked' ? `
+        <div class="fiche-section fiche-feedback-empty">
+          <div class="em">🔒</div>
+          <div class="txt">Compétence pas encore abordée. Tu pourras voir les retours de ton moniteur ici dès qu'elle sera travaillée.</div>
+        </div>
+      ` : `
+        <div class="fiche-section fiche-feedback-empty">
+          <div class="em">⏳</div>
+          <div class="txt">En cours d'apprentissage. Les retours du moniteur apparaîtront ici après chaque leçon.</div>
+        </div>
+      `}
+
+      ${(() => {
+        // Historique commentaires sur cette compétence à travers les leçons
+        const history = REVIEWS.filter(r =>
+          Array.isArray(r.comp_ids) &&
+          r.comp_ids.includes(compId) &&
+          (r.commentaire || '').trim().length > 0
+        ).slice(0, 5);
+        if (!history.length) return '';
+        return `
+          <div class="fiche-section">
+            <div class="lbl">📋 HISTORIQUE DES LEÇONS · ${history.length}</div>
+            ${history.map(r => `
+              <div class="fb-item">
+                <div class="fb-item-meta">
+                  <span class="fb-item-date">${new Date(r.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'short' })}</span>
+                  <span class="fb-item-stars">${'★'.repeat(r.note || 0)}${'☆'.repeat(5 - (r.note || 0))}</span>
+                </div>
+                <div class="fb-item-txt">« ${esc(r.commentaire)} »</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      })()}
+
       <div class="fiche-section">
-        <div class="lbl">OBJECTIF</div>
-        <div class="txt">${esc(sub.n)}. Compétence du programme REMC officiel.</div>
-      </div>
-      <div class="fiche-section">
-        <div class="meta-row"><span class="l">Identifiant</span><span class="v">${esc(compId.toUpperCase())}</span></div>
+        <div class="lbl">DÉTAILS</div>
+        <div class="meta-row"><span class="l">Identifiant</span><span class="v mono">${esc(compId.toUpperCase())}</span></div>
         <div class="meta-row"><span class="l">Monde</span><span class="v">${meta.num} · ${esc(meta.name)}</span></div>
         <div class="meta-row"><span class="l">Statut</span><span class="v">${stLabel}</span></div>
-        ${st === 'done' ? `<div class="meta-row"><span class="l">XP gagnés</span><span class="v" style="color:var(--am);font-weight:800">+${xpGagne} XP ⚡</span></div>` : ''}
-        ${e && e.validated_at ? `<div class="meta-row"><span class="l">Validée</span><span class="v">${validatedAgo} · ${new Date(e.validated_at).toLocaleDateString('fr-FR')}</span></div>` : ''}
+        ${st === 'done' ? `<div class="meta-row"><span class="l">XP gagnés</span><span class="v xp-v">+${xpGagne} XP ⚡</span></div>` : ''}
+        ${e && e.validated_at ? `<div class="meta-row"><span class="l">Validée</span><span class="v">${validatedAgo}</span></div>` : ''}
       </div>
-      ${e && e.note ? `
-        <div class="fiche-section">
-          <div class="lbl">DERNIER RETOUR MONITEUR</div>
-          <div class="txt" style="font-style:italic">« ${esc(e.note)} »</div>
-        </div>` : ''}
     </div>
   `;
   const sheet = root.querySelector('#pc3-sheet');

@@ -112,6 +112,10 @@ function render({ eleve, heuresDone, restantes, forfait, acquises, pct, presence
       .fe-ev-stt.conf{background:var(--grp);color:var(--gr)} .fe-ev-stt.pend{background:var(--amp);color:var(--am)}
       .fe-empty{padding:24px 16px;text-align:center;color:var(--mu);font-size:12.5px}
       .fe-notes{padding:12px 14px}
+      .fe-notes-templates{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+      .fe-tpl{padding:6px 11px;border-radius:99px;border:1px solid var(--bo);background:var(--bg2);font-family:inherit;font-size:11.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:all .15s;letter-spacing:-.005em;white-space:nowrap}
+      .fe-tpl:hover{background:var(--ap);border-color:var(--a);color:var(--a);transform:translateY(-1px)}
+      .fe-tpl:active{transform:translateY(0)}
       .fe-notes textarea{width:100%;min-height:80px;padding:10px 12px;border:1px solid var(--bo);border-radius:8px;font-family:var(--fb);font-size:13px;color:var(--ink);resize:vertical;background:var(--su2)}
       .fe-notes textarea:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px var(--ap)}
       .fe-notes-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:10.5px;color:var(--mu)}
@@ -245,6 +249,14 @@ function render({ eleve, heuresDone, restantes, forfait, acquises, pct, presence
           <div class="s">Non visible par l'élève</div>
         </div>
         <div class="fe-notes">
+          <div class="fe-notes-templates" role="toolbar" aria-label="Insérer un commentaire rapide">
+            <button type="button" class="fe-tpl" data-tpl="✓ Bonne séance, élève à l'écoute et progressant bien.">✓ Bonne séance</button>
+            <button type="button" class="fe-tpl" data-tpl="⚠️ À retravailler : ">⚠️ À retravailler…</button>
+            <button type="button" class="fe-tpl" data-tpl="❌ Problème de ponctualité aujourd'hui. À surveiller.">❌ Ponctualité</button>
+            <button type="button" class="fe-tpl" data-tpl="🎯 Quasi prêt(e) pour l'examen — encore quelques séances.">🎯 Prêt examen</button>
+            <button type="button" class="fe-tpl" data-tpl="🚧 Difficulté sur : ">🚧 Difficulté…</button>
+            <button type="button" class="fe-tpl" data-tpl="💪 Très bonne maîtrise de : ">💪 Maîtrise…</button>
+          </div>
           <label for="fe-notes-txt" class="sr-only">Notes privées sur ${esc(eleve.nom)} (max 500 caractères)</label>
           <textarea id="fe-notes-txt" maxlength="500" aria-describedby="fe-notes-count-wrap"
                     placeholder="Notes privées sur cet élève (forces, points à travailler, etc.)…">${esc(notesContenu)}</textarea>
@@ -282,6 +294,22 @@ function wire() {
   const ta = _root.querySelector('#fe-notes-txt');
   const count = _root.querySelector('#fe-notes-count');
   ta?.addEventListener('input', () => { count.textContent = ta.value.length; });
+
+  // Templates : insère le texte à la fin (avec retour à la ligne si déjà du contenu) + focus
+  _root.querySelectorAll('.fe-tpl').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!ta) return;
+      const tpl = btn.dataset.tpl || '';
+      const cur = ta.value.trim();
+      const sep = cur ? '\n' : '';
+      const next = (cur + sep + tpl).slice(0, 500);
+      ta.value = next;
+      count.textContent = next.length;
+      ta.focus();
+      // Place le curseur à la fin (utile si template avec "... : " à compléter)
+      ta.setSelectionRange(next.length, next.length);
+    });
+  });
 
   _root.querySelector('#fe-notes-save')?.addEventListener('click', async () => {
     const contenu = ta.value;

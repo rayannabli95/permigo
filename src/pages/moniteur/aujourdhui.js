@@ -161,6 +161,26 @@ function render() {
       .aujr-hs .v small{font-size:13px;opacity:.7;font-weight:700;margin-left:1px}
       .aujr-hs .l{font-size:10.5px;color:rgba(255,255,255,.7);font-weight:700;letter-spacing:.2px;margin-top:3px}
 
+      /* Card "Prochaine leçon" avec compte à rebours */
+      .aujr-next{background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 60%,#0c1e4f 100%);color:#fff;border-radius:16px;padding:16px;margin-bottom:18px;box-shadow:0 14px 32px -8px rgba(30,64,175,.4);position:relative;overflow:hidden}
+      .aujr-next::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 100% 0%,rgba(96,165,250,.25),transparent 60%);pointer-events:none}
+      .aujr-next.soon{background:linear-gradient(135deg,#9a3412 0%,#c2410c 50%,#7c2d12 100%);box-shadow:0 14px 32px -8px rgba(234,88,12,.55);animation:aujr-next-pulse 2s ease-in-out infinite}
+      @keyframes aujr-next-pulse{0%,100%{box-shadow:0 14px 32px -8px rgba(234,88,12,.55)}50%{box-shadow:0 16px 40px -8px rgba(234,88,12,.8)}}
+      .aujr-next-tag{font-family:var(--fn);font-size:10px;font-weight:900;color:rgba(255,255,255,.75);letter-spacing:.3em;text-transform:uppercase;margin-bottom:10px;position:relative;z-index:1}
+      .aujr-next.soon .aujr-next-tag{color:#fed7aa}
+      .aujr-next-row{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+      .aujr-next-av{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);overflow:hidden;flex-shrink:0;border:2px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:900;font-size:14px}
+      .aujr-next-av img{width:100%;height:100%;object-fit:cover}
+      .aujr-next-body{flex:1;min-width:0}
+      .aujr-next-nm{font-family:var(--fd);font-size:17px;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+      .aujr-next-meta{font-size:12px;color:rgba(255,255,255,.78);margin-top:3px;letter-spacing:-.005em}
+      .aujr-next-cd{display:flex;align-items:baseline;gap:3px;font-family:var(--fd);color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.4)}
+      .aujr-next-big{font-size:36px;font-weight:900;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+      .aujr-next-unit{font-size:13px;font-weight:800;opacity:.7;letter-spacing:.05em}
+      .aujr-next-actions{margin-top:14px;position:relative;z-index:1}
+      .aujr-next .aujr-btn-primary{width:100%;background:rgba(255,255,255,.95);color:#1e3a8a}
+      .aujr-next.soon .aujr-btn-primary{color:#9a3412}
+
       /* Section headers */
       .aujr-sec-h{font-family:var(--fn);font-size:10.5px;font-weight:900;color:var(--mu);letter-spacing:.2em;text-transform:uppercase;margin:18px 4px 10px;display:flex;align-items:center;gap:8px}
       .aujr-sec-h .count{font-family:var(--fd);font-size:11px;font-weight:800;color:var(--a);background:var(--ap);padding:2px 7px;border-radius:99px}
@@ -253,6 +273,32 @@ function render() {
           <p>${livretsRetard.map(e => esc(eleveNomFor(e) + ' (' + e.h + ')')).join(', ')}</p>
         </div>
       ` : ''}
+
+      ${!current && upcoming.length > 0 ? (() => {
+        const next = upcoming[0];
+        const { startMin } = eventTimeRange(next);
+        const minToGo = startMin - nowMin();
+        const countdownLabel = minToGo < 60
+          ? `<span class="aujr-next-big">${minToGo}</span><span class="aujr-next-unit">min</span>`
+          : `<span class="aujr-next-big">${Math.floor(minToGo / 60)}</span><span class="aujr-next-unit">h${(minToGo % 60).toString().padStart(2,'0')}</span>`;
+        const isSoon = minToGo <= 15;
+        return `
+        <div class="aujr-next ${isSoon ? 'soon' : ''}">
+          <div class="aujr-next-tag">${isSoon ? '⚡ Bientôt' : '⏱ Prochaine leçon'}</div>
+          <div class="aujr-next-row">
+            <div class="aujr-next-av">${avatarHtml(next)}</div>
+            <div class="aujr-next-body">
+              <div class="aujr-next-nm">${esc(eleveNomFor(next))}</div>
+              <div class="aujr-next-meta">${esc(next.h || '')}${next.lieu ? ' · 📍 ' + esc(next.lieu) : ''}</div>
+            </div>
+            <div class="aujr-next-cd" aria-label="Temps restant">${countdownLabel}</div>
+          </div>
+          <div class="aujr-next-actions">
+            <button class="aujr-btn aujr-btn-primary" data-act="fiche" data-eleve="${esc(next.eleve_id || '')}">👤 Préparer · voir fiche</button>
+          </div>
+        </div>
+        `;
+      })() : ''}
 
       ${current ? (() => {
         const { startMin, endMin } = eventTimeRange(current);

@@ -31,6 +31,14 @@ const HEADER_H = 44;        // hauteur du header colonnes
 
 let _root, _me, _weekRef = weekStart(new Date()), _events = [], _eleves = [], _reviews = [], _selfEvals = [];
 let _nowTimer = null;
+// Vue : 'day' (1 col), '3days' (3 cols à partir d'aujourd'hui), 'week' (Lun→Dim)
+let _viewMode = (typeof localStorage !== 'undefined' && localStorage.getItem('pl-view')) || 'week';
+
+function numDays() { return _viewMode === 'day' ? 1 : _viewMode === '3days' ? 3 : 7; }
+function viewStartDate() {
+  // En vue 'week', _weekRef = lundi. En 'day'/'3days', _weekRef = jour de départ.
+  return _weekRef;
+}
 
 export async function mount(root) {
   _root = root;
@@ -95,7 +103,7 @@ function stopNowTimer() {
 
 async function load() {
   const start = isoDate(_weekRef);
-  const end = isoDate(addDays(_weekRef, 6));
+  const end = isoDate(addDays(_weekRef, numDays() - 1));
 
   const [evtRes, elvRes] = await Promise.allSettled([
     sb.from('events')
@@ -168,8 +176,13 @@ function eleveNomFor(e) {
 
 function weekLabel() {
   const a = _weekRef;
-  const b = addDays(a, 6);
-  // Si même mois : "11 → 17 mai 2026"
+  const n = numDays();
+  if (n === 1) {
+    // Vue 1 jour : "Jeu 14 mai 2026"
+    const wd = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'][a.getDay()];
+    return `${wd} ${a.getDate()} ${MONTHS_FR_SHORT[a.getMonth()]} ${a.getFullYear()}`;
+  }
+  const b = addDays(a, n - 1);
   if (a.getMonth() === b.getMonth()) {
     return `${a.getDate()} → ${b.getDate()} ${MONTHS_FR_SHORT[a.getMonth()]} ${a.getFullYear()}`;
   }
@@ -193,6 +206,11 @@ function render() {
       .pl-nav .nav-week{min-width:200px;text-align:center;font-family:var(--fn);font-size:12.5px;color:var(--ink);font-weight:700}
       .pl-nav .nav-today{background:var(--a);color:#fff;border-color:var(--a)}
       .pl-nav .nav-today:hover{background:var(--adk)}
+
+      .pl-viewtoggle{display:inline-flex;gap:4px;background:var(--bg2);padding:4px;border-radius:10px;border:1px solid var(--bo);margin:0 4px 12px}
+      .pl-viewtoggle button{padding:7px 14px;border-radius:7px;border:0;background:transparent;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--mu);cursor:pointer;transition:all .15s;letter-spacing:-.005em}
+      .pl-viewtoggle button:hover{color:var(--ink)}
+      .pl-viewtoggle button.on{background:var(--su);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 
       .pl-legend{display:flex;gap:14px;flex-wrap:wrap;padding:6px 4px 12px;font-size:11px;color:var(--mu)}
       .pl-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
@@ -226,7 +244,7 @@ function render() {
       .pl-nc.empty-state .pl-nc-em{font-size:30px;line-height:1}
       .pl-nc.empty-state .pl-nc-nm{font-size:15px;white-space:normal}
 
-      .pl-grid{background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);overflow:hidden;box-shadow:var(--s1);display:grid;grid-template-columns:64px repeat(7,1fr)}
+      .pl-grid{background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);overflow:hidden;box-shadow:var(--s1);display:grid;grid-template-columns:64px repeat(${numDays()},1fr)}
       .pl-col-h{background:var(--bg2);border-bottom:1px solid var(--bo2);padding:8px 6px;text-align:center;font-size:11px;color:var(--mu);font-weight:700;border-right:1px solid var(--bo2);height:${HEADER_H}px;box-sizing:border-box}
       .pl-col-h:last-child{border-right:0}
       .pl-col-h.today{background:var(--ap);color:var(--a)}
@@ -313,6 +331,12 @@ function render() {
 
       ${renderNowNextWidget()}
 
+      <div class="pl-viewtoggle" role="tablist" aria-label="Vue planning">
+        <button data-view="day"    class="${_viewMode === 'day' ? 'on' : ''}" type="button">Jour</button>
+        <button data-view="3days"  class="${_viewMode === '3days' ? 'on' : ''}" type="button">3 jours</button>
+        <button data-view="week"   class="${_viewMode === 'week' ? 'on' : ''}" type="button">Semaine</button>
+      </div>
+
       <div class="pl-legend">
         <span><i style="background:var(--gr)"></i>Confirmée</span>
         <span><i style="background:var(--am)"></i>En attente</span>
@@ -339,12 +363,16 @@ function render() {
 function renderColumnHeaders() {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const cells = ['<div class="pl-col-h" style="border-right:1px solid var(--bo2)"></div>'];
-  for (let i = 0; i < 7; i++) {
+  const n = numDays();
+  for (let i = 0; i < n; i++) {
     const d = addDays(_weekRef, i);
     const isToday = d.getTime() === today.getTime();
+    // Si vue 'week', WEEK_DAYS[i] (Lun..Dim). Sinon, on prend le jour réel.
+    const wdLabels = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+    const dayName = _viewMode === 'week' ? WEEK_DAYS[i] : wdLabels[d.getDay()];
     cells.push(`
       <div class="pl-col-h ${isToday ? 'today' : ''}">
-        <span class="day-name">${WEEK_DAYS[i]}</span>
+        <span class="day-name">${dayName}</span>
         <span class="day-num">${d.getDate()}</span>
       </div>
     `);
@@ -355,10 +383,11 @@ function renderColumnHeaders() {
 function renderRows() {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const out = [];
+  const n = numDays();
   for (let r = 0; r < ROWS; r++) {
     const hour = HOUR_START + r;
     out.push(`<div class="pl-hour" role="rowheader">${String(hour).padStart(2, '0')}:00</div>`);
-    for (let c = 0; c < 7; c++) {
+    for (let c = 0; c < n; c++) {
       const d = addDays(_weekRef, c);
       const isToday = d.getTime() === today.getTime();
       const iso = isoDate(d);
@@ -564,10 +593,27 @@ function wire() {
   });
 
   // Navigation semaines
-  _root.querySelector('#pl-prev')?.addEventListener('click', () => navigateWeek(-7));
-  _root.querySelector('#pl-next')?.addEventListener('click', () => navigateWeek(7));
+  const step = numDays();
+  _root.querySelector('#pl-prev')?.addEventListener('click', () => navigateWeek(-step));
+  _root.querySelector('#pl-next')?.addEventListener('click', () => navigateWeek(step));
+
+  // Toggle vue Jour / 3 jours / Semaine
+  _root.querySelectorAll('[data-view]').forEach(b => {
+    b.addEventListener('click', async () => {
+      const next = b.dataset.view;
+      if (next === _viewMode) return;
+      _viewMode = next;
+      try { localStorage.setItem('pl-view', next); } catch {}
+      // Si on passe en vue 'week', recale _weekRef sur le lundi de la semaine courante
+      if (next === 'week') _weekRef = weekStart(_weekRef);
+      await load();
+      render();
+    });
+  });
   _root.querySelector('#pl-today')?.addEventListener('click', () => {
-    _weekRef = weekStart(new Date());
+    // Aujourd'hui : mode 'week' → lundi de la semaine courante ; mode 'day'/'3days' → aujourd'hui
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    _weekRef = _viewMode === 'week' ? weekStart(today) : today;
     refresh();
   });
 
