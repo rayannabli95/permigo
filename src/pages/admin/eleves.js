@@ -32,6 +32,7 @@ export async function mount(root) {
   _root = root;
   _me = getCurUser();
   if (!_me) return;
+  if (_me.role !== 'admin') { root.innerHTML = '<p>Accès admin requis</p>'; return; }
 
   root.innerHTML = `<div style="padding:18px"><div class="skel skel-card"></div><div class="skel skel-card"></div></div>`;
   await load();
@@ -302,7 +303,7 @@ function openCreate() {
         <label>Rôle</label>
         <div class="ae-toggle">
           <button class="t-btn on" data-r="eleve" type="button">🎓 Élève</button>
-          <button class="t-btn" data-r="moniteur" type="button">👨‍🏫 Moniteur</button>
+          <button class="t-btn" data-r="moniteur" type="button">👨‍🏫 Enseignant</button>
         </div>
       </div>
       <div class="r">
@@ -400,8 +401,25 @@ function openCreate() {
         return;
       }
 
+      // Audit log — création élève/moniteur (action métier réussie)
+      await sb.from('audit_log').insert({
+        user_id: _me.id,
+        user_nom: _me.nom,
+        user_role: 'admin',
+        action: pickedRole === 'eleve' ? 'create_eleve' : 'create_moniteur',
+        table_name: 'profiles',
+        record_id: data?.profileId || data?.userId || null,
+        details: JSON.stringify({
+          nom: esc(nom),
+          email: esc(email),
+          tel: tel ? esc(tel) : null,
+          role: pickedRole,
+          forfait_h: pickedRole === 'eleve' ? forfait_h : null,
+        }),
+      });
+
       closeModal();
-      toast(`✓ ${pickedRole === 'eleve' ? 'Élève' : 'Moniteur'} créé — email de bienvenue envoyé`, 'success');
+      toast(`✓ ${pickedRole === 'eleve' ? 'Élève' : 'Enseignant'} créé — email de bienvenue envoyé`, 'success');
       await refresh();
     } catch (err) {
       console.warn('[create-user] catch', err);
@@ -522,6 +540,13 @@ function openEdit(eleveId) {
     btn.disabled = true;
     btn.textContent = '…';
 
+    // Snapshot "before" pour audit/notif
+    const before = {
+      forfait_h: e.forfait_h || 20,
+      statut: e.statut || 'Actif',
+      code_statut: e.code_statut || 'En cours',
+    };
+
     const { error } = await sb.from('profiles').update(updates).eq('id', eleveId);
     if (error) {
       console.warn('[admin/eleves] update err', error);
@@ -529,6 +554,52 @@ function openEdit(eleveId) {
       btn.disabled = false;
       btn.textContent = 'Enregistrer';
       return;
+    }
+
+    // ── Audit log + notif (Flux 4) ──
+    const forfaitChanged = before.forfait_h !== updates.forfait_h;
+    const statutChanged = before.statut !== updates.statut || before.code_statut !== updates.code_statut;
+
+    if (forfaitChanged) {
+      await sb.from('audit_log').insert({
+        user_id: _me.id,
+        user_nom: _me.nom,
+        user_role: 'admin',
+        action: 'update_eleve_forfait',
+        table_name: 'profiles',
+        record_id: eleveId,
+        details: JSON.stringify({
+          eleve_nom: esc(updates.nom),
+          before: before.forfait_h,
+          after: updates.forfait_h,
+        }),
+      });
+    }
+    if (statutChanged) {
+      await sb.from('audit_log').insert({
+        user_id: _me.id,
+        user_nom: _me.nom,
+        user_role: 'admin',
+        action: 'update_eleve_statut',
+        table_name: 'profiles',
+        record_id: eleveId,
+        details: JSON.stringify({
+          eleve_nom: esc(updates.nom),
+          before: { statut: before.statut, code_statut: before.code_statut },
+          after: { statut: updates.statut, code_statut: updates.code_statut },
+        }),
+      });
+    }
+
+    // Notif forfait_maj vers l'élève (Flux 4) si le forfait a changé
+    if (forfaitChanged) {
+      await sb.from('notifications').insert({
+        user_id: eleveId,
+        type: 'forfait_maj',
+        title: 'Forfait mis à jour',
+        body: `Ton forfait est désormais de ${updates.forfait_h} heures.`,
+      });
+      // TODO retrieve moniteur attitré pour notif côté moniteur
     }
 
     closeModal();

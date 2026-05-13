@@ -18,6 +18,7 @@ import { toast } from '@/components/toast.js';
 import { esc } from '@/utils/escape.js';
 import { mountNotifBell } from '@/components/notif-bell.js';
 import { getTheme, applyTheme } from '@/components/theme-toggle.js';
+import { openAvatarModal, renderUserAvatar } from '@/components/avatar-modal.js';
 
 let _root, _me;
 
@@ -34,10 +35,10 @@ export async function mount(root) {
   wire();
 
   // Charge les stats moniteur en parallèle (non-bloquant)
-  if (_me.role === 'moniteur') loadMoniteurStats();
+  if (_me.role === 'moniteur') loadEnseignantStats();
 }
 
-async function loadMoniteurStats() {
+async function loadEnseignantStats() {
   const now = new Date();
   const yearStart = `${now.getFullYear()}-01-01`;
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
@@ -117,12 +118,12 @@ function initials(name) {
 }
 
 function roleLabel(role) {
-  return ({ eleve: '🎓 Élève', moniteur: '🚗 Moniteur', admin: '👑 Gérant' })[role] || role;
+  return ({ eleve: '🎓 Élève', moniteur: '🚗 Enseignant', admin: '👑 Gérant' })[role] || role;
 }
 
 function render(me) {
   const isEleve = me.role === 'eleve';
-  const isMoniteur = me.role === 'moniteur';
+  const isEnseignant = me.role === 'moniteur';
   return `
     <style>
       .pr-wrap{max-width:520px;margin:0 auto;padding:14px}
@@ -177,7 +178,7 @@ function render(me) {
       <div class="pr-hero">
         <div class="pr-av-wrap" id="pr-av-wrap">
           <div class="pr-av" id="pr-av" role="button" tabindex="0" aria-label="Changer ma photo de profil">
-            ${me.avatar_url ? `<img src="${esc(me.avatar_url)}" alt="" id="pr-av-img">` : `<span id="pr-av-init">${esc(initials(me.nom))}</span>`}
+            ${renderUserAvatar(me, 120).replace(/^<(img|div)/, '<$1 style="width:100%;height:100%;border-radius:0"')}
           </div>
           <button class="pr-av-btn" id="pr-av-btn" type="button" aria-label="Choisir une nouvelle photo">📷</button>
           <input class="pr-av-upload" id="pr-av-upload" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Sélectionner une photo">
@@ -213,7 +214,7 @@ function render(me) {
         ` : ''}
       </div>
 
-      ${isMoniteur ? `
+      ${isEnseignant ? `
         <!-- ╔══ DASHBOARD PERSO MONITEUR ══╗ -->
         <style>
           .pr-mon-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px}
@@ -330,13 +331,23 @@ function wire() {
   const avEl = _root.querySelector('#pr-av');
   const btnEl = _root.querySelector('#pr-av-btn');
 
-  // Clic sur l'avatar OU le bouton 📷 → ouvre le file picker
-  const triggerUpload = () => fileInput?.click();
-  avEl?.addEventListener('click', triggerUpload);
-  btnEl?.addEventListener('click', (e) => { e.stopPropagation(); triggerUpload(); });
-  avEl?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerUpload(); }
+  // Clic sur l'avatar OU le bouton 📷 → ouvre le modal (2 onglets : Photo / Avatars stylés)
+  const openModal = () => openAvatarModal({
+    onUpdate: () => {
+      // Refresh local + UI sans reload complet
+      setCurUser({ ..._me });
+      const wrap = _root.querySelector('#pr-av');
+      if (wrap) wrap.innerHTML = renderUserAvatar(_me, 120).replace(/^<(img|div)/, '<$1 style="width:100%;height:100%;border-radius:0"');
+    },
   });
+  avEl?.addEventListener('click', openModal);
+  btnEl?.addEventListener('click', (e) => { e.stopPropagation(); openModal(); });
+  avEl?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(); }
+  });
+
+  // Conservé : file input + fallback pour ancien flux direct (au cas où)
+  const triggerUpload = () => fileInput?.click();
 
   fileInput?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];

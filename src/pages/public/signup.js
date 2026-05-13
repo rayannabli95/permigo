@@ -152,7 +152,7 @@ function renderStep() {
       <div class="su-row">
         <label for="su-tel">Téléphone (optionnel)</label>
         <input id="su-tel" type="tel" autocomplete="tel" placeholder="06 12 34 56 78" value="${esc(_data.tel)}" maxlength="20">
-        <div class="hint">Utile pour que ton moniteur te joigne. Ne sera jamais partagé.</div>
+        <div class="hint">Utile pour que ton enseignant te joigne. Ne sera jamais partagé.</div>
       </div>
       <div class="su-row">
         <label>Ton forfait de conduite</label>
@@ -174,7 +174,7 @@ function renderStep() {
             </button>
           `).join('')}
         </div>
-        <div class="hint">Tu pourras le modifier plus tard avec ton moniteur.</div>
+        <div class="hint">Tu pourras le modifier plus tard avec ton enseignant.</div>
       </div>
       <div class="su-cta">
         <button class="back" id="su-back" type="button">‹ Retour</button>

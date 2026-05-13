@@ -27,6 +27,7 @@ export async function mount(root) {
   _root = root;
   _me = getCurUser();
   if (!_me) return;
+  if (_me.role !== 'admin') { root.innerHTML = '<p>Accès admin requis</p>'; return; }
 
   root.innerHTML = `<div style="padding:18px"><div class="skel skel-card"></div><div class="skel skel-card"></div></div>`;
 
@@ -37,7 +38,7 @@ export async function mount(root) {
   const weekStartISO = isoDate(weekStart(now));
   const weekEndISO = isoDate(addDays(weekStart(now), 6));
 
-  const [profilesRes, eventsMonthRes, eventsWeekRes, pendRes, reviewsRes, notifsRes, notatRes] = await Promise.allSettled([
+  const [profilesRes, eventsMonthRes, eventsWeekRes, pendRes, reviewsRes, notifsRes, notatRes, leadsRes] = await Promise.allSettled([
     sb.from('profiles').select('id, nom, email, role, statut, code_statut'),
     sb.from('events')
       .select('id, t, dur, date_event, moniteur_id, eleve_id, h, lieu')
@@ -58,6 +59,7 @@ export async function mount(root) {
       .limit(10),
     sb.from('notifications').select('id, title, body, created_at').order('created_at', { ascending: false }).limit(10),
     sb.from('notations').select('moniteur_id, note'),
+    sb.from('leads').select('id, ecole_nom, ville, nb_moniteurs, email, status, created_at').order('created_at', { ascending: false }).limit(20),
   ]);
 
   const profiles = profilesRes.value?.data || [];
@@ -66,6 +68,8 @@ export async function mount(root) {
   const pendEvents = pendRes.value?.data || [];
   const reviews = reviewsRes.value?.data || [];
   const notations = notatRes.value?.data || [];
+  const leads = leadsRes.value?.data || [];
+  const leadsNouveau = leads.filter(l => l.status === 'nouveau');
 
   // ── Calculs ──
   const eleves = profiles.filter(p => p.role === 'eleve');
@@ -129,6 +133,8 @@ export async function mount(root) {
     activity,
     profileNom,
     period: monthLabel(monthStart),
+    leadsNouveau,
+    leadsTotal: leads.length,
   });
 
   wire();
@@ -164,7 +170,7 @@ function timeAgo(iso) {
 
 // ─── Rendu ───
 
-function render({ me, ca, heuresMonth, elevesActifs, elevesTotal, lessonsWeekCount, pendCount, moniteurStats, activity, profileNom, period }) {
+function render({ me, ca, heuresMonth, elevesActifs, elevesTotal, lessonsWeekCount, pendCount, moniteurStats, activity, profileNom, period, leadsNouveau = [], leadsTotal = 0 }) {
   return `
     <style>
       /* Background premium */
@@ -211,6 +217,16 @@ function render({ me, ca, heuresMonth, elevesActifs, elevesTotal, lessonsWeekCou
       .ad-mon-stat{font-size:11px;color:rgba(255,255,255,.5)}
       .ad-mon-stat b{font-family:var(--fn);font-weight:800;color:#fff;font-size:13px}
       .ad-mon-stat .s{margin-left:2px}
+
+      /* Leads section */
+      .ad-leads{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+      .ad-lead{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(139,92,246,.12));border:1px solid rgba(139,92,246,.25);cursor:pointer;transition:all .15s}
+      .ad-lead:hover{transform:translateY(-1px);border-color:rgba(139,92,246,.5);box-shadow:0 8px 24px -8px rgba(139,92,246,.3)}
+      .ad-lead-em{width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,.25);border:1px solid rgba(245,158,11,.4);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+      .ad-lead-body{flex:1;min-width:0}
+      .ad-lead-nm{font-family:var(--fd);font-weight:700;font-size:13.5px;color:#fff;letter-spacing:-.005em}
+      .ad-lead-meta{font-size:11px;color:rgba(255,255,255,.55);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .ad-lead-time{font-size:10.5px;color:rgba(255,255,255,.4);font-family:var(--fn);font-weight:700;flex-shrink:0}
 
       .ad-activity{border-radius:var(--rl);overflow:hidden;margin-bottom:22px;background:rgba(255,255,255,.05);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.1)}
       .ad-act{padding:13px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06)}
@@ -261,7 +277,7 @@ function render({ me, ca, heuresMonth, elevesActifs, elevesTotal, lessonsWeekCou
         <div class="ad-kpi">
           <div class="lbl">📅 Leçons cette semaine</div>
           <div class="v">${lessonsWeekCount}</div>
-          <div class="foot">tous moniteurs confondus</div>
+          <div class="foot">tous enseignants confondus</div>
         </div>
         <div class="ad-kpi pend">
           <div class="lbl">⏳ À valider</div>
@@ -270,10 +286,36 @@ function render({ me, ca, heuresMonth, elevesActifs, elevesTotal, lessonsWeekCou
         </div>
       </div>
 
+      <!-- Leads commerciaux -->
+      ${leadsTotal > 0 ? `
+        <div class="ad-section-h" style="display:flex;align-items:center;justify-content:space-between">
+          <span>🔥 Pipeline commercial${leadsNouveau.length > 0 ? ` · <span style="color:#fbbf24">${leadsNouveau.length} nouveau${leadsNouveau.length > 1 ? 'x' : ''}</span>` : ''}</span>
+          <button class="btn btn-sm" id="ad-leads-all" style="background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;height:28px;padding:0 12px;font-size:11px;font-weight:700;letter-spacing:.3px">Voir tous (${leadsTotal}) →</button>
+        </div>
+        <div class="ad-leads">
+          ${leadsNouveau.slice(0, 3).map(l => `
+            <div class="ad-lead" data-id="${esc(l.id)}">
+              <div class="ad-lead-em">🔥</div>
+              <div class="ad-lead-body">
+                <div class="ad-lead-nm">${esc(l.ecole_nom)}</div>
+                <div class="ad-lead-meta">
+                  ${l.ville ? `📍 ${esc(l.ville)} · ` : ''}${l.nb_moniteurs || '?'} enseignant${(l.nb_moniteurs || 0) > 1 ? 's' : ''} · ${esc(l.email)}
+                </div>
+              </div>
+              <div class="ad-lead-time">${timeAgo(l.created_at)}</div>
+            </div>
+          `).join('') || `
+            <div class="ad-empty" style="border-radius:var(--rl);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:18px">
+              ✅ Tous les leads sont traités — click "Voir tous" pour l'historique
+            </div>
+          `}
+        </div>
+      ` : ''}
+
       <!-- Équipe -->
-      <div class="ad-section-h">Équipe (${moniteurStats.length} moniteur${moniteurStats.length > 1 ? 's' : ''})</div>
+      <div class="ad-section-h">Équipe (${moniteurStats.length} enseignant${moniteurStats.length > 1 ? 's' : ''})</div>
       <div class="ad-team">
-        ${moniteurStats.length === 0 ? `<div class="ad-empty" style="grid-column:1/-1">Aucun moniteur</div>` :
+        ${moniteurStats.length === 0 ? `<div class="ad-empty" style="grid-column:1/-1">Aucun enseignant</div>` :
           moniteurStats.map(m => `
             <div class="ad-mon">
               <div class="ad-mon-av">${esc(initials(m.nom))}</div>
@@ -337,5 +379,17 @@ function wire() {
     await logout();
     const { navigate } = await import('@/router.js');
     navigate('/');
+  });
+
+  // Leads : section "Voir tous" + click sur une carte lead
+  _root.querySelector('#ad-leads-all')?.addEventListener('click', async () => {
+    const { navigate } = await import('@/router.js');
+    navigate('/leads');
+  });
+  _root.querySelectorAll('.ad-lead').forEach(card => {
+    card.addEventListener('click', async () => {
+      const { navigate } = await import('@/router.js');
+      navigate('/leads');
+    });
   });
 }

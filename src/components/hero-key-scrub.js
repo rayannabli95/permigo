@@ -45,8 +45,8 @@ const SEEK_THRESHOLD  = IS_TOUCH ? 0.05 : 0.02;  // évite re-decode inutile sur
 // 5 steps espacés (~20% de scroll chacun) — laisse le temps de lire
 const OVERLAY_STEPS = [
   { from: 0.00, to: 0.22, eyebrow: 'PERMIGO',     title: 'Ton permis.',                sub: 'Sans détour.' },
-  { from: 0.22, to: 0.42, eyebrow: 'PROGRESSION', title: 'Compétence par compétence.', sub: '31 sous-compétences validées par ton moniteur.' },
-  { from: 0.42, to: 0.62, eyebrow: 'ACCOMPAGNÉ',  title: 'Un moniteur dédié.',         sub: 'Qui te guide à chaque virage.' },
+  { from: 0.22, to: 0.42, eyebrow: 'PROGRESSION', title: 'Compétence par compétence.', sub: '31 sous-compétences validées par ton enseignant.' },
+  { from: 0.42, to: 0.62, eyebrow: 'ACCOMPAGNÉ',  title: 'Un enseignant dédié.',       sub: 'Qui te guide à chaque virage.' },
   { from: 0.62, to: 0.82, eyebrow: 'LA CLÉ',      title: 'Près du but.',               sub: 'Ton autonomie se rapproche.' },
   { from: 0.82, to: 1.01, eyebrow: 'TON TOUR',    title: 'Elle est à toi.',            sub: 'Démarre maintenant.' },
 ];
@@ -109,7 +109,7 @@ export function mountHeroKeyScrub(rootEl, opts = {}) {
 
     <div class="hks-sticky">
       <div class="hks-video-wrap" id="hks-video-wrap">
-        <video class="hks-video" muted playsinline webkit-playsinline="true" x5-playsinline="true" preload="auto" disablepictureinpicture aria-label="Démonstration : un moniteur tend les clés de la voiture">
+        <video class="hks-video" muted playsinline webkit-playsinline="true" x5-playsinline="true" preload="auto" disablepictureinpicture aria-label="Démonstration : un enseignant tend les clés de la voiture">
           <source src="${VIDEO_SRC}" type="video/mp4">
         </video>
       </div>

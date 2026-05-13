@@ -33,6 +33,7 @@ export async function mount(root) {
   _root = root;
   _me = getCurUser();
   if (!_me) return;
+  if (_me.role !== 'admin') { root.innerHTML = '<p>Accès admin requis</p>'; return; }
 
   root.innerHTML = `<div style="padding:18px"><div class="skel skel-card"></div><div class="skel skel-card"></div></div>`;
   await load();
@@ -184,7 +185,7 @@ function render() {
         <span class="pg-logo-txt">PermiGo</span>
         <div>
           <div class="ttl">Équipe</div>
-          <div class="sub">${_moniteurs.length} moniteur${_moniteurs.length > 1 ? 's' : ''} · ${c.actif} actif${c.actif > 1 ? 's' : ''}</div>
+          <div class="sub">${_moniteurs.length} enseignant${_moniteurs.length > 1 ? 's' : ''} · ${c.actif} actif${c.actif > 1 ? 's' : ''}</div>
         </div>
         <div class="eq-top-r">
           <span id="eq-bell"></span>
@@ -198,7 +199,7 @@ function render() {
           <button data-f="actif" class="${_filter === 'actif' ? 'on' : ''}">Actifs · ${c.actif}</button>
           <button data-f="inactif" class="${_filter === 'inactif' ? 'on' : ''}">Inactifs · ${c.inactif}</button>
         </div>
-        <button class="eq-new" id="eq-new" type="button">+ Nouveau moniteur</button>
+        <button class="eq-new" id="eq-new" type="button">+ Nouvel enseignant</button>
       </div>
 
       <div class="eq-list" id="eq-list">${renderList(list)}</div>
@@ -213,7 +214,7 @@ function render() {
 
 function renderList(list) {
   if (list.length === 0) {
-    return `<div class="eq-empty">Aucun moniteur ne correspond aux filtres</div>`;
+    return `<div class="eq-empty">Aucun enseignant ne correspond aux filtres</div>`;
   }
   return list.map(renderRow).join('');
 }
@@ -286,7 +287,7 @@ function openCreate() {
   panel.innerHTML = `
     <div class="eq-mh">
       <div>
-        <div class="ti">+ Nouveau moniteur</div>
+        <div class="ti">+ Nouvel enseignant</div>
         <div class="id">Création depuis l'admin</div>
       </div>
       <button id="eq-close" aria-label="Fermer">×</button>
@@ -313,13 +314,13 @@ function openCreate() {
       </div>
 
       <div class="eq-note">
-        Le moniteur apparaîtra avec le statut <b>Actif</b> et pourra immédiatement gérer son planning.
+        L'enseignant apparaîtra avec le statut <b>Actif</b> et pourra immédiatement gérer son planning.
         Les autres détails (boîte véhicule…) sont éditables ensuite.
       </div>
 
       <div class="eq-cta">
         <button class="btn" id="eq-cancel">Annuler</button>
-        <button class="btn btn-p" id="eq-create" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-color:#6366f1">Créer le moniteur</button>
+        <button class="btn btn-p" id="eq-create" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);border-color:#6366f1">Créer l'enseignant</button>
       </div>
     </div>
   `;
@@ -355,23 +356,48 @@ function openCreate() {
         }
         toast(msg, 'error');
         btn.disabled = false;
-        btn.textContent = 'Créer le moniteur';
+        btn.textContent = 'Créer l'enseignant';
         return;
       }
+
+      // Audit log — création moniteur
+      await sb.from('audit_log').insert({
+        user_id: _me.id,
+        user_nom: _me.nom,
+        user_role: 'admin',
+        action: 'create_moniteur',
+        table_name: 'profiles',
+        record_id: data?.profileId || data?.userId || null,
+        details: JSON.stringify({
+          nom: esc(nom),
+          email: esc(email),
+          tel: tel ? esc(tel) : null,
+          plaque: plaque ? esc(plaque) : null,
+        }),
+      });
 
       // Si plaque fournie, on patch le profil juste après création
       if (plaque && data?.userId) {
         await sb.from('profiles').update({ plaque }).eq('auth_id', data.userId);
+        await sb.from('audit_log').insert({
+          user_id: _me.id,
+          user_nom: _me.nom,
+          user_role: 'admin',
+          action: 'update_moniteur_plaque',
+          table_name: 'profiles',
+          record_id: data?.profileId || data?.userId || null,
+          details: JSON.stringify({ before: null, after: esc(plaque), context: 'post_create' }),
+        });
       }
 
       closeModal();
-      toast('✓ Moniteur créé — email de bienvenue envoyé', 'success');
+      toast('✓ Enseignant créé — email de bienvenue envoyé', 'success');
       await refresh();
     } catch (err) {
       console.warn('[create-user moniteur] catch', err);
       toast('Erreur réseau — edge function déployée ?', 'error');
       btn.disabled = false;
-      btn.textContent = 'Créer le moniteur';
+      btn.textContent = 'Créer l'enseignant';
     }
   };
 
@@ -391,7 +417,7 @@ function openEdit(monId) {
   panel.innerHTML = `
     <div class="eq-mh">
       <div>
-        <div class="ti">Éditer le moniteur</div>
+        <div class="ti">Éditer l'enseignant</div>
         <div class="id">${esc(m.email || m.id)}</div>
       </div>
       <button id="eq-close" aria-label="Fermer">×</button>
@@ -404,7 +430,7 @@ function openEdit(monId) {
       <div class="r">
         <label>Email</label>
         <input id="f-email" type="email" value="${esc(m.email || '')}" disabled>
-        <div class="hint">Modifiable uniquement via le profil moniteur (auth).</div>
+        <div class="hint">Modifiable uniquement via le profil enseignant (auth).</div>
       </div>
       <div class="r2">
         <div class="r">
@@ -464,6 +490,12 @@ function openEdit(monId) {
     btn.disabled = true;
     btn.textContent = '…';
 
+    // Snapshot "before" pour audit
+    const before = {
+      plaque: m.plaque || null,
+      statut: m.statut || 'Actif',
+    };
+
     const { error } = await sb.from('profiles').update(updates).eq('id', monId);
     if (error) {
       toast(error.message || 'Erreur sauvegarde', 'error');
@@ -472,8 +504,40 @@ function openEdit(monId) {
       return;
     }
 
+    // ── Audit log : plaque / statut ──
+    if (before.plaque !== updates.plaque) {
+      await sb.from('audit_log').insert({
+        user_id: _me.id,
+        user_nom: _me.nom,
+        user_role: 'admin',
+        action: 'update_moniteur_plaque',
+        table_name: 'profiles',
+        record_id: monId,
+        details: JSON.stringify({
+          moniteur_nom: esc(updates.nom),
+          before: before.plaque ? esc(before.plaque) : null,
+          after: updates.plaque ? esc(updates.plaque) : null,
+        }),
+      });
+    }
+    if (before.statut !== updates.statut) {
+      await sb.from('audit_log').insert({
+        user_id: _me.id,
+        user_nom: _me.nom,
+        user_role: 'admin',
+        action: 'update_moniteur_statut',
+        table_name: 'profiles',
+        record_id: monId,
+        details: JSON.stringify({
+          moniteur_nom: esc(updates.nom),
+          before: before.statut,
+          after: updates.statut,
+        }),
+      });
+    }
+
     closeModal();
-    toast('Moniteur mis à jour ✓', 'success');
+    toast('Enseignant mis à jour ✓', 'success');
     await refresh();
   };
 

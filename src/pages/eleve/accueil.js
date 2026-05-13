@@ -80,7 +80,7 @@ export async function mount(root) {
     if (myNotatedMonIds.has(l.moniteur_id)) continue;
     if (seenMon.has(l.moniteur_id)) continue;
     seenMon.add(l.moniteur_id);
-    monToRateInfo = { id: l.moniteur_id, nom: l.mon_nom || 'votre moniteur' };
+    monToRateInfo = { id: l.moniteur_id, nom: l.mon_nom || 'votre enseignant' };
     break;
   }
 
@@ -177,7 +177,7 @@ export async function mount(root) {
     navigate('/parcours');
   });
 
-  // Bouton "Noter mon moniteur" (cas où l'auto-trigger a été manqué)
+  // Bouton "Noter mon enseignant" (cas où l'auto-trigger a été manqué)
   root.querySelector('#btn-rate-mon')?.addEventListener('click', () => openRateMonModal(root, me, true));
 
   // Bouton "Auto-évaluer" la dernière leçon
@@ -226,12 +226,12 @@ function computeWeeklyReplayStats({ events = [], remc = [], lastReview = null } 
   };
 }
 
-// ─── Modal "Noter mon moniteur" (anonyme, OBLIGATOIRE en fin de leçon) ───
+// ─── Modal "Noter mon enseignant" (anonyme, OBLIGATOIRE en fin de leçon) ───
 function openRateMonModal(root, me, mandatory = false) {
   // évite double-ouverture
   if (document.querySelector('.rm-bg')) return;
   const monId = root.querySelector('#btn-rate-mon')?.dataset.mon;
-  const monNom = root.querySelector('#btn-rate-mon')?.dataset.monNom || 'votre moniteur';
+  const monNom = root.querySelector('#btn-rate-mon')?.dataset.monNom || 'votre enseignant';
   if (!monId) return;
 
   const html = `
@@ -261,7 +261,7 @@ function openRateMonModal(root, me, mandatory = false) {
         <div class="rm-h">
           <div class="em">🎯</div>
           <div class="ti">${mandatory ? 'Note ta dernière leçon' : 'Évalue ' + esc(monNom.split(' ')[0])}</div>
-          <div class="sub">${mandatory ? `Avec <b>${esc(monNom.split(' ')[0])}</b> — une étape obligatoire pour continuer.` : 'Ton avis aide ton moniteur à progresser.'}</div>
+          <div class="sub">${mandatory ? `Avec <b>${esc(monNom.split(' ')[0])}</b> — une étape obligatoire pour continuer.` : 'Ton avis aide ton enseignant à progresser.'}</div>
         </div>
         <div class="rm-b">
           <div class="rm-stars" id="rm-stars">
@@ -269,7 +269,7 @@ function openRateMonModal(root, me, mandatory = false) {
           </div>
           <div class="rm-lbl" id="rm-lbl">Choisis une note de 1 à 5</div>
           <textarea id="rm-comment" maxlength="240" placeholder="Commentaire (optionnel)…"></textarea>
-          <div class="rm-note">🔒 <b>Ton avis est anonyme</b> — ton moniteur ne saura pas que c'est toi.</div>
+          <div class="rm-note">🔒 <b>Ton avis est anonyme</b> — ton enseignant ne saura pas que c'est toi.</div>
           <div class="rm-cta" style="${mandatory ? 'grid-template-columns:1fr' : ''}">
             ${mandatory ? '' : '<button class="btn" id="rm-cancel">Annuler</button>'}
             <button class="btn btn-p" id="rm-send" disabled>Envoyer mon avis</button>
@@ -502,7 +502,7 @@ function template(me, nextLesson, kpis, lessons, lastReview, monToRate, selfEval
         <div class="card" style="margin-bottom:14px;border:1px solid #fbbf24;background:linear-gradient(135deg,#fffbeb,#fef3c7);padding:14px 16px;display:flex;align-items:center;gap:14px">
           <div style="font-size:30px;line-height:1">🎯</div>
           <div style="flex:1;min-width:0">
-            <div style="font-family:var(--fd);font-weight:800;font-size:14px;color:#92400e">Note ton moniteur</div>
+            <div style="font-family:var(--fd);font-weight:800;font-size:14px;color:#92400e">Note ton enseignant</div>
             <div style="font-size:11.5px;color:#92400e;opacity:.85;margin-top:2px">🔒 100% anonyme — ${esc(monToRate.nom.split(' ')[0])} ne saura pas que c'est toi.</div>
           </div>
           <button class="btn btn-p btn-sm" id="btn-rate-mon" data-mon="${esc(monToRate.id)}" data-mon-nom="${esc(monToRate.nom)}">Noter ★</button>
@@ -601,7 +601,7 @@ function openSelfEvalModal(root, me, lesson) {
           </div>
           <div class="se-lbl" id="se-lbl">Choisis ton ressenti</div>
           <textarea id="se-comment" maxlength="240" placeholder="Une difficulté en particulier ? Un point fort ? (optionnel)"></textarea>
-          <div class="se-info">💡 <b>Ton moniteur</b> verra ton auto-éval — utile pour aligner vos perceptions.</div>
+          <div class="se-info">💡 <b>Ton enseignant</b> verra ton auto-éval — utile pour aligner vos perceptions.</div>
           <div class="se-cta">
             <button class="btn" id="se-cancel">Plus tard</button>
             <button class="btn btn-p" id="se-send" disabled>Envoyer</button>

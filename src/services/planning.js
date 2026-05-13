@@ -136,7 +136,7 @@ export async function checkVehicule({ moniteurId, eleveId }) {
 
   if (monBoite === 'both') return { ok: true, errors };
   if (monBoite !== elvBoite) {
-    errors.push(`Élève apprend en boîte ${elvBoite} — le moniteur conduit en ${monBoite}.`);
+    errors.push(`Élève apprend en boîte ${elvBoite} — l'enseignant conduit en ${monBoite}.`);
   }
   return { ok: errors.length === 0, errors };
 }

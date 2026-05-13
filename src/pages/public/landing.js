@@ -16,6 +16,9 @@ import { esc } from '@/utils/escape.js';
 import { mountCosmos } from '@/components/cosmos-bg.js';
 import { setupReveals } from '@/utils/reveal-on-scroll.js';
 import { mountHeroKeyScrub } from '@/components/hero-key-scrub.js';
+import { renderLampSection, wireLampReveal, LAMP_CSS } from '@/components/lamp-section.js';
+import { renderPricingSection, wirePricingSection, PRICING_CSS } from '@/components/pricing-cards.js';
+import { renderMeshBg, MESH_BG_CSS } from '@/components/mesh-bg.js';
 
 let _cosmos = null;
 let _scrollHandler = null;
@@ -25,10 +28,23 @@ export function mount(root) {
   root.innerHTML = template();
   wire(root);
   startBeams(root);
-  mountStarfield(root);
+  // mountStarfield(root); // remplacé par mesh-bg
   setupScrollProgress(root);
   splitTitle(root);
   setupReveals(root);
+  wireLampReveal(root);
+
+  // Pricing : toggle mensuel/annuel + CTAs branchés vers form inscription ou login (demo réseau)
+  wirePricingSection(root, {
+    onSignup: async () => {
+      const { navigate } = await import('@/router.js');
+      navigate('/inscription-ecole');
+    },
+    onContact: async () => {
+      const { navigate } = await import('@/router.js');
+      navigate('/inscription-ecole');
+    },
+  });
 
   // Insère le scrub vidéo cinématographique juste après la nav
   const ldRoot = root.querySelector('.ld-root');
@@ -78,12 +94,10 @@ function template() {
       /* ─── Reset & root ─── */
       .ld-root{position:relative;min-height:100vh;background:#0b0d1a;color:#fff;overflow-x:hidden;font-family:var(--fb)}
 
-      /* ─── Background premium (gradient + grille + STARFIELD canvas) ─── */
-      .ld-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-      .ld-bg::before{content:'';position:absolute;inset:-50%;background:radial-gradient(ellipse at 20% 20%,#6366f1 0%,transparent 40%),radial-gradient(ellipse at 80% 30%,#8b5cf6 0%,transparent 40%),radial-gradient(ellipse at 50% 80%,#0891b2 0%,transparent 40%);filter:blur(60px);opacity:.4;animation:ld-float 22s ease-in-out infinite alternate;z-index:0}
-      @keyframes ld-float{0%{transform:translate(0,0) rotate(0deg) scale(1)}50%{transform:translate(40px,-30px) rotate(180deg) scale(1.08)}100%{transform:translate(-30px,40px) rotate(360deg) scale(.96)}}
-      .ld-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,transparent 0%,rgba(11,13,26,.6) 100%);z-index:2}
-      .ld-bg canvas{z-index:1}
+      /* ─── Background premium : MESH GRADIENT (6 blobs animés) ─── */
+      ${MESH_BG_CSS}
+      /* Le starfield cosmos est désactivé (le mesh gradient suffit) */
+      .ld-bg{display:none}
 
       /* ─── Scroll progress indicator (right side, vertical) ─── */
       .ld-scroll{position:fixed;top:50%;right:18px;transform:translateY(-50%);z-index:30;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none}
@@ -230,13 +244,70 @@ function template() {
       @media (max-width:560px){.ld-final h2{font-size:24px}}
       .ld-final p{color:rgba(255,255,255,.7);margin:0 0 24px;font-size:15px}
 
-      /* Footer */
+      /* FAQ — accordion avec icônes colorées */
+      .ld-faq{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;transition:border-color .2s,background .2s}
+      .ld-faq:hover{border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.055)}
+      .ld-faq[open]{border-color:rgba(165,180,252,.3);background:rgba(99,102,241,.06)}
+      .ld-faq summary{padding:16px 18px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:14px;font-family:var(--fd);font-weight:700;font-size:15px;color:#fff;letter-spacing:-.005em;line-height:1.35}
+      .ld-faq summary::-webkit-details-marker{display:none}
+      .ld-faq-q{flex:1;min-width:0}
+      .ld-faq-ic{flex-shrink:0;width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;transition:transform .25s}
+      .ld-faq-ic svg{width:20px;height:20px}
+      .ld-faq[open] .ld-faq-ic{transform:scale(1.08)}
+      /* Variants couleur icône */
+      .ld-faq-ic-blue{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.25)}
+      .ld-faq-ic-amber{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.25)}
+      .ld-faq-ic-red{background:rgba(239,68,68,.13);color:#f87171;border:1px solid rgba(239,68,68,.25)}
+      .ld-faq-ic-green{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.25)}
+      .ld-faq-ic-violet{background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.28)}
+
+      .ld-faq-chev{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.55);transition:transform .3s cubic-bezier(.4,0,.2,1),background .2s,color .2s}
+      .ld-faq-chev svg{width:13px;height:13px}
+      .ld-faq[open] .ld-faq-chev{transform:rotate(45deg);background:rgba(165,180,252,.18);color:#a5b4fc;border-color:rgba(165,180,252,.35)}
+
+      .ld-faq-body{padding:0 18px 20px 72px;color:rgba(255,255,255,.7);font-size:14.5px;line-height:1.65;letter-spacing:-.003em}
+      @media (max-width:560px){.ld-faq-body{padding:0 18px 18px 18px}}
+
+      ${LAMP_CSS}
+      ${PRICING_CSS}
+
+      /* ─── Footer "taped" (carte papier + scotch en haut) ─── */
+      .ld-foot-wrap{position:relative;z-index:5;max-width:1100px;margin:60px auto 40px;padding:0 18px}
+      .ld-foot-card{position:relative;background:#f8f7f3;color:#1c1c1c;border-radius:28px;padding:46px 38px 38px;box-shadow:0 30px 80px -20px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06) inset;overflow:visible}
+      @media (max-width:720px){.ld-foot-card{padding:36px 22px 28px;border-radius:22px}}
+      .ld-foot-tape{position:absolute;top:-14px;width:90px;height:38px;display:block;pointer-events:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.18))}
+      .ld-foot-tape.l{left:32px;transform:rotate(-6deg)}
+      .ld-foot-tape.r{right:32px;transform:rotate(98deg)}
+      @media (max-width:720px){.ld-foot-tape{width:64px;height:28px}.ld-foot-tape.l{left:18px}.ld-foot-tape.r{right:18px}}
+
+      .ld-foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px;align-items:start}
+      @media (max-width:900px){.ld-foot-grid{grid-template-columns:1fr 1fr;gap:28px}}
+      @media (max-width:560px){.ld-foot-grid{grid-template-columns:1fr;gap:22px}}
+
+      .ld-foot-brand .nm{font-family:var(--fd);font-weight:900;font-size:24px;letter-spacing:-.02em;color:#1c1c1c;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+      .ld-foot-brand .nm::before{content:'';width:8px;height:8px;border-radius:50%;background:#6366f1;display:inline-block}
+      .ld-foot-brand p{font-size:14px;line-height:1.55;color:#555;margin:0;max-width:280px}
+
+      .ld-foot-col h4{font-family:var(--fd);font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin:0 0 14px}
+      .ld-foot-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
+      .ld-foot-col a{color:#333;font-size:13.5px;text-decoration:none;font-weight:500;transition:color .15s}
+      .ld-foot-col a:hover{color:#6366f1}
+      .ld-foot-col .soon{display:inline-block;margin-left:6px;padding:1px 7px;background:#1c1c1c;color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.5px;border-radius:99px;transform:rotate(-3deg);vertical-align:middle}
+
+      .ld-foot-bottom{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 6px 0;margin-top:8px;font-size:12px;color:rgba(255,255,255,.45);flex-wrap:wrap}
+      .ld-foot-bottom a{color:rgba(255,255,255,.7);text-decoration:none;margin:0 6px}
+      .ld-foot-bottom .copy{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+      .ld-foot-bottom .socials{display:flex;gap:12px;align-items:center}
+      .ld-foot-bottom .socials a{display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7);margin:0;transition:all .15s}
+      .ld-foot-bottom .socials a:hover{background:rgba(255,255,255,.12);color:#fff}
+
+      /* Footer (ancien — fallback) */
       .ld-foot{position:relative;z-index:5;text-align:center;padding:30px 20px;font-size:12px;color:rgba(255,255,255,.4);border-top:1px solid rgba(255,255,255,.05)}
       .ld-foot a{color:rgba(255,255,255,.7);text-decoration:none;margin:0 8px}
     </style>
 
     <div class="ld-root">
-      <div class="ld-bg"></div>
+      ${renderMeshBg()}
       <div class="ld-grid"></div>
 
       <!-- Scroll progress indicator (vertical, droite) -->
@@ -251,25 +322,24 @@ function template() {
         <div class="ld-logo">
           <span class="pg-logo-txt">PermiGo</span>
           <span class="ld-logo-fb" style="display:none">PermiGo</span>
-          <span class="badge">SAAS</span>
         </div>
         <div class="ld-nav-r">
           <button class="ld-btn ld-btn-ghost" id="ld-login">Se connecter</button>
           <button class="ld-btn ld-btn-ghost" id="ld-signup-eleve">Je suis élève</button>
-          <button class="ld-btn ld-btn-p" id="ld-signup-1">Inscrire mon auto-école</button>
+          <button class="ld-btn ld-btn-p" id="ld-signup-1">Essayer pendant 14 jours</button>
         </div>
       </nav>
 
       <!-- ─── Hero ─── -->
       <section class="ld-hero">
-        <div class="update-badge" style="margin-bottom:14px"><span class="pill">NOUVEAU</span>✨ Trophées REMC débloquables ➜</div>
-        <div class="ld-eyebrow"><span class="dot"></span>Le SaaS auto-école nouvelle génération</div>
-        <h1 class="ld-h1">Toute votre auto-école dans <span class="grad">une seule app</span>.</h1>
-        <p class="ld-sub">PermiGo connecte élèves, moniteurs et gérants sur une plateforme unique. Planning, livret REMC, réservation, évaluation, statistiques — tout y est.</p>
+        <div class="ld-eyebrow"><span class="dot"></span>Disponible en France depuis janvier 2026</div>
+        <h1 class="ld-h1">Une auto-école moderne, <span class="grad">sans devenir une usine</span>.</h1>
+        <p class="ld-sub">PermiGo réunit le planning, le suivi des élèves, le code et les paiements dans une seule application. Pensée en France, pour les auto-écoles qui veulent gagner du temps sans perdre leur âme.</p>
         <div class="ld-cta-row">
-          <button class="ld-btn ld-btn-p ld-btn-lg" id="ld-signup-2">Inscrire mon auto-école →</button>
-          <button class="ld-btn ld-btn-ghost ld-btn-lg" id="ld-demo">Voir la démo</button>
+          <button class="ld-btn ld-btn-p ld-btn-lg" id="ld-signup-2">Essayer pendant 14 jours</button>
+          <button class="ld-btn ld-btn-ghost ld-btn-lg" id="ld-demo">Voir une démonstration</button>
         </div>
+        <p style="font-size:12.5px;color:rgba(255,255,255,.5);margin-top:14px;letter-spacing:.2px">Sans carte bancaire. Sans engagement. Configuration en moins de dix minutes.</p>
 
         <!-- ─── PulseBeams diagram ─── -->
         <div class="ld-diagram" id="ld-diagram">
@@ -322,7 +392,7 @@ function template() {
           <div class="node n-moniteur">
             <div class="pill">
               <div class="em">🚗</div>
-              <div class="nm">Moniteur</div>
+              <div class="nm">Enseignant</div>
               <div class="sub">ENSEIGNE · ÉVALUE</div>
             </div>
           </div>
@@ -336,49 +406,58 @@ function template() {
         </div>
       </section>
 
-      <!-- ─── Features ─── -->
+      <!-- ─── Section Lampe (transition wow) ─── -->
+      ${renderLampSection({
+        eyebrow: 'Notre conviction',
+        title: 'Un outil construit pour le métier.<br>Pas pour faire joli en démo.',
+        sub: 'Chaque écran a été pensé avec des gérants, des enseignants et des candidats. Les détails comptent.'
+      })}
+
+      <!-- ─── Pourquoi PermiGo ─── -->
+      <section class="ld-section">
+        <div class="ld-section-h reveal" style="max-width:780px">
+          <div class="lbl">Notre histoire</div>
+          <h2>Pourquoi nous avons construit PermiGo.</h2>
+        </div>
+        <div class="reveal" style="max-width:740px;margin:0 auto;text-align:left;color:rgba(255,255,255,.78);font-size:16px;line-height:1.75;letter-spacing:-.005em">
+          <p style="margin:0 0 18px">Les auto-écoles n'ont pas besoin d'un énième logiciel "tout-en-un" pensé par des ingénieurs qui n'y ont jamais mis les pieds.</p>
+          <p style="margin:0 0 18px">Elles ont besoin d'un outil qui leur fait gagner les deux heures qu'elles perdent chaque jour à appeler les élèves, retaper le planning, vérifier les paiements, ressortir un livret papier déchiré.</p>
+          <p style="margin:0 0 18px">PermiGo a été construit avec des gérants d'auto-écoles, des enseignants et des candidats. Pas dans un open-space à Paris. Sur le terrain, en région, avec des écoles de cinq, dix, quinze enseignants.</p>
+          <p style="margin:0">Le résultat est simple : ce qui vous prend une demi-journée par semaine se fait désormais sur un téléphone, en deux minutes.</p>
+        </div>
+      </section>
+
+      <!-- ─── Ce qui change au quotidien ─── -->
       <section class="ld-section">
         <div class="ld-section-h reveal">
-          <div class="lbl">Une app pour chaque rôle</div>
-          <h2>Pensée pour vous, conçue pour eux.</h2>
-          <p>Chaque rôle a son interface dédiée — simple, focalisée sur l'essentiel, sans formation nécessaire.</p>
+          <div class="lbl">Au quotidien</div>
+          <h2>Ce qui change dans votre auto-école.</h2>
+          <p>Quatre choses concrètes, du premier appel à la dernière facture.</p>
         </div>
-        <div class="ld-features reveal reveal-stagger">
+        <div class="ld-features reveal reveal-stagger" style="grid-template-columns:repeat(2,1fr)">
           <div class="ld-feat">
-            <div class="em">🎓</div>
-            <div class="role">Espace élève</div>
-            <h3>Le permis qui motive.</h3>
-            <p>Suivi visuel REMC, réservation en 2 clics, feedback après chaque leçon — l'élève voit son progrès et reste engagé.</p>
-            <ul>
-              <li>Parcours REMC interactif (31 compétences)</li>
-              <li>Réservation autonome des créneaux</li>
-              <li>Feedback étoilé du moniteur en temps réel</li>
-              <li>Trophées et progression gamifiée</li>
-            </ul>
+            <div class="em">📞</div>
+            <div class="role">Le téléphone</div>
+            <h3>Plus de coups de fil pour fixer une heure de conduite.</h3>
+            <p>Vos élèves voient les créneaux disponibles de leur enseignant en temps réel et réservent depuis leur téléphone. Vous gardez la main sur tout depuis le planning gérant.</p>
           </div>
           <div class="ld-feat">
-            <div class="em">🚗</div>
-            <div class="role">Espace moniteur</div>
-            <h3>Plus d'élèves, moins d'admin.</h3>
-            <p>Planning visuel, livret REMC numérique, notes privées par élève — toute la pédagogie centralisée dans un seul outil.</p>
-            <ul>
-              <li>Planning semaine drag-and-drop</li>
-              <li>Validation REMC en bottom sheet</li>
-              <li>Évaluation post-leçon en 30s</li>
-              <li>Fiches élève complètes + notes privées</li>
-            </ul>
+            <div class="em">📋</div>
+            <div class="role">Le livret</div>
+            <h3>Un livret REMC numérique que les élèves consultent vraiment.</h3>
+            <p>Le référentiel officiel devient un parcours visuel. Les enseignants valident les compétences en un geste après chaque leçon. Les élèves savent où ils en sont, sans réclamer.</p>
           </div>
           <div class="ld-feat">
-            <div class="em">👑</div>
-            <div class="role">Espace gérant</div>
-            <h3>Pilotez en temps réel.</h3>
-            <p>Le tableau de bord qu'il vous faut — CA, occupation, élèves actifs — tout en un seul écran, à jour à la seconde.</p>
-            <ul>
-              <li>KPIs financiers (CA mensuel, factures)</li>
-              <li>Taux d'occupation par moniteur</li>
-              <li>Pipeline élèves + alertes inactifs</li>
-              <li>Export comptable CSV</li>
-            </ul>
+            <div class="em">📊</div>
+            <div class="role">Les paiements</div>
+            <h3>Les forfaits et les heures, sans Excel.</h3>
+            <p>Suivez les heures consommées, les forfaits restants et le chiffre d'affaires depuis le tableau de bord. Vos secrétaires ne ressaisissent plus rien.</p>
+          </div>
+          <div class="ld-feat">
+            <div class="em">📈</div>
+            <div class="role">Le pilotage</div>
+            <h3>Une vision claire de votre activité.</h3>
+            <p>Combien d'élèves actifs, quelle progression, quel taux de réussite par enseignant. Les réponses tiennent sur un seul écran. Pas de rapport à générer.</p>
           </div>
         </div>
       </section>
@@ -386,9 +465,9 @@ function template() {
       <!-- ─── PulseBeams — écosystème connecté ─── -->
       <section class="ld-section ld-ecosystem">
         <div class="ld-section-h">
-          <div class="lbl">Un écosystème entièrement connecté</div>
-          <h2>Tout circule. Tout est lié.</h2>
-          <p>Réservation, validation, évaluation, paiement — les actions de chaque rôle déclenchent des mises à jour en temps réel partout dans l'écosystème.</p>
+          <div class="lbl">Tout circule</div>
+          <h2>Une seule application, trois rôles, zéro double saisie.</h2>
+          <p>L'enseignant valide une compétence. L'élève la voit immédiatement. Le gérant retrouve la donnée dans son tableau de bord. Sans Excel, sans email, sans rappel.</p>
         </div>
 
         <div class="pb-stage">
@@ -499,76 +578,196 @@ function template() {
         </div>
       </section>
 
-      <!-- ─── Comment ça marche ─── -->
+      <!-- ─── En trois étapes ─── -->
       <section class="ld-section">
         <div class="ld-section-h reveal">
-          <div class="lbl">Démarrage en 3 étapes</div>
-          <h2>Opérationnel en 24h.</h2>
+          <div class="lbl">Comment on démarre</div>
+          <h2>En trois étapes.</h2>
           <p>Pas de migration complexe. Pas de formation longue. Pas de surprise.</p>
         </div>
         <div class="ld-steps reveal reveal-stagger">
           <div class="ld-step">
             <div class="n">1</div>
-            <h4>Création du compte gérant</h4>
-            <p>Vous nous donnez le nom de votre auto-école. On crée votre espace en 2 min.</p>
+            <h4>Nous configurons votre auto-école avec vous.</h4>
+            <p>Comptez trente minutes au téléphone. Nous importons vos enseignants, vos élèves, vos forfaits. Vous n'avez rien à faire d'autre que valider.</p>
           </div>
           <div class="ld-step">
             <div class="n">2</div>
-            <h4>Import de vos moniteurs & élèves</h4>
-            <p>Téléversez un CSV ou ajoutez-les un par un. Ils reçoivent leur lien d'invitation.</p>
+            <h4>Vos équipes se forment en se connectant.</h4>
+            <p>Pas de formation lourde, pas de manuel. La plupart des enseignants sont opérationnels en moins d'une heure.</p>
           </div>
           <div class="ld-step">
             <div class="n">3</div>
-            <h4>Vos moniteurs ouvrent leurs dispos</h4>
-            <p>Les élèves réservent. Vous voyez le CA grimper dans votre dashboard. C'est tout.</p>
+            <h4>Vous gardez le contrôle.</h4>
+            <p>Vous voyez ce qui se passe, vous arbitrez quand il faut. Le reste tourne tout seul.</p>
           </div>
         </div>
       </section>
 
-      <!-- ─── Tarif ─── -->
-      <section class="ld-section" id="ld-pricing">
-        <div class="ld-section-h reveal">
-          <div class="lbl">Tarif simple</div>
-          <h2>Une seule formule. Tout inclus.</h2>
-          <p>Pas de palier, pas d'engagement, pas de coût caché.</p>
+      <!-- ─── Témoignage ─── -->
+      <section class="ld-section">
+        <div class="reveal" style="max-width:780px;margin:0 auto;padding:36px 32px;border-radius:22px;background:linear-gradient(135deg,rgba(99,102,241,.10),rgba(139,92,246,.06));border:1px solid rgba(165,180,252,.18);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)">
+          <div style="font-size:42px;line-height:1;color:#a5b4fc;font-family:Georgia,serif;margin-bottom:8px">"</div>
+          <p style="color:rgba(255,255,255,.92);font-size:18px;line-height:1.6;letter-spacing:-.005em;margin:0 0 22px;font-style:italic">On a longtemps fonctionné avec un classeur, un téléphone et trois plannings papier. Avec PermiGo, on a arrêté de courir après les heures et les paiements. Mes secrétaires ont retrouvé du temps pour s'occuper des élèves, et c'est ça qui fait la différence.</p>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:800;color:#fff;font-size:14px">AÉ</div>
+            <div>
+              <div style="font-family:var(--fd);font-weight:700;color:#fff;font-size:13.5px">Auto-École en cours de pilote</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">Les premiers retours arrivent dès juin 2026.</div>
+            </div>
+          </div>
         </div>
-        <div class="ld-pricing reveal scale">
-          <div class="tag">⚡ Lancement</div>
-          <div class="price">49<small>€ / mois</small></div>
-          <div class="price-sub">par moniteur · sans engagement · TVA incluse</div>
-          <ul>
-            <li>Élèves & moniteurs illimités</li>
-            <li>Livret REMC numérique officiel</li>
-            <li>Réservation autonome élève</li>
-            <li>Notifications temps réel</li>
-            <li>Export comptable CSV</li>
-            <li>Mises à jour incluses à vie</li>
-            <li>Support email J+1</li>
-          </ul>
-          <button class="ld-btn ld-btn-p ld-btn-lg" style="width:100%" id="ld-signup-3">Démarrer l'essai gratuit 14 jours</button>
+      </section>
+
+      <!-- ─── Tarif (3 plans + toggle mensuel/annuel) ─── -->
+      ${renderPricingSection()}
+
+      <!-- ─── FAQ ─── -->
+      <section class="ld-section">
+        <div class="ld-section-h reveal">
+          <div class="lbl">Questions fréquentes</div>
+          <h2>Les questions qu'on nous pose.</h2>
+        </div>
+        <div class="reveal reveal-stagger" style="max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:14px">
+          ${faqItem({
+            icon: 'phone',
+            color: 'blue',
+            q: "Pas à l'aise avec l'informatique ?",
+            a: "Si vous envoyez un SMS, vous savez utiliser PermiGo. Testé avec des enseignants de 25 à 62 ans."
+          })}
+          ${faqItem({
+            icon: 'clock',
+            color: 'amber',
+            q: "Et ma secrétaire ?",
+            a: "Elle gagne deux heures par jour. Le téléphone et la facturation deviennent automatiques. Elle reste au cœur du contact humain."
+          })}
+          ${faqItem({
+            icon: 'exit',
+            color: 'red',
+            q: "Et si je veux arrêter ?",
+            a: "Vos données sont exportables en un clic. Pas de pénalité, pas d'engagement annuel."
+          })}
+          ${faqItem({
+            icon: 'shield',
+            color: 'green',
+            q: "Où sont mes données ?",
+            a: "En France et en Allemagne. Aucune donnée ne quitte l'Europe."
+          })}
+          ${faqItem({
+            icon: 'bolt',
+            color: 'violet',
+            q: "Combien de temps pour démarrer ?",
+            a: "Deux jours. Vous signez le lundi, vos élèves réservent le mercredi."
+          })}
         </div>
       </section>
 
       <!-- ─── Final CTA ─── -->
       <section class="ld-final reveal">
-        <h2>Prêt à moderniser votre auto-école ?</h2>
-        <p>Rejoignez les auto-écoles qui passent à un outil pensé pour 2026.</p>
-        <button class="ld-btn ld-btn-p ld-btn-lg" id="ld-signup-4">Inscrire mon auto-école →</button>
+        <h2>Vous voulez voir ce que ça donne sur votre auto-école ?</h2>
+        <p>Donnez-nous trente minutes au téléphone. Nous vous montrons PermiGo avec vos vraies données. Si vous n'êtes pas convaincu, vous reprenez votre planning papier.</p>
+        <button class="ld-btn ld-btn-p ld-btn-lg" id="ld-signup-4">Demander une démonstration</button>
       </section>
 
-      <!-- ─── Footer ─── -->
-      <div class="ld-foot">
-        PermiGo · v7 · 2026 — <a href="#" id="ld-login-2">Espace client</a> · <a href="#">Conditions</a> · <a href="#">Confidentialité</a> · <a href="#">Contact</a>
+      <!-- ─── Footer "taped" ─── -->
+      <div class="ld-foot-wrap">
+        <div class="ld-foot-card">
+          <svg class="ld-foot-tape l" viewBox="0 0 95 80" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true">
+            <path d="M1 45L70.282 5L88.282 36.1769L19 76.1769L1 45Z" fill="#222"/>
+            <path d="M69.68 39.99c5.09-3.07 10.6-4.97 15.76-7.95l-1.83 6.83C80.28 32.39 75.7 26.5 72.23 20.08c-2.23-4.1-4.43-8.24-6.61-12.39l7.36 1.97c-2.41 1.26-4.82 2.52-7.24 3.77-6.58 3.4-13.19 6.73-19.83 10.04-6.63 3.3-13.29 6.56-19.96 9.8-4.53 2.2-9.07 4.39-13.61 6.58-1.99.96-3.98 1.92-5.97 2.88-1.49.71-2.97 1.43-4.46 2.15-.21.1-.43.15-.63.13-.2-.02-.35-.1-.42-.23-.08-.13-.07-.3.01-.48.08-.18.24-.35.43-.48 1.38-.93 2.75-1.86 4.13-2.8 1.53-1.03 3.05-2.07 4.58-3.1l64.31 1.83Z" fill="#222"/>
+          </svg>
+          <svg class="ld-foot-tape r" viewBox="0 0 95 80" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true">
+            <path d="M1 45L70.282 5L88.282 36.1769L19 76.1769L1 45Z" fill="#222"/>
+            <path d="M69.68 39.99c5.09-3.07 10.6-4.97 15.76-7.95l-1.83 6.83C80.28 32.39 75.7 26.5 72.23 20.08c-2.23-4.1-4.43-8.24-6.61-12.39l7.36 1.97c-2.41 1.26-4.82 2.52-7.24 3.77-6.58 3.4-13.19 6.73-19.83 10.04-6.63 3.3-13.29 6.56-19.96 9.8-4.53 2.2-9.07 4.39-13.61 6.58-1.99.96-3.98 1.92-5.97 2.88-1.49.71-2.97 1.43-4.46 2.15-.21.1-.43.15-.63.13-.2-.02-.35-.1-.42-.23-.08-.13-.07-.3.01-.48.08-.18.24-.35.43-.48 1.38-.93 2.75-1.86 4.13-2.8 1.53-1.03 3.05-2.07 4.58-3.1l64.31 1.83Z" fill="#222"/>
+          </svg>
+
+          <div class="ld-foot-grid">
+            <div class="ld-foot-brand">
+              <div class="nm">PermiGo</div>
+              <p>L'application qui réunit le planning, le suivi et les paiements d'une auto-école. Pensée en France, pour des écoles françaises.</p>
+            </div>
+
+            <div class="ld-foot-col">
+              <h4>Produit</h4>
+              <ul>
+                <li><a href="#ld-pricing">Tarif</a></li>
+                <li><a href="#" id="ld-foot-demo">Démonstration</a></li>
+                <li><a href="#" id="ld-foot-essai">Essai gratuit</a></li>
+                <li><a href="#" id="ld-foot-login">Se connecter</a></li>
+              </ul>
+            </div>
+
+            <div class="ld-foot-col">
+              <h4>Ressources</h4>
+              <ul>
+                <li><a href="#">Centre d'aide <span class="soon">bientôt</span></a></li>
+                <li><a href="#">Le métier <span class="soon">bientôt</span></a></li>
+                <li><a href="#">Changelog <span class="soon">bientôt</span></a></li>
+                <li><a href="#">Statut</a></li>
+              </ul>
+            </div>
+
+            <div class="ld-foot-col">
+              <h4>Société</h4>
+              <ul>
+                <li><a href="mailto:hello@permigo.fr">Nous écrire</a></li>
+                <li><a href="#">Mentions légales</a></li>
+                <li><a href="#">Confidentialité</a></li>
+                <li><a href="#">Conditions</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="ld-foot-bottom">
+          <div class="copy">
+            <span>© 2026 PermiGo — Tous droits réservés.</span>
+            <a href="#">Confidentialité</a>
+            <a href="#">Conditions</a>
+            <a href="mailto:hello@permigo.fr">Contact</a>
+          </div>
+          <div class="socials">
+            <a href="https://www.linkedin.com" target="_blank" rel="nofollow noopener" aria-label="LinkedIn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+            <a href="https://x.com" target="_blank" rel="nofollow noopener" aria-label="X">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   `;
 }
 
+const FAQ_ICONS = {
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  exit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  bolt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+};
+
+function faqItem({ icon = 'shield', color = 'blue', q = '', a = '' } = {}) {
+  return `
+    <details class="ld-faq">
+      <summary>
+        <div class="ld-faq-ic ld-faq-ic-${color}">${FAQ_ICONS[icon] || FAQ_ICONS.shield}</div>
+        <div class="ld-faq-q">${q}</div>
+        <div class="ld-faq-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+      </summary>
+      <div class="ld-faq-body">${a}</div>
+    </details>
+  `;
+}
+
 function wire(root) {
-  // Tous les boutons "Inscrire" → toast placeholder
-  ['ld-signup-1', 'ld-signup-2', 'ld-signup-3', 'ld-signup-4', 'pb-center-btn'].forEach(id => {
-    root.querySelector('#' + id)?.addEventListener('click', () => {
-      toast('Formulaire d\'inscription à venir 🚧 — contactez-nous à hello@permigo.fr', 'success');
+  // Tous les boutons "Inscrire mon auto-école" + footer essai → page inscription-ecole
+  ['ld-signup-1', 'ld-signup-2', 'ld-signup-3', 'ld-signup-4', 'pb-center-btn', 'ld-foot-essai'].forEach(id => {
+    root.querySelector('#' + id)?.addEventListener('click', async (e) => {
+      e.preventDefault?.();
+      const { navigate } = await import('@/router.js');
+      navigate('/inscription-ecole');
     });
   });
 
@@ -579,7 +778,7 @@ function wire(root) {
     navigate('/signup');
   });
 
-  ['ld-login', 'ld-login-2', 'ld-demo'].forEach(id => {
+  ['ld-login', 'ld-login-2', 'ld-demo', 'ld-foot-demo', 'ld-foot-login'].forEach(id => {
     root.querySelector('#' + id)?.addEventListener('click', async (e) => {
       e.preventDefault?.();
       const { navigate } = await import('@/router.js');

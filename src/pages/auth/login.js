@@ -19,7 +19,7 @@ import { renderHoneypot, checkHoneypot } from '@/utils/honeypot.js';
 
 const DEMO_ACCOUNTS = [
   { role: 'Élève',    email: 'latifa.sahli@autopilot.fr', emoji: '🎓' },
-  { role: 'Moniteur', email: 'rayan.nabli@autopilot.fr',  emoji: '🚗' },
+  { role: 'Enseignant', email: 'rayan.nabli@autopilot.fr',  emoji: '🚗' },
   { role: 'Gérant',   email: 'rayannabli27@gmail.com',     emoji: '👑' },
 ];
 
@@ -123,7 +123,7 @@ function template() {
 
         <div class="lg-card">
           <h2>Connexion</h2>
-          <p class="h-sub">Élève, moniteur ou gérant — accède à ton espace</p>
+          <p class="h-sub">Élève, enseignant ou gérant — accède à ton espace</p>
 
           <form id="login-form" novalidate>
             ${renderHoneypot()}

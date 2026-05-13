@@ -42,6 +42,7 @@ export async function mount(root) {
   _root = root;
   _me = getCurUser();
   if (!_me) return;
+  if (_me.role !== 'admin') { root.innerHTML = '<p>Accès admin requis</p>'; return; }
 
   root.innerHTML = `<div style="padding:18px"><div class="skel skel-card"></div><div class="skel skel-card"></div></div>`;
   await load();
@@ -232,7 +233,7 @@ function render() {
         <div class="cal-kpi"><div class="l">📚 Leçons</div><div class="v">${k.lecons}</div></div>
         <div class="cal-kpi"><div class="l">⏱ Heures totales</div><div class="v">${k.heures}<small> h</small></div></div>
         <div class="cal-kpi"><div class="l">🎓 Élèves uniques</div><div class="v">${k.elevesUniques}</div></div>
-        <div class="cal-kpi"><div class="l">👨‍🏫 Moniteurs actifs</div><div class="v">${k.moniteursActifs}<small> / ${_moniteurs.length}</small></div></div>
+        <div class="cal-kpi"><div class="l">👨‍🏫 Enseignants actifs</div><div class="v">${k.moniteursActifs}<small> / ${_moniteurs.length}</small></div></div>
       </div>
 
       <!-- Chips filtres -->
@@ -247,7 +248,7 @@ function render() {
       ` : ''}
 
       ${visibles.length === 0 ? `
-        <div class="cal-grid"><div class="cal-empty"><div class="em">👻</div>Aucun moniteur sélectionné ou aucun dans l'équipe</div></div>
+        <div class="cal-grid"><div class="cal-empty"><div class="em">👻</div>Aucun enseignant sélectionné ou aucun dans l'équipe</div></div>
       ` : renderGrid(visibles)}
 
       <div style="height:30px"></div>
@@ -418,7 +419,7 @@ function openDetail(e) {
       <button id="cal-close" aria-label="Fermer">×</button>
     </div>
     <div class="cal-mb">
-      <div class="cal-row"><span class="l">Moniteur</span><span class="v">${esc(moniteurNomFor(e.moniteur_id))}</span></div>
+      <div class="cal-row"><span class="l">Enseignant</span><span class="v">${esc(moniteurNomFor(e.moniteur_id))}</span></div>
       ${e.eleve_id ? `<div class="cal-row"><span class="l">Élève</span><span class="v">${esc(eleveNomFor(e))}${e.numero_heure_eleve ? ` <small style="opacity:.6">· ${e.numero_heure_eleve}ème heure</small>` : ''}</span></div>` : ''}
       ${e.lieu ? `<div class="cal-row"><span class="l">Lieu</span><span class="v">📍 ${esc(e.lieu)}</span></div>` : ''}
       <div class="cal-row"><span class="l">Type</span><span class="v">${esc(e.t || '—')}</span></div>

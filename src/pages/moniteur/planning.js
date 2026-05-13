@@ -1,5 +1,5 @@
 /**
- * Page Planning Moniteur — vue semaine 7×16 (Lun→Dim, 6h→22h).
+ * Page Planning Enseignant — vue semaine 7×16 (Lun→Dim, 6h→22h).
  *
  * Fonctionnalités :
  *  - Navigation < Semaine du DD/MM > avec bouton "Aujourd'hui"
@@ -21,6 +21,7 @@ import { WEEK_DAYS, MONTHS_FR_SHORT, weekStart, addDays, isoDate, jsDayToWeekIdx
 import { REMC } from '@/data/remc.js';
 import { mountNotifBell } from '@/components/notif-bell.js';
 import { createDispo, createLecon, cancelLecon, confirmLecon, markLivretFilled, modifyLecon, MOTIFS_ANNULATION } from '@/services/planning.js';
+import { mountDateTimePicker } from '@/components/date-time-picker.js';
 import { PLANS_LECON } from '@/utils/diagnostic.js';
 
 const HOUR_START = 6;       // 6h
@@ -49,6 +50,16 @@ export async function mount(root) {
   await load();
   render();
   startNowTimer();
+
+  // Si on arrive depuis une alerte "Remplir livret obligatoire" (hash ?openLivret=<id>)
+  const hashParams = new URLSearchParams((location.hash.split('?')[1] || ''));
+  const openLivretId = hashParams.get('openLivret');
+  if (openLivretId) {
+    const ev = _events?.find?.(x => x.id === openLivretId);
+    if (ev) {
+      setTimeout(() => openDetailsModal(ev), 300);
+    }
+  }
 }
 
 export function unmount() {
@@ -779,6 +790,124 @@ async function refresh() {
 
 // ─── Modal CRÉER ───
 
+// ─── Helpers temps (utilisés par le modal create) ───
+function addHours(hhmm, h) {
+  const [hh, mm] = (hhmm || '09:00').split(':').map(Number);
+  const total = hh * 60 + (mm || 0) + h * 60;
+  const nh = Math.min(23, Math.floor(total / 60));
+  const nm = total % 60;
+  return `${String(nh).padStart(2, '0')}:${String(nm).padStart(2, '0')}`;
+}
+
+function hoursBetween(start, end) {
+  const [sh, sm] = (start || '00:00').split(':').map(Number);
+  const [eh, em] = (end || '00:00').split(':').map(Number);
+  const min = (eh * 60 + (em || 0)) - (sh * 60 + (sm || 0));
+  return Math.round((min / 60) * 100) / 100;
+}
+
+function formatDur(h) {
+  if (h < 1) return Math.round(h * 60) + 'min';
+  const hh = Math.floor(h);
+  const mm = Math.round((h - hh) * 60);
+  return mm === 0 ? `${hh}h` : `${hh}h${String(mm).padStart(2, '0')}`;
+}
+
+function formatDateFR(iso) {
+  if (!iso) return '';
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+/** Calcule les créneaux libres (au pas horaire) pour une date donnée — exclut les events occupés. */
+function computeFreeSlotsForDate(dateIso, durHours = 1) {
+  const slots = [];
+  for (let h = 6; h <= 21; h++) slots.push(`${String(h).padStart(2, '0')}:00`);
+  const occupied = (_events || []).filter(e => e.date_event === dateIso && !e.is_deleted && (e.t || '').toLowerCase() !== 'absence');
+  return slots.filter(slot => {
+    const [sh, sm] = slot.split(':').map(Number);
+    const slotStart = sh * 60 + (sm || 0);
+    const slotEnd = slotStart + durHours * 60;
+    for (const ev of occupied) {
+      const [eh, em] = (ev.h || '').split(':').map(Number);
+      if (Number.isNaN(eh)) continue;
+      const evStart = eh * 60 + (em || 0);
+      const evEnd = evStart + (parseFloat(ev.dur) || 1) * 60;
+      if (slotStart < evEnd && evStart < slotEnd) return false;
+    }
+    return true;
+  });
+}
+
+/** Overlay plein écran avec DateTimePicker → calendrier + slots LIBRES uniquement. */
+function openFreeSlotsPicker(parentPanel, initialDate, initialTime, onPick) {
+  const overlay = document.createElement('div');
+  overlay.className = 'pm-dtp-overlay';
+  overlay.innerHTML = `
+    <style>
+      .pm-dtp-overlay{position:fixed;inset:0;z-index:9300;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(8,10,20,.7);backdrop-filter:blur(8px);opacity:0;transition:opacity .25s}
+      .pm-dtp-overlay.in{opacity:1}
+      .pm-dtp-card{background:var(--su);border-radius:18px;padding:0;width:100%;max-width:680px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px -16px rgba(0,0,0,.5);transform:translateY(20px) scale(.96);transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+      .pm-dtp-overlay.in .pm-dtp-card{transform:translateY(0) scale(1)}
+      .pm-dtp-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bo)}
+      .pm-dtp-ti{font-family:var(--fd);font-weight:900;font-size:17px;letter-spacing:-.01em;color:var(--ink);margin:0}
+      .pm-dtp-sub{font-size:11.5px;color:var(--mu);margin-top:2px}
+      .pm-dtp-close{width:32px;height:32px;border-radius:50%;background:var(--bg2);border:0;cursor:pointer;font-size:14px;color:var(--mu);transition:background .15s}
+      .pm-dtp-close:hover{background:var(--bo)}
+      .pm-dtp-body{padding:16px;overflow-y:auto;flex:1}
+      .pm-dtp-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--bo);background:var(--bg2)}
+      .pm-dtp-btn{flex:1;padding:11px 14px;border-radius:11px;font-family:var(--fd);font-weight:700;font-size:13.5px;cursor:pointer;border:1px solid var(--bo);background:var(--su);color:var(--ink);transition:background .15s}
+      .pm-dtp-btn:hover{background:var(--bg2)}
+      .pm-dtp-btn.primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);border:0;color:#fff;flex:1.5;box-shadow:0 6px 16px -4px rgba(99,102,241,.5)}
+      .pm-dtp-btn.primary[disabled]{opacity:.5;cursor:not-allowed}
+    </style>
+    <div class="pm-dtp-card">
+      <header class="pm-dtp-head">
+        <div>
+          <h3 class="pm-dtp-ti">Créneaux libres</h3>
+          <div class="pm-dtp-sub">Tu vois uniquement les heures sans événement</div>
+        </div>
+        <button class="pm-dtp-close" type="button" aria-label="Fermer">✕</button>
+      </header>
+      <div class="pm-dtp-body" id="pm-dtp-mount"></div>
+      <footer class="pm-dtp-foot">
+        <button class="pm-dtp-btn" id="pm-dtp-cancel" type="button">Annuler</button>
+        <button class="pm-dtp-btn primary" id="pm-dtp-ok" type="button" disabled>Choisir ce créneau</button>
+      </footer>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('in'));
+
+  let chosen = { date: initialDate, time: initialTime };
+
+  const mount = overlay.querySelector('#pm-dtp-mount');
+  mountDateTimePicker(mount, {
+    mode: 'single',
+    minDate: isoDate(new Date()),
+    selectedDate: initialDate,
+    selectedTime: initialTime,
+    computeAvailableTimes: (date) => computeFreeSlotsForDate(date, 1),
+    onChange: ({ date, time }) => {
+      chosen = { date, time };
+      overlay.querySelector('#pm-dtp-ok').disabled = !(date && time);
+    },
+  });
+
+  const close = () => {
+    overlay.classList.remove('in');
+    setTimeout(() => overlay.remove(), 250);
+  };
+  overlay.querySelector('.pm-dtp-close').onclick = close;
+  overlay.querySelector('#pm-dtp-cancel').onclick = close;
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('#pm-dtp-ok').onclick = () => {
+    if (!chosen.date || !chosen.time) return;
+    onPick(chosen.date, chosen.time);
+    close();
+  };
+}
+
 function openCreateModal(iso, hour) {
   const panel = _root.querySelector('#pl-modal-panel');
   panel.innerHTML = `
@@ -808,12 +937,33 @@ function openCreateModal(iso, hour) {
         </select>
       </div>
 
-      <div class="pm-row">
-        <label>Heure de début</label>
+      <!-- Plage horaire : mode "De → À" pour DISPO, mode "Début + Durée" pour le reste -->
+      <div class="pm-row" id="pm-time-range" style="display:none">
+        <label>Plage horaire</label>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end">
+          <div>
+            <div style="font-size:10.5px;color:var(--mu);font-weight:700;margin-bottom:4px;letter-spacing:.2px">DE</div>
+            <input type="time" id="pm-h-start" value="${esc(hour)}" step="1800" style="width:100%">
+          </div>
+          <div style="font-size:18px;color:var(--mu);font-weight:800;padding-bottom:8px">→</div>
+          <div>
+            <div style="font-size:10.5px;color:var(--mu);font-weight:700;margin-bottom:4px;letter-spacing:.2px">À</div>
+            <input type="time" id="pm-h-end" value="${esc(addHours(hour, 2))}" step="1800" style="width:100%">
+          </div>
+        </div>
+        <div id="pm-range-info" style="font-size:11.5px;color:var(--mu);margin-top:6px;display:flex;align-items:center;gap:6px"><span>⏱</span><span id="pm-range-dur">2h</span> de disponibilité</div>
+      </div>
+
+      <div class="pm-row" id="pm-time-single">
+        <label style="display:flex;align-items:center;justify-content:space-between">
+          <span>Heure de début</span>
+          <button type="button" id="pm-open-dtp" style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);color:var(--a);font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px;cursor:pointer;font-family:inherit;display:none;align-items:center;gap:4px">📅 Voir créneaux libres</button>
+        </label>
+        <div id="pm-date-display" style="font-size:11.5px;color:var(--mu);margin-bottom:6px;font-weight:600">📅 ${esc(formatDateFR(iso))}</div>
         <input type="time" id="pm-h" value="${esc(hour)}" step="1800">
       </div>
 
-      <div class="pm-row">
+      <div class="pm-row" id="pm-dur-row">
         <label>Durée (heures)</label>
         <select id="pm-dur">
           <option value="1">1h</option>
@@ -872,11 +1022,51 @@ function openCreateModal(iso, hour) {
   const planRow = panel.querySelector('#pm-plan-row');
   const recurRow = panel.querySelector('#pm-recur-row');
 
+  // Date courante (modifiable via le DateTimePicker pour LEÇON)
+  let pickedDate = iso;
+
   function updateRowsVisibility() {
     eleveRow.style.display = (pickedType === 'conf') ? 'block' : 'none';
     planRow.style.display = (pickedType === 'conf') ? 'block' : 'none';
     recurRow.style.display = (pickedType === 'dispo') ? 'block' : 'none';
+    // DISPO → plage horaire "De → À"  |  autres → heure début + durée
+    const isDispo = pickedType === 'dispo';
+    panel.querySelector('#pm-time-range').style.display = isDispo ? 'block' : 'none';
+    panel.querySelector('#pm-time-single').style.display = isDispo ? 'none' : 'block';
+    panel.querySelector('#pm-dur-row').style.display = isDispo ? 'none' : 'block';
+    // Bouton "📅 Voir créneaux libres" : uniquement pour LEÇON
+    const dtpBtn = panel.querySelector('#pm-open-dtp');
+    if (dtpBtn) dtpBtn.style.display = (pickedType === 'conf') ? 'inline-flex' : 'none';
   }
+
+  // Bouton "📅 Voir créneaux libres" → ouvre overlay DateTimePicker
+  panel.querySelector('#pm-open-dtp')?.addEventListener('click', () => {
+    openFreeSlotsPicker(panel, pickedDate, panel.querySelector('#pm-h').value, (date, time) => {
+      pickedDate = date;
+      panel.querySelector('#pm-h').value = time;
+      panel.querySelector('#pm-date-display').innerHTML = `📅 ${formatDateFR(date)}`;
+    });
+  });
+
+  // Recalcule la durée affichée en mode plage à chaque changement
+  const updateRangeDur = () => {
+    const s = panel.querySelector('#pm-h-start')?.value;
+    const e = panel.querySelector('#pm-h-end')?.value;
+    const info = panel.querySelector('#pm-range-info');
+    if (!s || !e || !info) return;
+    const dur = hoursBetween(s, e);
+    const lbl = panel.querySelector('#pm-range-dur');
+    if (dur <= 0) {
+      info.style.color = '#dc2626';
+      if (lbl) lbl.textContent = 'fin avant le début';
+    } else {
+      info.style.color = 'var(--mu)';
+      if (lbl) lbl.textContent = formatDur(dur);
+    }
+  };
+  panel.querySelector('#pm-h-start')?.addEventListener('change', updateRangeDur);
+  panel.querySelector('#pm-h-end')?.addEventListener('change', updateRangeDur);
+  updateRangeDur();
 
   typeRow.forEach(b => {
     b.addEventListener('click', () => {
@@ -933,8 +1123,29 @@ function openCreateModal(iso, hour) {
   panel.querySelector('#pm-cancel').onclick = () => closeModal();
 
   panel.querySelector('#pm-save').onclick = async () => {
-    const h = panel.querySelector('#pm-h').value;
-    const dur = parseFloat(panel.querySelector('#pm-dur').value);
+    // En mode DISPO : on lit start+end de la plage → calcule la durée.
+    // Sinon : heure début + durée séparée comme avant.
+    let h, dur;
+    if (pickedType === 'dispo') {
+      h = panel.querySelector('#pm-h-start').value;
+      const end = panel.querySelector('#pm-h-end').value;
+      dur = hoursBetween(h, end);
+      if (!h || !end) {
+        toast('Choisis une heure de début et de fin', 'error');
+        return;
+      }
+      if (dur <= 0) {
+        toast('L\'heure de fin doit être après l\'heure de début', 'error');
+        return;
+      }
+      if (dur > 8) {
+        toast('Plage trop longue (8h max)', 'error');
+        return;
+      }
+    } else {
+      h = panel.querySelector('#pm-h').value;
+      dur = parseFloat(panel.querySelector('#pm-dur').value);
+    }
     const lieu = panel.querySelector('#pm-lieu').value.trim() || null;
     const eleveId = pickedType === 'conf' ? panel.querySelector('#pm-eleve').value : null;
 
@@ -950,11 +1161,12 @@ function openCreateModal(iso, hour) {
 
     if (pickedType === 'conf') {
       // Création d'une leçon — passe par le service avec toutes les validations métier
+      // Utilise pickedDate (modifiable via "Voir créneaux libres") au lieu d'iso fixe.
       const eleveNom = _eleves.find(p => p.id === eleveId)?.nom;
       result = await createLecon({
         moniteurId: _me.id, monNom: _me.nom,
         eleveId, eleveNom,
-        dateIso: iso, h, dur, lieu,
+        dateIso: pickedDate, h, dur, lieu,
       });
     } else if (pickedType === 'dispo') {
       // Récurrence : créer N créneaux successifs (chaque semaine)
@@ -1107,6 +1319,17 @@ function openDetailsModal(e) {
       btn.disabled = false; btn.textContent = 'Confirmer';
       return;
     }
+    // Flux 4 — notif élève "lecon_confirmee" (cf. FLOWS.md). Best-effort, n'interrompt pas l'UI.
+    if (e.eleve_id) {
+      const monNom = _me?.nom || 'ton enseignant';
+      const dateLabel = `${e.date_event} à ${e.h}`;
+      sb.from('notifications').insert({
+        user_id: e.eleve_id,
+        type: 'lecon_confirmee',
+        title: 'Leçon confirmée',
+        body: `${monNom} a confirmé ta leçon du ${dateLabel}.`,
+      }).then(({ error }) => { if (error) console.warn('[notif lecon_confirmee]', error); });
+    }
     closeModal();
     toast('Leçon confirmée ✓', 'success');
     await refresh();
@@ -1119,11 +1342,24 @@ function openDetailsModal(e) {
   panel.querySelector('#pm-livret-done')?.addEventListener('click', async () => {
     const btn = panel.querySelector('#pm-livret-done');
     btn.disabled = true; btn.textContent = '…';
+    const wasAlreadyFilled = !!e.livret_rempli;
     const result = await markLivretFilled({ leconId: e.id });
     if (!result.ok) {
       toast(result.errors[0] || 'Erreur', 'error');
       btn.disabled = false; btn.textContent = 'Marquer fait';
       return;
+    }
+    // Flux 4 — notif élève "lecon_terminee" (cf. FLOWS.md).
+    // Idempotence : on ne notifie QUE la première fois (si livret_rempli n'était pas déjà true).
+    if (!wasAlreadyFilled && e.eleve_id) {
+      const monNom = _me?.nom || 'ton enseignant';
+      const dateLabel = `${e.date_event} à ${e.h}`;
+      sb.from('notifications').insert({
+        user_id: e.eleve_id,
+        type: 'lecon_terminee',
+        title: 'Ta leçon est notée',
+        body: `${monNom} a clôturé ta leçon du ${dateLabel}. Découvre les détails dans ton parcours.`,
+      }).then(({ error }) => { if (error) console.warn('[notif lecon_terminee]', error); });
     }
     closeModal();
     toast('Livret marqué comme rempli ✓', 'success');
@@ -1384,14 +1620,30 @@ function openReviewModal(ev) {
       if (remcErr) console.warn('[review→remc] err', remcErr);
     }
 
-    // 3. Notif élève
-    if (ev.eleve_id) {
+    // 3. Notifs Flux 4 — uniquement à la PREMIÈRE évaluation (pas sur update) pour l'idempotence
+    if (ev.eleve_id && !existing) {
+      const monNom = _me?.nom || 'ton enseignant';
+      // 3a — Notif "lecon_terminee" (review qui clôt la leçon)
       sb.from('notifications').insert({
         user_id: ev.eleve_id,
-        type: 'info',
-        title: 'Nouvelle évaluation de leçon',
+        type: 'lecon_terminee',
+        title: 'Ta leçon est notée',
         body: `${pickedNote}★ — ${compIds.length} compétence(s) validée(s)${commentaire ? ' — « ' + commentaire + ' »' : ''}`,
-      }).then(({ error }) => { if (error) console.warn('[review notif]', error); });
+      }).then(({ error }) => { if (error) console.warn('[review notif lecon_terminee]', error); });
+      // 3b — Une notif "comp_acquise" par compétence validée via la review (REMC upsert lv='v' ci-dessus)
+      for (const c of compIds) {
+        let libelle = c;
+        for (const cat of REMC) {
+          const sub = cat.subs.find(x => x.c === c);
+          if (sub) { libelle = sub.n; break; }
+        }
+        sb.from('notifications').insert({
+          user_id: ev.eleve_id,
+          type: 'comp_acquise',
+          title: 'Compétence validée 🎉',
+          body: `${libelle} validée par ${monNom}`,
+        }).then(({ error }) => { if (error) console.warn('[review notif comp_acquise]', error); });
+      }
     }
 
     closeModal();

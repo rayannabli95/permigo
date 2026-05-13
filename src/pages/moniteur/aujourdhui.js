@@ -20,11 +20,14 @@ import { mountNotifBell } from '@/components/notif-bell.js';
 import { addDays, isoDate, WEEK_DAYS_FULL, MONTHS_FR_SHORT, jsDayToWeekIdx } from '@/utils/format-date.js';
 import { countUpAll } from '@/utils/count-up.js';
 import { startLecon, endLecon, isActive } from '@/services/geo-tracking.js';
+import { renderUserListCard, wireUserListCard, USER_LIST_CARD_CSS } from '@/components/user-list-card.js';
+import { showAlertCardModal } from '@/components/alert-card.js';
 
 let _root, _me;
 let _eventsToday = [];
 let _eventsTomorrow = [];
 let _eleves = [];
+let _mesEleves = []; // élèves uniques avec stats (dernière leçon, nb leçons)
 let _refreshTimer = null;
 
 export async function mount(root) {
@@ -38,7 +41,10 @@ export async function mount(root) {
   const todayIso = isoDate(today);
   const tomorrowIso = isoDate(addDays(today, 1));
 
-  const [evtTRes, evtTomRes, profRes] = await Promise.allSettled([
+  // Fetch leçons passées des 90 derniers jours pour calcul statut élèves
+  const past90 = isoDate(addDays(today, -90));
+
+  const [evtTRes, evtTomRes, profRes, evtPastRes] = await Promise.allSettled([
     sb.from('events')
       .select('id, h, d, t, dur, lieu, comment, eleve_id, mon_nom, n, date_event, livret_rempli, numero_heure_eleve, started_at, ended_at, distance_km, duree_reelle_min')
       .eq('moniteur_id', _me.id)
@@ -53,14 +59,74 @@ export async function mount(root) {
       .order('h')
       .limit(3),
     sb.from('profiles').select('id, nom, avatar_url').eq('role', 'eleve'),
+    sb.from('events')
+      .select('eleve_id, date_event, t, dur')
+      .eq('moniteur_id', _me.id)
+      .eq('is_deleted', false)
+      .gte('date_event', past90)
+      .lt('date_event', todayIso),
   ]);
 
   _eventsToday = evtTRes.value?.data || [];
   _eventsTomorrow = evtTomRes.value?.data || [];
   _eleves = profRes.value?.data || [];
 
+  // Calcul "Mes élèves" : groupement par eleve_id + dernière leçon + nb leçons
+  const pastEv = (evtPastRes.value?.data || []).filter(e => e.eleve_id && isLecon(e.t));
+  const byEleve = new Map();
+  for (const e of pastEv) {
+    const cur = byEleve.get(e.eleve_id) || { count: 0, lastDate: null, hours: 0 };
+    cur.count++;
+    cur.hours += parseFloat(e.dur) || 0;
+    if (!cur.lastDate || e.date_event > cur.lastDate) cur.lastDate = e.date_event;
+    byEleve.set(e.eleve_id, cur);
+  }
+  _mesEleves = Array.from(byEleve.entries())
+    .map(([id, st]) => {
+      const prof = _eleves.find(p => p.id === id);
+      return { id, nom: prof?.nom || '?', avatar_url: prof?.avatar_url, ...st };
+    })
+    .sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || ''))
+    .slice(0, 10);
+
   render();
   startAutoRefresh();
+  checkLivretsObligatoires();
+}
+
+/** Affiche une alert OBLIGATOIRE au mount si des livrets sont en retard.
+ *  L'enseignant doit cliquer "Remplir maintenant" → renvoie vers planning sur la 1ère leçon. */
+function checkLivretsObligatoires() {
+  const lecons = _eventsToday.filter(e => isLecon(e.t));
+  const livretsRetard = lecons.filter(e => {
+    const { endMin } = eventTimeRange(e);
+    return (e.t || '').toLowerCase() === 'conf' && endMin < nowMin() && !e.livret_rempli;
+  });
+
+  // Skip si aucune en retard OU si déjà acquittée pour aujourd'hui (sessionStorage)
+  if (livretsRetard.length === 0) return;
+  const ackKey = `livret-ack-${_me.id}-${isoDate(new Date())}`;
+  if (sessionStorage.getItem(ackKey)) return;
+
+  const firstId = livretsRetard[0].id;
+  const eleveNom = eleveNomFor(livretsRetard[0]);
+  showAlertCardModal({
+    variant: 'danger',
+    icon: 'book',
+    title: livretsRetard.length === 1
+      ? 'Livret à remplir'
+      : `${livretsRetard.length} livrets à remplir`,
+    description: livretsRetard.length === 1
+      ? `La leçon avec ${eleveNom} est terminée. Remplissez son livret avant de quitter — c'est une étape obligatoire.`
+      : `Plusieurs leçons sont terminées sans livret rempli. Commencez par celle de ${eleveNom}.`,
+    buttonText: 'Remplir maintenant',
+    dismissible: false,
+    onAction: async () => {
+      sessionStorage.setItem(ackKey, '1');
+      const { navigate } = await import('@/router.js');
+      navigate('/planning', { openLivret: firstId });
+    },
+  });
 }
 
 export function unmount() {
@@ -121,6 +187,13 @@ function categorize(e) {
   if (startMin <= m && endMin > m && isLecon(e.t)) return 'current';
   if (startMin > m) return 'upcoming';
   return 'past';
+}
+
+function daysSince(iso) {
+  if (!iso) return 999;
+  const d = new Date(iso);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.floor((today - d) / 86400000));
 }
 
 function todayLabel() {
@@ -237,6 +310,8 @@ function render() {
       .aujr-empty{text-align:center;padding:36px 20px;color:var(--mu);font-size:13.5px;background:var(--bg2);border-radius:12px}
       .aujr-empty .em{font-size:36px;line-height:1;margin-bottom:8px}
 
+      ${USER_LIST_CARD_CSS}
+
       /* FAB nouvelle leçon */
       .aujr-fab{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));right:18px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:0;font-size:26px;cursor:pointer;box-shadow:0 10px 28px -6px rgba(99,102,241,.7);z-index:30;transition:transform .15s;display:flex;align-items:center;justify-content:center;font-weight:300}
       .aujr-fab:hover{transform:translateY(-3px) scale(1.06)}
@@ -352,6 +427,30 @@ function render() {
         </div>
       ` : ''}
 
+      ${_mesEleves.length > 0 ? `
+        <div class="aujr-sec-h">Mes élèves</div>
+        ${renderUserListCard({
+          title: 'Mes élèves récents',
+          subtitle: 'Triés par leçon la plus récente',
+          items: _mesEleves.map(e => {
+            const daysAgo = e.lastDate ? daysSince(e.lastDate) : 999;
+            let badge;
+            if (daysAgo <= 14) badge = { label: 'Actif', variant: 'success' };
+            else if (daysAgo <= 30) badge = { label: `${daysAgo}j`, variant: 'neutral' };
+            else if (daysAgo <= 60) badge = { label: 'À relancer', variant: 'warning' };
+            else badge = { label: 'Inactif', variant: 'danger' };
+            return {
+              id: e.id,
+              nom: e.nom,
+              sub: `${e.count} leçon${e.count > 1 ? 's' : ''} · ${e.hours.toFixed(0)}h · dernière ${daysAgo === 0 ? "aujourd'hui" : `il y a ${daysAgo}j`}`,
+              avatarUrl: e.avatar_url,
+              badge,
+            };
+          }),
+          footer: { label: 'Voir tous mes élèves', action: 'seeAll' },
+        })}
+      ` : ''}
+
       ${_eventsTomorrow.length > 0 ? `
         <div class="aujr-sec-h">Demain <span class="count">${_eventsTomorrow.length}</span></div>
         ${_eventsTomorrow.map(renderCard).join('')}
@@ -411,6 +510,18 @@ function wire() {
   _root.querySelector('#aujr-fab')?.addEventListener('click', async () => {
     const { navigate } = await import('@/router.js');
     navigate('/planning');
+  });
+
+  // Widget "Mes élèves" — click sur un élève = fiche, click "Voir tous" = mes-eleves
+  wireUserListCard(_root, {
+    onItemClick: async (id) => {
+      const { navigate } = await import('@/router.js');
+      navigate('/fiche-eleve', { id });
+    },
+    onAction: async () => {
+      const { navigate } = await import('@/router.js');
+      navigate('/mes-eleves');
+    },
   });
 
   // Actions sur card en cours

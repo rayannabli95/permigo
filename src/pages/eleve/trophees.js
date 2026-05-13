@@ -17,6 +17,7 @@ import { REMC, REMC_TOTAL } from '@/data/remc.js';
 import { mountNotifBell } from '@/components/notif-bell.js';
 import { burstConfetti, burstConfettiFromElement } from '@/components/confetti.js';
 import { countUpAll } from '@/utils/count-up.js';
+import { showRewardReveal } from '@/components/reward-reveal.js';
 
 let _root, _me;
 
@@ -56,19 +57,40 @@ export async function mount(root) {
     countUpAll(root.querySelectorAll('[data-count]'), { stagger: 150, duration: 1200 });
   }, 250);
 
-  // Confetti automatique si l'élève vient de débloquer un nouveau trophée
-  const lastSeenKey = `troph-seen-${_me.id}`;
-  const lastSeen = parseInt(localStorage.getItem(lastSeenKey) || '0', 10);
-  if (trophiesDone > lastSeen) {
-    setTimeout(() => burstConfetti({ count: 120, y: 0.25, power: 18 }), 700);
+  // ─── Reveal premium + confetti si nouveau trophée débloqué ───
+  const seenCatsKey = `troph-seen-cats-${_me.id}`;
+  const seenIds = new Set(JSON.parse(localStorage.getItem(seenCatsKey) || '[]'));
+  const newlyUnlocked = cats.filter(c => c.isUnlocked && !seenIds.has(c.id));
+
+  if (newlyUnlocked.length > 0) {
+    // Le plus récent débloqué (s'il y en a plusieurs, on prend le premier)
+    const cat = newlyUnlocked[0];
+
+    // Variant selon le palier
+    const variant = trophiesDone === 4 ? 'platinum' : trophiesDone === 3 ? 'gold' : trophiesDone === 2 ? 'fire' : 'neon';
+
+    // Reveal animation + confetti
+    showRewardReveal({
+      text: trophiesDone === 4 ? 'PERMIS COMPLET' : 'TROPHÉE DÉBLOQUÉ',
+      sub: cat.titre || cat.nom || cat.label || 'Nouvelle catégorie maîtrisée',
+      emoji: trophiesDone === 4 ? '🏆' : '🎖️',
+      variant,
+      duration: 4000,
+    });
+    setTimeout(() => burstConfetti({ count: 120, y: 0.25, power: 18 }), 900);
     if (trophiesDone === 4) {
-      // Quadruple confetti pour tous les trophées !
-      setTimeout(() => burstConfetti({ count: 100, x: 0.25, y: 0.4, power: 16, spread: Math.PI * 0.5 }), 1100);
-      setTimeout(() => burstConfetti({ count: 100, x: 0.75, y: 0.4, power: 16, spread: Math.PI * 0.5 }), 1300);
+      setTimeout(() => burstConfetti({ count: 100, x: 0.25, y: 0.4, power: 16, spread: Math.PI * 0.5 }), 1300);
+      setTimeout(() => burstConfetti({ count: 100, x: 0.75, y: 0.4, power: 16, spread: Math.PI * 0.5 }), 1500);
     }
-    localStorage.setItem(lastSeenKey, String(trophiesDone));
+
+    // Mémorise les trophées vus pour ne pas re-trigger au prochain reload
+    cats.filter(c => c.isUnlocked).forEach(c => seenIds.add(c.id));
+    localStorage.setItem(seenCatsKey, JSON.stringify([...seenIds]));
   }
 }
+
+/** Trigger manuel d'un reveal pour tests ou autres cas (niveau up, achat, etc.). */
+export { showRewardReveal };
 
 function render({ me, cats, trophiesDone, allDone, nextTrophy }) {
   return `

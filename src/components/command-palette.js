@@ -253,7 +253,7 @@ function renderResults() {
     actions.push({ type: 'action', id: 'new-lecon', icon: '🚗', label: 'Programmer une leçon', meta: 'Va dans le planning' });
   } else if (me?.role === 'admin') {
     actions.push({ type: 'action', id: 'new-eleve', icon: '🎓', label: 'Ajouter un élève', meta: 'Création de compte' });
-    actions.push({ type: 'action', id: 'new-moniteur', icon: '👨‍🏫', label: 'Ajouter un moniteur', meta: 'Création de compte' });
+    actions.push({ type: 'action', id: 'new-moniteur', icon: '👨‍🏫', label: 'Ajouter un enseignant', meta: 'Création de compte' });
   }
   const filteredActions = actions.filter(a => !q || a.label.toLowerCase().includes(q));
 

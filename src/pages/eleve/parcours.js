@@ -289,6 +289,118 @@ function renderShell(me) {
       .pc3-legend i{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.7)}
 
       /* ─── WORLD section IMMERSIF avec image décor ─── */
+      /* ─── MAP CONTAINER (scroll isolé + design premium) ─── */
+      .pc3-map-frame{
+        position:relative;
+        margin:14px 12px 24px;
+        border-radius:24px;
+        overflow:hidden;
+        background:#0a0d1a;
+        box-shadow:0 24px 60px -20px rgba(11,13,26,.6),
+                   inset 0 1px 0 rgba(255,255,255,.08);
+        isolation:isolate;
+      }
+      /* Bordure gradient animée (rotation conique en boucle) */
+      .pc3-map-border{
+        position:absolute;
+        inset:-2px;
+        border-radius:26px;
+        background:conic-gradient(from 0deg,
+          #6366f1, #8b5cf6, #06b6d4, #10b981, #f59e0b, #ec4899, #6366f1);
+        animation:pc3-border-spin 12s linear infinite;
+        z-index:0;
+        opacity:.65;
+      }
+      @keyframes pc3-border-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+      .pc3-map-frame::before{
+        content:'';
+        position:absolute;
+        inset:2px;
+        border-radius:22px;
+        background:#0a0d1a;
+        z-index:1;
+      }
+      @media (prefers-reduced-motion:reduce){
+        .pc3-map-border{animation:none}
+      }
+
+      /* Coins décoratifs style mappe ancienne / tech */
+      .pc3-map-corners{position:absolute;inset:0;z-index:3;pointer-events:none}
+      .pc3-corner{position:absolute;width:18px;height:18px;border:2px solid rgba(255,255,255,.5);border-radius:3px}
+      .pc3-corner.tl{top:14px;left:14px;border-right:0;border-bottom:0}
+      .pc3-corner.tr{top:14px;right:14px;border-left:0;border-bottom:0}
+      .pc3-corner.bl{bottom:14px;left:14px;border-right:0;border-top:0}
+      .pc3-corner.br{bottom:14px;right:14px;border-left:0;border-top:0}
+
+      /* Badge en haut "CARTE D'APPRENTISSAGE" */
+      .pc3-map-badge{
+        position:absolute;
+        top:14px;
+        left:50%;
+        transform:translateX(-50%);
+        z-index:4;
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:5px 14px;
+        background:rgba(11,13,26,.85);
+        backdrop-filter:blur(12px);
+        -webkit-backdrop-filter:blur(12px);
+        border:1px solid rgba(255,255,255,.18);
+        border-radius:99px;
+        font-family:var(--fn);
+        font-size:9.5px;
+        font-weight:800;
+        letter-spacing:2px;
+        color:rgba(255,255,255,.9);
+        box-shadow:0 6px 16px -4px rgba(0,0,0,.5);
+        pointer-events:none;
+      }
+      .pc3-map-badge-dot{
+        width:6px;height:6px;border-radius:50%;
+        background:#10b981;
+        box-shadow:0 0 8px #10b981;
+        animation:pc3-dot-pulse 1.8s ease-in-out infinite;
+      }
+      @keyframes pc3-dot-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+      /* Le conteneur scrollable */
+      .pc3-map{
+        position:relative;
+        z-index:2;
+        max-height:70vh;
+        overflow-y:auto;
+        overflow-x:hidden;
+        overscroll-behavior:contain;
+        -webkit-overflow-scrolling:touch;
+        scrollbar-width:thin;
+        scrollbar-color:rgba(255,255,255,.3) transparent;
+      }
+      .pc3-map::-webkit-scrollbar{width:6px}
+      .pc3-map::-webkit-scrollbar-track{background:transparent}
+      .pc3-map::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:99px}
+      .pc3-map::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.35)}
+
+      @media (max-width:560px){
+        .pc3-map{max-height:65vh}
+        .pc3-map-frame{margin:10px 8px 20px;border-radius:20px}
+        .pc3-map-frame::before{border-radius:18px}
+      }
+      @media (min-height:900px){
+        .pc3-map{max-height:75vh}
+      }
+
+      /* Fade haut/bas pour signaler le scroll interne */
+      .pc3-map-fade-top,.pc3-map-fade-bottom{
+        position:absolute;
+        left:2px;right:2px;
+        height:38px;
+        pointer-events:none;
+        z-index:3;
+      }
+      .pc3-map-fade-top{top:2px;background:linear-gradient(180deg,#0a0d1a 0%,transparent 100%);border-radius:22px 22px 0 0}
+      .pc3-map-fade-bottom{bottom:2px;background:linear-gradient(0deg,#0a0d1a 0%,transparent 100%);border-radius:0 0 22px 22px}
+
       .pc3-world{position:relative;padding:0 0 80px;margin:0;overflow:hidden;background:var(--w-sky-mid)}
       /* Image décor pleine largeur (ChatGPT-generated PNG) */
       .pc3-scenery{position:absolute;inset:0;z-index:1;pointer-events:none}
@@ -502,11 +614,24 @@ function renderShell(me) {
         <span><i style="background:#94a3b8"></i>Verrouillé</span>
       </div>
 
-      <!-- Les 4 mondes en route continue -->
-      ${REMC.map((cat, i) => renderWorld(cat, WORLDS_META[i], i, i < REMC.length - 1)).join('')}
-
-      <!-- Fin du voyage -->
-      ${renderFinal(g)}
+      <!-- ╔═══════ MAP CONTAINER (scroll isolé) ═══════╗ -->
+      <div class="pc3-map-frame">
+        <div class="pc3-map-border" aria-hidden="true"></div>
+        <div class="pc3-map-corners" aria-hidden="true">
+          <span class="pc3-corner tl"></span><span class="pc3-corner tr"></span>
+          <span class="pc3-corner bl"></span><span class="pc3-corner br"></span>
+        </div>
+        <div class="pc3-map-badge" aria-hidden="true">
+          <span class="pc3-map-badge-dot"></span> CARTE D'APPRENTISSAGE
+        </div>
+        <div class="pc3-map" id="pc3-map-scroll">
+          ${REMC.map((cat, i) => renderWorld(cat, WORLDS_META[i], i, i < REMC.length - 1)).join('')}
+          ${renderFinal(g)}
+          <div style="height:30px"></div>
+        </div>
+        <div class="pc3-map-fade-top" aria-hidden="true"></div>
+        <div class="pc3-map-fade-bottom" aria-hidden="true"></div>
+      </div>
 
       <div style="height:30px"></div>
     </div>
@@ -1134,12 +1259,12 @@ function openFiche(root, compId, worldIdxStr) {
       ` : st === 'locked' ? `
         <div class="fiche-section fiche-feedback-empty">
           <div class="em">🔒</div>
-          <div class="txt">Compétence pas encore abordée. Tu pourras voir les retours de ton moniteur ici dès qu'elle sera travaillée.</div>
+          <div class="txt">Compétence pas encore abordée. Tu pourras voir les retours de ton enseignant ici dès qu'elle sera travaillée.</div>
         </div>
       ` : `
         <div class="fiche-section fiche-feedback-empty">
           <div class="em">⏳</div>
-          <div class="txt">En cours d'apprentissage. Les retours du moniteur apparaîtront ici après chaque leçon.</div>
+          <div class="txt">En cours d'apprentissage. Les retours de l'enseignant apparaîtront ici après chaque leçon.</div>
         </div>
       `}
 

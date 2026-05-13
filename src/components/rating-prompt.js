@@ -79,7 +79,7 @@ export async function checkAndPromptRating(eleveId) {
   }
 
   // Récupère le nom du moniteur
-  let moniteurNom = lastEvent.mon_nom || 'ton moniteur';
+  let moniteurNom = lastEvent.mon_nom || 'ton enseignant';
   if (lastEvent.moniteur_id) {
     const { data: mon } = await sb
       .from('profiles')

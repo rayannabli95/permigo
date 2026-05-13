@@ -29,6 +29,7 @@ const ROUTES = {
   '/login':    { loader: () => import('./pages/auth/login.js'),      roles: null },
   '/landing':  { loader: () => import('./pages/public/landing.js'),  roles: null },
   '/signup':   { loader: () => import('./pages/public/signup.js'),   roles: null },
+  '/inscription-ecole': { loader: () => import('./pages/public/inscription-ecole.js'), roles: null },
 
   // Élève
   '/accueil':     { loader: () => import('./pages/eleve/accueil.js'),     roles: ['eleve'] },
@@ -37,7 +38,7 @@ const ROUTES = {
   '/trophees':    { loader: () => import('./pages/eleve/trophees.js'),    roles: ['eleve'] },
   '/boutique':    { loader: () => import('./pages/eleve/boutique.js'),    roles: ['eleve'] },
 
-  // Moniteur
+  // Enseignant
   '/mes-eleves':  { loader: () => import('./pages/moniteur/mes-eleves.js'),  roles: ['moniteur'] },
   '/fiche-eleve': { loader: () => import('./pages/moniteur/fiche-eleve.js'), roles: ['moniteur', 'admin'] },
   '/livret-remc': { loader: () => import('./pages/moniteur/livret-remc.js'), roles: ['moniteur', 'admin'] },
@@ -51,6 +52,7 @@ const ROUTES = {
   '/eleves':      { loader: () => import('./pages/admin/eleves.js'),        roles: ['admin'] },
   '/calendrier':  { loader: () => import('./pages/admin/calendrier.js'),    roles: ['admin'] },
   '/equipe':      { loader: () => import('./pages/admin/equipe.js'),        roles: ['admin'] },
+  '/leads':       { loader: () => import('./pages/admin/leads.js'),         roles: ['admin'] },
 
   // Commun à tous les rôles authentifiés
   '/profil':         { loader: () => import('./pages/common/profil.js'),       roles: ['eleve', 'moniteur', 'admin'] },

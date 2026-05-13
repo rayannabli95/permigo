@@ -85,6 +85,34 @@ function chipCls(lv) {
   return ({ v: 'lv-v', p: 'lv-p', r: 'lv-r' })[lv] || 'lv-x';
 }
 
+/** Retrouve le libellé textuel d'une sous-compétence depuis son comp_id. */
+function compLabel(compId) {
+  for (const c of REMC) {
+    const s = c.subs.find(x => x.c === compId);
+    if (s) return s.n;
+  }
+  return compId;
+}
+
+/**
+ * Émet une notif `comp_acquise` à l'élève — Flux 4 (FLOWS.md).
+ * À n'appeler QUE lorsqu'une compétence vient de passer à `lv='v'`
+ * (pas si elle était déjà 'v' avant, pas pour 'p'/'r'/null) — idempotence.
+ * Best-effort : un échec n'interrompt pas le flux UI.
+ */
+async function notifyCompAcquise(compId) {
+  if (!_eleve?.id) return;
+  const monNom = _me?.nom || 'ton enseignant';
+  const libelle = compLabel(compId);
+  const { error } = await sb.from('notifications').insert({
+    user_id: _eleve.id,
+    type: 'comp_acquise',
+    title: 'Compétence validée 🎉',
+    body: `${libelle} validée par ${monNom}`,
+  });
+  if (error) console.warn('[livret-remc notif comp_acquise]', error);
+}
+
 // ─── Rendu ───
 function render() {
   const g = globalProgress();
@@ -341,6 +369,7 @@ function wire() {
 async function setLvQuick(compId, lv, btnEl) {
   // Optimistic UI : on update _entries localement avant la DB
   const existing = _entries.find(e => e.comp_id === compId);
+  const prevLv = existing?.lv || null;
   if (lv === null) {
     // Suppression de l'évaluation
     _entries = _entries.filter(e => e.comp_id !== compId);
@@ -376,12 +405,16 @@ async function setLvQuick(compId, lv, btnEl) {
       validated_at: new Date().toISOString(),
     };
     const { error } = await sb.from('remc_entries').upsert(payload, { onConflict: 'eleve_id,comp_id' });
-    if (error) { console.warn('[remc] upsert err', error); toast('Erreur sync', 'error'); }
+    if (error) { console.warn('[remc] upsert err', error); toast('Erreur sync', 'error'); return; }
+    // Flux 4 — notif élève si la comp vient de passer à 'v' (et pas déjà 'v' avant) — idempotent
+    if (lv === 'v' && prevLv !== 'v') notifyCompAcquise(compId);
   }
 }
 
 /** Set LV en masse (bouton "Tout acquis"). */
 async function setLvBatch(compIds, lv, btnEl) {
+  // Capture l'état AVANT mutation pour idempotence des notifs (ne pas re-notifier si déjà 'v')
+  const toNotify = lv === 'v' ? compIds.filter(c => (_entries.find(e => e.comp_id === c)?.lv) !== 'v') : [];
   for (const compId of compIds) {
     const existing = _entries.find(e => e.comp_id === compId);
     if (existing) {
@@ -404,7 +437,9 @@ async function setLvBatch(compIds, lv, btnEl) {
     checked: lv === 'v', validated_at: new Date().toISOString(),
   }));
   const { error } = await sb.from('remc_entries').upsert(payload, { onConflict: 'eleve_id,comp_id' });
-  if (error) { console.warn('[remc] batch err', error); toast('Erreur sync', 'error'); }
+  if (error) { console.warn('[remc] batch err', error); toast('Erreur sync', 'error'); return; }
+  // Flux 4 — une notif élève par compétence qui vient de passer à 'v' — idempotent
+  for (const c of toNotify) notifyCompAcquise(c);
 }
 
 /** Re-render UN row (sous-comp) sans recharger tout le DOM. */
@@ -561,6 +596,9 @@ function openEval(compId) {
     const idx = _entries.findIndex(e => e.comp_id === compId);
     const entry = { comp_id: compId, lv: pickedLv, note, validated_at: payload.validated_at };
     if (idx >= 0) _entries[idx] = entry; else _entries.push(entry);
+
+    // Flux 4 — notif élève si la comp vient de passer à 'v' (et pas déjà 'v' avant) — idempotent
+    if (pickedLv === 'v' && curLv !== 'v') notifyCompAcquise(compId);
 
     // Re-render (rafraîchit chips + progressions)
     _root.innerHTML = render();
