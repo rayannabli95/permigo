@@ -532,7 +532,7 @@ function openSheet(eventId) {
         <div class="ic">📍</div>
         <div class="col">
           <div class="lb">Lieu</div>
-          <div class="vl">${ev.lieu ? esc(ev.lieu) : "À confirmer avec l'enseignant"}</div>
+          <div class="vl">${ev.lieu ? esc(ev.lieu) : " avec l'enseignant"}</div>
         </div>
       </div>
       <div class="rv-recap-row">
