@@ -69,21 +69,32 @@ function render() {
       .bq-gemmes .em{font-size:16px;line-height:1;filter:drop-shadow(0 0 6px rgba(167,139,250,.8));animation:bq-gem-shine 2.5s ease-in-out infinite}
       @keyframes bq-gem-shine{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg) scale(1.1)}}
 
+      /* ─── Intro "Comment ça marche" ─── */
+      .bq-intro{background:linear-gradient(135deg,#1e1b4b,#312e81);color:#fff;border-radius:14px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 24px -8px rgba(99,102,241,.4)}
+      .bq-intro .em{font-size:38px;line-height:1;filter:drop-shadow(0 4px 12px rgba(167,139,250,.5))}
+      .bq-intro .body{flex:1}
+      .bq-intro .ti{font-family:var(--fd);font-weight:900;font-size:14px;letter-spacing:-.005em;margin-bottom:3px}
+      .bq-intro .sub{font-size:11.5px;color:rgba(255,255,255,.78);line-height:1.4}
+      .bq-intro .sub b{color:#fde68a;font-weight:800}
+
       .bq-tabs{display:flex;gap:6px;margin-bottom:16px;background:var(--bg2);padding:4px;border-radius:12px;border:1px solid var(--bo)}
-      .bq-tab{flex:1;padding:9px 8px;border:0;background:transparent;border-radius:8px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--mu);cursor:pointer;letter-spacing:.2px;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
+      .bq-tab{flex:1;padding:11px 6px;border:0;background:transparent;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700;color:var(--mu);cursor:pointer;letter-spacing:.2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .15s;line-height:1.1}
       .bq-tab:hover{color:var(--ink)}
       .bq-tab.on{background:var(--su);color:var(--ink);box-shadow:var(--s0)}
-      .bq-tab .em{font-size:14px}
+      .bq-tab .em{font-size:18px;line-height:1}
+      .bq-tab .lb{font-size:11px;font-weight:800}
 
-      .bq-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-      @media (max-width:380px){.bq-grid{grid-template-columns:1fr}}
-      .bq-card{background:var(--su);border:2px solid var(--bo);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;transition:transform .15s,border-color .15s,box-shadow .2s;position:relative;overflow:hidden}
+      .bq-section-h{font-family:var(--fn);font-size:10.5px;font-weight:900;color:var(--mu);letter-spacing:.2em;text-transform:uppercase;margin:0 4px 10px}
+
+      /* Cards en 1 colonne — plus grandes, plus claires */
+      .bq-grid{display:flex;flex-direction:column;gap:12px}
+      .bq-card{background:var(--su);border:2px solid var(--bo);border-radius:16px;padding:14px;display:flex;gap:14px;align-items:center;transition:transform .15s,border-color .15s,box-shadow .2s;position:relative;overflow:hidden}
       .bq-card:hover{transform:translateY(-2px);border-color:var(--a)}
       .bq-card.owned{border-color:var(--gr)}
-      .bq-card.equipped{border-color:var(--gr);box-shadow:0 0 0 3px var(--grp),0 14px 28px -10px rgba(16,185,129,.4)}
-      .bq-card.equipped::before{content:'EN COURS';position:absolute;top:8px;right:8px;font-family:var(--fn);font-size:9px;font-weight:900;color:var(--gr);background:var(--grp);padding:3px 8px;border-radius:99px;letter-spacing:.3px;border:1px solid var(--gr);z-index:2}
+      .bq-card.equipped{border-color:var(--gr);background:linear-gradient(135deg,var(--grp),var(--su));box-shadow:0 0 0 3px var(--grp),0 14px 28px -10px rgba(16,185,129,.4)}
+      .bq-card.equipped::before{content:'✓ ÉQUIPÉ';position:absolute;top:10px;right:12px;font-family:var(--fn);font-size:9.5px;font-weight:900;color:#fff;background:var(--gr);padding:3px 9px;border-radius:99px;letter-spacing:.3px;z-index:2;box-shadow:0 4px 10px -2px rgba(16,185,129,.5)}
 
-      .bq-preview{height:90px;border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--bg2),var(--bg))}
+      .bq-preview{width:96px;height:96px;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--bg2),var(--bg));flex-shrink:0;border:1px solid var(--bo2)}
 
       /* Preview skin carte permis */
       .bq-prev-permit{width:80px;height:50px;border-radius:5px;position:relative;overflow:hidden}
@@ -105,11 +116,15 @@ function render() {
       .bq-prev-color{width:64px;height:64px;border-radius:50%;box-shadow:0 8px 20px -4px var(--prev-glow),0 0 0 3px rgba(255,255,255,.5);position:relative}
       .bq-prev-color::after{content:'';position:absolute;inset:6px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,.4),transparent 60%)}
 
-      .bq-name{font-family:var(--fd);font-weight:800;font-size:14px;color:var(--ink);letter-spacing:-.005em;line-height:1.2}
-      .bq-desc{font-size:11.5px;color:var(--mu);line-height:1.4;flex:1}
-      .bq-price{display:flex;align-items:center;gap:5px;font-family:var(--fd);font-size:13px;font-weight:900;color:#7c3aed}
+      .bq-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+      .bq-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+      .bq-name{font-family:var(--fd);font-weight:800;font-size:15px;color:var(--ink);letter-spacing:-.005em;line-height:1.2}
+      .bq-price{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;background:linear-gradient(135deg,#4c1d95,#7c3aed);color:#fff;font-family:var(--fd);font-size:11px;font-weight:900;letter-spacing:.2px}
+      .bq-price .em{font-size:11px}
+      .bq-desc{font-size:11.5px;color:var(--mu);line-height:1.4}
+      .bq-actions{margin-top:8px}
 
-      .bq-cta{padding:10px 14px;border-radius:9px;border:0;font-family:var(--fd);font-size:12.5px;font-weight:900;cursor:pointer;letter-spacing:.3px;transition:transform .12s,box-shadow .15s}
+      .bq-cta{padding:10px 16px;border-radius:9px;border:0;font-family:var(--fd);font-size:12.5px;font-weight:900;cursor:pointer;letter-spacing:.3px;transition:transform .12s,box-shadow .15s;width:100%}
       .bq-cta-buy{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;box-shadow:0 6px 14px -4px rgba(139,92,246,.5)}
       .bq-cta-buy:hover{transform:translateY(-2px)}
       .bq-cta-buy:disabled{opacity:.5;cursor:not-allowed;transform:none}
@@ -123,16 +138,27 @@ function render() {
     <div class="bq-wrap anim-slide-up">
       <div class="bq-top">
         <button class="bq-back" id="bq-back" aria-label="Retour">‹</button>
+        <img src="permigo-logo.png" alt="PermiGo" style="height:26px;width:auto;margin-right:4px;filter:drop-shadow(0 3px 8px rgba(99,102,241,.25))" onerror="this.style.display='none'">
         <h1>🛒 Boutique</h1>
         <div class="bq-gemmes"><span class="em">💎</span><span>${gemmes}</span></div>
       </div>
 
-      <div class="bq-tabs" role="tablist">
-        ${TABS.map(t => `<button class="bq-tab ${_tab === t.id ? 'on' : ''}" data-tab="${t.id}" type="button"><span class="em">${t.icon}</span> ${esc(t.label)}</button>`).join('')}
+      <div class="bq-intro">
+        <div class="em">💎</div>
+        <div class="body">
+          <div class="ti">Personnalise ton expérience</div>
+          <div class="sub">Gagne des <b>gemmes</b> en validant des sous-compétences sur ton parcours REMC, puis échange-les ici contre des skins exclusifs.</div>
+        </div>
       </div>
 
+      <div class="bq-tabs" role="tablist">
+        ${TABS.map(t => `<button class="bq-tab ${_tab === t.id ? 'on' : ''}" data-tab="${t.id}" type="button"><span class="em">${t.icon}</span><span class="lb">${esc(t.label)}</span></button>`).join('')}
+      </div>
+
+      <div class="bq-section-h">${esc(TABS.find(t => t.id === _tab)?.label || '')} · ${items.length} article${items.length > 1 ? 's' : ''}</div>
+
       <div class="bq-grid">
-        ${items.map(item => renderCard(item, gemmes, equipped)).join('')}
+        ${items.length === 0 ? `<div class="bq-empty"><div class="em">📦</div><div>Aucun article dans cette catégorie</div></div>` : items.map(item => renderCard(item, gemmes, equipped)).join('')}
       </div>
     </div>
   `;
@@ -165,10 +191,14 @@ function renderCard(item, gemmes, equipped) {
   return `
     <div class="bq-card ${owned ? 'owned' : ''} ${isEquipped ? 'equipped' : ''}" data-item-id="${esc(item.id)}">
       <div class="bq-preview">${preview}</div>
-      <div class="bq-name">${esc(item.name)}</div>
-      <div class="bq-desc">${esc(item.desc)}</div>
-      <div class="bq-price"><span class="em">💎</span> <span>${item.cost}</span></div>
-      ${ctaHtml}
+      <div class="bq-body">
+        <div class="bq-name-row">
+          <div class="bq-name">${esc(item.name)}</div>
+          ${owned ? '' : `<div class="bq-price"><span class="em">💎</span><span>${item.cost}</span></div>`}
+        </div>
+        <div class="bq-desc">${esc(item.desc)}</div>
+        <div class="bq-actions">${ctaHtml}</div>
+      </div>
     </div>
   `;
 }

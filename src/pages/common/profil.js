@@ -166,6 +166,7 @@ function render(me) {
 
     <div class="pr-wrap anim-slide-up">
       <div class="pr-top">
+        <img src="permigo-logo.png" alt="PermiGo" style="height:28px;width:auto;filter:drop-shadow(0 3px 8px rgba(99,102,241,.25))" onerror="this.style.display='none'">
         <div style="flex:1">
           <div class="ttl">Mon profil</div>
           <div class="sub">${esc(me.nom)} · ${roleLabel(me.role)}</div>

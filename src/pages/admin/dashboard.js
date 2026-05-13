@@ -235,6 +235,7 @@ function render({ me, ca, heuresMonth, elevesActifs, elevesTotal, lessonsWeekCou
     <div class="ad-wrap anim-slide-up">
 
       <div class="ad-top">
+        <img src="permigo-logo.png" alt="PermiGo" style="height:30px;width:auto;filter:drop-shadow(0 4px 14px rgba(139,92,246,.45));margin-right:8px" onerror="this.style.display='none'">
         <div>
           <div class="ttl">Tableau de bord</div>
           <div class="sub">${esc(me.nom)} · gérant · ${esc(period)}</div>

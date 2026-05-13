@@ -110,8 +110,14 @@ function template() {
       .ld-logo img{height:36px;width:auto;display:block;filter:drop-shadow(0 4px 14px rgba(139,92,246,.45))}
       .ld-logo-fb{background:linear-gradient(90deg,#a5b4fc,#fff,#c4b5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
       .ld-logo .badge{font-size:9.5px;font-weight:800;color:#a5b4fc;background:rgba(99,102,241,.15);padding:3px 7px;border-radius:6px;letter-spacing:1px;border:1px solid rgba(165,180,252,.25)}
-      .ld-nav-r{display:flex;align-items:center;gap:10px}
-      .ld-btn{height:38px;padding:0 16px;border-radius:10px;font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;transition:all .15s;border:0;display:inline-flex;align-items:center;gap:6px}
+      .ld-nav-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+      .ld-btn{height:38px;padding:0 16px;border-radius:10px;font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;transition:all .15s;border:0;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+      /* Mobile : nav en colonne, boutons full-width */
+      @media (max-width:640px){
+        .ld-nav{flex-direction:column;align-items:stretch;gap:14px;padding:14px 18px}
+        .ld-nav-r{flex-direction:column;width:100%;gap:8px}
+        .ld-btn{width:100%;justify-content:center;height:42px;font-size:13.5px}
+      }
       .ld-btn-ghost{background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.12)}
       .ld-btn-ghost:hover{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.04)}
       .ld-btn-p{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 6px 20px -6px rgba(99,102,241,.6)}

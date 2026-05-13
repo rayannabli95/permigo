@@ -16,12 +16,12 @@ import { esc } from '@/utils/escape.js';
 
 let _root;
 let _step = 1;
-let _data = { email: '', password: '', nom: '', tel: '' };
+let _data = { email: '', password: '', nom: '', tel: '', forfait: 20 };
 
 export function mount(root) {
   _root = root;
   _step = 1;
-  _data = { email: '', password: '', nom: '', tel: '' };
+  _data = { email: '', password: '', nom: '', tel: '', forfait: 20 };
   render();
 }
 
@@ -150,6 +150,28 @@ function renderStep() {
         <input id="su-tel" type="tel" autocomplete="tel" placeholder="06 12 34 56 78" value="${esc(_data.tel)}" maxlength="20">
         <div class="hint">Utile pour que ton moniteur te joigne. Ne sera jamais partagé.</div>
       </div>
+      <div class="su-row">
+        <label>Ton forfait de conduite</label>
+        <style>
+          .su-forfaits{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+          .su-frf{padding:14px 10px;border-radius:11px;border:2px solid var(--bo);background:var(--su);cursor:pointer;text-align:center;font-family:inherit;transition:all .15s}
+          .su-frf:hover{border-color:var(--a)}
+          .su-frf.sel{border-color:var(--a);background:var(--ap)}
+          .su-frf .v{font-family:var(--fd);font-size:22px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:-.02em}
+          .su-frf .v small{font-size:12px;color:var(--mu);font-weight:700;margin-left:1px}
+          .su-frf .l{font-size:10.5px;color:var(--mu);font-weight:700;margin-top:4px;letter-spacing:.2px}
+          .su-frf.sel .v{color:var(--a)}
+        </style>
+        <div class="su-forfaits" role="radiogroup" aria-label="Choisis ton forfait">
+          ${[10, 13, 20, 30].map(h => `
+            <button class="su-frf ${_data.forfait === h ? 'sel' : ''}" data-forfait="${h}" type="button" role="radio" aria-checked="${_data.forfait === h}">
+              <div class="v">${h}<small>h</small></div>
+              <div class="l">${h === 10 ? 'Découverte' : h === 13 ? 'Standard' : h === 20 ? 'Recommandé' : 'Confort'}</div>
+            </button>
+          `).join('')}
+        </div>
+        <div class="hint">Tu pourras le modifier plus tard avec ton moniteur.</div>
+      </div>
       <div class="su-cta">
         <button class="back" id="su-back" type="button">‹ Retour</button>
         <button class="next" id="su-next" type="button" disabled>Créer mon compte 🚀</button>
@@ -222,6 +244,19 @@ function wire() {
 
     _root.querySelector('#su-back')?.addEventListener('click', () => { _step = 1; render(); });
 
+    // Wire les boutons forfait
+    _root.querySelectorAll('[data-forfait]').forEach(b => {
+      b.addEventListener('click', () => {
+        _root.querySelectorAll('[data-forfait]').forEach(o => {
+          o.classList.remove('sel');
+          o.setAttribute('aria-checked', 'false');
+        });
+        b.classList.add('sel');
+        b.setAttribute('aria-checked', 'true');
+        _data.forfait = parseInt(b.dataset.forfait, 10);
+      });
+    });
+
     nextBtn.addEventListener('click', async () => {
       _data.nom = nomEl.value.trim();
       _data.tel = telEl.value.trim();
@@ -234,7 +269,7 @@ function wire() {
           email: _data.email,
           password: _data.password,
           options: {
-            data: { nom: _data.nom, tel: _data.tel || null, role: 'eleve' },
+            data: { nom: _data.nom, tel: _data.tel || null, role: 'eleve', forfait_h: _data.forfait },
           },
         });
         if (error) {

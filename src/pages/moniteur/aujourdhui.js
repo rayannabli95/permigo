@@ -227,6 +227,7 @@ function render() {
     <div class="aujr-wrap anim-slide-up">
       <div class="aujr-top">
         <button class="aujr-back" id="aujr-back" aria-label="Retour planning">‹</button>
+        <img src="permigo-logo.png" alt="PermiGo" style="height:26px;width:auto;filter:drop-shadow(0 3px 8px rgba(99,102,241,.25))" onerror="this.style.display='none'">
         <div>
           <h1>Aujourd'hui</h1>
           <div class="sub">${esc(todayLabel())}</div>

@@ -181,6 +181,7 @@ function render() {
     <div class="eq-wrap anim-slide-up">
       <div class="eq-top">
         <button class="eq-back" id="eq-back" aria-label="Retour">‹</button>
+        <img src="permigo-logo.png" alt="PermiGo" style="height:28px;width:auto;filter:drop-shadow(0 4px 14px rgba(139,92,246,.45))" onerror="this.style.display='none'">
         <div>
           <div class="ttl">Équipe</div>
           <div class="sub">${_moniteurs.length} moniteur${_moniteurs.length > 1 ? 's' : ''} · ${c.actif} actif${c.actif > 1 ? 's' : ''}</div>

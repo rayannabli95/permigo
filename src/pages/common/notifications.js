@@ -37,53 +37,66 @@ function render() {
   _root.innerHTML = `
     <style>
       .nt-wrap{max-width:560px;margin:0 auto;padding:14px;padding-bottom:90px}
-      .nt-top{display:flex;align-items:center;gap:10px;padding:6px 4px 16px}
-      .nt-back{width:36px;height:36px;border-radius:10px;border:1px solid var(--bo);background:var(--su);font-size:18px;cursor:pointer;color:var(--ink)}
-      .nt-top h1{font-family:var(--fd);font-size:22px;font-weight:900;letter-spacing:-.02em;margin:0;flex:1}
-      .nt-top .sub{font-size:12px;color:var(--mu);margin-top:2px}
-      .nt-mark-all{padding:8px 14px;border-radius:99px;background:var(--ap);color:var(--a);border:1px solid var(--a);font-family:inherit;font-size:11.5px;font-weight:800;cursor:pointer;letter-spacing:.2px;transition:all .15s}
+      .nt-top{display:flex;align-items:center;gap:10px;padding:6px 4px 6px}
+      .nt-back{width:36px;height:36px;border-radius:10px;border:1px solid var(--bo);background:var(--su);font-size:18px;cursor:pointer;color:var(--ink);flex-shrink:0}
+      .nt-top-ti{flex:1;min-width:0}
+      .nt-top h1{font-family:var(--fd);font-size:20px;font-weight:900;letter-spacing:-.02em;margin:0;line-height:1.1}
+      .nt-top .sub{font-size:11.5px;color:var(--mu);margin-top:3px}
+      .nt-top .sub b{color:var(--a);font-weight:800}
+
+      .nt-toolbar{display:flex;justify-content:flex-end;margin:6px 0 14px}
+      .nt-mark-all{padding:9px 16px;border-radius:99px;background:var(--ap);color:var(--a);border:1px solid var(--a);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;letter-spacing:.2px;transition:all .15s;white-space:nowrap}
       .nt-mark-all:hover{background:var(--a);color:#fff}
-      .nt-mark-all:disabled{opacity:.5;cursor:not-allowed}
 
-      .nt-section{margin-bottom:18px}
-      .nt-section-h{font-family:var(--fn);font-size:10.5px;font-weight:900;color:var(--mu);letter-spacing:.2em;text-transform:uppercase;margin:0 4px 8px;padding-bottom:5px;border-bottom:1px solid var(--bo2)}
+      .nt-section{margin-bottom:20px}
+      .nt-section-h{font-family:var(--fn);font-size:10.5px;font-weight:900;color:var(--mu);letter-spacing:.2em;text-transform:uppercase;margin:0 4px 10px;padding-bottom:6px;border-bottom:1px solid var(--bo2)}
 
-      .nt-card{background:var(--su);border:1px solid var(--bo);border-radius:12px;padding:13px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:transform .15s,border-color .15s;position:relative}
-      .nt-card:hover{transform:translateY(-2px);border-color:var(--a)}
-      .nt-card.unread{border-left:3px solid var(--a);background:linear-gradient(135deg,var(--ap),var(--su) 50%)}
-      .nt-card.unread::before{content:'';position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--a);box-shadow:0 0 8px var(--a)}
-      .nt-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+      .nt-card{background:var(--su);border:1px solid var(--bo);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s;position:relative;overflow:hidden}
+      .nt-card:hover{transform:translateY(-2px);border-color:var(--a);box-shadow:0 8px 20px -8px rgba(99,102,241,.25)}
+      .nt-card.unread{border-left:3px solid var(--a);background:linear-gradient(135deg,var(--ap),var(--su) 60%)}
+      .nt-card.unread .nt-ti::after{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--a);box-shadow:0 0 6px var(--a);margin-left:7px;vertical-align:middle}
+      .nt-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
       .nt-icon.info{background:var(--ap);color:var(--a)}
       .nt-icon.success{background:var(--grp);color:var(--gr)}
       .nt-icon.warning{background:var(--amp);color:var(--am)}
       .nt-icon.error{background:var(--rdp);color:var(--rd)}
-      .nt-body{flex:1;min-width:0}
-      .nt-ti{font-family:var(--fd);font-weight:800;font-size:14px;color:var(--ink);line-height:1.2;letter-spacing:-.005em}
-      .nt-bd{font-size:12.5px;color:var(--mu);margin-top:4px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-      .nt-date{font-family:var(--fn);font-size:10px;font-weight:700;color:var(--mu2);margin-top:5px;letter-spacing:.3px}
-      .nt-del{position:absolute;right:8px;bottom:8px;width:28px;height:28px;border-radius:8px;border:0;background:transparent;color:var(--mu2);cursor:pointer;font-size:12px;opacity:0;transition:opacity .15s,background .15s}
-      .nt-card:hover .nt-del{opacity:1}
+      .nt-body{flex:1;min-width:0;padding-right:34px}
+      .nt-ti{font-family:var(--fd);font-weight:800;font-size:14px;color:var(--ink);line-height:1.25;letter-spacing:-.005em}
+      .nt-bd{font-size:12.5px;color:var(--mu);margin-top:5px;line-height:1.45;word-wrap:break-word;overflow-wrap:break-word}
+      .nt-date{font-family:var(--fn);font-size:10.5px;font-weight:700;color:var(--mu2);margin-top:7px;letter-spacing:.3px}
+      .nt-del{position:absolute;top:50%;right:10px;transform:translateY(-50%);width:32px;height:32px;border-radius:8px;border:0;background:var(--bg2);color:var(--mu2);cursor:pointer;font-size:13px;transition:background .15s,color .15s;display:flex;align-items:center;justify-content:center}
       .nt-del:hover{background:var(--rdp);color:var(--rd)}
 
-      .nt-empty{text-align:center;padding:48px 20px;color:var(--mu);background:var(--bg2);border-radius:14px;font-size:13.5px}
-      .nt-empty .em{font-size:42px;line-height:1;margin-bottom:10px}
+      .nt-empty{text-align:center;padding:56px 20px;color:var(--mu);background:var(--bg2);border-radius:14px;font-size:13.5px}
+      .nt-empty .em{font-size:48px;line-height:1;margin-bottom:12px}
+      .nt-empty .ti{font-family:var(--fd);font-weight:800;font-size:15px;color:var(--ink);margin-bottom:4px}
+
+      @media (max-width:420px){
+        .nt-top h1{font-size:18px}
+        .nt-card{padding:12px 14px;gap:10px}
+        .nt-icon{width:36px;height:36px;font-size:16px}
+        .nt-body{padding-right:30px}
+        .nt-ti{font-size:13.5px}
+        .nt-bd{font-size:12px}
+      }
     </style>
 
     <div class="nt-wrap anim-slide-up">
       <div class="nt-top">
         <button class="nt-back" id="nt-back" aria-label="Retour">‹</button>
-        <div>
-          <h1>Notifications</h1>
-          <div class="sub">${unread} non lue${unread > 1 ? 's' : ''} · ${_notifs.length} au total</div>
+        <img src="permigo-logo.png" alt="PermiGo" style="height:26px;width:auto;margin-right:4px;filter:drop-shadow(0 3px 8px rgba(99,102,241,.25))" onerror="this.style.display='none'">
+        <div class="nt-top-ti">
+          <h1>🔔 Notifications</h1>
+          <div class="sub">${unread > 0 ? `<b>${unread} non lue${unread > 1 ? 's' : ''}</b> · ` : ''}${_notifs.length} au total</div>
         </div>
-        ${unread > 0 ? `<button class="nt-mark-all" id="nt-mark-all" type="button">✓ Tout lu</button>` : ''}
       </div>
+      ${unread > 0 ? `<div class="nt-toolbar"><button class="nt-mark-all" id="nt-mark-all" type="button">✓ Tout marquer lu</button></div>` : ''}
 
       ${_notifs.length === 0 ? `
         <div class="nt-empty">
           <div class="em">🔔</div>
-          <div>Aucune notification</div>
-          <div style="font-size:12px;margin-top:4px;color:var(--mu2)">Tu es à jour</div>
+          <div class="ti">Aucune notification</div>
+          <div style="font-size:12px;color:var(--mu2)">Tu es à jour ✨</div>
         </div>
       ` : Object.entries(grouped).map(([label, items]) => `
         <div class="nt-section">

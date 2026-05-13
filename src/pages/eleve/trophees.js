@@ -126,6 +126,7 @@ function render({ me, cats, trophiesDone, allDone, nextTrophy }) {
     <div class="tr-wrap anim-slide-up">
       <div class="tr-top">
         <button class="tr-back" id="tr-back" aria-label="Retour">‹</button>
+        <img src="permigo-logo.png" alt="PermiGo" style="height:26px;width:auto;margin-right:4px;filter:drop-shadow(0 3px 8px rgba(99,102,241,.25))" onerror="this.style.display='none'">
         <div>
           <div class="ttl">🏆 Mes trophées</div>
           <div class="sub">${esc(me.nom)}</div>

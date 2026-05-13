@@ -297,6 +297,7 @@ function render() {
     <div class="pl-wrap anim-slide-up">
       <div class="pl-top">
         <button class="pl-back" id="pl-back" aria-label="Retour">‹</button>
+        <img src="permigo-logo.png" alt="PermiGo" style="height:26px;width:auto;margin-right:4px;filter:drop-shadow(0 3px 8px rgba(99,102,241,.25))" onerror="this.style.display='none'">
         <div>
           <div class="ttl">Planning</div>
           <div class="sub">${esc(_me.nom)}</div>

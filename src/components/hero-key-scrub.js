@@ -100,7 +100,7 @@ export function mountHeroKeyScrub(rootEl, opts = {}) {
 
     <div class="hks-sticky">
       <div class="hks-video-wrap" id="hks-video-wrap">
-        <video class="hks-video" muted playsinline preload="auto" aria-label="Démonstration : un moniteur tend les clés de la voiture">
+        <video class="hks-video" muted playsinline webkit-playsinline="true" x5-playsinline="true" preload="auto" disablepictureinpicture aria-label="Démonstration : un moniteur tend les clés de la voiture">
           <source src="${VIDEO_SRC}" type="video/mp4">
         </video>
       </div>
@@ -173,12 +173,31 @@ export function mountHeroKeyScrub(rootEl, opts = {}) {
   // Première frame en attendant le scroll
   video.addEventListener('loadedmetadata', () => {
     videoDuration = video.duration;
-    video.currentTime = 0.01; // force le poster sur la 1ère frame
+    // Hack iOS Safari : force un play+pause pour "déverrouiller" currentTime
+    const unlockIOS = () => {
+      video.play().then(() => {
+        video.pause();
+        video.currentTime = 0.01;
+      }).catch(() => {
+        // Si play refusé, attend un touch user
+        video.currentTime = 0.01;
+      });
+    };
+    unlockIOS();
   });
+
+  // Sur iOS, le 1er touch user-activated permet de déverrouiller la vidéo
+  const unlockOnTouch = () => {
+    video.play().then(() => video.pause()).catch(() => {});
+    window.removeEventListener('touchstart', unlockOnTouch);
+    window.removeEventListener('click', unlockOnTouch);
+  };
+  window.addEventListener('touchstart', unlockOnTouch, { once: true, passive: true });
+  window.addEventListener('click', unlockOnTouch, { once: true });
 
   // Évite que la vidéo joue en mode auto (on contrôle currentTime manuellement)
   video.addEventListener('play', () => {
-    if (!reduceMotion) video.pause();
+    if (!reduceMotion && videoDuration > 0) video.pause();
   });
 
   /** Renvoie true si la section est "active" (top du viewport pile dessus). */
