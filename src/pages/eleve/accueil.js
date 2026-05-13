@@ -21,6 +21,7 @@ import { countUpAll } from '@/utils/count-up.js';
 import { burstConfetti } from '@/components/confetti.js';
 import { renderHeatmap, ensureHeatmapStyles } from '@/components/activity-heatmap.js';
 import { maybePlayWeeklyReplay, forcePlayReplay } from '@/components/weekly-replay.js';
+import { checkAndPromptRating } from '@/components/rating-prompt.js';
 
 export async function mount(root) {
   const me = getCurUser();
@@ -28,6 +29,9 @@ export async function mount(root) {
 
   // Rendu initial avec skeleton
   root.innerHTML = template(me, null, { h: 0, total: me.forfait_h || 20, pct: 0 }, []);
+
+  // Vérifie si une leçon récente n'a pas été notée → prompt modal (delay 800ms pour laisser l'accueil se monter)
+  setTimeout(() => { checkAndPromptRating(me.id).catch(err => console.warn('[rating]', err)); }, 800);
 
   // Charge data depuis Supabase
   const [evtsRes, remcRes, reviewRes, notatRes, selfEvalRes] = await Promise.allSettled([
@@ -447,11 +451,12 @@ function template(me, nextLesson, kpis, lessons, lastReview, monToRate, selfEval
         .qa-btn{flex-direction:column;padding:14px 10px;height:auto;min-height:68px;gap:5px;transition:transform .2s cubic-bezier(.2,.7,.3,1),box-shadow .25s;position:relative;overflow:hidden}
         .qa-btn:hover{transform:translateY(-3px)}
         .qa-btn:active{transform:translateY(-1px) scale(.98)}
+        .qa-btn > *{pointer-events:none}
         .qa-btn .em{font-size:20px;line-height:1;display:block;transition:transform .25s cubic-bezier(.5,1.6,.4,1)}
         .qa-btn:hover .em{transform:scale(1.18) translateY(-2px)}
         .qa-btn .lb{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;display:block}
         /* Shine effect au hover */
-        .qa-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transition:left .55s}
+        .qa-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transition:left .55s;pointer-events:none}
         .qa-btn:hover::before{left:100%}
       </style>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px">
