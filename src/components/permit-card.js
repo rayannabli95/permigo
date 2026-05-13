@@ -79,7 +79,7 @@ export function renderPermitCard({ me, stats, doneCount, totalCount, heuresFaite
               <div class="permit-subtitle">EN FORMATION · CATÉGORIE B</div>
             </div>
             <div class="permit-logo-pg" aria-label="PermiGo">
-              <img src="permigo-logo.png" alt="PermiGo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+              <span class="pg-logo-txt">PermiGo</span>
               <span class="permit-logo-fb" style="display:none">PG</span>
             </div>
           </div>
@@ -176,7 +176,7 @@ export function renderPermitCard({ me, stats, doneCount, totalCount, heuresFaite
 
           <div class="permit-back-footer">
             <div class="permit-back-brand" aria-label="Émis par PermiGo">
-              <img src="permigo-logo.png" alt="PermiGo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+              <span class="pg-logo-txt">PermiGo</span>
               <span class="permit-back-brand-fb" style="display:none">PermiGo</span>
             </div>
             <div class="permit-microtext">

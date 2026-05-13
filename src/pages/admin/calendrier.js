@@ -213,7 +213,7 @@ function render() {
     <div class="cal-wrap anim-slide-up">
       <div class="cal-top">
         <button class="cal-back" id="cal-back" aria-label="Retour">‹</button>
-        <img src="permigo-logo.png" alt="PermiGo" style="height:28px;width:auto;filter:drop-shadow(0 4px 14px rgba(139,92,246,.45))" onerror="this.style.display='none'">
+        <span class="pg-logo-txt">PermiGo</span>
         <div>
           <div class="ttl">Calendrier global</div>
           <div class="sub">${esc(dayLabel())}</div>

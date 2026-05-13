@@ -368,9 +368,7 @@ function template(me, nextLesson, kpis, lessons, lastReview, monToRate, selfEval
         .ac-logo-fb{font-family:var(--fd);font-weight:900;font-size:18px;letter-spacing:-.02em;background:linear-gradient(90deg,#6366f1,#8b5cf6,#0ea5e9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
       </style>
       <div class="fx jb aic" style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
-        <img class="ac-logo" src="permigo-logo.png" alt="PermiGo"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'">
-        <span class="ac-logo-fb" style="display:none">PermiGo</span>
+        <span class="pg-logo-txt">PermiGo</span>
         <div style="display:flex;align-items:center;gap:8px">
           <span id="el-bell"></span>
           <button class="btn btn-sm" id="btn-profil" title="Mon profil" aria-label="Mon profil" style="display:inline-flex;align-items:center;justify-content:center;padding:0;width:36px;height:36px;overflow:hidden;border-radius:50%">

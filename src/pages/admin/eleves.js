@@ -177,7 +177,7 @@ function render() {
     <div class="ae-wrap anim-slide-up">
       <div class="ae-top">
         <button class="ae-back" id="ae-back" aria-label="Retour">‹</button>
-        <img src="permigo-logo.png" alt="PermiGo" style="height:28px;width:auto;filter:drop-shadow(0 4px 14px rgba(139,92,246,.45))" onerror="this.style.display='none'">
+        <span class="pg-logo-txt">PermiGo</span>
         <div>
           <div class="ttl">Élèves</div>
           <div class="sub">${_eleves.length} dans le portefeuille · ${c.actif} actif${c.actif > 1 ? 's' : ''}</div>

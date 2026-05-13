@@ -249,8 +249,7 @@ function template() {
       <!-- ─── Nav ─── -->
       <nav class="ld-nav" aria-label="Navigation principale">
         <div class="ld-logo">
-          <img src="permigo-logo.png" alt="PermiGo"
-               onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+          <span class="pg-logo-txt">PermiGo</span>
           <span class="ld-logo-fb" style="display:none">PermiGo</span>
           <span class="badge">SAAS</span>
         </div>

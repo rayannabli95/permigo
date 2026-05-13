@@ -115,7 +115,7 @@ export function playUnlockCinematic({ worldNum, worldName, worldColor = '#fbbf24
 
       <!-- Signature PermiGo en haut, discrète -->
       <div class="wuc-brand" aria-hidden="true">
-        <img src="permigo-logo.png" alt="PermiGo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+        <span class="pg-logo-txt">PermiGo</span>
         <span class="wuc-brand-fb" style="display:none">PermiGo</span>
       </div>
     </div>

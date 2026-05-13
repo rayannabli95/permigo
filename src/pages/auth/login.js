@@ -118,8 +118,7 @@ function template() {
 
       <div class="lg-content">
         <div class="lg-logo-host">
-          <img src="permigo-logo.png" alt="PermiGo"
-               onerror="this.style.display='none'">
+          <span class="pg-logo-txt">PermiGo</span>
         </div>
 
         <div class="lg-card">

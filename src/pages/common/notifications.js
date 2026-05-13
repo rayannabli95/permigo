@@ -84,7 +84,7 @@ function render() {
     <div class="nt-wrap anim-slide-up">
       <div class="nt-top">
         <button class="nt-back" id="nt-back" aria-label="Retour">‹</button>
-        <img src="permigo-logo.png" alt="PermiGo" style="height:26px;width:auto;margin-right:4px;filter:drop-shadow(0 3px 8px rgba(99,102,241,.25))" onerror="this.style.display='none'">
+        <span class="pg-logo-txt">PermiGo</span>
         <div class="nt-top-ti">
           <h1>🔔 Notifications</h1>
           <div class="sub">${unread > 0 ? `<b>${unread} non lue${unread > 1 ? 's' : ''}</b> · ` : ''}${_notifs.length} au total</div>

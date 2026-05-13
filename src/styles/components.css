@@ -2,6 +2,30 @@
    COMPONENTS — buttons, cards, badges, inputs, toggles, etc.
 ═══════════════════════════════════════════════════════════ */
 
+/* ─── Logo texte PermiGo (remplace l'image) ─── */
+.pg-logo-txt {
+  display: inline-block;
+  font-family: 'Archivo', ui-sans-serif, sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 60%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 6px rgba(99, 102, 241, 0.28));
+  white-space: nowrap;
+}
+.pg-logo-txt.dark {
+  background: linear-gradient(90deg, #a5b4fc 0%, #fff 35%, #fff 65%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.pg-logo-txt.lg { font-size: 36px; }
+.pg-logo-txt.xl { font-size: 56px; }
+.pg-logo-txt.sm { font-size: 18px; }
+
 /* ─── Boutons ─── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center;

@@ -109,7 +109,7 @@ function renderShell() {
     </style>
     <div class="me-wrap anim-slide-up">
       <div class="me-top">
-        <img src="permigo-logo.png" alt="PermiGo" style="height:26px;width:auto;margin-right:6px;filter:drop-shadow(0 3px 8px rgba(99,102,241,.25))" onerror="this.style.display='none'">
+        <span class="pg-logo-txt">PermiGo</span>
         <div style="flex:1">
           <div class="ttl">Mes élèves</div>
           <div class="sub" id="me-counts">…</div>

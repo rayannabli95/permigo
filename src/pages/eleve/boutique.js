@@ -138,7 +138,7 @@ function render() {
     <div class="bq-wrap anim-slide-up">
       <div class="bq-top">
         <button class="bq-back" id="bq-back" aria-label="Retour">‹</button>
-        <img src="permigo-logo.png" alt="PermiGo" style="height:26px;width:auto;margin-right:4px;filter:drop-shadow(0 3px 8px rgba(99,102,241,.25))" onerror="this.style.display='none'">
+        <span class="pg-logo-txt">PermiGo</span>
         <h1>🛒 Boutique</h1>
         <div class="bq-gemmes"><span class="em">💎</span><span>${gemmes}</span></div>
       </div>

@@ -45,8 +45,7 @@ export function logoHTML(opts = {}) {
   return `
     ${scopedStyles}
     <span class="pg-logo ${glow} ${inline} ${extra}" style="--pg-h:${size}px" role="img" aria-label="${alt}">
-      <img src="permigo-logo.png" alt="${alt}"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'">
+      <span class="pg-logo-txt">PermiGo</span>
       <span class="pg-logo-fb" style="display:none">PermiGo</span>
     </span>
   `;

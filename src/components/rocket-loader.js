@@ -126,10 +126,7 @@ export function showRocketLoader(opts = {}) {
         <div class="rl-cloud rl-cloud4"></div>
         <div class="rl-cloud rl-cloud5"></div>
       </div>
-      ${opts.logo !== false ? `
-        <img class="rl-logo" src="permigo-logo.png" alt="PermiGo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-        <div class="rl-logo-fallback" style="display:none">PermiGo</div>
-      ` : ''}
+      ${opts.logo !== false ? `<div class="rl-logo-txt"><span class="pg-logo-txt dark lg">PermiGo</span></div>` : ''}
       <div class="rl-loader">
         <span><span></span><span></span><span></span><span></span></span>
         <div class="base"><span></span><div class="face"></div></div>

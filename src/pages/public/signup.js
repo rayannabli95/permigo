@@ -93,7 +93,7 @@ function render() {
     <div class="su-wrap">
       <div class="su-card">
         <div class="su-logo">
-          <img src="permigo-logo.png" alt="PermiGo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'">
+          <span class="pg-logo-txt">PermiGo</span>
           <span class="su-logo-fb" style="display:none">PermiGo</span>
         </div>
 
