@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PermiGo - Élève</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(to bottom, #f9fafb, #ffffff);
+            color: #1f2937;
+            overflow-x: hidden;
+        }
+
+        /* Yellow scroll progress bar */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #FBBF24, #F59E0B);
+            width: 0%;
+            z-index: 50;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+        }
+
+        .header {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(37,217,217,0.05));
+        }
+
+        .header h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #FF6B6B, #25D9D9, #FFE066);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+
+        .header p {
+            font-size: clamp(1rem, 4vw, 1.3rem);
+            color: #6b7280;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .progress-badge {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #dc2626;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: clamp(0.95rem, 3vw, 1.1rem);
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.15);
+            border: 2px solid rgba(220, 38, 38, 0.2);
+        }
+
+        .scroll-hint {
+            margin-top: 50px;
+            animation: bounce 2.5s infinite;
+            font-size: 1.5rem;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(15px); }
+        }
+
+        .grid-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 28px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 32px;
+            }
+        }
+
+        .competence-card {
+            aspect-ratio: 1;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 3px solid transparent;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .competence-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .competence-card:hover {
+            transform: translateY(-12px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .competence-card:hover::before {
+            opacity: 1;
+        }
+
+        .competence-card.unlocked {
+            border-color: #FFD700;
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
+        }
+
+        .competence-card.unlocked:hover {
+            box-shadow: 0 30px 60px rgba(255, 215, 0, 0.4);
+        }
+
+        .competence-card.locked {
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            opacity: 0.65;
+        }
+
+        .competence-card.locked:hover {
+            opacity: 0.8;
+        }
+
+        .competence-icon {
+            font-size: clamp(2.2rem, 10vw, 3rem);
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .competence-name {
+            font-weight: 800;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            margin-bottom: 6px;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            line-height: 1.2;
+            letter-spacing: 0.3px;
+        }
+
+        .competence-desc {
+            font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+            opacity: 0.9;
+            color: white;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            line-height: 1.1;
+            font-weight: 500;
+        }
+
+        .competence-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .axe1 { background: linear-gradient(135deg, #FF6B6B, #FF8585); }
+        .axe2 { background: linear-gradient(135deg, #25D9D9, #1ABC9C); }
+        .axe3 { background: linear-gradient(135deg, #FFE066, #FFD700); }
+        .axe4 { background: linear-gradient(135deg, #D7A3FF, #C66FE2); }
+        .axe5 { background: linear-gradient(135deg, #95E1D3, #7FD9B8); }
+
+        .footer {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(37,217,217,0.1), transparent);
+            border-radius: 50%;
+            top: -100px;
+            right: -100px;
+        }
+
+        .footer h2 {
+            font-size: clamp(2.5rem, 10vw, 4rem);
+            margin-bottom: 20px;
+            font-weight: 900;
+            position: relative;
+        }
+
+        .footer p {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            margin-bottom: 40px;
+            opacity: 0.9;
+            max-width: 600px;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .cta-button {
+            padding: 14px 36px;
+            background: linear-gradient(135deg, #FBBF24, #F59E0B);
+            color: #1f2937;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: clamp(0.95rem, 3vw, 1.1rem);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-button:hover {
+            background: linear-gradient(135deg, #F59E0B, #FBBF24);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(251, 191, 36, 0.4);
+        }
+
+        .cta-button:active {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div id="progress-bar"></div>
+
+    <section class="header">
+        <h1>PermiGo</h1>
+        <p>Votre route vers la maîtrise du permis</p>
+        <div class="progress-badge" id="progress-badge">5/23 compétences</div>
+        <p class="scroll-hint">↓ Scrollez ↓</p>
+    </section>
+
+    <div class="grid-container">
+        <div class="grid" id="competence-grid"></div>
+    </div>
+
+    <section class="footer">
+        <h2>Bravo! 🎓</h2>
+        <p id="footer-text">Vous avez 5/23 compétences déverrouillées.</p>
+        <button class="cta-button">Continuer votre progression</button>
+    </section>
+
+    <script>
+        const competences = [
+            { id: 1, axeId: 1, axe: "axe1", name: "Démarrage", desc: "Moteur", icon: "🏁", unlocked: false },
+            { id: 2, axeId: 1, axe: "axe1", name: "Volant", desc: "Direction", icon: "🎡", unlocked: false },
+            { id: 3, axeId: 1, axe: "axe1", name: "Pédales", desc: "Freinage", icon: "🦶", unlocked: true },
+            { id: 4, axeId: 1, axe: "axe1", name: "Boîte", desc: "Vitesses", icon: "⚙️", unlocked: false },
+            { id: 5, axeId: 1, axe: "axe1", name: "Parking", desc: "Créneau", icon: "🅿️", unlocked: true },
+            { id: 6, axeId: 2, axe: "axe2", name: "Panneaux", desc: "Signaux", icon: "🛑", unlocked: false },
+            { id: 7, axeId: 2, axe: "axe2", name: "Météo", desc: "Pluie/Neige", icon: "🌧️", unlocked: false },
+            { id: 8, axeId: 2, axe: "axe2", name: "Urbain", desc: "Carrefours", icon: "🚦", unlocked: true },
+            { id: 9, axeId: 2, axe: "axe2", name: "Campagne", desc: "Routes", icon: "🛣️", unlocked: false },
+            { id: 10, axeId: 2, axe: "axe2", name: "Autoroute", desc: "Vitesse", icon: "🛣️", unlocked: false },
+            { id: 11, axeId: 3, axe: "axe3", name: "Priorités", desc: "Cédez", icon: "👑", unlocked: false },
+            { id: 12, axeId: 3, axe: "axe3", name: "Distance", desc: "Sécurité", icon: "📏", unlocked: false },
+            { id: 13, axeId: 3, axe: "axe3", name: "Rétro", desc: "360°", icon: "🔍", unlocked: true },
+            { id: 14, axeId: 3, axe: "axe3", name: "Piétons", desc: "Usagers", icon: "🚶", unlocked: false },
+            { id: 15, axeId: 3, axe: "axe3", name: "Comms", desc: "Signaux", icon: "🚨", unlocked: false },
+            { id: 16, axeId: 4, axe: "axe4", name: "Distraction", desc: "Focus", icon: "🎯", unlocked: false },
+            { id: 17, axeId: 4, axe: "axe4", name: "Vigilance", desc: "Attention", icon: "👀", unlocked: true },
+            { id: 18, axeId: 4, axe: "axe4", name: "Fatigue", desc: "Sommeil", icon: "😴", unlocked: false },
+            { id: 19, axeId: 4, axe: "axe4", name: "Réaction", desc: "Vitesse", icon: "⚡", unlocked: false },
+            { id: 20, axeId: 5, axe: "axe5", name: "Éco", desc: "Essence", icon: "🌱", unlocked: false },
+            { id: 21, axeId: 5, axe: "axe5", name: "Entretien", desc: "Révision", icon: "🔧", unlocked: false },
+            { id: 22, axeId: 5, axe: "axe5", name: "Assurance", desc: "Papiers", icon: "📄", unlocked: false },
+            { id: 23, axeId: 5, axe: "axe5", name: "Transport", desc: "Passagers", icon: "👥", unlocked: false },
+        ];
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('progress-bar').style.width = scrollPercent + '%';
+        });
+
+        const grid = document.getElementById('competence-grid');
+        competences.forEach((comp) => {
+            const card = document.createElement('div');
+            card.className = `competence-card ${comp.unlocked ? 'unlocked' : 'locked'} ${comp.axe}`;
+            card.innerHTML = `
+                <div class="competence-icon">${comp.icon}</div>
+                <div class="competence-name">${comp.name}</div>
+                <div class="competence-desc">${comp.desc}</div>
+                <div class="competence-status">${comp.unlocked ? '✓' : '🔒'}</div>
+            `;
+            grid.appendChild(card);
+        });
+
+        const unlockedCount = competences.filter(c => c.unlocked).length;
+        document.getElementById('progress-badge').textContent = `${unlockedCount}/23 compétences`;
+        document.getElementById('footer-text').textContent = `Vous avez ${unlockedCount}/23 compétences déverrouillées.`;
+    </script>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PermiGo — Candy Crush Trophy Board</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #FFF9E6, #F0F8FF);
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 428px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #FFF9E6 0%, #F0F8FF 100%);
+        }
+
+        /* HEADER */
+        .header {
+            padding: 20px;
+            text-align: center;
+            background: white;
+            border-bottom: 3px solid #FFE066;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #FF6B6B, #FFE066, #25D9D9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-sub {
+            font-size: 12px;
+            color: #7F8FA3;
+            margin-top: 4px;
+        }
+
+        /* BOARD CONTAINER - SCROLLABLE */
+        .board-scroll {
+            flex: 1;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .board-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .board-scroll::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+
+        .board-scroll::-webkit-scrollbar-thumb {
+            background: #FFE066;
+            border-radius: 10px;
+        }
+
+        /* PROGRESSION PATH */
+        .progression-path {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            padding: 20px 0;
+        }
+
+        /* CONNECTING LINE */
+        .path-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: linear-gradient(180deg, #FF6B6B, #25D9D9, #FFE066, #D7A3FF);
+            transform: translateX(-50%);
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        /* LEVEL STATION */
+        .level {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            animation: slideInLevel 0.6s ease-out forwards;
+        }
+
+        .level:nth-child(odd) {
+            flex-direction: row;
+        }
+
+        .level:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        @keyframes slideInLevel {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .level:nth-child(1) { animation-delay: 0.1s; }
+        .level:nth-child(2) { animation-delay: 0.2s; }
+        .level:nth-child(3) { animation-delay: 0.3s; }
+        .level:nth-child(4) { animation-delay: 0.4s; }
+        .level:nth-child(5) { animation-delay: 0.5s; }
+        .level:nth-child(6) { animation-delay: 0.6s; }
+
+        /* BADGE */
+        .badge {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            border: 5px solid white;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .badge:hover {
+            transform: scale(1.15);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+        }
+
+        .level:nth-child(1) .badge { background: linear-gradient(135deg, #FF6B6B, #FF8585); }
+        .level:nth-child(2) .badge { background: linear-gradient(135deg, #25D9D9, #1ABC9C); }
+        .level:nth-child(3) .badge { background: linear-gradient(135deg, #FFE066, #FFD700); }
+        .level:nth-child(4) .badge { background: linear-gradient(135deg, #D7A3FF, #C66FE2); }
+        .level:nth-child(5) .badge { background: linear-gradient(135deg, #95E1D3, #7FD9B8); }
+        .level:nth-child(6) .badge { background: linear-gradient(135deg, #FFA500, #FF8C42); }
+
+        /* CHECKMARK */
+        .checkmark {
+            position: absolute;
+            bottom: -8px;
+            right: -8px;
+            width: 36px;
+            height: 36px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            border: 3px solid white;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .badge.unlocked .checkmark {
+            opacity: 1;
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0) rotate(-180deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        /* LOCK ICON */
+        .lock {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 36px;
+            height: 36px;
+            background: #E8EBF0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 3px solid white;
+        }
+
+        .badge.unlocked .lock {
+            display: none;
+        }
+
+        /* LABEL */
+        .label {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .level:nth-child(odd) .label {
+            text-align: right;
+        }
+
+        .level:nth-child(even) .label {
+            text-align: left;
+        }
+
+        .level-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #2C3E50;
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .badge.locked ~ .label .level-name {
+            color: #7F8FA3;
+            opacity: 0.6;
+        }
+
+        .level-desc {
+            font-size: 12px;
+            color: #7F8FA3;
+            line-height: 1.3;
+        }
+
+        /* FOOTER */
+        .footer {
+            padding: 16px;
+            text-align: center;
+            background: white;
+            border-top: 2px solid #FFE066;
+            font-size: 13px;
+            color: #7F8FA3;
+        }
+
+        .progress-counter {
+            font-weight: 700;
+            color: #FFE066;
+        }
+    </style>
+</head>
+<body>
+    <div class="screen">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>PermiGo 🚗</h1>
+            <p class="header-sub">Votre route vers la maîtrise</p>
+        </div>
+
+        <!-- SCROLLABLE BOARD -->
+        <div class="board-scroll">
+            <div class="progression-path">
+                <div class="path-line"></div>
+
+                <!-- LEVEL 1 -->
+                <div class="level">
+                    <div class="badge unlocked">🏙️<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="level-name">Maître de la Ville</div>
+                        <div class="level-desc">5 leçons en circulation urbaine</div>
+                    </div>
+                </div>
+
+                <!-- LEVEL 2 -->
+                <div class="level">
+                    <div class="badge unlocked">🛣️<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="level-name">As de la Route</div>
+                        <div class="level-desc">1 leçon route nationale</div>
+                    </div>
+                </div>
+
+                <!-- LEVEL 3 -->
+                <div class="level">
+                    <div class="badge locked">🅿️<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="level-name">Expert du Stationnement</div>
+                        <div class="level-desc">3 leçons stationnement</div>
+                    </div>
+                </div>
+
+                <!-- LEVEL 4 -->
+                <div class="level">
+                    <div class="badge unlocked">😎<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="level-name">Conducteur Confiant</div>
+                        <div class="level-desc">Débloquez 3 autres trophées</div>
+                    </div>
+                </div>
+
+                <!-- LEVEL 5 -->
+                <div class="level">
+                    <div class="badge locked">⭐<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="level-name">Sans Défaut</div>
+                        <div class="level-desc">5 leçons avec 5 étoiles</div>
+                    </div>
+                </div>
+
+                <!-- LEVEL 6 - FINAL -->
+                <div class="level">
+                    <div class="badge locked">👑<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="level-name">Champion de la Route</div>
+                        <div class="level-desc">30h + 0 absence + 4.5★</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <span class="progress-counter">4/6</span> trophées débloqués • Cliquez pour tester
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.badge').forEach(badge => {
+            badge.addEventListener('click', function() {
+                this.classList.toggle('unlocked');
+                this.classList.toggle('locked');
+            });
+        });
+    </script>
+</body>
+</html>

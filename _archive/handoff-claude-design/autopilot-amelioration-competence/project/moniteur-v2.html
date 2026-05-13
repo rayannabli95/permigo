@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Vue moniteur — PermiGo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --a:#6366f1; --adk:#4f46e5; --ap:rgba(99,102,241,.09); --ag:rgba(99,102,241,.14);
+  --gr:#10b981; --grp:rgba(16,185,129,.09);
+  --rd:#ef4444; --rdp:rgba(239,68,68,.09);
+  --am:#f59e0b; --amp:rgba(245,158,11,.09);
+  --bl:#0ea5e9; --blp:rgba(14,165,233,.09);
+  --pu:#8b5cf6; --pup:rgba(139,92,246,.09);
+  --bg:#f4f5fb; --bg2:#eceef8; --su:#fff; --su2:#f8f9fd;
+  --bo:#e2e6f2; --bo2:#edf0f9;
+  --ink:#0b0d1a; --ink2:#1a1d2e; --ink3:#2d3050; --mu:#7880a4; --mu2:#9ba3c2;
+  --r:10px; --rl:14px; --rx:20px;
+  --s1:0 2px 10px rgba(11,13,26,.07),0 1px 3px rgba(11,13,26,.04);
+  --s2:0 6px 22px rgba(11,13,26,.09),0 2px 8px rgba(11,13,26,.05);
+  --s3:0 14px 40px rgba(11,13,26,.13),0 4px 12px rgba(11,13,26,.07);
+  --t:.16s cubic-bezier(.4,0,.2,1);
+  --fd:'Archivo',system-ui,sans-serif; --fb:'Space Grotesk',system-ui,sans-serif; --fn:'JetBrains Mono',monospace;
+  --a-ink:#fff;
+}
+body.dark{--bg:#0a0b0f;--bg2:#11131a;--su:#1c1e26;--su2:#22252f;--bo:#2a2d38;--bo2:#22252f;--ink:#f4f5f7;--ink2:#dadce4;--ink3:#bfc3d0;--mu:#7a7e8a;--mu2:#5b5f6b;--a:#c5ff3d;--adk:#a8e000;--a-ink:#0a0b0f;--ap:rgba(197,255,61,.10);--ag:rgba(197,255,61,.18)}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--fb);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;min-height:100vh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+
+.wrap{max-width:520px;margin:0 auto;padding:14px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:8px 4px 14px;gap:8px}
+.top .ttl{font-family:var(--fd);font-weight:800;font-size:20px;letter-spacing:-.02em}
+.top .sub{font-size:11px;color:var(--mu);margin-top:2px}
+.top .tools button{height:34px;padding:0 12px;border-radius:999px;background:var(--su);border:1px solid var(--bo);font-size:12px;font-weight:600;color:var(--ink2);display:inline-flex;align-items:center;gap:6px}
+.top .tools button.on{background:var(--a);color:var(--a-ink);border-color:transparent}
+
+/* Moniteur header — daily dopamine stats */
+.daily{
+  background:linear-gradient(135deg,var(--ink) 0%, var(--ink2) 100%);
+  color:#fff;border-radius:var(--rx);padding:16px 18px 18px;box-shadow:var(--s2);position:relative;overflow:hidden;
+}
+body.dark .daily{background:linear-gradient(135deg,var(--a) 0%,var(--adk) 100%);color:var(--a-ink)}
+.daily::before{content:'';position:absolute;top:-30px;right:-30px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,var(--a) 0%,transparent 70%);opacity:.4;pointer-events:none}
+body.dark .daily::before{background:radial-gradient(circle,#fff 0%,transparent 70%);opacity:.2}
+.daily .greet{font-size:11.5px;opacity:.7;font-weight:600}
+.daily .h1{font-family:var(--fd);font-size:22px;font-weight:800;margin-top:2px;letter-spacing:-.02em}
+.daily .kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px;position:relative;z-index:1}
+.daily .kpi{background:rgba(255,255,255,.10);backdrop-filter:blur(8px);border-radius:var(--r);padding:9px 10px}
+body.dark .daily .kpi{background:rgba(10,11,15,.18)}
+.daily .kpi .k{font-size:9.5px;font-weight:800;opacity:.7;letter-spacing:.8px}
+.daily .kpi .v{font-family:var(--fn);font-size:18px;font-weight:700;margin-top:2px}
+.daily .kpi .v .delta{font-size:10px;color:#86efac;margin-left:4px;font-family:var(--fb);font-weight:700}
+body.dark .daily .kpi .v .delta{color:#0a0b0f;opacity:.6}
+
+.sh{display:flex;align-items:baseline;justify-content:space-between;padding:18px 4px 10px}
+.sh .t{font-family:var(--fd);font-weight:800;font-size:14px;letter-spacing:-.01em}
+.sh .s{font-size:11.5px;color:var(--mu);font-weight:600}
+
+/* Élève card — sélection */
+.elv{display:flex;flex-direction:column;gap:8px}
+.elv-c{background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform var(--t),box-shadow var(--t)}
+.elv-c:active{transform:scale(.99)}
+.elv-c.sel{border-color:var(--a);box-shadow:0 0 0 3px var(--ap),var(--s2)}
+.elv-c .av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;font-family:var(--fd)}
+.elv-c .body{flex:1;min-width:0}
+.elv-c .body .nm{font-family:var(--fd);font-weight:700;font-size:14.5px;letter-spacing:-.01em}
+.elv-c .body .meta{font-size:11.5px;color:var(--mu);margin-top:1px}
+.elv-c .body .pr{display:flex;align-items:center;gap:8px;margin-top:5px}
+.elv-c .body .pr .bar2{flex:1;height:5px;background:var(--bo2);border-radius:99px;overflow:hidden}
+.elv-c .body .pr .bar2 i{display:block;height:100%;background:linear-gradient(90deg,var(--gr),#34d399);border-radius:99px;transition:width .8s cubic-bezier(.2,.7,.3,1)}
+.elv-c .body .pr .pct{font-family:var(--fn);font-size:10.5px;color:var(--mu);font-weight:700}
+.elv-c .arr{color:var(--mu2)}
+
+/* Détail élève — header */
+.elv-det{background:var(--su);border:1px solid var(--bo);border-radius:var(--rx);padding:14px;box-shadow:var(--s1)}
+.elv-det .head{display:flex;align-items:center;gap:12px}
+.elv-det .av{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;font-family:var(--fd);box-shadow:var(--s1)}
+.elv-det .info .nm{font-family:var(--fd);font-weight:800;font-size:18px;letter-spacing:-.02em}
+.elv-det .info .meta{font-size:11.5px;color:var(--mu);margin-top:2px}
+.elv-det .next-trophy{margin-top:12px;padding:10px 12px;border-radius:var(--r);background:var(--amp);display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink2)}
+.elv-det .next-trophy .ic{font-size:20px}
+.elv-det .next-trophy b{color:var(--am);font-weight:800}
+
+/* Catégorie collapsible */
+.cat-block{background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);overflow:hidden;box-shadow:var(--s1);margin-bottom:10px}
+.cat-head{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;transition:background var(--t)}
+.cat-head:hover{background:var(--su2)}
+.cat-head .ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.cat-head .info{flex:1;min-width:0}
+.cat-head .info .id{font-family:var(--fn);font-size:9.5px;font-weight:800;color:var(--mu);letter-spacing:1px}
+.cat-head .info .nm{font-family:var(--fd);font-weight:700;font-size:14.5px;letter-spacing:-.01em}
+.cat-head .pr-mini{display:flex;align-items:center;gap:6px;margin-top:3px}
+.cat-head .pr-mini .b{width:80px;height:4px;background:var(--bo2);border-radius:99px;overflow:hidden}
+.cat-head .pr-mini .b i{display:block;height:100%;background:var(--gr);border-radius:99px;transition:width .8s cubic-bezier(.2,.7,.3,1)}
+.cat-head .pr-mini .t{font-family:var(--fn);font-size:10px;color:var(--mu);font-weight:700}
+.cat-head .chev{color:var(--mu2);transition:transform var(--t)}
+.cat-block.open .chev{transform:rotate(90deg)}
+
+.cat-body{display:none;border-top:1px solid var(--bo2);padding:6px 8px 8px}
+.cat-block.open .cat-body{display:block;animation:expand .25s ease}
+@keyframes expand{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Compétence row — interactive validation */
+.comp{
+  display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:var(--r);
+  transition:background var(--t),transform var(--t);position:relative;
+}
+.comp:hover{background:var(--su2)}
+.comp .num{font-family:var(--fn);font-size:10.5px;color:var(--mu2);font-weight:700;min-width:18px}
+.comp .nm{flex:1;font-size:13.5px;font-weight:600;color:var(--ink2);letter-spacing:-.005em}
+.comp .nm small{display:block;font-weight:500;color:var(--mu);font-size:11px;margin-top:1px}
+.comp.done .nm{color:var(--mu);text-decoration:line-through;text-decoration-color:var(--gr);text-decoration-thickness:1.5px}
+
+/* Status pills (tap to cycle) */
+.comp .actions{display:flex;gap:4px}
+.comp .pip{
+  width:30px;height:30px;border-radius:50%;border:2px solid var(--bo);background:var(--su);
+  display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--mu);font-weight:800;
+  transition:transform var(--t),background var(--t),border-color var(--t);position:relative;
+}
+.comp .pip:active{transform:scale(.9)}
+.comp .pip:hover{border-color:var(--ink3)}
+.comp.done .pip-v{background:linear-gradient(180deg,#34d399,var(--gr));border-color:transparent;color:#fff;box-shadow:0 4px 12px -4px rgba(16,185,129,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.comp.active .pip-p{background:linear-gradient(180deg,#a78bfa,var(--a));border-color:transparent;color:#fff;box-shadow:0 4px 12px -4px rgba(99,102,241,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.comp.review .pip-r{background:linear-gradient(180deg,#fbbf24,var(--am));border-color:transparent;color:#fff;box-shadow:0 4px 12px -4px rgba(245,158,11,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+
+/* Just-validated burst (added then auto-removed) */
+.comp.just-validated{animation:validatePop .6s cubic-bezier(.2,.7,.3,1)}
+@keyframes validatePop{
+  0%{background:transparent}
+  30%{background:var(--grp);transform:scale(1.02)}
+  100%{background:transparent;transform:scale(1)}
+}
+
+/* Floating XP */
+.xp-fly{
+  position:absolute;font-family:var(--fd);font-weight:800;font-size:14px;color:var(--gr);
+  pointer-events:none;animation:flyUp 1.4s cubic-bezier(.2,.7,.3,1) forwards;z-index:30;
+  filter:drop-shadow(0 4px 8px rgba(16,185,129,.4));
+}
+@keyframes flyUp{0%{opacity:0;transform:translateY(0) scale(.8)}15%{opacity:1;transform:translateY(-10px) scale(1.1)}100%{opacity:0;transform:translateY(-60px) scale(1)}}
+
+/* Confetti dots */
+.confetti{position:absolute;width:6px;height:6px;border-radius:1px;pointer-events:none;z-index:25}
+
+/* Trophy banner — when whole category done */
+.trophy-banner{
+  margin:10px 6px;padding:14px;border-radius:var(--rl);
+  background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 100%);color:#fff;
+  display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px -6px rgba(245,158,11,.45);
+  animation:trophyIn .5s cubic-bezier(.2,.7,.3,1);
+}
+@keyframes trophyIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+.trophy-banner .big{font-size:32px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))}
+.trophy-banner .info .l{font-size:10px;font-weight:800;opacity:.85;letter-spacing:1.5px}
+.trophy-banner .info .nm{font-family:var(--fd);font-weight:800;font-size:16px;letter-spacing:-.01em;margin-top:1px}
+.trophy-banner .info .sub{font-size:11.5px;opacity:.9;margin-top:2px}
+
+/* Toast — bigger, more dopamine */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:99px;font-size:13.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:200;box-shadow:var(--s3);display:flex;align-items:center;gap:8px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{background:linear-gradient(135deg,var(--gr) 0%,#059669 100%)}
+.toast .ico{font-size:18px}
+
+/* Mid-screen big celebration (trophée) */
+.celebrate{
+  position:fixed;inset:0;background:rgba(11,13,26,.75);backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;z-index:300;padding:24px;
+}
+.celebrate.show{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.celebrate .panel{
+  background:var(--su);border-radius:var(--rx);padding:30px 24px 24px;text-align:center;max-width:340px;width:100%;
+  position:relative;overflow:hidden;animation:popIn .5s cubic-bezier(.2,.7,.3,1);
+  box-shadow:var(--s3);
+}
+@keyframes popIn{from{transform:scale(.7) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.celebrate .ring{width:120px;height:120px;border-radius:50%;margin:0 auto 16px;background:radial-gradient(circle,#fbbf24,#f59e0b);display:flex;align-items:center;justify-content:center;font-size:60px;box-shadow:0 16px 40px -10px rgba(245,158,11,.6);animation:wiggle 1.4s ease-in-out infinite}
+@keyframes wiggle{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.celebrate h2{font-family:var(--fd);font-weight:800;font-size:22px;margin:0;letter-spacing:-.02em}
+.celebrate .tro{font-family:var(--fd);font-size:16px;color:var(--am);margin-top:6px;font-weight:700}
+.celebrate p{font-size:13.5px;color:var(--mu);margin:10px 0 16px;line-height:1.5;text-wrap:pretty}
+.celebrate .btn{width:100%;height:46px;border-radius:var(--r);background:var(--a);color:var(--a-ink);font-weight:800;font-size:14px;font-family:var(--fb)}
+
+@media(max-width:480px){.wrap{padding:10px}}
+</style></head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="ttl">Mes élèves</div>
+      <div class="sub">Vue moniteur · démo dopamine validation</div>
+    </div>
+    <div class="tools"><button id="t-dark">🌓 Dark</button></div>
+  </div>
+
+  <!-- vue 1 — liste élèves -->
+  <div id="view-list"></div>
+
+  <!-- vue 2 — détail élève -->
+  <div id="view-elv" style="display:none"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="celebrate" id="celebrate">
+  <div class="panel">
+    <div class="ring">🏆</div>
+    <h2 id="cel-h">Trophée débloqué !</h2>
+    <div class="tro" id="cel-tro">Premiers Tours de Roues</div>
+    <p id="cel-p">Léa vient de compléter sa première catégorie. Elle progresse <b style="color:var(--a)">3× plus vite</b> que la moyenne.</p>
+    <button class="btn" onclick="document.getElementById('celebrate').classList.remove('show')">Magnifique</button>
+  </div>
+</div>
+
+<script>
+const REMC = [
+  {id:'C1',ico:'🏁',name:'Maîtrise du véhicule',tname:'Premiers Tours de Roues',color:'#10b981',subs:[
+    {c:'C1a',short:'Vérifications',n:'Organes, commandes, vérifications'},
+    {c:'C1b',short:'Poste de conduite',n:"S'installer au poste de conduite"},
+    {c:'C1c',short:'Trajectoire',n:'Tenir le volant, trajectoire'},
+    {c:'C1d',short:'Démarrer & arrêter',n:"Démarrer et s'arrêter"},
+    {c:'C1e',short:'Doser',n:'Doser accélération et freinage'},
+    {c:'C1f',short:'Boîte de vitesses',n:'Utiliser la boîte de vitesses'},
+    {c:'C1g',short:'Sécurité ext.',n:'Contrôles de sécurité extérieure'},
+    {c:'C1h',short:'Manœuvres',n:'Manœuvres : créneau, demi-tour'},
+    {c:'C1i',short:'Autonomie',n:'Autonomie sur manœuvres de base'},
+  ]},
+  {id:'C2',ico:'🛣️',name:'Circulation normale',tname:'Chasseur de Routes',color:'#0ea5e9',subs:[
+    {c:'C2a',short:'Signalisation',n:'Rechercher la signalisation'},
+    {c:'C2b',short:'Adapter',n:'Adapter sa conduite'},
+    {c:'C2c',short:'Communiquer',n:'Communiquer avec les autres'},
+    {c:'C2d',short:'Autres usagers',n:'Connaître les caractéristiques des autres'},
+    {c:'C2e',short:'Partager',n:'Partager la chaussée'},
+    {c:'C2f',short:'Distances',n:'Maintenir des distances de sécurité'},
+    {c:'C2g',short:'Dépassement',n:"Croiser, dépasser, être dépassé"},
+    {c:'C2h',short:'Virages',n:'Passer des virages, conduire en pente'},
+  ]},
+  {id:'C3',ico:'⚡',name:'Conditions difficiles',tname:'Maître des Conditions',color:'#f59e0b',subs:[
+    {c:'C3a',short:'Distances',n:'Évaluer et maintenir les distances'},
+    {c:'C3b',short:'Dépasser',n:'Croiser, dépasser, être dépassé'},
+    {c:'C3c',short:'Virages',n:'Passer des virages'},
+    {c:'C3d',short:'En file',n:'Conduire dans une file'},
+    {c:'C3e',short:'Nuit',n:'Conduire de nuit, par mauvaise visibilité'},
+    {c:'C3f',short:'Pluie',n:'Conduire sous la pluie ou sur sol glissant'},
+    {c:'C3g',short:'Autoroute',n:'Conduire sur autoroute, à vive allure'},
+  ]},
+  {id:'C4',ico:'👑',name:'Conduite autonome',tname:'As du Volant',color:'#8b5cf6',subs:[
+    {c:'C4a',short:'Itinéraire',n:'Suivre un itinéraire de manière autonome'},
+    {c:'C4b',short:'Long voyage',n:'Préparer et effectuer un voyage longue distance'},
+    {c:'C4c',short:'Démarches',n:'Connaître les démarches administratives'},
+    {c:'C4d',short:'Entretien',n:"Connaître l'utilité et l'entretien"},
+    {c:'C4e',short:'Risques',n:"Connaître les risques liés à l'usage"},
+    {c:'C4f',short:'Éco-conduite',n:'Éco-conduite : conduire de manière économique'},
+    {c:'C4g',short:'Premiers secours',n:'Premiers secours et accidents'},
+  ]},
+];
+
+const ELEVES = [
+  {id:'u1', nom:'Léa Marin',    color:'#ec4899', forfait:20, hours:14},
+  {id:'u2', nom:'Hugo Petit',   color:'#0ea5e9', forfait:20, hours:18},
+  {id:'u3', nom:'Sara Bernard', color:'#8b5cf6', forfait:25, hours:9},
+  {id:'u4', nom:'Tom Lefèvre',  color:'#f59e0b', forfait:20, hours:20},
+];
+
+// Initial state — réaliste : Léa au début de C1, Hugo en C2, Sara C1+C2 ✓, Tom presque fini
+const STATE = {
+  u1:[{comp_id:'C1a',lv:'v'},{comp_id:'C1b',lv:'v'},{comp_id:'C1c',lv:'p'},{comp_id:'C1d',checked:true,lv:null}],
+  u2:[...REMC[0].subs.map(s=>({comp_id:s.c,lv:'v'})), {comp_id:'C2a',lv:'v'},{comp_id:'C2b',lv:'p'}],
+  u3:[...REMC[0].subs.map(s=>({comp_id:s.c,lv:'v'})), ...REMC[1].subs.map(s=>({comp_id:s.c,lv:'v'})), {comp_id:'C3a',lv:'p'}],
+  u4:[...REMC[0].subs.map(s=>({comp_id:s.c,lv:'v'})), ...REMC[1].subs.map(s=>({comp_id:s.c,lv:'v'})), ...REMC[2].subs.map(s=>({comp_id:s.c,lv:'v'})), {comp_id:'C4a',lv:'v'},{comp_id:'C4b',lv:'p'}],
+};
+// Stats moniteur — incrementent au fil des validations
+let MONITEUR_STATS = {today:5, week:23, xp:850};
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function entryFor(uid,cid){return (STATE[uid]||[]).find(e=>e.comp_id===cid)}
+function statusFor(uid,cid){const e=entryFor(uid,cid);if(!e)return 'locked';if(e.lv==='v')return 'done';if(e.lv==='p')return 'active';if(e.checked)return 'review';return 'locked'}
+function progressCat(uid,cat){const total=cat.subs.length;const done=cat.subs.filter(s=>statusFor(uid,s.c)==='done').length;return{total,done,pct:total?Math.round(done/total*100):0}}
+function progressTotal(uid){const all=REMC.flatMap(c=>c.subs);const done=all.filter(s=>statusFor(uid,s.c)==='done').length;return{total:all.length,done,pct:Math.round(done/all.length*100)}}
+function nextTrophyFor(uid){
+  for(const c of REMC){const p=progressCat(uid,c);if(p.done<c.subs.length){return{cat:c,remaining:c.subs.length-p.done,p}}}
+  return null;
+}
+
+let curElv = null;
+
+function renderList(){
+  document.getElementById('view-list').innerHTML = `
+    <div class="daily">
+      <div class="greet">Bonjour Thomas 👋</div>
+      <div class="h1">Belle journée pour faire progresser tes élèves</div>
+      <div class="kpis">
+        <div class="kpi"><div class="k">VALIDÉES AUJ.</div><div class="v" id="stat-today">${MONITEUR_STATS.today}<span class="delta">+2</span></div></div>
+        <div class="kpi"><div class="k">CETTE SEMAINE</div><div class="v" id="stat-week">${MONITEUR_STATS.week}</div></div>
+        <div class="kpi"><div class="k">XP DONNÉS</div><div class="v" id="stat-xp">${MONITEUR_STATS.xp}</div></div>
+      </div>
+    </div>
+
+    <div class="sh"><div class="t">Mes élèves actifs</div><div class="s">${ELEVES.length} actifs</div></div>
+    <div class="elv">
+      ${ELEVES.map(e=>{
+        const p=progressTotal(e.id);
+        const nt=nextTrophyFor(e.id);
+        return `
+          <div class="elv-c" data-uid="${e.id}">
+            <div class="av" style="background:linear-gradient(135deg,${e.color},${e.color}aa)">${e.nom.split(' ').map(p=>p[0]).join('')}</div>
+            <div class="body">
+              <div class="nm">${esc(e.nom)}</div>
+              <div class="meta">${e.hours}/${e.forfait}h · ${nt?`Prochain : ${esc(nt.cat.tname)}`:'🏆 Tout validé'}</div>
+              <div class="pr">
+                <div class="bar2"><i style="width:${p.pct}%"></i></div>
+                <div class="pct">${p.done}/${p.total}</div>
+              </div>
+            </div>
+            <div class="arr">›</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  document.querySelectorAll('.elv-c').forEach(el=>el.addEventListener('click',()=>{
+    curElv = el.dataset.uid;
+    document.getElementById('view-list').style.display='none';
+    document.getElementById('view-elv').style.display='block';
+    renderElv();
+  }));
+}
+
+function renderElv(){
+  const e = ELEVES.find(x=>x.id===curElv);
+  const p = progressTotal(curElv);
+  const nt = nextTrophyFor(curElv);
+
+  document.getElementById('view-elv').innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;padding:0 4px 12px">
+      <button onclick="goBack()" style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--mu);background:none">‹ Tous les élèves</button>
+    </div>
+
+    <div class="elv-det">
+      <div class="head">
+        <div class="av" style="background:linear-gradient(135deg,${e.color},${e.color}aa)">${e.nom.split(' ').map(p=>p[0]).join('')}</div>
+        <div class="info">
+          <div class="nm">${esc(e.nom)}</div>
+          <div class="meta">${e.hours}/${e.forfait}h · progression <span class="pct" style="font-family:var(--fn);color:var(--gr);font-weight:800">${p.pct}%</span></div>
+        </div>
+      </div>
+      ${nt ? `
+        <div class="next-trophy">
+          <div class="ic">🏆</div>
+          <div>Plus que <b>${nt.remaining} compétence${nt.remaining>1?'s':''}</b> pour débloquer<br/>« <b>${esc(nt.cat.tname)}</b> »</div>
+        </div>
+      ` : `
+        <div class="next-trophy" style="background:var(--grp);color:var(--gr)">
+          <div class="ic">🎉</div><div><b>Programme REMC complet !</b><br/>Prêt(e) pour l'examen.</div>
+        </div>
+      `}
+    </div>
+
+    <div class="sh"><div class="t">Compétences REMC</div><div class="s">Tape ✓ pour valider</div></div>
+
+    ${REMC.map((cat,idx)=>{
+      const pc = progressCat(curElv,cat);
+      const open = pc.done < cat.subs.length && pc.done >= 0 ? (idx===REMC.findIndex(c=>{const pp=progressCat(curElv,c);return pp.done<c.subs.length})) : false;
+      return `
+        <div class="cat-block ${open?'open':''}" data-cat="${cat.id}">
+          <div class="cat-head">
+            <div class="ico" style="background:${cat.color}1f;color:${cat.color}">${cat.ico}</div>
+            <div class="info">
+              <div class="id">${cat.id} · ${cat.subs.length} compétences</div>
+              <div class="nm">${esc(cat.name)}</div>
+              <div class="pr-mini"><div class="b"><i style="width:${pc.pct}%;background:${cat.color}"></i></div><div class="t">${pc.done}/${pc.total}</div></div>
+            </div>
+            <div class="chev">›</div>
+          </div>
+          <div class="cat-body">
+            ${cat.subs.map((s,si)=>{
+              const st = statusFor(curElv,s.c);
+              return `
+                <div class="comp ${st}" data-cat="${cat.id}" data-comp="${s.c}">
+                  <div class="num">${String(si+1).padStart(2,'0')}</div>
+                  <div class="nm">${esc(s.short)}<small>${esc(s.n)}</small></div>
+                  <div class="actions">
+                    <button class="pip pip-r" data-set="r" title="À retravailler">!</button>
+                    <button class="pip pip-p" data-set="p" title="En cours">⌁</button>
+                    <button class="pip pip-v" data-set="v" title="Valider">✓</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }).join('')}
+
+    <div style="height:30px"></div>
+  `;
+
+  // Wire collapsibles
+  document.querySelectorAll('.cat-head').forEach(h=>{
+    h.addEventListener('click',()=>h.parentElement.classList.toggle('open'));
+  });
+  // Wire pips
+  document.querySelectorAll('.comp .pip').forEach(b=>{
+    b.addEventListener('click',(ev)=>{
+      ev.stopPropagation();
+      const row = b.closest('.comp');
+      const cid = row.dataset.comp;
+      const catId = row.dataset.cat;
+      const set = b.dataset.set;
+      validateComp(cid, catId, set, row);
+    });
+  });
+}
+
+function goBack(){
+  document.getElementById('view-elv').style.display='none';
+  document.getElementById('view-list').style.display='block';
+  renderList();
+}
+
+function validateComp(cid, catId, set, row){
+  const cat = REMC.find(c=>c.id===catId);
+  const wasDone = statusFor(curElv,cid)==='done';
+  // Update state
+  let arr = STATE[curElv] = STATE[curElv] || [];
+  let e = arr.find(x=>x.comp_id===cid);
+  if(!e){ e = {comp_id:cid}; arr.push(e); }
+  if(set==='v'){ e.lv='v'; e.checked=true; e.validated_at=new Date().toISOString(); }
+  else if(set==='p'){ e.lv='p'; e.checked=true; }
+  else if(set==='r'){ e.lv=null; e.checked=true; }
+
+  const nowDone = statusFor(curElv,cid)==='done';
+
+  // Update visuals immediately (without re-rendering everything)
+  row.classList.remove('done','active','review','locked');
+  row.classList.add(statusFor(curElv,cid));
+
+  if(set==='v' && !wasDone){
+    triggerValidationFeedback(row, cat);
+  } else if(set==='v' && wasDone){
+    // already done, no-op visual
+  } else {
+    toast(set==='p' ? '⌁ Marquée « en cours »' : '! Marquée « à retravailler »');
+  }
+
+  // Refresh category progress bar in header
+  const block = row.closest('.cat-block');
+  const pc = progressCat(curElv,cat);
+  block.querySelector('.pr-mini i').style.width = pc.pct + '%';
+  block.querySelector('.pr-mini .t').textContent = `${pc.done}/${pc.total}`;
+
+  // Refresh élève header progress
+  const p = progressTotal(curElv);
+  const headerPct = document.querySelector('.elv-det .meta .pct');
+  if(headerPct) headerPct.textContent = p.pct+'%';
+
+  // Refresh next trophy
+  const nt = nextTrophyFor(curElv);
+  const nextEl = document.querySelector('.elv-det .next-trophy');
+  if(nextEl){
+    if(nt){
+      nextEl.innerHTML = `<div class="ic">🏆</div><div>Plus que <b>${nt.remaining} compétence${nt.remaining>1?'s':''}</b> pour débloquer<br/>« <b>${esc(nt.cat.tname)}</b> »</div>`;
+      nextEl.style.background='var(--amp)';nextEl.style.color='var(--ink2)';
+    } else {
+      nextEl.style.background='var(--grp)';nextEl.style.color='var(--gr)';
+      nextEl.innerHTML = `<div class="ic">🎉</div><div><b>Programme REMC complet !</b><br/>Prêt(e) pour l'examen.</div>`;
+    }
+  }
+
+  // Check trophée unlock
+  if(set==='v' && pc.done === cat.subs.length && !wasDone){
+    setTimeout(()=>celebrateTrophy(cat), 700);
+  }
+}
+
+function triggerValidationFeedback(row, cat){
+  row.classList.add('just-validated');
+  setTimeout(()=>row.classList.remove('just-validated'), 600);
+
+  // Floating XP
+  const xp = document.createElement('div');
+  xp.className = 'xp-fly';
+  xp.textContent = '+50 XP';
+  const rect = row.getBoundingClientRect();
+  const parentRect = row.offsetParent.getBoundingClientRect();
+  xp.style.left = (rect.right - parentRect.left - 70) + 'px';
+  xp.style.top  = (rect.top   - parentRect.top  + 6) + 'px';
+  row.offsetParent.appendChild(xp);
+  setTimeout(()=>xp.remove(), 1500);
+
+  // Confetti burst
+  for(let i=0;i<10;i++){
+    const dot = document.createElement('div');
+    dot.className = 'confetti';
+    const colors = ['#10b981','#6366f1','#f59e0b','#ec4899','#0ea5e9'];
+    dot.style.background = colors[i%colors.length];
+    dot.style.left = (rect.right - parentRect.left - 50 + (Math.random()*40-20)) + 'px';
+    dot.style.top  = (rect.top   - parentRect.top  + 14) + 'px';
+    const dx = (Math.random()*120-60);
+    const dy = -(Math.random()*60+30);
+    dot.animate([
+      {transform:'translate(0,0) rotate(0)', opacity:1},
+      {transform:`translate(${dx}px,${dy}px) rotate(${Math.random()*360}deg)`, opacity:0},
+    ], {duration:900+Math.random()*300, easing:'cubic-bezier(.2,.7,.3,1)'});
+    row.offsetParent.appendChild(dot);
+    setTimeout(()=>dot.remove(), 1200);
+  }
+
+  // Update moniteur KPIs
+  MONITEUR_STATS.today += 1;
+  MONITEUR_STATS.week += 1;
+  MONITEUR_STATS.xp += 50;
+
+  toast(`+50 XP donnés à ${ELEVES.find(e=>e.id===curElv).nom.split(' ')[0]} ✨`, 'success');
+}
+
+function celebrateTrophy(cat){
+  document.getElementById('cel-tro').textContent = cat.tname;
+  const eleve = ELEVES.find(e=>e.id===curElv);
+  document.getElementById('cel-p').innerHTML = `${esc(eleve.nom.split(' ')[0])} vient de compléter la catégorie <b>${esc(cat.name)}</b>. Elle débloque le trophée <b style="color:var(--am)">« ${esc(cat.tname)} »</b>.`;
+  document.getElementById('celebrate').classList.add('show');
+}
+
+function toast(msg, kind){
+  const t = document.getElementById('toast');
+  t.className = 'toast' + (kind?' '+kind:'');
+  t.innerHTML = msg;
+  t.classList.add('show');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+document.getElementById('t-dark').addEventListener('click', (ev)=>{
+  document.body.classList.toggle('dark');
+  ev.currentTarget.classList.toggle('on');
+});
+
+renderList();
+</script>
+</body></html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PermiGo v2 — Coach DA Design Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f1419;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #2a3f5f;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            color: #c7ff00;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #c7ff00, #ffa400);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        /* DASHBOARD GRID */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        /* CARD */
+        .card {
+            background: #1a1f2e;
+            border-radius: 12px;
+            padding: 28px;
+            border: 1px solid #2a3f5f;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #c7ff00, transparent);
+        }
+
+        .card:hover {
+            border-color: #c7ff00;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(199, 255, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .card-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #c7ff00;
+            margin-bottom: 12px;
+        }
+
+        .card-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        /* PROGRESS BAR */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #0f1419;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #c7ff00, #ffa400);
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        /* STATUS BADGE */
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status.nouveau {
+            background: rgba(199, 255, 0, 0.1);
+            color: #c7ff00;
+        }
+
+        .status.pret {
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+        }
+
+        .status.en-cours {
+            background: rgba(255, 164, 0, 0.1);
+            color: #ffa400;
+        }
+
+        /* STUDENT LIST */
+        .student-list {
+            background: #1a1f2e;
+            border-radius: 12px;
+            border: 1px solid #2a3f5f;
+            overflow: hidden;
+        }
+
+        .list-header {
+            padding: 20px 28px;
+            border-bottom: 1px solid #2a3f5f;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 20px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #888;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .list-item {
+            padding: 20px 28px;
+            border-bottom: 1px solid #0f1419;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 20px;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item:hover {
+            background: #252d3d;
+        }
+
+        .student-name {
+            font-weight: 500;
+            color: #c7ff00;
+        }
+
+        .student-stat {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .action-btn {
+            background: #c7ff00;
+            color: #0f1419;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: #e0ff1a;
+            transform: scale(1.05);
+        }
+
+        /* SECTION TITLE */
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #c7ff00;
+            margin: 40px 0 24px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .list-header,
+            .list-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+        }
+
+        /* ANIMATION */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card, .student-list {
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div>
+                <h1>🚀 PermiGo v2</h1>
+                <p style="color: #888; margin-top: 4px; font-size: 14px;">Coach DA Design Inspiration Demo</p>
+            </div>
+            <div class="user-info">
+                <div>
+                    <div style="font-weight: 500; color: #c7ff00;">Rayan Nabli</div>
+                    <div style="font-size: 12px; color: #888;">Moniteur</div>
+                </div>
+                <div class="avatar">RN</div>
+            </div>
+        </div>
+
+        <!-- ÉLÈVE VIEW (if logged as Elyne) -->
+        <div style="margin-bottom: 60px;">
+            <h2 class="section-title">📊 Mon Progression (Elyne Semaan)</h2>
+            <div class="dashboard">
+                <!-- Card 1: Heures -->
+                <div class="card">
+                    <div class="card-title">Heures Complétées</div>
+                    <div class="card-value">22h</div>
+                    <div class="card-label">sur 30h requises</div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: 73%;"></div>
+                    </div>
+                    <div style="font-size: 12px; color: #888;">73% complété</div>
+                </div>
+
+                <!-- Card 2: Présence -->
+                <div class="card">
+                    <div class="card-title">Taux de Présence</div>
+                    <div class="card-value">95%</div>
+                    <div class="card-label">excellente assiduité</div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: 95%; background: linear-gradient(90deg, #00ff00, #7fff00);"></div>
+                    </div>
+                    <div style="font-size: 12px; color: #888;">1 absence enregistrée</div>
+                </div>
+
+                <!-- Card 3: État -->
+                <div class="card">
+                    <div class="card-title">État Actuel</div>
+                    <div class="card-value">🟢</div>
+                    <div class="card-label">Nouveau — Commencé 01/05/2026</div>
+                    <div>
+                        <span class="status pret">Prêt pour suivre</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MONITEUR VIEW -->
+        <div>
+            <h2 class="section-title">👥 Mes Élèves (Moniteur View)</h2>
+            <div class="student-list">
+                <div class="list-header">
+                    <div>Nom</div>
+                    <div>Heures</div>
+                    <div>Présence</div>
+                    <div>Action</div>
+                </div>
+
+                <!-- Student 1 -->
+                <div class="list-item">
+                    <div class="student-name">Elyne Semaan</div>
+                    <div class="student-stat">0h • Nouveau</div>
+                    <div><span class="status nouveau">Nouveau</span></div>
+                    <button class="action-btn">Voir Détails</button>
+                </div>
+
+                <!-- Student 2 -->
+                <div class="list-item">
+                    <div class="student-name">Sherine Nabli</div>
+                    <div class="student-stat">7h • 35% • Nouveau</div>
+                    <div><span class="status en-cours">En Cours</span></div>
+                    <button class="action-btn">Voir Détails</button>
+                </div>
+
+                <!-- Student 3 -->
+                <div class="list-item">
+                    <div class="student-name">Latifa Sahli</div>
+                    <div class="student-stat">22h • 110% • Prêt Examen ✅</div>
+                    <div><span class="status pret">Prêt</span></div>
+                    <button class="action-btn">Voir Détails</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div style="margin-top: 60px; padding-top: 30px; border-top: 1px solid #2a3f5f; text-align: center; color: #888; font-size: 12px;">
+            <p>PermiGo v2 — Inspired by Coach DA Design System</p>
+            <p style="margin-top: 8px;">🎨 Lime accent • Dark theme • Clean data-focused UI • Mobile responsive</p>
+        </div>
+    </div>
+</body>
+</html>

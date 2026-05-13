@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Rubrique Compétences — Vue Moniteur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<div class="canvas-h">
+  <div>
+    <h1>Rubrique Compétences — Vue moniteur <span class="tag">Moniteur</span></h1>
+    <div class="sub">Tous les écrans pour gérer et évaluer les compétences REMC</div>
+  </div>
+  <div class="legend">
+    <span class="lg"><span class="dot d-v">✓</span>Acquis</span>
+    <span class="lg"><span class="dot d-p">⌁</span>En cours</span>
+    <span class="lg"><span class="dot d-r">!</span>À retravailler</span>
+    <span class="lg"><span class="dot d-l">⌧</span>Verrouillée</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- 1 LISTE DES ÉLÈVES -->
+  <div class="screen">
+    <div class="label">1. Liste des élèves</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr">
+        <div class="app-top"><div class="h1">Mes élèves</div></div>
+        <div class="search"><i>🔍</i> Rechercher un élève…</div>
+        <div class="el-list">
+          <div class="el-c"><div class="av" style="background:linear-gradient(135deg,#ec4899,#be185d)">LM</div><div class="b"><div class="nm">Léa Marin</div><div class="meta">2/31 compétences</div><div class="bar"><i style="width:6%"></i></div></div><div class="pct">2/31</div></div>
+          <div class="el-c"><div class="av" style="background:linear-gradient(135deg,#0ea5e9,#0369a1)">HP</div><div class="b"><div class="nm">Hugo Petit</div><div class="meta">10/31 compétences</div><div class="bar"><i style="width:32%"></i></div></div><div class="pct">10/31</div></div>
+          <div class="el-c"><div class="av" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9)">SB</div><div class="b"><div class="nm">Sara Bernard</div><div class="meta">17/31 compétences</div><div class="bar"><i style="width:55%"></i></div></div><div class="pct">17/31</div></div>
+          <div class="el-c"><div class="av" style="background:linear-gradient(135deg,#f59e0b,#b45309)">TL</div><div class="b"><div class="nm">Tom Lefèvre</div><div class="meta">25/31 compétences</div><div class="bar"><i style="width:80%"></i></div></div><div class="pct">25/31</div></div>
+        </div>
+        <div class="pend-cta">
+          <div class="t">🔔 3 évaluations en attente</div>
+          <div class="s">Complétez les livrets pour faire progresser vos élèves.</div>
+          <button>Voir les évaluations</button>
+        </div>
+        <div class="navb">
+          <div class="it"><span class="ic">⌂</span>Accueil</div>
+          <div class="it"><span class="ic">▦</span>Planning</div>
+          <div class="it on"><span class="ic">👥</span>Élèves</div>
+          <div class="it"><span class="ic">⊛</span>Compétences</div>
+          <div class="it"><span class="ic">≡</span>Menu</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 VUE ÉLÈVE PARCOURS -->
+  <div class="screen">
+    <div class="label">2. Vue élève · parcours</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr">
+        <div class="app-top"><span class="back">‹</span><div class="h1">Léa Marin <small>14/20h · Prochain : Premiers Tours de Roues</small></div></div>
+        <div class="tabs"><div class="tab on">Parcours</div><div class="tab">Évaluations</div></div>
+        <div class="sec">
+          <div class="sec-h"><div class="nm">C1 — Maîtrise du véhicule</div><div class="pc">2/9 compétences</div></div>
+          <div class="road">
+            <div class="row v-line"><div class="node n-v">01</div><div class="nm">Organes, commandes…</div><div class="end">✓</div></div>
+            <div class="row v-line"><div class="node n-v">02</div><div class="nm">S'installer au poste de…</div><div class="end">✓</div></div>
+            <div class="row act"><div class="node n-p">03</div><div class="nm">Tenir le volant, trajec…</div><div class="end" style="color:var(--a)">⌁</div></div>
+            <div class="row"><div class="node n-r">04</div><div class="nm">Démarrer et s'arrêter</div><div class="end r">!</div></div>
+            <div class="row lock"><div class="node n-l">05</div><div class="nm">Doser accélération et freinage</div><div class="end l">⌧</div></div>
+            <div class="row lock"><div class="node n-l">06</div><div class="nm">Utiliser la boîte de vitesses</div><div class="end l">⌧</div></div>
+            <div class="row lock"><div class="node n-l">07</div><div class="nm">Contrôles de sécurité</div><div class="end l">⌧</div></div>
+            <div class="row lock"><div class="node n-l">08</div><div class="nm">Manœuvres : créneau…</div><div class="end l">⌧</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 DÉTAIL COMPÉTENCE -->
+  <div class="screen">
+    <div class="label">3. Détail compétence</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr">
+        <div class="app-top" style="padding-bottom:4px"><span class="back">‹</span><div class="h1" style="font-size:14px">03 Tenir le volant, trajectoire <small>C1 · Maîtrise du véhicule</small></div></div>
+        <div style="padding:0 12px 6px"><span class="bd" style="display:inline-flex;padding:3px 9px;border-radius:99px;background:var(--ap);color:var(--a);font-size:10px;font-weight:800">⌁ En cours</span></div>
+        <div class="det-card">
+          <div class="lbl">Objectif</div>
+          <div class="txt">Adapter le maintien du volant et la trajectoire du véhicule en toutes circonstances.</div>
+        </div>
+        <div class="det-card">
+          <div class="lbl">Critères observables</div>
+          <div class="crits">
+            <div class="crit"><div class="ck">✓</div><div>Position des mains adaptée</div></div>
+            <div class="crit"><div class="ck">✓</div><div>Trajectoire régulière</div></div>
+            <div class="crit"><div class="ck">✓</div><div>Adaptation en fonction de la vitesse</div></div>
+            <div class="crit"><div class="ck">✓</div><div>Anticipation des écarts</div></div>
+          </div>
+        </div>
+        <div class="det-card">
+          <div class="lbl">Dernière évaluation</div>
+          <div class="lasteval">
+            <div class="av">TH</div>
+            <div class="b" style="flex:1;min-width:0">
+              <div class="top"><span class="bd">En cours d'acquisition</span><span class="dt">Thomas · 18/05/2025</span></div>
+              <div class="nt">Bonne tenue du volant, trajectoire correcte en ligne droite. À améliorer en courbe.</div>
+            </div>
+          </div>
+        </div>
+        <div class="cta"><button class="btn-big btn-prim">Évaluer cette compétence</button></div>
+        <div class="cta" style="margin-top:-4px"><button class="btn-big btn-sec">Historique des évaluations</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 ÉVALUATION RAPIDE -->
+  <div class="screen">
+    <div class="label">4. Évaluation rapide</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr">
+        <div class="app-top" style="padding-bottom:4px"><span class="back">‹</span><div class="h1" style="font-size:14px">03 Tenir le volant, trajectoire <small>C1 · Maîtrise du véhicule</small></div></div>
+        <div style="padding:6px 12px 4px;font-size:10.5px;color:var(--ink2);font-weight:600">Sélectionnez le niveau atteint par l'élève</div>
+        <div class="choices">
+          <div class="ch-r on-v"><div class="pip">✓</div><div class="b"><div class="nm">Acquis</div><div class="sub">La compétence est maîtrisée.</div></div></div>
+          <div class="ch-r on-p"><div class="pip">⌁</div><div class="b"><div class="nm">En cours d'acquisition</div><div class="sub">L'élève progresse, mais la compétence n'est pas encore maîtrisée.</div></div></div>
+          <div class="ch-r on-r"><div class="pip">!</div><div class="b"><div class="nm">À retravailler</div><div class="sub">Des points importants doivent être revus.</div></div></div>
+          <div class="ch-r on-l"><div class="pip">⌧</div><div class="b"><div class="nm">Non travaillée</div><div class="sub">Cette compétence n'a pas été travaillée pendant la séance.</div></div></div>
+        </div>
+        <div class="ta-lbl">Ajouter un commentaire <span class="opt">(optionnel)</span></div>
+        <div class="ta">Ex : Bonne progression sur la trajectoire…<div class="ct">0/300</div></div>
+        <div class="cta" style="margin-top:8px"><button class="btn-big btn-prim">Enregistrer l'évaluation</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 VALIDATION FEEDBACK -->
+  <div class="screen">
+    <div class="label">5. Validation · feedback</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb" style="color:#fff"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr dark">
+        <div class="fbk">
+          <div class="confetti-bg"></div>
+          <div class="center">
+            <div class="trophy">🏆</div>
+            <h2>Compétence mise à jour !</h2>
+            <div class="h-sub">Tenir le volant, trajectoire</div>
+            <div class="pill">⌁ EN COURS D'ACQUISITION</div>
+          </div>
+          <div class="imp">
+            <div class="lbl">IMPACT POUR L'ÉLÈVE</div>
+            <div class="row"><div class="ic">⭐</div><div class="nm">+50 XP gagnés</div><div class="v">+50</div></div>
+            <div class="row"><div class="ic" style="background:rgba(16,185,129,.18)">▮</div><div class="nm">Progression du monde C1</div><div class="bar"><i style="width:33%"></i></div><div class="v" style="margin-left:6px">3/9</div></div>
+            <div class="row"><div class="ic" style="background:rgba(245,158,11,.18)">🔓</div><div class="nm">Prochaine étape débloquée<br/><span style="color:#8a92a8;font-weight:500;font-size:10px">Démarrer et s'arrêter</span></div></div>
+          </div>
+          <div class="footer"><button class="btn-fbk">Voir le parcours de Léa</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 PARCOURS MIS À JOUR -->
+  <div class="screen">
+    <div class="label">6. Parcours mis à jour</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr">
+        <div class="app-top"><span class="back">‹</span><div class="h1">Léa Marin <small>14/20h · Prochain : Premiers Tours de Roues</small></div></div>
+        <div class="tabs"><div class="tab on">Parcours</div><div class="tab">Évaluations</div></div>
+        <div class="sec">
+          <div class="sec-h"><div class="nm">C1 — Maîtrise du véhicule</div><div class="pc">3/9 compétences</div></div>
+          <div class="road">
+            <div class="row v-line"><div class="node n-v">01</div><div class="nm">Organes, commandes…</div><div class="end">✓</div></div>
+            <div class="row v-line"><div class="node n-v">02</div><div class="nm">S'installer au poste de…</div><div class="end">✓</div></div>
+            <div class="row v-line" style="background:linear-gradient(90deg,transparent,var(--grp),transparent);border-radius:8px;margin:0 6px"><div class="node n-v" style="box-shadow:0 0 0 4px rgba(16,185,129,.2),0 3px 8px -2px rgba(16,185,129,.5)">03</div><div class="nm" style="color:var(--gr);font-weight:800">Tenir le volant, trajectoire</div><div class="end">✓</div></div>
+            <div class="row act"><div class="node n-p">04</div><div class="nm">Démarrer et s'arrêter</div><div class="end" style="color:var(--a)">⌁</div></div>
+            <div class="row lock"><div class="node n-l">05</div><div class="nm">Doser accélération et freinage</div><div class="end l">⌧</div></div>
+            <div class="row lock"><div class="node n-l">06</div><div class="nm">Utiliser la boîte de vitesses</div><div class="end l">⌧</div></div>
+            <div class="row lock"><div class="node n-l">07</div><div class="nm">Contrôles de sécurité</div><div class="end l">⌧</div></div>
+            <div class="row lock"><div class="node n-l">08</div><div class="nm">Manœuvres : créneau…</div><div class="end l">⌧</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 ÉVALUATIONS EN ATTENTE -->
+  <div class="screen">
+    <div class="label">7. Évaluations en attente</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr">
+        <div class="pend-head"><div class="h1">Évaluations en attente</div><div class="cnt">3</div></div>
+        <div class="el-list" style="padding:4px 12px">
+          <div class="el-c"><div class="av" style="background:linear-gradient(135deg,#ec4899,#be185d)">LM</div><div class="b"><div class="nm">Léa Marin</div><div class="meta">Séance du 18/05 · 14h00</div><div class="meta" style="color:var(--a);font-weight:700;margin-top:3px">4 compétences à évaluer</div></div></div>
+          <div class="el-c"><div class="av" style="background:linear-gradient(135deg,#0ea5e9,#0369a1)">HP</div><div class="b"><div class="nm">Hugo Petit</div><div class="meta">Séance du 18/05 · 15h30</div><div class="meta" style="color:var(--a);font-weight:700;margin-top:3px">3 compétences à évaluer</div></div></div>
+          <div class="el-c"><div class="av" style="background:linear-gradient(135deg,#f59e0b,#b45309)">TL</div><div class="b"><div class="nm">Tom Lefèvre</div><div class="meta">Séance du 17/05 · 16h00</div><div class="meta" style="color:var(--a);font-weight:700;margin-top:3px">2 compétences à évaluer</div></div></div>
+        </div>
+        <div class="cta" style="margin:auto 12px 14px"><button class="btn-big btn-prim">Tout évaluer</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8 ÉVALUATION DE SÉANCE -->
+  <div class="screen">
+    <div class="label">8. Évaluation de séance</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr">
+        <div class="seance-head">
+          <div class="tl">Séance avec Léa Marin</div>
+          <div class="mt">18/05/2025 — 14h00 (1h00)</div>
+          <div class="pr"><span>C1 — Maîtrise du véhicule</span><span style="font-family:var(--fn);font-size:10px;color:var(--gr)">4/9 évaluées</span></div>
+        </div>
+        <div class="seance-rows">
+          <div class="sec-sm">
+            <div class="stt">C1 — Maîtrise du véhicule · 4 compétences travaillées</div>
+            <div class="row-sm"><div class="num">01</div><div class="nm">Organes, commandes…</div><div class="pips"><div class="pip">⌧</div><div class="pip">!</div><div class="pip on-v">✓</div></div></div>
+            <div class="row-sm"><div class="num">02</div><div class="nm">S'installer au poste de…</div><div class="pips"><div class="pip">⌧</div><div class="pip">!</div><div class="pip on-v">✓</div></div></div>
+            <div class="row-sm"><div class="num">03</div><div class="nm">Tenir le volant, trajectoire</div><div class="pips"><div class="pip">⌧</div><div class="pip">!</div><div class="pip on-p">⌁</div></div></div>
+            <div class="row-sm"><div class="num">04</div><div class="nm">Démarrer et s'arrêter</div><div class="pips"><div class="pip">⌧</div><div class="pip on-r">!</div><div class="pip">✓</div></div></div>
+          </div>
+        </div>
+        <div class="cta" style="margin-top:auto"><button class="btn-big btn-prim">Enregistrer la séance</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 COMMENTAIRE RAPIDE -->
+  <div class="screen">
+    <div class="label">9. Commentaire rapide</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr">
+        <div class="cm-head">Ajouter un commentaire <small>(optionnel)</small></div>
+        <div class="chips">
+          <span class="chip on">Bonne progression</span>
+          <span class="chip">Points à revoir</span>
+          <span class="chip">Manque d'anticipation</span>
+          <span class="chip">Trajectoire à améliorer</span>
+        </div>
+        <div class="ta-lbl" style="margin-top:14px">Commentaire personnalisé</div>
+        <div class="ta" style="height:120px">Votre commentaire…<div class="ct">0/200</div></div>
+        <div class="cta" style="margin-top:auto"><button class="btn-big btn-prim">Ajouter le commentaire</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 HISTORIQUE COMPÉTENCE -->
+  <div class="screen">
+    <div class="label">10. Historique compétence</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr">
+        <div class="app-top" style="padding-bottom:4px"><span class="back">‹</span><div class="h1" style="font-size:13.5px">Historique<small style="font-weight:700;color:var(--ink2);font-size:11px;margin-top:1px">03 Tenir le volant, trajectoire</small></div></div>
+        <div class="hist">
+          <div class="h-item">
+            <div class="dot d-p">⌁</div>
+            <div class="h-body">
+              <div class="top"><span>18/05/2025</span><span>·</span><span>Thomas</span></div>
+              <div class="bd bp">En cours d'acquisition</div>
+              <div class="nt">Bonne tenue du volant, trajectoire correcte en ligne droite.</div>
+            </div>
+          </div>
+          <div class="h-item">
+            <div class="dot d-r">!</div>
+            <div class="h-body">
+              <div class="top"><span>11/05/2025</span><span>·</span><span>Thomas</span></div>
+              <div class="bd bam">À retravailler</div>
+              <div class="nt">Trajectoire irrégulière en courbe.</div>
+            </div>
+          </div>
+          <div class="h-item">
+            <div class="dot d-l">⌧</div>
+            <div class="h-body">
+              <div class="top"><span>04/05/2025</span><span>·</span><span>Thomas</span></div>
+              <div class="bd bl">Non travaillée</div>
+              <div class="nt">Compétence non travaillée lors de la séance.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11 STATISTIQUES ÉLÈVE -->
+  <div class="screen">
+    <div class="label">11. Statistiques élève</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr">
+        <div class="app-top"><span class="back">‹</span><div class="h1">Léa Marin</div></div>
+        <div class="tabs"><div class="tab on">Aperçu</div><div class="tab">Détails</div></div>
+        <div class="stat-card">
+          <div class="lbl">Progression globale</div>
+          <div class="stat-big"><div class="v">2<small>/31</small></div><div class="pct">6%</div></div>
+          <div class="stat-bar"><i style="width:6%"></i></div>
+          <div class="stat-counts">
+            <div class="it v"><div class="vv">1</div><div class="k">Acquis</div></div>
+            <div class="it p"><div class="vv">1</div><div class="k">En cours</div></div>
+            <div class="it r"><div class="vv">0</div><div class="k">À retravailler</div></div>
+            <div class="it l"><div class="vv">29</div><div class="k">Non travaillés</div></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Répartition par catégorie</div>
+          <div class="cat-stat"><div class="nm">C1 — Maîtrise du véhicule</div><div class="b"><i style="width:22%;background:var(--gr)"></i></div><div class="v">2/9</div></div>
+          <div class="cat-stat"><div class="nm">C2 — Circulation normale</div><div class="b"><i style="width:0%;background:var(--bl)"></i></div><div class="v">0/8</div></div>
+          <div class="cat-stat"><div class="nm">C3 — Conditions difficiles</div><div class="b"><i style="width:0%;background:var(--am)"></i></div><div class="v">0/7</div></div>
+          <div class="cat-stat"><div class="nm">C4 — Conduite autonome</div><div class="b"><i style="width:0%;background:var(--pu)"></i></div><div class="v">0/7</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12 RÉCOMPENSE MONITEUR -->
+  <div class="screen">
+    <div class="label">12. Récompense moniteur</div>
+    <div class="phone"><div class="notch"></div>
+      <div class="sb" style="color:#fff"><span>9:41</span><span class="r">●●●●● 5G ▮</span></div>
+      <div class="scr dark">
+        <div class="reward">
+          <div class="confetti-bg" style="position:absolute;inset:0;background:
+            radial-gradient(circle at 18% 22%,rgba(245,158,11,.6) 0 2px,transparent 3px),
+            radial-gradient(circle at 78% 30%,rgba(99,102,241,.6) 0 2px,transparent 3px),
+            radial-gradient(circle at 14% 60%,rgba(16,185,129,.55) 0 1.5px,transparent 2.5px),
+            radial-gradient(circle at 88% 70%,rgba(236,72,153,.55) 0 1.5px,transparent 2.5px),
+            radial-gradient(circle at 50% 12%,rgba(14,165,233,.5) 0 1.5px,transparent 2.5px);
+            background-size:200px 200px;pointer-events:none;opacity:.7"></div>
+          <div class="center">
+            <div class="star">⭐</div>
+            <h2>Super travail !</h2>
+            <div class="h-sub">Vous êtes dans le <b>top 20%</b> des moniteurs cette semaine.</div>
+          </div>
+          <div class="rows">
+            <div class="row">Évaluations complètes <span class="v">23</span><span class="d">+5</span></div>
+            <div class="row">Compétences validées <span class="v">18</span><span class="d">+3</span></div>
+            <div class="row">Élèves progressent <span class="v">4</span><span class="d">+1</span></div>
+          </div>
+          <div class="footer"><button class="btn-rw">Voir mes statistiques</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="flux">
+  <div><b style="font-family:var(--fd);text-transform:uppercase;letter-spacing:.4px">Flux Moniteur</b> → Élève en temps réel</div>
+  <div class="steps">
+    <span>1. Le moniteur évalue une compétence</span><span class="arr">→</span>
+    <span>2. Validation et enregistrement</span><span class="arr">→</span>
+    <span>3. Mise à jour instantanée du parcours élève</span><span class="arr">→</span>
+    <span>4. Progression et déblocage</span><span class="arr">→</span>
+    <span>5. Motivation + récompenses</span>
+  </div>
+</div>
+
+</body></html>

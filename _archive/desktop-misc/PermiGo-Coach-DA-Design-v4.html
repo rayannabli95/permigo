@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PermiGo v4 — Mes Trophées de Conduite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #FFE066;
+            --accent-teal: #25D9D9;
+            --accent-purple: #D7A3FF;
+            --accent-green: #95E1D3;
+            --bg-light: #FAFBFC;
+            --bg-card: #FFFFFF;
+            --text-dark: #2C3E50;
+            --text-muted: #7F8FA3;
+            --locked-gray: #E8EBF0;
+            --gold: #FFD700;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 428px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* HEADER */
+        .header {
+            padding: 20px 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header-left p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .user-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 28px 0 16px 0;
+            color: var(--text-dark);
+        }
+
+        /* STATS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card.primary {
+            background: linear-gradient(135deg, var(--secondary) 0%, #FFD700 100%);
+            color: #333;
+        }
+
+        .stat-card.secondary {
+            background: linear-gradient(135deg, var(--accent-teal) 0%, #1ABC9C 100%);
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-desc {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* TROPHY GRID */
+        .trophy-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .trophy-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px dashed var(--locked-gray);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .trophy-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.8), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        /* UNLOCKED STATE */
+        .trophy-card.unlocked {
+            border-color: var(--gold);
+            background: linear-gradient(135deg, var(--bg-card), rgba(255, 215, 0, 0.05));
+            animation: trophy-unlock 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .trophy-card.unlocked::before {
+            opacity: 1;
+        }
+
+        .trophy-card.unlocked::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.3), 0 0 30px rgba(255, 215, 0, 0.2);
+            border-radius: 16px;
+            pointer-events: none;
+        }
+
+        .trophy-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .trophy-card.unlocked:hover {
+            box-shadow: 0 12px 32px rgba(255, 215, 0, 0.25);
+        }
+
+        @keyframes trophy-unlock {
+            0% {
+                transform: scale(0.8) rotate(-5deg);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.15) rotate(5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        /* TROPHY ICON */
+        .trophy-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 12px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trophy-icon svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            transition: all 0.3s ease;
+        }
+
+        .trophy-card.locked .trophy-icon svg {
+            opacity: 0.4;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)) grayscale(100%);
+        }
+
+        .trophy-card.unlocked .trophy-icon svg {
+            opacity: 1;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+        }
+
+        /* LOCK BADGE */
+        .lock-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 24px;
+            height: 24px;
+            background: var(--locked-gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border: 2px solid var(--bg-card);
+        }
+
+        .trophy-card.unlocked .lock-badge {
+            display: none;
+        }
+
+        /* TROPHY NAME */
+        .trophy-name {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            transition: color 0.3s ease;
+            line-height: 1.3;
+        }
+
+        .trophy-card.locked .trophy-name {
+            color: var(--text-muted);
+        }
+
+        .trophy-card.unlocked .trophy-name {
+            color: var(--text-dark);
+        }
+
+        /* TROPHY DESCRIPTION */
+        .trophy-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+            transition: color 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .trophy-card.unlocked .trophy-desc {
+            color: var(--accent-teal);
+            font-weight: 600;
+        }
+
+        /* PROGRESS RING */
+        .progress-ring-container {
+            width: 60px;
+            height: 60px;
+            margin-top: 8px;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.6s ease;
+            stroke-linecap: round;
+        }
+
+        .progress-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .trophy-card.unlocked .progress-value {
+            color: var(--accent-teal);
+            font-weight: 700;
+        }
+
+        /* GUIDE SECTION */
+        .guide-section {
+            background: linear-gradient(135deg, rgba(37, 217, 217, 0.05), rgba(255, 107, 107, 0.05));
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--locked-gray);
+            margin-bottom: 20px;
+        }
+
+        .guide-item {
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .guide-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .guide-item strong {
+            color: var(--text-dark);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .guide-item span {
+            color: var(--text-muted);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .trophy-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .trophy-card {
+                padding: 16px;
+            }
+
+            .trophy-icon {
+                width: 56px;
+                height: 56px;
+            }
+        }
+
+        /* ANIMATIONS */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .trophy-card {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+
+        .trophy-card:nth-child(1) { animation-delay: 0.1s; }
+        .trophy-card:nth-child(2) { animation-delay: 0.15s; }
+        .trophy-card:nth-child(3) { animation-delay: 0.2s; }
+        .trophy-card:nth-child(4) { animation-delay: 0.25s; }
+        .trophy-card:nth-child(5) { animation-delay: 0.3s; }
+        .trophy-card:nth-child(6) { animation-delay: 0.35s; }
+
+        .footer-spacing {
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-left">
+                <h1>PermiGo 🚗</h1>
+                <p>Vos réussites de conduite</p>
+            </div>
+            <div class="user-avatar">RN</div>
+        </div>
+
+        <!-- QUICK STATS -->
+        <div class="stats-grid">
+            <div class="stat-card primary">
+                <div class="stat-label">Vos Trophées</div>
+                <div class="stat-value">4/6</div>
+                <div class="stat-desc">débloqués</div>
+            </div>
+            <div class="stat-card secondary">
+                <div class="stat-label">Progression</div>
+                <div class="stat-value">67%</div>
+                <div class="stat-desc">complétée</div>
+            </div>
+        </div>
+
+        <!-- TROPHIES SECTION -->
+        <div class="section-title">🏆 Vos Trophées de Conduite</div>
+        <div class="trophy-grid">
+            <!-- Trophy 1: City Navigation (UNLOCKED) -->
+            <div class="trophy-card unlocked">
+                <div class="trophy-icon">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="32" r="22" fill="#FF6B6B" opacity="0.2"/>
+                        <path d="M32 14 L42 26 L40 26 L40 42 Q40 45 37 45 L27 45 Q24 45 24 42 L24 26 L22 26 Z" fill="#FF6B6B" stroke="#FF6B6B" stroke-width="2" stroke-linejoin="round"/>
+                        <circle cx="32" cy="36" r="3" fill="#FF6B6B"/>
+                    </svg>
+                    <div class="lock-badge">🔒</div>
+                </div>
+                <div class="trophy-name">Maître de la Ville</div>
+                <div class="trophy-desc">Vous avez maîtrisé la circulation urbaine</div>
+            </div>
+
+            <!-- Trophy 2: Highway Pro (UNLOCKED) -->
+            <div class="trophy-card unlocked">
+                <div class="trophy-icon">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 32 L52 32" stroke="#25D9D9" stroke-width="3" stroke-linecap="round"/>
+                        <path d="M12 26 L52 26 M12 38 L52 38" stroke="#25D9D9" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>
+                        <circle cx="20" cy="32" r="2.5" fill="#25D9D9"/>
+                        <circle cx="32" cy="32" r="2.5" fill="#25D9D9"/>
+                        <circle cx="44" cy="32" r="2.5" fill="#25D9D9"/>
+                    </svg>
+                    <div class="lock-badge">🔒</div>
+                </div>
+                <div class="trophy-name">As de la Route</div>
+                <div class="trophy-desc">Vous roulez en confiance sur l'autoroute</div>
+            </div>
+
+            <!-- Trophy 3: Parking Expert (LOCKED) -->
+            <div class="trophy-card locked">
+                <div class="trophy-icon">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="18" y="18" width="28" height="28" fill="none" stroke="#7F8FA3" stroke-width="2" rx="3"/>
+                        <rect x="24" y="24" width="16" height="16" fill="none" stroke="#7F8FA3" stroke-width="2" rx="2" stroke-dasharray="3,3"/>
+                        <circle cx="32" cy="32" r="3" fill="#7F8FA3" opacity="0.5"/>
+                    </svg>
+                    <div class="lock-badge">🔒</div>
+                </div>
+                <div class="trophy-name">Expert du Stationnement</div>
+                <div class="trophy-desc">Maîtrisez 3 leçons de stationnement</div>
+            </div>
+
+            <!-- Trophy 4: Confident Driver (LOCKED) -->
+            <div class="trophy-card locked">
+                <div class="trophy-icon">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M32 16 L44 26 L42 42 Q42 45 39 45 L25 45 Q22 45 22 42 L20 26 Z" fill="none" stroke="#7F8FA3" stroke-width="2.5" stroke-linejoin="round"/>
+                        <circle cx="28" cy="35" r="2.5" fill="#7F8FA3" opacity="0.6"/>
+                        <circle cx="36" cy="35" r="2.5" fill="#7F8FA3" opacity="0.6"/>
+                        <path d="M28 40 Q32 42 36 40" stroke="#7F8FA3" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+                    </svg>
+                    <div class="lock-badge">🔒</div>
+                </div>
+                <div class="trophy-name">Conducteur Confiant</div>
+                <div class="trophy-desc">Débloquez 3 autres trophées d'abord</div>
+            </div>
+
+            <!-- Trophy 5: Flawless (LOCKED with Progress) -->
+            <div class="trophy-card locked">
+                <div class="trophy-icon">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="32" cy="32" r="20" fill="none" stroke="#7F8FA3" stroke-width="2.5"/>
+                        <path d="M25 32 L30 37 L39 27" stroke="#7F8FA3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+                    </svg>
+                    <div class="lock-badge">🔒</div>
+                </div>
+                <div class="trophy-name">Sans Défaut</div>
+                <div class="trophy-desc">5 leçons avec 5 étoiles</div>
+                <div class="progress-ring-container">
+                    <svg class="progress-ring" viewBox="0 0 60 60">
+                        <circle cx="30" cy="30" r="25" fill="none" stroke="#E8EBF0" stroke-width="3"/>
+                        <circle class="progress-ring-circle" cx="30" cy="30" r="25" fill="none" stroke="#FFE066" stroke-width="3" stroke-dasharray="78.5 314" stroke-dashoffset="0"/>
+                    </svg>
+                    <div class="progress-value">2/5</div>
+                </div>
+            </div>
+
+            <!-- Trophy 6: Champion (LOCKED) -->
+            <div class="trophy-card locked">
+                <div class="trophy-icon">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M32 12 L37 24 L50 24 L40 33 L44 45 L32 36 L20 45 L24 33 L14 24 L27 24 Z" fill="none" stroke="#7F8FA3" stroke-width="2.5" stroke-linejoin="round"/>
+                        <circle cx="32" cy="32" r="22" fill="none" stroke="#7F8FA3" stroke-width="1.5" opacity="0.4"/>
+                    </svg>
+                    <div class="lock-badge">🔒</div>
+                </div>
+                <div class="trophy-name">Champion</div>
+                <div class="trophy-desc">30h + 0 absence + note 4.5+</div>
+            </div>
+        </div>
+
+        <!-- GUIDE SECTION -->
+        <div class="section-title">📖 Comment les débloquer?</div>
+        <div class="guide-section">
+            <div class="guide-item">
+                <strong>🏘️ Maître de la Ville</strong>
+                <span>Complétez 5 leçons en circulation urbaine</span>
+            </div>
+
+            <div class="guide-item">
+                <strong>🛣️ As de la Route</strong>
+                <span>Réussissez 1 leçon sur route nationale ou autoroute</span>
+            </div>
+
+            <div class="guide-item">
+                <strong>🅿️ Expert du Stationnement</strong>
+                <span>Validez 3 leçons de stationnement (créneau ou bataille)</span>
+            </div>
+
+            <div class="guide-item">
+                <strong>😊 Conducteur Confiant</strong>
+                <span>Débloquez au moins 3 des autres trophées</span>
+            </div>
+
+            <div class="guide-item">
+                <strong>⭐ Sans Défaut</strong>
+                <span>Obtenez 5 leçons avec une note de 5 étoiles</span>
+            </div>
+
+            <div class="guide-item">
+                <strong>👑 Champion</strong>
+                <span>Cumulez 30h de conduite, 0 absence, et une moyenne de 4.5+</span>
+            </div>
+        </div>
+
+        <div class="footer-spacing"></div>
+    </div>
+
+    <script>
+        // Cliquez sur un trophée pour voir l'animation de déblocage
+        document.querySelectorAll('.trophy-card').forEach((card) => {
+            card.addEventListener('click', () => {
+                card.classList.toggle('unlocked');
+            });
+        });
+    </script>
+</body>
+</html>

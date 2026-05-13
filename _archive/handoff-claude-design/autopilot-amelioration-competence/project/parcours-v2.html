@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Parcours REMC v2 — PermiGo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+
+<style>
+:root{
+  --a:#6366f1; --adk:#4f46e5;
+  --ap:rgba(99,102,241,.09); --ag:rgba(99,102,241,.14);
+  --gr:#10b981; --grp:rgba(16,185,129,.09);
+  --rd:#ef4444; --rdp:rgba(239,68,68,.09);
+  --am:#f59e0b; --amp:rgba(245,158,11,.09);
+  --bl:#0ea5e9; --blp:rgba(14,165,233,.09);
+  --pu:#8b5cf6; --pup:rgba(139,92,246,.09);
+  --bg:#f4f5fb; --bg2:#eceef8;
+  --su:#fff; --su2:#f8f9fd;
+  --bo:#e2e6f2; --bo2:#edf0f9;
+  --ink:#0b0d1a; --ink2:#1a1d2e; --ink3:#2d3050;
+  --mu:#7880a4; --mu2:#9ba3c2;
+  --r:10px; --rl:14px; --rx:20px;
+  --s1:0 2px 10px rgba(11,13,26,.07),0 1px 3px rgba(11,13,26,.04);
+  --s2:0 6px 22px rgba(11,13,26,.09),0 2px 8px rgba(11,13,26,.05);
+  --s3:0 14px 40px rgba(11,13,26,.13),0 4px 12px rgba(11,13,26,.07);
+  --t:.16s cubic-bezier(.4,0,.2,1);
+  --fd:'Archivo','Space Grotesk',system-ui,sans-serif;
+  --fb:'Space Grotesk','Inter',system-ui,sans-serif;
+  --fn:'JetBrains Mono',monospace;
+  --a-ink:#fff;
+}
+body.dark{
+  --bg:#0a0b0f; --bg2:#11131a; --su:#1c1e26; --su2:#22252f;
+  --bo:#2a2d38; --bo2:#22252f;
+  --ink:#f4f5f7; --ink2:#dadce4; --ink3:#bfc3d0; --mu:#7a7e8a; --mu2:#5b5f6b;
+  --a:#c5ff3d; --adk:#a8e000; --a-ink:#0a0b0f;
+  --ap:rgba(197,255,61,.10); --ag:rgba(197,255,61,.18);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--fb); background:var(--bg); color:var(--ink);
+  -webkit-font-smoothing:antialiased; min-height:100vh;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+button{font-family:inherit; cursor:pointer; border:0; background:none; color:inherit}
+
+/* Demo wrapper to mimic the autopilot.html chrome */
+.demo-wrap{max-width:520px; margin:0 auto; padding:14px}
+.demo-top{display:flex; align-items:center; justify-content:space-between; padding:8px 4px 14px; gap:8px}
+.demo-top .ttl{font-family:var(--fd); font-weight:800; font-size:20px; letter-spacing:-.02em}
+.demo-top .sub{font-size:11px; color:var(--mu); margin-top:2px}
+.demo-top .tools{display:flex; gap:6px}
+.demo-top .tools button{
+  height:34px; padding:0 12px; border-radius:999px; background:var(--su); border:1px solid var(--bo);
+  font-size:12px; font-weight:600; color:var(--ink2); display:inline-flex; align-items:center; gap:6px;
+}
+.demo-top .tools button.on{background:var(--a); color:var(--a-ink); border-color:transparent}
+
+/* Reused: card / btn / badge — same names as autopilot.html */
+.card{background:var(--su); border:1px solid var(--bo); border-radius:var(--rl); box-shadow:var(--s1)}
+.ch{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--bo2)}
+.ct{font-family:var(--fd); font-weight:700; font-size:14px; letter-spacing:-.01em}
+.cb{padding:14px}
+.btn{
+  height:40px; padding:0 14px; border-radius:var(--r); font-family:var(--fb); font-weight:600;
+  font-size:13.5px; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  background:var(--su); color:var(--ink); border:1px solid var(--bo); transition:transform var(--t), background var(--t);
+}
+.btn:active{transform:scale(.98)}
+.btn-p{background:var(--a); color:var(--a-ink); border-color:transparent}
+.btn-g{background:var(--gr); color:#fff; border-color:transparent}
+.btn-sm{height:34px; font-size:12.5px; padding:0 12px}
+.bd{display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:700; font-family:var(--fb); letter-spacing:.2px}
+.bg{background:var(--grp); color:var(--gr)}
+.bam{background:var(--amp); color:var(--am)}
+.br{background:var(--rdp); color:var(--rd)}
+.bind{background:var(--ap); color:var(--a)}
+.bpu{background:var(--pup); color:var(--pu)}
+.mu{color:var(--mu)}
+.fx{display:flex} .aic{align-items:center} .jb{justify-content:space-between} .g2{gap:8px} .g3{gap:12px}
+.mb4{margin-bottom:14px} .mt3{margin-top:12px}
+.kpi{display:flex; flex-direction:column; gap:2px; padding:10px 12px; border-radius:var(--r); background:var(--su2); border:1px solid var(--bo2)}
+.kpi .k{font-size:10px; font-weight:700; color:var(--mu); letter-spacing:.5px}
+.kpi .v{font-family:var(--fn); font-size:17px; font-weight:700; color:var(--ink)}
+
+/* ─── Page ─── */
+.page{display:none}
+.page.active{display:block}
+
+/* Hero progression */
+.hero{
+  background:linear-gradient(140deg, var(--a) 0%, var(--adk) 100%);
+  color:var(--a-ink); border-radius:var(--rx); padding:18px 18px 20px; position:relative; overflow:hidden;
+  box-shadow:var(--s2);
+}
+.hero .h-top{display:flex; align-items:center; justify-content:space-between}
+.hero h2{font-family:var(--fd); font-size:22px; font-weight:800; margin:6px 0 2px; letter-spacing:-.02em}
+.hero .h-sub{font-size:12px; opacity:.85}
+.hero .h-kpis{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:14px}
+.hero .h-kpi{background:rgba(255,255,255,.14); border-radius:var(--r); padding:8px 10px; backdrop-filter:blur(8px)}
+.hero .h-kpi .k{font-size:10px; opacity:.8; font-weight:700; letter-spacing:.4px}
+.hero .h-kpi .v{font-family:var(--fn); font-size:15px; font-weight:700; margin-top:2px}
+body.dark .hero{color:var(--a-ink)}
+
+.bar{height:6px; background:rgba(255,255,255,.22); border-radius:99px; overflow:hidden; margin-top:14px}
+.bar > i{display:block; height:100%; background:#fff; border-radius:99px; transition:width .4s ease}
+body.dark .bar > i{background:var(--a-ink)}
+
+/* Section heading */
+.sh{display:flex; align-items:baseline; justify-content:space-between; padding:18px 4px 10px}
+.sh .t{font-family:var(--fd); font-weight:800; font-size:14px; letter-spacing:-.01em}
+.sh .s{font-size:11.5px; color:var(--mu); font-weight:600}
+
+/* Monde courant (avec route sinueuse) */
+.world-active{
+  background:var(--su); border:1px solid var(--bo); border-radius:var(--rx);
+  padding:16px 14px 14px; box-shadow:var(--s1); position:relative; overflow:hidden;
+}
+.world-head{display:flex; gap:12px; align-items:center; margin-bottom:6px}
+.world-ico{
+  width:48px; height:48px; border-radius:14px; background:var(--ap); color:var(--a);
+  display:flex; align-items:center; justify-content:center; font-size:24px;
+}
+.world-info .lbl{font-size:10px; font-weight:800; color:var(--a); letter-spacing:1px}
+.world-info .nm{font-family:var(--fd); font-weight:800; font-size:18px; letter-spacing:-.02em}
+.world-info .tn{font-size:11.5px; color:var(--mu); margin-top:1px}
+.world-trophy{
+  margin-left:auto; display:inline-flex; align-items:center; gap:4px;
+  padding:6px 10px; border-radius:999px; background:var(--amp); color:var(--am);
+  font-size:12px; font-weight:800;
+}
+
+/* Sinuous road */
+.road-wrap{position:relative;margin-top:6px;border-radius:var(--rl);overflow:hidden;border:1px solid var(--bo2);background:radial-gradient(80% 50% at 50% 0%,var(--ap),transparent 70%),linear-gradient(180deg,var(--bg2) 0%,var(--su2) 100%)}
+.road-wrap::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 12px 12px,rgba(11,13,26,.04) 1px,transparent 1.5px);background-size:24px 24px;pointer-events:none;opacity:.6}
+body.dark .road-wrap::before{background-image:radial-gradient(circle at 12px 12px,rgba(255,255,255,.04) 1px,transparent 1.5px)}
+.road-wrap svg{display:block; width:100%; height:auto}
+.node{
+  position:absolute; transform:translate(-50%, -50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  cursor:pointer;
+}
+.node.lk{cursor:default}
+.node .dot{
+  width:54px; height:54px; border-radius:50%; border:3px solid var(--su);
+  display:flex; align-items:center; justify-content:center; color:#fff; position:relative;
+  font-size:21px; font-weight:800;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -10px 14px rgba(0,0,0,.18),
+    0 12px 26px -8px rgba(11,13,26,.45),
+    0 2px 6px rgba(11,13,26,.16);
+}
+.node .dot::after{content:'';position:absolute;inset:5px 8px 50% 8px;border-radius:50% 50% 40% 40%/60% 60% 40% 40%;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0));pointer-events:none}
+.node:not(.lk):hover .dot{transform:translateY(-2px) scale(1.04);transition:transform .2s cubic-bezier(.2,.7,.3,1)}
+.node .dot.d-done{background:linear-gradient(180deg,#34d399,var(--gr))}
+.node .dot.d-active{background:radial-gradient(circle at 30% 25%,#c4b5fd,var(--a) 55%,var(--adk))}
+.node .dot.d-active::before{content:'';position:absolute;inset:-12px;border-radius:50%;background:radial-gradient(circle,var(--ag),transparent 70%);z-index:-1;animation:breath 2.4s ease-in-out infinite}
+@keyframes breath{0%,100%{transform:scale(.85);opacity:.7}50%{transform:scale(1.15);opacity:1}}
+.node .dot.d-review{background:linear-gradient(180deg,#fbbf24,var(--am))}
+.node .dot.d-locked{background:linear-gradient(180deg,#94a3b8,#475569)}
+.node .lbl{
+  font-size:12px; font-weight:700; color:var(--ink2); background:var(--su);
+  padding:5px 11px; border-radius:99px; border:1px solid var(--bo); white-space:nowrap;
+  box-shadow:var(--s1); max-width:180px; overflow:hidden; text-overflow:ellipsis;
+  letter-spacing:-.01em;
+}
+.node.lk .lbl{color:var(--mu); background:var(--su2)}
+.node .num{font-family:var(--fn); font-size:9.5px; color:var(--mu2); font-weight:700; margin-right:4px}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 var(--ag), 0 8px 22px -6px rgba(99,102,241,.55)}
+  70%{box-shadow:0 0 0 14px transparent, 0 8px 22px -6px rgba(99,102,241,.55)}
+  100%{box-shadow:0 0 0 0 transparent, 0 8px 22px -6px rgba(99,102,241,.55)}
+}
+
+/* Catégorie carte (mondes suivants & passés) */
+.cat-list{display:flex; flex-direction:column; gap:8px}
+.cat{
+  background:var(--su); border:1px solid var(--bo); border-radius:var(--rl);
+  padding:12px 14px; display:flex; align-items:center; gap:12px; cursor:pointer;
+  transition:transform var(--t), box-shadow var(--t);
+}
+.cat:active{transform:scale(.99)}
+.cat:hover{box-shadow:var(--s2)}
+.cat.lk{opacity:.85}
+.cat .ico{
+  width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-size:20px; background:var(--bg2); color:var(--mu);
+}
+.cat.done .ico{background:var(--grp); color:var(--gr)}
+.cat .body{flex:1; min-width:0}
+.cat .body .lbl{font-size:9.5px; font-weight:800; color:var(--mu); letter-spacing:1px}
+.cat .body .nm{font-family:var(--fd); font-weight:700; font-size:14px; letter-spacing:-.01em}
+.cat .body .pr{display:flex; align-items:center; gap:8px; margin-top:4px}
+.cat .body .pr .bar2{flex:1; height:5px; background:var(--bo2); border-radius:99px; overflow:hidden}
+.cat .body .pr .bar2 i{display:block; height:100%; background:var(--gr); border-radius:99px}
+.cat .body .pr .pct{font-family:var(--fn); font-size:10.5px; color:var(--mu); font-weight:700}
+.cat .arr{color:var(--mu2)}
+
+/* Fiche compétence (modale plein écran sur mobile) */
+.sheet{
+  position:fixed; inset:0; background:rgba(11,13,26,.5); backdrop-filter:blur(4px);
+  display:none; align-items:flex-end; justify-content:center; z-index:90;
+}
+.sheet.show{display:flex; animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0} to{opacity:1}}
+.sheet .panel{
+  background:var(--bg); width:100%; max-width:520px; max-height:92vh; overflow:auto;
+  border-radius:var(--rx) var(--rx) 0 0; box-shadow:var(--s3);
+  animation:slideUp .25s cubic-bezier(.2,.7,.3,1);
+}
+@media(min-width:640px){
+  .sheet{align-items:center}
+  .sheet .panel{border-radius:var(--rx); max-height:88vh}
+}
+@keyframes slideUp{from{transform:translateY(40px); opacity:0} to{transform:translateY(0); opacity:1}}
+
+.fiche-hero{
+  position:relative; padding:18px 18px 26px; color:#fff;
+  background:radial-gradient(120% 80% at 50% 0%, var(--col-tint) 0%, var(--ink) 75%);
+}
+.fiche-hero .close{
+  position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%;
+  background:rgba(255,255,255,.14); color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px;
+}
+.fiche-hero .badge-cat{font-size:10px; font-weight:800; opacity:.7; letter-spacing:1.5px}
+.fiche-circle{
+  width:88px; height:88px; border-radius:50%; margin:14px auto 12px; border:4px solid #fff;
+  display:flex; align-items:center; justify-content:center; box-shadow:0 14px 30px -8px rgba(0,0,0,.4);
+  font-size:34px; color:#fff;
+}
+.fiche-hero h3{font-family:var(--fd); font-size:22px; font-weight:800; text-align:center; margin:0; letter-spacing:-.02em}
+.fiche-hero .id{text-align:center; font-family:var(--fn); font-size:11px; opacity:.75; margin-top:4px; letter-spacing:1px}
+.fiche-hero .stt{text-align:center; margin-top:12px}
+
+.fiche-body{padding:14px; margin-top:-18px}
+.fiche-section{background:var(--su); border:1px solid var(--bo); border-radius:var(--rl); padding:14px; margin-bottom:10px; box-shadow:var(--s1)}
+.fiche-section .lbl{font-size:10px; font-weight:800; color:var(--mu); letter-spacing:1px; margin-bottom:8px}
+.fiche-section .txt{font-size:13.5px; color:var(--ink); line-height:1.5; text-wrap:pretty}
+.meta-row{display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px dashed var(--bo2); font-size:13px}
+.meta-row:last-child{border-bottom:0}
+.meta-row .l{color:var(--mu); font-weight:600}
+.meta-row .v{font-family:var(--fn); font-weight:700; color:var(--ink)}
+.fiche-cta{position:sticky; bottom:0; padding:12px 14px calc(12px + env(safe-area-inset-bottom)); background:linear-gradient(180deg, transparent, var(--bg) 40%)}
+.fiche-cta .btn{width:100%; height:50px; font-size:14.5px; font-weight:800}
+
+/* Toast */
+.toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:99px; font-size:13px; font-weight:600; opacity:0; pointer-events:none; transition:opacity var(--t); z-index:200}
+.toast.show{opacity:1}
+
+@media (max-width:480px){
+  .demo-wrap{padding:10px}
+  .hero{padding:16px 14px 18px}
+}
+</style>
+</head>
+<body style="background-color: rgb(148, 150, 165)">
+
+<div class="demo-wrap">
+  <div class="demo-top">
+    <div>
+      <div class="ttl">Mon parcours</div>
+      <div class="sub">Démo standalone · à intégrer dans <code>autopilot.html</code></div>
+    </div>
+    <div class="tools">
+      <button id="t-dark">🌓 Dark</button>
+      <button id="t-state">🎲 État</button>
+    </div>
+  </div>
+
+  <!-- ───────────────────── page-parcours-v2 ───────────────────── -->
+  <div class="page active" id="page-parcours-v2"></div>
+</div>
+
+<div class="sheet" id="sheet-fiche"><div class="panel" id="sheet-fiche-panel"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =============================================================
+   PARCOURS REMC v2 — vanilla module
+   À copier-coller dans autopilot.html.
+   Suppose dispo : REMC, sb, CUR_USER, esc(), navTo(), toast().
+   ============================================================= */
+
+/* --- Données REMC (réelles, 4 cats × subs = 31) --- */
+const REMC = [
+  {id:'C1', ico:'🏁', name:'Maîtrise du véhicule', tname:'Premiers Tours de Roues', subs:[
+    {c:'C1a', short:'Vérifications', n:'Organes, commandes, vérifications'},
+    {c:'C1b', short:'Poste de conduite', n:"S'installer au poste de conduite"},
+    {c:'C1c', short:'Trajectoire', n:'Tenir le volant, trajectoire'},
+    {c:'C1d', short:'Démarrer & arrêter', n:"Démarrer et s'arrêter"},
+    {c:'C1e', short:'Doser', n:'Doser accélération et freinage'},
+    {c:'C1f', short:'Boîte de vitesses', n:'Utiliser la boîte de vitesses'},
+    {c:'C1g', short:'Sécurité ext.', n:'Contrôles de sécurité extérieure'},
+    {c:'C1h', short:'Manœuvres', n:'Manœuvres : créneau, demi-tour'},
+    {c:'C1i', short:'Autonomie', n:'Autonomie sur manœuvres de base'},
+  ]},
+  {id:'C2', ico:'🛣️', name:'Circulation normale', tname:'Chasseur de Routes', subs:[
+    {c:'C2a', n:'Rechercher la signalisation'},
+    {c:'C2b', n:'Adapter sa conduite'},
+    {c:'C2c', n:'Communiquer avec les autres'},
+    {c:'C2d', n:'Connaître les caractéristiques des autres'},
+    {c:'C2e', n:'Partager la chaussée'},
+    {c:'C2f', n:'Maintenir des distances de sécurité'},
+    {c:'C2g', n:"Croiser, dépasser, être dépassé"},
+    {c:'C2h', n:'Passer des virages, conduire en pente'},
+  ]},
+  {id:'C3', ico:'⚡', name:'Conditions difficiles', tname:'Maître des Conditions', subs:[
+    {c:'C3a', n:'Évaluer et maintenir les distances'},
+    {c:'C3b', n:'Croiser, dépasser, être dépassé'},
+    {c:'C3c', n:'Passer des virages'},
+    {c:'C3d', n:'Conduire dans une file'},
+    {c:'C3e', n:'Conduire de nuit, par mauvaise visibilité'},
+    {c:'C3f', n:'Conduire sous la pluie ou sur sol glissant'},
+    {c:'C3g', n:'Conduire sur autoroute, à vive allure'},
+  ]},
+  {id:'C4', ico:'👑', name:'Conduite autonome', tname:'As du Volant', subs:[
+    {c:'C4a', n:'Suivre un itinéraire de manière autonome'},
+    {c:'C4b', n:'Préparer et effectuer un voyage longue distance'},
+    {c:'C4c', n:'Connaître les démarches administratives'},
+    {c:'C4d', n:"Connaître l'utilité et l'entretien"},
+    {c:'C4e', n:"Connaître les risques liés à l'usage"},
+    {c:'C4f', n:'Éco-conduite : conduire de manière économique'},
+    {c:'C4g', n:'Premiers secours et accidents'},
+  ]},
+];
+
+/* --- Couleur de catégorie (utilisée pour le hero de la fiche) --- */
+function catColor(id){
+  return ({C1:'var(--gr)', C2:'var(--bl)', C3:'var(--am)', C4:'var(--pu)'})[id] || 'var(--a)';
+}
+function catColorRaw(id){
+  return ({C1:'#10b981', C2:'#0ea5e9', C3:'#f59e0b', C4:'#8b5cf6'})[id] || '#6366f1';
+}
+
+/* --- MOCK STATE (remplace par requête sb dans autopilot.html) --- */
+/* État réel = await sb.from('remc_entries').select().eq('eleve_id', CUR_USER.id) */
+let MOCK_STATE = [
+  {comp_id:'C1a', checked:true,  lv:'v', validated_at:'2026-05-02', note:'Très bien'},
+  {comp_id:'C1b', checked:true,  lv:'v', validated_at:'2026-05-05', note:'Position OK'},
+  {comp_id:'C1c', checked:true,  lv:'p', note:null},
+  {comp_id:'C1d', checked:true,  lv:null, note:'À revoir'},
+  // C1e..C1i locked
+  // C2/C3/C4 locked
+];
+
+/* --- Helpers --- */
+function _esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+const esc = window.esc || _esc;
+function entryFor(comp_id){ return MOCK_STATE.find(e=>e.comp_id===comp_id) || null; }
+function statusFor(comp_id){
+  const e = entryFor(comp_id);
+  if(!e) return 'locked';
+  if(e.lv === 'v') return 'done';
+  if(e.lv === 'p') return 'active';
+  if(e.checked) return 'review';
+  return 'locked';
+}
+function progressCat(cat){
+  const total = cat.subs.length;
+  const done = cat.subs.filter(s=>statusFor(s.c)==='done').length;
+  return {total, done, pct: total? Math.round(done/total*100) : 0};
+}
+function activeCat(){
+  // 1ère catégorie qui n'est pas 100% validée
+  return REMC.find(c => progressCat(c).done < c.subs.length) || REMC[REMC.length-1];
+}
+function globalProgress(){
+  const all = REMC.flatMap(c=>c.subs);
+  const done = all.filter(s=>statusFor(s.c)==='done').length;
+  return {total:all.length, done, pct:Math.round(done/all.length*100)};
+}
+function trophees(){
+  return REMC.filter(c => progressCat(c).done === c.subs.length).length;
+}
+
+/* --- Icone de statut --- */
+function statusGlyph(st){
+  return ({done:'✓', active:'⌁', review:'!', locked:'🔒'})[st] || '';
+}
+
+/* --- Sinuous road --- */
+function renderRoad(cat){
+  const W=340, H=Math.max(280, cat.subs.length*70 + 40);
+  const pts = cat.subs.map((s,i) => ({
+    c:s.c, n:s.n, short:s.short,
+    x: 50 + (i%2===0 ? 0 : W-100),    // zig-zag
+    y: 50 + i * ((H-100)/(cat.subs.length-1 || 1)),
+  }));
+  // path
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for(let i=1;i<pts.length;i++){
+    const p=pts[i], pp=pts[i-1];
+    const my=(pp.y+p.y)/2;
+    d += ` C ${pp.x} ${my}, ${p.x} ${my}, ${p.x} ${p.y}`;
+  }
+  const nodesHTML = pts.map((p,i)=>{
+    const st = statusFor(p.c);
+    const xp = (p.x/W*100).toFixed(2);
+    const yp = (p.y/H*100).toFixed(2);
+    const idx = String(i+1).padStart(2,'0');
+    return `<div class="node ${st==='locked'?'lk':''}" data-comp="${p.c}" style="left:${xp}%; top:${yp}%">
+      <div class="dot d-${st}">${statusGlyph(st)}</div>
+      <div class="lbl"><span class="num">${idx}</span>${esc(p.short || p.n)}</div>
+    </div>`;
+  }).join('');
+  return `
+    <div class="road-wrap" style="height:${H}px">
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="position:absolute; inset:0; width:100%; height:100%">
+        <defs>
+          <linearGradient id="road-grad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="var(--ink3)" stop-opacity=".18"/>
+            <stop offset=".5" stop-color="var(--ink3)" stop-opacity=".10"/>
+            <stop offset="1" stop-color="var(--ink3)" stop-opacity=".18"/>
+          </linearGradient>
+          <linearGradient id="road-shine" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="var(--su)" stop-opacity="0"/>
+            <stop offset=".5" stop-color="var(--su)" stop-opacity=".7"/>
+            <stop offset="1" stop-color="var(--su)" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="${d}" fill="none" stroke="rgba(11,13,26,.10)" stroke-width="28" stroke-linecap="round" transform="translate(0,2)"/>
+        <path d="${d}" fill="none" stroke="url(#road-grad)" stroke-width="26" stroke-linecap="round"/>
+        <path d="${d}" fill="none" stroke="url(#road-shine)" stroke-width="24" stroke-linecap="round" opacity=".25"/>
+        <path d="${d}" fill="none" stroke="var(--su)" stroke-width="2" stroke-dasharray="5 10" stroke-linecap="round" opacity=".75"/>
+      </svg>
+      ${nodesHTML}
+    </div>
+  `;
+}
+
+/* --- World card (catégorie hors active) --- */
+function renderCatCard(cat){
+  const p = progressCat(cat);
+  const isDone = p.done === cat.subs.length;
+  const isLocked = p.done === 0;
+  return `
+    <div class="cat ${isDone?'done':''} ${isLocked?'lk':''}" data-cat="${cat.id}">
+      <div class="ico">${isLocked?'🔒':cat.ico}</div>
+      <div class="body">
+        <div class="lbl">${cat.id} · ${isDone?'TROPHÉE DÉBLOQUÉ':isLocked?'À VENIR':'EN COURS'}</div>
+        <div class="nm">${esc(cat.name)}</div>
+        <div class="pr">
+          <div class="bar2"><i style="width:${p.pct}%"></i></div>
+          <div class="pct">${p.done}/${p.total}</div>
+        </div>
+      </div>
+      <div class="arr">›</div>
+    </div>
+  `;
+}
+
+/* --- Hero progression --- */
+function renderHero(){
+  const g = globalProgress();
+  const t = trophees();
+  const ac = activeCat();
+  return `
+    <div class="hero">
+      <div class="h-top">
+        <div>
+          <div style="font-size:10px; font-weight:800; opacity:.85; letter-spacing:1.5px">MA PROGRESSION</div>
+          <h2>${g.done} / ${g.total} compétences</h2>
+          <div class="h-sub">Catégorie active · ${esc(ac.name)}</div>
+        </div>
+        <div style="font-family:var(--fn); font-size:28px; font-weight:800">${g.pct}%</div>
+      </div>
+      <div class="bar"><i style="width:${g.pct}%"></i></div>
+      <div class="h-kpis">
+        <div class="h-kpi"><div class="k">TROPHÉES</div><div class="v">${t} / 4</div></div>
+        <div class="h-kpi"><div class="k">EN COURS</div><div class="v">${REMC.flatMap(c=>c.subs).filter(s=>statusFor(s.c)==='active').length}</div></div>
+        <div class="h-kpi"><div class="k">À REVOIR</div><div class="v">${REMC.flatMap(c=>c.subs).filter(s=>statusFor(s.c)==='review').length}</div></div>
+      </div>
+    </div>
+  `;
+}
+
+/* --- Page principale --- */
+function renderParcoursV2(){
+  const ac = activeCat();
+  const p = progressCat(ac);
+  const otherCats = REMC.filter(c=>c.id!==ac.id);
+
+  const root = document.getElementById('page-parcours-v2');
+  root.innerHTML = `
+    ${renderHero()}
+
+    <div class="sh"><div class="t">Catégorie active</div><div class="s">${ac.id}</div></div>
+
+    <div class="world-active">
+      <div class="world-head">
+        <div class="world-ico">${ac.ico}</div>
+        <div class="world-info">
+          <div class="lbl">${ac.id} · CATÉGORIE EN COURS</div>
+          <div class="nm">${esc(ac.name)}</div>
+          <div class="tn">🏆 ${esc(ac.tname)}</div>
+        </div>
+        <div class="world-trophy">${p.done}/${p.total}</div>
+      </div>
+      ${renderRoad(ac)}
+    </div>
+
+    <div class="sh"><div class="t">Autres catégories</div><div class="s">${otherCats.length} restantes</div></div>
+    <div class="cat-list">
+      ${otherCats.map(renderCatCard).join('')}
+    </div>
+
+    <div style="height:30px"></div>
+  `;
+
+  // Wire interactions
+  root.querySelectorAll('.node:not(.lk)').forEach(n=>{
+    n.addEventListener('click', ()=>openFiche(n.dataset.comp));
+  });
+  root.querySelectorAll('.cat').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      const cat = REMC.find(x=>x.id===c.dataset.cat);
+      _toast(`Détail catégorie ${cat.id} — à venir`);
+    });
+  });
+}
+
+/* --- Fiche compétence (bottom sheet) --- */
+function openFiche(comp_id){
+  let cat, sub;
+  for(const c of REMC){
+    const s = c.subs.find(x=>x.c===comp_id);
+    if(s){ cat=c; sub=s; break; }
+  }
+  if(!sub) return;
+  const e = entryFor(comp_id);
+  const st = statusFor(comp_id);
+  const colors = {
+    done:{label:'Compétence acquise', pill:'bg', icon:'✓', tint:catColorRaw(cat.id)},
+    active:{label:"En cours d'acquisition", pill:'bind', icon:'⌁', tint:'#6366f1'},
+    review:{label:'À retravailler', pill:'bam', icon:'!', tint:'#f59e0b'},
+    locked:{label:'Verrouillée', pill:'br', icon:'🔒', tint:'#475569'},
+  }[st];
+  const idx = cat.subs.findIndex(x=>x.c===comp_id)+1;
+  const total = cat.subs.length;
+
+  const cta = st==='done' ? null
+    : st==='review' ? {label:'Retravailler', cls:'btn-p'}
+    : st==='active' ? {label:'Continuer cette compétence', cls:'btn-p'}
+    : {label:'Compétence verrouillée', cls:'', dis:true};
+
+  document.getElementById('sheet-fiche-panel').innerHTML = `
+    <div class="fiche-hero" style="--col-tint:${colors.tint}cc">
+      <button class="close" aria-label="Fermer">×</button>
+      <div style="text-align:center" class="badge-cat">${cat.id} · ${esc(cat.name).toUpperCase()}</div>
+      <div class="fiche-circle" style="background:linear-gradient(180deg, ${colors.tint}, ${colors.tint}cc)">
+        ${colors.icon}
+      </div>
+      <h3>${esc(sub.n)}</h3>
+      <div class="id">${comp_id.toUpperCase()} · ÉTAPE ${idx}/${total}</div>
+      <div class="stt"><span class="bd ${colors.pill}">${colors.label}</span></div>
+    </div>
+
+    <div class="fiche-body">
+      <div class="fiche-section">
+        <div class="lbl">OBJECTIF</div>
+        <div class="txt">${esc(sub.n)}. Compétence du programme REMC officiel — catégorie <b>${esc(cat.name)}</b>.</div>
+      </div>
+
+      <div class="fiche-section">
+        <div class="meta-row"><span class="l">Identifiant</span><span class="v">${comp_id.toUpperCase()}</span></div>
+        <div class="meta-row"><span class="l">Catégorie</span><span class="v">${cat.id}</span></div>
+        <div class="meta-row"><span class="l">Statut</span><span class="v">${colors.label}</span></div>
+        ${e && e.validated_at ? `<div class="meta-row"><span class="l">Validée le</span><span class="v">${new Date(e.validated_at).toLocaleDateString('fr-FR')}</span></div>` : ''}
+        <div class="meta-row"><span class="l">Trophée associé</span><span class="v">🏆 ${esc(cat.tname)}</span></div>
+      </div>
+
+      ${e && e.note ? `
+        <div class="fiche-section">
+          <div class="lbl">DERNIER RETOUR MONITEUR</div>
+          <div class="txt" style="font-style:italic">« ${esc(e.note)} »</div>
+        </div>
+      ` : ''}
+
+      ${cta ? `<div class="fiche-cta">
+        <button class="btn ${cta.cls}" ${cta.dis?'disabled style="opacity:.5"':''}>${cta.label}</button>
+      </div>` : ''}
+    </div>
+  `;
+  const sheet = document.getElementById('sheet-fiche');
+  sheet.classList.add('show');
+  sheet.querySelector('.close').onclick = closeFiche;
+  sheet.onclick = (ev)=>{ if(ev.target===sheet) closeFiche(); };
+}
+function closeFiche(){ document.getElementById('sheet-fiche').classList.remove('show'); }
+
+/* --- Toast --- */
+function _toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm = setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+/* =============================================================
+   DANS autopilot.html, remplace MOCK_STATE par :
+
+   async function loadParcoursV2(){
+     const {data, error} = await sb.from('remc_entries')
+       .select('comp_id, checked, lv, note, validated_at')
+       .eq('eleve_id', CUR_USER.id);
+     if(error){ toast('Erreur chargement parcours'); return; }
+     MOCK_STATE = data || [];
+     renderParcoursV2();
+   }
+
+   Puis appelle loadParcoursV2() depuis navTo('parcours-v2', 'Mon parcours').
+   ============================================================= */
+
+/* --- Bootstrap (démo uniquement) --- */
+document.getElementById('t-dark').addEventListener('click', ()=>{
+  document.body.classList.toggle('dark');
+  document.getElementById('t-dark').classList.toggle('on');
+});
+document.getElementById('t-state').addEventListener('click', ()=>{
+  // Cycle: début → C1 presque fini → C2 active → tout fini
+  const presets = [
+    [{comp_id:'C1a',checked:true,lv:'v',validated_at:'2026-04-30'},{comp_id:'C1b',checked:true,lv:'v',validated_at:'2026-05-05'},{comp_id:'C1c',checked:true,lv:'p'},{comp_id:'C1d',checked:true,lv:null,note:'À revoir le freinage'}],
+    REMC[0].subs.map(s=>({comp_id:s.c,checked:true,lv:'v',validated_at:'2026-05-09'})).concat([{comp_id:'C2a',checked:true,lv:'p'}]),
+    [].concat(REMC[0].subs.map(s=>({comp_id:s.c,checked:true,lv:'v'}))).concat(REMC[1].subs.map(s=>({comp_id:s.c,checked:true,lv:'v'}))).concat([{comp_id:'C3a',checked:true,lv:'p'},{comp_id:'C3b',checked:true,lv:null,note:'Anticipation insuffisante'}]),
+    REMC.flatMap(c=>c.subs).map(s=>({comp_id:s.c,checked:true,lv:'v',validated_at:'2026-05-10'})),
+  ];
+  _toast._i = ((_toast._i||0)+1) % presets.length;
+  MOCK_STATE = presets[_toast._i];
+  const labels = ['Début · C1 en cours', 'C1 ✓ · C2 en cours', 'C1+C2 ✓ · C3 en cours', '🎉 Tout validé'];
+  _toast(labels[_toast._i]);
+  renderParcoursV2();
+});
+
+renderParcoursV2();
+</script>
+
+</body>
+</html>

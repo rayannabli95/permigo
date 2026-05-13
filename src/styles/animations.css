@@ -1,0 +1,344 @@
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS — micro-interactions premium
+   Toutes en CSS pur (pas de lib JS, perfs mobile garanties).
+═══════════════════════════════════════════════════════════ */
+
+/* ─── Splash boot ─── */
+.splash {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 24px;
+  background: var(--bg);
+  z-index: 100;
+  animation: fade-in .3s ease;
+}
+.splash-logo {
+  font: 800 32px var(--fd);
+  letter-spacing: -.02em;
+  background: linear-gradient(135deg, var(--a), var(--adk));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.splash-spin {
+  width: 32px; height: 32px;
+  border: 3px solid var(--bo);
+  border-top-color: var(--a);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+/* ─── Keyframes ─── */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .55; }
+}
+@keyframes checkmark-draw {
+  from { stroke-dashoffset: 30; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* ─── Helpers utilisables sur n'importe quel élément ─── */
+.anim-fade-in   { animation: fade-in   .3s ease both; }
+.anim-slide-up  { animation: slide-up  .35s cubic-bezier(.4,0,.2,1) both; }
+.anim-scale-in  { animation: scale-in  .25s cubic-bezier(.4,0,.2,1) both; }
+.anim-shake     { animation: shake     .35s cubic-bezier(.36,.07,.19,.97) both; }
+.anim-pulse     { animation: pulse     1.5s ease-in-out infinite; }
+
+/* ─── Page transition ─── */
+.page-enter {
+  animation: slide-up .25s cubic-bezier(.4,0,.2,1) both;
+}
+
+/* ─── Ripple effect (Material) ─── */
+.ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .2;
+  pointer-events: none;
+  animation: ripple-out .6s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes ripple-out {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ─── Skeleton loaders (pendant les fetch DB) ─── */
+.skel {
+  background: linear-gradient(90deg, var(--bo2) 0%, var(--bg2) 50%, var(--bo2) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--r);
+}
+.skel-text { height: 14px; margin: 6px 0; }
+.skel-card { height: 80px; margin-bottom: 12px; }
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ─── Désactiver les hover sticky sur tactile (corrige BUG-21) ─── */
+@media (hover: hover) {
+  .btn:hover { /* hover styles activés uniquement sur souris */ }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PREMIUM ANIMATIONS — inspirées de framer-motion patterns
+═══════════════════════════════════════════════════════════ */
+
+/* ─── Blur-in (élément qui se floute en entrée puis nette) ─── */
+@keyframes blur-in {
+  from { opacity: 0; transform: translateY(16px); filter: blur(10px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.anim-blur-in { animation: blur-in .55s cubic-bezier(.2,.7,.3,1) both; }
+
+/* ─── Spring scale (pour boutons whileTap) ─── */
+@keyframes spring-tap {
+  0% { transform: scale(1); }
+  40% { transform: scale(.94); }
+  100% { transform: scale(1); }
+}
+.btn:active, .pl-event:active, .nb-item:active, .lv-chip:active, .me-row:active {
+  animation: spring-tap .28s cubic-bezier(.5,1.6,.4,1) both;
+}
+
+/* ─── Hover lift (cards interactives) ─── */
+.hover-lift {
+  transition: transform .25s cubic-bezier(.2,.7,.3,1), box-shadow .25s;
+  will-change: transform;
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px -16px rgba(11,13,26,.25);
+}
+
+/* ─── Rotating ring (décoratif autour d'avatars ou icônes phares) ─── */
+@keyframes ring-rotate { to { transform: rotate(360deg); } }
+.ring-rotate {
+  position: absolute;
+  border: 1px dashed rgba(99,102,241,.25);
+  border-radius: 50%;
+  inset: -10%;
+  animation: ring-rotate 18s linear infinite;
+  pointer-events: none;
+}
+
+/* ─── Pulse glow (status indicators "Live", "Connected") ─── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 currentColor; }
+  50%      { box-shadow: 0 0 0 6px transparent; }
+}
+.pulse-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ─── Floating (élément qui flotte doucement, ex: hero illustration) ─── */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.float { animation: float-y 5s ease-in-out infinite; }
+
+/* ─── Stagger children — apply to parent, children get delays automatically ─── */
+.stagger > * {
+  opacity: 0;
+  animation: blur-in .5s cubic-bezier(.2,.7,.3,1) both;
+}
+.stagger > *:nth-child(1) { animation-delay: .03s; }
+.stagger > *:nth-child(2) { animation-delay: .08s; }
+.stagger > *:nth-child(3) { animation-delay: .13s; }
+.stagger > *:nth-child(4) { animation-delay: .18s; }
+.stagger > *:nth-child(5) { animation-delay: .23s; }
+.stagger > *:nth-child(6) { animation-delay: .28s; }
+.stagger > *:nth-child(7) { animation-delay: .33s; }
+.stagger > *:nth-child(8) { animation-delay: .38s; }
+.stagger > *:nth-child(9) { animation-delay: .43s; }
+.stagger > *:nth-child(n+10) { animation-delay: .48s; }
+
+/* ─── Progress bar — animated width from 0 to target via CSS var ─── */
+@keyframes bar-fill {
+  from { width: 0; }
+  to   { width: var(--bar-target, 100%); }
+}
+.bar-animated > i, .bar-animated::after {
+  animation: bar-fill 1.1s cubic-bezier(.2,.7,.3,1) both;
+}
+
+/* ─── Number counter feel — used on KPIs ─── */
+@keyframes number-pop {
+  0%   { transform: scale(.5); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.anim-number { animation: number-pop .55s cubic-bezier(.34,1.56,.64,1) both; }
+
+/* ─── Slide page transition (entre routes via router) ─── */
+@keyframes page-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.anim-page-in { animation: page-in-right .35s cubic-bezier(.2,.7,.3,1) both; }
+
+/* ─── Glow pulse (boutons CTA primaires) ─── */
+@keyframes cta-glow {
+  0%, 100% { box-shadow: 0 8px 28px -8px rgba(99,102,241,.5); }
+  50%      { box-shadow: 0 12px 36px -8px rgba(99,102,241,.75); }
+}
+.btn-glow { animation: cta-glow 2.6s ease-in-out infinite; }
+
+/* ─── Confetti success — pour les actions importantes (réservation, éval) ─── */
+@keyframes confetti-fall {
+  0%   { opacity: 0; transform: translateY(-20px) rotate(0); }
+  10%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(120px) rotate(540deg); }
+}
+.confetti {
+  position: fixed;
+  top: 30%;
+  width: 8px; height: 12px;
+  pointer-events: none;
+  z-index: 1000;
+  animation: confetti-fall 1.6s cubic-bezier(.4,0,.6,1) both;
+}
+
+/* ─── Gradient text shift (CTAs et titres) ─── */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+.text-gradient-shift {
+  background: linear-gradient(90deg, var(--a) 0%, #8b5cf6 50%, var(--a) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-shift 6s ease infinite;
+}
+
+/* ─── Card breathe (subtil sur cards hero) ─── */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.012); }
+}
+.breathe { animation: breathe 5s ease-in-out infinite; }
+
+/* ─── REVEAL ON SCROLL (inspiré de TimelineContent framer-motion)
+   Setup via JS (IntersectionObserver) qui toggle .revealed.
+   État initial = invisible & flou. Final = net & en place.
+─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  filter: blur(8px);
+  transition: opacity .7s cubic-bezier(.2,.7,.3,1),
+              transform .7s cubic-bezier(.2,.7,.3,1),
+              filter .7s cubic-bezier(.2,.7,.3,1);
+  will-change: opacity, transform, filter;
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+/* Variants */
+.reveal.from-left  { transform: translateX(-40px); }
+.reveal.from-right { transform: translateX(40px); }
+.reveal.from-left.revealed, .reveal.from-right.revealed { transform: translateX(0); }
+.reveal.scale { transform: scale(.92); }
+.reveal.scale.revealed { transform: scale(1); }
+/* Stagger reveal — children animés un par un */
+.reveal-stagger.revealed > * { animation: blur-in .65s cubic-bezier(.2,.7,.3,1) both; }
+.reveal-stagger.revealed > *:nth-child(1) { animation-delay: .05s; }
+.reveal-stagger.revealed > *:nth-child(2) { animation-delay: .15s; }
+.reveal-stagger.revealed > *:nth-child(3) { animation-delay: .25s; }
+.reveal-stagger.revealed > *:nth-child(4) { animation-delay: .35s; }
+.reveal-stagger.revealed > *:nth-child(5) { animation-delay: .45s; }
+.reveal-stagger.revealed > *:nth-child(6) { animation-delay: .55s; }
+.reveal-stagger > * { opacity: 0; }
+
+/* ─── PROGRESSIVE BLUR (inspiré du composant uilayouts)
+   Overlay flou en bas (ou autres directions) d'une card/image.
+   Génère un effet "depth/fog" très premium.
+─── */
+.progressive-blur-bottom {
+  position: relative;
+}
+.progressive-blur-bottom::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 35%;
+  background: linear-gradient(to top, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  mask-image: linear-gradient(to top, #000 30%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, #000 30%, transparent 100%);
+  pointer-events: none;
+}
+/* Variante "top" pour les bandeaux haut de page */
+.progressive-blur-top {
+  position: relative;
+}
+.progressive-blur-top::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 25%;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Update badge (style premium "✨ Introducing") ─── */
+.update-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px 3px 4px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: 3px solid rgba(165,180,252,.35);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+.update-badge .pill {
+  background: #fff;
+  color: #0b0d1a;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .3px;
+}
+
+/* ─── prefers-reduced-motion : respecter l'accessibilité ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}

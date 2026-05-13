@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PermiGo — Votre Progression</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #FFF9E6, #F0F8FF);
+        }
+
+        .screen {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 428px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #FFF9E6 0%, #F0F8FF 100%);
+        }
+
+        /* HEADER */
+        .header {
+            padding: 20px;
+            text-align: center;
+            background: white;
+            border-bottom: 3px solid #FFE066;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #FF6B6B, #FFE066, #25D9D9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-sub {
+            font-size: 12px;
+            color: #7F8FA3;
+            margin-top: 4px;
+        }
+
+        /* BOARD CONTAINER - SCROLLABLE */
+        .board-scroll {
+            flex: 1;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .board-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .board-scroll::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+
+        .board-scroll::-webkit-scrollbar-thumb {
+            background: #FFE066;
+            border-radius: 10px;
+        }
+
+        /* PROGRESSION PATH */
+        .progression-path {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            padding: 20px 0;
+        }
+
+        /* CONNECTING LINE */
+        .path-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: linear-gradient(180deg,
+                #FF6B6B 0%,
+                #FF6B6B 22%,
+                #25D9D9 22%,
+                #25D9D9 44%,
+                #FFE066 44%,
+                #FFE066 66%,
+                #D7A3FF 66%,
+                #D7A3FF 88%,
+                #95E1D3 88%);
+            transform: translateX(-50%);
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        /* LEVEL STATION */
+        .level {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            animation: slideInLevel 0.6s ease-out forwards;
+        }
+
+        .level:nth-child(odd) {
+            flex-direction: row;
+        }
+
+        .level:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        @keyframes slideInLevel {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* BADGE */
+        .badge {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            border: 5px solid white;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .badge:hover {
+            transform: scale(1.15);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+        }
+
+        .badge.locked {
+            filter: grayscale(100%) brightness(0.85);
+            border-color: #E8EBF0;
+            border-style: dashed;
+        }
+
+        .badge.unlocked {
+            filter: none;
+            border-color: #FFD700;
+            border-style: solid;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15), 0 0 20px rgba(255,215,0,0.4);
+        }
+
+        /* AXE 1 COLORS */
+        .level.axe1 .badge {
+            background: linear-gradient(135deg, #FF6B6B, #FF8585);
+        }
+
+        /* AXE 2 COLORS */
+        .level.axe2 .badge {
+            background: linear-gradient(135deg, #25D9D9, #1ABC9C);
+        }
+
+        /* AXE 3 COLORS */
+        .level.axe3 .badge {
+            background: linear-gradient(135deg, #FFE066, #FFD700);
+        }
+
+        /* AXE 4 COLORS */
+        .level.axe4 .badge {
+            background: linear-gradient(135deg, #D7A3FF, #C66FE2);
+        }
+
+        /* AXE 5 COLORS */
+        .level.axe5 .badge {
+            background: linear-gradient(135deg, #95E1D3, #7FD9B8);
+        }
+
+        /* CHECKMARK */
+        .checkmark {
+            position: absolute;
+            bottom: -8px;
+            right: -8px;
+            width: 36px;
+            height: 36px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            border: 3px solid white;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .badge.unlocked .checkmark {
+            opacity: 1;
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0) rotate(-180deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        /* LOCK ICON */
+        .lock {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 36px;
+            height: 36px;
+            background: #E8EBF0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 3px solid white;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+
+        .badge.unlocked .lock {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* LABEL */
+        .label {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .level:nth-child(odd) .label {
+            text-align: right;
+        }
+
+        .level:nth-child(even) .label {
+            text-align: left;
+        }
+
+        .level-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: #2C3E50;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        .badge.locked ~ .label .level-name {
+            color: #7F8FA3;
+            opacity: 0.6;
+        }
+
+        .level-desc {
+            font-size: 11px;
+            color: #7F8FA3;
+            line-height: 1.3;
+        }
+
+        .axe-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .axe1 .axe-label { color: #FF6B6B; }
+        .axe2 .axe-label { color: #25D9D9; }
+        .axe3 .axe-label { color: #FFE066; }
+        .axe4 .axe-label { color: #D7A3FF; }
+        .axe5 .axe-label { color: #95E1D3; }
+
+        /* FOOTER */
+        .footer {
+            padding: 16px;
+            text-align: center;
+            background: white;
+            border-top: 2px solid #FFE066;
+            font-size: 13px;
+            color: #7F8FA3;
+        }
+
+        .progress-counter {
+            font-weight: 700;
+            color: #FFE066;
+        }
+    </style>
+</head>
+<body>
+    <div class="screen">
+        <div class="header">
+            <h1>PermiGo 🚗</h1>
+            <p class="header-sub">Votre route vers la maîtrise</p>
+        </div>
+
+        <div class="board-scroll">
+            <div class="progression-path">
+                <div class="path-line"></div>
+
+                <!-- AXE 1: MAÎTRISER LE VÉHICULE (5 compétences) -->
+                <div class="level axe1 locked">
+                    <div class="badge locked">🔧<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 1</div>
+                        <div class="level-name">Démarrage & Arrêt</div>
+                        <div class="level-desc">Maîtrise du moteur</div>
+                    </div>
+                </div>
+
+                <div class="level axe1 locked">
+                    <div class="badge locked">🎡<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 1</div>
+                        <div class="level-name">Volant & Direction</div>
+                        <div class="level-desc">Contrôle du véhicule</div>
+                    </div>
+                </div>
+
+                <div class="level axe1 unlocked">
+                    <div class="badge unlocked">⏫<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 1</div>
+                        <div class="level-name">Maîtrise des Pédales</div>
+                        <div class="level-desc">Accélérateur & freinage</div>
+                    </div>
+                </div>
+
+                <div class="level axe1 locked">
+                    <div class="badge locked">⚙️<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 1</div>
+                        <div class="level-name">Boîte de Vitesse</div>
+                        <div class="level-desc">Manuel/Automatique</div>
+                    </div>
+                </div>
+
+                <div class="level axe1 unlocked">
+                    <div class="badge unlocked">🅿️<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 1</div>
+                        <div class="level-name">Stationnement</div>
+                        <div class="level-desc">Ligne & créneau</div>
+                    </div>
+                </div>
+
+                <!-- AXE 2: APPRÉHENDER LA ROUTE (5 compétences) -->
+                <div class="level axe2 locked">
+                    <div class="badge locked">🚦<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 2</div>
+                        <div class="level-name">Panneaux & Signalisation</div>
+                        <div class="level-desc">Lecture des panneaux</div>
+                    </div>
+                </div>
+
+                <div class="level axe2 locked">
+                    <div class="badge locked">🌧️<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 2</div>
+                        <div class="level-name">Adaptation Météo</div>
+                        <div class="level-desc">Pluie, neige, nuit</div>
+                    </div>
+                </div>
+
+                <div class="level axe2 unlocked">
+                    <div class="badge unlocked">🏙️<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 2</div>
+                        <div class="level-name">Circulation Urbaine</div>
+                        <div class="level-desc">Carrefours & feux</div>
+                    </div>
+                </div>
+
+                <div class="level axe2 locked">
+                    <div class="badge locked">🛣️<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 2</div>
+                        <div class="level-name">Routes Nationales</div>
+                        <div class="level-desc">Vitesse & dépassement</div>
+                    </div>
+                </div>
+
+                <div class="level axe2 locked">
+                    <div class="badge locked">🚁<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 2</div>
+                        <div class="level-name">Autoroute</div>
+                        <div class="level-desc">Entrée & changement voie</div>
+                    </div>
+                </div>
+
+                <!-- AXE 3: PARTAGER LA ROUTE (5 compétences) -->
+                <div class="level axe3 locked">
+                    <div class="badge locked">🚫<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 3</div>
+                        <div class="level-name">Priorité & Cédez-le</div>
+                        <div class="level-desc">Règles de priorité</div>
+                    </div>
+                </div>
+
+                <div class="level axe3 locked">
+                    <div class="badge locked">📏<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 3</div>
+                        <div class="level-name">Distance de Sécurité</div>
+                        <div class="level-desc">Espacement correct</div>
+                    </div>
+                </div>
+
+                <div class="level axe3 unlocked">
+                    <div class="badge unlocked">👀<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 3</div>
+                        <div class="level-name">Rétroviseurs & Angles</div>
+                        <div class="level-desc">Vérification complète</div>
+                    </div>
+                </div>
+
+                <div class="level axe3 locked">
+                    <div class="badge locked">👥<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 3</div>
+                        <div class="level-name">Respect Piétons & Vélos</div>
+                        <div class="level-desc">Usagers vulnérables</div>
+                    </div>
+                </div>
+
+                <div class="level axe3 locked">
+                    <div class="badge locked">🚘<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 3</div>
+                        <div class="level-name">Communication</div>
+                        <div class="level-desc">Signalisation avec autrui</div>
+                    </div>
+                </div>
+
+                <!-- AXE 4: MAINTENIR LA CONCENTRATION (4 compétences) -->
+                <div class="level axe4 locked">
+                    <div class="badge locked">📵<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 4</div>
+                        <div class="level-name">Absence Distractions</div>
+                        <div class="level-desc">Téléphone & passagers</div>
+                    </div>
+                </div>
+
+                <div class="level axe4 unlocked">
+                    <div class="badge unlocked">👁️<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 4</div>
+                        <div class="level-name">Vigilance Durée</div>
+                        <div class="level-desc">Attention prolongée</div>
+                    </div>
+                </div>
+
+                <div class="level axe4 locked">
+                    <div class="badge locked">😴<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 4</div>
+                        <div class="level-name">Gestion Fatigue & Émotions</div>
+                        <div class="level-desc">Bien-être du conducteur</div>
+                    </div>
+                </div>
+
+                <div class="level axe4 locked">
+                    <div class="badge locked">⚡<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 4</div>
+                        <div class="level-name">Réaction Danger</div>
+                        <div class="level-desc">Décision rapide</div>
+                    </div>
+                </div>
+
+                <!-- AXE 5: MOBILITÉ CITOYENNE (4 compétences) -->
+                <div class="level axe5 locked">
+                    <div class="badge locked">🌱<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 5</div>
+                        <div class="level-name">Éco-Conduite</div>
+                        <div class="level-desc">Économie carburant</div>
+                    </div>
+                </div>
+
+                <div class="level axe5 locked">
+                    <div class="badge locked">🔧<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 5</div>
+                        <div class="level-name">Entretien Basique</div>
+                        <div class="level-desc">Maintenance simple</div>
+                    </div>
+                </div>
+
+                <div class="level axe5 locked">
+                    <div class="badge locked">📋<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 5</div>
+                        <div class="level-name">Assurance & Responsabilité</div>
+                        <div class="level-desc">Cadre légal</div>
+                    </div>
+                </div>
+
+                <div class="level axe5 locked">
+                    <div class="badge locked">🚌<div class="checkmark">✓</div><div class="lock">🔒</div></div>
+                    <div class="label">
+                        <div class="axe-label">Axe 5</div>
+                        <div class="level-name">Transport Alternatif</div>
+                        <div class="level-desc">Mobilité écologique</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="footer">
+            <span class="progress-counter">4/23</span> compétences débloquées
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.badge').forEach(badge => {
+            badge.addEventListener('click', function() {
+                this.classList.toggle('unlocked');
+                this.classList.toggle('locked');
+                updateProgress();
+            });
+        });
+
+        function updateProgress() {
+            const unlocked = document.querySelectorAll('.badge.unlocked').length;
+            const total = document.querySelectorAll('.badge').length;
+            document.querySelector('.progress-counter').textContent = `${unlocked}/${total}`;
+        }
+    </script>
+</body>
+</html>

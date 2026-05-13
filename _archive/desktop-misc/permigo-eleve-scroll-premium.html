@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PermiGo - Élève</title>
+    <script src="https://cdn.jsdelivr.net/npm/framer-motion@11/dist/framer-motion.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(to bottom, #f9fafb, #ffffff, #f9fafb);
+            color: #1f2937;
+            overflow-x: hidden;
+        }
+
+        /* Scroll progress bar */
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FBBF24, #FBBF24);
+            width: 0%;
+            z-index: 50;
+            transition: width 0.1s ease-out;
+        }
+
+        .header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #EF4444, #FBBF24, #10B981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .progress-badge {
+            padding: 12px 24px;
+            background: #fee2e2;
+            color: #dc2626;
+            border-radius: 9999px;
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+
+        .scroll-hint {
+            animation: bounce 3s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+
+        .grid-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            padding: 40px 0;
+        }
+
+        .competence-card {
+            aspect-ratio: 1;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .competence-card:hover {
+            transform: scale(1.02);
+        }
+
+        .competence-card.unlocked {
+            border-color: #FFD700;
+        }
+
+        .competence-card.locked {
+            background-color: #E8EBF0;
+            opacity: 0.7;
+        }
+
+        .competence-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .competence-name {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 6px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .competence-desc {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .competence-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 1.5rem;
+        }
+
+        /* Axis colors */
+        .axe1 { background: linear-gradient(135deg, #FF6B6B, #FF8585); }
+        .axe2 { background: linear-gradient(135deg, #25D9D9, #1ABC9C); }
+        .axe3 { background: linear-gradient(135deg, #FFE066, #FFD700); }
+        .axe4 { background: linear-gradient(135deg, #D7A3FF, #C66FE2); }
+        .axe5 { background: linear-gradient(135deg, #95E1D3, #7FD9B8); }
+
+        .footer {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(to bottom, #1e293b, #0f172a);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .footer h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .footer p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            opacity: 0.8;
+        }
+
+        .cta-button {
+            padding: 12px 32px;
+            background: #FBBF24;
+            color: #1f2937;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background: #F59E0B;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="scroll-progress"></div>
+
+    <!-- Header -->
+    <section class="header">
+        <h1>PermiGo</h1>
+        <p>Votre route vers la maîtrise du permis</p>
+        <div class="progress-badge" id="progress-badge">4/23 compétences débloquées</div>
+        <p class="scroll-hint">↓ Scrollez vers le bas ↓</p>
+    </section>
+
+    <!-- Grid -->
+    <div class="grid-container">
+        <div class="grid" id="competence-grid"></div>
+    </div>
+
+    <!-- Footer -->
+    <section class="footer">
+        <h2>Bravo! 🎓</h2>
+        <p id="footer-text">Vous avez 4/23 compétences déverrouillées.</p>
+        <button class="cta-button">Continuer votre progression →</button>
+    </section>
+
+    <script>
+        const competences = [
+            { id: 1, axeId: 1, axe: "axe1", name: "Démarrage & Arrêt", desc: "Maîtrise du moteur", icon: "🏁", unlocked: false },
+            { id: 2, axeId: 1, axe: "axe1", name: "Volant & Direction", desc: "Contrôle du véhicule", icon: "🎡", unlocked: false },
+            { id: 3, axeId: 1, axe: "axe1", name: "Maîtrise des Pédales", desc: "Accélérateur & freinage", icon: "🦶", unlocked: true },
+            { id: 4, axeId: 1, axe: "axe1", name: "Boîte de Vitesse", desc: "Manuel/Automatique", icon: "⚙️", unlocked: false },
+            { id: 5, axeId: 1, axe: "axe1", name: "Stationnement", desc: "Ligne & créneau", icon: "🅿️", unlocked: true },
+
+            { id: 6, axeId: 2, axe: "axe2", name: "Panneaux & Signalisation", desc: "Lecture des panneaux", icon: "🛑", unlocked: false },
+            { id: 7, axeId: 2, axe: "axe2", name: "Adaptation Météo", desc: "Pluie, neige, nuit", icon: "🌧️", unlocked: false },
+            { id: 8, axeId: 2, axe: "axe2", name: "Circulation Urbaine", desc: "Carrefours & feux", icon: "🚦", unlocked: true },
+            { id: 9, axeId: 2, axe: "axe2", name: "Route de Campagne", desc: "Routes non urbaines", icon: "🛣️", unlocked: false },
+            { id: 10, axeId: 2, axe: "axe2", name: "Autoroute", desc: "Vitesses élevées", icon: "🛣️", unlocked: false },
+
+            { id: 11, axeId: 3, axe: "axe3", name: "Priorités & Cédez", desc: "Règles de priorité", icon: "👑", unlocked: false },
+            { id: 12, axeId: 3, axe: "axe3", name: "Distances de Sécurité", desc: "Espacements corrects", icon: "📏", unlocked: false },
+            { id: 13, axeId: 3, axe: "axe3", name: "Rétroviseurs", desc: "Monitoring 360°", icon: "🔍", unlocked: true },
+            { id: 14, axeId: 3, axe: "axe3", name: "Piétons & Cyclistes", desc: "Protection des usagers", icon: "🚶", unlocked: false },
+            { id: 15, axeId: 3, axe: "axe3", name: "Communication", desc: "Signalisation active", icon: "🚨", unlocked: false },
+
+            { id: 16, axeId: 4, axe: "axe4", name: "Distractions", desc: "Rester concentré", icon: "🎯", unlocked: false },
+            { id: 17, axeId: 4, axe: "axe4", name: "Vigilance", desc: "Attention routière", icon: "👀", unlocked: true },
+            { id: 18, axeId: 4, axe: "axe4", name: "Fatigue", desc: "Reconnaître les signes", icon: "😴", unlocked: false },
+            { id: 19, axeId: 4, axe: "axe4", name: "Temps de Réaction", desc: "Rapidité de réponse", icon: "⚡", unlocked: false },
+
+            { id: 20, axeId: 5, axe: "axe5", name: "Éco-Conduite", desc: "Efficiency énergétique", icon: "🌱", unlocked: false },
+            { id: 21, axeId: 5, axe: "axe5", name: "Entretien Véhicule", desc: "Maintenance & vérifications", icon: "🔧", unlocked: false },
+            { id: 22, axeId: 5, axe: "axe5", name: "Assurance & Docs", desc: "Papiers obligatoires", icon: "📄", unlocked: false },
+            { id: 23, axeId: 5, axe: "axe5", name: "Transport & Passagers", desc: "Équipement & sécurité", icon: "👥", unlocked: false },
+        ];
+
+        // Scroll progress
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('scroll-progress').style.width = scrollPercent + '%';
+        });
+
+        // Render grid
+        const grid = document.getElementById('competence-grid');
+        competences.forEach((comp, i) => {
+            const card = document.createElement('div');
+            card.className = `competence-card ${comp.unlocked ? 'unlocked' : 'locked'} ${comp.axe}`;
+            card.innerHTML = `
+                <div class="competence-icon">${comp.icon}</div>
+                <div class="competence-name">${comp.name}</div>
+                <div class="competence-desc">${comp.desc}</div>
+                <div class="competence-status">
+                    ${comp.unlocked ? '✓' : '🔒'}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        // Update footer
+        const unlockedCount = competences.filter(c => c.unlocked).length;
+        document.getElementById('progress-badge').textContent = `${unlockedCount}/23 compétences débloquées`;
+        document.getElementById('footer-text').textContent = `Vous avez ${unlockedCount}/23 compétences déverrouillées.`;
+    </script>
+</body>
+</html>

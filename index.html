@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- Base path injecté par Vite (= /permigo-v7/ en prod, / en dev) -->
+  <base href="%BASE_URL%" />
+  <meta name="theme-color" content="#6366f1" />
+  <meta name="description" content="PermiGo — plateforme intelligente pour auto-écoles modernes" />
+
+  <!-- ╔══ PWA / Add to Home Screen ══╗ -->
+  <!-- %BASE_URL% est remplacé par Vite au build (ex: /permigo-v7/) -->
+  <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="%BASE_URL%permigo-logo.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PermiGo" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co http://localhost:3001; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none';" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <title>PermiGo Autopilot</title>
+</head>
+<body>
+  <!-- A11y : skip link visible au focus clavier -->
+  <a href="#app" class="skip-link">Aller au contenu principal</a>
+
+  <!-- Container racine — toutes les pages s'y montent -->
+  <div id="app" role="main" tabindex="-1">
+    <!-- Splash écran pendant le chargement initial -->
+    <div id="splash" class="splash" aria-busy="true" aria-label="Chargement de l'application">
+      <div class="splash-logo">PermiGo</div>
+      <div class="splash-spin" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- Toast container (notifications éphémères) -->
+  <div id="toast-root" aria-live="polite"></div>
+
+  <!-- Modal container -->
+  <div id="modal-root"></div>
+
+  <!-- Module entry — Vite injecte le bundle ici -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

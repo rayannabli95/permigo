@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PermiGo Monitor - Dashboard Instructeur</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* PermiGo Axis Colors */
+            --axis-1-coral: #FF6B6B;
+            --axis-2-teal: #25D9D9;
+            --axis-3-gold: #FFE066;
+            --axis-4-purple: #D7A3FF;
+            --axis-5-mint: #95E1D3;
+
+            /* Semantic Colors */
+            --dark-bg: #0F172A;
+            --light-text: #F8FAFC;
+            --dark-text: #1F2937;
+            --gray-text: #64748B;
+            --light-gray: #E2E8F0;
+            --border-gray: #CBD5E1;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            color: var(--dark-text);
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1e293b 100%);
+            color: var(--light-text);
+            padding: 32px 48px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1920px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--axis-1-coral), var(--axis-2-teal), var(--axis-3-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        /* MAIN */
+        .container {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 48px;
+        }
+
+        /* KPI GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            border: 3px solid transparent;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            width: 100%;
+        }
+
+        .kpi-card.axis-1 { border-color: var(--axis-1-coral); }
+        .kpi-card.axis-1::before { background: var(--axis-1-coral); }
+        .kpi-card.axis-2 { border-color: var(--axis-2-teal); }
+        .kpi-card.axis-2::before { background: var(--axis-2-teal); }
+        .kpi-card.axis-3 { border-color: var(--axis-3-gold); }
+        .kpi-card.axis-3::before { background: var(--axis-3-gold); }
+        .kpi-card.axis-4 { border-color: var(--axis-4-purple); }
+        .kpi-card.axis-4::before { background: var(--axis-4-purple); }
+
+        .kpi-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .kpi-value {
+            font-size: 42px;
+            font-weight: 900;
+            margin: 16px 0 8px 0;
+        }
+
+        .kpi-card.axis-1 .kpi-value { background: linear-gradient(135deg, var(--axis-1-coral), #ff8585); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .kpi-card.axis-2 .kpi-value { background: linear-gradient(135deg, var(--axis-2-teal), #1abc9c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .kpi-card.axis-3 .kpi-value { background: linear-gradient(135deg, var(--axis-3-gold), #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .kpi-card.axis-4 .kpi-value { background: linear-gradient(135deg, var(--axis-4-purple), #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .kpi-label {
+            font-size: 14px;
+            color: var(--gray-text);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-subtitle {
+            font-size: 12px;
+            color: var(--light-gray);
+            margin-top: 8px;
+        }
+
+        /* SECTION TITLE */
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--dark-text);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--axis-1-coral), var(--axis-2-teal));
+            border-radius: 2px;
+        }
+
+        /* PROGRESSION */
+        .progression-section {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 48px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .student-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--light-gray);
+            transition: background 0.2s ease;
+        }
+
+        .student-row:hover {
+            background: rgba(255, 107, 107, 0.03);
+            border-radius: 8px;
+            padding: 20px 16px;
+        }
+
+        .student-info {
+            flex: 0 0 250px;
+        }
+
+        .student-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--dark-text);
+            margin-bottom: 4px;
+        }
+
+        .student-axis {
+            font-size: 12px;
+            color: var(--gray-text);
+            font-weight: 500;
+        }
+
+        .progress-bar-container {
+            flex: 1;
+            margin: 0 32px;
+            max-width: 400px;
+        }
+
+        .progress-bar-track {
+            height: 6px;
+            background: var(--light-gray);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+            background: linear-gradient(90deg, var(--axis-1-coral), var(--axis-2-teal));
+        }
+
+        .progress-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-text);
+        }
+
+        .progress-percentage {
+            flex: 0 0 60px;
+            text-align: right;
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .progress-percentage { background: linear-gradient(135deg, var(--axis-1-coral), var(--axis-2-teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* AXES GRID */
+        .axes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .axis-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .axis-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .axis-card.axis-1 { border-color: var(--axis-1-coral); }
+        .axis-card.axis-2 { border-color: var(--axis-2-teal); }
+        .axis-card.axis-3 { border-color: var(--axis-3-gold); }
+        .axis-card.axis-4 { border-color: var(--axis-4-purple); }
+        .axis-card.axis-5 { border-color: var(--axis-5-mint); }
+
+        .axis-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .axis-name {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .axis-card.axis-1 .axis-name { color: var(--axis-1-coral); }
+        .axis-card.axis-2 .axis-name { color: var(--axis-2-teal); }
+        .axis-card.axis-3 .axis-name { color: var(--axis-3-gold); }
+        .axis-card.axis-4 .axis-name { color: var(--axis-4-purple); }
+        .axis-card.axis-5 .axis-name { color: var(--axis-5-mint); }
+
+        .axis-count {
+            font-size: 12px;
+            color: var(--gray-text);
+            font-weight: 600;
+        }
+
+        .axis-stat {
+            font-size: 28px;
+            font-weight: 900;
+            margin-top: 8px;
+        }
+
+        .axis-card.axis-1 .axis-stat { background: linear-gradient(135deg, var(--axis-1-coral), #ff8585); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .axis-card.axis-2 .axis-stat { background: linear-gradient(135deg, var(--axis-2-teal), #1abc9c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .axis-card.axis-3 .axis-stat { background: linear-gradient(135deg, var(--axis-3-gold), #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .axis-card.axis-4 .axis-stat { background: linear-gradient(135deg, var(--axis-4-purple), #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .axis-card.axis-5 .axis-stat { background: linear-gradient(135deg, var(--axis-5-mint), #6ee7b7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* FOOTER */
+        .footer {
+            padding: 32px 48px;
+            border-top: 1px solid var(--light-gray);
+            text-align: center;
+            color: var(--gray-text);
+            font-size: 12px;
+            background: white;
+        }
+
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .student-info { flex: 0 0 180px; }
+            .progress-bar-container { max-width: 300px; }
+        }
+
+        @media (max-width: 640px) {
+            .container { padding: 16px; }
+            .kpi-grid { grid-template-columns: 1fr; }
+            .student-row { flex-wrap: wrap; gap: 16px; }
+            .student-info { flex: 0 0 100%; }
+            .progress-bar-container { flex: 1 1 100%; margin: 0; }
+            .progress-percentage { flex: 0 0 100%; text-align: left; margin-top: 8px; }
+            .axes-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>🎓 PermiGo Monitor</h1>
+                <p class="header-subtitle">Interface Instructeur - Dashboard Temps Réel</p>
+            </div>
+            <div class="header-subtitle">v2.0 Professional | Mise à jour en temps réel</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <h2 class="section-title">Trajectoires de Progression</h2>
+        <div class="progression-section" id="progressionSection"></div>
+
+        <h2 class="section-title">État des 5 Axes de Compétence</h2>
+        <div class="axes-grid" id="axesGrid"></div>
+    </div>
+
+    <footer class="footer">
+        <p>PermiGo © 2024 | Dashboard Moniteur v2.0 | Conception Pédagogique Avancée</p>
+    </footer>
+
+    <script>
+        const kpiData = [
+            { label: "Élèves Actifs", value: "24", subtitle: "+2 cette semaine", axis: 1 },
+            { label: "En Progression", value: "18", subtitle: "Moyennes en hausse", axis: 2 },
+            { label: "Prêts pour Examen", value: "6", subtitle: "Tests en cours", axis: 3 },
+            { label: "À Surveiller", value: "3", subtitle: "Support intensif", axis: 4 }
+        ];
+
+        const students = [
+            { name: "Alice Moreau", axis: "Axe 1 - Mécanique", progress: 72 },
+            { name: "Benjamin Thibault", axis: "Axe 2 - Conduite", progress: 58 },
+            { name: "Camille Dupont", axis: "Axe 3 - Sécurité", progress: 85 },
+            { name: "Delphine Rousseau", axis: "Axe 4 - Vigilance", progress: 45 },
+            { name: "Étienne Lefevre", axis: "Axe 5 - Responsabilité", progress: 62 }
+        ];
+
+        const axes = [
+            { name: "Mécanique", icon: "⚙️", count: "4/5", stat: "80%", class: "axis-1" },
+            { name: "Conduite", icon: "🛣️", count: "3/5", stat: "60%", class: "axis-2" },
+            { name: "Sécurité", icon: "🛑", count: "4/5", stat: "85%", class: "axis-3" },
+            { name: "Vigilance", icon: "👁️", count: "3/5", stat: "70%", class: "axis-4" },
+            { name: "Responsabilité", icon: "🌍", count: "2/5", stat: "65%", class: "axis-5" }
+        ];
+
+        document.getElementById('kpiGrid').innerHTML = kpiData.map(kpi => `
+            <div class="kpi-card axis-${kpi.axis}">
+                <div class="kpi-label">${kpi.label}</div>
+                <div class="kpi-value">${kpi.value}</div>
+                <div class="kpi-subtitle">${kpi.subtitle}</div>
+            </div>
+        `).join('');
+
+        document.getElementById('progressionSection').innerHTML = students.map(s => `
+            <div class="student-row">
+                <div class="student-info">
+                    <div class="student-name">${s.name}</div>
+                    <div class="student-axis">${s.axis}</div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" style="width: ${s.progress}%"></div>
+                    </div>
+                    <div class="progress-label">Progression</div>
+                </div>
+                <div class="progress-percentage">${s.progress}%</div>
+            </div>
+        `).join('');
+
+        document.getElementById('axesGrid').innerHTML = axes.map(a => `
+            <div class="axis-card ${a.class}">
+                <div class="axis-icon">${a.icon}</div>
+                <div class="axis-name">${a.name}</div>
+                <div class="axis-count">${a.count} compétences</div>
+                <div class="axis-stat">${a.stat}</div>
+            </div>
+        `).join('');
+    </script>
+</body>
+</html>

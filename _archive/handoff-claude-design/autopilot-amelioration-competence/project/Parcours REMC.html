@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Parcours REMC — Autopilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#0A0D1C">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#9A8BFF"/>
+        <stop offset="1" stop-color="#6D5BFF"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="800" fill="#0A0D1C"/>
+    <path d="M 360 200 C 360 320, 840 320, 840 400 S 360 480, 360 600" fill="none" stroke="#CBD9E7" stroke-width="80" stroke-linecap="round"/>
+    <path d="M 360 200 C 360 320, 840 320, 840 400 S 360 480, 360 600" fill="none" stroke="#fff" stroke-width="6" stroke-dasharray="18 24" stroke-linecap="round"/>
+    <circle cx="360" cy="200" r="48" fill="#22C55E" stroke="#fff" stroke-width="8"/>
+    <circle cx="840" cy="400" r="48" fill="url(#g)" stroke="#fff" stroke-width="8"/>
+    <circle cx="360" cy="600" r="40" fill="#475569" stroke="#fff" stroke-width="6"/>
+  </svg>
+</template>
+<div id="root"></div>
+
+<script type="text/babel" src="lib/ios-frame.jsx"></script>
+<script type="text/babel" src="lib/design-canvas.jsx"></script>
+<script type="text/babel" src="screens/shared.jsx"></script>
+<script type="text/babel" src="screens/parcours.jsx"></script>
+<script type="text/babel" src="screens/fiches.jsx"></script>
+<script type="text/babel" src="screens/extras.jsx"></script>
+
+<script type="text/babel">
+const W = 375, H = 812; // iPhone viewport
+
+function Phone({ children }) {
+  return (
+    <IOSDevice width={W} height={H}>
+      {children}
+    </IOSDevice>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection
+        id="parcours"
+        title="Parcours élève — REMC"
+        subtitle="Programme officiel · 6 mondes · 31 compétences · gamification adolescent friendly"
+      >
+        <DCArtboard id="home" label="Accueil — sinuous road" width={W} height={H}>
+          <Phone><ParcoursEleve/></Phone>
+        </DCArtboard>
+
+        <DCArtboard id="monde" label="Monde 2 — détail" width={W} height={H}>
+          <Phone><MondeDetail/></Phone>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="fiches"
+        title="Fiche compétence — 3 états"
+        subtitle="Acquise · En cours · À retravailler"
+      >
+        <DCArtboard id="done" label="Validée" width={W} height={H}>
+          <Phone><FicheCompetence status="done"/></Phone>
+        </DCArtboard>
+        <DCArtboard id="active" label="En cours" width={W} height={H}>
+          <Phone><FicheCompetence status="active"/></Phone>
+        </DCArtboard>
+        <DCArtboard id="review" label="À retravailler" width={W} height={H}>
+          <Phone><FicheCompetence status="review"/></Phone>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="moments"
+        title="Moments clés"
+        subtitle="Vue moniteur · Feedback dopamine"
+      >
+        <DCArtboard id="moniteur" label="Vue moniteur" width={W} height={H}>
+          <Phone><VueMoniteur/></Phone>
+        </DCArtboard>
+        <DCArtboard id="dopamine" label="Compétence validée" width={W} height={H}>
+          <Phone><FeedbackDopamine/></Phone>
+        </DCArtboard>
+      </DCSection>
+
+      <DCPostIt x={40} y={-60} width={260}>
+        <b>Système</b><br/>
+        Carte / Monde / Compétence / Critères. Couleur = monde. Statut = forme du nœud (✓ ⌁ ⚠ 🔒).
+      </DCPostIt>
+      <DCPostIt x={W*3 + 200} y={-60} width={240}>
+        <b>Gamification</b><br/>
+        XP, trophées par monde, série, et écran “dopamine” à chaque validation.
+      </DCPostIt>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

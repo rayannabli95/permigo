@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>REMC v4 — Direction premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  /* Surfaces */
+  --page:#f6f6f7; --su:#ffffff; --su2:#fafafb;
+  --bo:rgba(15,17,22,.07); --bo2:rgba(15,17,22,.05);
+  /* Text */
+  --ink:#0b0c0f; --ink2:#1a1d23; --ink3:#3c4148;
+  --mu:#6b7280; --mu2:#9ca3af; --mu3:#c0c4cc;
+  /* Accent (single) — deep indigo, Linear-like */
+  --a:#5b5bd6; --a2:#4a4ac4; --a-tint:rgba(91,91,214,.08); --a-line:rgba(91,91,214,.18);
+  /* Status — muted, sober */
+  --ok:#15834a; --ok-tint:rgba(21,131,74,.08); --ok-line:rgba(21,131,74,.18);
+  --pg:#6e56cf; --pg-tint:rgba(110,86,207,.09); --pg-line:rgba(110,86,207,.2);
+  --wa:#a96900; --wa-tint:rgba(169,105,0,.09); --wa-line:rgba(169,105,0,.2);
+  --lk:#9ca3af; --lk-tint:rgba(156,163,175,.13);
+  /* Radii, motion */
+  --r1:8px; --r2:12px; --r3:16px; --r4:20px;
+  --s1:0 1px 2px rgba(15,17,22,.04),0 1px 1px rgba(15,17,22,.03);
+  --s2:0 4px 16px -4px rgba(15,17,22,.08),0 2px 4px -1px rgba(15,17,22,.04);
+  --s3:0 16px 40px -16px rgba(15,17,22,.18);
+  --fd:'Geist','Inter',system-ui,sans-serif;
+  --fb:'Inter',system-ui,sans-serif;
+  --fn:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--fb);background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01";padding:32px 24px 80px}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+
+/* Page chrome */
+.head{max-width:1600px;margin:0 auto 28px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:0 4px}
+.head .l h1{font-family:var(--fd);font-weight:700;font-size:24px;letter-spacing:-.025em;margin:0;line-height:1.1}
+.head .l .meta{margin-top:6px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--mu)}
+.head .l .meta .tag{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:6px;background:var(--a-tint);color:var(--a);font-weight:600;font-size:11px}
+.head .l .meta .tag::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--a)}
+.head .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3);font-weight:500}
+.head .legend .lg{display:inline-flex;align-items:center;gap:6px}
+.head .legend .sw{width:10px;height:10px;border-radius:3px}
+.head .legend .o{background:var(--ok)}
+.head .legend .p{background:var(--pg)}
+.head .legend .w{background:var(--wa)}
+.head .legend .l{background:var(--lk)}
+
+/* Grid of phone screens */
+.grid{max-width:1600px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:24px 18px}
+@media(max-width:1400px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:960px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+
+.cell{display:flex;flex-direction:column;gap:12px}
+.cell .label{font-family:var(--fd);font-weight:600;font-size:11px;letter-spacing:.06em;color:var(--mu);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.cell .label .n{display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center;border-radius:5px;background:var(--ink);color:#fff;font-size:10px;font-weight:700;letter-spacing:0;font-family:var(--fb)}
+
+/* Phone */
+.phone{width:100%;aspect-ratio:9/19.5;border-radius:38px;background:#000;padding:7px;box-shadow:0 30px 60px -22px rgba(15,17,22,.32),0 2px 6px rgba(15,17,22,.06);position:relative}
+.scr{position:absolute;inset:7px;border-radius:31px;overflow:hidden;background:var(--page);display:flex;flex-direction:column}
+.scr.dark{background:#0b0c10;color:#fafafa}
+.island{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:30%;height:18px;background:#000;border-radius:99px;z-index:30}
+.sb{height:38px;display:flex;align-items:center;justify-content:space-between;padding:14px 22px 0;font-size:11px;font-weight:600;color:var(--ink);font-family:var(--fb);position:relative;z-index:10}
+.scr.dark .sb{color:#fafafa}
+.sb .r{display:inline-flex;gap:5px;align-items:center;opacity:.9}
+.sb .r svg{width:13px;height:8px}
+
+/* Generic app chrome */
+.bar-top{padding:6px 18px 12px;display:flex;align-items:center;gap:8px;background:transparent}
+.back{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;color:var(--mu);font-size:14px;line-height:1}
+.bar-top .ti{font-family:var(--fd);font-weight:700;font-size:18px;letter-spacing:-.02em;line-height:1.15}
+.bar-top .ti .sub{display:block;font-family:var(--fb);font-weight:500;font-size:11px;color:var(--mu);letter-spacing:0;margin-top:2px}
+.bar-top .act{margin-left:auto;display:flex;gap:6px}
+.icon-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--bo);background:var(--su);display:inline-flex;align-items:center;justify-content:center;color:var(--ink2);font-size:13px}
+
+/* Search */
+.search{margin:0 14px 10px;padding:9px 12px;background:var(--su);border:1px solid var(--bo);border-radius:10px;display:flex;align-items:center;gap:8px;color:var(--mu);font-size:12px;box-shadow:var(--s1)}
+.search svg{width:13px;height:13px;opacity:.7}
+.search kbd{margin-left:auto;font-family:var(--fn);font-size:9.5px;border:1px solid var(--bo);padding:1px 5px;border-radius:4px;color:var(--mu)}
+
+/* Section heading */
+.sh{padding:14px 18px 8px;display:flex;align-items:baseline;justify-content:space-between}
+.sh .t{font-family:var(--fd);font-weight:600;font-size:11.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em}
+.sh .ct{font-family:var(--fn);font-size:10.5px;color:var(--mu);font-weight:600}
+
+/* Élève row */
+.list{padding:0 14px;display:flex;flex-direction:column;gap:6px}
+.row{background:var(--su);border:1px solid var(--bo);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:var(--s1);transition:border-color .15s,box-shadow .15s}
+.row:hover{border-color:var(--a-line)}
+.av{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:11px;color:#fff;font-family:var(--fd);letter-spacing:-.01em;flex-shrink:0;background:linear-gradient(135deg,#5b5bd6,#3a3a8e)}
+.av.b{background:linear-gradient(135deg,#0891b2,#155e75)}
+.av.c{background:linear-gradient(135deg,#7c3aed,#4c1d95)}
+.av.d{background:linear-gradient(135deg,#0e7c66,#064e3b)}
+.av.e{background:linear-gradient(135deg,#9333ea,#6b21a8)}
+.av.f{background:linear-gradient(135deg,#a16207,#713f12)}
+.row .body{flex:1;min-width:0}
+.row .nm{font-family:var(--fd);font-weight:600;font-size:13px;letter-spacing:-.005em;line-height:1.2}
+.row .meta{font-size:11px;color:var(--mu);margin-top:1.5px;display:flex;align-items:center;gap:6px}
+.row .meta .dot{width:2px;height:2px;border-radius:50%;background:var(--mu2)}
+.row .pr-line{display:flex;align-items:center;gap:8px;margin-top:6px}
+.row .pr-line .b{flex:1;height:3px;background:var(--bo2);border-radius:2px;overflow:hidden}
+.row .pr-line .b i{display:block;height:100%;background:var(--ink);border-radius:2px}
+.row .pr-line .v{font-family:var(--fn);font-size:10px;color:var(--mu);font-weight:600}
+
+/* Banner CTA */
+.banner{margin:14px 14px 0;padding:11px 13px;background:var(--ink);color:#fff;border-radius:12px;display:flex;align-items:center;gap:12px}
+.banner .ico{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.1);display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:#fff;flex-shrink:0}
+.banner .tx{flex:1;min-width:0}
+.banner .tx .t{font-family:var(--fd);font-weight:600;font-size:12.5px;letter-spacing:-.01em}
+.banner .tx .s{font-size:10.5px;color:rgba(255,255,255,.55);margin-top:1px}
+.banner .cta{padding:5px 10px;border-radius:7px;background:#fff;color:var(--ink);font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+
+/* Bottom nav */
+.tab-bar{margin-top:auto;background:var(--su);border-top:1px solid var(--bo);padding:8px 0 calc(8px + 16px);display:grid;grid-template-columns:repeat(5,1fr)}
+.tab-bar .ti{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;color:var(--mu);font-weight:500}
+.tab-bar .ti.on{color:var(--ink)}
+.tab-bar .ti svg{width:16px;height:16px}
+
+/* Tabs (segmented) */
+.tabs{margin:0 18px;padding:3px;background:var(--bo2);border-radius:9px;display:grid;grid-template-columns:1fr 1fr}
+.tabs .tb{padding:6px 0;text-align:center;font-size:11.5px;font-weight:500;color:var(--mu);border-radius:7px}
+.tabs .tb.on{background:var(--su);color:var(--ink);font-weight:600;box-shadow:var(--s1)}
+
+/* Compétence card / section */
+.card{margin:12px 14px;background:var(--su);border:1px solid var(--bo);border-radius:14px;overflow:hidden;box-shadow:var(--s1)}
+.card-h{padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
+.card-h .l{display:flex;align-items:center;gap:9px}
+.card-h .l .id{width:24px;height:24px;border-radius:6px;background:var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-family:var(--fn);font-size:9.5px;font-weight:700}
+.card-h .l .nm{font-family:var(--fd);font-weight:600;font-size:12.5px;letter-spacing:-.01em}
+.card-h .l .nm .sb{display:block;font-family:var(--fb);font-weight:500;font-size:10px;color:var(--mu);margin-top:1px}
+.card-h .ct{font-family:var(--fn);font-size:10px;color:var(--mu);font-weight:600}
+
+/* Timeline parcours (vertical rail) */
+.tl{padding:4px 0 10px;position:relative}
+.tl .it{display:grid;grid-template-columns:46px 1fr auto;gap:10px;padding:7px 14px;position:relative;align-items:center}
+.tl .it::before{content:'';position:absolute;left:34.5px;top:0;bottom:0;width:1px;background:var(--bo)}
+.tl .it.l-on::before{background:var(--ok)}
+.tl .it:first-child::before{top:50%}
+.tl .it:last-child::before{bottom:50%}
+.tl .ix{font-family:var(--fn);font-size:10px;font-weight:600;color:var(--mu)}
+.tl .nd{width:18px;height:18px;border-radius:50%;background:var(--su);border:1.5px solid var(--bo);display:inline-flex;align-items:center;justify-content:center;color:var(--mu);font-size:9px;font-weight:700;position:relative;z-index:1;margin-left:auto}
+.tl .it.s-v .nd{background:var(--ok);border-color:var(--ok);color:#fff}
+.tl .it.s-p .nd{background:var(--pg);border-color:var(--pg);color:#fff;box-shadow:0 0 0 3px var(--pg-tint)}
+.tl .it.s-r .nd{background:var(--wa);border-color:var(--wa);color:#fff}
+.tl .it.s-l .nd{background:var(--su);border-color:var(--bo)}
+.tl .lb{font-size:12px;color:var(--ink2);font-weight:500;letter-spacing:-.005em}
+.tl .it.s-l .lb{color:var(--mu2)}
+.tl .it.s-p .lb{color:var(--ink);font-weight:600}
+.tl .it.cur{background:var(--a-tint)}
+.tl .badge{font-size:9.5px;font-weight:600;padding:2px 6px;border-radius:5px;font-family:var(--fb)}
+.tl .b-v{background:var(--ok-tint);color:var(--ok)}
+.tl .b-p{background:var(--pg-tint);color:var(--pg)}
+.tl .b-r{background:var(--wa-tint);color:var(--wa)}
+.tl .b-l{background:var(--lk-tint);color:var(--mu)}
+
+/* Compétence detail blocks */
+.field{padding:12px 14px;border-top:1px solid var(--bo2)}
+.field:first-child{border-top:0}
+.field .ttl{font-family:var(--fd);font-weight:600;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.field .body-tx{font-size:12.5px;color:var(--ink2);line-height:1.5;letter-spacing:-.005em}
+.crits{display:flex;flex-direction:column;gap:7px}
+.crit{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--ink2);line-height:1.4}
+.crit .ck{width:14px;height:14px;border-radius:4px;background:var(--ok-tint);color:var(--ok);font-size:9px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-weight:700}
+
+.eval-prev{display:flex;gap:10px;align-items:flex-start}
+.eval-prev .a-sm{width:24px;height:24px;border-radius:6px;background:var(--a-tint);color:var(--a);display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:10px;flex-shrink:0;letter-spacing:-.01em;font-family:var(--fd)}
+.eval-prev .b .top{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--mu);font-weight:500}
+.eval-prev .b .nt{font-size:11.5px;color:var(--ink2);margin-top:5px;line-height:1.4}
+
+/* Buttons */
+.actions{padding:14px;display:flex;flex-direction:column;gap:8px;margin-top:auto}
+.btn{height:40px;border-radius:10px;font-family:var(--fd);font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:-.01em}
+.btn-prim{background:var(--ink);color:#fff}
+.btn-sec{background:var(--su);color:var(--ink);border:1px solid var(--bo);box-shadow:var(--s1)}
+
+/* Eval rapide radios */
+.opts{padding:6px 14px;display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--su);border:1px solid var(--bo);border-radius:10px;box-shadow:var(--s1)}
+.opt.on{border-color:var(--ink);background:var(--ink);color:#fff}
+.opt.on .lb{color:#fff}
+.opt.on .sb{color:rgba(255,255,255,.6)}
+.opt .rd{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--mu2);position:relative;flex-shrink:0}
+.opt.on .rd{border-color:#fff}
+.opt.on .rd::after{content:'';position:absolute;inset:3px;border-radius:50%;background:#fff}
+.opt .b{flex:1;min-width:0}
+.opt .lb{font-family:var(--fd);font-weight:600;font-size:12.5px;letter-spacing:-.01em;line-height:1.2}
+.opt .sb{font-size:10.5px;color:var(--mu);margin-top:2px;line-height:1.35;font-weight:500}
+.opt .pip{padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600;font-family:var(--fb)}
+.opt.k-v .pip{background:var(--ok-tint);color:var(--ok)}
+.opt.k-p .pip{background:var(--pg-tint);color:var(--pg)}
+.opt.k-r .pip{background:var(--wa-tint);color:var(--wa)}
+.opt.k-l .pip{background:var(--lk-tint);color:var(--mu)}
+.opt.on .pip{background:rgba(255,255,255,.15);color:#fff}
+
+/* Textarea */
+.ta-wrap{padding:0 14px;margin-top:10px}
+.ta-wrap .ttl{font-size:11px;color:var(--mu);font-weight:600;margin-bottom:5px;display:flex;justify-content:space-between}
+.ta-wrap .ttl .ct{font-family:var(--fn);font-size:10px;color:var(--mu2)}
+.ta{background:var(--su);border:1px solid var(--bo);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--mu);min-height:54px;line-height:1.4;box-shadow:var(--s1)}
+
+/* Feedback (Validation) — dark elegant */
+.fbk{background:#0b0c10;color:#fafafa;flex:1;display:flex;flex-direction:column;padding:24px 18px;position:relative;overflow:hidden}
+.fbk::before{content:'';position:absolute;top:-40%;left:-20%;right:-20%;height:80%;background:radial-gradient(ellipse at center,rgba(91,91,214,.22),transparent 65%);pointer-events:none}
+.fbk .glyph{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#5b5bd6,#3a3a8e);display:flex;align-items:center;justify-content:center;margin:18px auto 16px;box-shadow:0 12px 32px -8px rgba(91,91,214,.45),inset 0 1px 0 rgba(255,255,255,.18);position:relative}
+.fbk .glyph svg{width:30px;height:30px;color:#fff}
+.fbk h2{font-family:var(--fd);font-weight:700;font-size:20px;text-align:center;letter-spacing:-.025em;margin:0;line-height:1.15}
+.fbk .sub{font-size:13px;color:rgba(255,255,255,.6);text-align:center;margin-top:6px}
+.fbk .pill{display:inline-flex;align-items:center;gap:6px;margin:14px auto 0;padding:5px 11px;border-radius:7px;background:rgba(110,86,207,.18);color:#c4b5fd;font-size:11px;font-weight:600;align-self:center}
+.fbk .pill::before{content:'';width:5px;height:5px;border-radius:50%;background:#c4b5fd}
+.fbk .imp{margin-top:24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden}
+.fbk .imp .ih{padding:9px 13px;border-bottom:1px solid rgba(255,255,255,.06);font-family:var(--fd);font-weight:600;font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.05em}
+.fbk .imp .ir{padding:11px 13px;display:flex;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,.04);font-size:12px;color:rgba(255,255,255,.88)}
+.fbk .imp .ir:first-of-type{border-top:0}
+.fbk .imp .ir .ig{width:24px;height:24px;border-radius:7px;background:rgba(255,255,255,.06);display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:rgba(255,255,255,.7)}
+.fbk .imp .ir .lb{flex:1;font-weight:500}
+.fbk .imp .ir .lb .s{display:block;font-size:10px;color:rgba(255,255,255,.42);font-weight:500;margin-top:1px}
+.fbk .imp .ir .vv{font-family:var(--fn);font-weight:600;font-size:12px;color:#fafafa}
+.fbk .imp .ir .bar{flex:0 0 60px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.fbk .imp .ir .bar i{display:block;height:100%;background:#5b5bd6;border-radius:2px}
+.fbk .ft{margin-top:auto;padding-top:18px;display:flex;flex-direction:column;gap:6px;position:relative}
+.btn-fbk{height:42px;border-radius:10px;background:#fafafa;color:#0b0c10;font-weight:600;font-size:13px;font-family:var(--fd);letter-spacing:-.01em}
+.btn-fbk-g{background:transparent;color:rgba(255,255,255,.55);font-size:12px;height:32px}
+
+/* Stats (11) */
+.stat-big{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.stat-big .v{font-family:var(--fd);font-size:36px;font-weight:700;letter-spacing:-.035em;line-height:1}
+.stat-big .v small{font-family:var(--fb);font-size:14px;color:var(--mu);font-weight:500;margin-left:2px;letter-spacing:0}
+.stat-big .delta{display:inline-flex;gap:4px;align-items:center;padding:3px 8px;border-radius:6px;background:var(--ok-tint);color:var(--ok);font-family:var(--fn);font-size:11px;font-weight:700}
+.stat-bar{height:4px;background:var(--bo2);border-radius:2px;overflow:hidden}
+.stat-bar i{display:block;height:100%;background:var(--ink);border-radius:2px}
+.stat-counts{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:14px;border-top:1px solid var(--bo2);padding-top:12px}
+.stat-counts .it{display:flex;flex-direction:column;gap:2px;padding:0 4px;border-left:1px solid var(--bo2)}
+.stat-counts .it:first-child{border-left:0}
+.stat-counts .it .vv{font-family:var(--fd);font-weight:700;font-size:18px;letter-spacing:-.025em;line-height:1.1}
+.stat-counts .it.v .vv{color:var(--ok)}
+.stat-counts .it.p .vv{color:var(--pg)}
+.stat-counts .it.r .vv{color:var(--wa)}
+.stat-counts .it.l .vv{color:var(--mu)}
+.stat-counts .it .k{font-size:9.5px;color:var(--mu);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-top:3px}
+.cat-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--bo2)}
+.cat-row:first-child{border-top:0;padding-top:4px}
+.cat-row .id{font-family:var(--fn);font-size:9.5px;color:var(--mu);font-weight:600;width:22px}
+.cat-row .nm{flex:1;font-size:11.5px;color:var(--ink2);font-weight:500;letter-spacing:-.005em}
+.cat-row .b{flex:0 0 64px;height:3px;background:var(--bo2);border-radius:2px;overflow:hidden}
+.cat-row .b i{display:block;height:100%;background:var(--ink);border-radius:2px}
+.cat-row .v{font-family:var(--fn);font-size:10px;color:var(--mu);font-weight:600;min-width:24px;text-align:right}
+
+/* Séance evaluation rows (8) */
+.season{margin:0 14px;background:var(--su);border:1px solid var(--bo);border-radius:14px;padding:13px 14px;box-shadow:var(--s1)}
+.season .tl-s{display:flex;justify-content:space-between;align-items:flex-start}
+.season .h{font-family:var(--fd);font-weight:600;font-size:13.5px;letter-spacing:-.015em}
+.season .h .s{display:block;font-family:var(--fb);font-weight:500;font-size:11px;color:var(--mu);margin-top:2px}
+.season .pr-pct{font-family:var(--fn);font-size:11px;color:var(--ink);font-weight:600;background:var(--bo2);padding:3px 7px;border-radius:6px}
+.season .pr-bar{height:3px;background:var(--bo2);border-radius:2px;margin-top:10px;overflow:hidden}
+.season .pr-bar i{display:block;height:100%;background:var(--ink);border-radius:2px}
+.season-rows{margin:8px 14px 0;background:var(--su);border:1px solid var(--bo);border-radius:14px;overflow:hidden;box-shadow:var(--s1)}
+.season-rows .sr{display:flex;align-items:center;gap:10px;padding:11px 13px;border-top:1px solid var(--bo2)}
+.season-rows .sr:first-child{border-top:0}
+.season-rows .ix{font-family:var(--fn);font-size:10px;color:var(--mu);font-weight:600;width:18px}
+.season-rows .lb{flex:1;font-size:12px;color:var(--ink2);font-weight:500;letter-spacing:-.005em}
+.season-rows .pip{padding:3px 8px;border-radius:6px;font-size:10px;font-weight:600;font-family:var(--fb)}
+.season-rows .pip.v{background:var(--ok-tint);color:var(--ok)}
+.season-rows .pip.p{background:var(--pg-tint);color:var(--pg)}
+.season-rows .pip.r{background:var(--wa-tint);color:var(--wa)}
+.season-rows .pip.l{background:var(--lk-tint);color:var(--mu)}
+
+/* Pending list (7) */
+.pend-row{background:var(--su);border:1px solid var(--bo);border-radius:12px;padding:11px 12px;display:flex;align-items:center;gap:10px;box-shadow:var(--s1)}
+.pend-row .av{width:32px;height:32px;border-radius:9px}
+.pend-row .body{flex:1;min-width:0}
+.pend-row .body .nm{font-family:var(--fd);font-weight:600;font-size:12.5px;letter-spacing:-.01em}
+.pend-row .body .mt{font-size:10.5px;color:var(--mu);margin-top:1.5px;display:flex;align-items:center;gap:6px}
+.pend-row .cnt-tag{font-family:var(--fn);font-size:10.5px;color:var(--a);font-weight:700;background:var(--a-tint);padding:3px 7px;border-radius:6px}
+
+/* Chips (9) */
+.chips{padding:6px 14px;display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 11px;border-radius:8px;background:var(--su);border:1px solid var(--bo);font-size:11.5px;font-weight:500;color:var(--ink2);box-shadow:var(--s1);transition:all .15s}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip .ic{margin-right:4px;font-size:10px;color:var(--mu)}
+.chip.on .ic{color:rgba(255,255,255,.6)}
+
+/* Hist timeline (10) */
+.hist{padding:8px 14px;flex:1;overflow:auto}
+.hist .h-it{display:grid;grid-template-columns:20px 1fr;gap:12px;padding:10px 0;position:relative;border-bottom:1px solid var(--bo2)}
+.hist .h-it:last-child{border-bottom:0}
+.hist .h-it::before{content:'';position:absolute;left:9px;top:24px;bottom:0;width:1px;background:var(--bo)}
+.hist .h-it:last-child::before{display:none}
+.hist .h-it .dot{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;z-index:1}
+.hist .h-it.s-p .dot{background:var(--pg)}
+.hist .h-it.s-r .dot{background:var(--wa)}
+.hist .h-it.s-l .dot{background:var(--lk);color:#fff}
+.hist .h-it.s-v .dot{background:var(--ok)}
+.hist .h-it .b .top{font-size:10.5px;color:var(--mu);font-weight:500;display:flex;align-items:center;gap:6px}
+.hist .h-it .b .badge{font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:5px;margin-top:5px;display:inline-flex;font-family:var(--fb)}
+.hist .h-it.s-p .badge{background:var(--pg-tint);color:var(--pg)}
+.hist .h-it.s-r .badge{background:var(--wa-tint);color:var(--wa)}
+.hist .h-it.s-l .badge{background:var(--lk-tint);color:var(--mu)}
+.hist .h-it .b .nt{font-size:11.5px;color:var(--ink2);margin-top:5px;line-height:1.4}
+
+/* Récompense moniteur (12) — dark, elegant */
+.reward{background:#0b0c10;color:#fafafa;flex:1;display:flex;flex-direction:column;padding:24px 18px;position:relative;overflow:hidden}
+.reward::before{content:'';position:absolute;top:-40%;left:-20%;right:-20%;height:80%;background:radial-gradient(ellipse at center,rgba(255,193,7,.18),transparent 65%);pointer-events:none}
+.reward .glyph{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#fbbf24,#a16207);display:flex;align-items:center;justify-content:center;margin:18px auto 16px;box-shadow:0 12px 32px -8px rgba(245,158,11,.4),inset 0 1px 0 rgba(255,255,255,.18);position:relative;z-index:1}
+.reward .glyph svg{width:28px;height:28px;color:#fff}
+.reward h2{font-family:var(--fd);font-weight:700;font-size:20px;text-align:center;letter-spacing:-.025em;margin:0;position:relative;z-index:1}
+.reward .sub{font-size:13px;color:rgba(255,255,255,.6);text-align:center;margin-top:6px;line-height:1.45;position:relative;z-index:1}
+.reward .sub b{color:#fbbf24;font-weight:600}
+.reward .stats{margin-top:24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;position:relative;z-index:1}
+.reward .stats .r{padding:12px 14px;display:flex;align-items:center;gap:10px;border-top:1px solid rgba(255,255,255,.05);font-size:12px}
+.reward .stats .r:first-child{border-top:0}
+.reward .stats .r .nm{flex:1;color:rgba(255,255,255,.88);font-weight:500}
+.reward .stats .r .vv{font-family:var(--fn);font-size:13px;font-weight:600}
+.reward .stats .r .d{font-family:var(--fn);font-size:10.5px;color:var(--ok);font-weight:700;background:rgba(21,131,74,.18);padding:2px 6px;border-radius:5px;margin-left:8px}
+.reward .ft{margin-top:auto;padding-top:18px;position:relative;z-index:1}
+.btn-rw{height:42px;width:100%;border-radius:10px;background:#fafafa;color:#0b0c10;font-weight:600;font-size:13px;font-family:var(--fd);letter-spacing:-.01em}
+
+/* Mini flow footer */
+.flow{max-width:1600px;margin:40px auto 0;border-top:1px solid var(--bo);padding:20px 4px 0;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3);font-weight:500}
+.flow .l{font-family:var(--fd);font-weight:600;color:var(--ink);text-transform:uppercase;font-size:11px;letter-spacing:.06em}
+.flow .steps{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.flow .steps .arr{color:var(--mu2)}
+.flow .steps span{display:inline-flex;align-items:center;gap:6px}
+.flow .steps .n{display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center;border-radius:5px;background:var(--bo2);font-family:var(--fn);font-size:10px;font-weight:600;color:var(--ink2)}
+</style>
+</head><body>
+
+<div class="head">
+  <div class="l">
+    <h1>Rubrique Compétences · Vue moniteur</h1>
+    <div class="meta"><span class="tag">v4 — direction premium</span><span>12 écrans · prêt pour handoff Claude Code</span></div>
+  </div>
+  <div class="legend">
+    <span class="lg"><span class="sw o"></span>Acquis</span>
+    <span class="lg"><span class="sw p"></span>En cours</span>
+    <span class="lg"><span class="sw w"></span>À retravailler</span>
+    <span class="lg"><span class="sw l"></span>Verrouillé</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- 1 LISTE -->
+  <div class="cell">
+    <div class="label"><span class="n">1</span>Liste des élèves</div>
+    <div class="phone"><div class="island"></div><div class="scr">
+      <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="bar-top"><div class="ti">Mes élèves <span class="sub">12 actifs · 3 à évaluer</span></div><div class="act"><div class="icon-btn">⌕</div><div class="icon-btn">⌥</div></div></div>
+      <div class="search"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="m11 11 3 3"/></svg> Rechercher un élève… <kbd>⌘K</kbd></div>
+      <div class="sh"><div class="t">Cette semaine</div><div class="ct">4</div></div>
+      <div class="list">
+        <div class="row"><div class="av">LM</div><div class="body"><div class="nm">Léa Marin</div><div class="meta">14/20h<span class="dot"></span>Premiers Tours de Roues</div><div class="pr-line"><div class="b"><i style="width:6%"></i></div><div class="v">2/31</div></div></div></div>
+        <div class="row"><div class="av b">HP</div><div class="body"><div class="nm">Hugo Petit</div><div class="meta">18/20h<span class="dot"></span>Chasseur de Routes</div><div class="pr-line"><div class="b"><i style="width:32%"></i></div><div class="v">10/31</div></div></div></div>
+        <div class="row"><div class="av c">SB</div><div class="body"><div class="nm">Sara Bernard</div><div class="meta">9/25h<span class="dot"></span>Conditions difficiles</div><div class="pr-line"><div class="b"><i style="width:55%"></i></div><div class="v">17/31</div></div></div></div>
+        <div class="row"><div class="av d">TL</div><div class="body"><div class="nm">Tom Lefèvre</div><div class="meta">20/20h<span class="dot"></span>Présentation examen</div><div class="pr-line"><div class="b"><i style="width:80%"></i></div><div class="v">25/31</div></div></div></div>
+      </div>
+      <div class="banner"><div class="ico">3</div><div class="tx"><div class="t">Évaluations en attente</div><div class="s">Léa, Hugo, Tom · 9 compétences au total</div></div><span class="cta">Évaluer →</span></div>
+      <div class="tab-bar">
+        <div class="ti"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2 8 6-5 6 5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg>Accueil</div>
+        <div class="ti"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6h12"/></svg>Planning</div>
+        <div class="ti on"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="6" cy="5" r="2.5"/><path d="M2 13c0-2 2-3.5 4-3.5s4 1.5 4 3.5"/><circle cx="11.5" cy="5.5" r="2"/><path d="M10 13c0-1.5 1.5-3 3-3 1 0 1.5.3 2 .6"/></svg>Élèves</div>
+        <div class="ti"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="m5 8 2 2 4-4"/></svg>Compétences</div>
+        <div class="ti"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="1"/><circle cx="3" cy="8" r="1"/><circle cx="13" cy="8" r="1"/></svg>Plus</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 2 VUE ÉLÈVE PARCOURS -->
+  <div class="cell">
+    <div class="label"><span class="n">2</span>Vue élève · parcours</div>
+    <div class="phone"><div class="island"></div><div class="scr">
+      <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="bar-top"><span class="back">‹</span><div class="ti">Léa Marin<span class="sub">14/20h · Premiers Tours de Roues</span></div></div>
+      <div class="tabs"><div class="tb on">Parcours</div><div class="tb">Évaluations</div></div>
+      <div class="card">
+        <div class="card-h"><div class="l"><div class="id">C1</div><div class="nm">Maîtrise du véhicule<span class="sb">9 compétences</span></div></div><div class="ct">2/9</div></div>
+        <div class="tl">
+          <div class="it s-v l-on"><div class="ix">01</div><div class="lb">Organes, commandes…</div><span class="badge b-v">Acquis</span></div>
+          <div class="it s-v l-on"><div class="ix">02</div><div class="lb">S'installer au poste</div><span class="badge b-v">Acquis</span></div>
+          <div class="it s-p cur"><div class="ix">03</div><div class="lb">Tenir le volant, trajectoire</div><span class="badge b-p">En cours</span></div>
+          <div class="it s-r"><div class="ix">04</div><div class="lb">Démarrer et s'arrêter</div><span class="badge b-r">À retravailler</span></div>
+          <div class="it s-l"><div class="ix">05</div><div class="lb">Doser accélération</div><span class="badge b-l">Verrouillé</span></div>
+          <div class="it s-l"><div class="ix">06</div><div class="lb">Boîte de vitesses</div><span class="badge b-l">Verrouillé</span></div>
+          <div class="it s-l"><div class="ix">07</div><div class="lb">Contrôles de sécurité</div><span class="badge b-l">Verrouillé</span></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 3 DÉTAIL COMPÉTENCE -->
+  <div class="cell">
+    <div class="label"><span class="n">3</span>Détail compétence</div>
+    <div class="phone"><div class="island"></div><div class="scr">
+      <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="bar-top"><span class="back">‹</span><div class="ti">Tenir le volant<span class="sub">C1 · 03 · En cours d'acquisition</span></div></div>
+      <div class="card">
+        <div class="field"><div class="ttl">Objectif</div><div class="body-tx">Adapter le maintien du volant et la trajectoire du véhicule en toutes circonstances.</div></div>
+        <div class="field"><div class="ttl">Critères observables</div><div class="crits">
+          <div class="crit"><div class="ck">✓</div>Position des mains adaptée</div>
+          <div class="crit"><div class="ck">✓</div>Trajectoire régulière</div>
+          <div class="crit"><div class="ck">✓</div>Adaptation à la vitesse</div>
+          <div class="crit"><div class="ck">✓</div>Anticipation des écarts</div>
+        </div></div>
+        <div class="field"><div class="ttl">Dernière évaluation</div>
+          <div class="eval-prev"><div class="a-sm">TH</div><div class="b" style="flex:1"><div class="top"><span style="color:var(--pg);font-weight:600">En cours</span> · Thomas · 18/05</div><div class="nt">Bonne tenue du volant, trajectoire correcte en ligne droite. À améliorer en courbe.</div></div></div>
+        </div>
+      </div>
+      <div class="actions"><button class="btn btn-prim">Évaluer cette compétence</button><button class="btn btn-sec">Voir l'historique</button></div>
+    </div></div>
+  </div>
+
+  <!-- 4 ÉVALUATION RAPIDE -->
+  <div class="cell">
+    <div class="label"><span class="n">4</span>Évaluation rapide</div>
+    <div class="phone"><div class="island"></div><div class="scr">
+      <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="bar-top"><span class="back">‹</span><div class="ti">Tenir le volant<span class="sub">Niveau atteint par l'élève</span></div></div>
+      <div class="opts">
+        <div class="opt k-v"><div class="rd"></div><div class="b"><div class="lb">Acquis</div><div class="sb">La compétence est maîtrisée.</div></div><span class="pip">+50 XP</span></div>
+        <div class="opt on k-p"><div class="rd"></div><div class="b"><div class="lb">En cours d'acquisition</div><div class="sb">L'élève progresse, pas encore maîtrisé.</div></div><span class="pip">+20 XP</span></div>
+        <div class="opt k-r"><div class="rd"></div><div class="b"><div class="lb">À retravailler</div><div class="sb">Des points importants doivent être revus.</div></div><span class="pip">+5 XP</span></div>
+        <div class="opt k-l"><div class="rd"></div><div class="b"><div class="lb">Non travaillée</div><div class="sb">N'a pas été travaillée pendant la séance.</div></div><span class="pip">—</span></div>
+      </div>
+      <div class="ta-wrap"><div class="ttl">Commentaire <span class="ct">0 / 300</span></div><div class="ta">Ex : Bonne progression sur la trajectoire en ligne droite…</div></div>
+      <div class="actions"><button class="btn btn-prim">Enregistrer l'évaluation</button></div>
+    </div></div>
+  </div>
+
+  <!-- 5 VALIDATION FEEDBACK -->
+  <div class="cell">
+    <div class="label"><span class="n">5</span>Validation · feedback</div>
+    <div class="phone"><div class="island"></div><div class="scr dark">
+      <div class="sb" style="color:#fafafa"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="fbk">
+        <div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 13 4 4L19 7"/></svg></div>
+        <h2>Compétence enregistrée</h2>
+        <div class="sub">Tenir le volant, trajectoire</div>
+        <span class="pill">EN COURS D'ACQUISITION</span>
+        <div class="imp">
+          <div class="ih">Impact pour Léa</div>
+          <div class="ir"><div class="ig">⊕</div><div class="lb">XP gagnés<span class="s">Total : 240 XP</span></div><div class="vv">+20</div></div>
+          <div class="ir"><div class="ig">▮</div><div class="lb">Progression C1<span class="s">Maîtrise du véhicule</span></div><div class="bar"><i style="width:33%"></i></div><div class="vv">3/9</div></div>
+          <div class="ir"><div class="ig">→</div><div class="lb">Prochaine étape<span class="s">Démarrer et s'arrêter</span></div><div class="vv" style="color:var(--ok)">Débloquée</div></div>
+        </div>
+        <div class="ft"><button class="btn-fbk">Voir le parcours de Léa</button><button class="btn-fbk-g">Continuer l'évaluation</button></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 6 PARCOURS MIS À JOUR -->
+  <div class="cell">
+    <div class="label"><span class="n">6</span>Parcours mis à jour</div>
+    <div class="phone"><div class="island"></div><div class="scr">
+      <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="bar-top"><span class="back">‹</span><div class="ti">Léa Marin<span class="sub">14/20h · +20 XP gagnés à 14h12</span></div></div>
+      <div class="tabs"><div class="tb on">Parcours</div><div class="tb">Évaluations</div></div>
+      <div class="card">
+        <div class="card-h"><div class="l"><div class="id">C1</div><div class="nm">Maîtrise du véhicule<span class="sb">9 compétences</span></div></div><div class="ct" style="color:var(--ok)">3/9 ↑</div></div>
+        <div class="tl">
+          <div class="it s-v l-on"><div class="ix">01</div><div class="lb">Organes, commandes…</div><span class="badge b-v">Acquis</span></div>
+          <div class="it s-v l-on"><div class="ix">02</div><div class="lb">S'installer au poste</div><span class="badge b-v">Acquis</span></div>
+          <div class="it s-v l-on cur" style="background:var(--ok-tint)"><div class="ix">03</div><div class="lb" style="color:var(--ok);font-weight:600">Tenir le volant, trajectoire</div><span class="badge b-v">Acquis · à l'instant</span></div>
+          <div class="it s-p"><div class="ix">04</div><div class="lb">Démarrer et s'arrêter</div><span class="badge b-p">Débloquée</span></div>
+          <div class="it s-l"><div class="ix">05</div><div class="lb">Doser accélération</div><span class="badge b-l">Verrouillé</span></div>
+          <div class="it s-l"><div class="ix">06</div><div class="lb">Boîte de vitesses</div><span class="badge b-l">Verrouillé</span></div>
+          <div class="it s-l"><div class="ix">07</div><div class="lb">Contrôles de sécurité</div><span class="badge b-l">Verrouillé</span></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 7 PENDING -->
+  <div class="cell">
+    <div class="label"><span class="n">7</span>Évaluations en attente</div>
+    <div class="phone"><div class="island"></div><div class="scr">
+      <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="bar-top"><span class="back">‹</span><div class="ti">Évaluations en attente<span class="sub">3 séances · 9 compétences</span></div></div>
+      <div class="sh"><div class="t">Aujourd'hui</div><div class="ct">2</div></div>
+      <div class="list">
+        <div class="pend-row"><div class="av">LM</div><div class="body"><div class="nm">Léa Marin</div><div class="mt">18/05 · 14h00 · 1h00</div></div><span class="cnt-tag">4 comp.</span></div>
+        <div class="pend-row"><div class="av b">HP</div><div class="body"><div class="nm">Hugo Petit</div><div class="mt">18/05 · 15h30 · 1h00</div></div><span class="cnt-tag">3 comp.</span></div>
+      </div>
+      <div class="sh"><div class="t">Hier</div><div class="ct">1</div></div>
+      <div class="list">
+        <div class="pend-row"><div class="av d">TL</div><div class="body"><div class="nm">Tom Lefèvre</div><div class="mt">17/05 · 16h00 · 1h30</div></div><span class="cnt-tag">2 comp.</span></div>
+      </div>
+      <div class="actions"><button class="btn btn-prim">Évaluer tout (9)</button></div>
+    </div></div>
+  </div>
+
+  <!-- 8 SÉANCE EVAL -->
+  <div class="cell">
+    <div class="label"><span class="n">8</span>Évaluation de séance</div>
+    <div class="phone"><div class="island"></div><div class="scr">
+      <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="bar-top"><span class="back">‹</span><div class="ti">Séance Léa Marin<span class="sub">18/05/2025 · 14h00 · 1h00</span></div></div>
+      <div class="season"><div class="tl-s"><div class="h">C1 — Maîtrise du véhicule<span class="s">4 compétences travaillées</span></div><div class="pr-pct">4/4</div></div><div class="pr-bar"><i style="width:100%"></i></div></div>
+      <div class="season-rows">
+        <div class="sr"><div class="ix">01</div><div class="lb">Organes, commandes…</div><span class="pip v">Acquis</span></div>
+        <div class="sr"><div class="ix">02</div><div class="lb">S'installer au poste</div><span class="pip v">Acquis</span></div>
+        <div class="sr"><div class="ix">03</div><div class="lb">Tenir le volant, trajectoire</div><span class="pip p">En cours</span></div>
+        <div class="sr"><div class="ix">04</div><div class="lb">Démarrer et s'arrêter</div><span class="pip r">À revoir</span></div>
+      </div>
+      <div class="actions"><button class="btn btn-prim">Enregistrer la séance</button><button class="btn btn-sec">Ajouter un commentaire</button></div>
+    </div></div>
+  </div>
+
+  <!-- 9 COMMENTAIRE -->
+  <div class="cell">
+    <div class="label"><span class="n">9</span>Commentaire rapide</div>
+    <div class="phone"><div class="island"></div><div class="scr">
+      <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="bar-top"><span class="back">‹</span><div class="ti">Commentaire<span class="sub">Pour Léa · 03 Tenir le volant</span></div></div>
+      <div class="sh"><div class="t">Suggestions rapides</div></div>
+      <div class="chips">
+        <span class="chip on"><span class="ic">+</span>Bonne progression</span>
+        <span class="chip"><span class="ic">+</span>Points à revoir</span>
+        <span class="chip"><span class="ic">+</span>Manque d'anticipation</span>
+        <span class="chip"><span class="ic">+</span>Trajectoire à améliorer</span>
+        <span class="chip"><span class="ic">+</span>Très bon contrôle</span>
+        <span class="chip"><span class="ic">+</span>À retravailler en virage</span>
+      </div>
+      <div class="ta-wrap" style="margin-top:14px"><div class="ttl">Personnaliser <span class="ct">28 / 200</span></div><div class="ta" style="min-height:84px;color:var(--ink2)">Bonne progression sur la trajectoire en ligne droite. Léa anticipe mieux les écarts.</div></div>
+      <div class="actions"><button class="btn btn-prim">Ajouter le commentaire</button></div>
+    </div></div>
+  </div>
+
+  <!-- 10 HISTORIQUE -->
+  <div class="cell">
+    <div class="label"><span class="n">10</span>Historique compétence</div>
+    <div class="phone"><div class="island"></div><div class="scr">
+      <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="bar-top"><span class="back">‹</span><div class="ti">Historique<span class="sub">03 Tenir le volant · 3 évaluations</span></div></div>
+      <div class="hist">
+        <div class="h-it s-p"><div class="dot">⌁</div><div class="b"><div class="top">18/05/2025 · Thomas · 14h00</div><span class="badge">En cours d'acquisition</span><div class="nt">Bonne tenue du volant, trajectoire correcte en ligne droite.</div></div></div>
+        <div class="h-it s-r"><div class="dot">!</div><div class="b"><div class="top">11/05/2025 · Thomas · 15h30</div><span class="badge">À retravailler</span><div class="nt">Trajectoire irrégulière en courbe. À reprendre.</div></div></div>
+        <div class="h-it s-l"><div class="dot">○</div><div class="b"><div class="top">04/05/2025 · Thomas · 14h00</div><span class="badge">Non travaillée</span><div class="nt">Compétence non abordée lors de la séance.</div></div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 11 STATISTIQUES -->
+  <div class="cell">
+    <div class="label"><span class="n">11</span>Statistiques élève</div>
+    <div class="phone"><div class="island"></div><div class="scr">
+      <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="bar-top"><span class="back">‹</span><div class="ti">Léa Marin<span class="sub">Statistiques · 14h écoulées</span></div></div>
+      <div class="tabs"><div class="tb on">Aperçu</div><div class="tb">Détails</div></div>
+      <div class="card"><div class="field"><div class="ttl">Progression globale</div>
+        <div class="stat-big"><div class="v">3<small>/31</small></div><span class="delta">+1 ↑ aujourd'hui</span></div>
+        <div class="stat-bar"><i style="width:10%"></i></div>
+        <div class="stat-counts">
+          <div class="it v"><div class="vv">2</div><div class="k">Acquis</div></div>
+          <div class="it p"><div class="vv">1</div><div class="k">En cours</div></div>
+          <div class="it r"><div class="vv">1</div><div class="k">À revoir</div></div>
+          <div class="it l"><div class="vv">27</div><div class="k">Verrouillé</div></div>
+        </div>
+      </div></div>
+      <div class="card"><div class="field"><div class="ttl">Répartition par catégorie</div>
+        <div class="cat-row"><div class="id">C1</div><div class="nm">Maîtrise du véhicule</div><div class="b"><i style="width:33%"></i></div><div class="v">3/9</div></div>
+        <div class="cat-row"><div class="id">C2</div><div class="nm">Circulation normale</div><div class="b"><i style="width:0%"></i></div><div class="v">0/8</div></div>
+        <div class="cat-row"><div class="id">C3</div><div class="nm">Conditions difficiles</div><div class="b"><i style="width:0%"></i></div><div class="v">0/7</div></div>
+        <div class="cat-row"><div class="id">C4</div><div class="nm">Conduite autonome</div><div class="b"><i style="width:0%"></i></div><div class="v">0/7</div></div>
+      </div></div>
+    </div></div>
+  </div>
+
+  <!-- 12 RÉCOMPENSE MONITEUR -->
+  <div class="cell">
+    <div class="label"><span class="n">12</span>Récompense moniteur</div>
+    <div class="phone"><div class="island"></div><div class="scr dark">
+      <div class="sb" style="color:#fafafa"><span>9:41</span><span class="r"><svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="6" width="3" height="6" rx="1"/><rect x="5" y="3" width="3" height="9" rx="1"/><rect x="10" y="0" width="3" height="12" rx="1"/></svg> 5G</span></div>
+      <div class="reward">
+        <div class="glyph"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14.5 8.5 21 9.3l-5 4.8L17.3 21 12 17.7 6.7 21l1.3-6.9-5-4.8L9.5 8.5z"/></svg></div>
+        <h2>Belle semaine, Thomas</h2>
+        <div class="sub">Vous êtes dans le <b>top 20%</b> des moniteurs cette semaine — +12% vs la semaine dernière.</div>
+        <div class="stats">
+          <div class="r"><div class="nm">Évaluations complètes</div><div class="vv">23</div><span class="d">+5</span></div>
+          <div class="r"><div class="nm">Compétences validées</div><div class="vv">18</div><span class="d">+3</span></div>
+          <div class="r"><div class="nm">Élèves qui progressent</div><div class="vv">4</div><span class="d">+1</span></div>
+          <div class="r"><div class="nm">Note moyenne reçue</div><div class="vv">4.9</div><span class="d">+0.2</span></div>
+        </div>
+        <div class="ft"><button class="btn-rw">Voir mes statistiques</button></div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+<div class="flow">
+  <div class="l">Flux moniteur → élève · temps réel</div>
+  <div class="steps">
+    <span><span class="n">1</span>Évaluation</span><span class="arr">→</span>
+    <span><span class="n">2</span>Enregistrement</span><span class="arr">→</span>
+    <span><span class="n">3</span>Mise à jour parcours</span><span class="arr">→</span>
+    <span><span class="n">4</span>Déblocage</span><span class="arr">→</span>
+    <span><span class="n">5</span>Récompense</span>
+  </div>
+</div>
+
+</body></html>
