@@ -356,7 +356,7 @@ function openCreate() {
         }
         toast(msg, 'error');
         btn.disabled = false;
-        btn.textContent = 'Créer l'enseignant';
+        btn.textContent = "Créer l'enseignant";
         return;
       }
 
@@ -397,7 +397,7 @@ function openCreate() {
       console.warn('[create-user moniteur] catch', err);
       toast('Erreur réseau — edge function déployée ?', 'error');
       btn.disabled = false;
-      btn.textContent = 'Créer l'enseignant';
+      btn.textContent = "Créer l'enseignant";
     }
   };
 
