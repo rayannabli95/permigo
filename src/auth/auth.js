@@ -126,7 +126,15 @@ export async function logout() {
   if (!sb) return;
   await sb.auth.signOut();
   setCurUser(null);
+  // Dispatch les deux events (compat anciens + nouveaux listeners)
   window.dispatchEvent(new CustomEvent('auth:loggedout'));
+  window.dispatchEvent(new CustomEvent('auth:signedout'));
+  // Redirige immédiatement vers login (évite que la page protégée crash sans session)
+  try {
+    if (typeof window !== 'undefined' && window.location) {
+      window.location.hash = '#/login';
+    }
+  } catch {}
 }
 
 /**

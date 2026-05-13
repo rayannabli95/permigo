@@ -10,6 +10,7 @@
 
 import './styles/main.css';
 import { restoreSession, sb } from './auth/auth.js';
+import { setupAuthListener } from './auth/auth-listener.js';
 import { getCurUser, onUserChange } from './auth/cur-user.js';
 import { toast } from './components/toast.js';
 import { initRouter } from './router.js';
@@ -47,11 +48,8 @@ async function boot() {
     console.error('[boot] restoreSession ERREUR :', e);
   }
 
-  // 2. Réagir aux changements d'auth (signout, signin autre onglet)
-  window.addEventListener('auth:signedout', () => {
-    toast('Session expirée — reconnexion nécessaire', 'error');
-    setTimeout(() => location.reload(), 1500);
-  });
+  // 2. Auth listener Supabase — détecte SIGNED_OUT/SIGNED_IN cross-tab + token expired
+  if (sb) setupAuthListener(sb);
 
   // 3. Hash router : gère / login / accueil / parcours / planning / etc.
   const appEl = document.getElementById('app');
@@ -63,12 +61,22 @@ async function boot() {
     mountCommandPalette();
   }
 
-  // 5. Hook signout / logout → démonte tout
-  window.addEventListener('auth:signedout', () => { unmountBottomNav(); unmountCommandPalette(); });
-  window.addEventListener('auth:loggedout', () => { unmountBottomNav(); unmountCommandPalette(); });
+  // 5. Hook signout / logout → démonte tout + redirige
+  const onSignedOut = () => {
+    unmountBottomNav();
+    unmountCommandPalette();
+    if (location.hash !== '#/login') {
+      toast('Session terminée', 'info');
+      setTimeout(() => { location.hash = '#/login'; }, 300);
+    }
+  };
+  window.addEventListener('auth:signedout', onSignedOut);
+  window.addEventListener('auth:loggedout', onSignedOut);
 
-  // 6. Auto-mount au login (event custom dispatché par auth.js)
-  window.addEventListener('auth:loggedin', () => { mountBottomNav(); mountCommandPalette(); });
+  // 6. Auto-mount au login (events dispatchés par auth.js ET auth-listener.js)
+  const onSignedIn = () => { mountBottomNav(); mountCommandPalette(); };
+  window.addEventListener('auth:signedin', onSignedIn);
+  window.addEventListener('auth:loggedin', onSignedIn);
 
   // Attendre le délai mini AVANT de cacher le splash (pour l'effet premium 3s)
   await splashMinDelay;
