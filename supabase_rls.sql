@@ -17,13 +17,13 @@
 CREATE OR REPLACE FUNCTION public.get_my_profile_id()
 RETURNS text LANGUAGE sql STABLE SECURITY DEFINER
 SET search_path = public AS $$
-  SELECT id FROM public.profiles WHERE auth_id = auth.uid()::text LIMIT 1;
+  SELECT id FROM public.profiles WHERE auth_id::text = auth.uid()::text LIMIT 1;
 $$;
 
 CREATE OR REPLACE FUNCTION public.get_my_role()
 RETURNS text LANGUAGE sql STABLE SECURITY DEFINER
 SET search_path = public AS $$
-  SELECT role FROM public.profiles WHERE auth_id = auth.uid()::text LIMIT 1;
+  SELECT role FROM public.profiles WHERE auth_id::text = auth.uid()::text LIMIT 1;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_my_profile_id() TO authenticated;
@@ -36,21 +36,21 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS p_profiles_select ON public.profiles;
 CREATE POLICY p_profiles_select ON public.profiles
   FOR SELECT TO authenticated USING (
-    auth_id = auth.uid()::text
+    auth_id::text = auth.uid()::text
     OR get_my_role() IN ('admin','moniteur')
   );
 
 DROP POLICY IF EXISTS p_profiles_insert ON public.profiles;
 CREATE POLICY p_profiles_insert ON public.profiles
   FOR INSERT TO authenticated WITH CHECK (
-    auth_id = auth.uid()::text
+    auth_id::text = auth.uid()::text
     OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_profiles_update ON public.profiles;
 CREATE POLICY p_profiles_update ON public.profiles
   FOR UPDATE TO authenticated USING (
-    auth_id = auth.uid()::text OR get_my_role() = 'admin'
+    auth_id::text = auth.uid()::text OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_profiles_delete ON public.profiles;
@@ -64,31 +64,31 @@ ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS p_events_select ON public.events;
 CREATE POLICY p_events_select ON public.events
   FOR SELECT TO authenticated USING (
-    eleve_id    = get_my_profile_id()
-    OR moniteur_id = get_my_profile_id()
+    eleve_id::text = get_my_profile_id()
+    OR moniteur_id::text = get_my_profile_id()
     OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_events_insert ON public.events;
 CREATE POLICY p_events_insert ON public.events
   FOR INSERT TO authenticated WITH CHECK (
-    moniteur_id = get_my_profile_id()
-    OR eleve_id  = get_my_profile_id()
+    moniteur_id::text = get_my_profile_id()
+    OR eleve_id::text = get_my_profile_id()
     OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_events_update ON public.events;
 CREATE POLICY p_events_update ON public.events
   FOR UPDATE TO authenticated USING (
-    moniteur_id = get_my_profile_id()
-    OR eleve_id  = get_my_profile_id()
+    moniteur_id::text = get_my_profile_id()
+    OR eleve_id::text = get_my_profile_id()
     OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_events_delete ON public.events;
 CREATE POLICY p_events_delete ON public.events
   FOR DELETE TO authenticated USING (
-    moniteur_id = get_my_profile_id() OR get_my_role() = 'admin'
+    moniteur_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 
@@ -98,7 +98,7 @@ ALTER TABLE public.remc_entries ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS p_remc_select ON public.remc_entries;
 CREATE POLICY p_remc_select ON public.remc_entries
   FOR SELECT TO authenticated USING (
-    eleve_id = get_my_profile_id()
+    eleve_id::text = get_my_profile_id()
     OR get_my_role() IN ('admin','moniteur')
   );
 
@@ -127,12 +127,12 @@ ALTER TABLE public.absences ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS p_absences_all ON public.absences;
 CREATE POLICY p_absences_all ON public.absences
   FOR ALL TO authenticated USING (
-    eleve_id    = get_my_profile_id()
-    OR moniteur_id = get_my_profile_id()
+    eleve_id::text = get_my_profile_id()
+    OR moniteur_id::text = get_my_profile_id()
     OR get_my_role() = 'admin'
   ) WITH CHECK (
-    eleve_id    = get_my_profile_id()
-    OR moniteur_id = get_my_profile_id()
+    eleve_id::text = get_my_profile_id()
+    OR moniteur_id::text = get_my_profile_id()
     OR get_my_role() = 'admin'
   );
 
@@ -143,27 +143,27 @@ ALTER TABLE public.notations ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS p_notations_select ON public.notations;
 CREATE POLICY p_notations_select ON public.notations
   FOR SELECT TO authenticated USING (
-    eleve_id = get_my_profile_id()
-    OR moniteur_id = get_my_profile_id()
+    eleve_id::text = get_my_profile_id()
+    OR moniteur_id::text = get_my_profile_id()
     OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_notations_write ON public.notations;
 CREATE POLICY p_notations_write ON public.notations
   FOR INSERT TO authenticated WITH CHECK (
-    moniteur_id = get_my_profile_id() OR get_my_role() = 'admin'
+    moniteur_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_notations_update ON public.notations;
 CREATE POLICY p_notations_update ON public.notations
   FOR UPDATE TO authenticated USING (
-    moniteur_id = get_my_profile_id() OR get_my_role() = 'admin'
+    moniteur_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_notations_delete ON public.notations;
 CREATE POLICY p_notations_delete ON public.notations
   FOR DELETE TO authenticated USING (
-    moniteur_id = get_my_profile_id() OR get_my_role() = 'admin'
+    moniteur_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 
@@ -173,26 +173,26 @@ ALTER TABLE public.lieux ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS p_lieux_select ON public.lieux;
 CREATE POLICY p_lieux_select ON public.lieux
   FOR SELECT TO authenticated USING (
-    moniteur_id = get_my_profile_id()
+    moniteur_id::text = get_my_profile_id()
     OR get_my_role() IN ('admin','eleve')
   );
 
 DROP POLICY IF EXISTS p_lieux_insert ON public.lieux;
 CREATE POLICY p_lieux_insert ON public.lieux
   FOR INSERT TO authenticated WITH CHECK (
-    moniteur_id = get_my_profile_id() OR get_my_role() = 'admin'
+    moniteur_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_lieux_update ON public.lieux;
 CREATE POLICY p_lieux_update ON public.lieux
   FOR UPDATE TO authenticated USING (
-    moniteur_id = get_my_profile_id() OR get_my_role() = 'admin'
+    moniteur_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_lieux_delete ON public.lieux;
 CREATE POLICY p_lieux_delete ON public.lieux
   FOR DELETE TO authenticated USING (
-    moniteur_id = get_my_profile_id() OR get_my_role() = 'admin'
+    moniteur_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 
@@ -203,25 +203,25 @@ ALTER TABLE public.notes_priv ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS p_notes_priv_select ON public.notes_priv;
 CREATE POLICY p_notes_priv_select ON public.notes_priv
   FOR SELECT TO authenticated USING (
-    moniteur_id = get_my_profile_id() OR get_my_role() = 'admin'
+    moniteur_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_notes_priv_write ON public.notes_priv;
 CREATE POLICY p_notes_priv_write ON public.notes_priv
   FOR INSERT TO authenticated WITH CHECK (
-    moniteur_id = get_my_profile_id() OR get_my_role() = 'admin'
+    moniteur_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_notes_priv_update ON public.notes_priv;
 CREATE POLICY p_notes_priv_update ON public.notes_priv
   FOR UPDATE TO authenticated USING (
-    moniteur_id = get_my_profile_id() OR get_my_role() = 'admin'
+    moniteur_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_notes_priv_delete ON public.notes_priv;
 CREATE POLICY p_notes_priv_delete ON public.notes_priv
   FOR DELETE TO authenticated USING (
-    moniteur_id = get_my_profile_id() OR get_my_role() = 'admin'
+    moniteur_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 
@@ -231,25 +231,25 @@ ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS p_notif_select ON public.notifications;
 CREATE POLICY p_notif_select ON public.notifications
   FOR SELECT TO authenticated USING (
-    user_id = get_my_profile_id() OR get_my_role() = 'admin'
+    user_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_notif_insert ON public.notifications;
 CREATE POLICY p_notif_insert ON public.notifications
   FOR INSERT TO authenticated WITH CHECK (
-    user_id = get_my_profile_id() OR get_my_role() IN ('admin','moniteur')
+    user_id::text = get_my_profile_id() OR get_my_role() IN ('admin','moniteur')
   );
 
 DROP POLICY IF EXISTS p_notif_update ON public.notifications;
 CREATE POLICY p_notif_update ON public.notifications
   FOR UPDATE TO authenticated USING (
-    user_id = get_my_profile_id() OR get_my_role() = 'admin'
+    user_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 DROP POLICY IF EXISTS p_notif_delete ON public.notifications;
 CREATE POLICY p_notif_delete ON public.notifications
   FOR DELETE TO authenticated USING (
-    user_id = get_my_profile_id() OR get_my_role() = 'admin'
+    user_id::text = get_my_profile_id() OR get_my_role() = 'admin'
   );
 
 
