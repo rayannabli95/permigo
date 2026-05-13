@@ -13,6 +13,9 @@
 import { sb } from '@/auth/auth.js';
 import { toast } from '@/components/toast.js';
 import { esc } from '@/utils/escape.js';
+import { checkRateLimit, recordAttempt, resetRateLimit, formatWaitTime } from '@/utils/rate-limit.js';
+import { getTurnstileToken, isTurnstileEnabled } from '@/utils/turnstile.js';
+import { renderHoneypot, checkHoneypot } from '@/utils/honeypot.js';
 
 let _root;
 let _step = 1;
@@ -102,6 +105,7 @@ function render() {
           </div>
         ` : ''}
 
+        ${renderHoneypot()}
         ${renderStep()}
 
         ${_step < 3 ? `
@@ -261,16 +265,43 @@ function wire() {
       _data.nom = nomEl.value.trim();
       _data.tel = telEl.value.trim();
 
+      // 1) Honeypot
+      const formRoot = nextBtn.closest('form') || _root;
+      if (!checkHoneypot(formRoot)) {
+        console.warn('[signup] honeypot triggered');
+        return;
+      }
+
+      // 2) Rate limit (3 tentatives par 10 min — création de compte = action coûteuse)
+      const rl = checkRateLimit('signup', _data.email, 3, 10 * 60_000);
+      if (!rl.allowed) {
+        toast(`Trop d'essais — réessaye dans ${formatWaitTime(rl.wait)}`, 'error');
+        return;
+      }
+      recordAttempt('signup', _data.email);
+
       nextBtn.disabled = true;
       nextBtn.textContent = 'Création…';
 
       try {
+        // 3) Captcha Turnstile (si activé)
+        const captchaToken = isTurnstileEnabled() ? await getTurnstileToken('signup') : null;
+        if (isTurnstileEnabled() && !captchaToken) {
+          toast('Vérification anti-bot échouée — réessaye', 'error');
+          nextBtn.disabled = false;
+          nextBtn.textContent = 'Créer mon compte 🚀';
+          return;
+        }
+
+        const options = {
+          data: { nom: _data.nom, tel: _data.tel || null, role: 'eleve', forfait_h: _data.forfait },
+        };
+        if (captchaToken) options.captchaToken = captchaToken;
+
         const { data, error } = await sb.auth.signUp({
           email: _data.email,
           password: _data.password,
-          options: {
-            data: { nom: _data.nom, tel: _data.tel || null, role: 'eleve', forfait_h: _data.forfait },
-          },
+          options,
         });
         if (error) {
           toast(error.message || 'Erreur création', 'error');
@@ -278,6 +309,7 @@ function wire() {
           nextBtn.textContent = 'Créer mon compte 🚀';
           return;
         }
+        resetRateLimit('signup', _data.email);
         _step = 3;
         render();
       } catch (err) {

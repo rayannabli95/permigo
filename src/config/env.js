@@ -19,6 +19,7 @@ export const env = {
   SUPABASE_ANON_KEY: getEnv('SUPABASE_ANON_KEY'),
   API_URL: getEnv('API_URL', 'http://localhost:3001'),
   DATABASE_URL: getEnv('DATABASE_URL', 'file:./dev.db'),
+  TURNSTILE_SITEKEY: getEnv('TURNSTILE_SITEKEY', ''), // Cloudflare Turnstile (optionnel)
   IS_PROD: getEnv('NODE_ENV') === 'production',
   IS_BROWSER: isBrowser,
 };

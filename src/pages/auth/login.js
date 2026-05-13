@@ -1,110 +1,113 @@
 /**
- * Page Login — design premium avec Gooey Text Morphing.
+ * Page Login — design v2 (inputs avec icônes, social OAuth, remember me).
  *
- * - Background : gradient animé + blobs flous
- * - Hero : "PermiGo" morphing vers d'autres mots via SVG threshold filter
- * - Tagline + form glassmorphism
- * - 3 boutons démo pour pré-remplir Élève / Moniteur / Gérant
- * - Footer : lien "Inscrire mon auto-école"
+ * Stack sécurité actif :
+ *  - Honeypot (champs invisibles website_url/fax_number)
+ *  - Rate limit client (5 login/5min, 3 OTP/5min)
+ *  - Cloudflare Turnstile captcha (si VITE_TURNSTILE_SITEKEY défini)
+ *  - Magic link / OTP par email (bouton "Code par email")
+ *  - OAuth Google / Apple (si activé dans Supabase)
+ *  - PKCE flow Supabase
  */
 
-import { login } from '@/auth/auth.js';
+import { sb, login, loginWithOtp, verifyOtp } from '@/auth/auth.js';
 import { toast } from '@/components/toast.js';
 import { esc } from '@/utils/escape.js';
+import { checkRateLimit, recordAttempt, resetRateLimit, formatWaitTime } from '@/utils/rate-limit.js';
+import { getTurnstileToken, isTurnstileEnabled } from '@/utils/turnstile.js';
+import { renderHoneypot, checkHoneypot } from '@/utils/honeypot.js';
 
 const DEMO_ACCOUNTS = [
-  { role: 'Élève',    email: 'latifa.sahli@autopilot.fr',  emoji: '🎓', tint: '#10b981' },
-  { role: 'Moniteur', email: 'rayan.nabli@autopilot.fr',   emoji: '🚗', tint: '#6366f1' },
-  { role: 'Gérant',   email: 'rayannabli27@gmail.com',      emoji: '👑', tint: '#f59e0b' },
+  { role: 'Élève',    email: 'latifa.sahli@autopilot.fr', emoji: '🎓' },
+  { role: 'Moniteur', email: 'rayan.nabli@autopilot.fr',  emoji: '🚗' },
+  { role: 'Gérant',   email: 'rayannabli27@gmail.com',     emoji: '👑' },
 ];
-
-const MORPH_WORDS = ['PermiGo', 'Conduis', 'Apprends', 'Progresse', 'Réussis'];
-
-let _gooeyRaf = null;
 
 export function mount(root) {
   root.innerHTML = template();
   wire(root);
-  startGooeyMorph(root);
+  restoreRememberedEmail(root);
 }
 
-export function unmount() {
-  if (_gooeyRaf) cancelAnimationFrame(_gooeyRaf);
-  _gooeyRaf = null;
-}
+export function unmount() { /* rien à clean */ }
 
 // ─── Template ───
 function template() {
   return `
     <style>
-      .lg-root{position:fixed;inset:0;overflow:hidden;background:#0b0d1a;display:flex;align-items:center;justify-content:center;padding:18px;font-family:var(--fb)}
-
-      /* Animated gradient background */
-      .lg-bg{position:absolute;inset:0;z-index:0}
-      .lg-bg::before{content:'';position:absolute;inset:-50%;background:radial-gradient(ellipse at 20% 20%,#6366f1 0%,transparent 40%),radial-gradient(ellipse at 80% 30%,#8b5cf6 0%,transparent 40%),radial-gradient(ellipse at 50% 80%,#0891b2 0%,transparent 40%);filter:blur(60px);opacity:.55;animation:lg-float 18s ease-in-out infinite alternate}
-      @keyframes lg-float{0%{transform:translate(0,0) rotate(0deg) scale(1)}50%{transform:translate(40px,-30px) rotate(180deg) scale(1.1)}100%{transform:translate(-30px,40px) rotate(360deg) scale(0.95)}}
+      .lg-root{position:fixed;inset:0;overflow:auto;background:#0b0d1a;display:flex;align-items:center;justify-content:center;padding:24px 16px;font-family:var(--fb)}
+      .lg-bg{position:absolute;inset:0;z-index:0;pointer-events:none}
+      .lg-bg::before{content:'';position:absolute;inset:-50%;background:radial-gradient(ellipse at 20% 20%,#6366f1 0%,transparent 40%),radial-gradient(ellipse at 80% 30%,#8b5cf6 0%,transparent 40%),radial-gradient(ellipse at 50% 80%,#0891b2 0%,transparent 40%);filter:blur(60px);opacity:.5;animation:lg-float 22s ease-in-out infinite alternate}
+      @keyframes lg-float{0%{transform:translate(0,0) rotate(0deg) scale(1)}50%{transform:translate(40px,-30px) rotate(180deg) scale(1.08)}100%{transform:translate(-30px,40px) rotate(360deg) scale(.96)}}
       .lg-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,transparent 0%,rgba(11,13,26,.6) 100%)}
-
-      /* Subtle grid overlay */
       .lg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:50px 50px;z-index:1;pointer-events:none;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%)}
 
-      /* Hero */
-      .lg-content{position:relative;z-index:2;width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center}
+      .lg-content{position:relative;z-index:2;width:100%;max-width:440px;display:flex;flex-direction:column;align-items:center;margin:auto}
 
-      .lg-hero{height:140px;width:100%;display:flex;align-items:center;justify-content:center;margin-bottom:6px;position:relative}
-      /* Logo PermiGo (remplace le hero gooey) */
-      .lg-logo-host{width:100%;display:flex;align-items:center;justify-content:center;margin:8px 0 14px;opacity:0;animation:lg-logoIn 1s cubic-bezier(.2,.7,.3,1) .1s both}
-      .lg-logo-host img{height:clamp(64px,12vw,110px);width:auto;max-width:88%;object-fit:contain;filter:drop-shadow(0 12px 32px rgba(139,92,246,.45)) drop-shadow(0 0 24px rgba(99,102,241,.3))}
-      .lg-logo-fb{font-family:'Archivo',ui-sans-serif,sans-serif;font-weight:900;letter-spacing:-.03em;font-size:clamp(36px,7vw,64px);line-height:1;background:linear-gradient(90deg,#a5b4fc 0%,#fff 35%,#fff 65%,#c4b5fd 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 8px 24px rgba(139,92,246,.4))}
-      @keyframes lg-logoIn{
-        0%{opacity:0;transform:scale(.88) translateY(8px);filter:blur(6px)}
-        100%{opacity:1;transform:scale(1) translateY(0);filter:blur(0)}
-      }
-      @media (prefers-reduced-motion:reduce){.lg-logo-host{animation:none;opacity:1}}
-      .gx-wrap{position:relative;width:100%;display:flex;align-items:center;justify-content:center}
-      .gx-stage{filter:url(#gx-threshold);display:flex;align-items:center;justify-content:center;height:120px;width:100%;position:relative}
-      .gx-word{position:absolute;font-family:var(--fd);font-weight:900;font-size:64px;letter-spacing:-.03em;color:#fff;line-height:1;text-align:center;will-change:filter,opacity}
-      @media (max-width:520px){.gx-word{font-size:48px}}
+      /* Hero logo */
+      .lg-logo-host{margin:8px 0 18px;display:flex;justify-content:center;opacity:0;animation:lg-in .7s cubic-bezier(.2,.7,.3,1) .1s both}
+      .lg-logo-host img{height:clamp(60px,11vw,96px);filter:drop-shadow(0 12px 32px rgba(139,92,246,.45)) drop-shadow(0 0 24px rgba(99,102,241,.3))}
+      @keyframes lg-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
-      .lg-tagline{color:#cbd5e1;font-size:14px;letter-spacing:.02em;text-align:center;margin:0 0 28px;max-width:380px;line-height:1.5;opacity:.85}
-      .lg-tagline b{color:#fff;font-weight:700}
+      /* Card — premium glass */
+      .lg-card{width:100%;background:rgba(255,255,255,.06);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:28px 26px;box-shadow:0 30px 80px -20px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.04) inset;animation:lg-in .5s cubic-bezier(.2,.7,.3,1) .15s both;display:flex;flex-direction:column;gap:18px;color:#fff}
 
-      /* Card glassmorphism */
-      .lg-card{width:100%;max-width:420px;background:rgba(255,255,255,.06);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:26px 24px;box-shadow:0 20px 60px -20px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04) inset;animation:lg-card-in .6s cubic-bezier(.2,.7,.3,1) .15s both}
-      @keyframes lg-card-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+      .lg-card h2{font-family:var(--fd);font-weight:900;font-size:22px;letter-spacing:-.02em;margin:0;text-align:center}
+      .lg-card .h-sub{font-size:13px;color:rgba(255,255,255,.65);text-align:center;margin:-10px 0 6px}
 
-      .lg-card h2{font-family:var(--fd);font-size:18px;font-weight:800;color:#fff;margin:0 0 4px;letter-spacing:-.01em;text-align:center}
-      .lg-card .h-sub{font-size:12.5px;color:rgba(255,255,255,.6);text-align:center;margin:0 0 22px}
+      /* Field — icone + input bordured */
+      .lg-field{display:flex;flex-direction:column;gap:6px}
+      .lg-field label{font-size:10.5px;font-weight:800;color:rgba(255,255,255,.78);letter-spacing:1.2px;text-transform:uppercase}
+      .lg-input-wrap{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);transition:all .15s}
+      .lg-input-wrap:focus-within{border-color:#a5b4fc;background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(99,102,241,.18)}
+      .lg-input-wrap svg{width:18px;height:18px;color:rgba(255,255,255,.5);flex-shrink:0}
+      .lg-input-wrap input{flex:1;background:transparent;border:0;outline:0;color:#fff;font-size:14.5px;font-family:inherit;min-width:0}
+      .lg-input-wrap input::placeholder{color:rgba(255,255,255,.35)}
+      .lg-pw-eye{background:transparent;border:0;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;font-size:16px;line-height:1;border-radius:6px}
+      .lg-pw-eye:hover{background:rgba(255,255,255,.06);color:#fff}
 
-      .lg-field{margin-bottom:14px}
-      .lg-field label{display:block;font-size:10.5px;font-weight:700;color:rgba(255,255,255,.75);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase}
-      .lg-field input{width:100%;height:46px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;font-size:14px;font-family:inherit;transition:all .15s;box-sizing:border-box}
-      .lg-field input::placeholder{color:rgba(255,255,255,.35)}
-      .lg-field input:focus{outline:0;border-color:#a5b4fc;background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(99,102,241,.18)}
-      .lg-pw-wrap{position:relative}
-      .lg-pw-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;background:transparent;border:0;color:rgba(255,255,255,.55);cursor:pointer;font-size:14px;border-radius:8px}
-      .lg-pw-toggle:hover{background:rgba(255,255,255,.06);color:#fff}
+      /* Remember + Forgot row */
+      .lg-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;margin-top:-4px}
+      .lg-remember{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.8);cursor:pointer;user-select:none}
+      .lg-remember input{appearance:none;width:16px;height:16px;border:1.5px solid rgba(255,255,255,.3);border-radius:4px;cursor:pointer;position:relative;flex-shrink:0;transition:all .15s}
+      .lg-remember input:checked{background:#6366f1;border-color:#6366f1}
+      .lg-remember input:checked::after{content:'✓';position:absolute;top:-1px;left:2px;font-size:13px;color:#fff;font-weight:900}
+      .lg-forgot{background:transparent;border:0;color:#a5b4fc;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:2px}
+      .lg-forgot:hover{color:#c7d2fe}
 
-      .lg-cta{width:100%;height:48px;border-radius:12px;border:0;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-family:var(--fd);font-weight:700;font-size:14.5px;letter-spacing:.01em;cursor:pointer;margin-top:6px;transition:transform .12s,box-shadow .12s;box-shadow:0 10px 30px -10px rgba(99,102,241,.6)}
-      .lg-cta:hover{transform:translateY(-1px);box-shadow:0 14px 36px -10px rgba(99,102,241,.75)}
+      /* CTA primary */
+      .lg-cta{width:100%;height:50px;border-radius:12px;border:0;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-family:var(--fd);font-weight:800;font-size:15px;letter-spacing:.01em;cursor:pointer;transition:transform .12s,box-shadow .12s;box-shadow:0 12px 32px -10px rgba(99,102,241,.65)}
+      .lg-cta:hover{transform:translateY(-1px);box-shadow:0 16px 40px -10px rgba(99,102,241,.8)}
       .lg-cta:disabled{opacity:.6;cursor:wait;transform:none}
 
-      .lg-err{color:#fda4af;font-size:12px;margin:10px 0 0;min-height:18px;text-align:center}
+      .lg-err{color:#fda4af;font-size:12.5px;margin:0;min-height:18px;text-align:center;font-weight:600}
 
-      /* Démo accounts */
-      .lg-divider{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.4);font-size:10.5px;font-weight:700;letter-spacing:1.5px;margin:20px 0 12px;text-transform:uppercase}
-      .lg-divider::before,.lg-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1)}
+      /* Divider */
+      .lg-divider{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.4);font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:4px 0}
+      .lg-divider::before,.lg-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.12)}
 
-      .lg-demos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-      .lg-demo{padding:10px 6px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;color:#fff}
-      .lg-demo:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);transform:translateY(-1px)}
-      .lg-demo .em{font-size:18px;line-height:1}
-      .lg-demo .nm{font-size:10.5px;font-weight:700;letter-spacing:.04em}
+      /* Social OAuth buttons */
+      .lg-social{display:flex;flex-direction:column;gap:8px}
+      .lg-oauth{display:flex;align-items:center;justify-content:center;gap:10px;height:46px;border-radius:11px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#fff;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .15s}
+      .lg-oauth:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);transform:translateY(-1px)}
+      .lg-oauth svg,.lg-oauth img{width:18px;height:18px}
+      .lg-oauth.apple svg{color:#fff}
 
-      /* Footer */
-      .lg-foot{margin-top:24px;font-size:12px;color:rgba(255,255,255,.5);text-align:center}
-      .lg-foot a{color:rgba(255,255,255,.85);font-weight:600;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.2);transition:border-color .12s}
-      .lg-foot a:hover{border-color:rgba(255,255,255,.6)}
+      /* OTP mode toggle */
+      .lg-otp-toggle{background:transparent;border:0;color:#a5b4fc;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px;letter-spacing:.2px;display:block;margin:-4px auto 0}
+      .lg-otp-toggle:hover{color:#c7d2fe}
+
+      /* Demo accounts (toujours utile en dev) */
+      .lg-demos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:-4px}
+      .lg-demo{padding:9px 4px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit;color:#fff;transition:all .15s}
+      .lg-demo:hover{background:rgba(255,255,255,.08);transform:translateY(-1px)}
+      .lg-demo .em{font-size:16px;line-height:1}
+      .lg-demo .nm{font-size:10px;font-weight:700;letter-spacing:.04em}
+
+      /* Signup footer */
+      .lg-foot{text-align:center;font-size:13px;color:rgba(255,255,255,.65);margin-top:2px}
+      .lg-foot a{color:#a5b4fc;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(165,180,252,.3);transition:border-color .15s}
+      .lg-foot a:hover{border-color:#a5b4fc}
 
       .lg-version{position:absolute;bottom:14px;right:14px;font-family:var(--fn);font-size:10.5px;color:rgba(255,255,255,.3);letter-spacing:1.5px;z-index:3}
     </style>
@@ -113,67 +116,86 @@ function template() {
       <div class="lg-bg"></div>
       <div class="lg-grid"></div>
 
-      <!-- Gooey SVG filter (caché) -->
-      <svg style="position:absolute;width:0;height:0" aria-hidden="true">
-        <defs>
-          <filter id="gx-threshold">
-            <feColorMatrix in="SourceGraphic" type="matrix" values="
-              1 0 0 0 0
-              0 1 0 0 0
-              0 0 1 0 0
-              0 0 0 255 -140
-            "/>
-          </filter>
-        </defs>
-      </svg>
-
       <div class="lg-content">
-        <div class="lg-logo-host" aria-hidden="false">
+        <div class="lg-logo-host">
           <img src="permigo-logo.png" alt="PermiGo"
-               onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'">
-          <span class="lg-logo-fb" style="display:none">PermiGo</span>
+               onerror="this.style.display='none'">
         </div>
-
-        <p class="lg-tagline">L'app <b>tout-en-un</b> qui rend l'apprentissage de la conduite simple, ludique et efficace.</p>
 
         <div class="lg-card">
           <h2>Connexion</h2>
-          <p class="h-sub">Élève, moniteur ou gérant — accède à ton espace.</p>
+          <p class="h-sub">Élève, moniteur ou gérant — accède à ton espace</p>
 
           <form id="login-form" novalidate>
+            ${renderHoneypot()}
+
             <div class="lg-field">
               <label for="lg-email">Email</label>
-              <input id="lg-email" type="email" name="email" required autocomplete="email" placeholder="vous@exemple.fr">
-            </div>
-            <div class="lg-field">
-              <label for="lg-pwd">Mot de passe</label>
-              <div class="lg-pw-wrap">
-                <input id="lg-pwd" type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
-                <button type="button" class="lg-pw-toggle" id="lg-pw-toggle" aria-label="Afficher le mot de passe">👁️</button>
+              <div class="lg-input-wrap">
+                ${ICON_MAIL}
+                <input id="lg-email" type="email" name="email" required autocomplete="email" placeholder="vous@exemple.fr">
               </div>
             </div>
-            <button type="submit" class="lg-cta">Se connecter</button>
+
+            <div class="lg-field" id="lg-pwd-field">
+              <label for="lg-pwd">Mot de passe</label>
+              <div class="lg-input-wrap">
+                ${ICON_LOCK}
+                <input id="lg-pwd" type="password" name="password" autocomplete="current-password" placeholder="••••••••">
+                <button type="button" class="lg-pw-eye" id="lg-pw-toggle" aria-label="Afficher le mot de passe">👁️</button>
+              </div>
+            </div>
+
+            <div class="lg-field" id="lg-otp-field" style="display:none">
+              <label for="lg-otp">Code reçu par email</label>
+              <div class="lg-input-wrap">
+                ${ICON_KEY}
+                <input id="lg-otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="123456" style="letter-spacing:.4em;font-family:var(--fn,monospace);font-size:17px;text-align:center">
+              </div>
+              <button type="button" id="lg-otp-resend" style="background:transparent;border:0;color:#a5b4fc;font-family:inherit;font-size:11.5px;cursor:pointer;margin-top:6px;text-align:center;text-decoration:underline">Renvoyer le code</button>
+            </div>
+
+            <div class="lg-row" id="lg-row-remember">
+              <label class="lg-remember">
+                <input type="checkbox" id="lg-remember">
+                <span>Se souvenir de moi</span>
+              </label>
+              <button type="button" class="lg-forgot" id="lg-forgot">Mot de passe oublié ?</button>
+            </div>
+
+            <button type="submit" class="lg-cta" id="lg-submit">Se connecter</button>
             <p class="lg-err" id="lg-err"></p>
           </form>
 
-          <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.7);margin-top:14px">
-            Pas encore de compte ?
-            <a href="#/signup" style="color:#a5b4fc;font-weight:700;text-decoration:none;margin-left:4px">Créer un compte gratuit →</a>
+          <button type="button" class="lg-otp-toggle" id="lg-mode-toggle">🔐 Recevoir un code par email</button>
+
+          <div class="lg-divider">— ou —</div>
+
+          <div class="lg-social">
+            <button type="button" class="lg-oauth" data-oauth="google">
+              ${ICON_GOOGLE}
+              Continuer avec Google
+            </button>
+            <button type="button" class="lg-oauth apple" data-oauth="apple">
+              ${ICON_APPLE}
+              Continuer avec Apple
+            </button>
           </div>
 
-          <div class="lg-divider">— Comptes démo —</div>
+          <div class="lg-divider">Démos rapides</div>
           <div class="lg-demos">
             ${DEMO_ACCOUNTS.map(a => `
-              <button class="lg-demo" type="button" data-email="${esc(a.email)}" style="--tint:${a.tint}">
+              <button class="lg-demo" type="button" data-email="${esc(a.email)}">
                 <span class="em">${a.emoji}</span>
                 <span class="nm">${esc(a.role)}</span>
               </button>
             `).join('')}
           </div>
-        </div>
 
-        <div class="lg-foot">
-          Pas encore de compte ? <a href="#" id="lg-signup">Inscrire mon auto-école →</a>
+          <div class="lg-foot">
+            Pas encore de compte ?
+            <a href="#/signup">Créer un compte gratuit →</a>
+          </div>
         </div>
       </div>
 
@@ -182,88 +204,102 @@ function template() {
   `;
 }
 
-// ─── Gooey Text Morphing ───
-function startGooeyMorph(root) {
-  const w1 = root.querySelector('#gx-w1');
-  const w2 = root.querySelector('#gx-w2');
-  if (!w1 || !w2) return;
+// ─── Icônes SVG inline (lucide-style) ───
+const ICON_MAIL  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>`;
+const ICON_LOCK  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;
+const ICON_KEY   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 8.5-8.5M16 6l3 3M14 8l3 3"/></svg>`;
+const ICON_GOOGLE = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC04" d="M5.84 14.09A6.97 6.97 0 0 1 5.46 12c0-.73.13-1.43.36-2.09V7.07H2.18A11 11 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/></svg>`;
+const ICON_APPLE = `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M17.05 12.04c-.03-2.93 2.4-4.35 2.51-4.42-1.37-2-3.49-2.27-4.25-2.31-1.81-.18-3.53 1.06-4.45 1.06-.92 0-2.34-1.03-3.84-1-1.98.03-3.8 1.15-4.82 2.92-2.05 3.55-.52 8.79 1.48 11.66.98 1.41 2.15 2.99 3.69 2.93 1.48-.06 2.04-.96 3.83-.96 1.79 0 2.29.96 3.86.93 1.59-.03 2.6-1.43 3.58-2.84 1.13-1.63 1.59-3.21 1.61-3.29-.04-.02-3.09-1.19-3.12-4.72zM14.5 4.06c.81-.98 1.36-2.34 1.21-3.69-1.17.05-2.59.78-3.43 1.76-.75.86-1.41 2.24-1.23 3.57 1.31.1 2.64-.66 3.45-1.64z"/></svg>`;
 
-  const texts = MORPH_WORDS;
-  const morphTime = 1;       // durée du fondu (s)
-  const cooldownTime = 0.9;  // temps stable entre morphs (s)
-
-  let textIndex = texts.length - 1;
-  w1.textContent = texts[textIndex % texts.length];
-  w2.textContent = texts[(textIndex + 1) % texts.length];
-
-  let time = performance.now();
-  let morph = 0;
-  let cooldown = cooldownTime;
-
-  function setMorph(fraction) {
-    w2.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
-    w2.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
-    const f1 = 1 - fraction;
-    w1.style.filter = `blur(${Math.min(8 / f1 - 8, 100)}px)`;
-    w1.style.opacity = `${Math.pow(f1, 0.4) * 100}%`;
-  }
-
-  function doCooldown() {
-    morph = 0;
-    w2.style.filter = '';
-    w2.style.opacity = '100%';
-    w1.style.filter = '';
-    w1.style.opacity = '0%';
-  }
-
-  function doMorph() {
-    morph -= cooldown;
-    cooldown = 0;
-    let fraction = morph / morphTime;
-    if (fraction > 1) {
-      cooldown = cooldownTime;
-      fraction = 1;
-    }
-    setMorph(fraction);
-  }
-
-  function animate(now) {
-    _gooeyRaf = requestAnimationFrame(animate);
-    const shouldIncrementIndex = cooldown > 0;
-    const dt = (now - time) / 1000;
-    time = now;
-    cooldown -= dt;
-    if (cooldown <= 0) {
-      if (shouldIncrementIndex) {
-        textIndex = (textIndex + 1) % texts.length;
-        w1.textContent = texts[textIndex % texts.length];
-        w2.textContent = texts[(textIndex + 1) % texts.length];
-      }
-      morph += dt;
-      doMorph();
-    } else {
-      doCooldown();
-    }
-  }
-  _gooeyRaf = requestAnimationFrame(animate);
-}
-
-// ─── Wire form + demos ───
+// ─── Wire ───
 function wire(root) {
   const form = root.querySelector('#login-form');
   const errEl = root.querySelector('#lg-err');
-  const submitBtn = form.querySelector('button[type=submit]');
+  const submitBtn = root.querySelector('#lg-submit');
   const emailIn = root.querySelector('#lg-email');
   const pwdIn = root.querySelector('#lg-pwd');
+  const pwdField = root.querySelector('#lg-pwd-field');
+  const otpField = root.querySelector('#lg-otp-field');
+  const otpIn = root.querySelector('#lg-otp');
+  const rowRemember = root.querySelector('#lg-row-remember');
   const pwToggle = root.querySelector('#lg-pw-toggle');
+  const modeToggle = root.querySelector('#lg-mode-toggle');
+  const remember = root.querySelector('#lg-remember');
 
-  // Toggle password visibility
+  let mode = 'password'; // 'password' | 'otp-request' | 'otp-verify'
+
+  function setMode(newMode) {
+    mode = newMode;
+    errEl.textContent = '';
+    if (mode === 'password') {
+      pwdField.style.display = '';
+      otpField.style.display = 'none';
+      rowRemember.style.display = '';
+      submitBtn.textContent = 'Se connecter';
+      modeToggle.textContent = '🔐 Recevoir un code par email';
+    } else if (mode === 'otp-request') {
+      pwdField.style.display = 'none';
+      otpField.style.display = 'none';
+      rowRemember.style.display = 'none';
+      submitBtn.textContent = 'Envoyer le code';
+      modeToggle.textContent = '← Utiliser mon mot de passe';
+    } else if (mode === 'otp-verify') {
+      pwdField.style.display = 'none';
+      otpField.style.display = '';
+      rowRemember.style.display = 'none';
+      submitBtn.textContent = 'Vérifier le code';
+      modeToggle.textContent = '← Utiliser mon mot de passe';
+      setTimeout(() => otpIn.focus(), 100);
+    }
+  }
+  modeToggle.addEventListener('click', () => setMode(mode === 'password' ? 'otp-request' : 'password'));
+
+  // Show/hide password
   pwToggle.addEventListener('click', () => {
     pwdIn.type = pwdIn.type === 'password' ? 'text' : 'password';
     pwToggle.textContent = pwdIn.type === 'password' ? '👁️' : '🙈';
   });
 
-  // Demo buttons → pré-remplit email + password
+  // Forgot password = bascule en mode OTP
+  root.querySelector('#lg-forgot').addEventListener('click', () => {
+    if (!emailIn.value.trim()) toast('Saisis ton email d\'abord', 'info');
+    setMode('otp-request');
+  });
+
+  // Resend OTP
+  root.querySelector('#lg-otp-resend').addEventListener('click', async () => {
+    const email = emailIn.value.trim();
+    if (!email) { setMode('otp-request'); return; }
+    const rl = checkRateLimit('otp', email, 3, 5 * 60_000);
+    if (!rl.allowed) {
+      errEl.textContent = `Trop de demandes — réessaye dans ${formatWaitTime(rl.wait)}`;
+      return;
+    }
+    recordAttempt('otp', email);
+    const captchaToken = isTurnstileEnabled() ? await getTurnstileToken('otp') : null;
+    const r = await loginWithOtp(email, { captchaToken });
+    if (r.ok) toast('Nouveau code envoyé ✉️', 'success');
+    else errEl.textContent = esc(r.error || 'Erreur envoi');
+  });
+
+  // OAuth buttons
+  root.querySelectorAll('[data-oauth]').forEach(b => {
+    b.addEventListener('click', async () => {
+      if (!sb) return toast('Auth non configurée', 'error');
+      const provider = b.dataset.oauth; // 'google' | 'apple'
+      b.disabled = true;
+      const { error } = await sb.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: window.location.origin + window.location.pathname,
+          queryParams: provider === 'google' ? { prompt: 'select_account' } : undefined,
+        },
+      });
+      if (error) { toast(error.message || 'Erreur OAuth', 'error'); b.disabled = false; }
+    });
+  });
+
+  // Demo buttons → pré-remplit
   root.querySelectorAll('.lg-demo').forEach(b => {
     b.addEventListener('click', () => {
       emailIn.value = b.dataset.email;
@@ -272,42 +308,73 @@ function wire(root) {
     });
   });
 
-  // Signup link (placeholder)
-  root.querySelector('#lg-signup')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    toast('Page d\'inscription — à venir 🚧');
-  });
-
-  // Submit
+  // ─── Submit ───
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errEl.textContent = '';
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Connexion…';
+
+    if (!checkHoneypot(form)) {
+      console.warn('[login] honeypot triggered');
+      return; // bot silencieux
+    }
 
     const email = emailIn.value.trim();
-    const pwd = pwdIn.value;
+    if (!email) { errEl.textContent = 'Email requis'; shake(); return; }
 
-    if (!email || !pwd) {
-      errEl.textContent = 'Email + mot de passe requis';
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Se connecter';
-      form.classList.add('anim-shake');
-      setTimeout(() => form.classList.remove('anim-shake'), 400);
-      return;
+    const rlAction = mode === 'otp-verify' ? 'otp-verify' : (mode === 'otp-request' ? 'otp' : 'login');
+    const rl = checkRateLimit(rlAction, email, 5, 5 * 60_000);
+    if (!rl.allowed) {
+      errEl.textContent = `Trop d'essais — réessaye dans ${formatWaitTime(rl.wait)}`;
+      shake(); return;
     }
+    recordAttempt(rlAction, email);
 
-    const { ok, profile, error } = await login(email, pwd);
-    if (!ok) {
-      errEl.textContent = esc(error || 'Identifiants invalides');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '…';
+
+    try {
+      const captchaToken = isTurnstileEnabled() ? await getTurnstileToken(rlAction) : null;
+      if (isTurnstileEnabled() && !captchaToken) {
+        errEl.textContent = 'Vérification anti-bot échouée — réessaye'; shake(); return;
+      }
+
+      if (mode === 'password') {
+        const pwd = pwdIn.value;
+        if (!pwd) { errEl.textContent = 'Mot de passe requis'; shake(); return; }
+        const { ok, profile, error } = await login(email, pwd, { captchaToken });
+        if (!ok) { errEl.textContent = esc(error || 'Identifiants invalides'); shake(); return; }
+        resetRateLimit('login', email);
+        if (remember.checked) saveRememberedEmail(email); else clearRememberedEmail();
+        toast(`Bonjour ${profile.nom.split(' ')[0]} 👋`, 'success');
+        afterLogin();
+      } else if (mode === 'otp-request') {
+        const r = await loginWithOtp(email, { captchaToken });
+        if (!r.ok) { errEl.textContent = esc(r.error || 'Erreur envoi'); shake(); return; }
+        toast('Code envoyé ✉️ Vérifie ta boîte mail', 'success');
+        setMode('otp-verify');
+      } else if (mode === 'otp-verify') {
+        const token = otpIn.value.trim();
+        if (!/^\d{6}$/.test(token)) { errEl.textContent = 'Code à 6 chiffres requis'; shake(); return; }
+        const r = await verifyOtp(email, token);
+        if (!r.ok) { errEl.textContent = esc(r.error || 'Code invalide'); shake(); return; }
+        resetRateLimit('otp', email);
+        resetRateLimit('otp-verify', email);
+        toast(`Bonjour ${r.profile.nom.split(' ')[0]} 👋`, 'success');
+        afterLogin();
+      }
+    } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Se connecter';
-      form.classList.add('anim-shake');
-      setTimeout(() => form.classList.remove('anim-shake'), 400);
-      return;
+      if (mode === 'password') submitBtn.textContent = 'Se connecter';
+      else if (mode === 'otp-request') submitBtn.textContent = 'Envoyer le code';
+      else submitBtn.textContent = 'Vérifier le code';
     }
+  });
 
-    toast(`Bonjour ${profile.nom.split(' ')[0]} 👋`, 'success');
+  function shake() {
+    form.classList.add('anim-shake');
+    setTimeout(() => form.classList.remove('anim-shake'), 400);
+  }
+  async function afterLogin() {
     setTimeout(async () => {
       const [{ navigate }, { mountBottomNav }] = await Promise.all([
         import('@/router.js'),
@@ -316,5 +383,19 @@ function wire(root) {
       mountBottomNav();
       navigate('/');
     }, 600);
-  });
+  }
+}
+
+// ─── Remember me ───
+const REMEMBER_KEY = 'permigo-remember-email';
+function saveRememberedEmail(email) { try { localStorage.setItem(REMEMBER_KEY, email); } catch {} }
+function clearRememberedEmail() { try { localStorage.removeItem(REMEMBER_KEY); } catch {} }
+function restoreRememberedEmail(root) {
+  try {
+    const e = localStorage.getItem(REMEMBER_KEY);
+    if (e) {
+      root.querySelector('#lg-email').value = e;
+      root.querySelector('#lg-remember').checked = true;
+    }
+  } catch {}
 }

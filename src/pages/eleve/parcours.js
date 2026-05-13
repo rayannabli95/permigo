@@ -240,8 +240,18 @@ function renderShell(me) {
   const g = globalStats();
   return `
     <style>
-      .pc3-cosmos{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:.3}
-      .pc3-cosmos::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.4) 0%,rgba(255,255,255,.85) 100%)}
+      .pc3-cosmos{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:.18}
+      .pc3-cosmos::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.9) 100%)}
+
+      /* ─── Bulles flottantes fixed (concept landing — restent en place au swipe) ─── */
+      /* z-index 5 → au-dessus des mondes (pc3-wrap z-index 2) MAIS sous le HUD top (z-index 20) et back-fab (z-index 40) */
+      /* mix-blend-mode: soft-light → teinte sans cacher le texte */
+      .pc3-bubbles{position:fixed;inset:0;z-index:5;overflow:hidden;pointer-events:none;mix-blend-mode:soft-light}
+      .pc3-bubbles::before{content:'';position:absolute;inset:-30%;background:radial-gradient(ellipse 50% 40% at 18% 18%,#6366f1 0%,transparent 55%),radial-gradient(ellipse 55% 45% at 82% 28%,#8b5cf6 0%,transparent 55%),radial-gradient(ellipse 50% 50% at 25% 75%,#0ea5e9 0%,transparent 55%),radial-gradient(ellipse 55% 45% at 78% 82%,#f59e0b 0%,transparent 55%);filter:blur(80px);opacity:.85;animation:pc3-bubbles-float 24s ease-in-out infinite alternate;will-change:transform}
+      .pc3-bubbles::after{content:'';position:absolute;inset:-20%;background:radial-gradient(ellipse 40% 35% at 50% 50%,#10b981 0%,transparent 55%),radial-gradient(ellipse 35% 30% at 70% 15%,#ec4899 0%,transparent 55%);filter:blur(70px);opacity:.7;animation:pc3-bubbles-float2 28s ease-in-out infinite alternate;will-change:transform}
+      @keyframes pc3-bubbles-float{0%{transform:translate(0,0) rotate(0deg) scale(1)}50%{transform:translate(40px,-30px) rotate(120deg) scale(1.08)}100%{transform:translate(-30px,40px) rotate(240deg) scale(.94)}}
+      @keyframes pc3-bubbles-float2{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,40px) scale(1.12)}100%{transform:translate(50px,-30px) scale(.9)}}
+      @media (prefers-reduced-motion: reduce){.pc3-bubbles::before,.pc3-bubbles::after{animation:none}}
 
       .pc3-wrap{position:relative;z-index:2;max-width:540px;margin:0 auto;padding-bottom:40px}
       .pc3-content{max-width:520px;margin:0 auto;padding:0 14px}
@@ -429,6 +439,7 @@ function renderShell(me) {
     </style>
 
     <div class="pc3-cosmos" id="pc3-cosmos-host"></div>
+    <div class="pc3-bubbles" aria-hidden="true"></div>
 
     <div class="pc3-wrap">
 

@@ -29,10 +29,19 @@
  */
 
 const SECTION_VH = 100; // 1 écran exactement — pas besoin de scroll-area géante
-const LERP_FACTOR = 0.10; // smooth scrub interne (rapide car on contrôle le delta nous-mêmes)
-const STEPS_PER_SCROLL = 2400; // pixels de "swipe budget" pour finir l'anim — plus long = textes lisibles
-const TOUCH_MULTIPLIER = 1.8;  // mobile : amplifie le delta touch
-const VIDEO_SRC = 'hero-key-1080.mp4'; // downscalé 1080p (path relatif compatible base GitHub Pages)
+const VIDEO_SRC = 'hero-key-1080.mp4'; // 1920x1080, 6s, 24fps (path relatif → compatible GitHub Pages base)
+
+// Détection appareil — params adaptés (mobile = plus rapide à compléter, seek plus tolérant)
+const IS_TOUCH = (typeof navigator !== 'undefined') && (
+  /iPad|iPhone|iPod|Android/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+  (typeof window !== 'undefined' && window.matchMedia('(pointer:coarse)').matches)
+);
+
+const LERP_FACTOR     = IS_TOUCH ? 0.18 : 0.10; // smoothing interne — plus agressif sur mobile pour rattraper
+const STEPS_PER_SCROLL = IS_TOUCH ? 1100 : 2200; // pixels de swipe pour finir l'anim
+const TOUCH_MULTIPLIER = 2.2;                    // amplifie le delta touch
+const SEEK_THRESHOLD  = IS_TOUCH ? 0.05 : 0.02;  // évite re-decode inutile sur iOS
 // 5 steps espacés (~20% de scroll chacun) — laisse le temps de lire
 const OVERLAY_STEPS = [
   { from: 0.00, to: 0.22, eyebrow: 'PERMIGO',     title: 'Ton permis.',                sub: 'Sans détour.' },
@@ -55,8 +64,8 @@ export function mountHeroKeyScrub(rootEl, opts = {}) {
       .hks-sticky::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(99,102,241,.18) 0%,transparent 40%),radial-gradient(ellipse at 80% 70%,rgba(139,92,246,.16) 0%,transparent 45%);pointer-events:none;animation:hks-bg-shift 18s ease-in-out infinite alternate}
       @keyframes hks-bg-shift{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.1) translate(-2%,3%)}}
       /* Wrapper vidéo : scale + clip-path inset animés via JS pour effet "fenêtre cinéma qui s'ouvre" */
-      /* Le clip-path par défaut force l'état initial AVANT chargement vidéo (sinon on voyait toute l'image) */
-      .hks-video-wrap{position:absolute;inset:0;overflow:hidden;will-change:transform,clip-path;transform-origin:50% 50%;background:#000;clip-path:inset(42% 28% 42% 28% round 600px);transform:scale(.85);box-shadow:0 30px 80px -20px rgba(0,0,0,.7),0 0 60px -10px rgba(139,92,246,.25)}
+      /* État initial moins agressif → la clé est lisible dès la 1ère frame */
+      .hks-video-wrap{position:absolute;inset:0;overflow:hidden;will-change:transform,clip-path;transform-origin:50% 50%;background:#000;clip-path:inset(28% 18% 28% 18% round 280px);transform:scale(.92);box-shadow:0 30px 80px -20px rgba(0,0,0,.7),0 0 60px -10px rgba(139,92,246,.25)}
       /* object-position center : centre vraiment la clé */
       .hks-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;will-change:contents;background:#000}
       /* Voile dégradé pour lisibilité texte — SANS blend mode (qui causait le noir 10-30%) */
@@ -159,43 +168,40 @@ export function mountHeroKeyScrub(rootEl, opts = {}) {
   let accumulated = 0; // pixels de delta cumulés (notre "scroll virtuel")
   let touchY = 0;      // pour calculer delta touch
 
-  // Reduce motion OU mobile = juste laisser jouer en loop, pas de scrub
-  // iOS Safari + Android ne peuvent pas faire un currentTime scrub fluide → fallback lecture normale
+  // Reduce motion = juste laisser jouer en loop, pas de scrub
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const isMobile = isIOS || /Android|Mobile/i.test(navigator.userAgent) || window.innerWidth < 768;
-  if (reduceMotion || isMobile) {
+  if (reduceMotion) {
     video.setAttribute('loop', '');
     video.setAttribute('autoplay', '');
     video.muted = true;
     video.play().catch(() => {});
-    // Force ouverture immédiate du clip-path (pas d'effet "fenêtre" sur mobile — direct fullscreen)
-    videoWrap.style.clipPath = 'inset(8% 5% 8% 5% round 48px)';
+    videoWrap.style.clipPath = 'inset(6% 4% 6% 4% round 36px)';
     videoWrap.style.transform = 'scale(1)';
-    // Cache l'indicateur "SCROLL" + le skip
     hint.classList.add('hidden');
     skipBtn?.classList.add('hidden');
-
-    // CTA "Voir la suite ↓" bien visible — scroll vers le bas de la section
-    const ctaBtn = document.createElement('button');
-    ctaBtn.type = 'button';
-    ctaBtn.className = 'hks-cta-mobile';
-    ctaBtn.innerHTML = 'Voir la suite ↓';
-    ctaBtn.style.cssText = 'position:absolute;bottom:32px;left:50%;transform:translateX(-50%);padding:14px 28px;border-radius:99px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:0;font-family:var(--fd,sans-serif);font-size:14px;font-weight:900;letter-spacing:.3px;cursor:pointer;z-index:11;box-shadow:0 10px 28px -8px rgba(99,102,241,.6);animation:hks-cta-bounce 2.4s ease-in-out infinite';
-    // Inject keyframes
-    const kfStyle = document.createElement('style');
-    kfStyle.textContent = '@keyframes hks-cta-bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-6px)}}';
-    host.querySelector('.hks-sticky').appendChild(kfStyle);
-    host.querySelector('.hks-sticky').appendChild(ctaBtn);
-    ctaBtn.addEventListener('click', () => {
-      const next = host.nextElementSibling || host.parentElement?.nextElementSibling;
-      const target = next || document.body;
-      const top = host.getBoundingClientRect().bottom + window.scrollY;
-      window.scrollTo({ top, behavior: 'smooth' });
-    });
-
     return { destroy: () => host.remove() };
   }
+
+  // CTA "Voir la suite ↓" — toujours présent, fallback si l'user ne veut pas scrub
+  const ctaBtn = document.createElement('button');
+  ctaBtn.type = 'button';
+  ctaBtn.className = 'hks-cta-skip';
+  ctaBtn.innerHTML = 'Voir la suite ↓';
+  ctaBtn.style.cssText = 'position:absolute;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 22px;border-radius:99px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);font-family:var(--fd,sans-serif);font-size:12.5px;font-weight:800;letter-spacing:.2px;cursor:pointer;z-index:11;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;transition:opacity .4s ease,background .15s;pointer-events:none';
+  host.querySelector('.hks-sticky').appendChild(ctaBtn);
+  // Affiche après 2.5s si l'user n'a pas commencé à scrub
+  let ctaShown = false;
+  setTimeout(() => {
+    if (currentProgress < 0.05 && !ctaShown) {
+      ctaShown = true;
+      ctaBtn.style.opacity = '1';
+      ctaBtn.style.pointerEvents = 'auto';
+    }
+  }, 2500);
+  ctaBtn.addEventListener('click', () => {
+    const top = host.getBoundingClientRect().bottom + window.scrollY;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
 
   // Première frame en attendant le scroll
   video.addEventListener('loadedmetadata', () => {
@@ -263,36 +269,39 @@ export function mountHeroKeyScrub(rootEl, opts = {}) {
 
   /** Applique l'état visuel pour un progress donné (smoothed). */
   function applyProgress(progress) {
-    // Sync vidéo (seulement si chargée — sinon on applique quand même le visuel)
+    // Sync vidéo (seuil adapté à l'appareil → évite re-decode inutile sur iOS)
     if (videoDuration) {
       const t = progress * videoDuration;
-      if (Math.abs(video.currentTime - t) > 0.02) {
+      if (Math.abs(video.currentTime - t) > SEEK_THRESHOLD) {
         try { video.currentTime = t; } catch (_) {}
       }
     }
 
-    // ─── Effet "fenêtre cinéma qui s'ouvre" ───
-    // Au début : ovale (42% inset, round 600px)
-    // À la fin : carte arrondie avec MARGES MARQUÉES (8% top/bottom, 5% sides, round 48px)
+    // ─── Effet "fenêtre cinéma qui s'ouvre" — recalibré ───
+    // État 0   : ovale large (28% Y / 18% X, round 280px) — la clé est DÉJÀ visible
+    // État 70% : presque plein écran (6% / 4%, round 36px)
+    // État 100%: léger zoom + petit translate up
     const openProgress = Math.min(progress / 0.7, 1);
+    const ease = openProgress * openProgress * (3 - 2 * openProgress); // smoothstep
 
-    const insetY = (1 - openProgress) * 34 + 8;   // 42% → 8% (marge haut/bas marquée)
-    const insetX = (1 - openProgress) * 23 + 5;   // 28% → 5%
-    const round  = (1 - openProgress) * 552 + 48; // 600px → 48px (bords vraiment arrondis)
+    const insetY = (1 - ease) * 22 + 6;   // 28% → 6%
+    const insetX = (1 - ease) * 14 + 4;   // 18% → 4%
+    const round  = (1 - ease) * 244 + 36; // 280px → 36px
     videoWrap.style.clipPath = `inset(${insetY.toFixed(1)}% ${insetX.toFixed(1)}% ${insetY.toFixed(1)}% ${insetX.toFixed(1)}% round ${round.toFixed(0)}px)`;
 
     const scale = openProgress < 1
-      ? (0.85 + openProgress * 0.15)
-      : (1.0 + (progress - 0.7) / 0.3 * 0.15);
-    const kbY = -progress * 22;
+      ? (0.92 + ease * 0.08)               // 0.92 → 1.0
+      : (1.0 + (progress - 0.7) / 0.3 * 0.10); // 1.0 → 1.10 sur le dernier 30%
+    const kbY = -progress * 14;
     videoWrap.style.transform = `scale(${scale.toFixed(3)}) translateY(${kbY.toFixed(1)}px)`;
 
-    const vigOpacity = openProgress < 1 ? 0.15 : (0.15 + (progress - 0.7) / 0.3 * 0.55);
+    const vigOpacity = openProgress < 1 ? 0.12 : (0.12 + (progress - 0.7) / 0.3 * 0.45);
     vignette.style.opacity = vigOpacity.toFixed(2);
 
     progressBar.style.width = (progress * 100).toFixed(2) + '%';
 
     if (progress > 0.04) hint.classList.add('hidden');
+    if (progress > 0.05 && ctaBtn) { ctaBtn.style.opacity = '0'; ctaBtn.style.pointerEvents = 'none'; }
     if (progress > 0.95 && skipBtn) skipBtn.classList.add('hidden');
 
     const stepIdx = OVERLAY_STEPS.findIndex(s => progress >= s.from && progress < s.to);
