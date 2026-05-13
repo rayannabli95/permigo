@@ -168,19 +168,6 @@ function template() {
 
           <button type="button" class="lg-otp-toggle" id="lg-mode-toggle">🔐 Recevoir un code par email</button>
 
-          <div class="lg-divider">— ou —</div>
-
-          <div class="lg-social">
-            <button type="button" class="lg-oauth" data-oauth="google">
-              ${ICON_GOOGLE}
-              Continuer avec Google
-            </button>
-            <button type="button" class="lg-oauth apple" data-oauth="apple">
-              ${ICON_APPLE}
-              Continuer avec Apple
-            </button>
-          </div>
-
           <div class="lg-divider">Démos rapides</div>
           <div class="lg-demos">
             ${DEMO_ACCOUNTS.map(a => `
