@@ -44,9 +44,9 @@
   --t-slow:.35s cubic-bezier(.4,0,.2,1);
 
   /* ─ Fonts ─ */
-  --fd:'Archivo','Space Grotesk',system-ui,sans-serif;
-  --fb:'Space Grotesk','Inter',system-ui,-apple-system,sans-serif;
-  --fn:'JetBrains Mono',monospace;
+  --fd:'Plus Jakarta Sans','Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --fb:'Inter','Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --fn:'IBM Plex Mono','SF Mono',Menlo,monospace;
 
   /* Scheme info pour les form controls natifs */
   color-scheme: light;
@@ -106,7 +106,11 @@
 }
 
 * { box-sizing: border-box; }
-html { font-size: 14px; -webkit-text-size-adjust: 100%; }
+html {
+  font-size: 14px;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
 
 body {
   font-family: var(--fb);
@@ -115,7 +119,26 @@ body {
   min-height: 100vh;
   margin: 0;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02","cv03","cv04","cv11"; /* Inter stylistic alternates → 'a' à 1 étage, etc. */
+  letter-spacing: -0.005em;
   transition: background var(--t-slow), color var(--t-slow);
+}
+
+/* Headings — kerning serré + letter-spacing optique */
+h1, h2, h3, h4, .pg-logo-txt {
+  font-family: var(--fd);
+  font-feature-settings: "ss01","cv01","cv11";
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+/* Mono — chiffres tabulaires + slashed zero pour les badges "1.01", REMC, dates */
+code, kbd, samp, pre,
+.font-mono, [class*="pc3-cat-id"], [class*="nm-id"] {
+  font-family: var(--fn);
+  font-feature-settings: "zero","tnum","ss01";
+  font-variant-numeric: tabular-nums slashed-zero;
 }
 
 /* iOS safe-area (notch + home bar) */
