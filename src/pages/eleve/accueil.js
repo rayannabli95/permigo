@@ -66,8 +66,12 @@ export async function mount(root) {
     .filter(e => isLessonType(e.t))
     .reduce((s, e) => s + (parseFloat(e.dur) || 1), 0);
   const forfait = me.forfait_h || 20;
-  const restantes = Math.max(0, forfait - conduiteH);
-  const acquises = remc.filter(r => r.lv === 'v').length;
+// Heures en attente = réservées mais pas encore confirmées par l'enseignant
+  const reservedH = lessons
+    .filter(e => e.t === 'pend')
+    .reduce((s, e) => s + (parseFloat(e.dur) || 1), 0);
+  // Heures restantes = forfait - faites - en attente (cohérent avec la page Réservation)
+  const restantes = Math.max(0, forfait - conduiteH - reservedH);  const acquises = remc.filter(r => r.lv === 'v').length;
   const pctComp = Math.round((acquises / REMC_TOTAL) * 100);
   const nextLesson = lessons.find(e => e.t === 'conf' || e.t === 'pend');
 
