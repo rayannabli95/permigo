@@ -3,8 +3,7 @@ import path from 'path';
 
 // Pour GitHub Pages : base = '/permigo-v7/' en prod, '/' en dev
 // Override possible via env var VITE_BASE (utile si renommage du repo)
-const base = process.env.VITE_BASE || (process.env.NODE_ENV === 'production' ? '/permigo-v7/' : '/');
-
+const base = process.env.VITE_BASE || '/';
 export default defineConfig({
   base,
   resolve: {
