@@ -3,27 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <!-- Base path injecté par Vite (= /permigo-v7/ en prod, / en dev) -->
   <base href="%BASE_URL%" />
   <meta name="theme-color" content="#6366f1" />
-  <meta name="description" content="PermiGo — plateforme intelligente pour auto-écoles modernes" />
+
+  <!-- ╔══ SEO ══╗ -->
+  <title>PermiGo — Une auto-école moderne, sans devenir une usine</title>
+  <meta name="description" content="L'application qui réunit planning, suivi REMC, paiements et communication. Pensée en France, pour les auto-écoles qui veulent gagner du temps." />
+  <meta name="keywords" content="auto-école, permis de conduire, planning auto-école, livret REMC numérique, gestion auto-école, logiciel auto-école" />
+  <link rel="canonical" href="https://permigo.vercel.app/" />
+
+  <!-- ╔══ Open Graph (WhatsApp, iMessage, Facebook, LinkedIn) ══╗ -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="PermiGo" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:title" content="PermiGo — Une auto-école moderne, sans devenir une usine" />
+  <meta property="og:description" content="L'app qui réunit planning, suivi REMC, paiements. Pensée en France, pour les auto-écoles." />
+  <meta property="og:url" content="https://permigo.vercel.app/" />
+  <meta property="og:image" content="https://permigo.vercel.app/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="PermiGo — Une auto-école moderne, sans devenir une usine" />
+
+  <!-- ╔══ Twitter Card ══╗ -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PermiGo" />
+  <meta name="twitter:description" content="L'app qui modernise les auto-écoles françaises. Planning, REMC, paiements en un seul outil." />
+  <meta name="twitter:image" content="https://permigo.vercel.app/og-image.png" />
+
+  <!-- ╔══ Favicon ══╗ -->
+  <link rel="icon" type="image/x-icon" href="%BASE_URL%favicon.ico" />
+  <link rel="icon" type="image/png" sizes="192x192" href="%BASE_URL%icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="%BASE_URL%icon-512.png" />
 
   <!-- ╔══ PWA / Add to Home Screen ══╗ -->
-  <!-- %BASE_URL% est remplacé par Vite au build (ex: /permigo-v7/) -->
   <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
   <link rel="apple-touch-icon" href="%BASE_URL%permigo-logo.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="%BASE_URL%icon-192.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PermiGo" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="format-detection" content="telephone=no" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co http://localhost:3001; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none';" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
 
-  <title>PermiGo Autopilot</title>
+  <!-- ╔══ Schema.org / JSON-LD (SEO Google) ══╗ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "PermiGo",
+    "description": "Application de gestion pour auto-écoles : planning, suivi REMC, paiements, communication avec les élèves.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web, iOS, Android",
+    "offers": {
+      "@type": "Offer",
+      "price": "29",
+      "priceCurrency": "EUR"
+    },
+    "url": "https://permigo.vercel.app/"
+  }
+  </script>
 </head>
 <body>
   <!-- A11y : skip link visible au focus clavier -->
