@@ -421,7 +421,7 @@ function template() {
         </div>
         <div class="reveal" style="max-width:740px;margin:0 auto;text-align:left;color:rgba(255,255,255,.78);font-size:16px;line-height:1.75;letter-spacing:-.005em">
           <p style="margin:0 0 18px">Les auto-écoles n'ont pas besoin d'un énième logiciel "tout-en-un" pensé par des ingénieurs qui n'y ont jamais mis les pieds.</p>
-          <p style="margin:0 0 18px">Elles ont besoin d'un outil qui leur fait gagner les deux heures qu'elles perdent chaque jour à appeler les élèves, retaper le planning, vérifier les paiements, ressortir un livret papier déchiré.</p>
+          <p style="margin:0 0 18px">Elles ont besoin d'un outil qui leur fait gagner les deux heures qu'elles perdent chaque jour à appeler les élèves, retaper le planning, suivre les progressions, ressortir un livret papier déchiré.</p>
           <p style="margin:0 0 18px">PermiGo a été construit avec des gérants d'auto-écoles, des enseignants et des candidats. Pas dans un open-space à Paris. Sur le terrain, en région, avec des écoles de cinq, dix, quinze enseignants.</p>
           <p style="margin:0">Le résultat est simple : ce qui vous prend une demi-journée par semaine se fait désormais sur un téléphone, en deux minutes.</p>
         </div>
