@@ -334,7 +334,7 @@ function template() {
       <section class="ld-hero">
         <div class="ld-eyebrow"><span class="dot"></span>Disponible en France depuis janvier 2026</div>
         <h1 class="ld-h1">Une auto-école moderne, <span class="grad">sans devenir une usine</span>.</h1>
-        <p class="ld-sub">PermiGo réunit le planning, le suivi des élèves, le code et les paiements dans une seule application. Pensée en France, pour les auto-écoles qui veulent gagner du temps sans perdre leur âme.</p>
+        <p class="ld-sub">PermiGo réunit le planning, le suivi des élèves, le suivi pédagogique et le livret REMC numérique dans une seule application. Pensée en France, pour les auto-écoles qui veulent gagner du temps sans perdre leur âme.</p>
         <div class="ld-cta-row">
           <button class="ld-btn ld-btn-p ld-btn-lg" id="ld-signup-2">Essayer pendant 14 jours</button>
           <button class="ld-btn ld-btn-ghost ld-btn-lg" id="ld-demo">Voir une démonstration</button>
