@@ -432,7 +432,7 @@ function template() {
         <div class="ld-section-h reveal">
           <div class="lbl">Au quotidien</div>
           <h2>Ce qui change dans votre auto-école.</h2>
-          <p>Quatre choses concrètes, du premier appel à la dernière facture.</p>
+          <p>Quatre choses concrètes, du premier appel à la dernière leçon.</p>
         </div>
         <div class="ld-features reveal reveal-stagger" style="grid-template-columns:repeat(2,1fr)">
           <div class="ld-feat">
