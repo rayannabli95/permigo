@@ -129,10 +129,11 @@ export async function logout() {
   // Dispatch les deux events (compat anciens + nouveaux listeners)
   window.dispatchEvent(new CustomEvent('auth:loggedout'));
   window.dispatchEvent(new CustomEvent('auth:signedout'));
-  // Redirige immédiatement vers login (évite que la page protégée crash sans session)
+  // Force un reload complet : reset hash + state + remount login proprement
   try {
     if (typeof window !== 'undefined' && window.location) {
-      window.location.hash = '#/login';
+      window.location.hash = '';
+      window.location.reload();
     }
   } catch {}
 }

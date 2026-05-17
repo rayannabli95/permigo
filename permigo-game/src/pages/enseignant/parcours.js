@@ -84,22 +84,13 @@ const STYLE = `<style>
   font: 600 11px/1 'Inter', sans-serif;
   color: #6366f1;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 4px;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
 }
-.epc-prof-num {
-  font: 700 22px/1 'Plus Jakarta Sans', sans-serif;
+.epc-prof-title-big {
+  font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
   color: #0a0d1a;
-  letter-spacing: -0.025em;
-}
-.epc-prof-num .epc-lvl-num {
-  font-size: 28px;
-  margin-right: 6px;
-}
-.epc-prof-title {
-  font: 500 13px/1.3 'Inter', sans-serif;
-  color: #94a3b8;
-  margin-top: 4px;
+  letter-spacing: -0.022em;
 }
 
 .epc-xp {
@@ -491,7 +482,7 @@ export async function mount(root) {
 
       <div class="epc-hd">
         <h1 class="epc-h1">Mon parcours pro</h1>
-        <p class="epc-sub">${esc(state.current.title)}</p>
+        <p class="epc-sub">${totalValidations} validation${totalValidations > 1 ? 's' : ''} cumulées</p>
       </div>
 
       <!-- Profil + barre XP -->
@@ -499,8 +490,8 @@ export async function mount(root) {
         <div class="epc-prof-row">
           <div class="epc-av">${esc(initials)}</div>
           <div class="epc-prof-info">
-            <div class="epc-prof-lvl">Niveau</div>
-            <div class="epc-prof-num"><span class="epc-lvl-num">${state.current.level}</span>${esc(state.current.title)}</div>
+            <div class="epc-prof-lvl">Niveau ${state.current.level}</div>
+            <div class="epc-prof-title-big">${esc(state.current.title)}</div>
           </div>
         </div>
         <div class="epc-xp">
@@ -509,7 +500,7 @@ export async function mount(root) {
           </div>
           <div class="epc-xp-meta">
             <span><strong>${xp}</strong> XP</span>
-            <span>${state.next ? `${state.xpToNext} XP avant <strong>${esc(state.next.title === state.current.title ? `Niv ${state.next.level}` : state.next.title)}</strong>` : 'Niveau max atteint 💎'}</span>
+            <span>${state.next ? `${state.xpToNext} XP avant Niveau ${state.next.level}` : 'Niveau max atteint 💎'}</span>
           </div>
         </div>
       </div>
