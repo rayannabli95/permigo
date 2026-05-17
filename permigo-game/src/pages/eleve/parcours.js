@@ -10,6 +10,8 @@ import { track } from '@/services/analytics.js';
 import { REMC } from '@/data/remc.js';
 import { WORLDS } from '@/data/worlds.js';
 import { ASSETS } from '@/utils/assets.js';
+import { getCompDetail } from '@/data/remc-details.js';
+import { icon } from '@/utils/icons.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -843,6 +845,182 @@ const STYLE = `<style>
 }
 .fiche-empty .em { font-size: 28px; opacity: .4; margin-bottom: 6px; }
 .fiche-empty .et { font: 500 12.5px/1.5 'Inter', sans-serif; color: #94a3b8; font-style: italic; }
+
+/* ── Fiche premium v2 (refonte 2026-05) ──────────────────────── */
+.fiche-circle svg { width: 36px; height: 36px; stroke: #fff; stroke-width: 2.5; }
+.fiche-circle.done svg { stroke: #fff; }
+
+/* Bloc "summary" — la phrase qui résume l'essentiel */
+.fiche-summary {
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, #f8f9fc, #fff);
+  border: 1px solid #e2e6f2;
+  border-radius: 16px;
+  position: relative;
+}
+.fiche-summary::before {
+  content: '"';
+  position: absolute;
+  top: -8px; left: 14px;
+  font: 900 48px/1 Georgia, serif;
+  color: var(--wc, #6366f1);
+  opacity: .55;
+}
+.fiche-summary p {
+  margin: 0;
+  font: 600 15px/1.45 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
+  letter-spacing: -.015em;
+}
+
+/* Progression chip + barre */
+.fiche-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 14px;
+}
+.fiche-progress-info {
+  flex-shrink: 0;
+  text-align: left;
+}
+.fiche-progress-step {
+  font: 700 11px/1 'Inter', sans-serif;
+  color: #94a3b8;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.fiche-progress-val {
+  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
+}
+.fiche-progress-val .of { font-weight: 600; color: #94a3b8; font-size: 13px; }
+.fiche-progress-track {
+  flex: 1;
+  height: 8px;
+  background: #f0f2f8;
+  border-radius: 99px;
+  overflow: hidden;
+  position: relative;
+}
+.fiche-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--wc, #6366f1), color-mix(in srgb, var(--wc, #6366f1) 70%, #fff));
+  border-radius: 99px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+
+/* Bloc "Ce que tu vas maîtriser" */
+.fiche-block {
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.fiche-block-title {
+  font: 700 11px/1 'Inter', sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fiche-block-title svg { color: var(--wc, #6366f1); }
+.fiche-block-list { list-style: none; margin: 0; padding: 0; }
+.fiche-block-list li {
+  position: relative;
+  padding: 7px 0 7px 26px;
+  font: 500 13.5px/1.4 'Inter', sans-serif;
+  color: #0a0d1a;
+  border-top: 1px solid #f0f2f8;
+}
+.fiche-block-list li:first-child { border-top: 0; padding-top: 4px; }
+.fiche-block-list li::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--wc, #6366f1) 15%, #fff);
+  border: 1.5px solid var(--wc, #6366f1);
+}
+
+/* Bloc "Conseil du coach" — accent jaune doux */
+.fiche-tip {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #fef9e7, #fffbeb);
+  border: 1px solid #fde68a;
+  border-radius: 14px;
+  margin-bottom: 10px;
+}
+.fiche-tip-ico {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: #f59e0b;
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+.fiche-tip-ico svg { color: #fff; }
+.fiche-tip-body { flex: 1; }
+.fiche-tip-label {
+  font: 700 10px/1 'Inter', sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #b45309;
+  margin-bottom: 4px;
+}
+.fiche-tip-text {
+  font: 500 13.5px/1.45 'Inter', sans-serif;
+  color: #0a0d1a;
+}
+
+/* Bloc status contextuel (acquise / next / locked) */
+.fiche-status {
+  padding: 14px 16px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.fiche-status.done   { background: #ecfdf5; border: 1px solid #a7f3d0; }
+.fiche-status.next   { background: color-mix(in srgb, var(--wc, #6366f1) 8%, #fff); border: 1px solid color-mix(in srgb, var(--wc, #6366f1) 35%, transparent); }
+.fiche-status.locked { background: #f8f9fc; border: 1px solid #e2e6f2; }
+.fiche-status-ico {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.fiche-status.done   .fiche-status-ico { background: #10b981; color: #fff; }
+.fiche-status.next   .fiche-status-ico { background: var(--wc, #6366f1); color: #fff; }
+.fiche-status.locked .fiche-status-ico { background: #cbd5e1; color: #fff; }
+.fiche-status-body { flex: 1; }
+.fiche-status-title {
+  font: 700 13px/1.3 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
+  margin-bottom: 2px;
+}
+.fiche-status-sub {
+  font: 500 12px/1.4 'Inter', sans-serif;
+  color: #64748b;
+}
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
@@ -1339,9 +1517,80 @@ function openFiche(root, compId, ws, validatedMap) {
 
   const st = compStatus(compId, status, nextChallenge, validatedMap);
   const val = validatedMap[compId];
-  const stLabel = { done: 'Compétence acquise', next: "En cours d'acquisition", todo: 'À travailler', locked: 'Verrouillée' }[st];
-  const stEmoji = { done: '✓', next: '⌁', todo: '○', locked: '🔒' }[st];
+  const stLabel = { done: 'Acquise', next: "En cours", todo: 'À travailler', locked: 'Verrouillée' }[st];
   const compNum = cat.subs.findIndex(s => s.c === compId) + 1;
+  const total = cat.subs.length;
+  const detail = getCompDetail(compId);
+
+  // Icône SVG selon statut (au lieu d'emoji)
+  const stIcon = {
+    done:   icon('check', { size: 36 }),
+    next:   icon('zap', { size: 32 }),
+    todo:   icon('clock', { size: 30 }),
+    locked: icon('lock', { size: 28 }),
+  }[st];
+
+  // Progression visuelle dans le monde (n / total)
+  const pctInWorld = Math.round((compNum / total) * 100);
+
+  // Bloc status contextuel selon état
+  const statusBlock = (() => {
+    if (st === 'done' && val) {
+      const dateStr = val.validated_at
+        ? new Date(val.validated_at).toLocaleDateString('fr-FR', { day:'numeric', month:'long' })
+        : null;
+      const parts = [];
+      if (dateStr) parts.push(`Validée le ${dateStr}`);
+      if (val.teacherName) parts.push(`par ${val.teacherName}`);
+      if (val.score_cognitif != null) parts.push(`Quiz : ${Math.round(val.score_cognitif * 100)}%`);
+      return `
+        <div class="fiche-status done">
+          <div class="fiche-status-ico">${icon('check', { size: 18 })}</div>
+          <div class="fiche-status-body">
+            <div class="fiche-status-title">Compétence acquise</div>
+            <div class="fiche-status-sub">${esc(parts.join(' · ') || 'Bravo, tu maîtrises cette compétence !')}</div>
+          </div>
+        </div>`;
+    }
+    if (st === 'done') {
+      return `
+        <div class="fiche-status done">
+          <div class="fiche-status-ico">${icon('check', { size: 18 })}</div>
+          <div class="fiche-status-body">
+            <div class="fiche-status-title">Compétence acquise</div>
+            <div class="fiche-status-sub">Bravo, tu maîtrises cette compétence.</div>
+          </div>
+        </div>`;
+    }
+    if (st === 'next') {
+      return `
+        <div class="fiche-status next" style="--wc:${meta.color}">
+          <div class="fiche-status-ico">${icon('zap', { size: 18 })}</div>
+          <div class="fiche-status-body">
+            <div class="fiche-status-title">Prochaine étape</div>
+            <div class="fiche-status-sub">Demande à ton moniteur de te faire pratiquer cette compétence lors de ta prochaine leçon.</div>
+          </div>
+        </div>`;
+    }
+    if (st === 'locked') {
+      return `
+        <div class="fiche-status locked">
+          <div class="fiche-status-ico">${icon('lock', { size: 18 })}</div>
+          <div class="fiche-status-body">
+            <div class="fiche-status-title">Verrouillée</div>
+            <div class="fiche-status-sub">Termine les compétences précédentes pour débloquer celle-ci.</div>
+          </div>
+        </div>`;
+    }
+    return `
+      <div class="fiche-status next" style="--wc:${meta.color}">
+        <div class="fiche-status-ico">${icon('clock', { size: 18 })}</div>
+        <div class="fiche-status-body">
+          <div class="fiche-status-title">À travailler</div>
+          <div class="fiche-status-sub">Cette compétence reste à pratiquer. Continue à avancer dans ton parcours.</div>
+        </div>
+      </div>`;
+  })();
 
   const body = root.querySelector('#bsheet-body') ?? document.getElementById('bsheet-body');
   body.innerHTML = `
@@ -1349,36 +1598,53 @@ function openFiche(root, compId, ws, validatedMap) {
       <button class="fiche-close" type="button" aria-label="Fermer">×</button>
       <div class="fiche-badge-cat">MONDE ${meta.num} · ${esc(world.nom).toUpperCase()}</div>
       <div class="fiche-circle ${st === 'done' ? 'done' : ''}" style="background:${st === 'done' ? '#10b981' : meta.color}">
-        ${esc(stEmoji)}
+        ${stIcon}
       </div>
       <h3>${esc(sub.n)}</h3>
-      <div class="fiche-id">${esc(compId.toUpperCase())} · ${compNum}/${cat.subs.length}</div>
-      <div><span class="stt-pill ${st}">${esc(stEmoji)} ${esc(stLabel)}</span></div>
+      <div class="fiche-id">${esc(compId.toUpperCase())} · ${compNum}/${total}</div>
+      <div><span class="stt-pill ${st}" style="--wc:${meta.color}">${esc(stLabel)}</span></div>
     </div>
     <div class="fiche-body">
-      ${st === 'done' && val ? `
-        <div class="fiche-section">
-          <div class="sec-lbl">📋 Validation</div>
-          <div class="fiche-meta-row">
-            <span class="ml">Date</span>
-            <span class="mv">${val.validated_at ? new Date(val.validated_at).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' }) : '–'}</span>
-          </div>
-          ${val.teacherName ? `<div class="fiche-meta-row"><span class="ml">Moniteur</span><span class="mv">${esc(val.teacherName)}</span></div>` : ''}
-          ${val.score_cognitif != null ? `<div class="fiche-meta-row"><span class="ml">Score quiz</span><span class="mv">${Math.round(val.score_cognitif * 100)}%</span></div>` : ''}
-        </div>
-      ` : st === 'done' ? `
-        <div class="fiche-section"><div class="fiche-empty"><div class="em">✓</div><div class="et">Compétence acquise.</div></div></div>
-      ` : st === 'locked' ? `
-        <div class="fiche-section"><div class="fiche-empty"><div class="em">🔒</div><div class="et">Débloque les compétences précédentes pour accéder à celle-ci.</div></div></div>
-      ` : `
-        <div class="fiche-section"><div class="fiche-empty"><div class="em">⏳</div><div class="et">En cours d'apprentissage. Le moniteur validera cette compétence après la leçon.</div></div></div>
-      `}
-      <div class="fiche-section">
-        <div class="sec-lbl">Détails</div>
-        <div class="fiche-meta-row"><span class="ml">Identifiant</span><span class="mv">${esc(compId.toUpperCase())}</span></div>
-        <div class="fiche-meta-row"><span class="ml">Monde</span><span class="mv">${meta.num} · ${esc(world.nom)}</span></div>
-        <div class="fiche-meta-row"><span class="ml">Statut</span><span class="mv">${esc(stLabel)}</span></div>
+
+      <!-- 1. SUMMARY — le pitch -->
+      <div class="fiche-summary" style="--wc:${meta.color}">
+        <p>${esc(detail.summary)}</p>
       </div>
+
+      <!-- 2. PROGRESSION dans le monde -->
+      <div class="fiche-progress" style="--wc:${meta.color}">
+        <div class="fiche-progress-info">
+          <div class="fiche-progress-step">Étape</div>
+          <div class="fiche-progress-val">${compNum}<span class="of">/${total}</span></div>
+        </div>
+        <div class="fiche-progress-track">
+          <div class="fiche-progress-fill" style="width:${pctInWorld}%"></div>
+        </div>
+      </div>
+
+      <!-- 3. STATUS contextuel -->
+      ${statusBlock}
+
+      <!-- 4. POINTS CLÉS -->
+      <div class="fiche-block" style="--wc:${meta.color}">
+        <div class="fiche-block-title">
+          ${icon('target', { size: 14 })}
+          Ce que tu vas maîtriser
+        </div>
+        <ul class="fiche-block-list">
+          ${detail.keyPoints.map(kp => `<li>${esc(kp)}</li>`).join('')}
+        </ul>
+      </div>
+
+      <!-- 5. CONSEIL DU COACH -->
+      <div class="fiche-tip">
+        <div class="fiche-tip-ico">${icon('sparkle', { size: 16 })}</div>
+        <div class="fiche-tip-body">
+          <div class="fiche-tip-label">Conseil du coach</div>
+          <div class="fiche-tip-text">${esc(detail.tip)}</div>
+        </div>
+      </div>
+
     </div>`;
 
   body.querySelector('.fiche-close')?.addEventListener('click', () => {
