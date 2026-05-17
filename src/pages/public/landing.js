@@ -334,7 +334,7 @@ function template() {
       <section class="ld-hero">
         <div class="ld-eyebrow"><span class="dot"></span>Disponible en France depuis janvier 2026</div>
         <h1 class="ld-h1">Une auto-école moderne, <span class="grad">sans devenir une usine</span>.</h1>
-        <p class="ld-sub">PermiGo réunit le planning, le suivi des élèves, le suivi pédagogique et le livret REMC numérique dans une seule application. Pensée en France, pour les auto-écoles qui veulent gagner du temps sans perdre leur âme.</p>
+        <p class="ld-sub">PermiGo réunit le planning, le suivi pédagogique et le livret REMC numérique dans une seule application. Pensée en France, pour les auto-écoles qui veulent gagner du temps sans perdre leur âme.</p>
         <div class="ld-cta-row">
           <button class="ld-btn ld-btn-p ld-btn-lg" id="ld-signup-2">Essayer pendant 14 jours</button>
           <button class="ld-btn ld-btn-ghost ld-btn-lg" id="ld-demo">Voir une démonstration</button>
@@ -450,8 +450,8 @@ function template() {
           <div class="ld-feat">
             <div class="em">📊</div>
             <div class="role">Les heures</div>
-            <h3>Les forfaits et les heures, sans Excel.</h3>
-            <p>Suivez les heures consommées, les forfaits restants et le chiffre d'affaires depuis le tableau de bord. Vos secrétaires ne ressaisissent plus rien.</p>
+            <h3>Les forfaits et les leçons, sans Excel.</h3>
+            <p>Suivez les heures consommées, les forfaits restants et l'activité de chaque enseignant depuis le tableau de bord. Plus de ressaisie manuelle.</p>
           </div>
           <div class="ld-feat">
             <div class="em">📈</div>
@@ -608,7 +608,7 @@ function template() {
       <section class="ld-section">
         <div class="reveal" style="max-width:780px;margin:0 auto;padding:36px 32px;border-radius:22px;background:linear-gradient(135deg,rgba(99,102,241,.10),rgba(139,92,246,.06));border:1px solid rgba(165,180,252,.18);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)">
           <div style="font-size:42px;line-height:1;color:#a5b4fc;font-family:Georgia,serif;margin-bottom:8px">"</div>
-          <p style="color:rgba(255,255,255,.92);font-size:18px;line-height:1.6;letter-spacing:-.005em;margin:0 0 22px;font-style:italic">On a longtemps fonctionné avec un classeur, un téléphone et trois plannings papier. Avec PermiGo, on a arrêté de courir après les heures et Les heures. Mes secrétaires ont retrouvé du temps pour s'occuper des élèves, et c'est ça qui fait la différence.</p>
+          <p style="color:rgba(255,255,255,.92);font-size:18px;line-height:1.6;letter-spacing:-.005em;margin:0 0 22px;font-style:italic">On a longtemps fonctionné avec un classeur, un téléphone et trois plannings papier. Avec PermiGo, on a arrêté de courir après les heures et les livrets perdus. Mes secrétaires ont retrouvé du temps pour s'occuper des élèves, et c'est ça qui fait la différence.</p>
           <div style="display:flex;align-items:center;gap:12px">
             <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:800;color:#fff;font-size:14px">AÉ</div>
             <div>
@@ -639,7 +639,7 @@ function template() {
             icon: 'clock',
             color: 'amber',
             q: "Et ma secrétaire ?",
-            a: "Elle gagne deux heures par jour. Le téléphone et la facturation deviennent automatiques. Elle reste au cœur du contact humain."
+            a: "Elle gagne deux heures par jour. Le téléphone et la prise de rendez-vous deviennent automatiques. Elle reste au cœur du contact humain."
           })}
           ${faqItem({
             icon: 'exit',
@@ -684,7 +684,7 @@ function template() {
           <div class="ld-foot-grid">
             <div class="ld-foot-brand">
               <div class="nm">PermiGo</div>
-              <p>L'application qui réunit le planning, le suivi et Les heures d'une auto-école. Pensée en France, pour des écoles françaises.</p>
+              <p>L'application qui réunit le planning, le suivi pédagogique et le livret REMC d'une auto-école. Pensée en France, pour des écoles françaises.</p>
             </div>
 
             <div class="ld-foot-col">

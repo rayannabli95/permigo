@@ -1,0 +1,671 @@
+meta:
+  product: "PermiGo Game"
+  version: 1
+  created: 2026-05-15
+  updated: 2026-05-15
+  owner: "Rayan"
+  destinations: [supabase_events, posthog]
+  pii_policy: none
+  internal_user_policy: "Exclude users with is_internal=true trait. Filter at tracking layer before sending."
+  naming_convention: "object.action snake_case"
+  primary_value_action: "validation.created"
+  north_star_metric: "weekly_active_students"
+
+# ─── ENTITIES ───────────────────────────────────────────────────
+entities:
+  user:
+    id_property: user_id
+    id_format: "uuid"
+    traits:
+      # Classification
+      - name: role
+        type: string
+        enum: [eleve, enseignant, gerant]
+        required: true
+        update_pattern: one-time
+
+      - name: prenom
+        type: string
+        required: true
+        update_pattern: on-change
+
+      - name: is_internal
+        type: boolean
+        required: true
+        update_pattern: one-time
+        description: "Marks test/admin accounts to exclude from analytics"
+
+      - name: auto_ecole_id
+        type: string
+        required: false
+        update_pattern: on-change
+
+      - name: enseignant_id
+        type: string
+        required: false
+        update_pattern: on-change
+        description: "For students only: their attributed instructor"
+
+      # Lifecycle dates
+      - name: created_at
+        type: datetime
+        required: true
+        update_pattern: one-time
+
+      - name: last_active_at
+        type: datetime
+        required: true
+        update_pattern: scheduled
+        description: "Updated on every app open"
+
+      - name: first_value_action_at
+        type: datetime
+        required: false
+        update_pattern: one-time
+        description: "First validated competence (for students) or first validation made (for instructors)"
+
+      # Snapshot metrics (updated daily via scheduled sync)
+      - name: competences_acquises_count
+        type: integer
+        required: true
+        update_pattern: scheduled
+        description: "Student only. Number of competences validated"
+
+      - name: competences_solid_count
+        type: integer
+        required: true
+        update_pattern: scheduled
+        description: "Student only. Competences with consolidation score > 60%"
+
+      - name: current_streak
+        type: integer
+        required: true
+        update_pattern: scheduled
+
+      - name: longest_streak
+        type: integer
+        required: true
+        update_pattern: scheduled
+
+      - name: xp_total
+        type: integer
+        required: true
+        update_pattern: scheduled
+
+      - name: gems_total
+        type: integer
+        required: true
+        update_pattern: scheduled
+
+      - name: credit_heures
+        type: number
+        required: false
+        update_pattern: on-change
+        description: "Student only. Remaining lesson credit"
+
+      - name: total_lessons_taught
+        type: integer
+        required: false
+        update_pattern: scheduled
+        description: "Instructor only. Cumulative lessons given"
+
+# ─── GROUPS ──────────────────────────────────────────────────────
+groups:
+  - type: auto_ecole
+    id_format: "uuid"
+    is_top_level: true
+    traits:
+      - name: nom
+        type: string
+        required: true
+        update_pattern: on-change
+      - name: ville
+        type: string
+        required: false
+        update_pattern: on-change
+      - name: abonnement_status
+        type: string
+        enum: [beta, active, cancelled]
+        required: true
+        update_pattern: on-change
+      - name: nb_enseignants
+        type: integer
+        required: true
+        update_pattern: scheduled
+      - name: nb_eleves_actifs_30d
+        type: integer
+        required: true
+        update_pattern: scheduled
+      - name: taux_reussite_12m
+        type: number
+        required: false
+        update_pattern: scheduled
+        description: "Percentage of students who passed in last 12 months"
+      - name: abandons_30d
+        type: integer
+        required: true
+        update_pattern: scheduled
+        description: "Students with no activity in last 30 days"
+      - name: created_at
+        type: datetime
+        required: true
+        update_pattern: one-time
+
+# ─── SNAPSHOT SYNC ───────────────────────────────────────────────
+snapshot_sync:
+  cadence: daily
+  schedule: "2 AM CET"
+  traits:
+    - entity: user
+      traits: [competences_acquises_count, competences_solid_count, current_streak, longest_streak, xp_total, gems_total, last_active_at, total_lessons_taught]
+      source: "Aggregated from validations + quiz_attempts + streaks tables"
+    - entity: auto_ecole
+      traits: [nb_enseignants, nb_eleves_actifs_30d, taux_reussite_12m, abandons_30d]
+      source: "Aggregated from profiles + validations tables, filtered by auto_ecole_id"
+
+# ─── EVENTS ──────────────────────────────────────────────────────
+events:
+
+  # ═══ LIFECYCLE ═══════════════════════════════════════════════
+  - name: user.signed_up
+    category: lifecycle
+    group_level: auto_ecole
+    description: "User completes signup via invitation"
+    properties:
+      - name: signup_source
+        type: string
+        enum: [invitation_email, qr_code, public_signup]
+        required: true
+      - name: invited_by_role
+        type: string
+        enum: [gerant, enseignant, self]
+        required: false
+    expected_frequency: low
+
+  - name: user.first_login
+    category: lifecycle
+    group_level: auto_ecole
+    description: "User logs in for the first time after signup"
+    properties: []
+    expected_frequency: low
+
+  - name: user.app_opened
+    category: lifecycle
+    group_level: auto_ecole
+    description: "App session started (mobile or web)"
+    properties:
+      - name: platform
+        type: string
+        enum: [ios_safari, android_chrome, desktop, pwa]
+        required: true
+      - name: days_since_signup
+        type: integer
+        required: true
+    expected_frequency: high
+
+  - name: user.session_ended
+    category: lifecycle
+    group_level: auto_ecole
+    description: "Session ended (logout or 15min inactive)"
+    properties:
+      - name: duration_seconds
+        type: integer
+        required: true
+      - name: actions_count
+        type: integer
+        required: true
+    expected_frequency: high
+
+  - name: user.invitation_sent
+    category: lifecycle
+    group_level: auto_ecole
+    description: "Manager or instructor sends invitation to new user"
+    properties:
+      - name: target_role
+        type: string
+        enum: [eleve, enseignant]
+        required: true
+    expected_frequency: medium
+
+  - name: user.invitation_accepted
+    category: lifecycle
+    group_level: auto_ecole
+    description: "Invited user creates their account"
+    properties:
+      - name: days_since_invitation
+        type: integer
+        required: true
+    expected_frequency: medium
+
+  # ═══ CORE VALUE — Triple Validation ═══════════════════════════
+  - name: validation.created
+    category: core_value
+    group_level: auto_ecole
+    description: "Instructor validates a competence for a student (Level 1: Practical)"
+    properties:
+      - name: competence_id
+        type: string
+        required: true
+      - name: competence_monde
+        type: integer
+        required: true
+        description: "1=Campagne, 2=Ville, 3=Montagne, 4=Sommet"
+      - name: student_id
+        type: string
+        required: true
+      - name: time_since_last_validation_minutes
+        type: integer
+        required: false
+        description: "For analytics: pacing of validation"
+    expected_frequency: medium
+
+  - name: validation.cancelled
+    category: core_value
+    group_level: auto_ecole
+    description: "Instructor cancels a recent validation (within 24h grace period)"
+    properties:
+      - name: competence_id
+        type: string
+        required: true
+      - name: hours_since_validation
+        type: integer
+        required: true
+    expected_frequency: low
+
+  - name: quiz.post_validation_started
+    category: core_value
+    group_level: auto_ecole
+    description: "Student opens the cognitive quiz (Level 2)"
+    properties:
+      - name: competence_id
+        type: string
+        required: true
+      - name: minutes_since_validation
+        type: integer
+        required: true
+        description: "Engagement signal: faster = more engaged"
+    expected_frequency: medium
+
+  - name: quiz.post_validation_completed
+    category: core_value
+    group_level: auto_ecole
+    description: "Student finishes the cognitive quiz"
+    properties:
+      - name: competence_id
+        type: string
+        required: true
+      - name: score
+        type: integer
+        required: true
+        description: "0-100"
+      - name: duration_seconds
+        type: integer
+        required: true
+      - name: questions_count
+        type: integer
+        required: true
+    expected_frequency: medium
+
+  - name: quiz.consolidation_started
+    category: core_value
+    group_level: auto_ecole
+    description: "Student opens 48h consolidation quiz (Level 3)"
+    properties:
+      - name: competence_id
+        type: string
+        required: true
+      - name: hours_since_validation
+        type: integer
+        required: true
+    expected_frequency: medium
+
+  - name: quiz.consolidation_completed
+    category: core_value
+    group_level: auto_ecole
+    description: "Student finishes consolidation quiz — measures long-term retention"
+    properties:
+      - name: competence_id
+        type: string
+        required: true
+      - name: score
+        type: integer
+        required: true
+      - name: score_change_vs_initial
+        type: integer
+        required: true
+        description: "Positive=improved, negative=degraded vs post_validation score"
+    expected_frequency: medium
+
+  - name: quiz.exam_blanc_started
+    category: core_value
+    group_level: auto_ecole
+    description: "Student starts a mock exam (V2 feature)"
+    properties:
+      - name: exam_level
+        type: integer
+        required: true
+        description: "1-5, increasing difficulty"
+    expected_frequency: low
+
+  - name: quiz.exam_blanc_completed
+    category: core_value
+    group_level: auto_ecole
+    description: "Student finishes a mock exam"
+    properties:
+      - name: exam_level
+        type: integer
+        required: true
+      - name: score
+        type: integer
+        required: true
+      - name: passed
+        type: boolean
+        required: true
+        description: "True if score >= 80%"
+      - name: duration_seconds
+        type: integer
+        required: true
+    expected_frequency: low
+
+  - name: competence.unlocked
+    category: core_value
+    group_level: auto_ecole
+    description: "A competence reaches 'acquis' status (validation + cognitive score >= 70%)"
+    properties:
+      - name: competence_id
+        type: string
+        required: true
+      - name: monde
+        type: integer
+        required: true
+      - name: total_competences_unlocked
+        type: integer
+        required: true
+        description: "Running count for this student"
+    expected_frequency: medium
+
+  - name: monde.completed
+    category: core_value
+    group_level: auto_ecole
+    description: "Student completes all competences of a monde (e.g., Campagne)"
+    properties:
+      - name: monde
+        type: integer
+        required: true
+      - name: days_since_signup
+        type: integer
+        required: true
+    expected_frequency: low
+
+  # ═══ ENGAGEMENT — Gamification ═══════════════════════════════
+  - name: streak.increased
+    category: engagement
+    group_level: auto_ecole
+    description: "Student's streak increments by 1 day"
+    properties:
+      - name: new_streak
+        type: integer
+        required: true
+      - name: milestone
+        type: boolean
+        required: true
+        description: "True at 7, 14, 30, 60, 90, 180 days"
+    expected_frequency: medium
+
+  - name: streak.broken
+    category: engagement
+    group_level: auto_ecole
+    description: "Student loses their streak (no activity for >24h)"
+    properties:
+      - name: previous_streak
+        type: integer
+        required: true
+    expected_frequency: medium
+
+  - name: streak.frozen
+    category: engagement
+    group_level: auto_ecole
+    description: "Student uses gems to freeze their streak (V2)"
+    properties:
+      - name: gems_spent
+        type: integer
+        required: true
+      - name: current_streak
+        type: integer
+        required: true
+    expected_frequency: low
+
+  - name: trophy.unlocked
+    category: engagement
+    group_level: auto_ecole
+    description: "Student earns a trophy (monde completion or special)"
+    properties:
+      - name: trophy_id
+        type: string
+        required: true
+      - name: trophy_type
+        type: string
+        enum: [monde, examen, streak, special]
+        required: true
+    expected_frequency: low
+
+  - name: gems.earned
+    category: engagement
+    group_level: auto_ecole
+    description: "Student earns gems"
+    properties:
+      - name: amount
+        type: integer
+        required: true
+      - name: source
+        type: string
+        enum: [quiz_perfect, streak_milestone, trophy, competence, exam_pass, daily_quest]
+        required: true
+      - name: new_total
+        type: integer
+        required: true
+    expected_frequency: medium
+
+  - name: gems.spent
+    category: engagement
+    group_level: auto_ecole
+    description: "Student spends gems in shop"
+    properties:
+      - name: amount
+        type: integer
+        required: true
+      - name: item_type
+        type: string
+        enum: [avatar, theme, streak_freeze, hint, exam_retry]
+        required: true
+      - name: item_id
+        type: string
+        required: true
+      - name: new_total
+        type: integer
+        required: true
+    expected_frequency: low
+
+  - name: avatar.changed
+    category: engagement
+    group_level: auto_ecole
+    description: "Student changes their avatar"
+    properties:
+      - name: from_avatar_id
+        type: string
+        required: false
+      - name: to_avatar_id
+        type: string
+        required: true
+      - name: is_premium
+        type: boolean
+        required: true
+    expected_frequency: low
+
+  - name: notification.received
+    category: engagement
+    group_level: auto_ecole
+    description: "User receives a push notification"
+    properties:
+      - name: type
+        type: string
+        enum: [validation, consolidation, streak_reminder, lesson_reminder, weekly_pulse]
+        required: true
+    expected_frequency: high
+
+  - name: notification.opened
+    category: engagement
+    group_level: auto_ecole
+    description: "User taps a push notification to open the app"
+    properties:
+      - name: type
+        type: string
+        required: true
+      - name: minutes_since_sent
+        type: integer
+        required: true
+        description: "Engagement signal: faster = more engaged"
+    expected_frequency: medium
+
+  # ═══ COLLABORATION — Instructor ↔ Student ════════════════════
+  - name: lesson.logged
+    category: collaboration
+    group_level: auto_ecole
+    description: "Instructor logs a completed lesson (simple log, not planning)"
+    properties:
+      - name: student_id
+        type: string
+        required: true
+      - name: duration_hours
+        type: number
+        required: true
+      - name: competences_validated_count
+        type: integer
+        required: true
+    expected_frequency: medium
+
+  - name: instructor.note_sent
+    category: collaboration
+    group_level: auto_ecole
+    description: "Instructor sends a post-lesson note to a student"
+    properties:
+      - name: student_id
+        type: string
+        required: true
+      - name: note_length_chars
+        type: integer
+        required: true
+    expected_frequency: low
+
+  # ═══ MANAGER (GÉRANT) ════════════════════════════════════════
+  - name: manager.dashboard_viewed
+    category: navigation
+    group_level: auto_ecole
+    description: "Manager opens the Pulse école dashboard"
+    properties:
+      - name: days_since_last_view
+        type: integer
+        required: true
+    expected_frequency: low
+
+  - name: manager.at_risk_student_clicked
+    category: core_value
+    group_level: auto_ecole
+    description: "Manager clicks on an 'at-risk' student to see details (signals high engagement)"
+    properties:
+      - name: student_id
+        type: string
+        required: true
+      - name: days_inactive
+        type: integer
+        required: true
+    expected_frequency: low
+
+  # ═══ CONFIGURATION ═══════════════════════════════════════════
+  - name: profile.completed
+    category: configuration
+    group_level: auto_ecole
+    description: "User completes their initial profile setup"
+    properties:
+      - name: has_avatar
+        type: boolean
+        required: true
+    expected_frequency: low
+
+  - name: school.created
+    category: configuration
+    group_level: auto_ecole
+    description: "New driving school registers (manager signup)"
+    properties:
+      - name: ville
+        type: string
+        required: false
+      - name: nb_enseignants_initial
+        type: integer
+        required: false
+    expected_frequency: low
+
+  # ═══ BILLING ═════════════════════════════════════════════════
+  - name: trial.started
+    category: billing
+    group_level: auto_ecole
+    description: "School enters 6-month beta trial period"
+    properties: []
+    expected_frequency: low
+
+  - name: trial.expired
+    category: billing
+    group_level: auto_ecole
+    description: "Beta trial period ends"
+    properties:
+      - name: days_active_during_trial
+        type: integer
+        required: true
+      - name: students_count_at_expiry
+        type: integer
+        required: true
+    expected_frequency: low
+
+  - name: plan.upgraded
+    category: billing
+    group_level: auto_ecole
+    description: "School activates paid subscription"
+    properties:
+      - name: from_plan
+        type: string
+        enum: [beta, none]
+        required: true
+      - name: to_plan
+        type: string
+        enum: [essentiel, pro]
+        required: true
+      - name: monthly_amount
+        type: number
+        required: true
+    expected_frequency: low
+
+  - name: plan.cancelled
+    category: billing
+    group_level: auto_ecole
+    description: "School cancels their subscription"
+    properties:
+      - name: previous_plan
+        type: string
+        required: true
+      - name: days_active_total
+        type: integer
+        required: true
+      - name: reason
+        type: string
+        required: false
+    expected_frequency: low
+
+# ─── EVENT GROUP TRIGGER POINTS ──────────────────────────────────
+group_triggers:
+  auto_ecole:
+    - trigger: creation
+      when: "On school.created event"
+    - trigger: trait_change
+      when: "On plan.upgraded, plan.cancelled, name change"
+    - trigger: scheduled_sync
+      when: "Daily at 2 AM CET for snapshot metrics"

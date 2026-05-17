@@ -1,0 +1,165 @@
+/* ═══════════════════════════════════════════════════════════
+   COMPONENTS — buttons, cards, badges, inputs, toggles, etc.
+═══════════════════════════════════════════════════════════ */
+
+/* ─── Logo texte PermiGo (remplace l'image) ─── */
+.pg-logo-txt {
+  display: inline-block;
+  font-family: 'Archivo', ui-sans-serif, sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 60%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 6px rgba(99, 102, 241, 0.28));
+  white-space: nowrap;
+}
+.pg-logo-txt.dark {
+  background: linear-gradient(90deg, #a5b4fc 0%, #fff 35%, #fff 65%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.pg-logo-txt.lg { font-size: 36px; }
+.pg-logo-txt.xl { font-size: 56px; }
+.pg-logo-txt.sm { font-size: 18px; }
+
+/* ─── Boutons ─── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-family: var(--fd); font-size: 13px; font-weight: 700;
+  color: var(--ink);
+  background: var(--su);
+  border: 1px solid var(--bo);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: transform var(--t), background var(--t), border-color var(--t), box-shadow var(--t);
+  min-height: 40px; min-width: 40px;
+  position: relative; overflow: hidden;
+}
+.btn:hover { background: var(--bg2); }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+
+.btn-p { background: var(--a); color: #fff; border-color: var(--a); }
+.btn-p:hover { background: var(--adk); border-color: var(--adk); }
+
+.btn-g { background: var(--gr); color: #fff; border-color: var(--gr); }
+.btn-r { background: var(--rd); color: #fff; border-color: var(--rd); }
+
+.btn-sm { min-height: 36px; padding: 6px 12px; font-size: 12px; }
+.btn-lg { min-height: 48px; padding: 14px 22px; font-size: 14px; }
+.btn-w { width: 100%; }
+
+/* ─── Cards ─── */
+.card {
+  background: var(--su);
+  border: 1px solid var(--bo);
+  border-radius: var(--rl);
+  box-shadow: var(--s1);
+  overflow: hidden;
+}
+.card-h { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--bo2); }
+.card-b { padding: 14px 16px; }
+
+/* ─── Badges ─── */
+.bd {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px;
+  font-size: 11px; font-weight: 700;
+  border-radius: 6px;
+  background: var(--bg2); color: var(--mu);
+}
+.bg { background: var(--grp); color: var(--gr); }
+.bam { background: var(--amp); color: var(--am); }
+.br { background: var(--rdp); color: var(--rd); }
+.ba { background: var(--ap); color: var(--a); }
+
+/* ─── Inputs / textareas ─── */
+.fi {
+  display: block; width: 100%;
+  padding: 11px 13px;
+  font: 500 14px var(--fb);
+  color: var(--ink);
+  background: var(--su);
+  border: 1px solid var(--bo);
+  border-radius: var(--r);
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.fi:focus { outline: 0; border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
+.fi[disabled] { opacity: .5; }
+
+/* ─── Toggle switch ─── */
+.tgl { position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; }
+.tgl input { display: none; }
+.tgl-t { position: absolute; inset: 0; background: var(--bo); border-radius: 999px; transition: background var(--t); }
+.tgl-t::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform var(--t); box-shadow: var(--s0); }
+.tgl input:checked + .tgl-t { background: var(--a); }
+.tgl input:checked + .tgl-t::after { transform: translateX(20px); }
+
+/* ─── Chrome layout — actif quand header + bottom nav sont montés ─── */
+body.has-chrome #app {
+  padding-top: calc(52px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ─── Boutons : scale global au :active ─── */
+button:active:not(:disabled),
+[role="button"]:active {
+  transform: scale(.96);
+  transition: transform .1s cubic-bezier(.4,0,.2,1);
+}
+
+/* ─── Progress bar ─── */
+.pt { height: 6px; background: var(--bo2); border-radius: 3px; overflow: hidden; }
+.pf { height: 100%; background: var(--a); border-radius: 3px; transition: width .5s ease; }
+
+/* ─── Toast ─── */
+#toast-root {
+  position: fixed;
+  left: 50%; bottom: calc(80px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex; flex-direction: column; gap: 8px; align-items: center;
+  pointer-events: none;
+}
+.toast {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 14px 11px 18px;
+  background: #fff; color: #0a0d1a;
+  border: 1px solid #e2e6f2;
+  border-radius: var(--r);
+  font-size: 13px; font-weight: 600;
+  box-shadow: 0 4px 16px rgba(11,13,26,.08), 0 1px 4px rgba(11,13,26,.04);
+  opacity: 0; transform: translateY(10px) scale(.96);
+  transition: opacity var(--t), transform var(--t);
+  pointer-events: auto;
+  max-width: 90vw;
+}
+.toast.on { opacity: 1; transform: translateY(0) scale(1); }
+.toast-error { background: var(--rd); color: #fff; border-color: var(--rd); }
+.toast-success { background: var(--gr); color: #fff; border-color: var(--gr); }
+.toast .toast-msg { flex: 1; }
+.toast .toast-close {
+  width: 22px; height: 22px;
+  border: 0; background: rgba(11,13,26,.08);
+  color: #0a0d1a; font-size: 16px; line-height: 1;
+  border-radius: 50%; cursor: pointer;
+  font-family: inherit; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.toast-error .toast-close,
+.toast-success .toast-close { background: rgba(255,255,255,.25); color: #fff; }
+.toast .toast-close:hover { background: rgba(11,13,26,.15); }
+.toast-error .toast-close:hover,
+.toast-success .toast-close:hover { background: rgba(255,255,255,.4); }
+.toast .toast-close:focus-visible {
+  outline: 2px solid var(--a); outline-offset: 2px;
+}

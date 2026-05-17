@@ -53,32 +53,47 @@ npm run build         # build prod
 - Styles : `src/styles/{base,components,animations,main}.css`
 - Backend Hono : `src/server/index.js` (API REST basique)
 
-### ✅ Pages migrées (5 pages fonctionnelles, branchées Supabase)
+### ✅ Pages migrées (23 pages fonctionnelles, branchées Supabase)
 
 | Page | Fichier | Rôle |
 |---|---|---|
 | Login | `src/pages/auth/login.js` | tous |
 | Accueil dashboard | `src/pages/eleve/accueil.js` | élève |
 | Parcours REMC (route SVG sinueuse + fiche bottom sheet) | `src/pages/eleve/parcours.js` | élève |
-| Mes Élèves (liste + recherche + tabs) | `src/pages/moniteur/mes-eleves.js` | moniteur |
-| Fiche Élève (KPIs + leçons + notes privées) | `src/pages/moniteur/fiche-eleve.js` | moniteur |
+| Réservation | `src/pages/eleve/reservation.js` | élève |
+| Trophées | `src/pages/eleve/trophees.js` | élève |
+| Boutique | `src/pages/eleve/boutique.js` | élève |
+| Mes Élèves | `src/pages/moniteur/mes-eleves.js` | moniteur |
+| Fiche Élève | `src/pages/moniteur/fiche-eleve.js` | moniteur |
+| Planning moniteur | `src/pages/moniteur/planning.js` | moniteur |
+| Aujourd'hui | `src/pages/moniteur/aujourdhui.js` | moniteur |
+| Livret REMC | `src/pages/moniteur/livret-remc.js` | moniteur |
+| Lieux | `src/pages/moniteur/lieux.js` | moniteur |
+| Avis | `src/pages/moniteur/avis.js` | moniteur |
+| Dashboard admin | `src/pages/admin/dashboard.js` | admin |
+| Calendrier admin | `src/pages/admin/calendrier.js` | admin |
+| Équipe admin | `src/pages/admin/equipe.js` | admin |
+| Élèves admin | `src/pages/admin/eleves.js` | admin |
+| Leads admin | `src/pages/admin/leads.js` | admin |
+| Notifications | `src/pages/common/notifications.js` | tous |
+| Profil | `src/pages/common/profil.js` | tous |
+| Landing publique | `src/pages/public/landing.js` | non-auth |
+| Signup | `src/pages/public/signup.js` | non-auth |
+| Inscription école | `src/pages/public/inscription-ecole.js` | non-auth |
 
-### ⏳ Pages à coder (prioritaire en haut)
+### ⏳ Pages à coder
 
-| Page | Effort | Rôle |
+Toutes les pages de la roadmap initiale sont shippées. Prochaines priorités possibles :
+
+| Idée | Effort | Rôle |
 |---|---|---|
-| **Planning moniteur** (jour/semaine, créneaux 6h-22h, click = créer leçon) | 60 min | moniteur |
-| Livret REMC évaluation (moniteur valide les sous-comp) | 45 min | moniteur |
-| Réservation (élève réserve un créneau) | 45 min | élève |
-| Trophées élève (vue ludique) | 20 min | élève |
-| Tableau bord admin (KPIs + offre/demande) | 45 min | admin |
-| Calendrier admin (tous les events) | 45 min | admin |
-| Gestion équipe admin (ajouter/modifier moniteurs) | 30 min | admin |
-| Notifications | 20 min | tous |
-| Profil utilisateur | 20 min | tous |
-| Page d'inscription publique | 30 min | non-auth |
+| Hash router (fix reload qui casse la nav) | 60 min | technique |
+| Dark mode (variables CSS déjà prêtes) | 45 min | tous |
+| Tests E2E sur les flows critiques (Playwright) | 2 h | technique |
+| Page paiements / facturation élève | 60 min | élève / admin |
+| Messagerie interne moniteur ↔ élève | 90 min | moniteur / élève |
 
-**Total restant : ~6h de dev.**
+**Migration v6 → v7 terminée.** Reste : durcir (router, tests, dark mode).
 
 ## Comptes de test (Supabase prod)
 

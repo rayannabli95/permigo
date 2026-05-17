@@ -26,7 +26,7 @@ const PLANS = [
       'Planning enseignant illimité',
       'Livret REMC numérique officiel',
       'Réservation autonome des élèves',
-      'Suivi forfaits & paiements',
+      'Suivi forfaits & heures consommées',
       'Application mobile élève',
       'Support par email',
     ],
