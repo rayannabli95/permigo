@@ -9,7 +9,8 @@ export const WORLDS = [
     titre: 'Maîtriser le véhicule',
     description: 'Les bases : démarrer, freiner, diriger.',
     couleur: '#10b981', // emerald
-    emoji: '🌾',
+    emoji: '🌾', // legacy fallback
+    image: '/skins/permigo-remc-maitrise-vehicule-flag-v1.png',
     sousCompetences: 9, // C1a → C1i
   },
   {
@@ -20,6 +21,7 @@ export const WORLDS = [
     description: 'Intersections, ronds-points, partage de la route.',
     couleur: '#06b6d4', // cyan
     emoji: '🏙️',
+    image: '/skins/permigo-remc-circulation-normale-v2.png',
     sousCompetences: 8, // C2a → C2h
   },
   {
@@ -30,6 +32,7 @@ export const WORLDS = [
     description: 'Autoroute, nuit, intempéries, dépassements.',
     couleur: '#8b5cf6', // violet
     emoji: '⛰️',
+    image: '/skins/permigo-remc-conditions-difficiles-v1.png',
     sousCompetences: 7, // C3a → C3g
   },
   {
@@ -40,6 +43,7 @@ export const WORLDS = [
     description: 'Voyage longue distance, éco-conduite, sécurité.',
     couleur: '#f59e0b', // amber
     emoji: '🏔️',
+    image: '/skins/permigo-autonomie-crown-v1.png',
     sousCompetences: 7, // C4a → C4g
   },
 ];

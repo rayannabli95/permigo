@@ -44,15 +44,15 @@ const MAX_VAL = MONITEUR_TIERS[MONITEUR_TIERS.length - 1].threshold;
  * Si l'image n'existe pas, on affiche juste l'accent color.
  */
 export const MONITEUR_SKINS = [
-  { threshold: 25,  slug: 'premier-kilometre', name: 'Premier kilomètre', accent: '#6366f1', image: '/skins/skin-01.png' },
-  { threshold: 55,  slug: 'volant-souple',     name: 'Volant souple',     accent: '#3b82f6', image: '/skins/skin-02.png' },
-  { threshold: 85,  slug: 'phares-allumes',    name: 'Phares allumés',    accent: '#06b6d4', image: '/skins/skin-03.png' },
-  { threshold: 115, slug: 'boite-fluide',      name: 'Boîte fluide',      accent: '#10b981', image: '/skins/skin-04.png' },
-  { threshold: 155, slug: 'carte-ouverte',     name: 'Carte ouverte',     accent: '#0ea5e9', image: '/skins/skin-05.png' },
-  { threshold: 205, slug: 'compas-cale',       name: 'Compas calé',       accent: '#a855f7', image: '/skins/skin-06.png' },
-  { threshold: 255, slug: 'tableau-pro',       name: 'Tableau pro',       accent: '#ec4899', image: '/skins/skin-07.png' },
-  { threshold: 305, slug: 'maitre-artisan',    name: 'Maître artisan',    accent: '#f59e0b', image: '/skins/skin-08.png' },
-  { threshold: 355, slug: 'couronne-discrete', name: 'Couronne discrète', accent: '#d946ef', image: '/skins/skin-09.png' },
+  { threshold: 25,  slug: 'premier-kilometre', name: 'Premier kilomètre', accent: '#6366f1', image: '/skins/badge-3d-01.png' },
+  { threshold: 55,  slug: 'volant-souple',     name: 'Volant souple',     accent: '#3b82f6', image: '/skins/badge-3d-02.png' },
+  { threshold: 85,  slug: 'phares-allumes',    name: 'Phares allumés',    accent: '#06b6d4', image: '/skins/badge-3d-03.png' },
+  { threshold: 115, slug: 'boite-fluide',      name: 'Boîte fluide',      accent: '#10b981', image: '/skins/badge-3d-04.png' },
+  { threshold: 155, slug: 'carte-ouverte',     name: 'Carte ouverte',     accent: '#0ea5e9', image: '/skins/badge-3d-05.png' },
+  { threshold: 205, slug: 'compas-cale',       name: 'Compas calé',       accent: '#a855f7', image: '/skins/badge-3d-06.png' },
+  { threshold: 255, slug: 'tableau-pro',       name: 'Tableau pro',       accent: '#ec4899', image: '/skins/badge-3d-07.png' },
+  { threshold: 305, slug: 'maitre-artisan',    name: 'Maître artisan',    accent: '#f59e0b', image: '/skins/badge-3d-08.png' },
+  { threshold: 355, slug: 'couronne-discrete', name: 'Couronne discrète', accent: '#d946ef', image: '/skins/badge-3d-09.png' },
 ];
 
 /**
