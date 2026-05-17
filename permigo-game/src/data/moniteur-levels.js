@@ -50,9 +50,10 @@ function generateSkins() {
     '#0ea5e9', '#a855f7', '#ec4899', '#f59e0b',
     '#84cc16', '#14b8a6', '#3b82f6', '#d946ef',
   ];
+  const tierThresholds = new Set(MONITEUR_TIERS.map(t => t.threshold));
   const out = [];
   for (let v = STEP_SKIN; v < MAX_VAL; v += STEP_SKIN) {
-    if (v % STEP_MAJOR === 0) continue; // skip les paliers majeurs
+    if (tierThresholds.has(v)) continue; // skip les paliers majeurs
     out.push({
       threshold: v,
       name: `Skin ${out.length + 1}`,
@@ -155,20 +156,24 @@ export function getMoniteurState(validations = 0) {
 }
 
 /**
- * Liste plate pour afficher la timeline (paliers + skins intercalés).
+ * Liste plate pour afficher la timeline (paliers + skins intercalés, triés par threshold).
  */
 export function buildTimelineStops() {
+  const tierThresholds = new Set(MONITEUR_TIERS.map(t => t.threshold));
   const stops = [];
-  for (let v = STEP_SKIN; v <= MAX_VAL; v += STEP_SKIN) {
-    const isMajor = v % STEP_MAJOR === 0;
-    const tier = isMajor ? MONITEUR_TIERS.find(t => t.threshold === v) : null;
-    const skin = isMajor ? null : MONITEUR_SKINS.find(s => s.threshold === v);
-    stops.push({
-      threshold: v,
-      kind: isMajor ? 'tier' : 'skin',
-      tier,
-      skin,
-    });
+
+  // 1) Ajoute tous les paliers majeurs (tiers)
+  for (const t of MONITEUR_TIERS) {
+    stops.push({ threshold: t.threshold, kind: 'tier', tier: t, skin: null });
   }
+
+  // 2) Ajoute tous les skins (qui ne sont pas sur un palier majeur)
+  for (const s of MONITEUR_SKINS) {
+    if (tierThresholds.has(s.threshold)) continue;
+    stops.push({ threshold: s.threshold, kind: 'skin', tier: null, skin: s });
+  }
+
+  // 3) Tri croissant par threshold
+  stops.sort((a, b) => a.threshold - b.threshold);
   return stops;
 }
