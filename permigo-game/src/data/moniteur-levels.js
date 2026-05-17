@@ -7,8 +7,8 @@
 // 500 validations = niveau max (Cercle Or)
 // ═══════════════════════════════════════════════════════════════
 
-const STEP_SKIN  = 10;   // 1 skin tous les 10 validations
 const MAX_TIER   = 10;   // 10 paliers majeurs
+// 9 skins thématiques intercalés entre les paliers (1 entre chaque)
 // MAX_VAL calculé dynamiquement depuis MONITEUR_TIERS[9].threshold
 
 /**
@@ -39,29 +39,21 @@ export const MONITEUR_TIERS = [
 const MAX_VAL = MONITEUR_TIERS[MONITEUR_TIERS.length - 1].threshold;
 
 /**
- * 40 skins intermédiaires — entre chaque palier majeur.
- * Sobres : juste accent color du profil. Pas kitsch.
+ * 9 skins thématiques — 1 entre chaque palier majeur (mi-chemin).
+ * Images PNG attendues dans /public/skins/skin-XX.png (transparent 512x512).
+ * Si l'image n'existe pas, on affiche juste l'accent color.
  */
-export const MONITEUR_SKINS = generateSkins();
-
-function generateSkins() {
-  const palette = [
-    '#6366f1', '#8b5cf6', '#06b6d4', '#10b981',
-    '#0ea5e9', '#a855f7', '#ec4899', '#f59e0b',
-    '#84cc16', '#14b8a6', '#3b82f6', '#d946ef',
-  ];
-  const tierThresholds = new Set(MONITEUR_TIERS.map(t => t.threshold));
-  const out = [];
-  for (let v = STEP_SKIN; v < MAX_VAL; v += STEP_SKIN) {
-    if (tierThresholds.has(v)) continue; // skip les paliers majeurs
-    out.push({
-      threshold: v,
-      name: `Skin ${out.length + 1}`,
-      accent: palette[out.length % palette.length],
-    });
-  }
-  return out;
-}
+export const MONITEUR_SKINS = [
+  { threshold: 25,  slug: 'premier-kilometre', name: 'Premier kilomètre', accent: '#6366f1', image: '/skins/skin-01.png' },
+  { threshold: 55,  slug: 'volant-souple',     name: 'Volant souple',     accent: '#3b82f6', image: '/skins/skin-02.png' },
+  { threshold: 85,  slug: 'phares-allumes',    name: 'Phares allumés',    accent: '#06b6d4', image: '/skins/skin-03.png' },
+  { threshold: 115, slug: 'boite-fluide',      name: 'Boîte fluide',      accent: '#10b981', image: '/skins/skin-04.png' },
+  { threshold: 155, slug: 'carte-ouverte',     name: 'Carte ouverte',     accent: '#0ea5e9', image: '/skins/skin-05.png' },
+  { threshold: 205, slug: 'compas-cale',       name: 'Compas calé',       accent: '#a855f7', image: '/skins/skin-06.png' },
+  { threshold: 255, slug: 'tableau-pro',       name: 'Tableau pro',       accent: '#ec4899', image: '/skins/skin-07.png' },
+  { threshold: 305, slug: 'maitre-artisan',    name: 'Maître artisan',    accent: '#f59e0b', image: '/skins/skin-08.png' },
+  { threshold: 355, slug: 'couronne-discrete', name: 'Couronne discrète', accent: '#d946ef', image: '/skins/skin-09.png' },
+];
 
 /**
  * 12 saisons = 12 mois.

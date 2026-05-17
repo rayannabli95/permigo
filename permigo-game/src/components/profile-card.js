@@ -12,6 +12,7 @@ import { esc } from '@/utils/escape.js';
 import { sb } from '@/auth/auth.js';
 import { getPrestige } from '@/data/prestige.js';
 import { haptic } from '@/utils/haptic.js';
+import { wrapAnimatedBorder, BORDER_PRESETS } from '@/components/animated-border.js';
 
 const STYLE = `<style>
 .pcc { width: 100%; max-width: 380px; margin: 0 auto; padding: 0; }
@@ -280,9 +281,14 @@ export function renderProfileCard({ me, avatarUrl, bannerUrl, count = 0, stats =
   const stats3 = stats.slice(0, 3);
   while (stats3.length < 3) stats3.push({ label: '—', value: 0 });
 
+  // Border preset selon le rôle : moniteur=cyan / élève=violet / gerant=gold
+  const borderPreset = role === 'enseignant' ? BORDER_PRESETS.cyan
+                     : role === 'gerant'     ? BORDER_PRESETS.gold
+                     : BORDER_PRESETS.violet;
+
   return `${STYLE}
 <div class="pcc">
-  <div class="pcc-card">
+  ${wrapAnimatedBorder(`<div class="pcc-card">
     <div class="pcc-banner">
       ${bannerUrl ? `<img src="${esc(bannerUrl)}" alt="" />` : ''}
       <button class="pcc-banner-edit" data-action="edit-banner" aria-label="Modifier la bannière" title="Modifier la bannière">✎</button>
@@ -339,7 +345,7 @@ export function renderProfileCard({ me, avatarUrl, bannerUrl, count = 0, stats =
         </button>
       </div>
     </div>
-  </div>
+  </div>`, { ...borderPreset, radius: 28, borderWidth: 2.5, bg: '#fff' })}
 
   <input type="file" class="pcc-file-input" accept="image/*" data-target="avatar" />
   <input type="file" class="pcc-file-input" accept="image/*" data-target="banner" />

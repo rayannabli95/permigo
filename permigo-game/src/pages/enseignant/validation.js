@@ -10,6 +10,7 @@ import { track } from '@/services/analytics.js';
 import { REMC } from '@/data/remc.js';
 import { labelComp } from '@/utils/remc-label.js';
 import { showXpToast } from '@/components/xp-toast.js';
+import { badge, Badges } from '@/components/badge.js';
 
 // Liste plate des compétences REMC dans l'ordre (C1a → C4g)
 const ORDERED_COMPS = REMC.flatMap(c => c.subs.map(s => s.c));
@@ -418,18 +419,19 @@ function renderCategory(cat) {
             isNext && 'comp-next',
             sel    && 'comp-sel',
           ].filter(Boolean).join(' ');
-          let badge = '';
-          if (done)        badge = '<span class="badge-ok">✓ Acquis</span>';
-          else if (sel)    badge = '<span class="badge-sel">Sélectionné</span>';
-          else if (isNext) badge = '<span class="badge-next">À valider</span>';
-          else             badge = '<span class="badge-lock">🔒</span>';
+          // Badges via le composant unifié
+          let badgeHtml = '';
+          if (done)        badgeHtml = Badges.acquis();
+          else if (sel)    badgeHtml = badge('Sélectionné', { variant: 'primary', appearance: 'light', size: 'sm', shape: 'circle', dot: true });
+          else if (isNext) badgeHtml = Badges.toValidate();
+          else             badgeHtml = Badges.locked('Verrouillé');
           return `
             <div class="comp-row ${cls}"
               data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
               ${locked ? 'aria-disabled="true"' : ''}>
               <span class="comp-code">${esc(sub.c)}</span>
               <span class="comp-nom">${esc(sub.n)}</span>
-              <span class="comp-status">${badge}</span>
+              <span class="comp-status">${badgeHtml}</span>
             </div>
           `;
         }).join('')}

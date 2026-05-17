@@ -12,6 +12,46 @@ export const PRESTIGE_ELEVE = [
   { p: 3, threshold: 30, name: 'Expert',    emoji: '👑', accent: '#f59e0b' },
 ];
 
+/**
+ * Skins élève — RÉUTILISE les mêmes 9 PNG que côté moniteur (/public/skins/skin-01..09.png)
+ * Thresholds adaptés à l'échelle élève (1-31 compétences au lieu de 1-380 validations).
+ * Cercle Or = 31 compétences = permis virtuel complet.
+ */
+export const ELEVE_SKINS = [
+  { threshold: 3,  slug: 'premier-kilometre', name: 'Premier kilomètre', accent: '#6366f1', image: '/skins/skin-01.png' },
+  { threshold: 6,  slug: 'volant-souple',     name: 'Volant souple',     accent: '#3b82f6', image: '/skins/skin-02.png' },
+  { threshold: 9,  slug: 'phares-allumes',    name: 'Phares allumés',    accent: '#06b6d4', image: '/skins/skin-03.png' },
+  { threshold: 12, slug: 'boite-fluide',      name: 'Boîte fluide',      accent: '#10b981', image: '/skins/skin-04.png' },
+  { threshold: 15, slug: 'carte-ouverte',     name: 'Carte ouverte',     accent: '#0ea5e9', image: '/skins/skin-05.png' },
+  { threshold: 18, slug: 'compas-cale',       name: 'Compas calé',       accent: '#a855f7', image: '/skins/skin-06.png' },
+  { threshold: 22, slug: 'tableau-pro',       name: 'Tableau pro',       accent: '#ec4899', image: '/skins/skin-07.png' },
+  { threshold: 26, slug: 'maitre-artisan',    name: 'Maître artisan',    accent: '#f59e0b', image: '/skins/skin-08.png' },
+  { threshold: 29, slug: 'couronne-discrete', name: 'Couronne discrète', accent: '#d946ef', image: '/skins/skin-09.png' },
+  { threshold: 31, slug: 'cercle-or',         name: 'Cercle Or',         accent: '#f1c40f', image: '/skins/cercle-or.png' },
+];
+
+/**
+ * Renvoie le skin élève actuel + le prochain selon le nombre de compétences validées.
+ */
+export function getEleveSkin(validatedCount = 0) {
+  let current = null;
+  let next = ELEVE_SKINS[0];
+  for (let i = 0; i < ELEVE_SKINS.length; i++) {
+    if (validatedCount >= ELEVE_SKINS[i].threshold) {
+      current = ELEVE_SKINS[i];
+      next = ELEVE_SKINS[i + 1] || null;
+    } else break;
+  }
+  let pct = 100;
+  if (next) {
+    const prev = current ? current.threshold : 0;
+    const span = next.threshold - prev;
+    const done = validatedCount - prev;
+    pct = Math.max(0, Math.min(100, Math.round((done / span) * 100)));
+  }
+  return { current, next, pctToNext: pct, isMax: validatedCount >= 31 };
+}
+
 /** Tiers enseignant — basé sur # validations totales faites */
 export const PRESTIGE_ENSEIGNANT = [
   { p: 0,  threshold: 0,    name: 'Débutant',  emoji: '✏️', accent: '#94a3b8' },

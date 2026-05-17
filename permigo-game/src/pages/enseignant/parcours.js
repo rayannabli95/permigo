@@ -350,10 +350,98 @@ const STYLE = `<style>
   color: #059669;
 }
 .epc-stop-reward-ico { display: flex; align-items: center; flex-shrink: 0; }
+.epc-stop-skin-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(10,13,26,.15));
+}
 .epc-stop-reward-txt {
   font: 500 12px/1.3 'Inter', sans-serif;
 }
 .epc-stop-reward-txt strong { font-weight: 700; }
+
+/* ═══════════════════════════════════════════════════════ */
+/* Badges visuels — anim float + shimmer + flou pour tiers locked  */
+/* ═══════════════════════════════════════════════════════ */
+
+/* Badge image dans le dot (tier ou skin atteint) — float subtil */
+.epc-stop.done .epc-stop-dot img,
+.epc-stop.done .epc-stop-skin-img,
+.epc-stop.done .epc-stop-reward-ico img {
+  animation: epcBadgeFloat 3.2s ease-in-out infinite;
+}
+@keyframes epcBadgeFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+
+/* Shimmer light qui passe sur les badges débloqués */
+.epc-stop.done .epc-stop-reward {
+  position: relative;
+  overflow: hidden;
+}
+.epc-stop.done .epc-stop-reward::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -120%;
+  width: 60%; height: 100%;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%);
+  animation: epcShimmer 3.8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes epcShimmer {
+  0%, 70% { left: -120%; }
+  100%    { left: 130%; }
+}
+
+/* Tiers 8/9/10 NON débloqués : floutés (effet "à découvrir") */
+.epc-stop.tier-locked .epc-stop-dot,
+.epc-stop.tier-locked .epc-stop-reward,
+.epc-stop.tier-locked .epc-stop-title {
+  filter: blur(4px) saturate(.5);
+  opacity: .7;
+  transition: filter .3s ease, opacity .3s ease;
+}
+.epc-stop.tier-locked:hover .epc-stop-dot,
+.epc-stop.tier-locked:hover .epc-stop-reward,
+.epc-stop.tier-locked:hover .epc-stop-title {
+  filter: blur(2px) saturate(.7);
+  opacity: .85;
+}
+.epc-stop.tier-locked .epc-stop-body::after {
+  content: '🔒 Mystère';
+  display: inline-block;
+  font: 600 10px/1 'Inter', sans-serif;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-top: 6px;
+  background: rgba(148,163,184,.12);
+  padding: 4px 8px;
+  border-radius: 99px;
+}
+
+/* Cercle Or atteint : halo doré pulsé spécial (T10) */
+.epc-stop.cercle-or.done .epc-stop-dot {
+  background: radial-gradient(circle, rgba(245,158,11,.3), transparent 70%);
+  animation: epcGoldHalo 2.4s ease-in-out infinite;
+}
+@keyframes epcGoldHalo {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,.5); }
+  50%      { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .epc-stop.done .epc-stop-dot img,
+  .epc-stop.done .epc-stop-skin-img,
+  .epc-stop.done .epc-stop-reward::before,
+  .epc-stop.cercle-or.done .epc-stop-dot {
+    animation: none !important;
+  }
+}
 
 /* ── Section 4 : Cohorte ── */
 .epc-cohort {
@@ -689,19 +777,24 @@ function renderStop(stop, totalValidations) {
   // stop = { threshold, kind: 'tier'|'skin', tier?, skin? }
   let cls = 'todo';
   if (totalValidations >= stop.threshold) cls = 'done';
-  else {
-    // Le "now" = la prochaine récompense pas encore atteinte
-    // (on l'ajoutera dynamiquement, plus simple : 1er stop todo = now)
-    cls = 'todo';
-  }
+
+  // Tiers 8/9/10 → floutés tant que pas atteints (mystère)
+  const isMajor = stop.kind === 'tier';
+  const tierNum = isMajor ? stop.tier.tier : 0;
+  const tierLocked = isMajor && tierNum >= 8 && cls !== 'done';
+  const isCercleOr = isMajor && tierNum === 10;
 
   // Contenu du dot
   let dotContent;
-  const isMajor = stop.kind === 'tier';
   const iconName = isMajor ? stop.tier.unlock.iconName : 'sparkle';
 
   if (cls === 'done') {
-    dotContent = icon('check', { size: 16, strokeWidth: 3 });
+    // Si le tier a une image, on la prend ; sinon icon check
+    dotContent = isMajor
+      ? icon('check', { size: 16, strokeWidth: 3 })
+      : (stop.skin?.image
+          ? `<img class="epc-stop-skin-img" src="${esc(stop.skin.image)}" alt="" style="width:100%;height:100%" onerror="this.style.display='none'">`
+          : icon('check', { size: 16, strokeWidth: 3 }));
   } else if (isMajor) {
     dotContent = icon(iconName, { size: 15, strokeWidth: 2 });
   } else {
@@ -730,14 +823,26 @@ function renderStop(stop, totalValidations) {
         <strong>${esc(stop.tier.unlock.name)}</strong>
       </span>
     </div>
-  ` : `
-    <div class="epc-stop-reward-mini" style="color:${esc(stop.skin?.accent || '#94a3b8')}">
-      <span class="epc-stop-reward-txt" style="opacity:.85">Skin · ${esc(stop.skin?.accent || '')}</span>
+  ` : (stop.skin ? `
+    <div class="epc-stop-reward skin-reward" style="border-color:${esc(stop.skin.accent)}44;background:${esc(stop.skin.accent)}10;color:${esc(stop.skin.accent)}">
+      ${stop.skin.image ? `<img class="epc-stop-skin-img" src="${esc(stop.skin.image)}" alt="" onerror="this.style.display='none'">` : ''}
+      <span class="epc-stop-reward-txt">
+        ${cls === 'done' ? 'Skin débloqué : ' : 'Skin : '}
+        <strong>${esc(stop.skin.name)}</strong>
+      </span>
     </div>
-  `;
+  ` : '');
+
+  const classList = [
+    'epc-stop',
+    cls,
+    isMajor ? 'tier' : 'skin',
+    tierLocked ? 'tier-locked' : '',
+    isCercleOr ? 'cercle-or' : '',
+  ].filter(Boolean).join(' ');
 
   return `
-    <div class="epc-stop ${cls} ${isMajor ? 'tier' : 'skin'}">
+    <div class="${classList}">
       <div class="epc-stop-dot">${dotContent}</div>
       <div class="epc-stop-body">
         <div class="epc-stop-head">
