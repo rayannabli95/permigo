@@ -32,7 +32,7 @@ const STYLE = `<style>
   }
   .qp-badge {
     display: inline-block;
-    font: 700 11px/1 'Inter', sans-serif;
+    font: 700 11px/1 'IBM Plex Mono', monospace;
     letter-spacing: .1em;
     text-transform: uppercase;
     color: #6366f1;
@@ -114,7 +114,7 @@ const STYLE = `<style>
     color: #0a0d1a;
   }
   .qp-score-pct {
-    font: 600 14px/1 'Inter', sans-serif;
+    font: 600 14px/1 'IBM Plex Mono', monospace;
     color: #64748b;
     margin-top: 4px;
   }

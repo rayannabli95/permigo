@@ -25,7 +25,7 @@ const STYLE = `<style>
   background: #fff;
   border-bottom: 1px solid #e2e6f2;
   position: sticky;
-  top: 0;
+  top: calc(52px + env(safe-area-inset-top, 0px));
   z-index: 10;
 }
 .st-back {
@@ -57,7 +57,7 @@ const STYLE = `<style>
 }
 .st-section-label {
   padding: 12px 16px 6px;
-  font: 700 11px/1 'IBM Plex Mono', monospace;
+  font: 600 11px/1 'Inter', sans-serif;
   letter-spacing: .08em;
   text-transform: uppercase;
   color: #94a3b8;

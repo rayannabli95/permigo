@@ -108,6 +108,30 @@ body.has-chrome #app {
   padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
 }
 
+/* ─── Desktop framing : iPhone-style centered, max-width 480 ─── */
+@media (min-width: 768px) {
+  body {
+    background: #f0f2f8;
+  }
+  body.has-chrome #app {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #f8f9fc;
+    min-height: 100vh;
+    box-shadow:
+      0 0 0 1px #e2e6f2,
+      0 24px 64px -16px rgba(11,13,26,.08);
+  }
+  #header-bar,
+  #bottom-nav {
+    max-width: 480px;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%);
+    width: 480px;
+  }
+}
+
 /* ─── Boutons : scale global au :active ─── */
 button:active:not(:disabled),
 [role="button"]:active {

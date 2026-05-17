@@ -6,69 +6,69 @@ import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 
-// ─── CSS ─────────────────────────────────────────────────────────
+// ─── CSS (cohérent avec design system permigo-game) ─────────────
 const STYLE = `<style>
 .prf {
   padding: 20px 16px 100px;
   max-width: 480px;
   margin: 0 auto;
-  color: var(--ink);
-  font-family: var(--fb);
-  background: var(--bg);
+  color: #0a0d1a;
+  font-family: 'Inter', sans-serif;
+  background: #f8f9fc;
 }
 .prf-avatar-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 32px 0 28px;
+  gap: 12px;
+  padding: 24px 0;
 }
 .prf-avatar {
   width: 80px; height: 80px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   display: flex; align-items: center; justify-content: center;
-  font: 800 32px/1 var(--fd);
+  font: 700 32px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
-  box-shadow: 0 8px 32px rgba(99,102,241,.3);
+  box-shadow: 0 8px 24px rgba(99,102,241,.25);
 }
 .prf-name {
-  font: 800 22px/1.1 var(--fd);
-  color: var(--ink);
+  font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
   text-align: center;
+  letter-spacing: -0.022em;
 }
 .prf-role-badge {
-  font: 700 11px/1 var(--fn);
+  font: 600 11px/1 'Inter', sans-serif;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--a);
-  background: var(--ap);
-  border: 1px solid rgba(99,102,241,.3);
-  border-radius: 20px;
-  padding: 4px 12px;
+  color: #6366f1;
+  background: rgba(99,102,241,.1);
+  border-radius: 99px;
+  padding: 6px 12px;
 }
 
 /* Info section */
 .prf-section {
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: 18px;
-  margin-bottom: 14px;
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 20px;
+  margin-bottom: 12px;
   overflow: hidden;
-  box-shadow: var(--s1);
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
 }
 .prf-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 15px 18px;
-  border-bottom: 1px solid var(--bo);
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f2f8;
 }
 .prf-row:last-child { border-bottom: none; }
 .prf-row-ico { font-size: 18px; line-height: 1; flex-shrink: 0; }
 .prf-row-body { flex: 1; min-width: 0; }
-.prf-row-lbl { font: 500 11px/1 var(--fn); color: var(--mu); margin-bottom: 3px; }
-.prf-row-val { font: 600 14px/1.3 var(--fb); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prf-row-lbl { font: 500 11px/1 'Inter', sans-serif; color: #94a3b8; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
+.prf-row-val { font: 600 14px/1.3 'Inter', sans-serif; color: #0a0d1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Buttons */
 .prf-btn-logout {
@@ -92,81 +92,80 @@ const STYLE = `<style>
   padding: 14px;
   background: none;
   border: 0;
-  color: var(--mu);
-  font: 500 13px/1 var(--fb);
+  color: #94a3b8;
+  font: 500 13px/1 'Inter', sans-serif;
   cursor: pointer;
   text-decoration: underline;
 }
 
 /* Mon Année — enseignant only */
 .prf-annee {
-  background: var(--su);
-  border: 1px solid rgba(99,102,241,.2);
-  border-radius: 18px;
-  padding: 20px 18px;
-  margin-bottom: 14px;
-  box-shadow: var(--s1);
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
 }
 .prf-annee-ttl {
-  font: 700 11px/1 var(--fn);
-  letter-spacing: .1em;
+  font: 600 11px/1 'Inter', sans-serif;
+  letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--a);
+  color: #94a3b8;
   margin: 0 0 16px;
 }
 .prf-annee-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 8px;
 }
 .prf-kpi {
-  background: var(--bg2);
-  border: 1px solid var(--bo2);
-  border-radius: 14px;
-  padding: 14px 12px;
+  background: #f8f9fc;
+  border: 1px solid #e2e6f2;
+  border-radius: 12px;
+  padding: 16px 12px;
   text-align: center;
 }
 .prf-kpi-n {
-  font: 800 28px/1 var(--fn);
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  font: 700 28px/1 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
   display: block;
   margin-bottom: 6px;
+  letter-spacing: -0.025em;
 }
 .prf-kpi-lbl {
-  font: 500 11px/1.3 var(--fb);
-  color: var(--mu);
+  font: 500 11px/1.3 'Inter', sans-serif;
+  color: #94a3b8;
 }
 .prf-streak {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: var(--su);
-  border: 1px solid rgba(251,191,36,.3);
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin-bottom: 14px;
-  box-shadow: var(--s1);
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 20px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
 }
 .prf-streak-ico { font-size: 24px; line-height: 1; }
 .prf-streak-body { flex: 1; }
 .prf-streak-n {
-  font: 800 20px/1 var(--fn);
-  color: #d97706;
+  font: 700 20px/1 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
+  letter-spacing: -0.022em;
 }
 .prf-streak-lbl {
-  font: 500 12px/1.3 var(--fb);
-  color: var(--mu);
-  margin-top: 3px;
+  font: 500 12px/1.3 'Inter', sans-serif;
+  color: #94a3b8;
+  margin-top: 4px;
 }
 
 /* Version */
 .prf-version {
   text-align: center;
-  font: 500 11px/1 var(--fn);
-  color: var(--mu2);
+  font: 500 11px/1 'Inter', sans-serif;
+  color: #94a3b8;
   padding: 20px 0 0;
 }
 </style>`;

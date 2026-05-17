@@ -24,7 +24,7 @@ const STYLE = `<style>
   background: #f8f9fc;
 }
 .trp-title { font: 800 24px/1.1 'Plus Jakarta Sans', sans-serif; color: #0b0d1a; letter-spacing: -.025em; }
-.trp-sub   { font: 600 12px/1 'Inter', sans-serif; color: #64748b; }
+.trp-sub   { font: 600 12px/1 'IBM Plex Mono', monospace; color: #64748b; }
 
 /* Grille */
 .trp-grid {
@@ -162,7 +162,7 @@ const STYLE = `<style>
   margin-bottom: 6px;
 }
 .trp-rarity {
-  font: 700 9px/1 'Inter', sans-serif;
+  font: 700 9px/1 'IBM Plex Mono', monospace;
   letter-spacing: .06em;
   text-transform: uppercase;
   border-radius: 20px;
@@ -183,13 +183,13 @@ const STYLE = `<style>
   padding: 20px 20px 10px;
 }
 .trp-section-title {
-  font: 700 13px/1 'Inter', sans-serif;
+  font: 700 13px/1 'IBM Plex Mono', monospace;
   letter-spacing: .08em;
   text-transform: uppercase;
   color: #64748b;
 }
 .trp-section-count {
-  font: 700 12px/1 'Inter', sans-serif;
+  font: 700 12px/1 'IBM Plex Mono', monospace;
   color: #6366f1;
   background: rgba(99,102,241,.1);
   border-radius: 20px;
@@ -240,7 +240,7 @@ const STYLE = `<style>
 .trp-sheet-desc { font: 500 14px/1.5 'Inter', sans-serif; color: #64748b; margin-bottom: 16px; }
 .trp-sheet-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .trp-sheet-tag {
-  font: 700 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 'IBM Plex Mono', monospace;
   letter-spacing: .06em;
   text-transform: uppercase;
   border-radius: 20px;

@@ -449,7 +449,7 @@ function renderActRow(val, elevesMap) {
   const grad = AVATARS[eleve.idx % AVATARS.length];
   const ini = initials(eleve.prenom, eleve.nom);
   const fullNom = esc(eleve.nom || eleve.prenom || '—');
-  const cfg = STATUT_LABEL[val.statut] || { label: val.statut || '—', color: 'var(--mu)', bg: 'var(--bg2)' };
+  const cfg = STATUT_LABEL[val.statut] || { label: val.statut || '—', color: '#94a3b8', bg: '#f8f9fc' };
 
   return `
     <div class="aj-act-row">

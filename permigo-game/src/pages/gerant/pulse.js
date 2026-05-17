@@ -7,32 +7,34 @@ import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { toast } from '@/components/toast.js';
 import { track } from '@/services/analytics.js';
+import { labelComp } from '@/utils/remc-label.js';
 
-// ─── CSS scoped ──────────────────────────────────────────────
+// ─── CSS scoped (Tesla × Bloomberg × Airbnb — cockpit gérant) ─────
 const STYLE = `<style>
 .pulse {
   padding: 0 0 100px;
   max-width: 580px;
   margin: 0 auto;
-  background: var(--bg);
-  font-family: var(--fb);
+  background: #f8f9fc;
+  font-family: 'Inter', sans-serif;
+  color: #0a0d1a;
 }
 
 /* Header */
 .pulse-hd {
   padding: 24px 20px 16px;
-  border-bottom: 1px solid var(--bo);
-  background: var(--su);
+  border-bottom: 1px solid #e2e6f2;
+  background: #fff;
 }
 .pulse-title {
-  font: 800 22px/1.2 var(--fd);
-  color: var(--ink);
+  font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
   letter-spacing: -0.022em;
 }
 .pulse-date {
-  font: 500 12px/1 var(--fn);
-  color: var(--mu);
-  margin-top: 5px;
+  font: 500 13px/1 'Inter', sans-serif;
+  color: #94a3b8;
+  margin-top: 6px;
   text-transform: capitalize;
 }
 
@@ -40,15 +42,15 @@ const STYLE = `<style>
 .kpi-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
   padding: 16px;
 }
 .kpi-card {
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: var(--rl);
-  padding: 18px;
-  box-shadow: var(--s1);
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
   position: relative;
   overflow: hidden;
   animation: kpiIn .4s ease both;
@@ -58,40 +60,55 @@ const STYLE = `<style>
 .kpi-card:nth-child(3) { animation-delay: 120ms; }
 .kpi-card:nth-child(4) { animation-delay: 180ms; }
 @keyframes kpiIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 .kpi-card::before {
   content: '';
   position: absolute;
-  top: -12px; right: -12px;
-  width: 56px; height: 56px;
-  background: radial-gradient(circle, var(--kc, var(--a)) 0%, transparent 70%);
-  opacity: .12;
+  top: -16px; right: -16px;
+  width: 64px; height: 64px;
+  background: radial-gradient(circle, var(--kc, #6366f1) 0%, transparent 70%);
+  opacity: .08;
+  pointer-events: none;
 }
-.kpi-ico  { font-size: 22px; margin-bottom: 10px; display: block; }
-.kpi-val  { font: 800 32px/1 var(--fd); color: var(--ink); margin-bottom: 4px; }
-.kpi-lbl  { font: 500 11px/1.4 var(--fb); color: var(--mu); }
+.kpi-ico {
+  font-size: 18px;
+  margin-bottom: 12px;
+  display: block;
+  opacity: .9;
+}
+.kpi-val {
+  font: 700 32px/1 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
+  margin-bottom: 6px;
+  letter-spacing: -0.025em;
+}
+.kpi-lbl {
+  font: 500 12px/1.4 'Inter', sans-serif;
+  color: #94a3b8;
+}
 
 /* Sections */
 .pulse-sec {
   padding: 0 16px;
-  margin-top: 20px;
+  margin-top: 24px;
 }
 .pulse-sec-hd {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .pulse-sec-title {
-  font: 700 13px/1 var(--fd);
-  color: var(--ink);
-  letter-spacing: -0.01em;
+  font: 600 11px/1 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
 }
 .pulse-sec-sub {
-  font: 600 11px/1 var(--fn);
-  color: var(--mu2);
+  font: 500 12px/1 'Inter', sans-serif;
+  color: #94a3b8;
 }
 
 /* Team list */
@@ -100,36 +117,39 @@ const STYLE = `<style>
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: var(--r);
-  box-shadow: var(--s0);
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+  transition: border-color .15s ease;
 }
+.team-row:hover { border-color: #6366f1; }
 .team-av {
-  width: 38px; height: 38px; border-radius: 50%;
+  width: 40px; height: 40px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font: 700 15px/1 var(--fd);
+  font: 600 14px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
   flex-shrink: 0;
+  background: #6366f1;
 }
 .team-info { flex: 1; min-width: 0; }
 .team-name {
-  font: 600 14px/1 var(--fb);
-  color: var(--ink);
+  font: 600 14px/1.3 'Inter', sans-serif;
+  color: #0a0d1a;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .team-sub {
-  font: 500 11px/1 var(--fn);
-  color: var(--mu);
-  margin-top: 3px;
+  font: 500 12px/1 'Inter', sans-serif;
+  color: #94a3b8;
+  margin-top: 4px;
 }
 .team-badge {
-  font: 700 12px/1 var(--fn);
-  color: var(--a);
-  background: var(--ap);
-  border-radius: 20px;
-  padding: 4px 10px;
+  font: 600 12px/1 'Inter', sans-serif;
+  color: #6366f1;
+  background: rgba(99,102,241,.1);
+  border-radius: 99px;
+  padding: 6px 12px;
   white-space: nowrap;
 }
 
@@ -139,46 +159,49 @@ const STYLE = `<style>
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px 14px;
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: var(--r);
-  box-shadow: var(--s0);
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
 }
 .activity-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
-  background: var(--gr);
+  background: #10b981;
   flex-shrink: 0;
-  margin-top: 5px;
+  margin-top: 6px;
 }
 .activity-body { flex: 1; min-width: 0; }
 .activity-line {
-  font: 500 13px/1.4 var(--fb);
-  color: var(--ink);
+  font: 500 13px/1.4 'Inter', sans-serif;
+  color: #0a0d1a;
 }
-.activity-line strong { font-weight: 700; color: var(--ink); }
+.activity-line strong { font-weight: 600; color: #0a0d1a; }
 .activity-meta {
-  font: 500 11px/1 var(--fn);
-  color: var(--mu2);
-  margin-top: 3px;
+  font: 500 12px/1 'Inter', sans-serif;
+  color: #94a3b8;
+  margin-top: 4px;
 }
 
 /* Skeleton */
 .skel-block {
-  background: linear-gradient(90deg, var(--bo2) 0%, var(--bg2) 50%, var(--bo2) 100%);
+  background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
   background-size: 200% 100%;
   animation: shimmerP 1.4s ease-in-out infinite;
-  border-radius: var(--r);
+  border-radius: 12px;
 }
 @keyframes shimmerP { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
 /* Empty state */
 .pulse-empty {
-  padding: 20px;
+  padding: 24px 16px;
   text-align: center;
-  color: var(--mu2);
-  font: 500 13px/1.5 var(--fb);
+  color: #94a3b8;
+  font: 500 13px/1.5 'Inter', sans-serif;
+  background: #fff;
+  border: 1px dashed #e2e6f2;
+  border-radius: 12px;
 }
 </style>`;
 
@@ -294,7 +317,7 @@ export async function mount(root) {
   } catch (e) {
     console.error('[pulse]', e);
     toast('Erreur de chargement', 'error');
-    root.innerHTML = `${STYLE}<div class="pulse"><p style="padding:32px;color:var(--rd)">Erreur de chargement du dashboard.</p></div>`;
+    root.innerHTML = `${STYLE}<div class="pulse"><p style="padding:32px;color:#ef4444">Erreur de chargement du dashboard.</p></div>`;
   }
 }
 
@@ -372,16 +395,17 @@ function render({ elevesTotal, compValidees, enseignants, quizReussis, teachers,
         : recentVals.map(v => {
             const eleveName = eleveNames[v.eleve_id] || '—';
             const ensName   = enseignantNames[v.validated_by] || '—';
-            const compLabel = v.competence_id ? esc(v.competence_id) : '—';
+            const compNom   = v.competence_id ? labelComp(v.competence_id) : '—';
+            const compId    = v.competence_id || '';
             const timeStr   = v.validated_at ? relativeTime(v.validated_at) : '—';
             return `
               <div class="activity-row">
                 <div class="activity-dot"></div>
                 <div class="activity-body">
                   <div class="activity-line">
-                    <strong>${esc(eleveName)}</strong> — compétence ${compLabel}
+                    <strong>${esc(eleveName)}</strong> · ${esc(compNom)}
                   </div>
-                  <div class="activity-meta">par ${esc(ensName)} · ${esc(timeStr)}</div>
+                  <div class="activity-meta">${esc(compId)} · par ${esc(ensName)} · ${esc(timeStr)}</div>
                 </div>
               </div>`;
           }).join('')

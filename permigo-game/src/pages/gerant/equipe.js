@@ -8,21 +8,22 @@ import { esc } from '@/utils/escape.js';
 import { toast } from '@/components/toast.js';
 import { track } from '@/services/analytics.js';
 
-// ─── CSS scoped ──────────────────────────────────────────────
+// ─── CSS scoped (cohérent avec pulse.js — cockpit gérant) ────────
 const STYLE = `<style>
 .eq-page {
   max-width: 580px;
   margin: 0 auto;
-  background: var(--bg);
+  background: #f8f9fc;
   padding-bottom: 100px;
-  font-family: var(--fb);
+  font-family: 'Inter', sans-serif;
+  color: #0a0d1a;
 }
 
 /* Header */
 .eq-hd {
   padding: 24px 20px 16px;
-  background: var(--su);
-  border-bottom: 1px solid var(--bo);
+  background: #fff;
+  border-bottom: 1px solid #e2e6f2;
 }
 .eq-hd-top {
   display: flex;
@@ -30,122 +31,127 @@ const STYLE = `<style>
   justify-content: space-between;
 }
 .eq-title {
-  font: 800 22px/1.2 var(--fd);
-  color: var(--ink);
+  font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
   letter-spacing: -0.022em;
 }
 .eq-count {
-  font: 700 12px/1 var(--fn);
-  color: var(--a);
-  background: var(--ap);
-  padding: 4px 10px;
-  border-radius: 20px;
+  font: 600 12px/1 'Inter', sans-serif;
+  color: #6366f1;
+  background: rgba(99,102,241,.1);
+  padding: 6px 12px;
+  border-radius: 99px;
 }
 
 /* Search */
 .eq-search-wrap {
-  margin-top: 14px;
+  margin-top: 16px;
   position: relative;
 }
 .eq-search-ico {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--mu2);
+  color: #94a3b8;
   font-size: 15px;
   pointer-events: none;
 }
 .eq-search {
   width: 100%;
-  height: 42px;
-  padding: 0 14px 0 36px;
-  border: 1px solid var(--bo);
-  border-radius: var(--r);
-  background: var(--bg);
-  color: var(--ink);
-  font: 500 14px/1 var(--fb);
+  height: 44px;
+  padding: 0 16px 0 40px;
+  border: 1px solid #e2e6f2;
+  border-radius: 12px;
+  background: #f8f9fc;
+  color: #0a0d1a;
+  font: 500 14px/1 'Inter', sans-serif;
   outline: none;
   box-sizing: border-box;
-  transition: border-color var(--t), box-shadow var(--t);
+  transition: border-color .15s ease, background .15s ease;
 }
-.eq-search::placeholder { color: var(--mu2); }
+.eq-search::placeholder { color: #94a3b8; }
 .eq-search:focus {
-  border-color: var(--a);
-  box-shadow: 0 0 0 3px var(--ap);
+  border-color: #6366f1;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(99,102,241,.12);
 }
 
 /* Liste */
 .eq-list {
-  padding: 14px 16px 0;
+  padding: 16px 16px 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* Card enseignant */
 .eq-card {
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: var(--rl);
-  padding: 16px;
-  box-shadow: var(--s1);
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
   display: flex;
   align-items: flex-start;
   gap: 14px;
+  transition: border-color .15s ease;
 }
+.eq-card:hover { border-color: #6366f1; }
 .eq-av {
-  width: 46px; height: 46px;
+  width: 44px; height: 44px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font: 700 17px/1 var(--fd);
+  font: 600 16px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
   flex-shrink: 0;
+  background: #6366f1;
 }
 .eq-info { flex: 1; min-width: 0; }
 .eq-name {
-  font: 700 15px/1.2 var(--fd);
-  color: var(--ink);
+  font: 600 15px/1.3 'Inter', sans-serif;
+  color: #0a0d1a;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .eq-email {
-  font: 500 12px/1 var(--fn);
-  color: var(--mu);
-  margin-top: 3px;
+  font: 500 12px/1 'Inter', sans-serif;
+  color: #94a3b8;
+  margin-top: 4px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .eq-stats {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
 .eq-stat {
-  font: 600 12px/1 var(--fn);
-  color: var(--mu);
-  background: var(--bg2);
-  border: 1px solid var(--bo2);
+  font: 500 12px/1 'Inter', sans-serif;
+  color: #64748b;
+  background: #f8f9fc;
+  border: 1px solid #e2e6f2;
   border-radius: 8px;
-  padding: 4px 9px;
+  padding: 6px 10px;
 }
 .eq-stat strong {
-  color: var(--ink);
-  font-weight: 700;
+  color: #0a0d1a;
+  font-weight: 600;
 }
 .eq-badge {
-  font: 700 11px/1 var(--fb);
-  padding: 3px 9px;
-  border-radius: 20px;
+  font: 600 11px/1 'Inter', sans-serif;
+  padding: 5px 10px;
+  border-radius: 99px;
   letter-spacing: .2px;
 }
 .eq-badge.actif {
-  color: var(--gr);
-  background: var(--grp);
+  color: #059669;
+  background: rgba(16,185,129,.12);
 }
 .eq-badge.inactif {
-  color: var(--mu2);
-  background: var(--bg2);
-  border: 1px solid var(--bo);
+  color: #94a3b8;
+  background: #f8f9fc;
+  border: 1px solid #e2e6f2;
 }
 
 /* Bouton ajouter */
@@ -158,19 +164,19 @@ const STYLE = `<style>
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 46px;
-  border: 1.5px dashed var(--bo);
-  border-radius: var(--rl);
+  height: 48px;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 12px;
   background: transparent;
-  color: var(--mu);
-  font: 600 14px/1 var(--fb);
+  color: #64748b;
+  font: 600 14px/1 'Inter', sans-serif;
   cursor: pointer;
-  transition: border-color var(--t), background var(--t), color var(--t);
+  transition: border-color .15s ease, background .15s ease, color .15s ease;
 }
 .eq-add-btn:hover {
-  border-color: var(--a);
-  background: var(--ap);
-  color: var(--a);
+  border-color: #6366f1;
+  background: rgba(99,102,241,.06);
+  color: #6366f1;
 }
 .eq-add-ico { font-size: 18px; }
 
@@ -178,17 +184,21 @@ const STYLE = `<style>
 .eq-empty {
   padding: 32px 20px;
   text-align: center;
-  color: var(--mu2);
-  font: 500 13px/1.6 var(--fb);
+  color: #94a3b8;
+  font: 500 13px/1.6 'Inter', sans-serif;
+  background: #fff;
+  border: 1px dashed #e2e6f2;
+  border-radius: 12px;
+  margin: 16px;
 }
 .eq-empty-ico { font-size: 36px; margin-bottom: 10px; }
 
 /* Skeleton */
 .eq-skel {
-  background: linear-gradient(90deg, var(--bo2) 0%, var(--bg2) 50%, var(--bo2) 100%);
+  background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
   background-size: 200% 100%;
   animation: eqShimmer 1.4s ease-in-out infinite;
-  border-radius: var(--rl);
+  border-radius: 20px;
 }
 @keyframes eqShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 </style>`;
