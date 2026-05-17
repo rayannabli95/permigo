@@ -396,10 +396,16 @@ const STYLE = `<style>
     box-shadow: 0 4px 22px rgba(16,185,129,.55);
   }
 }
-/* Volant qui oscille gauche-droite sur le prochain défi */
+/* Volant qui oscille gauche-droite sur le prochain défi (image PNG) */
 .nd-wheel {
+  display: block;
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
   animation: ndWheelOsc 1.6s ease-in-out infinite;
   transform-origin: 50% 50%;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.25));
 }
 @keyframes ndWheelOsc {
   0%, 100% { transform: rotate(-22deg); }
@@ -1140,13 +1146,7 @@ function renderWorldSection(ws, validatedMap, hasNext) {
       done: `<svg width="22" height="17" viewBox="0 0 22 17" fill="none" aria-hidden="true">
         <path d="M2 8.5l5.5 5.5L20 2" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>`,
-      next: `<svg class="nd-wheel" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="2"/>
-        <circle cx="12" cy="12" r="2.4" fill="#fff"/>
-        <path d="M12 5.5 L12 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-        <path d="M5.5 14.5 L7 13.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-        <path d="M18.5 14.5 L17 13.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-      </svg>`,
+      next: `<img class="nd-wheel" src="/worlds/volant.png" alt="" width="32" height="32" aria-hidden="true"/>`,
       todo:   '',
       locked: `<svg width="14" height="17" viewBox="0 0 14 17" fill="none" aria-hidden="true">
         <rect x="1.5" y="7.5" width="11" height="9" rx="2" stroke="#9ca3af" stroke-width="1.4"/>
