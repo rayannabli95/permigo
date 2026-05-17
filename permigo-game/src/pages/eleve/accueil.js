@@ -14,6 +14,7 @@ import { maybeSoftRequestPush, maybeSendStreakRiskNotif } from '@/services/web-p
 // import { getDailyAction, DA_TYPES, completeDailyAction } from '@/modules/progression/daily-action.js';
 import { maybePlayWeeklyReplay } from '@/components/weekly-replay.js';
 import { icon, iconBadge } from '@/utils/icons.js';
+import { ASSETS } from '@/utils/assets.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -281,6 +282,24 @@ const STYLE = `<style>
 .world-card:active { transform: scale(.97); }
 .world-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .world-ico  { font-size: 22px; line-height: 1; }
+.world-img {
+  width: 42px; height: 42px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(11,13,26,.12));
+  transition: transform .3s ease;
+}
+.world-card:hover .world-img { transform: scale(1.08) rotate(-3deg); }
+.world-card[data-complete="true"] .world-img {
+  animation: worldFloat 2.8s ease-in-out infinite;
+}
+@keyframes worldFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-3px) rotate(2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .world-card[data-complete="true"] .world-img { animation: none; }
+}
 .world-pct  { font: 700 13px/1 'Inter', sans-serif; }
 .world-name { font: 600 12px/1.3 'Inter', sans-serif; color: #94a3b8; margin-bottom: 8px; }
 .world-track {
@@ -389,9 +408,13 @@ const STYLE = `<style>
 const XP_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2200, 3000];
 const LEVEL_NAMES   = ['', 'Débutant', 'Apprenti', 'Conducteur', 'Confirmé', 'Expert', 'Pro', 'As du Volant'];
 
+// Images premium par monde (assets ChatGPT 3D — fallback emoji)
+const WORLD_IMAGES = [ASSETS.worldC1, ASSETS.worldC2, ASSETS.worldC3, ASSETS.worldC4];
+
 const WORLDS = REMC.map((cat, i) => ({
   id:    cat.id,
   ico:   cat.ico,
+  image: WORLD_IMAGES[i] || null,
   name:  cat.name,
   subs:  cat.subs,
   total: cat.subs.length,
@@ -658,9 +681,11 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, las
   </div>
   <div class="worlds-grid">
     ${worlds.map(w => `
-      <div class="world-card" data-world="${esc(w.id)}">
+      <div class="world-card" data-world="${esc(w.id)}" data-complete="${w.complete ? 'true' : 'false'}">
         <div class="world-top">
-          <span class="world-ico">${w.ico}</span>
+          ${w.image
+            ? `<img class="world-img" src="${esc(w.image)}" alt="${esc(w.name)}" loading="lazy" />`
+            : `<span class="world-ico">${w.ico}</span>`}
           <span class="world-pct" style="color:${w.color}">${w.pct}%</span>
         </div>
         <div class="world-name">${esc(w.name)}</div>

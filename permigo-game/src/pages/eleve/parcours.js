@@ -9,6 +9,7 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { REMC } from '@/data/remc.js';
 import { WORLDS } from '@/data/worlds.js';
+import { ASSETS } from '@/utils/assets.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -844,12 +845,12 @@ const STYLE = `<style>
 .fiche-empty .et { font: 500 12.5px/1.5 'Inter', sans-serif; color: #94a3b8; font-style: italic; }
 </style>`;
 
-// ─── Identité visuelle par monde ─────────────────────────────────
+// ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
 const WORLDS_META = [
-  { num: 1, color: '#10b981', glow: 'rgba(16,185,129,.35)',  img: 'worlds/monde-1.png' },
-  { num: 2, color: '#06b6d4', glow: 'rgba(6,182,212,.35)',   img: 'worlds/monde-2.png' },
-  { num: 3, color: '#8b5cf6', glow: 'rgba(139,92,246,.35)',  img: 'worlds/monde-3.png' },
-  { num: 4, color: '#f59e0b', glow: 'rgba(245,158,11,.35)',  img: 'worlds/monde-4.png' },
+  { num: 1, color: '#10b981', glow: 'rgba(16,185,129,.35)',  img: ASSETS.worldC1 },
+  { num: 2, color: '#06b6d4', glow: 'rgba(6,182,212,.35)',   img: ASSETS.worldC2 },
+  { num: 3, color: '#8b5cf6', glow: 'rgba(139,92,246,.35)',  img: ASSETS.worldC3 },
+  { num: 4, color: '#f59e0b', glow: 'rgba(245,158,11,.35)',  img: ASSETS.worldC4 },
 ];
 
 // Combien de compétences du monde N-1 pour débloquer le monde N
