@@ -296,26 +296,79 @@ const STYLE = `<style>
   50%     { transform: rotate(20deg); }
 }
 .epc-stop.locked .epc-stop-dot { opacity: .5; }
-.epc-stop-body { flex: 1; min-width: 0; }
+.epc-stop-body { flex: 1; min-width: 0; padding: 2px 0; }
+.epc-stop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
 .epc-stop-lvl {
-  font: 600 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 'Inter', sans-serif;
   color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: .06em;
-  margin-bottom: 2px;
 }
 .epc-stop.now .epc-stop-lvl { color: #6366f1; }
 .epc-stop.done .epc-stop-lvl { color: #10b981; }
+
+/* Coût XP — la nouvelle info clé */
+.epc-stop-cost {
+  font: 600 11px/1 'Inter', sans-serif;
+  padding: 4px 8px;
+  border-radius: 99px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.epc-stop-cost.done {
+  color: #059669;
+  background: rgba(16,185,129,.12);
+}
+.epc-stop-cost.now {
+  color: #fff;
+  background: #6366f1;
+}
+.epc-stop-cost.todo {
+  color: #64748b;
+  background: #f0f2f8;
+}
+.epc-stop-cost em {
+  font-style: normal;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
 .epc-stop-title {
   font: 600 14px/1.3 'Inter', sans-serif;
   color: #0a0d1a;
+  margin-bottom: 6px;
 }
 .epc-stop.locked .epc-stop-title { color: #94a3b8; }
-.epc-stop-unlock {
-  font: 500 12px/1 'Inter', sans-serif;
+.epc-stop.done .epc-stop-title { color: #64748b; }
+
+/* Récompense débloquée */
+.epc-stop-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(99,102,241,.08);
+  border: 1px solid rgba(99,102,241,.2);
+  border-radius: 10px;
   color: #6366f1;
-  margin-top: 2px;
+  margin-top: 4px;
 }
+.epc-stop-reward.unlocked {
+  background: rgba(16,185,129,.08);
+  border-color: rgba(16,185,129,.2);
+  color: #059669;
+}
+.epc-stop-reward-ico { display: flex; align-items: center; flex-shrink: 0; }
+.epc-stop-reward-txt {
+  font: 500 12px/1.3 'Inter', sans-serif;
+}
+.epc-stop-reward-txt strong { font-weight: 700; }
 
 /* ── Section 4 : Cohorte ── */
 .epc-cohort {
@@ -576,7 +629,7 @@ export async function mount(root) {
       <!-- Route timeline VERTICALE -->
       <div class="epc-section-title">Ma route</div>
       <div class="epc-route" id="epc-route">
-        ${stops.map(s => renderStop(s, state)).join('')}
+        ${stops.map(s => renderStop(s, state, xp)).join('')}
       </div>
 
       <!-- Ma cohorte -->
@@ -653,7 +706,7 @@ function buildRouteStops(state) {
   return sorted.map(level => MONITEUR_LEVELS[level - 1]);
 }
 
-function renderStop(stop, state) {
+function renderStop(stop, state, xp) {
   const lv = state.current.level;
   let cls = 'todo';
   if (stop.level < lv) cls = 'done';
@@ -672,22 +725,39 @@ function renderStop(stop, state) {
     dotContent = `<span style="width:8px;height:8px;border-radius:50%;background:currentColor"></span>`;
   }
 
-  // Titre principal : titre du tier ou nom de l'unlock
-  const mainTitle = stop.unlock ? stop.unlock.name : stop.title;
-  const subline = cls === 'now'
-    ? "Tu es ici"
-    : stop.unlock
-      ? `Récompense ${stop.unlock.icon ? '' : ''}`
-      : '';
+  // ─── Coût XP (ce qu'il faut pour débloquer) ───
+  const xpDiff = stop.threshold - xp;
+  let costLine;
+  if (cls === 'done') {
+    costLine = `<span class="epc-stop-cost done">Atteint · ${stop.threshold} XP</span>`;
+  } else if (cls === 'now') {
+    costLine = `<span class="epc-stop-cost now">Tu es ici · ${xp} XP</span>`;
+  } else {
+    const validations = Math.ceil(xpDiff / XP_PER_VALIDATION);
+    costLine = `<span class="epc-stop-cost todo">+${xpDiff} XP <em>(~${validations} validation${validations > 1 ? 's' : ''})</em></span>`;
+  }
+
+  // ─── Récompense débloquée à ce niveau ───
+  const rewardLine = stop.unlock ? `
+    <div class="epc-stop-reward ${cls === 'done' ? 'unlocked' : ''}">
+      <span class="epc-stop-reward-ico">${icon(iconForUnlock(stop.unlock.name), { size: 14, strokeWidth: 2.4 })}</span>
+      <span class="epc-stop-reward-txt">
+        ${cls === 'done' ? 'Débloqué : ' : 'Débloque : '}
+        <strong>${esc(stop.unlock.name)}</strong>
+      </span>
+    </div>
+  ` : '';
 
   return `
     <div class="epc-stop ${cls}">
       <div class="epc-stop-dot">${dotContent}</div>
       <div class="epc-stop-body">
-        <div class="epc-stop-lvl">Niveau ${stop.level}</div>
-        <div class="epc-stop-title">${esc(mainTitle)}</div>
-        ${cls === 'now' ? '<div class="epc-stop-unlock">Tu es ici</div>' : ''}
-        ${stop.unlock && cls !== 'now' ? `<div class="epc-stop-unlock">Récompense débloquée</div>` : ''}
+        <div class="epc-stop-head">
+          <span class="epc-stop-lvl">Niveau ${stop.level}</span>
+          ${costLine}
+        </div>
+        <div class="epc-stop-title">${esc(stop.title)}</div>
+        ${rewardLine}
       </div>
     </div>
   `;
