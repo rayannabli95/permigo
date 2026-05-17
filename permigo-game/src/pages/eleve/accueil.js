@@ -13,6 +13,7 @@ import { maybeSoftRequestPush, maybeSendStreakRiskNotif } from '@/services/web-p
 // daily-action.js importé uniquement si la feature DA est activée (actuellement désactivée)
 // import { getDailyAction, DA_TYPES, completeDailyAction } from '@/modules/progression/daily-action.js';
 import { maybePlayWeeklyReplay } from '@/components/weekly-replay.js';
+import { icon, iconBadge } from '@/utils/icons.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -539,7 +540,7 @@ function computeCta({ pendingNotif, lastLecon }) {
     const isConsolid = pendingNotif.type === 'consolidation_quiz';
     return {
       type: pendingNotif.type,
-      ico: isConsolid ? '🧠' : '⚡',
+      ico: isConsolid ? icon('target', { size: 22 }) : icon('zap', { size: 22 }),
       label: isConsolid ? 'Quiz de consolidation' : 'Quiz post-validation',
       sub: isConsolid
         ? '2 questions · 30 secondes · Renforce ta mémoire'
@@ -640,7 +641,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, las
   <div class="action-card">
     <div class="action-top">
       <span class="action-tag">Action du jour</span>
-      ${cta.type === 'consolidation_quiz' ? '<span class="action-urgent">⚡ Urgent</span>' : ''}
+      ${cta.type === 'consolidation_quiz' ? `<span class="action-urgent">${icon('zap', { size: 13 })} Urgent</span>` : ''}
     </div>
     <div class="action-ico">${cta.ico}</div>
     <div class="action-label">${esc(cta.label)}</div>
@@ -667,7 +668,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, las
           <div class="world-fill" style="width:${w.pct}%;background:${w.color}"></div>
         </div>
         <div class="world-count">${w.done}/${w.total}</div>
-        ${w.complete ? '<div class="world-crown">👑</div>' : ''}
+        ${w.complete ? `<div class="world-crown">${icon('award', { size: 16 })}</div>` : ''}
       </div>
     `).join('')}
   </div>
@@ -680,14 +681,14 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, las
   <div class="trophees-row">
     ${trophees.unlocked.length === 0
       ? `<div class="trophees-empty">
-           <div class="trophees-empty-ico">🏆</div>
+           <div class="trophees-empty-ico">${icon('trophy', { size: 32 })}</div>
            <div class="trophees-empty-txt">Valide toutes les compétences d'un monde pour débloquer ton premier trophée</div>
          </div>`
       : trophees.unlocked.slice(0, 3).map(w => `
            <div class="trophy-card trophy-unlocked" style="--tc:${w.color}">
              <div class="trophy-ico">${w.ico}</div>
              <div class="trophy-label">${esc(w.name)}</div>
-             <div class="trophy-state">Acquis ✓</div>
+             <div class="trophy-state">${icon('check', { size: 11, strokeWidth: 3 })} Acquis</div>
            </div>`).join('')
     }
     ${trophees.nextUp ? `

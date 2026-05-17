@@ -294,7 +294,7 @@ async function doValidate() {
   await sb.from('notifications').insert({
     user_id: _eleve.id,
     type: 'post_validation_quiz',
-    title: 'Compétence validée ! 🎯',
+    title: 'Compétence validée !',
     body: `${_selectedComp.n} — Fais le quiz en 30 sec`,
     data: { competence_id: _selectedComp.c },
   });
@@ -421,7 +421,7 @@ function renderCategory(cat) {
           let badge = '';
           if (done)        badge = '<span class="badge-ok">✓ Acquis</span>';
           else if (sel)    badge = '<span class="badge-sel">Sélectionné</span>';
-          else if (isNext) badge = '<span class="badge-next">⭐ À valider</span>';
+          else if (isNext) badge = '<span class="badge-next">À valider</span>';
           else             badge = '<span class="badge-lock">🔒</span>';
           return `
             <div class="comp-row ${cls}"

@@ -10,6 +10,7 @@ import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { REMC_TOTAL } from '@/data/remc.js';
 import { labelComp } from '@/utils/remc-label.js';
+import { icon, iconBadge } from '@/utils/icons.js';
 
 // ─── Gradients avatar ─────────────────────────────────────────────
 const AVATARS = [
@@ -56,34 +57,81 @@ const STYLE = `<style>
     text-transform: capitalize;
   }
 
-  /* KPI grid */
-  .aj-kpi-grid {
+  /* Widgets KPI — style Apple Health */
+  .aj-widgets {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
     margin-bottom: 24px;
   }
-  .aj-kpi {
+  .aj-widget {
     background: #fff;
-    border: 1.5px solid #e2e6f2;
-    border-radius: 20px;
-    padding: 16px;
-    text-align: center;
-    box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+    border: 1px solid #e2e6f2;
+    border-radius: 24px;
+    padding: 18px;
+    box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 6px 16px -8px rgba(10,13,26,.08);
+    position: relative;
+    overflow: hidden;
+    animation: ajWidgetIn .5s cubic-bezier(.34,1.56,.64,1) both;
   }
-  .aj-kpi-val {
-    font: 700 28px/1 'Plus Jakarta Sans', sans-serif;
-    color: #6366f1;
-    display: block;
-    margin-bottom: 6px;
-    letter-spacing: -0.02em;
+  .aj-widget:nth-child(1) { animation-delay: .05s; }
+  .aj-widget:nth-child(2) { animation-delay: .12s; }
+  .aj-widget:nth-child(3) { animation-delay: .19s; }
+  @keyframes ajWidgetIn {
+    from { opacity: 0; transform: translateY(10px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
   }
-  .aj-kpi-lbl {
-    font: 500 11px/1.3 'Inter', sans-serif;
+  .aj-widget-wide {
+    grid-column: span 2;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .aj-widget-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .aj-widget-lbl {
+    font: 600 11px/1 'Inter', sans-serif;
     color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: .08em;
   }
-  .aj-kpi.kpi-acquis .aj-kpi-val { color: #10b981; }
-  .aj-kpi.kpi-eleves .aj-kpi-val { color: #0a0d1a; }
+  .aj-widget-val {
+    font: 700 32px/1 'Plus Jakarta Sans', sans-serif;
+    color: #0a0d1a;
+    letter-spacing: -0.025em;
+    margin: 0;
+  }
+  .aj-widget-sub {
+    font: 500 12px/1.3 'Inter', sans-serif;
+    color: #64748b;
+    margin-top: 4px;
+  }
+  .aj-widget-trend {
+    flex: 1;
+  }
+  .aj-widget-trend-bar {
+    height: 6px;
+    background: #f0f2f8;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .aj-widget-trend-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    border-radius: 99px;
+    transition: width 1s cubic-bezier(.2,.7,.3,1);
+  }
+  .aj-widget-delta {
+    font: 600 12px/1 'Inter', sans-serif;
+    color: #10b981;
+    margin-top: 6px;
+  }
+  .aj-widget-delta.down { color: #94a3b8; }
 
   /* Section title */
   .aj-section-title {
@@ -430,20 +478,36 @@ async function renderInto(root, _me) {
         <p class="aj-date">${formatDate(new Date())}</p>
       </header>
 
-      <!-- KPI -->
-      <div class="aj-kpi-grid">
-        <div class="aj-kpi">
-          <span class="aj-kpi-val">${validationsAujourdhui}</span>
-          <span class="aj-kpi-lbl">Validations<br>aujourd'hui</span>
+      <!-- Widgets KPI iOS-style -->
+      <div class="aj-widgets">
+
+        <div class="aj-widget">
+          <div class="aj-widget-head">
+            ${iconBadge('check', { color: '#10b981', size: 32 })}
+            <span class="aj-widget-lbl">Validées</span>
+          </div>
+          <p class="aj-widget-val">${acquisAujourdhui}</p>
+          <p class="aj-widget-sub">Aujourd'hui</p>
         </div>
-        <div class="aj-kpi kpi-acquis">
-          <span class="aj-kpi-val">${acquisAujourdhui}</span>
-          <span class="aj-kpi-lbl">Compétences<br>acquises</span>
+
+        <div class="aj-widget">
+          <div class="aj-widget-head">
+            ${iconBadge('users', { color: '#6366f1', size: 32 })}
+            <span class="aj-widget-lbl">Élèves</span>
+          </div>
+          <p class="aj-widget-val">${nbElevesActifs}</p>
+          <p class="aj-widget-sub">Suivis ce mois</p>
         </div>
-        <div class="aj-kpi kpi-eleves">
-          <span class="aj-kpi-val">${nbElevesActifs}</span>
-          <span class="aj-kpi-lbl">Élèves<br>suivis</span>
+
+        <div class="aj-widget aj-widget-wide">
+          ${iconBadge('trending-up', { color: '#8b5cf6', size: 40 })}
+          <div class="aj-widget-trend">
+            <span class="aj-widget-lbl">Activité du jour</span>
+            <p class="aj-widget-val">${validationsAujourdhui} <span style="font-size:14px;color:#94a3b8;font-weight:500;">action${validationsAujourdhui > 1 ? 's' : ''}</span></p>
+            <div class="aj-widget-trend-bar"><div class="aj-widget-trend-fill" style="width:${Math.min(100, validationsAujourdhui * 20)}%"></div></div>
+          </div>
         </div>
+
       </div>
 
       <!-- Activité récente -->
@@ -472,8 +536,9 @@ async function renderInto(root, _me) {
 
     <!-- CTA fixe -->
     <div class="aj-cta">
-      <button class="aj-cta-btn" id="aj-btn-valider">
-        + Valider une compétence
+      <button class="aj-cta-btn" id="aj-btn-valider" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+        ${icon('plus', { size: 18, strokeWidth: 2.6 })}
+        <span>Valider une compétence</span>
       </button>
     </div>
   `;

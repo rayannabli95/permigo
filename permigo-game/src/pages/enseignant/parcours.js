@@ -18,6 +18,24 @@ import { REMC_TOTAL } from '@/data/remc.js';
 import { getMoniteurState, MONITEUR_LEVELS } from '@/data/moniteur-levels.js';
 import { animateCounter } from '@/utils/gestures.js';
 import { haptic } from '@/utils/haptic.js';
+import { icon, iconBadge } from '@/utils/icons.js';
+
+// Map des unlocks → SVG icon (au lieu d'emojis)
+const UNLOCK_ICON = {
+  'Export PDF Livret':       'file-text',
+  'Stats avancées élèves':   'chart-bar',
+  'Templates bilan pédago':  'clipboard',
+  'Prépa examen enrichie':   'target',
+  'Analytics comparatives':  'trending-up',
+  'Profil mis en avant':     'award',
+  'Modules formation':       'book',
+  'Programme mentorat':      'users',
+  'Expert Hub':              'shield',
+  'Cercle Or':               'sparkle',
+};
+function iconForUnlock(name) {
+  return UNLOCK_ICON[name] || 'sparkle';
+}
 
 const XP_PER_VALIDATION = 25;
 
@@ -117,7 +135,7 @@ const STYLE = `<style>
 }
 .epc-xp-meta strong { color: #0a0d1a; font-weight: 600; }
 
-/* ── Section 2 : Route timeline ── */
+/* ── Section title ── */
 .epc-section-title {
   font: 600 11px/1 'Inter', sans-serif;
   text-transform: uppercase;
@@ -125,74 +143,149 @@ const STYLE = `<style>
   color: #94a3b8;
   margin: 24px 20px 12px;
 }
-.epc-route {
-  margin: 0 16px;
-  padding: 24px 8px 16px;
-  background: #fff;
-  border: 1px solid #e2e6f2;
-  border-radius: 20px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
-}
-.epc-route::-webkit-scrollbar { height: 4px; }
-.epc-route::-webkit-scrollbar-track { background: transparent; }
-.epc-route::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
-.epc-route-track {
+
+/* ── HÉRO : Prochaine récompense (la motivation) ── */
+.epc-hero {
+  margin: 16px;
+  padding: 24px;
+  background: linear-gradient(160deg, #6366f1 0%, #8b5cf6 100%);
+  border-radius: 28px;
+  color: #fff;
   position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 0;
-  min-width: max-content;
-  padding: 30px 12px 8px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px -10px rgba(99,102,241,.4), 0 6px 16px -8px rgba(10,13,26,.1);
+  animation: epcHeroIn .55s cubic-bezier(.34,1.56,.64,1) both;
 }
-/* Ligne horizontale continue derrière */
-.epc-route-track::before {
+@keyframes epcHeroIn {
+  from { opacity: 0; transform: translateY(12px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.epc-hero::before {
   content: '';
   position: absolute;
-  top: 50px;
-  left: 28px;
-  right: 28px;
-  height: 3px;
-  background: linear-gradient(90deg, #10b981 0%, #6366f1 var(--prog,30%), #e2e8f0 var(--prog,30%), #e2e8f0 100%);
-  border-radius: 99px;
-  z-index: 0;
+  top: -30%; right: -20%;
+  width: 70%; height: 140%;
+  background: radial-gradient(ellipse, rgba(255,255,255,.18) 0%, transparent 60%);
+  pointer-events: none;
 }
-.epc-stop {
+.epc-hero-lbl {
+  font: 600 11px/1 'Inter', sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
-  width: 72px;
-  flex-shrink: 0;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
 }
-.epc-stop-icon-wrap {
+.epc-hero-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+.epc-hero-icon {
+  width: 60px; height: 60px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.18);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.25);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+}
+.epc-hero-info { flex: 1; min-width: 0; }
+.epc-hero-level {
+  font: 600 11px/1 'Inter', sans-serif;
+  color: rgba(255,255,255,.7);
+  margin-bottom: 4px;
+}
+.epc-hero-name {
+  font: 700 19px/1.2 'Plus Jakarta Sans', sans-serif;
+  margin: 0 0 6px;
+  letter-spacing: -0.022em;
+}
+.epc-hero-desc {
+  font: 500 12.5px/1.4 'Inter', sans-serif;
+  color: rgba(255,255,255,.8);
+  margin: 0;
+}
+.epc-hero-prog {
+  margin-top: 18px;
+  position: relative;
+  z-index: 1;
+}
+.epc-hero-prog-bar {
+  height: 8px;
+  background: rgba(255,255,255,.2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.epc-hero-prog-fill {
+  height: 100%;
+  background: #fff;
+  border-radius: 99px;
+  transition: width 1s cubic-bezier(.2,.7,.3,1);
+}
+.epc-hero-prog-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font: 500 11.5px/1 'Inter', sans-serif;
+  color: rgba(255,255,255,.85);
+}
+
+/* ── MA ROUTE : timeline VERTICALE ── */
+.epc-route {
+  margin: 0 16px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 24px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+}
+.epc-stop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  position: relative;
+}
+.epc-stop:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 38px;
+  bottom: -10px;
+  width: 2px;
+  background: #e2e8f0;
+}
+.epc-stop.done:not(:last-child)::before { background: #10b981; }
+.epc-stop-dot {
   width: 36px; height: 36px;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
   background: #fff;
   border: 2.5px solid #e2e8f0;
-  font-size: 16px;
-  line-height: 1;
-  transition: transform .2s;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  z-index: 1;
+  color: #94a3b8;
 }
-.epc-stop.done .epc-stop-icon-wrap {
+.epc-stop.done .epc-stop-dot {
   background: #10b981;
   border-color: #10b981;
   color: #fff;
 }
-.epc-stop.now .epc-stop-icon-wrap {
+.epc-stop.now .epc-stop-dot {
   background: #fff;
   border-color: #6366f1;
-  box-shadow: 0 0 0 5px rgba(99,102,241,.18);
+  box-shadow: 0 0 0 4px rgba(99,102,241,.2);
   width: 44px; height: 44px;
   padding: 4px;
+  margin-left: -4px;
 }
-.epc-stop.now .epc-stop-icon-wrap img {
+.epc-stop.now .epc-stop-dot img {
   width: 100%; height: 100%;
   object-fit: contain;
   animation: epcWheelOsc 1.8s ease-in-out infinite;
@@ -202,74 +295,26 @@ const STYLE = `<style>
   0%,100% { transform: rotate(-20deg); }
   50%     { transform: rotate(20deg); }
 }
-.epc-stop.locked .epc-stop-icon-wrap {
-  opacity: .55;
-}
+.epc-stop.locked .epc-stop-dot { opacity: .5; }
+.epc-stop-body { flex: 1; min-width: 0; }
 .epc-stop-lvl {
-  font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
-}
-.epc-stop-lbl {
-  font: 500 9.5px/1.2 'Inter', sans-serif;
+  font: 600 11px/1 'Inter', sans-serif;
   color: #94a3b8;
   text-transform: uppercase;
-  letter-spacing: .04em;
-  min-height: 12px;
+  letter-spacing: .06em;
+  margin-bottom: 2px;
 }
 .epc-stop.now .epc-stop-lvl { color: #6366f1; }
-.epc-stop.now .epc-stop-lbl { color: #6366f1; font-weight: 600; }
-
-/* ── Section 3 : Prochain palier ── */
-.epc-next {
-  margin: 12px 16px;
-  padding: 18px 20px;
-  background: linear-gradient(135deg, rgba(99,102,241,.05), rgba(139,92,246,.05));
-  border: 1px solid rgba(99,102,241,.2);
-  border-radius: 20px;
-}
-.epc-next-hd {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.epc-next-ico {
-  font-size: 22px;
-  line-height: 1;
-}
-.epc-next-lbl {
-  font: 600 10px/1 'Inter', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #6366f1;
-}
-.epc-next-name {
-  font: 700 16px/1.3 'Plus Jakarta Sans', sans-serif;
+.epc-stop.done .epc-stop-lvl { color: #10b981; }
+.epc-stop-title {
+  font: 600 14px/1.3 'Inter', sans-serif;
   color: #0a0d1a;
-  letter-spacing: -0.01em;
-  margin: 0 0 4px;
 }
-.epc-next-desc {
-  font: 500 13px/1.4 'Inter', sans-serif;
-  color: #64748b;
-  margin: 0 0 12px;
-}
-.epc-next-prog {
-  height: 5px;
-  background: rgba(99,102,241,.15);
-  border-radius: 99px;
-  overflow: hidden;
-}
-.epc-next-prog-fill {
-  height: 100%;
-  background: #6366f1;
-  border-radius: 99px;
-}
-.epc-next-eta {
-  font: 500 11px/1 'Inter', sans-serif;
-  color: #94a3b8;
-  margin-top: 6px;
-  text-align: right;
+.epc-stop.locked .epc-stop-title { color: #94a3b8; }
+.epc-stop-unlock {
+  font: 500 12px/1 'Inter', sans-serif;
+  color: #6366f1;
+  margin-top: 2px;
 }
 
 /* ── Section 4 : Cohorte ── */
@@ -500,37 +545,39 @@ export async function mount(root) {
           </div>
           <div class="epc-xp-meta">
             <span><strong>${xp}</strong> XP</span>
-            <span>${state.next ? `${state.xpToNext} XP avant Niveau ${state.next.level}` : 'Niveau max atteint 💎'}</span>
+            <span>${state.next ? `${state.xpToNext} XP avant Niveau ${state.next.level}` : 'Niveau max atteint'}</span>
           </div>
         </div>
       </div>
 
-      <!-- Route -->
-      <div class="epc-section-title">Ma route</div>
-      <div class="epc-route" id="epc-route">
-        <div class="epc-route-track" style="--prog:${routeProgress(stops, state)}%">
-          ${stops.map(s => renderStop(s, state)).join('')}
-        </div>
-      </div>
-
-      <!-- Prochain palier -->
+      <!-- HÉRO : Prochaine récompense (le moteur de motivation) -->
       ${state.nextUnlock ? `
-      <div class="epc-next">
-        <div class="epc-next-hd">
-          <span class="epc-next-ico">${esc(state.nextUnlock.icon)}</span>
-          <span class="epc-next-lbl">Prochain palier</span>
+      <div class="epc-hero">
+        <div class="epc-hero-lbl">Prochaine récompense</div>
+        <div class="epc-hero-row">
+          <div class="epc-hero-icon">${icon(iconForUnlock(state.nextUnlock.name), { size: 28, strokeWidth: 2.2 })}</div>
+          <div class="epc-hero-info">
+            <div class="epc-hero-level">Niveau ${state.nextUnlock.level}</div>
+            <h3 class="epc-hero-name">${esc(state.nextUnlock.name)}</h3>
+            <p class="epc-hero-desc">${esc(state.nextUnlock.desc)}</p>
+          </div>
         </div>
-        <h3 class="epc-next-name">Niv ${state.nextUnlock.level} · ${esc(state.nextUnlock.name)}</h3>
-        <p class="epc-next-desc">${esc(state.nextUnlock.desc)}</p>
-        <div class="epc-next-prog">
-          <div class="epc-next-prog-fill" style="width:${unlockPct(xp, state.nextUnlock.level)}%"></div>
-        </div>
-        <div class="epc-next-eta">
-          ${state.xpUntilNextUnlock > 0
-            ? `${state.xpUntilNextUnlock} XP restants · ~${Math.ceil(state.xpUntilNextUnlock / XP_PER_VALIDATION)} validations`
-            : 'Débloqué bientôt !'}
+        <div class="epc-hero-prog">
+          <div class="epc-hero-prog-bar">
+            <div class="epc-hero-prog-fill" style="width:${unlockPct(xp, state.nextUnlock.level)}%"></div>
+          </div>
+          <div class="epc-hero-prog-meta">
+            <span>${state.xpUntilNextUnlock} XP restants</span>
+            <span>~${Math.ceil(state.xpUntilNextUnlock / XP_PER_VALIDATION)} validations</span>
+          </div>
         </div>
       </div>` : ''}
+
+      <!-- Route timeline VERTICALE -->
+      <div class="epc-section-title">Ma route</div>
+      <div class="epc-route" id="epc-route">
+        ${stops.map(s => renderStop(s, state)).join('')}
+      </div>
 
       <!-- Ma cohorte -->
       ${elevesProfiles.length > 0 ? `
@@ -552,12 +599,12 @@ export async function mount(root) {
       <div class="epc-section-title">Cette semaine</div>
       <div class="epc-week">
         <div class="epc-week-row">
-          <span class="epc-week-ico">📊</span>
+          <span class="epc-week-ico">${icon('chart-bar', { size: 18 })}</span>
           <span class="epc-week-txt"><strong data-counter="${valsThisWeek.length}">0</strong> validation${valsThisWeek.length > 1 ? 's' : ''} · <strong>${elevesThisWeek}</strong> élève${elevesThisWeek > 1 ? 's' : ''}</span>
         </div>
         ${trendLabel ? `
         <div class="epc-week-row">
-          <span class="epc-week-ico">📈</span>
+          <span class="epc-week-ico">${icon('trending-up', { size: 18 })}</span>
           <span class="epc-week-txt">${esc(trendLabel)}</span>
         </div>` : ''}
       </div>
@@ -565,14 +612,12 @@ export async function mount(root) {
     </div>`;
 
   // ─── Wire ─────────────────────────────────────────────────────
-  // Scroll auto vers le stop "now" sur la route
-  const route = root.querySelector('#epc-route');
+  // Scroll smooth vers le stop "now" sur la route verticale
   const nowStop = root.querySelector('.epc-stop.now');
-  if (route && nowStop) {
+  if (nowStop) {
     setTimeout(() => {
-      const offset = nowStop.offsetLeft - (route.clientWidth / 2) + (nowStop.clientWidth / 2);
-      route.scrollTo({ left: offset, behavior: 'smooth' });
-    }, 300);
+      nowStop.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 600);
   }
 
   // Anime le compteur "validations cette semaine"
@@ -613,28 +658,39 @@ function renderStop(stop, state) {
   let cls = 'todo';
   if (stop.level < lv) cls = 'done';
   else if (stop.level === lv) cls = 'now';
-  else if (stop.level > lv + 5) cls = 'locked';
-  // Le node "now" affiche le volant
-  const inner = cls === 'now'
-    ? `<img src="/worlds/volant.png" alt="" aria-hidden="true" />`
-    : cls === 'done' ? '✓'
-    : stop.unlock ? stop.unlock.icon
-    : '';
-  const label = stop.unlock ? stop.unlock.name.split(' ')[0] : '';
+  else if (stop.level > lv + 10) cls = 'locked';
+
+  // Contenu du dot
+  let dotContent;
+  if (cls === 'now') {
+    dotContent = `<img src="/worlds/volant.png" alt="" aria-hidden="true" />`;
+  } else if (cls === 'done') {
+    dotContent = icon('check', { size: 16, strokeWidth: 3 });
+  } else if (stop.unlock) {
+    dotContent = icon(iconForUnlock(stop.unlock.name), { size: 15, strokeWidth: 2 });
+  } else {
+    dotContent = `<span style="width:8px;height:8px;border-radius:50%;background:currentColor"></span>`;
+  }
+
+  // Titre principal : titre du tier ou nom de l'unlock
+  const mainTitle = stop.unlock ? stop.unlock.name : stop.title;
+  const subline = cls === 'now'
+    ? "Tu es ici"
+    : stop.unlock
+      ? `Récompense ${stop.unlock.icon ? '' : ''}`
+      : '';
+
   return `
     <div class="epc-stop ${cls}">
-      <div class="epc-stop-icon-wrap">${inner}</div>
-      <div class="epc-stop-lvl">N${stop.level}</div>
-      <div class="epc-stop-lbl">${esc(label || (cls === 'now' ? 'Toi' : ''))}</div>
+      <div class="epc-stop-dot">${dotContent}</div>
+      <div class="epc-stop-body">
+        <div class="epc-stop-lvl">Niveau ${stop.level}</div>
+        <div class="epc-stop-title">${esc(mainTitle)}</div>
+        ${cls === 'now' ? '<div class="epc-stop-unlock">Tu es ici</div>' : ''}
+        ${stop.unlock && cls !== 'now' ? `<div class="epc-stop-unlock">Récompense débloquée</div>` : ''}
+      </div>
     </div>
   `;
-}
-
-function routeProgress(stops, state) {
-  const lv = state.current.level;
-  const idx = stops.findIndex(s => s.level === lv);
-  if (idx < 0) return 0;
-  return Math.round(((idx + (state.pctInLevel / 100)) / Math.max(1, stops.length - 1)) * 100);
 }
 
 function unlockPct(xp, targetLevel) {

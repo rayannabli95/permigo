@@ -8,6 +8,7 @@ import { esc } from '@/utils/escape.js';
 import { toast } from '@/components/toast.js';
 import { track } from '@/services/analytics.js';
 import { labelComp } from '@/utils/remc-label.js';
+import { icon } from '@/utils/icons.js';
 
 // ─── CSS scoped (Tesla × Bloomberg × Airbnb — cockpit gérant) ─────
 const STYLE = `<style>
@@ -334,22 +335,22 @@ function render({ elevesTotal, compValidees, enseignants, quizReussis, teachers,
 
   <div class="kpi-grid">
     <div class="kpi-card" style="--kc:#6366f1">
-      <span class="kpi-ico">👥</span>
+      <span class="kpi-ico" style="color:#6366f1">${icon('users', { size: 22 })}</span>
       <div class="kpi-val">${elevesTotal}</div>
       <div class="kpi-lbl">Élèves actifs</div>
     </div>
     <div class="kpi-card" style="--kc:#10b981">
-      <span class="kpi-ico">✅</span>
+      <span class="kpi-ico" style="color:#10b981">${icon('check-circle', { size: 22 })}</span>
       <div class="kpi-val">${compValidees}</div>
       <div class="kpi-lbl">Compétences validées<br>${esc(monthLabel)}</div>
     </div>
     <div class="kpi-card" style="--kc:#8b5cf6">
-      <span class="kpi-ico">🏫</span>
+      <span class="kpi-ico" style="color:#8b5cf6">${icon('book', { size: 22 })}</span>
       <div class="kpi-val">${enseignants}</div>
       <div class="kpi-lbl">Enseignants actifs</div>
     </div>
     <div class="kpi-card" style="--kc:#f59e0b">
-      <span class="kpi-ico">🎯</span>
+      <span class="kpi-ico" style="color:#f59e0b">${icon('target', { size: 22 })}</span>
       <div class="kpi-val">${quizReussis}</div>
       <div class="kpi-lbl">Quiz réussis<br>${esc(monthLabel)}</div>
     </div>

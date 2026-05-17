@@ -132,15 +132,21 @@ const STYLE = `
   .nf-empty .s { font-size: 13px; }
 `;
 
+// Mapping vers icons SVG (au lieu d'emojis)
+import { icon as _icon } from '@/utils/icons.js';
 const TYPE_META = {
-  xp:           { icon: '⚡', bg: 'rgba(99,102,241,.1)',  color: '#6366f1' },
-  trophy:       { icon: '🏆', bg: 'rgba(245,158,11,.1)',  color: '#f59e0b' },
-  validation:   { icon: '✅', bg: 'rgba(16,185,129,.1)',  color: '#10b981' },
-  streak:       { icon: '🔥', bg: 'rgba(239,68,68,.1)',   color: '#ef4444' },
-  consolidation:{ icon: '🧠', bg: 'rgba(139,92,246,.1)', color: '#8b5cf6' },
-  reminder:     { icon: '📌', bg: 'rgba(14,165,233,.1)',  color: '#0ea5e9' },
-  info:         { icon: 'ℹ️', bg: 'rgba(100,116,139,.1)', color: '#64748b' },
+  xp:           { iconName: 'zap',          bg: 'rgba(99,102,241,.1)',  color: '#6366f1' },
+  trophy:       { iconName: 'trophy',       bg: 'rgba(245,158,11,.1)',  color: '#f59e0b' },
+  validation:   { iconName: 'check-circle', bg: 'rgba(16,185,129,.1)',  color: '#10b981' },
+  streak:       { iconName: 'flame',        bg: 'rgba(239,68,68,.1)',   color: '#ef4444' },
+  consolidation:{ iconName: 'target',       bg: 'rgba(139,92,246,.1)', color: '#8b5cf6' },
+  reminder:     { iconName: 'bell',         bg: 'rgba(14,165,233,.1)',  color: '#0ea5e9' },
+  info:         { iconName: 'bell',         bg: 'rgba(100,116,139,.1)', color: '#64748b' },
 };
+function typeIcon(type) {
+  const meta = TYPE_META[type] || TYPE_META.info;
+  return _icon(meta.iconName, { size: 18 });
+}
 
 function typeMeta(type) {
   return TYPE_META[type] || TYPE_META.info;
@@ -184,7 +190,7 @@ function renderGroup(label, items) {
         const m = typeMeta(n.type);
         return `
           <div class="nf-item ${n.read ? '' : 'unread'}" data-id="${esc(n.id)}" data-read="${n.read}">
-            <div class="nf-icon" style="background:${m.bg};">${m.icon}</div>
+            <div class="nf-icon" style="background:${m.bg};color:${m.color};">${typeIcon(n.type)}</div>
             <div class="nf-body">
               <div class="nf-name">${esc(n.title)}</div>
               ${n.body ? `<div class="nf-desc">${esc(n.body)}</div>` : ''}

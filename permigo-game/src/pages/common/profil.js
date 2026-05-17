@@ -8,6 +8,7 @@ import { track } from '@/services/analytics.js';
 import { mountPermisCard } from '@/components/permis-card.js';
 import { mountProfileCard } from '@/components/profile-card.js';
 import { REMC_TOTAL } from '@/data/remc.js';
+import { icon } from '@/utils/icons.js';
 
 // ─── CSS (cohérent avec design system permigo-game) ─────────────
 const STYLE = `<style>
@@ -285,7 +286,7 @@ export async function mount(root) {
 
   ${anneeStats ? `
   <div class="prf-streak">
-    <span class="prf-streak-ico">🔥</span>
+    <span class="prf-streak-ico" style="color:#f97316">${icon('flame', { size: 22, strokeWidth: 2.4 })}</span>
     <div class="prf-streak-body">
       <div class="prf-streak-n">${anneeStats.streakDays} jour${anneeStats.streakDays !== 1 ? 's' : ''}</div>
       <div class="prf-streak-lbl">d'affilée cette semaine</div>
@@ -317,14 +318,14 @@ export async function mount(root) {
 
   <div class="prf-section">
     <div class="prf-row">
-      <span class="prf-row-ico">✉️</span>
+      <span class="prf-row-ico">${icon('mail', { size: 18 })}</span>
       <div class="prf-row-body">
         <div class="prf-row-lbl">Email</div>
         <div class="prf-row-val">${esc(profile?.email || me.email || '—')}</div>
       </div>
     </div>
     <div class="prf-row">
-      <span class="prf-row-ico">🎭</span>
+      <span class="prf-row-ico">${icon('user', { size: 18 })}</span>
       <div class="prf-row-body">
         <div class="prf-row-lbl">Rôle</div>
         <div class="prf-row-val">${esc(ROLE_LABELS[me.role] || me.role)}</div>
@@ -332,14 +333,14 @@ export async function mount(root) {
     </div>
     ${profile?.xp != null ? `
     <div class="prf-row">
-      <span class="prf-row-ico">⚡</span>
+      <span class="prf-row-ico">${icon('zap', { size: 18 })}</span>
       <div class="prf-row-body">
         <div class="prf-row-lbl">XP total</div>
         <div class="prf-row-val" style="color:#6366f1">${esc(String(profile.xp))} XP</div>
       </div>
     </div>` : ''}
     <div class="prf-row">
-      <span class="prf-row-ico">🔑</span>
+      <span class="prf-row-ico">${icon('key', { size: 18 })}</span>
       <div class="prf-row-body">
         <div class="prf-row-lbl">ID profil</div>
         <div class="prf-row-val" style="font-size:11px;color:#94a3b8">${esc(me.id)}</div>

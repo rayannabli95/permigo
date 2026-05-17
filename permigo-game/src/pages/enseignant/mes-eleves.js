@@ -607,7 +607,7 @@ function openQuickMenu(eleveId, anchorRow) {
         <span class="me-qm-ico">✓</span> Valider une compétence
       </button>
       <button class="me-qm-item" data-action="livret">
-        <span class="me-qm-ico">📋</span> Ouvrir le livret REMC
+        <span class="me-qm-ico">→</span> Ouvrir le livret REMC
       </button>
       <button class="me-qm-item" data-action="note">
         <span class="me-qm-ico">📝</span> Ajouter une note rapide
