@@ -280,16 +280,22 @@ const STYLE = `<style>
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
 }
 .world-card:active { transform: scale(.97); }
-.world-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.world-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; min-height: 60px; }
 .world-ico  { font-size: 22px; line-height: 1; }
 .world-img {
-  width: 42px; height: 42px;
+  width: 60px; height: 60px;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 2px 6px rgba(11,13,26,.12));
+  filter: drop-shadow(0 3px 8px rgba(11,13,26,.14));
   transition: transform .3s ease;
 }
-.world-card:hover .world-img { transform: scale(1.08) rotate(-3deg); }
+/* C2 (circulation normale) — l'image a un contour foncé natif :
+   on zoome 1.15× pour rogner les bords disgracieux */
+.world-card[data-world="C2"] .world-img {
+  transform: scale(1.18);
+}
+.world-card:hover .world-img { transform: scale(1.10) rotate(-3deg); }
+.world-card[data-world="C2"]:hover .world-img { transform: scale(1.28) rotate(-3deg); }
 .world-card[data-complete="true"] .world-img {
   animation: worldFloat 2.8s ease-in-out infinite;
 }
