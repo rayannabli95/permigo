@@ -294,10 +294,12 @@ export async function mount(root) {
   }</div></div>`;
 
   try {
-    const [streakRes, validRes, quizRes] = await Promise.allSettled([
+    const [streakRes, validRes, quizRes, leconsRes] = await Promise.allSettled([
       sb.from('streaks').select('current_streak, longest_streak').eq('user_id', me.id).maybeSingle(),
       sb.from('validations').select('competence_id, validated_at').eq('eleve_id', me.id).eq('statut', 'acquis'),
       sb.from('quiz_attempts').select('score, completed_at').eq('user_id', me.id).eq('type', 'post_validation').gte('score', 100),
+      // Détection night_rider via heure UTC de created_at (21h-6h local FR ≈ 19h-04h UTC en été, 20h-05h hiver)
+      sb.from('lecons_realisees').select('created_at, notes').eq('eleve_id', me.id),
     ]);
 
     const streak = streakRes.value?.data || { current_streak: 0, longest_streak: 0 };
@@ -306,11 +308,26 @@ export async function mount(root) {
     const hasPerfectQuiz = (quizRes.value?.data?.length ?? 0) > 0;
     const c1ValidatedCount = validated.filter(c => c.startsWith('C1')).length;
 
+    // hasNightSession : au moins 1 leçon avec heure locale ≥ 21h ou ≤ 6h
+    const lecons = leconsRes.value?.data || [];
+    const hasNightSession = lecons.some(l => {
+      if (!l.created_at) return false;
+      const h = new Date(l.created_at).getHours();
+      return h >= 21 || h <= 6;
+    });
+    // hasEcoSession : leçon dont les notes mentionnent éco-conduite (provisoire,
+    // remplacer par un vrai flag DB quand dispo)
+    const hasEcoSession = lecons.some(l =>
+      typeof l.notes === 'string' && /\béco|economi|consommation\b/i.test(l.notes)
+    );
+
     const ctx = {
       validatedCount: validated.length,
       longestStreak: streak.longest_streak || 0,
       hasPerfectQuiz,
       c1ValidatedCount,
+      hasNightSession,
+      hasEcoSession,
     };
 
     const trophees = TROPHEES.map(t => ({ ...t, unlocked: t.check(ctx) }));

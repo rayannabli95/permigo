@@ -13,7 +13,7 @@ import { sb } from '@/auth/auth.js';
 import { getPrestige } from '@/data/prestige.js';
 import { haptic } from '@/utils/haptic.js';
 import { wrapAnimatedBorder, BORDER_PRESETS } from '@/components/animated-border.js';
-import { openAvatarPicker } from '@/components/avatar-picker.js';
+import { openAvatarPicker, AVATAR_PICKER_UPLOAD } from '@/components/avatar-picker.js';
 
 const STYLE = `<style>
 .pcc { width: 100%; max-width: 380px; margin: 0 auto; padding: 0; }
@@ -450,9 +450,9 @@ export function mountProfileCard(container, opts) {
   card.querySelector('[data-action="edit-avatar"]').addEventListener('click', async () => {
     haptic('select');
     try {
-      const choice = await openAvatarPicker({ currentUrl: avatarUrl || me.avatar_url });
+      const choice = await openAvatarPicker({ currentUrl: avatarUrl ?? me.avatar_url ?? null });
       if (!choice) return; // annulé
-      if (choice === '__upload__') {
+      if (choice === AVATAR_PICKER_UPLOAD) {
         avInput.click(); // déclenche le file picker existant
         return;
       }

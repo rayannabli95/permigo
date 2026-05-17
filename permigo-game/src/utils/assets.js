@@ -22,7 +22,7 @@ export const ASSETS = {
   badge: n => `/skins/badge-3d-${String(n).padStart(2, '0')}.png`,
   badgeUltimate: '/skins/badge-3d-ultimate.png',
 
-  // ── Trophées élève (8 visuels premium) ─────────────────────────
+  // ── Trophées élève (8 visuels premium — streak_3 utilise emoji fallback) ───
   trophy: {
     firstValidation:  '/skins/trophy-first-validation.png',
     streak7d:         '/skins/trophy-streak-7d.png',

@@ -12,6 +12,9 @@ import { ASSETS } from '@/utils/assets.js';
 import { haptic } from '@/utils/haptic.js';
 import { esc } from '@/utils/escape.js';
 
+/** Sentinelle exportée — utilisée par les consommateurs pour détecter le choix "upload custom" */
+export const AVATAR_PICKER_UPLOAD = '__permigo_upload_custom__';
+
 const STYLE = `<style>
 .avpk-bg {
   position: fixed; inset: 0;
@@ -131,9 +134,16 @@ const STYLE = `<style>
  */
 export function openAvatarPicker(opts = {}) {
   return new Promise(resolve => {
+    // Dédup style — injecté une seule fois par session
+    if (!document.getElementById('avpk-style')) {
+      const styleNode = document.createElement('div');
+      styleNode.innerHTML = STYLE;
+      const sEl = styleNode.querySelector('style');
+      if (sEl) { sEl.id = 'avpk-style'; document.head.appendChild(sEl); }
+    }
+
     const container = document.createElement('div');
     container.innerHTML = `
-      ${STYLE}
       <div class="avpk-bg"></div>
       <div class="avpk-sheet" role="dialog" aria-label="Choisir un avatar">
         <div class="avpk-handle"></div>
@@ -200,7 +210,7 @@ export function openAvatarPicker(opts = {}) {
     });
     container.querySelector('[data-action="upload"]').addEventListener('click', () => {
       haptic('select');
-      close('__upload__'); // sentinelle interceptée par profile-card
+      close(AVATAR_PICKER_UPLOAD); // sentinelle interceptée par profile-card
     });
     confirmBtn.addEventListener('click', () => {
       haptic('success');
