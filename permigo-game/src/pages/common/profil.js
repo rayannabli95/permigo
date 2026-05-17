@@ -6,6 +6,7 @@ import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { mountPermisCard } from '@/components/permis-card.js';
+import { mountProfileCard } from '@/components/profile-card.js';
 import { REMC_TOTAL } from '@/data/remc.js';
 
 // ─── CSS (cohérent avec design system permigo-game) ─────────────
@@ -184,10 +185,10 @@ export async function mount(root) {
   // Skeleton
   root.innerHTML = `${STYLE}<div class="prf"><div class="skel skel-card" style="height:180px;margin-bottom:14px"></div><div class="skel skel-card"></div></div>`;
 
-  // Fetch profil complet (xp, streak_pro_days, prenom, created_at)
+  // Fetch profil complet (xp, streak_pro_days, prenom, created_at, avatar, banner)
   const { data: profile } = await sb
     .from('profiles')
-    .select('email, prenom, nom, xp, streak_pro_days, created_at')
+    .select('email, prenom, nom, xp, streak_pro_days, created_at, avatar_url, banner_url')
     .eq('id', me.id)
     .single();
 
@@ -235,15 +236,52 @@ export async function mount(root) {
   const displayName = me.nom || profile?.email || me.email || '?';
   const initials = displayName.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || '?';
 
+  // ─── Données pour la ProfileCard sociale (élève + enseignant) ──────
+  let profileCardData = null;
+  if (me.role === 'eleve' && permisData) {
+    profileCardData = {
+      me: { ...me, prenom: profile?.prenom || '', nom: profile?.nom || '' },
+      avatarUrl: profile?.avatar_url || null,
+      bannerUrl: profile?.banner_url || null,
+      count: permisData.validated, // pour calcul prestige (max 31)
+      bio: `Apprenti permis B · ${permisData.validated}/${REMC_TOTAL} compétences`,
+      stats: [
+        { label: 'Compétences', value: permisData.validated },
+        { label: 'Streak',      value: profile?.streak_pro_days || 0 },
+        { label: 'XP',          value: profile?.xp || 0 },
+      ],
+      shareUrl: window.location.origin,
+      shareText: `Je suis à ${permisData.validated}/${REMC_TOTAL} compétences validées sur PermiGo 🚗`,
+    };
+  } else if (me.role === 'enseignant' && anneeStats) {
+    profileCardData = {
+      me: { ...me, prenom: profile?.prenom || '', nom: profile?.nom || '' },
+      avatarUrl: profile?.avatar_url || null,
+      bannerUrl: profile?.banner_url || null,
+      count: anneeStats.totalValidations, // pour calcul prestige (carrière)
+      bio: `Moniteur · ${anneeStats.elevesCount} élève${anneeStats.elevesCount > 1 ? 's' : ''} accompagné${anneeStats.elevesCount > 1 ? 's' : ''}`,
+      stats: [
+        { label: 'Validations', value: anneeStats.totalValidations },
+        { label: 'Élèves',      value: anneeStats.elevesCount },
+        { label: 'Streak',      value: anneeStats.streakDays },
+      ],
+      shareUrl: window.location.origin,
+      shareText: `${anneeStats.totalValidations} validations REMC sur PermiGo cette année 🎯`,
+    };
+  }
+
   root.innerHTML = `${STYLE}
 <div class="prf anim-slide-up">
-  <div class="prf-avatar-wrap">
-    <div class="prf-avatar">${esc(initials)}</div>
-    <div class="prf-name">${esc(displayName)}</div>
-    <span class="prf-role-badge">${esc(ROLE_LABELS[me.role] || me.role)}</span>
-  </div>
+  ${profileCardData
+    ? `<div id="prf-social-card"></div>`
+    : `<div class="prf-avatar-wrap">
+        <div class="prf-avatar">${esc(initials)}</div>
+        <div class="prf-name">${esc(displayName)}</div>
+        <span class="prf-role-badge">${esc(ROLE_LABELS[me.role] || me.role)}</span>
+      </div>`
+  }
 
-  ${permisData ? `<div id="prf-permis-card"></div>` : ''}
+  ${permisData ? `<div id="prf-permis-card" style="margin-top:16px"></div>` : ''}
 
   ${anneeStats ? `
   <div class="prf-streak">
@@ -314,6 +352,12 @@ export async function mount(root) {
 
   <div class="prf-version">PermiGo v7 · Sprint 2</div>
 </div>`;
+
+  // Mount ProfileCard sociale (élève + enseignant) — avatar/banner modifiables + partage
+  if (profileCardData) {
+    const socialHost = root.querySelector('#prf-social-card');
+    if (socialHost) mountProfileCard(socialHost, profileCardData);
+  }
 
   // Mount carte permis pour les élèves (avec tilt 3D au touch)
   if (permisData) {

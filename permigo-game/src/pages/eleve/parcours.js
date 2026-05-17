@@ -379,6 +379,45 @@ const STYLE = `<style>
 .prc-node.next .nd-circle {
   background: #6366f1;
   box-shadow: 0 4px 18px rgba(99,102,241,.45);
+  animation: ndPulseValid 2.4s ease-in-out infinite;
+}
+/* Pulse blanc → vert pour indiquer "prêt à valider" */
+@keyframes ndPulseValid {
+  0%, 100% {
+    background: #6366f1;
+    box-shadow: 0 4px 18px rgba(99,102,241,.45);
+  }
+  40% {
+    background: #ffffff;
+    box-shadow: 0 4px 22px rgba(255,255,255,.7), inset 0 0 0 2.5px #6366f1;
+  }
+  70% {
+    background: #10b981;
+    box-shadow: 0 4px 22px rgba(16,185,129,.55);
+  }
+}
+/* Volant qui oscille gauche-droite sur le prochain défi */
+.nd-wheel {
+  animation: ndWheelOsc 1.6s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+@keyframes ndWheelOsc {
+  0%, 100% { transform: rotate(-22deg); }
+  50%      { transform: rotate(22deg); }
+}
+/* Rotation très lente sur les acquis = "ça vit" */
+.prc-node.done .nd-circle > svg {
+  animation: ndSlowSpin 16s linear infinite;
+  transform-origin: 50% 50%;
+}
+@keyframes ndSlowSpin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .nd-wheel,
+  .prc-node.done .nd-circle > svg,
+  .prc-node.next .nd-circle {
+    animation: none !important;
+  }
 }
 .prc-node.next .nd-circle::before {
   content: '';
@@ -826,6 +865,126 @@ export async function mount(root) {
   const worldStates = computeWorldStates(validatedMap);
   root.innerHTML = renderPage(worldStates, validatedMap);
   wire(root, worldStates, validatedMap, me);
+
+  // ── Flèche "Tu viens de débloquer !" si une comp a été validée < 10 min ──
+  const FRESH_MS = 10 * 60 * 1000;
+  let fresh = null;
+  let freshTs = 0;
+  for (const [cid, entry] of Object.entries(validatedMap)) {
+    if (!entry.validated_at) continue;
+    const ts = new Date(entry.validated_at).getTime();
+    if (Date.now() - ts < FRESH_MS && ts > freshTs) {
+      fresh = cid; freshTs = ts;
+    }
+  }
+  if (fresh) {
+    setTimeout(() => flashFreshComp(root, fresh), 400);
+  }
+}
+
+/**
+ * Flèche animée + scroll vers la dernière comp débloquée
+ */
+function flashFreshComp(root, compId) {
+  const node = root.querySelector(`[data-comp="${CSS.escape(compId)}"]`);
+  if (!node) return;
+
+  // Scroll smooth vers le node
+  node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Crée l'overlay flèche après le scroll
+  setTimeout(() => spawnArrow(node, compId), 600);
+}
+
+function spawnArrow(node, compId) {
+  // Évite doublon
+  document.querySelector('.fresh-arrow')?.remove();
+
+  const ind = document.createElement('div');
+  ind.className = 'fresh-arrow';
+  ind.innerHTML = `
+    <style>
+      .fresh-arrow {
+        position: fixed;
+        z-index: 320;
+        pointer-events: none;
+        transform: translate(-50%, -100%);
+        animation: faIn .35s cubic-bezier(.34,1.56,.64,1);
+      }
+      @keyframes faIn {
+        from { opacity: 0; transform: translate(-50%, -130%) scale(.85); }
+        to   { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+      }
+      .fa-bubble {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 14px;
+        font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
+        white-space: nowrap;
+        box-shadow: 0 12px 32px -8px rgba(99,102,241,.6);
+        margin-bottom: 6px;
+        position: relative;
+      }
+      .fa-bubble::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 50%;
+        transform: translateX(-50%) rotate(45deg);
+        width: 10px; height: 10px;
+        background: #8b5cf6;
+      }
+      .fa-arrow {
+        width: 28px;
+        height: 40px;
+        margin: 0 auto;
+        color: #6366f1;
+        animation: faBounce 1.2s ease-in-out infinite;
+        filter: drop-shadow(0 4px 8px rgba(99,102,241,.4));
+      }
+      @keyframes faBounce {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(8px); }
+      }
+      .fresh-arrow.dismiss { animation: faOut .25s ease forwards; }
+      @keyframes faOut {
+        to { opacity: 0; transform: translate(-50%, -130%) scale(.85); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .fresh-arrow, .fa-arrow { animation: none !important; }
+      }
+    </style>
+    <div class="fa-bubble">✨ Tu viens de débloquer ${compId} !</div>
+    <svg class="fa-arrow" viewBox="0 0 24 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M12 0 L12 32" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      <path d="M3 24 L12 36 L21 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+  `;
+  document.body.appendChild(ind);
+
+  function position() {
+    const rect = node.getBoundingClientRect();
+    ind.style.left = `${rect.left + rect.width / 2}px`;
+    ind.style.top = `${rect.top - 8}px`;
+  }
+  position();
+  window.addEventListener('scroll', position, { passive: true });
+  window.addEventListener('resize', position);
+
+  const dismiss = () => {
+    ind.classList.add('dismiss');
+    setTimeout(() => {
+      ind.remove();
+      window.removeEventListener('scroll', position);
+      window.removeEventListener('resize', position);
+    }, 280);
+  };
+
+  // Tap node = disparaît
+  node.addEventListener('click', dismiss, { once: true });
+  // Auto-dismiss après 8s
+  setTimeout(dismiss, 8000);
 }
 
 // ─── Logique métier ───────────────────────────────────────────────
@@ -981,8 +1140,12 @@ function renderWorldSection(ws, validatedMap, hasNext) {
       done: `<svg width="22" height="17" viewBox="0 0 22 17" fill="none" aria-hidden="true">
         <path d="M2 8.5l5.5 5.5L20 2" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>`,
-      next: `<svg width="13" height="20" viewBox="0 0 13 20" fill="none" aria-hidden="true">
-        <path d="M7.5 1L1 11h5.5L5 19 12 9H6.5L7.5 1z" fill="#fff" stroke="#fff" stroke-width=".4" stroke-linejoin="round"/>
+      next: `<svg class="nd-wheel" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="2"/>
+        <circle cx="12" cy="12" r="2.4" fill="#fff"/>
+        <path d="M12 5.5 L12 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <path d="M5.5 14.5 L7 13.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <path d="M18.5 14.5 L17 13.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
       </svg>`,
       todo:   '',
       locked: `<svg width="14" height="17" viewBox="0 0 14 17" fill="none" aria-hidden="true">
