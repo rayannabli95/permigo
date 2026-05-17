@@ -22,10 +22,11 @@ const TABS = {
     { id: 'profil',   label: 'Profil',   icon: ICO.user },
   ],
   enseignant: [
-    { id: 'default',    label: "Auj.",    icon: ICO.activity },
-    { id: 'validation', label: 'Valider', icon: ICO.check },
-    { id: 'eleves',     label: 'Élèves',  icon: ICO.users },
-    { id: 'profil',     label: 'Profil',  icon: ICO.user },
+    { id: 'parcours',   label: 'Parcours', icon: ICO.map },
+    { id: 'default',    label: "Auj.",     icon: ICO.activity },
+    { id: 'validation', label: 'Valider',  icon: ICO.check },
+    { id: 'eleves',     label: 'Élèves',   icon: ICO.users },
+    { id: 'profil',     label: 'Profil',   icon: ICO.user },
   ],
   gerant: [
     { id: 'default', label: 'Pulse',  icon: ICO.activity },

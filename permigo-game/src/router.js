@@ -14,6 +14,7 @@ const ROUTES = {
   enseignant: {
     default: () => import('@/pages/enseignant/aujourdhui.js'),
     aujourdhui: () => import('@/pages/enseignant/aujourdhui.js'),
+    parcours: () => import('@/pages/enseignant/parcours.js'),
     validation: () => import('@/pages/enseignant/validation.js'),
     eleves: () => import('@/pages/enseignant/mes-eleves.js'),
     livret: () => import('@/pages/enseignant/livret-remc.js'),
