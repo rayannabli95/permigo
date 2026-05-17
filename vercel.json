@@ -1,5 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "cd permigo-game && npm install && npm run build",
+  "outputDirectory": "permigo-game/dist",
+  "installCommand": "echo skip",
+  "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
