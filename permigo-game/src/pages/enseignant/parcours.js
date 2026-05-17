@@ -15,29 +15,14 @@ import { toast } from '@/components/toast.js';
 import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { REMC_TOTAL } from '@/data/remc.js';
-import { getMoniteurState, MONITEUR_LEVELS } from '@/data/moniteur-levels.js';
+import { getMoniteurState, buildTimelineStops, MONITEUR_TIERS } from '@/data/moniteur-levels.js';
 import { animateCounter } from '@/utils/gestures.js';
 import { haptic } from '@/utils/haptic.js';
 import { icon, iconBadge } from '@/utils/icons.js';
 
-// Map des unlocks → SVG icon (au lieu d'emojis)
-const UNLOCK_ICON = {
-  'Export PDF Livret':       'file-text',
-  'Stats avancées élèves':   'chart-bar',
-  'Templates bilan pédago':  'clipboard',
-  'Prépa examen enrichie':   'target',
-  'Analytics comparatives':  'trending-up',
-  'Profil mis en avant':     'award',
-  'Modules formation':       'book',
-  'Programme mentorat':      'users',
-  'Expert Hub':              'shield',
-  'Cercle Or':               'sparkle',
-};
-function iconForUnlock(name) {
-  return UNLOCK_ICON[name] || 'sparkle';
+function iconForUnlock(iconName) {
+  return iconName || 'sparkle';
 }
-
-const XP_PER_VALIDATION = 25;
 
 // ─── CSS ────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -508,11 +493,9 @@ export async function mount(root) {
   const allVals = validationsRes.data || [];
   const me = profileRes.data || {};
 
-  // ─── Calcul XP du moniteur ────────────────────────────────────
-  // Utilise la colonne xp si elle est peuplée, sinon dérive du count (25 XP par validation)
+  // ─── Calcul de l'état moniteur (basé sur count de validations) ──
   const totalValidations = allVals.length;
-  const xp = me.xp || (totalValidations * XP_PER_VALIDATION);
-  const state = getMoniteurState(xp);
+  const state = getMoniteurState(totalValidations);
 
   // ─── Stats cette semaine ──────────────────────────────────────
   const now = new Date();
@@ -566,70 +549,78 @@ export async function mount(root) {
     );
   }
 
-  // ─── Stops à afficher sur la route ────────────────────────────
-  // 6 stops visibles autour du niveau actuel + on inclut les paliers utiles (5,10,15,20,25,30…)
-  const stops = buildRouteStops(state);
+  // ─── Stops timeline (tiers majeurs + skins intercalés) ────────
+  const stops = buildTimelineStops();
 
   // ─── Render final ─────────────────────────────────────────────
   const prenom = me.prenom || '';
   const nom = me.nom || '';
   const initials = ((prenom[0] || '') + (nom[0] || '')).toUpperCase() || '?';
+  const currentTitle = state.tier ? state.tier.title : 'Débutant';
+  const currentRank = state.tier ? state.tier.tier : 0;
+  const accentColor = state.skin ? state.skin.accent : '#6366f1';
 
   root.innerHTML = `${STYLE}
     <div class="epc anim-slide-up">
 
       <div class="epc-hd">
         <h1 class="epc-h1">Mon parcours pro</h1>
-        <p class="epc-sub">${totalValidations} validation${totalValidations > 1 ? 's' : ''} cumulées</p>
+        <p class="epc-sub">${totalValidations} validation${totalValidations > 1 ? 's' : ''} cumulées · ${esc(state.saison.name)}</p>
       </div>
 
-      <!-- Profil + barre XP -->
+      <!-- Profil + progression -->
       <div class="epc-prof">
         <div class="epc-prof-row">
-          <div class="epc-av">${esc(initials)}</div>
+          <div class="epc-av" style="background:${esc(accentColor)}">${esc(initials)}</div>
           <div class="epc-prof-info">
-            <div class="epc-prof-lvl">Niveau ${state.current.level}</div>
-            <div class="epc-prof-title-big">${esc(state.current.title)}</div>
+            <div class="epc-prof-lvl">Palier ${currentRank} / 10</div>
+            <div class="epc-prof-title-big">${esc(currentTitle)}</div>
           </div>
         </div>
         <div class="epc-xp">
           <div class="epc-xp-bar">
-            <div class="epc-xp-fill" style="width:${state.pctInLevel}%"></div>
+            <div class="epc-xp-fill" style="width:${state.pctToNextReward}%"></div>
           </div>
           <div class="epc-xp-meta">
-            <span><strong>${xp}</strong> XP</span>
-            <span>${state.next ? `${state.xpToNext} XP avant Niveau ${state.next.level}` : 'Niveau max atteint'}</span>
+            <span><strong>${totalValidations}</strong> validations</span>
+            <span>${state.nextReward ? `${state.nextReward.missing} avant ${esc(state.nextReward.kind === 'tier' ? state.nextReward.data.unlock.name : 'nouveau skin')}` : 'Cercle Or atteint'}</span>
           </div>
         </div>
       </div>
 
-      <!-- HÉRO : Prochaine récompense (le moteur de motivation) -->
-      ${state.nextUnlock ? `
+      <!-- HÉRO : Prochaine récompense (skin OU outil majeur — le + proche) -->
+      ${state.nextReward ? `
       <div class="epc-hero">
         <div class="epc-hero-lbl">Prochaine récompense</div>
         <div class="epc-hero-row">
-          <div class="epc-hero-icon">${icon(iconForUnlock(state.nextUnlock.name), { size: 28, strokeWidth: 2.2 })}</div>
+          <div class="epc-hero-icon">${icon(state.nextReward.kind === 'tier' ? state.nextReward.data.unlock.iconName : 'sparkle', { size: 28, strokeWidth: 2.2 })}</div>
           <div class="epc-hero-info">
-            <div class="epc-hero-level">Niveau ${state.nextUnlock.level}</div>
-            <h3 class="epc-hero-name">${esc(state.nextUnlock.name)}</h3>
-            <p class="epc-hero-desc">${esc(state.nextUnlock.desc)}</p>
+            ${state.nextReward.kind === 'tier' ? `
+              <div class="epc-hero-level">Palier ${state.nextReward.data.tier} · Outil utile</div>
+              <h3 class="epc-hero-name">${esc(state.nextReward.data.unlock.name)}</h3>
+              <p class="epc-hero-desc">${esc(state.nextReward.data.unlock.desc)}</p>
+            ` : `
+              <div class="epc-hero-level">Récompense intermédiaire</div>
+              <h3 class="epc-hero-name">Nouveau skin de profil</h3>
+              <p class="epc-hero-desc">Couleur d'accent personnalisée pour ton avatar.</p>
+            `}
           </div>
         </div>
         <div class="epc-hero-prog">
           <div class="epc-hero-prog-bar">
-            <div class="epc-hero-prog-fill" style="width:${unlockPct(xp, state.nextUnlock.level)}%"></div>
+            <div class="epc-hero-prog-fill" style="width:${state.pctToNextReward}%"></div>
           </div>
           <div class="epc-hero-prog-meta">
-            <span>${state.xpUntilNextUnlock} XP restants</span>
-            <span>~${Math.ceil(state.xpUntilNextUnlock / XP_PER_VALIDATION)} validations</span>
+            <span>${state.nextReward.missing} validation${state.nextReward.missing > 1 ? 's' : ''} restantes</span>
+            <span>${state.pctToNextReward}%</span>
           </div>
         </div>
       </div>` : ''}
 
       <!-- Route timeline VERTICALE -->
-      <div class="epc-section-title">Ma route</div>
+      <div class="epc-section-title">Ma route · ${esc(state.saison.name)}</div>
       <div class="epc-route" id="epc-route">
-        ${stops.map(s => renderStop(s, state, xp)).join('')}
+        ${stops.map(s => renderStop(s, totalValidations)).join('')}
       </div>
 
       <!-- Ma cohorte -->
@@ -692,84 +683,72 @@ export async function mount(root) {
 
 // ─── Helpers ─────────────────────────────────────────────────────
 
-/**
- * Sélectionne les stops à afficher sur la route (autour du niveau actuel + paliers utiles).
- */
-function buildRouteStops(state) {
-  const lv = state.current.level;
-  // Stops "obligatoires" : tous les paliers d'unlock + niveau actuel
-  const must = new Set([1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, lv]);
-  // Plus 1 niveau avant et 1 après le current
-  if (lv > 1) must.add(lv - 1);
-  if (lv < 50) must.add(lv + 1);
-  const sorted = [...must].sort((a, b) => a - b);
-  return sorted.map(level => MONITEUR_LEVELS[level - 1]);
-}
+// buildRouteStops() supprimé — remplacé par buildTimelineStops() du data layer
 
-function renderStop(stop, state, xp) {
-  const lv = state.current.level;
+function renderStop(stop, totalValidations) {
+  // stop = { threshold, kind: 'tier'|'skin', tier?, skin? }
   let cls = 'todo';
-  if (stop.level < lv) cls = 'done';
-  else if (stop.level === lv) cls = 'now';
-  else if (stop.level > lv + 10) cls = 'locked';
+  if (totalValidations >= stop.threshold) cls = 'done';
+  else {
+    // Le "now" = la prochaine récompense pas encore atteinte
+    // (on l'ajoutera dynamiquement, plus simple : 1er stop todo = now)
+    cls = 'todo';
+  }
 
   // Contenu du dot
   let dotContent;
-  if (cls === 'now') {
-    dotContent = `<img src="/worlds/volant.png" alt="" aria-hidden="true" />`;
-  } else if (cls === 'done') {
+  const isMajor = stop.kind === 'tier';
+  const iconName = isMajor ? stop.tier.unlock.iconName : 'sparkle';
+
+  if (cls === 'done') {
     dotContent = icon('check', { size: 16, strokeWidth: 3 });
-  } else if (stop.unlock) {
-    dotContent = icon(iconForUnlock(stop.unlock.name), { size: 15, strokeWidth: 2 });
+  } else if (isMajor) {
+    dotContent = icon(iconName, { size: 15, strokeWidth: 2 });
   } else {
-    dotContent = `<span style="width:8px;height:8px;border-radius:50%;background:currentColor"></span>`;
+    dotContent = `<span style="width:8px;height:8px;border-radius:50%;background:${esc(stop.skin?.accent || '#cbd5e1')}"></span>`;
   }
 
-  // ─── Coût XP (ce qu'il faut pour débloquer) ───
-  const xpDiff = stop.threshold - xp;
+  // ─── Coût (validations restantes pour débloquer) ───
+  const diff = stop.threshold - totalValidations;
   let costLine;
   if (cls === 'done') {
-    costLine = `<span class="epc-stop-cost done">Atteint · ${stop.threshold} XP</span>`;
-  } else if (cls === 'now') {
-    costLine = `<span class="epc-stop-cost now">Tu es ici · ${xp} XP</span>`;
+    costLine = `<span class="epc-stop-cost done">Atteint · ${stop.threshold} valid.</span>`;
   } else {
-    const validations = Math.ceil(xpDiff / XP_PER_VALIDATION);
-    costLine = `<span class="epc-stop-cost todo">+${xpDiff} XP <em>(~${validations} validation${validations > 1 ? 's' : ''})</em></span>`;
+    costLine = `<span class="epc-stop-cost todo">+${diff} validation${diff > 1 ? 's' : ''}</span>`;
   }
 
-  // ─── Récompense débloquée à ce niveau ───
-  const rewardLine = stop.unlock ? `
+  // ─── Titre & récompense ───
+  const title = isMajor ? stop.tier.title : 'Skin de profil';
+  const rewardName = isMajor ? stop.tier.unlock.name : `Couleur ${stop.skin?.accent || ''}`;
+  const rewardDesc = isMajor ? stop.tier.unlock.desc : null;
+
+  const rewardLine = isMajor ? `
     <div class="epc-stop-reward ${cls === 'done' ? 'unlocked' : ''}">
-      <span class="epc-stop-reward-ico">${icon(iconForUnlock(stop.unlock.name), { size: 14, strokeWidth: 2.4 })}</span>
+      <span class="epc-stop-reward-ico">${icon(iconName, { size: 14, strokeWidth: 2.4 })}</span>
       <span class="epc-stop-reward-txt">
         ${cls === 'done' ? 'Débloqué : ' : 'Débloque : '}
-        <strong>${esc(stop.unlock.name)}</strong>
+        <strong>${esc(stop.tier.unlock.name)}</strong>
       </span>
     </div>
-  ` : '';
+  ` : `
+    <div class="epc-stop-reward-mini" style="color:${esc(stop.skin?.accent || '#94a3b8')}">
+      <span class="epc-stop-reward-txt" style="opacity:.85">Skin · ${esc(stop.skin?.accent || '')}</span>
+    </div>
+  `;
 
   return `
-    <div class="epc-stop ${cls}">
+    <div class="epc-stop ${cls} ${isMajor ? 'tier' : 'skin'}">
       <div class="epc-stop-dot">${dotContent}</div>
       <div class="epc-stop-body">
         <div class="epc-stop-head">
-          <span class="epc-stop-lvl">Niveau ${stop.level}</span>
+          <span class="epc-stop-lvl">${isMajor ? `Palier ${stop.tier.tier}` : `${stop.threshold} valid.`}</span>
           ${costLine}
         </div>
-        <div class="epc-stop-title">${esc(stop.title)}</div>
+        ${isMajor ? `<div class="epc-stop-title">${esc(title)}</div>` : ''}
         ${rewardLine}
       </div>
     </div>
   `;
 }
 
-function unlockPct(xp, targetLevel) {
-  if (targetLevel <= 0) return 100;
-  const target = MONITEUR_LEVELS[targetLevel - 1];
-  const prev = MONITEUR_LEVELS[Math.max(0, targetLevel - 2)];
-  if (!target) return 100;
-  const span = target.threshold - prev.threshold;
-  if (span <= 0) return 100;
-  const done = xp - prev.threshold;
-  return Math.max(0, Math.min(100, Math.round((done / span) * 100)));
-}
+// unlockPct() supprimé — remplacé par state.pctToNextReward (calculé dans data layer)
