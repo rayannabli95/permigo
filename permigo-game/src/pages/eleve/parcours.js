@@ -411,16 +411,23 @@ const STYLE = `<style>
   0%, 100% { transform: rotate(-22deg); }
   50%      { transform: rotate(22deg); }
 }
-/* Rotation très lente sur les acquis = "ça vit" */
-.prc-node.done .nd-circle > svg {
+/* Volant acquis — silhouette PNG teintée en blanc, rotation lente */
+.nd-wheel-done {
+  width: 70%;
+  height: 70%;
+  background-color: #ffffff;
+  -webkit-mask: url('/worlds/volant.png') center/contain no-repeat;
+          mask: url('/worlds/volant.png') center/contain no-repeat;
   animation: ndSlowSpin 16s linear infinite;
   transform-origin: 50% 50%;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.15));
 }
 @keyframes ndSlowSpin { to { transform: rotate(360deg); } }
 
 @media (prefers-reduced-motion: reduce) {
   .nd-wheel,
-  .prc-node.done .nd-circle > svg,
+  .nd-wheel-done,
   .prc-node.next .nd-circle {
     animation: none !important;
   }
@@ -453,9 +460,19 @@ const STYLE = `<style>
   border-style: dashed;
   box-shadow: 0 2px 8px rgba(0,0,0,.05);
 }
-/* Petit point gris centré */
+/* Volant grisé statique sur les compétences pas encore débloquées */
+.nd-wheel-todo {
+  width: 60%;
+  height: 60%;
+  background-color: #cbd5e1;
+  -webkit-mask: url('/worlds/volant.png') center/contain no-repeat;
+          mask: url('/worlds/volant.png') center/contain no-repeat;
+  pointer-events: none;
+  opacity: .8;
+}
+/* Petit point gris (legacy — remplacé par .nd-wheel-todo, à supprimer plus tard) */
 .prc-node.todo .nd-circle::before {
-  content: '';
+  content: none;
   width: 10px; height: 10px;
   border-radius: 50%;
   background: #cbd5e1;
@@ -995,7 +1012,7 @@ function spawnArrow(node, compId) {
 
 // ─── Logique métier ───────────────────────────────────────────────
 function computeWorldStates(validatedMap) {
-  return REMC.map((cat, idx) => {
+  const states = REMC.map((cat, idx) => {
     const world  = WORLDS[idx];
     const subs   = cat.subs;
     const done   = subs.filter(s => validatedMap[s.c]).length;
@@ -1022,6 +1039,18 @@ function computeWorldStates(validatedMap) {
 
     return { idx, world, cat, subs, done, total, pct, complete, status, nextChallenge, prevDoneCount };
   });
+
+  // ─ Garde UN SEUL nextChallenge global (le 1er monde in_progress dans l'ordre) ─
+  // Empêche d'afficher 2 volants si C1 et C2 sont tous les deux in_progress.
+  let foundOne = false;
+  for (const s of states) {
+    if (!foundOne && s.nextChallenge) {
+      foundOne = true; // celui-ci garde son next
+    } else {
+      s.nextChallenge = null; // les autres mondes : pas de next
+    }
+  }
+  return states;
 }
 
 function compStatus(compId, worldStatus, nextChallenge, validatedMap) {
@@ -1143,11 +1172,9 @@ function renderWorldSection(ws, validatedMap, hasNext) {
 
     // Icône SVG propre selon statut
     const icon = {
-      done: `<svg width="22" height="17" viewBox="0 0 22 17" fill="none" aria-hidden="true">
-        <path d="M2 8.5l5.5 5.5L20 2" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`,
+      done: `<div class="nd-wheel-done" aria-hidden="true"></div>`,
       next: `<img class="nd-wheel" src="/worlds/volant.png" alt="" width="32" height="32" aria-hidden="true"/>`,
-      todo:   '',
+      todo:   `<div class="nd-wheel-todo" aria-hidden="true"></div>`,
       locked: `<svg width="14" height="17" viewBox="0 0 14 17" fill="none" aria-hidden="true">
         <rect x="1.5" y="7.5" width="11" height="9" rx="2" stroke="#9ca3af" stroke-width="1.4"/>
         <path d="M3.5 7.5V5.5a3.5 3.5 0 017 0v2" stroke="#9ca3af" stroke-width="1.4" stroke-linecap="round" fill="none"/>

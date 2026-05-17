@@ -11,6 +11,19 @@ import { REMC } from '@/data/remc.js';
 import { labelComp } from '@/utils/remc-label.js';
 import { showXpToast } from '@/components/xp-toast.js';
 
+// Liste plate des compétences REMC dans l'ordre (C1a → C4g)
+const ORDERED_COMPS = REMC.flatMap(c => c.subs.map(s => s.c));
+
+/**
+ * Retourne la prochaine compétence à valider dans l'ordre REMC,
+ * compte tenu de celles déjà acquises. Le moniteur ne peut valider QUE celle-ci.
+ * @param {Set<string>} validatedIds
+ * @returns {string|null}
+ */
+function getNextUnlockable(validatedIds) {
+  return ORDERED_COMPS.find(c => !validatedIds.has(c)) || null;
+}
+
 // ─── CSS ────────────────────────────────────────────────────────
 const STYLE = `<style>
   .vp {
@@ -104,6 +117,25 @@ const STYLE = `<style>
   .comp-row:active { transform: scale(.99); }
   .comp-row.comp-done { opacity: .5; cursor: default; }
   .comp-row.comp-sel { background: rgba(99,102,241,.06); }
+  .comp-row.comp-next { background: rgba(99,102,241,.04); border-left: 3px solid #6366f1; }
+  .comp-row.comp-next:hover { background: rgba(99,102,241,.08); }
+  .comp-row.comp-locked { opacity: .5; cursor: not-allowed; background: #f8f9fc; }
+  .comp-row.comp-locked .comp-code,
+  .comp-row.comp-locked .comp-nom { color: #94a3b8; }
+  .comp-row.comp-locked:hover { background: #f8f9fc; }
+  .badge-next {
+    font: 600 11px/1 'Inter', sans-serif;
+    color: #6366f1;
+    background: rgba(99,102,241,.1);
+    padding: 5px 10px;
+    border-radius: 99px;
+    white-space: nowrap;
+  }
+  .badge-lock {
+    font: 600 12px/1 'Inter', sans-serif;
+    color: #cbd5e1;
+    padding: 5px 8px;
+  }
   .comp-code {
     font: 600 11px/1 'Inter', sans-serif;
     color: #6366f1;
@@ -216,6 +248,15 @@ async function selectEleve(eleve) {
 
 function selectComp(compId, compNom) {
   if (_validatedIds.has(compId)) return;
+
+  // Règle pédagogique : on ne valide que la prochaine comp dans l'ordre REMC
+  const nextUnlock = getNextUnlockable(_validatedIds);
+  if (compId !== nextUnlock) {
+    const idx = ORDERED_COMPS.indexOf(compId);
+    const required = ORDERED_COMPS.slice(0, idx).find(c => !_validatedIds.has(c)) || nextUnlock;
+    toast(`Valide d'abord ${required} avant ${compId}`, 'info', 3500);
+    return;
+  }
 
   const clickedSame = _selectedComp?.c === compId;
   _selectedComp = clickedSame ? null : { c: compId, n: compNom };
@@ -357,6 +398,7 @@ function renderEleveCard(eleve) {
 function renderCategory(cat) {
   const doneCount = cat.subs.filter(s => _validatedIds.has(s.c)).length;
   const allDone = doneCount === cat.subs.length;
+  const nextUnlock = getNextUnlockable(_validatedIds);
   return `
     <div class="cat-section${allDone ? ' cat-done' : ''}">
       <div class="cat-hd">
@@ -367,15 +409,27 @@ function renderCategory(cat) {
       <div class="comp-list">
         ${cat.subs.map(sub => {
           const done = _validatedIds.has(sub.c);
+          const isNext = !done && sub.c === nextUnlock;
+          const locked = !done && !isNext;
           const sel = _selectedComp?.c === sub.c;
+          const cls = [
+            done   && 'comp-done',
+            locked && 'comp-locked',
+            isNext && 'comp-next',
+            sel    && 'comp-sel',
+          ].filter(Boolean).join(' ');
+          let badge = '';
+          if (done)        badge = '<span class="badge-ok">✓ Acquis</span>';
+          else if (sel)    badge = '<span class="badge-sel">Sélectionné</span>';
+          else if (isNext) badge = '<span class="badge-next">⭐ À valider</span>';
+          else             badge = '<span class="badge-lock">🔒</span>';
           return `
-            <div class="comp-row${done ? ' comp-done' : ''}${sel ? ' comp-sel' : ''}"
-              data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}">
+            <div class="comp-row ${cls}"
+              data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
+              ${locked ? 'aria-disabled="true"' : ''}>
               <span class="comp-code">${esc(sub.c)}</span>
               <span class="comp-nom">${esc(sub.n)}</span>
-              <span class="comp-status">
-                ${done ? '<span class="badge-ok">✓ Acquis</span>' : sel ? '<span class="badge-sel">Sélectionné</span>' : ''}
-              </span>
+              <span class="comp-status">${badge}</span>
             </div>
           `;
         }).join('')}
