@@ -292,13 +292,18 @@ async function doValidate() {
   }
 
   // Déclenche le quiz post-validation côté élève
-  await sb.from('notifications').insert({
+  const { error: errNotif } = await sb.from('notifications').insert({
     user_id: _eleve.id,
     type: 'post_validation_quiz',
     title: 'Compétence validée !',
     body: `${_selectedComp.n} — Fais le quiz en 30 sec`,
     data: { competence_id: _selectedComp.c },
   });
+  if (errNotif) {
+    // La validation est OK, mais l'élève ne recevra pas le déclencheur quiz
+    console.error('[validation] notification insert failed', errNotif);
+    toast('Validé, mais notification non envoyée', 'warning');
+  }
 
   track('competence.validated', {
     competence_id: _selectedComp.c,

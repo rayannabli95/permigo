@@ -17,6 +17,7 @@ export const PRESTIGE_ELEVE = [
  * Thresholds adaptés à l'échelle élève (1-31 compétences au lieu de 1-380 validations).
  * Cercle Or = 31 compétences = permis virtuel complet.
  */
+// Élève : cadence régulière tous les 3 comp sur 31 (max = Cercle Or à 30)
 export const ELEVE_SKINS = [
   { threshold: 3,  slug: 'premier-kilometre', name: 'Premier kilomètre', accent: '#6366f1', image: '/skins/badge-3d-01.png' },
   { threshold: 6,  slug: 'volant-souple',     name: 'Volant souple',     accent: '#3b82f6', image: '/skins/badge-3d-02.png' },
@@ -24,10 +25,10 @@ export const ELEVE_SKINS = [
   { threshold: 12, slug: 'boite-fluide',      name: 'Boîte fluide',      accent: '#10b981', image: '/skins/badge-3d-04.png' },
   { threshold: 15, slug: 'carte-ouverte',     name: 'Carte ouverte',     accent: '#0ea5e9', image: '/skins/badge-3d-05.png' },
   { threshold: 18, slug: 'compas-cale',       name: 'Compas calé',       accent: '#a855f7', image: '/skins/badge-3d-06.png' },
-  { threshold: 22, slug: 'tableau-pro',       name: 'Tableau pro',       accent: '#ec4899', image: '/skins/badge-3d-07.png' },
-  { threshold: 26, slug: 'maitre-artisan',    name: 'Maître artisan',    accent: '#f59e0b', image: '/skins/badge-3d-08.png' },
-  { threshold: 29, slug: 'couronne-discrete', name: 'Couronne discrète', accent: '#d946ef', image: '/skins/badge-3d-09.png' },
-  { threshold: 31, slug: 'cercle-or',         name: 'Cercle Or',         accent: '#f1c40f', image: '/skins/badge-3d-ultimate.png' },
+  { threshold: 21, slug: 'tableau-pro',       name: 'Tableau pro',       accent: '#ec4899', image: '/skins/badge-3d-07.png' },
+  { threshold: 24, slug: 'maitre-artisan',    name: 'Maître artisan',    accent: '#f59e0b', image: '/skins/badge-3d-08.png' },
+  { threshold: 27, slug: 'couronne-discrete', name: 'Couronne discrète', accent: '#d946ef', image: '/skins/badge-3d-09.png' },
+  { threshold: 30, slug: 'cercle-or',         name: 'Cercle Or',         accent: '#f1c40f', image: '/skins/badge-3d-ultimate.png' },
 ];
 
 /**

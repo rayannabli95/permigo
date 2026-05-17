@@ -146,15 +146,21 @@ const STYLE = `<style>
 }
 
 .trp-ico-wrap {
-  width: 52px; height: 52px;
-  border-radius: 14px;
+  width: 64px; height: 64px;
+  border-radius: 16px;
   background: color-mix(in srgb, var(--tc,#94a3b8) 14%, #fff);
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 10px;
-  font-size: 26px;
+  font-size: 30px;
   line-height: 1;
   position: relative;
   z-index: 1;
+  overflow: hidden;
+}
+.trp-ico-wrap img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  display: block;
 }
 .trp-nom {
   font: 700 11px/1.3 'Plus Jakarta Sans', sans-serif;
@@ -361,12 +367,16 @@ function render(trophees, unlockedCount) {
 function renderCard(t, unlocked) {
   const rarityColor = RARITY_COLOR[t.rarity] || '#94a3b8';
   const isLegendary = t.rarity === 'légendaire' && unlocked;
+  // Visuel : image PNG premium si dispo, sinon emoji fallback
+  const visual = t.image
+    ? `<img src="${t.image}" alt="${esc(t.nom)}" loading="lazy" />`
+    : t.ico;
   return `
 <div class="trp-card ${unlocked ? 'unlocked' : 'trp-card-locked'} ${isLegendary ? 'legendary' : ''}"
      style="--tc:${t.color}"
      data-trp="${esc(t.id)}">
   <div class="trp-ico-wrap" style="background:color-mix(in srgb,${t.color} 14%,#fff)">
-    ${t.ico}
+    ${visual}
   </div>
   <div class="trp-nom">${esc(t.nom)}</div>
   <span class="trp-rarity" style="color:${rarityColor};background:color-mix(in srgb,${rarityColor} 12%,#fff)">
@@ -393,9 +403,12 @@ function wire(root, trophees) {
 
       const rarityColor = RARITY_COLOR[t.rarity] || '#94a3b8';
       const canShare = Boolean(navigator.share);
+      const sheetVisual = t.image
+        ? `<img src="${t.image}" alt="${esc(t.nom)}" style="width:100%;height:100%;object-fit:contain" />`
+        : `<span style="font-size:38px">${t.ico}</span>`;
       body.innerHTML = `
-        <div class="trp-sheet-ico-wrap" style="background:color-mix(in srgb,${t.color} 14%,#fff)">
-          <span style="font-size:38px">${t.ico}</span>
+        <div class="trp-sheet-ico-wrap" style="background:color-mix(in srgb,${t.color} 14%,#fff);overflow:hidden">
+          ${sheetVisual}
         </div>
         <div class="trp-sheet-nom">${esc(t.nom)}</div>
         <div class="trp-sheet-desc">${esc(t.desc)}</div>

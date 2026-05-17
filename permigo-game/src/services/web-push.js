@@ -107,7 +107,11 @@ function _createSoftBanner() {
 
   el.querySelector('#pb-allow').addEventListener('click', async () => {
     el.remove();
-    await requestPushPermission();
+    try {
+      await requestPushPermission();
+    } catch (e) {
+      console.warn('[web-push] requestPushPermission failed', e);
+    }
   });
 
   el.querySelector('#pb-skip').addEventListener('click', () => {

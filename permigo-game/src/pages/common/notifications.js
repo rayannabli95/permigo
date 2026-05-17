@@ -269,13 +269,17 @@ export async function mount(root, me) {
     el.addEventListener('click', async () => {
       if (el.dataset.read === 'true') return;
       const id = el.dataset.id;
-      const { error } = await sb.from('notifications').update({ read: true }).eq('id', id);
-      if (error) return;
-      el.dataset.read = 'true';
-      el.classList.remove('unread');
-      track('notification.read', { notif_id: id });
-      const remaining = root.querySelectorAll('.nf-item.unread').length;
-      markAllBtn.disabled = remaining === 0;
+      try {
+        const { error } = await sb.from('notifications').update({ read: true }).eq('id', id);
+        if (error) return;
+        el.dataset.read = 'true';
+        el.classList.remove('unread');
+        track('notification.read', { notif_id: id });
+        const remaining = root.querySelectorAll('.nf-item.unread').length;
+        markAllBtn.disabled = remaining === 0;
+      } catch (e) {
+        console.warn('[notifications] mark read failed', e);
+      }
     });
   });
 

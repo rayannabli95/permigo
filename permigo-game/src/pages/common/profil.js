@@ -369,7 +369,13 @@ export async function mount(root) {
 
   root.querySelector('#btn-logout').addEventListener('click', async () => {
     track('auth.logout', { user_role: me.role });
-    await logout();
+    try {
+      await logout();
+    } catch (e) {
+      console.error('[profil] logout failed', e);
+      const { toast } = await import('@/components/toast.js');
+      toast('Déconnexion impossible — réessaie', 'error');
+    }
   });
 
   root.querySelector('#btn-delete').addEventListener('click', () => {

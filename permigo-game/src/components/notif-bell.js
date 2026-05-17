@@ -160,8 +160,13 @@ function wireBell(container, me) {
   // Voir tout → page /notifications
   container.querySelector('#nb-seeall')?.addEventListener('click', async () => {
     panel.classList.remove('show');
-    const { navigate } = await import('@/router.js');
-    navigate('/notifications');
+    try {
+      const { navigate } = await import('@/router.js');
+      navigate('/notifications');
+    } catch (e) {
+      console.warn('[notif-bell] navigate failed', e);
+      window.location.hash = '#/notifications';
+    }
   });
 
   readall.addEventListener('click', async () => {

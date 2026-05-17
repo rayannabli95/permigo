@@ -39,13 +39,26 @@ function schedule() {
 async function flush() {
   flushTimer = null;
   if (!queue.length) return;
-  const batch = queue.splice(0, queue.length);
-  try {
-    await sb.from('events_analytics').insert(batch);
-  } catch (e) {
-    if (DEBUG) console.warn('[track] flush failed', e);
-    // Re-queue on failure (max 50 retries pour éviter boucle infinie)
-    if (queue.length < 50) queue.unshift(...batch);
+
+  // Re-synchroniser user_id avec la session courante.
+  // Si l'utilisateur s'est déconnecté entre track() et flush(),
+  // get_my_id() retourne null côté RLS et un user_id non-null casse la policy.
+  const me = getCurUser();
+  const batch = queue.splice(0, queue.length).map(evt => ({
+    ...evt,
+    user_id: me?.id || null,
+    auto_ecole_id: me?.auto_ecole_id || null,
+    role: me?.role || 'guest',
+  }));
+
+  const { error } = await sb.from('events_analytics').insert(batch);
+
+  if (error) {
+    if (DEBUG) console.warn('[track] flush failed', error.message);
+    // RLS 42501 → on drop (event obsolète, replay aurait le même résultat)
+    // Réseau / 5xx → on retente (cap 50 pour éviter la boucle infinie)
+    const isRls = error.code === '42501';
+    if (!isRls && queue.length < 50) queue.unshift(...batch);
   }
 }
 
@@ -64,8 +77,9 @@ export async function identify(traits = {}) {
   const me = getCurUser();
   if (!me) return;
   try {
-    await sb.from('profiles').update(traits).eq('id', me.id);
+    const { error } = await sb.from('profiles').update(traits).eq('id', me.id);
+    if (error && DEBUG) console.warn('[identify] RLS or DB error:', error.message);
   } catch (e) {
-    if (DEBUG) console.warn('[identify]', e);
+    if (DEBUG) console.warn('[identify] network error:', e);
   }
 }

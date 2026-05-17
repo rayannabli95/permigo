@@ -123,23 +123,36 @@ async function saveQuizResult(me, { competenceId, type, score, total }) {
   const { data: profileBefore } = await sb.from('profiles').select('xp').eq('id', me.id).maybeSingle();
   const xpBefore = profileBefore?.xp ?? 0;
 
-  await sb.from('quiz_attempts').insert({
+  const { error: errAttempt } = await sb.from('quiz_attempts').insert({
     user_id: me.id,
     competence_id: competenceId,
     type,
     score: scorePct,
   });
+  if (errAttempt) {
+    console.error('[notif-listener] quiz_attempts insert failed', errAttempt);
+    toast('Sauvegarde du quiz impossible', 'error');
+    return;
+  }
 
-  await sb.from('validations')
+  const { error: errVal } = await sb.from('validations')
     .update({
       [scoreField]: scorePct,
       ...(type === 'consolidation' ? { consolidation_done_at: new Date().toISOString() } : {}),
     })
     .eq('eleve_id', me.id)
     .eq('competence_id', competenceId);
+  if (errVal) {
+    console.error('[notif-listener] validation update failed', errVal);
+    // On continue malgré tout — l'attempt est déjà sauvegardé
+  }
 
   // Increment XP
-  await sb.from('profiles').update({ xp: xpBefore + xpGain }).eq('id', me.id);
+  const { error: errXp } = await sb.from('profiles').update({ xp: xpBefore + xpGain }).eq('id', me.id);
+  if (errXp) {
+    console.error('[notif-listener] XP increment failed', errXp);
+    // L'XP sera re-calculée au prochain refresh — on continue
+  }
 
   // Detect level up
   const xpAfter = xpBefore + xpGain;

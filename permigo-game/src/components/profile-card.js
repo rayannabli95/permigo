@@ -13,6 +13,7 @@ import { sb } from '@/auth/auth.js';
 import { getPrestige } from '@/data/prestige.js';
 import { haptic } from '@/utils/haptic.js';
 import { wrapAnimatedBorder, BORDER_PRESETS } from '@/components/animated-border.js';
+import { openAvatarPicker } from '@/components/avatar-picker.js';
 
 const STYLE = `<style>
 .pcc { width: 100%; max-width: 380px; margin: 0 auto; padding: 0; }
@@ -413,15 +414,30 @@ async function uploadAndSet(userId, file, kind /* 'avatar' | 'banner' */, onProg
   if (!publicUrl) return null;
 
   const column = kind === 'avatar' ? 'avatar_url' : 'banner_url';
-  await sb.from('profiles').update({ [column]: publicUrl }).eq('id', userId);
+  const { error: errUpd } = await sb.from('profiles').update({ [column]: publicUrl }).eq('id', userId);
+  if (errUpd) {
+    const { toast } = await import('@/components/toast.js');
+    toast('URL non persistée — réessaie', 'error');
+    return null;
+  }
   return publicUrl;
+}
+
+// Helper : enveloppe un handler async pour capturer les rejets
+async function safeRun(fn, label = 'handler') {
+  try { await fn(); }
+  catch (e) {
+    console.error(`[profile-card] ${label} failed`, e);
+    const { toast } = await import('@/components/toast.js');
+    toast('Action impossible — réessaie', 'error');
+  }
 }
 
 /**
  * Mount + branche tous les listeners (édit photo, édit bannière, partage).
  */
 export function mountProfileCard(container, opts) {
-  const { me, shareUrl, shareText } = opts;
+  const { me, shareUrl, shareText, avatarUrl } = opts;
   container.innerHTML = renderProfileCard(opts);
   const card = container.querySelector('.pcc');
   if (!card) return;
@@ -429,24 +445,44 @@ export function mountProfileCard(container, opts) {
   // Anime les stats
   setTimeout(() => animateStats(card), 200);
 
-  // Edit avatar
+  // Edit avatar — ouvre d'abord le picker (6 défauts + option "Ma photo")
   const avInput = card.querySelector('.pcc-file-input[data-target="avatar"]');
-  card.querySelector('[data-action="edit-avatar"]').addEventListener('click', () => {
+  card.querySelector('[data-action="edit-avatar"]').addEventListener('click', async () => {
     haptic('select');
-    avInput.click();
+    try {
+      const choice = await openAvatarPicker({ currentUrl: avatarUrl || me.avatar_url });
+      if (!choice) return; // annulé
+      if (choice === '__upload__') {
+        avInput.click(); // déclenche le file picker existant
+        return;
+      }
+      // Avatar par défaut sélectionné — persist direct, pas d'upload
+      await safeRun(async () => {
+        const { error } = await sb.from('profiles').update({ avatar_url: choice }).eq('id', me.id);
+        if (error) throw error;
+        const avEl = card.querySelector('.pcc-av');
+        avEl.innerHTML = `<img src="${esc(choice)}" alt="" />`;
+        haptic('success');
+        const { toast } = await import('@/components/toast.js');
+        toast('Avatar mis à jour ✓', 'success', 2500);
+      }, 'avatar default pick');
+    } catch (e) {
+      console.warn('[profile-card] avatar picker failed', e);
+    }
   });
-  avInput.addEventListener('change', async (e) => {
+  avInput.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = await uploadAndSet(me.id, file, 'avatar');
-    if (url) {
-      const avEl = card.querySelector('.pcc-av');
-      avEl.innerHTML = `<img src="${url}" alt="" />`;
-      haptic('success');
-      const { toast } = await import('@/components/toast.js');
-      toast('Photo mise à jour ✓', 'success', 2500);
-    }
-    avInput.value = '';
+    safeRun(async () => {
+      const url = await uploadAndSet(me.id, file, 'avatar');
+      if (url) {
+        const avEl = card.querySelector('.pcc-av');
+        avEl.innerHTML = `<img src="${url}" alt="" />`;
+        haptic('success');
+        const { toast } = await import('@/components/toast.js');
+        toast('Photo mise à jour ✓', 'success', 2500);
+      }
+    }, 'avatar upload').finally(() => { avInput.value = ''; });
   });
 
   // Edit banner
@@ -455,20 +491,21 @@ export function mountProfileCard(container, opts) {
     haptic('select');
     bnInput.click();
   });
-  bnInput.addEventListener('change', async (e) => {
+  bnInput.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = await uploadAndSet(me.id, file, 'banner');
-    if (url) {
-      const bnEl = card.querySelector('.pcc-banner');
-      const existing = bnEl.querySelector('img');
-      if (existing) existing.src = url;
-      else bnEl.insertAdjacentHTML('afterbegin', `<img src="${url}" alt="" />`);
-      haptic('success');
-      const { toast } = await import('@/components/toast.js');
-      toast('Bannière mise à jour ✓', 'success', 2500);
-    }
-    bnInput.value = '';
+    safeRun(async () => {
+      const url = await uploadAndSet(me.id, file, 'banner');
+      if (url) {
+        const bnEl = card.querySelector('.pcc-banner');
+        const existing = bnEl.querySelector('img');
+        if (existing) existing.src = url;
+        else bnEl.insertAdjacentHTML('afterbegin', `<img src="${url}" alt="" />`);
+        haptic('success');
+        const { toast } = await import('@/components/toast.js');
+        toast('Bannière mise à jour ✓', 'success', 2500);
+      }
+    }, 'banner upload').finally(() => { bnInput.value = ''; });
   });
 
   // Share natif

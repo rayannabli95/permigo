@@ -671,7 +671,7 @@ async function doSave(overlay) {
 
   // Notification élève si compétence acquise
   if (_sheetStatut === 'acquis') {
-    await sb.from('notifications').insert({
+    const { error: errNotif } = await sb.from('notifications').insert({
       user_id: _eleveId,
       type: 'post_validation_quiz',
       title: 'Compétence validée ! 🎯',
@@ -679,6 +679,10 @@ async function doSave(overlay) {
       data: { competence_id: _sheetComp.c },
       read: false,
     });
+    if (errNotif) {
+      console.error('[livret-remc] notification insert failed', errNotif);
+      toast('Validé, mais notification non envoyée', 'warning');
+    }
   }
 
   track('competence.evaluated', {

@@ -215,9 +215,14 @@ export function showOnboarding(userId, onDone) {
     setTimeout(() => { overlay.remove(); styleEl.remove(); }, 280);
 
     if (userId) {
-      await sb.from('profiles')
-        .update({ first_value_action_at: new Date().toISOString() })
-        .eq('id', userId);
+      try {
+        const { error } = await sb.from('profiles')
+          .update({ first_value_action_at: new Date().toISOString() })
+          .eq('id', userId);
+        if (error) console.warn('[onboarding] update first_value_action_at failed', error);
+      } catch (e) {
+        console.warn('[onboarding] finish update failed', e);
+      }
     }
     onDone?.();
   }
