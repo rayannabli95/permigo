@@ -5,6 +5,8 @@ import { sb, logout } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
+import { mountPermisCard } from '@/components/permis-card.js';
+import { REMC_TOTAL } from '@/data/remc.js';
 
 // ─── CSS (cohérent avec design system permigo-game) ─────────────
 const STYLE = `<style>
@@ -182,12 +184,29 @@ export async function mount(root) {
   // Skeleton
   root.innerHTML = `${STYLE}<div class="prf"><div class="skel skel-card" style="height:180px;margin-bottom:14px"></div><div class="skel skel-card"></div></div>`;
 
-  // Fetch profil complet (xp, streak_pro_days)
+  // Fetch profil complet (xp, streak_pro_days, prenom, created_at)
   const { data: profile } = await sb
     .from('profiles')
-    .select('email, nom, xp, streak_pro_days')
+    .select('email, prenom, nom, xp, streak_pro_days, created_at')
     .eq('id', me.id)
     .single();
+
+  // Pour élève : compte des compétences validées (pour la carte permis)
+  let permisData = null;
+  if (me.role === 'eleve') {
+    const { data: valData } = await sb
+      .from('validations')
+      .select('competence_id')
+      .eq('eleve_id', me.id)
+      .eq('statut', 'acquis');
+    permisData = {
+      prenom: profile?.prenom || '',
+      nom: profile?.nom || '',
+      created_at: profile?.created_at || null,
+      validated: (valData || []).length,
+      total: REMC_TOTAL,
+    };
+  }
 
   // Pour enseignant : stats "Mon Année"
   let anneeStats = null;
@@ -223,6 +242,8 @@ export async function mount(root) {
     <div class="prf-name">${esc(displayName)}</div>
     <span class="prf-role-badge">${esc(ROLE_LABELS[me.role] || me.role)}</span>
   </div>
+
+  ${permisData ? `<div id="prf-permis-card"></div>` : ''}
 
   ${anneeStats ? `
   <div class="prf-streak">
@@ -276,14 +297,14 @@ export async function mount(root) {
       <span class="prf-row-ico">⚡</span>
       <div class="prf-row-body">
         <div class="prf-row-lbl">XP total</div>
-        <div class="prf-row-val" style="font-family:var(--fn);color:var(--a)">${esc(String(profile.xp))} XP</div>
+        <div class="prf-row-val" style="color:#6366f1">${esc(String(profile.xp))} XP</div>
       </div>
     </div>` : ''}
     <div class="prf-row">
       <span class="prf-row-ico">🔑</span>
       <div class="prf-row-body">
         <div class="prf-row-lbl">ID profil</div>
-        <div class="prf-row-val" style="font-family:var(--fn);font-size:11px;color:var(--mu2)">${esc(me.id)}</div>
+        <div class="prf-row-val" style="font-size:11px;color:#94a3b8">${esc(me.id)}</div>
       </div>
     </div>
   </div>
@@ -293,6 +314,12 @@ export async function mount(root) {
 
   <div class="prf-version">PermiGo v7 · Sprint 2</div>
 </div>`;
+
+  // Mount carte permis pour les élèves (avec tilt 3D au touch)
+  if (permisData) {
+    const cardHost = root.querySelector('#prf-permis-card');
+    if (cardHost) mountPermisCard(cardHost, permisData);
+  }
 
   root.querySelector('#btn-logout').addEventListener('click', async () => {
     track('auth.logout', { user_role: me.role });

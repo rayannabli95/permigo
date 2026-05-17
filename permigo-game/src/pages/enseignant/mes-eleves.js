@@ -274,6 +274,12 @@ let _query = '';
 let _tab = 'tous';      // 'tous' | 'actifs' | 'inactifs'
 
 // ─── Entry point ─────────────────────────────────────────────────
+export async function unmount() {
+  const { unmountFab } = await import('@/components/fab.js');
+  unmountFab();
+  document.querySelector('.me-qm')?.remove();
+}
+
 export async function mount(root) {
   _root = root;
   _me = getCurUser();
@@ -301,6 +307,17 @@ export async function mount(root) {
   await loadData();
   render();
   wire();
+
+  // FAB : raccourci validation rapide
+  const { mountFab } = await import('@/components/fab.js');
+  mountFab({
+    icon: '+',
+    label: 'Valider une compétence',
+    onClick: () => {
+      track('cta.valider_competence', { from: 'mes_eleves_fab' });
+      navigate('#/validation');
+    },
+  });
 }
 
 // ─── Data ────────────────────────────────────────────────────────
@@ -480,15 +497,148 @@ function wire() {
   wireRows();
 }
 
-function wireRows() {
+async function wireRows() {
+  const { attachSwipe, attachLongPress } = await import('@/utils/gestures.js');
+  const { haptic } = await import('@/utils/haptic.js');
+
   _root.querySelectorAll('.me-row[data-eleve-id]').forEach(row => {
+    const id = row.dataset.eleveId;
+
+    // ── Click standard → livret ──
     const handler = () => {
-      const id = row.dataset.eleveId;
+      haptic('tap');
       track('eleve.fiche.open', { eleve_id: id });
       navigate(`#/livret/${id}`);
     };
     row.addEventListener('click', handler);
     row.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') handler(); });
+
+    // ── Swipe right = validation rapide, swipe left = livret ──
+    // Visual follow : on translate la row pendant le drag
+    row.style.transition = 'transform .25s cubic-bezier(.2,.7,.3,1), background .15s';
+    attachSwipe(row, {
+      threshold: 80,
+      follow: (dx) => {
+        // Clamp visual
+        const clamped = Math.max(-100, Math.min(100, dx));
+        row.style.transform = `translateX(${clamped}px)`;
+        row.style.background = dx > 30 ? 'rgba(99,102,241,.06)'
+                              : dx < -30 ? 'rgba(16,185,129,.06)'
+                              : '';
+      },
+      onSwipeRight: () => {
+        haptic('select');
+        track('eleve.swipe_validate', { eleve_id: id });
+        navigate(`#/validation?eleveId=${id}`);
+      },
+      onSwipeLeft: () => {
+        haptic('select');
+        track('eleve.swipe_livret', { eleve_id: id });
+        navigate(`#/livret/${id}`);
+      },
+      onEnd: () => {
+        row.style.transform = '';
+        row.style.background = '';
+      },
+    });
+
+    // ── Long press → menu rapide ──
+    attachLongPress(row, {
+      holdMs: 480,
+      onLongPress: () => {
+        track('eleve.longpress_menu', { eleve_id: id });
+        openQuickMenu(id, row);
+      },
+    });
+  });
+}
+
+/**
+ * Mini menu contextuel apparaît sous la ligne au long-press
+ */
+function openQuickMenu(eleveId, anchorRow) {
+  // Retire menu existant
+  document.querySelector('.me-qm')?.remove();
+
+  const rect = anchorRow.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.className = 'me-qm';
+  menu.innerHTML = `
+    <style>
+      .me-qm-bg {
+        position: fixed; inset: 0; z-index: 400;
+        background: rgba(10,13,26,.18);
+        backdrop-filter: blur(2px);
+        animation: meqmIn .15s ease;
+      }
+      @keyframes meqmIn { from { opacity: 0; } to { opacity: 1; } }
+      .me-qm-panel {
+        position: fixed; z-index: 401;
+        background: #fff;
+        border: 1px solid #e2e6f2;
+        border-radius: 16px;
+        box-shadow: 0 12px 32px -8px rgba(10,13,26,.2);
+        padding: 6px;
+        min-width: 220px;
+        font-family: 'Inter', sans-serif;
+        animation: meqmPanel .2s cubic-bezier(.34,1.56,.64,1);
+      }
+      @keyframes meqmPanel { from { opacity: 0; transform: translateY(-4px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+      .me-qm-item {
+        display: flex; align-items: center; gap: 10px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        font: 500 14px/1.2 'Inter', sans-serif;
+        color: #0a0d1a;
+        background: transparent;
+        border: 0;
+        width: 100%;
+        text-align: left;
+      }
+      .me-qm-item:hover { background: #f8f9fc; }
+      .me-qm-item:active { background: #f0f2f8; }
+      .me-qm-ico { font-size: 16px; line-height: 1; }
+      .me-qm-item.danger { color: #ef4444; }
+    </style>
+    <div class="me-qm-bg" data-close="1"></div>
+    <div class="me-qm-panel">
+      <button class="me-qm-item" data-action="valider">
+        <span class="me-qm-ico">✓</span> Valider une compétence
+      </button>
+      <button class="me-qm-item" data-action="livret">
+        <span class="me-qm-ico">📋</span> Ouvrir le livret REMC
+      </button>
+      <button class="me-qm-item" data-action="note">
+        <span class="me-qm-ico">📝</span> Ajouter une note rapide
+      </button>
+    </div>
+  `;
+  document.body.appendChild(menu);
+
+  // Position du panel sous la row
+  const panel = menu.querySelector('.me-qm-panel');
+  const top = Math.min(rect.bottom + 8, window.innerHeight - 220);
+  const left = Math.min(rect.left + 16, window.innerWidth - 240);
+  panel.style.top = `${top}px`;
+  panel.style.left = `${left}px`;
+
+  const close = () => menu.remove();
+
+  menu.querySelector('[data-close]').addEventListener('click', close);
+  menu.querySelectorAll('.me-qm-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      close();
+      if (action === 'valider') navigate(`#/validation?eleveId=${eleveId}`);
+      else if (action === 'livret') navigate(`#/livret/${eleveId}`);
+      else if (action === 'note') {
+        // Placeholder pour future feature notes
+        import('@/components/toast.js').then(({ toast }) => {
+          toast('Notes rapides : bientôt 📝', 'info', 2500);
+        });
+      }
+    });
   });
 }
 

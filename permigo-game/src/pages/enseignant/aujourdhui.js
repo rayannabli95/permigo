@@ -290,6 +290,14 @@ function initials(prenom, nom) {
 }
 
 // ─── Entry point ──────────────────────────────────────────────────
+let _ptrCleanup = null;
+
+export async function unmount() {
+  if (_ptrCleanup) { _ptrCleanup(); _ptrCleanup = null; }
+  const { unmountFab } = await import('@/components/fab.js');
+  unmountFab();
+}
+
 export async function mount(root) {
   const _root = root;
   const _me = getCurUser();
@@ -308,6 +316,48 @@ export async function mount(root) {
       </div>
     </div>
   `;
+
+  // ─── Render principal (extrait pour réutilisation au pull-to-refresh) ──
+  async function renderAll() {
+    await renderInto(root, _me);
+  }
+
+  await renderAll();
+
+  // ─── Pull-to-refresh + FAB + Live counter ─────────────────────────────
+  const { attachPullToRefresh, animateCounter } = await import('@/utils/gestures.js');
+  const { mountFab } = await import('@/components/fab.js');
+
+  // PTR : refait le fetch + render avec animation du compteur
+  _ptrCleanup?.();
+  _ptrCleanup = attachPullToRefresh(document.scrollingElement || document.body, {
+    onRefresh: async () => {
+      const before = parseInt(root.querySelector('.aj-kpi .aj-kpi-val')?.textContent || '0', 10);
+      await renderAll();
+      const after = parseInt(root.querySelector('.aj-kpi .aj-kpi-val')?.textContent || '0', 10);
+      // Si nouvelles validations détectées, on anime le delta visuellement
+      if (after > before) {
+        const el = root.querySelector('.aj-kpi .aj-kpi-val');
+        if (el) animateCounter(el, before, after, 700);
+      }
+    },
+  });
+
+  // FAB : raccourci vers la page validation
+  mountFab({
+    icon: '+',
+    label: 'Valider une compétence',
+    onClick: () => {
+      track('cta.valider_competence', { from: 'aujourdhui_fab' });
+      navigate('#/validation');
+    },
+  });
+
+  return;
+}
+
+// ─── Render principal (factorisé pour pull-to-refresh) ─────────────────
+async function renderInto(root, _me) {
 
   // ─── Fetch en parallèle ────────────────────────────────────────
   const today = todayISO();

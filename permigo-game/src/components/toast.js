@@ -62,3 +62,77 @@ export function toast(msg, type = 'info', duration = 3000) {
 
   setTimeout(dismiss, duration);
 }
+
+/**
+ * Toast riche avec avatar (initiales) — pour validations enseignant.
+ * @param {{title: string, sub?: string, initials?: string, color?: string, type?: 'success'|'info'|'error', duration?: number}} opts
+ */
+export function toastAvatar({ title, sub = '', initials = '?', color = '#6366f1', type = 'success', duration = 3500 }) {
+  const root = ensureRoot();
+  const el = document.createElement('div');
+  el.className = `toast toast-${type} toast-rich`;
+  el.setAttribute('role', 'status');
+  el.setAttribute('aria-live', 'polite');
+  el.setAttribute('aria-atomic', 'true');
+
+  el.innerHTML = `
+    <style>
+      .toast-rich {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px !important;
+        background: #fff !important;
+        border: 1px solid #e2e6f2 !important;
+        box-shadow: 0 12px 32px -8px rgba(10,13,26,.18) !important;
+        min-width: 260px;
+        max-width: 90vw;
+      }
+      .toast-rich .ta-av {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .toast-rich .ta-body { flex: 1; min-width: 0; }
+      .toast-rich .ta-title {
+        font: 600 13.5px/1.3 'Inter', sans-serif;
+        color: #0a0d1a;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .toast-rich .ta-sub {
+        font: 500 11.5px/1.2 'Inter', sans-serif;
+        color: #94a3b8;
+        margin-top: 2px;
+      }
+      .toast-rich .ta-check {
+        width: 22px; height: 22px;
+        border-radius: 50%;
+        background: #10b981;
+        color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font: 700 14px/1 'Inter', sans-serif;
+        flex-shrink: 0;
+      }
+    </style>
+    <div class="ta-av" style="background:${esc(color)}">${esc(initials)}</div>
+    <div class="ta-body">
+      <div class="ta-title">${esc(title)}</div>
+      ${sub ? `<div class="ta-sub">${esc(sub)}</div>` : ''}
+    </div>
+    ${type === 'success' ? `<div class="ta-check">✓</div>` : ''}
+  `;
+  root.appendChild(el);
+
+  const dismiss = () => {
+    el.classList.remove('on');
+    el.addEventListener('transitionend', () => el.remove(), { once: true });
+  };
+
+  el.addEventListener('click', dismiss);
+
+  requestAnimationFrame(() => el.classList.add('on'));
+  setTimeout(dismiss, duration);
+}

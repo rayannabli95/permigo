@@ -264,7 +264,22 @@ async function doValidate() {
     auto_ecole_id: _me.auto_ecole_id,
   });
 
-  toast('Compétence validée — quiz dans 30 s côté élève', 'success');
+  // Feedback haptique + toast riche avec avatar élève
+  const { haptic } = await import('@/utils/haptic.js');
+  const { toastAvatar } = await import('@/components/toast.js');
+  haptic('success');
+
+  const prenom = _eleve.prenom || '';
+  const nom = _eleve.nom || '';
+  const ini = ((prenom[0] || '') + (nom[0] || '')).toUpperCase() || '?';
+  toastAvatar({
+    title: `${prenom} ${nom}`.trim() + ' — validée',
+    sub: `${_selectedComp.c} · ${_selectedComp.n}`,
+    initials: ini,
+    color: '#6366f1',
+    type: 'success',
+    duration: 4000,
+  });
 
   // Fetch updated XP (after trigger ran) → show XP toast
   const eleveName = _eleve.prenom || 'Élève';
