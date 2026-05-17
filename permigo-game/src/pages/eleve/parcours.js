@@ -213,18 +213,20 @@ const STYLE = `<style>
   object-position: center;
   display: block;
   z-index: 1;
+  filter: saturate(1.15) brightness(1.05) contrast(1.05);
 }
 /* Overlay blanc progressif pour que le texte et la route restent lisibles */
 .prc-world-overlay {
   position: absolute;
   inset: 0;
   z-index: 2;
+  /* Overlay réduit pour laisser les couleurs des images premium ressortir */
   background:
     linear-gradient(180deg,
-      rgba(255,255,255,.75) 0%,
-      rgba(255,255,255,.55) 40%,
-      rgba(255,255,255,.60) 70%,
-      rgba(255,255,255,.72) 100%);
+      rgba(255,255,255,.45) 0%,
+      rgba(255,255,255,.22) 40%,
+      rgba(255,255,255,.28) 70%,
+      rgba(255,255,255,.50) 100%);
   pointer-events: none;
 }
 

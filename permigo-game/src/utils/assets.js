@@ -13,7 +13,7 @@ export const ASSETS = {
 
   // ── 4 mondes REMC (illustrations premium) ──────────────────────
   worldC1: '/skins/permigo-remc-maitrise-vehicule-flag-v1.png',
-  worldC2: '/skins/permigo-remc-circulation-normale-v2.png',
+  worldC2: '/skins/permigo-remc-circulation-normale-v3.png',
   worldC3: '/skins/permigo-remc-conditions-difficiles-v1.png',
   worldC4: '/skins/permigo-autonomie-crown-v1.png',
 
