@@ -248,19 +248,29 @@ async function selectEleve(eleve) {
 }
 
 function selectComp(compId, compNom) {
-  if (_validatedIds.has(compId)) return;
+  // DEBUG : logs pour identifier le bug de sélection
+  console.log('[selectComp] click', { compId, compNom, validatedIds: [..._validatedIds], selected: _selectedComp });
 
-  // Règle pédagogique : on ne valide que la prochaine comp dans l'ordre REMC
+  if (_validatedIds.has(compId)) {
+    console.log('[selectComp] déjà validée → ignore');
+    return;
+  }
+
+  // Règle pédagogique REMC : on ne valide que dans l'ordre
   const nextUnlock = getNextUnlockable(_validatedIds);
+  console.log('[selectComp] nextUnlock attendue :', nextUnlock);
+
   if (compId !== nextUnlock) {
     const idx = ORDERED_COMPS.indexOf(compId);
     const required = ORDERED_COMPS.slice(0, idx).find(c => !_validatedIds.has(c)) || nextUnlock;
+    console.warn(`[selectComp] blocage : ${compId} requiert ${required}`);
     toast(`Valide d'abord ${required} avant ${compId}`, 'info', 3500);
     return;
   }
 
   const clickedSame = _selectedComp?.c === compId;
   _selectedComp = clickedSame ? null : { c: compId, n: compNom };
+  console.log('[selectComp] nouvelle selection :', _selectedComp);
 
   // Partial DOM update — évite un full re-render + perte de scroll
   _root.querySelectorAll('[data-comp-id]').forEach(el => {

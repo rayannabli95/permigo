@@ -44,4 +44,31 @@ export const ASSETS = {
     '/skins/avatar-default-05-v2.png',
     '/skins/avatar-default-06.png',
   ],
+
+  // ── Fonds carte permis (3 paliers évolutifs) ───────────────────
+  // Mesh = neutre/débutant, Route = milieu, Holographic = expert
+  permisBg: {
+    mesh:         '/skins/permis-bg-mesh.png',
+    route:        '/skins/permis-bg-route.png',
+    holographic:  '/skins/permis-bg-holographic.png',
+  },
 };
+
+/**
+ * Renvoie le fond carte permis adapté au nombre de compétences validées.
+ * Système narratif : ta carte évolue avec ta progression.
+ * @param {number} count - compétences validées (élève) ou validations faites (enseignant)
+ * @param {'eleve'|'enseignant'} role - barème différent par rôle
+ */
+export function getPermisBg(count = 0, role = 'eleve') {
+  if (role === 'enseignant') {
+    // Enseignant : barème 10 paliers (10 → 380)
+    if (count >= 230) return ASSETS.permisBg.holographic; // tier 7+
+    if (count >= 100) return ASSETS.permisBg.route;       // tier 4-6
+    return ASSETS.permisBg.mesh;                          // tier 1-3
+  }
+  // Élève : barème 31 compétences max
+  if (count >= 20) return ASSETS.permisBg.holographic; // expert
+  if (count >= 10) return ASSETS.permisBg.route;       // apprenti
+  return ASSETS.permisBg.mesh;                         // débutant
+}

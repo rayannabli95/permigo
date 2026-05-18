@@ -5,6 +5,7 @@
 // Pas de NEPH, pas de mention "République" (règle PermiGo)
 // ═══════════════════════════════════════════════════════════════
 import { esc } from '@/utils/escape.js';
+import { getPermisBg } from '@/utils/assets.js';
 
 const STYLE = `<style>
 .pc-wrap {
@@ -44,16 +45,30 @@ const STYLE = `<style>
 }
 .pc:hover::before, .pc:active::before { transform: translateX(100%); }
 
-/* Grain texture pour effet matière */
+/* Background image premium (mesh / route / holographic selon palier) */
+.pc-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: .55;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+.pc.s-valide .pc-bg { opacity: .72; mix-blend-mode: screen; }
+
+/* Grain texture pour effet matière (au-dessus du PNG) */
 .pc::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(circle at 20% 30%, rgba(255,255,255,.04) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(255,255,255,.03) 0%, transparent 50%);
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255,255,255,.04) 0%, transparent 50%);
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
 }
 
 /* ─── États visuels ─── */
@@ -316,10 +331,12 @@ export function renderPermisCard({ prenom = '', nom = '', created_at = null, val
   const pct = Math.min(100, Math.round((validated / total) * 100));
   const state = getState(pct);
   const ini = initials(prenom, nom);
+  const bgUrl = getPermisBg(validated, 'eleve');
 
   return `${STYLE}
 <div class="pc-wrap">
   <div class="pc s-${state.key}" role="img" aria-label="Carte permis - ${esc(state.label)}">
+    <div class="pc-bg" style="background-image:url('${esc(bgUrl)}')"></div>
     <div class="pc-inner">
 
       <div class="pc-top">
