@@ -7,6 +7,7 @@ import { esc } from '@/utils/escape.js';
 import { toast } from '@/components/toast.js';
 import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
+import { applyTheme, getTheme } from '@/utils/theme.js';
 
 const STYLE = `<style>
 .st {
@@ -232,6 +233,35 @@ const STYLE = `<style>
   margin-top: 12px;
 }
 .st-dpo-note a { color: #6366f1; }
+
+/* Theme segmented control */
+.st-theme-seg {
+  display: flex;
+  gap: 3px;
+  background: #f0f2f8;
+  border-radius: 10px;
+  padding: 3px;
+  width: 100%;
+}
+.st-theme-btn {
+  flex: 1;
+  padding: 7px 4px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  font: 600 12px/1 'Inter', sans-serif;
+  color: #64748b;
+  cursor: pointer;
+  transition: background .15s cubic-bezier(.23,1,.32,1), color .15s, box-shadow .15s;
+  white-space: nowrap;
+  min-height: 34px;
+  font-family: inherit;
+}
+.st-theme-btn.active {
+  background: #fff;
+  color: #6366f1;
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+}
 </style>`;
 
 export async function mount(root) {
@@ -257,6 +287,7 @@ export async function mount(root) {
     dndEnd: (profile?.dnd_end ?? '07:00:00').slice(0, 5),
     prenom: profile?.prenom ?? '',
     marketingOptin: myPrefs?.marketing_optin ?? false,
+    theme: (myPrefs?.theme === 'light' || myPrefs?.theme === 'dark' || myPrefs?.theme === 'auto') ? myPrefs.theme : getTheme(),
   };
 
   render(root, me, prefs);
@@ -355,13 +386,15 @@ function render(root, me, prefs) {
   <!-- APPARENCE -->
   <div class="st-section">
     <div class="st-section-label">Apparence</div>
-    <div class="st-row">
-      <div class="st-row-left">
+    <div class="st-row" style="flex-direction:column;align-items:flex-start;gap:10px">
+      <div>
         <div class="st-row-title">Thème</div>
-        <div class="st-row-sub">Mode sombre disponible dans une prochaine version</div>
+        <div class="st-row-sub">Apparence de l'application</div>
       </div>
-      <div class="st-row-action">
-        <span class="st-chip">☀️ Clair</span>
+      <div class="st-theme-seg" id="theme-seg" role="group" aria-label="Choisir le thème">
+        <button class="st-theme-btn ${prefs.theme === 'light' ? 'active' : ''}" data-theme="light" aria-pressed="${prefs.theme === 'light'}">☀️ Clair</button>
+        <button class="st-theme-btn ${prefs.theme === 'dark'  ? 'active' : ''}" data-theme="dark"  aria-pressed="${prefs.theme === 'dark'}">🌙 Sombre</button>
+        <button class="st-theme-btn ${prefs.theme === 'auto'  ? 'active' : ''}" data-theme="auto"  aria-pressed="${prefs.theme === 'auto'}">Système</button>
       </div>
     </div>
   </div>
@@ -489,6 +522,24 @@ function wire(root, me, prefs) {
     if (error) { toast('Erreur d\'envoi de l\'email', 'error'); return; }
     toast('Email de réinitialisation envoyé !', 'success', 5000);
     track('settings.pwd_reset_requested', {});
+  });
+
+  // Theme segmented control
+  root.querySelector('#theme-seg')?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.st-theme-btn');
+    if (!btn) return;
+    const mode = btn.dataset.theme;
+    root.querySelectorAll('.st-theme-btn').forEach(b => {
+      b.classList.toggle('active', b === btn);
+      b.setAttribute('aria-pressed', String(b === btn));
+    });
+    applyTheme(mode);
+    track('settings.theme_changed', { theme: mode });
+    try {
+      await sb.rpc('set_my_preferences', { theme: mode });
+    } catch (e) {
+      console.error('[settings] theme save', e);
+    }
   });
 
   // Export mes données

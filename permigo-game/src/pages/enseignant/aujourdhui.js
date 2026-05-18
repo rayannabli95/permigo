@@ -707,7 +707,7 @@ function renderActRow(val, elevesMap) {
   const eleve = elevesMap[val.eleve_id] || { prenom: 'Élève', nom: '', idx: 0 };
   const grad = AVATARS[eleve.idx % AVATARS.length];
   const ini = initials(eleve.prenom, eleve.nom);
-  const fullNom = esc(eleve.nom || eleve.prenom || '—');
+  const fullNom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(' ') || '—');
   const cfg = STATUT_LABEL[val.statut] || { label: val.statut || '—', color: '#94a3b8', bg: '#f8f9fc' };
 
   return `
@@ -733,7 +733,7 @@ function renderActRow(val, elevesMap) {
 function renderEleveRow(eleve) {
   const grad = AVATARS[eleve.idx % AVATARS.length];
   const ini = initials(eleve.prenom, eleve.nom);
-  const fullNom = esc(eleve.nom || eleve.prenom || '—');
+  const fullNom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(' ') || '—');
   const pct = REMC_TOTAL > 0 ? Math.round((eleve.acquis / REMC_TOTAL) * 100) : 0;
 
   return `

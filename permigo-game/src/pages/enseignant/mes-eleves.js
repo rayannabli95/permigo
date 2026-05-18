@@ -340,7 +340,7 @@ async function loadData() {
   //    Côté frontend on marquera ensuite les "attitrés" (enseignant_id = me.id)
   const { data: elevesRaw, error: e1 } = await sb
     .from('profiles')
-    .select('id, prenom, nom, credit_heures, enseignant_id, last_active_at')
+    .select('id, prenom, nom, credit_heures, enseignant_id, last_active_at, avatar_url')
     .eq('role', 'eleve')
     .order('prenom');
 
@@ -562,12 +562,15 @@ function renderRow(eleve) {
   const initials = (_ini1 + _ini2).toUpperCase() || '?';
   const grad = AVATARS[eleve.idx % AVATARS.length];
   const pct = eleve.total > 0 ? Math.round((eleve.acquis / eleve.total) * 100) : 0;
-  const fullNom = esc(eleve.nom || eleve.prenom || '—');
+  const fullNom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(' ') || '—');
 
   return `
     <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="button" tabindex="0"
          aria-label="Fiche de ${fullNom}">
-      <div class="me-av" style="background:${grad}">${esc(initials || '?')}</div>
+      ${eleve.avatar_url
+        ? `<img class="me-av" src="${esc(eleve.avatar_url)}" alt="${fullNom}" loading="lazy" style="object-fit:cover">`
+        : `<div class="me-av" style="background:${grad}">${esc(initials || '?')}</div>`
+      }
 
       <div class="me-info">
         <div class="me-nom">

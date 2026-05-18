@@ -22,6 +22,18 @@ const STYLE = `
     padding-right: 12px;
     z-index: 300;
   }
+  .pg-logo-btn {
+    background: none;
+    border: none;
+    padding: 6px 4px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background .12s;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .pg-logo-btn:active { background: rgba(99,102,241,.08); }
 `;
 
 export async function mountHeader() {
@@ -38,12 +50,18 @@ export async function mountHeader() {
   bar.id = 'header-bar';
   bar.setAttribute('role', 'banner');
   bar.innerHTML = `
-    <div class="pg-logo-txt sm">PermiGo</div>
+    <button class="pg-logo-btn" id="ht-logo" aria-label="Accueil PermiGo">
+      <span class="pg-logo-txt sm">PermiGo</span>
+    </button>
     <div id="ht-bell"></div>
   `;
 
   const appEl = document.getElementById('app');
   document.body.insertBefore(bar, appEl);
+
+  bar.querySelector('#ht-logo')?.addEventListener('click', () => {
+    location.hash = '#/';
+  });
 
   await mountNotifBell(bar.querySelector('#ht-bell'));
 }

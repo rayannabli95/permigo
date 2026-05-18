@@ -529,7 +529,7 @@ export async function mount(root) {
 
   try {
   // Fetch tout en parallèle
-  const [profileRes, streakRes, validRes, notifRes, attemptsRes, lbRes] = await Promise.allSettled([
+  const [profileRes, streakRes, validRes, notifRes, attemptsRes] = await Promise.allSettled([
     sb.from('profiles')
       .select('prenom, xp, last_active_at, first_value_action_at, gemmes')
       .eq('id', me.id)
@@ -558,8 +558,6 @@ export async function mount(root) {
       .eq('user_id', me.id)
       .gte('completed_at', new Date(Date.now() - 35 * 86400000).toISOString())
       .order('completed_at', { ascending: true }),
-
-    sb.rpc('get_my_leaderboard_position'),
   ]);
 
   const profile   = profileRes.value?.data  || { prenom: me.prenom || 'Toi', xp: 0 };
@@ -567,7 +565,6 @@ export async function mount(root) {
   const validated = new Set((validRes.value?.data || []).map(v => v.competence_id));
   const pendingNotif = notifRes.value?.data?.[0] || null;
   const activityDays = buildActivityData(attemptsRes.value?.data || [], streak);
-  const lbPos     = (lbRes.value?.data && !lbRes.value?.data?.error) ? lbRes.value.data : null;
 
   ensureHeatmapStyles();
 
@@ -580,32 +577,35 @@ export async function mount(root) {
   track('streak.viewed', { days: streak.current_streak, status: streakSt });
 
   const gemmes = profile.gemmes || 0;
-  root.innerHTML = render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, activityDays, gemmes, lbPos });
-  wire(root, { cta, worlds, pendingNotif, streak, streakSt, gemmes, activityDays, lbPos });
+  root.innerHTML = render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, activityDays, gemmes });
+  wire(root, { cta, worlds, pendingNotif, streak, streakSt, gemmes, activityDays });
 
   const accDiv = root.querySelector('.acc');
 
   // Coaching tip (au-dessus du streak — non-bloquant)
-  if (accDiv) mountCoachingTip(accDiv).catch(() => {});
+  if (accDiv) Promise.resolve().then(() => mountCoachingTip(accDiv)).catch(e => console.error('[accueil] coaching-tip', e));
 
   // Quêtes du jour (avant streak — non-bloquant, après coaching tip)
-  if (accDiv) mountDailyQuests(accDiv).catch(() => {});
+  if (accDiv) Promise.resolve().then(() => mountDailyQuests(accDiv)).catch(e => console.error('[accueil] daily-quests', e));
 
   // Bannière sessions à confirmer (non-bloquante)
   if (accDiv) {
     const streakAnchor = accDiv.querySelector('.streak-pro') || accDiv.firstElementChild;
-    mountSessionConfirmation(accDiv, streakAnchor).catch(() => {});
+    Promise.resolve().then(() => mountSessionConfirmation(accDiv, streakAnchor)).catch(e => console.error('[accueil] session-confirm', e));
   }
 
   // Feed retours moniteurs (non-bloquant — injecté avant footer)
   if (accDiv) {
-    mountFeedbackFeed(accDiv, { eleveId: me.id, limit: 5 }).catch(() => {});
+    Promise.resolve().then(() => mountFeedbackFeed(accDiv, { eleveId: me.id, limit: 5 })).catch(e => console.error('[accueil] feedback-feed', e));
   }
 
   // Révisions mémoire espacée (non-bloquant — injecté avant footer)
   if (accDiv) {
-    mountRevisionCards(accDiv, { eleveId: me.id, limit: 3 }).catch(() => {});
+    Promise.resolve().then(() => mountRevisionCards(accDiv, { eleveId: me.id, limit: 3 })).catch(e => console.error('[accueil] revision-cards', e));
   }
+
+  // Leaderboard (non-bloquant — injecté dans le slot dédié)
+  _loadAndInjectLeaderboard(root);
 
   // Bannière émotionnelle (non-bloquante — indépendante du render principal)
   emotionalBanner.checkAndRender(root).catch(() => {});
@@ -711,7 +711,7 @@ function computeCta({ pendingNotif }) {
 }
 
 // ─── Render ───────────────────────────────────────────────────────
-function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, activityDays = { days7: [], activeDates: [], levels: {}, details: {}, totalActive: 0 }, gemmes = 0, lbPos = null }) {
+function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, activityDays = { days7: [], activeDates: [], levels: {}, details: {}, totalActive: 0 }, gemmes = 0 }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const isActive = streakSt !== 'broken';
 
@@ -832,8 +832,8 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, act
     ` : ''}
   </div>
 
-  <!-- 6. LEADERBOARD -->
-  ${lbPos ? renderLeaderboardCard(lbPos) : ''}
+  <!-- 6. LEADERBOARD — injecté en post-render (non-bloquant) -->
+  <div id="acc-lb-slot"></div>
 
   <!-- 7. FOOTER — métriques compétences -->
   ${totalValidated === 0 ? `
@@ -901,6 +901,22 @@ function avatarSvg(prenom) {
   </svg>`;
 }
 
+async function _loadAndInjectLeaderboard(root) {
+  try {
+    const { data, error } = await sb.rpc('get_my_leaderboard_position');
+    if (error || !data || data?.error) return;
+    const slot = root.querySelector('#acc-lb-slot');
+    if (!slot) return;
+    slot.innerHTML = renderLeaderboardCard(data);
+    slot.querySelector('#acc-lb-card')?.addEventListener('click', () => {
+      track('leaderboard.tapped', { rank: data.my_rank, percentile: data.percentile });
+      location.hash = '#/trophees';
+    });
+  } catch (e) {
+    console.error('[accueil] leaderboard', e);
+  }
+}
+
 function renderLeaderboardCard(lb) {
   const rank  = lb.my_rank ?? null;
   const total = lb.total_eleves ?? null;
@@ -933,14 +949,7 @@ function streakSubText(status, streak) {
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
-function wire(root, { cta, streak, streakSt, gemmes = 0, activityDays, lbPos = null }) {
-  // Leaderboard card
-  root.querySelector('#acc-lb-card')?.addEventListener('click', () => {
-    track('leaderboard.tapped', { rank: lbPos?.my_rank, percentile: lbPos?.percentile });
-    // For now navigate to trophees — full leaderboard page to be created in V2
-    location.hash = '#/trophees';
-  });
-
+function wire(root, { cta, streak, streakSt, gemmes = 0, activityDays }) {
   root.querySelector('.action-btn')?.addEventListener('click', (e) => {
     const btn  = e.currentTarget;
     const type = btn.dataset.ctaType;

@@ -761,8 +761,10 @@ const STYLE = `<style>
   touch-action: pan-y;
   padding-bottom: max(20px, env(safe-area-inset-bottom));
   will-change: transform;
-  max-height: 80vh;
+  max-height: 86vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 .bsheet.open { transform: translateY(0); }
 .bsheet-handle {
@@ -771,6 +773,8 @@ const STYLE = `<style>
   border-radius: 2px;
   margin: 12px auto 0;
   flex-shrink: 0;
+  touch-action: none;
+  cursor: grab;
 }
 
 /* Fiche compétence (bottom sheet content) */

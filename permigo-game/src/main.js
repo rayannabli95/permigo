@@ -2,7 +2,7 @@
 // PermiGo Game — entry point
 // ═══════════════════════════════════════════════════════════════
 import './styles/main.css';
-import { restoreSession } from '@/auth/auth.js';
+import { restoreSession, sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { route } from '@/router.js';
 import { track } from '@/services/analytics.js';
@@ -10,6 +10,10 @@ import { startNotifListener } from '@/services/notif-listener.js';
 import { toast } from '@/components/toast.js';
 import { mountHeader } from '@/components/header-top.js';
 import { mountBottomNav } from '@/components/nav-bottom.js';
+import { initThemeEarly, syncFromPrefs } from '@/utils/theme.js';
+
+// Apply saved/system theme before any rendering (reads localStorage, synchronous)
+initThemeEarly();
 
 const app = document.getElementById('app');
 
@@ -18,6 +22,9 @@ async function boot() {
     await restoreSession();
     const me = getCurUser();
     track('app.opened', { role: me?.role || 'guest' });
+
+    // Sync theme preference from backend (non-blocking — fallback already applied by initThemeEarly)
+    if (me) syncFromPrefs(sb).catch(() => {});
 
     if (!me) {
       // Cas spécial : invitation en cours d'activation
