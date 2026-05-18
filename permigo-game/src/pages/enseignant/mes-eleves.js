@@ -9,6 +9,7 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { REMC_TOTAL } from '@/data/remc.js';
+import { renderEmptyState } from '@/components/empty-state.js';
 
 // ─── Gradients avatar (8 couleurs cycliques) ─────────────────────
 const AVATARS = [
@@ -468,10 +469,16 @@ function render() {
 
       <div class="me-list">
         ${filtered.length === 0
-          ? `<div class="me-empty">
-               <span class="me-empty-ico">👥</span>
-               ${_query ? 'Aucun résultat pour <strong>"' + esc(_query) + '"</strong>.' : 'Aucun élève dans cet onglet.'}
-             </div>`
+          ? (_tab === 'tous' && !_query
+              ? renderEmptyState({
+                  illustration: '/skins/empty-students-manager-minimal.png',
+                  title: 'Aucun élève pour l\'instant',
+                  subtitle: 'Vos élèves apparaîtront ici une fois invités par le gérant.',
+                })
+              : `<div class="me-empty">
+                   <span class="me-empty-ico">👥</span>
+                   ${_query ? 'Aucun résultat pour <strong>"' + esc(_query) + '"</strong>.' : 'Aucun élève dans cet onglet.'}
+                 </div>`)
           : filtered.map(renderRow).join('')
         }
       </div>
@@ -750,10 +757,16 @@ function renderList() {
   });
 
   if (filtered.length === 0) {
-    listEl.innerHTML = `<div class="me-empty">
-      <span class="me-empty-ico">👥</span>
-      ${_query ? 'Aucun résultat pour <strong>"' + esc(_query) + '"</strong>.' : 'Aucun élève dans cet onglet.'}
-    </div>`;
+    listEl.innerHTML = _tab === 'tous' && !_query
+      ? renderEmptyState({
+          illustration: '/skins/empty-students-manager-minimal.png',
+          title: 'Aucun élève pour l\'instant',
+          subtitle: 'Vos élèves apparaîtront ici une fois invités par le gérant.',
+        })
+      : `<div class="me-empty">
+           <span class="me-empty-ico">👥</span>
+           ${_query ? 'Aucun résultat pour <strong>"' + esc(_query) + '"</strong>.' : 'Aucun élève dans cet onglet.'}
+         </div>`;
     return;
   }
 

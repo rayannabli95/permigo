@@ -10,6 +10,7 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { lancerQuiz } from '@/modules/pedagogie/quiz-engine.js';
 import { findSubComp, findCategory } from '@/data/remc.js';
+import { unlockChest } from '@/utils/game-state.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -251,6 +252,11 @@ async function handleComplete(root, me, { competenceId, type, score, total, dura
     success,
     duration_seconds: duration,
   });
+
+  // Coffre quiz parfait (100%) — idempotent, unique par utilisateur
+  if (scorePct === 100) {
+    unlockChest('perfect_quiz', { xp: 100, gemmes: 25, title: 'Précision' }).catch(() => {});
+  }
 
   if (success) {
     toast('🔥 Compétence consolidée !', 'success');

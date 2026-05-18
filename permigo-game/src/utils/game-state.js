@@ -1,21 +1,22 @@
 /**
  * Game State — moteur centralisé XP/Niveau/Streak/Ligue/Coffres.
  *
- * Tout est en localStorage côté client (pas de sync DB pour cette V1).
- * Le ground-truth des compétences acquises vient de `remc_entries` Supabase
+ * Coffres : localStorage (cache immédiat) + RPC Supabase (persistance DB).
+ * Le ground-truth des compétences acquises vient de `validations` Supabase
  * (passé en paramètre dans `computeStats({ doneCount, worldsCompleted })`).
  *
  * Usage :
- *   import { computeStats, updateStreak, getOpenedChests, markChestOpened } from '@/utils/game-state.js';
- *   const stats = computeStats({ doneCount: 13, worldsCompleted: 1 });
- *   // → { xp, level, xpInLevel, xpForNextLevel, league, streak, availableChests, gemmes }
+ *   import { computeStats, updateStreak, getOpenedChests, markChestOpened,
+ *            getMyChests, unlockChest, openChest } from '@/utils/game-state.js';
  */
+import { sb } from '@/auth/auth.js';
 
 const XP_PER_COMP = 100;
 const XP_PER_LEVEL = 500;
 const LS_STREAK_DATE = 'pg-streak-date';
 const LS_STREAK_COUNT = 'pg-streak-count';
-const LS_CHESTS_OPENED = 'pg-chests-opened';
+const LS_CHESTS_OPENED   = 'pg-chests-opened';
+const LS_CHESTS_DB_CACHE = 'pg-chests-db-v1';
 const LS_GEMMES = 'pg-gemmes';
 const LS_OWNED = 'pg-owned';        // array d'item IDs achetés
 const LS_EQUIPPED = 'pg-equipped';  // { permit, avatarFrame, theme }
@@ -80,7 +81,14 @@ export function updateStreak() {
     const next = count + 1;
     localStorage.setItem(LS_STREAK_DATE, today);
     localStorage.setItem(LS_STREAK_COUNT, String(next));
-    return { count: next, isNewDay: true, justBroken: false };
+
+    // Coffres streak jalons — idempotent (RPC gère les doublons)
+    let pendingChest = null;
+    if (next === 7)  pendingChest = { chestType: 'streak_7',  rewards: { xp: 150, gemmes: 30,  title: 'Persévérant' } };
+    if (next === 14) pendingChest = { chestType: 'streak_14', rewards: { xp: 350, gemmes: 80,  title: 'Constant' } };
+    if (next === 30) pendingChest = { chestType: 'streak_30', rewards: { xp: 800, gemmes: 200, title: 'Inarrêtable' } };
+
+    return { count: next, isNewDay: true, justBroken: false, pendingChest };
   }
 
   // Streak cassée
@@ -147,6 +155,73 @@ export function markChestOpened(worldNum) {
   localStorage.setItem(LS_CHESTS_OPENED, JSON.stringify(Array.from(s)));
   // Récompense bonus : +50 gemmes par coffre ouvert
   addGemmes(50);
+  // Persister en DB (fire-and-forget — idempotent via contrainte UNIQUE)
+  openChest('world_' + worldNum).catch(() => {});
+}
+
+// ─── RPC Coffres (DB) ─────────────────────────────────────────────
+
+function _dbCacheGet() {
+  try { return JSON.parse(localStorage.getItem(LS_CHESTS_DB_CACHE) || '[]'); }
+  catch { return []; }
+}
+
+function _dbCacheSet(data) {
+  try { localStorage.setItem(LS_CHESTS_DB_CACHE, JSON.stringify(data)); } catch {}
+}
+
+/**
+ * Récupère tous les coffres de l'utilisateur depuis la DB.
+ * Retourne le cache localStorage si la RPC échoue.
+ * @returns {Promise<Array<{id, chest_type, unlocked_at, opened_at, rewards}>>}
+ */
+export async function getMyChests() {
+  try {
+    const { data, error } = await sb.rpc('get_my_chests');
+    if (error) throw error;
+    _dbCacheSet(data || []);
+    return data || [];
+  } catch (e) {
+    console.warn('[chests] getMyChests fallback to cache', e?.message);
+    return _dbCacheGet();
+  }
+}
+
+/**
+ * Débloque un coffre côté DB (idempotent).
+ * Met aussi à jour le cache localStorage.
+ * @returns {Promise<{unlocked:boolean, already_unlocked?:boolean, chest:object}|null>}
+ */
+export async function unlockChest(chestType, rewards = {}) {
+  try {
+    const { data, error } = await sb.rpc('unlock_chest', {
+      p_chest_type: chestType,
+      p_rewards: rewards,
+    });
+    if (error) throw error;
+    // Invalide le cache DB pour forcer un refresh au prochain getMyChests()
+    _dbCacheSet([]);
+    return data;
+  } catch (e) {
+    console.warn('[chests] unlockChest failed (RPC not deployed yet?)', e?.message);
+    return null;
+  }
+}
+
+/**
+ * Marque un coffre comme ouvert (déclenché par la modal).
+ * @returns {Promise<{opened:boolean, chest:object}|null>}
+ */
+export async function openChest(chestType) {
+  try {
+    const { data, error } = await sb.rpc('open_chest', { p_chest_type: chestType });
+    if (error) throw error;
+    _dbCacheSet([]);
+    return data;
+  } catch (e) {
+    console.warn('[chests] openChest failed (RPC not deployed yet?)', e?.message);
+    return null;
+  }
 }
 
 // ─── Gemmes ───

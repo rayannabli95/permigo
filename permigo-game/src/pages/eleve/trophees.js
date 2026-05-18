@@ -6,6 +6,7 @@ import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { TROPHEES, RARITY_LABEL, RARITY_COLOR } from '@/data/trophees.js';
+import { renderEmptyState } from '@/components/empty-state.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -362,7 +363,13 @@ function render(trophees, unlockedCount) {
     <div class="trp-grid">
       ${unlocked.map(t => renderCard(t, true)).join('')}
     </div>
-  ` : ''}
+  ` : renderEmptyState({
+    illustration: '/skins/empty-trophies.png',
+    title: 'Aucun trophée encore',
+    subtitle: 'Valide toutes les compétences d\'un monde pour débloquer ton premier trophée.',
+    ctaLabel: 'Valide ta première compétence',
+    ctaHref: '#/parcours',
+  })}
 
   ${locked.length > 0 ? `
     <div class="trp-section-hd">

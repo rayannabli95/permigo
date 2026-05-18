@@ -15,6 +15,8 @@ import { maybeSoftRequestPush, maybeSendStreakRiskNotif } from '@/services/web-p
 import { maybePlayWeeklyReplay } from '@/components/weekly-replay.js';
 import { icon, iconBadge } from '@/utils/icons.js';
 import { ASSETS } from '@/utils/assets.js';
+import { renderEmptyState } from '@/components/empty-state.js';
+import { emotionalBanner } from '@/components/emotional-banner.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -496,6 +498,9 @@ export async function mount(root) {
   root.innerHTML = render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, lastLecon, activityDays });
   wire(root, { cta, worlds, pendingNotif, streak, activityDays });
 
+  // Bannière émotionnelle (non-bloquante — indépendante du render principal)
+  emotionalBanner.checkAndRender(root).catch(() => {});
+
   // Flame bump si streak vient d'être sauvegardée aujourd'hui
   if (streakSt === 'saved' && streak.current_streak > 0) {
     setTimeout(() => {
@@ -745,6 +750,12 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, las
   </div>
 
   <!-- 6. FOOTER — métriques compétences (zéro heure) -->
+  ${!lastLecon ? renderEmptyState({
+    illustration: '/skins/empty-lessons.png',
+    title: 'Première leçon à venir',
+    subtitle: 'Ta première leçon en voiture sera enregistrée ici par ton moniteur.',
+    compact: true,
+  }) : ''}
   <div class="acc-footer">
     <div class="footer-stat">
       <div class="footer-val">${totalValidated}<span style="font-size:.55em;color:#94a3b8">/31</span></div>

@@ -12,6 +12,9 @@ import { WORLDS } from '@/data/worlds.js';
 import { ASSETS } from '@/utils/assets.js';
 import { getCompDetail } from '@/data/remc-details.js';
 import { icon } from '@/utils/icons.js';
+import { renderEmptyState } from '@/components/empty-state.js';
+import { renderChest, openChestModal, ensureChestStyles } from '@/components/chest.js';
+import { isChestOpened, unlockChest } from '@/utils/game-state.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -1101,8 +1104,24 @@ export async function mount(root) {
   }
 
   const worldStates = computeWorldStates(validatedMap);
+
+  ensureChestStyles();
   root.innerHTML = renderPage(worldStates, validatedMap);
   wire(root, worldStates, validatedMap, me);
+
+  // Persister en DB les coffres des mondes complétés (idempotent)
+  const CHEST_REWARDS = [
+    { xp: 200, gemmes: 50  },
+    { xp: 400, gemmes: 100 },
+    { xp: 700, gemmes: 175 },
+    { xp: 1200, gemmes: 300 },
+  ];
+  worldStates.forEach((ws, i) => {
+    if (ws.status === 'complete') {
+      const num = i + 1;
+      unlockChest(`world_${num}`, CHEST_REWARDS[i] ?? { xp: 200, gemmes: 50 }).catch(() => {});
+    }
+  });
 
   // ── Flèche "Tu viens de débloquer !" si une comp a été validée < 10 min ──
   const FRESH_MS = 10 * 60 * 1000;
@@ -1339,6 +1358,13 @@ function renderPage(worldStates, validatedMap) {
       <span class="prc-map-badge-dot"></span> CARTE D'APPRENTISSAGE
     </div>
     <div class="prc-map" id="prc-map-scroll">
+      ${totalDone === 0 ? renderEmptyState({
+        illustration: '/skins/empty-parcours.png',
+        title: 'Ton parcours t\'attend !',
+        subtitle: 'Clique sur ta première compétence ci-dessous pour démarrer.',
+        ctaLabel: 'Voir ma première compétence',
+        ctaHref: '#prc-comp-first',
+      }) : ''}
       ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, i < worldStates.length - 1)).join('')}
       ${renderFinal(totalDone, totalComps)}
       <div style="height: 24px"></div>
@@ -1476,6 +1502,12 @@ function renderWorldSection(ws, validatedMap, hasNext) {
       : (hasNext ? `Termine ce monde pour débloquer le suivant.` : `Le sommet est proche.`)}</p>
   </div>
 
+  ${isComplete ? renderChest({
+    worldNum: meta.num,
+    worldName: world.nom,
+    opened: isChestOpened(meta.num),
+  }) : ''}
+
   ${hasNext ? '<div class="prc-bridge"></div>' : ''}
 </section>`;
 }
@@ -1534,6 +1566,20 @@ function wire(root, worldStates, validatedMap, me) {
       root.querySelector(`[data-world-idx="${target.idx}"]`)
         ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  });
+
+  // Coffres → modal cinématique
+  root.querySelectorAll('.chest-card:not(.opened)').forEach(card => {
+    const worldNum = parseInt(card.dataset.chestWorld, 10);
+    const ws = worldStates[worldNum - 1];
+    const open = () => {
+      track('parcours.chest_open', { worldNum });
+      openChestModal({ worldNum, worldName: ws?.world?.nom ?? `Monde ${worldNum}` });
+    };
+    card.addEventListener('click', open);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+    });
   });
 
   // Nodes → ouvre la fiche (click + Enter/Space pour keyboard nav)
