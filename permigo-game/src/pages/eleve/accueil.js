@@ -583,12 +583,12 @@ function computeCta({ pendingNotif, lastLecon }) {
     const days = Math.floor((Date.now() - new Date(lastLecon).getTime()) / 86_400_000);
     if (days > 3) {
       return {
-        type: 'reserve_lecon',
-        ico: '📅',
-        label: 'Planifie ta prochaine leçon',
-        sub: `Dernière leçon il y a ${days} jours — contacte ton moniteur`,
-        btn: 'Voir mon moniteur →',
-        href: null,
+        type: 'reprise',
+        ico: '🎯',
+        label: 'Reprends là où tu en étais',
+        sub: 'Une nouvelle compétence t\'attend dans ton parcours',
+        btn: 'Continuer →',
+        href: '#/parcours',
         accent: '#f59e0b',
       };
     }
@@ -734,16 +734,16 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, las
     ` : ''}
   </div>
 
-  <!-- 6. FOOTER -->
+  <!-- 6. FOOTER — métriques compétences (zéro heure) -->
   <div class="acc-footer">
     <div class="footer-stat">
-      <div class="footer-val">${profile.credit_heures ?? '—'}h</div>
-      <div class="footer-lbl">de conduite restantes</div>
+      <div class="footer-val">${totalValidated}<span style="font-size:.55em;color:#94a3b8">/31</span></div>
+      <div class="footer-lbl">compétences acquises</div>
     </div>
     <div class="footer-sep"></div>
     <div class="footer-stat">
-      <div class="footer-val footer-lecon">${daysSinceLabel(lastLecon)}</div>
-      <div class="footer-lbl">Lecture seule · contacte ton moniteur</div>
+      <div class="footer-val">${Math.max(0, 28 - totalValidated)}</div>
+      <div class="footer-lbl">avant l'examen blanc</div>
     </div>
   </div>
 
