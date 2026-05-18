@@ -19,6 +19,7 @@ const ROUTES = {
     validation: () => import('@/pages/enseignant/validation.js'),
     eleves: () => import('@/pages/enseignant/mes-eleves.js'),
     livret: () => import('@/pages/enseignant/livret-remc.js'),
+    insights: () => import('@/pages/enseignant/insights.js'),
     profil: () => import('@/pages/common/profil.js'),
     notifications: () => import('@/pages/common/notifications.js'),
     settings: () => import('@/pages/common/settings.js'),

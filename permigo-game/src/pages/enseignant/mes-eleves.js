@@ -264,14 +264,52 @@ const STYLE = `<style>
     0%, 100% { opacity: 1; }
     50% { opacity: .5; }
   }
+
+  /* Anti-décrochage */
+  .me-relancer-section {
+    background: rgba(245,158,11,.06);
+    border: 1.5px solid rgba(245,158,11,.25);
+    border-radius: 20px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    animation: skel-pulse 0s; /* reset */
+  }
+  .me-relancer-title {
+    font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
+    color: #b45309;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .me-relancer-sub {
+    font: 500 12px/1.4 'Inter', sans-serif;
+    color: #92400e;
+    margin: 0;
+  }
+
+  /* Badge à relancer inline */
+  .me-badge-relancer {
+    font: 600 10px/1 'Inter', sans-serif;
+    padding: 3px 7px;
+    border-radius: 10px;
+    color: #b45309;
+    background: rgba(245,158,11,.12);
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
 </style>`;
+
+const INACTIF_SEUIL_MS = 14 * 86400000; // 14 jours
 
 // ─── State ───────────────────────────────────────────────────────
 let _root = null;
 let _me = null;
 let _eleves = [];       // { id, prenom, nom, acquis, total, actif }
 let _query = '';
-let _tab = 'tous';      // 'tous' | 'actifs' | 'inactifs'
+let _tab = 'tous';      // 'tous' | 'actifs' | 'inactifs' | 'arelancer'
 
 // ─── Entry point ─────────────────────────────────────────────────
 export async function unmount() {
@@ -326,7 +364,7 @@ async function loadData() {
   //    Côté frontend on marquera ensuite les "attitrés" (enseignant_id = me.id)
   const { data: elevesRaw, error: e1 } = await sb
     .from('profiles')
-    .select('id, prenom, nom, credit_heures, enseignant_id')
+    .select('id, prenom, nom, credit_heures, enseignant_id, last_active_at')
     .eq('role', 'eleve')
     .order('prenom');
 
@@ -354,11 +392,15 @@ async function loadData() {
   // Set des élèves que j'ai validé au moins une fois
   const touchedEleves = new Set(Object.keys(acquisByEleve));
 
+  const now = Date.now();
   _eleves = rawList
     .map((e, i) => {
       const acquis = acquisByEleve[e.id] || 0;
       const actif = (e.credit_heures != null && e.credit_heures > 0) || touchedEleves.has(e.id);
-      return { ...e, acquis, total: REMC_TOTAL, actif, idx: i };
+      const lastActive = e.last_active_at ? new Date(e.last_active_at).getTime() : null;
+      const aRelancer = actif && (!lastActive || (now - lastActive) >= INACTIF_SEUIL_MS);
+      const joursInactif = lastActive ? Math.floor((now - lastActive) / 86400000) : null;
+      return { ...e, acquis, total: REMC_TOTAL, actif, idx: i, aRelancer, joursInactif };
     })
     // Mes élèves attitrés en haut, puis ceux que j'ai déjà validé, puis le reste
     .sort((a, b) => {
@@ -374,6 +416,14 @@ function render() {
   const total = _eleves.length;
   const actifs = _eleves.filter(e => e.actif).length;
   const inactifs = total - actifs;
+  const aRelancerList = _eleves.filter(e => e.aRelancer);
+
+  const relancerSection = aRelancerList.length > 0 ? `
+    <div class="me-relancer-section" id="me-relancer-section">
+      <p class="me-relancer-title">⚠️ ${aRelancerList.length} élève${aRelancerList.length > 1 ? 's' : ''} à relancer cette semaine</p>
+      <p class="me-relancer-sub">Sans activité depuis 14 jours ou plus — un point en leçon peut débloquer la progression.</p>
+    </div>
+  ` : '';
 
   _root.innerHTML = `
     ${STYLE}
@@ -382,6 +432,8 @@ function render() {
         <h1 class="me-h1">Mes élèves</h1>
         <p class="me-sub">${total} élève${total > 1 ? 's' : ''} · ${actifs} actif${actifs > 1 ? 's' : ''}</p>
       </header>
+
+      ${relancerSection}
 
       <div class="me-search-wrap">
         <span class="me-search-ico">🔍</span>
@@ -402,9 +454,16 @@ function render() {
         <button class="me-tab${_tab === 'actifs' ? ' active' : ''}" data-tab="actifs" role="tab">
           Actifs (${actifs})
         </button>
+        ${aRelancerList.length > 0 ? `
+        <button class="me-tab${_tab === 'arelancer' ? ' active' : ''}" data-tab="arelancer" role="tab"
+                style="${_tab !== 'arelancer' ? 'color:#b45309' : ''}">
+          ⚠️ (${aRelancerList.length})
+        </button>
+        ` : `
         <button class="me-tab${_tab === 'inactifs' ? ' active' : ''}" data-tab="inactifs" role="tab">
           Inactifs (${inactifs})
         </button>
+        `}
       </div>
 
       <div class="me-list">
@@ -427,8 +486,9 @@ function render() {
 function filterList() {
   let list = _eleves;
 
-  if (_tab === 'actifs') list = list.filter(e => e.actif);
-  if (_tab === 'inactifs') list = list.filter(e => !e.actif);
+  if (_tab === 'actifs')    list = list.filter(e => e.actif);
+  if (_tab === 'inactifs')  list = list.filter(e => !e.actif);
+  if (_tab === 'arelancer') list = list.filter(e => e.aRelancer);
 
   if (_query.trim()) {
     const q = _query.toLowerCase().trim();
@@ -466,6 +526,11 @@ function renderRow(eleve) {
           <span class="me-badge ${eleve.actif ? 'actif' : 'inactif'}">
             ${eleve.actif ? 'Actif' : 'Inactif'}
           </span>
+          ${eleve.aRelancer ? `
+            <span class="me-badge-relancer">
+              ⚠ ${eleve.joursInactif ? `${eleve.joursInactif}j` : 'À relancer'}
+            </span>
+          ` : ''}
           <span class="me-meta-count">
             ${eleve.acquis} validation${eleve.acquis > 1 ? 's' : ''}
           </span>
@@ -490,6 +555,14 @@ function wire() {
   _root.querySelector('#me-btn-valider')?.addEventListener('click', () => {
     track('cta.valider_competence', { from: 'mes_eleves' });
     navigate('#/validation');
+  });
+
+  // Section relancer → filtre tab arelancer
+  _root.querySelector('#me-relancer-section')?.addEventListener('click', () => {
+    _tab = 'arelancer';
+    _root.querySelectorAll('.me-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === 'arelancer'));
+    renderList();
+    track('mes_eleves.relancer_section.click');
   });
 
   // Search

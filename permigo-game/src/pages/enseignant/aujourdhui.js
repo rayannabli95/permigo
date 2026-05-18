@@ -478,6 +478,14 @@ async function renderInto(root, _me) {
     return !p?.last_active_at || p.last_active_at < sevenDaysAgo;
   }).length;
 
+  // Élèves à reconnecter : inactifs depuis 14j+ parmi mes élèves suivis
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 86400000).toISOString();
+  const reconnectList = mesElevesActifs.filter(e => {
+    const p = elevesMap[e.id];
+    return !p?.last_active_at || p.last_active_at < fourteenDaysAgo;
+  });
+  const reconnectCount = reconnectList.length;
+
   // ─── Render ───────────────────────────────────────────────────
   root.innerHTML = `
     ${STYLE}
@@ -531,6 +539,20 @@ async function renderInto(root, _me) {
 
       </div>
 
+      ${reconnectCount > 0 ? `
+      <!-- Widget anti-décrochage 14j+ -->
+      <div class="aj-widget aj-widget-alert" id="aj-w-reconnect" role="button" tabindex="0"
+           aria-label="${reconnectCount} élèves à reconnecter depuis plus de 14 jours"
+           style="margin-bottom:24px;border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.03)">
+        <div class="aj-widget-head">
+          ${iconBadge('users', { color: '#d97706', size: 32 })}
+          <span class="aj-widget-lbl" style="color:#d97706">À reconnecter</span>
+        </div>
+        <p class="aj-widget-val" style="color:#b45309">${reconnectCount}</p>
+        <p class="aj-widget-sub">Sans activité 14j+ — clique pour voir</p>
+      </div>
+      ` : ''}
+
       <!-- Activité récente -->
       <div class="aj-section">
         <div class="aj-section-title">Activité récente</div>
@@ -578,6 +600,11 @@ async function renderInto(root, _me) {
   root.querySelector('#aj-w-inactifs')?.addEventListener('click', () => {
     track('widget.inactifs.clicked', { count: inactifCount });
     navigate('#/eleves');
+  });
+
+  root.querySelector('#aj-w-reconnect')?.addEventListener('click', () => {
+    track('widget.reconnect.clicked', { count: reconnectCount });
+    navigate('#/eleves?tab=arelancer');
   });
 
   root.querySelectorAll('.aj-eleve-row[data-eleve-id]').forEach(row => {
