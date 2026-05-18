@@ -43,21 +43,18 @@ export async function mount(root) {
 
 // ─── Slides ──────────────────────────────────────────────────
 function renderWrapped(root, me, w) {
-  const prenom       = esc(me.prenom || w.prenom || 'Toi');
   const longestStreak = w.streaks?.longest ?? 0;
-  const totalDays    = w.streaks?.total_active_days ?? 0;
   const topCompId    = w.top_competence?.competence_id ?? null;
   const topCompLabel = w.top_competence?.label ?? (topCompId ? esc(topCompId) : 'Aucune');
   const percentile   = w.percentile ?? null;
-  const totalValid   = w.total_validations ?? 0;
-  const totalQuiz    = w.total_quiz ?? 0;
   const xpGained     = w.xp_gained ?? 0;
 
+  // Slide order: 1 cover · 2 percentile · 3 streak · 4 top_comp
   const slides = [
-    renderSlide1({ prenom, year: YEAR }),
-    renderSlide2({ longestStreak, totalDays }),
-    renderSlide3({ topCompLabel, totalValid, totalQuiz }),
-    renderSlide4({ percentile, xpGained, prenom }),
+    renderSlide1(),
+    renderSlide2({ percentile }),
+    renderSlide3({ longestStreak }),
+    renderSlide4({ topCompLabel }),
   ];
 
   const wrpRoot = root.querySelector('#wrp-root');
@@ -74,75 +71,53 @@ function renderWrapped(root, me, w) {
     </div>
   `;
 
-  wireWrapped(root, me, { longestStreak, percentile, xpGained, totalValid, prenom });
+  wireWrapped(root, me, { longestStreak, percentile, xpGained });
 }
 
-function renderSlide1({ prenom, year }) {
+// Slide 1 — Cover : image seule, aucun overlay texte
+function renderSlide1() {
   return `
 <div class="wrp-slide" data-slide="0">
-  <div class="wrp-slide-bg" style="background:linear-gradient(160deg,#6366f1 0%,#7c3aed 50%,#0a0d1a 100%)">
+  <div class="wrp-slide-bg">
     <img class="wrp-slide-img" src="/skins/wrapped_cover.png" alt="" aria-hidden="true">
   </div>
-  <div class="wrp-slide-content">
-    <div class="wrp-slide-eyebrow">PermiGo · ${year}</div>
-    <div class="wrp-slide-headline">Ta route en<br>${year}</div>
-    <div class="wrp-slide-sub">${prenom}, voici le récap de ton apprentissage 🚗</div>
-  </div>
 </div>`;
 }
 
-function renderSlide2({ longestStreak, totalDays }) {
-  const emoji = longestStreak >= 30 ? '🔥' : longestStreak >= 14 ? '⚡' : longestStreak >= 7 ? '✨' : '💪';
+// Slide 2 — Percentile
+function renderSlide2({ percentile }) {
+  const text = percentile !== null ? `Top ${100 - percentile}%` : '🚀';
   return `
 <div class="wrp-slide" data-slide="1">
-  <div class="wrp-slide-bg" style="background:linear-gradient(160deg,#f97316 0%,#dc2626 50%,#0a0d1a 100%)">
+  <div class="wrp-slide-bg">
     <img class="wrp-slide-img" src="/skins/wrapped_streak.png" alt="" aria-hidden="true">
   </div>
-  <div class="wrp-slide-content">
-    <div class="wrp-slide-eyebrow">Ta série record</div>
-    <div class="wrp-slide-headline">${emoji}<br><span class="wrp-big-num">${longestStreak}</span><br>jours d'affilée</div>
-    <div class="wrp-slide-sub">${totalDays} jour${totalDays !== 1 ? 's' : ''} d'apprentissage actif cette année</div>
-  </div>
+  <div class="wrp-slide-overlay-dark"></div>
+  <div class="wrp-overlay-centered">${text}</div>
 </div>`;
 }
 
-function renderSlide3({ topCompLabel, totalValid, totalQuiz }) {
+// Slide 3 — Streak
+function renderSlide3({ longestStreak }) {
   return `
 <div class="wrp-slide" data-slide="2">
-  <div class="wrp-slide-bg" style="background:linear-gradient(160deg,#059669 0%,#0891b2 50%,#0a0d1a 100%)">
-    <img class="wrp-slide-img" src="/skins/wrapped_top_comp.png" alt="" aria-hidden="true">
+  <div class="wrp-slide-bg">
+    <img class="wrp-slide-img" src="/skins/wrapped_streak.png" alt="" aria-hidden="true">
   </div>
-  <div class="wrp-slide-content">
-    <div class="wrp-slide-eyebrow">Ta compétence phare</div>
-    <div class="wrp-slide-headline">🎯<br>${esc(String(topCompLabel))}</div>
-    <div class="wrp-slide-stats">
-      <div class="wrp-stat-pill">${totalValid} compétences acquises</div>
-      <div class="wrp-stat-pill">${totalQuiz} quiz réussis</div>
-    </div>
-  </div>
+  <div class="wrp-slide-overlay-dark"></div>
+  <div class="wrp-overlay-centered">${longestStreak} jours 🔥</div>
 </div>`;
 }
 
-function renderSlide4({ percentile, xpGained, prenom }) {
-  const pctText = percentile !== null
-    ? `Top ${100 - percentile}% de ton école`
-    : 'Continue comme ça !';
-  const badge = percentile !== null && percentile >= 90 ? '🌟 Top de l\'école' : null;
-
+// Slide 4 — Top compétence
+function renderSlide4({ topCompLabel }) {
   return `
 <div class="wrp-slide" data-slide="3">
-  <div class="wrp-slide-bg" style="background:linear-gradient(160deg,#7c3aed 0%,#db2777 50%,#0a0d1a 100%)">
-    <img class="wrp-slide-img" src="/skins/wrapped_percentile.png" alt="" aria-hidden="true">
+  <div class="wrp-slide-bg">
+    <img class="wrp-slide-img" src="/skins/wrapped_streak.png" alt="" aria-hidden="true">
   </div>
-  <div class="wrp-slide-content">
-    <div class="wrp-slide-eyebrow">Ton classement</div>
-    <div class="wrp-slide-headline">
-      ${percentile !== null ? `<span class="wrp-big-num">${percentile}</span><br>%ile` : '🚀'}
-    </div>
-    <div class="wrp-slide-sub">${pctText}</div>
-    ${badge ? `<div class="wrp-badge">${badge}</div>` : ''}
-    <div class="wrp-slide-sub" style="margin-top:12px">+${xpGained} XP gagnés cette année</div>
-  </div>
+  <div class="wrp-slide-overlay-dark"></div>
+  <div class="wrp-overlay-centered">Top compétence :<br>${esc(String(topCompLabel))}</div>
 </div>`;
 }
 
@@ -252,12 +227,12 @@ function renderStyles() {
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   overflow: hidden;
 }
 .wrp-slide-bg {
   position: absolute;
   inset: 0;
+  background: #0a0d1a;
   z-index: 0;
 }
 .wrp-slide-img {
@@ -266,70 +241,30 @@ function renderStyles() {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: .25;
-  mix-blend-mode: luminosity;
 }
-/* Dark gradient from bottom for text readability */
-.wrp-slide::after {
-  content: '';
+
+/* Semi-transparent dark overlay for text readability (slides 2-4) */
+.wrp-slide-overlay-dark {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.2) 60%, transparent 100%);
+  background: rgba(0,0,0,.35);
   z-index: 1;
 }
-.wrp-slide-content {
-  position: relative;
+
+/* Centered text overlay (slides 2-4) */
+.wrp-overlay-centered {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 60px;
+  font: 800 clamp(40px,8vw,64px)/1.15 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0,0,0,.6);
+  text-align: center;
   z-index: 2;
-  padding: 24px 28px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.wrp-slide-eyebrow {
-  font: 700 11px/1 'Inter', sans-serif;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.6);
-}
-.wrp-slide-headline {
-  font: 800 42px/1.1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  letter-spacing: -.03em;
-  line-height: 1.1;
-}
-.wrp-big-num {
-  font: 800 80px/1 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -.05em;
-  display: block;
-}
-.wrp-slide-sub {
-  font: 500 15px/1.5 'Inter', sans-serif;
-  color: rgba(255,255,255,.75);
-}
-.wrp-stat-pills {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-}
-.wrp-stat-pill, .wrp-stat-pills .wrp-stat-pill {
-  display: inline-block;
-  padding: 6px 12px;
-  background: rgba(255,255,255,.15);
-  border-radius: 99px;
-  font: 600 12px/1 'Inter', sans-serif;
-  color: #fff;
-  backdrop-filter: blur(4px);
-}
-.wrp-stat-pill { display: inline-block; padding: 6px 14px; background: rgba(255,255,255,.15); border-radius: 99px; font: 600 12px/1 'Inter', sans-serif; color: #fff; margin-right: 6px; }
-.wrp-badge {
-  display: inline-block;
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
-  border-radius: 99px;
-  font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
-  align-self: flex-start;
+  pointer-events: none;
 }
 
 /* Controls bar */

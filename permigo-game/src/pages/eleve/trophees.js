@@ -547,4 +547,13 @@ function wire(root, trophees) {
       });
     });
   });
+
+  // Achievement cards → parcours
+  root.querySelectorAll('.trp-ach-card').forEach(card => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => {
+      track('achievement.tapped', {});
+      location.hash = '#/parcours';
+    });
+  });
 }

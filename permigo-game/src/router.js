@@ -97,7 +97,12 @@ export async function route(root, me) {
 window.addEventListener('hashchange', () => {
   import('@/auth/cur-user.js').then(({ getCurUser }) => {
     const me = getCurUser();
-    if (me) route(document.getElementById('app'), me);
+    if (me) {
+      route(document.getElementById('app'), me);
+    } else {
+      // Fallback : user déconnecté → re-render la page de login plutôt qu'écran blanc
+      import('@/pages/auth/login.js').then(m => m.mount?.(document.getElementById('app')));
+    }
   });
 });
 

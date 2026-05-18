@@ -940,9 +940,11 @@ function renderLeaderboardCard(lb) {
 }
 
 function streakSubText(status, streak) {
-  if (status === 'saved')   return '🟢 Ta série est sauvegardée aujourd\'hui !';
-  if (status === 'critical') return '🔴 Continue ta série — moins de 6h !';
-  if (status === 'at_risk') return '🟡 Fais une action aujourd\'hui pour maintenir ta série';
+  // Dot CSS coloré au lieu d'emojis 🟢🔴🟡 (rendu inégal sur certains Android)
+  const dot = (color) => `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:6px;vertical-align:middle"></span>`;
+  if (status === 'saved')   return `${dot('#10b981')}Ta série est sauvegardée aujourd'hui !`;
+  if (status === 'critical') return `${dot('#ef4444')}Continue ta série — moins de 6h !`;
+  if (status === 'at_risk') return `${dot('#f59e0b')}Fais une action aujourd'hui pour maintenir ta série`;
   return streak.longest_streak > 0
     ? `Ton record : ${streak.longest_streak} jours — relance ta série !`
     : 'Lance ta première série d\'apprentissage !';
@@ -964,6 +966,15 @@ function wire(root, { cta, streak, streakSt, gemmes = 0, activityDays }) {
       location.hash = '#/parcours';
     })
   );
+
+  // Trophée cards → page trophées
+  root.querySelectorAll('.trophy-card').forEach(card => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => {
+      track('cta.clicked', { cta_type: 'trophy_card' });
+      location.hash = '#/trophees';
+    });
+  });
 
   // Streak bottom sheet
   const bsBg = root.querySelector('#bs-bg');

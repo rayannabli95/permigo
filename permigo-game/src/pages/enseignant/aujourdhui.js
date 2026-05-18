@@ -552,7 +552,7 @@ async function renderInto(root, _me) {
         <span class="aj-recap-title">Ta journée</span>
         <span class="aj-recap-kpi">${_fmtMin(totalSessionMinutes)}</span>
       </div>
-      <div class="aj-recap-sub">${todaySessions.length} session${todaySessions.length > 1 ? 's' : ''} loggée${todaySessions.length > 1 ? 's' : ''}${confirmedCount > 0 ? ` · ${confirmedCount} confirmée${confirmedCount > 1 ? 's' : ''} par tes élèves` : ''}</div>
+      <div class="aj-recap-sub">${todaySessions.length} session${todaySessions.length > 1 ? 's' : ''} enregistrée${todaySessions.length > 1 ? 's' : ''}${confirmedCount > 0 ? ` · ${confirmedCount} confirmée${confirmedCount > 1 ? 's' : ''} par tes élèves` : ''}</div>
       <div class="aj-recap-rows">
         ${todaySessions.map(s => `
           <div class="aj-recap-row">
@@ -564,10 +564,10 @@ async function renderInto(root, _me) {
       </div>
     </div>
   ` : isEvening && todaySessions.length === 0 && mesElevesActifs.length > 0 ? `
-    <div class="aj-log-prompt" id="aj-log-prompt-soir" role="button" tabindex="0" aria-label="Logger une session">
+    <div class="aj-log-prompt" id="aj-log-prompt-soir" role="button" tabindex="0" aria-label="Enregistrer une session">
       <span class="aj-log-prompt-ico" aria-hidden="true">💭</span>
       <span class="aj-log-prompt-txt">Tu as fait conduire aujourd'hui ?</span>
-      <span class="aj-log-prompt-cta">Logger →</span>
+      <span class="aj-log-prompt-cta">Enregistrer →</span>
     </div>
   ` : '';
 

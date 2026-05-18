@@ -186,6 +186,20 @@ const STYLE = `<style>
   }
   .btn-validate:disabled { opacity: .5; cursor: not-allowed; }
   .btn-validate:not(:disabled):active { transform: scale(.97); opacity: .9; }
+  .btn-cancel-cta {
+    width: 40px; height: 40px;
+    border: 1.5px solid #e2e6f2;
+    border-radius: 10px;
+    background: #fff;
+    color: #64748b;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background .12s, color .12s;
+    font-family: inherit;
+  }
+  .btn-cancel-cta:active { background: #f0f2f8; color: #0a0d1a; }
 
   .empty { padding: 40px 20px; text-align: center; color: #94a3b8; font: 500 14px/1.5 'Inter', sans-serif; }
   .v-loading { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
@@ -444,7 +458,14 @@ export async function mount(root) {
 
 // ─── Actions ────────────────────────────────────────────────────
 async function selectEleve(eleve) {
-  if (_eleve?.id === eleve.id) return;
+  if (_eleve?.id === eleve.id) {
+    // Re-tap on selected → deselect and go back to step 1
+    _eleve = null;
+    _selectedComp = null;
+    render();
+    wire();
+    return;
+  }
   _eleve = eleve;
   _selectedComp = null;
 
@@ -684,6 +705,7 @@ function renderCta() {
   if (!_selectedComp) { slot.innerHTML = ''; return; }
   slot.innerHTML = `
     <div class="cta-strip">
+      <button class="btn-cancel-cta" type="button" id="btn-cancel-cta" aria-label="Annuler">✕</button>
       <div class="cta-info">
         <div class="cta-comp-nm">${esc(labelComp(_selectedComp.c))}</div>
         <div class="cta-for">pour <strong>${esc(_eleve?.prenom || '')}</strong></div>
@@ -692,6 +714,10 @@ function renderCta() {
     </div>
   `;
   slot.querySelector('.btn-validate').addEventListener('click', doValidate);
+  slot.querySelector('#btn-cancel-cta').addEventListener('click', () => {
+    _selectedComp = null;
+    renderCta();
+  });
 }
 
 // ─── Event wiring ────────────────────────────────────────────────

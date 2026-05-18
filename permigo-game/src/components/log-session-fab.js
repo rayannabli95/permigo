@@ -128,8 +128,8 @@ export function mountLogSessionFab() {
   const btn = document.createElement('button');
   btn.id = FAB_ID;
   btn.type = 'button';
-  btn.setAttribute('aria-label', 'Logger une session de conduite');
-  btn.setAttribute('title', 'Logger une session');
+  btn.setAttribute('aria-label', 'Enregistrer une session de conduite');
+  btn.setAttribute('title', 'Enregistrer une session');
   btn.innerHTML = _plusIcon();
   btn.addEventListener('click', () => {
     haptic('select');

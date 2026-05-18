@@ -57,6 +57,22 @@ const STYLE = `
   .nf-mark-all:hover { background: rgba(99,102,241,.08); }
   .nf-mark-all:disabled { color: #94a3b8; cursor: default; }
   .nf-mark-all:disabled:hover { background: none; }
+  .nf-refresh {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 1px solid #e2e6f2;
+    background: #fff;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    color: #64748b;
+    font-family: inherit;
+    padding: 0;
+    transition: background .12s, transform .3s cubic-bezier(.23,1,.32,1);
+  }
+  .nf-refresh:hover { background: #f4f5fb; }
+  .nf-refresh.spinning svg { animation: nfSpin .6s linear; }
+  @keyframes nfSpin { to { transform: rotate(360deg); } }
 
   .nf-group-label {
     padding: 16px 16px 6px;
@@ -203,6 +219,8 @@ function renderGroup(label, items) {
   `;
 }
 
+const REFRESH_ICON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
+
 export async function mount(root, me) {
   if (!me) me = getCurUser();
   if (!me) return;
@@ -219,6 +237,7 @@ export async function mount(root, me) {
           </svg>
         </button>
         <div class="nf-title">Notifications</div>
+        <button class="nf-refresh" id="nf-refresh" aria-label="Actualiser">${REFRESH_ICON}</button>
         <button class="nf-mark-all" id="nf-mark-all" disabled>Tout lu</button>
       </div>
       <div id="nf-content">${skelRows(5)}</div>
@@ -226,6 +245,21 @@ export async function mount(root, me) {
   `;
 
   root.querySelector('#nf-back').addEventListener('click', () => navigate('/'));
+  root.querySelector('#nf-refresh').addEventListener('click', async () => {
+    const btn = root.querySelector('#nf-refresh');
+    btn.classList.add('spinning');
+    btn.disabled = true;
+    await loadNotifs(root, me);
+    btn.disabled = false;
+    setTimeout(() => btn.classList.remove('spinning'), 600);
+    track('notifications.refreshed', {});
+  });
+
+  await loadNotifs(root, me);
+}
+
+async function loadNotifs(root, me) {
+  root.querySelector('#nf-content').innerHTML = skelRows(5);
 
   const { data, error } = await sb
     .from('notifications')
@@ -283,17 +317,18 @@ export async function mount(root, me) {
     });
   });
 
-  // Mark all as read
-  markAllBtn.addEventListener('click', async () => {
-    markAllBtn.disabled = true;
-    markAllBtn.textContent = '…';
-    const hasUnread = notifs.some(n => !n.read);
-    if (!hasUnread) return;
+  // Mark all as read — re-wire after each load
+  markAllBtn.replaceWith(markAllBtn.cloneNode(true));
+  const freshMarkAll = root.querySelector('#nf-mark-all');
+  freshMarkAll.disabled = unreadCount === 0;
+  freshMarkAll.addEventListener('click', async () => {
+    freshMarkAll.disabled = true;
+    freshMarkAll.textContent = '…';
     const { error } = await sb.rpc('mark_all_notifs_read');
-    if (error) { toast('Erreur de mise à jour', 'error'); markAllBtn.disabled = false; markAllBtn.textContent = 'Tout lu'; return; }
+    if (error) { toast('Erreur de mise à jour', 'error'); freshMarkAll.disabled = false; freshMarkAll.textContent = 'Tout lu'; return; }
     root.querySelectorAll('.nf-item.unread').forEach(el => { el.classList.remove('unread'); el.dataset.read = 'true'; });
-    markAllBtn.textContent = 'Tout lu';
+    freshMarkAll.textContent = 'Tout lu';
     toast('Toutes les notifications marquées comme lues', 'success');
-    track('notifications.mark_all_read', { count: notifs.filter(n => !n.read).length });
+    track('notifications.mark_all_read', { count: unreadCount });
   });
 }

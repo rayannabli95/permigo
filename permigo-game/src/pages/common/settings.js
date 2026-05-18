@@ -642,7 +642,7 @@ function _showDeleteModal(root, me) {
       }
       overlay.remove();
       await sb.auth.signOut();
-      location.hash = '/';
+      location.hash = '#/';
       location.reload();
     } catch (e) {
       console.error('[settings] delete_account', e);

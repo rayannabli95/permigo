@@ -129,11 +129,10 @@ export async function logout() {
   // Dispatch les deux events (compat anciens + nouveaux listeners)
   window.dispatchEvent(new CustomEvent('auth:loggedout'));
   window.dispatchEvent(new CustomEvent('auth:signedout'));
-  // Force un reload complet : reset hash + state + remount login proprement
+  // Navigate to clean root — plus fiable qu'un reload avec hash
   try {
     if (typeof window !== 'undefined' && window.location) {
-      window.location.hash = '';
-      window.location.reload();
+      window.location.href = window.location.origin + '/';
     }
   } catch {}
 }

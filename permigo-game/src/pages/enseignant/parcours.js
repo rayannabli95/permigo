@@ -711,9 +711,9 @@ export async function mount(root) {
         ${stops.map(s => renderStop(s, totalValidations)).join('')}
       </div>
 
-      <!-- Ma cohorte -->
+      <!-- Mes élèves -->
       ${elevesProfiles.length > 0 ? `
-      <div class="epc-section-title">Ma cohorte</div>
+      <div class="epc-section-title">Mes élèves</div>
       <div class="epc-cohort">
         ${elevesProfiles.map(e => {
           const ini = ((e.prenom || '')[0] || '') + ((e.nom || '')[0] || '');

@@ -77,6 +77,27 @@ const STYLE = `<style>
   }
   .me-search::placeholder { color: #94a3b8; }
   .me-search:focus { border-color: #6366f1; }
+  .me-search::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+  .me-search-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px; height: 22px;
+    border: none;
+    background: #e2e6f2;
+    border-radius: 50%;
+    color: #64748b;
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-family: inherit;
+    flex-shrink: 0;
+  }
+  .me-search-clear.visible { display: flex; }
 
   /* Tabs */
   .me-tabs {
@@ -499,6 +520,7 @@ function render() {
           autocomplete="off"
           aria-label="Rechercher un élève"
         />
+        <button class="me-search-clear${_query ? ' visible' : ''}" id="me-search-clear" type="button" aria-label="Effacer la recherche">✕</button>
       </div>
 
       <div class="me-tabs" role="tablist">
@@ -615,9 +637,18 @@ function wire() {
   });
 
   // Search
-  const searchEl = _root.querySelector('.me-search');
+  const searchEl  = _root.querySelector('.me-search');
+  const clearBtn  = _root.querySelector('#me-search-clear');
   searchEl?.addEventListener('input', e => {
     _query = e.target.value;
+    clearBtn?.classList.toggle('visible', _query.length > 0);
+    renderList();
+  });
+  clearBtn?.addEventListener('click', () => {
+    _query = '';
+    if (searchEl) searchEl.value = '';
+    clearBtn.classList.remove('visible');
+    searchEl?.focus();
     renderList();
   });
 

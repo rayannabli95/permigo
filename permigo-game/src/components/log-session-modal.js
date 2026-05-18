@@ -41,9 +41,9 @@ function readableDate(daysAgo) {
 
 // ─── Error messages ────────────────────────────────────────────
 const ERROR_MSG = {
-  cap_daily_exceeded:  "Tu as déjà 10h de sessions loggées aujourd'hui.",
-  cap_weekly_exceeded: 'Tu as déjà 50h de sessions loggées cette semaine.',
-  session_too_old:     'Impossible de logger une session de plus de 48h.',
+  cap_daily_exceeded:  "Tu as déjà 10h de sessions enregistrées aujourd'hui.",
+  cap_weekly_exceeded: 'Tu as déjà 50h de sessions enregistrées cette semaine.',
+  session_too_old:     "Impossible d'enregistrer une session de plus de 48h.",
   invalid_duration:    'Durée invalide.',
 };
 
@@ -369,7 +369,7 @@ export async function openLogSessionModal() {
     <div class="lsm-sheet">
       <div class="lsm-handle"></div>
       <div class="lsm-head">
-        <span class="lsm-title">Logger une session</span>
+        <span class="lsm-title">Enregistrer une session</span>
         <button class="lsm-close" aria-label="Fermer">${icon('x', { size: 16, strokeWidth: 2.5 })}</button>
       </div>
       <div class="lsm-body" id="lsm-body-inner">
@@ -378,7 +378,7 @@ export async function openLogSessionModal() {
       <div class="lsm-footer">
         <button class="lsm-submit" id="lsm-btn-submit" disabled>
           ${icon('check', { size: 18, strokeWidth: 2.5 })}
-          <span id="lsm-submit-label">Logger la session</span>
+          <span id="lsm-submit-label">Enregistrer la session</span>
         </button>
       </div>
     </div>
@@ -657,9 +657,9 @@ export async function openLogSessionModal() {
     if (!lbl) return;
     const compCount = selectedComps.size;
     if (compCount > 0) {
-      lbl.textContent = `Logger · ${compCount} compétence${compCount > 1 ? 's' : ''} validée${compCount > 1 ? 's' : ''}`;
+      lbl.textContent = `Enregistrer · ${compCount} compétence${compCount > 1 ? 's' : ''} validée${compCount > 1 ? 's' : ''}`;
     } else {
-      lbl.textContent = 'Logger la session';
+      lbl.textContent = 'Enregistrer la session';
     }
   }
 
@@ -717,7 +717,7 @@ export async function openLogSessionModal() {
       if (created > 0) {
         toast(`+10 XP · ${created} compétence${created > 1 ? 's' : ''} validée${created > 1 ? 's' : ''} 🎉`, 'success');
       } else {
-        toast(`Session loggée · ${durLabel} avec ${esc(eleveName?.prenom || "l'élève")} 📝`, 'success');
+        toast(`Session enregistrée · ${durLabel} avec ${esc(eleveName?.prenom || "l'élève")} 📝`, 'success');
       }
       closeModal();
 

@@ -175,9 +175,7 @@ function rankRowClass(rank) {
   return 'rn';
 }
 function rankLabel(rank) {
-  if (rank === 1) return '🥇';
-  if (rank === 2) return '🥈';
-  if (rank === 3) return '🥉';
+  // Affichage textuel cohérent (emojis 🥇🥈🥉 abandonnés car rendu inégal sur certains Android)
   return `#${rank}`;
 }
 function fmtHours(h) {
@@ -215,11 +213,14 @@ export async function mountMoniteurRanking(root, { myId }) {
 
   track('moniteur_ranking.viewed', { user_id: myId });
 
-  const mine  = ranking.find(r => r.moniteur_id === myId);
-  const top3  = ranking.slice(0, 3);
-  const next  = mine ? ranking[ranking.findIndex(r => r.moniteur_id === myId) + 1] : null;
+  const mine     = ranking.find(r => r.moniteur_id === myId);
+  const top3     = ranking.slice(0, 3);
+  const mineIdx  = mine ? ranking.findIndex(r => r.moniteur_id === myId) : -1;
+  const prev     = mineIdx > 0 ? ranking[mineIdx - 1] : null; // personne au-dessus
 
   const monthLabel = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+  const noHours = !mine?.hours_confirmed || parseFloat(mine.hours_confirmed) === 0;
 
   root.innerHTML = `
   <div class="mr-wrap">
@@ -239,6 +240,11 @@ export async function mountMoniteurRanking(root, { myId }) {
         </div>
       </div>
       <div class="mr-metrics">
+        ${noHours ? `
+        <div class="mr-metric" style="grid-column:span 2">
+          <div class="mr-metric-val" style="color:#94a3b8;font-size:13px">${mine.n_validations ?? 0} val. · pas encore de session enregistrée</div>
+          <div class="mr-metric-lbl" style="margin-top:4px">Enregistre une session pour débloquer ce compteur</div>
+        </div>` : `
         <div class="mr-metric">
           <div class="mr-metric-val">${fmtHours(mine.hours_confirmed)}</div>
           <div class="mr-metric-lbl">confirmées</div>
@@ -246,7 +252,7 @@ export async function mountMoniteurRanking(root, { myId }) {
         <div class="mr-metric">
           <div class="mr-metric-val">${mine.n_validations ?? 0}</div>
           <div class="mr-metric-lbl">validations</div>
-        </div>
+        </div>`}
         <div class="mr-metric">
           <div class="mr-metric-val">${mine.n_eleves_diff ?? 0}</div>
           <div class="mr-metric-lbl">élèves</div>
@@ -256,10 +262,10 @@ export async function mountMoniteurRanking(root, { myId }) {
           <div class="mr-metric-lbl">actifs</div>
         </div>
       </div>
-      ${next ? `
+      ${prev ? `
       <div class="mr-compare">
         ${icon('trending-up', { size: 12, strokeWidth: 2.4 })}
-        <strong>${next.score_total - mine.score_total} pts</strong> séparent toi de ${esc(next.moniteur_prenom)}
+        Tu es à <strong>${Math.round((prev.score_total - mine.score_total) * 10) / 10} pts</strong> derrière ${esc(prev.moniteur_prenom)}
       </div>` : (mine.rank === 1 ? `<div class="mr-compare">🏆 Tu es en tête ce mois-ci !</div>` : '')}
     </div>` : ''}
 

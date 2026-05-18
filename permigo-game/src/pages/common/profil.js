@@ -475,7 +475,7 @@ export async function mount(root) {
 
   ${anneeStats ? `
   <div class="prf-streak">
-    <img class="prf-streak-ico" src="/skins/permigo-streak-flame-v1.png" alt="" aria-hidden="true" style="width:32px;height:32px;object-fit:contain;" onerror="this.outerHTML='<span class=&quot;prf-streak-ico&quot; style=&quot;color:#f97316&quot;>${icon('flame', { size: 22, strokeWidth: 2.4 })}</span>'">
+    <span class="prf-streak-ico" style="color:#f97316;display:flex;align-items:center" aria-hidden="true">${icon('flame', { size: 28, strokeWidth: 2.2 })}</span>
 
     <div class="prf-streak-body">
       <div class="prf-streak-n">${anneeStats.streakDays} jour${anneeStats.streakDays !== 1 ? 's' : ''}</div>
