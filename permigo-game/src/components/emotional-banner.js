@@ -131,7 +131,7 @@ function ensureBannerStyles() {
 }
 
 async function markRead(notifId) {
-  await sb.rpc('mark_notif_read', { p_notif_id: notifId }).catch(() => {});
+  try { await sb.rpc('mark_notif_read', { p_notif_id: notifId }); } catch (e) { /* silent */ }
 }
 
 function renderBanner(notif, content) {

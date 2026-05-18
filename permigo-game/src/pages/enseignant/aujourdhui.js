@@ -471,7 +471,8 @@ async function renderInto(root, _me) {
       .is('consolidation_done_at', null),
 
     // Sessions loggées aujourd'hui (pour le widget récap soir)
-    sb.rpc('get_my_today_sessions').catch(() => ({ data: null })),
+    // Note : Supabase rpc ne supporte pas .catch() direct → on wrap dans Promise.resolve
+    Promise.resolve(sb.rpc('get_my_today_sessions')).then(r => r).catch(() => ({ data: null })),
   ]);
 
   if (valsToday.error || valsAll.error) {
