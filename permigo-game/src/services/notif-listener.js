@@ -77,7 +77,7 @@ async function dispatch(notif, me) {
   }
 }
 
-function _celebrateValidation(compId) {
+async function _celebrateValidation(compId) {
   // Marque que l'élève a ≥1 validation → débloque le banner push
   markHasValidated();
 
@@ -86,6 +86,26 @@ function _celebrateValidation(compId) {
   }, 200);
   const compLabel = compId ? ` (${compId})` : '';
   toast(`✨ Nouvelle compétence acquise${compLabel} !`, 'success', 4000);
+
+  // Trigger éventuel d'un Celebrate Screen fullscreen sur les paliers majeurs
+  // (1ère validation, 10 acquises, 28 acquises = prêt examen, 31 acquises = permis)
+  try {
+    const me = (await import('@/auth/cur-user.js')).getCurUser();
+    if (!me?.id) return;
+    const { sb } = await import('@/auth/auth.js');
+    const { count } = await sb
+      .from('validations')
+      .select('id', { count: 'exact', head: true })
+      .eq('eleve_id', me.id)
+      .eq('statut', 'acquis');
+    if (typeof count === 'number') {
+      const { maybeCelebrateMilestone } = await import('@/components/celebrate-screen.js');
+      // Petit délai pour laisser le confetti + toast respirer
+      setTimeout(() => maybeCelebrateMilestone(count), 800);
+    }
+  } catch (e) {
+    console.warn('[notif-listener] milestone celebrate failed', e);
+  }
 }
 
 async function handleQuiz(notif, me, type, nbQuestions) {

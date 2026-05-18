@@ -15,14 +15,36 @@ import { icon } from '@/utils/icons.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
-/* ── Layout global ── */
+/* ── Layout global avec volant filigrane fixe ── */
 .prc {
   padding: 0 0 100px;
   max-width: 480px;
   margin: 0 auto;
   font-family: 'Inter', sans-serif;
   color: #0a0d1a;
+  position: relative;
+  /* Le volant est fixe dans le viewport → suit le scroll comme un watermark */
+  background-color: #f8f9fc;
 }
+.prc::before {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(560px, 90vw);
+  height: min(560px, 90vw);
+  background-image: url('${ASSETS.volantBg}');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: translate(-50%, -50%);
+  opacity: .055;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(0.4px);
+}
+/* Tous les contenus passent au-dessus du volant */
+.prc > * { position: relative; z-index: 1; }
 
 /* ── Header sticky (sous le header global fixe de 52px) ── */
 .prc-hd {

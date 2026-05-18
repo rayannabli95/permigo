@@ -7,6 +7,7 @@ const ROUTES = {
     parcours: () => import('@/pages/eleve/parcours.js'),
     quiz: () => import('@/pages/eleve/quiz.js'),
     trophees: () => import('@/pages/eleve/trophees.js'),
+    galerie: () => import('@/pages/eleve/galerie.js'),
     profil: () => import('@/pages/common/profil.js'),
     notifications: () => import('@/pages/common/notifications.js'),
     settings: () => import('@/pages/common/settings.js'),

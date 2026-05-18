@@ -17,6 +17,9 @@ export const ASSETS = {
   worldC3: '/skins/permigo-remc-conditions-difficiles-v1.png',
   worldC4: '/skins/permigo-autonomie-crown-v1.png',
 
+  // ── Volant — background filigrane du parcours (1 image qui rapproche tout) ──
+  volantBg: '/skins/permigo-volant-bg.png',
+
   // ── Badges 3D (9 skins + Cercle Or) ─────────────────────────────
   // déjà câblés dans MONITEUR_SKINS et ELEVE_SKINS
   badge: n => `/skins/badge-3d-${String(n).padStart(2, '0')}.png`,
