@@ -9,6 +9,7 @@ import { lancerQuiz } from '@/modules/pedagogie/quiz-engine.js';
 import { track } from '@/services/analytics.js';
 import { toast } from '@/components/toast.js';
 import { burstConfetti } from '@/components/confetti.js';
+import { markHasValidated } from '@/services/web-push.js';
 
 const POLL_INTERVAL = 30_000; // 30 secondes
 let _intervalId = null;
@@ -77,11 +78,12 @@ async function dispatch(notif, me) {
 }
 
 function _celebrateValidation(compId) {
-  // Burst confetti subtil depuis le centre
+  // Marque que l'élève a ≥1 validation → débloque le banner push
+  markHasValidated();
+
   setTimeout(() => {
     burstConfetti({ count: 55, power: 10, spread: Math.PI * 0.5 });
   }, 200);
-  // Toast
   const compLabel = compId ? ` (${compId})` : '';
   toast(`✨ Nouvelle compétence acquise${compLabel} !`, 'success', 4000);
 }

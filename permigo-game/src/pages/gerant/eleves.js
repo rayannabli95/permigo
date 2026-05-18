@@ -446,10 +446,71 @@ function renderCards(eleves) {
 // ─── Wire clics cards ────────────────────────────────────────
 function wireCardClicks(container) {
   container.querySelectorAll('.el-card').forEach(card => {
-    card.addEventListener('click', () => {
-      toast('Fiche élève disponible en V2', 'info');
+    card.addEventListener('click', async () => {
+      const id = card.dataset.id;
+      if (!id) return;
+      try {
+        // Navigation vers le livret REMC de l'élève (déjà existant côté enseignant — réutilisé pour gérant)
+        const { navigate } = await import('@/router.js');
+        navigate(`/livret/${id}`);
+      } catch (e) {
+        console.warn('[eleves] navigate failed', e);
+        // Fallback : ouvre quick view inline
+        openQuickView(id, card);
+      }
     });
   });
+}
+
+// Quick view fallback si la nav livret est cassée
+async function openQuickView(eleveId, anchorCard) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;animation:elqvIn .2s ease;';
+  overlay.innerHTML = `
+    <style>
+      @keyframes elqvIn { from { opacity:0; } to { opacity:1; } }
+      .elqv-card { width:100%; max-width:420px; background:#fff; border-radius:24px; padding:24px; font-family:'Inter',sans-serif; }
+      .elqv-card h3 { font:800 18px/1.2 'Plus Jakarta Sans',sans-serif; color:#0a0d1a; margin:0 0 10px; }
+      .elqv-row { display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid #f0f2f8; font:500 13px/1.4 'Inter',sans-serif; }
+      .elqv-row:first-of-type { border-top:0; }
+      .elqv-row .l { color:#64748b; }
+      .elqv-row .v { color:#0a0d1a; font-weight:700; }
+      .elqv-btn { width:100%; margin-top:16px; padding:14px; background:#6366f1; color:#fff; border:0; border-radius:14px; font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s; }
+      .elqv-btn:active { transform: scale(.97); }
+    </style>
+    <div class="elqv-card">
+      <h3>Vue rapide élève</h3>
+      <div id="elqv-body" style="color:#94a3b8;font-size:13px">Chargement…</div>
+      <button class="elqv-btn" id="elqv-close">Fermer</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('#elqv-close').addEventListener('click', close);
+
+  try {
+    const [profileRes, validRes] = await Promise.all([
+      sb.from('profiles').select('prenom, nom, email, credit_heures, last_active_at').eq('id', eleveId).maybeSingle(),
+      sb.from('validations').select('competence_id').eq('eleve_id', eleveId).eq('statut', 'acquis'),
+    ]);
+    const p = profileRes.data;
+    const v = validRes.data || [];
+    const body = overlay.querySelector('#elqv-body');
+    if (!p) {
+      body.innerHTML = '<div style="color:#ef4444">Élève introuvable.</div>';
+      return;
+    }
+    body.innerHTML = `
+      <div class="elqv-row"><span class="l">Nom</span><span class="v">${esc(p.nom || p.prenom || '—')}</span></div>
+      <div class="elqv-row"><span class="l">Email</span><span class="v" style="font-size:12px">${esc(p.email || '—')}</span></div>
+      <div class="elqv-row"><span class="l">Compétences</span><span class="v">${v.length}/${REMC_TOTAL}</span></div>
+      <div class="elqv-row"><span class="l">Crédit heures</span><span class="v">${p.credit_heures ?? 0}h</span></div>
+      <div class="elqv-row"><span class="l">Dernière activité</span><span class="v">${p.last_active_at ? relativeTime(p.last_active_at) : 'jamais'}</span></div>
+    `;
+  } catch (e) {
+    overlay.querySelector('#elqv-body').innerHTML = '<div style="color:#ef4444">Erreur lors du chargement.</div>';
+  }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────

@@ -9,6 +9,7 @@ import { mountPermisCard } from '@/components/permis-card.js';
 import { mountProfileCard } from '@/components/profile-card.js';
 import { REMC_TOTAL } from '@/data/remc.js';
 import { icon } from '@/utils/icons.js';
+import { isPushEnabled, requestPushPermission, optOutPush, optInPush } from '@/services/web-push.js';
 
 // ─── CSS (cohérent avec design system permigo-game) ─────────────
 const STYLE = `<style>
@@ -84,7 +85,7 @@ const STYLE = `<style>
   color: #ef4444;
   font: 700 15px/1 var(--fd);
   cursor: pointer;
-  transition: all .2s;
+  transition: background .2s, transform .15s;
   margin-bottom: 10px;
   min-height: 52px;
 }
@@ -172,6 +173,50 @@ const STYLE = `<style>
   color: #94a3b8;
   padding: 20px 0 0;
 }
+
+/* ── Notification toggle ── */
+.prf-notif-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f2f8;
+  cursor: pointer;
+  transition: background .15s;
+  min-height: 60px;
+}
+.prf-notif-row:active { background: #f8f9fc; transform: scale(.99); }
+@media(hover:hover)and(pointer:fine){.prf-notif-row:hover{background:#f8f9fc}}
+.prf-notif-ico { font-size: 18px; line-height: 1; flex-shrink: 0; }
+.prf-notif-body { flex: 1; min-width: 0; }
+.prf-notif-lbl { font: 600 14px/1.3 'Inter', sans-serif; color: #0a0d1a; }
+.prf-notif-sub { font: 500 12px/1.3 'Inter', sans-serif; color: #94a3b8; margin-top: 2px; }
+/* iOS-style toggle pill */
+.prf-toggle {
+  flex-shrink: 0;
+  position: relative;
+  width: 44px; height: 26px;
+  background: #d1d8ee;
+  border-radius: 13px;
+  transition: background .2s cubic-bezier(.23,1,.32,1);
+  pointer-events: none; /* le click est géré par la row */
+}
+.prf-toggle.on { background: #6366f1; }
+.prf-toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  transition: transform .2s cubic-bezier(.23,1,.32,1);
+}
+.prf-toggle.on::after { transform: translateX(18px); }
+/* État "bloqué par le navigateur" */
+.prf-notif-denied { font: 500 12px/1.3 'Inter', sans-serif; color: #f97316; margin-top: 2px; }
+@media(prefers-reduced-motion:reduce){.prf-toggle,.prf-toggle::after{transition:none}}
 </style>`;
 
 const ROLE_LABELS = { eleve: 'Élève', enseignant: 'Enseignant', gerant: 'Gérant' };
@@ -349,6 +394,8 @@ export async function mount(root) {
     </div>
   </div>
 
+  ${_renderNotifToggle()}
+
   <button class="prf-btn-logout" id="btn-logout">Se déconnecter</button>
   <button class="prf-btn-delete" id="btn-delete">Supprimer mon compte</button>
 
@@ -381,4 +428,62 @@ export async function mount(root) {
   root.querySelector('#btn-delete').addEventListener('click', () => {
     alert('La suppression de compte est gérée par l\'administrateur de ton auto-école. Contacte-le directement.');
   });
+
+  _wireNotifToggle(root);
+}
+
+// ─── Notifications toggle ─────────────────────────────────────────
+
+function _renderNotifToggle() {
+  if (!('Notification' in window)) return ''; // API absente (iOS < 16.4 en dehors de PWA)
+
+  const denied  = Notification.permission === 'denied';
+  const enabled = isPushEnabled();
+
+  return `
+  <div class="prf-section">
+    <div class="prf-notif-row" id="prf-notif-row" role="button" tabindex="0"
+         aria-pressed="${enabled}" aria-label="Notifications ${enabled ? 'activées' : 'désactivées'}">
+      <span class="prf-notif-ico">${icon('bell', { size: 18 })}</span>
+      <div class="prf-notif-body">
+        <div class="prf-notif-lbl">Notifications</div>
+        ${denied
+          ? `<div class="prf-notif-denied">Bloquées par le navigateur — autorise-les dans les réglages</div>`
+          : `<div class="prf-notif-sub">${enabled ? 'Quiz et streak actifs' : 'Désactivées'}</div>`
+        }
+      </div>
+      ${!denied ? `<div class="prf-toggle ${enabled ? 'on' : ''}" aria-hidden="true"></div>` : ''}
+    </div>
+  </div>`;
+}
+
+function _wireNotifToggle(root) {
+  const row = root.querySelector('#prf-notif-row');
+  if (!row || Notification.permission === 'denied') return;
+
+  const toggle = row.querySelector('.prf-toggle');
+  const sub    = row.querySelector('.prf-notif-sub');
+
+  async function flip() {
+    const nowEnabled = isPushEnabled();
+    row.setAttribute('aria-pressed', String(!nowEnabled));
+    if (nowEnabled) {
+      await optOutPush();
+      toggle?.classList.remove('on');
+      if (sub) sub.textContent = 'Désactivées';
+    } else {
+      const granted = await optInPush();
+      if (granted) {
+        toggle?.classList.add('on');
+        if (sub) sub.textContent = 'Quiz et streak actifs';
+      } else if (Notification.permission === 'denied') {
+        // L'utilisateur a refusé → met à jour le texte
+        if (sub) sub.outerHTML = `<div class="prf-notif-denied">Bloquées par le navigateur — autorise-les dans les réglages</div>`;
+        toggle?.remove();
+      }
+    }
+  }
+
+  row.addEventListener('click', flip);
+  row.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
 }

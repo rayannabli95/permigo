@@ -4,6 +4,18 @@
 
 ---
 
+## 🌙 MODE NIGHT RUN (3h autonome)
+
+Si l'utilisateur dit **"night run"**, **"vas-y bosse seul"**, **"je dodo"**, **"go autonome"**, ou colle un message contenant `NIGHT_RUN.md` :
+
+→ **Lis immédiatement** `.claude/NIGHT_RUN.md` et applique-le **à la lettre**.
+
+Ce mode est conçu pour 3h de travail sans interruption. Il demande TOUTES les permissions en une fois au début, puis bosse seul en 4 phases (stabilisation / polish / feature / QA + push). Tu DOIS suivre le format de report final demandé.
+
+Ce mode est valable **autant pour Claude Code que pour Claude Cowork**.
+
+---
+
 ## 🧠 RÈGLE #0 — ABSOLUE : SCAN DES SKILLS AVANT CHAQUE RÉPONSE
 
 **OBLIGATOIRE.** Avant de répondre à TOUT message du user, tu DOIS :

@@ -47,9 +47,13 @@
   <!-- ╔══ CSP ══╗ -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none';" />
 
-  <!-- ╔══ Fonts ══╗ -->
+  <!-- ╔══ Preconnects critiques ══╗ -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://arrfmdagdqtrtfbhxlty.supabase.co" crossorigin />
+  <link rel="dns-prefetch" href="https://arrfmdagdqtrtfbhxlty.supabase.co" />
+
+  <!-- ╔══ Fonts ══╗ -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
 
   <!-- ╔══ Schema.org / JSON-LD ══╗ -->
@@ -78,7 +82,7 @@
   <!-- Container racine -->
   <div id="app" role="main" tabindex="-1">
     <div id="splash" class="splash" aria-busy="true" aria-label="Chargement de l'application">
-      <div class="splash-logo">PermiGo</div>
+      <div class="splash-logo" aria-label="PermiGo">PermiGo</div>
       <div class="splash-spin" aria-hidden="true"></div>
     </div>
   </div>

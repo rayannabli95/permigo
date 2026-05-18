@@ -28,7 +28,7 @@ const SLIDES = [
       ${['Leçon', 'Quiz', 'Maîtrise'].map((l, i) => `
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
           <div style="width:52px;height:52px;border-radius:14px;background:${['rgba(99,102,241,.12)','rgba(16,185,129,.12)','rgba(245,158,11,.12)'][i]};display:flex;align-items:center;justify-content:center;font-size:22px">${['📖','⚡','🏆'][i]}</div>
-          <span style="font:700 10px/1 'IBM Plex Mono',monospace;color:#64748b;letter-spacing:.04em;text-transform:uppercase">${l}</span>
+          <span style="font:700 10px/1 'Inter',sans-serif;color:#64748b;letter-spacing:.04em;text-transform:uppercase">${l}</span>
         </div>
         ${i < 2 ? `<div style="font:700 18px/1 'Plus Jakarta Sans',sans-serif;color:#d1d8ee">→</div>` : ''}
       `).join('')}
@@ -62,8 +62,10 @@ const SLIDES = [
 
 const STYLE = `
   @keyframes obFlame { from { transform: scale(1) rotate(-3deg); } to { transform: scale(1.12) rotate(3deg); } }
-  @keyframes obIn { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes obSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes obOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes obSheetIn { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes obSheetOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(40px); } }
+  @keyframes obContentIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
 
   .ob-overlay {
     position: fixed; inset: 0; z-index: 9990;
@@ -71,7 +73,7 @@ const STYLE = `
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex; align-items: flex-end; justify-content: center;
-    animation: obIn .25s ease;
+    animation: obOverlayIn .2s cubic-bezier(.23,1,.32,1);
   }
   .ob-sheet {
     width: 100%; max-width: 480px;
@@ -80,13 +82,16 @@ const STYLE = `
     border-top: 1px solid #e2e6f2;
     padding: 0 0 max(32px, env(safe-area-inset-bottom));
     overflow: hidden;
-    animation: obSlideUp .3s cubic-bezier(.2,.7,.3,1);
+    animation: obSheetIn .35s cubic-bezier(.23,1,.32,1);
+  }
+  .ob-sheet.ob-closing {
+    animation: obSheetOut .25s cubic-bezier(.4,0,1,1) forwards;
   }
   .ob-accent-bar {
     height: 4px;
     width: 100%;
     background: var(--ob-accent, #6366f1);
-    transition: background .4s;
+    transition: background .4s cubic-bezier(.23,1,.32,1);
   }
   .ob-handle {
     width: 36px; height: 4px;
@@ -94,7 +99,10 @@ const STYLE = `
     border-radius: 2px;
     margin: 14px auto 24px;
   }
-  .ob-slide { padding: 0 28px; }
+  .ob-slide {
+    padding: 0 28px;
+    animation: obContentIn .25s cubic-bezier(.23,1,.32,1);
+  }
   .ob-illo {
     display: flex;
     align-items: center;
@@ -127,7 +135,7 @@ const STYLE = `
     width: 6px;
     border-radius: 3px;
     background: #e2e6f2;
-    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    transition: width .3s cubic-bezier(.34,1.56,.64,1), background .3s cubic-bezier(.34,1.56,.64,1);
   }
   .ob-dot.active { width: 20px; background: var(--ob-accent, #6366f1); }
   .ob-btn {
@@ -141,7 +149,7 @@ const STYLE = `
     font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
     box-shadow: 0 8px 24px color-mix(in srgb, var(--ob-accent,#6366f1) 40%, transparent);
-    transition: background .3s, box-shadow .3s, transform .12s;
+    transition: background .3s cubic-bezier(.23,1,.32,1), box-shadow .3s cubic-bezier(.23,1,.32,1), transform .12s;
     min-height: 52px;
     font-family: inherit;
   }
@@ -158,8 +166,13 @@ const STYLE = `
     cursor: pointer;
     width: 100%;
     font-family: inherit;
+    transition: color .15s;
   }
   .ob-skip:hover { color: #64748b; }
+  @media (prefers-reduced-motion: reduce) {
+    .ob-overlay, .ob-sheet, .ob-slide { animation: none; }
+    .ob-dot, .ob-btn, .ob-accent-bar { transition: none; }
+  }
 `;
 
 export function showOnboarding(userId, onDone) {
@@ -175,44 +188,81 @@ export function showOnboarding(userId, onDone) {
   styleEl.textContent = STYLE;
   document.head.appendChild(styleEl);
 
-  function renderSlide() {
-    const slide = SLIDES[idx];
-    const isLast = idx === SLIDES.length - 1;
-    overlay.innerHTML = `
-      <div class="ob-sheet" style="--ob-accent:${slide.accent}">
-        <div class="ob-accent-bar"></div>
-        <div class="ob-handle"></div>
-        <div class="ob-slide">
-          <div class="ob-illo">${slide.illo}</div>
-          <div class="ob-title">${esc(slide.title)}</div>
-          <div class="ob-body">${esc(slide.body)}</div>
-        </div>
-        <div class="ob-dots">
-          ${SLIDES.map((_, i) => `<div class="ob-dot ${i === idx ? 'active' : ''}"></div>`).join('')}
-        </div>
-        <button class="ob-btn" id="ob-next">
-          ${isLast ? 'C\'est parti ! 🚀' : 'Suivant →'}
-        </button>
-        ${!isLast ? `<button class="ob-skip" id="ob-skip">Passer</button>` : ''}
+  // Stable shell — accent-bar, handle, dots, button separate from animated slide content
+  overlay.innerHTML = `
+    <div class="ob-sheet" id="ob-sheet" style="--ob-accent:${SLIDES[0].accent}">
+      <div class="ob-accent-bar" id="ob-accent-bar"></div>
+      <div class="ob-handle"></div>
+      <div id="ob-slide-wrap"></div>
+      <div class="ob-dots" id="ob-dots">
+        ${SLIDES.map((_, i) => `<div class="ob-dot ${i === 0 ? 'active' : ''}"></div>`).join('')}
       </div>
-    `;
+      <button class="ob-btn" id="ob-next">Suivant →</button>
+      <button class="ob-skip" id="ob-skip">Passer</button>
+    </div>
+  `;
 
-    overlay.querySelector('#ob-next')?.addEventListener('click', () => {
-      track('onboarding.slide_next', { slide: idx });
-      if (isLast) finish();
-      else { idx++; renderSlide(); }
-    });
-    overlay.querySelector('#ob-skip')?.addEventListener('click', () => {
-      track('onboarding.skipped', { at_slide: idx });
-      finish();
+  const sheet     = overlay.querySelector('#ob-sheet');
+  const slideWrap = overlay.querySelector('#ob-slide-wrap');
+  const dotsEl    = overlay.querySelector('#ob-dots');
+  const accentBar = overlay.querySelector('#ob-accent-bar');
+  const btnNext   = overlay.querySelector('#ob-next');
+  const btnSkip   = overlay.querySelector('#ob-skip');
+
+  function updateDots() {
+    dotsEl.querySelectorAll('.ob-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
     });
   }
 
+  function renderSlideContent() {
+    const slide = SLIDES[idx];
+    const isLast = idx === SLIDES.length - 1;
+
+    // Animate in new content (class reset via re-creating the element)
+    const div = document.createElement('div');
+    div.className = 'ob-slide';
+    div.innerHTML = `
+      <div class="ob-illo">${slide.illo}</div>
+      <div class="ob-title">${esc(slide.title)}</div>
+      <div class="ob-body">${esc(slide.body)}</div>
+    `;
+
+    slideWrap.innerHTML = '';
+    slideWrap.appendChild(div);
+
+    // Sync accent color
+    sheet.style.setProperty('--ob-accent', slide.accent);
+
+    // Btn label
+    btnNext.textContent = isLast ? 'C\'est parti ! 🚀' : 'Suivant →';
+
+    // Hide skip on last slide
+    btnSkip.style.display = isLast ? 'none' : '';
+
+    updateDots();
+  }
+
+  btnNext.addEventListener('click', () => {
+    track('onboarding.slide_next', { slide: idx });
+    const isLast = idx === SLIDES.length - 1;
+    if (isLast) finish();
+    else { idx++; renderSlideContent(); }
+  });
+
+  btnSkip.addEventListener('click', () => {
+    track('onboarding.skipped', { at_slide: idx });
+    finish();
+  });
+
   async function finish() {
     track('onboarding.completed', { slides_seen: idx + 1 });
-    overlay.style.opacity = '0';
+
+    // Slide sheet down, fade overlay
+    sheet.classList.add('ob-closing');
     overlay.style.transition = 'opacity .25s';
-    setTimeout(() => { overlay.remove(); styleEl.remove(); }, 280);
+    setTimeout(() => { overlay.style.opacity = '0'; }, 50);
+    setTimeout(() => { overlay.remove(); styleEl.remove(); }, 320);
 
     if (userId) {
       try {
@@ -227,6 +277,6 @@ export function showOnboarding(userId, onDone) {
     onDone?.();
   }
 
-  renderSlide();
+  renderSlideContent();
   document.body.appendChild(overlay);
 }

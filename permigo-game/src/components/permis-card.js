@@ -32,18 +32,23 @@ const STYLE = `<style>
   -webkit-user-select: none;
 }
 
-/* Shine effect au touch / hover */
+/* Shine effect au touch / hover (skill emil-design-eng : ease-out custom, < 200ms entrée) */
 .pc::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%);
+  background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,.28) 50%, transparent 70%);
   transform: translateX(-100%);
-  transition: transform .8s cubic-bezier(.2,.7,.3,1);
+  transition: transform .65s cubic-bezier(0.23, 1, 0.32, 1);
   pointer-events: none;
   z-index: 1;
 }
-.pc:hover::before, .pc:active::before { transform: translateX(100%); }
+/* hover seulement sur device avec vrai pointer (évite faux trigger sur touch) */
+@media (hover: hover) and (pointer: fine) {
+  .pc:hover::before { transform: translateX(100%); }
+}
+.pc:active::before { transform: translateX(100%); }
+.pc:active { transform: scale(0.985); transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
 
 /* Background image premium (mesh / route / holographic selon palier) */
 .pc-bg {
@@ -56,8 +61,30 @@ const STYLE = `<style>
   opacity: .55;
   mix-blend-mode: overlay;
   pointer-events: none;
+  animation: pcBgIn .6s cubic-bezier(.23,1,.32,1) both;
+  transition: opacity .4s ease;
 }
-.pc.s-valide .pc-bg { opacity: .72; mix-blend-mode: screen; }
+@keyframes pcBgIn {
+  from { opacity: 0; transform: scale(1.08); }
+  to   { opacity: .55; transform: scale(1); }
+}
+/* État "Prêt" (palier route) : opacité un poil + + très subtle shift */
+.pc.s-pret .pc-bg { opacity: .62; }
+/* État "Validé" (palier holographique) : opacité max + screen blend + shift animé */
+.pc.s-valide .pc-bg {
+  opacity: .78;
+  mix-blend-mode: screen;
+  animation: pcBgIn .6s cubic-bezier(.23,1,.32,1) both, pcHoloShift 9s ease-in-out infinite alternate;
+}
+@keyframes pcHoloShift {
+  0%   { background-position: 0%   50%; filter: hue-rotate(0deg) saturate(1.05); }
+  50%  { background-position: 100% 50%; filter: hue-rotate(15deg) saturate(1.15); }
+  100% { background-position: 0%   50%; filter: hue-rotate(-10deg) saturate(1.05); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc-bg { animation: none !important; }
+  .pc.s-valide .pc-bg { animation: none !important; filter: none !important; }
+}
 
 /* Grain texture pour effet matière (au-dessus du PNG) */
 .pc::after {
@@ -390,12 +417,73 @@ export function renderPermisCard({ prenom = '', nom = '', created_at = null, val
 }
 
 /**
+ * Détecte si l'élève a franchi un palier de fond (mesh→route à 10, route→holo à 20).
+ * Stocke en localStorage le dernier palier vu pour ne notifier qu'une fois.
+ */
+function detectBgMilestone(validated) {
+  if (typeof localStorage === 'undefined') return null;
+  const KEY = 'permigo:permis_bg_milestone_seen';
+  let tier = 0;
+  if (validated >= 20) tier = 2;       // Holographic
+  else if (validated >= 10) tier = 1;  // Route
+  // tier 0 = Mesh (défaut)
+  const seen = parseInt(localStorage.getItem(KEY) || '0', 10);
+  if (tier > seen) {
+    localStorage.setItem(KEY, String(tier));
+    return tier; // 1 = Route, 2 = Holographic
+  }
+  return null;
+}
+
+/**
+ * Affiche un toast léger "Nouveau fond débloqué" en haut de la card.
+ */
+function showBgMilestoneToast(card, tier) {
+  const labels = {
+    1: { title: 'Fond Route débloqué', sub: 'Tu progresses bien — déjà 10 compétences acquises.' },
+    2: { title: 'Fond Holographic débloqué', sub: '20 compétences acquises. Plus que la ligne d\'arrivée !' },
+  };
+  const conf = labels[tier];
+  if (!conf) return;
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: absolute; left: 50%; top: -8px; transform: translate(-50%, -100%);
+    background: rgba(15, 23, 42, .94); color: #fff; padding: 12px 16px; border-radius: 14px;
+    font: 600 12px/1.3 'Inter', sans-serif; box-shadow: 0 12px 28px rgba(10,13,26,.32);
+    z-index: 10; min-width: 220px; text-align: center; pointer-events: none;
+    opacity: 0; transition: opacity .35s ease, transform .35s cubic-bezier(.23,1,.32,1);
+    backdrop-filter: blur(8px);
+  `;
+  toast.innerHTML = `
+    <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;margin-bottom:3px;color:#fde68a">🎴 ${conf.title}</div>
+    <div style="font:500 11px/1.4 'Inter',sans-serif;color:#cbd5e1">${conf.sub}</div>
+  `;
+  card.style.position = card.style.position || 'relative';
+  card.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translate(-50%, -110%)';
+  });
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translate(-50%, -100%)';
+    setTimeout(() => toast.remove(), 380);
+  }, 4500);
+}
+
+/**
  * Mount + branche le tilt 3D sur touch/mouse
  */
 export function mountPermisCard(container, opts) {
   container.innerHTML = renderPermisCard(opts);
   const card = container.querySelector('.pc');
   if (!card) return;
+
+  // Toast palier au mount (max une fois par franchissement)
+  const milestone = detectBgMilestone(opts?.validated ?? 0);
+  if (milestone) {
+    setTimeout(() => showBgMilestoneToast(card.parentElement || card, milestone), 700);
+  }
 
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 

@@ -524,9 +524,10 @@ const STYLE = `<style>
   hyphens: auto;
   margin-bottom: 3px;
 }
-/* Code REMC — métadonnée discrète */
+/* Code REMC — caché sur la map (bruit visuel pour le débutant)
+   reste accessible dans la fiche détail bottom sheet */
 .nd-lbl .nd-code {
-  display: inline-block;
+  display: none;
   font: 500 10px/1 'Inter', sans-serif;
   color: #94a3b8;
   letter-spacing: .4px;
@@ -1050,7 +1051,7 @@ export async function mount(root) {
 
   track('page.view', { page: 'eleve_parcours' });
 
-  root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div><div class="prc-subtitle">REMC · Permis B</div></div></div><div style="padding:32px;text-align:center;color:#94a3b8">Chargement…</div></div>`;
+  root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div><div class="prc-subtitle">31 compétences · Permis B</div></div></div><div style="padding:32px;text-align:center;color:#94a3b8">Chargement…</div></div>`;
 
   const { data: valData } = await sb
     .from('validations')
@@ -1163,7 +1164,7 @@ function spawnArrow(node, compId) {
         .fresh-arrow, .fa-arrow { animation: none !important; }
       }
     </style>
-    <div class="fa-bubble">✨ Tu viens de débloquer ${compId} !</div>
+    <div class="fa-bubble">✨ Tu viens de débloquer : ${esc(resolveCompName(compId))}</div>
     <svg class="fa-arrow" viewBox="0 0 24 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M12 0 L12 32" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
       <path d="M3 24 L12 36 L21 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
@@ -1238,6 +1239,17 @@ function computeWorldStates(validatedMap) {
   return states;
 }
 
+/** Résout le nom humain d'une compétence depuis son ID (ex: C1A → "Manœuvres : créneau") */
+function resolveCompName(compId) {
+  if (!compId) return '';
+  const normalized = compId.toLowerCase();
+  for (const cat of REMC) {
+    const sub = cat.subs.find(s => s.c.toLowerCase() === normalized);
+    if (sub) return sub.n;
+  }
+  return compId;
+}
+
 function compStatus(compId, worldStatus, nextChallenge, validatedMap) {
   if (worldStatus === 'locked') return 'locked';
   if (validatedMap[compId])     return 'done';
@@ -1258,7 +1270,7 @@ function renderPage(worldStates, validatedMap) {
   <div class="prc-hd">
     <div>
       <div class="prc-title">Mon parcours</div>
-      <div class="prc-subtitle">REMC · Permis B</div>
+      <div class="prc-subtitle">31 compétences · Permis B</div>
     </div>
     <div class="prc-hd-right">
       <div class="prc-total">${totalDone}<span class="prc-total-denom">/${totalComps}</span></div>
@@ -1310,8 +1322,8 @@ function renderPage(worldStates, validatedMap) {
 
 <!-- Bottom sheet -->
 <div class="bsheet-bg" id="bsheet-bg" aria-hidden="true"></div>
-<div class="bsheet" id="bsheet" role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="bsheet-handle"></div>
+<div class="bsheet" id="bsheet" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="bsheet-title">
+  <div class="bsheet-handle" aria-hidden="true"></div>
   <div id="bsheet-body"></div>
 </div>`;
 }
@@ -1367,11 +1379,14 @@ function renderWorldSection(ws, validatedMap, hasNext) {
       </svg>`,
     }[st];
 
+    const isLocked = st === 'locked';
     return `
       <div class="prc-node ${st}" data-comp="${esc(p.c)}" data-world-idx="${idx}"
-           style="left:${xp}%;top:${yp}%;--wc:${meta.color};--wg:${meta.glow};--nd-delay:${delay}s">
+           style="left:${xp}%;top:${yp}%;--wc:${meta.color};--wg:${meta.glow};--nd-delay:${delay}s"
+           ${!isLocked ? `role="button" tabindex="0"` : 'aria-hidden="true"'}
+           aria-label="${esc(p.n)} — ${esc(sttLabel)}">
         <div class="nd-circle">${icon}</div>
-        <div class="nd-lbl">
+        <div class="nd-lbl" aria-hidden="true">
           <span class="nd-name">${esc(p.n)}</span>
           <span class="nd-code">${esc(p.c.toUpperCase())}</span>
           <span class="nd-stt">${esc(sttLabel)}</span>
@@ -1492,13 +1507,17 @@ function wire(root, worldStates, validatedMap, me) {
     }
   });
 
-  // Nodes → ouvre la fiche
+  // Nodes → ouvre la fiche (click + Enter/Space pour keyboard nav)
   root.querySelectorAll('.prc-node:not(.locked)').forEach(n => {
-    n.addEventListener('click', () => {
+    const open = () => {
       const compId   = n.dataset.comp;
       const worldIdx = parseInt(n.dataset.worldIdx, 10);
       openFiche(root, compId, worldStates[worldIdx], validatedMap);
       track('parcours.node_tap', { compId, worldIdx });
+    };
+    n.addEventListener('click', open);
+    n.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
     });
   });
 
@@ -1606,7 +1625,7 @@ function openFiche(root, compId, ws, validatedMap) {
       <div class="fiche-circle ${st === 'done' ? 'done' : ''}" style="background:${st === 'done' ? '#10b981' : meta.color}">
         ${stIcon}
       </div>
-      <h3>${esc(sub.n)}</h3>
+      <h3 id="bsheet-title">${esc(sub.n)}</h3>
       <div class="fiche-id">${esc(compId.toUpperCase())} · ${compNum}/${total}</div>
       <div><span class="stt-pill ${st}" style="--wc:${meta.color}">${esc(stLabel)}</span></div>
     </div>
@@ -1665,4 +1684,8 @@ function openFiche(root, compId, ws, validatedMap) {
   sheet?.classList.add('open');
   bg?.classList.add('open');
   sheet?.setAttribute('aria-hidden', 'false');
+  // Move focus into the dialog for keyboard/screen reader users
+  requestAnimationFrame(() => {
+    sheet?.querySelector('.fiche-close')?.focus();
+  });
 }

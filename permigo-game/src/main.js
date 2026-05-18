@@ -20,6 +20,11 @@ async function boot() {
     track('app.opened', { role: me?.role || 'guest' });
 
     if (!me) {
+      // Cas spécial : invitation en cours d'activation
+      if (location.hash.startsWith('#/signup')) {
+        const { mount } = await import('@/pages/public/signup.js');
+        return mount(app);
+      }
       const { mount } = await import('@/pages/auth/login.js');
       return mount(app);
     }

@@ -73,19 +73,20 @@ const STYLE = `<style>
     position: relative;
     overflow: hidden;
     animation: ajWidgetIn .5s cubic-bezier(.34,1.56,.64,1) both;
+    transition: transform .15s, border-color .15s;
   }
+  .aj-widget[role="button"] { cursor: pointer; }
+  .aj-widget[role="button"]:active { transform: scale(.97); }
   .aj-widget:nth-child(1) { animation-delay: .05s; }
   .aj-widget:nth-child(2) { animation-delay: .12s; }
   .aj-widget:nth-child(3) { animation-delay: .19s; }
+  .aj-widget:nth-child(4) { animation-delay: .26s; }
   @keyframes ajWidgetIn {
     from { opacity: 0; transform: translateY(10px) scale(.97); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
-  .aj-widget-wide {
-    grid-column: span 2;
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  @media (prefers-reduced-motion: reduce) {
+    .aj-widget { animation: none; }
   }
   .aj-widget-head {
     display: flex;
@@ -110,28 +111,18 @@ const STYLE = `<style>
     color: #64748b;
     margin-top: 4px;
   }
-  .aj-widget-trend {
-    flex: 1;
-  }
-  .aj-widget-trend-bar {
-    height: 6px;
-    background: #f0f2f8;
-    border-radius: 99px;
-    overflow: hidden;
-    margin-top: 10px;
-  }
-  .aj-widget-trend-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6);
-    border-radius: 99px;
-    transition: width 1s cubic-bezier(.2,.7,.3,1);
-  }
   .aj-widget-delta {
     font: 600 12px/1 'Inter', sans-serif;
     color: #10b981;
     margin-top: 6px;
   }
   .aj-widget-delta.down { color: #94a3b8; }
+
+  /* Widget alert state (metric > 0 and needs attention) */
+  .aj-widget.aj-widget-alert {
+    border-color: rgba(245,158,11,.3);
+    background: rgba(245,158,11,.03);
+  }
 
   /* Section title */
   .aj-section-title {
@@ -410,7 +401,7 @@ async function renderInto(root, _me) {
   // ─── Fetch en parallèle ────────────────────────────────────────
   const today = todayISO();
 
-  const [valsToday, valsAll, elevesAll] = await Promise.all([
+  const [valsToday, valsAll, elevesAll, consolidRes] = await Promise.all([
     // Validations d'aujourd'hui (faites par moi)
     sb
       .from('validations')
@@ -428,11 +419,20 @@ async function renderInto(root, _me) {
       .order('validated_at', { ascending: false })
       .limit(5),
 
-    // Tous les élèves
+    // Tous les élèves (avec last_active_at pour inactifs)
     sb
       .from('profiles')
-      .select('id, prenom, nom')
+      .select('id, prenom, nom, last_active_at')
       .eq('role', 'eleve'),
+
+    // Quiz de consolidation en attente pour mes élèves
+    sb
+      .from('validations')
+      .select('id', { count: 'exact', head: true })
+      .eq('validated_by', _me.id)
+      .not('consolidation_due_at', 'is', null)
+      .lt('consolidation_due_at', new Date().toISOString())
+      .is('consolidation_done_at', null),
   ]);
 
   if (valsToday.error || valsAll.error) {
@@ -468,6 +468,16 @@ async function renderInto(root, _me) {
 
   const nbElevesActifs = mesElevesActifs.length;
 
+  // Consolidations à relancer (quizzes 48h overdue)
+  const consolidCount = consolidRes.count ?? 0;
+
+  // Élèves inactifs depuis 7+ jours parmi mes élèves
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  const inactifCount = mesElevesActifs.filter(e => {
+    const p = elevesMap[e.id];
+    return !p?.last_active_at || p.last_active_at < sevenDaysAgo;
+  }).length;
+
   // ─── Render ───────────────────────────────────────────────────
   root.innerHTML = `
     ${STYLE}
@@ -478,7 +488,7 @@ async function renderInto(root, _me) {
         <p class="aj-date">${formatDate(new Date())}</p>
       </header>
 
-      <!-- Widgets KPI iOS-style -->
+      <!-- Widgets KPI iOS-style — 2×2 grid -->
       <div class="aj-widgets">
 
         <div class="aj-widget">
@@ -499,13 +509,24 @@ async function renderInto(root, _me) {
           <p class="aj-widget-sub">Suivis ce mois</p>
         </div>
 
-        <div class="aj-widget aj-widget-wide">
-          ${iconBadge('trending-up', { color: '#8b5cf6', size: 40 })}
-          <div class="aj-widget-trend">
-            <span class="aj-widget-lbl">Activité du jour</span>
-            <p class="aj-widget-val">${validationsAujourdhui} <span style="font-size:14px;color:#94a3b8;font-weight:500;">action${validationsAujourdhui > 1 ? 's' : ''}</span></p>
-            <div class="aj-widget-trend-bar"><div class="aj-widget-trend-fill" style="width:${Math.min(100, validationsAujourdhui * 20)}%"></div></div>
+        <div class="aj-widget${consolidCount > 0 ? ' aj-widget-alert' : ''}" id="aj-w-consolidation"
+             role="button" tabindex="0" aria-label="${consolidCount} quiz de consolidation à relancer">
+          <div class="aj-widget-head">
+            ${iconBadge('refresh', { color: consolidCount > 0 ? '#f59e0b' : '#94a3b8', size: 32 })}
+            <span class="aj-widget-lbl">Consolidation</span>
           </div>
+          <p class="aj-widget-val">${consolidCount}</p>
+          <p class="aj-widget-sub">${consolidCount === 0 ? 'Aucun en attente' : `Quiz${consolidCount > 1 ? 's' : ''} à relancer`}</p>
+        </div>
+
+        <div class="aj-widget${inactifCount > 0 ? ' aj-widget-alert' : ''}" id="aj-w-inactifs"
+             role="button" tabindex="0" aria-label="${inactifCount} élèves inactifs depuis plus de 7 jours">
+          <div class="aj-widget-head">
+            ${iconBadge('clock', { color: inactifCount > 0 ? '#8b5cf6' : '#94a3b8', size: 32 })}
+            <span class="aj-widget-lbl">Inactifs</span>
+          </div>
+          <p class="aj-widget-val">${inactifCount}</p>
+          <p class="aj-widget-sub">${inactifCount === 0 ? 'Tous actifs' : 'Depuis 7j+'}</p>
         </div>
 
       </div>
@@ -547,6 +568,16 @@ async function renderInto(root, _me) {
   root.querySelector('#aj-btn-valider')?.addEventListener('click', () => {
     track('cta.valider_competence', { from: 'aujourdhui' });
     navigate('#/validation');
+  });
+
+  root.querySelector('#aj-w-consolidation')?.addEventListener('click', () => {
+    track('widget.consolidation.clicked', { count: consolidCount });
+    navigate('#/eleves');
+  });
+
+  root.querySelector('#aj-w-inactifs')?.addEventListener('click', () => {
+    track('widget.inactifs.clicked', { count: inactifCount });
+    navigate('#/eleves');
   });
 
   root.querySelectorAll('.aj-eleve-row[data-eleve-id]').forEach(row => {

@@ -34,6 +34,92 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// ─── Push Notifications ──────────────────────────────────────────
+// Payload JSON attendu depuis la edge function dispatch_push :
+// { type, title, body, icon?, badge?, data: { route?, competence_id? } }
+
+const NOTIF_DEFAULTS = {
+  icon:  '/icons/icon-192.png',
+  badge: '/icons/badge-72.png',
+  requireInteraction: false,
+};
+
+const NOTIF_COPY = {
+  post_validation_quiz: {
+    title: '🎉 Compétence validée !',
+    body:  'Ton moniteur a validé une compétence. Lance le quiz de 3 questions maintenant !',
+  },
+  consolidation_quiz: {
+    title: '🔄 Consolide tes acquis',
+    body:  'Il est temps de revoir une compétence. 2 questions, 2 minutes.',
+  },
+  streak_risk: {
+    title: '🔥 Ta série t\'attend',
+    body:  'Ne laisse pas ta flamme s\'éteindre. Une petite session suffit !',
+  },
+};
+
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try {
+    payload = event.data?.json() ?? {};
+  } catch {
+    payload = { type: 'generic', body: event.data?.text() ?? '' };
+  }
+
+  const defaults = NOTIF_COPY[payload.type] ?? { title: 'PermiGo', body: payload.body || '' };
+  const title   = payload.title ?? defaults.title;
+  const options = {
+    ...NOTIF_DEFAULTS,
+    body:  payload.body  ?? defaults.body,
+    icon:  payload.icon  ?? NOTIF_DEFAULTS.icon,
+    badge: payload.badge ?? NOTIF_DEFAULTS.badge,
+    tag:   payload.type  ?? 'permigo',
+    data:  payload.data  ?? {},
+    // Vibration douce : 200ms on, 100ms off, 100ms on
+    vibrate: [200, 100, 100],
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const route = event.notification.data?.route ?? '';
+  const targetUrl = self.registration.scope + (route ? `#${route.replace(/^#/, '')}` : '');
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      // Cherche une fenêtre déjà ouverte et navigue dedans
+      for (const client of clients) {
+        if ('focus' in client) {
+          client.focus();
+          if ('navigate' in client) client.navigate(targetUrl);
+          return;
+        }
+      }
+      // Aucune fenêtre ouverte → on ouvre l'app
+      return self.clients.openWindow(targetUrl);
+    })
+  );
+});
+
+// Re-subscribe automatiquement si la subscription expire
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil(
+    self.registration.pushManager.subscribe(event.oldSubscription.options)
+      .then((sub) => {
+        // Le frontend se chargera de re-synchroniser la nouvelle sub avec Supabase
+        // via un BroadcastChannel au prochain boot de l'app
+        const bc = new BroadcastChannel('permigo-push');
+        bc.postMessage({ type: 'subscription_renewed', subscription: sub.toJSON() });
+        bc.close();
+      })
+  );
+});
+
+// ─── Fetch (cache + network) ─────────────────────────────────────
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 

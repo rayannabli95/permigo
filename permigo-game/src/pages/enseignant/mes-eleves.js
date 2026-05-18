@@ -322,16 +322,21 @@ export async function mount(root) {
 
 // ─── Data ────────────────────────────────────────────────────────
 async function loadData() {
-  // 1. Tous les élèves (scope : auto_ecole de l'enseignant ou liés via validations)
+  // 1. Tous les élèves de mon auto-école (RLS multi-moniteurs : on voit tout le monde)
+  //    Côté frontend on marquera ensuite les "attitrés" (enseignant_id = me.id)
   const { data: elevesRaw, error: e1 } = await sb
     .from('profiles')
-    .select('id, prenom, nom, credit_heures')
+    .select('id, prenom, nom, credit_heures, enseignant_id')
     .eq('role', 'eleve')
     .order('prenom');
 
   if (e1) { toast('Impossible de charger les élèves', 'error'); _eleves = []; return; }
 
-  const rawList = elevesRaw || [];
+  // Tag "attitré" sur chaque élève — affichage UI peut prioriser
+  const rawList = (elevesRaw || []).map(e => ({
+    ...e,
+    isMine: e.enseignant_id === _me.id,
+  }));
 
   // 2. Mes validations groupées par eleve_id (statut acquis uniquement)
   const { data: valsRaw } = await sb
@@ -349,11 +354,18 @@ async function loadData() {
   // Set des élèves que j'ai validé au moins une fois
   const touchedEleves = new Set(Object.keys(acquisByEleve));
 
-  _eleves = rawList.map((e, i) => {
-    const acquis = acquisByEleve[e.id] || 0;
-    const actif = (e.credit_heures != null && e.credit_heures > 0) || touchedEleves.has(e.id);
-    return { ...e, acquis, total: REMC_TOTAL, actif, idx: i };
-  });
+  _eleves = rawList
+    .map((e, i) => {
+      const acquis = acquisByEleve[e.id] || 0;
+      const actif = (e.credit_heures != null && e.credit_heures > 0) || touchedEleves.has(e.id);
+      return { ...e, acquis, total: REMC_TOTAL, actif, idx: i };
+    })
+    // Mes élèves attitrés en haut, puis ceux que j'ai déjà validé, puis le reste
+    .sort((a, b) => {
+      if (a.isMine !== b.isMine) return a.isMine ? -1 : 1;
+      if (touchedEleves.has(a.id) !== touchedEleves.has(b.id)) return touchedEleves.has(a.id) ? -1 : 1;
+      return (a.prenom || '').localeCompare(b.prenom || '');
+    });
 }
 
 // ─── Render ──────────────────────────────────────────────────────
@@ -446,7 +458,10 @@ function renderRow(eleve) {
       <div class="me-av" style="background:${grad}">${esc(initials || '?')}</div>
 
       <div class="me-info">
-        <div class="me-nom">${fullNom || '—'}</div>
+        <div class="me-nom">
+          ${fullNom || '—'}
+          ${eleve.isMine ? `<span style="margin-left:6px;display:inline-block;font:700 9px/1 'Inter',sans-serif;padding:3px 6px;border-radius:4px;background:rgba(99,102,241,.12);color:#4f46e5;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle">attitré</span>` : ''}
+        </div>
         <div class="me-meta">
           <span class="me-badge ${eleve.actif ? 'actif' : 'inactif'}">
             ${eleve.actif ? 'Actif' : 'Inactif'}
@@ -584,6 +599,7 @@ function openQuickMenu(eleveId, anchorRow) {
         animation: meqmPanel .2s cubic-bezier(.34,1.56,.64,1);
       }
       @keyframes meqmPanel { from { opacity: 0; transform: translateY(-4px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+      @media (prefers-reduced-motion: reduce) { .me-qm-bg, .me-qm-panel { animation: none; } }
       .me-qm-item {
         display: flex; align-items: center; gap: 10px;
         padding: 12px 14px;

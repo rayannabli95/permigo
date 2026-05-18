@@ -22,7 +22,10 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false,          // prod: off (Vercel ne les sert pas, pèse 2-3x le JS)
+    minify: 'esbuild',         // esbuild >> terser en vitesse, comparable en taille
+    cssCodeSplit: true,        // CSS par chunk → évite un gros bloc bloquant
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         manualChunks: {

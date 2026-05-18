@@ -324,10 +324,108 @@ function render(root, teachers, teacherStats) {
     listEl.innerHTML = renderCards(filtered, teacherStats);
   });
 
-  // Bouton ajouter
+  // Bouton ajouter — vrai modal d'invitation (utilise table invitations)
   root.querySelector('#eq-add-btn')?.addEventListener('click', () => {
-    toast('Contactez le support pour ajouter un enseignant', 'info');
+    openInviteModal(getCurUser());
   });
+}
+
+// ─── Modal d'invitation enseignant ──────────────────────────────
+function openInviteModal(me) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;animation:invFadeIn .25s ease;';
+  overlay.innerHTML = `
+    <style>
+      @keyframes invFadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes invSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+      .inv-sheet { width:100%; max-width:480px; background:#fff; border-radius:32px 32px 0 0; padding:24px 24px max(32px, env(safe-area-inset-bottom)); animation: invSlideUp .3s cubic-bezier(.2,.7,.3,1); font-family:'Inter',sans-serif; }
+      .inv-handle { width:36px; height:4px; background:#e2e6f2; border-radius:2px; margin:0 auto 20px; }
+      .inv-title { font:800 22px/1.2 'Plus Jakarta Sans',sans-serif; color:#0a0d1a; margin:0 0 6px; letter-spacing:-.02em; }
+      .inv-sub { font:500 14px/1.4 'Inter',sans-serif; color:#64748b; margin:0 0 20px; }
+      .inv-label { display:block; font:600 12px/1 'Inter',sans-serif; color:#64748b; text-transform:uppercase; letter-spacing:.08em; margin:14px 0 6px; }
+      .inv-input { width:100%; padding:14px 16px; border:1.5px solid #e2e6f2; border-radius:14px; font:500 15px/1.3 'Inter',sans-serif; color:#0a0d1a; transition:border-color .15s; font-family:inherit; }
+      .inv-input:focus { outline:0; border-color:#6366f1; }
+      .inv-actions { display:flex; gap:10px; margin-top:24px; }
+      .inv-btn { flex:1; padding:16px; border-radius:14px; font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s, background .15s; font-family:inherit; }
+      .inv-btn:active { transform: scale(.97); }
+      .inv-btn-cancel { background:#f8f9fc; border:1.5px solid #e2e6f2; color:#475569; }
+      .inv-btn-cancel:hover { background:#f0f2f8; }
+      .inv-btn-go { background:#6366f1; border:0; color:#fff; }
+      .inv-btn-go:hover { background:#4f46e5; }
+      .inv-btn-go:disabled { opacity:.4; cursor:default; }
+    </style>
+    <div class="inv-sheet">
+      <div class="inv-handle"></div>
+      <h3 class="inv-title">Inviter un enseignant</h3>
+      <p class="inv-sub">Il recevra un email avec un lien pour rejoindre ton auto-école.</p>
+      <label class="inv-label">Email de l'enseignant</label>
+      <input class="inv-input" id="inv-email" type="email" placeholder="marie@auto-ecole.fr" autocomplete="email" />
+      <label class="inv-label">Prénom (optionnel)</label>
+      <input class="inv-input" id="inv-prenom" type="text" placeholder="Marie" autocomplete="given-name" />
+      <div class="inv-actions">
+        <button class="inv-btn inv-btn-cancel" id="inv-cancel">Annuler</button>
+        <button class="inv-btn inv-btn-go" id="inv-send" disabled>Envoyer l'invitation</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const emailEl = overlay.querySelector('#inv-email');
+  const prenomEl = overlay.querySelector('#inv-prenom');
+  const sendBtn = overlay.querySelector('#inv-send');
+  const close = () => {
+    overlay.style.animation = 'invFadeIn .2s ease reverse';
+    setTimeout(() => overlay.remove(), 200);
+  };
+
+  emailEl.addEventListener('input', () => {
+    const ok = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(emailEl.value.trim());
+    sendBtn.disabled = !ok;
+  });
+
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('#inv-cancel').addEventListener('click', close);
+  sendBtn.addEventListener('click', async () => {
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Envoi…';
+    try {
+      // Génère un token sécurisé (UUID v4 + timestamp en suffix pour unicité)
+      const token = crypto.randomUUID() + '-' + Date.now().toString(36);
+      // Expire dans 7 jours
+      const expiresAt = new Date(Date.now() + 7 * 86400000).toISOString();
+
+      const { data, error } = await sb.from('invitations').insert({
+        email: emailEl.value.trim().toLowerCase(),
+        role: 'enseignant',
+        token,
+        expires_at: expiresAt,
+        auto_ecole_id: me.auto_ecole_id,
+      }).select().maybeSingle();
+
+      if (error) throw error;
+
+      // Déclenche l'envoi d'email via Edge Function (best-effort, ne bloque pas l'UX)
+      try {
+        await sb.functions.invoke('send-invitation-email', {
+          body: { invitation_id: data?.id, token, email: data?.email, role: 'enseignant' },
+        });
+      } catch (emailErr) {
+        // Email a échoué mais l'invitation est créée en DB → on garde
+        console.warn('[invite] email send failed (invitation still created)', emailErr);
+      }
+
+      const { toast } = await import('@/components/toast.js');
+      toast('Invitation envoyée ✓', 'success');
+      close();
+    } catch (e) {
+      console.error('[invite] failed', e);
+      const { toast } = await import('@/components/toast.js');
+      toast(e.message?.includes('duplicate') ? 'Cet email est déjà invité' : 'Erreur lors de l\'envoi', 'error');
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Envoyer l\'invitation';
+    }
+  });
+  setTimeout(() => emailEl.focus(), 100);
 }
 
 function renderCards(teachers, teacherStats) {

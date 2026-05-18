@@ -78,7 +78,7 @@ const STYLE = `<style>
     font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
     box-shadow: 0 8px 24px rgba(99,102,241,.4);
-    transition: all .2s;
+    transition: transform .15s, opacity .15s, box-shadow .15s;
     margin-bottom: 12px;
   }
   .btn-start:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
@@ -94,8 +94,9 @@ const STYLE = `<style>
   }
 
   /* Result */
-  .qp-result-card { animation: pop .4s cubic-bezier(.175,.885,.32,1.275); }
-  @keyframes pop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .qp-result-card { animation: pop .35s cubic-bezier(.23,1,.32,1); }
+  @keyframes pop { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .qp-result-card { animation: none; } }
   .qp-score-ring {
     width: 120px;
     height: 120px;
@@ -133,7 +134,7 @@ const STYLE = `<style>
     font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
     margin-bottom: 12px;
-    transition: all .2s;
+    transition: transform .15s, opacity .15s;
     box-shadow: 0 6px 20px rgba(99,102,241,.25);
   }
   .btn-parcours:active { transform: scale(.98); }

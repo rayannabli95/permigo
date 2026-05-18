@@ -26,6 +26,8 @@ const ROUTES = {
     default: () => import('@/pages/gerant/pulse.js'),
     equipe: () => import('@/pages/gerant/equipe.js'),
     eleves: () => import('@/pages/gerant/eleves.js'),
+    // Réutilise le livret REMC de l'enseignant pour la vue détail élève côté gérant
+    livret: () => import('@/pages/enseignant/livret-remc.js'),
     profil: () => import('@/pages/common/profil.js'),
     notifications: () => import('@/pages/common/notifications.js'),
     settings: () => import('@/pages/common/settings.js'),

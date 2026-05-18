@@ -285,7 +285,7 @@ const STYLE = `<style>
     background: #f8f9fc;
     cursor: pointer;
     text-align: center;
-    transition: all .15s ease;
+    transition: border-color .15s ease, background .15s ease, color .15s ease, transform .15s ease;
     display: flex;
     flex-direction: column;
     align-items: center;

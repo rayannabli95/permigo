@@ -231,13 +231,20 @@ async function selectEleve(eleve) {
   _eleve = eleve;
   _selectedComp = null;
 
-  // Charger les validations existantes de cet élève
-  const { data } = await sb
-    .from('validations')
-    .select('competence_id')
-    .eq('eleve_id', eleve.id);
+  // Charger les validations existantes de cet élève (avec garde-fou réseau)
+  try {
+    const { data, error } = await sb
+      .from('validations')
+      .select('competence_id')
+      .eq('eleve_id', eleve.id);
 
-  _validatedIds = new Set((data || []).map(v => v.competence_id));
+    if (error) throw error;
+    _validatedIds = new Set((data || []).map(v => v.competence_id));
+  } catch (e) {
+    console.error('[selectEleve] fetch validations failed', e);
+    toast('Impossible de charger les compétences de l\'élève', 'error');
+    _validatedIds = new Set(); // continue avec set vide pour pas bloquer l'UI
+  }
 
   render();
   wire();
@@ -248,29 +255,19 @@ async function selectEleve(eleve) {
 }
 
 function selectComp(compId, compNom) {
-  // DEBUG : logs pour identifier le bug de sélection
-  console.log('[selectComp] click', { compId, compNom, validatedIds: [..._validatedIds], selected: _selectedComp });
-
-  if (_validatedIds.has(compId)) {
-    console.log('[selectComp] déjà validée → ignore');
-    return;
-  }
+  if (_validatedIds.has(compId)) return;
 
   // Règle pédagogique REMC : on ne valide que dans l'ordre
   const nextUnlock = getNextUnlockable(_validatedIds);
-  console.log('[selectComp] nextUnlock attendue :', nextUnlock);
-
   if (compId !== nextUnlock) {
     const idx = ORDERED_COMPS.indexOf(compId);
     const required = ORDERED_COMPS.slice(0, idx).find(c => !_validatedIds.has(c)) || nextUnlock;
-    console.warn(`[selectComp] blocage : ${compId} requiert ${required}`);
     toast(`Valide d'abord ${required} avant ${compId}`, 'info', 3500);
     return;
   }
 
   const clickedSame = _selectedComp?.c === compId;
   _selectedComp = clickedSame ? null : { c: compId, n: compNom };
-  console.log('[selectComp] nouvelle selection :', _selectedComp);
 
   // Partial DOM update — évite un full re-render + perte de scroll
   _root.querySelectorAll('[data-comp-id]').forEach(el => {
@@ -401,8 +398,11 @@ function renderEleveCard(eleve) {
   const initials = (eleve.prenom?.[0] || '') + (eleve.nom_initial?.replace('.', '') || '');
   const selected = _eleve?.id === eleve.id;
   return `
-    <div class="eleve-card${selected ? ' selected' : ''}" data-eleve-id="${esc(eleve.id)}">
-      <div class="eleve-av">${esc(initials || '?')}</div>
+    <div class="eleve-card${selected ? ' selected' : ''}" data-eleve-id="${esc(eleve.id)}"
+         role="button" tabindex="0"
+         aria-label="${esc(eleve.prenom || '—')} ${esc(eleve.nom_initial || '')}"
+         aria-pressed="${selected}">
+      <div class="eleve-av" aria-hidden="true">${esc(initials || '?')}</div>
       <div class="eleve-prenom">${esc(eleve.prenom || '—')}</div>
       ${eleve.credit_heures != null
         ? `<div class="eleve-hrs">${esc(String(eleve.credit_heures))}h restantes</div>`
@@ -443,7 +443,7 @@ function renderCategory(cat) {
           return `
             <div class="comp-row ${cls}"
               data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
-              ${locked ? 'aria-disabled="true"' : ''}>
+              ${locked ? 'aria-disabled="true" aria-label="Verrouillée — ' + esc(sub.n) + '"' : `role="button" tabindex="0" aria-label="${esc(sub.n)}" aria-pressed="${sel}"`}>
               <span class="comp-code">${esc(sub.c)}</span>
               <span class="comp-nom">${esc(sub.n)}</span>
               <span class="comp-status">${badgeHtml}</span>
@@ -465,25 +465,38 @@ function renderCta() {
         <div class="cta-comp-nm">${esc(labelComp(_selectedComp.c))}</div>
         <div class="cta-for">pour <strong>${esc(_eleve?.prenom || '')}</strong></div>
       </div>
-      <button class="btn-validate">Confirmer ✓</button>
+      <button class="btn-validate" type="button">Confirmer ✓</button>
     </div>
   `;
   slot.querySelector('.btn-validate').addEventListener('click', doValidate);
 }
 
 // ─── Event wiring ────────────────────────────────────────────────
+// Cleanup avant ré-attache pour éviter les listeners cumulés à chaque render
 function wire() {
-  _root.querySelectorAll('[data-eleve-id]').forEach(el =>
-    el.addEventListener('click', () => {
-      const eleve = _eleves.find(e => e.id === el.dataset.eleveId);
+  // Clone-replace pour réinitialiser les listeners sur chaque élément
+  _root.querySelectorAll('[data-eleve-id]').forEach(el => {
+    const fresh = el.cloneNode(true);
+    el.parentNode?.replaceChild(fresh, el);
+    const act = () => {
+      const eleve = _eleves.find(e => e.id === fresh.dataset.eleveId);
       if (eleve) selectEleve(eleve);
-    })
-  );
+    };
+    fresh.addEventListener('click', act);
+    fresh.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); }
+    });
+  });
 
-  _root.querySelectorAll('[data-comp-id]').forEach(el =>
-    el.addEventListener('click', () =>
-      selectComp(el.dataset.compId, el.dataset.compNom)
-    )
-  );
+  _root.querySelectorAll('[data-comp-id]').forEach(el => {
+    const fresh = el.cloneNode(true);
+    el.parentNode?.replaceChild(fresh, el);
+    if (fresh.getAttribute('aria-disabled') === 'true') return;
+    const act = () => selectComp(fresh.dataset.compId, fresh.dataset.compNom);
+    fresh.addEventListener('click', act);
+    fresh.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); }
+    });
+  });
 }
 

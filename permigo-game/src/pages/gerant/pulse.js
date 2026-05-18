@@ -112,6 +112,109 @@ const STYLE = `<style>
   color: #94a3b8;
 }
 
+/* Delta KPI (cockpit) */
+.kpi-delta {
+  margin-top: 8px;
+  font: 700 10px/1 'Inter', sans-serif;
+  letter-spacing: .04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.kpi-delta.up   { color: #047857; background: rgba(16,185,129,.12); }
+.kpi-delta.down { color: #b91c1c; background: rgba(239,68,68,.12); }
+
+/* Sparkline activité 7j (Tesla cockpit feel) */
+.spark-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 16px;
+  height: 96px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+}
+.spark-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  height: 100%;
+}
+.spark-bar {
+  width: 100%;
+  max-width: 28px;
+  background: linear-gradient(180deg, #6366f1, #8b5cf6);
+  border-radius: 6px 6px 0 0;
+  transition: height .6s cubic-bezier(.2,.7,.3,1);
+  box-shadow: 0 -2px 6px rgba(99,102,241,.18);
+}
+.spark-bar.today {
+  background: linear-gradient(180deg, #f59e0b, #f97316);
+  box-shadow: 0 -2px 8px rgba(245,158,11,.35);
+}
+.spark-lbl {
+  font: 700 10px/1 'Inter', sans-serif;
+  color: #94a3b8;
+  letter-spacing: .04em;
+}
+
+/* Proches examen */
+.exam-list { display: flex; flex-direction: column; gap: 8px; }
+.exam-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color .15s, transform .12s;
+}
+.exam-row:hover { border-color: #f59e0b; }
+.exam-row:active { transform: scale(.98); }
+.exam-name {
+  font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.exam-prog {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.exam-prog-bar {
+  width: 70px;
+  height: 6px;
+  background: #f0f2f8;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.exam-prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  border-radius: 99px;
+  transition: width .6s cubic-bezier(.2,.7,.3,1);
+}
+.exam-prog-val {
+  font: 700 12px/1 'IBM Plex Mono', monospace;
+  color: #b45309;
+  min-width: 38px;
+  text-align: right;
+}
+
 /* Team list */
 .team-list { display: flex; flex-direction: column; gap: 8px; }
 .team-row {
@@ -241,27 +344,75 @@ export async function mount(root) {
   try {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+
+    // Seuil "actif" = activité dans les 30 derniers jours
+    const sinceActif = new Date(Date.now() - 30 * 86400000).toISOString();
+    // Seuil "à risque" = pas d'activité depuis 14j
+    const sinceRisque = new Date(Date.now() - 14 * 86400000).toISOString();
+    // Sparkline activité 7 jours
+    const since7d = new Date(Date.now() - 7 * 86400000).toISOString();
 
     const [
       elevesRes,
       validMoisRes,
+      validPrevMoisRes,
+      validations7dRes,
       enseignantsRes,
       quizMoisRes,
+      quizPrevMoisRes,
+      validationsAcquisRes,
     ] = await Promise.all([
-      // KPI 1 — élèves actifs (tous les élèves)
-      sb.from('profiles').select('id').eq('role', 'eleve'),
+      // KPI 1 — élèves (on récupère aussi last_active_at pour calculer le taux réel)
+      sb.from('profiles').select('id, prenom, nom, last_active_at').eq('role', 'eleve'),
       // KPI 2 — compétences validées ce mois
-      sb.from('validations').select('id').gte('validated_at', startOfMonth),
+      sb.from('validations').select('id, eleve_id').gte('validated_at', startOfMonth),
+      // KPI 2 bis — compétences validées mois précédent (pour delta)
+      sb.from('validations').select('id').gte('validated_at', startOfPrevMonth).lt('validated_at', startOfMonth),
+      // Sparkline — validations 7 derniers jours
+      sb.from('validations').select('validated_at').gte('validated_at', since7d),
       // KPI 3 — enseignants actifs
       sb.from('profiles').select('id, prenom, nom').eq('role', 'enseignant'),
       // KPI 4 — quiz réussis ce mois (score >= 60)
       sb.from('quiz_attempts').select('id').gte('score', 60).gte('completed_at', startOfMonth),
+      // KPI 4 bis — quiz mois précédent (pour delta)
+      sb.from('quiz_attempts').select('id').gte('score', 60).gte('completed_at', startOfPrevMonth).lt('completed_at', startOfMonth),
+      // Élèves proches de l'examen — toutes validations acquises agrégées
+      sb.from('validations').select('eleve_id').eq('statut', 'acquis'),
     ]);
 
-    const elevesTotal = elevesRes.data?.length ?? 0;
+    const elevesAll = elevesRes.data || [];
+    const elevesTotal = elevesAll.length;
+    // Élèves actifs = activité dans les 30j OU validation ce mois
+    const idsValidsCeMois = new Set((validMoisRes.data || []).map(v => v.eleve_id).filter(Boolean));
+    const elevesActifs = elevesAll.filter(e =>
+      (e.last_active_at && e.last_active_at >= sinceActif) || idsValidsCeMois.has(e.id)
+    ).length;
+    // Élèves à risque (inactifs > 14j)
+    const elevesARisque = elevesAll.filter(e =>
+      !e.last_active_at || (e.last_active_at < sinceRisque && !idsValidsCeMois.has(e.id))
+    ).length;
+
     const compValidees = validMoisRes.data?.length ?? 0;
+    const compValideesPrev = validPrevMoisRes.data?.length ?? 0;
     const enseignants = enseignantsRes.data || [];
     const quizReussis = quizMoisRes.data?.length ?? 0;
+    const quizReussisPrev = quizPrevMoisRes.data?.length ?? 0;
+
+    // ─── Sparkline 7 derniers jours ─────────────────────────────────
+    const spark7d = build7dSparkline(validations7dRes.data || []);
+
+    // ─── Élèves proches de l'examen (≥ 28 compétences acquises sur 31) ──
+    const compsByEleve = {};
+    (validationsAcquisRes.data || []).forEach(v => {
+      if (!v.eleve_id) return;
+      compsByEleve[v.eleve_id] = (compsByEleve[v.eleve_id] || 0) + 1;
+    });
+    const elevesProchesExam = elevesAll
+      .map(e => ({ ...e, acquis: compsByEleve[e.id] || 0 }))
+      .filter(e => e.acquis >= 28)
+      .sort((a, b) => b.acquis - a.acquis)
+      .slice(0, 5);
 
     // Stats validations ce mois par enseignant
     let teacherValMap = {};
@@ -310,9 +461,24 @@ export async function mount(root) {
     }
 
     root.innerHTML = render({
-      elevesTotal, compValidees, enseignants: enseignants.length, quizReussis,
+      elevesTotal, elevesActifs, elevesARisque,
+      compValidees, compValideesPrev,
+      enseignants: enseignants.length,
+      quizReussis, quizReussisPrev,
+      spark7d, elevesProchesExam,
       teachers: enseignants, teacherValMap, teacherElevesMap,
       recentVals: recentVals || [], eleveNames, enseignantNames,
+    });
+
+    // Wire — proches examen → livret REMC
+    root.querySelectorAll('.exam-row[data-eleve-id]').forEach(row => {
+      row.addEventListener('click', () => {
+        const id = row.dataset.eleveId;
+        if (id) {
+          track('pulse.exam_row_click', { eleve_id: id });
+          location.hash = `#/livret/${id}`;
+        }
+      });
     });
 
   } catch (e) {
@@ -323,8 +489,10 @@ export async function mount(root) {
 }
 
 // ─── Render ──────────────────────────────────────────────────
-function render({ elevesTotal, compValidees, enseignants, quizReussis, teachers, teacherValMap, teacherElevesMap, recentVals, eleveNames, enseignantNames }) {
+function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees, compValideesPrev = 0, enseignants, quizReussis, quizReussisPrev = 0, spark7d = { values: [], total: 0, max: 1 }, elevesProchesExam = [], teachers, teacherValMap, teacherElevesMap, recentVals, eleveNames, enseignantNames }) {
   const monthLabel = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const compDelta = deltaPct(compValidees, compValideesPrev);
+  const quizDelta = deltaPct(quizReussis, quizReussisPrev);
 
   return `${STYLE}
 <div class="pulse anim-slide-up">
@@ -333,16 +501,32 @@ function render({ elevesTotal, compValidees, enseignants, quizReussis, teachers,
     <div class="pulse-date">${todayLabel()}</div>
   </div>
 
+  ${elevesARisque > 0 ? `
+    <div style="margin:12px 16px 0;padding:14px 16px;background:linear-gradient(135deg,#fef9e7,#fffbeb);border:1px solid #fde68a;border-radius:14px;display:flex;align-items:center;gap:12px">
+      <div style="width:36px;height:36px;border-radius:50%;background:#f59e0b;color:#fff;display:grid;place-items:center;flex-shrink:0">${icon('alert-circle', { size: 18 }) || '⚠️'}</div>
+      <div style="flex:1">
+        <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;color:#0a0d1a;margin-bottom:2px">${elevesARisque} élève${elevesARisque > 1 ? 's' : ''} à relancer</div>
+        <div style="font:500 12px/1.4 'Inter',sans-serif;color:#64748b">Pas d'activité depuis 14 jours ou plus.</div>
+      </div>
+      <a href="#/eleves" style="font:700 11px/1 'Inter',sans-serif;color:#b45309;text-decoration:none;padding:8px 12px;background:rgba(245,158,11,.15);border-radius:8px;white-space:nowrap">Voir</a>
+    </div>
+  ` : ''}
+
   <div class="kpi-grid">
     <div class="kpi-card" style="--kc:#6366f1">
       <span class="kpi-ico" style="color:#6366f1">${icon('users', { size: 22 })}</span>
-      <div class="kpi-val">${elevesTotal}</div>
-      <div class="kpi-lbl">Élèves actifs</div>
+      <div class="kpi-val">${elevesActifs}<span style="font-size:.5em;color:#94a3b8;font-weight:600">/${elevesTotal}</span></div>
+      <div class="kpi-lbl">Élèves actifs<br><span style="font-size:.7em;color:#94a3b8">(30 derniers jours)</span></div>
     </div>
     <div class="kpi-card" style="--kc:#10b981">
       <span class="kpi-ico" style="color:#10b981">${icon('check-circle', { size: 22 })}</span>
       <div class="kpi-val">${compValidees}</div>
       <div class="kpi-lbl">Compétences validées<br>${esc(monthLabel)}</div>
+      ${compValideesPrev > 0 || compValidees > 0 ? `
+        <div class="kpi-delta ${compDelta >= 0 ? 'up' : 'down'}">
+          ${compDelta >= 0 ? '▲' : '▼'} ${Math.abs(compDelta)}% vs mois -1
+        </div>
+      ` : ''}
     </div>
     <div class="kpi-card" style="--kc:#8b5cf6">
       <span class="kpi-ico" style="color:#8b5cf6">${icon('book', { size: 22 })}</span>
@@ -353,8 +537,60 @@ function render({ elevesTotal, compValidees, enseignants, quizReussis, teachers,
       <span class="kpi-ico" style="color:#f59e0b">${icon('target', { size: 22 })}</span>
       <div class="kpi-val">${quizReussis}</div>
       <div class="kpi-lbl">Quiz réussis<br>${esc(monthLabel)}</div>
+      ${quizReussisPrev > 0 || quizReussis > 0 ? `
+        <div class="kpi-delta ${quizDelta >= 0 ? 'up' : 'down'}">
+          ${quizDelta >= 0 ? '▲' : '▼'} ${Math.abs(quizDelta)}% vs mois -1
+        </div>
+      ` : ''}
     </div>
   </div>
+
+  <!-- SPARKLINE 7 derniers jours -->
+  <div class="pulse-sec">
+    <div class="pulse-sec-hd">
+      <span class="pulse-sec-title">Activité 7 jours</span>
+      <span class="pulse-sec-sub">${spark7d.total} validation${spark7d.total > 1 ? 's' : ''}</span>
+    </div>
+    <div class="spark-wrap">
+      ${spark7d.values.map((v, i) => {
+        const h = Math.max(4, Math.round((v / spark7d.max) * 56));
+        const isToday = i === spark7d.values.length - 1;
+        const dayLabel = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        const idx = (d.getDay() + 6) % 7;
+        return `
+          <div class="spark-col" title="${v} validation${v > 1 ? 's' : ''} le ${d.toLocaleDateString('fr-FR')}">
+            <div class="spark-bar ${isToday ? 'today' : ''}" style="height:${h}px"></div>
+            <div class="spark-lbl">${dayLabel[idx]}</div>
+          </div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  ${elevesProchesExam.length > 0 ? `
+    <!-- PROCHES EXAMEN -->
+    <div class="pulse-sec">
+      <div class="pulse-sec-hd">
+        <span class="pulse-sec-title">Proches de l'examen</span>
+        <span class="pulse-sec-sub">${elevesProchesExam.length} élève${elevesProchesExam.length > 1 ? 's' : ''}</span>
+      </div>
+      <div class="exam-list">
+        ${elevesProchesExam.map(e => {
+          const fullName = esc(e.prenom || e.nom || '—');
+          const pct = Math.round((e.acquis / 31) * 100);
+          return `
+          <div class="exam-row" data-eleve-id="${esc(e.id)}">
+            <div class="exam-name">${fullName}</div>
+            <div class="exam-prog">
+              <div class="exam-prog-bar"><div class="exam-prog-fill" style="width:${pct}%"></div></div>
+              <span class="exam-prog-val">${e.acquis}/31</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  ` : ''}
 
   <!-- EQUIPE -->
   <div class="pulse-sec">
@@ -414,6 +650,42 @@ function render({ elevesTotal, compValidees, enseignants, quizReussis, teachers,
     </div>
   </div>
 </div>`;
+}
+
+// ─── Sparkline 7 derniers jours ──────────────────────────────
+/**
+ * Compte les validations par jour sur les 7 derniers jours et renvoie
+ * { values: [n6, n5, ..., n0], total, max }.
+ * `n0` = aujourd'hui, `n6` = il y a 6 jours.
+ */
+function build7dSparkline(validationRows) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - (6 - i));
+    return { ts: d.getTime(), count: 0 };
+  });
+
+  validationRows.forEach(v => {
+    if (!v.validated_at) return;
+    const d = new Date(v.validated_at);
+    d.setHours(0, 0, 0, 0);
+    const ts = d.getTime();
+    const day = days.find(x => x.ts === ts);
+    if (day) day.count++;
+  });
+
+  const values = days.map(d => d.count);
+  const total = values.reduce((s, v) => s + v, 0);
+  const max = Math.max(1, ...values);
+  return { values, total, max };
+}
+
+/** Calcule un delta % entre une valeur courante et une référence. */
+function deltaPct(current, previous) {
+  if (previous === 0) return current > 0 ? 100 : 0;
+  return Math.round(((current - previous) / previous) * 100);
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
