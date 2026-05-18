@@ -153,8 +153,8 @@ export function markChestOpened(worldNum) {
   const s = getOpenedSet();
   s.add(worldNum);
   localStorage.setItem(LS_CHESTS_OPENED, JSON.stringify(Array.from(s)));
-  // Récompense bonus : +50 gemmes par coffre ouvert
-  addGemmes(50);
+  // Gemmes : DÉJÀ attribuées par la modal coffre via les rewards du tier
+  // (chest.js → TIERS[worldNum].gemmes). Pas de double-bonus ici.
   // Persister en DB (fire-and-forget — idempotent via contrainte UNIQUE)
   openChest('world_' + worldNum).catch(() => {});
 }

@@ -251,34 +251,6 @@ const STYLE = `<style>
   }
   .aj-eleve-chev { color: #94a3b8; font-size: 14px; flex-shrink: 0; }
 
-  /* CTA */
-  .aj-cta {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    z-index: 50;
-    padding: 16px;
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-    background: rgba(248,249,252,.95);
-    border-top: 1px solid #e2e6f2;
-    backdrop-filter: blur(10px);
-  }
-  .aj-cta-btn {
-    width: 100%;
-    max-width: 600px;
-    display: block;
-    margin: 0 auto;
-    padding: 16px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border: none;
-    border-radius: 12px;
-    color: #fff;
-    font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
-    cursor: pointer;
-    transition: transform .15s, opacity .15s;
-    min-height: 48px;
-  }
-  .aj-cta-btn:active { transform: scale(.98); opacity: .9; }
-
   /* Empty */
   .aj-empty {
     padding: 24px 20px;
@@ -410,8 +382,6 @@ let _ptrCleanup = null;
 
 export async function unmount() {
   if (_ptrCleanup) { _ptrCleanup(); _ptrCleanup = null; }
-  const { unmountFab } = await import('@/components/fab.js');
-  unmountFab();
 }
 
 export async function mount(root) {
@@ -440,9 +410,8 @@ export async function mount(root) {
 
   await renderAll();
 
-  // ─── Pull-to-refresh + FAB + Live counter ─────────────────────────────
+  // ─── Pull-to-refresh + Live counter ──────────────────────────────────
   const { attachPullToRefresh, animateCounter } = await import('@/utils/gestures.js');
-  const { mountFab } = await import('@/components/fab.js');
 
   // PTR : refait le fetch + render avec animation du compteur
   _ptrCleanup?.();
@@ -456,16 +425,6 @@ export async function mount(root) {
         const el = root.querySelector('.aj-kpi .aj-kpi-val');
         if (el) animateCounter(el, before, after, 700);
       }
-    },
-  });
-
-  // FAB : raccourci vers la page validation
-  mountFab({
-    icon: '+',
-    label: 'Valider une compétence',
-    onClick: () => {
-      track('cta.valider_competence', { from: 'aujourdhui_fab' });
-      navigate('#/validation');
     },
   });
 
@@ -704,21 +663,9 @@ async function renderInto(root, _me) {
 
     </div>
 
-    <!-- CTA fixe -->
-    <div class="aj-cta">
-      <button class="aj-cta-btn" id="aj-btn-valider" style="display:flex;align-items:center;justify-content:center;gap:8px;">
-        ${icon('plus', { size: 18, strokeWidth: 2.6 })}
-        <span>Valider une compétence</span>
-      </button>
-    </div>
   `;
 
   // Wire listeners
-  root.querySelector('#aj-btn-valider')?.addEventListener('click', () => {
-    track('cta.valider_competence', { from: 'aujourdhui' });
-    navigate('#/validation');
-  });
-
   root.querySelector('#aj-w-consolidation')?.addEventListener('click', () => {
     track('widget.consolidation.clicked', { count: consolidCount });
     navigate('#/eleves');

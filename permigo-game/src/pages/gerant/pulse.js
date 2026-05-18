@@ -307,6 +307,54 @@ const STYLE = `<style>
   border: 1px dashed #e2e6f2;
   border-radius: 12px;
 }
+
+/* ─── Tendance 30j (Bloomberg style multi-séries) ─── */
+.trend-card {
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 16px;
+  padding: 16px 16px 12px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+}
+.trend-legend {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  margin-bottom: 14px;
+  font: 600 11px/1 'Inter', sans-serif;
+  letter-spacing: .02em;
+}
+.trend-lg-item { display: inline-flex; align-items: center; gap: 6px; color: #475569; }
+.trend-lg-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block;
+}
+.trend-svg-wrap { position: relative; width: 100%; height: 120px; }
+.trend-svg { display: block; width: 100%; height: 100%; }
+.trend-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.trend-line.validations  { stroke: #6366f1; }
+.trend-line.quiz         { stroke: #8b5cf6; }
+.trend-line.sessions     { stroke: #f59e0b; }
+.trend-area              { opacity: .08; }
+.trend-area.validations  { fill: #6366f1; }
+.trend-area.quiz         { fill: #8b5cf6; }
+.trend-area.sessions     { fill: #f59e0b; }
+.trend-axis-y {
+  font: 500 9px/1 'IBM Plex Mono', 'Menlo', monospace;
+  fill: #94a3b8;
+}
+.trend-axis-x {
+  font: 500 9px/1 'Inter', sans-serif;
+  fill: #94a3b8;
+}
+.trend-grid {
+  stroke: #e2e6f2;
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+.trend-empty {
+  text-align: center; padding: 28px 12px;
+  font: 500 12px/1.5 'Inter', sans-serif;
+  color: #94a3b8;
+}
 </style>`;
 
 const AVATARS = [
@@ -402,6 +450,15 @@ export async function mount(root) {
     // ─── Sparkline 7 derniers jours ─────────────────────────────────
     const spark7d = build7dSparkline(validations7dRes.data || []);
 
+    // ─── Tendance 30 jours (depuis school_daily_snapshot) ───────────
+    let trend30d = [];
+    try {
+      const { data: trendData } = await sb.rpc('get_school_trend', { p_days: 30 });
+      trend30d = Array.isArray(trendData) ? trendData : [];
+    } catch (e) {
+      console.warn('[pulse] trend30d unavailable', e);
+    }
+
     // ─── Élèves proches de l'examen (≥ 28 compétences acquises sur 31) ──
     const compsByEleve = {};
     (validationsAcquisRes.data || []).forEach(v => {
@@ -465,7 +522,7 @@ export async function mount(root) {
       compValidees, compValideesPrev,
       enseignants: enseignants.length,
       quizReussis, quizReussisPrev,
-      spark7d, elevesProchesExam,
+      spark7d, trend30d, elevesProchesExam,
       teachers: enseignants, teacherValMap, teacherElevesMap,
       recentVals: recentVals || [], eleveNames, enseignantNames,
     });
@@ -489,7 +546,7 @@ export async function mount(root) {
 }
 
 // ─── Render ──────────────────────────────────────────────────
-function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees, compValideesPrev = 0, enseignants, quizReussis, quizReussisPrev = 0, spark7d = { values: [], total: 0, max: 1 }, elevesProchesExam = [], teachers, teacherValMap, teacherElevesMap, recentVals, eleveNames, enseignantNames }) {
+function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees, compValideesPrev = 0, enseignants, quizReussis, quizReussisPrev = 0, spark7d = { values: [], total: 0, max: 1 }, trend30d = [], elevesProchesExam = [], teachers, teacherValMap, teacherElevesMap, recentVals, eleveNames, enseignantNames }) {
   const monthLabel = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   const compDelta = deltaPct(compValidees, compValideesPrev);
   const quizDelta = deltaPct(quizReussis, quizReussisPrev);
@@ -567,6 +624,8 @@ function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees
       }).join('')}
     </div>
   </div>
+
+  ${renderTrend30d(trend30d)}
 
   ${elevesProchesExam.length > 0 ? `
     <!-- PROCHES EXAMEN -->
@@ -650,6 +709,125 @@ function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees
     </div>
   </div>
 </div>`;
+}
+
+// ─── Tendance 30 jours (Bloomberg multi-series line chart) ───
+/**
+ * Rendu d'un mini line-chart SVG avec 3 séries : validations, quiz, sessions_h.
+ * Trend = SETOF school_daily_snapshot (asc by snapshot_date).
+ */
+function renderTrend30d(trend) {
+  if (!Array.isArray(trend) || trend.length < 2) {
+    return `
+      <div class="pulse-sec">
+        <div class="pulse-sec-hd">
+          <span class="pulse-sec-title">Tendance 30 jours</span>
+          <span class="pulse-sec-sub">en construction</span>
+        </div>
+        <div class="trend-card">
+          <div class="trend-empty">Les données se construisent automatiquement chaque nuit.<br/>Reviens dans quelques jours.</div>
+        </div>
+      </div>`;
+  }
+
+  const W = 320;          // viewBox width
+  const H = 120;          // viewBox height
+  const PAD_L = 28;
+  const PAD_R = 8;
+  const PAD_T = 8;
+  const PAD_B = 18;
+  const innerW = W - PAD_L - PAD_R;
+  const innerH = H - PAD_T - PAD_B;
+
+  // Extract series
+  const valsValidations = trend.map(t => Number(t.validations_24h) || 0);
+  const valsQuiz        = trend.map(t => Number(t.quiz_24h)        || 0);
+  const valsSessions    = trend.map(t => Number(t.sessions_h_24h)  || 0);
+
+  // Scale Y commun : on prend le max global (validations + quiz comparables, sessions_h plus petit)
+  // On scale les sessions × 5 pour les rendre visibles à la même échelle (heuristique)
+  const sessionScale = 5;
+  const allMax = Math.max(
+    1,
+    ...valsValidations, ...valsQuiz,
+    ...valsSessions.map(v => v * sessionScale)
+  );
+
+  const n = trend.length;
+  const xAt = (i) => PAD_L + (innerW * i) / (n - 1);
+  const yAt = (v) => PAD_T + innerH - (innerH * (v / allMax));
+
+  const buildPath = (values, scale = 1) => {
+    return values.map((v, i) => {
+      const x = xAt(i);
+      const y = yAt(v * scale);
+      return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }).join(' ');
+  };
+
+  const buildArea = (values, scale = 1) => {
+    const top = values.map((v, i) => {
+      const x = xAt(i); const y = yAt(v * scale);
+      return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }).join(' ');
+    const bottomY = PAD_T + innerH;
+    return `${top} L${xAt(n - 1).toFixed(1)} ${bottomY} L${xAt(0).toFixed(1)} ${bottomY} Z`;
+  };
+
+  // Gridlines : 4 horizontal
+  const gridY = [0.25, 0.5, 0.75, 1].map(r => PAD_T + innerH * (1 - r));
+
+  // X labels : 4 dates espacées
+  const xLabels = [0, Math.floor(n / 3), Math.floor((2 * n) / 3), n - 1].map(i => {
+    const d = new Date(trend[i].snapshot_date);
+    return {
+      x: xAt(i),
+      label: d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+    };
+  });
+
+  // Totaux pour la légende
+  const totalVal = valsValidations.reduce((s, v) => s + v, 0);
+  const totalQuiz = valsQuiz.reduce((s, v) => s + v, 0);
+  const totalSessions = Math.round(valsSessions.reduce((s, v) => s + v, 0) * 10) / 10;
+
+  return `
+  <div class="pulse-sec">
+    <div class="pulse-sec-hd">
+      <span class="pulse-sec-title">Tendance 30 jours</span>
+      <span class="pulse-sec-sub">${n} jour${n > 1 ? 's' : ''}</span>
+    </div>
+    <div class="trend-card">
+      <div class="trend-legend">
+        <span class="trend-lg-item"><span class="trend-lg-dot" style="background:#6366f1"></span>${totalVal} validations</span>
+        <span class="trend-lg-item"><span class="trend-lg-dot" style="background:#8b5cf6"></span>${totalQuiz} quiz</span>
+        <span class="trend-lg-item"><span class="trend-lg-dot" style="background:#f59e0b"></span>${totalSessions}h sessions</span>
+      </div>
+      <div class="trend-svg-wrap">
+        <svg class="trend-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Tendance 30 jours">
+          <!-- gridlines -->
+          ${gridY.map(y => `<line class="trend-grid" x1="${PAD_L}" y1="${y}" x2="${W - PAD_R}" y2="${y}"/>`).join('')}
+
+          <!-- areas (fill légères) -->
+          <path class="trend-area validations" d="${buildArea(valsValidations)}"/>
+          <path class="trend-area quiz"        d="${buildArea(valsQuiz)}"/>
+          <path class="trend-area sessions"    d="${buildArea(valsSessions, sessionScale)}"/>
+
+          <!-- lines -->
+          <path class="trend-line sessions"    d="${buildPath(valsSessions, sessionScale)}"/>
+          <path class="trend-line quiz"        d="${buildPath(valsQuiz)}"/>
+          <path class="trend-line validations" d="${buildPath(valsValidations)}"/>
+
+          <!-- Y axis label (max) -->
+          <text class="trend-axis-y" x="${PAD_L - 4}" y="${PAD_T + 4}" text-anchor="end">${Math.round(allMax)}</text>
+          <text class="trend-axis-y" x="${PAD_L - 4}" y="${PAD_T + innerH}" text-anchor="end">0</text>
+
+          <!-- X labels -->
+          ${xLabels.map(l => `<text class="trend-axis-x" x="${l.x}" y="${H - 4}" text-anchor="middle">${esc(l.label)}</text>`).join('')}
+        </svg>
+      </div>
+    </div>
+  </div>`;
 }
 
 // ─── Sparkline 7 derniers jours ──────────────────────────────

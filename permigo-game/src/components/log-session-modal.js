@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// Log Session Modal — bottom sheet 3 sections
+// Log Session Modal v2 — bottom sheet 5 sections
+// A: élève  B: durée  C: jour  D: compétences  E: commentaire
 // Usage : openLogSessionModal()
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
@@ -20,6 +21,9 @@ const DURATIONS = [
   { value: 180, label: '3h' },
 ];
 const DEFAULT_DURATION = 90;
+const MAX_COMMENT = 500;
+
+const MONDE_LABELS = ['', 'Monde 1 · Maîtrise du véhicule', 'Monde 2 · Appréhension de la route', 'Monde 3 · Circulation', 'Monde 4 · En autonomie'];
 
 // ─── Helpers date ──────────────────────────────────────────────
 function isoDate(daysAgo = 0) {
@@ -37,7 +41,7 @@ function readableDate(daysAgo) {
 
 // ─── Error messages ────────────────────────────────────────────
 const ERROR_MSG = {
-  cap_daily_exceeded:  'Tu as déjà 10h de sessions loggées aujourd\'hui.',
+  cap_daily_exceeded:  "Tu as déjà 10h de sessions loggées aujourd'hui.",
   cap_weekly_exceeded: 'Tu as déjà 50h de sessions loggées cette semaine.',
   session_too_old:     'Impossible de logger une session de plus de 48h.',
   invalid_duration:    'Durée invalide.',
@@ -130,12 +134,20 @@ function ensureStyle() {
     flex: 1; height: 1px;
     background: #f0f2f8;
   }
+  .lsm-sec-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .lsm-sec-count {
+    font: 600 11px/1 'Inter', sans-serif;
+    color: #6366f1;
+    background: rgba(99,102,241,.08);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
 
   /* Elève rows */
-  .lsm-eleve-list {
-    display: flex; flex-direction: column;
-    gap: 6px;
-  }
+  .lsm-eleve-list { display: flex; flex-direction: column; gap: 6px; }
   .lsm-eleve-row {
     display: flex; align-items: center; gap: 12px;
     padding: 10px 14px;
@@ -147,10 +159,7 @@ function ensureStyle() {
     min-height: 52px;
   }
   .lsm-eleve-row:active { transform: scale(.99); }
-  .lsm-eleve-row.lsm-selected {
-    border-color: #6366f1;
-    background: rgba(99,102,241,.04);
-  }
+  .lsm-eleve-row.lsm-selected { border-color: #6366f1; background: rgba(99,102,241,.04); }
   .lsm-eleve-av {
     width: 36px; height: 36px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -163,11 +172,7 @@ function ensureStyle() {
     color: #0a0d1a;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .lsm-eleve-hint {
-    font: 500 11px/1 'Inter', sans-serif;
-    color: #94a3b8;
-    margin-top: 2px;
-  }
+  .lsm-eleve-hint { font: 500 11px/1 'Inter', sans-serif; color: #94a3b8; margin-top: 2px; }
   .lsm-eleve-check {
     width: 20px; height: 20px;
     border-radius: 50%;
@@ -176,14 +181,10 @@ function ensureStyle() {
     display: flex; align-items: center; justify-content: center;
     transition: background .12s, border-color .12s;
   }
-  .lsm-selected .lsm-eleve-check {
-    background: #6366f1; border-color: #6366f1;
-  }
+  .lsm-selected .lsm-eleve-check { background: #6366f1; border-color: #6366f1; }
 
   /* Chips durée */
-  .lsm-chips {
-    display: flex; flex-wrap: wrap; gap: 8px;
-  }
+  .lsm-chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .lsm-chip {
     padding: 9px 16px;
     border: 1.5px solid #e2e6f2;
@@ -197,19 +198,96 @@ function ensureStyle() {
     display: flex; align-items: center;
   }
   .lsm-chip:active { transform: scale(.96); }
-  .lsm-chip.lsm-selected {
-    border-color: #6366f1;
-    background: rgba(99,102,241,.07);
-    color: #6366f1;
-  }
+  .lsm-chip.lsm-selected { border-color: #6366f1; background: rgba(99,102,241,.07); color: #6366f1; }
 
   /* Chips jours — plus larges */
   .lsm-day-chips { gap: 8px; }
-  .lsm-day-chip {
-    flex: 1;
-    justify-content: center;
-    padding: 11px 12px;
+  .lsm-day-chip { flex: 1; justify-content: center; padding: 11px 12px; }
+
+  /* Comp chips groupées par monde */
+  .lsm-monde-group { margin-bottom: 12px; }
+  .lsm-monde-lbl {
+    font: 500 10px/1 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #94a3b8;
+    margin: 0 0 7px;
   }
+  .lsm-comp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .lsm-comp-chip {
+    padding: 6px 12px;
+    border: 1.5px solid #e2e6f2;
+    border-radius: 20px;
+    font: 500 12px/1 'Inter', sans-serif;
+    color: #4b5563;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color .12s, background .12s, color .12s, transform .1s;
+    min-height: 36px;
+    display: flex; align-items: center; gap: 5px;
+    text-align: left;
+  }
+  .lsm-comp-chip:active { transform: scale(.97); }
+  .lsm-comp-chip.lsm-selected {
+    border-color: #10b981;
+    background: rgba(16,185,129,.07);
+    color: #059669;
+    font-weight: 600;
+  }
+  .lsm-comp-chip .lsm-comp-code {
+    font: 700 9px/1 'Inter', sans-serif;
+    padding: 1px 5px;
+    border-radius: 6px;
+    background: rgba(16,185,129,.12);
+    color: #059669;
+    flex-shrink: 0;
+  }
+  .lsm-comp-chip.lsm-selected .lsm-comp-code { background: #059669; color: #fff; }
+  .lsm-comp-loading {
+    color: #94a3b8; font: 500 12px/1.5 'Inter', sans-serif;
+    padding: 8px 0;
+  }
+  .lsm-comp-empty {
+    color: #10b981; font: 500 12px/1.4 'Inter', sans-serif;
+    padding: 4px 0;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* Textarea commentaire */
+  .lsm-visibility-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font: 500 11px/1 'Inter', sans-serif;
+    color: #64748b;
+    background: #f1f3f9;
+    padding: 4px 8px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .lsm-textarea-wrap { position: relative; }
+  .lsm-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1.5px solid #e2e6f2;
+    border-radius: 14px;
+    font: 500 13px/1.5 'Inter', sans-serif;
+    color: #0a0d1a;
+    background: #fff;
+    resize: none;
+    min-height: 90px;
+    outline: none;
+    transition: border-color .15s;
+    -webkit-appearance: none;
+  }
+  .lsm-textarea:focus { border-color: #6366f1; }
+  .lsm-char-count {
+    position: absolute;
+    bottom: 8px; right: 10px;
+    font: 500 10px/1 'Inter', sans-serif;
+    color: #c4ccd8;
+    pointer-events: none;
+  }
+  .lsm-char-count.lsm-near-limit { color: #f59e0b; }
 
   /* Footer fixe */
   .lsm-footer {
@@ -276,15 +354,15 @@ function closeModal() {
 
 // ─── Open ──────────────────────────────────────────────────────
 export async function openLogSessionModal() {
-  if (_overlay) return; // déjà ouvert
+  if (_overlay) return;
   ensureStyle();
 
   const me = getCurUser();
   if (!me) return;
 
-  const todayDow = new Date().getDay(); // 0=dimanche JS (= 0=dimanche RPC)
+  const todayDow = new Date().getDay();
 
-  // Skeleton de la modal pendant le fetch
+  // Skeleton pendant le fetch initial
   _overlay = document.createElement('div');
   _overlay.className = 'lsm-overlay';
   _overlay.innerHTML = `
@@ -300,49 +378,101 @@ export async function openLogSessionModal() {
       <div class="lsm-footer">
         <button class="lsm-submit" id="lsm-btn-submit" disabled>
           ${icon('check', { size: 18, strokeWidth: 2.5 })}
-          Logger la session
+          <span id="lsm-submit-label">Logger la session</span>
         </button>
       </div>
     </div>
   `;
   document.body.appendChild(_overlay);
 
-  // Fermer sur backdrop
   _overlay.addEventListener('click', e => { if (e.target === _overlay) closeModal(); });
   _overlay.querySelector('.lsm-close').addEventListener('click', closeModal);
 
-  // ─── Fetch données ──────────────────────────────────────────
+  // ─── Fetch données initiales ────────────────────────────────
   let suggestions = [];
-  let eleves = [];
+  let allEleves = [];
   try {
     const [suggestRes, elevesRes] = await Promise.all([
       sb.rpc('suggest_next_session', { p_day_of_week: todayDow }),
       sb.from('profiles').select('id, prenom, nom').eq('role', 'eleve').order('prenom'),
     ]);
     suggestions = suggestRes.data || [];
-    eleves = elevesRes.data || [];
+    const eleves = elevesRes.data || [];
+    const suggestedIds = new Set(suggestions.map(s => s.eleve_id));
+    const otherEleves = eleves.filter(e => !suggestedIds.has(e.id));
+    allEleves = [
+      ...suggestions.map(s => ({ id: s.eleve_id, prenom: s.eleve_prenom, nom: '', _hint: _durationHint(s) })),
+      ...otherEleves.map(e => ({ ...e, _hint: null })),
+    ];
   } catch (e) {
     console.error('[log-session-modal] fetch error', e);
   }
 
-  // Fusionner : les suggestions gardent leur rang, les autres élèves en dessous
-  const suggestedIds = new Set(suggestions.map(s => s.eleve_id));
-  const otherEleves = eleves.filter(e => !suggestedIds.has(e.id));
-  const suggestMap = Object.fromEntries(suggestions.map(s => [s.eleve_id, s]));
-  const allEleves = [
-    ...suggestions.map(s => ({ id: s.eleve_id, prenom: s.eleve_prenom, nom: '', _hint: _durationHint(s) })),
-    ...otherEleves.map(e => ({ ...e, _hint: null })),
-  ];
-
-  // État local
-  let selectedEleve = allEleves[0]?.id || null;
+  // ─── État local ────────────────────────────────────────────
+  let selectedEleve   = allEleves[0]?.id || null;
   let selectedDuration = DEFAULT_DURATION;
-  let selectedDay = 0; // 0=aujourd'hui, 1=hier, 2=avant-hier
+  let selectedDay     = 0;
+  let selectedComps   = new Set();
+  let comment         = '';
+  let pendingComps    = [];      // [{ competence_id, code, monde, nom }]
+  let _compsFetched   = false;  // flag pour savoir si on a déjà fetché pour cet élève
+  let _compCache      = {};     // cache par eleveId
 
-  // ─── Render body ────────────────────────────────────────────
+  // ─── Fetch comps d'un élève ─────────────────────────────────
+  async function fetchComps(eleveId) {
+    if (!eleveId) { pendingComps = []; _compsFetched = true; return; }
+    if (_compCache[eleveId]) {
+      pendingComps = _compCache[eleveId];
+      _compsFetched = true;
+      return;
+    }
+    _compsFetched = false;
+    try {
+      const { data } = await sb.rpc('get_eleve_pending_competences', { p_eleve_id: eleveId });
+      pendingComps = data || [];
+      _compCache[eleveId] = pendingComps;
+    } catch (e) {
+      pendingComps = [];
+    }
+    _compsFetched = true;
+  }
+
+  // ─── Render compétences section (section D) ─────────────────
+  function renderSectionD() {
+    if (!_compsFetched) {
+      return `<div class="lsm-comp-loading">Chargement des compétences…</div>`;
+    }
+    if (pendingComps.length === 0) {
+      return `<div class="lsm-comp-empty">${icon('check-circle', { size: 14, color: '#10b981', strokeWidth: 2.5 })} Toutes les compétences sont déjà acquises !</div>`;
+    }
+    // Grouper par monde
+    const byMonde = {};
+    pendingComps.forEach(c => {
+      if (!byMonde[c.monde]) byMonde[c.monde] = [];
+      byMonde[c.monde].push(c);
+    });
+    return Object.entries(byMonde).sort(([a], [b]) => a - b).map(([monde, comps]) => `
+      <div class="lsm-monde-group">
+        <div class="lsm-monde-lbl">${esc(MONDE_LABELS[monde] || `Monde ${monde}`)}</div>
+        <div class="lsm-comp-chips" data-monde="${monde}">
+          ${comps.map(c => `
+            <button class="lsm-comp-chip${selectedComps.has(c.competence_id) ? ' lsm-selected' : ''}"
+                    data-comp="${esc(c.competence_id)}" title="${esc(c.nom)}">
+              <span class="lsm-comp-code">${esc(c.code || c.competence_id)}</span>
+              <span>${esc(c.nom)}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ─── Render body complet ────────────────────────────────────
   function renderBody() {
     const bodyEl = document.getElementById('lsm-body-inner');
     if (!bodyEl) return;
+
+    const compCount = selectedComps.size;
 
     bodyEl.innerHTML = `
       <!-- A: Choix élève -->
@@ -393,34 +523,127 @@ export async function openLogSessionModal() {
           `).join('')}
         </div>
       </div>
+
+      <!-- D: Compétences travaillées (optionnel) -->
+      <div class="lsm-section">
+        <div class="lsm-sec-header">
+          <div class="lsm-sec-title" style="margin:0;flex:1">Compétences travaillées ?</div>
+          ${compCount > 0 ? `<span class="lsm-sec-count">${compCount} sélectionnée${compCount > 1 ? 's' : ''}</span>` : ''}
+        </div>
+        <div id="lsm-comp-section" style="margin-top:8px">${renderSectionD()}</div>
+      </div>
+
+      <!-- E: Commentaire (optionnel) -->
+      <div class="lsm-section">
+        <div class="lsm-sec-title">Commentaire</div>
+        <div class="lsm-visibility-badge">
+          ${icon('eye', { size: 12, strokeWidth: 2 })}
+          Visible élève + autres moniteurs
+        </div>
+        <div class="lsm-textarea-wrap">
+          <textarea class="lsm-textarea" id="lsm-comment"
+            maxlength="${MAX_COMMENT}"
+            placeholder="${compCount > 0 ? 'Pourquoi tu valides ces compétences ? (optionnel)' : 'Comment s\'est passée la séance ? (optionnel)'}"
+            rows="3">${esc(comment)}</textarea>
+          <span class="lsm-char-count${comment.length > MAX_COMMENT * 0.85 ? ' lsm-near-limit' : ''}" id="lsm-char-count">${comment.length}/${MAX_COMMENT}</span>
+        </div>
+      </div>
     `;
 
-    // Wire élève selection
+    wireInteractions();
+    updateSubmitLabel();
+  }
+
+  // ─── Wire toutes les interactions du body ───────────────────
+  function wireInteractions() {
+    // A — Élève
     document.getElementById('lsm-eleve-list')?.querySelectorAll('.lsm-eleve-row').forEach(row => {
-      row.addEventListener('click', () => {
-        selectedEleve = row.dataset.eleve;
+      row.addEventListener('click', async () => {
+        const newId = row.dataset.eleve;
+        if (newId === selectedEleve) return;
+        selectedEleve = newId;
+        selectedComps.clear();
+        // Fetch comps pour le nouvel élève puis re-render
+        renderBody(); // render immédiat avec loading dans section D
+        await fetchComps(selectedEleve);
         renderBody();
         updateSubmit();
       });
     });
 
-    // Wire duration chips
+    // B — Durée (toggle direct, pas de re-render)
     document.getElementById('lsm-duration-chips')?.querySelectorAll('.lsm-chip').forEach(chip => {
       chip.addEventListener('click', () => {
+        document.getElementById('lsm-duration-chips')?.querySelectorAll('.lsm-chip').forEach(c => {
+          c.classList.toggle('lsm-selected', c === chip);
+          c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+        });
         selectedDuration = parseInt(chip.dataset.dur, 10);
-        renderBody();
-        updateSubmit();
+        updateSubmitLabel();
       });
     });
 
-    // Wire day chips
+    // C — Jour (toggle direct)
     document.getElementById('lsm-day-chips')?.querySelectorAll('.lsm-chip').forEach(chip => {
       chip.addEventListener('click', () => {
+        document.getElementById('lsm-day-chips')?.querySelectorAll('.lsm-chip').forEach(c => {
+          c.classList.toggle('lsm-selected', c === chip);
+          c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+        });
         selectedDay = parseInt(chip.dataset.day, 10);
-        renderBody();
-        updateSubmit();
       });
     });
+
+    // D — Comp chips (toggle direct, pas de re-render)
+    document.getElementById('lsm-comp-section')?.querySelectorAll('.lsm-comp-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const compId = chip.dataset.comp;
+        if (selectedComps.has(compId)) {
+          selectedComps.delete(compId);
+          chip.classList.remove('lsm-selected');
+        } else {
+          selectedComps.add(compId);
+          chip.classList.add('lsm-selected');
+        }
+        // Update counter badge
+        const count = selectedComps.size;
+        const secHeader = chip.closest('.lsm-section')?.querySelector('.lsm-sec-header');
+        if (secHeader) {
+          let badge = secHeader.querySelector('.lsm-sec-count');
+          if (count > 0) {
+            if (!badge) {
+              badge = document.createElement('span');
+              badge.className = 'lsm-sec-count';
+              secHeader.appendChild(badge);
+            }
+            badge.textContent = `${count} sélectionnée${count > 1 ? 's' : ''}`;
+          } else {
+            badge?.remove();
+          }
+        }
+        // Update textarea placeholder
+        const ta = document.getElementById('lsm-comment');
+        if (ta) {
+          ta.placeholder = count > 0
+            ? 'Pourquoi tu valides ces compétences ? (optionnel)'
+            : "Comment s'est passée la séance ? (optionnel)";
+        }
+        updateSubmitLabel();
+      });
+    });
+
+    // E — Textarea (wire sans re-render)
+    const ta = document.getElementById('lsm-comment');
+    if (ta) {
+      ta.addEventListener('input', () => {
+        comment = ta.value;
+        const cc = document.getElementById('lsm-char-count');
+        if (cc) {
+          cc.textContent = `${comment.length}/${MAX_COMMENT}`;
+          cc.classList.toggle('lsm-near-limit', comment.length > MAX_COMMENT * 0.85);
+        }
+      });
+    }
   }
 
   function updateSubmit() {
@@ -429,7 +652,20 @@ export async function openLogSessionModal() {
     btn.disabled = !selectedEleve;
   }
 
-  renderBody();
+  function updateSubmitLabel() {
+    const lbl = document.getElementById('lsm-submit-label');
+    if (!lbl) return;
+    const compCount = selectedComps.size;
+    if (compCount > 0) {
+      lbl.textContent = `Logger · ${compCount} compétence${compCount > 1 ? 's' : ''} validée${compCount > 1 ? 's' : ''}`;
+    } else {
+      lbl.textContent = 'Logger la session';
+    }
+  }
+
+  // Fetch comps pour l'élève initial + render
+  if (selectedEleve) fetchComps(selectedEleve).then(() => renderBody());
+  else renderBody();
   updateSubmit();
 
   // ─── Submit ─────────────────────────────────────────────────
@@ -439,13 +675,17 @@ export async function openLogSessionModal() {
     if (btn) { btn.disabled = true; btn.classList.add('lsm-loading'); }
 
     const sessionDate = isoDate(selectedDay);
+    const compIds = selectedComps.size > 0 ? [...selectedComps] : undefined;
+    const commentVal = comment.trim() || null;
 
     try {
       const { data, error } = await sb.rpc('log_session', {
         p_eleve_id: selectedEleve,
         p_duration_minutes: selectedDuration,
         p_session_date: sessionDate,
-        p_notes: null,
+        p_notes: commentVal,
+        ...(compIds ? { p_competence_ids: compIds } : {}),
+        ...(commentVal ? { p_comment: commentVal } : {}),
       });
 
       if (error) {
@@ -454,7 +694,6 @@ export async function openLogSessionModal() {
         return;
       }
 
-      // Le RPC retourne { ok: true, session: {...} } ou { error: '...' }
       const result = data?.[0] ?? data;
       if (result?.error) {
         toast(ERROR_MSG[result.error] || result.error, 'error');
@@ -463,15 +702,23 @@ export async function openLogSessionModal() {
       }
 
       const eleveName = allEleves.find(e => e.id === selectedEleve);
-      const durLabel = DURATIONS.find(d => d.value === selectedDuration)?.label || `${selectedDuration}min`;
+      const durLabel  = DURATIONS.find(d => d.value === selectedDuration)?.label || `${selectedDuration}min`;
+      const validations = result?.validations || [];
+      const created = validations.filter(v => v.created).length;
 
       track('session.logged', {
         duration_minutes: selectedDuration,
         day_offset: selectedDay,
+        n_competences: selectedComps.size,
+        has_comment: !!commentVal,
         user_role: me.role,
       });
 
-      toast(`Session loggée · ${durLabel} avec ${esc(eleveName?.prenom || 'l\'élève')} 📝`, 'success');
+      if (created > 0) {
+        toast(`+10 XP · ${created} compétence${created > 1 ? 's' : ''} validée${created > 1 ? 's' : ''} 🎉`, 'success');
+      } else {
+        toast(`Session loggée · ${durLabel} avec ${esc(eleveName?.prenom || "l'élève")} 📝`, 'success');
+      }
       closeModal();
 
     } catch (e) {
@@ -487,9 +734,7 @@ function _durationHint(suggestion) {
   if (!suggestion) return null;
   const dur = suggestion.typical_duration;
   const d = DURATIONS.find(d => d.value === dur);
-  const lastSeen = suggestion.last_seen_at
-    ? _relativeDate(suggestion.last_seen_at)
-    : null;
+  const lastSeen = suggestion.last_seen_at ? _relativeDate(suggestion.last_seen_at) : null;
   const parts = [];
   if (d) parts.push(`Durée habituelle ${d.label}`);
   if (lastSeen) parts.push(`vu ${lastSeen}`);

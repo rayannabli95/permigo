@@ -18,6 +18,8 @@ import { ASSETS } from '@/utils/assets.js';
 import { renderEmptyState } from '@/components/empty-state.js';
 import { emotionalBanner } from '@/components/emotional-banner.js';
 import { mountSessionConfirmation } from '@/components/session-confirmation-banner.js';
+import { mountFeedbackFeed } from '@/components/feedback-feed.js';
+import { mountRevisionCards } from '@/components/revision-cards.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -515,6 +517,16 @@ export async function mount(root) {
   if (accDiv) {
     const streakAnchor = accDiv.querySelector('.streak-pro') || accDiv.firstElementChild;
     mountSessionConfirmation(accDiv, streakAnchor).catch(() => {});
+  }
+
+  // Feed retours moniteurs (non-bloquant — injecté avant footer)
+  if (accDiv) {
+    mountFeedbackFeed(accDiv, { eleveId: me.id, limit: 5 }).catch(() => {});
+  }
+
+  // Révisions mémoire espacée (non-bloquant — injecté avant footer)
+  if (accDiv) {
+    mountRevisionCards(accDiv, { eleveId: me.id, limit: 3 }).catch(() => {});
   }
 
   // Bannière émotionnelle (non-bloquante — indépendante du render principal)

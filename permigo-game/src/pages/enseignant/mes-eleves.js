@@ -10,6 +10,7 @@ import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { REMC_TOTAL } from '@/data/remc.js';
 import { renderEmptyState } from '@/components/empty-state.js';
+import { icon } from '@/utils/icons.js';
 
 // ─── Gradients avatar (8 couleurs cycliques) ─────────────────────
 const AVATARS = [
@@ -210,34 +211,6 @@ const STYLE = `<style>
     flex-shrink: 0;
   }
 
-  /* CTA flottant */
-  .me-cta {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    z-index: 50;
-    padding: 16px;
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-    background: rgba(248,249,252,.95);
-    border-top: 1px solid #e2e6f2;
-    backdrop-filter: blur(10px);
-  }
-  .me-cta-btn {
-    width: 100%;
-    max-width: 600px;
-    display: block;
-    margin: 0 auto;
-    padding: 16px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border: none;
-    border-radius: 12px;
-    color: #fff;
-    font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
-    cursor: pointer;
-    transition: transform .15s, opacity .15s;
-    min-height: 48px;
-  }
-  .me-cta-btn:active { transform: scale(.98); opacity: .9; }
-
   /* Empty state */
   .me-empty {
     padding: 48px 20px;
@@ -311,11 +284,10 @@ let _me = null;
 let _eleves = [];       // { id, prenom, nom, acquis, total, actif }
 let _query = '';
 let _tab = 'tous';      // 'tous' | 'actifs' | 'inactifs' | 'arelancer'
+let _drillComp = null;  // competence_id si mode drill bloque_sur
 
 // ─── Entry point ─────────────────────────────────────────────────
 export async function unmount() {
-  const { unmountFab } = await import('@/components/fab.js');
-  unmountFab();
   document.querySelector('.me-qm')?.remove();
 }
 
@@ -326,15 +298,24 @@ export async function mount(root) {
 
   _query = '';
   _tab = 'tous';
+  _drillComp = null;
 
-  track('page.view', { page: 'mes_eleves', role: _me.role });
+  // Lire le param bloque_sur depuis le hash URL (#/eleves?bloque_sur=C2a)
+  const hash = window.location.hash;
+  const qmark = hash.indexOf('?');
+  if (qmark >= 0) {
+    const params = new URLSearchParams(hash.slice(qmark + 1));
+    _drillComp = params.get('bloque_sur') || null;
+  }
+
+  track('page.view', { page: 'mes_eleves', role: _me.role, drill: _drillComp || undefined });
 
   // Skeleton
   root.innerHTML = `
     ${STYLE}
     <div class="me-page anim-slide-up">
       <header class="me-hd">
-        <h1 class="me-h1">Mes élèves</h1>
+        <h1 class="me-h1">${_drillComp ? `Élèves bloqués sur ${esc(_drillComp)}` : 'Mes élèves'}</h1>
         <p class="me-sub">Chargement…</p>
       </header>
       <div class="me-skel-list">
@@ -343,20 +324,14 @@ export async function mount(root) {
     </div>
   `;
 
-  await loadData();
-  render();
-  wire();
-
-  // FAB : raccourci validation rapide
-  const { mountFab } = await import('@/components/fab.js');
-  mountFab({
-    icon: '+',
-    label: 'Valider une compétence',
-    onClick: () => {
-      track('cta.valider_competence', { from: 'mes_eleves_fab' });
-      navigate('#/validation');
-    },
-  });
+  if (_drillComp) {
+    await loadDrillData(_drillComp);
+    renderDrill();
+  } else {
+    await loadData();
+    render();
+    wire();
+  }
 }
 
 // ─── Data ────────────────────────────────────────────────────────
@@ -411,6 +386,84 @@ async function loadData() {
     });
 }
 
+// ─── Drill mode : élèves bloqués sur une compétence ──────────────
+let _drillEleves = [];
+
+async function loadDrillData(compId) {
+  try {
+    const { data, error } = await sb.rpc('get_eleves_bloque_sur_competence', {
+      p_competence_id: compId,
+      p_window_days: 30,
+    });
+    if (error) throw error;
+    _drillEleves = data || [];
+  } catch (e) {
+    console.error('[mes-eleves] drill load error', e);
+    _drillEleves = [];
+    toast('Impossible de charger le drill', 'error');
+  }
+}
+
+function renderDrill() {
+  const page = _root.querySelector('.me-page');
+  if (!page) return;
+
+  const count = _drillEleves.length;
+  page.innerHTML = `
+    <header class="me-hd" style="margin-bottom:4px;">
+      <div>
+        <h1 class="me-h1" style="display:flex;align-items:center;gap:8px;font-size:17px;">
+          ${icon('search', { size: 16, strokeWidth: 2.2, color: '#6366f1' })}
+          Bloqués sur ${esc(_drillComp)}
+        </h1>
+        <p class="me-sub">${count} élève${count !== 1 ? 's' : ''} · 30 derniers jours</p>
+      </div>
+    </header>
+    <button class="me-drill-back" id="me-drill-back"
+            style="display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:8px 12px;background:#fff;border:1.5px solid #e2e6f2;border-radius:10px;font:600 13px/1 'Inter',sans-serif;color:#6366f1;cursor:pointer;">
+      ${icon('arrow-left', { size: 14, strokeWidth: 2.5 })} Voir tous les élèves
+    </button>
+    <div class="me-list">
+      ${count === 0
+        ? `<div style="text-align:center;padding:40px 20px;color:#94a3b8;font:500 14px/1.6 'Inter',sans-serif;">
+             ${icon('check-circle', { size: 32, strokeWidth: 1.5, color: '#e2e6f2' })}
+             <br><br>Aucun élève bloqué sur cette compétence actuellement.
+           </div>`
+        : _drillEleves.map(e => {
+            const nm = esc(`${e.prenom || ''} ${e.nom || ''}`.trim());
+            const ava = ((e.prenom || '')[0] || '').toUpperCase() + ((e.nom || '')[0] || '').toUpperCase();
+            const grad = AVATARS[(e.prenom || '').charCodeAt(0) % AVATARS.length] || AVATARS[0];
+            return `
+              <div class="me-row" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
+                <div class="me-ava" style="background:${grad}">${esc(ava || '?')}</div>
+                <div class="me-info">
+                  <div class="me-name">${nm}</div>
+                  <div class="me-meta">
+                    ${e.jours_bloque != null ? `<span style="font:500 11px/1 'Inter',sans-serif;color:#dc2626;">Bloqué depuis ${e.jours_bloque}j</span>` : ''}
+                  </div>
+                </div>
+                <div class="me-eleve-chev">${icon('chevron-right', { size: 16, strokeWidth: 2.5, color: '#cbd5e1' })}</div>
+              </div>
+            `;
+          }).join('')
+      }
+    </div>
+  `;
+
+  // Back button
+  _root.querySelector('#me-drill-back')?.addEventListener('click', () => {
+    navigate('#/eleves');
+  });
+
+  // Row click → livret
+  _root.querySelectorAll('.me-row[data-eleve-id]').forEach(row => {
+    row.addEventListener('click', () => {
+      track('drill.eleve.open', { eleve_id: row.dataset.eleveId, comp: _drillComp });
+      navigate(`#/livret/${row.dataset.eleveId}`);
+    });
+  });
+}
+
 // ─── Render ──────────────────────────────────────────────────────
 function render() {
   const filtered = filterList();
@@ -421,7 +474,7 @@ function render() {
 
   const relancerSection = aRelancerList.length > 0 ? `
     <div class="me-relancer-section" id="me-relancer-section">
-      <p class="me-relancer-title">⚠️ ${aRelancerList.length} élève${aRelancerList.length > 1 ? 's' : ''} à relancer cette semaine</p>
+      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;">${icon('alert-circle', { size: 15, strokeWidth: 2.2, color: '#b45309' })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? 's' : ''} à relancer cette semaine</p>
       <p class="me-relancer-sub">Sans activité depuis 14 jours ou plus — un point en leçon peut débloquer la progression.</p>
     </div>
   ` : '';
@@ -437,7 +490,7 @@ function render() {
       ${relancerSection}
 
       <div class="me-search-wrap">
-        <span class="me-search-ico">🔍</span>
+        <span class="me-search-ico">${icon('search', { size: 15, strokeWidth: 2, color: '#94a3b8' })}</span>
         <input
           class="me-search"
           type="search"
@@ -455,16 +508,11 @@ function render() {
         <button class="me-tab${_tab === 'actifs' ? ' active' : ''}" data-tab="actifs" role="tab">
           Actifs (${actifs})
         </button>
-        ${aRelancerList.length > 0 ? `
         <button class="me-tab${_tab === 'arelancer' ? ' active' : ''}" data-tab="arelancer" role="tab"
-                style="${_tab !== 'arelancer' ? 'color:#b45309' : ''}">
-          ⚠️ (${aRelancerList.length})
+                style="display:flex;align-items:center;gap:4px;${aRelancerList.length > 0 && _tab !== 'arelancer' ? 'color:#b45309' : ''}">
+          ${aRelancerList.length > 0 ? icon('alert-circle', { size: 13, strokeWidth: 2.2 }) : ''}
+          À relancer (${aRelancerList.length})
         </button>
-        ` : `
-        <button class="me-tab${_tab === 'inactifs' ? ' active' : ''}" data-tab="inactifs" role="tab">
-          Inactifs (${inactifs})
-        </button>
-        `}
       </div>
 
       <div class="me-list">
@@ -484,9 +532,6 @@ function render() {
       </div>
     </div>
 
-    <div class="me-cta">
-      <button class="me-cta-btn" id="me-btn-valider">+ Valider une compétence</button>
-    </div>
   `;
 }
 
@@ -534,8 +579,8 @@ function renderRow(eleve) {
             ${eleve.actif ? 'Actif' : 'Inactif'}
           </span>
           ${eleve.aRelancer ? `
-            <span class="me-badge-relancer">
-              ⚠ ${eleve.joursInactif ? `${eleve.joursInactif}j` : 'À relancer'}
+            <span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">
+              ${icon('alert-circle', { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `${eleve.joursInactif}j` : 'À relancer'}
             </span>
           ` : ''}
           <span class="me-meta-count">
@@ -558,12 +603,6 @@ function renderRow(eleve) {
 
 // ─── Wire ────────────────────────────────────────────────────────
 function wire() {
-  // CTA
-  _root.querySelector('#me-btn-valider')?.addEventListener('click', () => {
-    track('cta.valider_competence', { from: 'mes_eleves' });
-    navigate('#/validation');
-  });
-
   // Section relancer → filtre tab arelancer
   _root.querySelector('#me-relancer-section')?.addEventListener('click', () => {
     _tab = 'arelancer';
@@ -608,28 +647,19 @@ async function wireRows() {
     row.addEventListener('click', handler);
     row.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') handler(); });
 
-    // ── Swipe right = validation rapide, swipe left = livret ──
-    // Visual follow : on translate la row pendant le drag
+    // ── Swipe right = validation rapide ──
     row.style.transition = 'transform .25s cubic-bezier(.2,.7,.3,1), background .15s';
     attachSwipe(row, {
       threshold: 80,
       follow: (dx) => {
-        // Clamp visual
-        const clamped = Math.max(-100, Math.min(100, dx));
+        const clamped = Math.max(0, Math.min(100, dx));
         row.style.transform = `translateX(${clamped}px)`;
-        row.style.background = dx > 30 ? 'rgba(99,102,241,.06)'
-                              : dx < -30 ? 'rgba(16,185,129,.06)'
-                              : '';
+        row.style.background = dx > 30 ? 'rgba(99,102,241,.06)' : '';
       },
       onSwipeRight: () => {
         haptic('select');
         track('eleve.swipe_validate', { eleve_id: id });
         navigate(`#/validation?eleveId=${id}`);
-      },
-      onSwipeLeft: () => {
-        haptic('select');
-        track('eleve.swipe_livret', { eleve_id: id });
-        navigate(`#/livret/${id}`);
       },
       onEnd: () => {
         row.style.transform = '';
@@ -700,13 +730,10 @@ function openQuickMenu(eleveId, anchorRow) {
     <div class="me-qm-bg" data-close="1"></div>
     <div class="me-qm-panel">
       <button class="me-qm-item" data-action="valider">
-        <span class="me-qm-ico">✓</span> Valider une compétence
+        <span class="me-qm-ico">${icon('check', { size: 14, strokeWidth: 2.5 })}</span> Valider une compétence
       </button>
       <button class="me-qm-item" data-action="livret">
-        <span class="me-qm-ico">→</span> Ouvrir le livret REMC
-      </button>
-      <button class="me-qm-item" data-action="note">
-        <span class="me-qm-ico">📝</span> Ajouter une note rapide
+        <span class="me-qm-ico">${icon('arrow-right', { size: 14, strokeWidth: 2.5 })}</span> Ouvrir le livret REMC
       </button>
     </div>
   `;
@@ -728,12 +755,6 @@ function openQuickMenu(eleveId, anchorRow) {
       close();
       if (action === 'valider') navigate(`#/validation?eleveId=${eleveId}`);
       else if (action === 'livret') navigate(`#/livret/${eleveId}`);
-      else if (action === 'note') {
-        // Placeholder pour future feature notes
-        import('@/components/toast.js').then(({ toast }) => {
-          toast('Notes rapides : bientôt 📝', 'info', 2500);
-        });
-      }
     });
   });
 }

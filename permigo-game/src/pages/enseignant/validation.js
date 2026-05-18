@@ -11,6 +11,7 @@ import { REMC } from '@/data/remc.js';
 import { labelComp } from '@/utils/remc-label.js';
 import { showXpToast } from '@/components/xp-toast.js';
 import { badge, Badges } from '@/components/badge.js';
+import { icon } from '@/utils/icons.js';
 
 // Liste plate des compétences REMC dans l'ordre (C1a → C4g)
 const ORDERED_COMPS = REMC.flatMap(c => c.subs.map(s => s.c));
@@ -581,8 +582,9 @@ function render() {
           <h1 class="vp-h1">Valider une compétence</h1>
           <p class="vp-sub">L'élève reçoit le quiz instantanément après validation.</p>
         </div>
-        <button class="btn-mode-rapide" id="btn-mode-rapide" type="button" aria-label="Mode validation rapide multi-élèves">
-          🚀 Mode rapide
+        <button class="btn-mode-rapide" id="btn-mode-rapide" type="button" aria-label="Mode validation rapide multi-élèves"
+                style="display:flex;align-items:center;gap:6px;">
+          ${icon('zap', { size: 15, strokeWidth: 2.2 })} Mode rapide
         </button>
       </header>
 
@@ -768,7 +770,7 @@ function _renderMrModal() {
   overlay.innerHTML = `
     <div class="mr-sheet" id="mr-sheet">
       <div class="mr-handle" aria-hidden="true"></div>
-      <h2 class="mr-h2">🚀 Mode rapide</h2>
+      <h2 class="mr-h2" style="display:flex;align-items:center;gap:8px;">${icon('zap', { size: 18, strokeWidth: 2.2 })} Mode rapide</h2>
       <p class="mr-sub">Validez une compétence pour plusieurs élèves en une fois.</p>
 
       <div class="mr-section-lbl">Sélectionner des élèves</div>

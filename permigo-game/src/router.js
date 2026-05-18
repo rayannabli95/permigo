@@ -11,6 +11,7 @@ const ROUTES = {
     trophees: () => import('@/pages/eleve/trophees.js'),
     galerie: () => import('@/pages/eleve/galerie.js'),
     examen: () => import('@/pages/eleve/examen.js'),
+    feedback: () => import('@/pages/eleve/feedback.js'),
     dbg: () => import('@/pages/admin/debug.js'),
     profil: () => import('@/pages/common/profil.js'),
     notifications: () => import('@/pages/common/notifications.js'),

@@ -270,7 +270,7 @@ export async function mount(root, me) {
       if (el.dataset.read === 'true') return;
       const id = el.dataset.id;
       try {
-        const { error } = await sb.from('notifications').update({ read: true }).eq('id', id);
+        const { error } = await sb.rpc('mark_notif_read', { p_notif_id: id });
         if (error) return;
         el.dataset.read = 'true';
         el.classList.remove('unread');
@@ -287,13 +287,13 @@ export async function mount(root, me) {
   markAllBtn.addEventListener('click', async () => {
     markAllBtn.disabled = true;
     markAllBtn.textContent = '…';
-    const ids = notifs.filter(n => !n.read).map(n => n.id);
-    if (!ids.length) return;
-    const { error } = await sb.from('notifications').update({ read: true }).in('id', ids);
+    const hasUnread = notifs.some(n => !n.read);
+    if (!hasUnread) return;
+    const { error } = await sb.rpc('mark_all_notifs_read');
     if (error) { toast('Erreur de mise à jour', 'error'); markAllBtn.disabled = false; markAllBtn.textContent = 'Tout lu'; return; }
     root.querySelectorAll('.nf-item.unread').forEach(el => { el.classList.remove('unread'); el.dataset.read = 'true'; });
     markAllBtn.textContent = 'Tout lu';
     toast('Toutes les notifications marquées comme lues', 'success');
-    track('notifications.mark_all_read', { count: ids.length });
+    track('notifications.mark_all_read', { count: notifs.filter(n => !n.read).length });
   });
 }

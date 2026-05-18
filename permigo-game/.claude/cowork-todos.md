@@ -5,6 +5,518 @@
 
 ---
 
+## [2026-05-18] 🚀 SUPER-VAGUE BACKEND v3 — 14 chantiers autonomes shippés
+
+> Cowork a shippé 14 chantiers backend pendant que tu bossais. **87 RPC, 16 triggers, 13 cron jobs, 29 tables** au total. Voici la liste des câblages frontend à faire, regroupés par persona et priorité.
+
+### 📚 RPC DISPONIBLES (référence complète)
+
+#### Côté ÉLÈVE (dopamine)
+| RPC | Usage |
+|---|---|
+| `get_coaching_tip()` | Tip contextuel personnalisé (8 contextes) — pour widget accueil |
+| `predict_exam_ready_date()` | Date examen prédite + vélocité + confiance + conseil |
+| `get_my_wrapped(year)` | Récap annuel style Spotify (overview, streaks, hour fav, percentile école) |
+| `get_my_achievements()` | Liste achievements débloqués (5/10/15/20/25/28/31 + streaks + quiz) |
+| `get_today_quests()` | 3 quêtes du jour avec progress/completed/claimed |
+| `claim_quest(quest_id)` | Réclame récompenses XP/gemmes |
+| `get_items_catalog(type?)` | Items boutique avec flag owned |
+| `purchase_item(item_id)` | Achat avec débit gemmes |
+| `get_my_inventory(type?)` | Mes items débloqués |
+| `use_streak_freeze(date?)` | Geler 1 jour pour 50 gemmes |
+| `get_my_freezes()` | Historique freezes |
+| `start_exam_blanc()` | Démarre exam 40 questions |
+| `submit_exam_blanc(session_id, answers)` | Soumet et calcule score |
+| `generate_referral_code()` | Génère/retourne code parrain 6 chars |
+| `apply_referral(code)` | Applique un code, +200 XP +50 gemmes pour les 2 |
+| `get_my_referral_stats()` | Code + n_referrals + xp_earned |
+| `send_message(to_id, body)` | Envoie message (auto notif) |
+| `get_thread(partner_id, limit?)` | Messages d'un thread |
+| `get_my_threads()` | Liste threads avec last_message + unread count |
+
+#### Côté ENSEIGNANT
+| RPC | Usage |
+|---|---|
+| `get_moniteur_dashboard(id?, days?)` | KPI complets + timeline 30 events + rank |
+| `suggest_moniteur_for_eleve(eleve_id)` | Match-score multi-critères |
+| `get_revision_recommendations(eleve_id, limit)` | Reco révisions pour un élève spécifique |
+
+#### Côté GÉRANT
+| RPC | Usage |
+|---|---|
+| `get_school_spotlights()` | Top progressant/streak/moniteur/comp difficile/quiz parfait récents |
+| `export_eleves_csv()` | Liste élèves formatée pour export CSV |
+| `get_school_trend(days)` | Évolution KPI école (déjà câblé Pulse) |
+
+#### Admin RAYAN (rayannabli27@gmail.com)
+| RPC | Usage |
+|---|---|
+| `get_global_stats()` | Vue platform/engagement/conversion/top_schools |
+| `get_audit_trail(table?, actor?, limit?)` | Historique actions sensibles |
+| `get_live_activity(minutes?)` | Events live 5 dernières min |
+| `get_backend_stats()` | Diagnostic technique (RPC/triggers/crons/tables) |
+| `admin_list_incidents(status?, limit?)` | Liste incidents reportés |
+| `get_fraud_signals()` | Signaux anti-fraude moniteurs (déjà câblé debug) |
+
+#### Tech transverse
+| RPC | Usage |
+|---|---|
+| `is_flag_enabled(key)` | Check feature flag pour rollout progressif |
+| `get_my_variant(experiment_key)` | A/B test variant deterministe |
+| `track_event(name, props?, session?)` | Tracking analytics (fail silent) |
+| `mark_notif_read`, `mark_all_notifs_read`, `count_unread_notifs` | Notifs (déjà câblé chantier A) |
+| `report_incident(category, title, desc, severity?, url?, ua?)` | User report un bug |
+| `add_gemmes(amount)` | Crédit gemmes (utilitaire) |
+
+### 🎯 CHANTIERS FRONTEND à faire (par priorité)
+
+#### 🥇 NIVEAU 1 — Impact dopamine + visibilité immédiate
+
+**1. Widget coaching tip sur accueil élève** (15 min)
+- Créer `src/components/coaching-tip.js` exportant `mountCoachingTip(root)`
+- Fetch `get_coaching_tip()` au mount
+- Card horizontale en top d'accueil (au-dessus du streak)
+- Adaptive selon `tone` (urgent/celebrate/warm/gentle)
+- Tap CTA → navigate `route`
+- Skip si pas de tip
+- Câbler dans `src/pages/eleve/accueil.js`
+
+**2. Daily quests carousel sur accueil élève** (45 min)
+- Créer `src/components/daily-quests.js`
+- 3 cartes scrollables avec progress bar
+- Fetch `get_today_quests()` 
+- Card complétée tap → `claim_quest()` + anim "+XP +gemmes" + remove
+- Câbler accueil élève (après header, avant streak)
+
+**3. Streak freeze button** (20 min)
+- Dans le bottom-sheet streak `accueil.js` (déjà existant)
+- Si `streakSt === 'critical'` ou `'at_risk'` ET `gemmes >= 50`
+- Bouton "🧊 Geler ma série (50💎)" → `use_streak_freeze()` 
+- Toast vert success + close sheet
+
+**4. Section "Examen prévu pour..." sur page examen** (30 min)
+- Dans `src/pages/eleve/examen.js`
+- Fetch `predict_exam_ready_date()` 
+- Card avec date prédite + advice + barre de progression vers 28/31
+- Si déjà ≥28, message "Tu es prêt !"
+
+#### 🥈 NIVEAU 2 — Nouvelles pages (gros chantiers)
+
+**5. Page Boutique** (1-2h) `src/pages/eleve/boutique.js`
+- 3 sections : Avatars, Thèmes, Fonds permis
+- Fetch `get_items_catalog()` 
+- Cards avec rarity (gris/bleu/violet/or)
+- Tap → modal "Acheter pour X💎 ?" → `purchase_item()`
+- Affichage balance gemmes en header
+- Route `#/boutique` à créer dans router.js (Cowork)
+
+**6. Page Exam Blanc** (2-3h) `src/pages/eleve/exam-blanc.js`
+- Écran intro : "40 questions · 30 min · 70% pour valider"
+- Tap "Commencer" → `start_exam_blanc()` → reçoit questions
+- UI quiz : 1 question/écran, timer global
+- Submit → `submit_exam_blanc(session_id, answers)` → écran résultat
+- Route `#/exam-blanc` à créer (Cowork)
+
+**7. Page Messagerie** (2-3h) `src/pages/common/messages.js`
+- Liste threads `get_my_threads()` + tap → ouvre conversation
+- Conversation : `get_thread(partner_id)` + input bottom
+- Send → `send_message(partner_id, body)`
+- Route `#/messages` à créer (Cowork)
+- Style WhatsApp simple
+
+**8. Page PermiGo Wrapped** (annuelle, V2)
+- Trigger : si décembre, banner sur accueil "Ton Wrapped 2026 est dispo"
+- Page slides Spotify-like avec stats annuelles
+- À faire plus tard
+
+#### 🥉 NIVEAU 3 — Côté ENSEIGNANT/GÉRANT
+
+**9. Profil moniteur enrichi** (1h) `src/pages/common/profil.js`
+- Si `me.role === 'enseignant'` : fetch `get_moniteur_dashboard()`
+- Section "Mes 30 jours" avec KPI grid + rank
+- Mini-timeline des 5 derniers events
+
+**10. Section Spotlights sur Pulse gérant** (45 min)
+- ⚠️ **À demander à Cowork** : `src/pages/gerant/pulse.js` est zone interdite Claude Code
+- Skip ou laisser à Cowork
+
+**11. Export CSV élèves bouton gérant** (15 min)
+- Dans `src/pages/gerant/eleves.js` header : bouton "📥 Exporter CSV"
+- Tap → `export_eleves_csv()` → format CSV côté JS → download
+```js
+const csv = rows.map(r => Object.values(r).map(v => `"${v ?? ''}"`).join(',')).join('\n');
+const blob = new Blob([headers + '\n' + csv], { type: 'text/csv' });
+// puis url.createObjectURL + a.click()
+```
+
+#### Niveau 4 — Tech / transverse
+
+**12. Câbler analytics tracking** (30 min)
+- `src/services/analytics.js` : remplacer le track local par `sb.rpc('track_event', { p_event_name, p_properties })`
+- Garder la signature `track(name, props)` identique
+- Fail silent (déjà géré côté DB)
+
+**13. Référral section dans profil** (45 min)
+- Dans `src/pages/common/profil.js` côté élève
+- Fetch `get_my_referral_stats()` → si pas de code, bouton "Générer mon code"
+- Affichage code + n_referrals + xp_earned
+- Input pour entrer un code parrain (`apply_referral`)
+- Bouton "Partager" → Web Share API
+
+### 📋 Ordre recommandé pour câblage en 1 session
+
+1. **NIVEAU 1 complet (4 widgets)** → 2h
+2. **Boutique** (gros impact) → 1-2h
+3. **Câblage analytics + référral profil** → 1h
+4. Reste pour V2
+
+### 📋 Routes manquantes à câbler (Cowork)
+
+- `#/boutique` → `src/pages/eleve/boutique.js`
+- `#/exam-blanc` → `src/pages/eleve/exam-blanc.js`
+- `#/messages` → `src/pages/common/messages.js`
+
+---
+
+## [2026-05-18] 🆕 BACKEND v2 — Câblages restants après autonomie Cowork
+
+> **Contexte :** Cowork a shippé 8 chantiers backend en autonomie. 4 sont autonomes (triggers XP, monthly recap, fraud alert, school snapshot — fonctionnent via cron). 4 RPC attendent un câblage frontend.
+
+### ✅ Backend dispo (à utiliser)
+
+| RPC | Usage |
+|---|---|
+| `mark_notif_read(p_notif_id)` | marque une notif lue (set `read=true` + `read_at=now()`) |
+| `mark_all_notifs_read(p_type?)` | marque toutes les notifs (ou d'un type) comme lues |
+| `count_unread_notifs(p_type?)` | nombre de notifs non-lues (pour badge bell) |
+| `get_school_trend(p_days)` | évolution KPI école sur N jours (validations/quiz/sessions_h par jour) |
+| `get_revision_recommendations(p_eleve_id?, p_limit)` | 3-5 comp à réviser (basé fails quiz + ancienneté validation + consolidation due) |
+| `get_eleves_bloque_sur_competence(p_competence_id, p_window_days)` | drill depuis comp difficile insights |
+
+### 🔌 CHANTIER A — Standardiser les notifs lues (priorité haute)
+
+3 composants utilisent des conventions différentes pour marquer notif lue. Tous doivent passer par les RPC.
+
+**Fichiers** :
+- `src/components/notif-bell.js` : remplacer le UPDATE direct par `sb.rpc('mark_notif_read', { p_notif_id: id })`
+- `src/components/notif-bell.js` : badge count = `await sb.rpc('count_unread_notifs')` (au lieu de query manuelle)
+- `src/components/emotional-banner.js` : déjà OK avec `read_at IS NULL`, mais remplacer `update({ read_at: new Date().toISOString() })` par `sb.rpc('mark_notif_read', { p_notif_id })`
+- `src/components/session-confirmation-banner.js` : si marque la notif lue après confirm → utiliser `mark_notif_read`
+- `src/pages/common/notifications.js` : bouton "Tout marquer comme lu" → `sb.rpc('mark_all_notifs_read')`
+
+### 📊 CHANTIER B — Graphe évolution 30j Pulse gérant (priorité moyenne)
+
+**Fichier :** `src/pages/gerant/pulse.js`
+
+Ajouter une section "📈 Tendance 30 jours" (Bloomberg style) :
+```js
+const { data: trend } = await sb.rpc('get_school_trend', { p_days: 30 });
+// trend = [{ snapshot_date, validations_24h, quiz_24h, sessions_h_24h, eleves_at_risk, ... }]
+```
+
+Rendu : mini-line-chart 3 séries (validations / quiz / sessions h) avec couleurs accent indigo. Axe X = 30 derniers jours. Pas de lib externe (canvas ou SVG pur).
+
+Position : juste après les 4 cards KPI principales, avant la section moniteurs.
+
+### 🎯 CHANTIER C — Section "Mes révisions" élève (priorité haute, dopamine)
+
+**Fichier nouveau :** `src/components/revision-cards.js`
+
+```js
+import { mountRevisionCards } from '@/components/revision-cards.js';
+await mountRevisionCards(root, { eleveId: me.id, limit: 3 });
+```
+
+Fetch `get_revision_recommendations(me.id, 3)` → 3 cartes compactes :
+- Couleur selon `reason` : `quiz_fails` rouge tendre, `old_validation` ambre, `consolidation_due` violet urgent
+- Tap card → ouvre quiz de cette compétence (`#/quiz/{competence_id}/post_validation`)
+- Si 0 reco → ne rien afficher
+
+**Câblage :** dans `accueil.js`, ajouter mount entre la section "Trophées" et "Footer" (sauf si déjà 0 reco).
+
+### 🔎 CHANTIER D — Drill comp difficile dans insights (priorité basse)
+
+**Fichier :** `src/pages/enseignant/insights.js`
+
+Le chantier 2 de l'audit a déjà câblé `.ins-diff-row` vers `#/eleves?bloque_sur={competence_id}`. Maintenant **côté `src/pages/enseignant/mes-eleves.js`** : lire le query param `bloque_sur` au mount, et si présent → fetch `get_eleves_bloque_sur_competence(competence_id, 30)` au lieu de la liste normale.
+
+Header de la page indique : "🔎 Élèves bloqués sur C2a (4 élèves)" avec un bouton "Voir tous les élèves →" pour revenir à la liste normale.
+
+### 📋 Ordre prioritaire
+
+1. **A** — Standardiser notifs (impact cohérence) — gros impact, mais touche plusieurs fichiers
+2. **C** — Section révisions élève (dopamine, mémoire espacée light) — peut être petit composant standalone
+3. **B** — Graphe Pulse gérant (visibilité cockpit) — peut être très simple ou très polish
+4. **D** — Drill mes-eleves (utile mais petit cas d'usage)
+
+---
+
+## [2026-05-18] 🆕 AUDIT UX ÉLÈVE + GÉRANT — Cleanup boutons
+
+> **Contexte :** audit complet des 137 boutons cliquables sur tous les personas. Backend pagination feedback fixée côté Cowork. Reste 4 chantiers Claude Code.
+
+### ✅ Backend Cowork
+- ✅ RPC `get_eleve_feedback_feed` accepte maintenant `p_offset` (pagination fixée)
+
+### 🔌 CHANTIER A — Câbler boutons morts (priorité haute)
+
+**ÉLÈVE :**
+
+**`src/pages/eleve/accueil.js`** :
+- [ ] `.trophy-card.trophy-unlocked` (×3 cards sur accueil) — actuellement hover/cursor:pointer mais aucun handler. Ajouter listener → `location.hash = '#/trophees'` (ou `#/galerie` si tu préfères)
+- [ ] `.trophy-card.trophy-locked` (next up) — même problème, câbler vers `#/parcours` (pour aller débloquer)
+
+**`src/pages/eleve/parcours.js`** :
+- [ ] Bloc "Examen" final (renderFinal, ~ligne 1532) — non-cliquable. Ajouter handler → `location.hash = '#/examen'`. Pulse animation + drapeau si 28+/31 acquises
+- [ ] Empty state CTA `#prc-comp-first` ligne ~1361 — ancre morte. Remplacer par `location.hash = '#/parcours'` direct
+
+**`src/pages/eleve/galerie.js`** :
+- [ ] `.gal-card` (trophées) — cursor:pointer mais pas de handler. Soit ouvrir le bottom-sheet détail (réutiliser logique de `trophees.js`), soit retirer cursor:pointer
+
+**`src/pages/eleve/feedback.js`** :
+- [ ] `loadMore()` doit envoyer `p_offset: currentItems.length` à la RPC (backend supporte maintenant `p_offset`)
+
+**GÉRANT :**
+
+**`src/pages/gerant/pulse.js`** :
+- [ ] `.team-row` (cartes enseignants équipe) — hover bleu mais pas câblé. Ajouter handler → `location.hash = '#/equipe'` (ou `#/livret-enseignant/<id>` si page existe)
+- [ ] `.activity-row` — opportunity miss. Câbler → drill vers `#/livret/<eleve_id>` si la row concerne un élève
+
+**`src/pages/gerant/equipe.js`** :
+- [ ] `.eq-card` (carte enseignant) — pas de handler malgré le hover. Câbler vers une vue détail enseignant. Si pas de page fiche enseignant prête, ouvrir un bottom-sheet avec stats (validations 30j, n élèves, ranking position)
+
+### 🚮 CHANTIER B — Émojis interdits côté gérant (ADN Bloomberg)
+
+L'ADN gérant = Tesla + Airbnb + Bloomberg. Zéro émoji. Remplacer par icônes Lucide :
+
+**`src/pages/gerant/eleves.js`** :
+- [ ] Ligne ~325 : `🔍` dans search icon → `icon('search')` SVG
+- [ ] Ligne ~408 : `🎓` dans empty state → `icon('graduation-cap')` ou retirer
+- [ ] Ligne ~484 : bouton `#elqv-close` "Fermer" trop primaire (#6366f1) — utiliser style cancel (#f8f9fc + border #e2e6f2)
+
+**`src/pages/gerant/equipe.js`** :
+- [ ] Ligne ~288 : `🔍` search icon → `icon('search')`
+- [ ] Ligne ~434 : `👥` empty state → `icon('users')` ou retirer
+- [ ] Position bouton "+ Ajouter enseignant" ligne ~305 — déplacer dans le header (`.eq-hd-top`) pour cockpit pattern
+
+**`src/pages/gerant/pulse.js`** :
+- [ ] Ligne ~506 : fallback émoji `⚠️` dans le bandeau alerte → garantir SVG inline (pas de fallback string)
+
+### 🎨 CHANTIER C — Différenciation icônes nav gérant
+
+**`src/components/nav-bottom.js`** :
+- [ ] Tabs "Équipe" et "Élèves" utilisent toutes les deux `ICO.users` — confusion. Changer :
+  - Équipe → `icon('users')`
+  - Élèves → `icon('user-check')` ou `icon('graduation-cap')`
+
+### 🎨 CHANTIER D — Refonte visuelle (priorité moyenne)
+
+**ÉLÈVE :**
+- [ ] `parcours.js` : `.fiche-close (×)` → circle 36px style `.cs-close` du celebrate-screen (rgba blanc + blur)
+- [ ] `feedback.js` : `.fb-back` ← flèche unicode → `icon('arrow-left')` propre
+- [ ] `emotional-banner.js` : `.eb-close` rendre adaptatif au tone (border-color matching)
+- [ ] `feedback.js` + `feedback-feed.js` : ajouter chevron qui rotate 180° au expand (affordance)
+- [ ] `accueil.js` fallback erreur "Recharger" → illustration sad + ton plus Duolingo
+- [ ] `chest.js` `.chest-cta` → text-shadow pour pop sur fond clair
+- [ ] `session-confirmation-banner.js` : "Oui, c'est juste" → "✓ Confirmer" (plus net)
+
+**GÉRANT :**
+- [ ] `pulse.js` sparkline `.spark-bar` aujourd'hui → indigo saturé au lieu de jaune/orange (cohérence Bloomberg)
+- [ ] `pulse.js` lien "Voir" dans bandeau alerte → vrai `<button>` (sémantique correcte)
+
+### 🧹 CHANTIER E — Redondances à supprimer (priorité basse)
+
+- [ ] `trophees.js` `#trp-close-btn` "Fermer" — redondant avec backdrop + swipe. Garder uniquement "Partager"
+- [ ] `parcours.js` `#prc-back` ← legacy si nav-bottom couvre déjà. Soit retirer, soit sticky-scroll only
+- [ ] `feedback.js` vs `feedback-feed.js` → mutualiser dans un composant avec `mode: 'page' | 'widget'`
+- [ ] `galerie.js` vs `trophees.js` → fusionner en 1 page galerie avec onglets, ou supprimer une des deux pages
+
+### 📋 Ordre de priorité Claude Code
+
+1. **Chantier A** (boutons morts) — gros impact UX immédiat (8 fixes)
+2. **Chantier B** (émojis gérant) — cohérence ADN, vite fait (6 fixes)
+3. **Chantier C** (nav icônes) — 1 fix vital
+4. **Chantier D** (refonte visuelle) — polish (~7 fixes)
+5. **Chantier E** (redondances) — cleanup architectural
+
+---
+
+## [2026-05-18] 🆕 AUDIT UX ENSEIGNANT — Cleanup boutons + uniformisation icônes
+
+> **Contexte :** audit complet UX/UI des 7 pages enseignant + composants moniteur. Le FAB log-session a été refait côté Cowork (style Apple sobre, circle 56px noir, plus de pulse infinie). Reste 3 chantiers Claude Code.
+
+### 🚮 CHANTIER 1 — Supprimer les FAB locaux redondants
+
+3 FAB superposés en bas droite sur `aujourdhui.js` et `mes-eleves.js`. Le `log-session-fab` du router suffit (et son modal couvre désormais log + validation).
+
+**Fichier `src/pages/enseignant/aujourdhui.js`** :
+- [ ] Retirer le `mountFab(...)` ligne ~463 (FAB local "Valider une compétence")
+- [ ] Retirer le CTA sticky bas `#aj-btn-valider` lignes ~709 (bouton plein gradient violet)
+- [ ] Le log-session-fab du router fait le job
+
+**Fichier `src/pages/enseignant/mes-eleves.js`** :
+- [ ] Retirer le `mountFab(...)` ligne ~352
+- [ ] Retirer le CTA sticky `#me-btn-valider` ligne ~488
+- [ ] Garder le log-session-fab du router
+
+### 🔌 CHANTIER 2 — Câbler les boutons morts
+
+**`src/pages/enseignant/insights.js`** :
+- [ ] `.ins-reco-card` (recommandations) — actuellement non-cliquables. Ajouter handler `click` → navigate `#/livret/{eleve_id}` si la reco concerne un élève spécifique (data.topStagnent[0] ou data.topProgressent[0]), sinon `#/validation` pour les recos générales
+- [ ] `.ins-diff-row` (compétences difficiles) — non-cliquables. Ajouter handler → ouvre un bottom sheet ou navigate vers `#/eleves?bloque_sur={competence_id}` (Cowork ajoutera ce filtre si demandé)
+
+**`src/pages/enseignant/mes-eleves.js`** :
+- [ ] Long press → action "📝 Ajouter une note rapide" affiche `toast('Bientôt 📝')` — soit câbler une vraie fonctionnalité (modal note libre + RPC Cowork à demander), soit RETIRER l'option du quick menu (préférer retirer pour ne pas promettre du vaporware)
+
+### 🎨 CHANTIER 3 — Uniformiser émojis → icônes Lucide
+
+L'ADN PermiGo est Apple + Linear (pas Duolingo côté enseignant/gérant). Les émojis font enfantin et incohérents avec la charte. À remplacer par `icon('xxx')` partout :
+
+**`src/pages/enseignant/livret-remc.js`** :
+- [ ] Statut buttons : `✅` → `icon('check-circle')`, `🔄` → `icon('refresh-cw')`, `⚠️` → `icon('alert-triangle')`
+- [ ] "📜 Fil des moniteurs" → `icon('list')` ou `icon('clock')`
+
+**`src/pages/enseignant/mes-eleves.js`** :
+- [ ] Bannière `⚠️ N élève à relancer` → `icon('alert-circle')` + adoucir le fond (moins alerte agressive)
+- [ ] Quick menu items : `✓` `→` `📝` → `icon('check')`, `icon('arrow-right')`, `icon('edit-3')`
+
+**`src/pages/enseignant/validation.js`** :
+- [ ] Bouton "🚀 Mode rapide" → `icon('zap')` + label "Mode rapide" (sans rocket)
+
+**`src/pages/enseignant/insights.js`** :
+- [ ] Tabs `📈 Progressent` / `⚠️ Stagnent` → `icon('trending-up')` + `icon('alert-triangle')` (déjà partiellement Lucide, vérifier homogénéité)
+- [ ] Reco cards émojis `🎯 ⚠️ 🔍 ✅` → icônes Lucide cohérentes
+
+### 🧹 CHANTIER 4 — Nettoyage logique tabs mes-eleves.js
+
+- [ ] Fusionner les onglets "Inactifs" et "À relancer" : sémantiquement c'est presque pareil (≥14j sans validation). Garder UN seul onglet "À relancer" (≥14j). L'onglet "Inactifs" actuel apporte de la confusion.
+- [ ] Swipe LEFT sur row élève = navigate livret/{id} (identique au click). REDONDANT. Soit changer pour un autre raccourci (genre marquer "vu"), soit retirer.
+
+### 📋 Coordination
+
+**Côté Cowork (déjà fait) :**
+- ✅ FAB log-session refait (`src/components/log-session-fab.js`) — style Apple circle 56px, ombre douce, pas de pulse infinie
+
+**Côté Claude Code (à faire — ordre de priorité) :**
+1. Chantier 1 (supprimer FAB redondants) — priorité top, gros impact visuel immédiat
+2. Chantier 3 (uniformiser icônes) — priorité haute, cohérence charte
+3. Chantier 2 (câbler boutons morts) — priorité moyenne
+4. Chantier 4 (cleanup tabs) — priorité basse, petite ambiguïté
+
+---
+
+## [2026-05-18] 🆕 LOG SESSION v2 — Fusion atomique session + comp + commentaire
+
+> **Concept :** la modal "Log session" devient l'**outil unique** moniteur. En 1 submit : log durée + valider compétences (optionnel) + commentaire (visible élève + autres moniteurs). Plus de double saisie.
+
+### ✅ Backend déployé (Cowork)
+
+**RPC `log_session` étendue :**
+```js
+const { data, error } = await sb.rpc('log_session', {
+  p_eleve_id: eleveId,
+  p_duration_minutes: 120,
+  p_session_date: '2026-05-18',
+  p_notes: null,                          // fallback si pas de commentaire
+  p_competence_ids: ['C1a', 'C1b'],       // 🆕 array optionnel
+  p_comment: 'Belle séance ! Tu maîtrises bien le freinage.'  // 🆕 visible élève + moniteurs
+});
+
+// Retour :
+{
+  ok: true,
+  session: { id, duration_minutes, session_date, notes, ... },
+  validations: [
+    { competence_id: 'C1a', created: true },
+    { competence_id: 'C1b', created: false, reason: 'already_acquired' }
+  ]
+}
+```
+
+**Nouvelles RPC :**
+```js
+// Comp NON-validées d'un élève (pour les chips de la modal)
+const { data } = await sb.rpc('get_eleve_pending_competences', { p_eleve_id: eleveId });
+// → [{ competence_id, code: 'C1a', monde: 1, ordre: 1, nom: 'Organes, commandes, vérifications' }]
+
+// Timeline feedback (visible élève + moniteurs même école)
+const { data } = await sb.rpc('get_eleve_feedback_feed', {
+  p_eleve_id: eleveId,  // null = mon propre feed (élève voit le sien)
+  p_limit: 30
+});
+// → [{ kind: 'session'|'validation', ts, moniteur_prenom, moniteur_nom, competence_id, duration_minutes, comment, confirmation_status }]
+```
+
+### 🎨 Frontend à faire
+
+#### A. Modal log-session étendue — `src/components/log-session-modal.js`
+
+**Ajouter 2 nouvelles sections** après les 3 existantes :
+
+**D. Compétences travaillées** (optionnel)
+- Fetch `get_eleve_pending_competences(eleveId)` quand l'élève change
+- Affiche chips groupées par monde (Monde 1, 2, 3, 4)
+- Multi-select, tap pour toggle
+- Header : "Tu as validé une compétence aujourd'hui ?" + compteur "X sélectionnées"
+- Skippable (zéro friction si juste session pure)
+
+**E. Commentaire** (optionnel mais encouragé)
+- Textarea max 500 chars
+- Placeholder selon contexte :
+  - Si 0 comp sélectionnée : "Comment s'est passée la séance ? (visible élève + autres moniteurs)"
+  - Si N comp sélectionnées : "Pourquoi tu valides ces compétences ? (visible élève + autres moniteurs)"
+- Au-dessus de la textarea : badge "👁 Visible élève + autres moniteurs"
+- Compteur de chars discret en bas-droite
+
+**Submit** : appelle `log_session` avec p_competence_ids + p_comment. Toast vert :
+- Si validations created : "+10 XP · 2 compétences validées 🎉"
+- Sinon : "+10 XP · Session loggée"
+
+#### B. Composant feedback feed élève — `src/components/feedback-feed.js`
+
+Section "Retours de tes moniteurs" sur l'accueil élève (entre streak et trophées) :
+```js
+import { mountFeedbackFeed } from '@/components/feedback-feed.js';
+await mountFeedbackFeed(root, { eleveId: me.id, limit: 5 });
+```
+
+Affichage :
+- Carte par event (session validée OU validation)
+- Avatar moniteur + prénom + temps relatif (il y a 2h, hier, etc.)
+- Si session : icône `clock` + "1h30 de conduite avec toi"
+- Si validation : icône `check-circle` vert + nom de la compétence
+- Commentaire (si présent) en italique
+- Tap → expand pour voir tout le détail
+- Bouton "Voir tout le fil →" → ouvre `#/feedback` (page complète)
+
+#### C. Timeline feedback livret REMC — `src/pages/enseignant/livret-remc.js`
+
+Dans la vue détail élève côté enseignant, ajouter une section :
+- "📜 Fil des moniteurs (transmission)"
+- Liste les events des 30 derniers jours
+- Permet à Lassaad de voir ce que Rayan a fait avec Sherine
+- Cherche le commentaire en premier plan, le détail comp/durée en sous-info
+
+#### D. (Optionnel) Page complète feedback élève — `src/pages/eleve/feedback.js`
+
+Route `#/feedback` qui affiche tout le fil chronologique (pagination 30 par 30).
+
+### 📋 Coordination
+
+**Pré-requis : RPC dispo immédiatement** (backend déployé).
+
+Order recommandé :
+1. A (modal étendue) — gros impact UX
+2. B (feedback feed accueil) — dopamine pour l'élève
+3. C (timeline livret) — transmission moniteurs
+4. D (page complète) — nice-to-have
+
+### ✅ Frontend DONE (Claude Code — 2026-05-18)
+
+A, B, C, D tous implémentés. ✅ Route `#/feedback` câblée dans router.js par Cowork.
+
+---
+
 ## [2026-05-18] 🆕 CHANTIER PERMIGO LOG — Sessions moniteur (zéro planning, full gamif)
 
 > **Concept :** PermiGo n'est PAS un outil de planning. Le moniteur log ses sessions APRÈS coup en 3 taps. L'élève confirme (anti-triche). Ranking moniteur 4-dim. ADN = Uber Driver + Apple.

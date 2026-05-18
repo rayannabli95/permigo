@@ -181,9 +181,17 @@ export async function mount(root) {
 
 async function refresh(root) {
   try {
-    const { data, error } = await sb.rpc('admin_get_dashboard');
-    if (error) throw error;
-    render(root, data);
+    const [dashRes, fraudRes] = await Promise.allSettled([
+      sb.rpc('admin_get_dashboard'),
+      sb.rpc('get_fraud_signals'),
+    ]);
+    if (dashRes.status !== 'fulfilled' || dashRes.value.error) {
+      throw dashRes.status === 'fulfilled' ? dashRes.value.error : new Error('dashboard_failed');
+    }
+    const fraud = fraudRes.status === 'fulfilled' && !fraudRes.value.error
+      ? (fraudRes.value.data || [])
+      : [];
+    render(root, dashRes.value.data, fraud);
   } catch (e) {
     console.error('[debug] fetch failed', e);
     root.innerHTML = `${STYLE}<div class="dbg"><div class="dbg-err">
@@ -192,7 +200,7 @@ async function refresh(root) {
   }
 }
 
-function render(root, data) {
+function render(root, data, fraud = []) {
   if (!data) {
     root.innerHTML = `${STYLE}<div class="dbg">
       <div class="dbg-hd">
@@ -253,6 +261,33 @@ function render(root, data) {
           </div>
         </div>
       `).join('')}
+    </div>
+
+    <!-- ─── FRAUD SIGNALS ─── -->
+    <div class="dbg-section">
+      <div class="dbg-section-hd">Fraud signals — 30j (${fraud.filter(f => f.flag_count > 0).length} flagged)</div>
+      ${fraud.length === 0 ? '<div style="color:#64748b;font-size:12px">no signals</div>' : fraud.slice(0, 12).map(f => {
+        const cls = f.flag_count >= 2 ? 'error' : f.flag_count === 1 ? 'warn' : 'ok';
+        const hh = Math.floor(Number(f.total_minutes || 0) / 60);
+        const mm = Number(f.total_minutes || 0) % 60;
+        return `
+        <div class="dbg-row">
+          <span class="l">${esc(f.prenom || '?')} ${esc(f.nom || '')}</span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+            <code style="color:#94a3b8;font-size:10px">${hh}h${String(mm).padStart(2,'0')} · ${f.total_sessions||0}s · ${f.n_validations||0}v · ${f.n_eleves_diff||0}e</code>
+            <span class="dbg-tag ${cls}">${f.flag_count > 0 ? f.flag_count + ' flag' + (f.flag_count > 1 ? 's' : '') : 'clean'}</span>
+          </div>
+        </div>
+        ${f.flag_count > 0 ? `<div style="padding:4px 0 8px;font:500 10px/1.4 'IBM Plex Mono',monospace;color:#94a3b8">
+          ${[f.flag_refused_sessions && '• refusals élève',
+             f.flag_high_auto_rate && '• taux auto-valid >50%',
+             f.flag_hours_zero_val && '• 150h+ sans validation',
+             f.flag_single_eleve_burst && '• un seul élève, 8+ sessions',
+             f.flag_high_daily_avg && '• moyenne >8h/jour'
+            ].filter(Boolean).join(' ')}
+        </div>` : ''}
+        `;
+      }).join('')}
     </div>
 
     <!-- ─── QUICK ACTIONS ─── -->

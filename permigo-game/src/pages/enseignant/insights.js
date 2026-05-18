@@ -586,9 +586,10 @@ async function loadData(me) {
   const recos = [];
   if (streakPro !== null && streakPro < 3) {
     recos.push({
-      icon: '🎯',
+      icon: icon('target', { size: 18, strokeWidth: 2, color: '#6366f1' }),
       ttl: 'Lance ta semaine',
       txt: 'Valide 1 compétence avec un élève actif pour relancer ton streak pro.',
+      route: '#/validation',
     });
   }
   if (topStagnent.length > 0) {
@@ -596,25 +597,28 @@ async function loadData(me) {
     const nm = esc(`${e.prenom || ''} ${e.nom || ''}`.trim());
     const since = e.daysAgo ? `depuis ${e.daysAgo}j` : 'depuis un moment';
     recos.push({
-      icon: '⚠️',
+      icon: icon('alert-triangle', { size: 18, strokeWidth: 2, color: '#d97706' }),
       ttl: `Relance ${nm}`,
       txt: `${nm} n'a plus validé ${since}. Un point en leçon peut débloquer la progression.`,
+      route: `#/livret/${e.id}`,
     });
   }
   if (topDiff.length > 0) {
     const d = topDiff[0];
     const nm = esc(labelComp(d.compId));
     recos.push({
-      icon: '🔍',
+      icon: icon('search', { size: 18, strokeWidth: 2, color: '#0891b2' }),
       ttl: `Débrief sur ${d.compId}`,
       txt: `${d.count} élève${d.count > 1 ? 's' : ''} bloqué${d.count > 1 ? 's' : ''} sur "${nm}". Prévois un point pédagogique dédié.`,
+      route: `#/eleves?bloque_sur=${encodeURIComponent(d.compId)}`,
     });
   }
   if (recos.length === 0) {
     recos.push({
-      icon: '✅',
+      icon: icon('check-circle', { size: 18, strokeWidth: 2, color: '#059669' }),
       ttl: 'Tout roule',
       txt: 'Tes élèves progressent bien. Continue sur cette lancée !',
+      route: null,
     });
   }
 
@@ -761,11 +765,13 @@ function renderTopElevesSection({ topProgressent, topStagnent }) {
     <div class="ins-section" id="ins-top-section">
       <div class="ins-section-title">Élèves</div>
       <div class="ins-tabs" role="tablist">
-        <button class="ins-tab active" data-tab="progressent" role="tab">
-          📈 Progressent (${topProgressent.length})
+        <button class="ins-tab active" data-tab="progressent" role="tab"
+                style="display:flex;align-items:center;gap:5px;">
+          ${icon('trending-up', { size: 14, strokeWidth: 2.2 })} Progressent (${topProgressent.length})
         </button>
-        <button class="ins-tab" data-tab="stagnent" role="tab">
-          ⚠️ Stagnent (${topStagnent.length})
+        <button class="ins-tab" data-tab="stagnent" role="tab"
+                style="display:flex;align-items:center;gap:5px;">
+          ${icon('alert-triangle', { size: 14, strokeWidth: 2.2 })} Stagnent (${topStagnent.length})
         </button>
       </div>
       <div id="ins-eleves-list">
@@ -824,7 +830,7 @@ function renderDiffSection({ topDiff, maxDiff }) {
     const r = Math.round(239 - (count / maxDiff) * 120);
     const color = `rgb(${r}, 68, 68)`;
     return `
-      <div class="ins-diff-row">
+      <div class="ins-diff-row" data-comp-id="${esc(compId)}" role="button" tabindex="0" style="cursor:pointer;">
         <span class="ins-diff-code">${esc(compId)}</span>
         <div class="ins-diff-info">
           <div class="ins-diff-name">${esc(labelComp(compId))}</div>
@@ -848,7 +854,8 @@ function renderDiffSection({ topDiff, maxDiff }) {
 // ── Recommandations ───────────────────────────────────────────
 function renderRecoSection({ recos }) {
   const cards = recos.map(r => `
-    <div class="ins-reco-card">
+    <div class="ins-reco-card${r.route ? ' ins-reco-card--link' : ''}"
+         ${r.route ? `data-route="${esc(r.route)}" role="button" tabindex="0" style="cursor:pointer;"` : ''}>
       <span class="ins-reco-icon">${r.icon}</span>
       <div class="ins-reco-body">
         <div class="ins-reco-ttl">${esc(r.ttl)}</div>
@@ -883,6 +890,30 @@ function wireAll(root, me, data) {
 
   // Élèves rows initials
   wireEleveRows(root);
+
+  // Reco cards → navigate to route
+  root.querySelectorAll('.ins-reco-card--link[data-route]').forEach(card => {
+    const handler = () => {
+      track('insights.reco.click', { route: card.dataset.route });
+      navigate(card.dataset.route);
+    };
+    card.addEventListener('click', handler);
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+    });
+  });
+
+  // Diff rows → filtre élèves bloqués sur cette comp
+  root.querySelectorAll('.ins-diff-row[data-comp-id]').forEach(row => {
+    const handler = () => {
+      track('insights.diff.click', { comp_id: row.dataset.compId });
+      navigate(`#/eleves?bloque_sur=${encodeURIComponent(row.dataset.compId)}`);
+    };
+    row.addEventListener('click', handler);
+    row.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+    });
+  });
 }
 
 function wireEleveRows(container) {

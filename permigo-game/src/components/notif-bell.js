@@ -133,7 +133,7 @@ function renderList(container) {
       const id = it.dataset.id;
       const n = _notifs.find(x => x.id === id);
       if (!n || n.read) return;
-      const { error } = await sb.from('notifications').update({ read: true }).eq('id', id);
+      const { error } = await sb.rpc('mark_notif_read', { p_notif_id: id });
       if (error) { console.warn('[notif read]', error); return; }
       n.read = true;
       renderList(container);
@@ -171,9 +171,9 @@ function wireBell(container, me) {
 
   readall.addEventListener('click', async () => {
     readall.disabled = true; readall.textContent = '…';
-    const ids = _notifs.filter(n => !n.read).map(n => n.id);
-    if (!ids.length) return;
-    const { error } = await sb.from('notifications').update({ read: true }).in('id', ids);
+    const hasUnread = _notifs.some(n => !n.read);
+    if (!hasUnread) return;
+    const { error } = await sb.rpc('mark_all_notifs_read');
     if (error) { toast('Erreur marquage', 'error'); readall.disabled = false; readall.textContent = 'Tout marquer comme lu'; return; }
     _notifs.forEach(n => { n.read = true; });
     renderList(container);

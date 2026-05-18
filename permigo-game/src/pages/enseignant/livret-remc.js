@@ -10,6 +10,7 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { REMC, REMC_TOTAL } from '@/data/remc.js';
+import { icon } from '@/utils/icons.js';
 
 // ─── Couleurs par monde ───────────────────────────────────────────
 const MONDE_COLORS = {
@@ -490,10 +491,129 @@ function render() {
       <div class="lr-body">
         ${REMC.map(renderMonde).join('')}
       </div>
+
+      <!-- Fil des moniteurs — injecté dynamiquement -->
+      <div id="lr-feed-section" style="padding:0 16px 100px"></div>
+
     </div>
   `;
 
   wireMain();
+  _loadFeedSection();
+}
+
+async function _loadFeedSection() {
+  const host = document.getElementById('lr-feed-section');
+  if (!host || !_eleveId) return;
+
+  host.innerHTML = `<div style="padding:8px 0;color:#94a3b8;font:500 12px/1 'Inter',sans-serif">Chargement du fil…</div>`;
+
+  let events = [];
+  try {
+    const { data } = await sb.rpc('get_eleve_feedback_feed', {
+      p_eleve_id: _eleveId,
+      p_limit: 30,
+    });
+    events = data || [];
+  } catch (e) {
+    host.innerHTML = '';
+    return;
+  }
+
+  if (events.length === 0) {
+    host.innerHTML = '';
+    return;
+  }
+
+  function _relTime(ts) {
+    if (!ts) return '';
+    const d = Math.floor((Date.now() - new Date(ts).getTime()) / 86400000);
+    if (d === 0) return "aujourd'hui";
+    if (d === 1) return 'hier';
+    if (d < 7) return `il y a ${d}j`;
+    return new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  }
+  function _fmtMin(m) {
+    if (!m) return '';
+    const h = Math.floor(m / 60), r = m % 60;
+    return h === 0 ? `${r}min` : r === 0 ? `${h}h` : `${h}h${r}`;
+  }
+
+  host.innerHTML = `
+    <style>
+      .lr-feed { margin-bottom: 0; }
+      .lr-feed-hd {
+        font: 600 11px/1 'Inter', sans-serif;
+        text-transform: uppercase; letter-spacing: .08em;
+        color: #94a3b8; margin: 0 0 12px;
+        display: flex; align-items: center; gap: 8px;
+      }
+      .lr-feed-hd::after { content:''; flex:1; height:1px; background:#e2e6f2; }
+      .lr-feed-list { display: flex; flex-direction: column; gap: 1px; }
+      .lr-feed-item {
+        display: flex; align-items: flex-start; gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f2f8;
+      }
+      .lr-feed-item:last-child { border-bottom: none; }
+      .lr-feed-dot {
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 2px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px;
+      }
+      .lr-feed-dot.k-session { background: rgba(99,102,241,.1); }
+      .lr-feed-dot.k-validation { background: rgba(16,185,129,.1); }
+      .lr-feed-content { flex: 1; min-width: 0; }
+      .lr-feed-author {
+        font: 600 12px/1.2 'Inter', sans-serif;
+        color: #0a0d1a;
+        margin-bottom: 2px;
+      }
+      .lr-feed-desc {
+        font: 500 12px/1.4 'Inter', sans-serif;
+        color: #64748b;
+      }
+      .lr-feed-comment {
+        font: italic 11px/1.4 'Inter', sans-serif;
+        color: #94a3b8;
+        margin-top: 4px;
+        padding-left: 6px;
+        border-left: 2px solid #e2e6f2;
+      }
+      .lr-feed-ts {
+        font: 500 10px/1 'Inter', sans-serif;
+        color: #c4ccd8;
+        flex-shrink: 0;
+        margin-top: 4px;
+      }
+    </style>
+    <div class="lr-feed">
+      <div class="lr-feed-hd" style="display:flex;align-items:center;gap:6px;">${icon('clock', { size: 14, strokeWidth: 2.2, color: '#6366f1' })} Fil des moniteurs</div>
+      <div class="lr-feed-list">
+        ${events.map(evt => {
+          const isSession = evt.kind === 'session';
+          const dot = isSession ? '🚗' : '✓';
+          const dotCls = isSession ? 'k-session' : 'k-validation';
+          const desc = isSession
+            ? `${_fmtMin(evt.duration_minutes)} de conduite`
+            : `${esc(evt.competence_id || '—')} validée`;
+          return `
+          <div class="lr-feed-item">
+            <div class="lr-feed-dot ${dotCls}">${dot}</div>
+            <div class="lr-feed-content">
+              <div class="lr-feed-author">${esc(evt.moniteur_prenom || '')} ${esc(evt.moniteur_nom || '')}</div>
+              <div class="lr-feed-desc">${desc}</div>
+              ${evt.comment ? `<div class="lr-feed-comment">"${esc(evt.comment)}"</div>` : ''}
+            </div>
+            <div class="lr-feed-ts">${_relTime(evt.ts)}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
 }
 
 function renderMonde(cat) {
@@ -569,9 +689,9 @@ function openSheet(compId, compNom) {
         <div>
           <label class="lr-note-label">Statut</label>
           <div class="lr-statut-grid">
-            ${renderStatutBtn('acquis',         '✅', 'Acquis')}
-            ${renderStatutBtn('en_cours',       '🔄', 'En cours')}
-            ${renderStatutBtn('a_retravailler', '⚠️', 'À retravailler')}
+            ${renderStatutBtn('acquis',         icon('check-circle', { size: 16, strokeWidth: 2.2, color: '#059669' }), 'Acquis')}
+            ${renderStatutBtn('en_cours',       icon('refresh-cw',   { size: 16, strokeWidth: 2.2, color: '#d97706' }), 'En cours')}
+            ${renderStatutBtn('a_retravailler', icon('alert-triangle',{ size: 16, strokeWidth: 2.2, color: '#dc2626' }), 'À retravailler')}
           </div>
         </div>
         <div>

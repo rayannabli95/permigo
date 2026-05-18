@@ -11,7 +11,7 @@
  */
 
 import { esc } from '@/utils/escape.js';
-import { markChestOpened } from '@/utils/game-state.js';
+import { markChestOpened, addGemmes } from '@/utils/game-state.js';
 import { burstConfetti } from '@/components/confetti.js';
 import { lootToast } from '@/components/loot-toast.js';
 
@@ -87,6 +87,10 @@ export function openChestModal({ worldNum, worldName }) {
   closeBtn.style.pointerEvents = 'none';
 
   // ─── SÉQUENCE D'OUVERTURE CINÉMATIQUE ───
+
+  // CRÉDIT DES RÉCOMPENSES — une seule fois, avant l'animation
+  // (gemmes en localStorage, XP DB sera géré séparément quand l'API XP sera en place)
+  addGemmes(tier.gemmes);
 
   // Phase 1 : 3 vibrations (0-900ms)
   stage.classList.add('cm-shaking');
