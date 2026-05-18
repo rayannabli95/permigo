@@ -218,6 +218,138 @@ const STYLE = `<style>
 /* État "bloqué par le navigateur" */
 .prf-notif-denied { font: 500 12px/1.3 'Inter', sans-serif; color: #f97316; margin-top: 2px; }
 @media(prefers-reduced-motion:reduce){.prf-toggle,.prf-toggle::after{transition:none}}
+
+/* ── Parrainage (élève) ── */
+.prf-ref {
+  background: #fff;
+  border: 1px solid #e2e6f2;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+}
+.prf-ref-ttl {
+  font: 600 11px/1 'Inter', sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 0 0 14px;
+}
+.prf-ref-code-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8f9fc;
+  border: 1.5px solid #e2e6f2;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.prf-ref-code {
+  flex: 1;
+  font: 700 18px/1 'IBM Plex Mono', monospace;
+  color: #6366f1;
+  letter-spacing: .1em;
+}
+.prf-ref-copy-btn {
+  background: none;
+  border: none;
+  color: #6366f1;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background .12s;
+}
+.prf-ref-copy-btn:active { background: rgba(99,102,241,.1); }
+.prf-ref-stats {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.prf-ref-stat {
+  flex: 1;
+  background: #f8f9fc;
+  border: 1px solid #e2e6f2;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+.prf-ref-stat-n {
+  font: 700 22px/1 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
+  display: block;
+  margin-bottom: 4px;
+}
+.prf-ref-stat-lbl {
+  font: 500 10px/1.3 'Inter', sans-serif;
+  color: #94a3b8;
+}
+.prf-ref-share-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: transform 120ms cubic-bezier(.23,1,.32,1), opacity 120ms;
+  min-height: 46px;
+}
+.prf-ref-share-btn:active { transform: scale(.97); }
+.prf-ref-gen-btn {
+  width: 100%;
+  padding: 13px;
+  background: rgba(99,102,241,.08);
+  border: 1.5px solid rgba(99,102,241,.2);
+  border-radius: 12px;
+  color: #6366f1;
+  font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: background .15s;
+  min-height: 46px;
+}
+.prf-ref-gen-btn:active { background: rgba(99,102,241,.15); }
+.prf-ref-apply {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+}
+.prf-ref-apply-input {
+  flex: 1;
+  padding: 12px 14px;
+  background: #f8f9fc;
+  border: 1.5px solid #e2e6f2;
+  border-radius: 12px;
+  font: 600 14px/1 'IBM Plex Mono', monospace;
+  color: #0a0d1a;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color .14s;
+  min-height: 44px;
+}
+.prf-ref-apply-input:focus { border-color: #6366f1; }
+.prf-ref-apply-btn {
+  padding: 0 16px;
+  background: #0a0d1a;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font: 700 13px/1 'Inter', sans-serif;
+  cursor: pointer;
+  min-height: 44px;
+  white-space: nowrap;
+  transition: background .12s;
+}
+.prf-ref-apply-btn:active { background: #1e2235; }
+.prf-ref-apply-btn:disabled { opacity: .5; cursor: not-allowed; }
 </style>`;
 
 const ROLE_LABELS = { eleve: 'Élève', enseignant: 'Enseignant', gerant: 'Gérant' };
@@ -254,6 +386,13 @@ export async function mount(root) {
       validated: (valData || []).length,
       total: REMC_TOTAL,
     };
+  }
+
+  // Pour élève : parrainage
+  let referralStats = null;
+  if (me.role === 'eleve') {
+    const { data: rStats } = await sb.rpc('get_my_referral_stats');
+    referralStats = (rStats && !rStats.error) ? rStats : null;
   }
 
   // Pour enseignant : stats "Mon Année"
@@ -329,6 +468,8 @@ export async function mount(root) {
   }
 
   ${permisData ? `<div id="prf-permis-card" style="margin-top:16px"></div>` : ''}
+
+  ${referralStats !== null ? `<div id="prf-ref-section">${_renderReferral(referralStats)}</div>` : ''}
 
   ${anneeStats ? `<div id="prf-ranking-host"></div>` : ''}
 
@@ -423,6 +564,9 @@ export async function mount(root) {
     if (rankingHost) mountMoniteurRanking(rankingHost, { myId: me.id }).catch(() => {});
   }
 
+  // Wire referral (élève)
+  if (me.role === 'eleve') _wireReferral(root, me);
+
   root.querySelector('#btn-logout').addEventListener('click', async () => {
     track('auth.logout', { user_role: me.role });
     try {
@@ -439,6 +583,138 @@ export async function mount(root) {
   });
 
   _wireNotifToggle(root);
+}
+
+// ─── Referral (élève) ─────────────────────────────────────────────
+
+function _renderReferral(stats) {
+  const code     = stats?.code;
+  const nRefs    = stats?.n_referrals ?? 0;
+  const xpEarned = stats?.xp_earned ?? 0;
+
+  return `
+<div class="prf-ref">
+  <div class="prf-ref-ttl">Parrainage · +200 XP par filleul</div>
+
+  ${code ? `
+  <div class="prf-ref-code-wrap">
+    <span class="prf-ref-code" id="prf-ref-code">${esc(code)}</span>
+    <button class="prf-ref-copy-btn" id="prf-ref-copy" title="Copier le code">📋</button>
+  </div>
+  <div class="prf-ref-stats">
+    <div class="prf-ref-stat">
+      <span class="prf-ref-stat-n">${nRefs}</span>
+      <div class="prf-ref-stat-lbl">filleul${nRefs !== 1 ? 's' : ''}</div>
+    </div>
+    <div class="prf-ref-stat">
+      <span class="prf-ref-stat-n">${xpEarned}</span>
+      <div class="prf-ref-stat-lbl">XP gagnés</div>
+    </div>
+  </div>
+  <button class="prf-ref-share-btn" id="prf-ref-share">Partager mon code 🔗</button>
+  ` : `
+  <button class="prf-ref-gen-btn" id="prf-ref-gen">Générer mon code de parrainage</button>
+  `}
+
+  <div class="prf-ref-apply">
+    <input class="prf-ref-apply-input" id="prf-ref-input" type="text"
+           placeholder="Code d'un ami…" maxlength="12" autocomplete="off">
+    <button class="prf-ref-apply-btn" id="prf-ref-apply-btn">Appliquer</button>
+  </div>
+</div>`;
+}
+
+function _wireReferral(root, me) {
+  const section = root.querySelector('#prf-ref-section');
+  if (!section) return;
+
+  // Copy code
+  section.querySelector('#prf-ref-copy')?.addEventListener('click', async () => {
+    const code = section.querySelector('#prf-ref-code')?.textContent?.trim();
+    if (!code) return;
+    try {
+      await navigator.clipboard.writeText(code);
+      const btn = section.querySelector('#prf-ref-copy');
+      if (btn) { btn.textContent = '✓'; setTimeout(() => { btn.textContent = '📋'; }, 1500); }
+      track('referral.code_copied', {});
+    } catch { /* clipboard unavailable */ }
+  });
+
+  // Share code
+  section.querySelector('#prf-ref-share')?.addEventListener('click', async () => {
+    const code = section.querySelector('#prf-ref-code')?.textContent?.trim();
+    if (!code) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Rejoins PermiGo !',
+          text: `Utilise mon code ${code} sur PermiGo et gagne 200 XP 🚗`,
+          url: window.location.origin,
+        });
+        track('referral.shared', { code });
+      } catch { /* cancelled */ }
+    } else {
+      try {
+        await navigator.clipboard.writeText(`Mon code PermiGo : ${code} — ${window.location.origin}`);
+        const { toast: _toast } = await import('@/components/toast.js');
+        _toast('Lien copié 📋', 'success');
+      } catch { /* unavailable */ }
+    }
+  });
+
+  // Generate code
+  section.querySelector('#prf-ref-gen')?.addEventListener('click', async () => {
+    const btn = section.querySelector('#prf-ref-gen');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = 'Génération…';
+    try {
+      const { data, error } = await sb.rpc('generate_referral_code');
+      if (error || data?.error) {
+        const { toast: _toast } = await import('@/components/toast.js');
+        _toast(data?.error || 'Impossible de générer le code', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Générer mon code de parrainage';
+        return;
+      }
+      track('referral.code_generated', {});
+      const { data: rStats } = await sb.rpc('get_my_referral_stats');
+      if (rStats && !rStats.error) {
+        section.innerHTML = _renderReferral(rStats);
+        _wireReferral(root, me);
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Générer mon code de parrainage';
+    }
+  });
+
+  // Apply referral code
+  const applyBtn = section.querySelector('#prf-ref-apply-btn');
+  const applyInput = section.querySelector('#prf-ref-input');
+  applyBtn?.addEventListener('click', async () => {
+    const code = applyInput?.value?.trim().toUpperCase();
+    if (!code || code.length < 4) return;
+    applyBtn.disabled = true;
+    applyBtn.textContent = '…';
+    try {
+      const { data, error } = await sb.rpc('apply_referral', { code });
+      const { toast: _toast } = await import('@/components/toast.js');
+      if (error || data?.error) {
+        _toast(data?.error || 'Code invalide ou déjà utilisé', 'error');
+      } else {
+        _toast('Code appliqué ! +200 XP et +50 💎', 'success', 4000);
+        track('referral.applied', { code });
+        if (applyInput) applyInput.value = '';
+      }
+    } catch {
+      const { toast: _toast } = await import('@/components/toast.js');
+      _toast('Erreur de connexion', 'error');
+    } finally {
+      applyBtn.disabled = false;
+      applyBtn.textContent = 'Appliquer';
+    }
+  });
 }
 
 // ─── Notifications toggle ─────────────────────────────────────────

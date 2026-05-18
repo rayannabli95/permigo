@@ -331,7 +331,7 @@ function wire(root) {
         if (!ok) { errEl.textContent = esc(error || 'Identifiants invalides'); shake(); return; }
         resetRateLimit('login', email);
         if (remember.checked) saveRememberedEmail(email); else clearRememberedEmail();
-        toast(`Bonjour ${profile.nom.split(' ')[0]} 👋`, 'success');
+        toast(`Bonjour ${esc(profile.nom.split(' ')[0])} 👋`, 'success');
         afterLogin();
       } else if (mode === 'otp-request') {
         const r = await loginWithOtp(email, { captchaToken });
@@ -345,7 +345,7 @@ function wire(root) {
         if (!r.ok) { errEl.textContent = esc(r.error || 'Code invalide'); shake(); return; }
         resetRateLimit('otp', email);
         resetRateLimit('otp-verify', email);
-        toast(`Bonjour ${r.profile.nom.split(' ')[0]} 👋`, 'success');
+        toast(`Bonjour ${esc(r.profile.nom.split(' ')[0])} 👋`, 'success');
         afterLogin();
       }
     } finally {

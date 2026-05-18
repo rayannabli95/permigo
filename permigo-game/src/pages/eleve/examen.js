@@ -252,6 +252,37 @@ const STYLE = `<style>
 .exam-tip-ico { font-size: 24px; margin-bottom: 8px; display: block; }
 .exam-tip-txt { font: 500 13px/1.4 'Inter',sans-serif; color: #374151; }
 
+/* ── Predict card ── */
+.exam-predict {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.exam-predict-ico {
+  width: 40px; height: 40px; flex-shrink: 0;
+  background: linear-gradient(135deg,rgba(99,102,241,.1),rgba(139,92,246,.1));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.exam-predict-body { flex: 1; min-width: 0; }
+.exam-predict-title { font: 700 14px/1.2 'Plus Jakarta Sans',sans-serif; color: #0a0d1a; }
+.exam-predict-sub { font: 500 12px/1.4 'Inter',sans-serif; color: #64748b; margin-top: 3px; }
+.exam-predict-track {
+  height: 6px; background: #e2e6f2;
+  border-radius: 3px; overflow: hidden; margin: 10px 0 5px;
+}
+.exam-predict-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#6366f1,#8b5cf6); transition: width .5s ease; }
+.exam-predict-labels {
+  display: flex; justify-content: space-between;
+  font: 500 10px/1 'Inter',sans-serif; color: #94a3b8;
+}
+.exam-predict-ready {
+  display: flex; align-items: center; gap: 12px;
+  padding: 6px 0;
+}
+.exam-predict-ready .exam-predict-title { color: #15803d; }
+
 /* ── Readiness pill ── */
 .exam-readiness {
   display: flex;
@@ -320,7 +351,7 @@ function isRevised() {
 
 // ─── Data ────────────────────────────────────────────────────────
 async function loadData(meId) {
-  const [validRes, streakRes, quizRes] = await Promise.allSettled([
+  const [validRes, streakRes, quizRes, predictRes] = await Promise.allSettled([
     sb.from('validations')
       .select('competence_id', { count: 'exact' })
       .eq('eleve_id', meId)
@@ -335,6 +366,8 @@ async function loadData(meId) {
       .select('score')
       .eq('user_id', meId)
       .not('score', 'is', null),
+
+    sb.rpc('predict_exam_ready_date'),
   ]);
 
   const compsCount = validRes.value?.count  ?? 0;
@@ -344,7 +377,10 @@ async function loadData(meId) {
     ? Math.round(scores.reduce((s, r) => s + (r.score ?? 0), 0) / scores.length)
     : null;
 
-  return { compsCount, streak, avgScore };
+  const predictRaw = predictRes.value?.data;
+  const predict    = predictRaw?.error ? null : (predictRaw || null);
+
+  return { compsCount, streak, avgScore, predict };
 }
 
 // ─── Render helpers ───────────────────────────────────────────────
@@ -405,6 +441,45 @@ function renderCountdown(examDate) {
 <div class="exam-date-row">
   <input type="date" class="exam-date-input" id="exam-date-input" value="${examDate.toISOString().slice(0,10)}" />
   <button class="exam-date-save" id="exam-date-save">Modifier</button>
+</div>`;
+}
+
+const PREDICT_TARGET = 28;
+
+function renderPredict({ compsCount, predict }) {
+  const pct = Math.min(100, Math.round((compsCount / PREDICT_TARGET) * 100));
+
+  if (compsCount >= PREDICT_TARGET) {
+    return `
+<div class="exam-predict-ready">
+  <span style="font-size:28px" aria-hidden="true">🎉</span>
+  <div>
+    <div class="exam-predict-title">Tu es prêt pour l'examen !</div>
+    <div class="exam-predict-sub">${compsCount}/31 compétences validées — objectif atteint</div>
+  </div>
+</div>`;
+  }
+
+  const dateStr = predict?.predicted_date
+    ? new Date(predict.predicted_date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
+  const advice = predict?.advice || `Encore ${PREDICT_TARGET - compsCount} compétences à valider`;
+
+  return `
+<div class="exam-predict">
+  <div class="exam-predict-ico">${icon('calendar', { size: 18, color: '#6366f1' })}</div>
+  <div class="exam-predict-body">
+    <div class="exam-predict-title">${dateStr ? `Prêt vers le ${esc(dateStr)}` : 'Estimation en cours…'}</div>
+    <div class="exam-predict-sub">${esc(advice)}</div>
+  </div>
+</div>
+<div class="exam-predict-track">
+  <div class="exam-predict-fill" style="width:${pct}%"></div>
+</div>
+<div class="exam-predict-labels">
+  <span>${compsCount} validées</span>
+  <span>${pct}% · objectif ${PREDICT_TARGET}</span>
+  <span>${PREDICT_TARGET} cible</span>
 </div>`;
 }
 
@@ -538,13 +613,19 @@ export async function mount(root) {
     </div>
   </div>
 
-  <!-- 3. CHECKLIST -->
+  <!-- 3. PREDICT -->
+  <div class="exam-card">
+    <div class="exam-card-title">Prévision de préparation</div>
+    ${renderPredict(data)}
+  </div>
+
+  <!-- 4. CHECKLIST -->
   <div class="exam-card">
     <div class="exam-card-title">Suis-je prêt ?</div>
     ${renderChecklist(data)}
   </div>
 
-  <!-- 4. TIPS -->
+  <!-- 5. TIPS -->
   <div class="exam-card">
     <div class="exam-card-title">Conseils dernière ligne droite</div>
     <div class="exam-tips">

@@ -281,6 +281,72 @@ const STYLE = `<style>
   border-radius: 8px;
 }
 @keyframes sklAnim { to { background-position: -200% 0; } }
+
+/* ── Achievements ── */
+.trp-ach-hd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 20px 10px;
+}
+.trp-ach-title {
+  font: 700 13px/1 'Inter', sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+.trp-ach-count {
+  font: 700 12px/1 'Inter', sans-serif;
+  color: #f59e0b;
+  background: rgba(245,158,11,.1);
+  border-radius: 20px;
+  padding: 3px 8px;
+}
+.trp-ach-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 0 16px 16px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.trp-ach-scroll::-webkit-scrollbar { display: none; }
+.trp-ach-card {
+  flex-shrink: 0;
+  width: 140px;
+  background: #fff;
+  border: 1.5px solid #e2e6f2;
+  border-radius: 16px;
+  padding: 14px 12px;
+  text-align: center;
+  scroll-snap-align: start;
+  box-shadow: 0 1px 4px rgba(11,13,26,.05);
+}
+.trp-ach-card--unlocked {
+  border-color: rgba(245,158,11,.35);
+  background: rgba(245,158,11,.05);
+}
+.trp-ach-card--locked { opacity: .5; }
+.trp-ach-ico {
+  font-size: 28px;
+  margin-bottom: 8px;
+  display: block;
+}
+.trp-ach-name {
+  font: 700 11px/1.3 'Plus Jakarta Sans', sans-serif;
+  color: #0b0d1a;
+  margin-bottom: 4px;
+}
+.trp-ach-desc {
+  font: 400 10px/1.4 'Inter', sans-serif;
+  color: #94a3b8;
+}
+.trp-ach-date {
+  font: 500 10px/1 'IBM Plex Mono', monospace;
+  color: #f59e0b;
+  margin-top: 6px;
+  display: block;
+}
 </style>`;
 
 // ─── Entry point ─────────────────────────────────────────────────
@@ -295,10 +361,11 @@ export async function mount(root) {
   }</div></div>`;
 
   try {
-    const [streakRes, validRes, quizRes] = await Promise.allSettled([
+    const [streakRes, validRes, quizRes, achRes] = await Promise.allSettled([
       sb.from('streaks').select('current_streak, longest_streak').eq('user_id', me.id).maybeSingle(),
       sb.from('validations').select('competence_id, validated_at').eq('eleve_id', me.id).eq('statut', 'acquis'),
       sb.from('quiz_attempts').select('score, completed_at').eq('user_id', me.id).eq('type', 'post_validation').gte('score', 100),
+      sb.rpc('get_my_achievements'),
     ]);
 
     const streak = streakRes.value?.data || { current_streak: 0, longest_streak: 0 };
@@ -324,7 +391,10 @@ export async function mount(root) {
     const trophees = TROPHEES.map(t => ({ ...t, unlocked: t.check(ctx) }));
     const unlockedCount = trophees.filter(t => t.unlocked).length;
 
-    root.innerHTML = render(trophees, unlockedCount);
+    const achRaw = achRes.value?.data;
+    const achievements = Array.isArray(achRaw) ? achRaw : [];
+
+    root.innerHTML = render(trophees, unlockedCount, achievements);
     wire(root, trophees);
   } catch {
     root.innerHTML = `${STYLE}<div class="trp"><p style="padding:32px;color:#ef4444">Erreur de chargement des trophées.</p></div>`;
@@ -332,7 +402,7 @@ export async function mount(root) {
 }
 
 // ─── Render ───────────────────────────────────────────────────────
-function render(trophees, unlockedCount) {
+function render(trophees, unlockedCount, achievements = []) {
   const unlocked = trophees.filter(t => t.unlocked);
   const locked = trophees.filter(t => !t.unlocked);
 
@@ -370,11 +440,35 @@ function render(trophees, unlockedCount) {
     </div>
   ` : ''}
 
+  ${achievements.length > 0 ? `
+  <div class="trp-ach-hd">
+    <span class="trp-ach-title">Milestones</span>
+    <span class="trp-ach-count">${achievements.filter(a => a.unlocked_at).length}/${achievements.length}</span>
+  </div>
+  <div class="trp-ach-scroll">
+    ${achievements.map(a => renderAchievement(a)).join('')}
+  </div>
+  ` : ''}
+
   <div class="trp-bg" id="trp-bg"></div>
   <div class="trp-sheet" id="trp-sheet">
     <div class="trp-sheet-handle"></div>
     <div class="trp-sheet-body" id="trp-sheet-body"></div>
   </div>
+</div>`;
+}
+
+function renderAchievement(a) {
+  const unlocked = Boolean(a.unlocked_at);
+  const date = unlocked
+    ? new Date(a.unlocked_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+    : null;
+  return `
+<div class="trp-ach-card ${unlocked ? 'trp-ach-card--unlocked' : 'trp-ach-card--locked'}">
+  <span class="trp-ach-ico">${esc(a.icon || '🏅')}</span>
+  <div class="trp-ach-name">${esc(a.name || a.label || '')}</div>
+  <div class="trp-ach-desc">${esc(a.description || '')}</div>
+  ${date ? `<span class="trp-ach-date">${date}</span>` : ''}
 </div>`;
 }
 

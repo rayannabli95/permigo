@@ -155,6 +155,83 @@ const STYLE = `<style>
   font: 700 12px/1 'IBM Plex Mono', monospace;
   color: #6366f1;
 }
+
+/* Delete modal overlay */
+.st-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.5);
+  backdrop-filter: blur(4px);
+  z-index: 900;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.st-modal-box {
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 32px;
+}
+.st-modal-handle {
+  width: 36px; height: 4px;
+  background: #e2e6f2;
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+.st-modal-title {
+  font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: #0b0d1a;
+  margin-bottom: 8px;
+}
+.st-modal-body {
+  font: 400 14px/1.6 'Inter', sans-serif;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+.st-modal-body strong { color: #0b0d1a; }
+.st-modal-label {
+  font: 600 12px/1 'Inter', sans-serif;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+.st-modal-inp {
+  width: 100%;
+  padding: 12px 14px;
+  background: #f8f9fc;
+  border: 1.5px solid #e2e6f2;
+  border-radius: 10px;
+  font: 500 14px/1 'IBM Plex Mono', monospace;
+  color: #0b0d1a;
+  letter-spacing: .04em;
+  transition: border-color .15s;
+  box-sizing: border-box;
+}
+.st-modal-inp:focus { outline: none; border-color: #ef4444; }
+.st-modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+.st-modal-cancel {
+  flex: 1; padding: 14px;
+  background: #f8f9fc; border: 1.5px solid #e2e6f2; border-radius: 12px;
+  font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: #64748b;
+  cursor: pointer; min-height: 48px; font-family: inherit;
+  transition: background .12s;
+}
+.st-modal-cancel:active { background: #f0f2f8; }
+.st-modal-confirm {
+  flex: 1; padding: 14px;
+  background: #ef4444; border: none; border-radius: 12px;
+  font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: #fff;
+  cursor: pointer; min-height: 48px; font-family: inherit;
+  transition: background .12s, opacity .12s;
+}
+.st-modal-confirm:disabled { opacity: .4; cursor: not-allowed; }
+.st-modal-confirm:not(:disabled):active { background: #dc2626; }
+.st-dpo-note {
+  font: 400 12px/1.5 'Inter', sans-serif;
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 12px;
+}
+.st-dpo-note a { color: #6366f1; }
 </style>`;
 
 export async function mount(root) {
@@ -163,12 +240,14 @@ export async function mount(root) {
 
   track('page_view', { page: 'settings', role: me.role });
 
-  // Load current profile prefs
-  const { data: profile } = await sb
-    .from('profiles')
-    .select('prenom, notif_push, notif_email, show_in_ranking, dnd_start, dnd_end')
-    .eq('id', me.id)
-    .maybeSingle();
+  // Load current profile prefs + RGPD preferences in parallel
+  const [{ data: profile }, { data: myPrefs }] = await Promise.all([
+    sb.from('profiles')
+      .select('prenom, notif_push, notif_email, show_in_ranking, dnd_start, dnd_end')
+      .eq('id', me.id)
+      .maybeSingle(),
+    sb.rpc('get_my_preferences'),
+  ]);
 
   const prefs = {
     notifPush: profile?.notif_push ?? true,
@@ -177,6 +256,7 @@ export async function mount(root) {
     dndStart: (profile?.dnd_start ?? '22:00:00').slice(0, 5),
     dndEnd: (profile?.dnd_end ?? '07:00:00').slice(0, 5),
     prenom: profile?.prenom ?? '',
+    marketingOptin: myPrefs?.marketing_optin ?? false,
   };
 
   render(root, me, prefs);
@@ -286,6 +366,54 @@ function render(root, me, prefs) {
     </div>
   </div>
 
+  <!-- 🔐 MES DONNÉES (RGPD) -->
+  <div class="st-section">
+    <div class="st-section-label">🔐 Mes données</div>
+
+    <!-- Export -->
+    <div class="st-row">
+      <div class="st-row-left">
+        <div class="st-row-title">Exporter mes données</div>
+        <div class="st-row-sub">Télécharge un fichier JSON de toutes tes données</div>
+      </div>
+      <div class="st-row-action">
+        <button class="st-btn-txt" id="btn-export-data">Exporter →</button>
+      </div>
+    </div>
+
+    <!-- Marketing toggle -->
+    <div class="st-row">
+      <div class="st-row-left">
+        <div class="st-row-title">Emails marketing</div>
+        <div class="st-row-sub">Conseils, nouveautés et offres PermiGo</div>
+      </div>
+      <div class="st-row-action">
+        <label class="st-tgl" aria-label="Recevoir les emails marketing">
+          <input type="checkbox" id="tgl-marketing" ${prefs.marketingOptin ? 'checked' : ''}>
+          <span class="st-tgl-t"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Legal links -->
+    <div class="st-row">
+      <div class="st-row-left">
+        <div class="st-row-title">Politique de confidentialité</div>
+      </div>
+      <div class="st-row-action">
+        <button class="st-btn-txt" id="btn-privacy">Lire →</button>
+      </div>
+    </div>
+    <div class="st-row">
+      <div class="st-row-left">
+        <div class="st-row-title">Conditions générales d'utilisation</div>
+      </div>
+      <div class="st-row-action">
+        <button class="st-btn-txt" id="btn-cgu">Lire →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ZONE DANGER -->
   <div class="st-section st-danger">
     <div class="st-section-label">Zone critique</div>
@@ -363,26 +491,114 @@ function wire(root, me, prefs) {
     track('settings.pwd_reset_requested', {});
   });
 
-  // Delete account — double confirmation
+  // Export mes données
+  root.querySelector('#btn-export-data')?.addEventListener('click', async () => {
+    const btn = root.querySelector('#btn-export-data');
+    btn.textContent = '…';
+    btn.style.pointerEvents = 'none';
+    try {
+      const { data, error } = await sb.rpc('export_my_data');
+      if (error || data?.error) { toast(data?.error || 'Export impossible', 'error'); return; }
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      const date = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `permigo-export-${date}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast('Téléchargement lancé 📥', 'success', 3000);
+      track('rgpd.data_exported', {});
+    } catch (e) {
+      console.error('[settings] export', e);
+      toast('Erreur lors de l\'export', 'error');
+    } finally {
+      btn.textContent = 'Exporter →';
+      btn.style.pointerEvents = '';
+    }
+  });
+
+  // Marketing toggle
+  root.querySelector('#tgl-marketing')?.addEventListener('change', async (e) => {
+    const val = e.target.checked;
+    try {
+      const { error } = await sb.rpc('set_my_preferences', { marketing_optin: val });
+      if (error) { toast('Erreur de sauvegarde', 'error'); return; }
+      toast(val ? 'Emails marketing activés' : 'Emails marketing désactivés', 'success', 2000);
+      track('rgpd.marketing_optin_changed', { value: val });
+    } catch { toast('Erreur de connexion', 'error'); }
+  });
+
+  // Legal links
+  root.querySelector('#btn-privacy')?.addEventListener('click', () => navigate('#/legal/privacy'));
+  root.querySelector('#btn-cgu')?.addEventListener('click', () => navigate('#/legal/cgu'));
+
+  // Delete account — modal avec saisie de confirmation
   root.querySelector('#btn-delete-account')?.addEventListener('click', () => {
-    const confirmed = confirm('⚠️ Cette action est irréversible.\n\nToutes tes données (progression, trophées, streak) seront définitivement effacées.\n\nConfirmer la suppression ?');
-    if (!confirmed) return;
-    const confirmed2 = confirm('Dernière confirmation : supprimer définitivement ton compte PermiGo ?');
-    if (!confirmed2) return;
-    _deleteAccount(me);
+    _showDeleteModal(root, me);
   });
 }
 
-async function _deleteAccount(me) {
-  track('account.delete_requested', {});
-  toast('Suppression en cours…', 'info', 3000);
-  const { error } = await sb.auth.admin?.deleteUser(me.id).catch(() => ({ error: new Error('not_admin') })) ?? { error: null };
-  if (error) {
-    toast('Contacte le support pour supprimer ton compte.', 'error', 6000);
-    return;
-  }
-  await sb.auth.signOut();
-  location.reload();
+const CONFIRM_TEXT = 'SUPPRIMER MON COMPTE';
+
+function _showDeleteModal(root, me) {
+  const overlay = document.createElement('div');
+  overlay.className = 'st-modal-overlay';
+  overlay.innerHTML = `
+<div class="st-modal-box" role="dialog" aria-modal="true" aria-labelledby="del-modal-title">
+  <div class="st-modal-handle"></div>
+  <div class="st-modal-title" id="del-modal-title">⚠️ Supprimer mon compte</div>
+  <div class="st-modal-body">
+    Cette action est <strong>irréversible</strong>. Toutes tes données (progression, trophées, streak, XP) seront définitivement effacées.
+    <br><br>Pour confirmer, tape exactement :<br><strong>${CONFIRM_TEXT}</strong>
+  </div>
+  <div class="st-modal-label">Confirmation</div>
+  <input class="st-modal-inp" id="del-confirm-inp" type="text" placeholder="${CONFIRM_TEXT}" autocomplete="off" spellcheck="false">
+  <div class="st-modal-actions">
+    <button class="st-modal-cancel" id="del-cancel">Annuler</button>
+    <button class="st-modal-confirm" id="del-confirm" disabled>Supprimer</button>
+  </div>
+  <p class="st-dpo-note">Pour l'effacement côté authentification, contacte <a href="mailto:dpo@permigo.fr">dpo@permigo.fr</a></p>
+</div>`;
+
+  document.body.appendChild(overlay);
+
+  const inp     = overlay.querySelector('#del-confirm-inp');
+  const confirm = overlay.querySelector('#del-confirm');
+  const cancel  = overlay.querySelector('#del-cancel');
+
+  inp.focus();
+  inp.addEventListener('input', () => {
+    confirm.disabled = inp.value !== CONFIRM_TEXT;
+  });
+
+  cancel.addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+  confirm.addEventListener('click', async () => {
+    if (inp.value !== CONFIRM_TEXT) return;
+    confirm.disabled = true;
+    confirm.textContent = '…';
+    track('account.delete_confirmed', {});
+    try {
+      const { data, error } = await sb.rpc('delete_my_account', { p_confirm_text: CONFIRM_TEXT });
+      if (error || data?.error) {
+        toast(data?.error || 'Suppression impossible — contacte dpo@permigo.fr', 'error', 6000);
+        overlay.remove();
+        return;
+      }
+      overlay.remove();
+      await sb.auth.signOut();
+      location.hash = '/';
+      location.reload();
+    } catch (e) {
+      console.error('[settings] delete_account', e);
+      toast('Erreur — contacte dpo@permigo.fr', 'error', 6000);
+      overlay.remove();
+    }
+  });
 }
 
 function _debounce(fn, ms) {

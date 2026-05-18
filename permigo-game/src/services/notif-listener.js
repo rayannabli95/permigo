@@ -18,13 +18,13 @@ let _quizOpen = false;
 export function startNotifListener() {
   if (_intervalId) return;
   const me = getCurUser();
-  console.log(`[notif-listener] starting, user=${me?.id ?? 'none'}`);
+  import.meta.env.DEV && console.log(`[notif-listener] starting, user=${me?.id ?? 'none'}`);
   poll();
   _intervalId = setInterval(poll, POLL_INTERVAL);
 }
 
 export function stopNotifListener() {
-  console.log('[notif-listener] stopping');
+  import.meta.env.DEV && console.log('[notif-listener] stopping');
   clearInterval(_intervalId);
   _intervalId = null;
 }
@@ -32,7 +32,7 @@ export function stopNotifListener() {
 // ─── Polling ─────────────────────────────────────────────────────
 async function poll() {
   const me = getCurUser();
-  console.log(`[notif-listener] poll cycle — user=${me?.id ?? 'none'} quizOpen=${_quizOpen}`);
+  import.meta.env.DEV && console.log(`[notif-listener] poll cycle — user=${me?.id ?? 'none'} quizOpen=${_quizOpen}`);
 
   if (!me || _quizOpen) return;
 
@@ -46,12 +46,12 @@ async function poll() {
       .order('created_at', { ascending: true })
       .limit(5);
 
-    console.log(`[notif-listener] found ${data?.length ?? 0} unread notifs`, error ?? '');
+    import.meta.env.DEV && console.log(`[notif-listener] found ${data?.length ?? 0} unread notifs`, error ?? '');
 
     if (error || !data?.length) return;
 
     for (const notif of data) {
-      console.log(`[notif-listener] dispatching type=${notif.type} id=${notif.id}`);
+      import.meta.env.DEV && console.log(`[notif-listener] dispatching type=${notif.type} id=${notif.id}`);
       // Marquer LU avant de traiter → anti double-trigger même si quiz crash
       await sb.from('notifications').update({ read: true }).eq('id', notif.id);
       await dispatch(notif, me);
@@ -73,7 +73,7 @@ async function dispatch(notif, me) {
       await handleQuiz(notif, me, 'consolidation', 2);
       break;
     default:
-      console.log(`[notif-listener] unknown notif type: ${notif.type}`);
+      import.meta.env.DEV && console.log(`[notif-listener] unknown notif type: ${notif.type}`);
   }
 }
 
@@ -112,7 +112,7 @@ async function handleQuiz(notif, me, type, nbQuestions) {
   const competenceId = notif.data?.competence_id;
   if (!competenceId || _quizOpen) return;
 
-  console.log(`[notif-listener] launching quiz type=${type} competence=${competenceId}`);
+  import.meta.env.DEV && console.log(`[notif-listener] launching quiz type=${type} competence=${competenceId}`);
   track('notification.opened', { type: notif.type, competence_id: competenceId });
 
   _quizOpen = true;
@@ -123,7 +123,7 @@ async function handleQuiz(notif, me, type, nbQuestions) {
       nbQuestions,
       onComplete: async (score, total) => {
         _quizOpen = false;
-        console.log(`[notif-listener] quiz done score=${score}/${total}`);
+        import.meta.env.DEV && console.log(`[notif-listener] quiz done score=${score}/${total}`);
         await saveQuizResult(me, { competenceId, type, score, total });
       },
     });

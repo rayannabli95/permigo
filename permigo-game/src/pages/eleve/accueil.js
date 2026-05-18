@@ -20,6 +20,9 @@ import { emotionalBanner } from '@/components/emotional-banner.js';
 import { mountSessionConfirmation } from '@/components/session-confirmation-banner.js';
 import { mountFeedbackFeed } from '@/components/feedback-feed.js';
 import { mountRevisionCards } from '@/components/revision-cards.js';
+import { mountCoachingTip }  from '@/components/coaching-tip.js';
+import { mountDailyQuests }  from '@/components/daily-quests.js';
+import { toast }             from '@/components/toast.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -431,6 +434,70 @@ const STYLE = `<style>
 .next-comp-bd { flex: 1; min-width: 0; }
 .next-comp-title { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: #0a0d1a; }
 .next-comp-sub { font: 500 11.5px/1.4 'Inter', sans-serif; color: #64748b; margin-top: 3px; }
+
+/* ── Streak freeze ── */
+.bs-freeze-wrap { padding: 0 20px 8px; margin-top: 12px; }
+.bs-freeze-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 14px 20px;
+  background: linear-gradient(135deg,#dbeafe,#e0f2fe);
+  border: 1.5px solid #bfdbfe; border-radius: 16px;
+  color: #1d4ed8; font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer; min-height: 52px;
+  transition: transform .15s cubic-bezier(.23,1,.32,1), opacity .15s;
+}
+.bs-freeze-btn:active { transform: scale(.98); opacity: .9; }
+.bs-freeze-btn:disabled { opacity: .55; cursor: default; }
+.bs-freeze-desc {
+  font: 500 11px/1.4 'Inter', sans-serif; color: #64748b;
+  text-align: center; margin-top: 7px;
+}
+
+/* ── Leaderboard card ── */
+.acc-lb {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, rgba(99,102,241,.08) 0%, rgba(139,92,246,.06) 100%);
+  border: 1.5px solid rgba(99,102,241,.18);
+  border-radius: 20px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: transform .15s cubic-bezier(.23,1,.32,1), box-shadow .15s;
+}
+.acc-lb:active { transform: scale(.985); }
+.acc-lb-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.acc-lb-title {
+  font: 700 12px/1 'Inter', sans-serif;
+  color: #6366f1;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.acc-lb-badge {
+  font: 700 11px/1 'Inter', sans-serif;
+  color: #f59e0b;
+  background: rgba(245,158,11,.12);
+  border-radius: 99px;
+  padding: 4px 10px;
+}
+.acc-lb-body {
+  font: 800 20px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: #0a0d1a;
+  letter-spacing: -.02em;
+  margin-bottom: 4px;
+}
+.acc-lb-sub {
+  font: 500 12px/1.3 'Inter', sans-serif;
+  color: #94a3b8;
+}
+.acc-lb-arrow {
+  color: #6366f1;
+  font-size: 16px;
+  align-self: flex-start;
+}
 </style>`;
 
 // ─── Constantes ──────────────────────────────────────────────────
@@ -462,9 +529,9 @@ export async function mount(root) {
 
   try {
   // Fetch tout en parallèle
-  const [profileRes, streakRes, validRes, notifRes, attemptsRes] = await Promise.allSettled([
+  const [profileRes, streakRes, validRes, notifRes, attemptsRes, lbRes] = await Promise.allSettled([
     sb.from('profiles')
-      .select('prenom, xp, last_active_at, first_value_action_at')
+      .select('prenom, xp, last_active_at, first_value_action_at, gemmes')
       .eq('id', me.id)
       .maybeSingle(),
 
@@ -491,6 +558,8 @@ export async function mount(root) {
       .eq('user_id', me.id)
       .gte('completed_at', new Date(Date.now() - 35 * 86400000).toISOString())
       .order('completed_at', { ascending: true }),
+
+    sb.rpc('get_my_leaderboard_position'),
   ]);
 
   const profile   = profileRes.value?.data  || { prenom: me.prenom || 'Toi', xp: 0 };
@@ -498,6 +567,7 @@ export async function mount(root) {
   const validated = new Set((validRes.value?.data || []).map(v => v.competence_id));
   const pendingNotif = notifRes.value?.data?.[0] || null;
   const activityDays = buildActivityData(attemptsRes.value?.data || [], streak);
+  const lbPos     = (lbRes.value?.data && !lbRes.value?.data?.error) ? lbRes.value.data : null;
 
   ensureHeatmapStyles();
 
@@ -509,11 +579,19 @@ export async function mount(root) {
 
   track('streak.viewed', { days: streak.current_streak, status: streakSt });
 
-  root.innerHTML = render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, activityDays });
-  wire(root, { cta, worlds, pendingNotif, streak, activityDays });
+  const gemmes = profile.gemmes || 0;
+  root.innerHTML = render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, activityDays, gemmes, lbPos });
+  wire(root, { cta, worlds, pendingNotif, streak, streakSt, gemmes, activityDays, lbPos });
+
+  const accDiv = root.querySelector('.acc');
+
+  // Coaching tip (au-dessus du streak — non-bloquant)
+  if (accDiv) mountCoachingTip(accDiv).catch(() => {});
+
+  // Quêtes du jour (avant streak — non-bloquant, après coaching tip)
+  if (accDiv) mountDailyQuests(accDiv).catch(() => {});
 
   // Bannière sessions à confirmer (non-bloquante)
-  const accDiv = root.querySelector('.acc');
   if (accDiv) {
     const streakAnchor = accDiv.querySelector('.streak-pro') || accDiv.firstElementChild;
     mountSessionConfirmation(accDiv, streakAnchor).catch(() => {});
@@ -633,7 +711,7 @@ function computeCta({ pendingNotif }) {
 }
 
 // ─── Render ───────────────────────────────────────────────────────
-function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, activityDays = { days7: [], activeDates: [], levels: {}, details: {}, totalActive: 0 } }) {
+function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, activityDays = { days7: [], activeDates: [], levels: {}, details: {}, totalActive: 0 }, gemmes = 0, lbPos = null }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const isActive = streakSt !== 'broken';
 
@@ -754,7 +832,10 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, act
     ` : ''}
   </div>
 
-  <!-- 6. FOOTER — métriques compétences -->
+  <!-- 6. LEADERBOARD -->
+  ${lbPos ? renderLeaderboardCard(lbPos) : ''}
+
+  <!-- 7. FOOTER — métriques compétences -->
   ${totalValidated === 0 ? `
     <div class="next-comp-empty">
       <div class="next-comp-icon">${icon('compass', { size: 22 })}</div>
@@ -794,6 +875,14 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, act
     ${renderHeatmap({ activeDates: activityDays.activeDates, activityLevels: activityDays.levels, activityDetails: activityDays.details, weeks: 5, title: '' })}
     <div class="hmap-tap-info" id="hmap-info" style="opacity:0"> </div>
   </div>
+  ${(streakSt === 'critical' || streakSt === 'at_risk') && gemmes >= 50 ? `
+  <div class="bs-freeze-wrap">
+    <button class="bs-freeze-btn" id="bs-freeze-btn">
+      🧊 Geler ma série · 50 💎
+    </button>
+    <div class="bs-freeze-desc">Protège ta série pour les prochaines 24h</div>
+  </div>
+  ` : ''}
 </div>`;
 }
 
@@ -812,6 +901,28 @@ function avatarSvg(prenom) {
   </svg>`;
 }
 
+function renderLeaderboardCard(lb) {
+  const rank  = lb.my_rank ?? null;
+  const total = lb.total_eleves ?? null;
+  const pct   = lb.percentile ?? null;
+  const isTop = pct !== null && pct >= 90;
+
+  const rankText = rank !== null && total !== null
+    ? `Tu es #${rank} sur ${total} élève${total > 1 ? 's' : ''}`
+    : 'Classement de l\'école';
+  const pctText = pct !== null ? ` · Top ${100 - pct}%` : '';
+
+  return `
+<div class="acc-lb" id="acc-lb-card" role="button" tabindex="0" aria-label="Classement de l'école">
+  <div class="acc-lb-top">
+    <div class="acc-lb-title">🏆 Classement de l'école</div>
+    ${isTop ? `<div class="acc-lb-badge">🌟 Top de l'école</div>` : ''}
+  </div>
+  <div class="acc-lb-body">${esc(rankText + pctText)}</div>
+  ${pct !== null ? `<div class="acc-lb-sub">Dans le top ${100 - pct}% de ton auto-école</div>` : ''}
+</div>`;
+}
+
 function streakSubText(status, streak) {
   if (status === 'saved')   return '🟢 Ta série est sauvegardée aujourd\'hui !';
   if (status === 'critical') return '🔴 Continue ta série — moins de 6h !';
@@ -822,7 +933,7 @@ function streakSubText(status, streak) {
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
-function wire(root, { cta, streak, activityDays }) {
+function wire(root, { cta, streak, streakSt, gemmes = 0, activityDays }) {
   root.querySelector('.action-btn')?.addEventListener('click', (e) => {
     const btn  = e.currentTarget;
     const type = btn.dataset.ctaType;
@@ -845,6 +956,30 @@ function wire(root, { cta, streak, activityDays }) {
   const closeBS = () => { bsSheet?.classList.remove('open'); bsBg?.classList.remove('open'); };
   root.querySelector('#streak-card')?.addEventListener('click', openBS);
   bsBg?.addEventListener('click', closeBS);
+
+  // Streak freeze
+  root.querySelector('#bs-freeze-btn')?.addEventListener('click', async () => {
+    const btn = root.querySelector('#bs-freeze-btn');
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = '⏳ Gel en cours…';
+    try {
+      const { data, error } = await sb.rpc('use_streak_freeze');
+      if (error || data?.error) {
+        toast('Impossible de geler la série', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '🧊 Geler ma série · 50 💎';
+        return;
+      }
+      track('streak.freeze_used', {});
+      toast('Série gelée pour 24h 🧊', 'success');
+      closeBS();
+    } catch {
+      toast('Erreur lors du gel', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '🧊 Geler ma série · 50 💎';
+    }
+  });
 
   // Heatmap tap-info tooltip
   const infoEl = root.querySelector('#hmap-info');

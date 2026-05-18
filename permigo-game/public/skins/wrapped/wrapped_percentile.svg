@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1200" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bgPercentile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="55%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <radialGradient id="glowPerc" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blurPerc" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="50"/>
+    </filter>
+  </defs>
+
+  <rect width="800" height="1200" fill="url(#bgPercentile)"/>
+
+  <!-- Halo central -->
+  <circle cx="400" cy="500" r="320" fill="url(#glowPerc)" filter="url(#blurPerc)"/>
+
+  <!-- Couronne stylisée -->
+  <g transform="translate(400 500)">
+    <path d="M -120 -40 L -80 -110 L -30 -40 L 0 -130 L 30 -40 L 80 -110 L 120 -40 L 110 60 L -110 60 Z"
+          fill="#fbbf24" stroke="#ffffff" stroke-width="6"/>
+    <circle cx="-80" cy="-90" r="10" fill="#ffffff"/>
+    <circle cx="0"   cy="-110" r="12" fill="#ffffff"/>
+    <circle cx="80"  cy="-90" r="10" fill="#ffffff"/>
+    <rect x="-110" y="60" width="220" height="14" rx="7" fill="#ffffff" opacity="0.9"/>
+  </g>
+
+  <!-- Texte placeholder -->
+  <text x="400" y="780" text-anchor="middle" font-family="Inter,sans-serif" font-weight="900" font-size="80" fill="#ffffff" letter-spacing="-2">
+    TOP
+  </text>
+  <text x="400" y="880" text-anchor="middle" font-family="Inter,sans-serif" font-weight="900" font-size="100" fill="#ffffff" letter-spacing="-3">
+    XX%
+  </text>
+  <text x="400" y="950" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700" font-size="28" fill="#ffffff" opacity="0.9">
+    de ton école
+  </text>
+  <text x="400" y="1020" text-anchor="middle" font-family="Inter,sans-serif" font-weight="500" font-size="20" fill="#ffffff" opacity="0.75">
+    [Placeholder · à remplacer par PNG]
+  </text>
+
+  <!-- Particules dorées -->
+  <circle cx="140" cy="180" r="5" fill="#fde68a"/>
+  <circle cx="660" cy="260" r="7" fill="#fde68a" opacity="0.8"/>
+  <circle cx="180" cy="950" r="4" fill="#fbbf24"/>
+  <circle cx="680" cy="1080" r="6" fill="#fbbf24" opacity="0.7"/>
+  <circle cx="100" cy="600" r="5" fill="#fde68a" opacity="0.5"/>
+  <circle cx="710" cy="640" r="4" fill="#fde68a" opacity="0.6"/>
+</svg>
