@@ -31,17 +31,24 @@ const STYLE = `<style>
   position: fixed;
   top: 50%;
   left: 50%;
-  width: min(560px, 90vw);
-  height: min(560px, 90vw);
+  width: min(620px, 95vw);
+  height: min(620px, 95vw);
   background-image: url('${ASSETS.volantBg}');
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
   transform: translate(-50%, -50%);
-  opacity: .055;
+  opacity: .18;
   pointer-events: none;
   z-index: 0;
-  filter: blur(0.4px);
+  filter: blur(0.6px) saturate(.92);
+}
+/* Le contenu reste lisible : on baisse l'opacity du fond blanc des sections monde */
+.prc-world {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--wc, #10b981) 6%, rgba(255,255,255,.88)) 0%,
+    color-mix(in srgb, var(--wc, #10b981) 3%, rgba(255,255,255,.85)) 50%,
+    rgba(255,255,255,.78) 100%) !important;
 }
 /* Tous les contenus passent au-dessus du volant */
 .prc > * { position: relative; z-index: 1; }

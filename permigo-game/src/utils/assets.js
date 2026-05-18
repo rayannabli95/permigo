@@ -12,7 +12,8 @@ export const ASSETS = {
   parcoursMap: '/skins/permigo-parcours-map-v1.png',
 
   // ── 4 mondes REMC (illustrations premium) ──────────────────────
-  worldC1: '/skins/permigo-remc-maitrise-vehicule-flag-v1.png',
+  // Monde 1 (Maîtrise du véhicule) = volant 3D (remplace le drapeau de course)
+  worldC1: '/skins/permigo-volant-bg.png',
   worldC2: '/skins/permigo-remc-circulation-normale-v3.png',
   worldC3: '/skins/permigo-remc-conditions-difficiles-v1.png',
   worldC4: '/skins/permigo-autonomie-crown-v1.png',
