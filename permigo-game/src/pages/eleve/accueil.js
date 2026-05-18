@@ -933,7 +933,14 @@ function streakSubText(status, streak) {
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
-function wire(root, { cta, streak, streakSt, gemmes = 0, activityDays }) {
+function wire(root, { cta, streak, streakSt, gemmes = 0, activityDays, lbPos = null }) {
+  // Leaderboard card
+  root.querySelector('#acc-lb-card')?.addEventListener('click', () => {
+    track('leaderboard.tapped', { rank: lbPos?.my_rank, percentile: lbPos?.percentile });
+    // For now navigate to trophees — full leaderboard page to be created in V2
+    location.hash = '#/trophees';
+  });
+
   root.querySelector('.action-btn')?.addEventListener('click', (e) => {
     const btn  = e.currentTarget;
     const type = btn.dataset.ctaType;
