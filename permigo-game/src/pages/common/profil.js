@@ -10,6 +10,7 @@ import { mountProfileCard } from '@/components/profile-card.js';
 import { REMC_TOTAL } from '@/data/remc.js';
 import { icon } from '@/utils/icons.js';
 import { isPushEnabled, requestPushPermission, optOutPush, optInPush } from '@/services/web-push.js';
+import { mountMoniteurRanking } from '@/components/moniteur-ranking.js';
 
 // ─── CSS (cohérent avec design system permigo-game) ─────────────
 const STYLE = `<style>
@@ -329,6 +330,8 @@ export async function mount(root) {
 
   ${permisData ? `<div id="prf-permis-card" style="margin-top:16px"></div>` : ''}
 
+  ${anneeStats ? `<div id="prf-ranking-host"></div>` : ''}
+
   ${anneeStats ? `
   <div class="prf-streak">
     <img class="prf-streak-ico" src="/skins/permigo-streak-flame-v1.png" alt="" aria-hidden="true" style="width:32px;height:32px;object-fit:contain;" onerror="this.outerHTML='<span class=&quot;prf-streak-ico&quot; style=&quot;color:#f97316&quot;>${icon('flame', { size: 22, strokeWidth: 2.4 })}</span>'">
@@ -412,6 +415,12 @@ export async function mount(root) {
   if (permisData) {
     const cardHost = root.querySelector('#prf-permis-card');
     if (cardHost) mountPermisCard(cardHost, permisData);
+  }
+
+  // Mount ranking moniteur (enseignant uniquement)
+  if (me.role === 'enseignant') {
+    const rankingHost = root.querySelector('#prf-ranking-host');
+    if (rankingHost) mountMoniteurRanking(rankingHost, { myId: me.id }).catch(() => {});
   }
 
   root.querySelector('#btn-logout').addEventListener('click', async () => {

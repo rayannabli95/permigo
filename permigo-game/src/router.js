@@ -1,6 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
 // Router minimal — route selon role + hash
 // ═══════════════════════════════════════════════════════════════
+import { mountLogSessionFab, unmountLogSessionFab } from '@/components/log-session-fab.js';
+
 const ROUTES = {
   eleve: {
     default: () => import('@/pages/eleve/accueil.js'),
@@ -50,6 +52,14 @@ export async function route(root, me) {
   const routeName = segments[0] || 'default';
   const param = segments[1] || null; // ex: eleveId pour #/livret/{id}
   const loader = map[routeName] || map.default;
+
+  // ─── FAB "+ Session" — visible uniquement pour moniteurs/gérants ───
+  // Idempotent : mount/unmount sont safe à appeler à chaque navigation.
+  if (role === 'enseignant' || role === 'gerant') {
+    mountLogSessionFab();
+  } else {
+    unmountLogSessionFab();
+  }
 
   try {
     const mod = await loader();

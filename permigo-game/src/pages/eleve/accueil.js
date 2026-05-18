@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // Élève — Accueil (hub principal)
-// ADN : Clash Royale + Duolingo — dopamine immédiate, "encore une leçon"
+// ADN : Clash Royale + Duolingo — dopamine immédiate, "encore une compétence"
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
@@ -17,6 +17,7 @@ import { icon, iconBadge } from '@/utils/icons.js';
 import { ASSETS } from '@/utils/assets.js';
 import { renderEmptyState } from '@/components/empty-state.js';
 import { emotionalBanner } from '@/components/emotional-banner.js';
+import { mountSessionConfirmation } from '@/components/session-confirmation-banner.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -407,9 +408,27 @@ const STYLE = `<style>
 }
 .footer-stat { flex: 1; }
 .footer-val  { font: 800 20px/1 'Plus Jakarta Sans', sans-serif; color: #0a0d1a; margin-bottom: 4px; }
-.footer-lecon { font-size: 13px; }
 .footer-lbl  { font: 500 11px/1.3 'Inter', sans-serif; color: #94a3b8; }
 .footer-sep  { width: 1px; height: 40px; background: #e2e6f2; flex-shrink: 0; }
+
+/* ── Prochaine compétence (état vide) ── */
+.next-comp-empty {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(99,102,241,.06) 0%, rgba(139,92,246,.04) 100%);
+  border: 1px solid rgba(99,102,241,.18);
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+.next-comp-icon {
+  width: 38px; height: 38px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; flex-shrink: 0;
+}
+.next-comp-bd { flex: 1; min-width: 0; }
+.next-comp-title { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: #0a0d1a; }
+.next-comp-sub { font: 500 11.5px/1.4 'Inter', sans-serif; color: #64748b; margin-top: 3px; }
 </style>`;
 
 // ─── Constantes ──────────────────────────────────────────────────
@@ -441,9 +460,9 @@ export async function mount(root) {
 
   try {
   // Fetch tout en parallèle
-  const [profileRes, streakRes, validRes, notifRes, leconRes, attemptsRes] = await Promise.allSettled([
+  const [profileRes, streakRes, validRes, notifRes, attemptsRes] = await Promise.allSettled([
     sb.from('profiles')
-      .select('prenom, xp, credit_heures, last_active_at, first_value_action_at')
+      .select('prenom, xp, last_active_at, first_value_action_at')
       .eq('id', me.id)
       .maybeSingle(),
 
@@ -465,12 +484,6 @@ export async function mount(root) {
       .order('created_at', { ascending: false })
       .limit(1),
 
-    sb.from('lecons_realisees')
-      .select('date_lecon')
-      .eq('eleve_id', me.id)
-      .order('date_lecon', { ascending: false })
-      .limit(1),
-
     sb.from('quiz_attempts')
       .select('completed_at')
       .eq('user_id', me.id)
@@ -478,11 +491,10 @@ export async function mount(root) {
       .order('completed_at', { ascending: true }),
   ]);
 
-  const profile   = profileRes.value?.data  || { prenom: me.prenom || 'Toi', xp: 0, credit_heures: 0 };
+  const profile   = profileRes.value?.data  || { prenom: me.prenom || 'Toi', xp: 0 };
   const streak    = streakRes.value?.data   || { current_streak: 0, last_activity_date: null, longest_streak: 0 };
   const validated = new Set((validRes.value?.data || []).map(v => v.competence_id));
   const pendingNotif = notifRes.value?.data?.[0] || null;
-  const lastLecon = leconRes.value?.data?.[0]?.date_lecon || null;
   const activityDays = buildActivityData(attemptsRes.value?.data || [], streak);
 
   ensureHeatmapStyles();
@@ -491,12 +503,19 @@ export async function mount(root) {
   const worlds  = computeWorlds(validated);
   const trophees = computeTrophees(worlds);
   const streakSt = streakStatus(streak);
-  const cta      = computeCta({ pendingNotif, lastLecon });
+  const cta      = computeCta({ pendingNotif });
 
   track('streak.viewed', { days: streak.current_streak, status: streakSt });
 
-  root.innerHTML = render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, lastLecon, activityDays });
+  root.innerHTML = render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, activityDays });
   wire(root, { cta, worlds, pendingNotif, streak, activityDays });
+
+  // Bannière sessions à confirmer (non-bloquante)
+  const accDiv = root.querySelector('.acc');
+  if (accDiv) {
+    const streakAnchor = accDiv.querySelector('.streak-pro') || accDiv.firstElementChild;
+    mountSessionConfirmation(accDiv, streakAnchor).catch(() => {});
+  }
 
   // Bannière émotionnelle (non-bloquante — indépendante du render principal)
   emotionalBanner.checkAndRender(root).catch(() => {});
@@ -524,12 +543,8 @@ export async function mount(root) {
     // Weekly replay (dimanche/lundi soir seulement)
     const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
     maybePlayWeeklyReplay({
-      hoursThisWeek: 0, // TODO: from lecons_realisees when data exists
-      hoursLastWeek: 0,
       compsValidated: totalValidated,
       monsReview: null,
-      topLessonHour: null,
-      topLessonLieu: null,
       streak: streak.current_streak,
     });
   }
@@ -579,7 +594,7 @@ function streakStatus(streak) {
   return hoursLeft < 6 ? 'critical' : 'at_risk';
 }
 
-function computeCta({ pendingNotif, lastLecon }) {
+function computeCta({ pendingNotif }) {
   if (pendingNotif?.data?.competence_id) {
     const isConsolid = pendingNotif.type === 'consolidation_quiz';
     return {
@@ -594,20 +609,6 @@ function computeCta({ pendingNotif, lastLecon }) {
       accent: isConsolid ? '#8b5cf6' : '#6366f1',
     };
   }
-  if (lastLecon) {
-    const days = Math.floor((Date.now() - new Date(lastLecon).getTime()) / 86_400_000);
-    if (days > 3) {
-      return {
-        type: 'reprise',
-        ico: '🎯',
-        label: 'Reprends là où tu en étais',
-        sub: 'Une nouvelle compétence t\'attend dans ton parcours',
-        btn: 'Continuer →',
-        href: '#/parcours',
-        accent: '#f59e0b',
-      };
-    }
-  }
   return {
     type: 'parcours_remc',
     ico: '🗺️',
@@ -619,16 +620,8 @@ function computeCta({ pendingNotif, lastLecon }) {
   };
 }
 
-function daysSinceLabel(dateStr) {
-  if (!dateStr) return 'Aucune leçon enregistrée';
-  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86_400_000);
-  if (days === 0) return "Leçon aujourd'hui";
-  if (days === 1) return 'Leçon hier';
-  return `Dernière leçon il y a ${days}j`;
-}
-
 // ─── Render ───────────────────────────────────────────────────────
-function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, lastLecon, activityDays = { days7: [], activeDates: [], levels: {}, details: {}, totalActive: 0 } }) {
+function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, activityDays = { days7: [], activeDates: [], levels: {}, details: {}, totalActive: 0 } }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const isActive = streakSt !== 'broken';
 
@@ -749,13 +742,16 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees, cta, las
     ` : ''}
   </div>
 
-  <!-- 6. FOOTER — métriques compétences (zéro heure) -->
-  ${!lastLecon ? renderEmptyState({
-    illustration: '/skins/empty-lessons.png',
-    title: 'Première leçon à venir',
-    subtitle: 'Ta première leçon en voiture sera enregistrée ici par ton moniteur.',
-    compact: true,
-  }) : ''}
+  <!-- 6. FOOTER — métriques compétences -->
+  ${totalValidated === 0 ? `
+    <div class="next-comp-empty">
+      <div class="next-comp-icon">${icon('compass', { size: 22 })}</div>
+      <div class="next-comp-bd">
+        <div class="next-comp-title">Prochaine compétence à valider</div>
+        <div class="next-comp-sub">Lance ton parcours REMC — ton moniteur validera tes acquis au fil de la conduite.</div>
+      </div>
+    </div>
+  ` : ''}
   <div class="acc-footer">
     <div class="footer-stat">
       <div class="footer-val">${totalValidated}<span style="font-size:.55em;color:#94a3b8">/31</span></div>

@@ -73,28 +73,17 @@ export const TROPHEES = [
     check: ({ hasPerfectQuiz }) => !!hasPerfectQuiz,
   },
 
-  // ─── Conditions spéciales (déclenchables côté moniteur via flag leçon) ─
+  // ─── Conditions spéciales (basées sur l'heure d'activité élève) ─
   {
     id: 'night_rider',
     ico: '🌙',
     image: ASSETS.trophy.nightRider,
     nom: 'Pilote de Nuit',
-    desc: 'Réalise une leçon programmée après 21h.',
+    desc: 'Valide une compétence après 21h.',
     rarity: 'rare',
     color: '#6366f1',
     xp: 80,
-    check: ({ hasNightSession }) => !!hasNightSession,
-  },
-  {
-    id: 'eco_driver',
-    ico: '🌿',
-    image: ASSETS.trophy.ecoDriver,
-    nom: 'Éco-Pilote',
-    desc: 'Réalise une leçon dédiée à l\'éco-conduite.',
-    rarity: 'rare',
-    color: '#10b981',
-    xp: 80,
-    check: ({ hasEcoSession }) => !!hasEcoSession,
+    check: ({ hasNightValidation }) => !!hasNightValidation,
   },
 
   // ─── Étapes majeures ──────────────────────────────────────────

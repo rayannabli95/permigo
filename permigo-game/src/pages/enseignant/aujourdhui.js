@@ -298,6 +298,83 @@ const STYLE = `<style>
     0%, 100% { opacity: 1; }
     50% { opacity: .5; }
   }
+
+  /* Widget récap soir */
+  .aj-recap {
+    background: linear-gradient(135deg, rgba(99,102,241,.06), rgba(139,92,246,.06));
+    border: 1.5px solid rgba(99,102,241,.2);
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: border-color .15s, transform .15s;
+    animation: ajWidgetIn .5s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .aj-recap:active { transform: scale(.985); }
+  .aj-recap-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .aj-recap-title {
+    font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif;
+    color: #0a0d1a;
+    flex: 1;
+  }
+  .aj-recap-kpi {
+    font: 700 20px/1 'Plus Jakarta Sans', sans-serif;
+    color: #6366f1;
+    letter-spacing: -.02em;
+  }
+  .aj-recap-sub {
+    font: 500 12px/1.4 'Inter', sans-serif;
+    color: #64748b;
+  }
+  .aj-recap-rows { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+  .aj-recap-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,.7);
+    border-radius: 10px;
+    font: 500 12px/1 'Inter', sans-serif;
+    color: #0a0d1a;
+  }
+  .aj-recap-row-name { flex: 1; }
+  .aj-recap-row-dur  { font-weight: 600; color: #6366f1; flex-shrink: 0; }
+  .aj-recap-row-status {
+    font: 600 10px/1 'Inter', sans-serif;
+    padding: 2px 6px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .aj-recap-row-status.s-confirmed { background: rgba(16,185,129,.1); color: #059669; }
+  .aj-recap-row-status.s-pending   { background: rgba(245,158,11,.1); color: #d97706; }
+  .aj-recap-row-status.s-refused   { background: rgba(239,68,68,.08); color: #dc2626; }
+  .aj-recap-row-status.s-auto      { background: #f0f2f8; color: #94a3b8; }
+
+  /* Prompt log si gap */
+  .aj-log-prompt {
+    background: rgba(99,102,241,.05);
+    border: 1.5px dashed rgba(99,102,241,.25);
+    border-radius: 20px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    transition: border-color .15s, background .15s;
+    animation: ajWidgetIn .5s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .aj-log-prompt:active { transform: scale(.985); }
+  .aj-log-prompt-ico { font-size: 22px; flex-shrink: 0; }
+  .aj-log-prompt-txt {
+    flex: 1;
+    font: 500 13px/1.4 'Inter', sans-serif;
+    color: #4b5563;
+  }
+  .aj-log-prompt-cta {
+    font: 700 12px/1 'Inter', sans-serif;
+    color: #6366f1;
+    flex-shrink: 0;
+  }
 </style>`;
 
 // ─── Helpers ──────────────────────────────────────────────────────
@@ -401,7 +478,7 @@ async function renderInto(root, _me) {
   // ─── Fetch en parallèle ────────────────────────────────────────
   const today = todayISO();
 
-  const [valsToday, valsAll, elevesAll, consolidRes] = await Promise.all([
+  const [valsToday, valsAll, elevesAll, consolidRes, todaySessionsRes] = await Promise.all([
     // Validations d'aujourd'hui (faites par moi)
     sb
       .from('validations')
@@ -433,6 +510,9 @@ async function renderInto(root, _me) {
       .not('consolidation_due_at', 'is', null)
       .lt('consolidation_due_at', new Date().toISOString())
       .is('consolidation_done_at', null),
+
+    // Sessions loggées aujourd'hui (pour le widget récap soir)
+    sb.rpc('get_my_today_sessions').catch(() => ({ data: null })),
   ]);
 
   if (valsToday.error || valsAll.error) {
@@ -486,6 +566,51 @@ async function renderInto(root, _me) {
   });
   const reconnectCount = reconnectList.length;
 
+  // ─── Widget récap soir ────────────────────────────────────────
+  const isEvening = new Date().getHours() >= 18;
+  const todaySessions = todaySessionsRes?.data || [];
+  const totalSessionMinutes = todaySessions.reduce((s, r) => s + (r.duration_minutes || 0), 0);
+  const confirmedCount = todaySessions.filter(r => r.confirmation_status === 'confirmed').length;
+
+  function _fmtMin(min) {
+    if (!min) return '0h';
+    const h = Math.floor(min / 60), m = min % 60;
+    if (h === 0) return `${m}min`;
+    return m === 0 ? `${h}h` : `${h}h${m}`;
+  }
+  function _statusLabel(s) {
+    if (s === 'confirmed') return '<span class="aj-recap-row-status s-confirmed">✓ Confirmée</span>';
+    if (s === 'refused')   return '<span class="aj-recap-row-status s-refused">Refusée</span>';
+    if (s === 'auto')      return '<span class="aj-recap-row-status s-auto">Auto</span>';
+    return '<span class="aj-recap-row-status s-pending">En attente</span>';
+  }
+
+  const recapWidget = isEvening && todaySessions.length > 0 ? `
+    <div class="aj-recap" id="aj-recap-soir" role="button" tabindex="0" aria-label="Ouvrir le log de session">
+      <div class="aj-recap-head">
+        <span style="font-size:18px" aria-hidden="true">🌙</span>
+        <span class="aj-recap-title">Ta journée</span>
+        <span class="aj-recap-kpi">${_fmtMin(totalSessionMinutes)}</span>
+      </div>
+      <div class="aj-recap-sub">${todaySessions.length} session${todaySessions.length > 1 ? 's' : ''} loggée${todaySessions.length > 1 ? 's' : ''}${confirmedCount > 0 ? ` · ${confirmedCount} confirmée${confirmedCount > 1 ? 's' : ''} par tes élèves` : ''}</div>
+      <div class="aj-recap-rows">
+        ${todaySessions.map(s => `
+          <div class="aj-recap-row">
+            <span class="aj-recap-row-name">${esc(s.eleve_prenom || 'Élève')}</span>
+            <span class="aj-recap-row-dur">${_fmtMin(s.duration_minutes)}</span>
+            ${_statusLabel(s.confirmation_status)}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : isEvening && todaySessions.length === 0 && mesElevesActifs.length > 0 ? `
+    <div class="aj-log-prompt" id="aj-log-prompt-soir" role="button" tabindex="0" aria-label="Logger une session">
+      <span class="aj-log-prompt-ico" aria-hidden="true">💭</span>
+      <span class="aj-log-prompt-txt">Tu as fait conduire aujourd'hui ?</span>
+      <span class="aj-log-prompt-cta">Logger →</span>
+    </div>
+  ` : '';
+
   // ─── Render ───────────────────────────────────────────────────
   root.innerHTML = `
     ${STYLE}
@@ -495,6 +620,8 @@ async function renderInto(root, _me) {
         <h1 class="aj-h1">Aujourd'hui</h1>
         <p class="aj-date">${formatDate(new Date())}</p>
       </header>
+
+      ${recapWidget}
 
       <!-- Widgets KPI iOS-style — 2×2 grid -->
       <div class="aj-widgets">
@@ -605,6 +732,17 @@ async function renderInto(root, _me) {
   root.querySelector('#aj-w-reconnect')?.addEventListener('click', () => {
     track('widget.reconnect.clicked', { count: reconnectCount });
     navigate('#/eleves?tab=arelancer');
+  });
+
+  // Recap soir / prompt log
+  const openModal = async () => {
+    const { openLogSessionModal } = await import('@/components/log-session-modal.js');
+    openLogSessionModal();
+  };
+  root.querySelector('#aj-recap-soir')?.addEventListener('click', openModal);
+  root.querySelector('#aj-log-prompt-soir')?.addEventListener('click', () => {
+    track('log_prompt.soir.clicked');
+    openModal();
   });
 
   root.querySelectorAll('.aj-eleve-row[data-eleve-id]').forEach(row => {

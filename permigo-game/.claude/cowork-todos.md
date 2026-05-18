@@ -5,6 +5,176 @@
 
 ---
 
+## [2026-05-18] 🆕 CHANTIER PERMIGO LOG — Sessions moniteur (zéro planning, full gamif)
+
+> **Concept :** PermiGo n'est PAS un outil de planning. Le moniteur log ses sessions APRÈS coup en 3 taps. L'élève confirme (anti-triche). Ranking moniteur 4-dim. ADN = Uber Driver + Apple.
+> **Détail produit complet** dans la conversation Cowork du 2026-05-18.
+
+### ✅ Backend DÉPLOYÉ en prod le 2026-05-18 (Cowork)
+
+**Table `sessions_moniteur`** :
+```sql
+CREATE TABLE sessions_moniteur (
+  id uuid PK,
+  moniteur_id uuid → profiles,
+  eleve_id uuid → profiles,
+  duration_minutes int CHECK (IN (30,45,60,90,120,150,180)),
+  session_date date,            -- jour réel de la session
+  logged_at timestamptz,        -- horodatage saisie
+  confirmation_status text,     -- 'pending'|'confirmed'|'refused'|'auto'
+  confirmed_at timestamptz,
+  flagged boolean,
+  notes text
+);
+```
+
+**RPC disponibles (à utiliser côté Claude Code) :**
+
+```js
+// 1. Logger une session (côté moniteur)
+const { data, error } = await sb.rpc('log_session', {
+  p_eleve_id: eleveId,
+  p_duration_minutes: 120,    // 30|45|60|90|120|150|180
+  p_session_date: '2026-05-18', // YYYY-MM-DD, max 48h ago
+  p_notes: null
+});
+// Retour : { ok: true, session: {...} } OU { error: 'cap_daily_exceeded'|'cap_weekly_exceeded'|'session_too_old'|'invalid_duration' }
+
+// 2. Confirmer/refuser une session (côté élève)
+await sb.rpc('confirm_session', {
+  p_session_id: id,
+  p_status: 'confirmed'  // 'confirmed' | 'refused'
+});
+
+// 3. Sessions à confirmer pour l'élève (banner home élève)
+const { data } = await sb.rpc('get_my_pending_sessions');
+// Retour : [{ id, moniteur_prenom, duration_minutes, session_date }]
+
+// 4. Récap journée moniteur (widget soir accueil)
+const { data } = await sb.rpc('get_my_today_sessions');
+// Retour : [{ id, eleve_prenom, duration_minutes, confirmation_status }]
+
+// 5. Suggestions smart (habitudes)
+const { data } = await sb.rpc('suggest_next_session', {
+  p_day_of_week: 2  // 0=dimanche, 1=lundi...
+});
+// Retour : [{ eleve_id, eleve_prenom, typical_duration, last_seen_at, score }]
+
+// 6. Ranking moniteurs du mois (Pulse gérant + Profil moniteur)
+const { data } = await sb.rpc('get_moniteur_ranking', {
+  p_month: '2026-05-01'  // 1er du mois, défaut = mois courant
+});
+// Retour : [{ moniteur_id, moniteur_prenom, score_total, hours_confirmed, n_validations, n_eleves_diff, n_jours_actifs, rank }]
+```
+
+**Garde-fous appliqués côté DB (CHECK + trigger BEFORE INSERT) :**
+- Cap 10h/jour par moniteur (CHECK contre SUM existant)
+- Cap 50h/semaine par moniteur
+- Session date max 48h dans le passé
+- Duration valide uniquement (30/45/60/90/120/150/180 min)
+- Insert auto crée une notif `session_confirmation` pour l'élève
+- pg_cron `auto-confirm-sessions-daily` à 03h UTC qui passe `pending` → `auto` après 7j
+
+**dispatch-push v4** ajoute le type `session_confirmation` qui rend :
+- title : `Confirme ta session avec {moniteur_prenom}`
+- body : `{duration_minutes} min · {date_lisible}`
+- route : `#/` (accueil élève — la bannière de confirmation se trouve là)
+
+### 🎨 Frontend à faire (pour Claude Code)
+
+#### 3.1 FAB "+ Session" — composant `src/components/log-session-fab.js`
+
+Bouton flottant rond en bas-droite, visible sur **toutes les pages moniteur** (enseignant + gerant si gérant fait aussi de la conduite). Icône `plus`, accent indigo, animation pulse subtile.
+
+```js
+import { mountLogSessionFab } from '@/components/log-session-fab.js';
+
+// Dans router.js ou main.js, après route enseignant/gerant :
+if (me.role === 'enseignant' || me.role === 'gerant') {
+  mountLogSessionFab(document.body);
+}
+```
+
+Tap → ouvre modal `log-session-modal.js`.
+
+#### 3.2 Modal log session — `src/components/log-session-modal.js`
+
+3 sections, scroll vertical :
+
+**A. Choix élève** : liste avec dernière session pré-cochée. Pull suggestions de `suggest_next_session(today_day_of_week)`. Search box si beaucoup d'élèves.
+
+**B. Durée** : 7 chips one-tap : `30min · 1h · 1h15 · 1h30 · 2h · 2h30 · 3h`. Sélection par défaut = 1h30. Style chips ronds avec accent quand sélectionnés.
+
+**C. Jour** : 3 chips horizontaux : `Aujourd'hui · Hier · Avant-hier`. Par défaut "Aujourd'hui". Au-delà = 48h = bloqué côté DB.
+
+**Submit** :
+- Toast vert "+10 XP · Session loggée" 
+- Appel `log_session()` 
+- Si error : affiche raison ('cap_daily_exceeded' → "Tu as déjà 10h aujourd'hui", etc.)
+- Si success : ferme modal + maj cache local si dispo
+
+#### 3.3 Bannière confirmation élève — `src/components/session-confirmation-banner.js`
+
+Sur l'accueil élève, si `get_my_pending_sessions()` retourne >=1 session :
+
+Carte premium avec :
+- "Rayan a déclaré 2h de conduite avec toi mardi"
+- 2 boutons : `[✓ Oui c'est juste]` (vert) · `[✗ Non]` (rouge léger)
+- Tap → `confirm_session(id, 'confirmed'|'refused')` + retire de la liste
+- Si plusieurs sessions à confirmer : stack vertical
+
+#### 3.4 Widget récap soir — `src/pages/enseignant/aujourdhui.js`
+
+Si l'heure locale > 18h, afficher en haut un widget :
+```
+🌙 Ta journée
+3 sessions loggées · 6h totales
+[2 confirmées par tes élèves]
+```
+
+Si gap >48h sans log un jour habituel : afficher "💭 Tu as fait conduire hier ? Tape pour logger."
+
+#### 3.5 Ranking moniteur
+
+**Côté Pulse gérant** : section "🏆 Top moniteurs ce mois" avec top 3, chacun avec son score + 4 sous-métriques (heures · validations · élèves · jours actifs).
+
+**Côté Profil moniteur** : sa position dans le ranking + ses 4 métriques perso + comparaison vs moniteur n+1.
+
+### 📋 Order recommandé
+
+1. 3.2 Modal (cœur du flow)
+2. 3.1 FAB (déclencheur)
+3. 3.3 Bannière confirmation élève (boucle anti-triche)
+4. 3.5 Ranking (le truc gratifiant)
+5. 3.4 Widget récap soir (cherry on top)
+
+### 🚫 Hors-scope (ne PAS faire)
+
+- ❌ Pas de calendrier ni planning à l'avance
+- ❌ Pas de récurrence hebdo
+- ❌ Pas de sync Google Calendar
+- ❌ Pas de géoloc
+
+### 📋 Demandes Claude Code → router.js / main.js
+
+#### FAB log session ✅ TRAITÉ (router.js : mount/unmount selon role)
+
+```js
+// Dans router.js, après le mount de chaque page enseignant :
+import { mountLogSessionFab, unmountLogSessionFab } from '@/components/log-session-fab.js';
+
+// À ajouter dans le beforeUnmount / unmount de chaque page enseignant :
+unmountLogSessionFab();
+
+// À ajouter après le mount de chaque page enseignant :
+mountLogSessionFab();
+
+// Pages concernées : tous les hash routes #/enseignant/* 
+// (aujourd'hui, mes-eleves, fiche-eleve, livret-remc, planning, validation)
+```
+
+---
+
 ## [2026-05-18] 🆕 CHANTIER COFFRES + NOTIFS ÉMOTIONNELLES — pour Claude Code
 
 > **Contexte :** Cowork prépare le backend (table `chest_unlocks`, RPC `unlock_chest` / `open_chest` / `get_my_chests`, edge function `send-emotional-nudge` + pg_cron 11h Paris). Claude Code prend tout le frontend.

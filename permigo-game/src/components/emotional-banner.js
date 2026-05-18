@@ -12,7 +12,6 @@ import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
-import { findById, hydrate } from '@/data/emotional-nudges.js';
 
 // ─── Styles ──────────────────────────────────────────────────────
 const STYLES = `
@@ -132,7 +131,7 @@ function ensureBannerStyles() {
 }
 
 async function markRead(notifId) {
-  await sb.from('notifications').update({ read: true }).eq('id', notifId).catch(() => {});
+  await sb.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', notifId).catch(() => {});
 }
 
 function renderBanner(notif, content) {
@@ -155,22 +154,20 @@ export const emotionalBanner = {
     try {
       const { data, error } = await sb
         .from('notifications')
-        .select('id, type, data')
+        .select('id, data')
         .eq('user_id', me.id)
-        .eq('read', false)
-        .filter('type', 'like', 'emotional\\_%')
+        .eq('type', 'emotional_nudge')
+        .is('read_at', null)
         .order('created_at', { ascending: false })
         .limit(1);
 
       if (error || !data?.length) return;
       const notif = data[0];
 
-      const nudgeId = notif.data?.nudge_id;
-      const vars    = notif.data?.vars || {};
-      const template = findById(nudgeId);
-      if (!template) return;
+      // data est déjà pré-hydraté côté backend : { template_id, tone, title, body, cta, route }
+      const content = notif.data;
+      if (!content?.title || !content?.tone) return;
 
-      const content = hydrate(template, vars);
       ensureBannerStyles();
 
       // Inject au début du container .acc (ou dans root si .acc absent)
@@ -180,7 +177,7 @@ export const emotionalBanner = {
       const el = div.firstElementChild;
       container.insertBefore(el, container.firstChild);
 
-      track('emotional_banner.shown', { nudge_id: nudgeId, tone: content.tone });
+      track('emotional_banner.shown', { template_id: content.template_id, tone: content.tone });
 
       // Fermer + mark read
       const close = async () => {
@@ -193,13 +190,13 @@ export const emotionalBanner = {
 
       // CTA click
       el.querySelector('[data-cta="1"]')?.addEventListener('click', () => {
-        track('emotional_banner.cta_clicked', { nudge_id: nudgeId });
+        track('emotional_banner.cta_clicked', { template_id: content.template_id });
         close();
       });
 
       // Close button
       el.querySelector('[data-close="1"]')?.addEventListener('click', () => {
-        track('emotional_banner.dismissed', { nudge_id: nudgeId });
+        track('emotional_banner.dismissed', { template_id: content.template_id });
         close();
       });
 

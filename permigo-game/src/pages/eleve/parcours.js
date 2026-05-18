@@ -1668,7 +1668,7 @@ function openFiche(root, compId, ws, validatedMap) {
           <div class="fiche-status-ico">${icon('zap', { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Prochaine étape</div>
-            <div class="fiche-status-sub">Demande à ton moniteur de te faire pratiquer cette compétence lors de ta prochaine leçon.</div>
+            <div class="fiche-status-sub">Pratique cette compétence avec ton moniteur — il la validera dans ton livret.</div>
           </div>
         </div>`;
     }

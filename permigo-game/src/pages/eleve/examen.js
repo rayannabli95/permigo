@@ -275,7 +275,6 @@ const STYLE = `<style>
 // ─── Constants ───────────────────────────────────────────────────
 const LS_KEY_DATE    = 'permigo:exam_date';
 const LS_KEY_REVISED = 'permigo:has_revised';
-const LECONS_TARGET  = 20;
 const COMPS_TARGET   = 16; // > 50% of 31
 const QUIZ_TARGET    = 70;
 
@@ -321,7 +320,7 @@ function isRevised() {
 
 // ─── Data ────────────────────────────────────────────────────────
 async function loadData(meId) {
-  const [validRes, streakRes, leconRes, quizRes] = await Promise.allSettled([
+  const [validRes, streakRes, quizRes] = await Promise.allSettled([
     sb.from('validations')
       .select('competence_id', { count: 'exact' })
       .eq('eleve_id', meId)
@@ -332,25 +331,20 @@ async function loadData(meId) {
       .eq('user_id', meId)
       .maybeSingle(),
 
-    sb.from('lecons_realisees')
-      .select('id', { count: 'exact' })
-      .eq('eleve_id', meId),
-
     sb.from('quiz_attempts')
       .select('score')
       .eq('user_id', meId)
       .not('score', 'is', null),
   ]);
 
-  const compsCount  = validRes.value?.count  ?? 0;
-  const streak      = streakRes.value?.data?.current_streak ?? 0;
-  const leconsCount = leconRes.value?.count  ?? 0;
-  const scores      = quizRes.value?.data    ?? [];
-  const avgScore    = scores.length
+  const compsCount = validRes.value?.count  ?? 0;
+  const streak     = streakRes.value?.data?.current_streak ?? 0;
+  const scores     = quizRes.value?.data    ?? [];
+  const avgScore   = scores.length
     ? Math.round(scores.reduce((s, r) => s + (r.score ?? 0), 0) / scores.length)
     : null;
 
-  return { compsCount, streak, leconsCount, avgScore };
+  return { compsCount, streak, avgScore };
 }
 
 // ─── Render helpers ───────────────────────────────────────────────
@@ -414,17 +408,10 @@ function renderCountdown(examDate) {
 </div>`;
 }
 
-function renderChecklist({ leconsCount, compsCount, streak, avgScore }) {
+function renderChecklist({ compsCount, streak, avgScore }) {
   const revised = isRevised();
 
   const criteria = [
-    {
-      label:  'Leçons effectuées',
-      sub:    `Objectif : ${LECONS_TARGET} leçons minimum`,
-      pass:   leconsCount >= LECONS_TARGET,
-      badge:  `${leconsCount}/${LECONS_TARGET}`,
-      ico:    '🚗',
-    },
     {
       label:  'Parcours REMC > 50%',
       sub:    `${compsCount} compétences validées sur 31`,
@@ -458,7 +445,7 @@ function renderChecklist({ leconsCount, compsCount, streak, avgScore }) {
 
   const passCount = criteria.filter(c => c.pass).length;
   let readinessClass, readinessTxt;
-  if (passCount >= 4) { readinessClass = 'high'; readinessTxt = `${icon('check-circle', { size: 14 })} Tu es bien préparé${passCount === 5 ? ' · Excellent !' : ' · Encore un effort !'}`; }
+  if (passCount >= 3) { readinessClass = 'high'; readinessTxt = `${icon('check-circle', { size: 14 })} Tu es bien préparé${passCount === 4 ? ' · Excellent !' : ' · Encore un effort !'}`; }
   else if (passCount >= 2) { readinessClass = 'mid';  readinessTxt = `${icon('alert-triangle', { size: 14 })} Progression correcte · Continue !`; }
   else                    { readinessClass = 'low';  readinessTxt = `${icon('alert-circle', { size: 14 })} Encore du travail · Ne lâche pas !`; }
 
