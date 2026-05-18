@@ -4,6 +4,37 @@
 
 ---
 
+## 🧠 RÈGLE #0 — ABSOLUE : SCAN DES SKILLS AVANT CHAQUE RÉPONSE
+
+**OBLIGATOIRE.** Avant de répondre à TOUT message du user, tu DOIS :
+
+1. **Lire** le contenu de `.claude/skills/` (chaque dossier = 1 skill avec son `SKILL.md`)
+2. **Comparer** le message du user aux `description:` (frontmatter YAML) de chaque skill
+3. **Invoquer** la skill la plus pertinente AVANT de générer ta réponse
+
+**Aucune exception.** Même pour une question simple, tu scannes. Tu n'attends JAMAIS que le user invoque explicitement une skill par son nom — c'est À TOI de détecter et d'utiliser.
+
+### Skills installées actuellement (à scanner à chaque message)
+
+| Skill | Trigger naturel quand le user dit… |
+|---|---|
+| `concise-planning` | "fais un plan", "comment je m'attaque à", "découpe ça" |
+| `lint-and-validate` | après chaque code change (automatique) |
+| `git-pushing` | "push", "commit", "save sur GitHub" |
+| `kaizen` | "améliore", "refactor", "comment je peux faire mieux" |
+| `systematic-debugging` | "bug", "ça marche pas", "erreur", "pourquoi…" |
+| `emil-design-eng` | UI, animations, easing, transitions, micro-interactions |
+| `llm-council` | "council this", "should I X or Y", décision à fort enjeu |
+| `page-vanilla` | nouvelle page vanilla JS pour PermiGo |
+| `supabase-permigo` | requête / migration / RLS Supabase du projet |
+| `triple-validation` | tout ce qui touche au flow pédagogique Triple Validation |
+
+**Tu peux invoquer plusieurs skills en combinaison.** Ex : `systematic-debugging` + `supabase-permigo` pour un bug DB.
+
+**Anti-rationalisation** : si tu réponds sans avoir invoqué de skill alors qu'une matchait → c'est un échec. Le user attend que tu sois proactif sur ça.
+
+---
+
 ## 🎯 Mission (ne JAMAIS perdre de vue)
 
 > **PermiGo transforme l'apprentissage du permis de conduire en habitude quotidienne.**
