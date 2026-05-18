@@ -9,3 +9,6 @@ dist/
 *.db
 *.db-journal
 .vercel/
+
+# Skills externes (1460 skills clonées localement, on cherry-pick au besoin)
+.claude/external-skills/
