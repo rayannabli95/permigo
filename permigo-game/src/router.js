@@ -48,7 +48,19 @@ export async function route(root, me) {
     await mod.mount(root, param);
   } catch (e) {
     console.error('[router]', e);
-    root.innerHTML = `<div class="err">Page introuvable.</div>`;
+    // Stale chunk après deploy : le hash JS a changé, l'index.html cached
+    // référence un module qui n'existe plus → on force le reload
+    const isStaleChunk = /Failed to fetch dynamically imported module|Loading chunk|ChunkLoadError/i.test(e?.message || '');
+    if (isStaleChunk && !sessionStorage.getItem('reloaded_once')) {
+      sessionStorage.setItem('reloaded_once', '1');
+      window.location.reload();
+      return;
+    }
+    sessionStorage.removeItem('reloaded_once');
+    root.innerHTML = `<div class="err" style="padding:32px;text-align:center;color:#64748b">
+      <p>Cette page n'a pas pu être chargée.</p>
+      <button onclick="location.reload()" style="margin-top:12px;padding:12px 24px;border:0;background:#6366f1;color:#fff;border-radius:12px;cursor:pointer">Recharger</button>
+    </div>`;
   }
 }
 

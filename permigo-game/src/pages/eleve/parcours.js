@@ -197,37 +197,41 @@ const STYLE = `<style>
   border-radius: 0 0 22px 22px;
 }
 
-/* ── Sections Monde ── */
+/* ── Sections Monde — design propre, gradient subtil par monde ── */
 .prc-world {
   position: relative;
   padding: 0 0 70px;
   overflow: hidden;
   min-height: 300px;
+  /* Fond gradient doux : couleur du monde 5% → blanc */
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--wc, #10b981) 8%, #fff) 0%,
+    color-mix(in srgb, var(--wc, #10b981) 3%, #fff) 50%,
+    #fff 100%);
 }
-/* Image fond : cover + overlay blanc léger pour rester lisible en light */
-.prc-world-img {
+/* Petit visuel décoratif en haut à droite (au lieu de fond pleine page) */
+.prc-world-decor {
   position: absolute;
-  inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  z-index: 1;
-  filter: saturate(1.15) brightness(1.05) contrast(1.05);
-}
-/* Overlay blanc progressif pour que le texte et la route restent lisibles */
-.prc-world-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  /* Overlay réduit pour laisser les couleurs des images premium ressortir */
-  background:
-    linear-gradient(180deg,
-      rgba(255,255,255,.45) 0%,
-      rgba(255,255,255,.22) 40%,
-      rgba(255,255,255,.28) 70%,
-      rgba(255,255,255,.50) 100%);
+  top: 14px;
+  right: 14px;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  z-index: 4;
+  filter: drop-shadow(0 4px 12px rgba(11,13,26,.15));
+  opacity: .95;
+  transition: transform .4s cubic-bezier(.23,1,.32,1);
   pointer-events: none;
+}
+.prc-world.complete .prc-world-decor {
+  animation: decorFloat 2.6s ease-in-out infinite;
+}
+@keyframes decorFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-4px) rotate(3deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prc-world.complete .prc-world-decor { animation: none; }
 }
 
 /* En-tête du monde */
@@ -635,8 +639,8 @@ const STYLE = `<style>
   backdrop-filter: grayscale(.8);
   pointer-events: none;
 }
-.prc-world.locked .prc-world-img { filter: grayscale(.8) opacity(.5); }
-.prc-world.locked .prc-world-overlay { background: rgba(255,255,255,.6); }
+.prc-world.locked { background: #fafbfd; }
+.prc-world.locked .prc-world-decor { filter: grayscale(.9) opacity(.4); }
 
 /* Pont entre mondes */
 .prc-bridge {
@@ -1387,9 +1391,9 @@ function renderWorldSection(ws, validatedMap, hasNext) {
 <section class="prc-world ${isLocked ? 'locked' : ''} ${isComplete ? 'complete' : ''}"
          data-world-idx="${idx}"
          style="--wc:${meta.color};--wg:${meta.glow}">
-  <!-- Image décor -->
-  <img src="${meta.img}" alt="" class="prc-world-img" loading="lazy" draggable="false">
-  <div class="prc-world-overlay"></div>
+  <!-- Petit visuel décoratif top-right (au lieu de fond plein) -->
+  <img src="${meta.img}" alt="" class="prc-world-decor" loading="lazy" draggable="false">
+
 
   <!-- En-tête monde -->
   <div class="prc-world-hd">
