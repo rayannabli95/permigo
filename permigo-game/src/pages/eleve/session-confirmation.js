@@ -241,7 +241,7 @@ const STYLE = `<style>
   display: flex;
   flex-direction: column;
   gap: 8px;
-  z-index: 50;
+  z-index: 350;
 }
 .sc-btn-confirm {
   display: flex; align-items: center; justify-content: center; gap: 8px;

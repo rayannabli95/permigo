@@ -572,12 +572,6 @@ async function renderInto(root, _me) {
         `).join('')}
       </div>
     </div>
-  ` : isEvening && todaySessions.length === 0 && mesElevesActifs.length > 0 ? `
-    <div class="aj-log-prompt" id="aj-log-prompt-soir" role="button" tabindex="0" aria-label="Enregistrer une session">
-      <span class="aj-log-prompt-ico" aria-hidden="true">💭</span>
-      <span class="aj-log-prompt-txt">Tu as fait conduire aujourd'hui ?</span>
-      <span class="aj-log-prompt-cta">Enregistrer →</span>
-    </div>
   ` : '';
 
   // ─── Render ───────────────────────────────────────────────────
@@ -702,7 +696,6 @@ async function renderInto(root, _me) {
   // Recap soir / prompt log → page dédiée plein écran
   const goLogSession = () => { track('log_prompt.soir.clicked'); navigate('#/log-session'); };
   root.querySelector('#aj-recap-soir')?.addEventListener('click', goLogSession);
-  root.querySelector('#aj-log-prompt-soir')?.addEventListener('click', goLogSession);
 
   root.querySelectorAll('.aj-eleve-row[data-eleve-id]').forEach(row => {
     row.addEventListener('click', () => {

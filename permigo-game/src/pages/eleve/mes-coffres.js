@@ -308,10 +308,8 @@ export async function mount(root) {
         const WORLD_NAMES = ['', 'Sécurité', 'Manœuvres', 'Conduite', 'Maîtrise'];
         openChestModal({ worldNum, worldName: WORLD_NAMES[worldNum] || `Monde ${worldNum}` });
       } else {
-        // Streak / other chest: mark via RPC and show a simple open
-        openChest(chestType)
-          .then(() => {
-            // Refresh the card to "opened" state
+        openChest(chestType).then(result => {
+          const markOpened = () => {
             card.classList.remove('mc-can-open');
             card.classList.add('mc-opened');
             card.tabIndex = -1;
@@ -324,8 +322,17 @@ export async function mount(root) {
             const sub = card.querySelector('.mc-sub');
             if (sub) sub.textContent = 'Ouvert aujourd\'hui';
             card.querySelector('.mc-rewards')?.remove();
-          })
-          .catch(() => {});
+          };
+          if (result?.ok) {
+            markOpened();
+            toast(`${meta.label} ouvert ! +${meta.xp} XP +${meta.gemmes} 💎`, 'success');
+          } else if (result?.error === 'already_opened') {
+            markOpened();
+            toast('Tu as déjà ouvert ce coffre', 'info');
+          } else {
+            toast(result?.error || 'Erreur lors de l\'ouverture', 'error');
+          }
+        });
       }
       track('chest.opened_from_page', { chest_type: chestType });
     };

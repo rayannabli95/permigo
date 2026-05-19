@@ -1158,10 +1158,10 @@ const CSS = `
 .ls-dup-confirm:active { opacity: .85; }
 .ls-dup-view {
   width: 100%; padding: 13px;
-  border: 1.5px solid #6366f1;
+  border: 1.5px solid #4f46e5;
   border-radius: 12px;
   font: 600 13px/1 'Inter', sans-serif;
-  color: #6366f1;
+  color: #4f46e5;
   background: rgba(99,102,241,.05);
   cursor: pointer;
   min-height: 46px;

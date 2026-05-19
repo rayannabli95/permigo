@@ -192,7 +192,7 @@ const STYLE = `<style>
     border: 1.5px solid var(--bo);
     border-radius: 10px;
     background: var(--su);
-    color: var(--mu);
+    color: var(--ink);
     font-size: 16px;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -200,32 +200,11 @@ const STYLE = `<style>
     transition: background .12s, color .12s;
     font-family: inherit;
   }
-  .btn-cancel-cta:active { background: var(--bg2); color: #0a0d1a; }
+  .btn-cancel-cta:active { background: var(--bg2); }
 
   .empty { padding: 40px 20px; text-align: center; color: #94a3b8; font: 500 14px/1.5 'Inter', sans-serif; }
   .v-loading { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 
-  /* Bouton enregistrer séance */
-  .btn-mode-rapide {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    background: rgba(99,102,241,.08);
-    border: 1.5px solid rgba(99,102,241,.2);
-    border-radius: 10px;
-    color: #6366f1;
-    font: 600 13px/1 'Inter', sans-serif;
-    cursor: pointer;
-    transition: background .15s cubic-bezier(.23,1,.32,1),
-                transform .15s cubic-bezier(.23,1,.32,1);
-    min-height: 36px;
-    flex-shrink: 0;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .btn-mode-rapide:hover { background: rgba(99,102,241,.14); }
-  }
-  .btn-mode-rapide:active { transform: scale(.97); }
 </style>`;
 
 // Module-level state (reset à chaque mount)
@@ -396,15 +375,9 @@ function render() {
   _root.innerHTML = `
     ${STYLE}
     <div class="vp anim-slide-up">
-      <header class="vp-hd" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-        <div>
-          <h1 class="vp-h1">Valider une compétence</h1>
-          <p class="vp-sub">L'élève reçoit le quiz instantanément après validation.</p>
-        </div>
-        <button class="btn-mode-rapide" id="btn-mode-rapide" type="button" aria-label="Enregistrer une séance"
-                style="display:flex;align-items:center;gap:6px;">
-          ${icon('plus', { size: 15, strokeWidth: 2.5 })} Enreg. séance
-        </button>
+      <header class="vp-hd">
+        <h1 class="vp-h1">Valider une compétence</h1>
+        <p class="vp-sub">L'élève reçoit le quiz instantanément après validation.</p>
       </header>
 
       <section class="step step-1">
@@ -518,15 +491,6 @@ function renderCta() {
 // ─── Event wiring ────────────────────────────────────────────────
 // Cleanup avant ré-attache pour éviter les listeners cumulés à chaque render
 function wire() {
-  // Bouton "Enreg. séance" → redirige vers log-session (pré-sélection élève si dispo)
-  const mrBtn = _root.querySelector('#btn-mode-rapide');
-  if (mrBtn) {
-    mrBtn.addEventListener('click', () => {
-      const path = _eleve ? `#/log-session/${_eleve.id}` : '#/log-session';
-      navigate(path);
-    });
-  }
-
   // Clone-replace pour réinitialiser les listeners sur chaque élément
   _root.querySelectorAll('[data-eleve-id]').forEach(el => {
     const fresh = el.cloneNode(true);

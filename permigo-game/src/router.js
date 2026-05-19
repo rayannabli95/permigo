@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // Router minimal — route selon role + hash
 // ═══════════════════════════════════════════════════════════════
-import { mountLogSessionFab, unmountLogSessionFab } from '@/components/log-session-fab.js';
+import { unmountLogSessionFab } from '@/components/log-session-fab.js';
 
 const ROUTES = {
   eleve: {
@@ -71,12 +71,8 @@ export async function route(root, me) {
   const param = segments[1] || null; // ex: eleveId pour #/livret/{id}
   const loader = map[routeName] || map.default;
 
-  // ─── FAB "+ Session" — visible uniquement pour les enseignants ───
-  if (role === 'enseignant') {
-    mountLogSessionFab();
-  } else {
-    unmountLogSessionFab();
-  }
+  // nav-bottom gère le "+" central — on retire le FAB flottant noir (doublon)
+  unmountLogSessionFab();
 
   try {
     const mod = await loader();

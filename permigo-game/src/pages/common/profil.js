@@ -354,6 +354,13 @@ const STYLE = `<style>
 
 const ROLE_LABELS = { eleve: 'Élève', enseignant: 'Enseignant', gerant: 'Gérant' };
 
+function renderAccountActions(me) {
+  return `
+    <button class="prf-btn-logout" id="btn-logout">Se déconnecter</button>
+    ${me.role === 'eleve' ? '<button class="prf-btn-delete" id="btn-delete">Supprimer mon compte</button>' : ''}
+  `;
+}
+
 // ─── Entry point ─────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
@@ -552,8 +559,7 @@ export async function mount(root) {
 
   ${_renderNotifToggle()}
 
-  <button class="prf-btn-logout" id="btn-logout">Se déconnecter</button>
-  <button class="prf-btn-delete" id="btn-delete">Supprimer mon compte</button>
+  ${renderAccountActions(me)}
 
   <div class="prf-version">PermiGo v7 · Sprint 2</div>
 </div>`;
@@ -579,7 +585,7 @@ export async function mount(root) {
   // Wire referral (élève)
   if (me.role === 'eleve') _wireReferral(root, me);
 
-  root.querySelector('#btn-logout').addEventListener('click', async () => {
+  root.querySelector('#btn-logout')?.addEventListener('click', async () => {
     track('auth.logout', { user_role: me.role });
     try {
       await logout();
@@ -590,7 +596,7 @@ export async function mount(root) {
     }
   });
 
-  root.querySelector('#btn-delete').addEventListener('click', () => {
+  root.querySelector('#btn-delete')?.addEventListener('click', () => {
     alert('La suppression de compte est gérée par l\'administrateur de ton auto-école. Contacte-le directement.');
   });
 

@@ -248,16 +248,16 @@ export async function unlockChest(chestType, rewards = {}) {
   }
 }
 
-/** @returns {Promise<{opened:boolean, chest:object}|null>} */
+/** @returns {Promise<{ok:boolean, data?, error?, chest?}>} */
 export async function openChest(chestType) {
   try {
     const { data, error } = await sb.rpc('open_chest', { p_chest_type: chestType });
-    if (error) throw error;
+    if (error) return { ok: false, error: error.message || String(error) };
+    if (data?.error) return { ok: false, error: data.error, chest: data.chest };
     _dbCacheSet([]);
-    return data;
+    return { ok: true, data };
   } catch (e) {
-    console.warn('[chests] openChest failed', e?.message);
-    return null;
+    return { ok: false, error: e?.message || 'unknown' };
   }
 }
 
