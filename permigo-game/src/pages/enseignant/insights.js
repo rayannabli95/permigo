@@ -32,22 +32,22 @@ const STYLE = `<style>
     padding: 20px 16px 100px;
     max-width: 600px;
     margin: 0 auto;
-    background: #f8f9fc;
+    background: var(--bg);
     font-family: 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
   }
 
   /* Header */
   .ins-hd { margin-bottom: 24px; }
   .ins-h1 {
     font: 700 26px/1.15 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     margin: 0 0 4px;
     letter-spacing: -.025em;
   }
   .ins-sub {
     font: 500 13px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     margin: 0;
   }
 
@@ -56,7 +56,7 @@ const STYLE = `<style>
     font: 600 11px/1 'Inter', sans-serif;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: #94a3b8;
+    color: var(--mu2);
     margin: 0 0 12px;
     display: flex;
     align-items: center;
@@ -78,8 +78,8 @@ const STYLE = `<style>
     margin-bottom: 28px;
   }
   .ins-widget {
-    background: #fff;
-    border: 1px solid #e2e6f2;
+    background: var(--su);
+    border: 1px solid var(--bo);
     border-radius: 24px;
     padding: 18px;
     box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 6px 16px -8px rgba(10,13,26,.08);
@@ -104,19 +104,19 @@ const STYLE = `<style>
   }
   .ins-widget-lbl {
     font: 600 11px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     text-transform: uppercase;
     letter-spacing: .07em;
   }
   .ins-widget-val {
     font: 700 30px/1 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     letter-spacing: -.025em;
     margin: 0;
   }
   .ins-widget-sub {
     font: 500 11px/1.3 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu);
     margin-top: 4px;
   }
   .ins-widget-delta {
@@ -129,8 +129,8 @@ const STYLE = `<style>
 
   /* Heatmap */
   .ins-heatmap-wrap {
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 20px;
     padding: 16px;
     box-shadow: 0 1px 2px rgba(10,13,26,.04);
@@ -144,7 +144,7 @@ const STYLE = `<style>
   }
   .ins-hmap-day-lbl {
     font: 500 10px/11px 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -152,7 +152,7 @@ const STYLE = `<style>
   }
   .ins-hmap-hour-lbl {
     font: 500 9px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     text-align: center;
   }
   .ins-hmap-cell {
@@ -168,7 +168,7 @@ const STYLE = `<style>
     gap: 6px;
     margin-top: 10px;
     font: 500 10px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
   }
   .ins-heatmap-legend-scale {
     display: flex;
@@ -181,8 +181,8 @@ const STYLE = `<style>
 
   /* Top élèves rows */
   .ins-eleve-row {
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 16px;
     padding: 12px 14px;
     display: flex;
@@ -209,13 +209,13 @@ const STYLE = `<style>
   .ins-eleve-info { flex: 1; min-width: 0; }
   .ins-eleve-name {
     font: 600 13px/1.2 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     margin-bottom: 3px;
   }
   .ins-eleve-meta {
     font: 500 11px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
   }
   .ins-badge {
     font: 600 11px/1 'Inter', sans-serif;
@@ -231,7 +231,7 @@ const STYLE = `<style>
   .ins-tabs {
     display: flex;
     gap: 4px;
-    background: #f0f2f8;
+    background: var(--bg2);
     padding: 4px;
     border-radius: 12px;
     margin-bottom: 12px;
@@ -243,21 +243,21 @@ const STYLE = `<style>
     background: transparent;
     border-radius: 8px;
     font: 600 12px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     cursor: pointer;
     min-height: 36px;
     transition: background .15s, color .15s;
   }
   .ins-tab.active {
-    background: #fff;
+    background: var(--su);
     color: #6366f1;
     box-shadow: 0 1px 2px rgba(10,13,26,.06);
   }
 
   /* Difficulté comps */
   .ins-diff-row {
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 16px;
     padding: 12px 14px;
     margin-bottom: 6px;
@@ -277,13 +277,13 @@ const STYLE = `<style>
   .ins-diff-info { flex: 1; min-width: 0; }
   .ins-diff-name {
     font: 500 13px/1.3 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     margin-bottom: 5px;
   }
   .ins-diff-bar-wrap {
     height: 4px;
-    background: #f0f2f8;
+    background: var(--bg2);
     border-radius: 2px;
     overflow: hidden;
   }
@@ -301,8 +301,8 @@ const STYLE = `<style>
   /* Recommandations */
   .ins-reco-list { display: flex; flex-direction: column; gap: 8px; }
   .ins-reco-card {
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 16px;
     padding: 14px 16px;
     display: flex;
@@ -317,12 +317,12 @@ const STYLE = `<style>
   .ins-reco-body { flex: 1; min-width: 0; }
   .ins-reco-ttl {
     font: 600 13px/1.3 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     margin-bottom: 3px;
   }
   .ins-reco-txt {
     font: 400 12px/1.5 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu);
   }
 
   /* Skeleton */
@@ -332,8 +332,8 @@ const STYLE = `<style>
   }
   .ins-skel-block {
     height: 80px;
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 20px;
     animation: insSkelPulse 1.4s ease-in-out infinite;
   }
@@ -347,10 +347,10 @@ const STYLE = `<style>
   .ins-empty {
     padding: 20px;
     text-align: center;
-    color: #94a3b8;
+    color: var(--mu2);
     font: 500 13px/1.5 'Inter', sans-serif;
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 16px;
   }
 </style>`;
@@ -393,7 +393,7 @@ export async function mount(root) {
     ${STYLE}
     <div class="ins-page">
       <header class="ins-hd">
-        <h1 class="ins-h1">Insights</h1>
+        <h1 class="ins-h1">Analyses</h1>
         <p class="ins-sub">Chargement…</p>
       </header>
       <div class="ins-skel">
@@ -641,7 +641,7 @@ function renderAll(root, me, data) {
     ${STYLE}
     <div class="ins-page anim-slide-up">
       <header class="ins-hd">
-        <h1 class="ins-h1">Insights</h1>
+        <h1 class="ins-h1">Analyses</h1>
         <p class="ins-sub">Votre activité pédagogique · 60 derniers jours</p>
       </header>
 

@@ -23,7 +23,7 @@
 - [x] Offline/online toast (main.js)
 - [x] Notif-listener fix (user_id = profiles.id + mark-read before quiz)
 
-### Sprint 2 (semaine 2) — Module pédagogie + Moniteur XP ✅ EN COURS
+### Sprint 2 (semaine 2) — Module pédagogie + Moniteur XP ✅ SHIPPÉ
 
 - [x] Migration 0003_xp_moniteur.sql (streak_pro_days + trigger XP)
 - [x] XP toast composant (src/components/xp-toast.js)
@@ -79,8 +79,8 @@
 ### Marketing-ready
 
 - [ ] OG image + meta SEO
-- [ ] Page publique auto-école (`permigo.app/<slug>`)
-- [ ] Témoignages élèves intégrés
+- [x] Page publique auto-école (`#/ecole/{slug}` — src/pages/public/ecole.js)
+- [x] Témoignages élèves intégrés (mock MVP)
 - [ ] Sticker "Certifié PermiGo" téléchargeable
 - [ ] QR code auto-école
 

@@ -27,13 +27,25 @@ async function boot() {
     if (me) syncFromPrefs(sb).catch(() => {});
 
     if (!me) {
-      // Cas spécial : invitation en cours d'activation
+      // Pages publiques accessibles sans authentification
       if (location.hash.startsWith('#/signup')) {
         const { mount } = await import('@/pages/public/signup.js');
         return mount(app);
       }
+      if (location.hash.startsWith('#/ecole/')) {
+        const slug = location.hash.replace('#/ecole/', '').split('?')[0];
+        const { mount } = await import('@/pages/public/ecole.js');
+        return mount(app, slug);
+      }
       const { mount } = await import('@/pages/auth/login.js');
       return mount(app);
+    }
+
+    // Onboarding magique — élèves jamais passés par le flow d'accueil
+    if (me.role === 'eleve' && !me.first_value_action_at) {
+      const { mount } = await import('@/pages/onboarding/index.js');
+      await mount(app);
+      return; // pas de chrome pendant l'onboarding
     }
 
     await route(app, me);

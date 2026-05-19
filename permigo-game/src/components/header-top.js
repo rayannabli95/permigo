@@ -14,7 +14,8 @@ const STYLE = `
     background: rgba(255,255,255,.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid #e2e6f2;
+    border-bottom: 1px solid var(--bo);
+    transition: background .2s;
     display: flex;
     align-items: center;
     justify-content: space-between;

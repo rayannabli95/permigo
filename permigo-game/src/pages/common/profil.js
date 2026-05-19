@@ -18,9 +18,9 @@ const STYLE = `<style>
   padding: 20px 16px 100px;
   max-width: 480px;
   margin: 0 auto;
-  color: #0a0d1a;
+  color: var(--ink);
   font-family: 'Inter', sans-serif;
-  background: #f8f9fc;
+  background: var(--bg);
 }
 .prf-avatar-wrap {
   display: flex;
@@ -40,7 +40,7 @@ const STYLE = `<style>
 }
 .prf-name {
   font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   text-align: center;
   letter-spacing: -0.022em;
 }
@@ -56,8 +56,8 @@ const STYLE = `<style>
 
 /* Info section */
 .prf-section {
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 20px;
   margin-bottom: 12px;
   overflow: hidden;
@@ -68,7 +68,7 @@ const STYLE = `<style>
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f2f8;
+  border-bottom: 1px solid var(--bo2);
 }
 .prf-row:last-child { border-bottom: none; }
 .prf-row-ico { font-size: 18px; line-height: 1; flex-shrink: 0; }
@@ -98,7 +98,7 @@ const STYLE = `<style>
   padding: 14px;
   background: none;
   border: 0;
-  color: #94a3b8;
+  color: var(--mu2);
   font: 500 13px/1 'Inter', sans-serif;
   cursor: pointer;
   text-decoration: underline;
@@ -106,8 +106,8 @@ const STYLE = `<style>
 
 /* Mon Année — enseignant only */
 .prf-annee {
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 20px;
   padding: 20px;
   margin-bottom: 12px;
@@ -117,7 +117,7 @@ const STYLE = `<style>
   font: 600 11px/1 'Inter', sans-serif;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--mu2);
   margin: 0 0 16px;
 }
 .prf-annee-grid {
@@ -126,29 +126,29 @@ const STYLE = `<style>
   gap: 8px;
 }
 .prf-kpi {
-  background: #f8f9fc;
-  border: 1px solid #e2e6f2;
+  background: var(--bg);
+  border: 1px solid var(--bo);
   border-radius: 12px;
   padding: 16px 12px;
   text-align: center;
 }
 .prf-kpi-n {
   font: 700 28px/1 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   display: block;
   margin-bottom: 6px;
   letter-spacing: -0.025em;
 }
 .prf-kpi-lbl {
   font: 500 11px/1.3 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 .prf-streak {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 20px;
   padding: 16px 20px;
   margin-bottom: 12px;
@@ -158,12 +158,12 @@ const STYLE = `<style>
 .prf-streak-body { flex: 1; }
 .prf-streak-n {
   font: 700 20px/1 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   letter-spacing: -0.022em;
 }
 .prf-streak-lbl {
   font: 500 12px/1.3 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-top: 4px;
 }
 
@@ -171,7 +171,7 @@ const STYLE = `<style>
 .prf-version {
   text-align: center;
   font: 500 11px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   padding: 20px 0 0;
 }
 
@@ -182,12 +182,12 @@ const STYLE = `<style>
   justify-content: space-between;
   gap: 16px;
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f2f8;
+  border-bottom: 1px solid var(--bo2);
   cursor: pointer;
   transition: background .15s;
   min-height: 60px;
 }
-.prf-notif-row:active { background: #f8f9fc; transform: scale(.99); }
+.prf-notif-row:active { background: var(--bg); transform: scale(.99); }
 @media(hover:hover)and(pointer:fine){.prf-notif-row:hover{background:#f8f9fc}}
 .prf-notif-ico { font-size: 18px; line-height: 1; flex-shrink: 0; }
 .prf-notif-body { flex: 1; min-width: 0; }
@@ -209,7 +209,7 @@ const STYLE = `<style>
   position: absolute;
   top: 3px; left: 3px;
   width: 20px; height: 20px;
-  background: #fff;
+  background: var(--su);
   border-radius: 50%;
   box-shadow: 0 1px 3px rgba(0,0,0,.2);
   transition: transform .2s cubic-bezier(.23,1,.32,1);
@@ -221,8 +221,8 @@ const STYLE = `<style>
 
 /* ── Parrainage (élève) ── */
 .prf-ref {
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 20px;
   padding: 20px;
   margin-bottom: 12px;
@@ -232,15 +232,15 @@ const STYLE = `<style>
   font: 600 11px/1 'Inter', sans-serif;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--mu2);
   margin: 0 0 14px;
 }
 .prf-ref-code-wrap {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f8f9fc;
-  border: 1.5px solid #e2e6f2;
+  background: var(--bg);
+  border: 1.5px solid var(--bo);
   border-radius: 12px;
   padding: 12px 14px;
   margin-bottom: 12px;
@@ -274,21 +274,21 @@ const STYLE = `<style>
 }
 .prf-ref-stat {
   flex: 1;
-  background: #f8f9fc;
-  border: 1px solid #e2e6f2;
+  background: var(--bg);
+  border: 1px solid var(--bo);
   border-radius: 12px;
   padding: 12px;
   text-align: center;
 }
 .prf-ref-stat-n {
   font: 700 22px/1 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   display: block;
   margin-bottom: 4px;
 }
 .prf-ref-stat-lbl {
   font: 500 10px/1.3 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 .prf-ref-share-btn {
   width: 100%;
@@ -324,11 +324,11 @@ const STYLE = `<style>
 .prf-ref-apply-input {
   flex: 1;
   padding: 12px 14px;
-  background: #f8f9fc;
-  border: 1.5px solid #e2e6f2;
+  background: var(--bg);
+  border: 1.5px solid var(--bo);
   border-radius: 12px;
   font: 600 14px/1 'IBM Plex Mono', monospace;
-  color: #0a0d1a;
+  color: var(--ink);
   letter-spacing: .08em;
   text-transform: uppercase;
   outline: none;

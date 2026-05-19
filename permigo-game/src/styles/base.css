@@ -105,6 +105,11 @@
   }
 }
 
+/* Dark mode: header glass + chrome overrides */
+[data-theme="dark"] #header-bar {
+  background: rgba(24,27,48,.92) !important;
+}
+
 * { box-sizing: border-box; }
 html {
   font-size: 14px;
@@ -116,7 +121,7 @@ html {
 
 body {
   font-family: var(--fb);
-  background: #f8f9fc;
+  background: var(--bg);
   color: var(--ink);
   min-height: 100dvh;
   margin: 0;

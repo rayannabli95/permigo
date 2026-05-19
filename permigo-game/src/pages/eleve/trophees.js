@@ -1,559 +1,431 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — Trophées (light theme)
+// Élève — Trophées (Clash Royale ADN)
+// RPC : get_my_achievements()
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
-import { TROPHEES, RARITY_LABEL, RARITY_COLOR } from '@/data/trophees.js';
-import { renderEmptyState } from '@/components/empty-state.js';
+import { navigate } from '@/router.js';
+import { haptic } from '@/utils/haptic.js';
+import { toast } from '@/components/toast.js';
 
-// ─── CSS ─────────────────────────────────────────────────────────
+// ─── Catalogue complet (miroir de _achievement_meta) ──────────
+const CATALOG = [
+  // Compétences
+  { key: 'comp_5',        emoji: '🎯', title: 'Premières racines',    body: '5 compétences validées. Tu démarres fort !',                    rarity: 'commun',    xp: 50,   gemmes: 15,  group: 'Compétences' },
+  { key: 'comp_10',       emoji: '🌱', title: '10/31',                body: 'Tu maîtrises un tiers du parcours. Belle dynamique !',          rarity: 'rare',      xp: 120,  gemmes: 30,  group: 'Compétences' },
+  { key: 'comp_15',       emoji: '⚡', title: 'Cap des 15',            body: 'Presque la moitié du chemin. Continue !',                      rarity: 'rare',      xp: 200,  gemmes: 50,  group: 'Compétences' },
+  { key: 'comp_20',       emoji: '🔥', title: '20 acquises',           body: "Deux tiers du parcours. L'examen approche.",                   rarity: 'epique',    xp: 300,  gemmes: 75,  group: 'Compétences' },
+  { key: 'comp_25',       emoji: '💎', title: '25/31',                 body: 'Tu touches au but. Plus que 6 compétences !',                  rarity: 'epique',    xp: 450,  gemmes: 110, group: 'Compétences' },
+  { key: 'comp_28',       emoji: '🎓', title: 'Prêt examen blanc',     body: "28/31. Tu peux passer ton examen blanc.",                      rarity: 'legendaire',xp: 600,  gemmes: 150, group: 'Compétences' },
+  { key: 'comp_31',       emoji: '👑', title: '31/31 — Complet !',     body: "Toutes les compétences validées. Prêt pour l'officiel.",        rarity: 'legendaire',xp: 1000, gemmes: 300, group: 'Compétences' },
+  // Séries
+  { key: 'streak_3',      emoji: '🔥', title: '3 jours',               body: 'Premier vrai streak. Continue !',                              rarity: 'commun',    xp: 30,   gemmes: 10,  group: 'Séries' },
+  { key: 'streak_14',     emoji: '🔥', title: 'Deux semaines',          body: 'Tu es accroché à PermiGo !',                                   rarity: 'rare',      xp: 180,  gemmes: 50,  group: 'Séries' },
+  { key: "streak_60",     emoji: '🔥', title: "60 jours d'affilée",    body: 'Inarrêtable. Respect.',                                        rarity: 'legendaire',xp: 800,  gemmes: 200, group: 'Séries' },
+  // Quiz
+  { key: 'quiz_10',       emoji: '🧠', title: '10 quiz',               body: 'Tu deviens un pro des quiz.',                                  rarity: 'commun',    xp: 50,   gemmes: 15,  group: 'Quiz' },
+  { key: 'quiz_50',       emoji: '🧠', title: '50 quiz',               body: 'Mémoire en béton.',                                            rarity: 'epique',    xp: 250,  gemmes: 80,  group: 'Quiz' },
+  { key: 'quiz_perfect_5',emoji: '✨', title: '5 quiz parfaits',        body: 'La précision incarnée.',                                       rarity: 'epique',    xp: 200,  gemmes: 60,  group: 'Quiz' },
+];
+
+const RARITY_META = {
+  commun:     { label: 'Commun',     gradient: 'linear-gradient(145deg,#475569,#64748b)' },
+  rare:       { label: 'Rare',       gradient: 'linear-gradient(145deg,#1d4ed8,#60a5fa)' },
+  epique:     { label: 'Épique',     gradient: 'linear-gradient(145deg,#6d28d9,#a78bfa)' },
+  legendaire: { label: 'Légendaire', gradient: 'linear-gradient(145deg,#b45309,#fbbf24)' },
+};
+
+// ─── CSS ──────────────────────────────────────────────────────
 const STYLE = `<style>
-.trp {
-  padding: 0 0 100px;
+.tr2 {
   max-width: 480px;
   margin: 0 auto;
-  background: #f8f9fc;
+  padding: 0 0 100px;
+  background: var(--bg);
+  min-height: 100dvh;
   font-family: 'Inter', sans-serif;
 }
-.trp-hd {
-  padding: 20px 20px 16px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  background: #f8f9fc;
-}
-.trp-title { font: 800 24px/1.1 'Plus Jakarta Sans', sans-serif; color: #0b0d1a; letter-spacing: -.025em; }
-.trp-sub   { font: 600 12px/1 'Inter', sans-serif; color: #64748b; }
 
-/* Grille */
-.trp-grid {
+/* ── Skeleton ── */
+.tr2-skel {
+  background: linear-gradient(90deg, var(--bg2) 0%, var(--bo) 50%, var(--bg2) 100%);
+  background-size: 200% 100%;
+  animation: tr2Shim 1.4s ease-in-out infinite;
+  border-radius: 16px;
+}
+@keyframes tr2Shim { from{background-position:200% 0} to{background-position:-200% 0} }
+
+/* ── Hero sticky ── */
+.tr2-hero {
+  position: sticky;
+  top: calc(52px + env(safe-area-inset-top, 0px));
+  z-index: 10;
+  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, #4f46e5 100%);
+  padding: 16px 20px 20px;
+  overflow: hidden;
+}
+.tr2-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 70% at 10% 30%, rgba(167,139,250,.35) 0%, transparent 55%),
+              radial-gradient(ellipse 50% 60% at 90% 80%, rgba(99,102,241,.2) 0%, transparent 50%);
+  pointer-events: none;
+}
+.tr2-hero-inner { position: relative; z-index: 1; }
+.tr2-hero-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.tr2-hero-title {
+  font: 800 22px/1.1 'Plus Jakarta Sans', sans-serif;
+  color: #fff; letter-spacing: -.03em;
+}
+.tr2-hero-count {
+  font: 700 12px/1 'IBM Plex Mono', monospace;
+  color: rgba(255,255,255,.7);
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 99px; padding: 5px 10px;
+}
+.tr2-progress-wrap { display: flex; flex-direction: column; gap: 5px; }
+.tr2-progress-bar {
+  height: 6px; background: rgba(255,255,255,.2);
+  border-radius: 99px; overflow: hidden;
+}
+.tr2-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,.6) 100%);
+  border-radius: 99px;
+  transition: width 1s cubic-bezier(.2,.7,.3,1);
+}
+.tr2-progress-hint {
+  font: 500 11px/1 'Inter', sans-serif;
+  color: rgba(255,255,255,.5);
+}
+
+/* ── Section label ── */
+.tr2-group-label {
+  padding: 20px 16px 10px;
+  font: 700 11px/1 'Inter', sans-serif;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--mu2);
+}
+
+/* ── Grille 3 colonnes ── */
+.tr2-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  padding: 0 16px;
-}
-@media (max-width: 360px) {
-  .trp-grid { grid-template-columns: 1fr 1fr; }
+  gap: 10px; padding: 0 12px;
 }
 
-.trp-card {
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
+/* ── Card trophée ── */
+.tr2-card {
+  position: relative;
   border-radius: 18px;
-  padding: 16px 10px;
-  text-align: center;
-  cursor: pointer;
-  transition: transform .2s, box-shadow .2s;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(11,13,26,.05);
+  padding: 14px 8px 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform .14s cubic-bezier(.34,1.56,.64,1), opacity .12s;
+  overflow: hidden; min-height: 100px; user-select: none;
 }
-.trp-card.unlocked {
-  border-color: color-mix(in srgb, var(--tc) 45%, transparent);
-  background: color-mix(in srgb, var(--tc) 8%, #fff);
-  box-shadow:
-    0 1px 4px rgba(11,13,26,.05),
-    0 0 0 0 color-mix(in srgb, var(--tc) 50%, transparent);
-  animation: trpHaloPulse 2.6s ease-in-out infinite;
+.tr2-card:active { transform: scale(.93); opacity: .9; }
+.tr2-card.locked { background: var(--su); border: 1px solid var(--bo); }
+.tr2-card.locked .tr2-card-emoji { filter: grayscale(1) brightness(.4); opacity: .5; }
+.tr2-card.commun    { background: linear-gradient(145deg,#475569,#64748b); box-shadow: 0 4px 16px -4px rgba(100,116,139,.5); }
+.tr2-card.rare      { background: linear-gradient(145deg,#1d4ed8,#60a5fa); box-shadow: 0 4px 16px -4px rgba(59,130,246,.6); }
+.tr2-card.epique    { background: linear-gradient(145deg,#6d28d9,#a78bfa); box-shadow: 0 4px 16px -4px rgba(139,92,246,.6); }
+.tr2-card.legendaire {
+  background: linear-gradient(145deg,#b45309,#fbbf24);
+  animation: tr2GoldGlow 2.5s ease-in-out infinite alternate;
 }
-@keyframes trpHaloPulse {
-  0%, 100% {
-    box-shadow:
-      0 1px 4px rgba(11,13,26,.05),
-      0 0 0 0 color-mix(in srgb, var(--tc) 35%, transparent);
-  }
-  50% {
-    box-shadow:
-      0 4px 16px color-mix(in srgb, var(--tc) 22%, transparent),
-      0 0 0 4px color-mix(in srgb, var(--tc) 12%, transparent);
-  }
+@keyframes tr2GoldGlow {
+  from { box-shadow: 0 4px 24px -4px rgba(245,158,11,.7); }
+  to   { box-shadow: 0 4px 32px -2px rgba(251,191,36,1), 0 0 0 1px rgba(251,191,36,.4); }
 }
-.trp-card.unlocked::after {
-  content: '';
-  position: absolute;
-  top: -60%; left: -60%;
-  width: 220%; height: 220%;
-  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.75) 50%, transparent 65%);
-  animation: shimTrophy 2.8s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 2;
+.tr2-card-rarity {
+  position: absolute; top: 7px; right: 7px;
+  width: 6px; height: 6px; border-radius: 50%;
 }
-@keyframes shimTrophy {
-  0%   { transform: translateX(-100%) rotate(15deg); }
-  60%, 100% { transform: translateX(100%) rotate(15deg); }
+.tr2-card.commun    .tr2-card-rarity { background: rgba(255,255,255,.5); }
+.tr2-card.rare      .tr2-card-rarity { background: rgba(255,255,255,.7); }
+.tr2-card.epique    .tr2-card-rarity { background: rgba(255,255,255,.8); box-shadow: 0 0 6px rgba(255,255,255,.6); }
+.tr2-card.legendaire .tr2-card-rarity { background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.9); }
+.tr2-card-emoji { font-size: 28px; line-height: 1; transition: transform .2s; }
+.tr2-card:not(.locked):active .tr2-card-emoji { transform: scale(1.15); }
+.tr2-card-name {
+  font: 700 10px/1.2 'Plus Jakarta Sans', sans-serif;
+  text-align: center; letter-spacing: -.005em;
+  overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
-/* Icône qui flotte subtilement sur unlocked */
-.trp-card.unlocked .trp-ico-wrap {
-  animation: trpIcoFloat 3.2s ease-in-out infinite;
-  box-shadow: 0 0 18px color-mix(in srgb, var(--tc) 30%, transparent);
-}
-@keyframes trpIcoFloat {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-3px); }
-}
-/* Légendaire — bordure or animée + sparkles */
-.trp-card.legendary {
-  border: 1.5px solid transparent;
-  background-clip: padding-box;
-  position: relative;
-}
-.trp-card.legendary::before {
-  content: '';
-  position: absolute;
-  inset: -1.5px;
-  border-radius: 19px;
-  background: conic-gradient(from var(--angle,0deg), #f59e0b, #fde68a, #f59e0b, #d97706, #f59e0b);
-  animation: goldSpin 3s linear infinite;
-  z-index: -1;
-}
-.trp-card.legendary .trp-ico-wrap {
-  box-shadow:
-    0 0 24px rgba(245,158,11,.55),
-    inset 0 0 12px rgba(254,243,199,.4);
-  animation: trpIcoFloat 3.2s ease-in-out infinite, trpGoldGlow 2s ease-in-out infinite alternate;
-}
-@keyframes trpGoldGlow {
-  from { filter: brightness(1) drop-shadow(0 0 4px rgba(245,158,11,.5)); }
-  to   { filter: brightness(1.15) drop-shadow(0 0 10px rgba(245,158,11,.8)); }
-}
-@keyframes goldSpin {
-  to { --angle: 360deg; }
-}
-@property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+.tr2-card.locked .tr2-card-name { color: var(--mu2); }
+.tr2-card:not(.locked) .tr2-card-name { color: rgba(255,255,255,.9); }
+.tr2-card-mystery { font: 700 10px/1 'IBM Plex Mono', monospace; color: var(--mu); }
 
-/* Respect reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .trp-card.unlocked,
-  .trp-card.unlocked::after,
-  .trp-card.unlocked .trp-ico-wrap,
-  .trp-card.legendary::before,
-  .trp-card.legendary .trp-ico-wrap {
-    animation: none !important;
-  }
-}
-
-.trp-card:not(.trp-card-locked):hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(11,13,26,.1); }
-.trp-card:not(.trp-card-locked):active { transform: scale(.96); }
-.trp-card-locked {
-  opacity: .55;
-  cursor: default;
-  pointer-events: none;
-}
-.trp-card-locked .trp-ico-wrap {
-  filter: grayscale(1);
-  opacity: .6;
-}
-
-.trp-ico-wrap {
-  width: 64px; height: 64px;
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--tc,#94a3b8) 14%, #fff);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 10px;
-  font-size: 30px;
-  line-height: 1;
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
-}
-.trp-ico-wrap img {
-  width: 100%; height: 100%;
-  object-fit: contain;
-  display: block;
-}
-.trp-nom {
-  font: 700 11px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: #0b0d1a;
-  margin-bottom: 6px;
-}
-.trp-rarity {
-  font: 700 9px/1 'Inter', sans-serif;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  border-radius: 20px;
-  padding: 3px 8px;
-  display: inline-block;
-}
-.trp-locked-lbl {
-  font: 500 10px/1.3 'Inter', sans-serif;
-  color: #94a3b8;
-  margin-top: 6px;
-}
-
-/* Section header */
-.trp-section-hd {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 20px 20px 10px;
-}
-.trp-section-title {
-  font: 700 13px/1 'Inter', sans-serif;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-.trp-section-count {
-  font: 700 12px/1 'Inter', sans-serif;
-  color: #6366f1;
-  background: rgba(99,102,241,.1);
-  border-radius: 20px;
-  padding: 3px 8px;
-}
-
-/* Bottom sheet */
-.trp-bg {
+/* ── Modal ── */
+.tr2-modal-bg {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0);
-  z-index: 490;
-  pointer-events: none;
-  transition: background .3s;
+  background: rgba(0,0,0,.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  z-index: 500; display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  animation: tr2FadeBg .2s ease both;
 }
-.trp-bg.open {
-  background: rgba(0,0,0,.45);
-  pointer-events: auto;
-  backdrop-filter: blur(4px);
+@keyframes tr2FadeBg { from{opacity:0} to{opacity:1} }
+.tr2-modal {
+  width: 100%; max-width: 480px; border-radius: 28px 28px 0 0;
+  padding: 0 0 32px; overflow: hidden;
+  animation: tr2ModalUp .28s cubic-bezier(.32,.72,0,1) both;
 }
-.trp-sheet {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  z-index: 495;
-  background: #fff;
-  border-radius: 28px 28px 0 0;
-  border-top: 1px solid #e2e6f2;
-  transform: translateY(100%);
-  transition: transform .32s cubic-bezier(.32,.72,0,1);
-  padding-bottom: max(24px, env(safe-area-inset-bottom));
+@keyframes tr2ModalUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+.tr2-modal-glow {
+  height: 160px; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 8px; position: relative; overflow: hidden;
 }
-.trp-sheet.open { transform: translateY(0); }
-.trp-sheet-handle {
-  width: 36px; height: 4px;
-  background: #e2e6f2;
-  border-radius: 2px;
-  margin: 14px auto 0;
+.tr2-modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,.3); border-radius: 2px; margin: 14px auto 0; }
+.tr2-modal-locked-handle { width: 36px; height: 4px; background: var(--bo); border-radius: 2px; margin: 14px auto 0; }
+.tr2-modal-emoji {
+  font-size: 60px; position: relative; z-index: 1;
+  animation: tr2EmojiIn .5s .1s cubic-bezier(.34,1.56,.64,1) both;
+  filter: drop-shadow(0 0 18px rgba(255,255,255,.6));
 }
-.trp-sheet-body { padding: 20px 24px 8px; }
-.trp-sheet-ico-wrap {
-  width: 72px; height: 72px;
-  border-radius: 20px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 38px;
-  line-height: 1;
-  margin: 0 auto 14px;
+@keyframes tr2EmojiIn { from{transform:scale(.4) rotate(-10deg);opacity:0} to{transform:scale(1) rotate(0deg);opacity:1} }
+.tr2-rarity-chip {
+  position: relative; z-index: 1;
+  font: 700 11px/1 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase;
+  color: #fff; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
+  border-radius: 99px; padding: 4px 10px;
 }
-.trp-sheet-nom { font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif; color: #0b0d1a; margin-bottom: 6px; letter-spacing: -.025em; }
-.trp-sheet-desc { font: 500 14px/1.5 'Inter', sans-serif; color: #64748b; margin-bottom: 16px; }
-.trp-sheet-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.trp-sheet-tag {
-  font: 700 11px/1 'Inter', sans-serif;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  border-radius: 20px;
-  padding: 5px 12px;
+.tr2-modal-locked-hd {
+  height: 140px; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; border-bottom: 1px solid var(--bo);
 }
-.trp-sheet-actions { display: flex; gap: 10px; }
-.trp-sheet-btn {
-  flex: 1;
-  height: 48px;
-  border-radius: 14px;
-  border: 1.5px solid #e2e6f2;
-  background: #f8f9fc;
-  color: #0b0d1a;
-  font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  transition: background .12s, border-color .12s;
-  font-family: inherit;
+.tr2-modal-locked-ico { font-size: 52px; filter: grayscale(1) brightness(.3); opacity: .4; }
+.tr2-modal-locked-lbl { font: 600 11px/1 'Inter', sans-serif; color: var(--mu2); letter-spacing: .06em; text-transform: uppercase; }
+.tr2-modal-body { padding: 20px 20px 8px; background: var(--su); }
+.tr2-modal-title { font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.025em; margin-bottom: 8px; }
+.tr2-modal-desc { font: 500 14px/1.55 'Inter', sans-serif; color: var(--mu); margin-bottom: 16px; }
+.tr2-modal-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.tr2-modal-chip { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 99px; font: 700 12px/1 'IBM Plex Mono', monospace; }
+.tr2-modal-chip.xp   { background: rgba(99,102,241,.1); color: #6366f1; }
+.tr2-modal-chip.gems { background: rgba(16,185,129,.1); color: #10b981; }
+.tr2-modal-chip.date { background: var(--bg); color: var(--mu); }
+.tr2-modal-social { font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu2); margin-bottom: 20px; }
+.tr2-modal-actions { display: flex; gap: 8px; padding: 0 20px; background: var(--su); }
+.tr2-modal-share {
+  flex: 1; padding: 14px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none; border-radius: 14px; color: #fff;
+  font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; min-height: 50px;
+  transition: transform .12s, opacity .12s;
 }
-.trp-sheet-btn:hover { background: #f0f2f8; border-color: #d1d8ee; }
-.trp-sheet-btn.primary { background: #6366f1; border-color: #6366f1; color: #fff; }
-.trp-sheet-btn.primary:hover { background: #4f46e5; border-color: #4f46e5; }
-.trp-sheet-btn:disabled { opacity: .4; cursor: default; }
-
-/* Skeleton */
-.skel-line {
-  display: block;
-  background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
-  background-size: 200% 100%;
-  animation: sklAnim 1.4s infinite;
-  border-radius: 8px;
+.tr2-modal-share:active { transform: scale(.97); opacity: .9; }
+.tr2-modal-close {
+  padding: 14px 20px; background: var(--bg); border: 1px solid var(--bo); border-radius: 14px;
+  color: var(--mu); font: 600 14px/1 'Inter', sans-serif; cursor: pointer; min-height: 50px;
+  transition: background .12s;
 }
-@keyframes sklAnim { to { background-position: -200% 0; } }
-
-/* ── Achievements ── */
-.trp-ach-hd {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 24px 20px 10px;
-}
-.trp-ach-title {
-  font: 700 13px/1 'Inter', sans-serif;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-.trp-ach-count {
-  font: 700 12px/1 'Inter', sans-serif;
-  color: #f59e0b;
-  background: rgba(245,158,11,.1);
-  border-radius: 20px;
-  padding: 3px 8px;
-}
-.trp-ach-scroll {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding: 0 16px 16px;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-}
-.trp-ach-scroll::-webkit-scrollbar { display: none; }
-.trp-ach-card {
-  flex-shrink: 0;
-  width: 140px;
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
-  border-radius: 16px;
-  padding: 14px 12px;
-  text-align: center;
-  scroll-snap-align: start;
-  box-shadow: 0 1px 4px rgba(11,13,26,.05);
-}
-.trp-ach-card--unlocked {
-  border-color: rgba(245,158,11,.35);
-  background: rgba(245,158,11,.05);
-}
-.trp-ach-card--locked { opacity: .5; }
-.trp-ach-ico {
-  font-size: 28px;
-  margin-bottom: 8px;
-  display: block;
-}
-.trp-ach-name {
-  font: 700 11px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: #0b0d1a;
-  margin-bottom: 4px;
-}
-.trp-ach-desc {
-  font: 400 10px/1.4 'Inter', sans-serif;
-  color: #94a3b8;
-}
-.trp-ach-date {
-  font: 500 10px/1 'IBM Plex Mono', monospace;
-  color: #f59e0b;
-  margin-top: 6px;
-  display: block;
-}
+.tr2-modal-close:active { background: var(--bg2); }
 </style>`;
 
-// ─── Entry point ─────────────────────────────────────────────────
+// ─── Mount ────────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
+  track('page.view', { page: 'trophees' });
 
-  track('page_view', { page: 'trophees', user_role: me.role });
-
-  root.innerHTML = `${STYLE}<div class="trp"><div style="padding:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${
-    Array(5).fill(0).map(() => `<div class="skel-line" style="height:110px;border-radius:18px"></div>`).join('')
-  }</div></div>`;
+  root.innerHTML = `${STYLE}
+<div class="tr2 anim-slide-up">
+  <div class="tr2-hero">
+    <div class="tr2-hero-inner">
+      <div class="tr2-hero-top">
+        <div class="tr2-hero-title">Mes trophées</div>
+        <div class="tr2-hero-count" id="tr2-count">— / ${CATALOG.length}</div>
+      </div>
+      <div class="tr2-progress-wrap">
+        <div class="tr2-progress-bar"><div class="tr2-progress-fill" id="tr2-fill" style="width:0%"></div></div>
+        <div class="tr2-progress-hint" id="tr2-hint">Chargement…</div>
+      </div>
+    </div>
+  </div>
+  <div id="tr2-body">
+    ${[...Array(3)].map(() => `
+      <div class="tr2-group-label"><div class="tr2-skel" style="height:11px;width:80px;display:inline-block"></div></div>
+      <div class="tr2-grid">${[...Array(6)].map(() => `<div class="tr2-skel" style="min-height:100px"></div>`).join('')}</div>
+    `).join('')}
+  </div>
+</div>`;
 
   try {
-    const [streakRes, validRes, quizRes, achRes] = await Promise.allSettled([
-      sb.from('streaks').select('current_streak, longest_streak').eq('user_id', me.id).maybeSingle(),
-      sb.from('validations').select('competence_id, validated_at').eq('eleve_id', me.id).eq('statut', 'acquis'),
-      sb.from('quiz_attempts').select('score, completed_at').eq('user_id', me.id).eq('type', 'post_validation').gte('score', 100),
-      sb.rpc('get_my_achievements'),
-    ]);
-
-    const streak = streakRes.value?.data || { current_streak: 0, longest_streak: 0 };
-    const validData = validRes.value?.data || [];
-    const validated = validData.map(v => v.competence_id);
-    const hasPerfectQuiz = (quizRes.value?.data?.length ?? 0) > 0;
-    const c1ValidatedCount = validated.filter(c => c.startsWith('C1')).length;
-    // Trophée "Pilote de Nuit" : au moins une validation après 21h locale
-    const hasNightValidation = validData.some(v => {
-      if (!v.validated_at) return false;
-      const h = new Date(v.validated_at).getHours();
-      return h >= 21 || h < 6;
-    });
-
-    const ctx = {
-      validatedCount: validated.length,
-      longestStreak: streak.longest_streak || 0,
-      hasPerfectQuiz,
-      c1ValidatedCount,
-      hasNightValidation,
-    };
-
-    const trophees = TROPHEES.map(t => ({ ...t, unlocked: t.check(ctx) }));
-    const unlockedCount = trophees.filter(t => t.unlocked).length;
-
-    const achRaw = achRes.value?.data;
-    const achievements = Array.isArray(achRaw) ? achRaw : [];
-
-    root.innerHTML = render(trophees, unlockedCount, achievements);
-    wire(root, trophees);
-  } catch {
-    root.innerHTML = `${STYLE}<div class="trp"><p style="padding:32px;color:#ef4444">Erreur de chargement des trophées.</p></div>`;
+    const { data, error } = await sb.rpc('get_my_achievements');
+    if (error) throw error;
+    renderAll(root, data ?? []);
+  } catch (e) {
+    console.error('[trophees]', e);
+    toast('Impossible de charger les trophées', 'error');
+    root.querySelector('#tr2-body').innerHTML = `
+      <div style="text-align:center;padding:56px 24px;color:var(--mu)">
+        <div style="font-size:48px;margin-bottom:12px">🏆</div>
+        <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Continue à apprendre</div>
+        <div style="font:500 13px/1.5 'Inter',sans-serif">Tes premiers trophées arrivent ✨</div>
+      </div>`;
   }
 }
 
-// ─── Render ───────────────────────────────────────────────────────
-function render(trophees, unlockedCount, achievements = []) {
-  const unlocked = trophees.filter(t => t.unlocked);
-  const locked = trophees.filter(t => !t.unlocked);
+// ─── Render all ───────────────────────────────────────────────
+function renderAll(root, unlocked) {
+  const unlockedMap = new Map(unlocked.map(u => [u.achievement_key, u]));
+  const unlockedCount = CATALOG.filter(t => unlockedMap.has(t.key)).length;
 
-  return `${STYLE}
-<div class="trp">
-  <div class="trp-hd">
-    <div>
-      <div class="trp-title">Trophées</div>
-    </div>
-    <div class="trp-sub">${unlockedCount}/${trophees.length} débloqués</div>
-  </div>
+  // Hero
+  root.querySelector('#tr2-count').textContent = `${unlockedCount} / ${CATALOG.length}`;
+  const pct = Math.round(100 * unlockedCount / CATALOG.length);
+  requestAnimationFrame(() => {
+    const fill = root.querySelector('#tr2-fill');
+    if (fill) fill.style.width = pct + '%';
+  });
+  root.querySelector('#tr2-hint').textContent = unlockedCount === 0
+    ? 'Commence à valider des compétences pour débloquer tes premiers trophées !'
+    : `${pct}% du parcours — ${CATALOG.length - unlockedCount} restant${CATALOG.length - unlockedCount > 1 ? 's' : ''}`;
 
-  ${unlocked.length > 0 ? `
-    <div class="trp-section-hd">
-      <span class="trp-section-title">Débloqués</span>
-      <span class="trp-section-count">${unlocked.length}</span>
-    </div>
-    <div class="trp-grid">
-      ${unlocked.map(t => renderCard(t, true)).join('')}
-    </div>
-  ` : renderEmptyState({
-    illustration: '/skins/empty-trophies.png',
-    title: 'Aucun trophée encore',
-    subtitle: 'Valide toutes les compétences d\'un monde pour débloquer ton premier trophée.',
-    ctaLabel: 'Valide ta première compétence',
-    ctaHref: '#/parcours',
-  })}
+  // Add entry keyframe
+  if (!document.head.querySelector('#tr2-kf')) {
+    const s = document.createElement('style');
+    s.id = 'tr2-kf';
+    s.textContent = `@keyframes tr2CardIn{from{opacity:0;transform:translateY(12px) scale(.92)}to{opacity:1;transform:none}}`;
+    document.head.appendChild(s);
+  }
 
-  ${locked.length > 0 ? `
-    <div class="trp-section-hd">
-      <span class="trp-section-title">À débloquer</span>
-    </div>
-    <div class="trp-grid">
-      ${locked.map(t => renderCard(t, false)).join('')}
-    </div>
-  ` : ''}
+  // Group by category
+  const groups = {};
+  for (const t of CATALOG) {
+    if (!groups[t.group]) groups[t.group] = [];
+    groups[t.group].push(t);
+  }
 
-  ${achievements.length > 0 ? `
-  <div class="trp-ach-hd">
-    <span class="trp-ach-title">Milestones</span>
-    <span class="trp-ach-count">${achievements.filter(a => a.unlocked_at).length}/${achievements.length}</span>
-  </div>
-  <div class="trp-ach-scroll">
-    ${achievements.map(a => renderAchievement(a)).join('')}
-  </div>
-  ` : ''}
+  let html = '';
+  let globalIdx = 0;
+  for (const [group, items] of Object.entries(groups)) {
+    html += `<div class="tr2-group-label">${esc(group)}</div><div class="tr2-grid">`;
+    for (const t of items) {
+      const u = unlockedMap.get(t.key);
+      const cssClass = u ? t.rarity : 'locked';
+      html += `
+        <div class="tr2-card ${cssClass}" data-key="${esc(t.key)}"
+          style="animation:tr2CardIn .4s ${globalIdx * 50}ms cubic-bezier(.34,1.56,.64,1) both">
+          ${u ? `<div class="tr2-card-rarity"></div>` : ''}
+          <div class="tr2-card-emoji">${t.emoji}</div>
+          <div class="tr2-card-name">${u ? esc(t.title) : '???'}</div>
+          ${!u ? `<div class="tr2-card-mystery">${esc(shortProgress(t.key))}</div>` : ''}
+        </div>`;
+      globalIdx++;
+    }
+    html += `</div>`;
+  }
+  root.querySelector('#tr2-body').innerHTML = html;
 
-  <div class="trp-bg" id="trp-bg"></div>
-  <div class="trp-sheet" id="trp-sheet">
-    <div class="trp-sheet-handle"></div>
-    <div class="trp-sheet-body" id="trp-sheet-body"></div>
-  </div>
-</div>`;
+  root.querySelectorAll('.tr2-card').forEach(el => {
+    el.addEventListener('click', () => {
+      haptic('select');
+      const key = el.dataset.key;
+      const def = CATALOG.find(t => t.key === key);
+      const unlockData = unlockedMap.get(key) ?? null;
+      if (def) showModal(def, unlockData, unlockedCount);
+    });
+  });
 }
 
-function renderAchievement(a) {
-  const unlocked = Boolean(a.unlocked_at);
-  const date = unlocked
-    ? new Date(a.unlocked_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+// ─── Progress hint (locked cards) ─────────────────────────────
+function shortProgress(key) {
+  if (key.startsWith('comp_'))        return key.replace('comp_', '') + ' validations';
+  if (key.startsWith('streak_'))      return key.replace('streak_', '') + ' jours';
+  if (key === 'quiz_perfect_5')       return '5 quiz 100%';
+  if (key.startsWith('quiz_'))        return key.replace('quiz_', '') + ' quiz';
+  return '?';
+}
+
+// ─── Modal ────────────────────────────────────────────────────
+function showModal(def, unlockData, totalUnlocked) {
+  const rm = RARITY_META[def.rarity];
+  const isUnlocked = !!unlockData;
+  const dateStr = unlockData?.unlocked_at
+    ? new Date(unlockData.unlocked_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
-  return `
-<div class="trp-ach-card ${unlocked ? 'trp-ach-card--unlocked' : 'trp-ach-card--locked'}">
-  <span class="trp-ach-ico">${esc(a.icon || '🏅')}</span>
-  <div class="trp-ach-name">${esc(a.name || a.label || '')}</div>
-  <div class="trp-ach-desc">${esc(a.description || '')}</div>
-  ${date ? `<span class="trp-ach-date">${date}</span>` : ''}
-</div>`;
-}
 
-function renderCard(t, unlocked) {
-  const rarityColor = RARITY_COLOR[t.rarity] || '#94a3b8';
-  const isLegendary = t.rarity === 'légendaire' && unlocked;
-  // Visuel : image PNG premium si dispo, sinon emoji fallback
-  const visual = t.image
-    ? `<img src="${t.image}" alt="${esc(t.nom)}" loading="lazy" />`
-    : t.ico;
-  return `
-<div class="trp-card ${unlocked ? 'unlocked' : 'trp-card-locked'} ${isLegendary ? 'legendary' : ''}"
-     style="--tc:${t.color}"
-     data-trp="${esc(t.id)}">
-  <div class="trp-ico-wrap" style="background:color-mix(in srgb,${t.color} 14%,#fff)">
-    ${visual}
-  </div>
-  <div class="trp-nom">${esc(t.nom)}</div>
-  <span class="trp-rarity" style="color:${rarityColor};background:color-mix(in srgb,${rarityColor} 12%,#fff)">
-    ${esc(RARITY_LABEL[t.rarity])}
-  </span>
-  ${!unlocked ? `<div class="trp-locked-lbl">${esc(t.desc.slice(0, 42))}…</div>` : ''}
-</div>`;
-}
-
-// ─── Wire ────────────────────────────────────────────────────────
-function wire(root, trophees) {
-  const bg = root.querySelector('#trp-bg');
-  const sheet = root.querySelector('#trp-sheet');
-  const body = root.querySelector('#trp-sheet-body');
-
-  const close = () => { sheet.classList.remove('open'); bg.classList.remove('open'); };
-  bg.addEventListener('click', close);
-
-  root.querySelectorAll('.trp-card.unlocked').forEach(card => {
-    card.addEventListener('click', () => {
-      const t = trophees.find(x => x.id === card.dataset.trp);
-      if (!t) return;
-      track('trophy.tapped', { trophy_id: t.id });
-
-      const rarityColor = RARITY_COLOR[t.rarity] || '#94a3b8';
-      const canShare = Boolean(navigator.share);
-      const sheetVisual = t.image
-        ? `<img src="${t.image}" alt="${esc(t.nom)}" style="width:100%;height:100%;object-fit:contain" />`
-        : `<span style="font-size:38px">${t.ico}</span>`;
-      body.innerHTML = `
-        <div class="trp-sheet-ico-wrap" style="background:color-mix(in srgb,${t.color} 14%,#fff);overflow:hidden">
-          ${sheetVisual}
+  const overlay = document.createElement('div');
+  overlay.className = 'tr2-modal-bg';
+  overlay.innerHTML = isUnlocked ? `
+    <div class="tr2-modal" style="background:var(--su)">
+      <div class="tr2-modal-glow" style="background:${rm.gradient}">
+        <div class="tr2-modal-handle"></div>
+        <div class="tr2-modal-emoji">${def.emoji}</div>
+        <div class="tr2-rarity-chip">${esc(rm.label)}</div>
+      </div>
+      <div class="tr2-modal-body">
+        <div class="tr2-modal-title">${esc(def.title)}</div>
+        <div class="tr2-modal-desc">${esc(def.body)}</div>
+        <div class="tr2-modal-meta">
+          <div class="tr2-modal-chip xp">+${def.xp} XP</div>
+          <div class="tr2-modal-chip gems">+${def.gemmes} 💎</div>
+          ${dateStr ? `<div class="tr2-modal-chip date">🗓 ${esc(dateStr)}</div>` : ''}
         </div>
-        <div class="trp-sheet-nom">${esc(t.nom)}</div>
-        <div class="trp-sheet-desc">${esc(t.desc)}</div>
-        <div class="trp-sheet-meta">
-          <span class="trp-sheet-tag" style="color:${rarityColor};background:color-mix(in srgb,${rarityColor} 12%,#fff)">
-            ${esc(RARITY_LABEL[t.rarity])}
-          </span>
-          <span class="trp-sheet-tag" style="color:#10b981;background:rgba(16,185,129,.1)">✓ Débloqué</span>
+        <div class="tr2-modal-social">${totalUnlocked > 1
+          ? `Tu es parmi les élèves les plus avancés de ton école ✨`
+          : 'Continue pour débloquer plus de trophées !'}</div>
+      </div>
+      <div class="tr2-modal-actions">
+        <button class="tr2-modal-share" id="tr2-share-btn">Partager 🔗</button>
+        <button class="tr2-modal-close" id="tr2-close-btn">Fermer</button>
+      </div>
+    </div>
+  ` : `
+    <div class="tr2-modal" style="background:var(--su)">
+      <div class="tr2-modal-locked-hd">
+        <div class="tr2-modal-locked-handle"></div>
+        <div class="tr2-modal-locked-ico">${def.emoji}</div>
+        <div class="tr2-modal-locked-lbl">🔒 Trophée verrouillé</div>
+      </div>
+      <div class="tr2-modal-body">
+        <div class="tr2-modal-title">${esc(def.title)}</div>
+        <div class="tr2-modal-desc">${esc(def.body)}</div>
+        <div class="tr2-modal-meta">
+          <div class="tr2-modal-chip xp">+${def.xp} XP à débloquer</div>
+          <div class="tr2-modal-chip gems">+${def.gemmes} 💎 à débloquer</div>
+          <div class="tr2-modal-chip date">${esc(rm.label)}</div>
         </div>
-        <div class="trp-sheet-actions">
-          <button class="trp-sheet-btn" id="trp-close-btn">Fermer</button>
-          ${canShare ? `<button class="trp-sheet-btn primary" id="trp-share-btn">Partager 🔗</button>` : ''}
-        </div>
-      `;
-      sheet.classList.add('open');
-      bg.classList.add('open');
+        <div class="tr2-modal-social">Objectif : ${esc(shortProgress(def.key))}</div>
+      </div>
+      <div class="tr2-modal-actions">
+        <button class="tr2-modal-share" id="tr2-goto-btn" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">Aller au parcours →</button>
+        <button class="tr2-modal-close" id="tr2-close-btn">Fermer</button>
+      </div>
+    </div>
+  `;
 
-      body.querySelector('#trp-close-btn')?.addEventListener('click', close);
-      body.querySelector('#trp-share-btn')?.addEventListener('click', async () => {
-        try {
-          await navigator.share({
-            title: 'Trophée PermiGo débloqué !',
-            text: `${t.ico} ${t.nom} — ${t.desc}`,
-            url: location.href,
-          });
-          track('trophy.shared', { trophy_id: t.id });
-        } catch { /* user cancelled */ }
-      });
+  document.body.appendChild(overlay);
+  track('trophy.modal_opened', { key: def.key, unlocked: isUnlocked });
+
+  const closeModal = () => { haptic('select'); overlay.remove(); };
+  overlay.querySelector('#tr2-close-btn')?.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+  if (isUnlocked) {
+    overlay.querySelector('#tr2-share-btn')?.addEventListener('click', async () => {
+      const text = `J'ai débloqué "${def.title}" sur PermiGo ! 🏆\n+${def.xp} XP`;
+      if (navigator.share) {
+        try { await navigator.share({ title: 'Mon trophée PermiGo', text, url: window.location.origin }); }
+        catch { /* cancelled */ }
+      } else {
+        try { await navigator.clipboard.writeText(text); toast('Texte copié 📋', 'success'); }
+        catch { /* unavailable */ }
+      }
     });
-  });
-
-  // Achievement cards → parcours
-  root.querySelectorAll('.trp-ach-card').forEach(card => {
-    card.style.cursor = 'pointer';
-    card.addEventListener('click', () => {
-      track('achievement.tapped', {});
-      location.hash = '#/parcours';
+  } else {
+    overlay.querySelector('#tr2-goto-btn')?.addEventListener('click', () => {
+      overlay.remove();
+      navigate('#/parcours');
     });
-  });
+  }
 }

@@ -8,7 +8,7 @@ import { esc }        from '@/utils/escape.js';
 import { track }      from '@/services/analytics.js';
 import { navigate }   from '@/router.js';
 
-const YEAR = new Date().getFullYear();
+const YEAR = 2026;
 
 // ─── Mount ───────────────────────────────────────────────────
 export async function mount(root) {
@@ -25,7 +25,7 @@ export async function mount(root) {
 </div>`;
 
   try {
-    const { data, error } = await sb.rpc('get_my_wrapped', { year: YEAR });
+    const { data, error } = await sb.rpc('get_wrapped_eleve', { p_year: YEAR });
     if (error || data?.error) throw new Error(data?.error || 'Erreur chargement');
     renderWrapped(root, me, data || {});
   } catch (e) {
@@ -43,18 +43,19 @@ export async function mount(root) {
 
 // ─── Slides ──────────────────────────────────────────────────
 function renderWrapped(root, me, w) {
-  const longestStreak = w.streaks?.longest ?? 0;
-  const topCompId    = w.top_competence?.competence_id ?? null;
-  const topCompLabel = w.top_competence?.label ?? (topCompId ? esc(topCompId) : 'Aucune');
-  const percentile   = w.percentile ?? null;
-  const xpGained     = w.xp_gained ?? 0;
+  // Field names from get_wrapped_eleve RPC
+  const longestStreak  = w.streak_max ?? w.streaks?.longest ?? 0;
+  const topCompLabel   = w.top_competence_nom ?? w.top_competence?.label ?? 'Aucune';
+  const topCompN       = w.top_competence_n ?? w.top_competence?.count ?? null;
+  const percentile     = w.percentile ?? null;
+  const xpGained       = w.xp_total ?? w.xp_gained ?? 0;
 
   // Slide order: 1 cover · 2 percentile · 3 streak · 4 top_comp
   const slides = [
     renderSlide1(),
     renderSlide2({ percentile }),
     renderSlide3({ longestStreak }),
-    renderSlide4({ topCompLabel }),
+    renderSlide4({ topCompLabel, topCompN }),
   ];
 
   const wrpRoot = root.querySelector('#wrp-root');
@@ -86,14 +87,25 @@ function renderSlide1() {
 
 // Slide 2 — Percentile
 function renderSlide2({ percentile }) {
-  const text = percentile !== null ? `Top ${100 - percentile}%` : '🚀';
+  const topPct = percentile !== null ? `${100 - percentile}%` : null;
   return `
 <div class="wrp-slide" data-slide="1">
   <div class="wrp-slide-bg">
     <img class="wrp-slide-img" src="/skins/wrapped_streak.png" alt="" aria-hidden="true">
   </div>
   <div class="wrp-slide-overlay-dark"></div>
-  <div class="wrp-overlay-centered">${text}</div>
+  <div class="wrp-overlay-centered">
+    ${topPct ? `
+    <div>
+      <div style="font:600 14px/1 'Inter',sans-serif;letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:16px">Classement école</div>
+      <div style="font:800 clamp(56px,14vw,88px)/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.04em">TOP ${esc(topPct)}</div>
+      <div style="font:500 16px/1.4 'Inter',sans-serif;opacity:.8;margin-top:12px">Tu es dans le top ${esc(topPct)}<br>des élèves de ton auto-école</div>
+    </div>` : `
+    <div>
+      <div style="font-size:64px;margin-bottom:16px">🚀</div>
+      <div style="font:700 24px/1.3 'Plus Jakarta Sans',sans-serif">Lance-toi en ${YEAR} !</div>
+    </div>`}
+  </div>
 </div>`;
 }
 
@@ -105,19 +117,32 @@ function renderSlide3({ longestStreak }) {
     <img class="wrp-slide-img" src="/skins/wrapped_streak.png" alt="" aria-hidden="true">
   </div>
   <div class="wrp-slide-overlay-dark"></div>
-  <div class="wrp-overlay-centered">${longestStreak} jours 🔥</div>
+  <div class="wrp-overlay-centered">
+    <div>
+      <div style="font-size:48px;margin-bottom:12px;filter:drop-shadow(0 0 20px rgba(251,146,60,.8))">🔥</div>
+      <div style="font:800 clamp(56px,14vw,88px)/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.04em">${longestStreak}</div>
+      <div style="font:500 18px/1 'Inter',sans-serif;opacity:.75;margin-top:8px">jours d'affilée</div>
+      <div style="font:600 14px/1.4 'Inter',sans-serif;opacity:.6;margin-top:10px">Ton record en ${YEAR}</div>
+    </div>
+  </div>
 </div>`;
 }
 
 // Slide 4 — Top compétence
-function renderSlide4({ topCompLabel }) {
+function renderSlide4({ topCompLabel, topCompN }) {
   return `
 <div class="wrp-slide" data-slide="3">
   <div class="wrp-slide-bg">
     <img class="wrp-slide-img" src="/skins/wrapped_streak.png" alt="" aria-hidden="true">
   </div>
   <div class="wrp-slide-overlay-dark"></div>
-  <div class="wrp-overlay-centered">Top compétence :<br>${esc(String(topCompLabel))}</div>
+  <div class="wrp-overlay-centered">
+    <div>
+      <div style="font:600 11px/1 'Inter',sans-serif;letter-spacing:.12em;text-transform:uppercase;opacity:.6;margin-bottom:16px">Ta force cette année</div>
+      <div style="font:800 clamp(24px,6vw,40px)/1.2 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em">${esc(String(topCompLabel))}</div>
+      ${topCompN ? `<div style="font:700 20px/1 'IBM Plex Mono',monospace;opacity:.8;margin-top:14px">${topCompN} validation${topCompN > 1 ? 's' : ''}</div>` : ''}
+    </div>
+  </div>
 </div>`;
 }
 
@@ -193,7 +218,7 @@ function renderStyles() {
 .wrp-loading-ico { font-size: 48px; }
 .wrp-loading-txt {
   font: 500 16px/1.5 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 .wrp-back-btn {
   margin-top: 8px;
@@ -292,7 +317,7 @@ function renderStyles() {
 }
 .wrp-dot--active {
   width: 20px;
-  background: #fff;
+  background: var(--su);
 }
 .wrp-share-btn {
   width: 100%;

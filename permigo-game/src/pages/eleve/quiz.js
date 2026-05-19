@@ -24,8 +24,8 @@ const STYLE = `<style>
     justify-content: center;
   }
   .qp-card {
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 24px;
     padding: 32px 24px;
     text-align: center;
@@ -44,7 +44,7 @@ const STYLE = `<style>
   }
   .qp-cat-row {
     font: 500 13px/1 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu);
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -53,7 +53,7 @@ const STYLE = `<style>
   }
   .qp-comp {
     font: 800 22px/1.3 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     margin: 0 0 20px;
   }
   .qp-meta {
@@ -64,8 +64,8 @@ const STYLE = `<style>
   }
   .qp-meta-item {
     font: 600 12px/1 'Inter', sans-serif;
-    color: #64748b;
-    background: #f0f2f8;
+    color: var(--mu);
+    background: var(--bg2);
     border-radius: 20px;
     padding: 6px 12px;
   }
@@ -87,7 +87,7 @@ const STYLE = `<style>
   .btn-skip {
     background: none;
     border: 0;
-    color: #64748b;
+    color: var(--mu);
     font: 500 14px/1 'Inter', sans-serif;
     cursor: pointer;
     padding: 8px;
@@ -113,11 +113,11 @@ const STYLE = `<style>
   .ring-warn { border-color: #f59e0b; background: rgba(245,158,11,.08); }
   .qp-score-num {
     font: 800 28px/1 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
   }
   .qp-score-pct {
     font: 600 14px/1 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu);
     margin-top: 4px;
   }
   .qp-result-msg {
@@ -142,8 +142,8 @@ const STYLE = `<style>
   .btn-home {
     width: 100%;
     padding: 14px;
-    background: #f8f9fc;
-    border: 1.5px solid #e2e6f2;
+    background: var(--bg);
+    border: 1.5px solid var(--bo);
     border-radius: 14px;
     color: #475569;
     font: 600 14px/1 'Inter', sans-serif;

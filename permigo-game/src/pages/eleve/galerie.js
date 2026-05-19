@@ -16,12 +16,12 @@ const STYLE = `<style>
   padding: 0 0 100px;
   max-width: 480px;
   margin: 0 auto;
-  background: #f8f9fc;
+  background: var(--bg);
   font-family: 'Inter', sans-serif;
 }
 .gal-hd {
   padding: 20px 20px 12px;
-  background: #f8f9fc;
+  background: var(--bg);
 }
 .gal-title { font: 800 24px/1.1 'Plus Jakarta Sans', sans-serif; color: #0b0d1a; letter-spacing: -.025em; margin: 0; }
 .gal-sub   { font: 500 13px/1.4 'Inter', sans-serif; color: #64748b; margin: 4px 0 0; }
@@ -30,7 +30,7 @@ const STYLE = `<style>
 .gal-tabs {
   display: flex; gap: 4px;
   padding: 12px 20px 16px;
-  background: #f8f9fc;
+  background: var(--bg);
   position: sticky; top: 0; z-index: 10;
 }
 .gal-tab {
@@ -40,7 +40,7 @@ const STYLE = `<style>
   border: 1.5px solid transparent;
   border-radius: 12px;
   font: 700 12px/1 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
   letter-spacing: .04em;
   text-transform: uppercase;
   cursor: pointer;
@@ -49,7 +49,7 @@ const STYLE = `<style>
   min-height: 44px;
 }
 .gal-tab.active {
-  background: #fff;
+  background: var(--su);
   color: #6366f1;
   border-color: rgba(99,102,241,.25);
   box-shadow: 0 1px 3px rgba(11,13,26,.06);
@@ -74,8 +74,8 @@ const STYLE = `<style>
 @media (max-width: 360px) { .gal-grid { grid-template-columns: 1fr 1fr; } }
 
 .gal-card {
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
   border-radius: 18px;
   padding: 14px 10px 12px;
   text-align: center;
@@ -104,13 +104,13 @@ const STYLE = `<style>
 
 .gal-card-nom {
   font: 700 11px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: #0b0d1a;
+  color: var(--ink);
   margin-bottom: 4px;
   letter-spacing: -.005em;
 }
 .gal-card-meta {
   font: 600 9.5px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   letter-spacing: .04em;
   text-transform: uppercase;
 }
@@ -137,8 +137,8 @@ const STYLE = `<style>
   padding: 0 16px;
 }
 .gal-permis-card {
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
   border-radius: 18px;
   padding: 14px;
   display: flex;
@@ -169,7 +169,7 @@ const STYLE = `<style>
   margin: 20px 16px 0;
   padding: 18px 16px;
   text-align: center;
-  background: #fff;
+  background: var(--su);
   border: 1px dashed #e2e6f2;
   border-radius: 14px;
 }

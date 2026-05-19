@@ -60,7 +60,7 @@ export async function login(email, password, opts = {}) {
   // Récupère le profil DB (role, nom, etc.)
   const { data: profile, error: pErr } = await sb
     .from('profiles')
-    .select('id, role, nom, email, avatar_url, avatar_preset, unlocked_avatars')
+    .select('id, role, nom, prenom, email, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes')
     .eq('auth_id', data.user.id)
     .maybeSingle();
 
@@ -111,7 +111,7 @@ export async function verifyOtp(email, token) {
   // Recupère le profil après succès
   const { data: profile } = await sb
     .from('profiles')
-    .select('id, role, nom, email, avatar_url, avatar_preset, unlocked_avatars')
+    .select('id, role, nom, prenom, email, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes')
     .eq('auth_id', data.user.id)
     .maybeSingle();
   if (!profile) {
@@ -148,7 +148,7 @@ export async function restoreSession() {
 
   const { data: profile } = await sb
     .from('profiles')
-    .select('id, role, nom, email, avatar_url, avatar_preset, unlocked_avatars')
+    .select('id, role, nom, prenom, email, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes')
     .eq('auth_id', session.user.id)
     .maybeSingle();
 

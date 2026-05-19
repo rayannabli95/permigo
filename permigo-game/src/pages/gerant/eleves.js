@@ -14,17 +14,17 @@ const STYLE = `<style>
 .el-page {
   max-width: 580px;
   margin: 0 auto;
-  background: #f8f9fc;
+  background: var(--bg);
   padding-bottom: 100px;
   font-family: 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
 }
 
 /* Header */
 .el-hd {
   padding: 24px 20px 16px;
-  background: #fff;
-  border-bottom: 1px solid #e2e6f2;
+  background: var(--su);
+  border-bottom: 1px solid var(--bo);
 }
 .el-hd-top {
   display: flex;
@@ -33,7 +33,7 @@ const STYLE = `<style>
 }
 .el-title {
   font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   letter-spacing: -0.022em;
 }
 .el-count {
@@ -54,7 +54,7 @@ const STYLE = `<style>
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: var(--mu2);
   font-size: 15px;
   pointer-events: none;
 }
@@ -62,10 +62,10 @@ const STYLE = `<style>
   width: 100%;
   height: 44px;
   padding: 0 16px 0 40px;
-  border: 1px solid #e2e6f2;
+  border: 1px solid var(--bo);
   border-radius: 12px;
-  background: #f8f9fc;
-  color: #0a0d1a;
+  background: var(--bg);
+  color: var(--ink);
   font: 500 14px/1 'Inter', sans-serif;
   outline: none;
   box-sizing: border-box;
@@ -74,7 +74,7 @@ const STYLE = `<style>
 .el-search::placeholder { color: #94a3b8; }
 .el-search:focus {
   border-color: #6366f1;
-  background: #fff;
+  background: var(--su);
   box-shadow: 0 0 0 3px rgba(99,102,241,.12);
 }
 
@@ -83,7 +83,7 @@ const STYLE = `<style>
   display: flex;
   gap: 0;
   margin-top: 16px;
-  background: #f0f2f8;
+  background: var(--bg2);
   border-radius: 12px;
   padding: 4px;
 }
@@ -92,15 +92,15 @@ const STYLE = `<style>
   height: 36px;
   border: none;
   background: transparent;
-  color: #64748b;
+  color: var(--mu);
   font: 600 13px/1 'Inter', sans-serif;
   border-radius: 8px;
   cursor: pointer;
   transition: background .15s ease, color .15s ease, box-shadow .15s ease;
 }
 .el-tab.active {
-  background: #fff;
-  color: #0a0d1a;
+  background: var(--su);
+  color: var(--ink);
   box-shadow: 0 1px 2px rgba(10,13,26,.06);
 }
 
@@ -114,8 +114,8 @@ const STYLE = `<style>
 
 /* Card eleve */
 .el-card {
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 20px;
   padding: 20px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
@@ -139,7 +139,7 @@ const STYLE = `<style>
 .el-info { flex: 1; min-width: 0; }
 .el-name {
   font: 600 15px/1.3 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
@@ -156,8 +156,8 @@ const STYLE = `<style>
   margin-top: 6px;
 }
 .el-hours.zero {
-  color: #94a3b8;
-  background: #f8f9fc;
+  color: var(--mu2);
+  background: var(--bg);
 }
 
 /* REMC progress */
@@ -172,11 +172,11 @@ const STYLE = `<style>
 }
 .el-remc-lbl {
   font: 500 11px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 .el-remc-val {
   font: 600 11px/1 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
 }
 .el-remc-bar {
   height: 4px;
@@ -195,7 +195,7 @@ const STYLE = `<style>
 /* Derniere validation */
 .el-last {
   font: 500 11px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-top: 8px;
 }
 
@@ -203,9 +203,9 @@ const STYLE = `<style>
 .el-empty {
   padding: 32px 20px;
   text-align: center;
-  color: #94a3b8;
+  color: var(--mu2);
   font: 500 13px/1.6 'Inter', sans-serif;
-  background: #fff;
+  background: var(--su);
   border: 1px dashed #e2e6f2;
   border-radius: 12px;
   margin: 16px;
@@ -214,7 +214,7 @@ const STYLE = `<style>
 
 /* Skeleton */
 .el-skel {
-  background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
+  background: linear-gradient(90deg, var(--bg2) 0%, var(--bo) 50%, var(--bg2) 100%);
   background-size: 200% 100%;
   animation: elShimmer 1.4s ease-in-out infinite;
   border-radius: 20px;
@@ -469,12 +469,12 @@ async function openQuickView(eleveId, anchorCard) {
   overlay.innerHTML = `
     <style>
       @keyframes elqvIn { from { opacity:0; } to { opacity:1; } }
-      .elqv-card { width:100%; max-width:420px; background:#fff; border-radius:24px; padding:24px; font-family:'Inter',sans-serif; }
-      .elqv-card h3 { font:800 18px/1.2 'Plus Jakarta Sans',sans-serif; color:#0a0d1a; margin:0 0 10px; }
-      .elqv-row { display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid #f0f2f8; font:500 13px/1.4 'Inter',sans-serif; }
+      .elqv-card { width:100%; max-width:420px; background:var(--su); border-radius:24px; padding:24px; font-family:'Inter',sans-serif; }
+      .elqv-card h3 { font:800 18px/1.2 'Plus Jakarta Sans',sans-serif; color:var(--ink); margin:0 0 10px; }
+      .elqv-row { display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid var(--bo); font:500 13px/1.4 'Inter',sans-serif; }
       .elqv-row:first-of-type { border-top:0; }
-      .elqv-row .l { color:#64748b; }
-      .elqv-row .v { color:#0a0d1a; font-weight:700; }
+      .elqv-row .l { color:var(--mu); }
+      .elqv-row .v { color:var(--ink); font-weight:700; }
       .elqv-btn { width:100%; margin-top:16px; padding:14px; background:#6366f1; color:#fff; border:0; border-radius:14px; font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s; }
       .elqv-btn:active { transform: scale(.97); }
     </style>

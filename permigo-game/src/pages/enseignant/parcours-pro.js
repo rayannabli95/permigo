@@ -1,0 +1,627 @@
+// ═══════════════════════════════════════════════════════════════
+// Enseignant — Parcours Pro (refonte 3 blocs)
+// Bloc 1 : HERO immersif (niveau, XP, streak)
+// Bloc 2 : NEXT UNLOCK — 1 seul palier visible via RPC
+// Bloc 3 : ROADMAP MINI — 3 stops (current / next / blurred)
+// ═══════════════════════════════════════════════════════════════
+import { sb } from '@/auth/auth.js';
+import { getCurUser } from '@/auth/cur-user.js';
+import { esc } from '@/utils/escape.js';
+import { toast } from '@/components/toast.js';
+import { track } from '@/services/analytics.js';
+import { navigate } from '@/router.js';
+import { getMoniteurState, buildTimelineStops } from '@/data/moniteur-levels.js';
+import { animateCounter } from '@/utils/gestures.js';
+import { icon } from '@/utils/icons.js';
+
+// ─── CSS ────────────────────────────────────────────────────────
+const STYLE = `<style>
+.pcp {
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 0 0 100px;
+  background: var(--bg);
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+}
+
+/* ═══════════════════════════ BLOC 1 — HERO ═══════════════════════ */
+.pcp-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 52px 24px 36px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background:
+    linear-gradient(160deg, #1e1b4b 0%, #312e81 28%, #4f46e5 58%, #7c3aed 100%);
+}
+
+/* Mesh lumière animée */
+.pcp-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 40%, rgba(167,139,250,.35) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 70%, rgba(99,102,241,.25) 0%, transparent 55%);
+  pointer-events: none;
+}
+/* Grain subtil */
+.pcp-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px;
+  pointer-events: none;
+}
+
+.pcp-hero-content { position: relative; z-index: 1; }
+
+.pcp-hero-label {
+  font: 600 11px/1 'Inter', sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.55);
+  margin-bottom: 8px;
+}
+.pcp-hero-title {
+  font: 800 44px/1.05 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  letter-spacing: -0.03em;
+  margin: 0 0 20px;
+  text-shadow: 0 2px 24px rgba(0,0,0,.3);
+}
+.pcp-hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.pcp-hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.pcp-hero-stat-val {
+  font: 700 24px/1 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+.pcp-hero-stat-lbl {
+  font: 500 11px/1 'Inter', sans-serif;
+  color: rgba(255,255,255,.6);
+}
+.pcp-hero-sep {
+  width: 1px; height: 32px;
+  background: rgba(255,255,255,.2);
+  flex-shrink: 0;
+}
+.pcp-streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 99px;
+  padding: 6px 12px;
+  backdrop-filter: blur(8px);
+}
+.pcp-streak-fire {
+  font-size: 16px;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px rgba(251,146,60,.8));
+}
+.pcp-streak-val {
+  font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+}
+.pcp-streak-lbl {
+  font: 500 11px/1 'Inter', sans-serif;
+  color: rgba(255,255,255,.7);
+}
+
+/* ═══════════════════════ BLOC 2 — NEXT UNLOCK ════════════════════ */
+.pcp-next {
+  margin: 20px 16px 0;
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
+  min-height: 260px;
+  background: linear-gradient(145deg, #6d28d9 0%, #7c3aed 40%, #a855f7 75%, #d946ef 100%);
+  box-shadow:
+    0 24px 48px -12px rgba(109,40,217,.5),
+    0 8px 16px -4px rgba(10,13,26,.15);
+  animation: pcpNextIn .6s .1s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes pcpNextIn {
+  from { opacity: 0; transform: translateY(16px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.pcp-next::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 85% 20%, rgba(255,255,255,.18) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 15% 90%, rgba(255,255,255,.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.pcp-next-inner {
+  position: relative;
+  z-index: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.pcp-next-label {
+  font: 600 10px/1 'Inter', sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+  margin-bottom: 20px;
+}
+.pcp-next-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.pcp-next-icon-wrap {
+  width: 64px; height: 64px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.18);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+}
+.pcp-next-info { flex: 1; min-width: 0; }
+.pcp-next-remaining {
+  font: 800 28px/1 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+.pcp-next-remaining span {
+  font: 500 13px/1 'Inter', sans-serif;
+  color: rgba(255,255,255,.7);
+  letter-spacing: 0;
+  margin-left: 4px;
+}
+.pcp-next-reward-label {
+  font: 700 16px/1.3 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  margin-bottom: 3px;
+}
+.pcp-next-reward-desc {
+  font: 500 12px/1.4 'Inter', sans-serif;
+  color: rgba(255,255,255,.7);
+}
+
+/* Mystery mode */
+.pcp-next-mystery .pcp-next-icon-wrap {
+  filter: blur(2px);
+}
+.pcp-next-mystery .pcp-next-reward-label,
+.pcp-next-mystery .pcp-next-reward-desc {
+  filter: blur(5px);
+  user-select: none;
+}
+.pcp-mystery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 99px;
+  padding: 4px 10px;
+  font: 700 11px/1 'Inter', sans-serif;
+  color: #fff;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* Barre de progression */
+.pcp-next-prog {
+  margin-top: 4px;
+}
+.pcp-next-prog-track {
+  height: 8px;
+  background: rgba(255,255,255,.18);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.pcp-next-prog-fill {
+  height: 100%;
+  background: var(--su);
+  border-radius: 99px;
+  width: 0; /* animé via JS */
+  transition: width .9s cubic-bezier(.2,.7,.3,1);
+  box-shadow: 0 0 12px rgba(255,255,255,.5);
+}
+.pcp-next-prog-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font: 500 11px/1 'Inter', sans-serif;
+  color: rgba(255,255,255,.7);
+}
+.pcp-next-prog-meta strong { color: #fff; }
+
+/* All done */
+.pcp-next-alldone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 24px;
+  color: rgba(255,255,255,.9);
+  text-align: center;
+}
+.pcp-next-alldone-ico {
+  font-size: 48px;
+  line-height: 1;
+}
+.pcp-next-alldone-title {
+  font: 700 20px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+}
+.pcp-next-alldone-sub {
+  font: 500 13px/1.4 'Inter', sans-serif;
+  color: rgba(255,255,255,.7);
+}
+
+/* ═══════════════════════ BLOC 3 — ROADMAP MINI ═══════════════════ */
+.pcp-road {
+  margin: 20px 16px 0;
+}
+.pcp-road-title {
+  font: 600 11px/1 'Inter', sans-serif;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--mu2);
+  margin-bottom: 12px;
+}
+.pcp-road-stops {
+  background: var(--su);
+  border: 1px solid var(--bo);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(10,13,26,.06);
+}
+.pcp-road-stop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  position: relative;
+  border-bottom: 1px solid var(--bo2);
+  transition: background .12s;
+}
+.pcp-road-stop:last-of-type { border-bottom: none; }
+.pcp-road-stop.pcp-now { background: rgba(99,102,241,.04); }
+.pcp-road-stop.pcp-blurred { opacity: .45; filter: blur(1.5px); pointer-events: none; user-select: none; }
+
+.pcp-road-dot {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.pcp-road-dot.done  { background: #10b981; color: #fff; }
+.pcp-road-dot.now   { background: #fff; border: 2.5px solid #6366f1; color: #6366f1;
+                       box-shadow: 0 0 0 4px rgba(99,102,241,.15); }
+.pcp-road-dot.todo  { background: var(--bg2); border: 2px solid #e2e6f2; color: #94a3b8; }
+
+.pcp-road-body { flex: 1; min-width: 0; }
+.pcp-road-tier {
+  font: 600 10px/1 'Inter', sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--mu2);
+  margin-bottom: 4px;
+}
+.pcp-road-stop.done .pcp-road-tier  { color: #10b981; }
+.pcp-road-stop.pcp-now .pcp-road-tier { color: #6366f1; }
+
+.pcp-road-name {
+  font: 600 14px/1.3 'Inter', sans-serif;
+  color: var(--ink);
+}
+.pcp-road-stop.done .pcp-road-name { color: #64748b; }
+
+.pcp-road-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  font: 500 11.5px/1 'Inter', sans-serif;
+  color: #6366f1;
+  background: rgba(99,102,241,.08);
+  border-radius: 8px;
+  padding: 3px 8px;
+}
+.pcp-road-stop.done .pcp-road-reward { color: #059669; background: rgba(16,185,129,.08); }
+
+.pcp-road-badge {
+  flex-shrink: 0;
+  font: 600 11px/1 'Inter', sans-serif;
+  padding: 4px 8px;
+  border-radius: 99px;
+}
+.pcp-road-badge.done  { color: #059669; background: rgba(16,185,129,.1); }
+.pcp-road-badge.now   { color: #fff; background: #6366f1; }
+.pcp-road-badge.todo  { color: #94a3b8; background: var(--bg2); }
+
+/* Bouton voir tout */
+.pcp-see-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  background: none;
+  border: 1.5px solid var(--bo);
+  border-radius: 14px;
+  color: var(--mu);
+  font: 600 13px/1 'Inter', sans-serif;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.pcp-see-all:hover { border-color: #6366f1; color: #6366f1; background: rgba(99,102,241,.04); }
+.pcp-see-all:active { transform: scale(.98); }
+
+/* Skeletons */
+.pcp-skel {
+  background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
+  background-size: 200% 100%;
+  animation: pcpShim 1.4s ease-in-out infinite;
+  border-radius: 20px;
+}
+@keyframes pcpShim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* Anims fade-up séquentielles */
+.pcp-hero   { animation: pcpBlockIn .5s 0ms cubic-bezier(.2,.7,.3,1) both; }
+.pcp-next   { animation: pcpBlockIn .5s 120ms cubic-bezier(.2,.7,.3,1) both; }
+.pcp-road   { animation: pcpBlockIn .5s 240ms cubic-bezier(.2,.7,.3,1) both; }
+@keyframes pcpBlockIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pcp-hero, .pcp-next, .pcp-road { animation: none; }
+  .pcp-next-prog-fill { transition: none; }
+}
+</style>`;
+
+// ─── State ──────────────────────────────────────────────────────
+let _root = null;
+let _me = null;
+
+// ─── Entry point ────────────────────────────────────────────────
+export async function mount(root) {
+  _root = root;
+  _me = getCurUser();
+  if (!_me || _me.role !== 'enseignant') return;
+
+  track('page.view', { page: 'parcours_pro' });
+
+  root.innerHTML = `${STYLE}
+    <div class="pcp">
+      <div class="pcp-skel" style="height:300px;margin:0;border-radius:0"></div>
+      <div class="pcp-skel" style="height:260px;margin:20px 16px 0"></div>
+      <div class="pcp-skel" style="height:180px;margin:20px 16px 0"></div>
+    </div>`;
+
+  // ─── Fetch en parallèle ──────────────────────────────────────
+  const [rpcRes, profileRes, streakRes, countRes] = await Promise.all([
+    sb.rpc('get_my_next_unlock_moniteur'),
+    sb.from('profiles').select('prenom, xp').eq('id', _me.id).maybeSingle(),
+    sb.from('streaks').select('current_streak').eq('user_id', _me.id).maybeSingle(),
+    sb.from('validations')
+      .select('id', { count: 'exact', head: true })
+      .eq('validated_by', _me.id),
+  ]);
+
+  const nextData    = rpcRes.data;
+  const me          = profileRes.data || {};
+  const streak      = streakRes.data?.current_streak ?? 0;
+  const totalVals   = countRes.count ?? 0;
+  const state       = getMoniteurState(totalVals);
+  const stops       = buildTimelineStops();
+
+  render(root, { nextData, me, streak, totalVals, state, stops });
+}
+
+// ─── Render ──────────────────────────────────────────────────────
+function render(root, { nextData, me, streak, totalVals, state, stops }) {
+  const currentTitle = state.tier?.title ?? 'Débutant';
+  const xp = me.xp ?? totalVals * 10;
+
+  root.innerHTML = `${STYLE}
+    <div class="pcp">
+
+      <!-- ══ BLOC 1 — HERO ══ -->
+      <div class="pcp-hero">
+        <div class="pcp-hero-content">
+          <div class="pcp-hero-label">Niveau actuel</div>
+          <h1 class="pcp-hero-title">${esc(currentTitle)}</h1>
+          <div class="pcp-hero-stats">
+            <div class="pcp-hero-stat">
+              <span class="pcp-hero-stat-val" data-counter="${totalVals}">0</span>
+              <span class="pcp-hero-stat-lbl">validations</span>
+            </div>
+            <div class="pcp-hero-sep"></div>
+            <div class="pcp-hero-stat">
+              <span class="pcp-hero-stat-val">${xp.toLocaleString('fr-FR')}</span>
+              <span class="pcp-hero-stat-lbl">XP total</span>
+            </div>
+            ${streak > 0 ? `
+            <div class="pcp-hero-sep"></div>
+            <div class="pcp-streak-badge">
+              <span class="pcp-streak-fire">🔥</span>
+              <span class="pcp-streak-val">${streak}</span>
+              <span class="pcp-streak-lbl">j. de suite</span>
+            </div>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ BLOC 2 — NEXT UNLOCK ══ -->
+      ${renderNextUnlock(nextData)}
+
+      <!-- ══ BLOC 3 — ROADMAP MINI ══ -->
+      ${renderRoadmapMini(stops, totalVals)}
+
+    </div>`;
+
+  wire(root, nextData?.progress_pct ?? 0);
+}
+
+// ─── Render Bloc 2 — Next Unlock ────────────────────────────────
+function renderNextUnlock(data) {
+  if (!data) {
+    return `
+      <div class="pcp-next">
+        <div class="pcp-next-inner pcp-next-alldone">
+          <div class="pcp-next-alldone-ico">🏆</div>
+          <div class="pcp-next-alldone-title">Cercle Or atteint !</div>
+          <div class="pcp-next-alldone-sub">Tu as débloqué tous les paliers.</div>
+        </div>
+      </div>`;
+  }
+
+  const isMystery   = Boolean(data.mystery);
+  const iconName    = data.next_palier?.reward_icon ?? 'star';
+  const label       = data.next_palier?.reward_label ?? '—';
+  const title       = data.next_palier?.title ?? '—';
+  const remaining   = data.remaining ?? 0;
+  const pct         = data.progress_pct ?? 0;
+
+  return `
+    <div class="pcp-next${isMystery ? ' pcp-next-mystery' : ''}">
+      <div class="pcp-next-inner">
+        <div class="pcp-next-label">Prochaine récompense</div>
+        <div class="pcp-next-top">
+          <div class="pcp-next-icon-wrap">
+            ${isMystery
+              ? icon('lock', { size: 28, strokeWidth: 2 })
+              : icon(iconName, { size: 28, strokeWidth: 2 })
+            }
+          </div>
+          <div class="pcp-next-info">
+            <div class="pcp-next-remaining">
+              ${remaining}<span>validation${remaining > 1 ? 's' : ''} restantes</span>
+            </div>
+            ${isMystery ? `
+              <div class="pcp-mystery-badge">${icon('lock', { size: 12 })} Mystère</div>
+            ` : `
+              <div class="pcp-next-reward-label">${esc(label)}</div>
+              <div class="pcp-next-reward-desc">${esc(title)}</div>
+            `}
+          </div>
+        </div>
+        <div class="pcp-next-prog">
+          <div class="pcp-next-prog-track">
+            <div class="pcp-next-prog-fill" id="pcp-prog-fill" style="width:0%"></div>
+          </div>
+          <div class="pcp-next-prog-meta">
+            <span>Progression</span>
+            <strong>${pct}%</strong>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─── Render Bloc 3 — Roadmap mini ───────────────────────────────
+function renderRoadmapMini(stops, totalVals) {
+  // Trouve l'index du prochain stop non atteint
+  const nextIdx = stops.findIndex(s => totalVals < s.threshold);
+  if (nextIdx === -1) return ''; // tout débloqué → pas de roadmap
+
+  // 3 stops : précédent (done) + prochain (now) + suivant (blurred)
+  const toShow = [];
+  if (nextIdx > 0) toShow.push({ ...stops[nextIdx - 1], state: 'done' });
+  toShow.push({ ...stops[nextIdx], state: 'now' });
+  if (nextIdx + 1 < stops.length) toShow.push({ ...stops[nextIdx + 1], state: 'todo' });
+
+  return `
+    <div class="pcp-road">
+      <div class="pcp-road-title">Ma route</div>
+      <div class="pcp-road-stops">
+        ${toShow.map((s, i) => renderRoadStop(s, i === toShow.length - 1 && s.state === 'todo')).join('')}
+      </div>
+      <button class="pcp-see-all" id="pcp-see-all">
+        Voir tous les paliers ${icon('chevron-right', { size: 14, strokeWidth: 2.5 })}
+      </button>
+    </div>`;
+}
+
+function renderRoadStop(s, blurred) {
+  const isTier = s.kind === 'tier';
+  const label  = isTier ? `Palier ${s.tier.tier}` : `${s.threshold} valid.`;
+  const name   = isTier ? s.tier.title : 'Skin de profil';
+  const reward = isTier ? s.tier.unlock.name : null;
+  const iconName = isTier ? s.tier.unlock.iconName : 'sparkle';
+  const diffLabel = s.state === 'done'
+    ? `Atteint`
+    : `+${s.threshold - (s.totalVals ?? 0)} valid.`;
+  // On n'a pas totalVals ici, on affiche juste le threshold
+  const badgeTxt = s.state === 'done' ? 'Atteint' : (s.state === 'now' ? 'Prochain' : `Palier ${s.kind === 'tier' ? s.tier.tier : '—'}`);
+
+  const dotState = s.state;
+  const dotIcon  = s.state === 'done'
+    ? icon('check', { size: 15, strokeWidth: 3 })
+    : icon(iconName, { size: 15, strokeWidth: 2 });
+
+  return `
+    <div class="pcp-road-stop ${dotState}${blurred ? ' pcp-blurred' : ''} ${s.state === 'now' ? 'pcp-now' : ''}">
+      <div class="pcp-road-dot ${dotState}">${dotIcon}</div>
+      <div class="pcp-road-body">
+        <div class="pcp-road-tier">${esc(label)}</div>
+        <div class="pcp-road-name">${esc(name)}</div>
+        ${reward ? `
+          <div class="pcp-road-reward">
+            ${icon(iconName, { size: 11, strokeWidth: 2.4 })} ${esc(reward)}
+          </div>` : ''}
+      </div>
+      <span class="pcp-road-badge ${dotState}">${esc(badgeTxt)}</span>
+    </div>`;
+}
+
+// ─── Wire ────────────────────────────────────────────────────────
+function wire(root, progressPct) {
+  // Anime la barre de progression Bloc 2
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      const fill = root.querySelector('#pcp-prog-fill');
+      if (fill) fill.style.width = `${Math.min(100, progressPct)}%`;
+    }, 150);
+  });
+
+  // Anime le compteur validations dans le hero
+  setTimeout(() => {
+    const el = root.querySelector('[data-counter]');
+    if (el) animateCounter(el, 0, parseInt(el.dataset.counter, 10) || 0, 900);
+  }, 100);
+
+  // Bouton "Voir tous les paliers →"
+  root.querySelector('#pcp-see-all')?.addEventListener('click', () => {
+    track('parcours_pro.see_all');
+    navigate('#/parcours-complet');
+  });
+}

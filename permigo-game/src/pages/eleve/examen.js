@@ -15,8 +15,8 @@ const STYLE = `<style>
   padding: 20px 16px 100px;
   max-width: 480px;
   margin: 0 auto;
-  background: #f8f9fc;
-  color: #0a0d1a;
+  background: var(--bg);
+  color: var(--ink);
   font-family: 'Inter', sans-serif;
 }
 @keyframes examSlideUp {
@@ -66,8 +66,8 @@ const STYLE = `<style>
 
 /* ── Shared card ── */
 .exam-card {
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
   border-radius: 20px;
   padding: 20px;
   margin-bottom: 12px;
@@ -77,7 +77,7 @@ const STYLE = `<style>
   font: 700 13px/1 'Plus Jakarta Sans',sans-serif;
   text-transform: uppercase;
   letter-spacing: .04em;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-bottom: 16px;
 }
 
@@ -91,19 +91,19 @@ const STYLE = `<style>
 .exam-tile {
   flex: 1;
   background: linear-gradient(145deg,#f8f9fc,#f0f2f8);
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 16px;
   padding: 14px 8px 10px;
   text-align: center;
 }
 .exam-tile-num {
   font: 800 30px/1 'IBM Plex Mono',monospace;
-  color: #0a0d1a;
+  color: var(--ink);
   display: block;
 }
 .exam-tile-lbl {
   font: 500 10px/1 'Inter',sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   text-transform: uppercase;
   letter-spacing: .06em;
   display: block;
@@ -121,12 +121,12 @@ const STYLE = `<style>
 }
 .exam-date-input {
   flex: 1;
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 12px;
   padding: 10px 14px;
   font: 500 14px/1 'Inter',sans-serif;
-  color: #0a0d1a;
-  background: #f8f9fc;
+  color: var(--ink);
+  background: var(--bg);
   outline: none;
   transition: border-color .18s ease;
   min-height: 44px;
@@ -185,8 +185,8 @@ const STYLE = `<style>
   gap: 12px;
   padding: 12px 14px;
   border-radius: 14px;
-  background: #f8f9fc;
-  border: 1.5px solid #e2e6f2;
+  background: var(--bg);
+  border: 1.5px solid var(--bo);
   transition: border-color .18s ease, background .18s ease;
 }
 .exam-check-row.pass {
@@ -238,8 +238,8 @@ const STYLE = `<style>
 /* ── Tips ── */
 .exam-tips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .exam-tip {
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
   border-radius: 16px;
   padding: 14px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04);

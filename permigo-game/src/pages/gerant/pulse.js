@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// Gérant — Dashboard Pulse (light theme)
+// Gérant — Pulse École (light theme)
 // 4 KPI ce mois + équipe + activité récente
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
@@ -16,25 +16,25 @@ const STYLE = `<style>
   padding: 0 0 100px;
   max-width: 580px;
   margin: 0 auto;
-  background: #f8f9fc;
+  background: var(--bg);
   font-family: 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
 }
 
 /* Header */
 .pulse-hd {
   padding: 24px 20px 16px;
-  border-bottom: 1px solid #e2e6f2;
-  background: #fff;
+  border-bottom: 1px solid var(--bo);
+  background: var(--su);
 }
 .pulse-title {
   font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   letter-spacing: -0.022em;
 }
 .pulse-date {
   font: 500 13px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-top: 6px;
   text-transform: capitalize;
 }
@@ -47,8 +47,8 @@ const STYLE = `<style>
   padding: 16px;
 }
 .kpi-card {
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 20px;
   padding: 20px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
@@ -81,13 +81,13 @@ const STYLE = `<style>
 }
 .kpi-val {
   font: 700 32px/1 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   margin-bottom: 6px;
   letter-spacing: -0.025em;
 }
 .kpi-lbl {
   font: 500 12px/1.4 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 
 /* Sections */
@@ -105,11 +105,11 @@ const STYLE = `<style>
   font: 600 11px/1 'Inter', sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 .pulse-sec-sub {
   font: 500 12px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 
 /* Delta KPI (cockpit) */
@@ -132,8 +132,8 @@ const STYLE = `<style>
   align-items: flex-end;
   gap: 8px;
   padding: 16px;
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 16px;
   height: 96px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
@@ -161,7 +161,7 @@ const STYLE = `<style>
 }
 .spark-lbl {
   font: 700 10px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   letter-spacing: .04em;
 }
 
@@ -172,8 +172,8 @@ const STYLE = `<style>
   align-items: center;
   gap: 14px;
   padding: 12px 16px;
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 12px;
   cursor: pointer;
   transition: border-color .15s, transform .12s;
@@ -182,7 +182,7 @@ const STYLE = `<style>
 .exam-row:active { transform: scale(.98); }
 .exam-name {
   font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   flex: 1;
   min-width: 0;
   white-space: nowrap;
@@ -198,7 +198,7 @@ const STYLE = `<style>
 .exam-prog-bar {
   width: 70px;
   height: 6px;
-  background: #f0f2f8;
+  background: var(--bg2);
   border-radius: 99px;
   overflow: hidden;
 }
@@ -222,8 +222,8 @@ const STYLE = `<style>
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 12px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
   transition: border-color .15s ease;
@@ -240,12 +240,12 @@ const STYLE = `<style>
 .team-info { flex: 1; min-width: 0; }
 .team-name {
   font: 600 14px/1.3 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .team-sub {
   font: 500 12px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-top: 4px;
 }
 .team-badge {
@@ -264,8 +264,8 @@ const STYLE = `<style>
   align-items: flex-start;
   gap: 12px;
   padding: 12px 16px;
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 12px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
 }
@@ -279,12 +279,12 @@ const STYLE = `<style>
 .activity-body { flex: 1; min-width: 0; }
 .activity-line {
   font: 500 13px/1.4 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
 }
 .activity-line strong { font-weight: 600; color: #0a0d1a; }
 .activity-meta {
   font: 500 12px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-top: 4px;
 }
 
@@ -301,17 +301,17 @@ const STYLE = `<style>
 .pulse-empty {
   padding: 24px 16px;
   text-align: center;
-  color: #94a3b8;
+  color: var(--mu2);
   font: 500 13px/1.5 'Inter', sans-serif;
-  background: #fff;
+  background: var(--su);
   border: 1px dashed #e2e6f2;
   border-radius: 12px;
 }
 
 /* ─── Tendance 30j (Bloomberg style multi-séries) ─── */
 .trend-card {
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 16px;
   padding: 16px 16px 12px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
@@ -353,7 +353,7 @@ const STYLE = `<style>
 .trend-empty {
   text-align: center; padding: 28px 12px;
   font: 500 12px/1.5 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 </style>`;
 

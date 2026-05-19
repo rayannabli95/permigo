@@ -22,11 +22,11 @@ const TABS = {
     { id: 'profil',   label: 'Profil',   icon: ICO.user },
   ],
   enseignant: [
-    { id: 'parcours',   label: 'Parcours', icon: ICO.map },
     { id: 'default',    label: "Auj.",     icon: ICO.activity },
-    { id: 'validation', label: 'Valider',  icon: ICO.check },
     { id: 'eleves',     label: 'Élèves',   icon: ICO.users },
-    { id: 'profil',     label: 'Profil',   icon: ICO.user },
+    { id: '__fab__',    label: '',         icon: '' },
+    { id: 'validation', label: 'Valider',  icon: ICO.check },
+    { id: 'parcours',   label: 'Parcours', icon: ICO.map },
   ],
   gerant: [
     { id: 'default', label: 'Pulse',  icon: ICO.activity },
@@ -41,8 +41,8 @@ const STYLE = `
     position: fixed;
     bottom: 0; left: 0; right: 0;
     height: calc(60px + env(safe-area-inset-bottom, 0px));
-    background: #fff;
-    border-top: 1px solid #e2e6f2;
+    background: var(--su);
+    border-top: 1px solid var(--bo);
     display: flex;
     align-items: stretch;
     z-index: 300;
@@ -57,7 +57,7 @@ const STYLE = `
     gap: 3px;
     padding: 6px 4px 8px;
     cursor: pointer;
-    color: #94a3b8;
+    color: var(--mu2);
     background: none;
     border: none;
     font-family: inherit;
@@ -89,6 +89,44 @@ const STYLE = `
     white-space: nowrap;
   }
   .bn-tab:active { transform: scale(.93); transition: transform .12s; }
+
+  /* ── iOS-style central FAB "+" ── */
+  .bn-fab-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* raised above nav */
+    margin-top: -20px;
+  }
+  .bn-fab-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    box-shadow: 0 4px 16px -4px rgba(99,102,241,.65), 0 2px 6px rgba(10,13,26,.18);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .14s cubic-bezier(.34,1.56,.64,1), box-shadow .14s ease;
+    position: relative;
+    z-index: 1;
+  }
+  .bn-fab-btn:active {
+    transform: scale(.88);
+    box-shadow: 0 2px 8px -2px rgba(99,102,241,.5);
+  }
+  .bn-fab-btn svg { display: block; }
+  .bn-fab-label {
+    font: 700 9px/1 'Inter', sans-serif;
+    letter-spacing: .02em;
+    color: #94a3b8;
+    margin-top: 4px;
+    white-space: nowrap;
+  }
 `;
 
 export function mountBottomNav(role) {
@@ -105,20 +143,38 @@ export function mountBottomNav(role) {
   const nav = document.createElement('nav');
   nav.id = 'bottom-nav';
   nav.setAttribute('aria-label', 'Navigation principale');
-  nav.innerHTML = tabs.map(t => `
-    <button class="bn-tab" data-id="${t.id}" aria-label="${t.label}">
-      ${t.icon}
-      <span class="bn-label">${t.label}</span>
-    </button>
-  `).join('');
+  nav.innerHTML = tabs.map(t => {
+    if (t.id === '__fab__') {
+      return `
+        <div class="bn-fab-wrap">
+          <button class="bn-fab-btn" data-id="__fab__" aria-label="Enregistrer une séance">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <span class="bn-fab-label">Séance</span>
+        </div>
+      `;
+    }
+    return `
+      <button class="bn-tab" data-id="${t.id}" aria-label="${t.label}">
+        ${t.icon}
+        <span class="bn-label">${t.label}</span>
+      </button>
+    `;
+  }).join('');
 
   document.body.appendChild(nav);
   _updateActive();
 
-  nav.querySelectorAll('.bn-tab').forEach(btn => {
+  nav.querySelectorAll('[data-id]').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
-      location.hash = id === 'default' ? '#/' : `#/${id}`;
+      if (id === '__fab__') {
+        location.hash = '#/log-session';
+      } else {
+        location.hash = id === 'default' ? '#/' : `#/${id}`;
+      }
     });
   });
 
@@ -134,7 +190,8 @@ function _updateActive() {
   const nav = document.querySelector('#bottom-nav');
   if (!nav) return;
   const section = (location.hash || '').replace(/^#\/?/, '').split('/')[0] || 'default';
-  nav.querySelectorAll('.bn-tab').forEach(btn => {
+  nav.querySelectorAll('[data-id]').forEach(btn => {
+    if (btn.dataset.id === '__fab__') return;
     const active = btn.dataset.id === section;
     btn.classList.toggle('active', active);
     btn.setAttribute('aria-current', active ? 'page' : 'false');

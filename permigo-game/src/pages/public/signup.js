@@ -18,7 +18,7 @@ const STYLE = `<style>
     background: linear-gradient(180deg, #f8f9fc 0%, #fff 100%);
     padding: 32px 20px max(60px, env(safe-area-inset-bottom));
     font-family: 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -27,8 +27,8 @@ const STYLE = `<style>
   .sg-card {
     width: 100%;
     max-width: 420px;
-    background: #fff;
-    border: 1px solid #e2e6f2;
+    background: var(--su);
+    border: 1px solid var(--bo);
     border-radius: 24px;
     padding: 28px 24px;
     box-shadow: 0 4px 24px rgba(10,13,26,.06);
@@ -51,31 +51,31 @@ const STYLE = `<style>
   }
   .sg-title {
     font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     text-align: center;
     margin: 0 0 6px;
     letter-spacing: -.022em;
   }
   .sg-sub {
     font: 500 14px/1.5 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu);
     text-align: center;
     margin: 0 0 24px;
   }
   .sg-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
   .sg-label {
     font: 600 11px/1 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu);
     letter-spacing: .08em;
     text-transform: uppercase;
   }
   .sg-input {
     padding: 14px 16px;
-    border: 1.5px solid #e2e6f2;
+    border: 1.5px solid var(--bo);
     border-radius: 14px;
     font: 500 15px/1.3 'Inter', sans-serif;
-    color: #0a0d1a;
-    background: #fff;
+    color: var(--ink);
+    background: var(--su);
     transition: border-color .15s ease, box-shadow .15s ease;
     font-family: inherit;
   }
@@ -84,11 +84,11 @@ const STYLE = `<style>
     border-color: #6366f1;
     box-shadow: 0 0 0 4px rgba(99,102,241,.12);
   }
-  .sg-input[readonly] { background: #f8f9fc; color: #64748b; cursor: default; }
+  .sg-input[readonly] { background: var(--bg); color: #64748b; cursor: default; }
   .sg-input.error { border-color: #ef4444; }
   .sg-help {
     font: 500 11px/1.4 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     margin-top: 2px;
   }
   .sg-help.error { color: #ef4444; }
@@ -122,7 +122,7 @@ const STYLE = `<style>
   .sg-error-card {
     width: 100%;
     max-width: 420px;
-    background: #fff;
+    background: var(--su);
     border: 1px solid #fecaca;
     border-radius: 20px;
     padding: 28px;
@@ -131,13 +131,13 @@ const STYLE = `<style>
   .sg-error-ico { font-size: 38px; margin-bottom: 12px; }
   .sg-error-title {
     font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     margin: 0 0 8px;
     letter-spacing: -.022em;
   }
   .sg-error-msg {
     font: 500 13px/1.5 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu);
     margin: 0 0 18px;
   }
   .sg-link {
@@ -145,12 +145,12 @@ const STYLE = `<style>
     font: 600 14px/1 'Inter', sans-serif;
     text-decoration: none;
     padding: 12px 24px;
-    border: 1.5px solid #e2e6f2;
+    border: 1.5px solid var(--bo);
     border-radius: 12px;
     display: inline-block;
     transition: border-color .15s, background .15s;
   }
-  .sg-link:hover { border-color: #6366f1; background: #f0f2f8; }
+  .sg-link:hover { border-color: #6366f1; background: var(--bg2); }
 
   /* Skeleton */
   .sg-skel {

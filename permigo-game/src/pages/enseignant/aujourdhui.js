@@ -37,22 +37,22 @@ const STYLE = `<style>
     padding: 20px 16px 100px;
     max-width: 600px;
     margin: 0 auto;
-    background: #f8f9fc;
+    background: var(--bg);
     font-family: 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
   }
 
   /* Header */
   .aj-hd { margin-bottom: 24px; }
   .aj-h1 {
     font: 700 26px/1.15 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     margin: 0 0 4px;
     letter-spacing: -0.025em;
   }
   .aj-date {
     font: 500 13px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     margin: 0;
     text-transform: capitalize;
   }
@@ -65,8 +65,8 @@ const STYLE = `<style>
     margin-bottom: 24px;
   }
   .aj-widget {
-    background: #fff;
-    border: 1px solid #e2e6f2;
+    background: var(--su);
+    border: 1px solid var(--bo);
     border-radius: 24px;
     padding: 18px;
     box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 6px 16px -8px rgba(10,13,26,.08);
@@ -96,19 +96,19 @@ const STYLE = `<style>
   }
   .aj-widget-lbl {
     font: 600 11px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     text-transform: uppercase;
     letter-spacing: .08em;
   }
   .aj-widget-val {
     font: 700 32px/1 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     letter-spacing: -0.025em;
     margin: 0;
   }
   .aj-widget-sub {
     font: 500 12px/1.3 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu);
     margin-top: 4px;
   }
   .aj-widget-delta {
@@ -129,7 +129,7 @@ const STYLE = `<style>
     font: 600 11px/1 'Inter', sans-serif;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: #94a3b8;
+    color: var(--mu2);
     margin: 0 0 12px;
     display: flex;
     align-items: center;
@@ -147,8 +147,8 @@ const STYLE = `<style>
 
   /* Activité récente */
   .aj-activity-list {
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
@@ -158,7 +158,7 @@ const STYLE = `<style>
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-bottom: 1px solid #f0f2f8;
+    border-bottom: 1px solid var(--bo2);
   }
   .aj-act-row:last-child { border-bottom: none; }
 
@@ -173,7 +173,7 @@ const STYLE = `<style>
   .aj-act-info { flex: 1; min-width: 0; }
   .aj-act-name {
     font: 600 13px/1.2 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     margin: 0 0 3px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
@@ -181,13 +181,13 @@ const STYLE = `<style>
   .aj-act-comp-label {
     display: block;
     font: 600 13px/1.3 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .aj-act-comp-code {
     display: block;
     font: 500 11px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     margin-top: 2px;
   }
   .aj-act-right {
@@ -204,7 +204,7 @@ const STYLE = `<style>
   }
   .aj-act-time {
     font: 500 11px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
   }
 
   /* Élèves compacts */
@@ -214,8 +214,8 @@ const STYLE = `<style>
     gap: 8px;
   }
   .aj-eleve-row {
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 20px;
     padding: 12px 16px;
     display: flex;
@@ -239,7 +239,7 @@ const STYLE = `<style>
   }
   .aj-eleve-nom {
     font: 500 13px/1.2 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     flex: 1;
     min-width: 0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -255,17 +255,17 @@ const STYLE = `<style>
   .aj-empty {
     padding: 24px 20px;
     text-align: center;
-    color: #94a3b8;
+    color: var(--mu2);
     font: 500 13px/1.5 'Inter', sans-serif;
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 20px;
   }
 
   /* Skeleton */
   .aj-skel { display: flex; flex-direction: column; gap: 16px; padding: 20px 16px; }
-  .aj-skel-kpi { height: 90px; background: #fff; border: 1.5px solid #e2e6f2; border-radius: 20px; animation: aj-pulse 1.4s ease-in-out infinite; }
-  .aj-skel-bloc { height: 160px; background: #fff; border: 1.5px solid #e2e6f2; border-radius: 20px; animation: aj-pulse 1.4s ease-in-out infinite; animation-delay: .1s; }
+  .aj-skel-kpi { height: 90px; background: var(--su); border: 1.5px solid var(--bo); border-radius: 20px; animation: aj-pulse 1.4s ease-in-out infinite; }
+  .aj-skel-bloc { height: 160px; background: var(--su); border: 1.5px solid var(--bo); border-radius: 20px; animation: aj-pulse 1.4s ease-in-out infinite; animation-delay: .1s; }
   @keyframes aj-pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: .5; }
@@ -289,7 +289,7 @@ const STYLE = `<style>
   }
   .aj-recap-title {
     font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     flex: 1;
   }
   .aj-recap-kpi {
@@ -299,7 +299,7 @@ const STYLE = `<style>
   }
   .aj-recap-sub {
     font: 500 12px/1.4 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu);
   }
   .aj-recap-rows { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
   .aj-recap-row {
@@ -308,7 +308,7 @@ const STYLE = `<style>
     background: rgba(255,255,255,.7);
     border-radius: 10px;
     font: 500 12px/1 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
   }
   .aj-recap-row-name { flex: 1; }
   .aj-recap-row-dur  { font-weight: 600; color: #6366f1; flex-shrink: 0; }
@@ -321,7 +321,7 @@ const STYLE = `<style>
   .aj-recap-row-status.s-confirmed { background: rgba(16,185,129,.1); color: #059669; }
   .aj-recap-row-status.s-pending   { background: rgba(245,158,11,.1); color: #d97706; }
   .aj-recap-row-status.s-refused   { background: rgba(239,68,68,.08); color: #dc2626; }
-  .aj-recap-row-status.s-auto      { background: #f0f2f8; color: #94a3b8; }
+  .aj-recap-row-status.s-auto      { background: var(--bg2); color: #94a3b8; }
 
   /* Prompt log si gap */
   .aj-log-prompt {
@@ -644,7 +644,11 @@ async function renderInto(root, _me) {
       <div class="aj-section">
         <div class="aj-section-title">Activité récente</div>
         ${recentVals.length === 0
-          ? `<div class="aj-empty">Aucune validation encore enregistrée.</div>`
+          ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;">
+               <span style="font-size:36px;opacity:.5" aria-hidden="true">📋</span>
+               <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Pas encore de validation</strong>
+               <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Enregistre ta première séance<br>pour voir l'activité ici.</span>
+             </div>`
           : `<div class="aj-activity-list">
               ${recentVals.map(v => renderActRow(v, elevesMap)).join('')}
             </div>`
@@ -655,7 +659,11 @@ async function renderInto(root, _me) {
       <div class="aj-section">
         <div class="aj-section-title">Mes élèves</div>
         ${mesElevesActifs.length === 0
-          ? `<div class="aj-empty">Validez une première compétence pour voir vos élèves ici.</div>`
+          ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;">
+               <span style="font-size:36px;opacity:.5" aria-hidden="true">👥</span>
+               <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Aucun élève assigné</strong>
+               <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Tes élèves apparaîtront ici<br>une fois affectés par le gérant.</span>
+             </div>`
           : `<div class="aj-eleves-list">
               ${mesElevesActifs.map(e => renderEleveRow(e)).join('')}
             </div>`

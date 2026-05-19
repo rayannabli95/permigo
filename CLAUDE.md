@@ -53,47 +53,47 @@ npm run build         # build prod
 - Styles : `src/styles/{base,components,animations,main}.css`
 - Backend Hono : `src/server/index.js` (API REST basique)
 
-### ✅ Pages migrées (23 pages fonctionnelles, branchées Supabase)
+### ✅ Pages shippées (26 pages fonctionnelles, branchées Supabase)
 
 | Page | Fichier | Rôle |
 |---|---|---|
 | Login | `src/pages/auth/login.js` | tous |
-| Accueil dashboard | `src/pages/eleve/accueil.js` | élève |
-| Parcours REMC (route SVG sinueuse + fiche bottom sheet) | `src/pages/eleve/parcours.js` | élève |
+| Accueil (3 blocs HERO / MILESTONE / ACTION) | `src/pages/eleve/accueil.js` | élève |
+| Confirmation de séance | `src/pages/eleve/session-confirmation.js` | élève |
+| Parcours REMC | `src/pages/eleve/parcours.js` | élève |
 | Réservation | `src/pages/eleve/reservation.js` | élève |
 | Trophées | `src/pages/eleve/trophees.js` | élève |
 | Boutique | `src/pages/eleve/boutique.js` | élève |
-| Mes Élèves | `src/pages/moniteur/mes-eleves.js` | moniteur |
-| Fiche Élève | `src/pages/moniteur/fiche-eleve.js` | moniteur |
-| Planning moniteur | `src/pages/moniteur/planning.js` | moniteur |
-| Aujourd'hui | `src/pages/moniteur/aujourdhui.js` | moniteur |
-| Livret REMC | `src/pages/moniteur/livret-remc.js` | moniteur |
-| Lieux | `src/pages/moniteur/lieux.js` | moniteur |
-| Avis | `src/pages/moniteur/avis.js` | moniteur |
-| Dashboard admin | `src/pages/admin/dashboard.js` | admin |
-| Calendrier admin | `src/pages/admin/calendrier.js` | admin |
-| Équipe admin | `src/pages/admin/equipe.js` | admin |
-| Élèves admin | `src/pages/admin/eleves.js` | admin |
-| Leads admin | `src/pages/admin/leads.js` | admin |
+| Wrapped | `src/pages/eleve/wrapped.js` | élève |
+| Mes Élèves | `src/pages/enseignant/mes-eleves.js` | enseignant |
+| Aujourd'hui | `src/pages/enseignant/aujourdhui.js` | enseignant |
+| Validation compétence | `src/pages/enseignant/validation.js` | enseignant |
+| Livret REMC | `src/pages/enseignant/livret-remc.js` | enseignant |
+| Parcours Pro (3 blocs) | `src/pages/enseignant/parcours-pro.js` | enseignant |
+| Tous les paliers | `src/pages/enseignant/parcours-pro-complet.js` | enseignant |
+| Log session | `src/pages/enseignant/log-session.js` | enseignant |
+| Insights | `src/pages/enseignant/insights.js` | enseignant |
+| Cockpit gérant (Bloomberg dark) | `src/pages/gerant/cockpit.js` | gérant |
+| Pulse (legacy light) | `src/pages/gerant/pulse.js` | gérant |
+| Équipe | `src/pages/gerant/equipe.js` | gérant |
+| Élèves gérant | `src/pages/gerant/eleves.js` | gérant |
 | Notifications | `src/pages/common/notifications.js` | tous |
 | Profil | `src/pages/common/profil.js` | tous |
+| Paramètres (dark mode toggle) | `src/pages/common/settings.js` | tous |
 | Landing publique | `src/pages/public/landing.js` | non-auth |
 | Signup | `src/pages/public/signup.js` | non-auth |
 | Inscription école | `src/pages/public/inscription-ecole.js` | non-auth |
 
-### ⏳ Pages à coder
-
-Toutes les pages de la roadmap initiale sont shippées. Prochaines priorités possibles :
+### ⏳ Prochaines priorités
 
 | Idée | Effort | Rôle |
 |---|---|---|
 | Hash router (fix reload qui casse la nav) | 60 min | technique |
-| Dark mode (variables CSS déjà prêtes) | 45 min | tous |
 | Tests E2E sur les flows critiques (Playwright) | 2 h | technique |
-| Page paiements / facturation élève | 60 min | élève / admin |
-| Messagerie interne moniteur ↔ élève | 90 min | moniteur / élève |
+| RPCs backend : `get_pending_sessions_eleve`, `get_today_quests`, `get_gerant_cockpit`, `confirm_session`, `get_wrapped_eleve` | 2h | Supabase |
+| CSS dark mode audit (remplacer couleurs hardcodées par var(--surface) etc.) | 3h | tous |
 
-**Migration v6 → v7 terminée.** Reste : durcir (router, tests, dark mode).
+**Sprint Premium Mobile terminé (19 mai 2026).** 8 chantiers livrés : refonte accueil élève, page confirmation séance, cockpit gérant Bloomberg, wrapped câblé, dark mode, haptic, empty states, cleanup.
 
 ## Comptes de test (Supabase prod)
 

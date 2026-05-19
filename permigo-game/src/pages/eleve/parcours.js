@@ -24,7 +24,7 @@ const STYLE = `<style>
   max-width: 480px;
   margin: 0 auto;
   font-family: 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   position: relative;
   /* Le volant est fixe dans le viewport → suit le scroll comme un watermark */
   background-color: #f8f9fc;
@@ -68,7 +68,7 @@ const STYLE = `<style>
   background: rgba(248,249,252,.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid #e2e6f2;
+  border-bottom: 1px solid var(--bo);
 }
 .prc-title    { font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif; color: #0a0d1a; }
 .prc-subtitle { font: 500 11px/1 'Inter', sans-serif; color: #94a3b8; margin-top: 3px; }
@@ -80,8 +80,8 @@ const STYLE = `<style>
 /* ── Barre de progression globale ── */
 .prc-global-bar {
   padding: 12px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f2f8;
+  background: var(--su);
+  border-bottom: 1px solid var(--bo2);
 }
 .prc-global-track {
   height: 6px;
@@ -100,7 +100,7 @@ const STYLE = `<style>
   justify-content: space-between;
   margin-top: 5px;
   font: 600 10.5px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 
 /* ── Légende ── */
@@ -109,10 +109,10 @@ const STYLE = `<style>
   gap: 12px;
   flex-wrap: wrap;
   padding: 10px 20px;
-  background: #f8f9fc;
-  border-bottom: 1px solid #e2e6f2;
+  background: var(--bg);
+  border-bottom: 1px solid var(--bo);
   font: 600 11px/1 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
 }
 .prc-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .prc-legend i { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -123,7 +123,7 @@ const STYLE = `<style>
   margin: 14px 12px 24px;
   border-radius: 24px;
   overflow: hidden;
-  background: #fff;
+  background: var(--su);
   box-shadow:
     0 24px 60px -20px rgba(11,13,26,.12),
     0 4px 16px rgba(11,13,26,.06);
@@ -147,7 +147,7 @@ const STYLE = `<style>
   position: absolute;
   inset: 2px;
   border-radius: 22px;
-  background: #f8f9fc;
+  background: var(--bg);
   z-index: 1;
 }
 
@@ -172,13 +172,13 @@ const STYLE = `<style>
   padding: 5px 14px;
   background: rgba(248,249,252,.95);
   backdrop-filter: blur(12px);
-  border: 1px solid #e2e6f2;
+  border: 1px solid var(--bo);
   border-radius: 99px;
   font-family: 'Inter', sans-serif;
   font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 2px;
-  color: #64748b;
+  color: var(--mu);
   box-shadow: 0 4px 12px rgba(11,13,26,.08);
   pointer-events: none;
   white-space: nowrap;
@@ -303,7 +303,7 @@ const STYLE = `<style>
 }
 .prc-world-h2 {
   font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   margin: 0 0 3px;
   text-shadow: 0 1px 8px rgba(255,255,255,.8);
 }
@@ -496,7 +496,7 @@ const STYLE = `<style>
 
 /* ─ TODO — blanc, bordure pointillée ─ */
 .prc-node.todo .nd-circle {
-  background: #fff;
+  background: var(--su);
   border-color: #e2e6f2;
   border-style: dashed;
   box-shadow: 0 2px 8px rgba(0,0,0,.05);
@@ -536,7 +536,7 @@ const STYLE = `<style>
   background: rgba(255,255,255,.97);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid #e2e6f2;
+  border: 1px solid var(--bo);
   border-radius: 12px;
   padding: 7px 11px 8px;
   width: max-content;
@@ -550,7 +550,7 @@ const STYLE = `<style>
 .nd-lbl .nd-name {
   display: block;
   font: 600 13px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   white-space: normal;
   word-wrap: break-word;
   hyphens: auto;
@@ -561,7 +561,7 @@ const STYLE = `<style>
 .nd-lbl .nd-code {
   display: none;
   font: 500 10px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   letter-spacing: .4px;
   margin-bottom: 5px;
 }
@@ -648,7 +648,7 @@ const STYLE = `<style>
   padding: 5px 11px;
   border-radius: 99px;
   background: rgba(255,255,255,.9);
-  border: 1px solid #e2e6f2;
+  border: 1px solid var(--bo);
   font-family: 'Inter', sans-serif;
   font-size: 9.5px;
   font-weight: 800;
@@ -710,9 +710,9 @@ const STYLE = `<style>
 .prc-final {
   margin: 20px 12px 0;
   padding: 24px 18px;
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
-  color: #0a0d1a;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
+  color: var(--ink);
   border-radius: 20px;
   text-align: center;
   box-shadow: 0 4px 16px rgba(11,13,26,.07);
@@ -752,9 +752,9 @@ const STYLE = `<style>
   position: fixed;
   bottom: 0; left: 0; right: 0;
   z-index: 99;
-  background: #fff;
+  background: var(--su);
   border-radius: 24px 24px 0 0;
-  border-top: 1px solid #e2e6f2;
+  border-top: 1px solid var(--bo);
   box-shadow: 0 -4px 32px rgba(11,13,26,.1);
   transform: translateY(100%);
   transition: transform .32s cubic-bezier(.32,.72,0,1);
@@ -788,8 +788,8 @@ const STYLE = `<style>
   top: 14px; right: 14px;
   width: 32px; height: 32px;
   border-radius: 50%;
-  background: #f0f2f8;
-  color: #64748b;
+  background: var(--bg2);
+  color: var(--mu);
   display: flex; align-items: center; justify-content: center;
   font-size: 18px;
   cursor: pointer;
@@ -799,7 +799,7 @@ const STYLE = `<style>
   font: 700 9.5px/1 'Inter', sans-serif;
   letter-spacing: 1.8px;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-bottom: 12px;
   text-align: center;
 }
@@ -822,12 +822,12 @@ const STYLE = `<style>
 }
 .fiche-hero h3 {
   font: 800 20px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   margin: 0 0 4px;
 }
 .fiche-hero .fiche-id {
   font: 600 10.5px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   letter-spacing: 1px;
   margin-bottom: 10px;
 }
@@ -845,13 +845,13 @@ const STYLE = `<style>
 }
 .stt-pill.done   { background: #dcfce7; color: #15803d; }
 .stt-pill.next   { background: var(--wc, #6366f1); color: #fff; }
-.stt-pill.todo   { background: #f0f2f8; color: #64748b; }
-.stt-pill.locked { background: #f0f2f8; color: #94a3b8; }
+.stt-pill.todo   { background: var(--bg2); color: #64748b; }
+.stt-pill.locked { background: var(--bg2); color: #94a3b8; }
 
 .fiche-body { padding: 0 16px 16px; }
 .fiche-section {
-  background: #f8f9fc;
-  border: 1px solid #e2e6f2;
+  background: var(--bg);
+  border: 1px solid var(--bo);
   border-radius: 14px;
   padding: 14px;
   margin-bottom: 10px;
@@ -860,7 +860,7 @@ const STYLE = `<style>
   font: 700 9.5px/1 'Inter', sans-serif;
   letter-spacing: .15em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -868,7 +868,7 @@ const STYLE = `<style>
 }
 .fiche-section .sec-txt {
   font: 500 13.5px/1.5 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   font-style: italic;
 }
 .fiche-meta-row {
@@ -898,7 +898,7 @@ const STYLE = `<style>
   padding: 16px 18px;
   margin-bottom: 14px;
   background: linear-gradient(135deg, #f8f9fc, #fff);
-  border: 1px solid #e2e6f2;
+  border: 1px solid var(--bo);
   border-radius: 16px;
   position: relative;
 }
@@ -913,7 +913,7 @@ const STYLE = `<style>
 .fiche-summary p {
   margin: 0;
   font: 600 15px/1.45 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   letter-spacing: -.015em;
 }
 
@@ -924,8 +924,8 @@ const STYLE = `<style>
   gap: 12px;
   margin-bottom: 14px;
   padding: 12px 14px;
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 14px;
 }
 .fiche-progress-info {
@@ -934,20 +934,20 @@ const STYLE = `<style>
 }
 .fiche-progress-step {
   font: 700 11px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   letter-spacing: .08em;
   text-transform: uppercase;
   margin-bottom: 4px;
 }
 .fiche-progress-val {
   font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
 }
 .fiche-progress-val .of { font-weight: 600; color: #94a3b8; font-size: 13px; }
 .fiche-progress-track {
   flex: 1;
   height: 8px;
-  background: #f0f2f8;
+  background: var(--bg2);
   border-radius: 99px;
   overflow: hidden;
   position: relative;
@@ -961,8 +961,8 @@ const STYLE = `<style>
 
 /* Bloc "Ce que tu vas maîtriser" */
 .fiche-block {
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 14px;
   padding: 14px 16px;
   margin-bottom: 10px;
@@ -971,7 +971,7 @@ const STYLE = `<style>
   font: 700 11px/1 'Inter', sans-serif;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -983,7 +983,7 @@ const STYLE = `<style>
   position: relative;
   padding: 7px 0 7px 26px;
   font: 500 13.5px/1.4 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   border-top: 1px solid #f0f2f8;
 }
 .fiche-block-list li:first-child { border-top: 0; padding-top: 4px; }
@@ -1029,7 +1029,7 @@ const STYLE = `<style>
 }
 .fiche-tip-text {
   font: 500 13.5px/1.45 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
 }
 
 /* Bloc status contextuel (acquise / next / locked) */
@@ -1043,7 +1043,7 @@ const STYLE = `<style>
 }
 .fiche-status.done   { background: #ecfdf5; border: 1px solid #a7f3d0; }
 .fiche-status.next   { background: color-mix(in srgb, var(--wc, #6366f1) 8%, #fff); border: 1px solid color-mix(in srgb, var(--wc, #6366f1) 35%, transparent); }
-.fiche-status.locked { background: #f8f9fc; border: 1px solid #e2e6f2; }
+.fiche-status.locked { background: var(--bg); border: 1px solid var(--bo); }
 .fiche-status-ico {
   width: 36px; height: 36px;
   border-radius: 50%;
@@ -1057,12 +1057,12 @@ const STYLE = `<style>
 .fiche-status-body { flex: 1; }
 .fiche-status-title {
   font: 700 13px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   margin-bottom: 2px;
 }
 .fiche-status-sub {
   font: 500 12px/1.4 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
 }
 </style>`;
 

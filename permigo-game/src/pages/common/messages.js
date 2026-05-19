@@ -63,7 +63,7 @@ function renderThreadList(root, me, threads) {
       <div class="msg-empty">
         <div class="msg-empty-ico">💬</div>
         <div class="msg-empty-txt">Pas encore de messages</div>
-        <div class="msg-empty-sub">Tes échanges avec ton moniteur apparaîtront ici</div>
+        <div class="msg-empty-sub">Tes échanges avec ton moniteur apparaîtront ici.<br>Continue ton parcours pour en recevoir.</div>
       </div>
     `;
     return;
@@ -366,7 +366,7 @@ function renderStyles() {
 }
 .msg-thread-last {
   font: 400 13px/1 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -519,11 +519,11 @@ function renderStyles() {
 }
 .msg-empty-sub {
   font: 400 14px/1.5 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
 }
 .msg-conv-empty, .msg-conv-err {
   font: 400 14px/1.5 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
 }
 .msg-retry-btn {
   margin-top: 12px;

@@ -30,22 +30,22 @@ const STYLE = `<style>
     padding: 20px 16px 100px;
     max-width: 600px;
     margin: 0 auto;
-    background: #f8f9fc;
+    background: var(--bg);
     font-family: 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
   }
 
   /* Header */
   .me-hd { margin-bottom: 24px; }
   .me-h1 {
     font: 700 24px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     margin: 0 0 4px;
     letter-spacing: -0.02em;
   }
   .me-sub {
     font: 500 13px/1.4 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     margin: 0;
   }
 
@@ -59,18 +59,18 @@ const STYLE = `<style>
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: var(--mu2);
     font-size: 15px;
     pointer-events: none;
   }
   .me-search {
     width: 100%;
     padding: 12px 12px 12px 40px;
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 12px;
     font: 500 14px/1 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     outline: none;
     transition: border-color .15s;
     box-sizing: border-box;
@@ -87,7 +87,7 @@ const STYLE = `<style>
     border: none;
     background: #e2e6f2;
     border-radius: 50%;
-    color: #64748b;
+    color: var(--mu);
     font-size: 12px;
     cursor: pointer;
     display: none;
@@ -104,7 +104,7 @@ const STYLE = `<style>
     display: flex;
     gap: 4px;
     margin-bottom: 16px;
-    background: #f0f2f8;
+    background: var(--bg2);
     padding: 4px;
     border-radius: 12px;
   }
@@ -115,13 +115,13 @@ const STYLE = `<style>
     background: transparent;
     border-radius: 8px;
     font: 600 13px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     cursor: pointer;
     transition: background .15s, color .15s;
     min-height: 36px;
   }
   .me-tab.active {
-    background: #fff;
+    background: var(--su);
     color: #6366f1;
     box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
   }
@@ -135,8 +135,8 @@ const STYLE = `<style>
 
   /* Card élève */
   .me-row {
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 20px;
     padding: 16px;
     display: flex;
@@ -167,7 +167,7 @@ const STYLE = `<style>
   .me-info { flex: 1; min-width: 0; }
   .me-nom {
     font: 600 14px/1.2 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     margin: 0 0 4px;
     white-space: nowrap;
     overflow: hidden;
@@ -181,7 +181,7 @@ const STYLE = `<style>
   }
   .me-meta-count {
     font: 500 11px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
   }
 
   /* Badge statut */
@@ -196,7 +196,7 @@ const STYLE = `<style>
     background: rgba(16,185,129,.1);
   }
   .me-badge.inactif {
-    color: #94a3b8;
+    color: var(--mu2);
     background: rgba(148,163,184,.1);
   }
 
@@ -221,13 +221,13 @@ const STYLE = `<style>
   }
   .me-prog-txt {
     font: 600 11px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     text-align: right;
   }
 
   /* Chevron */
   .me-chev {
-    color: #94a3b8;
+    color: var(--mu2);
     font-size: 16px;
     flex-shrink: 0;
   }
@@ -236,7 +236,7 @@ const STYLE = `<style>
   .me-empty {
     padding: 48px 20px;
     text-align: center;
-    color: #94a3b8;
+    color: var(--mu2);
     font: 500 14px/1.6 'Inter', sans-serif;
   }
   .me-empty-ico {
@@ -250,8 +250,8 @@ const STYLE = `<style>
   .me-skel-list { display: flex; flex-direction: column; gap: 8px; }
   .me-skel-row {
     height: 72px;
-    background: #fff;
-    border: 1.5px solid #e2e6f2;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
     border-radius: 20px;
     animation: skel-pulse 1.4s ease-in-out infinite;
   }
@@ -733,8 +733,8 @@ function openQuickMenu(eleveId, anchorRow) {
       @keyframes meqmIn { from { opacity: 0; } to { opacity: 1; } }
       .me-qm-panel {
         position: fixed; z-index: 401;
-        background: #fff;
-        border: 1px solid #e2e6f2;
+        background: var(--su);
+        border: 1px solid var(--bo);
         border-radius: 16px;
         box-shadow: 0 12px 32px -8px rgba(10,13,26,.2);
         padding: 6px;
@@ -750,14 +750,14 @@ function openQuickMenu(eleveId, anchorRow) {
         border-radius: 10px;
         cursor: pointer;
         font: 500 14px/1.2 'Inter', sans-serif;
-        color: #0a0d1a;
+        color: var(--ink);
         background: transparent;
         border: 0;
         width: 100%;
         text-align: left;
       }
-      .me-qm-item:hover { background: #f8f9fc; }
-      .me-qm-item:active { background: #f0f2f8; }
+      .me-qm-item:hover { background: var(--bg); }
+      .me-qm-item:active { background: var(--bg2); }
       .me-qm-ico { font-size: 16px; line-height: 1; }
       .me-qm-item.danger { color: #ef4444; }
     </style>

@@ -322,7 +322,7 @@ function renderStyles() {
 }
 .exb-intro-sub {
   font: 400 15px/1.5 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   text-align: center;
   margin: 0 0 32px;
 }
@@ -394,7 +394,7 @@ function renderStyles() {
   background: rgba(255,255,255,.08);
   border: none;
   border-radius: 8px;
-  color: #94a3b8;
+  color: var(--mu2);
   font-size: 16px;
   width: 36px;
   height: 36px;
@@ -427,12 +427,12 @@ function renderStyles() {
 }
 .exb-progress-label {
   font: 500 11px/1 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
   text-align: right;
 }
 .exb-timer {
   font: 700 15px/1 'IBM Plex Mono', monospace;
-  color: #94a3b8;
+  color: var(--mu2);
   flex-shrink: 0;
   min-width: 48px;
   text-align: right;
@@ -492,7 +492,7 @@ function renderStyles() {
   border-radius: 8px;
   background: rgba(255,255,255,.08);
   font: 700 13px/28px 'IBM Plex Mono', monospace;
-  color: #94a3b8;
+  color: var(--mu2);
   text-align: center;
   flex-shrink: 0;
   transition: background 140ms, color 140ms;
@@ -518,7 +518,7 @@ function renderStyles() {
 .exb-submitting-ico { font-size: 40px; }
 .exb-submitting-txt {
   font: 500 16px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 
 /* Results */
@@ -544,7 +544,7 @@ function renderStyles() {
 .exb-res-total { font-size: 28px; color: #64748b; }
 .exb-res-pct {
   font: 700 20px/1 'IBM Plex Mono', monospace;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 .exb-res-label {
   font: 700 18px/1 'Plus Jakarta Sans', sans-serif;
@@ -594,12 +594,12 @@ function renderStyles() {
 
 .exb-res-msg {
   font: 400 14px/1.6 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   margin: 0 0 24px;
 }
 .exb-res-detail-title {
   font: 600 13px/1 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
   text-transform: uppercase;
   letter-spacing: .05em;
   margin-bottom: 10px;
@@ -623,7 +623,7 @@ function renderStyles() {
 .exb-res-detail-row--ko { border-left: 3px solid #ef4444; }
 .exb-res-detail-n {
   font: 700 12px/1 'IBM Plex Mono', monospace;
-  color: #64748b;
+  color: var(--mu);
   min-width: 20px;
 }
 .exb-res-detail-ico {
@@ -634,7 +634,7 @@ function renderStyles() {
 .exb-res-detail-row--ko .exb-res-detail-ico { color: #ef4444; }
 .exb-res-detail-q {
   font: 400 13px/1.4 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -5,6 +5,67 @@
 
 ---
 
+## [2026-05-19 MATIN] 🔥 P0 — REFONTE PARCOURS MONITEUR (ADN Clash Royale + Apple)
+
+> ChatGPT a roasté la page parcours moniteur. Verdict : "tu affiches le système au lieu d'afficher l'émotion du système". UI 8/10 mais sensation mobile native 5.5/10. À fixer.
+
+### 🐛 BUG À TRAITER EN PREMIER
+
+**"Mode rapide" (validate-batch.js)** doit être supprimé ou redirigé vers `#/log-session`. Pourquoi : il INSERT direct dans `validations` sans créer de session → bloqué par le trigger `validations_check_prerequisites` → toast rouge "Erreur lors de la validation batch" (visible en prod). C'est le comportement correct du trigger, c'est le bouton qui ne doit plus exister.
+
+**Fix proposé** : remplacer le bouton "Mode rapide" + page validate-batch.js par redirect vers `#/log-session?eleve_id={id}` (pré-rempli si élève déjà choisi).
+
+### 🎬 REFONTE — 3 BLOCS, RIEN DE PLUS
+
+**Bloc 1 — HERO** (premium, presque jeu AAA)
+- Niveau actuel ENORME (le nom du palier : "Débutant", "Moniteur en route", etc.)
+- XP total + streak (compteur animé, glow léger)
+- Background : gradient subtle violet → indigo, avec mesh/grain
+- Hauteur : 280-320px, immersif
+- Pas de cards blanches inutiles, pas de border, juste du fond + texte hiérarchisé
+
+**Bloc 2 — NEXT UNLOCK** (UN SEUL palier visible, le prochain)
+- Appel RPC : `const { data } = await sb.rpc('get_my_next_unlock_moniteur');`
+- Affiche UNIQUEMENT `data.next_palier` avec :
+  - Icône GROSSE de la récompense (`reward_icon` = lucide icon name)
+  - Label palier : `"Plus que {data.remaining} validations"`
+  - Nom récompense : `data.next_palier.reward_label` (ex: "Export PDF Livret")
+  - Description : `data.next_palier.title` (ex: "Moniteur en route")
+  - Barre de progression : `data.progress_pct` (animée au mount)
+- Si `mystery === true` → afficher avec cadenas + "MYSTÈRE" (cachez le label)
+- Design : carte 280px haut avec gradient violet → fuchsia, glow subtle, ombre portée
+- L'utilisateur doit avoir envie de débloquer
+
+**Bloc 3 — ROADMAP MINIMALISTE**
+- Montre UNIQUEMENT 3 paliers : actuel + prochain + suivant flouté
+- Si l'utilisateur veut voir toute la roadmap : bouton discret en bas "Voir tous les paliers →" → ouvre une page secondaire `#/parcours-pro-complet` (la timeline actuelle, gardée intacte mais cachée par défaut)
+
+### 🔘 FAB EN BAS
+
+Remplacer le bouton noir rond style Material par :
+- **Tabbar enrichie** : 5 onglets en bas + un bouton "+" central proéminent (gradient violet, légèrement remonté façon iOS app store "+ Create")
+- OU **dock flottant glass** : barre en bas avec glassmorphism (`backdrop-filter: blur(20px)`, fond `rgba(255,255,255,0.7)`)
+- Pas de bouton noir Android-style isolé. Jamais.
+
+### 🎨 RÈGLES PREMIUM MOBILE
+
+- **Respiration** : 24-32px de padding vertical entre les 3 blocs (laisser respirer)
+- **Hiérarchie forte** : un seul élément "hero" par écran (le bloc Next Unlock, le reste est support)
+- **Animations cinéma** : fade-up au mount sur chaque bloc (delay 0/150/300ms), barre de progression qui se remplit en 800ms avec ease-out cubic
+- **Couleurs émotionnelles** : utilisez les gradients (violet→indigo→fuchsia) pour les moments importants, pas pour tout
+- **Fini les cartes blanches sur fond blanc** : varier les fonds (gradient, mesh, glass) pour créer du contraste
+
+### 📦 LIVRABLES
+
+- [ ] `src/pages/enseignant/parcours-pro.js` refonte complète en 3 blocs
+- [ ] `src/pages/enseignant/parcours-pro-complet.js` (nouvelle page, la timeline actuelle déplacée ici)
+- [ ] Suppression ou redirect de `validate-batch.js` → `#/log-session`
+- [ ] Refonte FAB : tabbar + bouton central iOS-style
+- [ ] Test sur iPhone (375x812 et 393x852)
+- [ ] Coche cette section + retour ligne courte ici
+
+---
+
 ## [2026-05-18 SOIR] 🎯 P0 — REFONTE FAB "ENREGISTRER SESSION" (ADN Uber Driver)
 
 > Discuté avec Rayan : le moniteur doit pouvoir logger une séance complète en 30 secondes, une main, en sortant de la voiture. **Validation = session + commentaire + templates, en 1 action atomique.**

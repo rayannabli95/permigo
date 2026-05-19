@@ -735,7 +735,7 @@ function _showDuplicateModal(root, dup) {
 const CSS = `
 .ls-page {
   min-height: 100dvh;
-  background: #f8f9fc;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   font-family: 'Inter', sans-serif;
@@ -746,8 +746,8 @@ const CSS = `
 .ls-header {
   position: sticky;
   top: 0; z-index: 100;
-  background: #fff;
-  border-bottom: 1px solid #e2e6f2;
+  background: var(--su);
+  border-bottom: 1px solid var(--bo);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -757,18 +757,18 @@ const CSS = `
 .ls-back {
   width: 40px; height: 40px;
   border-radius: 10px;
-  border: 1.5px solid #e2e6f2;
-  background: #fff;
+  border: 1.5px solid var(--bo);
+  background: var(--su);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #0a0d1a;
+  color: var(--ink);
   flex-shrink: 0;
   transition: background .12s;
 }
-.ls-back:active { background: #f0f2f8; }
+.ls-back:active { background: var(--bg2); }
 .ls-header-title {
   font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   letter-spacing: -.02em;
 }
 
@@ -784,8 +784,8 @@ const CSS = `
 
 /* Card */
 .ls-card {
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
   border-radius: 20px;
   padding: 16px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
@@ -796,7 +796,7 @@ const CSS = `
   font: 700 11px/1 'Inter', sans-serif;
   text-transform: uppercase;
   letter-spacing: .09em;
-  color: #94a3b8;
+  color: var(--mu2);
   margin: 0 0 12px;
   display: flex; align-items: center; gap: 6px;
 }
@@ -834,11 +834,11 @@ const CSS = `
 .ls-search {
   width: 100%; box-sizing: border-box;
   padding: 9px 12px 9px 34px;
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 12px;
   font: 500 13px/1 'Inter', sans-serif;
-  color: #0a0d1a;
-  background: #f8f9fc;
+  color: var(--ink);
+  background: var(--bg);
   outline: none;
   -webkit-appearance: none;
   transition: border-color .15s;
@@ -849,11 +849,11 @@ const CSS = `
 .ls-eleve-row {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 14px;
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 16px;
   cursor: pointer;
   transition: border-color .12s, background .12s, transform .1s;
-  background: #fff;
+  background: var(--su);
   min-height: 52px;
   -webkit-tap-highlight-color: transparent;
 }
@@ -868,7 +868,7 @@ const CSS = `
 .ls-eleve-info { flex: 1; min-width: 0; }
 .ls-eleve-name {
   font: 600 14px/1.2 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
 }
 .ls-eleve-check {
   width: 22px; height: 22px;
@@ -887,11 +887,11 @@ const CSS = `
 .ls-dur-chip {
   flex: 1;
   padding: 14px 8px;
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 14px;
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
-  color: #64748b;
-  background: #fff;
+  color: var(--mu);
+  background: var(--su);
   cursor: pointer;
   text-align: center;
   transition: border-color .12s, background .12s, color .12s, transform .1s;
@@ -903,7 +903,7 @@ const CSS = `
 .ls-dur-sheet {
   margin-top: 12px;
   padding: 14px;
-  background: #f8f9fc;
+  background: var(--bg);
   border-radius: 14px;
   display: flex; align-items: center; gap: 12px;
 }
@@ -912,16 +912,16 @@ const CSS = `
 }
 .ls-step-btn {
   width: 40px; height: 40px;
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 10px;
-  background: #fff;
+  background: var(--su);
   font: 700 20px/1 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background .12s;
 }
-.ls-step-btn:active { background: #f0f2f8; }
+.ls-step-btn:active { background: var(--bg2); }
 .ls-step-val {
   flex: 1; text-align: center;
   font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
@@ -944,10 +944,10 @@ const CSS = `
 .ls-date-row {
   display: flex; align-items: center; gap: 10px;
   padding: 12px 14px;
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 14px;
   cursor: pointer;
-  background: #fff;
+  background: var(--su);
   position: relative;
   transition: border-color .12s;
 }
@@ -955,7 +955,7 @@ const CSS = `
 .ls-date-txt {
   flex: 1;
   font: 600 14px/1 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
 }
 .ls-date-badge {
   font: 600 11px/1 'Inter', sans-serif;
@@ -978,18 +978,18 @@ const CSS = `
   font: 600 10px/1 'Inter', sans-serif;
   text-transform: uppercase;
   letter-spacing: .07em;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-bottom: 8px;
 }
 .ls-comp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .ls-comp-chip {
   display: flex; align-items: center; gap: 4px;
   padding: 7px 11px;
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 20px;
   font: 500 12px/1 'Inter', sans-serif;
   color: #4b5563;
-  background: #fff;
+  background: var(--su);
   cursor: pointer;
   transition: border-color .12s, background .12s, color .12s, transform .1s;
   min-height: 34px;
@@ -1014,7 +1014,7 @@ const CSS = `
 /* Commentaire */
 .ls-visibility-tag {
   font: 500 11px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   display: inline-flex; align-items: center; gap: 5px;
   margin-bottom: 10px;
 }
@@ -1022,11 +1022,11 @@ const CSS = `
 .ls-textarea {
   width: 100%; box-sizing: border-box;
   padding: 12px 14px 24px;
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 14px;
   font: 500 13px/1.5 'Inter', sans-serif;
-  color: #0a0d1a;
-  background: #fff;
+  color: var(--ink);
+  background: var(--su);
   resize: none;
   outline: none;
   -webkit-appearance: none;
@@ -1046,7 +1046,7 @@ const CSS = `
 }
 .ls-tpl-chip {
   padding: 7px 12px;
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 20px;
   font: 500 12px/1 'Inter', sans-serif;
   color: #6366f1;
@@ -1056,12 +1056,12 @@ const CSS = `
   min-height: 34px;
 }
 .ls-tpl-chip:active { background: rgba(99,102,241,.12); border-color: #6366f1; }
-.ls-tpl-locked { color: #c4ccd8; cursor: not-allowed; background: #f8f9fc; display: inline-flex; align-items: center; gap: 5px; }
+.ls-tpl-locked { color: #c4ccd8; cursor: not-allowed; background: var(--bg); display: inline-flex; align-items: center; gap: 5px; }
 
 /* Empty hint */
 .ls-empty-hint {
   font: 500 13px/1.4 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   padding: 8px 0;
 }
 
@@ -1071,8 +1071,8 @@ const CSS = `
   bottom: 0;
   padding: 12px 16px;
   padding-bottom: max(12px, env(safe-area-inset-bottom));
-  background: #fff;
-  border-top: 1px solid #e2e6f2;
+  background: var(--su);
+  border-top: 1px solid var(--bo);
   z-index: 50;
 }
 .ls-submit-btn {
@@ -1100,7 +1100,7 @@ const CSS = `
   padding: 24px;
 }
 .ls-dup-sheet {
-  background: #fff;
+  background: var(--su);
   border-radius: 20px;
   padding: 24px;
   width: 100%; max-width: 360px;
@@ -1108,29 +1108,29 @@ const CSS = `
 }
 .ls-dup-title {
   font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   margin-bottom: 10px;
   letter-spacing: -.02em;
 }
 .ls-dup-body {
   font: 500 14px/1.5 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
   margin-bottom: 20px;
 }
 .ls-dup-btns { display: flex; gap: 10px; }
 .ls-dup-btns-col { flex-direction: column; }
 .ls-dup-cancel {
   width: 100%; padding: 13px;
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 12px;
   font: 600 13px/1 'Inter', sans-serif;
-  color: #64748b;
-  background: #fff;
+  color: var(--mu);
+  background: var(--su);
   cursor: pointer;
   min-height: 46px;
   transition: background .12s;
 }
-.ls-dup-cancel:active { background: #f0f2f8; }
+.ls-dup-cancel:active { background: var(--bg2); }
 .ls-dup-confirm {
   width: 100%; padding: 13px;
   border: none;

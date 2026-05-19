@@ -6,7 +6,9 @@ import { mountLogSessionFab, unmountLogSessionFab } from '@/components/log-sessi
 const ROUTES = {
   eleve: {
     default: () => import('@/pages/eleve/accueil.js'),
+    ecole: () => import('@/pages/public/ecole.js'),
     parcours: () => import('@/pages/eleve/parcours.js'),
+    sessions: () => import('@/pages/eleve/session-confirmation.js'),
     quiz: () => import('@/pages/eleve/quiz.js'),
     trophees: () => import('@/pages/eleve/trophees.js'),
     galerie: () => import('@/pages/eleve/galerie.js'),
@@ -24,8 +26,10 @@ const ROUTES = {
   },
   enseignant: {
     default: () => import('@/pages/enseignant/aujourdhui.js'),
+    ecole: () => import('@/pages/public/ecole.js'),
     aujourdhui: () => import('@/pages/enseignant/aujourdhui.js'),
-    parcours: () => import('@/pages/enseignant/parcours.js'),
+    parcours: () => import('@/pages/enseignant/parcours-pro.js'),
+    'parcours-complet': () => import('@/pages/enseignant/parcours-pro-complet.js'),
     validation: () => import('@/pages/enseignant/validation.js'),
     eleves: () => import('@/pages/enseignant/mes-eleves.js'),
     livret: () => import('@/pages/enseignant/livret-remc.js'),
@@ -40,7 +44,9 @@ const ROUTES = {
     settings: () => import('@/pages/common/settings.js'),
   },
   gerant: {
-    default: () => import('@/pages/gerant/pulse.js'),
+    default: () => import('@/pages/gerant/cockpit.js'),
+    ecole: () => import('@/pages/public/ecole.js'),
+    pulse:   () => import('@/pages/gerant/pulse.js'),
     equipe: () => import('@/pages/gerant/equipe.js'),
     eleves: () => import('@/pages/gerant/eleves.js'),
     // Réutilise le livret REMC de l'enseignant pour la vue détail élève côté gérant
@@ -66,7 +72,7 @@ export async function route(root, me) {
 
   // ─── FAB "+ Session" — visible uniquement pour moniteurs/gérants ───
   // Idempotent : mount/unmount sont safe à appeler à chaque navigation.
-  if (role === 'enseignant' || role === 'gerant') {
+  if (role === 'gerant') {
     mountLogSessionFab();
   } else {
     unmountLogSessionFab();

@@ -13,17 +13,17 @@ const STYLE = `<style>
 .eq-page {
   max-width: 580px;
   margin: 0 auto;
-  background: #f8f9fc;
+  background: var(--bg);
   padding-bottom: 100px;
   font-family: 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
 }
 
 /* Header */
 .eq-hd {
   padding: 24px 20px 16px;
-  background: #fff;
-  border-bottom: 1px solid #e2e6f2;
+  background: var(--su);
+  border-bottom: 1px solid var(--bo);
 }
 .eq-hd-top {
   display: flex;
@@ -32,7 +32,7 @@ const STYLE = `<style>
 }
 .eq-title {
   font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   letter-spacing: -0.022em;
 }
 .eq-count {
@@ -53,7 +53,7 @@ const STYLE = `<style>
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: var(--mu2);
   font-size: 15px;
   pointer-events: none;
 }
@@ -61,10 +61,10 @@ const STYLE = `<style>
   width: 100%;
   height: 44px;
   padding: 0 16px 0 40px;
-  border: 1px solid #e2e6f2;
+  border: 1px solid var(--bo);
   border-radius: 12px;
-  background: #f8f9fc;
-  color: #0a0d1a;
+  background: var(--bg);
+  color: var(--ink);
   font: 500 14px/1 'Inter', sans-serif;
   outline: none;
   box-sizing: border-box;
@@ -73,7 +73,7 @@ const STYLE = `<style>
 .eq-search::placeholder { color: #94a3b8; }
 .eq-search:focus {
   border-color: #6366f1;
-  background: #fff;
+  background: var(--su);
   box-shadow: 0 0 0 3px rgba(99,102,241,.12);
 }
 
@@ -87,8 +87,8 @@ const STYLE = `<style>
 
 /* Card enseignant */
 .eq-card {
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 20px;
   padding: 20px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
@@ -110,12 +110,12 @@ const STYLE = `<style>
 .eq-info { flex: 1; min-width: 0; }
 .eq-name {
   font: 600 15px/1.3 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .eq-email {
   font: 500 12px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-top: 4px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -128,14 +128,14 @@ const STYLE = `<style>
 }
 .eq-stat {
   font: 500 12px/1 'Inter', sans-serif;
-  color: #64748b;
-  background: #f8f9fc;
-  border: 1px solid #e2e6f2;
+  color: var(--mu);
+  background: var(--bg);
+  border: 1px solid var(--bo);
   border-radius: 8px;
   padding: 6px 10px;
 }
 .eq-stat strong {
-  color: #0a0d1a;
+  color: var(--ink);
   font-weight: 600;
 }
 .eq-badge {
@@ -149,9 +149,9 @@ const STYLE = `<style>
   background: rgba(16,185,129,.12);
 }
 .eq-badge.inactif {
-  color: #94a3b8;
-  background: #f8f9fc;
-  border: 1px solid #e2e6f2;
+  color: var(--mu2);
+  background: var(--bg);
+  border: 1px solid var(--bo);
 }
 
 /* Bouton ajouter */
@@ -168,7 +168,7 @@ const STYLE = `<style>
   border: 1.5px dashed #cbd5e1;
   border-radius: 12px;
   background: transparent;
-  color: #64748b;
+  color: var(--mu);
   font: 600 14px/1 'Inter', sans-serif;
   cursor: pointer;
   transition: border-color .15s ease, background .15s ease, color .15s ease;
@@ -184,9 +184,9 @@ const STYLE = `<style>
 .eq-empty {
   padding: 32px 20px;
   text-align: center;
-  color: #94a3b8;
+  color: var(--mu2);
   font: 500 13px/1.6 'Inter', sans-serif;
-  background: #fff;
+  background: var(--su);
   border: 1px dashed #e2e6f2;
   border-radius: 12px;
   margin: 16px;
@@ -195,7 +195,7 @@ const STYLE = `<style>
 
 /* Skeleton */
 .eq-skel {
-  background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
+  background: linear-gradient(90deg, var(--bg2) 0%, var(--bo) 50%, var(--bg2) 100%);
   background-size: 200% 100%;
   animation: eqShimmer 1.4s ease-in-out infinite;
   border-radius: 20px;

@@ -42,18 +42,18 @@ export async function mount(root, param = 'privacy') {
   max-width: 480px;
   margin: 0 auto;
   padding: 0 0 80px;
-  background: #f8f9fc;
+  background: var(--bg);
   min-height: 100svh;
   font-family: 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
 }
 .legal-header {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
-  background: #fff;
-  border-bottom: 1px solid #e2e6f2;
+  background: var(--su);
+  border-bottom: 1px solid var(--bo);
   position: sticky;
   top: calc(52px + env(safe-area-inset-top, 0px));
   z-index: 10;
@@ -61,38 +61,38 @@ export async function mount(root, param = 'privacy') {
 .legal-back {
   width: 36px; height: 36px;
   border-radius: 8px;
-  border: 1px solid #e2e6f2;
-  background: #fff;
+  border: 1px solid var(--bo);
+  background: var(--su);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  color: #0b0d1a;
+  color: var(--ink);
   font-size: 16px;
 }
 .legal-header-title {
   font: 700 16px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0b0d1a;
+  color: var(--ink);
 }
 .legal-body { padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
 .legal-section {
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 16px;
   padding: 16px 18px;
 }
 .legal-section-title {
   font: 700 14px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: #0b0d1a;
+  color: var(--ink);
   margin-bottom: 6px;
 }
 .legal-section-body {
   font: 400 13px/1.65 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
 }
 .legal-footer {
   text-align: center;
   font: 400 11px/1.5 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   padding: 16px;
 }
 </style>

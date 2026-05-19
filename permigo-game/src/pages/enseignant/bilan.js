@@ -18,8 +18,8 @@ const STYLE = `<style>
   padding: 20px 16px 80px;
   max-width: 640px;
   margin: 0 auto;
-  background: #f8f9fc;
-  color: #0a0d1a;
+  background: var(--bg);
+  color: var(--ink);
   font-family: 'Inter', sans-serif;
 }
 
@@ -36,17 +36,17 @@ const STYLE = `<style>
   font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
   text-transform: uppercase;
   letter-spacing: .1em;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-bottom: 8px;
 }
 .bl-title {
   font: 800 24px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   letter-spacing: -.02em;
 }
 .bl-subtitle {
   font: 500 13px/1.4 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
   margin-top: 4px;
 }
 .bl-print-btn {
@@ -54,8 +54,8 @@ const STYLE = `<style>
   align-items: center;
   gap: 6px;
   padding: 10px 16px;
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
   border-radius: 12px;
   font: 600 13px/1 'Plus Jakarta Sans', sans-serif;
   color: #374151;
@@ -91,15 +91,15 @@ const STYLE = `<style>
   margin-bottom: 16px;
 }
 .bl-kpi {
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
   border-radius: 18px;
   padding: 16px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04);
 }
 .bl-kpi-val {
   font: 800 28px/1 'IBM Plex Mono', monospace;
-  color: #0a0d1a;
+  color: var(--ink);
   margin-bottom: 4px;
 }
 .bl-kpi-val .bl-kpi-unit { font-size: .55em; color: #94a3b8; }
@@ -149,8 +149,8 @@ const STYLE = `<style>
 
 /* ── Section card ── */
 .bl-section {
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
   border-radius: 20px;
   padding: 18px;
   margin-bottom: 12px;
@@ -164,7 +164,7 @@ const STYLE = `<style>
 }
 .bl-section-title {
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -185,7 +185,7 @@ const STYLE = `<style>
   gap: 10px;
   padding: 8px 10px;
   border-radius: 10px;
-  background: #f8f9fc;
+  background: var(--bg);
 }
 .bl-comp-check {
   width: 20px; height: 20px;
@@ -217,7 +217,7 @@ const STYLE = `<style>
 .bl-no-data {
   text-align: center;
   padding: 40px 20px;
-  color: #94a3b8;
+  color: var(--mu2);
   font: 500 14px/1.5 'Inter', sans-serif;
 }
 

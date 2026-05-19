@@ -88,7 +88,7 @@ const STYLE = `<style>
 }
 .dbg-card-sub {
   font: 500 11px/1.3 'IBM Plex Mono', monospace;
-  color: #64748b;
+  color: var(--mu);
   margin-top: 4px;
 }
 
@@ -100,7 +100,7 @@ const STYLE = `<style>
   font: 700 10px/1 'IBM Plex Mono', monospace;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--mu);
   margin-bottom: 12px;
 }
 .dbg-row {

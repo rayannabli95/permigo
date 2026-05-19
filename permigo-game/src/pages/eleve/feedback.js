@@ -15,8 +15,8 @@ const STYLE = `<style>
   padding: 20px 16px 100px;
   max-width: 480px;
   margin: 0 auto;
-  background: #f8f9fc;
-  color: #0a0d1a;
+  background: var(--bg);
+  color: var(--ink);
   font-family: 'Inter', sans-serif;
 }
 .fb-hd {
@@ -26,8 +26,8 @@ const STYLE = `<style>
 .fb-back {
   width: 36px; height: 36px;
   border-radius: 50%;
-  border: 1.5px solid #e2e6f2;
-  background: #fff;
+  border: 1.5px solid var(--bo);
+  background: var(--su);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: #0a0d1a;
   font-size: 18px; line-height: 1;
@@ -37,7 +37,7 @@ const STYLE = `<style>
 .fb-back:active { transform: scale(.93); }
 .fb-h1 {
   font: 700 22px/1.15 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   letter-spacing: -.02em;
   margin: 0;
   flex: 1;
@@ -46,8 +46,8 @@ const STYLE = `<style>
 /* Cards */
 .fb-list { display: flex; flex-direction: column; gap: 6px; }
 .fb-card {
-  background: #fff;
-  border: 1.5px solid #e2e6f2;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
   border-radius: 18px;
   padding: 14px;
   cursor: pointer;
@@ -88,7 +88,7 @@ const STYLE = `<style>
 .fb-event strong { color: #0a0d1a; }
 .fb-comment {
   font: italic 12px/1.5 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
   margin-top: 5px;
   padding-left: 8px;
   border-left: 2px solid #e2e6f2;
@@ -104,7 +104,7 @@ const STYLE = `<style>
   padding-top: 8px; margin-top: 8px;
   border-top: 1px solid #f0f2f8;
   font: 500 12px/1.5 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu);
   display: flex; flex-direction: column; gap: 4px;
 }
 .fb-extra-row { display: flex; gap: 6px; align-items: center; }
@@ -113,9 +113,9 @@ const STYLE = `<style>
 .fb-load-more {
   width: 100%; margin-top: 16px;
   padding: 14px;
-  border: 1.5px solid #e2e6f2;
+  border: 1.5px solid var(--bo);
   border-radius: 14px;
-  background: #fff;
+  background: var(--su);
   font: 600 14px/1 'Plus Jakarta Sans', sans-serif;
   color: #6366f1;
   cursor: pointer;
@@ -128,7 +128,7 @@ const STYLE = `<style>
 /* Empty */
 .fb-empty {
   text-align: center; padding: 40px 0;
-  color: #94a3b8;
+  color: var(--mu2);
   font: 500 14px/1.6 'Inter', sans-serif;
 }
 .fb-empty-ico { font-size: 36px; margin-bottom: 12px; }
@@ -136,7 +136,7 @@ const STYLE = `<style>
 /* Skel */
 .fb-skel-card {
   height: 80px; background: #fff;
-  border: 1.5px solid #e2e6f2; border-radius: 18px;
+  border: 1.5px solid var(--bo); border-radius: 18px;
   animation: fbPulse 1.4s ease-in-out infinite;
 }
 .fb-skel-card:nth-child(2) { animation-delay: .1s; }

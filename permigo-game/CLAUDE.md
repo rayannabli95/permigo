@@ -195,8 +195,18 @@ export async function mount(root, ...args) {
 
 ### V3 — Croissance
 - Leagues + classements
-- Page publique école
+- Page publique école ✅ (src/pages/public/ecole.js — `#/ecole/{slug}`)
 - Programme parrainage
+
+### ✅ Sprint Premium 2 livré (19–20 mai 2026)
+- Dark mode CSS vars complet (tous les fichiers)
+- Trophées élève refonte (Clash Royale ADN, rareté, mystère)
+- Boutique élève refonte (Supercell ADN, tabs, achat, gemmes)
+- Notifications premium (pull-to-refresh, swipe-to-delete, deep-link)
+- Empty states + skeletons audit + dark mode fix (todos pages)
+- Onboarding magique 3 écrans (src/pages/onboarding/index.js)
+- Page école publique (src/pages/public/ecole.js)
+- Cleanup : anglicismes (Insights → Analyses), skeleton CSS vars
 
 **TU NE DOIS PAS coder une feature V2 si V1 n'est pas finie.** Toujours valider avec l'utilisateur si tu veux dévier.
 

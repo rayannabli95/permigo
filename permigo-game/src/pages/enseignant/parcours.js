@@ -30,9 +30,9 @@ const STYLE = `<style>
   max-width: 580px;
   margin: 0 auto;
   padding: 0 0 100px;
-  background: #f8f9fc;
+  background: var(--bg);
   font-family: 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
 }
 
 /* Header sticky */
@@ -44,17 +44,17 @@ const STYLE = `<style>
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 16px 20px 12px;
-  border-bottom: 1px solid #e2e6f2;
+  border-bottom: 1px solid var(--bo);
 }
 .epc-h1 {
   font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   letter-spacing: -0.022em;
   margin: 0;
 }
 .epc-sub {
   font: 500 12px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   margin: 4px 0 0;
 }
 
@@ -62,8 +62,8 @@ const STYLE = `<style>
 .epc-prof {
   margin: 16px;
   padding: 20px;
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 20px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
 }
@@ -92,7 +92,7 @@ const STYLE = `<style>
 }
 .epc-prof-title-big {
   font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   letter-spacing: -0.022em;
 }
 
@@ -116,7 +116,7 @@ const STYLE = `<style>
   justify-content: space-between;
   margin-top: 6px;
   font: 500 11px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 .epc-xp-meta strong { color: #0a0d1a; font-weight: 600; }
 
@@ -125,7 +125,7 @@ const STYLE = `<style>
   font: 600 11px/1 'Inter', sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #94a3b8;
+  color: var(--mu2);
   margin: 24px 20px 12px;
 }
 
@@ -208,7 +208,7 @@ const STYLE = `<style>
 }
 .epc-hero-prog-fill {
   height: 100%;
-  background: #fff;
+  background: var(--su);
   border-radius: 99px;
   transition: width 1s cubic-bezier(.2,.7,.3,1);
 }
@@ -224,8 +224,8 @@ const STYLE = `<style>
 .epc-route {
   margin: 0 16px;
   padding: 20px;
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 24px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
 }
@@ -250,12 +250,12 @@ const STYLE = `<style>
   width: 36px; height: 36px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: #fff;
+  background: var(--su);
   border: 2.5px solid #e2e8f0;
   display: flex; align-items: center; justify-content: center;
   position: relative;
   z-index: 1;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 .epc-stop.done .epc-stop-dot {
   background: #10b981;
@@ -263,7 +263,7 @@ const STYLE = `<style>
   color: #fff;
 }
 .epc-stop.now .epc-stop-dot {
-  background: #fff;
+  background: var(--su);
   border-color: #6366f1;
   box-shadow: 0 0 0 4px rgba(99,102,241,.2);
   width: 44px; height: 44px;
@@ -291,7 +291,7 @@ const STYLE = `<style>
 }
 .epc-stop-lvl {
   font: 700 11px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   text-transform: uppercase;
   letter-spacing: .06em;
 }
@@ -315,18 +315,18 @@ const STYLE = `<style>
   background: #6366f1;
 }
 .epc-stop-cost.todo {
-  color: #64748b;
-  background: #f0f2f8;
+  color: var(--mu);
+  background: var(--bg2);
 }
 .epc-stop-cost em {
   font-style: normal;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 
 .epc-stop-title {
   font: 600 14px/1.3 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   margin-bottom: 6px;
 }
 .epc-stop.locked .epc-stop-title { color: #94a3b8; }
@@ -415,7 +415,7 @@ const STYLE = `<style>
   content: '🔒 Mystère';
   display: inline-block;
   font: 600 10px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   text-transform: uppercase;
   letter-spacing: .08em;
   margin-top: 6px;
@@ -456,8 +456,8 @@ const STYLE = `<style>
 .epc-cohort-card {
   flex-shrink: 0;
   width: 110px;
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 16px;
   padding: 14px 10px 12px;
   text-align: center;
@@ -478,7 +478,7 @@ const STYLE = `<style>
 }
 .epc-cohort-nom {
   font: 600 12px/1.2 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   margin-bottom: 4px;
 }
@@ -489,15 +489,15 @@ const STYLE = `<style>
 }
 .epc-cohort-prog small {
   font: 500 10px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
 }
 
 /* ── Section 5 : Cette semaine ── */
 .epc-week {
   margin: 12px 16px 0;
   padding: 16px 20px;
-  background: #fff;
-  border: 1px solid #e2e6f2;
+  background: var(--su);
+  border: 1px solid var(--bo);
   border-radius: 20px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
   display: flex;
@@ -517,7 +517,7 @@ const STYLE = `<style>
 }
 .epc-week-txt {
   font: 500 13px/1.3 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   flex: 1;
 }
 .epc-week-txt strong { font-weight: 700; }
