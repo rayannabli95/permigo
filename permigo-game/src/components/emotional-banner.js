@@ -147,7 +147,13 @@ function renderBanner(notif, content) {
 }
 
 export const emotionalBanner = {
-  async checkAndRender(root) {
+  /**
+   * @param {Element} root - page root element
+   * @param {object} [opts]
+   * @param {string} [opts.containerSelector] - CSS selector for insertion point (insertBefore firstChild)
+   * @param {string} [opts.afterSelector]     - CSS selector — banner is inserted AFTER this element
+   */
+  async checkAndRender(root, { containerSelector, afterSelector } = {}) {
     const me = getCurUser();
     if (!me) return;
 
@@ -156,7 +162,7 @@ export const emotionalBanner = {
         .from('notifications')
         .select('id, data')
         .eq('user_id', me.id)
-        .eq('type', 'emotional_nudge')
+        .like('type', 'emotional_%')
         .is('read_at', null)
         .order('created_at', { ascending: false })
         .limit(1);
@@ -170,12 +176,23 @@ export const emotionalBanner = {
 
       ensureBannerStyles();
 
-      // Inject au début du container .acc (ou dans root si .acc absent)
-      const container = root.querySelector('.acc') || root;
       const div = document.createElement('div');
       div.innerHTML = renderBanner(notif, content);
       const el = div.firstElementChild;
-      container.insertBefore(el, container.firstChild);
+
+      // afterSelector → insert right after the matched element
+      if (afterSelector) {
+        const anchor = root.querySelector(afterSelector);
+        if (anchor?.parentNode) { anchor.parentNode.insertBefore(el, anchor.nextSibling); }
+        else root.appendChild(el);
+      } else {
+        // containerSelector → insertBefore firstChild; fallback to common containers then root
+        const container = (containerSelector && root.querySelector(containerSelector))
+          || root.querySelector('.acc2')
+          || root.querySelector('.acc')
+          || root;
+        container.insertBefore(el, container.firstChild);
+      }
 
       track('emotional_banner.shown', { template_id: content.template_id, tone: content.tone });
 

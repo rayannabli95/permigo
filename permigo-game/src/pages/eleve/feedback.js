@@ -259,6 +259,7 @@ export async function mount(root) {
       const { data } = await sb.rpc('get_eleve_feedback_feed', {
         p_eleve_id: me.id,
         p_limit: PAGE_SIZE,
+        p_offset: offset,
       });
       const batch = data || [];
       allEvents = [...allEvents, ...batch];

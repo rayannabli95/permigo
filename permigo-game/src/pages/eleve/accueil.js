@@ -652,8 +652,8 @@ export async function mount(root) {
     // Leaderboard async
     _loadAndInjectLeaderboard(root);
 
-    // Bannière émotionnelle
-    emotionalBanner.checkAndRender(root).catch(() => {});
+    // Bannière émotionnelle — insérée juste après le hero
+    emotionalBanner.checkAndRender(root, { afterSelector: '.acc2-hero' }).catch(() => {});
 
     // Onboarding premier login
     if (!profile.first_value_action_at) showOnboarding(me.id, () => {});
