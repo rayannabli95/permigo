@@ -40,6 +40,9 @@ import { checkRateLimit, recordAttempt, resetRateLimit, formatWaitTime } from '@
 import { getTurnstileToken, isTurnstileEnabled } from '@/utils/turnstile.js';
 import { renderHoneypot, checkHoneypot } from '@/utils/honeypot.js';
 
+const _isNight = (() => { const h = new Date().getHours(); return h >= 20 || h < 7; })();
+const _landingBg = `/skins/landing/monde4${_isNight ? 'nuit' : 'jour'}.png`;
+
 const DEMO_ACCOUNTS = [
   { role: 'Élève',      email: 'eleve@test.fr',           emoji: '🎓' },
   { role: 'Enseignant', email: 'enseignant@test.fr',       emoji: '🚗' },
@@ -133,9 +136,11 @@ function template() {
       .lg-foot a:hover{border-color:#a5b4fc}
 
       .lg-version{position:absolute;bottom:14px;right:14px;font-family:var(--fn);font-size:10.5px;color:rgba(255,255,255,.3);letter-spacing:1.5px;z-index:3}
+      .lg-world-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.65;filter:blur(6px) saturate(.7);pointer-events:none;z-index:0}
     </style>
 
     <div class="lg-root">
+      <img src="${_landingBg}" alt="" class="lg-world-bg" loading="eager" draggable="false">
       <div class="lg-bg"></div>
       <div class="lg-grid"></div>
 

@@ -15,6 +15,9 @@ import { icon } from '@/utils/icons.js';
 import { renderChest, openChestModal, ensureChestStyles } from '@/components/chest.js';
 import { isChestOpened, unlockChest } from '@/utils/game-state.js';
 
+const isNight = (() => { const h = new Date().getHours(); return h >= 20 || h < 7; })();
+const WORLD_BG = (num) => `/skins/landing/monde${num}${isNight ? 'nuit' : 'jour'}.png`;
+
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
 /* ── Layout global avec volant filigrane fixe ── */
@@ -44,12 +47,17 @@ const STYLE = `<style>
   z-index: 0;
   filter: blur(0.6px) saturate(.92);
 }
-/* Le contenu reste lisible : fond teinté par la couleur du monde, compatible dark mode */
-.prc-world {
+/* Gradient teinté par monde — ::before pour passer au-dessus du fond photo */
+.prc-world::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--wc, #10b981) 6%, var(--bg)) 0%,
+    color-mix(in srgb, var(--wc, #10b981) 8%, var(--bg)) 0%,
     color-mix(in srgb, var(--wc, #10b981) 3%, var(--bg)) 50%,
-    var(--bg) 100%) !important;
+    var(--bg) 100%);
 }
 /* Tous les contenus passent au-dessus du volant */
 .prc > * { position: relative; z-index: 1; }
@@ -227,17 +235,13 @@ const STYLE = `<style>
   border-radius: 0 0 22px 22px;
 }
 
-/* ── Sections Monde — design propre, gradient subtil par monde ── */
+/* ── Sections Monde — fond photo z:0, gradient ::before z:1, contenu z:3+ ── */
 .prc-world {
   position: relative;
   padding: 0 0 70px;
   overflow: hidden;
   min-height: 300px;
-  /* Fond gradient doux : couleur du monde 5% → bg (compatible dark mode) */
-  background: linear-gradient(180deg,
-    color-mix(in srgb, var(--wc, #10b981) 8%, var(--bg)) 0%,
-    color-mix(in srgb, var(--wc, #10b981) 3%, var(--bg)) 50%,
-    var(--bg) 100%);
+  background: var(--bg);
 }
 /* Petit visuel décoratif en haut à droite (au lieu de fond pleine page) */
 .prc-world-decor {
@@ -263,6 +267,31 @@ const STYLE = `<style>
 @media (prefers-reduced-motion: reduce) {
   .prc-world.complete .prc-world-decor { animation: none; }
 }
+/* ── Fond photographique jour/nuit ── */
+.prc-world-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: .14;
+  filter: blur(2px) saturate(.85);
+  transition: opacity .6s ease;
+  pointer-events: none;
+}
+.prc-world-bg--active { opacity: .38; }
+[data-theme="dark"] .prc-world-bg         { opacity: .084; }
+[data-theme="dark"] .prc-world-bg--active { opacity: .228; }
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .prc-world-bg         { opacity: .084; }
+  html:not([data-theme="light"]) .prc-world-bg--active { opacity: .228; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prc-world-bg { transition: none; }
+}
+/* Filigrane volant atténué quand fond photo présent */
+.prc:has(.prc-world-bg)::before { opacity: .08; }
 
 /* En-tête du monde */
 .prc-world-hd {
@@ -671,6 +700,7 @@ const STYLE = `<style>
   pointer-events: none;
 }
 .prc-world.locked { background: var(--bg2); }
+.prc-world.locked .prc-world-bg   { display: none; }
 .prc-world.locked .prc-world-decor { filter: grayscale(.9) opacity(.4); }
 
 /* Pont entre mondes */
@@ -1452,10 +1482,12 @@ function renderWorldSection(ws, validatedMap, hasNext) {
     return `<div style="position:relative;z-index:9;text-align:center;padding:12px 16px;font:500 13px/1.4 'Inter',sans-serif;color:#64748b">Débloque <strong style="color:#0a0d1a">${need} compétence${need > 1 ? 's' : ''}</strong> dans le monde précédent pour accéder.</div>`;
   })() : '';
 
+  const isActive = status === 'in_progress';
   return `
 <section class="prc-world ${isLocked ? 'locked' : ''} ${isComplete ? 'complete' : ''}"
          data-world-idx="${idx}"
          style="--wc:${meta.color};--wg:${meta.glow}">
+  <img src="${WORLD_BG(meta.num)}" alt="" class="prc-world-bg${isActive ? ' prc-world-bg--active' : ''}" ${isActive ? 'loading="eager"' : 'loading="lazy"'} draggable="false">
   <!-- Petit visuel décoratif top-right (au lieu de fond plein) -->
   <img src="${meta.img}" alt="" class="prc-world-decor" loading="lazy" draggable="false">
 
