@@ -88,9 +88,7 @@ function renderSlide2({ percentile }) {
   const topPct = percentile !== null ? `${100 - percentile}%` : null;
   return `
 <div class="wrp-slide" data-slide="1">
-  <div class="wrp-slide-bg">
-    <img class="wrp-slide-img" src="/skins/wrapped_streak.png" alt="" aria-hidden="true">
-  </div>
+  <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_streak.png')"></div>
   <div class="wrp-slide-overlay-dark"></div>
   <div class="wrp-overlay-centered">
     ${topPct ? `
@@ -111,9 +109,7 @@ function renderSlide2({ percentile }) {
 function renderSlide3({ longestStreak }) {
   return `
 <div class="wrp-slide" data-slide="2">
-  <div class="wrp-slide-bg">
-    <img class="wrp-slide-img" src="/skins/wrapped_streak.png" alt="" aria-hidden="true">
-  </div>
+  <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_streak.png')"></div>
   <div class="wrp-slide-overlay-dark"></div>
   <div class="wrp-overlay-centered">
     <div>
@@ -130,9 +126,7 @@ function renderSlide3({ longestStreak }) {
 function renderSlide4({ topCompLabel, topCompN }) {
   return `
 <div class="wrp-slide" data-slide="3">
-  <div class="wrp-slide-bg">
-    <img class="wrp-slide-img" src="/skins/wrapped_streak.png" alt="" aria-hidden="true">
-  </div>
+  <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_streak.png')"></div>
   <div class="wrp-slide-overlay-dark"></div>
   <div class="wrp-overlay-centered">
     <div>

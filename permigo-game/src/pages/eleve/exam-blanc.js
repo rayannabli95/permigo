@@ -317,6 +317,7 @@ function renderStyles() {
 }
 .exb-intro-title {
   font: 700 28px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
   margin: 0 0 8px;
   text-align: center;
 }
