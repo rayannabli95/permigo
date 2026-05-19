@@ -390,13 +390,19 @@ function wire(root) {
   }
   async function afterLogin() {
     setTimeout(async () => {
-      const [{ navigate }, { mountBottomNav }] = await Promise.all([
+      const [{ route }, { mountBottomNav }, { mountHeader }] = await Promise.all([
         import('@/router.js'),
         import('@/components/nav-bottom.js'),
+        import('@/components/header-top.js'),
       ]);
       const me = getCurUser();
+      // Force la home : set le hash ET appelle route() direct (sinon hashchange ne fire pas si hash déjà = #/)
+      if (location.hash !== '#/') location.hash = '#/';
+      const app = document.getElementById('app');
+      await route(app, me);
+      await mountHeader();
       mountBottomNav(me?.role);
-      navigate('/');
+      document.body.classList.add('has-chrome');
     }, 600);
   }
 }

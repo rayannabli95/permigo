@@ -4,6 +4,8 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { mountNotifBell } from '@/components/notif-bell.js';
+import { icon } from '@/utils/icons.js';
+import { getCurUser } from '@/auth/cur-user.js';
 
 const STYLE = `
   #header-bar {
@@ -35,6 +37,19 @@ const STYLE = `
     align-items: center;
   }
   .pg-logo-btn:active { background: rgba(99,102,241,.08); }
+  #ht-right { display: flex; align-items: center; gap: 4px; }
+  .ht-icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--bo);
+    background: var(--su, #fff);
+    color: var(--ink);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .12s, background .12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ht-icon-btn:active { transform: scale(.92); background: var(--bg2, rgba(99,102,241,.08)); }
 `;
 
 export async function mountHeader() {
@@ -50,11 +65,16 @@ export async function mountHeader() {
   const bar = document.createElement('header');
   bar.id = 'header-bar';
   bar.setAttribute('role', 'banner');
+  const me = getCurUser();
+  const isEleve = me?.role === 'eleve';
   bar.innerHTML = `
     <button class="pg-logo-btn" id="ht-logo" aria-label="Accueil PermiGo">
       <span class="pg-logo-txt sm">PermiGo</span>
     </button>
-    <div id="ht-bell"></div>
+    <div id="ht-right">
+      ${isEleve ? `<button class="ht-icon-btn" id="ht-shop" aria-label="Boutique" title="Boutique">${icon('shopping-bag', { size: 20 })}</button>` : ''}
+      <div id="ht-bell"></div>
+    </div>
   `;
 
   const appEl = document.getElementById('app');
@@ -62,6 +82,10 @@ export async function mountHeader() {
 
   bar.querySelector('#ht-logo')?.addEventListener('click', () => {
     location.hash = '#/';
+  });
+
+  bar.querySelector('#ht-shop')?.addEventListener('click', () => {
+    location.hash = '#/boutique';
   });
 
   await mountNotifBell(bar.querySelector('#ht-bell'));

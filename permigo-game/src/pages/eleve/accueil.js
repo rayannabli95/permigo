@@ -995,10 +995,10 @@ function renderActionDuJour(quest, pendingNotif, totalValidated) {
     btnText = 'Voir le parcours →';
     href    = '#/parcours';
   } else {
-    title   = 'Continue ton parcours';
-    sub     = `${31 - totalValidated} compétences restantes avant la maîtrise complète`;
-    btnText = 'Voir le parcours →';
-    href    = '#/parcours';
+    title   = 'Tente un examen blanc';
+    sub     = '40 questions officielles · évalue où tu en es';
+    btnText = 'Démarrer →';
+    href    = '#/exam-blanc';
   }
 
   return `

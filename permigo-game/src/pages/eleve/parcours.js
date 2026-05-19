@@ -700,7 +700,7 @@ const STYLE = `<style>
   pointer-events: none;
 }
 .prc-world.locked { background: var(--bg2); }
-.prc-world.locked .prc-world-bg   { opacity: .25; filter: grayscale(.5) saturate(.7); }
+.prc-world.locked .prc-world-bg   { opacity: .18; filter: grayscale(.5) saturate(.7); }
 .prc-world.locked .prc-world-decor { filter: grayscale(.9) opacity(.4); }
 
 /* Pont entre mondes */
