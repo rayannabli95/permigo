@@ -479,7 +479,8 @@ function wire(root, { sessionId, monPrenom }) {
       setTimeout(() => navigate('#/'), 800);
     } catch (err) {
       console.error('[session-confirmation] confirm', err);
-      toast(`Impossible de confirmer — ${err?.message || 'réessaie'}`, 'error');
+      const msg = translateSessionError(err?.message) || 'réessaie dans un instant';
+      toast(`Impossible de confirmer — ${msg}`, 'error');
       btn.disabled = false;
       btn.innerHTML = `${icon('check', { size: 16, strokeWidth: 2.8 })} Confirmer la séance`;
     }
@@ -490,6 +491,17 @@ function wire(root, { sessionId, monPrenom }) {
     haptic('warning');
     showRefuseModal(root, sessionId, monPrenom);
   });
+}
+
+// Traduit les codes d'erreur backend RPC confirm_session en messages FR lisibles
+function translateSessionError(code) {
+  const map = {
+    already_decided: 'cette séance a déjà été traitée',
+    not_found:       'séance introuvable',
+    forbidden:       'tu n\'as pas accès à cette séance',
+    invalid_status:  'statut de séance invalide',
+  };
+  return map[code] || null;
 }
 
 // ─── Modal confirmation refus ────────────────────────────────────
