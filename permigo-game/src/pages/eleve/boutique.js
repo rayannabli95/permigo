@@ -339,12 +339,12 @@ export async function mount(root) {
         }
         showPurchaseModal(item, gemmes, async () => {
           const result = await doPurchase(item, root, allItems);
-          if (result?.ok) {
-            gemmes = result.new_balance;
-            // Update items owned state
+          if (result) {
+            // Refetch complet pour éviter les bugs de re-render partiel
+            const newGemmes = result.new_balance ?? (typeof gemmes === 'number' ? gemmes - item.cost_gemmes : gemmes);
+            if (typeof newGemmes === 'number') gemmes = newGemmes;
             const target = allItems.find(i => i.id === item.id);
             if (target) { target.owned = true; target.acquired_at = new Date().toISOString(); }
-            // Refresh gem display + float animation
             const gv = root.querySelector('#bo2-gems-val');
             if (gv) gv.textContent = gemmes;
             showGemsFloat(root, `-${item.cost_gemmes}`);

@@ -87,13 +87,16 @@ function _scheduleSave() {
 export async function initGameState(userId) {
   _userId = userId;
   try {
-    const { data, error } = await sb
-      .from('user_preferences')
-      .select('custom')
-      .eq('user_id', userId)
-      .maybeSingle();
+    // Pull en parallèle : user_preferences (custom) + streaks (table dédiée) + profiles.gemmes
+    const [prefsRes, streakRes, profileRes] = await Promise.allSettled([
+      sb.from('user_preferences').select('custom').eq('user_id', userId).maybeSingle(),
+      sb.from('streaks').select('current_streak, last_activity_date').eq('user_id', userId).maybeSingle(),
+      sb.from('profiles').select('gemmes').eq('id', userId).maybeSingle(),
+    ]);
 
-    if (error) throw error;
+    const data = prefsRes.value?.data;
+    const streakRow = streakRes.value?.data;
+    const profile = profileRes.value?.data;
 
     if (data?.custom && Object.keys(data.custom).length > 0) {
       // DB wins — hydrate localStorage
@@ -106,6 +109,18 @@ export async function initGameState(userId) {
     } else {
       // Première fois : upload le localStorage courant
       await _flushToDb();
+    }
+
+    // OVERRIDE : la table streaks est la source canonique du streak (plus fiable que custom jsonb)
+    if (streakRow?.current_streak != null) {
+      localStorage.setItem(LS_STREAK_COUNT, String(streakRow.current_streak));
+    }
+    if (streakRow?.last_activity_date) {
+      localStorage.setItem(LS_STREAK_DATE, streakRow.last_activity_date);
+    }
+    // OVERRIDE : profiles.gemmes est la source canonique des gemmes
+    if (profile?.gemmes != null) {
+      localStorage.setItem(LS_GEMMES, String(profile.gemmes));
     }
   } catch (e) {
     console.warn('[game-state] initGameState failed, using localStorage only', e?.message);

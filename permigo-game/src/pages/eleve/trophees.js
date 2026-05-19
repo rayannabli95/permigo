@@ -134,6 +134,8 @@ const STYLE = `<style>
 .tr2-card:active { transform: scale(.93); opacity: .9; }
 .tr2-card.locked { background: var(--su); border: 1px solid var(--bo); }
 .tr2-card.locked .tr2-card-emoji { filter: grayscale(1) brightness(.4); opacity: .5; }
+/* Mix-blend-mode multiply pour les PNG avec fond blanc (le blanc devient invisible sur card colorée) */
+.tr2-card-emoji img { mix-blend-mode: multiply; }
 .tr2-card.commun    { background: linear-gradient(145deg,#475569,#64748b); box-shadow: 0 4px 16px -4px rgba(100,116,139,.5); }
 .tr2-card.rare      { background: linear-gradient(145deg,#1d4ed8,#60a5fa); box-shadow: 0 4px 16px -4px rgba(59,130,246,.6); }
 .tr2-card.epique    { background: linear-gradient(145deg,#6d28d9,#a78bfa); box-shadow: 0 4px 16px -4px rgba(139,92,246,.6); }
@@ -394,7 +396,9 @@ function showModal(def, unlockData, totalUnlocked) {
     <div class="tr2-modal" style="background:var(--su)">
       <div class="tr2-modal-glow" style="background:${rm.gradient}">
         <div class="tr2-modal-handle"></div>
-        <div class="tr2-modal-emoji">${def.emoji}</div>
+        <div class="tr2-modal-emoji">${def.image
+          ? `<img src="${def.image}" alt="${esc(def.title)}" loading="lazy" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:64px">${def.emoji}</span>`
+          : `<span style="font-size:64px">${def.emoji}</span>`}</div>
         <div class="tr2-rarity-chip">${esc(rm.label)}</div>
       </div>
       <div class="tr2-modal-body">
@@ -418,7 +422,9 @@ function showModal(def, unlockData, totalUnlocked) {
     <div class="tr2-modal" style="background:var(--su)">
       <div class="tr2-modal-locked-hd">
         <div class="tr2-modal-locked-handle"></div>
-        <div class="tr2-modal-locked-ico">${def.emoji}</div>
+        <div class="tr2-modal-locked-ico">${def.image
+          ? `<img src="${def.image}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) opacity(.5)" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:64px">${def.emoji}</span>`
+          : `<span style="font-size:64px">${def.emoji}</span>`}</div>
         <div class="tr2-modal-locked-lbl">🔒 Trophée verrouillé</div>
       </div>
       <div class="tr2-modal-body">
