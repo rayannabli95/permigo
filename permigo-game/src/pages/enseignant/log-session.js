@@ -308,10 +308,10 @@ function _render(root) {
         ${_templates.map(t => t.unlocked === false
           ? `<button class="ls-tpl-chip ls-tpl-locked" disabled title="Débloque à ${t.unlock_at ?? '?'} validations">
                ${icon('lock', { size: 10, strokeWidth: 2.5, color: '#94a3b8' })}
-               ${esc(t.title || t.body?.slice(0, 24) || 'Template')}
+               ${esc(t.title || t.body || 'Template')}
              </button>`
           : `<button class="ls-tpl-chip" data-body="${esc(t.body || '')}" type="button">
-               ${esc(t.title || t.body?.slice(0, 24) || 'Template')}
+               ${esc(t.title || t.body || 'Template')}
              </button>`
         ).join('')}
       </div>` : ''}
