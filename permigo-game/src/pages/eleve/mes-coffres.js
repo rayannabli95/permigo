@@ -11,7 +11,8 @@ import { esc }         from '@/utils/escape.js';
 import { track }       from '@/services/analytics.js';
 import { navigate }    from '@/router.js';
 import { icon }        from '@/utils/icons.js';
-import { getMyChests, unlockChest, openChest } from '@/utils/game-state.js';
+import { toast }       from '@/components/toast.js';
+import { getMyChests, openChest } from '@/utils/game-state.js';
 import { openChestModal, ensureChestStyles }   from '@/components/chest.js';
 
 // ─── Metadata par type de coffre ─────────────────────────────────
@@ -300,41 +301,50 @@ export async function mount(root) {
     const chestType = card.dataset.chestType;
     const meta = CHEST_META[chestType] || { label: chestType };
 
-    const triggerOpen = () => {
-      // Parse world number for the cinematic modal (falls back to generic)
+    const triggerOpen = async () => {
+      track('chest.opened_from_page', { chest_type: chestType });
+
+      // Cinematic modal for world chests
       const worldMatch = chestType.match(/^world_(\d+)$/);
       if (worldMatch) {
         const worldNum = parseInt(worldMatch[1], 10);
         const WORLD_NAMES = ['', 'Sécurité', 'Manœuvres', 'Conduite', 'Maîtrise'];
         openChestModal({ worldNum, worldName: WORLD_NAMES[worldNum] || `Monde ${worldNum}` });
-      } else {
-        openChest(chestType).then(result => {
-          const markOpened = () => {
-            card.classList.remove('mc-can-open');
-            card.classList.add('mc-opened');
-            card.tabIndex = -1;
-            card.querySelector('.mc-open-btn')?.replaceWith(
-              Object.assign(document.createElement('div'), {
-                className: 'mc-badge mc-badge-opened',
-                innerHTML: icon('check', { size: 14, strokeWidth: 2.5 }),
-              })
-            );
-            const sub = card.querySelector('.mc-sub');
-            if (sub) sub.textContent = 'Ouvert aujourd\'hui';
-            card.querySelector('.mc-rewards')?.remove();
-          };
-          if (result?.ok) {
-            markOpened();
-            toast(`${meta.label} ouvert ! +${meta.xp} XP +${meta.gemmes} 💎`, 'success');
-          } else if (result?.error === 'already_opened') {
-            markOpened();
-            toast('Tu as déjà ouvert ce coffre', 'info');
-          } else {
-            toast(result?.error || 'Erreur lors de l\'ouverture', 'error');
-          }
-        });
+        return;
       }
-      track('chest.opened_from_page', { chest_type: chestType });
+
+      const btn = card.querySelector('.mc-open-btn');
+      if (btn) { btn.disabled = true; btn.textContent = '…'; }
+
+      const result = await openChest(chestType);
+
+      const markOpened = () => {
+        card.classList.remove('mc-can-open');
+        card.classList.add('mc-opened');
+        card.tabIndex = -1;
+        card.querySelector('.mc-open-btn')?.replaceWith(
+          Object.assign(document.createElement('div'), {
+            className: 'mc-badge mc-badge-opened',
+            innerHTML: icon('check', { size: 14, strokeWidth: 2.5 }),
+          })
+        );
+        const sub = card.querySelector('.mc-sub');
+        if (sub) sub.textContent = 'Ouvert aujourd\'hui';
+        card.querySelector('.mc-rewards')?.remove();
+      };
+
+      if (result.ok) {
+        markOpened();
+        navigator.vibrate?.([30, 50, 30]);
+        toast(`${meta.label} ouvert ! +${meta.xp ?? 0} XP +${meta.gemmes ?? 0} 💎`, 'success');
+      } else if (result.error === 'already_opened') {
+        markOpened();
+        toast('Tu as déjà ouvert ce coffre', 'info');
+      } else {
+        console.error('[mes-coffres] openChest error:', result.error);
+        toast(result.error || 'Erreur ouverture coffre — réessaie', 'error');
+        if (btn) { btn.disabled = false; btn.textContent = 'Ouvrir'; }
+      }
     };
 
     card.addEventListener('click', triggerOpen);

@@ -468,17 +468,18 @@ function wire(root, { sessionId, monPrenom }) {
     btn.disabled = true;
     btn.innerHTML = `<div style="width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> En cours…`;
     try {
-      const { error } = await sb.rpc('confirm_session', {
+      const { data, error } = await sb.rpc('confirm_session', {
         p_session_id: sessionId,
         p_status: 'confirmed',
       });
-      if (error) throw error;
+      if (error || data?.error) throw (error || new Error(data.error));
       track('session.confirmed', { session_id: sessionId });
+      navigator.vibrate?.(50);
       toast('Séance confirmée ✓', 'success');
-      navigate('#/');
+      setTimeout(() => navigate('#/'), 800);
     } catch (err) {
       console.error('[session-confirmation] confirm', err);
-      toast('Impossible de confirmer la séance', 'error');
+      toast(`Impossible de confirmer — ${err?.message || 'réessaie'}`, 'error');
       btn.disabled = false;
       btn.innerHTML = `${icon('check', { size: 16, strokeWidth: 2.8 })} Confirmer la séance`;
     }
@@ -514,18 +515,18 @@ function showRefuseModal(root, sessionId, monPrenom) {
     btn.disabled = true;
     btn.textContent = 'En cours…';
     try {
-      const { error } = await sb.rpc('confirm_session', {
+      const { data, error } = await sb.rpc('confirm_session', {
         p_session_id: sessionId,
         p_status: 'refused',
       });
-      if (error) throw error;
+      if (error || data?.error) throw (error || new Error(data.error));
       track('session.refused', { session_id: sessionId });
       modal.remove();
       toast('Séance refusée', 'info');
-      navigate('#/');
+      setTimeout(() => navigate('#/'), 800);
     } catch (err) {
       console.error('[session-confirmation] refuse', err);
-      toast('Impossible de refuser la séance', 'error');
+      toast(`Impossible de refuser — ${err?.message || 'réessaie'}`, 'error');
       modal.remove();
     }
   });
