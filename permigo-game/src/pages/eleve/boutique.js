@@ -400,11 +400,13 @@ function renderCard(item, gemmes, idx) {
   const rm = RARITY_META[item.rarity] ?? RARITY_META.commun;
   const canAfford = gemmes >= item.cost_gemmes;
   const borderStyle = `border: 1.5px solid ${rm.border}; box-shadow: ${rm.glow};`;
+  const color = item.display_color || '#6366f1';
+  const imgUrl = item.asset_url || item.image_url || null;
 
-  const preview = item.asset_url
-    ? `<img src="${esc(item.asset_url)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-      + `<div class="bo2-card-preview-circle" style="background:${esc(item.display_color)}20;color:${esc(item.display_color)};display:none;font-size:36px">🎨</div>`
-    : `<div class="bo2-card-preview-circle" style="background:${esc(item.display_color)}20;color:${esc(item.display_color)}">${typeEmoji(item.type)}</div>`;
+  const preview = imgUrl
+    ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      + `<div class="bo2-card-preview-circle" style="background:${esc(color)}20;color:${esc(color)};display:none;font-size:36px">${typeEmoji(item.type)}</div>`
+    : `<div class="bo2-card-preview-circle" style="background:${esc(color)}20;color:${esc(color)}">${typeEmoji(item.type)}</div>`;
 
   return `
     <div class="bo2-card ${item.owned ? 'owned' : ''}"
@@ -421,8 +423,8 @@ function renderCard(item, gemmes, idx) {
           <div class="bo2-rarity-pill" style="background:${rm.badge}">${esc(rm.label)}</div>
           ${item.owned
             ? `<div class="bo2-owned-txt">✓ Obtenu</div>`
-            : `<button class="bo2-price-btn ${canAfford ? 'can-afford' : 'cant-afford'}">
-                💎 ${item.cost_gemmes}
+            : `<button class="bo2-price-btn ${canAfford ? 'can-afford' : 'cant-afford'}" ${!canAfford ? 'disabled' : ''}>
+                Acheter · ${item.cost_gemmes} 💎
                </button>`
           }
         </div>
@@ -453,10 +455,12 @@ function showPurchaseModal(item, gemmes, onConfirm) {
   const rm = RARITY_META[item.rarity] ?? RARITY_META.commun;
   const afterBalance = gemmes - item.cost_gemmes;
   const canAfford = afterBalance >= 0;
+  const color = item.display_color || '#6366f1';
+  const imgUrl = item.asset_url || item.image_url || null;
 
-  const preview = item.asset_url
-    ? `<img src="${esc(item.asset_url)}" alt="${esc(item.name)}" loading="lazy">`
-    : `<div class="bo2-modal-preview-circle" style="background:${esc(item.display_color)}20;color:${esc(item.display_color)}">${typeEmoji(item.type)}</div>`;
+  const preview = imgUrl
+    ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy">`
+    : `<div class="bo2-modal-preview-circle" style="background:${esc(color)}20;color:${esc(color)}">${typeEmoji(item.type)}</div>`;
 
   const overlay = document.createElement('div');
   overlay.className = 'bo2-modal-bg';

@@ -12,7 +12,6 @@ import { WORLDS } from '@/data/worlds.js';
 import { ASSETS } from '@/utils/assets.js';
 import { getCompDetail } from '@/data/remc-details.js';
 import { icon } from '@/utils/icons.js';
-import { renderEmptyState } from '@/components/empty-state.js';
 import { renderChest, openChestModal, ensureChestStyles } from '@/components/chest.js';
 import { isChestOpened, unlockChest } from '@/utils/game-state.js';
 
@@ -26,8 +25,7 @@ const STYLE = `<style>
   font-family: 'Inter', sans-serif;
   color: var(--ink);
   position: relative;
-  /* Le volant est fixe dans le viewport → suit le scroll comme un watermark */
-  background-color: #f8f9fc;
+  background-color: var(--bg);
 }
 .prc::before {
   content: '';
@@ -46,12 +44,12 @@ const STYLE = `<style>
   z-index: 0;
   filter: blur(0.6px) saturate(.92);
 }
-/* Le contenu reste lisible : on baisse l'opacity du fond blanc des sections monde */
+/* Le contenu reste lisible : fond teinté par la couleur du monde, compatible dark mode */
 .prc-world {
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--wc, #10b981) 6%, rgba(255,255,255,.88)) 0%,
-    color-mix(in srgb, var(--wc, #10b981) 3%, rgba(255,255,255,.85)) 50%,
-    rgba(255,255,255,.78) 100%) !important;
+    color-mix(in srgb, var(--wc, #10b981) 6%, var(--bg)) 0%,
+    color-mix(in srgb, var(--wc, #10b981) 3%, var(--bg)) 50%,
+    var(--bg) 100%) !important;
 }
 /* Tous les contenus passent au-dessus du volant */
 .prc > * { position: relative; z-index: 1; }
@@ -65,7 +63,7 @@ const STYLE = `<style>
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px 14px;
-  background: rgba(248,249,252,.92);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--bo);
@@ -170,7 +168,7 @@ const STYLE = `<style>
   align-items: center;
   gap: 6px;
   padding: 5px 14px;
-  background: rgba(248,249,252,.95);
+  background: color-mix(in srgb, var(--bg) 95%, transparent);
   backdrop-filter: blur(12px);
   border: 1px solid var(--bo);
   border-radius: 99px;
@@ -220,12 +218,12 @@ const STYLE = `<style>
 }
 .prc-map-fade-top {
   top: 2px;
-  background: linear-gradient(180deg, #f8f9fc 0%, transparent 100%);
+  background: linear-gradient(to bottom, var(--bg), transparent);
   border-radius: 22px 22px 0 0;
 }
 .prc-map-fade-bottom {
   bottom: 2px;
-  background: linear-gradient(0deg, #f8f9fc 0%, transparent 100%);
+  background: linear-gradient(to top, var(--bg), transparent);
   border-radius: 0 0 22px 22px;
 }
 
@@ -235,11 +233,11 @@ const STYLE = `<style>
   padding: 0 0 70px;
   overflow: hidden;
   min-height: 300px;
-  /* Fond gradient doux : couleur du monde 5% → blanc */
+  /* Fond gradient doux : couleur du monde 5% → bg (compatible dark mode) */
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--wc, #10b981) 8%, #fff) 0%,
-    color-mix(in srgb, var(--wc, #10b981) 3%, #fff) 50%,
-    #fff 100%);
+    color-mix(in srgb, var(--wc, #10b981) 8%, var(--bg)) 0%,
+    color-mix(in srgb, var(--wc, #10b981) 3%, var(--bg)) 50%,
+    var(--bg) 100%);
 }
 /* Petit visuel décoratif en haut à droite (au lieu de fond pleine page) */
 .prc-world-decor {
@@ -611,7 +609,7 @@ const STYLE = `<style>
 .prc-node.todo .nd-lbl .nd-stt  { color: #94a3b8; }
 
 .prc-node.locked .nd-lbl {
-  background: rgba(248,249,252,.95);
+  background: color-mix(in srgb, var(--su) 95%, transparent);
   border-color: rgba(203,213,225,.4);
   box-shadow: 0 2px 8px rgba(11,13,26,.06);
 }
@@ -667,12 +665,12 @@ const STYLE = `<style>
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(248,249,252,.6);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
   z-index: 8;
   backdrop-filter: grayscale(.8);
   pointer-events: none;
 }
-.prc-world.locked { background: #fafbfd; }
+.prc-world.locked { background: var(--bg2); }
 .prc-world.locked .prc-world-decor { filter: grayscale(.9) opacity(.4); }
 
 /* Pont entre mondes */
@@ -897,7 +895,7 @@ const STYLE = `<style>
 .fiche-summary {
   padding: 16px 18px;
   margin-bottom: 14px;
-  background: linear-gradient(135deg, #f8f9fc, #fff);
+  background: var(--su);
   border: 1px solid var(--bo);
   border-radius: 16px;
   position: relative;
@@ -1362,13 +1360,6 @@ function renderPage(worldStates, validatedMap) {
       <span class="prc-map-badge-dot"></span> CARTE D'APPRENTISSAGE
     </div>
     <div class="prc-map" id="prc-map-scroll">
-      ${totalDone === 0 ? renderEmptyState({
-        illustration: '/skins/empty-parcours.png',
-        title: 'Ton parcours t\'attend !',
-        subtitle: 'Clique sur ta première compétence ci-dessous pour démarrer.',
-        ctaLabel: 'Voir ma première compétence',
-        ctaHref: '#prc-comp-first',
-      }) : ''}
       ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, i < worldStates.length - 1)).join('')}
       ${renderFinal(totalDone, totalComps)}
       <div style="height: 24px"></div>

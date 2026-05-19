@@ -12,6 +12,7 @@ import { labelComp } from '@/utils/remc-label.js';
 import { showXpToast } from '@/components/xp-toast.js';
 import { badge, Badges } from '@/components/badge.js';
 import { icon } from '@/utils/icons.js';
+import { navigate } from '@/router.js';
 
 // Liste plate des compétences REMC dans l'ordre (C1a → C4g)
 const ORDERED_COMPS = REMC.flatMap(c => c.subs.map(s => s.c));
@@ -301,15 +302,6 @@ async function selectEleve(eleve) {
 function selectComp(compId, compNom) {
   if (_validatedIds.has(compId)) return;
 
-  // Règle pédagogique REMC : on ne valide que dans l'ordre
-  const nextUnlock = getNextUnlockable(_validatedIds);
-  if (compId !== nextUnlock) {
-    const idx = ORDERED_COMPS.indexOf(compId);
-    const required = ORDERED_COMPS.slice(0, idx).find(c => !_validatedIds.has(c)) || nextUnlock;
-    toast(`Valide d'abord ${required} avant ${compId}`, 'info', 3500);
-    return;
-  }
-
   const clickedSame = _selectedComp?.c === compId;
   _selectedComp = clickedSame ? null : { c: compId, n: compNom };
 
@@ -476,24 +468,21 @@ function renderCategory(cat) {
         ${cat.subs.map(sub => {
           const done = _validatedIds.has(sub.c);
           const isNext = !done && sub.c === nextUnlock;
-          const locked = !done && !isNext;
           const sel = _selectedComp?.c === sub.c;
           const cls = [
             done   && 'comp-done',
-            locked && 'comp-locked',
             isNext && 'comp-next',
             sel    && 'comp-sel',
           ].filter(Boolean).join(' ');
-          // Badges via le composant unifié
           let badgeHtml = '';
           if (done)        badgeHtml = Badges.acquis();
           else if (sel)    badgeHtml = badge('Sélectionné', { variant: 'primary', appearance: 'light', size: 'sm', shape: 'circle', dot: true });
           else if (isNext) badgeHtml = Badges.toValidate();
-          else             badgeHtml = Badges.locked('Verrouillé');
+          else             badgeHtml = badge('À valider', { variant: 'secondary', appearance: 'light', size: 'sm', shape: 'circle' });
           return `
             <div class="comp-row ${cls}"
               data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
-              ${locked ? 'aria-disabled="true" aria-label="Verrouillée — ' + esc(sub.n) + '"' : `role="button" tabindex="0" aria-label="${esc(sub.n)}" aria-pressed="${sel}"`}>
+              role="button" tabindex="0" aria-label="${esc(sub.n)}" aria-pressed="${sel}">
               <span class="comp-code">${esc(sub.c)}</span>
               <span class="comp-nom">${esc(sub.n)}</span>
               <span class="comp-status">${badgeHtml}</span>

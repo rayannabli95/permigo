@@ -399,7 +399,7 @@ export async function mount(root) {
   let anneeStats = null;
   if (me.role === 'enseignant') {
     const yearStart = `${new Date().getFullYear()}-01-01`;
-    const [{ data: valData }, { data: streakProfile }] = await Promise.all([
+    const [{ data: valData }, { data: streakProfile }, { data: elevesData }] = await Promise.all([
       sb.from('validations')
         .select('competence_id, eleve_id')
         .eq('validated_by', me.id)
@@ -408,15 +408,23 @@ export async function mount(root) {
         .select('streak_pro_days')
         .eq('id', me.id)
         .single(),
+      sb.from('profiles')
+        .select('id')
+        .eq('role', 'eleve')
+        .eq('enseignant_id', me.id)
+        .is('deleted_at', null),
     ]);
 
     const vals = valData || [];
     const totalValidations = vals.length;
-    const elevesSet = new Set(vals.map(v => v.eleve_id));
+    // Union: élèves assignés + élèves ayant au moins une validation (pour rétrocompatibilité)
+    const elevesIds = new Set((elevesData || []).map(e => e.id));
+    for (const v of vals) elevesIds.add(v.eleve_id);
+    const elevesCount = elevesIds.size;
     const c3Count = vals.filter(v => v.competence_id?.startsWith('C3')).length;
     const streakDays = streakProfile?.streak_pro_days ?? 0;
 
-    anneeStats = { totalValidations, elevesCount: elevesSet.size, c3Count, streakDays };
+    anneeStats = { totalValidations, elevesCount, c3Count, streakDays };
   }
 
   const displayName = me.nom || profile?.email || me.email || '?';

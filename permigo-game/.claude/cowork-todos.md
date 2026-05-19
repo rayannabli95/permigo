@@ -5,6 +5,22 @@
 
 ---
 
+## [2026-05-19 SOIR] ✅ SPRINT 4 — Bug fixes livrés (Claude Code)
+
+> 5 bugs P0/P1 fixés, build propre (130 modules, 866ms).
+
+| Fichier | Bug | Fix |
+|---|---|---|
+| `profil.js` | "0 élèves accompagnés" même si élèves assignés | Union `enseignant_id` query + validations (plus de count incorrect) |
+| `parcours.js` | Zone blanche en dark mode | Toutes les couleurs hardcodées → CSS vars (`var(--bg)`, `color-mix(in srgb, var(--bg) N%, transparent)`) + suppression `renderEmptyState` du `.prc-map` |
+| `parcours-pro.js` | Hero vide au chargement (opacity:0) + `.pcp-next` animation écrasée | Nouveau keyframe `pcpHeroIn` sans opacity (juste transform), retrait `.pcp-next` du bloc sequential, `streak_pro_days` depuis `profiles`, hero title depuis RPC `current_palier.title` |
+| `validation.js` | C1b–C1f verrouillées (gating séquentiel abusif) + `navigate` manquant | Suppression du bloc de gating séquentiel, badges "À valider" au lieu de "Verrouillé", import `navigate` ajouté |
+| `boutique.js` | Pas de bouton "Acheter" lisible + images sans fallback | Texte `Acheter · X 💎`, `disabled` si solde insuffisant, fallback `asset_url || image_url || null` + `display_color || '#6366f1'` |
+
+**Aucune demande Cowork dans ce sprint.** Tout côté Claude Code.
+
+---
+
 ## [2026-05-19 MATIN] 🔥 P0 — REFONTE PARCOURS MONITEUR (ADN Clash Royale + Apple)
 
 > ChatGPT a roasté la page parcours moniteur. Verdict : "tu affiches le système au lieu d'afficher l'émotion du système". UI 8/10 mais sensation mobile native 5.5/10. À fixer.

@@ -393,10 +393,14 @@ const STYLE = `<style>
 }
 @keyframes pcpShim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
-/* Anims fade-up séquentielles */
-.pcp-hero   { animation: pcpBlockIn .5s 0ms cubic-bezier(.2,.7,.3,1) both; }
-.pcp-next   { animation: pcpBlockIn .5s 120ms cubic-bezier(.2,.7,.3,1) both; }
-.pcp-road   { animation: pcpBlockIn .5s 240ms cubic-bezier(.2,.7,.3,1) both; }
+/* Hero : slide only — toujours visible (pas de flash opacity: 0) */
+.pcp-hero { animation: pcpHeroIn .4s cubic-bezier(.2,.7,.3,1) forwards; }
+@keyframes pcpHeroIn {
+  from { transform: translateY(10px); }
+  to   { transform: translateY(0); }
+}
+/* Next + Road : fade-up séquentiels (.pcp-next garde pcpNextIn défini plus haut) */
+.pcp-road { animation: pcpBlockIn .5s 240ms cubic-bezier(.2,.7,.3,1) both; }
 @keyframes pcpBlockIn {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -427,10 +431,9 @@ export async function mount(root) {
     </div>`;
 
   // ─── Fetch en parallèle ──────────────────────────────────────
-  const [rpcRes, profileRes, streakRes, countRes] = await Promise.all([
+  const [rpcRes, profileRes, countRes] = await Promise.all([
     sb.rpc('get_my_next_unlock_moniteur'),
-    sb.from('profiles').select('prenom, xp').eq('id', _me.id).maybeSingle(),
-    sb.from('streaks').select('current_streak').eq('user_id', _me.id).maybeSingle(),
+    sb.from('profiles').select('prenom, xp, streak_pro_days').eq('id', _me.id).maybeSingle(),
     sb.from('validations')
       .select('id', { count: 'exact', head: true })
       .eq('validated_by', _me.id),
@@ -438,7 +441,7 @@ export async function mount(root) {
 
   const nextData    = rpcRes.data;
   const me          = profileRes.data || {};
-  const streak      = streakRes.data?.current_streak ?? 0;
+  const streak      = me.streak_pro_days ?? 0;
   const totalVals   = countRes.count ?? 0;
   const state       = getMoniteurState(totalVals);
   const stops       = buildTimelineStops();
@@ -448,7 +451,9 @@ export async function mount(root) {
 
 // ─── Render ──────────────────────────────────────────────────────
 function render(root, { nextData, me, streak, totalVals, state, stops }) {
-  const currentTitle = state.tier?.title ?? 'Débutant';
+  // Titre du palier actuel : RPC en priorité (peut contenir current_palier), sinon local
+  const currentTitle = nextData?.current_palier?.title ?? state.tier?.title ?? 'Débutant';
+  const displayVals = nextData?.n_validations ?? totalVals;
   const xp = me.xp ?? totalVals * 10;
 
   root.innerHTML = `${STYLE}
@@ -461,7 +466,7 @@ function render(root, { nextData, me, streak, totalVals, state, stops }) {
           <h1 class="pcp-hero-title">${esc(currentTitle)}</h1>
           <div class="pcp-hero-stats">
             <div class="pcp-hero-stat">
-              <span class="pcp-hero-stat-val" data-counter="${totalVals}">0</span>
+              <span class="pcp-hero-stat-val" data-counter="${displayVals}">0</span>
               <span class="pcp-hero-stat-lbl">validations</span>
             </div>
             <div class="pcp-hero-sep"></div>
@@ -616,7 +621,7 @@ function wire(root, progressPct) {
   // Anime le compteur validations dans le hero
   setTimeout(() => {
     const el = root.querySelector('[data-counter]');
-    if (el) animateCounter(el, 0, parseInt(el.dataset.counter, 10) || 0, 900);
+    if (el) animateCounter(el, 0, parseInt(el.dataset.counter, 10) || 0, 800);
   }, 100);
 
   // Bouton "Voir tous les paliers →"
