@@ -275,17 +275,17 @@ const STYLE = `<style>
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  opacity: .14;
-  filter: blur(2px) saturate(.85);
+  opacity: .35;
+  filter: saturate(1);
   transition: opacity .6s ease;
   pointer-events: none;
 }
-.prc-world-bg--active { opacity: .38; }
-[data-theme="dark"] .prc-world-bg         { opacity: .084; }
-[data-theme="dark"] .prc-world-bg--active { opacity: .228; }
+.prc-world-bg--active { opacity: .75; }
+[data-theme="dark"] .prc-world-bg         { opacity: .28; }
+[data-theme="dark"] .prc-world-bg--active { opacity: .68; }
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"]) .prc-world-bg         { opacity: .084; }
-  html:not([data-theme="light"]) .prc-world-bg--active { opacity: .228; }
+  html:not([data-theme="light"]) .prc-world-bg         { opacity: .28; }
+  html:not([data-theme="light"]) .prc-world-bg--active { opacity: .68; }
 }
 @media (prefers-reduced-motion: reduce) {
   .prc-world-bg { transition: none; }
@@ -700,7 +700,7 @@ const STYLE = `<style>
   pointer-events: none;
 }
 .prc-world.locked { background: var(--bg2); }
-.prc-world.locked .prc-world-bg   { display: none; }
+.prc-world.locked .prc-world-bg   { opacity: .25; filter: grayscale(.5) saturate(.7); }
 .prc-world.locked .prc-world-decor { filter: grayscale(.9) opacity(.4); }
 
 /* Pont entre mondes */
