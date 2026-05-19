@@ -333,12 +333,45 @@ export async function mount(root) {
         card.querySelector('.mc-rewards')?.remove();
       };
 
+      const migrateCard = () => {
+        const fromList = card.closest('.mc-list');
+        const sectionHdr = fromList?.previousElementSibling;
+        card.remove();
+
+        // Update or remove the "À ouvrir" section
+        if (fromList) {
+          if (fromList.children.length === 0) {
+            fromList.remove();
+            sectionHdr?.remove();
+          } else {
+            sectionHdr.textContent = `À ouvrir (${fromList.children.length})`;
+          }
+        }
+
+        // Find or create the "Déjà ouverts" section
+        let openedList = null;
+        page.querySelectorAll('.mc-section').forEach(hdr => {
+          if (hdr.textContent.startsWith('Déjà ouverts')) {
+            openedList = hdr.nextElementSibling;
+          }
+        });
+        if (!openedList) {
+          const hdr = Object.assign(document.createElement('div'), { className: 'mc-section', textContent: 'Déjà ouverts' });
+          openedList = Object.assign(document.createElement('div'), { className: 'mc-list' });
+          page.appendChild(hdr);
+          page.appendChild(openedList);
+        }
+        openedList.prepend(card);
+      };
+
       if (result.ok) {
         markOpened();
+        migrateCard();
         navigator.vibrate?.([30, 50, 30]);
         toast(`${meta.label} ouvert ! +${meta.xp ?? 0} XP +${meta.gemmes ?? 0} 💎`, 'success');
       } else if (result.error === 'already_opened') {
         markOpened();
+        migrateCard();
         toast('Tu as déjà ouvert ce coffre', 'info');
       } else {
         console.error('[mes-coffres] openChest error:', result.error);
