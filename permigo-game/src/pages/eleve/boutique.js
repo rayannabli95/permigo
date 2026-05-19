@@ -511,7 +511,17 @@ async function doPurchase(item, root, allItems) {
     if (data?.error === 'already_owned')       { toast('Déjà dans ton inventaire', 'info'); return null; }
     if (data?.error)                           { toast('Achat impossible', 'error'); return null; }
     haptic('success');
-    toast(`🎁 ${item.name} débloqué !`, 'success', 3000);
+
+    // Auto-équipement de l'item acheté (sinon l'user comprend pas à quoi ça sert)
+    try {
+      const { equipItem } = await import('@/utils/game-state.js');
+      equipItem(item.type, item.id);
+      toast(`🎁 ${item.name} équipé !`, 'success', 3000);
+    } catch (eqErr) {
+      console.warn('[boutique] auto-equip failed', eqErr);
+      toast(`🎁 ${item.name} débloqué !`, 'success', 3000);
+    }
+
     track('boutique.item_purchased', { item_id: item.id, cost: item.cost_gemmes });
     return data;
   } catch (e) {

@@ -270,9 +270,9 @@ export function addGemmes(n) {
   const next = getGemmes() + n;
   localStorage.setItem(LS_GEMMES, String(next));
   _scheduleSave();
-  // Sync aussi profiles.gemmes (source canonique pour le HUD)
+  // Sync aussi profiles.gemmes (source canonique pour le HUD) — fire-and-forget
   if (_userId) {
-    sb.from('profiles').update({ gemmes: next }).eq('id', _userId).catch(() => {});
+    Promise.resolve(sb.from('profiles').update({ gemmes: next }).eq('id', _userId)).catch(() => {});
   }
   return next;
 }
@@ -284,7 +284,7 @@ export function spendGemmes(n) {
   localStorage.setItem(LS_GEMMES, String(next));
   _scheduleSave();
   if (_userId) {
-    sb.from('profiles').update({ gemmes: next }).eq('id', _userId).catch(() => {});
+    Promise.resolve(sb.from('profiles').update({ gemmes: next }).eq('id', _userId)).catch(() => {});
   }
   return true;
 }
@@ -347,7 +347,9 @@ const THEME_COLORS = {
 
 export function applyThemeColor(themeId) {
   const root = document.documentElement;
-  const c = themeId && THEME_COLORS[themeId];
+  // Accepte aussi bien "rouge" que "theme_rouge" (id boutique)
+  const key = typeof themeId === 'string' ? themeId.replace(/^theme_/, '') : themeId;
+  const c = key && THEME_COLORS[key];
   if (c) {
     root.style.setProperty('--a',   c.a);
     root.style.setProperty('--adk', c.adk);

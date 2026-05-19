@@ -547,12 +547,13 @@ const STYLE = `<style>
   position: absolute;
 }
 
-/* ─ LOCKED — gris pâle, cadenas SVG ─ */
+/* ─ LOCKED — gris pâle, volant grisé (uniformisé avec todo) ─ */
 .prc-node.locked .nd-circle {
   background: #e5e7eb;
   border-color: #f3f4f6;
   box-shadow: none;
 }
+.nd-wheel-locked { opacity: .45; }
 
 /* ── Labels flottants sous le node ── */
 .nd-lbl {
@@ -1452,11 +1453,7 @@ function renderWorldSection(ws, validatedMap, hasNext) {
       done: `<div class="nd-wheel-done" aria-hidden="true"></div>`,
       next: `<img class="nd-wheel" src="/worlds/volant.png" alt="" width="32" height="32" aria-hidden="true"/>`,
       todo:   `<div class="nd-wheel-todo" aria-hidden="true"></div>`,
-      locked: `<svg width="14" height="17" viewBox="0 0 14 17" fill="none" aria-hidden="true">
-        <rect x="1.5" y="7.5" width="11" height="9" rx="2" stroke="#9ca3af" stroke-width="1.4"/>
-        <path d="M3.5 7.5V5.5a3.5 3.5 0 017 0v2" stroke="#9ca3af" stroke-width="1.4" stroke-linecap="round" fill="none"/>
-        <circle cx="7" cy="12" r="1.4" fill="#9ca3af"/>
-      </svg>`,
+      locked: `<div class="nd-wheel-todo nd-wheel-locked" aria-hidden="true"></div>`,
     }[st];
 
     const isLocked = st === 'locked';

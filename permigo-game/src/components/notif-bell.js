@@ -89,7 +89,7 @@ export async function mountNotifBell(container) {
 
 async function refreshBell(container, me) {
   const { data, error } = await sb.from('notifications')
-    .select('id, type, title, body, read, created_at')
+    .select('id, type, title, body, read, created_at, data')
     .eq('user_id', me.id)
     .order('created_at', { ascending: false })
     .limit(20);
@@ -127,18 +127,42 @@ function renderList(container) {
     </div>
   `).join('');
 
-  // Click sur une notif → mark read
+  // Click sur une notif → mark read + navigate vers l'action liée
   list.querySelectorAll('.nb-item').forEach(it => {
     it.addEventListener('click', async () => {
       const id = it.dataset.id;
       const n = _notifs.find(x => x.id === id);
-      if (!n || n.read) return;
-      const { error } = await sb.rpc('mark_notif_read', { p_notif_id: id });
-      if (error) { console.warn('[notif read]', error); return; }
-      n.read = true;
-      renderList(container);
+      if (!n) return;
+      // Mark read (si pas déjà lu)
+      if (!n.read) {
+        const { error } = await sb.rpc('mark_notif_read', { p_notif_id: id });
+        if (!error) { n.read = true; renderList(container); }
+        else console.warn('[notif read]', error);
+      }
+      // Navigation contextuelle selon type + data
+      const route = notifRoute(n);
+      if (route) {
+        container.querySelector('#nb-panel')?.classList.remove('show');
+        try {
+          const { navigate } = await import('@/router.js');
+          navigate(route);
+        } catch (_) { window.location.hash = route.startsWith('#') ? route : `#${route}`; }
+      }
     });
   });
+}
+
+// Map type+data → URL
+function notifRoute(n) {
+  const d = n.data || {};
+  switch (n.type) {
+    case 'post_validation_quiz': return d.competence_id ? `/quiz/${d.competence_id}/post_validation` : '/parcours';
+    case 'consolidation_quiz':   return d.competence_id ? `/quiz/${d.competence_id}/consolidation`   : '/parcours';
+    case 'session_confirmation': return d.session_id    ? `/sessions/${d.session_id}` : '/';
+    case 'session_confirmed':    return '/';
+    case 'emotional_nudge':      return '/parcours';
+    default: return '/notifications';
+  }
 }
 
 function wireBell(container, me) {
