@@ -17,6 +17,7 @@ const ROUTES = {
     boutique: () => import('@/pages/eleve/boutique.js'),
     'exam-blanc': () => import('@/pages/eleve/exam-blanc.js'),
     wrapped: () => import('@/pages/eleve/wrapped.js'),
+    'mes-coffres': () => import('@/pages/eleve/mes-coffres.js'),
     messages: () => import('@/pages/common/messages.js'),
     legal: () => import('@/pages/common/legal.js'),
     dbg: () => import('@/pages/admin/debug.js'),

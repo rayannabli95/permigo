@@ -338,7 +338,7 @@ function wireItems(root, me, initialUnread) {
         el.classList.remove('unread');
         unreadCount = Math.max(0, unreadCount - 1);
         updateBadge();
-        sb.rpc('mark_notif_read', { p_notif_id: id }).catch(() => {});
+        Promise.resolve(sb.rpc('mark_notif_read', { p_notif_id: id })).catch(() => {});
         track('notification.read', { notif_id: id });
       }
       if (route && route !== '#/') {

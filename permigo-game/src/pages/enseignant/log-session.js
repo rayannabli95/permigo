@@ -114,7 +114,7 @@ export async function mount(root) {
     sb.from('competences_remc')
       .select('id, nom, code, monde')
       .order('monde').order('nom'),
-    sb.rpc('get_my_message_templates').catch(() => ({ data: [] })),
+    Promise.resolve(sb.rpc('get_my_message_templates')).catch(() => ({ data: [] })),
   ]);
 
   _eleves    = elevesRes.status === 'fulfilled' ? (elevesRes.value.data || []) : [];

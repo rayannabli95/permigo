@@ -455,10 +455,10 @@ async function renderInto(root, _me) {
       .order('validated_at', { ascending: false })
       .limit(5),
 
-    // Tous les élèves (avec last_active_at pour inactifs)
+    // Tous les élèves de l'école (RLS filtre par école automatiquement)
     sb
       .from('profiles')
-      .select('id, prenom, nom, last_active_at')
+      .select('id, prenom, nom, last_active_at, enseignant_id')
       .eq('role', 'eleve'),
 
     // Quiz de consolidation en attente pour mes élèves
@@ -500,10 +500,19 @@ async function renderInto(root, _me) {
     if (v.statut === 'acquis') tousByEleve[v.eleve_id].acquis++;
   });
 
-  const mesElevesActifs = Object.entries(tousByEleve).map(([id, stats]) => ({
+  // Union : élèves directement attitrés (enseignant_id = me) + élèves déjà validés
+  // → garantit que les élèves assignés sans validation encore apparaissent quand même
+  const mesIds = new Set(
+    Object.values(elevesMap)
+      .filter(e => e.enseignant_id === _me.id)
+      .map(e => e.id)
+  );
+  for (const id of Object.keys(tousByEleve)) mesIds.add(id);
+
+  const mesElevesActifs = Array.from(mesIds).map(id => ({
     id,
     ...(elevesMap[id] || { prenom: 'Élève', nom: '', idx: 0 }),
-    acquis: stats.acquis,
+    acquis: tousByEleve[id]?.acquis || 0,
   }));
 
   const nbElevesActifs = mesElevesActifs.length;

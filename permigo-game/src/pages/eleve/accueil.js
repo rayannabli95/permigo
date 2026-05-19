@@ -16,6 +16,7 @@ import { maybePlayWeeklyReplay } from '@/components/weekly-replay.js';
 import { icon } from '@/utils/icons.js';
 import { ASSETS } from '@/utils/assets.js';
 import { emotionalBanner } from '@/components/emotional-banner.js';
+import { getMyChests } from '@/utils/game-state.js';
 import { mountFeedbackFeed } from '@/components/feedback-feed.js';
 import { mountRevisionCards } from '@/components/revision-cards.js';
 import { toast } from '@/components/toast.js';
@@ -424,6 +425,39 @@ const STYLE = `<style>
   margin: 28px 20px 12px;
 }
 
+/* ── Chest teaser ── */
+.acc2-chest-teaser {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, rgba(99,102,241,.08), rgba(139,92,246,.06));
+  border: 1.5px solid rgba(99,102,241,.2);
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer;
+  transition: border-color .14s, transform .14s;
+  animation: acc2ChestIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes acc2ChestIn {
+  from { opacity:0; transform:translateY(8px) scale(.97); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+@media (hover:hover) and (pointer:fine) {
+  .acc2-chest-teaser:hover { border-color: rgba(99,102,241,.4); }
+}
+.acc2-chest-teaser:active { transform: scale(.98); }
+.acc2-ct-ico { font-size: 28px; flex-shrink: 0; }
+.acc2-ct-text { flex: 1; min-width: 0; }
+.acc2-ct-title {
+  font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+}
+.acc2-ct-sub {
+  font: 500 12px/1 'Inter', sans-serif;
+  color: var(--mu);
+  margin-top: 3px;
+}
+.acc2-ct-arrow { flex-shrink: 0; }
+
 .worlds-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -654,6 +688,9 @@ export async function mount(root) {
 
     // Bannière émotionnelle — insérée juste après le hero
     emotionalBanner.checkAndRender(root, { afterSelector: '.acc2-hero' }).catch(() => {});
+
+    // Coffres disponibles — teaser non-bloquant injecté sous l'action du jour
+    _loadAndInjectChests(root);
 
     // Onboarding premier login
     if (!profile.first_value_action_at) showOnboarding(me.id, () => {});
@@ -1096,6 +1133,37 @@ async function _loadAndInjectLeaderboard(root) {
       navigate('#/trophees');
     });
   } catch (e) { console.error('[accueil] leaderboard', e); }
+}
+
+async function _loadAndInjectChests(root) {
+  try {
+    const chests = await getMyChests();
+    const pending = chests.filter(c => !c.opened_at);
+    if (!pending.length) return;
+
+    // Inject a teaser card just before the worlds grid
+    const anchor = root.querySelector('.acc2-section-title');
+    if (!anchor) return;
+
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div class="acc2-chest-teaser" id="acc-chest-teaser" role="button" tabindex="0"
+           aria-label="${pending.length} coffre${pending.length > 1 ? 's' : ''} à ouvrir">
+        <span class="acc2-ct-ico">🎁</span>
+        <div class="acc2-ct-text">
+          <div class="acc2-ct-title">${pending.length} coffre${pending.length > 1 ? 's' : ''} à ouvrir</div>
+          <div class="acc2-ct-sub">Réclame tes récompenses</div>
+        </div>
+        <div class="acc2-ct-arrow">${icon('chevron-right', { size: 16, strokeWidth: 2.5, color: '#6366f1' })}</div>
+      </div>`;
+
+    const el = div.firstElementChild;
+    anchor.parentNode.insertBefore(el, anchor);
+
+    const open = () => { track('chest_teaser.tapped', { count: pending.length }); navigate('#/mes-coffres'); };
+    el.addEventListener('click', open);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  } catch (e) { /* silent */ }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────

@@ -11,6 +11,7 @@ import { toast } from '@/components/toast.js';
 import { mountHeader } from '@/components/header-top.js';
 import { mountBottomNav } from '@/components/nav-bottom.js';
 import { initThemeEarly, syncFromPrefs } from '@/utils/theme.js';
+import { initGameState, initEquippedTheme } from '@/utils/game-state.js';
 
 // Apply saved/system theme before any rendering (reads localStorage, synchronous)
 initThemeEarly();
@@ -25,6 +26,12 @@ async function boot() {
 
     // Sync theme preference from backend (non-blocking — fallback already applied by initThemeEarly)
     if (me) syncFromPrefs(sb).catch(() => {});
+
+    // Init game state: loads user_preferences.custom into localStorage (DB wins)
+    if (me) {
+      initEquippedTheme();
+      initGameState(me.id).catch(() => {});
+    }
 
     if (!me) {
       // Pages publiques accessibles sans authentification
