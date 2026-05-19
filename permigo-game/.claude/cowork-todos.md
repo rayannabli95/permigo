@@ -5,6 +5,246 @@
 
 ---
 
+## [2026-05-19 NUIT] 🔧 SPRINT 5.5 — Fixes P1 cockpit gérant (Cowork → Claude Code)
+
+> Backend patché par Cowork (RPC `get_gerant_cockpit` renvoie maintenant `validations_30j`). Il reste 2 diffs front, **très petits**.
+
+### 🎯 OBJECTIF
+Cockpit gérant affiche 6 KPIs corrects (au lieu de 4 dont 2 manquantes) + listes équipe/élèves triées par prénom (pas par nom).
+
+### 🔒 CONTRAINTES
+- Ne touche QUE aux 3 lignes ci-dessous
+- Aucune autre modification dans ces fichiers
+
+### Diff 1 — `src/pages/gerant/cockpit.js` ligne 27
+
+```diff
+-  { key: 'taux_reussite',    label: 'Taux réussite',    color: '#10b981', unit: '%'  },
++  { key: 'taux_reussite_90j', label: 'Taux réussite 90j', color: '#10b981', unit: '%'  },
+```
+
+**Pourquoi** : la RPC renvoie `taux_reussite_90j`, pas `taux_reussite`. Sans ce fix la KPI est silencieusement filtrée. (Backend confirmé : `SELECT get_gerant_cockpit()->'kpis'` renvoie bien `taux_reussite_90j` + maintenant `validations_30j: 4`).
+
+### Diff 2 — `src/pages/gerant/equipe.js` ligne 246
+
+```diff
+-        .order('nom', { ascending: true }),
++        .order('prenom', { ascending: true }),
+```
+
+### Diff 3 — `src/pages/gerant/eleves.js` ligne 268
+
+```diff
+-      .order('nom', { ascending: true });
++      .order('prenom', { ascending: true });
+```
+
+**Pourquoi** : l'affichage est `${prenom} ${nom}` (correct) mais l'ordre alphabétique se faisait sur le nom de famille → impression que "le nom est devant le prénom". Trier par `prenom` aligne l'ordre visuel avec ce qu'on lit en premier.
+
+### ⚠️ BUGS À ÉVITER
+- Ne PAS changer le `label` "Taux réussite" — laisse "Taux réussite 90j" pour la transparence sur la fenêtre temporelle (cohérent avec "Heures 30j", "Nouveaux 30j", "Validations 30j")
+
+---
+
+## [2026-05-19 NUIT] 🎨 SPRINT 5 — Câbler 21 assets ChatGPT (Cowork → Claude Code)
+
+> **⚠️ Lecture préalable obligatoire** : `/permigo-game/design-system/permigo-laws.md` (vient d'être créé, c'est la nouvelle bible). Loi 9 du projet = chaque prompt suit le format OBJECTIF / CONTRAINTES / ÉMOTION / CE QU'ON GARDE / BUGS À ÉVITER. Ce prompt suit ce format.
+
+---
+
+### 🎯 OBJECTIF
+
+Câbler 21 assets PNG ChatGPT (uploadés mais inutilisés) dans 3 pages élève (`mes-coffres`, `trophees`, `wrapped`) + 4 empty states. Aucun nouveau composant XL, on étend l'existant.
+
+### 🔒 CONTRAINTES (strictes)
+
+1. **NE PAS toucher** à `src/components/chest.js` — le modal cinématique reste en SVG inline (les animations en dépendent)
+2. **NE PAS supprimer** les emojis existants — ils restent en fallback `onerror`
+3. **NE PAS introduire** de couleurs hex en dur — toujours `var(--token)` (cf permigo-laws.md §1)
+4. **NE PAS ajouter** d'animations gratuites (cf Loi 3 — animations = récompenses, pas décoration)
+5. **Build doit passer** : `npm run build` 0 erreur, taille bundle stable (±10kb max)
+6. **Mobile-first** : conteneur 480px max, touch targets ≥44px
+
+### 💛 ÉMOTION CIBLE
+
+- **Coffres** : prestige + anticipation. Le légendaire doit donner envie. Le commun reste sobre.
+- **Trophées** : fierté + collection. Le mur de trophées doit donner le sentiment "j'ai construit ça".
+- **Wrapped** : screenshot-worthy en 0.8s (Loi 6). Chaque slide doit être lisible à l'arrêt sur une story Instagram.
+- **Empty states** : calme + direction (Loi 7). Jamais "rien à voir", toujours "voici la prochaine étape".
+
+### 🛡️ CE QU'ON GARDE
+
+- Hiérarchie visuelle actuelle des pages (titres, sections, ordres)
+- Couleurs sémantiques (tokens existants)
+- Les emojis (en fallback `onerror`)
+- Le modal d'ouverture coffre (SVG cinématique)
+- Les animations existantes de unlock (confetti, lootToast)
+
+### ⚠️ BUGS À ÉVITER
+
+- **Régression visuelle si PNG 404** : tester avec `onerror` qui montre l'emoji
+- **Layout shift** au chargement image : fixer `width/height` inline
+- **Performance** : `loading="lazy"` sur toutes les `<img>` non visibles initialement
+- **Dark mode** : vérifier que les PNG fonctionnent sur fond `--bg` clair ET sombre (drop-shadow)
+- **Path absolu** : toujours `/skins/...` (pas `./skins/`, casse en hash routing)
+
+---
+
+### 1. COFFRES — `src/pages/eleve/mes-coffres.js`
+
+Fichier ligne 19-28 : remplacer le bloc `CHEST_META` complet par :
+
+```js
+const CHEST_META = {
+  world_1:      { label: 'Monde 1 — Sécurité',  image: '/skins/chests/chest_world_1.png',     tier: 'bronze',     xp: 200,  gemmes: 50  },
+  world_2:      { label: 'Monde 2 — Manœuvres', image: '/skins/chests/chest_world_2.png',     tier: 'argent',     xp: 400,  gemmes: 100 },
+  world_3:      { label: 'Monde 3 — Conduite',  image: '/skins/chests/chest_world_3.png',     tier: 'or',         xp: 700,  gemmes: 175 },
+  world_4:      { label: 'Monde 4 — Maîtrise',  image: '/skins/chests/chest_world_4.png',     tier: 'legendaire', xp: 1200, gemmes: 300 },
+  streak_7:     { label: 'Streak 7 jours',      image: '/skins/chests/chest_streak_7.png',    tier: 'argent',     xp: 150,  gemmes: 30  },
+  streak_14:    { label: 'Streak 14 jours',     image: '/skins/chests/chest_streak_14.png',   tier: 'or',         xp: 350,  gemmes: 80  },
+  streak_30:    { label: 'Streak 30 jours',     image: '/skins/chests/chest_streak_30.png',   tier: 'legendaire', xp: 800,  gemmes: 200 },
+  perfect_quiz: { label: 'Quiz parfait',        image: '/skins/chests/chest_perfect_quiz.png',tier: 'or',         xp: 100,  gemmes: 25  },
+};
+```
+
+Puis dans la fonction qui rend la card coffre (cherche `meta.emoji` dans le fichier), remplacer le rendu emoji par :
+
+```html
+<div class="mc-thumb" style="background:${TIER_GRADIENT[meta.tier]}">
+  <img src="${meta.image}" alt="${esc(meta.label)}" loading="lazy"
+       onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+       style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))">
+  <span style="font-size:32px;display:none">${meta.emoji ?? '🎁'}</span>
+</div>
+```
+
+Si `meta.emoji` n'existe plus dans CHEST_META, garde un fallback emoji inline `'🎁'`.
+
+---
+
+### 2. TROPHÉES — `src/pages/eleve/trophees.js`
+
+Fichier ligne 14-31 : ajouter le champ `image:` à chaque entrée CATALOG dont l'asset existe (les autres restent en emoji) :
+
+```js
+const CATALOG = [
+  // Compétences
+  { key: 'comp_5',         emoji: '🎯', image: '/skins/achievements/ach_comp_5.png',         title: 'Premières racines', ... },
+  { key: 'comp_10',        emoji: '🌱', image: '/skins/achievements/ach_comp_10.png',        title: '10/31', ... },
+  { key: 'comp_15',        emoji: '⚡', image: '/skins/achievements/ach_comp_15.png',        title: 'Cap des 15', ... },
+  { key: 'comp_20',        emoji: '🔥', image: '/skins/achievements/ach_comp_20.png',        title: '20 acquises', ... },
+  { key: 'comp_25',        emoji: '💎', image: '/skins/achievements/ach_comp_25.png',        title: '25/31', ... },
+  { key: 'comp_28',        emoji: '🎓', image: '/skins/achievements/ach_comp_28.png',        title: 'Prêt examen blanc', ... },
+  { key: 'comp_31',        emoji: '👑', image: '/skins/achievements/ach_comp_31.png',        title: '31/31 — Complet !', ... },
+  // Séries
+  { key: 'streak_3',       emoji: '🔥', image: '/skins/achievements/ach_streak_3.png',       title: '3 jours', ... },
+  { key: 'streak_14',      emoji: '🔥', image: '/skins/achievements/ach_streak_14.png',      title: 'Deux semaines', ... },
+  { key: 'streak_60',      emoji: '🔥', image: '/skins/achievements/ach_streak_60.png',      title: "60 jours d'affilée", ... },
+  // Quiz
+  { key: 'quiz_10',        emoji: '🧠', image: '/skins/achievements/ach_quiz_10.png',        title: '10 quiz', ... },
+  { key: 'quiz_50',        emoji: '🧠', image: '/skins/achievements/ach_quiz_50.png',        title: '50 quiz', ... },
+  { key: 'quiz_perfect_5', emoji: '✨', image: '/skins/achievements/ach_quiz_perfect_5.png', title: '5 quiz parfaits', ... },
+];
+```
+
+Puis dans le template qui rend chaque trophée (cherche `tr2-card-emoji` ou `${esc(it.emoji)}` dans le fichier), remplacer par :
+
+```html
+<div class="tr2-card-emoji">
+  ${it.image ? `
+    <img src="${it.image}" alt="${esc(it.title)}" loading="lazy"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"
+         style="width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.25))">
+    <span style="display:none;font-size:36px">${it.emoji}</span>
+  ` : `<span style="font-size:36px">${it.emoji}</span>`}
+</div>
+```
+
+Important : **désaturer si non-débloqué** (ajouter `filter: grayscale(1) opacity(.4)` si `!it.unlocked`).
+
+---
+
+### 3. WRAPPED — `src/pages/eleve/wrapped.js`
+
+Fichier ligne 91 : `wrapped_streak.png` → `wrapped_percentile.png`
+Fichier ligne 129 : `wrapped_streak.png` → `wrapped_top_comp.png`
+Fichier ligne 112 : laisser `wrapped_streak.png` (slide 3 = streak, correct)
+
+Diff exact :
+
+```diff
+- function renderSlide2({ percentile }) {
+-   ...
+-   <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_streak.png')"></div>
++ function renderSlide2({ percentile }) {
++   ...
++   <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_percentile.png')"></div>
+
+- function renderSlide4({ topCompLabel, topCompN }) {
+-   ...
+-   <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_streak.png')"></div>
++ function renderSlide4({ topCompLabel, topCompN }) {
++   ...
++   <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_top_comp.png')"></div>
+```
+
+---
+
+### 4. EMPTY STATES — wire dans 4 pages
+
+Crée un helper réutilisable `src/components/empty-state.js` :
+
+```js
+export function emptyState({ image, title, body, cta }) {
+  return `
+    <div style="text-align:center;padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <img src="${image}" alt="" loading="lazy"
+           style="width:140px;height:140px;object-fit:contain;opacity:.92"
+           onerror="this.style.display='none'">
+      <div style="font:700 18px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)">${title}</div>
+      <div style="font:500 14px/1.5 'Inter',sans-serif;color:var(--mu);max-width:280px">${body}</div>
+      ${cta ?? ''}
+    </div>
+  `;
+}
+```
+
+Puis wire dans :
+
+- `src/pages/common/notifications.js` — quand `notifs.length === 0`, render `emptyState({ image:'/skins/empty-states/empty_notifications.png', title:'Aucune notification', body:'Tu es à jour ! Reviens plus tard.' })`
+- `src/pages/common/messages.js` — quand pas de threads, `emptyState({ image:'/skins/empty-states/empty_messages.png', title:'Aucun message', body:'Lance la conversation avec ton moniteur ou ta classe.' })`
+- `src/pages/enseignant/mes-eleves.js` — quand 0 élèves, `emptyState({ image:'/skins/empty-states/empty_eleves.png', title:'Aucun élève assigné', body:'Ton gérant doit t\\'attribuer des élèves dans la console.' })`
+- `src/pages/eleve/trophees.js` — quand 0 unlocked, `emptyState({ image:'/skins/empty-states/empty_trophees.png', title:'Aucun trophée encore', body:'Valide des compétences, fais des quiz, débloque !' })`
+
+---
+
+### 5. CONTRAINTES
+
+- **Ne touche pas** à `src/components/chest.js` (le modal cinématique reste en SVG inline, c'est volontaire pour les animations)
+- **Garde l'emoji en fallback** partout (la PNG peut 404, on ne casse jamais le rendu)
+- **Vérifie le build** : `npm run build` doit sortir 0 erreur
+- **Commit + push** à la fin
+
+---
+
+### 6. BONUS si tu as le temps
+
+Sur les coffres légendaires (`tier: 'legendaire'`) **fermés**, ajoute une animation pulse glow sur la card :
+
+```css
+.mc-card[data-tier="legendaire"]:not(.opened) {
+  animation: legendaryPulse 2.4s ease-in-out infinite;
+}
+@keyframes legendaryPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(168,85,247,.4); }
+  50%      { box-shadow: 0 0 24px 6px rgba(168,85,247,.55); }
+}
+```
+
+Ça donne l'effet "dopamine Clash Royale" — le légendaire pulse, le commun reste statique.
+
+---
+
 ## [2026-05-19 SOIR] ✅ SPRINT 4 — Bug fixes livrés (Claude Code)
 
 > 5 bugs P0/P1 fixés, build propre (130 modules, 866ms).

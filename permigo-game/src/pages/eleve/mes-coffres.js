@@ -17,14 +17,14 @@ import { openChestModal, ensureChestStyles }   from '@/components/chest.js';
 
 // ─── Metadata par type de coffre ─────────────────────────────────
 const CHEST_META = {
-  world_1:   { label: 'Monde 1 — Sécurité',      emoji: '🛡️',  tier: 'bronze',     xp: 200,  gemmes: 50  },
-  world_2:   { label: 'Monde 2 — Manœuvres',     emoji: '🔧',  tier: 'argent',     xp: 400,  gemmes: 100 },
-  world_3:   { label: 'Monde 3 — Conduite',       emoji: '🚗',  tier: 'or',         xp: 700,  gemmes: 175 },
-  world_4:   { label: 'Monde 4 — Maîtrise',       emoji: '🏆',  tier: 'legendaire', xp: 1200, gemmes: 300 },
-  streak_7:  { label: 'Streak 7 jours',           emoji: '🔥',  tier: 'argent',     xp: 150,  gemmes: 30  },
-  streak_14: { label: 'Streak 14 jours',          emoji: '⚡',  tier: 'or',         xp: 350,  gemmes: 80  },
-  streak_30:    { label: 'Streak 30 jours', emoji: '👑',  tier: 'legendaire', xp: 800,  gemmes: 200 },
-  perfect_quiz: { label: 'Quiz parfait',  emoji: '✨',  tier: 'or',         xp: 100,  gemmes: 25  },
+  world_1:      { label: 'Monde 1 — Sécurité',  image: '/skins/chests/chest_world_1.png',      emoji: '🛡️', tier: 'bronze',     xp: 200,  gemmes: 50  },
+  world_2:      { label: 'Monde 2 — Manœuvres', image: '/skins/chests/chest_world_2.png',      emoji: '🔧', tier: 'argent',     xp: 400,  gemmes: 100 },
+  world_3:      { label: 'Monde 3 — Conduite',  image: '/skins/chests/chest_world_3.png',      emoji: '🚗', tier: 'or',         xp: 700,  gemmes: 175 },
+  world_4:      { label: 'Monde 4 — Maîtrise',  image: '/skins/chests/chest_world_4.png',      emoji: '🏆', tier: 'legendaire', xp: 1200, gemmes: 300 },
+  streak_7:     { label: 'Streak 7 jours',      image: '/skins/chests/chest_streak_7.png',     emoji: '🔥', tier: 'argent',     xp: 150,  gemmes: 30  },
+  streak_14:    { label: 'Streak 14 jours',     image: '/skins/chests/chest_streak_14.png',    emoji: '⚡', tier: 'or',         xp: 350,  gemmes: 80  },
+  streak_30:    { label: 'Streak 30 jours',     image: '/skins/chests/chest_streak_30.png',    emoji: '👑', tier: 'legendaire', xp: 800,  gemmes: 200 },
+  perfect_quiz: { label: 'Quiz parfait',        image: '/skins/chests/chest_perfect_quiz.png', emoji: '✨', tier: 'or',         xp: 100,  gemmes: 25  },
 };
 
 const TIER_GRADIENT = {
@@ -107,17 +107,31 @@ const STYLE = `<style>
 .mc-card.mc-can-open:active { transform: scale(.98); }
 .mc-card.mc-opened { opacity: .52; filter: saturate(.45); cursor: default; }
 
-.mc-icon {
-  width: 52px; height: 52px; border-radius: 16px;
+.mc-thumb {
+  width: 72px; height: 72px; border-radius: 16px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 26px; flex-shrink: 0;
+  flex-shrink: 0;
   position: relative;
+  overflow: visible;
 }
 .mc-icon-glow {
   position: absolute; inset: -4px;
   border-radius: 20px;
   opacity: .35; filter: blur(10px);
   z-index: -1;
+}
+
+/* ── Légendaire pulse ── */
+.mc-card[data-tier="legendaire"]:not(.mc-opened) {
+  animation: mcCardIn .35s cubic-bezier(.34,1.56,.64,1) both,
+             legendaryPulse 2.4s 0.4s ease-in-out infinite;
+}
+.mc-card[data-tier="legendaire"]:not(.mc-opened):nth-child(n+5) {
+  animation: legendaryPulse 2.4s ease-in-out infinite;
+}
+@keyframes legendaryPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(168,85,247,.4); }
+  50%       { box-shadow: 0 0 24px 6px rgba(168,85,247,.55); }
 }
 
 .mc-info { flex: 1; min-width: 0; }
@@ -211,11 +225,15 @@ function renderCard(chest) {
   <div class="mc-card${canOpen ? ' mc-can-open' : ' mc-opened'}"
        data-chest-type="${esc(chest.chest_type)}"
        data-chest-id="${esc(chest.id)}"
+       data-tier="${esc(meta.tier)}"
        role="${canOpen ? 'button' : 'article'}"
        tabindex="${canOpen ? '0' : '-1'}"
        aria-label="${canOpen ? `Ouvrir : ${esc(meta.label)}` : `Déjà ouvert : ${esc(meta.label)}`}">
-    <div class="mc-icon" style="background:${grad}">
-      <span aria-hidden="true">${meta.emoji}</span>
+    <div class="mc-thumb" style="background:${grad}">
+      <img src="${meta.image}" alt="${esc(meta.label)}" loading="lazy"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+           style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))">
+      <span style="font-size:32px;display:none" aria-hidden="true">${meta.emoji ?? '🎁'}</span>
       <div class="mc-icon-glow" style="background:${grad}"></div>
     </div>
     <div class="mc-info">

@@ -8,6 +8,7 @@ import { getCurUser } from '@/auth/cur-user.js';
 import { toast }      from '@/components/toast.js';
 import { esc }        from '@/utils/escape.js';
 import { track }      from '@/services/analytics.js';
+import { emptyState } from '@/components/empty-state.js';
 
 const MSG_LIMIT = 50;
 
@@ -60,11 +61,11 @@ function renderThreadList(root, me, threads) {
       <div class="msg-list-header">
         <h1 class="msg-title">Messages</h1>
       </div>
-      <div class="msg-empty">
-        <div class="msg-empty-ico">💬</div>
-        <div class="msg-empty-txt">Pas encore de messages</div>
-        <div class="msg-empty-sub">Tes échanges avec ton moniteur apparaîtront ici.<br>Continue ton parcours pour en recevoir.</div>
-      </div>
+      ${emptyState({
+        image: '/skins/empty-states/empty_messages.png',
+        title: 'Aucun message',
+        body: 'Lance la conversation avec ton moniteur ou ta classe.',
+      })}
     `;
     return;
   }

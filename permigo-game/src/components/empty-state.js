@@ -97,7 +97,29 @@ function ensureStyles() {
 }
 
 /**
- * Retourne le HTML d'un empty state.
+ * API allégée (compatible brief Sprint 5).
+ * emptyState({ image, title, body, cta? })
+ * — image : URL absolue (toujours /skins/...)
+ * — title : string (texte pur)
+ * — body  : string (texte pur)
+ * — cta   : HTML string optionnel (bouton pré-formaté)
+ * @returns {string} HTML
+ */
+export function emptyState({ image, title, body, cta }) {
+  return `
+    <div style="text-align:center;padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <img src="${image}" alt="" loading="lazy"
+           style="width:140px;height:140px;object-fit:contain;opacity:.92"
+           onerror="this.style.display='none'">
+      <div style="font:700 18px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)">${esc(title)}</div>
+      <div style="font:500 14px/1.5 'Inter',sans-serif;color:var(--mu);max-width:280px">${esc(body)}</div>
+      ${cta ?? ''}
+    </div>
+  `;
+}
+
+/**
+ * Retourne le HTML d'un empty state (API complète).
  *
  * @param {object} opts
  * @param {string}  opts.illustration  — URL de l'image (ex: '/skins/empty-parcours.png')

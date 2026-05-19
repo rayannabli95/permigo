@@ -88,7 +88,7 @@ function renderSlide2({ percentile }) {
   const topPct = percentile !== null ? `${100 - percentile}%` : null;
   return `
 <div class="wrp-slide" data-slide="1">
-  <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_streak.png')"></div>
+  <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_percentile.png')"></div>
   <div class="wrp-slide-overlay-dark"></div>
   <div class="wrp-overlay-centered">
     ${topPct ? `
@@ -126,7 +126,7 @@ function renderSlide3({ longestStreak }) {
 function renderSlide4({ topCompLabel, topCompN }) {
   return `
 <div class="wrp-slide" data-slide="3">
-  <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_streak.png')"></div>
+  <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_top_comp.png')"></div>
   <div class="wrp-slide-overlay-dark"></div>
   <div class="wrp-overlay-centered">
     <div>

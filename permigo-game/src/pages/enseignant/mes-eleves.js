@@ -9,7 +9,7 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { REMC_TOTAL } from '@/data/remc.js';
-import { renderEmptyState } from '@/components/empty-state.js';
+import { renderEmptyState, emptyState } from '@/components/empty-state.js';
 import { icon } from '@/utils/icons.js';
 
 // ─── Gradients avatar (8 couleurs cycliques) ─────────────────────
@@ -544,10 +544,10 @@ function render() {
       <div class="me-list">
         ${filtered.length === 0
           ? (_tab === 'tous' && !_query
-              ? renderEmptyState({
-                  illustration: '/skins/empty-students-manager-minimal.png',
-                  title: 'Aucun élève pour l\'instant',
-                  subtitle: 'Vos élèves apparaîtront ici une fois invités par le gérant.',
+              ? emptyState({
+                  image: '/skins/empty-states/empty_eleves.png',
+                  title: 'Aucun élève assigné',
+                  body: 'Ton gérant doit t\'attribuer des élèves dans la console.',
                 })
               : `<div class="me-empty">
                    <span class="me-empty-ico">👥</span>
@@ -817,10 +817,10 @@ function renderList() {
 
   if (filtered.length === 0) {
     listEl.innerHTML = _tab === 'tous' && !_query
-      ? renderEmptyState({
-          illustration: '/skins/empty-students-manager-minimal.png',
-          title: 'Aucun élève pour l\'instant',
-          subtitle: 'Vos élèves apparaîtront ici une fois invités par le gérant.',
+      ? emptyState({
+          image: '/skins/empty-states/empty_eleves.png',
+          title: 'Aucun élève assigné',
+          body: 'Ton gérant doit t\'attribuer des élèves dans la console.',
         })
       : `<div class="me-empty">
            <span class="me-empty-ico">👥</span>

@@ -9,6 +9,7 @@ import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { icon as _icon } from '@/utils/icons.js';
 import { haptic } from '@/utils/haptic.js';
+import { emptyState } from '@/components/empty-state.js';
 
 // ─── Deep-link resolver ───────────────────────────────────────
 function notifRoute(n) {
@@ -265,13 +266,13 @@ async function loadNotifs(root, me) {
   if (markAll) markAll.disabled = unreadCount === 0;
 
   if (notifs.length === 0) {
-    content.innerHTML = `
-      <div class="nf2-empty">
-        <div class="nf2-empty-ico">🎉</div>
-        <div class="nf2-empty-title">Tu es à jour !</div>
-        <div class="nf2-empty-sub">Aucune notification en attente.<br>Reviens après ta prochaine séance.</div>
-        <button class="nf2-empty-cta" id="nf2-back-home">← Retour à l'accueil</button>
-      </div>`;
+    const cta = `<button class="nf2-empty-cta" id="nf2-back-home">← Retour à l'accueil</button>`;
+    content.innerHTML = emptyState({
+      image: '/skins/empty-states/empty_notifications.png',
+      title: 'Aucune notification',
+      body: 'Tu es à jour ! Reviens plus tard.',
+      cta,
+    });
     root.querySelector('#nf2-back-home')?.addEventListener('click', () => navigate('/'));
     return;
   }

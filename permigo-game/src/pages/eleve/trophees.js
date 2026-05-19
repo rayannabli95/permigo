@@ -9,25 +9,26 @@ import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { haptic } from '@/utils/haptic.js';
 import { toast } from '@/components/toast.js';
+import { emptyState } from '@/components/empty-state.js';
 
 // ─── Catalogue complet (miroir de _achievement_meta) ──────────
 const CATALOG = [
   // Compétences
-  { key: 'comp_5',        emoji: '🎯', title: 'Premières racines',    body: '5 compétences validées. Tu démarres fort !',                    rarity: 'commun',    xp: 50,   gemmes: 15,  group: 'Compétences' },
-  { key: 'comp_10',       emoji: '🌱', title: '10/31',                body: 'Tu maîtrises un tiers du parcours. Belle dynamique !',          rarity: 'rare',      xp: 120,  gemmes: 30,  group: 'Compétences' },
-  { key: 'comp_15',       emoji: '⚡', title: 'Cap des 15',            body: 'Presque la moitié du chemin. Continue !',                      rarity: 'rare',      xp: 200,  gemmes: 50,  group: 'Compétences' },
-  { key: 'comp_20',       emoji: '🔥', title: '20 acquises',           body: "Deux tiers du parcours. L'examen approche.",                   rarity: 'epique',    xp: 300,  gemmes: 75,  group: 'Compétences' },
-  { key: 'comp_25',       emoji: '💎', title: '25/31',                 body: 'Tu touches au but. Plus que 6 compétences !',                  rarity: 'epique',    xp: 450,  gemmes: 110, group: 'Compétences' },
-  { key: 'comp_28',       emoji: '🎓', title: 'Prêt examen blanc',     body: "28/31. Tu peux passer ton examen blanc.",                      rarity: 'legendaire',xp: 600,  gemmes: 150, group: 'Compétences' },
-  { key: 'comp_31',       emoji: '👑', title: '31/31 — Complet !',     body: "Toutes les compétences validées. Prêt pour l'officiel.",        rarity: 'legendaire',xp: 1000, gemmes: 300, group: 'Compétences' },
+  { key: 'comp_5',         emoji: '🎯', image: '/skins/achievements/ach_comp_5.png',         title: 'Premières racines',    body: '5 compétences validées. Tu démarres fort !',                    rarity: 'commun',    xp: 50,   gemmes: 15,  group: 'Compétences' },
+  { key: 'comp_10',        emoji: '🌱', image: '/skins/achievements/ach_comp_10.png',        title: '10/31',                body: 'Tu maîtrises un tiers du parcours. Belle dynamique !',          rarity: 'rare',      xp: 120,  gemmes: 30,  group: 'Compétences' },
+  { key: 'comp_15',        emoji: '⚡', image: '/skins/achievements/ach_comp_15.png',        title: 'Cap des 15',            body: 'Presque la moitié du chemin. Continue !',                      rarity: 'rare',      xp: 200,  gemmes: 50,  group: 'Compétences' },
+  { key: 'comp_20',        emoji: '🔥', image: '/skins/achievements/ach_comp_20.png',        title: '20 acquises',           body: "Deux tiers du parcours. L'examen approche.",                   rarity: 'epique',    xp: 300,  gemmes: 75,  group: 'Compétences' },
+  { key: 'comp_25',        emoji: '💎', image: '/skins/achievements/ach_comp_25.png',        title: '25/31',                 body: 'Tu touches au but. Plus que 6 compétences !',                  rarity: 'epique',    xp: 450,  gemmes: 110, group: 'Compétences' },
+  { key: 'comp_28',        emoji: '🎓', image: '/skins/achievements/ach_comp_28.png',        title: 'Prêt examen blanc',     body: "28/31. Tu peux passer ton examen blanc.",                      rarity: 'legendaire',xp: 600,  gemmes: 150, group: 'Compétences' },
+  { key: 'comp_31',        emoji: '👑', image: '/skins/achievements/ach_comp_31.png',        title: '31/31 — Complet !',     body: "Toutes les compétences validées. Prêt pour l'officiel.",        rarity: 'legendaire',xp: 1000, gemmes: 300, group: 'Compétences' },
   // Séries
-  { key: 'streak_3',      emoji: '🔥', title: '3 jours',               body: 'Premier vrai streak. Continue !',                              rarity: 'commun',    xp: 30,   gemmes: 10,  group: 'Séries' },
-  { key: 'streak_14',     emoji: '🔥', title: 'Deux semaines',          body: 'Tu es accroché à PermiGo !',                                   rarity: 'rare',      xp: 180,  gemmes: 50,  group: 'Séries' },
-  { key: "streak_60",     emoji: '🔥', title: "60 jours d'affilée",    body: 'Inarrêtable. Respect.',                                        rarity: 'legendaire',xp: 800,  gemmes: 200, group: 'Séries' },
+  { key: 'streak_3',       emoji: '🔥', image: '/skins/achievements/ach_streak_3.png',       title: '3 jours',               body: 'Premier vrai streak. Continue !',                              rarity: 'commun',    xp: 30,   gemmes: 10,  group: 'Séries' },
+  { key: 'streak_14',      emoji: '🔥', image: '/skins/achievements/ach_streak_14.png',      title: 'Deux semaines',          body: 'Tu es accroché à PermiGo !',                                   rarity: 'rare',      xp: 180,  gemmes: 50,  group: 'Séries' },
+  { key: 'streak_60',      emoji: '🔥', image: '/skins/achievements/ach_streak_60.png',      title: "60 jours d'affilée",    body: 'Inarrêtable. Respect.',                                        rarity: 'legendaire',xp: 800,  gemmes: 200, group: 'Séries' },
   // Quiz
-  { key: 'quiz_10',       emoji: '🧠', title: '10 quiz',               body: 'Tu deviens un pro des quiz.',                                  rarity: 'commun',    xp: 50,   gemmes: 15,  group: 'Quiz' },
-  { key: 'quiz_50',       emoji: '🧠', title: '50 quiz',               body: 'Mémoire en béton.',                                            rarity: 'epique',    xp: 250,  gemmes: 80,  group: 'Quiz' },
-  { key: 'quiz_perfect_5',emoji: '✨', title: '5 quiz parfaits',        body: 'La précision incarnée.',                                       rarity: 'epique',    xp: 200,  gemmes: 60,  group: 'Quiz' },
+  { key: 'quiz_10',        emoji: '🧠', image: '/skins/achievements/ach_quiz_10.png',        title: '10 quiz',               body: 'Tu deviens un pro des quiz.',                                  rarity: 'commun',    xp: 50,   gemmes: 15,  group: 'Quiz' },
+  { key: 'quiz_50',        emoji: '🧠', image: '/skins/achievements/ach_quiz_50.png',        title: '50 quiz',               body: 'Mémoire en béton.',                                            rarity: 'epique',    xp: 250,  gemmes: 80,  group: 'Quiz' },
+  { key: 'quiz_perfect_5', emoji: '✨', image: '/skins/achievements/ach_quiz_perfect_5.png', title: '5 quiz parfaits',        body: 'La précision incarnée.',                                       rarity: 'epique',    xp: 200,  gemmes: 60,  group: 'Quiz' },
 ];
 
 const RARITY_META = {
@@ -313,6 +314,16 @@ function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
     groups[t.group].push(t);
   }
 
+  // Empty state si aucun trophée débloqué
+  if (unlockedCount === 0) {
+    root.querySelector('#tr2-body').innerHTML = emptyState({
+      image: '/skins/empty-states/empty_trophees.png',
+      title: 'Aucun trophée encore',
+      body: 'Valide des compétences, fais des quiz, débloque !',
+    });
+    return;
+  }
+
   let html = '';
   let globalIdx = 0;
   for (const [group, items] of Object.entries(groups)) {
@@ -320,11 +331,20 @@ function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
     for (const t of items) {
       const u = unlockedMap.get(t.key);
       const cssClass = u ? t.rarity : 'locked';
+      // For unlocked: subtle drop-shadow. For locked: CSS class .locked already handles grayscale/opacity on the parent .tr2-card-emoji
+      const imgFilter = u ? 'drop-shadow(0 2px 8px rgba(0,0,0,.25))' : 'none';
       html += `
         <div class="tr2-card ${cssClass}" data-key="${esc(t.key)}"
           style="animation:tr2CardIn .4s ${globalIdx * 50}ms cubic-bezier(.34,1.56,.64,1) both">
           ${u ? `<div class="tr2-card-rarity"></div>` : ''}
-          <div class="tr2-card-emoji">${t.emoji}</div>
+          <div class="tr2-card-emoji">
+            ${t.image ? `
+              <img src="${t.image}" alt="${esc(t.title)}" loading="lazy"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"
+                   style="width:56px;height:56px;object-fit:contain;filter:${imgFilter}">
+              <span style="display:none;font-size:36px">${t.emoji}</span>
+            ` : `<span style="font-size:36px">${t.emoji}</span>`}
+          </div>
           <div class="tr2-card-name">${u ? esc(t.title) : '???'}</div>
           ${!u ? `<div class="tr2-card-mystery">${esc(shortProgress(t.key, stats))}</div>` : ''}
         </div>`;
