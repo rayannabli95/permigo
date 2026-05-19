@@ -25,7 +25,7 @@ const STATUT_CFG = {
   acquis:         { label: 'Acquis',         color: '#059669', bg: 'rgba(16,185,129,.12)', dot: '#10b981' },
   en_cours:       { label: 'En cours',       color: '#b45309', bg: 'rgba(245,158,11,.12)', dot: '#f59e0b' },
   a_retravailler: { label: 'À retravailler', color: '#b91c1c', bg: 'rgba(239,68,68,.12)',  dot: '#ef4444' },
-  null:           { label: 'Non évalué',     color: '#94a3b8', bg: '#f8f9fc',              dot: '#cbd5e1' },
+  null:           { label: 'Non évalué',     color: 'var(--ink)', bg: 'var(--su2)',          dot: 'var(--bo)' },
 };
 
 // ─── CSS (design clean — cohérent avec aujourdhui/mes-eleves/validation) ──

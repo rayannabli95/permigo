@@ -147,8 +147,12 @@ const STYLE = `<style>
     cursor: pointer;
     min-height: 44px;
   }
-  .me-row:hover { border-color: #6366f1; }
+  @media (hover: hover) and (pointer: fine) {
+    .me-row:hover { border-color: #6366f1; }
+  }
   .me-row:active { transform: scale(.985); }
+  .me-row:focus { outline: none; }
+  .me-row:focus-visible { border-color: #6366f1; }
 
   /* Avatar */
   .me-av {

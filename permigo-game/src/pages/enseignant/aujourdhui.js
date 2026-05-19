@@ -557,7 +557,6 @@ async function renderInto(root, _me) {
   const recapWidget = isEvening && todaySessions.length > 0 ? `
     <div class="aj-recap" id="aj-recap-soir" role="button" tabindex="0" aria-label="Ouvrir le log de session">
       <div class="aj-recap-head">
-        <span style="font-size:18px" aria-hidden="true">🌙</span>
         <span class="aj-recap-title">Ta journée</span>
         <span class="aj-recap-kpi">${_fmtMin(totalSessionMinutes)}</span>
       </div>

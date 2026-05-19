@@ -88,7 +88,6 @@ const STYLE = `<style>
     font: 600 18px/1 'Plus Jakarta Sans', sans-serif;
   }
   .eleve-prenom { font: 600 13px/1.2 'Inter', sans-serif; color: #0a0d1a; margin-bottom: 4px; }
-  .eleve-hrs { font: 500 11px/1 'Inter', sans-serif; color: #94a3b8; }
 
   /* Catégories */
   .comp-sections { display: flex; flex-direction: column; gap: 12px; }
@@ -230,7 +229,7 @@ export async function mount(root) {
 
   const { data, error } = await sb
     .from('profiles')
-    .select('id, prenom, nom_initial, credit_heures')
+    .select('id, prenom, nom_initial')
     .eq('enseignant_id', _me.id)
     .eq('role', 'eleve')
     .order('prenom');
@@ -419,9 +418,6 @@ function renderEleveCard(eleve) {
          aria-pressed="${selected}">
       <div class="eleve-av" aria-hidden="true">${esc(initials || '?')}</div>
       <div class="eleve-prenom">${esc(eleve.prenom || '—')}</div>
-      ${eleve.credit_heures != null
-        ? `<div class="eleve-hrs">${esc(String(eleve.credit_heures))}h restantes</div>`
-        : ''}
     </div>
   `;
 }
