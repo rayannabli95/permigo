@@ -13,14 +13,37 @@
 import { sb, login, loginWithOtp, verifyOtp } from '@/auth/auth.js';
 import { toast } from '@/components/toast.js';
 import { esc } from '@/utils/escape.js';
+import { getCurUser } from '@/auth/cur-user.js';
+
+// Traductions FR des messages d'erreur Supabase Auth (en anglais côté API)
+const AUTH_ERRORS_FR = {
+  'Invalid login credentials':              'Identifiants invalides.',
+  'Email not confirmed':                    'Email non confirmé — vérifie ta boîte mail.',
+  'User not found':                         'Aucun compte trouvé pour cet email.',
+  'Invalid OTP':                            'Code invalide ou expiré.',
+  'Token has expired or is invalid':        'Le lien a expiré. Demande un nouveau code.',
+  'Signup requires a valid password':       'Mot de passe requis.',
+  'Password should be at least 6 characters': 'Le mot de passe doit contenir au moins 6 caractères.',
+  'User already registered':                'Un compte existe déjà pour cet email.',
+  'Email rate limit exceeded':              'Trop de tentatives — réessaie dans quelques minutes.',
+  'over_email_send_rate_limit':             'Trop de codes envoyés — réessaie dans 60 secondes.',
+  'For security purposes, you can only request this once every 60 seconds': 'Attends 60 secondes avant de renvoyer un code.',
+};
+function translateAuthError(msg) {
+  if (!msg) return null;
+  for (const [en, fr] of Object.entries(AUTH_ERRORS_FR)) {
+    if (msg.includes(en)) return fr;
+  }
+  return msg; // fallback : message brut Supabase
+}
 import { checkRateLimit, recordAttempt, resetRateLimit, formatWaitTime } from '@/utils/rate-limit.js';
 import { getTurnstileToken, isTurnstileEnabled } from '@/utils/turnstile.js';
 import { renderHoneypot, checkHoneypot } from '@/utils/honeypot.js';
 
 const DEMO_ACCOUNTS = [
-  { role: 'Élève',    email: 'latifa.sahli@autopilot.fr', emoji: '🎓' },
-  { role: 'Enseignant', email: 'rayan.nabli@autopilot.fr',  emoji: '🚗' },
-  { role: 'Gérant',   email: 'rayannabli27@gmail.com',     emoji: '👑' },
+  { role: 'Élève',      email: 'eleve@test.fr',           emoji: '🎓' },
+  { role: 'Enseignant', email: 'enseignant@test.fr',       emoji: '🚗' },
+  { role: 'Gérant',     email: 'rayannabli27@gmail.com',   emoji: '👑' },
 ];
 
 export function mount(root) {
@@ -281,7 +304,7 @@ function wire(root) {
           queryParams: provider === 'google' ? { prompt: 'select_account' } : undefined,
         },
       });
-      if (error) { toast(error.message || 'Erreur OAuth', 'error'); b.disabled = false; }
+      if (error) { toast(translateAuthError(error.message) || 'Erreur OAuth', 'error'); b.disabled = false; }
     });
   });
 
@@ -328,21 +351,21 @@ function wire(root) {
         const pwd = pwdIn.value;
         if (!pwd) { errEl.textContent = 'Mot de passe requis'; shake(); return; }
         const { ok, profile, error } = await login(email, pwd, { captchaToken });
-        if (!ok) { errEl.textContent = esc(error || 'Identifiants invalides'); shake(); return; }
+        if (!ok) { errEl.textContent = esc(translateAuthError(error) || 'Identifiants invalides'); shake(); return; }
         resetRateLimit('login', email);
         if (remember.checked) saveRememberedEmail(email); else clearRememberedEmail();
         toast(`Bonjour ${esc(profile.nom.split(' ')[0])} 👋`, 'success');
         afterLogin();
       } else if (mode === 'otp-request') {
         const r = await loginWithOtp(email, { captchaToken });
-        if (!r.ok) { errEl.textContent = esc(r.error || 'Erreur envoi'); shake(); return; }
+        if (!r.ok) { errEl.textContent = esc(translateAuthError(r.error) || 'Erreur envoi'); shake(); return; }
         toast('Code envoyé ✉️ Vérifie ta boîte mail', 'success');
         setMode('otp-verify');
       } else if (mode === 'otp-verify') {
         const token = otpIn.value.trim();
         if (!/^\d{6}$/.test(token)) { errEl.textContent = 'Code à 6 chiffres requis'; shake(); return; }
         const r = await verifyOtp(email, token);
-        if (!r.ok) { errEl.textContent = esc(r.error || 'Code invalide'); shake(); return; }
+        if (!r.ok) { errEl.textContent = esc(translateAuthError(r.error) || 'Code invalide'); shake(); return; }
         resetRateLimit('otp', email);
         resetRateLimit('otp-verify', email);
         toast(`Bonjour ${esc(r.profile.nom.split(' ')[0])} 👋`, 'success');
@@ -366,7 +389,8 @@ function wire(root) {
         import('@/router.js'),
         import('@/components/nav-bottom.js'),
       ]);
-      mountBottomNav();
+      const me = getCurUser();
+      mountBottomNav(me?.role);
       navigate('/');
     }, 600);
   }

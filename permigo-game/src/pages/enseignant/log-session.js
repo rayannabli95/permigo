@@ -113,7 +113,7 @@ export async function mount(root) {
       .order('last_active_at', { ascending: false }),
     sb.from('competences_remc')
       .select('id, nom, code, monde')
-      .order('monde').order('nom'),
+      .order('id', { ascending: true }),
     Promise.resolve(sb.rpc('get_my_message_templates')).catch(() => ({ data: [] })),
   ]);
 
@@ -639,11 +639,19 @@ async function _handleSubmit(root) {
     if (error || data?.error) {
       const rawCode = error?.code || '';
       const rawMsg  = error?.message || data?.error || '';
-      const detail  = error?.details || error?.hint || '';
+      const detail  = error?.details || '';
+      const hint    = error?.hint    || '';
+
+      // Trace complète pour débugger côté dev
+      console.error('[log-session] RPC log_session error ↓');
+      console.error('  code   :', rawCode);
+      console.error('  message:', rawMsg);
+      console.error('  details:', detail);
+      console.error('  hint   :', hint);
+
       let friendlyMsg;
 
       if (rawMsg.startsWith('no_quiz_attempt')) {
-        // Le RPC inclut le nom de la compétence dans le message ou details
         const compName = detail || rawMsg.replace('no_quiz_attempt', '').replace(/^[_\s]+/, '').trim();
         friendlyMsg = compName
           ? `L'élève n'a pas encore tenté le quiz de "${esc(compName)}". Validation impossible pour cette compétence.`
@@ -652,6 +660,7 @@ async function _handleSubmit(root) {
         friendlyMsg = RPC_ERRORS[rawMsg] ?? RPC_ERRORS[rawCode] ?? rawMsg ?? "Erreur lors de l'enregistrement";
       }
 
+      // Affiche le message Postgres réel si aucun mapping connu
       toast(friendlyMsg, 'error');
       if (btn) { btn.disabled = false; btn.classList.remove('ls-loading'); }
       return;
@@ -1048,12 +1057,16 @@ const CSS = `
   padding: 7px 12px;
   border: 1.5px solid var(--bo);
   border-radius: 20px;
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 500 12px/1.4 'Inter', sans-serif;
   color: #6366f1;
   background: rgba(99,102,241,.04);
   cursor: pointer;
   transition: background .12s, border-color .12s;
   min-height: 34px;
+  white-space: normal;
+  max-width: 100%;
+  text-align: left;
+  word-break: break-word;
 }
 .ls-tpl-chip:active { background: rgba(99,102,241,.12); border-color: #6366f1; }
 .ls-tpl-locked { color: #c4ccd8; cursor: not-allowed; background: var(--bg); display: inline-flex; align-items: center; gap: 5px; }
