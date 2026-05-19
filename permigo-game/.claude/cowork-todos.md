@@ -5,6 +5,128 @@
 
 ---
 
+## [2026-05-19 NUIT] 🌅🌌 SPRINT 6 — Backgrounds mondes jour/nuit (parcours élève + landing)
+
+> **⚠️ Lecture préalable obligatoire** : `/permigo-game/design-system/permigo-laws.md` (Lois 2, 3, 4, 10). Ce prompt suit la Loi 9 (OBJECTIF / CONTRAINTES / ÉMOTION / GARDE / BUGS).
+>
+> **AVANT TOUTE MODIFICATION** : ouvre et lis `src/pages/eleve/parcours.js` en entier. Identifie la hiérarchie actuelle (`prc-world`, `prc-world-decor`, gradient `--wc`, scroll snap). Comprends comment chaque monde a déjà sa couleur (`#10b981`, `#06b6d4`, `#8b5cf6`, `#f59e0b`) et son décor en haut à droite. **NE PAS** casser ce qui existe — on **AJOUTE** un fond derrière, on ne remplace pas le gradient.
+
+### 🎯 OBJECTIF
+
+1. Intégrer 8 backgrounds (`monde{1-4}jour.png` + `monde{1-4}nuit.png`, déjà dans `/public/skins/landing/`) en **fond très subtil** de chaque section monde du parcours élève
+2. Switch jour/nuit **automatique selon l'heure locale** : nuit si `getHours() >= 20 || getHours() < 7`, sinon jour
+3. La landing (route racine non-auth — à identifier : probablement `src/pages/auth/login.js` ou racine dans `main.js`) utilise `monde4nuit.png` comme background si nuit, sinon `monde4jour.png` ou hero existant
+4. Monde **actif** (celui où l'élève progresse) = background **plus vif** (opacity .35-.45)
+5. Mondes **verrouillés** ou complétés = background **plus discret** (opacity .12-.18)
+
+### 💛 ÉMOTION CIBLE (Loi 2)
+
+- **Sensation** : aventure légère + progression, **comme ouvrir un atlas Apple**. Pas un jeu mobile bruyant.
+- **Référence visuelle** : Apple Health "Découvrir", Linear "Workspace dark", Headspace splash screens
+- **Test ultime** : *"Si je montre ça à un fondateur Apple, est-ce que ça passe ?"* Si non, baisser l'opacity et le blur.
+
+### 🔒 CONTRAINTES (strictes — bible Loi 4)
+
+1. **NE PAS** dépasser opacity `.45` sur le monde actif, `.18` sur les autres
+2. **NE PAS** retirer le gradient `prc-world` existant — il reste, le background s'AJOUTE derrière en `position:absolute; z-index: 0`
+3. **NE PAS** supprimer le filigrane volant (`prc::before` ligne ~31) — il reste, on l'estompe encore plus (`opacity:.08` si fond image présent)
+4. **Blur léger obligatoire** : `filter: blur(2px) saturate(.85)` sur les backgrounds pour qu'ils ne distraient jamais du texte
+5. **Lazy load** : `<img loading="lazy" decoding="async">` pour éviter de charger 4 PNG au mount
+6. **Preload UNIQUEMENT** le monde actif (le reste se charge au scroll)
+7. **Respecter `prefers-reduced-motion`** : pas de fade-in animé si l'user a cette préférence
+8. **Mode sombre** : les backgrounds NUIT marchent en dark mode natif ; les backgrounds JOUR doivent être atténués en dark mode (`opacity * 0.6`)
+9. **Pas d'overlay coloré** par-dessus — laisser le gradient `--wc` faire le boulot
+10. **Mobile-first** : container 480px, les PNG sont 1080×1920 → `object-fit: cover; object-position: center`
+
+### 🛡️ CE QU'ON GARDE (intouchable)
+
+- La couleur emerald/cyan/violet/amber par monde
+- La position du `prc-world-decor` (logo monde haut-droite)
+- Le scroll snap entre mondes
+- Le filigrane volant (juste atténué)
+- La structure HTML `prc-world > prc-world-hd + prc-world-nodes`
+- L'animation `decorFloat` sur monde complete
+
+### ⚠️ BUGS À ÉVITER
+
+- **Layout shift** : fixer `width:100%; height:100%; position:absolute; inset:0` sur le `<img>`, pas de hauteur naturelle
+- **Z-index hell** : background image en `z-index:0`, gradient en `z-index:1`, decor/header/nodes en `z-index:5+`
+- **Performance** : 4 PNG × 1080×1920 = ~3 Mo. Lazy mandatory, sinon premier paint catastrophique
+- **Mauvais path** : les fichiers sont dans `/skins/landing/`, pas `/skins/worlds/` (oui c'est bizarre, on a renommé)
+- **Switch jour/nuit qui glitch** : calculer `isNight` UNE fois au mount, ne pas recalculer à chaque render
+
+### 📐 IMPLEMENTATION GUIDELINE
+
+```js
+// En haut de parcours.js
+const isNight = (() => {
+  const h = new Date().getHours();
+  return h >= 20 || h < 7;
+})();
+
+const WORLD_BG = (worldId) => `/skins/landing/monde${worldId}${isNight ? 'nuit' : 'jour'}.png`;
+```
+
+Dans le render de chaque `.prc-world`, ajouter en premier enfant :
+
+```html
+<img class="prc-world-bg ${isActive ? 'prc-world-bg--active' : ''}"
+     src="${WORLD_BG(world.id)}"
+     alt=""
+     aria-hidden="true"
+     loading="${isActive ? 'eager' : 'lazy'}"
+     decoding="async">
+```
+
+CSS à ajouter :
+
+```css
+.prc-world { position: relative; overflow: hidden; isolation: isolate; }
+.prc-world-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: .14;
+  filter: blur(2px) saturate(.85);
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity .6s cubic-bezier(.22,1,.36,1);
+}
+.prc-world-bg--active { opacity: .38; }
+@media (prefers-color-scheme: dark) {
+  .prc-world-bg { opacity: .10; }
+  .prc-world-bg--active { opacity: .28; }
+}
+.prc > * { position: relative; z-index: 1; }  /* déjà présent ligne 55 */
+
+/* Atténuer le volant si fond image présent */
+.prc:has(.prc-world-bg)::before { opacity: .08; }
+```
+
+### 📄 LANDING — page racine non-auth
+
+1. **D'abord identifier** où elle est : grep `landing`, regarde `main.js` route racine, ou `src/pages/auth/login.js` si c'est le premier écran public
+2. Si la landing n'existe pas en tant que page dédiée → c'est `login.js` qui sert de landing → ajouter le background nuit/jour en `<div class="lg-bg">` derrière le formulaire login
+3. Asset : `/skins/landing/monde4nuit.png` (nuit) ou `/skins/landing/monde4jour.png` (jour) — monde 4 (le sommet) = aspiration ultime, parfait pour la landing
+4. **Opacity max** sur la landing : `.65` (plus immersif que parcours car pas de contenu dense), avec gradient overlay `linear-gradient(180deg, transparent 0%, var(--bg) 100%)` en bas pour la lisibilité du CTA
+
+### ✅ VALIDATION
+
+Quand tu push, vérifie en local :
+- `npm run dev`, ouvre `/parcours` à 14h → backgrounds jour visibles
+- Change l'horloge système (ou hardcode `isNight = true` temporairement) → backgrounds nuit
+- Inspecte performance : Network tab → 1 seul PNG chargé eagerly (le monde actif), 3 lazy
+- Lisibilité texte : sur monde 4 actif (le plus vif), le titre `Sommet` reste contrasté et propre
+
+### 📦 SI tu doutes
+
+Ne push pas. Pose la question dans `.claude/cowork-todos.md` en bas, je passe derrière.
+
+---
+
 ## [2026-05-19 NUIT] 🔧 SPRINT 5.5 — Fixes P1 cockpit gérant (Cowork → Claude Code)
 
 > Backend patché par Cowork (RPC `get_gerant_cockpit` renvoie maintenant `validations_30j`). Il reste 2 diffs front, **très petits**.
