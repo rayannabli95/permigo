@@ -79,9 +79,7 @@ function renderWrapped(root, me, w) {
 function renderSlide1() {
   return `
 <div class="wrp-slide" data-slide="0">
-  <div class="wrp-slide-bg">
-    <img class="wrp-slide-img" src="/skins/wrapped_cover.png" alt="" aria-hidden="true">
-  </div>
+  <div class="wrp-slide-bg" style="background-image:url('/skins/wrapped/wrapped_cover.png')"></div>
 </div>`;
 }
 
@@ -248,6 +246,7 @@ function renderStyles() {
   flex-shrink: 0;
   width: 100svw;
   height: 100%;
+  min-height: 100dvh;
   scroll-snap-align: start;
   position: relative;
   display: flex;
@@ -258,14 +257,9 @@ function renderStyles() {
   position: absolute;
   inset: 0;
   background: #0a0d1a;
+  background-size: cover;
+  background-position: center;
   z-index: 0;
-}
-.wrp-slide-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 /* Semi-transparent dark overlay for text readability (slides 2-4) */

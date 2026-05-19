@@ -259,9 +259,17 @@ export async function mount(root) {
 </div>`;
 
   try {
-    const { data, error } = await sb.rpc('get_my_achievements');
-    if (error) throw error;
-    renderAll(root, data ?? []);
+    const [achRes, cntRes, strkRes] = await Promise.allSettled([
+      sb.rpc('get_my_achievements'),
+      sb.from('validations').select('id', { count: 'exact', head: true }).eq('eleve_id', me.id).eq('statut', 'acquis'),
+      sb.from('profiles').select('streak_days').eq('id', me.id).maybeSingle(),
+    ]);
+    if (achRes.value?.error) throw achRes.value.error;
+    const stats = {
+      compCount: cntRes.value?.count ?? 0,
+      streak:    strkRes.value?.data?.streak_days ?? 0,
+    };
+    renderAll(root, achRes.value?.data ?? [], stats);
   } catch (e) {
     console.error('[trophees]', e);
     toast('Impossible de charger les trophées', 'error');
@@ -275,7 +283,7 @@ export async function mount(root) {
 }
 
 // ─── Render all ───────────────────────────────────────────────
-function renderAll(root, unlocked) {
+function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
   const unlockedMap = new Map(unlocked.map(u => [u.achievement_key, u]));
   const unlockedCount = CATALOG.filter(t => unlockedMap.has(t.key)).length;
 
@@ -318,7 +326,7 @@ function renderAll(root, unlocked) {
           ${u ? `<div class="tr2-card-rarity"></div>` : ''}
           <div class="tr2-card-emoji">${t.emoji}</div>
           <div class="tr2-card-name">${u ? esc(t.title) : '???'}</div>
-          ${!u ? `<div class="tr2-card-mystery">${esc(shortProgress(t.key))}</div>` : ''}
+          ${!u ? `<div class="tr2-card-mystery">${esc(shortProgress(t.key, stats))}</div>` : ''}
         </div>`;
       globalIdx++;
     }
@@ -338,9 +346,15 @@ function renderAll(root, unlocked) {
 }
 
 // ─── Progress hint (locked cards) ─────────────────────────────
-function shortProgress(key) {
-  if (key.startsWith('comp_'))        return key.replace('comp_', '') + ' validations';
-  if (key.startsWith('streak_'))      return key.replace('streak_', '') + ' jours';
+function shortProgress(key, stats = { compCount: 0, streak: 0 }) {
+  if (key.startsWith('comp_')) {
+    const seuil = parseInt(key.replace('comp_', ''), 10);
+    return `${Math.min(stats.compCount, seuil - 1)}/${seuil} compétences`;
+  }
+  if (key.startsWith('streak_')) {
+    const seuil = parseInt(key.replace('streak_', ''), 10);
+    return `${Math.min(stats.streak, seuil - 1)}/${seuil} jours`;
+  }
   if (key === 'quiz_perfect_5')       return '5 quiz 100%';
   if (key.startsWith('quiz_'))        return key.replace('quiz_', '') + ' quiz';
   return '?';

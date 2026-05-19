@@ -401,7 +401,7 @@ function renderCard(item, gemmes, idx) {
   const canAfford = gemmes >= item.cost_gemmes;
   const borderStyle = `border: 1.5px solid ${rm.border}; box-shadow: ${rm.glow};`;
   const color = item.display_color || '#6366f1';
-  const imgUrl = item.asset_url || item.image_url || null;
+  const imgUrl = item.asset_url ?? null;
 
   const preview = imgUrl
     ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
@@ -456,7 +456,7 @@ function showPurchaseModal(item, gemmes, onConfirm) {
   const afterBalance = gemmes - item.cost_gemmes;
   const canAfford = afterBalance >= 0;
   const color = item.display_color || '#6366f1';
-  const imgUrl = item.asset_url || item.image_url || null;
+  const imgUrl = item.asset_url ?? null;
 
   const preview = imgUrl
     ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy">`

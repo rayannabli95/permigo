@@ -24,11 +24,11 @@ export const EMOTIONAL_NUDGES = [
   // ── palier_proche ──
   { id: 'palier_2', cat: 'palier_proche', tone: 'celebrate',
     title: '🔥 Tu y es presque !',
-    body: 'Plus que {n} compétences pour atteindre le palier {target}',
+    body: 'Plus que {n} compétences validées avant l\'étape suivante de ton parcours',
     cta: 'Continuer', route: '#/parcours' },
   { id: 'palier_1', cat: 'palier_proche', tone: 'urgent',
     title: '⚡ Une seule compétence',
-    body: 'Une seule compétence te sépare du palier {target} 💪',
+    body: 'Une seule compétence validée avant l\'étape suivante de ton parcours 💪',
     cta: 'Y aller', route: '#/parcours' },
 
   // ── streak_warm ──

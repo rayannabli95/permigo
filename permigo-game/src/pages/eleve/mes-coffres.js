@@ -22,7 +22,8 @@ const CHEST_META = {
   world_4:   { label: 'Monde 4 — Maîtrise',       emoji: '🏆',  tier: 'legendaire', xp: 1200, gemmes: 300 },
   streak_7:  { label: 'Streak 7 jours',           emoji: '🔥',  tier: 'argent',     xp: 150,  gemmes: 30  },
   streak_14: { label: 'Streak 14 jours',          emoji: '⚡',  tier: 'or',         xp: 350,  gemmes: 80  },
-  streak_30: { label: 'Streak 30 jours',          emoji: '👑',  tier: 'legendaire', xp: 800,  gemmes: 200 },
+  streak_30:    { label: 'Streak 30 jours', emoji: '👑',  tier: 'legendaire', xp: 800,  gemmes: 200 },
+  perfect_quiz: { label: 'Quiz parfait',  emoji: '✨',  tier: 'or',         xp: 100,  gemmes: 25  },
 };
 
 const TIER_GRADIENT = {

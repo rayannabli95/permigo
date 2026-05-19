@@ -399,9 +399,10 @@ export async function mount(root) {
   let anneeStats = null;
   if (me.role === 'enseignant') {
     const yearStart = `${new Date().getFullYear()}-01-01`;
+    const today = new Date().toISOString().slice(0, 10);
     const [{ data: valData }, { data: streakProfile }, { data: elevesData }] = await Promise.all([
       sb.from('validations')
-        .select('competence_id, eleve_id')
+        .select('competence_id, eleve_id, validated_at')
         .eq('validated_by', me.id)
         .gte('validated_at', yearStart),
       sb.from('profiles')
@@ -422,7 +423,10 @@ export async function mount(root) {
     for (const v of vals) elevesIds.add(v.eleve_id);
     const elevesCount = elevesIds.size;
     const c3Count = vals.filter(v => v.competence_id?.startsWith('C3')).length;
-    const streakDays = streakProfile?.streak_pro_days ?? 0;
+    // streak_pro_days est mis à jour par trigger DB mais peut avoir 1 jour de délai
+    // si une validation existe aujourd'hui on garantit au moins 1
+    const hasValidationToday = vals.some(v => v.validated_at?.startsWith(today));
+    const streakDays = Math.max(streakProfile?.streak_pro_days ?? 0, hasValidationToday ? 1 : 0);
 
     anneeStats = { totalValidations, elevesCount, c3Count, streakDays };
   }
@@ -441,7 +445,7 @@ export async function mount(root) {
       bio: `Apprenti permis B · ${permisData.validated}/${REMC_TOTAL} compétences`,
       stats: [
         { label: 'Compétences', value: permisData.validated },
-        { label: 'Streak',      value: profile?.streak_pro_days || 0 },
+        { label: 'Streak',      value: profile?.streak_days ?? profile?.streak_pro_days ?? 0 },
         { label: 'XP',          value: profile?.xp || 0 },
       ],
       shareUrl: window.location.origin,
