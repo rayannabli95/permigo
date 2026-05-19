@@ -24,7 +24,7 @@ const ACC  = '#6366f1';
 const KPI_DEFS = [
   { key: 'eleves_actifs',    label: 'Élèves actifs',    color: ACC,       unit: null },
   { key: 'moniteurs_actifs', label: 'Moniteurs actifs', color: '#10b981', unit: null },
-  { key: 'taux_reussite',    label: 'Taux réussite',    color: '#10b981', unit: '%'  },
+  { key: 'taux_reussite_90j', label: 'Taux réussite 90j', color: '#10b981', unit: '%'  },
   { key: 'heures_30j',       label: 'Heures 30j',       color: '#f59e0b', unit: 'h'  },
   { key: 'nouveaux_30j',     label: 'Nouveaux 30j',     color: '#8b5cf6', unit: null },
   { key: 'validations_30j',  label: 'Validations 30j',  color: ACC,       unit: null },

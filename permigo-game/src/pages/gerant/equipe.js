@@ -243,7 +243,7 @@ export async function mount(root) {
       sb.from('profiles')
         .select('id, prenom, nom, email, created_at')
         .eq('role', 'enseignant')
-        .order('nom', { ascending: true }),
+        .order('prenom', { ascending: true }),
       sb.from('validations')
         .select('validated_by, eleve_id')
         .gte('validated_at', startOfMonth)

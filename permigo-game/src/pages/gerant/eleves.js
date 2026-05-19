@@ -265,7 +265,7 @@ export async function mount(root) {
       .from('profiles')
       .select('id, prenom, nom, credit_heures, created_at')
       .eq('role', 'eleve')
-      .order('nom', { ascending: true });
+      .order('prenom', { ascending: true });
 
     if (eErr) throw eErr;
 
