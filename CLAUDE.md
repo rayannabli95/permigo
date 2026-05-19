@@ -99,7 +99,8 @@ npm run build         # build prod
 
 | Rôle | Email | Mot de passe |
 |---|---|---|
-| Admin/Gérant | rayannabli27@gmail.com | Autopilot2025! |
+| Gérant (test) | gerant@test.fr | Autopilot2025! |
+| Admin (Rayan) | rayannabli27@gmail.com | Autopilot2025! |
 | Moniteur | rayan.nabli@autopilot.fr | Autopilot2025! |
 | Élève | latifa.sahli@autopilot.fr | Autopilot2025! |
 | Élève 2 | sherine.nabli@autopilot.fr | Autopilot2025! |

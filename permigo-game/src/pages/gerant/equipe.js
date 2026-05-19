@@ -443,7 +443,7 @@ function renderCards(teachers, teacherStats) {
     const gradient = AVATARS[i % AVATARS.length];
     const stats = teacherStats[t.id] || { valCount: 0, eleveIds: new Set() };
     const actif = stats.valCount > 0;
-    const fullName = t.nom || t.prenom || '—';
+    const fullName = [t.prenom, t.nom].filter(Boolean).join(' ') || '—';
 
     return `
     <div class="eq-card">

@@ -413,7 +413,7 @@ function renderCards(eleves) {
   return eleves.map((e, i) => {
     const initials = initials2(e.prenom, e.nom);
     const gradient = AVATARS[i % AVATARS.length];
-    const fullName = e.nom || e.prenom || '—';
+    const fullName = [e.prenom, e.nom].filter(Boolean).join(' ') || '—';
     const heures = e.credit_heures ?? 0;
     const pct = REMC_TOTAL > 0 ? Math.round((e.acquisCount / REMC_TOTAL) * 100) : 0;
     const lastLabel = e.lastValidatedAt

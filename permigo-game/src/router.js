@@ -71,9 +71,8 @@ export async function route(root, me) {
   const param = segments[1] || null; // ex: eleveId pour #/livret/{id}
   const loader = map[routeName] || map.default;
 
-  // ─── FAB "+ Session" — visible uniquement pour moniteurs/gérants ───
-  // Idempotent : mount/unmount sont safe à appeler à chaque navigation.
-  if (role === 'gerant') {
+  // ─── FAB "+ Session" — visible uniquement pour les enseignants ───
+  if (role === 'enseignant') {
     mountLogSessionFab();
   } else {
     unmountLogSessionFab();

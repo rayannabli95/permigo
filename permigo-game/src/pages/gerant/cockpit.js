@@ -20,6 +20,43 @@ const TEXT = '#f1f5f9';
 const MUTED = '#64748b';
 const ACC  = '#6366f1';
 
+// KPI definitions — used to normalize RPC object → array
+const KPI_DEFS = [
+  { key: 'eleves_actifs',    label: 'Élèves actifs',    color: ACC,       unit: null },
+  { key: 'moniteurs_actifs', label: 'Moniteurs actifs', color: '#10b981', unit: null },
+  { key: 'taux_reussite',    label: 'Taux réussite',    color: '#10b981', unit: '%'  },
+  { key: 'heures_30j',       label: 'Heures 30j',       color: '#f59e0b', unit: 'h'  },
+  { key: 'nouveaux_30j',     label: 'Nouveaux 30j',     color: '#8b5cf6', unit: null },
+  { key: 'validations_30j',  label: 'Validations 30j',  color: ACC,       unit: null },
+];
+
+// Normalize RPC response which can return kpis/cohorts as objects instead of arrays
+function normalizeRpcData(data) {
+  if (!data) return { kpis: [], cohorts: [], top_moniteurs: [], alerts: [] };
+
+  let kpis = data.kpis;
+  if (kpis && !Array.isArray(kpis)) {
+    const obj = kpis;
+    kpis = KPI_DEFS
+      .filter(def => obj[def.key] !== undefined && obj[def.key] !== null)
+      .map(def => ({ key: def.key, label: def.label, color: def.color, unit: def.unit, value: obj[def.key], delta: null }));
+  }
+
+  let cohorts = data.cohorts;
+  if (cohorts && !Array.isArray(cohorts)) {
+    cohorts = Object.entries(cohorts)
+      .filter(([k]) => COHORT_ORDER.includes(k))
+      .map(([k, v]) => ({ cohort: k, key: k, count: typeof v === 'number' ? v : (v?.count ?? 0) }));
+  }
+
+  return {
+    kpis:          kpis ?? [],
+    cohorts:       cohorts ?? [],
+    top_moniteurs: Array.isArray(data.top_moniteurs) ? data.top_moniteurs : [],
+    alerts:        Array.isArray(data.alerts) ? data.alerts : [],
+  };
+}
+
 const COHORT_META = {
   champion: { label: 'Champion',  color: '#10b981', icon: 'award' },
   engage:   { label: 'Engagé',    color: '#6366f1', icon: 'zap' },
@@ -387,8 +424,9 @@ async function loadAndRender(root, me) {
   try {
     const { data, error } = await sb.rpc('get_gerant_cockpit');
     if (error) throw error;
-    _cockpitData = data;
-    root.innerHTML = render(data, me);
+    const normalized = normalizeRpcData(data);
+    _cockpitData = normalized;
+    root.innerHTML = render(normalized, me);
     wire(root, me);
   } catch (err) {
     console.error('[cockpit] load failed', err);

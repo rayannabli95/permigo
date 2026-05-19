@@ -43,7 +43,7 @@ import { renderHoneypot, checkHoneypot } from '@/utils/honeypot.js';
 const DEMO_ACCOUNTS = [
   { role: 'Élève',      email: 'eleve@test.fr',           emoji: '🎓' },
   { role: 'Enseignant', email: 'enseignant@test.fr',       emoji: '🚗' },
-  { role: 'Gérant',     email: 'rayannabli27@gmail.com',   emoji: '👑' },
+  { role: 'Gérant',     email: 'gerant@test.fr',            emoji: '👑' },
 ];
 
 export function mount(root) {
