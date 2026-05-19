@@ -5,6 +5,58 @@
 
 ---
 
+## [2026-05-19 NUIT+1] 🩹 SPRINT 6.5 — Fix gradient opaque qui masque les fonds (Cowork → Claude Code)
+
+> **Bug confirmé en live sur Vercel prod via Chrome MCP** : l'image `monde1nuit.png` se charge bien (naturalWidth 853, complete:true, opacity:.38, display:block) mais elle est INVISIBLE sous une plaque opaque. En désactivant `.prc-world::before` via JS le fond apparaît instantanément, parfait.
+>
+> **Cause** : `color-mix(in srgb, var(--wc) X%, var(--bg))` produit un mélange OPAQUE entre la couleur du monde et la couleur du fond — pas une transparence. Le pseudo-élément `::before` à z-index:1 est donc un rectangle quasi-opaque qui cache l'image en z-index:0.
+
+### 🎯 OBJECTIF
+Remplacer `var(--bg)` par `transparent` dans le gradient `.prc-world::before` pour préserver la teinte couleur du monde TOUT EN laissant passer l'image background.
+
+### 🔒 CONTRAINTES
+- Ne touche QUE au bloc `.prc-world::before` (lignes ~50-61 de `src/pages/eleve/parcours.js`)
+- Aucune autre modification dans le fichier
+- Garde l'identité couleur du monde (la teinte doit rester perceptible)
+
+### Diff exact — `src/pages/eleve/parcours.js` lignes 57-60
+
+```diff
+ .prc-world::before {
+   content: '';
+   position: absolute;
+   inset: 0;
+   z-index: 1;
+   pointer-events: none;
+   background: linear-gradient(180deg,
+-    color-mix(in srgb, var(--wc, #10b981) 8%, var(--bg)) 0%,
+-    color-mix(in srgb, var(--wc, #10b981) 3%, var(--bg)) 50%,
+-    var(--bg) 100%);
++    color-mix(in srgb, var(--wc, #10b981) 22%, transparent) 0%,
++    color-mix(in srgb, var(--wc, #10b981) 12%, transparent) 50%,
++    color-mix(in srgb, var(--wc, #10b981) 4%, transparent) 100%);
+ }
+```
+
+**Pourquoi ces pourcentages** : 22% en haut donne assez de teinte pour identifier le monde (emerald/cyan/violet/amber) sans étouffer l'image. 4% en bas laisse l'image presque pure pour que les nodes du parcours soient lisibles.
+
+### 💛 ÉMOTION CIBLE
+Quand tu push, l'effet doit être : *"on voit une route nocturne en arrière-plan teintée légèrement de la couleur du monde, comme une fenêtre sur un atlas Apple"*. Pas un overlay plastique.
+
+### ⚠️ BUGS À ÉVITER
+- Si tu mets >25% en haut, on perd l'image
+- Si tu mets <10% en haut, on perd l'identité couleur du monde
+- Ne pas re-introduire `var(--bg)` à 100% en bas (re-créerait l'opacité)
+- Vérifie dark mode : la même règle marche (transparent reste transparent)
+
+### ✅ VALIDATION
+Après push Vercel, vérifie sur `/parcours` que :
+- Monde 1 (Campagne) actif : route nocturne légèrement verte visible derrière
+- Le titre "Maîtriser le véhicule" reste parfaitement lisible
+- Les nodes (cercles compétences) restent contrastés
+
+---
+
 ## [2026-05-19 NUIT] 🌅🌌 SPRINT 6 — Backgrounds mondes jour/nuit (parcours élève + landing)
 
 > **⚠️ Lecture préalable obligatoire** : `/permigo-game/design-system/permigo-laws.md` (Lois 2, 3, 4, 10). Ce prompt suit la Loi 9 (OBJECTIF / CONTRAINTES / ÉMOTION / GARDE / BUGS).

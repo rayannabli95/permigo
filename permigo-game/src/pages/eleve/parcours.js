@@ -55,9 +55,9 @@ const STYLE = `<style>
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--wc, #10b981) 8%, var(--bg)) 0%,
-    color-mix(in srgb, var(--wc, #10b981) 3%, var(--bg)) 50%,
-    var(--bg) 100%);
+    color-mix(in srgb, var(--wc, #10b981) 22%, transparent) 0%,
+    color-mix(in srgb, var(--wc, #10b981) 12%, transparent) 50%,
+    color-mix(in srgb, var(--wc, #10b981) 4%, transparent) 100%);
 }
 /* Tous les contenus passent au-dessus du volant */
 .prc > * { position: relative; z-index: 1; }
