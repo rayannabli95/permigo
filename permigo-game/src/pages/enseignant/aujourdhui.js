@@ -682,16 +682,10 @@ async function renderInto(root, _me) {
     navigate('#/eleves?tab=arelancer');
   });
 
-  // Recap soir / prompt log
-  const openModal = async () => {
-    const { openLogSessionModal } = await import('@/components/log-session-modal.js');
-    openLogSessionModal();
-  };
-  root.querySelector('#aj-recap-soir')?.addEventListener('click', openModal);
-  root.querySelector('#aj-log-prompt-soir')?.addEventListener('click', () => {
-    track('log_prompt.soir.clicked');
-    openModal();
-  });
+  // Recap soir / prompt log → page dédiée plein écran
+  const goLogSession = () => { track('log_prompt.soir.clicked'); navigate('#/log-session'); };
+  root.querySelector('#aj-recap-soir')?.addEventListener('click', goLogSession);
+  root.querySelector('#aj-log-prompt-soir')?.addEventListener('click', goLogSession);
 
   root.querySelectorAll('.aj-eleve-row[data-eleve-id]').forEach(row => {
     row.addEventListener('click', () => {

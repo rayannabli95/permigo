@@ -5,7 +5,6 @@
 // Appelé dans router.js après chaque page enseignant/gerant.
 // ═══════════════════════════════════════════════════════════════
 import { haptic } from '@/utils/haptic.js';
-import { openLogSessionModal } from '@/components/log-session-modal.js';
 
 const STYLE_ID = 'log-session-fab-style';
 const FAB_ID   = 'log-session-fab';
@@ -133,7 +132,7 @@ export function mountLogSessionFab() {
   btn.innerHTML = _plusIcon();
   btn.addEventListener('click', () => {
     haptic('select');
-    openLogSessionModal();
+    location.hash = '#/log-session';
   });
   document.body.appendChild(btn);
   return btn;

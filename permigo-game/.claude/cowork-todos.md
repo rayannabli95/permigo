@@ -5,6 +5,121 @@
 
 ---
 
+## [2026-05-18 SOIR] 🎯 P0 — REFONTE FAB "ENREGISTRER SESSION" (ADN Uber Driver)
+
+> Discuté avec Rayan : le moniteur doit pouvoir logger une séance complète en 30 secondes, une main, en sortant de la voiture. **Validation = session + commentaire + templates, en 1 action atomique.**
+
+### 🔒 Backend Cowork — DÉJÀ EN PROD
+
+- **Trigger `enforce_session_before_validation`** : refuse INSERT/UPDATE de `validations.statut='acquis'` si pas de session confirmée du binôme moniteur/élève dans les 7 derniers jours **OU** si l'élève n'a pas tenté le quiz de la compétence au moins 1 fois.
+  - Erreur P0001 = pas de session
+  - Erreur P0002 = pas de tentative quiz
+- **Table `message_templates`** seedée avec 15 templates (5 default + 10 progressifs paliers 5/15/30/50)
+- **RPC `get_my_message_templates()`** : retourne tous les templates avec flag `unlocked` selon nb total de validations lifetime du moniteur
+
+### 📋 Spec frontend complète
+
+Fichier cible : `src/pages/enseignant/log-session.js` (refonte complète)
+Pattern : `mount(root, ...args)` exporté
+Objectif : 30 sec max pour logger séance complète
+
+**Écran unique, scroll vertical, 5 blocs :**
+
+**1. Élève** (sélecteur)
+- `sb.from('profiles').select('id,prenom,nom,avatar_url').eq('role','eleve').eq('enseignant_id', me.id).order('last_active_at',{ascending:false})`
+- Photo + prénom + nom, le + récent en haut
+- Search bar si > 6 élèves
+- 1 tap = sélectionné (border violet `#6366f1`)
+
+**2. Durée** (préset)
+- 3 chips XL côte à côte : `1h` `1h30` `2h`
+- Bouton secondaire "Autre durée" → bottom sheet stepper 15min
+- Stocker en **minutes** (60, 90, 120…)
+
+**3. Date** (auto = aujourd'hui)
+- Display : `"Aujourd'hui · " + new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'})`
+- Tap → calendar picker bottom sheet (rattrapage)
+
+**4. Compétences** (multi-select, ordre **alphabétique**)
+- `sb.from('competences_remc').select('id,nom').order('nom',{ascending:true})`
+- Pour chaque comp, check si déjà 'acquis' pour cet élève → chip vert "✓ Déjà acquis" et **désactive le tap** (anti-doublon)
+- Sinon checkbox toggleable
+- Header sticky : `"{N} compétences sélectionnées"`
+- ⚠️ Le trigger refuse les comps sans tentative quiz → ne PAS pré-filtrer mais catch P0002 au submit avec toast clair
+
+**5. Commentaire** (optionnel)
+- Textarea 300 chars max, counter en bas droite
+- Sous le textarea : grille de chips templates :
+  ```js
+  const { data: templates } = await sb.rpc('get_my_message_templates');
+  // Affiche unlocked en couleur, locked en grisé avec 🔒 + "Débloque à {n} validations"
+  ```
+- Tap chip = `textarea.value = template.emoji + ' ' + template.body` (éditable après)
+- Le message sera visible élève + autres enseignants de l'école
+
+**Bouton sticky bas** : `"Enregistrer la session"` — gradient violet, h:56px
+
+**Au tap :**
+1. `navigator.vibrate?.(50)`
+2. Show loader
+3. INSERT atomique :
+   ```js
+   const { data: session, error: e1 } = await sb.from('sessions_moniteur').insert({
+     moniteur_id: me.id,
+     eleve_id: selectedEleveId,
+     duration_minutes: selectedMinutes,
+     session_date: selectedDate, // ISO YYYY-MM-DD
+     confirmation_status: 'pending', // élève confirme depuis sa notif
+     notes: commentText || null
+   }).select().single();
+   if (e1) return toast('Erreur enregistrement séance', 'error');
+
+   // Pour chaque comp sélectionnée :
+   for (const compId of selectedComps) {
+     const { error: e2 } = await sb.from('validations').insert({
+       eleve_id: selectedEleveId,
+       competence_id: compId,
+       validated_by: me.id,
+       statut: 'acquis',
+       validated_at: new Date().toISOString(),
+       note_enseignant: commentText || null
+     });
+     if (e2?.code === 'P0002') {
+       toast(`L'élève n'a pas encore tenté le quiz de cette compétence — validation impossible`, 'warning', 5000);
+       continue;
+     }
+   }
+   ```
+4. Sur succès : `mount(celebrate-screen)` 500ms confetti puis retour Aujourd'hui + toast vert `"Séance enregistrée · {N} compétences validées"`
+
+### 🎨 Règles UX absolues
+
+- Mobile-first, zone safe iPhone (`env(safe-area-inset-bottom)`)
+- Tout opérable à une main (pouce droit)
+- `prefers-reduced-motion` respecté (skip confetti)
+- `esc()` sur tous les noms d'élèves dans innerHTML
+- Auto-save brouillon localStorage clé `draft_session_{date}` toutes les 5s
+- Détection doublon : avant submit, check `sb.from('sessions_moniteur').select('id').eq('moniteur_id',me.id).eq('eleve_id',sel).eq('session_date',date)` → si existe : modal "Une séance existe déjà aujourd'hui avec {prenom}. Éditer ou créer une 2ème ?"
+
+### 🎨 Design tokens
+
+- Background : `#f8f9fc`
+- Cards : bg `#fff`, radius 20px, border 1.5px `#e2e6f2`
+- Accent violet : `#6366f1`
+- Vert success : `#10b981`
+- Rouge erreur : `#ef4444`
+- Spacing inter-blocs : 16px
+- Fonts : `'Plus Jakarta Sans'` (titres 16-18px 700) + `'Inter'` (body 13-14px 500)
+
+### 📦 Livrables attendus
+
+- [ ] `src/pages/enseignant/log-session.js` refonte complète
+- [ ] Branche dans `src/main.js` si pas déjà fait
+- [ ] Test : login moniteur (`enseignant@test.fr` / Autopilot2025!) → FAB → flow complet → vérif séance + validations en DB
+- [ ] Coche cette section quand terminé + retour ligne courte ici
+
+---
+
 ## [2026-05-18] 🚀 SUPER-VAGUE BACKEND v3 — 14 chantiers autonomes shippés
 
 > Cowork a shippé 14 chantiers backend pendant que tu bossais. **87 RPC, 16 triggers, 13 cron jobs, 29 tables** au total. Voici la liste des câblages frontend à faire, regroupés par persona et priorité.

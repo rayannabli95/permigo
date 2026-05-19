@@ -31,6 +31,7 @@ const ROUTES = {
     livret: () => import('@/pages/enseignant/livret-remc.js'),
     insights: () => import('@/pages/enseignant/insights.js'),
     bilan: () => import('@/pages/enseignant/bilan.js'),
+    'log-session': () => import('@/pages/enseignant/log-session.js'),
     messages: () => import('@/pages/common/messages.js'),
     legal: () => import('@/pages/common/legal.js'),
     dbg: () => import('@/pages/admin/debug.js'),
