@@ -9,7 +9,6 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { REMC } from '@/data/remc.js';
 import { labelComp } from '@/utils/remc-label.js';
-import { showXpToast } from '@/components/xp-toast.js';
 import { badge, Badges } from '@/components/badge.js';
 import { icon } from '@/utils/icons.js';
 import { navigate } from '@/router.js';
@@ -303,27 +302,29 @@ async function doValidate() {
   const btn = _root.querySelector('.btn-validate');
   if (btn) { btn.disabled = true; btn.textContent = 'En cours…'; }
 
+  // Nouveau flux : le moniteur DÉBLOQUE la compétence (a_valider).
+  // C'est l'élève qui la valide (→ acquis) en réussissant son quiz.
   const { error } = await sb.from('validations').upsert(
     {
       eleve_id: _eleve.id,
       competence_id: _selectedComp.c,
       validated_by: _me.id,
-      statut: 'acquis',
+      statut: 'a_valider',
     },
     { onConflict: 'eleve_id,competence_id' }
   );
 
   if (error) {
-    toast('Erreur lors de la validation', 'error');
-    if (btn) { btn.disabled = false; btn.textContent = 'Confirmer ✓'; }
+    toast('Erreur lors du déblocage', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Débloquer ✓'; }
     return;
   }
 
-  // Déclenche le quiz post-validation côté élève
+  // Déclenche le quiz de validation côté élève
   const { error: errNotif } = await sb.from('notifications').insert({
     user_id: _eleve.id,
     type: 'post_validation_quiz',
-    title: 'Compétence validée !',
+    title: 'Nouvelle compétence à valider !',
     body: `${_selectedComp.n} — Fais le quiz en 30 sec`,
     data: { competence_id: _selectedComp.c },
   });
@@ -348,7 +349,7 @@ async function doValidate() {
   const nom = _eleve.nom || '';
   const ini = ((prenom[0] || '') + (nom[0] || '')).toUpperCase() || '?';
   toastAvatar({
-    title: `${prenom} ${nom}`.trim() + ' — validée',
+    title: `${prenom} ${nom}`.trim() + ' — quiz envoyé',
     sub: `${_selectedComp.c} · ${_selectedComp.n}`,
     initials: ini,
     color: '#6366f1',
@@ -356,20 +357,10 @@ async function doValidate() {
     duration: 4000,
   });
 
-  // Fetch updated XP (after trigger ran) → show XP toast
-  const eleveName = _eleve.prenom || 'Élève';
-  const compNom = _selectedComp.n;
-  const { data: updatedProfile } = await sb
-    .from('profiles')
-    .select('xp')
-    .eq('id', _me.id)
-    .single();
-  if (updatedProfile) {
-    track('xp.gained', { amount: 25, source: 'validation' });
-    showXpToast({ xp: 25, eleveName: eleveName });
-  }
+  // Pas d'XP au déblocage : le moniteur est crédité quand l'élève VALIDE
+  // sa compétence via le quiz (trigger sur transition a_valider → acquis).
 
-  _validatedIds.add(_selectedComp.c);
+  _aValiderIds.add(_selectedComp.c);
   _selectedComp = null;
 
   render();
@@ -382,8 +373,8 @@ function render() {
     ${STYLE}
     <div class="vp anim-slide-up">
       <header class="vp-hd">
-        <h1 class="vp-h1">Valider une compétence</h1>
-        <p class="vp-sub">L'élève reçoit le quiz instantanément après validation.</p>
+        <h1 class="vp-h1">Débloquer une compétence</h1>
+        <p class="vp-sub">Tu débloques la compétence — l'élève la valide en réussissant son quiz.</p>
       </header>
 
       <section class="step step-1">
@@ -485,7 +476,7 @@ function renderCta() {
         <div class="cta-comp-nm">${esc(labelComp(_selectedComp.c))}</div>
         <div class="cta-for">pour <strong>${esc(_eleve?.prenom || '')}</strong></div>
       </div>
-      <button class="btn-validate" type="button">Confirmer ✓</button>
+      <button class="btn-validate" type="button">Débloquer ✓</button>
     </div>
   `;
   slot.querySelector('.btn-validate').addEventListener('click', doValidate);

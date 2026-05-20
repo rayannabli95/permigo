@@ -179,6 +179,8 @@ const STYLE = `<style>
   font: 700 9px/1 'IBM Plex Mono', monospace;
   letter-spacing: .05em; text-transform: uppercase;
   padding: 3px 7px; border-radius: 99px; color: #fff;
+  white-space: nowrap; flex-shrink: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis;
 }
 .bo2-price-btn {
   display: flex; align-items: center; gap: 5px;
@@ -187,6 +189,7 @@ const STYLE = `<style>
   border: none; border-radius: 10px;
   color: #fff; font: 700 12px/1 'IBM Plex Mono', monospace;
   cursor: pointer; min-height: 32px;
+  white-space: nowrap; flex-shrink: 0;
   transition: transform .12s, opacity .12s;
   -webkit-tap-highlight-color: transparent;
 }

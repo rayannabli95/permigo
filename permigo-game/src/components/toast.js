@@ -50,9 +50,14 @@ export function toast(msg, type = 'info', duration = 3000) {
   `;
   root.appendChild(el);
 
+  let removed = false;
+  const remove = () => { if (!removed) { removed = true; el.remove(); } };
   const dismiss = () => {
     el.classList.remove('on');
-    el.addEventListener('transitionend', () => el.remove(), { once: true });
+    el.addEventListener('transitionend', remove, { once: true });
+    // Fallback : si transitionend ne se déclenche jamais (reduced-motion,
+    // élément déjà hors transition), on force la suppression.
+    setTimeout(remove, 400);
   };
 
   el.querySelector('.toast-close')?.addEventListener('click', dismiss);
@@ -126,9 +131,12 @@ export function toastAvatar({ title, sub = '', initials = '?', color = '#6366f1'
   `;
   root.appendChild(el);
 
+  let removed = false;
+  const remove = () => { if (!removed) { removed = true; el.remove(); } };
   const dismiss = () => {
     el.classList.remove('on');
-    el.addEventListener('transitionend', () => el.remove(), { once: true });
+    el.addEventListener('transitionend', remove, { once: true });
+    setTimeout(remove, 400);
   };
 
   el.addEventListener('click', dismiss);

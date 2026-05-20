@@ -377,20 +377,24 @@ async function loadData() {
     isMine: e.enseignant_id === _me.id,
   }));
 
-  // 2. Mes validations groupées par eleve_id (statut acquis uniquement)
+  // 2. Progression REMC réelle de chaque élève = TOTAL des compétences acquises
+  //    (peu importe le moniteur validateur — auto-école multi-moniteurs).
+  //    La barre "X/31" doit refléter l'avancement permis de l'élève, pas la
+  //    seule contribution du moniteur courant (sinon 0/31 trompeur pour un
+  //    élève suivi par un collègue). RLS partage déjà les validations école.
   const { data: valsRaw } = await sb
     .from('validations')
     .select('eleve_id, statut')
-    .eq('validated_by', _me.id);
+    .eq('statut', 'acquis');
 
-  // Map : eleve_id → count acquis
+  // Map : eleve_id → count acquis (total école)
   const acquisByEleve = {};
   (valsRaw || []).forEach(v => {
     if (!acquisByEleve[v.eleve_id]) acquisByEleve[v.eleve_id] = 0;
-    if (v.statut === 'acquis') acquisByEleve[v.eleve_id]++;
+    acquisByEleve[v.eleve_id]++;
   });
 
-  // Set des élèves que j'ai validé au moins une fois
+  // Set des élèves ayant au moins 1 compétence acquise
   const touchedEleves = new Set(Object.keys(acquisByEleve));
 
   const now = Date.now();
@@ -580,11 +584,11 @@ function filterList() {
 }
 
 function renderRow(eleve) {
-  const _nomParts = (eleve.nom || '').trim().split(/\s+/);
+  const _nomParts = (eleve.nom || '').trim().replace(/\./g, '').split(/\s+/).filter(Boolean);
   const _ini1 = (eleve.prenom || '')[0] || '';
-  const _ini2 = _nomParts.length > 1
-    ? (_nomParts[_nomParts.length - 1].replace(/\./g, '')[0] || _ini1)
-    : (_nomParts[0]?.[1] || _ini1);
+  const _ini2 = _nomParts.length
+    ? (_nomParts[_nomParts.length - 1][0] || '')
+    : ((eleve.prenom || '').trim()[1] || '');
   const initials = (_ini1 + _ini2).toUpperCase() || '?';
   const grad = AVATARS[eleve.idx % AVATARS.length];
   const pct = eleve.total > 0 ? Math.round((eleve.acquis / eleve.total) * 100) : 0;

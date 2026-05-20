@@ -9,7 +9,6 @@ import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { haptic } from '@/utils/haptic.js';
 import { toast } from '@/components/toast.js';
-import { emptyState } from '@/components/empty-state.js';
 
 // ─── Catalogue complet (miroir de _achievement_meta) ──────────
 const CATALOG = [
@@ -328,15 +327,9 @@ function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
     groups[t.group].push(t);
   }
 
-  // Empty state si aucun trophée débloqué
-  if (unlockedCount === 0) {
-    root.querySelector('#tr2-body').innerHTML = emptyState({
-      image: '/skins/empty-states/empty_trophees.png',
-      title: 'Aucun trophée encore',
-      body: 'Valide des compétences, fais des quiz, débloque !',
-    });
-    return;
-  }
+  // NB : même avec 0 trophée débloqué, on affiche TOUTE la grille verrouillée
+  // (grisée + "???" + progression) — ADN Clash Royale/Duolingo : montrer les
+  // objectifs à viser crée le désir. Pas d'empty state qui tue la motivation.
 
   let html = '';
   let globalIdx = 0;

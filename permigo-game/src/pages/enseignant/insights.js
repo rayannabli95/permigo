@@ -358,10 +358,10 @@ const STYLE = `<style>
 // ─── Helpers ──────────────────────────────────────────────────
 function initials(prenom, nom) {
   const p = (prenom || '')[0] || '';
-  const parts = (nom || '').trim().split(/\s+/);
-  const n = parts.length > 1
-    ? (parts[parts.length - 1].replace(/\./g, '')[0] || p)
-    : (parts[0]?.[1] || p);
+  const parts = (nom || '').trim().replace(/\./g, '').split(/\s+/).filter(Boolean);
+  const n = parts.length
+    ? (parts[parts.length - 1][0] || '')
+    : ((prenom || '').trim()[1] || '');
   return (p + n).toUpperCase() || '?';
 }
 

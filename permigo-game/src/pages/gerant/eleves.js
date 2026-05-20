@@ -509,10 +509,12 @@ async function openQuickView(eleveId, anchorCard) {
 // ─── Helpers ─────────────────────────────────────────────────
 function initials2(prenom, nom) {
   const p = (prenom || '').trim()[0] || '';
-  const parts = (nom || '').trim().split(/\s+/);
-  const n = parts.length > 1
-    ? (parts[parts.length - 1].replace(/\./g, '')[0] || p)
-    : (parts[0]?.[1] || p);
+  // Initiale prénom + initiale du nom (dernier mot du nom).
+  // Fallback : 2e lettre du prénom si pas de nom.
+  const parts = (nom || '').trim().replace(/\./g, '').split(/\s+/).filter(Boolean);
+  const n = parts.length
+    ? (parts[parts.length - 1][0] || '')
+    : ((prenom || '').trim()[1] || '');
   return (p + n).toUpperCase() || '?';
 }
 
