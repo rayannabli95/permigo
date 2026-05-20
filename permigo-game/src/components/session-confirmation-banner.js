@@ -191,7 +191,8 @@ export async function mountSessionConfirmation(root, anchorEl) {
       card?.querySelectorAll('.scb-btn').forEach(b => { b.disabled = true; });
 
       try {
-        await sb.rpc('confirm_session', { p_session_id: sessionId, p_status: action });
+        const { data: cfData, error: cfErr } = await sb.rpc('confirm_session', { p_session_id: sessionId, p_status: action });
+        if (cfErr || cfData?.error) throw (cfErr || new Error(cfData.error));
         track('session_confirmation.responded', { action });
 
         if (action === 'confirmed') {

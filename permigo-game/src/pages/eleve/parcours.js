@@ -1580,7 +1580,7 @@ function renderFinal(done, total) {
 function wire(root, worldStates, validatedMap, me) {
   // Back via hashchange
   root.querySelector('#prc-back')?.addEventListener('click', () => {
-    location.hash = '#/accueil';
+    location.hash = '#/';
   });
 
   // Auto-scroll vers le monde en cours

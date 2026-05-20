@@ -193,6 +193,18 @@ const STYLE = `<style>
   animation: tr2EmojiIn .5s .1s cubic-bezier(.34,1.56,.64,1) both;
   filter: drop-shadow(0 0 18px rgba(255,255,255,.6));
 }
+/* PNG badge cadré en cercle (cache le damier de transparence baked dans l'asset) */
+.tr2-modal-emoji:has(img) {
+  width: 120px; height: 120px; border-radius: 50%; overflow: hidden;
+  margin: 0 auto; display: flex; align-items: center; justify-content: center;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,.25));
+}
+.tr2-modal-emoji img { width: 160%; height: 160%; object-fit: cover; mix-blend-mode: normal !important; }
+.tr2-modal-locked-ico:has(img) {
+  width: 110px; height: 110px; border-radius: 50%; overflow: hidden;
+  margin: 0 auto; display: flex; align-items: center; justify-content: center;
+}
+.tr2-modal-locked-ico img { width: 160%; height: 160%; object-fit: cover; mix-blend-mode: normal !important; }
 @keyframes tr2EmojiIn { from{transform:scale(.4) rotate(-10deg);opacity:0} to{transform:scale(1) rotate(0deg);opacity:1} }
 .tr2-rarity-chip {
   position: relative; z-index: 1;

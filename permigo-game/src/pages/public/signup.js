@@ -301,7 +301,8 @@ function renderForm(root, invitation, token) {
       }
 
       // 3. Marquer l'invitation comme acceptée (via RPC sécurisée)
-      await sb.rpc('accept_invitation', { p_token: token });
+      const { error: acceptErr } = await sb.rpc('accept_invitation', { p_token: token });
+      if (acceptErr) console.warn('[signup] accept_invitation', acceptErr.message);
 
       track('signup.completed', { role: invitation.role, from: 'invitation' });
 

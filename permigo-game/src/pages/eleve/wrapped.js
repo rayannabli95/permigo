@@ -158,6 +158,28 @@ function wireWrapped(root, me, stats) {
     });
   });
 
+  // Drag-to-scroll desktop (souris) — sur mobile le touch swipe natif marche déjà
+  let isDown = false, startX = 0, scrollStart = 0;
+  slidesEl?.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    isDown = true; startX = e.clientX; scrollStart = slidesEl.scrollLeft;
+    slidesEl.style.cursor = 'grabbing';
+    try { slidesEl.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  slidesEl?.addEventListener('pointermove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    slidesEl.scrollLeft = scrollStart - (e.clientX - startX);
+  });
+  const endDrag = () => {
+    if (!isDown) return;
+    isDown = false; slidesEl.style.cursor = '';
+    const idx = Math.round(slidesEl.scrollLeft / slidesEl.clientWidth);
+    slidesEl.scrollTo({ left: idx * slidesEl.clientWidth, behavior: 'smooth' });
+  };
+  slidesEl?.addEventListener('pointerup', endDrag);
+  slidesEl?.addEventListener('pointercancel', endDrag);
+
   // Share
   root.querySelector('#wrp-share')?.addEventListener('click', async () => {
     const text = `Mon PermiGo Wrapped ${YEAR} 🚗\n`

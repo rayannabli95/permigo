@@ -287,7 +287,7 @@ function renderResult(root, { score, total, scorePct, success, type }) {
     </div>
   `;
 
-  root.querySelector('#btn-parcours').addEventListener('click', () => { location.hash = '#/parcours'; });
+  root.querySelector('#btn-parcours')?.addEventListener('click', () => { location.hash = '#/parcours'; });
   root.querySelector('#btn-home')?.addEventListener('click', () => { location.hash = '#/'; });
 }
 

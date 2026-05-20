@@ -322,20 +322,6 @@ export async function mount(root) {
     const triggerOpen = async () => {
       track('chest.opened_from_page', { chest_type: chestType });
 
-      // Cinematic modal for world chests
-      const worldMatch = chestType.match(/^world_(\d+)$/);
-      if (worldMatch) {
-        const worldNum = parseInt(worldMatch[1], 10);
-        const WORLD_NAMES = ['', 'Sécurité', 'Manœuvres', 'Conduite', 'Maîtrise'];
-        openChestModal({ worldNum, worldName: WORLD_NAMES[worldNum] || `Monde ${worldNum}` });
-        return;
-      }
-
-      const btn = card.querySelector('.mc-open-btn');
-      if (btn) { btn.disabled = true; btn.textContent = '…'; }
-
-      const result = await openChest(chestType);
-
       const markOpened = () => {
         card.classList.remove('mc-can-open');
         card.classList.add('mc-opened');
@@ -382,20 +368,43 @@ export async function mount(root) {
         openedList.prepend(card);
       };
 
-      if (result.ok) {
-        markOpened();
-        migrateCard();
-        navigator.vibrate?.([30, 50, 30]);
-        toast(`${meta.label} ouvert ! +${meta.xp ?? 0} XP +${meta.gemmes ?? 0} 💎`, 'success');
-      } else if (result.error === 'already_opened') {
-        markOpened();
-        migrateCard();
-        toast('Tu as déjà ouvert ce coffre', 'info');
-      } else {
-        console.error('[mes-coffres] openChest error:', result.error);
-        toast(result.error || 'Erreur ouverture coffre — réessaie', 'error');
-        if (btn) { btn.disabled = false; btn.textContent = 'Ouvrir'; }
+      // Persiste l'ouverture en DB + met à jour l'UI
+      const persistOpen = async (silent = false) => {
+        const result = await openChest(chestType);
+        if (result.ok) {
+          markOpened();
+          migrateCard();
+          if (!silent) {
+            navigator.vibrate?.([30, 50, 30]);
+            toast(`${meta.label} ouvert ! +${meta.xp ?? 0} XP +${meta.gemmes ?? 0} 💎`, 'success');
+          }
+        } else if (result.error === 'already_opened') {
+          markOpened();
+          migrateCard();
+        } else {
+          console.error('[mes-coffres] openChest error:', result.error);
+          toast(result.error || 'Erreur ouverture coffre — réessaie', 'error');
+        }
+      };
+
+      // Coffres MONDE → modal cinématique, persistance DB au clic "Réclamer" (onClaim)
+      const worldMatch = chestType.match(/^world_(\d+)$/);
+      if (worldMatch) {
+        const worldNum = parseInt(worldMatch[1], 10);
+        const WORLD_NAMES = ['', 'Sécurité', 'Manœuvres', 'Conduite', 'Maîtrise'];
+        openChestModal({
+          worldNum,
+          worldName: WORLD_NAMES[worldNum] || `Monde ${worldNum}`,
+          onClaim: () => persistOpen(true), // l'anim affiche déjà les récompenses
+        });
+        return;
       }
+
+      // Coffres non-monde (streak, quiz) → ouverture directe
+      const btn = card.querySelector('.mc-open-btn');
+      if (btn) { btn.disabled = true; btn.textContent = '…'; }
+      await persistOpen(false);
+      if (btn && card.classList.contains('mc-can-open')) { btn.disabled = false; btn.textContent = 'Ouvrir'; }
     };
 
     card.addEventListener('click', triggerOpen);

@@ -45,8 +45,8 @@ export function renderChest({ worldNum, worldName, opened = false }) {
   `;
 }
 
-/** Modal cinématique d'ouverture. */
-export function openChestModal({ worldNum, worldName }) {
+/** Modal cinématique d'ouverture. onClaim() est appelé quand l'user clique "Réclamer". */
+export function openChestModal({ worldNum, worldName, onClaim }) {
   if (document.querySelector('.chest-modal')) return;
   const tier = TIERS[worldNum] || TIERS[1];
 
@@ -138,13 +138,19 @@ export function openChestModal({ worldNum, worldName }) {
     }, 240);
   }, 900);
 
-  const dismiss = () => {
+  let claimed = false;
+  const dismiss = (viaClaim = false) => {
     markChestOpened(worldNum);
+    // Persistance DB + UI uniquement si l'user a réclamé (clic bouton), pas si fermeture via bg
+    if (viaClaim && !claimed) {
+      claimed = true;
+      try { onClaim?.(); } catch (e) { console.warn('[chest] onClaim error', e); }
+    }
     modal.classList.add('cm-closing');
     setTimeout(() => modal.remove(), 280);
   };
-  closeBtn.addEventListener('click', dismiss);
-  modal.querySelector('.chest-modal-bg').addEventListener('click', dismiss);
+  closeBtn.addEventListener('click', () => dismiss(true));
+  modal.querySelector('.chest-modal-bg').addEventListener('click', () => dismiss(true));
 }
 
 /** SVG illustré du coffre — multi-layered avec reflets et détails. */
