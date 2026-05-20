@@ -179,7 +179,7 @@ export async function mount(root, params = {}) {
       <div class="qp-card" id="qp-welcome">
         <div class="qp-badge">${esc(typeLabel)}</div>
         <div class="qp-cat-row">${cat?.ico || ''} <span>${esc(cat?.name || '')}</span></div>
-        <h2 class="qp-comp">${esc(sub?.n || competenceId)}</h2>
+        <h1 class="qp-comp" tabindex="-1">${esc(sub?.n || competenceId)}</h1>
         <div class="qp-meta">
           <span class="qp-meta-item">📝 ${nbQuestions} questions</span>
           <span class="qp-meta-item">⚡ ~30 secondes</span>

@@ -780,7 +780,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
           ${icon('bell', { size: 18 })}
         </button>
       </div>
-      <div class="acc2-hero-title">${esc(lvl.name)}</div>
+      <h1 class="acc2-hero-title" tabindex="-1">${esc(lvl.name)}</h1>
       <div class="acc2-hero-meta">
         <div class="acc2-hero-xp-pill">
           ${icon('zap', { size: 13 })}

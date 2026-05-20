@@ -267,7 +267,15 @@ export async function mount(root) {
       renderList(batch.length < PAGE_SIZE);
     } catch (e) {
       console.error('[feedback] load error', e);
-      if (btn) btn.disabled = false;
+      const lb = root.querySelector('#fb-load-btn');
+      if (lb) { lb.disabled = false; return; }            // pagination : on garde l'existant
+      const list = root.querySelector('.fb-list');         // 1er chargement : on tue le skeleton
+      if (list) {
+        list.innerHTML = `<div class="fb-empty"><div class="fb-empty-ico">📡</div>
+          Impossible de charger tes retours.<br>
+          <button class="fb-load-more" id="fb-retry" style="margin-top:12px">Réessayer</button></div>`;
+        root.querySelector('#fb-retry')?.addEventListener('click', () => { offset = 0; allEvents = []; loadMore(); });
+      }
     }
   }
 

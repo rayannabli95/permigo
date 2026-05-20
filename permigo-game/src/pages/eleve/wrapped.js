@@ -17,6 +17,7 @@ export async function mount(root) {
   track('page_view', { page: 'wrapped', user_role: me.role, year: YEAR });
 
   root.innerHTML = renderStyles() + `
+<h1 tabindex="-1">Mon Wrapped</h1>
 <div class="wrp" id="wrp-root">
   <div class="wrp-loading">
     <div class="wrp-loading-ico">✨</div>
@@ -354,5 +355,10 @@ function renderStyles() {
   transition: color .15s;
 }
 .wrp-close-btn:active { color: rgba(255,255,255,.7); }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{
+        animation-duration:.001ms!important;animation-iteration-count:1!important;
+        transition-duration:.001ms!important;scroll-behavior:auto!important}
+    }
 </style>`;
 }

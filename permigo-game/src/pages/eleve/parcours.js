@@ -1152,10 +1152,19 @@ export async function mount(root) {
 
   root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div><div class="prc-subtitle">31 compétences · Permis B</div></div></div><div style="padding:32px;text-align:center;color:#94a3b8">Chargement…</div></div>`;
 
-  const { data: valData } = await sb
+  const { data: valData, error: valErr } = await sb
     .from('validations')
     .select('competence_id, validated_at, statut, score_cognitif, score_consolidation, teacher:profiles!validated_by(prenom, nom)')
     .eq('eleve_id', me.id);
+  if (valErr) {
+    root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div></div></div>
+      <div style="padding:48px 24px;text-align:center;color:#64748b">
+        <div style="font-size:40px;margin-bottom:12px">📡</div>
+        <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
+        <button onclick="location.reload()" style="margin-top:14px;padding:12px 24px;border:0;background:#6366f1;color:#fff;border-radius:12px;cursor:pointer">Réessayer</button>
+      </div></div>`;
+    return;
+  }
 
   // validatedMap : { compId → entry }  — acquis seulement
   // pendingMap   : { compId → true }   — a_valider (quiz à faire)
@@ -1389,7 +1398,7 @@ function renderPage(worldStates, validatedMap, pendingMap) {
   <!-- Header sticky -->
   <div class="prc-hd">
     <div>
-      <div class="prc-title">Mon parcours</div>
+      <h1 class="prc-title" tabindex="-1">Mon parcours</h1>
       <div class="prc-subtitle">31 compétences · Permis B</div>
     </div>
     <div class="prc-hd-right">

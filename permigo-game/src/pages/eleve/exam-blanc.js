@@ -663,5 +663,10 @@ function renderStyles() {
   0%, 100% { opacity: 1; }
   50% { opacity: .5; }
 }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{
+        animation-duration:.001ms!important;animation-iteration-count:1!important;
+        transition-duration:.001ms!important;scroll-behavior:auto!important}
+    }
 </style>`;
 }

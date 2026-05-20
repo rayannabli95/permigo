@@ -79,6 +79,9 @@ export async function route(root, me) {
     // Pour les pages qui attendent (root, eleveId) on passe param en 2e arg
     // Les autres pages ignorent les args supplémentaires
     await mod.mount(root, param);
+    const heading = root.querySelector('h1') || root;
+    heading.setAttribute('tabindex', '-1');
+    heading.focus({ preventScroll: false });
   } catch (e) {
     console.error('[router]', e);
     // Stale chunk après deploy : le hash JS a changé, l'index.html cached

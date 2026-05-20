@@ -266,6 +266,11 @@ const STYLE = `<style>
   from { opacity: 0; transform: translateY(14px) scale(.93); }
   to   { opacity: 1; transform: none; }
 }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{
+        animation-duration:.001ms!important;animation-iteration-count:1!important;
+        transition-duration:.001ms!important;scroll-behavior:auto!important}
+    }
 </style>`;
 
 // ─── Mount ────────────────────────────────────────────────────
@@ -278,7 +283,7 @@ export async function mount(root) {
 <div class="bo2 anim-slide-up">
   <div class="bo2-hd">
     <div class="bo2-hd-row">
-      <div class="bo2-hd-title">Boutique</div>
+      <h1 class="bo2-hd-title" tabindex="-1">Boutique</h1>
       <div class="bo2-gems" id="bo2-gems-badge">
         <span class="bo2-gems-ico">💎</span>
         <span class="bo2-gems-val" id="bo2-gems-val">…</span>

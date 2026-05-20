@@ -307,6 +307,11 @@ const STYLE = `<style>
   color: var(--mu); font: 600 13px/1 'Inter', sans-serif;
   cursor: pointer;
 }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{
+        animation-duration:.001ms!important;animation-iteration-count:1!important;
+        transition-duration:.001ms!important;scroll-behavior:auto!important}
+    }
 </style>`;
 
 // ─── Entry point ─────────────────────────────────────────────────
@@ -376,7 +381,7 @@ export async function mount(root, sessionId) {
 
       <div class="sc-hd">
         <button class="sc-back" id="sc-back-btn" aria-label="Retour">${icon('arrow-left', { size: 18, strokeWidth: 2.5 })}</button>
-        <div class="sc-hd-title">Confirmer la séance</div>
+        <h1 class="sc-hd-title" tabindex="-1">Confirmer la séance</h1>
       </div>
 
       <!-- HERO moniteur -->

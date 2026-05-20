@@ -242,6 +242,11 @@ const STYLE = `<style>
   transition: background .12s;
 }
 .tr2-modal-close:active { background: var(--bg2); }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{
+        animation-duration:.001ms!important;animation-iteration-count:1!important;
+        transition-duration:.001ms!important;scroll-behavior:auto!important}
+    }
 </style>`;
 
 // ─── Mount ────────────────────────────────────────────────────
@@ -255,7 +260,7 @@ export async function mount(root) {
   <div class="tr2-hero">
     <div class="tr2-hero-inner">
       <div class="tr2-hero-top">
-        <div class="tr2-hero-title">Mes trophées</div>
+        <h1 class="tr2-hero-title" tabindex="-1">Mes trophées</h1>
         <div class="tr2-hero-count" id="tr2-count">— / ${CATALOG.length}</div>
       </div>
       <div class="tr2-progress-wrap">
@@ -304,10 +309,16 @@ function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
   // Hero
   root.querySelector('#tr2-count').textContent = `${unlockedCount} / ${CATALOG.length}`;
   const pct = Math.round(100 * unlockedCount / CATALOG.length);
-  requestAnimationFrame(() => {
-    const fill = root.querySelector('#tr2-fill');
-    if (fill) fill.style.width = pct + '%';
-  });
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fill = root.querySelector('#tr2-fill');
+  if (reduceMotion) {
+    // Pas de remplissage progressif : on pose directement la valeur réelle
+    if (fill) { fill.style.transition = 'none'; fill.style.width = pct + '%'; }
+  } else {
+    requestAnimationFrame(() => {
+      if (fill) fill.style.width = pct + '%';
+    });
+  }
   root.querySelector('#tr2-hint').textContent = unlockedCount === 0
     ? 'Commence à valider des compétences pour débloquer tes premiers trophées !'
     : `${pct}% du parcours — ${CATALOG.length - unlockedCount} restant${CATALOG.length - unlockedCount > 1 ? 's' : ''}`;

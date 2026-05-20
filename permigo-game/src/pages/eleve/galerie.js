@@ -175,6 +175,11 @@ const STYLE = `<style>
 }
 .gal-empty-hint-emoji { font-size: 28px; margin-bottom: 6px; }
 .gal-empty-hint-txt { font: 500 12.5px/1.5 'Inter', sans-serif; color: #94a3b8; font-style: italic; }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{
+        animation-duration:.001ms!important;animation-iteration-count:1!important;
+        transition-duration:.001ms!important;scroll-behavior:auto!important}
+    }
 </style>`;
 
 export async function mount(root) {
