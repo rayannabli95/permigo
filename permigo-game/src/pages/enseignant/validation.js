@@ -320,18 +320,18 @@ async function doValidate() {
     return;
   }
 
-  // Déclenche le quiz de validation côté élève
-  const { error: errNotif } = await sb.from('notifications').insert({
-    user_id: _eleve.id,
-    type: 'post_validation_quiz',
-    title: 'Nouvelle compétence à valider !',
-    body: `${_selectedComp.n} — Fais le quiz en 30 sec`,
-    data: { competence_id: _selectedComp.c },
+  // Déclenche le quiz de validation côté élève.
+  // Via RPC SECURITY DEFINER : la policy notifications_insert interdit d'insérer
+  // une notif pour autrui, donc le moniteur ne peut pas notifier l'élève en direct.
+  const { error: errNotif } = await sb.rpc('send_quiz_notification', {
+    p_eleve_id: _eleve.id,
+    p_competence_id: _selectedComp.c,
+    p_comp_nom: _selectedComp.n,
   });
   if (errNotif) {
-    // La validation est OK, mais l'élève ne recevra pas le déclencheur quiz
-    console.error('[validation] notification insert failed', errNotif);
-    toast('Validé, mais notification non envoyée', 'warning');
+    // Le déblocage est OK, mais l'élève ne recevra pas le déclencheur quiz
+    console.error('[validation] send_quiz_notification failed', errNotif);
+    toast('Débloqué, mais notification non envoyée', 'warning');
   }
 
   track('competence.validated', {
