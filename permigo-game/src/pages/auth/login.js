@@ -41,7 +41,7 @@ import { getTurnstileToken, isTurnstileEnabled } from '@/utils/turnstile.js';
 import { renderHoneypot, checkHoneypot } from '@/utils/honeypot.js';
 
 const _isNight = (() => { const h = new Date().getHours(); return h >= 20 || h < 7; })();
-const _landingBg = `/skins/landing/monde4${_isNight ? 'nuit' : 'jour'}.png`;
+const _landingBg = `/skins/landing/monde4${_isNight ? 'nuit' : 'jour'}.webp`;
 
 const DEMO_ACCOUNTS = [
   { role: 'Élève',      email: 'eleve@test.fr',           emoji: '🎓' },

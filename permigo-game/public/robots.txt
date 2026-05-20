@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Pas d'espaces privés à exposer (app en hash-routing #/, rien à bloquer côté URL)
+Sitemap: https://permigo.vercel.app/sitemap.xml

@@ -12,6 +12,7 @@ import { mountHeader } from '@/components/header-top.js';
 import { mountBottomNav } from '@/components/nav-bottom.js';
 import { initThemeEarly, syncFromPrefs } from '@/utils/theme.js';
 import { initGameState, initEquippedTheme } from '@/utils/game-state.js';
+import { mountCookieBanner } from '@/components/cookie-banner.js';
 
 // Apply saved/system theme before any rendering (reads localStorage, synchronous)
 initThemeEarly();
@@ -80,6 +81,10 @@ async function boot() {
 }
 
 boot();
+
+// Bandeau cookies (RGPD) — affiché tant qu'aucun choix n'est mémorisé,
+// indépendamment de l'état d'authentification.
+mountCookieBanner();
 
 // Offline / online feedback
 window.addEventListener('offline', () => toast('Pas de connexion internet', 'error', 5000));

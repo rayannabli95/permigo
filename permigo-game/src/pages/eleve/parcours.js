@@ -16,7 +16,7 @@ import { renderChest, openChestModal, ensureChestStyles } from '@/components/che
 import { isChestOpened, unlockChest } from '@/utils/game-state.js';
 
 const isNight = (() => { const h = new Date().getHours(); return h >= 20 || h < 7; })();
-const WORLD_BG = (num) => `/skins/landing/monde${num}${isNight ? 'nuit' : 'jour'}.png`;
+const WORLD_BG = (num) => `/skins/landing/monde${num}${isNight ? 'nuit' : 'jour'}.webp`;
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>

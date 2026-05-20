@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
+import { analyticsConsentGranted } from '@/components/cookie-banner.js';
 
 const DEBUG = import.meta.env.DEV;
 const queue = [];
@@ -15,6 +16,13 @@ let flushTimer = null;
  * @param {object} props - event properties (no PII)
  */
 export function track(name, props = {}) {
+  // RGPD / ePrivacy : pas de mesure d'audience tant que le consentement
+  // analytics n'est pas accordé (privacy by default).
+  if (!analyticsConsentGranted()) {
+    if (DEBUG) console.log('[track] skipped (no consent)', name);
+    return;
+  }
+
   const me = getCurUser();
   const evt = {
     user_id: me?.id || null,
