@@ -480,7 +480,7 @@ function render(data, me) {
 
   const now = new Date();
   const dateStr = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-  const maxMon  = Math.max(1, ...topMons.map(m => m.validations_count ?? m.heures ?? 1));
+  const maxMon  = Math.max(1, ...topMons.map(m => (m.n_validations ?? m.validations_count) || (m.heures_30j ?? m.heures) || 1));
 
   return `${STYLE}
 <div class="ck">
@@ -653,8 +653,8 @@ function renderAlert(alert) {
     <div class="ck-alert" data-alert-id="${esc(alert.id ?? '')}" style="--alert-color:${c.color};--alert-rgb:${c.rgb}">
       <div class="ck-alert-ico">${icon(c.icon, { size: 16 })}</div>
       <div class="ck-alert-body">
-        <div class="ck-alert-title">${esc(alert.title ?? alert.message ?? 'Alerte')}</div>
-        ${alert.sub ?? alert.detail ? `<div class="ck-alert-sub">${esc(alert.sub ?? alert.detail)}</div>` : ''}
+        <div class="ck-alert-title">${esc(alert.label ?? alert.title ?? alert.message ?? 'Alerte')}</div>
+        ${alert.count != null ? `<div class="ck-alert-sub">${alert.count} concerné${alert.count > 1 ? 's' : ''}</div>` : (alert.sub ?? alert.detail ? `<div class="ck-alert-sub">${esc(alert.sub ?? alert.detail)}</div>` : '')}
       </div>
       <div class="ck-alert-arrow">${icon('chevron-right', { size: 14 })}</div>
     </div>`;
@@ -665,9 +665,12 @@ function renderMon(mon, idx, maxVal) {
   const prenom   = mon.prenom ?? mon.first_name ?? 'Moniteur';
   const nom      = mon.nom ?? mon.last_name ?? '';
   const initials = ((prenom[0] ?? '') + (nom[0] ?? '')).toUpperCase() || 'M';
-  const val      = mon.validations_count ?? mon.heures ?? 0;
+  // RPC renvoie n_validations + heures_30j (anciens noms validations_count/heures gardés en fallback)
+  const nVal     = mon.n_validations ?? mon.validations_count ?? 0;
+  const hrs      = mon.heures_30j ?? mon.heures ?? 0;
+  const val      = nVal > 0 ? nVal : hrs;
   const pct      = maxVal > 0 ? Math.round((val / maxVal) * 100) : 0;
-  const valLabel = mon.validations_count != null ? `${val} valid.` : `${val}h`;
+  const valLabel = nVal > 0 ? `${nVal} valid.` : `${hrs}h`;
 
   return `
     <div class="ck-mon-row" data-moniteur-id="${esc(mon.id ?? '')}">
