@@ -23,8 +23,8 @@ const ORDERED_COMPS = REMC.flatMap(c => c.subs.map(s => s.c));
  * @param {Set<string>} validatedIds
  * @returns {string|null}
  */
-function getNextUnlockable(validatedIds) {
-  return ORDERED_COMPS.find(c => !validatedIds.has(c)) || null;
+function getNextUnlockable(validatedIds, aValiderIds = new Set()) {
+  return ORDERED_COMPS.find(c => !validatedIds.has(c) && !aValiderIds.has(c)) || null;
 }
 
 // ─── CSS ────────────────────────────────────────────────────────
@@ -125,6 +125,9 @@ const STYLE = `<style>
   .comp-row.comp-locked .comp-code,
   .comp-row.comp-locked .comp-nom { color: #94a3b8; }
   .comp-row.comp-locked:hover { background: var(--bg); }
+  .comp-row.comp-a-valider { background: rgba(245,158,11,.04); cursor: not-allowed; border-left: 3px solid #f59e0b; }
+  .comp-row.comp-a-valider:hover { background: rgba(245,158,11,.06); }
+  .comp-row.comp-a-valider .comp-code { color: #d97706; background: rgba(245,158,11,.12); }
   .badge-next {
     font: 600 11px/1 'Inter', sans-serif;
     color: #6366f1;
@@ -211,6 +214,7 @@ let _root, _me;
 let _eleves = [];
 let _eleve = null;
 let _validatedIds = new Set();
+let _aValiderIds  = new Set();
 let _selectedComp = null; // { c: string, n: string }
 
 // ─── Entry point ────────────────────────────────────────────────
@@ -224,6 +228,7 @@ export async function mount(root) {
   _eleve = null;
   _selectedComp = null;
   _validatedIds = new Set();
+  _aValiderIds  = new Set();
 
   root.innerHTML = `<div class="v-loading"><div class="skel skel-card"></div><div class="skel skel-card"></div></div>`;
 
@@ -258,15 +263,17 @@ async function selectEleve(eleve) {
   try {
     const { data, error } = await sb
       .from('validations')
-      .select('competence_id')
+      .select('competence_id, statut')
       .eq('eleve_id', eleve.id);
 
     if (error) throw error;
-    _validatedIds = new Set((data || []).map(v => v.competence_id));
+    _validatedIds = new Set((data || []).filter(v => v.statut === 'acquis').map(v => v.competence_id));
+    _aValiderIds  = new Set((data || []).filter(v => v.statut === 'a_valider').map(v => v.competence_id));
   } catch (e) {
     console.error('[selectEleve] fetch validations failed', e);
     toast('Impossible de charger les compétences de l\'élève', 'error');
-    _validatedIds = new Set(); // continue avec set vide pour pas bloquer l'UI
+    _validatedIds = new Set();
+    _aValiderIds  = new Set();
   }
 
   render();
@@ -278,7 +285,7 @@ async function selectEleve(eleve) {
 }
 
 function selectComp(compId, compNom) {
-  if (_validatedIds.has(compId)) return;
+  if (_validatedIds.has(compId) || _aValiderIds.has(compId)) return;
 
   const clickedSame = _selectedComp?.c === compId;
   _selectedComp = clickedSame ? null : { c: compId, n: compNom };
@@ -425,7 +432,7 @@ function renderEleveCard(eleve) {
 function renderCategory(cat) {
   const doneCount = cat.subs.filter(s => _validatedIds.has(s.c)).length;
   const allDone = doneCount === cat.subs.length;
-  const nextUnlock = getNextUnlockable(_validatedIds);
+  const nextUnlock = getNextUnlockable(_validatedIds, _aValiderIds);
   return `
     <div class="cat-section${allDone ? ' cat-done' : ''}">
       <div class="cat-hd">
@@ -435,23 +442,27 @@ function renderCategory(cat) {
       </div>
       <div class="comp-list">
         ${cat.subs.map(sub => {
-          const done = _validatedIds.has(sub.c);
-          const isNext = !done && sub.c === nextUnlock;
-          const sel = _selectedComp?.c === sub.c;
+          const done    = _validatedIds.has(sub.c);
+          const pending = _aValiderIds.has(sub.c);
+          const isNext  = !done && !pending && sub.c === nextUnlock;
+          const sel     = _selectedComp?.c === sub.c;
           const cls = [
-            done   && 'comp-done',
-            isNext && 'comp-next',
-            sel    && 'comp-sel',
+            done    && 'comp-done',
+            pending && 'comp-a-valider',
+            isNext  && 'comp-next',
+            sel     && 'comp-sel',
           ].filter(Boolean).join(' ');
           let badgeHtml = '';
-          if (done)        badgeHtml = Badges.acquis();
-          else if (sel)    badgeHtml = badge('Sélectionné', { variant: 'primary', appearance: 'light', size: 'sm', shape: 'circle', dot: true });
-          else if (isNext) badgeHtml = Badges.toValidate();
-          else             badgeHtml = badge('À valider', { variant: 'secondary', appearance: 'light', size: 'sm', shape: 'circle' });
+          if (done)         badgeHtml = Badges.acquis();
+          else if (pending) badgeHtml = badge('En attente quiz', { variant: 'warning', appearance: 'light', size: 'sm', shape: 'circle' });
+          else if (sel)     badgeHtml = badge('Sélectionné', { variant: 'primary', appearance: 'light', size: 'sm', shape: 'circle', dot: true });
+          else if (isNext)  badgeHtml = Badges.toValidate();
+          else              badgeHtml = badge('À valider', { variant: 'secondary', appearance: 'light', size: 'sm', shape: 'circle' });
+          const isBlocked = done || pending;
           return `
             <div class="comp-row ${cls}"
               data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
-              role="button" tabindex="0" aria-label="${esc(sub.n)}" aria-pressed="${sel}">
+              ${isBlocked ? `aria-disabled="true" aria-label="${esc(sub.n)}"` : `role="button" tabindex="0" aria-label="${esc(sub.n)}" aria-pressed="${sel}"`}>
               <span class="comp-code">${esc(sub.c)}</span>
               <span class="comp-nom">${esc(sub.n)}</span>
               <span class="comp-status">${badgeHtml}</span>

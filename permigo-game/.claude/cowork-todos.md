@@ -5,6 +5,69 @@
 
 ---
 
+## [2026-05-20] 🔄 SPRINT 7 — NOUVEAU FLUX VALIDATION (séance → quiz) + retrait crédits (Cowork → Claude Code)
+
+> **Backend DÉJÀ migré et testé par Cowork** (migration `inverse_validation_flow`). Il reste tout le FRONT à adapter. Lis `/permigo-game/design-system/permigo-laws.md` avant.
+
+### 🎯 OBJECTIF
+Inverser la logique pédagogique : **la séance débloque la compétence, le quiz la valide**. Avant : quiz prérequis → moniteur valide. Maintenant : moniteur log séance → compétence passe en `a_valider` → élève fait le quiz → compétence `acquis`. + Retirer TOUS les crédits heures (on est 100% compétences).
+
+### 🔧 CE QUE LE BACKEND FAIT DÉJÀ (ne pas re-coder, juste câbler)
+- `log_session(p_eleve_id, p_duration_minutes, p_session_date, p_notes, p_competence_ids, p_comment)` → insère les compétences en statut **`a_valider`** (plus jamais `acquis` direct). **Ne bloque plus sur le quiz.** Retourne `{ ok, session, validations:[{competence_id, created, statut:'a_valider'}] }`.
+- **NOUVELLE RPC** `submit_competence_quiz(p_competence_id text, p_score int, p_type text default 'post_validation')` → enregistre le quiz + si `score >= 70` passe la compétence `a_valider`→`acquis` (crédite XP/trophées automatiquement). Retourne `{ ok, passed, validated, reason? }`.
+- Nouveau statut DB : **`a_valider`** (en plus de `acquis`/`en_cours`/`a_retravailler`).
+
+### 📋 CHANGEMENTS FRONT (par zone)
+
+**A. Nouveau statut `a_valider` partout où les statuts sont mappés**
+Fichiers : `pages/eleve/parcours.js`, `pages/enseignant/livret-remc.js`, `pages/enseignant/validation.js`, `pages/enseignant/parcours.js`
+- Ajouter le statut `a_valider` aux maps de libellé/couleur/icône.
+- Libellé élève : **"À valider"** (+ sous-texte "Fais ton quiz") · couleur ambre/violet · icône `clipboard-check` ou `help-circle`
+- Libellé moniteur/gérant : **"En attente quiz élève"** · couleur ambre
+- Sur le parcours élève, un node `a_valider` = débloqué, cliquable → ouvre le quiz de la compétence.
+
+**B. log-session moniteur — `pages/enseignant/log-session.js`**
+- Renommer la section "COMPÉTENCES" en **"COMPÉTENCES TRAVAILLÉES"** (pas "validées").
+- Le bouton final : **"Enregistrer la séance"** (plus "X compétences validées"). Sous-texte optionnel : "X compétence(s) débloquée(s)".
+- Au succès, toast : **"Séance enregistrée · X compétence(s) débloquée(s) 🔓"** (plus "validées").
+- Retirer toute la gestion d'erreur `no_quiz_attempt` (n'existe plus). Garder `no_session` (improbable ici).
+
+**C. Quiz élève — `pages/eleve/quiz.js` + `modules/pedagogie/quiz-engine.js`**
+- À la fin du quiz d'une compétence, appeler **`await sb.rpc('submit_competence_quiz', { p_competence_id: compId, p_score: scorePct })`** (au lieu de l'ancien flux d'insertion validation).
+- Gérer le retour :
+  - `validated: true` → écran succès "Compétence validée ! ✅ +XP" + confetti (réutilise celebrate-screen)
+  - `passed: false` (score < 70) → "Presque ! Il te faut 70% pour valider. Réessaie." + bouton recommencer
+  - `reason: 'no_competence_unlocked'` → "Cette compétence n'est pas encore débloquée par ton moniteur."
+- Le quiz d'une compétence n'est accessible QUE si elle est `a_valider` (débloquée). Sinon message "Pas encore débloquée".
+
+**D. Accueil élève — `pages/eleve/accueil.js`**
+- Si l'élève a des compétences `a_valider`, l'**ACTION DU JOUR** devient prioritaire : **"Valide ta compétence — Fais le quiz de [nom]"** → `#/quiz/{compId}/post_validation`. (avant l'examen blanc)
+
+**E. Retirer les CRÉDITS HEURES partout**
+Fichiers : `pages/enseignant/mes-eleves.js`, `pages/gerant/eleves.js`, `pages/enseignant/livret-remc.js` (+ tout endroit affichant `credit_heures` / "Xh crédit" / "Xh crédits")
+- Supprimer les chips/labels "0h crédit", "20h crédits", etc.
+- Remplacer par la **progression compétences** uniquement (X/31). C'est la seule métrique élève.
+
+### 🔒 CONTRAINTES (Loi 4)
+- Ne PAS toucher au backend (déjà fait, testé).
+- `var(--token)` partout, pas de hex en dur.
+- Le statut `a_valider` doit avoir une identité visuelle distincte (ambre) — ni vert (acquis) ni gris (à faire).
+- Mobile-first, fallback gracieux.
+
+### ⚠️ BUGS À ÉVITER
+- Ne pas oublier `a_valider` dans les `switch/map` de statut → sinon affichage cassé (statut inconnu = vide).
+- Le quiz doit envoyer le **score en pourcentage 0-100** (le backend valide à >= 70).
+- Ne pas ré-insérer de validation côté front : `submit_competence_quiz` gère tout.
+
+### ✅ VALIDATION
+Tester le flux complet : moniteur log séance Rezah (compétence) → Rezah voit "À valider" sur son parcours → clique → quiz → réussit → "acquis" + XP. Échec quiz → reste "À valider".
+
+### 📊 DONNÉES DE TEST EN PLACE (Cowork)
+- **Rezah Bensalem** : C1a `acquis` (quiz réussi), C1b `a_valider` (quiz à refaire) → parfait pour démontrer les 2 états.
+- Comptes : `rezah.bensalem@test.fr` / `betty.ntoni@test.fr` / `eleve@test.fr` (Latifa god-mode) — tous `Autopilot2025!`
+
+---
+
 ## [2026-05-19 NUIT+1] 🩹 SPRINT 6.5 — Fix gradient opaque qui masque les fonds (Cowork → Claude Code)
 
 > **Bug confirmé en live sur Vercel prod via Chrome MCP** : l'image `monde1nuit.png` se charge bien (naturalWidth 853, complete:true, opacity:.38, display:block) mais elle est INVISIBLE sous une plaque opaque. En désactivant `.prc-world::before` via JS le fond apparaît instantanément, parfait.
