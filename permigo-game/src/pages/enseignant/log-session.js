@@ -28,7 +28,6 @@ const RPC_ERRORS = {
   P0001: "Une erreur pédagogique a bloqué l'enregistrement. Vérifie les compétences sélectionnées.",
   // Par message RAISE (plus précis quand le code est P0001 générique)
   no_session:              "Impossible de trouver la session. Rafraîchis et réessaie.",
-  no_quiz_attempt:         null, // géré dynamiquement (inclut le nom de la compétence)
   cap_daily_exceeded:      "Tu as déjà 10h de sessions enregistrées aujourd'hui.",
   cap_weekly_exceeded:     "Tu as déjà 50h de sessions enregistrées cette semaine.",
   session_too_old:         "Impossible d'enregistrer une session de plus de 48h.",
@@ -264,7 +263,7 @@ function _render(root) {
     <!-- ── 4. COMPÉTENCES ────────────────────── -->
     <div class="ls-card">
       <div class="ls-sec-header">
-        <div class="ls-sec-title">${icon('book-open', { size: 13, strokeWidth: 2.4 })} Compétences</div>
+        <div class="ls-sec-title">${icon('book-open', { size: 13, strokeWidth: 2.4 })} Compétences travaillées</div>
         ${compCount > 0 ? `<span class="ls-comp-count">${compCount} sélectionnée${compCount > 1 ? 's' : ''}</span>` : ''}
       </div>
       <div class="ls-comps-list" id="ls-comps-list">
@@ -595,7 +594,7 @@ function _updateSubmit(root) {
   const lbl = root.querySelector('#ls-submit-lbl');
   if (!lbl) return;
   if (_comps.size > 0) {
-    lbl.textContent = `Enregistrer · ${_comps.size} compétence${_comps.size > 1 ? 's' : ''} validée${_comps.size > 1 ? 's' : ''}`;
+    lbl.textContent = `Enregistrer · ${_comps.size} compétence${_comps.size > 1 ? 's' : ''} débloquée${_comps.size > 1 ? 's' : ''}`;
   } else {
     lbl.textContent = 'Enregistrer la session';
   }
@@ -651,14 +650,7 @@ async function _handleSubmit(root) {
 
       let friendlyMsg;
 
-      if (rawMsg.startsWith('no_quiz_attempt')) {
-        const compName = detail || rawMsg.replace('no_quiz_attempt', '').replace(/^[_\s]+/, '').trim();
-        friendlyMsg = compName
-          ? `L'élève n'a pas encore tenté le quiz de "${esc(compName)}". Validation impossible pour cette compétence.`
-          : "L'élève n'a pas encore tenté le quiz de cette compétence. Validation impossible.";
-      } else {
-        friendlyMsg = RPC_ERRORS[rawMsg] ?? RPC_ERRORS[rawCode] ?? rawMsg ?? "Erreur lors de l'enregistrement";
-      }
+      friendlyMsg = RPC_ERRORS[rawMsg] ?? RPC_ERRORS[rawCode] ?? rawMsg ?? "Erreur lors de l'enregistrement";
 
       // Affiche le message Postgres réel si aucun mapping connu
       toast(friendlyMsg, 'error');
@@ -680,7 +672,7 @@ async function _handleSubmit(root) {
     _clearDraft();
 
     if (created > 0) {
-      toast(`+10 XP · ${created} compétence${created > 1 ? 's' : ''} validée${created > 1 ? 's' : ''} 🎉`, 'success');
+      toast(`Séance enregistrée · ${created} compétence${created > 1 ? 's' : ''} débloquée${created > 1 ? 's' : ''} 🔓`, 'success');
     } else {
       const eleveObj = _eleves.find(e => e.id === _eleve);
       toast(`Séance enregistrée · ${fmtDur(_duration)} avec ${esc(eleveObj?.prenom || "l'élève")} 📝`, 'success');

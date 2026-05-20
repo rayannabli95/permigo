@@ -638,6 +638,40 @@ const STYLE = `<style>
 .prc-node.todo .nd-lbl .nd-name { color: #64748b; }
 .prc-node.todo .nd-lbl .nd-stt  { color: #94a3b8; }
 
+.prc-node.a_valider .nd-circle {
+  border-color: #f59e0b;
+  background: rgba(245,158,11,.12);
+  box-shadow: 0 0 0 4px rgba(245,158,11,.18), 0 8px 22px rgba(245,158,11,.2);
+  animation: nd-pop-next 2s ease-in-out infinite;
+}
+.prc-node.a_valider .nd-lbl {
+  border-color: rgba(245,158,11,.35);
+  box-shadow: 0 6px 18px rgba(245,158,11,.15), 0 0 0 1px rgba(245,158,11,.2);
+}
+.prc-node.a_valider .nd-lbl::before {
+  content: 'FAIS TON QUIZ';
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f59e0b;
+  color: #fff;
+  font: 800 8px/1 'Inter', sans-serif;
+  padding: 3px 9px;
+  border-radius: 99px;
+  letter-spacing: .14em;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(245,158,11,.35);
+  animation: tu-bounce 1.6s ease-in-out infinite;
+}
+.prc-node.a_valider .nd-lbl .nd-stt { color: #b45309; font-weight: 700; }
+.nd-wheel-pending {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 2px 8px rgba(245,158,11,.5);
+}
+
 .prc-node.locked .nd-lbl {
   background: color-mix(in srgb, var(--su) 95%, transparent);
   border-color: rgba(203,213,225,.4);
@@ -1123,8 +1157,10 @@ export async function mount(root) {
     .select('competence_id, validated_at, statut, score_cognitif, score_consolidation, teacher:profiles!validated_by(prenom, nom)')
     .eq('eleve_id', me.id);
 
-  // validatedMap : { compId → validation entry }
+  // validatedMap : { compId → entry }  — acquis seulement
+  // pendingMap   : { compId → true }   — a_valider (quiz à faire)
   const validatedMap = {};
+  const pendingMap   = {};
   for (const v of (valData || [])) {
     if (v.statut === 'acquis') {
       validatedMap[v.competence_id] = {
@@ -1133,14 +1169,16 @@ export async function mount(root) {
         score_cognitif:      v.score_cognitif ?? null,
         score_consolidation: v.score_consolidation ?? null,
       };
+    } else if (v.statut === 'a_valider') {
+      pendingMap[v.competence_id] = true;
     }
   }
 
   const worldStates = computeWorldStates(validatedMap);
 
   ensureChestStyles();
-  root.innerHTML = renderPage(worldStates, validatedMap);
-  wire(root, worldStates, validatedMap, me);
+  root.innerHTML = renderPage(worldStates, validatedMap, pendingMap);
+  wire(root, worldStates, validatedMap, pendingMap, me);
 
   // Persister en DB les coffres des mondes complétés (idempotent)
   const CHEST_REWARDS = [
@@ -1331,15 +1369,16 @@ function resolveCompName(compId) {
   return compId;
 }
 
-function compStatus(compId, worldStatus, nextChallenge, validatedMap) {
+function compStatus(compId, worldStatus, nextChallenge, validatedMap, pendingMap) {
   if (worldStatus === 'locked') return 'locked';
   if (validatedMap[compId])     return 'done';
+  if (pendingMap?.[compId])     return 'a_valider';
   if (compId === nextChallenge) return 'next';
   return 'todo';
 }
 
 // ─── Render principal ─────────────────────────────────────────────
-function renderPage(worldStates, validatedMap) {
+function renderPage(worldStates, validatedMap, pendingMap) {
   const totalDone  = worldStates.reduce((s, w) => s + w.done, 0);
   const totalComps = worldStates.reduce((s, w) => s + w.total, 0);
   const globalPct  = Math.round((totalDone / totalComps) * 100);
@@ -1391,7 +1430,7 @@ function renderPage(worldStates, validatedMap) {
       <span class="prc-map-badge-dot"></span> CARTE D'APPRENTISSAGE
     </div>
     <div class="prc-map" id="prc-map-scroll">
-      ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, i < worldStates.length - 1)).join('')}
+      ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1)).join('')}
       ${renderFinal(totalDone, totalComps)}
       <div style="height: 24px"></div>
     </div>
@@ -1410,7 +1449,7 @@ function renderPage(worldStates, validatedMap) {
 }
 
 // ─── Render d'un monde avec route SVG + nodes ─────────────────────
-function renderWorldSection(ws, validatedMap, hasNext) {
+function renderWorldSection(ws, validatedMap, pendingMap, hasNext) {
   const { idx, cat, subs, done, total, status, nextChallenge } = ws;
   const meta = WORLDS_META[idx];
   const world = WORLDS[idx];
@@ -1437,23 +1476,25 @@ function renderWorldSection(ws, validatedMap, hasNext) {
   pathD += ` L ${points[points.length - 1].x} ${H}`;
 
   const nodesHTML = points.map((p, i) => {
-    const st = compStatus(p.c, status, nextChallenge, validatedMap);
+    const st = compStatus(p.c, status, nextChallenge, validatedMap, pendingMap);
     const xp = (p.x / W * 100).toFixed(2);
     const yp = (p.y / H * 100).toFixed(2);
     const delay = (i * 0.07 + 0.12).toFixed(2);
     const sttLabel = {
-      done:   'Acquis',
-      next:   'Prochain défi',
-      todo:   'À débloquer',
-      locked: 'Verrouillé',
+      done:      'Acquis',
+      a_valider: 'À valider',
+      next:      'Prochain défi',
+      todo:      'À débloquer',
+      locked:    'Verrouillé',
     }[st];
 
     // Icône SVG propre selon statut
     const icon = {
-      done: `<div class="nd-wheel-done" aria-hidden="true"></div>`,
-      next: `<img class="nd-wheel" src="/worlds/volant.png" alt="" width="32" height="32" aria-hidden="true"/>`,
-      todo:   `<div class="nd-wheel-todo" aria-hidden="true"></div>`,
-      locked: `<div class="nd-wheel-todo nd-wheel-locked" aria-hidden="true"></div>`,
+      done:      `<div class="nd-wheel-done" aria-hidden="true"></div>`,
+      a_valider: `<div class="nd-wheel-pending" aria-hidden="true"></div>`,
+      next:      `<img class="nd-wheel" src="/worlds/volant.png" alt="" width="32" height="32" aria-hidden="true"/>`,
+      todo:      `<div class="nd-wheel-todo" aria-hidden="true"></div>`,
+      locked:    `<div class="nd-wheel-todo nd-wheel-locked" aria-hidden="true"></div>`,
     }[st];
 
     const isLocked = st === 'locked';
@@ -1577,7 +1618,7 @@ function renderFinal(done, total) {
 }
 
 // ─── Wire & bottom sheet ──────────────────────────────────────────
-function wire(root, worldStates, validatedMap, me) {
+function wire(root, worldStates, validatedMap, pendingMap, me) {
   // Back via hashchange
   root.querySelector('#prc-back')?.addEventListener('click', () => {
     location.hash = '#/';
@@ -1611,7 +1652,13 @@ function wire(root, worldStates, validatedMap, me) {
     const open = () => {
       const compId   = n.dataset.comp;
       const worldIdx = parseInt(n.dataset.worldIdx, 10);
-      openFiche(root, compId, worldStates[worldIdx], validatedMap);
+      // a_valider nodes → direct vers le quiz
+      if (pendingMap?.[compId]) {
+        track('parcours.node_tap', { compId, worldIdx, status: 'a_valider' });
+        location.hash = `#/quiz/${compId}/post_validation`;
+        return;
+      }
+      openFiche(root, compId, worldStates[worldIdx], validatedMap, pendingMap);
       track('parcours.node_tap', { compId, worldIdx });
     };
     n.addEventListener('click', open);
@@ -1632,27 +1679,28 @@ function wire(root, worldStates, validatedMap, me) {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFn(); });
 }
 
-function openFiche(root, compId, ws, validatedMap) {
+function openFiche(root, compId, ws, validatedMap, pendingMap) {
   const { idx, cat, status, nextChallenge } = ws;
   const meta = WORLDS_META[idx];
   const world = WORLDS[idx];
   const sub = cat.subs.find(s => s.c === compId);
   if (!sub) return;
 
-  const st = compStatus(compId, status, nextChallenge, validatedMap);
+  const st = compStatus(compId, status, nextChallenge, validatedMap, pendingMap);
   const val = validatedMap[compId];
-  const stLabel = { done: 'Acquise', next: "En cours", todo: 'À travailler', locked: 'Verrouillée' }[st];
+  const stLabel = { done: 'Acquise', a_valider: 'À valider', next: 'En cours', todo: 'À travailler', locked: 'Verrouillée' }[st];
   const compNum = cat.subs.findIndex(s => s.c === compId) + 1;
   const total = cat.subs.length;
   const detail = getCompDetail(compId);
 
   // Icône SVG selon statut (au lieu d'emoji)
   const stIcon = {
-    done:   icon('check', { size: 36 }),
-    next:   icon('zap', { size: 32 }),
-    todo:   icon('clock', { size: 30 }),
-    locked: icon('lock', { size: 28 }),
-  }[st];
+    done:      icon('check', { size: 36 }),
+    a_valider: icon('clipboard-check', { size: 32 }),
+    next:      icon('zap', { size: 32 }),
+    todo:      icon('clock', { size: 30 }),
+    locked:    icon('lock', { size: 28 }),
+  }[st] ?? icon('clock', { size: 30 });
 
   // Progression visuelle dans le monde (n / total)
   const pctInWorld = Math.round((compNum / total) * 100);
@@ -1685,6 +1733,19 @@ function openFiche(root, compId, ws, validatedMap) {
             <div class="fiche-status-sub">Bravo, tu maîtrises cette compétence.</div>
           </div>
         </div>`;
+    }
+    if (st === 'a_valider') {
+      return `
+        <div class="fiche-status next" style="--wc:#f59e0b">
+          <div class="fiche-status-ico">${icon('clipboard-check', { size: 18 })}</div>
+          <div class="fiche-status-body">
+            <div class="fiche-status-title" style="color:#b45309">Compétence débloquée !</div>
+            <div class="fiche-status-sub">Ton moniteur a validé la séance. Fais le quiz pour confirmer que tu maîtrises.</div>
+          </div>
+        </div>
+        <a href="#/quiz/${esc(compId)}/post_validation" style="display:block;margin:12px 0;padding:14px;background:#f59e0b;color:#fff;border-radius:14px;font:700 15px/1 'Inter',sans-serif;text-align:center;text-decoration:none;">
+          Faire le quiz →
+        </a>`;
     }
     if (st === 'next') {
       return `

@@ -640,7 +640,7 @@ export async function mount(root) {
     const [profileRes, streakRes, validRes, notifRes, attemptsRes] = await Promise.allSettled([
       sb.from('profiles').select('prenom, xp, last_active_at, first_value_action_at, gemmes').eq('id', me.id).maybeSingle(),
       sb.from('streaks').select('current_streak, last_activity_date, longest_streak').eq('user_id', me.id).maybeSingle(),
-      sb.from('validations').select('competence_id').eq('eleve_id', me.id).eq('statut', 'acquis'),
+      sb.from('validations').select('competence_id, statut').eq('eleve_id', me.id).in('statut', ['acquis', 'a_valider']),
       sb.from('notifications').select('id, data, type').eq('user_id', me.id).eq('read', false)
         .in('type', ['consolidation_quiz', 'post_validation_quiz']).order('created_at', { ascending: false }).limit(1),
       sb.from('quiz_attempts').select('completed_at').eq('user_id', me.id)
@@ -655,7 +655,9 @@ export async function mount(root) {
 
     const profile        = profileRes.value?.data  || { prenom: me.prenom || 'Toi', xp: 0 };
     const streak         = streakRes.value?.data   || { current_streak: 0, last_activity_date: null, longest_streak: 0 };
-    const validated      = new Set((validRes.value?.data || []).map(v => v.competence_id));
+    const allValRows     = validRes.value?.data || [];
+    const validated      = new Set(allValRows.filter(v => v.statut === 'acquis').map(v => v.competence_id));
+    const aValider       = allValRows.filter(v => v.statut === 'a_valider').map(v => v.competence_id);
     const pendingNotif   = notifRes.value?.data?.[0] || null;
     const activityDays   = buildActivityData(attemptsRes.value?.data || [], streak);
     const pendingSessions = pendingSessionsRes.value?.data || [];
@@ -672,8 +674,8 @@ export async function mount(root) {
     track('streak.viewed', { days: streak.current_streak, status: streakSt });
 
     root.innerHTML = render({ me, profile, lvl, streak, streakSt, worlds, trophees,
-                              activityDays, gemmes, pendingSessions, todayQuests, pendingNotif });
-    wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, todayQuests, pendingNotif });
+                              activityDays, gemmes, pendingSessions, todayQuests, pendingNotif, aValider });
+    wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, todayQuests, pendingNotif, aValider });
 
     const accDiv = root.querySelector('.acc2');
 
@@ -749,7 +751,7 @@ function streakStatus(streak) {
 
 // ─── Render ───────────────────────────────────────────────────────
 function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
-                  activityDays, gemmes, pendingSessions, todayQuests, pendingNotif }) {
+                  activityDays, gemmes, pendingSessions, todayQuests, pendingNotif, aValider }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom   = profile.prenom || me.prenom || 'Toi';
   const initials = prenom.slice(0, 2).toUpperCase();
@@ -763,7 +765,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
 
   // ── BLOC 3 content ──
   const quest = todayQuests?.[0] ?? null;
-  const bloc3 = renderActionDuJour(quest, pendingNotif, totalValidated);
+  const bloc3 = renderActionDuJour(quest, pendingNotif, totalValidated, aValider);
 
   return `${STYLE}
 <div class="acc2">
@@ -972,11 +974,18 @@ function renderNextReward(totalValidated, worlds, trophees) {
     </div>`;
 }
 
-function renderActionDuJour(quest, pendingNotif, totalValidated) {
+function renderActionDuJour(quest, pendingNotif, totalValidated, aValider) {
   let label = 'Action du jour';
   let title, sub, btnText, href, urgent = false;
 
-  if (quest) {
+  if (aValider?.length > 0) {
+    const compId = aValider[0];
+    title   = 'Valide ta compétence';
+    sub     = `Fais le quiz de ${compId.toUpperCase()} pour confirmer ta maîtrise`;
+    btnText = 'Faire le quiz →';
+    href    = `#/quiz/${compId}/post_validation`;
+    urgent  = true;
+  } else if (quest) {
     title   = quest.label ?? 'Quiz disponible';
     sub     = quest.sub ?? '';
     btnText = 'Commencer →';
@@ -1018,7 +1027,7 @@ function renderActionDuJour(quest, pendingNotif, totalValidated) {
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
-function wire(root, { streak, streakSt, gemmes, activityDays }) {
+function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, todayQuests, pendingNotif, aValider }) {
   // XP bar animation
   const xpFill = root.querySelector('.acc2-xp-fill[data-target]');
   if (xpFill) setTimeout(() => { xpFill.style.width = xpFill.dataset.target + '%'; }, 120);

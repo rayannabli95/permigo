@@ -220,57 +220,62 @@ export async function mount(root, params = {}) {
 // ─── Fin de quiz ─────────────────────────────────────────────────
 async function handleComplete(root, me, { competenceId, type, score, total, duration }) {
   const scorePct = Math.round((score / total) * 100);
-  const success = score >= Math.ceil(total * 0.67); // ≥ 2/3
 
-  // Persister quiz_attempts
-  const { error: errAttempt } = await sb.from('quiz_attempts').insert({
-    user_id: me.id,
-    competence_id: competenceId,
-    type,
-    score: scorePct,
-    duration_seconds: duration,
+  // Coffre quiz parfait (100%) — idempotent
+  if (scorePct === 100) {
+    unlockChest('perfect_quiz', { xp: 100, gemmes: 25, title: 'Précision' }).catch(() => {});
+  }
+
+  // Appel RPC central — gère quiz_attempts + transition statut + XP
+  const { data, error } = await sb.rpc('submit_competence_quiz', {
+    p_competence_id: competenceId,
+    p_score: scorePct,
+    p_type: type,
   });
-  if (errAttempt) console.warn('[quiz] quiz_attempts insert failed', errAttempt);
 
-  // Recalculer score_cognitif ou score_consolidation dans validations
-  const scoreField = type === 'post_validation' ? 'score_cognitif' : 'score_consolidation';
-  const extraFields = type === 'consolidation'
-    ? { consolidation_done_at: new Date().toISOString() }
-    : {};
+  if (error) {
+    console.warn('[quiz] submit_competence_quiz error', error);
+    toast('Erreur lors de la sauvegarde — réessaie', 'error');
+    // Fallback : afficher le résultat quand même
+    renderResult(root, { score, total, scorePct, validated: false, passed: scorePct >= 70, reason: null, type });
+    return;
+  }
 
-  const { error: errVal } = await sb
-    .from('validations')
-    .update({ [scoreField]: scorePct, ...extraFields })
-    .eq('eleve_id', me.id)
-    .eq('competence_id', competenceId);
-  if (errVal) console.warn('[quiz] validations update failed', errVal);
+  const result = data?.[0] ?? data ?? {};
+  const { passed, validated, reason } = result;
 
   track('quiz.result_saved', {
     competence_id: competenceId,
     type,
     score_pct: scorePct,
-    success,
+    passed: !!passed,
+    validated: !!validated,
     duration_seconds: duration,
   });
 
-  // Coffre quiz parfait (100%) — idempotent, unique par utilisateur
-  if (scorePct === 100) {
-    unlockChest('perfect_quiz', { xp: 100, gemmes: 25, title: 'Précision' }).catch(() => {});
-  }
-
-  if (success) {
-    toast('🔥 Compétence consolidée !', 'success');
+  if (reason === 'no_competence_unlocked') {
+    toast('Cette compétence n\'est pas encore débloquée par ton moniteur.', 'info');
+  } else if (validated) {
+    toast('Compétence validée ! ✅', 'success');
+    navigator.vibrate?.([30, 50, 30]);
+  } else if (!passed) {
+    toast('Presque ! Il te faut 70% pour valider. Réessaie.', 'info');
   } else {
-    toast('💡 On va re-travailler ça avec ton moniteur', 'info');
+    toast('Quiz enregistré.', 'success');
   }
 
-  renderResult(root, { score, total, scorePct, success, type });
+  renderResult(root, { score, total, scorePct, validated: !!validated, passed: !!passed, reason, type });
 }
 
-function renderResult(root, { score, total, scorePct, success, type }) {
-  const msg = success
-    ? 'Bien joué ! La mémoire fait son travail.'
-    : 'Pas de panique — revoir avec ton moniteur avant la prochaine leçon.';
+function renderResult(root, { score, total, scorePct, validated, passed, reason, type }) {
+  const success = validated || passed;
+  const msg = validated
+    ? 'Compétence validée ! Continue comme ça 🎯'
+    : passed
+      ? 'Bien joué ! Quiz réussi.'
+      : reason === 'no_competence_unlocked'
+        ? 'Compétence pas encore débloquée par ton moniteur.'
+        : 'Continue à pratiquer — revoir avec ton moniteur avant la prochaine leçon.';
 
   root.innerHTML = `
     ${STYLE}

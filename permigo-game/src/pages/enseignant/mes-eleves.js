@@ -365,7 +365,7 @@ async function loadData() {
   //    Côté frontend on marquera ensuite les "attitrés" (enseignant_id = me.id)
   const { data: elevesRaw, error: e1 } = await sb
     .from('profiles')
-    .select('id, prenom, nom, credit_heures, enseignant_id, last_active_at, avatar_url')
+    .select('id, prenom, nom, enseignant_id, last_active_at, avatar_url')
     .eq('role', 'eleve')
     .order('prenom');
 
@@ -397,7 +397,7 @@ async function loadData() {
   _eleves = rawList
     .map((e, i) => {
       const acquis = acquisByEleve[e.id] || 0;
-      const actif = (e.credit_heures != null && e.credit_heures > 0) || touchedEleves.has(e.id);
+      const actif = touchedEleves.has(e.id) || !!e.last_active_at;
       const lastActive = e.last_active_at ? new Date(e.last_active_at).getTime() : null;
       const aRelancer = actif && (!lastActive || (now - lastActive) >= INACTIF_SEUIL_MS);
       const joursInactif = lastActive ? Math.floor((now - lastActive) / 86400000) : null;

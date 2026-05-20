@@ -263,7 +263,7 @@ export async function mount(root) {
     // 1. Tous les eleves
     const { data: eleves, error: eErr } = await sb
       .from('profiles')
-      .select('id, prenom, nom, credit_heures, created_at')
+      .select('id, prenom, nom, created_at')
       .eq('role', 'eleve')
       .order('prenom', { ascending: true });
 
@@ -392,8 +392,6 @@ function filterEleves(eleves, tab, query) {
 }
 
 function isActif(e) {
-  // Actif = credit_heures > 0 ou validation dans les 30 jours
-  if ((e.credit_heures || 0) > 0) return true;
   if (e.lastValidatedAt) {
     const diff = Date.now() - new Date(e.lastValidatedAt).getTime();
     return diff <= 30 * 86_400_000;
@@ -414,7 +412,6 @@ function renderCards(eleves) {
     const initials = initials2(e.prenom, e.nom);
     const gradient = AVATARS[i % AVATARS.length];
     const fullName = [e.prenom, e.nom].filter(Boolean).join(' ') || '—';
-    const heures = e.credit_heures ?? 0;
     const pct = REMC_TOTAL > 0 ? Math.round((e.acquisCount / REMC_TOTAL) * 100) : 0;
     const lastLabel = e.lastValidatedAt
       ? `Dernière validation ${relativeTime(e.lastValidatedAt)}`
@@ -425,9 +422,6 @@ function renderCards(eleves) {
       <div class="el-av" style="background:${gradient}">${esc(initials)}</div>
       <div class="el-info">
         <div class="el-name">${esc(fullName)}</div>
-        <div class="el-hours ${heures === 0 ? 'zero' : ''}">
-          ${heures}h crédit${heures > 1 ? 's' : ''}
-        </div>
         <div class="el-remc">
           <div class="el-remc-row">
             <span class="el-remc-lbl">Parcours REMC</span>
@@ -491,7 +485,7 @@ async function openQuickView(eleveId, anchorCard) {
 
   try {
     const [profileRes, validRes] = await Promise.all([
-      sb.from('profiles').select('prenom, nom, email, credit_heures, last_active_at').eq('id', eleveId).maybeSingle(),
+      sb.from('profiles').select('prenom, nom, email, last_active_at').eq('id', eleveId).maybeSingle(),
       sb.from('validations').select('competence_id').eq('eleve_id', eleveId).eq('statut', 'acquis'),
     ]);
     const p = profileRes.data;
@@ -505,7 +499,6 @@ async function openQuickView(eleveId, anchorCard) {
       <div class="elqv-row"><span class="l">Nom</span><span class="v">${esc(p.nom || p.prenom || '—')}</span></div>
       <div class="elqv-row"><span class="l">Email</span><span class="v" style="font-size:12px">${esc(p.email || '—')}</span></div>
       <div class="elqv-row"><span class="l">Compétences</span><span class="v">${v.length}/${REMC_TOTAL}</span></div>
-      <div class="elqv-row"><span class="l">Crédit heures</span><span class="v">${p.credit_heures ?? 0}h</span></div>
       <div class="elqv-row"><span class="l">Dernière activité</span><span class="v">${p.last_active_at ? relativeTime(p.last_active_at) : 'jamais'}</span></div>
     `;
   } catch (e) {
