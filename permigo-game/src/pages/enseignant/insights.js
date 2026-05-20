@@ -452,7 +452,7 @@ async function loadData(me) {
 
     // Mes élèves attitrés
     sb.from('profiles')
-      .select('id, prenom, nom, last_active_at, credit_heures')
+      .select('id, prenom, nom, last_active_at')
       .eq('enseignant_id', me.id)
       .eq('role', 'eleve'),
 
@@ -557,7 +557,7 @@ async function loadData(me) {
   const topStagnent = elevesAvecPrenom
     .filter(e => {
       const lastVal = lastValMap[e.id];
-      const hasActivity = lastVal != null || (e.credit_heures ?? 0) > 0;
+      const hasActivity = lastVal != null || e.last_active_at != null;
       const inactive14j = !lastVal || lastVal < ago14;
       return hasActivity && inactive14j && (compsCeMoisByEleve[e.id] || 0) === 0;
     })
