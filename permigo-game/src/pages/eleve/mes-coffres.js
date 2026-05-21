@@ -174,7 +174,7 @@ const STYLE = `<style>
   color: #fff;
   cursor: pointer;
   transition: transform .12s, opacity .12s;
-  min-height: 36px;
+  min-height: 44px;
   white-space: nowrap;
 }
 .mc-open-btn:active { transform: scale(.96); opacity: .88; }

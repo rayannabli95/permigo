@@ -96,8 +96,8 @@ const STYLE = `<style>
   flex: 1;
 }
 .acc2-hero-notif-btn {
-  width: 36px; height: 36px;
-  border-radius: 10px;
+  width: 44px; height: 44px;
+  border-radius: 12px;
   background: rgba(255,255,255,.12);
   border: none;
   cursor: pointer;
@@ -1057,7 +1057,11 @@ function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, t
     btn.disabled = true; btn.textContent = '⏳ Gel en cours…';
     try {
       const { data, error } = await sb.rpc('use_streak_freeze');
-      if (error || data?.error) { toast('Impossible de geler la série', 'error'); btn.disabled = false; btn.innerHTML = '🧊 Geler ma série · 50 💎'; return; }
+      if (error || data?.error) {
+        toast('Pas assez de gemmes pour geler ta série. Il t\'en faut 50 💎', 'error');
+        setTimeout(() => { btn.disabled = false; btn.innerHTML = '🧊 Geler ma série · 50 💎'; }, 1800);
+        return;
+      }
       track('streak.freeze_used', {});
       toast('Série gelée pour 24h 🧊', 'success');
       closeBS();
@@ -1126,7 +1130,9 @@ async function _loadAndInjectLeaderboard(root) {
     if (!slot) return;
     const rank = data.my_rank, total = data.total_eleves, pct = data.percentile;
     const isTop = pct !== null && pct >= 90;
-    const rankText = rank !== null && total !== null ? `Tu es #${rank} sur ${total} élève${total > 1 ? 's' : ''}` : 'Classement de l\'école';
+    const rankText = (rank !== null && total !== null && total > 1)
+      ? `Tu es #${rank} sur ${total} élèves`
+      : 'Tu ouvres le classement de ton école. Invite tes potes 👀';
     const pctText  = pct !== null ? ` · Top ${100 - pct}%` : '';
     slot.innerHTML = `
       <div class="acc-lb" id="acc-lb-card" role="button" tabindex="0" aria-label="Classement">

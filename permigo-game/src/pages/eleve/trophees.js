@@ -418,7 +418,7 @@ function showModal(def, unlockData, totalUnlocked) {
         <div class="tr2-rarity-chip">${esc(rm.label)}</div>
       </div>
       <div class="tr2-modal-body">
-        <div class="tr2-modal-title">${esc(def.title)}</div>
+        <h2 class="tr2-modal-title">${esc(def.title)}</h2>
         <div class="tr2-modal-desc">${esc(def.body)}</div>
         <div class="tr2-modal-meta">
           <div class="tr2-modal-chip xp">+${def.xp} XP</div>
@@ -430,7 +430,7 @@ function showModal(def, unlockData, totalUnlocked) {
           : 'Continue pour débloquer plus de trophées !'}</div>
       </div>
       <div class="tr2-modal-actions">
-        <button class="tr2-modal-share" id="tr2-share-btn">Partager 🔗</button>
+        <button class="tr2-modal-share" id="tr2-share-btn" aria-label="Partager ce trophée"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg><span>Partager</span></button>
         <button class="tr2-modal-close" id="tr2-close-btn">Fermer</button>
       </div>
     </div>
@@ -444,7 +444,7 @@ function showModal(def, unlockData, totalUnlocked) {
         <div class="tr2-modal-locked-lbl">🔒 Trophée verrouillé</div>
       </div>
       <div class="tr2-modal-body">
-        <div class="tr2-modal-title">${esc(def.title)}</div>
+        <h2 class="tr2-modal-title">${esc(def.title)}</h2>
         <div class="tr2-modal-desc">${esc(def.body)}</div>
         <div class="tr2-modal-meta">
           <div class="tr2-modal-chip xp">+${def.xp} XP à débloquer</div>
