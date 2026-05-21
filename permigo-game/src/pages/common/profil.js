@@ -15,7 +15,7 @@ import { mountMoniteurRanking } from '@/components/moniteur-ranking.js';
 // ─── CSS (cohérent avec design system permigo-game) ─────────────
 const STYLE = `<style>
 .prf {
-  padding: 20px 16px 100px;
+  padding: 20px 16px calc(60px + env(safe-area-inset-bottom, 0px) + 24px); /* #15 — clearance bottom nav */
   max-width: 480px;
   margin: 0 auto;
   color: var(--ink);
@@ -53,6 +53,20 @@ const STYLE = `<style>
   border-radius: 99px;
   padding: 6px 12px;
 }
+
+/* #19 — tuiles d'accès galerie + wrapped (élève only) */
+.prf-nav-tiles { display: flex; gap: 10px; margin: 16px 0; }
+.prf-nav-tile {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 12px;
+  background: var(--su); border: 1px solid var(--bo); border-radius: 16px;
+  color: var(--tx, #0b0d1a); text-decoration: none;
+  font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+  box-shadow: 0 1px 3px rgba(10,13,26,.06);
+  transition: transform .12s, box-shadow .2s;
+}
+.prf-nav-tile:active { transform: scale(.98); }
+.prf-nav-ico { font-size: 18px; line-height: 1; }
 
 /* Info section */
 .prf-section {
@@ -488,6 +502,16 @@ export async function mount(root) {
 
   ${permisData ? `<div id="prf-permis-card" style="margin-top:16px"></div>` : ''}
 
+  ${me.role === 'eleve' ? `
+  <div class="prf-nav-tiles">
+    <a class="prf-nav-tile" href="#/galerie" aria-label="Ouvrir ta galerie">
+      <span class="prf-nav-ico" aria-hidden="true">🖼️</span><span>Ta galerie</span>
+    </a>
+    <a class="prf-nav-tile" href="#/wrapped" aria-label="Ouvrir ton Wrapped">
+      <span class="prf-nav-ico" aria-hidden="true">🎁</span><span>Ton Wrapped</span>
+    </a>
+  </div>` : ''}
+
   ${referralStats !== null ? `<div id="prf-ref-section">${_renderReferral(referralStats)}</div>` : ''}
 
   ${anneeStats ? `<div id="prf-ranking-host"></div>` : ''}
@@ -503,7 +527,7 @@ export async function mount(root) {
   </div>
 
   <div class="prf-annee">
-    <div class="prf-annee-ttl">Ma chasse en ${new Date().getFullYear()}</div>
+    <h2 class="prf-annee-ttl">Ma chasse en ${new Date().getFullYear()}</h2>
     <div class="prf-annee-grid">
       <div class="prf-kpi">
         <span class="prf-kpi-n">${anneeStats.totalValidations}</span>
@@ -612,7 +636,7 @@ function _renderReferral(stats) {
 
   return `
 <div class="prf-ref">
-  <div class="prf-ref-ttl">Parrainage · +200 XP par filleul</div>
+  <h2 class="prf-ref-ttl">Parrainage · +200 XP par filleul</h2>
 
   ${code ? `
   <div class="prf-ref-code-wrap">

@@ -17,11 +17,13 @@ export async function mount(root) {
   track('page_view', { page: 'wrapped', user_role: me.role, year: YEAR });
 
   root.innerHTML = renderStyles() + `
-<h1 tabindex="-1">Mon Wrapped</h1>
-<div class="wrp" id="wrp-root">
-  <div class="wrp-loading">
-    <div class="wrp-loading-ico">✨</div>
-    <div class="wrp-loading-txt">Génération de ton Wrapped…</div>
+<div class="wrp">
+  <h1 class="wrp-title" tabindex="-1">Ton Wrapped</h1>
+  <div id="wrp-root">
+    <div class="wrp-loading">
+      <div class="wrp-loading-ico">✨</div>
+      <div class="wrp-loading-txt">Génération de ton Wrapped…</div>
+    </div>
   </div>
 </div>`;
 

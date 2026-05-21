@@ -580,6 +580,11 @@ export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
+  // #11 — plein écran d'épreuve : masque la bottom nav (anti-triche, anti-distraction)
+  document.getElementById('bottom-nav')?.setAttribute('hidden', '');
+  const _restoreNav = () => { document.getElementById('bottom-nav')?.removeAttribute('hidden'); window.removeEventListener('hashchange', _restoreNav); };
+  window.addEventListener('hashchange', _restoreNav);
+
   track('page.view', { page: 'eleve_examen' });
 
   root.innerHTML = `
@@ -600,7 +605,7 @@ export async function mount(root) {
   <div class="exam-hd exam-card" style="background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:16px">
     <div class="exam-hd-ico" aria-hidden="true">🎓</div>
     <div>
-      <div class="exam-hd-title">Mon examen B</div>
+      <h1 class="exam-hd-title">Ton examen blanc</h1>
       <div class="exam-hd-sub">Prépare-toi sereinement pour le grand jour.</div>
     </div>
   </div>

@@ -238,6 +238,10 @@ const STYLE = `<style>
     from { transform: translateY(100%); }
     to   { transform: translateY(0); }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .lr-overlay, .lr-sheet { animation: none !important; }
+    .lr-sheet { transform: translateY(0); }
+  }
 
   .lr-sheet-hd {
     display: flex;
@@ -759,6 +763,8 @@ function renderStatutBtn(statut, ico, lbl) {
 }
 
 function closeSheet(overlay) {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) { overlay.remove(); return; }
   overlay.style.animation = 'lr-overlay-in .18s ease reverse';
   setTimeout(() => overlay.remove(), 180);
 }
