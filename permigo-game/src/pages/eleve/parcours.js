@@ -85,6 +85,7 @@ const STYLE = `<style>
 
 /* ── Barre de progression globale ── */
 .prc-global-bar {
+  position: relative; z-index: 51; /* #12 — au-dessus du header sticky (z 50) */
   padding: 12px 20px;
   background: var(--su);
   border-bottom: 1px solid var(--bo2);

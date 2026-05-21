@@ -16,6 +16,12 @@ const DURATION_S  = 30 * 60; // 30 min in seconds
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
+
+  // #11 — plein écran d'épreuve : masque la bottom nav (anti-triche, anti-distraction)
+  document.getElementById('bottom-nav')?.setAttribute('hidden', '');
+  const _restoreNav = () => { document.getElementById('bottom-nav')?.removeAttribute('hidden'); window.removeEventListener('hashchange', _restoreNav); };
+  window.addEventListener('hashchange', _restoreNav);
+
   track('page_view', { page: 'exam_blanc', user_role: me.role });
 
   root.innerHTML = renderStyles() + renderIntro();

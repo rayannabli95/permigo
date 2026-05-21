@@ -179,8 +179,7 @@ const STYLE = `<style>
   font: 700 9px/1 'IBM Plex Mono', monospace;
   letter-spacing: .05em; text-transform: uppercase;
   padding: 3px 7px; border-radius: 99px; color: #fff;
-  white-space: nowrap; flex-shrink: 1; min-width: 0;
-  overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; flex-shrink: 0; /* #9 — pas de troncature des libellés de rareté */
 }
 .bo2-price-btn {
   display: flex; align-items: center; gap: 5px;
@@ -188,7 +187,7 @@ const STYLE = `<style>
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   border: none; border-radius: 10px;
   color: #fff; font: 700 12px/1 'IBM Plex Mono', monospace;
-  cursor: pointer; min-height: 32px;
+  cursor: pointer; min-height: 44px;
   white-space: nowrap; flex-shrink: 0;
   transition: transform .12s, opacity .12s;
   -webkit-tap-highlight-color: transparent;
@@ -316,6 +315,19 @@ export async function mount(root) {
 
   let activeTab = TABS[0].key;
 
+  // #10 — source unique du solde : un seul contrat de retour + un seul renderGems.
+  // Robuste aux deux formes de retour de doPurchase (result truthy OU result.ok).
+  function applyPurchase(result, item) {
+    if (!result || result.ok === false) return false;
+    const fallback = (typeof gemmes === 'number') ? gemmes - item.cost_gemmes : gemmes;
+    gemmes = (typeof result.new_balance === 'number') ? result.new_balance : fallback;
+    const target = allItems.find(i => i.id === item.id);
+    if (target) { target.owned = true; target.acquired_at = new Date().toISOString(); }
+    const gv = root.querySelector('#bo2-gems-val');
+    if (gv) gv.textContent = gemmes;
+    return true;
+  }
+
   function renderTab(tabKey) {
     const items = allItems.filter(i => i.type === tabKey);
     const content = root.querySelector('#bo2-content');
@@ -347,14 +359,7 @@ export async function mount(root) {
         }
         showPurchaseModal(item, gemmes, async () => {
           const result = await doPurchase(item, root, allItems);
-          if (result) {
-            // Refetch complet pour éviter les bugs de re-render partiel
-            const newGemmes = result.new_balance ?? (typeof gemmes === 'number' ? gemmes - item.cost_gemmes : gemmes);
-            if (typeof newGemmes === 'number') gemmes = newGemmes;
-            const target = allItems.find(i => i.id === item.id);
-            if (target) { target.owned = true; target.acquired_at = new Date().toISOString(); }
-            const gv = root.querySelector('#bo2-gems-val');
-            if (gv) gv.textContent = gemmes;
+          if (applyPurchase(result, item)) {
             showGemsFloat(root, `-${item.cost_gemmes}`);
             renderTab(activeTab);
           }
@@ -373,12 +378,7 @@ export async function mount(root) {
         if (!item || item.owned) return;
         showPurchaseModal(item, gemmes, async () => {
           const result = await doPurchase(item, root, allItems);
-          if (result?.ok) {
-            gemmes = result.new_balance;
-            const target = allItems.find(i => i.id === item.id);
-            if (target) { target.owned = true; }
-            const gv = root.querySelector('#bo2-gems-val');
-            if (gv) gv.textContent = gemmes;
+          if (applyPurchase(result, item)) {
             showGemsFloat(root, `-${item.cost_gemmes}`);
             renderTab(activeTab);
           }

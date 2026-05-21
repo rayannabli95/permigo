@@ -48,6 +48,7 @@ const STYLE = `
     z-index: 300;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+  #bottom-nav[hidden] { display: none !important; } /* #11 — masquée pendant les épreuves */
   .bn-tab {
     flex: 1;
     display: flex;
