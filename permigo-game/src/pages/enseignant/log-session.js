@@ -17,7 +17,7 @@ const DURATIONS_PRESET = [
   { value: 90,  label: '1h30' },
   { value: 120, label: '2h' },
 ];
-const DEFAULT_DURATION = 90;
+const DEFAULT_DURATION = 60;
 const MAX_COMMENT      = 300;
 
 // Codes Postgres renvoyés par le RPC log_session
@@ -434,7 +434,17 @@ function _wireDate(root) {
   const dateInput = root.querySelector('#ls-date-input');
   if (!dateRow || !dateInput) return;
 
-  dateRow.addEventListener('click', () => dateInput.showPicker?.() ?? dateInput.click());
+  dateRow.addEventListener('click', () => {
+    // showPicker() est le moyen fiable sur iOS Safari 16+ et Chrome Android.
+    // Attention : il renvoie undefined en succès (donc pas de `?? click()`, qui
+    // rappellerait click() à tort) et peut throw (hors gesture utilisateur, sécurité).
+    try {
+      if (typeof dateInput.showPicker === 'function') { dateInput.showPicker(); return; }
+    } catch { /* fallback ci-dessous */ }
+    // Vieux navigateurs : focus + click pour ouvrir le sélecteur natif.
+    dateInput.focus();
+    dateInput.click();
+  });
   dateInput.addEventListener('change', () => {
     if (!dateInput.value) return;
     _date = dateInput.value;

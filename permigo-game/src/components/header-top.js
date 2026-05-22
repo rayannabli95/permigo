@@ -6,6 +6,7 @@
 import { mountNotifBell } from '@/components/notif-bell.js';
 import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
+import { renderUserAvatar } from '@/components/avatar-modal.js';
 
 const STYLE = `
   #header-bar {
@@ -50,6 +51,20 @@ const STYLE = `
     -webkit-tap-highlight-color: transparent;
   }
   .ht-icon-btn:active { transform: scale(.92); background: var(--bg2, rgba(99,102,241,.08)); }
+  .ht-avatar-btn {
+    width: 36px; height: 36px;
+    padding: 0;
+    border: 0;
+    background: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .12s;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+  }
+  .ht-avatar-btn:active { transform: scale(.92); }
+  .ht-avatar-btn > * { pointer-events: none; }
 `;
 
 export async function mountHeader() {
@@ -74,6 +89,7 @@ export async function mountHeader() {
     <div id="ht-right">
       ${isEleve ? `<button class="ht-icon-btn" id="ht-shop" aria-label="Boutique" title="Boutique">${icon('shopping-bag', { size: 20 })}</button>` : ''}
       <div id="ht-bell"></div>
+      ${me ? `<button class="ht-avatar-btn" id="ht-avatar" aria-label="Mon profil" title="Mon profil">${renderUserAvatar(me, 36)}</button>` : ''}
     </div>
   `;
 
@@ -86,6 +102,10 @@ export async function mountHeader() {
 
   bar.querySelector('#ht-shop')?.addEventListener('click', () => {
     location.hash = '#/boutique';
+  });
+
+  bar.querySelector('#ht-avatar')?.addEventListener('click', () => {
+    location.hash = '#/profil';
   });
 
   await mountNotifBell(bar.querySelector('#ht-bell'));
