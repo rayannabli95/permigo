@@ -1135,6 +1135,10 @@ const STYLE = `<style>
    (le chip "Compétence acquise" apparaissait blanc sur fond clair). */
 .fiche-status.done .fiche-status-title { color: #065f46; }
 .fiche-status.done .fiche-status-sub   { color: #047857; }
+/* Variante .next : fond quasi-blanc (color-mix 8% + #fff), clair dans les 2 modes
+   → titre foncé fixe (sinon var(--ink) clair en dark = illisible). */
+.fiche-status.next .fiche-status-title { color: #1e293b; }
+.fiche-status.next .fiche-status-sub   { color: #475569; }
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
