@@ -13,7 +13,7 @@ import { ASSETS } from '@/utils/assets.js';
 import { getCompDetail } from '@/data/remc-details.js';
 import { icon } from '@/utils/icons.js';
 import { renderChest, openChestModal, ensureChestStyles } from '@/components/chest.js';
-import { isChestOpened, unlockChest, openChest } from '@/utils/game-state.js';
+import { unlockChest, openChest, getMyChests, markChestOpened } from '@/utils/game-state.js';
 
 const isNight = (() => { const h = new Date().getHours(); return h >= 20 || h < 7; })();
 const WORLD_BG = (num) => `/skins/landing/monde${num}${isNight ? 'nuit' : 'jour'}.webp`;
@@ -1197,8 +1197,24 @@ export async function mount(root) {
 
   const worldStates = computeWorldStates(validatedMap);
 
+  // Coffres : l'état « ouvert » est la source de vérité DB
+  // (chest_unlocks.opened_at via get_my_chests), PAS le localStorage.
+  // On aligne aussi le cache LS sur la DB.
+  const openedWorlds = new Set();
+  try {
+    const myChests = await getMyChests();
+    for (const c of (myChests || [])) {
+      const m = /^world_(\d+)$/.exec(c?.chest_type || '');
+      if (m && c.opened_at) {
+        const n = parseInt(m[1], 10);
+        openedWorlds.add(n);
+        markChestOpened(n); // sync cache LS ← DB
+      }
+    }
+  } catch (_) { /* fallback : aucun coffre marqué ouvert si la DB échoue */ }
+
   ensureChestStyles();
-  root.innerHTML = renderPage(worldStates, validatedMap, pendingMap);
+  root.innerHTML = renderPage(worldStates, validatedMap, pendingMap, openedWorlds);
   wire(root, worldStates, validatedMap, pendingMap, me);
 
   // Persister en DB les coffres des mondes complétés (idempotent)
@@ -1399,7 +1415,7 @@ function compStatus(compId, worldStatus, nextChallenge, validatedMap, pendingMap
 }
 
 // ─── Render principal ─────────────────────────────────────────────
-function renderPage(worldStates, validatedMap, pendingMap) {
+function renderPage(worldStates, validatedMap, pendingMap, openedWorlds = new Set()) {
   const totalDone  = worldStates.reduce((s, w) => s + w.done, 0);
   const totalComps = worldStates.reduce((s, w) => s + w.total, 0);
   const globalPct  = Math.round((totalDone / totalComps) * 100);
@@ -1451,7 +1467,7 @@ function renderPage(worldStates, validatedMap, pendingMap) {
       <span class="prc-map-badge-dot"></span> CARTE D'APPRENTISSAGE
     </div>
     <div class="prc-map" id="prc-map-scroll">
-      ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1)).join('')}
+      ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1, openedWorlds)).join('')}
       ${renderFinal(totalDone, totalComps)}
       <div style="height: 24px"></div>
     </div>
@@ -1470,7 +1486,7 @@ function renderPage(worldStates, validatedMap, pendingMap) {
 }
 
 // ─── Render d'un monde avec route SVG + nodes ─────────────────────
-function renderWorldSection(ws, validatedMap, pendingMap, hasNext) {
+function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds = new Set()) {
   const { idx, cat, subs, done, total, status, nextChallenge } = ws;
   const meta = WORLDS_META[idx];
   const world = WORLDS[idx];
@@ -1591,7 +1607,7 @@ function renderWorldSection(ws, validatedMap, pendingMap, hasNext) {
   ${isComplete ? renderChest({
     worldNum: meta.num,
     worldName: world.nom,
-    opened: isChestOpened(meta.num),
+    opened: openedWorlds.has(meta.num),
   }) : ''}
 
   ${hasNext ? '<div class="prc-bridge"></div>' : ''}
