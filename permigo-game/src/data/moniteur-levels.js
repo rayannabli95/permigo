@@ -4,35 +4,40 @@
 //   - 10 paliers majeurs, titres pros, récompenses UTILES uniquement
 //     (exports, stats, templates, modules…) — JAMAIS de skin/cosmétique.
 //   - 12 saisons mensuelles (badge + wrap-up).
-// 380 validations = palier max (Cercle Or = statut Expert REMC certifié).
+// 300 validations = palier max (Expert REMC certifié).
 //
 // ⚠️ Antipatterns vision V3 n°2 & n°8 : aucune monnaie virtuelle, aucun
 //    skin, aucune récompense décorative. Monter de palier = débloquer un outil.
+//
+// Terminologie : « Enseignant » partout (jamais « Moniteur en route »).
+// Échelle : Démarrage → confirmé → chevronné → Référent pédagogique →
+//           Expert REMC (certifié au dernier palier).
 // ═══════════════════════════════════════════════════════════════
 
 /**
  * 10 paliers majeurs — progression non-linéaire (HOOK rapide, MASTERY lente).
  *
- * Phase 1 — HOOK (jours 1-3) : 1er outil dès 10 validations
- * Phase 2 — ENGAGEMENT (semaines 1-4) : +30 entre chaque palier
- * Phase 3 — MASTERY (mois 2+) : +50 entre chaque palier
+ * Phase 1 — TUTO/HOOK (jours 1-2) : 1ers paliers à 3 / 8 / 15 validations.
+ * Phase 2 — ENGAGEMENT : montée régulière (30 → 50 → 80).
+ * Phase 3 — MASTERY (mois 2+) : 120 → 170 → 230 → 300.
  *
- * Cercle Or atteignable en ~1.5 mois actif (380 validations à 10/jour).
+ * Le champ unlock.desc est volontairement concret (2-3 infos) : il alimente
+ * le panneau de détail affiché au clic sur un palier (parcours-pro*).
  */
 export const MONITEUR_TIERS = [
-  // ─ Phase 1 HOOK ─
-  { tier: 1,  threshold: 10,  title: 'Moniteur en route',  unlock: { iconName: 'file-text',    name: 'Export PDF Livret',        desc: 'Export PDF personnalisé du livret élève' } },
-  // ─ Phase 2 ENGAGEMENT (+30) ─
-  { tier: 2,  threshold: 40,  title: 'Moniteur confirmé',  unlock: { iconName: 'chart-bar',    name: 'Stats avancées élèves',    desc: 'Tableaux de bord détaillés par élève' } },
-  { tier: 3,  threshold: 70,  title: 'Moniteur confirmé',  unlock: { iconName: 'clipboard',    name: 'Templates bilan pédago',   desc: 'Modèles de bilans mensuels prêts' } },
-  { tier: 4,  threshold: 100, title: 'Enseignant chevronné', unlock: { iconName: 'target',     name: 'Prépa examen enrichie',   desc: 'Mode préparation examen avec checkpoints' } },
-  { tier: 5,  threshold: 130, title: 'Enseignant chevronné', unlock: { iconName: 'trending-up', name: 'Analytics comparatives',  desc: 'Comparaison anonyme vs cohorte nationale' } },
-  // ─ Phase 3 MASTERY (+50) ─
-  { tier: 6,  threshold: 180, title: 'Référent pédagogique', unlock: { iconName: 'award',      name: 'Profil mis en avant',     desc: 'Ton profil remonte aux nouveaux élèves' } },
-  { tier: 7,  threshold: 230, title: 'Référent pédagogique', unlock: { iconName: 'book',       name: 'Modules formation',       desc: 'Accès aux modules de formation continue' } },
-  { tier: 8,  threshold: 280, title: 'Maître enseignant',    unlock: { iconName: 'users',      name: 'Programme mentorat',      desc: 'Accompagne d\'autres moniteurs débutants' } },
-  { tier: 9,  threshold: 330, title: 'Maître enseignant',    unlock: { iconName: 'shield',     name: 'Expert Hub',              desc: 'Communauté privée des experts REMC' } },
-  { tier: 10, threshold: 380, title: 'Expert REMC',          unlock: { iconName: 'sparkle',    name: 'Cercle Or',               desc: 'Statut Expert REMC certifié PermiGo' } },
+  // ─ Phase 1 TUTO/HOOK (early game rapide pour le hook) ─
+  { tier: 1,  threshold: 3,   title: 'Enseignant — Démarrage', unlock: { iconName: 'file-text',    name: 'Export PDF du livret élève',         desc: 'Génère un PDF propre du livret REMC d\'un élève (compétences acquises, dates, commentaires). Pratique pour un point parent ou un dossier examen.' } },
+  { tier: 2,  threshold: 8,   title: 'Enseignant confirmé',    unlock: { iconName: 'chart-bar',    name: 'Tableaux de bord détaillés par élève', desc: 'Une vue par élève : progression compétence par compétence, rythme d\'acquisition et points à retravailler, pour préparer la prochaine séance.' } },
+  { tier: 3,  threshold: 15,  title: 'Enseignant confirmé',    unlock: { iconName: 'clipboard',    name: 'Modèles de bilans mensuels',          desc: 'Des trames prêtes à remplir pour le bilan mensuel d\'un élève. Tu gagnes du temps et tu gardes une trace structurée de son évolution.' } },
+  // ─ Phase 2 ENGAGEMENT (montée régulière) ─
+  { tier: 4,  threshold: 30,  title: 'Enseignant chevronné',   unlock: { iconName: 'target',       name: 'Mode préparation à l\'examen',        desc: 'Un mode dédié à l\'approche de l\'examen : check-list des points sensibles et suivi des dernières compétences à sécuriser avant le jour J.' } },
+  { tier: 5,  threshold: 50,  title: 'Enseignant chevronné',   unlock: { iconName: 'trending-up',  name: 'Comparaison avec d\'autres écoles (anonyme)', desc: 'Situe tes indicateurs (rythme, validations) par rapport à d\'autres auto-écoles, de façon totalement anonyme. Aucune donnée nominative.' } },
+  // ─ Phase 3 MASTERY ─
+  { tier: 6,  threshold: 80,  title: 'Référent pédagogique',   unlock: { iconName: 'award',        name: 'Profil visible par les nouveaux élèves', desc: 'Ton profil enseignant peut être mis en avant auprès des nouveaux élèves de l\'école, avec ton expérience et tes spécialités.' } },
+  { tier: 7,  threshold: 120, title: 'Référent pédagogique',   unlock: { iconName: 'book',         name: 'Formation continue',                  desc: 'Accès aux modules de formation continue PermiGo : mises à jour REMC, pédagogie et nouveautés réglementaires.' } },
+  { tier: 8,  threshold: 170, title: 'Référent pédagogique',   unlock: { iconName: 'users',        name: 'Mentorat de nouveaux moniteurs',      desc: 'Tu peux accompagner les enseignants débutants de ton réseau : partage de méthodes et suivi de leurs premiers mois.' } },
+  { tier: 9,  threshold: 230, title: 'Expert REMC',            unlock: { iconName: 'shield',       name: 'Communauté privée experts REMC',      desc: 'Rejoins l\'espace privé des enseignants experts : échanges de cas concrets, ressources avancées et entraide entre pairs.' } },
+  { tier: 10, threshold: 300, title: 'Expert REMC certifié',   unlock: { iconName: 'sparkle',      name: 'Statut Expert REMC certifié',         desc: 'Le palier le plus élevé : statut Expert REMC certifié PermiGo, qui reconnaît ton expérience et la qualité de ton suivi pédagogique.' } },
 ];
 
 const MAX_VAL = MONITEUR_TIERS[MONITEUR_TIERS.length - 1].threshold;

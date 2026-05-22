@@ -1,22 +1,4 @@
-// ═══════════════════════════════════════════════════════════════
-// Enseignant — Parcours Pro (refonte 3 blocs)
-// Bloc 1 : HERO immersif (niveau, XP, streak)
-// Bloc 2 : NEXT UNLOCK — 1 seul palier visible via RPC
-// Bloc 3 : ROADMAP MINI — 3 stops (current / next / blurred)
-// ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { toast } from '@/components/toast.js';
-import { track } from '@/services/analytics.js';
-import { navigate } from '@/router.js';
-import { getMoniteurState, buildTimelineStops } from '@/data/moniteur-levels.js';
-import { animateCounter } from '@/utils/gestures.js';
-import { icon } from '@/utils/icons.js';
-import { openPalierSheet } from '@/components/palier-sheet.js';
-
-// ─── CSS ────────────────────────────────────────────────────────
-const STYLE = `<style>
+import{E as f,z as g,e as s,j as d,u,d as m}from"./index-BAp2bzVE.js";import{g as v,b as h,o as k}from"./palier-sheet-D5S9iZ4K.js";import{animateCounter as y}from"./gestures-CSoaZJ63.js";import"./supabase-D2gm834s.js";import"./haptic-Cf_t5lnp.js";const b=`<style>
 .pcp {
   max-width: 580px;
   margin: 0 auto;
@@ -404,132 +386,67 @@ const STYLE = `<style>
   .pcp-hero, .pcp-next, .pcp-road { animation: none; }
   .pcp-next-prog-fill { transition: none; }
 }
-</style>`;
-
-// ─── State ──────────────────────────────────────────────────────
-let _root = null;
-let _me = null;
-
-// ─── Entry point ────────────────────────────────────────────────
-export async function mount(root) {
-  _root = root;
-  _me = getCurUser();
-  if (!_me || _me.role !== 'enseignant') return;
-
-  track('page.view', { page: 'parcours_pro' });
-
-  root.innerHTML = `${STYLE}
+</style>`;let c=null;async function E(e){if(c=m(),!c||c.role!=="enseignant")return;f("page.view",{page:"parcours_pro"}),e.innerHTML=`${b}
     <div class="pcp">
       <div class="pcp-skel" style="height:300px;margin:0;border-radius:0"></div>
       <div class="pcp-skel" style="height:260px;margin:20px 16px 0"></div>
       <div class="pcp-skel" style="height:180px;margin:20px 16px 0"></div>
-    </div>`;
-
-  // ─── Fetch en parallèle ──────────────────────────────────────
-  // ⚠️ La progression (titre, prochain palier, %) est dérivée du VRAI compte
-  // de validations via getMoniteurState() — source de vérité = table
-  // `validations` + `moniteur-levels.js`. On n'utilise plus le RPC
-  // get_my_next_unlock_moniteur (paliers DB) pour l'affichage, afin d'éviter
-  // toute désynchro avec les seuils du fichier local.
-  const [profileRes, countRes] = await Promise.all([
-    sb.from('profiles').select('prenom, xp, streak_pro_days').eq('id', _me.id).maybeSingle(),
-    sb.from('validations')
-      .select('id', { count: 'exact', head: true })
-      .eq('validated_by', _me.id),
-  ]);
-
-  const me          = profileRes.data || {};
-  const streak      = me.streak_pro_days ?? 0;
-  const totalVals   = countRes.count ?? 0;
-  const state       = getMoniteurState(totalVals);
-  const stops       = buildTimelineStops();
-
-  render(root, { me, streak, totalVals, state, stops });
-}
-
-// ─── Render ──────────────────────────────────────────────────────
-function render(root, { me, streak, totalVals, state, stops }) {
-  // Titre du palier actuel + compteur : 100 % dérivés du state local
-  // (= vrai compte de validations). Avant le 1er palier → « Débutant ».
-  const currentTitle = state.tier?.title ?? 'Débutant';
-  const displayVals = totalVals;
-  const xp = me.xp ?? totalVals * 10;
-
-  root.innerHTML = `${STYLE}
+    </div>`;const[o,a]=await Promise.all([g.from("profiles").select("prenom, xp, streak_pro_days").eq("id",c.id).maybeSingle(),g.from("validations").select("id",{count:"exact",head:!0}).eq("validated_by",c.id)]),t=o.data||{},p=t.streak_pro_days??0,n=a.count??0,r=v(n),i=h();w(e,{me:t,streak:p,totalVals:n,state:r,stops:i})}function w(e,{me:o,streak:a,totalVals:t,state:p,stops:n}){var x;const r=((x=p.tier)==null?void 0:x.title)??"Débutant",i=t,l=o.xp??t*10;e.innerHTML=`${b}
     <div class="pcp">
 
       <!-- ══ BLOC 1 — HERO ══ -->
       <div class="pcp-hero">
         <div class="pcp-hero-content">
           <div class="pcp-hero-label">Niveau actuel</div>
-          <h1 class="pcp-hero-title">${esc(currentTitle)}</h1>
+          <h1 class="pcp-hero-title">${s(r)}</h1>
           <div class="pcp-hero-stats">
             <div class="pcp-hero-stat">
-              <span class="pcp-hero-stat-val" data-counter="${displayVals}">0</span>
+              <span class="pcp-hero-stat-val" data-counter="${i}">0</span>
               <span class="pcp-hero-stat-lbl">validations</span>
             </div>
             <div class="pcp-hero-sep"></div>
             <div class="pcp-hero-stat">
-              <span class="pcp-hero-stat-val">${xp.toLocaleString('fr-FR')}</span>
+              <span class="pcp-hero-stat-val">${l.toLocaleString("fr-FR")}</span>
               <span class="pcp-hero-stat-lbl">XP total</span>
             </div>
-            ${streak > 0 ? `
+            ${a>0?`
             <div class="pcp-hero-sep"></div>
             <div class="pcp-streak-badge">
               <span class="pcp-streak-fire">🔥</span>
-              <span class="pcp-streak-val">${streak}</span>
+              <span class="pcp-streak-val">${a}</span>
               <span class="pcp-streak-lbl">j. de suite</span>
-            </div>` : ''}
+            </div>`:""}
           </div>
         </div>
       </div>
 
       <!-- ══ BLOC 2 — NEXT UNLOCK ══ -->
-      ${renderNextUnlock(state)}
+      ${I(p)}
 
       <!-- ══ BLOC 3 — ROADMAP MINI ══ -->
-      ${renderRoadmapMini(stops, totalVals)}
+      ${$(n,t)}
 
-    </div>`;
-
-  wire(root, state.pctToNextReward ?? 0, stops, totalVals);
-}
-
-// ─── Render Bloc 2 — Next Unlock ────────────────────────────────
-function renderNextUnlock(state) {
-  // state.nextReward null → tous les paliers débloqués
-  if (!state.nextReward) {
-    return `
+    </div>`,N(e,p.pctToNextReward??0,n,t)}function I(e){if(!e.nextReward)return`
       <div class="pcp-next">
         <div class="pcp-next-inner pcp-next-alldone">
           <div class="pcp-next-alldone-ico">🏆</div>
           <div class="pcp-next-alldone-title">Tous les paliers atteints</div>
           <div class="pcp-next-alldone-sub">Statut Expert REMC certifié débloqué.</div>
         </div>
-      </div>`;
-  }
-
-  const nextTier    = state.nextReward.data; // palier cible (objet MONITEUR_TIERS)
-  const iconName    = nextTier.unlock.iconName ?? 'star';
-  const label       = nextTier.unlock.name ?? '—';
-  const title       = nextTier.title ?? '—';
-  const remaining   = state.nextReward.missing ?? 0;
-  const pct         = state.pctToNextReward ?? 0;
-
-  return `
+      </div>`;const o=e.nextReward.data,a=o.unlock.iconName??"star",t=o.unlock.name??"—",p=o.title??"—",n=e.nextReward.missing??0,r=e.pctToNextReward??0;return`
     <div class="pcp-next">
       <div class="pcp-next-inner">
         <div class="pcp-next-label">Prochaine récompense</div>
         <div class="pcp-next-top">
           <div class="pcp-next-icon-wrap">
-            ${icon(iconName, { size: 28, strokeWidth: 2 })}
+            ${d(a,{size:28,strokeWidth:2})}
           </div>
           <div class="pcp-next-info">
             <div class="pcp-next-remaining">
-              ${remaining}<span>validation${remaining > 1 ? 's' : ''} restantes</span>
+              ${n}<span>validation${n>1?"s":""} restantes</span>
             </div>
-            <div class="pcp-next-reward-label">${esc(label)}</div>
-            <div class="pcp-next-reward-desc">${esc(title)}</div>
+            <div class="pcp-next-reward-label">${s(t)}</div>
+            <div class="pcp-next-reward-desc">${s(p)}</div>
           </div>
         </div>
         <div class="pcp-next-prog">
@@ -538,98 +455,28 @@ function renderNextUnlock(state) {
           </div>
           <div class="pcp-next-prog-meta">
             <span>Progression</span>
-            <strong>${pct}%</strong>
+            <strong>${r}%</strong>
           </div>
         </div>
       </div>
-    </div>`;
-}
-
-// ─── Render Bloc 3 — Roadmap mini ───────────────────────────────
-function renderRoadmapMini(stops, totalVals) {
-  // Trouve l'index du prochain stop non atteint
-  const nextIdx = stops.findIndex(s => totalVals < s.threshold);
-  if (nextIdx === -1) return ''; // tout débloqué → pas de roadmap
-
-  // 3 stops : précédent (done) + prochain (now) + suivant (blurred)
-  const toShow = [];
-  if (nextIdx > 0) toShow.push({ ...stops[nextIdx - 1], state: 'done' });
-  toShow.push({ ...stops[nextIdx], state: 'now' });
-  if (nextIdx + 1 < stops.length) toShow.push({ ...stops[nextIdx + 1], state: 'todo' });
-
-  return `
+    </div>`}function $(e,o){const a=e.findIndex(p=>o<p.threshold);if(a===-1)return"";const t=[];return a>0&&t.push({...e[a-1],state:"done"}),t.push({...e[a],state:"now"}),a+1<e.length&&t.push({...e[a+1],state:"todo"}),`
     <div class="pcp-road">
       <div class="pcp-road-title">Ma route</div>
       <div class="pcp-road-stops">
-        ${toShow.map(s => renderRoadStop(s)).join('')}
+        ${t.map(p=>S(p)).join("")}
       </div>
       <button class="pcp-see-all" id="pcp-see-all">
-        Voir tous les paliers ${icon('chevron-right', { size: 14, strokeWidth: 2.5 })}
+        Voir tous les paliers ${d("chevron-right",{size:14,strokeWidth:2.5})}
       </button>
-    </div>`;
-}
-
-function renderRoadStop(s) {
-  // Tiers uniquement (plus de skin) — récompense = outil utile
-  const label    = `Palier ${s.tier.tier}`;
-  const name     = s.tier.title;
-  const reward   = s.tier.unlock.name;
-  const iconName = s.tier.unlock.iconName;
-  const badgeTxt = s.state === 'done' ? 'Atteint' : (s.state === 'now' ? 'Prochain' : label);
-
-  const dotState = s.state;
-  const dotIcon  = s.state === 'done'
-    ? icon('check', { size: 15, strokeWidth: 3 })
-    : icon(iconName, { size: 15, strokeWidth: 2 });
-
-  return `
-    <div class="pcp-road-stop ${dotState} ${s.state === 'now' ? 'pcp-now' : ''}" data-tier="${s.tier.tier}" role="button" tabindex="0" aria-label="Détail du palier ${s.tier.tier}">
-      <div class="pcp-road-dot ${dotState}">${dotIcon}</div>
+    </div>`}function S(e){const o=`Palier ${e.tier.tier}`,a=e.tier.title,t=e.tier.unlock.name,p=e.tier.unlock.iconName,n=e.state==="done"?"Atteint":e.state==="now"?"Prochain":o,r=e.state,i=e.state==="done"?d("check",{size:15,strokeWidth:3}):d(p,{size:15,strokeWidth:2});return`
+    <div class="pcp-road-stop ${r} ${e.state==="now"?"pcp-now":""}" data-tier="${e.tier.tier}" role="button" tabindex="0" aria-label="Détail du palier ${e.tier.tier}">
+      <div class="pcp-road-dot ${r}">${i}</div>
       <div class="pcp-road-body">
-        <div class="pcp-road-tier">${esc(label)}</div>
-        <div class="pcp-road-name">${esc(name)}</div>
+        <div class="pcp-road-tier">${s(o)}</div>
+        <div class="pcp-road-name">${s(a)}</div>
         <div class="pcp-road-reward">
-          ${icon(iconName, { size: 11, strokeWidth: 2.4 })} ${esc(reward)}
+          ${d(p,{size:11,strokeWidth:2.4})} ${s(t)}
         </div>
       </div>
-      <span class="pcp-road-badge ${dotState}">${esc(badgeTxt)}</span>
-    </div>`;
-}
-
-// ─── Wire ────────────────────────────────────────────────────────
-function wire(root, progressPct, stops = [], totalVals = 0) {
-  // Anime la barre de progression Bloc 2
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      const fill = root.querySelector('#pcp-prog-fill');
-      if (fill) fill.style.width = `${Math.min(100, progressPct)}%`;
-    }, 150);
-  });
-
-  // Anime le compteur validations dans le hero
-  setTimeout(() => {
-    const el = root.querySelector('[data-counter]');
-    if (el) animateCounter(el, 0, parseInt(el.dataset.counter, 10) || 0, 800);
-  }, 100);
-
-  // Clic / clavier sur un palier de la roadmap → sheet de détail
-  const openFromStop = (el) => {
-    const tierNum = parseInt(el.dataset.tier, 10);
-    const stop = stops.find(s => s.tier.tier === tierNum);
-    if (!stop) return;
-    track('parcours_pro.tier_detail', { tier: tierNum });
-    openPalierSheet(stop.tier, totalVals);
-  };
-  root.querySelectorAll('.pcp-road-stop[data-tier]').forEach(el => {
-    el.addEventListener('click', () => openFromStop(el));
-    el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFromStop(el); }
-    });
-  });
-
-  // Bouton "Voir tous les paliers →"
-  root.querySelector('#pcp-see-all')?.addEventListener('click', () => {
-    track('parcours_pro.see_all');
-    navigate('#/parcours-complet');
-  });
-}
+      <span class="pcp-road-badge ${r}">${s(n)}</span>
+    </div>`}function N(e,o,a=[],t=0){var n;requestAnimationFrame(()=>{setTimeout(()=>{const r=e.querySelector("#pcp-prog-fill");r&&(r.style.width=`${Math.min(100,o)}%`)},150)}),setTimeout(()=>{const r=e.querySelector("[data-counter]");r&&y(r,0,parseInt(r.dataset.counter,10)||0,800)},100);const p=r=>{const i=parseInt(r.dataset.tier,10),l=a.find(x=>x.tier.tier===i);l&&(f("parcours_pro.tier_detail",{tier:i}),k(l.tier,t))};e.querySelectorAll(".pcp-road-stop[data-tier]").forEach(r=>{r.addEventListener("click",()=>p(r)),r.addEventListener("keydown",i=>{(i.key==="Enter"||i.key===" ")&&(i.preventDefault(),p(r))})}),(n=e.querySelector("#pcp-see-all"))==null||n.addEventListener("click",()=>{f("parcours_pro.see_all"),u("#/parcours-complet")})}export{E as mount};
