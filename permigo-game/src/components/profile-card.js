@@ -14,6 +14,7 @@ import { getPrestige } from '@/data/prestige.js';
 import { haptic } from '@/utils/haptic.js';
 import { wrapAnimatedBorder, BORDER_PRESETS } from '@/components/animated-border.js';
 import { openAvatarPicker, AVATAR_PICKER_UPLOAD } from '@/components/avatar-picker.js';
+import { AVATAR_PRESETS, avatarSvg } from '@/components/avatar-modal.js';
 
 const STYLE = `<style>
 .pcc { width: 100%; max-width: 380px; margin: 0 auto; padding: 0; }
@@ -272,7 +273,7 @@ const STYLE = `<style>
  * @param {{label:string, value:number|string}[]} opts.stats - 3 stats à afficher
  * @param {string} opts.bio - sous-titre / bio courte
  */
-export function renderProfileCard({ me, avatarUrl, bannerUrl, count = 0, stats = [], bio = '' }) {
+export function renderProfileCard({ me, avatarUrl, avatarPreset = null, bannerUrl, count = 0, stats = [], bio = '' }) {
   const role = me.role || 'eleve';
   const { current, next, pctToNext } = getPrestige(role, count);
   const xpBarClass = role === 'enseignant' ? 'gradient-indigo' : 'gradient-rainbow';
@@ -281,6 +282,14 @@ export function renderProfileCard({ me, avatarUrl, bannerUrl, count = 0, stats =
 
   const stats3 = stats.slice(0, 3);
   while (stats3.length < 3) stats3.push({ label: '—', value: 0 });
+
+  // Avatar : url uploadée > preset choisi (SVG) > initiales
+  const presetObj = avatarPreset ? AVATAR_PRESETS.find(p => p.id === avatarPreset) : null;
+  const avatarInner = avatarUrl
+    ? `<img src="${esc(avatarUrl)}" alt="${esc(displayName)}" />`
+    : presetObj
+      ? avatarSvg(presetObj)
+      : esc((initials || '?').toUpperCase());
 
   // Border preset selon le rôle : moniteur=cyan / élève=violet / gerant=gold
   const borderPreset = role === 'enseignant' ? BORDER_PRESETS.cyan
@@ -301,7 +310,7 @@ export function renderProfileCard({ me, avatarUrl, bannerUrl, count = 0, stats =
     <div class="pcc-body">
       <div class="pcc-av-wrap">
         <div class="pcc-av">
-          ${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="${esc(displayName)}" />` : esc((initials || '?').toUpperCase())}
+          ${avatarInner}
         </div>
         <button class="pcc-av-edit" data-action="edit-avatar" aria-label="Modifier la photo" title="Modifier la photo">✎</button>
       </div>

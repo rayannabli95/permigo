@@ -28,7 +28,7 @@ export const AVATAR_PRESETS = [
   { id: 'galaxy',    name: 'Galactique',    cost: 100, bg: '#0e7c66', skin: '#f87171' },
 ];
 
-function avatarSvg(preset) {
+export function avatarSvg(preset) {
   const seed = preset.id;
   // Simple "boring avatar" style avec couleurs du preset
   return `
