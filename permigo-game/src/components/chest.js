@@ -11,7 +11,7 @@
  */
 
 import { esc } from '@/utils/escape.js';
-import { markChestOpened, addGemmes } from '@/utils/game-state.js';
+import { markChestOpened } from '@/utils/game-state.js';
 import { burstConfetti } from '@/components/confetti.js';
 import { lootToast } from '@/components/loot-toast.js';
 
@@ -88,9 +88,10 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
 
   // ─── SÉQUENCE D'OUVERTURE CINÉMATIQUE ───
 
-  // CRÉDIT DES RÉCOMPENSES — une seule fois, avant l'animation
-  // (gemmes en localStorage, XP DB sera géré séparément quand l'API XP sera en place)
-  addGemmes(tier.gemmes);
+  // NB : le crédit des gemmes est fait CÔTÉ SERVEUR par open_chest (migration
+  // 0010), déclenché via onClaim → game-state.openChest(). On ne crédite plus
+  // côté client (l'ancien addGemmes était bloqué par protect_profile_fields).
+  // L'animation ci-dessous n'affiche que les récompenses (barème = serveur).
 
   // Phase 1 : 3 vibrations (0-900ms)
   stage.classList.add('cm-shaking');

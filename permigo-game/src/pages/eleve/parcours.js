@@ -13,7 +13,7 @@ import { ASSETS } from '@/utils/assets.js';
 import { getCompDetail } from '@/data/remc-details.js';
 import { icon } from '@/utils/icons.js';
 import { renderChest, openChestModal, ensureChestStyles } from '@/components/chest.js';
-import { isChestOpened, unlockChest } from '@/utils/game-state.js';
+import { unlockChest, openChest, getMyChests, markChestOpened } from '@/utils/game-state.js';
 
 const isNight = (() => { const h = new Date().getHours(); return h >= 20 || h < 7; })();
 const WORLD_BG = (num) => `/skins/landing/monde${num}${isNight ? 'nuit' : 'jour'}.webp`;
@@ -1093,7 +1093,9 @@ const STYLE = `<style>
 }
 .fiche-tip-text {
   font: 500 13.5px/1.45 'Inter', sans-serif;
-  color: var(--ink);
+  /* Fond crème codé en dur (.fiche-tip) → couleur fixe lisible.
+     var(--ink) devenait blanc en dark mode = texte blanc sur fond clair. */
+  color: #422006;
 }
 
 /* Bloc status contextuel (acquise / next / locked) */
@@ -1128,6 +1130,15 @@ const STYLE = `<style>
   font: 500 12px/1.4 'Inter', sans-serif;
   color: var(--mu);
 }
+/* Variante .done : fond vert clair codé en dur (#ecfdf5) → texte vert foncé fixe.
+   Sans ça, var(--ink)/var(--mu) passent au clair en dark mode = illisible
+   (le chip "Compétence acquise" apparaissait blanc sur fond clair). */
+.fiche-status.done .fiche-status-title { color: #065f46; }
+.fiche-status.done .fiche-status-sub   { color: #047857; }
+/* Variante .next : fond quasi-blanc (color-mix 8% + #fff), clair dans les 2 modes
+   → titre foncé fixe (sinon var(--ink) clair en dark = illisible). */
+.fiche-status.next .fiche-status-title { color: #1e293b; }
+.fiche-status.next .fiche-status-sub   { color: #475569; }
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
@@ -1186,8 +1197,24 @@ export async function mount(root) {
 
   const worldStates = computeWorldStates(validatedMap);
 
+  // Coffres : l'état « ouvert » est la source de vérité DB
+  // (chest_unlocks.opened_at via get_my_chests), PAS le localStorage.
+  // On aligne aussi le cache LS sur la DB.
+  const openedWorlds = new Set();
+  try {
+    const myChests = await getMyChests();
+    for (const c of (myChests || [])) {
+      const m = /^world_(\d+)$/.exec(c?.chest_type || '');
+      if (m && c.opened_at) {
+        const n = parseInt(m[1], 10);
+        openedWorlds.add(n);
+        markChestOpened(n); // sync cache LS ← DB
+      }
+    }
+  } catch (_) { /* fallback : aucun coffre marqué ouvert si la DB échoue */ }
+
   ensureChestStyles();
-  root.innerHTML = renderPage(worldStates, validatedMap, pendingMap);
+  root.innerHTML = renderPage(worldStates, validatedMap, pendingMap, openedWorlds);
   wire(root, worldStates, validatedMap, pendingMap, me);
 
   // Persister en DB les coffres des mondes complétés (idempotent)
@@ -1388,7 +1415,7 @@ function compStatus(compId, worldStatus, nextChallenge, validatedMap, pendingMap
 }
 
 // ─── Render principal ─────────────────────────────────────────────
-function renderPage(worldStates, validatedMap, pendingMap) {
+function renderPage(worldStates, validatedMap, pendingMap, openedWorlds = new Set()) {
   const totalDone  = worldStates.reduce((s, w) => s + w.done, 0);
   const totalComps = worldStates.reduce((s, w) => s + w.total, 0);
   const globalPct  = Math.round((totalDone / totalComps) * 100);
@@ -1440,7 +1467,7 @@ function renderPage(worldStates, validatedMap, pendingMap) {
       <span class="prc-map-badge-dot"></span> CARTE D'APPRENTISSAGE
     </div>
     <div class="prc-map" id="prc-map-scroll">
-      ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1)).join('')}
+      ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1, openedWorlds)).join('')}
       ${renderFinal(totalDone, totalComps)}
       <div style="height: 24px"></div>
     </div>
@@ -1459,7 +1486,7 @@ function renderPage(worldStates, validatedMap, pendingMap) {
 }
 
 // ─── Render d'un monde avec route SVG + nodes ─────────────────────
-function renderWorldSection(ws, validatedMap, pendingMap, hasNext) {
+function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds = new Set()) {
   const { idx, cat, subs, done, total, status, nextChallenge } = ws;
   const meta = WORLDS_META[idx];
   const world = WORLDS[idx];
@@ -1580,7 +1607,7 @@ function renderWorldSection(ws, validatedMap, pendingMap, hasNext) {
   ${isComplete ? renderChest({
     worldNum: meta.num,
     worldName: world.nom,
-    opened: isChestOpened(meta.num),
+    opened: openedWorlds.has(meta.num),
   }) : ''}
 
   ${hasNext ? '<div class="prc-bridge"></div>' : ''}
@@ -1648,8 +1675,18 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
     const worldNum = parseInt(card.dataset.chestWorld, 10);
     const ws = worldStates[worldNum - 1];
     const open = () => {
+      if (card.classList.contains('opened')) return; // déjà ouvert → pas de re-clic
       track('parcours.chest_open', { worldNum });
-      openChestModal({ worldNum, worldName: ws?.world?.nom ?? `Monde ${worldNum}` });
+      openChestModal({
+        worldNum,
+        worldName: ws?.world?.nom ?? `Monde ${worldNum}`,
+        // Persiste l'ouverture + crédite les gemmes côté serveur (idempotent),
+        // puis verrouille la carte pour empêcher toute réouverture/re-crédit.
+        onClaim: async () => {
+          await openChest('world_' + worldNum);
+          card.classList.add('opened');
+        },
+      });
     };
     card.addEventListener('click', open);
     card.addEventListener('keydown', (e) => {
