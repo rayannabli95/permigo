@@ -29,33 +29,23 @@ const STYLE = `<style>
 .pcp-hero {
   position: relative;
   overflow: hidden;
-  padding: 52px 24px 36px;
-  min-height: 300px;
+  padding: 48px 24px 32px;
+  min-height: 260px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  background:
-    linear-gradient(160deg, #1e1b4b 0%, #312e81 28%, #4f46e5 58%, #7c3aed 100%);
+  /* Ton sobre « Linear » : slate profond neutre, pas de néon */
+  background: linear-gradient(165deg, #1e293b 0%, #0f172a 100%);
+  border-bottom: 1px solid rgba(255,255,255,.06);
 }
 
-/* Mesh lumière animée */
+/* Fine ligne d'accent en haut — discrète, pas de mesh ni de grain */
 .pcp-hero::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 40%, rgba(167,139,250,.35) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 80% 70%, rgba(99,102,241,.25) 0%, transparent 55%);
-  pointer-events: none;
-}
-/* Grain subtil */
-.pcp-hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: .045;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,.6), transparent);
   pointer-events: none;
 }
 
@@ -129,11 +119,12 @@ const STYLE = `<style>
   border-radius: 28px;
   overflow: hidden;
   position: relative;
-  min-height: 260px;
-  background: linear-gradient(145deg, #6d28d9 0%, #7c3aed 40%, #a855f7 75%, #d946ef 100%);
+  min-height: 220px;
+  /* Accent indigo sobre — outil utile, pas une loot box */
+  background: linear-gradient(150deg, #4f46e5 0%, #6366f1 100%);
   box-shadow:
-    0 24px 48px -12px rgba(109,40,217,.5),
-    0 8px 16px -4px rgba(10,13,26,.15);
+    0 12px 28px -14px rgba(79,70,229,.45),
+    0 4px 10px -4px rgba(10,13,26,.12);
   animation: pcpNextIn .6s .1s cubic-bezier(.34,1.56,.64,1) both;
 }
 @keyframes pcpNextIn {
@@ -509,7 +500,6 @@ function renderNextUnlock(data) {
       </div>`;
   }
 
-  const isMystery   = Boolean(data.mystery);
   const iconName    = data.next_palier?.reward_icon ?? 'star';
   const label       = data.next_palier?.reward_label ?? '—';
   const title       = data.next_palier?.title ?? '—';
@@ -517,26 +507,19 @@ function renderNextUnlock(data) {
   const pct         = data.progress_pct ?? 0;
 
   return `
-    <div class="pcp-next${isMystery ? ' pcp-next-mystery' : ''}">
+    <div class="pcp-next">
       <div class="pcp-next-inner">
         <div class="pcp-next-label">Prochaine récompense</div>
         <div class="pcp-next-top">
           <div class="pcp-next-icon-wrap">
-            ${isMystery
-              ? icon('lock', { size: 28, strokeWidth: 2 })
-              : icon(iconName, { size: 28, strokeWidth: 2 })
-            }
+            ${icon(iconName, { size: 28, strokeWidth: 2 })}
           </div>
           <div class="pcp-next-info">
             <div class="pcp-next-remaining">
               ${remaining}<span>validation${remaining > 1 ? 's' : ''} restantes</span>
             </div>
-            ${isMystery ? `
-              <div class="pcp-mystery-badge">${icon('lock', { size: 12 })} Mystère</div>
-            ` : `
-              <div class="pcp-next-reward-label">${esc(label)}</div>
-              <div class="pcp-next-reward-desc">${esc(title)}</div>
-            `}
+            <div class="pcp-next-reward-label">${esc(label)}</div>
+            <div class="pcp-next-reward-desc">${esc(title)}</div>
           </div>
         </div>
         <div class="pcp-next-prog">
@@ -568,7 +551,7 @@ function renderRoadmapMini(stops, totalVals) {
     <div class="pcp-road">
       <div class="pcp-road-title">Ma route</div>
       <div class="pcp-road-stops">
-        ${toShow.map((s, i) => renderRoadStop(s, i === toShow.length - 1 && s.state === 'todo')).join('')}
+        ${toShow.map(s => renderRoadStop(s)).join('')}
       </div>
       <button class="pcp-see-all" id="pcp-see-all">
         Voir tous les paliers ${icon('chevron-right', { size: 14, strokeWidth: 2.5 })}
@@ -576,17 +559,13 @@ function renderRoadmapMini(stops, totalVals) {
     </div>`;
 }
 
-function renderRoadStop(s, blurred) {
-  const isTier = s.kind === 'tier';
-  const label  = isTier ? `Palier ${s.tier.tier}` : `${s.threshold} valid.`;
-  const name   = isTier ? s.tier.title : 'Skin de profil';
-  const reward = isTier ? s.tier.unlock.name : null;
-  const iconName = isTier ? s.tier.unlock.iconName : 'sparkle';
-  const diffLabel = s.state === 'done'
-    ? `Atteint`
-    : `+${s.threshold - (s.totalVals ?? 0)} valid.`;
-  // On n'a pas totalVals ici, on affiche juste le threshold
-  const badgeTxt = s.state === 'done' ? 'Atteint' : (s.state === 'now' ? 'Prochain' : `Palier ${s.kind === 'tier' ? s.tier.tier : '—'}`);
+function renderRoadStop(s) {
+  // Tiers uniquement (plus de skin) — récompense = outil utile
+  const label    = `Palier ${s.tier.tier}`;
+  const name     = s.tier.title;
+  const reward   = s.tier.unlock.name;
+  const iconName = s.tier.unlock.iconName;
+  const badgeTxt = s.state === 'done' ? 'Atteint' : (s.state === 'now' ? 'Prochain' : label);
 
   const dotState = s.state;
   const dotIcon  = s.state === 'done'
@@ -594,15 +573,14 @@ function renderRoadStop(s, blurred) {
     : icon(iconName, { size: 15, strokeWidth: 2 });
 
   return `
-    <div class="pcp-road-stop ${dotState}${blurred ? ' pcp-blurred' : ''} ${s.state === 'now' ? 'pcp-now' : ''}">
+    <div class="pcp-road-stop ${dotState} ${s.state === 'now' ? 'pcp-now' : ''}">
       <div class="pcp-road-dot ${dotState}">${dotIcon}</div>
       <div class="pcp-road-body">
         <div class="pcp-road-tier">${esc(label)}</div>
         <div class="pcp-road-name">${esc(name)}</div>
-        ${reward ? `
-          <div class="pcp-road-reward">
-            ${icon(iconName, { size: 11, strokeWidth: 2.4 })} ${esc(reward)}
-          </div>` : ''}
+        <div class="pcp-road-reward">
+          ${icon(iconName, { size: 11, strokeWidth: 2.4 })} ${esc(reward)}
+        </div>
       </div>
       <span class="pcp-road-badge ${dotState}">${esc(badgeTxt)}</span>
     </div>`;

@@ -1,15 +1,14 @@
 // ═══════════════════════════════════════════════════════════════
-// Moniteur — Système de progression v2
-// Modèle : basé sur # validations cumulées (pas XP)
-//   - 10 paliers majeurs tous les 50 validations (outils utiles débloqués)
-//   - 4 skins intermédiaires entre chaque palier (tous les 10 validations)
-//   - 12 saisons mensuelles (badge + wrap-up)
-// 500 validations = niveau max (Cercle Or)
+// Moniteur — Système de progression (vision V3 : Linear, pas Duolingo)
+// Modèle : basé sur # validations cumulées.
+//   - 10 paliers majeurs, titres pros, récompenses UTILES uniquement
+//     (exports, stats, templates, modules…) — JAMAIS de skin/cosmétique.
+//   - 12 saisons mensuelles (badge + wrap-up).
+// 380 validations = palier max (Cercle Or = statut Expert REMC certifié).
+//
+// ⚠️ Antipatterns vision V3 n°2 & n°8 : aucune monnaie virtuelle, aucun
+//    skin, aucune récompense décorative. Monter de palier = débloquer un outil.
 // ═══════════════════════════════════════════════════════════════
-
-const MAX_TIER   = 10;   // 10 paliers majeurs
-// 9 skins thématiques intercalés entre les paliers (1 entre chaque)
-// MAX_VAL calculé dynamiquement depuis MONITEUR_TIERS[9].threshold
 
 /**
  * 10 paliers majeurs — progression non-linéaire (HOOK rapide, MASTERY lente).
@@ -39,23 +38,6 @@ export const MONITEUR_TIERS = [
 const MAX_VAL = MONITEUR_TIERS[MONITEUR_TIERS.length - 1].threshold;
 
 /**
- * 9 skins thématiques — 1 entre chaque palier majeur (mi-chemin).
- * Images PNG attendues dans /public/skins/skin-XX.png (transparent 512x512).
- * Si l'image n'existe pas, on affiche juste l'accent color.
- */
-export const MONITEUR_SKINS = [
-  { threshold: 25,  slug: 'premier-kilometre', name: 'Premier kilomètre', accent: '#6366f1', image: '/skins/badge-3d-01.png' },
-  { threshold: 55,  slug: 'volant-souple',     name: 'Volant souple',     accent: '#3b82f6', image: '/skins/badge-3d-02.png' },
-  { threshold: 85,  slug: 'phares-allumes',    name: 'Phares allumés',    accent: '#06b6d4', image: '/skins/badge-3d-03.png' },
-  { threshold: 115, slug: 'boite-fluide',      name: 'Boîte fluide',      accent: '#10b981', image: '/skins/badge-3d-04.png' },
-  { threshold: 155, slug: 'carte-ouverte',     name: 'Carte ouverte',     accent: '#0ea5e9', image: '/skins/badge-3d-05.png' },
-  { threshold: 205, slug: 'compas-cale',       name: 'Compas calé',       accent: '#a855f7', image: '/skins/badge-3d-06.png' },
-  { threshold: 255, slug: 'tableau-pro',       name: 'Tableau pro',       accent: '#ec4899', image: '/skins/badge-3d-07.png' },
-  { threshold: 305, slug: 'maitre-artisan',    name: 'Maître artisan',    accent: '#f59e0b', image: '/skins/badge-3d-08.png' },
-  { threshold: 355, slug: 'couronne-discrete', name: 'Couronne discrète', accent: '#d946ef', image: '/skins/badge-3d-09.png' },
-];
-
-/**
  * 12 saisons = 12 mois.
  */
 export const SAISONS = [
@@ -79,12 +61,12 @@ export const SAISONS = [
  * @returns {{
  *   tier: {tier, threshold, title, unlock} | null,
  *   nextTier: {tier, threshold, title, unlock} | null,
- *   skin: {threshold, name, accent} | null,
- *   nextSkin: {threshold, name, accent} | null,
- *   nextReward: {kind: 'skin'|'tier', threshold, label, missing},
+ *   nextReward: {kind: 'tier', threshold, label, data, missing} | null,
  *   pctToNextReward: number,
  *   isMax: boolean,
- *   saison: {month, name, accent, badge}
+ *   saison: {month, name, accent, badge},
+ *   validations: number,
+ *   maxVal: number
  * }}
  */
 export function getMoniteurState(validations = 0) {
@@ -99,32 +81,22 @@ export function getMoniteurState(validations = 0) {
   const tierIdx = tier ? MONITEUR_TIERS.findIndex(t => t.tier === tier.tier) : -1;
   const nextTier = tierIdx + 1 < MONITEUR_TIERS.length ? MONITEUR_TIERS[tierIdx + 1] : null;
 
-  // Skin actuel (le dernier atteint)
-  let skin = null;
-  for (const s of MONITEUR_SKINS) {
-    if (safe >= s.threshold) skin = s; else break;
-  }
-  const skinIdx = skin ? MONITEUR_SKINS.findIndex(s => s.threshold === skin.threshold) : -1;
-  const nextSkin = skinIdx + 1 < MONITEUR_SKINS.length ? MONITEUR_SKINS[skinIdx + 1] : null;
-
-  // Prochaine récompense (peut être skin ou tier — on prend la + proche)
+  // Prochaine récompense = prochain palier (toujours un outil utile)
   let nextReward = null;
-  const candidates = [
-    nextSkin ? { kind: 'skin', threshold: nextSkin.threshold, label: 'Nouveau skin', data: nextSkin } : null,
-    nextTier ? { kind: 'tier', threshold: nextTier.threshold, label: nextTier.unlock.name, data: nextTier } : null,
-  ].filter(Boolean);
-  if (candidates.length > 0) {
-    nextReward = candidates.sort((a, b) => a.threshold - b.threshold)[0];
-    nextReward.missing = nextReward.threshold - safe;
+  if (nextTier) {
+    nextReward = {
+      kind: 'tier',
+      threshold: nextTier.threshold,
+      label: nextTier.unlock.name,
+      data: nextTier,
+      missing: nextTier.threshold - safe,
+    };
   }
 
   // Progression vers prochaine récompense (en %)
   let pctToNextReward = 100;
   if (nextReward) {
-    const prevThr = Math.max(
-      tier ? tier.threshold : 0,
-      skin ? skin.threshold : 0
-    );
+    const prevThr = tier ? tier.threshold : 0;
     const span = nextReward.threshold - prevThr;
     const done = safe - prevThr;
     pctToNextReward = span > 0 ? Math.max(0, Math.min(100, Math.round((done / span) * 100))) : 100;
@@ -136,8 +108,6 @@ export function getMoniteurState(validations = 0) {
   return {
     tier,
     nextTier,
-    skin,
-    nextSkin,
     nextReward,
     pctToNextReward,
     isMax: safe >= MAX_VAL,
@@ -148,24 +118,11 @@ export function getMoniteurState(validations = 0) {
 }
 
 /**
- * Liste plate pour afficher la timeline (paliers + skins intercalés, triés par threshold).
+ * Liste plate des paliers pour afficher la timeline.
+ * Tiers uniquement — plus aucun skin cosmétique (vision V3).
  */
 export function buildTimelineStops() {
-  const tierThresholds = new Set(MONITEUR_TIERS.map(t => t.threshold));
-  const stops = [];
-
-  // 1) Ajoute tous les paliers majeurs (tiers)
-  for (const t of MONITEUR_TIERS) {
-    stops.push({ threshold: t.threshold, kind: 'tier', tier: t, skin: null });
-  }
-
-  // 2) Ajoute tous les skins (qui ne sont pas sur un palier majeur)
-  for (const s of MONITEUR_SKINS) {
-    if (tierThresholds.has(s.threshold)) continue;
-    stops.push({ threshold: s.threshold, kind: 'skin', tier: null, skin: s });
-  }
-
-  // 3) Tri croissant par threshold
-  stops.sort((a, b) => a.threshold - b.threshold);
-  return stops;
+  return MONITEUR_TIERS
+    .map(t => ({ threshold: t.threshold, kind: 'tier', tier: t }))
+    .sort((a, b) => a.threshold - b.threshold);
 }

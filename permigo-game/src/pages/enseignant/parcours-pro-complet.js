@@ -316,28 +316,15 @@ export async function mount(root) {
 // ─── Render helpers ─────────────────────────────────────────────
 
 function renderStop(stop, totalValidations) {
-  const isMajor = stop.kind === 'tier';
-  const tierNum = isMajor ? stop.tier.tier : 0;
+  // Tiers uniquement (plus de skin, plus de blur « Mystère »)
+  const tierNum = stop.tier.tier;
+  const cls = totalValidations >= stop.threshold ? 'done' : 'todo';
+  const isCercleOr = tierNum === 10;
+  const iconName = stop.tier.unlock.iconName;
 
-  let cls = totalValidations >= stop.threshold ? 'done' : 'todo';
-  const tierLocked = isMajor && tierNum >= 8 && cls !== 'done';
-  const isCercleOr = isMajor && tierNum === 10;
-
-  const iconName = isMajor ? stop.tier.unlock.iconName : 'sparkle';
-
-  // Dot content
-  let dotContent;
-  if (cls === 'done') {
-    dotContent = isMajor
-      ? icon('check', { size: 16, strokeWidth: 3 })
-      : (stop.skin?.image
-          ? `<img class="epcf-stop-skin-img" src="${esc(stop.skin.image)}" alt="" onerror="this.style.display='none'">`
-          : icon('check', { size: 16, strokeWidth: 3 }));
-  } else if (isMajor) {
-    dotContent = icon(iconName, { size: 15, strokeWidth: 2 });
-  } else {
-    dotContent = `<span style="width:8px;height:8px;border-radius:50%;background:${esc(stop.skin?.accent || '#cbd5e1')}"></span>`;
-  }
+  const dotContent = cls === 'done'
+    ? icon('check', { size: 16, strokeWidth: 3 })
+    : icon(iconName, { size: 15, strokeWidth: 2 });
 
   // Cost badge
   const diff = stop.threshold - totalValidations;
@@ -345,8 +332,8 @@ function renderStop(stop, totalValidations) {
     ? `<span class="epcf-stop-cost done">Atteint · ${stop.threshold} valid.</span>`
     : `<span class="epcf-stop-cost todo">+${diff} validation${diff > 1 ? 's' : ''}</span>`;
 
-  // Reward line
-  const rewardLine = isMajor ? `
+  // Reward line — toujours un outil utile
+  const rewardLine = `
     <div class="epcf-stop-reward ${cls === 'done' ? 'unlocked' : ''}">
       <span class="epcf-stop-reward-ico">${icon(iconName, { size: 14, strokeWidth: 2.4 })}</span>
       <span class="epcf-stop-reward-txt">
@@ -354,21 +341,12 @@ function renderStop(stop, totalValidations) {
         <strong>${esc(stop.tier.unlock.name)}</strong>
       </span>
     </div>
-  ` : (stop.skin ? `
-    <div class="epcf-stop-reward${cls === 'done' ? ' unlocked' : ''}" style="border-color:${esc(stop.skin.accent)}44;background:${esc(stop.skin.accent)}10;color:${esc(stop.skin.accent)}">
-      ${stop.skin.image ? `<img class="epcf-stop-skin-img" src="${esc(stop.skin.image)}" alt="" onerror="this.style.display='none'">` : ''}
-      <span class="epcf-stop-reward-txt">
-        ${cls === 'done' ? 'Skin débloqué : ' : 'Skin : '}
-        <strong>${esc(stop.skin.name)}</strong>
-      </span>
-    </div>
-  ` : '');
+  `;
 
   const classList = [
     'epcf-stop',
     cls,
-    isMajor ? 'tier' : 'skin',
-    tierLocked ? 'tier-locked' : '',
+    'tier',
     isCercleOr ? 'cercle-or' : '',
   ].filter(Boolean).join(' ');
 
@@ -377,10 +355,10 @@ function renderStop(stop, totalValidations) {
       <div class="epcf-stop-dot">${dotContent}</div>
       <div class="epcf-stop-body">
         <div class="epcf-stop-head">
-          <span class="epcf-stop-lvl">${isMajor ? `Palier ${stop.tier.tier}` : `${stop.threshold} valid.`}</span>
+          <span class="epcf-stop-lvl">Palier ${stop.tier.tier}</span>
           ${costLine}
         </div>
-        ${isMajor ? `<div class="epcf-stop-title">${esc(stop.tier.title)}</div>` : ''}
+        <div class="epcf-stop-title">${esc(stop.tier.title)}</div>
         ${rewardLine}
       </div>
     </div>
