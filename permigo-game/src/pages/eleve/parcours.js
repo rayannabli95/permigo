@@ -13,7 +13,7 @@ import { ASSETS } from '@/utils/assets.js';
 import { getCompDetail } from '@/data/remc-details.js';
 import { icon } from '@/utils/icons.js';
 import { renderChest, openChestModal, ensureChestStyles } from '@/components/chest.js';
-import { isChestOpened, unlockChest } from '@/utils/game-state.js';
+import { isChestOpened, unlockChest, openChest } from '@/utils/game-state.js';
 
 const isNight = (() => { const h = new Date().getHours(); return h >= 20 || h < 7; })();
 const WORLD_BG = (num) => `/skins/landing/monde${num}${isNight ? 'nuit' : 'jour'}.webp`;
@@ -1659,8 +1659,18 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
     const worldNum = parseInt(card.dataset.chestWorld, 10);
     const ws = worldStates[worldNum - 1];
     const open = () => {
+      if (card.classList.contains('opened')) return; // déjà ouvert → pas de re-clic
       track('parcours.chest_open', { worldNum });
-      openChestModal({ worldNum, worldName: ws?.world?.nom ?? `Monde ${worldNum}` });
+      openChestModal({
+        worldNum,
+        worldName: ws?.world?.nom ?? `Monde ${worldNum}`,
+        // Persiste l'ouverture + crédite les gemmes côté serveur (idempotent),
+        // puis verrouille la carte pour empêcher toute réouverture/re-crédit.
+        onClaim: async () => {
+          await openChest('world_' + worldNum);
+          card.classList.add('opened');
+        },
+      });
     };
     card.addEventListener('click', open);
     card.addEventListener('keydown', (e) => {

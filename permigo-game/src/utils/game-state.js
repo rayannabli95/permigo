@@ -221,8 +221,9 @@ export function markChestOpened(worldNum) {
   const s = getOpenedSet();
   s.add(worldNum);
   localStorage.setItem(LS_CHESTS_OPENED, JSON.stringify(Array.from(s)));
-  // Persiste en DB (fire-and-forget — idempotent)
-  openChest('world_' + worldNum).catch(() => {});
+  // Marquage local seulement. La persistance DB + le crédit gemmes passent
+  // par openChest() appelé depuis le onClaim de la modal (résultat exploité,
+  // crédit serveur idempotent). On évite ainsi un 2e appel RPC non maîtrisé.
 }
 
 // ─── RPC Coffres (DB) ─────────────────────────────────────────────
@@ -270,6 +271,11 @@ export async function openChest(chestType) {
     if (error) return { ok: false, error: error.message || String(error) };
     if (data?.error) return { ok: false, error: data.error, chest: data.chest };
     _dbCacheSet([]);
+    // Le serveur a crédité les gemmes (open_chest, migration 0010) : on aligne
+    // le cache local sur le solde réel pour que le HUD affiche le bon total.
+    if (typeof data?.new_balance === 'number') {
+      localStorage.setItem(LS_GEMMES, String(data.new_balance));
+    }
     return { ok: true, data };
   } catch (e) {
     return { ok: false, error: e?.message || 'unknown' };
