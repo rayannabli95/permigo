@@ -275,6 +275,9 @@ export async function openChest(chestType) {
     // le cache local sur le solde réel pour que le HUD affiche le bon total.
     if (typeof data?.new_balance === 'number') {
       localStorage.setItem(LS_GEMMES, String(data.new_balance));
+      // Notifie le HUD (pattern identique à pg-equipped-changed) pour
+      // rafraîchir le compteur de gemmes en live, sans reload.
+      window.dispatchEvent(new CustomEvent('pg-gemmes-changed', { detail: { balance: data.new_balance } }));
     }
     return { ok: true, data };
   } catch (e) {

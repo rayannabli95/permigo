@@ -346,6 +346,16 @@ export function wireGameHUD(root, callbacks = {}) {
     const { navigate } = await import('@/router.js');
     navigate('/boutique');
   });
+
+  // Rafraîchit le compteur de gemmes en live après ouverture d'un coffre
+  // (open_chest crédite côté serveur et émet pg-gemmes-changed avec new_balance).
+  window.addEventListener('pg-gemmes-changed', (e) => {
+    const bal = e?.detail?.balance;
+    if (typeof bal !== 'number') return;
+    const v = gemmesBtn?.querySelector('.ghud-pill-v');
+    if (v) v.textContent = String(bal);
+    gemmesBtn?.setAttribute('aria-label', `Boutique — ${bal} gemmes`);
+  });
 }
 
 // ─── Icônes SVG custom (cross-platform stable, mieux que emoji) ───
