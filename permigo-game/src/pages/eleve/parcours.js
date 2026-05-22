@@ -1093,7 +1093,9 @@ const STYLE = `<style>
 }
 .fiche-tip-text {
   font: 500 13.5px/1.45 'Inter', sans-serif;
-  color: var(--ink);
+  /* Fond crème codé en dur (.fiche-tip) → couleur fixe lisible.
+     var(--ink) devenait blanc en dark mode = texte blanc sur fond clair. */
+  color: #422006;
 }
 
 /* Bloc status contextuel (acquise / next / locked) */
@@ -1128,6 +1130,11 @@ const STYLE = `<style>
   font: 500 12px/1.4 'Inter', sans-serif;
   color: var(--mu);
 }
+/* Variante .done : fond vert clair codé en dur (#ecfdf5) → texte vert foncé fixe.
+   Sans ça, var(--ink)/var(--mu) passent au clair en dark mode = illisible
+   (le chip "Compétence acquise" apparaissait blanc sur fond clair). */
+.fiche-status.done .fiche-status-title { color: #065f46; }
+.fiche-status.done .fiche-status-sub   { color: #047857; }
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
