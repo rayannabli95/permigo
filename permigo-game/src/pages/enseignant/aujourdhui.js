@@ -361,7 +361,16 @@ function formatDate(date) {
 
 function formatHeure(isoStr) {
   if (!isoStr) return '';
-  return new Date(isoStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const d = new Date(isoStr);
+  const heure = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  // Libellé daté relatif : lève l'illusion de tri cassé quand la liste
+  // d'activité couvre plusieurs jours (Bug #1).
+  const j0 = new Date(); j0.setHours(0, 0, 0, 0);
+  const dj = new Date(d); dj.setHours(0, 0, 0, 0);
+  const diffJ = Math.round((j0 - dj) / 86400000);
+  if (diffJ === 0) return `Aujourd'hui ${heure}`;
+  if (diffJ === 1) return `Hier ${heure}`;
+  return `${d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} ${heure}`;
 }
 
 function todayISO() {
@@ -560,7 +569,7 @@ async function renderInto(root, _me) {
         <span class="aj-recap-title">Ta journée</span>
         <span class="aj-recap-kpi">${_fmtMin(totalSessionMinutes)}</span>
       </div>
-      <div class="aj-recap-sub">${todaySessions.length} session${todaySessions.length > 1 ? 's' : ''} enregistrée${todaySessions.length > 1 ? 's' : ''}${confirmedCount > 0 ? ` · ${confirmedCount} confirmée${confirmedCount > 1 ? 's' : ''} par tes élèves` : ''}</div>
+      <div class="aj-recap-sub">${todaySessions.length} session${todaySessions.length > 1 ? 's' : ''} enregistrée${todaySessions.length > 1 ? 's' : ''}${confirmedCount > 0 ? ` · ${confirmedCount} confirmée${confirmedCount > 1 ? 's' : ''} par vos élèves` : ''}</div>
       <div class="aj-recap-rows">
         ${todaySessions.map(s => `
           <div class="aj-recap-row">
@@ -638,7 +647,7 @@ async function renderInto(root, _me) {
           <span class="aj-widget-lbl" style="color:#d97706">À reconnecter</span>
         </div>
         <p class="aj-widget-val" style="color:#b45309">${reconnectCount}</p>
-        <p class="aj-widget-sub">Sans activité 14j+ — clique pour voir</p>
+        <p class="aj-widget-sub">Sans activité 14j+ — cliquez pour voir</p>
       </div>
       ` : ''}
 
@@ -649,7 +658,7 @@ async function renderInto(root, _me) {
           ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;">
                <span style="font-size:36px;opacity:.5" aria-hidden="true">📋</span>
                <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Pas encore de validation</strong>
-               <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Enregistre ta première séance<br>pour voir l'activité ici.</span>
+               <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Enregistrez votre première séance<br>pour voir l'activité ici.</span>
              </div>`
           : `<div class="aj-activity-list">
               ${recentVals.map(v => renderActRow(v, elevesMap)).join('')}

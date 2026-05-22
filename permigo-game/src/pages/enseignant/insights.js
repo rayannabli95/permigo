@@ -587,8 +587,8 @@ async function loadData(me) {
   if (streakPro !== null && streakPro < 3) {
     recos.push({
       icon: icon('target', { size: 18, strokeWidth: 2, color: '#6366f1' }),
-      ttl: 'Lance ta semaine',
-      txt: 'Valide 1 compétence avec un élève actif pour relancer ton streak pro.',
+      ttl: 'Lancez votre semaine',
+      txt: 'Validez 1 compétence avec un élève actif pour relancer votre série pro.',
       route: '#/validation',
     });
   }
@@ -617,7 +617,7 @@ async function loadData(me) {
     recos.push({
       icon: icon('check-circle', { size: 18, strokeWidth: 2, color: '#059669' }),
       ttl: 'Tout roule',
-      txt: 'Tes élèves progressent bien. Continue sur cette lancée !',
+      txt: 'Vos élèves progressent bien.',
       route: null,
     });
   }

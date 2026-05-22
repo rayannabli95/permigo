@@ -543,7 +543,7 @@ export async function openLogSessionModal() {
         <div class="lsm-textarea-wrap">
           <textarea class="lsm-textarea" id="lsm-comment"
             maxlength="${MAX_COMMENT}"
-            placeholder="${compCount > 0 ? 'Pourquoi tu valides ces compétences ? (optionnel)' : 'Comment s\'est passée la séance ? (optionnel)'}"
+            placeholder="${compCount > 0 ? 'Pourquoi validez-vous ces compétences ? (optionnel)' : 'Comment s\'est passée la séance ? (optionnel)'}"
             rows="3">${esc(comment)}</textarea>
           <span class="lsm-char-count${comment.length > MAX_COMMENT * 0.85 ? ' lsm-near-limit' : ''}" id="lsm-char-count">${comment.length}/${MAX_COMMENT}</span>
         </div>
@@ -625,7 +625,7 @@ export async function openLogSessionModal() {
         const ta = document.getElementById('lsm-comment');
         if (ta) {
           ta.placeholder = count > 0
-            ? 'Pourquoi tu valides ces compétences ? (optionnel)'
+            ? 'Pourquoi validez-vous ces compétences ? (optionnel)'
             : "Comment s'est passée la séance ? (optionnel)";
         }
         updateSubmitLabel();
@@ -679,17 +679,18 @@ export async function openLogSessionModal() {
     const commentVal = comment.trim() || null;
 
     try {
-      const { data, error } = await sb.rpc('log_session', {
-        p_eleve_id: selectedEleve,
+      const { data, error } = await sb.rpc('log_session_v2', {
+        p_eleve_id:         selectedEleve,
         p_duration_minutes: selectedDuration,
-        p_session_date: sessionDate,
-        p_notes: commentVal,
-        ...(compIds ? { p_competence_ids: compIds } : {}),
-        ...(commentVal ? { p_comment: commentVal } : {}),
+        p_session_date:     sessionDate,
+        p_competence_ids:   compIds ?? null,
+        p_comment:          commentVal,   // visible par l'élève
+        p_notes:            null,
       });
 
       if (error) {
-        toast(ERROR_MSG[error.message] || error.message || 'Erreur lors du log', 'error');
+        console.error('[log-session-modal] log_session_v2 error', { code: error.code, message: error.message });
+        toast(ERROR_MSG[error.code] || "Enregistrement impossible pour le moment. Veuillez réessayer.", 'error');
         if (btn) { btn.disabled = false; btn.classList.remove('lsm-loading'); }
         return;
       }

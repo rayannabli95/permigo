@@ -374,7 +374,7 @@ function render() {
     <div class="vp anim-slide-up">
       <header class="vp-hd">
         <h1 class="vp-h1">Débloquer une compétence</h1>
-        <p class="vp-sub">Tu débloques la compétence — l'élève la valide en réussissant son quiz.</p>
+        <p class="vp-sub">Vous débloquez la compétence — l'élève la valide en réussissant son quiz.</p>
       </header>
 
       <section class="step step-1">

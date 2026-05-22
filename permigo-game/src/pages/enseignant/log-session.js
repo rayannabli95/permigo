@@ -294,7 +294,7 @@ function _render(root) {
     <!-- ── 5. COMMENTAIRE ────────────────────── -->
     <div class="ls-card">
       <div class="ls-sec-title">${icon('message-square', { size: 13, strokeWidth: 2.4 })} Commentaire <span class="ls-optional">optionnel</span></div>
-      <div class="ls-visibility-tag">${icon('eye', { size: 11, strokeWidth: 2, color: '#94a3b8' })} Visible par l'élève et l'auto-école</div>
+      <div class="ls-visibility-tag">${icon('eye', { size: 14, strokeWidth: 2, color: '#475569' })} <span>Visible par l'élève et l'auto-école</span></div>
       <div class="ls-ta-wrap">
         <textarea class="ls-textarea" id="ls-textarea" maxlength="${MAX_COMMENT}"
                   placeholder="Observations, points à travailler, encouragements…"
@@ -623,36 +623,28 @@ async function _handleSubmit(root) {
     }
   } catch { /* RPC absent en dev — proceed */ }
 
-  const compIds  = _comps.size > 0 ? [..._comps] : undefined;
-  const noteVal  = _comment.trim() || null;
+  const compIds    = _comps.size > 0 ? [..._comps] : undefined;
+  const commentVal = _comment.trim() || null;   // commentaire VISIBLE par l'élève
 
   try {
-    const { data, error } = await sb.rpc('log_session', {
-      p_eleve_id:        _eleve,
+    const { data, error } = await sb.rpc('log_session_v2', {
+      p_eleve_id:         _eleve,
       p_duration_minutes: _duration,
-      p_session_date:    _date,
-      p_notes:           noteVal,
-      ...(compIds ? { p_competence_ids: compIds } : {}),
+      p_session_date:     _date,
+      p_competence_ids:   compIds ?? null,
+      p_comment:          commentVal,   // → note_enseignant des validations (vue élève)
+      p_notes:            null,         // note interne réservée à un futur champ dédié
     });
 
     if (error || data?.error) {
-      const rawCode = error?.code || '';
-      const rawMsg  = error?.message || data?.error || '';
-      const detail  = error?.details || '';
-      const hint    = error?.hint    || '';
-
-      // Trace complète pour débugger côté dev
-      console.error('[log-session] RPC log_session error ↓');
-      console.error('  code   :', rawCode);
-      console.error('  message:', rawMsg);
-      console.error('  details:', detail);
-      console.error('  hint   :', hint);
-
-      let friendlyMsg;
-
-      friendlyMsg = RPC_ERRORS[rawMsg] ?? RPC_ERRORS[rawCode] ?? rawMsg ?? "Erreur lors de l'enregistrement";
-
-      // Affiche le message Postgres réel si aucun mapping connu
+      // Trace technique réservée au dev — jamais affichée à l'utilisateur
+      console.error('[log-session] log_session_v2 error', {
+        code: error?.code, message: error?.message,
+        details: error?.details, hint: error?.hint, dataError: data?.error,
+      });
+      // Message générique vouvoyé, sans exposition technique
+      const friendlyMsg = RPC_ERRORS[error?.code] ?? RPC_ERRORS[data?.error]
+        ?? "Enregistrement impossible pour le moment. Veuillez réessayer.";
       toast(friendlyMsg, 'error');
       if (btn) { btn.disabled = false; btn.classList.remove('ls-loading'); }
       return;
@@ -708,7 +700,7 @@ function _showDuplicateModal(root, dup) {
         <div class="ls-dup-body">
           Une séance de <strong>${esc(durLabel)}</strong> existe déjà ce jour
           (statut : <strong>${esc(statusLabel)}</strong>).
-          Que veux-tu faire ?
+          Que souhaitez-vous faire ?
         </div>
         <div class="ls-dup-btns ls-dup-btns-col">
           ${dup.session_id
@@ -1014,9 +1006,11 @@ const CSS = `
 
 /* Commentaire */
 .ls-visibility-tag {
-  font: 500 11px/1 'Inter', sans-serif;
-  color: var(--mu2);
-  display: inline-flex; align-items: center; gap: 5px;
+  font: 600 13px/1.4 'Inter', sans-serif;
+  color: #475569;                 /* contraste >= 4.5:1 sur #EEF0FF (WCAG 2.2 AA) */
+  background: #EEF0FF;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px; border-radius: 8px;
   margin-bottom: 10px;
 }
 .ls-ta-wrap { position: relative; }

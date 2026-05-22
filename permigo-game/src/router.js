@@ -1,7 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // Router minimal — route selon role + hash
 // ═══════════════════════════════════════════════════════════════
-import { unmountLogSessionFab } from '@/components/log-session-fab.js';
 
 const ROUTES = {
   eleve: {
@@ -71,8 +70,8 @@ export async function route(root, me) {
   const param = segments[1] || null; // ex: eleveId pour #/livret/{id}
   const loader = map[routeName] || map.default;
 
-  // nav-bottom gère le "+" central — on retire le FAB flottant noir (doublon)
-  unmountLogSessionFab();
+  // nav-bottom gère le "+" central (#P3 variante A) — le FAB flottant
+  // log-session-fab.js était du code mort (jamais monté) et a été supprimé.
 
   try {
     const mod = await loader();
