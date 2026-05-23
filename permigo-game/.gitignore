@@ -1,6 +1,8 @@
 node_modules/
 dist/
 dist_ci/
+vite.config.js.timestamp-*.mjs
+*.timestamp-*.mjs
 .env
 .env.local
 *.log

@@ -203,8 +203,11 @@ function startQuiz(root, { session_id, questions }) {
 
     try {
       const { data, error } = await sb.rpc('submit_exam_blanc', {
-        session_id,
-        answers,
+        p_session_id: session_id,
+        p_answers: Object.entries(answers).map(([question_id, selected_idx]) => ({
+          question_id,
+          selected_idx,
+        })),
       });
       if (error || data?.error) {
         toast(data?.error || 'Erreur lors de la correction', 'error');
@@ -221,19 +224,57 @@ function startQuiz(root, { session_id, questions }) {
   }
 
   function showResults(res) {
-    const score    = res?.score ?? 0;
+    const correct  = res?.correct ?? 0;
     const total    = res?.total ?? TOTAL_Q;
-    const pct      = Math.round((score / total) * 100);
-    const passed   = pct >= PASS_PCT;
-    const details  = res?.details || [];
+    const pct      = res?.score ?? (total ? Math.round((correct / total) * 100) : 0);
+    const passed   = res?.passed ?? (pct >= PASS_PCT);
+    const results  = res?.results || [];
 
-    track('exam_blanc.result', { session_id, score, total, pct, passed });
+    track('exam_blanc.result', { session_id, score: correct, total, pct, passed });
+
+    // Index des questions (texte + choix) gardées en mémoire depuis start_exam_blanc
+    const qById = {};
+    questions.forEach(q => { qById[q.id || q.question_id] = q; });
+
+    // Correction détaillée : pour chaque question, surligne ta réponse vs la bonne
+    const correctionHtml = results.map((r, i) => {
+      const q       = qById[r.question_id] || {};
+      const choices = q.options || q.choices || [];
+      const sel     = r.selected_idx;
+      const cor     = r.correct_idx;
+      const ok      = r.is_correct;
+
+      const choicesHtml = choices.map((opt, ci) => {
+        let cls = 'exb-cor-opt';
+        let mark = '';
+        if (ci === cor)      { cls += ' exb-cor-opt--correct'; mark = '✓'; }
+        else if (ci === sel) { cls += ' exb-cor-opt--wrong';   mark = '✗'; }
+        return `<div class="${cls}">
+            <span class="exb-cor-opt-letter">${'ABCD'[ci] || ''}</span>
+            <span class="exb-cor-opt-text">${esc(opt)}</span>
+            <span class="exb-cor-opt-mark">${mark}</span>
+          </div>`;
+      }).join('');
+
+      const noAnswer = sel < 0 ? '<div class="exb-cor-noanswer">Tu n\'as pas répondu à cette question</div>' : '';
+
+      return `
+        <div class="exb-cor-item">
+          <div class="exb-cor-head">
+            <span class="exb-cor-n">Question ${i + 1}</span>
+            <span class="exb-cor-badge ${ok ? 'exb-cor-badge--ok' : 'exb-cor-badge--ko'}">${ok ? '✓ Correct' : '✗ Erreur'}</span>
+          </div>
+          <div class="exb-cor-q">${esc(q.question || q.texte || '')}</div>
+          <div class="exb-cor-opts">${choicesHtml}</div>
+          ${noAnswer}
+        </div>`;
+    }).join('');
 
     root.querySelector('#exb-screen').innerHTML = `
       <div class="exb-results anim-slide-up">
         <div class="exb-res-top ${passed ? 'exb-res-top--pass' : 'exb-res-top--fail'}">
           <div class="exb-res-ico">${passed ? '🏆' : '📚'}</div>
-          <div class="exb-res-score">${score}<span class="exb-res-total">/${total}</span></div>
+          <div class="exb-res-score">${correct}<span class="exb-res-total">/${total}</span></div>
           <div class="exb-res-pct">${pct} %</div>
           <div class="exb-res-label">${passed ? 'Réussi !' : 'À retenter'}</div>
         </div>
@@ -255,16 +296,10 @@ function startQuiz(root, { session_id, questions }) {
             : `<p class="exb-res-msg">Il te manque ${PASS_PCT - pct} points. Concentre-toi sur les thèmes où tu as perdu des points.</p>`
           }
 
-          ${details.length > 0 ? `
-          <div class="exb-res-detail-title">Détail par question</div>
-          <div class="exb-res-details">
-            ${details.map((d, i) => `
-              <div class="exb-res-detail-row ${d.correct ? 'exb-res-detail-row--ok' : 'exb-res-detail-row--ko'}">
-                <span class="exb-res-detail-n">${i + 1}</span>
-                <span class="exb-res-detail-ico">${d.correct ? '✓' : '✗'}</span>
-                <span class="exb-res-detail-q">${esc(d.question || '')}</span>
-              </div>
-            `).join('')}
+          ${results.length > 0 ? `
+          <div class="exb-res-detail-title">Correction détaillée</div>
+          <div class="exb-cor-list">
+            ${correctionHtml}
           </div>
           ` : ''}
         </div>
@@ -611,40 +646,91 @@ function renderStyles() {
   letter-spacing: .05em;
   margin-bottom: 10px;
 }
-.exb-res-details {
+.exb-cor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.exb-cor-item {
+  background: #1a1d2e;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.exb-cor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.exb-cor-n {
+  font: 500 11px/1 'Inter', sans-serif;
+  color: var(--mu);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.exb-cor-badge {
+  font: 700 11px/1 'IBM Plex Mono', monospace;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.exb-cor-badge--ok { color: #22c55e; background: rgba(34,197,94,.12); }
+.exb-cor-badge--ko { color: #ef4444; background: rgba(239,68,68,.12); }
+.exb-cor-q {
+  font: 600 14px/1.5 'Plus Jakarta Sans', sans-serif;
+  color: #f1f5f9;
+}
+.exb-cor-opts {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 280px;
-  overflow-y: auto;
 }
-.exb-res-detail-row {
+.exb-cor-opt {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 9px 10px;
   border-radius: 8px;
-  background: #1a1d2e;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
 }
-.exb-res-detail-row--ok { border-left: 3px solid #22c55e; }
-.exb-res-detail-row--ko { border-left: 3px solid #ef4444; }
-.exb-res-detail-n {
-  font: 700 12px/1 'IBM Plex Mono', monospace;
-  color: var(--mu);
-  min-width: 20px;
+.exb-cor-opt--correct {
+  background: rgba(34,197,94,.12);
+  border-color: rgba(34,197,94,.4);
 }
-.exb-res-detail-ico {
-  font: 700 14px/1 'IBM Plex Mono', monospace;
-  min-width: 16px;
+.exb-cor-opt--wrong {
+  background: rgba(239,68,68,.1);
+  border-color: rgba(239,68,68,.4);
 }
-.exb-res-detail-row--ok .exb-res-detail-ico { color: #22c55e; }
-.exb-res-detail-row--ko .exb-res-detail-ico { color: #ef4444; }
-.exb-res-detail-q {
-  font: 400 13px/1.4 'Inter', sans-serif;
+.exb-cor-opt-letter {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(255,255,255,.08);
+  font: 700 11px/22px 'IBM Plex Mono', monospace;
   color: var(--mu2);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-align: center;
+  flex-shrink: 0;
+}
+.exb-cor-opt--correct .exb-cor-opt-letter { background: #22c55e; color: #fff; }
+.exb-cor-opt--wrong .exb-cor-opt-letter { background: #ef4444; color: #fff; }
+.exb-cor-opt-text {
+  font: 400 13px/1.4 'Inter', sans-serif;
+  color: #e2e8f0;
+  flex: 1;
+}
+.exb-cor-opt-mark {
+  font: 700 14px/1 'IBM Plex Mono', monospace;
+  flex-shrink: 0;
+}
+.exb-cor-opt--correct .exb-cor-opt-mark { color: #22c55e; }
+.exb-cor-opt--wrong .exb-cor-opt-mark { color: #ef4444; }
+.exb-cor-noanswer {
+  font: 400 12px/1.4 'Inter', sans-serif;
+  color: #f59e0b;
+  font-style: italic;
 }
 
 .exb-res-actions {
