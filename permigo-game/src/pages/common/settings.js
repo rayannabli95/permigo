@@ -8,6 +8,7 @@ import { toast } from '@/components/common/toast.js';
 import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { applyTheme, getTheme } from '@/utils/theme.js';
+import { isSoundEnabled, setSoundEnabled } from '@/utils/sound.js';
 
 const STYLE = `<style>
 .st {
@@ -397,6 +398,18 @@ function render(root, me, prefs) {
         <button class="st-theme-btn ${prefs.theme === 'auto'  ? 'active' : ''}" data-theme="auto"  aria-pressed="${prefs.theme === 'auto'}">Système</button>
       </div>
     </div>
+    <div class="st-row">
+      <div class="st-row-left">
+        <div class="st-row-title">Sons d'interface</div>
+        <div class="st-row-sub">Retours sonores sur les actions et récompenses</div>
+      </div>
+      <div class="st-row-action">
+        <label class="st-tgl" aria-label="Activer les sons d'interface">
+          <input type="checkbox" id="tgl-sound" ${isSoundEnabled() ? 'checked' : ''}>
+          <span class="st-tgl-t"></span>
+        </label>
+      </div>
+    </div>
   </div>
 
   <!-- 🔐 MES DONNÉES (RGPD) -->
@@ -540,6 +553,12 @@ function wire(root, me, prefs) {
     } catch (e) {
       console.error('[settings] theme save', e);
     }
+  });
+
+  // Sound toggle (localStorage only, no DB write)
+  root.querySelector('#tgl-sound')?.addEventListener('change', (e) => {
+    setSoundEnabled(e.target.checked);
+    track('settings.sound_toggled', { enabled: e.target.checked });
   });
 
   // Export mes données

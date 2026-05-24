@@ -14,6 +14,8 @@
  * Variants : 'gold' | 'platinum' | 'fire' | 'neon' | 'mint'
  */
 
+import { playReward } from '@/utils/sound.js';
+
 let _hostEl = null;
 
 function ensureHost() {
@@ -59,6 +61,7 @@ export function showRewardReveal({
   if (haptic && navigator.vibrate) {
     try { navigator.vibrate([30, 50, 30]); } catch {}
   }
+  playReward();
 
   const node = document.createElement('div');
   node.className = `rr-overlay rr-variant-${variant}`;
