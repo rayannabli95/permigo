@@ -2,7 +2,7 @@
  * Confetti burst — effet "feu d'artifice" pour célébrer une réussite.
  *
  * Usage :
- *   import { burstConfetti } from '@/components/confetti.js';
+ *   import { burstConfetti } from '@/components/common/confetti.js';
  *   burstConfetti();              // depuis le centre haut
  *   burstConfetti({ x: 0.5, y: 0.3, count: 80 });  // position + intensité
  *

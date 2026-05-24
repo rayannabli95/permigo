@@ -5,10 +5,10 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
-import { lancerQuiz } from '@/modules/pedagogie/quiz-engine.js';
+import { lancerQuiz } from '@/services/quiz-engine.js';
 import { track } from '@/services/analytics.js';
-import { toast } from '@/components/toast.js';
-import { burstConfetti } from '@/components/confetti.js';
+import { toast } from '@/components/common/toast.js';
+import { burstConfetti } from '@/components/common/confetti.js';
 import { markHasValidated } from '@/services/web-push.js';
 
 const POLL_INTERVAL = 30_000; // 30 secondes
@@ -99,7 +99,7 @@ async function _celebrateValidation(compId) {
       .eq('eleve_id', me.id)
       .eq('statut', 'acquis');
     if (typeof count === 'number') {
-      const { maybeCelebrateMilestone } = await import('@/components/celebrate-screen.js');
+      const { maybeCelebrateMilestone } = await import('@/components/common/celebrate-screen.js');
       // Petit délai pour laisser le confetti + toast respirer
       setTimeout(() => maybeCelebrateMilestone(count), 800);
     }

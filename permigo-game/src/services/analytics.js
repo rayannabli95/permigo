@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
-import { analyticsConsentGranted } from '@/components/cookie-banner.js';
+import { analyticsConsentGranted } from '@/components/common/cookie-banner.js';
 
 const DEBUG = import.meta.env.DEV;
 const queue = [];

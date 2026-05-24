@@ -5,7 +5,7 @@
  * Celui-ci célèbre les gains : XP, étoiles, coffres, niveaux up, etc.
  *
  * Usage :
- *   import { lootToast } from '@/components/loot-toast.js';
+ *   import { lootToast } from '@/components/eleve/loot-toast.js';
  *   lootToast({ icon: '⭐', label: '+100 XP', subLabel: 'Compétence acquise' });
  *   lootToast({ icon: '🔥', label: 'STREAK ×5', subLabel: 'Continue !', kind: 'warm' });
  *   lootToast({ icon: '🎉', label: 'LEVEL UP!', subLabel: 'Niveau 7', kind: 'levelup' });

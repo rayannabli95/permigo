@@ -2,7 +2,7 @@
 // Celebrate Screen — Succès fullscreen avec confettis premium
 //
 // Usage simple :
-//   import { showCelebrate, CELEBRATE_PRESETS } from '@/components/celebrate-screen.js';
+//   import { showCelebrate, CELEBRATE_PRESETS } from '@/components/common/celebrate-screen.js';
 //   showCelebrate(CELEBRATE_PRESETS.firstValidation);
 //   showCelebrate({ illustration: '/path.png', title: 'Bravo !', subtitle: '...', ctaLabel: 'Suivant' });
 //

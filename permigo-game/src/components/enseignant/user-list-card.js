@@ -5,7 +5,7 @@
  * Cas d'usage : "Mes élèves" enseignant, "Équipe en ligne" admin, etc.
  *
  * Usage :
- *   import { renderUserListCard, wireUserListCard, USER_LIST_CARD_CSS } from '@/components/user-list-card.js';
+ *   import { renderUserListCard, wireUserListCard, USER_LIST_CARD_CSS } from '@/components/enseignant/user-list-card.js';
  *
  *   const html = renderUserListCard({
  *     title: 'Mes élèves',

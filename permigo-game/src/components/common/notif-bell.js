@@ -2,7 +2,7 @@
  * Composant Cloche de notifications.
  *
  * Usage :
- *   import { mountNotifBell } from '@/components/notif-bell.js';
+ *   import { mountNotifBell } from '@/components/common/notif-bell.js';
  *   mountNotifBell(container);   // monte une cloche cliquable
  *
  * - Fetch les 20 dernières notifs de l'utilisateur connecté
@@ -18,7 +18,7 @@
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
-import { toast } from '@/components/toast.js';
+import { toast } from '@/components/common/toast.js';
 
 let _notifs = [];
 

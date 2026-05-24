@@ -8,7 +8,7 @@
  *   - Achat boutique
  *
  * Usage simple :
- *   import { showRewardReveal } from '@/components/reward-reveal.js';
+ *   import { showRewardReveal } from '@/components/eleve/reward-reveal.js';
  *   showRewardReveal({ text: 'TROPHÉE DÉBLOQUÉ', sub: 'Conducteur urbain' });
  *
  * Variants : 'gold' | 'platinum' | 'fire' | 'neon' | 'mint'

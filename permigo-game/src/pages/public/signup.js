@@ -320,7 +320,7 @@ function renderForm(root, invitation, token) {
 
     } catch (e) {
       console.error('[signup] failed', e);
-      const { toast } = await import('@/components/toast.js');
+      const { toast } = await import('@/components/common/toast.js');
       const msg = /already.*registered|already.*exists/i.test(e?.message || '')
         ? 'Un compte existe déjà avec cet email. Connecte-toi directement.'
         : (e?.message || 'Erreur lors de l\'activation');

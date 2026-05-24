@@ -5,15 +5,15 @@
  * Multi-tier : bronze / argent / or / légendaire selon le worldNum.
  *
  * Usage :
- *   import { renderChest, openChestModal, ensureChestStyles } from '@/components/chest.js';
+ *   import { renderChest, openChestModal, ensureChestStyles } from '@/components/eleve/chest.js';
  *   ensureChestStyles();
  *   `<div>${renderChest({ worldNum: 1, worldName: '...', opened: false })}</div>`
  */
 
 import { esc } from '@/utils/escape.js';
 import { markChestOpened } from '@/utils/game-state.js';
-import { burstConfetti } from '@/components/confetti.js';
-import { lootToast } from '@/components/loot-toast.js';
+import { burstConfetti } from '@/components/common/confetti.js';
+import { lootToast } from '@/components/eleve/loot-toast.js';
 
 // 4 mondes = 4 tiers de coffres avec leur identité visuelle
 const TIERS = {

@@ -5,7 +5,7 @@
 // est disponible. Styles par tone, auto-dismiss après 12s.
 //
 // Usage :
-//   import { emotionalBanner } from '@/components/emotional-banner.js';
+//   import { emotionalBanner } from '@/components/eleve/emotional-banner.js';
 //   await emotionalBanner.checkAndRender(root);
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';

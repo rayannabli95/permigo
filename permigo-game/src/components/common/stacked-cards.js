@@ -4,7 +4,7 @@
  * Inspiré du composant Aceternity Stacked Cards Interaction, porté en vanilla CSS + JS.
  *
  * Usage :
- *   import { renderStackedCards, wireStackedCards, STACKED_CARDS_CSS } from '@/components/stacked-cards.js';
+ *   import { renderStackedCards, wireStackedCards, STACKED_CARDS_CSS } from '@/components/common/stacked-cards.js';
  *
  *   // 1. Injecter le CSS une fois (inline ou dans le <style> de la page)
  *   // 2. Injecter le markup

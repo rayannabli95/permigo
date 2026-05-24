@@ -9,12 +9,12 @@
  *  - Auto-dismiss après `duration` (annulable au focus, idée future)
  *
  * @example
- *   import { toast } from '@/components/toast.js';
+ *   import { toast } from '@/components/common/toast.js';
  *   toast('Leçon créée ✅');
  *   toast('Erreur réseau', 'error');
  */
 
-import { esc } from '../utils/escape.js';
+import { esc } from '@/utils/escape.js';
 
 const ROOT_ID = 'toast-root';
 

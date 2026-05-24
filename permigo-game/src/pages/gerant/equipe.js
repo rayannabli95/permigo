@@ -5,7 +5,7 @@
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
-import { toast } from '@/components/toast.js';
+import { toast } from '@/components/common/toast.js';
 import { track } from '@/services/analytics.js';
 
 // ─── CSS scoped (cohérent avec pulse.js — cockpit gérant) ────────
@@ -414,12 +414,12 @@ function openInviteModal(me) {
         console.warn('[invite] email send failed (invitation still created)', emailErr);
       }
 
-      const { toast } = await import('@/components/toast.js');
+      const { toast } = await import('@/components/common/toast.js');
       toast('Invitation envoyée ✓', 'success');
       close();
     } catch (e) {
       console.error('[invite] failed', e);
-      const { toast } = await import('@/components/toast.js');
+      const { toast } = await import('@/components/common/toast.js');
       toast(e.message?.includes('duplicate') ? 'Cet email est déjà invité' : 'Erreur lors de l\'envoi', 'error');
       sendBtn.disabled = false;
       sendBtn.textContent = 'Envoyer l\'invitation';

@@ -12,8 +12,8 @@ import { esc } from '@/utils/escape.js';
 import { sb } from '@/auth/auth.js';
 import { getPrestige } from '@/data/prestige.js';
 import { haptic } from '@/utils/haptic.js';
-import { wrapAnimatedBorder, BORDER_PRESETS } from '@/components/animated-border.js';
-import { openAvatarPicker, AVATAR_PICKER_UPLOAD } from '@/components/avatar-picker.js';
+import { wrapAnimatedBorder, BORDER_PRESETS } from '@/components/common/animated-border.js';
+import { openAvatarPicker, AVATAR_PICKER_UPLOAD } from '@/components/common/avatar-picker.js';
 
 const STYLE = `<style>
 .pcc { width: 100%; max-width: 380px; margin: 0 auto; padding: 0; }
@@ -398,7 +398,7 @@ function formatNum(n) {
 async function uploadAndSet(userId, file, kind /* 'avatar' | 'banner' */, onProgress) {
   if (!file) return null;
   if (file.size > 5 * 1024 * 1024) {
-    const { toast } = await import('@/components/toast.js');
+    const { toast } = await import('@/components/common/toast.js');
     toast('Image trop grosse (max 5 MB)', 'error');
     return null;
   }
@@ -411,7 +411,7 @@ async function uploadAndSet(userId, file, kind /* 'avatar' | 'banner' */, onProg
     contentType: file.type,
   });
   if (error) {
-    const { toast } = await import('@/components/toast.js');
+    const { toast } = await import('@/components/common/toast.js');
     toast('Échec upload : ' + (error.message || ''), 'error');
     return null;
   }
@@ -422,7 +422,7 @@ async function uploadAndSet(userId, file, kind /* 'avatar' | 'banner' */, onProg
   const column = kind === 'avatar' ? 'avatar_url' : 'banner_url';
   const { error: errUpd } = await sb.from('profiles').update({ [column]: publicUrl }).eq('id', userId);
   if (errUpd) {
-    const { toast } = await import('@/components/toast.js');
+    const { toast } = await import('@/components/common/toast.js');
     toast('URL non persistée — réessaie', 'error');
     return null;
   }
@@ -434,7 +434,7 @@ async function safeRun(fn, label = 'handler') {
   try { await fn(); }
   catch (e) {
     console.error(`[profile-card] ${label} failed`, e);
-    const { toast } = await import('@/components/toast.js');
+    const { toast } = await import('@/components/common/toast.js');
     toast('Action impossible — réessaie', 'error');
   }
 }
@@ -469,7 +469,7 @@ export function mountProfileCard(container, opts) {
         const avEl = card.querySelector('.pcc-av');
         avEl.innerHTML = `<img src="${esc(choice)}" alt="" />`;
         haptic('success');
-        const { toast } = await import('@/components/toast.js');
+        const { toast } = await import('@/components/common/toast.js');
         toast('Avatar mis à jour ✓', 'success', 2500);
       }, 'avatar default pick');
     } catch (e) {
@@ -485,7 +485,7 @@ export function mountProfileCard(container, opts) {
         const avEl = card.querySelector('.pcc-av');
         avEl.innerHTML = `<img src="${url}" alt="" />`;
         haptic('success');
-        const { toast } = await import('@/components/toast.js');
+        const { toast } = await import('@/components/common/toast.js');
         toast('Photo mise à jour ✓', 'success', 2500);
       }
     }, 'avatar upload').finally(() => { avInput.value = ''; });
@@ -508,7 +508,7 @@ export function mountProfileCard(container, opts) {
         if (existing) existing.src = url;
         else bnEl.insertAdjacentHTML('afterbegin', `<img src="${url}" alt="" />`);
         haptic('success');
-        const { toast } = await import('@/components/toast.js');
+        const { toast } = await import('@/components/common/toast.js');
         toast('Bannière mise à jour ✓', 'success', 2500);
       }
     }, 'banner upload').finally(() => { bnInput.value = ''; });
@@ -540,7 +540,7 @@ export function mountProfileCard(container, opts) {
     haptic('tap');
     // Instagram n'a pas d'URL share direct → on copie le lien
     await copyLink(shareData.url, card);
-    const { toast } = await import('@/components/toast.js');
+    const { toast } = await import('@/components/common/toast.js');
     toast('Lien copié — colle-le dans Instagram', 'info', 3000);
   });
 
@@ -553,10 +553,10 @@ export function mountProfileCard(container, opts) {
 async function copyLink(url, card) {
   try {
     await navigator.clipboard.writeText(url);
-    const { toast } = await import('@/components/toast.js');
+    const { toast } = await import('@/components/common/toast.js');
     toast('Lien copié ✓', 'success', 2000);
   } catch {
-    const { toast } = await import('@/components/toast.js');
+    const { toast } = await import('@/components/common/toast.js');
     toast('Impossible de copier', 'error');
   }
 }

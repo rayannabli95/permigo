@@ -3,10 +3,10 @@
 // Usage : await mountHeader() depuis main.js après route()
 // ═══════════════════════════════════════════════════════════════
 
-import { mountNotifBell } from '@/components/notif-bell.js';
+import { mountNotifBell } from '@/components/common/notif-bell.js';
 import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
-import { renderUserAvatar } from '@/components/avatar.js';
+import { renderUserAvatar } from '@/components/common/avatar.js';
 
 const STYLE = `
   #header-bar {

@@ -11,7 +11,7 @@
  * Auto-detect : utilise localStorage pour ne pas re-jouer une cinematic déjà vue.
  *
  * Usage :
- *   import { detectAndPlayUnlock } from '@/components/world-unlock-cinematic.js';
+ *   import { detectAndPlayUnlock } from '@/components/eleve/world-unlock-cinematic.js';
  *   detectAndPlayUnlock({
  *     worldsCompleted: [1, 2],       // numéros (1-based) des mondes complets
  *     worldsMeta: WORLDS_META,        // metadata (name, color, etc.)
@@ -21,7 +21,7 @@
  */
 
 import { esc } from '@/utils/escape.js';
-import { burstConfetti } from '@/components/confetti.js';
+import { burstConfetti } from '@/components/common/confetti.js';
 
 const LS_KEY = 'pg-unlock-seen';
 

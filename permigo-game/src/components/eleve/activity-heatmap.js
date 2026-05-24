@@ -4,7 +4,7 @@
  * Pour l'élève : visualise sa régularité (jours où il s'est connecté + a validé des comp).
  *
  * Usage :
- *   import { renderHeatmap, ensureHeatmapStyles } from '@/components/activity-heatmap.js';
+ *   import { renderHeatmap, ensureHeatmapStyles } from '@/components/eleve/activity-heatmap.js';
  *   ensureHeatmapStyles();
  *   `<div>${renderHeatmap({ activeDates: ['2026-05-10', ...], weeks: 12 })}</div>`
  *

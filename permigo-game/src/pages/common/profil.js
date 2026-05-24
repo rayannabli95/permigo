@@ -5,12 +5,12 @@ import { sb, logout } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
-import { mountPermisCard } from '@/components/permis-card.js';
-import { mountProfileCard } from '@/components/profile-card.js';
+import { mountPermisCard } from '@/components/eleve/permis-card.js';
+import { mountProfileCard } from '@/components/common/profile-card.js';
 import { REMC_TOTAL } from '@/data/remc.js';
 import { icon } from '@/utils/icons.js';
 import { isPushEnabled, requestPushPermission, optOutPush, optInPush } from '@/services/web-push.js';
-import { mountMoniteurRanking } from '@/components/moniteur-ranking.js';
+import { mountMoniteurRanking } from '@/components/enseignant/moniteur-ranking.js';
 
 // ─── CSS (cohérent avec design system permigo-game) ─────────────
 const STYLE = `<style>
@@ -615,7 +615,7 @@ export async function mount(root) {
       await logout();
     } catch (e) {
       console.error('[profil] logout failed', e);
-      const { toast } = await import('@/components/toast.js');
+      const { toast } = await import('@/components/common/toast.js');
       toast('Déconnexion impossible — réessaie', 'error');
     }
   });
@@ -698,7 +698,7 @@ function _wireReferral(root, me) {
     } else {
       try {
         await navigator.clipboard.writeText(`Mon code PermiGo : ${code} — ${window.location.origin}`);
-        const { toast: _toast } = await import('@/components/toast.js');
+        const { toast: _toast } = await import('@/components/common/toast.js');
         _toast('Lien copié 📋', 'success');
       } catch { /* unavailable */ }
     }
@@ -713,7 +713,7 @@ function _wireReferral(root, me) {
     try {
       const { data, error } = await sb.rpc('generate_referral_code');
       if (error || data?.error) {
-        const { toast: _toast } = await import('@/components/toast.js');
+        const { toast: _toast } = await import('@/components/common/toast.js');
         _toast(data?.error || 'Impossible de générer le code', 'error');
         btn.disabled = false;
         btn.textContent = 'Générer mon code de parrainage';
@@ -741,7 +741,7 @@ function _wireReferral(root, me) {
     applyBtn.textContent = '…';
     try {
       const { data, error } = await sb.rpc('apply_referral', { code });
-      const { toast: _toast } = await import('@/components/toast.js');
+      const { toast: _toast } = await import('@/components/common/toast.js');
       if (error || data?.error) {
         _toast(data?.error || 'Code invalide ou déjà utilisé', 'error');
       } else {
@@ -750,7 +750,7 @@ function _wireReferral(root, me) {
         if (applyInput) applyInput.value = '';
       }
     } catch {
-      const { toast: _toast } = await import('@/components/toast.js');
+      const { toast: _toast } = await import('@/components/common/toast.js');
       _toast('Erreur de connexion', 'error');
     } finally {
       applyBtn.disabled = false;

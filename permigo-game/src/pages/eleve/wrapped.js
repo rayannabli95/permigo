@@ -198,7 +198,7 @@ function wireWrapped(root, me, stats) {
     } else {
       try {
         await navigator.clipboard.writeText(text);
-        const { toast } = await import('@/components/toast.js');
+        const { toast } = await import('@/components/common/toast.js');
         toast('Texte copié 📋', 'success');
       } catch { /* unavailable */ }
     }

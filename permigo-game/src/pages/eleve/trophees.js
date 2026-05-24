@@ -8,7 +8,7 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { haptic } from '@/utils/haptic.js';
-import { toast } from '@/components/toast.js';
+import { toast } from '@/components/common/toast.js';
 
 // ─── Catalogue complet (miroir de _achievement_meta) ──────────
 const CATALOG = [
