@@ -13,6 +13,7 @@ import { navigate } from '@/router.js';
 import { getMoniteurState, buildTimelineStops } from '@/data/moniteur-levels.js';
 import { animateCounter } from '@/utils/gestures.js';
 import { icon } from '@/utils/icons.js';
+import { openPalierSheet } from '@/components/common/palier-sheet.js';
 
 // ─── CSS ────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -29,33 +30,23 @@ const STYLE = `<style>
 .pcp-hero {
   position: relative;
   overflow: hidden;
-  padding: 52px 24px 36px;
-  min-height: 300px;
+  padding: 48px 24px 32px;
+  min-height: 260px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  background:
-    linear-gradient(160deg, #1e1b4b 0%, #312e81 28%, #4f46e5 58%, #7c3aed 100%);
+  /* Ton sobre « Linear » : slate profond neutre, pas de néon */
+  background: linear-gradient(165deg, #1e293b 0%, #0f172a 100%);
+  border-bottom: 1px solid rgba(255,255,255,.06);
 }
 
-/* Mesh lumière animée */
+/* Fine ligne d'accent en haut — discrète, pas de mesh ni de grain */
 .pcp-hero::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 40%, rgba(167,139,250,.35) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 80% 70%, rgba(99,102,241,.25) 0%, transparent 55%);
-  pointer-events: none;
-}
-/* Grain subtil */
-.pcp-hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: .045;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,.6), transparent);
   pointer-events: none;
 }
 
@@ -129,11 +120,12 @@ const STYLE = `<style>
   border-radius: 28px;
   overflow: hidden;
   position: relative;
-  min-height: 260px;
-  background: linear-gradient(145deg, #6d28d9 0%, #7c3aed 40%, #a855f7 75%, #d946ef 100%);
+  min-height: 220px;
+  /* Accent indigo sobre — outil utile, pas une loot box */
+  background: linear-gradient(150deg, #4f46e5 0%, #6366f1 100%);
   box-shadow:
-    0 24px 48px -12px rgba(109,40,217,.5),
-    0 8px 16px -4px rgba(10,13,26,.15);
+    0 12px 28px -14px rgba(79,70,229,.45),
+    0 4px 10px -4px rgba(10,13,26,.12);
   animation: pcpNextIn .6s .1s cubic-bezier(.34,1.56,.64,1) both;
 }
 @keyframes pcpNextIn {
@@ -310,6 +302,9 @@ const STYLE = `<style>
   transition: background .12s;
 }
 .pcp-road-stop:last-of-type { border-bottom: none; }
+.pcp-road-stop[role="button"] { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pcp-road-stop[role="button"]:active { background: rgba(99,102,241,.07); }
+.pcp-road-stop:focus-visible { outline: 2px solid #6366f1; outline-offset: -2px; }
 .pcp-road-stop.pcp-now { background: rgba(99,102,241,.04); }
 .pcp-road-stop.pcp-blurred { opacity: .45; filter: blur(1.5px); pointer-events: none; user-select: none; }
 
@@ -431,29 +426,33 @@ export async function mount(root) {
     </div>`;
 
   // ─── Fetch en parallèle ──────────────────────────────────────
-  const [rpcRes, profileRes, countRes] = await Promise.all([
-    sb.rpc('get_my_next_unlock_moniteur'),
+  // ⚠️ La progression (titre, prochain palier, %) est dérivée du VRAI compte
+  // de validations via getMoniteurState() — source de vérité = table
+  // `validations` + `moniteur-levels.js`. On n'utilise plus le RPC
+  // get_my_next_unlock_moniteur (paliers DB) pour l'affichage, afin d'éviter
+  // toute désynchro avec les seuils du fichier local.
+  const [profileRes, countRes] = await Promise.all([
     sb.from('profiles').select('prenom, xp, streak_pro_days').eq('id', _me.id).maybeSingle(),
     sb.from('validations')
       .select('id', { count: 'exact', head: true })
       .eq('validated_by', _me.id),
   ]);
 
-  const nextData    = rpcRes.data;
   const me          = profileRes.data || {};
   const streak      = me.streak_pro_days ?? 0;
   const totalVals   = countRes.count ?? 0;
   const state       = getMoniteurState(totalVals);
   const stops       = buildTimelineStops();
 
-  render(root, { nextData, me, streak, totalVals, state, stops });
+  render(root, { me, streak, totalVals, state, stops });
 }
 
 // ─── Render ──────────────────────────────────────────────────────
-function render(root, { nextData, me, streak, totalVals, state, stops }) {
-  // Titre du palier actuel : RPC en priorité (peut contenir current_palier), sinon local
-  const currentTitle = nextData?.current_palier?.title ?? state.tier?.title ?? 'Débutant';
-  const displayVals = nextData?.n_validations ?? totalVals;
+function render(root, { me, streak, totalVals, state, stops }) {
+  // Titre du palier actuel + compteur : 100 % dérivés du state local
+  // (= vrai compte de validations). Avant le 1er palier → « Débutant ».
+  const currentTitle = state.tier?.title ?? 'Débutant';
+  const displayVals = totalVals;
   const xp = me.xp ?? totalVals * 10;
 
   root.innerHTML = `${STYLE}
@@ -486,57 +485,51 @@ function render(root, { nextData, me, streak, totalVals, state, stops }) {
       </div>
 
       <!-- ══ BLOC 2 — NEXT UNLOCK ══ -->
-      ${renderNextUnlock(nextData)}
+      ${renderNextUnlock(state)}
 
       <!-- ══ BLOC 3 — ROADMAP MINI ══ -->
       ${renderRoadmapMini(stops, totalVals)}
 
     </div>`;
 
-  wire(root, nextData?.progress_pct ?? 0);
+  wire(root, state.pctToNextReward ?? 0, stops, totalVals);
 }
 
 // ─── Render Bloc 2 — Next Unlock ────────────────────────────────
-function renderNextUnlock(data) {
-  if (!data) {
+function renderNextUnlock(state) {
+  // state.nextReward null → tous les paliers débloqués
+  if (!state.nextReward) {
     return `
       <div class="pcp-next">
         <div class="pcp-next-inner pcp-next-alldone">
           <div class="pcp-next-alldone-ico">🏆</div>
-          <div class="pcp-next-alldone-title">Cercle Or atteint !</div>
-          <div class="pcp-next-alldone-sub">Tu as débloqué tous les paliers.</div>
+          <div class="pcp-next-alldone-title">Tous les paliers atteints</div>
+          <div class="pcp-next-alldone-sub">Statut Expert REMC certifié débloqué.</div>
         </div>
       </div>`;
   }
 
-  const isMystery   = Boolean(data.mystery);
-  const iconName    = data.next_palier?.reward_icon ?? 'star';
-  const label       = data.next_palier?.reward_label ?? '—';
-  const title       = data.next_palier?.title ?? '—';
-  const remaining   = data.remaining ?? 0;
-  const pct         = data.progress_pct ?? 0;
+  const nextTier    = state.nextReward.data; // palier cible (objet MONITEUR_TIERS)
+  const iconName    = nextTier.unlock.iconName ?? 'star';
+  const label       = nextTier.unlock.name ?? '—';
+  const title       = nextTier.title ?? '—';
+  const remaining   = state.nextReward.missing ?? 0;
+  const pct         = state.pctToNextReward ?? 0;
 
   return `
-    <div class="pcp-next${isMystery ? ' pcp-next-mystery' : ''}">
+    <div class="pcp-next">
       <div class="pcp-next-inner">
         <div class="pcp-next-label">Prochaine récompense</div>
         <div class="pcp-next-top">
           <div class="pcp-next-icon-wrap">
-            ${isMystery
-              ? icon('lock', { size: 28, strokeWidth: 2 })
-              : icon(iconName, { size: 28, strokeWidth: 2 })
-            }
+            ${icon(iconName, { size: 28, strokeWidth: 2 })}
           </div>
           <div class="pcp-next-info">
             <div class="pcp-next-remaining">
               ${remaining}<span>validation${remaining > 1 ? 's' : ''} restantes</span>
             </div>
-            ${isMystery ? `
-              <div class="pcp-mystery-badge">${icon('lock', { size: 12 })} Mystère</div>
-            ` : `
-              <div class="pcp-next-reward-label">${esc(label)}</div>
-              <div class="pcp-next-reward-desc">${esc(title)}</div>
-            `}
+            <div class="pcp-next-reward-label">${esc(label)}</div>
+            <div class="pcp-next-reward-desc">${esc(title)}</div>
           </div>
         </div>
         <div class="pcp-next-prog">
@@ -568,7 +561,7 @@ function renderRoadmapMini(stops, totalVals) {
     <div class="pcp-road">
       <div class="pcp-road-title">Ma route</div>
       <div class="pcp-road-stops">
-        ${toShow.map((s, i) => renderRoadStop(s, i === toShow.length - 1 && s.state === 'todo')).join('')}
+        ${toShow.map(s => renderRoadStop(s)).join('')}
       </div>
       <button class="pcp-see-all" id="pcp-see-all">
         Voir tous les paliers ${icon('chevron-right', { size: 14, strokeWidth: 2.5 })}
@@ -576,17 +569,13 @@ function renderRoadmapMini(stops, totalVals) {
     </div>`;
 }
 
-function renderRoadStop(s, blurred) {
-  const isTier = s.kind === 'tier';
-  const label  = isTier ? `Palier ${s.tier.tier}` : `${s.threshold} valid.`;
-  const name   = isTier ? s.tier.title : 'Skin de profil';
-  const reward = isTier ? s.tier.unlock.name : null;
-  const iconName = isTier ? s.tier.unlock.iconName : 'sparkle';
-  const diffLabel = s.state === 'done'
-    ? `Atteint`
-    : `+${s.threshold - (s.totalVals ?? 0)} valid.`;
-  // On n'a pas totalVals ici, on affiche juste le threshold
-  const badgeTxt = s.state === 'done' ? 'Atteint' : (s.state === 'now' ? 'Prochain' : `Palier ${s.kind === 'tier' ? s.tier.tier : '—'}`);
+function renderRoadStop(s) {
+  // Tiers uniquement (plus de skin) — récompense = outil utile
+  const label    = `Palier ${s.tier.tier}`;
+  const name     = s.tier.title;
+  const reward   = s.tier.unlock.name;
+  const iconName = s.tier.unlock.iconName;
+  const badgeTxt = s.state === 'done' ? 'Atteint' : (s.state === 'now' ? 'Prochain' : label);
 
   const dotState = s.state;
   const dotIcon  = s.state === 'done'
@@ -594,22 +583,21 @@ function renderRoadStop(s, blurred) {
     : icon(iconName, { size: 15, strokeWidth: 2 });
 
   return `
-    <div class="pcp-road-stop ${dotState}${blurred ? ' pcp-blurred' : ''} ${s.state === 'now' ? 'pcp-now' : ''}">
+    <div class="pcp-road-stop ${dotState} ${s.state === 'now' ? 'pcp-now' : ''}" data-tier="${s.tier.tier}" role="button" tabindex="0" aria-label="Détail du palier ${s.tier.tier}">
       <div class="pcp-road-dot ${dotState}">${dotIcon}</div>
       <div class="pcp-road-body">
         <div class="pcp-road-tier">${esc(label)}</div>
         <div class="pcp-road-name">${esc(name)}</div>
-        ${reward ? `
-          <div class="pcp-road-reward">
-            ${icon(iconName, { size: 11, strokeWidth: 2.4 })} ${esc(reward)}
-          </div>` : ''}
+        <div class="pcp-road-reward">
+          ${icon(iconName, { size: 11, strokeWidth: 2.4 })} ${esc(reward)}
+        </div>
       </div>
       <span class="pcp-road-badge ${dotState}">${esc(badgeTxt)}</span>
     </div>`;
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
-function wire(root, progressPct) {
+function wire(root, progressPct, stops = [], totalVals = 0) {
   // Anime la barre de progression Bloc 2
   requestAnimationFrame(() => {
     setTimeout(() => {
@@ -623,6 +611,21 @@ function wire(root, progressPct) {
     const el = root.querySelector('[data-counter]');
     if (el) animateCounter(el, 0, parseInt(el.dataset.counter, 10) || 0, 800);
   }, 100);
+
+  // Clic / clavier sur un palier de la roadmap → sheet de détail
+  const openFromStop = (el) => {
+    const tierNum = parseInt(el.dataset.tier, 10);
+    const stop = stops.find(s => s.tier.tier === tierNum);
+    if (!stop) return;
+    track('parcours_pro.tier_detail', { tier: tierNum });
+    openPalierSheet(stop.tier, totalVals);
+  };
+  root.querySelectorAll('.pcp-road-stop[data-tier]').forEach(el => {
+    el.addEventListener('click', () => openFromStop(el));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFromStop(el); }
+    });
+  });
 
   // Bouton "Voir tous les paliers →"
   root.querySelector('#pcp-see-all')?.addEventListener('click', () => {
