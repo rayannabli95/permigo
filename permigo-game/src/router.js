@@ -2,6 +2,7 @@
 // Router minimal — route selon role + hash
 // ═══════════════════════════════════════════════════════════════
 import { unmountLogSessionFab } from '@/components/enseignant/log-session-fab.js';
+import { phPageview } from '@/services/posthog.js';
 
 const ROUTES = {
   eleve: {
@@ -105,6 +106,7 @@ window.addEventListener('hashchange', () => {
     const me = getCurUser();
     if (me) {
       route(document.getElementById('app'), me);
+      phPageview();   // hash-router SPA : PostHog ne détecte pas les hashchanges seul
     } else {
       // Fallback : user déconnecté → re-render la page de login plutôt qu'écran blanc
       import('@/pages/auth/login.js').then(m => m.mount?.(document.getElementById('app')));

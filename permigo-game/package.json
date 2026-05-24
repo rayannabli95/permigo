@@ -16,7 +16,8 @@
     "test:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.0"
+    "@supabase/supabase-js": "^2.45.0",
+    "posthog-js": "^1.376.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",

@@ -13,6 +13,7 @@ import { mountBottomNav } from '@/components/common/nav-bottom.js';
 import { initThemeEarly, syncFromPrefs } from '@/utils/theme.js';
 import { initGameState, initEquippedTheme } from '@/utils/game-state.js';
 import { mountCookieBanner } from '@/components/common/cookie-banner.js';
+import { initPosthog } from '@/services/posthog.js';
 
 // Apply saved/system theme before any rendering (reads localStorage, synchronous)
 initThemeEarly();
@@ -85,6 +86,10 @@ boot();
 // Bandeau cookies (RGPD) — affiché tant qu'aucun choix n'est mémorisé,
 // indépendamment de l'état d'authentification.
 mountCookieBanner();
+
+// PostHog : init immédiat si déjà consenti (visite précédente), ou attend le bandeau.
+initPosthog();
+window.addEventListener('permigo:consent', (e) => { if (e.detail === 'all') initPosthog(); });
 
 // Offline / online feedback
 window.addEventListener('offline', () => toast('Pas de connexion internet', 'error', 5000));
