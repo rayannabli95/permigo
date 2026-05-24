@@ -8,7 +8,7 @@ import { toast } from '@/components/common/toast.js';
 import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { applyTheme, getTheme } from '@/utils/theme.js';
-import { isSoundEnabled, setSoundEnabled } from '@/utils/sound.js';
+import { isSoundEnabled, setSoundEnabled, playBack } from '@/utils/sound.js';
 
 const STYLE = `<style>
 .st {
@@ -478,7 +478,7 @@ function render(root, me, prefs) {
 }
 
 function wire(root, me, prefs) {
-  root.querySelector('#st-back')?.addEventListener('click', () => navigate('/'));
+  root.querySelector('#st-back')?.addEventListener('click', () => { playBack(); navigate('/'); });
 
   // Toggle changes — save debounced
   const savePrefs = _debounce(async () => {

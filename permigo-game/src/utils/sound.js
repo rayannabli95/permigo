@@ -1,54 +1,67 @@
-// Web Audio API — sons synthétisés, 0 fichier réseau
-const PREF_KEY = 'permigo-sound';
-let _ctx = null;
+// HTML Audio — fichiers /sounds/*.mp3 (dossier public/, servi par Vite sans import)
+const PREF_KEY     = 'permigo-sound';
+const LAUNCH_KEY   = 'permigo-launched';
+const PARCOURS_KEY = 'permigo-parcours-played';
+const _cache = {};
 
 export function isSoundEnabled() {
   try { return localStorage.getItem(PREF_KEY) !== 'off'; } catch { return true; }
 }
-
 export function setSoundEnabled(v) {
   try { localStorage.setItem(PREF_KEY, v ? 'on' : 'off'); } catch {}
 }
 
-function getCtx() {
-  if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
-  if (_ctx.state === 'suspended') _ctx.resume().catch(() => {});
-  return _ctx;
+function _get(name, vol = 0.4) {
+  if (!_cache[name]) {
+    const a = new Audio(`/sounds/${name}.mp3`);
+    a.volume = vol;
+    _cache[name] = a;
+  }
+  return _cache[name];
 }
 
-function tone(freq, type = 'sine', gain = 0.06, dur = 0.06) {
+function play(name, vol = 0.4) {
   if (!isSoundEnabled()) return;
   try {
-    const ctx = getCtx();
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.connect(g);
-    g.connect(ctx.destination);
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    g.gain.setValueAtTime(0, ctx.currentTime);
-    g.gain.linearRampToValueAtTime(gain, ctx.currentTime + 0.003);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + dur);
+    const a = _get(name, vol);
+    a.currentTime = 0;
+    a.play().catch(() => {});
   } catch {}
 }
 
-export function playClick() {
-  tone(800, 'sine', 0.05, 0.04);
+// Précharger click + success : les navigateurs créent l'élément Audio même sans autoplay
+_get('click');
+_get('success');
+
+// ─── Exports existants — haptic.js, reward-reveal.js, celebrate-screen.js déjà câblés ───
+export const playClick   = () => play('click');
+export const playSuccess = () => play('success');
+export const playReward  = () => play('reward');
+export const playError   = () => play('hint');
+
+// ─── Nouveaux exports ───
+export const playUnlock   = () => play('unlock');
+export const playCoin     = () => play('coin');
+export const playReveal   = () => play('reveal');
+export const playPop      = () => play('pop');
+export const playBack     = () => play('back');
+export const playWrapped  = () => play('wrapped');
+export const playWhoosh   = () => play('whoosh');
+export const playGold     = () => play('gold');
+export const playPageturn = () => play('pageturn');
+export const playNotify   = () => play('notify');
+export const playHorn     = () => play('horn');
+
+// Joué une seule fois par session (jingle long ~2-3s, page souvent revisitée)
+export function playParcours() {
+  if (sessionStorage.getItem(PARCOURS_KEY)) return;
+  sessionStorage.setItem(PARCOURS_KEY, '1');
+  play('parcours');
 }
 
-export function playSuccess() {
-  tone(660, 'sine', 0.06, 0.08);
-  setTimeout(() => tone(880, 'sine', 0.07, 0.10), 90);
-}
-
-export function playReward() {
-  [880, 1100, 1320].forEach((f, i) =>
-    setTimeout(() => tone(f, 'sine', 0.06, 0.09), i * 65)
-  );
-}
-
-export function playError() {
-  tone(220, 'triangle', 0.05, 0.14);
+// Joué une seule fois par session, après le 1er geste user (autoplay safe)
+export function playLaunch() {
+  if (sessionStorage.getItem(LAUNCH_KEY)) return;
+  sessionStorage.setItem(LAUNCH_KEY, '1');
+  play('transition', 0.3);
 }

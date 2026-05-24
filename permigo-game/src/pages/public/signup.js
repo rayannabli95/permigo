@@ -11,6 +11,7 @@
 import { sb } from '@/auth/auth.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
+import { playLaunch } from '@/utils/sound.js';
 
 const STYLE = `<style>
   .sg {
@@ -293,6 +294,7 @@ function renderForm(root, invitation, token) {
       if (accepted === false) throw new Error('Lien invalide ou email ne correspond pas');
 
       track('signup.completed', { role: invitation.role, from: 'invitation' });
+      playLaunch();
 
       // 4. Affichage succès + redirection
       root.innerHTML = `${STYLE}

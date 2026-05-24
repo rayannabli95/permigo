@@ -37,6 +37,7 @@ function translateAuthError(msg) {
   return msg; // fallback : message brut Supabase
 }
 import { checkRateLimit, recordAttempt, resetRateLimit, formatWaitTime } from '@/utils/rate-limit.js';
+import { playLaunch } from '@/utils/sound.js';
 import { getTurnstileToken, isTurnstileEnabled } from '@/utils/turnstile.js';
 import { renderHoneypot, checkHoneypot } from '@/utils/honeypot.js';
 
@@ -400,6 +401,7 @@ function wire(root) {
       if (location.hash !== '#/') location.hash = '#/';
       const app = document.getElementById('app');
       await route(app, me);
+      playLaunch();
       await mountHeader();
       mountBottomNav(me?.role);
       document.body.classList.add('has-chrome');

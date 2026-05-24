@@ -7,6 +7,7 @@ import { getCurUser } from '@/auth/cur-user.js';
 import { esc }        from '@/utils/escape.js';
 import { track }      from '@/services/analytics.js';
 import { navigate }   from '@/router.js';
+import { playWrapped, playBack } from '@/utils/sound.js';
 
 const YEAR = 2026;
 
@@ -15,6 +16,7 @@ export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
   track('page_view', { page: 'wrapped', user_role: me.role, year: YEAR });
+  playWrapped();
 
   root.innerHTML = renderStyles() + `
 <div class="wrp">
@@ -204,7 +206,7 @@ function wireWrapped(root, me, stats) {
     }
   });
 
-  root.querySelector('#wrp-close')?.addEventListener('click', () => navigate('/'));
+  root.querySelector('#wrp-close')?.addEventListener('click', () => { playBack(); navigate('/'); });
 }
 
 // ─── Styles ──────────────────────────────────────────────────
