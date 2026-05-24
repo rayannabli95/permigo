@@ -388,7 +388,7 @@ export async function mount(root) {
   // Fetch profil complet (xp, streak_pro_days, prenom, created_at, avatar, banner)
   const { data: profile } = await sb
     .from('profiles')
-    .select('email, prenom, nom, xp, streak_pro_days, created_at, avatar_url, avatar_preset, banner_url')
+    .select('email, prenom, nom, xp, streak_pro_days, created_at, avatar_url, banner_url')
     .eq('id', me.id)
     .single();
 
@@ -461,7 +461,6 @@ export async function mount(root) {
     profileCardData = {
       me: { ...me, prenom: profile?.prenom || '', nom: profile?.nom || '' },
       avatarUrl: profile?.avatar_url || null,
-      avatarPreset: profile?.avatar_preset || null,
       bannerUrl: profile?.banner_url || null,
       count: permisData.validated, // pour calcul prestige (max 31)
       bio: `Apprenti permis B · ${permisData.validated}/${REMC_TOTAL} compétences`,
@@ -477,7 +476,6 @@ export async function mount(root) {
     profileCardData = {
       me: { ...me, prenom: profile?.prenom || '', nom: profile?.nom || '' },
       avatarUrl: profile?.avatar_url || null,
-      avatarPreset: profile?.avatar_preset || null,
       bannerUrl: profile?.banner_url || null,
       count: anneeStats.totalValidations, // pour calcul prestige (carrière)
       bio: `Moniteur · ${anneeStats.elevesCount} élève${anneeStats.elevesCount > 1 ? 's' : ''} accompagné${anneeStats.elevesCount > 1 ? 's' : ''}`,

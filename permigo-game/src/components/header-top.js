@@ -6,7 +6,7 @@
 import { mountNotifBell } from '@/components/notif-bell.js';
 import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
-import { renderUserAvatar } from '@/components/avatar-modal.js';
+import { renderUserAvatar } from '@/components/avatar.js';
 
 const STYLE = `
   #header-bar {

@@ -6,7 +6,7 @@ import { sb } from '@/auth/auth.js';
 import { getCurUser, setCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
-import { AVATAR_PRESETS } from '@/components/avatar-modal.js';
+import { ASSETS } from '@/utils/assets.js';
 
 // ─── Shared CSS ───────────────────────────────────────────────
 const STYLE = `<style>
@@ -162,8 +162,11 @@ const STYLE = `<style>
     box-shadow: 0 0 0 3px rgba(99,102,241,.25), 0 0 20px rgba(99,102,241,.2);
   }
   .ob-av-card.locked { opacity: .45; cursor: default; }
-  .ob-av-svg {
-    width: 64%; height: 64%;
+  .ob-av-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
   }
   .ob-av-name {
     font: 600 9px/1 'Inter', sans-serif;
@@ -241,25 +244,6 @@ const STYLE = `<style>
 </style>`;
 
 // ─── Helpers ──────────────────────────────────────────────────
-function avatarSvg(preset) {
-  const seed = preset.id;
-  return `
-    <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" aria-hidden="true">
-      <mask id="om-${seed}" maskUnits="userSpaceOnUse" x="0" y="0" width="36" height="36">
-        <rect width="36" height="36" rx="72" fill="#FFFFFF"/>
-      </mask>
-      <g mask="url(#om-${seed})">
-        <rect width="36" height="36" fill="${preset.bg}"/>
-        <rect x="0" y="0" width="36" height="36" transform="translate(9 -5) rotate(219 18 18) scale(1)" fill="${preset.skin}" rx="6"/>
-        <g transform="translate(4.5 -4) rotate(9 18 18)">
-          <path d="M15 19c2 1 4 1 6 0" stroke="${preset.bg === '#0a0310' ? '#FFFFFF' : '#000000'}" fill="none" stroke-linecap="round"/>
-          <rect x="10" y="14" width="1.5" height="2" rx="1" fill="${preset.bg === '#0a0310' ? '#FFFFFF' : '#000000'}"/>
-          <rect x="24" y="14" width="1.5" height="2" rx="1" fill="${preset.bg === '#0a0310' ? '#FFFFFF' : '#000000'}"/>
-        </g>
-      </g>
-    </svg>`;
-}
-
 function dots(active) {
   return `<div class="ob-dots">
     ${[0,1,2].map(i => `<div class="ob-dot${i < active ? ' done' : i === active ? ' active' : ''}"></div>`).join('')}
@@ -297,7 +281,7 @@ function renderWelcome(root, me) {
           </div>
           <div class="ob-feat">
             <span class="ob-feat-ico" aria-hidden="true">🏆</span>
-            <div class="ob-feat-txt"><strong>Trophées & récompenses</strong>Débloques des avatars en progressant</div>
+            <div class="ob-feat-txt"><strong>Trophées & récompenses</strong>Gagne des trophées en progressant</div>
           </div>
         </div>
       </div>
@@ -316,7 +300,7 @@ function renderWelcome(root, me) {
 
 // ─── Step 2 — Choose Avatar ────────────────────────────────────
 function renderChooseAvatar(root, me) {
-  let selected = me.avatar_preset || AVATAR_PRESETS[0].id;
+  let selected = (me.avatar_url && ASSETS.avatar.includes(me.avatar_url)) ? me.avatar_url : ASSETS.avatar[0];
 
   function html() {
     return `
@@ -325,19 +309,14 @@ function renderChooseAvatar(root, me) {
         ${dots(1)}
         <div class="ob-body">
           <h1 class="ob-title">Choisis ton avatar</h1>
-          <p class="ob-sub" style="margin-bottom:28px">Tu pourras en débloquer d'autres en progressant.</p>
+          <p class="ob-sub" style="margin-bottom:28px">Tu pourras le changer quand tu veux depuis ton profil.</p>
           <div class="ob-av-grid" id="ob-av-grid">
-            ${AVATAR_PRESETS.map(p => {
-              const free = p.cost === 0;
-              const sel  = p.id === selected;
-              return `
-                <div class="ob-av-card${sel ? ' selected' : ''}${!free ? ' locked' : ''}"
-                     data-preset="${esc(p.id)}" ${!free ? 'aria-disabled="true"' : ''}>
-                  <div class="ob-av-svg">${avatarSvg(p)}</div>
-                  <div class="ob-av-name">${esc(p.name)}</div>
-                  ${!free ? `<span class="ob-av-lock" aria-hidden="true">🔒</span>` : `<span class="ob-av-check" aria-hidden="true">✓</span>`}
-                </div>`;
-            }).join('')}
+            ${ASSETS.avatar.map((url, i) => `
+                <div class="ob-av-card${url === selected ? ' selected' : ''}"
+                     data-url="${esc(url)}" role="button" aria-label="Avatar ${i + 1}">
+                  <img class="ob-av-img" src="${esc(url)}" alt="" loading="lazy" />
+                  <span class="ob-av-check" aria-hidden="true">✓</span>
+                </div>`).join('')}
           </div>
         </div>
         <div class="ob-footer">
@@ -352,20 +331,19 @@ function renderChooseAvatar(root, me) {
   root.innerHTML = html();
 
   function wire() {
-    root.querySelectorAll('.ob-av-card:not(.locked)').forEach(card => {
-      card.addEventListener('click', async () => {
-        selected = card.dataset.preset;
-        root.querySelectorAll('.ob-av-card').forEach(c => c.classList.toggle('selected', c.dataset.preset === selected));
+    root.querySelectorAll('.ob-av-card').forEach(card => {
+      card.addEventListener('click', () => {
+        selected = card.dataset.url;
+        root.querySelectorAll('.ob-av-card').forEach(c => c.classList.toggle('selected', c.dataset.url === selected));
       });
     });
 
     root.querySelector('#ob-next-2').addEventListener('click', async () => {
-      track('onboarding.avatar.selected', { preset: selected });
+      track('onboarding.avatar.selected', { url: selected });
       // Persist avatar choice
       try {
-        await sb.from('profiles').update({ avatar_preset: selected, avatar_url: null }).eq('id', me.id);
-        me.avatar_preset = selected;
-        me.avatar_url = null;
+        await sb.from('profiles').update({ avatar_url: selected }).eq('id', me.id);
+        me.avatar_url = selected;
       } catch {}
       renderFirstQuest(root, me);
     });
