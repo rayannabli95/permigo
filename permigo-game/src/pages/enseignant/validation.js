@@ -302,25 +302,26 @@ async function doValidate() {
   const btn = _root.querySelector('.btn-validate');
   if (btn) { btn.disabled = true; btn.textContent = 'En cours…'; }
 
-  // Nouveau flux : le moniteur DÉBLOQUE la compétence (a_valider).
-  // C'est l'élève qui la valide (→ acquis) en réussissant son quiz.
+  // Moniteur = source de vérité : la compétence est VALIDÉE immédiatement (acquis).
+  // Le quiz élève est désormais un rappel optionnel, il ne conditionne plus rien.
   const { error } = await sb.from('validations').upsert(
     {
       eleve_id: _eleve.id,
       competence_id: _selectedComp.c,
       validated_by: _me.id,
-      statut: 'a_valider',
+      statut: 'acquis',
     },
     { onConflict: 'eleve_id,competence_id' }
   );
 
   if (error) {
-    toast('Erreur lors du déblocage', 'error');
-    if (btn) { btn.disabled = false; btn.textContent = 'Débloquer ✓'; }
+    toast('Erreur lors de la validation', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Valider ✓'; }
     return;
   }
 
-  // Déclenche le quiz de validation côté élève.
+  // Invite l'élève à un quiz-récap OPTIONNEL (notif). La compétence est déjà acquise ;
+  // faire le quiz ne change pas son statut (already_acquired) — c'est juste un rappel.
   // Via RPC SECURITY DEFINER : la policy notifications_insert interdit d'insérer
   // une notif pour autrui, donc le moniteur ne peut pas notifier l'élève en direct.
   const { error: errNotif } = await sb.rpc('send_quiz_notification', {
@@ -329,9 +330,9 @@ async function doValidate() {
     p_comp_nom: _selectedComp.n,
   });
   if (errNotif) {
-    // Le déblocage est OK, mais l'élève ne recevra pas le déclencheur quiz
+    // La validation est OK, mais l'élève ne recevra pas l'invitation quiz-récap
     console.error('[validation] send_quiz_notification failed', errNotif);
-    toast('Débloqué, mais notification non envoyée', 'warning');
+    toast('Validé, mais invitation quiz non envoyée', 'warning');
   }
 
   track('competence.validated', {
@@ -349,7 +350,7 @@ async function doValidate() {
   const nom = _eleve.nom || '';
   const ini = ((prenom[0] || '') + (nom[0] || '')).toUpperCase() || '?';
   toastAvatar({
-    title: `${prenom} ${nom}`.trim() + ' — quiz envoyé',
+    title: `${prenom} ${nom}`.trim() + ' — compétence validée',
     sub: `${_selectedComp.c} · ${_selectedComp.n}`,
     initials: ini,
     color: '#6366f1',
@@ -357,10 +358,10 @@ async function doValidate() {
     duration: 4000,
   });
 
-  // Pas d'XP au déblocage : le moniteur est crédité quand l'élève VALIDE
-  // sa compétence via le quiz (trigger sur transition a_valider → acquis).
+  // XP moniteur crédité immédiatement par le trigger credit_xp_moniteur_on_validation
+  // (INSERT/UPDATE statut='acquis'). Le quiz élève ne crédite plus la validation.
 
-  _aValiderIds.add(_selectedComp.c);
+  _validatedIds.add(_selectedComp.c);
   _selectedComp = null;
 
   render();
@@ -373,8 +374,8 @@ function render() {
     ${STYLE}
     <div class="vp anim-slide-up">
       <header class="vp-hd">
-        <h1 class="vp-h1">Débloquer une compétence</h1>
-        <p class="vp-sub">Tu débloques la compétence — l'élève la valide en réussissant son quiz.</p>
+        <h1 class="vp-h1">Valider une compétence</h1>
+        <p class="vp-sub">Tu valides la compétence — l'élève reçoit une invitation à un quiz-récap optionnel.</p>
       </header>
 
       <section class="step step-1">
@@ -445,7 +446,7 @@ function renderCategory(cat) {
           ].filter(Boolean).join(' ');
           let badgeHtml = '';
           if (done)         badgeHtml = Badges.acquis();
-          else if (pending) badgeHtml = badge('En attente quiz', { variant: 'warning', appearance: 'light', size: 'sm', shape: 'circle' });
+          else if (pending) badgeHtml = Badges.acquis();
           else if (sel)     badgeHtml = badge('Sélectionné', { variant: 'primary', appearance: 'light', size: 'sm', shape: 'circle', dot: true });
           else if (isNext)  badgeHtml = Badges.toValidate();
           else              badgeHtml = badge('À valider', { variant: 'secondary', appearance: 'light', size: 'sm', shape: 'circle' });
@@ -476,7 +477,7 @@ function renderCta() {
         <div class="cta-comp-nm">${esc(labelComp(_selectedComp.c))}</div>
         <div class="cta-for">pour <strong>${esc(_eleve?.prenom || '')}</strong></div>
       </div>
-      <button class="btn-validate" type="button">Débloquer ✓</button>
+      <button class="btn-validate" type="button">Valider ✓</button>
     </div>
   `;
   slot.querySelector('.btn-validate').addEventListener('click', doValidate);

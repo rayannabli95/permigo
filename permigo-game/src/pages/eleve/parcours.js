@@ -1699,12 +1699,8 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
     const open = () => {
       const compId   = n.dataset.comp;
       const worldIdx = parseInt(n.dataset.worldIdx, 10);
-      // a_valider nodes → direct vers le quiz
-      if (pendingMap?.[compId]) {
-        track('parcours.node_tap', { compId, worldIdx, status: 'a_valider' });
-        location.hash = `#/quiz/${compId}/post_validation`;
-        return;
-      }
+      // Le quiz n'est plus une porte : on ouvre toujours la fiche.
+      // Le quiz-récap (optionnel) se lance depuis la fiche d'une compétence acquise.
       openFiche(root, compId, worldStates[worldIdx], validatedMap, pendingMap);
       track('parcours.node_tap', { compId, worldIdx });
     };
@@ -1752,6 +1748,13 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   // Progression visuelle dans le monde (n / total)
   const pctInWorld = Math.round((compNum / total) * 100);
 
+  // Quiz-récap : rappel OPTIONNEL proposé sur une compétence acquise.
+  // Ne change pas le statut (already_acquired) — joue l'animation + crédite l'XP d'engagement.
+  const recapBtn = `
+    <a href="#/quiz/${esc(compId)}/post_validation" style="display:block;margin:12px 0 0;padding:13px;background:#fff;border:1.5px solid #6366f1;color:#4f46e5;border-radius:14px;font:700 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;">
+      Quiz-récap (optionnel) →
+    </a>`;
+
   // Bloc status contextuel selon état
   const statusBlock = (() => {
     if (st === 'done' && val) {
@@ -1769,7 +1772,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
             <div class="fiche-status-title">Compétence acquise</div>
             <div class="fiche-status-sub">${esc(parts.join(' · ') || 'Bravo, tu maîtrises cette compétence !')}</div>
           </div>
-        </div>`;
+        </div>${recapBtn}`;
     }
     if (st === 'done') {
       return `
@@ -1779,20 +1782,19 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
             <div class="fiche-status-title">Compétence acquise</div>
             <div class="fiche-status-sub">Bravo, tu maîtrises cette compétence.</div>
           </div>
-        </div>`;
+        </div>${recapBtn}`;
     }
     if (st === 'a_valider') {
+      // Legacy : ne devrait plus apparaître (validation moniteur = acquis direct).
+      // Affiché comme acquise + quiz-récap optionnel.
       return `
-        <div class="fiche-status next" style="--wc:#f59e0b">
-          <div class="fiche-status-ico">${icon('clipboard-check', { size: 18 })}</div>
+        <div class="fiche-status done">
+          <div class="fiche-status-ico">${icon('check', { size: 18 })}</div>
           <div class="fiche-status-body">
-            <div class="fiche-status-title" style="color:#b45309">Compétence débloquée !</div>
-            <div class="fiche-status-sub">Ton moniteur a validé la séance. Fais le quiz pour confirmer que tu maîtrises.</div>
+            <div class="fiche-status-title">Compétence acquise</div>
+            <div class="fiche-status-sub">Validée par ton moniteur.</div>
           </div>
-        </div>
-        <a href="#/quiz/${esc(compId)}/post_validation" style="display:block;margin:12px 0;padding:14px;background:#f59e0b;color:#fff;border-radius:14px;font:700 15px/1 'Inter',sans-serif;text-align:center;text-decoration:none;">
-          Faire le quiz →
-        </a>`;
+        </div>${recapBtn}`;
     }
     if (st === 'next') {
       return `
