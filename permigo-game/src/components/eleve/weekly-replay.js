@@ -48,7 +48,8 @@ export function maybePlayWeeklyReplay(stats) {
   const week = isoWeekKey();
   if (localStorage.getItem(LS_KEY) === week) return false;
 
-  if (!stats || (stats.hoursThisWeek === 0 && stats.compsValidated === 0)) return false;
+  const hrs = Number(stats?.hoursThisWeek) || 0;
+  if (!stats || (hrs === 0 && (stats.compsValidated || 0) === 0)) return false;
 
   track('weekly_replay.viewed', { comp_semaine: stats.compsValidated, streak: stats.streak });
   playReplay(stats);
@@ -61,8 +62,10 @@ export function playReplay(stats) {
   ensureStyles();
   if (document.querySelector('.wrep-overlay')) return;
 
-  const delta = stats.hoursLastWeek > 0
-    ? Math.round(((stats.hoursThisWeek - stats.hoursLastWeek) / stats.hoursLastWeek) * 100)
+  const hoursThisWeek = Number(stats.hoursThisWeek) || 0;
+  const hoursLastWeek = Number(stats.hoursLastWeek) || 0;
+  const delta = hoursLastWeek > 0
+    ? Math.round(((hoursThisWeek - hoursLastWeek) / hoursLastWeek) * 100)
     : null;
   const deltaText = delta === null ? null
     : delta > 0 ? `+${delta}% vs semaine dernière`
@@ -83,7 +86,7 @@ export function playReplay(stats) {
       bg: 'linear-gradient(180deg,#7c2d12 0%,#dc2626 50%,#f97316 100%)',
       content: `
         <div class="wrep-tag">🚗 TEMPS AU VOLANT</div>
-        <div class="wrep-big">${stats.hoursThisWeek.toFixed(1).replace(/\.0$/, '')}<small>h</small></div>
+        <div class="wrep-big">${hoursThisWeek.toFixed(1).replace(/\.0$/, '')}<small>h</small></div>
         <div class="wrep-medium">de conduite cette semaine</div>
         ${deltaText ? `<div class="wrep-meta">${esc(deltaText)}</div>` : ''}
       `,
