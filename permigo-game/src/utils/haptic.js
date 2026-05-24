@@ -2,6 +2,7 @@
 // Haptic feedback — vibrations courtes pour actions critiques
 // Apple-style : court, discret, jamais long
 // ═══════════════════════════════════════════════════════════════
+import { playClick, playSuccess, playError } from '@/utils/sound.js';
 
 const HAS_VIBRATE = typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
 
@@ -18,12 +19,17 @@ const PATTERNS = {
 };
 
 /**
- * Déclenche un feedback haptique court.
- * Silencieux si non supporté ou si le user a désactivé les anims réduites.
+ * Déclenche un feedback haptique court + son d'interface.
+ * Vibration silencieuse si non supporté ou prefers-reduced-motion.
+ * Son ignoré si l'utilisateur a désactivé les sons (localStorage).
  * @param {'tap'|'select'|'success'|'warning'|'swipe'|'longpress'} type
  */
 export function haptic(type = 'tap') {
-  if (!HAS_VIBRATE) return;
-  if (matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-  try { navigator.vibrate(PATTERNS[type] || PATTERNS.tap); } catch {}
+  if (HAS_VIBRATE && !matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    try { navigator.vibrate(PATTERNS[type] || PATTERNS.tap); } catch {}
+  }
+  // swipe exclu : déclenché sur chaque pixel, trop fréquent pour un son
+  if (type === 'success')       playSuccess();
+  else if (type === 'warning')  playError();
+  else if (type !== 'swipe')    playClick();
 }

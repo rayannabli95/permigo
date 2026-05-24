@@ -13,6 +13,7 @@ import { navigate }    from '@/router.js';
 import { icon }        from '@/utils/icons.js';
 import { toast }       from '@/components/common/toast.js';
 import { getMyChests, openChest } from '@/utils/game-state.js';
+import { playCoin } from '@/utils/sound.js';
 import { openChestModal, ensureChestStyles }   from '@/components/eleve/chest.js';
 
 // ─── Metadata par type de coffre ─────────────────────────────────
@@ -321,6 +322,7 @@ export async function mount(root) {
 
     const triggerOpen = async () => {
       track('chest.opened_from_page', { chest_type: chestType });
+      playCoin();
 
       const markOpened = () => {
         card.classList.remove('mc-can-open');

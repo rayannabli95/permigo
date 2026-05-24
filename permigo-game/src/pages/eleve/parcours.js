@@ -14,6 +14,7 @@ import { getCompDetail } from '@/data/remc-details.js';
 import { icon } from '@/utils/icons.js';
 import { renderChest, openChestModal, ensureChestStyles } from '@/components/eleve/chest.js';
 import { unlockChest, openChest, getMyChests, markChestOpened } from '@/utils/game-state.js';
+import { playParcours } from '@/utils/sound.js';
 
 const isNight = (() => { const h = new Date().getHours(); return h >= 20 || h < 7; })();
 const WORLD_BG = (num) => `/skins/landing/monde${num}${isNight ? 'nuit' : 'jour'}.webp`;
@@ -1161,6 +1162,7 @@ export async function mount(root) {
   if (!me) return;
 
   track('page.view', { page: 'eleve_parcours' });
+  playParcours();
 
   root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div><div class="prc-subtitle">31 compétences · Permis B</div></div></div><div style="padding:32px;text-align:center;color:#94a3b8">Chargement…</div></div>`;
 

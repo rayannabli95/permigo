@@ -24,6 +24,7 @@
 import { esc } from '@/utils/escape.js';
 import { ASSETS } from '@/utils/assets.js';
 import { haptic } from '@/utils/haptic.js';
+import { playReward } from '@/utils/sound.js';
 import { track } from '@/services/analytics.js';
 
 const STYLE_ID = 'celebrate-screen-style';
@@ -317,8 +318,9 @@ export function showCelebrate(opts = {}) {
     renderConfetti(overlay, 24);
     document.body.appendChild(overlay);
 
-    // Haptic à l'ouverture
-    try { haptic('success'); } catch {}
+    // Vibration + son de récompense à l'ouverture (playReward seul — pas de double son)
+    try { if (navigator.vibrate) navigator.vibrate([10, 50, 18]); } catch {}
+    playReward();
 
     // Force reflow puis classe show pour déclencher les transitions
     void overlay.offsetWidth;
