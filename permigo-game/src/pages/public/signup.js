@@ -277,32 +277,20 @@ function renderForm(root, invitation, token) {
     submitBtn.textContent = 'Activation…';
 
     try {
-      // 1. Sign up Supabase Auth
-      const { data: authData, error: authErr } = await sb.auth.signUp({
+      // 1. Sign up — le trigger handle_new_user_signup crée le profil "nu"
+      //    avec prenom + role depuis les metadata.
+      const { error: authErr } = await sb.auth.signUp({
         email: invitation.email,
         password: pwdEl.value,
+        options: { data: { prenom: prenomEl.value.trim(), role: invitation.role } },
       });
       if (authErr) throw authErr;
-      const authUserId = authData?.user?.id;
-      if (!authUserId) throw new Error('Auth user non créé');
 
-      // 2. Créer le profil (rôle + auto_ecole hérités de l'invitation)
-      const { error: profErr } = await sb.from('profiles').insert({
-        auth_id: authUserId,
-        email: invitation.email,
-        prenom: prenomEl.value.trim(),
-        role: invitation.role,
-        auto_ecole_id: invitation.auto_ecole_id,
-        enseignant_id: invitation.enseignant_attitre_id || null,
-      });
-      if (profErr) {
-        // Si le profile existe déjà (trigger handle_new_user_signup), on ignore
-        if (!/duplicate|unique/i.test(profErr.message || '')) throw profErr;
-      }
-
-      // 3. Marquer l'invitation comme acceptée (via RPC sécurisée)
-      const { error: acceptErr } = await sb.rpc('accept_invitation', { p_token: token });
-      if (acceptErr) console.warn('[signup] accept_invitation', acceptErr.message);
+      // 2. accept_invitation rattache le profil (role, auto_ecole_id, enseignant_id)
+      //    et vérifie que l'email du compte correspond à l'invitation.
+      const { data: accepted, error: acceptErr } = await sb.rpc('accept_invitation', { p_token: token });
+      if (acceptErr) throw acceptErr;
+      if (accepted === false) throw new Error('Lien invalide ou email ne correspond pas');
 
       track('signup.completed', { role: invitation.role, from: 'invitation' });
 
