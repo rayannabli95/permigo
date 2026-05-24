@@ -5,6 +5,7 @@
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { analyticsConsentGranted } from '@/components/common/cookie-banner.js';
+import { phCapture } from '@/services/posthog.js';
 
 const DEBUG = import.meta.env.DEV;
 const queue = [];
@@ -37,6 +38,7 @@ export function track(name, props = {}) {
 
   queue.push(evt);
   schedule();
+  phCapture(name, props);  // mirror vers PostHog (events métier unifiés)
 }
 
 function schedule() {
