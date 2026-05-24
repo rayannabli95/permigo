@@ -657,7 +657,6 @@ export async function mount(root) {
     const streak         = streakRes.value?.data   || { current_streak: 0, last_activity_date: null, longest_streak: 0 };
     const allValRows     = validRes.value?.data || [];
     const validated      = new Set(allValRows.filter(v => v.statut === 'acquis').map(v => v.competence_id));
-    const aValider       = allValRows.filter(v => v.statut === 'a_valider').map(v => v.competence_id);
     const pendingNotif   = notifRes.value?.data?.[0] || null;
     const activityDays   = buildActivityData(attemptsRes.value?.data || [], streak);
     const pendingSessions = pendingSessionsRes.value?.data || [];
@@ -674,8 +673,8 @@ export async function mount(root) {
     track('streak.viewed', { days: streak.current_streak, status: streakSt });
 
     root.innerHTML = render({ me, profile, lvl, streak, streakSt, worlds, trophees,
-                              activityDays, gemmes, pendingSessions, todayQuests, pendingNotif, aValider });
-    wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, todayQuests, pendingNotif, aValider });
+                              activityDays, gemmes, pendingSessions, todayQuests, pendingNotif });
+    wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, todayQuests, pendingNotif });
 
     const accDiv = root.querySelector('.acc2');
 
@@ -751,7 +750,7 @@ function streakStatus(streak) {
 
 // ─── Render ───────────────────────────────────────────────────────
 function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
-                  activityDays, gemmes, pendingSessions, todayQuests, pendingNotif, aValider }) {
+                  activityDays, gemmes, pendingSessions, todayQuests, pendingNotif }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom   = profile.prenom || me.prenom || 'Toi';
   const initials = prenom.slice(0, 2).toUpperCase();
@@ -765,7 +764,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
 
   // ── BLOC 3 content ──
   const quest = todayQuests?.[0] ?? null;
-  const bloc3 = renderActionDuJour(quest, pendingNotif, totalValidated, aValider);
+  const bloc3 = renderActionDuJour(quest, pendingNotif, totalValidated);
 
   return `${STYLE}
 <div class="acc2">
@@ -974,18 +973,13 @@ function renderNextReward(totalValidated, worlds, trophees) {
     </div>`;
 }
 
-function renderActionDuJour(quest, pendingNotif, totalValidated, aValider) {
+function renderActionDuJour(quest, pendingNotif, totalValidated) {
   let label = 'Action du jour';
   let title, sub, btnText, href, urgent = false;
 
-  if (aValider?.length > 0) {
-    const compId = aValider[0];
-    title   = 'Valide ta compétence';
-    sub     = `Fais le quiz de ${compId.toUpperCase()} pour confirmer ta maîtrise`;
-    btnText = 'Faire le quiz →';
-    href    = `#/quiz/${compId}/post_validation`;
-    urgent  = true;
-  } else if (quest) {
+  // Le quiz n'est plus une porte de validation : on ne pousse plus 'a_valider' en URGENT.
+  // L'invitation au quiz-récap (optionnel) vient d'une notif quiz non lue.
+  if (quest) {
     title   = quest.label ?? 'Quiz disponible';
     sub     = quest.sub ?? '';
     btnText = 'Commencer →';
@@ -993,9 +987,9 @@ function renderActionDuJour(quest, pendingNotif, totalValidated, aValider) {
     urgent  = quest.type === 'consolidation_quiz';
   } else if (pendingNotif?.data?.competence_id) {
     const isConsolid = pendingNotif.type === 'consolidation_quiz';
-    title   = isConsolid ? 'Quiz de consolidation' : 'Quiz post-validation';
-    sub     = isConsolid ? '2 questions · 30 secondes · Renforce ta mémoire' : '3 questions · Prouve que tu maîtrises !';
-    btnText = 'Commencer maintenant →';
+    title   = isConsolid ? 'Quiz de consolidation' : 'Quiz-récap (optionnel)';
+    sub     = isConsolid ? '2 questions · 30 secondes · Renforce ta mémoire' : 'Compétence déjà acquise — un petit récap pour le plaisir.';
+    btnText = isConsolid ? 'Commencer maintenant →' : 'Faire le récap →';
     href    = `#/quiz/${pendingNotif.data.competence_id}/${isConsolid ? 'consolidation' : 'post_validation'}`;
     urgent  = isConsolid;
   } else if (totalValidated === 0) {
@@ -1027,7 +1021,7 @@ function renderActionDuJour(quest, pendingNotif, totalValidated, aValider) {
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
-function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, todayQuests, pendingNotif, aValider }) {
+function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, todayQuests, pendingNotif }) {
   // XP bar animation
   const xpFill = root.querySelector('.acc2-xp-fill[data-target]');
   if (xpFill) setTimeout(() => { xpFill.style.width = xpFill.dataset.target + '%'; }, 120);
