@@ -4,7 +4,7 @@
  * Inspiré de Linear / Stripe / Vercel. Très premium, ~3kb, GPU-accelerated.
  *
  * Usage :
- *   import { renderMeshBg, MESH_BG_CSS } from '@/components/mesh-bg.js';
+ *   import { renderMeshBg, MESH_BG_CSS } from '@/components/common/mesh-bg.js';
  *
  *   // Dans le <style> de la page :
  *   ${MESH_BG_CSS}

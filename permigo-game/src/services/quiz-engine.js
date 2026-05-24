@@ -5,7 +5,7 @@
 import { sb } from '@/auth/auth.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
-import { burstConfetti } from '@/components/confetti.js';
+import { burstConfetti } from '@/components/common/confetti.js';
 
 /**
  * @param {Object} opts

@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb }         from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
-import { toast }      from '@/components/toast.js';
+import { toast }      from '@/components/common/toast.js';
 import { esc }        from '@/utils/escape.js';
 import { track }      from '@/services/analytics.js';
 import { navigate }   from '@/router.js';
@@ -690,7 +690,7 @@ async function _handleSubmit(root) {
 
     // Celebrate léger puis retour
     try {
-      const { mountCelebrate } = await import('@/components/celebrate-screen.js');
+      const { mountCelebrate } = await import('@/components/common/celebrate-screen.js');
       mountCelebrate?.({ duration: 500 });
     } catch { /* composant optionnel */ }
 

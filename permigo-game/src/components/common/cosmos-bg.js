@@ -11,7 +11,7 @@
  * Aucune dépendance externe — perfs mobiles garanties.
  *
  * Usage :
- *   import { mountCosmos, unmountCosmos } from '@/components/cosmos-bg.js';
+ *   import { mountCosmos, unmountCosmos } from '@/components/common/cosmos-bg.js';
  *   const cosmos = mountCosmos(parentEl);  // monte un <canvas> position:absolute
  *   cosmos.destroy();                       // cleanup
  */

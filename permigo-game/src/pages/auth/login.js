@@ -11,7 +11,7 @@
  */
 
 import { sb, login, loginWithOtp, verifyOtp } from '@/auth/auth.js';
-import { toast } from '@/components/toast.js';
+import { toast } from '@/components/common/toast.js';
 import { esc } from '@/utils/escape.js';
 import { getCurUser } from '@/auth/cur-user.js';
 
@@ -392,8 +392,8 @@ function wire(root) {
     setTimeout(async () => {
       const [{ route }, { mountBottomNav }, { mountHeader }] = await Promise.all([
         import('@/router.js'),
-        import('@/components/nav-bottom.js'),
-        import('@/components/header-top.js'),
+        import('@/components/common/nav-bottom.js'),
+        import('@/components/common/header-top.js'),
       ]);
       const me = getCurUser();
       // Force la home : set le hash ET appelle route() direct (sinon hashchange ne fire pas si hash déjà = #/)

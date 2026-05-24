@@ -3,7 +3,7 @@
 // Dopamine mémoire espacée : 3 compétences à réviser
 //
 // Usage :
-//   import { mountRevisionCards } from '@/components/revision-cards.js';
+//   import { mountRevisionCards } from '@/components/eleve/revision-cards.js';
 //   await mountRevisionCards(root, { eleveId, limit });
 //
 // RPC : get_revision_recommendations(p_eleve_id, p_limit)

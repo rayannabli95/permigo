@@ -5,7 +5,7 @@
  * 5 cards qui s'enchaînent : intro, heures, comp, top moment, CTA continue.
  *
  * Usage :
- *   import { maybePlayWeeklyReplay } from '@/components/weekly-replay.js';
+ *   import { maybePlayWeeklyReplay } from '@/components/eleve/weekly-replay.js';
  *   maybePlayWeeklyReplay({ stats: {...} });  // affiche si pas encore vu cette semaine
  *
  * Stats requises :
@@ -13,7 +13,7 @@
  */
 
 import { esc } from '@/utils/escape.js';
-import { burstConfetti } from '@/components/confetti.js';
+import { burstConfetti } from '@/components/common/confetti.js';
 import { track } from '@/services/analytics.js';
 
 const LS_KEY = 'pg-replay-week';

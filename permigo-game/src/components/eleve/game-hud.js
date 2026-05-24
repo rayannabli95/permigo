@@ -9,7 +9,7 @@
  *  - Gemmes (placeholder, display only)
  *
  * Usage :
- *   import { renderGameHUD, wireGameHUD } from '@/components/game-hud.js';
+ *   import { renderGameHUD, wireGameHUD } from '@/components/eleve/game-hud.js';
  *   parent.innerHTML += renderGameHUD(stats, me);
  *   wireGameHUD(parent);
  */

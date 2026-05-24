@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
-import { toast } from '@/components/toast.js';
+import { toast } from '@/components/common/toast.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';

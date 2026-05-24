@@ -5,7 +5,7 @@
  * le glow s'allume, le titre monte. Pure vanilla JS + CSS (pas de framer-motion).
  *
  * Usage :
- *   import { renderLampSection } from '@/components/lamp-section.js';
+ *   import { renderLampSection } from '@/components/common/lamp-section.js';
  *   const html = renderLampSection({ title: '...', sub: '...' });
  *
  * Puis appeler `wireLampReveal(rootEl)` après injection dans le DOM.

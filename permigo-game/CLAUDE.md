@@ -99,11 +99,16 @@ Toute action utilisateur significative est trackée dans la table `events_analyt
 - ❌ Express / Node serveur (Supabase suffit pour tout)
 - ❌ JSX (tout reste en `.js` avec template literals)
 
-### Modules métier (organisation `src/modules/`)
-1. **pedagogie** : système Triple Validation (quiz post-validation, consolidation 48h, score cognitif)
-2. **progression** : parcours REMC visuel, streak, XP, trophées, gemmes
+### Modules métier (maintenant dans `src/services/`)
+1. **pedagogie** : système Triple Validation → `src/services/quiz-engine.js`
+2. **progression** : streak, XP, actions quotidiennes → `src/services/daily-action.js`
 3. **enseignant** : 1 écran simple "Mes élèves + bouton valider compétence"
 4. **gerant** : dashboard "Pulse école" avec 4 KPI
+
+### Composants (`src/components/`)
+- `common/` — partagés (toast, header-top, nav-bottom, confetti, badge…)
+- `eleve/` — spécifiques élève (chest, game-hud, reward-reveal, weekly-replay…)
+- `enseignant/` — spécifiques moniteur (log-session-fab, moniteur-ranking…)
 
 ---
 
@@ -111,12 +116,12 @@ Toute action utilisateur significative est trackée dans la table `events_analyt
 
 ### Quand tu ouvres une session
 1. Lis ce fichier (déjà fait)
-2. Lis `PRODUCT.md` et `ROADMAP.md` (pour comprendre où on en est)
+2. Lis `docs/PRODUCT.md` et `docs/ROADMAP.md` (pour comprendre où on en est)
 3. Vérifie `git status` (commits non poussés)
 4. Annonce à l'utilisateur : "*Je reprends sur [contexte]. Voici ce que je vais faire : [plan]*"
 
 ### Avant de coder une feature
-1. Vérifie qu'elle correspond à `ROADMAP.md` (V1 / V2 / V3)
+1. Vérifie qu'elle correspond à `docs/ROADMAP.md` (V1 / V2 / V3)
 2. Vérifie qu'elle respecte les 5 règles non-négociables ci-dessus
 3. Cherche dans le code existant si un composant similaire existe (réutiliser > recoder)
 4. Code, teste localement, commit avec message descriptif
@@ -126,7 +131,7 @@ Toute action utilisateur significative est trackée dans la table `events_analyt
 // src/pages/<role>/<nom>.js
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
-import { toast } from '@/components/toast.js';
+import { toast } from '@/components/common/toast.js';
 import { esc } from '@/utils/escape.js';
 import { trackEvent } from '@/services/analytics.js';
 
@@ -147,12 +152,12 @@ export async function mount(root, ...args) {
 - **`esc()` partout** sur les données user dans `innerHTML` (sinon XSS)
 - **`mount(root)` exporté** (pas de side effects au import)
 - **CSS scoped** via `<style>` inline dans la page
-- **Animations** : utilise les composants de `src/components/` (mesh-bg, reward-reveal, etc.)
+- **Animations** : utilise les composants de `src/components/common/` (mesh-bg) et `src/components/eleve/` (reward-reveal, etc.)
 - **Erreurs** : `try/catch` autour de chaque opération Supabase. Toast en cas d'erreur.
 
 ---
 
-## 🗃 Structure DB Supabase (cf. `ARCHITECTURE.md` pour détails)
+## 🗃 Structure DB Supabase (cf. `docs/ARCHITECTURE.md` pour détails)
 
 **Tables principales** :
 - `profiles` (auth + rôles + crédit d'heures)
@@ -168,7 +173,7 @@ export async function mount(root, ...args) {
 
 ---
 
-## 🎨 Design system (cf. `DESIGN_SYSTEM.md`)
+## 🎨 Design system (cf. `docs/DESIGN_SYSTEM.md`)
 
 - **Couleurs** : indigo `#6366f1`, violet `#8b5cf6`, cyan `#06b6d4`, fond `#0a0d1a`
 - **Typo** : Plus Jakarta Sans (titres) + Inter (corps) + IBM Plex Mono (chiffres)
@@ -178,7 +183,7 @@ export async function mount(root, ...args) {
 
 ---
 
-## 🚀 Roadmap (cf. `ROADMAP.md` pour détails)
+## 🚀 Roadmap (cf. `docs/ROADMAP.md` pour détails)
 
 ### V1 (en cours) — Le MVP "Triple Validation"
 - Module pedagogie complet

@@ -2,7 +2,7 @@
  * Theme toggle — bouton soleil/lune pour switch light/dark.
  *
  * Usage :
- *   import { initTheme, mountThemeToggle } from '@/components/theme-toggle.js';
+ *   import { initTheme, mountThemeToggle } from '@/components/common/theme-toggle.js';
  *   initTheme();                            // appelé au boot (avant le 1er render)
  *   mountThemeToggle(parentEl);             // monte le bouton dans un parent
  *

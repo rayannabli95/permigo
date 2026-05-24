@@ -11,9 +11,9 @@ import { esc }         from '@/utils/escape.js';
 import { track }       from '@/services/analytics.js';
 import { navigate }    from '@/router.js';
 import { icon }        from '@/utils/icons.js';
-import { toast }       from '@/components/toast.js';
+import { toast }       from '@/components/common/toast.js';
 import { getMyChests, openChest } from '@/utils/game-state.js';
-import { openChestModal, ensureChestStyles }   from '@/components/chest.js';
+import { openChestModal, ensureChestStyles }   from '@/components/eleve/chest.js';
 
 // ─── Metadata par type de coffre ─────────────────────────────────
 const CHEST_META = {

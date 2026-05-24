@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // Router minimal — route selon role + hash
 // ═══════════════════════════════════════════════════════════════
-import { unmountLogSessionFab } from '@/components/log-session-fab.js';
+import { unmountLogSessionFab } from '@/components/enseignant/log-session-fab.js';
 
 const ROUTES = {
   eleve: {

@@ -2,7 +2,7 @@
 // Avatar Picker — bottom sheet pour choisir parmi 6 avatars par défaut
 //
 // Usage :
-//   import { openAvatarPicker } from '@/components/avatar-picker.js';
+//   import { openAvatarPicker } from '@/components/common/avatar-picker.js';
 //   const url = await openAvatarPicker({ currentUrl: me.avatar_url });
 //   if (url) await sb.from('profiles').update({ avatar_url: url }).eq('id', me.id);
 //

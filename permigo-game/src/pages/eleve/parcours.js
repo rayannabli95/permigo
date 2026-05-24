@@ -12,7 +12,7 @@ import { WORLDS } from '@/data/worlds.js';
 import { ASSETS } from '@/utils/assets.js';
 import { getCompDetail } from '@/data/remc-details.js';
 import { icon } from '@/utils/icons.js';
-import { renderChest, openChestModal, ensureChestStyles } from '@/components/chest.js';
+import { renderChest, openChestModal, ensureChestStyles } from '@/components/eleve/chest.js';
 import { unlockChest, openChest, getMyChests, markChestOpened } from '@/utils/game-state.js';
 
 const isNight = (() => { const h = new Date().getHours(); return h >= 20 || h < 7; })();

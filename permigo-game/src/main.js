@@ -7,12 +7,12 @@ import { getCurUser } from '@/auth/cur-user.js';
 import { route } from '@/router.js';
 import { track } from '@/services/analytics.js';
 import { startNotifListener } from '@/services/notif-listener.js';
-import { toast } from '@/components/toast.js';
-import { mountHeader } from '@/components/header-top.js';
-import { mountBottomNav } from '@/components/nav-bottom.js';
+import { toast } from '@/components/common/toast.js';
+import { mountHeader } from '@/components/common/header-top.js';
+import { mountBottomNav } from '@/components/common/nav-bottom.js';
 import { initThemeEarly, syncFromPrefs } from '@/utils/theme.js';
 import { initGameState, initEquippedTheme } from '@/utils/game-state.js';
-import { mountCookieBanner } from '@/components/cookie-banner.js';
+import { mountCookieBanner } from '@/components/common/cookie-banner.js';
 
 // Apply saved/system theme before any rendering (reads localStorage, synchronous)
 initThemeEarly();

@@ -8,7 +8,7 @@ import { sb }    from '@/auth/auth.js';
 import { esc }   from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { icon }  from '@/utils/icons.js';
-import { toast } from '@/components/toast.js';
+import { toast } from '@/components/common/toast.js';
 
 const STYLE_ID = 'daily-quests-style';
 
