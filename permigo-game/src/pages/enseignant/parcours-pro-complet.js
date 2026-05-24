@@ -11,6 +11,7 @@ import { navigate } from '@/router.js';
 import { getMoniteurState, buildTimelineStops } from '@/data/moniteur-levels.js';
 import { haptic } from '@/utils/haptic.js';
 import { icon } from '@/utils/icons.js';
+import { openPalierSheet } from '@/components/common/palier-sheet.js';
 
 // ─── CSS ────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -188,25 +189,10 @@ const STYLE = `<style>
 }
 .epcf-stop-reward-txt strong { font-weight: 700; }
 
-/* Tier locked (tiers 8-10 non débloqués) */
-.epcf-stop.tier-locked .epcf-stop-dot,
-.epcf-stop.tier-locked .epcf-stop-reward,
-.epcf-stop.tier-locked .epcf-stop-title {
-  filter: blur(4px) saturate(.5);
-  opacity: .7;
-}
-.epcf-stop.tier-locked .epcf-stop-body::after {
-  content: '🔒 Mystère';
-  display: inline-block;
-  font: 600 10px/1 'Inter', sans-serif;
-  color: var(--mu2);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  margin-top: 6px;
-  background: rgba(148,163,184,.12);
-  padding: 4px 8px;
-  border-radius: 99px;
-}
+/* Stop cliquable → ouvre le détail du palier */
+.epcf-stop[role="button"] { cursor: pointer; -webkit-tap-highlight-color: transparent; border-radius: 12px; transition: background .12s; }
+.epcf-stop[role="button"]:active { background: rgba(99,102,241,.06); }
+.epcf-stop:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 /* Cercle Or halo */
 .epcf-stop.cercle-or.done .epcf-stop-dot {
@@ -306,6 +292,22 @@ export async function mount(root) {
     navigate('#/parcours');
   });
 
+  // Clic / clavier sur un stop → sheet de détail du palier
+  const openFromStop = (el) => {
+    const tierNum = parseInt(el.dataset.tier, 10);
+    const stop = stops.find(s => s.tier.tier === tierNum);
+    if (!stop) return;
+    haptic('select');
+    track('parcours_complet.tier_detail', { tier: tierNum });
+    openPalierSheet(stop.tier, totalValidations);
+  };
+  root.querySelectorAll('.epcf-stop[data-tier]').forEach(el => {
+    el.addEventListener('click', () => openFromStop(el));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFromStop(el); }
+    });
+  });
+
   // Scroll vers le stop "now" si présent
   const nowStop = root.querySelector('.epcf-stop.now');
   if (nowStop) {
@@ -316,28 +318,15 @@ export async function mount(root) {
 // ─── Render helpers ─────────────────────────────────────────────
 
 function renderStop(stop, totalValidations) {
-  const isMajor = stop.kind === 'tier';
-  const tierNum = isMajor ? stop.tier.tier : 0;
+  // Tiers uniquement (plus de skin, plus de blur « Mystère »)
+  const tierNum = stop.tier.tier;
+  const cls = totalValidations >= stop.threshold ? 'done' : 'todo';
+  const isCercleOr = tierNum === 10;
+  const iconName = stop.tier.unlock.iconName;
 
-  let cls = totalValidations >= stop.threshold ? 'done' : 'todo';
-  const tierLocked = isMajor && tierNum >= 8 && cls !== 'done';
-  const isCercleOr = isMajor && tierNum === 10;
-
-  const iconName = isMajor ? stop.tier.unlock.iconName : 'sparkle';
-
-  // Dot content
-  let dotContent;
-  if (cls === 'done') {
-    dotContent = isMajor
-      ? icon('check', { size: 16, strokeWidth: 3 })
-      : (stop.skin?.image
-          ? `<img class="epcf-stop-skin-img" src="${esc(stop.skin.image)}" alt="" onerror="this.style.display='none'">`
-          : icon('check', { size: 16, strokeWidth: 3 }));
-  } else if (isMajor) {
-    dotContent = icon(iconName, { size: 15, strokeWidth: 2 });
-  } else {
-    dotContent = `<span style="width:8px;height:8px;border-radius:50%;background:${esc(stop.skin?.accent || '#cbd5e1')}"></span>`;
-  }
+  const dotContent = cls === 'done'
+    ? icon('check', { size: 16, strokeWidth: 3 })
+    : icon(iconName, { size: 15, strokeWidth: 2 });
 
   // Cost badge
   const diff = stop.threshold - totalValidations;
@@ -345,8 +334,8 @@ function renderStop(stop, totalValidations) {
     ? `<span class="epcf-stop-cost done">Atteint · ${stop.threshold} valid.</span>`
     : `<span class="epcf-stop-cost todo">+${diff} validation${diff > 1 ? 's' : ''}</span>`;
 
-  // Reward line
-  const rewardLine = isMajor ? `
+  // Reward line — toujours un outil utile
+  const rewardLine = `
     <div class="epcf-stop-reward ${cls === 'done' ? 'unlocked' : ''}">
       <span class="epcf-stop-reward-ico">${icon(iconName, { size: 14, strokeWidth: 2.4 })}</span>
       <span class="epcf-stop-reward-txt">
@@ -354,33 +343,24 @@ function renderStop(stop, totalValidations) {
         <strong>${esc(stop.tier.unlock.name)}</strong>
       </span>
     </div>
-  ` : (stop.skin ? `
-    <div class="epcf-stop-reward${cls === 'done' ? ' unlocked' : ''}" style="border-color:${esc(stop.skin.accent)}44;background:${esc(stop.skin.accent)}10;color:${esc(stop.skin.accent)}">
-      ${stop.skin.image ? `<img class="epcf-stop-skin-img" src="${esc(stop.skin.image)}" alt="" onerror="this.style.display='none'">` : ''}
-      <span class="epcf-stop-reward-txt">
-        ${cls === 'done' ? 'Skin débloqué : ' : 'Skin : '}
-        <strong>${esc(stop.skin.name)}</strong>
-      </span>
-    </div>
-  ` : '');
+  `;
 
   const classList = [
     'epcf-stop',
     cls,
-    isMajor ? 'tier' : 'skin',
-    tierLocked ? 'tier-locked' : '',
+    'tier',
     isCercleOr ? 'cercle-or' : '',
   ].filter(Boolean).join(' ');
 
   return `
-    <div class="${classList}">
+    <div class="${classList}" data-tier="${stop.tier.tier}" role="button" tabindex="0" aria-label="Détail du palier ${stop.tier.tier}">
       <div class="epcf-stop-dot">${dotContent}</div>
       <div class="epcf-stop-body">
         <div class="epcf-stop-head">
-          <span class="epcf-stop-lvl">${isMajor ? `Palier ${stop.tier.tier}` : `${stop.threshold} valid.`}</span>
+          <span class="epcf-stop-lvl">Palier ${stop.tier.tier}</span>
           ${costLine}
         </div>
-        ${isMajor ? `<div class="epcf-stop-title">${esc(stop.tier.title)}</div>` : ''}
+        <div class="epcf-stop-title">${esc(stop.tier.title)}</div>
         ${rewardLine}
       </div>
     </div>

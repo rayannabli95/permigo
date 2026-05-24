@@ -478,7 +478,7 @@ export async function mount(root) {
       avatarUrl: profile?.avatar_url || null,
       bannerUrl: profile?.banner_url || null,
       count: anneeStats.totalValidations, // pour calcul prestige (carrière)
-      bio: `Moniteur · ${anneeStats.elevesCount} élève${anneeStats.elevesCount > 1 ? 's' : ''} accompagné${anneeStats.elevesCount > 1 ? 's' : ''}`,
+      bio: `Enseignant · ${anneeStats.elevesCount} élève${anneeStats.elevesCount > 1 ? 's' : ''} suivi${anneeStats.elevesCount > 1 ? 's' : ''}`,
       stats: [
         { label: 'Validations', value: anneeStats.totalValidations },
         { label: 'Élèves',      value: anneeStats.elevesCount },
@@ -535,7 +535,7 @@ export async function mount(root) {
       </div>
       <div class="prf-kpi">
         <span class="prf-kpi-n">${anneeStats.elevesCount}</span>
-        <div class="prf-kpi-lbl">élèves accompagnés</div>
+        <div class="prf-kpi-lbl">élèves suivis</div>
       </div>
       <div class="prf-kpi">
         <span class="prf-kpi-n">${anneeStats.c3Count}</span>

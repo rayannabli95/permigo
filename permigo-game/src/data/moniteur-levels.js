@@ -1,59 +1,46 @@
 // ═══════════════════════════════════════════════════════════════
-// Moniteur — Système de progression v2
-// Modèle : basé sur # validations cumulées (pas XP)
-//   - 10 paliers majeurs tous les 50 validations (outils utiles débloqués)
-//   - 4 skins intermédiaires entre chaque palier (tous les 10 validations)
-//   - 12 saisons mensuelles (badge + wrap-up)
-// 500 validations = niveau max (Cercle Or)
+// Moniteur — Système de progression (vision V3 : Linear, pas Duolingo)
+// Modèle : basé sur # validations cumulées.
+//   - 10 paliers majeurs, titres pros, récompenses UTILES uniquement
+//     (exports, stats, templates, modules…) — JAMAIS de skin/cosmétique.
+//   - 12 saisons mensuelles (badge + wrap-up).
+// 300 validations = palier max (Expert REMC certifié).
+//
+// ⚠️ Antipatterns vision V3 n°2 & n°8 : aucune monnaie virtuelle, aucun
+//    skin, aucune récompense décorative. Monter de palier = débloquer un outil.
+//
+// Terminologie : « Enseignant » partout (jamais « Moniteur en route »).
+// Échelle : Démarrage → confirmé → chevronné → Référent pédagogique →
+//           Expert REMC (certifié au dernier palier).
 // ═══════════════════════════════════════════════════════════════
-
-const MAX_TIER   = 10;   // 10 paliers majeurs
-// 9 skins thématiques intercalés entre les paliers (1 entre chaque)
-// MAX_VAL calculé dynamiquement depuis MONITEUR_TIERS[9].threshold
 
 /**
  * 10 paliers majeurs — progression non-linéaire (HOOK rapide, MASTERY lente).
  *
- * Phase 1 — HOOK (jours 1-3) : 1er outil dès 10 validations
- * Phase 2 — ENGAGEMENT (semaines 1-4) : +30 entre chaque palier
- * Phase 3 — MASTERY (mois 2+) : +50 entre chaque palier
+ * Phase 1 — TUTO/HOOK (jours 1-2) : 1ers paliers à 3 / 8 / 15 validations.
+ * Phase 2 — ENGAGEMENT : montée régulière (30 → 50 → 80).
+ * Phase 3 — MASTERY (mois 2+) : 120 → 170 → 230 → 300.
  *
- * Cercle Or atteignable en ~1.5 mois actif (380 validations à 10/jour).
+ * Le champ unlock.desc est volontairement concret (2-3 infos) : il alimente
+ * le panneau de détail affiché au clic sur un palier (parcours-pro*).
  */
 export const MONITEUR_TIERS = [
-  // ─ Phase 1 HOOK ─
-  { tier: 1,  threshold: 10,  title: 'Moniteur en route',  unlock: { iconName: 'file-text',    name: 'Export PDF Livret',        desc: 'Export PDF personnalisé du livret élève' } },
-  // ─ Phase 2 ENGAGEMENT (+30) ─
-  { tier: 2,  threshold: 40,  title: 'Moniteur confirmé',  unlock: { iconName: 'chart-bar',    name: 'Stats avancées élèves',    desc: 'Tableaux de bord détaillés par élève' } },
-  { tier: 3,  threshold: 70,  title: 'Moniteur confirmé',  unlock: { iconName: 'clipboard',    name: 'Templates bilan pédago',   desc: 'Modèles de bilans mensuels prêts' } },
-  { tier: 4,  threshold: 100, title: 'Enseignant chevronné', unlock: { iconName: 'target',     name: 'Prépa examen enrichie',   desc: 'Mode préparation examen avec checkpoints' } },
-  { tier: 5,  threshold: 130, title: 'Enseignant chevronné', unlock: { iconName: 'trending-up', name: 'Analytics comparatives',  desc: 'Comparaison anonyme vs cohorte nationale' } },
-  // ─ Phase 3 MASTERY (+50) ─
-  { tier: 6,  threshold: 180, title: 'Référent pédagogique', unlock: { iconName: 'award',      name: 'Profil mis en avant',     desc: 'Ton profil remonte aux nouveaux élèves' } },
-  { tier: 7,  threshold: 230, title: 'Référent pédagogique', unlock: { iconName: 'book',       name: 'Modules formation',       desc: 'Accès aux modules de formation continue' } },
-  { tier: 8,  threshold: 280, title: 'Maître enseignant',    unlock: { iconName: 'users',      name: 'Programme mentorat',      desc: 'Accompagne d\'autres moniteurs débutants' } },
-  { tier: 9,  threshold: 330, title: 'Maître enseignant',    unlock: { iconName: 'shield',     name: 'Expert Hub',              desc: 'Communauté privée des experts REMC' } },
-  { tier: 10, threshold: 380, title: 'Expert REMC',          unlock: { iconName: 'sparkle',    name: 'Cercle Or',               desc: 'Statut Expert REMC certifié PermiGo' } },
+  // ─ Phase 1 TUTO/HOOK (early game rapide pour le hook) ─
+  { tier: 1,  threshold: 3,   title: 'Enseignant — Démarrage', unlock: { iconName: 'file-text',    name: 'Export PDF du livret élève',         desc: 'Génère un PDF propre du livret REMC d\'un élève (compétences acquises, dates, commentaires). Pratique pour un point parent ou un dossier examen.' } },
+  { tier: 2,  threshold: 8,   title: 'Enseignant confirmé',    unlock: { iconName: 'chart-bar',    name: 'Tableaux de bord détaillés par élève', desc: 'Une vue par élève : progression compétence par compétence, rythme d\'acquisition et points à retravailler, pour préparer la prochaine séance.' } },
+  { tier: 3,  threshold: 15,  title: 'Enseignant confirmé',    unlock: { iconName: 'clipboard',    name: 'Modèles de bilans mensuels',          desc: 'Des trames prêtes à remplir pour le bilan mensuel d\'un élève. Tu gagnes du temps et tu gardes une trace structurée de son évolution.' } },
+  // ─ Phase 2 ENGAGEMENT (montée régulière) ─
+  { tier: 4,  threshold: 30,  title: 'Enseignant chevronné',   unlock: { iconName: 'target',       name: 'Mode préparation à l\'examen',        desc: 'Un mode dédié à l\'approche de l\'examen : check-list des points sensibles et suivi des dernières compétences à sécuriser avant le jour J.' } },
+  { tier: 5,  threshold: 50,  title: 'Enseignant chevronné',   unlock: { iconName: 'users',        name: 'Vue d\'ensemble de tous tes élèves',   desc: 'Un tableau agrégé de toute ta classe : qui avance, qui stagne, qui est à relancer. Tu repères d\'un coup d\'œil où porter ton attention.' } },
+  // ─ Phase 3 MASTERY ─
+  { tier: 6,  threshold: 80,  title: 'Référent pédagogique',   unlock: { iconName: 'file-text',    name: 'Export groupé des livrets',           desc: 'Génère les PDF des livrets de plusieurs élèves en une seule fois. Idéal pour un bilan de fin de mois ou un dépôt de dossiers examen groupé.' } },
+  { tier: 7,  threshold: 120, title: 'Référent pédagogique',   unlock: { iconName: 'book',         name: 'Formation continue',                  desc: 'Accès aux modules de formation continue PermiGo : mises à jour REMC, pédagogie et nouveautés réglementaires.' } },
+  { tier: 8,  threshold: 170, title: 'Référent pédagogique',   unlock: { iconName: 'users',        name: 'Mentorat de nouveaux moniteurs',      desc: 'Tu peux accompagner les enseignants débutants de ton réseau : partage de méthodes et suivi de leurs premiers mois.' } },
+  { tier: 9,  threshold: 230, title: 'Expert REMC',            unlock: { iconName: 'shield',       name: 'Communauté privée experts REMC',      desc: 'Rejoins l\'espace privé des enseignants experts : échanges de cas concrets, ressources avancées et entraide entre pairs.' } },
+  { tier: 10, threshold: 300, title: 'Expert REMC certifié',   unlock: { iconName: 'trending-up',  name: 'Comparaison avec d\'autres écoles (anonyme)', desc: 'Le palier le plus élevé. Situe tes indicateurs (rythme, validations) par rapport à d\'autres auto-écoles, de façon totalement anonyme. Aucune donnée nominative.' } },
 ];
 
 const MAX_VAL = MONITEUR_TIERS[MONITEUR_TIERS.length - 1].threshold;
-
-/**
- * 9 skins thématiques — 1 entre chaque palier majeur (mi-chemin).
- * Images PNG attendues dans /public/skins/skin-XX.png (transparent 512x512).
- * Si l'image n'existe pas, on affiche juste l'accent color.
- */
-export const MONITEUR_SKINS = [
-  { threshold: 25,  slug: 'premier-kilometre', name: 'Premier kilomètre', accent: '#6366f1', image: '/skins/badge-3d-01.png' },
-  { threshold: 55,  slug: 'volant-souple',     name: 'Volant souple',     accent: '#3b82f6', image: '/skins/badge-3d-02.png' },
-  { threshold: 85,  slug: 'phares-allumes',    name: 'Phares allumés',    accent: '#06b6d4', image: '/skins/badge-3d-03.png' },
-  { threshold: 115, slug: 'boite-fluide',      name: 'Boîte fluide',      accent: '#10b981', image: '/skins/badge-3d-04.png' },
-  { threshold: 155, slug: 'carte-ouverte',     name: 'Carte ouverte',     accent: '#0ea5e9', image: '/skins/badge-3d-05.png' },
-  { threshold: 205, slug: 'compas-cale',       name: 'Compas calé',       accent: '#a855f7', image: '/skins/badge-3d-06.png' },
-  { threshold: 255, slug: 'tableau-pro',       name: 'Tableau pro',       accent: '#ec4899', image: '/skins/badge-3d-07.png' },
-  { threshold: 305, slug: 'maitre-artisan',    name: 'Maître artisan',    accent: '#f59e0b', image: '/skins/badge-3d-08.png' },
-  { threshold: 355, slug: 'couronne-discrete', name: 'Couronne discrète', accent: '#d946ef', image: '/skins/badge-3d-09.png' },
-];
 
 /**
  * 12 saisons = 12 mois.
@@ -79,12 +66,12 @@ export const SAISONS = [
  * @returns {{
  *   tier: {tier, threshold, title, unlock} | null,
  *   nextTier: {tier, threshold, title, unlock} | null,
- *   skin: {threshold, name, accent} | null,
- *   nextSkin: {threshold, name, accent} | null,
- *   nextReward: {kind: 'skin'|'tier', threshold, label, missing},
+ *   nextReward: {kind: 'tier', threshold, label, data, missing} | null,
  *   pctToNextReward: number,
  *   isMax: boolean,
- *   saison: {month, name, accent, badge}
+ *   saison: {month, name, accent, badge},
+ *   validations: number,
+ *   maxVal: number
  * }}
  */
 export function getMoniteurState(validations = 0) {
@@ -99,32 +86,22 @@ export function getMoniteurState(validations = 0) {
   const tierIdx = tier ? MONITEUR_TIERS.findIndex(t => t.tier === tier.tier) : -1;
   const nextTier = tierIdx + 1 < MONITEUR_TIERS.length ? MONITEUR_TIERS[tierIdx + 1] : null;
 
-  // Skin actuel (le dernier atteint)
-  let skin = null;
-  for (const s of MONITEUR_SKINS) {
-    if (safe >= s.threshold) skin = s; else break;
-  }
-  const skinIdx = skin ? MONITEUR_SKINS.findIndex(s => s.threshold === skin.threshold) : -1;
-  const nextSkin = skinIdx + 1 < MONITEUR_SKINS.length ? MONITEUR_SKINS[skinIdx + 1] : null;
-
-  // Prochaine récompense (peut être skin ou tier — on prend la + proche)
+  // Prochaine récompense = prochain palier (toujours un outil utile)
   let nextReward = null;
-  const candidates = [
-    nextSkin ? { kind: 'skin', threshold: nextSkin.threshold, label: 'Nouveau skin', data: nextSkin } : null,
-    nextTier ? { kind: 'tier', threshold: nextTier.threshold, label: nextTier.unlock.name, data: nextTier } : null,
-  ].filter(Boolean);
-  if (candidates.length > 0) {
-    nextReward = candidates.sort((a, b) => a.threshold - b.threshold)[0];
-    nextReward.missing = nextReward.threshold - safe;
+  if (nextTier) {
+    nextReward = {
+      kind: 'tier',
+      threshold: nextTier.threshold,
+      label: nextTier.unlock.name,
+      data: nextTier,
+      missing: nextTier.threshold - safe,
+    };
   }
 
   // Progression vers prochaine récompense (en %)
   let pctToNextReward = 100;
   if (nextReward) {
-    const prevThr = Math.max(
-      tier ? tier.threshold : 0,
-      skin ? skin.threshold : 0
-    );
+    const prevThr = tier ? tier.threshold : 0;
     const span = nextReward.threshold - prevThr;
     const done = safe - prevThr;
     pctToNextReward = span > 0 ? Math.max(0, Math.min(100, Math.round((done / span) * 100))) : 100;
@@ -136,8 +113,6 @@ export function getMoniteurState(validations = 0) {
   return {
     tier,
     nextTier,
-    skin,
-    nextSkin,
     nextReward,
     pctToNextReward,
     isMax: safe >= MAX_VAL,
@@ -148,24 +123,11 @@ export function getMoniteurState(validations = 0) {
 }
 
 /**
- * Liste plate pour afficher la timeline (paliers + skins intercalés, triés par threshold).
+ * Liste plate des paliers pour afficher la timeline.
+ * Tiers uniquement — plus aucun skin cosmétique (vision V3).
  */
 export function buildTimelineStops() {
-  const tierThresholds = new Set(MONITEUR_TIERS.map(t => t.threshold));
-  const stops = [];
-
-  // 1) Ajoute tous les paliers majeurs (tiers)
-  for (const t of MONITEUR_TIERS) {
-    stops.push({ threshold: t.threshold, kind: 'tier', tier: t, skin: null });
-  }
-
-  // 2) Ajoute tous les skins (qui ne sont pas sur un palier majeur)
-  for (const s of MONITEUR_SKINS) {
-    if (tierThresholds.has(s.threshold)) continue;
-    stops.push({ threshold: s.threshold, kind: 'skin', tier: null, skin: s });
-  }
-
-  // 3) Tri croissant par threshold
-  stops.sort((a, b) => a.threshold - b.threshold);
-  return stops;
+  return MONITEUR_TIERS
+    .map(t => ({ threshold: t.threshold, kind: 'tier', tier: t }))
+    .sort((a, b) => a.threshold - b.threshold);
 }

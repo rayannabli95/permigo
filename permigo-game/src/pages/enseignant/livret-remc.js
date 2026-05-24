@@ -11,6 +11,7 @@ import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { REMC, REMC_TOTAL } from '@/data/remc.js';
 import { icon } from '@/utils/icons.js';
+import { STATUT_CFG } from '@/utils/statut-label.js';
 
 // ─── Couleurs par monde ───────────────────────────────────────────
 const MONDE_COLORS = {
@@ -20,14 +21,7 @@ const MONDE_COLORS = {
   C4: { accent: '#10b981', bg: 'rgba(16,185,129,.07)', border: 'rgba(16,185,129,.2)' },
 };
 
-// ─── Statuts ──────────────────────────────────────────────────────
-const STATUT_CFG = {
-  acquis:         { label: 'Acquis',                color: '#059669', bg: 'rgba(16,185,129,.12)', dot: '#10b981' },
-  a_valider:      { label: 'À valider (legacy)',    color: '#b45309', bg: 'rgba(245,158,11,.12)', dot: '#f59e0b' },
-  en_cours:       { label: 'En cours',              color: '#b45309', bg: 'rgba(245,158,11,.12)', dot: '#f59e0b' },
-  a_retravailler: { label: 'À retravailler',        color: '#b91c1c', bg: 'rgba(239,68,68,.12)',  dot: '#ef4444' },
-  null:           { label: 'Non évalué',            color: 'var(--ink)', bg: 'var(--su2)',          dot: 'var(--bo)' },
-};
+// Mapping centralisé : @/utils/statut-label.js (STATUT_CFG importé)
 
 // ─── CSS (design clean — cohérent avec aujourdhui/mes-eleves/validation) ──
 const STYLE = `<style>

@@ -10,6 +10,7 @@ import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { REMC_TOTAL } from '@/data/remc.js';
 import { labelComp } from '@/utils/remc-label.js';
+import { statutCfg } from '@/utils/statut-label.js';
 import { icon, iconBadge } from '@/utils/icons.js';
 
 // ─── Gradients avatar ─────────────────────────────────────────────
@@ -24,12 +25,7 @@ const AVATARS = [
   'linear-gradient(135deg,#059669,#064e3b)',
 ];
 
-// ─── Statuts labels ───────────────────────────────────────────────
-const STATUT_LABEL = {
-  acquis:         { label: 'Acquis',         color: '#059669',  bg: 'rgba(16,185,129,.1)' },
-  en_cours:       { label: 'En cours',       color: '#d97706',  bg: 'rgba(245,158,11,.1)' },
-  a_retravailler: { label: 'À retravailler', color: '#dc2626',  bg: 'rgba(239,68,68,.1)' },
-};
+// ─── Statuts labels : mapping centralisé @/utils/statut-label.js ──
 
 // ─── CSS ──────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -122,6 +118,86 @@ const STYLE = `<style>
   .aj-widget.aj-widget-alert {
     border-color: rgba(245,158,11,.3);
     background: rgba(245,158,11,.03);
+  }
+
+  /* ── Hero « prochaine action » (sobre, mobile-first) ── */
+  .aj-hero {
+    background: var(--su);
+    border: 1px solid var(--bo);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 6px 16px -8px rgba(10,13,26,.08);
+    animation: ajWidgetIn .5s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .aj-hero-top { display: flex; align-items: flex-start; gap: 14px; }
+  .aj-hero-ico {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .aj-hero.tone-warn    .aj-hero-ico { background: rgba(245,158,11,.12); color: #d97706; }
+  .aj-hero.tone-ok      .aj-hero-ico { background: rgba(16,185,129,.12); color: #059669; }
+  .aj-hero.tone-neutral .aj-hero-ico { background: var(--bg2);           color: #6366f1; }
+  .aj-hero-body { flex: 1; min-width: 0; }
+  .aj-hero-kicker {
+    font: 600 11px/1 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--mu2);
+    margin-bottom: 6px;
+  }
+  .aj-hero-title {
+    font: 700 18px/1.25 'Plus Jakarta Sans', sans-serif;
+    color: var(--ink);
+    letter-spacing: -.02em;
+    margin: 0 0 4px;
+  }
+  .aj-hero-sub {
+    font: 500 13px/1.4 'Inter', sans-serif;
+    color: var(--mu);
+    margin: 0;
+  }
+  .aj-hero-cta {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 13px;
+    background: #6366f1;
+    color: #fff;
+    font: 600 14px/1 'Inter', sans-serif;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .12s, background .12s;
+    min-height: 44px;
+  }
+  .aj-hero-cta:active { transform: scale(.98); }
+  .aj-hero-cta:hover { background: #4f46e5; }
+
+  /* ── Stats compactes (remplacent les KPI 2×2 souvent à zéro) ── */
+  .aj-quickstats { display: flex; gap: 10px; margin-bottom: 24px; }
+  .aj-quickstat {
+    flex: 1;
+    background: var(--su);
+    border: 1px solid var(--bo);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 2px rgba(10,13,26,.04);
+  }
+  .aj-quickstat-val {
+    font: 700 20px/1 'Plus Jakarta Sans', sans-serif;
+    color: var(--ink);
+    letter-spacing: -.02em;
+  }
+  .aj-quickstat-lbl {
+    font: 500 11px/1.3 'Inter', sans-serif;
+    color: var(--mu2);
+    margin-top: 4px;
   }
 
   /* Section title */
@@ -485,7 +561,6 @@ async function renderInto(root, _me) {
   (elevesAll.data || []).forEach((e, i) => { elevesMap[e.id] = { ...e, idx: i }; });
 
   // KPI
-  const validationsAujourdhui = todayVals.length;
   const acquisAujourdhui = todayVals.filter(v => v.statut === 'acquis').length;
 
   // Élèves que j'ai validé au moins une fois (tous statuts)
@@ -534,6 +609,64 @@ async function renderInto(root, _me) {
     return !p?.last_active_at || p.last_active_at < fourteenDaysAgo;
   });
   const reconnectCount = reconnectList.length;
+
+  // ─── Hero « prochaine action » — 1 action utile priorisée ──────
+  // Priorité : relancer (14j+) → consolidation due → inactifs 7j → faire
+  // avancer le prochain élève → fallback démarrage. Ton factuel, pas d'emoji.
+  let hero;
+  if (reconnectCount > 0) {
+    const noms = reconnectList.slice(0, 2).map(e => e.prenom || 'Élève').join(', ');
+    hero = {
+      tone: 'warn', ico: 'users', kicker: 'À relancer',
+      title: `${reconnectCount} élève${reconnectCount > 1 ? 's' : ''} sans activité depuis 14 j`,
+      sub: noms ? `Dont ${esc(noms)}${reconnectCount > 2 ? '…' : ''}` : '',
+      cta: 'Voir qui relancer', href: '#/eleves?tab=arelancer', ev: 'hero.reconnect',
+    };
+  } else if (consolidCount > 0) {
+    hero = {
+      tone: 'warn', ico: 'refresh', kicker: 'Consolidation',
+      title: `${consolidCount} quiz à relancer`,
+      sub: 'Des acquis attendent leur quiz de consolidation.',
+      cta: 'Ouvrir mes élèves', href: '#/eleves', ev: 'hero.consolidation',
+    };
+  } else if (inactifCount > 0) {
+    hero = {
+      tone: 'neutral', ico: 'clock', kicker: 'Suivi',
+      title: `${inactifCount} élève${inactifCount > 1 ? 's' : ''} inactif${inactifCount > 1 ? 's' : ''} cette semaine`,
+      sub: 'Un message peut les remettre en route.',
+      cta: 'Voir mes élèves', href: '#/eleves', ev: 'hero.inactifs',
+    };
+  } else if (nbElevesActifs > 0) {
+    // Tout est à jour → proposer de faire avancer l'élève le moins avancé
+    const next = mesElevesActifs.slice().sort((a, b) => (a.acquis || 0) - (b.acquis || 0))[0];
+    hero = {
+      tone: 'ok', ico: 'check', kicker: 'Tout est à jour',
+      title: 'Aucune relance en attente',
+      sub: next ? `Prochain élève à faire avancer : ${esc(next.prenom || 'Élève')}` : 'Enregistre ta prochaine séance.',
+      cta: next ? 'Ouvrir son livret' : 'Enregistrer une séance',
+      href: next ? `#/livret/${next.id}` : '#/log-session', ev: 'hero.next_eleve',
+    };
+  } else {
+    hero = {
+      tone: 'neutral', ico: 'users', kicker: 'Démarrage',
+      title: 'Aucun élève assigné',
+      sub: 'Tes élèves apparaîtront ici une fois affectés par le gérant.',
+      cta: null, href: null, ev: null,
+    };
+  }
+
+  const heroHtml = `
+    <div class="aj-hero tone-${hero.tone}"${hero.href ? ` id="aj-hero" data-href="${esc(hero.href)}" data-ev="${esc(hero.ev)}"` : ''}>
+      <div class="aj-hero-top">
+        <div class="aj-hero-ico">${iconBadge(hero.ico, { color: hero.tone === 'warn' ? '#d97706' : hero.tone === 'ok' ? '#059669' : '#6366f1', size: 44 })}</div>
+        <div class="aj-hero-body">
+          <div class="aj-hero-kicker">${esc(hero.kicker)}</div>
+          <h2 class="aj-hero-title">${hero.title}</h2>
+          ${hero.sub ? `<p class="aj-hero-sub">${hero.sub}</p>` : ''}
+        </div>
+      </div>
+      ${hero.cta ? `<button class="aj-hero-cta" type="button" id="aj-hero-cta">${esc(hero.cta)} ${icon('chevron-right', { size: 16, strokeWidth: 2.5 })}</button>` : ''}
+    </div>`;
 
   // ─── Widget récap soir ────────────────────────────────────────
   const isEvening = new Date().getHours() >= 18;
@@ -585,62 +718,20 @@ async function renderInto(root, _me) {
 
       ${recapWidget}
 
-      <!-- Widgets KPI iOS-style — 2×2 grid -->
-      <div class="aj-widgets">
+      <!-- Hero : prochaine action utile -->
+      ${heroHtml}
 
-        <div class="aj-widget">
-          <div class="aj-widget-head">
-            ${iconBadge('check', { color: '#10b981', size: 32 })}
-            <span class="aj-widget-lbl">Validées</span>
-          </div>
-          <p class="aj-widget-val">${acquisAujourdhui}</p>
-          <p class="aj-widget-sub">Aujourd'hui</p>
+      <!-- Stats compactes du jour (factuelles, pas de gros zéros) -->
+      <div class="aj-quickstats">
+        <div class="aj-quickstat">
+          <div class="aj-quickstat-val">${acquisAujourdhui}</div>
+          <div class="aj-quickstat-lbl">Validée${acquisAujourdhui > 1 ? 's' : ''} aujourd'hui</div>
         </div>
-
-        <div class="aj-widget">
-          <div class="aj-widget-head">
-            ${iconBadge('users', { color: '#6366f1', size: 32 })}
-            <span class="aj-widget-lbl">Élèves</span>
-          </div>
-          <p class="aj-widget-val">${nbElevesActifs}</p>
-          <p class="aj-widget-sub">Suivis ce mois</p>
+        <div class="aj-quickstat">
+          <div class="aj-quickstat-val">${nbElevesActifs}</div>
+          <div class="aj-quickstat-lbl">Élève${nbElevesActifs > 1 ? 's' : ''} suivi${nbElevesActifs > 1 ? 's' : ''}</div>
         </div>
-
-        <div class="aj-widget${consolidCount > 0 ? ' aj-widget-alert' : ''}" id="aj-w-consolidation"
-             role="button" tabindex="0" aria-label="${consolidCount} quiz de consolidation à relancer">
-          <div class="aj-widget-head">
-            ${iconBadge('refresh', { color: consolidCount > 0 ? '#f59e0b' : '#94a3b8', size: 32 })}
-            <span class="aj-widget-lbl">Consolidation</span>
-          </div>
-          <p class="aj-widget-val">${consolidCount}</p>
-          <p class="aj-widget-sub">${consolidCount === 0 ? 'Aucun en attente' : `Quiz${consolidCount > 1 ? 's' : ''} à relancer`}</p>
-        </div>
-
-        <div class="aj-widget${inactifCount > 0 ? ' aj-widget-alert' : ''}" id="aj-w-inactifs"
-             role="button" tabindex="0" aria-label="${inactifCount} élèves inactifs depuis plus de 7 jours">
-          <div class="aj-widget-head">
-            ${iconBadge('clock', { color: inactifCount > 0 ? '#8b5cf6' : '#94a3b8', size: 32 })}
-            <span class="aj-widget-lbl">Inactifs</span>
-          </div>
-          <p class="aj-widget-val">${inactifCount}</p>
-          <p class="aj-widget-sub">${inactifCount === 0 ? 'Tous actifs' : 'Depuis 7j+'}</p>
-        </div>
-
       </div>
-
-      ${reconnectCount > 0 ? `
-      <!-- Widget anti-décrochage 14j+ -->
-      <div class="aj-widget aj-widget-alert" id="aj-w-reconnect" role="button" tabindex="0"
-           aria-label="${reconnectCount} élèves à reconnecter depuis plus de 14 jours"
-           style="margin-bottom:24px;border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.03)">
-        <div class="aj-widget-head">
-          ${iconBadge('users', { color: '#d97706', size: 32 })}
-          <span class="aj-widget-lbl" style="color:#d97706">À reconnecter</span>
-        </div>
-        <p class="aj-widget-val" style="color:#b45309">${reconnectCount}</p>
-        <p class="aj-widget-sub">Sans activité 14j+ — clique pour voir</p>
-      </div>
-      ` : ''}
 
       <!-- Activité récente -->
       <div class="aj-section">
@@ -677,20 +768,18 @@ async function renderInto(root, _me) {
   `;
 
   // Wire listeners
-  root.querySelector('#aj-w-consolidation')?.addEventListener('click', () => {
-    track('widget.consolidation.clicked', { count: consolidCount });
-    navigate('#/eleves');
-  });
-
-  root.querySelector('#aj-w-inactifs')?.addEventListener('click', () => {
-    track('widget.inactifs.clicked', { count: inactifCount });
-    navigate('#/eleves');
-  });
-
-  root.querySelector('#aj-w-reconnect')?.addEventListener('click', () => {
-    track('widget.reconnect.clicked', { count: reconnectCount });
-    navigate('#/eleves?tab=arelancer');
-  });
+  // Hero « prochaine action » → navigue vers la cible priorisée
+  if (hero.href) {
+    const goHero = () => {
+      track(hero.ev || 'hero.clicked');
+      navigate(hero.href);
+    };
+    root.querySelector('#aj-hero-cta')?.addEventListener('click', goHero);
+    root.querySelector('#aj-hero')?.addEventListener('click', (e) => {
+      // tap sur la carte (hors bouton, déjà géré) = même action
+      if (!e.target.closest('#aj-hero-cta')) goHero();
+    });
+  }
 
   // Recap soir / prompt log → page dédiée plein écran
   const goLogSession = () => { track('log_prompt.soir.clicked'); navigate('#/log-session'); };
@@ -711,7 +800,7 @@ function renderActRow(val, elevesMap) {
   const grad = AVATARS[eleve.idx % AVATARS.length];
   const ini = initials(eleve.prenom, eleve.nom);
   const fullNom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(' ') || '—');
-  const cfg = STATUT_LABEL[val.statut] || { label: val.statut || '—', color: '#94a3b8', bg: '#f8f9fc' };
+  const cfg = statutCfg(val.statut);
 
   return `
     <div class="aj-act-row">
@@ -725,7 +814,7 @@ function renderActRow(val, elevesMap) {
       </div>
       <div class="aj-act-right">
         <span class="aj-act-badge" style="color:${cfg.color}; background:${cfg.bg}">
-          ${cfg.label}
+          ${esc(cfg.label)}
         </span>
         <span class="aj-act-time">${formatHeure(val.validated_at)}</span>
       </div>
