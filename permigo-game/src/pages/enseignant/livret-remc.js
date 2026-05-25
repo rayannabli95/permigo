@@ -49,7 +49,7 @@ const STYLE = `<style>
     gap: 12px;
   }
   .lr-back {
-    width: 36px; height: 36px;
+    width: 44px; height: 44px;
     border-radius: 50%;
     border: 1px solid var(--bo);
     background: var(--su);
@@ -253,7 +253,7 @@ const STYLE = `<style>
     letter-spacing: -0.022em;
   }
   .lr-sheet-close {
-    width: 32px; height: 32px;
+    width: 44px; height: 44px;
     border-radius: 50%;
     border: 1px solid var(--bo);
     background: var(--bg);

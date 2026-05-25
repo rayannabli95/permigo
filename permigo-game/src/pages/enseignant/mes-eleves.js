@@ -267,7 +267,7 @@ const STYLE = `<style>
   /* Bouton Inviter */
   .me-invite-btn {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 14px; height: 36px; border-radius: 10px;
+    padding: 8px 14px; min-height: 44px; border-radius: 10px;
     background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.2);
     color: #6366f1; font: 600 13px/1 'Inter', sans-serif;
     cursor: pointer; flex-shrink: 0;

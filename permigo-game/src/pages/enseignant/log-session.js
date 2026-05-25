@@ -769,7 +769,7 @@ const CSS = `
   padding-top: max(14px, env(safe-area-inset-top));
 }
 .ls-back {
-  width: 40px; height: 40px;
+  width: 44px; height: 44px;
   border-radius: 10px;
   border: 1.5px solid var(--bo);
   background: var(--su);
@@ -925,7 +925,7 @@ const CSS = `
   display: flex; align-items: center; gap: 12px; flex: 1;
 }
 .ls-step-btn {
-  width: 40px; height: 40px;
+  width: 44px; height: 44px;
   border: 1.5px solid var(--bo);
   border-radius: 10px;
   background: var(--su);
