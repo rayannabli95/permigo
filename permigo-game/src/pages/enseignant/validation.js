@@ -189,7 +189,7 @@ const STYLE = `<style>
   .btn-validate:disabled { opacity: .5; cursor: not-allowed; }
   .btn-validate:not(:disabled):active { transform: scale(.97); opacity: .9; }
   .btn-cancel-cta {
-    width: 40px; height: 40px;
+    width: 44px; height: 44px;
     border: 1.5px solid var(--bo);
     border-radius: 10px;
     background: var(--su);

@@ -39,7 +39,7 @@ const STYLE = `<style>
   gap: 10px;
 }
 .epc-full-back {
-  width: 36px; height: 36px;
+  width: 44px; height: 44px;
   border-radius: 10px;
   background: var(--bg2);
   border: none;
