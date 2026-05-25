@@ -851,7 +851,7 @@ const STYLE = `<style>
 .fiche-hero .fiche-close {
   position: absolute;
   top: 14px; right: 14px;
-  width: 32px; height: 32px;
+  width: 44px; height: 44px;
   border-radius: 50%;
   background: var(--bg2);
   color: var(--mu);
