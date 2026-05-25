@@ -817,7 +817,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
       <div class="acc2-hero-meta">
         <div class="acc2-hero-xp-pill">
           ${icon('zap', { size: 13 })}
-          <span class="acc-xp-num" data-to="${lvl.xp}">${lvl.xp}</span> XP · Niv. ${lvl.level}
+          Niveau ${lvl.level}
         </div>
         ${streak.current_streak > 0 ? `
         <div class="acc2-hero-streak ${isActive ? 'active' : ''}" id="streak-badge-btn" role="button" tabindex="0" aria-label="Streak ${streak.current_streak} jours">
