@@ -280,7 +280,7 @@ export async function mount(root) {
   let chests = [];
   let loadFailed = false;
   try {
-    chests = await getMyChests();
+    chests = await getMyChests({ throwOnError: true });
   } catch (e) {
     console.error('[mes-coffres] load failed', e);
     loadFailed = true;

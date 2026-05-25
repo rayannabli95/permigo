@@ -236,7 +236,7 @@ function _dbCacheSet(data) {
 }
 
 /** @returns {Promise<Array<{id, chest_type, unlocked_at, opened_at, rewards}>>} */
-export async function getMyChests() {
+export async function getMyChests({ throwOnError = false } = {}) {
   try {
     const { data, error } = await sb.rpc('get_my_chests');
     if (error) throw error;
@@ -244,6 +244,7 @@ export async function getMyChests() {
     return data || [];
   } catch (e) {
     console.warn('[chests] getMyChests fallback to cache', e?.message);
+    if (throwOnError) throw e;
     return _dbCacheGet();
   }
 }
