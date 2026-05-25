@@ -8,7 +8,7 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { toast } from '@/components/common/toast.js';
 import { haptic } from '@/utils/haptic.js';
-import { equipItem, setEquippedAsset } from '@/utils/game-state.js';
+import { equipItem, unequipItem, setEquippedAsset, getEquipped } from '@/utils/game-state.js';
 
 const TABS = [
   { key: 'avatar',    label: 'Avatars',  emoji: '🧑' },
@@ -361,10 +361,18 @@ export async function mount(root) {
         const item = allItems.find(i => i.id === itemId);
         if (!item) return;
         if (item.owned) {
-          // Item déjà possédé → un tap l'équipe (avatars/fonds/thèmes)
-          equipItem(item.type, item.id);
-          setEquippedAsset(item.type, item.asset_url || null);
-          toast(`${item.name} équipé ✓`, 'success');
+          // Item déjà possédé → tap = bascule équiper / retirer (retour au défaut)
+          const eq = getEquipped();
+          if (eq[item.type] === item.id) {
+            unequipItem(item.type);
+            setEquippedAsset(item.type, null);
+            toast(`${item.name} retiré`, 'info');
+          } else {
+            equipItem(item.type, item.id);
+            setEquippedAsset(item.type, item.asset_url || null);
+            toast(`${item.name} équipé ✓`, 'success');
+          }
+          renderTab(activeTab);
           return;
         }
         showPurchaseModal(item, gemmes, async () => {
@@ -426,8 +434,9 @@ function renderCard(item, gemmes, idx) {
       + `<div class="bo2-card-preview-circle" style="background:${esc(color)}20;color:${esc(color)};display:none;font-size:36px">${typeEmoji(item.type)}</div>`
     : `<div class="bo2-card-preview-circle" style="background:${esc(color)}20;color:${esc(color)}">${typeEmoji(item.type)}</div>`;
 
+  const isEquipped = item.owned && getEquipped()[item.type] === item.id;
   return `
-    <div class="bo2-card ${item.owned ? 'owned' : ''}"
+    <div class="bo2-card ${item.owned ? 'owned' : ''}${isEquipped ? ' is-equipped' : ''}"
       data-item-id="${esc(item.id)}"
       style="${borderStyle} animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
       <div class="bo2-card-preview">
@@ -440,7 +449,9 @@ function renderCard(item, gemmes, idx) {
         <div class="bo2-card-footer">
           <div class="bo2-rarity-pill" style="background:${rm.badge}">${esc(rm.label)}</div>
           ${item.owned
-            ? `<div class="bo2-owned-txt">✓ Obtenu</div>`
+            ? (isEquipped
+                ? `<div class="bo2-owned-txt" style="color:#10b981">✓ Équipé</div>`
+                : `<div class="bo2-owned-txt">Appuyer pour équiper</div>`)
             : `<button class="bo2-price-btn ${canAfford ? 'can-afford' : 'cant-afford'}" ${!canAfford ? 'disabled' : ''}>
                 Acheter · ${item.cost_gemmes} 💎
                </button>`
