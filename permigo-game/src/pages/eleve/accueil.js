@@ -23,6 +23,7 @@ import { toast } from '@/components/common/toast.js';
 import { navigate } from '@/router.js';
 import { haptic } from '@/utils/haptic.js';
 import { playClick, playWhoosh, playPop } from '@/utils/sound.js';
+import { ensureAnimStyles, confettiFrom, countUp } from '@/utils/anim.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -639,11 +640,6 @@ const STYLE = `<style>
 }
 @keyframes accShine { 0% { left: -60%; } 55%,100% { left: 135%; } }
 
-/* Confettis (burst à l'ouverture du streak) */
-.acc-confetti { position: fixed; left: 0; top: 0; width: 0; height: 0; pointer-events: none; z-index: 9999; }
-.acc-confetti i { position: absolute; width: 8px; height: 12px; border-radius: 2px; will-change: transform, opacity; animation: accConf 1.1s cubic-bezier(.2,.6,.4,1) forwards; }
-@keyframes accConf { 0% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
-
 @media (prefers-reduced-motion: reduce) {
   .acc2-hero-content, .acc2-ms, .acc2-action, .acc2-section-title, .worlds-grid,
   .trophees-row, .acc2-footer, .acc2-hero-streak-fire, .acc2-hero::after { animation: none !important; }
@@ -1055,54 +1051,13 @@ function renderActionDuJour(quest, pendingNotif, totalValidated) {
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
-// Compteur animé 0 → valeur
-function countUp(el, to, dur = 900) {
-  if (!el || !Number.isFinite(to)) return;
-  const t0 = performance.now();
-  function step(t) {
-    const p = Math.min(1, (t - t0) / dur);
-    const eased = 1 - Math.pow(1 - p, 3);
-    el.textContent = Math.round(to * eased);
-    if (p < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
-// Burst de confettis autour d'un point (x, y) écran
-function burstConfetti(x, y) {
-  try {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const colors = ['#6366f1', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444', '#3b82f6'];
-    const wrap = document.createElement('div');
-    wrap.className = 'acc-confetti';
-    wrap.style.left = x + 'px';
-    wrap.style.top = y + 'px';
-    for (let i = 0; i < 18; i++) {
-      const p = document.createElement('i');
-      p.style.background = colors[i % colors.length];
-      const ang = Math.random() * Math.PI * 2;
-      const dist = 60 + Math.random() * 80;
-      p.style.setProperty('--dx', Math.cos(ang) * dist + 'px');
-      p.style.setProperty('--dy', (Math.sin(ang) * dist + 40) + 'px');
-      p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
-      p.style.animationDelay = (Math.random() * 60) + 'ms';
-      wrap.appendChild(p);
-    }
-    document.body.appendChild(wrap);
-    setTimeout(() => wrap.remove(), 1300);
-  } catch {}
-}
-
 function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, todayQuests, pendingNotif }) {
+  ensureAnimStyles();
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Compteurs animés (XP + compétences)
-  if (!reduceMotion) {
-    const xpNum = root.querySelector('.acc-xp-num');
-    if (xpNum) { const to = +xpNum.dataset.to; xpNum.textContent = '0'; countUp(xpNum, to); }
-    const compNum = root.querySelector('.acc-comp-num');
-    if (compNum) { const to = +compNum.dataset.to; compNum.textContent = '0'; countUp(compNum, to, 700); }
-  }
+  // Compteur animé (compétences acquises)
+  const compNum = root.querySelector('.acc-comp-num');
+  if (compNum) { const to = +compNum.dataset.to; compNum.textContent = '0'; countUp(compNum, to, { duration: 700 }); }
 
   // Petit son d'entrée, une seule fois par session
   if (!sessionStorage.getItem('acc-whoosh')) { sessionStorage.setItem('acc-whoosh', '1'); playWhoosh(); }
@@ -1128,8 +1083,7 @@ function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, t
   const openBS   = () => {
     bsSheet?.classList.add('open'); bsBg?.classList.add('open');
     playPop();
-    const b = root.querySelector('#streak-badge-btn');
-    if (b) { const r = b.getBoundingClientRect(); burstConfetti(r.left + r.width / 2, r.top + r.height / 2); }
+    confettiFrom(root.querySelector('#streak-badge-btn'));
     track('streak.detail_opened', { days: streak?.current_streak });
   };
   const closeBS  = () => { bsSheet?.classList.remove('open'); bsBg?.classList.remove('open'); };
