@@ -354,6 +354,21 @@ export function unequipItem(slot) {
   window.dispatchEvent(new CustomEvent('pg-equipped-changed', { detail: { slot, itemId: null } }));
 }
 
+// ─── Asset équipé (URL résolue) ───────────────────────────────────
+// Le localStorage d'équipement ne garde que l'id ; les items boutique (avatars,
+// fonds permis) ont une asset_url qu'on stocke ici pour pouvoir les AFFICHER.
+const LS_EQUIPPED_ASSETS = 'pg-equipped-assets';
+export function getEquippedAsset(slot) {
+  try { return (JSON.parse(localStorage.getItem(LS_EQUIPPED_ASSETS) || '{}'))[slot] || null; }
+  catch { return null; }
+}
+export function setEquippedAsset(slot, url) {
+  let m = {};
+  try { m = JSON.parse(localStorage.getItem(LS_EQUIPPED_ASSETS) || '{}'); } catch {}
+  if (url) m[slot] = url; else delete m[slot];
+  try { localStorage.setItem(LS_EQUIPPED_ASSETS, JSON.stringify(m)); } catch {}
+}
+
 // ─── Achat ────────────────────────────────────────────────────────
 export function purchaseItem(itemId, cost) {
   if (ownsItem(itemId)) return { ok: false, error: 'already-owned' };

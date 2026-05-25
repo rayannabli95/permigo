@@ -277,12 +277,12 @@ const STYLE = `<style>
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  opacity: .35;
+  opacity: .5;
   filter: saturate(1);
   transition: opacity .6s ease;
   pointer-events: none;
 }
-.prc-world-bg--active { opacity: .75; }
+.prc-world-bg--active { opacity: .88; }
 [data-theme="dark"] .prc-world-bg         { opacity: .28; }
 [data-theme="dark"] .prc-world-bg--active { opacity: .68; }
 @media (prefers-color-scheme: dark) {

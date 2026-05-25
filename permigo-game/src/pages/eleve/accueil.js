@@ -52,7 +52,7 @@ const STYLE = `<style>
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 28%, #4f46e5 60%, #7c3aed 100%);
+  background: linear-gradient(160deg, rgba(30,27,75,.80) 0%, rgba(49,46,129,.62) 35%, rgba(79,70,229,.50) 70%, rgba(124,58,237,.55) 100%), url('/skins/landing/monde4jour.webp') center/cover no-repeat;
 }
 .acc2-hero::before {
   content: '';

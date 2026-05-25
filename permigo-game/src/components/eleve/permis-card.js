@@ -6,6 +6,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { esc } from '@/utils/escape.js';
 import { getPermisBg } from '@/utils/assets.js';
+import { getEquippedAsset } from '@/utils/game-state.js';
 
 const STYLE = `<style>
 .pc-wrap {
@@ -358,7 +359,7 @@ export function renderPermisCard({ prenom = '', nom = '', created_at = null, val
   const pct = Math.min(100, Math.round((validated / total) * 100));
   const state = getState(pct);
   const ini = initials(prenom, nom);
-  const bgUrl = getPermisBg(validated, 'eleve');
+  const bgUrl = getEquippedAsset('permis_bg') || getPermisBg(validated, 'eleve');
 
   return `${STYLE}
 <div class="pc-wrap">

@@ -8,6 +8,7 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { toast } from '@/components/common/toast.js';
 import { haptic } from '@/utils/haptic.js';
+import { equipItem, setEquippedAsset } from '@/utils/game-state.js';
 
 const TABS = [
   { key: 'avatar',    label: 'Avatars',  emoji: '🧑' },
@@ -360,7 +361,10 @@ export async function mount(root) {
         const item = allItems.find(i => i.id === itemId);
         if (!item) return;
         if (item.owned) {
-          toast('Déjà dans ton inventaire 🎒', 'info');
+          // Item déjà possédé → un tap l'équipe (avatars/fonds/thèmes)
+          equipItem(item.type, item.id);
+          setEquippedAsset(item.type, item.asset_url || null);
+          toast(`${item.name} équipé ✓`, 'success');
           return;
         }
         showPurchaseModal(item, gemmes, async () => {
@@ -528,8 +532,8 @@ async function doPurchase(item, root, allItems) {
 
     // Auto-équipement de l'item acheté (sinon l'user comprend pas à quoi ça sert)
     try {
-      const { equipItem } = await import('@/utils/game-state.js');
       equipItem(item.type, item.id);
+      setEquippedAsset(item.type, item.asset_url || null);
       toast(`🎁 ${item.name} équipé !`, 'success', 3000);
     } catch (eqErr) {
       console.warn('[boutique] auto-equip failed', eqErr);
