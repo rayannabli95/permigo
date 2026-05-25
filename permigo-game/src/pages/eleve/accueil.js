@@ -990,7 +990,7 @@ function renderActionDuJour(quest, pendingNotif, totalValidated) {
     const isConsolid = pendingNotif.type === 'consolidation_quiz';
     title   = isConsolid ? 'Quiz de consolidation' : 'Quiz-récap (optionnel)';
     sub     = isConsolid ? '2 questions · 30 secondes · Renforce ta mémoire' : 'Compétence déjà acquise — un petit récap pour le plaisir.';
-    btnText = isConsolid ? 'Commencer maintenant →' : 'Faire le récap →';
+    btnText = isConsolid ? 'Commencer →' : 'Faire le récap →';
     href    = `#/quiz/${pendingNotif.data.competence_id}/${isConsolid ? 'consolidation' : 'post_validation'}`;
     urgent  = isConsolid;
   } else if (totalValidated === 0) {
@@ -1001,7 +1001,7 @@ function renderActionDuJour(quest, pendingNotif, totalValidated) {
   } else {
     title   = 'Ton parcours d\'examen';
     sub     = '5 parcours · 15 questions · estime tes chances au permis';
-    btnText = 'Démarrer →';
+    btnText = 'Démarrer l\'examen →';
     href    = '#/exam-blanc';
   }
 
