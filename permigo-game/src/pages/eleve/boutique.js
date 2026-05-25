@@ -308,6 +308,7 @@ export async function mount(root) {
   ]);
 
   let gemmes = profileRes.value?.data?.gemmes ?? 0;
+  const catalogFailed = itemsRes.status === 'rejected' || !!itemsRes.value?.error;
   const allItems = itemsRes.value?.data ?? [];
 
   const gemsVal = root.querySelector('#bo2-gems-val');
@@ -334,12 +335,17 @@ export async function mount(root) {
     if (!content) return;
 
     if (!items.length) {
-      content.innerHTML = `
-        <div style="text-align:center;padding:56px 24px;color:var(--mu)">
-          <div style="font-size:48px;margin-bottom:12px">🛒</div>
-          <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Bientôt disponible</div>
-          <div style="font:500 13px/1.5 'Inter',sans-serif">Ces items arrivent dans la prochaine mise à jour !</div>
-        </div>`;
+      content.innerHTML = catalogFailed
+        ? `<div style="text-align:center;padding:56px 24px;color:var(--mu)">
+             <div style="font-size:48px;margin-bottom:12px">📡</div>
+             <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Boutique indisponible</div>
+             <div style="font:500 13px/1.5 'Inter',sans-serif">Vérifie ta connexion et réessaie.</div>
+           </div>`
+        : `<div style="text-align:center;padding:56px 24px;color:var(--mu)">
+             <div style="font-size:48px;margin-bottom:12px">🛒</div>
+             <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Bientôt disponible</div>
+             <div style="font:500 13px/1.5 'Inter',sans-serif">Ces items arrivent dans la prochaine mise à jour !</div>
+           </div>`;
       return;
     }
 

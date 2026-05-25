@@ -278,10 +278,12 @@ export async function mount(root) {
   ensureChestStyles();
 
   let chests = [];
+  let loadFailed = false;
   try {
     chests = await getMyChests();
   } catch (e) {
     console.error('[mes-coffres] load failed', e);
+    loadFailed = true;
   }
 
   const toOpen   = chests.filter(c => !c.opened_at);
@@ -303,17 +305,16 @@ export async function mount(root) {
   }
 
   if (chests.length === 0) {
-    html = `
-      <div class="mc-empty">
-        <div class="mc-empty-ico">🎁</div>
-        Aucun coffre encore — complète des mondes<br>et construis ton streak !
-      </div>
-    `;
+    html = loadFailed
+      ? `<div class="mc-empty"><div class="mc-empty-ico">📡</div>Impossible de charger tes coffres.<br>
+         <button class="mc-open-btn" id="mc-retry" style="margin-top:12px">Réessayer</button></div>`
+      : `<div class="mc-empty"><div class="mc-empty-ico">🎁</div>Aucun coffre encore — complète des mondes<br>et construis ton streak !</div>`;
   }
 
   // Replace skeleton with real content
   page.querySelector('.mc-list')?.remove();
   page.insertAdjacentHTML('beforeend', html);
+  page.querySelector('#mc-retry')?.addEventListener('click', () => mount(root));
 
   // Wire click on "can open" cards
   page.querySelectorAll('.mc-card.mc-can-open').forEach(card => {
