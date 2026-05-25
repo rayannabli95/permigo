@@ -543,8 +543,10 @@ function showRefuseModal(root, sessionId, monPrenom) {
       setTimeout(() => navigate('#/'), 800);
     } catch (err) {
       console.error('[session-confirmation] refuse', err);
-      toast(`Impossible de refuser — ${err?.message || 'réessaie'}`, 'error');
-      modal.remove();
+      const msg = translateSessionError(err?.message) || 'réessaie dans un instant';
+      toast(`Impossible de refuser — ${msg}`, 'error');
+      btn.disabled = false;
+      btn.innerHTML = `${icon('x-circle', { size: 16 })} Oui, refuser`;
     }
   });
 }

@@ -8,6 +8,7 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { toast } from '@/components/common/toast.js';
 import { haptic } from '@/utils/haptic.js';
+import { equipItem, setEquippedAsset } from '@/utils/game-state.js';
 
 const TABS = [
   { key: 'avatar',    label: 'Avatars',  emoji: '🧑' },
@@ -308,6 +309,7 @@ export async function mount(root) {
   ]);
 
   let gemmes = profileRes.value?.data?.gemmes ?? 0;
+  const catalogFailed = itemsRes.status === 'rejected' || !!itemsRes.value?.error;
   const allItems = itemsRes.value?.data ?? [];
 
   const gemsVal = root.querySelector('#bo2-gems-val');
@@ -334,12 +336,17 @@ export async function mount(root) {
     if (!content) return;
 
     if (!items.length) {
-      content.innerHTML = `
-        <div style="text-align:center;padding:56px 24px;color:var(--mu)">
-          <div style="font-size:48px;margin-bottom:12px">🛒</div>
-          <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Bientôt disponible</div>
-          <div style="font:500 13px/1.5 'Inter',sans-serif">Ces items arrivent dans la prochaine mise à jour !</div>
-        </div>`;
+      content.innerHTML = catalogFailed
+        ? `<div style="text-align:center;padding:56px 24px;color:var(--mu)">
+             <div style="font-size:48px;margin-bottom:12px">📡</div>
+             <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Boutique indisponible</div>
+             <div style="font:500 13px/1.5 'Inter',sans-serif">Vérifie ta connexion et réessaie.</div>
+           </div>`
+        : `<div style="text-align:center;padding:56px 24px;color:var(--mu)">
+             <div style="font-size:48px;margin-bottom:12px">🛒</div>
+             <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Bientôt disponible</div>
+             <div style="font:500 13px/1.5 'Inter',sans-serif">Ces items arrivent dans la prochaine mise à jour !</div>
+           </div>`;
       return;
     }
 
@@ -354,7 +361,10 @@ export async function mount(root) {
         const item = allItems.find(i => i.id === itemId);
         if (!item) return;
         if (item.owned) {
-          toast('Déjà dans ton inventaire 🎒', 'info');
+          // Item déjà possédé → un tap l'équipe (avatars/fonds/thèmes)
+          equipItem(item.type, item.id);
+          setEquippedAsset(item.type, item.asset_url || null);
+          toast(`${item.name} équipé ✓`, 'success');
           return;
         }
         showPurchaseModal(item, gemmes, async () => {
@@ -522,8 +532,8 @@ async function doPurchase(item, root, allItems) {
 
     // Auto-équipement de l'item acheté (sinon l'user comprend pas à quoi ça sert)
     try {
-      const { equipItem } = await import('@/utils/game-state.js');
       equipItem(item.type, item.id);
+      setEquippedAsset(item.type, item.asset_url || null);
       toast(`🎁 ${item.name} équipé !`, 'success', 3000);
     } catch (eqErr) {
       console.warn('[boutique] auto-equip failed', eqErr);

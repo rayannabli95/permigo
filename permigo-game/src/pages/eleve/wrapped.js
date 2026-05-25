@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // Élève — PermiGo Wrapped (récap annuel Spotify-style)
-// RPC : get_my_wrapped(year?)
+// RPC : get_wrapped_eleve(p_year)
 // ═══════════════════════════════════════════════════════════════
 import { sb }         from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';

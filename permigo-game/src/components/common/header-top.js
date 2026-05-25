@@ -7,6 +7,7 @@ import { mountNotifBell } from '@/components/common/notif-bell.js';
 import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { renderUserAvatar } from '@/components/common/avatar.js';
+import { getEquippedAsset } from '@/utils/game-state.js';
 
 const STYLE = `
   #header-bar {
@@ -89,7 +90,7 @@ export async function mountHeader() {
     <div id="ht-right">
       ${isEleve ? `<button class="ht-icon-btn" id="ht-shop" aria-label="Boutique" title="Boutique">${icon('shopping-bag', { size: 20 })}</button>` : ''}
       <div id="ht-bell"></div>
-      ${me ? `<button class="ht-avatar-btn" id="ht-avatar" aria-label="Mon profil" title="Mon profil">${renderUserAvatar(me, 36)}</button>` : ''}
+      ${me ? `<button class="ht-avatar-btn" id="ht-avatar" aria-label="Mon profil" title="Mon profil">${renderUserAvatar({ ...me, avatar_url: getEquippedAsset('avatar') || me.avatar_url }, 36)}</button>` : ''}
     </div>
   `;
 

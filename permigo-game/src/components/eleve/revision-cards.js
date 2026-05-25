@@ -196,6 +196,7 @@ export async function mountRevisionCards(root, { eleveId, limit = 3 }) {
     const handler = () => {
       const compId = card.dataset.compId;
       track('revision_cards.card_tapped', { competence_id: compId, eleve_id: eleveId });
+      try { localStorage.setItem('permigo:has_revised', '1'); } catch {}
       navigate(`#/quiz/${compId}/post_validation`);
     };
     card.addEventListener('click', handler);

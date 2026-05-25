@@ -277,12 +277,12 @@ const STYLE = `<style>
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  opacity: .35;
+  opacity: .5;
   filter: saturate(1);
   transition: opacity .6s ease;
   pointer-events: none;
 }
-.prc-world-bg--active { opacity: .75; }
+.prc-world-bg--active { opacity: .88; }
 [data-theme="dark"] .prc-world-bg         { opacity: .28; }
 [data-theme="dark"] .prc-world-bg--active { opacity: .68; }
 @media (prefers-color-scheme: dark) {
@@ -851,7 +851,7 @@ const STYLE = `<style>
 .fiche-hero .fiche-close {
   position: absolute;
   top: 14px; right: 14px;
-  width: 32px; height: 32px;
+  width: 44px; height: 44px;
   border-radius: 50%;
   background: var(--bg2);
   color: var(--mu);

@@ -236,7 +236,7 @@ function _dbCacheSet(data) {
 }
 
 /** @returns {Promise<Array<{id, chest_type, unlocked_at, opened_at, rewards}>>} */
-export async function getMyChests() {
+export async function getMyChests({ throwOnError = false } = {}) {
   try {
     const { data, error } = await sb.rpc('get_my_chests');
     if (error) throw error;
@@ -244,6 +244,7 @@ export async function getMyChests() {
     return data || [];
   } catch (e) {
     console.warn('[chests] getMyChests fallback to cache', e?.message);
+    if (throwOnError) throw e;
     return _dbCacheGet();
   }
 }
@@ -351,6 +352,21 @@ export function unequipItem(slot) {
   _scheduleSave();
   if (slot === 'theme') applyThemeColor(null);
   window.dispatchEvent(new CustomEvent('pg-equipped-changed', { detail: { slot, itemId: null } }));
+}
+
+// ─── Asset équipé (URL résolue) ───────────────────────────────────
+// Le localStorage d'équipement ne garde que l'id ; les items boutique (avatars,
+// fonds permis) ont une asset_url qu'on stocke ici pour pouvoir les AFFICHER.
+const LS_EQUIPPED_ASSETS = 'pg-equipped-assets';
+export function getEquippedAsset(slot) {
+  try { return (JSON.parse(localStorage.getItem(LS_EQUIPPED_ASSETS) || '{}'))[slot] || null; }
+  catch { return null; }
+}
+export function setEquippedAsset(slot, url) {
+  let m = {};
+  try { m = JSON.parse(localStorage.getItem(LS_EQUIPPED_ASSETS) || '{}'); } catch {}
+  if (url) m[slot] = url; else delete m[slot];
+  try { localStorage.setItem(LS_EQUIPPED_ASSETS, JSON.stringify(m)); } catch {}
 }
 
 // ─── Achat ────────────────────────────────────────────────────────

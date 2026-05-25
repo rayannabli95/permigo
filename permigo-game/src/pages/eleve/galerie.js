@@ -8,8 +8,7 @@ import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { TROPHEES, RARITY_COLOR, RARITY_LABEL } from '@/data/trophees.js';
-import { ASSETS, getPermisBg } from '@/utils/assets.js';
-import { ELEVE_SKINS } from '@/data/prestige.js';
+import { ASSETS } from '@/utils/assets.js';
 
 const STYLE = `<style>
 .gal {

@@ -287,7 +287,7 @@ function renderResult(root, { score, total, scorePct, validated, passed, reason,
   root.innerHTML = `
     ${STYLE}
     <div class="qp anim-slide-up">
-      <div class="qp-card qp-result-card">
+      <div class="qp-card qp-result-card" role="status" aria-live="polite">
         <div class="qp-score-ring ${success ? 'ring-ok' : 'ring-warn'}">
           <span class="qp-score-num">${score}/${total}</span>
           <span class="qp-score-pct">${scorePct}%</span>
