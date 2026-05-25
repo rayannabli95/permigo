@@ -1058,6 +1058,7 @@ function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, t
       }
       track('streak.freeze_used', {});
       toast('Série gelée pour 24h 🧊', 'success');
+      btn.textContent = '✓ Série gelée';   // évite de laisser "⏳ Gel en cours…" figé
       closeBS();
     } catch { toast('Erreur lors du gel', 'error'); btn.disabled = false; btn.innerHTML = '🧊 Geler ma série · 50 💎'; }
   });
