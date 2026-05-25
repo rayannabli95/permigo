@@ -15,7 +15,7 @@
  */
 
 import { esc } from '@/utils/escape.js';
-import { getLast7Days, getEquipped, getGemmes } from '@/utils/game-state.js';
+import { getLast7Days, getEquipped, getEquippedAsset, getGemmes } from '@/utils/game-state.js';
 
 function initials(name) {
   return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase();
@@ -27,6 +27,7 @@ export function renderGameHUD(stats, me) {
   const chestBadge = availableChests.length > 0 ? `<span class="ghud-chest-badge">${availableChests.length}</span>` : '';
   const equipped = getEquipped();
   const avatarFrame = equipped.avatarFrame ? `frame-${equipped.avatarFrame.replace('frame-', '')}` : '';
+  const avatarSrc = getEquippedAsset('avatar') || me?.avatar_url || null;
 
   return `
     <style>
@@ -262,8 +263,8 @@ export function renderGameHUD(stats, me) {
     <div class="ghud" role="status" aria-label="Tableau de bord du joueur">
       <div class="ghud-row">
         <button class="ghud-avatar ${avatarFrame}" id="ghud-avatar-btn" type="button" aria-label="Aller à mon profil">
-          ${me?.avatar_url
-            ? `<img src="${esc(me.avatar_url)}" alt="" class="ghud-avatar-img" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="ghud-avatar-init" style="display:none">${esc(initials(me?.nom))}</span>`
+          ${avatarSrc
+            ? `<img src="${esc(avatarSrc)}" alt="" class="ghud-avatar-img" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="ghud-avatar-init" style="display:none">${esc(initials(me?.nom))}</span>`
             : `<span class="ghud-avatar-init">${esc(initials(me?.nom))}</span>`}
         </button>
         <div class="ghud-xp">
