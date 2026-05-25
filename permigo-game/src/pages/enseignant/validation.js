@@ -37,7 +37,7 @@ const STYLE = `<style>
     color: var(--ink);
   }
   .vp-hd { margin-bottom: 24px; }
-  .vp-h1 { font: 700 26px/1.2 'Plus Jakarta Sans', sans-serif; color: #0a0d1a; margin: 0 0 6px; }
+  .vp-h1 { font: 700 26px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin: 0 0 6px; }
   .vp-sub { font: 500 14px/1.4 'Inter', sans-serif; color: #94a3b8; margin: 0; }
 
   .step { margin-bottom: 32px; }
@@ -86,7 +86,7 @@ const STYLE = `<style>
     color: #fff;
     font: 600 18px/1 'Plus Jakarta Sans', sans-serif;
   }
-  .eleve-prenom { font: 600 13px/1.2 'Inter', sans-serif; color: #0a0d1a; margin-bottom: 4px; }
+  .eleve-prenom { font: 600 13px/1.2 'Inter', sans-serif; color: var(--ink); margin-bottom: 4px; }
 
   /* Catégories */
   .comp-sections { display: flex; flex-direction: column; gap: 12px; }
@@ -101,7 +101,7 @@ const STYLE = `<style>
   .cat-hd { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid var(--bo2); }
   .cat-done .cat-hd { background: rgba(16,185,129,.04); }
   .cat-ico { font-size: 18px; line-height: 1; }
-  .cat-nm { font: 600 14px/1 'Plus Jakarta Sans', sans-serif; color: #0a0d1a; flex: 1; }
+  .cat-nm { font: 600 14px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); flex: 1; }
   .cat-cnt { font: 600 12px/1 'Inter', sans-serif; color: #94a3b8; }
 
   /* Compétences */
@@ -148,7 +148,7 @@ const STYLE = `<style>
     padding: 4px 7px;
     flex-shrink: 0;
   }
-  .comp-nom { font: 500 13px/1.4 'Inter', sans-serif; color: #0a0d1a; flex: 1; }
+  .comp-nom { font: 500 13px/1.4 'Inter', sans-serif; color: var(--ink); flex: 1; }
   .comp-status { flex-shrink: 0; }
   .badge-ok { font: 600 11px/1 'Inter', sans-serif; color: #059669; background: rgba(16,185,129,.1); border-radius: 12px; padding: 3px 8px; }
   .badge-sel { font: 600 11px/1 'Inter', sans-serif; color: #6366f1; background: rgba(99,102,241,.1); border-radius: 12px; padding: 3px 8px; }

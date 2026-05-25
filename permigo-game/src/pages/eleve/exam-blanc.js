@@ -250,16 +250,19 @@ function showResults(root, questions, answers, parcours_id) {
   const parcours = PARCOURS.find(p => p.id === parcours_id);
   const score    = answers.filter((a, i) => a === questions[i].correct).length;
   const total    = questions.length;
-  const passed   = score >= PASS_THRESHOLD;
   const pct      = Math.round(score / total * 100);
-
-  track('parcours_quiz.completed', { parcours_id, nom: parcours?.nom, score, total, passed });
-
-  if (passed) playSuccess(); else playError();
 
   const wrongItems = questions
     .map((q, i) => ({ q, chosen: answers[i], isCorrect: answers[i] === q.correct }))
     .filter(x => !x.isCorrect);
+
+  // Faute éliminatoire ratée → recalé direct, quel que soit le score (comme au vrai CEPC)
+  const fauteRatee = wrongItems.some(({ q }) => q.tags?.includes('faute_eliminatoire'));
+  const passed     = score >= PASS_THRESHOLD && !fauteRatee;
+
+  track('parcours_quiz.completed', { parcours_id, nom: parcours?.nom, score, total, passed, faute_eliminatoire: fauteRatee });
+
+  if (passed) playSuccess(); else playError();
 
   const wrongHtml = wrongItems.length === 0
     ? `<p class="exb-perfect">Parfait ! Aucune erreur.</p>`
@@ -280,13 +283,18 @@ function showResults(root, questions, answers, parcours_id) {
   root.querySelector('#exb-screen').innerHTML = `
     <div class="exb-results">
       <div class="exb-res-top ${passed ? 'exb-res-top--pass' : 'exb-res-top--fail'}">
-        <div class="exb-res-ico">${passed ? '🎉' : '💪'}</div>
+        <div class="exb-res-ico">${passed ? '🎉' : (fauteRatee ? '🛑' : '💪')}</div>
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
         <div class="exb-res-pct">${pct} %</div>
-        <div class="exb-res-verdict">${passed ? 'Admis — tu es dans les clous !' : 'Non admis — encore un peu d\'entraînement'}</div>
-        <div class="exb-res-cepc">${passed
-          ? 'Au CEPC, il faut ≥ 35 / 40. Continue comme ça !'
-          : 'Au CEPC, le seuil est de 35 / 40. Reviens t\'entraîner !'
+        <div class="exb-res-verdict">${
+          fauteRatee ? 'Recalé — faute éliminatoire'
+          : passed ? 'Admis — tu es dans les clous !'
+          : 'Non admis — encore un peu d\'entraînement'
+        }</div>
+        <div class="exb-res-cepc">${
+          fauteRatee ? 'Une faute éliminatoire = échec direct à l\'examen, peu importe le reste du score.'
+          : passed ? 'Tu décrocherais ton permis. Continue comme ça !'
+          : 'Il te faut au moins 12 / 15 sans faute éliminatoire. Reviens t\'entraîner !'
         }</div>
       </div>
 
