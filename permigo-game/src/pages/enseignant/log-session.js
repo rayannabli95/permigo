@@ -89,7 +89,7 @@ export async function mount(root) {
   root.innerHTML = `<style>${CSS}</style><div class="ls-page anim-slide-up" id="ls-root">
     <div class="ls-header">
       <button class="ls-back" id="ls-back" aria-label="Retour">${icon('arrow-left', { size: 20, strokeWidth: 2.5 })}</button>
-      <div class="ls-header-title">Enregistrer une session</div>
+      <h1 class="ls-header-title" tabindex="-1">Enregistrer une session</h1>
     </div>
     <div class="ls-scroll" id="ls-scroll">
       <div class="ls-skel-wrap">
@@ -202,6 +202,7 @@ function _render(root) {
       <div class="ls-search-wrap">
         <span class="ls-search-ico">${icon('search', { size: 14, strokeWidth: 2.2, color: '#94a3b8' })}</span>
         <input class="ls-search" id="ls-search" type="search" placeholder="Chercher un élève…"
+               aria-label="Chercher un élève"
                value="${esc(_query)}" autocomplete="off" autocorrect="off" spellcheck="false">
       </div>` : ''}
       <div class="ls-eleve-list" id="ls-eleve-list">
@@ -255,6 +256,7 @@ function _render(root) {
         <span class="ls-date-txt">${isoToFr(_date)}</span>
         <span class="ls-date-badge">Modifier</span>
         <input type="date" id="ls-date-input" class="ls-date-input"
+               aria-label="Date de la séance"
                value="${esc(_date)}" max="${todayIso()}"
                min="${(() => { const d = new Date(); d.setDate(d.getDate()-7); return d.toISOString().slice(0,10); })()}">
       </div>
@@ -297,6 +299,7 @@ function _render(root) {
       <div class="ls-visibility-tag">${icon('eye', { size: 11, strokeWidth: 2, color: '#94a3b8' })} Visible par l'élève et l'auto-école</div>
       <div class="ls-ta-wrap">
         <textarea class="ls-textarea" id="ls-textarea" maxlength="${MAX_COMMENT}"
+                  aria-label="Commentaire de séance"
                   placeholder="Observations, points à travailler, encouragements…"
                   rows="3">${esc(_comment)}</textarea>
         <span class="ls-char-count${_comment.length > MAX_COMMENT * .85 ? ' ls-near' : ''}"

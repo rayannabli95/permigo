@@ -465,7 +465,7 @@ function render() {
       <header class="lr-hd">
         <button class="lr-back" aria-label="Retour liste élèves">←</button>
         <div class="lr-hd-info">
-          <p class="lr-title">Livret REMC — ${prenomNom || 'Élève'}</p>
+          <h1 class="lr-title" tabindex="-1">Livret REMC — ${prenomNom || 'Élève'}</h1>
           <p class="lr-subtitle">${acquis}/${REMC_TOTAL} compétences acquises</p>
         </div>
       </header>
