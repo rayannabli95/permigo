@@ -617,7 +617,7 @@ function renderMonde(cat) {
   const pct = cat.subs.length > 0 ? Math.round((acquis / cat.subs.length) * 100) : 0;
 
   return `
-    <div class="lr-monde">
+    <div class="lr-monde" role="group" aria-label="${esc(cat.name)} — ${acquis}/${cat.subs.length} acquises">
       <div class="lr-monde-hd" style="background:${col.bg}; border-color:${col.border};">
         <span class="lr-monde-ico">${cat.ico}</span>
         <span class="lr-monde-nm">${esc(cat.name)}</span>
@@ -638,7 +638,7 @@ function renderComp(sub, col) {
 
   return `
     <div class="lr-comp" data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
-         role="button" tabindex="0" aria-label="Évaluer ${esc(sub.n)}">
+         role="button" tabindex="0" aria-label="${esc(sub.n)} — ${cfg.label}. Appuyer pour évaluer">
       <span class="lr-comp-dot" style="background:${cfg.dot}"></span>
       <span class="lr-comp-code" style="color:${col.accent}; background:${col.bg}">${esc(sub.c)}</span>
       <span class="lr-comp-nom">${esc(sub.n)}</span>
