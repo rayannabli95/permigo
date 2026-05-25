@@ -39,14 +39,14 @@ export const ASSETS = {
   },
 
   // ── Avatars par défaut (6 choix au signup) ─────────────────────
-  // NB : 03 et 04 ont un tiret en trop dans le fichier — conservé tel quel
+  // Skins fournis par Rayan (skin1–6) — remplacent les anciens avatar-default-*
   avatar: [
-    '/skins/avatar-default-01.png',
-    '/skins/avatar-default-02.png',
-    '/skins/avatar-default-03-.png',
-    '/skins/avatar-default-04-.png',
-    '/skins/avatar-default-05-v2.png',
-    '/skins/avatar-default-06.png',
+    '/skins/avatars/skin1.png',
+    '/skins/avatars/skin2.png',
+    '/skins/avatars/skin3.png',
+    '/skins/avatars/skin4.png',
+    '/skins/avatars/skin5.png',
+    '/skins/avatars/skin6.png',
   ],
 
   // ── Fonds carte permis (3 paliers évolutifs) ───────────────────

@@ -615,7 +615,7 @@ function renderRow(eleve) {
 
   return `
     <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="button" tabindex="0"
-         aria-label="Fiche de ${fullNom}">
+         aria-label="Fiche de ${fullNom} — ${eleve.acquis}/${eleve.total} compétences acquises, ${eleve.actif ? 'actif' : 'inactif'}">
       ${eleve.avatar_url
         ? `<img class="me-av" src="${esc(eleve.avatar_url)}" alt="${fullNom}" loading="lazy" style="object-fit:cover">`
         : `<div class="me-av" style="background:${grad}">${esc(initials || '?')}</div>`
