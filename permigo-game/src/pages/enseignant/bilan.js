@@ -417,7 +417,7 @@ export async function mount(root, eleveId) {
   <div class="bl-hd">
     <div class="bl-hd-left">
       <div class="bl-school-logo">PermiGo Autopilot</div>
-      <div class="bl-title">Bilan de ${esc(prenom)} ${esc(nom)}</div>
+      <h1 class="bl-title" tabindex="-1">Bilan de ${esc(prenom)} ${esc(nom)}</h1>
       <div class="bl-subtitle">Rapport trimestriel · Permis B</div>
     </div>
     <button class="bl-print-btn" id="bl-btn-print" aria-label="Imprimer le bilan">
