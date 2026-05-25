@@ -998,8 +998,8 @@ function renderActionDuJour(quest, pendingNotif, totalValidated) {
     btnText = 'Voir le parcours →';
     href    = '#/parcours';
   } else {
-    title   = 'Tente un examen blanc';
-    sub     = '40 questions officielles · évalue où tu en es';
+    title   = 'Ton parcours d\'examen';
+    sub     = '5 parcours · 15 questions · estime tes chances au permis';
     btnText = 'Démarrer →';
     href    = '#/exam-blanc';
   }

@@ -1,508 +1,491 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — Examen blanc
-// RPCs : start_exam_blanc() → submit_exam_blanc(session_id, answers)
+// Élève — Ton parcours d'examen (5 parcours × 15 questions)
+// 100 % statique — pas de Supabase
+// Seuil : 12/15 (80 %) — verdict CEPC
 // ═══════════════════════════════════════════════════════════════
-import { sb }         from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { toast }      from '@/components/common/toast.js';
-import { esc }        from '@/utils/escape.js';
-import { track }      from '@/services/analytics.js';
+import { getCurUser }            from '@/auth/cur-user.js';
+import { esc }                   from '@/utils/escape.js';
+import { track }                 from '@/services/analytics.js';
+import { navigate }              from '@/router.js';
+import { PARCOURS, questionsForParcours } from '@/data/parcours-quiz.js';
+import { haptic }                from '@/utils/haptic.js';
+import { playPageturn, playSuccess, playError } from '@/utils/sound.js';
 
-const TOTAL_Q     = 40;
-const PASS_PCT    = 70;
-const DURATION_S  = 30 * 60; // 30 min in seconds
+const PASS_THRESHOLD = 12; // / 15
 
 // ─── Mount ───────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  // #11 — plein écran d'épreuve : masque la bottom nav (anti-triche, anti-distraction)
+  // Masque la bottom nav pendant le quiz (anti-distraction)
   document.getElementById('bottom-nav')?.setAttribute('hidden', '');
-  const _restoreNav = () => { document.getElementById('bottom-nav')?.removeAttribute('hidden'); window.removeEventListener('hashchange', _restoreNav); };
+  const _restoreNav = () => {
+    document.getElementById('bottom-nav')?.removeAttribute('hidden');
+    window.removeEventListener('hashchange', _restoreNav);
+  };
   window.addEventListener('hashchange', _restoreNav);
 
-  track('page_view', { page: 'exam_blanc', user_role: me.role });
+  track('page_view', { page: 'parcours_quiz', user_role: me.role });
 
-  root.innerHTML = renderStyles() + renderIntro();
-  wireIntro(root);
+  root.innerHTML = renderStyles() + renderSelection();
+  wireSelection(root);
 }
 
-// ─── Intro screen ────────────────────────────────────────────
-function renderIntro() {
+// ─── Écran 1 : sélection du parcours ─────────────────────────
+function renderSelection() {
+  const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
+  const cards = PARCOURS.map(p => `
+    <button class="exb-pcard" data-pid="${p.id}" aria-label="Démarrer le parcours ${esc(p.nom)}">
+      <div class="exb-pcard-top">
+        <span class="exb-pcard-num">Parcours ${p.id}</span>
+        <span class="exb-pcard-stars" aria-label="Difficulté ${p.difficulte}/5">${esc(stars(p.difficulte))}</span>
+      </div>
+      <div class="exb-pcard-nom">${esc(p.nom)}</div>
+      <div class="exb-pcard-ctx">${esc(p.contexte)}</div>
+      <div class="exb-pcard-meta">15 questions · seuil 12/15</div>
+    </button>
+  `).join('');
+
   return `
 <div class="exb anim-slide-up" id="exb-screen">
-  <div class="exb-intro">
-    <div class="exb-intro-icon">📋</div>
-    <h1 class="exb-intro-title">Examen blanc</h1>
-    <p class="exb-intro-sub">Teste tes connaissances dans les conditions réelles</p>
-
-    <div class="exb-rules">
-      <div class="exb-rule">
-        <span class="exb-rule-ico">❓</span>
-        <span class="exb-rule-txt"><strong>40 questions</strong> de code de la route</span>
-      </div>
-      <div class="exb-rule">
-        <span class="exb-rule-ico">⏱</span>
-        <span class="exb-rule-txt"><strong>30 minutes</strong> pour répondre</span>
-      </div>
-      <div class="exb-rule">
-        <span class="exb-rule-ico">🎯</span>
-        <span class="exb-rule-txt"><strong>70 % minimum</strong> pour valider (28 / 40)</span>
-      </div>
-      <div class="exb-rule">
-        <span class="exb-rule-ico">🔒</span>
-        <span class="exb-rule-txt">Pas de retour en arrière possible</span>
-      </div>
-    </div>
-
-    <button class="exb-start-btn" id="exb-start">Commencer l'examen</button>
-    <p class="exb-disclaimer">Résultats non pris en compte pour ton permis officiel</p>
+  <div class="exb-sel-header">
+    <button class="exb-quit-btn" id="exb-back" aria-label="Retour">←</button>
+    <h1 class="exb-sel-title">Ton parcours d'examen</h1>
+    <p class="exb-sel-sub">5 parcours · 15 questions · estime tes chances au permis</p>
+  </div>
+  <div class="exb-pcards" id="exb-pcards">
+    ${cards}
   </div>
 </div>`;
 }
 
-function wireIntro(root) {
-  root.querySelector('#exb-start')?.addEventListener('click', async () => {
-    const btn = root.querySelector('#exb-start');
-    btn.disabled = true;
-    btn.textContent = 'Chargement…';
+function wireSelection(root) {
+  root.querySelector('#exb-back')?.addEventListener('click', () => {
+    haptic('tap');
+    navigate('/');
+  });
 
-    try {
-      const { data, error } = await sb.rpc('start_exam_blanc');
-      if (error || data?.error) {
-        toast(data?.error || 'Impossible de démarrer l\'examen', 'error');
-        btn.disabled = false;
-        btn.textContent = 'Commencer l\'examen';
-        return;
-      }
-
-      const { session_id, questions } = data;
-      if (!session_id || !Array.isArray(questions) || questions.length === 0) {
-        toast('Erreur: examen incomplet reçu', 'error');
-        btn.disabled = false;
-        btn.textContent = 'Commencer l\'examen';
-        return;
-      }
-
-      track('exam_blanc.started', { session_id, q_count: questions.length });
-      startQuiz(root, { session_id, questions });
-    } catch (e) {
-      console.error('[exam-blanc] start error', e);
-      toast('Erreur de connexion', 'error');
-      btn.disabled = false;
-      btn.textContent = 'Commencer l\'examen';
-    }
+  root.querySelectorAll('.exb-pcard').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pid = parseInt(btn.dataset.pid, 10);
+      haptic('select');
+      startParcours(root, pid);
+    });
   });
 }
 
-// ─── Quiz flow ───────────────────────────────────────────────
-function startQuiz(root, { session_id, questions }) {
-  const answers = {};   // { [question_id]: answer_index }
-  let currentIdx = 0;
-  let timerLeft  = DURATION_S;
-  let timerInterval = null;
+// ─── Écran 2 : quiz ──────────────────────────────────────────
+function startParcours(root, parcours_id) {
+  const parcours   = PARCOURS.find(p => p.id === parcours_id);
+  const questions  = questionsForParcours(parcours_id);
+  const answers    = new Array(questions.length).fill(null); // null = non répondu
+  let currentIdx   = 0;
+  let answered     = false; // flag pour éviter le double-clic
+
+  track('parcours_quiz.started', { parcours_id, nom: parcours?.nom });
 
   function renderQuestion() {
-    const q = questions[currentIdx];
-    const n = currentIdx + 1;
+    answered = false;
+    const q   = questions[currentIdx];
+    const num = currentIdx + 1;
+    const pct = Math.round((num - 1) / questions.length * 100);
 
     root.querySelector('#exb-screen').innerHTML = `
       <div class="exb-quiz-header">
-        <button class="exb-quit-btn" id="exb-quit" title="Abandonner">✕</button>
+        <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
         <div class="exb-progress-wrap">
           <div class="exb-progress-bar">
-            <div class="exb-progress-fill" style="width:${((n - 1) / questions.length) * 100}%"></div>
+            <div class="exb-progress-fill" style="width:${pct}%"></div>
           </div>
-          <span class="exb-progress-label">${n} / ${questions.length}</span>
+          <span class="exb-progress-label">${num} / ${questions.length}</span>
         </div>
-        <div class="exb-timer" id="exb-timer">${formatTime(timerLeft)}</div>
+        <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? '')}</span>
       </div>
 
-      <div class="exb-qbody anim-slide-up" id="exb-qbody">
-        <div class="exb-qnum">Question ${n}</div>
-        <div class="exb-qtext">${esc(q.question || q.texte || '')}</div>
-
-        ${q.image_url ? `<img class="exb-qimg" src="${esc(q.image_url)}" alt="Illustration" loading="lazy">` : ''}
-
-        <div class="exb-choices" id="exb-choices">
-          ${(q.options || q.choices || []).map((opt, i) => `
-            <button class="exb-choice" data-idx="${i}">
-              <span class="exb-choice-letter">${'ABCD'[i]}</span>
+      <div class="exb-qbody" id="exb-qbody">
+        <p class="exb-qnum">Question ${num}</p>
+        <p class="exb-qtext">${esc(q.enonce)}</p>
+        <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
+          ${q.options.map((opt, i) => `
+            <button class="exb-choice" data-idx="${i}" aria-pressed="false">
+              <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
               <span class="exb-choice-text">${esc(opt)}</span>
             </button>
           `).join('')}
         </div>
+        <div class="exb-feedback" id="exb-feedback" hidden></div>
       </div>
     `;
 
-    // Wire choices
-    root.querySelectorAll('.exb-choice').forEach(btn => {
-      btn.addEventListener('click', () => pickAnswer(btn, q.id || q.question_id));
-    });
-
-    // Wire quit
     root.querySelector('#exb-quit')?.addEventListener('click', () => {
-      if (confirm('Abandonner l\'examen ? Ta progression sera perdue.')) {
-        clearInterval(timerInterval);
-        track('exam_blanc.abandoned', { session_id, at_question: currentIdx });
-        mount(root);
+      if (confirm('Quitter ce parcours ? Ta progression sera perdue.')) {
+        haptic('tap');
+        track('parcours_quiz.quit', { parcours_id, question: num });
+        root.innerHTML = renderStyles() + renderSelection();
+        wireSelection(root);
       }
+    });
+
+    root.querySelectorAll('.exb-choice').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        const chosen = parseInt(btn.dataset.idx, 10);
+        answers[currentIdx] = chosen;
+        showFeedback(root, q, chosen, questions, currentIdx, parcours_id, answers, renderQuestion);
+      });
     });
   }
 
-  function pickAnswer(btn, questionId) {
-    if (btn.classList.contains('exb-choice--selected')) return;
-
-    const idx = parseInt(btn.dataset.idx, 10);
-    answers[questionId] = idx;
-
-    // Visual feedback
-    root.querySelectorAll('.exb-choice').forEach(b => b.classList.remove('exb-choice--selected'));
-    btn.classList.add('exb-choice--selected');
-
-    // Auto-advance after 350ms
-    setTimeout(() => {
-      if (currentIdx < questions.length - 1) {
-        currentIdx++;
-        const qbody = root.querySelector('#exb-qbody');
-        if (qbody) {
-          qbody.classList.remove('anim-slide-up');
-          void qbody.offsetWidth;
-          qbody.classList.add('anim-slide-up');
-        }
-        renderQuestion();
-      } else {
-        // Last question answered
-        clearInterval(timerInterval);
-        submitExam();
-      }
-    }, 350);
-  }
-
-  function tickTimer() {
-    timerLeft--;
-    const el = root.querySelector('#exb-timer');
-    if (el) {
-      el.textContent = formatTime(timerLeft);
-      if (timerLeft <= 5 * 60) el.classList.add('exb-timer--urgent');
-    }
-    if (timerLeft <= 0) {
-      clearInterval(timerInterval);
-      submitExam();
-    }
-  }
-
-  async function submitExam() {
-    root.querySelector('#exb-screen').innerHTML = `
-      <div class="exb-submitting">
-        <div class="exb-submitting-ico">⏳</div>
-        <div class="exb-submitting-txt">Correction en cours…</div>
-      </div>
-    `;
-
-    try {
-      const { data, error } = await sb.rpc('submit_exam_blanc', {
-        p_session_id: session_id,
-        p_answers: Object.entries(answers).map(([question_id, selected_idx]) => ({
-          question_id,
-          selected_idx,
-        })),
-      });
-      if (error || data?.error) {
-        toast(data?.error || 'Erreur lors de la correction', 'error');
-        mount(root);
-        return;
-      }
-      track('exam_blanc.submitted', { session_id, score: data?.score });
-      showResults(data);
-    } catch (e) {
-      console.error('[exam-blanc] submit error', e);
-      toast('Erreur de connexion', 'error');
-      mount(root);
-    }
-  }
-
-  function showResults(res) {
-    const correct  = res?.correct ?? 0;
-    const total    = res?.total ?? TOTAL_Q;
-    const pct      = res?.score ?? (total ? Math.round((correct / total) * 100) : 0);
-    const passed   = res?.passed ?? (pct >= PASS_PCT);
-    const results  = res?.results || [];
-
-    track('exam_blanc.result', { session_id, score: correct, total, pct, passed });
-
-    // Index des questions (texte + choix) gardées en mémoire depuis start_exam_blanc
-    const qById = {};
-    questions.forEach(q => { qById[q.id || q.question_id] = q; });
-
-    // Correction détaillée : pour chaque question, surligne ta réponse vs la bonne
-    const correctionHtml = results.map((r, i) => {
-      const q       = qById[r.question_id] || {};
-      const choices = q.options || q.choices || [];
-      const sel     = r.selected_idx;
-      const cor     = r.correct_idx;
-      const ok      = r.is_correct;
-
-      const choicesHtml = choices.map((opt, ci) => {
-        let cls = 'exb-cor-opt';
-        let mark = '';
-        if (ci === cor)      { cls += ' exb-cor-opt--correct'; mark = '✓'; }
-        else if (ci === sel) { cls += ' exb-cor-opt--wrong';   mark = '✗'; }
-        return `<div class="${cls}">
-            <span class="exb-cor-opt-letter">${'ABCD'[ci] || ''}</span>
-            <span class="exb-cor-opt-text">${esc(opt)}</span>
-            <span class="exb-cor-opt-mark">${mark}</span>
-          </div>`;
-      }).join('');
-
-      const noAnswer = sel < 0 ? '<div class="exb-cor-noanswer">Tu n\'as pas répondu à cette question</div>' : '';
-
-      return `
-        <div class="exb-cor-item">
-          <div class="exb-cor-head">
-            <span class="exb-cor-n">Question ${i + 1}</span>
-            <span class="exb-cor-badge ${ok ? 'exb-cor-badge--ok' : 'exb-cor-badge--ko'}">${ok ? '✓ Correct' : '✗ Erreur'}</span>
-          </div>
-          <div class="exb-cor-q">${esc(q.question || q.texte || '')}</div>
-          <div class="exb-cor-opts">${choicesHtml}</div>
-          ${noAnswer}
-        </div>`;
-    }).join('');
-
-    root.querySelector('#exb-screen').innerHTML = `
-      <div class="exb-results anim-slide-up">
-        <div class="exb-res-top ${passed ? 'exb-res-top--pass' : 'exb-res-top--fail'}">
-          <div class="exb-res-ico">${passed ? '🏆' : '📚'}</div>
-          <div class="exb-res-score">${correct}<span class="exb-res-total">/${total}</span></div>
-          <div class="exb-res-pct">${pct} %</div>
-          <div class="exb-res-label">${passed ? 'Réussi !' : 'À retenter'}</div>
-        </div>
-
-        <div class="exb-res-body">
-          <div class="exb-res-bar-wrap">
-            <div class="exb-res-bar">
-              <div class="exb-res-bar-fill ${passed ? 'exb-res-bar-fill--pass' : ''}" style="width:0%" data-target="${pct}%"></div>
-            </div>
-            <div class="exb-res-bar-labels">
-              <span>0 %</span>
-              <span class="exb-res-bar-threshold">70 %</span>
-              <span>100 %</span>
-            </div>
-          </div>
-
-          ${passed
-            ? '<p class="exb-res-msg">Bravo ! Tu maîtrises bien le code de la route. Continue à travailler tes compétences faibles.</p>'
-            : `<p class="exb-res-msg">Il te manque ${PASS_PCT - pct} points. Concentre-toi sur les thèmes où tu as perdu des points.</p>`
-          }
-
-          ${results.length > 0 ? `
-          <div class="exb-res-detail-title">Correction détaillée</div>
-          <div class="exb-cor-list">
-            ${correctionHtml}
-          </div>
-          ` : ''}
-        </div>
-
-        <div class="exb-res-actions">
-          <button class="exb-retry-btn" id="exb-retry">Refaire un examen</button>
-        </div>
-      </div>
-    `;
-
-    // Animate bar
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const fill = root.querySelector('.exb-res-bar-fill');
-      if (fill) fill.style.width = fill.dataset.target;
-    }));
-
-    root.querySelector('#exb-retry')?.addEventListener('click', () => mount(root));
-  }
-
-  // Start
   renderQuestion();
-  timerInterval = setInterval(tickTimer, 1000);
 }
 
-// ─── Helpers ─────────────────────────────────────────────────
-function formatTime(secs) {
-  const m = Math.floor(secs / 60).toString().padStart(2, '0');
-  const s = (secs % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
+function showFeedback(root, q, chosen, questions, currentIdx, parcours_id, answers, renderQuestion) {
+  const isCorrect = chosen === q.correct;
+  const isFaute   = q.tags?.includes('faute_eliminatoire');
+
+  if (isCorrect) { haptic('success'); playSuccess(); }
+  else           { haptic('warning'); playError(); }
+
+  // Colorie les boutons
+  root.querySelectorAll('.exb-choice').forEach(btn => {
+    const idx = parseInt(btn.dataset.idx, 10);
+    btn.disabled = true;
+    btn.setAttribute('aria-pressed', idx === chosen ? 'true' : 'false');
+    if (idx === q.correct)   btn.classList.add('exb-choice--correct');
+    if (idx === chosen && !isCorrect) btn.classList.add('exb-choice--wrong');
+  });
+
+  const feedbackEl = root.querySelector('#exb-feedback');
+  feedbackEl.hidden = false;
+  feedbackEl.innerHTML = `
+    ${!isCorrect && isFaute ? '<div class="exb-faute-banner">⚠️ Faute éliminatoire à l\'examen</div>' : ''}
+    <div class="exb-feedback-verdict ${isCorrect ? 'exb-feedback-verdict--ok' : 'exb-feedback-verdict--ko'}">
+      ${isCorrect ? '✓ Bonne réponse' : '✗ Mauvaise réponse — Réponse : ' + esc(String.fromCharCode(65 + q.correct))}
+    </div>
+    <p class="exb-feedback-explication">${esc(q.explication)}</p>
+    <button class="exb-next-btn" id="exb-next">
+      ${currentIdx + 1 < questions.length ? 'Question suivante →' : 'Voir les résultats →'}
+    </button>
+  `;
+
+  root.querySelector('#exb-next')?.addEventListener('click', () => {
+    playPageturn();
+    if (currentIdx + 1 < questions.length) {
+      // Remplace uniquement le contenu du qbody pour éviter de recréer les listeners du header
+      const exbScreen = root.querySelector('#exb-screen');
+      // Incrément puis re-render complet (simple et fiable)
+      const nextIdx = currentIdx + 1;
+      // On réaffecte currentIdx via closure dans renderQuestion — passer via callback
+      renderNextQuestion(root, questions, answers, nextIdx, parcours_id);
+    } else {
+      showResults(root, questions, answers, parcours_id);
+    }
+  });
+}
+
+function renderNextQuestion(root, questions, answers, idx, parcours_id) {
+  const parcours = PARCOURS.find(p => p.id === parcours_id);
+  let answered   = false;
+
+  function renderAt(currentIdx) {
+    answered = false;
+    const q   = questions[currentIdx];
+    const num = currentIdx + 1;
+    const pct = Math.round((num - 1) / questions.length * 100);
+
+    root.querySelector('#exb-screen').innerHTML = `
+      <div class="exb-quiz-header">
+        <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
+        <div class="exb-progress-wrap">
+          <div class="exb-progress-bar">
+            <div class="exb-progress-fill" style="width:${pct}%"></div>
+          </div>
+          <span class="exb-progress-label">${num} / ${questions.length}</span>
+        </div>
+        <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? '')}</span>
+      </div>
+
+      <div class="exb-qbody" id="exb-qbody">
+        <p class="exb-qnum">Question ${num}</p>
+        <p class="exb-qtext">${esc(q.enonce)}</p>
+        <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
+          ${q.options.map((opt, i) => `
+            <button class="exb-choice" data-idx="${i}" aria-pressed="false">
+              <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
+              <span class="exb-choice-text">${esc(opt)}</span>
+            </button>
+          `).join('')}
+        </div>
+        <div class="exb-feedback" id="exb-feedback" hidden></div>
+      </div>
+    `;
+
+    root.querySelector('#exb-quit')?.addEventListener('click', () => {
+      if (confirm('Quitter ce parcours ? Ta progression sera perdue.')) {
+        haptic('tap');
+        track('parcours_quiz.quit', { parcours_id, question: num });
+        root.innerHTML = renderStyles() + renderSelection();
+        wireSelection(root);
+      }
+    });
+
+    root.querySelectorAll('.exb-choice').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        const chosen = parseInt(btn.dataset.idx, 10);
+        answers[currentIdx] = chosen;
+        showFeedback(root, q, chosen, questions, currentIdx, parcours_id, answers, () => renderAt(currentIdx + 1));
+      });
+    });
+  }
+
+  renderAt(idx);
+}
+
+// ─── Écran 3 : résultats ─────────────────────────────────────
+function showResults(root, questions, answers, parcours_id) {
+  const parcours = PARCOURS.find(p => p.id === parcours_id);
+  const score    = answers.filter((a, i) => a === questions[i].correct).length;
+  const total    = questions.length;
+  const passed   = score >= PASS_THRESHOLD;
+  const pct      = Math.round(score / total * 100);
+
+  track('parcours_quiz.completed', { parcours_id, nom: parcours?.nom, score, total, passed });
+
+  if (passed) playSuccess(); else playError();
+
+  const wrongItems = questions
+    .map((q, i) => ({ q, chosen: answers[i], isCorrect: answers[i] === q.correct }))
+    .filter(x => !x.isCorrect);
+
+  const wrongHtml = wrongItems.length === 0
+    ? `<p class="exb-perfect">Parfait ! Aucune erreur.</p>`
+    : `
+      <h2 class="exb-recap-title">Questions ratées</h2>
+      <div class="exb-recap-list">
+        ${wrongItems.map(({ q, chosen }) => `
+          <div class="exb-recap-item">
+            <p class="exb-recap-enonce">${esc(q.enonce)}</p>
+            ${chosen !== null ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>` : ''}
+            <p class="exb-recap-correct">Bonne réponse : <strong>${esc(q.options[q.correct])}</strong></p>
+            <p class="exb-recap-explication">${esc(q.explication)}</p>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+  root.querySelector('#exb-screen').innerHTML = `
+    <div class="exb-results">
+      <div class="exb-res-top ${passed ? 'exb-res-top--pass' : 'exb-res-top--fail'}">
+        <div class="exb-res-ico">${passed ? '🎉' : '💪'}</div>
+        <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
+        <div class="exb-res-pct">${pct} %</div>
+        <div class="exb-res-verdict">${passed ? 'Admis — tu es dans les clous !' : 'Non admis — encore un peu d\'entraînement'}</div>
+        <div class="exb-res-cepc">${passed
+          ? 'Au CEPC, il faut ≥ 35 / 40. Continue comme ça !'
+          : 'Au CEPC, le seuil est de 35 / 40. Reviens t\'entraîner !'
+        }</div>
+      </div>
+
+      <div class="exb-res-body">
+        <div class="exb-res-bar">
+          <div class="exb-res-bar-fill ${passed ? 'exb-res-bar-fill--pass' : ''}" style="width:${pct}%"></div>
+        </div>
+        ${wrongHtml}
+      </div>
+
+      <div class="exb-res-actions">
+        <button class="exb-retry-btn" id="exb-retry">Refaire ce parcours</button>
+        <button class="exb-start-btn" id="exb-other">Choisir un autre parcours</button>
+        <button class="exb-quit-btn-text" id="exb-home">← Accueil</button>
+      </div>
+    </div>
+  `;
+
+  root.querySelector('#exb-retry')?.addEventListener('click', () => {
+    haptic('tap');
+    track('parcours_quiz.retry', { parcours_id });
+    startParcours(root, parcours_id);
+  });
+
+  root.querySelector('#exb-other')?.addEventListener('click', () => {
+    haptic('tap');
+    root.innerHTML = renderStyles() + renderSelection();
+    wireSelection(root);
+  });
+
+  root.querySelector('#exb-home')?.addEventListener('click', () => {
+    haptic('tap');
+    navigate('/');
+  });
 }
 
 // ─── Styles ──────────────────────────────────────────────────
 function renderStyles() {
   return `<style>
-/* === Exam Blanc === */
+/* === Parcours quiz — exb-* === */
 .exb {
   min-height: 100svh;
-  background: #0a0d1a;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
   font-family: 'Inter', sans-serif;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
+  color: var(--ink);
+  overflow-x: hidden;
+}
+.anim-slide-up {
+  animation: exbSlideUp .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes exbSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Intro */
-.exb-intro {
+/* ── Sélection ── */
+.exb-sel-header {
+  padding: 20px 20px 0;
+}
+.exb-sel-title {
+  font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  margin: 10px 0 4px;
+  letter-spacing: -.022em;
+}
+.exb-sel-sub {
+  font: 500 14px/1.5 'Inter', sans-serif;
+  color: var(--mu);
+  margin: 0 0 20px;
+}
+.exb-pcards {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 48px 24px 120px;
-  gap: 0;
-}
-.exb-intro-icon {
-  font-size: 56px;
-  margin-bottom: 16px;
-}
-.exb-intro-title {
-  font: 700 28px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  margin: 0 0 8px;
-  text-align: center;
-}
-.exb-intro-sub {
-  font: 400 15px/1.5 'Inter', sans-serif;
-  color: var(--mu2);
-  text-align: center;
-  margin: 0 0 32px;
-}
-
-.exb-rules {
-  background: #1a1d2e;
-  border-radius: 16px;
-  padding: 20px;
-  width: 100%;
-  max-width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-bottom: 32px;
-}
-.exb-rule {
-  display: flex;
-  align-items: flex-start;
   gap: 12px;
+  padding: 0 16px 40px;
 }
-.exb-rule-ico {
-  font-size: 18px;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-.exb-rule-txt {
-  font: 400 14px/1.5 'Inter', sans-serif;
-  color: #cbd5e1;
-}
-.exb-rule-txt strong { color: #fff; }
-
-.exb-start-btn {
+.exb-pcard {
   width: 100%;
-  max-width: 400px;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
+  border-radius: 18px;
   padding: 16px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  border: none;
-  border-radius: 14px;
-  color: #fff;
-  font: 700 16px/1 'Plus Jakarta Sans', sans-serif;
+  text-align: left;
   cursor: pointer;
-  transition: transform 160ms cubic-bezier(.23,1,.32,1), opacity 160ms;
-  min-height: 54px;
+  transition: border-color .15s, box-shadow .15s, transform .1s;
 }
-.exb-start-btn:active { transform: scale(0.97); }
-.exb-start-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
-
-.exb-disclaimer {
-  font: 400 12px/1.5 'Inter', sans-serif;
-  color: #475569;
-  text-align: center;
-  margin: 12px 0 0;
+.exb-pcard:active { transform: scale(.98); }
+.exb-pcard:hover { border-color: #6366f1; box-shadow: 0 4px 20px rgba(99,102,241,.12); }
+.exb-pcard-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.exb-pcard-num {
+  font: 700 11px/1 'Inter', sans-serif;
+  color: #6366f1;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.exb-pcard-stars {
+  font-size: 13px;
+  color: #f59e0b;
+  letter-spacing: 2px;
+}
+.exb-pcard-nom {
+  font: 700 17px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  margin-bottom: 4px;
+  letter-spacing: -.015em;
+}
+.exb-pcard-ctx {
+  font: 400 13px/1.5 'Inter', sans-serif;
+  color: var(--mu);
+  margin-bottom: 8px;
+}
+.exb-pcard-meta {
+  font: 600 11px/1 'Inter', sans-serif;
+  color: var(--mu2);
+  letter-spacing: .06em;
 }
 
-/* Quiz header */
+/* ── Quiz header ── */
 .exb-quiz-header {
+  padding: 16px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg);
   position: sticky;
   top: 0;
   z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: rgba(10,13,26,.92);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid var(--bo);
+  padding-bottom: 12px;
 }
 .exb-quit-btn {
-  background: rgba(255,255,255,.08);
+  align-self: flex-end;
+  background: none;
   border: none;
-  border-radius: 8px;
-  color: var(--mu2);
-  font-size: 16px;
-  width: 36px;
-  height: 36px;
+  font-size: 22px;
+  color: var(--mu);
   cursor: pointer;
-  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: background 120ms;
+  justify-content: flex-end;
+  padding: 0;
 }
-.exb-quit-btn:active { background: rgba(255,255,255,.15); }
-
 .exb-progress-wrap {
-  flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 10px;
 }
 .exb-progress-bar {
-  height: 4px;
-  background: rgba(255,255,255,.1);
-  border-radius: 2px;
+  flex: 1;
+  height: 6px;
+  background: var(--bo);
+  border-radius: 3px;
   overflow: hidden;
 }
 .exb-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #6366f1, #8b5cf6);
-  border-radius: 2px;
-  transition: width 300ms cubic-bezier(.23,1,.32,1);
+  border-radius: 3px;
+  transition: width .3s cubic-bezier(.23,1,.32,1);
 }
 .exb-progress-label {
-  font: 500 11px/1 'Inter', sans-serif;
+  font: 600 12px/1 'Inter', sans-serif;
   color: var(--mu);
-  text-align: right;
+  white-space: nowrap;
+  min-width: 36px;
 }
-.exb-timer {
-  font: 700 15px/1 'IBM Plex Mono', monospace;
+.exb-quiz-parcours-name {
+  font: 600 11px/1 'Inter', sans-serif;
   color: var(--mu2);
-  flex-shrink: 0;
-  min-width: 48px;
-  text-align: right;
+  letter-spacing: .06em;
+  text-transform: uppercase;
 }
-.exb-timer--urgent { color: #ef4444; animation: exb-pulse 1s ease-in-out infinite; }
 
-/* Question body */
+/* ── Question body ── */
 .exb-qbody {
-  padding: 24px 20px 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  padding: 20px 16px 32px;
+  flex: 1;
 }
 .exb-qnum {
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 700 11px/1 'Inter', sans-serif;
   color: #6366f1;
   text-transform: uppercase;
-  letter-spacing: .06em;
+  letter-spacing: .1em;
+  margin: 0 0 10px;
 }
 .exb-qtext {
-  font: 600 18px/1.5 'Plus Jakarta Sans', sans-serif;
-  color: #f1f5f9;
-}
-.exb-qimg {
-  width: 100%;
-  border-radius: 12px;
-  object-fit: cover;
-  max-height: 200px;
+  font: 600 17px/1.5 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  margin: 0 0 20px;
+  letter-spacing: -.015em;
 }
 .exb-choices {
   display: flex;
@@ -510,255 +493,243 @@ function renderStyles() {
   gap: 10px;
 }
 .exb-choice {
+  width: 100%;
   display: flex;
-  align-items: center;
-  gap: 14px;
+  align-items: flex-start;
+  gap: 12px;
   padding: 14px 16px;
-  background: #1a1d2e;
-  border: 1.5px solid rgba(255,255,255,.08);
-  border-radius: 12px;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
+  border-radius: 14px;
   cursor: pointer;
   text-align: left;
-  width: 100%;
-  transition: border-color 140ms, background 140ms, transform 100ms;
-  min-height: 54px;
+  font-family: inherit;
+  transition: border-color .12s, background .12s, transform .1s;
+  min-height: 52px;
 }
-.exb-choice:active { transform: scale(0.98); }
-.exb-choice--selected {
-  border-color: #6366f1;
-  background: rgba(99,102,241,.12);
-}
+.exb-choice:active { transform: scale(.98); }
+.exb-choice:not(:disabled):hover { border-color: #6366f1; }
+.exb-choice:disabled { cursor: default; }
+.exb-choice--correct { border-color: #22c55e; background: rgba(34,197,94,.08); }
+.exb-choice--wrong   { border-color: #ef4444; background: rgba(239,68,68,.08); }
 .exb-choice-letter {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: rgba(255,255,255,.08);
-  font: 700 13px/28px 'IBM Plex Mono', monospace;
-  color: var(--mu2);
-  text-align: center;
   flex-shrink: 0;
-  transition: background 140ms, color 140ms;
-}
-.exb-choice--selected .exb-choice-letter {
-  background: #6366f1;
-  color: #fff;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(99,102,241,.1);
+  color: #6366f1;
+  font: 700 13px/26px 'Inter', sans-serif;
+  text-align: center;
 }
 .exb-choice-text {
-  font: 400 14px/1.5 'Inter', sans-serif;
-  color: #e2e8f0;
+  font: 500 15px/1.4 'Inter', sans-serif;
+  color: var(--ink);
+  flex: 1;
 }
 
-/* Submitting */
-.exb-submitting {
+/* ── Feedback ── */
+.exb-feedback {
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 50svh;
-  gap: 16px;
+  gap: 10px;
 }
-.exb-submitting-ico { font-size: 40px; }
-.exb-submitting-txt {
-  font: 500 16px/1 'Inter', sans-serif;
-  color: var(--mu2);
+.exb-faute-banner {
+  background: rgba(239,68,68,.1);
+  border: 1px solid rgba(239,68,68,.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font: 700 13px/1.4 'Inter', sans-serif;
+  color: #ef4444;
 }
+.exb-feedback-verdict {
+  font: 700 14px/1.3 'Plus Jakarta Sans', sans-serif;
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+.exb-feedback-verdict--ok {
+  background: rgba(34,197,94,.1);
+  color: #16a34a;
+}
+.exb-feedback-verdict--ko {
+  background: rgba(239,68,68,.08);
+  color: #dc2626;
+}
+.exb-feedback-explication {
+  font: 400 13px/1.6 'Inter', sans-serif;
+  color: var(--mu);
+  margin: 0;
+}
+.exb-next-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: transform .12s, opacity .12s;
+  min-height: 50px;
+}
+.exb-next-btn:active { transform: scale(.97); }
 
-/* Results */
+/* ── Résultats ── */
 .exb-results {
   display: flex;
   flex-direction: column;
   min-height: 100svh;
 }
 .exb-res-top {
+  padding: 40px 20px 24px;
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 48px 24px 40px;
   gap: 8px;
 }
-.exb-res-top--pass { background: linear-gradient(160deg, rgba(34,197,94,.15) 0%, rgba(10,13,26,0) 100%); }
-.exb-res-top--fail { background: linear-gradient(160deg, rgba(239,68,68,.1) 0%, rgba(10,13,26,0) 100%); }
-.exb-res-ico { font-size: 48px; margin-bottom: 8px; }
+.exb-res-top--pass { background: linear-gradient(180deg, rgba(34,197,94,.12) 0%, transparent 100%); }
+.exb-res-top--fail { background: linear-gradient(180deg, rgba(239,68,68,.08) 0%, transparent 100%); }
+.exb-res-ico { font-size: 48px; margin-bottom: 4px; }
 .exb-res-score {
   font: 800 56px/1 'Plus Jakarta Sans', sans-serif;
-  color: #f1f5f9;
+  color: var(--ink);
+  letter-spacing: -.04em;
 }
-.exb-res-total { font-size: 28px; color: #64748b; }
+.exb-res-total { font-size: 28px; color: var(--mu); }
 .exb-res-pct {
-  font: 700 20px/1 'IBM Plex Mono', monospace;
-  color: var(--mu2);
+  font: 600 18px/1 'Inter', sans-serif;
+  color: var(--mu);
 }
-.exb-res-label {
-  font: 700 18px/1 'Plus Jakarta Sans', sans-serif;
-  color: #f1f5f9;
+.exb-res-verdict {
+  font: 700 17px/1.3 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
   margin-top: 4px;
 }
-.exb-res-top--pass .exb-res-label { color: #22c55e; }
-.exb-res-top--fail .exb-res-label { color: #ef4444; }
-
-.exb-res-body {
-  flex: 1;
-  padding: 0 20px 20px;
+.exb-res-cepc {
+  font: 500 13px/1.5 'Inter', sans-serif;
+  color: var(--mu);
+  max-width: 280px;
+  text-align: center;
 }
-.exb-res-bar-wrap { margin-bottom: 16px; }
+.exb-res-body {
+  padding: 20px 16px;
+  flex: 1;
+}
 .exb-res-bar {
   height: 8px;
-  background: rgba(255,255,255,.08);
+  background: var(--bo);
   border-radius: 4px;
   overflow: hidden;
-  position: relative;
-  margin-bottom: 6px;
-}
-.exb-res-bar::after {
-  content: '';
-  position: absolute;
-  left: 70%;
-  top: -2px;
-  bottom: -2px;
-  width: 2px;
-  background: rgba(255,255,255,.3);
-  border-radius: 1px;
+  margin-bottom: 28px;
 }
 .exb-res-bar-fill {
   height: 100%;
   background: #ef4444;
   border-radius: 4px;
-  transition: width 900ms cubic-bezier(.23,1,.32,1);
+  transition: width .8s cubic-bezier(.23,1,.32,1);
 }
 .exb-res-bar-fill--pass { background: #22c55e; }
-.exb-res-bar-labels {
-  display: flex;
-  justify-content: space-between;
-  font: 400 11px/1 'IBM Plex Mono', monospace;
-  color: #475569;
+.exb-perfect {
+  font: 500 15px/1.5 'Inter', sans-serif;
+  color: #16a34a;
+  text-align: center;
+  margin: 0;
 }
-.exb-res-bar-threshold { color: #64748b; }
-
-.exb-res-msg {
-  font: 400 14px/1.6 'Inter', sans-serif;
-  color: var(--mu2);
-  margin: 0 0 24px;
+.exb-recap-title {
+  font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  margin: 0 0 14px;
 }
-.exb-res-detail-title {
-  font: 600 13px/1 'Inter', sans-serif;
-  color: var(--mu);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  margin-bottom: 10px;
-}
-.exb-cor-list {
+.exb-recap-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
-.exb-cor-item {
-  background: #1a1d2e;
+.exb-recap-item {
+  background: var(--su);
+  border: 1px solid var(--bo);
+  border-left: 3px solid #ef4444;
   border-radius: 12px;
   padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-.exb-cor-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.exb-cor-n {
-  font: 500 11px/1 'Inter', sans-serif;
-  color: var(--mu);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-}
-.exb-cor-badge {
-  font: 700 11px/1 'IBM Plex Mono', monospace;
-  padding: 4px 8px;
-  border-radius: 6px;
-}
-.exb-cor-badge--ok { color: #22c55e; background: rgba(34,197,94,.12); }
-.exb-cor-badge--ko { color: #ef4444; background: rgba(239,68,68,.12); }
-.exb-cor-q {
-  font: 600 14px/1.5 'Plus Jakarta Sans', sans-serif;
-  color: #f1f5f9;
-}
-.exb-cor-opts {
-  display: flex;
-  flex-direction: column;
   gap: 6px;
 }
-.exb-cor-opt {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 8px;
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.06);
+.exb-recap-enonce {
+  font: 600 14px/1.4 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  margin: 0;
 }
-.exb-cor-opt--correct {
-  background: rgba(34,197,94,.12);
-  border-color: rgba(34,197,94,.4);
+.exb-recap-wrong {
+  font: 500 13px/1.4 'Inter', sans-serif;
+  color: #dc2626;
+  margin: 0;
 }
-.exb-cor-opt--wrong {
-  background: rgba(239,68,68,.1);
-  border-color: rgba(239,68,68,.4);
+.exb-recap-correct {
+  font: 500 13px/1.4 'Inter', sans-serif;
+  color: #16a34a;
+  margin: 0;
 }
-.exb-cor-opt-letter {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  background: rgba(255,255,255,.08);
-  font: 700 11px/22px 'IBM Plex Mono', monospace;
+.exb-recap-explication {
+  font: 400 12px/1.5 'Inter', sans-serif;
   color: var(--mu2);
-  text-align: center;
-  flex-shrink: 0;
+  margin: 0;
+  padding-top: 4px;
+  border-top: 1px solid var(--bo);
 }
-.exb-cor-opt--correct .exb-cor-opt-letter { background: #22c55e; color: #fff; }
-.exb-cor-opt--wrong .exb-cor-opt-letter { background: #ef4444; color: #fff; }
-.exb-cor-opt-text {
-  font: 400 13px/1.4 'Inter', sans-serif;
-  color: #e2e8f0;
-  flex: 1;
-}
-.exb-cor-opt-mark {
-  font: 700 14px/1 'IBM Plex Mono', monospace;
-  flex-shrink: 0;
-}
-.exb-cor-opt--correct .exb-cor-opt-mark { color: #22c55e; }
-.exb-cor-opt--wrong .exb-cor-opt-mark { color: #ef4444; }
-.exb-cor-noanswer {
-  font: 400 12px/1.4 'Inter', sans-serif;
-  color: #f59e0b;
-  font-style: italic;
-}
-
 .exb-res-actions {
-  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
-  border-top: 1px solid rgba(255,255,255,.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px calc(32px + env(safe-area-inset-bottom));
 }
 .exb-retry-btn {
   width: 100%;
-  padding: 16px;
-  background: #1a1d2e;
-  border: 1.5px solid rgba(255,255,255,.1);
+  padding: 14px;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
+  border-radius: 14px;
+  color: var(--ink);
+  font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  min-height: 50px;
+  transition: border-color .12s, transform .1s;
+}
+.exb-retry-btn:hover { border-color: #6366f1; }
+.exb-retry-btn:active { transform: scale(.98); }
+.exb-start-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
   border-radius: 14px;
   color: #fff;
-  font: 600 15px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
-  transition: background 160ms;
-  min-height: 54px;
+  min-height: 50px;
+  transition: transform .12s, opacity .12s;
 }
-.exb-retry-btn:active { background: #252840; }
+.exb-start-btn:active { transform: scale(.97); }
+.exb-quit-btn-text {
+  background: none;
+  border: none;
+  color: var(--mu);
+  font: 500 13px/1 'Inter', sans-serif;
+  cursor: pointer;
+  padding: 10px;
+  min-height: 44px;
+  transition: color .15s;
+}
+.exb-quit-btn-text:active { color: var(--ink); }
 
-@keyframes exb-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: .5; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
 }
-    @media (prefers-reduced-motion: reduce){
-      *,*::before,*::after{
-        animation-duration:.001ms!important;animation-iteration-count:1!important;
-        transition-duration:.001ms!important;scroll-behavior:auto!important}
-    }
 </style>`;
 }
