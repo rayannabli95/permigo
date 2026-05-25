@@ -13,6 +13,30 @@ import { playPageturn, playSuccess, playError } from '@/utils/sound.js';
 
 const PASS_THRESHOLD = 12; // / 15
 
+// Trophées DÉCORATIFS (pas de déblocage ici — pur design)
+const TROPHY_START = { img: '/skins/trophy-first-validation.png', emoji: '⚡', nom: 'Première étincelle' };
+const TROPHY_END   = { img: '/skins/trophy-streak-30d.png',       emoji: '💎', nom: 'Mois sans rater' };
+
+function renderTrophy(t, variant) {
+  return `
+    <div class="exb-trophy ${variant}">
+      <img class="exb-trophy-img" src="${esc(t.img)}" alt="${esc(t.nom)}"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <span class="exb-trophy-emoji" style="display:none">${t.emoji}</span>
+      <span class="exb-trophy-cap">${esc(t.nom)}</span>
+    </div>`;
+}
+
+// Parcours visuel : 15 points reliés, vert (juste) / rouge (faux) / courant
+function renderTrack(questions, answers, currentIdx) {
+  return `<div class="exb-track" id="exb-track">${questions.map((q, i) => {
+    let cls = '';
+    if (answers[i] === null || answers[i] === undefined) cls = (i === currentIdx ? 'is-current' : '');
+    else cls = (answers[i] === q.correct ? 'is-correct' : 'is-wrong');
+    return `<span class="exb-node ${cls}" data-node="${i}"></span>`;
+  }).join('')}</div>`;
+}
+
 // ─── Mount ───────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
@@ -51,6 +75,7 @@ function renderSelection() {
 <div class="exb anim-slide-up" id="exb-screen">
   <div class="exb-sel-header">
     <button class="exb-quit-btn" id="exb-back" aria-label="Retour">←</button>
+    ${renderTrophy(TROPHY_START, 'exb-trophy--start')}
     <h1 class="exb-sel-title">Ton parcours d'examen</h1>
     <p class="exb-sel-sub">5 parcours · 15 questions · estime tes chances au permis</p>
   </div>
@@ -89,15 +114,12 @@ function startParcours(root, parcours_id) {
     answered = false;
     const q   = questions[currentIdx];
     const num = currentIdx + 1;
-    const pct = Math.round((num - 1) / questions.length * 100);
 
     root.querySelector('#exb-screen').innerHTML = `
       <div class="exb-quiz-header">
         <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
-        <div class="exb-progress-wrap">
-          <div class="exb-progress-bar">
-            <div class="exb-progress-fill" style="width:${pct}%"></div>
-          </div>
+        <div class="exb-track-wrap">
+          ${renderTrack(questions, answers, currentIdx)}
           <span class="exb-progress-label">${num} / ${questions.length}</span>
         </div>
         <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? '')}</span>
@@ -157,6 +179,13 @@ function showFeedback(root, q, chosen, questions, currentIdx, parcours_id, answe
     if (idx === chosen && !isCorrect) btn.classList.add('exb-choice--wrong');
   });
 
+  // Colorie le point du parcours correspondant à cette question
+  const node = root.querySelector(`.exb-node[data-node="${currentIdx}"]`);
+  if (node) {
+    node.classList.remove('is-current');
+    node.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+  }
+
   const feedbackEl = root.querySelector('#exb-feedback');
   feedbackEl.hidden = false;
   feedbackEl.innerHTML = `
@@ -193,15 +222,12 @@ function renderNextQuestion(root, questions, answers, idx, parcours_id) {
     answered = false;
     const q   = questions[currentIdx];
     const num = currentIdx + 1;
-    const pct = Math.round((num - 1) / questions.length * 100);
 
     root.querySelector('#exb-screen').innerHTML = `
       <div class="exb-quiz-header">
         <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
-        <div class="exb-progress-wrap">
-          <div class="exb-progress-bar">
-            <div class="exb-progress-fill" style="width:${pct}%"></div>
-          </div>
+        <div class="exb-track-wrap">
+          ${renderTrack(questions, answers, currentIdx)}
           <span class="exb-progress-label">${num} / ${questions.length}</span>
         </div>
         <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? '')}</span>
@@ -282,6 +308,7 @@ function showResults(root, questions, answers, parcours_id) {
 
   root.querySelector('#exb-screen').innerHTML = `
     <div class="exb-results">
+      ${renderTrophy(TROPHY_END, 'exb-trophy--end')}
       <div class="exb-res-top ${passed ? 'exb-res-top--pass' : 'exb-res-top--fail'}">
         <div class="exb-res-ico">${passed ? '🎉' : (fauteRatee ? '🛑' : '💪')}</div>
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
@@ -731,6 +758,56 @@ function renderStyles() {
   transition: color .15s;
 }
 .exb-quit-btn-text:active { color: var(--ink); }
+
+/* ── Parcours visuel (15 points reliés) ── */
+.exb-track-wrap { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.exb-track {
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 2px 4px;
+}
+.exb-track::before {
+  content: ''; position: absolute; left: 7px; right: 7px; top: 50%;
+  height: 3px; background: var(--bo); transform: translateY(-50%);
+  border-radius: 2px; z-index: 0;
+}
+.exb-node {
+  width: 15px; height: 15px; border-radius: 50%;
+  background: var(--bo); border: 2px solid var(--su);
+  position: relative; z-index: 1; flex-shrink: 0;
+  transition: background .3s, transform .25s, box-shadow .3s;
+}
+.exb-node.is-correct { background: #22c55e; }
+.exb-node.is-wrong   { background: #ef4444; }
+.exb-node.is-current {
+  background: #6366f1; transform: scale(1.35);
+  animation: exbNodePulse 1.2s ease-in-out infinite;
+}
+@keyframes exbNodePulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(99,102,241,.25); }
+  50%      { box-shadow: 0 0 0 6px rgba(99,102,241,.10); }
+}
+
+/* ── Trophées décoratifs ── */
+.exb-trophy { display: flex; flex-direction: column; align-items: center; }
+.exb-trophy--start { margin: 8px auto 12px; }
+.exb-trophy--end   { margin: 8px auto 0; }
+.exb-trophy-img, .exb-trophy-emoji {
+  width: 64px; height: 64px; object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(99,102,241,.35));
+  animation: exbTrophyFloat 3s ease-in-out infinite;
+}
+.exb-trophy-emoji { align-items: center; justify-content: center; font-size: 44px; }
+.exb-trophy--end .exb-trophy-img, .exb-trophy--end .exb-trophy-emoji {
+  width: 84px; height: 84px; font-size: 56px;
+  filter: drop-shadow(0 8px 18px rgba(168,85,247,.42));
+}
+.exb-trophy-cap {
+  font: 700 10px/1 'IBM Plex Mono', monospace;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--mu2); margin-top: 7px;
+}
+@keyframes exbTrophyFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
