@@ -52,9 +52,9 @@ export const ASSETS = {
   // ── Fonds carte permis (3 paliers évolutifs) ───────────────────
   // Mesh = neutre/débutant, Route = milieu, Holographic = expert
   permisBg: {
-    mesh:         '/skins/permis-bg-mesh.png',
-    route:        '/skins/permis-bg-route.png',
-    holographic:  '/skins/permis-bg-holographic.png',
+    mesh:         '/skins/permis-bg-mesh.webp',
+    route:        '/skins/permis-bg-route.webp',
+    holographic:  '/skins/permis-bg-holographic.webp',
   },
 };
 

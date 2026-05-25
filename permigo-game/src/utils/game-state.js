@@ -59,6 +59,7 @@ function _buildCustomPayload() {
     gemmes:       parseInt(localStorage.getItem(LS_GEMMES) || '0', 10),
     owned_items:  (() => { try { return JSON.parse(localStorage.getItem(LS_OWNED) || '[]'); } catch { return []; } })(),
     equipped:     (() => { try { return JSON.parse(localStorage.getItem(LS_EQUIPPED) || '{}'); } catch { return {}; } })(),
+    equipped_assets: (() => { try { return JSON.parse(localStorage.getItem(LS_EQUIPPED_ASSETS) || '{}'); } catch { return {}; } })(),
   };
 }
 
@@ -106,6 +107,7 @@ export async function initGameState(userId) {
       if (c.gemmes != null)       localStorage.setItem(LS_GEMMES, String(c.gemmes));
       if (c.owned_items)          localStorage.setItem(LS_OWNED, JSON.stringify(c.owned_items));
       if (c.equipped)             localStorage.setItem(LS_EQUIPPED, JSON.stringify(c.equipped));
+      if (c.equipped_assets)      localStorage.setItem(LS_EQUIPPED_ASSETS, JSON.stringify(c.equipped_assets));
     } else {
       // Première fois : upload le localStorage courant
       await _flushToDb();
@@ -367,6 +369,7 @@ export function setEquippedAsset(slot, url) {
   try { m = JSON.parse(localStorage.getItem(LS_EQUIPPED_ASSETS) || '{}'); } catch {}
   if (url) m[slot] = url; else delete m[slot];
   try { localStorage.setItem(LS_EQUIPPED_ASSETS, JSON.stringify(m)); } catch {}
+  _scheduleSave(); // persiste l'URL équipée en DB (suivi entre appareils)
   // Notifie les vues persistantes (header) pour rafraîchir l'affichage sans reload
   try { window.dispatchEvent(new CustomEvent('pg:cosmetics-changed', { detail: { slot } })); } catch {}
 }
