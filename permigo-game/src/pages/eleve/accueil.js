@@ -22,6 +22,7 @@ import { mountRevisionCards } from '@/components/eleve/revision-cards.js';
 import { toast } from '@/components/common/toast.js';
 import { navigate } from '@/router.js';
 import { haptic } from '@/utils/haptic.js';
+import { playClick, playWhoosh, playPop } from '@/utils/sound.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -614,6 +615,39 @@ const STYLE = `<style>
 .bs-freeze-btn:active { transform: scale(.98); opacity: .9; }
 .bs-freeze-btn:disabled { opacity: .55; cursor: default; }
 .bs-freeze-desc { font: 500 11px/1.4 'Inter', sans-serif; color: #64748b; text-align: center; margin-top: 7px; }
+
+/* ════ Vie & gamification ════ */
+@keyframes accRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.acc2-hero-content { animation: accRise .55s cubic-bezier(.34,1.56,.64,1) both; }
+.acc2-ms          { animation: accRise .55s cubic-bezier(.34,1.56,.64,1) .08s both; }
+.acc2-action      { animation: accRise .55s cubic-bezier(.34,1.56,.64,1) .16s both; }
+.acc2-section-title { animation: accRise .5s ease .22s both; }
+.worlds-grid      { animation: accRise .5s ease .26s both; }
+.trophees-row     { animation: accRise .5s ease .30s both; }
+.acc2-footer      { animation: accRise .5s ease .34s both; }
+
+/* Flamme du streak qui vit */
+.acc2-hero-streak-fire { display: inline-block; transform-origin: 50% 90%; animation: accFire 1.6s ease-in-out infinite; }
+@keyframes accFire { 0%,100% { transform: scale(1) rotate(-4deg); } 50% { transform: scale(1.2) rotate(4deg); } }
+
+/* Sweep de lumière sur le hero à l'entrée */
+.acc2-hero::after {
+  content: ''; position: absolute; top: 0; left: -60%; width: 45%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.16), transparent);
+  transform: skewX(-18deg); pointer-events: none;
+  animation: accShine 3.4s ease-in-out .5s 1;
+}
+@keyframes accShine { 0% { left: -60%; } 55%,100% { left: 135%; } }
+
+/* Confettis (burst à l'ouverture du streak) */
+.acc-confetti { position: fixed; left: 0; top: 0; width: 0; height: 0; pointer-events: none; z-index: 9999; }
+.acc-confetti i { position: absolute; width: 8px; height: 12px; border-radius: 2px; will-change: transform, opacity; animation: accConf 1.1s cubic-bezier(.2,.6,.4,1) forwards; }
+@keyframes accConf { 0% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .acc2-hero-content, .acc2-ms, .acc2-action, .acc2-section-title, .worlds-grid,
+  .trophees-row, .acc2-footer, .acc2-hero-streak-fire, .acc2-hero::after { animation: none !important; }
+}
 </style>`;
 
 // ─── Constantes ──────────────────────────────────────────────────
@@ -783,7 +817,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
       <div class="acc2-hero-meta">
         <div class="acc2-hero-xp-pill">
           ${icon('zap', { size: 13 })}
-          ${lvl.xp} XP · Niv. ${lvl.level}
+          <span class="acc-xp-num" data-to="${lvl.xp}">${lvl.xp}</span> XP · Niv. ${lvl.level}
         </div>
         ${streak.current_streak > 0 ? `
         <div class="acc2-hero-streak ${isActive ? 'active' : ''}" id="streak-badge-btn" role="button" tabindex="0" aria-label="Streak ${streak.current_streak} jours">
@@ -854,7 +888,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
   <!-- Stats footer -->
   <div class="acc2-footer">
     <div class="footer-stat">
-      <div class="footer-val">${totalValidated}<span style="font-size:.55em;color:#94a3b8">/31</span></div>
+      <div class="footer-val"><span class="acc-comp-num" data-to="${totalValidated}">${totalValidated}</span><span style="font-size:.55em;color:#94a3b8">/31</span></div>
       <div class="footer-lbl">compétences acquises</div>
     </div>
     <div class="footer-sep"></div>
@@ -1021,7 +1055,58 @@ function renderActionDuJour(quest, pendingNotif, totalValidated) {
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
+// Compteur animé 0 → valeur
+function countUp(el, to, dur = 900) {
+  if (!el || !Number.isFinite(to)) return;
+  const t0 = performance.now();
+  function step(t) {
+    const p = Math.min(1, (t - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(to * eased);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// Burst de confettis autour d'un point (x, y) écran
+function burstConfetti(x, y) {
+  try {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const colors = ['#6366f1', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444', '#3b82f6'];
+    const wrap = document.createElement('div');
+    wrap.className = 'acc-confetti';
+    wrap.style.left = x + 'px';
+    wrap.style.top = y + 'px';
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('i');
+      p.style.background = colors[i % colors.length];
+      const ang = Math.random() * Math.PI * 2;
+      const dist = 60 + Math.random() * 80;
+      p.style.setProperty('--dx', Math.cos(ang) * dist + 'px');
+      p.style.setProperty('--dy', (Math.sin(ang) * dist + 40) + 'px');
+      p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+      p.style.animationDelay = (Math.random() * 60) + 'ms';
+      wrap.appendChild(p);
+    }
+    document.body.appendChild(wrap);
+    setTimeout(() => wrap.remove(), 1300);
+  } catch {}
+}
+
 function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, todayQuests, pendingNotif }) {
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Compteurs animés (XP + compétences)
+  if (!reduceMotion) {
+    const xpNum = root.querySelector('.acc-xp-num');
+    if (xpNum) { const to = +xpNum.dataset.to; xpNum.textContent = '0'; countUp(xpNum, to); }
+    const compNum = root.querySelector('.acc-comp-num');
+    if (compNum) { const to = +compNum.dataset.to; compNum.textContent = '0'; countUp(compNum, to, 700); }
+  }
+
+  // Petit son d'entrée, une seule fois par session
+  if (!sessionStorage.getItem('acc-whoosh')) { sessionStorage.setItem('acc-whoosh', '1'); playWhoosh(); }
+
   // XP bar animation
   const xpFill = root.querySelector('.acc2-xp-fill[data-target]');
   if (xpFill) setTimeout(() => { xpFill.style.width = xpFill.dataset.target + '%'; }, 120);
@@ -1032,6 +1117,7 @@ function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, t
 
   // Notif btn → notifications
   root.querySelector('#notif-btn')?.addEventListener('click', () => {
+    playClick();
     track('cta.clicked', { cta_type: 'notif_btn' });
     navigate('#/notifications');
   });
@@ -1039,7 +1125,13 @@ function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, t
   // Streak badge → bottom sheet
   const bsBg     = root.querySelector('#bs-bg');
   const bsSheet  = root.querySelector('#bs-streak');
-  const openBS   = () => { bsSheet?.classList.add('open'); bsBg?.classList.add('open'); track('streak.detail_opened', { days: streak?.current_streak }); };
+  const openBS   = () => {
+    bsSheet?.classList.add('open'); bsBg?.classList.add('open');
+    playPop();
+    const b = root.querySelector('#streak-badge-btn');
+    if (b) { const r = b.getBoundingClientRect(); burstConfetti(r.left + r.width / 2, r.top + r.height / 2); }
+    track('streak.detail_opened', { days: streak?.current_streak });
+  };
   const closeBS  = () => { bsSheet?.classList.remove('open'); bsBg?.classList.remove('open'); };
   root.querySelector('#streak-badge-btn')?.addEventListener('click', openBS);
   bsBg?.addEventListener('click', closeBS);
@@ -1082,6 +1174,7 @@ function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, t
     const sessionId = btn.dataset.sessionId;
     if (!sessionId) return;
     haptic('select');
+    playClick();
     track('session.confirm_tapped', { session_id: sessionId });
     navigate(`#/sessions/${sessionId}`);
   });
@@ -1089,18 +1182,19 @@ function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, t
   // BLOC 2 CTA (next reward btn)
   root.querySelector('.acc2-ms-cta-btn')?.addEventListener('click', (e) => {
     const href = e.currentTarget.dataset.href;
-    if (href) { haptic('tap'); track('cta.clicked', { cta_type: 'ms_cta' }); navigate(href); }
+    if (href) { haptic('tap'); playClick(); track('cta.clicked', { cta_type: 'ms_cta' }); navigate(href); }
   });
 
   // BLOC 3 action btn
   root.querySelector('#action-cta-btn')?.addEventListener('click', (e) => {
     const href = e.currentTarget.dataset.href;
-    if (href) { haptic('select'); track('cta.clicked', { cta_type: 'action_btn' }); navigate(href); }
+    if (href) { haptic('select'); playWhoosh(); track('cta.clicked', { cta_type: 'action_btn' }); navigate(href); }
   });
 
   // World cards → parcours
   root.querySelectorAll('[data-world]').forEach(el => {
     el.addEventListener('click', () => {
+      playClick();
       track('cta.clicked', { cta_type: 'world_card', world: el.dataset.world });
       navigate('#/parcours');
     });
@@ -1109,6 +1203,7 @@ function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, t
   // Trophy cards → trophées
   root.querySelectorAll('.trophy-card').forEach(card => {
     card.addEventListener('click', () => {
+      playClick();
       track('cta.clicked', { cta_type: 'trophy_card' });
       navigate('#/trophees');
     });
