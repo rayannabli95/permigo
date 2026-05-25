@@ -7,6 +7,7 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { mountPermisCard } from '@/components/eleve/permis-card.js';
 import { mountProfileCard } from '@/components/common/profile-card.js';
+import { getEquippedAsset } from '@/utils/game-state.js';
 import { REMC_TOTAL } from '@/data/remc.js';
 import { icon } from '@/utils/icons.js';
 import { isPushEnabled, requestPushPermission, optOutPush, optInPush } from '@/services/web-push.js';
@@ -460,7 +461,7 @@ export async function mount(root) {
   if (me.role === 'eleve' && permisData) {
     profileCardData = {
       me: { ...me, prenom: profile?.prenom || '', nom: profile?.nom || '' },
-      avatarUrl: profile?.avatar_url || null,
+      avatarUrl: getEquippedAsset('avatar') || profile?.avatar_url || null,
       bannerUrl: profile?.banner_url || null,
       count: permisData.validated, // pour calcul prestige (max 31)
       bio: `Apprenti permis B · ${permisData.validated}/${REMC_TOTAL} compétences`,

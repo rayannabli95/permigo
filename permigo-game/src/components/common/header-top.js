@@ -109,6 +109,19 @@ export async function mountHeader() {
     location.hash = '#/profil';
   });
 
+  // Rafraîchit l'avatar de l'en-tête dès qu'un cosmétique est équipé (sans reload).
+  // Listener enregistré une seule fois au niveau window.
+  if (!window.__pgHeaderCosmeticListener) {
+    window.__pgHeaderCosmeticListener = true;
+    window.addEventListener('pg:cosmetics-changed', () => {
+      const cur = getCurUser();
+      const avBtn = document.querySelector('#ht-avatar');
+      if (cur && avBtn) {
+        avBtn.innerHTML = renderUserAvatar({ ...cur, avatar_url: getEquippedAsset('avatar') || cur.avatar_url }, 36);
+      }
+    });
+  }
+
   await mountNotifBell(bar.querySelector('#ht-bell'));
 }
 

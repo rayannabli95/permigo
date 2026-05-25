@@ -367,6 +367,8 @@ export function setEquippedAsset(slot, url) {
   try { m = JSON.parse(localStorage.getItem(LS_EQUIPPED_ASSETS) || '{}'); } catch {}
   if (url) m[slot] = url; else delete m[slot];
   try { localStorage.setItem(LS_EQUIPPED_ASSETS, JSON.stringify(m)); } catch {}
+  // Notifie les vues persistantes (header) pour rafraîchir l'affichage sans reload
+  try { window.dispatchEvent(new CustomEvent('pg:cosmetics-changed', { detail: { slot } })); } catch {}
 }
 
 // ─── Achat ────────────────────────────────────────────────────────

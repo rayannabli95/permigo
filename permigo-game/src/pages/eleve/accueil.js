@@ -16,7 +16,7 @@ import { maybePlayWeeklyReplay } from '@/components/eleve/weekly-replay.js';
 import { icon } from '@/utils/icons.js';
 import { ASSETS } from '@/utils/assets.js';
 import { emotionalBanner } from '@/components/eleve/emotional-banner.js';
-import { getMyChests } from '@/utils/game-state.js';
+import { getMyChests, getEquippedAsset } from '@/utils/game-state.js';
 import { mountFeedbackFeed } from '@/components/eleve/feedback-feed.js';
 import { mountRevisionCards } from '@/components/eleve/revision-cards.js';
 import { toast } from '@/components/common/toast.js';
@@ -755,6 +755,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom   = profile.prenom || me.prenom || 'Toi';
   const initials = prenom.slice(0, 2).toUpperCase();
+  const heroAv   = getEquippedAsset('avatar') || me.avatar_url || null;
   const isActive = streakSt !== 'broken';
 
   // ── BLOC 2 content ──
@@ -774,7 +775,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
   <div class="acc2-hero">
     <div class="acc2-hero-content">
       <div class="acc2-hero-top">
-        <div class="acc2-hero-av">${esc(initials)}</div>
+        <div class="acc2-hero-av">${heroAv ? `<img src="${esc(heroAv)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block">` : esc(initials)}</div>
         <span class="acc2-hero-hi">Bonjour ${esc(prenom)} 👋</span>
         <button class="acc2-hero-notif-btn" id="notif-btn" aria-label="Notifications">
           ${icon('bell', { size: 18 })}
