@@ -708,8 +708,9 @@ export async function mount(root) {
     root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:#64748b;font-family:'Inter',sans-serif">
       <div style="font:800 18px/1.3 'Plus Jakarta Sans',sans-serif;color:#0a0d1a;margin-bottom:8px">Oups, ton accueil a du mal à charger</div>
       <p style="font-size:14px;margin:0 0 20px">Vérifie ta connexion et réessaie.</p>
-      <button onclick="location.reload()" style="padding:12px 24px;border:0;background:#6366f1;color:#fff;border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Recharger</button>
+      <button id="acc-reload" style="padding:12px 24px;border:0;background:#6366f1;color:#fff;border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Recharger</button>
     </div>`;
+    root.querySelector('#acc-reload')?.addEventListener('click', () => location.reload());
   }
 }
 

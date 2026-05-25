@@ -271,6 +271,9 @@ export async function mount(root) {
     hasPerfectQuiz = (quizRes.value?.data?.length ?? 0) > 0;
   } catch (e) {
     console.warn('[galerie] fetch failed', e);
+    import('@/components/common/toast.js')
+      .then(({ toast }) => toast('Connexion instable — compteurs indisponibles', 'info'))
+      .catch(() => {});
   }
 
   const ctx = { validatedCount, longestStreak, hasPerfectQuiz, c1ValidatedCount: 0, hasNightSession: false, hasEcoSession: false };
