@@ -39,7 +39,7 @@ function ensureStyle() {
     padding: 0;
 
     /* Style Apple sobre : noir profond + ring subtil indigo */
-    background: #0a0d1a;
+    background: var(--ink);
     color: #fff;
 
     display: flex;
@@ -94,7 +94,7 @@ function ensureStyle() {
 
   /* Focus accessibilité */
   #log-session-fab:focus-visible {
-    outline: 2px solid #6366f1;
+    outline: 2px solid var(--a);
     outline-offset: 3px;
   }
 

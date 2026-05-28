@@ -15,10 +15,10 @@ import { STATUT_CFG } from '@/utils/statut-label.js';
 
 // ─── Couleurs par monde ───────────────────────────────────────────
 const MONDE_COLORS = {
-  C1: { accent: '#6366f1', bg: 'rgba(99,102,241,.07)', border: 'rgba(99,102,241,.2)' },
-  C2: { accent: '#0891b2', bg: 'rgba(8,145,178,.07)',  border: 'rgba(8,145,178,.2)' },
-  C3: { accent: '#f59e0b', bg: 'rgba(245,158,11,.07)', border: 'rgba(245,158,11,.2)' },
-  C4: { accent: '#10b981', bg: 'rgba(16,185,129,.07)', border: 'rgba(16,185,129,.2)' },
+  C1: { accent: 'var(--a)', bg: 'rgba(99,102,241,.07)', border: 'rgba(99,102,241,.2)' },
+  C2: { accent: 'var(--blk)', bg: 'rgba(8,145,178,.07)',  border: 'rgba(8,145,178,.2)' },
+  C3: { accent: 'var(--am)', bg: 'rgba(245,158,11,.07)', border: 'rgba(245,158,11,.2)' },
+  C4: { accent: 'var(--gr)', bg: 'rgba(16,185,129,.07)', border: 'rgba(16,185,129,.2)' },
 };
 
 // Mapping centralisé : @/utils/statut-label.js (STATUT_CFG importé)
@@ -60,7 +60,7 @@ const STYLE = `<style>
     flex-shrink: 0;
     transition: border-color .15s ease;
   }
-  .lr-back:hover { border-color: #6366f1; }
+  .lr-back:hover { border-color: var(--a); }
   .lr-hd-info { flex: 1; min-width: 0; }
   .lr-title {
     font: 700 17px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -69,7 +69,7 @@ const STYLE = `<style>
     letter-spacing: -0.022em;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .lr-subtitle { font: 500 12px/1 'Inter', sans-serif; color: #94a3b8; margin: 0; }
+  .lr-subtitle { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin: 0; }
 
   /* KPI global — la "barre de chaleur" du livret */
   .lr-kpi {
@@ -104,13 +104,13 @@ const STYLE = `<style>
   }
   .lr-global-bar {
     height: 6px;
-    background: #e2e8f0;
+    background: var(--bo3);
     border-radius: 99px;
     overflow: hidden;
   }
   .lr-global-fill {
     height: 100%;
-    background: #6366f1;
+    background: var(--a);
     border-radius: 99px;
     transition: width .8s cubic-bezier(.2,.7,.3,1);
   }
@@ -148,7 +148,7 @@ const STYLE = `<style>
   }
   .lr-monde-bar-wrap {
     height: 3px;
-    background: #e2e8f0;
+    background: var(--bo3);
   }
   .lr-monde-bar-fill {
     height: 100%;
@@ -177,7 +177,7 @@ const STYLE = `<style>
   }
   .lr-comp-code {
     font: 600 11px/1 'Inter', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     background: rgba(99,102,241,.1);
     border-radius: 6px;
     padding: 4px 8px;
@@ -196,7 +196,7 @@ const STYLE = `<style>
     white-space: nowrap;
     flex-shrink: 0;
   }
-  .lr-comp-chev { color: #cbd5e1; font-size: 14px; flex-shrink: 0; }
+  .lr-comp-chev { color: var(--bo4); font-size: 14px; flex-shrink: 0; }
 
   /* ─── Bottom sheet overlay ────────────────────────────────── */
   .lr-overlay {
@@ -264,7 +264,7 @@ const STYLE = `<style>
     flex-shrink: 0;
     transition: border-color .15s ease, color .15s ease;
   }
-  .lr-sheet-close:hover { border-color: #6366f1; color: #6366f1; }
+  .lr-sheet-close:hover { border-color: var(--a); color: var(--a); }
 
   .lr-sheet-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
 
@@ -287,17 +287,17 @@ const STYLE = `<style>
     align-items: center;
     gap: 6px;
   }
-  .lr-statut-btn:hover { border-color: #6366f1; background: #fff; }
+  .lr-statut-btn:hover { border-color: var(--a); background: #fff; }
   .lr-statut-btn.selected-acquis {
-    border-color: #10b981;
+    border-color: var(--gr);
     background: rgba(16,185,129,.08);
   }
   .lr-statut-btn.selected-en_cours {
-    border-color: #f59e0b;
+    border-color: var(--am);
     background: rgba(245,158,11,.08);
   }
   .lr-statut-btn.selected-a_retravailler {
-    border-color: #ef4444;
+    border-color: var(--rd);
     background: rgba(239,68,68,.08);
   }
   .lr-statut-btn-ico { font-size: 20px; line-height: 1; }
@@ -330,9 +330,9 @@ const STYLE = `<style>
     transition: border-color .15s ease, background .15s ease;
     box-sizing: border-box;
   }
-  .lr-note::placeholder { color: #94a3b8; }
+  .lr-note::placeholder { color: var(--mu2); }
   .lr-note:focus {
-    border-color: #6366f1;
+    border-color: var(--a);
     background: var(--su);
     box-shadow: 0 0 0 3px rgba(99,102,241,.12);
   }
@@ -347,7 +347,7 @@ const STYLE = `<style>
   .lr-btn-save {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, var(--a), var(--pu));
     border: none;
     border-radius: 12px;
     color: #fff;
@@ -501,7 +501,7 @@ async function _loadFeedSection() {
   const host = document.getElementById('lr-feed-section');
   if (!host || !_eleveId) return;
 
-  host.innerHTML = `<div style="padding:8px 0;color:#94a3b8;font:500 12px/1 'Inter',sans-serif">Chargement du fil…</div>`;
+  host.innerHTML = `<div style="padding:8px 0;color:var(--mu2);font:500 12px/1 'Inter',sans-serif">Chargement du fil…</div>`;
 
   let events = [];
   try {
@@ -543,7 +543,7 @@ async function _loadFeedSection() {
         color: var(--mu2); margin: 0 0 12px;
         display: flex; align-items: center; gap: 8px;
       }
-      .lr-feed-hd::after { content:''; flex:1; height:1px; background:#e2e6f2; }
+      .lr-feed-hd::after { content:''; flex:1; height:1px; background:var(--bo); }
       .lr-feed-list { display: flex; flex-direction: column; gap: 1px; }
       .lr-feed-item {
         display: flex; align-items: flex-start; gap: 12px;
@@ -576,17 +576,17 @@ async function _loadFeedSection() {
         color: var(--mu2);
         margin-top: 4px;
         padding-left: 6px;
-        border-left: 2px solid #e2e6f2;
+        border-left: 2px solid var(--bo);
       }
       .lr-feed-ts {
         font: 500 10px/1 'Inter', sans-serif;
-        color: #c4ccd8;
+        color: var(--mu5);
         flex-shrink: 0;
         margin-top: 4px;
       }
     </style>
     <div class="lr-feed">
-      <div class="lr-feed-hd" style="display:flex;align-items:center;gap:6px;">${icon('clock', { size: 14, strokeWidth: 2.2, color: '#6366f1' })} Fil des moniteurs</div>
+      <div class="lr-feed-hd" style="display:flex;align-items:center;gap:6px;">${icon('clock', { size: 14, strokeWidth: 2.2, color: 'var(--a)' })} Fil des moniteurs</div>
       <div class="lr-feed-list">
         ${events.map(evt => {
           const isSession = evt.kind === 'session';
@@ -684,9 +684,9 @@ function openSheet(compId, compNom) {
         <div>
           <label class="lr-note-label">Statut</label>
           <div class="lr-statut-grid">
-            ${renderStatutBtn('acquis',         icon('check-circle', { size: 16, strokeWidth: 2.2, color: '#059669' }), 'Acquis')}
-            ${renderStatutBtn('en_cours',       icon('refresh-cw',   { size: 16, strokeWidth: 2.2, color: '#d97706' }), 'En cours')}
-            ${renderStatutBtn('a_retravailler', icon('alert-triangle',{ size: 16, strokeWidth: 2.2, color: '#dc2626' }), 'À retravailler')}
+            ${renderStatutBtn('acquis',         icon('check-circle', { size: 16, strokeWidth: 2.2, color: 'var(--grd)' }), 'Acquis')}
+            ${renderStatutBtn('en_cours',       icon('refresh-cw',   { size: 16, strokeWidth: 2.2, color: 'var(--amk)' }), 'En cours')}
+            ${renderStatutBtn('a_retravailler', icon('alert-triangle',{ size: 16, strokeWidth: 2.2, color: 'var(--rdk)' }), 'À retravailler')}
           </div>
         </div>
         <div>

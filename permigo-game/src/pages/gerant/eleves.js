@@ -38,7 +38,7 @@ const STYLE = `<style>
 }
 .el-count {
   font: 600 12px/1 'Inter', sans-serif;
-  color: #6366f1;
+  color: var(--a);
   background: rgba(99,102,241,.1);
   padding: 6px 12px;
   border-radius: 99px;
@@ -71,9 +71,9 @@ const STYLE = `<style>
   box-sizing: border-box;
   transition: border-color .15s ease, background .15s ease;
 }
-.el-search::placeholder { color: #94a3b8; }
+.el-search::placeholder { color: var(--mu2); }
 .el-search:focus {
-  border-color: #6366f1;
+  border-color: var(--a);
   background: var(--su);
   box-shadow: 0 0 0 3px rgba(99,102,241,.12);
 }
@@ -125,7 +125,7 @@ const STYLE = `<style>
   align-items: flex-start;
   gap: 14px;
 }
-.el-card:hover { border-color: #6366f1; }
+.el-card:hover { border-color: var(--a); }
 .el-card:active { transform: scale(.99); }
 .el-av {
   width: 44px; height: 44px;
@@ -134,7 +134,7 @@ const STYLE = `<style>
   font: 600 16px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
   flex-shrink: 0;
-  background: #6366f1;
+  background: var(--a);
 }
 .el-info { flex: 1; min-width: 0; }
 .el-name {
@@ -149,7 +149,7 @@ const STYLE = `<style>
   align-items: center;
   gap: 4px;
   font: 600 11px/1 'Inter', sans-serif;
-  color: #6366f1;
+  color: var(--a);
   background: rgba(99,102,241,.1);
   border-radius: 99px;
   padding: 4px 10px;
@@ -180,13 +180,13 @@ const STYLE = `<style>
 }
 .el-remc-bar {
   height: 4px;
-  background: #e2e8f0;
+  background: var(--bo3);
   border-radius: 99px;
   overflow: hidden;
 }
 .el-remc-fill {
   height: 100%;
-  background: #6366f1;
+  background: var(--a);
   border-radius: 99px;
   min-width: 4px;
   transition: width 1s cubic-bezier(.2,.7,.3,1);
@@ -206,7 +206,7 @@ const STYLE = `<style>
   color: var(--mu2);
   font: 500 13px/1.6 'Inter', sans-serif;
   background: var(--su);
-  border: 1px dashed #e2e6f2;
+  border: 1px dashed var(--bo);
   border-radius: 12px;
   margin: 16px;
 }
@@ -224,11 +224,11 @@ const STYLE = `<style>
 
 const AVATARS = [
   'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,#0891b2,#155e75)',
-  'linear-gradient(135deg,#7c3aed,#4c1d95)',
+  'linear-gradient(135deg,var(--blk),#155e75)',
+  'linear-gradient(135deg,var(--puk),#4c1d95)',
   'linear-gradient(135deg,#0e7c66,#064e3b)',
   'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,#dc2626,#7f1d1d)',
+  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
 ];
 
 // ─── State ───────────────────────────────────────────────────
@@ -469,12 +469,12 @@ async function openQuickView(eleveId, anchorCard) {
       .elqv-row:first-of-type { border-top:0; }
       .elqv-row .l { color:var(--mu); }
       .elqv-row .v { color:var(--ink); font-weight:700; }
-      .elqv-btn { width:100%; margin-top:16px; padding:14px; background:#6366f1; color:#fff; border:0; border-radius:14px; font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s; }
+      .elqv-btn { width:100%; margin-top:16px; padding:14px; background:var(--a); color:#fff; border:0; border-radius:14px; font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s; }
       .elqv-btn:active { transform: scale(.97); }
     </style>
     <div class="elqv-card">
       <h3>Vue rapide élève</h3>
-      <div id="elqv-body" style="color:#94a3b8;font-size:13px">Chargement…</div>
+      <div id="elqv-body" style="color:var(--mu2);font-size:13px">Chargement…</div>
       <button class="elqv-btn" id="elqv-close">Fermer</button>
     </div>
   `;
@@ -492,7 +492,7 @@ async function openQuickView(eleveId, anchorCard) {
     const v = validRes.data || [];
     const body = overlay.querySelector('#elqv-body');
     if (!p) {
-      body.innerHTML = '<div style="color:#ef4444">Élève introuvable.</div>';
+      body.innerHTML = '<div style="color:var(--rd)">Élève introuvable.</div>';
       return;
     }
     body.innerHTML = `
@@ -502,7 +502,7 @@ async function openQuickView(eleveId, anchorCard) {
       <div class="elqv-row"><span class="l">Dernière activité</span><span class="v">${p.last_active_at ? relativeTime(p.last_active_at) : 'jamais'}</span></div>
     `;
   } catch (e) {
-    overlay.querySelector('#elqv-body').innerHTML = '<div style="color:#ef4444">Erreur lors du chargement.</div>';
+    overlay.querySelector('#elqv-body').innerHTML = '<div style="color:var(--rd)">Erreur lors du chargement.</div>';
   }
 }
 

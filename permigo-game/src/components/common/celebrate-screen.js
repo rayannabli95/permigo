@@ -87,7 +87,7 @@ const STYLE = `
   font: 800 32px/1.1 'Plus Jakarta Sans', sans-serif;
   margin: 0 0 12px;
   letter-spacing: -.03em;
-  background: linear-gradient(135deg, #fff 0%, #fde68a 100%);
+  background: linear-gradient(135deg, #fff 0%, var(--aml) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -111,8 +111,8 @@ const STYLE = `
 
 .cs-cta {
   padding: 18px 40px;
-  background: linear-gradient(135deg, #fde68a 0%, #f59e0b 60%, #d97706 100%);
-  color: #0a0d1a;
+  background: linear-gradient(135deg, var(--aml) 0%, var(--am) 60%, var(--amk) 100%);
+  color: var(--ink);
   border: 0;
   border-radius: 16px;
   font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
@@ -137,7 +137,7 @@ const STYLE = `
   position: absolute;
   top: -30px;
   width: 14px; height: 18px;
-  background: var(--cs-c, #fde68a);
+  background: var(--cs-c, var(--aml));
   pointer-events: none;
   opacity: 0;
   z-index: 1;
@@ -226,7 +226,7 @@ export const CELEBRATE_PRESETS = {
   },
 };
 
-const CONFETTI_COLORS = ['#fde68a', '#f59e0b', '#ef4444', '#10b981', '#6366f1', '#a855f7', '#ec4899', '#fff'];
+const CONFETTI_COLORS = ['var(--aml)', 'var(--am)', 'var(--rd)', 'var(--gr)', 'var(--a)', 'var(--pul)', '#ec4899', '#fff'];
 const CONFETTI_SHAPES = ['cs-square', 'cs-circle', 'cs-ribbon'];
 
 function ensureStyle() {

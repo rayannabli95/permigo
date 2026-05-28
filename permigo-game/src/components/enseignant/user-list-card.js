@@ -114,7 +114,7 @@ export function wireUserListCard(root, { onItemClick, onAction } = {}) {
 export const USER_LIST_CARD_CSS = `
   .ulc-card{
     background:var(--su,#fff);
-    border:1px solid var(--bo,#e2e8f0);
+    border:1px solid var(--bo,var(--bo3));
     border-radius:16px;
     overflow:hidden;
     box-shadow:0 4px 14px -4px rgba(15,23,42,.08);
@@ -125,20 +125,20 @@ export const USER_LIST_CARD_CSS = `
     justify-content:space-between;
     gap:10px;
     padding:16px 18px 12px;
-    border-bottom:1px solid var(--bo2,#f1f5f9);
+    border-bottom:1px solid var(--bo2,var(--bg4));
   }
   .ulc-ti{
     font-family:var(--fd,system-ui);
     font-size:15px;
     font-weight:800;
-    color:var(--ink,#0f172a);
+    color:var(--ink);
     margin:0;
     letter-spacing:-.01em;
     line-height:1.2;
   }
   .ulc-sub{
     font-size:11.5px;
-    color:var(--mu,#64748b);
+    color:var(--mu,var(--mu3));
     margin-top:3px;
     line-height:1.3;
   }
@@ -146,9 +146,9 @@ export const USER_LIST_CARD_CSS = `
     font-family:var(--fn,system-ui);
     font-size:11px;
     font-weight:800;
-    color:var(--mu,#64748b);
+    color:var(--mu,var(--mu3));
     background:var(--bg2,#f8fafc);
-    border:1px solid var(--bo2,#f1f5f9);
+    border:1px solid var(--bo2,var(--bg4));
     padding:3px 9px;
     border-radius:99px;
     letter-spacing:.2px;
@@ -179,12 +179,12 @@ export const USER_LIST_CARD_CSS = `
     border-radius:10px;
     transition:background .15s;
     text-align:left;
-    border-bottom:1px dashed var(--bo2,#f1f5f9);
+    border-bottom:1px dashed var(--bo2,var(--bg4));
     font-family:inherit;
   }
   .ulc-row:last-child{border-bottom:0}
   .ulc-row:hover{background:var(--bg2,#f8fafc)}
-  .ulc-row:focus-visible{outline:2px solid var(--a,#6366f1);outline-offset:-2px;background:var(--bg2,#f8fafc)}
+  .ulc-row:focus-visible{outline:2px solid var(--a);outline-offset:-2px;background:var(--bg2,#f8fafc)}
 
   .ulc-av{
     width:36px;
@@ -211,7 +211,7 @@ export const USER_LIST_CARD_CSS = `
     font-family:var(--fd,system-ui);
     font-size:13.5px;
     font-weight:700;
-    color:var(--ink,#0f172a);
+    color:var(--ink);
     line-height:1.2;
     letter-spacing:-.005em;
     overflow:hidden;
@@ -220,7 +220,7 @@ export const USER_LIST_CARD_CSS = `
   }
   .ulc-meta{
     font-size:12px;
-    color:var(--mu,#64748b);
+    color:var(--mu,var(--mu3));
     margin-top:2px;
     line-height:1.3;
     overflow:hidden;
@@ -239,29 +239,29 @@ export const USER_LIST_CARD_CSS = `
     white-space:nowrap;
     flex-shrink:0;
   }
-  .ulc-badge-success{background:rgba(16,185,129,.1);color:#059669;border-color:rgba(16,185,129,.3)}
-  .ulc-badge-warning{background:rgba(245,158,11,.1);color:#d97706;border-color:rgba(245,158,11,.3)}
-  .ulc-badge-danger{background:rgba(239,68,68,.1);color:#dc2626;border-color:rgba(239,68,68,.3)}
-  .ulc-badge-neutral{background:rgba(100,116,139,.08);color:#64748b;border-color:rgba(100,116,139,.2)}
+  .ulc-badge-success{background:rgba(16,185,129,.1);color:var(--grd);border-color:rgba(16,185,129,.3)}
+  .ulc-badge-warning{background:rgba(245,158,11,.1);color:var(--amk);border-color:rgba(245,158,11,.3)}
+  .ulc-badge-danger{background:rgba(239,68,68,.1);color:var(--rdk);border-color:rgba(239,68,68,.3)}
+  .ulc-badge-neutral{background:rgba(100,116,139,.08);color:var(--mu3);border-color:rgba(100,116,139,.2)}
 
   .ulc-empty{
     padding:30px 20px;
     text-align:center;
-    color:var(--mu,#64748b);
+    color:var(--mu,var(--mu3));
     font-size:13px;
   }
   .ulc-empty-em{font-size:28px;margin-bottom:8px;opacity:.5}
 
   .ulc-foot{
     padding:10px 16px 14px;
-    border-top:1px solid var(--bo2,#f1f5f9);
+    border-top:1px solid var(--bo2,var(--bg4));
     text-align:center;
     background:var(--su,#fff);
   }
   .ulc-foot-btn{
     background:none;
     border:0;
-    color:var(--a,#6366f1);
+    color:var(--a);
     font-family:inherit;
     font-weight:700;
     font-size:13px;
@@ -276,7 +276,7 @@ export const USER_LIST_CARD_CSS = `
     text-underline-offset:4px;
     text-decoration-color:rgba(99,102,241,.3);
   }
-  .ulc-foot-btn:hover{gap:8px;text-decoration-color:var(--a,#6366f1)}
+  .ulc-foot-btn:hover{gap:8px;text-decoration-color:var(--a)}
   .ulc-foot-arrow{transition:transform .15s}
   .ulc-foot-btn:hover .ulc-foot-arrow{transform:translateX(2px)}
 `;

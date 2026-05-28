@@ -215,7 +215,7 @@ function renderStyles() {
 /* === Wrapped === */
 .wrp {
   min-height: 100svh;
-  background: #0a0d1a;
+  background: var(--ink);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -277,7 +277,7 @@ function renderStyles() {
 .wrp-slide-bg {
   position: absolute;
   inset: 0;
-  background: #0a0d1a;
+  background: var(--ink);
   background-size: cover;
   background-position: center;
   z-index: 0;
@@ -315,7 +315,7 @@ function renderStyles() {
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  background: #0a0d1a;
+  background: var(--ink);
   border-top: 1px solid rgba(255,255,255,.06);
 }
 .wrp-dots {
@@ -338,7 +338,7 @@ function renderStyles() {
   width: 100%;
   max-width: 400px;
   padding: 14px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--a), var(--pu));
   border: none;
   border-radius: 14px;
   color: #fff;

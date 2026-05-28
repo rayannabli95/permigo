@@ -29,7 +29,7 @@ const STYLE = `<style>
   border: 1.5px solid var(--bo);
   background: var(--su);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: #0a0d1a;
+  cursor: pointer; color: var(--ink);
   font-size: 18px; line-height: 1;
   transition: border-color .12s, transform .12s;
   flex-shrink: 0;
@@ -70,28 +70,28 @@ const STYLE = `<style>
   color: #fff; flex-shrink: 0;
 }
 .fb-meta { flex: 1; min-width: 0; }
-.fb-author { font: 600 13px/1.2 'Inter', sans-serif; color: #0a0d1a; }
-.fb-time   { font: 500 11px/1 'Inter', sans-serif; color: #94a3b8; margin-top: 2px; }
+.fb-author { font: 600 13px/1.2 'Inter', sans-serif; color: var(--ink); }
+.fb-time   { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
 .fb-badge  {
   width: 28px; height: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.fb-badge-session    { background: rgba(99,102,241,.1); color: #6366f1; }
-.fb-badge-validation { background: rgba(16,185,129,.1); color: #059669; }
+.fb-badge-session    { background: rgba(99,102,241,.1); color: var(--a); }
+.fb-badge-validation { background: rgba(16,185,129,.1); color: var(--grd); }
 
 .fb-body { margin-top: 8px; }
 .fb-event {
   font: 500 13px/1.4 'Inter', sans-serif;
-  color: #374151;
+  color: var(--ink5);
 }
-.fb-event strong { color: #0a0d1a; }
+.fb-event strong { color: var(--ink); }
 .fb-comment {
   font: italic 12px/1.5 'Inter', sans-serif;
   color: var(--mu);
   margin-top: 5px;
   padding-left: 8px;
-  border-left: 2px solid #e2e6f2;
+  border-left: 2px solid var(--bo);
 }
 
 /* Expand */
@@ -102,7 +102,7 @@ const STYLE = `<style>
 .fb-card.fb-expanded .fb-card-extra { max-height: 160px; }
 .fb-extra {
   padding-top: 8px; margin-top: 8px;
-  border-top: 1px solid #f0f2f8;
+  border-top: 1px solid var(--bg3);
   font: 500 12px/1.5 'Inter', sans-serif;
   color: var(--mu);
   display: flex; flex-direction: column; gap: 4px;
@@ -117,7 +117,7 @@ const STYLE = `<style>
   border-radius: 14px;
   background: var(--su);
   font: 600 14px/1 'Plus Jakarta Sans', sans-serif;
-  color: #6366f1;
+  color: var(--a);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 8px;
   transition: border-color .12s, transform .12s;
@@ -152,11 +152,11 @@ const STYLE = `<style>
 // ─── Helpers ─────────────────────────────────────────────────
 const GRADS = [
   'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,#0891b2,#155e75)',
-  'linear-gradient(135deg,#7c3aed,#4c1d95)',
-  'linear-gradient(135deg,#059669,#064e3b)',
+  'linear-gradient(135deg,var(--blk),#155e75)',
+  'linear-gradient(135deg,var(--puk),#4c1d95)',
+  'linear-gradient(135deg,var(--grd),#064e3b)',
   'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,#dc2626,#7f1d1d)',
+  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
 ];
 function gradFor(str) {
   let h = 0;
@@ -194,7 +194,7 @@ function renderCard(evt) {
     : `Compétence validée : <strong>${esc(evt.competence_id || '—')}</strong>`;
 
   const statusLine = isSession && evt.confirmation_status ? `
-    <div class="fb-extra-row" style="color:${evt.confirmation_status === 'confirmed' ? '#059669' : '#94a3b8'}">
+    <div class="fb-extra-row" style="color:${evt.confirmation_status === 'confirmed' ? 'var(--grd)' : 'var(--mu2)'}">
       ${evt.confirmation_status === 'confirmed' ? '✓ Confirmée' : evt.confirmation_status === 'refused' ? '✗ Refusée' : '⏳ En attente'}
     </div>` : '';
 
@@ -214,8 +214,8 @@ function renderCard(evt) {
     </div>
     <div class="fb-card-extra">
       <div class="fb-extra">
-        <div class="fb-extra-row">${icon('calendar', { size: 12, color: '#94a3b8', strokeWidth: 2 })} ${new Date(evt.ts).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
-        ${isSession ? `<div class="fb-extra-row">${icon('clock', { size: 12, color: '#94a3b8', strokeWidth: 2 })} ${fmtMin(evt.duration_minutes)}</div>` : ''}
+        <div class="fb-extra-row">${icon('calendar', { size: 12, color: 'var(--mu2)', strokeWidth: 2 })} ${new Date(evt.ts).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+        ${isSession ? `<div class="fb-extra-row">${icon('clock', { size: 12, color: 'var(--mu2)', strokeWidth: 2 })} ${fmtMin(evt.duration_minutes)}</div>` : ''}
         ${statusLine}
       </div>
     </div>

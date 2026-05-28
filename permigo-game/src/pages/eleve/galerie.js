@@ -22,8 +22,8 @@ const STYLE = `<style>
   padding: 20px 20px 12px;
   background: var(--bg);
 }
-.gal-title { font: 800 24px/1.1 'Plus Jakarta Sans', sans-serif; color: #0b0d1a; letter-spacing: -.025em; margin: 0; }
-.gal-sub   { font: 500 13px/1.4 'Inter', sans-serif; color: #64748b; margin: 4px 0 0; }
+.gal-title { font: 800 24px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.025em; margin: 0; }
+.gal-sub   { font: 500 13px/1.4 'Inter', sans-serif; color: var(--mu3); margin: 4px 0 0; }
 
 /* Tabs */
 .gal-tabs {
@@ -49,19 +49,19 @@ const STYLE = `<style>
 }
 .gal-tab.active {
   background: var(--su);
-  color: #6366f1;
+  color: var(--a);
   border-color: rgba(99,102,241,.25);
   box-shadow: 0 1px 3px rgba(11,13,26,.06);
 }
-.gal-tab:not(.active):hover { color: #0b0d1a; }
+.gal-tab:not(.active):hover { color: var(--ink); }
 
 /* Section heading */
 .gal-section-hd {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 20px 8px;
 }
-.gal-section-title { font: 700 13px/1 'Inter', sans-serif; color: #64748b; letter-spacing: .08em; text-transform: uppercase; }
-.gal-section-count { font: 700 12px/1 'Inter', sans-serif; color: #6366f1; background: rgba(99,102,241,.1); border-radius: 20px; padding: 3px 10px; }
+.gal-section-title { font: 700 13px/1 'Inter', sans-serif; color: var(--mu3); letter-spacing: .08em; text-transform: uppercase; }
+.gal-section-count { font: 700 12px/1 'Inter', sans-serif; color: var(--a); background: rgba(99,102,241,.1); border-radius: 20px; padding: 3px 10px; }
 
 /* Grid */
 .gal-grid {
@@ -84,7 +84,7 @@ const STYLE = `<style>
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(11,13,26,.05);
 }
-.gal-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--gc, #6366f1) 35%, transparent); }
+.gal-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--gc, var(--a)) 35%, transparent); }
 .gal-card:active { transform: scale(.97); }
 .gal-card.locked { opacity: .55; }
 .gal-card.locked .gal-card-visual { filter: grayscale(.9); }
@@ -94,7 +94,7 @@ const STYLE = `<style>
   border-radius: 14px;
   margin: 0 auto 8px;
   display: grid; place-items: center;
-  background: color-mix(in srgb, var(--gc, #6366f1) 12%, #fff);
+  background: color-mix(in srgb, var(--gc, var(--a)) 12%, #fff);
   overflow: hidden;
   position: relative;
 }
@@ -113,7 +113,7 @@ const STYLE = `<style>
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.gal-card.acquis .gal-card-meta { color: #047857; }
+.gal-card.acquis .gal-card-meta { color: var(--grdk); }
 
 /* Lock icon overlay */
 .gal-lock-badge {
@@ -159,8 +159,8 @@ const STYLE = `<style>
 }
 .gal-permis-card.locked .gal-permis-preview { filter: grayscale(.85) brightness(.92); }
 .gal-permis-info { flex: 1; min-width: 0; }
-.gal-permis-nom { font: 800 14px/1.2 'Plus Jakarta Sans', sans-serif; color: #0b0d1a; margin-bottom: 4px; letter-spacing: -.01em; }
-.gal-permis-cond { font: 500 12px/1.4 'Inter', sans-serif; color: #64748b; }
+.gal-permis-nom { font: 800 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 4px; letter-spacing: -.01em; }
+.gal-permis-cond { font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu3); }
 .gal-permis-status { flex-shrink: 0; }
 
 /* Hint footer */
@@ -169,11 +169,11 @@ const STYLE = `<style>
   padding: 18px 16px;
   text-align: center;
   background: var(--su);
-  border: 1px dashed #e2e6f2;
+  border: 1px dashed var(--bo);
   border-radius: 14px;
 }
 .gal-empty-hint-emoji { font-size: 28px; margin-bottom: 6px; }
-.gal-empty-hint-txt { font: 500 12.5px/1.5 'Inter', sans-serif; color: #94a3b8; font-style: italic; }
+.gal-empty-hint-txt { font: 500 12.5px/1.5 'Inter', sans-serif; color: var(--mu2); font-style: italic; }
 
 /* ── Modal agrandissement trophée ── */
 .gal-modal-bg {
@@ -211,7 +211,7 @@ const STYLE = `<style>
   margin: 4px auto 16px;
   border-radius: 28px;
   display: grid; place-items: center;
-  background: color-mix(in srgb, var(--gc, #6366f1) 14%, var(--su));
+  background: color-mix(in srgb, var(--gc, var(--a)) 14%, var(--su));
   overflow: hidden;
 }
 .gal-modal-visual img { width: 100%; height: 100%; object-fit: contain; }
@@ -229,10 +229,10 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center; gap: 8px;
   font: 700 12px/1 'Inter', sans-serif;
 }
-.gal-modal-xp { color: #6366f1; background: rgba(99,102,241,.1); padding: 6px 12px; border-radius: 99px; }
+.gal-modal-xp { color: var(--a); background: rgba(99,102,241,.1); padding: 6px 12px; border-radius: 99px; }
 .gal-modal-state { padding: 6px 12px; border-radius: 99px; }
-.gal-modal-state.on  { color: #047857; background: rgba(16,185,129,.12); }
-.gal-modal-state.off { color: var(--mu2); background: var(--bg2, #f0f2f8); }
+.gal-modal-state.on  { color: var(--grdk); background: rgba(16,185,129,.12); }
+.gal-modal-state.off { color: var(--mu2); background: var(--bg2, var(--bg3)); }
 
     @media (prefers-reduced-motion: reduce){
       *,*::before,*::after{
@@ -253,7 +253,7 @@ export async function mount(root) {
       <h1 class="gal-title">Ma collection</h1>
       <p class="gal-sub">Tout ce que tu peux débloquer.</p>
     </div>
-    <div style="padding:24px;text-align:center;color:#94a3b8">Chargement…</div>
+    <div style="padding:24px;text-align:center;color:var(--mu2)">Chargement…</div>
   </div>`;
 
   // Fetch validations acquises + scores quiz
@@ -315,7 +315,7 @@ export async function mount(root) {
   }
 
   function renderTrophyCard(t, unlocked) {
-    const color = t.color || '#94a3b8';
+    const color = t.color || 'var(--mu2)';
     const visual = t.image
       ? `<img src="${esc(t.image)}" alt="${esc(t.nom)}" loading="lazy" />`
       : `<span class="gal-emoji">${esc(t.ico || '🏆')}</span>`;
@@ -347,8 +347,8 @@ export async function mount(root) {
             </div>
             <div class="gal-permis-status">
               ${t.unlocked
-                ? `<span style="font:700 10px/1 'Inter',sans-serif;color:#047857;background:rgba(16,185,129,.12);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">Acquis</span>`
-                : `<span style="font:700 10px/1 'Inter',sans-serif;color:#94a3b8;background:#f0f2f8;padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">🔒 ${esc(`${t.min}`)} comp</span>`}
+                ? `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--grdk);background:rgba(16,185,129,.12);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">Acquis</span>`
+                : `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--mu2);background:var(--bg3);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">🔒 ${esc(`${t.min}`)} comp</span>`}
             </div>
           </div>
         `).join('')}
@@ -359,8 +359,8 @@ export async function mount(root) {
   // Modal d'agrandissement d'un trophée (clic carte)
   function openTrophyModal(t, unlocked) {
     if (document.querySelector('.gal-modal-bg')) return;
-    const color = t.color || '#94a3b8';
-    const rarityColor = RARITY_COLOR[t.rarity] || '#94a3b8';
+    const color = t.color || 'var(--mu2)';
+    const rarityColor = RARITY_COLOR[t.rarity] || 'var(--mu2)';
     const rarityLabel = RARITY_LABEL[t.rarity] || t.rarity || '';
     const visual = t.image
       ? `<img src="${esc(t.image)}" alt="${esc(t.nom)}" />`

@@ -16,16 +16,16 @@ const STYLE = `
       linear-gradient(var(--ab-bg, #fff), var(--ab-bg, #fff)),
       conic-gradient(
         from var(--gradient-angle, 0deg),
-        var(--ab-primary, #6366f1) 0%,
-        var(--ab-secondary, #8b5cf6) 37%,
+        var(--ab-primary, var(--a)) 0%,
+        var(--ab-secondary, var(--pu)) 37%,
         var(--ab-accent, #f9de90) 30%,
-        var(--ab-secondary, #8b5cf6) 33%,
-        var(--ab-primary, #6366f1) 40%,
-        var(--ab-primary, #6366f1) 50%,
-        var(--ab-secondary, #8b5cf6) 77%,
+        var(--ab-secondary, var(--pu)) 33%,
+        var(--ab-primary, var(--a)) 40%,
+        var(--ab-primary, var(--a)) 50%,
+        var(--ab-secondary, var(--pu)) 77%,
         var(--ab-accent, #f9de90) 80%,
-        var(--ab-secondary, #8b5cf6) 83%,
-        var(--ab-primary, #6366f1) 90%
+        var(--ab-secondary, var(--pu)) 83%,
+        var(--ab-primary, var(--a)) 90%
       );
     background-clip: padding-box, border-box;
     background-origin: padding-box, border-box;
@@ -77,8 +77,8 @@ function ensureStyle() {
  * @param {Object} opts
  * @param {'auto-rotate'|'rotate-on-hover'|'stop-rotate-on-hover'} [opts.mode='auto-rotate']
  * @param {number} [opts.speed=5]  vitesse en secondes (1 tour)
- * @param {string} [opts.primary='#6366f1']
- * @param {string} [opts.secondary='#8b5cf6']
+ * @param {string} [opts.primary='var(--a)']
+ * @param {string} [opts.secondary='var(--pu)']
  * @param {string} [opts.accent='#f9de90']
  * @param {string} [opts.bg='#fff']  couleur intérieur card
  * @param {number} [opts.borderWidth=2]
@@ -91,8 +91,8 @@ export function wrapAnimatedBorder(innerHTML, opts = {}) {
   const {
     mode = 'auto-rotate',
     speed = 5,
-    primary = '#6366f1',
-    secondary = '#8b5cf6',
+    primary = 'var(--a)',
+    secondary = 'var(--pu)',
     accent = '#f9de90',
     bg = '#fff',
     borderWidth = 2,
@@ -126,11 +126,11 @@ export const BORDER_PRESETS = {
   // Or premium (pour Cercle Or / badges max)
   gold: { primary: '#584827', secondary: '#c7a03c', accent: '#f9de90', speed: 6 },
   // Indigo (par défaut profil)
-  indigo: { primary: '#4338ca', secondary: '#6366f1', accent: '#a5b4fc', speed: 5 },
+  indigo: { primary: 'var(--adx)', secondary: 'var(--a)', accent: 'var(--al3)', speed: 5 },
   // Cyan moniteur
   cyan:   { primary: '#0e7490', secondary: '#06b6d4', accent: '#67e8f9', speed: 5 },
   // Émeraude (acquis)
-  emerald:{ primary: '#047857', secondary: '#10b981', accent: '#6ee7b7', speed: 5 },
+  emerald:{ primary: 'var(--grdk)', secondary: 'var(--gr)', accent: '#6ee7b7', speed: 5 },
   // Violet élève (gamifié)
-  violet: { primary: '#6d28d9', secondary: '#8b5cf6', accent: '#c4b5fd', speed: 4 },
+  violet: { primary: '#6d28d9', secondary: 'var(--pu)', accent: '#c4b5fd', speed: 4 },
 };

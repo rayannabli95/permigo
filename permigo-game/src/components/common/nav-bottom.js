@@ -73,12 +73,12 @@ const STYLE = `
     top: 0; left: 50%;
     transform: translateX(-50%) scaleX(0);
     width: 32px; height: 2.5px;
-    background: #6366f1;
+    background: var(--a);
     border-radius: 0 0 3px 3px;
     transition: transform .2s cubic-bezier(.34,1.56,.64,1);
   }
   .bn-tab.active {
-    color: #6366f1;
+    color: var(--a);
   }
   .bn-tab.active::after {
     transform: translateX(-50%) scaleX(1);
@@ -105,7 +105,7 @@ const STYLE = `
   .bn-fab-btn {
     width: 56px; height: 56px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    background: linear-gradient(135deg, var(--a) 0%, var(--pu) 100%);
     border: none;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -124,7 +124,7 @@ const STYLE = `
   .bn-fab-label {
     font: 700 9px/1 'Inter', sans-serif;
     letter-spacing: .02em;
-    color: #94a3b8;
+    color: var(--mu2);
     margin-top: 4px;
     white-space: nowrap;
   }

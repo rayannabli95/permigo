@@ -41,37 +41,37 @@ const STYLE = `
   .bdg.bdg-circle { border-radius: 999px; }
 
   /* Variants DEFAULT (solide) */
-  .bdg.v-primary       { background: #6366f1; color: #fff; }
-  .bdg.v-secondary     { background: #f0f2f8; color: #0a0d1a; }
-  .bdg.v-success       { background: #10b981; color: #fff; }
-  .bdg.v-warning       { background: #f59e0b; color: #fff; }
-  .bdg.v-info          { background: #8b5cf6; color: #fff; }
-  .bdg.v-destructive   { background: #ef4444; color: #fff; }
-  .bdg.v-outline       { background: transparent; border-color: #e2e6f2; color: #64748b; }
+  .bdg.v-primary       { background: var(--a); color: #fff; }
+  .bdg.v-secondary     { background: var(--bg3); color: var(--ink); }
+  .bdg.v-success       { background: var(--gr); color: #fff; }
+  .bdg.v-warning       { background: var(--am); color: #fff; }
+  .bdg.v-info          { background: var(--pu); color: #fff; }
+  .bdg.v-destructive   { background: var(--rd); color: #fff; }
+  .bdg.v-outline       { background: transparent; border-color: var(--bo); color: var(--mu3); }
 
   /* Appearance LIGHT (pastel doux) */
-  .bdg.v-primary.a-light     { background: rgba(99,102,241,.12);  color: #4338ca; border-color: transparent; }
-  .bdg.v-secondary.a-light   { background: #f8f9fc;               color: #475569; border-color: transparent; }
-  .bdg.v-success.a-light     { background: rgba(16,185,129,.12);  color: #047857; border-color: transparent; }
-  .bdg.v-warning.a-light     { background: rgba(245,158,11,.12);  color: #b45309; border-color: transparent; }
+  .bdg.v-primary.a-light     { background: rgba(99,102,241,.12);  color: var(--adx); border-color: transparent; }
+  .bdg.v-secondary.a-light   { background: var(--su2);               color: var(--mu4); border-color: transparent; }
+  .bdg.v-success.a-light     { background: rgba(16,185,129,.12);  color: var(--grdk); border-color: transparent; }
+  .bdg.v-warning.a-light     { background: rgba(245,158,11,.12);  color: var(--amx); border-color: transparent; }
   .bdg.v-info.a-light        { background: rgba(139,92,246,.12);  color: #6d28d9; border-color: transparent; }
-  .bdg.v-destructive.a-light { background: rgba(239,68,68,.12);   color: #b91c1c; border-color: transparent; }
+  .bdg.v-destructive.a-light { background: rgba(239,68,68,.12);   color: var(--rdx); border-color: transparent; }
 
   /* Appearance OUTLINE (bordure colorée) */
-  .bdg.v-primary.a-outline     { background: rgba(99,102,241,.06);  color: #4338ca; border-color: rgba(99,102,241,.3); }
-  .bdg.v-success.a-outline     { background: rgba(16,185,129,.06);  color: #047857; border-color: rgba(16,185,129,.3); }
-  .bdg.v-warning.a-outline     { background: rgba(245,158,11,.06);  color: #b45309; border-color: rgba(245,158,11,.3); }
+  .bdg.v-primary.a-outline     { background: rgba(99,102,241,.06);  color: var(--adx); border-color: rgba(99,102,241,.3); }
+  .bdg.v-success.a-outline     { background: rgba(16,185,129,.06);  color: var(--grdk); border-color: rgba(16,185,129,.3); }
+  .bdg.v-warning.a-outline     { background: rgba(245,158,11,.06);  color: var(--amx); border-color: rgba(245,158,11,.3); }
   .bdg.v-info.a-outline        { background: rgba(139,92,246,.06);  color: #6d28d9; border-color: rgba(139,92,246,.3); }
-  .bdg.v-destructive.a-outline { background: rgba(239,68,68,.06);   color: #b91c1c; border-color: rgba(239,68,68,.3); }
+  .bdg.v-destructive.a-outline { background: rgba(239,68,68,.06);   color: var(--rdx); border-color: rgba(239,68,68,.3); }
 
   /* Appearance GHOST (texte seul) */
   .bdg.a-ghost { background: transparent !important; border-color: transparent; padding: 0 !important; }
-  .bdg.v-primary.a-ghost       { color: #6366f1; }
-  .bdg.v-secondary.a-ghost     { color: #475569; }
-  .bdg.v-success.a-ghost       { color: #10b981; }
-  .bdg.v-warning.a-ghost       { color: #f59e0b; }
-  .bdg.v-info.a-ghost          { color: #8b5cf6; }
-  .bdg.v-destructive.a-ghost   { color: #ef4444; }
+  .bdg.v-primary.a-ghost       { color: var(--a); }
+  .bdg.v-secondary.a-ghost     { color: var(--mu4); }
+  .bdg.v-success.a-ghost       { color: var(--gr); }
+  .bdg.v-warning.a-ghost       { color: var(--am); }
+  .bdg.v-info.a-ghost          { color: var(--pu); }
+  .bdg.v-destructive.a-ghost   { color: var(--rd); }
 
   .bdg[aria-disabled="true"] { opacity: .5; pointer-events: none; }
 

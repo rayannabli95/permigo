@@ -62,9 +62,9 @@ export function unmount() { /* rien à clean */ }
 function template() {
   return `
     <style>
-      .lg-root{position:fixed;inset:0;overflow:auto;background:#0b0d1a;display:flex;align-items:center;justify-content:center;padding:24px 16px;font-family:var(--fb)}
+      .lg-root{position:fixed;inset:0;overflow:auto;background:var(--ink);display:flex;align-items:center;justify-content:center;padding:24px 16px;font-family:var(--fb)}
       .lg-bg{position:absolute;inset:0;z-index:0;pointer-events:none}
-      .lg-bg::before{content:'';position:absolute;inset:-50%;background:radial-gradient(ellipse at 20% 20%,#6366f1 0%,transparent 40%),radial-gradient(ellipse at 80% 30%,#8b5cf6 0%,transparent 40%),radial-gradient(ellipse at 50% 80%,#0891b2 0%,transparent 40%);filter:blur(60px);opacity:.5;animation:lg-float 22s ease-in-out infinite alternate}
+      .lg-bg::before{content:'';position:absolute;inset:-50%;background:radial-gradient(ellipse at 20% 20%,var(--a) 0%,transparent 40%),radial-gradient(ellipse at 80% 30%,var(--pu) 0%,transparent 40%),radial-gradient(ellipse at 50% 80%,var(--blk) 0%,transparent 40%);filter:blur(60px);opacity:.5;animation:lg-float 22s ease-in-out infinite alternate}
       @keyframes lg-float{0%{transform:translate(0,0) rotate(0deg) scale(1)}50%{transform:translate(40px,-30px) rotate(180deg) scale(1.08)}100%{transform:translate(-30px,40px) rotate(360deg) scale(.96)}}
       .lg-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,transparent 0%,rgba(11,13,26,.6) 100%)}
       .lg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:50px 50px;z-index:1;pointer-events:none;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%)}
@@ -86,7 +86,7 @@ function template() {
       .lg-field{display:flex;flex-direction:column;gap:6px}
       .lg-field label{font-size:10.5px;font-weight:800;color:rgba(255,255,255,.78);letter-spacing:1.2px;text-transform:uppercase}
       .lg-input-wrap{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);transition:all .15s}
-      .lg-input-wrap:focus-within{border-color:#a5b4fc;background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(99,102,241,.18)}
+      .lg-input-wrap:focus-within{border-color:var(--al3);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(99,102,241,.18)}
       .lg-input-wrap svg{width:18px;height:18px;color:rgba(255,255,255,.5);flex-shrink:0}
       .lg-input-wrap input{flex:1;background:transparent;border:0;outline:0;color:#fff;font-size:14.5px;font-family:inherit;min-width:0}
       .lg-input-wrap input::placeholder{color:rgba(255,255,255,.35)}
@@ -97,13 +97,13 @@ function template() {
       .lg-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;margin-top:-4px}
       .lg-remember{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.8);cursor:pointer;user-select:none}
       .lg-remember input{appearance:none;width:16px;height:16px;border:1.5px solid rgba(255,255,255,.3);border-radius:4px;cursor:pointer;position:relative;flex-shrink:0;transition:all .15s}
-      .lg-remember input:checked{background:#6366f1;border-color:#6366f1}
+      .lg-remember input:checked{background:var(--a);border-color:var(--a)}
       .lg-remember input:checked::after{content:'✓';position:absolute;top:-1px;left:2px;font-size:13px;color:#fff;font-weight:900}
-      .lg-forgot{background:transparent;border:0;color:#a5b4fc;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:2px}
-      .lg-forgot:hover{color:#c7d2fe}
+      .lg-forgot{background:transparent;border:0;color:var(--al3);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:2px}
+      .lg-forgot:hover{color:var(--al2)}
 
       /* CTA primary */
-      .lg-cta{width:100%;height:50px;border-radius:12px;border:0;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-family:var(--fd);font-weight:800;font-size:15px;letter-spacing:.01em;cursor:pointer;transition:transform .12s,box-shadow .12s;box-shadow:0 12px 32px -10px rgba(99,102,241,.65)}
+      .lg-cta{width:100%;height:50px;border-radius:12px;border:0;background:linear-gradient(135deg,var(--a),var(--pu));color:#fff;font-family:var(--fd);font-weight:800;font-size:15px;letter-spacing:.01em;cursor:pointer;transition:transform .12s,box-shadow .12s;box-shadow:0 12px 32px -10px rgba(99,102,241,.65)}
       .lg-cta:hover{transform:translateY(-1px);box-shadow:0 16px 40px -10px rgba(99,102,241,.8)}
       .lg-cta:disabled{opacity:.6;cursor:wait;transform:none}
 
@@ -121,8 +121,8 @@ function template() {
       .lg-oauth.apple svg{color:#fff}
 
       /* OTP mode toggle */
-      .lg-otp-toggle{background:transparent;border:0;color:#a5b4fc;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px;letter-spacing:.2px;display:block;margin:-4px auto 0}
-      .lg-otp-toggle:hover{color:#c7d2fe}
+      .lg-otp-toggle{background:transparent;border:0;color:var(--al3);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px;letter-spacing:.2px;display:block;margin:-4px auto 0}
+      .lg-otp-toggle:hover{color:var(--al2)}
 
       /* Demo accounts (toujours utile en dev) */
       .lg-demos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:-4px}
@@ -133,8 +133,8 @@ function template() {
 
       /* Signup footer */
       .lg-foot{text-align:center;font-size:13px;color:rgba(255,255,255,.65);margin-top:2px}
-      .lg-foot a{color:#a5b4fc;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(165,180,252,.3);transition:border-color .15s}
-      .lg-foot a:hover{border-color:#a5b4fc}
+      .lg-foot a{color:var(--al3);font-weight:700;text-decoration:none;border-bottom:1px solid rgba(165,180,252,.3);transition:border-color .15s}
+      .lg-foot a:hover{border-color:var(--al3)}
 
       .lg-version{position:absolute;bottom:14px;right:14px;font-family:var(--fn);font-size:10.5px;color:rgba(255,255,255,.3);letter-spacing:1.5px;z-index:3}
       .lg-world-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.65;filter:blur(6px) saturate(.7);pointer-events:none;z-index:0}
@@ -180,7 +180,7 @@ function template() {
                 ${ICON_KEY}
                 <input id="lg-otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="123456" style="letter-spacing:.4em;font-family:var(--fn,monospace);font-size:17px;text-align:center">
               </div>
-              <button type="button" id="lg-otp-resend" style="background:transparent;border:0;color:#a5b4fc;font-family:inherit;font-size:11.5px;cursor:pointer;margin-top:6px;text-align:center;text-decoration:underline">Renvoyer le code</button>
+              <button type="button" id="lg-otp-resend" style="background:transparent;border:0;color:var(--al3);font-family:inherit;font-size:11.5px;cursor:pointer;margin-top:6px;text-align:center;text-decoration:underline">Renvoyer le code</button>
             </div>
 
             <div class="lg-row" id="lg-row-remember">

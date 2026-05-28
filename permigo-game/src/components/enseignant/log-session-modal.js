@@ -84,7 +84,7 @@ function ensureStyle() {
   }
   .lsm-handle {
     width: 36px; height: 4px;
-    background: #e2e6f2;
+    background: var(--bo);
     border-radius: 2px;
     margin: 12px auto 0;
     flex-shrink: 0;
@@ -97,19 +97,19 @@ function ensureStyle() {
   .lsm-title {
     flex: 1;
     font: 700 18px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     letter-spacing: -.02em;
   }
   .lsm-close {
     width: 32px; height: 32px;
-    border: none; background: #f1f3f9;
+    border: none; background: var(--bg4);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; color: #64748b;
+    cursor: pointer; color: var(--mu3);
     transition: background .12s;
     flex-shrink: 0;
   }
-  .lsm-close:active { background: #e2e6f2; }
+  .lsm-close:active { background: var(--bo); }
 
   .lsm-body {
     overflow-y: auto;
@@ -125,14 +125,14 @@ function ensureStyle() {
     font: 600 11px/1 'Inter', sans-serif;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: #94a3b8;
+    color: var(--mu2);
     margin: 0 0 10px;
     display: flex; align-items: center; gap: 8px;
   }
   .lsm-sec-title::after {
     content: '';
     flex: 1; height: 1px;
-    background: #f0f2f8;
+    background: var(--bg3);
   }
   .lsm-sec-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -140,7 +140,7 @@ function ensureStyle() {
   }
   .lsm-sec-count {
     font: 600 11px/1 'Inter', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     background: rgba(99,102,241,.08);
     padding: 2px 8px;
     border-radius: 10px;
@@ -151,7 +151,7 @@ function ensureStyle() {
   .lsm-eleve-row {
     display: flex; align-items: center; gap: 12px;
     padding: 10px 14px;
-    border: 1.5px solid #e2e6f2;
+    border: 1.5px solid var(--bo);
     border-radius: 16px;
     cursor: pointer;
     transition: border-color .12s, background .12s;
@@ -159,7 +159,7 @@ function ensureStyle() {
     min-height: 52px;
   }
   .lsm-eleve-row:active { transform: scale(.99); }
-  .lsm-eleve-row.lsm-selected { border-color: #6366f1; background: rgba(99,102,241,.04); }
+  .lsm-eleve-row.lsm-selected { border-color: var(--a); background: rgba(99,102,241,.04); }
   .lsm-eleve-av {
     width: 36px; height: 36px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -169,28 +169,28 @@ function ensureStyle() {
   .lsm-eleve-info { flex: 1; min-width: 0; }
   .lsm-eleve-name {
     font: 600 14px/1.2 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .lsm-eleve-hint { font: 500 11px/1 'Inter', sans-serif; color: #94a3b8; margin-top: 2px; }
+  .lsm-eleve-hint { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
   .lsm-eleve-check {
     width: 20px; height: 20px;
     border-radius: 50%;
-    border: 2px solid #e2e6f2;
+    border: 2px solid var(--bo);
     flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
     transition: background .12s, border-color .12s;
   }
-  .lsm-selected .lsm-eleve-check { background: #6366f1; border-color: #6366f1; }
+  .lsm-selected .lsm-eleve-check { background: var(--a); border-color: var(--a); }
 
   /* Chips durée */
   .lsm-chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .lsm-chip {
     padding: 9px 16px;
-    border: 1.5px solid #e2e6f2;
+    border: 1.5px solid var(--bo);
     border-radius: 40px;
     font: 600 13px/1 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu3);
     background: #fff;
     cursor: pointer;
     transition: border-color .12s, background .12s, color .12s, transform .1s;
@@ -198,7 +198,7 @@ function ensureStyle() {
     display: flex; align-items: center;
   }
   .lsm-chip:active { transform: scale(.96); }
-  .lsm-chip.lsm-selected { border-color: #6366f1; background: rgba(99,102,241,.07); color: #6366f1; }
+  .lsm-chip.lsm-selected { border-color: var(--a); background: rgba(99,102,241,.07); color: var(--a); }
 
   /* Chips jours — plus larges */
   .lsm-day-chips { gap: 8px; }
@@ -210,13 +210,13 @@ function ensureStyle() {
     font: 500 10px/1 'Inter', sans-serif;
     text-transform: uppercase;
     letter-spacing: .07em;
-    color: #94a3b8;
+    color: var(--mu2);
     margin: 0 0 7px;
   }
   .lsm-comp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .lsm-comp-chip {
     padding: 6px 12px;
-    border: 1.5px solid #e2e6f2;
+    border: 1.5px solid var(--bo);
     border-radius: 20px;
     font: 500 12px/1 'Inter', sans-serif;
     color: #4b5563;
@@ -229,9 +229,9 @@ function ensureStyle() {
   }
   .lsm-comp-chip:active { transform: scale(.97); }
   .lsm-comp-chip.lsm-selected {
-    border-color: #10b981;
+    border-color: var(--gr);
     background: rgba(16,185,129,.07);
-    color: #059669;
+    color: var(--grd);
     font-weight: 600;
   }
   .lsm-comp-chip .lsm-comp-code {
@@ -239,16 +239,16 @@ function ensureStyle() {
     padding: 1px 5px;
     border-radius: 6px;
     background: rgba(16,185,129,.12);
-    color: #059669;
+    color: var(--grd);
     flex-shrink: 0;
   }
-  .lsm-comp-chip.lsm-selected .lsm-comp-code { background: #059669; color: #fff; }
+  .lsm-comp-chip.lsm-selected .lsm-comp-code { background: var(--grd); color: #fff; }
   .lsm-comp-loading {
-    color: #94a3b8; font: 500 12px/1.5 'Inter', sans-serif;
+    color: var(--mu2); font: 500 12px/1.5 'Inter', sans-serif;
     padding: 8px 0;
   }
   .lsm-comp-empty {
-    color: #10b981; font: 500 12px/1.4 'Inter', sans-serif;
+    color: var(--gr); font: 500 12px/1.4 'Inter', sans-serif;
     padding: 4px 0;
     display: flex; align-items: center; gap: 6px;
   }
@@ -257,8 +257,8 @@ function ensureStyle() {
   .lsm-visibility-badge {
     display: inline-flex; align-items: center; gap: 4px;
     font: 500 11px/1 'Inter', sans-serif;
-    color: #64748b;
-    background: #f1f3f9;
+    color: var(--mu3);
+    background: var(--bg4);
     padding: 4px 8px;
     border-radius: 8px;
     margin-bottom: 8px;
@@ -268,10 +268,10 @@ function ensureStyle() {
     width: 100%;
     box-sizing: border-box;
     padding: 12px 14px;
-    border: 1.5px solid #e2e6f2;
+    border: 1.5px solid var(--bo);
     border-radius: 14px;
     font: 500 13px/1.5 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     background: #fff;
     resize: none;
     min-height: 90px;
@@ -279,21 +279,21 @@ function ensureStyle() {
     transition: border-color .15s;
     -webkit-appearance: none;
   }
-  .lsm-textarea:focus { border-color: #6366f1; }
+  .lsm-textarea:focus { border-color: var(--a); }
   .lsm-char-count {
     position: absolute;
     bottom: 8px; right: 10px;
     font: 500 10px/1 'Inter', sans-serif;
-    color: #c4ccd8;
+    color: var(--mu5);
     pointer-events: none;
   }
-  .lsm-char-count.lsm-near-limit { color: #f59e0b; }
+  .lsm-char-count.lsm-near-limit { color: var(--am); }
 
   /* Footer fixe */
   .lsm-footer {
     padding: 16px 20px;
     padding-bottom: max(16px, env(safe-area-inset-bottom));
-    border-top: 1px solid #f0f2f8;
+    border-top: 1px solid var(--bg3);
     flex-shrink: 0;
     background: #fff;
   }
@@ -302,7 +302,7 @@ function ensureStyle() {
     padding: 16px;
     border: none;
     border-radius: 14px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, var(--a), var(--pu));
     color: #fff;
     font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
@@ -324,9 +324,9 @@ function ensureStyle() {
 // ─── Avatar gradient ──────────────────────────────────────────
 const GRADS = [
   'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,#0891b2,#155e75)',
-  'linear-gradient(135deg,#7c3aed,#4c1d95)',
-  'linear-gradient(135deg,#059669,#064e3b)',
+  'linear-gradient(135deg,var(--blk),#155e75)',
+  'linear-gradient(135deg,var(--puk),#4c1d95)',
+  'linear-gradient(135deg,var(--grd),#064e3b)',
   'linear-gradient(135deg,#9333ea,#6b21a8)',
   'linear-gradient(135deg,#a16207,#713f12)',
 ];
@@ -373,7 +373,7 @@ export async function openLogSessionModal() {
         <button class="lsm-close" aria-label="Fermer">${icon('x', { size: 16, strokeWidth: 2.5 })}</button>
       </div>
       <div class="lsm-body" id="lsm-body-inner">
-        <div style="padding:20px 0;text-align:center;color:#94a3b8;font:500 13px/1 'Inter',sans-serif">Chargement…</div>
+        <div style="padding:20px 0;text-align:center;color:var(--mu2);font:500 13px/1 'Inter',sans-serif">Chargement…</div>
       </div>
       <div class="lsm-footer">
         <button class="lsm-submit" id="lsm-btn-submit" disabled>
@@ -443,7 +443,7 @@ export async function openLogSessionModal() {
       return `<div class="lsm-comp-loading">Chargement des compétences…</div>`;
     }
     if (pendingComps.length === 0) {
-      return `<div class="lsm-comp-empty">${icon('check-circle', { size: 14, color: '#10b981', strokeWidth: 2.5 })} Toutes les compétences sont déjà acquises !</div>`;
+      return `<div class="lsm-comp-empty">${icon('check-circle', { size: 14, color: 'var(--gr)', strokeWidth: 2.5 })} Toutes les compétences sont déjà acquises !</div>`;
     }
     // Grouper par monde
     const byMonde = {};
@@ -479,7 +479,7 @@ export async function openLogSessionModal() {
       <div class="lsm-section">
         <div class="lsm-sec-title">Avec qui ?</div>
         ${allEleves.length === 0
-          ? `<div style="color:#94a3b8;font:500 13px/1.5 'Inter',sans-serif;padding:12px 0">Aucun élève trouvé.</div>`
+          ? `<div style="color:var(--mu2);font:500 13px/1.5 'Inter',sans-serif;padding:12px 0">Aucun élève trouvé.</div>`
           : `<div class="lsm-eleve-list" id="lsm-eleve-list">
               ${allEleves.map(e => `
                 <div class="lsm-eleve-row${e.id === selectedEleve ? ' lsm-selected' : ''}"

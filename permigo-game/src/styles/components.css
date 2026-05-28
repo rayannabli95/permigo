@@ -18,7 +18,7 @@
   white-space: nowrap;
 }
 .pg-logo-txt.dark {
-  background: linear-gradient(90deg, #a5b4fc 0%, #fff 35%, #fff 65%, #c4b5fd 100%);
+  background: linear-gradient(90deg, var(--al3) 0%, #fff 35%, #fff 65%, #c4b5fd 100%);
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -111,15 +111,15 @@ body.has-chrome #app {
 /* ─── Desktop framing : iPhone-style centered, max-width 480 ─── */
 @media (min-width: 768px) {
   body {
-    background: #f0f2f8;
+    background: var(--bg3);
   }
   body.has-chrome #app {
     max-width: 480px;
     margin: 0 auto;
-    background: #f8f9fc;
+    background: var(--su2);
     min-height: 100vh;
     box-shadow:
-      0 0 0 1px #e2e6f2,
+      0 0 0 1px var(--bo),
       0 24px 64px -16px rgba(11,13,26,.08);
   }
   #header-bar,
@@ -155,8 +155,8 @@ button:active:not(:disabled),
 .toast {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 11px 14px 11px 18px;
-  background: #fff; color: #0a0d1a;
-  border: 1px solid #e2e6f2;
+  background: #fff; color: var(--ink);
+  border: 1px solid var(--bo);
   border-radius: var(--r);
   font-size: 13px; font-weight: 600;
   box-shadow: 0 4px 16px rgba(11,13,26,.08), 0 1px 4px rgba(11,13,26,.04);
@@ -172,7 +172,7 @@ button:active:not(:disabled),
 .toast .toast-close {
   width: 22px; height: 22px;
   border: 0; background: rgba(11,13,26,.08);
-  color: #0a0d1a; font-size: 16px; line-height: 1;
+  color: var(--ink); font-size: 16px; line-height: 1;
   border-radius: 50%; cursor: pointer;
   font-family: inherit; padding: 0;
   display: inline-flex; align-items: center; justify-content: center;

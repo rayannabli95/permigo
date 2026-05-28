@@ -13,11 +13,11 @@ import { toast } from '@/components/common/toast.js';
 const STYLE_ID = 'daily-quests-style';
 
 const CAT_CFG = {
-  quiz:       { ico: 'brain',   color: '#6366f1' },
-  streak:     { ico: 'flame',   color: '#f97316' },
-  competence: { ico: 'award',   color: '#22c55e' },
-  session:    { ico: 'map-pin', color: '#0891b2' },
-  default:    { ico: 'zap',     color: '#8b5cf6' },
+  quiz:       { ico: 'brain',   color: 'var(--a)' },
+  streak:     { ico: 'flame',   color: 'var(--or)' },
+  competence: { ico: 'award',   color: 'var(--gr2)' },
+  session:    { ico: 'map-pin', color: 'var(--blk)' },
+  default:    { ico: 'zap',     color: 'var(--pu)' },
 };
 
 function ensureStyle() {
@@ -32,12 +32,12 @@ function ensureStyle() {
   }
   .dq-title {
     font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a; letter-spacing: -.01em;
+    color: var(--ink); letter-spacing: -.01em;
     display: flex; align-items: center; gap: 6px;
   }
   .dq-count {
     font: 700 11px/1 'Inter', sans-serif;
-    color: #8b5cf6; background: rgba(139,92,246,.1);
+    color: var(--pu); background: rgba(139,92,246,.1);
     border-radius: 99px; padding: 2px 8px;
   }
   .dq-scroll {
@@ -49,7 +49,7 @@ function ensureStyle() {
 
   .dq-card {
     flex-shrink: 0; width: 156px;
-    background: #fff; border: 1.5px solid #e2e6f2;
+    background: #fff; border: 1.5px solid var(--bo);
     border-radius: 16px; padding: 14px 14px 12px;
     cursor: pointer; position: relative; overflow: hidden;
     transition: transform .15s cubic-bezier(.23,1,.32,1), border-color .15s;
@@ -82,9 +82,9 @@ function ensureStyle() {
     font: 600 9px/1 'Plus Jakarta Sans', sans-serif;
     padding: 3px 7px; border-radius: 99px; letter-spacing: .03em;
   }
-  .dq-badge--claim { background: #7c3aed; color: #fff; }
+  .dq-badge--claim { background: var(--puk); color: #fff; }
   .dq-badge--done  {
-    background: #10b981; color: #fff;
+    background: var(--gr); color: #fff;
     display: flex; align-items: center; gap: 3px;
   }
 
@@ -95,25 +95,25 @@ function ensureStyle() {
   }
   .dq-name {
     font: 600 12px/1.3 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a; margin-bottom: 4px;
+    color: var(--ink); margin-bottom: 4px;
     display: -webkit-box;
     -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
   .dq-track {
-    height: 4px; background: #e2e6f2;
+    height: 4px; background: var(--bo);
     border-radius: 2px; overflow: hidden; margin: 8px 0 6px;
   }
   .dq-fill { height: 100%; border-radius: 2px; transition: width .4s ease; }
   .dq-foot { display: flex; align-items: center; justify-content: space-between; }
-  .dq-prog { font: 500 10px/1 'IBM Plex Mono', monospace; color: #94a3b8; }
-  .dq-reward { font: 600 10px/1 'Inter', sans-serif; color: #6366f1; }
-  .dq-card--ready .dq-reward { color: #7c3aed; }
+  .dq-prog { font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
+  .dq-reward { font: 600 10px/1 'Inter', sans-serif; color: var(--a); }
+  .dq-card--ready .dq-reward { color: var(--puk); }
 
   /* XP popup */
   .dq-xp-pop {
     position: fixed; pointer-events: none; z-index: 9999;
     font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
-    color: #7c3aed; text-shadow: 0 1px 8px rgba(124,58,237,.35);
+    color: var(--puk); text-shadow: 0 1px 8px rgba(124,58,237,.35);
     animation: dqXpPop .75s cubic-bezier(.23,1,.32,1) forwards;
     white-space: nowrap; transform: translateX(-50%);
   }
@@ -214,7 +214,7 @@ function renderSection(quests) {
   return `
     <div class="dq-hd">
       <div class="dq-title">
-        ${icon('zap', { size: 14, strokeWidth: 2.2, color: '#8b5cf6' })}
+        ${icon('zap', { size: 14, strokeWidth: 2.2, color: 'var(--pu)' })}
         Quêtes du jour
       </div>
       ${readyCount > 0 ? `<span class="dq-count">${readyCount} à réclamer</span>` : ''}
@@ -231,7 +231,7 @@ function renderCard(q) {
   const done  = q.completed;
 
   const cat      = CAT_CFG[q.category] || CAT_CFG.default;
-  const fillClr  = done ? '#10b981' : ready ? '#7c3aed' : '#6366f1';
+  const fillClr  = done ? 'var(--gr)' : ready ? 'var(--puk)' : 'var(--a)';
   const stCls    = done ? 'dq-card--claimed' : ready ? 'dq-card--ready' : 'dq-card--pending';
 
   const badge = done

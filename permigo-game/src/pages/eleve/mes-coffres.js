@@ -29,10 +29,10 @@ const CHEST_META = {
 };
 
 const TIER_GRADIENT = {
-  bronze:     'linear-gradient(135deg,#d97706,#7c2d12)',
-  argent:     'linear-gradient(135deg,#94a3b8,#475569)',
+  bronze:     'linear-gradient(135deg,var(--amk),#7c2d12)',
+  argent:     'linear-gradient(135deg,var(--mu2),var(--mu4))',
   or:         'linear-gradient(135deg,#facc15,#a16207)',
-  legendaire: 'linear-gradient(135deg,#a855f7,#581c87)',
+  legendaire: 'linear-gradient(135deg,var(--pul),#581c87)',
 };
 
 const STYLE = `<style>
@@ -153,7 +153,7 @@ const STYLE = `<style>
   font: 700 11px/1 'Inter', sans-serif;
   padding: 3px 8px; border-radius: 99px;
   background: rgba(99,102,241,.08);
-  color: #6366f1;
+  color: var(--a);
 }
 
 .mc-badge {
@@ -161,8 +161,8 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   font-size: 16px; flex-shrink: 0;
 }
-.mc-badge-open    { background: rgba(99,102,241,.12); color: #6366f1; }
-.mc-badge-opened  { background: rgba(16,185,129,.1);  color: #059669; }
+.mc-badge-open    { background: rgba(99,102,241,.12); color: var(--a); }
+.mc-badge-opened  { background: rgba(16,185,129,.1);  color: var(--grd); }
 
 /* ── CTA open button on card ── */
 .mc-open-btn {
@@ -171,7 +171,7 @@ const STYLE = `<style>
   border-radius: 10px;
   border: 0;
   font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
-  background: #6366f1;
+  background: var(--a);
   color: #fff;
   cursor: pointer;
   transition: transform .12s, opacity .12s;

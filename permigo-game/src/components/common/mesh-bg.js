@@ -57,12 +57,12 @@ export const MESH_BG_CSS = `
   }
 
   /* 6 blobs avec couleurs / positions / animations différentes pour un effet organique */
-  .mb-b1{width:680px;height:680px;background:#3b82f6;top:-15%;left:-12%;animation:mb-float-1 32s ease-in-out infinite}
-  .mb-b2{width:560px;height:560px;background:#8b5cf6;top:25%;right:-18%;animation:mb-float-2 42s ease-in-out infinite}
+  .mb-b1{width:680px;height:680px;background:var(--bl2);top:-15%;left:-12%;animation:mb-float-1 32s ease-in-out infinite}
+  .mb-b2{width:560px;height:560px;background:var(--pu);top:25%;right:-18%;animation:mb-float-2 42s ease-in-out infinite}
   .mb-b3{width:520px;height:520px;background:#06b6d4;bottom:-12%;left:25%;animation:mb-float-3 37s ease-in-out infinite}
-  .mb-b4{width:480px;height:480px;background:#6366f1;top:45%;left:35%;animation:mb-float-4 48s ease-in-out infinite}
-  .mb-b5{width:420px;height:420px;background:#7c3aed;bottom:5%;right:10%;animation:mb-float-5 35s ease-in-out infinite}
-  .mb-b6{width:380px;height:380px;background:#0ea5e9;top:8%;left:55%;animation:mb-float-6 44s ease-in-out infinite;opacity:.35}
+  .mb-b4{width:480px;height:480px;background:var(--a);top:45%;left:35%;animation:mb-float-4 48s ease-in-out infinite}
+  .mb-b5{width:420px;height:420px;background:var(--puk);bottom:5%;right:10%;animation:mb-float-5 35s ease-in-out infinite}
+  .mb-b6{width:380px;height:380px;background:var(--bl);top:8%;left:55%;animation:mb-float-6 44s ease-in-out infinite;opacity:.35}
 
   @media (max-width:720px){
     .mb-b1{width:420px;height:420px}

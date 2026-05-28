@@ -284,7 +284,7 @@ function renderStyles() {
   display: flex;
   flex-direction: column;
   min-height: 100svh;
-  background: #0a0d1a;
+  background: var(--ink);
   font-family: 'Inter', sans-serif;
   color: #fff;
 }
@@ -309,7 +309,7 @@ function renderStyles() {
 }
 .msg-count {
   background: rgba(99,102,241,.2);
-  color: #818cf8;
+  color: var(--al);
   border-radius: 10px;
   font: 600 12px/1 'IBM Plex Mono', monospace;
   padding: 4px 8px;
@@ -332,7 +332,7 @@ function renderStyles() {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--a), var(--pu));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -349,14 +349,14 @@ function renderStyles() {
 }
 .msg-thread-name {
   font: 600 15px/1 'Plus Jakarta Sans', sans-serif;
-  color: #f1f5f9;
+  color: var(--bg4);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .msg-thread-ts {
   font: 400 11px/1 'IBM Plex Mono', monospace;
-  color: #475569;
+  color: var(--mu4);
   flex-shrink: 0;
 }
 .msg-thread-bottom {
@@ -373,7 +373,7 @@ function renderStyles() {
   text-overflow: ellipsis;
 }
 .msg-badge {
-  background: #6366f1;
+  background: var(--a);
   color: #fff;
   border-radius: 10px;
   font: 700 11px/1 'IBM Plex Mono', monospace;
@@ -414,7 +414,7 @@ function renderStyles() {
 .msg-back-btn:active { background: rgba(255,255,255,.15); }
 .msg-conv-name {
   font: 700 16px/1 'Plus Jakarta Sans', sans-serif;
-  color: #f1f5f9;
+  color: var(--bg4);
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -441,22 +441,22 @@ function renderStyles() {
 .msg-input {
   flex: 1;
   padding: 12px 16px;
-  background: #1a1d2e;
+  background: var(--ink2);
   border: 1.5px solid rgba(255,255,255,.08);
   border-radius: 24px;
-  color: #f1f5f9;
+  color: var(--bg4);
   font: 400 15px/1 'Inter', sans-serif;
   outline: none;
   transition: border-color 140ms;
   min-height: 44px;
 }
 .msg-input:focus { border-color: rgba(99,102,241,.5); }
-.msg-input::placeholder { color: #475569; }
+.msg-input::placeholder { color: var(--mu4); }
 .msg-send-btn {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--a), var(--pu));
   border: none;
   color: #fff;
   font-size: 18px;
@@ -486,19 +486,19 @@ function renderStyles() {
   word-break: break-word;
 }
 .msg-bubble--other {
-  background: #1a1d2e;
-  color: #e2e8f0;
+  background: var(--ink2);
+  color: var(--bo3);
   border-bottom-left-radius: 4px;
 }
 .msg-bubble--mine {
-  background: #6366f1;
+  background: var(--a);
   color: #fff;
   border-bottom-right-radius: 4px;
 }
 .msg-bubble--pending { opacity: .6; }
 .msg-bubble-ts {
   font: 400 11px/1 'IBM Plex Mono', monospace;
-  color: #475569;
+  color: var(--mu4);
   padding: 0 4px;
 }
 
@@ -516,7 +516,7 @@ function renderStyles() {
 .msg-empty-ico { font-size: 40px; margin-bottom: 8px; }
 .msg-empty-txt {
   font: 600 16px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: #f1f5f9;
+  color: var(--bg4);
 }
 .msg-empty-sub {
   font: 400 14px/1.5 'Inter', sans-serif;
@@ -532,7 +532,7 @@ function renderStyles() {
   background: rgba(99,102,241,.15);
   border: 1px solid rgba(99,102,241,.3);
   border-radius: 10px;
-  color: #818cf8;
+  color: var(--al);
   font: 600 14px/1 'Inter', sans-serif;
   cursor: pointer;
   min-height: 44px;

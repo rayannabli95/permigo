@@ -38,7 +38,7 @@ const STYLES = `
   border: 1.5px solid #fed7aa;
 }
 .eb-urgent {
-  background: linear-gradient(135deg,#fef2f2,#fee2e2);
+  background: linear-gradient(135deg,#fef2f2,var(--rdp2));
   border: 1.5px solid #fca5a5;
   animation: ebSlideDown 320ms cubic-bezier(.32,.72,0,1) both,
              ebPulse 2.4s ease-in-out 500ms infinite;
@@ -59,12 +59,12 @@ const STYLES = `
 /* ── Content ── */
 .eb-title {
   font: 700 15px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   margin-bottom: 3px;
 }
 .eb-body {
   font: 500 13px/1.4 'Inter', sans-serif;
-  color: #374151;
+  color: var(--ink5);
   margin-bottom: 10px;
 }
 .eb-cta {
@@ -83,10 +83,10 @@ const STYLES = `
 @media (hover:hover) and (pointer:fine) { .eb-cta:hover { opacity: .88; } }
 
 /* CTA color per tone */
-.eb-warm     .eb-cta { background: #f97316; color: #fff; }
-.eb-urgent   .eb-cta { background: #ef4444; color: #fff; }
-.eb-celebrate .eb-cta { background: #7c3aed; color: #fff; }
-.eb-gentle   .eb-cta { background: #3b82f6; color: #fff; }
+.eb-warm     .eb-cta { background: var(--or); color: #fff; }
+.eb-urgent   .eb-cta { background: var(--rd); color: #fff; }
+.eb-celebrate .eb-cta { background: var(--puk); color: #fff; }
+.eb-gentle   .eb-cta { background: var(--bl2); color: #fff; }
 
 /* ── Close button ── */
 .eb-close {
@@ -98,7 +98,7 @@ const STYLES = `
   border: 0;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #64748b;
+  color: var(--mu3);
   font-size: 14px;
   line-height: 1;
   transition: background .14s;

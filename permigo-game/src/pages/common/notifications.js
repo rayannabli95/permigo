@@ -30,21 +30,21 @@ function notifRoute(n) {
 
 // ─── Icon map ────────────────────────────────────────────────
 const TYPE_META = {
-  xp:                  { iconName: 'zap',          bg: 'rgba(99,102,241,.12)',  color: '#6366f1' },
-  trophy:              { iconName: 'trophy',        bg: 'rgba(245,158,11,.12)',  color: '#f59e0b' },
-  achievement_unlocked:{ iconName: 'trophy',        bg: 'rgba(245,158,11,.12)',  color: '#f59e0b' },
-  validation:          { iconName: 'check-circle',  bg: 'rgba(16,185,129,.12)',  color: '#10b981' },
-  session_confirmation:{ iconName: 'check-circle',  bg: 'rgba(99,102,241,.12)',  color: '#6366f1' },
-  session_logged:      { iconName: 'check-circle',  bg: 'rgba(99,102,241,.12)',  color: '#6366f1' },
-  session_confirmed:   { iconName: 'check',         bg: 'rgba(16,185,129,.12)',  color: '#10b981' },
-  session_refused:     { iconName: 'x-circle',      bg: 'rgba(239,68,68,.12)',   color: '#ef4444' },
-  streak_at_risk:      { iconName: 'flame',         bg: 'rgba(239,68,68,.12)',   color: '#ef4444' },
-  streak:              { iconName: 'flame',         bg: 'rgba(239,68,68,.12)',   color: '#ef4444' },
-  consolidation_quiz:  { iconName: 'target',        bg: 'rgba(139,92,246,.12)', color: '#8b5cf6' },
-  post_validation_quiz:{ iconName: 'target',        bg: 'rgba(139,92,246,.12)', color: '#8b5cf6' },
-  new_message:         { iconName: 'message-circle',bg: 'rgba(14,165,233,.12)',  color: '#0ea5e9' },
-  reminder:            { iconName: 'bell',          bg: 'rgba(14,165,233,.12)',  color: '#0ea5e9' },
-  info:                { iconName: 'bell',          bg: 'rgba(100,116,139,.12)', color: '#64748b' },
+  xp:                  { iconName: 'zap',          bg: 'rgba(99,102,241,.12)',  color: 'var(--a)' },
+  trophy:              { iconName: 'trophy',        bg: 'rgba(245,158,11,.12)',  color: 'var(--am)' },
+  achievement_unlocked:{ iconName: 'trophy',        bg: 'rgba(245,158,11,.12)',  color: 'var(--am)' },
+  validation:          { iconName: 'check-circle',  bg: 'rgba(16,185,129,.12)',  color: 'var(--gr)' },
+  session_confirmation:{ iconName: 'check-circle',  bg: 'rgba(99,102,241,.12)',  color: 'var(--a)' },
+  session_logged:      { iconName: 'check-circle',  bg: 'rgba(99,102,241,.12)',  color: 'var(--a)' },
+  session_confirmed:   { iconName: 'check',         bg: 'rgba(16,185,129,.12)',  color: 'var(--gr)' },
+  session_refused:     { iconName: 'x-circle',      bg: 'rgba(239,68,68,.12)',   color: 'var(--rd)' },
+  streak_at_risk:      { iconName: 'flame',         bg: 'rgba(239,68,68,.12)',   color: 'var(--rd)' },
+  streak:              { iconName: 'flame',         bg: 'rgba(239,68,68,.12)',   color: 'var(--rd)' },
+  consolidation_quiz:  { iconName: 'target',        bg: 'rgba(139,92,246,.12)', color: 'var(--pu)' },
+  post_validation_quiz:{ iconName: 'target',        bg: 'rgba(139,92,246,.12)', color: 'var(--pu)' },
+  new_message:         { iconName: 'message-circle',bg: 'rgba(14,165,233,.12)',  color: 'var(--bl)' },
+  reminder:            { iconName: 'bell',          bg: 'rgba(14,165,233,.12)',  color: 'var(--bl)' },
+  info:                { iconName: 'bell',          bg: 'rgba(100,116,139,.12)', color: 'var(--mu3)' },
 };
 function typeMeta(t) { return TYPE_META[t] || TYPE_META.info; }
 
@@ -100,11 +100,11 @@ const STYLE = `<style>
 .nf2-title { font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; color: var(--ink); flex: 1; }
 .nf2-unread-badge {
   font: 700 11px/1 'IBM Plex Mono', monospace;
-  color: #6366f1; background: rgba(99,102,241,.1);
+  color: var(--a); background: rgba(99,102,241,.1);
   border-radius: 99px; padding: 4px 8px; flex-shrink: 0;
 }
 .nf2-mark-all {
-  font: 700 12px/1 'Inter', sans-serif; color: #6366f1;
+  font: 700 12px/1 'Inter', sans-serif; color: var(--a);
   background: none; border: none; cursor: pointer; padding: 8px 4px;
   border-radius: 6px; transition: background .12s; font-family: inherit;
 }
@@ -120,7 +120,7 @@ const STYLE = `<style>
 }
 .nf2-ptr.visible { height: 48px; }
 .nf2-ptr-ico {
-  width: 20px; height: 20px; border: 2px solid var(--bo); border-top-color: #6366f1;
+  width: 20px; height: 20px; border: 2px solid var(--bo); border-top-color: var(--a);
   border-radius: 50%; animation: nf2Spin .7s linear infinite;
 }
 @keyframes nf2Spin { to { transform: rotate(360deg); } }
@@ -147,7 +147,7 @@ const STYLE = `<style>
 /* Delete reveal */
 .nf2-delete-bg {
   position: absolute; right: 0; top: 0; bottom: 0;
-  width: 72px; background: #ef4444;
+  width: 72px; background: var(--rd);
   display: flex; align-items: center; justify-content: center;
   color: #fff; font: 600 11px/1 'Inter', sans-serif; gap: 4px;
   flex-direction: column;
@@ -179,7 +179,7 @@ const STYLE = `<style>
 }
 .nf2-item-title::before {
   content: ''; width: 6px; height: 6px; border-radius: 50%;
-  background: #6366f1; flex-shrink: 0; opacity: 0; transition: opacity .15s;
+  background: var(--a); flex-shrink: 0; opacity: 0; transition: opacity .15s;
 }
 .nf2-item.unread .nf2-item-title::before { opacity: 1; }
 .nf2-item-desc { font: 500 12px/1.45 'Inter', sans-serif; color: var(--mu); margin-top: 3px; }
@@ -198,7 +198,7 @@ const STYLE = `<style>
 .nf2-empty-cta {
   display: inline-block; padding: 12px 24px;
   background: rgba(99,102,241,.08); border: 1.5px solid rgba(99,102,241,.2);
-  border-radius: 12px; color: #6366f1; font: 600 13px/1 'Inter', sans-serif;
+  border-radius: 12px; color: var(--a); font: 600 13px/1 'Inter', sans-serif;
   cursor: pointer; min-height: 44px; transition: background .12s;
 }
 .nf2-empty-cta:active { background: rgba(99,102,241,.15); }
@@ -376,8 +376,8 @@ function wireItems(root, me, initialUnread) {
       haptic('warning');
       const id = wrap.dataset.id;
       const undoEl = document.createElement('div');
-      undoEl.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0b0d1a;color:#fff;padding:12px 20px;border-radius:12px;font:600 13px/1 Inter,sans-serif;z-index:999;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)';
-      undoEl.innerHTML = `<span>Notification supprimée</span><button style="background:none;border:none;color:#6366f1;font:700 12px/1 Inter,sans-serif;cursor:pointer;padding:0">Annuler</button>`;
+      undoEl.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font:600 13px/1 Inter,sans-serif;z-index:999;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)';
+      undoEl.innerHTML = `<span>Notification supprimée</span><button style="background:none;border:none;color:var(--a);font:700 12px/1 Inter,sans-serif;cursor:pointer;padding:0">Annuler</button>`;
       document.body.appendChild(undoEl);
 
       let undone = false;

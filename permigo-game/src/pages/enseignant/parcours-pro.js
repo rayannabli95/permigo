@@ -36,7 +36,7 @@ const STYLE = `<style>
   flex-direction: column;
   justify-content: flex-end;
   /* Ton sobre « Linear » : slate profond neutre, pas de néon */
-  background: linear-gradient(165deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(165deg, var(--ink4) 0%, var(--ink) 100%);
   border-bottom: 1px solid rgba(255,255,255,.06);
 }
 
@@ -122,7 +122,7 @@ const STYLE = `<style>
   position: relative;
   min-height: 220px;
   /* Accent indigo sobre — outil utile, pas une loot box */
-  background: linear-gradient(150deg, #4f46e5 0%, #6366f1 100%);
+  background: linear-gradient(150deg, var(--adk) 0%, var(--a) 100%);
   box-shadow:
     0 12px 28px -14px rgba(79,70,229,.45),
     0 4px 10px -4px rgba(10,13,26,.12);
@@ -304,7 +304,7 @@ const STYLE = `<style>
 .pcp-road-stop:last-of-type { border-bottom: none; }
 .pcp-road-stop[role="button"] { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .pcp-road-stop[role="button"]:active { background: rgba(99,102,241,.07); }
-.pcp-road-stop:focus-visible { outline: 2px solid #6366f1; outline-offset: -2px; }
+.pcp-road-stop:focus-visible { outline: 2px solid var(--a); outline-offset: -2px; }
 .pcp-road-stop.pcp-now { background: rgba(99,102,241,.04); }
 .pcp-road-stop.pcp-blurred { opacity: .45; filter: blur(1.5px); pointer-events: none; user-select: none; }
 
@@ -314,10 +314,10 @@ const STYLE = `<style>
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
 }
-.pcp-road-dot.done  { background: #10b981; color: #fff; }
-.pcp-road-dot.now   { background: #fff; border: 2.5px solid #6366f1; color: #6366f1;
+.pcp-road-dot.done  { background: var(--gr); color: #fff; }
+.pcp-road-dot.now   { background: #fff; border: 2.5px solid var(--a); color: var(--a);
                        box-shadow: 0 0 0 4px rgba(99,102,241,.15); }
-.pcp-road-dot.todo  { background: var(--bg2); border: 2px solid #e2e6f2; color: #94a3b8; }
+.pcp-road-dot.todo  { background: var(--bg2); border: 2px solid var(--bo); color: var(--mu2); }
 
 .pcp-road-body { flex: 1; min-width: 0; }
 .pcp-road-tier {
@@ -327,14 +327,14 @@ const STYLE = `<style>
   color: var(--mu2);
   margin-bottom: 4px;
 }
-.pcp-road-stop.done .pcp-road-tier  { color: #10b981; }
-.pcp-road-stop.pcp-now .pcp-road-tier { color: #6366f1; }
+.pcp-road-stop.done .pcp-road-tier  { color: var(--gr); }
+.pcp-road-stop.pcp-now .pcp-road-tier { color: var(--a); }
 
 .pcp-road-name {
   font: 600 14px/1.3 'Inter', sans-serif;
   color: var(--ink);
 }
-.pcp-road-stop.done .pcp-road-name { color: #64748b; }
+.pcp-road-stop.done .pcp-road-name { color: var(--mu3); }
 
 .pcp-road-reward {
   display: inline-flex;
@@ -342,12 +342,12 @@ const STYLE = `<style>
   gap: 5px;
   margin-top: 5px;
   font: 500 11.5px/1 'Inter', sans-serif;
-  color: #6366f1;
+  color: var(--a);
   background: rgba(99,102,241,.08);
   border-radius: 8px;
   padding: 3px 8px;
 }
-.pcp-road-stop.done .pcp-road-reward { color: #059669; background: rgba(16,185,129,.08); }
+.pcp-road-stop.done .pcp-road-reward { color: var(--grd); background: rgba(16,185,129,.08); }
 
 .pcp-road-badge {
   flex-shrink: 0;
@@ -355,9 +355,9 @@ const STYLE = `<style>
   padding: 4px 8px;
   border-radius: 99px;
 }
-.pcp-road-badge.done  { color: #059669; background: rgba(16,185,129,.1); }
-.pcp-road-badge.now   { color: #fff; background: #6366f1; }
-.pcp-road-badge.todo  { color: #94a3b8; background: var(--bg2); }
+.pcp-road-badge.done  { color: var(--grd); background: rgba(16,185,129,.1); }
+.pcp-road-badge.now   { color: #fff; background: var(--a); }
+.pcp-road-badge.todo  { color: var(--mu2); background: var(--bg2); }
 
 /* Bouton voir tout */
 .pcp-see-all {
@@ -376,12 +376,12 @@ const STYLE = `<style>
   cursor: pointer;
   transition: border-color .15s, color .15s, background .15s;
 }
-.pcp-see-all:hover { border-color: #6366f1; color: #6366f1; background: rgba(99,102,241,.04); }
+.pcp-see-all:hover { border-color: var(--a); color: var(--a); background: rgba(99,102,241,.04); }
 .pcp-see-all:active { transform: scale(.98); }
 
 /* Skeletons */
 .pcp-skel {
-  background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
+  background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
   background-size: 200% 100%;
   animation: pcpShim 1.4s ease-in-out infinite;
   border-radius: 20px;

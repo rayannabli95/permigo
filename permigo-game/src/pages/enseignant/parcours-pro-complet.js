@@ -50,7 +50,7 @@ const STYLE = `<style>
   -webkit-tap-highlight-color: transparent;
   transition: background .12s;
 }
-.epc-full-back:active { background: #e2e6f2; transform: scale(.93); }
+.epc-full-back:active { background: var(--bo); transform: scale(.93); }
 .epc-full-hd-info { flex: 1; min-width: 0; }
 .epc-full-h1 {
   font: 700 18px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -67,7 +67,7 @@ const STYLE = `<style>
 /* Progress pill */
 .epc-full-pill {
   font: 700 12px/1 'IBM Plex Mono', monospace;
-  color: #6366f1;
+  color: var(--a);
   background: rgba(99,102,241,.1);
   padding: 6px 10px;
   border-radius: 99px;
@@ -100,15 +100,15 @@ const STYLE = `<style>
   top: 38px;
   bottom: -10px;
   width: 2px;
-  background: #e2e8f0;
+  background: var(--bo3);
 }
-.epcf-stop.done:not(:last-child)::before { background: #10b981; }
+.epcf-stop.done:not(:last-child)::before { background: var(--gr); }
 .epcf-stop-dot {
   width: 36px; height: 36px;
   border-radius: 50%;
   flex-shrink: 0;
   background: var(--su);
-  border: 2.5px solid #e2e8f0;
+  border: 2.5px solid var(--bo3);
   display: flex; align-items: center; justify-content: center;
   position: relative;
   z-index: 1;
@@ -116,13 +116,13 @@ const STYLE = `<style>
   margin-top: 2px;
 }
 .epcf-stop.done .epcf-stop-dot {
-  background: #10b981;
-  border-color: #10b981;
+  background: var(--gr);
+  border-color: var(--gr);
   color: #fff;
 }
 .epcf-stop.now .epcf-stop-dot {
   background: var(--su);
-  border-color: #6366f1;
+  border-color: var(--a);
   box-shadow: 0 0 0 4px rgba(99,102,241,.2);
   width: 44px; height: 44px;
   margin-left: -4px;
@@ -143,8 +143,8 @@ const STYLE = `<style>
   text-transform: uppercase;
   letter-spacing: .06em;
 }
-.epcf-stop.now .epcf-stop-lvl  { color: #6366f1; }
-.epcf-stop.done .epcf-stop-lvl { color: #10b981; }
+.epcf-stop.now .epcf-stop-lvl  { color: var(--a); }
+.epcf-stop.done .epcf-stop-lvl { color: var(--gr); }
 .epcf-stop-cost {
   font: 600 11px/1 'Inter', sans-serif;
   padding: 4px 8px;
@@ -152,16 +152,16 @@ const STYLE = `<style>
   white-space: nowrap;
   flex-shrink: 0;
 }
-.epcf-stop-cost.done { color: #059669; background: rgba(16,185,129,.12); }
-.epcf-stop-cost.now  { color: #fff; background: #6366f1; }
-.epcf-stop-cost.todo { color: #64748b; background: var(--bg2); }
+.epcf-stop-cost.done { color: var(--grd); background: rgba(16,185,129,.12); }
+.epcf-stop-cost.now  { color: #fff; background: var(--a); }
+.epcf-stop-cost.todo { color: var(--mu3); background: var(--bg2); }
 .epcf-stop-title {
   font: 600 14px/1.3 'Inter', sans-serif;
   color: var(--ink);
   margin-bottom: 6px;
 }
-.epcf-stop.locked .epcf-stop-title { color: #94a3b8; }
-.epcf-stop.done  .epcf-stop-title  { color: #64748b; }
+.epcf-stop.locked .epcf-stop-title { color: var(--mu2); }
+.epcf-stop.done  .epcf-stop-title  { color: var(--mu3); }
 .epcf-stop-reward {
   display: inline-flex;
   align-items: center;
@@ -170,13 +170,13 @@ const STYLE = `<style>
   background: rgba(99,102,241,.08);
   border: 1px solid rgba(99,102,241,.2);
   border-radius: 10px;
-  color: #6366f1;
+  color: var(--a);
   margin-top: 4px;
 }
 .epcf-stop-reward.unlocked {
   background: rgba(16,185,129,.08);
   border-color: rgba(16,185,129,.2);
-  color: #059669;
+  color: var(--grd);
 }
 .epcf-stop-reward-ico { display: flex; align-items: center; flex-shrink: 0; }
 .epcf-stop-skin-img {
@@ -192,7 +192,7 @@ const STYLE = `<style>
 /* Stop cliquable → ouvre le détail du palier */
 .epcf-stop[role="button"] { cursor: pointer; -webkit-tap-highlight-color: transparent; border-radius: 12px; transition: background .12s; }
 .epcf-stop[role="button"]:active { background: rgba(99,102,241,.06); }
-.epcf-stop:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+.epcf-stop:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
 
 /* Cercle Or halo */
 .epcf-stop.cercle-or.done .epcf-stop-dot {
@@ -206,7 +206,7 @@ const STYLE = `<style>
 
 /* Skeleton */
 .epcf-skel {
-  background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
+  background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
   background-size: 200% 100%;
   animation: epcfShim 1.4s ease-in-out infinite;
   border-radius: 20px;

@@ -50,7 +50,7 @@ export function renderGameHUD(stats, me) {
       /* Bande lumineuse animée en bas du HUD */
       .ghud::after{
         content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
-        background:linear-gradient(90deg,transparent 0%,#6366f1 30%,#a78bfa 50%,#6366f1 70%,transparent 100%);
+        background:linear-gradient(90deg,transparent 0%,var(--a) 30%,#a78bfa 50%,var(--a) 70%,transparent 100%);
         background-size:200% 100%;
         animation:ghud-line-flow 4s linear infinite;
         opacity:.7;
@@ -63,7 +63,7 @@ export function renderGameHUD(stats, me) {
       .ghud-avatar{
         position:relative;width:46px;height:46px;flex-shrink:0;
         border-radius:14px;
-        background:linear-gradient(135deg,#6366f1 0%,#4338ca 50%,#1e1b4b 100%);
+        background:linear-gradient(135deg,var(--a) 0%,var(--adx) 50%,#1e1b4b 100%);
         display:flex;align-items:center;justify-content:center;
         font-family:var(--fd);font-weight:900;font-size:17px;color:#fff;
         box-shadow:
@@ -80,7 +80,7 @@ export function renderGameHUD(stats, me) {
       /* ─── AVATAR FRAMES PREMIUM (boutique) ─── */
       .ghud-avatar.frame-rainbow::after{
         content:'';position:absolute;inset:-3px;border-radius:16px;
-        background:conic-gradient(from 0deg,#ef4444,#fbbf24,#10b981,#0ea5e9,#a855f7,#ef4444);
+        background:conic-gradient(from 0deg,var(--rd),var(--aml2),var(--gr),var(--bl),var(--pul),var(--rd));
         z-index:-1;filter:blur(2px);
         animation:ghud-frame-rainbow 3s linear infinite;
       }
@@ -95,7 +95,7 @@ export function renderGameHUD(stats, me) {
 
       .ghud-avatar.frame-glow-or::after{
         content:'';position:absolute;inset:-6px;border-radius:18px;
-        background:radial-gradient(circle,#fbbf24,transparent 65%);
+        background:radial-gradient(circle,var(--aml2),transparent 65%);
         filter:blur(8px);z-index:-1;
         animation:ghud-frame-pulse 1.8s ease-in-out infinite;
       }
@@ -117,7 +117,7 @@ export function renderGameHUD(stats, me) {
       .ghud-xp-meta .lvl-tag{
         display:inline-flex;align-items:center;
         padding:3px 10px;border-radius:99px;
-        background:linear-gradient(180deg,#fde68a 0%,#fbbf24 50%,#d97706 100%);
+        background:linear-gradient(180deg,var(--aml) 0%,var(--aml2) 50%,var(--amk) 100%);
         color:#451a03;
         font-family:var(--fd);font-size:11px;font-weight:900;
         letter-spacing:.6px;line-height:1;
@@ -137,7 +137,7 @@ export function renderGameHUD(stats, me) {
       }
       .ghud-xp-bar i{
         display:block;height:100%;
-        background:linear-gradient(90deg,#fbbf24 0%,#f59e0b 50%,#fb923c 100%);
+        background:linear-gradient(90deg,var(--aml2) 0%,var(--am) 50%,#fb923c 100%);
         border-radius:99px;
         width:${pctLevel.toFixed(1)}%;
         box-shadow:
@@ -179,7 +179,7 @@ export function renderGameHUD(stats, me) {
       /* Streak pill — large pour montrer la flame + count */
       .ghud-pill.streak{
         width:auto;min-width:62px;padding:0 12px 0 8px;
-        background:linear-gradient(135deg,#7c2d12 0%,#dc2626 50%,#f97316 100%);
+        background:linear-gradient(135deg,#7c2d12 0%,var(--rdk) 50%,var(--or) 100%);
         border-color:rgba(251,191,36,.5);
         box-shadow:0 4px 14px -2px rgba(220,38,38,.55),0 0 12px rgba(220,38,38,.25),0 1px 0 rgba(255,255,255,.18) inset;
       }
@@ -204,7 +204,7 @@ export function renderGameHUD(stats, me) {
       /* Gemmes pill — violet/indigo gradient, cliquable boutique */
       .ghud-pill.gemmes{
         width:auto;min-width:60px;padding:0 12px 0 8px;
-        background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 50%,#a855f7 100%);
+        background:linear-gradient(135deg,#4c1d95 0%,var(--puk) 50%,var(--pul) 100%);
         border-color:rgba(167,139,250,.5);
         box-shadow:0 4px 14px -2px rgba(139,92,246,.55),0 0 12px rgba(167,139,250,.3),0 1px 0 rgba(255,255,255,.2) inset;
       }
@@ -228,12 +228,12 @@ export function renderGameHUD(stats, me) {
 
       .ghud-chest-badge{
         position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;
-        background:linear-gradient(180deg,#fb7185,#ef4444);
+        background:linear-gradient(180deg,#fb7185,var(--rd));
         color:#fff;
         font-family:var(--fd);font-size:10px;font-weight:900;
         border-radius:99px;
         display:flex;align-items:center;justify-content:center;
-        border:2px solid #0b0d1a;
+        border:2px solid var(--ink);
         box-shadow:0 4px 10px -2px rgba(239,68,68,.6);
         animation:ghud-badge-bounce 1.2s ease-in-out infinite;
       }
@@ -243,10 +243,10 @@ export function renderGameHUD(stats, me) {
       .ghud-streak-modal{position:fixed;inset:0;background:rgba(11,13,26,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:14px;z-index:200}
       .ghud-streak-modal.show{display:flex;animation:fadeIn .2s}
       @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-      .ghud-streak-panel{background:linear-gradient(160deg,#7c2d12 0%,#9a3412 40%,#0b0d1a 100%);width:100%;max-width:420px;border-radius:24px;padding:28px 24px;color:#fff;text-align:center;box-shadow:0 24px 60px -16px rgba(0,0,0,.7);border:1px solid rgba(251,191,36,.3);animation:popIn .3s cubic-bezier(.5,1.6,.4,1)}
+      .ghud-streak-panel{background:linear-gradient(160deg,#7c2d12 0%,#9a3412 40%,var(--ink) 100%);width:100%;max-width:420px;border-radius:24px;padding:28px 24px;color:#fff;text-align:center;box-shadow:0 24px 60px -16px rgba(0,0,0,.7);border:1px solid rgba(251,191,36,.3);animation:popIn .3s cubic-bezier(.5,1.6,.4,1)}
       @keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
       .ghud-streak-flame{font-size:72px;line-height:1;filter:drop-shadow(0 8px 24px rgba(251,191,36,.6));animation:ghud-flame-flicker 1s ease-in-out infinite alternate}
-      .ghud-streak-count{font-family:var(--fd);font-size:48px;font-weight:900;margin-top:8px;letter-spacing:-.04em;color:#fde68a;text-shadow:0 4px 16px rgba(251,191,36,.5)}
+      .ghud-streak-count{font-family:var(--fd);font-size:48px;font-weight:900;margin-top:8px;letter-spacing:-.04em;color:var(--aml);text-shadow:0 4px 16px rgba(251,191,36,.5)}
       .ghud-streak-lbl{font-family:var(--fn);font-size:11px;font-weight:800;color:rgba(255,255,255,.8);letter-spacing:.25em;text-transform:uppercase;margin-top:4px}
       .ghud-streak-msg{font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.9);margin-top:18px}
       .ghud-streak-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:20px}
@@ -257,7 +257,7 @@ export function renderGameHUD(stats, me) {
       .ghud-streak-day.active .dl,.ghud-streak-day.active .dn{color:#fff}
       .ghud-streak-day.active::before{content:'🔥';font-size:13px;line-height:1}
       .ghud-streak-day.today{box-shadow:0 0 0 2px #fff}
-      .ghud-streak-close{margin-top:22px;padding:12px 26px;border-radius:99px;background:#fff;color:#0b0d1a;border:0;font-family:var(--fd);font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.3px;width:100%}
+      .ghud-streak-close{margin-top:22px;padding:12px 26px;border-radius:99px;background:#fff;color:var(--ink);border:0;font-family:var(--fd);font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.3px;width:100%}
     </style>
 
     <div class="ghud" role="status" aria-label="Tableau de bord du joueur">
@@ -365,8 +365,8 @@ function flameIconSVG() {
     <defs>
       <linearGradient id="flame-grad" x1="50%" y1="0%" x2="50%" y2="100%">
         <stop offset="0%" stop-color="#fef08a"/>
-        <stop offset="40%" stop-color="#fbbf24"/>
-        <stop offset="100%" stop-color="#dc2626"/>
+        <stop offset="40%" stop-color="var(--aml2)"/>
+        <stop offset="100%" stop-color="var(--rdk)"/>
       </linearGradient>
     </defs>
     <path d="M12 2 C 11 5 7 7 7 12 C 7 16 9 20 12 22 C 15 20 17 16 17 12 C 17 9 14 8 14 5 C 13 6 12 8 12 2 Z" fill="url(#flame-grad)" stroke="#7c2d12" stroke-width=".8"/>
@@ -414,8 +414,8 @@ function chestIconSVG() {
   return `<svg class="ghud-svg-chest" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
     <defs>
       <linearGradient id="chest-icon-grad" x1="50%" y1="0%" x2="50%" y2="100%">
-        <stop offset="0%" stop-color="#fde68a"/>
-        <stop offset="100%" stop-color="#d97706"/>
+        <stop offset="0%" stop-color="var(--aml)"/>
+        <stop offset="100%" stop-color="var(--amk)"/>
       </linearGradient>
     </defs>
     <!-- Corps -->
@@ -426,7 +426,7 @@ function chestIconSVG() {
     <rect x="3" y="12" width="18" height=".8" fill="#451a03"/>
     <!-- Serrure -->
     <rect x="10.5" y="11" width="3" height="3" rx=".5" fill="#451a03"/>
-    <circle cx="12" cy="12.5" r=".6" fill="#fde68a"/>
+    <circle cx="12" cy="12.5" r=".6" fill="var(--aml)"/>
   </svg>`;
 }
 

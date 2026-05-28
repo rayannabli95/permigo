@@ -31,18 +31,18 @@ function ensureStyle() {
     font: 600 11px/1 'Inter', sans-serif;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: #94a3b8;
+    color: var(--mu2);
     display: flex; align-items: center; gap: 8px;
   }
   .ff-sec-title::after {
     content: ''; display: inline-block;
     width: 32px; height: 1px;
-    background: #e2e6f2;
+    background: var(--bo);
     vertical-align: middle;
   }
   .ff-see-all {
     font: 600 12px/1 'Inter', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     background: none; border: none;
     cursor: pointer; padding: 4px 0;
     display: flex; align-items: center; gap: 4px;
@@ -55,7 +55,7 @@ function ensureStyle() {
 
   .ff-card {
     background: #fff;
-    border: 1.5px solid #e2e6f2;
+    border: 1.5px solid var(--bo);
     border-radius: 18px;
     padding: 12px 14px;
     box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.05);
@@ -87,12 +87,12 @@ function ensureStyle() {
   .ff-meta { flex: 1; min-width: 0; }
   .ff-author {
     font: 600 13px/1.2 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .ff-time {
     font: 500 11px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     margin-top: 2px;
   }
   .ff-kind-badge {
@@ -101,21 +101,21 @@ function ensureStyle() {
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  .ff-kind-session  { background: rgba(99,102,241,.1); color: #6366f1; }
-  .ff-kind-validation { background: rgba(16,185,129,.1); color: #059669; }
+  .ff-kind-session  { background: rgba(99,102,241,.1); color: var(--a); }
+  .ff-kind-validation { background: rgba(16,185,129,.1); color: var(--grd); }
 
   .ff-card-body { margin-top: 8px; }
   .ff-event-line {
     font: 500 13px/1.4 'Inter', sans-serif;
-    color: #374151;
+    color: var(--ink5);
   }
-  .ff-event-line strong { color: #0a0d1a; }
+  .ff-event-line strong { color: var(--ink); }
   .ff-comment {
     font: 400 italic 12px/1.5 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu3);
     margin-top: 5px;
     padding-left: 8px;
-    border-left: 2px solid #e2e6f2;
+    border-left: 2px solid var(--bo);
   }
 
   /* Expand state */
@@ -128,8 +128,8 @@ function ensureStyle() {
   .ff-extra-content {
     padding-top: 8px;
     font: 500 12px/1.5 'Inter', sans-serif;
-    color: #64748b;
-    border-top: 1px solid #f0f2f8;
+    color: var(--mu3);
+    border-top: 1px solid var(--bg3);
     margin-top: 8px;
   }
   .ff-extra-row { display: flex; gap: 6px; align-items: center; margin-bottom: 3px; }
@@ -145,11 +145,11 @@ function ensureStyle() {
 // ─── Helpers ─────────────────────────────────────────────────
 const GRADS = [
   'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,#0891b2,#155e75)',
-  'linear-gradient(135deg,#7c3aed,#4c1d95)',
-  'linear-gradient(135deg,#059669,#064e3b)',
+  'linear-gradient(135deg,var(--blk),#155e75)',
+  'linear-gradient(135deg,var(--puk),#4c1d95)',
+  'linear-gradient(135deg,var(--grd),#064e3b)',
   'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,#dc2626,#7f1d1d)',
+  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
 ];
 function gradFor(str) {
   let h = 0;
@@ -192,7 +192,7 @@ function renderCard(evt, idx) {
     : `A validé : <strong>${esc(evt.competence_id || '—')}</strong>`;
 
   const statusBit = isSession && evt.confirmation_status
-    ? `<span style="font-size:10px;color:${evt.confirmation_status === 'confirmed' ? '#059669' : '#94a3b8'}">
+    ? `<span style="font-size:10px;color:${evt.confirmation_status === 'confirmed' ? 'var(--grd)' : 'var(--mu2)'}">
         ${evt.confirmation_status === 'confirmed' ? '✓ confirmée' : evt.confirmation_status === 'refused' ? '✗ refusée' : '⏳ en attente'}
        </span>`
     : '';
@@ -213,8 +213,8 @@ function renderCard(evt, idx) {
     </div>
     <div class="ff-card-extra">
       <div class="ff-extra-content">
-        <div class="ff-extra-row">${icon('calendar', { size: 12, color: '#94a3b8', strokeWidth: 2 })} ${new Date(evt.ts).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
-        ${isSession ? `<div class="ff-extra-row">${icon('clock', { size: 12, color: '#94a3b8', strokeWidth: 2 })} Durée : ${fmtDuration(evt.duration_minutes)}</div>` : ''}
+        <div class="ff-extra-row">${icon('calendar', { size: 12, color: 'var(--mu2)', strokeWidth: 2 })} ${new Date(evt.ts).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+        ${isSession ? `<div class="ff-extra-row">${icon('clock', { size: 12, color: 'var(--mu2)', strokeWidth: 2 })} Durée : ${fmtDuration(evt.duration_minutes)}</div>` : ''}
         ${!isSession && evt.comment ? '' : ''}
       </div>
     </div>

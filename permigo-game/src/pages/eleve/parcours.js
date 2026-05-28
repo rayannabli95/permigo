@@ -56,9 +56,9 @@ const STYLE = `<style>
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--wc, #10b981) 22%, transparent) 0%,
-    color-mix(in srgb, var(--wc, #10b981) 12%, transparent) 50%,
-    color-mix(in srgb, var(--wc, #10b981) 4%, transparent) 100%);
+    color-mix(in srgb, var(--wc, var(--gr)) 22%, transparent) 0%,
+    color-mix(in srgb, var(--wc, var(--gr)) 12%, transparent) 50%,
+    color-mix(in srgb, var(--wc, var(--gr)) 4%, transparent) 100%);
 }
 /* Tous les contenus passent au-dessus du volant */
 .prc > * { position: relative; z-index: 1; }
@@ -77,12 +77,12 @@ const STYLE = `<style>
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--bo);
 }
-.prc-title    { font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif; color: #0a0d1a; }
-.prc-subtitle { font: 500 11px/1 'Inter', sans-serif; color: #94a3b8; margin-top: 3px; }
+.prc-title    { font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
+.prc-subtitle { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 .prc-hd-right { text-align: right; }
-.prc-total    { font: 800 26px/1 'Plus Jakarta Sans', sans-serif; color: #0a0d1a; }
-.prc-total-denom { font-size: 15px; color: #94a3b8; }
-.prc-total-lbl{ font: 600 10px/1 'Inter', sans-serif; color: #94a3b8; margin-top: 3px; }
+.prc-total    { font: 800 26px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
+.prc-total-denom { font-size: 15px; color: var(--mu2); }
+.prc-total-lbl{ font: 600 10px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 
 /* ── Barre de progression globale ── */
 .prc-global-bar {
@@ -93,13 +93,13 @@ const STYLE = `<style>
 }
 .prc-global-track {
   height: 6px;
-  background: #e2e6f2;
+  background: var(--bo);
   border-radius: 3px;
   overflow: hidden;
 }
 .prc-global-fill {
   height: 100%;
-  background: linear-gradient(90deg, #10b981, #06b6d4, #8b5cf6, #f59e0b);
+  background: linear-gradient(90deg, var(--gr), #06b6d4, var(--pu), var(--am));
   border-radius: 3px;
   transition: width 1s cubic-bezier(.2,.7,.3,1);
 }
@@ -143,7 +143,7 @@ const STYLE = `<style>
   inset: -2px;
   border-radius: 26px;
   background: conic-gradient(from 0deg,
-    #10b981, #06b6d4, #8b5cf6, #f59e0b, #10b981);
+    var(--gr), #06b6d4, var(--pu), var(--am), var(--gr));
   animation: prc-border-spin 12s linear infinite;
   z-index: 0;
   opacity: .5;
@@ -193,8 +193,8 @@ const STYLE = `<style>
 }
 .prc-map-badge-dot {
   width: 6px; height: 6px; border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 6px #10b981;
+  background: var(--gr);
+  box-shadow: 0 0 6px var(--gr);
   animation: prc-dot-pulse 1.8s ease-in-out infinite;
 }
 @keyframes prc-dot-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(.7); } }
@@ -323,7 +323,7 @@ const STYLE = `<style>
   display: inline-flex;
   width: 16px; height: 16px;
   border-radius: 50%;
-  background: var(--wc, #10b981);
+  background: var(--wc, var(--gr));
   color: #fff;
   align-items: center;
   justify-content: center;
@@ -338,7 +338,7 @@ const STYLE = `<style>
 }
 .prc-world-tagline {
   font: 500 12px/1.3 'Inter', sans-serif;
-  color: #475569;
+  color: var(--mu4);
   margin-bottom: 8px;
   text-shadow: 0 1px 4px rgba(255,255,255,.7);
 }
@@ -350,10 +350,10 @@ const STYLE = `<style>
   font-size: 12px;
   font-weight: 700;
   color: #fff;
-  background: var(--wc, #10b981);
+  background: var(--wc, var(--gr));
   padding: 4px 12px;
   border-radius: 99px;
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--wc, #10b981) 40%, transparent);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--wc, var(--gr)) 40%, transparent);
 }
 
 /* ── Route SVG ── */
@@ -366,8 +366,8 @@ const STYLE = `<style>
 /* 4 layers route : ombre, bord, surface, marquage */
 .prc-path-shadow { stroke: rgba(11,13,26,.12); stroke-width: 28; fill: none; stroke-linecap: round; filter: blur(4px); transform: translateY(3px); }
 .prc-path-edge   { stroke: rgba(71,85,105,.3);  stroke-width: 26; fill: none; stroke-linecap: round; }
-.prc-path        { stroke: #94a3b8;              stroke-width: 20; fill: none; stroke-linecap: round; }
-.prc-path-light  { stroke: #f59e0b; stroke-width: 1.5; stroke-dasharray: 5 10; stroke-linecap: round; fill: none; opacity: .9; }
+.prc-path        { stroke: var(--mu2);              stroke-width: 20; fill: none; stroke-linecap: round; }
+.prc-path-light  { stroke: var(--am); stroke-width: 1.5; stroke-dasharray: 5 10; stroke-linecap: round; fill: none; opacity: .9; }
 
 /* ── Nodes (style Duolingo path) ── */
 .prc-node {
@@ -423,7 +423,7 @@ const STYLE = `<style>
 
 /* ─ DONE — cercle vert, check SVG ─ */
 .prc-node.done .nd-circle {
-  background: #10b981;
+  background: var(--gr);
   box-shadow: 0 4px 12px rgba(16,185,129,.35);
   animation: nd-breathe-done 3s ease-in-out infinite;
 }
@@ -447,22 +447,22 @@ const STYLE = `<style>
 
 /* ─ NEXT — couleur monde, éclair, halo pulsant ─ */
 .prc-node.next .nd-circle {
-  background: #6366f1;
+  background: var(--a);
   box-shadow: 0 4px 18px rgba(99,102,241,.45);
   animation: ndPulseValid 2.4s ease-in-out infinite;
 }
 /* Pulse blanc → vert pour indiquer "prêt à valider" */
 @keyframes ndPulseValid {
   0%, 100% {
-    background: #6366f1;
+    background: var(--a);
     box-shadow: 0 4px 18px rgba(99,102,241,.45);
   }
   40% {
     background: #ffffff;
-    box-shadow: 0 4px 22px rgba(255,255,255,.7), inset 0 0 0 2.5px #6366f1;
+    box-shadow: 0 4px 22px rgba(255,255,255,.7), inset 0 0 0 2.5px var(--a);
   }
   70% {
-    background: #10b981;
+    background: var(--gr);
     box-shadow: 0 4px 22px rgba(16,185,129,.55);
   }
 }
@@ -526,7 +526,7 @@ const STYLE = `<style>
 /* ─ TODO — blanc, bordure pointillée ─ */
 .prc-node.todo .nd-circle {
   background: var(--su);
-  border-color: #e2e6f2;
+  border-color: var(--bo);
   border-style: dashed;
   box-shadow: 0 2px 8px rgba(0,0,0,.05);
 }
@@ -534,7 +534,7 @@ const STYLE = `<style>
 .nd-wheel-todo {
   width: 60%;
   height: 60%;
-  background-color: #cbd5e1;
+  background-color: var(--bo4);
   -webkit-mask: url('/worlds/volant.png') center/contain no-repeat;
           mask: url('/worlds/volant.png') center/contain no-repeat;
   pointer-events: none;
@@ -545,7 +545,7 @@ const STYLE = `<style>
   content: none;
   width: 10px; height: 10px;
   border-radius: 50%;
-  background: #cbd5e1;
+  background: var(--bo4);
   position: absolute;
 }
 
@@ -607,14 +607,14 @@ const STYLE = `<style>
   border-color: rgba(16,185,129,.25);
   box-shadow: 0 6px 18px rgba(16,185,129,.12), 0 0 0 1px rgba(16,185,129,.12);
 }
-.prc-node.done .nd-lbl .nd-stt { color: #10b981; }
+.prc-node.done .nd-lbl .nd-stt { color: var(--gr); }
 
 .prc-node.next .nd-lbl {
   border-color: rgba(99,102,241,.3);
   box-shadow: 0 8px 22px rgba(99,102,241,.15), 0 0 0 2px rgba(99,102,241,.2);
 }
-.prc-node.next .nd-lbl .nd-name { color: #0a0d1a; }
-.prc-node.next .nd-lbl .nd-stt  { color: #6366f1; }
+.prc-node.next .nd-lbl .nd-name { color: var(--ink); }
+.prc-node.next .nd-lbl .nd-stt  { color: var(--a); }
 /* Badge "TU ES ICI" */
 .prc-node.next .nd-lbl::before {
   content: 'TU ES ICI';
@@ -622,7 +622,7 @@ const STYLE = `<style>
   bottom: calc(100% + 5px);
   left: 50%;
   transform: translateX(-50%);
-  background: #6366f1;
+  background: var(--a);
   color: #fff;
   font: 800 8px/1 'Inter', sans-serif;
   padding: 3px 9px;
@@ -637,11 +637,11 @@ const STYLE = `<style>
   50%     { transform: translateX(-50%) translateY(-3px); }
 }
 
-.prc-node.todo .nd-lbl .nd-name { color: #64748b; }
-.prc-node.todo .nd-lbl .nd-stt  { color: #94a3b8; }
+.prc-node.todo .nd-lbl .nd-name { color: var(--mu3); }
+.prc-node.todo .nd-lbl .nd-stt  { color: var(--mu2); }
 
 .prc-node.a_valider .nd-circle {
-  border-color: #f59e0b;
+  border-color: var(--am);
   background: rgba(245,158,11,.12);
   box-shadow: 0 0 0 4px rgba(245,158,11,.18), 0 8px 22px rgba(245,158,11,.2);
   animation: nd-pop-next 2s ease-in-out infinite;
@@ -656,7 +656,7 @@ const STYLE = `<style>
   bottom: calc(100% + 5px);
   left: 50%;
   transform: translateX(-50%);
-  background: #f59e0b;
+  background: var(--am);
   color: #fff;
   font: 800 8px/1 'Inter', sans-serif;
   padding: 3px 9px;
@@ -666,11 +666,11 @@ const STYLE = `<style>
   box-shadow: 0 3px 10px rgba(245,158,11,.35);
   animation: tu-bounce 1.6s ease-in-out infinite;
 }
-.prc-node.a_valider .nd-lbl .nd-stt { color: #b45309; font-weight: 700; }
+.prc-node.a_valider .nd-lbl .nd-stt { color: var(--amx); font-weight: 700; }
 .nd-wheel-pending {
   width: 28px; height: 28px;
   border-radius: 50%;
-  background: #f59e0b;
+  background: var(--am);
   box-shadow: 0 2px 8px rgba(245,158,11,.5);
 }
 
@@ -679,9 +679,9 @@ const STYLE = `<style>
   border-color: rgba(203,213,225,.4);
   box-shadow: 0 2px 8px rgba(11,13,26,.06);
 }
-.prc-node.locked .nd-lbl .nd-name { color: #94a3b8; }
-.prc-node.locked .nd-lbl .nd-code { color: #cbd5e1; }
-.prc-node.locked .nd-lbl .nd-stt  { color: #cbd5e1; }
+.prc-node.locked .nd-lbl .nd-name { color: var(--mu2); }
+.prc-node.locked .nd-lbl .nd-code { color: var(--bo4); }
+.prc-node.locked .nd-lbl .nd-stt  { color: var(--bo4); }
 
 /* ── Portail entre mondes ── */
 .prc-portal {
@@ -716,14 +716,14 @@ const STYLE = `<style>
   font-family: 'Inter', sans-serif;
   font-size: 9.5px;
   font-weight: 800;
-  color: var(--wc, #6366f1);
+  color: var(--wc, var(--a));
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-bottom: 5px;
   box-shadow: 0 2px 8px rgba(11,13,26,.07);
 }
-.prc-portal h3 { font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif; color: #0a0d1a; margin: 0 0 4px; }
-.prc-portal p  { font: 500 12px/1.4 'Inter', sans-serif; color: #64748b; max-width: 260px; margin: 0 auto; }
+.prc-portal h3 { font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin: 0 0 4px; }
+.prc-portal p  { font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu3); max-width: 260px; margin: 0 auto; }
 .prc-world.complete .prc-portal h3 { color: var(--wc); }
 
 /* Monde verrouillé → overlay grisé */
@@ -766,7 +766,7 @@ const STYLE = `<style>
   bottom: 0;
   width: 2px;
   transform: translateX(-50%);
-  background-image: linear-gradient(180deg, #94a3b8 50%, transparent 0);
+  background-image: linear-gradient(180deg, var(--mu2) 50%, transparent 0);
   background-size: 2px 10px;
   opacity: .6;
 }
@@ -793,11 +793,11 @@ const STYLE = `<style>
     radial-gradient(ellipse at 80% 80%, rgba(245,158,11,.05), transparent 50%);
   pointer-events: none;
 }
-.prc-final h3  { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; margin: 0 0 6px; position: relative; color: #0a0d1a; }
-.prc-final p   { font: 500 12.5px/1.4 'Inter', sans-serif; color: #64748b; margin: 0 0 16px; position: relative; }
+.prc-final h3  { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; margin: 0 0 6px; position: relative; color: var(--ink); }
+.prc-final p   { font: 500 12.5px/1.4 'Inter', sans-serif; color: var(--mu3); margin: 0 0 16px; position: relative; }
 .prc-final-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; position: relative; }
-.prc-final-stat .v { font: 900 22px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; color: #0a0d1a; }
-.prc-final-stat .l { font: 600 9px/1 'Inter', sans-serif; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+.prc-final-stat .v { font: 900 22px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; color: var(--ink); }
+.prc-final-stat .l { font: 600 9px/1 'Inter', sans-serif; color: var(--mu2); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
 
 /* ── Bottom sheet ── */
 .bsheet-bg {
@@ -834,7 +834,7 @@ const STYLE = `<style>
 .bsheet.open { transform: translateY(0); }
 .bsheet-handle {
   width: 36px; height: 4px;
-  background: #e2e6f2;
+  background: var(--bo);
   border-radius: 2px;
   margin: 12px auto 0;
   flex-shrink: 0;
@@ -876,10 +876,10 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 10px 24px rgba(11,13,26,.12);
   font-size: 28px;
-  background: var(--wc, #6366f1);
+  background: var(--wc, var(--a));
   color: #fff;
 }
-.fiche-circle.done { background: #10b981; animation: fiche-pop .55s cubic-bezier(.5,1.6,.4,1) both; }
+.fiche-circle.done { background: var(--gr); animation: fiche-pop .55s cubic-bezier(.5,1.6,.4,1) both; }
 @keyframes fiche-pop {
   0%  { transform: scale(.3) rotate(-180deg); opacity: 0; }
   60% { transform: scale(1.12) rotate(8deg); opacity: 1; }
@@ -908,10 +908,10 @@ const STYLE = `<style>
   letter-spacing: .12em;
   text-transform: uppercase;
 }
-.stt-pill.done   { background: #dcfce7; color: #15803d; }
-.stt-pill.next   { background: var(--wc, #6366f1); color: #fff; }
-.stt-pill.todo   { background: var(--bg2); color: #64748b; }
-.stt-pill.locked { background: var(--bg2); color: #94a3b8; }
+.stt-pill.done   { background: var(--grp2); color: var(--grk2); }
+.stt-pill.next   { background: var(--wc, var(--a)); color: #fff; }
+.stt-pill.todo   { background: var(--bg2); color: var(--mu3); }
+.stt-pill.locked { background: var(--bg2); color: var(--mu2); }
 
 .fiche-body { padding: 0 16px 16px; }
 .fiche-section {
@@ -941,18 +941,18 @@ const STYLE = `<style>
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-top: 1px solid #f0f2f8;
+  border-top: 1px solid var(--bg3);
   font-size: 13px;
 }
 .fiche-meta-row:first-of-type { border-top: 0; padding-top: 0; }
-.fiche-meta-row .ml { color: #64748b; font-weight: 500; }
-.fiche-meta-row .mv { color: #0a0d1a; font-weight: 700; font-family: 'Inter', sans-serif; font-size: 12px; }
+.fiche-meta-row .ml { color: var(--mu3); font-weight: 500; }
+.fiche-meta-row .mv { color: var(--ink); font-weight: 700; font-family: 'Inter', sans-serif; font-size: 12px; }
 .fiche-empty {
   text-align: center;
   padding: 18px;
 }
 .fiche-empty .em { font-size: 28px; opacity: .4; margin-bottom: 6px; }
-.fiche-empty .et { font: 500 12.5px/1.5 'Inter', sans-serif; color: #94a3b8; font-style: italic; }
+.fiche-empty .et { font: 500 12.5px/1.5 'Inter', sans-serif; color: var(--mu2); font-style: italic; }
 
 /* ── Fiche premium v2 (refonte 2026-05) ──────────────────────── */
 .fiche-circle svg { width: 36px; height: 36px; stroke: #fff; stroke-width: 2.5; }
@@ -972,7 +972,7 @@ const STYLE = `<style>
   position: absolute;
   top: -8px; left: 14px;
   font: 900 48px/1 Georgia, serif;
-  color: var(--wc, #6366f1);
+  color: var(--wc, var(--a));
   opacity: .55;
 }
 .fiche-summary p {
@@ -1008,7 +1008,7 @@ const STYLE = `<style>
   font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
   color: var(--ink);
 }
-.fiche-progress-val .of { font-weight: 600; color: #94a3b8; font-size: 13px; }
+.fiche-progress-val .of { font-weight: 600; color: var(--mu2); font-size: 13px; }
 .fiche-progress-track {
   flex: 1;
   height: 8px;
@@ -1019,7 +1019,7 @@ const STYLE = `<style>
 }
 .fiche-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--wc, #6366f1), color-mix(in srgb, var(--wc, #6366f1) 70%, #fff));
+  background: linear-gradient(90deg, var(--wc, var(--a)), color-mix(in srgb, var(--wc, var(--a)) 70%, #fff));
   border-radius: 99px;
   transition: width .6s cubic-bezier(.4,0,.2,1);
 }
@@ -1042,14 +1042,14 @@ const STYLE = `<style>
   align-items: center;
   gap: 6px;
 }
-.fiche-block-title svg { color: var(--wc, #6366f1); }
+.fiche-block-title svg { color: var(--wc, var(--a)); }
 .fiche-block-list { list-style: none; margin: 0; padding: 0; }
 .fiche-block-list li {
   position: relative;
   padding: 7px 0 7px 26px;
   font: 500 13.5px/1.4 'Inter', sans-serif;
   color: var(--ink);
-  border-top: 1px solid #f0f2f8;
+  border-top: 1px solid var(--bg3);
 }
 .fiche-block-list li:first-child { border-top: 0; padding-top: 4px; }
 .fiche-block-list li::before {
@@ -1060,8 +1060,8 @@ const STYLE = `<style>
   transform: translateY(-50%);
   width: 14px; height: 14px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--wc, #6366f1) 15%, #fff);
-  border: 1.5px solid var(--wc, #6366f1);
+  background: color-mix(in srgb, var(--wc, var(--a)) 15%, #fff);
+  border: 1.5px solid var(--wc, var(--a));
 }
 
 /* Bloc "Conseil du coach" — accent jaune doux */
@@ -1070,7 +1070,7 @@ const STYLE = `<style>
   gap: 12px;
   padding: 14px 16px;
   background: linear-gradient(135deg, #fef9e7, #fffbeb);
-  border: 1px solid #fde68a;
+  border: 1px solid var(--aml);
   border-radius: 14px;
   margin-bottom: 10px;
 }
@@ -1078,7 +1078,7 @@ const STYLE = `<style>
   flex-shrink: 0;
   width: 32px; height: 32px;
   border-radius: 10px;
-  background: #f59e0b;
+  background: var(--am);
   color: #fff;
   display: grid;
   place-items: center;
@@ -1089,7 +1089,7 @@ const STYLE = `<style>
   font: 700 10px/1 'Inter', sans-serif;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: #b45309;
+  color: var(--amx);
   margin-bottom: 4px;
 }
 .fiche-tip-text {
@@ -1109,7 +1109,7 @@ const STYLE = `<style>
   gap: 12px;
 }
 .fiche-status.done   { background: #ecfdf5; border: 1px solid #a7f3d0; }
-.fiche-status.next   { background: color-mix(in srgb, var(--wc, #6366f1) 8%, #fff); border: 1px solid color-mix(in srgb, var(--wc, #6366f1) 35%, transparent); }
+.fiche-status.next   { background: color-mix(in srgb, var(--wc, var(--a)) 8%, #fff); border: 1px solid color-mix(in srgb, var(--wc, var(--a)) 35%, transparent); }
 .fiche-status.locked { background: var(--bg); border: 1px solid var(--bo); }
 .fiche-status-ico {
   width: 36px; height: 36px;
@@ -1118,9 +1118,9 @@ const STYLE = `<style>
   place-items: center;
   flex-shrink: 0;
 }
-.fiche-status.done   .fiche-status-ico { background: #10b981; color: #fff; }
-.fiche-status.next   .fiche-status-ico { background: var(--wc, #6366f1); color: #fff; }
-.fiche-status.locked .fiche-status-ico { background: #cbd5e1; color: #fff; }
+.fiche-status.done   .fiche-status-ico { background: var(--gr); color: #fff; }
+.fiche-status.next   .fiche-status-ico { background: var(--wc, var(--a)); color: #fff; }
+.fiche-status.locked .fiche-status-ico { background: var(--bo4); color: #fff; }
 .fiche-status-body { flex: 1; }
 .fiche-status-title {
   font: 700 13px/1.3 'Plus Jakarta Sans', sans-serif;
@@ -1135,19 +1135,19 @@ const STYLE = `<style>
    Sans ça, var(--ink)/var(--mu) passent au clair en dark mode = illisible
    (le chip "Compétence acquise" apparaissait blanc sur fond clair). */
 .fiche-status.done .fiche-status-title { color: #065f46; }
-.fiche-status.done .fiche-status-sub   { color: #047857; }
+.fiche-status.done .fiche-status-sub   { color: var(--grdk); }
 /* Variante .next : fond quasi-blanc (color-mix 8% + #fff), clair dans les 2 modes
    → titre foncé fixe (sinon var(--ink) clair en dark = illisible). */
-.fiche-status.next .fiche-status-title { color: #1e293b; }
-.fiche-status.next .fiche-status-sub   { color: #475569; }
+.fiche-status.next .fiche-status-title { color: var(--ink4); }
+.fiche-status.next .fiche-status-sub   { color: var(--mu4); }
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
 const WORLDS_META = [
-  { num: 1, color: '#10b981', glow: 'rgba(16,185,129,.35)',  img: ASSETS.worldC1 },
+  { num: 1, color: 'var(--gr)', glow: 'rgba(16,185,129,.35)',  img: ASSETS.worldC1 },
   { num: 2, color: '#06b6d4', glow: 'rgba(6,182,212,.35)',   img: ASSETS.worldC2 },
-  { num: 3, color: '#8b5cf6', glow: 'rgba(139,92,246,.35)',  img: ASSETS.worldC3 },
-  { num: 4, color: '#f59e0b', glow: 'rgba(245,158,11,.35)',  img: ASSETS.worldC4 },
+  { num: 3, color: 'var(--pu)', glow: 'rgba(139,92,246,.35)',  img: ASSETS.worldC3 },
+  { num: 4, color: 'var(--am)', glow: 'rgba(245,158,11,.35)',  img: ASSETS.worldC4 },
 ];
 
 // Combien de compétences du monde N-1 pour débloquer le monde N
@@ -1164,7 +1164,7 @@ export async function mount(root) {
   track('page.view', { page: 'eleve_parcours' });
   playParcours();
 
-  root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div><div class="prc-subtitle">31 compétences · Permis B</div></div></div><div style="padding:32px;text-align:center;color:#94a3b8">Chargement…</div></div>`;
+  root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div><div class="prc-subtitle">31 compétences · Permis B</div></div></div><div style="padding:32px;text-align:center;color:var(--mu2)">Chargement…</div></div>`;
 
   const { data: valData, error: valErr } = await sb
     .from('validations')
@@ -1172,10 +1172,10 @@ export async function mount(root) {
     .eq('eleve_id', me.id);
   if (valErr) {
     root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div></div></div>
-      <div style="padding:48px 24px;text-align:center;color:#64748b">
+      <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
         <div style="font-size:40px;margin-bottom:12px">📡</div>
         <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
-        <button onclick="location.reload()" style="margin-top:14px;padding:12px 24px;border:0;background:#6366f1;color:#fff;border-radius:12px;cursor:pointer">Réessayer</button>
+        <button onclick="location.reload()" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:#fff;border-radius:12px;cursor:pointer">Réessayer</button>
       </div></div>`;
     return;
   }
@@ -1283,7 +1283,7 @@ function spawnArrow(node, compId) {
         to   { opacity: 1; transform: translate(-50%, -100%) scale(1); }
       }
       .fa-bubble {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        background: linear-gradient(135deg, var(--a), var(--pu));
         color: #fff;
         padding: 10px 16px;
         border-radius: 14px;
@@ -1300,13 +1300,13 @@ function spawnArrow(node, compId) {
         left: 50%;
         transform: translateX(-50%) rotate(45deg);
         width: 10px; height: 10px;
-        background: #8b5cf6;
+        background: var(--pu);
       }
       .fa-arrow {
         width: 28px;
         height: 40px;
         margin: 0 auto;
-        color: #6366f1;
+        color: var(--a);
         animation: faBounce 1.2s ease-in-out infinite;
         filter: drop-shadow(0 4px 8px rgba(99,102,241,.4));
       }
@@ -1450,10 +1450,10 @@ function renderPage(worldStates, validatedMap, pendingMap, openedWorlds = new Se
 
   <!-- Légende -->
   <div class="prc-legend">
-    <span><i style="background:#10b981"></i>Acquis</span>
-    <span><i style="background:#6366f1"></i>En cours</span>
-    <span><i style="background:#e2e6f2"></i>À faire</span>
-    <span><i style="background:#cbd5e1"></i>Verrouillé</span>
+    <span><i style="background:var(--gr)"></i>Acquis</span>
+    <span><i style="background:var(--a)"></i>En cours</span>
+    <span><i style="background:var(--bo)"></i>À faire</span>
+    <span><i style="background:var(--bo4)"></i>Verrouillé</span>
   </div>
 
   <!-- Carte des mondes -->
@@ -1556,7 +1556,7 @@ function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds 
     const req = UNLOCK_REQ[idx];
     const prevDone = ws.prevDoneCount ?? 0;
     const need = req - prevDone;
-    return `<div style="position:relative;z-index:9;text-align:center;padding:12px 16px;font:500 13px/1.4 'Inter',sans-serif;color:#64748b">Débloque <strong style="color:#0a0d1a">${need} compétence${need > 1 ? 's' : ''}</strong> dans le monde précédent pour accéder.</div>`;
+    return `<div style="position:relative;z-index:9;text-align:center;padding:12px 16px;font:500 13px/1.4 'Inter',sans-serif;color:var(--mu3)">Débloque <strong style="color:var(--ink)">${need} compétence${need > 1 ? 's' : ''}</strong> dans le monde précédent pour accéder.</div>`;
   })() : '';
 
   const isActive = status === 'in_progress';
@@ -1753,7 +1753,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   // Quiz-récap : rappel OPTIONNEL proposé sur une compétence acquise.
   // Ne change pas le statut (already_acquired) — joue l'animation + crédite l'XP d'engagement.
   const recapBtn = `
-    <a href="#/quiz/${esc(compId)}/post_validation" style="display:block;margin:12px 0 0;padding:13px;background:#fff;border:1.5px solid #6366f1;color:#4f46e5;border-radius:14px;font:700 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;">
+    <a href="#/quiz/${esc(compId)}/post_validation" style="display:block;margin:12px 0 0;padding:13px;background:#fff;border:1.5px solid var(--a);color:var(--adk);border-radius:14px;font:700 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;">
       Quiz-récap (optionnel) →
     </a>`;
 
@@ -1833,7 +1833,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
     <div class="fiche-hero" style="--wc:${meta.color}">
       <button class="fiche-close" type="button" aria-label="Fermer">×</button>
       <div class="fiche-badge-cat">MONDE ${meta.num} · ${esc(world.nom).toUpperCase()}</div>
-      <div class="fiche-circle ${st === 'done' ? 'done' : ''}" style="background:${st === 'done' ? '#10b981' : meta.color}">
+      <div class="fiche-circle ${st === 'done' ? 'done' : ''}" style="background:${st === 'done' ? 'var(--gr)' : meta.color}">
         ${stIcon}
       </div>
       <h3 id="bsheet-title">${esc(sub.n)}</h3>

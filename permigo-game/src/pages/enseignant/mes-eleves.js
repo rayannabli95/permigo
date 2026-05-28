@@ -15,13 +15,13 @@ import { icon } from '@/utils/icons.js';
 // ─── Gradients avatar (8 couleurs cycliques) ─────────────────────
 const AVATARS = [
   'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,#0891b2,#155e75)',
-  'linear-gradient(135deg,#7c3aed,#4c1d95)',
+  'linear-gradient(135deg,var(--blk),#155e75)',
+  'linear-gradient(135deg,var(--puk),#4c1d95)',
   'linear-gradient(135deg,#0e7c66,#064e3b)',
   'linear-gradient(135deg,#9333ea,#6b21a8)',
   'linear-gradient(135deg,#a16207,#713f12)',
-  'linear-gradient(135deg,#dc2626,#7f1d1d)',
-  'linear-gradient(135deg,#059669,#064e3b)',
+  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
+  'linear-gradient(135deg,var(--grd),#064e3b)',
 ];
 
 // ─── CSS ─────────────────────────────────────────────────────────
@@ -75,8 +75,8 @@ const STYLE = `<style>
     transition: border-color .15s;
     box-sizing: border-box;
   }
-  .me-search::placeholder { color: #94a3b8; }
-  .me-search:focus { border-color: #6366f1; }
+  .me-search::placeholder { color: var(--mu2); }
+  .me-search:focus { border-color: var(--a); }
   .me-search::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
   .me-search-clear {
     position: absolute;
@@ -85,7 +85,7 @@ const STYLE = `<style>
     transform: translateY(-50%);
     width: 22px; height: 22px;
     border: none;
-    background: #e2e6f2;
+    background: var(--bo);
     border-radius: 50%;
     color: var(--mu);
     font-size: 12px;
@@ -122,7 +122,7 @@ const STYLE = `<style>
   }
   .me-tab.active {
     background: var(--su);
-    color: #6366f1;
+    color: var(--a);
     box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
   }
 
@@ -148,11 +148,11 @@ const STYLE = `<style>
     min-height: 44px;
   }
   @media (hover: hover) and (pointer: fine) {
-    .me-row:hover { border-color: #6366f1; }
+    .me-row:hover { border-color: var(--a); }
   }
   .me-row:active { transform: scale(.985); }
   .me-row:focus { outline: none; }
-  .me-row:focus-visible { border-color: #6366f1; }
+  .me-row:focus-visible { border-color: var(--a); }
 
   /* Avatar */
   .me-av {
@@ -196,7 +196,7 @@ const STYLE = `<style>
     flex-shrink: 0;
   }
   .me-badge.actif {
-    color: #059669;
+    color: var(--grd);
     background: rgba(16,185,129,.1);
   }
   .me-badge.inactif {
@@ -212,14 +212,14 @@ const STYLE = `<style>
   }
   .me-prog-bar {
     height: 4px;
-    background: #e2e6f2;
+    background: var(--bo);
     border-radius: 2px;
     overflow: hidden;
     margin-bottom: 4px;
   }
   .me-prog-fill {
     height: 100%;
-    background: #6366f1;
+    background: var(--a);
     border-radius: 2px;
     transition: width .5s ease;
   }
@@ -269,7 +269,7 @@ const STYLE = `<style>
     display: inline-flex; align-items: center; gap: 6px;
     padding: 8px 14px; min-height: 44px; border-radius: 10px;
     background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.2);
-    color: #6366f1; font: 600 13px/1 'Inter', sans-serif;
+    color: var(--a); font: 600 13px/1 'Inter', sans-serif;
     cursor: pointer; flex-shrink: 0;
     transition: background .12s, border-color .12s;
     -webkit-tap-highlight-color: transparent;
@@ -288,7 +288,7 @@ const STYLE = `<style>
   }
   .me-relancer-title {
     font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: #b45309;
+    color: var(--amx);
     margin: 0 0 4px;
     display: flex;
     align-items: center;
@@ -305,7 +305,7 @@ const STYLE = `<style>
     font: 600 10px/1 'Inter', sans-serif;
     padding: 3px 7px;
     border-radius: 10px;
-    color: #b45309;
+    color: var(--amx);
     background: rgba(245,158,11,.12);
     flex-shrink: 0;
     display: inline-flex;
@@ -455,20 +455,20 @@ function renderDrill() {
     <header class="me-hd" style="margin-bottom:4px;">
       <div>
         <h1 class="me-h1" style="display:flex;align-items:center;gap:8px;font-size:17px;">
-          ${icon('search', { size: 16, strokeWidth: 2.2, color: '#6366f1' })}
+          ${icon('search', { size: 16, strokeWidth: 2.2, color: 'var(--a)' })}
           Bloqués sur ${esc(_drillComp)}
         </h1>
         <p class="me-sub">${count} élève${count !== 1 ? 's' : ''} · 30 derniers jours</p>
       </div>
     </header>
     <button class="me-drill-back" id="me-drill-back"
-            style="display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:8px 12px;background:#fff;border:1.5px solid #e2e6f2;border-radius:10px;font:600 13px/1 'Inter',sans-serif;color:#6366f1;cursor:pointer;">
+            style="display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:8px 12px;background:#fff;border:1.5px solid var(--bo);border-radius:10px;font:600 13px/1 'Inter',sans-serif;color:var(--a);cursor:pointer;">
       ${icon('arrow-left', { size: 14, strokeWidth: 2.5 })} Voir tous les élèves
     </button>
     <div class="me-list">
       ${count === 0
-        ? `<div style="text-align:center;padding:40px 20px;color:#94a3b8;font:500 14px/1.6 'Inter',sans-serif;">
-             ${icon('check-circle', { size: 32, strokeWidth: 1.5, color: '#e2e6f2' })}
+        ? `<div style="text-align:center;padding:40px 20px;color:var(--mu2);font:500 14px/1.6 'Inter',sans-serif;">
+             ${icon('check-circle', { size: 32, strokeWidth: 1.5, color: 'var(--bo)' })}
              <br><br>Aucun élève bloqué sur cette compétence actuellement.
            </div>`
         : _drillEleves.map(e => {
@@ -481,10 +481,10 @@ function renderDrill() {
                 <div class="me-info">
                   <div class="me-name">${nm}</div>
                   <div class="me-meta">
-                    ${e.jours_bloque != null ? `<span style="font:500 11px/1 'Inter',sans-serif;color:#dc2626;">Bloqué depuis ${e.jours_bloque}j</span>` : ''}
+                    ${e.jours_bloque != null ? `<span style="font:500 11px/1 'Inter',sans-serif;color:var(--rdk);">Bloqué depuis ${e.jours_bloque}j</span>` : ''}
                   </div>
                 </div>
-                <div class="me-eleve-chev">${icon('chevron-right', { size: 16, strokeWidth: 2.5, color: '#cbd5e1' })}</div>
+                <div class="me-eleve-chev">${icon('chevron-right', { size: 16, strokeWidth: 2.5, color: 'var(--bo4)' })}</div>
               </div>
             `;
           }).join('')
@@ -516,7 +516,7 @@ function render() {
 
   const relancerSection = aRelancerList.length > 0 ? `
     <div class="me-relancer-section" id="me-relancer-section">
-      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;">${icon('alert-circle', { size: 15, strokeWidth: 2.2, color: '#b45309' })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? 's' : ''} à relancer cette semaine</p>
+      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;">${icon('alert-circle', { size: 15, strokeWidth: 2.2, color: 'var(--amx)' })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? 's' : ''} à relancer cette semaine</p>
       <p class="me-relancer-sub">Sans activité depuis 14 jours ou plus — un point en leçon peut débloquer la progression.</p>
     </div>
   ` : '';
@@ -538,7 +538,7 @@ function render() {
       ${relancerSection}
 
       <div class="me-search-wrap">
-        <span class="me-search-ico">${icon('search', { size: 15, strokeWidth: 2, color: '#94a3b8' })}</span>
+        <span class="me-search-ico">${icon('search', { size: 15, strokeWidth: 2, color: 'var(--mu2)' })}</span>
         <input
           class="me-search"
           type="search"
@@ -558,7 +558,7 @@ function render() {
           Actifs (${actifs})
         </button>
         <button class="me-tab${_tab === 'arelancer' ? ' active' : ''}" data-tab="arelancer" role="tab"
-                style="display:flex;align-items:center;gap:4px;${aRelancerList.length > 0 && _tab !== 'arelancer' ? 'color:#b45309' : ''}">
+                style="display:flex;align-items:center;gap:4px;${aRelancerList.length > 0 && _tab !== 'arelancer' ? 'color:var(--amx)' : ''}">
           ${aRelancerList.length > 0 ? icon('alert-circle', { size: 13, strokeWidth: 2.2 }) : ''}
           À relancer (${aRelancerList.length})
         </button>
@@ -624,7 +624,7 @@ function renderRow(eleve) {
       <div class="me-info">
         <div class="me-nom">
           ${fullNom || '—'}
-          ${eleve.isMine ? `<span style="margin-left:6px;display:inline-block;font:700 9px/1 'Inter',sans-serif;padding:3px 6px;border-radius:4px;background:rgba(99,102,241,.12);color:#4f46e5;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle">attitré</span>` : ''}
+          ${eleve.isMine ? `<span style="margin-left:6px;display:inline-block;font:700 9px/1 'Inter',sans-serif;padding:3px 6px;border-radius:4px;background:rgba(99,102,241,.12);color:var(--adk);letter-spacing:.04em;text-transform:uppercase;vertical-align:middle">attitré</span>` : ''}
         </div>
         <div class="me-meta">
           <span class="me-badge ${eleve.actif ? 'actif' : 'inactif'}">
@@ -788,7 +788,7 @@ function openQuickMenu(eleveId, anchorRow) {
       .me-qm-item:hover { background: var(--bg); }
       .me-qm-item:active { background: var(--bg2); }
       .me-qm-ico { font-size: 16px; line-height: 1; }
-      .me-qm-item.danger { color: #ef4444; }
+      .me-qm-item.danger { color: var(--rd); }
     </style>
     <div class="me-qm-bg" data-close="1"></div>
     <div class="me-qm-panel">
@@ -887,39 +887,39 @@ function openInviteEleveModal(me) {
         border-radius:28px 28px 0 0;
         padding:8px 20px calc(28px + env(safe-area-inset-bottom,0px));
         animation: meInvSlide .3s cubic-bezier(.2,.7,.3,1);
-        font-family:'Inter',sans-serif; color:var(--ink,#0f172a);
+        font-family:'Inter',sans-serif; color:var(--ink);
         box-shadow:0 -8px 32px rgba(10,13,26,.14);
       }
       .me-inv-grab {
-        width:36px; height:4px; background:var(--bo,#e2e6f2);
+        width:36px; height:4px; background:var(--bo);
         border-radius:2px; margin:8px auto 18px;
       }
       .me-inv-title {
         font:800 20px/1.2 'Plus Jakarta Sans',sans-serif;
-        color:var(--ink,#0f172a); margin:0 0 4px; letter-spacing:-.02em;
+        color:var(--ink); margin:0 0 4px; letter-spacing:-.02em;
       }
       .me-inv-sub {
-        font:500 13px/1.5 'Inter',sans-serif; color:var(--mu,#64748b);
+        font:500 13px/1.5 'Inter',sans-serif; color:var(--mu,var(--mu3));
         margin:0 0 16px;
       }
       .me-inv-textarea {
         width:100%; min-height:110px; resize:vertical;
         padding:13px 14px; box-sizing:border-box;
-        border:1.5px solid var(--bo,#e2e6f2); border-radius:14px;
-        font:500 14px/1.55 'Inter',sans-serif; color:var(--ink,#0f172a);
-        background:var(--bg,#f8f9fc);
+        border:1.5px solid var(--bo); border-radius:14px;
+        font:500 14px/1.55 'Inter',sans-serif; color:var(--ink);
+        background:var(--bg,var(--su2));
         transition:border-color .15s, box-shadow .15s;
         font-family:inherit;
       }
       .me-inv-textarea:focus {
-        outline:0; border-color:#6366f1;
+        outline:0; border-color:var(--a);
         box-shadow:0 0 0 3px rgba(99,102,241,.12);
       }
       .me-inv-counter {
-        font:500 12px/1 'Inter',sans-serif; color:var(--mu2,#94a3b8);
+        font:500 12px/1 'Inter',sans-serif; color:var(--mu2);
         margin:8px 0 18px; min-height:16px;
       }
-      .me-inv-counter.ok { color:#059669; }
+      .me-inv-counter.ok { color:var(--grd); }
       .me-inv-actions { display:flex; gap:10px; }
       .me-inv-btn {
         flex:1; padding:15px; border-radius:14px;
@@ -929,12 +929,12 @@ function openInviteEleveModal(me) {
       }
       .me-inv-btn:active { transform:scale(.97); }
       .me-inv-cancel {
-        background:var(--bg2,#f1f3f9); color:var(--mu,#475569);
-        border:1.5px solid var(--bo,#e2e6f2);
+        background:var(--bg2,var(--bg4)); color:var(--mu,var(--mu4));
+        border:1.5px solid var(--bo);
       }
-      .me-inv-cancel:hover { background:var(--bo,#e2e6f2); }
+      .me-inv-cancel:hover { background:var(--bo); }
       .me-inv-go {
-        background:linear-gradient(135deg,#6366f1,#8b5cf6);
+        background:linear-gradient(135deg,var(--a),var(--pu));
         color:#fff; box-shadow:0 6px 18px -6px rgba(99,102,241,.45);
       }
       .me-inv-go:hover { box-shadow:0 8px 22px -6px rgba(99,102,241,.55); }
@@ -942,7 +942,7 @@ function openInviteEleveModal(me) {
       /* Écran résultats */
       .me-inv-result-ttl {
         font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;
-        color:#059669; margin:0 0 16px;
+        color:var(--grd); margin:0 0 16px;
         display:flex; align-items:center; gap:8px;
       }
       .me-inv-link-row {
@@ -951,39 +951,39 @@ function openInviteEleveModal(me) {
       }
       .me-inv-link-row:last-of-type { border-bottom:0; }
       .me-inv-link-email {
-        font:600 12px/1 'Inter',sans-serif; color:var(--mu,#64748b);
+        font:600 12px/1 'Inter',sans-serif; color:var(--mu,var(--mu3));
         text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px;
       }
-      .me-inv-link-email.err { color:#ef4444; }
+      .me-inv-link-email.err { color:var(--rd); }
       .me-inv-link-wrap { display:flex; gap:8px; align-items:center; }
       .me-inv-link-input {
         flex:1; padding:9px 12px; border-radius:10px;
-        border:1px solid var(--bo,#e2e6f2); background:var(--bg,#f8f9fc);
-        font:500 11.5px/1 'IBM Plex Mono',monospace; color:var(--mu,#64748b);
+        border:1px solid var(--bo); background:var(--bg,var(--su2));
+        font:500 11.5px/1 'IBM Plex Mono',monospace; color:var(--mu,var(--mu3));
         overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
         cursor:text;
       }
       .me-inv-copy {
         flex-shrink:0; padding:9px 14px; border-radius:10px;
         background:rgba(99,102,241,.1); border:1px solid rgba(99,102,241,.2);
-        color:#6366f1; font:600 12px/1 'Inter',sans-serif;
+        color:var(--a); font:600 12px/1 'Inter',sans-serif;
         cursor:pointer; white-space:nowrap; transition:background .12s;
       }
       .me-inv-copy:active { background:rgba(99,102,241,.2); }
-      .me-inv-copy.copied { background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.2); color:#059669; }
+      .me-inv-copy.copied { background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.2); color:var(--grd); }
       .me-inv-err-msg {
-        font:500 12px/1.4 'Inter',sans-serif; color:#ef4444;
+        font:500 12px/1.4 'Inter',sans-serif; color:var(--rd);
         margin-top:4px;
       }
       .me-inv-close-btn {
         width:100%; margin-top:20px; padding:15px;
         border-radius:14px; border:0;
-        background:var(--bg2,#f1f3f9); color:var(--ink,#0f172a);
+        background:var(--bg2,var(--bg4)); color:var(--ink);
         font:700 14px/1 'Plus Jakarta Sans',sans-serif;
         cursor:pointer; font-family:inherit;
         transition:background .12s;
       }
-      .me-inv-close-btn:hover { background:var(--bo,#e2e6f2); }
+      .me-inv-close-btn:hover { background:var(--bo); }
     </style>
     <div class="me-inv-sheet">
       <div class="me-inv-grab"></div>
@@ -1087,8 +1087,8 @@ function openInviteEleveModal(me) {
       <div class="me-inv-grab"></div>
       <p class="me-inv-result-ttl">
         ${ok > 0
-          ? `${icon('check-circle', { size: 18, strokeWidth: 2, color: '#059669' })} ${ok} invitation${ok > 1 ? 's' : ''} créée${ok > 1 ? 's' : ''}`
-          : `${icon('alert-circle', { size: 18, strokeWidth: 2, color: '#ef4444' })} Aucune invitation créée`
+          ? `${icon('check-circle', { size: 18, strokeWidth: 2, color: 'var(--grd)' })} ${ok} invitation${ok > 1 ? 's' : ''} créée${ok > 1 ? 's' : ''}`
+          : `${icon('alert-circle', { size: 18, strokeWidth: 2, color: 'var(--rd)' })} Aucune invitation créée`
         }
       </p>
       ${results.map(r => `

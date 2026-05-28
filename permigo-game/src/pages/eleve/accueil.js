@@ -36,7 +36,7 @@ const STYLE = `<style>
 
 /* ── Skeletons ── */
 .skel2 {
-  background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
+  background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
   background-size: 200% 100%;
   animation: skel2Shim 1.4s ease-in-out infinite;
   border-radius: 20px;
@@ -196,7 +196,7 @@ const STYLE = `<style>
 
 /* Session à confirmer (priorité) */
 .acc2-ms-session {
-  background: linear-gradient(145deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  background: linear-gradient(145deg, var(--ink) 0%, var(--ink4) 50%, var(--ink) 100%);
   padding: 24px;
   min-height: 200px;
   position: relative;
@@ -250,7 +250,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   width: 100%;
   padding: 14px 20px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--a), var(--pu));
   border: none;
   border-radius: 16px;
   color: #fff;
@@ -265,7 +265,7 @@ const STYLE = `<style>
 
 /* Next reward */
 .acc2-ms-reward {
-  background: linear-gradient(145deg, #6d28d9 0%, #7c3aed 40%, #a855f7 75%, #d946ef 100%);
+  background: linear-gradient(145deg, #6d28d9 0%, var(--puk) 40%, var(--pul) 75%, #d946ef 100%);
   padding: 24px;
   position: relative;
   overflow: hidden;
@@ -383,10 +383,10 @@ const STYLE = `<style>
 .acc2-action-tag-dot {
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: #6366f1;
+  background: var(--a);
   flex-shrink: 0;
 }
-.acc2-action-tag-dot.urgent { background: #ef4444; animation: urgentPulse 1s ease-in-out infinite; }
+.acc2-action-tag-dot.urgent { background: var(--rd); animation: urgentPulse 1s ease-in-out infinite; }
 @keyframes urgentPulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
 .acc2-action-title {
   font: 700 18px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -403,7 +403,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%;
   padding: 16px 24px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--a) 0%, var(--pu) 100%);
   border: none;
   border-radius: 16px;
   color: #fff;
@@ -487,10 +487,10 @@ const STYLE = `<style>
 @keyframes worldFloat2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 @media (prefers-reduced-motion: reduce) { .world-card[data-complete="true"] .world-img { animation: none; } }
 .world-pct  { font: 700 13px/1 'Inter', sans-serif; }
-.world-name { font: 600 12px/1.3 'Inter', sans-serif; color: #94a3b8; margin-bottom: 8px; }
-.world-track { height: 4px; background: #e2e6f2; border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
+.world-name { font: 600 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-bottom: 8px; }
+.world-track { height: 4px; background: var(--bo); border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
 .world-fill  { height: 100%; border-radius: 2px; transition: width .5s ease; }
-.world-count { font: 500 11px/1 'Inter', sans-serif; color: #94a3b8; }
+.world-count { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); }
 .world-crown { position: absolute; top: 10px; right: 10px; }
 
 .trophees-row {
@@ -527,10 +527,10 @@ const STYLE = `<style>
 @keyframes shimmerTrophy { 0% { transform: translateX(-100%) rotate(15deg); } 100% { transform: translateX(100%) rotate(15deg); } }
 .trophy-ico     { font-size: 28px; line-height: 1; margin-bottom: 8px; display: block; }
 .trophy-ico-dim { opacity: .35; filter: grayscale(1); }
-.trophy-label   { font: 600 11px/1.3 'Inter', sans-serif; color: #0a0d1a; margin-bottom: 4px; }
-.trophy-state   { font: 500 10px/1 'Inter', sans-serif; color: #94a3b8; }
+.trophy-label   { font: 600 11px/1.3 'Inter', sans-serif; color: var(--ink); margin-bottom: 4px; }
+.trophy-state   { font: 500 10px/1 'Inter', sans-serif; color: var(--mu2); }
 .trophy-unlocked .trophy-state { color: var(--tc); }
-.trophy-next-bar { height: 3px; background: #e2e6f2; border-radius: 2px; overflow: hidden; margin: 5px 0 4px; }
+.trophy-next-bar { height: 3px; background: var(--bo); border-radius: 2px; overflow: hidden; margin: 5px 0 4px; }
 .trophy-next-fill { height: 100%; border-radius: 2px; }
 .trophees-empty {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -538,7 +538,7 @@ const STYLE = `<style>
   border-radius: 20px; text-align: center;
 }
 .trophees-empty-ico { font-size: 28px; opacity: .3; }
-.trophees-empty-txt { font: 500 12px/1.5 'Inter', sans-serif; color: #94a3b8; }
+.trophees-empty-txt { font: 500 12px/1.5 'Inter', sans-serif; color: var(--mu2); }
 
 .acc2-footer {
   display: flex; align-items: center; gap: 16px;
@@ -550,9 +550,9 @@ const STYLE = `<style>
   box-shadow: 0 1px 2px rgba(10,13,26,.04);
 }
 .footer-stat { flex: 1; }
-.footer-val  { font: 800 20px/1 'Plus Jakarta Sans', sans-serif; color: #0a0d1a; margin-bottom: 3px; }
-.footer-lbl  { font: 500 11px/1.3 'Inter', sans-serif; color: #94a3b8; }
-.footer-sep  { width: 1px; height: 38px; background: #e2e6f2; flex-shrink: 0; }
+.footer-val  { font: 800 20px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 3px; }
+.footer-lbl  { font: 500 11px/1.3 'Inter', sans-serif; color: var(--mu2); }
+.footer-sep  { width: 1px; height: 38px; background: var(--bo); flex-shrink: 0; }
 
 /* Leaderboard slot */
 .acc-lb {
@@ -566,10 +566,10 @@ const STYLE = `<style>
 }
 .acc-lb:active { transform: scale(.985); }
 .acc-lb-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.acc-lb-title { font: 700 11px/1 'Inter', sans-serif; color: #6366f1; letter-spacing: .07em; text-transform: uppercase; }
-.acc-lb-badge { font: 700 11px/1 'Inter', sans-serif; color: #f59e0b; background: rgba(245,158,11,.12); border-radius: 99px; padding: 4px 10px; }
-.acc-lb-body  { font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif; color: #0a0d1a; letter-spacing: -.02em; margin-bottom: 3px; }
-.acc-lb-sub   { font: 500 12px/1.3 'Inter', sans-serif; color: #94a3b8; }
+.acc-lb-title { font: 700 11px/1 'Inter', sans-serif; color: var(--a); letter-spacing: .07em; text-transform: uppercase; }
+.acc-lb-badge { font: 700 11px/1 'Inter', sans-serif; color: var(--am); background: rgba(245,158,11,.12); border-radius: 99px; padding: 4px 10px; }
+.acc-lb-body  { font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; margin-bottom: 3px; }
+.acc-lb-sub   { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); }
 
 /* ── Bottom sheet streak ── */
 .bs-bg {
@@ -591,29 +591,29 @@ const STYLE = `<style>
   animation: none !important;
 }
 .bs-streak.open { transform: translateY(0) !important; }
-.bs-handle { width: 36px; height: 4px; background: #e2e6f2; border-radius: 2px; margin: 14px auto 0; }
+.bs-handle { width: 36px; height: 4px; background: var(--bo); border-radius: 2px; margin: 14px auto 0; }
 .bs-hd { padding: 16px 20px 14px; border-bottom: 1px solid var(--bo2); }
-.bs-hd-title { font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif; color: #0b0d1a; letter-spacing: -.02em; }
-.bs-hd-sub { font: 500 12px/1.3 'Inter', sans-serif; color: #94a3b8; margin-top: 4px; }
+.bs-hd-title { font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; }
+.bs-hd-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 4px; }
 .bs-hmap-wrap { padding: 16px 16px 8px; }
 .bs-hmap-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-.bs-hmap-title { font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: #0b0d1a; }
-.bs-hmap-sub { font: 500 11px/1 'Inter', sans-serif; color: #94a3b8; }
+.bs-hmap-title { font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
+.bs-hmap-sub { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); }
 .bs-hmap-wrap .hmap { padding: 0; background: none; border: none; box-shadow: none; }
-.bs-hmap-wrap .hmap-tap-info { margin-top: 10px; min-height: 20px; font: 600 11.5px/1 'Inter', sans-serif; color: #64748b; text-align: center; transition: opacity .15s; }
+.bs-hmap-wrap .hmap-tap-info { margin-top: 10px; min-height: 20px; font: 600 11.5px/1 'Inter', sans-serif; color: var(--mu3); text-align: center; transition: opacity .15s; }
 .bs-freeze-wrap { padding: 0 20px 8px; margin-top: 12px; }
 .bs-freeze-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; padding: 14px 20px;
   background: linear-gradient(135deg,#dbeafe,#e0f2fe);
   border: 1.5px solid #bfdbfe; border-radius: 16px;
-  color: #1d4ed8; font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--blk2); font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; min-height: 52px;
   transition: transform .15s, opacity .15s;
 }
 .bs-freeze-btn:active { transform: scale(.98); opacity: .9; }
 .bs-freeze-btn:disabled { opacity: .55; cursor: default; }
-.bs-freeze-desc { font: 500 11px/1.4 'Inter', sans-serif; color: #64748b; text-align: center; margin-top: 7px; }
+.bs-freeze-desc { font: 500 11px/1.4 'Inter', sans-serif; color: var(--mu3); text-align: center; margin-top: 7px; }
 </style>`;
 
 // ─── Constantes ──────────────────────────────────────────────────
@@ -623,7 +623,7 @@ const WORLD_IMAGES  = [ASSETS.worldC1, ASSETS.worldC2, ASSETS.worldC3, ASSETS.wo
 const WORLDS = REMC.map((cat, i) => ({
   id: cat.id, ico: cat.ico, image: WORLD_IMAGES[i] || null,
   name: cat.name, subs: cat.subs, total: cat.subs.length,
-  color: ['#22c55e', '#3b82f6', '#eab308', '#a855f7'][i],
+  color: ['var(--gr2)', 'var(--bl2)', '#eab308', 'var(--pul)'][i],
 }));
 
 // ─── Entry point ─────────────────────────────────────────────────
@@ -705,10 +705,10 @@ export async function mount(root) {
     }
   } catch (e) {
     console.error('[accueil] mount failed', e);
-    root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:#64748b;font-family:'Inter',sans-serif">
-      <div style="font:800 18px/1.3 'Plus Jakarta Sans',sans-serif;color:#0a0d1a;margin-bottom:8px">Oups, ton accueil a du mal à charger</div>
+    root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:var(--mu3);font-family:'Inter',sans-serif">
+      <div style="font:800 18px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">Oups, ton accueil a du mal à charger</div>
       <p style="font-size:14px;margin:0 0 20px">Vérifie ta connexion et réessaie.</p>
-      <button id="acc-reload" style="padding:12px 24px;border:0;background:#6366f1;color:#fff;border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Recharger</button>
+      <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color:#fff;border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Recharger</button>
     </div>`;
     root.querySelector('#acc-reload')?.addEventListener('click', () => location.reload());
   }
@@ -856,7 +856,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
   <!-- Stats footer -->
   <div class="acc2-footer">
     <div class="footer-stat">
-      <div class="footer-val">${totalValidated}<span style="font-size:.55em;color:#94a3b8">/31</span></div>
+      <div class="footer-val">${totalValidated}<span style="font-size:.55em;color:var(--mu2)">/31</span></div>
       <div class="footer-lbl">compétences acquises</div>
     </div>
     <div class="footer-sep"></div>
@@ -1011,7 +1011,7 @@ function renderActionDuJour(quest, pendingNotif, totalValidated) {
       <div class="acc2-action-tag">
         <div class="acc2-action-tag-dot${urgent ? ' urgent' : ''}"></div>
         ${esc(label)}
-        ${urgent ? `<span style="color:#ef4444;font-weight:700">URGENT</span>` : ''}
+        ${urgent ? `<span style="color:var(--rd);font-weight:700">URGENT</span>` : ''}
       </div>
       <div class="acc2-action-title">${esc(title)}</div>
       <div class="acc2-action-sub">${esc(sub)}</div>
@@ -1166,7 +1166,7 @@ async function _loadAndInjectChests(root) {
           <div class="acc2-ct-title">${pending.length} coffre${pending.length > 1 ? 's' : ''} à ouvrir</div>
           <div class="acc2-ct-sub">Réclame tes récompenses</div>
         </div>
-        <div class="acc2-ct-arrow">${icon('chevron-right', { size: 16, strokeWidth: 2.5, color: '#6366f1' })}</div>
+        <div class="acc2-ct-arrow">${icon('chevron-right', { size: 16, strokeWidth: 2.5, color: 'var(--a)' })}</div>
       </div>`;
 
     const el = div.firstElementChild;

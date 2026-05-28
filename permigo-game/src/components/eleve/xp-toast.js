@@ -32,7 +32,7 @@ const STYLE = `
   .xpt-icon {
     width: 36px; height: 36px;
     border-radius: 10px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, var(--a), var(--pu));
     display: flex; align-items: center; justify-content: center;
     font-size: 18px;
     flex-shrink: 0;
@@ -40,14 +40,14 @@ const STYLE = `
   .xpt-text { flex: 1; min-width: 0; }
   .xpt-label {
     font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .xpt-sub {
     font: 500 11px/1.3 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu3);
     margin-top: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -55,7 +55,7 @@ const STYLE = `
   }
   .xpt-xp {
     font: 800 15px/1 'IBM Plex Mono', monospace;
-    color: #6366f1;
+    color: var(--a);
     flex-shrink: 0;
   }
 `;
@@ -108,7 +108,7 @@ export function showXpToast({ xp, eleveName, trophy = null, duration = 4000 }) {
     tCard.className = 'xpt-card';
     tCard.style.borderColor = 'rgba(251,191,36,.35)';
     tCard.innerHTML = `
-      <div class="xpt-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)">🏆</div>
+      <div class="xpt-icon" style="background:linear-gradient(135deg,var(--am),var(--amk))">🏆</div>
       <div class="xpt-text">
         <div class="xpt-label">${eleveName} a débloqué</div>
         <div class="xpt-sub">${trophy}</div>

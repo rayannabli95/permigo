@@ -95,20 +95,20 @@ const STYLE = `<style>
 .st-tgl input { display: none; }
 .st-tgl-t { position: absolute; inset: 0; background: #d1d8ee; border-radius: 999px; transition: background .2s; }
 .st-tgl-t::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
-.st-tgl input:checked + .st-tgl-t { background: #6366f1; }
+.st-tgl input:checked + .st-tgl-t { background: var(--a); }
 .st-tgl input:checked + .st-tgl-t::after { transform: translateX(18px); }
 
 /* Text button */
 .st-btn-txt {
   font: 600 13px/1 'Inter', sans-serif;
-  color: #6366f1;
+  color: var(--a);
   background: none;
   border: none;
   cursor: pointer;
   padding: 6px 0;
   font-family: inherit;
 }
-.st-btn-txt.danger { color: #ef4444; }
+.st-btn-txt.danger { color: var(--rd); }
 
 /* Input inline */
 .st-inp {
@@ -122,14 +122,14 @@ const STYLE = `<style>
   transition: border-color .15s;
   font-family: inherit;
 }
-.st-inp:focus { outline: none; border-color: #6366f1; }
+.st-inp:focus { outline: none; border-color: var(--a); }
 .st-inp-row { padding: 10px 16px 14px; }
 .st-save-btn {
   display: block;
   width: calc(100% - 32px);
   margin: 10px 16px 0;
   padding: 13px;
-  background: #6366f1;
+  background: var(--a);
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -138,12 +138,12 @@ const STYLE = `<style>
   transition: background .15s;
   font-family: inherit;
 }
-.st-save-btn:hover { background: #4f46e5; }
+.st-save-btn:hover { background: var(--adk); }
 .st-save-btn:disabled { opacity: .5; cursor: default; }
 
 /* Danger zone */
 .st-danger { border-color: rgba(239,68,68,.2); }
-.st-danger .st-section-label { color: #ef4444; background: rgba(239,68,68,.04); border-color: rgba(239,68,68,.12); }
+.st-danger .st-section-label { color: var(--rd); background: rgba(239,68,68,.04); border-color: rgba(239,68,68,.12); }
 
 /* Appearance chip */
 .st-chip {
@@ -152,10 +152,10 @@ const STYLE = `<style>
   gap: 6px;
   padding: 6px 12px;
   border-radius: 20px;
-  border: 1.5px solid #6366f1;
+  border: 1.5px solid var(--a);
   background: rgba(99,102,241,.08);
   font: 700 12px/1 'IBM Plex Mono', monospace;
-  color: #6366f1;
+  color: var(--a);
 }
 
 /* Delete modal overlay */
@@ -176,7 +176,7 @@ const STYLE = `<style>
 }
 .st-modal-handle {
   width: 36px; height: 4px;
-  background: #e2e6f2;
+  background: var(--bo);
   border-radius: 2px;
   margin: 0 auto 20px;
 }
@@ -190,7 +190,7 @@ const STYLE = `<style>
   color: var(--mu);
   margin-bottom: 16px;
 }
-.st-modal-body strong { color: #0b0d1a; }
+.st-modal-body strong { color: var(--ink); }
 .st-modal-label {
   font: 600 12px/1 'Inter', sans-serif;
   color: var(--mu);
@@ -208,32 +208,32 @@ const STYLE = `<style>
   transition: border-color .15s;
   box-sizing: border-box;
 }
-.st-modal-inp:focus { outline: none; border-color: #ef4444; }
+.st-modal-inp:focus { outline: none; border-color: var(--rd); }
 .st-modal-actions { display: flex; gap: 10px; margin-top: 16px; }
 .st-modal-cancel {
   flex: 1; padding: 14px;
   background: var(--bg); border: 1.5px solid var(--bo); border-radius: 12px;
-  font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: #64748b;
+  font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu3);
   cursor: pointer; min-height: 48px; font-family: inherit;
   transition: background .12s;
 }
 .st-modal-cancel:active { background: var(--bg2); }
 .st-modal-confirm {
   flex: 1; padding: 14px;
-  background: #ef4444; border: none; border-radius: 12px;
+  background: var(--rd); border: none; border-radius: 12px;
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: #fff;
   cursor: pointer; min-height: 48px; font-family: inherit;
   transition: background .12s, opacity .12s;
 }
 .st-modal-confirm:disabled { opacity: .4; cursor: not-allowed; }
-.st-modal-confirm:not(:disabled):active { background: #dc2626; }
+.st-modal-confirm:not(:disabled):active { background: var(--rdk); }
 .st-dpo-note {
   font: 400 12px/1.5 'Inter', sans-serif;
   color: var(--mu2);
   text-align: center;
   margin-top: 12px;
 }
-.st-dpo-note a { color: #6366f1; }
+.st-dpo-note a { color: var(--a); }
 
 /* Theme segmented control */
 .st-theme-seg {
@@ -260,7 +260,7 @@ const STYLE = `<style>
 }
 .st-theme-btn.active {
   background: var(--su);
-  color: #6366f1;
+  color: var(--a);
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
 }
 </style>`;
@@ -337,9 +337,9 @@ function render(root, me, prefs) {
     <div class="st-row" style="flex-direction:column;align-items:flex-start;gap:8px">
       <div class="st-row-title">Ne pas déranger</div>
       <div style="display:flex;align-items:center;gap:8px;width:100%">
-        <label style="font:500 12px/1 'Inter',sans-serif;color:#64748b;flex-shrink:0">De</label>
+        <label style="font:500 12px/1 'Inter',sans-serif;color:var(--mu3);flex-shrink:0">De</label>
         <input class="st-inp" id="inp-dnd-start" type="time" value="${prefs.dndStart}" style="flex:1;padding:8px 10px">
-        <label style="font:500 12px/1 'Inter',sans-serif;color:#64748b;flex-shrink:0">à</label>
+        <label style="font:500 12px/1 'Inter',sans-serif;color:var(--mu3);flex-shrink:0">à</label>
         <input class="st-inp" id="inp-dnd-end" type="time" value="${prefs.dndEnd}" style="flex:1;padding:8px 10px">
         <button class="st-save-btn" id="btn-save-dnd" style="margin:0;width:auto;padding:8px 14px;font-size:12px">OK</button>
       </div>
@@ -465,7 +465,7 @@ function render(root, me, prefs) {
     <div class="st-section-label">Zone critique</div>
     <div class="st-row">
       <div class="st-row-left">
-        <div class="st-row-title" style="color:#ef4444">Supprimer mon compte</div>
+        <div class="st-row-title" style="color:var(--rd)">Supprimer mon compte</div>
         <div class="st-row-sub">Irréversible — toutes tes données seront effacées</div>
       </div>
       <div class="st-row-action">

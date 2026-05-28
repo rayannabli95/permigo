@@ -59,7 +59,7 @@ export function detectAndPlayUnlock({ worldsCompleted = [], worldsMeta = [], sta
 }
 
 /** Lance manuellement la cinematic pour un monde donné. */
-export function playUnlockCinematic({ worldNum, worldName, worldColor = '#fbbf24', worldGlow = 'rgba(251,191,36,.5)', nextWorldName, nextWorldNum, stats, onEnter } = {}) {
+export function playUnlockCinematic({ worldNum, worldName, worldColor = 'var(--aml2)', worldGlow = 'rgba(251,191,36,.5)', nextWorldName, nextWorldNum, stats, onEnter } = {}) {
   ensureStyles();
 
   if (document.querySelector('.wuc-overlay')) return; // déjà ouvert
@@ -175,7 +175,7 @@ function ensureStyles() {
     .wuc-bg{
       position:absolute;inset:0;
       background:
-        radial-gradient(ellipse at center, var(--wuc-c) 0%, #0b0d1a 50%, #000 100%);
+        radial-gradient(ellipse at center, var(--wuc-c) 0%, var(--ink) 50%, #000 100%);
     }
 
     /* Rayons divins rotatifs */
@@ -292,8 +292,8 @@ function ensureStyles() {
     .wuc-cta{
       display:flex;flex-direction:column;align-items:center;gap:3px;
       padding:18px 36px;
-      background:linear-gradient(180deg,#fff 0%,#fde68a 50%,var(--wuc-c) 100%);
-      color:#0b0d1a;
+      background:linear-gradient(180deg,#fff 0%,var(--aml) 50%,var(--wuc-c) 100%);
+      color:var(--ink);
       border:0;
       border-radius:99px;
       font-family:var(--fd);font-weight:900;cursor:pointer;
@@ -321,7 +321,7 @@ function ensureStyles() {
     @keyframes wuc-arrow-bounce{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
     .wuc-cta:hover{transform:translateY(-3px) scale(1.03)}
     .wuc-cta:active{transform:translateY(-1px) scale(.98)}
-    .wuc-cta-final{background:linear-gradient(180deg,#fbbf24,#f59e0b)}
+    .wuc-cta-final{background:linear-gradient(180deg,var(--aml2),var(--am))}
     @keyframes wuc-cta-in{
       0%{opacity:0;transform:translateY(40px) scale(.7)}
       60%{opacity:1;transform:translateY(-4px) scale(1.08)}
@@ -339,7 +339,7 @@ function ensureStyles() {
       animation:fadein-late 1s ease 2.4s forwards;
     }
     .wuc-brand img{height:20px;width:auto;filter:drop-shadow(0 2px 8px rgba(99,102,241,.6))}
-    .wuc-brand-fb{font-family:var(--fd);font-weight:900;font-size:14px;letter-spacing:-.02em;background:linear-gradient(90deg,#a5b4fc,#fff,#c4b5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .wuc-brand-fb{font-family:var(--fd);font-weight:900;font-size:14px;letter-spacing:-.02em;background:linear-gradient(90deg,var(--al3),#fff,#c4b5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 
     /* Skip discret en bas */
     .wuc-skip{

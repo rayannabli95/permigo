@@ -102,21 +102,21 @@ const STYLE = `<style>
 /* ─── États visuels ─── */
 .pc.s-formation {
   background:
-    linear-gradient(135deg, #64748b 0%, #94a3b8 50%, #cbd5e1 100%);
+    linear-gradient(135deg, var(--mu3) 0%, var(--mu2) 50%, var(--bo4) 100%);
   box-shadow:
     0 10px 30px -10px rgba(100,116,139,.5),
     0 4px 12px rgba(10,13,26,.08);
 }
 .pc.s-pret {
   background:
-    linear-gradient(135deg, #4f46e5 0%, #6366f1 45%, #8b5cf6 100%);
+    linear-gradient(135deg, var(--adk) 0%, var(--a) 45%, var(--pu) 100%);
   box-shadow:
     0 16px 40px -12px rgba(99,102,241,.55),
     0 4px 12px rgba(10,13,26,.1);
 }
 .pc.s-valide {
   background:
-    linear-gradient(135deg, #d97706 0%, #f59e0b 40%, #fde68a 100%);
+    linear-gradient(135deg, var(--amk) 0%, var(--am) 40%, var(--aml) 100%);
   box-shadow:
     0 20px 50px -10px rgba(245,158,11,.6),
     0 0 0 1px rgba(254,243,199,.4),
@@ -291,10 +291,10 @@ const STYLE = `<style>
   padding: 4px;
   background: rgba(255,255,255,.96);
 }
-.pc.s-formation .pc-sceau { color: #b91c1c; }
-.pc.s-pret      .pc-sceau { color: #b45309; }
+.pc.s-formation .pc-sceau { color: var(--rdx); }
+.pc.s-pret      .pc-sceau { color: var(--amx); }
 .pc.s-valide    .pc-sceau {
-  color: #047857;
+  color: var(--grdk);
   animation: pcSceauPulse 2.4s ease-in-out infinite;
 }
 .pc-sceau-ico { font-size: 14px; line-height: 1; margin-bottom: 2px; }
@@ -307,7 +307,7 @@ const STYLE = `<style>
 .pc-hint {
   text-align: center;
   font: 500 11px/1.4 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   margin-top: 12px;
   padding: 0 24px;
 }
@@ -456,8 +456,8 @@ function showBgMilestoneToast(card, tier) {
     backdrop-filter: blur(8px);
   `;
   toast.innerHTML = `
-    <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;margin-bottom:3px;color:#fde68a">🎴 ${conf.title}</div>
-    <div style="font:500 11px/1.4 'Inter',sans-serif;color:#cbd5e1">${conf.sub}</div>
+    <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;margin-bottom:3px;color:var(--aml)">🎴 ${conf.title}</div>
+    <div style="font:500 11px/1.4 'Inter',sans-serif;color:var(--bo4)">${conf.sub}</div>
   `;
   card.style.position = card.style.position || 'relative';
   card.appendChild(toast);

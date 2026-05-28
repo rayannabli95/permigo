@@ -17,10 +17,10 @@ const TABS = [
 ];
 
 const RARITY_META = {
-  commun:     { label: 'Commun',     border: '#64748b', glow: 'none',                                                  badge: '#475569' },
-  rare:       { label: 'Rare',       border: '#3b82f6', glow: '0 0 12px rgba(59,130,246,.4)',                          badge: '#1d4ed8' },
-  epique:     { label: 'Épique',     border: '#8b5cf6', glow: '0 0 16px rgba(139,92,246,.5)',                          badge: '#6d28d9' },
-  legendaire: { label: 'Légendaire', border: '#fbbf24', glow: '0 0 20px rgba(251,191,36,.6), 0 0 0 1px rgba(251,191,36,.3)', badge: '#b45309' },
+  commun:     { label: 'Commun',     border: 'var(--mu3)', glow: 'none',                                                  badge: 'var(--mu4)' },
+  rare:       { label: 'Rare',       border: 'var(--bl2)', glow: '0 0 12px rgba(59,130,246,.4)',                          badge: 'var(--blk2)' },
+  epique:     { label: 'Épique',     border: 'var(--pu)', glow: '0 0 16px rgba(139,92,246,.5)',                          badge: '#6d28d9' },
+  legendaire: { label: 'Légendaire', border: 'var(--aml2)', glow: '0 0 20px rgba(251,191,36,.6), 0 0 0 1px rgba(251,191,36,.3)', badge: 'var(--amx)' },
 };
 
 // ─── CSS ──────────────────────────────────────────────────────
@@ -48,7 +48,7 @@ const STYLE = `<style>
   position: sticky;
   top: calc(52px + env(safe-area-inset-top, 0px));
   z-index: 20;
-  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, #4f46e5 100%);
+  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, var(--adk) 100%);
   padding: 14px 20px 0;
   overflow: hidden;
 }
@@ -83,7 +83,7 @@ const STYLE = `<style>
 .bo2-gems-float {
   position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
   font: 700 13px/1 'IBM Plex Mono', monospace;
-  color: #fde68a; pointer-events: none; opacity: 0;
+  color: var(--aml); pointer-events: none; opacity: 0;
   animation: bo2Float .8s ease-out both;
 }
 @keyframes bo2Float {
@@ -185,7 +185,7 @@ const STYLE = `<style>
 .bo2-price-btn {
   display: flex; align-items: center; gap: 5px;
   padding: 7px 12px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--a), var(--pu));
   border: none; border-radius: 10px;
   color: #fff; font: 700 12px/1 'IBM Plex Mono', monospace;
   cursor: pointer; min-height: 44px;
@@ -195,11 +195,11 @@ const STYLE = `<style>
 }
 .bo2-price-btn:active { transform: scale(.95); opacity: .9; }
 .bo2-price-btn:disabled { opacity: .5; cursor: default; }
-.bo2-price-btn.can-afford { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+.bo2-price-btn.can-afford { background: linear-gradient(135deg, var(--a), var(--pu)); }
 .bo2-price-btn.cant-afford { background: var(--bg2); color: var(--mu2); }
 .bo2-owned-txt {
   font: 700 11px/1 'IBM Plex Mono', monospace;
-  color: #10b981; padding: 7px 0;
+  color: var(--gr); padding: 7px 0;
 }
 
 /* ── Purchase modal ── */
@@ -248,7 +248,7 @@ const STYLE = `<style>
 .bo2-modal-buy {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: calc(100% - 40px); margin: 0 20px;
-  padding: 16px; background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  padding: 16px; background: linear-gradient(135deg, var(--a), var(--pu));
   border: none; border-radius: 16px; color: #fff;
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; min-height: 54px; box-shadow: 0 8px 24px -6px rgba(99,102,241,.45);
@@ -426,7 +426,7 @@ function renderCard(item, gemmes, idx) {
   const rm = RARITY_META[item.rarity] ?? RARITY_META.commun;
   const canAfford = gemmes >= item.cost_gemmes;
   const borderStyle = `border: 1.5px solid ${rm.border}; box-shadow: ${rm.glow};`;
-  const color = item.display_color || '#6366f1';
+  const color = item.display_color || 'var(--a)';
   const imgUrl = item.asset_url ?? null;
 
   const preview = imgUrl
@@ -450,7 +450,7 @@ function renderCard(item, gemmes, idx) {
           <div class="bo2-rarity-pill" style="background:${rm.badge}">${esc(rm.label)}</div>
           ${item.owned
             ? (isEquipped
-                ? `<div class="bo2-owned-txt" style="color:#10b981">✓ Équipé</div>`
+                ? `<div class="bo2-owned-txt" style="color:var(--gr)">✓ Équipé</div>`
                 : `<div class="bo2-owned-txt">Appuyer pour équiper</div>`)
             : `<button class="bo2-price-btn ${canAfford ? 'can-afford' : 'cant-afford'}" ${!canAfford ? 'disabled' : ''}>
                 Acheter · ${item.cost_gemmes} 💎
@@ -484,7 +484,7 @@ function showPurchaseModal(item, gemmes, onConfirm) {
   const rm = RARITY_META[item.rarity] ?? RARITY_META.commun;
   const afterBalance = gemmes - item.cost_gemmes;
   const canAfford = afterBalance >= 0;
-  const color = item.display_color || '#6366f1';
+  const color = item.display_color || 'var(--a)';
   const imgUrl = item.asset_url ?? null;
 
   const preview = imgUrl
@@ -508,7 +508,7 @@ function showPurchaseModal(item, gemmes, onConfirm) {
         </div>
         ${canAfford
           ? `<div class="bo2-modal-balance">Il te restera <strong>${afterBalance} 💎</strong> après l'achat</div>`
-          : `<div class="bo2-modal-balance" style="color:#ef4444">Pas assez de gemmes — il t'en faut ${item.cost_gemmes - gemmes} de plus</div>`
+          : `<div class="bo2-modal-balance" style="color:var(--rd)">Pas assez de gemmes — il t'en faut ${item.cost_gemmes - gemmes} de plus</div>`
         }
       </div>
       <button class="bo2-modal-buy" id="bo2-buy-confirm" ${!canAfford ? 'disabled' : ''}>

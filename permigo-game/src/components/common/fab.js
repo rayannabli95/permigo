@@ -15,7 +15,7 @@ const STYLE = `
     height: 56px;
     border-radius: 50%;
     border: 0;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, var(--a), var(--pu));
     color: #fff;
     font-size: 26px;
     line-height: 1;

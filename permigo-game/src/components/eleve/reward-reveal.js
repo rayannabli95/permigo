@@ -310,7 +310,7 @@ const REWARD_REVEAL_CSS = `
   .rr-variant-gold .rr-text-reveal{color:#FFE873;text-shadow:0 0 32px rgba(255,215,0,.55)}
   .rr-variant-gold .rr-rays div{background:linear-gradient(180deg,transparent,rgba(255,215,0,.45),transparent)}
 
-  .rr-variant-platinum{color:#e2e8f0}
+  .rr-variant-platinum{color:var(--bo3)}
   .rr-variant-platinum .rr-text-reveal{color:#fff;text-shadow:0 0 32px rgba(255,255,255,.55)}
   .rr-variant-platinum .rr-rays div{background:linear-gradient(180deg,transparent,rgba(226,232,240,.45),transparent)}
 
@@ -319,10 +319,10 @@ const REWARD_REVEAL_CSS = `
   .rr-variant-fire .rr-rays div{background:linear-gradient(180deg,transparent,rgba(255,107,53,.45),transparent)}
   .rr-variant-fire .rr-bar-line{background:#ff6b35;box-shadow:0 0 12px rgba(255,107,53,.8)}
 
-  .rr-variant-neon{color:#a5b4fc}
+  .rr-variant-neon{color:var(--al3)}
   .rr-variant-neon .rr-text-reveal{color:#c4b5fd;text-shadow:0 0 32px rgba(165,180,252,.6)}
   .rr-variant-neon .rr-rays div{background:linear-gradient(180deg,transparent,rgba(165,180,252,.45),transparent)}
-  .rr-variant-neon .rr-bar-line{background:#a5b4fc;box-shadow:0 0 12px rgba(165,180,252,.8)}
+  .rr-variant-neon .rr-bar-line{background:var(--al3);box-shadow:0 0 12px rgba(165,180,252,.8)}
 
   .rr-variant-mint{color:#34d399}
   .rr-variant-mint .rr-text-reveal{color:#6ee7b7;text-shadow:0 0 32px rgba(52,211,153,.6)}

@@ -17,10 +17,10 @@ import { lootToast } from '@/components/eleve/loot-toast.js';
 
 // 4 mondes = 4 tiers de coffres avec leur identité visuelle
 const TIERS = {
-  1: { name: 'COFFRE DE BRONZE',  primary: '#d97706', secondary: '#7c2d12', accent: '#fde68a', gem: '#22c55e', xp: 200, gemmes: 50 },
-  2: { name: 'COFFRE D\'ARGENT',  primary: '#94a3b8', secondary: '#475569', accent: '#f1f5f9', gem: '#a78bfa', xp: 400, gemmes: 100 },
-  3: { name: 'COFFRE D\'OR',      primary: '#facc15', secondary: '#a16207', accent: '#fef9c3', gem: '#f97316', xp: 700, gemmes: 175 },
-  4: { name: 'COFFRE LÉGENDAIRE', primary: '#a855f7', secondary: '#581c87', accent: '#f3e8ff', gem: '#ec4899', xp: 1200, gemmes: 300 },
+  1: { name: 'COFFRE DE BRONZE',  primary: 'var(--amk)', secondary: '#7c2d12', accent: 'var(--aml)', gem: 'var(--gr2)', xp: 200, gemmes: 50 },
+  2: { name: 'COFFRE D\'ARGENT',  primary: 'var(--mu2)', secondary: 'var(--mu4)', accent: 'var(--bg4)', gem: '#a78bfa', xp: 400, gemmes: 100 },
+  3: { name: 'COFFRE D\'OR',      primary: '#facc15', secondary: '#a16207', accent: '#fef9c3', gem: 'var(--or)', xp: 700, gemmes: 175 },
+  4: { name: 'COFFRE LÉGENDAIRE', primary: 'var(--pul)', secondary: '#581c87', accent: '#f3e8ff', gem: '#ec4899', xp: 1200, gemmes: 300 },
 };
 
 /** Rendu inline d'un coffre fermé / ouvert. */
@@ -336,7 +336,7 @@ export function ensureChestStyles() {
     .chest-modal-bg{
       position:absolute;inset:0;
       background:
-        radial-gradient(ellipse at center,var(--ch-2) 0%,#0b0d1a 60%,#000 100%);
+        radial-gradient(ellipse at center,var(--ch-2) 0%,var(--ink) 60%,#000 100%);
       backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
       animation:fadeIn .3s;
     }
@@ -356,7 +356,7 @@ export function ensureChestStyles() {
 
     .chest-modal-panel{
       position:relative;
-      background:linear-gradient(160deg,#1a1208 0%,#2d1810 30%,#0b0d1a 100%);
+      background:linear-gradient(160deg,#1a1208 0%,#2d1810 30%,var(--ink) 100%);
       width:100%;max-width:480px;border-radius:32px;
       padding:36px 24px 24px;
       color:#fff;text-align:center;
@@ -450,7 +450,7 @@ export function ensureChestStyles() {
       border:1px solid rgba(251,191,36,.4);
       border-radius:99px;
       font-family:var(--fd);font-weight:900;font-size:16px;
-      color:#fde68a;
+      color:var(--aml);
       animation:cm-reward-in .55s cubic-bezier(.5,1.7,.4,1) both;
       letter-spacing:-.005em;
       position:relative;overflow:hidden;
@@ -471,7 +471,7 @@ export function ensureChestStyles() {
 
     .chest-modal-close{
       padding:16px 28px;border-radius:99px;
-      background:linear-gradient(180deg,#fef3c7 0%,#fbbf24 100%);
+      background:linear-gradient(180deg,#fef3c7 0%,var(--aml2) 100%);
       color:#451a03;border:0;
       font-family:var(--fd);font-size:14px;font-weight:900;
       cursor:pointer;letter-spacing:.6px;width:100%;

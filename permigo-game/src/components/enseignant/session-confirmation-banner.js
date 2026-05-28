@@ -58,17 +58,17 @@ function ensureStyle() {
     background: rgba(99,102,241,.1);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    color: #6366f1;
+    color: var(--a);
   }
   .scb-info { flex: 1; }
   .scb-title {
     font: 600 14px/1.3 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     margin: 0 0 3px;
   }
   .scb-meta {
     font: 500 12px/1 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu3);
   }
   .scb-btns {
     display: flex;
@@ -88,12 +88,12 @@ function ensureStyle() {
   .scb-btn:active { transform: scale(.97); opacity: .85; }
   .scb-btn-yes {
     background: rgba(16,185,129,.1);
-    color: #059669;
+    color: var(--grd);
     border: 1px solid rgba(16,185,129,.2);
   }
   .scb-btn-no {
     background: rgba(239,68,68,.07);
-    color: #dc2626;
+    color: var(--rdk);
     border: 1px solid rgba(239,68,68,.15);
   }
   .scb-btn:disabled { opacity:.5; cursor:not-allowed; }

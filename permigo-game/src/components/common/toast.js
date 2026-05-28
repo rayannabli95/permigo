@@ -72,7 +72,7 @@ export function toast(msg, type = 'info', duration = 3000) {
  * Toast riche avec avatar (initiales) — pour validations enseignant.
  * @param {{title: string, sub?: string, initials?: string, color?: string, type?: 'success'|'info'|'error', duration?: number}} opts
  */
-export function toastAvatar({ title, sub = '', initials = '?', color = '#6366f1', type = 'success', duration = 3500 }) {
+export function toastAvatar({ title, sub = '', initials = '?', color = 'var(--a)', type = 'success', duration = 3500 }) {
   const root = ensureRoot();
   const el = document.createElement('div');
   el.className = `toast toast-${type} toast-rich`;
@@ -88,7 +88,7 @@ export function toastAvatar({ title, sub = '', initials = '?', color = '#6366f1'
         gap: 12px;
         padding: 12px 14px !important;
         background: #fff !important;
-        border: 1px solid #e2e6f2 !important;
+        border: 1px solid var(--bo) !important;
         box-shadow: 0 12px 32px -8px rgba(10,13,26,.18) !important;
         min-width: 260px;
         max-width: 90vw;
@@ -104,18 +104,18 @@ export function toastAvatar({ title, sub = '', initials = '?', color = '#6366f1'
       .toast-rich .ta-body { flex: 1; min-width: 0; }
       .toast-rich .ta-title {
         font: 600 13.5px/1.3 'Inter', sans-serif;
-        color: #0a0d1a;
+        color: var(--ink);
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .toast-rich .ta-sub {
         font: 500 11.5px/1.2 'Inter', sans-serif;
-        color: #94a3b8;
+        color: var(--mu2);
         margin-top: 2px;
       }
       .toast-rich .ta-check {
         width: 22px; height: 22px;
         border-radius: 50%;
-        background: #10b981;
+        background: var(--gr);
         color: #fff;
         display: flex; align-items: center; justify-content: center;
         font: 700 14px/1 'Inter', sans-serif;

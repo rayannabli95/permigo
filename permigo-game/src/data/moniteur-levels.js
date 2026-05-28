@@ -46,17 +46,17 @@ const MAX_VAL = MONITEUR_TIERS[MONITEUR_TIERS.length - 1].threshold;
  * 12 saisons = 12 mois.
  */
 export const SAISONS = [
-  { month: 0,  name: 'Janvier — Nouveau départ',   accent: '#0ea5e9', badge: 'Saisonnier hiver' },
-  { month: 1,  name: 'Février — Cap maintenu',     accent: '#6366f1', badge: 'Saisonnier hiver' },
-  { month: 2,  name: 'Mars — Premier souffle',     accent: '#10b981', badge: 'Saisonnier printemps' },
+  { month: 0,  name: 'Janvier — Nouveau départ',   accent: 'var(--bl)', badge: 'Saisonnier hiver' },
+  { month: 1,  name: 'Février — Cap maintenu',     accent: 'var(--a)', badge: 'Saisonnier hiver' },
+  { month: 2,  name: 'Mars — Premier souffle',     accent: 'var(--gr)', badge: 'Saisonnier printemps' },
   { month: 3,  name: 'Avril — Élan',                accent: '#84cc16', badge: 'Saisonnier printemps' },
-  { month: 4,  name: 'Mai — Pleine accélération',   accent: '#f59e0b', badge: 'Saisonnier printemps' },
-  { month: 5,  name: 'Juin — Examen blanc',         accent: '#f97316', badge: 'Saisonnier été' },
+  { month: 4,  name: 'Mai — Pleine accélération',   accent: 'var(--am)', badge: 'Saisonnier printemps' },
+  { month: 5,  name: 'Juin — Examen blanc',         accent: 'var(--or)', badge: 'Saisonnier été' },
   { month: 6,  name: 'Juillet — Permanence',        accent: '#eab308', badge: 'Saisonnier été' },
-  { month: 7,  name: 'Août — Repli stratégique',    accent: '#a855f7', badge: 'Saisonnier été' },
-  { month: 8,  name: 'Septembre — Rentrée',         accent: '#3b82f6', badge: 'Saisonnier automne' },
+  { month: 7,  name: 'Août — Repli stratégique',    accent: 'var(--pul)', badge: 'Saisonnier été' },
+  { month: 8,  name: 'Septembre — Rentrée',         accent: 'var(--bl2)', badge: 'Saisonnier automne' },
   { month: 9,  name: 'Octobre — Cadence',           accent: '#d946ef', badge: 'Saisonnier automne' },
-  { month: 10, name: 'Novembre — Concentration',    accent: '#0891b2', badge: 'Saisonnier automne' },
+  { month: 10, name: 'Novembre — Concentration',    accent: 'var(--blk)', badge: 'Saisonnier automne' },
   { month: 11, name: 'Décembre — Wrapped',          accent: '#ec4899', badge: 'Saisonnier hiver' },
 ];
 

@@ -186,12 +186,12 @@ export const STACKED_CARDS_CSS = `
     font-size:18px;
     font-weight:800;
     letter-spacing:-.015em;
-    color:#0b0d1a;
+    color:var(--ink);
     margin:0 0 4px;
   }
   .sc-card-body p{
     font-size:13px;
-    color:#64748b;
+    color:var(--mu3);
     margin:0;
     line-height:1.4;
   }
