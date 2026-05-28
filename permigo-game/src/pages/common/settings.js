@@ -153,7 +153,7 @@ const STYLE = `<style>
   padding: 6px 12px;
   border-radius: 20px;
   border: 1.5px solid var(--a);
-  background: rgba(99,102,241,.08);
+  background: rgba(88,204,2,.08);
   font: 700 12px/1 'IBM Plex Mono', monospace;
   color: var(--a);
 }

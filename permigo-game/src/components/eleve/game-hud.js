@@ -38,11 +38,11 @@ export function renderGameHUD(stats, me) {
           linear-gradient(180deg,rgba(11,13,26,.96) 0%,rgba(15,17,36,.92) 100%);
         backdrop-filter:blur(20px) saturate(180%);
         -webkit-backdrop-filter:blur(20px) saturate(180%);
-        border-bottom:1px solid rgba(99,102,241,.25);
+        border-bottom:1px solid rgba(88,204,2,.25);
         box-shadow:
           0 10px 32px -8px rgba(0,0,0,.5),
           0 1px 0 rgba(255,255,255,.06) inset,
-          0 -1px 0 rgba(99,102,241,.3) inset;
+          0 -1px 0 rgba(88,204,2,.3) inset;
         color:#fff;
         padding:max(11px,env(safe-area-inset-top)) 14px 12px;
         position:relative;overflow:hidden;
@@ -67,15 +67,15 @@ export function renderGameHUD(stats, me) {
         display:flex;align-items:center;justify-content:center;
         font-family:var(--fd);font-weight:900;font-size:17px;color:#fff;
         box-shadow:
-          0 6px 18px -4px rgba(99,102,241,.6),
+          0 6px 18px -4px rgba(88,204,2,.6),
           0 0 0 2px rgba(255,255,255,.12) inset,
-          0 0 0 1px rgba(99,102,241,.4);
+          0 0 0 1px rgba(88,204,2,.4);
         letter-spacing:-.02em;
         text-shadow:0 1px 2px rgba(0,0,0,.5);
         cursor:pointer;border:0;padding:0;overflow:hidden;
         transition:transform .18s cubic-bezier(.2,.7,.3,1),box-shadow .2s;
       }
-      .ghud-avatar:hover{transform:translateY(-2px) scale(1.05);box-shadow:0 10px 24px -6px rgba(99,102,241,.8),0 0 0 2px rgba(255,255,255,.2) inset,0 0 0 2px rgba(167,139,250,.6)}
+      .ghud-avatar:hover{transform:translateY(-2px) scale(1.05);box-shadow:0 10px 24px -6px rgba(88,204,2,.8),0 0 0 2px rgba(255,255,255,.2) inset,0 0 0 2px rgba(167,139,250,.6)}
 
       /* ─── AVATAR FRAMES PREMIUM (boutique) ─── */
       .ghud-avatar.frame-rainbow::after{
@@ -101,7 +101,7 @@ export function renderGameHUD(stats, me) {
       }
       @keyframes ghud-frame-pulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
       .ghud-avatar:active{transform:scale(.94)}
-      .ghud-avatar:focus-visible{outline:none;box-shadow:0 6px 18px -4px rgba(99,102,241,.6),0 0 0 3px var(--a)}
+      .ghud-avatar:focus-visible{outline:none;box-shadow:0 6px 18px -4px rgba(88,204,2,.6),0 0 0 3px var(--a)}
       .ghud-avatar::before{
         content:'';position:absolute;inset:0;border-radius:14px;
         background:linear-gradient(135deg,rgba(255,255,255,.22) 0%,transparent 50%);

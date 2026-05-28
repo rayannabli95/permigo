@@ -50,7 +50,7 @@ const STYLE = `<style>
 .gal-tab.active {
   background: var(--su);
   color: var(--a);
-  border-color: rgba(99,102,241,.25);
+  border-color: rgba(88,204,2,.25);
   box-shadow: 0 1px 3px rgba(11,13,26,.06);
 }
 .gal-tab:not(.active):hover { color: var(--ink); }
@@ -61,7 +61,7 @@ const STYLE = `<style>
   padding: 14px 20px 8px;
 }
 .gal-section-title { font: 700 13px/1 'Inter', sans-serif; color: var(--mu3); letter-spacing: .08em; text-transform: uppercase; }
-.gal-section-count { font: 700 12px/1 'Inter', sans-serif; color: var(--a); background: rgba(99,102,241,.1); border-radius: 20px; padding: 3px 10px; }
+.gal-section-count { font: 700 12px/1 'Inter', sans-serif; color: var(--a); background: rgba(88,204,2,.1); border-radius: 20px; padding: 3px 10px; }
 
 /* Grid */
 .gal-grid {
@@ -229,7 +229,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center; gap: 8px;
   font: 700 12px/1 'Inter', sans-serif;
 }
-.gal-modal-xp { color: var(--a); background: rgba(99,102,241,.1); padding: 6px 12px; border-radius: 99px; }
+.gal-modal-xp { color: var(--a); background: rgba(88,204,2,.1); padding: 6px 12px; border-radius: 99px; }
 .gal-modal-state { padding: 6px 12px; border-radius: 99px; }
 .gal-modal-state.on  { color: var(--grdk); background: rgba(16,185,129,.12); }
 .gal-modal-state.off { color: var(--mu2); background: var(--bg2, var(--bg3)); }

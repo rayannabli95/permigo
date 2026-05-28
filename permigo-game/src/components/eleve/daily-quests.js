@@ -68,7 +68,7 @@ function ensureStyle() {
   .dq-card:active { transform: scale(.97); }
   .dq-card--ready {
     border-color: rgba(139,92,246,.3);
-    background: linear-gradient(145deg, rgba(139,92,246,.06), rgba(99,102,241,.04));
+    background: linear-gradient(145deg, rgba(139,92,246,.06), rgba(88,204,2,.04));
   }
   .dq-card--claimed {
     border-color: rgba(16,185,129,.22);

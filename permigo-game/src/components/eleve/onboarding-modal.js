@@ -27,7 +27,7 @@ const SLIDES = [
     illo: `<div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:4px 0">
       ${['Leçon', 'Quiz', 'Maîtrise'].map((l, i) => `
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
-          <div style="width:52px;height:52px;border-radius:14px;background:${['rgba(99,102,241,.12)','rgba(16,185,129,.12)','rgba(245,158,11,.12)'][i]};display:flex;align-items:center;justify-content:center;font-size:22px">${['📖','⚡','🏆'][i]}</div>
+          <div style="width:52px;height:52px;border-radius:14px;background:${['rgba(88,204,2,.12)','rgba(16,185,129,.12)','rgba(245,158,11,.12)'][i]};display:flex;align-items:center;justify-content:center;font-size:22px">${['📖','⚡','🏆'][i]}</div>
           <span style="font:700 10px/1 'Inter',sans-serif;color:var(--mu3);letter-spacing:.04em;text-transform:uppercase">${l}</span>
         </div>
         ${i < 2 ? `<div style="font:700 18px/1 'Plus Jakarta Sans',sans-serif;color:#d1d8ee">→</div>` : ''}
@@ -51,7 +51,7 @@ const SLIDES = [
         <path d="M22 2C22 2 32 15 29 24C34 20 37 25 37 31C37 41 30 49 22 52C14 49 7 41 7 31C7 25 10 20 15 24C12 15 22 2 22 2Z" fill="url(#ob3fl)"/>
         <path d="M22 18C22 18 27 26 25 33C24 36 22 37.5 22 37.5C22 37.5 20 36 19 33C17 26 22 18 22 18Z" fill="white" opacity="0.28"/>
       </svg>
-      <div style="font:800 36px/1 'Plus Jakarta Sans',sans-serif;background:linear-gradient(135deg,var(--a),var(--pu));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.04em">12 jours</div>
+      <div style="font:800 36px/1 'Plus Jakarta Sans',sans-serif;background:linear-gradient(135deg, var(--a), var(--adk));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.04em">12 jours</div>
       <div style="font:500 13px/1 'Inter',sans-serif;color:var(--mu3)">de série continue</div>
     </div>`,
     title: 'La régularité fait\nla différence.',

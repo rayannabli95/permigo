@@ -338,7 +338,7 @@ function ensureStyles() {
       opacity:0;
       animation:fadein-late 1s ease 2.4s forwards;
     }
-    .wuc-brand img{height:20px;width:auto;filter:drop-shadow(0 2px 8px rgba(99,102,241,.6))}
+    .wuc-brand img{height:20px;width:auto;filter:drop-shadow(0 2px 8px rgba(88,204,2,.6))}
     .wuc-brand-fb{font-family:var(--fd);font-weight:900;font-size:14px;letter-spacing:-.02em;background:linear-gradient(90deg,var(--al3),#fff,#c4b5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 
     /* Skip discret en bas */

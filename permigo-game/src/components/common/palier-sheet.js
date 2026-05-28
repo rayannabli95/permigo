@@ -39,7 +39,7 @@ const STYLE = `<style id="palier-sheet-style">
 .psheet-icon {
   width: 52px; height: 52px; border-radius: 16px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(99,102,241,.1); color: var(--a);
+  background: rgba(88,204,2,.1); color: var(--a);
 }
 .psheet-icon.done { background: rgba(16,185,129,.1); color: var(--grd); }
 .psheet-head-info { flex: 1; min-width: 0; }
@@ -56,7 +56,7 @@ const STYLE = `<style id="palier-sheet-style">
   padding: 5px 9px; border-radius: 99px; white-space: nowrap;
 }
 .psheet-badge.done { color: var(--grd); background: rgba(16,185,129,.12); }
-.psheet-badge.todo { color: var(--adk); background: rgba(99,102,241,.1); }
+.psheet-badge.todo { color: var(--adk); background: rgba(88,204,2,.1); }
 .psheet-reward-lbl {
   font: 600 10px/1 'Inter', sans-serif; letter-spacing: .1em;
   text-transform: uppercase; color: var(--mu2); margin-bottom: 6px;

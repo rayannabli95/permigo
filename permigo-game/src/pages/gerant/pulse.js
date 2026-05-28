@@ -150,10 +150,10 @@ const STYLE = `<style>
 .spark-bar {
   width: 100%;
   max-width: 28px;
-  background: linear-gradient(180deg, var(--a), var(--pu));
+  background: linear-gradient(180deg, var(--a), var(--adk));
   border-radius: 6px 6px 0 0;
   transition: height .6s cubic-bezier(.2,.7,.3,1);
-  box-shadow: 0 -2px 6px rgba(99,102,241,.18);
+  box-shadow: 0 -2px 6px rgba(88,204,2,.18);
 }
 .spark-bar.today {
   background: linear-gradient(180deg, var(--am), var(--or));
@@ -251,7 +251,7 @@ const STYLE = `<style>
 .team-badge {
   font: 600 12px/1 'Inter', sans-serif;
   color: var(--a);
-  background: rgba(99,102,241,.1);
+  background: rgba(88,204,2,.1);
   border-radius: 99px;
   padding: 6px 12px;
   white-space: nowrap;

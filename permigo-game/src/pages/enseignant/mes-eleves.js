@@ -268,14 +268,14 @@ const STYLE = `<style>
   .me-invite-btn {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 8px 14px; min-height: 44px; border-radius: 10px;
-    background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.2);
+    background: rgba(88,204,2,.1); border: 1px solid rgba(88,204,2,.2);
     color: var(--a); font: 600 13px/1 'Inter', sans-serif;
     cursor: pointer; flex-shrink: 0;
     transition: background .12s, border-color .12s;
     -webkit-tap-highlight-color: transparent;
   }
-  .me-invite-btn:hover { background: rgba(99,102,241,.18); border-color: rgba(99,102,241,.4); }
-  .me-invite-btn:active { background: rgba(99,102,241,.22); }
+  .me-invite-btn:hover { background: rgba(88,204,2,.18); border-color: rgba(88,204,2,.4); }
+  .me-invite-btn:active { background: rgba(88,204,2,.22); }
 
   /* Anti-décrochage */
   .me-relancer-section {
@@ -624,7 +624,7 @@ function renderRow(eleve) {
       <div class="me-info">
         <div class="me-nom">
           ${fullNom || '—'}
-          ${eleve.isMine ? `<span style="margin-left:6px;display:inline-block;font:700 9px/1 'Inter',sans-serif;padding:3px 6px;border-radius:4px;background:rgba(99,102,241,.12);color:var(--adk);letter-spacing:.04em;text-transform:uppercase;vertical-align:middle">attitré</span>` : ''}
+          ${eleve.isMine ? `<span style="margin-left:6px;display:inline-block;font:700 9px/1 'Inter',sans-serif;padding:3px 6px;border-radius:4px;background:rgba(88,204,2,.12);color:var(--adk);letter-spacing:.04em;text-transform:uppercase;vertical-align:middle">attitré</span>` : ''}
         </div>
         <div class="me-meta">
           <span class="me-badge ${eleve.actif ? 'actif' : 'inactif'}">
@@ -717,7 +717,7 @@ async function wireRows() {
       follow: (dx) => {
         const clamped = Math.max(0, Math.min(100, dx));
         row.style.transform = `translateX(${clamped}px)`;
-        row.style.background = dx > 30 ? 'rgba(99,102,241,.06)' : '';
+        row.style.background = dx > 30 ? 'rgba(88,204,2,.06)' : '';
       },
       onSwipeRight: () => {
         haptic('select');
@@ -913,7 +913,7 @@ function openInviteEleveModal(me) {
       }
       .me-inv-textarea:focus {
         outline:0; border-color:var(--a);
-        box-shadow:0 0 0 3px rgba(99,102,241,.12);
+        box-shadow:0 0 0 3px rgba(88,204,2,.12);
       }
       .me-inv-counter {
         font:500 12px/1 'Inter',sans-serif; color:var(--mu2);
@@ -934,10 +934,10 @@ function openInviteEleveModal(me) {
       }
       .me-inv-cancel:hover { background:var(--bo); }
       .me-inv-go {
-        background:linear-gradient(135deg,var(--a),var(--pu));
-        color:#fff; box-shadow:0 6px 18px -6px rgba(99,102,241,.45);
+        background:var(--a);
+        color:#fff; box-shadow:0 6px 18px -6px rgba(88,204,2,.45);
       }
-      .me-inv-go:hover { box-shadow:0 8px 22px -6px rgba(99,102,241,.55); }
+      .me-inv-go:hover { box-shadow:0 8px 22px -6px rgba(88,204,2,.55); }
       .me-inv-go:disabled { opacity:.35; cursor:default; box-shadow:none; }
       /* Écran résultats */
       .me-inv-result-ttl {
@@ -965,11 +965,11 @@ function openInviteEleveModal(me) {
       }
       .me-inv-copy {
         flex-shrink:0; padding:9px 14px; border-radius:10px;
-        background:rgba(99,102,241,.1); border:1px solid rgba(99,102,241,.2);
+        background:rgba(88,204,2,.1); border:1px solid rgba(88,204,2,.2);
         color:var(--a); font:600 12px/1 'Inter',sans-serif;
         cursor:pointer; white-space:nowrap; transition:background .12s;
       }
-      .me-inv-copy:active { background:rgba(99,102,241,.2); }
+      .me-inv-copy:active { background:rgba(88,204,2,.2); }
       .me-inv-copy.copied { background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.2); color:var(--grd); }
       .me-inv-err-msg {
         font:500 12px/1.4 'Inter',sans-serif; color:var(--rd);

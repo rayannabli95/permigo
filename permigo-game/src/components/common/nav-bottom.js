@@ -105,12 +105,12 @@ const STYLE = `
   .bn-fab-btn {
     width: 56px; height: 56px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--a) 0%, var(--pu) 100%);
+    background: var(--a);
     border: none;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     color: #fff;
-    box-shadow: 0 4px 16px -4px rgba(99,102,241,.65), 0 2px 6px rgba(10,13,26,.18);
+    box-shadow: 0 4px 16px -4px rgba(88,204,2,.65), 0 2px 6px rgba(10,13,26,.18);
     -webkit-tap-highlight-color: transparent;
     transition: transform .14s cubic-bezier(.34,1.56,.64,1), box-shadow .14s ease;
     position: relative;
@@ -118,7 +118,7 @@ const STYLE = `
   }
   .bn-fab-btn:active {
     transform: scale(.88);
-    box-shadow: 0 2px 8px -2px rgba(99,102,241,.5);
+    box-shadow: 0 2px 8px -2px rgba(88,204,2,.5);
   }
   .bn-fab-btn svg { display: block; }
   .bn-fab-label {

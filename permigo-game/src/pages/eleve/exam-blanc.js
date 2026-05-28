@@ -411,7 +411,7 @@ function renderStyles() {
   transition: border-color .15s, box-shadow .15s, transform .1s;
 }
 .exb-pcard:active { transform: scale(.98); }
-.exb-pcard:hover { border-color: var(--a); box-shadow: 0 4px 20px rgba(99,102,241,.12); }
+.exb-pcard:hover { border-color: var(--a); box-shadow: 0 4px 20px rgba(88,204,2,.12); }
 .exb-pcard-top {
   display: flex;
   justify-content: space-between;
@@ -487,7 +487,7 @@ function renderStyles() {
 }
 .exb-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--a), var(--pu));
+  background: var(--a);
   border-radius: 3px;
   transition: width .3s cubic-bezier(.23,1,.32,1);
 }
@@ -552,7 +552,7 @@ function renderStyles() {
   width: 26px;
   height: 26px;
   border-radius: 8px;
-  background: rgba(99,102,241,.1);
+  background: rgba(88,204,2,.1);
   color: var(--a);
   font: 700 13px/26px 'Inter', sans-serif;
   text-align: center;
@@ -599,7 +599,7 @@ function renderStyles() {
 .exb-next-btn {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, var(--a), var(--pu));
+  background: var(--a);
   border: none;
   border-radius: 14px;
   color: #fff;
@@ -737,7 +737,7 @@ function renderStyles() {
 .exb-start-btn {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, var(--a), var(--pu));
+  background: var(--a);
   border: none;
   border-radius: 14px;
   color: #fff;
@@ -784,8 +784,8 @@ function renderStyles() {
   animation: exbNodePulse 1.2s ease-in-out infinite;
 }
 @keyframes exbNodePulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(99,102,241,.25); }
-  50%      { box-shadow: 0 0 0 6px rgba(99,102,241,.10); }
+  0%, 100% { box-shadow: 0 0 0 3px rgba(88,204,2,.25); }
+  50%      { box-shadow: 0 0 0 6px rgba(88,204,2,.10); }
 }
 
 /* ── Trophées décoratifs ── */
@@ -794,7 +794,7 @@ function renderStyles() {
 .exb-trophy--end   { margin: 8px auto 0; }
 .exb-trophy-img, .exb-trophy-emoji {
   width: 64px; height: 64px; object-fit: contain;
-  filter: drop-shadow(0 6px 14px rgba(99,102,241,.35));
+  filter: drop-shadow(0 6px 14px rgba(88,204,2,.35));
   animation: exbTrophyFloat 3s ease-in-out infinite;
 }
 .exb-trophy-emoji { align-items: center; justify-content: center; font-size: 44px; }

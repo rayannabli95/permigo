@@ -60,7 +60,7 @@ const STYLE = `<style>
   inset: 0;
   background:
     radial-gradient(ellipse 80% 60% at 15% 35%, rgba(167,139,250,.38) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 85% 75%, rgba(99,102,241,.22) 0%, transparent 55%);
+    radial-gradient(ellipse 60% 50% at 85% 75%, rgba(88,204,2,.22) 0%, transparent 55%);
   pointer-events: none;
 }
 .acc2-hero::after {
@@ -207,7 +207,7 @@ const STYLE = `<style>
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 70% 60% at 90% 20%, rgba(99,102,241,.25) 0%, transparent 55%);
+  background: radial-gradient(ellipse 70% 60% at 90% 20%, rgba(88,204,2,.25) 0%, transparent 55%);
   pointer-events: none;
 }
 .acc2-ms-session-label {
@@ -228,8 +228,8 @@ const STYLE = `<style>
 .acc2-ms-session-av {
   width: 48px; height: 48px;
   border-radius: 14px;
-  background: rgba(99,102,241,.3);
-  border: 1px solid rgba(99,102,241,.4);
+  background: rgba(88,204,2,.3);
+  border: 1px solid rgba(88,204,2,.4);
   display: flex; align-items: center; justify-content: center;
   font: 700 16px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
@@ -250,7 +250,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   width: 100%;
   padding: 14px 20px;
-  background: linear-gradient(135deg, var(--a), var(--pu));
+  background: var(--a);
   border: none;
   border-radius: 16px;
   color: #fff;
@@ -403,18 +403,18 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%;
   padding: 16px 24px;
-  background: linear-gradient(135deg, var(--a) 0%, var(--pu) 100%);
+  background: var(--a);
   border: none;
   border-radius: 16px;
   color: #fff;
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   min-height: 52px;
-  box-shadow: 0 8px 24px -6px rgba(99,102,241,.45);
+  box-shadow: 0 8px 24px -6px rgba(88,204,2,.45);
   -webkit-tap-highlight-color: transparent;
   transition: transform .14s cubic-bezier(.34,1.56,.64,1), box-shadow .14s;
 }
-.acc2-action-btn:active { transform: scale(.96); box-shadow: 0 4px 12px -4px rgba(99,102,241,.4); }
+.acc2-action-btn:active { transform: scale(.96); box-shadow: 0 4px 12px -4px rgba(88,204,2,.4); }
 
 /* ═══════════════════════ BELOW FOLD ═══════════════════════════ */
 .acc2-section-title {
@@ -428,8 +428,8 @@ const STYLE = `<style>
 /* ── Chest teaser ── */
 .acc2-chest-teaser {
   margin: 0 16px 16px;
-  background: linear-gradient(135deg, rgba(99,102,241,.08), rgba(139,92,246,.06));
-  border: 1.5px solid rgba(99,102,241,.2);
+  background: linear-gradient(135deg, rgba(88,204,2,.08), rgba(139,92,246,.06));
+  border: 1.5px solid rgba(88,204,2,.2);
   border-radius: 18px;
   padding: 14px 16px;
   display: flex; align-items: center; gap: 12px;
@@ -442,7 +442,7 @@ const STYLE = `<style>
   to   { opacity:1; transform:translateY(0) scale(1); }
 }
 @media (hover:hover) and (pointer:fine) {
-  .acc2-chest-teaser:hover { border-color: rgba(99,102,241,.4); }
+  .acc2-chest-teaser:hover { border-color: rgba(88,204,2,.4); }
 }
 .acc2-chest-teaser:active { transform: scale(.98); }
 .acc2-ct-ico { font-size: 28px; flex-shrink: 0; }
@@ -557,8 +557,8 @@ const STYLE = `<style>
 /* Leaderboard slot */
 .acc-lb {
   margin: 0 16px 16px;
-  background: linear-gradient(135deg, rgba(99,102,241,.08) 0%, rgba(139,92,246,.06) 100%);
-  border: 1.5px solid rgba(99,102,241,.18);
+  background: linear-gradient(135deg, rgba(88,204,2,.08) 0%, rgba(139,92,246,.06) 100%);
+  border: 1.5px solid rgba(88,204,2,.18);
   border-radius: 20px;
   padding: 14px 18px;
   cursor: pointer;

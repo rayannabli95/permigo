@@ -109,9 +109,9 @@ const STYLE = `<style>
 }
 .pc.s-pret {
   background:
-    linear-gradient(135deg, var(--adk) 0%, var(--a) 45%, var(--pu) 100%);
+    linear-gradient(135deg, var(--adk) 0%, var(--a) 45%, #3a9000 100%);
   box-shadow:
-    0 16px 40px -12px rgba(99,102,241,.55),
+    0 16px 40px -12px rgba(88,204,2,.55),
     0 4px 12px rgba(10,13,26,.1);
 }
 .pc.s-valide {

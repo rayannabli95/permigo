@@ -30,13 +30,13 @@ const STYLE = `<style>
   .ec-hero::before {
     content: '';
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99,102,241,.3) 0%, transparent 70%);
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(88,204,2,.3) 0%, transparent 70%);
     pointer-events: none;
   }
   .ec-hero-badge {
     display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(99,102,241,.15);
-    border: 1px solid rgba(99,102,241,.3);
+    background: rgba(88,204,2,.15);
+    border: 1px solid rgba(88,204,2,.3);
     border-radius: 99px;
     padding: 5px 14px;
     font: 600 11px/1 'Inter', sans-serif;
@@ -163,7 +163,7 @@ const STYLE = `<style>
   .ec-mon-tag {
     font: 500 11px/1 'Inter', sans-serif;
     color: var(--a);
-    background: rgba(99,102,241,.12);
+    background: rgba(88,204,2,.12);
     padding: 3px 8px;
     border-radius: 99px;
     display: inline-block;
@@ -184,7 +184,7 @@ const STYLE = `<style>
     content: '"';
     position: absolute; top: 12px; left: 16px;
     font-size: 40px; line-height: 1;
-    color: rgba(99,102,241,.3);
+    color: rgba(88,204,2,.3);
     font-family: Georgia, serif;
   }
   .ec-temo-text {
@@ -218,7 +218,7 @@ const STYLE = `<style>
   /* ── CTA ── */
   .ec-cta {
     margin: 0 20px;
-    background: linear-gradient(135deg, var(--a) 0%, var(--pu) 100%);
+    background: var(--a);
     border-radius: 24px;
     padding: 28px 24px;
     text-align: center;

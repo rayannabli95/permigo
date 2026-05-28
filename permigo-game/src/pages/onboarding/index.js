@@ -37,7 +37,7 @@ const STYLE = `<style>
     width: 18px; border-radius: 3px;
     background: var(--a);
   }
-  .ob-dot.done { background: rgba(99,102,241,.4); }
+  .ob-dot.done { background: rgba(88,204,2,.4); }
 
   /* Content area */
   .ob-body {
@@ -128,7 +128,7 @@ const STYLE = `<style>
     cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 8px;
     transition: transform .15s, background .15s, box-shadow .15s;
-    box-shadow: 0 4px 20px rgba(99,102,241,.4);
+    box-shadow: 0 4px 20px rgba(88,204,2,.4);
     -webkit-tap-highlight-color: transparent;
   }
   .ob-btn:active { transform: scale(.97); background: #5558e3; }
@@ -159,7 +159,7 @@ const STYLE = `<style>
   .ob-av-card:active { transform: scale(.93); }
   .ob-av-card.selected {
     border-color: var(--a);
-    box-shadow: 0 0 0 3px rgba(99,102,241,.25), 0 0 20px rgba(99,102,241,.2);
+    box-shadow: 0 0 0 3px rgba(88,204,2,.25), 0 0 20px rgba(88,204,2,.2);
   }
   .ob-av-card.locked { opacity: .45; cursor: default; }
   .ob-av-img {
@@ -203,8 +203,8 @@ const STYLE = `<style>
   }
   .ob-milestone {
     display: flex; align-items: center; gap: 14px;
-    background: rgba(99,102,241,.08);
-    border: 1px solid rgba(99,102,241,.2);
+    background: rgba(88,204,2,.08);
+    border: 1px solid rgba(88,204,2,.2);
     border-radius: 14px;
     padding: 14px 16px;
     animation: obSlideIn .45s cubic-bezier(.34,1.56,.64,1) both;
@@ -214,7 +214,7 @@ const STYLE = `<style>
   .ob-milestone:nth-child(3) { animation-delay: .3s; }
   .ob-m-num {
     width: 36px; height: 36px; border-radius: 10px;
-    background: rgba(99,102,241,.2);
+    background: rgba(88,204,2,.2);
     display: flex; align-items: center; justify-content: center;
     font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
     color: var(--al);
@@ -385,7 +385,7 @@ function renderFirstQuest(root, me) {
         </div>
       </div>
       <div class="ob-footer">
-        <button class="ob-btn" id="ob-finish" style="background:linear-gradient(135deg,var(--a),var(--pu))">
+        <button class="ob-btn" id="ob-finish" style="background:var(--a)">
           C'est parti&nbsp;! <span aria-hidden="true">🚀</span>
         </button>
       </div>

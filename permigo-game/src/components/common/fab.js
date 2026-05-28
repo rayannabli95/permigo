@@ -15,13 +15,13 @@ const STYLE = `
     height: 56px;
     border-radius: 50%;
     border: 0;
-    background: linear-gradient(135deg, var(--a), var(--pu));
+    background: var(--a);
     color: #fff;
     font-size: 26px;
     line-height: 1;
     cursor: pointer;
     box-shadow:
-      0 12px 32px -8px rgba(99,102,241,.55),
+      0 12px 32px -8px rgba(88,204,2,.55),
       0 4px 12px rgba(10,13,26,.1);
     display: flex; align-items: center; justify-content: center;
     transition: transform .15s ease, box-shadow .15s ease;
@@ -34,7 +34,7 @@ const STYLE = `
   }
   .fab:hover {
     box-shadow:
-      0 16px 40px -8px rgba(99,102,241,.7),
+      0 16px 40px -8px rgba(88,204,2,.7),
       0 4px 12px rgba(10,13,26,.12);
   }
   .fab:active { transform: scale(.92); }

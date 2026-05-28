@@ -141,7 +141,7 @@ function ensureStyle() {
   .lsm-sec-count {
     font: 600 11px/1 'Inter', sans-serif;
     color: var(--a);
-    background: rgba(99,102,241,.08);
+    background: rgba(88,204,2,.08);
     padding: 2px 8px;
     border-radius: 10px;
   }
@@ -159,7 +159,7 @@ function ensureStyle() {
     min-height: 52px;
   }
   .lsm-eleve-row:active { transform: scale(.99); }
-  .lsm-eleve-row.lsm-selected { border-color: var(--a); background: rgba(99,102,241,.04); }
+  .lsm-eleve-row.lsm-selected { border-color: var(--a); background: rgba(88,204,2,.04); }
   .lsm-eleve-av {
     width: 36px; height: 36px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -198,7 +198,7 @@ function ensureStyle() {
     display: flex; align-items: center;
   }
   .lsm-chip:active { transform: scale(.96); }
-  .lsm-chip.lsm-selected { border-color: var(--a); background: rgba(99,102,241,.07); color: var(--a); }
+  .lsm-chip.lsm-selected { border-color: var(--a); background: rgba(88,204,2,.07); color: var(--a); }
 
   /* Chips jours — plus larges */
   .lsm-day-chips { gap: 8px; }
@@ -302,7 +302,7 @@ function ensureStyle() {
     padding: 16px;
     border: none;
     border-radius: 14px;
-    background: linear-gradient(135deg, var(--a), var(--pu));
+    background: var(--a);
     color: #fff;
     font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;

@@ -244,7 +244,7 @@
   50%      { background-position: 100% 50%; }
 }
 .text-gradient-shift {
-  background: linear-gradient(90deg, var(--a) 0%, var(--pu) 50%, var(--a) 100%);
+  background: linear-gradient(90deg, var(--a) 0%, var(--adk) 50%, var(--a) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -335,7 +335,7 @@
   align-items: center;
   gap: 6px;
   padding: 3px 12px 3px 4px;
-  background: linear-gradient(135deg, var(--a), var(--pu));
+  background: linear-gradient(135deg, var(--a), var(--adk));
   border: 3px solid rgba(165,180,252,.35);
   border-radius: 999px;
   font-size: 12px;

@@ -38,7 +38,7 @@ const STYLE = `<style>
     letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--a);
-    background: rgba(99,102,241,.1);
+    background: rgba(88,204,2,.1);
     border-radius: 20px;
     padding: 5px 12px;
     margin-bottom: 20px;
@@ -73,13 +73,13 @@ const STYLE = `<style>
   .btn-start {
     width: 100%;
     padding: 18px;
-    background: linear-gradient(135deg, var(--a), var(--pu));
+    background: var(--a);
     border: 0;
     border-radius: 16px;
     color: #fff;
     font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
-    box-shadow: 0 8px 24px rgba(99,102,241,.4);
+    box-shadow: 0 8px 24px rgba(88,204,2,.4);
     transition: transform .15s, opacity .15s, box-shadow .15s;
     margin-bottom: 12px;
   }
@@ -129,7 +129,7 @@ const STYLE = `<style>
   .btn-parcours {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(135deg, var(--a), var(--pu));
+    background: var(--a);
     border: 0;
     border-radius: 14px;
     color: #fff;
@@ -137,7 +137,7 @@ const STYLE = `<style>
     cursor: pointer;
     margin-bottom: 12px;
     transition: transform .15s, opacity .15s;
-    box-shadow: 0 6px 20px rgba(99,102,241,.25);
+    box-shadow: 0 6px 20px rgba(88,204,2,.25);
   }
   .btn-parcours:active { transform: scale(.98); }
   .btn-home {

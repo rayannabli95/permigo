@@ -20,7 +20,7 @@ const STYLE = `
 
   .xpt-card {
     background: #fff;
-    border: 1px solid rgba(99,102,241,.2);
+    border: 1px solid rgba(88,204,2,.2);
     border-radius: 16px;
     padding: 12px 16px;
     display: flex;
@@ -32,7 +32,7 @@ const STYLE = `
   .xpt-icon {
     width: 36px; height: 36px;
     border-radius: 10px;
-    background: linear-gradient(135deg, var(--a), var(--pu));
+    background: linear-gradient(135deg, var(--a), var(--adk));
     display: flex; align-items: center; justify-content: center;
     font-size: 18px;
     flex-shrink: 0;

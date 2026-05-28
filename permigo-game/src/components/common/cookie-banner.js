@@ -62,7 +62,7 @@ const STYLE = `<style>
     -webkit-tap-highlight-color: transparent;
   }
   .ck-btn:active { transform: scale(.97); }
-  .ck-btn-accept { background: linear-gradient(135deg, var(--a), var(--pu)); color: #fff; box-shadow: 0 6px 18px -6px rgba(99,102,241,.5); }
+  .ck-btn-accept { background: var(--a); color: #fff; box-shadow: 0 6px 18px -6px rgba(88,204,2,.5); }
   .ck-btn-refuse { background: var(--bg); color: var(--mu, var(--mu4)); border-color: var(--bo); }
 </style>`;
 

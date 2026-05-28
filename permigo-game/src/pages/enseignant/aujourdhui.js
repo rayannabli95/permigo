@@ -349,8 +349,8 @@ const STYLE = `<style>
 
   /* Widget récap soir */
   .aj-recap {
-    background: linear-gradient(135deg, rgba(99,102,241,.06), rgba(139,92,246,.06));
-    border: 1.5px solid rgba(99,102,241,.2);
+    background: linear-gradient(135deg, rgba(88,204,2,.06), rgba(139,92,246,.06));
+    border: 1.5px solid rgba(88,204,2,.2);
     border-radius: 20px;
     padding: 16px;
     margin-bottom: 20px;
@@ -401,8 +401,8 @@ const STYLE = `<style>
 
   /* Prompt log si gap */
   .aj-log-prompt {
-    background: rgba(99,102,241,.05);
-    border: 1.5px dashed rgba(99,102,241,.25);
+    background: rgba(88,204,2,.05);
+    border: 1.5px dashed rgba(88,204,2,.25);
     border-radius: 20px;
     padding: 14px 16px;
     margin-bottom: 20px;

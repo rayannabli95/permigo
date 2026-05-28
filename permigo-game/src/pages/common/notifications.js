@@ -30,12 +30,12 @@ function notifRoute(n) {
 
 // ─── Icon map ────────────────────────────────────────────────
 const TYPE_META = {
-  xp:                  { iconName: 'zap',          bg: 'rgba(99,102,241,.12)',  color: 'var(--a)' },
+  xp:                  { iconName: 'zap',          bg: 'rgba(88,204,2,.12)',  color: 'var(--a)' },
   trophy:              { iconName: 'trophy',        bg: 'rgba(245,158,11,.12)',  color: 'var(--am)' },
   achievement_unlocked:{ iconName: 'trophy',        bg: 'rgba(245,158,11,.12)',  color: 'var(--am)' },
   validation:          { iconName: 'check-circle',  bg: 'rgba(16,185,129,.12)',  color: 'var(--gr)' },
-  session_confirmation:{ iconName: 'check-circle',  bg: 'rgba(99,102,241,.12)',  color: 'var(--a)' },
-  session_logged:      { iconName: 'check-circle',  bg: 'rgba(99,102,241,.12)',  color: 'var(--a)' },
+  session_confirmation:{ iconName: 'check-circle',  bg: 'rgba(88,204,2,.12)',  color: 'var(--a)' },
+  session_logged:      { iconName: 'check-circle',  bg: 'rgba(88,204,2,.12)',  color: 'var(--a)' },
   session_confirmed:   { iconName: 'check',         bg: 'rgba(16,185,129,.12)',  color: 'var(--gr)' },
   session_refused:     { iconName: 'x-circle',      bg: 'rgba(239,68,68,.12)',   color: 'var(--rd)' },
   streak_at_risk:      { iconName: 'flame',         bg: 'rgba(239,68,68,.12)',   color: 'var(--rd)' },
@@ -100,7 +100,7 @@ const STYLE = `<style>
 .nf2-title { font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; color: var(--ink); flex: 1; }
 .nf2-unread-badge {
   font: 700 11px/1 'IBM Plex Mono', monospace;
-  color: var(--a); background: rgba(99,102,241,.1);
+  color: var(--a); background: rgba(88,204,2,.1);
   border-radius: 99px; padding: 4px 8px; flex-shrink: 0;
 }
 .nf2-mark-all {
@@ -108,7 +108,7 @@ const STYLE = `<style>
   background: none; border: none; cursor: pointer; padding: 8px 4px;
   border-radius: 6px; transition: background .12s; font-family: inherit;
 }
-.nf2-mark-all:hover { background: rgba(99,102,241,.08); }
+.nf2-mark-all:hover { background: rgba(88,204,2,.08); }
 .nf2-mark-all:disabled { color: var(--mu2); cursor: default; }
 .nf2-mark-all:disabled:hover { background: none; }
 
@@ -164,8 +164,8 @@ const STYLE = `<style>
   user-select: none; touch-action: pan-y;
 }
 .nf2-item:active { background: var(--bg); }
-.nf2-item.unread { background: linear-gradient(90deg, rgba(99,102,241,.06) 0%, var(--su) 40%); }
-.nf2-item.unread:active { background: linear-gradient(90deg, rgba(99,102,241,.1) 0%, var(--bg) 60%); }
+.nf2-item.unread { background: linear-gradient(90deg, rgba(88,204,2,.06) 0%, var(--su) 40%); }
+.nf2-item.unread:active { background: linear-gradient(90deg, rgba(88,204,2,.1) 0%, var(--bg) 60%); }
 .nf2-item-ico {
   width: 38px; height: 38px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
@@ -197,11 +197,11 @@ const STYLE = `<style>
 .nf2-empty-sub { font: 500 13px/1.5 'Inter', sans-serif; color: var(--mu); margin-bottom: 24px; }
 .nf2-empty-cta {
   display: inline-block; padding: 12px 24px;
-  background: rgba(99,102,241,.08); border: 1.5px solid rgba(99,102,241,.2);
+  background: rgba(88,204,2,.08); border: 1.5px solid rgba(88,204,2,.2);
   border-radius: 12px; color: var(--a); font: 600 13px/1 'Inter', sans-serif;
   cursor: pointer; min-height: 44px; transition: background .12s;
 }
-.nf2-empty-cta:active { background: rgba(99,102,241,.15); }
+.nf2-empty-cta:active { background: rgba(88,204,2,.15); }
 </style>`;
 
 // ─── Mount ────────────────────────────────────────────────────

@@ -94,14 +94,14 @@ const STYLE = `<style>
   cursor: pointer;
   border-color: transparent;
   background: var(--su);
-  box-shadow: 0 0 0 1.5px rgba(99,102,241,.3),
-              0 8px 24px -8px rgba(99,102,241,.2);
+  box-shadow: 0 0 0 1.5px rgba(88,204,2,.3),
+              0 8px 24px -8px rgba(88,204,2,.2);
 }
 @media (hover:hover) and (pointer:fine) {
   .mc-card.mc-can-open:hover {
     border-color: transparent;
-    box-shadow: 0 0 0 2px rgba(99,102,241,.55),
-                0 12px 32px -8px rgba(99,102,241,.3);
+    box-shadow: 0 0 0 2px rgba(88,204,2,.55),
+                0 12px 32px -8px rgba(88,204,2,.3);
     transform: translateY(-2px);
   }
 }
@@ -152,7 +152,7 @@ const STYLE = `<style>
 .mc-rew-chip {
   font: 700 11px/1 'Inter', sans-serif;
   padding: 3px 8px; border-radius: 99px;
-  background: rgba(99,102,241,.08);
+  background: rgba(88,204,2,.08);
   color: var(--a);
 }
 
@@ -161,7 +161,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   font-size: 16px; flex-shrink: 0;
 }
-.mc-badge-open    { background: rgba(99,102,241,.12); color: var(--a); }
+.mc-badge-open    { background: rgba(88,204,2,.12); color: var(--a); }
 .mc-badge-opened  { background: rgba(16,185,129,.1);  color: var(--grd); }
 
 /* ── CTA open button on card ── */
