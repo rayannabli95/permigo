@@ -12,10 +12,10 @@ import { icon }     from '@/utils/icons.js';
 const STYLE_ID = 'coaching-tip-style';
 
 const TONE_CONFIG = {
-  urgent:    { bg: 'linear-gradient(135deg,#fef2f2,#fee2e2)', border: '#fca5a5', ico: 'alert-circle', icoColor: '#dc2626',  ctaBg: '#ef4444' },
-  celebrate: { bg: 'linear-gradient(135deg,#faf5ff,#f3e8ff)', border: '#d8b4fe', ico: 'star',         icoColor: '#7c3aed',  ctaBg: '#7c3aed' },
-  warm:      { bg: 'linear-gradient(135deg,#fff7ed,#ffedd5)', border: '#fed7aa', ico: 'sun',          icoColor: '#ea580c',  ctaBg: '#f97316' },
-  gentle:    { bg: 'linear-gradient(135deg,#eff6ff,#dbeafe)', border: '#bfdbfe', ico: 'lightbulb',    icoColor: '#2563eb',  ctaBg: '#3b82f6' },
+  urgent:    { bg: 'linear-gradient(135deg,#fef2f2,var(--rdp2))', border: '#fca5a5', ico: 'alert-circle', icoColor: 'var(--rdk)',  ctaBg: 'var(--rd)' },
+  celebrate: { bg: 'linear-gradient(135deg,#faf5ff,#f3e8ff)', border: '#d8b4fe', ico: 'star',         icoColor: 'var(--puk)',  ctaBg: 'var(--puk)' },
+  warm:      { bg: 'linear-gradient(135deg,#fff7ed,#ffedd5)', border: '#fed7aa', ico: 'sun',          icoColor: '#ea580c',  ctaBg: 'var(--or)' },
+  gentle:    { bg: 'linear-gradient(135deg,#eff6ff,#dbeafe)', border: '#bfdbfe', ico: 'lightbulb',    icoColor: '#2563eb',  ctaBg: 'var(--bl2)' },
 };
 
 function ensureStyle() {
@@ -51,7 +51,7 @@ function ensureStyle() {
   .ct-body { flex: 1; min-width: 0; }
   .ct-text {
     font: 500 13px/1.4 'Inter', sans-serif;
-    color: #1e293b;
+    color: var(--ink4);
   }
   .ct-cta {
     display: inline-flex;
@@ -76,7 +76,7 @@ function ensureStyle() {
     background: rgba(0,0,0,.06);
     border: 0; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    color: #64748b; font-size: 12px;
+    color: var(--mu3); font-size: 12px;
     transition: background .12s;
   }
   .ct-dismiss:hover { background: rgba(0,0,0,.12); }

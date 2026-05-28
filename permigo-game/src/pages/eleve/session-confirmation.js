@@ -26,7 +26,7 @@ const STYLE = `<style>
 
 /* ── Skeleton ── */
 .sc-skel {
-  background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
+  background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
   background-size: 200% 100%;
   animation: scShim 1.4s ease-in-out infinite;
   border-radius: 20px;
@@ -59,7 +59,7 @@ const STYLE = `<style>
   -webkit-tap-highlight-color: transparent;
   transition: background .12s;
 }
-.sc-back:active { background: #e2e6f2; transform: scale(.93); }
+.sc-back:active { background: var(--bo); transform: scale(.93); }
 .sc-hd-title {
   font: 700 16px/1 'Plus Jakarta Sans', sans-serif;
   color: var(--ink);
@@ -71,7 +71,7 @@ const STYLE = `<style>
   position: relative;
   overflow: hidden;
   padding: 40px 24px 32px;
-  background: linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #1e1b4b 100%);
+  background: linear-gradient(160deg, var(--ink) 0%, var(--ink4) 50%, #1e1b4b 100%);
   min-height: 200px;
   display: flex;
   flex-direction: column;
@@ -145,7 +145,7 @@ const STYLE = `<style>
   border-radius: 10px;
   background: rgba(99,102,241,.08);
   display: flex; align-items: center; justify-content: center;
-  color: #6366f1;
+  color: var(--a);
   flex-shrink: 0;
 }
 .sc-recap-lbl {
@@ -185,7 +185,7 @@ const STYLE = `<style>
 .sc-comp-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
-  background: #10b981;
+  background: var(--gr);
   flex-shrink: 0;
 }
 .sc-comp-name {
@@ -195,7 +195,7 @@ const STYLE = `<style>
 }
 .sc-comp-status {
   font: 500 11px/1 'Inter', sans-serif;
-  color: #10b981;
+  color: var(--gr);
   background: rgba(16,185,129,.1);
   border-radius: 99px;
   padding: 3px 8px;
@@ -220,12 +220,12 @@ const STYLE = `<style>
   font: 600 11px/1 'Inter', sans-serif;
   text-transform: uppercase;
   letter-spacing: .1em;
-  color: #6366f1;
+  color: var(--a);
   margin-bottom: 10px;
 }
 .sc-comment-text {
   font: 500 15px/1.5 'Inter', sans-serif;
-  color: #1e293b;
+  color: var(--ink4);
   font-style: italic;
 }
 
@@ -246,7 +246,7 @@ const STYLE = `<style>
 .sc-btn-confirm {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; padding: 16px 24px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--a) 0%, var(--pu) 100%);
   border: none; border-radius: 16px;
   color: #fff;
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
@@ -261,7 +261,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center; gap: 6px;
   width: 100%; padding: 12px 24px;
   background: none; border: 1.5px solid #fca5a5;
-  border-radius: 14px; color: #ef4444;
+  border-radius: 14px; color: var(--rd);
   font: 600 13px/1 'Inter', sans-serif;
   cursor: pointer; min-height: 44px;
   -webkit-tap-highlight-color: transparent;
@@ -296,7 +296,7 @@ const STYLE = `<style>
 .sc-modal-confirm-refuse {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; padding: 14px 20px;
-  background: #ef4444; border: none; border-radius: 14px;
+  background: var(--rd); border: none; border-radius: 14px;
   color: #fff; font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; min-height: 50px; margin-bottom: 8px;
   -webkit-tap-highlight-color: transparent;

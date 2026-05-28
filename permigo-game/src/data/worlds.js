@@ -8,7 +8,7 @@ export const WORLDS = [
     nom: 'Campagne',
     titre: 'Maîtriser le véhicule',
     description: 'Les bases : démarrer, freiner, diriger.',
-    couleur: '#10b981', // emerald
+    couleur: 'var(--gr)', // emerald
     emoji: '🌾', // legacy fallback
     image: '/skins/permigo-remc-maitrise-vehicule-flag-v1.png',
     sousCompetences: 9, // C1a → C1i
@@ -30,7 +30,7 @@ export const WORLDS = [
     nom: 'Montagne',
     titre: 'Conditions difficiles',
     description: 'Autoroute, nuit, intempéries, dépassements.',
-    couleur: '#8b5cf6', // violet
+    couleur: 'var(--pu)', // violet
     emoji: '⛰️',
     image: '/skins/permigo-remc-conditions-difficiles-v1.png',
     sousCompetences: 7, // C3a → C3g
@@ -41,7 +41,7 @@ export const WORLDS = [
     nom: 'Sommet',
     titre: 'Conduite autonome & sûre',
     description: 'Voyage longue distance, éco-conduite, sécurité.',
-    couleur: '#f59e0b', // amber
+    couleur: 'var(--am)', // amber
     emoji: '🏔️',
     image: '/skins/permigo-autonomie-crown-v1.png',
     sousCompetences: 7, // C4a → C4g

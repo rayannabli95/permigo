@@ -12,9 +12,9 @@ const STYLE = `<style>
   .ec {
     max-width: 640px;
     margin: 0 auto;
-    background: #0a0d1a;
+    background: var(--ink);
     font-family: 'Inter', sans-serif;
-    color: #f1f5f9;
+    color: var(--bg4);
     min-height: 100dvh;
     padding-bottom: 80px;
     -webkit-font-smoothing: antialiased;
@@ -40,7 +40,7 @@ const STYLE = `<style>
     border-radius: 99px;
     padding: 5px 14px;
     font: 600 11px/1 'Inter', sans-serif;
-    color: #818cf8;
+    color: var(--al);
     letter-spacing: .06em;
     text-transform: uppercase;
     margin-bottom: 20px;
@@ -54,7 +54,7 @@ const STYLE = `<style>
   .ec-hero-ville {
     display: inline-flex; align-items: center; gap: 6px;
     font: 500 15px/1 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu3);
     margin-bottom: 28px;
   }
   .ec-hero-kpis {
@@ -76,7 +76,7 @@ const STYLE = `<style>
   }
   .ec-kpi-lbl {
     font: 500 11px/1 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu3);
     margin-top: 6px;
     text-transform: uppercase;
     letter-spacing: .06em;
@@ -88,7 +88,7 @@ const STYLE = `<style>
     font: 700 11px/1 'Inter', sans-serif;
     text-transform: uppercase;
     letter-spacing: .1em;
-    color: #475569;
+    color: var(--mu4);
     margin: 0 0 16px;
     display: flex; align-items: center; gap: 10px;
   }
@@ -105,8 +105,8 @@ const STYLE = `<style>
     gap: 10px;
   }
   .ec-feature {
-    background: #0f172a;
-    border: 1px solid #1e293b;
+    background: var(--ink);
+    border: 1px solid var(--ink4);
     border-radius: 18px;
     padding: 18px 16px;
     position: relative;
@@ -116,18 +116,18 @@ const STYLE = `<style>
     content: '';
     position: absolute; top: 0; left: 0; right: 0;
     height: 2px;
-    background: var(--f-color, #6366f1);
+    background: var(--f-color, var(--a));
     opacity: .6;
   }
   .ec-feature-ico { font-size: 24px; margin-bottom: 10px; display: block; }
   .ec-feature-title {
     font: 700 13px/1.3 'Plus Jakarta Sans', sans-serif;
-    color: #e2e8f0;
+    color: var(--bo3);
     margin: 0 0 4px;
   }
   .ec-feature-sub {
     font: 500 11px/1.4 'Inter', sans-serif;
-    color: #475569;
+    color: var(--mu4);
   }
 
   /* ── Moniteurs ── */
@@ -136,8 +136,8 @@ const STYLE = `<style>
   }
   .ec-moniteur {
     display: flex; align-items: center; gap: 14px;
-    background: #0f172a;
-    border: 1px solid #1e293b;
+    background: var(--ink);
+    border: 1px solid var(--ink4);
     border-radius: 18px;
     padding: 16px;
     animation: ecCardIn .4s cubic-bezier(.34,1.56,.64,1) both;
@@ -157,12 +157,12 @@ const STYLE = `<style>
   .ec-mon-info { flex: 1; min-width: 0; }
   .ec-mon-name {
     font: 600 14px/1.2 'Inter', sans-serif;
-    color: #e2e8f0;
+    color: var(--bo3);
     margin-bottom: 3px;
   }
   .ec-mon-tag {
     font: 500 11px/1 'Inter', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     background: rgba(99,102,241,.12);
     padding: 3px 8px;
     border-radius: 99px;
@@ -174,8 +174,8 @@ const STYLE = `<style>
     display: flex; flex-direction: column; gap: 12px;
   }
   .ec-temoignage {
-    background: #0f172a;
-    border: 1px solid #1e293b;
+    background: var(--ink);
+    border: 1px solid var(--ink4);
     border-radius: 18px;
     padding: 18px 20px;
     position: relative;
@@ -189,7 +189,7 @@ const STYLE = `<style>
   }
   .ec-temo-text {
     font: 500 13px/1.6 'Inter', sans-serif;
-    color: #cbd5e1;
+    color: var(--bo4);
     padding-top: 14px;
     margin-bottom: 12px;
   }
@@ -206,11 +206,11 @@ const STYLE = `<style>
   }
   .ec-temo-name {
     font: 600 12px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
   }
   .ec-temo-stars {
     margin-left: auto;
-    color: #fbbf24;
+    color: var(--aml2);
     font-size: 12px;
     letter-spacing: 1px;
   }
@@ -218,7 +218,7 @@ const STYLE = `<style>
   /* ── CTA ── */
   .ec-cta {
     margin: 0 20px;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    background: linear-gradient(135deg, var(--a) 0%, var(--pu) 100%);
     border-radius: 24px;
     padding: 28px 24px;
     text-align: center;
@@ -246,7 +246,7 @@ const STYLE = `<style>
   .ec-cta-btn {
     display: inline-flex; align-items: center; gap: 8px;
     background: #fff;
-    color: #4f46e5;
+    color: var(--adk);
     border: none;
     border-radius: 14px;
     padding: 16px 28px;
@@ -262,7 +262,7 @@ const STYLE = `<style>
 
   /* ── Skeleton ── */
   .ec-skel {
-    background: linear-gradient(90deg, #0f172a 0%, #1a2236 50%, #0f172a 100%);
+    background: linear-gradient(90deg, var(--ink) 0%, #1a2236 50%, var(--ink) 100%);
     background-size: 200% 100%;
     animation: ecShim 1.6s ease-in-out infinite;
     border-radius: 16px;
@@ -273,26 +273,26 @@ const STYLE = `<style>
   .ec-err {
     padding: 80px 24px;
     text-align: center;
-    color: #475569;
+    color: var(--mu4);
   }
   .ec-err-ico { font-size: 48px; margin-bottom: 16px; }
   .ec-err-title {
     font: 700 18px/1.3 'Plus Jakarta Sans', sans-serif;
-    color: #cbd5e1;
+    color: var(--bo4);
     margin-bottom: 8px;
   }
   .ec-err-sub {
     font: 500 13px/1.5 'Inter', sans-serif;
-    color: #475569;
+    color: var(--mu4);
   }
 </style>`;
 
 const AVATARS_GRAD = [
   'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,#0891b2,#155e75)',
-  'linear-gradient(135deg,#7c3aed,#4c1d95)',
+  'linear-gradient(135deg,var(--blk),#155e75)',
+  'linear-gradient(135deg,var(--puk),#4c1d95)',
   'linear-gradient(135deg,#0e7c66,#064e3b)',
-  'linear-gradient(135deg,#dc2626,#7f1d1d)',
+  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
   'linear-gradient(135deg,#a16207,#713f12)',
 ];
 
@@ -384,10 +384,10 @@ async function renderEcole(root, slugOrId) {
   const ville = ecole.ville || '';
 
   const features = [
-    { ico: '🎯', title: 'Parcours REMC', sub: '31 compétences officielles', color: '#6366f1' },
-    { ico: '⚡', title: 'Quiz post-leçon', sub: 'Validation immédiate', color: '#10b981' },
-    { ico: '📊', title: 'Suivi temps réel', sub: 'Moniteur + élève synchronisés', color: '#f59e0b' },
-    { ico: '🏆', title: 'Gamification', sub: 'XP, trophées et streaks', color: '#8b5cf6' },
+    { ico: '🎯', title: 'Parcours REMC', sub: '31 compétences officielles', color: 'var(--a)' },
+    { ico: '⚡', title: 'Quiz post-leçon', sub: 'Validation immédiate', color: 'var(--gr)' },
+    { ico: '📊', title: 'Suivi temps réel', sub: 'Moniteur + élève synchronisés', color: 'var(--am)' },
+    { ico: '🏆', title: 'Gamification', sub: 'XP, trophées et streaks', color: 'var(--pu)' },
   ];
 
   const me = getCurUser();

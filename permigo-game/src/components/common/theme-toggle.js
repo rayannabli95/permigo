@@ -42,7 +42,7 @@ export function applyTheme(mode) {
     const effective = mode === 'auto'
       ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
       : mode;
-    meta.setAttribute('content', effective === 'dark' ? '#0b0d1a' : '#6366f1');
+    meta.setAttribute('content', effective === 'dark' ? 'var(--ink)' : 'var(--a)');
   }
 }
 

@@ -74,7 +74,7 @@ export function playReplay(stats) {
 
   const cards = [
     {
-      bg: 'linear-gradient(180deg,#1e1b4b 0%,#312e81 50%,#4338ca 100%)',
+      bg: 'linear-gradient(180deg,#1e1b4b 0%,#312e81 50%,var(--adx) 100%)',
       content: `
         <div class="wrep-tag">SEMAINE ${week()}</div>
         <div class="wrep-em" style="font-size:80px">🎬</div>
@@ -83,7 +83,7 @@ export function playReplay(stats) {
       `,
     },
     {
-      bg: 'linear-gradient(180deg,#7c2d12 0%,#dc2626 50%,#f97316 100%)',
+      bg: 'linear-gradient(180deg,#7c2d12 0%,var(--rdk) 50%,var(--or) 100%)',
       content: `
         <div class="wrep-tag">🚗 TEMPS AU VOLANT</div>
         <div class="wrep-big">${hoursThisWeek.toFixed(1).replace(/\.0$/, '')}<small>h</small></div>
@@ -92,7 +92,7 @@ export function playReplay(stats) {
       `,
     },
     {
-      bg: 'linear-gradient(180deg,#064e3b 0%,#10b981 50%,#34d399 100%)',
+      bg: 'linear-gradient(180deg,#064e3b 0%,var(--gr) 50%,#34d399 100%)',
       content: `
         <div class="wrep-tag">⚡ COMPÉTENCES</div>
         <div class="wrep-big">${stats.compsValidated}</div>
@@ -101,7 +101,7 @@ export function playReplay(stats) {
       `,
     },
     {
-      bg: 'linear-gradient(180deg,#581c87 0%,#a855f7 50%,#c084fc 100%)',
+      bg: 'linear-gradient(180deg,#581c87 0%,var(--pul) 50%,#c084fc 100%)',
       content: stats.topLessonHour ? `
         <div class="wrep-tag">⭐ MOMENT FORT</div>
         <div class="wrep-em" style="font-size:72px">${stats.monsReview >= 4 ? '🏆' : '✨'}</div>
@@ -115,7 +115,7 @@ export function playReplay(stats) {
       `,
     },
     {
-      bg: 'linear-gradient(180deg,#451a03 0%,#a16207 50%,#fbbf24 100%)',
+      bg: 'linear-gradient(180deg,#451a03 0%,#a16207 50%,var(--aml2) 100%)',
       content: `
         <div class="wrep-tag">🔥 SÉRIE</div>
         <div class="wrep-big">${stats.streak || 1}<small>j</small></div>
@@ -344,7 +344,7 @@ function ensureStyles() {
     .wrep-final-cta{
       margin-top:24px;
       padding:16px 32px;border-radius:99px;
-      background:#fff;color:#0b0d1a;border:0;
+      background:#fff;color:var(--ink);border:0;
       font-family:var(--fd);font-size:14px;font-weight:900;
       letter-spacing:.4px;cursor:pointer;
       box-shadow:0 10px 28px -4px rgba(0,0,0,.4);

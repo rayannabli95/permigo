@@ -153,10 +153,10 @@ export const ALERT_CARD_CSS = `
   }
 
   /* Variants */
-  .alc-danger{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff}
-  .alc-warning{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
-  .alc-info{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff}
-  .alc-success{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+  .alc-danger{background:linear-gradient(135deg,var(--rdk),var(--rdx));color:#fff}
+  .alc-warning{background:linear-gradient(135deg,var(--am),var(--amk));color:#fff}
+  .alc-info{background:linear-gradient(135deg,var(--bl2),var(--blk2));color:#fff}
+  .alc-success{background:linear-gradient(135deg,var(--gr),var(--grd));color:#fff}
 
   .alc-close{
     position:absolute;
@@ -227,7 +227,7 @@ export const ALERT_CARD_CSS = `
     border-radius:99px;
     border:0;
     background:#fff;
-    color:#0f172a;
+    color:var(--ink);
     font-family:var(--fd,system-ui);
     font-size:14.5px;
     font-weight:800;
@@ -240,10 +240,10 @@ export const ALERT_CARD_CSS = `
   .alc-btn:active{transform:scale(.97)}
 
   /* Variant button color override */
-  .alc-danger .alc-btn{color:#b91c1c}
-  .alc-warning .alc-btn{color:#b45309}
-  .alc-info .alc-btn{color:#1d4ed8}
-  .alc-success .alc-btn{color:#047857}
+  .alc-danger .alc-btn{color:var(--rdx)}
+  .alc-warning .alc-btn{color:var(--amx)}
+  .alc-info .alc-btn{color:var(--blk2)}
+  .alc-success .alc-btn{color:var(--grdk)}
 
   /* ── Modal mode ── */
   .alc-modal-host{

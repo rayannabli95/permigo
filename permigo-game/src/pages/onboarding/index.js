@@ -12,13 +12,13 @@ import { ASSETS } from '@/utils/assets.js';
 const STYLE = `<style>
   .ob {
     position: fixed; inset: 0;
-    background: #0a0d1a;
+    background: var(--ink);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     font-family: 'Inter', sans-serif;
-    color: #f1f5f9;
+    color: var(--bg4);
     -webkit-font-smoothing: antialiased;
   }
 
@@ -35,7 +35,7 @@ const STYLE = `<style>
   }
   .ob-dot.active {
     width: 18px; border-radius: 3px;
-    background: #6366f1;
+    background: var(--a);
   }
   .ob-dot.done { background: rgba(99,102,241,.4); }
 
@@ -63,7 +63,7 @@ const STYLE = `<style>
     color: #fff;
     margin-bottom: 32px;
   }
-  .ob-logo span { color: #6366f1; }
+  .ob-logo span { color: var(--a); }
 
   /* Illustration */
   .ob-illo {
@@ -84,12 +84,12 @@ const STYLE = `<style>
     letter-spacing: -.03em;
     margin: 0 0 12px;
   }
-  .ob-title .accent { color: #818cf8; }
+  .ob-title .accent { color: var(--al); }
 
   /* Subtitle */
   .ob-sub {
     font: 500 16px/1.6 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     margin: 0 0 40px;
     max-width: 300px;
   }
@@ -111,7 +111,7 @@ const STYLE = `<style>
   .ob-feat-ico { font-size: 22px; flex-shrink: 0; }
   .ob-feat-txt {
     font: 500 13px/1.4 'Inter', sans-serif;
-    color: #e2e8f0;
+    color: var(--bo3);
   }
   .ob-feat-txt strong { color: #fff; display: block; font-weight: 700; margin-bottom: 1px; }
 
@@ -119,7 +119,7 @@ const STYLE = `<style>
   .ob-btn {
     width: 100%; max-width: 320px;
     padding: 18px 24px;
-    background: #6366f1;
+    background: var(--a);
     color: #fff;
     border: none;
     border-radius: 16px;
@@ -147,7 +147,7 @@ const STYLE = `<style>
     aspect-ratio: 1;
     border-radius: 20px;
     border: 2px solid rgba(255,255,255,.1);
-    background: #0f172a;
+    background: var(--ink);
     overflow: hidden;
     cursor: pointer;
     position: relative;
@@ -158,7 +158,7 @@ const STYLE = `<style>
   }
   .ob-av-card:active { transform: scale(.93); }
   .ob-av-card.selected {
-    border-color: #6366f1;
+    border-color: var(--a);
     box-shadow: 0 0 0 3px rgba(99,102,241,.25), 0 0 20px rgba(99,102,241,.2);
   }
   .ob-av-card.locked { opacity: .45; cursor: default; }
@@ -170,7 +170,7 @@ const STYLE = `<style>
   }
   .ob-av-name {
     font: 600 9px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     margin-top: 4px;
     text-align: center;
     padding: 0 4px;
@@ -186,7 +186,7 @@ const STYLE = `<style>
   .ob-av-check {
     position: absolute; top: 6px; right: 6px;
     width: 18px; height: 18px;
-    background: #6366f1;
+    background: var(--a);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 10px;
@@ -217,22 +217,22 @@ const STYLE = `<style>
     background: rgba(99,102,241,.2);
     display: flex; align-items: center; justify-content: center;
     font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
-    color: #818cf8;
+    color: var(--al);
     flex-shrink: 0;
   }
   .ob-m-body { flex: 1; }
   .ob-m-title {
     font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: #e2e8f0;
+    color: var(--bo3);
     margin-bottom: 2px;
   }
   .ob-m-sub {
     font: 500 11px/1.3 'Inter', sans-serif;
-    color: #64748b;
+    color: var(--mu3);
   }
   .ob-m-reward {
     font: 700 12px/1 'IBM Plex Mono', monospace;
-    color: #818cf8;
+    color: var(--al);
     flex-shrink: 0;
   }
 
@@ -385,7 +385,7 @@ function renderFirstQuest(root, me) {
         </div>
       </div>
       <div class="ob-footer">
-        <button class="ob-btn" id="ob-finish" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+        <button class="ob-btn" id="ob-finish" style="background:linear-gradient(135deg,var(--a),var(--pu))">
           C'est parti&nbsp;! <span aria-hidden="true">🚀</span>
         </button>
       </div>

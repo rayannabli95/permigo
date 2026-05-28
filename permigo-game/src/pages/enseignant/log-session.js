@@ -38,9 +38,9 @@ const MONDE_LABELS     = ['', 'Maîtrise du véhicule', 'Appréhension de la rou
 
 const GRADS = [
   'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,#0891b2,#155e75)',
-  'linear-gradient(135deg,#7c3aed,#4c1d95)',
-  'linear-gradient(135deg,#059669,#064e3b)',
+  'linear-gradient(135deg,var(--blk),#155e75)',
+  'linear-gradient(135deg,var(--puk),#4c1d95)',
+  'linear-gradient(135deg,var(--grd),#064e3b)',
   'linear-gradient(135deg,#9333ea,#6b21a8)',
   'linear-gradient(135deg,#a16207,#713f12)',
 ];
@@ -200,7 +200,7 @@ function _render(root) {
       <div class="ls-sec-title">${icon('users', { size: 13, strokeWidth: 2.4 })} Avec qui ?</div>
       ${_eleves.length > 6 ? `
       <div class="ls-search-wrap">
-        <span class="ls-search-ico">${icon('search', { size: 14, strokeWidth: 2.2, color: '#94a3b8' })}</span>
+        <span class="ls-search-ico">${icon('search', { size: 14, strokeWidth: 2.2, color: 'var(--mu2)' })}</span>
         <input class="ls-search" id="ls-search" type="search" placeholder="Chercher un élève…"
                aria-label="Chercher un élève"
                value="${esc(_query)}" autocomplete="off" autocorrect="off" spellcheck="false">
@@ -282,7 +282,7 @@ function _render(root) {
                                   data-comp="${esc(c.id)}"
                                   ${isAcquis ? 'disabled aria-disabled="true"' : ''}
                                   type="button" title="${esc(c.nom)}">
-                    ${isAcquis ? `<span class="ls-comp-check-ico">${icon('check', { size: 10, strokeWidth: 3, color: '#059669' })}</span>` : ''}
+                    ${isAcquis ? `<span class="ls-comp-check-ico">${icon('check', { size: 10, strokeWidth: 3, color: 'var(--grd)' })}</span>` : ''}
                     <span class="ls-comp-code">${esc(c.code || '')}</span>
                     <span class="ls-comp-lbl">${esc(c.nom)}</span>
                   </button>`;
@@ -296,7 +296,7 @@ function _render(root) {
     <!-- ── 5. COMMENTAIRE ────────────────────── -->
     <div class="ls-card">
       <div class="ls-sec-title">${icon('message-square', { size: 13, strokeWidth: 2.4 })} Commentaire <span class="ls-optional">optionnel</span></div>
-      <div class="ls-visibility-tag">${icon('eye', { size: 11, strokeWidth: 2, color: '#94a3b8' })} Visible par l'élève et l'auto-école</div>
+      <div class="ls-visibility-tag">${icon('eye', { size: 11, strokeWidth: 2, color: 'var(--mu2)' })} Visible par l'élève et l'auto-école</div>
       <div class="ls-ta-wrap">
         <textarea class="ls-textarea" id="ls-textarea" maxlength="${MAX_COMMENT}"
                   aria-label="Commentaire de séance"
@@ -309,7 +309,7 @@ function _render(root) {
       <div class="ls-tpl-list" id="ls-tpl-list">
         ${_templates.map(t => t.unlocked === false
           ? `<button class="ls-tpl-chip ls-tpl-locked" disabled title="Débloque à ${t.unlock_at ?? '?'} validations">
-               ${icon('lock', { size: 10, strokeWidth: 2.5, color: '#94a3b8' })}
+               ${icon('lock', { size: 10, strokeWidth: 2.5, color: 'var(--mu2)' })}
                ${esc(t.title || t.body || 'Template')}
              </button>`
           : `<button class="ls-tpl-chip" data-body="${esc(t.body || '')}" type="button">
@@ -398,7 +398,7 @@ function _wireEleveList(root) {
 
       // Fetch comp data pour ce nouvel élève
       const compsEl = root.querySelector('#ls-comps-list');
-      if (compsEl) compsEl.innerHTML = `<div class="ls-empty-hint" style="color:#6366f1">Chargement des compétences…</div>`;
+      if (compsEl) compsEl.innerHTML = `<div class="ls-empty-hint" style="color:var(--a)">Chargement des compétences…</div>`;
       await _fetchCompData(id);
       // Re-render juste le bloc comps
       _rerenderComps(root);
@@ -545,7 +545,7 @@ function _rerenderComps(root) {
           return `<button class="ls-comp-chip${isAcquis ? ' ls-comp-acquis' : isSel ? ' ls-comp-sel' : ''}"
                           data-comp="${esc(c.id)}" ${isAcquis ? 'disabled aria-disabled="true"' : ''}
                           type="button" title="${esc(c.nom)}">
-            ${isAcquis ? `<span class="ls-comp-check-ico">${icon('check', { size: 10, strokeWidth: 3, color: '#059669' })}</span>` : ''}
+            ${isAcquis ? `<span class="ls-comp-check-ico">${icon('check', { size: 10, strokeWidth: 3, color: 'var(--grd)' })}</span>` : ''}
             <span class="ls-comp-code">${esc(c.code || '')}</span>
             <span class="ls-comp-lbl">${esc(c.nom)}</span>
           </button>`;
@@ -823,7 +823,7 @@ const CSS = `
 .ls-comp-count {
   margin-left: auto;
   font: 700 11px/1 'Inter', sans-serif;
-  color: #6366f1;
+  color: var(--a);
   background: rgba(99,102,241,.08);
   padding: 3px 9px;
   border-radius: 10px;
@@ -832,7 +832,7 @@ const CSS = `
   font-weight: 500;
   text-transform: none;
   letter-spacing: 0;
-  color: #c4ccd8;
+  color: var(--mu5);
 }
 
 /* Élèves */
@@ -857,7 +857,7 @@ const CSS = `
   -webkit-appearance: none;
   transition: border-color .15s;
 }
-.ls-search:focus { border-color: #6366f1; background: #fff; }
+.ls-search:focus { border-color: var(--a); background: #fff; }
 .ls-search::-webkit-search-cancel-button { -webkit-appearance: none; }
 .ls-eleve-list { display: flex; flex-direction: column; gap: 6px; }
 .ls-eleve-row {
@@ -872,7 +872,7 @@ const CSS = `
   -webkit-tap-highlight-color: transparent;
 }
 .ls-eleve-row:active { transform: scale(.99); }
-.ls-eleve-row.ls-sel { border-color: #6366f1; background: rgba(99,102,241,.04); }
+.ls-eleve-row.ls-sel { border-color: var(--a); background: rgba(99,102,241,.04); }
 .ls-av {
   width: 38px; height: 38px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -887,12 +887,12 @@ const CSS = `
 .ls-eleve-check {
   width: 22px; height: 22px;
   border-radius: 50%;
-  border: 2px solid #e2e6f2;
+  border: 2px solid var(--bo);
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   transition: background .12s, border-color .12s;
 }
-.ls-eleve-check-on { background: #6366f1; border-color: #6366f1; }
+.ls-eleve-check-on { background: var(--a); border-color: var(--a); }
 
 /* Durée */
 .ls-dur-chips {
@@ -912,7 +912,7 @@ const CSS = `
   min-height: 50px;
 }
 .ls-dur-chip:active { transform: scale(.96); }
-.ls-dur-chip.ls-sel { border-color: #6366f1; background: rgba(99,102,241,.07); color: #6366f1; }
+.ls-dur-chip.ls-sel { border-color: var(--a); background: rgba(99,102,241,.07); color: var(--a); }
 .ls-dur-other { font-size: 13px; font-weight: 600; }
 .ls-dur-sheet {
   margin-top: 12px;
@@ -939,11 +939,11 @@ const CSS = `
 .ls-step-val {
   flex: 1; text-align: center;
   font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
-  color: #6366f1;
+  color: var(--a);
 }
 .ls-step-apply {
   padding: 10px 18px;
-  background: #6366f1;
+  background: var(--a);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -965,7 +965,7 @@ const CSS = `
   position: relative;
   transition: border-color .12s;
 }
-.ls-date-row:active { border-color: #6366f1; }
+.ls-date-row:active { border-color: var(--a); }
 .ls-date-txt {
   flex: 1;
   font: 600 14px/1 'Inter', sans-serif;
@@ -973,7 +973,7 @@ const CSS = `
 }
 .ls-date-badge {
   font: 600 11px/1 'Inter', sans-serif;
-  color: #6366f1;
+  color: var(--a);
   background: rgba(99,102,241,.08);
   padding: 4px 9px;
   border-radius: 8px;
@@ -1010,18 +1010,18 @@ const CSS = `
   text-align: left;
 }
 .ls-comp-chip:active { transform: scale(.96); }
-.ls-comp-chip.ls-comp-sel { border-color: #10b981; background: rgba(16,185,129,.07); color: #059669; font-weight: 600; }
+.ls-comp-chip.ls-comp-sel { border-color: var(--gr); background: rgba(16,185,129,.07); color: var(--grd); font-weight: 600; }
 .ls-comp-chip.ls-comp-acquis { border-color: #d1fae5; background: #f0fdf4; color: #6ee7b7; cursor: default; opacity: .8; }
 .ls-comp-code {
   font: 700 9px/1 'Inter', sans-serif;
   padding: 1px 5px;
   border-radius: 5px;
   background: rgba(99,102,241,.1);
-  color: #6366f1;
+  color: var(--a);
   flex-shrink: 0;
 }
-.ls-comp-sel .ls-comp-code { background: #059669; color: #fff; }
-.ls-comp-acquis .ls-comp-code { background: #bbf7d0; color: #059669; }
+.ls-comp-sel .ls-comp-code { background: var(--grd); color: #fff; }
+.ls-comp-acquis .ls-comp-code { background: #bbf7d0; color: var(--grd); }
 .ls-comp-check-ico { flex-shrink: 0; }
 .ls-comp-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
 
@@ -1046,14 +1046,14 @@ const CSS = `
   -webkit-appearance: none;
   transition: border-color .15s;
 }
-.ls-textarea:focus { border-color: #6366f1; }
+.ls-textarea:focus { border-color: var(--a); }
 .ls-char-count {
   position: absolute; bottom: 8px; right: 10px;
   font: 500 10px/1 'Inter', sans-serif;
-  color: #c4ccd8;
+  color: var(--mu5);
   pointer-events: none;
 }
-.ls-char-count.ls-near { color: #f59e0b; }
+.ls-char-count.ls-near { color: var(--am); }
 .ls-tpl-list {
   display: flex; flex-wrap: wrap; gap: 6px;
   margin-top: 10px;
@@ -1063,7 +1063,7 @@ const CSS = `
   border: 1.5px solid var(--bo);
   border-radius: 20px;
   font: 500 12px/1.4 'Inter', sans-serif;
-  color: #6366f1;
+  color: var(--a);
   background: rgba(99,102,241,.04);
   cursor: pointer;
   transition: background .12s, border-color .12s;
@@ -1073,8 +1073,8 @@ const CSS = `
   text-align: left;
   word-break: break-word;
 }
-.ls-tpl-chip:active { background: rgba(99,102,241,.12); border-color: #6366f1; }
-.ls-tpl-locked { color: #c4ccd8; cursor: not-allowed; background: var(--bg); display: inline-flex; align-items: center; gap: 5px; }
+.ls-tpl-chip:active { background: rgba(99,102,241,.12); border-color: var(--a); }
+.ls-tpl-locked { color: var(--mu5); cursor: not-allowed; background: var(--bg); display: inline-flex; align-items: center; gap: 5px; }
 
 /* Empty hint */
 .ls-empty-hint {
@@ -1098,7 +1098,7 @@ const CSS = `
   height: 56px;
   border: none;
   border-radius: 16px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--a), var(--pu));
   color: #fff;
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
@@ -1155,7 +1155,7 @@ const CSS = `
   border-radius: 12px;
   font: 700 13px/1 'Inter', sans-serif;
   color: #fff;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--a), var(--pu));
   cursor: pointer;
   min-height: 46px;
   transition: opacity .12s;
@@ -1163,10 +1163,10 @@ const CSS = `
 .ls-dup-confirm:active { opacity: .85; }
 .ls-dup-view {
   width: 100%; padding: 13px;
-  border: 1.5px solid #4f46e5;
+  border: 1.5px solid var(--adk);
   border-radius: 12px;
   font: 600 13px/1 'Inter', sans-serif;
-  color: #4f46e5;
+  color: var(--adk);
   background: rgba(99,102,241,.05);
   cursor: pointer;
   min-height: 46px;

@@ -9,20 +9,35 @@
   --ap:rgba(99,102,241,.09); --ag:rgba(99,102,241,.14);
 
   /* ─ États ─ */
-  --gr:#10b981; --grp:rgba(16,185,129,.09);  /* succès */
-  --rd:#ef4444; --rdp:rgba(239,68,68,.09);   /* danger */
-  --am:#f59e0b; --amp:rgba(245,158,11,.09);  /* warning */
-  --bl:#0ea5e9; --blp:rgba(14,165,233,.09);  /* info */
-  --pu:#8b5cf6; --pup:rgba(139,92,246,.09);  /* violet */
+  --gr:#10b981; --grd:#059669; --grp:rgba(16,185,129,.09);  /* succès / succès dark */
+  --rd:#ef4444; --rdk:#dc2626; --rdx:#b91c1c; --rdp:rgba(239,68,68,.09); /* danger / dark / darker */
+  --am:#f59e0b; --amk:#d97706; --amx:#b45309; --aml:#fde68a; --aml2:#fbbf24; --amp:rgba(245,158,11,.09); /* warning variants */
+  --bl:#0ea5e9; --blk:#0891b2; --blp:rgba(14,165,233,.09);  /* info / info dark */
+  --pu:#8b5cf6; --puk:#7c3aed; --pul:#a855f7; --pup:rgba(139,92,246,.09); /* violet variants */
 
   /* ─ Surfaces (light mode) ─ */
-  --bg:#f4f5fb; --bg2:#eceef8;
+  --bg:#f4f5fb; --bg2:#eceef8; --bg3:#f0f2f8; --bg4:#f1f5f9; --bg5:#e4e8f4;
   --su:#fff; --su2:#f8f9fd;
-  --bo:#e2e6f2; --bo2:#edf0f9;
+  --bo:#e2e6f2; --bo2:#edf0f9; --bo3:#e2e8f0; --bo4:#cbd5e1;
 
   /* ─ Texte ─ */
-  --ink:#0b0d1a; --ink2:#1a1d2e; --ink3:#2d3050;
-  --mu:#7880a4; --mu2:#9ba3c2;
+  --ink:#0b0d1a; --ink2:#1a1d2e; --ink3:#2d3050; --ink4:#1e293b; --ink5:#374151;
+  --mu:#7880a4; --mu2:#94a3b8; --mu3:#64748b; --mu4:#475569;
+  /* ─ Vert complémentaire ─ */
+  --gr2:#22c55e; --grk:#16a34a; --grk2:#15803d; --grdk:#047857;
+  --grp2:#dcfce7; /* success bg très clair */
+  /* ─ Rouge bg clair ─ */
+  --rdp2:#fee2e2;
+  /* ─ Accent clair (indigo-300/200) ─ */
+  --al:#818cf8; --al2:#c7d2fe;
+  /* ─ Bleu variants ─ */
+  --bl2:#3b82f6; --blk2:#1d4ed8;
+  /* ─ Orange (streak / warm CTA) ─ */
+  --or:#f97316;
+  /* ─ Accent clair supplémentaire / muted argent ─ */
+  --al3:#a5b4fc; --mu5:#c4ccd8;
+  /* ─ Indigo dark (badges) ─ */
+  --adx:#4338ca;
 
   /* ─ Layout ─ */
   --sw:248px; /* sidebar width */

@@ -28,13 +28,13 @@ function ensureStyle() {
     font: 600 11px/1 'Inter', sans-serif;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: #94a3b8;
+    color: var(--mu2);
     margin: 0 0 12px;
     display: flex; align-items: center; gap: 8px;
   }
   .mr-sec-title::after {
     content: ''; flex: 1;
-    height: 1px; background: #e2e6f2;
+    height: 1px; background: var(--bo);
   }
 
   /* Ma position highlight */
@@ -58,24 +58,24 @@ function ensureStyle() {
     font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
     flex-shrink: 0;
   }
-  .mr-rank-badge.rank-1 { background: linear-gradient(135deg,#f59e0b,#d97706); color:#fff; }
-  .mr-rank-badge.rank-2 { background: linear-gradient(135deg,#94a3b8,#64748b); color:#fff; }
-  .mr-rank-badge.rank-3 { background: linear-gradient(135deg,#b45309,#92400e); color:#fff; }
-  .mr-rank-badge.rank-other { background: rgba(99,102,241,.1); color:#6366f1; border:1.5px solid rgba(99,102,241,.2); }
+  .mr-rank-badge.rank-1 { background: linear-gradient(135deg,var(--am),var(--amk)); color:#fff; }
+  .mr-rank-badge.rank-2 { background: linear-gradient(135deg,var(--mu2),var(--mu3)); color:#fff; }
+  .mr-rank-badge.rank-3 { background: linear-gradient(135deg,var(--amx),#92400e); color:#fff; }
+  .mr-rank-badge.rank-other { background: rgba(99,102,241,.1); color:var(--a); border:1.5px solid rgba(99,102,241,.2); }
   .mr-name {
     font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     flex: 1;
   }
   .mr-score {
     font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     letter-spacing: -.02em;
     flex-shrink: 0;
   }
   .mr-score-lbl {
     font: 500 10px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     text-align: right;
     margin-top: 2px;
   }
@@ -88,24 +88,24 @@ function ensureStyle() {
   .mr-metric {
     text-align: center;
     padding: 8px 4px;
-    background: #f8f9fc;
+    background: var(--su2);
     border-radius: 12px;
   }
   .mr-metric-val {
     font: 700 16px/1 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     letter-spacing: -.02em;
   }
   .mr-metric-lbl {
     font: 500 10px/1.3 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     margin-top: 3px;
   }
 
   /* Comparaison vs n+1 */
   .mr-compare {
     font: 500 12px/1.4 'Inter', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     background: rgba(99,102,241,.05);
     border-radius: 10px;
     padding: 8px 12px;
@@ -116,7 +116,7 @@ function ensureStyle() {
   /* Top 3 leaderboard */
   .mr-list {
     background: #fff;
-    border: 1.5px solid #e2e6f2;
+    border: 1.5px solid var(--bo);
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(10,13,26,.06);
@@ -125,7 +125,7 @@ function ensureStyle() {
   .mr-row {
     display: flex; align-items: center; gap: 12px;
     padding: 12px 16px;
-    border-bottom: 1px solid #f0f2f8;
+    border-bottom: 1px solid var(--bg3);
     transition: background .12s;
   }
   .mr-row:last-child { border-bottom: none; }
@@ -137,24 +137,24 @@ function ensureStyle() {
     width: 24px; text-align: center;
     flex-shrink: 0;
   }
-  .mr-row-rank.r1 { color: #d97706; }
-  .mr-row-rank.r2 { color: #64748b; }
-  .mr-row-rank.r3 { color: #b45309; }
-  .mr-row-rank.rn { color: #94a3b8; }
+  .mr-row-rank.r1 { color: var(--amk); }
+  .mr-row-rank.r2 { color: var(--mu3); }
+  .mr-row-rank.r3 { color: var(--amx); }
+  .mr-row-rank.rn { color: var(--mu2); }
   .mr-row-info { flex: 1; min-width: 0; }
   .mr-row-name {
     font: 600 13px/1.2 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .mr-row-sub {
     font: 500 11px/1 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     margin-top: 2px;
   }
   .mr-row-score {
     font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     flex-shrink: 0;
   }
   `;
@@ -193,7 +193,7 @@ function fmtHours(h) {
 export async function mountMoniteurRanking(root, { myId }) {
   ensureStyle();
 
-  root.innerHTML = `<div style="padding:12px 0;text-align:center;color:#94a3b8;font:500 13px/1 'Inter',sans-serif">Chargement du ranking…</div>`;
+  root.innerHTML = `<div style="padding:12px 0;text-align:center;color:var(--mu2);font:500 13px/1 'Inter',sans-serif">Chargement du ranking…</div>`;
 
   let ranking = [];
   try {
@@ -207,7 +207,7 @@ export async function mountMoniteurRanking(root, { myId }) {
   }
 
   if (ranking.length === 0) {
-    root.innerHTML = `<div style="text-align:center;color:#94a3b8;font:500 13px/1.5 'Inter',sans-serif;padding:16px">Aucune donnée ce mois-ci encore.</div>`;
+    root.innerHTML = `<div style="text-align:center;color:var(--mu2);font:500 13px/1.5 'Inter',sans-serif;padding:16px">Aucune donnée ce mois-ci encore.</div>`;
     return;
   }
 
@@ -242,7 +242,7 @@ export async function mountMoniteurRanking(root, { myId }) {
       <div class="mr-metrics">
         ${noHours ? `
         <div class="mr-metric" style="grid-column:span 2">
-          <div class="mr-metric-val" style="color:#94a3b8;font-size:13px">${mine.n_validations ?? 0} val. · pas encore de session enregistrée</div>
+          <div class="mr-metric-val" style="color:var(--mu2);font-size:13px">${mine.n_validations ?? 0} val. · pas encore de session enregistrée</div>
           <div class="mr-metric-lbl" style="margin-top:4px">Enregistre une session pour débloquer ce compteur</div>
         </div>` : `
         <div class="mr-metric">
@@ -275,7 +275,7 @@ export async function mountMoniteurRanking(root, { myId }) {
         <div class="mr-row${r.moniteur_id === myId ? ' mr-row-me' : ''}">
           <span class="mr-row-rank ${rankRowClass(r.rank)}">${rankLabel(r.rank)}</span>
           <div class="mr-row-info">
-            <div class="mr-row-name">${esc(r.moniteur_prenom)}${r.moniteur_id === myId ? ' <span style="font-size:10px;color:#6366f1">(toi)</span>' : ''}</div>
+            <div class="mr-row-name">${esc(r.moniteur_prenom)}${r.moniteur_id === myId ? ' <span style="font-size:10px;color:var(--a)">(toi)</span>' : ''}</div>
             <div class="mr-row-sub">${fmtHours(r.hours_confirmed)} · ${r.n_validations ?? 0} val. · ${r.n_eleves_diff ?? 0} élèves</div>
           </div>
           <div class="mr-row-score">${r.score_total} pts</div>

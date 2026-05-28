@@ -69,7 +69,7 @@ const STYLE = `<style>
   position: absolute;
   top: -16px; right: -16px;
   width: 64px; height: 64px;
-  background: radial-gradient(circle, var(--kc, #6366f1) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--kc, var(--a)) 0%, transparent 70%);
   opacity: .08;
   pointer-events: none;
 }
@@ -123,8 +123,8 @@ const STYLE = `<style>
   padding: 4px 8px;
   border-radius: 6px;
 }
-.kpi-delta.up   { color: #047857; background: rgba(16,185,129,.12); }
-.kpi-delta.down { color: #b91c1c; background: rgba(239,68,68,.12); }
+.kpi-delta.up   { color: var(--grdk); background: rgba(16,185,129,.12); }
+.kpi-delta.down { color: var(--rdx); background: rgba(239,68,68,.12); }
 
 /* Sparkline activité 7j (Tesla cockpit feel) */
 .spark-wrap {
@@ -150,13 +150,13 @@ const STYLE = `<style>
 .spark-bar {
   width: 100%;
   max-width: 28px;
-  background: linear-gradient(180deg, #6366f1, #8b5cf6);
+  background: linear-gradient(180deg, var(--a), var(--pu));
   border-radius: 6px 6px 0 0;
   transition: height .6s cubic-bezier(.2,.7,.3,1);
   box-shadow: 0 -2px 6px rgba(99,102,241,.18);
 }
 .spark-bar.today {
-  background: linear-gradient(180deg, #f59e0b, #f97316);
+  background: linear-gradient(180deg, var(--am), var(--or));
   box-shadow: 0 -2px 8px rgba(245,158,11,.35);
 }
 .spark-lbl {
@@ -178,7 +178,7 @@ const STYLE = `<style>
   cursor: pointer;
   transition: border-color .15s, transform .12s;
 }
-.exam-row:hover { border-color: #f59e0b; }
+.exam-row:hover { border-color: var(--am); }
 .exam-row:active { transform: scale(.98); }
 .exam-name {
   font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -204,13 +204,13 @@ const STYLE = `<style>
 }
 .exam-prog-fill {
   height: 100%;
-  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  background: linear-gradient(90deg, var(--am), var(--aml2));
   border-radius: 99px;
   transition: width .6s cubic-bezier(.2,.7,.3,1);
 }
 .exam-prog-val {
   font: 700 12px/1 'IBM Plex Mono', monospace;
-  color: #b45309;
+  color: var(--amx);
   min-width: 38px;
   text-align: right;
 }
@@ -228,14 +228,14 @@ const STYLE = `<style>
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
   transition: border-color .15s ease;
 }
-.team-row:hover { border-color: #6366f1; }
+.team-row:hover { border-color: var(--a); }
 .team-av {
   width: 40px; height: 40px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font: 600 14px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
   flex-shrink: 0;
-  background: #6366f1;
+  background: var(--a);
 }
 .team-info { flex: 1; min-width: 0; }
 .team-name {
@@ -250,7 +250,7 @@ const STYLE = `<style>
 }
 .team-badge {
   font: 600 12px/1 'Inter', sans-serif;
-  color: #6366f1;
+  color: var(--a);
   background: rgba(99,102,241,.1);
   border-radius: 99px;
   padding: 6px 12px;
@@ -272,7 +272,7 @@ const STYLE = `<style>
 .activity-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
-  background: #10b981;
+  background: var(--gr);
   flex-shrink: 0;
   margin-top: 6px;
 }
@@ -281,7 +281,7 @@ const STYLE = `<style>
   font: 500 13px/1.4 'Inter', sans-serif;
   color: var(--ink);
 }
-.activity-line strong { font-weight: 600; color: #0a0d1a; }
+.activity-line strong { font-weight: 600; color: var(--ink); }
 .activity-meta {
   font: 500 12px/1 'Inter', sans-serif;
   color: var(--mu2);
@@ -290,7 +290,7 @@ const STYLE = `<style>
 
 /* Skeleton */
 .skel-block {
-  background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
+  background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
   background-size: 200% 100%;
   animation: shimmerP 1.4s ease-in-out infinite;
   border-radius: 12px;
@@ -304,7 +304,7 @@ const STYLE = `<style>
   color: var(--mu2);
   font: 500 13px/1.5 'Inter', sans-serif;
   background: var(--su);
-  border: 1px dashed #e2e6f2;
+  border: 1px dashed var(--bo);
   border-radius: 12px;
 }
 
@@ -322,7 +322,7 @@ const STYLE = `<style>
   font: 600 11px/1 'Inter', sans-serif;
   letter-spacing: .02em;
 }
-.trend-lg-item { display: inline-flex; align-items: center; gap: 6px; color: #475569; }
+.trend-lg-item { display: inline-flex; align-items: center; gap: 6px; color: var(--mu4); }
 .trend-lg-dot {
   width: 8px; height: 8px; border-radius: 50%;
   display: inline-block;
@@ -330,23 +330,23 @@ const STYLE = `<style>
 .trend-svg-wrap { position: relative; width: 100%; height: 120px; }
 .trend-svg { display: block; width: 100%; height: 100%; }
 .trend-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.trend-line.validations  { stroke: #6366f1; }
-.trend-line.quiz         { stroke: #8b5cf6; }
-.trend-line.sessions     { stroke: #f59e0b; }
+.trend-line.validations  { stroke: var(--a); }
+.trend-line.quiz         { stroke: var(--pu); }
+.trend-line.sessions     { stroke: var(--am); }
 .trend-area              { opacity: .08; }
-.trend-area.validations  { fill: #6366f1; }
-.trend-area.quiz         { fill: #8b5cf6; }
-.trend-area.sessions     { fill: #f59e0b; }
+.trend-area.validations  { fill: var(--a); }
+.trend-area.quiz         { fill: var(--pu); }
+.trend-area.sessions     { fill: var(--am); }
 .trend-axis-y {
   font: 500 9px/1 'IBM Plex Mono', 'Menlo', monospace;
-  fill: #94a3b8;
+  fill: var(--mu2);
 }
 .trend-axis-x {
   font: 500 9px/1 'Inter', sans-serif;
-  fill: #94a3b8;
+  fill: var(--mu2);
 }
 .trend-grid {
-  stroke: #e2e6f2;
+  stroke: var(--bo);
   stroke-width: 1;
   stroke-dasharray: 2 3;
 }
@@ -359,11 +359,11 @@ const STYLE = `<style>
 
 const AVATARS = [
   'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,#0891b2,#155e75)',
-  'linear-gradient(135deg,#7c3aed,#4c1d95)',
+  'linear-gradient(135deg,var(--blk),#155e75)',
+  'linear-gradient(135deg,var(--puk),#4c1d95)',
   'linear-gradient(135deg,#0e7c66,#064e3b)',
   'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,#dc2626,#7f1d1d)',
+  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
 ];
 
 // ─── Entry point ─────────────────────────────────────────────
@@ -541,7 +541,7 @@ export async function mount(root) {
   } catch (e) {
     console.error('[pulse]', e);
     toast('Erreur de chargement', 'error');
-    root.innerHTML = `${STYLE}<div class="pulse"><p style="padding:32px;color:#ef4444">Erreur de chargement du dashboard.</p></div>`;
+    root.innerHTML = `${STYLE}<div class="pulse"><p style="padding:32px;color:var(--rd)">Erreur de chargement du dashboard.</p></div>`;
   }
 }
 
@@ -559,24 +559,24 @@ function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees
   </div>
 
   ${elevesARisque > 0 ? `
-    <div style="margin:12px 16px 0;padding:14px 16px;background:linear-gradient(135deg,#fef9e7,#fffbeb);border:1px solid #fde68a;border-radius:14px;display:flex;align-items:center;gap:12px">
-      <div style="width:36px;height:36px;border-radius:50%;background:#f59e0b;color:#fff;display:grid;place-items:center;flex-shrink:0">${icon('alert-circle', { size: 18 }) || '⚠️'}</div>
+    <div style="margin:12px 16px 0;padding:14px 16px;background:linear-gradient(135deg,#fef9e7,#fffbeb);border:1px solid var(--aml);border-radius:14px;display:flex;align-items:center;gap:12px">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--am);color:#fff;display:grid;place-items:center;flex-shrink:0">${icon('alert-circle', { size: 18 }) || '⚠️'}</div>
       <div style="flex:1">
-        <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;color:#0a0d1a;margin-bottom:2px">${elevesARisque} élève${elevesARisque > 1 ? 's' : ''} à relancer</div>
-        <div style="font:500 12px/1.4 'Inter',sans-serif;color:#64748b">Pas d'activité depuis 14 jours ou plus.</div>
+        <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:2px">${elevesARisque} élève${elevesARisque > 1 ? 's' : ''} à relancer</div>
+        <div style="font:500 12px/1.4 'Inter',sans-serif;color:var(--mu3)">Pas d'activité depuis 14 jours ou plus.</div>
       </div>
-      <a href="#/eleves" style="font:700 11px/1 'Inter',sans-serif;color:#b45309;text-decoration:none;padding:8px 12px;background:rgba(245,158,11,.15);border-radius:8px;white-space:nowrap">Voir</a>
+      <a href="#/eleves" style="font:700 11px/1 'Inter',sans-serif;color:var(--amx);text-decoration:none;padding:8px 12px;background:rgba(245,158,11,.15);border-radius:8px;white-space:nowrap">Voir</a>
     </div>
   ` : ''}
 
   <div class="kpi-grid">
-    <div class="kpi-card" style="--kc:#6366f1">
-      <span class="kpi-ico" style="color:#6366f1">${icon('users', { size: 22 })}</span>
-      <div class="kpi-val">${elevesActifs}<span style="font-size:.5em;color:#94a3b8;font-weight:600">/${elevesTotal}</span></div>
-      <div class="kpi-lbl">Élèves actifs<br><span style="font-size:.7em;color:#94a3b8">(30 derniers jours)</span></div>
+    <div class="kpi-card" style="--kc:var(--a)">
+      <span class="kpi-ico" style="color:var(--a)">${icon('users', { size: 22 })}</span>
+      <div class="kpi-val">${elevesActifs}<span style="font-size:.5em;color:var(--mu2);font-weight:600">/${elevesTotal}</span></div>
+      <div class="kpi-lbl">Élèves actifs<br><span style="font-size:.7em;color:var(--mu2)">(30 derniers jours)</span></div>
     </div>
-    <div class="kpi-card" style="--kc:#10b981">
-      <span class="kpi-ico" style="color:#10b981">${icon('check-circle', { size: 22 })}</span>
+    <div class="kpi-card" style="--kc:var(--gr)">
+      <span class="kpi-ico" style="color:var(--gr)">${icon('check-circle', { size: 22 })}</span>
       <div class="kpi-val">${compValidees}</div>
       <div class="kpi-lbl">Compétences validées<br>${esc(monthLabel)}</div>
       ${compValideesPrev > 0 || compValidees > 0 ? `
@@ -585,13 +585,13 @@ function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees
         </div>
       ` : ''}
     </div>
-    <div class="kpi-card" style="--kc:#8b5cf6">
-      <span class="kpi-ico" style="color:#8b5cf6">${icon('book', { size: 22 })}</span>
+    <div class="kpi-card" style="--kc:var(--pu)">
+      <span class="kpi-ico" style="color:var(--pu)">${icon('book', { size: 22 })}</span>
       <div class="kpi-val">${enseignants}</div>
       <div class="kpi-lbl">Enseignants actifs</div>
     </div>
-    <div class="kpi-card" style="--kc:#f59e0b">
-      <span class="kpi-ico" style="color:#f59e0b">${icon('target', { size: 22 })}</span>
+    <div class="kpi-card" style="--kc:var(--am)">
+      <span class="kpi-ico" style="color:var(--am)">${icon('target', { size: 22 })}</span>
       <div class="kpi-val">${quizReussis}</div>
       <div class="kpi-lbl">Quiz réussis<br>${esc(monthLabel)}</div>
       ${quizReussisPrev > 0 || quizReussis > 0 ? `
@@ -799,9 +799,9 @@ function renderTrend30d(trend) {
     </div>
     <div class="trend-card">
       <div class="trend-legend">
-        <span class="trend-lg-item"><span class="trend-lg-dot" style="background:#6366f1"></span>${totalVal} validations</span>
-        <span class="trend-lg-item"><span class="trend-lg-dot" style="background:#8b5cf6"></span>${totalQuiz} quiz</span>
-        <span class="trend-lg-item"><span class="trend-lg-dot" style="background:#f59e0b"></span>${totalSessions}h sessions</span>
+        <span class="trend-lg-item"><span class="trend-lg-dot" style="background:var(--a)"></span>${totalVal} validations</span>
+        <span class="trend-lg-item"><span class="trend-lg-dot" style="background:var(--pu)"></span>${totalQuiz} quiz</span>
+        <span class="trend-lg-item"><span class="trend-lg-dot" style="background:var(--am)"></span>${totalSessions}h sessions</span>
       </div>
       <div class="trend-svg-wrap">
         <svg class="trend-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Tendance 30 jours">

@@ -38,14 +38,14 @@ const STYLE = `<style>
   }
   .vp-hd { margin-bottom: 24px; }
   .vp-h1 { font: 700 26px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin: 0 0 6px; }
-  .vp-sub { font: 500 14px/1.4 'Inter', sans-serif; color: #94a3b8; margin: 0; }
+  .vp-sub { font: 500 14px/1.4 'Inter', sans-serif; color: var(--mu2); margin: 0; }
 
   .step { margin-bottom: 32px; }
   .step-lbl {
     font: 600 11px/1 'Inter', sans-serif;
     letter-spacing: .08em;
     text-transform: uppercase;
-    color: #6366f1;
+    color: var(--a);
     margin-bottom: 6px;
   }
   .step-ttl {
@@ -56,7 +56,7 @@ const STYLE = `<style>
   }
   .step-progress {
     font: 600 12px/1 'Inter', sans-serif;
-    color: #10b981;
+    color: var(--gr);
     background: rgba(16,185,129,.1);
     border-radius: 12px;
     padding: 4px 10px;
@@ -74,13 +74,13 @@ const STYLE = `<style>
     transition: border-color .15s, transform .15s;
     box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
   }
-  .eleve-card:hover { border-color: #6366f1; }
+  .eleve-card:hover { border-color: var(--a); }
   .eleve-card:active { transform: scale(.96); }
-  .eleve-card.selected { background: rgba(99,102,241,.06); border-color: #6366f1; }
+  .eleve-card.selected { background: rgba(99,102,241,.06); border-color: var(--a); }
   .eleve-av {
     width: 48px; height: 48px;
     border-radius: 50%;
-    background: #6366f1;
+    background: var(--a);
     margin: 0 auto 10px;
     display: flex; align-items: center; justify-content: center;
     color: #fff;
@@ -102,7 +102,7 @@ const STYLE = `<style>
   .cat-done .cat-hd { background: rgba(16,185,129,.04); }
   .cat-ico { font-size: 18px; line-height: 1; }
   .cat-nm { font: 600 14px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); flex: 1; }
-  .cat-cnt { font: 600 12px/1 'Inter', sans-serif; color: #94a3b8; }
+  .cat-cnt { font: 600 12px/1 'Inter', sans-serif; color: var(--mu2); }
 
   /* Compétences */
   .comp-list { display: flex; flex-direction: column; }
@@ -118,18 +118,18 @@ const STYLE = `<style>
   .comp-row:active { transform: scale(.99); }
   .comp-row.comp-done { opacity: .5; cursor: default; }
   .comp-row.comp-sel { background: rgba(99,102,241,.06); }
-  .comp-row.comp-next { background: rgba(99,102,241,.04); border-left: 3px solid #6366f1; }
+  .comp-row.comp-next { background: rgba(99,102,241,.04); border-left: 3px solid var(--a); }
   .comp-row.comp-next:hover { background: rgba(99,102,241,.08); }
   .comp-row.comp-locked { opacity: .5; cursor: not-allowed; background: var(--bg); }
   .comp-row.comp-locked .comp-code,
-  .comp-row.comp-locked .comp-nom { color: #94a3b8; }
+  .comp-row.comp-locked .comp-nom { color: var(--mu2); }
   .comp-row.comp-locked:hover { background: var(--bg); }
-  .comp-row.comp-a-valider { background: rgba(245,158,11,.04); cursor: not-allowed; border-left: 3px solid #f59e0b; }
+  .comp-row.comp-a-valider { background: rgba(245,158,11,.04); cursor: not-allowed; border-left: 3px solid var(--am); }
   .comp-row.comp-a-valider:hover { background: rgba(245,158,11,.06); }
-  .comp-row.comp-a-valider .comp-code { color: #d97706; background: rgba(245,158,11,.12); }
+  .comp-row.comp-a-valider .comp-code { color: var(--amk); background: rgba(245,158,11,.12); }
   .badge-next {
     font: 600 11px/1 'Inter', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     background: rgba(99,102,241,.1);
     padding: 5px 10px;
     border-radius: 99px;
@@ -137,12 +137,12 @@ const STYLE = `<style>
   }
   .badge-lock {
     font: 600 12px/1 'Inter', sans-serif;
-    color: #cbd5e1;
+    color: var(--bo4);
     padding: 5px 8px;
   }
   .comp-code {
     font: 600 11px/1 'Inter', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     background: rgba(99,102,241,.1);
     border-radius: 6px;
     padding: 4px 7px;
@@ -150,8 +150,8 @@ const STYLE = `<style>
   }
   .comp-nom { font: 500 13px/1.4 'Inter', sans-serif; color: var(--ink); flex: 1; }
   .comp-status { flex-shrink: 0; }
-  .badge-ok { font: 600 11px/1 'Inter', sans-serif; color: #059669; background: rgba(16,185,129,.1); border-radius: 12px; padding: 3px 8px; }
-  .badge-sel { font: 600 11px/1 'Inter', sans-serif; color: #6366f1; background: rgba(99,102,241,.1); border-radius: 12px; padding: 3px 8px; }
+  .badge-ok { font: 600 11px/1 'Inter', sans-serif; color: var(--grd); background: rgba(16,185,129,.1); border-radius: 12px; padding: 3px 8px; }
+  .badge-sel { font: 600 11px/1 'Inter', sans-serif; color: var(--a); background: rgba(99,102,241,.1); border-radius: 12px; padding: 3px 8px; }
 
   /* CTA sticky */
   .cta-slot {
@@ -172,10 +172,10 @@ const STYLE = `<style>
     color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .cta-for { font: 500 12px/1 'Inter', sans-serif; color: #94a3b8; margin-top: 4px; }
+  .cta-for { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 4px; }
   .btn-validate {
     padding: 14px 22px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, var(--a), var(--pu));
     border: 0;
     border-radius: 12px;
     color: #fff;
@@ -203,7 +203,7 @@ const STYLE = `<style>
   }
   .btn-cancel-cta:active { background: var(--bg2); }
 
-  .empty { padding: 40px 20px; text-align: center; color: #94a3b8; font: 500 14px/1.5 'Inter', sans-serif; }
+  .empty { padding: 40px 20px; text-align: center; color: var(--mu2); font: 500 14px/1.5 'Inter', sans-serif; }
   .v-loading { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 
 </style>`;
@@ -353,7 +353,7 @@ async function doValidate() {
     title: `${prenom} ${nom}`.trim() + ' — compétence validée',
     sub: `${_selectedComp.c} · ${_selectedComp.n}`,
     initials: ini,
-    color: '#6366f1',
+    color: 'var(--a)',
     type: 'success',
     duration: 4000,
   });

@@ -37,7 +37,7 @@ const STYLE = `<style>
     font: 700 11px/1 'Inter', sans-serif;
     letter-spacing: .1em;
     text-transform: uppercase;
-    color: #6366f1;
+    color: var(--a);
     background: rgba(99,102,241,.1);
     border-radius: 20px;
     padding: 5px 12px;
@@ -73,7 +73,7 @@ const STYLE = `<style>
   .btn-start {
     width: 100%;
     padding: 18px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, var(--a), var(--pu));
     border: 0;
     border-radius: 16px;
     color: #fff;
@@ -110,8 +110,8 @@ const STYLE = `<style>
     justify-content: center;
     margin: 0 auto 24px;
   }
-  .ring-ok { border-color: #10b981; background: rgba(16,185,129,.08); }
-  .ring-warn { border-color: #f59e0b; background: rgba(245,158,11,.08); }
+  .ring-ok { border-color: var(--gr); background: rgba(16,185,129,.08); }
+  .ring-warn { border-color: var(--am); background: rgba(245,158,11,.08); }
   .qp-score-num {
     font: 800 28px/1 'Plus Jakarta Sans', sans-serif;
     color: var(--ink);
@@ -123,13 +123,13 @@ const STYLE = `<style>
   }
   .qp-result-msg {
     font: 500 15px/1.5 'Inter', sans-serif;
-    color: #475569;
+    color: var(--mu4);
     margin: 0 0 28px;
   }
   .btn-parcours {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, var(--a), var(--pu));
     border: 0;
     border-radius: 14px;
     color: #fff;
@@ -146,7 +146,7 @@ const STYLE = `<style>
     background: var(--bg);
     border: 1.5px solid var(--bo);
     border-radius: 14px;
-    color: #475569;
+    color: var(--mu4);
     font: 600 14px/1 'Inter', sans-serif;
     cursor: pointer;
   }
@@ -168,7 +168,7 @@ export async function mount(root, params = {}) {
   const autoStart = params.autoStart || hashParts[3] === 'auto';
 
   if (!competenceId) {
-    root.innerHTML = `<div style="padding:32px;text-align:center;color:#94a3b8">Aucune compétence à réviser.</div>`;
+    root.innerHTML = `<div style="padding:32px;text-align:center;color:var(--mu2)">Aucune compétence à réviser.</div>`;
     return;
   }
 

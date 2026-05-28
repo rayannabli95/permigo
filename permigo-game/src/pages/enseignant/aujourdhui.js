@@ -16,13 +16,13 @@ import { icon, iconBadge } from '@/utils/icons.js';
 // ─── Gradients avatar ─────────────────────────────────────────────
 const AVATARS = [
   'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,#0891b2,#155e75)',
-  'linear-gradient(135deg,#7c3aed,#4c1d95)',
+  'linear-gradient(135deg,var(--blk),#155e75)',
+  'linear-gradient(135deg,var(--puk),#4c1d95)',
   'linear-gradient(135deg,#0e7c66,#064e3b)',
   'linear-gradient(135deg,#9333ea,#6b21a8)',
   'linear-gradient(135deg,#a16207,#713f12)',
-  'linear-gradient(135deg,#dc2626,#7f1d1d)',
-  'linear-gradient(135deg,#059669,#064e3b)',
+  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
+  'linear-gradient(135deg,var(--grd),#064e3b)',
 ];
 
 // ─── Statuts labels : mapping centralisé @/utils/statut-label.js ──
@@ -109,10 +109,10 @@ const STYLE = `<style>
   }
   .aj-widget-delta {
     font: 600 12px/1 'Inter', sans-serif;
-    color: #10b981;
+    color: var(--gr);
     margin-top: 6px;
   }
-  .aj-widget-delta.down { color: #94a3b8; }
+  .aj-widget-delta.down { color: var(--mu2); }
 
   /* Widget alert state (metric > 0 and needs attention) */
   .aj-widget.aj-widget-alert {
@@ -140,9 +140,9 @@ const STYLE = `<style>
     flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
   }
-  .aj-hero.tone-warn    .aj-hero-ico { background: rgba(245,158,11,.12); color: #d97706; }
-  .aj-hero.tone-ok      .aj-hero-ico { background: rgba(16,185,129,.12); color: #059669; }
-  .aj-hero.tone-neutral .aj-hero-ico { background: var(--bg2);           color: #6366f1; }
+  .aj-hero.tone-warn    .aj-hero-ico { background: rgba(245,158,11,.12); color: var(--amk); }
+  .aj-hero.tone-ok      .aj-hero-ico { background: rgba(16,185,129,.12); color: var(--grd); }
+  .aj-hero.tone-neutral .aj-hero-ico { background: var(--bg2);           color: var(--a); }
   .aj-hero-body { flex: 1; min-width: 0; }
   .aj-hero-kicker {
     font: 600 11px/1 'Inter', sans-serif;
@@ -168,7 +168,7 @@ const STYLE = `<style>
     padding: 13px;
     border: none;
     border-radius: 13px;
-    background: #6366f1;
+    background: var(--a);
     color: #fff;
     font: 600 14px/1 'Inter', sans-serif;
     cursor: pointer;
@@ -177,7 +177,7 @@ const STYLE = `<style>
     min-height: 44px;
   }
   .aj-hero-cta:active { transform: scale(.98); }
-  .aj-hero-cta:hover { background: #4f46e5; }
+  .aj-hero-cta:hover { background: var(--adk); }
 
   /* ── Stats compactes (remplacent les KPI 2×2 souvent à zéro) ── */
   .aj-quickstats { display: flex; gap: 10px; margin-bottom: 24px; }
@@ -215,7 +215,7 @@ const STYLE = `<style>
     content: '';
     flex: 1;
     height: 1px;
-    background: #e2e6f2;
+    background: var(--bo);
   }
 
   /* Section block */
@@ -302,7 +302,7 @@ const STYLE = `<style>
     transition: border-color .15s, transform .15s;
     min-height: 44px;
   }
-  .aj-eleve-row:hover { border-color: #6366f1; }
+  .aj-eleve-row:hover { border-color: var(--a); }
   .aj-eleve-row:active { transform: scale(.985); }
 
   .aj-eleve-av {
@@ -322,10 +322,10 @@ const STYLE = `<style>
   }
   .aj-eleve-prog {
     font: 600 12px/1 'Inter', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     flex-shrink: 0;
   }
-  .aj-eleve-chev { color: #94a3b8; font-size: 14px; flex-shrink: 0; }
+  .aj-eleve-chev { color: var(--mu2); font-size: 14px; flex-shrink: 0; }
 
   /* Empty */
   .aj-empty {
@@ -370,7 +370,7 @@ const STYLE = `<style>
   }
   .aj-recap-kpi {
     font: 700 20px/1 'Plus Jakarta Sans', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     letter-spacing: -.02em;
   }
   .aj-recap-sub {
@@ -387,17 +387,17 @@ const STYLE = `<style>
     color: var(--ink);
   }
   .aj-recap-row-name { flex: 1; }
-  .aj-recap-row-dur  { font-weight: 600; color: #6366f1; flex-shrink: 0; }
+  .aj-recap-row-dur  { font-weight: 600; color: var(--a); flex-shrink: 0; }
   .aj-recap-row-status {
     font: 600 10px/1 'Inter', sans-serif;
     padding: 2px 6px;
     border-radius: 8px;
     flex-shrink: 0;
   }
-  .aj-recap-row-status.s-confirmed { background: rgba(16,185,129,.1); color: #059669; }
-  .aj-recap-row-status.s-pending   { background: rgba(245,158,11,.1); color: #d97706; }
-  .aj-recap-row-status.s-refused   { background: rgba(239,68,68,.08); color: #dc2626; }
-  .aj-recap-row-status.s-auto      { background: var(--bg2); color: #94a3b8; }
+  .aj-recap-row-status.s-confirmed { background: rgba(16,185,129,.1); color: var(--grd); }
+  .aj-recap-row-status.s-pending   { background: rgba(245,158,11,.1); color: var(--amk); }
+  .aj-recap-row-status.s-refused   { background: rgba(239,68,68,.08); color: var(--rdk); }
+  .aj-recap-row-status.s-auto      { background: var(--bg2); color: var(--mu2); }
 
   /* Prompt log si gap */
   .aj-log-prompt {
@@ -420,7 +420,7 @@ const STYLE = `<style>
   }
   .aj-log-prompt-cta {
     font: 700 12px/1 'Inter', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     flex-shrink: 0;
   }
 </style>`;
@@ -658,7 +658,7 @@ async function renderInto(root, _me) {
   const heroHtml = `
     <div class="aj-hero tone-${hero.tone}"${hero.href ? ` id="aj-hero" data-href="${esc(hero.href)}" data-ev="${esc(hero.ev)}"` : ''}>
       <div class="aj-hero-top">
-        <div class="aj-hero-ico">${iconBadge(hero.ico, { color: hero.tone === 'warn' ? '#d97706' : hero.tone === 'ok' ? '#059669' : '#6366f1', size: 44 })}</div>
+        <div class="aj-hero-ico">${iconBadge(hero.ico, { color: hero.tone === 'warn' ? 'var(--amk)' : hero.tone === 'ok' ? 'var(--grd)' : 'var(--a)', size: 44 })}</div>
         <div class="aj-hero-body">
           <div class="aj-hero-kicker">${esc(hero.kicker)}</div>
           <h2 class="aj-hero-title">${hero.title}</h2>

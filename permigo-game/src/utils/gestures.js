@@ -126,7 +126,7 @@ export function attachPullToRefresh(scrollEl, { onRefresh, threshold = 70, max =
         width: 44px; height: 44px;
         border-radius: 50%;
         background: #fff;
-        border: 1px solid #e2e6f2;
+        border: 1px solid var(--bo);
         box-shadow: 0 4px 16px rgba(10,13,26,.12);
         display: flex; align-items: center; justify-content: center;
         transition: transform .25s cubic-bezier(.2,.7,.3,1);
@@ -135,8 +135,8 @@ export function attachPullToRefresh(scrollEl, { onRefresh, threshold = 70, max =
       .ptr-ind.show { transition: transform 0s; }
       .ptr-arrow {
         width: 18px; height: 18px;
-        border-right: 2.5px solid #6366f1;
-        border-bottom: 2.5px solid #6366f1;
+        border-right: 2.5px solid var(--a);
+        border-bottom: 2.5px solid var(--a);
         transform: rotate(45deg) translate(-2px,-2px);
         transition: transform .25s ease, opacity .15s ease;
       }
@@ -145,8 +145,8 @@ export function attachPullToRefresh(scrollEl, { onRefresh, threshold = 70, max =
       .ptr-spinner {
         display: none;
         width: 22px; height: 22px;
-        border: 2.5px solid #e2e6f2;
-        border-top-color: #6366f1;
+        border: 2.5px solid var(--bo);
+        border-top-color: var(--a);
         border-radius: 50%;
         animation: ptrSpin .8s linear infinite;
       }

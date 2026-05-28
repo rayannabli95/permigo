@@ -42,7 +42,7 @@ const STYLE = `<style>
 
 .avpk-handle {
   width: 36px; height: 4px;
-  background: #e2e6f2;
+  background: var(--bo);
   border-radius: 2px;
   margin: 12px auto 6px;
 }
@@ -52,12 +52,12 @@ const STYLE = `<style>
 }
 .avpk-title {
   font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0b0d1a;
+  color: var(--ink);
   letter-spacing: -.025em;
 }
 .avpk-sub {
   font: 500 13px/1.4 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu3);
   margin-top: 4px;
 }
 .avpk-grid {
@@ -69,8 +69,8 @@ const STYLE = `<style>
 .avpk-opt {
   aspect-ratio: 1;
   border-radius: 22px;
-  border: 2.5px solid #e2e6f2;
-  background: #f8f9fc;
+  border: 2.5px solid var(--bo);
+  background: var(--su2);
   cursor: pointer;
   overflow: hidden;
   position: relative;
@@ -79,7 +79,7 @@ const STYLE = `<style>
 }
 .avpk-opt:active { transform: scale(.94); }
 .avpk-opt.selected {
-  border-color: #6366f1;
+  border-color: var(--a);
   box-shadow: 0 0 0 4px rgba(99,102,241,.18);
 }
 .avpk-opt img {
@@ -92,7 +92,7 @@ const STYLE = `<style>
   position: absolute;
   top: 4px; right: 4px;
   width: 22px; height: 22px;
-  background: #6366f1;
+  background: var(--a);
   color: #fff;
   border-radius: 50%;
   display: grid; place-items: center;
@@ -106,21 +106,21 @@ const STYLE = `<style>
   flex: 1;
   height: 50px;
   border-radius: 14px;
-  border: 1.5px solid #e2e6f2;
-  background: #f8f9fc;
-  color: #0b0d1a;
+  border: 1.5px solid var(--bo);
+  background: var(--su2);
+  color: var(--ink);
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   font-family: inherit;
   transition: background .12s;
 }
-.avpk-btn:hover { background: #f0f2f8; }
+.avpk-btn:hover { background: var(--bg3); }
 .avpk-btn.primary {
-  background: #6366f1;
-  border-color: #6366f1;
+  background: var(--a);
+  border-color: var(--a);
   color: #fff;
 }
-.avpk-btn.primary:hover { background: #4f46e5; }
+.avpk-btn.primary:hover { background: var(--adk); }
 .avpk-btn:disabled { opacity: .45; cursor: default; }
 @media (prefers-reduced-motion: reduce) {
   .avpk-bg, .avpk-sheet { transition: none; }

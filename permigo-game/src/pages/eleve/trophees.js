@@ -31,10 +31,10 @@ const CATALOG = [
 ];
 
 const RARITY_META = {
-  commun:     { label: 'Commun',     gradient: 'linear-gradient(145deg,#475569,#64748b)' },
-  rare:       { label: 'Rare',       gradient: 'linear-gradient(145deg,#1d4ed8,#60a5fa)' },
+  commun:     { label: 'Commun',     gradient: 'linear-gradient(145deg,var(--mu4),var(--mu3))' },
+  rare:       { label: 'Rare',       gradient: 'linear-gradient(145deg,var(--blk2),#60a5fa)' },
   epique:     { label: 'Épique',     gradient: 'linear-gradient(145deg,#6d28d9,#a78bfa)' },
-  legendaire: { label: 'Légendaire', gradient: 'linear-gradient(145deg,#b45309,#fbbf24)' },
+  legendaire: { label: 'Légendaire', gradient: 'linear-gradient(145deg,var(--amx),var(--aml2))' },
 };
 
 // ─── CSS ──────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ const STYLE = `<style>
   position: sticky;
   top: calc(52px + env(safe-area-inset-top, 0px));
   z-index: 10;
-  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, #4f46e5 100%);
+  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, var(--adk) 100%);
   padding: 16px 20px 20px;
   overflow: hidden;
 }
@@ -135,11 +135,11 @@ const STYLE = `<style>
 .tr2-card.locked .tr2-card-emoji { filter: grayscale(1) brightness(.4); opacity: .5; }
 /* Mix-blend-mode multiply pour les PNG avec fond blanc (le blanc devient invisible sur card colorée) */
 .tr2-card-emoji img { mix-blend-mode: multiply; }
-.tr2-card.commun    { background: linear-gradient(145deg,#475569,#64748b); box-shadow: 0 4px 16px -4px rgba(100,116,139,.5); }
-.tr2-card.rare      { background: linear-gradient(145deg,#1d4ed8,#60a5fa); box-shadow: 0 4px 16px -4px rgba(59,130,246,.6); }
+.tr2-card.commun    { background: linear-gradient(145deg,var(--mu4),var(--mu3)); box-shadow: 0 4px 16px -4px rgba(100,116,139,.5); }
+.tr2-card.rare      { background: linear-gradient(145deg,var(--blk2),#60a5fa); box-shadow: 0 4px 16px -4px rgba(59,130,246,.6); }
 .tr2-card.epique    { background: linear-gradient(145deg,#6d28d9,#a78bfa); box-shadow: 0 4px 16px -4px rgba(139,92,246,.6); }
 .tr2-card.legendaire {
-  background: linear-gradient(145deg,#b45309,#fbbf24);
+  background: linear-gradient(145deg,var(--amx),var(--aml2));
   animation: tr2GoldGlow 2.5s ease-in-out infinite alternate;
 }
 @keyframes tr2GoldGlow {
@@ -223,14 +223,14 @@ const STYLE = `<style>
 .tr2-modal-desc { font: 500 14px/1.55 'Inter', sans-serif; color: var(--mu); margin-bottom: 16px; }
 .tr2-modal-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .tr2-modal-chip { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 99px; font: 700 12px/1 'IBM Plex Mono', monospace; }
-.tr2-modal-chip.xp   { background: rgba(99,102,241,.1); color: #6366f1; }
-.tr2-modal-chip.gems { background: rgba(16,185,129,.1); color: #10b981; }
+.tr2-modal-chip.xp   { background: rgba(99,102,241,.1); color: var(--a); }
+.tr2-modal-chip.gems { background: rgba(16,185,129,.1); color: var(--gr); }
 .tr2-modal-chip.date { background: var(--bg); color: var(--mu); }
 .tr2-modal-social { font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu2); margin-bottom: 20px; }
 .tr2-modal-actions { display: flex; gap: 8px; padding: 0 20px; background: var(--su); }
 .tr2-modal-share {
   flex: 1; padding: 14px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--a), var(--pu));
   border: none; border-radius: 14px; color: #fff;
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; min-height: 50px;
   transition: transform .12s, opacity .12s;
@@ -454,7 +454,7 @@ function showModal(def, unlockData, totalUnlocked) {
         <div class="tr2-modal-social">Objectif : ${esc(shortProgress(def.key))}</div>
       </div>
       <div class="tr2-modal-actions">
-        <button class="tr2-modal-share" id="tr2-goto-btn" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">Aller au parcours →</button>
+        <button class="tr2-modal-share" id="tr2-goto-btn" style="background:linear-gradient(135deg,var(--adk),var(--puk))">Aller au parcours →</button>
         <button class="tr2-modal-close" id="tr2-close-btn">Fermer</button>
       </div>
     </div>

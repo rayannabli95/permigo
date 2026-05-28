@@ -109,7 +109,7 @@ export function icon(name, opts = {}) {
  * Icône "filled" Apple style — version remplie pour les widgets KPI.
  * Background coloré + icon en blanc dessus.
  */
-export function iconBadge(name, { color = '#6366f1', size = 36 } = {}) {
+export function iconBadge(name, { color = 'var(--a)', size = 36 } = {}) {
   return `
     <div style="width:${size}px;height:${size}px;border-radius:${Math.round(size * 0.32)}px;background:${color};display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff">
       ${icon(name, { size: Math.round(size * 0.55), strokeWidth: 2.4 })}

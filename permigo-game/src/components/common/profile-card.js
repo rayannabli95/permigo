@@ -19,7 +19,7 @@ const STYLE = `<style>
 .pcc { width: 100%; max-width: 380px; margin: 0 auto; padding: 0; }
 .pcc-card {
   background: #fff;
-  border: 1px solid #e2e6f2;
+  border: 1px solid var(--bo);
   border-radius: 28px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(10,13,26,.06), 0 10px 30px -12px rgba(10,13,26,.12);
@@ -30,7 +30,7 @@ const STYLE = `<style>
 .pcc-banner {
   position: relative;
   height: 140px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #0891b2);
+  background: linear-gradient(135deg, var(--a), var(--pu), var(--blk));
   overflow: hidden;
 }
 .pcc-banner img {
@@ -55,7 +55,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   font-size: 14px;
-  color: #0a0d1a;
+  color: var(--ink);
   box-shadow: 0 2px 8px rgba(10,13,26,.15);
   transition: transform .15s ease;
 }
@@ -72,7 +72,7 @@ const STYLE = `<style>
   backdrop-filter: blur(10px);
   border: 0;
   font: 600 13px/1 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -101,7 +101,7 @@ const STYLE = `<style>
   width: 100%; height: 100%;
   border-radius: 50%;
   border: 4px solid #fff;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--a), var(--pu));
   overflow: hidden;
   box-shadow: 0 4px 14px rgba(10,13,26,.12);
   display: flex; align-items: center; justify-content: center;
@@ -119,7 +119,7 @@ const STYLE = `<style>
   bottom: 0; right: 0;
   width: 28px; height: 28px;
   border-radius: 50%;
-  background: #6366f1;
+  background: var(--a);
   color: #fff;
   border: 2.5px solid #fff;
   cursor: pointer;
@@ -142,7 +142,7 @@ const STYLE = `<style>
 }
 .pcc-xp-lbl {
   font: 600 10.5px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   text-transform: uppercase;
   letter-spacing: .12em;
   flex-shrink: 0;
@@ -150,7 +150,7 @@ const STYLE = `<style>
 .pcc-xp-bar {
   flex: 1;
   height: 6px;
-  background: #e2e8f0;
+  background: var(--bo3);
   border-radius: 99px;
   overflow: hidden;
 }
@@ -160,14 +160,14 @@ const STYLE = `<style>
   transition: width 1s cubic-bezier(.2,.7,.3,1);
 }
 .pcc-xp-fill.gradient-rainbow {
-  background: linear-gradient(90deg, #8b5cf6, #ec4899, #f97316, #f59e0b, #10b981, #06b6d4, #6366f1);
+  background: linear-gradient(90deg, var(--pu), #ec4899, var(--or), var(--am), var(--gr), #06b6d4, var(--a));
 }
 .pcc-xp-fill.gradient-indigo {
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  background: linear-gradient(90deg, var(--a), var(--pu));
 }
 .pcc-xp-val {
   font: 600 11px/1 'Inter', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   flex-shrink: 0;
 }
 
@@ -194,13 +194,13 @@ const STYLE = `<style>
 /* ── Nom + bio ── */
 .pcc-name {
   font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   margin: 0 0 6px;
   letter-spacing: -0.022em;
 }
 .pcc-bio {
   font: 500 13px/1.5 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu3);
   margin: 0 0 20px;
 }
 
@@ -210,25 +210,25 @@ const STYLE = `<style>
   grid-template-columns: repeat(3, 1fr);
   padding: 16px 0;
   margin: 0 -4px 16px;
-  border-top: 1px solid #e2e6f2;
-  border-bottom: 1px solid #e2e6f2;
+  border-top: 1px solid var(--bo);
+  border-bottom: 1px solid var(--bo);
 }
 .pcc-stat {
   text-align: center;
   padding: 0 8px;
 }
 .pcc-stat + .pcc-stat {
-  border-left: 1px solid #e2e6f2;
+  border-left: 1px solid var(--bo);
 }
 .pcc-stat-val {
   font: 700 22px/1 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   margin-bottom: 4px;
   letter-spacing: -0.022em;
 }
 .pcc-stat-lbl {
   font: 500 11px/1 'Inter', sans-serif;
-  color: #94a3b8;
+  color: var(--mu2);
   text-transform: uppercase;
   letter-spacing: .04em;
 }
@@ -242,14 +242,14 @@ const STYLE = `<style>
 .pcc-social-btn {
   width: 40px; height: 40px;
   border-radius: 12px;
-  background: #f8f9fc;
-  border: 1px solid #e2e6f2;
+  background: var(--su2);
+  border: 1px solid var(--bo);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  color: #0a0d1a;
+  color: var(--ink);
   transition: background .12s ease, border-color .12s ease, transform .12s ease;
 }
-.pcc-social-btn:hover { background: #fff; border-color: #6366f1; color: #6366f1; }
+.pcc-social-btn:hover { background: #fff; border-color: var(--a); color: var(--a); }
 .pcc-social-btn:active { transform: scale(.94); }
 .pcc-social-btn svg { width: 18px; height: 18px; }
 

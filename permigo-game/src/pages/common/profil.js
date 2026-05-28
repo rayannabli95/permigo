@@ -33,7 +33,7 @@ const STYLE = `<style>
 .prf-avatar {
   width: 80px; height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--a), var(--pu));
   display: flex; align-items: center; justify-content: center;
   font: 700 32px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
@@ -49,7 +49,7 @@ const STYLE = `<style>
   font: 600 11px/1 'Inter', sans-serif;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: #6366f1;
+  color: var(--a);
   background: rgba(99,102,241,.1);
   border-radius: 99px;
   padding: 6px 12px;
@@ -61,7 +61,7 @@ const STYLE = `<style>
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 44px; padding: 12px;
   background: var(--su); border: 1px solid var(--bo); border-radius: 16px;
-  color: var(--tx, #0b0d1a); text-decoration: none;
+  color: var(--tx, var(--ink)); text-decoration: none;
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   box-shadow: 0 1px 3px rgba(10,13,26,.06);
   transition: transform .12s, box-shadow .2s;
@@ -88,8 +88,8 @@ const STYLE = `<style>
 .prf-row:last-child { border-bottom: none; }
 .prf-row-ico { font-size: 18px; line-height: 1; flex-shrink: 0; }
 .prf-row-body { flex: 1; min-width: 0; }
-.prf-row-lbl { font: 500 11px/1 'Inter', sans-serif; color: #94a3b8; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
-.prf-row-val { font: 600 14px/1.3 'Inter', sans-serif; color: #0a0d1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prf-row-lbl { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
+.prf-row-val { font: 600 14px/1.3 'Inter', sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Buttons */
 .prf-btn-logout {
@@ -98,7 +98,7 @@ const STYLE = `<style>
   background: rgba(239,68,68,.08);
   border: 1.5px solid rgba(239,68,68,.25);
   border-radius: 16px;
-  color: #ef4444;
+  color: var(--rd);
   font: 700 15px/1 var(--fd);
   cursor: pointer;
   transition: background .2s, transform .15s;
@@ -203,11 +203,11 @@ const STYLE = `<style>
   min-height: 60px;
 }
 .prf-notif-row:active { background: var(--bg); transform: scale(.99); }
-@media(hover:hover)and(pointer:fine){.prf-notif-row:hover{background:#f8f9fc}}
+@media(hover:hover)and(pointer:fine){.prf-notif-row:hover{background:var(--su2)}}
 .prf-notif-ico { font-size: 18px; line-height: 1; flex-shrink: 0; }
 .prf-notif-body { flex: 1; min-width: 0; }
-.prf-notif-lbl { font: 600 14px/1.3 'Inter', sans-serif; color: #0a0d1a; }
-.prf-notif-sub { font: 500 12px/1.3 'Inter', sans-serif; color: #94a3b8; margin-top: 2px; }
+.prf-notif-lbl { font: 600 14px/1.3 'Inter', sans-serif; color: var(--ink); }
+.prf-notif-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
 /* iOS-style toggle pill */
 .prf-toggle {
   flex-shrink: 0;
@@ -218,7 +218,7 @@ const STYLE = `<style>
   transition: background .2s cubic-bezier(.23,1,.32,1);
   pointer-events: none; /* le click est géré par la row */
 }
-.prf-toggle.on { background: #6366f1; }
+.prf-toggle.on { background: var(--a); }
 .prf-toggle::after {
   content: '';
   position: absolute;
@@ -231,7 +231,7 @@ const STYLE = `<style>
 }
 .prf-toggle.on::after { transform: translateX(18px); }
 /* État "bloqué par le navigateur" */
-.prf-notif-denied { font: 500 12px/1.3 'Inter', sans-serif; color: #f97316; margin-top: 2px; }
+.prf-notif-denied { font: 500 12px/1.3 'Inter', sans-serif; color: var(--or); margin-top: 2px; }
 @media(prefers-reduced-motion:reduce){.prf-toggle,.prf-toggle::after{transition:none}}
 
 /* ── Parrainage (élève) ── */
@@ -263,13 +263,13 @@ const STYLE = `<style>
 .prf-ref-code {
   flex: 1;
   font: 700 18px/1 'IBM Plex Mono', monospace;
-  color: #6366f1;
+  color: var(--a);
   letter-spacing: .1em;
 }
 .prf-ref-copy-btn {
   background: none;
   border: none;
-  color: #6366f1;
+  color: var(--a);
   font-size: 18px;
   cursor: pointer;
   padding: 4px;
@@ -308,7 +308,7 @@ const STYLE = `<style>
 .prf-ref-share-btn {
   width: 100%;
   padding: 13px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--a), var(--pu));
   border: none;
   border-radius: 12px;
   color: #fff;
@@ -324,7 +324,7 @@ const STYLE = `<style>
   background: rgba(99,102,241,.08);
   border: 1.5px solid rgba(99,102,241,.2);
   border-radius: 12px;
-  color: #6366f1;
+  color: var(--a);
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   transition: background .15s;
@@ -350,10 +350,10 @@ const STYLE = `<style>
   transition: border-color .14s;
   min-height: 44px;
 }
-.prf-ref-apply-input:focus { border-color: #6366f1; }
+.prf-ref-apply-input:focus { border-color: var(--a); }
 .prf-ref-apply-btn {
   padding: 0 16px;
-  background: #0a0d1a;
+  background: var(--ink);
   border: none;
   border-radius: 12px;
   color: #fff;
@@ -519,7 +519,7 @@ export async function mount(root) {
 
   ${anneeStats ? `
   <div class="prf-streak">
-    <span class="prf-streak-ico" style="color:#f97316;display:flex;align-items:center" aria-hidden="true">${icon('flame', { size: 28, strokeWidth: 2.2 })}</span>
+    <span class="prf-streak-ico" style="color:var(--or);display:flex;align-items:center" aria-hidden="true">${icon('flame', { size: 28, strokeWidth: 2.2 })}</span>
 
     <div class="prf-streak-body">
       <div class="prf-streak-n">${anneeStats.streakDays} jour${anneeStats.streakDays !== 1 ? 's' : ''}</div>
@@ -570,14 +570,14 @@ export async function mount(root) {
       <span class="prf-row-ico">${icon('zap', { size: 18 })}</span>
       <div class="prf-row-body">
         <div class="prf-row-lbl">XP total</div>
-        <div class="prf-row-val" style="color:#6366f1">${esc(String(profile.xp))} XP</div>
+        <div class="prf-row-val" style="color:var(--a)">${esc(String(profile.xp))} XP</div>
       </div>
     </div>` : ''}
     <div class="prf-row">
       <span class="prf-row-ico">${icon('key', { size: 18 })}</span>
       <div class="prf-row-body">
         <div class="prf-row-lbl">ID profil</div>
-        <div class="prf-row-val" style="font-size:11px;color:#94a3b8">${esc(me.id)}</div>
+        <div class="prf-row-val" style="font-size:11px;color:var(--mu2)">${esc(me.id)}</div>
       </div>
     </div>
   </div>

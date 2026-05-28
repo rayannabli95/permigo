@@ -16,7 +16,7 @@ import { playLaunch } from '@/utils/sound.js';
 const STYLE = `<style>
   .sg {
     min-height: 100dvh;
-    background: linear-gradient(180deg, #f8f9fc 0%, #fff 100%);
+    background: linear-gradient(180deg, var(--su2) 0%, #fff 100%);
     padding: 32px 20px max(60px, env(safe-area-inset-bottom));
     font-family: 'Inter', sans-serif;
     color: var(--ink);
@@ -41,7 +41,7 @@ const STYLE = `<style>
   }
   .sg-logo {
     width: 56px; height: 56px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, var(--a), var(--pu));
     border-radius: 16px;
     margin: 0 auto 16px;
     display: flex; align-items: center; justify-content: center;
@@ -82,22 +82,22 @@ const STYLE = `<style>
   }
   .sg-input:focus {
     outline: 0;
-    border-color: #6366f1;
+    border-color: var(--a);
     box-shadow: 0 0 0 4px rgba(99,102,241,.12);
   }
-  .sg-input[readonly] { background: var(--bg); color: #64748b; cursor: default; }
-  .sg-input.error { border-color: #ef4444; }
+  .sg-input[readonly] { background: var(--bg); color: var(--mu3); cursor: default; }
+  .sg-input.error { border-color: var(--rd); }
   .sg-help {
     font: 500 11px/1.4 'Inter', sans-serif;
     color: var(--mu2);
     margin-top: 2px;
   }
-  .sg-help.error { color: #ef4444; }
+  .sg-help.error { color: var(--rd); }
   .sg-btn {
     width: 100%;
     margin-top: 18px;
     padding: 16px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, var(--a), var(--pu));
     color: #fff;
     border: 0;
     border-radius: 14px;
@@ -114,7 +114,7 @@ const STYLE = `<style>
     margin: 0 0 18px;
     padding: 5px 12px;
     background: rgba(99,102,241,.12);
-    color: #4f46e5;
+    color: var(--adk);
     border-radius: 99px;
     font: 700 11px/1 'Inter', sans-serif;
     text-transform: uppercase;
@@ -142,7 +142,7 @@ const STYLE = `<style>
     margin: 0 0 18px;
   }
   .sg-link {
-    color: #6366f1;
+    color: var(--a);
     font: 600 14px/1 'Inter', sans-serif;
     text-decoration: none;
     padding: 12px 24px;
@@ -151,13 +151,13 @@ const STYLE = `<style>
     display: inline-block;
     transition: border-color .15s, background .15s;
   }
-  .sg-link:hover { border-color: #6366f1; background: var(--bg2); }
+  .sg-link:hover { border-color: var(--a); background: var(--bg2); }
 
   /* Skeleton */
   .sg-skel {
     width: 100%; max-width: 420px;
     height: 320px;
-    background: linear-gradient(90deg, #f0f2f8 0%, #e4e8f4 50%, #f0f2f8 100%);
+    background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
     background-size: 200% 100%;
     animation: sgSkel 1.4s infinite;
     border-radius: 24px;

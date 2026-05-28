@@ -42,14 +42,14 @@ const SHARED_STYLES = `
 /* ── Text ── */
 .es-title {
   font: 700 17px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: #0a0d1a;
+  color: var(--ink);
   margin-bottom: 6px;
 }
 .es-compact .es-title { font-size: 14px; margin-bottom: 4px; }
 
 .es-sub {
   font: 500 13px/1.4 'Inter', sans-serif;
-  color: #64748b;
+  color: var(--mu3);
   margin-bottom: 18px;
   max-width: 280px;
 }
@@ -61,7 +61,7 @@ const SHARED_STYLES = `
   align-items: center;
   justify-content: center;
   padding: 11px 22px;
-  background: #6366f1;
+  background: var(--a);
   color: #fff;
   border: 0;
   border-radius: 14px;
@@ -73,7 +73,7 @@ const SHARED_STYLES = `
   animation: esBounceIn 380ms cubic-bezier(.34,1.56,.64,1) 80ms both;
 }
 @media (hover:hover) and (pointer:fine) {
-  .es-cta:hover { background: #4f46e5; }
+  .es-cta:hover { background: var(--adk); }
 }
 .es-cta:active { transform: scale(.97); }
 

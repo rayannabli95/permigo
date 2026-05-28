@@ -58,7 +58,7 @@ const STYLE = `<style>
   border: 1.5px solid var(--bo);
   border-radius: 12px;
   font: 600 13px/1 'Plus Jakarta Sans', sans-serif;
-  color: #374151;
+  color: var(--ink5);
   cursor: pointer;
   min-height: 44px;
   flex-shrink: 0;
@@ -66,7 +66,7 @@ const STYLE = `<style>
 }
 .bl-print-btn:active { transform: scale(.97); }
 @media (hover:hover) and (pointer:fine) {
-  .bl-print-btn:hover { border-color: #a5b4fc; color: #4f46e5; }
+  .bl-print-btn:hover { border-color: var(--al3); color: var(--adk); }
 }
 
 /* ── Trimestre badge ── */
@@ -79,7 +79,7 @@ const STYLE = `<style>
   border: 1px solid rgba(99,102,241,.2);
   border-radius: 20px;
   font: 600 12px/1 'Plus Jakarta Sans', sans-serif;
-  color: #4f46e5;
+  color: var(--adk);
   margin-bottom: 20px;
 }
 
@@ -102,8 +102,8 @@ const STYLE = `<style>
   color: var(--ink);
   margin-bottom: 4px;
 }
-.bl-kpi-val .bl-kpi-unit { font-size: .55em; color: #94a3b8; }
-.bl-kpi-label { font: 500 11px/1.4 'Inter', sans-serif; color: #64748b; text-transform: uppercase; letter-spacing: .04em; }
+.bl-kpi-val .bl-kpi-unit { font-size: .55em; color: var(--mu2); }
+.bl-kpi-label { font: 500 11px/1.4 'Inter', sans-serif; color: var(--mu3); text-transform: uppercase; letter-spacing: .04em; }
 .bl-kpi-delta {
   display: inline-flex;
   align-items: center;
@@ -113,9 +113,9 @@ const STYLE = `<style>
   border-radius: 8px;
   margin-top: 6px;
 }
-.bl-kpi-delta.up   { background: #dcfce7; color: #16a34a; }
-.bl-kpi-delta.down { background: #fee2e2; color: #dc2626; }
-.bl-kpi-delta.flat { background: #f1f5f9; color: #64748b; }
+.bl-kpi-delta.up   { background: var(--grp2); color: var(--grk); }
+.bl-kpi-delta.down { background: var(--rdp2); color: var(--rdk); }
+.bl-kpi-delta.flat { background: var(--bg4); color: var(--mu3); }
 
 /* ── Auto comment ── */
 .bl-comment {
@@ -138,12 +138,12 @@ const STYLE = `<style>
   font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
   text-transform: uppercase;
   letter-spacing: .08em;
-  color: #6366f1;
+  color: var(--a);
   margin-bottom: 8px;
 }
 .bl-comment-txt {
   font: 500 14px/1.6 'Inter', sans-serif;
-  color: #374151;
+  color: var(--ink5);
   padding-left: 4px;
 }
 
@@ -173,8 +173,8 @@ const STYLE = `<style>
   font: 700 11px/1 'IBM Plex Mono', monospace;
   padding: 3px 8px;
   border-radius: 8px;
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--bg4);
+  color: var(--mu4);
 }
 
 /* ── Comp list ── */
@@ -190,28 +190,28 @@ const STYLE = `<style>
 .bl-comp-check {
   width: 20px; height: 20px;
   border-radius: 50%;
-  background: #dcfce7;
+  background: var(--grp2);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  color: #16a34a;
+  color: var(--grk);
   font-size: 11px;
 }
-.bl-comp-name { font: 500 13px/1.3 'Inter', sans-serif; color: #374151; flex: 1; min-width: 0; }
-.bl-comp-date { font: 500 11px/1 'IBM Plex Mono', monospace; color: #94a3b8; flex-shrink: 0; }
-.bl-comp-none { font: 500 13px/1.4 'Inter',sans-serif; color: #94a3b8; text-align: center; padding: 12px 0; }
+.bl-comp-name { font: 500 13px/1.3 'Inter', sans-serif; color: var(--ink5); flex: 1; min-width: 0; }
+.bl-comp-date { font: 500 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); flex-shrink: 0; }
+.bl-comp-none { font: 500 13px/1.4 'Inter',sans-serif; color: var(--mu2); text-align: center; padding: 12px 0; }
 
 /* ── Evolution chart ── */
 .bl-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
 .bl-bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
 .bl-bar {
   width: 100%;
-  background: linear-gradient(180deg,#6366f1,#8b5cf6);
+  background: linear-gradient(180deg,var(--a),var(--pu));
   border-radius: 4px 4px 0 0;
   min-height: 4px;
   transition: height .3s cubic-bezier(.23,1,.32,1);
 }
-.bl-bar-lbl { font: 500 9px/1 'Inter', sans-serif; color: #94a3b8; text-align: center; white-space: nowrap; }
-.bl-bar-val { font: 600 10px/1 'IBM Plex Mono', monospace; color: #64748b; }
+.bl-bar-lbl { font: 500 9px/1 'Inter', sans-serif; color: var(--mu2); text-align: center; white-space: nowrap; }
+.bl-bar-val { font: 600 10px/1 'IBM Plex Mono', monospace; color: var(--mu3); }
 
 /* ── No data ── */
 .bl-no-data {
@@ -252,10 +252,10 @@ const STYLE = `<style>
 
 // ─── Monde metadata ──────────────────────────────────────────────
 const MONDES = {
-  C1: { name: 'Contrôle & Sécurité', color: '#22c55e', ico: '🟢', short: 'C1' },
-  C2: { name: 'Manœuvres',           color: '#3b82f6', ico: '🔵', short: 'C2' },
+  C1: { name: 'Contrôle & Sécurité', color: 'var(--gr2)', ico: '🟢', short: 'C1' },
+  C2: { name: 'Manœuvres',           color: 'var(--bl2)', ico: '🔵', short: 'C2' },
   C3: { name: 'Circulation',         color: '#eab308', ico: '🟡', short: 'C3' },
-  C4: { name: 'Situations complexes', color: '#a855f7', ico: '🟣', short: 'C4' },
+  C4: { name: 'Situations complexes', color: 'var(--pul)', ico: '🟣', short: 'C4' },
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────
@@ -285,7 +285,7 @@ function deltaLabel(pct) {
 // ─── Render helpers ───────────────────────────────────────────────
 function renderKPI(kpi) {
   const delta = kpi.delta_pct != null ? `<span class="bl-kpi-delta ${deltaClass(kpi.delta_pct)}">${esc(deltaLabel(kpi.delta_pct))}</span>` : '';
-  const scoreColor = kpi.score_moyen >= 70 ? '#16a34a' : kpi.score_moyen >= 50 ? '#a16207' : '#dc2626';
+  const scoreColor = kpi.score_moyen >= 70 ? 'var(--grk)' : kpi.score_moyen >= 50 ? '#a16207' : 'var(--rdk)';
 
   return `
 <div class="bl-kpi-grid">
@@ -390,7 +390,7 @@ export async function mount(root, eleveId) {
   root.innerHTML = `${STYLE}
 <div class="bl">
   <div style="display:flex;flex-direction:column;gap:10px;padding:40px 0">
-    ${[160,80,120,120,120].map(h => `<div style="height:${h}px;background:linear-gradient(90deg,#f0f2f8 0%,#e4e8f4 50%,#f0f2f8 100%);background-size:200% 100%;animation:blShimmer 1.4s infinite;border-radius:16px"></div>`).join('')}
+    ${[160,80,120,120,120].map(h => `<div style="height:${h}px;background:linear-gradient(90deg,var(--bg3) 0%,var(--bg5) 50%,var(--bg3) 100%);background-size:200% 100%;animation:blShimmer 1.4s infinite;border-radius:16px"></div>`).join('')}
   </div>
   <style>@keyframes blShimmer{to{background-position:-200% 0}}</style>
 </div>`;

@@ -15,13 +15,13 @@ import { iconBadge, icon } from '@/utils/icons.js';
 // ─── Constantes ───────────────────────────────────────────────
 const AVATARS = [
   'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,#0891b2,#155e75)',
-  'linear-gradient(135deg,#7c3aed,#4c1d95)',
+  'linear-gradient(135deg,var(--blk),#155e75)',
+  'linear-gradient(135deg,var(--puk),#4c1d95)',
   'linear-gradient(135deg,#0e7c66,#064e3b)',
   'linear-gradient(135deg,#9333ea,#6b21a8)',
   'linear-gradient(135deg,#a16207,#713f12)',
-  'linear-gradient(135deg,#dc2626,#7f1d1d)',
-  'linear-gradient(135deg,#059669,#064e3b)',
+  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
+  'linear-gradient(135deg,var(--grd),#064e3b)',
 ];
 
 const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
@@ -66,7 +66,7 @@ const STYLE = `<style>
     content: '';
     flex: 1;
     height: 1px;
-    background: #e2e6f2;
+    background: var(--bo);
   }
   .ins-section { margin-bottom: 28px; }
 
@@ -123,9 +123,9 @@ const STYLE = `<style>
     font: 700 12px/1 'IBM Plex Mono', monospace;
     margin-top: 5px;
   }
-  .ins-widget-delta.up   { color: #10b981; }
-  .ins-widget-delta.down { color: #ef4444; }
-  .ins-widget-delta.flat { color: #94a3b8; }
+  .ins-widget-delta.up   { color: var(--gr); }
+  .ins-widget-delta.down { color: var(--rd); }
+  .ins-widget-delta.flat { color: var(--mu2); }
 
   /* Heatmap */
   .ins-heatmap-wrap {
@@ -195,7 +195,7 @@ const STYLE = `<style>
     margin-bottom: 6px;
   }
   @media (hover: hover) and (pointer: fine) {
-    .ins-eleve-row:hover { border-color: #6366f1; }
+    .ins-eleve-row:hover { border-color: var(--a); }
   }
   .ins-eleve-row:active { transform: scale(.97); }
   .ins-eleve-av {
@@ -223,9 +223,9 @@ const STYLE = `<style>
     border-radius: 12px;
     flex-shrink: 0;
   }
-  .ins-badge-green  { color: #059669; background: rgba(16,185,129,.1); }
-  .ins-badge-orange { color: #d97706; background: rgba(245,158,11,.1); }
-  .ins-badge-red    { color: #dc2626; background: rgba(239,68,68,.1); }
+  .ins-badge-green  { color: var(--grd); background: rgba(16,185,129,.1); }
+  .ins-badge-orange { color: var(--amk); background: rgba(245,158,11,.1); }
+  .ins-badge-red    { color: var(--rdk); background: rgba(239,68,68,.1); }
 
   /* Tabs progressent/stagnent */
   .ins-tabs {
@@ -250,7 +250,7 @@ const STYLE = `<style>
   }
   .ins-tab.active {
     background: var(--su);
-    color: #6366f1;
+    color: var(--a);
     box-shadow: 0 1px 2px rgba(10,13,26,.06);
   }
 
@@ -268,7 +268,7 @@ const STYLE = `<style>
   }
   .ins-diff-code {
     font: 600 11px/1 'IBM Plex Mono', monospace;
-    color: #6366f1;
+    color: var(--a);
     background: rgba(99,102,241,.1);
     padding: 4px 7px;
     border-radius: 6px;
@@ -294,7 +294,7 @@ const STYLE = `<style>
   }
   .ins-diff-count {
     font: 600 12px/1 'Inter', sans-serif;
-    color: #dc2626;
+    color: var(--rdk);
     flex-shrink: 0;
   }
 
@@ -586,7 +586,7 @@ async function loadData(me) {
   const recos = [];
   if (streakPro !== null && streakPro < 3) {
     recos.push({
-      icon: icon('target', { size: 18, strokeWidth: 2, color: '#6366f1' }),
+      icon: icon('target', { size: 18, strokeWidth: 2, color: 'var(--a)' }),
       ttl: 'Lance ta semaine',
       txt: 'Valide 1 compétence avec un élève actif pour relancer ton streak pro.',
       route: '#/validation',
@@ -597,7 +597,7 @@ async function loadData(me) {
     const nm = esc(`${e.prenom || ''} ${e.nom || ''}`.trim());
     const since = e.daysAgo ? `depuis ${e.daysAgo}j` : 'depuis un moment';
     recos.push({
-      icon: icon('alert-triangle', { size: 18, strokeWidth: 2, color: '#d97706' }),
+      icon: icon('alert-triangle', { size: 18, strokeWidth: 2, color: 'var(--amk)' }),
       ttl: `Relance ${nm}`,
       txt: `${nm} n'a plus validé ${since}. Un point en leçon peut débloquer la progression.`,
       route: `#/livret/${e.id}`,
@@ -607,7 +607,7 @@ async function loadData(me) {
     const d = topDiff[0];
     const nm = esc(labelComp(d.compId));
     recos.push({
-      icon: icon('search', { size: 18, strokeWidth: 2, color: '#0891b2' }),
+      icon: icon('search', { size: 18, strokeWidth: 2, color: 'var(--blk)' }),
       ttl: `Débrief sur ${d.compId}`,
       txt: `${d.count} élève${d.count > 1 ? 's' : ''} bloqué${d.count > 1 ? 's' : ''} sur "${nm}". Prévois un point pédagogique dédié.`,
       route: `#/eleves?bloque_sur=${encodeURIComponent(d.compId)}`,
@@ -615,7 +615,7 @@ async function loadData(me) {
   }
   if (recos.length === 0) {
     recos.push({
-      icon: icon('check-circle', { size: 18, strokeWidth: 2, color: '#059669' }),
+      icon: icon('check-circle', { size: 18, strokeWidth: 2, color: 'var(--grd)' }),
       ttl: 'Tout roule',
       txt: 'Tes élèves progressent bien. Continue sur cette lancée !',
       route: null,
@@ -671,7 +671,7 @@ function renderKpis({ valsCeMoisCount, valsPrevCount, delta, nbElevesAccompagnes
     <div class="ins-widgets" id="ins-kpi-grid">
       <div class="ins-widget">
         <div class="ins-widget-head">
-          ${iconBadge('check', { color: '#10b981', size: 32 })}
+          ${iconBadge('check', { color: 'var(--gr)', size: 32 })}
           <span class="ins-widget-lbl">Validées</span>
         </div>
         <p class="ins-widget-val">${valsCeMoisCount}</p>
@@ -681,7 +681,7 @@ function renderKpis({ valsCeMoisCount, valsPrevCount, delta, nbElevesAccompagnes
 
       <div class="ins-widget">
         <div class="ins-widget-head">
-          ${iconBadge('users', { color: '#6366f1', size: 32 })}
+          ${iconBadge('users', { color: 'var(--a)', size: 32 })}
           <span class="ins-widget-lbl">Élèves</span>
         </div>
         <p class="ins-widget-val">${nbElevesAccompagnes}</p>
@@ -690,7 +690,7 @@ function renderKpis({ valsCeMoisCount, valsPrevCount, delta, nbElevesAccompagnes
 
       <div class="ins-widget">
         <div class="ins-widget-head">
-          ${iconBadge('target', { color: '#8b5cf6', size: 32 })}
+          ${iconBadge('target', { color: 'var(--pu)', size: 32 })}
           <span class="ins-widget-lbl">Taux quiz</span>
         </div>
         <p class="ins-widget-val">${tauxVal}</p>
@@ -699,7 +699,7 @@ function renderKpis({ valsCeMoisCount, valsPrevCount, delta, nbElevesAccompagnes
 
       <div class="ins-widget">
         <div class="ins-widget-head">
-          ${iconBadge('flame', { color: '#f59e0b', size: 32 })}
+          ${iconBadge('flame', { color: 'var(--am)', size: 32 })}
           <span class="ins-widget-lbl">Streak pro</span>
         </div>
         <p class="ins-widget-val">${streakVal}</p>
@@ -809,7 +809,7 @@ function renderElevesList(tab, topProgressent, topStagnent) {
           <div class="ins-eleve-meta">${meta}</div>
         </div>
         ${badge}
-        <span aria-hidden="true" style="color:#94a3b8;font-size:14px">›</span>
+        <span aria-hidden="true" style="color:var(--mu2);font-size:14px">›</span>
       </div>
     `;
   }).join('');

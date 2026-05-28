@@ -37,7 +37,7 @@ const STYLE = `<style>
   margin: 0 auto;
 }
 .exam-skel-block {
-  background: linear-gradient(90deg,#f0f2f8 0%,#e4e8f4 50%,#f0f2f8 100%);
+  background: linear-gradient(90deg,var(--bg3) 0%,var(--bg5) 50%,var(--bg3) 100%);
   background-size: 200% 100%;
   animation: examShimmer 1.4s infinite;
   border-radius: 16px;
@@ -55,14 +55,14 @@ const STYLE = `<style>
 }
 .exam-hd-ico {
   width: 40px; height: 40px;
-  background: linear-gradient(135deg,#6366f1,#8b5cf6);
+  background: linear-gradient(135deg,var(--a),var(--pu));
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   font-size: 20px;
   flex-shrink: 0;
 }
-.exam-hd-title { font: 700 22px/1.2 'Plus Jakarta Sans',sans-serif; color: #0a0d1a; }
-.exam-hd-sub { font: 500 13px/1.4 'Inter',sans-serif; color: #64748b; margin-top: 2px; }
+.exam-hd-title { font: 700 22px/1.2 'Plus Jakarta Sans',sans-serif; color: var(--ink); }
+.exam-hd-sub { font: 500 13px/1.4 'Inter',sans-serif; color: var(--mu3); margin-top: 2px; }
 
 /* ── Shared card ── */
 .exam-card {
@@ -90,7 +90,7 @@ const STYLE = `<style>
 }
 .exam-tile {
   flex: 1;
-  background: linear-gradient(145deg,#f8f9fc,#f0f2f8);
+  background: linear-gradient(145deg,var(--su2),var(--bg3));
   border: 1.5px solid var(--bo);
   border-radius: 16px;
   padding: 14px 8px 10px;
@@ -109,10 +109,10 @@ const STYLE = `<style>
   display: block;
   margin-top: 6px;
 }
-.exam-tile.urgent { border-color: #fca5a5; background: linear-gradient(145deg,#fff5f5,#fee2e2); }
-.exam-tile.urgent .exam-tile-num { color: #ef4444; }
-.exam-tile.done { border-color: #bbf7d0; background: linear-gradient(145deg,#f0fdf4,#dcfce7); }
-.exam-tile.done .exam-tile-num { color: #16a34a; }
+.exam-tile.urgent { border-color: #fca5a5; background: linear-gradient(145deg,#fff5f5,var(--rdp2)); }
+.exam-tile.urgent .exam-tile-num { color: var(--rd); }
+.exam-tile.done { border-color: #bbf7d0; background: linear-gradient(145deg,#f0fdf4,var(--grp2)); }
+.exam-tile.done .exam-tile-num { color: var(--grk); }
 
 .exam-date-row {
   display: flex;
@@ -131,10 +131,10 @@ const STYLE = `<style>
   transition: border-color .18s ease;
   min-height: 44px;
 }
-.exam-date-input:focus { border-color: #6366f1; background: #fff; }
+.exam-date-input:focus { border-color: var(--a); background: #fff; }
 .exam-date-save {
   padding: 10px 18px;
-  background: #6366f1;
+  background: var(--a);
   color: #fff;
   border: 0;
   border-radius: 12px;
@@ -144,9 +144,9 @@ const STYLE = `<style>
   transition: transform .16s cubic-bezier(.23,1,.32,1), background .16s;
   flex-shrink: 0;
 }
-.exam-date-save:hover { background: #4f46e5; }
+.exam-date-save:hover { background: var(--adk); }
 @media (hover:hover) and (pointer:fine) {
-  .exam-date-save:hover { background: #4f46e5; }
+  .exam-date-save:hover { background: var(--adk); }
 }
 .exam-date-save:active { transform: scale(.97); }
 
@@ -155,13 +155,13 @@ const STYLE = `<style>
   padding: 8px 0 4px;
 }
 .exam-no-date-emoji { font-size: 36px; display: block; margin-bottom: 8px; }
-.exam-no-date-txt { font: 500 14px/1.4 'Inter',sans-serif; color: #64748b; margin-bottom: 16px; }
+.exam-no-date-txt { font: 500 14px/1.4 'Inter',sans-serif; color: var(--mu3); margin-bottom: 16px; }
 .exam-choose-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 12px 20px;
-  background: #6366f1;
+  background: var(--a);
   color: #fff;
   border: 0;
   border-radius: 14px;
@@ -172,7 +172,7 @@ const STYLE = `<style>
 }
 .exam-choose-btn:active { transform: scale(.97); }
 @media (hover:hover) and (pointer:fine) {
-  .exam-choose-btn:hover { background: #4f46e5; }
+  .exam-choose-btn:hover { background: var(--adk); }
 }
 .exam-date-input-wrap { display: none; margin-top: 12px; }
 .exam-date-input-wrap.open { display: flex; align-items: center; gap: 10px; }
@@ -204,21 +204,21 @@ const STYLE = `<style>
   font-size: 16px;
   flex-shrink: 0;
 }
-.exam-check-row.pass .exam-check-ico { background: #dcfce7; }
+.exam-check-row.pass .exam-check-ico { background: var(--grp2); }
 .exam-check-row.fail .exam-check-ico { background: #ffedd5; }
-.exam-check-row.neutral .exam-check-ico { background: #f1f5f9; }
+.exam-check-row.neutral .exam-check-ico { background: var(--bg4); }
 .exam-check-body { flex: 1; min-width: 0; }
-.exam-check-label { font: 600 14px/1.3 'Plus Jakarta Sans',sans-serif; color: #0a0d1a; }
-.exam-check-sub { font: 500 12px/1.3 'Inter',sans-serif; color: #64748b; margin-top: 2px; }
+.exam-check-label { font: 600 14px/1.3 'Plus Jakarta Sans',sans-serif; color: var(--ink); }
+.exam-check-sub { font: 500 12px/1.3 'Inter',sans-serif; color: var(--mu3); margin-top: 2px; }
 .exam-check-badge {
   font: 700 12px/1 'IBM Plex Mono',monospace;
   padding: 4px 8px;
   border-radius: 8px;
   flex-shrink: 0;
 }
-.exam-check-row.pass .exam-check-badge { background: #dcfce7; color: #15803d; }
+.exam-check-row.pass .exam-check-badge { background: var(--grp2); color: var(--grk2); }
 .exam-check-row.fail .exam-check-badge { background: #ffedd5; color: #c2410c; }
-.exam-check-row.neutral .exam-check-badge { background: #f1f5f9; color: #64748b; }
+.exam-check-row.neutral .exam-check-badge { background: var(--bg4); color: var(--mu3); }
 
 /* ── Score pill ── */
 .exam-score-row {
@@ -232,8 +232,8 @@ const STYLE = `<style>
   margin-top: -2px;
   margin-bottom: 4px;
 }
-.exam-score-lbl { font: 600 14px/1 'Plus Jakarta Sans',sans-serif; color: #4f46e5; }
-.exam-score-val { font: 800 18px/1 'IBM Plex Mono',monospace; color: #4f46e5; }
+.exam-score-lbl { font: 600 14px/1 'Plus Jakarta Sans',sans-serif; color: var(--adk); }
+.exam-score-val { font: 800 18px/1 'IBM Plex Mono',monospace; color: var(--adk); }
 
 /* ── Tips ── */
 .exam-tips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -250,7 +250,7 @@ const STYLE = `<style>
 .exam-tip:nth-child(3) { animation-delay:.30s; }
 .exam-tip:nth-child(4) { animation-delay:.34s; }
 .exam-tip-ico { font-size: 24px; margin-bottom: 8px; display: block; }
-.exam-tip-txt { font: 500 13px/1.4 'Inter',sans-serif; color: #374151; }
+.exam-tip-txt { font: 500 13px/1.4 'Inter',sans-serif; color: var(--ink5); }
 
 /* ── Predict card ── */
 .exam-predict {
@@ -266,22 +266,22 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
 }
 .exam-predict-body { flex: 1; min-width: 0; }
-.exam-predict-title { font: 700 14px/1.2 'Plus Jakarta Sans',sans-serif; color: #0a0d1a; }
-.exam-predict-sub { font: 500 12px/1.4 'Inter',sans-serif; color: #64748b; margin-top: 3px; }
+.exam-predict-title { font: 700 14px/1.2 'Plus Jakarta Sans',sans-serif; color: var(--ink); }
+.exam-predict-sub { font: 500 12px/1.4 'Inter',sans-serif; color: var(--mu3); margin-top: 3px; }
 .exam-predict-track {
-  height: 6px; background: #e2e6f2;
+  height: 6px; background: var(--bo);
   border-radius: 3px; overflow: hidden; margin: 10px 0 5px;
 }
-.exam-predict-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#6366f1,#8b5cf6); transition: width .5s ease; }
+.exam-predict-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,var(--a),var(--pu)); transition: width .5s ease; }
 .exam-predict-labels {
   display: flex; justify-content: space-between;
-  font: 500 10px/1 'Inter',sans-serif; color: #94a3b8;
+  font: 500 10px/1 'Inter',sans-serif; color: var(--mu2);
 }
 .exam-predict-ready {
   display: flex; align-items: center; gap: 12px;
   padding: 6px 0;
 }
-.exam-predict-ready .exam-predict-title { color: #15803d; }
+.exam-predict-ready .exam-predict-title { color: var(--grk2); }
 
 /* ── Readiness pill ── */
 .exam-readiness {
@@ -294,9 +294,9 @@ const STYLE = `<style>
   margin-bottom: 16px;
   font: 600 13px/1.3 'Plus Jakarta Sans',sans-serif;
 }
-.exam-readiness.high { background: #dcfce7; color: #15803d; }
+.exam-readiness.high { background: var(--grp2); color: var(--grk2); }
 .exam-readiness.mid  { background: #fef9c3; color: #a16207; }
-.exam-readiness.low  { background: #fee2e2; color: #b91c1c; }
+.exam-readiness.low  { background: var(--rdp2); color: var(--rdx); }
 
 @media (prefers-reduced-motion:reduce) {
   .exam-card, .exam-tip { animation: none; opacity: 1; }
@@ -408,9 +408,9 @@ function renderCountdown(examDate) {
     return `
 <div style="text-align:center;padding:8px 0">
   <div style="font-size:36px;margin-bottom:8px">🎉</div>
-  <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:#0a0d1a;margin-bottom:4px">Ton examen est passé !</div>
-  <div style="font:500 13px/1.4 'Inter',sans-serif;color:#64748b;margin-bottom:16px">Bonne chance pour les résultats.</div>
-  <button class="exam-choose-btn" id="exam-btn-choose" style="background:#10b981">
+  <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:4px">Ton examen est passé !</div>
+  <div style="font:500 13px/1.4 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">Bonne chance pour les résultats.</div>
+  <button class="exam-choose-btn" id="exam-btn-choose" style="background:var(--gr)">
     ${icon('calendar', { size: 16 })} Changer la date
   </button>
   <div class="exam-date-input-wrap" id="exam-date-wrap">
@@ -435,7 +435,7 @@ function renderCountdown(examDate) {
     <span class="exam-tile-lbl">Minutes</span>
   </div>
 </div>
-<div style="text-align:center;font:500 12px/1.4 'Inter',sans-serif;color:#64748b;margin-bottom:14px">
+<div style="text-align:center;font:500 12px/1.4 'Inter',sans-serif;color:var(--mu3);margin-bottom:14px">
   ${urgent ? '⚡ ' : ''}${esc(fmtDate(examDate))}
 </div>
 <div class="exam-date-row">
@@ -467,7 +467,7 @@ function renderPredict({ compsCount, predict }) {
 
   return `
 <div class="exam-predict">
-  <div class="exam-predict-ico">${icon('calendar', { size: 18, color: '#6366f1' })}</div>
+  <div class="exam-predict-ico">${icon('calendar', { size: 18, color: 'var(--a)' })}</div>
   <div class="exam-predict-body">
     <div class="exam-predict-title">${dateStr ? `Prêt vers le ${esc(dateStr)}` : 'Estimation en cours…'}</div>
     <div class="exam-predict-sub">${esc(advice)}</div>

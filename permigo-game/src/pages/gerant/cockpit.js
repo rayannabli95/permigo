@@ -12,21 +12,21 @@ import { navigate } from '@/router.js';
 import { haptic } from '@/utils/haptic.js';
 
 // ─── Design tokens ────────────────────────────────────────────────
-const BG   = '#0a0d1a';
-const SURF = '#0f172a';
+const BG   = 'var(--ink)';
+const SURF = 'var(--ink)';
 const SURF2 = '#1a2236';
-const BORD = '#1e293b';
-const TEXT = '#f1f5f9';
-const MUTED = '#64748b';
-const ACC  = '#6366f1';
+const BORD = 'var(--ink4)';
+const TEXT = 'var(--bg4)';
+const MUTED = 'var(--mu3)';
+const ACC  = 'var(--a)';
 
 // KPI definitions — used to normalize RPC object → array
 const KPI_DEFS = [
   { key: 'eleves_actifs',    label: 'Élèves actifs',    color: ACC,       unit: null },
-  { key: 'moniteurs_actifs', label: 'Moniteurs actifs', color: '#10b981', unit: null },
-  { key: 'taux_reussite_90j', label: 'Taux réussite 90j', color: '#10b981', unit: '%'  },
-  { key: 'heures_30j',       label: 'Heures 30j',       color: '#f59e0b', unit: 'h'  },
-  { key: 'nouveaux_30j',     label: 'Nouveaux 30j',     color: '#8b5cf6', unit: null },
+  { key: 'moniteurs_actifs', label: 'Moniteurs actifs', color: 'var(--gr)', unit: null },
+  { key: 'taux_reussite_90j', label: 'Taux réussite 90j', color: 'var(--gr)', unit: '%'  },
+  { key: 'heures_30j',       label: 'Heures 30j',       color: 'var(--am)', unit: 'h'  },
+  { key: 'nouveaux_30j',     label: 'Nouveaux 30j',     color: 'var(--pu)', unit: null },
   { key: 'validations_30j',  label: 'Validations 30j',  color: ACC,       unit: null },
 ];
 
@@ -58,11 +58,11 @@ function normalizeRpcData(data) {
 }
 
 const COHORT_META = {
-  champion: { label: 'Champion',  color: '#10b981', icon: 'award' },
-  engage:   { label: 'Engagé',    color: '#6366f1', icon: 'zap' },
-  a_risque: { label: 'À risque',  color: '#f59e0b', icon: 'alert-triangle' },
-  inactif:  { label: 'Inactif',   color: '#64748b', icon: 'moon' },
-  bloque:   { label: 'Bloqué',    color: '#ef4444', icon: 'x-circle' },
+  champion: { label: 'Champion',  color: 'var(--gr)', icon: 'award' },
+  engage:   { label: 'Engagé',    color: 'var(--a)', icon: 'zap' },
+  a_risque: { label: 'À risque',  color: 'var(--am)', icon: 'alert-triangle' },
+  inactif:  { label: 'Inactif',   color: 'var(--mu3)', icon: 'moon' },
+  bloque:   { label: 'Bloqué',    color: 'var(--rd)', icon: 'x-circle' },
 };
 const COHORT_ORDER = ['champion', 'engage', 'a_risque', 'inactif', 'bloque'];
 
@@ -200,8 +200,8 @@ const STYLE = `<style>
   padding: 3px 7px;
   border-radius: 99px;
 }
-.ck-kpi-delta.up   { color: #10b981; background: rgba(16,185,129,.12); }
-.ck-kpi-delta.down { color: #ef4444; background: rgba(239,68,68,.12); }
+.ck-kpi-delta.up   { color: var(--gr); background: rgba(16,185,129,.12); }
+.ck-kpi-delta.down { color: var(--rd); background: rgba(239,68,68,.12); }
 .ck-kpi-delta.flat { color: ${MUTED}; background: ${SURF2}; }
 
 /* ═══════════ COHORTES ═══════════ */
@@ -448,9 +448,9 @@ async function loadFallback(root, me) {
     const fallbackData = {
       kpis: [
         { key: 'eleves_actifs',    label: 'Élèves actifs',   value: elevesRes.value?.count ?? '—', delta: null, color: ACC },
-        { key: 'taux_reussite',    label: 'Taux réussite',   value: '—',  unit: '%', delta: null, color: '#10b981' },
-        { key: 'heures_30j',       label: 'Heures 30j',      value: '—',  delta: null, color: '#f59e0b' },
-        { key: 'nouveaux_30j',     label: 'Nouveaux 30j',    value: valsRes.value?.count ?? '—', delta: null, color: '#8b5cf6' },
+        { key: 'taux_reussite',    label: 'Taux réussite',   value: '—',  unit: '%', delta: null, color: 'var(--gr)' },
+        { key: 'heures_30j',       label: 'Heures 30j',      value: '—',  delta: null, color: 'var(--am)' },
+        { key: 'nouveaux_30j',     label: 'Nouveaux 30j',    value: valsRes.value?.count ?? '—', delta: null, color: 'var(--pu)' },
       ],
       cohorts: [],
       top_moniteurs: [],
@@ -644,8 +644,8 @@ function renderDonut(cohorts) {
 // ─── Alert renderer ──────────────────────────────────────────────
 function renderAlert(alert) {
   const colors = {
-    high:   { color: '#ef4444', rgb: '239,68,68',   icon: 'alert-octagon' },
-    medium: { color: '#f59e0b', rgb: '245,158,11',   icon: 'alert-triangle' },
+    high:   { color: 'var(--rd)', rgb: '239,68,68',   icon: 'alert-octagon' },
+    medium: { color: 'var(--am)', rgb: '245,158,11',   icon: 'alert-triangle' },
     low:    { color: '#eab308', rgb: '234,179,8',    icon: 'info' },
   };
   const c = colors[alert.severity] ?? colors.low;
@@ -753,7 +753,7 @@ function wire(root, me) {
         }
       } catch (err) {
         if (subEl) subEl.textContent = 'Erreur de chargement';
-        if (listEl) listEl.innerHTML = `<div style="padding:20px;text-align:center;color:#ef4444">Impossible de charger les données</div>`;
+        if (listEl) listEl.innerHTML = `<div style="padding:20px;text-align:center;color:var(--rd)">Impossible de charger les données</div>`;
       }
     });
   });

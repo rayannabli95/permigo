@@ -15,15 +15,15 @@ const STYLE = `<style>
   padding: 0 0 80px;
   max-width: 720px;
   margin: 0 auto;
-  background: #0a0d1a;
-  color: #e2e8f0;
+  background: var(--ink);
+  color: var(--bo3);
   font-family: 'IBM Plex Mono', 'Menlo', monospace;
   min-height: 100vh;
 }
 .dbg-hd {
   position: sticky; top: 0; z-index: 10;
   padding: 16px 20px;
-  background: linear-gradient(180deg, #0a0d1a 0%, rgba(10,13,26,.92) 100%);
+  background: linear-gradient(180deg, var(--ink) 0%, rgba(10,13,26,.92) 100%);
   border-bottom: 1px solid rgba(99,102,241,.3);
   backdrop-filter: blur(12px);
   display: flex; align-items: center; justify-content: space-between;
@@ -31,14 +31,14 @@ const STYLE = `<style>
 .dbg-title {
   font: 800 15px/1 'IBM Plex Mono', monospace;
   letter-spacing: .1em;
-  color: #6366f1;
+  color: var(--a);
   text-transform: uppercase;
 }
 .dbg-pulse {
   width: 8px; height: 8px;
-  background: #10b981;
+  background: var(--gr);
   border-radius: 50%;
-  box-shadow: 0 0 12px #10b981;
+  box-shadow: 0 0 12px var(--gr);
   animation: dbgPulse 1.6s ease-in-out infinite;
 }
 @keyframes dbgPulse {
@@ -48,7 +48,7 @@ const STYLE = `<style>
 .dbg-refresh {
   background: transparent;
   border: 1px solid rgba(99,102,241,.4);
-  color: #6366f1;
+  color: var(--a);
   border-radius: 6px;
   padding: 5px 10px;
   font: 700 10px/1 'IBM Plex Mono', monospace;
@@ -78,7 +78,7 @@ const STYLE = `<style>
   font: 600 9.5px/1 'IBM Plex Mono', monospace;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: #6366f1;
+  color: var(--a);
   margin-bottom: 6px;
 }
 .dbg-card-val {
@@ -110,7 +110,7 @@ const STYLE = `<style>
   font: 500 12px/1.4 'IBM Plex Mono', monospace;
 }
 .dbg-row:last-of-type { border-bottom: 0; }
-.dbg-row .l { color: #94a3b8; }
+.dbg-row .l { color: var(--mu2); }
 .dbg-row .v {
   color: #fff;
   font-weight: 700;
@@ -122,16 +122,16 @@ const STYLE = `<style>
   border-radius: 4px;
   text-transform: uppercase;
 }
-.dbg-tag.ok    { background: rgba(16,185,129,.18); color: #10b981; }
-.dbg-tag.warn  { background: rgba(245,158,11,.18); color: #f59e0b; }
-.dbg-tag.error { background: rgba(239,68,68,.18); color: #ef4444; }
+.dbg-tag.ok    { background: rgba(16,185,129,.18); color: var(--gr); }
+.dbg-tag.warn  { background: rgba(245,158,11,.18); color: var(--am); }
+.dbg-tag.error { background: rgba(239,68,68,.18); color: var(--rd); }
 
 .dbg-action {
   display: block;
   width: 100%;
   margin-top: 8px;
   padding: 12px 14px;
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  background: linear-gradient(135deg, var(--a), var(--adk));
   color: #fff;
   border: 0;
   border-radius: 8px;
@@ -148,14 +148,14 @@ const STYLE = `<style>
 .dbg-action.secondary {
   background: transparent;
   border: 1px solid rgba(99,102,241,.4);
-  color: #6366f1;
+  color: var(--a);
 }
 
 .dbg-err {
   padding: 32px 20px;
   text-align: center;
   font: 600 14px/1.5 'IBM Plex Mono', monospace;
-  color: #ef4444;
+  color: var(--rd);
 }
 </style>`;
 
@@ -167,7 +167,7 @@ export async function mount(root) {
   if (me.email !== 'rayannabli27@gmail.com') {
     root.innerHTML = `${STYLE}<div class="dbg"><div class="dbg-err">
       ⛔ Cette page est réservée à l'administrateur.<br>
-      <span style="font-size:12px;color:#94a3b8;margin-top:8px;display:block">
+      <span style="font-size:12px;color:var(--mu2);margin-top:8px;display:block">
         Connecté en tant que : ${esc(me.email || me.id)}
       </span>
     </div></div>`;
@@ -207,7 +207,7 @@ function render(root, data, fraud = []) {
         <span class="dbg-title">▶ permigo://admin/debug</span>
         <span class="dbg-pulse"></span>
       </div>
-      <div style="padding:32px 20px;color:#64748b;font-size:12px">loading…</div>
+      <div style="padding:32px 20px;color:var(--mu3);font-size:12px">loading…</div>
     </div>`;
     return;
   }
@@ -252,11 +252,11 @@ function render(root, data, fraud = []) {
     <!-- ─── CRON JOBS ─── -->
     <div class="dbg-section">
       <div class="dbg-section-hd">pg_cron jobs (${crons.length})</div>
-      ${crons.length === 0 ? '<div style="color:#64748b;font-size:12px">no jobs</div>' : crons.map(j => `
+      ${crons.length === 0 ? '<div style="color:var(--mu3);font-size:12px">no jobs</div>' : crons.map(j => `
         <div class="dbg-row">
           <span class="l">${esc(j.name)}</span>
           <div style="display:flex;gap:8px;align-items:center">
-            <code style="color:#fde68a;font-size:11px">${esc(j.schedule)}</code>
+            <code style="color:var(--aml);font-size:11px">${esc(j.schedule)}</code>
             <span class="dbg-tag ${j.active ? 'ok' : 'error'}">${j.active ? 'active' : 'paused'}</span>
           </div>
         </div>
@@ -266,7 +266,7 @@ function render(root, data, fraud = []) {
     <!-- ─── FRAUD SIGNALS ─── -->
     <div class="dbg-section">
       <div class="dbg-section-hd">Fraud signals — 30j (${fraud.filter(f => f.flag_count > 0).length} flagged)</div>
-      ${fraud.length === 0 ? '<div style="color:#64748b;font-size:12px">no signals</div>' : fraud.slice(0, 12).map(f => {
+      ${fraud.length === 0 ? '<div style="color:var(--mu3);font-size:12px">no signals</div>' : fraud.slice(0, 12).map(f => {
         const cls = f.flag_count >= 2 ? 'error' : f.flag_count === 1 ? 'warn' : 'ok';
         const hh = Math.floor(Number(f.total_minutes || 0) / 60);
         const mm = Number(f.total_minutes || 0) % 60;
@@ -274,11 +274,11 @@ function render(root, data, fraud = []) {
         <div class="dbg-row">
           <span class="l">${esc(f.prenom || '?')} ${esc(f.nom || '')}</span>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-            <code style="color:#94a3b8;font-size:10px">${hh}h${String(mm).padStart(2,'0')} · ${f.total_sessions||0}s · ${f.n_validations||0}v · ${f.n_eleves_diff||0}e</code>
+            <code style="color:var(--mu2);font-size:10px">${hh}h${String(mm).padStart(2,'0')} · ${f.total_sessions||0}s · ${f.n_validations||0}v · ${f.n_eleves_diff||0}e</code>
             <span class="dbg-tag ${cls}">${f.flag_count > 0 ? f.flag_count + ' flag' + (f.flag_count > 1 ? 's' : '') : 'clean'}</span>
           </div>
         </div>
-        ${f.flag_count > 0 ? `<div style="padding:4px 0 8px;font:500 10px/1.4 'IBM Plex Mono',monospace;color:#94a3b8">
+        ${f.flag_count > 0 ? `<div style="padding:4px 0 8px;font:500 10px/1.4 'IBM Plex Mono',monospace;color:var(--mu2)">
           ${[f.flag_refused_sessions && '• refusals élève',
              f.flag_high_auto_rate && '• taux auto-valid >50%',
              f.flag_hours_zero_val && '• 150h+ sans validation',
@@ -304,7 +304,7 @@ function render(root, data, fraud = []) {
     </div>
 
     <div class="dbg-section" style="border-top:0">
-      <div style="font:500 10px/1.4 'IBM Plex Mono',monospace;color:#475569;text-align:center">
+      <div style="font:500 10px/1.4 'IBM Plex Mono',monospace;color:var(--mu4);text-align:center">
         snapshot at ${esc(ts)}
       </div>
     </div>

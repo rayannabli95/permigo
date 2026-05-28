@@ -36,7 +36,7 @@ const STYLE = `<style>
     width: min(520px, calc(100vw - 24px));
     margin-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     background: var(--su, #fff);
-    border: 1px solid var(--bo, #e2e6f2);
+    border: 1px solid var(--bo);
     border-radius: 20px;
     box-shadow: 0 16px 48px -12px rgba(11,13,26,.28);
     padding: 18px 18px 16px;
@@ -48,11 +48,11 @@ const STYLE = `<style>
   @media (prefers-reduced-motion: reduce) { .ck-banner { transition: none; } }
   .ck-ttl {
     font: 800 15px/1.3 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink, #0b0d1a); margin: 0 0 6px;
+    color: var(--ink); margin: 0 0 6px;
     display: flex; align-items: center; gap: 7px;
   }
-  .ck-txt { font: 500 12.5px/1.55 'Inter', sans-serif; color: var(--mu, #64748b); margin: 0 0 14px; }
-  .ck-txt a { color: #6366f1; text-decoration: underline; }
+  .ck-txt { font: 500 12.5px/1.55 'Inter', sans-serif; color: var(--mu, var(--mu3)); margin: 0 0 14px; }
+  .ck-txt a { color: var(--a); text-decoration: underline; }
   .ck-row { display: flex; gap: 8px; }
   .ck-btn {
     flex: 1; padding: 12px 14px; border-radius: 12px;
@@ -62,8 +62,8 @@ const STYLE = `<style>
     -webkit-tap-highlight-color: transparent;
   }
   .ck-btn:active { transform: scale(.97); }
-  .ck-btn-accept { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; box-shadow: 0 6px 18px -6px rgba(99,102,241,.5); }
-  .ck-btn-refuse { background: var(--bg, #f4f5fb); color: var(--mu, #475569); border-color: var(--bo, #e2e6f2); }
+  .ck-btn-accept { background: linear-gradient(135deg, var(--a), var(--pu)); color: #fff; box-shadow: 0 6px 18px -6px rgba(99,102,241,.5); }
+  .ck-btn-refuse { background: var(--bg); color: var(--mu, var(--mu4)); border-color: var(--bo); }
 </style>`;
 
 export function mountCookieBanner() {

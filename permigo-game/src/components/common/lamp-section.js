@@ -122,7 +122,7 @@ export const LAMP_CSS = `
     position:absolute;
     left:0;bottom:0;
     width:100%;height:160px;
-    background:#0b0d1a;
+    background:var(--ink);
     z-index:20;
     -webkit-mask-image:linear-gradient(to top, white, transparent);
             mask-image:linear-gradient(to top, white, transparent);
@@ -131,7 +131,7 @@ export const LAMP_CSS = `
     position:absolute;
     left:0;bottom:0;
     width:160px;height:100%;
-    background:#0b0d1a;
+    background:var(--ink);
     z-index:20;
     -webkit-mask-image:linear-gradient(to right, white, transparent);
             mask-image:linear-gradient(to right, white, transparent);
@@ -140,7 +140,7 @@ export const LAMP_CSS = `
     position:absolute;
     right:0;bottom:0;
     width:160px;height:100%;
-    background:#0b0d1a;
+    background:var(--ink);
     z-index:20;
     -webkit-mask-image:linear-gradient(to left, white, transparent);
             mask-image:linear-gradient(to left, white, transparent);
@@ -153,7 +153,7 @@ export const LAMP_CSS = `
     width:100%;
     height:192px;
     transform:translateY(48px) scaleX(1.5);
-    background:#0b0d1a;
+    background:var(--ink);
     filter:blur(28px);
     z-index:30;
   }
@@ -229,7 +229,7 @@ export const LAMP_CSS = `
     width:100%;
     height:11rem;
     transform:translateY(-12.5rem);
-    background:#0b0d1a;
+    background:var(--ink);
     z-index:40;
   }
 
@@ -272,7 +272,7 @@ export const LAMP_CSS = `
     letter-spacing:-.03em;
     line-height:1.05;
     margin:0 0 14px;
-    background:linear-gradient(180deg, #e2e8f0, #64748b);
+    background:linear-gradient(180deg, var(--bo3), var(--mu3));
     -webkit-background-clip:text;
             background-clip:text;
     color:transparent;

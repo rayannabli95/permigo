@@ -35,7 +35,7 @@ function ensureStyle() {
   }
   .rc-title {
     font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     letter-spacing: -.01em;
     display: flex;
     align-items: center;
@@ -43,7 +43,7 @@ function ensureStyle() {
   }
   .rc-count {
     font: 700 11px/1 'Inter', sans-serif;
-    color: #6366f1;
+    color: var(--a);
     background: rgba(99,102,241,.1);
     border-radius: 99px;
     padding: 2px 8px;
@@ -63,7 +63,7 @@ function ensureStyle() {
     align-items: center;
     gap: 12px;
     cursor: pointer;
-    border: 1.5px solid #e2e6f2;
+    border: 1.5px solid var(--bo);
     transition: border-color .12s, transform .15s cubic-bezier(.23,1,.32,1);
     animation: rcCardIn .3s cubic-bezier(.34,1.56,.64,1) both;
     -webkit-tap-highlight-color: transparent;
@@ -86,28 +86,28 @@ function ensureStyle() {
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  .rc-dot--quiz_fails       { background: rgba(239,68,68,.1);   color: #dc2626; }
-  .rc-dot--old_validation   { background: rgba(245,158,11,.1);  color: #d97706; }
-  .rc-dot--consolidation_due { background: rgba(139,92,246,.1); color: #7c3aed; }
+  .rc-dot--quiz_fails       { background: rgba(239,68,68,.1);   color: var(--rdk); }
+  .rc-dot--old_validation   { background: rgba(245,158,11,.1);  color: var(--amk); }
+  .rc-dot--consolidation_due { background: rgba(139,92,246,.1); color: var(--puk); }
 
   .rc-body { flex: 1; min-width: 0; }
   .rc-comp {
     font: 600 13px/1.3 'Inter', sans-serif;
-    color: #0a0d1a;
+    color: var(--ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .rc-reason {
     font: 500 11px/1.2 'Inter', sans-serif;
-    color: #94a3b8;
+    color: var(--mu2);
     margin-top: 3px;
   }
-  .rc-reason--quiz_fails       { color: #dc2626; }
-  .rc-reason--old_validation   { color: #d97706; }
-  .rc-reason--consolidation_due { color: #7c3aed; }
+  .rc-reason--quiz_fails       { color: var(--rdk); }
+  .rc-reason--old_validation   { color: var(--amk); }
+  .rc-reason--consolidation_due { color: var(--puk); }
 
-  .rc-arrow { color: #cbd5e1; flex-shrink: 0; }
+  .rc-arrow { color: var(--bo4); flex-shrink: 0; }
 
   @media (prefers-reduced-motion: reduce) {
     .rc-card { animation: none; }
@@ -158,7 +158,7 @@ export async function mountRevisionCards(root, { eleveId, limit = 3 }) {
   section.innerHTML = `
     <div class="rc-hd">
       <div class="rc-title">
-        ${icon('book-open', { size: 14, strokeWidth: 2.2, color: '#6366f1' })}
+        ${icon('book-open', { size: 14, strokeWidth: 2.2, color: 'var(--a)' })}
         Mes révisions
       </div>
       <span class="rc-count">${recos.length}</span>
