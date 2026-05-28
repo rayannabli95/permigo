@@ -1300,7 +1300,7 @@ function spawnArrow(node, compId) {
         left: 50%;
         transform: translateX(-50%) rotate(45deg);
         width: 10px; height: 10px;
-        background: var(--pu);
+        background: var(--a);
       }
       .fa-arrow {
         width: 28px;

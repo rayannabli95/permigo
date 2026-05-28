@@ -211,7 +211,7 @@ const STYLE = `<style>
 /* ── Commentaire moniteur ── */
 .sc-comment {
   margin: 0 16px 16px;
-  background: linear-gradient(135deg, rgba(88,204,2,.07) 0%, rgba(139,92,246,.05) 100%);
+  background: linear-gradient(135deg, rgba(88,204,2,.07) 0%, rgba(88,204,2,.04) 100%);
   border: 1.5px solid rgba(88,204,2,.15);
   border-radius: 24px;
   padding: 20px;

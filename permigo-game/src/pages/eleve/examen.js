@@ -226,7 +226,7 @@ const STYLE = `<style>
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  background: linear-gradient(135deg,rgba(88,204,2,.07),rgba(139,92,246,.07));
+  background: linear-gradient(135deg,rgba(88,204,2,.07),rgba(88,204,2,.05));
   border: 1.5px solid rgba(88,204,2,.18);
   border-radius: 16px;
   margin-top: -2px;
@@ -261,7 +261,7 @@ const STYLE = `<style>
 }
 .exam-predict-ico {
   width: 40px; height: 40px; flex-shrink: 0;
-  background: linear-gradient(135deg,rgba(88,204,2,.1),rgba(139,92,246,.1));
+  background: linear-gradient(135deg,rgba(88,204,2,.1),rgba(88,204,2,.07));
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
 }

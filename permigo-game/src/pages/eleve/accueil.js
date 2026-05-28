@@ -265,11 +265,11 @@ const STYLE = `<style>
 
 /* Next reward */
 .acc2-ms-reward {
-  background: linear-gradient(145deg, #6d28d9 0%, var(--puk) 40%, var(--pul) 75%, #d946ef 100%);
+  background: linear-gradient(135deg, var(--a) 0%, var(--adk) 100%);
   padding: 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 20px 40px -12px rgba(109,40,217,.45), 0 6px 16px rgba(10,13,26,.15);
+  box-shadow: 0 20px 40px -12px rgba(88,204,2,.35), 0 6px 16px rgba(10,13,26,.15);
 }
 .acc2-ms-reward::before {
   content: '';
@@ -428,7 +428,7 @@ const STYLE = `<style>
 /* ── Chest teaser ── */
 .acc2-chest-teaser {
   margin: 0 16px 16px;
-  background: linear-gradient(135deg, rgba(88,204,2,.08), rgba(139,92,246,.06));
+  background: linear-gradient(135deg, rgba(88,204,2,.08), rgba(88,204,2,.04));
   border: 1.5px solid rgba(88,204,2,.2);
   border-radius: 18px;
   padding: 14px 16px;
@@ -557,7 +557,7 @@ const STYLE = `<style>
 /* Leaderboard slot */
 .acc-lb {
   margin: 0 16px 16px;
-  background: linear-gradient(135deg, rgba(88,204,2,.08) 0%, rgba(139,92,246,.06) 100%);
+  background: linear-gradient(135deg, rgba(88,204,2,.08) 0%, rgba(88,204,2,.04) 100%);
   border: 1.5px solid rgba(88,204,2,.18);
   border-radius: 20px;
   padding: 14px 18px;
