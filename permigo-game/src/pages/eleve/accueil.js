@@ -52,24 +52,26 @@ const STYLE = `<style>
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  background: linear-gradient(160deg, rgba(30,27,75,.80) 0%, rgba(49,46,129,.62) 35%, rgba(79,70,229,.50) 70%, rgba(124,58,237,.55) 100%), url('/skins/landing/monde4jour.webp') center/cover no-repeat;
+  background: linear-gradient(160deg, rgba(11,13,26,.72) 0%, rgba(20,35,5,.55) 40%, rgba(11,13,26,.68) 100%), url('/skins/landing/monde4jour.webp') center/cover no-repeat;
 }
 .acc2-hero::before {
   content: '';
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 15% 35%, rgba(167,139,250,.38) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 85% 75%, rgba(88,204,2,.22) 0%, transparent 55%);
+    radial-gradient(ellipse 80% 60% at 15% 35%, rgba(88,204,2,.20) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 75%, rgba(70,163,2,.14) 0%, transparent 55%);
   pointer-events: none;
 }
 .acc2-hero::after {
   content: '';
   position: absolute;
   inset: 0;
-  opacity: .045;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px;
+  background: linear-gradient(135deg,
+    rgba(70,163,2,.55) 0%,
+    rgba(46,122,0,.35) 50%,
+    rgba(70,163,2,.55) 100%);
+  mix-blend-mode: multiply;
   pointer-events: none;
 }
 .acc2-hero-content { position: relative; z-index: 1; }
@@ -109,11 +111,20 @@ const STYLE = `<style>
 }
 .acc2-hero-notif-btn:active { background: rgba(255,255,255,.2); }
 .acc2-hero-title {
-  font: 800 40px/1.05 'Plus Jakarta Sans', sans-serif;
+  font: 800 40px/1.05 var(--fd), sans-serif;
   color: #fff;
   letter-spacing: -0.03em;
   margin: 0 0 16px;
-  text-shadow: 0 2px 24px rgba(0,0,0,.25);
+}
+.acc2-hero-niv-badge {
+  display: inline-block;
+  background: var(--a);
+  color: #fff;
+  padding: 10px 22px;
+  border-radius: var(--rl);
+  font-weight: 900;
+  box-shadow: var(--s-btn-rest);
+  text-shadow: none;
 }
 .acc2-hero-meta {
   display: flex;
@@ -781,7 +792,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
           ${icon('bell', { size: 18 })}
         </button>
       </div>
-      <h1 class="acc2-hero-title" tabindex="-1">${esc(lvl.name)}</h1>
+      <h1 class="acc2-hero-title" tabindex="-1"><span class="acc2-hero-niv-badge">${esc(lvl.name)}</span></h1>
       <div class="acc2-hero-meta">
         <div class="acc2-hero-xp-pill">
           ${icon('zap', { size: 13 })}
