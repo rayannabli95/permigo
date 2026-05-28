@@ -3,13 +3,15 @@
    Modifiable : ajuste les couleurs ici, tout le reste suit.
 ═══════════════════════════════════════════════════════════ */
 
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap');
+
 :root {
-  /* ─ Accent principal (indigo) ─ */
-  --a:#6366f1; --adk:#4f46e5;
-  --ap:rgba(99,102,241,.09); --ag:rgba(99,102,241,.14);
+  /* ─ Accent principal (Duo green) ─ */
+  --a:#58CC02; --adk:#46A302;
+  --ap:rgba(88,204,2,.09); --ag:rgba(88,204,2,.14);
 
   /* ─ États ─ */
-  --gr:#10b981; --grd:#059669; --grp:rgba(16,185,129,.09);  /* succès / succès dark */
+  --gr:#22c55e; --grd:#16a34a; --grp:rgba(34,197,94,.09);   /* succès / succès dark */
   --rd:#ef4444; --rdk:#dc2626; --rdx:#b91c1c; --rdp:rgba(239,68,68,.09); /* danger / dark / darker */
   --am:#f59e0b; --amk:#d97706; --amx:#b45309; --aml:#fde68a; --aml2:#fbbf24; --amp:rgba(245,158,11,.09); /* warning variants */
   --bl:#0ea5e9; --blk:#0891b2; --blp:rgba(14,165,233,.09);  /* info / info dark */
@@ -28,7 +30,7 @@
   --grp2:#dcfce7; /* success bg très clair */
   /* ─ Rouge bg clair ─ */
   --rdp2:#fee2e2;
-  /* ─ Accent clair (indigo-300/200) ─ */
+  /* ─ Accent clair (indigo-300/200 — conservés pour compatibilité) ─ */
   --al:#818cf8; --al2:#c7d2fe;
   /* ─ Bleu variants ─ */
   --bl2:#3b82f6; --blk2:#1d4ed8;
@@ -45,7 +47,7 @@
   --bh:64px;  /* bottom nav height */
 
   /* ─ Radius ─ */
-  --r:10px; --rl:14px; --rx:20px;
+  --r:12px; --rl:18px; --rx:24px;
 
   /* ─ Shadows ─ */
   --s0:0 1px 3px rgba(11,13,26,.05);
@@ -53,15 +55,19 @@
   --s2:0 6px 22px rgba(11,13,26,.09), 0 2px 8px rgba(11,13,26,.05);
   --s3:0 14px 40px rgba(11,13,26,.13), 0 4px 12px rgba(11,13,26,.07);
   --s4:0 28px 60px rgba(11,13,26,.17), 0 8px 22px rgba(11,13,26,.08);
+  /* ─ Bouton 3D Duo-style ─ */
+  --s-btn-rest:0 4px 0 0 var(--adk);
+  --s-btn-active:0 1px 0 0 var(--adk);
 
   /* ─ Motion ─ */
   --t:.16s cubic-bezier(.4,0,.2,1);
   --t-slow:.35s cubic-bezier(.4,0,.2,1);
+  --ease-bounce:cubic-bezier(.5,1.8,.5,1);
 
   /* ─ Fonts ─ */
-  --fd:'Plus Jakarta Sans','Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
-  --fb:'Inter','Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
-  --fn:'IBM Plex Mono','SF Mono',Menlo,monospace;
+  --fd:'Nunito','Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --fb:'Nunito','Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --fn:'JetBrains Mono','IBM Plex Mono','SF Mono',Menlo,monospace;
 
   /* Scheme info pour les form controls natifs */
   color-scheme: light;
@@ -82,8 +88,8 @@
   --mu:#9da3c0;    --mu2:#727896;
 
   /* ─ Accents : opacités plus marquées sur fond sombre ─ */
-  --ap:rgba(99,102,241,.15);   --ag:rgba(99,102,241,.22);
-  --grp:rgba(16,185,129,.15);
+  --ap:rgba(88,204,2,.15);     --ag:rgba(88,204,2,.22);
+  --grp:rgba(34,197,94,.15);
   --rdp:rgba(239,68,68,.15);
   --amp:rgba(245,158,11,.15);
   --blp:rgba(14,165,233,.15);
@@ -107,8 +113,8 @@
     --bo:#2a2e48;    --bo2:#23263c;
     --ink:#f3f4f8;   --ink2:#e2e5ee;   --ink3:#c9cde0;
     --mu:#9da3c0;    --mu2:#727896;
-    --ap:rgba(99,102,241,.15);   --ag:rgba(99,102,241,.22);
-    --grp:rgba(16,185,129,.15);  --rdp:rgba(239,68,68,.15);
+    --ap:rgba(88,204,2,.15);     --ag:rgba(88,204,2,.22);
+    --grp:rgba(34,197,94,.15);   --rdp:rgba(239,68,68,.15);
     --amp:rgba(245,158,11,.15);  --blp:rgba(14,165,233,.15);
     --pup:rgba(139,92,246,.15);
     --s0:0 1px 3px rgba(0,0,0,.4);
