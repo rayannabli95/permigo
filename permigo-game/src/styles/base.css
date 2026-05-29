@@ -202,15 +202,11 @@ a:hover { text-decoration: underline; }
   outline: 2px solid var(--a); outline-offset: 2px;
 }
 
-/* ─── A11y : Focus visible global cohérent ─── */
-/* On RESET le outline natif (souvent moche) puis on le redéfinit pour le clavier uniquement */
+/* ─── A11y : Focus visible scopé aux contrôles interactifs ─── */
+/* RESET du outline natif (souvent moche). Le ring vert ne s'applique QU'AUX
+   éléments interactifs (clavier) — pas aux conteneurs focusés par script
+   avec tabindex="-1" (router → H1 pour annonce lecteur d'écran). */
 :focus { outline: none; }
-:focus-visible {
-  outline: 2px solid var(--a);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-/* Sur les éléments avec border-radius custom, on garde le ring mais avec un box-shadow */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -218,6 +214,9 @@ select:focus-visible,
 textarea:focus-visible,
 [role="button"]:focus-visible,
 [role="tab"]:focus-visible,
+[role="checkbox"]:focus-visible,
+[role="switch"]:focus-visible,
+[role="menuitem"]:focus-visible,
 [tabindex="0"]:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--ap), 0 0 0 1px var(--a);
