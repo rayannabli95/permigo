@@ -41,14 +41,14 @@ const STYLE = `<style>
   }
   .sg-logo {
     width: 56px; height: 56px;
-    background: linear-gradient(135deg, var(--a), var(--pu));
+    background: var(--a);
     border-radius: 16px;
     margin: 0 auto 16px;
     display: flex; align-items: center; justify-content: center;
     color: #fff;
     font: 800 22px/1 'Plus Jakarta Sans', sans-serif;
     letter-spacing: -.02em;
-    box-shadow: 0 8px 24px rgba(99,102,241,.3);
+    box-shadow: 0 8px 24px rgba(88,204,2,.3);
   }
   .sg-title {
     font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -83,7 +83,7 @@ const STYLE = `<style>
   .sg-input:focus {
     outline: 0;
     border-color: var(--a);
-    box-shadow: 0 0 0 4px rgba(99,102,241,.12);
+    box-shadow: 0 0 0 4px rgba(88,204,2,.12);
   }
   .sg-input[readonly] { background: var(--bg); color: var(--mu3); cursor: default; }
   .sg-input.error { border-color: var(--rd); }
@@ -97,13 +97,13 @@ const STYLE = `<style>
     width: 100%;
     margin-top: 18px;
     padding: 16px;
-    background: linear-gradient(135deg, var(--a), var(--pu));
+    background: var(--a);
     color: #fff;
     border: 0;
     border-radius: 14px;
     font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
-    box-shadow: 0 8px 24px rgba(99,102,241,.35);
+    box-shadow: 0 8px 24px rgba(88,204,2,.35);
     transition: transform .12s, box-shadow .15s;
     font-family: inherit;
   }
@@ -113,7 +113,7 @@ const STYLE = `<style>
     display: inline-block;
     margin: 0 0 18px;
     padding: 5px 12px;
-    background: rgba(99,102,241,.12);
+    background: rgba(88,204,2,.12);
     color: var(--adk);
     border-radius: 99px;
     font: 700 11px/1 'Inter', sans-serif;

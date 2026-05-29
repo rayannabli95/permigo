@@ -73,7 +73,7 @@ function template() {
 
       /* Hero logo */
       .lg-logo-host{margin:8px 0 18px;display:flex;justify-content:center;opacity:0;animation:lg-in .7s cubic-bezier(.2,.7,.3,1) .1s both}
-      .lg-logo-host img{height:clamp(60px,11vw,96px);filter:drop-shadow(0 12px 32px rgba(139,92,246,.45)) drop-shadow(0 0 24px rgba(99,102,241,.3))}
+      .lg-logo-host img{height:clamp(60px,11vw,96px);filter:drop-shadow(0 12px 32px rgba(139,92,246,.45)) drop-shadow(0 0 24px rgba(88,204,2,.3))}
       @keyframes lg-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
       /* Card — premium glass */
@@ -86,7 +86,7 @@ function template() {
       .lg-field{display:flex;flex-direction:column;gap:6px}
       .lg-field label{font-size:10.5px;font-weight:800;color:rgba(255,255,255,.78);letter-spacing:1.2px;text-transform:uppercase}
       .lg-input-wrap{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);transition:all .15s}
-      .lg-input-wrap:focus-within{border-color:var(--al3);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(99,102,241,.18)}
+      .lg-input-wrap:focus-within{border-color:var(--al3);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(88,204,2,.18)}
       .lg-input-wrap svg{width:18px;height:18px;color:rgba(255,255,255,.5);flex-shrink:0}
       .lg-input-wrap input{flex:1;background:transparent;border:0;outline:0;color:#fff;font-size:14.5px;font-family:inherit;min-width:0}
       .lg-input-wrap input::placeholder{color:rgba(255,255,255,.35)}
@@ -103,8 +103,8 @@ function template() {
       .lg-forgot:hover{color:var(--al2)}
 
       /* CTA primary */
-      .lg-cta{width:100%;height:50px;border-radius:12px;border:0;background:linear-gradient(135deg,var(--a),var(--pu));color:#fff;font-family:var(--fd);font-weight:800;font-size:15px;letter-spacing:.01em;cursor:pointer;transition:transform .12s,box-shadow .12s;box-shadow:0 12px 32px -10px rgba(99,102,241,.65)}
-      .lg-cta:hover{transform:translateY(-1px);box-shadow:0 16px 40px -10px rgba(99,102,241,.8)}
+      .lg-cta{width:100%;height:50px;border-radius:12px;border:0;background:var(--a);color:#fff;font-family:var(--fd);font-weight:800;font-size:15px;letter-spacing:.01em;cursor:pointer;transition:transform .12s,box-shadow .12s;box-shadow:0 12px 32px -10px rgba(88,204,2,.65)}
+      .lg-cta:hover{transform:translateY(-1px);box-shadow:0 16px 40px -10px rgba(88,204,2,.8)}
       .lg-cta:disabled{opacity:.6;cursor:wait;transform:none}
 
       .lg-err{color:#fda4af;font-size:12.5px;margin:0;min-height:18px;text-align:center;font-weight:600}

@@ -338,7 +338,7 @@ function renderStyles() {
   width: 100%;
   max-width: 400px;
   padding: 14px;
-  background: linear-gradient(135deg, var(--a), var(--pu));
+  background: var(--a);
   border: none;
   border-radius: 14px;
   color: #fff;

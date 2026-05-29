@@ -70,7 +70,7 @@ const STYLE = `<style>
   content: '';
   position: absolute; inset: 0;
   background: radial-gradient(ellipse 80% 70% at 10% 30%, rgba(167,139,250,.35) 0%, transparent 55%),
-              radial-gradient(ellipse 50% 60% at 90% 80%, rgba(99,102,241,.2) 0%, transparent 50%);
+              radial-gradient(ellipse 50% 60% at 90% 80%, rgba(88,204,2,.2) 0%, transparent 50%);
   pointer-events: none;
 }
 .tr2-hero-inner { position: relative; z-index: 1; }
@@ -223,14 +223,14 @@ const STYLE = `<style>
 .tr2-modal-desc { font: 500 14px/1.55 'Inter', sans-serif; color: var(--mu); margin-bottom: 16px; }
 .tr2-modal-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .tr2-modal-chip { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 99px; font: 700 12px/1 'IBM Plex Mono', monospace; }
-.tr2-modal-chip.xp   { background: rgba(99,102,241,.1); color: var(--a); }
+.tr2-modal-chip.xp   { background: rgba(88,204,2,.1); color: var(--a); }
 .tr2-modal-chip.gems { background: rgba(16,185,129,.1); color: var(--gr); }
 .tr2-modal-chip.date { background: var(--bg); color: var(--mu); }
 .tr2-modal-social { font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu2); margin-bottom: 20px; }
 .tr2-modal-actions { display: flex; gap: 8px; padding: 0 20px; background: var(--su); }
 .tr2-modal-share {
   flex: 1; padding: 14px;
-  background: linear-gradient(135deg, var(--a), var(--pu));
+  background: var(--a);
   border: none; border-radius: 14px; color: #fff;
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; min-height: 50px;
   transition: transform .12s, opacity .12s;

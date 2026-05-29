@@ -22,5 +22,5 @@ export function renderUserAvatar({ avatar_url, prenom, nom } = {}, size = 40) {
   }
   const init = (name || nom || '?')
     .split(/\s+/).slice(0, 2).map(s => s[0] || '').join('').toUpperCase() || '?';
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--pu));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:${Math.floor(size * 0.4)}px;font-family:var(--fd,system-ui)">${esc(init)}</div>`;
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg, var(--a), var(--adk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:${Math.floor(size * 0.4)}px;font-family:var(--fd,system-ui)">${esc(init)}</div>`;
 }

@@ -159,7 +159,7 @@ const STYLE = `<style>
     width: 11px;
     height: 11px;
     border-radius: 2px;
-    background: rgba(99,102,241,.07);
+    background: rgba(88,204,2,.07);
     cursor: default;
   }
   .ins-heatmap-legend {
@@ -269,7 +269,7 @@ const STYLE = `<style>
   .ins-diff-code {
     font: 600 11px/1 'IBM Plex Mono', monospace;
     color: var(--a);
-    background: rgba(99,102,241,.1);
+    background: rgba(88,204,2,.1);
     padding: 4px 7px;
     border-radius: 6px;
     flex-shrink: 0;
@@ -728,8 +728,8 @@ function renderHeatmapSection({ heatmap, heatmapMax }) {
       const intensity = heatmapMax > 0 ? count / heatmapMax : 0;
       const alpha = 0.07 + intensity * 0.88;
       const bg = count === 0
-        ? 'rgba(99,102,241,.07)'
-        : `rgba(99,102,241,${alpha.toFixed(2)})`;
+        ? 'rgba(88,204,2,.07)'
+        : `rgba(88,204,2,${alpha.toFixed(2)})`;
       const title = count > 0 ? `${jour} ${h}h — ${count} validation${count > 1 ? 's' : ''}` : '';
       return `<div class="ins-hmap-cell" style="background:${bg}" ${title ? `title="${title}"` : ''}></div>`;
     }).join('');
@@ -738,7 +738,7 @@ function renderHeatmapSection({ heatmap, heatmapMax }) {
 
   // Légende
   const legendCells = [.07, .25, .45, .65, .90].map(a =>
-    `<div class="ins-heatmap-legend-cell" style="background:rgba(99,102,241,${a})"></div>`
+    `<div class="ins-heatmap-legend-cell" style="background:rgba(88,204,2,${a})"></div>`
   ).join('');
 
   return `

@@ -17,7 +17,7 @@ const CAT_CFG = {
   streak:     { ico: 'flame',   color: 'var(--or)' },
   competence: { ico: 'award',   color: 'var(--gr2)' },
   session:    { ico: 'map-pin', color: 'var(--blk)' },
-  default:    { ico: 'zap',     color: 'var(--pu)' },
+  default:    { ico: 'zap',     color: 'var(--a)' },
 };
 
 function ensureStyle() {
@@ -37,7 +37,7 @@ function ensureStyle() {
   }
   .dq-count {
     font: 700 11px/1 'Inter', sans-serif;
-    color: var(--pu); background: rgba(139,92,246,.1);
+    color: var(--a); background: rgba(88,204,2,.1);
     border-radius: 99px; padding: 2px 8px;
   }
   .dq-scroll {
@@ -63,12 +63,12 @@ function ensureStyle() {
     to   { opacity:1; transform:translateY(0)    scale(1); }
   }
   @media (hover:hover) and (pointer:fine) {
-    .dq-card--ready:hover { border-color: rgba(139,92,246,.4); }
+    .dq-card--ready:hover { border-color: rgba(88,204,2,.4); }
   }
   .dq-card:active { transform: scale(.97); }
   .dq-card--ready {
-    border-color: rgba(139,92,246,.3);
-    background: linear-gradient(145deg, rgba(139,92,246,.06), rgba(99,102,241,.04));
+    border-color: rgba(88,204,2,.3);
+    background: linear-gradient(145deg, rgba(88,204,2,.06), rgba(88,204,2,.03));
   }
   .dq-card--claimed {
     border-color: rgba(16,185,129,.22);
@@ -214,7 +214,7 @@ function renderSection(quests) {
   return `
     <div class="dq-hd">
       <div class="dq-title">
-        ${icon('zap', { size: 14, strokeWidth: 2.2, color: 'var(--pu)' })}
+        ${icon('zap', { size: 14, strokeWidth: 2.2, color: 'var(--a)' })}
         Quêtes du jour
       </div>
       ${readyCount > 0 ? `<span class="dq-count">${readyCount} à réclamer</span>` : ''}

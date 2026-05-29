@@ -33,11 +33,11 @@ const STYLE = `<style>
 .prf-avatar {
   width: 80px; height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--a), var(--pu));
+  background: var(--a);
   display: flex; align-items: center; justify-content: center;
   font: 700 32px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
-  box-shadow: 0 8px 24px rgba(99,102,241,.25);
+  box-shadow: 0 8px 24px rgba(88,204,2,.25);
 }
 .prf-name {
   font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -50,7 +50,7 @@ const STYLE = `<style>
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--a);
-  background: rgba(99,102,241,.1);
+  background: rgba(88,204,2,.1);
   border-radius: 99px;
   padding: 6px 12px;
 }
@@ -281,7 +281,7 @@ const STYLE = `<style>
   border-radius: 8px;
   transition: background .12s;
 }
-.prf-ref-copy-btn:active { background: rgba(99,102,241,.1); }
+.prf-ref-copy-btn:active { background: rgba(88,204,2,.1); }
 .prf-ref-stats {
   display: flex;
   gap: 8px;
@@ -308,7 +308,7 @@ const STYLE = `<style>
 .prf-ref-share-btn {
   width: 100%;
   padding: 13px;
-  background: linear-gradient(135deg, var(--a), var(--pu));
+  background: var(--a);
   border: none;
   border-radius: 12px;
   color: #fff;
@@ -321,8 +321,8 @@ const STYLE = `<style>
 .prf-ref-gen-btn {
   width: 100%;
   padding: 13px;
-  background: rgba(99,102,241,.08);
-  border: 1.5px solid rgba(99,102,241,.2);
+  background: rgba(88,204,2,.08);
+  border: 1.5px solid rgba(88,204,2,.2);
   border-radius: 12px;
   color: var(--a);
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
@@ -330,7 +330,7 @@ const STYLE = `<style>
   transition: background .15s;
   min-height: 46px;
 }
-.prf-ref-gen-btn:active { background: rgba(99,102,241,.15); }
+.prf-ref-gen-btn:active { background: rgba(88,204,2,.15); }
 .prf-ref-apply {
   margin-top: 14px;
   display: flex;

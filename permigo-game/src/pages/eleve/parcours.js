@@ -161,7 +161,7 @@ const STYLE = `<style>
 
 /* Coins décoratifs */
 .prc-map-corners { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
-.prc-corner { position: absolute; width: 16px; height: 16px; border: 2px solid rgba(99,102,241,.35); border-radius: 2px; }
+.prc-corner { position: absolute; width: 16px; height: 16px; border: 2px solid rgba(88,204,2,.35); border-radius: 2px; }
 .prc-corner.tl { top: 14px; left: 14px; border-right: 0; border-bottom: 0; }
 .prc-corner.tr { top: 14px; right: 14px; border-left: 0; border-bottom: 0; }
 .prc-corner.bl { bottom: 14px; left: 14px; border-right: 0; border-top: 0; }
@@ -209,12 +209,12 @@ const STYLE = `<style>
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: rgba(99,102,241,.2) transparent;
+  scrollbar-color: rgba(88,204,2,.2) transparent;
   padding-top: 40px;
 }
 .prc-map::-webkit-scrollbar { width: 4px; }
 .prc-map::-webkit-scrollbar-track { background: transparent; }
-.prc-map::-webkit-scrollbar-thumb { background: rgba(99,102,241,.2); border-radius: 99px; }
+.prc-map::-webkit-scrollbar-thumb { background: rgba(88,204,2,.2); border-radius: 99px; }
 @media (max-width: 560px) { .prc-map { max-height: 65vh; } }
 @media (min-height: 900px) { .prc-map { max-height: 75vh; } }
 
@@ -448,14 +448,14 @@ const STYLE = `<style>
 /* ─ NEXT — couleur monde, éclair, halo pulsant ─ */
 .prc-node.next .nd-circle {
   background: var(--a);
-  box-shadow: 0 4px 18px rgba(99,102,241,.45);
+  box-shadow: 0 4px 18px rgba(88,204,2,.45);
   animation: ndPulseValid 2.4s ease-in-out infinite;
 }
 /* Pulse blanc → vert pour indiquer "prêt à valider" */
 @keyframes ndPulseValid {
   0%, 100% {
     background: var(--a);
-    box-shadow: 0 4px 18px rgba(99,102,241,.45);
+    box-shadow: 0 4px 18px rgba(88,204,2,.45);
   }
   40% {
     background: #ffffff;
@@ -507,7 +507,7 @@ const STYLE = `<style>
   position: absolute;
   inset: -12px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(99,102,241,.22) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(88,204,2,.22) 0%, transparent 70%);
   animation: nd-halo 1.8s ease-in-out infinite;
 }
 @keyframes nd-halo {
@@ -519,7 +519,7 @@ const STYLE = `<style>
   position: absolute;
   inset: -18px;
   border-radius: 50%;
-  border: 1.5px solid rgba(99,102,241,.25);
+  border: 1.5px solid rgba(88,204,2,.25);
   animation: nd-ring-pulse 1.8s ease-out infinite;
 }
 
@@ -610,8 +610,8 @@ const STYLE = `<style>
 .prc-node.done .nd-lbl .nd-stt { color: var(--gr); }
 
 .prc-node.next .nd-lbl {
-  border-color: rgba(99,102,241,.3);
-  box-shadow: 0 8px 22px rgba(99,102,241,.15), 0 0 0 2px rgba(99,102,241,.2);
+  border-color: rgba(88,204,2,.3);
+  box-shadow: 0 8px 22px rgba(88,204,2,.15), 0 0 0 2px rgba(88,204,2,.2);
 }
 .prc-node.next .nd-lbl .nd-name { color: var(--ink); }
 .prc-node.next .nd-lbl .nd-stt  { color: var(--a); }
@@ -629,7 +629,7 @@ const STYLE = `<style>
   border-radius: 99px;
   letter-spacing: .14em;
   white-space: nowrap;
-  box-shadow: 0 3px 10px rgba(99,102,241,.35);
+  box-shadow: 0 3px 10px rgba(88,204,2,.35);
   animation: tu-bounce 1.6s ease-in-out infinite;
 }
 @keyframes tu-bounce {
@@ -789,7 +789,7 @@ const STYLE = `<style>
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(99,102,241,.06), transparent 50%),
+    radial-gradient(ellipse at 30% 20%, rgba(88,204,2,.06), transparent 50%),
     radial-gradient(ellipse at 80% 80%, rgba(245,158,11,.05), transparent 50%);
   pointer-events: none;
 }
@@ -1283,13 +1283,13 @@ function spawnArrow(node, compId) {
         to   { opacity: 1; transform: translate(-50%, -100%) scale(1); }
       }
       .fa-bubble {
-        background: linear-gradient(135deg, var(--a), var(--pu));
+        background: var(--a);
         color: #fff;
         padding: 10px 16px;
         border-radius: 14px;
         font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
         white-space: nowrap;
-        box-shadow: 0 12px 32px -8px rgba(99,102,241,.6);
+        box-shadow: 0 12px 32px -8px rgba(88,204,2,.6);
         margin-bottom: 6px;
         position: relative;
       }
@@ -1300,7 +1300,7 @@ function spawnArrow(node, compId) {
         left: 50%;
         transform: translateX(-50%) rotate(45deg);
         width: 10px; height: 10px;
-        background: var(--pu);
+        background: var(--a);
       }
       .fa-arrow {
         width: 28px;
@@ -1308,7 +1308,7 @@ function spawnArrow(node, compId) {
         margin: 0 auto;
         color: var(--a);
         animation: faBounce 1.2s ease-in-out infinite;
-        filter: drop-shadow(0 4px 8px rgba(99,102,241,.4));
+        filter: drop-shadow(0 4px 8px rgba(88,204,2,.4));
       }
       @keyframes faBounce {
         0%, 100% { transform: translateY(0); }

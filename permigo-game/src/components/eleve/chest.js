@@ -266,7 +266,7 @@ export function ensureChestStyles() {
       outline:none;overflow:hidden;
     }
     .chest-card:hover{transform:translateY(-5px) scale(1.03);box-shadow:0 30px 60px -10px var(--ch-1),0 0 0 6px rgba(255,255,255,.6),inset 0 -4px 0 rgba(0,0,0,.06),inset 0 2px 0 rgba(255,255,255,.8)}
-    .chest-card:focus-visible{box-shadow:0 22px 50px -12px var(--ch-1),0 0 0 6px rgba(99,102,241,.5),inset 0 -4px 0 rgba(0,0,0,.06),inset 0 2px 0 rgba(255,255,255,.8)}
+    .chest-card:focus-visible{box-shadow:0 22px 50px -12px var(--ch-1),0 0 0 6px rgba(88,204,2,.5),inset 0 -4px 0 rgba(0,0,0,.06),inset 0 2px 0 rgba(255,255,255,.8)}
     .chest-card.opened{opacity:.5;cursor:default;filter:saturate(.4)}
     .chest-card.opened:hover{transform:none}
 

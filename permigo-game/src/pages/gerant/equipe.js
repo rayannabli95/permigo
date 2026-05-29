@@ -38,7 +38,7 @@ const STYLE = `<style>
 .eq-count {
   font: 600 12px/1 'Inter', sans-serif;
   color: var(--a);
-  background: rgba(99,102,241,.1);
+  background: rgba(88,204,2,.1);
   padding: 6px 12px;
   border-radius: 99px;
 }
@@ -74,7 +74,7 @@ const STYLE = `<style>
 .eq-search:focus {
   border-color: var(--a);
   background: var(--su);
-  box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+  box-shadow: 0 0 0 3px rgba(88,204,2,.12);
 }
 
 /* Liste */
@@ -175,7 +175,7 @@ const STYLE = `<style>
 }
 .eq-add-btn:hover {
   border-color: var(--a);
-  background: rgba(99,102,241,.06);
+  background: rgba(88,204,2,.06);
   color: var(--a);
 }
 .eq-add-ico { font-size: 18px; }

@@ -15,7 +15,7 @@ import { STATUT_CFG } from '@/utils/statut-label.js';
 
 // ─── Couleurs par monde ───────────────────────────────────────────
 const MONDE_COLORS = {
-  C1: { accent: 'var(--a)', bg: 'rgba(99,102,241,.07)', border: 'rgba(99,102,241,.2)' },
+  C1: { accent: 'var(--a)', bg: 'rgba(88,204,2,.07)', border: 'rgba(88,204,2,.2)' },
   C2: { accent: 'var(--blk)', bg: 'rgba(8,145,178,.07)',  border: 'rgba(8,145,178,.2)' },
   C3: { accent: 'var(--am)', bg: 'rgba(245,158,11,.07)', border: 'rgba(245,158,11,.2)' },
   C4: { accent: 'var(--gr)', bg: 'rgba(16,185,129,.07)', border: 'rgba(16,185,129,.2)' },
@@ -178,7 +178,7 @@ const STYLE = `<style>
   .lr-comp-code {
     font: 600 11px/1 'Inter', sans-serif;
     color: var(--a);
-    background: rgba(99,102,241,.1);
+    background: rgba(88,204,2,.1);
     border-radius: 6px;
     padding: 4px 8px;
     flex-shrink: 0;
@@ -334,7 +334,7 @@ const STYLE = `<style>
   .lr-note:focus {
     border-color: var(--a);
     background: var(--su);
-    box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+    box-shadow: 0 0 0 3px rgba(88,204,2,.12);
   }
   .lr-note-count {
     font: 500 11px/1 'Inter', sans-serif;
@@ -347,7 +347,7 @@ const STYLE = `<style>
   .lr-btn-save {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(135deg, var(--a), var(--pu));
+    background: var(--a);
     border: none;
     border-radius: 12px;
     color: #fff;
@@ -559,7 +559,7 @@ async function _loadFeedSection() {
         display: flex; align-items: center; justify-content: center;
         font-size: 12px;
       }
-      .lr-feed-dot.k-session { background: rgba(99,102,241,.1); }
+      .lr-feed-dot.k-session { background: rgba(88,204,2,.1); }
       .lr-feed-dot.k-validation { background: rgba(16,185,129,.1); }
       .lr-feed-content { flex: 1; min-width: 0; }
       .lr-feed-author {

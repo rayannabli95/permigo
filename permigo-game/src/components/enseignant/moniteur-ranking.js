@@ -40,11 +40,11 @@ function ensureStyle() {
   /* Ma position highlight */
   .mr-my-position {
     background: #fff;
-    border: 1.5px solid rgba(99,102,241,.3);
+    border: 1.5px solid rgba(88,204,2,.3);
     border-radius: 20px;
     padding: 16px;
     margin-bottom: 10px;
-    box-shadow: 0 2px 12px -4px rgba(99,102,241,.15);
+    box-shadow: 0 2px 12px -4px rgba(88,204,2,.15);
     animation: mrIn .4s cubic-bezier(.34,1.56,.64,1) both;
   }
   .mr-my-top {
@@ -61,7 +61,7 @@ function ensureStyle() {
   .mr-rank-badge.rank-1 { background: linear-gradient(135deg,var(--am),var(--amk)); color:#fff; }
   .mr-rank-badge.rank-2 { background: linear-gradient(135deg,var(--mu2),var(--mu3)); color:#fff; }
   .mr-rank-badge.rank-3 { background: linear-gradient(135deg,var(--amx),#92400e); color:#fff; }
-  .mr-rank-badge.rank-other { background: rgba(99,102,241,.1); color:var(--a); border:1.5px solid rgba(99,102,241,.2); }
+  .mr-rank-badge.rank-other { background: rgba(88,204,2,.1); color:var(--a); border:1.5px solid rgba(88,204,2,.2); }
   .mr-name {
     font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif;
     color: var(--ink);
@@ -106,7 +106,7 @@ function ensureStyle() {
   .mr-compare {
     font: 500 12px/1.4 'Inter', sans-serif;
     color: var(--a);
-    background: rgba(99,102,241,.05);
+    background: rgba(88,204,2,.05);
     border-radius: 10px;
     padding: 8px 12px;
     margin-top: 10px;
@@ -130,7 +130,7 @@ function ensureStyle() {
   }
   .mr-row:last-child { border-bottom: none; }
   .mr-row.mr-row-me {
-    background: rgba(99,102,241,.04);
+    background: rgba(88,204,2,.04);
   }
   .mr-row-rank {
     font: 700 14px/1 'Plus Jakarta Sans', sans-serif;

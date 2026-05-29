@@ -185,7 +185,7 @@ const STYLE = `<style>
 .bo2-price-btn {
   display: flex; align-items: center; gap: 5px;
   padding: 7px 12px;
-  background: linear-gradient(135deg, var(--a), var(--pu));
+  background: var(--a);
   border: none; border-radius: 10px;
   color: #fff; font: 700 12px/1 'IBM Plex Mono', monospace;
   cursor: pointer; min-height: 44px;
@@ -195,7 +195,7 @@ const STYLE = `<style>
 }
 .bo2-price-btn:active { transform: scale(.95); opacity: .9; }
 .bo2-price-btn:disabled { opacity: .5; cursor: default; }
-.bo2-price-btn.can-afford { background: linear-gradient(135deg, var(--a), var(--pu)); }
+.bo2-price-btn.can-afford { background: var(--a); }
 .bo2-price-btn.cant-afford { background: var(--bg2); color: var(--mu2); }
 .bo2-owned-txt {
   font: 700 11px/1 'IBM Plex Mono', monospace;
@@ -248,10 +248,10 @@ const STYLE = `<style>
 .bo2-modal-buy {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: calc(100% - 40px); margin: 0 20px;
-  padding: 16px; background: linear-gradient(135deg, var(--a), var(--pu));
+  padding: 16px; background: var(--a);
   border: none; border-radius: 16px; color: #fff;
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
-  cursor: pointer; min-height: 54px; box-shadow: 0 8px 24px -6px rgba(99,102,241,.45);
+  cursor: pointer; min-height: 54px; box-shadow: 0 8px 24px -6px rgba(88,204,2,.45);
   transition: transform .14s cubic-bezier(.34,1.56,.64,1), opacity .12s;
 }
 .bo2-modal-buy:active { transform: scale(.97); opacity: .9; }

@@ -39,7 +39,7 @@ const STYLE = `<style>
 .el-count {
   font: 600 12px/1 'Inter', sans-serif;
   color: var(--a);
-  background: rgba(99,102,241,.1);
+  background: rgba(88,204,2,.1);
   padding: 6px 12px;
   border-radius: 99px;
 }
@@ -75,7 +75,7 @@ const STYLE = `<style>
 .el-search:focus {
   border-color: var(--a);
   background: var(--su);
-  box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+  box-shadow: 0 0 0 3px rgba(88,204,2,.12);
 }
 
 /* Tabs */
@@ -150,7 +150,7 @@ const STYLE = `<style>
   gap: 4px;
   font: 600 11px/1 'Inter', sans-serif;
   color: var(--a);
-  background: rgba(99,102,241,.1);
+  background: rgba(88,204,2,.1);
   border-radius: 99px;
   padding: 4px 10px;
   margin-top: 6px;

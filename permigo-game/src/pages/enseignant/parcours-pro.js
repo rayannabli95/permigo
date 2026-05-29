@@ -46,7 +46,7 @@ const STYLE = `<style>
   position: absolute;
   inset: 0 0 auto 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(99,102,241,.6), transparent);
+  background: linear-gradient(90deg, transparent, rgba(88,204,2,.6), transparent);
   pointer-events: none;
 }
 
@@ -303,9 +303,9 @@ const STYLE = `<style>
 }
 .pcp-road-stop:last-of-type { border-bottom: none; }
 .pcp-road-stop[role="button"] { cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.pcp-road-stop[role="button"]:active { background: rgba(99,102,241,.07); }
+.pcp-road-stop[role="button"]:active { background: rgba(88,204,2,.07); }
 .pcp-road-stop:focus-visible { outline: 2px solid var(--a); outline-offset: -2px; }
-.pcp-road-stop.pcp-now { background: rgba(99,102,241,.04); }
+.pcp-road-stop.pcp-now { background: rgba(88,204,2,.04); }
 .pcp-road-stop.pcp-blurred { opacity: .45; filter: blur(1.5px); pointer-events: none; user-select: none; }
 
 .pcp-road-dot {
@@ -316,7 +316,7 @@ const STYLE = `<style>
 }
 .pcp-road-dot.done  { background: var(--gr); color: #fff; }
 .pcp-road-dot.now   { background: #fff; border: 2.5px solid var(--a); color: var(--a);
-                       box-shadow: 0 0 0 4px rgba(99,102,241,.15); }
+                       box-shadow: 0 0 0 4px rgba(88,204,2,.15); }
 .pcp-road-dot.todo  { background: var(--bg2); border: 2px solid var(--bo); color: var(--mu2); }
 
 .pcp-road-body { flex: 1; min-width: 0; }
@@ -343,7 +343,7 @@ const STYLE = `<style>
   margin-top: 5px;
   font: 500 11.5px/1 'Inter', sans-serif;
   color: var(--a);
-  background: rgba(99,102,241,.08);
+  background: rgba(88,204,2,.08);
   border-radius: 8px;
   padding: 3px 8px;
 }
@@ -376,7 +376,7 @@ const STYLE = `<style>
   cursor: pointer;
   transition: border-color .15s, color .15s, background .15s;
 }
-.pcp-see-all:hover { border-color: var(--a); color: var(--a); background: rgba(99,102,241,.04); }
+.pcp-see-all:hover { border-color: var(--a); color: var(--a); background: rgba(88,204,2,.04); }
 .pcp-see-all:active { transform: scale(.98); }
 
 /* Skeletons */

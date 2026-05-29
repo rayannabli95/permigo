@@ -55,7 +55,7 @@ const STYLE = `<style>
 }
 .exam-hd-ico {
   width: 40px; height: 40px;
-  background: linear-gradient(135deg,var(--a),var(--pu));
+  background: var(--a);
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   font-size: 20px;
@@ -226,8 +226,8 @@ const STYLE = `<style>
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  background: linear-gradient(135deg,rgba(99,102,241,.07),rgba(139,92,246,.07));
-  border: 1.5px solid rgba(99,102,241,.18);
+  background: linear-gradient(135deg,rgba(88,204,2,.07),rgba(88,204,2,.05));
+  border: 1.5px solid rgba(88,204,2,.18);
   border-radius: 16px;
   margin-top: -2px;
   margin-bottom: 4px;
@@ -261,7 +261,7 @@ const STYLE = `<style>
 }
 .exam-predict-ico {
   width: 40px; height: 40px; flex-shrink: 0;
-  background: linear-gradient(135deg,rgba(99,102,241,.1),rgba(139,92,246,.1));
+  background: linear-gradient(135deg,rgba(88,204,2,.1),rgba(88,204,2,.07));
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
 }
@@ -272,7 +272,7 @@ const STYLE = `<style>
   height: 6px; background: var(--bo);
   border-radius: 3px; overflow: hidden; margin: 10px 0 5px;
 }
-.exam-predict-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,var(--a),var(--pu)); transition: width .5s ease; }
+.exam-predict-fill { height: 100%; border-radius: 3px; background: var(--a); transition: width .5s ease; }
 .exam-predict-labels {
   display: flex; justify-content: space-between;
   font: 500 10px/1 'Inter',sans-serif; color: var(--mu2);

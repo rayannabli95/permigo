@@ -30,7 +30,7 @@ const STYLE = `<style>
 .pcc-banner {
   position: relative;
   height: 140px;
-  background: linear-gradient(135deg, var(--a), var(--pu), var(--blk));
+  background: linear-gradient(135deg, var(--pu), var(--puk), var(--blk));
   overflow: hidden;
 }
 .pcc-banner img {
@@ -101,7 +101,7 @@ const STYLE = `<style>
   width: 100%; height: 100%;
   border-radius: 50%;
   border: 4px solid #fff;
-  background: linear-gradient(135deg, var(--a), var(--pu));
+  background: linear-gradient(135deg, var(--a), var(--adk));
   overflow: hidden;
   box-shadow: 0 4px 14px rgba(10,13,26,.12);
   display: flex; align-items: center; justify-content: center;
@@ -163,7 +163,7 @@ const STYLE = `<style>
   background: linear-gradient(90deg, var(--pu), #ec4899, var(--or), var(--am), var(--gr), #06b6d4, var(--a));
 }
 .pcc-xp-fill.gradient-indigo {
-  background: linear-gradient(90deg, var(--a), var(--pu));
+  background: linear-gradient(90deg, var(--a), var(--adk));
 }
 .pcc-xp-val {
   font: 600 11px/1 'Inter', sans-serif;
