@@ -611,21 +611,21 @@ async function renderInto(root, _me) {
   const reconnectCount = reconnectList.length;
 
   // ─── Hero « prochaine action » — 1 action utile priorisée ──────
-  // Priorité : relancer (14j+) → consolidation due → inactifs 7j → faire
+  // Priorité : inactifs longs (14j+) → consolidation due → inactifs 7j → faire
   // avancer le prochain élève → fallback démarrage. Ton factuel, pas d'emoji.
   let hero;
   if (reconnectCount > 0) {
     const noms = reconnectList.slice(0, 2).map(e => e.prenom || 'Élève').join(', ');
     hero = {
-      tone: 'warn', ico: 'users', kicker: 'À relancer',
+      tone: 'warn', ico: 'users', kicker: 'Élèves inactifs',
       title: `${reconnectCount} élève${reconnectCount > 1 ? 's' : ''} sans activité depuis 14 j`,
       sub: noms ? `Dont ${esc(noms)}${reconnectCount > 2 ? '…' : ''}` : '',
-      cta: 'Voir qui relancer', href: '#/eleves?tab=arelancer', ev: 'hero.reconnect',
+      cta: 'Voir la liste', href: '#/eleves?tab=arelancer', ev: 'hero.reconnect',
     };
   } else if (consolidCount > 0) {
     hero = {
       tone: 'warn', ico: 'refresh', kicker: 'Consolidation',
-      title: `${consolidCount} quiz à relancer`,
+      title: `${consolidCount} quiz en attente côté élève`,
       sub: 'Des acquis attendent leur quiz de consolidation.',
       cta: 'Ouvrir mes élèves', href: '#/eleves', ev: 'hero.consolidation',
     };
