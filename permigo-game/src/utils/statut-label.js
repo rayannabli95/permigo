@@ -11,11 +11,11 @@
  * `null` = compétence non encore évaluée.
  */
 export const STATUT_CFG = {
-  acquis:         { label: 'Acquis',         color: 'var(--grd)', bg: 'rgba(16,185,129,.12)', dot: 'var(--gr)' },
-  a_valider:      { label: 'À valider',      color: 'var(--grd)', bg: 'rgba(34,197,94,.12)',  dot: 'var(--gr)' },
-  en_cours:       { label: 'En cours',       color: 'var(--amx)', bg: 'rgba(245,158,11,.12)', dot: 'var(--am)' },
-  a_retravailler: { label: 'À retravailler', color: 'var(--rdx)', bg: 'rgba(239,68,68,.12)',  dot: 'var(--rd)' },
-  null:           { label: 'Non évalué',     color: 'var(--ink)', bg: 'var(--su2)',           dot: 'var(--bo)' },
+  acquis:         { label: 'Acquis',                color: 'var(--grd)',    bg: 'rgba(16,185,129,.12)', dot: 'var(--gr)' },
+  a_valider:      { label: 'En attente quiz élève', color: 'var(--amx)',    bg: 'rgba(245,158,11,.12)', dot: 'var(--am)' },
+  en_cours:       { label: 'En cours',              color: 'var(--amx)',    bg: 'rgba(245,158,11,.12)', dot: 'var(--am)' },
+  a_retravailler: { label: 'À retravailler',        color: 'var(--rdx)',    bg: 'rgba(239,68,68,.12)',  dot: 'var(--rd)' },
+  null:           { label: 'Non évalué',            color: 'var(--ink)', bg: 'var(--su2)',           dot: 'var(--bo)' },
 };
 
 const FALLBACK = STATUT_CFG.null;
