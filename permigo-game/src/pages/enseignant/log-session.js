@@ -96,7 +96,7 @@ export async function mount(root) {
 
   // Reset state
   _eleve = null; _duration = DEFAULT_DURATION; _date = todayIso();
-  _comps = new Set(); _comment = ''; _query = '';
+  _comps = new Map(); _comment = ''; _query = '';
   _customDurOpen = false; _customDur = 105;
   _compCache = {}; _templates = [];
 
@@ -441,7 +441,7 @@ function _wireEleveList(root) {
       const id = row.dataset.eleve;
       if (_eleve === id) return; // déjà sélectionné
       _eleve = id;
-      _comps = new Set(); // reset comps quand on change d'élève
+      _comps = new Map(); // reset comps quand on change d'élève
       _saveDraft();
 
       // Update visuel immédiatement
