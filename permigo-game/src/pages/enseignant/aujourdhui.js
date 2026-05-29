@@ -141,9 +141,7 @@ const STYLE = `<style>
     display: flex; align-items: center; justify-content: center;
   }
   .aj-hero.tone-warn    .aj-hero-ico { background: rgba(245,158,11,.12); color: var(--amk); }
-  .aj-hero.tone-ok      .aj-hero-ico { background: rgba(34,197,94,.14);  color: var(--grd); }
-  .aj-hero.tone-danger  .aj-hero-ico { background: rgba(239,68,68,.12);  color: var(--rdx); }
-  .aj-hero.tone-info    .aj-hero-ico { background: rgba(14,165,233,.14); color: var(--blk); }
+  .aj-hero.tone-ok      .aj-hero-ico { background: rgba(16,185,129,.12); color: var(--grd); }
   .aj-hero.tone-neutral .aj-hero-ico { background: var(--bg2);           color: var(--a); }
   .aj-hero-body { flex: 1; min-width: 0; }
   .aj-hero-kicker {
@@ -180,84 +178,6 @@ const STYLE = `<style>
   }
   .aj-hero-cta:active { transform: scale(.98); }
   .aj-hero-cta:hover { background: var(--adk); }
-
-  /* ── Widget « Ma to-do du jour » : 3 verbes / 3 couleurs unifiés ── */
-  .aj-todo {
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: 20px;
-    padding: 14px 14px 10px;
-    margin-bottom: 16px;
-    box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 6px 16px -8px rgba(10,13,26,.08);
-    animation: ajWidgetIn .5s cubic-bezier(.34,1.56,.64,1) both;
-  }
-  .aj-todo-head {
-    display: flex; align-items: baseline; justify-content: space-between;
-    padding: 0 4px 10px;
-  }
-  .aj-todo-title {
-    font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink);
-    letter-spacing: -.01em;
-  }
-  .aj-todo-total {
-    font: 600 11px/1 'Inter', sans-serif;
-    color: var(--mu2);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-  }
-  .aj-todo-rows { display: flex; flex-direction: column; gap: 6px; }
-  .aj-todo-row {
-    display: flex; align-items: center; gap: 12px;
-    width: 100%;
-    padding: 12px 12px 12px 12px;
-    border: 1.5px solid transparent;
-    border-radius: 14px;
-    background: var(--su2);
-    cursor: pointer;
-    text-align: left;
-    transition: background .12s, border-color .12s, transform .08s;
-    -webkit-tap-highlight-color: transparent;
-    min-height: 56px;
-  }
-  .aj-todo-row:hover:not(.empty)  { background: var(--bg2); }
-  .aj-todo-row:active:not(.empty) { transform: scale(.985); }
-  .aj-todo-row.empty {
-    opacity: .45;
-    cursor: default;
-  }
-  .aj-todo-row-ico {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .aj-todo-row.tone-danger .aj-todo-row-ico { background: rgba(239,68,68,.12); color: var(--rdx); }
-  .aj-todo-row.tone-danger:not(.empty)      { border-color: rgba(239,68,68,.22); }
-  .aj-todo-row.tone-ok     .aj-todo-row-ico { background: rgba(34,197,94,.14);  color: var(--grd); }
-  .aj-todo-row.tone-ok:not(.empty)          { border-color: rgba(34,197,94,.22); }
-  .aj-todo-row.tone-info   .aj-todo-row-ico { background: rgba(14,165,233,.14); color: var(--blk); }
-  .aj-todo-row.tone-info:not(.empty)        { border-color: rgba(14,165,233,.22); }
-  .aj-todo-row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-  .aj-todo-row-label {
-    font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink);
-  }
-  .aj-todo-row-sub {
-    font: 500 11px/1.3 'Inter', sans-serif;
-    color: var(--mu2);
-  }
-  .aj-todo-row-count {
-    font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
-    letter-spacing: -.02em;
-    min-width: 28px;
-    text-align: right;
-  }
-  .aj-todo-row.tone-danger .aj-todo-row-count { color: var(--rdx); }
-  .aj-todo-row.tone-ok     .aj-todo-row-count { color: var(--grd); }
-  .aj-todo-row.tone-info   .aj-todo-row-count { color: var(--blk); }
-  .aj-todo-row.empty       .aj-todo-row-count { color: var(--mu2); }
-  .aj-todo-row-chev { color: var(--mu2); display: flex; align-items: center; }
 
   /* ── Stats compactes (remplacent les KPI 2×2 souvent à zéro) ── */
   .aj-quickstats { display: flex; gap: 10px; margin-bottom: 24px; }
@@ -672,20 +592,8 @@ async function renderInto(root, _me) {
 
   const nbElevesActifs = mesElevesActifs.length;
 
-  // Quizzes de consolidation en retard côté élève (rappel élève)
+  // Consolidations à relancer (quizzes 48h overdue)
   const consolidCount = consolidRes.count ?? 0;
-
-  // Compétences "À valider" : vues en séance mais le moniteur n'a pas tranché.
-  // Depuis migration 0013 ce statut ne naît quasiment plus, mais on garde le compteur pour les héritages.
-  let aValiderCount = 0;
-  try {
-    const { count } = await sb
-      .from('validations')
-      .select('id', { count: 'exact', head: true })
-      .eq('validated_by', _me.id)
-      .eq('statut', 'a_valider');
-    aValiderCount = count ?? 0;
-  } catch (_) { /* silent */ }
 
   // Élèves inactifs depuis 7+ jours parmi mes élèves
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
@@ -703,30 +611,22 @@ async function renderInto(root, _me) {
   const reconnectCount = reconnectList.length;
 
   // ─── Hero « prochaine action » — 1 action utile priorisée ──────
-  // Priorité : à rappeler (14j+) → à valider → rappel élève (quiz overdue) →
-  // inactifs 7j → faire avancer le prochain élève → fallback démarrage.
-  // 3 verbes / 3 couleurs unifiés avec le widget to-do : rouge / vert / bleu.
+  // Priorité : relancer (14j+) → consolidation due → inactifs 7j → faire
+  // avancer le prochain élève → fallback démarrage. Ton factuel, pas d'emoji.
   let hero;
   if (reconnectCount > 0) {
     const noms = reconnectList.slice(0, 2).map(e => e.prenom || 'Élève').join(', ');
     hero = {
-      tone: 'danger', ico: 'phone-call', kicker: 'À rappeler',
+      tone: 'warn', ico: 'users', kicker: 'À relancer',
       title: `${reconnectCount} élève${reconnectCount > 1 ? 's' : ''} sans activité depuis 14 j`,
-      sub: noms ? `Dont ${esc(noms)}${reconnectCount > 2 ? '…' : ''} — un coup de fil suffit` : 'Un coup de fil ou un SMS peut les remettre en route.',
-      cta: 'Voir qui rappeler', href: '#/eleves?tab=arelancer', ev: 'hero.reconnect',
-    };
-  } else if (aValiderCount > 0) {
-    hero = {
-      tone: 'ok', ico: 'check', kicker: 'À valider',
-      title: `${aValiderCount} compétence${aValiderCount > 1 ? 's' : ''} en attente de ta validation`,
-      sub: 'Un clic pour les passer en « Acquis ».',
-      cta: 'Ouvrir la validation', href: '#/validation', ev: 'hero.a_valider',
+      sub: noms ? `Dont ${esc(noms)}${reconnectCount > 2 ? '…' : ''}` : '',
+      cta: 'Voir qui relancer', href: '#/eleves?tab=arelancer', ev: 'hero.reconnect',
     };
   } else if (consolidCount > 0) {
     hero = {
-      tone: 'info', ico: 'bell-ring', kicker: 'Rappel élève',
-      title: `${consolidCount} quiz à faire côté élève`,
-      sub: 'Des acquis attendent leur quiz de consolidation — un petit ping suffit.',
+      tone: 'warn', ico: 'refresh', kicker: 'Consolidation',
+      title: `${consolidCount} quiz à relancer`,
+      sub: 'Des acquis attendent leur quiz de consolidation.',
       cta: 'Ouvrir mes élèves', href: '#/eleves', ev: 'hero.consolidation',
     };
   } else if (inactifCount > 0) {
@@ -758,7 +658,7 @@ async function renderInto(root, _me) {
   const heroHtml = `
     <div class="aj-hero tone-${hero.tone}"${hero.href ? ` id="aj-hero" data-href="${esc(hero.href)}" data-ev="${esc(hero.ev)}"` : ''}>
       <div class="aj-hero-top">
-        <div class="aj-hero-ico">${iconBadge(hero.ico, { color: heroIcoColor(hero.tone), size: 44 })}</div>
+        <div class="aj-hero-ico">${iconBadge(hero.ico, { color: hero.tone === 'warn' ? 'var(--amk)' : hero.tone === 'ok' ? 'var(--grd)' : 'var(--a)', size: 44 })}</div>
         <div class="aj-hero-body">
           <div class="aj-hero-kicker">${esc(hero.kicker)}</div>
           <h2 class="aj-hero-title">${hero.title}</h2>
@@ -767,47 +667,6 @@ async function renderInto(root, _me) {
       </div>
       ${hero.cta ? `<button class="aj-hero-cta" type="button" id="aj-hero-cta">${esc(hero.cta)} ${icon('chevron-right', { size: 16, strokeWidth: 2.5 })}</button>` : ''}
     </div>`;
-
-  // ─── Widget « Ma to-do du jour » — 3 piles unifiées ─────────────
-  // Toujours les mêmes 3 verbes, 3 couleurs, partout dans l'app.
-  //   📞 À rappeler  (rouge)  → moi je décroche le téléphone
-  //   ✅ À valider   (vert)   → moi je clique un bouton
-  //   🔔 Rappel élève (bleu)  → lui doit faire son quiz, je le pousse
-  const todoPiles = [
-    { key: 'rappeler', count: reconnectCount, tone: 'danger', ico: 'phone-call',
-      label: 'À rappeler', sub: 'Élèves inactifs 14 j+',
-      href: '#/eleves?tab=arelancer', ev: 'todo.rappeler' },
-    { key: 'valider',  count: aValiderCount,  tone: 'ok',     ico: 'check',
-      label: 'À valider', sub: 'Compétences en attente',
-      href: '#/validation', ev: 'todo.valider' },
-    { key: 'rappel',   count: consolidCount,  tone: 'info',   ico: 'bell-ring',
-      label: 'Rappel élève', sub: 'Quiz consolid. en retard',
-      href: '#/eleves', ev: 'todo.rappel_eleve' },
-  ];
-  const todoTotal = todoPiles.reduce((s, p) => s + p.count, 0);
-
-  const todoHtml = todoTotal > 0 ? `
-    <div class="aj-todo" role="region" aria-label="Ma to-do du jour">
-      <div class="aj-todo-head">
-        <span class="aj-todo-title">Ma to-do du jour</span>
-        <span class="aj-todo-total">${todoTotal} action${todoTotal > 1 ? 's' : ''}</span>
-      </div>
-      <div class="aj-todo-rows">
-        ${todoPiles.map(p => `
-          <button class="aj-todo-row tone-${p.tone}${p.count === 0 ? ' empty' : ''}" type="button"
-                  data-href="${esc(p.href)}" data-ev="${esc(p.ev)}"
-                  ${p.count === 0 ? 'disabled aria-disabled="true"' : ''}>
-            <span class="aj-todo-row-ico">${icon(p.ico, { size: 18, strokeWidth: 2.2 })}</span>
-            <span class="aj-todo-row-body">
-              <span class="aj-todo-row-label">${esc(p.label)}</span>
-              <span class="aj-todo-row-sub">${esc(p.sub)}</span>
-            </span>
-            <span class="aj-todo-row-count">${p.count}</span>
-            <span class="aj-todo-row-chev" aria-hidden="true">${p.count === 0 ? '' : icon('chevron-right', { size: 16, strokeWidth: 2.5 })}</span>
-          </button>
-        `).join('')}
-      </div>
-    </div>` : '';
 
   // ─── Widget récap soir ────────────────────────────────────────
   const isEvening = new Date().getHours() >= 18;
@@ -859,11 +718,8 @@ async function renderInto(root, _me) {
 
       ${recapWidget}
 
-      <!-- Ma to-do du jour : 3 verbes / 3 couleurs unifiés -->
-      ${todoHtml}
-
-      <!-- Hero : fallback quand la to-do est vide (tout à jour / next eleve / démarrage) -->
-      ${todoTotal === 0 ? heroHtml : ''}
+      <!-- Hero : prochaine action utile -->
+      ${heroHtml}
 
       <!-- Stats compactes du jour (factuelles, pas de gros zéros) -->
       <div class="aj-quickstats">
@@ -929,16 +785,6 @@ async function renderInto(root, _me) {
   const goLogSession = () => { track('log_prompt.soir.clicked'); navigate('#/log-session'); };
   root.querySelector('#aj-recap-soir')?.addEventListener('click', goLogSession);
 
-  // Widget « Ma to-do » : chaque pile non vide navigue vers sa cible
-  root.querySelectorAll('.aj-todo-row:not(.empty)').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const href = btn.dataset.href;
-      const ev = btn.dataset.ev;
-      if (ev) track(ev);
-      if (href) navigate(href);
-    });
-  });
-
   root.querySelectorAll('.aj-eleve-row[data-eleve-id]').forEach(row => {
     row.addEventListener('click', () => {
       const id = row.dataset.eleveId;
@@ -974,16 +820,6 @@ function renderActRow(val, elevesMap) {
       </div>
     </div>
   `;
-}
-
-// ─── Helpers UI : 3 verbes / 3 couleurs unifiés ──────────────────
-// danger = À rappeler (rouge), ok = À valider (vert), info = Rappel élève (bleu)
-function heroIcoColor(tone) {
-  if (tone === 'danger') return 'var(--rdx)';
-  if (tone === 'ok')     return 'var(--grd)';
-  if (tone === 'info')   return 'var(--blk)';
-  if (tone === 'warn')   return 'var(--amk)';
-  return 'var(--a)';
 }
 
 function renderEleveRow(eleve) {

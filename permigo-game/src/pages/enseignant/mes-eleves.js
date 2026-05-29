@@ -277,10 +277,10 @@ const STYLE = `<style>
   .me-invite-btn:hover { background: rgba(88,204,2,.18); border-color: rgba(88,204,2,.4); }
   .me-invite-btn:active { background: rgba(88,204,2,.22); }
 
-  /* Anti-décrochage — À rappeler (élève inactif 14j+) */
+  /* Anti-décrochage */
   .me-relancer-section {
-    background: rgba(239,68,68,.06);
-    border: 1.5px solid rgba(239,68,68,.25);
+    background: rgba(245,158,11,.06);
+    border: 1.5px solid rgba(245,158,11,.25);
     border-radius: 20px;
     padding: 14px 16px;
     margin-bottom: 16px;
@@ -288,7 +288,7 @@ const STYLE = `<style>
   }
   .me-relancer-title {
     font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: var(--rdx);
+    color: var(--amx);
     margin: 0 0 4px;
     display: flex;
     align-items: center;
@@ -296,17 +296,17 @@ const STYLE = `<style>
   }
   .me-relancer-sub {
     font: 500 12px/1.4 'Inter', sans-serif;
-    color: #7f1d1d;
+    color: #92400e;
     margin: 0;
   }
 
-  /* Badge À rappeler inline */
+  /* Badge à relancer inline */
   .me-badge-relancer {
     font: 600 10px/1 'Inter', sans-serif;
     padding: 3px 7px;
     border-radius: 10px;
-    color: var(--rdx);
-    background: rgba(239,68,68,.12);
+    color: var(--amx);
+    background: rgba(245,158,11,.12);
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
@@ -516,8 +516,8 @@ function render() {
 
   const relancerSection = aRelancerList.length > 0 ? `
     <div class="me-relancer-section" id="me-relancer-section">
-      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;">${icon('phone-call', { size: 15, strokeWidth: 2.2, color: 'var(--rdx)' })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? 's' : ''} à rappeler cette semaine</p>
-      <p class="me-relancer-sub">Sans activité depuis 14 jours ou plus — un coup de fil ou un SMS pour relancer.</p>
+      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;">${icon('alert-circle', { size: 15, strokeWidth: 2.2, color: 'var(--amx)' })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? 's' : ''} à relancer cette semaine</p>
+      <p class="me-relancer-sub">Sans activité depuis 14 jours ou plus — un point en leçon peut débloquer la progression.</p>
     </div>
   ` : '';
 
@@ -558,9 +558,9 @@ function render() {
           Actifs (${actifs})
         </button>
         <button class="me-tab${_tab === 'arelancer' ? ' active' : ''}" data-tab="arelancer" role="tab"
-                style="display:flex;align-items:center;gap:4px;${aRelancerList.length > 0 && _tab !== 'arelancer' ? 'color:var(--rdx)' : ''}">
-          ${aRelancerList.length > 0 ? icon('phone-call', { size: 13, strokeWidth: 2.2 }) : ''}
-          À rappeler (${aRelancerList.length})
+                style="display:flex;align-items:center;gap:4px;${aRelancerList.length > 0 && _tab !== 'arelancer' ? 'color:var(--amx)' : ''}">
+          ${aRelancerList.length > 0 ? icon('alert-circle', { size: 13, strokeWidth: 2.2 }) : ''}
+          À relancer (${aRelancerList.length})
         </button>
       </div>
 
@@ -632,7 +632,7 @@ function renderRow(eleve) {
           </span>
           ${eleve.aRelancer ? `
             <span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">
-              ${icon('phone-call', { size: 11, strokeWidth: 2.2 })} À rappeler${eleve.joursInactif ? ` · ${eleve.joursInactif}j` : ''}
+              ${icon('alert-circle', { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `${eleve.joursInactif}j` : 'À relancer'}
             </span>
           ` : ''}
           <span class="me-meta-count">
