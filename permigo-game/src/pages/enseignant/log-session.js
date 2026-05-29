@@ -518,9 +518,16 @@ function _wireDate(root) {
 }
 
 function _wireComps(root) {
-  root.querySelectorAll('.ls-comp-chip:not([disabled])').forEach(chip => {
-    chip.addEventListener('click', () => {
+  // Event delegation : un seul listener sur le conteneur, pas un par chip.
+  // Évite le double-bind quand on rebind après chaque clic.
+  root.querySelectorAll('.ls-comps-list').forEach(list => {
+    if (list._wired) return;
+    list._wired = true;
+    list.addEventListener('click', (e) => {
+      const chip = e.target.closest('.ls-comp-chip');
+      if (!chip || chip.disabled) return;
       const id = chip.dataset.comp;
+      if (!id) return;
       const current = _comps.get(id) || null;
       const next = _nextStatut(current);
       if (next === null) _comps.delete(id);
@@ -537,7 +544,6 @@ function _wireComps(root) {
       _saveDraft();
       _updateSubmit(root);
       _refreshCompCountHeader(root);
-      _wireComps(root); // rebind sur le chip remplacé
     });
   });
 }
