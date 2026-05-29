@@ -69,9 +69,25 @@ function fmtDur(min) {
 // ─── State module-level (réinitialisé à chaque mount) ─────────
 let _me, _eleves, _allComps, _compCache, _templates;
 let _eleve = null, _duration = DEFAULT_DURATION, _date = todayIso();
-let _comps = new Set(), _comment = '', _query = '';
+// _comps : Map<comp_id, 'acquis'|'en_cours'|'a_retravailler'>
+// Cycle au clic : (rien) → acquis → en_cours → a_retravailler → (rien)
+let _comps = new Map(), _comment = '', _query = '';
 let _customDurOpen = false, _customDur = 105;
 let _draftTimer = null;
+
+// Cycle des statuts au clic sur un chip compétence
+const STATUT_CYCLE = ['acquis', 'en_cours', 'a_retravailler'];
+function _nextStatut(current) {
+  if (!current) return 'acquis';
+  const i = STATUT_CYCLE.indexOf(current);
+  return i === STATUT_CYCLE.length - 1 ? null : STATUT_CYCLE[i + 1];
+}
+function _statutMeta(s) {
+  if (s === 'acquis')         return { label: 'Acquis',         icoName: 'check',         color: 'var(--grd)', bg: 'rgba(34,197,94,.14)',  border: 'rgba(34,197,94,.45)' };
+  if (s === 'en_cours')       return { label: 'En cours',       icoName: 'refresh-cw',    color: 'var(--amk)', bg: 'rgba(245,158,11,.14)', border: 'rgba(245,158,11,.45)' };
+  if (s === 'a_retravailler') return { label: 'À retravailler', icoName: 'alert-triangle',color: 'var(--rdx)', bg: 'rgba(239,68,68,.14)',  border: 'rgba(239,68,68,.45)' };
+  return null;
+}
 
 // ─── Mount ────────────────────────────────────────────────────
 export async function mount(root) {
@@ -125,7 +141,14 @@ export async function mount(root) {
     _eleve    = _eleves.find(e => e.id === draft.eleve_id) ? draft.eleve_id : null;
     _duration = draft.duration ?? DEFAULT_DURATION;
     _date     = draft.date ?? todayIso();
-    _comps    = new Set(draft.comps ?? []);
+    // Compat ancien draft (array d'ids → tous acquis)
+    if (Array.isArray(draft.comps)) {
+      _comps = new Map(draft.comps.map(id => [id, 'acquis']));
+    } else if (draft.comps && typeof draft.comps === 'object') {
+      _comps = new Map(Object.entries(draft.comps));
+    } else {
+      _comps = new Map();
+    }
     _comment  = draft.comment ?? '';
   }
   if (!_eleve && _eleves.length > 0) _eleve = _eleves[0].id;
@@ -154,6 +177,48 @@ async function _fetchCompData(eleveId) {
 
 function _acquis() { return _compCache[_eleve] ?? new Set(); }
 
+// Résumé compact pour le header de la section comp
+function _compsSummary() {
+  if (_comps.size === 0) return '';
+  const counts = { acquis: 0, en_cours: 0, a_retravailler: 0 };
+  for (const s of _comps.values()) counts[s] = (counts[s] || 0) + 1;
+  const parts = [];
+  if (counts.acquis)         parts.push(`${counts.acquis} acquis`);
+  if (counts.en_cours)       parts.push(`${counts.en_cours} en cours`);
+  if (counts.a_retravailler) parts.push(`${counts.a_retravailler} à retravailler`);
+  return parts.join(' · ');
+}
+
+// Rendu d'un chip compétence selon son état (acquis DB, ou statut en cours de saisie)
+function _renderCompChip(c, acquisSet) {
+  const isAlreadyAcquis = acquisSet.has(c.id);
+  const localStatut = _comps.get(c.id) || null;
+  // déjà acquis en DB = on bloque la sélection (déjà validé), affiché grisé/check
+  if (isAlreadyAcquis) {
+    return `<button class="ls-comp-chip ls-comp-acquis"
+                    data-comp="${esc(c.id)}"
+                    disabled aria-disabled="true"
+                    type="button" title="${esc(c.nom)} — déjà acquis">
+      <span class="ls-comp-check-ico">${icon('check', { size: 10, strokeWidth: 3, color: 'var(--grd)' })}</span>
+      <span class="ls-comp-code">${esc(c.code || '')}</span>
+      <span class="ls-comp-lbl">${esc(c.nom)}</span>
+    </button>`;
+  }
+  // En cours de saisie : selon le statut local (null / acquis / en_cours / a_retravailler)
+  const cls = localStatut ? `ls-comp-sel ls-comp-${localStatut}` : '';
+  const meta = _statutMeta(localStatut);
+  const statutIco = meta ? `<span class="ls-comp-statut-ico">${icon(meta.icoName, { size: 10, strokeWidth: 2.8 })}</span>` : '';
+  return `<button class="ls-comp-chip ${cls}"
+                  data-comp="${esc(c.id)}"
+                  data-statut="${esc(localStatut || '')}"
+                  aria-label="${esc(c.nom)}${meta ? ' — ' + meta.label : ''}"
+                  type="button" title="${esc(c.nom)}${meta ? ' — ' + meta.label : ''}">
+    ${statutIco}
+    <span class="ls-comp-code">${esc(c.code || '')}</span>
+    <span class="ls-comp-lbl">${esc(c.nom)}</span>
+  </button>`;
+}
+
 // ─── Draft ─────────────────────────────────────────────────────
 function _saveDraft() {
   clearTimeout(_draftTimer);
@@ -161,7 +226,7 @@ function _saveDraft() {
     try {
       localStorage.setItem(DRAFT_KEY(), JSON.stringify({
         eleve_id: _eleve, duration: _duration, date: _date,
-        comps: [..._comps], comment: _comment,
+        comps: Object.fromEntries(_comps), comment: _comment,
       }));
     } catch { /* storage full */ }
   }, 600);
@@ -266,7 +331,13 @@ function _render(root) {
     <div class="ls-card">
       <div class="ls-sec-header">
         <div class="ls-sec-title">${icon('book-open', { size: 13, strokeWidth: 2.4 })} Compétences travaillées</div>
-        ${compCount > 0 ? `<span class="ls-comp-count">${compCount} sélectionnée${compCount > 1 ? 's' : ''}</span>` : ''}
+        ${compCount > 0 ? `<span class="ls-comp-count">${_compsSummary()}</span>` : ''}
+      </div>
+      <div class="ls-comp-legend" aria-label="Légende des statuts">
+        <span>Clique pour cycler :</span>
+        <span class="ls-leg-pill ls-leg-acquis">${icon('check', { size: 10, strokeWidth: 3 })} Acquis</span>
+        <span class="ls-leg-pill ls-leg-en_cours">${icon('refresh-cw', { size: 10, strokeWidth: 2.4 })} En cours</span>
+        <span class="ls-leg-pill ls-leg-a_retravailler">${icon('alert-triangle', { size: 10, strokeWidth: 2.4 })} À retravailler</span>
       </div>
       <div class="ls-comps-list" id="ls-comps-list">
         ${_allComps.length === 0
@@ -275,18 +346,7 @@ function _render(root) {
             <div class="ls-monde-group">
               <div class="ls-monde-lbl">C${monde} — ${esc(MONDE_LABELS[+monde] || `Monde ${monde}`)}</div>
               <div class="ls-comp-chips">
-                ${comps.map(c => {
-                  const isAcquis  = acquis.has(c.id);
-                  const isSel     = _comps.has(c.id);
-                  return `<button class="ls-comp-chip${isAcquis ? ' ls-comp-acquis' : isSel ? ' ls-comp-sel' : ''}"
-                                  data-comp="${esc(c.id)}"
-                                  ${isAcquis ? 'disabled aria-disabled="true"' : ''}
-                                  type="button" title="${esc(c.nom)}">
-                    ${isAcquis ? `<span class="ls-comp-check-ico">${icon('check', { size: 10, strokeWidth: 3, color: 'var(--grd)' })}</span>` : ''}
-                    <span class="ls-comp-code">${esc(c.code || '')}</span>
-                    <span class="ls-comp-lbl">${esc(c.nom)}</span>
-                  </button>`;
-                }).join('')}
+                ${comps.map(c => _renderCompChip(c, acquis)).join('')}
               </div>
             </div>
           `).join('')}
@@ -461,19 +521,42 @@ function _wireComps(root) {
   root.querySelectorAll('.ls-comp-chip:not([disabled])').forEach(chip => {
     chip.addEventListener('click', () => {
       const id = chip.dataset.comp;
-      if (_comps.has(id)) { _comps.delete(id); chip.classList.remove('ls-comp-sel'); }
-      else                 { _comps.add(id);    chip.classList.add('ls-comp-sel'); }
+      const current = _comps.get(id) || null;
+      const next = _nextStatut(current);
+      if (next === null) _comps.delete(id);
+      else               _comps.set(id, next);
+
+      // Refresh visuel du chip uniquement
+      const acquisSet = _acquis();
+      const compObj = _allComps.find(c => c.id === id);
+      if (compObj) {
+        const fresh = document.createElement('div');
+        fresh.innerHTML = _renderCompChip(compObj, acquisSet);
+        chip.replaceWith(fresh.firstElementChild);
+      }
       _saveDraft();
       _updateSubmit(root);
-      // Update header count
-      const count = root.querySelector('.ls-comp-count');
-      if (count) count.textContent = `${_comps.size} sélectionnée${_comps.size > 1 ? 's' : ''}`;
-      const secHeader = root.querySelector('.ls-sec-header');
-      if (secHeader && _comps.size > 0 && !count) {
-        secHeader.insertAdjacentHTML('beforeend', `<span class="ls-comp-count" style="margin-left:auto">${_comps.size} sélectionnée</span>`);
-      }
+      _refreshCompCountHeader(root);
+      _wireComps(root); // rebind sur le chip remplacé
     });
   });
+}
+
+// Met à jour le compteur dans le header de la section comp
+function _refreshCompCountHeader(root) {
+  const secHeader = root.querySelector('.ls-sec-header');
+  if (!secHeader) return;
+  const existing = secHeader.querySelector('.ls-comp-count');
+  const summary = _compsSummary();
+  if (_comps.size === 0) {
+    existing?.remove();
+    return;
+  }
+  if (existing) {
+    existing.textContent = summary;
+  } else {
+    secHeader.insertAdjacentHTML('beforeend', `<span class="ls-comp-count" style="margin-left:auto">${summary}</span>`);
+  }
 }
 
 function _removeSheet(root) {
@@ -539,20 +622,11 @@ function _rerenderComps(root) {
     <div class="ls-monde-group">
       <div class="ls-monde-lbl">C${monde} — ${esc(MONDE_LABELS[+monde] || `Monde ${monde}`)}</div>
       <div class="ls-comp-chips">
-        ${comps.map(c => {
-          const isAcquis = acquis.has(c.id);
-          const isSel    = _comps.has(c.id);
-          return `<button class="ls-comp-chip${isAcquis ? ' ls-comp-acquis' : isSel ? ' ls-comp-sel' : ''}"
-                          data-comp="${esc(c.id)}" ${isAcquis ? 'disabled aria-disabled="true"' : ''}
-                          type="button" title="${esc(c.nom)}">
-            ${isAcquis ? `<span class="ls-comp-check-ico">${icon('check', { size: 10, strokeWidth: 3, color: 'var(--grd)' })}</span>` : ''}
-            <span class="ls-comp-code">${esc(c.code || '')}</span>
-            <span class="ls-comp-lbl">${esc(c.nom)}</span>
-          </button>`;
-        }).join('')}
+        ${comps.map(c => _renderCompChip(c, acquis)).join('')}
       </div>
     </div>
   `).join('');
+  _refreshCompCountHeader(root);
   _wireComps(root);
 }
 
@@ -606,8 +680,11 @@ function _updateSubmit(root) {
   btn.disabled = !_eleve;
   const lbl = root.querySelector('#ls-submit-lbl');
   if (!lbl) return;
-  if (_comps.size > 0) {
-    lbl.textContent = `Enregistrer · ${_comps.size} compétence${_comps.size > 1 ? 's' : ''} débloquée${_comps.size > 1 ? 's' : ''}`;
+  const acquisCount = [..._comps.values()].filter(s => s === 'acquis').length;
+  if (acquisCount > 0) {
+    lbl.textContent = `Enregistrer · ${acquisCount} compétence${acquisCount > 1 ? 's' : ''} validée${acquisCount > 1 ? 's' : ''}`;
+  } else if (_comps.size > 0) {
+    lbl.textContent = `Enregistrer la session`;
   } else {
     lbl.textContent = 'Enregistrer la session';
   }
@@ -636,7 +713,11 @@ async function _handleSubmit(root) {
     }
   } catch { /* RPC absent en dev — proceed */ }
 
-  const compIds  = _comps.size > 0 ? [..._comps] : undefined;
+  // Split par statut : acquis = via log_session (validation atomique + XP)
+  //                   en_cours / a_retravailler = upsert direct dans validations
+  const acquisIds         = [..._comps.entries()].filter(([, s]) => s === 'acquis').map(([id]) => id);
+  const enCoursIds        = [..._comps.entries()].filter(([, s]) => s === 'en_cours').map(([id]) => id);
+  const aRetravaillerIds  = [..._comps.entries()].filter(([, s]) => s === 'a_retravailler').map(([id]) => id);
   const noteVal  = _comment.trim() || null;
 
   try {
@@ -645,7 +726,7 @@ async function _handleSubmit(root) {
       p_duration_minutes: _duration,
       p_session_date:    _date,
       p_notes:           noteVal,
-      ...(compIds ? { p_competence_ids: compIds } : {}),
+      ...(acquisIds.length > 0 ? { p_competence_ids: acquisIds } : {}),
     });
 
     if (error || data?.error) {
@@ -675,20 +756,52 @@ async function _handleSubmit(root) {
     const validations = result?.validations || [];
     const created    = validations.filter(v => v.created).length;
 
+    // Insère/upsert les statuts "en_cours" et "a_retravailler" séparément
+    // (le RPC log_session ne gère que 'acquis'). On utilise upsert avec
+    // ON CONFLICT (eleve_id, competence_id) pour ne pas écraser un acquis déjà posé.
+    let extraCreated = 0;
+    const extraIds = [
+      ...enCoursIds.map(id => ({ id, statut: 'en_cours' })),
+      ...aRetravaillerIds.map(id => ({ id, statut: 'a_retravailler' })),
+    ];
+    if (extraIds.length > 0) {
+      try {
+        const rows = extraIds.map(({ id, statut }) => ({
+          eleve_id:        _eleve,
+          competence_id:   id,
+          validated_by:    _me.id,
+          validated_at:    new Date().toISOString(),
+          statut,
+          note_enseignant: noteVal,
+        }));
+        const { error: upErr } = await sb
+          .from('validations')
+          .upsert(rows, { onConflict: 'eleve_id,competence_id', ignoreDuplicates: false });
+        if (!upErr) extraCreated = extraIds.length;
+        else console.error('[log-session] upsert validations extra error', upErr);
+      } catch (e) { console.error('[log-session] upsert extra crashed', e); }
+    }
+
     track('session.logged', {
       duration_minutes: _duration,
-      n_competences:    _comps.size,
+      n_acquis:         acquisIds.length,
+      n_en_cours:       enCoursIds.length,
+      n_a_retravailler: aRetravaillerIds.length,
       has_comment:      !!noteVal,
       user_role:        _me.role,
     });
 
     _clearDraft();
 
-    if (created > 0) {
-      toast(`Séance enregistrée · ${created} compétence${created > 1 ? 's' : ''} débloquée${created > 1 ? 's' : ''} 🔓`, 'success');
+    const eleveObj = _eleves.find(e => e.id === _eleve);
+    const totalChanges = created + extraCreated;
+    if (totalChanges > 0) {
+      const parts = [];
+      if (created > 0)        parts.push(`${created} validée${created > 1 ? 's' : ''}`);
+      if (extraCreated > 0)   parts.push(`${extraCreated} suivie${extraCreated > 1 ? 's' : ''}`);
+      toast(`Séance enregistrée · ${parts.join(' + ')}`, 'success');
     } else {
-      const eleveObj = _eleves.find(e => e.id === _eleve);
-      toast(`Séance enregistrée · ${fmtDur(_duration)} avec ${esc(eleveObj?.prenom || "l'élève")} 📝`, 'success');
+      toast(`Séance enregistrée · ${fmtDur(_duration)} avec ${esc(eleveObj?.prenom || "l'élève")}`, 'success');
     }
 
     // Celebrate léger puis retour
@@ -1010,8 +1123,13 @@ const CSS = `
   text-align: left;
 }
 .ls-comp-chip:active { transform: scale(.96); }
-.ls-comp-chip.ls-comp-sel { border-color: var(--gr); background: rgba(16,185,129,.07); color: var(--grd); font-weight: 600; }
-.ls-comp-chip.ls-comp-acquis { border-color: #d1fae5; background: #f0fdf4; color: #6ee7b7; cursor: default; opacity: .8; }
+.ls-comp-chip.ls-comp-sel { font-weight: 600; }
+/* Statuts en cours de saisie : 3 couleurs distinctes */
+.ls-comp-chip.ls-comp-acquis:not([disabled])         { border-color: rgba(34,197,94,.55);  background: rgba(34,197,94,.12);  color: var(--grd); }
+.ls-comp-chip.ls-comp-en_cours       { border-color: rgba(245,158,11,.55); background: rgba(245,158,11,.12); color: var(--amk); }
+.ls-comp-chip.ls-comp-a_retravailler { border-color: rgba(239,68,68,.55);  background: rgba(239,68,68,.12);  color: var(--rdx); }
+/* Déjà acquis en DB (disabled) : grisé succès */
+.ls-comp-chip.ls-comp-acquis[disabled] { border-color: #d1fae5; background: #f0fdf4; color: #6ee7b7; cursor: default; opacity: .8; }
 .ls-comp-code {
   font: 700 9px/1 'Inter', sans-serif;
   padding: 1px 5px;
@@ -1020,10 +1138,29 @@ const CSS = `
   color: var(--a);
   flex-shrink: 0;
 }
-.ls-comp-sel .ls-comp-code { background: var(--grd); color: #fff; }
-.ls-comp-acquis .ls-comp-code { background: #bbf7d0; color: var(--grd); }
-.ls-comp-check-ico { flex-shrink: 0; }
+.ls-comp-sel.ls-comp-acquis:not([disabled])         .ls-comp-code { background: var(--grd); color: #fff; }
+.ls-comp-sel.ls-comp-en_cours                       .ls-comp-code { background: var(--amk); color: #fff; }
+.ls-comp-sel.ls-comp-a_retravailler                 .ls-comp-code { background: var(--rdx); color: #fff; }
+.ls-comp-acquis[disabled] .ls-comp-code { background: #bbf7d0; color: var(--grd); }
+.ls-comp-check-ico, .ls-comp-statut-ico { flex-shrink: 0; display: inline-flex; }
 .ls-comp-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+
+/* Légende statuts au-dessus de la liste */
+.ls-comp-legend {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  font: 500 11px/1.3 'Inter', sans-serif;
+  color: var(--mu2);
+  margin-bottom: 10px;
+}
+.ls-leg-pill {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 7px;
+  border-radius: 12px;
+  font: 600 10px/1 'Inter', sans-serif;
+}
+.ls-leg-pill.ls-leg-acquis         { background: rgba(34,197,94,.12);  color: var(--grd); }
+.ls-leg-pill.ls-leg-en_cours       { background: rgba(245,158,11,.12); color: var(--amk); }
+.ls-leg-pill.ls-leg-a_retravailler { background: rgba(239,68,68,.12);  color: var(--rdx); }
 
 /* Commentaire */
 .ls-visibility-tag {
