@@ -3,6 +3,8 @@
 // Usage : mountBottomNav(role) depuis main.js après route()
 // ═══════════════════════════════════════════════════════════════
 
+import { haptic } from '@/utils/haptic.js';
+
 const ICO = {
   home: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>`,
   map:  `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>`,
@@ -172,8 +174,10 @@ export function mountBottomNav(role) {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
       if (id === '__fab__') {
+        haptic('select');               // action principale : feedback marqué
         location.hash = '#/log-session';
       } else {
+        haptic('tap');                  // navigation : feedback léger
         location.hash = id === 'default' ? '#/' : `#/${id}`;
       }
     });

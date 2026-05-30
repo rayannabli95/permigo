@@ -1,5 +1,7 @@
 node_modules/
 dist/
+dist-test*/
+vite.config.js.timestamp-*
 .env
 .env.local
 *.log

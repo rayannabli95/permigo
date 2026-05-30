@@ -63,6 +63,26 @@ const ROUTES = {
   },
 };
 
+// Libellés de titre de page (a11y lecteur d'écran, onglet, historique, SEO).
+// On préfère le <h1> réel rendu par la page ; ce map sert de repli.
+const ROUTE_TITLES = {
+  default: 'Accueil', ecole: 'École', aujourdhui: "Aujourd'hui",
+  parcours: 'Parcours', 'parcours-complet': 'Parcours', validation: 'Valider',
+  eleves: 'Mes élèves', livret: 'Livret REMC', insights: 'Insights', bilan: 'Bilan',
+  'log-session': 'Séance', sessions: 'Mes séances', quiz: 'Quiz', trophees: 'Trophées',
+  galerie: 'Galerie', examen: 'Examen', 'exam-blanc': 'Examen blanc', feedback: 'Feedback',
+  boutique: 'Boutique', wrapped: 'Rétro', 'mes-coffres': 'Mes coffres', messages: 'Messages',
+  legal: 'Mentions légales', profil: 'Profil', notifications: 'Notifications',
+  settings: 'Réglages', pulse: 'Pulse', equipe: 'Équipe', dbg: 'Debug',
+};
+
+function _setPageTitle(root, routeName) {
+  const h1 = root.querySelector('h1');
+  const fromH1 = (h1?.textContent || '').trim().split('\n')[0].slice(0, 60);
+  const label = fromH1 || ROUTE_TITLES[routeName] || '';
+  document.title = label ? `${label} · PermiGo` : 'PermiGo';
+}
+
 export async function route(root, me) {
   const role = me.role || 'eleve';
   const map = ROUTES[role] || ROUTES.eleve;
@@ -83,6 +103,7 @@ export async function route(root, me) {
     const heading = root.querySelector('h1') || root;
     heading.setAttribute('tabindex', '-1');
     heading.focus({ preventScroll: false });
+    _setPageTitle(root, routeName);
   } catch (e) {
     console.error('[router]', e);
     // Stale chunk après deploy : le hash JS a changé, l'index.html cached

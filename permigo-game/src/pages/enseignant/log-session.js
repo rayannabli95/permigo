@@ -10,6 +10,7 @@ import { esc }        from '@/utils/escape.js';
 import { track }      from '@/services/analytics.js';
 import { navigate }   from '@/router.js';
 import { icon }       from '@/utils/icons.js';
+import { haptic }     from '@/utils/haptic.js';
 
 // ─── Constantes ───────────────────────────────────────────────
 const DURATIONS_PRESET = [
@@ -532,6 +533,9 @@ function _wireComps(root) {
       const next = _nextStatut(current);
       if (next === null) _comps.delete(id);
       else               _comps.set(id, next);
+
+      // Retour haptique + son léger selon le nouveau statut (reduced-motion respecté côté util)
+      haptic(next === 'acquis' ? 'success' : next === 'a_retravailler' ? 'warning' : next === 'en_cours' ? 'select' : 'tap');
 
       // Refresh visuel du chip uniquement
       const acquisSet = _acquis();

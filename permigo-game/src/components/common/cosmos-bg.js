@@ -32,6 +32,10 @@ export function mountCosmos(parent) {
 
   const ctx = canvas.getContext('2d');
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // A11y : si l'utilisateur réduit les animations, on rend un ciel étoilé
+  // STATIQUE (une seule frame, sans scintillement ni parallax).
+  const REDUCED = typeof matchMedia === 'function'
+    && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let W = 0, H = 0;
   let layers = [];
@@ -48,6 +52,7 @@ export function mountCosmos(parent) {
     canvas.style.height = H + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     generateStars();
+    if (REDUCED) paint();    // repeindre la frame statique après resize
   };
 
   const generateStars = () => {
@@ -77,15 +82,13 @@ export function mountCosmos(parent) {
     scrollY = window.scrollY || window.pageYOffset || 0;
   };
 
-  const draw = () => {
-    rafId = requestAnimationFrame(draw);
-    time += 0.012;
-
+  // Rendu d'une frame. En reduced-motion : pas de floating, pas de twinkle.
+  const paint = () => {
     ctx.clearRect(0, 0, W, H);
 
-    // Rotation très lente du field (camera floating)
-    const camX = Math.sin(time * 0.1) * 6;
-    const camY = Math.cos(time * 0.13) * 4;
+    // Rotation très lente du field (camera floating) — neutralisée si reduced-motion
+    const camX = REDUCED ? 0 : Math.sin(time * 0.1) * 6;
+    const camY = REDUCED ? 0 : Math.cos(time * 0.13) * 4;
 
     for (let li = 0; li < layers.length; li++) {
       const { stars, speed } = layers[li];
@@ -95,8 +98,8 @@ export function mountCosmos(parent) {
         // Position avec parallax + floating
         let x = s.x + camX * (li + 1);
         let y = (s.y - offsetY + H) % H + camY * (li + 1);
-        // Twinkle : opacity sinusoidale
-        const alpha = 0.55 + 0.45 * Math.sin(time * s.twinkleSpeed + s.twinkleOffset);
+        // Twinkle : opacity sinusoidale (fixe si reduced-motion)
+        const alpha = REDUCED ? 0.8 : 0.55 + 0.45 * Math.sin(time * s.twinkleSpeed + s.twinkleOffset);
         ctx.globalAlpha = alpha;
         ctx.fillStyle = s.color;
         ctx.beginPath();
@@ -114,14 +117,24 @@ export function mountCosmos(parent) {
     ctx.globalAlpha = 1;
   };
 
+  const draw = () => {
+    rafId = requestAnimationFrame(draw);
+    time += 0.012;
+    paint();
+  };
+
   // Init
   resize();
-  draw();
+  if (REDUCED) {
+    paint();                 // une seule frame, aucune boucle
+  } else {
+    draw();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
   // Fade-in après init
   requestAnimationFrame(() => { canvas.style.opacity = '1'; });
 
   window.addEventListener('resize', resize);
-  window.addEventListener('scroll', onScroll, { passive: true });
 
   return {
     canvas,

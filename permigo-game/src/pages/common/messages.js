@@ -120,7 +120,7 @@ async function openConversation(root, me, thread) {
   const partnerName = esc(thread.partner_name || 'Conversation');
   convView.innerHTML = `
     <div class="msg-conv-header">
-      <button class="msg-back-btn" id="msg-back">←</button>
+      <button class="msg-back-btn" id="msg-back" aria-label="Retour">←</button>
       <div class="msg-conv-name">${partnerName}</div>
     </div>
     <div class="msg-conv-messages" id="msg-conv-messages">

@@ -329,7 +329,7 @@ export async function mount(root, sessionId) {
   root.innerHTML = `${STYLE}
     <div class="sc">
       <div class="sc-hd">
-        <button class="sc-back" id="sc-back-btn">${icon('arrow-left', { size: 18, strokeWidth: 2.5 })}</button>
+        <button class="sc-back" id="sc-back-btn" aria-label="Retour">${icon('arrow-left', { size: 18, strokeWidth: 2.5 })}</button>
         <div class="sc-hd-title">Confirmer la séance</div>
       </div>
       <div class="sc-skel" style="height:200px;border-radius:0"></div>

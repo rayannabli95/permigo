@@ -98,7 +98,7 @@ export async function mount(root, param = 'privacy') {
 </style>
 <div class="legal anim-slide-up">
   <div class="legal-header">
-    <button class="legal-back" id="legal-back">←</button>
+    <button class="legal-back" id="legal-back" aria-label="Retour">←</button>
     <div class="legal-header-title">${page.title}</div>
   </div>
   <div class="legal-body">
