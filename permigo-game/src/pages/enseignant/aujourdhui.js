@@ -624,10 +624,10 @@ async function renderInto(root, _me) {
     };
   } else if (consolidCount > 0) {
     hero = {
-      tone: 'warn', ico: 'refresh', kicker: 'Consolidation',
-      title: `${consolidCount} quiz à relancer`,
-      sub: 'Des acquis attendent leur quiz de consolidation.',
-      cta: 'Ouvrir mes élèves', href: '#/eleves', ev: 'hero.consolidation',
+      tone: 'warn', ico: 'refresh', kicker: 'Côté élève',
+      title: `${consolidCount} quiz pas encore refait${consolidCount > 1 ? 's' : ''} par tes élèves`,
+      sub: 'Le quiz de révision aide l\'élève à mémoriser ses acquis. Un petit rappel oral en leçon suffit.',
+      cta: 'Voir mes élèves', href: '#/eleves', ev: 'hero.consolidation',
     };
   } else if (inactifCount > 0) {
     hero = {
