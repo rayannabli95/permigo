@@ -613,8 +613,29 @@ const STYLE = `<style>
   border-color: rgba(88,204,2,.3);
   box-shadow: 0 8px 22px rgba(88,204,2,.15), 0 0 0 2px rgba(88,204,2,.2);
 }
+.prc-node.next .nd-lbl { padding-bottom: 11px; }
 .prc-node.next .nd-lbl .nd-name { color: var(--ink); }
-.prc-node.next .nd-lbl .nd-stt  { color: var(--a); }
+/* Statut "next" rendu comme un bouton tappable → incite au clic */
+.prc-node.next .nd-lbl .nd-stt {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 6px 13px;
+  background: var(--wc, var(--a));
+  color: #fff;
+  font: 800 11px/1 'Inter', sans-serif;
+  font-style: normal;
+  border-radius: 99px;
+  box-shadow: 0 3px 10px var(--wg, rgba(88,204,2,.4));
+  animation: nd-cta-pulse 1.8s ease-in-out infinite;
+}
+.prc-node.next .nd-lbl .nd-stt::after { content: ' →'; }
+@keyframes nd-cta-pulse {
+  0%,100% { transform: scale(1); box-shadow: 0 3px 10px var(--wg, rgba(88,204,2,.4)); }
+  50%     { transform: scale(1.06); box-shadow: 0 5px 16px var(--wg, rgba(88,204,2,.6)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prc-node.next .nd-lbl .nd-stt { animation: none !important; }
+}
 /* Badge "TU ES ICI" */
 .prc-node.next .nd-lbl::before {
   content: 'TU ES ICI';
@@ -845,7 +866,7 @@ const STYLE = `<style>
 /* Fiche compétence (bottom sheet content) */
 .fiche-hero {
   position: relative;
-  padding: 20px 20px 28px;
+  padding: 20px 20px 18px;
   text-align: center;
 }
 .fiche-hero .fiche-close {
@@ -913,7 +934,10 @@ const STYLE = `<style>
 .stt-pill.todo   { background: var(--bg2); color: var(--mu3); }
 .stt-pill.locked { background: var(--bg2); color: var(--mu2); }
 
-.fiche-body { padding: 0 16px 16px; }
+.fiche-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+/* Rythme vertical homogène : on neutralise les marges hétérogènes des blocs
+   (14px/10px) au profit d'un gap unique → fiche mieux répartie. */
+.fiche-body > * { margin-bottom: 0; }
 .fiche-section {
   background: var(--bg);
   border: 1px solid var(--bo);
@@ -1522,7 +1546,7 @@ function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds 
     const sttLabel = {
       done:      'Acquis',
       a_valider: 'À valider',
-      next:      'Prochain défi',
+      next:      'Appuie pour commencer',
       todo:      'À débloquer',
       locked:    'Verrouillé',
     }[st];
@@ -1753,7 +1777,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   // Quiz-récap : rappel OPTIONNEL proposé sur une compétence acquise.
   // Ne change pas le statut (already_acquired) — joue l'animation + crédite l'XP d'engagement.
   const recapBtn = `
-    <a href="#/quiz/${esc(compId)}/post_validation" style="display:block;margin:12px 0 0;padding:13px;background:#fff;border:1.5px solid var(--a);color:var(--adk);border-radius:14px;font:700 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;">
+    <a href="#/quiz/${esc(compId)}/post_validation" style="display:block;margin:0;padding:13px;background:#fff;border:1.5px solid var(--a);color:var(--adk);border-radius:14px;font:700 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;">
       Quiz-récap (optionnel) →
     </a>`;
 
@@ -1766,7 +1790,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
       const parts = [];
       if (dateStr) parts.push(`Validée le ${dateStr}`);
       if (val.teacherName) parts.push(`par ${val.teacherName}`);
-      if (val.score_cognitif != null) parts.push(`Quiz : ${Math.round(val.score_cognitif * 100)}%`);
+      if (val.score_cognitif != null) parts.push(`Quiz : ${Math.round(val.score_cognitif)}%`);
       return `
         <div class="fiche-status done">
           <div class="fiche-status-ico">${icon('check', { size: 18 })}</div>
@@ -1865,7 +1889,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
       <div class="fiche-block" style="--wc:${meta.color}">
         <div class="fiche-block-title">
           ${icon('target', { size: 14 })}
-          Ce que tu vas maîtriser
+          ${st === 'done' ? 'Ce que tu maîtrises' : 'Ce que tu vas maîtriser'}
         </div>
         <ul class="fiche-block-list">
           ${detail.keyPoints.map(kp => `<li>${esc(kp)}</li>`).join('')}
