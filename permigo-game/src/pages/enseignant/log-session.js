@@ -11,6 +11,7 @@ import { track }      from '@/services/analytics.js';
 import { navigate }   from '@/router.js';
 import { icon }       from '@/utils/icons.js';
 import { haptic }     from '@/utils/haptic.js';
+import { renderUserAvatar } from '@/components/common/avatar.js';
 
 // ─── Constantes ───────────────────────────────────────────────
 const DURATIONS_PRESET = [
@@ -37,22 +38,7 @@ const RPC_ERRORS = {
 const DRAFT_KEY        = () => `draft_session_${todayIso()}`;
 const MONDE_LABELS     = ['', 'Maîtrise du véhicule', 'Appréhension de la route', 'Circulation', 'En autonomie'];
 
-const GRADS = [
-  'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,var(--blk),#155e75)',
-  'linear-gradient(135deg,var(--puk),#4c1d95)',
-  'linear-gradient(135deg,var(--grd),#064e3b)',
-  'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,#a16207,#713f12)',
-];
-
 // ─── Helpers ──────────────────────────────────────────────────
-function gradFor(id) {
-  let h = 0;
-  for (let i = 0; i < (id || '').length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return GRADS[h % GRADS.length];
-}
-function initials(p, n) { return ((p || '')[0] || '') + ((n || '')[0] || ''); }
 function todayIso() { return new Date().toISOString().slice(0, 10); }
 function isoToFr(iso) {
   const d = new Date(iso + 'T12:00:00');
@@ -275,11 +261,10 @@ function _render(root) {
         ${filtered.length === 0
           ? `<div class="ls-empty-hint">Aucun élève trouvé.</div>`
           : filtered.map(e => {
-              const ini = initials(e.prenom, e.nom).toUpperCase() || '?';
               const sel = e.id === _eleve;
               return `<div class="ls-eleve-row${sel ? ' ls-sel' : ''}" data-eleve="${esc(e.id)}"
                            role="radio" aria-checked="${sel}">
-                <div class="ls-av" style="background:${gradFor(e.id)}">${esc(ini)}</div>
+                <div class="ls-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 38)}</div>
                 <div class="ls-eleve-info">
                   <div class="ls-eleve-name">${esc(e.prenom || '')} ${esc(e.nom || '')}</div>
                 </div>
@@ -649,11 +634,10 @@ function _renderEleveList(root) {
   listEl.innerHTML = filtered.length === 0
     ? `<div class="ls-empty-hint">Aucun élève trouvé.</div>`
     : filtered.map(e => {
-        const ini = initials(e.prenom, e.nom).toUpperCase() || '?';
         const sel = e.id === _eleve;
         return `<div class="ls-eleve-row${sel ? ' ls-sel' : ''}" data-eleve="${esc(e.id)}"
                      role="radio" aria-checked="${sel}">
-          <div class="ls-av" style="background:${gradFor(e.id)}">${esc(ini)}</div>
+          <div class="ls-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 38)}</div>
           <div class="ls-eleve-info">
             <div class="ls-eleve-name">${esc(e.prenom || '')} ${esc(e.nom || '')}</div>
           </div>

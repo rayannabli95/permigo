@@ -9,6 +9,7 @@ import { toast } from '@/components/common/toast.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { icon } from '@/utils/icons.js';
+import { renderUserAvatar } from '@/components/common/avatar.js';
 
 // ─── Constantes durées ────────────────────────────────────────
 const DURATIONS = [
@@ -322,23 +323,6 @@ function ensureStyle() {
 }
 
 // ─── Avatar gradient ──────────────────────────────────────────
-const GRADS = [
-  'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,var(--blk),#155e75)',
-  'linear-gradient(135deg,var(--puk),#4c1d95)',
-  'linear-gradient(135deg,var(--grd),#064e3b)',
-  'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,#a16207,#713f12)',
-];
-function gradFor(id) {
-  let h = 0;
-  for (let i = 0; i < (id || '').length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return GRADS[h % GRADS.length];
-}
-function initials(prenom, nom) {
-  return ((prenom || '')[0] || '') + ((nom || '')[0] || '');
-}
-
 // ─── Fermeture animée ─────────────────────────────────────────
 function closeModal() {
   if (!_overlay) return;
@@ -394,7 +378,7 @@ export async function openLogSessionModal() {
   try {
     const [suggestRes, elevesRes] = await Promise.all([
       sb.rpc('suggest_next_session', { p_day_of_week: todayDow }),
-      sb.from('profiles').select('id, prenom, nom').eq('role', 'eleve').order('prenom'),
+      sb.from('profiles').select('id, prenom, nom, avatar_url').eq('role', 'eleve').order('prenom'),
     ]);
     suggestions = suggestRes.data || [];
     const eleves = elevesRes.data || [];
@@ -484,7 +468,7 @@ export async function openLogSessionModal() {
               ${allEleves.map(e => `
                 <div class="lsm-eleve-row${e.id === selectedEleve ? ' lsm-selected' : ''}"
                      data-eleve="${esc(e.id)}" role="radio" aria-checked="${e.id === selectedEleve}">
-                  <div class="lsm-eleve-av" style="background:${gradFor(e.id)}">${esc(initials(e.prenom, e.nom).toUpperCase() || '?')}</div>
+                  <div class="lsm-eleve-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 36)}</div>
                   <div class="lsm-eleve-info">
                     <div class="lsm-eleve-name">${esc(e.prenom || '')} ${esc(e.nom || '')}</div>
                     ${e._hint ? `<div class="lsm-eleve-hint">${esc(e._hint)}</div>` : ''}

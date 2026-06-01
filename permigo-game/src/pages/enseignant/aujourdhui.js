@@ -12,18 +12,7 @@ import { REMC_TOTAL } from '@/data/remc.js';
 import { labelComp } from '@/utils/remc-label.js';
 import { statutCfg } from '@/utils/statut-label.js';
 import { icon, iconBadge } from '@/utils/icons.js';
-
-// ─── Gradients avatar ─────────────────────────────────────────────
-const AVATARS = [
-  'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,var(--blk),#155e75)',
-  'linear-gradient(135deg,var(--puk),#4c1d95)',
-  'linear-gradient(135deg,#0e7c66,#064e3b)',
-  'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,#a16207,#713f12)',
-  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
-  'linear-gradient(135deg,var(--grd),#064e3b)',
-];
+import { renderUserAvatar } from '@/components/common/avatar.js';
 
 // ─── Statuts labels : mapping centralisé @/utils/statut-label.js ──
 
@@ -444,15 +433,6 @@ function todayISO() {
   return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 }
 
-function initials(prenom, nom) {
-  const p = (prenom || '')[0] || '';
-  const parts = (nom || '').trim().replace(/\./g, '').split(/\s+/).filter(Boolean);
-  const n = parts.length
-    ? (parts[parts.length - 1][0] || '')
-    : ((prenom || '').trim()[1] || '');
-  return (p + n).toUpperCase() || '?';
-}
-
 // ─── Entry point ──────────────────────────────────────────────────
 let _ptrCleanup = null;
 
@@ -534,7 +514,7 @@ async function renderInto(root, _me) {
     // Tous les élèves de l'école (RLS filtre par école automatiquement)
     sb
       .from('profiles')
-      .select('id, prenom, nom, last_active_at, enseignant_id')
+      .select('id, prenom, nom, last_active_at, enseignant_id, avatar_url')
       .eq('role', 'eleve'),
 
     // Quiz de consolidation en attente pour mes élèves
@@ -797,14 +777,12 @@ async function renderInto(root, _me) {
 // ─── Sub-renders ──────────────────────────────────────────────────
 function renderActRow(val, elevesMap) {
   const eleve = elevesMap[val.eleve_id] || { prenom: 'Élève', nom: '', idx: 0 };
-  const grad = AVATARS[eleve.idx % AVATARS.length];
-  const ini = initials(eleve.prenom, eleve.nom);
   const fullNom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(' ') || '—');
   const cfg = statutCfg(val.statut);
 
   return `
     <div class="aj-act-row">
-      <div class="aj-act-av" style="background:${grad}">${esc(ini)}</div>
+      <div class="aj-act-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
       <div class="aj-act-info">
         <div class="aj-act-name">${fullNom || '—'}</div>
         <div class="aj-act-comp">
@@ -823,15 +801,13 @@ function renderActRow(val, elevesMap) {
 }
 
 function renderEleveRow(eleve) {
-  const grad = AVATARS[eleve.idx % AVATARS.length];
-  const ini = initials(eleve.prenom, eleve.nom);
   const fullNom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(' ') || '—');
   const pct = REMC_TOTAL > 0 ? Math.round((eleve.acquis / REMC_TOTAL) * 100) : 0;
 
   return `
     <div class="aj-eleve-row" data-eleve-id="${esc(eleve.id)}"
          role="button" tabindex="0" aria-label="Livret de ${fullNom}">
-      <div class="aj-eleve-av" style="background:${grad}">${esc(ini)}</div>
+      <div class="aj-eleve-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
       <span class="aj-eleve-nom">${fullNom || '—'}</span>
       <span class="aj-eleve-prog">${eleve.acquis}/${REMC_TOTAL}</span>
       <span class="aj-eleve-chev" aria-hidden="true">›</span>

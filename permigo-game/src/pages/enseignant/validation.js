@@ -6,6 +6,7 @@ import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { toast } from '@/components/common/toast.js';
 import { esc } from '@/utils/escape.js';
+import { renderUserAvatar } from '@/components/common/avatar.js';
 import { track } from '@/services/analytics.js';
 import { REMC } from '@/data/remc.js';
 import { labelComp } from '@/utils/remc-label.js';
@@ -233,7 +234,7 @@ export async function mount(root) {
 
   const { data, error } = await sb
     .from('profiles')
-    .select('id, prenom, nom_initial')
+    .select('id, prenom, nom_initial, avatar_url')
     .eq('enseignant_id', _me.id)
     .eq('role', 'eleve')
     .order('prenom');
@@ -408,14 +409,13 @@ function render() {
 }
 
 function renderEleveCard(eleve) {
-  const initials = (eleve.prenom?.[0] || '') + (eleve.nom_initial?.replace('.', '') || '');
   const selected = _eleve?.id === eleve.id;
   return `
     <div class="eleve-card${selected ? ' selected' : ''}" data-eleve-id="${esc(eleve.id)}"
          role="button" tabindex="0"
          aria-label="${esc(eleve.prenom || '—')} ${esc(eleve.nom_initial || '')}"
          aria-pressed="${selected}">
-      <div class="eleve-av" aria-hidden="true">${esc(initials || '?')}</div>
+      <div class="eleve-av" aria-hidden="true" style="background:transparent">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom_initial }, 48)}</div>
       <div class="eleve-prenom">${esc(eleve.prenom || '—')}</div>
     </div>
   `;

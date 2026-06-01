@@ -11,19 +11,9 @@ import { navigate }    from '@/router.js';
 import { REMC }        from '@/data/remc.js';
 import { labelComp }   from '@/utils/remc-label.js';
 import { iconBadge, icon } from '@/utils/icons.js';
+import { renderUserAvatar } from '@/components/common/avatar.js';
 
 // ─── Constantes ───────────────────────────────────────────────
-const AVATARS = [
-  'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,var(--blk),#155e75)',
-  'linear-gradient(135deg,var(--puk),#4c1d95)',
-  'linear-gradient(135deg,#0e7c66,#064e3b)',
-  'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,#a16207,#713f12)',
-  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
-  'linear-gradient(135deg,var(--grd),#064e3b)',
-];
-
 const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
 // ─── CSS ──────────────────────────────────────────────────────
@@ -356,15 +346,6 @@ const STYLE = `<style>
 </style>`;
 
 // ─── Helpers ──────────────────────────────────────────────────
-function initials(prenom, nom) {
-  const p = (prenom || '')[0] || '';
-  const parts = (nom || '').trim().replace(/\./g, '').split(/\s+/).filter(Boolean);
-  const n = parts.length
-    ? (parts[parts.length - 1][0] || '')
-    : ((prenom || '').trim()[1] || '');
-  return (p + n).toUpperCase() || '?';
-}
-
 function monthBounds(offset = 0) {
   const now = new Date();
   const y = now.getFullYear();
@@ -452,7 +433,7 @@ async function loadData(me) {
 
     // Mes élèves attitrés
     sb.from('profiles')
-      .select('id, prenom, nom, last_active_at')
+      .select('id, prenom, nom, last_active_at, avatar_url')
       .eq('enseignant_id', me.id)
       .eq('role', 'eleve'),
 
@@ -790,8 +771,6 @@ function renderElevesList(tab, topProgressent, topStagnent) {
     return `<div class="ins-empty">${empty}</div>`;
   }
   return list.map((e, i) => {
-    const ini   = initials(e.prenom, e.nom);
-    const grad  = AVATARS[e.idx % AVATARS.length];
     const nom   = esc(`${e.prenom || ''} ${e.nom || ''}`.trim() || 'Élève');
     const badge = tab === 'progressent'
       ? `<span class="ins-badge ins-badge-green">+${e.compsThisMonth} ce mois</span>`
@@ -803,7 +782,7 @@ function renderElevesList(tab, topProgressent, topStagnent) {
       <div class="ins-eleve-row" data-eleve-id="${esc(e.id)}" data-tab="${tab}"
            role="button" tabindex="0" aria-label="Livret de ${nom}"
            style="animation: insWidgetIn .3s cubic-bezier(.23,1,.32,1) ${i * 50}ms both">
-        <div class="ins-eleve-av" style="background:${grad}">${esc(ini)}</div>
+        <div class="ins-eleve-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 36)}</div>
         <div class="ins-eleve-info">
           <div class="ins-eleve-name">${nom}</div>
           <div class="ins-eleve-meta">${meta}</div>
