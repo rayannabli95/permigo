@@ -118,8 +118,8 @@ function ensureStyle() {
 
 const REASON_LABELS = {
   quiz_fails:        'Quiz raté — à retravailler',
-  old_validation:    'Validation ancienne — consolide',
-  consolidation_due: 'Consolidation due — révise maintenant',
+  old_validation:    'Acquis il y a longtemps — à rafraîchir',
+  consolidation_due: 'Quiz de révision à refaire',
 };
 
 const REASON_ICONS = {

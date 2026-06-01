@@ -355,8 +355,8 @@ function renderChooseAvatar(root, me) {
 // ─── Step 3 — First Quest ─────────────────────────────────────
 function renderFirstQuest(root, me) {
   const MILESTONES = [
-    { num: '5',  title: 'Premières racines',   sub: 'Valide tes 5 premières compétences',     reward: '+50 XP',  emoji: '🌱' },
-    { num: '15', title: 'Halfway there',        sub: 'Atteins la moitié du parcours REMC',     reward: '+200 XP', emoji: '🚀' },
+    { num: '5',  title: 'Premiers pas',         sub: 'Valide tes 5 premières compétences',     reward: '+50 XP',  emoji: '🌱' },
+    { num: '15', title: 'À mi-parcours',        sub: 'Atteins la moitié du parcours REMC',     reward: '+200 XP', emoji: '🚀' },
     { num: '31', title: 'Permis décroché !',    sub: 'Maîtrise les 31 compétences officielles', reward: '🏆 Trophée légendaire', emoji: '👑' },
   ];
 
@@ -368,8 +368,8 @@ function renderFirstQuest(root, me) {
         <div class="ob-illo" style="font-size:60px;margin-bottom:16px" aria-hidden="true">🗺️</div>
         <h1 class="ob-title">Ta première mission</h1>
         <p class="ob-sub" style="margin-bottom:28px">
-          Voici les 3 jalons qui jalonnent ton parcours.
-          Chaque leçon te rapproche de la prochaine étape.
+          Voici les 3 grandes étapes de ton parcours.
+          Chaque leçon te rapproche de la suivante.
         </p>
         <div class="ob-milestones">
           ${MILESTONES.map(m => `
