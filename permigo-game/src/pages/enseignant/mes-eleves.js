@@ -10,19 +10,8 @@ import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { REMC_TOTAL } from '@/data/remc.js';
 import { renderEmptyState, emptyState } from '@/components/common/empty-state.js';
+import { renderUserAvatar } from '@/components/common/avatar.js';
 import { icon } from '@/utils/icons.js';
-
-// ─── Gradients avatar (8 couleurs cycliques) ─────────────────────
-const AVATARS = [
-  'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,var(--blk),#155e75)',
-  'linear-gradient(135deg,var(--puk),#4c1d95)',
-  'linear-gradient(135deg,#0e7c66,#064e3b)',
-  'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,#a16207,#713f12)',
-  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
-  'linear-gradient(135deg,var(--grd),#064e3b)',
-];
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -473,11 +462,9 @@ function renderDrill() {
            </div>`
         : _drillEleves.map(e => {
             const nm = esc(`${e.prenom || ''} ${e.nom || ''}`.trim());
-            const ava = ((e.prenom || '')[0] || '').toUpperCase() + ((e.nom || '')[0] || '').toUpperCase();
-            const grad = AVATARS[(e.prenom || '').charCodeAt(0) % AVATARS.length] || AVATARS[0];
             return `
               <div class="me-row" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
-                <div class="me-ava" style="background:${grad}">${esc(ava || '?')}</div>
+                <div class="me-ava" style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 44)}</div>
                 <div class="me-info">
                   <div class="me-name">${nm}</div>
                   <div class="me-meta">
@@ -603,23 +590,13 @@ function filterList() {
 }
 
 function renderRow(eleve) {
-  const _nomParts = (eleve.nom || '').trim().replace(/\./g, '').split(/\s+/).filter(Boolean);
-  const _ini1 = (eleve.prenom || '')[0] || '';
-  const _ini2 = _nomParts.length
-    ? (_nomParts[_nomParts.length - 1][0] || '')
-    : ((eleve.prenom || '').trim()[1] || '');
-  const initials = (_ini1 + _ini2).toUpperCase() || '?';
-  const grad = AVATARS[eleve.idx % AVATARS.length];
   const pct = eleve.total > 0 ? Math.round((eleve.acquis / eleve.total) * 100) : 0;
   const fullNom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(' ') || '—');
 
   return `
     <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="button" tabindex="0"
          aria-label="Fiche de ${fullNom} — ${eleve.acquis}/${eleve.total} compétences acquises, ${eleve.actif ? 'actif' : 'inactif'}">
-      ${eleve.avatar_url
-        ? `<img class="me-av" src="${esc(eleve.avatar_url)}" alt="${fullNom}" loading="lazy" style="object-fit:cover">`
-        : `<div class="me-av" style="background:${grad}">${esc(initials || '?')}</div>`
-      }
+      <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 44)}</div>
 
       <div class="me-info">
         <div class="me-nom">
