@@ -7,3 +7,9 @@ dist/
 .vscode/
 .idea/
 *.log
+
+# Notes de session Claude (audits, prompts inter-session, alertes auto)
+/ALERTE_*.md
+/AUDIT_*.md
+/PROMPT_*.md
+/PROMPTS_*.md
