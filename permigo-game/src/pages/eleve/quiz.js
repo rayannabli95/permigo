@@ -11,7 +11,7 @@ import { track } from '@/services/analytics.js';
 import { lancerQuiz } from '@/services/quiz-engine.js';
 import { findSubComp, findCategory } from '@/data/remc.js';
 import { unlockChest } from '@/utils/game-state.js';
-import { playUnlock } from '@/utils/sound.js';
+import { playLevelup } from '@/utils/sound.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -264,7 +264,7 @@ async function handleComplete(root, me, { competenceId, type, score, total, dura
   } else if (validated) {
     toast('Compétence validée ! ✅', 'success');
     navigator.vibrate?.([30, 50, 30]);
-    playUnlock();
+    playLevelup();
   } else if (!passed) {
     toast('Presque ! Il te faut 70% pour valider. Réessaie.', 'info');
   } else {

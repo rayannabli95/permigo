@@ -6,6 +6,7 @@ import { sb } from '@/auth/auth.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { burstConfetti } from '@/components/common/confetti.js';
+import { playCorrect, playWrong, playStreak, playPerfect } from '@/utils/sound.js';
 
 /**
  * @param {Object} opts
@@ -31,6 +32,7 @@ export async function lancerQuiz({ competenceId, type, nbQuestions, onComplete }
   const pool = shuffle(questions).slice(0, nbQuestions);
   let idx = 0;
   let score = 0;
+  let streak = 0; // compteur de bonnes réponses consécutives (pour le son d'escalade)
 
   track('quiz.started', { competence_id: competenceId, quiz_type: type, nb_questions: pool.length });
 
@@ -73,7 +75,15 @@ export async function lancerQuiz({ competenceId, type, nbQuestions, onComplete }
 
   function handleAnswer(chosen, q, btn) {
     const correct = chosen === q.correct_index;
-    if (correct) score++;
+    if (correct) {
+      score++;
+      streak++;
+      playCorrect();
+      if (streak >= 2) playStreak();  // escalade à partir de la 2e bonne d'affilée
+    } else {
+      streak = 0;
+      playWrong();
+    }
 
     overlay.querySelectorAll('.quiz-opt').forEach(b => {
       b.disabled = true;
@@ -119,8 +129,8 @@ export async function lancerQuiz({ competenceId, type, nbQuestions, onComplete }
       score_pct: Math.round((score / total) * 100),
     });
 
-    // Confetti sur score parfait
-    if (perfect) burstConfetti({ count: 100, power: 16 });
+    // Confetti + son sur score parfait
+    if (perfect) { burstConfetti({ count: 100, power: 16 }); playPerfect(); }
 
     overlay.querySelector('.quiz-body').innerHTML = `
       <div class="quiz-result">

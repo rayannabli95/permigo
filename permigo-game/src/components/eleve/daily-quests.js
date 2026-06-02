@@ -9,6 +9,7 @@ import { esc }   from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { icon }  from '@/utils/icons.js';
 import { toast } from '@/components/common/toast.js';
+import { playStar } from '@/utils/sound.js';
 
 const STYLE_ID = 'daily-quests-style';
 
@@ -177,6 +178,7 @@ export async function mountDailyQuests(root) {
 
         const xpGained  = data?.xp_gained  ?? quest.xp_reward  ?? 0;
         const gemGained = data?.gem_gained ?? quest.gem_reward ?? 0;
+        playStar();
         track('daily_quests.claimed', { quest_id: questId, xp: xpGained, gems: gemGained });
 
         // Popup XP

@@ -22,6 +22,7 @@
 
 import { esc } from '@/utils/escape.js';
 import { burstConfetti } from '@/components/common/confetti.js';
+import { playFanfare } from '@/utils/sound.js';
 
 const LS_KEY = 'pg-unlock-seen';
 
@@ -64,8 +65,9 @@ export function playUnlockCinematic({ worldNum, worldName, worldColor = 'var(--a
 
   if (document.querySelector('.wuc-overlay')) return; // déjà ouvert
 
-  // Haptique
+  // Haptique + fanfare
   try { navigator.vibrate?.([80, 50, 80, 50, 200]); } catch (_) {}
+  playFanfare();
 
   const overlay = document.createElement('div');
   overlay.className = 'wuc-overlay';

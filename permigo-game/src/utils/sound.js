@@ -52,6 +52,15 @@ export const playPageturn = () => play('pageturn');
 export const playNotify   = () => play('notify');
 export const playHorn     = () => play('horn');
 
+// ─── Alias sémantiques quiz/examen (remappés sur .mp3 existants en attendant vrais sons) ───
+export const playCorrect = () => play('success');        // bonne réponse
+export const playWrong   = () => play('hint');           // mauvaise réponse
+export const playStreak  = () => play('whoosh', 0.5);    // 2+ bonnes d'affilée
+export const playPerfect = () => play('reward');         // quiz sans-faute
+export const playLevelup = () => play('unlock');         // compétence validée
+export const playFanfare = () => play('horn', 0.45);     // exam réussi / monde débloqué
+export const playStar    = () => play('coin');           // quête réclamée
+
 // Joué une seule fois par session (jingle long ~2-3s, page souvent revisitée)
 export function playParcours() {
   if (sessionStorage.getItem(PARCOURS_KEY)) return;

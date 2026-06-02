@@ -9,7 +9,7 @@ import { track }                 from '@/services/analytics.js';
 import { navigate }              from '@/router.js';
 import { PARCOURS, questionsForParcours } from '@/data/parcours-quiz.js';
 import { haptic }                from '@/utils/haptic.js';
-import { playPageturn, playSuccess, playError } from '@/utils/sound.js';
+import { playPageturn, playCorrect, playWrong, playFanfare } from '@/utils/sound.js';
 
 const PASS_THRESHOLD = 12; // / 15
 
@@ -167,8 +167,8 @@ function showFeedback(root, q, chosen, questions, currentIdx, parcours_id, answe
   const isCorrect = chosen === q.correct;
   const isFaute   = q.tags?.includes('faute_eliminatoire');
 
-  if (isCorrect) { haptic('success'); playSuccess(); }
-  else           { haptic('warning'); playError(); }
+  if (isCorrect) { haptic('success'); playCorrect(); }
+  else           { haptic('warning'); playWrong(); }
 
   // Colorie les boutons
   root.querySelectorAll('.exb-choice').forEach(btn => {
@@ -288,7 +288,7 @@ function showResults(root, questions, answers, parcours_id) {
 
   track('parcours_quiz.completed', { parcours_id, nom: parcours?.nom, score, total, passed, faute_eliminatoire: fauteRatee });
 
-  if (passed) playSuccess(); else playError();
+  if (passed) playFanfare(); else playWrong();
 
   const wrongHtml = wrongItems.length === 0
     ? `<p class="exb-perfect">Parfait ! Aucune erreur.</p>`
