@@ -1,15 +1,25 @@
 node_modules/
 dist/
 dist-test*/
+dist_soundcheck/
 vite.config.js.timestamp-*
+
+# Env files — tout sauf .env.example (qui est un template versionné)
 .env
-.env.local
+.env.*
+!.env.example
+
+# Logs et IDE
 *.log
 .DS_Store
 .vscode/
 .idea/
+
+# DB locale
 *.db
 *.db-journal
+
+# Vercel
 .vercel/
 
 # Skills externes (1460 skills clonées localement, on cherry-pick au besoin)
