@@ -245,6 +245,12 @@ function renderForm(root, invitation, token) {
           <label class="sg-label" for="sg-naissance">Date de naissance</label>
           <input class="sg-input" id="sg-naissance" type="date" />
         </div>
+
+        <div class="sg-row" id="sg-parent-block" style="display:none">
+          <label class="sg-label" for="sg-parent-email">Email d'un parent</label>
+          <input class="sg-input" id="sg-parent-email" type="email" autocomplete="email" placeholder="parent@exemple.fr" />
+          <div class="sg-italic">Tu as moins de 15 ans : on doit recueillir l'accord de ton parent ou tuteur légal. Un lien de validation lui sera transmis.</div>
+        </div>
   ` : '';
 
   root.innerHTML = `${STYLE}
@@ -285,9 +291,16 @@ function renderForm(root, invitation, token) {
   const usertagEl = root.querySelector('#sg-usertag');
   const usertagHelp = root.querySelector('#sg-usertag-help');
   const naissanceEl = root.querySelector('#sg-naissance');
+  const parentBlock = root.querySelector('#sg-parent-block');
+  const parentEmailEl = root.querySelector('#sg-parent-email');
   const pwdEl = root.querySelector('#sg-password');
   const pwdHelp = root.querySelector('#sg-pwd-help');
   const submitBtn = root.querySelector('#sg-submit');
+
+  const updateMinor = () => {
+    if (!parentBlock) return;
+    parentBlock.style.display = isMinorDate(naissanceEl.value) ? '' : 'none';
+  };
 
   let usertagAvailable = false;
   let usertagChecking = false;
@@ -302,7 +315,9 @@ function renderForm(root, invitation, token) {
       const nomOk = nomEl.value.trim().length >= 1;
       const tagOk = usertagEl.value.trim().length >= 3 && usertagAvailable && !usertagChecking;
       const dateOk = !!naissanceEl.value;
-      ok = ok && nomOk && tagOk && dateOk;
+      const minor = isMinorDate(naissanceEl.value);
+      const parentOk = !minor || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((parentEmailEl?.value || '').trim());
+      ok = ok && nomOk && tagOk && dateOk && parentOk;
     }
     submitBtn.disabled = !ok;
     if (pwdEl.value && !pwdOk) {
@@ -354,7 +369,8 @@ function renderForm(root, invitation, token) {
   pwdEl.addEventListener('input', validate);
   if (isEleve) {
     nomEl.addEventListener('input', validate);
-    naissanceEl.addEventListener('input', validate);
+    naissanceEl.addEventListener('input', () => { updateMinor(); validate(); });
+    parentEmailEl?.addEventListener('input', validate);
     usertagEl.addEventListener('input', checkUsertag);
   }
 
@@ -380,13 +396,15 @@ function renderForm(root, invitation, token) {
         accountCreated = true;
       }
 
-      // 3. Élève : pose usertag / nom / date de naissance (unicité usertag vérifiée serveur)
+      // 3. Élève : pose usertag / nom / date de naissance (+ email parent si mineur)
+      let consentToken = null;
       if (isEleve) {
-        const { error: profErr } = await sb.rpc('set_eleve_signup_profile', {
+        const { data: profData, error: profErr } = await sb.rpc('set_eleve_signup_profile', {
           p_username: usertagEl.value.trim(),
           p_nom: nomEl.value.trim(),
           p_prenom: prenomEl.value.trim(),
           p_date_naissance: naissanceEl.value,
+          p_parent_email: parentEmailEl?.value.trim() || null,
         });
         if (profErr) {
           if (/username_taken/i.test(profErr.message || '')) {
@@ -395,15 +413,29 @@ function renderForm(root, invitation, token) {
             usertagHelp.textContent = "✗ Ce usertag vient d'être pris, choisis-en un autre";
             toast('Ce usertag est déjà pris, change-le puis réessaie', 'error', 4000);
             submitBtn.textContent = 'Activer mon compte';
-            validate(); // se réactivera quand un usertag dispo est saisi
+            validate();
+            return;
+          }
+          if (/parent_email_required/i.test(profErr.message || '')) {
+            toast("Renseigne un email de parent valide", 'error', 4000);
+            submitBtn.disabled = false; submitBtn.textContent = 'Activer mon compte';
+            updateMinor(); validate();
             return;
           }
           throw profErr;
         }
+        const cr = Array.isArray(profData) ? profData[0] : profData;
+        if (cr?.consent_required && cr?.consent_token) consentToken = cr.consent_token;
       }
 
-      track('signup.completed', { role: invitation.role, from: 'invitation' });
+      track('signup.completed', { role: invitation.role, from: 'invitation', minor: !!consentToken });
       playLaunch();
+
+      // 3bis. Élève mineur : compte en attente du consentement parental
+      if (consentToken) {
+        renderConsentPending(root, consentToken);
+        return;
+      }
 
       // 4. Succès + redirection
       root.innerHTML = `${STYLE}
@@ -430,6 +462,51 @@ function renderForm(root, invitation, token) {
 
   // Focus auto sur le prénom
   setTimeout(() => prenomEl.focus(), 100);
+}
+
+// Moins de 15 ans (âge du consentement numérique en France)
+function isMinorDate(str) {
+  if (!str) return false;
+  const b = new Date(str);
+  if (isNaN(b.getTime())) return false;
+  const t = new Date();
+  let age = t.getFullYear() - b.getFullYear();
+  const m = t.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && t.getDate() < b.getDate())) age--;
+  return age < 15;
+}
+
+// Écran post-signup pour un élève mineur : lien de consentement à transmettre au parent
+function renderConsentPending(root, token) {
+  track('signup.consent_pending');
+  const link = `${location.origin}/#/parental-consent?token=${encodeURIComponent(token)}`;
+  root.innerHTML = `${STYLE}
+    <div class="sg">
+      <div class="sg-card" style="text-align:center">
+        <div style="font-size:46px;margin-bottom:10px">👨‍👩‍👧</div>
+        <h1 class="sg-title">Presque&nbsp;! On attend l'accord de ton parent</h1>
+        <p class="sg-sub">Comme tu as moins de 15 ans, un parent ou tuteur doit donner son accord avant que tu puisses utiliser PermiGo. Envoie-lui ce lien&nbsp;:</p>
+        <div class="sg-row">
+          <input class="sg-input" id="sg-consent-link" type="text" readonly value="${esc(link)}" />
+        </div>
+        <button class="sg-btn" id="sg-copy-link" type="button">📋 Copier le lien</button>
+        <p class="sg-sub" style="margin-top:16px;margin-bottom:0">Tu peux le coller dans WhatsApp ou un SMS à ton parent. Dès qu'il valide, ton compte se débloque.</p>
+        <a class="sg-link" href="/#" style="margin-top:18px">J'ai compris</a>
+      </div>
+    </div>`;
+  const linkEl = root.querySelector('#sg-consent-link');
+  root.querySelector('#sg-copy-link')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(link);
+      const btn = root.querySelector('#sg-copy-link');
+      btn.textContent = '✓ Lien copié';
+      setTimeout(() => { btn.textContent = '📋 Copier le lien'; }, 2000);
+    } catch {
+      linkEl?.select();
+      const { toast } = await import('@/components/common/toast.js');
+      toast('Sélectionne et copie le lien manuellement', 'info', 3500);
+    }
+  });
 }
 
 function renderError(root, title, message) {

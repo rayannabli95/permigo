@@ -35,6 +35,12 @@ async function boot() {
       initGameState(me.id).catch(() => {});
     }
 
+    // Consentement parental : page publique par token, accessible connecté ou non
+    if (location.hash.startsWith('#/parental-consent')) {
+      const { mount } = await import('@/pages/public/parental-consent.js');
+      return mount(app);
+    }
+
     if (!me) {
       // Pages publiques accessibles sans authentification
       if (location.hash.startsWith('#/signup')) {
@@ -48,6 +54,13 @@ async function boot() {
       }
       const { mount } = await import('@/pages/auth/login.js');
       return mount(app);
+    }
+
+    // RGPD : élève mineur (<15 ans) en attente du consentement parental → bloqué
+    if (me.role === 'eleve' && me.parental_consent_required && !me.parental_consent_given_at) {
+      const { mountConsentBlocked } = await import('@/pages/eleve/consent-blocked.js');
+      mountConsentBlocked(app, me);
+      return; // pas de chrome, aucun accès tant que pas consenti
     }
 
     // Onboarding magique — élèves jamais passés par le flow d'accueil
