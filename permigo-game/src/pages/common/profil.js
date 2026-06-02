@@ -365,6 +365,34 @@ const STYLE = `<style>
 }
 .prf-ref-apply-btn:active { background: #1e2235; }
 .prf-ref-apply-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Pseudo public (élève) ── */
+.prf-pseudo {
+  background: var(--su); border: 1px solid var(--bo); border-radius: 20px;
+  padding: 20px; margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+}
+.prf-pseudo-ttl {
+  font: 600 11px/1 'Inter', sans-serif; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--mu2); margin: 0 0 6px;
+}
+.prf-pseudo-help { font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu2); margin: 0 0 12px; }
+.prf-pseudo-row { display: flex; gap: 8px; }
+.prf-pseudo-input {
+  flex: 1; padding: 12px 14px; background: var(--bg); border: 1.5px solid var(--bo);
+  border-radius: 12px; font: 600 14px/1 'IBM Plex Mono', monospace; color: var(--ink);
+  outline: none; transition: border-color .14s; min-height: 44px;
+}
+.prf-pseudo-input:focus { border-color: var(--a); }
+.prf-pseudo-input.invalid { border-color: var(--rd); }
+.prf-pseudo-save {
+  padding: 0 18px; background: var(--a); border: none; border-radius: 12px; color: #fff;
+  font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; min-height: 44px;
+  white-space: nowrap; transition: opacity .12s, transform .12s;
+}
+.prf-pseudo-save:active { transform: scale(.97); }
+.prf-pseudo-save:disabled { opacity: .5; cursor: not-allowed; }
+.prf-pseudo-err { font: 500 12px/1.3 'Inter', sans-serif; color: var(--rd); margin-top: 8px; min-height: 14px; }
 </style>`;
 
 const ROLE_LABELS = { eleve: 'Élève', enseignant: 'Enseignant', gerant: 'Gérant' };
@@ -389,7 +417,7 @@ export async function mount(root) {
   // Fetch profil complet (xp, streak_pro_days, prenom, created_at, avatar, banner)
   const { data: profile } = await sb
     .from('profiles')
-    .select('email, prenom, nom, xp, streak_pro_days, created_at, avatar_url, banner_url')
+    .select('email, prenom, nom, xp, streak_pro_days, created_at, avatar_url, banner_url, username')
     .eq('id', me.id)
     .single();
 
@@ -513,6 +541,8 @@ export async function mount(root) {
     </a>
   </div>` : ''}
 
+  ${me.role === 'eleve' ? `<div id="prf-pseudo-section">${_renderPseudo(profile?.username)}</div>` : ''}
+
   ${referralStats !== null ? `<div id="prf-ref-section">${_renderReferral(referralStats)}</div>` : ''}
 
   ${anneeStats ? `<div id="prf-ranking-host"></div>` : ''}
@@ -607,8 +637,8 @@ export async function mount(root) {
     if (rankingHost) mountMoniteurRanking(rankingHost, { myId: me.id }).catch(() => {});
   }
 
-  // Wire referral (élève)
-  if (me.role === 'eleve') _wireReferral(root, me);
+  // Wire pseudo public + referral (élève)
+  if (me.role === 'eleve') { _wirePseudo(root, me); _wireReferral(root, me); }
 
   root.querySelector('#btn-logout')?.addEventListener('click', async () => {
     track('auth.logout', { user_role: me.role });
@@ -626,6 +656,92 @@ export async function mount(root) {
   });
 
   _wireNotifToggle(root);
+}
+
+// ─── Pseudo public (élève) ────────────────────────────────────────
+
+const PSEUDO_RE = /^[A-Za-z0-9_]{3,16}$/;
+// Blocklist minimale (v1) — usurpations / insultes basiques. Comparaison lower-case.
+const PSEUDO_BLOCKLIST = [
+  'admin', 'moderator', 'moderateur', 'permigo', 'support', 'staff',
+  'putain', 'merde', 'connard', 'salope', 'pute',
+];
+
+function _isBlocked(name) {
+  return PSEUDO_BLOCKLIST.includes(name.toLowerCase());
+}
+
+function _renderPseudo(username) {
+  return `
+<div class="prf-pseudo">
+  <h2 class="prf-pseudo-ttl">Pseudo public</h2>
+  <p class="prf-pseudo-help">Visible dans le classement. Laisse vide pour rester anonyme. 3 à 16 caractères, lettres/chiffres/_</p>
+  <div class="prf-pseudo-row">
+    <input class="prf-pseudo-input" id="prf-pseudo-input" type="text" inputmode="text"
+           placeholder="ex: speedy_lea" maxlength="16" autocomplete="off" spellcheck="false"
+           value="${esc(username || '')}">
+    <button class="prf-pseudo-save" id="prf-pseudo-save">Enregistrer</button>
+  </div>
+  <div class="prf-pseudo-err" id="prf-pseudo-err"></div>
+</div>`;
+}
+
+function _wirePseudo(root, me) {
+  const section = root.querySelector('#prf-pseudo-section');
+  if (!section) return;
+  const input = section.querySelector('#prf-pseudo-input');
+  const btn   = section.querySelector('#prf-pseudo-save');
+  const err   = section.querySelector('#prf-pseudo-err');
+  if (!input || !btn) return;
+
+  const showErr = (msg) => { if (err) err.textContent = msg || ''; input.classList.toggle('invalid', !!msg); };
+
+  input.addEventListener('input', () => showErr(''));
+
+  btn.addEventListener('click', async () => {
+    const raw = input.value.trim();
+
+    // Validation front AVANT update Supabase
+    if (raw !== '') {
+      if (!PSEUDO_RE.test(raw)) {
+        showErr('3 à 16 caractères : lettres, chiffres ou _ uniquement.');
+        return;
+      }
+      if (_isBlocked(raw)) {
+        showErr('Ce pseudo n\'est pas autorisé.');
+        return;
+      }
+    }
+
+    const value = raw === '' ? null : raw;
+    btn.disabled = true;
+    btn.textContent = '…';
+    try {
+      const { error } = await sb.from('profiles').update({ username: value }).eq('id', me.id);
+      const { toast } = await import('@/components/common/toast.js');
+      if (error) {
+        if (error.code === '23505') {
+          showErr('Ce pseudo est déjà pris.');
+          toast('Ce pseudo est déjà pris', 'error');
+        } else if (error.code === '23514') {
+          showErr('Format invalide.');
+        } else {
+          toast('Impossible d\'enregistrer le pseudo', 'error');
+        }
+      } else {
+        showErr('');
+        track('pseudo.updated', { has_pseudo: value !== null });
+        toast(value ? 'Pseudo enregistré 🎭' : 'Pseudo retiré', 'success');
+      }
+    } catch (e) {
+      console.error('[profil] pseudo', e);
+      const { toast } = await import('@/components/common/toast.js');
+      toast('Erreur de connexion', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Enregistrer';
+    }
+  });
 }
 
 // ─── Referral (élève) ─────────────────────────────────────────────

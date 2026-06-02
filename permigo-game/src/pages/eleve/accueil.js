@@ -1153,7 +1153,7 @@ async function _loadAndInjectLeaderboard(root) {
       </div>`;
     slot.querySelector('#acc-lb-card')?.addEventListener('click', () => {
       track('leaderboard.tapped', { rank: data.my_rank, percentile: data.percentile });
-      navigate('#/trophees');
+      navigate('#/classement');
     });
   } catch (e) { console.error('[accueil] leaderboard', e); }
 }
