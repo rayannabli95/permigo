@@ -798,6 +798,21 @@ async function _handleSubmit(root) {
       toast(`Séance enregistrée · ${fmtDur(_duration)} avec ${esc(eleveObj?.prenom || "l'élève")}`, 'success');
     }
 
+    // Quiz éclair (optionnel) : proposer de pousser 3 questions à l'élève
+    // sur une compétence travaillée. Si proposé, on saute le celebrate.
+    const workedComps = [..._comps.keys()]
+      .map(id => { const c = _allComps?.find(x => x.id === id); return c ? { id: c.id, nom: c.nom } : null; })
+      .filter(Boolean);
+
+    if (workedComps.length > 0) {
+      try {
+        const { openFlashQuizModal } = await import('@/components/enseignant/flash-quiz-modal.js');
+        await openFlashQuizModal({ eleveId: _eleve, eleveNom: eleveObj?.prenom, competences: workedComps });
+      } catch (e) { console.error('[log-session] flash quiz modal', e); }
+      navigate('/');
+      return;
+    }
+
     // Celebrate léger puis retour
     try {
       const { mountCelebrate } = await import('@/components/common/celebrate-screen.js');
