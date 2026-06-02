@@ -9,7 +9,6 @@ import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { REMC } from '@/data/remc.js';
-import { showOnboarding } from '@/components/eleve/onboarding-modal.js';
 import { renderHeatmap, ensureHeatmapStyles } from '@/components/eleve/activity-heatmap.js';
 import { maybeSoftRequestPush, maybeSendStreakRiskNotif } from '@/services/web-push.js';
 import { maybePlayWeeklyReplay } from '@/components/eleve/weekly-replay.js';
@@ -707,8 +706,8 @@ export async function mount(root) {
     // Coffres disponibles — teaser non-bloquant injecté sous l'action du jour
     _loadAndInjectChests(root);
 
-    // Onboarding premier login
-    if (!profile.first_value_action_at) showOnboarding(me.id, () => {});
+    // Onboarding premier login : géré en amont par main.js (page plein écran
+    // pages/onboarding/index.js, gate first_value_action_at). Rien à faire ici.
 
     // Push web (soft, après 5s)
     if (profile.first_value_action_at) {

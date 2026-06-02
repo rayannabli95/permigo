@@ -2,7 +2,7 @@
 // Profil — commun à tous les rôles
 // ═══════════════════════════════════════════════════════════════
 import { sb, logout } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
+import { getCurUser, setCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { mountPermisCard } from '@/components/eleve/permis-card.js';
@@ -399,6 +399,7 @@ const ROLE_LABELS = { eleve: 'Élève', enseignant: 'Enseignant', gerant: 'Géra
 
 function renderAccountActions(me) {
   return `
+    ${me.role === 'eleve' ? '<button class="prf-btn-logout" id="btn-replay-tour" type="button" style="background:transparent;color:var(--mu);border:1px solid var(--bo);margin-bottom:10px">🎓 Revoir le tour de bienvenue</button>' : ''}
     <button class="prf-btn-logout" id="btn-logout">Se déconnecter</button>
     ${me.role === 'eleve' ? '<button class="prf-btn-delete" id="btn-delete">Supprimer mon compte</button>' : ''}
   `;
@@ -653,6 +654,16 @@ export async function mount(root) {
 
   root.querySelector('#btn-delete')?.addEventListener('click', () => {
     alert('La suppression de compte est gérée par l\'administrateur de ton auto-école. Contacte-le directement.');
+  });
+
+  root.querySelector('#btn-replay-tour')?.addEventListener('click', async () => {
+    track('onboarding.replay_requested', { user_role: me.role });
+    try {
+      await sb.from('profiles').update({ first_value_action_at: null }).eq('id', me.id);
+      setCurUser({ ...me, first_value_action_at: null });
+    } catch (e) { console.error('[profil] replay tour failed', e); }
+    location.hash = '#/';
+    location.reload();
   });
 
   _wireNotifToggle(root);
