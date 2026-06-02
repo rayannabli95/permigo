@@ -1209,21 +1209,15 @@ async function _loadAndInjectFlashQuiz(root, me) {
 
     const hero = root.querySelector('.acc2-hero');
     if (!hero) return;
+    if (root.querySelector('#acc-flashq')) return; // déjà injecté (garde anti double-mount)
 
     const expiresMs = new Date(fq.expires_at).getTime();
     const fmt = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 
-    const div = document.createElement('div');
-    div.innerHTML = `
-      <div class="acc2-flashq" id="acc-flashq" role="button" tabindex="0" aria-label="Quiz éclair de ton moniteur, réponds maintenant">
-        <span class="acc2-fq-ico" aria-hidden="true">⚡</span>
-        <div class="acc2-fq-text">
-          <div class="acc2-fq-title">Quiz éclair de ton moniteur</div>
-          <div class="acc2-fq-sub">3 questions · réponds maintenant</div>
-        </div>
-        <span class="acc2-fq-clock" id="acc-fq-clock">${esc(fmt(expiresMs - Date.now()))}</span>
-      </div>
-      <style>
+    if (!document.getElementById('acc-flashq-styles')) {
+      const st = document.createElement('style');
+      st.id = 'acc-flashq-styles';
+      st.textContent = `
         .acc2-flashq{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 16px;border-radius:16px;cursor:pointer;
           background:linear-gradient(135deg,#f59e0b,#f97316);box-shadow:0 6px 20px rgba(249,115,22,.32);animation:fqBannerIn .4s cubic-bezier(.23,1,.32,1)}
         @keyframes fqBannerIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
@@ -1234,12 +1228,22 @@ async function _loadAndInjectFlashQuiz(root, me) {
         .acc2-fq-title{font:800 15px/1.2 'Plus Jakarta Sans',sans-serif;color:#fff}
         .acc2-fq-sub{font:600 12.5px/1.3 'Inter',sans-serif;color:rgba(255,255,255,.88);margin-top:2px}
         .acc2-fq-clock{font:800 18px/1 'IBM Plex Mono',monospace;color:#fff;background:rgba(0,0,0,.18);padding:8px 12px;border-radius:10px;flex-shrink:0}
-        @media(prefers-reduced-motion:reduce){.acc2-fq-ico{animation:none}}
-      </style>`;
+        @media(prefers-reduced-motion:reduce){.acc2-fq-ico{animation:none}}`;
+      document.head.appendChild(st);
+    }
 
-    const el = div.firstElementChild;
-    hero.insertAdjacentElement('afterend', el);
+    hero.insertAdjacentHTML('afterend', `
+      <div class="acc2-flashq" id="acc-flashq" role="button" tabindex="0" aria-label="Quiz éclair de ton moniteur, réponds maintenant">
+        <span class="acc2-fq-ico" aria-hidden="true">⚡</span>
+        <div class="acc2-fq-text">
+          <div class="acc2-fq-title">Quiz éclair de ton moniteur</div>
+          <div class="acc2-fq-sub">3 questions · réponds maintenant</div>
+        </div>
+        <span class="acc2-fq-clock" id="acc-fq-clock">${esc(fmt(expiresMs - Date.now()))}</span>
+      </div>`);
 
+    const el = root.querySelector('#acc-flashq');
+    if (!el) return;
     const clockEl = el.querySelector('#acc-fq-clock');
     const iv = setInterval(() => {
       if (!document.body.contains(el)) { clearInterval(iv); return; }

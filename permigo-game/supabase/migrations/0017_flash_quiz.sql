@@ -50,6 +50,7 @@ CREATE OR REPLACE FUNCTION public.send_flash_quiz(
 RETURNS TABLE (id uuid, question_ids uuid[], expires_at timestamptz)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
+#variable_conflict use_column
 DECLARE
   v_moniteur uuid := current_profile_id();
   v_qids uuid[];
@@ -68,10 +69,10 @@ BEGIN
   END IF;
 
   -- 3 questions aléatoires de la compétence
-  SELECT array_agg(q.id) INTO v_qids
+  SELECT array_agg(q.qid) INTO v_qids
   FROM (
-    SELECT id FROM questions_competence
-    WHERE competence_id = p_competence_id
+    SELECT qc.id AS qid FROM questions_competence qc
+    WHERE qc.competence_id = p_competence_id
     ORDER BY random()
     LIMIT 3
   ) q;
@@ -83,11 +84,11 @@ BEGIN
   PERFORM _set_trusted_op();
 
   -- 1 seul quiz éclair actif par élève : on périme les précédents non répondus
-  UPDATE flash_quizzes
+  UPDATE flash_quizzes fq
      SET expires_at = now()
-   WHERE sent_to = p_eleve_id
-     AND responded_at IS NULL
-     AND expires_at > now();
+   WHERE fq.sent_to = p_eleve_id
+     AND fq.responded_at IS NULL
+     AND fq.expires_at > now();
 
   INSERT INTO flash_quizzes (sent_by, sent_to, competence_id, question_ids, expires_at)
   VALUES (v_moniteur, p_eleve_id, p_competence_id, v_qids, v_expires)
@@ -116,6 +117,7 @@ CREATE OR REPLACE FUNCTION public.respond_flash_quiz(
 RETURNS TABLE (score int, total int, results jsonb)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
+#variable_conflict use_column
 DECLARE
   v_eleve uuid := current_profile_id();
   v_quiz record;
@@ -139,7 +141,7 @@ BEGIN
     -- Ne compter que les questions appartenant à ce quiz
     CONTINUE WHEN NOT (v_qid = ANY(v_quiz.question_ids));
 
-    SELECT correct_index INTO v_correct FROM questions_competence WHERE id = v_qid;
+    SELECT qc.correct_index INTO v_correct FROM questions_competence qc WHERE qc.id = v_qid;
     IF v_correct = (v_ans->>'selected_idx')::int THEN v_score := v_score + 1; END IF;
     v_results := v_results || jsonb_build_object(
       'question_id', v_qid,
@@ -150,9 +152,9 @@ BEGIN
   END LOOP;
 
   PERFORM _set_trusted_op();
-  UPDATE flash_quizzes
+  UPDATE flash_quizzes fq
      SET responded_at = now(), score = v_score, results = v_results
-   WHERE id = p_flash_quiz_id;
+   WHERE fq.id = p_flash_quiz_id;
 
   RETURN QUERY SELECT v_score, v_total, v_results;
 END;
