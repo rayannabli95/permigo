@@ -701,6 +701,9 @@ export async function mount(root) {
     // Bannière émotionnelle — insérée juste après le hero
     emotionalBanner.checkAndRender(root, { afterSelector: '.acc2-hero' }).catch(() => {});
 
+    // Quiz éclair actif poussé par le moniteur — bandeau prioritaire
+    _loadAndInjectFlashQuiz(root, me).catch(() => {});
+
     // Coffres disponibles — teaser non-bloquant injecté sous l'action du jour
     _loadAndInjectChests(root);
 
@@ -1184,6 +1187,68 @@ async function _loadAndInjectChests(root) {
     anchor.parentNode.insertBefore(el, anchor);
 
     const open = () => { track('chest_teaser.tapped', { count: pending.length }); navigate('#/mes-coffres'); };
+    el.addEventListener('click', open);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  } catch (e) { /* silent */ }
+}
+
+async function _loadAndInjectFlashQuiz(root, me) {
+  try {
+    const nowIso = new Date().toISOString();
+    const { data } = await sb
+      .from('flash_quizzes')
+      .select('id, expires_at')
+      .eq('sent_to', me.id)
+      .is('responded_at', null)
+      .gt('expires_at', nowIso)
+      .order('sent_at', { ascending: false })
+      .limit(1);
+
+    const fq = data?.[0];
+    if (!fq) return;
+
+    const hero = root.querySelector('.acc2-hero');
+    if (!hero) return;
+
+    const expiresMs = new Date(fq.expires_at).getTime();
+    const fmt = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div class="acc2-flashq" id="acc-flashq" role="button" tabindex="0" aria-label="Quiz éclair de ton moniteur, réponds maintenant">
+        <span class="acc2-fq-ico" aria-hidden="true">⚡</span>
+        <div class="acc2-fq-text">
+          <div class="acc2-fq-title">Quiz éclair de ton moniteur</div>
+          <div class="acc2-fq-sub">3 questions · réponds maintenant</div>
+        </div>
+        <span class="acc2-fq-clock" id="acc-fq-clock">${esc(fmt(expiresMs - Date.now()))}</span>
+      </div>
+      <style>
+        .acc2-flashq{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 16px;border-radius:16px;cursor:pointer;
+          background:linear-gradient(135deg,#f59e0b,#f97316);box-shadow:0 6px 20px rgba(249,115,22,.32);animation:fqBannerIn .4s cubic-bezier(.23,1,.32,1)}
+        @keyframes fqBannerIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+        .acc2-flashq:active{transform:scale(.99)}
+        .acc2-fq-ico{font-size:24px;line-height:1;animation:fqWiggle 1.4s ease-in-out infinite}
+        @keyframes fqWiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+        .acc2-fq-text{flex:1;min-width:0}
+        .acc2-fq-title{font:800 15px/1.2 'Plus Jakarta Sans',sans-serif;color:#fff}
+        .acc2-fq-sub{font:600 12.5px/1.3 'Inter',sans-serif;color:rgba(255,255,255,.88);margin-top:2px}
+        .acc2-fq-clock{font:800 18px/1 'IBM Plex Mono',monospace;color:#fff;background:rgba(0,0,0,.18);padding:8px 12px;border-radius:10px;flex-shrink:0}
+        @media(prefers-reduced-motion:reduce){.acc2-fq-ico{animation:none}}
+      </style>`;
+
+    const el = div.firstElementChild;
+    hero.insertAdjacentElement('afterend', el);
+
+    const clockEl = el.querySelector('#acc-fq-clock');
+    const iv = setInterval(() => {
+      if (!document.body.contains(el)) { clearInterval(iv); return; }
+      const left = expiresMs - Date.now();
+      if (left <= 0) { clearInterval(iv); el.remove(); return; }
+      clockEl.textContent = fmt(left);
+    }, 500);
+
+    const open = () => { track('flash_quiz.banner_tapped', { flash_quiz_id: fq.id }); navigate(`#/flash-quiz/${fq.id}`); };
     el.addEventListener('click', open);
     el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
   } catch (e) { /* silent */ }
