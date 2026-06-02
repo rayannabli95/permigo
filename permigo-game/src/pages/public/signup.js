@@ -93,6 +93,13 @@ const STYLE = `<style>
     margin-top: 2px;
   }
   .sg-help.error { color: var(--rd); }
+  .sg-help.ok { color: var(--adk); }
+  .sg-italic {
+    font: italic 500 12px/1.45 'Inter', sans-serif;
+    color: var(--mu2);
+    margin-top: 4px;
+  }
+  .sg-avail { display: inline-flex; align-items: center; gap: 5px; }
   .sg-btn {
     width: 100%;
     margin-top: 18px;
@@ -217,7 +224,28 @@ export async function mount(root) {
 
 function renderForm(root, invitation, token) {
   const ecoleName = invitation?.auto_ecoles?.nom || '';
+  const isEleve = invitation.role === 'eleve';
   const roleLabel = invitation.role === 'enseignant' ? 'Enseignant' : 'Élève';
+
+  // Champs supplémentaires demandés à l'élève (stats + classement)
+  const eleveFields = isEleve ? `
+        <div class="sg-row">
+          <label class="sg-label" for="sg-nom">Nom</label>
+          <input class="sg-input" id="sg-nom" type="text" autocomplete="family-name" placeholder="Ton nom" />
+        </div>
+
+        <div class="sg-row">
+          <label class="sg-label" for="sg-usertag">Usertag</label>
+          <input class="sg-input" id="sg-usertag" type="text" autocomplete="off" autocapitalize="off" placeholder="Ex : maxdu13" />
+          <div class="sg-help" id="sg-usertag-help">3 caractères minimum.</div>
+          <div class="sg-italic">Ton pseudo pour voir ton niveau par rapport aux autres élèves dans le classement.</div>
+        </div>
+
+        <div class="sg-row">
+          <label class="sg-label" for="sg-naissance">Date de naissance</label>
+          <input class="sg-input" id="sg-naissance" type="date" />
+        </div>
+  ` : '';
 
   root.innerHTML = `${STYLE}
     <div class="sg">
@@ -239,6 +267,8 @@ function renderForm(root, invitation, token) {
           <input class="sg-input" id="sg-prenom" type="text" autocomplete="given-name" placeholder="Ton prénom" />
         </div>
 
+        ${eleveFields}
+
         <div class="sg-row">
           <label class="sg-label" for="sg-password">Mot de passe</label>
           <input class="sg-input" id="sg-password" type="password" autocomplete="new-password" minlength="8" placeholder="8 caractères minimum" />
@@ -250,53 +280,132 @@ function renderForm(root, invitation, token) {
     </div>
   `;
 
-  const emailEl = root.querySelector('#sg-email');
   const prenomEl = root.querySelector('#sg-prenom');
+  const nomEl = root.querySelector('#sg-nom');
+  const usertagEl = root.querySelector('#sg-usertag');
+  const usertagHelp = root.querySelector('#sg-usertag-help');
+  const naissanceEl = root.querySelector('#sg-naissance');
   const pwdEl = root.querySelector('#sg-password');
   const pwdHelp = root.querySelector('#sg-pwd-help');
   const submitBtn = root.querySelector('#sg-submit');
 
+  let usertagAvailable = false;
+  let usertagChecking = false;
+  let checkTimer = null;
+  let accountCreated = false; // permet de retenter le claim sans recréer le compte
+
   const validate = () => {
     const pwdOk = pwdEl.value.length >= 8;
     const prenomOk = prenomEl.value.trim().length >= 2;
-    submitBtn.disabled = !(pwdOk && prenomOk);
+    let ok = pwdOk && prenomOk;
+    if (isEleve) {
+      const nomOk = nomEl.value.trim().length >= 1;
+      const tagOk = usertagEl.value.trim().length >= 3 && usertagAvailable && !usertagChecking;
+      const dateOk = !!naissanceEl.value;
+      ok = ok && nomOk && tagOk && dateOk;
+    }
+    submitBtn.disabled = !ok;
     if (pwdEl.value && !pwdOk) {
-      pwdEl.classList.add('error');
-      pwdHelp.classList.add('error');
+      pwdEl.classList.add('error'); pwdHelp.classList.add('error');
       pwdHelp.textContent = 'Trop court (minimum 8 caractères).';
     } else {
-      pwdEl.classList.remove('error');
-      pwdHelp.classList.remove('error');
+      pwdEl.classList.remove('error'); pwdHelp.classList.remove('error');
       pwdHelp.textContent = 'Minimum 8 caractères.';
     }
   };
+
+  // Vérif live de la disponibilité du usertag (débounce 450ms)
+  const checkUsertag = () => {
+    const v = usertagEl.value.trim();
+    usertagAvailable = false;
+    if (v.length < 3) {
+      usertagChecking = false;
+      usertagHelp.className = 'sg-help';
+      usertagHelp.textContent = '3 caractères minimum.';
+      validate(); return;
+    }
+    usertagChecking = true;
+    usertagHelp.className = 'sg-help';
+    usertagHelp.textContent = 'Vérification…';
+    validate();
+    clearTimeout(checkTimer);
+    checkTimer = setTimeout(async () => {
+      if (usertagEl.value.trim() !== v) return;
+      try {
+        const { data, error } = await sb.rpc('is_username_available', { p_username: v });
+        if (usertagEl.value.trim() !== v) return;
+        usertagChecking = false;
+        if (error) {
+          usertagAvailable = false; usertagHelp.className = 'sg-help';
+          usertagHelp.textContent = 'Vérification impossible, réessaie.';
+        } else if (data === true) {
+          usertagAvailable = true; usertagHelp.className = 'sg-help ok';
+          usertagHelp.textContent = '✓ Disponible';
+        } else {
+          usertagAvailable = false; usertagHelp.className = 'sg-help error';
+          usertagHelp.textContent = '✗ Déjà pris, choisis-en un autre';
+        }
+      } catch { usertagChecking = false; usertagAvailable = false; }
+      validate();
+    }, 450);
+  };
+
   prenomEl.addEventListener('input', validate);
   pwdEl.addEventListener('input', validate);
+  if (isEleve) {
+    nomEl.addEventListener('input', validate);
+    naissanceEl.addEventListener('input', validate);
+    usertagEl.addEventListener('input', checkUsertag);
+  }
 
   submitBtn.addEventListener('click', async () => {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Activation…';
+    const { toast } = await import('@/components/common/toast.js');
 
     try {
-      // 1. Sign up — le trigger handle_new_user_signup crée le profil "nu"
-      //    avec prenom + role depuis les metadata.
-      const { error: authErr } = await sb.auth.signUp({
-        email: invitation.email,
-        password: pwdEl.value,
-        options: { data: { prenom: prenomEl.value.trim(), role: invitation.role } },
-      });
-      if (authErr) throw authErr;
+      if (!accountCreated) {
+        // 1. Sign up — le trigger handle_new_user_signup crée le profil "nu"
+        const { error: authErr } = await sb.auth.signUp({
+          email: invitation.email,
+          password: pwdEl.value,
+          options: { data: { prenom: prenomEl.value.trim(), role: invitation.role } },
+        });
+        if (authErr) throw authErr;
 
-      // 2. accept_invitation rattache le profil (role, auto_ecole_id, enseignant_id)
-      //    et vérifie que l'email du compte correspond à l'invitation.
-      const { data: accepted, error: acceptErr } = await sb.rpc('accept_invitation', { p_token: token });
-      if (acceptErr) throw acceptErr;
-      if (accepted === false) throw new Error('Lien invalide ou email ne correspond pas');
+        // 2. accept_invitation rattache le profil (role, auto_ecole_id, enseignant_id)
+        const { data: accepted, error: acceptErr } = await sb.rpc('accept_invitation', { p_token: token });
+        if (acceptErr) throw acceptErr;
+        if (accepted === false) throw new Error('Lien invalide ou email ne correspond pas');
+        accountCreated = true;
+      }
+
+      // 3. Élève : pose usertag / nom / date de naissance (unicité usertag vérifiée serveur)
+      if (isEleve) {
+        const { error: profErr } = await sb.rpc('set_eleve_signup_profile', {
+          p_username: usertagEl.value.trim(),
+          p_nom: nomEl.value.trim(),
+          p_prenom: prenomEl.value.trim(),
+          p_date_naissance: naissanceEl.value,
+        });
+        if (profErr) {
+          if (/username_taken/i.test(profErr.message || '')) {
+            usertagAvailable = false;
+            usertagHelp.className = 'sg-help error';
+            usertagHelp.textContent = "✗ Ce usertag vient d'être pris, choisis-en un autre";
+            toast('Ce usertag est déjà pris, change-le puis réessaie', 'error', 4000);
+            submitBtn.textContent = 'Activer mon compte';
+            validate(); // se réactivera quand un usertag dispo est saisi
+            return;
+          }
+          throw profErr;
+        }
+      }
 
       track('signup.completed', { role: invitation.role, from: 'invitation' });
       playLaunch();
 
-      // 4. Affichage succès + redirection
+      // 4. Succès + redirection
       root.innerHTML = `${STYLE}
         <div class="sg">
           <div class="sg-card" style="text-align:center">
@@ -310,10 +419,9 @@ function renderForm(root, invitation, token) {
 
     } catch (e) {
       console.error('[signup] failed', e);
-      const { toast } = await import('@/components/common/toast.js');
       const msg = /already.*registered|already.*exists/i.test(e?.message || '')
         ? 'Un compte existe déjà avec cet email. Connecte-toi directement.'
-        : (e?.message || 'Erreur lors de l\'activation');
+        : (e?.message || "Erreur lors de l'activation");
       toast(msg, 'error', 4500);
       submitBtn.disabled = false;
       submitBtn.textContent = 'Activer mon compte';
