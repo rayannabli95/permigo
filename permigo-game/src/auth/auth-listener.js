@@ -23,7 +23,7 @@ export function setupAuthListener(sb) {
       if (event === 'SIGNED_IN' && session) {
         const { data: profile } = await sb
           .from('profiles')
-          .select('id, role, nom, prenom, email, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes')
+          .select('id, role, nom, prenom, email, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes, parental_consent_required, parental_consent_given_at, parental_consent_token')
           .eq('auth_id', session.user.id)
           .maybeSingle();
         if (profile) {
