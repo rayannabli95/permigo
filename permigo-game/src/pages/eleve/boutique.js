@@ -103,10 +103,10 @@ const STYLE = `<style>
 }
 .bo2-skin:active { transform: scale(.98); }
 .bo2-skin-thumb {
-  width: 66px; height: 66px; border-radius: 50%; flex-shrink: 0;
+  width: 66px; height: 66px; border-radius: 16px; flex-shrink: 0; overflow: hidden;
   display: flex; align-items: center; justify-content: center; position: relative;
 }
-.bo2-skin-thumb img { width: 56px; height: 56px; object-fit: contain; }
+.bo2-skin-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .bo2-skin-thumb .bo2-fallback { font-size: 30px; }
 .bo2-skin-mid { flex: 1; min-width: 0; }
 .bo2-skin-name { font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; }
@@ -198,13 +198,13 @@ const STYLE = `<style>
 @keyframes bo2ModalUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
 .bo2-modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,.3); border-radius: 2px; margin: 14px auto 8px; }
 .bo2-halo {
-  height: 200px; display: flex; align-items: center; justify-content: center; position: relative;
+  height: 248px; display: flex; align-items: center; justify-content: center; position: relative; padding-top: 10px;
 }
 .bo2-halo-ring {
-  width: 168px; height: 168px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  width: 216px; height: 216px; border-radius: 28px; overflow: hidden; display: flex; align-items: center; justify-content: center;
   position: relative;
 }
-.bo2-halo-ring img { width: 142px; height: 142px; object-fit: contain; position: relative; z-index: 2; filter: drop-shadow(0 10px 18px rgba(0,0,0,.45)); }
+.bo2-halo-ring img { width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 2; }
 .bo2-halo-ring .bo2-fallback { font-size: 76px; position: relative; z-index: 2; }
 .bo2-modal-body { padding: 4px 24px 0; text-align: center; }
 .bo2-modal-pill {
@@ -422,7 +422,7 @@ function renderSkinCard(item, gemmes, idx) {
   return `
     <div class="bo2-skin" data-item-id="${esc(item.id)}"
       style="border:1.5px solid ${r.c}66; box-shadow:0 0 18px ${r.c}26; animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
-      <div class="bo2-skin-thumb" style="background:radial-gradient(circle, ${r.c}33 0%, transparent 72%); border:2px solid ${r.c}; box-shadow:0 0 16px ${r.c}66, inset 0 0 12px ${r.c}33">
+      <div class="bo2-skin-thumb" style="background:${r.c}1a; box-shadow:0 0 16px ${r.c}55">
         ${thumb}
       </div>
       <div class="bo2-skin-mid">
@@ -495,7 +495,7 @@ function renderGridCard(item, gemmes, idx) {
 function thumbHtml(item, r, size) {
   const imgUrl = item.asset_url ?? null;
   if (imgUrl) {
-    return `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" style="width:${size}px;height:${size}px" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`
+    return `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`
       + `<span class="bo2-fallback" style="display:none">${typeEmoji(item.type)}</span>`;
   }
   return `<span class="bo2-fallback">${typeEmoji(item.type)}</span>`;
@@ -548,7 +548,7 @@ function showDetailModal(item, gemmes, onConfirm) {
     <div class="bo2-modal">
       <div class="bo2-modal-handle"></div>
       <div class="bo2-halo">
-        <div class="bo2-halo-ring" style="background:radial-gradient(circle, ${r.c}55 0%, ${r.c}1a 45%, transparent 70%); box-shadow:0 0 60px ${r.c}66, inset 0 0 40px ${r.c}40; border:2px solid ${r.c}">
+        <div class="bo2-halo-ring" style="background:${r.c}1a; box-shadow:0 0 50px ${r.c}66">
           ${halo}
         </div>
       </div>
