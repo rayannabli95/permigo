@@ -212,7 +212,12 @@ const STYLE = `<style>
   padding: 5px 12px; border-radius: 99px; color: #fff; margin-bottom: 10px;
 }
 .bo2-modal-name { font: 800 26px/1.1 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: -.03em; margin-bottom: 8px; }
-.bo2-modal-desc { font: 500 14px/1.5 'Inter', sans-serif; color: rgba(255,255,255,.7); margin-bottom: 22px; max-width: 320px; margin-left: auto; margin-right: auto; }
+.bo2-modal-desc { font: 500 14px/1.5 'Inter', sans-serif; color: rgba(255,255,255,.7); margin-bottom: 18px; max-width: 320px; margin-left: auto; margin-right: auto; }
+.bo2-modal-price { margin: 0 24px 18px; padding: 12px 16px; border-radius: 16px; background: rgba(255,255,255,.08); }
+.bo2-price-row { display: flex; align-items: center; justify-content: space-between; font: 600 14px/1.3 'Inter', sans-serif; color: #fff; }
+.bo2-price-row strong { font: 800 19px/1 'IBM Plex Mono', monospace; }
+.bo2-price-row.sub { color: rgba(255,255,255,.6); font-weight: 500; font-size: 13px; margin-top: 8px; }
+.bo2-price-row.sub span:last-child { font-family: 'IBM Plex Mono', monospace; }
 .bo2-modal-balance { font: 500 12px/1 'Inter', sans-serif; color: rgba(255,255,255,.55); text-align: center; margin: 14px 0 0; }
 .bo2-modal-cta {
   display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -532,13 +537,19 @@ function showDetailModal(item, gemmes, onConfirm) {
     : `<span class="bo2-fallback">${typeEmoji(item.type)}</span>`;
 
   let cta, balanceLine = '';
+  // Bloc Prix / Solde — visible seulement pour un item pas encore possédé
+  const priceBlock = item.owned ? '' : `
+      <div class="bo2-modal-price">
+        <div class="bo2-price-row"><span>Prix</span><strong>💎 ${item.cost_gemmes}</strong></div>
+        <div class="bo2-price-row sub"><span>Ton solde</span><span>💎 ${gemmes}</span></div>
+      </div>`;
   if (item.owned) {
     cta = `<button class="bo2-modal-cta equip" id="bo2-cta">${isEquipped ? '✓ Équipé — retirer' : 'Équiper'}</button>`;
   } else if (canAfford) {
-    cta = `<button class="bo2-modal-cta buy" id="bo2-cta">💎 ${item.cost_gemmes}</button>`;
+    cta = `<button class="bo2-modal-cta buy" id="bo2-cta">Acheter — ${item.cost_gemmes} 💎</button>`;
     balanceLine = `<div class="bo2-modal-balance">Il te restera <strong>${afterBalance} 💎</strong> après l'achat</div>`;
   } else {
-    cta = `<button class="bo2-modal-cta locked" disabled>🔒 ${item.cost_gemmes} 💎</button>`;
+    cta = `<button class="bo2-modal-cta locked" disabled>🔒 Pas assez de gemmes</button>`;
     balanceLine = `<div class="bo2-modal-balance" style="color:#f87171">Il te manque ${item.cost_gemmes - gemmes} 💎</div>`;
   }
 
@@ -557,6 +568,7 @@ function showDetailModal(item, gemmes, onConfirm) {
         <div class="bo2-modal-name">${esc(item.name)}</div>
         <div class="bo2-modal-desc">${esc(item.description || '')}</div>
       </div>
+      ${priceBlock}
       ${cta}
       ${balanceLine}
       <button class="bo2-modal-cancel" id="bo2-modal-cancel">Fermer</button>
