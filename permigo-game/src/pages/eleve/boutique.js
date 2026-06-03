@@ -10,6 +10,7 @@ import { track } from '@/services/analytics.js';
 import { toast } from '@/components/common/toast.js';
 import { haptic } from '@/utils/haptic.js';
 import { equipItem, unequipItem, setEquippedAsset, getEquipped } from '@/utils/game-state.js';
+import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
 
 const TABS = [
   { key: 'skins', label: 'Skins',  emoji: '🚗' },
@@ -578,6 +579,7 @@ function showDetailModal(item, gemmes, onConfirm) {
   track('boutique.detail_opened', { item_id: item.id });
 
   const close = () => { haptic('select'); overlay.remove(); };
+  enableSheetSwipe(overlay.querySelector('.bo2-modal'), close, { overlay });
   overlay.querySelector('#bo2-modal-cancel')?.addEventListener('click', close);
   overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
 

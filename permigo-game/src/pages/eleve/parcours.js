@@ -13,6 +13,7 @@ import { ASSETS } from '@/utils/assets.js';
 import { getCompDetail } from '@/data/remc-details.js';
 import { icon } from '@/utils/icons.js';
 import { renderChest, openChestModal, ensureChestStyles } from '@/components/eleve/chest.js';
+import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
 import { unlockChest, openChest, getMyChests, markChestOpened } from '@/utils/game-state.js';
 import { playParcours } from '@/utils/sound.js';
 
@@ -1746,6 +1747,8 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
   };
   bg?.addEventListener('click', closeFn);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFn(); });
+  // Swipe-to-dismiss : glisser la fiche vers le bas pour la fermer
+  if (sheet) enableSheetSwipe(sheet, closeFn, { overlay: bg });
 }
 
 function openFiche(root, compId, ws, validatedMap, pendingMap) {

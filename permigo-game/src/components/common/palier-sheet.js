@@ -6,6 +6,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { esc } from '@/utils/escape.js';
 import { icon } from '@/utils/icons.js';
+import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
 
 let _injectedStyle = false;
 let _activeOverlay = null;
@@ -143,6 +144,7 @@ export function openPalierSheet(tier, totalVals = 0) {
     if (e.target === ov) closePalierSheet();
   });
   ov.querySelector('.psheet-close')?.addEventListener('click', closePalierSheet);
+  enableSheetSwipe(ov.querySelector('.psheet'), closePalierSheet, { overlay: ov });
 
   _onKeydown = (e) => { if (e.key === 'Escape') closePalierSheet(); };
   document.addEventListener('keydown', _onKeydown);
