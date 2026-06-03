@@ -23,6 +23,11 @@ const TIERS = {
   4: { name: 'COFFRE LÉGENDAIRE', primary: 'var(--pul)', secondary: '#581c87', accent: '#f3e8ff', gem: '#ec4899', xp: 1200, gemmes: 300 },
 };
 
+/** Image PNG premium du coffre par monde (fournie par Rayan). */
+function chestImage(worldNum) {
+  return `/skins/chests/chest_world_${worldNum}.png`;
+}
+
 /** Rendu inline d'un coffre fermé / ouvert. */
 export function renderChest({ worldNum, worldName, opened = false }) {
   const tier = TIERS[worldNum] || TIERS[1];
@@ -34,7 +39,9 @@ export function renderChest({ worldNum, worldName, opened = false }) {
       ${!opened ? '<div class="chest-rays" aria-hidden="true"></div>' : ''}
       <div class="chest-halo" aria-hidden="true"></div>
       <div class="chest-icon" aria-hidden="true">
-        ${chestSVG({ id: `c${worldNum}`, primary: tier.primary, secondary: tier.secondary, accent: tier.accent, gem: tier.gem, opened })}
+        <img class="chest-icon-img" src="${chestImage(worldNum)}" alt="" loading="lazy"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <span class="chest-icon-emoji" style="display:none">🎁</span>
       </div>
       <div class="chest-label">
         <div class="chest-tier">${opened ? '✓ OUVERT' : tier.name}</div>
@@ -66,8 +73,11 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
       <div class="chest-modal-stage">
         <div class="chest-modal-glow"></div>
         <div class="chest-modal-spotlight"></div>
-        <div class="chest-modal-svg">
-          ${chestSVG({ id: 'cm', primary: tier.primary, secondary: tier.secondary, accent: tier.accent, gem: tier.gem, opened: false, big: true })}
+        <div class="chest-modal-burst" aria-hidden="true"></div>
+        <div class="chest-modal-img-wrap">
+          <img class="chest-modal-img" src="${chestImage(worldNum)}" alt="${esc(tier.name)}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+          <span class="chest-modal-emoji" style="display:none">🎁</span>
         </div>
       </div>
       <h2 class="chest-modal-title" id="chest-modal-title">${tier.name}</h2>
@@ -79,8 +89,8 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
   document.body.appendChild(modal);
 
   const stage = modal.querySelector('.chest-modal-stage');
-  const lid = modal.querySelector('.cm-lid');
-  const lock = modal.querySelector('.cm-lock');
+  const imgEl = modal.querySelector('.chest-modal-img');
+  const burstEl = modal.querySelector('.chest-modal-burst');
   const rewards = modal.querySelector('#chest-rewards');
   const closeBtn = modal.querySelector('#chest-modal-close');
   closeBtn.style.opacity = '0';
@@ -100,14 +110,14 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
   setTimeout(() => {
     stage.classList.remove('cm-shaking');
 
-    // Phase 2 : Crack du cadenas + flash (900ms)
-    if (lock) lock.classList.add('cm-lock-crack');
+    // Phase 2 : pop du coffre + flash + burst de lumière (900ms)
+    if (imgEl) imgEl.classList.add('cm-img-pop');
+    if (burstEl) burstEl.classList.add('go');
     document.body.classList.add('cm-flash');
     setTimeout(() => document.body.classList.remove('cm-flash'), 240);
 
-    // Phase 3 : Lid s'envole + light burst massif (1100ms)
+    // Phase 3 : light burst massif + confettis (1100ms)
     setTimeout(() => {
-      if (lid) lid.classList.add('cm-lid-fly');
       try { navigator.vibrate?.(120); } catch (_) {}
 
       // Burst confetti depuis le centre (couleurs du tier)
@@ -373,7 +383,20 @@ export function ensureChestStyles() {
       position:relative;display:flex;align-items:center;justify-content:center;
       margin-bottom:20px;height:240px;
     }
-    .chest-modal-svg{position:relative;z-index:2;width:240px;height:240px}
+    .chest-modal-img-wrap{position:relative;z-index:2;width:240px;height:240px;display:flex;align-items:center;justify-content:center}
+    .chest-modal-img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 14px 30px rgba(0,0,0,.55))}
+    .chest-modal-emoji{font-size:150px;line-height:1}
+    /* Burst de lumière à l'ouverture */
+    .chest-modal-burst{position:absolute;inset:-12%;border-radius:50%;z-index:1;pointer-events:none;opacity:0;
+      background:radial-gradient(circle,#fff 0%,var(--ch-3) 24%,var(--ch-1) 42%,transparent 62%)}
+    .chest-modal-burst.go{animation:cm-burst .85s ease-out forwards}
+    @keyframes cm-burst{0%{opacity:0;transform:scale(.4)}28%{opacity:.95;transform:scale(1.1)}100%{opacity:0;transform:scale(1.8)}}
+    /* Pop rebond du coffre */
+    .chest-modal-img.cm-img-pop{animation:cm-img-pop .7s cubic-bezier(.34,1.56,.64,1)}
+    @keyframes cm-img-pop{0%{transform:scale(1)}28%{transform:scale(.88) rotate(-3deg)}60%{transform:scale(1.2) rotate(2deg)}100%{transform:scale(1.06)}}
+    /* Coffre inline (parcours) */
+    .chest-icon-img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 16px rgba(0,0,0,.3))}
+    .chest-icon-emoji{font-size:96px;line-height:1}
 
     /* Glow massif derrière le coffre */
     .chest-modal-glow{
@@ -489,7 +512,7 @@ export function ensureChestStyles() {
 
     @media (prefers-reduced-motion:reduce){
       .chest-card.unlocked,.chest-halo,.chest-rays,.csp,.chest-modal-rays,
-      .cm-shaking,.cm-lid-fly,.cm-lock-crack{animation:none}
+      .cm-shaking,.cm-img-pop,.chest-modal-burst.go{animation:none}
     }
   `;
   document.head.appendChild(style);
