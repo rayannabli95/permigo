@@ -1264,7 +1264,7 @@ async function _loadAndInjectCrystalBall(root) {
           background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
           transform:rotate(18deg);animation:cbSweep 4.4s ease-in-out infinite}
         @keyframes cbSweep{0%{left:-45%}60%{left:125%}100%{left:125%}}
-        .cb-orb-num{position:relative;z-index:1;font:800 46px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;color:#fff;
+        .cb-orb-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;font:800 46px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;color:#fff;
           text-shadow:0 1px 0 rgba(255,255,255,.55),0 -1px 1px rgba(72,28,140,.6),0 3px 8px rgba(18,9,38,.55);
           animation:cbPulse 3.4s ease-in-out infinite}
         .cb-orb-num .cb-pct{font-size:24px;opacity:.92;margin-left:1px}
