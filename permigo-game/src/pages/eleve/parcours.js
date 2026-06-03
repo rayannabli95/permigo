@@ -57,9 +57,9 @@ const STYLE = `<style>
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--wc, var(--gr)) 22%, transparent) 0%,
-    color-mix(in srgb, var(--wc, var(--gr)) 12%, transparent) 50%,
-    color-mix(in srgb, var(--wc, var(--gr)) 4%, transparent) 100%);
+    color-mix(in srgb, var(--wc, var(--gr)) 12%, transparent) 0%,
+    color-mix(in srgb, var(--wc, var(--gr)) 6%, transparent) 50%,
+    color-mix(in srgb, var(--wc, var(--gr)) 2%, transparent) 100%);
 }
 /* Tous les contenus passent au-dessus du volant */
 .prc > * { position: relative; z-index: 1; }
@@ -278,12 +278,12 @@ const STYLE = `<style>
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  opacity: .5;
-  filter: saturate(1);
+  opacity: .68;
+  filter: saturate(1.05);
   transition: opacity .6s ease;
   pointer-events: none;
 }
-.prc-world-bg--active { opacity: .88; }
+.prc-world-bg--active { opacity: 1; }
 [data-theme="dark"] .prc-world-bg         { opacity: .28; }
 [data-theme="dark"] .prc-world-bg--active { opacity: .68; }
 @media (prefers-color-scheme: dark) {
@@ -1552,8 +1552,11 @@ function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds 
   const isComplete = status === 'complete';
 
   // ─ Génération route SVG sinueuse ─
-  const W = 280;
-  const H = Math.max(480, subs.length * 175 + 80);
+  // W ≈ largeur réelle rendue (≈ conteneur 480) pour éviter la distorsion
+  // horizontale du trait : avant W=280 + preserveAspectRatio="none" étirait
+  // la route ~1,7× en largeur (route trop grosse/déformée).
+  const W = 440;
+  const H = Math.max(420, subs.length * 150 + 70);
 
   const points = subs.map((sub, i) => {
     const yPct = (i + 0.5) / subs.length;
