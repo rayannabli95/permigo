@@ -8,6 +8,7 @@ import { track } from '@/services/analytics.js';
 import { mountPermisCard } from '@/components/eleve/permis-card.js';
 import { mountProfileCard } from '@/components/common/profile-card.js';
 import { getEquippedAsset } from '@/utils/game-state.js';
+import { getPermisBg } from '@/utils/assets.js';
 import { REMC_TOTAL } from '@/data/remc.js';
 import { icon } from '@/utils/icons.js';
 import { isPushEnabled, requestPushPermission, optOutPush, optInPush } from '@/services/web-push.js';
@@ -506,7 +507,8 @@ export async function mount(root) {
     profileCardData = {
       me: { ...me, prenom: profile?.prenom || '', nom: profile?.nom || '' },
       avatarUrl: profile?.avatar_url || null,
-      bannerUrl: profile?.banner_url || null,
+      // Pas de bannière uploadée → fond évolutif selon les validations (mesh → route → holo)
+      bannerUrl: profile?.banner_url || getPermisBg(anneeStats.totalValidations, 'enseignant'),
       count: anneeStats.totalValidations, // pour calcul prestige (carrière)
       bio: `Enseignant · ${anneeStats.elevesCount} élève${anneeStats.elevesCount > 1 ? 's' : ''} suivi${anneeStats.elevesCount > 1 ? 's' : ''}`,
       stats: [
