@@ -192,7 +192,7 @@ const STYLE = `<style>
 @keyframes bo2FadeBg { from{opacity:0} to{opacity:1} }
 .bo2-modal {
   width: 100%; max-width: 480px; border-radius: 28px 28px 0 0; padding: 0 0 24px;
-  background: linear-gradient(180deg, #1e1b4b 0%, var(--su) 42%);
+  background: linear-gradient(180deg, #1e1b4b 0%, #15122e 100%);
   animation: bo2ModalUp .3s cubic-bezier(.32,.72,0,1) both;
 }
 @keyframes bo2ModalUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
