@@ -566,20 +566,65 @@ const STYLE = `<style>
 
 /* Leaderboard slot */
 .acc-lb {
+  display: flex; align-items: center; gap: 14px;
   margin: 0 16px 16px;
-  background: linear-gradient(135deg, rgba(88,204,2,.08) 0%, rgba(88,204,2,.04) 100%);
-  border: 1.5px solid rgba(88,204,2,.18);
+  background: linear-gradient(135deg, rgba(88,204,2,.15) 0%, rgba(88,204,2,.05) 100%);
+  border: 1.5px solid rgba(88,204,2,.28);
   border-radius: 20px;
-  padding: 14px 18px;
+  padding: 14px 16px;
   cursor: pointer;
-  transition: transform .15s;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 14px -6px rgba(88,204,2,.35);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s ease, border-color .15s ease;
 }
-.acc-lb:active { transform: scale(.985); }
-.acc-lb-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.acc-lb-title { font: 700 11px/1 'Inter', sans-serif; color: var(--a); letter-spacing: .07em; text-transform: uppercase; }
-.acc-lb-badge { font: 700 11px/1 'Inter', sans-serif; color: var(--am); background: rgba(245,158,11,.12); border-radius: 99px; padding: 4px 10px; }
-.acc-lb-body  { font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; margin-bottom: 3px; }
-.acc-lb-sub   { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); }
+.acc-lb::before {
+  content: ''; position: absolute; top: -45%; right: -12%;
+  width: 130px; height: 130px; pointer-events: none;
+  background: radial-gradient(circle, rgba(88,204,2,.20), transparent 70%);
+}
+.acc-lb:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 9px 22px -7px rgba(88,204,2,.45);
+  border-color: rgba(88,204,2,.45);
+}
+.acc-lb:active { transform: scale(.98); }
+.acc-lb:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+
+.acc-lb-rank {
+  flex-shrink: 0; width: 52px; height: 52px; border-radius: 15px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--a); color: #fff;
+  box-shadow: 0 5px 13px -3px rgba(88,204,2,.6);
+  font: 800 19px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.03em;
+  position: relative; z-index: 1;
+}
+.acc-lb-rank.empty { background: rgba(88,204,2,.16); color: var(--a); font-size: 24px; box-shadow: none; }
+.acc-lb-rank.img { background: transparent; box-shadow: none; padding: 0; }
+.acc-lb-rank.img img { width: 52px; height: 52px; object-fit: contain; display: block; }
+.acc-lb-rank-hash { font-size: 12px; font-weight: 700; opacity: .75; margin-right: 1px; }
+
+.acc-lb-main { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.acc-lb-eyebrow {
+  font: 700 10px/1 'Inter', sans-serif; color: var(--a);
+  letter-spacing: .08em; text-transform: uppercase; margin-bottom: 5px;
+}
+.acc-lb-body {
+  font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.acc-lb-chip {
+  font: 700 11px/1 'Inter', sans-serif; color: var(--am);
+  background: rgba(245,158,11,.14); border-radius: 99px; padding: 4px 9px;
+}
+.acc-lb-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
+
+.acc-lb-arrow {
+  flex-shrink: 0; color: var(--a); display: flex; align-items: center;
+  opacity: .9; position: relative; z-index: 1; transition: transform .15s ease;
+}
+.acc-lb:hover .acc-lb-arrow { transform: translateX(3px); }
 
 /* ── Bottom sheet streak ── */
 .bs-bg {
@@ -1142,23 +1187,38 @@ async function _loadAndInjectLeaderboard(root) {
     const slot = root.querySelector('#acc-lb-slot');
     if (!slot) return;
     const rank = data.my_rank, total = data.total_eleves, pct = data.percentile;
-    const isTop = pct !== null && pct >= 90;
-    const rankText = (rank !== null && total !== null && total > 1)
-      ? `Tu es #${rank} sur ${total} élèves`
-      : 'Tu ouvres le classement de ton école. Invite tes potes 👀';
-    const pctText  = pct !== null ? ` · Top ${100 - pct}%` : '';
+    const ranked = (rank !== null && total !== null && total > 1);
+
+    const badge = ranked
+      ? `<div class="acc-lb-rank"><span class="acc-lb-rank-hash">#</span>${esc(String(rank))}</div>`
+      : `<div class="acc-lb-rank img"><img src="/skins/badge-3d-ultimate.png" alt="" width="52" height="52" loading="lazy"></div>`;
+    const chip = pct !== null ? `<span class="acc-lb-chip">Top ${100 - pct}%</span>` : '';
+    const bodyText = ranked ? `Tu es #${rank} sur ${total}` : 'Clique pour voir ton classement';
+    const sub = ranked
+      ? (pct !== null ? `Dans le top ${100 - pct}% de ton auto-école` : 'Garde le rythme pour grimper')
+      : 'Invite tes potes pour lancer le classement';
+
+    const ARROW = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+
     slot.innerHTML = `
-      <div class="acc-lb" id="acc-lb-card" role="button" tabindex="0" aria-label="Classement">
-        <div class="acc-lb-top">
-          <div class="acc-lb-title">🏆 Classement de l'école</div>
-          ${isTop ? `<div class="acc-lb-badge">🌟 Top de l'école</div>` : ''}
+      <div class="acc-lb" id="acc-lb-card" role="button" tabindex="0" aria-label="Voir le classement de l'école">
+        ${badge}
+        <div class="acc-lb-main">
+          <div class="acc-lb-eyebrow">Classement de l'école</div>
+          <div class="acc-lb-body">${esc(bodyText)}${chip}</div>
+          <div class="acc-lb-sub">${esc(sub)}</div>
         </div>
-        <div class="acc-lb-body">${esc(rankText + pctText)}</div>
-        ${pct !== null ? `<div class="acc-lb-sub">Dans le top ${100 - pct}% de ton auto-école</div>` : ''}
+        <div class="acc-lb-arrow">${ARROW}</div>
       </div>`;
-    slot.querySelector('#acc-lb-card')?.addEventListener('click', () => {
+
+    const card = slot.querySelector('#acc-lb-card');
+    const open = () => {
       track('leaderboard.tapped', { rank: data.my_rank, percentile: data.percentile });
       navigate('#/classement');
+    };
+    card?.addEventListener('click', open);
+    card?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
     });
   } catch (e) { console.error('[accueil] leaderboard', e); }
 }
