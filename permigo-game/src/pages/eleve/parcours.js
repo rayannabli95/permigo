@@ -1165,6 +1165,33 @@ const STYLE = `<style>
    → titre foncé fixe (sinon var(--ink) clair en dark = illisible). */
 .fiche-status.next .fiche-status-title { color: var(--ink4); }
 .fiche-status.next .fiche-status-sub   { color: var(--mu4); }
+
+/* ── Accessibilité : focus clavier visible ──
+   Aucun style :focus n'existait → la navigation clavier était invisible.
+   On cible :focus-visible pour ne PAS afficher l'anneau au clic souris. */
+.prc-node:focus-visible { outline: none; }
+.prc-node:focus-visible .nd-circle {
+  outline: 3px solid var(--a);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--a) 28%, transparent);
+}
+.chest-card:focus-visible,
+.fiche-close:focus-visible,
+.prc-back:focus-visible,
+#prc-back:focus-visible {
+  outline: 3px solid var(--a);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+/* Lien d'évitement clavier vers la carte */
+.prc-skip {
+  position: absolute; left: 50%; top: 8px; transform: translateX(-50%) translateY(-200%);
+  z-index: 60; padding: 10px 16px; border-radius: 10px;
+  background: var(--a); color: #fff; font: 700 13px/1 'Inter', sans-serif;
+  text-decoration: none; transition: transform .15s ease;
+}
+.prc-skip:focus { transform: translateX(-50%) translateY(0); outline: 2px solid #fff; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .prc-skip { transition: none; } }
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
@@ -1450,6 +1477,8 @@ function renderPage(worldStates, validatedMap, pendingMap, openedWorlds = new Se
   return `${STYLE}
 <div class="prc">
 
+  <a href="#prc-map-scroll" class="prc-skip">Aller à la carte</a>
+
   <!-- Header sticky -->
   <div class="prc-hd">
     <div>
@@ -1464,7 +1493,9 @@ function renderPage(worldStates, validatedMap, pendingMap, openedWorlds = new Se
 
   <!-- Barre globale -->
   <div class="prc-global-bar">
-    <div class="prc-global-track">
+    <div class="prc-global-track" role="progressbar"
+         aria-valuenow="${globalPct}" aria-valuemin="0" aria-valuemax="100"
+         aria-label="Progression du parcours : ${globalPct}%, ${totalDone} compétences sur ${totalComps}">
       <div class="prc-global-fill" style="width:${globalPct}%"></div>
     </div>
     <div class="prc-global-meta">
@@ -1474,11 +1505,11 @@ function renderPage(worldStates, validatedMap, pendingMap, openedWorlds = new Se
   </div>
 
   <!-- Légende -->
-  <div class="prc-legend">
-    <span><i style="background:var(--gr)"></i>Acquis</span>
-    <span><i style="background:var(--a)"></i>En cours</span>
-    <span><i style="background:var(--bo)"></i>À faire</span>
-    <span><i style="background:var(--bo4)"></i>Verrouillé</span>
+  <div class="prc-legend" role="list" aria-label="Légende des statuts">
+    <span role="listitem"><i style="background:var(--gr)" aria-hidden="true"></i>Acquis</span>
+    <span role="listitem"><i style="background:var(--a)" aria-hidden="true"></i>En cours</span>
+    <span role="listitem"><i style="background:var(--bo)" aria-hidden="true"></i>À faire</span>
+    <span role="listitem"><i style="background:var(--bo4)" aria-hidden="true"></i>Verrouillé</span>
   </div>
 
   <!-- Carte des mondes -->
@@ -1493,7 +1524,7 @@ function renderPage(worldStates, validatedMap, pendingMap, openedWorlds = new Se
     <div class="prc-map-badge" aria-hidden="true">
       <span class="prc-map-badge-dot"></span> CARTE D'APPRENTISSAGE
     </div>
-    <div class="prc-map" id="prc-map-scroll">
+    <div class="prc-map" id="prc-map-scroll" tabindex="-1" role="region" aria-label="Carte d'apprentissage REMC">
       ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1, openedWorlds)).join('')}
       ${renderFinal(totalDone, totalComps)}
       <div style="height: 24px"></div>
@@ -1721,9 +1752,13 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
     });
   });
 
+  // Élément qui a ouvert la fiche → on lui rend le focus à la fermeture (a11y).
+  let lastTrigger = null;
+
   // Nodes → ouvre la fiche (click + Enter/Space pour keyboard nav)
   root.querySelectorAll('.prc-node:not(.locked)').forEach(n => {
     const open = () => {
+      lastTrigger = n;
       const compId   = n.dataset.comp;
       const worldIdx = parseInt(n.dataset.worldIdx, 10);
       // Le quiz n'est plus une porte : on ouvre toujours la fiche.
@@ -1740,13 +1775,17 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
   // Bottom sheet — close
   const bg    = root.querySelector('#bsheet-bg') ?? document.getElementById('bsheet-bg');
   const sheet = root.querySelector('#bsheet')    ?? document.getElementById('bsheet');
+  const isOpen = () => sheet?.classList.contains('open');
   const closeFn = () => {
+    const wasOpen = isOpen();
     sheet?.classList.remove('open');
     bg?.classList.remove('open');
     sheet?.setAttribute('aria-hidden', 'true');
+    // Rend le focus au node déclencheur (sinon le focus part dans le vide).
+    if (wasOpen && lastTrigger) { lastTrigger.focus(); lastTrigger = null; }
   };
   bg?.addEventListener('click', closeFn);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFn(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) closeFn(); });
   // Swipe-to-dismiss : glisser la fiche vers le bas pour la fermer
   if (sheet) enableSheetSwipe(sheet, closeFn, { overlay: bg });
 }
