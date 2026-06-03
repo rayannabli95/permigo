@@ -105,6 +105,26 @@ const STYLE = `<style>
   color: rgba(255,255,255,.5);
 }
 
+/* ── Accès Galerie ── */
+.tr2-galerie {
+  display: flex; align-items: center; gap: 12px;
+  margin: 14px 16px 0; padding: 12px 14px;
+  background: var(--bg2); border: 1px solid var(--bo);
+  border-radius: 16px; cursor: pointer; text-decoration: none; color: inherit;
+  transition: transform .15s, border-color .15s;
+}
+.tr2-galerie:hover { transform: translateY(-1px); border-color: #a78bfa; }
+.tr2-galerie:active { transform: scale(.99); }
+.tr2-galerie-ico {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(167,139,250,.16); color: #a78bfa;
+}
+.tr2-galerie-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.tr2-galerie-t { font: 800 15px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; }
+.tr2-galerie-s { font: 500 12px/1.2 'Inter', sans-serif; color: var(--mu); }
+.tr2-galerie-arrow { flex-shrink: 0; color: var(--mu); display: flex; }
+
 /* ── Section label ── */
 .tr2-group-label {
   padding: 20px 16px 10px;
@@ -269,6 +289,14 @@ export async function mount(root) {
       </div>
     </div>
   </div>
+  <a class="tr2-galerie" href="#/galerie" aria-label="Ouvrir ta galerie de récompenses">
+    <span class="tr2-galerie-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
+    <span class="tr2-galerie-tx">
+      <span class="tr2-galerie-t">Ta galerie</span>
+      <span class="tr2-galerie-s">Tes skins et badges débloqués</span>
+    </span>
+    <span class="tr2-galerie-arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+  </a>
   <div id="tr2-body">
     ${[...Array(3)].map(() => `
       <div class="tr2-group-label"><div class="tr2-skel" style="height:11px;width:80px;display:inline-block"></div></div>
