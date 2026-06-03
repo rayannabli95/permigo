@@ -706,6 +706,9 @@ export async function mount(root) {
     // Coffres disponibles — teaser non-bloquant injecté sous l'action du jour
     _loadAndInjectChests(root);
 
+    // Crystal Ball — prédiction de réussite (au-dessus du parcours REMC)
+    _loadAndInjectCrystalBall(root).catch(() => {});
+
     // Onboarding premier login : géré en amont par main.js (page plein écran
     // pages/onboarding/index.js, gate first_value_action_at). Rien à faire ici.
 
@@ -1158,6 +1161,84 @@ async function _loadAndInjectLeaderboard(root) {
       navigate('#/classement');
     });
   } catch (e) { console.error('[accueil] leaderboard', e); }
+}
+
+async function _loadAndInjectCrystalBall(root) {
+  try {
+    if (root.querySelector('#acc-crystal')) return; // anti double-mount
+    const { data } = await sb.rpc('get_my_prediction');
+    const p = Array.isArray(data) ? data[0] : data;
+    if (!p) return;
+
+    const anchor = root.querySelector('.acc2-section-title');
+    if (!anchor) return;
+
+    if (!document.getElementById('acc-crystal-styles')) {
+      const st = document.createElement('style');
+      st.id = 'acc-crystal-styles';
+      st.textContent = `
+        .acc2-crystal{margin:18px 16px 0;padding:22px 20px;border-radius:22px;color:#fff;position:relative;overflow:hidden;
+          background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);box-shadow:0 12px 32px -10px rgba(99,102,241,.55);
+          animation:cbIn .45s cubic-bezier(.23,1,.32,1)}
+        @keyframes cbIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .acc2-crystal::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 85% 15%,rgba(255,255,255,.18) 0%,transparent 60%);pointer-events:none}
+        .acc2-cb-head{display:flex;align-items:center;gap:8px;font:700 12px/1 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:6px;position:relative;z-index:1}
+        .acc2-cb-num{font:800 56px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;position:relative;z-index:1}
+        .acc2-cb-num span{font-size:30px}
+        .acc2-cb-msg{font:600 14.5px/1.4 'Inter',sans-serif;color:rgba(255,255,255,.92);margin:4px 0 0;position:relative;z-index:1}
+        .acc2-cb-axes-lbl{font:600 12px/1 'Inter',sans-serif;color:rgba(255,255,255,.8);margin:16px 0 8px;position:relative;z-index:1}
+        .acc2-cb-chips{display:flex;flex-wrap:wrap;gap:7px;position:relative;z-index:1}
+        .acc2-cb-chip{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:6px 12px;font:700 12.5px/1 'Inter',sans-serif;color:#fff}
+        .acc2-cb-empty{margin:18px 16px 0;padding:18px 20px;border-radius:18px;background:var(--bg3);color:var(--mu2);font:600 13.5px/1.4 'Inter',sans-serif;display:flex;align-items:center;gap:10px}
+      `;
+      document.head.appendChild(st);
+    }
+
+    const pct = Math.max(0, Math.min(99, p.prediction_pct ?? 0));
+
+    if ((p.validated_count ?? 0) === 0) {
+      anchor.insertAdjacentHTML('beforebegin',
+        `<div class="acc2-cb-empty" id="acc-crystal"><span style="font-size:22px">🔮</span><span>Valide ta 1ʳᵉ compétence pour débloquer ta boule de cristal.</span></div>`);
+      track('crystal_ball.viewed', { prediction_pct: 0, validated_count: 0 });
+      return;
+    }
+
+    const CAT_NAMES = Object.fromEntries((REMC || []).map(c => [c.id, c.name]));
+    const axes = (p.axes_to_improve || []).map(code => CAT_NAMES[code] || code);
+    const msg = pct >= 80 ? "de chances de décrocher ton permis au 1er coup 🔥"
+              : pct >= 55 ? "de chances de réussir ton permis au 1er coup"
+              : "de chances pour l'instant — chaque jour compte";
+
+    anchor.insertAdjacentHTML('beforebegin', `
+      <div class="acc2-crystal" id="acc-crystal">
+        <div class="acc2-cb-head"><span aria-hidden="true">🔮</span> Boule de cristal</div>
+        <div class="acc2-cb-num"><span class="acc2-cb-val">0</span><span>%</span></div>
+        <p class="acc2-cb-msg">${esc(msg)}</p>
+        ${axes.length ? `
+          <div class="acc2-cb-axes-lbl">Pour monter, focus sur :</div>
+          <div class="acc2-cb-chips">${axes.map(a => `<span class="acc2-cb-chip">${esc(a)}</span>`).join('')}</div>
+        ` : ''}
+      </div>`);
+
+    track('crystal_ball.viewed', { prediction_pct: pct, validated_count: p.validated_count });
+
+    // Count-up
+    const valEl = root.querySelector('#acc-crystal .acc2-cb-val');
+    if (valEl) {
+      const reduce = matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) { valEl.textContent = String(pct); }
+      else {
+        const t0 = performance.now(), dur = 1100;
+        const tick = (now) => {
+          const k = Math.min(1, (now - t0) / dur);
+          const eased = 1 - Math.pow(1 - k, 3);
+          valEl.textContent = String(Math.round(pct * eased));
+          if (k < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    }
+  } catch (e) { /* silent */ }
 }
 
 async function _loadAndInjectChests(root) {
