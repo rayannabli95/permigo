@@ -9,6 +9,7 @@ import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { haptic } from '@/utils/haptic.js';
 import { toast } from '@/components/common/toast.js';
+import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
 
 // ─── Catalogue complet (miroir de _achievement_meta) ──────────
 const CATALOG = [
@@ -205,8 +206,9 @@ const STYLE = `<style>
   height: 160px; display: flex; flex-direction: column; align-items: center;
   justify-content: center; gap: 8px; position: relative; overflow: hidden;
 }
-.tr2-modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,.3); border-radius: 2px; margin: 14px auto 0; }
-.tr2-modal-locked-handle { width: 36px; height: 4px; background: var(--bo); border-radius: 2px; margin: 14px auto 0; }
+.tr2-modal { touch-action: none; }
+.tr2-modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,.3); border-radius: 2px; margin: 14px auto 0; cursor: grab; }
+.tr2-modal-locked-handle { width: 36px; height: 4px; background: var(--bo); border-radius: 2px; margin: 14px auto 0; cursor: grab; }
 .tr2-modal-emoji {
   font-size: 60px; position: relative; z-index: 1;
   animation: tr2EmojiIn .5s .1s cubic-bezier(.34,1.56,.64,1) both;
@@ -494,6 +496,10 @@ function showModal(def, unlockData, totalUnlocked) {
   const closeModal = () => { haptic('select'); overlay.remove(); };
   overlay.querySelector('#tr2-close-btn')?.addEventListener('click', closeModal);
   overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+  // Swipe-to-dismiss : glisser la feuille vers le bas pour fermer
+  const sheet = overlay.querySelector('.tr2-modal');
+  if (sheet) enableSheetSwipe(sheet, closeModal, { overlay });
 
   if (isUnlocked) {
     overlay.querySelector('#tr2-share-btn')?.addEventListener('click', async () => {

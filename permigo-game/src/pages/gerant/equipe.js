@@ -5,6 +5,7 @@
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
+import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
 import { toast } from '@/components/common/toast.js';
 import { track } from '@/services/analytics.js';
 
@@ -385,6 +386,7 @@ function openInviteModal(me) {
 
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
   overlay.querySelector('#inv-cancel').addEventListener('click', close);
+  enableSheetSwipe(overlay.querySelector('.inv-sheet'), close, { overlay });
   sendBtn.addEventListener('click', async () => {
     sendBtn.disabled = true;
     sendBtn.textContent = 'Envoi…';

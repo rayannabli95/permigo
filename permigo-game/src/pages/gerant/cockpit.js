@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
+import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
 import { esc } from '@/utils/escape.js';
 import { toast } from '@/components/common/toast.js';
 import { track } from '@/services/analytics.js';
@@ -710,6 +711,7 @@ function wire(root, me) {
   const openBS  = () => { bsSheet?.classList.add('open'); bsBg?.classList.add('open'); };
   const closeBS = () => { bsSheet?.classList.remove('open'); bsBg?.classList.remove('open'); };
   bsBg?.addEventListener('click', closeBS);
+  if (bsSheet) enableSheetSwipe(bsSheet, closeBS, { overlay: bsBg });
 
   // Donut segments + legend rows → drill cohorte
   root.querySelectorAll('[data-cohort]').forEach(el => {

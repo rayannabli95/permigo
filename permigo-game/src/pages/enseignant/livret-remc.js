@@ -12,6 +12,7 @@ import { navigate } from '@/router.js';
 import { REMC, REMC_TOTAL } from '@/data/remc.js';
 import { icon } from '@/utils/icons.js';
 import { STATUT_CFG } from '@/utils/statut-label.js';
+import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
 
 // ─── Couleurs par monde ───────────────────────────────────────────
 const MONDE_COLORS = {
@@ -714,6 +715,7 @@ function openSheet(compId, compNom) {
     if (e.target === overlay) closeSheet(overlay);
   });
   overlay.querySelector('.lr-sheet-close').addEventListener('click', () => closeSheet(overlay));
+  enableSheetSwipe(overlay.querySelector('.lr-sheet'), () => closeSheet(overlay), { overlay });
 
   // Boutons statut
   overlay.querySelectorAll('.lr-statut-btn').forEach(btn => {

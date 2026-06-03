@@ -4,6 +4,7 @@
 import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
+import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
 import { toast } from '@/components/common/toast.js';
 import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
@@ -646,6 +647,7 @@ function _showDeleteModal(root, me) {
 
   cancel.addEventListener('click', () => overlay.remove());
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  enableSheetSwipe(overlay.querySelector('.st-modal-box'), () => overlay.remove(), { overlay });
 
   confirm.addEventListener('click', async () => {
     if (inp.value !== CONFIRM_TEXT) return;
