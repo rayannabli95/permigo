@@ -15,6 +15,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public
 AS $$
+#variable_conflict use_column
 DECLARE
   v_me        uuid := current_profile_id();
   v_validated int;
@@ -40,7 +41,7 @@ BEGIN
   ) q;
 
   -- Régularité : plus longue série
-  SELECT COALESCE(longest_streak, 0) INTO v_streak FROM streaks WHERE user_id = v_me;
+  SELECT COALESCE(s.longest_streak, 0) INTO v_streak FROM streaks s WHERE s.user_id = v_me;
 
   -- Vélocité : compétences acquises sur les 28 derniers jours
   SELECT COUNT(*) INTO v_last28
