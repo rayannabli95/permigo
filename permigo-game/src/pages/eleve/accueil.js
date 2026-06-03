@@ -889,28 +889,6 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
     `).join('')}
   </div>
 
-  <div class="acc2-section-title">Trophées</div>
-  <div class="trophees-row">
-    ${trophees.unlocked.length === 0 ? `
-      <div class="trophees-empty">
-        <div class="trophees-empty-ico">${icon('trophy', { size: 28 })}</div>
-        <div class="trophees-empty-txt">Valide toutes les compétences d'un monde pour débloquer ton 1er trophée</div>
-      </div>` :
-      trophees.unlocked.slice(0, 3).map(w => `
-        <div class="trophy-card trophy-unlocked" style="--tc:${w.color}">
-          <div class="trophy-ico">${w.ico}</div>
-          <div class="trophy-label">${esc(w.name)}</div>
-          <div class="trophy-state">${icon('check', { size: 11, strokeWidth: 3 })} Acquis</div>
-        </div>`).join('')}
-    ${trophees.nextUp ? `
-      <div class="trophy-card" style="--tc:${trophees.nextUp.color}">
-        <div class="trophy-ico trophy-ico-dim">${trophees.nextUp.ico}</div>
-        <div class="trophy-label">${esc(trophees.nextUp.name)}</div>
-        <div class="trophy-next-bar"><div class="trophy-next-fill" style="width:${trophees.nextUp.pct}%;background:${trophees.nextUp.color}"></div></div>
-        <div class="trophy-state">${trophees.nextUp.pct}% · encore ${trophees.nextUp.total - trophees.nextUp.done} comp.</div>
-      </div>` : ''}
-  </div>
-
   <!-- Leaderboard slot -->
   <div id="acc-lb-slot"></div>
 
