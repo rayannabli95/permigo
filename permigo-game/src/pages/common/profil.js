@@ -542,6 +542,13 @@ export async function mount(root) {
     </a>
   </div>` : ''}
 
+  ${me.role === 'enseignant' ? `
+  <div class="prf-nav-tiles">
+    <a class="prf-nav-tile" href="#/boutique" aria-label="Ouvrir la boutique">
+      <span class="prf-nav-ico" aria-hidden="true">🚗</span><span>Boutique</span>
+    </a>
+  </div>` : ''}
+
   ${me.role === 'eleve' ? `<div id="prf-pseudo-section">${_renderPseudo(profile?.username)}</div>` : ''}
 
   ${referralStats !== null ? `<div id="prf-ref-section">${_renderReferral(referralStats)}</div>` : ''}
