@@ -467,6 +467,27 @@ const STYLE = `<style>
     box-shadow: 0 4px 22px rgba(16,185,129,.55);
   }
 }
+/* ── Badge PermiGo dans les nodes (remplace l'ancien volant) ── */
+.nd-badge {
+  display: block;
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.28));
+}
+/* Node actif : badge légèrement plus grand + pulsation douce */
+.nd-badge-next {
+  width: 90%; height: 90%;
+  animation: ndBadgePulse 1.8s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+@keyframes ndBadgePulse { 0%,100% { transform: scale(.94); } 50% { transform: scale(1.06); } }
+/* À débloquer : badge désaturé et atténué */
+.nd-badge-dim    { filter: grayscale(.85) opacity(.45); }
+.nd-badge-locked { filter: grayscale(1) opacity(.3); }
+@media (prefers-reduced-motion: reduce) { .nd-badge-next { animation: none !important; } }
+
 /* Volant qui oscille gauche-droite sur le prochain défi (image PNG) */
 .nd-wheel {
   display: block;
@@ -1586,13 +1607,15 @@ function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds 
       locked:    'Verrouillé',
     }[st];
 
-    // Icône SVG propre selon statut
+    // Icône node = badge PermiGo (remplace l'ancien volant). Le badge est une
+    // image pleine couleur : on joue sur l'opacité/grayscale selon le statut.
+    const BADGE = '/skins/avatars/permigo-badge-icon.png';
     const icon = {
-      done:      `<div class="nd-wheel-done" aria-hidden="true"></div>`,
+      done:      `<img class="nd-badge" src="${BADGE}" alt="" aria-hidden="true"/>`,
       a_valider: `<div class="nd-wheel-pending" aria-hidden="true"></div>`,
-      next:      `<img class="nd-wheel" src="/worlds/volant.png" alt="" width="32" height="32" aria-hidden="true"/>`,
-      todo:      `<div class="nd-wheel-todo" aria-hidden="true"></div>`,
-      locked:    `<div class="nd-wheel-todo nd-wheel-locked" aria-hidden="true"></div>`,
+      next:      `<img class="nd-badge nd-badge-next" src="${BADGE}" alt="" aria-hidden="true"/>`,
+      todo:      `<img class="nd-badge nd-badge-dim" src="${BADGE}" alt="" aria-hidden="true"/>`,
+      locked:    `<img class="nd-badge nd-badge-locked" src="${BADGE}" alt="" aria-hidden="true"/>`,
     }[st];
 
     const isLocked = st === 'locked';
