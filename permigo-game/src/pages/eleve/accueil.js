@@ -1237,19 +1237,44 @@ async function _loadAndInjectCrystalBall(root) {
       const st = document.createElement('style');
       st.id = 'acc-crystal-styles';
       st.textContent = `
-        .acc2-crystal{margin:18px 16px 0;padding:22px 20px;border-radius:22px;color:#fff;position:relative;overflow:hidden;
-          background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);box-shadow:0 12px 32px -10px rgba(99,102,241,.55);
+        .acc2-crystal{margin:18px 16px 0;padding:20px 20px 24px;border-radius:22px;color:#fff;position:relative;overflow:hidden;
+          background:linear-gradient(160deg,#3b1f8f 0%,#5b21b6 45%,#2e2a72 100%);box-shadow:0 14px 40px -12px rgba(91,33,182,.7);
           animation:cbIn .45s cubic-bezier(.23,1,.32,1)}
         @keyframes cbIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        .acc2-crystal::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 85% 15%,rgba(255,255,255,.18) 0%,transparent 60%);pointer-events:none}
-        .acc2-cb-head{display:flex;align-items:center;gap:8px;font:700 12px/1 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:6px;position:relative;z-index:1}
-        .acc2-cb-num{font:800 56px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;position:relative;z-index:1}
-        .acc2-cb-num span{font-size:30px}
-        .acc2-cb-msg{font:600 14.5px/1.4 'Inter',sans-serif;color:rgba(255,255,255,.92);margin:4px 0 0;position:relative;z-index:1}
-        .acc2-cb-axes-lbl{font:600 12px/1 'Inter',sans-serif;color:rgba(255,255,255,.8);margin:16px 0 8px;position:relative;z-index:1}
-        .acc2-cb-chips{display:flex;flex-wrap:wrap;gap:7px;position:relative;z-index:1}
-        .acc2-cb-chip{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:6px 12px;font:700 12.5px/1 'Inter',sans-serif;color:#fff}
+        .acc2-crystal::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.7;
+          background:radial-gradient(1px 1px at 18% 24%,rgba(255,255,255,.55),transparent),
+                     radial-gradient(1px 1px at 72% 16%,rgba(255,255,255,.45),transparent),
+                     radial-gradient(1.5px 1.5px at 88% 58%,rgba(255,255,255,.4),transparent),
+                     radial-gradient(1px 1px at 38% 82%,rgba(255,255,255,.32),transparent),
+                     radial-gradient(1px 1px at 60% 90%,rgba(255,255,255,.3),transparent)}
+        .acc2-cb-head{display:flex;align-items:center;gap:8px;font:700 12px/1 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:14px;position:relative;z-index:2}
+        /* ── Boule de cristal (CSS) ── */
+        .cb-stage{display:flex;justify-content:center;position:relative;z-index:2}
+        .cb-orb{position:relative;width:150px;height:150px;display:flex;align-items:center;justify-content:center}
+        .cb-orb-glow{position:absolute;inset:-20%;border-radius:50%;filter:blur(7px);
+          background:radial-gradient(circle,rgba(167,139,250,.7) 0%,rgba(139,92,246,.28) 45%,transparent 70%);
+          animation:cbAura 3.4s ease-in-out infinite}
+        @keyframes cbAura{0%,100%{opacity:.5;transform:scale(.95)}50%{opacity:1;transform:scale(1.07)}}
+        .cb-orb-glass{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;border:1px solid rgba(255,255,255,.18);
+          background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.6) 0%,rgba(255,255,255,0) 24%),
+                     radial-gradient(circle at 50% 48%,rgba(196,181,253,.55) 0%,rgba(124,58,237,.6) 55%,rgba(72,28,140,.92) 100%);
+          box-shadow:inset 0 -14px 30px rgba(46,16,101,.85),inset 0 12px 24px rgba(255,255,255,.22),
+            0 0 32px rgba(167,139,250,.55),0 10px 20px rgba(18,9,38,.5)}
+        .cb-orb-shine{position:absolute;top:-60%;width:55%;height:220%;pointer-events:none;
+          background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
+          transform:rotate(18deg);animation:cbSweep 4.4s ease-in-out infinite}
+        @keyframes cbSweep{0%{left:-45%}60%{left:125%}100%{left:125%}}
+        .cb-orb-num{position:relative;z-index:1;font:800 46px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;color:#fff;
+          text-shadow:0 1px 0 rgba(255,255,255,.55),0 -1px 1px rgba(72,28,140,.6),0 3px 8px rgba(18,9,38,.55);
+          animation:cbPulse 3.4s ease-in-out infinite}
+        .cb-orb-num .cb-pct{font-size:24px;opacity:.92;margin-left:1px}
+        @keyframes cbPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(196,181,253,.5))}50%{filter:drop-shadow(0 0 13px rgba(224,210,255,.95))}}
+        .acc2-cb-msg{font:600 14.5px/1.4 'Inter',sans-serif;color:rgba(255,255,255,.94);margin:8px 0 0;text-align:center;position:relative;z-index:2}
+        .acc2-cb-axes-lbl{font:600 12px/1 'Inter',sans-serif;color:rgba(255,255,255,.8);margin:16px 0 8px;text-align:center;position:relative;z-index:2}
+        .acc2-cb-chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;position:relative;z-index:2}
+        .acc2-cb-chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);border-radius:999px;padding:6px 12px;font:700 12.5px/1 'Inter',sans-serif;color:#fff}
         .acc2-cb-empty{margin:18px 16px 0;padding:18px 20px;border-radius:18px;background:var(--bg3);color:var(--mu2);font:600 13.5px/1.4 'Inter',sans-serif;display:flex;align-items:center;gap:10px}
+        @media (prefers-reduced-motion:reduce){.cb-orb-glow,.cb-orb-shine,.cb-orb-num{animation:none}}
       `;
       document.head.appendChild(st);
     }
@@ -1272,12 +1297,16 @@ async function _loadAndInjectCrystalBall(root) {
     anchor.insertAdjacentHTML('beforebegin', `
       <div class="acc2-crystal" id="acc-crystal">
         <div class="acc2-cb-head"><span aria-hidden="true">🔮</span> Boule de cristal</div>
-        <div class="acc2-cb-num"><span class="acc2-cb-val">0</span><span>%</span></div>
+        <div class="cb-stage">
+          <div class="cb-orb">
+            <div class="cb-orb-glow" aria-hidden="true"></div>
+            <div class="cb-orb-glass">
+              <div class="cb-orb-shine" aria-hidden="true"></div>
+              <div class="cb-orb-num"><span class="acc2-cb-val">0</span><span class="cb-pct">%</span></div>
+            </div>
+          </div>
+        </div>
         <p class="acc2-cb-msg">${esc(msg)}</p>
-        ${axes.length ? `
-          <div class="acc2-cb-axes-lbl">Pour monter, focus sur :</div>
-          <div class="acc2-cb-chips">${axes.map(a => `<span class="acc2-cb-chip">${esc(a)}</span>`).join('')}</div>
-        ` : ''}
       </div>`);
 
     track('crystal_ball.viewed', { prediction_pct: pct, validated_count: p.validated_count });
