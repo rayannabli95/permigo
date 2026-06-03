@@ -8,6 +8,13 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { icon } from '@/utils/icons.js';
 import { navigate } from '@/router.js';
+import { findSubComp } from '@/data/remc.js';
+
+// "C2f" → "Intersections, ronds-points" (fallback : code brut)
+function compLabel(compId) {
+  const sub = findSubComp(compId);
+  return sub ? sub.n : (compId || '—');
+}
 
 const STYLE_ID = 'feedback-feed-style';
 
@@ -189,7 +196,7 @@ function renderCard(evt, idx) {
 
   const eventLine = isSession
     ? `<strong>${fmtDuration(evt.duration_minutes)}</strong> de conduite avec toi`
-    : `A validé : <strong>${esc(evt.competence_id || '—')}</strong>`;
+    : `A validé : <strong>${esc(compLabel(evt.competence_id))}</strong>`;
 
   const statusBit = isSession && evt.confirmation_status
     ? `<span style="font-size:10px;color:${evt.confirmation_status === 'confirmed' ? 'var(--grd)' : 'var(--mu2)'}">

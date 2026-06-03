@@ -9,6 +9,13 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { icon } from '@/utils/icons.js';
+import { findSubComp } from '@/data/remc.js';
+
+// "C2f" → "Intersections, ronds-points" (fallback : code brut)
+function compLabel(compId) {
+  const sub = findSubComp(compId);
+  return sub ? sub.n : (compId || '—');
+}
 
 const STYLE = `<style>
 .fb-page {
@@ -191,7 +198,7 @@ function renderCard(evt) {
     : icon('check-circle',  { size: 14, strokeWidth: 2.2 });
   const desc = isSession
     ? `<strong>${fmtMin(evt.duration_minutes)}</strong> de conduite avec toi`
-    : `Compétence validée : <strong>${esc(evt.competence_id || '—')}</strong>`;
+    : `Compétence validée : <strong>${esc(compLabel(evt.competence_id))}</strong>`;
 
   const statusLine = isSession && evt.confirmation_status ? `
     <div class="fb-extra-row" style="color:${evt.confirmation_status === 'confirmed' ? 'var(--grd)' : 'var(--mu2)'}">
