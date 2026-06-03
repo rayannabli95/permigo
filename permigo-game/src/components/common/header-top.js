@@ -4,7 +4,6 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { mountNotifBell } from '@/components/common/notif-bell.js';
-import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { renderUserAvatar } from '@/components/common/avatar.js';
 import { getEquippedAsset } from '@/utils/game-state.js';
@@ -82,13 +81,11 @@ export async function mountHeader() {
   bar.id = 'header-bar';
   bar.setAttribute('role', 'banner');
   const me = getCurUser();
-  const isEleve = me?.role === 'eleve';
   bar.innerHTML = `
     <button class="pg-logo-btn" id="ht-logo" aria-label="Accueil PermiGo">
       <span class="pg-logo-txt sm">PermiGo</span>
     </button>
     <div id="ht-right">
-      ${isEleve ? `<button class="ht-icon-btn" id="ht-shop" aria-label="Boutique" title="Boutique">${icon('shopping-bag', { size: 20 })}</button>` : ''}
       <div id="ht-bell"></div>
       ${me ? `<button class="ht-avatar-btn" id="ht-avatar" aria-label="Mon profil" title="Mon profil">${renderUserAvatar({ ...me, avatar_url: getEquippedAsset('avatar') || me.avatar_url }, 36)}</button>` : ''}
     </div>
@@ -99,10 +96,6 @@ export async function mountHeader() {
 
   bar.querySelector('#ht-logo')?.addEventListener('click', () => {
     location.hash = '#/';
-  });
-
-  bar.querySelector('#ht-shop')?.addEventListener('click', () => {
-    location.hash = '#/boutique';
   });
 
   bar.querySelector('#ht-avatar')?.addEventListener('click', () => {
