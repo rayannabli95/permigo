@@ -7,8 +7,12 @@ import { sb } from '@/auth/auth.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
-import { TROPHEES, RARITY_COLOR, RARITY_LABEL } from '@/data/trophees.js';
+import { CATALOG, RARITY_COLOR, RARITY_META, shortProgress } from '@/data/achievements.js';
 import { ASSETS } from '@/utils/assets.js';
+
+const RARITY_LABEL = Object.fromEntries(
+  Object.entries(RARITY_META).map(([k, v]) => [k, v.label])
+);
 
 const STYLE = `<style>
 .gal {
@@ -256,19 +260,20 @@ export async function mount(root) {
     <div style="padding:24px;text-align:center;color:var(--mu2)">Chargement…</div>
   </div>`;
 
-  // Fetch validations acquises + scores quiz
+  // Source de vérité : succès réellement débloqués (table achievements_unlocked)
+  // + compteurs pour la progression des cartes verrouillées.
   let validatedCount = 0;
-  let longestStreak = 0;
-  let hasPerfectQuiz = false;
+  let currentStreak = 0;
+  let unlockedMap = new Map();
   try {
-    const [validRes, streakRes, quizRes] = await Promise.allSettled([
+    const [achRes, validRes, streakRes] = await Promise.allSettled([
+      sb.rpc('get_my_achievements'),
       sb.from('validations').select('id', { count: 'exact', head: true }).eq('eleve_id', me.id).eq('statut', 'acquis'),
-      sb.from('streaks').select('longest_streak').eq('user_id', me.id).maybeSingle(),
-      sb.from('quiz_attempts').select('id').eq('user_id', me.id).gte('score', 100).limit(1),
+      sb.from('streaks').select('current_streak').eq('user_id', me.id).maybeSingle(),
     ]);
+    unlockedMap = new Map((achRes.value?.data ?? []).map(u => [u.achievement_key, u]));
     validatedCount = validRes.value?.count ?? 0;
-    longestStreak = streakRes.value?.data?.longest_streak ?? 0;
-    hasPerfectQuiz = (quizRes.value?.data?.length ?? 0) > 0;
+    currentStreak = streakRes.value?.data?.current_streak ?? 0;
   } catch (e) {
     console.warn('[galerie] fetch failed', e);
     import('@/components/common/toast.js')
@@ -276,8 +281,20 @@ export async function mount(root) {
       .catch(() => {});
   }
 
-  const ctx = { validatedCount, longestStreak, hasPerfectQuiz, c1ValidatedCount: 0, hasNightSession: false, hasEcoSession: false };
-  const trophees = TROPHEES.map(t => ({ ...t, unlocked: t.check ? !!t.check(ctx) : false }));
+  const progressStats = { compCount: validatedCount, streak: currentStreak };
+  const trophees = CATALOG.map(c => ({
+    id: c.key,
+    image: c.image,
+    ico: c.emoji,
+    nom: c.title,
+    desc: c.body,
+    rarity: c.rarity,
+    xp: c.xp,
+    gemmes: c.gemmes,
+    color: RARITY_COLOR[c.rarity] || 'var(--mu2)',
+    objectif: shortProgress(c.key, progressStats),
+    unlocked: unlockedMap.has(c.key),
+  }));
   const unlockedTrophies = trophees.filter(t => t.unlocked).length;
 
   // 3 paliers fonds permis (mesh < 10, route 10-19, holo 20+)
@@ -326,7 +343,7 @@ export async function mount(root) {
         ${!unlocked ? `<div class="gal-lock-badge" aria-hidden="true">🔒</div>` : ''}
         <div class="gal-card-visual">${visual}</div>
         <div class="gal-card-nom">${esc(t.nom)}</div>
-        <div class="gal-card-meta">${unlocked ? 'Acquis' : esc(t.desc?.slice(0, 32) || 'Verrouillé')}${!unlocked && t.desc?.length > 32 ? '…' : ''}</div>
+        <div class="gal-card-meta">${unlocked ? 'Acquis' : esc(t.objectif || 'Verrouillé')}</div>
       </div>
     `;
   }
@@ -377,7 +394,8 @@ export async function mount(root) {
         <div class="gal-modal-desc">${esc(t.desc || '')}</div>
         <div class="gal-modal-foot">
           ${t.xp ? `<span class="gal-modal-xp">+${t.xp} XP</span>` : ''}
-          <span class="gal-modal-state ${unlocked ? 'on' : 'off'}">${unlocked ? '✓ Débloqué' : '🔒 Verrouillé'}</span>
+          ${t.gemmes ? `<span class="gal-modal-xp" style="color:var(--gr);background:rgba(16,185,129,.1)">+${t.gemmes} 💎</span>` : ''}
+          <span class="gal-modal-state ${unlocked ? 'on' : 'off'}">${unlocked ? '✓ Débloqué' : esc(t.objectif || '🔒 Verrouillé')}</span>
         </div>
       </div>`;
     document.body.appendChild(overlay);
