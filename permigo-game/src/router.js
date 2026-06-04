@@ -34,7 +34,9 @@ const ROUTES = {
     aujourdhui: () => import('@/pages/enseignant/aujourdhui.js'),
     parcours: () => import('@/pages/enseignant/parcours-pro.js'),
     'parcours-complet': () => import('@/pages/enseignant/parcours-pro-complet.js'),
-    validation: () => import('@/pages/enseignant/validation.js'),
+    // Refonte : "Valider" n'est plus un moteur séparé — la Séance est l'unique
+    // point de saisie. On garde la route en alias vers log-session (?eleveId=).
+    validation: () => import('@/pages/enseignant/log-session.js'),
     eleves: () => import('@/pages/enseignant/mes-eleves.js'),
     livret: () => import('@/pages/enseignant/livret-remc.js'),
     insights: () => import('@/pages/enseignant/insights.js'),
@@ -91,7 +93,11 @@ export async function route(root, me) {
   const role = me.role || 'eleve';
   const map = ROUTES[role] || ROUTES.eleve;
   // segments[0] = route name, segments[1] = optional param (ex: eleve UUID pour livret)
-  const segments = (location.hash || '').replace('#/', '').split('/');
+  // On retire la query string (?x=y) AVANT le split : sinon routeName vaut
+  // "eleves?bloque_sur=C2a" et ne matche aucune route → fallback default.
+  // Les pages lisent elles-mêmes leur query depuis location.hash.
+  const rawPath = (location.hash || '').replace(/^#\/?/, '').split('?')[0];
+  const segments = rawPath.split('/');
   const routeName = segments[0] || 'default';
   const param = segments[1] || null; // ex: eleveId pour #/livret/{id}
   const loader = map[routeName] || map.default;

@@ -700,7 +700,7 @@ async function wireRows() {
       onSwipeRight: () => {
         haptic('select');
         track('eleve.swipe_validate', { eleve_id: id });
-        navigate(`#/validation?eleveId=${id}`);
+        navigate(`#/log-session?eleveId=${id}`);
       },
       onEnd: () => {
         row.style.transform = '';
@@ -771,7 +771,7 @@ function openQuickMenu(eleveId, anchorRow) {
     <div class="me-qm-bg" data-close="1"></div>
     <div class="me-qm-panel">
       <button class="me-qm-item" data-action="valider">
-        <span class="me-qm-ico">${icon('check', { size: 14, strokeWidth: 2.5 })}</span> Valider une compétence
+        <span class="me-qm-ico">${icon('check', { size: 14, strokeWidth: 2.5 })}</span> Enregistrer une séance
       </button>
       <button class="me-qm-item" data-action="livret">
         <span class="me-qm-ico">${icon('arrow-right', { size: 14, strokeWidth: 2.5 })}</span> Ouvrir le livret REMC
@@ -794,7 +794,7 @@ function openQuickMenu(eleveId, anchorRow) {
     btn.addEventListener('click', () => {
       const action = btn.dataset.action;
       close();
-      if (action === 'valider') navigate(`#/validation?eleveId=${eleveId}`);
+      if (action === 'valider') navigate(`#/log-session?eleveId=${eleveId}`);
       else if (action === 'livret') navigate(`#/livret/${eleveId}`);
     });
   });

@@ -15,6 +15,7 @@ const ICO = {
   book: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
   bag: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
   activity: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+  chart: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
 };
 
 const TABS = {
@@ -26,11 +27,11 @@ const TABS = {
     { id: 'profil',   label: 'Profil',   icon: ICO.user },
   ],
   enseignant: [
-    { id: 'default',    label: "Auj.",     icon: ICO.activity },
-    { id: 'eleves',     label: 'Élèves',   icon: ICO.users },
-    { id: '__fab__',    label: '',         icon: '' },
-    { id: 'validation', label: 'Valider',  icon: ICO.check },
-    { id: 'parcours',   label: 'Parcours', icon: ICO.map },
+    { id: 'default',  label: "Auj.",      icon: ICO.activity },
+    { id: 'eleves',   label: 'Élèves',    icon: ICO.users },
+    { id: '__fab__',  label: '',          icon: '' },
+    { id: 'insights', label: 'Analyses',  icon: ICO.chart },
+    { id: 'parcours', label: 'Parcours',  icon: ICO.map },
   ],
   gerant: [
     { id: 'default', label: 'Pulse',  icon: ICO.activity },
