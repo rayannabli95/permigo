@@ -8,6 +8,7 @@ import { sb } from '@/auth/auth.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { icon } from '@/utils/icons.js';
+import { renderUserAvatar } from '@/components/common/avatar.js';
 
 const STYLE_ID = 'moniteur-ranking-style';
 
@@ -141,6 +142,8 @@ function ensureStyle() {
   .mr-row-rank.r2 { color: var(--mu3); }
   .mr-row-rank.r3 { color: var(--amx); }
   .mr-row-rank.rn { color: var(--mu2); }
+  .mr-row-av { flex-shrink: 0; width: 32px; height: 32px; }
+  .mr-row-av img { border-radius: 50%; }
   .mr-row-info { flex: 1; min-width: 0; }
   .mr-row-name {
     font: 600 13px/1.2 'Inter', sans-serif;
@@ -233,6 +236,7 @@ export async function mountMoniteurRanking(root, { myId }) {
     <div class="mr-my-position">
       <div class="mr-my-top">
         <div class="mr-rank-badge ${rankClass(mine.rank)}">${rankLabel(mine.rank)}</div>
+        <div class="mr-row-av">${renderUserAvatar({ avatar_url: mine.moniteur_avatar, prenom: mine.moniteur_prenom, nom: mine.moniteur_nom }, 36)}</div>
         <div class="mr-name">Ma position</div>
         <div>
           <div class="mr-score">${mine.score_total}</div>
@@ -274,6 +278,7 @@ export async function mountMoniteurRanking(root, { myId }) {
       ${top3.map(r => `
         <div class="mr-row${r.moniteur_id === myId ? ' mr-row-me' : ''}">
           <span class="mr-row-rank ${rankRowClass(r.rank)}">${rankLabel(r.rank)}</span>
+          <div class="mr-row-av">${renderUserAvatar({ avatar_url: r.moniteur_avatar, prenom: r.moniteur_prenom, nom: r.moniteur_nom }, 32)}</div>
           <div class="mr-row-info">
             <div class="mr-row-name">${esc(r.moniteur_prenom)}${r.moniteur_id === myId ? ' <span style="font-size:10px;color:var(--a)">(toi)</span>' : ''}</div>
             <div class="mr-row-sub">${fmtHours(r.hours_confirmed)} · ${r.n_validations ?? 0} val. · ${r.n_eleves_diff ?? 0} élèves</div>

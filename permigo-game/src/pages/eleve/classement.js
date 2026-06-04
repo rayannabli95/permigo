@@ -9,6 +9,7 @@ import { track } from '@/services/analytics.js';
 import { navigate } from '@/router.js';
 import { playPop, playClick } from '@/utils/sound.js';
 import { haptic } from '@/utils/haptic.js';
+import { renderUserAvatar } from '@/components/common/avatar.js';
 
 const LIMIT = 50;
 const MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' };
@@ -56,6 +57,8 @@ const STYLE = `<style>
   font: 800 16px/1 'IBM Plex Mono', monospace; color: var(--mu2);
 }
 .clt-rank.medal { font-size: 22px; }
+.clt-av { flex-shrink: 0; width: 36px; height: 36px; }
+.clt-av img { border-radius: 50%; }
 .clt-name {
   flex: 1; min-width: 0; font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -191,6 +194,7 @@ function rowHtml(r) {
   return `
   <div class="clt-row ${r.is_me ? 'me' : ''}">
     ${rankCell}
+    <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 36)}</div>
     <div class="clt-name">${esc(r.display_name)}</div>
     ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ''}
     <div class="clt-score">${r.score}<span class="clt-score-sub">/31</span></div>
