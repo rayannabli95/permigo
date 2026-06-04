@@ -438,17 +438,10 @@ function renderForm(root, invitation, token) {
         return;
       }
 
-      // 4. Succès + redirection
-      root.innerHTML = `${STYLE}
-        <div class="sg">
-          <div class="sg-card" style="text-align:center">
-            <div style="margin-bottom:12px;color:var(--gr)">${icon('check-circle',{size:44})}</div>
-            <h1 class="sg-title">Bienvenue dans PermiGo !</h1>
-            <p class="sg-sub">Ton compte est activé. On te redirige…</p>
-          </div>
-        </div>`;
-
-      setTimeout(() => { window.location.href = '/#'; window.location.reload(); }, 1500);
+      // 4. Succès → tuto "Ajouter à l'écran d'accueil" (engagement), puis redirection
+      const goToApp = () => { window.location.href = '/#'; window.location.reload(); };
+      const { renderAddToHome } = await import('@/components/common/add-to-home.js');
+      renderAddToHome(root, { onDone: goToApp });
 
     } catch (e) {
       console.error('[signup] failed', e);

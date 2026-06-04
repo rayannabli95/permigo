@@ -14,6 +14,7 @@ import { initThemeEarly, syncFromPrefs } from '@/utils/theme.js';
 import { initGameState, initEquippedTheme } from '@/utils/game-state.js';
 import { mountCookieBanner } from '@/components/common/cookie-banner.js';
 import { initPosthog } from '@/services/posthog.js';
+import '@/utils/pwa.js'; // capte beforeinstallprompt très tôt
 
 // Apply saved/system theme before any rendering (reads localStorage, synchronous)
 initThemeEarly();
