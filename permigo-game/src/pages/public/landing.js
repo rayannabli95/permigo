@@ -4,14 +4,14 @@
 // CTA principal : formulaire "être recontacté" → table public.leads (insert anon).
 // Montée par main.js quand !me et hash racine.
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
+import { sb } from "@/auth/auth.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
 
-const BADGE = '/skins/avatars/permigo-badge-icon.png';
+const BADGE = "/skins/avatars/permigo-badge-icon.png";
 
 export function mount(root) {
-  track('landing.view', {});
+  track("landing.view", {});
 
   root.innerHTML = `${STYLE}
   <div class="lp">
@@ -82,6 +82,47 @@ export function mount(root) {
         <div class="lp-feat-row">
           <div class="lp-feat-ic">📊</div>
           <div><h3>Une vision claire pour toi</h3><p>En tant que gérant, tu vois la progression de toute ton école, l'activité de chaque moniteur et chaque élève, en temps réel.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Témoignages ── -->
+    <section class="lp-sec lp-testi">
+      <h2 class="lp-h2">Ce que disent les premiers utilisateurs</h2>
+      <p class="lp-sub">Gérants, moniteurs, élèves — ils ont testé PermiGo en beta.</p>
+      <div class="lp-testicards">
+        <div class="lp-tc">
+          <div class="lp-tc-stars">★★★★★</div>
+          <p class="lp-tc-quote">« Depuis PermiGo, le taux de connexion de mes élèves entre les leçons a explosé. En 3 mois, j'ai vu une vraie progression sur les compétences à risque. »</p>
+          <div class="lp-tc-author">
+            <div class="lp-tc-av lp-tc-av-g">KB</div>
+            <div>
+              <div class="lp-tc-name">Karim B.</div>
+              <div class="lp-tc-role">Gérant · Auto-École Victoire, Lyon</div>
+            </div>
+          </div>
+        </div>
+        <div class="lp-tc">
+          <div class="lp-tc-stars">★★★★★</div>
+          <p class="lp-tc-quote">« Valider les compétences en 2 taps, c'est ce dont j'avais besoin. Fini le livret papier que je perdais dans la voiture. Mes élèves voient leur progression en temps réel. »</p>
+          <div class="lp-tc-author">
+            <div class="lp-tc-av lp-tc-av-b">SM</div>
+            <div>
+              <div class="lp-tc-name">Sophie M.</div>
+              <div class="lp-tc-role">Monitrice · Auto-École du Centre, Marseille</div>
+            </div>
+          </div>
+        </div>
+        <div class="lp-tc">
+          <div class="lp-tc-stars">★★★★★</div>
+          <p class="lp-tc-quote">« Mon streak c'est devenu un rituel. Chaque soir, 2 questions pour ne pas le perdre. J'ai eu 18 à l'examen — je suis convaincu que PermiGo m'y a aidé. »</p>
+          <div class="lp-tc-author">
+            <div class="lp-tc-av lp-tc-av-p">LT</div>
+            <div>
+              <div class="lp-tc-name">Lucas T.</div>
+              <div class="lp-tc-role">Élève · Paris</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -199,33 +240,42 @@ export function mount(root) {
   </div>`;
 
   // ── Navigation interne (scroll doux) ──
-  root.querySelectorAll('[data-scroll]').forEach(el => {
-    el.addEventListener('click', () => {
-      const t = root.querySelector('#' + el.dataset.scroll);
-      t?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      track('landing.cta_click', { target: el.dataset.scroll });
+  root.querySelectorAll("[data-scroll]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const t = root.querySelector("#" + el.dataset.scroll);
+      t?.scrollIntoView({ behavior: "smooth", block: "start" });
+      track("landing.cta_click", { target: el.dataset.scroll });
     });
   });
-  root.querySelectorAll('a[href^="#lp-"]').forEach(a => {
-    a.addEventListener('click', (e) => {
+  root.querySelectorAll('a[href^="#lp-"]').forEach((a) => {
+    a.addEventListener("click", (e) => {
       e.preventDefault();
-      root.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      root
+        .querySelector(a.getAttribute("href"))
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 
   // ── Se connecter ──
-  const goLogin = () => { location.hash = '#/login'; location.reload(); };
-  root.querySelector('#lp-login')?.addEventListener('click', goLogin);
-  root.querySelector('#lp-login2')?.addEventListener('click', goLogin);
-  root.querySelector('#lp-legal')?.addEventListener('click', (e) => { e.preventDefault(); location.hash = '#/legal'; location.reload(); });
+  const goLogin = () => {
+    location.hash = "#/login";
+    location.reload();
+  };
+  root.querySelector("#lp-login")?.addEventListener("click", goLogin);
+  root.querySelector("#lp-login2")?.addEventListener("click", goLogin);
+  root.querySelector("#lp-legal")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    location.hash = "#/legal";
+    location.reload();
+  });
 
   // ── Formulaire → leads ──
-  const form = root.querySelector('#lp-form');
-  const errEl = root.querySelector('#lp-form-err');
-  const okEl = root.querySelector('#lp-form-ok');
-  const submitBtn = root.querySelector('#lp-submit');
+  const form = root.querySelector("#lp-form");
+  const errEl = root.querySelector("#lp-form-err");
+  const okEl = root.querySelector("#lp-form-ok");
+  const submitBtn = root.querySelector("#lp-submit");
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     errEl.hidden = true;
 
@@ -235,31 +285,44 @@ export function mount(root) {
     const telephone = form.telephone.value.trim() || null;
     const message = form.message.value.trim() || null;
     const nbRaw = form.nb_enseignants.value.trim();
-    const nb_enseignants = nbRaw ? Math.max(1, Math.min(999, parseInt(nbRaw, 10) || 0)) || null : null;
+    const nb_enseignants = nbRaw
+      ? Math.max(1, Math.min(999, parseInt(nbRaw, 10) || 0)) || null
+      : null;
 
     if (!ecole_nom || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errEl.textContent = "Renseigne au moins le nom de l'auto-école et un email valide.";
+      errEl.textContent =
+        "Renseigne au moins le nom de l'auto-école et un email valide.";
       errEl.hidden = false;
       return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Envoi…';
+    submitBtn.textContent = "Envoi…";
     try {
-      const { error } = await sb.from('leads').insert({
-        ecole_nom, email, ville, telephone, message, nb_enseignants, source: 'landing',
+      const { error } = await sb.from("leads").insert({
+        ecole_nom,
+        email,
+        ville,
+        telephone,
+        message,
+        nb_enseignants,
+        source: "landing",
       });
       if (error) throw error;
-      track('landing.lead_submitted', { has_phone: !!telephone, nb_enseignants });
+      track("landing.lead_submitted", {
+        has_phone: !!telephone,
+        nb_enseignants,
+      });
       form.hidden = true;
       okEl.hidden = false;
-      okEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      okEl.scrollIntoView({ behavior: "smooth", block: "center" });
     } catch (err) {
-      console.error('[landing] lead insert failed', err);
-      errEl.textContent = "Une erreur est survenue. Réessaie, ou écris-nous directement.";
+      console.error("[landing] lead insert failed", err);
+      errEl.textContent =
+        "Une erreur est survenue. Réessaie, ou écris-nous directement.";
       errEl.hidden = false;
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Être recontacté';
+      submitBtn.textContent = "Être recontacté";
     }
   });
 }
@@ -405,6 +468,25 @@ const STYLE = `<style>
   .lp-foot-links a, .lp-foot-login { font: 600 14px/1 'Inter'; color: var(--lp-mut); background: none; border: 0; cursor: pointer; }
   .lp-foot-copy { font: 400 12.5px/1 'Inter'; color: var(--lp-mut); }
 
+  /* Témoignages */
+  .lp-testi { background: #f7f8fb; border-radius: 0; margin-left: 0; margin-right: 0;
+    max-width: none; padding-left: 22px; padding-right: 22px; }
+  .lp-testi .lp-h2, .lp-testi .lp-sub { max-width: 1000px; margin-left: auto; margin-right: auto; }
+  .lp-testicards { max-width: 1000px; margin: 28px auto 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .lp-tc { background: #fff; border: 1px solid var(--lp-line); border-radius: 20px; padding: 24px;
+    display: flex; flex-direction: column; gap: 14px; box-shadow: 0 2px 12px -6px rgba(11,16,32,.07); }
+  .lp-tc-stars { color: #f59e0b; font-size: 15px; letter-spacing: 1px; }
+  .lp-tc-quote { font: 400 15px/1.6 'Inter'; color: var(--lp-ink); margin: 0; flex: 1; }
+  .lp-tc-author { display: flex; align-items: center; gap: 12px; margin-top: auto; }
+  .lp-tc-av { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font: 700 14px/1 'Plus Jakarta Sans'; color: #fff; }
+  .lp-tc-av-g { background: linear-gradient(135deg, #10b981, #059669); }
+  .lp-tc-av-b { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+  .lp-tc-av-p { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  .lp-tc-name { font: 700 14px/1.2 'Plus Jakarta Sans'; color: var(--lp-ink); }
+  .lp-tc-role { font: 400 12px/1.3 'Inter'; color: var(--lp-mut); margin-top: 2px; }
+
   /* Responsive */
   @media (max-width: 860px) {
     .lp-hero { grid-template-columns: 1fr; text-align: center; padding-top: 40px; gap: 30px; }
@@ -412,7 +494,7 @@ const STYLE = `<style>
     .lp-lead { margin-inline: auto; }
     .lp-hero-cta { justify-content: center; }
     .lp-hero-art { order: -1; }
-    .lp-cards3, .lp-steps, .lp-plans { grid-template-columns: 1fr; }
+    .lp-cards3, .lp-steps, .lp-plans, .lp-testicards { grid-template-columns: 1fr; }
     .lp-feat-row { flex-direction: column; }
     .lp-plan-feat { order: -1; }
   }
