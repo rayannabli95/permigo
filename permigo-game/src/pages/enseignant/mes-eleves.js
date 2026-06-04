@@ -13,6 +13,7 @@ import { REMC_TOTAL } from '@/data/remc.js';
 import { renderEmptyState, emptyState } from '@/components/common/empty-state.js';
 import { renderUserAvatar } from '@/components/common/avatar.js';
 import { icon } from '@/utils/icons.js';
+import { playNotify } from '@/utils/sound.js';
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -1062,6 +1063,7 @@ function openInviteEleveModal(me) {
 
     // Affiche les résultats
     const ok = results.filter(r => r.link).length;
+    if (ok > 0) playNotify();
     sheet.innerHTML = `
       <div class="me-inv-grab"></div>
       <p class="me-inv-result-ttl">

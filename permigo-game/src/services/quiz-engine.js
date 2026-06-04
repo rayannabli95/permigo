@@ -6,7 +6,7 @@ import { sb } from '@/auth/auth.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { burstConfetti } from '@/components/common/confetti.js';
-import { playCorrect, playWrong, playStreak, playPerfect } from '@/utils/sound.js';
+import { playCorrect, playWrong, playStreak, playVictory, playDefeat } from '@/utils/sound.js';
 
 /**
  * @param {Object} opts
@@ -129,8 +129,10 @@ export async function lancerQuiz({ competenceId, type, nbQuestions, onComplete }
       score_pct: Math.round((score / total) * 100),
     });
 
-    // Confetti + son sur score parfait
-    if (perfect) { burstConfetti({ count: 100, power: 16 }); playPerfect(); }
+    // Musique de fin : victoire si réussi (>=60%), défaite sinon. Confetti en plus sur sans-faute.
+    const passed = score >= total * 0.6;
+    if (perfect) burstConfetti({ count: 100, power: 16 });
+    if (passed) playVictory(); else playDefeat();
 
     overlay.querySelector('.quiz-body').innerHTML = `
       <div class="quiz-result">

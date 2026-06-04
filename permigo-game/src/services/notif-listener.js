@@ -10,6 +10,7 @@ import { track } from '@/services/analytics.js';
 import { toast } from '@/components/common/toast.js';
 import { burstConfetti } from '@/components/common/confetti.js';
 import { markHasValidated } from '@/services/web-push.js';
+import { playNotify } from '@/utils/sound.js';
 
 const POLL_INTERVAL = 30_000; // 30 secondes
 let _intervalId = null;
@@ -81,6 +82,7 @@ async function _celebrateValidation(compId) {
   // Marque que l'élève a ≥1 validation → débloque le banner push
   markHasValidated();
 
+  playNotify();
   setTimeout(() => {
     burstConfetti({ count: 55, power: 10, spread: Math.PI * 0.5 });
   }, 200);

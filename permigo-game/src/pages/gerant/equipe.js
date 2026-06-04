@@ -418,6 +418,8 @@ function openInviteModal(me) {
       }
 
       const { toast } = await import('@/components/common/toast.js');
+      const { playNotify } = await import('@/utils/sound.js');
+      playNotify();
       toast('Invitation envoyée ✓', 'success');
       close();
     } catch (e) {
