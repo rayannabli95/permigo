@@ -3,11 +3,11 @@
 // Usage : mountBottomNav(role) depuis main.js après route()
 // ═══════════════════════════════════════════════════════════════
 
-import { haptic } from '@/utils/haptic.js';
+import { haptic } from "@/utils/haptic.js";
 
 const ICO = {
   home: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>`,
-  map:  `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>`,
+  map: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>`,
   trophy: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>`,
   user: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
   check: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
@@ -20,24 +20,22 @@ const ICO = {
 
 const TABS = {
   eleve: [
-    { id: 'default',  label: 'Accueil',  icon: ICO.home },
-    { id: 'parcours', label: 'Parcours', icon: ICO.map },
-    { id: 'boutique', label: 'Boutique', icon: ICO.bag },
-    { id: 'trophees', label: 'Trophées', icon: ICO.trophy },
-    { id: 'profil',   label: 'Profil',   icon: ICO.user },
+    { id: "default", label: "Accueil", icon: ICO.home },
+    { id: "parcours", label: "Parcours", icon: ICO.map },
+    { id: "boutique", label: "Boutique", icon: ICO.bag },
+    { id: "trophees", label: "Trophées", icon: ICO.trophy },
+    { id: "profil", label: "Profil", icon: ICO.user },
   ],
   enseignant: [
-    { id: 'default',  label: "Auj.",      icon: ICO.activity },
-    { id: 'eleves',   label: 'Élèves',    icon: ICO.users },
-    { id: '__fab__',  label: '',          icon: '' },
-    { id: 'insights', label: 'Analyses',  icon: ICO.chart },
-    { id: 'parcours', label: 'Parcours',  icon: ICO.map },
+    { id: "default", label: "Aujourd'hui", icon: ICO.activity },
+    { id: "eleves", label: "Mes élèves", icon: ICO.users },
+    { id: "parcours", label: "Parcours", icon: ICO.map },
   ],
   gerant: [
-    { id: 'default', label: 'Pulse',  icon: ICO.activity },
-    { id: 'equipe',  label: 'Équipe', icon: ICO.users },
-    { id: 'eleves',  label: 'Élèves', icon: ICO.users },
-    { id: 'profil',  label: 'Profil', icon: ICO.user },
+    { id: "default", label: "Pulse", icon: ICO.activity },
+    { id: "equipe", label: "Équipe", icon: ICO.users },
+    { id: "eleves", label: "Élèves", icon: ICO.users },
+    { id: "profil", label: "Profil", icon: ICO.user },
   ],
 };
 
@@ -96,112 +94,124 @@ const STYLE = `
   }
   .bn-tab:active { transform: scale(.93); transition: transform .12s; }
 
-  /* ── iOS-style central FAB "+" ── */
-  .bn-fab-wrap {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    /* raised above nav */
-    margin-top: -20px;
+  /* ── FAB flottant "Séance" (enseignant seulement) ── */
+  @keyframes bnFabIn {
+    from { opacity: 0; transform: scale(.85) translateY(6px); }
+    to   { opacity: 1; transform: scale(1)   translateY(0);   }
   }
-  .bn-fab-btn {
+  #bn-seance-fab {
+    position: fixed;
+    right: 20px;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    z-index: 310;
     width: 56px; height: 56px;
     border-radius: 50%;
-    background: var(--a);
-    border: none;
+    background: var(--ink, #0a0d1a);
+    color: #fff;
+    border: none; padding: 0;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    color: #fff;
-    box-shadow: 0 4px 16px -4px rgba(88,204,2,.65), 0 2px 6px rgba(10,13,26,.18);
     -webkit-tap-highlight-color: transparent;
-    transition: transform .14s cubic-bezier(.34,1.56,.64,1), box-shadow .14s ease;
-    position: relative;
-    z-index: 1;
+    box-shadow:
+      0 8px 20px -6px rgba(10,13,26,.55),
+      0 3px 8px -2px rgba(10,13,26,.2),
+      inset 0 0 0 1px rgba(255,255,255,.08);
+    animation: bnFabIn .3s cubic-bezier(.34,1.56,.64,1) both;
+    transition: transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s ease;
   }
-  .bn-fab-btn:active {
-    transform: scale(.88);
-    box-shadow: 0 2px 8px -2px rgba(88,204,2,.5);
+  #bn-seance-fab:active {
+    transform: scale(.9);
+    box-shadow: 0 4px 12px -4px rgba(10,13,26,.5), inset 0 0 0 1px rgba(255,255,255,.12);
   }
-  .bn-fab-btn svg { display: block; }
-  .bn-fab-label {
-    font: 700 9px/1 'Inter', sans-serif;
-    letter-spacing: .02em;
-    color: var(--mu2);
-    margin-top: 4px;
-    white-space: nowrap;
+  @media (hover: hover) and (pointer: fine) {
+    #bn-seance-fab:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px -8px rgba(10,13,26,.6), inset 0 0 0 1px rgba(255,255,255,.12);
+    }
+  }
+  #bn-seance-fab:focus-visible {
+    outline: 2px solid var(--a);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #bn-seance-fab { animation: none !important; transition: none !important; }
+  }
+
+  /* FAB haut = 76+56=132px du bas — on pousse #app pour que rien ne se cache dessous */
+  body.has-enseignant-fab #app {
+    padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
   }
 `;
 
 export function mountBottomNav(role) {
-  if (!document.head.querySelector('#bn-style')) {
-    const s = document.createElement('style');
-    s.id = 'bn-style';
+  if (!document.head.querySelector("#bn-style")) {
+    const s = document.createElement("style");
+    s.id = "bn-style";
     s.textContent = STYLE;
     document.head.appendChild(s);
   }
 
-  document.querySelector('#bottom-nav')?.remove();
+  document.querySelector("#bottom-nav")?.remove();
 
   const tabs = TABS[role] || TABS.eleve;
-  const nav = document.createElement('nav');
-  nav.id = 'bottom-nav';
-  nav.setAttribute('aria-label', 'Navigation principale');
-  nav.innerHTML = tabs.map(t => {
-    if (t.id === '__fab__') {
-      return `
-        <div class="bn-fab-wrap">
-          <button class="bn-fab-btn" data-id="__fab__" aria-label="Enregistrer une séance">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-          </button>
-          <span class="bn-fab-label">Séance</span>
-        </div>
-      `;
-    }
-    return `
+  const nav = document.createElement("nav");
+  nav.id = "bottom-nav";
+  nav.setAttribute("aria-label", "Navigation principale");
+  nav.innerHTML = tabs
+    .map(
+      (t) => `
       <button class="bn-tab" data-id="${t.id}" aria-label="${t.label}">
         ${t.icon}
         <span class="bn-label">${t.label}</span>
       </button>
-    `;
-  }).join('');
+    `,
+    )
+    .join("");
 
   document.body.appendChild(nav);
   _updateActive();
 
-  nav.querySelectorAll('[data-id]').forEach(btn => {
-    btn.addEventListener('click', () => {
+  nav.querySelectorAll("[data-id]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      haptic("tap");
       const id = btn.dataset.id;
-      if (id === '__fab__') {
-        haptic('select');               // action principale : feedback marqué
-        location.hash = '#/log-session';
-      } else {
-        haptic('tap');                  // navigation : feedback léger
-        location.hash = id === 'default' ? '#/' : `#/${id}`;
-      }
+      location.hash = id === "default" ? "#/" : `#/${id}`;
     });
   });
 
-  window.addEventListener('hashchange', _updateActive);
+  // FAB flottant "Séance" — monté uniquement pour les enseignants
+  if (role === "enseignant") {
+    const fab = document.createElement("button");
+    fab.id = "bn-seance-fab";
+    fab.type = "button";
+    fab.setAttribute("aria-label", "Enregistrer une séance");
+    fab.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+    fab.addEventListener("click", () => {
+      haptic("select");
+      location.hash = "#/log-session";
+    });
+    document.body.appendChild(fab);
+    document.body.classList.add("has-enseignant-fab");
+  }
+
+  window.addEventListener("hashchange", _updateActive);
 }
 
 export function unmountBottomNav() {
-  document.querySelector('#bottom-nav')?.remove();
-  window.removeEventListener('hashchange', _updateActive);
+  document.querySelector("#bottom-nav")?.remove();
+  document.getElementById("bn-seance-fab")?.remove();
+  document.body.classList.remove("has-enseignant-fab");
+  window.removeEventListener("hashchange", _updateActive);
 }
 
 function _updateActive() {
-  const nav = document.querySelector('#bottom-nav');
+  const nav = document.querySelector("#bottom-nav");
   if (!nav) return;
-  const section = (location.hash || '').replace(/^#\/?/, '').split('/')[0] || 'default';
-  nav.querySelectorAll('[data-id]').forEach(btn => {
-    if (btn.dataset.id === '__fab__') return;
+  const section =
+    (location.hash || "").replace(/^#\/?/, "").split("/")[0] || "default";
+  nav.querySelectorAll("[data-id]").forEach((btn) => {
     const active = btn.dataset.id === section;
-    btn.classList.toggle('active', active);
-    btn.setAttribute('aria-current', active ? 'page' : 'false');
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-current", active ? "page" : "false");
   });
 }
