@@ -4,6 +4,7 @@
 //        send_message(p_partner_id, p_body)
 // ═══════════════════════════════════════════════════════════════
 import { sb }         from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { toast }      from '@/components/common/toast.js';
 import { esc }        from '@/utils/escape.js';
@@ -41,7 +42,7 @@ async function loadThreads(root, me) {
     console.error('[messages] loadThreads', e);
     root.querySelector('#msg-list-view').innerHTML = `
       <div class="msg-empty">
-        <div class="msg-empty-ico">⚠️</div>
+        <div class="msg-empty-ico">${icon('alert-triangle',{size:28})}</div>
         <div class="msg-empty-txt">Impossible de charger les messages</div>
         <button class="msg-retry-btn" id="msg-retry">Réessayer</button>
       </div>
@@ -166,7 +167,7 @@ function renderMessages(root, me, messages) {
   if (!el) return;
 
   if (messages.length === 0) {
-    el.innerHTML = `<div class="msg-conv-empty">Commencez la conversation 👋</div>`;
+    el.innerHTML = `<div class="msg-conv-empty">Commencez la conversation</div>`;
     return;
   }
 

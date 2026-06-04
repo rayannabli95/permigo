@@ -561,7 +561,7 @@ function render() {
                   body: 'Ton gérant doit t\'attribuer des élèves dans la console.',
                 })
               : `<div class="me-empty">
-                   <span class="me-empty-ico">👥</span>
+                   <span class="me-empty-ico">${icon('users',{size:30})}</span>
                    ${_query ? 'Aucun résultat pour <strong>"' + esc(_query) + '"</strong>.' : 'Aucun élève dans cet onglet.'}
                  </div>`)
           : filtered.map(renderRow).join('')
@@ -826,7 +826,7 @@ function renderList() {
           body: 'Ton gérant doit t\'attribuer des élèves dans la console.',
         })
       : `<div class="me-empty">
-           <span class="me-empty-ico">👥</span>
+           <span class="me-empty-ico">${icon('users',{size:30})}</span>
            ${_query ? 'Aucun résultat pour <strong>"' + esc(_query) + '"</strong>.' : 'Aucun élève dans cet onglet.'}
          </div>`;
     return;

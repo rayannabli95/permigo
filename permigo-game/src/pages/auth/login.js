@@ -11,6 +11,7 @@
  */
 
 import { sb, login, loginWithOtp, verifyOtp } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { toast } from '@/components/common/toast.js';
 import { esc } from '@/utils/escape.js';
 import { getCurUser } from '@/auth/cur-user.js';
@@ -170,7 +171,7 @@ function template() {
               <div class="lg-input-wrap">
                 ${ICON_LOCK}
                 <input id="lg-pwd" type="password" name="password" autocomplete="current-password" placeholder="••••••••">
-                <button type="button" class="lg-pw-eye" id="lg-pw-toggle" aria-label="Afficher le mot de passe">👁️</button>
+                <button type="button" class="lg-pw-eye" id="lg-pw-toggle" aria-label="Afficher le mot de passe">${icon('eye',{size:18})}</button>
               </div>
             </div>
 
@@ -195,7 +196,7 @@ function template() {
             <p class="lg-err" id="lg-err"></p>
           </form>
 
-          <button type="button" class="lg-otp-toggle" id="lg-mode-toggle">🔐 Recevoir un code par email</button>
+          <button type="button" class="lg-otp-toggle" id="lg-mode-toggle">Recevoir un code par email</button>
 
           <div class="lg-divider">Démos rapides</div>
           <div class="lg-demos">
@@ -251,7 +252,7 @@ function wire(root) {
       otpField.style.display = 'none';
       rowRemember.style.display = '';
       submitBtn.textContent = 'Se connecter';
-      modeToggle.textContent = '🔐 Recevoir un code par email';
+      modeToggle.textContent = 'Recevoir un code par email';
     } else if (mode === 'otp-request') {
       pwdField.style.display = 'none';
       otpField.style.display = 'none';
@@ -272,7 +273,7 @@ function wire(root) {
   // Show/hide password
   pwToggle.addEventListener('click', () => {
     pwdIn.type = pwdIn.type === 'password' ? 'text' : 'password';
-    pwToggle.textContent = pwdIn.type === 'password' ? '👁️' : '🙈';
+    pwToggle.innerHTML = pwdIn.type === 'password' ? icon('eye',{size:18}) : icon('eye-off',{size:18});
   });
 
   // Forgot password = bascule en mode OTP
@@ -293,7 +294,7 @@ function wire(root) {
     recordAttempt('otp', email);
     const captchaToken = isTurnstileEnabled() ? await getTurnstileToken('otp') : null;
     const r = await loginWithOtp(email, { captchaToken });
-    if (r.ok) toast('Nouveau code envoyé ✉️', 'success');
+    if (r.ok) toast('Nouveau code envoyé', 'success');
     else errEl.textContent = esc(r.error || 'Erreur envoi');
   });
 
@@ -360,12 +361,12 @@ function wire(root) {
         if (!ok) { errEl.textContent = esc(translateAuthError(error) || 'Identifiants invalides'); shake(); return; }
         resetRateLimit('login', email);
         if (remember.checked) saveRememberedEmail(email); else clearRememberedEmail();
-        toast(`Bonjour ${esc(profile.nom.split(' ')[0])} 👋`, 'success');
+        toast(`Bonjour ${esc(profile.nom.split(' ')[0])}`, 'success');
         afterLogin();
       } else if (mode === 'otp-request') {
         const r = await loginWithOtp(email, { captchaToken });
         if (!r.ok) { errEl.textContent = esc(translateAuthError(r.error) || 'Erreur envoi'); shake(); return; }
-        toast('Code envoyé ✉️ Vérifie ta boîte mail', 'success');
+        toast('Code envoyé — vérifie ta boîte mail', 'success');
         setMode('otp-verify');
       } else if (mode === 'otp-verify') {
         const token = otpIn.value.trim();
@@ -374,7 +375,7 @@ function wire(root) {
         if (!r.ok) { errEl.textContent = esc(translateAuthError(r.error) || 'Code invalide'); shake(); return; }
         resetRateLimit('otp', email);
         resetRateLimit('otp-verify', email);
-        toast(`Bonjour ${esc(r.profile.nom.split(' ')[0])} 👋`, 'success');
+        toast(`Bonjour ${esc(r.profile.nom.split(' ')[0])}`, 'success');
         afterLogin();
       }
     } finally {

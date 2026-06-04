@@ -4,6 +4,7 @@
 // est vrai et parental_consent_given_at est null.
 // ═══════════════════════════════════════════════════════════════
 import { esc } from '@/utils/escape.js';
+import { icon } from '@/utils/icons.js';
 import { track } from '@/services/analytics.js';
 import { logout } from '@/auth/auth.js';
 
@@ -33,12 +34,12 @@ export function mountConsentBlocked(root, me) {
 
   root.innerHTML = `${STYLE}
     <div class="cb">
-      <div class="cb-ico">👨‍👩‍👧</div>
+      <div class="cb-ico">${icon('users',{size:34})}</div>
       <h1 class="cb-title">En attente de l'accord de ton parent</h1>
       <p class="cb-sub">Tu as moins de 15 ans : un parent ou tuteur doit valider ton inscription avant que tu puisses utiliser PermiGo. Renvoie-lui le lien ci-dessous si besoin.</p>
       ${link ? `
         <div class="cb-link-row"><input class="cb-input" id="cb-link" type="text" readonly value="${esc(link)}" /></div>
-        <button class="cb-btn cb-btn-primary" id="cb-copy" type="button">📋 Copier le lien pour mon parent</button>
+        <button class="cb-btn cb-btn-primary" id="cb-copy" type="button">${icon('copy',{size:16})} Copier le lien pour mon parent</button>
       ` : `<p class="cb-sub">Demande à ton auto-école de relancer la validation.</p>`}
       <button class="cb-btn cb-btn-ghost" id="cb-logout" type="button">Se déconnecter</button>
     </div>`;
@@ -47,7 +48,7 @@ export function mountConsentBlocked(root, me) {
     try {
       await navigator.clipboard.writeText(link);
       const b = root.querySelector('#cb-copy'); b.textContent = '✓ Lien copié';
-      setTimeout(() => { b.textContent = '📋 Copier le lien pour mon parent'; }, 2000);
+      setTimeout(() => { b.textContent = 'Copier le lien pour mon parent'; }, 2000);
     } catch {
       root.querySelector('#cb-link')?.select();
     }

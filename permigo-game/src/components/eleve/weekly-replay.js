@@ -85,7 +85,7 @@ export function playReplay(stats) {
     {
       bg: 'linear-gradient(180deg,#7c2d12 0%,var(--rdk) 50%,var(--or) 100%)',
       content: `
-        <div class="wrep-tag">🚗 TEMPS AU VOLANT</div>
+        <div class="wrep-tag">TEMPS AU VOLANT</div>
         <div class="wrep-big">${hoursThisWeek.toFixed(1).replace(/\.0$/, '')}<small>h</small></div>
         <div class="wrep-medium">de conduite cette semaine</div>
         ${deltaText ? `<div class="wrep-meta">${esc(deltaText)}</div>` : ''}
@@ -94,7 +94,7 @@ export function playReplay(stats) {
     {
       bg: 'linear-gradient(180deg,#064e3b 0%,var(--gr) 50%,#34d399 100%)',
       content: `
-        <div class="wrep-tag">⚡ COMPÉTENCES</div>
+        <div class="wrep-tag">COMPÉTENCES</div>
         <div class="wrep-big">${stats.compsValidated}</div>
         <div class="wrep-medium">${stats.compsValidated === 1 ? 'compétence validée' : 'compétences validées'}</div>
         <div class="wrep-meta">+${stats.compsValidated * 100} XP gagnés</div>
@@ -117,19 +117,19 @@ export function playReplay(stats) {
     {
       bg: 'linear-gradient(180deg,#451a03 0%,#a16207 50%,var(--aml2) 100%)',
       content: `
-        <div class="wrep-tag">🔥 SÉRIE</div>
+        <div class="wrep-tag">SÉRIE</div>
         <div class="wrep-big">${stats.streak || 1}<small>j</small></div>
         <div class="wrep-medium">${(stats.streak || 1) > 1 ? "d'affilée" : 'à continuer demain'}</div>
-        ${stats.streak >= 7 ? '<div class="wrep-meta">Tu deviens un habitué 💪</div>' : '<div class="wrep-meta">Reviens demain pour grandir la série</div>'}
+        ${stats.streak >= 7 ? '<div class="wrep-meta">Tu deviens un habitué</div>' : '<div class="wrep-meta">Reviens demain pour grandir la série</div>'}
       `,
     },
     {
       bg: 'linear-gradient(180deg,#0c4a6e 0%,#0284c7 50%,#38bdf8 100%)',
       content: `
-        <div class="wrep-tag">🚀 CETTE SEMAINE</div>
+        <div class="wrep-tag">CETTE SEMAINE</div>
         <h1 class="wrep-title" style="font-size:38px">Continue.<br>Le permis t'attend.</h1>
         <p class="wrep-sub">Prêt(e) pour une nouvelle semaine ?</p>
-        <button class="wrep-final-cta" id="wrep-share" type="button">PARTAGER MA SEMAINE 🚀</button>
+        <button class="wrep-final-cta" id="wrep-share" type="button">PARTAGER MA SEMAINE</button>
       `,
     },
   ];
@@ -186,7 +186,7 @@ export function playReplay(stats) {
       if (navigator.share) {
         try {
           await navigator.share({
-            title: 'Ma semaine sur PermiGo 🛣️',
+            title: 'Ma semaine sur PermiGo',
             text: `${stats.compsValidated} compétence${stats.compsValidated !== 1 ? 's' : ''} cette semaine — je progresse vers mon permis !`,
             url: 'https://permigo-game.vercel.app',
           });

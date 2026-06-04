@@ -96,7 +96,7 @@ export async function lancerQuiz({ competenceId, type, nbQuestions, onComplete }
       const expl = document.createElement('div');
       expl.className = `quiz-expl ${correct ? 'expl-ok' : 'expl-ko'}`;
       expl.innerHTML = `
-        <div class="expl-head">${correct ? '✅ Bien joué !' : '💡 À retenir'}</div>
+        <div class="expl-head">${correct ? 'Bien joué !' : 'À retenir'}</div>
         <div class="expl-body">${richEsc(q.explanation)}</div>
       `;
       overlay.querySelector('.quiz-options').appendChild(expl);
@@ -135,7 +135,7 @@ export async function lancerQuiz({ competenceId, type, nbQuestions, onComplete }
     overlay.querySelector('.quiz-body').innerHTML = `
       <div class="quiz-result">
         <div class="quiz-score">${score}/${total}</div>
-        <p>${perfect ? '🔥 Parfait !' : score >= total * 0.6 ? '👍 Bien !' : '🤔 À revoir'}</p>
+        <p>${perfect ? 'Parfait !' : score >= total * 0.6 ? 'Bien !' : 'À revoir'}</p>
         <button class="quiz-close-btn">Continuer</button>
       </div>
     `;

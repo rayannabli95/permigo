@@ -19,7 +19,6 @@ const ROUTES = {
     feedback: () => import('@/pages/eleve/feedback.js'),
     boutique: () => import('@/pages/eleve/boutique.js'),
     'exam-blanc': () => import('@/pages/eleve/exam-blanc.js'),
-    wrapped: () => import('@/pages/eleve/wrapped.js'),
     'mes-coffres': () => import('@/pages/eleve/mes-coffres.js'),
     messages: () => import('@/pages/common/messages.js'),
     legal: () => import('@/pages/common/legal.js'),
@@ -77,7 +76,7 @@ const ROUTE_TITLES = {
   'log-session': 'Séance', sessions: 'Mes séances', quiz: 'Quiz', 'flash-quiz': 'Quiz éclair', trophees: 'Trophées',
   classement: 'Classement',
   galerie: 'Galerie', examen: 'Examen', 'exam-blanc': 'Examen blanc', feedback: 'Feedback',
-  boutique: 'Boutique', wrapped: 'Rétro', 'mes-coffres': 'Mes coffres', messages: 'Messages',
+  boutique: 'Boutique', 'mes-coffres': 'Mes coffres', messages: 'Messages',
   legal: 'Mentions légales', profil: 'Profil', notifications: 'Notifications',
   settings: 'Réglages', pulse: 'Pulse', equipe: 'Équipe', dbg: 'Debug',
 };

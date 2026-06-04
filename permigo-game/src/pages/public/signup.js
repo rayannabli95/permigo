@@ -9,6 +9,7 @@
 //   5. Redirige vers l'accueil de son rôle
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { playLaunch } from '@/utils/sound.js';
@@ -441,7 +442,7 @@ function renderForm(root, invitation, token) {
       root.innerHTML = `${STYLE}
         <div class="sg">
           <div class="sg-card" style="text-align:center">
-            <div style="font-size:48px;margin-bottom:12px">🎉</div>
+            <div style="margin-bottom:12px;color:var(--gr)">${icon('check-circle',{size:44})}</div>
             <h1 class="sg-title">Bienvenue dans PermiGo !</h1>
             <p class="sg-sub">Ton compte est activé. On te redirige…</p>
           </div>
@@ -483,13 +484,13 @@ function renderConsentPending(root, token) {
   root.innerHTML = `${STYLE}
     <div class="sg">
       <div class="sg-card" style="text-align:center">
-        <div style="font-size:46px;margin-bottom:10px">👨‍👩‍👧</div>
+        <div style="margin-bottom:10px;color:var(--mu)">${icon('users',{size:42})}</div>
         <h1 class="sg-title">Presque&nbsp;! On attend l'accord de ton parent</h1>
         <p class="sg-sub">Comme tu as moins de 15 ans, un parent ou tuteur doit donner son accord avant que tu puisses utiliser PermiGo. Envoie-lui ce lien&nbsp;:</p>
         <div class="sg-row">
           <input class="sg-input" id="sg-consent-link" type="text" readonly value="${esc(link)}" />
         </div>
-        <button class="sg-btn" id="sg-copy-link" type="button">📋 Copier le lien</button>
+        <button class="sg-btn" id="sg-copy-link" type="button">${icon('copy',{size:16})} Copier le lien</button>
         <p class="sg-sub" style="margin-top:16px;margin-bottom:0">Tu peux le coller dans WhatsApp ou un SMS à ton parent. Dès qu'il valide, ton compte se débloque.</p>
         <a class="sg-link" href="/#" style="margin-top:18px">J'ai compris</a>
       </div>
@@ -500,7 +501,7 @@ function renderConsentPending(root, token) {
       await navigator.clipboard.writeText(link);
       const btn = root.querySelector('#sg-copy-link');
       btn.textContent = '✓ Lien copié';
-      setTimeout(() => { btn.textContent = '📋 Copier le lien'; }, 2000);
+      setTimeout(() => { btn.innerHTML = `${icon('copy',{size:16})} Copier le lien`; }, 2000);
     } catch {
       linkEl?.select();
       const { toast } = await import('@/components/common/toast.js');
@@ -514,7 +515,7 @@ function renderError(root, title, message) {
   root.innerHTML = `${STYLE}
     <div class="sg">
       <div class="sg-error-card">
-        <div class="sg-error-ico">⚠️</div>
+        <div class="sg-error-ico">${icon('alert-triangle',{size:30})}</div>
         <h1 class="sg-error-title">${esc(title)}</h1>
         <p class="sg-error-msg">${esc(message)}</p>
         <a class="sg-link" href="/#">Retour à l'accueil</a>

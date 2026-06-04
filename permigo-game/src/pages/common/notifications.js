@@ -247,7 +247,7 @@ async function loadNotifs(root, me) {
 
   if (error) {
     toast('Impossible de charger les notifications', 'error');
-    content.innerHTML = `<div class="nf2-empty"><div class="nf2-empty-ico">⚠️</div><div class="nf2-empty-title">Erreur de chargement</div><div class="nf2-empty-sub">Vérifie ta connexion et réessaie.</div></div>`;
+    content.innerHTML = `<div class="nf2-empty"><div class="nf2-empty-ico">${icon('alert-triangle',{size:28})}</div><div class="nf2-empty-title">Erreur de chargement</div><div class="nf2-empty-sub">Vérifie ta connexion et réessaie.</div></div>`;
     return;
   }
 

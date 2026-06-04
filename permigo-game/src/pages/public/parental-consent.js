@@ -7,6 +7,7 @@
 // JURISTE / DPO avant mise en service large.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 
@@ -72,7 +73,7 @@ function renderForm(root, req, token) {
   root.innerHTML = `${STYLE}
     <div class="pc">
       <div class="pc-card">
-        <div class="pc-ico">👨‍👩‍👧</div>
+        <div class="pc-ico">${icon('users',{size:36})}</div>
         <h1 class="pc-title">Consentement parental</h1>
         <p class="pc-sub">Votre enfant souhaite utiliser <strong>PermiGo</strong> pour son apprentissage du code de la route.</p>
 
@@ -125,7 +126,7 @@ function renderDone(root, prenom) {
   root.innerHTML = `${STYLE}
     <div class="pc">
       <div class="pc-card" style="text-align:center">
-        <div class="pc-ico">✅</div>
+        <div class="pc-ico">${icon('check-circle',{size:36})}</div>
         <h1 class="pc-title">Merci&nbsp;!</h1>
         <p class="pc-sub">Le consentement est enregistré. ${prenom} peut désormais utiliser PermiGo pleinement.</p>
       </div>
@@ -136,7 +137,7 @@ function renderError(root, message) {
   root.innerHTML = `${STYLE}
     <div class="pc">
       <div class="pc-card" style="text-align:center">
-        <div class="pc-err-ico">⚠️</div>
+        <div class="pc-err-ico">${icon('alert-triangle',{size:32})}</div>
         <h1 class="pc-title">Lien indisponible</h1>
         <p class="pc-sub">${esc(message)}</p>
       </div>

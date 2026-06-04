@@ -45,7 +45,6 @@ export const playCoin     = () => play('coin');
 export const playReveal   = () => play('reveal');
 export const playPop      = () => play('pop');
 export const playBack     = () => play('back');
-export const playWrapped  = () => play('wrapped');
 export const playWhoosh   = () => play('whoosh');
 export const playGold     = () => play('gold');
 export const playPageturn = () => play('pageturn');

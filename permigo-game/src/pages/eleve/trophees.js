@@ -3,6 +3,7 @@
 // RPC : get_my_achievements()
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
@@ -298,9 +299,9 @@ export async function mount(root) {
     toast('Impossible de charger les trophées', 'error');
     root.querySelector('#tr2-body').innerHTML = `
       <div style="text-align:center;padding:56px 24px;color:var(--mu)">
-        <div style="font-size:48px;margin-bottom:12px">🏆</div>
+        <div style="margin-bottom:12px;color:var(--am)">${icon('trophy',{size:44})}</div>
         <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Continue à apprendre</div>
-        <div style="font:500 13px/1.5 'Inter',sans-serif">Tes premiers trophées arrivent ✨</div>
+        <div style="font:500 13px/1.5 'Inter',sans-serif">Tes premiers trophées arrivent</div>
       </div>`;
   }
 }
@@ -411,8 +412,8 @@ function showModal(def, unlockData, totalUnlocked) {
         <div class="tr2-modal-desc">${esc(def.body)}</div>
         <div class="tr2-modal-meta">
           <div class="tr2-modal-chip xp">+${def.xp} XP</div>
-          <div class="tr2-modal-chip gems">+${def.gemmes} 💎</div>
-          ${dateStr ? `<div class="tr2-modal-chip date">🗓 ${esc(dateStr)}</div>` : ''}
+          <div class="tr2-modal-chip gems">+${def.gemmes} ${icon('gem',{size:13})}</div>
+          ${dateStr ? `<div class="tr2-modal-chip date">${icon('calendar',{size:13})} ${esc(dateStr)}</div>` : ''}
         </div>
         <div class="tr2-modal-social">${totalUnlocked > 1
           ? `Tu es parmi les élèves les plus avancés de ton école ✨`
@@ -430,14 +431,14 @@ function showModal(def, unlockData, totalUnlocked) {
         <div class="tr2-modal-locked-ico">${def.image
           ? `<img src="${def.image}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) opacity(.5)" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:64px">${def.emoji}</span>`
           : `<span style="font-size:64px">${def.emoji}</span>`}</div>
-        <div class="tr2-modal-locked-lbl">🔒 Trophée verrouillé</div>
+        <div class="tr2-modal-locked-lbl">${icon('lock',{size:14})} Trophée verrouillé</div>
       </div>
       <div class="tr2-modal-body">
         <h2 class="tr2-modal-title">${esc(def.title)}</h2>
         <div class="tr2-modal-desc">${esc(def.body)}</div>
         <div class="tr2-modal-meta">
           <div class="tr2-modal-chip xp">+${def.xp} XP à débloquer</div>
-          <div class="tr2-modal-chip gems">+${def.gemmes} 💎 à débloquer</div>
+          <div class="tr2-modal-chip gems">+${def.gemmes} ${icon('gem',{size:13})} à débloquer</div>
           <div class="tr2-modal-chip date">${esc(rm.label)}</div>
         </div>
         <div class="tr2-modal-social">Objectif : ${esc(shortProgress(def.key))}</div>
@@ -462,12 +463,12 @@ function showModal(def, unlockData, totalUnlocked) {
 
   if (isUnlocked) {
     overlay.querySelector('#tr2-share-btn')?.addEventListener('click', async () => {
-      const text = `J'ai débloqué "${def.title}" sur PermiGo ! 🏆\n+${def.xp} XP`;
+      const text = `J'ai débloqué "${def.title}" sur PermiGo !\n+${def.xp} XP`;
       if (navigator.share) {
         try { await navigator.share({ title: 'Mon trophée PermiGo', text, url: window.location.origin }); }
         catch { /* cancelled */ }
       } else {
-        try { await navigator.clipboard.writeText(text); toast('Texte copié 📋', 'success'); }
+        try { await navigator.clipboard.writeText(text); toast('Texte copié', 'success'); }
         catch { /* unavailable */ }
       }
     });

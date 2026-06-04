@@ -476,7 +476,7 @@ function render(root, { me, streak, totalVals, state, stops }) {
             ${streak > 0 ? `
             <div class="pcp-hero-sep"></div>
             <div class="pcp-streak-badge">
-              <span class="pcp-streak-fire">🔥</span>
+              <span class="pcp-streak-fire">${icon('flame',{size:16})}</span>
               <span class="pcp-streak-val">${streak}</span>
               <span class="pcp-streak-lbl">j. de suite</span>
             </div>` : ''}
@@ -502,7 +502,7 @@ function renderNextUnlock(state) {
     return `
       <div class="pcp-next">
         <div class="pcp-next-inner pcp-next-alldone">
-          <div class="pcp-next-alldone-ico">🏆</div>
+          <div class="pcp-next-alldone-ico">${icon('trophy',{size:28})}</div>
           <div class="pcp-next-alldone-title">Tous les paliers atteints</div>
           <div class="pcp-next-alldone-sub">Statut Expert REMC certifié débloqué.</div>
         </div>

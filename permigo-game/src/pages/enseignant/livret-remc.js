@@ -404,7 +404,7 @@ export async function mount(root, eleveId) {
       ${STYLE}
       <div class="lr-page">
         <div class="lr-err">
-          <span class="lr-err-ico">❌</span>
+          <span class="lr-err-ico">${icon('alert-circle',{size:22})}</span>
           Aucun élève sélectionné. Retournez à la liste.
         </div>
       </div>
@@ -791,7 +791,7 @@ async function doSave(overlay) {
     const { error: errNotif } = await sb.from('notifications').insert({
       user_id: _eleveId,
       type: 'post_validation_quiz',
-      title: 'Compétence validée ! 🎯',
+      title: 'Compétence validée !',
       body: `${_sheetComp.n} — Fais le quiz en 30 sec`,
       data: { competence_id: _sheetComp.c },
       read: false,

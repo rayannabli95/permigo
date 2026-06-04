@@ -21,6 +21,7 @@
  */
 
 import { esc } from '@/utils/escape.js';
+import { icon } from '@/utils/icons.js';
 import { burstConfetti } from '@/components/common/confetti.js';
 import { playFanfare } from '@/utils/sound.js';
 
@@ -108,7 +109,7 @@ export function playUnlockCinematic({ worldNum, worldName, worldColor = 'var(--a
         </button>
       ` : `
         <button class="wuc-cta wuc-cta-final" id="wuc-cta" type="button">
-          <span class="wuc-cta-lbl">🏆 TU AS CONQUIS TOUS LES MONDES</span>
+          <span class="wuc-cta-lbl">${icon('trophy',{size:18})} TU AS CONQUIS TOUS LES MONDES</span>
           <span class="wuc-cta-name">Tu es prêt pour l'examen</span>
         </button>
       `}

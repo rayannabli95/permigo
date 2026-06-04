@@ -16,6 +16,7 @@
  */
 
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { toast } from '@/components/common/toast.js';
@@ -115,7 +116,7 @@ function renderList(container) {
   readall.disabled = unread === 0;
 
   if (_notifs.length === 0) {
-    list.innerHTML = `<div class="nb-empty"><div class="em">🌴</div>Aucune notification</div>`;
+    list.innerHTML = `<div class="nb-empty"><div class="em">${icon('bell',{size:26})}</div>Aucune notification</div>`;
     return;
   }
 

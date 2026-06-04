@@ -15,6 +15,7 @@
  */
 
 import { esc } from '@/utils/escape.js';
+import { icon } from '@/utils/icons.js';
 import { getLast7Days, getEquipped, getEquippedAsset, getGemmes } from '@/utils/game-state.js';
 
 function initials(name) {
@@ -299,7 +300,7 @@ export function renderGameHUD(stats, me) {
     <!-- Modal Streak Calendar -->
     <div class="ghud-streak-modal" id="ghud-streak-modal" role="dialog" aria-modal="true" aria-labelledby="ghud-streak-title">
       <div class="ghud-streak-panel">
-        <div class="ghud-streak-flame">🔥</div>
+        <div class="ghud-streak-flame">${icon('flame',{size:20})}</div>
         <div class="ghud-streak-count" id="ghud-streak-title">${streak.count}</div>
         <div class="ghud-streak-lbl">${streak.count > 1 ? 'JOURS DE SÉRIE' : 'JOUR DE SÉRIE'}</div>
         <div class="ghud-streak-msg" id="ghud-streak-msg">${streakMsg(streak.count)}</div>
@@ -435,7 +436,7 @@ function streakMsg(count) {
   if (count === 0) return "Commence ta série dès aujourd'hui !";
   if (count === 1) return 'Belle entame. Reviens demain pour continuer ta série.';
   if (count < 7) return `Tu es sur ${count} jours d'affilée. Ne casse pas le rythme !`;
-  if (count < 30) return `${count} jours de suite — tu deviens un habitué 💪`;
+  if (count < 30) return `${count} jours de suite — tu deviens un habitué`;
   if (count < 100) return `${count} jours — légendaire. Tu vas chercher le permis.`;
   return `${count} jours — culte. Respect total.`;
 }

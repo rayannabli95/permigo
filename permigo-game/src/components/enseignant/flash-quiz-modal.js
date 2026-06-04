@@ -4,6 +4,7 @@
 // à l'élève (5 min pour répondre). Ton pro (Linear/Notion), pas Duolingo.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { esc } from '@/utils/escape.js';
 import { toast } from '@/components/common/toast.js';
 
@@ -66,7 +67,7 @@ export function openFlashQuizModal({ eleveId, eleveNom, competences = [] }) {
     overlay.innerHTML = `
       <div class="fq-sheet" role="dialog" aria-modal="true" aria-label="Envoyer un quiz éclair">
         <div class="fq-head">
-          <span class="fq-badge" aria-hidden="true">⚡</span>
+          <span class="fq-badge" aria-hidden="true">${icon('zap',{size:16})}</span>
           <h2 class="fq-title">Quiz éclair à ${esc(eleveNom || "l'élève")}</h2>
         </div>
         <p class="fq-sub">3 questions, 5 minutes pour répondre. Idéal pour ancrer ce que vous venez de travailler.</p>

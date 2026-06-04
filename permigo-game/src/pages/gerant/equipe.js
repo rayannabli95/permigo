@@ -3,6 +3,7 @@
 // Liste enseignants + stats ce mois + recherche
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
@@ -286,7 +287,7 @@ function render(root, teachers, teacherStats) {
       <div class="eq-count">${teachers.length} enseignant${teachers.length > 1 ? 's' : ''}</div>
     </div>
     <div class="eq-search-wrap">
-      <span class="eq-search-ico">🔍</span>
+      <span class="eq-search-ico">${icon('search',{size:16})}</span>
       <input
         id="eq-search"
         class="eq-search"
@@ -433,7 +434,7 @@ function openInviteModal(me) {
 function renderCards(teachers, teacherStats) {
   if (teachers.length === 0) {
     return `<div class="eq-empty">
-      <div class="eq-empty-ico">👥</div>
+      <div class="eq-empty-ico">${icon('users',{size:30})}</div>
       Aucun enseignant trouvé
     </div>`;
   }

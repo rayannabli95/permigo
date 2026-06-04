@@ -1263,7 +1263,7 @@ export async function mount(root) {
   if (valErr) {
     root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div></div></div>
       <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
-        <div style="font-size:40px;margin-bottom:12px">📡</div>
+        <div style="font-size:40px;margin-bottom:12px">${icon('alert-circle',{size:30})}</div>
         <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
         <button onclick="location.reload()" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:#fff;border-radius:12px;cursor:pointer">Réessayer</button>
       </div></div>`;
@@ -1412,7 +1412,7 @@ function spawnArrow(node, compId) {
         .fresh-arrow, .fa-arrow { animation: none !important; }
       }
     </style>
-    <div class="fa-bubble">✨ Tu viens de débloquer : ${esc(resolveCompName(compId))}</div>
+    <div class="fa-bubble">Tu viens de débloquer : ${esc(resolveCompName(compId))}</div>
     <svg class="fa-arrow" viewBox="0 0 24 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M12 0 L12 32" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
       <path d="M3 24 L12 36 L21 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
@@ -1678,7 +1678,7 @@ function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds 
     <div class="prc-world-tagline">${esc(world.description)}</div>
     <div class="prc-world-count">
       ${done} / ${total} compétences
-      ${isComplete ? ' 🏆' : ''}
+      ${isComplete ? ' ' + icon('trophy',{size:15}) : ''}
     </div>
   </div>
 

@@ -4,6 +4,7 @@
 // Onglets : Skins (avatars = voitures) · Autres (thèmes + fonds permis)
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
@@ -277,7 +278,7 @@ export async function mount(root) {
     <div class="bo2-hd-row">
       <h1 class="bo2-hd-title" tabindex="-1">Boutique</h1>
       <div class="bo2-gems" id="bo2-gems-badge">
-        <span class="bo2-gems-ico">💎</span>
+        <span class="bo2-gems-ico">${icon('gem',{size:13})}</span>
         <span class="bo2-gems-val" id="bo2-gems-val">…</span>
       </div>
     </div>
@@ -354,8 +355,8 @@ export async function mount(root) {
 
     if (!items.length) {
       content.innerHTML = catalogFailed
-        ? `<div class="bo2-empty"><div class="bo2-empty-ico">📡</div><div class="bo2-empty-t">Boutique indisponible</div><div class="bo2-empty-d">Vérifie ta connexion et réessaie.</div></div>`
-        : `<div class="bo2-empty"><div class="bo2-empty-ico">🛒</div><div class="bo2-empty-t">Bientôt disponible</div><div class="bo2-empty-d">Ces items arrivent dans la prochaine mise à jour !</div></div>`;
+        ? `<div class="bo2-empty"><div class="bo2-empty-ico">${icon('alert-circle',{size:30})}</div><div class="bo2-empty-t">Boutique indisponible</div><div class="bo2-empty-d">Vérifie ta connexion et réessaie.</div></div>`
+        : `<div class="bo2-empty"><div class="bo2-empty-ico">${icon('shopping-bag',{size:30})}</div><div class="bo2-empty-t">Bientôt disponible</div><div class="bo2-empty-d">Ces items arrivent dans la prochaine mise à jour !</div></div>`;
       return;
     }
 
@@ -439,10 +440,10 @@ function renderSkinCard(item, gemmes, idx) {
   } else if (item.owned) {
     cta = `<button class="bo2-equip-btn">Équiper</button>`;
   } else if (canAfford) {
-    cta = `<button class="bo2-buy" style="background:${r.c};box-shadow:0 4px 14px -4px ${r.c}">💎 ${item.cost_gemmes}</button>`;
+    cta = `<button class="bo2-buy" style="background:${r.c};box-shadow:0 4px 14px -4px ${r.c}">${icon('gem',{size:13})} ${item.cost_gemmes}</button>`;
   } else {
-    cta = `<div class="bo2-lock" style="background:${r.c}55">🔒</div>
-           <span class="bo2-buy" style="background:transparent;color:var(--mu);padding-left:8px">💎 ${item.cost_gemmes}</span>`;
+    cta = `<div class="bo2-lock" style="background:${r.c}55">${icon('lock',{size:14})}</div>
+           <span class="bo2-buy" style="background:transparent;color:var(--mu);padding-left:8px">${icon('gem',{size:13})} ${item.cost_gemmes}</span>`;
   }
 
   return `
@@ -477,7 +478,7 @@ function renderRarityScale(items) {
           return `<div class="bo2-scale-item">
             <div class="bo2-scale-dot" style="background:${r.c}26;border:2px solid ${r.c};box-shadow:0 0 12px ${r.c}66">${icons[k]}</div>
             <div class="bo2-scale-lbl" style="color:${r.c}">${esc(r.label)}</div>
-            ${price != null ? `<div class="bo2-scale-price">💎 ${price}</div>` : ''}
+            ${price != null ? `<div class="bo2-scale-price">${icon('gem',{size:13})} ${price}</div>` : ''}
           </div>`;
         }).join('')}
       </div>
@@ -510,7 +511,7 @@ function renderGridCard(item, gemmes, idx) {
           <span class="bo2-pill" style="background:${r.c}">${esc(r.label)}</span>
           ${item.owned
             ? (isEquipped ? `<div class="bo2-owned-txt">✓ Équipé</div>` : `<div class="bo2-owned-txt" style="color:var(--mu2)">Équiper</div>`)
-            : `<button class="bo2-price-btn ${canAfford ? '' : 'cant-afford'}" style="${canAfford ? `background:${r.c}` : ''}" ${!canAfford ? 'disabled' : ''}>💎 ${item.cost_gemmes}</button>`
+            : `<button class="bo2-price-btn ${canAfford ? '' : 'cant-afford'}" style="${canAfford ? `background:${r.c}` : ''}" ${!canAfford ? 'disabled' : ''}>${icon('gem',{size:13})} ${item.cost_gemmes}</button>`
           }
         </div>
       </div>
@@ -561,17 +562,17 @@ function showDetailModal(item, gemmes, onConfirm) {
   // Bloc Prix / Solde — visible seulement pour un item pas encore possédé
   const priceBlock = item.owned ? '' : `
       <div class="bo2-modal-price">
-        <div class="bo2-price-row"><span>Prix</span><strong>💎 ${item.cost_gemmes}</strong></div>
-        <div class="bo2-price-row sub"><span>Ton solde</span><span>💎 ${gemmes}</span></div>
+        <div class="bo2-price-row"><span>Prix</span><strong>${icon('gem',{size:13})} ${item.cost_gemmes}</strong></div>
+        <div class="bo2-price-row sub"><span>Ton solde</span><span>${icon('gem',{size:13})} ${gemmes}</span></div>
       </div>`;
   if (item.owned) {
     cta = `<button class="bo2-modal-cta equip" id="bo2-cta">${isEquipped ? '✓ Équipé — retirer' : 'Équiper'}</button>`;
   } else if (canAfford) {
-    cta = `<button class="bo2-modal-cta buy" id="bo2-cta">Acheter — ${item.cost_gemmes} 💎</button>`;
-    balanceLine = `<div class="bo2-modal-balance">Il te restera <strong>${afterBalance} 💎</strong> après l'achat</div>`;
+    cta = `<button class="bo2-modal-cta buy" id="bo2-cta">Acheter — ${item.cost_gemmes} ${icon('gem',{size:13})}</button>`;
+    balanceLine = `<div class="bo2-modal-balance">Il te restera <strong>${afterBalance} ${icon('gem',{size:13})}</strong> après l'achat</div>`;
   } else {
-    cta = `<button class="bo2-modal-cta locked" disabled>🔒 Pas assez de gemmes</button>`;
-    balanceLine = `<div class="bo2-modal-balance" style="color:#f87171">Il te manque ${item.cost_gemmes - gemmes} 💎</div>`;
+    cta = `<button class="bo2-modal-cta locked" disabled>${icon('lock',{size:14})} Pas assez de gemmes</button>`;
+    balanceLine = `<div class="bo2-modal-balance" style="color:#f87171">Il te manque ${item.cost_gemmes - gemmes} ${icon('gem',{size:13})}</div>`;
   }
 
   const overlay = document.createElement('div');
@@ -630,7 +631,7 @@ async function doPurchase(item, root, allItems) {
   try {
     const { data, error } = await sb.rpc('purchase_item', { p_item_id: item.id });
     if (error) { toast('Erreur lors de l\'achat', 'error'); return null; }
-    if (data?.error === 'insufficient_gemmes') { toast('Pas assez de gemmes 💎', 'error'); return null; }
+    if (data?.error === 'insufficient_gemmes') { toast('Pas assez de gemmes gemmes', 'error'); return null; }
     if (data?.error === 'already_owned')       { toast('Déjà dans ton inventaire', 'info'); return null; }
     if (data?.error)                           { toast('Achat impossible', 'error'); return null; }
     haptic('success');
@@ -640,10 +641,10 @@ async function doPurchase(item, root, allItems) {
       equipItem(item.type, item.id);
       setEquippedAsset(item.type, item.asset_url || null);
       syncAvatarUrlToProfile(item.type, item.asset_url || null);
-      toast(`🎁 ${item.name} équipé !`, 'success', 3000);
+      toast(`${item.name} équipé !`, 'success', 3000);
     } catch (eqErr) {
       console.warn('[boutique] auto-equip failed', eqErr);
-      toast(`🎁 ${item.name} débloqué !`, 'success', 3000);
+      toast(`${item.name} débloqué !`, 'success', 3000);
     }
 
     track('boutique.item_purchased', { item_id: item.id, cost: item.cost_gemmes });

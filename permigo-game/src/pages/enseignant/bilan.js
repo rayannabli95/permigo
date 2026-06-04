@@ -252,10 +252,10 @@ const STYLE = `<style>
 
 // ─── Monde metadata ──────────────────────────────────────────────
 const MONDES = {
-  C1: { name: 'Contrôle & Sécurité', color: 'var(--gr2)', ico: '🟢', short: 'C1' },
-  C2: { name: 'Manœuvres',           color: 'var(--bl2)', ico: '🔵', short: 'C2' },
-  C3: { name: 'Circulation',         color: '#eab308', ico: '🟡', short: 'C3' },
-  C4: { name: 'Situations complexes', color: 'var(--pul)', ico: '🟣', short: 'C4' },
+  C1: { name: 'Contrôle & Sécurité', color: 'var(--gr2)', ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--gr2);vertical-align:middle"></span>', short: 'C1' },
+  C2: { name: 'Manœuvres',           color: 'var(--bl2)', ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--bl2);vertical-align:middle"></span>', short: 'C2' },
+  C3: { name: 'Circulation',         color: '#eab308', ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#eab308;vertical-align:middle"></span>', short: 'C3' },
+  C4: { name: 'Situations complexes', color: 'var(--pul)', ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--pul);vertical-align:middle"></span>', short: 'C4' },
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────
@@ -400,7 +400,7 @@ export async function mount(root, eleveId) {
   if (error || !data) {
     toast('Impossible de charger le bilan', 'error');
     root.innerHTML = `${STYLE}<div class="bl"><div class="bl-no-data">
-      <div style="font-size:32px;margin-bottom:12px">📋</div>
+      <div style="margin-bottom:12px;color:var(--mu)">${icon('clipboard',{size:30})}</div>
       Bilan indisponible. Vérifie que cet élève est bien rattaché à ton compte.
     </div></div>`;
     return;

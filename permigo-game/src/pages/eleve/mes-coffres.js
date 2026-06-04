@@ -241,8 +241,8 @@ function renderCard(chest) {
       <div class="mc-label">${esc(meta.label)}</div>
       <div class="mc-sub">${canOpen ? 'Débloqué ' + relTime(chest.unlocked_at) : 'Ouvert ' + relTime(chest.opened_at)}</div>
       ${canOpen ? `<div class="mc-rewards">
-        <span class="mc-rew-chip">⚡ +${xp} XP</span>
-        <span class="mc-rew-chip">💎 +${gemmes}</span>
+        <span class="mc-rew-chip">${icon('zap',{size:13})} +${xp} XP</span>
+        <span class="mc-rew-chip">${icon('gem',{size:13})} +${gemmes}</span>
       </div>` : ''}
     </div>
     ${canOpen
@@ -306,7 +306,7 @@ export async function mount(root) {
 
   if (chests.length === 0) {
     html = loadFailed
-      ? `<div class="mc-empty"><div class="mc-empty-ico">📡</div>Impossible de charger tes coffres.<br>
+      ? `<div class="mc-empty"><div class="mc-empty-ico">${icon('alert-circle',{size:30})}</div>Impossible de charger tes coffres.<br>
          <button class="mc-open-btn" id="mc-retry" style="margin-top:12px">Réessayer</button></div>`
       : `<div class="mc-empty"><div class="mc-empty-ico">🎁</div>Aucun coffre encore — complète des mondes<br>et construis ton streak !</div>`;
   }
@@ -379,7 +379,7 @@ export async function mount(root) {
           migrateCard();
           if (!silent) {
             navigator.vibrate?.([30, 50, 30]);
-            toast(`${meta.label} ouvert ! +${meta.xp ?? 0} XP +${meta.gemmes ?? 0} 💎`, 'success');
+            toast(`${meta.label} ouvert ! +${meta.xp ?? 0} XP +${meta.gemmes ?? 0} gemmes`, 'success');
           }
         } else if (result.error === 'already_opened') {
           markOpened();

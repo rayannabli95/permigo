@@ -3,6 +3,7 @@
 // Aucun nom complet d'élève n'est jamais exposé : pseudo ou « Apprenti #XXXX ».
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
@@ -111,7 +112,7 @@ export async function mount(root) {
   if (ecoleRes.error && nationalRes.error) {
     console.error('[classement]', ecoleRes.error || nationalRes.error);
     root.innerHTML = `${STYLE}<div class="clt"><div class="clt-hd"><h1 class="clt-title">Classement</h1></div>
-      <div class="clt-empty"><div class="clt-empty-ico">😕</div>
+      <div class="clt-empty"><div class="clt-empty-ico">${icon('alert-circle',{size:30})}</div>
       <div class="clt-empty-txt">Le classement n'a pas pu se charger. Réessaie plus tard.</div></div></div>`;
     return;
   }
@@ -140,8 +141,8 @@ function render(scope, data) {
   const total = totalKnown(rows);
 
   const pill = mine
-    ? `<div class="clt-mepill"><span class="clt-mepill-ico">🏆</span>Tu es #${mine.rang}${total ? ` sur ${total}` : ''}</div>`
-    : `<div class="clt-mepill"><span class="clt-mepill-ico">🏁</span>Valide une compétence pour entrer au classement</div>`;
+    ? `<div class="clt-mepill"><span class="clt-mepill-ico">${icon('trophy',{size:15})}</span>Tu es #${mine.rang}${total ? ` sur ${total}` : ''}</div>`
+    : `<div class="clt-mepill"><span class="clt-mepill-ico">${icon('target',{size:15})}</span>Valide une compétence pour entrer au classement</div>`;
 
   return `
 <div class="clt">
@@ -155,7 +156,7 @@ function render(scope, data) {
   </div>
   <div id="clt-body">${renderBody(rows)}</div>
   <a class="clt-pseudo" href="#/profil">
-    <span class="clt-pseudo-ico" aria-hidden="true">🎭</span>
+    <span class="clt-pseudo-ico" aria-hidden="true">${icon('user',{size:16})}</span>
     <div class="clt-pseudo-body">
       <div class="clt-pseudo-ttl">Choisis ton pseudo public</div>
       <div class="clt-pseudo-sub">Sinon tu apparais en « Apprenti #XXXX »</div>
@@ -170,7 +171,7 @@ function renderBody(rows) {
   const active = rows.filter(r => r.score > 0).length;
   if (active < 2) {
     return `<div class="clt-empty">
-      <div class="clt-empty-ico">🏁</div>
+      <div class="clt-empty-ico">${icon('target',{size:30})}</div>
       <div class="clt-empty-txt">Le classement s'anime quand 2+ élèves ont validé des compétences.</div>
     </div>`;
   }
@@ -219,8 +220,8 @@ function wire(root, data, setScope) {
       const pill = root.querySelector('.clt-mepill');
       if (pill) {
         pill.innerHTML = mine
-          ? `<span class="clt-mepill-ico">🏆</span>Tu es #${mine.rang}${total ? ` sur ${total}` : ''}`
-          : `<span class="clt-mepill-ico">🏁</span>Valide une compétence pour entrer au classement`;
+          ? `<span class="clt-mepill-ico">${icon('trophy',{size:15})}</span>Tu es #${mine.rang}${total ? ` sur ${total}` : ''}`
+          : `<span class="clt-mepill-ico">${icon('target',{size:15})}</span>Valide une compétence pour entrer au classement`;
       }
       // Corps
       const body = root.querySelector('#clt-body');

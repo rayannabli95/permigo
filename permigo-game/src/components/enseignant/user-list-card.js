@@ -19,6 +19,7 @@
  */
 
 import { esc } from '@/utils/escape.js';
+import { icon } from '@/utils/icons.js';
 
 const AVATAR_GRADIENTS = [
   'linear-gradient(135deg,#667eea,#764ba2)',
@@ -60,7 +61,7 @@ export function renderUserListCard({
       <div class="ulc-body" style="max-height:${maxHeight}px">
         ${items.length === 0 ? `
           <div class="ulc-empty">
-            <div class="ulc-empty-em">📭</div>
+            <div class="ulc-empty-em">${icon('inbox',{size:28})}</div>
             <div>${esc(emptyText)}</div>
           </div>
         ` : items.map(it => renderItem(it)).join('')}

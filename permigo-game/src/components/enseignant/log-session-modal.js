@@ -699,9 +699,9 @@ export async function openLogSessionModal() {
       });
 
       if (created > 0) {
-        toast(`+10 XP · ${created} compétence${created > 1 ? 's' : ''} validée${created > 1 ? 's' : ''} 🎉`, 'success');
+        toast(`+10 XP · ${created} compétence${created > 1 ? 's' : ''} validée${created > 1 ? 's' : ''}`, 'success');
       } else {
-        toast(`Session enregistrée · ${durLabel} avec ${esc(eleveName?.prenom || "l'élève")} 📝`, 'success');
+        toast(`Session enregistrée · ${durLabel} avec ${esc(eleveName?.prenom || "l'élève")}`, 'success');
       }
       closeModal();
 

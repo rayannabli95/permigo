@@ -75,7 +75,7 @@ export function mountCookieBanner() {
   root.id = 'ck-banner-root';
   root.innerHTML = `${STYLE}
     <div class="ck-banner" role="dialog" aria-label="Préférences cookies" aria-live="polite">
-      <div class="ck-ttl">🍪 Cookies & confidentialité</div>
+      <div class="ck-ttl">Cookies & confidentialité</div>
       <p class="ck-txt">
         On utilise le strict nécessaire pour te connecter, plus une mesure d'audience
         interne (sans pub ni tracker tiers) pour améliorer l'app.
