@@ -251,12 +251,12 @@ const STYLE = `<style>
   position: absolute;
   top: 14px;
   right: 14px;
-  width: 72px;
-  height: 72px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
   z-index: 4;
   filter: drop-shadow(0 4px 12px rgba(11,13,26,.15));
-  opacity: .95;
+  opacity: .8;
   transition: transform .4s cubic-bezier(.23,1,.32,1);
   pointer-events: none;
 }
@@ -339,9 +339,10 @@ const STYLE = `<style>
 }
 .prc-world-tagline {
   font: 500 12px/1.3 'Inter', sans-serif;
-  color: var(--mu4);
+  color: var(--ink);
+  opacity: .82;
   margin-bottom: 8px;
-  text-shadow: 0 1px 4px rgba(255,255,255,.7);
+  text-shadow: 0 1px 6px rgba(255,255,255,.95);
 }
 .prc-world-count {
   display: inline-flex;
@@ -610,12 +611,12 @@ const STYLE = `<style>
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--bo);
   border-radius: 12px;
-  padding: 7px 11px 8px;
+  padding: 6px 10px 7px;
   width: max-content;
-  max-width: 190px;
-  min-width: 120px;
+  max-width: 168px;
+  min-width: 104px;
   text-align: center;
-  box-shadow: 0 6px 18px rgba(11,13,26,.1), 0 1px 3px rgba(11,13,26,.06);
+  box-shadow: 0 4px 12px rgba(11,13,26,.08);
   pointer-events: none;
 }
 /* Nom compétence — ROI typographique */
@@ -1237,7 +1238,7 @@ const STYLE = `<style>
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
 const WORLDS_META = [
-  { num: 1, color: 'var(--gr)', glow: 'rgba(16,185,129,.35)',  img: ASSETS.worldC1 },
+  { num: 1, color: 'var(--gr)', glow: 'rgba(16,185,129,.35)',  img: '/skins/permigo-remc-maitrise-vehicule-flag-v1.png' },
   { num: 2, color: '#06b6d4', glow: 'rgba(6,182,212,.35)',   img: ASSETS.worldC2 },
   { num: 3, color: 'var(--pu)', glow: 'rgba(139,92,246,.35)',  img: ASSETS.worldC3 },
   { num: 4, color: 'var(--am)', glow: 'rgba(245,158,11,.35)',  img: ASSETS.worldC4 },
