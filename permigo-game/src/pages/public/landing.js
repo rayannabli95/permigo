@@ -30,24 +30,63 @@ export function mount(root) {
 
     <!-- ── Hero ── -->
     <section class="lp-hero">
-      <div class="lp-hero-txt">
-        <div class="lp-eyebrow">Pour les auto-écoles</div>
-        <h1 class="lp-h1">Tes élèves progressent comme dans un jeu. Tes moniteurs se prennent au jeu.</h1>
-        <p class="lp-lead">PermiGo transforme le programme du permis en parcours gamifié : streaks, récompenses, et un classement qui motive autant les élèves que les moniteurs. Plus d'engagement, moins d'abandons.</p>
-        <div class="lp-hero-cta">
-          <button class="lp-btn lp-btn-primary" data-scroll="lp-lead" type="button">Être recontacté</button>
-          <a class="lp-btn lp-btn-soft" href="#lp-how">Voir comment ça marche</a>
-        </div>
-        <div class="lp-hero-note">Sans engagement · Mise en route en quelques minutes</div>
+      <!-- Fond animé -->
+      <div class="lp-hero-bg" aria-hidden="true">
+        <div class="lp-blob lp-blob-1"></div>
+        <div class="lp-blob lp-blob-2"></div>
+        <div class="lp-blob lp-blob-3"></div>
       </div>
-      <div class="lp-hero-art" aria-hidden="true">
-        <div class="lp-phone">
-          <div class="lp-phone-screen">
-            <img src="${BADGE}" alt="" class="lp-phone-badge" />
-            <div class="lp-phone-streak">🔥 7 jours d'affilée</div>
-            <div class="lp-phone-bar"><span style="width:72%"></span></div>
-            <div class="lp-phone-cap">Compétence 22 / 31 validée</div>
-            <div class="lp-phone-rank">🏆 #2 au classement de l'école</div>
+
+      <div class="lp-hero-inner">
+        <!-- Texte gauche -->
+        <div class="lp-hero-txt">
+          <div class="lp-hero-badge">
+            <span class="lp-badge-pulse"></span>
+            Bêta ouverte · 47 auto-écoles rejointes
+          </div>
+          <h1 class="lp-h1">
+            Le permis, transformé<br>
+            en <em class="lp-h1-em">parcours qui accroche</em>
+          </h1>
+          <p class="lp-lead">Streaks quotidiens, quiz, classement moniteurs — PermiGo engage tes élèves entre les leçons et valorise le travail de tes enseignants. Plus d'abandons, plus de réussite.</p>
+          <div class="lp-hero-cta">
+            <button class="lp-btn lp-btn-primary" data-scroll="lp-lead" type="button">
+              Être recontacté
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+            <a class="lp-btn lp-btn-ghost-hero" href="#lp-how">Comment ça marche</a>
+          </div>
+          <div class="lp-hero-chips">
+            <span class="lp-chip">✓ Conforme REMC officiel</span>
+            <span class="lp-chip">✓ Sans installation</span>
+            <span class="lp-chip">✓ Sans engagement</span>
+          </div>
+        </div>
+
+        <!-- Visuel droit -->
+        <div class="lp-hero-visual" aria-hidden="true">
+          <div class="lp-phone">
+            <div class="lp-phone-notch"></div>
+            <div class="lp-phone-screen">
+              <img src="${BADGE}" alt="" class="lp-phone-badge" />
+              <div class="lp-phone-lvl">Niveau 4 · Maîtrise du véhicule</div>
+              <div class="lp-phone-streak">🔥 <strong>12</strong> jours de suite</div>
+              <div class="lp-phone-bar"><div class="lp-phone-fill"></div></div>
+              <div class="lp-phone-stats">
+                <div class="lp-pstat"><div class="lp-pstat-val">22</div><div class="lp-pstat-lbl">compétences</div></div>
+                <div class="lp-pstat lp-pstat-mid"><div class="lp-pstat-val">#2</div><div class="lp-pstat-lbl">classement</div></div>
+                <div class="lp-pstat"><div class="lp-pstat-val">847</div><div class="lp-pstat-lbl">XP</div></div>
+              </div>
+            </div>
+          </div>
+          <!-- Floating cards -->
+          <div class="lp-fcard lp-fcard-1">
+            <span class="lp-fcard-ico">🏆</span>
+            <div><div class="lp-fcard-val">+89 XP</div><div class="lp-fcard-sub">Compétence acquise</div></div>
+          </div>
+          <div class="lp-fcard lp-fcard-2">
+            <span class="lp-fcard-ico">🔥</span>
+            <div><div class="lp-fcard-val">Streak actif</div><div class="lp-fcard-sub">12 jours d'affilée</div></div>
           </div>
         </div>
       </div>
@@ -358,31 +397,159 @@ const STYLE = `<style>
   .lp-nav-actions { display: flex; align-items: center; gap: 6px; }
   .lp-nav-link { font: 600 14px/1 'Inter'; color: var(--lp-mut); padding: 10px 12px; }
 
-  /* Hero */
-  .lp-hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center;
-    max-width: 1080px; margin: 0 auto; padding: 64px 22px 40px; }
-  .lp-eyebrow { display: inline-block; font: 700 12px/1 'Inter'; letter-spacing: .08em; text-transform: uppercase;
-    color: var(--lp-indigo-dk); background: rgba(99,102,241,.1); padding: 7px 12px; border-radius: 999px; margin-bottom: 18px; }
-  .lp-h1 { font: 800 44px/1.08 'Plus Jakarta Sans', sans-serif; letter-spacing: -.03em; margin: 0 0 18px; max-width: 16ch; }
-  .lp-lead { font: 400 18px/1.6 'Inter'; color: var(--lp-mut); margin: 0 0 28px; max-width: 46ch; }
-  .lp-hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
-  .lp-hero-note { margin-top: 16px; font: 500 13px/1 'Inter'; color: var(--lp-mut); }
+  /* ─── HERO dark immersif ─── */
+  .lp-hero {
+    position: relative; overflow: hidden;
+    background: #060c1a;
+    padding: 0 0 80px;
+  }
 
-  /* Hero art (mockup CSS) */
-  .lp-hero-art { display: flex; justify-content: center; }
-  .lp-phone { width: 250px; aspect-ratio: 9/18; border-radius: 36px; padding: 12px;
-    background: linear-gradient(160deg, #1b2240, #0b1020); box-shadow: 0 30px 70px -20px rgba(20,24,60,.5);
-    border: 1px solid rgba(255,255,255,.08); }
-  .lp-phone-screen { height: 100%; border-radius: 26px; background:
-      radial-gradient(ellipse 90% 50% at 50% 0%, rgba(88,204,2,.18), transparent 60%),
-      linear-gradient(180deg, #11183a, #0b1020);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 22px; text-align: center; }
-  .lp-phone-badge { width: 76px; height: 76px; object-fit: contain; filter: drop-shadow(0 10px 22px rgba(88,204,2,.4)); }
-  .lp-phone-streak { font: 800 14px/1 'Plus Jakarta Sans'; color: #fff; }
-  .lp-phone-bar { width: 80%; height: 9px; border-radius: 9px; background: rgba(255,255,255,.12); overflow: hidden; }
-  .lp-phone-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--lp-green), #8ee84e); border-radius: 9px; }
-  .lp-phone-cap { font: 600 12px/1.3 'Inter'; color: rgba(255,255,255,.7); }
-  .lp-phone-rank { font: 700 12px/1 'Inter'; color: #fff; background: rgba(99,102,241,.3); padding: 8px 12px; border-radius: 999px; }
+  /* Blobs animés */
+  .lp-hero-bg { position: absolute; inset: 0; pointer-events: none; }
+  .lp-blob { position: absolute; border-radius: 50%; filter: blur(90px); will-change: transform; }
+  .lp-blob-1 { width: 700px; height: 560px; background: radial-gradient(circle, rgba(88,204,2,.42), transparent 68%);
+    top: -200px; right: -160px; opacity: .7;
+    animation: blobA 16s ease-in-out infinite alternate; }
+  .lp-blob-2 { width: 560px; height: 480px; background: radial-gradient(circle, rgba(99,102,241,.38), transparent 68%);
+    bottom: -160px; left: -120px; opacity: .6;
+    animation: blobA 20s ease-in-out infinite alternate-reverse; }
+  .lp-blob-3 { width: 380px; height: 320px; background: radial-gradient(circle, rgba(56,189,248,.28), transparent 68%);
+    top: 40%; left: 45%; opacity: .35;
+    animation: blobA 24s ease-in-out infinite alternate; }
+  @keyframes blobA {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(28px,18px) scale(1.07); }
+  }
+  @media (prefers-reduced-motion: reduce) { .lp-blob { animation: none; } }
+
+  /* Layout intérieur */
+  .lp-hero-inner {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 56px; align-items: center;
+    max-width: 1080px; margin: 0 auto;
+    padding: 80px 32px 0;
+  }
+
+  /* Badge annonce */
+  .lp-hero-badge {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: rgba(88,204,2,.1); border: 1px solid rgba(88,204,2,.28);
+    border-radius: 999px; padding: 8px 16px;
+    font: 600 12.5px/1 'Inter', sans-serif; color: rgba(88,204,2,.95);
+    margin-bottom: 24px; letter-spacing: .01em;
+  }
+  .lp-badge-pulse {
+    width: 7px; height: 7px; border-radius: 50%; background: #58cc02; flex-shrink: 0;
+    box-shadow: 0 0 0 0 rgba(88,204,2,.7);
+    animation: pulse 2.2s ease-out infinite;
+  }
+  @keyframes pulse {
+    0%  { box-shadow: 0 0 0 0 rgba(88,204,2,.7); }
+    70% { box-shadow: 0 0 0 9px rgba(88,204,2,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(88,204,2,0); }
+  }
+
+  /* Headline */
+  .lp-h1 {
+    font: 900 60px/1.05 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -.038em; color: #fff;
+    margin: 0 0 22px;
+  }
+  .lp-h1-em {
+    font-style: normal; display: inline;
+    background: linear-gradient(90deg, #58cc02 0%, #a3e635 45%, #38bdf8 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  /* Lead */
+  .lp-lead { font: 400 17px/1.7 'Inter', sans-serif; color: rgba(255,255,255,.58); margin: 0 0 30px; max-width: 44ch; }
+
+  /* CTA */
+  .lp-hero-cta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+  .lp-btn-ghost-hero {
+    display: inline-flex; align-items: center;
+    padding: 14px 20px;
+    font: 700 15px/1 'Inter', sans-serif; color: rgba(255,255,255,.75);
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16);
+    border-radius: 13px; cursor: pointer; text-decoration: none;
+    transition: background .15s, border-color .15s;
+  }
+  .lp-btn-ghost-hero:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.28); }
+
+  /* Trust chips */
+  .lp-hero-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .lp-chip {
+    font: 500 12px/1 'Inter', sans-serif; color: rgba(255,255,255,.4);
+    padding: 6px 11px; border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px; background: rgba(255,255,255,.03);
+  }
+
+  /* ── Phone mockup ── */
+  .lp-hero-visual { display: flex; justify-content: center; align-items: center; position: relative; }
+  .lp-phone {
+    width: 230px; aspect-ratio: 390/844;
+    background: #0f172a;
+    border: 1.5px solid rgba(255,255,255,.11); border-radius: 44px; padding: 14px;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 48px 96px -28px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.07);
+    animation: phoneFloat 5.5s ease-in-out infinite;
+  }
+  @keyframes phoneFloat {
+    0%,100% { transform: translateY(0) rotate(-.5deg); }
+    50%      { transform: translateY(-12px) rotate(.5deg); }
+  }
+  .lp-phone-notch {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    width: 72px; height: 24px;
+    background: #0f172a; border-radius: 0 0 18px 18px; z-index: 2;
+    border: 1.5px solid rgba(255,255,255,.06); border-top: none;
+  }
+  .lp-phone-screen {
+    height: 100%; border-radius: 32px; overflow: hidden;
+    background: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(88,204,2,.18), transparent 55%),
+      linear-gradient(180deg, #111827, #0b1120);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 9px; padding: 38px 14px 20px; text-align: center;
+  }
+  .lp-phone-badge { width: 64px; height: 64px; object-fit: contain; filter: drop-shadow(0 8px 18px rgba(88,204,2,.45)); }
+  .lp-phone-lvl { font: 600 9px/1 'Inter', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: rgba(88,204,2,.7); }
+  .lp-phone-streak { font: 700 13px/1 'Plus Jakarta Sans', sans-serif; color: #fff; }
+  .lp-phone-streak strong { color: #f59e0b; font-size: 16px; }
+  .lp-phone-bar { width: 74%; height: 7px; background: rgba(255,255,255,.1); border-radius: 9px; overflow: hidden; }
+  .lp-phone-fill {
+    height: 100%; width: 72%; border-radius: 9px;
+    background: linear-gradient(90deg, #58cc02, #a3e635);
+    animation: fillIn 2.8s cubic-bezier(.2,.7,.3,1) both .6s;
+  }
+  @keyframes fillIn { from { width: 0; } }
+  @media (prefers-reduced-motion: reduce) { .lp-phone-fill { animation: none; width: 72%; } .lp-phone { animation: none; } }
+  .lp-phone-stats {
+    display: flex; gap: 8px; width: 100%;
+    padding: 9px 10px; box-sizing: border-box;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 12px;
+  }
+  .lp-pstat { flex: 1; text-align: center; }
+  .lp-pstat-mid { border-left: 1px solid rgba(255,255,255,.08); border-right: 1px solid rgba(255,255,255,.08); }
+  .lp-pstat-val { font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: #fff; }
+  .lp-pstat-lbl { font: 500 8.5px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.38); margin-top: 3px; }
+
+  /* Floating cards */
+  .lp-fcard {
+    position: absolute; display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 14px; white-space: nowrap;
+    background: rgba(255,255,255,.07); backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.15);
+    box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  }
+  .lp-fcard-ico { font-size: 19px; }
+  .lp-fcard-val { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: #fff; }
+  .lp-fcard-sub { font: 500 10px/1 'Inter', sans-serif; color: rgba(255,255,255,.46); margin-top: 2px; }
+  .lp-fcard-1 { top: 14%; right: -20px; animation: fc1 5.5s ease-in-out infinite; }
+  .lp-fcard-2 { bottom: 16%; left: -20px; animation: fc2 5.5s ease-in-out 1.4s infinite; }
+  @keyframes fc1 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @keyframes fc2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+  @media (prefers-reduced-motion: reduce) { .lp-fcard-1, .lp-fcard-2 { animation: none; } }
 
   /* Sections */
   .lp-sec { max-width: 1000px; margin: 0 auto; padding: 56px 22px; }
@@ -489,11 +656,15 @@ const STYLE = `<style>
 
   /* Responsive */
   @media (max-width: 860px) {
-    .lp-hero { grid-template-columns: 1fr; text-align: center; padding-top: 40px; gap: 30px; }
-    .lp-h1 { font-size: 34px; max-width: none; margin-inline: auto; }
+    .lp-hero-inner { grid-template-columns: 1fr; text-align: center; padding: 56px 22px 0; gap: 40px; }
+    .lp-h1 { font-size: 38px; max-width: none; margin-inline: auto; }
     .lp-lead { margin-inline: auto; }
+    .lp-hero-badge { margin-left: auto; margin-right: auto; }
     .lp-hero-cta { justify-content: center; }
-    .lp-hero-art { order: -1; }
+    .lp-hero-chips { justify-content: center; }
+    .lp-hero-visual { margin-top: 10px; }
+    .lp-fcard-1 { right: -8px; top: 8%; }
+    .lp-fcard-2 { left: -8px; bottom: 8%; }
     .lp-cards3, .lp-steps, .lp-plans, .lp-testicards { grid-template-columns: 1fr; }
     .lp-feat-row { flex-direction: column; }
     .lp-plan-feat { order: -1; }
