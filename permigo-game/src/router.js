@@ -1,7 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // Router minimal — route selon role + hash
 // ═══════════════════════════════════════════════════════════════
-import { unmountLogSessionFab } from "@/components/enseignant/log-session-fab.js";
 import { phPageview } from "@/services/posthog.js";
 
 const ROUTES = {
@@ -122,9 +121,6 @@ export async function route(root, me) {
   const routeName = segments[0] || "default";
   const param = segments[1] || null; // ex: eleveId pour #/livret/{id}
   const loader = map[routeName] || map.default;
-
-  // Nettoyage défensif : retire l'ancien FAB standalone si présent
-  unmountLogSessionFab();
 
   try {
     const mod = await loader();

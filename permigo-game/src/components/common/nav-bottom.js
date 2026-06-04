@@ -136,6 +136,11 @@ const STYLE = `
   @media (prefers-reduced-motion: reduce) {
     #bn-seance-fab { animation: none !important; transition: none !important; }
   }
+
+  /* FAB haut = 76+56=132px du bas — on pousse #app pour que rien ne se cache dessous */
+  body.has-enseignant-fab #app {
+    padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+  }
 `;
 
 export function mountBottomNav(role) {
@@ -186,6 +191,7 @@ export function mountBottomNav(role) {
       location.hash = "#/log-session";
     });
     document.body.appendChild(fab);
+    document.body.classList.add("has-enseignant-fab");
   }
 
   window.addEventListener("hashchange", _updateActive);
@@ -194,6 +200,7 @@ export function mountBottomNav(role) {
 export function unmountBottomNav() {
   document.querySelector("#bottom-nav")?.remove();
   document.getElementById("bn-seance-fab")?.remove();
+  document.body.classList.remove("has-enseignant-fab");
   window.removeEventListener("hashchange", _updateActive);
 }
 
