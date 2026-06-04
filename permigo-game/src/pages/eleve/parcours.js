@@ -488,6 +488,26 @@ const STYLE = `<style>
 .nd-badge-locked { filter: grayscale(1) opacity(.3); }
 @media (prefers-reduced-motion: reduce) { .nd-badge-next { animation: none !important; } }
 
+/* ── On garde QUE le badge : on retire le rond vert/blanc du node
+   (fond, bordure, ombre, anneaux pulsants). Le badge a déjà son halo blanc. ── */
+.prc-node.done .nd-circle,
+.prc-node.next .nd-circle,
+.prc-node.todo .nd-circle,
+.prc-node.locked .nd-circle {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+.prc-node.done .nd-circle::after,
+.prc-node.next .nd-circle::before,
+.prc-node.next .nd-circle::after { display: none !important; }
+/* Le badge occupe tout le node (un poil débordant pour compenser l'absence de cercle) */
+.prc-node.done .nd-badge,
+.prc-node.todo .nd-badge,
+.prc-node.locked .nd-badge { width: 112%; height: 112%; }
+.nd-badge-next { width: 120%; height: 120%; }
+
 /* Volant qui oscille gauche-droite sur le prochain défi (image PNG) */
 .nd-wheel {
   display: block;
