@@ -1107,23 +1107,24 @@ const STYLE = `<style>
 .fiche-block-title svg { color: var(--wc, var(--a)); }
 .fiche-block-list { list-style: none; margin: 0; padding: 0; }
 .fiche-block-list li {
-  position: relative;
-  padding: 9px 0 9px 26px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 0;
   font: 500 13.5px/1.4 'Inter', sans-serif;
   color: var(--ink);
   border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
 }
 .fiche-block-list li:first-child { border-top: 0; padding-top: 2px; }
-.fiche-block-list li::before {
-  content: '';
-  position: absolute;
-  left: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 14px; height: 14px;
+.fiche-block-list .kp-check {
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  margin-top: 1px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--wc, var(--a)) 15%, #fff);
-  border: 1.5px solid var(--wc, var(--a));
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--wc, var(--a)) 16%, transparent);
+  color: var(--wc, var(--a));
 }
 
 /* Bloc "Conseil du coach" — accent jaune doux */
@@ -1947,7 +1948,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
       </div>
       <h3 id="bsheet-title">${esc(sub.n)}</h3>
       <div class="fiche-id">${esc(compId.toUpperCase())} · ${compNum}/${total}</div>
-      <div><span class="stt-pill ${st}" style="--wc:${meta.color}">${esc(stLabel)}</span></div>
+      ${st === 'done' ? '' : `<div><span class="stt-pill ${st}" style="--wc:${meta.color}">${esc(stLabel)}</span></div>`}
     </div>
     <div class="fiche-body">
 
@@ -1977,7 +1978,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
           ${st === 'done' ? 'Ce que tu maîtrises' : 'Ce que tu vas maîtriser'}
         </div>
         <ul class="fiche-block-list">
-          ${detail.keyPoints.map(kp => `<li>${esc(kp)}</li>`).join('')}
+          ${detail.keyPoints.map(kp => `<li><span class="kp-check">${icon('check', { size: 12, strokeWidth: 3 })}</span>${esc(kp)}</li>`).join('')}
         </ul>
       </div>
 

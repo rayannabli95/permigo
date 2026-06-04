@@ -185,49 +185,49 @@ export const REMC_DETAILS = {
     tip: 'Sur sol mouillé, le freinage prend 2× plus de distance. Anticipe.',
   },
   C3c: {
-    summary: 'Rouler sur autoroute en sécurité : insertion, voies, vitesses, sortie.',
+    summary: 'Garder le contrôle sur chaussée glissante : pluie, verglas, feuilles, gravillons.',
+    keyPoints: [
+      'Gestes doux : accélération, freinage, volant progressifs',
+      'Allonger nettement les distances de sécurité',
+      'Éviter de freiner en plein virage',
+    ],
+    tip: 'Sur sol glissant, tout en souplesse. Un geste brusque = perte d\'adhérence.',
+  },
+  C3d: {
+    summary: 'Comprendre l\'adhérence et réussir un freinage d\'urgence en gardant le contrôle.',
+    keyPoints: [
+      'Freinage d\'urgence : pied à fond, l\'ABS gère',
+      'Regarder où tu veux aller, pas l\'obstacle',
+      'Adhérence réduite = distances augmentées',
+    ],
+    tip: 'En urgence : freine FORT et regarde ton échappatoire, la voiture suit ton regard.',
+  },
+  C3e: {
+    summary: 'Rouler sur voie rapide et autoroute en sécurité : insertion, voies, sortie.',
     keyPoints: [
       'Insertion : utiliser toute la bande d\'accélération',
-      'Voie de droite par défaut',
-      'Sortie : clignotant 200m avant',
+      'Voie de droite par défaut, dépassement à gauche',
+      'Sortie : clignotant 200 m avant',
     ],
     tip: 'Sur autoroute, le danger n\'est pas la vitesse mais l\'inattention. Reste vigilant.',
   },
-  C3d: {
-    summary: 'Dépasser un véhicule sur route ou autoroute en respectant la sécurité.',
-    keyPoints: [
-      'Vérifier 3 conditions : autorisé, possible, utile',
-      'Clignotant gauche + contrôle angle mort',
-      'Ne jamais ralentir un véhicule dépassé',
-    ],
-    tip: 'Si tu dépasses, fais-le franchement. L\'hésitation crée le danger.',
-  },
-  C3e: {
-    summary: 'Réagir vite et bien face à un événement imprévu (animal, ouverture de portière, freinage).',
-    keyPoints: [
-      'Freinage d\'urgence : pied à fond + ABS',
-      'Évitement : un seul mouvement de volant',
-      'Garder le contrôle, pas paniquer',
-    ],
-    tip: 'En cas d\'urgence : freiner FORT, regarder OÙ tu veux aller (pas l\'obstacle).',
-  },
   C3f: {
-    summary: 'Gérer le stress, la fatigue et les distractions au volant.',
+    summary: 'Aborder tunnels, ponts et zones spécifiques avec les bons réflexes.',
     keyPoints: [
-      'Téléphone éteint ou en mode "Au volant"',
-      'Pause toutes les 2h si trajet long',
-      'Pas d\'alcool, pas de médicaments somnolents',
+      'Tunnel : allumer les feux, garder ses distances',
+      'Pont ou viaduc : vigilance au vent latéral',
+      'Repérer les sorties de secours dès l\'entrée du tunnel',
     ],
-    tip: 'Si tu bâilles 2 fois : pause immédiate. La micro-sieste de 15 min sauve.',
+    tip: 'En tunnel, garde tes distances et repère la sortie de secours la plus proche dès l\'entrée.',
   },
   C3g: {
-    summary: 'Réagir en cas d\'accident : sécuriser, alerter, secourir.',
+    summary: 'Conduire en ville dense en partageant la route avec piétons, vélos et bus.',
     keyPoints: [
-      'Protéger : warnings, triangle, gilet',
-      'Alerter : 18 (pompiers), 15 (SAMU), 112',
-      'Secourir : sans déplacer les blessés',
+      'Allure réduite, anticiper les piétons',
+      'Surveiller les angles morts (vélos, trottinettes)',
+      'Respecter couloirs de bus et zones de rencontre',
     ],
-    tip: 'PAS = Protéger, Alerter, Secourir. Dans cet ordre, toujours.',
+    tip: 'En ville dense, lève le pied et regarde loin : tout peut surgir entre deux voitures.',
   },
 
   // ─── MONDE 4 — Conduite autonome & sûre ───────────────────────
