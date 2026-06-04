@@ -933,16 +933,17 @@ const STYLE = `<style>
   text-align: center;
 }
 .fiche-circle {
-  width: 80px; height: 80px;
+  width: 66px; height: 66px;
   border-radius: 50%;
-  margin: 0 auto 12px;
-  border: 3px solid #fff;
+  margin: 0 auto 14px;
+  border: 0;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 10px 24px rgba(11,13,26,.12);
-  font-size: 28px;
+  box-shadow: 0 8px 22px -6px color-mix(in srgb, var(--wc, var(--a)) 55%, transparent);
+  font-size: 24px;
   background: var(--wc, var(--a));
   color: #fff;
 }
+.fiche-circle.done { box-shadow: 0 8px 22px -6px rgba(16,185,129,.55); }
 .fiche-circle.done { background: var(--gr); animation: fiche-pop .55s cubic-bezier(.5,1.6,.4,1) both; }
 @keyframes fiche-pop {
   0%  { transform: scale(.3) rotate(-180deg); opacity: 0; }
@@ -979,7 +980,7 @@ const STYLE = `<style>
 
 /* padding-bottom large : le dernier bloc (conseil du coach) doit pouvoir
    défiler entièrement au-dessus de la barre de nav fixe (~60px). */
-.fiche-body { padding: 0 16px calc(80px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 12px; }
+.fiche-body { padding: 0 18px calc(84px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 16px; }
 /* Rythme vertical homogène : on neutralise les marges hétérogènes des blocs
    (14px/10px) au profit d'un gap unique → fiche mieux répartie. */
 .fiche-body > * { margin-bottom: 0; }
@@ -1027,40 +1028,32 @@ const STYLE = `<style>
 .fiche-circle svg { width: 36px; height: 36px; stroke: #fff; stroke-width: 2.5; }
 .fiche-circle.done svg { stroke: #fff; }
 
-/* Bloc "summary" — la phrase qui résume l'essentiel */
+/* Bloc "summary" — phrase d'accroche en texte plein, sous le héros (plus de boîte/guillemet) */
 .fiche-summary {
-  padding: 16px 18px;
-  margin-bottom: 14px;
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: 16px;
-  position: relative;
+  padding: 2px 8px 4px;
+  margin: 0;
+  background: transparent;
+  border: 0;
+  text-align: center;
 }
-.fiche-summary::before {
-  content: '"';
-  position: absolute;
-  top: -8px; left: 14px;
-  font: 900 48px/1 Georgia, serif;
-  color: var(--wc, var(--a));
-  opacity: .55;
-}
+.fiche-summary::before { content: none; }
 .fiche-summary p {
   margin: 0;
-  font: 600 15px/1.45 'Plus Jakarta Sans', sans-serif;
+  font: 600 15.5px/1.5 'Plus Jakarta Sans', sans-serif;
   color: var(--ink);
-  letter-spacing: -.015em;
+  opacity: .82;
+  letter-spacing: -.01em;
 }
 
 /* Progression chip + barre */
 .fiche-progress {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-  padding: 12px 14px;
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: 14px;
+  gap: 14px;
+  margin: 0;
+  padding: 4px 6px;
+  background: transparent;
+  border: 0;
 }
 .fiche-progress-info {
   flex-shrink: 0;
@@ -1095,11 +1088,11 @@ const STYLE = `<style>
 
 /* Bloc "Ce que tu vas maîtriser" */
 .fiche-block {
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin-bottom: 10px;
+  background: var(--bg2);
+  border: 0;
+  border-radius: 16px;
+  padding: 16px 16px 8px;
+  margin: 0;
 }
 .fiche-block-title {
   font: 700 11px/1 'Inter', sans-serif;
@@ -1115,12 +1108,12 @@ const STYLE = `<style>
 .fiche-block-list { list-style: none; margin: 0; padding: 0; }
 .fiche-block-list li {
   position: relative;
-  padding: 7px 0 7px 26px;
+  padding: 9px 0 9px 26px;
   font: 500 13.5px/1.4 'Inter', sans-serif;
   color: var(--ink);
-  border-top: 1px solid var(--bg3);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
 }
-.fiche-block-list li:first-child { border-top: 0; padding-top: 4px; }
+.fiche-block-list li:first-child { border-top: 0; padding-top: 2px; }
 .fiche-block-list li::before {
   content: '';
   position: absolute;
@@ -1139,9 +1132,9 @@ const STYLE = `<style>
   gap: 12px;
   padding: 14px 16px;
   background: linear-gradient(135deg, #fef9e7, #fffbeb);
-  border: 1px solid var(--aml);
-  border-radius: 14px;
-  margin-bottom: 10px;
+  border: 0;
+  border-radius: 16px;
+  margin: 0;
 }
 .fiche-tip-ico {
   flex-shrink: 0;
@@ -1171,15 +1164,15 @@ const STYLE = `<style>
 /* Bloc status contextuel (acquise / next / locked) */
 .fiche-status {
   padding: 14px 16px;
-  border-radius: 14px;
-  margin-bottom: 10px;
+  border-radius: 16px;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 12px;
 }
-.fiche-status.done   { background: #ecfdf5; border: 1px solid #a7f3d0; }
-.fiche-status.next   { background: color-mix(in srgb, var(--wc, var(--a)) 8%, #fff); border: 1px solid color-mix(in srgb, var(--wc, var(--a)) 35%, transparent); }
-.fiche-status.locked { background: var(--bg); border: 1px solid var(--bo); }
+.fiche-status.done   { background: #ecfdf5; border: 0; }
+.fiche-status.next   { background: color-mix(in srgb, var(--wc, var(--a)) 10%, var(--su)); border: 0; }
+.fiche-status.locked { background: var(--bg2); border: 0; }
 .fiche-status-ico {
   width: 36px; height: 36px;
   border-radius: 50%;
