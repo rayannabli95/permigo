@@ -138,6 +138,19 @@ export async function mount(root) {
     }
     _comment  = draft.comment ?? '';
   }
+
+  // Élève pré-sélectionné via deep-link (?eleveId=) — raccourci depuis "Mes élèves".
+  // Priorité sur le draft : un geste explicite « séance pour X » doit cibler X.
+  const _hash = window.location.hash;
+  const _qIdx = _hash.indexOf('?');
+  const _preEleveId = _qIdx >= 0
+    ? new URLSearchParams(_hash.slice(_qIdx + 1)).get('eleveId')
+    : null;
+  if (_preEleveId && _eleves.find(e => e.id === _preEleveId)) {
+    _eleve = _preEleveId;
+    _comps = new Map(); // nouvel élève ciblé → on repart propre
+  }
+
   if (!_eleve && _eleves.length > 0) _eleve = _eleves[0].id;
 
   // Load comps for initial eleve

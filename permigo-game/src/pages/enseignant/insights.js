@@ -570,7 +570,7 @@ async function loadData(me) {
       icon: icon('target', { size: 18, strokeWidth: 2, color: 'var(--a)' }),
       ttl: 'Lance ta semaine',
       txt: 'Valide 1 compétence avec un élève actif pour relancer ton streak pro.',
-      route: '#/validation',
+      route: '#/log-session',
     });
   }
   if (topStagnent.length > 0) {
