@@ -93,10 +93,10 @@ export function showXpToast({ xp, eleveName, trophy = null, duration = 4000 }) {
   const card = document.createElement('div');
   card.className = 'xpt-card anim-slide-up';
   card.innerHTML = `
-    <div class="xpt-icon">⚡</div>
+    <div class="xpt-icon">${icon('zap',{size:20})}</div>
     <div class="xpt-text">
       <div class="xpt-label">+${xp} XP</div>
-      <div class="xpt-sub">${eleveName} progresse avec toi 🎯</div>
+      <div class="xpt-sub">${eleveName} progresse avec toi</div>
     </div>
     <div class="xpt-xp">+${xp}</div>
   `;
@@ -108,7 +108,7 @@ export function showXpToast({ xp, eleveName, trophy = null, duration = 4000 }) {
     tCard.className = 'xpt-card';
     tCard.style.borderColor = 'rgba(251,191,36,.35)';
     tCard.innerHTML = `
-      <div class="xpt-icon" style="background:linear-gradient(135deg,var(--am),var(--amk))">🏆</div>
+      <div class="xpt-icon" style="background:linear-gradient(135deg,var(--am),var(--amk))">${icon('trophy',{size:20})}</div>
       <div class="xpt-text">
         <div class="xpt-label">${eleveName} a débloqué</div>
         <div class="xpt-sub">${trophy}</div>

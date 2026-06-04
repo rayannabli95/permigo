@@ -3,6 +3,7 @@
 // Liste élèves + barre progression REMC + tabs + recherche
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { toast } from '@/components/common/toast.js';
@@ -322,7 +323,7 @@ function renderPage(root, eleves) {
       <div class="el-count">${eleves.length} élève${eleves.length > 1 ? 's' : ''}</div>
     </div>
     <div class="el-search-wrap">
-      <span class="el-search-ico">🔍</span>
+      <span class="el-search-ico">${icon('search',{size:16})}</span>
       <input
         id="el-search"
         class="el-search"
@@ -403,7 +404,7 @@ function isActif(e) {
 function renderCards(eleves) {
   if (eleves.length === 0) {
     return `<div class="el-empty">
-      <div class="el-empty-ico">🎓</div>
+      <div class="el-empty-ico">${icon('graduation-cap',{size:30})}</div>
       Aucun élève trouvé
     </div>`;
   }

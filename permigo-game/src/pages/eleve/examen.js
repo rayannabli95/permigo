@@ -388,7 +388,7 @@ function renderCountdown(examDate) {
   if (!examDate) {
     return `
 <div class="exam-no-date">
-  <span class="exam-no-date-emoji">📅</span>
+  <span class="exam-no-date-emoji">${icon('calendar',{size:26})}</span>
   <div class="exam-no-date-txt">Renseigne ta date d'examen pour voir le compte à rebours.</div>
   <button class="exam-choose-btn" id="exam-btn-choose">
     ${icon('calendar', { size: 16 })} Choisir ma date
@@ -407,7 +407,7 @@ function renderCountdown(examDate) {
   if (cd.passed) {
     return `
 <div style="text-align:center;padding:8px 0">
-  <div style="font-size:36px;margin-bottom:8px">🎉</div>
+  <div style="margin-bottom:8px;color:var(--gr)">${icon('check-circle',{size:34})}</div>
   <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:4px">Ton examen est passé !</div>
   <div style="font:500 13px/1.4 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">Bonne chance pour les résultats.</div>
   <button class="exam-choose-btn" id="exam-btn-choose" style="background:var(--gr)">
@@ -436,7 +436,7 @@ function renderCountdown(examDate) {
   </div>
 </div>
 <div style="text-align:center;font:500 12px/1.4 'Inter',sans-serif;color:var(--mu3);margin-bottom:14px">
-  ${urgent ? '⚡ ' : ''}${esc(fmtDate(examDate))}
+  ${urgent ? '' : ''}${esc(fmtDate(examDate))}
 </div>
 <div class="exam-date-row">
   <input type="date" class="exam-date-input" id="exam-date-input" value="${examDate.toISOString().slice(0,10)}" />
@@ -452,7 +452,7 @@ function renderPredict({ compsCount, predict }) {
   if (compsCount >= PREDICT_TARGET) {
     return `
 <div class="exam-predict-ready">
-  <span style="font-size:28px" aria-hidden="true">🎉</span>
+  <span aria-hidden="true" style="color:var(--gr)">${icon('check-circle',{size:26})}</span>
   <div>
     <div class="exam-predict-title">Tu es prêt pour l'examen !</div>
     <div class="exam-predict-sub">${compsCount}/31 compétences validées — objectif atteint</div>
@@ -492,14 +492,14 @@ function renderChecklist({ compsCount, streak, avgScore }) {
       sub:    `${compsCount} compétences validées sur 31`,
       pass:   compsCount >= COMPS_TARGET,
       badge:  `${Math.round((compsCount / 31) * 100)}%`,
-      ico:    '🗺️',
+      ico:    icon('map',{size:20}),
     },
     {
       label:  'Streak actif',
       sub:    streak > 0 ? `${streak} jours d'affilée` : 'Reprends l\'application aujourd\'hui',
       pass:   streak > 0,
       badge:  streak > 0 ? `${streak}j` : '0j',
-      ico:    '🔥',
+      ico:    icon('flame',{size:20}),
     },
     {
       label:  'Score quiz > 70%',
@@ -507,14 +507,14 @@ function renderChecklist({ compsCount, streak, avgScore }) {
       pass:   avgScore !== null && avgScore >= QUIZ_TARGET,
       neutral: avgScore === null,
       badge:  avgScore !== null ? `${avgScore}%` : '—',
-      ico:    '🧠',
+      ico:    icon('lightbulb',{size:20}),
     },
     {
       label:  'Révision complète',
       sub:    revised ? 'Fiches de révision consultées' : 'Consulte les fiches résumé',
       pass:   revised,
       badge:  revised ? '✓' : '—',
-      ico:    '📖',
+      ico:    icon('book',{size:20}),
     },
   ];
 
@@ -603,7 +603,7 @@ export async function mount(root) {
 
   <!-- 1. HEADER -->
   <div class="exam-hd exam-card" style="background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:16px">
-    <div class="exam-hd-ico" aria-hidden="true">🎓</div>
+    <div class="exam-hd-ico" aria-hidden="true">${icon('graduation-cap',{size:34})}</div>
     <div>
       <h1 class="exam-hd-title">Ton examen blanc</h1>
       <div class="exam-hd-sub">Prépare-toi sereinement pour le grand jour.</div>

@@ -718,7 +718,7 @@ async function renderInto(root, _me) {
         <div class="aj-section-title">Activité récente</div>
         ${recentVals.length === 0
           ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;">
-               <span style="font-size:36px;opacity:.5" aria-hidden="true">📋</span>
+               <span style="opacity:.5;color:var(--mu)" aria-hidden="true">${icon('clipboard',{size:34})}</span>
                <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Pas encore de validation</strong>
                <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Enregistre ta première séance<br>pour voir l'activité ici.</span>
              </div>`
@@ -733,7 +733,7 @@ async function renderInto(root, _me) {
         <div class="aj-section-title">Mes élèves</div>
         ${mesElevesActifs.length === 0
           ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;">
-               <span style="font-size:36px;opacity:.5" aria-hidden="true">👥</span>
+               <span style="opacity:.5;color:var(--mu)" aria-hidden="true">${icon('users',{size:34})}</span>
                <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Aucun élève assigné</strong>
                <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Tes élèves apparaîtront ici<br>une fois affectés par le gérant.</span>
              </div>`

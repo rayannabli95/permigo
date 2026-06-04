@@ -847,7 +847,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
     <div class="acc2-hero-content">
       <div class="acc2-hero-top">
         <div class="acc2-hero-av">${heroAv ? `<img src="${esc(heroAv)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block">` : esc(initials)}</div>
-        <span class="acc2-hero-hi">Bonjour ${esc(prenom)} 👋</span>
+        <span class="acc2-hero-hi">Bonjour ${esc(prenom)}</span>
         <button class="acc2-hero-notif-btn" id="notif-btn" aria-label="Notifications">
           ${icon('bell', { size: 18 })}
         </button>
@@ -860,7 +860,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
         </div>
         ${streak.current_streak > 0 ? `
         <div class="acc2-hero-streak ${isActive ? 'active' : ''}" id="streak-badge-btn" role="button" tabindex="0" aria-label="Streak ${streak.current_streak} jours">
-          <span class="acc2-hero-streak-fire">🔥</span>
+          <span class="acc2-hero-streak-fire">${icon('flame',{size:16})}</span>
           <span class="acc2-hero-streak-val">${streak.current_streak}</span>
           <span class="acc2-hero-streak-lbl">jours</span>
         </div>` : ''}
@@ -935,7 +935,7 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
   </div>
   ${(streakSt === 'critical' || streakSt === 'at_risk') && gemmes >= 50 ? `
   <div class="bs-freeze-wrap">
-    <button class="bs-freeze-btn" id="bs-freeze-btn">🧊 Geler ma série · 50 💎</button>
+    <button class="bs-freeze-btn" id="bs-freeze-btn">Geler ma série · 50 ${icon('gem',{size:14})}</button>
     <div class="bs-freeze-desc">Protège ta série pour les prochaines 24h</div>
   </div>` : ''}
 </div>`;
@@ -980,7 +980,7 @@ function renderNextReward(totalValidated, worlds, trophees) {
           <div class="acc2-ms-reward-top">
             <div class="acc2-ms-reward-icon">${icon('award', { size: 28 })}</div>
             <div class="acc2-ms-reward-info">
-              <div class="acc2-ms-reward-remaining">🎉 <span>Tous les mondes maîtrisés</span></div>
+              <div class="acc2-ms-reward-remaining"><span>Tous les mondes maîtrisés</span></div>
               <div class="acc2-ms-reward-name">Tu es prêt pour l'examen</div>
             </div>
           </div>
@@ -1103,15 +1103,15 @@ function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, t
     try {
       const { data, error } = await sb.rpc('use_streak_freeze');
       if (error || data?.error) {
-        toast('Pas assez de gemmes pour geler ta série. Il t\'en faut 50 💎', 'error');
-        setTimeout(() => { btn.disabled = false; btn.innerHTML = '🧊 Geler ma série · 50 💎'; }, 1800);
+        toast('Pas assez de gemmes pour geler ta série. Il t\'en faut 50 gemmes', 'error');
+        setTimeout(() => { btn.disabled = false; btn.innerHTML = `Geler ma série · 50 ${icon('gem',{size:14})}`; }, 1800);
         return;
       }
       track('streak.freeze_used', {});
-      toast('Série gelée pour 24h 🧊', 'success');
+      toast('Série gelée pour 24h', 'success');
       btn.textContent = '✓ Série gelée';   // évite de laisser "⏳ Gel en cours…" figé
       closeBS();
-    } catch { toast('Erreur lors du gel', 'error'); btn.disabled = false; btn.innerHTML = '🧊 Geler ma série · 50 💎'; }
+    } catch { toast('Erreur lors du gel', 'error'); btn.disabled = false; btn.innerHTML = `Geler ma série · 50 ${icon('gem',{size:14})}`; }
   });
 
   // Heatmap tap
@@ -1332,7 +1332,7 @@ async function _loadAndInjectChests(root) {
     div.innerHTML = `
       <div class="acc2-chest-teaser" id="acc-chest-teaser" role="button" tabindex="0"
            aria-label="${pending.length} coffre${pending.length > 1 ? 's' : ''} à ouvrir">
-        <span class="acc2-ct-ico">🎁</span>
+        <span class="acc2-ct-ico">${icon('gift',{size:18})}</span>
         <div class="acc2-ct-text">
           <div class="acc2-ct-title">${pending.length} coffre${pending.length > 1 ? 's' : ''} à ouvrir</div>
           <div class="acc2-ct-sub">Réclame tes récompenses</div>
@@ -1391,7 +1391,7 @@ async function _loadAndInjectFlashQuiz(root, me) {
 
     hero.insertAdjacentHTML('afterend', `
       <div class="acc2-flashq" id="acc-flashq" role="button" tabindex="0" aria-label="Quiz éclair de ton moniteur, réponds maintenant">
-        <span class="acc2-fq-ico" aria-hidden="true">⚡</span>
+        <span class="acc2-fq-ico" aria-hidden="true">${icon('zap',{size:18})}</span>
         <div class="acc2-fq-text">
           <div class="acc2-fq-title">Quiz éclair de ton moniteur</div>
           <div class="acc2-fq-sub">3 questions · réponds maintenant</div>

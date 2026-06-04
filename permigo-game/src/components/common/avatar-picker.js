@@ -9,6 +9,7 @@
 // Pattern : promise-based, résout avec l'URL choisie ou null si annulé.
 // ═══════════════════════════════════════════════════════════════
 import { ASSETS } from '@/utils/assets.js';
+import { icon } from '@/utils/icons.js';
 import { haptic } from '@/utils/haptic.js';
 import { esc } from '@/utils/escape.js';
 
@@ -163,7 +164,7 @@ export function openAvatarPicker(opts = {}) {
         <div class="avpk-actions" style="flex-direction:column;gap:8px">
           <button class="avpk-btn primary" data-action="confirm" disabled>Choisir cet avatar</button>
           <div style="display:flex;gap:8px">
-            <button class="avpk-btn" data-action="upload" style="flex:1">📷 Ma photo</button>
+            <button class="avpk-btn" data-action="upload" style="flex:1">${icon('image',{size:16})} Ma photo</button>
             <button class="avpk-btn" data-action="cancel" style="flex:1">Annuler</button>
           </div>
         </div>

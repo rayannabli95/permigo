@@ -4,6 +4,7 @@
 // 3 questions, 5 min, score serveur-side via respond_flash_quiz.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
@@ -76,7 +77,7 @@ function runQuiz(root, { quiz, pool }) {
   root.innerHTML = `${STYLE}
     <div class="fqz">
       <div class="fqz-top">
-        <div class="fqz-tag">⚡ Quiz éclair</div>
+        <div class="fqz-tag">${icon('zap',{size:14})} Quiz éclair</div>
         <div class="fqz-clock" id="fqz-clock">5:00</div>
       </div>
       <div class="fqz-card"><div class="fqz-body" id="fqz-body"></div></div>
@@ -132,7 +133,7 @@ function runQuiz(root, { quiz, pool }) {
     if (q.explanation) {
       const expl = document.createElement('div');
       expl.className = `fqz-expl ${correct ? 'ok' : 'ko'}`;
-      expl.innerHTML = `<div class="fqz-expl-h">${correct ? '✅ Bien joué !' : '💡 À retenir'}</div><div>${richEsc(q.explanation)}</div>`;
+      expl.innerHTML = `<div class="fqz-expl-h">${correct ? 'Bien joué !' : 'À retenir'}</div><div>${richEsc(q.explanation)}</div>`;
       bodyEl.querySelector('.fqz-opts').appendChild(expl);
     }
 
@@ -163,7 +164,7 @@ function runQuiz(root, { quiz, pool }) {
     track('flash_quiz.completed', { flash_quiz_id: quiz.id, competence_id: quiz.competence_id, score: score3, total });
     if (perfect) { burstConfetti({ count: 100, power: 16 }); playPerfect(); }
 
-    const msg = perfect ? '🔥 Sans-faute !' : score3 >= total * 0.6 ? '👍 Bien joué !' : '🤔 À revoir avec ton moniteur';
+    const msg = perfect ? 'Sans-faute !' : score3 >= total * 0.6 ? 'Bien joué !' : 'À revoir avec ton moniteur';
     bodyEl.innerHTML = `
       <div class="fqz-result">
         <div class="fqz-score">${score3}/${total}</div>

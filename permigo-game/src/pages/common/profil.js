@@ -56,7 +56,7 @@ const STYLE = `<style>
   padding: 6px 12px;
 }
 
-/* #19 — tuiles d'accès galerie + wrapped (élève only) */
+/* #19 — tuile d'accès galerie (élève only) */
 .prf-nav-tiles { display: flex; gap: 10px; margin: 16px 0; }
 .prf-nav-tile {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -400,7 +400,7 @@ const ROLE_LABELS = { eleve: 'Élève', enseignant: 'Enseignant', gerant: 'Géra
 
 function renderAccountActions(me) {
   return `
-    ${me.role === 'eleve' ? '<button class="prf-btn-logout" id="btn-replay-tour" type="button" style="background:transparent;color:var(--mu);border:1px solid var(--bo);margin-bottom:10px">🎓 Revoir le tour de bienvenue</button>' : ''}
+    ${me.role === 'eleve' ? `<button class="prf-btn-logout" id="btn-replay-tour" type="button" style="background:transparent;color:var(--mu);border:1px solid var(--bo);margin-bottom:10px">${icon('graduation-cap',{size:16})} Revoir le tour de bienvenue</button>` : ''}
     <button class="prf-btn-logout" id="btn-logout">Se déconnecter</button>
     ${me.role === 'eleve' ? '<button class="prf-btn-delete" id="btn-delete">Supprimer mon compte</button>' : ''}
   `;
@@ -502,7 +502,7 @@ export async function mount(root) {
         { label: 'XP',          value: profile?.xp || 0 },
       ],
       shareUrl: window.location.origin,
-      shareText: `Je suis à ${permisData.validated}/${REMC_TOTAL} compétences validées sur PermiGo 🚗`,
+      shareText: `Je suis à ${permisData.validated}/${REMC_TOTAL} compétences validées sur PermiGo`,
     };
   } else if (me.role === 'enseignant' && anneeStats) {
     profileCardData = {
@@ -518,7 +518,7 @@ export async function mount(root) {
         { label: 'Streak',      value: anneeStats.streakDays },
       ],
       shareUrl: window.location.origin,
-      shareText: `${anneeStats.totalValidations} validations REMC sur PermiGo cette année 🎯`,
+      shareText: `${anneeStats.totalValidations} validations REMC sur PermiGo cette année`,
     };
   }
 
@@ -538,17 +538,14 @@ export async function mount(root) {
   ${me.role === 'eleve' ? `
   <div class="prf-nav-tiles">
     <a class="prf-nav-tile" href="#/galerie" aria-label="Ouvrir ta galerie">
-      <span class="prf-nav-ico" aria-hidden="true">🖼️</span><span>Ta galerie</span>
-    </a>
-    <a class="prf-nav-tile" href="#/wrapped" aria-label="Ouvrir ton Wrapped">
-      <span class="prf-nav-ico" aria-hidden="true">🎁</span><span>Ton Wrapped</span>
+      <span class="prf-nav-ico" aria-hidden="true">${icon('image',{size:18})}</span><span>Ta galerie</span>
     </a>
   </div>` : ''}
 
   ${me.role === 'enseignant' ? `
   <div class="prf-nav-tiles">
     <a class="prf-nav-tile" href="#/boutique" aria-label="Ouvrir la boutique">
-      <span class="prf-nav-ico" aria-hidden="true">🚗</span><span>Boutique</span>
+      <span class="prf-nav-ico" aria-hidden="true">${icon('car',{size:18})}</span><span>Boutique</span>
     </a>
   </div>` : ''}
 
@@ -752,7 +749,7 @@ function _wirePseudo(root, me) {
       } else {
         showErr('');
         track('pseudo.updated', { has_pseudo: value !== null });
-        toast(value ? 'Pseudo enregistré 🎭' : 'Pseudo retiré', 'success');
+        toast(value ? 'Pseudo enregistré' : 'Pseudo retiré', 'success');
       }
     } catch (e) {
       console.error('[profil] pseudo', e);
@@ -779,7 +776,7 @@ function _renderReferral(stats) {
   ${code ? `
   <div class="prf-ref-code-wrap">
     <span class="prf-ref-code" id="prf-ref-code">${esc(code)}</span>
-    <button class="prf-ref-copy-btn" id="prf-ref-copy" title="Copier le code">📋</button>
+    <button class="prf-ref-copy-btn" id="prf-ref-copy" title="Copier le code">${icon('copy',{size:16})}</button>
   </div>
   <div class="prf-ref-stats">
     <div class="prf-ref-stat">
@@ -791,7 +788,7 @@ function _renderReferral(stats) {
       <div class="prf-ref-stat-lbl">XP gagnés</div>
     </div>
   </div>
-  <button class="prf-ref-share-btn" id="prf-ref-share">Partager mon code 🔗</button>
+  <button class="prf-ref-share-btn" id="prf-ref-share">Partager mon code</button>
   ` : `
   <button class="prf-ref-gen-btn" id="prf-ref-gen">Générer mon code de parrainage</button>
   `}
@@ -815,7 +812,7 @@ function _wireReferral(root, me) {
     try {
       await navigator.clipboard.writeText(code);
       const btn = section.querySelector('#prf-ref-copy');
-      if (btn) { btn.textContent = '✓'; setTimeout(() => { btn.textContent = '📋'; }, 1500); }
+      if (btn) { btn.textContent = '✓'; setTimeout(() => { btn.innerHTML = icon('copy',{size:16}); }, 1500); }
       track('referral.code_copied', {});
     } catch { /* clipboard unavailable */ }
   });
@@ -828,7 +825,7 @@ function _wireReferral(root, me) {
       try {
         await navigator.share({
           title: 'Rejoins PermiGo !',
-          text: `Utilise mon code ${code} sur PermiGo et gagne 200 XP 🚗`,
+          text: `Utilise mon code ${code} sur PermiGo et gagne 200 XP`,
           url: window.location.origin,
         });
         track('referral.shared', { code });
@@ -837,7 +834,7 @@ function _wireReferral(root, me) {
       try {
         await navigator.clipboard.writeText(`Mon code PermiGo : ${code} — ${window.location.origin}`);
         const { toast: _toast } = await import('@/components/common/toast.js');
-        _toast('Lien copié 📋', 'success');
+        _toast('Lien copié', 'success');
       } catch { /* unavailable */ }
     }
   });
@@ -883,7 +880,7 @@ function _wireReferral(root, me) {
       if (error || data?.error) {
         _toast(data?.error || 'Code invalide ou déjà utilisé', 'error');
       } else {
-        _toast('Code appliqué ! +200 XP et +50 💎', 'success', 4000);
+        _toast('Code appliqué ! +200 XP et +50 gemmes', 'success', 4000);
         track('referral.applied', { code });
         if (applyInput) applyInput.value = '';
       }

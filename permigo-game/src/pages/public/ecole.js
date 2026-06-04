@@ -3,6 +3,7 @@
 // Route : #/ecole/{slug}  (accès sans auth)
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { getCurUser } from '@/auth/cur-user.js';
@@ -331,7 +332,7 @@ export async function mount(root, slugOrId) {
     console.error('[ecole] load error', err);
     root.innerHTML = `${STYLE}<div class="ec">
       <div class="ec-err">
-        <div class="ec-err-ico" aria-hidden="true">🏫</div>
+        <div class="ec-err-ico" aria-hidden="true">${icon('school',{size:34})}</div>
         <div class="ec-err-title">École introuvable</div>
         <div class="ec-err-sub">Vérifie l'URL ou reviens plus tard.</div>
       </div>
@@ -384,10 +385,10 @@ async function renderEcole(root, slugOrId) {
   const ville = ecole.ville || '';
 
   const features = [
-    { ico: '🎯', title: 'Parcours REMC', sub: '31 compétences officielles', color: 'var(--a)' },
-    { ico: '⚡', title: 'Quiz post-leçon', sub: 'Validation immédiate', color: 'var(--gr)' },
-    { ico: '📊', title: 'Suivi temps réel', sub: 'Moniteur + élève synchronisés', color: 'var(--am)' },
-    { ico: '🏆', title: 'Gamification', sub: 'XP, trophées et streaks', color: 'var(--pu)' },
+    { ico: icon('target',{size:22}), title: 'Parcours REMC', sub: '31 compétences officielles', color: 'var(--a)' },
+    { ico: icon('zap',{size:22}), title: 'Quiz post-leçon', sub: 'Validation immédiate', color: 'var(--gr)' },
+    { ico: icon('chart-bar',{size:22}), title: 'Suivi temps réel', sub: 'Moniteur + élève synchronisés', color: 'var(--am)' },
+    { ico: icon('trophy',{size:22}), title: 'Gamification', sub: 'XP, trophées et streaks', color: 'var(--pu)' },
   ];
 
   const me = getCurUser();
@@ -399,10 +400,10 @@ async function renderEcole(root, slugOrId) {
       <!-- HERO -->
       <div class="ec-hero">
         <div class="ec-hero-badge">
-          <span aria-hidden="true">📍</span> Auto-école partenaire PermiGo
+          <span aria-hidden="true">${icon('map-pin',{size:14})}</span> Auto-école partenaire PermiGo
         </div>
         <h1 class="ec-hero-title">${esc(nom)}</h1>
-        ${ville ? `<div class="ec-hero-ville"><span aria-hidden="true">📍</span> ${esc(ville)}</div>` : ''}
+        ${ville ? `<div class="ec-hero-ville"><span aria-hidden="true">${icon('map-pin',{size:14})}</span> ${esc(ville)}</div>` : ''}
         <div class="ec-hero-kpis">
           <div class="ec-hero-kpi">
             <div class="ec-kpi-val">${nbEleves ?? '—'}</div>

@@ -119,7 +119,7 @@ export async function maybeSendStreakRiskNotif() {
   localStorage.setItem(lastSentKey, '1');
   track('push.streak_risk_sent', {});
 
-  new Notification('PermiGo 🛣️', {
+  new Notification('PermiGo', {
     body:  `Ton parcours t'attend — 2 min suffisent !`,
     icon:  '/icons/icon-192.png',
     badge: '/icons/badge-72.png',
@@ -232,7 +232,7 @@ function _createSoftBanner() {
       }
       #push-soft-banner .pb-skip:active { background: rgba(255,255,255,.1); }
     </style>
-    <div class="pb-ttl">🛣️ Reste dans ton parcours</div>
+    <div class="pb-ttl">Reste dans ton parcours</div>
     <p class="pb-sub">Active les notifications pour ne jamais rater un quiz ou une compétence validée.</p>
     <div class="pb-btns">
       <button class="pb-ok"   id="pb-allow">Activer</button>

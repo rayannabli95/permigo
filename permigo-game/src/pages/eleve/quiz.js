@@ -4,6 +4,7 @@
 // type: 'post_validation' (3 questions) | 'consolidation' (2 questions)
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { toast } from '@/components/common/toast.js';
 import { esc } from '@/utils/escape.js';
@@ -187,10 +188,10 @@ export async function mount(root, params = {}) {
         <div class="qp-cat-row">${cat?.ico || ''} <span>${esc(cat?.name || '')}</span></div>
         <h1 class="qp-comp" tabindex="-1">${esc(sub?.n || competenceId)}</h1>
         <div class="qp-meta">
-          <span class="qp-meta-item">📝 ${nbQuestions} questions</span>
-          <span class="qp-meta-item">⚡ ~30 secondes</span>
+          <span class="qp-meta-item">${icon('file-text',{size:14})} ${nbQuestions} questions</span>
+          <span class="qp-meta-item">${icon('zap',{size:14})} ~30 secondes</span>
         </div>
-        <button class="btn-start" id="btn-start">Commencer 🚀</button>
+        <button class="btn-start" id="btn-start">Commencer</button>
         <button class="btn-skip" id="btn-skip">Plus tard</button>
       </div>
     </div>
@@ -262,7 +263,7 @@ async function handleComplete(root, me, { competenceId, type, score, total, dura
   if (reason === 'no_competence_unlocked') {
     toast('Cette compétence n\'est pas encore débloquée par ton moniteur.', 'info');
   } else if (validated) {
-    toast('Compétence validée ! ✅', 'success');
+    toast('Compétence validée !', 'success');
     navigator.vibrate?.([30, 50, 30]);
     playLevelup();
   } else if (!passed) {
@@ -277,7 +278,7 @@ async function handleComplete(root, me, { competenceId, type, score, total, dura
 function renderResult(root, { score, total, scorePct, validated, passed, reason, type }) {
   const success = validated || passed;
   const msg = validated
-    ? 'Compétence validée ! Continue comme ça 🎯'
+    ? 'Compétence validée ! Continue comme ça'
     : passed
       ? 'Bien joué ! Quiz réussi.'
       : reason === 'no_competence_unlocked'

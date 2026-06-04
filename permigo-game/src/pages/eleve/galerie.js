@@ -4,6 +4,7 @@
 // Permet de visualiser TOUT ce qui est débloquable + l'état (acquis/verrouillé)
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
@@ -320,7 +321,7 @@ export async function mount(root) {
       </div>
       ${unlocked.length === 0 ? `
         <div class="gal-empty-hint">
-          <div class="gal-empty-hint-emoji">🏆</div>
+          <div class="gal-empty-hint-emoji">${icon('trophy',{size:30})}</div>
           <div class="gal-empty-hint-txt">Aucun trophée débloqué pour l'instant — valide ta première compétence pour commencer !</div>
         </div>
       ` : ''}
@@ -340,7 +341,7 @@ export async function mount(root) {
       <div class="gal-card ${unlocked ? 'acquis' : 'locked'}" style="--gc:${color}"
            data-id="${esc(t.id)}" role="button" tabindex="0"
            aria-label="${unlocked ? `Voir le trophée ${esc(t.nom)}` : `Trophée verrouillé : ${esc(t.nom)}`}">
-        ${!unlocked ? `<div class="gal-lock-badge" aria-hidden="true">🔒</div>` : ''}
+        ${!unlocked ? `<div class="gal-lock-badge" aria-hidden="true">${icon('lock',{size:14})}</div>` : ''}
         <div class="gal-card-visual">${visual}</div>
         <div class="gal-card-nom">${esc(t.nom)}</div>
         <div class="gal-card-meta">${unlocked ? 'Acquis' : esc(t.objectif || 'Verrouillé')}</div>
@@ -365,7 +366,7 @@ export async function mount(root) {
             <div class="gal-permis-status">
               ${t.unlocked
                 ? `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--grdk);background:rgba(16,185,129,.12);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">Acquis</span>`
-                : `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--mu2);background:var(--bg3);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">🔒 ${esc(`${t.min}`)} comp</span>`}
+                : `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--mu2);background:var(--bg3);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">${icon('lock',{size:11})} ${esc(`${t.min}`)} comp</span>`}
             </div>
           </div>
         `).join('')}
@@ -394,7 +395,7 @@ export async function mount(root) {
         <div class="gal-modal-desc">${esc(t.desc || '')}</div>
         <div class="gal-modal-foot">
           ${t.xp ? `<span class="gal-modal-xp">+${t.xp} XP</span>` : ''}
-          ${t.gemmes ? `<span class="gal-modal-xp" style="color:var(--gr);background:rgba(16,185,129,.1)">+${t.gemmes} 💎</span>` : ''}
+          ${t.gemmes ? `<span class="gal-modal-xp" style="color:var(--gr);background:rgba(16,185,129,.1)">+${t.gemmes} ${icon('gem',{size:13})}</span>` : ''}
           <span class="gal-modal-state ${unlocked ? 'on' : 'off'}">${unlocked ? '✓ Débloqué' : esc(t.objectif || '🔒 Verrouillé')}</span>
         </div>
       </div>`;

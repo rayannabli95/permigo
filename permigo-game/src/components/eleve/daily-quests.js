@@ -185,7 +185,7 @@ export async function mountDailyQuests(root) {
         const rect = card.getBoundingClientRect();
         const pop  = document.createElement('div');
         pop.className = 'dq-xp-pop';
-        pop.textContent = `+${xpGained} XP${gemGained > 0 ? ` · +${gemGained} 💎` : ''}`;
+        pop.textContent = `+${xpGained} XP${gemGained > 0 ? ` · +${gemGained} gemmes` : ''}`;
         pop.style.cssText = `left:${rect.left + rect.width / 2}px;top:${rect.top}px`;
         document.body.appendChild(pop);
         setTimeout(() => pop.remove(), 800);
@@ -243,8 +243,8 @@ function renderCard(q) {
     : '';
 
   const reward = q.xp_reward > 0
-    ? `+${q.xp_reward} XP${q.gem_reward > 0 ? ` · +${q.gem_reward} 💎` : ''}`
-    : q.gem_reward > 0 ? `+${q.gem_reward} 💎` : '';
+    ? `+${q.xp_reward} XP${q.gem_reward > 0 ? ` · +${q.gem_reward} gemmes` : ''}`
+    : q.gem_reward > 0 ? `+${q.gem_reward} gemmes` : '';
 
   return `
     <div class="dq-card ${stCls}" data-quest-id="${esc(String(q.id))}"

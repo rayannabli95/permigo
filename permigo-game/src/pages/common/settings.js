@@ -2,6 +2,7 @@
 // Settings — préférences utilisateur (notifs, confidentialité, compte)
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
@@ -394,8 +395,8 @@ function render(root, me, prefs) {
         <div class="st-row-sub">Apparence de l'application</div>
       </div>
       <div class="st-theme-seg" id="theme-seg" role="group" aria-label="Choisir le thème">
-        <button class="st-theme-btn ${prefs.theme === 'light' ? 'active' : ''}" data-theme="light" aria-pressed="${prefs.theme === 'light'}">☀️ Clair</button>
-        <button class="st-theme-btn ${prefs.theme === 'dark'  ? 'active' : ''}" data-theme="dark"  aria-pressed="${prefs.theme === 'dark'}">🌙 Sombre</button>
+        <button class="st-theme-btn ${prefs.theme === 'light' ? 'active' : ''}" data-theme="light" aria-pressed="${prefs.theme === 'light'}">${icon('sun',{size:16})} Clair</button>
+        <button class="st-theme-btn ${prefs.theme === 'dark'  ? 'active' : ''}" data-theme="dark"  aria-pressed="${prefs.theme === 'dark'}">${icon('moon',{size:16})} Sombre</button>
         <button class="st-theme-btn ${prefs.theme === 'auto'  ? 'active' : ''}" data-theme="auto"  aria-pressed="${prefs.theme === 'auto'}">Système</button>
       </div>
     </div>
@@ -415,7 +416,7 @@ function render(root, me, prefs) {
 
   <!-- 🔐 MES DONNÉES (RGPD) -->
   <div class="st-section">
-    <div class="st-section-label">🔐 Mes données</div>
+    <div class="st-section-label">${icon('lock',{size:14})} Mes données</div>
 
     <!-- Export -->
     <div class="st-row">
@@ -580,7 +581,7 @@ function wire(root, me, prefs) {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      toast('Téléchargement lancé 📥', 'success', 3000);
+      toast('Téléchargement lancé', 'success', 3000);
       track('rgpd.data_exported', {});
     } catch (e) {
       console.error('[settings] export', e);
@@ -620,7 +621,7 @@ function _showDeleteModal(root, me) {
   overlay.innerHTML = `
 <div class="st-modal-box" role="dialog" aria-modal="true" aria-labelledby="del-modal-title">
   <div class="st-modal-handle"></div>
-  <div class="st-modal-title" id="del-modal-title">⚠️ Supprimer mon compte</div>
+  <div class="st-modal-title" id="del-modal-title">Supprimer mon compte</div>
   <div class="st-modal-body">
     Cette action est <strong>irréversible</strong>. Toutes tes données (progression, trophées, streak, XP) seront définitivement effacées.
     <br><br>Pour confirmer, tape exactement :<br><strong>${CONFIRM_TEXT}</strong>

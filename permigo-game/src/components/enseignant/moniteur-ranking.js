@@ -270,7 +270,7 @@ export async function mountMoniteurRanking(root, { myId }) {
       <div class="mr-compare">
         ${icon('trending-up', { size: 12, strokeWidth: 2.4 })}
         Tu es à <strong>${Math.round((prev.score_total - mine.score_total) * 10) / 10} pts</strong> derrière ${esc(prev.moniteur_prenom)}
-      </div>` : (mine.rank === 1 ? `<div class="mr-compare">🏆 Tu es en tête ce mois-ci !</div>` : '')}
+      </div>` : (mine.rank === 1 ? `<div class="mr-compare">${icon('trophy',{size:16})} Tu es en tête ce mois-ci !</div>` : '')}
     </div>` : ''}
 
     ${top3.length > 0 ? `

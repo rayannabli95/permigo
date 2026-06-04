@@ -85,7 +85,7 @@ async function _celebrateValidation(compId) {
     burstConfetti({ count: 55, power: 10, spread: Math.PI * 0.5 });
   }, 200);
   const compLabel = compId ? ` (${compId})` : '';
-  toast(`✨ Nouvelle compétence acquise${compLabel} !`, 'success', 4000);
+  toast(`Nouvelle compétence acquise${compLabel} !`, 'success', 4000);
 
   // Trigger éventuel d'un Celebrate Screen fullscreen sur les paliers majeurs
   // (1ère validation, 10 acquises, 28 acquises = prêt examen, 31 acquises = permis)
@@ -183,7 +183,7 @@ async function saveQuizResult(me, { competenceId, type, score, total }) {
   if (lvlAfter > lvlBefore) {
     setTimeout(() => {
       burstConfetti({ count: 80, power: 13 });
-      toast(`🎉 Niveau ${lvlAfter} atteint ! +${xpGain} XP`, 'success', 5000);
+      toast(`Niveau ${lvlAfter} atteint ! +${xpGain} XP`, 'success', 5000);
       track('level_up', { level: lvlAfter, xp: xpAfter });
     }, 800);
   }

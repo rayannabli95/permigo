@@ -6,6 +6,7 @@
 // swipe natif, progression claire, perso (prénom + avatar), skippable.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from '@/auth/auth.js';
+import { icon } from '@/utils/icons.js';
 import { getCurUser, setCurUser } from '@/auth/cur-user.js';
 import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
@@ -75,7 +76,7 @@ export async function mount(root) {
             </section>
           `).join('')}
           <section class="ob-slide ob-slide-avatar" data-i="${SLIDES.length}">
-            <div class="ob-emoji" aria-hidden="true">🎨</div>
+            <div class="ob-emoji" aria-hidden="true">${icon('palette',{size:34})}</div>
             <h1 class="ob-title">Choisis ta tête</h1>
             <p class="ob-body-txt">Tu pourras en changer quand tu veux depuis ton profil.</p>
             <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="Choix de l'avatar">
@@ -114,7 +115,7 @@ export async function mount(root) {
       s.setAttribute('aria-hidden', i === idx ? 'false' : 'true');
     });
     if (isAvatarSlide()) {
-      ctaBtn.innerHTML = 'Voir mon parcours <span aria-hidden="true">🚀</span>';
+      ctaBtn.innerHTML = 'Voir mon parcours';
     } else {
       ctaBtn.innerHTML = `${esc(SLIDES[idx].cta)} <span aria-hidden="true">→</span>`;
     }

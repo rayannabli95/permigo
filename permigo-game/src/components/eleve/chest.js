@@ -11,6 +11,7 @@
  */
 
 import { esc } from '@/utils/escape.js';
+import { icon } from '@/utils/icons.js';
 import { markChestOpened } from '@/utils/game-state.js';
 import { burstConfetti } from '@/components/common/confetti.js';
 import { lootToast } from '@/components/eleve/loot-toast.js';
@@ -46,7 +47,7 @@ export function renderChest({ worldNum, worldName, opened = false }) {
       <div class="chest-label">
         <div class="chest-tier">${opened ? '✓ OUVERT' : tier.name}</div>
         <div class="chest-name">${esc(worldName)}</div>
-        ${!opened ? `<div class="chest-cta">⚡ +${tier.xp} XP &nbsp;·&nbsp; 💎 +${tier.gemmes}</div>` : ''}
+        ${!opened ? `<div class="chest-cta">${icon('zap',{size:18})} +${tier.xp} XP &nbsp;·&nbsp; ${icon('gem',{size:13})} +${tier.gemmes}</div>` : ''}
       </div>
     </div>
   `;
@@ -125,9 +126,9 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
 
       // Phase 4 : Cascade de récompenses (1300ms+)
       const list = [
-        { icon: '⚡', label: `+${tier.xp} XP`, delay: 150 },
-        { icon: '💎', label: `+${tier.gemmes} Gemmes`, delay: 450 },
-        { icon: '🏆', label: `Titre "Maître ${worldName}"`, delay: 800 },
+        { icon: icon('zap',{size:20}), label: `+${tier.xp} XP`, delay: 150 },
+        { icon: icon('gem',{size:20}), label: `+${tier.gemmes} Gemmes`, delay: 450 },
+        { icon: icon('trophy',{size:20}), label: `Titre "Maître ${worldName}"`, delay: 800 },
       ];
       list.forEach((r) => {
         setTimeout(() => {

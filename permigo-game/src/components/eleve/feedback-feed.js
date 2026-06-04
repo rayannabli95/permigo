@@ -200,7 +200,7 @@ function renderCard(evt, idx) {
 
   const statusBit = isSession && evt.confirmation_status
     ? `<span style="font-size:10px;color:${evt.confirmation_status === 'confirmed' ? 'var(--grd)' : 'var(--mu2)'}">
-        ${evt.confirmation_status === 'confirmed' ? '✓ confirmée' : evt.confirmation_status === 'refused' ? '✗ refusée' : '⏳ en attente'}
+        ${evt.confirmation_status === 'confirmed' ? '✓ confirmée' : evt.confirmation_status === 'refused' ? '✗ refusée' : 'en attente'}
        </span>`
     : '';
 

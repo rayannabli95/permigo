@@ -202,7 +202,7 @@ function renderCard(evt) {
 
   const statusLine = isSession && evt.confirmation_status ? `
     <div class="fb-extra-row" style="color:${evt.confirmation_status === 'confirmed' ? 'var(--grd)' : 'var(--mu2)'}">
-      ${evt.confirmation_status === 'confirmed' ? '✓ Confirmée' : evt.confirmation_status === 'refused' ? '✗ Refusée' : '⏳ En attente'}
+      ${evt.confirmation_status === 'confirmed' ? '✓ Confirmée' : evt.confirmation_status === 'refused' ? '✗ Refusée' : 'En attente'}
     </div>` : '';
 
   return `
@@ -278,7 +278,7 @@ export async function mount(root) {
       if (lb) { lb.disabled = false; return; }            // pagination : on garde l'existant
       const list = root.querySelector('.fb-list');         // 1er chargement : on tue le skeleton
       if (list) {
-        list.innerHTML = `<div class="fb-empty"><div class="fb-empty-ico">📡</div>
+        list.innerHTML = `<div class="fb-empty"><div class="fb-empty-ico">${icon('alert-circle',{size:30})}</div>
           Impossible de charger tes retours.<br>
           <button class="fb-load-more" id="fb-retry" style="margin-top:12px">Réessayer</button></div>`;
         root.querySelector('#fb-retry')?.addEventListener('click', () => { offset = 0; allEvents = []; loadMore(); });
@@ -296,7 +296,7 @@ export async function mount(root) {
       if (!page.querySelector('.fb-empty')) {
         page.insertAdjacentHTML('beforeend', `
           <div class="fb-empty">
-            <div class="fb-empty-ico">💬</div>
+            <div class="fb-empty-ico">${icon('message-circle',{size:30})}</div>
             Aucun retour encore — continue tes leçons !
           </div>
         `);
