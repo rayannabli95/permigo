@@ -505,8 +505,8 @@ const STYLE = `<style>
 /* Le badge occupe tout le node (un poil débordant pour compenser l'absence de cercle) */
 .prc-node.done .nd-badge,
 .prc-node.todo .nd-badge,
-.prc-node.locked .nd-badge { width: 112%; height: 112%; }
-.nd-badge-next { width: 120%; height: 120%; }
+.prc-node.locked .nd-badge { width: 150%; height: 150%; }
+.nd-badge-next { width: 165%; height: 165%; }
 
 /* Volant qui oscille gauche-droite sur le prochain défi (image PNG) */
 .nd-wheel {
