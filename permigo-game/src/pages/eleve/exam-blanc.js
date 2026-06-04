@@ -9,7 +9,7 @@ import { track }                 from '@/services/analytics.js';
 import { navigate }              from '@/router.js';
 import { PARCOURS, questionsForParcours } from '@/data/parcours-quiz.js';
 import { haptic }                from '@/utils/haptic.js';
-import { playPageturn, playCorrect, playWrong, playFanfare } from '@/utils/sound.js';
+import { playPageturn, playCorrect, playWrong, playVictory, playDefeat } from '@/utils/sound.js';
 
 const PASS_THRESHOLD = 12; // / 15
 
@@ -288,7 +288,7 @@ function showResults(root, questions, answers, parcours_id) {
 
   track('parcours_quiz.completed', { parcours_id, nom: parcours?.nom, score, total, passed, faute_eliminatoire: fauteRatee });
 
-  if (passed) playFanfare(); else playWrong();
+  if (passed) playVictory(); else playDefeat();
 
   const wrongHtml = wrongItems.length === 0
     ? `<p class="exb-perfect">Parfait ! Aucune erreur.</p>`

@@ -14,6 +14,7 @@ import { getMoniteurState, buildTimelineStops } from '@/data/moniteur-levels.js'
 import { animateCounter } from '@/utils/gestures.js';
 import { icon } from '@/utils/icons.js';
 import { openPalierSheet } from '@/components/common/palier-sheet.js';
+import { playParcours } from '@/utils/sound.js';
 
 // ─── CSS ────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -417,6 +418,7 @@ export async function mount(root) {
   if (!_me || _me.role !== 'enseignant') return;
 
   track('page.view', { page: 'parcours_pro' });
+  playParcours();
 
   root.innerHTML = `${STYLE}
     <div class="pcp">

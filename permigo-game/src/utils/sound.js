@@ -51,6 +51,10 @@ export const playPageturn = () => play('pageturn');
 export const playNotify   = () => play('notify');
 export const playHorn     = () => play('horn');
 
+// ─── Musiques de fin (vraies pistes dédiées) ───
+export const playVictory  = () => play('victory', 0.5);  // quiz recap réussi / exam blanc admis / compétence débloquée
+export const playDefeat   = () => play('defeat', 0.5);   // quiz recap échoué / exam blanc recalé
+
 // ─── Alias sémantiques quiz/examen (remappés sur .mp3 existants en attendant vrais sons) ───
 export const playCorrect = () => play('success');        // bonne réponse
 export const playWrong   = () => play('hint');           // mauvaise réponse
