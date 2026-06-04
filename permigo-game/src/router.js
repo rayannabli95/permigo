@@ -40,6 +40,8 @@ const ROUTES = {
     livret: () => import("@/pages/enseignant/livret-remc.js"),
     insights: () => import("@/pages/enseignant/insights.js"),
     bilan: () => import("@/pages/enseignant/bilan.js"),
+    "trophees-moniteur": () =>
+      import("@/pages/enseignant/trophees-moniteur.js"),
     boutique: () => import("@/pages/eleve/boutique.js"),
     "log-session": () => import("@/pages/enseignant/log-session.js"),
     messages: () => import("@/pages/common/messages.js"),
