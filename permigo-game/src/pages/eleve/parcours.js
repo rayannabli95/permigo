@@ -977,7 +977,9 @@ const STYLE = `<style>
 .stt-pill.todo   { background: var(--bg2); color: var(--mu3); }
 .stt-pill.locked { background: var(--bg2); color: var(--mu2); }
 
-.fiche-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+/* padding-bottom large : le dernier bloc (conseil du coach) doit pouvoir
+   défiler entièrement au-dessus de la barre de nav fixe (~60px). */
+.fiche-body { padding: 0 16px calc(80px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 12px; }
 /* Rythme vertical homogène : on neutralise les marges hétérogènes des blocs
    (14px/10px) au profit d'un gap unique → fiche mieux répartie. */
 .fiche-body > * { margin-bottom: 0; }
@@ -1866,8 +1868,9 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   // Quiz-récap : rappel OPTIONNEL proposé sur une compétence acquise.
   // Ne change pas le statut (already_acquired) — joue l'animation + crédite l'XP d'engagement.
   const recapBtn = `
-    <a href="#/quiz/${esc(compId)}/post_validation" style="display:block;margin:0;padding:13px;background:#fff;border:1.5px solid var(--a);color:var(--adk);border-radius:14px;font:700 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;">
-      Quiz-récap (optionnel) →
+    <a href="#/quiz/${esc(compId)}/post_validation" role="button"
+       style="display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:15px;background:var(--a);border:none;color:#fff;border-radius:14px;font:800 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;box-shadow:0 6px 16px -4px color-mix(in srgb, var(--a) 60%, transparent);min-height:52px;">
+      ${icon('refresh-cw', { size: 16 })} Refaire le quiz-récap <span style="opacity:.8;font-weight:600">(optionnel)</span>
     </a>`;
 
   // Bloc status contextuel selon état
