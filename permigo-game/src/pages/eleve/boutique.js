@@ -9,7 +9,7 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { toast } from '@/components/common/toast.js';
 import { haptic } from '@/utils/haptic.js';
-import { equipItem, unequipItem, setEquippedAsset, getEquipped } from '@/utils/game-state.js';
+import { equipItem, unequipItem, setEquippedAsset, getEquipped, getEquippedAsset } from '@/utils/game-state.js';
 import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
 
 const TABS = [
@@ -247,11 +247,29 @@ const STYLE = `<style>
 }
 </style>`;
 
+// Persiste l'avatar équipé dans profiles.avatar_url (slot 'avatar' seulement).
+// Sans ça, l'équipement vit en localStorage → invisible du serveur, donc le
+// classement affiche toujours l'avatar d'inscription au lieu du skin équipé.
+async function syncAvatarUrlToProfile(slot, assetUrl) {
+  if (slot !== 'avatar') return;
+  const me = getCurUser();
+  if (!me) return;
+  try {
+    await sb.from('profiles').update({ avatar_url: assetUrl || null }).eq('id', me.id);
+    me.avatar_url = assetUrl || null;
+  } catch (e) { console.warn('[boutique] sync avatar_url failed', e); }
+}
+
 // ─── Mount ────────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
   track('page.view', { page: 'boutique' });
+
+  // Réconciliation : un avatar équipé en local mais absent de la base (ancien
+  // équipement) → on le pousse dans profiles.avatar_url pour le classement.
+  const equippedAv = getEquippedAsset('avatar');
+  if (equippedAv && equippedAv !== me.avatar_url) syncAvatarUrlToProfile('avatar', equippedAv);
 
   root.innerHTML = `${STYLE}
 <div class="bo2 anim-slide-up">
@@ -317,10 +335,12 @@ export async function mount(root) {
     if (eq[item.type] === item.id) {
       unequipItem(item.type);
       setEquippedAsset(item.type, null);
+      syncAvatarUrlToProfile(item.type, null);
       toast(`${item.name} retiré`, 'info');
     } else {
       equipItem(item.type, item.id);
       setEquippedAsset(item.type, item.asset_url || null);
+      syncAvatarUrlToProfile(item.type, item.asset_url || null);
       toast(`${item.name} équipé ✓`, 'success');
     }
     renderTab(activeTab);
@@ -590,9 +610,9 @@ function showDetailModal(item, gemmes, onConfirm) {
         // équiper / retirer directement
         const eq = getEquipped();
         if (eq[item.type] === item.id) {
-          unequipItem(item.type); setEquippedAsset(item.type, null); toast(`${item.name} retiré`, 'info');
+          unequipItem(item.type); setEquippedAsset(item.type, null); syncAvatarUrlToProfile(item.type, null); toast(`${item.name} retiré`, 'info');
         } else {
-          equipItem(item.type, item.id); setEquippedAsset(item.type, item.asset_url || null); toast(`${item.name} équipé ✓`, 'success');
+          equipItem(item.type, item.id); setEquippedAsset(item.type, item.asset_url || null); syncAvatarUrlToProfile(item.type, item.asset_url || null); toast(`${item.name} équipé ✓`, 'success');
         }
         overlay.remove();
         // force refresh de la liste sous-jacente
@@ -619,6 +639,7 @@ async function doPurchase(item, root, allItems) {
     try {
       equipItem(item.type, item.id);
       setEquippedAsset(item.type, item.asset_url || null);
+      syncAvatarUrlToProfile(item.type, item.asset_url || null);
       toast(`🎁 ${item.name} équipé !`, 'success', 3000);
     } catch (eqErr) {
       console.warn('[boutique] auto-equip failed', eqErr);
