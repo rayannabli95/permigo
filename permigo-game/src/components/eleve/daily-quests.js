@@ -143,8 +143,8 @@ export async function mountDailyQuests(root) {
     return;
   }
 
-  // Hide section if every quest is already claimed
-  if (quests.length === 0 || quests.every(q => q.completed)) return;
+  // Hide section if every quest is already claimed (réclamée, pas juste complétée)
+  if (quests.length === 0 || quests.every(q => q.claimed)) return;
 
   ensureStyle();
   track('daily_quests.shown', { count: quests.length });
@@ -212,7 +212,7 @@ export async function mountDailyQuests(root) {
 }
 
 function renderSection(quests) {
-  const readyCount = quests.filter(q => !q.completed && q.progress >= q.target).length;
+  const readyCount = quests.filter(q => q.completed && !q.claimed).length;
   return `
     <div class="dq-hd">
       <div class="dq-title">
@@ -229,8 +229,8 @@ function renderSection(quests) {
 
 function renderCard(q) {
   const pct   = q.target > 0 ? Math.min(100, Math.round((q.progress / q.target) * 100)) : 0;
-  const ready = !q.completed && q.progress >= q.target;
-  const done  = q.completed;
+  const ready = q.completed && !q.claimed;   // objectif atteint → récompense à réclamer
+  const done  = q.claimed;                   // récompense déjà réclamée
 
   const cat      = CAT_CFG[q.category] || CAT_CFG.default;
   const fillClr  = done ? 'var(--gr)' : ready ? 'var(--puk)' : 'var(--a)';

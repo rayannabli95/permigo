@@ -18,6 +18,7 @@ import { emotionalBanner } from '@/components/eleve/emotional-banner.js';
 import { getMyChests, getEquippedAsset } from '@/utils/game-state.js';
 import { mountFeedbackFeed } from '@/components/eleve/feedback-feed.js';
 import { mountRevisionCards } from '@/components/eleve/revision-cards.js';
+import { mountDailyQuests } from '@/components/eleve/daily-quests.js';
 import { toast } from '@/components/common/toast.js';
 import { navigate } from '@/router.js';
 import { haptic } from '@/utils/haptic.js';
@@ -735,6 +736,14 @@ export async function mount(root) {
 
     // Composants non-bloquants injectés sous le fold
     if (accDiv) {
+      // Quêtes du jour — carrousel réclamable, juste sous l'action du jour
+      const actionEl = accDiv.querySelector('.acc2-action');
+      if (actionEl) {
+        const dqHost = document.createElement('div');
+        dqHost.style.cssText = 'margin:16px 16px 0';
+        actionEl.insertAdjacentElement('afterend', dqHost);
+        Promise.resolve().then(() => mountDailyQuests(dqHost)).catch(() => {});
+      }
       Promise.resolve().then(() => mountFeedbackFeed(accDiv, { eleveId: me.id, limit: 5 })).catch(() => {});
       Promise.resolve().then(() => mountRevisionCards(accDiv, { eleveId: me.id, limit: 3 })).catch(() => {});
     }
@@ -826,8 +835,9 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
     : renderNextReward(totalValidated, worlds, trophees);
 
   // ── BLOC 3 content ──
-  const quest = todayQuests?.[0] ?? null;
-  const bloc3 = renderActionDuJour(quest, pendingNotif, totalValidated);
+  // Les quêtes du jour ont leur propre carrousel (mountDailyQuests). L'action
+  // du jour reste contextuelle (quiz en attente / 1re compétence / examen).
+  const bloc3 = renderActionDuJour(null, pendingNotif, totalValidated);
 
   return `${STYLE}
 <div class="acc2">
