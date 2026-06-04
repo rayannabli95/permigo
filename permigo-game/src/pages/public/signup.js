@@ -438,10 +438,16 @@ function renderForm(root, invitation, token) {
         return;
       }
 
-      // 4. Succès → tuto "Ajouter à l'écran d'accueil" (engagement), puis redirection
+      // 4. Succès → redirection. Le tuto "Ajouter à l'écran d'accueil" est
+      //    dans l'onboarding pour l'élève ; pour moniteur/gérant (pas d'onboarding)
+      //    on l'affiche ici.
       const goToApp = () => { window.location.href = '/#'; window.location.reload(); };
-      const { renderAddToHome } = await import('@/components/common/add-to-home.js');
-      renderAddToHome(root, { onDone: goToApp });
+      if (isEleve) {
+        goToApp();
+      } else {
+        const { renderAddToHome } = await import('@/components/common/add-to-home.js');
+        renderAddToHome(root, { onDone: goToApp });
+      }
 
     } catch (e) {
       console.error('[signup] failed', e);
