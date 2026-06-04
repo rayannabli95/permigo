@@ -425,12 +425,13 @@ export async function mount(root) {
 
   // Pour élève : compte des compétences validées (pour la carte permis)
   let permisData = null;
+  let eleveStreak = 0;
   if (me.role === 'eleve') {
-    const { data: valData } = await sb
-      .from('validations')
-      .select('competence_id')
-      .eq('eleve_id', me.id)
-      .eq('statut', 'acquis');
+    const [{ data: valData }, { data: streakRow }] = await Promise.all([
+      sb.from('validations').select('competence_id').eq('eleve_id', me.id).eq('statut', 'acquis'),
+      sb.from('streaks').select('current_streak').eq('user_id', me.id).maybeSingle(),
+    ]);
+    eleveStreak = streakRow?.current_streak ?? 0;
     permisData = {
       prenom: profile?.prenom || '',
       nom: profile?.nom || '',
@@ -497,7 +498,7 @@ export async function mount(root) {
       bio: `Apprenti permis B · ${permisData.validated}/${REMC_TOTAL} compétences`,
       stats: [
         { label: 'Compétences', value: permisData.validated },
-        { label: 'Streak',      value: profile?.streak_days ?? profile?.streak_pro_days ?? 0 },
+        { label: 'Streak',      value: eleveStreak },
         { label: 'XP',          value: profile?.xp || 0 },
       ],
       shareUrl: window.location.origin,
