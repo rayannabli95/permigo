@@ -12,6 +12,12 @@ import { esc } from '@/utils/escape.js';
 import { track } from '@/services/analytics.js';
 import { ASSETS } from '@/utils/assets.js';
 import { haptic } from '@/utils/haptic.js';
+import { isStandalone, guessPlatform, canPromptInstall, promptInstall } from '@/utils/pwa.js';
+
+// Pictos inline pour le tuto "ajouter à l'écran d'accueil"
+const A2HS_SHARE = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg>`;
+const A2HS_DOTS  = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>`;
+const A2HS_PLUS  = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`;
 
 // ─── Contenu des 4 écrans narratifs (le 5e = avatar) ─────────────
 const SLIDES = [
@@ -43,16 +49,21 @@ const SLIDES = [
   // 5e écran : choix d'avatar (interactif) + CTA final, géré à part.
 ];
 
-const TOTAL = SLIDES.length + 1; // +1 pour l'écran avatar
-
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
   track('onboarding.start', { role: me.role });
 
+  // Dernière étape = tuto "ajouter à l'écran d'accueil" (sauf si déjà installée)
+  const showA2HS = !isStandalone();
+  const AVATAR_I = SLIDES.length;
+  const A2HS_I   = SLIDES.length + 1;
+  const TOTAL    = SLIDES.length + 1 + (showA2HS ? 1 : 0);
+
   let idx = 0;
   let avatar = (me.avatar_url && ASSETS.avatar?.includes(me.avatar_url)) ? me.avatar_url : (ASSETS.avatar?.[0] || null);
+  let a2hsPlat = guessPlatform() === 'android' ? 'android' : 'ios';
   let finishing = false;
 
   root.innerHTML = `
@@ -75,7 +86,7 @@ export async function mount(root) {
               <p class="ob-body-txt">${esc(s.body)}</p>
             </section>
           `).join('')}
-          <section class="ob-slide ob-slide-avatar" data-i="${SLIDES.length}">
+          <section class="ob-slide ob-slide-avatar" data-i="${AVATAR_I}">
             <div class="ob-emoji" aria-hidden="true">${icon('palette',{size:34})}</div>
             <h1 class="ob-title">Choisis ta tête</h1>
             <p class="ob-body-txt">Tu pourras en changer quand tu veux depuis ton profil.</p>
@@ -87,6 +98,17 @@ export async function mount(root) {
                 </button>`).join('')}
             </div>
           </section>
+          ${showA2HS ? `
+          <section class="ob-slide ob-slide-a2hs" data-i="${A2HS_I}">
+            <img class="ob-a2hs-badge" src="/skins/avatars/permigo-badge-icon.png" alt="" />
+            <h1 class="ob-title">Garde PermiGo à portée de main</h1>
+            <p class="ob-body-txt">Ajoute l'app à ton écran d'accueil pour l'ouvrir d'un seul geste, chaque jour.</p>
+            <div class="ob-seg" role="tablist">
+              <button class="ob-seg-btn" data-plat="ios" type="button">iPhone (iOS)</button>
+              <button class="ob-seg-btn" data-plat="android" type="button">Android</button>
+            </div>
+            <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
+          </section>` : ''}
         </div>
       </div>
 
@@ -101,7 +123,10 @@ export async function mount(root) {
   const dotsEl = root.querySelector('#ob-dots');
   const viewport = root.querySelector('#ob-viewport');
 
-  function isAvatarSlide() { return idx === SLIDES.length; }
+  const lastIdx = TOTAL - 1;
+  function isLast()   { return idx === lastIdx; }
+  function isAvatar() { return idx === AVATAR_I; }
+  function isA2HS()   { return showA2HS && idx === A2HS_I; }
 
   function update() {
     track$.style.transform = `translateX(-${(idx * 100) / TOTAL}%)`;
@@ -114,8 +139,10 @@ export async function mount(root) {
       s.classList.toggle('on', i === idx);
       s.setAttribute('aria-hidden', i === idx ? 'false' : 'true');
     });
-    if (isAvatarSlide()) {
+    if (isLast()) {
       ctaBtn.innerHTML = 'Voir mon parcours';
+    } else if (isAvatar()) {
+      ctaBtn.innerHTML = 'Continuer <span aria-hidden="true">→</span>';
     } else {
       ctaBtn.innerHTML = `${esc(SLIDES[idx].cta)} <span aria-hidden="true">→</span>`;
     }
@@ -127,7 +154,7 @@ export async function mount(root) {
     haptic?.('tap');
     update();
   }
-  function next() { isAvatarSlide() ? finish() : goTo(idx + 1); }
+  function next() { isLast() ? finish() : goTo(idx + 1); }
   function prev() { if (idx > 0) goTo(idx - 1); }
 
   ctaBtn.addEventListener('click', next);
@@ -149,6 +176,46 @@ export async function mount(root) {
       });
     });
   });
+
+  // ─── Tuto "ajouter à l'écran d'accueil" (dernière slide) ──────────
+  if (showA2HS) {
+    const stepsEl = root.querySelector('#ob-a2hs-steps');
+
+    const stepsIOS = () => `
+      <div class="ob-a2hs-step"><span class="ob-a2hs-num">1</span><span>Dans <strong>Safari</strong>, touche le bouton Partager <span class="ob-a2hs-glyph">${A2HS_SHARE}</span> en bas.</span></div>
+      <div class="ob-a2hs-step"><span class="ob-a2hs-num">2</span><span>Choisis <strong>« Sur l'écran d'accueil »</strong>.</span></div>
+      <div class="ob-a2hs-step"><span class="ob-a2hs-num">3</span><span>Touche <strong>« Ajouter »</strong>. C'est fait !</span></div>`;
+
+    const stepsAndroid = () => {
+      const btn = canPromptInstall()
+        ? `<button class="ob-a2hs-install" id="ob-a2hs-install" type="button">Installer l'app en 1 tap</button>` : '';
+      return `${btn}
+      <div class="ob-a2hs-step"><span class="ob-a2hs-num">1</span><span>Dans <strong>Chrome</strong>, touche le menu <span class="ob-a2hs-glyph">${A2HS_DOTS}</span> en haut à droite.</span></div>
+      <div class="ob-a2hs-step"><span class="ob-a2hs-num">2</span><span>Choisis <strong>« Ajouter à l'écran d'accueil »</strong> <span class="ob-a2hs-glyph">${A2HS_PLUS}</span>.</span></div>
+      <div class="ob-a2hs-step"><span class="ob-a2hs-num">3</span><span>Confirme avec <strong>« Ajouter »</strong>. C'est fait !</span></div>`;
+    };
+
+    const renderA2HSSteps = () => {
+      root.querySelectorAll('.ob-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.plat === a2hsPlat));
+      stepsEl.innerHTML = a2hsPlat === 'android' ? stepsAndroid() : stepsIOS();
+      const ib = root.querySelector('#ob-a2hs-install');
+      if (ib) ib.addEventListener('click', async () => {
+        ib.disabled = true; ib.textContent = 'Installation…';
+        const outcome = await promptInstall();
+        track('a2hs.install_prompt', { outcome, source: 'onboarding' });
+        if (outcome === 'accepted') { finish(); return; }
+        ib.disabled = false; ib.textContent = "Installer l'app en 1 tap";
+      });
+    };
+
+    root.querySelectorAll('.ob-seg-btn').forEach(b => b.addEventListener('click', () => {
+      a2hsPlat = b.dataset.plat;
+      track('a2hs.platform_selected', { platform: a2hsPlat, source: 'onboarding' });
+      renderA2HSSteps();
+    }));
+
+    renderA2HSSteps();
+  }
 
   // Skip → termine direct
   root.querySelector('#ob-skip').addEventListener('click', () => {
@@ -320,4 +387,43 @@ const STYLE = `<style>
   }
   .ob-cta:active { transform: scale(.98); }
   .ob-cta:disabled { opacity: .6; cursor: wait; }
+
+  /* Slide "ajouter à l'écran d'accueil" */
+  .ob-a2hs-badge {
+    width: 84px; height: 84px; object-fit: contain; margin-bottom: 18px;
+    filter: drop-shadow(0 12px 26px rgba(16,185,129,.4));
+  }
+  .ob-slide.on .ob-a2hs-badge { animation: obPop .55s cubic-bezier(.34,1.56,.64,1) both; }
+  .ob-seg {
+    display: flex; gap: 6px; background: rgba(255,255,255,.07);
+    padding: 5px; border-radius: 14px; margin: 22px 0 16px; width: 100%; max-width: 320px;
+  }
+  .ob-seg-btn {
+    flex: 1; border: 0; background: transparent; padding: 11px 8px; border-radius: 10px;
+    font: 700 14px/1 'Inter', sans-serif; color: rgba(255,255,255,.6); cursor: pointer; transition: .15s;
+  }
+  .ob-seg-btn.active { background: rgba(255,255,255,.16); color: #fff; }
+  .ob-a2hs-steps { width: 100%; max-width: 340px; text-align: left; }
+  .ob-a2hs-step {
+    display: flex; gap: 11px; align-items: flex-start; padding: 9px 0;
+    font: 500 14.5px/1.45 'Inter', sans-serif; color: rgba(255,255,255,.85);
+  }
+  .ob-a2hs-step + .ob-a2hs-step { border-top: 1px solid rgba(255,255,255,.08); }
+  .ob-a2hs-step strong { color: #fff; font-weight: 700; }
+  .ob-a2hs-num {
+    flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--a); color: #fff; font: 800 13px/24px 'Inter'; text-align: center;
+  }
+  .ob-a2hs-glyph {
+    display: inline-flex; vertical-align: -5px; margin: 0 2px; padding: 2px;
+    border-radius: 6px; background: rgba(255,255,255,.12); color: #fff;
+  }
+  .ob-a2hs-install {
+    width: 100%; margin-bottom: 14px; border: 0; border-radius: 13px;
+    background: linear-gradient(135deg, var(--a), var(--adk, #46a302)); color: #fff;
+    font: 800 15px/1 'Inter'; padding: 14px; cursor: pointer;
+    box-shadow: 0 8px 20px -6px rgba(88,204,2,.55);
+  }
+  .ob-a2hs-install:active { transform: translateY(1px); }
+  .ob-a2hs-install:disabled { opacity: .6; cursor: wait; }
 </style>`;
