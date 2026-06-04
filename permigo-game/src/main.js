@@ -14,6 +14,7 @@ import { initThemeEarly, syncFromPrefs } from '@/utils/theme.js';
 import { initGameState, initEquippedTheme } from '@/utils/game-state.js';
 import { mountCookieBanner } from '@/components/common/cookie-banner.js';
 import { initPosthog } from '@/services/posthog.js';
+import { initVercelAnalytics } from '@/services/vercel-analytics.js';
 import '@/utils/pwa.js'; // capte beforeinstallprompt très tôt
 
 // Apply saved/system theme before any rendering (reads localStorage, synchronous)
@@ -53,7 +54,17 @@ async function boot() {
         const { mount } = await import('@/pages/public/ecole.js');
         return mount(app, slug);
       }
-      const { mount } = await import('@/pages/auth/login.js');
+      if (location.hash.startsWith('#/legal')) {
+        const { mount } = await import('@/pages/common/legal.js');
+        return mount(app);
+      }
+      // Connexion explicite (depuis la landing)
+      if (location.hash.startsWith('#/login')) {
+        const { mount } = await import('@/pages/auth/login.js');
+        return mount(app);
+      }
+      // Défaut visiteur = landing / page de vente
+      const { mount } = await import('@/pages/public/landing.js');
       return mount(app);
     }
 
@@ -103,7 +114,10 @@ mountCookieBanner();
 
 // PostHog : init immédiat si déjà consenti (visite précédente), ou attend le bandeau.
 initPosthog();
-window.addEventListener('permigo:consent', (e) => { if (e.detail === 'all') initPosthog(); });
+initVercelAnalytics();
+window.addEventListener('permigo:consent', (e) => {
+  if (e.detail === 'all') { initPosthog(); initVercelAnalytics(); }
+});
 
 // Offline / online feedback
 window.addEventListener('offline', () => toast('Pas de connexion internet', 'error', 5000));
