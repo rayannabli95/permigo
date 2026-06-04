@@ -392,7 +392,7 @@ const STYLE = `<style>
   .lp-nav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between;
     padding: 14px max(20px, env(safe-area-inset-left)); background: rgba(255,255,255,.82);
     backdrop-filter: saturate(160%) blur(12px); border-bottom: 1px solid var(--lp-line); }
-  .lp-brand { display: flex; align-items: center; gap: 9px; font: 800 19px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; }
+  .lp-brand { display: flex; align-items: center; gap: 9px; font: 800 19px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; color: var(--lp-ink); }
   .lp-brand-badge { width: 28px; height: 28px; object-fit: contain; }
   .lp-nav-actions { display: flex; align-items: center; gap: 6px; }
   .lp-nav-link { font: 600 14px/1 'Inter'; color: var(--lp-mut); padding: 10px 12px; }
@@ -402,6 +402,7 @@ const STYLE = `<style>
     position: relative; overflow: hidden;
     background: #060c1a;
     padding: 0 0 80px;
+    color: #fff; /* base blanche — tout le texte non-explicite hérite blanc */
   }
 
   /* Blobs animés */
@@ -552,24 +553,24 @@ const STYLE = `<style>
   @media (prefers-reduced-motion: reduce) { .lp-fcard-1, .lp-fcard-2 { animation: none; } }
 
   /* Sections */
-  .lp-sec { max-width: 1000px; margin: 0 auto; padding: 56px 22px; }
-  .lp-h2 { font: 800 32px/1.15 'Plus Jakarta Sans', sans-serif; letter-spacing: -.025em; text-align: center; margin: 0 0 10px; }
+  .lp-sec { max-width: 1000px; margin: 0 auto; padding: 56px 22px; color: var(--lp-ink); }
+  .lp-h2 { font: 800 32px/1.15 'Plus Jakarta Sans', sans-serif; letter-spacing: -.025em; text-align: center; margin: 0 0 10px; color: var(--lp-ink); }
   .lp-sub { text-align: center; color: var(--lp-mut); font: 400 16px/1.5 'Inter'; margin: 0 0 32px; }
 
   /* Problème (3 cartes) */
   .lp-cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
-  .lp-card { background: #f7f8fb; border: 1px solid var(--lp-line); border-radius: 18px; padding: 22px; }
+  .lp-card { background: #f7f8fb; border: 1px solid var(--lp-line); border-radius: 18px; padding: 22px; color: var(--lp-ink); }
   .lp-card-ic { font-size: 30px; margin-bottom: 10px; }
-  .lp-card h3 { font: 700 17px/1.2 'Plus Jakarta Sans'; margin: 0 0 6px; }
+  .lp-card h3 { font: 700 17px/1.2 'Plus Jakarta Sans'; margin: 0 0 6px; color: var(--lp-ink); }
   .lp-card p { font: 400 14.5px/1.5 'Inter'; color: var(--lp-mut); margin: 0; }
 
   /* Features */
   .lp-feat { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
   .lp-feat-row { display: flex; gap: 18px; align-items: flex-start; background: #fff; border: 1px solid var(--lp-line);
-    border-radius: 18px; padding: 22px; }
+    border-radius: 18px; padding: 22px; color: var(--lp-ink); }
   .lp-feat-ic { font-size: 30px; flex: 0 0 auto; width: 56px; height: 56px; border-radius: 14px;
     display: flex; align-items: center; justify-content: center; background: rgba(99,102,241,.08); }
-  .lp-feat-row h3 { font: 700 19px/1.2 'Plus Jakarta Sans'; margin: 4px 0 6px; }
+  .lp-feat-row h3 { font: 700 19px/1.2 'Plus Jakarta Sans'; margin: 4px 0 6px; color: var(--lp-ink); }
   .lp-feat-row p { font: 400 15px/1.55 'Inter'; color: var(--lp-mut); margin: 0; }
 
   /* Comment ça marche */
@@ -578,13 +579,13 @@ const STYLE = `<style>
   .lp-step-n { width: 44px; height: 44px; margin: 0 auto 14px; border-radius: 50%;
     background: linear-gradient(135deg, var(--lp-indigo), var(--lp-indigo-dk)); color: #fff;
     font: 800 20px/44px 'Plus Jakarta Sans'; }
-  .lp-step h3 { font: 700 17px/1.2 'Plus Jakarta Sans'; margin: 0 0 6px; }
+  .lp-step h3 { font: 700 17px/1.2 'Plus Jakarta Sans'; margin: 0 0 6px; color: var(--lp-ink); }
   .lp-step p { font: 400 14.5px/1.5 'Inter'; color: var(--lp-mut); margin: 0; }
 
   /* Pricing */
   .lp-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch; }
   .lp-plan { position: relative; background: #fff; border: 1px solid var(--lp-line); border-radius: 20px;
-    padding: 26px 22px; display: flex; flex-direction: column; }
+    padding: 26px 22px; display: flex; flex-direction: column; color: var(--lp-ink); }
   .lp-plan-feat { border: 2px solid var(--lp-green); box-shadow: 0 18px 44px -20px rgba(88,204,2,.5); }
   .lp-plan-tag { position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
     background: var(--lp-green); color: #fff; font: 800 11px/1 'Inter'; letter-spacing: .04em; text-transform: uppercase;
@@ -601,7 +602,7 @@ const STYLE = `<style>
   /* FAQ */
   .lp-faq-list { max-width: 720px; margin: 28px auto 0; display: flex; flex-direction: column; gap: 10px; }
   .lp-faq-item { background: #f7f8fb; border: 1px solid var(--lp-line); border-radius: 14px; padding: 4px 18px; }
-  .lp-faq-item summary { font: 700 15.5px/1.4 'Inter'; padding: 14px 0; cursor: pointer; list-style: none; }
+  .lp-faq-item summary { font: 700 15.5px/1.4 'Inter'; padding: 14px 0; cursor: pointer; list-style: none; color: var(--lp-ink); }
   .lp-faq-item summary::-webkit-details-marker { display: none; }
   .lp-faq-item summary::after { content: '+'; float: right; color: var(--lp-mut); font-weight: 700; }
   .lp-faq-item[open] summary::after { content: '–'; }
