@@ -2,13 +2,13 @@
 // Gérant — Pulse École (light theme)
 // 4 KPI ce mois + équipe + activité récente
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { toast } from '@/components/common/toast.js';
-import { track } from '@/services/analytics.js';
-import { labelComp } from '@/utils/remc-label.js';
-import { icon } from '@/utils/icons.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { toast } from "@/components/common/toast.js";
+import { track } from "@/services/analytics.js";
+import { labelComp } from "@/utils/remc-label.js";
+import { icon } from "@/utils/icons.js";
 
 // ─── CSS scoped (Tesla × Bloomberg × Airbnb — cockpit gérant) ─────
 const STYLE = `<style>
@@ -352,26 +352,70 @@ const STYLE = `<style>
 }
 .trend-empty {
   text-align: center; padding: 28px 12px;
-  font: 500 12px/1.5 'Inter', sans-serif;
+  font: 500 12px/1.5 "Inter", sans-serif;
   color: var(--mu2);
+}
+
+/* ─── Heatmap activité annuelle (GitHub-style) ─── */
+.heat-card {
+  background: var(--su);
+  border: 1px solid var(--bo);
+  border-radius: 16px;
+  padding: 14px 16px 10px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+  overflow: hidden;
+}
+.heat-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.heat-scroll::-webkit-scrollbar { display: none; }
+.heat-svg { display: block; }
+.heat-month {
+  font: 600 9px/1 "Inter", sans-serif;
+  fill: var(--mu2);
+}
+.heat-day {
+  font: 600 9px/1 "Inter", sans-serif;
+  fill: var(--mu2);
+}
+.heat-legend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 8px;
+  justify-content: flex-end;
+}
+.heat-leg-lbl {
+  font: 500 10px/1 "Inter", sans-serif;
+  color: var(--mu2);
+  margin: 0 2px;
+}
+.heat-leg-dot {
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+  flex-shrink: 0;
 }
 </style>`;
 
 const AVATARS = [
-  'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,var(--blk),#155e75)',
-  'linear-gradient(135deg,var(--puk),#4c1d95)',
-  'linear-gradient(135deg,#0e7c66,#064e3b)',
-  'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
+  "linear-gradient(135deg,#5b5bd6,#3a3a8e)",
+  "linear-gradient(135deg,var(--blk),#155e75)",
+  "linear-gradient(135deg,var(--puk),#4c1d95)",
+  "linear-gradient(135deg,#0e7c66,#064e3b)",
+  "linear-gradient(135deg,#9333ea,#6b21a8)",
+  "linear-gradient(135deg,var(--rdk),#7f1d1d)",
 ];
 
 // ─── Entry point ─────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
-  if (!me || me.role !== 'gerant') return;
+  if (!me || me.role !== "gerant") return;
 
-  track('page_view', { page: 'gerant_pulse', user_role: me.role });
+  track("page_view", { page: "gerant_pulse", user_role: me.role });
 
   // Skeleton
   root.innerHTML = `${STYLE}
@@ -381,18 +425,26 @@ export async function mount(root) {
     <div class="pulse-date">${todayLabel()}</div>
   </div>
   <div class="kpi-grid">
-    ${[80, 90, 80, 90].map(h => `<div class="skel-block" style="height:${h}px;border-radius:var(--rl)"></div>`).join('')}
+    ${[80, 90, 80, 90].map((h) => `<div class="skel-block" style="height:${h}px;border-radius:var(--rl)"></div>`).join("")}
   </div>
   <div class="pulse-sec">
     <div class="skel-block" style="height:14px;width:100px;margin-bottom:10px"></div>
-    ${[1,2,3].map(() => `<div class="skel-block" style="height:56px;margin-bottom:8px"></div>`).join('')}
+    ${[1, 2, 3].map(() => `<div class="skel-block" style="height:56px;margin-bottom:8px"></div>`).join("")}
   </div>
 </div>`;
 
   try {
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+    const startOfMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1,
+    ).toISOString();
+    const startOfPrevMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1,
+    ).toISOString();
 
     // Seuil "actif" = activité dans les 30 derniers jours
     const sinceActif = new Date(Date.now() - 30 * 86400000).toISOString();
@@ -412,33 +464,61 @@ export async function mount(root) {
       validationsAcquisRes,
     ] = await Promise.all([
       // KPI 1 — élèves (on récupère aussi last_active_at pour calculer le taux réel)
-      sb.from('profiles').select('id, prenom, nom, last_active_at').eq('role', 'eleve'),
+      sb
+        .from("profiles")
+        .select("id, prenom, nom, last_active_at")
+        .eq("role", "eleve"),
       // KPI 2 — compétences validées ce mois
-      sb.from('validations').select('id, eleve_id').gte('validated_at', startOfMonth),
+      sb
+        .from("validations")
+        .select("id, eleve_id")
+        .gte("validated_at", startOfMonth),
       // KPI 2 bis — compétences validées mois précédent (pour delta)
-      sb.from('validations').select('id').gte('validated_at', startOfPrevMonth).lt('validated_at', startOfMonth),
+      sb
+        .from("validations")
+        .select("id")
+        .gte("validated_at", startOfPrevMonth)
+        .lt("validated_at", startOfMonth),
       // Sparkline — validations 7 derniers jours
-      sb.from('validations').select('validated_at').gte('validated_at', since7d),
+      sb
+        .from("validations")
+        .select("validated_at")
+        .gte("validated_at", since7d),
       // KPI 3 — enseignants actifs
-      sb.from('profiles').select('id, prenom, nom').eq('role', 'enseignant'),
+      sb.from("profiles").select("id, prenom, nom").eq("role", "enseignant"),
       // KPI 4 — quiz réussis ce mois (score >= 60)
-      sb.from('quiz_attempts').select('id').gte('score', 60).gte('completed_at', startOfMonth),
+      sb
+        .from("quiz_attempts")
+        .select("id")
+        .gte("score", 60)
+        .gte("completed_at", startOfMonth),
       // KPI 4 bis — quiz mois précédent (pour delta)
-      sb.from('quiz_attempts').select('id').gte('score', 60).gte('completed_at', startOfPrevMonth).lt('completed_at', startOfMonth),
+      sb
+        .from("quiz_attempts")
+        .select("id")
+        .gte("score", 60)
+        .gte("completed_at", startOfPrevMonth)
+        .lt("completed_at", startOfMonth),
       // Élèves proches de l'examen — toutes validations acquises agrégées
-      sb.from('validations').select('eleve_id').eq('statut', 'acquis'),
+      sb.from("validations").select("eleve_id").eq("statut", "acquis"),
     ]);
 
     const elevesAll = elevesRes.data || [];
     const elevesTotal = elevesAll.length;
     // Élèves actifs = activité dans les 30j OU validation ce mois
-    const idsValidsCeMois = new Set((validMoisRes.data || []).map(v => v.eleve_id).filter(Boolean));
-    const elevesActifs = elevesAll.filter(e =>
-      (e.last_active_at && e.last_active_at >= sinceActif) || idsValidsCeMois.has(e.id)
+    const idsValidsCeMois = new Set(
+      (validMoisRes.data || []).map((v) => v.eleve_id).filter(Boolean),
+    );
+    const elevesActifs = elevesAll.filter(
+      (e) =>
+        (e.last_active_at && e.last_active_at >= sinceActif) ||
+        idsValidsCeMois.has(e.id),
     ).length;
     // Élèves à risque (inactifs > 14j)
-    const elevesARisque = elevesAll.filter(e =>
-      !e.last_active_at || (e.last_active_at < sinceRisque && !idsValidsCeMois.has(e.id))
+    const elevesARisque = elevesAll.filter(
+      (e) =>
+        !e.last_active_at ||
+        (e.last_active_at < sinceRisque && !idsValidsCeMois.has(e.id)),
     ).length;
 
     const compValidees = validMoisRes.data?.length ?? 0;
@@ -453,21 +533,36 @@ export async function mount(root) {
     // ─── Tendance 30 jours (depuis school_daily_snapshot) ───────────
     let trend30d = [];
     try {
-      const { data: trendData } = await sb.rpc('get_school_trend', { p_days: 30 });
+      const { data: trendData } = await sb.rpc("get_school_trend", {
+        p_days: 30,
+      });
       trend30d = Array.isArray(trendData) ? trendData : [];
     } catch (e) {
-      console.warn('[pulse] trend30d unavailable', e);
+      console.warn("[pulse] trend30d unavailable", e);
+    }
+
+    // ─── Heatmap activité annuelle ───────────────────────────────────
+    let heatmapData = null;
+    try {
+      const since1y = new Date(Date.now() - 365 * 86400000).toISOString();
+      const { data: yearVals } = await sb
+        .from("validations")
+        .select("validated_at")
+        .gte("validated_at", since1y);
+      heatmapData = buildYearHeatmap(yearVals || []);
+    } catch (e) {
+      console.warn("[pulse] heatmap unavailable", e);
     }
 
     // ─── Élèves proches de l'examen (≥ 28 compétences acquises sur 31) ──
     const compsByEleve = {};
-    (validationsAcquisRes.data || []).forEach(v => {
+    (validationsAcquisRes.data || []).forEach((v) => {
       if (!v.eleve_id) return;
       compsByEleve[v.eleve_id] = (compsByEleve[v.eleve_id] || 0) + 1;
     });
     const elevesProchesExam = elevesAll
-      .map(e => ({ ...e, acquis: compsByEleve[e.id] || 0 }))
-      .filter(e => e.acquis >= 28)
+      .map((e) => ({ ...e, acquis: compsByEleve[e.id] || 0 }))
+      .filter((e) => e.acquis >= 28)
       .sort((a, b) => b.acquis - a.acquis)
       .slice(0, 5);
 
@@ -476,16 +571,18 @@ export async function mount(root) {
     let teacherElevesMap = {};
     if (enseignants.length > 0) {
       const { data: tvData, error: tvErr } = await sb
-        .from('validations')
-        .select('validated_by, eleve_id')
-        .gte('validated_at', startOfMonth)
-        .not('validated_by', 'is', null);
+        .from("validations")
+        .select("validated_by, eleve_id")
+        .gte("validated_at", startOfMonth)
+        .not("validated_by", "is", null);
 
       if (!tvErr) {
-        (tvData || []).forEach(v => {
+        (tvData || []).forEach((v) => {
           if (!v.validated_by) return;
-          teacherValMap[v.validated_by] = (teacherValMap[v.validated_by] || 0) + 1;
-          if (!teacherElevesMap[v.validated_by]) teacherElevesMap[v.validated_by] = new Set();
+          teacherValMap[v.validated_by] =
+            (teacherValMap[v.validated_by] || 0) + 1;
+          if (!teacherElevesMap[v.validated_by])
+            teacherElevesMap[v.validated_by] = new Set();
           if (v.eleve_id) teacherElevesMap[v.validated_by].add(v.eleve_id);
         });
       }
@@ -493,61 +590,101 @@ export async function mount(root) {
 
     // Activite recente : 5 dernieres validations
     const { data: recentVals, error: rvErr } = await sb
-      .from('validations')
-      .select('id, eleve_id, competence_id, validated_by, validated_at')
-      .order('validated_at', { ascending: false })
+      .from("validations")
+      .select("id, eleve_id, competence_id, validated_by, validated_at")
+      .order("validated_at", { ascending: false })
       .limit(5);
 
     // Enrichissement : noms eleves + enseignants pour l'activite
     let eleveNames = {};
     let enseignantNames = {};
     if (!rvErr && recentVals?.length > 0) {
-      const eleveIds = [...new Set(recentVals.map(v => v.eleve_id).filter(Boolean))];
-      const ensIds   = [...new Set(recentVals.map(v => v.validated_by).filter(Boolean))];
+      const eleveIds = [
+        ...new Set(recentVals.map((v) => v.eleve_id).filter(Boolean)),
+      ];
+      const ensIds = [
+        ...new Set(recentVals.map((v) => v.validated_by).filter(Boolean)),
+      ];
 
       const [eRes, enRes] = await Promise.all([
         eleveIds.length > 0
-          ? sb.from('profiles').select('id, prenom, nom').in('id', eleveIds)
+          ? sb.from("profiles").select("id, prenom, nom").in("id", eleveIds)
           : Promise.resolve({ data: [] }),
         ensIds.length > 0
-          ? sb.from('profiles').select('id, prenom, nom').in('id', ensIds)
+          ? sb.from("profiles").select("id, prenom, nom").in("id", ensIds)
           : Promise.resolve({ data: [] }),
       ]);
-      (eRes.data || []).forEach(p => { eleveNames[p.id] = p.prenom || p.nom || '—'; });
-      (enRes.data || []).forEach(p => { enseignantNames[p.id] = p.prenom || p.nom || '—'; });
+      (eRes.data || []).forEach((p) => {
+        eleveNames[p.id] = p.prenom || p.nom || "—";
+      });
+      (enRes.data || []).forEach((p) => {
+        enseignantNames[p.id] = p.prenom || p.nom || "—";
+      });
     }
 
     root.innerHTML = render({
-      elevesTotal, elevesActifs, elevesARisque,
-      compValidees, compValideesPrev,
+      elevesTotal,
+      elevesActifs,
+      elevesARisque,
+      compValidees,
+      compValideesPrev,
       enseignants: enseignants.length,
-      quizReussis, quizReussisPrev,
-      spark7d, trend30d, elevesProchesExam,
-      teachers: enseignants, teacherValMap, teacherElevesMap,
-      recentVals: recentVals || [], eleveNames, enseignantNames,
+      quizReussis,
+      quizReussisPrev,
+      spark7d,
+      trend30d,
+      heatmapData,
+      elevesProchesExam,
+      teachers: enseignants,
+      teacherValMap,
+      teacherElevesMap,
+      recentVals: recentVals || [],
+      eleveNames,
+      enseignantNames,
     });
 
     // Wire — proches examen → livret REMC
-    root.querySelectorAll('.exam-row[data-eleve-id]').forEach(row => {
-      row.addEventListener('click', () => {
+    root.querySelectorAll(".exam-row[data-eleve-id]").forEach((row) => {
+      row.addEventListener("click", () => {
         const id = row.dataset.eleveId;
         if (id) {
-          track('pulse.exam_row_click', { eleve_id: id });
+          track("pulse.exam_row_click", { eleve_id: id });
           location.hash = `#/livret/${id}`;
         }
       });
     });
-
   } catch (e) {
-    console.error('[pulse]', e);
-    toast('Erreur de chargement', 'error');
+    console.error("[pulse]", e);
+    toast("Erreur de chargement", "error");
     root.innerHTML = `${STYLE}<div class="pulse"><p style="padding:32px;color:var(--rd)">Erreur de chargement du dashboard.</p></div>`;
   }
 }
 
 // ─── Render ──────────────────────────────────────────────────
-function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees, compValideesPrev = 0, enseignants, quizReussis, quizReussisPrev = 0, spark7d = { values: [], total: 0, max: 1 }, trend30d = [], elevesProchesExam = [], teachers, teacherValMap, teacherElevesMap, recentVals, eleveNames, enseignantNames }) {
-  const monthLabel = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+function render({
+  elevesTotal,
+  elevesActifs = 0,
+  elevesARisque = 0,
+  compValidees,
+  compValideesPrev = 0,
+  enseignants,
+  quizReussis,
+  quizReussisPrev = 0,
+  spark7d = { values: [], total: 0, max: 1 },
+  trend30d = [],
+  heatmapData = null,
+  elevesProchesExam = [],
+  teachers,
+  teacherValMap,
+  teacherElevesMap,
+  recentVals,
+  eleveNames,
+  enseignantNames,
+}) {
+  const monthLabel = new Date().toLocaleDateString("fr-FR", {
+    month: "long",
+    year: "numeric",
+  });
   const compDelta = deltaPct(compValidees, compValideesPrev);
   const quizDelta = deltaPct(quizReussis, quizReussisPrev);
 
@@ -558,47 +695,59 @@ function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees
     <div class="pulse-date">${todayLabel()}</div>
   </div>
 
-  ${elevesARisque > 0 ? `
+  ${
+    elevesARisque > 0
+      ? `
     <div style="margin:12px 16px 0;padding:14px 16px;background:linear-gradient(135deg,#fef9e7,#fffbeb);border:1px solid var(--aml);border-radius:14px;display:flex;align-items:center;gap:12px">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--am);color:#fff;display:grid;place-items:center;flex-shrink:0">${icon('alert-circle', { size: 18 }) || '⚠️'}</div>
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--am);color:#fff;display:grid;place-items:center;flex-shrink:0">${icon("alert-circle", { size: 18 }) || "⚠️"}</div>
       <div style="flex:1">
-        <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:2px">${elevesARisque} élève${elevesARisque > 1 ? 's' : ''} à relancer</div>
+        <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:2px">${elevesARisque} élève${elevesARisque > 1 ? "s" : ""} à relancer</div>
         <div style="font:500 12px/1.4 'Inter',sans-serif;color:var(--mu3)">Pas d'activité depuis 14 jours ou plus.</div>
       </div>
       <a href="#/eleves" style="font:700 11px/1 'Inter',sans-serif;color:var(--amx);text-decoration:none;padding:8px 12px;background:rgba(245,158,11,.15);border-radius:8px;white-space:nowrap">Voir</a>
     </div>
-  ` : ''}
+  `
+      : ""
+  }
 
   <div class="kpi-grid">
     <div class="kpi-card" style="--kc:var(--a)">
-      <span class="kpi-ico" style="color:var(--a)">${icon('users', { size: 22 })}</span>
+      <span class="kpi-ico" style="color:var(--a)">${icon("users", { size: 22 })}</span>
       <div class="kpi-val">${elevesActifs}<span style="font-size:.5em;color:var(--mu2);font-weight:600">/${elevesTotal}</span></div>
       <div class="kpi-lbl">Élèves actifs<br><span style="font-size:.7em;color:var(--mu2)">(30 derniers jours)</span></div>
     </div>
     <div class="kpi-card" style="--kc:var(--gr)">
-      <span class="kpi-ico" style="color:var(--gr)">${icon('check-circle', { size: 22 })}</span>
+      <span class="kpi-ico" style="color:var(--gr)">${icon("check-circle", { size: 22 })}</span>
       <div class="kpi-val">${compValidees}</div>
       <div class="kpi-lbl">Compétences validées<br>${esc(monthLabel)}</div>
-      ${compValideesPrev > 0 || compValidees > 0 ? `
-        <div class="kpi-delta ${compDelta >= 0 ? 'up' : 'down'}">
-          ${compDelta >= 0 ? '▲' : '▼'} ${Math.abs(compDelta)}% vs mois -1
+      ${
+        compValideesPrev > 0 || compValidees > 0
+          ? `
+        <div class="kpi-delta ${compDelta >= 0 ? "up" : "down"}">
+          ${compDelta >= 0 ? "▲" : "▼"} ${Math.abs(compDelta)}% vs mois -1
         </div>
-      ` : ''}
+      `
+          : ""
+      }
     </div>
     <div class="kpi-card" style="--kc:var(--pu)">
-      <span class="kpi-ico" style="color:var(--pu)">${icon('book', { size: 22 })}</span>
+      <span class="kpi-ico" style="color:var(--pu)">${icon("book", { size: 22 })}</span>
       <div class="kpi-val">${enseignants}</div>
       <div class="kpi-lbl">Enseignants actifs</div>
     </div>
     <div class="kpi-card" style="--kc:var(--am)">
-      <span class="kpi-ico" style="color:var(--am)">${icon('target', { size: 22 })}</span>
+      <span class="kpi-ico" style="color:var(--am)">${icon("target", { size: 22 })}</span>
       <div class="kpi-val">${quizReussis}</div>
       <div class="kpi-lbl">Quiz réussis<br>${esc(monthLabel)}</div>
-      ${quizReussisPrev > 0 || quizReussis > 0 ? `
-        <div class="kpi-delta ${quizDelta >= 0 ? 'up' : 'down'}">
-          ${quizDelta >= 0 ? '▲' : '▼'} ${Math.abs(quizDelta)}% vs mois -1
+      ${
+        quizReussisPrev > 0 || quizReussis > 0
+          ? `
+        <div class="kpi-delta ${quizDelta >= 0 ? "up" : "down"}">
+          ${quizDelta >= 0 ? "▲" : "▼"} ${Math.abs(quizDelta)}% vs mois -1
         </div>
-      ` : ''}
+      `
+          : ""
+      }
     </div>
   </div>
 
@@ -606,39 +755,46 @@ function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees
   <div class="pulse-sec">
     <div class="pulse-sec-hd">
       <span class="pulse-sec-title">Activité 7 jours</span>
-      <span class="pulse-sec-sub">${spark7d.total} validation${spark7d.total > 1 ? 's' : ''}</span>
+      <span class="pulse-sec-sub">${spark7d.total} validation${spark7d.total > 1 ? "s" : ""}</span>
     </div>
     <div class="spark-wrap">
-      ${spark7d.values.map((v, i) => {
-        const h = Math.max(4, Math.round((v / spark7d.max) * 56));
-        const isToday = i === spark7d.values.length - 1;
-        const dayLabel = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-        const d = new Date();
-        d.setDate(d.getDate() - (6 - i));
-        const idx = (d.getDay() + 6) % 7;
-        return `
-          <div class="spark-col" title="${v} validation${v > 1 ? 's' : ''} le ${d.toLocaleDateString('fr-FR')}">
-            <div class="spark-bar ${isToday ? 'today' : ''}" style="height:${h}px"></div>
+      ${spark7d.values
+        .map((v, i) => {
+          const h = Math.max(4, Math.round((v / spark7d.max) * 56));
+          const isToday = i === spark7d.values.length - 1;
+          const dayLabel = ["L", "M", "M", "J", "V", "S", "D"];
+          const d = new Date();
+          d.setDate(d.getDate() - (6 - i));
+          const idx = (d.getDay() + 6) % 7;
+          return `
+          <div class="spark-col" title="${v} validation${v > 1 ? "s" : ""} le ${d.toLocaleDateString("fr-FR")}">
+            <div class="spark-bar ${isToday ? "today" : ""}" style="height:${h}px"></div>
             <div class="spark-lbl">${dayLabel[idx]}</div>
           </div>`;
-      }).join('')}
+        })
+        .join("")}
     </div>
   </div>
 
+  ${heatmapData ? renderHeatmap(heatmapData) : ""}
+
   ${renderTrend30d(trend30d)}
 
-  ${elevesProchesExam.length > 0 ? `
+  ${
+    elevesProchesExam.length > 0
+      ? `
     <!-- PROCHES EXAMEN -->
     <div class="pulse-sec">
       <div class="pulse-sec-hd">
         <span class="pulse-sec-title">Proches de l'examen</span>
-        <span class="pulse-sec-sub">${elevesProchesExam.length} élève${elevesProchesExam.length > 1 ? 's' : ''}</span>
+        <span class="pulse-sec-sub">${elevesProchesExam.length} élève${elevesProchesExam.length > 1 ? "s" : ""}</span>
       </div>
       <div class="exam-list">
-        ${elevesProchesExam.map(e => {
-          const fullName = esc(e.prenom || e.nom || '—');
-          const pct = Math.round((e.acquis / 31) * 100);
-          return `
+        ${elevesProchesExam
+          .map((e) => {
+            const fullName = esc(e.prenom || e.nom || "—");
+            const pct = Math.round((e.acquis / 31) * 100);
+            return `
           <div class="exam-row" data-eleve-id="${esc(e.id)}">
             <div class="exam-name">${fullName}</div>
             <div class="exam-prog">
@@ -646,35 +802,41 @@ function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees
               <span class="exam-prog-val">${e.acquis}/31</span>
             </div>
           </div>`;
-        }).join('')}
+          })
+          .join("")}
       </div>
     </div>
-  ` : ''}
+  `
+      : ""
+  }
 
   <!-- EQUIPE -->
   <div class="pulse-sec">
     <div class="pulse-sec-hd">
       <span class="pulse-sec-title">Équipe</span>
-      <span class="pulse-sec-sub">${teachers.length} enseignant${teachers.length > 1 ? 's' : ''}</span>
+      <span class="pulse-sec-sub">${teachers.length} enseignant${teachers.length > 1 ? "s" : ""}</span>
     </div>
     <div class="team-list">
-      ${teachers.length === 0
-        ? `<div class="pulse-empty">Aucun enseignant enregistré</div>`
-        : teachers.map((t, i) => {
-            const initials = initials2(t.prenom, t.nom);
-            const gradient = AVATARS[i % AVATARS.length];
-            const valCount = teacherValMap[t.id] || 0;
-            const eleveCount = teacherElevesMap[t.id]?.size || 0;
-            return `
+      ${
+        teachers.length === 0
+          ? `<div class="pulse-empty">Aucun enseignant enregistré</div>`
+          : teachers
+              .map((t, i) => {
+                const initials = initials2(t.prenom, t.nom);
+                const gradient = AVATARS[i % AVATARS.length];
+                const valCount = teacherValMap[t.id] || 0;
+                const eleveCount = teacherElevesMap[t.id]?.size || 0;
+                return `
               <div class="team-row">
                 <div class="team-av" style="background:${gradient}">${esc(initials)}</div>
                 <div class="team-info">
-                  <div class="team-name">${esc(t.nom || t.prenom || '—')}</div>
-                  <div class="team-sub">${eleveCount} élève${eleveCount > 1 ? 's' : ''} ce mois</div>
+                  <div class="team-name">${esc(t.nom || t.prenom || "—")}</div>
+                  <div class="team-sub">${eleveCount} élève${eleveCount > 1 ? "s" : ""} ce mois</div>
                 </div>
                 <div class="team-badge">${valCount} valid.</div>
               </div>`;
-          }).join('')
+              })
+              .join("")
       }
     </div>
   </div>
@@ -686,15 +848,21 @@ function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees
       <span class="pulse-sec-sub">5 dernières validations</span>
     </div>
     <div class="activity-list">
-      ${recentVals.length === 0
-        ? `<div class="pulse-empty">Aucune validation enregistrée</div>`
-        : recentVals.map(v => {
-            const eleveName = eleveNames[v.eleve_id] || '—';
-            const ensName   = enseignantNames[v.validated_by] || '—';
-            const compNom   = v.competence_id ? labelComp(v.competence_id) : '—';
-            const compId    = v.competence_id || '';
-            const timeStr   = v.validated_at ? relativeTime(v.validated_at) : '—';
-            return `
+      ${
+        recentVals.length === 0
+          ? `<div class="pulse-empty">Aucune validation enregistrée</div>`
+          : recentVals
+              .map((v) => {
+                const eleveName = eleveNames[v.eleve_id] || "—";
+                const ensName = enseignantNames[v.validated_by] || "—";
+                const compNom = v.competence_id
+                  ? labelComp(v.competence_id)
+                  : "—";
+                const compId = v.competence_id || "";
+                const timeStr = v.validated_at
+                  ? relativeTime(v.validated_at)
+                  : "—";
+                return `
               <div class="activity-row">
                 <div class="activity-dot"></div>
                 <div class="activity-body">
@@ -704,7 +872,8 @@ function render({ elevesTotal, elevesActifs = 0, elevesARisque = 0, compValidees
                   <div class="activity-meta">${esc(compId)} · par ${esc(ensName)} · ${esc(timeStr)}</div>
                 </div>
               </div>`;
-          }).join('')
+              })
+              .join("")
       }
     </div>
   </div>
@@ -730,8 +899,8 @@ function renderTrend30d(trend) {
       </div>`;
   }
 
-  const W = 320;          // viewBox width
-  const H = 120;          // viewBox height
+  const W = 320; // viewBox width
+  const H = 120; // viewBox height
   const PAD_L = 28;
   const PAD_R = 8;
   const PAD_T = 8;
@@ -740,62 +909,74 @@ function renderTrend30d(trend) {
   const innerH = H - PAD_T - PAD_B;
 
   // Extract series
-  const valsValidations = trend.map(t => Number(t.validations_24h) || 0);
-  const valsQuiz        = trend.map(t => Number(t.quiz_24h)        || 0);
-  const valsSessions    = trend.map(t => Number(t.sessions_h_24h)  || 0);
+  const valsValidations = trend.map((t) => Number(t.validations_24h) || 0);
+  const valsQuiz = trend.map((t) => Number(t.quiz_24h) || 0);
+  const valsSessions = trend.map((t) => Number(t.sessions_h_24h) || 0);
 
   // Scale Y commun : on prend le max global (validations + quiz comparables, sessions_h plus petit)
   // On scale les sessions × 5 pour les rendre visibles à la même échelle (heuristique)
   const sessionScale = 5;
   const allMax = Math.max(
     1,
-    ...valsValidations, ...valsQuiz,
-    ...valsSessions.map(v => v * sessionScale)
+    ...valsValidations,
+    ...valsQuiz,
+    ...valsSessions.map((v) => v * sessionScale),
   );
 
   const n = trend.length;
   const xAt = (i) => PAD_L + (innerW * i) / (n - 1);
-  const yAt = (v) => PAD_T + innerH - (innerH * (v / allMax));
+  const yAt = (v) => PAD_T + innerH - innerH * (v / allMax);
 
   const buildPath = (values, scale = 1) => {
-    return values.map((v, i) => {
-      const x = xAt(i);
-      const y = yAt(v * scale);
-      return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1);
-    }).join(' ');
+    return values
+      .map((v, i) => {
+        const x = xAt(i);
+        const y = yAt(v * scale);
+        return (i === 0 ? "M" : "L") + x.toFixed(1) + " " + y.toFixed(1);
+      })
+      .join(" ");
   };
 
   const buildArea = (values, scale = 1) => {
-    const top = values.map((v, i) => {
-      const x = xAt(i); const y = yAt(v * scale);
-      return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1);
-    }).join(' ');
+    const top = values
+      .map((v, i) => {
+        const x = xAt(i);
+        const y = yAt(v * scale);
+        return (i === 0 ? "M" : "L") + x.toFixed(1) + " " + y.toFixed(1);
+      })
+      .join(" ");
     const bottomY = PAD_T + innerH;
     return `${top} L${xAt(n - 1).toFixed(1)} ${bottomY} L${xAt(0).toFixed(1)} ${bottomY} Z`;
   };
 
   // Gridlines : 4 horizontal
-  const gridY = [0.25, 0.5, 0.75, 1].map(r => PAD_T + innerH * (1 - r));
+  const gridY = [0.25, 0.5, 0.75, 1].map((r) => PAD_T + innerH * (1 - r));
 
   // X labels : 4 dates espacées
-  const xLabels = [0, Math.floor(n / 3), Math.floor((2 * n) / 3), n - 1].map(i => {
-    const d = new Date(trend[i].snapshot_date);
-    return {
-      x: xAt(i),
-      label: d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-    };
-  });
+  const xLabels = [0, Math.floor(n / 3), Math.floor((2 * n) / 3), n - 1].map(
+    (i) => {
+      const d = new Date(trend[i].snapshot_date);
+      return {
+        x: xAt(i),
+        label: d.toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "short",
+        }),
+      };
+    },
+  );
 
   // Totaux pour la légende
   const totalVal = valsValidations.reduce((s, v) => s + v, 0);
   const totalQuiz = valsQuiz.reduce((s, v) => s + v, 0);
-  const totalSessions = Math.round(valsSessions.reduce((s, v) => s + v, 0) * 10) / 10;
+  const totalSessions =
+    Math.round(valsSessions.reduce((s, v) => s + v, 0) * 10) / 10;
 
   return `
   <div class="pulse-sec">
     <div class="pulse-sec-hd">
       <span class="pulse-sec-title">Tendance 30 jours</span>
-      <span class="pulse-sec-sub">${n} jour${n > 1 ? 's' : ''}</span>
+      <span class="pulse-sec-sub">${n} jour${n > 1 ? "s" : ""}</span>
     </div>
     <div class="trend-card">
       <div class="trend-legend">
@@ -806,7 +987,7 @@ function renderTrend30d(trend) {
       <div class="trend-svg-wrap">
         <svg class="trend-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Tendance 30 jours">
           <!-- gridlines -->
-          ${gridY.map(y => `<line class="trend-grid" x1="${PAD_L}" y1="${y}" x2="${W - PAD_R}" y2="${y}"/>`).join('')}
+          ${gridY.map((y) => `<line class="trend-grid" x1="${PAD_L}" y1="${y}" x2="${W - PAD_R}" y2="${y}"/>`).join("")}
 
           <!-- areas (fill légères) -->
           <path class="trend-area validations" d="${buildArea(valsValidations)}"/>
@@ -823,7 +1004,7 @@ function renderTrend30d(trend) {
           <text class="trend-axis-y" x="${PAD_L - 4}" y="${PAD_T + innerH}" text-anchor="end">0</text>
 
           <!-- X labels -->
-          ${xLabels.map(l => `<text class="trend-axis-x" x="${l.x}" y="${H - 4}" text-anchor="middle">${esc(l.label)}</text>`).join('')}
+          ${xLabels.map((l) => `<text class="trend-axis-x" x="${l.x}" y="${H - 4}" text-anchor="middle">${esc(l.label)}</text>`).join("")}
         </svg>
       </div>
     </div>
@@ -845,16 +1026,16 @@ function build7dSparkline(validationRows) {
     return { ts: d.getTime(), count: 0 };
   });
 
-  validationRows.forEach(v => {
+  validationRows.forEach((v) => {
     if (!v.validated_at) return;
     const d = new Date(v.validated_at);
     d.setHours(0, 0, 0, 0);
     const ts = d.getTime();
-    const day = days.find(x => x.ts === ts);
+    const day = days.find((x) => x.ts === ts);
     if (day) day.count++;
   });
 
-  const values = days.map(d => d.count);
+  const values = days.map((d) => d.count);
   const total = values.reduce((s, v) => s + v, 0);
   const max = Math.max(1, ...values);
   return { values, total, max };
@@ -868,27 +1049,168 @@ function deltaPct(current, previous) {
 
 // ─── Helpers ─────────────────────────────────────────────────
 function todayLabel() {
-  return new Date().toLocaleDateString('fr-FR', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  return new Date().toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 }
 
 function initials2(prenom, nom) {
-  const p = (prenom || '').trim()[0] || '';
-  const parts = (nom || '').trim().replace(/\./g, '').split(/\s+/).filter(Boolean);
+  const p = (prenom || "").trim()[0] || "";
+  const parts = (nom || "")
+    .trim()
+    .replace(/\./g, "")
+    .split(/\s+/)
+    .filter(Boolean);
   const n = parts.length
-    ? (parts[parts.length - 1][0] || '')
-    : ((prenom || '').trim()[1] || '');
-  return (p + n).toUpperCase() || '?';
+    ? parts[parts.length - 1][0] || ""
+    : (prenom || "").trim()[1] || "";
+  return (p + n).toUpperCase() || "?";
 }
 
 function relativeTime(iso) {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60_000);
-  if (m < 1) return 'à l\'instant';
+  if (m < 1) return "à l'instant";
   if (m < 60) return `il y a ${m} min`;
   const h = Math.floor(m / 60);
   if (h < 24) return `il y a ${h}h`;
   const d = Math.floor(h / 24);
   return `il y a ${d}j`;
+}
+
+// ─── Heatmap activité annuelle ────────────────────────────────
+function buildYearHeatmap(rows) {
+  const countByDay = {};
+  rows.forEach((v) => {
+    if (!v.validated_at) return;
+    const key = v.validated_at.slice(0, 10);
+    countByDay[key] = (countByDay[key] || 0) + 1;
+  });
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Début = 52 semaines en arrière, aligné sur lundi
+  const start = new Date(today);
+  start.setDate(start.getDate() - 364);
+  const dow = (start.getDay() + 6) % 7; // 0=lundi
+  start.setDate(start.getDate() - dow);
+
+  const days = [];
+  const d = new Date(start);
+  while (d <= today) {
+    const key = d.toISOString().slice(0, 10);
+    days.push({ date: key, count: countByDay[key] || 0 });
+    d.setDate(d.getDate() + 1);
+  }
+  // Compléter à semaine entière
+  while (days.length % 7 !== 0) days.push({ date: null, count: 0 });
+
+  const total = rows.length;
+  const max = Math.max(1, ...Object.values(countByDay));
+  return { days, total, max };
+}
+
+function renderHeatmap({ days, total }) {
+  const CELL = 10;
+  const GAP = 2;
+  const STEP = CELL + GAP;
+  const DAY_LBL_W = 20;
+  const MONTH_H = 16;
+  const MONTHS_FR = [
+    "jan",
+    "fév",
+    "mar",
+    "avr",
+    "mai",
+    "juin",
+    "juil",
+    "août",
+    "sep",
+    "oct",
+    "nov",
+    "déc",
+  ];
+  const COLOR = [
+    "var(--bg2)",
+    "rgba(88,204,2,.28)",
+    "rgba(88,204,2,.52)",
+    "rgba(88,204,2,.76)",
+    "var(--a)",
+  ];
+
+  function cellColor(n) {
+    if (n === 0) return COLOR[0];
+    if (n <= 2) return COLOR[1];
+    if (n <= 5) return COLOR[2];
+    if (n <= 9) return COLOR[3];
+    return COLOR[4];
+  }
+
+  const weeks = Math.ceil(days.length / 7);
+  const svgW = DAY_LBL_W + weeks * STEP - GAP;
+  const svgH = MONTH_H + 7 * STEP - GAP;
+
+  let cells = "";
+  for (let w = 0; w < weeks; w++) {
+    for (let dow = 0; dow < 7; dow++) {
+      const idx = w * 7 + dow;
+      if (idx >= days.length) continue;
+      const { date, count } = days[idx];
+      if (!date) continue;
+      const x = DAY_LBL_W + w * STEP;
+      const y = MONTH_H + dow * STEP;
+      cells += `<rect x="${x}" y="${y}" width="${CELL}" height="${CELL}" rx="2" fill="${cellColor(count)}"><title>${esc(date)}: ${count} validation${count !== 1 ? "s" : ""}</title></rect>`;
+    }
+  }
+
+  let monthLabels = "";
+  let lastMonth = -1;
+  for (let w = 0; w < weeks; w++) {
+    const day = days[w * 7];
+    if (!day?.date) continue;
+    const month = parseInt(day.date.slice(5, 7)) - 1;
+    if (month !== lastMonth) {
+      lastMonth = month;
+      const x = DAY_LBL_W + w * STEP;
+      monthLabels += `<text x="${x}" y="${MONTH_H - 4}" class="heat-month">${MONTHS_FR[month]}</text>`;
+    }
+  }
+
+  // Étiquettes jours : L, M, V (lignes 0, 2, 4 = lundi, mercredi, vendredi)
+  const dayLabels = [
+    [0, "L"],
+    [2, "M"],
+    [4, "V"],
+  ]
+    .map(([dow, lbl]) => {
+      const y = MONTH_H + dow * STEP + CELL - 1;
+      return `<text x="${DAY_LBL_W - 3}" y="${y}" class="heat-day" text-anchor="end">${lbl}</text>`;
+    })
+    .join("");
+
+  return `
+  <div class="pulse-sec">
+    <div class="pulse-sec-hd">
+      <span class="pulse-sec-title">Activité annuelle</span>
+      <span class="pulse-sec-sub">${total} validation${total !== 1 ? "s" : ""} sur 52 semaines</span>
+    </div>
+    <div class="heat-card">
+      <div class="heat-scroll">
+        <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" aria-label="Heatmap activité annuelle" role="img">
+          ${dayLabels}
+          ${monthLabels}
+          ${cells}
+        </svg>
+      </div>
+      <div class="heat-legend">
+        <span class="heat-leg-lbl">Moins</span>
+        ${COLOR.map((c) => `<span class="heat-leg-dot" style="background:${c}"></span>`).join("")}
+        <span class="heat-leg-lbl">Plus</span>
+      </div>
+    </div>
+  </div>`;
 }
