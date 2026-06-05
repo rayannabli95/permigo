@@ -204,18 +204,21 @@ const STYLE = `<style>
 }
 .tm-back {
   width: 44px; height: 44px; border-radius: 10px;
-  border: 1.5px solid var(--bo); background: var(--su);
+  border: 1px solid rgba(99,102,241,.15); background: var(--su);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   color: var(--ink); flex-shrink: 0;
-  transition: background .12s; -webkit-tap-highlight-color: transparent;
+  transition: background .15s cubic-bezier(.4,0,.2,1), border-color .15s cubic-bezier(.4,0,.2,1);
+  -webkit-tap-highlight-color: transparent;
 }
+.tm-back:hover { background: rgba(99,102,241,.06); border-color: rgba(99,102,241,.3); }
 .tm-back:active { background: var(--bg2); }
+.tm-back:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 .tm-hd-info { flex: 1; min-width: 0; }
 .tm-hd-title {
   font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink); letter-spacing: -.02em;
+  color: var(--ink); letter-spacing: -.025em;
 }
-.tm-hd-sub { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
+.tm-hd-sub { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 
 /* ── Hero (dark gradient comme trophées élève) ── */
 .tm-hero {
@@ -263,14 +266,15 @@ const STYLE = `<style>
 
 /* Barre progression globale */
 .tm-global-bar {
-  height: 5px; background: rgba(255,255,255,.12);
+  height: 6px; background: rgba(255,255,255,.12);
   border-radius: 99px; overflow: hidden; margin-bottom: 14px;
 }
 .tm-global-fill {
   height: 100%;
-  background: linear-gradient(90deg,#a78bfa,#f59e0b);
+  background: linear-gradient(90deg, #6366f1, #a78bfa, #f59e0b);
   border-radius: 99px;
   transition: width .9s cubic-bezier(.2,.7,.3,1) .4s;
+  box-shadow: 0 0 8px rgba(167,139,250,.5);
 }
 
 /* Chips de tier dans le hero */
@@ -306,16 +310,16 @@ const STYLE = `<style>
   position: relative;
   display: flex; align-items: flex-start; gap: 14px;
   padding: 16px;
-  border-radius: 18px;
-  border: 1.5px solid var(--bo);
+  border-radius: 16px;
+  border: 1px solid rgba(99,102,241,.1);
   background: var(--su);
-  transition: transform .12s cubic-bezier(.34,1.56,.64,1), box-shadow .15s;
+  transition: transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1), border-color .15s cubic-bezier(.4,0,.2,1);
   -webkit-tap-highlight-color: transparent;
   animation: tmCardIn .45s cubic-bezier(.2,.7,.3,1) both;
   overflow: hidden;
 }
 @keyframes tmCardIn {
-  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  from { opacity: 0; transform: translateY(10px) scale(.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 .tm-card:active { transform: scale(.975); }
@@ -325,9 +329,16 @@ const STYLE = `<style>
 .tm-card.tm-unlocked {
   border-color: var(--tc-border);
   background: var(--tc-bg);
-  box-shadow: 0 0 0 0 transparent, 0 2px 12px -4px var(--tc-glow);
+  box-shadow:
+    0 0 0 0 transparent,
+    0 2px 12px -4px var(--tc-glow),
+    inset 0 1px 0 rgba(255,255,255,.08);
 }
-/* Shimmer diagonal sur card débloquée */
+.tm-card.tm-unlocked:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -6px var(--tc-glow), inset 0 1px 0 rgba(255,255,255,.1);
+}
+/* Shimmer diagonal sur card débloquée — Or et Diamant uniquement via JS .tm-shimmer */
 .tm-card.tm-unlocked::after {
   content: '';
   position: absolute;
@@ -341,11 +352,14 @@ const STYLE = `<style>
   0%,100% { left: -60%; opacity: .7; }
   50% { left: 120%; opacity: 1; }
 }
-@media (prefers-reduced-motion: reduce) { .tm-card.tm-unlocked::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .tm-card.tm-unlocked::after { animation: none; }
+  .tm-card.tm-unlocked:hover { transform: none; }
+}
 
 /* ── Card locked ── */
 .tm-card.tm-locked { opacity: .72; }
-.tm-card.tm-locked-mystery { opacity: .5; }
+.tm-card.tm-locked-mystery { opacity: .5; filter: saturate(.4); }
 
 /* ── Icône ── */
 .tm-card-ico {
@@ -366,6 +380,10 @@ const STYLE = `<style>
   background: var(--bg3, var(--bg2));
   color: var(--mu5, var(--mu2));
   border: 1px solid var(--bo);
+}
+/* Mystery : silhouette floue — mystérieux mais pas terne */
+.tm-card.tm-locked-mystery .tm-card-ico {
+  filter: blur(1px) brightness(.4);
 }
 
 /* ── Body texte ── */

@@ -55,76 +55,106 @@ ${LEAGUE_CSS}
 }
 .ls-w-back {
   width: 44px; height: 44px; border-radius: 10px;
-  border: 1.5px solid var(--bo); background: var(--su);
+  border: 1px solid rgba(99,102,241,.15); background: var(--su);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  color: var(--ink); flex-shrink: 0; transition: background .12s;
+  color: var(--ink); flex-shrink: 0;
+  transition: background .15s cubic-bezier(.4,0,.2,1), border-color .15s cubic-bezier(.4,0,.2,1);
   -webkit-tap-highlight-color: transparent;
 }
+.ls-w-back:hover { background: rgba(99,102,241,.06); border-color: rgba(99,102,241,.3); }
 .ls-w-back:active { background: var(--bg2); }
+.ls-w-back:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 .ls-w-hd-info { flex: 1; }
-.ls-w-title { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; }
-.ls-w-sub { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
+.ls-w-title { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.025em; }
+.ls-w-sub { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 
 /* Hero */
 .ls-w-hero {
-  margin: 14px 16px 0;
-  padding: 16px;
-  background: var(--su); border: 1.5px solid var(--bo); border-radius: 20px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04);
+  margin: 16px 16px 0;
+  padding: 18px;
+  background: var(--su);
+  border: 1px solid rgba(99,102,241,.15);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 3px rgba(10,13,26,.04),
+    0 8px 24px -8px rgba(10,13,26,.08),
+    inset 0 1px 0 rgba(255,255,255,.06);
 }
 .ls-w-hero-top {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 .ls-w-countdown {
-  display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 3px;
   font: 500 11px/1 'Inter', sans-serif; color: var(--mu2);
 }
 .ls-w-countdown-val { font: 700 14px/1 'IBM Plex Mono', monospace; color: var(--ink); }
 .ls-w-pts-legend {
-  display: flex; flex-wrap: wrap; gap: 5px;
-  padding-top: 12px; border-top: 1px solid var(--bo2);
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding-top: 14px; border-top: 1px solid var(--bo2);
 }
 .ls-w-pts-pill {
   font: 500 10px/1 'Inter', sans-serif; color: var(--mu2);
-  padding: 3px 8px; border-radius: 6px;
+  padding: 4px 9px; border-radius: 8px;
   background: var(--bg2); border: 1px solid var(--bo);
+  transition: border-color .15s cubic-bezier(.4,0,.2,1);
 }
 
 /* Ligues header dans la liste */
 .ls-w-league-hd {
   display: flex; align-items: center; gap: 6px;
-  padding: 8px 0 4px;
-  font: 600 10px/1 'Inter', sans-serif; text-transform: uppercase; letter-spacing: .08em;
+  padding: 10px 0 5px;
+  font: 700 10px/1 'Inter', sans-serif; text-transform: uppercase; letter-spacing: .1em;
   color: var(--mu2);
 }
 .ls-w-league-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
 /* Liste */
-.ls-w-list { padding: 10px 16px 0; display: flex; flex-direction: column; gap: 6px; }
-.ls-w-empty { text-align: center; padding: 40px 24px; color: var(--mu2); }
-.ls-w-empty-ico { font-size: 36px; opacity: .35; margin-bottom: 10px; }
+.ls-w-list { padding: 12px 16px 0; display: flex; flex-direction: column; gap: 6px; }
+.ls-w-empty { text-align: center; padding: 48px 24px; color: var(--mu2); }
+.ls-w-empty-ico { font-size: 36px; opacity: .35; margin-bottom: 12px; }
 .ls-w-empty-txt { font: 500 13px/1.5 'Inter', sans-serif; }
+
+/* Row override — top 3 medal */
+.lg-row[data-rank="1"],
+.lg-row[data-rank="2"],
+.lg-row[data-rank="3"] {
+  border-color: rgba(245,158,11,.25);
+}
+.lg-row[data-rank="1"] { background: rgba(245,158,11,.04); }
 
 /* Motivation footer */
 .ls-w-motivation {
-  margin: 14px 16px 0;
-  padding: 14px 16px;
-  background: var(--su); border: 1px solid var(--bo); border-radius: 16px;
-  display: flex; flex-direction: column; gap: 8px;
+  margin: 16px 16px 0;
+  padding: 18px;
+  background: var(--su);
+  border: 1px solid rgba(99,102,241,.15);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(10,13,26,.04), 0 4px 12px -4px rgba(10,13,26,.06);
+  display: flex; flex-direction: column; gap: 10px;
 }
-.ls-w-motivation-title { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
-.ls-w-motivation-sub { font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu2); }
+.ls-w-motivation-title { font: 700 14px/1.3 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.01em; }
+.ls-w-motivation-sub { font: 500 12px/1.5 'Inter', sans-serif; color: var(--mu2); }
 .ls-w-motivation-cta {
   display: flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 12px; border: none; border-radius: 12px;
-  background: var(--a); color: #fff;
+  padding: 13px; border: none; border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
   font: 700 13px/1 'Inter', sans-serif; cursor: pointer;
   min-height: 44px;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity .12s;
+  transition: transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 4px 14px -4px rgba(99,102,241,.45);
 }
-.ls-w-motivation-cta:active { opacity: .85; }
+.ls-w-motivation-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px -4px rgba(99,102,241,.55); }
+.ls-w-motivation-cta:active { transform: scale(.98); }
+.ls-w-motivation-cta:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+
+/* Shimmer animation pour ligues Or et Diamant */
+@keyframes ls-shimmer-badge {
+  0%,100% { opacity: .6; }
+  50% { opacity: 1; }
+}
 </style>`;
 
 // ─── Mount ────────────────────────────────────────────────────
@@ -211,18 +241,21 @@ function _render(root, rows) {
   } else {
     const sorted = [...rows].sort((a, b) => b.weekly_pts - a.weekly_pts);
     let prevLeagueId = null;
+    const MEDALS = ["", "🥇", "🥈", "🥉"];
     for (const entry of sorted) {
       const lg = getLeague(entry.weekly_pts);
       const lid = lg?.id ?? "hors";
       if (lid !== prevLeagueId) {
-        if (prevLeagueId !== null) listHtml += `<div style="height:6px"></div>`;
+        if (prevLeagueId !== null) listHtml += `<div style="height:8px"></div>`;
         const lObj = LEAGUES.find((l) => l.id === lid);
         listHtml += `<div class="ls-w-league-hd">
           ${lObj ? `<span class="ls-w-league-dot" style="background:${lObj.color}"></span>${icon(lObj.iconName, { size: 12, strokeWidth: 2, color: lObj.color })} Ligue ${esc(lObj.name)}` : "Hors ligue"}
         </div>`;
         prevLeagueId = lid;
       }
-      listHtml += renderLeagueRow(entry, true);
+      // Wrapper pour attribut data-rank (override CSS bordure top 3)
+      const rankPos = entry.rank_pos ?? 0;
+      listHtml += `<div data-rank="${rankPos}">${renderLeagueRow(entry, true)}</div>`;
     }
   }
 

@@ -61,16 +61,16 @@ const STYLE = `<style>
     width: 100%;
     padding: 12px 12px 12px 40px;
     background: var(--su);
-    border: 1.5px solid var(--bo);
+    border: 1px solid rgba(99,102,241,.15);
     border-radius: 12px;
     font: 500 14px/1 'Inter', sans-serif;
     color: var(--ink);
     outline: none;
-    transition: border-color .15s;
+    transition: border-color .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
     box-sizing: border-box;
   }
   .me-search::placeholder { color: var(--mu2); }
-  .me-search:focus { border-color: var(--a); }
+  .me-search:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
   .me-search::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
   .me-search-clear {
     position: absolute;
@@ -111,13 +111,13 @@ const STYLE = `<style>
     font: 600 13px/1 'Inter', sans-serif;
     color: var(--mu2);
     cursor: pointer;
-    transition: background .15s, color .15s;
+    transition: background .15s cubic-bezier(.4,0,.2,1), color .15s cubic-bezier(.4,0,.2,1);
     min-height: 36px;
   }
   .me-tab.active {
     background: var(--su);
-    color: var(--a);
-    box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+    color: #6366f1;
+    box-shadow: 0 1px 3px rgba(10,13,26,.06), 0 2px 6px -2px rgba(10,13,26,.08);
   }
 
   /* Liste */
@@ -130,23 +130,27 @@ const STYLE = `<style>
   /* Card élève */
   .me-row {
     background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: 20px;
-    padding: 16px;
+    border: 1px solid rgba(99,102,241,.12);
+    border-radius: 12px;
+    padding: 14px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
-    transition: border-color .15s, transform .15s;
+    box-shadow: 0 1px 2px rgba(10,13,26,.03);
+    transition: border-color .15s cubic-bezier(.4,0,.2,1), transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
     cursor: pointer;
     min-height: 44px;
   }
   @media (hover: hover) and (pointer: fine) {
-    .me-row:hover { border-color: var(--a); }
+    .me-row:hover {
+      border-color: rgba(99,102,241,.3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px -4px rgba(10,13,26,.1);
+    }
   }
   .me-row:active { transform: scale(.985); }
   .me-row:focus { outline: none; }
-  .me-row:focus-visible { border-color: var(--a); }
+  .me-row:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; border-radius: 12px; }
 
   /* Avatar */
   .me-av {
@@ -213,12 +217,12 @@ const STYLE = `<style>
   }
   .me-prog-fill {
     height: 100%;
-    background: var(--a);
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
     border-radius: 2px;
-    transition: width .5s ease;
+    transition: width .6s cubic-bezier(.4,0,.2,1);
   }
   .me-prog-txt {
-    font: 600 11px/1 'Inter', sans-serif;
+    font: 700 11px/1 'IBM Plex Mono', monospace;
     color: var(--mu2);
     text-align: right;
   }
@@ -316,17 +320,22 @@ const STYLE = `<style>
     display: flex; align-items: center; gap: 8px;
     padding: 0 20px 0 16px;
     height: 52px;
-    background: var(--a);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
     color: #fff;
     border: none; border-radius: 26px;
     font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
-    box-shadow: 0 4px 18px -4px rgba(88,204,2,.55), 0 2px 6px rgba(0,0,0,.12);
-    transition: transform .14s cubic-bezier(.34,1.56,.64,1), box-shadow .14s;
+    box-shadow: 0 4px 18px -4px rgba(99,102,241,.6), 0 2px 6px rgba(0,0,0,.12);
+    transition: transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
     -webkit-tap-highlight-color: transparent;
     animation: meFabIn .5s .3s cubic-bezier(.34,1.56,.64,1) both;
   }
-  .me-fab:active { transform: scale(.94); box-shadow: 0 2px 8px -2px rgba(88,204,2,.4); }
+  .me-fab:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px -4px rgba(99,102,241,.65), 0 2px 8px rgba(0,0,0,.14);
+  }
+  .me-fab:active { transform: scale(.94); box-shadow: 0 2px 8px -2px rgba(99,102,241,.4); }
+  .me-fab:focus-visible { outline: 2px solid #6366f1; outline-offset: 3px; }
   @keyframes meFabIn {
     from { opacity: 0; transform: translateY(20px) scale(.9); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
