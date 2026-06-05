@@ -630,6 +630,16 @@ function render(
         </div>
       </div>
 
+      <!-- CTA premier démarrage — affiché uniquement si 0 validations -->
+      ${
+        totalVals === 0
+          ? `<div style="margin:16px 16px 0;padding:16px 18px;background:var(--su);border:1px solid rgba(99,102,241,.18);border-radius:16px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 3px rgba(10,13,26,.04);">
+        <div style="flex:1;font:500 13px/1.45 'Inter',sans-serif;color:var(--mu);">Enregistre ta première séance pour commencer à progresser.</div>
+        <button id="pcp-start-btn" style="padding:11px 16px;min-height:44px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font:700 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 12px -4px rgba(99,102,241,.45);">Première séance</button>
+      </div>`
+          : ""
+      }
+
       <!-- ══ BLOC 3 — NEXT UNLOCK ══ -->
       ${renderNextUnlock(state)}
 
@@ -777,6 +787,11 @@ function wire(root, progressPct, stops = [], totalVals = 0) {
         openFromStop(el);
       }
     });
+  });
+
+  // CTA premier démarrage (visible uniquement si totalVals === 0)
+  root.querySelector("#pcp-start-btn")?.addEventListener("click", () => {
+    navigate("#/log-session");
   });
 
   // Bouton "Voir tous les paliers →"

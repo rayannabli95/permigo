@@ -484,7 +484,7 @@ export async function mount(root) {
 
   root.querySelector("#tm-back")?.addEventListener("click", () => {
     haptic("tap");
-    navigate("/parcours");
+    navigate("#/parcours");
   });
 
   try {
@@ -635,13 +635,31 @@ function _render(root, d) {
   </div>
 </div>
 
+${
+  unlockedCount === 0
+    ? `
+<div style="margin:16px 16px 0;padding:16px 18px;background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.15);border-radius:16px;display:flex;align-items:center;gap:14px;">
+  <div style="flex:1;font:500 13px/1.45 'Inter',sans-serif;color:var(--mu);">
+    Enregistre ta première séance pour débloquer tes premiers trophées.
+  </div>
+  <button id="tm-start-btn" style="padding:11px 16px;min-height:44px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font:700 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px -4px rgba(99,102,241,.45);">
+    Première séance
+  </button>
+</div>`
+    : ""
+}
+
 ${sectionsHtml}
 
 </div>`;
 
   root.querySelector("#tm-back")?.addEventListener("click", () => {
     haptic("tap");
-    navigate("/parcours");
+    navigate("#/parcours");
+  });
+
+  root.querySelector("#tm-start-btn")?.addEventListener("click", () => {
+    navigate("#/log-session");
   });
 
   // Animer la ring et la barre après rendu

@@ -215,6 +215,20 @@ const STYLE = `<style>
   }
   .lr-comp-chev { color: var(--bo4); font-size: 14px; flex-shrink: 0; }
 
+  /* Bouton bilan trimestriel */
+  .lr-bilan-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 8px 12px; min-height: 44px; border-radius: 10px;
+    background: transparent; border: 1px solid var(--bo);
+    color: var(--mu); font: 600 12px/1 'Inter', sans-serif;
+    cursor: pointer; flex-shrink: 0; white-space: nowrap;
+    transition: border-color .15s, color .15s, background .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .lr-bilan-btn:hover { border-color: #6366f1; color: #6366f1; }
+  .lr-bilan-btn:active { background: rgba(99,102,241,.06); transform: scale(.97); }
+  .lr-bilan-btn:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+
   /* ─── Bottom sheet overlay ────────────────────────────────── */
   .lr-overlay {
     position: fixed;
@@ -499,6 +513,9 @@ function render() {
           <h1 class="lr-title" tabindex="-1">Livret REMC — ${prenomNom || "Élève"}</h1>
           <p class="lr-subtitle">${acquis}/${REMC_TOTAL} compétences acquises</p>
         </div>
+        <button class="lr-bilan-btn" id="lr-bilan-btn" aria-label="Voir le bilan trimestriel">
+          ${icon("file-text", { size: 14, strokeWidth: 2 })} Bilan
+        </button>
       </header>
 
       <div class="lr-kpi">
@@ -695,6 +712,12 @@ function wireMain() {
   _root
     .querySelector(".lr-back")
     ?.addEventListener("click", () => navigate("#/eleves"));
+
+  // Bilan trimestriel
+  _root.querySelector("#lr-bilan-btn")?.addEventListener("click", () => {
+    track("livret.bilan.open", { eleve_id: _eleveId });
+    navigate(`#/bilan/${_eleveId}`);
+  });
 
   // Clic sur sous-compétence → ouvrir sheet
   _root.querySelectorAll(".lr-comp[data-comp-id]").forEach((el) => {

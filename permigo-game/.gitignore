@@ -24,3 +24,7 @@ vite.config.js.timestamp-*
 
 # Skills externes (1460 skills clonées localement, on cherry-pick au besoin)
 .claude/external-skills/
+
+# Artefacts Playwright (résultats de tests locaux, screenshots, traces)
+test-results/
+playwright-report/

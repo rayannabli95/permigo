@@ -184,7 +184,7 @@ export async function mount(root) {
 
   root.querySelector("#ls-back")?.addEventListener("click", () => {
     haptic("tap");
-    navigate("/parcours");
+    navigate("#/parcours");
   });
 
   try {
@@ -287,7 +287,7 @@ ${motiv}
 
   root.querySelector("#ls-back")?.addEventListener("click", () => {
     haptic("tap");
-    navigate("/parcours");
+    navigate("#/parcours");
   });
   root.querySelector("#ls-seance-cta")?.addEventListener("click", () => {
     navigate("#/log-session");
@@ -310,5 +310,5 @@ function _renderEmpty(root) {
 </div>`;
   root
     .querySelector("#ls-back")
-    ?.addEventListener("click", () => navigate("/parcours"));
+    ?.addEventListener("click", () => navigate("#/parcours"));
 }
