@@ -3,96 +3,128 @@
 // Route : #/flash-quiz/{id}
 // 3 questions, 5 min, score serveur-side via respond_flash_quiz.
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { navigate } from '@/router.js';
-import { burstConfetti } from '@/components/common/confetti.js';
-import { playCorrect, playWrong, playStreak, playPerfect } from '@/utils/sound.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { burstConfetti } from "@/components/common/confetti.js";
+import {
+  playCorrect,
+  playWrong,
+  playStreak,
+  playPerfect,
+} from "@/utils/sound.js";
 
 let _timer = null;
 
 function richEsc(str) {
-  return esc(String(str ?? ''))
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\b(\d+(?:[.,]\d+)?\s*(?:%|km\/h|m|sec|secondes?|min|minutes?|heures?|jours?|mois|g\/L))\b/gi, '<strong>$1</strong>')
-    .replace(/\b(JAMAIS|TOUJOURS|OBLIGATOIRE|INTERDIT|IMPÉRATIF|AUCUN)\b/g, '<strong>$1</strong>');
+  return esc(String(str ?? ""))
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(
+      /\b(\d+(?:[.,]\d+)?\s*(?:%|km\/h|m|sec|secondes?|min|minutes?|heures?|jours?|mois|g\/L))\b/gi,
+      "<strong>$1</strong>",
+    )
+    .replace(
+      /\b(JAMAIS|TOUJOURS|OBLIGATOIRE|INTERDIT|IMPÉRATIF|AUCUN)\b/g,
+      "<strong>$1</strong>",
+    );
 }
 
 function fmtClock(ms) {
   const s = Math.max(0, Math.ceil(ms / 1000));
   const m = Math.floor(s / 60);
-  return `${m}:${String(s % 60).padStart(2, '0')}`;
+  return `${m}:${String(s % 60).padStart(2, "0")}`;
 }
 
 export async function mount(root, flashQuizId) {
-  if (_timer) { clearInterval(_timer); _timer = null; }
+  if (_timer) {
+    clearInterval(_timer);
+    _timer = null;
+  }
   const me = getCurUser();
   if (!me) return;
-  if (!flashQuizId) { navigate('/'); return; }
+  if (!flashQuizId) {
+    navigate("/");
+    return;
+  }
 
-  track('page.view', { page: 'eleve_flash_quiz' });
+  track("page.view", { page: "eleve_flash_quiz" });
   root.innerHTML = `${STYLE}<div class="fqz"><div class="fqz-card"><div class="fqz-load">Chargement…</div></div></div>`;
 
   try {
     // RLS : seul sent_to (l'élève) peut lire sa ligne
     const { data: quiz, error } = await sb
-      .from('flash_quizzes')
-      .select('id, competence_id, question_ids, expires_at, responded_at, score')
-      .eq('id', flashQuizId)
+      .from("flash_quizzes")
+      .select(
+        "id, competence_id, question_ids, expires_at, responded_at, score",
+      )
+      .eq("id", flashQuizId)
       .maybeSingle();
 
-    if (error || !quiz) return renderClosed(root, "Ce quiz éclair est introuvable.");
-    if (quiz.responded_at) return renderClosed(root, "Tu as déjà répondu à ce quiz éclair.");
+    if (error || !quiz)
+      return renderClosed(root, "Ce quiz éclair est introuvable.");
+    if (quiz.responded_at)
+      return renderClosed(root, "Tu as déjà répondu à ce quiz éclair.");
     if (new Date(quiz.expires_at).getTime() <= Date.now()) {
       return renderClosed(root, "Trop tard — ce quiz éclair est expiré.");
     }
 
     // Charge les questions (ordre = question_ids)
     const { data: rows } = await sb
-      .from('questions_competence')
-      .select('id, question, options, correct_index, explanation')
-      .in('id', quiz.question_ids);
+      .from("questions_competence")
+      .select("id, question, options, correct_index, explanation")
+      .in("id", quiz.question_ids);
 
-    const byId = new Map((rows || []).map(q => [q.id, q]));
-    const pool = quiz.question_ids.map(id => byId.get(id)).filter(Boolean);
+    const byId = new Map((rows || []).map((q) => [q.id, q]));
+    const pool = quiz.question_ids.map((id) => byId.get(id)).filter(Boolean);
 
-    if (pool.length === 0) return renderClosed(root, "Questions indisponibles, réessaie plus tard.");
+    if (pool.length === 0)
+      return renderClosed(root, "Questions indisponibles, réessaie plus tard.");
 
-    track('flash_quiz.started', { flash_quiz_id: quiz.id, competence_id: quiz.competence_id });
+    track("flash_quiz.started", {
+      flash_quiz_id: quiz.id,
+      competence_id: quiz.competence_id,
+    });
     runQuiz(root, { quiz, pool });
   } catch (e) {
-    console.error('[flash-quiz] mount failed', e);
+    console.error("[flash-quiz] mount failed", e);
     renderClosed(root, "Oups, impossible de charger le quiz.");
   }
 }
 
 function runQuiz(root, { quiz, pool }) {
-  let idx = 0, score = 0, streak = 0;
+  let idx = 0,
+    score = 0,
+    streak = 0;
   const answers = [];
   const expiresMs = new Date(quiz.expires_at).getTime();
 
   root.innerHTML = `${STYLE}
     <div class="fqz">
       <div class="fqz-top">
-        <div class="fqz-tag">${icon('zap',{size:14})} Quiz éclair</div>
+        <div class="fqz-tag">${icon("zap", { size: 14 })} Quiz éclair</div>
         <div class="fqz-clock" id="fqz-clock">5:00</div>
       </div>
       <div class="fqz-card"><div class="fqz-body" id="fqz-body"></div></div>
     </div>`;
 
-  const clockEl = root.querySelector('#fqz-clock');
-  const bodyEl = root.querySelector('#fqz-body');
+  const clockEl = root.querySelector("#fqz-clock");
+  const bodyEl = root.querySelector("#fqz-body");
 
   function tick() {
-    if (!document.body.contains(clockEl)) { clearInterval(_timer); _timer = null; return; }
+    if (!document.body.contains(clockEl)) {
+      clearInterval(_timer);
+      _timer = null;
+      return;
+    }
     const left = expiresMs - Date.now();
     clockEl.textContent = fmtClock(left);
-    clockEl.classList.toggle('danger', left < 60000);
+    clockEl.classList.toggle("danger", left < 60000);
     if (left <= 0) {
-      clearInterval(_timer); _timer = null;
+      clearInterval(_timer);
+      _timer = null;
       renderClosed(root, "Temps écoulé — le quiz éclair est expiré.");
     }
   }
@@ -110,86 +142,132 @@ function runQuiz(root, { quiz, pool }) {
       </div>
       <h3 class="fqz-q">${richEsc(q.question)}</h3>
       <div class="fqz-opts">
-        ${(q.options || []).map((opt, i) => `<button class="fqz-opt" data-i="${i}" type="button">${richEsc(opt)}</button>`).join('')}
+        ${(q.options || []).map((opt, i) => `<button class="fqz-opt" data-i="${i}" type="button">${richEsc(opt)}</button>`).join("")}
       </div>`;
-    bodyEl.querySelectorAll('.fqz-opt').forEach(btn => {
-      btn.addEventListener('click', () => handleAnswer(parseInt(btn.dataset.i, 10), q));
+    bodyEl.querySelectorAll(".fqz-opt").forEach((btn) => {
+      btn.addEventListener("click", () =>
+        handleAnswer(parseInt(btn.dataset.i, 10), q),
+      );
     });
   }
 
   function handleAnswer(chosen, q) {
     const correct = chosen === q.correct_index;
     answers.push({ question_id: q.id, selected_idx: chosen });
-    if (correct) { score++; streak++; playCorrect(); if (streak >= 2) playStreak(); }
-    else { streak = 0; playWrong(); }
+    if (correct) {
+      score++;
+      streak++;
+      playCorrect();
+      if (streak >= 2) playStreak();
+    } else {
+      streak = 0;
+      playWrong();
+    }
 
-    bodyEl.querySelectorAll('.fqz-opt').forEach(b => {
+    bodyEl.querySelectorAll(".fqz-opt").forEach((b) => {
       b.disabled = true;
       const i = parseInt(b.dataset.i, 10);
-      if (i === q.correct_index) b.classList.add('ok');
-      else if (i === chosen) b.classList.add('ko');
+      if (i === q.correct_index) b.classList.add("ok");
+      else if (i === chosen) b.classList.add("ko");
     });
 
     if (q.explanation) {
-      const expl = document.createElement('div');
-      expl.className = `fqz-expl ${correct ? 'ok' : 'ko'}`;
-      expl.innerHTML = `<div class="fqz-expl-h">${correct ? 'Bien joué !' : 'À retenir'}</div><div>${richEsc(q.explanation)}</div>`;
-      bodyEl.querySelector('.fqz-opts').appendChild(expl);
+      const expl = document.createElement("div");
+      expl.className = `fqz-expl ${correct ? "ok" : "ko"}`;
+      expl.innerHTML = `<div class="fqz-expl-h">${correct ? "Bien joué !" : "À retenir"}</div><div>${richEsc(q.explanation)}</div>`;
+      bodyEl.querySelector(".fqz-opts").appendChild(expl);
     }
 
-    setTimeout(() => { idx++; renderQuestion(); }, correct ? 2000 : 3800);
+    setTimeout(
+      () => {
+        idx++;
+        renderQuestion();
+      },
+      correct ? 2000 : 3800,
+    );
   }
 
   async function finish() {
-    if (_timer) { clearInterval(_timer); _timer = null; }
+    if (_timer) {
+      clearInterval(_timer);
+      _timer = null;
+    }
     bodyEl.innerHTML = `<div class="fqz-result"><div class="fqz-spin">Envoi…</div></div>`;
-    let score3 = score, total = pool.length;
+    let score3 = score,
+      total = pool.length;
     try {
-      const { data, error } = await sb.rpc('respond_flash_quiz', {
+      const { data, error } = await sb.rpc("respond_flash_quiz", {
         p_flash_quiz_id: quiz.id,
         p_answers: answers,
       });
       if (!error && data) {
         const r = Array.isArray(data) ? data[0] : data;
-        if (r) { score3 = r.score ?? score; total = r.total ?? pool.length; }
+        if (r) {
+          score3 = r.score ?? score;
+          total = r.total ?? pool.length;
+        }
       } else if (error) {
-        console.error('[flash-quiz] respond error', error);
-        if (/expired/i.test(error.message || '')) {
-          return renderClosed(root, "Temps écoulé — le quiz éclair est expiré.");
+        console.error("[flash-quiz] respond error", error);
+        if (/expired/i.test(error.message || "")) {
+          return renderClosed(
+            root,
+            "Temps écoulé — le quiz éclair est expiré.",
+          );
         }
       }
-    } catch (e) { console.error('[flash-quiz] respond crashed', e); }
+    } catch (e) {
+      console.error("[flash-quiz] respond crashed", e);
+    }
 
     const perfect = score3 === total;
-    track('flash_quiz.completed', { flash_quiz_id: quiz.id, competence_id: quiz.competence_id, score: score3, total });
-    if (perfect) { burstConfetti({ count: 100, power: 16 }); playPerfect(); }
+    track("flash_quiz.completed", {
+      flash_quiz_id: quiz.id,
+      competence_id: quiz.competence_id,
+      score: score3,
+      total,
+    });
+    if (perfect) {
+      burstConfetti({ count: 100, power: 16 });
+      playPerfect();
+    }
 
-    const msg = perfect ? 'Sans-faute !' : score3 >= total * 0.6 ? 'Bien joué !' : 'À revoir avec ton moniteur';
+    const msg = perfect
+      ? "Sans-faute !"
+      : score3 >= total * 0.6
+        ? "Bien joué !"
+        : "À revoir avec ton moniteur";
     bodyEl.innerHTML = `
       <div class="fqz-result">
         <div class="fqz-score">${score3}/${total}</div>
         <p>${msg}</p>
         <button class="fqz-cta" id="fqz-done" type="button">Continuer</button>
       </div>`;
-    bodyEl.querySelector('#fqz-done').addEventListener('click', () => navigate('/'));
+    bodyEl
+      .querySelector("#fqz-done")
+      .addEventListener("click", () => navigate("/"));
   }
 
   renderQuestion();
 }
 
 function renderClosed(root, message) {
-  if (_timer) { clearInterval(_timer); _timer = null; }
+  if (_timer) {
+    clearInterval(_timer);
+    _timer = null;
+  }
   root.innerHTML = `${STYLE}
     <div class="fqz">
       <div class="fqz-card">
         <div class="fqz-closed">
-          <div class="fqz-closed-ico">⏱️</div>
+          <div class="fqz-closed-ico">${icon("clock", { size: 44, strokeWidth: 1.5, color: "#94a3b8" })}</div>
           <p>${esc(message)}</p>
           <button class="fqz-cta" id="fqz-back" type="button">Retour à l'accueil</button>
         </div>
       </div>
     </div>`;
-  root.querySelector('#fqz-back')?.addEventListener('click', () => navigate('/'));
+  root
+    .querySelector("#fqz-back")
+    ?.addEventListener("click", () => navigate("/"));
 }
 
 const STYLE = `<style>

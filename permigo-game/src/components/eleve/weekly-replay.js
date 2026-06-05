@@ -12,11 +12,12 @@
  *   { hoursThisWeek, hoursLastWeek, compsValidated, monsReview, topLessonHour, topLessonLieu, streak }
  */
 
-import { esc } from '@/utils/escape.js';
-import { burstConfetti } from '@/components/common/confetti.js';
-import { track } from '@/services/analytics.js';
+import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
+import { burstConfetti } from "@/components/common/confetti.js";
+import { track } from "@/services/analytics.js";
 
-const LS_KEY = 'pg-replay-week';
+const LS_KEY = "pg-replay-week";
 const CARD_DURATION = 4500; // ms par card auto-advance
 
 /** ISO week number 'YYYY-WW' pour identifier la semaine en cours. */
@@ -28,10 +29,10 @@ function isoWeekKey() {
   const firstThursday = target.getTime();
   target.setUTCMonth(0, 1);
   if (target.getUTCDay() !== 4) {
-    target.setUTCMonth(0, 1 + ((4 - target.getUTCDay()) + 7) % 7);
+    target.setUTCMonth(0, 1 + ((4 - target.getUTCDay() + 7) % 7));
   }
   const week = 1 + Math.ceil((firstThursday - target) / 604800000);
-  return `${d.getUTCFullYear()}-${String(week).padStart(2, '0')}`;
+  return `${d.getUTCFullYear()}-${String(week).padStart(2, "0")}`;
 }
 
 /** Affiche le replay si :
@@ -51,7 +52,10 @@ export function maybePlayWeeklyReplay(stats) {
   const hrs = Number(stats?.hoursThisWeek) || 0;
   if (!stats || (hrs === 0 && (stats.compsValidated || 0) === 0)) return false;
 
-  track('weekly_replay.viewed', { comp_semaine: stats.compsValidated, streak: stats.streak });
+  track("weekly_replay.viewed", {
+    comp_semaine: stats.compsValidated,
+    streak: stats.streak,
+  });
   playReplay(stats);
   localStorage.setItem(LS_KEY, week);
   return true;
@@ -60,71 +64,78 @@ export function maybePlayWeeklyReplay(stats) {
 /** Lance manuellement (depuis un bouton "voir mon récap"). */
 export function playReplay(stats) {
   ensureStyles();
-  if (document.querySelector('.wrep-overlay')) return;
+  if (document.querySelector(".wrep-overlay")) return;
 
   const hoursThisWeek = Number(stats.hoursThisWeek) || 0;
   const hoursLastWeek = Number(stats.hoursLastWeek) || 0;
-  const delta = hoursLastWeek > 0
-    ? Math.round(((hoursThisWeek - hoursLastWeek) / hoursLastWeek) * 100)
-    : null;
-  const deltaText = delta === null ? null
-    : delta > 0 ? `+${delta}% vs semaine dernière`
-    : delta < 0 ? `${delta}% vs semaine dernière`
-    : 'Stable vs semaine dernière';
+  const delta =
+    hoursLastWeek > 0
+      ? Math.round(((hoursThisWeek - hoursLastWeek) / hoursLastWeek) * 100)
+      : null;
+  const deltaText =
+    delta === null
+      ? null
+      : delta > 0
+        ? `+${delta}% vs semaine dernière`
+        : delta < 0
+          ? `${delta}% vs semaine dernière`
+          : "Stable vs semaine dernière";
 
   const cards = [
     {
-      bg: 'linear-gradient(180deg,#1e1b4b 0%,#312e81 50%,var(--adx) 100%)',
+      bg: "linear-gradient(180deg,#1e1b4b 0%,#312e81 50%,var(--adx) 100%)",
       content: `
         <div class="wrep-tag">SEMAINE ${week()}</div>
-        <div class="wrep-em" style="font-size:80px">🎬</div>
+        <div class="wrep-em">${icon("sparkle", { size: 72, strokeWidth: 1.5 })}</div>
         <h1 class="wrep-title">Ta semaine,<br>en rétro.</h1>
         <p class="wrep-sub">Voici ce que tu as fait ces 7 derniers jours.</p>
       `,
     },
     {
-      bg: 'linear-gradient(180deg,#7c2d12 0%,var(--rdk) 50%,var(--or) 100%)',
+      bg: "linear-gradient(180deg,#7c2d12 0%,var(--rdk) 50%,var(--or) 100%)",
       content: `
         <div class="wrep-tag">TEMPS AU VOLANT</div>
-        <div class="wrep-big">${hoursThisWeek.toFixed(1).replace(/\.0$/, '')}<small>h</small></div>
+        <div class="wrep-big">${hoursThisWeek.toFixed(1).replace(/\.0$/, "")}<small>h</small></div>
         <div class="wrep-medium">de conduite cette semaine</div>
-        ${deltaText ? `<div class="wrep-meta">${esc(deltaText)}</div>` : ''}
+        ${deltaText ? `<div class="wrep-meta">${esc(deltaText)}</div>` : ""}
       `,
     },
     {
-      bg: 'linear-gradient(180deg,#064e3b 0%,var(--gr) 50%,#34d399 100%)',
+      bg: "linear-gradient(180deg,#064e3b 0%,var(--gr) 50%,#34d399 100%)",
       content: `
         <div class="wrep-tag">COMPÉTENCES</div>
         <div class="wrep-big">${stats.compsValidated}</div>
-        <div class="wrep-medium">${stats.compsValidated === 1 ? 'compétence validée' : 'compétences validées'}</div>
+        <div class="wrep-medium">${stats.compsValidated === 1 ? "compétence validée" : "compétences validées"}</div>
         <div class="wrep-meta">+${stats.compsValidated * 100} XP gagnés</div>
       `,
     },
     {
-      bg: 'linear-gradient(180deg,#581c87 0%,var(--pul) 50%,#c084fc 100%)',
-      content: stats.topLessonHour ? `
-        <div class="wrep-tag">⭐ MOMENT FORT</div>
-        <div class="wrep-em" style="font-size:72px">${stats.monsReview >= 4 ? '🏆' : '✨'}</div>
-        <h2 class="wrep-h2">${stats.monsReview ? `Note ${stats.monsReview}/5` : 'Une belle session'}</h2>
-        <div class="wrep-medium">${esc(stats.topLessonHour)}${stats.topLessonLieu ? ' · ' + esc(stats.topLessonLieu) : ''}</div>
-      ` : `
-        <div class="wrep-tag">⭐ MOMENT FORT</div>
-        <div class="wrep-em" style="font-size:72px">🌱</div>
+      bg: "linear-gradient(180deg,#581c87 0%,var(--pul) 50%,#c084fc 100%)",
+      content: stats.topLessonHour
+        ? `
+        <div class="wrep-tag">${icon("star", { size: 14, strokeWidth: 2 })} MOMENT FORT</div>
+        <div class="wrep-em">${stats.monsReview >= 4 ? icon("trophy", { size: 72, strokeWidth: 1 }) : icon("zap", { size: 72, strokeWidth: 1 })}</div>
+        <h2 class="wrep-h2">${stats.monsReview ? `Note ${stats.monsReview}/5` : "Une belle session"}</h2>
+        <div class="wrep-medium">${esc(stats.topLessonHour)}${stats.topLessonLieu ? " · " + esc(stats.topLessonLieu) : ""}</div>
+      `
+        : `
+        <div class="wrep-tag">${icon("star", { size: 14, strokeWidth: 2 })} MOMENT FORT</div>
+        <div class="wrep-em">${icon("sun", { size: 72, strokeWidth: 1 })}</div>
         <h2 class="wrep-h2">Tu poses les bases</h2>
         <div class="wrep-medium">La semaine prochaine, encore plus loin.</div>
       `,
     },
     {
-      bg: 'linear-gradient(180deg,#451a03 0%,#a16207 50%,var(--aml2) 100%)',
+      bg: "linear-gradient(180deg,#451a03 0%,#a16207 50%,var(--aml2) 100%)",
       content: `
         <div class="wrep-tag">SÉRIE</div>
         <div class="wrep-big">${stats.streak || 1}<small>j</small></div>
-        <div class="wrep-medium">${(stats.streak || 1) > 1 ? "d'affilée" : 'à continuer demain'}</div>
+        <div class="wrep-medium">${(stats.streak || 1) > 1 ? "d'affilée" : "à continuer demain"}</div>
         ${stats.streak >= 7 ? '<div class="wrep-meta">Tu deviens un habitué</div>' : '<div class="wrep-meta">Reviens demain pour grandir la série</div>'}
       `,
     },
     {
-      bg: 'linear-gradient(180deg,#0c4a6e 0%,#0284c7 50%,#38bdf8 100%)',
+      bg: "linear-gradient(180deg,#0c4a6e 0%,#0284c7 50%,#38bdf8 100%)",
       content: `
         <div class="wrep-tag">CETTE SEMAINE</div>
         <h1 class="wrep-title" style="font-size:38px">Continue.<br>Le permis t'attend.</h1>
@@ -134,11 +145,11 @@ export function playReplay(stats) {
     },
   ];
 
-  const overlay = document.createElement('div');
-  overlay.className = 'wrep-overlay';
+  const overlay = document.createElement("div");
+  overlay.className = "wrep-overlay";
   overlay.innerHTML = `
     <div class="wrep-progress" aria-hidden="true">
-      ${cards.map((_, i) => `<span class="wrep-pbar" data-pb="${i}"><i></i></span>`).join('')}
+      ${cards.map((_, i) => `<span class="wrep-pbar" data-pb="${i}"><i></i></span>`).join("")}
     </div>
     <button class="wrep-close" id="wrep-close" type="button" aria-label="Fermer">×</button>
     <div class="wrep-stage" id="wrep-stage"></div>
@@ -152,48 +163,66 @@ export function playReplay(stats) {
 
   function showCard(i) {
     idx = Math.max(0, Math.min(cards.length - 1, i));
-    const stage = overlay.querySelector('#wrep-stage');
+    const stage = overlay.querySelector("#wrep-stage");
     const c = cards[idx];
     overlay.style.background = c.bg;
     stage.innerHTML = `<div class="wrep-card" key="${idx}">${c.content}</div>`;
 
     // Update progress bars
-    overlay.querySelectorAll('.wrep-pbar').forEach((pb, i) => {
-      const fill = pb.querySelector('i');
-      if (i < idx) { fill.style.width = '100%'; fill.style.transition = 'none'; }
-      else if (i === idx) {
-        fill.style.transition = 'none'; fill.style.width = '0%';
+    overlay.querySelectorAll(".wrep-pbar").forEach((pb, i) => {
+      const fill = pb.querySelector("i");
+      if (i < idx) {
+        fill.style.width = "100%";
+        fill.style.transition = "none";
+      } else if (i === idx) {
+        fill.style.transition = "none";
+        fill.style.width = "0%";
         void fill.offsetWidth;
         fill.style.transition = `width ${CARD_DURATION}ms linear`;
-        fill.style.width = '100%';
-      } else { fill.style.width = '0%'; fill.style.transition = 'none'; }
+        fill.style.width = "100%";
+      } else {
+        fill.style.width = "0%";
+        fill.style.transition = "none";
+      }
     });
 
     // Confetti sur les cards joyeuses
     if (idx === 2 && stats.compsValidated > 0) {
-      setTimeout(() => burstConfetti({ x: 0.5, y: 0.3, count: 50, power: 12 }), 300);
+      setTimeout(
+        () => burstConfetti({ x: 0.5, y: 0.3, count: 50, power: 12 }),
+        300,
+      );
     }
     if (idx === cards.length - 1) {
-      setTimeout(() => burstConfetti({ x: 0.5, y: 0.3, count: 100, power: 18 }), 200);
+      setTimeout(
+        () => burstConfetti({ x: 0.5, y: 0.3, count: 100, power: 18 }),
+        200,
+      );
     }
 
     // Haptique sur chaque card
-    try { navigator.vibrate?.(20); } catch (_) {}
+    try {
+      navigator.vibrate?.(20);
+    } catch (_) {}
 
     // Wire bouton partage
-    overlay.querySelector('#wrep-share')?.addEventListener('click', async () => {
-      track('weekly_replay.shared', { comp_semaine: stats.compsValidated });
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: 'Ma semaine sur PermiGo',
-            text: `${stats.compsValidated} compétence${stats.compsValidated !== 1 ? 's' : ''} cette semaine — je progresse vers mon permis !`,
-            url: 'https://permigo-game.vercel.app',
-          });
-        } catch { /* user cancelled */ }
-      }
-      close();
-    });
+    overlay
+      .querySelector("#wrep-share")
+      ?.addEventListener("click", async () => {
+        track("weekly_replay.shared", { comp_semaine: stats.compsValidated });
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "Ma semaine sur PermiGo",
+              text: `${stats.compsValidated} compétence${stats.compsValidated !== 1 ? "s" : ""} cette semaine — je progresse vers mon permis !`,
+              url: "https://permigo-game.vercel.app",
+            });
+          } catch {
+            /* user cancelled */
+          }
+        }
+        close();
+      });
 
     // Auto-advance
     clearTimeout(timer);
@@ -204,18 +233,28 @@ export function playReplay(stats) {
 
   function close() {
     clearTimeout(timer);
-    overlay.classList.add('wrep-closing');
+    overlay.classList.add("wrep-closing");
     setTimeout(() => overlay.remove(), 300);
   }
 
-  overlay.querySelector('#wrep-close').addEventListener('click', close);
-  overlay.querySelector('#wrep-tap-left').addEventListener('click', () => showCard(idx - 1));
-  overlay.querySelector('#wrep-tap-right').addEventListener('click', () => showCard(idx + 1));
+  overlay.querySelector("#wrep-close").addEventListener("click", close);
+  overlay
+    .querySelector("#wrep-tap-left")
+    .addEventListener("click", () => showCard(idx - 1));
+  overlay
+    .querySelector("#wrep-tap-right")
+    .addEventListener("click", () => showCard(idx + 1));
 
   // Swipe
   let touchX = 0;
-  overlay.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
-  overlay.addEventListener('touchend', (e) => {
+  overlay.addEventListener(
+    "touchstart",
+    (e) => {
+      touchX = e.touches[0].clientX;
+    },
+    { passive: true },
+  );
+  overlay.addEventListener("touchend", (e) => {
     const dx = e.changedTouches[0].clientX - touchX;
     if (Math.abs(dx) > 50) {
       if (dx > 0) showCard(idx - 1);
@@ -225,13 +264,14 @@ export function playReplay(stats) {
 
   // Keyboard
   const onKey = (e) => {
-    if (e.key === 'ArrowRight') showCard(idx + 1);
-    else if (e.key === 'ArrowLeft') showCard(idx - 1);
-    else if (e.key === 'Escape') close();
+    if (e.key === "ArrowRight") showCard(idx + 1);
+    else if (e.key === "ArrowLeft") showCard(idx - 1);
+    else if (e.key === "Escape") close();
   };
-  document.addEventListener('keydown', onKey);
-  overlay.addEventListener('animationend', () => {
-    if (overlay.classList.contains('wrep-closing')) document.removeEventListener('keydown', onKey);
+  document.addEventListener("keydown", onKey);
+  overlay.addEventListener("animationend", () => {
+    if (overlay.classList.contains("wrep-closing"))
+      document.removeEventListener("keydown", onKey);
   });
 
   showCard(0);
@@ -239,13 +279,14 @@ export function playReplay(stats) {
 
 function week() {
   const d = new Date();
-  return isoWeekKey().split('-')[1];
+  return isoWeekKey().split("-")[1];
 }
 
 let _styled = false;
 function ensureStyles() {
-  if (_styled) return; _styled = true;
-  const style = document.createElement('style');
+  if (_styled) return;
+  _styled = true;
+  const style = document.createElement("style");
   style.textContent = `
     .wrep-overlay{
       position:fixed;inset:0;z-index:400;
@@ -302,9 +343,11 @@ function ensureStyles() {
       color:rgba(255,255,255,.85);
       margin-bottom:18px;
       filter:drop-shadow(0 2px 8px rgba(0,0,0,.4));
+      display:inline-flex;align-items:center;gap:6px;
     }
     .wrep-em{
-      font-size:60px;line-height:1;margin-bottom:14px;
+      display:flex;align-items:center;justify-content:center;
+      margin-bottom:14px;color:#fff;
       filter:drop-shadow(0 8px 24px rgba(0,0,0,.4));
       animation:wrep-em-bob 2.2s ease-in-out infinite;
     }

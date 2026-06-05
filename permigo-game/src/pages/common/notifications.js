@@ -1,66 +1,130 @@
 // ═══════════════════════════════════════════════════════════════
 // Notifications — groupées par jour, pull-to-refresh, swipe-to-delete
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { toast } from '@/components/common/toast.js';
-import { track } from '@/services/analytics.js';
-import { navigate } from '@/router.js';
-import { icon as _icon } from '@/utils/icons.js';
-import { haptic } from '@/utils/haptic.js';
-import { emptyState } from '@/components/common/empty-state.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { toast } from "@/components/common/toast.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { icon } from "@/utils/icons.js";
+import { haptic } from "@/utils/haptic.js";
+import { emptyState } from "@/components/common/empty-state.js";
 
 // ─── Deep-link resolver ───────────────────────────────────────
 function notifRoute(n) {
   const d = n.data || {};
   switch (n.type) {
-    case 'session_confirmation':
-    case 'session_logged':       return d.session_id ? `#/sessions/${d.session_id}` : '#/';
-    case 'new_message':          return d.thread_id  ? `#/messages/${d.thread_id}`  : '#/messages';
-    case 'achievement_unlocked': return '#/trophees';
-    case 'streak_at_risk':
-    case 'post_validation_quiz':
-    case 'consolidation_quiz':   return '#/parcours';
-    case 'session_confirmed':
-    case 'session_refused':      return '#/';
-    default:                     return '#/';
+    case "session_confirmation":
+    case "session_logged":
+      return d.session_id ? `#/sessions/${d.session_id}` : "#/";
+    case "new_message":
+      return d.thread_id ? `#/messages/${d.thread_id}` : "#/messages";
+    case "achievement_unlocked":
+      return "#/trophees";
+    case "streak_at_risk":
+    case "post_validation_quiz":
+    case "consolidation_quiz":
+      return "#/parcours";
+    case "session_confirmed":
+    case "session_refused":
+      return "#/";
+    default:
+      return "#/";
   }
 }
 
 // ─── Icon map ────────────────────────────────────────────────
 const TYPE_META = {
-  xp:                  { iconName: 'zap',          bg: 'rgba(88,204,2,.12)',  color: 'var(--a)' },
-  trophy:              { iconName: 'trophy',        bg: 'rgba(245,158,11,.12)',  color: 'var(--am)' },
-  achievement_unlocked:{ iconName: 'trophy',        bg: 'rgba(245,158,11,.12)',  color: 'var(--am)' },
-  validation:          { iconName: 'check-circle',  bg: 'rgba(16,185,129,.12)',  color: 'var(--gr)' },
-  session_confirmation:{ iconName: 'check-circle',  bg: 'rgba(88,204,2,.12)',  color: 'var(--a)' },
-  session_logged:      { iconName: 'check-circle',  bg: 'rgba(88,204,2,.12)',  color: 'var(--a)' },
-  session_confirmed:   { iconName: 'check',         bg: 'rgba(16,185,129,.12)',  color: 'var(--gr)' },
-  session_refused:     { iconName: 'x-circle',      bg: 'rgba(239,68,68,.12)',   color: 'var(--rd)' },
-  streak_at_risk:      { iconName: 'flame',         bg: 'rgba(239,68,68,.12)',   color: 'var(--rd)' },
-  streak:              { iconName: 'flame',         bg: 'rgba(239,68,68,.12)',   color: 'var(--rd)' },
-  consolidation_quiz:  { iconName: 'target',        bg: 'rgba(139,92,246,.12)', color: 'var(--pu)' },
-  post_validation_quiz:{ iconName: 'target',        bg: 'rgba(139,92,246,.12)', color: 'var(--pu)' },
-  new_message:         { iconName: 'message-circle',bg: 'rgba(14,165,233,.12)',  color: 'var(--bl)' },
-  reminder:            { iconName: 'bell',          bg: 'rgba(14,165,233,.12)',  color: 'var(--bl)' },
-  info:                { iconName: 'bell',          bg: 'rgba(100,116,139,.12)', color: 'var(--mu3)' },
+  xp: { iconName: "zap", bg: "rgba(88,204,2,.12)", color: "var(--a)" },
+  trophy: {
+    iconName: "trophy",
+    bg: "rgba(245,158,11,.12)",
+    color: "var(--am)",
+  },
+  achievement_unlocked: {
+    iconName: "trophy",
+    bg: "rgba(245,158,11,.12)",
+    color: "var(--am)",
+  },
+  validation: {
+    iconName: "check-circle",
+    bg: "rgba(16,185,129,.12)",
+    color: "var(--gr)",
+  },
+  session_confirmation: {
+    iconName: "check-circle",
+    bg: "rgba(88,204,2,.12)",
+    color: "var(--a)",
+  },
+  session_logged: {
+    iconName: "check-circle",
+    bg: "rgba(88,204,2,.12)",
+    color: "var(--a)",
+  },
+  session_confirmed: {
+    iconName: "check",
+    bg: "rgba(16,185,129,.12)",
+    color: "var(--gr)",
+  },
+  session_refused: {
+    iconName: "x-circle",
+    bg: "rgba(239,68,68,.12)",
+    color: "var(--rd)",
+  },
+  streak_at_risk: {
+    iconName: "flame",
+    bg: "rgba(239,68,68,.12)",
+    color: "var(--rd)",
+  },
+  streak: { iconName: "flame", bg: "rgba(239,68,68,.12)", color: "var(--rd)" },
+  consolidation_quiz: {
+    iconName: "target",
+    bg: "rgba(139,92,246,.12)",
+    color: "var(--pu)",
+  },
+  post_validation_quiz: {
+    iconName: "target",
+    bg: "rgba(139,92,246,.12)",
+    color: "var(--pu)",
+  },
+  new_message: {
+    iconName: "message-circle",
+    bg: "rgba(14,165,233,.12)",
+    color: "var(--bl)",
+  },
+  reminder: {
+    iconName: "bell",
+    bg: "rgba(14,165,233,.12)",
+    color: "var(--bl)",
+  },
+  info: { iconName: "bell", bg: "rgba(100,116,139,.12)", color: "var(--mu3)" },
 };
-function typeMeta(t) { return TYPE_META[t] || TYPE_META.info; }
+function typeMeta(t) {
+  return TYPE_META[t] || TYPE_META.info;
+}
 
 // ─── Grouping ─────────────────────────────────────────────────
 function groupByDay(notifs) {
   const now = new Date();
-  const today     = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const today = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).getTime();
   const yesterday = today - 86400000;
-  const weekAgo   = today - 7 * 86400000;
+  const weekAgo = today - 7 * 86400000;
   const groups = { today: [], yesterday: [], week: [], older: [] };
   for (const n of notifs) {
-    const day = new Date(new Date(n.created_at).getFullYear(), new Date(n.created_at).getMonth(), new Date(n.created_at).getDate()).getTime();
-    if      (day >= today)     groups.today.push(n);
+    const day = new Date(
+      new Date(n.created_at).getFullYear(),
+      new Date(n.created_at).getMonth(),
+      new Date(n.created_at).getDate(),
+    ).getTime();
+    if (day >= today) groups.today.push(n);
     else if (day >= yesterday) groups.yesterday.push(n);
-    else if (day >= weekAgo)   groups.week.push(n);
-    else                       groups.older.push(n);
+    else if (day >= weekAgo) groups.week.push(n);
+    else groups.older.push(n);
   }
   return groups;
 }
@@ -68,11 +132,11 @@ function groupByDay(notifs) {
 function fmtTime(iso) {
   const d = new Date(iso);
   const min = Math.floor((Date.now() - d.getTime()) / 60000);
-  if (min < 1)  return "à l'instant";
+  if (min < 1) return "à l'instant";
   if (min < 60) return `il y a ${min} min`;
   const h = Math.floor(min / 60);
-  if (h < 24)   return `il y a ${h}h`;
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  if (h < 24) return `il y a ${h}h`;
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
 // ─── CSS ──────────────────────────────────────────────────────
@@ -209,7 +273,7 @@ export async function mount(root, me) {
   if (!me) me = getCurUser();
   if (!me) return;
 
-  track('page.view', { page: 'notifications', role: me.role });
+  track("page.view", { page: "notifications", role: me.role });
 
   root.innerHTML = `${STYLE}
 <div class="nf2 anim-slide-up" id="nf2-root">
@@ -227,7 +291,9 @@ export async function mount(root, me) {
   </div>
 </div>`;
 
-  root.querySelector('#nf2-back')?.addEventListener('click', () => navigate('/'));
+  root
+    .querySelector("#nf2-back")
+    ?.addEventListener("click", () => navigate("/"));
 
   await loadNotifs(root, me);
   wirePullToRefresh(root, me);
@@ -235,57 +301,62 @@ export async function mount(root, me) {
 
 // ─── Load & render ────────────────────────────────────────────
 async function loadNotifs(root, me) {
-  const content = root.querySelector('#nf2-content');
+  const content = root.querySelector("#nf2-content");
   if (!content) return;
 
   const { data, error } = await sb
-    .from('notifications')
-    .select('id, type, title, body, data, read, created_at')
-    .eq('user_id', me.id)
-    .order('created_at', { ascending: false })
+    .from("notifications")
+    .select("id, type, title, body, data, read, created_at")
+    .eq("user_id", me.id)
+    .order("created_at", { ascending: false })
     .limit(60);
 
   if (error) {
-    toast('Impossible de charger les notifications', 'error');
-    content.innerHTML = `<div class="nf2-empty"><div class="nf2-empty-ico">${icon('alert-triangle',{size:28})}</div><div class="nf2-empty-title">Erreur de chargement</div><div class="nf2-empty-sub">Vérifie ta connexion et réessaie.</div></div>`;
+    toast("Impossible de charger les notifications", "error");
+    content.innerHTML = `<div class="nf2-empty"><div class="nf2-empty-ico">${icon("alert-triangle", { size: 28 })}</div><div class="nf2-empty-title">Erreur de chargement</div><div class="nf2-empty-sub">Vérifie ta connexion et réessaie.</div></div>`;
     return;
   }
 
   const notifs = data || [];
-  const unreadCount = notifs.filter(n => !n.read).length;
+  const unreadCount = notifs.filter((n) => !n.read).length;
 
   // Update badge
-  const badge = root.querySelector('#nf2-badge');
+  const badge = root.querySelector("#nf2-badge");
   if (badge) {
-    badge.style.display = unreadCount > 0 ? '' : 'none';
-    badge.textContent = unreadCount > 0 ? `${unreadCount} non lue${unreadCount > 1 ? 's' : ''}` : '';
+    badge.style.display = unreadCount > 0 ? "" : "none";
+    badge.textContent =
+      unreadCount > 0
+        ? `${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`
+        : "";
   }
 
   // Update mark-all
-  const markAll = root.querySelector('#nf2-mark-all');
+  const markAll = root.querySelector("#nf2-mark-all");
   if (markAll) markAll.disabled = unreadCount === 0;
 
   if (notifs.length === 0) {
     const cta = `<button class="nf2-empty-cta" id="nf2-back-home">← Retour à l'accueil</button>`;
     content.innerHTML = emptyState({
-      image: '/skins/empty-states/empty_notifications.png',
-      title: 'Aucune notification',
-      body: 'Tu es à jour ! Reviens plus tard.',
+      image: "/skins/empty-states/empty_notifications.png",
+      title: "Aucune notification",
+      body: "Tu es à jour ! Reviens plus tard.",
       cta,
     });
-    root.querySelector('#nf2-back-home')?.addEventListener('click', () => navigate('/'));
+    root
+      .querySelector("#nf2-back-home")
+      ?.addEventListener("click", () => navigate("/"));
     return;
   }
 
   const groups = groupByDay(notifs);
   const groupDefs = [
-    { key: 'today',     label: "Aujourd'hui" },
-    { key: 'yesterday', label: 'Hier' },
-    { key: 'week',      label: 'Cette semaine' },
-    { key: 'older',     label: 'Plus ancien' },
+    { key: "today", label: "Aujourd'hui" },
+    { key: "yesterday", label: "Hier" },
+    { key: "week", label: "Cette semaine" },
+    { key: "older", label: "Plus ancien" },
   ];
 
-  let html = '';
+  let html = "";
   for (const { key, label } of groupDefs) {
     if (!groups[key].length) continue;
     html += `<div class="nf2-group-label">${label}</div><div class="nf2-list">`;
@@ -297,11 +368,11 @@ async function loadNotifs(root, me) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             Suppr.
           </div>
-          <div class="nf2-item ${n.read ? '' : 'unread'}" data-id="${esc(n.id)}" data-read="${n.read}" data-route="${esc(notifRoute(n))}">
-            <div class="nf2-item-ico" style="background:${m.bg};color:${m.color}">${_icon(m.iconName, { size: 18 })}</div>
+          <div class="nf2-item ${n.read ? "" : "unread"}" data-id="${esc(n.id)}" data-read="${n.read}" data-route="${esc(notifRoute(n))}">
+            <div class="nf2-item-ico" style="background:${m.bg};color:${m.color}">${icon(m.iconName, { size: 18 })}</div>
             <div class="nf2-item-body">
               <div class="nf2-item-title">${esc(n.title)}</div>
-              ${n.body ? `<div class="nf2-item-desc">${esc(n.body)}</div>` : ''}
+              ${n.body ? `<div class="nf2-item-desc">${esc(n.body)}</div>` : ""}
               <div class="nf2-item-time">${fmtTime(n.created_at)}</div>
             </div>
           </div>
@@ -319,92 +390,101 @@ function wireItems(root, me, initialUnread) {
   let unreadCount = initialUnread;
 
   const updateBadge = () => {
-    const badge = root.querySelector('#nf2-badge');
+    const badge = root.querySelector("#nf2-badge");
     if (badge) {
-      badge.style.display = unreadCount > 0 ? '' : 'none';
-      badge.textContent = unreadCount > 0 ? `${unreadCount} non lue${unreadCount > 1 ? 's' : ''}` : '';
+      badge.style.display = unreadCount > 0 ? "" : "none";
+      badge.textContent =
+        unreadCount > 0
+          ? `${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`
+          : "";
     }
-    const markAll = root.querySelector('#nf2-mark-all');
+    const markAll = root.querySelector("#nf2-mark-all");
     if (markAll) markAll.disabled = unreadCount === 0;
   };
 
   // Mark single as read + navigate
-  root.querySelectorAll('.nf2-item').forEach(el => {
-    el.addEventListener('click', async () => {
-      haptic('select');
+  root.querySelectorAll(".nf2-item").forEach((el) => {
+    el.addEventListener("click", async () => {
+      haptic("select");
       const id = el.dataset.id;
       const route = el.dataset.route;
-      if (el.dataset.read === 'false') {
-        el.dataset.read = 'true';
-        el.classList.remove('unread');
+      if (el.dataset.read === "false") {
+        el.dataset.read = "true";
+        el.classList.remove("unread");
         unreadCount = Math.max(0, unreadCount - 1);
         updateBadge();
-        Promise.resolve(sb.rpc('mark_notif_read', { p_notif_id: id })).catch(() => {});
-        track('notification.read', { notif_id: id });
+        Promise.resolve(sb.rpc("mark_notif_read", { p_notif_id: id })).catch(
+          () => {},
+        );
+        track("notification.read", { notif_id: id });
       }
-      if (route && route !== '#/') {
+      if (route && route !== "#/") {
         navigate(route);
       }
     });
   });
 
   // Mark all
-  const markAllBtn = root.querySelector('#nf2-mark-all');
+  const markAllBtn = root.querySelector("#nf2-mark-all");
   if (markAllBtn) {
-    markAllBtn.addEventListener('click', async () => {
+    markAllBtn.addEventListener("click", async () => {
       markAllBtn.disabled = true;
-      markAllBtn.textContent = '…';
-      const { error } = await sb.rpc('mark_all_notifs_read');
+      markAllBtn.textContent = "…";
+      const { error } = await sb.rpc("mark_all_notifs_read");
       if (error) {
-        toast('Erreur de mise à jour', 'error');
+        toast("Erreur de mise à jour", "error");
         markAllBtn.disabled = false;
-        markAllBtn.textContent = 'Tout lu';
+        markAllBtn.textContent = "Tout lu";
         return;
       }
-      root.querySelectorAll('.nf2-item.unread').forEach(el => { el.classList.remove('unread'); el.dataset.read = 'true'; });
+      root.querySelectorAll(".nf2-item.unread").forEach((el) => {
+        el.classList.remove("unread");
+        el.dataset.read = "true";
+      });
       unreadCount = 0;
       updateBadge();
-      markAllBtn.textContent = 'Tout lu';
-      toast('Toutes les notifications lues', 'success', 2000);
-      track('notifications.mark_all_read', {});
+      markAllBtn.textContent = "Tout lu";
+      toast("Toutes les notifications lues", "success", 2000);
+      track("notifications.mark_all_read", {});
     });
   }
 
   // Swipe to delete
-  root.querySelectorAll('.nf2-item-wrap').forEach(wrap => {
+  root.querySelectorAll(".nf2-item-wrap").forEach((wrap) => {
     wireSwipeDelete(wrap, async () => {
-      haptic('warning');
+      haptic("warning");
       const id = wrap.dataset.id;
-      const undoEl = document.createElement('div');
-      undoEl.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font:600 13px/1 Inter,sans-serif;z-index:999;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)';
+      const undoEl = document.createElement("div");
+      undoEl.style.cssText =
+        "position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font:600 13px/1 Inter,sans-serif;z-index:999;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)";
       undoEl.innerHTML = `<span>Notification supprimée</span><button style="background:none;border:none;color:var(--a);font:700 12px/1 Inter,sans-serif;cursor:pointer;padding:0">Annuler</button>`;
       document.body.appendChild(undoEl);
 
       let undone = false;
-      undoEl.querySelector('button')?.addEventListener('click', () => {
+      undoEl.querySelector("button")?.addEventListener("click", () => {
         undone = true;
         undoEl.remove();
-        wrap.style.height = '';
-        wrap.style.overflow = '';
-        wrap.querySelector('.nf2-item').style.transform = '';
-        wrap.style.opacity = '';
-        track('notification.delete_undone', { notif_id: id });
+        wrap.style.height = "";
+        wrap.style.overflow = "";
+        wrap.querySelector(".nf2-item").style.transform = "";
+        wrap.style.opacity = "";
+        track("notification.delete_undone", { notif_id: id });
       });
 
       setTimeout(async () => {
         undoEl.remove();
         if (undone) return;
-        wrap.style.transition = 'height .3s ease, opacity .3s ease';
-        wrap.style.height = '0';
-        wrap.style.opacity = '0';
-        wrap.style.overflow = 'hidden';
-        await sb.from('notifications').delete().eq('id', id);
+        wrap.style.transition = "height .3s ease, opacity .3s ease";
+        wrap.style.height = "0";
+        wrap.style.opacity = "0";
+        wrap.style.overflow = "hidden";
+        await sb.from("notifications").delete().eq("id", id);
         setTimeout(() => wrap.remove(), 350);
-        if (wrap.querySelector('.nf2-item.unread')) {
+        if (wrap.querySelector(".nf2-item.unread")) {
           unreadCount = Math.max(0, unreadCount - 1);
           updateBadge();
         }
-        track('notification.deleted', { notif_id: id });
+        track("notification.deleted", { notif_id: id });
       }, 3000);
     });
   });
@@ -412,54 +492,74 @@ function wireItems(root, me, initialUnread) {
 
 // ─── Swipe-to-delete logic ────────────────────────────────────
 function wireSwipeDelete(wrap, onDelete) {
-  const item = wrap.querySelector('.nf2-item');
+  const item = wrap.querySelector(".nf2-item");
   if (!item) return;
   const THRESHOLD = 64;
-  let startX = 0, curX = 0, swiping = false;
-
-  item.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX;
-    curX = 0;
-    swiping = true;
-  }, { passive: true });
-
-  item.addEventListener('touchmove', e => {
-    if (!swiping) return;
-    const dx = e.touches[0].clientX - startX;
-    if (dx > 0) { swiping = false; return; } // only left swipe
-    curX = Math.max(-80, dx);
-    item.style.transition = 'none';
-    item.style.transform = `translateX(${curX}px)`;
-  }, { passive: true });
-
-  item.addEventListener('touchend', () => {
-    if (!swiping) return;
+  let startX = 0,
+    curX = 0,
     swiping = false;
-    if (curX <= -THRESHOLD) {
-      item.style.transition = 'transform .25s cubic-bezier(.32,.72,0,1)';
-      item.style.transform = 'translateX(-80px)';
-      // Tap on delete bg
-      const deleteBg = wrap.querySelector('.nf2-delete-bg');
-      if (deleteBg) {
-        deleteBg.addEventListener('click', onDelete, { once: true });
-        // Auto-delete after 400ms if not tapped
-        setTimeout(() => {
-          if (!wrap.parentNode) return;
-          item.style.transition = 'transform .2s ease';
-          item.style.transform = '';
-        }, 3000);
+
+  item.addEventListener(
+    "touchstart",
+    (e) => {
+      startX = e.touches[0].clientX;
+      curX = 0;
+      swiping = true;
+    },
+    { passive: true },
+  );
+
+  item.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!swiping) return;
+      const dx = e.touches[0].clientX - startX;
+      if (dx > 0) {
+        swiping = false;
+        return;
+      } // only left swipe
+      curX = Math.max(-80, dx);
+      item.style.transition = "none";
+      item.style.transform = `translateX(${curX}px)`;
+    },
+    { passive: true },
+  );
+
+  item.addEventListener(
+    "touchend",
+    () => {
+      if (!swiping) return;
+      swiping = false;
+      if (curX <= -THRESHOLD) {
+        item.style.transition = "transform .25s cubic-bezier(.32,.72,0,1)";
+        item.style.transform = "translateX(-80px)";
+        // Tap on delete bg
+        const deleteBg = wrap.querySelector(".nf2-delete-bg");
+        if (deleteBg) {
+          deleteBg.addEventListener("click", onDelete, { once: true });
+          // Auto-delete after 400ms if not tapped
+          setTimeout(() => {
+            if (!wrap.parentNode) return;
+            item.style.transition = "transform .2s ease";
+            item.style.transform = "";
+          }, 3000);
+        }
+      } else {
+        item.style.transition = "transform .2s cubic-bezier(.23,1,.32,1)";
+        item.style.transform = "";
       }
-    } else {
-      item.style.transition = 'transform .2s cubic-bezier(.23,1,.32,1)';
-      item.style.transform = '';
-    }
-  }, { passive: true });
+    },
+    { passive: true },
+  );
 
   // Tap delete bg directly
-  const deleteBg = wrap.querySelector('.nf2-delete-bg');
+  const deleteBg = wrap.querySelector(".nf2-delete-bg");
   if (deleteBg) {
-    deleteBg.addEventListener('click', () => {
-      if (parseFloat(item.style.transform?.replace('translateX(','') ?? '0') < -THRESHOLD) {
+    deleteBg.addEventListener("click", () => {
+      if (
+        parseFloat(item.style.transform?.replace("translateX(", "") ?? "0") <
+        -THRESHOLD
+      ) {
         onDelete();
       }
     });
@@ -468,39 +568,52 @@ function wireSwipeDelete(wrap, onDelete) {
 
 // ─── Pull-to-refresh ──────────────────────────────────────────
 function wirePullToRefresh(root, me) {
-  const scrollEl = root.querySelector('.nf2') || root;
-  const ptr = root.querySelector('#nf2-ptr');
+  const scrollEl = root.querySelector(".nf2") || root;
+  const ptr = root.querySelector("#nf2-ptr");
   if (!ptr) return;
 
-  let startY = 0, pulling = false;
+  let startY = 0,
+    pulling = false;
   const THRESHOLD = 60;
 
-  scrollEl.addEventListener('touchstart', e => {
-    if (window.scrollY <= 0) {
-      startY = e.touches[0].clientY;
-      pulling = true;
-    }
-  }, { passive: true });
+  scrollEl.addEventListener(
+    "touchstart",
+    (e) => {
+      if (window.scrollY <= 0) {
+        startY = e.touches[0].clientY;
+        pulling = true;
+      }
+    },
+    { passive: true },
+  );
 
-  scrollEl.addEventListener('touchmove', e => {
-    if (!pulling) return;
-    const dy = e.touches[0].clientY - startY;
-    if (dy > 10 && window.scrollY <= 0) {
-      ptr.classList.add('visible');
-    }
-  }, { passive: true });
+  scrollEl.addEventListener(
+    "touchmove",
+    (e) => {
+      if (!pulling) return;
+      const dy = e.touches[0].clientY - startY;
+      if (dy > 10 && window.scrollY <= 0) {
+        ptr.classList.add("visible");
+      }
+    },
+    { passive: true },
+  );
 
-  scrollEl.addEventListener('touchend', async () => {
-    if (!pulling) return;
-    pulling = false;
-    if (!ptr.classList.contains('visible')) return;
+  scrollEl.addEventListener(
+    "touchend",
+    async () => {
+      if (!pulling) return;
+      pulling = false;
+      if (!ptr.classList.contains("visible")) return;
 
-    haptic('select');
-    track('notifications.pull_refreshed', {});
-    await loadNotifs(root, me);
-    wireItems(root, me, root.querySelectorAll('.nf2-item.unread').length);
-    ptr.classList.remove('visible');
-  }, { passive: true });
+      haptic("select");
+      track("notifications.pull_refreshed", {});
+      await loadNotifs(root, me);
+      wireItems(root, me, root.querySelectorAll(".nf2-item.unread").length);
+      ptr.classList.remove("visible");
+    },
+    { passive: true },
+  );
 }
 
 // ─── Skeleton helper (inline fallback) ────────────────────────

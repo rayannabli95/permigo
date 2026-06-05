@@ -3,9 +3,9 @@
 // Condition : profiles.first_value_action_at IS NULL
 // Appeler : showOnboarding(userId, onDone)
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
+import { sb } from "@/auth/auth.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
 
 const SLIDES = [
   {
@@ -19,23 +19,27 @@ const SLIDES = [
       <circle cx="40" cy="40" r="38" fill="url(#ob1g)" opacity="0.1"/>
       <text x="40" y="54" text-anchor="middle" font-size="36">🛣️</text>
     </svg>`,
-    title: 'Bienvenue dans PermiGo',
-    body: 'L\'app qui transforme l\'apprentissage du permis en habitude quotidienne.',
-    accent: 'var(--a)',
+    title: "Bienvenue dans PermiGo",
+    body: "L'app qui transforme l'apprentissage du permis en habitude quotidienne.",
+    accent: "var(--a)",
   },
   {
     illo: `<div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:4px 0">
-      ${['Leçon', 'Quiz', 'Maîtrise'].map((l, i) => `
+      ${["Leçon", "Quiz", "Maîtrise"]
+        .map(
+          (l, i) => `
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
-          <div style="width:52px;height:52px;border-radius:14px;background:${['rgba(88,204,2,.12)','rgba(16,185,129,.12)','rgba(245,158,11,.12)'][i]};display:flex;align-items:center;justify-content:center;font-size:22px">${['📖','⚡','🏆'][i]}</div>
+          <div style="width:52px;height:52px;border-radius:14px;background:${["rgba(88,204,2,.12)", "rgba(16,185,129,.12)", "rgba(245,158,11,.12)"][i]};display:flex;align-items:center;justify-content:center;font-size:22px">${["📖", "⚡", "🏆"][i]}</div>
           <span style="font:700 10px/1 'Inter',sans-serif;color:var(--mu3);letter-spacing:.04em;text-transform:uppercase">${l}</span>
         </div>
-        ${i < 2 ? `<div style="font:700 18px/1 'Plus Jakarta Sans',sans-serif;color:#d1d8ee">→</div>` : ''}
-      `).join('')}
+        ${i < 2 ? `<div style="font:700 18px/1 'Plus Jakarta Sans',sans-serif;color:#d1d8ee">→</div>` : ""}
+      `,
+        )
+        .join("")}
     </div>`,
-    title: 'Ton enseignant valide,\ntoi tu joues.',
-    body: 'Après chaque leçon, ton enseignant valide tes compétences. Tu reçois un quiz express pour ancrer ce que tu viens d\'apprendre.',
-    accent: 'var(--gr)',
+    title: "Ton enseignant valide,\ntoi tu joues.",
+    body: "Après chaque leçon, ton enseignant valide tes compétences. Tu reçois un quiz express pour ancrer ce que tu viens d'apprendre.",
+    accent: "var(--gr)",
   },
   {
     illo: `<div style="display:flex;flex-direction:column;align-items:center;gap:6px">
@@ -54,9 +58,9 @@ const SLIDES = [
       <div style="font:800 36px/1 'Plus Jakarta Sans',sans-serif;background:linear-gradient(135deg, var(--a), var(--adk));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.04em">12 jours</div>
       <div style="font:500 13px/1 'Inter',sans-serif;color:var(--mu3)">de série continue</div>
     </div>`,
-    title: 'La régularité fait\nla différence.',
-    body: 'Plus tu t\'entraînes chaque jour, plus ton cerveau mémorise. Lance ta première série et bats ton record !',
-    accent: 'var(--am)',
+    title: "La régularité fait\nla différence.",
+    body: "Plus tu t'entraînes chaque jour, plus ton cerveau mémorise. Lance ta première série et bats ton record !",
+    accent: "var(--am)",
   },
 ];
 
@@ -178,13 +182,13 @@ const STYLE = `
 export function showOnboarding(userId, onDone) {
   let idx = 0;
 
-  const overlay = document.createElement('div');
-  overlay.className = 'ob-overlay';
-  overlay.setAttribute('role', 'dialog');
-  overlay.setAttribute('aria-modal', 'true');
-  overlay.setAttribute('aria-label', 'Bienvenue dans PermiGo');
+  const overlay = document.createElement("div");
+  overlay.className = "ob-overlay";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-label", "Bienvenue dans PermiGo");
 
-  const styleEl = document.createElement('style');
+  const styleEl = document.createElement("style");
   styleEl.textContent = STYLE;
   document.head.appendChild(styleEl);
 
@@ -195,23 +199,23 @@ export function showOnboarding(userId, onDone) {
       <div class="ob-handle"></div>
       <div id="ob-slide-wrap"></div>
       <div class="ob-dots" id="ob-dots">
-        ${SLIDES.map((_, i) => `<div class="ob-dot ${i === 0 ? 'active' : ''}"></div>`).join('')}
+        ${SLIDES.map((_, i) => `<div class="ob-dot ${i === 0 ? "active" : ""}"></div>`).join("")}
       </div>
       <button class="ob-btn" id="ob-next">Suivant →</button>
       <button class="ob-skip" id="ob-skip">Passer</button>
     </div>
   `;
 
-  const sheet     = overlay.querySelector('#ob-sheet');
-  const slideWrap = overlay.querySelector('#ob-slide-wrap');
-  const dotsEl    = overlay.querySelector('#ob-dots');
-  const accentBar = overlay.querySelector('#ob-accent-bar');
-  const btnNext   = overlay.querySelector('#ob-next');
-  const btnSkip   = overlay.querySelector('#ob-skip');
+  const sheet = overlay.querySelector("#ob-sheet");
+  const slideWrap = overlay.querySelector("#ob-slide-wrap");
+  const dotsEl = overlay.querySelector("#ob-dots");
+  const accentBar = overlay.querySelector("#ob-accent-bar");
+  const btnNext = overlay.querySelector("#ob-next");
+  const btnSkip = overlay.querySelector("#ob-skip");
 
   function updateDots() {
-    dotsEl.querySelectorAll('.ob-dot').forEach((d, i) => {
-      d.classList.toggle('active', i === idx);
+    dotsEl.querySelectorAll(".ob-dot").forEach((d, i) => {
+      d.classList.toggle("active", i === idx);
     });
   }
 
@@ -220,58 +224,71 @@ export function showOnboarding(userId, onDone) {
     const isLast = idx === SLIDES.length - 1;
 
     // Animate in new content (class reset via re-creating the element)
-    const div = document.createElement('div');
-    div.className = 'ob-slide';
+    const div = document.createElement("div");
+    div.className = "ob-slide";
     div.innerHTML = `
       <div class="ob-illo">${slide.illo}</div>
       <div class="ob-title">${esc(slide.title)}</div>
       <div class="ob-body">${esc(slide.body)}</div>
     `;
 
-    slideWrap.innerHTML = '';
+    slideWrap.innerHTML = "";
     slideWrap.appendChild(div);
 
     // Sync accent color
-    sheet.style.setProperty('--ob-accent', slide.accent);
+    sheet.style.setProperty("--ob-accent", slide.accent);
 
     // Btn label
-    btnNext.textContent = isLast ? 'C\'est parti ! 🚀' : 'Suivant →';
+    btnNext.textContent = isLast ? "C'est parti !" : "Suivant →";
 
     // Hide skip on last slide
-    btnSkip.style.display = isLast ? 'none' : '';
+    btnSkip.style.display = isLast ? "none" : "";
 
     updateDots();
   }
 
-  btnNext.addEventListener('click', () => {
-    track('onboarding.slide_next', { slide: idx });
+  btnNext.addEventListener("click", () => {
+    track("onboarding.slide_next", { slide: idx });
     const isLast = idx === SLIDES.length - 1;
     if (isLast) finish();
-    else { idx++; renderSlideContent(); }
+    else {
+      idx++;
+      renderSlideContent();
+    }
   });
 
-  btnSkip.addEventListener('click', () => {
-    track('onboarding.skipped', { at_slide: idx });
+  btnSkip.addEventListener("click", () => {
+    track("onboarding.skipped", { at_slide: idx });
     finish();
   });
 
   async function finish() {
-    track('onboarding.completed', { slides_seen: idx + 1 });
+    track("onboarding.completed", { slides_seen: idx + 1 });
 
     // Slide sheet down, fade overlay
-    sheet.classList.add('ob-closing');
-    overlay.style.transition = 'opacity .25s';
-    setTimeout(() => { overlay.style.opacity = '0'; }, 50);
-    setTimeout(() => { overlay.remove(); styleEl.remove(); }, 320);
+    sheet.classList.add("ob-closing");
+    overlay.style.transition = "opacity .25s";
+    setTimeout(() => {
+      overlay.style.opacity = "0";
+    }, 50);
+    setTimeout(() => {
+      overlay.remove();
+      styleEl.remove();
+    }, 320);
 
     if (userId) {
       try {
-        const { error } = await sb.from('profiles')
+        const { error } = await sb
+          .from("profiles")
           .update({ first_value_action_at: new Date().toISOString() })
-          .eq('id', userId);
-        if (error) console.warn('[onboarding] update first_value_action_at failed', error);
+          .eq("id", userId);
+        if (error)
+          console.warn(
+            "[onboarding] update first_value_action_at failed",
+            error,
+          );
       } catch (e) {
-        console.warn('[onboarding] finish update failed', e);
+        console.warn("[onboarding] finish update failed", e);
       }
     }
     onDone?.();

@@ -7,6 +7,7 @@
 import { sb } from "@/auth/auth.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
+import { icon } from "@/utils/icons.js";
 
 const BADGE = "/skins/avatars/permigo-badge-icon.png";
 
@@ -107,19 +108,19 @@ export function mount(root) {
       <h2 class="lp-h2">Ce que PermiGo apporte à ton auto-école</h2>
       <div class="lp-feat">
         <div class="lp-feat-row">
-          <div class="lp-feat-ic">🎮</div>
+          <div class="lp-feat-ic">${icon("map", { size: 28, strokeWidth: 1.5 })}</div>
           <div><h3>Un parcours qui accroche</h3><p>Le programme officiel REMC (31 compétences) transformé en aventure : mondes à débloquer, quiz éclair, streaks quotidiens et récompenses. Tes élèves reviennent tous les jours.</p></div>
         </div>
         <div class="lp-feat-row">
-          <div class="lp-feat-ic">🏆</div>
+          <div class="lp-feat-ic">${icon("trophy", { size: 28, strokeWidth: 1.5 })}</div>
           <div><h3>Un classement qui motive les moniteurs</h3><p>Classement local (au sein de ton école) et national. Tes enseignants se challengent, et leur travail devient enfin visible et valorisé.</p></div>
         </div>
         <div class="lp-feat-row">
-          <div class="lp-feat-ic">✅</div>
+          <div class="lp-feat-ic">${icon("check-circle", { size: 28, strokeWidth: 1.5 })}</div>
           <div><h3>Une validation simple et fiable</h3><p>Le moniteur valide les compétences en séance, en deux taps. Le livret REMC numérique se met à jour tout seul — fini le papier.</p></div>
         </div>
         <div class="lp-feat-row">
-          <div class="lp-feat-ic">📊</div>
+          <div class="lp-feat-ic">${icon("bar-chart-2", { size: 28, strokeWidth: 1.5 })}</div>
           <div><h3>Une vision claire pour toi</h3><p>En tant que gérant, tu vois la progression de toute ton école, l'activité de chaque moniteur et chaque élève, en temps réel.</p></div>
         </div>
       </div>
@@ -568,8 +569,8 @@ const STYLE = `<style>
   .lp-feat { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
   .lp-feat-row { display: flex; gap: 18px; align-items: flex-start; background: #fff; border: 1px solid var(--lp-line);
     border-radius: 18px; padding: 22px; color: var(--lp-ink); }
-  .lp-feat-ic { font-size: 30px; flex: 0 0 auto; width: 56px; height: 56px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center; background: rgba(99,102,241,.08); }
+  .lp-feat-ic { flex: 0 0 auto; width: 56px; height: 56px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center; background: rgba(99,102,241,.08); color: #6366f1; }
   .lp-feat-row h3 { font: 700 19px/1.2 'Plus Jakarta Sans'; margin: 4px 0 6px; color: var(--lp-ink); }
   .lp-feat-row p { font: 400 15px/1.55 'Inter'; color: var(--lp-mut); margin: 0; }
 
