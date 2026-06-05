@@ -65,7 +65,7 @@ ${LEAGUE_CSS}
 .clt-mepill-ico { font-size: 15px; }
 .clt-tabs { display: flex; gap: 6px; margin-top: 12px; }
 .clt-tab {
-  flex: 1; min-height: 38px; padding: 9px 6px;
+  flex: 1; min-height: 44px; padding: 9px 6px;
   background: var(--su); border: 1px solid var(--bo); border-radius: 10px;
   color: var(--mu2); font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; transition: background .15s, color .15s, border-color .15s;
