@@ -1,29 +1,29 @@
 // ═══════════════════════════════════════════════════════════════
 // Daily Quests — quêtes du jour élève
-// RPC : get_today_quests() → [{ id, title, category, xp_reward, gem_reward, progress, target, completed }]
-// RPC : claim_quest({ p_quest_id }) → { xp_gained, gem_gained }
+// RPC : get_today_quests() → [{ quest_id, title, progress, target, completed, claimed, reward_xp, reward_gemmes }]
+// RPC : claim_quest({ p_quest_id }) → { xp_gained, gemmes_gained }
 // Usage : mountDailyQuests(root) — inject avant .streak-pro
 // ═══════════════════════════════════════════════════════════════
-import { sb }    from '@/auth/auth.js';
-import { esc }   from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { icon }  from '@/utils/icons.js';
-import { toast } from '@/components/common/toast.js';
-import { playStar } from '@/utils/sound.js';
+import { sb } from "@/auth/auth.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { icon } from "@/utils/icons.js";
+import { toast } from "@/components/common/toast.js";
+import { playStar } from "@/utils/sound.js";
 
-const STYLE_ID = 'daily-quests-style';
+const STYLE_ID = "daily-quests-style";
 
 const CAT_CFG = {
-  quiz:       { ico: 'brain',   color: 'var(--a)' },
-  streak:     { ico: 'flame',   color: 'var(--or)' },
-  competence: { ico: 'award',   color: 'var(--gr2)' },
-  session:    { ico: 'map-pin', color: 'var(--blk)' },
-  default:    { ico: 'zap',     color: 'var(--a)' },
+  quiz: { ico: "brain", color: "var(--a)" },
+  streak: { ico: "flame", color: "var(--or)" },
+  competence: { ico: "award", color: "var(--gr2)" },
+  session: { ico: "map-pin", color: "var(--blk)" },
+  default: { ico: "zap", color: "var(--a)" },
 };
 
 function ensureStyle() {
   if (document.head.querySelector(`#${STYLE_ID}`)) return;
-  const s = document.createElement('style');
+  const s = document.createElement("style");
   s.id = STYLE_ID;
   s.textContent = `
   .dq-section { margin-bottom: 12px; }
@@ -135,120 +135,146 @@ function ensureStyle() {
 export async function mountDailyQuests(root) {
   let quests = [];
   try {
-    const { data, error } = await sb.rpc('get_today_quests');
+    const { data, error } = await sb.rpc("get_today_quests");
     if (error || data?.error) return;
     quests = Array.isArray(data) ? data : [];
   } catch (e) {
-    console.warn('[daily-quests] fetch error', e);
+    console.warn("[daily-quests] fetch error", e);
     return;
   }
 
   // Hide section if every quest is already claimed (réclamée, pas juste complétée)
-  if (quests.length === 0 || quests.every(q => q.claimed)) return;
+  if (quests.length === 0 || quests.every((q) => q.claimed)) return;
 
   ensureStyle();
-  track('daily_quests.shown', { count: quests.length });
+  track("daily_quests.shown", { count: quests.length });
 
-  const section = document.createElement('div');
-  section.className = 'dq-section';
+  const section = document.createElement("div");
+  section.className = "dq-section";
   section.innerHTML = renderSection(quests);
 
   // Inject avant .streak-pro
-  const streakEl = root.querySelector('.streak-pro') || root.querySelector('#streak-card');
+  const streakEl =
+    root.querySelector(".streak-pro") || root.querySelector("#streak-card");
   if (streakEl) streakEl.parentNode.insertBefore(section, streakEl);
   else root.appendChild(section);
 
   // Wire "ready" cards only
-  section.querySelectorAll('.dq-card--ready').forEach(card => {
+  section.querySelectorAll(".dq-card--ready").forEach((card) => {
     const questId = card.dataset.questId;
-    const quest   = quests.find(q => q.id === questId);
+    const quest = quests.find((q) => q.quest_id === questId);
     if (!quest) return;
 
     const handler = async () => {
       if (card.dataset.claiming) return;
-      card.dataset.claiming = '1';
+      card.dataset.claiming = "1";
 
       try {
-        const { data, error } = await sb.rpc('claim_quest', { p_quest_id: questId });
+        const { data, error } = await sb.rpc("claim_quest", {
+          p_quest_id: questId,
+        });
         if (error || data?.error) {
-          toast('Quête introuvable', 'error');
+          toast("Quête introuvable", "error");
           delete card.dataset.claiming;
           return;
         }
 
-        const xpGained  = data?.xp_gained  ?? quest.xp_reward  ?? 0;
-        const gemGained = data?.gem_gained ?? quest.gem_reward ?? 0;
+        const xpGained = data?.xp_gained ?? quest.reward_xp ?? 0;
+        const gemGained = data?.gemmes_gained ?? quest.reward_gemmes ?? 0;
         playStar();
-        track('daily_quests.claimed', { quest_id: questId, xp: xpGained, gems: gemGained });
+        track("daily_quests.claimed", {
+          quest_id: questId,
+          xp: xpGained,
+          gems: gemGained,
+        });
 
         // Popup XP
         const rect = card.getBoundingClientRect();
-        const pop  = document.createElement('div');
-        pop.className = 'dq-xp-pop';
-        pop.textContent = `+${xpGained} XP${gemGained > 0 ? ` · +${gemGained} gemmes` : ''}`;
+        const pop = document.createElement("div");
+        pop.className = "dq-xp-pop";
+        pop.textContent = `+${xpGained} XP${gemGained > 0 ? ` · +${gemGained} gemmes` : ""}`;
         pop.style.cssText = `left:${rect.left + rect.width / 2}px;top:${rect.top}px`;
         document.body.appendChild(pop);
         setTimeout(() => pop.remove(), 800);
 
         // Fade out card
-        card.style.transition = 'opacity .28s ease, transform .28s ease';
-        card.style.opacity    = '0';
-        card.style.transform  = 'scale(.92)';
+        card.style.transition = "opacity .28s ease, transform .28s ease";
+        card.style.opacity = "0";
+        card.style.transform = "scale(.92)";
         setTimeout(() => {
           card.remove();
           // Remove section when no more visible cards
-          if (!section.querySelector('.dq-card')) section.remove();
+          if (!section.querySelector(".dq-card")) section.remove();
         }, 300);
-
       } catch (e) {
-        console.warn('[daily-quests] claim error', e);
+        console.warn("[daily-quests] claim error", e);
         delete card.dataset.claiming;
       }
     };
 
-    card.addEventListener('click', handler);
-    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); } });
+    card.addEventListener("click", handler);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handler();
+      }
+    });
   });
 }
 
 function renderSection(quests) {
-  const readyCount = quests.filter(q => q.completed && !q.claimed).length;
+  const readyCount = quests.filter((q) => q.completed && !q.claimed).length;
   return `
     <div class="dq-hd">
       <div class="dq-title">
-        ${icon('zap', { size: 14, strokeWidth: 2.2, color: 'var(--a)' })}
+        ${icon("zap", { size: 14, strokeWidth: 2.2, color: "var(--a)" })}
         Quêtes du jour
       </div>
-      ${readyCount > 0 ? `<span class="dq-count">${readyCount} à réclamer</span>` : ''}
+      ${readyCount > 0 ? `<span class="dq-count">${readyCount} à réclamer</span>` : ""}
     </div>
     <div class="dq-scroll">
-      ${quests.map(renderCard).join('')}
+      ${quests.map(renderCard).join("")}
     </div>
   `;
 }
 
 function renderCard(q) {
-  const pct   = q.target > 0 ? Math.min(100, Math.round((q.progress / q.target) * 100)) : 0;
-  const ready = q.completed && !q.claimed;   // objectif atteint → récompense à réclamer
-  const done  = q.claimed;                   // récompense déjà réclamée
+  const pct =
+    q.target > 0 ? Math.min(100, Math.round((q.progress / q.target) * 100)) : 0;
+  const ready = q.completed && !q.claimed; // objectif atteint → récompense à réclamer
+  const done = q.claimed; // récompense déjà réclamée
 
-  const cat      = CAT_CFG[q.category] || CAT_CFG.default;
-  const fillClr  = done ? 'var(--gr)' : ready ? 'var(--puk)' : 'var(--a)';
-  const stCls    = done ? 'dq-card--claimed' : ready ? 'dq-card--ready' : 'dq-card--pending';
+  const _catKey = q.quest_id?.startsWith("quest_quiz")
+    ? "quiz"
+    : q.quest_id?.startsWith("quest_streak")
+      ? "streak"
+      : q.quest_id?.startsWith("quest_validate")
+        ? "competence"
+        : "default";
+  const cat = CAT_CFG[_catKey];
+  const fillClr = done ? "var(--gr)" : ready ? "var(--puk)" : "var(--a)";
+  const stCls = done
+    ? "dq-card--claimed"
+    : ready
+      ? "dq-card--ready"
+      : "dq-card--pending";
 
   const badge = done
-    ? `<span class="dq-badge dq-badge--done">${icon('check', { size: 9, strokeWidth: 3 })} Fait</span>`
+    ? `<span class="dq-badge dq-badge--done">${icon("check", { size: 9, strokeWidth: 3 })} Fait</span>`
     : ready
-    ? `<span class="dq-badge dq-badge--claim">Réclamer</span>`
-    : '';
+      ? `<span class="dq-badge dq-badge--claim">Réclamer</span>`
+      : "";
 
-  const reward = q.xp_reward > 0
-    ? `+${q.xp_reward} XP${q.gem_reward > 0 ? ` · +${q.gem_reward} gemmes` : ''}`
-    : q.gem_reward > 0 ? `+${q.gem_reward} gemmes` : '';
+  const reward =
+    q.reward_xp > 0
+      ? `+${q.reward_xp} XP${q.reward_gemmes > 0 ? ` · +${q.reward_gemmes} gemmes` : ""}`
+      : q.reward_gemmes > 0
+        ? `+${q.reward_gemmes} gemmes`
+        : "";
 
   return `
-    <div class="dq-card ${stCls}" data-quest-id="${esc(String(q.id))}"
-         role="${ready ? 'button' : 'article'}" tabindex="${ready ? '0' : '-1'}"
+    <div class="dq-card ${stCls}" data-quest-id="${esc(String(q.quest_id))}"
+         role="${ready ? "button" : "article"}" tabindex="${ready ? "0" : "-1"}"
          aria-label="${esc(q.title)}">
       ${badge}
       <div class="dq-ico" style="background:${cat.color}18">

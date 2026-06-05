@@ -316,6 +316,11 @@ function selectComp(compId, compNom) {
 async function doValidate() {
   if (!_eleve || !_selectedComp) return;
 
+  // Garde-fou #1 : selectComp() bloque les comps déjà dans _validatedIds,
+  // donc ce flag est toujours true ici — on le capture explicitement pour
+  // conditionner l'affichage des gemmes et pour rester robuste si le flow change.
+  const isFirstValidation = !_validatedIds.has(_selectedComp.c);
+
   const btn = _root.querySelector(".btn-validate");
   if (btn) {
     btn.disabled = true;
@@ -374,7 +379,7 @@ async function doValidate() {
   const ini = ((prenom[0] || "") + (nom[0] || "")).toUpperCase() || "?";
   toastAvatar({
     title: `${prenom} ${nom}`.trim() + " — compétence validée",
-    sub: `${_selectedComp.c} · ${_selectedComp.n}`,
+    sub: `${_selectedComp.c} · ${_selectedComp.n}${isFirstValidation ? " · +10 gemmes" : ""}`,
     initials: ini,
     color: "var(--a)",
     type: "success",

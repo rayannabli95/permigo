@@ -5,7 +5,6 @@
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { toast } from "@/components/common/toast.js";
-import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
@@ -16,7 +15,7 @@ import {
 } from "@/components/common/empty-state.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { icon } from "@/utils/icons.js";
-import { playNotify } from "@/utils/sound.js";
+import { openInviteEleveModal } from "@/services/invite-eleve.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -647,8 +646,14 @@ function render() {
             ? _tab === "tous" && !_query
               ? emptyState({
                   image: "/skins/empty-states/empty_eleves.png",
-                  title: "Aucun élève assigné",
-                  body: "Ton gérant doit t'attribuer des élèves dans la console.",
+                  title: "Invite ton premier élève",
+                  body: "Envoie un lien d'inscription par SMS ou WhatsApp. Ton élève crée son compte en 30 secondes.",
+                  cta: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:4px">
+                    <button id="me-invite-empty-btn" style="display:inline-flex;align-items:center;gap:7px;padding:12px 22px;background:var(--a);color:#fff;border:0;border-radius:12px;font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
+                      ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter ton premier élève
+                    </button>
+                    <span style="font:500 12px/1.4 'Inter',sans-serif;color:var(--mu2);max-width:260px;text-align:center">Tu travailles en auto-école ? Tes élèves peuvent aussi être affectés par le gérant.</span>
+                  </div>`,
                 })
               : `<div class="me-empty">
                    <span class="me-empty-ico">${icon("users", { size: 30 })}</span>
@@ -734,6 +739,12 @@ function wire() {
   _root
     .querySelector("#me-invite-btn")
     ?.addEventListener("click", () => openInviteEleveModal(_me));
+
+  // Bouton CTA dans l'état vide (0 élève)
+  _root.querySelector("#me-invite-empty-btn")?.addEventListener("click", () => {
+    track("invite.empty.header.clicked");
+    openInviteEleveModal(_me);
+  });
 
   _root.querySelector("#me-fab")?.addEventListener("click", () => {
     track("fab.seance.clicked", { from: "mes_eleves" });
@@ -938,13 +949,26 @@ function renderList() {
       _tab === "tous" && !_query
         ? emptyState({
             image: "/skins/empty-states/empty_eleves.png",
-            title: "Aucun élève assigné",
-            body: "Ton gérant doit t'attribuer des élèves dans la console.",
+            title: "Invite ton premier élève",
+            body: "Envoie un lien d'inscription par SMS ou WhatsApp. Ton élève crée son compte en 30 secondes.",
+            cta: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:4px">
+              <button id="me-invite-empty-btn" style="display:inline-flex;align-items:center;gap:7px;padding:12px 22px;background:var(--a);color:#fff;border:0;border-radius:12px;font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
+                ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter ton premier élève
+              </button>
+              <span style="font:500 12px/1.4 'Inter',sans-serif;color:var(--mu2);max-width:260px;text-align:center">Tu travailles en auto-école ? Tes élèves peuvent aussi être affectés par le gérant.</span>
+            </div>`,
           })
         : `<div class="me-empty">
            <span class="me-empty-ico">${icon("users", { size: 30 })}</span>
            ${_query ? 'Aucun résultat pour <strong>"' + esc(_query) + '"</strong>.' : "Aucun élève dans cet onglet."}
          </div>`;
+    // Wire the invite button if it was just rendered
+    listEl
+      .querySelector("#me-invite-empty-btn")
+      ?.addEventListener("click", () => {
+        track("invite.empty.list.clicked");
+        openInviteEleveModal(_me);
+      });
     return;
   }
 
@@ -952,314 +976,3 @@ function renderList() {
   wireRows();
 }
 
-// ─── Modal — Inviter des élèves ───────────────────────────────────
-const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-
-function parseEmails(raw) {
-  return [
-    ...new Set(
-      raw
-        .split(/[,;\n]+/)
-        .map((s) => s.trim().toLowerCase())
-        .filter((s) => EMAIL_RE.test(s)),
-    ),
-  ];
-}
-
-function openInviteEleveModal(me) {
-  if (!me?.auto_ecole_id) {
-    toast(
-      "Ton profil ne contient pas d'auto-école — contacte le gérant.",
-      "error",
-    );
-    return;
-  }
-
-  const ov = document.createElement("div");
-  ov.style.cssText =
-    "position:fixed;inset:0;z-index:9990;background:rgba(10,13,26,.55);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;";
-  ov.innerHTML = `
-    <style>
-      @keyframes meInvSlide { from { transform:translateY(100%); } to { transform:translateY(0); } }
-      @keyframes meInvFade  { from { opacity:0; } to { opacity:1; } }
-      .me-inv-sheet {
-        width:100%; max-width:520px;
-        background:var(--su,#fff);
-        border-radius:28px 28px 0 0;
-        padding:8px 20px calc(28px + env(safe-area-inset-bottom,0px));
-        animation: meInvSlide .3s cubic-bezier(.2,.7,.3,1);
-        font-family:'Inter',sans-serif; color:var(--ink);
-        box-shadow:0 -8px 32px rgba(10,13,26,.14);
-      }
-      .me-inv-grab {
-        width:36px; height:4px; background:var(--bo);
-        border-radius:2px; margin:8px auto 18px;
-      }
-      .me-inv-title {
-        font:800 20px/1.2 'Plus Jakarta Sans',sans-serif;
-        color:var(--ink); margin:0 0 4px; letter-spacing:-.02em;
-      }
-      .me-inv-sub {
-        font:500 13px/1.5 'Inter',sans-serif; color:var(--mu,var(--mu3));
-        margin:0 0 16px;
-      }
-      .me-inv-textarea {
-        width:100%; min-height:110px; resize:vertical;
-        padding:13px 14px; box-sizing:border-box;
-        border:1.5px solid var(--bo); border-radius:14px;
-        font:500 14px/1.55 'Inter',sans-serif; color:var(--ink);
-        background:var(--bg,var(--su2));
-        transition:border-color .15s, box-shadow .15s;
-        font-family:inherit;
-      }
-      .me-inv-textarea:focus {
-        outline:0; border-color:var(--a);
-        box-shadow:0 0 0 3px rgba(88,204,2,.12);
-      }
-      .me-inv-counter {
-        font:500 12px/1 'Inter',sans-serif; color:var(--mu2);
-        margin:8px 0 18px; min-height:16px;
-      }
-      .me-inv-counter.ok { color:var(--grd); }
-      .me-inv-actions { display:flex; gap:10px; }
-      .me-inv-btn {
-        flex:1; padding:15px; border-radius:14px;
-        font:700 14px/1 'Plus Jakarta Sans',sans-serif;
-        cursor:pointer; transition:transform .12s, background .12s;
-        border:0; font-family:inherit;
-      }
-      .me-inv-btn:active { transform:scale(.97); }
-      .me-inv-cancel {
-        background:var(--bg2,var(--bg4)); color:var(--mu,var(--mu4));
-        border:1.5px solid var(--bo);
-      }
-      .me-inv-cancel:hover { background:var(--bo); }
-      .me-inv-go {
-        background:var(--a);
-        color:#fff; box-shadow:0 6px 18px -6px rgba(88,204,2,.45);
-      }
-      .me-inv-go:hover { box-shadow:0 8px 22px -6px rgba(88,204,2,.55); }
-      .me-inv-go:disabled { opacity:.35; cursor:default; box-shadow:none; }
-      /* Écran résultats */
-      .me-inv-result-ttl {
-        font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;
-        color:var(--grd); margin:0 0 16px;
-        display:flex; align-items:center; gap:8px;
-      }
-      .me-inv-link-row {
-        margin-bottom:14px; padding-bottom:14px;
-        border-bottom:1px solid var(--bo2,#eef1f7);
-      }
-      .me-inv-link-row:last-of-type { border-bottom:0; }
-      .me-inv-link-email {
-        font:600 12px/1 'Inter',sans-serif; color:var(--mu,var(--mu3));
-        text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px;
-      }
-      .me-inv-link-email.err { color:var(--rd); }
-      .me-inv-link-wrap { display:flex; gap:8px; align-items:center; }
-      .me-inv-link-input {
-        flex:1; padding:9px 12px; border-radius:10px;
-        border:1px solid var(--bo); background:var(--bg,var(--su2));
-        font:500 11.5px/1 'IBM Plex Mono',monospace; color:var(--mu,var(--mu3));
-        overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
-        cursor:text;
-      }
-      .me-inv-copy {
-        flex-shrink:0; padding:9px 14px; border-radius:10px;
-        background:rgba(88,204,2,.1); border:1px solid rgba(88,204,2,.2);
-        color:var(--a); font:600 12px/1 'Inter',sans-serif;
-        cursor:pointer; white-space:nowrap; transition:background .12s;
-      }
-      .me-inv-copy:active { background:rgba(88,204,2,.2); }
-      .me-inv-copy.copied { background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.2); color:var(--grd); }
-      .me-inv-err-msg {
-        font:500 12px/1.4 'Inter',sans-serif; color:var(--rd);
-        margin-top:4px;
-      }
-      .me-inv-close-btn {
-        width:100%; margin-top:20px; padding:15px;
-        border-radius:14px; border:0;
-        background:var(--bg2,var(--bg4)); color:var(--ink);
-        font:700 14px/1 'Plus Jakarta Sans',sans-serif;
-        cursor:pointer; font-family:inherit;
-        transition:background .12s;
-      }
-      .me-inv-close-btn:hover { background:var(--bo); }
-    </style>
-    <div class="me-inv-sheet">
-      <div class="me-inv-grab"></div>
-      <h2 class="me-inv-title">Inviter des élèves</h2>
-      <p class="me-inv-sub">
-        Colle une liste d'emails ou entre-les un par ligne.<br>
-        Chaque élève sera rattaché à toi automatiquement.
-      </p>
-      <textarea
-        class="me-inv-textarea"
-        id="me-inv-ta"
-        placeholder="cole@gmail.com&#10;paul@hotmail.fr&#10;lea.martin@yahoo.fr"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        spellcheck="false"
-      ></textarea>
-      <div class="me-inv-counter" id="me-inv-counter">Entre au moins un email valide</div>
-      <div class="me-inv-actions">
-        <button class="me-inv-btn me-inv-cancel" id="me-inv-cancel" type="button">Annuler</button>
-        <button class="me-inv-btn me-inv-go" id="me-inv-go" type="button" disabled>Inviter</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(ov);
-
-  const sheet = ov.querySelector(".me-inv-sheet");
-  const ta = ov.querySelector("#me-inv-ta");
-  const counter = ov.querySelector("#me-inv-counter");
-  const goBtn = ov.querySelector("#me-inv-go");
-
-  const close = () => {
-    sheet.style.transition = "transform .25s cubic-bezier(.4,0,1,1)";
-    sheet.style.transform = "translateY(100%)";
-    ov.style.transition = "opacity .25s";
-    ov.style.opacity = "0";
-    setTimeout(() => ov.remove(), 260);
-  };
-
-  ov.addEventListener("click", (e) => {
-    if (e.target === ov) close();
-  });
-  ov.querySelector("#me-inv-cancel").addEventListener("click", close);
-  enableSheetSwipe(sheet, close, { overlay: ov });
-
-  ta.addEventListener("input", () => {
-    const emails = parseEmails(ta.value);
-    if (emails.length === 0) {
-      counter.textContent = "Entre au moins un email valide";
-      counter.classList.remove("ok");
-      goBtn.disabled = true;
-      goBtn.textContent = "Inviter";
-    } else {
-      counter.textContent = `${emails.length} adresse${emails.length > 1 ? "s" : ""} valide${emails.length > 1 ? "s" : ""}`;
-      counter.classList.add("ok");
-      goBtn.disabled = false;
-      goBtn.textContent = `Inviter (${emails.length})`;
-    }
-  });
-
-  goBtn.addEventListener("click", async () => {
-    const emails = parseEmails(ta.value);
-    if (emails.length === 0) return;
-
-    goBtn.disabled = true;
-    goBtn.textContent = "Création…";
-    counter.classList.remove("ok");
-    counter.textContent = `Envoi en cours…`;
-
-    const results = [];
-    for (const email of emails) {
-      const invToken = crypto.randomUUID() + "-" + Date.now().toString(36);
-      const expiresAt = new Date(Date.now() + 7 * 86400_000).toISOString();
-
-      const { data: inv, error: invErr } = await sb
-        .from("invitations")
-        .insert({
-          email,
-          role: "eleve",
-          auto_ecole_id: me.auto_ecole_id,
-          enseignant_attitre_id: me.id,
-          token: invToken,
-          expires_at: expiresAt,
-        })
-        .select("id, email, token")
-        .maybeSingle();
-
-      if (invErr) {
-        const isDup = /duplicate|unique/i.test(invErr.message || "");
-        results.push({
-          email,
-          error: isDup ? "Déjà invité(e)" : invErr.message,
-        });
-        continue;
-      }
-
-      const link =
-        window.location.origin + "/#/signup?token=" + (inv?.token ?? invToken);
-      results.push({ email, link });
-
-      // Best-effort email (ne bloque pas si la Edge Function échoue)
-      try {
-        await sb.functions.invoke("send-invitation-email", {
-          body: {
-            invitation_id: inv?.id,
-            token: inv?.token ?? invToken,
-            email,
-            role: "eleve",
-          },
-        });
-      } catch {
-        /* silencieux */
-      }
-    }
-
-    // Affiche les résultats
-    const ok = results.filter((r) => r.link).length;
-    if (ok > 0) playNotify();
-    sheet.innerHTML = `
-      <div class="me-inv-grab"></div>
-      <p class="me-inv-result-ttl">
-        ${
-          ok > 0
-            ? `${icon("check-circle", { size: 18, strokeWidth: 2, color: "var(--grd)" })} ${ok} invitation${ok > 1 ? "s" : ""} créée${ok > 1 ? "s" : ""}`
-            : `${icon("alert-circle", { size: 18, strokeWidth: 2, color: "var(--rd)" })} Aucune invitation créée`
-        }
-      </p>
-      ${results
-        .map(
-          (r) => `
-        <div class="me-inv-link-row">
-          <div class="me-inv-link-email ${r.error ? "err" : ""}">${esc(r.email)}</div>
-          ${
-            r.link
-              ? `<div class="me-inv-link-wrap">
-                 <input class="me-inv-link-input" type="text" value="${esc(r.link)}" readonly />
-                 <button class="me-inv-copy" type="button" data-link="${esc(r.link)}">Copier</button>
-               </div>`
-              : `<div class="me-inv-err-msg">${esc(r.error || "Erreur inconnue")}</div>`
-          }
-        </div>
-      `,
-        )
-        .join("")}
-      <button class="me-inv-close-btn" type="button">Fermer</button>
-    `;
-
-    sheet.querySelector(".me-inv-close-btn").addEventListener("click", close);
-
-    sheet.querySelectorAll(".me-inv-copy").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const link = btn.dataset.link;
-        try {
-          await navigator.clipboard.writeText(link);
-          btn.textContent = "Copié ✓";
-          btn.classList.add("copied");
-          setTimeout(() => {
-            btn.textContent = "Copier";
-            btn.classList.remove("copied");
-          }, 2000);
-        } catch {
-          // Fallback : sélectionne le champ texte
-          const input = btn.previousElementSibling;
-          input?.select?.();
-          toast(
-            "Sélectionne le lien manuellement (clipboard indisponible)",
-            "error",
-            3500,
-          );
-        }
-      });
-    });
-
-    track("invite_eleve.created", { count: ok, total: results.length });
-  });
-
-  setTimeout(() => ta.focus(), 120);
-}
