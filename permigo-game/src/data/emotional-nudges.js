@@ -22,62 +22,117 @@
 
 export const EMOTIONAL_NUDGES = [
   // ── palier_proche ──
-  { id: 'palier_2', cat: 'palier_proche', tone: 'celebrate',
-    title: 'Tu y es presque !',
-    body: 'Plus que {n} compétences validées avant l\'étape suivante de ton parcours',
-    cta: 'Continuer', route: '#/parcours' },
-  { id: 'palier_1', cat: 'palier_proche', tone: 'urgent',
-    title: 'Une seule compétence',
-    body: 'Une seule compétence validée avant l\'étape suivante de ton parcours',
-    cta: 'Y aller', route: '#/parcours' },
+  {
+    id: "palier_2",
+    cat: "palier_proche",
+    tone: "celebrate",
+    title: "Tu y es presque !",
+    body: "Plus que {n} compétences validées avant l'étape suivante de ton parcours",
+    cta: "Continuer",
+    route: "#/parcours",
+  },
+  {
+    id: "palier_1",
+    cat: "palier_proche",
+    tone: "urgent",
+    title: "Une seule compétence",
+    body: "Une seule compétence validée avant l'étape suivante de ton parcours",
+    cta: "Y aller",
+    route: "#/parcours",
+  },
 
   // ── streak_warm ──
-  { id: 'streak_save', cat: 'streak_warm', tone: 'urgent',
-    title: 'Ta flamme s\'éteint',
-    body: 'Plus que quelques heures pour garder ta série de {streak} jours',
-    cta: 'Sauver ma série', route: '#/parcours' },
-  { id: 'streak_milestone_close', cat: 'streak_warm', tone: 'celebrate',
-    title: 'Tu touches le jalon',
-    body: 'Demain c\'est le palier {milestone} jours. Tu vas y arriver',
-    cta: 'Garder la flamme', route: '#/parcours' },
+  {
+    id: "streak_save",
+    cat: "streak_warm",
+    tone: "urgent",
+    title: "Ta flamme s'éteint",
+    body: "Plus que quelques heures pour garder ta série de {streak} jours",
+    cta: "Sauver ma série",
+    route: "#/parcours",
+  },
+  {
+    id: "streak_milestone_close",
+    cat: "streak_warm",
+    tone: "celebrate",
+    title: "Tu touches le jalon",
+    body: "Demain c'est le palier {milestone} jours. Tu vas y arriver",
+    cta: "Garder la flamme",
+    route: "#/parcours",
+  },
 
   // ── record ──
-  { id: 'record_week', cat: 'record', tone: 'celebrate',
-    title: 'Personne ne fait mieux',
-    body: 'Tu es l\'élève le plus actif cette semaine dans ton école',
-    cta: 'Voir mon profil', route: '#/profil' },
+  {
+    id: "record_week",
+    cat: "record",
+    tone: "celebrate",
+    title: "Personne ne fait mieux",
+    body: "Tu es l'élève le plus actif cette semaine dans ton école",
+    cta: "Voir mon profil",
+    route: "#/profil",
+  },
 
   // ── validation_mono ──
-  { id: 'validation_fresh', cat: 'validation_mono', tone: 'celebrate',
-    title: 'Validation !',
+  {
+    id: "validation_fresh",
+    cat: "validation_mono",
+    tone: "celebrate",
+    title: "Validation !",
     body: '{teacher_name} vient de te valider "{competence_name}"',
-    cta: 'Voir', route: '#/parcours' },
+    cta: "Voir",
+    route: "#/parcours",
+  },
 
   // ── retour ──
-  { id: 'come_back_3d', cat: 'retour', tone: 'gentle',
-    title: 'Ton parcours t\'attend',
-    body: 'Ça fait 3 jours. 5 minutes suffisent pour reprendre le rythme',
-    cta: 'Reprendre', route: '#/parcours' },
-  { id: 'come_back_7d', cat: 'retour', tone: 'warm',
-    title: 'On pense à toi',
-    body: 'Une semaine sans toi. Reviens quand tu veux, on est là',
-    cta: 'Revenir', route: '#/accueil' },
+  {
+    id: "come_back_3d",
+    cat: "retour",
+    tone: "gentle",
+    title: "Ton parcours t'attend",
+    body: "Ça fait 3 jours. 5 minutes suffisent pour reprendre le rythme",
+    cta: "Reprendre",
+    route: "#/parcours",
+  },
+  {
+    id: "come_back_7d",
+    cat: "retour",
+    tone: "warm",
+    title: "On pense à toi",
+    body: "Une semaine sans toi. Reviens quand tu veux, on est là",
+    cta: "Revenir",
+    route: "#/accueil",
+  },
 
   // ── examen_proche ──
-  { id: 'exam_30d', cat: 'examen_proche', tone: 'celebrate',
-    title: 'J-30 examen',
-    body: 'Plus qu\'un mois ! Tu en es à {acquired}/31. Continue comme ça',
-    cta: 'Mon examen', route: '#/examen' },
-  { id: 'exam_7d', cat: 'examen_proche', tone: 'urgent',
-    title: '⏰ J-7 examen',
-    body: 'Dernière semaine. Révise les compétences clés',
-    cta: 'Réviser', route: '#/parcours' },
+  {
+    id: "exam_30d",
+    cat: "examen_proche",
+    tone: "celebrate",
+    title: "J-30 examen",
+    body: "Plus qu'un mois ! Tu en es à {acquired}/31. Continue comme ça",
+    cta: "Mon examen",
+    route: "#/examen",
+  },
+  {
+    id: "exam_7d",
+    cat: "examen_proche",
+    tone: "urgent",
+    title: "J-7 examen",
+    body: "Dernière semaine. Révise les compétences clés",
+    cta: "Réviser",
+    route: "#/parcours",
+  },
 
   // ── micro_victoire ──
-  { id: 'week_summary', cat: 'micro_victoire', tone: 'celebrate',
-    title: 'Belle semaine',
-    body: 'Tu as validé {n_comp} compétences et joué {n_quiz} quiz. Bravo',
-    cta: 'Voir mon bilan', route: '#/accueil' },
+  {
+    id: "week_summary",
+    cat: "micro_victoire",
+    tone: "celebrate",
+    title: "Belle semaine",
+    body: "Tu as validé {n_comp} compétences et joué {n_quiz} quiz. Bravo",
+    cta: "Voir mon bilan",
+    route: "#/accueil",
+  },
 ];
 
 /**
@@ -87,7 +142,8 @@ export const EMOTIONAL_NUDGES = [
  *   → { title: 'Tu y es presque !', body: 'Plus que 2 compétences pour atteindre le palier 10', ... }
  */
 export function hydrate(template, vars = {}) {
-  const replace = (str) => str.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);
+  const replace = (str) =>
+    str.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);
   return {
     ...template,
     title: replace(template.title),
@@ -96,5 +152,5 @@ export function hydrate(template, vars = {}) {
 }
 
 export function findById(id) {
-  return EMOTIONAL_NUDGES.find(n => n.id === id) || null;
+  return EMOTIONAL_NUDGES.find((n) => n.id === id) || null;
 }

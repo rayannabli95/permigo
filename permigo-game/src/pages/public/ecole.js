@@ -2,11 +2,11 @@
 // Page publique — Présentation auto-école
 // Route : #/ecole/{slug}  (accès sans auth)
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { getCurUser } from '@/auth/cur-user.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { getCurUser } from "@/auth/cur-user.js";
 
 // ─── CSS ──────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -289,24 +289,42 @@ const STYLE = `<style>
 </style>`;
 
 const AVATARS_GRAD = [
-  'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,var(--blk),#155e75)',
-  'linear-gradient(135deg,var(--puk),#4c1d95)',
-  'linear-gradient(135deg,#0e7c66,#064e3b)',
-  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
-  'linear-gradient(135deg,#a16207,#713f12)',
+  "linear-gradient(135deg,#5b5bd6,#3a3a8e)",
+  "linear-gradient(135deg,var(--blk),#155e75)",
+  "linear-gradient(135deg,var(--puk),#4c1d95)",
+  "linear-gradient(135deg,#0e7c66,#064e3b)",
+  "linear-gradient(135deg,var(--rdk),#7f1d1d)",
+  "linear-gradient(135deg,#a16207,#713f12)",
 ];
 
 // Mock témoignages (données fictives MVP)
 const TEMOIGNAGES = [
-  { initials: 'LM', grad: AVATARS_GRAD[0], name: 'Léa M.', text: 'Grâce aux quiz après chaque leçon, j\'ai vraiment compris où j\'en étais. J\'ai eu le permis du premier coup !', stars: '★★★★★' },
-  { initials: 'TR', grad: AVATARS_GRAD[2], name: 'Thomas R.', text: 'Super clair de voir mes compétences validées au fil des séances. Ça motive vraiment de voir la progression.', stars: '★★★★★' },
-  { initials: 'SK', grad: AVATARS_GRAD[3], name: 'Sara K.', text: 'L\'app m\'a aidé à rester régulière. Mon moniteur voyait exactement sur quoi je devais travailler.', stars: '★★★★☆' },
+  {
+    initials: "LM",
+    grad: AVATARS_GRAD[0],
+    name: "Léa M.",
+    text: "Grâce aux quiz après chaque leçon, j'ai vraiment compris où j'en étais. J'ai eu le permis du premier coup !",
+    stars: "★★★★★",
+  },
+  {
+    initials: "TR",
+    grad: AVATARS_GRAD[2],
+    name: "Thomas R.",
+    text: "Super clair de voir mes compétences validées au fil des séances. Ça motive vraiment de voir la progression.",
+    stars: "★★★★★",
+  },
+  {
+    initials: "SK",
+    grad: AVATARS_GRAD[3],
+    name: "Sara K.",
+    text: "L'app m'a aidé à rester régulière. Mon moniteur voyait exactement sur quoi je devais travailler.",
+    stars: "★★★★☆",
+  },
 ];
 
 // ─── Entry point ─────────────────────────────────────────────
 export async function mount(root, slugOrId) {
-  track('page.view', { page: 'ecole_publique', slug: slugOrId || null });
+  track("page.view", { page: "ecole_publique", slug: slugOrId || null });
 
   // Skeleton
   root.innerHTML = `
@@ -317,7 +335,7 @@ export async function mount(root, slugOrId) {
         <div class="ec-skel" style="width:220px;height:40px;margin:0 auto 12px"></div>
         <div class="ec-skel" style="width:100px;height:18px;margin:0 auto 28px"></div>
         <div style="display:flex;gap:12px;justify-content:center">
-          ${[1,2,3].map(() => `<div class="ec-skel" style="width:80px;height:70px;border-radius:16px"></div>`).join('')}
+          ${[1, 2, 3].map(() => `<div class="ec-skel" style="width:80px;height:70px;border-radius:16px"></div>`).join("")}
         </div>
       </div>
       <div class="ec-section">
@@ -329,10 +347,10 @@ export async function mount(root, slugOrId) {
   try {
     await renderEcole(root, slugOrId);
   } catch (err) {
-    console.error('[ecole] load error', err);
+    console.error("[ecole] load error", err);
     root.innerHTML = `${STYLE}<div class="ec">
       <div class="ec-err">
-        <div class="ec-err-ico" aria-hidden="true">${icon('school',{size:34})}</div>
+        <div class="ec-err-ico" aria-hidden="true">${icon("school", { size: 34 })}</div>
         <div class="ec-err-title">École introuvable</div>
         <div class="ec-err-sub">Vérifie l'URL ou reviens plus tard.</div>
       </div>
@@ -342,53 +360,73 @@ export async function mount(root, slugOrId) {
 
 async function renderEcole(root, slugOrId) {
   if (!slugOrId) {
-    throw new Error('slug manquant');
+    throw new Error("slug manquant");
   }
 
   // Fetch école — essaie slug, puis id
   let ecole = null;
   const { data: bySlug } = await sb
-    .from('auto_ecoles')
-    .select('id, nom, slug, ville')
-    .eq('slug', slugOrId)
+    .from("auto_ecoles")
+    .select("id, nom, slug, ville")
+    .eq("slug", slugOrId)
     .maybeSingle();
   ecole = bySlug;
 
   if (!ecole) {
     const { data: byId } = await sb
-      .from('auto_ecoles')
-      .select('id, nom, slug, ville')
-      .eq('id', slugOrId)
+      .from("auto_ecoles")
+      .select("id, nom, slug, ville")
+      .eq("id", slugOrId)
       .maybeSingle();
     ecole = byId;
   }
 
-  if (!ecole) throw new Error('not found');
+  if (!ecole) throw new Error("not found");
 
   // Fetch moniteurs (aucune PII sensible)
   const { data: moniteurs } = await sb
-    .from('profiles')
-    .select('id, prenom, nom')
-    .eq('auto_ecole_id', ecole.id)
-    .in('role', ['enseignant', 'moniteur'])
+    .from("profiles")
+    .select("id, prenom, nom")
+    .eq("auto_ecole_id", ecole.id)
+    .in("role", ["enseignant", "moniteur"])
     .limit(6);
 
   // Fetch stats : nb élèves actifs
   const { count: nbEleves } = await sb
-    .from('profiles')
-    .select('id', { count: 'exact', head: true })
-    .eq('auto_ecole_id', ecole.id)
-    .eq('role', 'eleve');
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("auto_ecole_id", ecole.id)
+    .eq("role", "eleve");
 
   const nbMoniteurs = (moniteurs || []).length;
-  const nom = ecole.nom || 'Auto-école';
-  const ville = ecole.ville || '';
+  const nom = ecole.nom || "Auto-école";
+  const ville = ecole.ville || "";
 
   const features = [
-    { ico: icon('target',{size:22}), title: 'Parcours REMC', sub: '31 compétences officielles', color: 'var(--a)' },
-    { ico: icon('zap',{size:22}), title: 'Quiz post-leçon', sub: 'Validation immédiate', color: 'var(--gr)' },
-    { ico: icon('chart-bar',{size:22}), title: 'Suivi temps réel', sub: 'Moniteur + élève synchronisés', color: 'var(--am)' },
-    { ico: icon('trophy',{size:22}), title: 'Gamification', sub: 'XP, trophées et streaks', color: 'var(--pu)' },
+    {
+      ico: icon("target", { size: 22 }),
+      title: "Parcours REMC",
+      sub: "31 compétences officielles",
+      color: "var(--a)",
+    },
+    {
+      ico: icon("zap", { size: 22 }),
+      title: "Quiz post-leçon",
+      sub: "Validation immédiate",
+      color: "var(--gr)",
+    },
+    {
+      ico: icon("chart-bar", { size: 22 }),
+      title: "Suivi temps réel",
+      sub: "Moniteur + élève synchronisés",
+      color: "var(--am)",
+    },
+    {
+      ico: icon("trophy", { size: 22 }),
+      title: "Gamification",
+      sub: "XP, trophées et streaks",
+      color: "var(--pu)",
+    },
   ];
 
   const me = getCurUser();
@@ -400,17 +438,17 @@ async function renderEcole(root, slugOrId) {
       <!-- HERO -->
       <div class="ec-hero">
         <div class="ec-hero-badge">
-          <span aria-hidden="true">${icon('map-pin',{size:14})}</span> Auto-école partenaire PermiGo
+          <span aria-hidden="true">${icon("map-pin", { size: 14 })}</span> Auto-école partenaire PermiGo
         </div>
         <h1 class="ec-hero-title">${esc(nom)}</h1>
-        ${ville ? `<div class="ec-hero-ville"><span aria-hidden="true">${icon('map-pin',{size:14})}</span> ${esc(ville)}</div>` : ''}
+        ${ville ? `<div class="ec-hero-ville"><span aria-hidden="true">${icon("map-pin", { size: 14 })}</span> ${esc(ville)}</div>` : ""}
         <div class="ec-hero-kpis">
           <div class="ec-hero-kpi">
-            <div class="ec-kpi-val">${nbEleves ?? '—'}</div>
+            <div class="ec-kpi-val">${nbEleves ?? "—"}</div>
             <div class="ec-kpi-lbl">Élèves</div>
           </div>
           <div class="ec-hero-kpi">
-            <div class="ec-kpi-val">${nbMoniteurs || '—'}</div>
+            <div class="ec-kpi-val">${nbMoniteurs || "—"}</div>
             <div class="ec-kpi-lbl">Moniteurs</div>
           </div>
           <div class="ec-hero-kpi">
@@ -424,46 +462,60 @@ async function renderEcole(root, slugOrId) {
       <div class="ec-section">
         <div class="ec-section-title">Avec PermiGo</div>
         <div class="ec-features">
-          ${features.map((f, i) => `
-            <div class="ec-feature" style="--f-color:${f.color};animation-delay:${i * .06}s"
+          ${features
+            .map(
+              (f, i) => `
+            <div class="ec-feature" style="--f-color:${f.color};animation-delay:${i * 0.06}s"
                  class="ecCardIn">
-              <span class="ec-feature-ico" aria-hidden="true">${esc(f.ico)}</span>
+              <span class="ec-feature-ico" aria-hidden="true">${f.ico}</span>
               <div class="ec-feature-title">${esc(f.title)}</div>
               <div class="ec-feature-sub">${esc(f.sub)}</div>
             </div>
-          `).join('')}
+          `,
+            )
+            .join("")}
         </div>
       </div>
 
       <!-- MONITEURS -->
-      ${(moniteurs || []).length > 0 ? `
+      ${
+        (moniteurs || []).length > 0
+          ? `
       <div class="ec-section">
         <div class="ec-section-title">Nos moniteurs</div>
         <div class="ec-moniteurs">
-          ${(moniteurs || []).map((m, i) => {
-            const ini = ((m.prenom || '')[0] || '') + ((m.nom || '')[0] || '');
-            const grad = AVATARS_GRAD[i % AVATARS_GRAD.length];
-            const full = esc([m.prenom, m.nom].filter(Boolean).join(' ') || '—');
-            return `
-              <div class="ec-moniteur" style="animation-delay:${i * .08}s">
-                <div class="ec-mon-av" style="background:${grad}">${esc(ini.toUpperCase() || '?')}</div>
+          ${(moniteurs || [])
+            .map((m, i) => {
+              const ini =
+                ((m.prenom || "")[0] || "") + ((m.nom || "")[0] || "");
+              const grad = AVATARS_GRAD[i % AVATARS_GRAD.length];
+              const full = esc(
+                [m.prenom, m.nom].filter(Boolean).join(" ") || "—",
+              );
+              return `
+              <div class="ec-moniteur" style="animation-delay:${i * 0.08}s">
+                <div class="ec-mon-av" style="background:${grad}">${esc(ini.toUpperCase() || "?")}</div>
                 <div class="ec-mon-info">
                   <div class="ec-mon-name">${full}</div>
                   <span class="ec-mon-tag">Moniteur certifié</span>
                 </div>
               </div>
             `;
-          }).join('')}
+            })
+            .join("")}
         </div>
       </div>
-      ` : ''}
+      `
+          : ""
+      }
 
       <!-- TÉMOIGNAGES -->
       <div class="ec-section">
         <div class="ec-section-title">Témoignages</div>
         <div class="ec-temoignages">
-          ${TEMOIGNAGES.map((t, i) => `
-            <div class="ec-temoignage" style="animation:ecCardIn .4s cubic-bezier(.34,1.56,.64,1) ${i * .1}s both">
+          ${TEMOIGNAGES.map(
+            (t, i) => `
+            <div class="ec-temoignage" style="animation:ecCardIn .4s cubic-bezier(.34,1.56,.64,1) ${i * 0.1}s both">
               <div class="ec-temo-text">${esc(t.text)}</div>
               <div class="ec-temo-author">
                 <div class="ec-temo-av" style="background:${t.grad}">${esc(t.initials)}</div>
@@ -471,7 +523,8 @@ async function renderEcole(root, slugOrId) {
                 <span class="ec-temo-stars" aria-label="5 étoiles">${esc(t.stars)}</span>
               </div>
             </div>
-          `).join('')}
+          `,
+          ).join("")}
         </div>
       </div>
 
@@ -482,9 +535,10 @@ async function renderEcole(root, slugOrId) {
           Ton moniteur te communique un code d'invitation.<br>
           Crée ton compte en 30 secondes.
         </div>
-        ${me
-          ? `<a class="ec-cta-btn" href="#/parcours">Mon parcours <span aria-hidden="true">→</span></a>`
-          : `<a class="ec-cta-btn" id="ec-cta-btn" href="#/signup">Créer un compte <span aria-hidden="true">→</span></a>`
+        ${
+          me
+            ? `<a class="ec-cta-btn" href="#/parcours">Mon parcours <span aria-hidden="true">→</span></a>`
+            : `<a class="ec-cta-btn" id="ec-cta-btn" href="#/signup">Créer un compte <span aria-hidden="true">→</span></a>`
         }
       </div>
 
@@ -492,9 +546,9 @@ async function renderEcole(root, slugOrId) {
   `;
 
   // Wire CTA
-  root.querySelector('#ec-cta-btn')?.addEventListener('click', (e) => {
+  root.querySelector("#ec-cta-btn")?.addEventListener("click", (e) => {
     e.preventDefault();
-    track('ecole.cta.clicked', { ecole_id: ecole.id });
-    location.hash = '#/signup';
+    track("ecole.cta.clicked", { ecole_id: ecole.id });
+    location.hash = "#/signup";
   });
 }
