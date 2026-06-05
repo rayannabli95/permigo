@@ -1,29 +1,57 @@
 // ═══════════════════════════════════════════════════════════════
-// Classement élève — opt-in pseudo, scope école / national, anonymisé.
-// Aucun nom complet d'élève n'est jamais exposé : pseudo ou « Apprenti #XXXX ».
+// Classement élève — 3 onglets : Ligue semaine / École / National
+// Ligues : Bronze→Diamant selon pts hebdo (quiz×2 + comp_acquis×5)
+// Aucun nom réel exposé : pseudo ou « Apprenti »
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { navigate } from '@/router.js';
-import { playPop, playClick } from '@/utils/sound.js';
-import { haptic } from '@/utils/haptic.js';
-import { renderUserAvatar } from '@/components/common/avatar.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { playPop, playClick } from "@/utils/sound.js";
+import { haptic } from "@/utils/haptic.js";
+import { renderUserAvatar } from "@/components/common/avatar.js";
+import {
+  LEAGUES,
+  getLeague,
+  renderLeagueBadge,
+  renderLeagueRow,
+  LEAGUE_CSS,
+} from "@/utils/league-shared.js";
 
 const LIMIT = 50;
-const MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' };
+const MEDALS = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
+// ─── Countdown : temps restant jusqu'au lundi 00:00 ────────────
+function msToNextMonday() {
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=dim, 1=lun … 6=sam
+  const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+  const nextMonday = new Date(now);
+  nextMonday.setDate(now.getDate() + daysUntilMonday);
+  nextMonday.setHours(0, 0, 0, 0);
+  return nextMonday - now;
+}
+function fmtCountdown(ms) {
+  const s = Math.floor(ms / 1000);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (d > 0) return `${d}j ${h}h`;
+  if (h > 0) return `${h}h ${m}min`;
+  return `${m}min`;
+}
+
+// ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
+${LEAGUE_CSS}
 .clt {
   padding: 0 0 calc(72px + env(safe-area-inset-bottom, 0px));
   max-width: 480px; margin: 0 auto;
   color: var(--ink); font-family: 'Inter', sans-serif; background: var(--bg);
 }
 .clt-hd {
-  position: sticky; top: 0; z-index: 10;
-  background: var(--bg);
+  position: sticky; top: 0; z-index: 10; background: var(--bg);
   padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px 12px;
   border-bottom: 1px solid var(--bo2);
 }
@@ -35,114 +63,144 @@ const STYLE = `<style>
   font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
 }
 .clt-mepill-ico { font-size: 15px; }
-/* Onglets */
-.clt-tabs { display: flex; gap: 8px; margin-top: 12px; }
+.clt-tabs { display: flex; gap: 6px; margin-top: 12px; }
 .clt-tab {
-  flex: 1; min-height: 40px; padding: 10px;
-  background: var(--su); border: 1px solid var(--bo); border-radius: 12px;
-  color: var(--mu2); font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
+  flex: 1; min-height: 44px; padding: 9px 6px;
+  background: var(--su); border: 1px solid var(--bo); border-radius: 10px;
+  color: var(--mu2); font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
 }
-.clt-tab.on { background: #6366f1; border-color: #6366f1; color: #fff; }
-.clt-tab:active { transform: scale(.98); }
-/* Liste */
-.clt-list { padding: 12px 16px 0; display: flex; flex-direction: column; gap: 8px; }
+.clt-tab.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.clt-tab-ligue.on { background: linear-gradient(135deg,#d97706,#fbbf24); border-color: transparent; color: #fff; }
+.clt-tab:active { transform: scale(.97); }
+
+/* Onglet ligue */
+.clt-league-hero {
+  margin: 14px 16px 0;
+  padding: 16px;
+  background: var(--su); border: 1.5px solid var(--bo); border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04);
+}
+.clt-league-hero-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.clt-countdown {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+  font: 500 11px/1 'Inter', sans-serif; color: var(--mu2);
+}
+.clt-countdown-val {
+  font: 700 14px/1 'IBM Plex Mono', monospace; color: var(--ink);
+}
+.clt-pts-legend {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  padding-top: 12px; border-top: 1px solid var(--bo2);
+}
+.clt-pts-pill {
+  font: 500 10px/1 'Inter', sans-serif; color: var(--mu2);
+  padding: 3px 8px; border-radius: 6px;
+  background: var(--bg2); border: 1px solid var(--bo);
+}
+
+/* Liste unifiée */
+.clt-list { padding: 10px 16px 0; display: flex; flex-direction: column; gap: 6px; }
 .clt-row {
   display: flex; align-items: center; gap: 12px;
-  background: var(--su); border: 1px solid var(--bo); border-radius: 16px;
-  padding: 12px 14px;
+  background: var(--su); border: 1px solid var(--bo); border-radius: 14px;
+  padding: 11px 14px;
 }
 .clt-row.me { border: 2px solid #6366f1; background: rgba(99,102,241,.06); }
-.clt-rank {
-  flex-shrink: 0; min-width: 32px; text-align: center;
-  font: 800 16px/1 'IBM Plex Mono', monospace; color: var(--mu2);
-}
-.clt-rank.medal { font-size: 22px; }
-.clt-av { flex-shrink: 0; width: 36px; height: 36px; }
-.clt-av img { border-radius: 50%; }
-.clt-name {
-  flex: 1; min-width: 0; font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.clt-me-tag {
-  flex-shrink: 0; font: 700 10px/1 'Inter', sans-serif; letter-spacing: .04em;
-  background: #6366f1; color: #fff; border-radius: 99px; padding: 4px 8px; text-transform: uppercase;
-}
-.clt-score {
-  flex-shrink: 0; font: 700 14px/1 'IBM Plex Mono', monospace; color: var(--a);
-  display: flex; align-items: baseline; gap: 2px;
-}
+.clt-rank { flex-shrink: 0; min-width: 30px; text-align: center;
+  font: 800 13px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
+.clt-rank.medal { font-size: 20px; }
+.clt-av { flex-shrink: 0; }
+.clt-name { flex: 1; min-width: 0; font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.clt-me-tag { flex-shrink: 0; font: 700 10px/1 'Inter', sans-serif; letter-spacing: .04em;
+  background: #6366f1; color: #fff; border-radius: 99px; padding: 3px 7px; text-transform: uppercase; }
+.clt-score { flex-shrink: 0; font: 700 13px/1 'IBM Plex Mono', monospace; color: var(--a);
+  display: flex; align-items: baseline; gap: 2px; }
 .clt-score-sub { font-size: 11px; color: var(--mu2); }
 .clt-sep { text-align: center; color: var(--mu2); font: 600 12px/1 'Inter', sans-serif; padding: 6px 0 2px; }
-/* Empty */
-.clt-empty { text-align: center; padding: 48px 24px; color: var(--mu2); }
-.clt-empty-ico { font-size: 40px; opacity: .35; margin-bottom: 12px; }
-.clt-empty-txt { font: 500 14px/1.5 'Inter', sans-serif; max-width: 280px; margin: 0 auto; }
-/* CTA pseudo */
-.clt-pseudo {
-  margin: 16px 16px 0; padding: 14px 16px;
-  background: var(--su); border: 1px solid var(--bo); border-radius: 16px;
+.clt-empty { text-align: center; padding: 40px 24px; color: var(--mu2); }
+.clt-empty-ico { font-size: 36px; opacity: .35; margin-bottom: 10px; }
+.clt-empty-txt { font: 500 13px/1.5 'Inter', sans-serif; max-width: 280px; margin: 0 auto; }
+.clt-pseudo { margin: 14px 16px 0; padding: 13px 16px;
+  background: var(--su); border: 1px solid var(--bo); border-radius: 14px;
   display: flex; align-items: center; gap: 12px;
-  text-decoration: none; color: var(--ink);
-}
+  text-decoration: none; color: var(--ink); }
 .clt-pseudo:active { transform: scale(.99); }
-.clt-pseudo-ico { font-size: 20px; }
+.clt-pseudo-ico { font-size: 18px; }
 .clt-pseudo-body { flex: 1; }
-.clt-pseudo-ttl { font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; }
-.clt-pseudo-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
-.clt-pseudo-chev { color: var(--mu2); font-size: 18px; }
-@media (prefers-reduced-motion: reduce) { .clt-tab, .clt-row, .clt-pseudo { transition: none; } }
+.clt-pseudo-ttl { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; }
+.clt-pseudo-sub { font: 500 11px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
+@media (prefers-reduced-motion: reduce) { .clt-tab, .clt-row { transition: none; } }
 </style>`;
 
+// ─── Mount ───────────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track('page_view', { page: 'classement', user_role: me.role });
+  track("page_view", { page: "classement", user_role: me.role });
 
-  root.innerHTML = `${STYLE}<div class="clt"><div class="clt-hd"><h1 class="clt-title">Classement</h1></div>
-    <div class="clt-list">${Array.from({ length: 6 }).map(() => `<div class="skel skel-card" style="height:56px"></div>`).join('')}</div></div>`;
+  root.innerHTML = `${STYLE}<div class="clt">
+    <div class="clt-hd"><h1 class="clt-title">Classement</h1></div>
+    <div class="clt-list">${Array.from({ length: 5 })
+      .map(
+        () =>
+          `<div class="skel skel-card" style="height:52px;border-radius:14px"></div>`,
+      )
+      .join("")}</div>
+  </div>`;
 
-  // Fetch les deux scopes en parallèle
-  const [ecoleRes, nationalRes] = await Promise.all([
-    sb.rpc('get_eleve_leaderboard', { p_scope: 'ecole', p_limit: LIMIT }),
-    sb.rpc('get_eleve_leaderboard', { p_scope: 'national', p_limit: LIMIT }),
+  const [ecoleRes, nationalRes, ligueRes] = await Promise.all([
+    sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: LIMIT }),
+    sb.rpc("get_eleve_leaderboard", { p_scope: "national", p_limit: LIMIT }),
+    sb
+      .rpc("get_league_leaderboard", { p_role: "eleve", p_limit: LIMIT })
+      .catch(() => ({ data: null, error: true })),
   ]);
-
-  if (ecoleRes.error && nationalRes.error) {
-    console.error('[classement]', ecoleRes.error || nationalRes.error);
-    root.innerHTML = `${STYLE}<div class="clt"><div class="clt-hd"><h1 class="clt-title">Classement</h1></div>
-      <div class="clt-empty"><div class="clt-empty-ico">${icon('alert-circle',{size:30})}</div>
-      <div class="clt-empty-txt">Le classement n'a pas pu se charger. Réessaie plus tard.</div></div></div>`;
-    return;
-  }
 
   const data = {
     ecole: ecoleRes.data || [],
     national: nationalRes.data || [],
+    semaine: ligueRes.data || [],
   };
 
-  let scope = 'ecole';
-  root.innerHTML = `${STYLE}${render(scope, data)}`;
-  wire(root, data, (s) => { scope = s; });
+  let scope = "semaine";
+  root.innerHTML = `${STYLE}${_render(scope, data)}`;
+  _wire(root, data, (s) => {
+    scope = s;
+  });
 }
 
-// ── Helpers ───────────────────────────────────────────────────────
-function myRow(rows) { return rows.find(r => r.is_me === true) || null; }
-
-// Total fiable seulement si rien ne dépasse la limite (sinon on connaît pas N).
-function totalKnown(rows) {
-  return !rows.some(r => r.rang > LIMIT) ? rows.length : null;
+// ─── Render ──────────────────────────────────────────────────────
+function _myRow(rows) {
+  return rows.find((r) => r.is_me === true) || null;
 }
 
-function render(scope, data) {
+function _render(scope, data) {
   const rows = data[scope];
-  const mine = myRow(rows);
-  const total = totalKnown(rows);
+  const mine = _myRow(rows);
 
-  const pill = mine
-    ? `<div class="clt-mepill"><span class="clt-mepill-ico">${icon('trophy',{size:15})}</span>Tu es #${mine.rang}${total ? ` sur ${total}` : ''}</div>`
-    : `<div class="clt-mepill"><span class="clt-mepill-ico">${icon('target',{size:15})}</span>Valide une compétence pour entrer au classement</div>`;
+  // Pill header selon scope
+  let pill = "";
+  if (scope === "semaine") {
+    const myLeague = getLeague(mine?.weekly_pts ?? 0);
+    if (myLeague) {
+      pill = `<div class="clt-mepill"><span class="clt-mepill-ico">${myLeague.emoji}</span>Ligue ${esc(myLeague.name)} · ${mine?.weekly_pts ?? 0} pts</div>`;
+    } else {
+      pill = `<div class="clt-mepill"><span class="clt-mepill-ico">${icon("zap", { size: 14 })}</span>Fais des quiz pour entrer en ligue</div>`;
+    }
+  } else {
+    const totalKnown = rows.filter((r) => r.rang <= LIMIT).length;
+    pill = mine
+      ? `<div class="clt-mepill"><span class="clt-mepill-ico">${icon("trophy", { size: 14 })}</span>Tu es #${mine.rang}</div>`
+      : `<div class="clt-mepill"><span class="clt-mepill-ico">${icon("target", { size: 14 })}</span>Valide une compétence pour entrer</div>`;
+    void totalKnown;
+  }
 
   return `
 <div class="clt">
@@ -150,83 +208,154 @@ function render(scope, data) {
     <h1 class="clt-title">Classement</h1>
     ${pill}
     <div class="clt-tabs">
-      <button class="clt-tab ${scope === 'ecole' ? 'on' : ''}" data-scope="ecole">Mon auto-école</button>
-      <button class="clt-tab ${scope === 'national' ? 'on' : ''}" data-scope="national">National</button>
+      <button class="clt-tab clt-tab-ligue ${scope === "semaine" ? "on" : ""}" data-scope="semaine">🏆 Ligue</button>
+      <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">Mon école</button>
+      <button class="clt-tab ${scope === "national" ? "on" : ""}" data-scope="national">National</button>
     </div>
   </div>
-  <div id="clt-body">${renderBody(rows)}</div>
+  <div id="clt-body">${_renderBody(scope, rows)}</div>
   <a class="clt-pseudo" href="#/profil">
-    <span class="clt-pseudo-ico" aria-hidden="true">${icon('user',{size:16})}</span>
+    <span class="clt-pseudo-ico" aria-hidden="true">🎭</span>
     <div class="clt-pseudo-body">
       <div class="clt-pseudo-ttl">Choisis ton pseudo public</div>
-      <div class="clt-pseudo-sub">Sinon tu apparais en « Apprenti #XXXX »</div>
+      <div class="clt-pseudo-sub">Sinon tu apparais en « Apprenti »</div>
     </div>
-    <span class="clt-pseudo-chev" aria-hidden="true">›</span>
+    <span style="color:var(--mu2)" aria-hidden="true">›</span>
   </a>
 </div>`;
 }
 
-function renderBody(rows) {
-  // Assez d'élèves pour un classement vivant ? (au moins 2 avec un score > 0)
-  const active = rows.filter(r => r.score > 0).length;
+function _renderBody(scope, rows) {
+  if (scope === "semaine") return _renderLeagueBody(rows);
+  return _renderAllTimeBody(rows);
+}
+
+// ── Corps ligue semaine ──────────────────────────────────────────
+function _renderLeagueBody(rows) {
+  const mine = _myRow(rows);
+  const myPts = mine?.weekly_pts ?? 0;
+  const myLeague = getLeague(myPts);
+  const countdown = fmtCountdown(msToNextMonday());
+
+  // Hero ligue
+  const hero = `
+  <div class="clt-league-hero">
+    <div class="clt-league-hero-top">
+      ${renderLeagueBadge(myLeague, myPts, "md")}
+      <div class="clt-countdown">
+        <span>Réinitialisation dans</span>
+        <span class="clt-countdown-val">${esc(countdown)}</span>
+      </div>
+    </div>
+    <div class="clt-pts-legend">
+      <span class="clt-pts-pill">Quiz réussi +2 pts</span>
+      <span class="clt-pts-pill">Compétence acquise +5 pts</span>
+      <span class="clt-pts-pill">💎 ≥40 · 🏆 ≥20 · 🥈 ≥8 · 🥉 ≥1</span>
+    </div>
+  </div>`;
+
+  if (rows.length === 0) {
+    return `${hero}<div class="clt-empty">
+      <div class="clt-empty-ico">${icon("zap", { size: 30 })}</div>
+      <div class="clt-empty-txt">Fais des quiz ou valide des compétences pour apparaître ici cette semaine.</div>
+    </div>`;
+  }
+
+  // Trier par pts
+  const sorted = [...rows].sort((a, b) => b.weekly_pts - a.weekly_pts);
+
+  // Séparateurs de ligue
+  let prevLeagueId = null;
+  let listHtml = "";
+  for (const entry of sorted) {
+    const league = getLeague(entry.weekly_pts);
+    const lid = league?.id ?? "hors";
+    if (lid !== prevLeagueId) {
+      if (prevLeagueId !== null) listHtml += `<div style="height:6px"></div>`;
+      const lObj = LEAGUES.find((l) => l.id === lid);
+      listHtml += `<div style="display:flex;align-items:center;gap:6px;padding:6px 0 2px;font:600 10px/1 'Inter',sans-serif;text-transform:uppercase;letter-spacing:.08em;color:var(--mu2)">
+        ${lObj ? `<span style="width:6px;height:6px;border-radius:50%;background:${lObj.color};display:inline-block;flex-shrink:0"></span>Ligue ${esc(lObj.name)}` : "Hors ligue"}
+      </div>`;
+      prevLeagueId = lid;
+    }
+    listHtml += renderLeagueRow(entry, true);
+  }
+
+  return `${hero}<div class="clt-list">${listHtml}</div>`;
+}
+
+// ── Corps classement all-time ─────────────────────────────────────
+function _renderAllTimeBody(rows) {
+  const active = rows.filter((r) => r.score > 0).length;
   if (active < 2) {
     return `<div class="clt-empty">
-      <div class="clt-empty-ico">${icon('target',{size:30})}</div>
+      <div class="clt-empty-ico">${icon("target", { size: 30 })}</div>
       <div class="clt-empty-txt">Le classement s'anime quand 2+ élèves ont validé des compétences.</div>
     </div>`;
   }
 
-  const top = rows.filter(r => r.rang <= LIMIT).sort((a, b) => a.rang - b.rang);
-  const mine = myRow(rows);
+  const top = rows
+    .filter((r) => r.rang <= LIMIT)
+    .sort((a, b) => a.rang - b.rang);
+  const mine = _myRow(rows);
   const meOutside = mine && mine.rang > LIMIT;
 
-  let html = `<div class="clt-list">${top.map(rowHtml).join('')}</div>`;
+  let html = `<div class="clt-list">${top.map(_rowHtml).join("")}</div>`;
   if (meOutside) {
-    html += `<div class="clt-sep">· · ·</div><div class="clt-list">${rowHtml(mine)}</div>`;
+    html += `<div class="clt-sep">· · ·</div><div class="clt-list">${_rowHtml(mine)}</div>`;
   }
   return html;
 }
 
-function rowHtml(r) {
+function _rowHtml(r) {
   const medal = MEDALS[r.rang];
-  const rankCell = medal
-    ? `<div class="clt-rank medal" aria-label="Rang ${r.rang}">${medal}</div>`
-    : `<div class="clt-rank">${r.rang}</div>`;
   return `
-  <div class="clt-row ${r.is_me ? 'me' : ''}">
-    ${rankCell}
-    <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 36)}</div>
+  <div class="clt-row ${r.is_me ? "me" : ""}">
+    <div class="clt-rank ${medal ? "medal" : ""}" aria-label="Rang ${r.rang}">${medal || r.rang}</div>
+    <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 34)}</div>
     <div class="clt-name">${esc(r.display_name)}</div>
-    ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ''}
+    ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ""}
     <div class="clt-score">${r.score}<span class="clt-score-sub">/31</span></div>
   </div>`;
 }
 
-function wire(root, data, setScope) {
-  const tabs = root.querySelectorAll('.clt-tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
+// ─── Wire ────────────────────────────────────────────────────────
+function _wire(root, data, setScope) {
+  root.querySelectorAll(".clt-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
       const next = tab.dataset.scope;
-      if (tab.classList.contains('on')) return;
+      if (tab.classList.contains("on")) return;
       setScope(next);
-      haptic('select');
+      haptic("select");
       playClick();
-      // Onglets
-      tabs.forEach(t => t.classList.toggle('on', t.dataset.scope === next));
-      // Pill perso
+
+      root.querySelectorAll(".clt-tab").forEach((t) => {
+        t.classList.toggle("on", t.dataset.scope === next);
+      });
+
+      // Update pill
       const rows = data[next];
-      const mine = myRow(rows);
-      const total = totalKnown(rows);
-      const pill = root.querySelector('.clt-mepill');
+      const mine = _myRow(rows);
+      const pill = root.querySelector(".clt-mepill");
       if (pill) {
-        pill.innerHTML = mine
-          ? `<span class="clt-mepill-ico">${icon('trophy',{size:15})}</span>Tu es #${mine.rang}${total ? ` sur ${total}` : ''}`
-          : `<span class="clt-mepill-ico">${icon('target',{size:15})}</span>Valide une compétence pour entrer au classement`;
+        if (next === "semaine") {
+          const lg = getLeague(mine?.weekly_pts ?? 0);
+          pill.innerHTML = lg
+            ? `<span class="clt-mepill-ico">${lg.emoji}</span>Ligue ${esc(lg.name)} · ${mine?.weekly_pts ?? 0} pts`
+            : `<span class="clt-mepill-ico">${icon("zap", { size: 14 })}</span>Fais des quiz pour entrer en ligue`;
+        } else {
+          pill.innerHTML = mine
+            ? `<span class="clt-mepill-ico">${icon("trophy", { size: 14 })}</span>Tu es #${mine.rang}`
+            : `<span class="clt-mepill-ico">${icon("target", { size: 14 })}</span>Valide une compétence pour entrer`;
+        }
       }
-      // Corps
-      const body = root.querySelector('#clt-body');
-      if (body) { body.innerHTML = renderBody(rows); playPop(); }
-      track('classement.scope_changed', { scope: next });
+
+      const body = root.querySelector("#clt-body");
+      if (body) {
+        body.innerHTML = _renderBody(next, rows);
+        playPop();
+      }
+      track("classement.scope_changed", { scope: next });
     });
   });
 }

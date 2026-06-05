@@ -461,6 +461,30 @@ const STYLE = `<style>
   padding: 4px 8px; border-radius: 8px;
   white-space: nowrap; flex-shrink: 0;
 }
+
+/* ── Ligue shortcut card ── */
+.pcp-ligue-card {
+  margin: 16px 16px 0;
+  padding: 15px 16px;
+  background: var(--su); border: 1.5px solid var(--bo); border-radius: 20px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04);
+  animation: pcpBlockIn .5s 400ms cubic-bezier(.2,.7,.3,1) both;
+  transition: border-color .15s, transform .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.pcp-ligue-card:active { transform: scale(.98); }
+.pcp-ligue-card:hover { border-color: #f59e0b; }
+.pcp-ligue-ico {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(245,158,11,.1); border: 1.5px solid rgba(245,158,11,.25);
+  display: flex; align-items: center; justify-content: center;
+  color: #f59e0b; flex-shrink: 0; font-size: 22px; line-height: 1;
+}
+.pcp-ligue-body { flex: 1; min-width: 0; }
+.pcp-ligue-title { font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 3px; }
+.pcp-ligue-sub { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); }
 </style>`;
 
 // ─── State ──────────────────────────────────────────────────────
@@ -626,6 +650,16 @@ function render(
         ${icon("chevron-right", { size: 16, strokeWidth: 2.5, color: "var(--mu2)" })}
       </div>
 
+      <!-- ══ BLOC 5 — LIGUE SEMAINE ══ -->
+      <div class="pcp-ligue-card" id="pcp-ligue" role="button" tabindex="0" aria-label="Voir la ligue de la semaine">
+        <div class="pcp-ligue-ico">🏆</div>
+        <div class="pcp-ligue-body">
+          <div class="pcp-ligue-title">Ligue de la semaine</div>
+          <div class="pcp-ligue-sub">Classement hebdo par validations</div>
+        </div>
+        ${icon("chevron-right", { size: 16, strokeWidth: 2.5, color: "var(--mu2)" })}
+      </div>
+
     </div>`;
 
   wire(root, state.pctToNextReward ?? 0, stops, totalVals);
@@ -787,6 +821,22 @@ function wire(root, progressPct, stops = [], totalVals = 0) {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         goTrophees();
+      }
+    });
+  }
+
+  // Ligue de la semaine
+  const ligueCard = root.querySelector("#pcp-ligue");
+  if (ligueCard) {
+    const goLigue = () => {
+      track("parcours_pro.ligue_open");
+      navigate("#/ligue-semaine");
+    };
+    ligueCard.addEventListener("click", goLigue);
+    ligueCard.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        goLigue();
       }
     });
   }
