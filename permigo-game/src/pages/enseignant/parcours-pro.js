@@ -4,17 +4,21 @@
 // Bloc 2 : NEXT UNLOCK — 1 seul palier visible via RPC
 // Bloc 3 : ROADMAP MINI — 3 stops (current / next / blurred)
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { toast } from '@/components/common/toast.js';
-import { track } from '@/services/analytics.js';
-import { navigate } from '@/router.js';
-import { getMoniteurState, buildTimelineStops } from '@/data/moniteur-levels.js';
-import { animateCounter } from '@/utils/gestures.js';
-import { icon } from '@/utils/icons.js';
-import { openPalierSheet } from '@/components/common/palier-sheet.js';
-import { playParcours } from '@/utils/sound.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { toast } from "@/components/common/toast.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import {
+  getMoniteurState,
+  buildTimelineStops,
+  SAISONS,
+} from "@/data/moniteur-levels.js";
+import { animateCounter } from "@/utils/gestures.js";
+import { icon } from "@/utils/icons.js";
+import { openPalierSheet } from "@/components/common/palier-sheet.js";
+import { playParcours } from "@/utils/sound.js";
 
 // ─── CSS ────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -405,6 +409,58 @@ const STYLE = `<style>
   .pcp-hero, .pcp-next, .pcp-road { animation: none; }
   .pcp-next-prog-fill { transition: none; }
 }
+
+/* ── Saison chip ── */
+.pcp-saison {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  font: 600 11px/1 'Inter', sans-serif;
+  color: rgba(255,255,255,.8);
+  margin-top: 16px;
+}
+.pcp-saison-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Trophées shortcut card ── */
+.pcp-trophees-card {
+  margin: 16px 16px 0;
+  padding: 16px;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
+  border-radius: 20px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(10,13,26,.04);
+  animation: pcpBlockIn .5s 360ms cubic-bezier(.2,.7,.3,1) both;
+  transition: border-color .15s, transform .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.pcp-trophees-card:active { transform: scale(.98); }
+.pcp-trophees-card:hover { border-color: var(--a); }
+.pcp-trophees-ico {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(245,158,11,.1); border: 1.5px solid rgba(245,158,11,.25);
+  display: flex; align-items: center; justify-content: center;
+  color: #f59e0b; flex-shrink: 0;
+}
+.pcp-trophees-body { flex: 1; min-width: 0; }
+.pcp-trophees-title {
+  font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+.pcp-trophees-sub {
+  font: 500 12px/1 'Inter', sans-serif;
+  color: var(--mu2);
+}
+.pcp-trophees-badge {
+  font: 700 12px/1 'IBM Plex Mono', monospace;
+  color: #f59e0b;
+  background: rgba(245,158,11,.1);
+  padding: 4px 8px; border-radius: 8px;
+  white-space: nowrap; flex-shrink: 0;
+}
 </style>`;
 
 // ─── State ──────────────────────────────────────────────────────
@@ -415,9 +471,9 @@ let _me = null;
 export async function mount(root) {
   _root = root;
   _me = getCurUser();
-  if (!_me || _me.role !== 'enseignant') return;
+  if (!_me || _me.role !== "enseignant") return;
 
-  track('page.view', { page: 'parcours_pro' });
+  track("page.view", { page: "parcours_pro" });
   playParcours();
 
   root.innerHTML = `${STYLE}
@@ -433,29 +489,88 @@ export async function mount(root) {
   // `validations` + `moniteur-levels.js`. On n'utilise plus le RPC
   // get_my_next_unlock_moniteur (paliers DB) pour l'affichage, afin d'éviter
   // toute désynchro avec les seuils du fichier local.
-  const [profileRes, countRes] = await Promise.all([
-    sb.from('profiles').select('prenom, xp, streak_pro_days').eq('id', _me.id).maybeSingle(),
-    sb.from('validations')
-      .select('id', { count: 'exact', head: true })
-      .eq('validated_by', _me.id),
+  const since30d = new Date(Date.now() - 30 * 86400000).toISOString();
+
+  const [profileRes, countRes, studentsRes, activeRes] = await Promise.all([
+    sb
+      .from("profiles")
+      .select("prenom, xp, streak_pro_days")
+      .eq("id", _me.id)
+      .maybeSingle(),
+    sb
+      .from("validations")
+      .select("id", { count: "exact", head: true })
+      .eq("validated_by", _me.id),
+    sb
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("enseignant_id", _me.id)
+      .eq("role", "eleve"),
+    sb
+      .from("validations")
+      .select("eleve_id")
+      .eq("validated_by", _me.id)
+      .gte("validated_at", since30d),
   ]);
 
-  const me          = profileRes.data || {};
-  const streak      = me.streak_pro_days ?? 0;
-  const totalVals   = countRes.count ?? 0;
-  const state       = getMoniteurState(totalVals);
-  const stops       = buildTimelineStops();
+  const me = profileRes.data || {};
+  const streak = me.streak_pro_days ?? 0;
+  const totalVals = countRes.count ?? 0;
+  const studentsTotal = studentsRes.count ?? 0;
+  const studentsActive = new Set(
+    (activeRes.data || []).map((v) => v.eleve_id).filter(Boolean),
+  ).size;
+  const state = getMoniteurState(totalVals);
+  const stops = buildTimelineStops();
 
-  render(root, { me, streak, totalVals, state, stops });
+  render(root, {
+    me,
+    streak,
+    totalVals,
+    studentsTotal,
+    studentsActive,
+    state,
+    stops,
+  });
 }
 
 // ─── Render ──────────────────────────────────────────────────────
-function render(root, { me, streak, totalVals, state, stops }) {
-  // Titre du palier actuel + compteur : 100 % dérivés du state local
-  // (= vrai compte de validations). Avant le 1er palier → « Débutant ».
-  const currentTitle = state.tier?.title ?? 'Débutant';
+function render(
+  root,
+  {
+    me,
+    streak,
+    totalVals,
+    studentsTotal = 0,
+    studentsActive = 0,
+    state,
+    stops,
+  },
+) {
+  const currentTitle = state.tier?.title ?? "Débutant";
   const displayVals = totalVals;
   const xp = me.xp ?? totalVals * 10;
+
+  // Saison courante (mois)
+  const saison = SAISONS[new Date().getMonth()];
+
+  // Comptage rapide des trophées débloqués (miroir de trophees-moniteur.js)
+  const trophyChecks = [
+    totalVals >= 1,
+    totalVals >= 10,
+    studentsActive >= 1,
+    streak >= 7,
+    totalVals >= 50,
+    studentsTotal >= 5,
+    totalVals >= 100,
+    streak >= 30,
+    studentsTotal >= 10,
+    totalVals >= 200,
+    studentsTotal >= 3 && studentsActive >= studentsTotal,
+    totalVals >= 300,
+  ];
+  const trophyUnlocked = trophyChecks.filter(Boolean).length;
+  const trophyTotal = trophyChecks.length;
 
   root.innerHTML = `${STYLE}
     <div class="pcp">
@@ -472,16 +587,24 @@ function render(root, { me, streak, totalVals, state, stops }) {
             </div>
             <div class="pcp-hero-sep"></div>
             <div class="pcp-hero-stat">
-              <span class="pcp-hero-stat-val">${xp.toLocaleString('fr-FR')}</span>
+              <span class="pcp-hero-stat-val">${xp.toLocaleString("fr-FR")}</span>
               <span class="pcp-hero-stat-lbl">XP total</span>
             </div>
-            ${streak > 0 ? `
+            ${
+              streak > 0
+                ? `
             <div class="pcp-hero-sep"></div>
             <div class="pcp-streak-badge">
-              <span class="pcp-streak-fire">${icon('flame',{size:16})}</span>
+              <span class="pcp-streak-fire">${icon("flame", { size: 16 })}</span>
               <span class="pcp-streak-val">${streak}</span>
               <span class="pcp-streak-lbl">j. de suite</span>
-            </div>` : ''}
+            </div>`
+                : ""
+            }
+          </div>
+          <div class="pcp-saison">
+            <span class="pcp-saison-dot" style="background:${saison.accent}"></span>
+            ${esc(saison.name)}
           </div>
         </div>
       </div>
@@ -491,6 +614,17 @@ function render(root, { me, streak, totalVals, state, stops }) {
 
       <!-- ══ BLOC 3 — ROADMAP MINI ══ -->
       ${renderRoadmapMini(stops, totalVals)}
+
+      <!-- ══ BLOC 4 — TROPHÉES ══ -->
+      <div class="pcp-trophees-card" id="pcp-trophees" role="button" tabindex="0" aria-label="Voir mes trophées">
+        <div class="pcp-trophees-ico">${icon("award", { size: 20, strokeWidth: 2 })}</div>
+        <div class="pcp-trophees-body">
+          <div class="pcp-trophees-title">Trophées professionnels</div>
+          <div class="pcp-trophees-sub">Jalons pédagogiques débloqués</div>
+        </div>
+        <div class="pcp-trophees-badge">${trophyUnlocked}/${trophyTotal}</div>
+        ${icon("chevron-right", { size: 16, strokeWidth: 2.5, color: "var(--mu2)" })}
+      </div>
 
     </div>`;
 
@@ -504,19 +638,19 @@ function renderNextUnlock(state) {
     return `
       <div class="pcp-next">
         <div class="pcp-next-inner pcp-next-alldone">
-          <div class="pcp-next-alldone-ico">${icon('trophy',{size:28})}</div>
+          <div class="pcp-next-alldone-ico">${icon("trophy", { size: 28 })}</div>
           <div class="pcp-next-alldone-title">Tous les paliers atteints</div>
           <div class="pcp-next-alldone-sub">Statut Expert REMC certifié débloqué.</div>
         </div>
       </div>`;
   }
 
-  const nextTier    = state.nextReward.data; // palier cible (objet MONITEUR_TIERS)
-  const iconName    = nextTier.unlock.iconName ?? 'star';
-  const label       = nextTier.unlock.name ?? '—';
-  const title       = nextTier.title ?? '—';
-  const remaining   = state.nextReward.missing ?? 0;
-  const pct         = state.pctToNextReward ?? 0;
+  const nextTier = state.nextReward.data; // palier cible (objet MONITEUR_TIERS)
+  const iconName = nextTier.unlock.iconName ?? "star";
+  const label = nextTier.unlock.name ?? "—";
+  const title = nextTier.title ?? "—";
+  const remaining = state.nextReward.missing ?? 0;
+  const pct = state.pctToNextReward ?? 0;
 
   return `
     <div class="pcp-next">
@@ -528,7 +662,7 @@ function renderNextUnlock(state) {
           </div>
           <div class="pcp-next-info">
             <div class="pcp-next-remaining">
-              ${remaining}<span>validation${remaining > 1 ? 's' : ''} restantes</span>
+              ${remaining}<span>validation${remaining > 1 ? "s" : ""} restantes</span>
             </div>
             <div class="pcp-next-reward-label">${esc(label)}</div>
             <div class="pcp-next-reward-desc">${esc(title)}</div>
@@ -550,42 +684,45 @@ function renderNextUnlock(state) {
 // ─── Render Bloc 3 — Roadmap mini ───────────────────────────────
 function renderRoadmapMini(stops, totalVals) {
   // Trouve l'index du prochain stop non atteint
-  const nextIdx = stops.findIndex(s => totalVals < s.threshold);
-  if (nextIdx === -1) return ''; // tout débloqué → pas de roadmap
+  const nextIdx = stops.findIndex((s) => totalVals < s.threshold);
+  if (nextIdx === -1) return ""; // tout débloqué → pas de roadmap
 
   // 3 stops : précédent (done) + prochain (now) + suivant (blurred)
   const toShow = [];
-  if (nextIdx > 0) toShow.push({ ...stops[nextIdx - 1], state: 'done' });
-  toShow.push({ ...stops[nextIdx], state: 'now' });
-  if (nextIdx + 1 < stops.length) toShow.push({ ...stops[nextIdx + 1], state: 'todo' });
+  if (nextIdx > 0) toShow.push({ ...stops[nextIdx - 1], state: "done" });
+  toShow.push({ ...stops[nextIdx], state: "now" });
+  if (nextIdx + 1 < stops.length)
+    toShow.push({ ...stops[nextIdx + 1], state: "todo" });
 
   return `
     <div class="pcp-road">
       <div class="pcp-road-title">Ma route</div>
       <div class="pcp-road-stops">
-        ${toShow.map(s => renderRoadStop(s)).join('')}
+        ${toShow.map((s) => renderRoadStop(s)).join("")}
       </div>
       <button class="pcp-see-all" id="pcp-see-all">
-        Voir tous les paliers ${icon('chevron-right', { size: 14, strokeWidth: 2.5 })}
+        Voir tous les paliers ${icon("chevron-right", { size: 14, strokeWidth: 2.5 })}
       </button>
     </div>`;
 }
 
 function renderRoadStop(s) {
   // Tiers uniquement (plus de skin) — récompense = outil utile
-  const label    = `Palier ${s.tier.tier}`;
-  const name     = s.tier.title;
-  const reward   = s.tier.unlock.name;
+  const label = `Palier ${s.tier.tier}`;
+  const name = s.tier.title;
+  const reward = s.tier.unlock.name;
   const iconName = s.tier.unlock.iconName;
-  const badgeTxt = s.state === 'done' ? 'Atteint' : (s.state === 'now' ? 'Prochain' : label);
+  const badgeTxt =
+    s.state === "done" ? "Atteint" : s.state === "now" ? "Prochain" : label;
 
   const dotState = s.state;
-  const dotIcon  = s.state === 'done'
-    ? icon('check', { size: 15, strokeWidth: 3 })
-    : icon(iconName, { size: 15, strokeWidth: 2 });
+  const dotIcon =
+    s.state === "done"
+      ? icon("check", { size: 15, strokeWidth: 3 })
+      : icon(iconName, { size: 15, strokeWidth: 2 });
 
   return `
-    <div class="pcp-road-stop ${dotState} ${s.state === 'now' ? 'pcp-now' : ''}" data-tier="${s.tier.tier}" role="button" tabindex="0" aria-label="Détail du palier ${s.tier.tier}">
+    <div class="pcp-road-stop ${dotState} ${s.state === "now" ? "pcp-now" : ""}" data-tier="${s.tier.tier}" role="button" tabindex="0" aria-label="Détail du palier ${s.tier.tier}">
       <div class="pcp-road-dot ${dotState}">${dotIcon}</div>
       <div class="pcp-road-body">
         <div class="pcp-road-tier">${esc(label)}</div>
@@ -603,35 +740,54 @@ function wire(root, progressPct, stops = [], totalVals = 0) {
   // Anime la barre de progression Bloc 2
   requestAnimationFrame(() => {
     setTimeout(() => {
-      const fill = root.querySelector('#pcp-prog-fill');
+      const fill = root.querySelector("#pcp-prog-fill");
       if (fill) fill.style.width = `${Math.min(100, progressPct)}%`;
     }, 150);
   });
 
   // Anime le compteur validations dans le hero
   setTimeout(() => {
-    const el = root.querySelector('[data-counter]');
+    const el = root.querySelector("[data-counter]");
     if (el) animateCounter(el, 0, parseInt(el.dataset.counter, 10) || 0, 800);
   }, 100);
 
   // Clic / clavier sur un palier de la roadmap → sheet de détail
   const openFromStop = (el) => {
     const tierNum = parseInt(el.dataset.tier, 10);
-    const stop = stops.find(s => s.tier.tier === tierNum);
+    const stop = stops.find((s) => s.tier.tier === tierNum);
     if (!stop) return;
-    track('parcours_pro.tier_detail', { tier: tierNum });
+    track("parcours_pro.tier_detail", { tier: tierNum });
     openPalierSheet(stop.tier, totalVals);
   };
-  root.querySelectorAll('.pcp-road-stop[data-tier]').forEach(el => {
-    el.addEventListener('click', () => openFromStop(el));
-    el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFromStop(el); }
+  root.querySelectorAll(".pcp-road-stop[data-tier]").forEach((el) => {
+    el.addEventListener("click", () => openFromStop(el));
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openFromStop(el);
+      }
     });
   });
 
   // Bouton "Voir tous les paliers →"
-  root.querySelector('#pcp-see-all')?.addEventListener('click', () => {
-    track('parcours_pro.see_all');
-    navigate('#/parcours-complet');
+  root.querySelector("#pcp-see-all")?.addEventListener("click", () => {
+    track("parcours_pro.see_all");
+    navigate("#/parcours-complet");
   });
+
+  // Trophées card
+  const tCard = root.querySelector("#pcp-trophees");
+  if (tCard) {
+    const goTrophees = () => {
+      track("parcours_pro.trophees_open");
+      navigate("#/trophees-moniteur");
+    };
+    tCard.addEventListener("click", goTrophees);
+    tCard.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        goTrophees();
+      }
+    });
+  }
 }

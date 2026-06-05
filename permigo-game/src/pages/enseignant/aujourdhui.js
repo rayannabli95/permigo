@@ -2,17 +2,17 @@
 // Enseignant — Aujourd'hui
 // KPI du jour + activité récente + mes élèves actifs
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { toast } from '@/components/common/toast.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { navigate } from '@/router.js';
-import { REMC_TOTAL } from '@/data/remc.js';
-import { labelComp } from '@/utils/remc-label.js';
-import { statutCfg } from '@/utils/statut-label.js';
-import { icon, iconBadge } from '@/utils/icons.js';
-import { renderUserAvatar } from '@/components/common/avatar.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { toast } from "@/components/common/toast.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { REMC_TOTAL } from "@/data/remc.js";
+import { labelComp } from "@/utils/remc-label.js";
+import { statutCfg } from "@/utils/statut-label.js";
+import { icon, iconBadge } from "@/utils/icons.js";
+import { renderUserAvatar } from "@/components/common/avatar.js";
 
 // ─── Statuts labels : mapping centralisé @/utils/statut-label.js ──
 
@@ -40,6 +40,19 @@ const STYLE = `<style>
     color: var(--mu2);
     margin: 0;
     text-transform: capitalize;
+  }
+  .aj-xp-strip { display: flex; align-items: center; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .aj-xp-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 99px;
+    background: rgba(88,204,2,.1); border: 1px solid rgba(88,204,2,.25);
+    font: 600 12px/1 'Inter', sans-serif; color: var(--grd);
+  }
+  .aj-streak-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 99px;
+    background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.25);
+    font: 600 12px/1 'Inter', sans-serif; color: var(--amk);
   }
 
   /* Widgets KPI — style Apple Health */
@@ -416,17 +429,20 @@ const STYLE = `<style>
 
 // ─── Helpers ──────────────────────────────────────────────────────
 function formatDate(date) {
-  return date.toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  return date.toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 }
 
 function formatHeure(isoStr) {
-  if (!isoStr) return '';
-  return new Date(isoStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  if (!isoStr) return "";
+  return new Date(isoStr).toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function todayISO() {
@@ -437,7 +453,10 @@ function todayISO() {
 let _ptrCleanup = null;
 
 export async function unmount() {
-  if (_ptrCleanup) { _ptrCleanup(); _ptrCleanup = null; }
+  if (_ptrCleanup) {
+    _ptrCleanup();
+    _ptrCleanup = null;
+  }
 }
 
 export async function mount(root) {
@@ -445,7 +464,7 @@ export async function mount(root) {
   const _me = getCurUser();
   if (!_me) return;
 
-  track('page.view', { page: 'aujourdhui', role: _me.role });
+  track("page.view", { page: "aujourdhui", role: _me.role });
 
   // Skeleton
   root.innerHTML = `
@@ -467,106 +486,138 @@ export async function mount(root) {
   await renderAll();
 
   // ─── Pull-to-refresh + Live counter ──────────────────────────────────
-  const { attachPullToRefresh, animateCounter } = await import('@/utils/gestures.js');
+  const { attachPullToRefresh, animateCounter } =
+    await import("@/utils/gestures.js");
 
   // PTR : refait le fetch + render avec animation du compteur
   _ptrCleanup?.();
-  _ptrCleanup = attachPullToRefresh(document.scrollingElement || document.body, {
-    onRefresh: async () => {
-      const before = parseInt(root.querySelector('.aj-kpi .aj-kpi-val')?.textContent || '0', 10);
-      await renderAll();
-      const after = parseInt(root.querySelector('.aj-kpi .aj-kpi-val')?.textContent || '0', 10);
-      // Si nouvelles validations détectées, on anime le delta visuellement
-      if (after > before) {
-        const el = root.querySelector('.aj-kpi .aj-kpi-val');
-        if (el) animateCounter(el, before, after, 700);
-      }
+  _ptrCleanup = attachPullToRefresh(
+    document.scrollingElement || document.body,
+    {
+      onRefresh: async () => {
+        const before = parseInt(
+          root.querySelector(".aj-kpi .aj-kpi-val")?.textContent || "0",
+          10,
+        );
+        await renderAll();
+        const after = parseInt(
+          root.querySelector(".aj-kpi .aj-kpi-val")?.textContent || "0",
+          10,
+        );
+        // Si nouvelles validations détectées, on anime le delta visuellement
+        if (after > before) {
+          const el = root.querySelector(".aj-kpi .aj-kpi-val");
+          if (el) animateCounter(el, before, after, 700);
+        }
+      },
     },
-  });
+  );
 
   return;
 }
 
 // ─── Render principal (factorisé pour pull-to-refresh) ─────────────────
 async function renderInto(root, _me) {
-
   // ─── Fetch en parallèle ────────────────────────────────────────
   const today = todayISO();
 
-  const [valsToday, valsAll, elevesAll, consolidRes, todaySessionsRes] = await Promise.all([
+  const [
+    valsToday,
+    valsAll,
+    elevesAll,
+    consolidRes,
+    todaySessionsRes,
+    profileRes,
+  ] = await Promise.all([
     // Validations d'aujourd'hui (faites par moi)
     sb
-      .from('validations')
-      .select('id, competence_id, statut, eleve_id, validated_at')
-      .eq('validated_by', _me.id)
-      .gte('validated_at', today + 'T00:00:00.000Z')
-      .lte('validated_at', today + 'T23:59:59.999Z')
-      .order('validated_at', { ascending: false }),
+      .from("validations")
+      .select("id, competence_id, statut, eleve_id, validated_at")
+      .eq("validated_by", _me.id)
+      .gte("validated_at", today + "T00:00:00.000Z")
+      .lte("validated_at", today + "T23:59:59.999Z")
+      .order("validated_at", { ascending: false }),
 
     // 5 dernières validations (activité récente)
     sb
-      .from('validations')
-      .select('id, competence_id, statut, eleve_id, validated_at')
-      .eq('validated_by', _me.id)
-      .order('validated_at', { ascending: false })
+      .from("validations")
+      .select("id, competence_id, statut, eleve_id, validated_at")
+      .eq("validated_by", _me.id)
+      .order("validated_at", { ascending: false })
       .limit(5),
 
     // Tous les élèves de l'école (RLS filtre par école automatiquement)
     sb
-      .from('profiles')
-      .select('id, prenom, nom, last_active_at, enseignant_id, avatar_url')
-      .eq('role', 'eleve'),
+      .from("profiles")
+      .select("id, prenom, nom, last_active_at, enseignant_id, avatar_url")
+      .eq("role", "eleve"),
 
     // Quiz de consolidation en attente pour mes élèves
     sb
-      .from('validations')
-      .select('id', { count: 'exact', head: true })
-      .eq('validated_by', _me.id)
-      .not('consolidation_due_at', 'is', null)
-      .lt('consolidation_due_at', new Date().toISOString())
-      .is('consolidation_done_at', null),
+      .from("validations")
+      .select("id", { count: "exact", head: true })
+      .eq("validated_by", _me.id)
+      .not("consolidation_due_at", "is", null)
+      .lt("consolidation_due_at", new Date().toISOString())
+      .is("consolidation_done_at", null),
 
     // Sessions loggées aujourd'hui (pour le widget récap soir)
     // Note : Supabase rpc ne supporte pas .catch() direct → on wrap dans Promise.resolve
-    Promise.resolve(sb.rpc('get_my_today_sessions')).then(r => r).catch(() => ({ data: null })),
+    Promise.resolve(sb.rpc("get_my_today_sessions"))
+      .then((r) => r)
+      .catch(() => ({ data: null })),
+
+    // Profil : prénom + streak pour le greeting
+    sb
+      .from("profiles")
+      .select("prenom, streak_pro_days")
+      .eq("id", _me.id)
+      .maybeSingle(),
   ]);
 
   if (valsToday.error || valsAll.error) {
-    toast('Impossible de charger les données', 'error');
+    toast("Impossible de charger les données", "error");
   }
 
   const todayVals = valsToday.data || [];
   const recentVals = valsAll.data || [];
   const elevesMap = {};
-  (elevesAll.data || []).forEach((e, i) => { elevesMap[e.id] = { ...e, idx: i }; });
+  (elevesAll.data || []).forEach((e, i) => {
+    elevesMap[e.id] = { ...e, idx: i };
+  });
+
+  const prenom = profileRes?.data?.prenom || "";
+  const streakPro = profileRes?.data?.streak_pro_days ?? 0;
 
   // KPI
-  const acquisAujourdhui = todayVals.filter(v => v.statut === 'acquis').length;
+  const acquisAujourdhui = todayVals.filter(
+    (v) => v.statut === "acquis",
+  ).length;
 
   // Élèves que j'ai validé au moins une fois (tous statuts)
   const { data: elevesValides } = await sb
-    .from('validations')
-    .select('eleve_id, competence_id, statut')
-    .eq('validated_by', _me.id);
+    .from("validations")
+    .select("eleve_id, competence_id, statut")
+    .eq("validated_by", _me.id);
 
   const tousByEleve = {};
-  (elevesValides || []).forEach(v => {
+  (elevesValides || []).forEach((v) => {
     if (!tousByEleve[v.eleve_id]) tousByEleve[v.eleve_id] = { acquis: 0 };
-    if (v.statut === 'acquis') tousByEleve[v.eleve_id].acquis++;
+    if (v.statut === "acquis") tousByEleve[v.eleve_id].acquis++;
   });
 
   // Union : élèves directement attitrés (enseignant_id = me) + élèves déjà validés
   // → garantit que les élèves assignés sans validation encore apparaissent quand même
   const mesIds = new Set(
     Object.values(elevesMap)
-      .filter(e => e.enseignant_id === _me.id)
-      .map(e => e.id)
+      .filter((e) => e.enseignant_id === _me.id)
+      .map((e) => e.id),
   );
   for (const id of Object.keys(tousByEleve)) mesIds.add(id);
 
-  const mesElevesActifs = Array.from(mesIds).map(id => ({
+  const mesElevesActifs = Array.from(mesIds).map((id) => ({
     id,
-    ...(elevesMap[id] || { prenom: 'Élève', nom: '', idx: 0 }),
+    ...(elevesMap[id] || { prenom: "Élève", nom: "", idx: 0 }),
     acquis: tousByEleve[id]?.acquis || 0,
   }));
 
@@ -577,14 +628,14 @@ async function renderInto(root, _me) {
 
   // Élèves inactifs depuis 7+ jours parmi mes élèves
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
-  const inactifCount = mesElevesActifs.filter(e => {
+  const inactifCount = mesElevesActifs.filter((e) => {
     const p = elevesMap[e.id];
     return !p?.last_active_at || p.last_active_at < sevenDaysAgo;
   }).length;
 
   // Élèves à reconnecter : inactifs depuis 14j+ parmi mes élèves suivis
   const fourteenDaysAgo = new Date(Date.now() - 14 * 86400000).toISOString();
-  const reconnectList = mesElevesActifs.filter(e => {
+  const reconnectList = mesElevesActifs.filter((e) => {
     const p = elevesMap[e.id];
     return !p?.last_active_at || p.last_active_at < fourteenDaysAgo;
   });
@@ -595,96 +646,138 @@ async function renderInto(root, _me) {
   // avancer le prochain élève → fallback démarrage. Ton factuel, pas d'emoji.
   let hero;
   if (reconnectCount > 0) {
-    const noms = reconnectList.slice(0, 2).map(e => e.prenom || 'Élève').join(', ');
+    const noms = reconnectList
+      .slice(0, 2)
+      .map((e) => e.prenom || "Élève")
+      .join(", ");
     hero = {
-      tone: 'warn', ico: 'users', kicker: 'À relancer',
-      title: `${reconnectCount} élève${reconnectCount > 1 ? 's' : ''} sans activité depuis 14 j`,
-      sub: noms ? `Dont ${esc(noms)}${reconnectCount > 2 ? '…' : ''}` : '',
-      cta: 'Voir qui relancer', href: '#/eleves?tab=arelancer', ev: 'hero.reconnect',
+      tone: "warn",
+      ico: "users",
+      kicker: "À relancer",
+      title: `${reconnectCount} élève${reconnectCount > 1 ? "s" : ""} sans activité depuis 14 j`,
+      sub: noms ? `Dont ${esc(noms)}${reconnectCount > 2 ? "…" : ""}` : "",
+      cta: "Voir qui relancer",
+      href: "#/eleves?tab=arelancer",
+      ev: "hero.reconnect",
     };
   } else if (consolidCount > 0) {
     hero = {
-      tone: 'warn', ico: 'refresh', kicker: 'Côté élève',
-      title: `${consolidCount} quiz pas encore refait${consolidCount > 1 ? 's' : ''} par tes élèves`,
-      sub: 'Le quiz de révision aide l\'élève à mémoriser ses acquis. Un petit rappel oral en leçon suffit.',
-      cta: 'Voir mes élèves', href: '#/eleves', ev: 'hero.consolidation',
+      tone: "warn",
+      ico: "refresh",
+      kicker: "Côté élève",
+      title: `${consolidCount} quiz pas encore refait${consolidCount > 1 ? "s" : ""} par tes élèves`,
+      sub: "Le quiz de révision aide l'élève à mémoriser ses acquis. Un petit rappel oral en leçon suffit.",
+      cta: "Voir mes élèves",
+      href: "#/eleves",
+      ev: "hero.consolidation",
     };
   } else if (inactifCount > 0) {
     hero = {
-      tone: 'neutral', ico: 'clock', kicker: 'Suivi',
-      title: `${inactifCount} élève${inactifCount > 1 ? 's' : ''} inactif${inactifCount > 1 ? 's' : ''} cette semaine`,
-      sub: 'Un message peut les remettre en route.',
-      cta: 'Voir mes élèves', href: '#/eleves', ev: 'hero.inactifs',
+      tone: "neutral",
+      ico: "clock",
+      kicker: "Suivi",
+      title: `${inactifCount} élève${inactifCount > 1 ? "s" : ""} inactif${inactifCount > 1 ? "s" : ""} cette semaine`,
+      sub: "Un message peut les remettre en route.",
+      cta: "Voir mes élèves",
+      href: "#/eleves",
+      ev: "hero.inactifs",
     };
   } else if (nbElevesActifs > 0) {
     // Tout est à jour → proposer de faire avancer l'élève le moins avancé
-    const next = mesElevesActifs.slice().sort((a, b) => (a.acquis || 0) - (b.acquis || 0))[0];
+    const next = mesElevesActifs
+      .slice()
+      .sort((a, b) => (a.acquis || 0) - (b.acquis || 0))[0];
     hero = {
-      tone: 'ok', ico: 'check', kicker: 'Tout est à jour',
-      title: 'Aucune relance en attente',
-      sub: next ? `Prochain élève à faire avancer : ${esc(next.prenom || 'Élève')}` : 'Enregistre ta prochaine séance.',
-      cta: next ? 'Ouvrir son livret' : 'Enregistrer une séance',
-      href: next ? `#/livret/${next.id}` : '#/log-session', ev: 'hero.next_eleve',
+      tone: "ok",
+      ico: "check",
+      kicker: "Tout est à jour",
+      title: "Aucune relance en attente",
+      sub: next
+        ? `Prochain élève à faire avancer : ${esc(next.prenom || "Élève")}`
+        : "Enregistre ta prochaine séance.",
+      cta: next ? "Ouvrir son livret" : "Enregistrer une séance",
+      href: next ? `#/livret/${next.id}` : "#/log-session",
+      ev: "hero.next_eleve",
     };
   } else {
     hero = {
-      tone: 'neutral', ico: 'users', kicker: 'Démarrage',
-      title: 'Aucun élève assigné',
-      sub: 'Tes élèves apparaîtront ici une fois affectés par le gérant.',
-      cta: null, href: null, ev: null,
+      tone: "neutral",
+      ico: "users",
+      kicker: "Démarrage",
+      title: "Aucun élève assigné",
+      sub: "Tes élèves apparaîtront ici une fois affectés par le gérant.",
+      cta: null,
+      href: null,
+      ev: null,
     };
   }
 
   const heroHtml = `
-    <div class="aj-hero tone-${hero.tone}"${hero.href ? ` id="aj-hero" data-href="${esc(hero.href)}" data-ev="${esc(hero.ev)}"` : ''}>
+    <div class="aj-hero tone-${hero.tone}"${hero.href ? ` id="aj-hero" data-href="${esc(hero.href)}" data-ev="${esc(hero.ev)}"` : ""}>
       <div class="aj-hero-top">
-        <div class="aj-hero-ico">${iconBadge(hero.ico, { color: hero.tone === 'warn' ? 'var(--amk)' : hero.tone === 'ok' ? 'var(--grd)' : 'var(--a)', size: 44 })}</div>
+        <div class="aj-hero-ico">${iconBadge(hero.ico, { color: hero.tone === "warn" ? "var(--amk)" : hero.tone === "ok" ? "var(--grd)" : "var(--a)", size: 44 })}</div>
         <div class="aj-hero-body">
           <div class="aj-hero-kicker">${esc(hero.kicker)}</div>
           <h2 class="aj-hero-title">${hero.title}</h2>
-          ${hero.sub ? `<p class="aj-hero-sub">${hero.sub}</p>` : ''}
+          ${hero.sub ? `<p class="aj-hero-sub">${hero.sub}</p>` : ""}
         </div>
       </div>
-      ${hero.cta ? `<button class="aj-hero-cta" type="button" id="aj-hero-cta">${esc(hero.cta)} ${icon('chevron-right', { size: 16, strokeWidth: 2.5 })}</button>` : ''}
+      ${hero.cta ? `<button class="aj-hero-cta" type="button" id="aj-hero-cta">${esc(hero.cta)} ${icon("chevron-right", { size: 16, strokeWidth: 2.5 })}</button>` : ""}
     </div>`;
 
   // ─── Widget récap soir ────────────────────────────────────────
   const isEvening = new Date().getHours() >= 18;
   const todaySessions = todaySessionsRes?.data || [];
-  const totalSessionMinutes = todaySessions.reduce((s, r) => s + (r.duration_minutes || 0), 0);
-  const confirmedCount = todaySessions.filter(r => r.confirmation_status === 'confirmed').length;
+  const totalSessionMinutes = todaySessions.reduce(
+    (s, r) => s + (r.duration_minutes || 0),
+    0,
+  );
+  const confirmedCount = todaySessions.filter(
+    (r) => r.confirmation_status === "confirmed",
+  ).length;
 
   function _fmtMin(min) {
-    if (!min) return '0h';
-    const h = Math.floor(min / 60), m = min % 60;
+    if (!min) return "0h";
+    const h = Math.floor(min / 60),
+      m = min % 60;
     if (h === 0) return `${m}min`;
     return m === 0 ? `${h}h` : `${h}h${m}`;
   }
   function _statusLabel(s) {
-    if (s === 'confirmed') return '<span class="aj-recap-row-status s-confirmed">✓ Confirmée</span>';
-    if (s === 'refused')   return '<span class="aj-recap-row-status s-refused">Refusée</span>';
-    if (s === 'auto')      return '<span class="aj-recap-row-status s-auto">Auto</span>';
+    if (s === "confirmed")
+      return '<span class="aj-recap-row-status s-confirmed">✓ Confirmée</span>';
+    if (s === "refused")
+      return '<span class="aj-recap-row-status s-refused">Refusée</span>';
+    if (s === "auto")
+      return '<span class="aj-recap-row-status s-auto">Auto</span>';
     return '<span class="aj-recap-row-status s-pending">En attente</span>';
   }
 
-  const recapWidget = isEvening && todaySessions.length > 0 ? `
+  const recapWidget =
+    isEvening && todaySessions.length > 0
+      ? `
     <div class="aj-recap" id="aj-recap-soir" role="button" tabindex="0" aria-label="Ouvrir le log de session">
       <div class="aj-recap-head">
         <span class="aj-recap-title">Ta journée</span>
         <span class="aj-recap-kpi">${_fmtMin(totalSessionMinutes)}</span>
       </div>
-      <div class="aj-recap-sub">${todaySessions.length} session${todaySessions.length > 1 ? 's' : ''} enregistrée${todaySessions.length > 1 ? 's' : ''}${confirmedCount > 0 ? ` · ${confirmedCount} confirmée${confirmedCount > 1 ? 's' : ''} par tes élèves` : ''}</div>
+      <div class="aj-recap-sub">${todaySessions.length} session${todaySessions.length > 1 ? "s" : ""} enregistrée${todaySessions.length > 1 ? "s" : ""}${confirmedCount > 0 ? ` · ${confirmedCount} confirmée${confirmedCount > 1 ? "s" : ""} par tes élèves` : ""}</div>
       <div class="aj-recap-rows">
-        ${todaySessions.map(s => `
+        ${todaySessions
+          .map(
+            (s) => `
           <div class="aj-recap-row">
-            <span class="aj-recap-row-name">${esc(s.eleve_prenom || 'Élève')}</span>
+            <span class="aj-recap-row-name">${esc(s.eleve_prenom || "Élève")}</span>
             <span class="aj-recap-row-dur">${_fmtMin(s.duration_minutes)}</span>
             ${_statusLabel(s.confirmation_status)}
           </div>
-        `).join('')}
+        `,
+          )
+          .join("")}
       </div>
     </div>
-  ` : '';
+  `
+      : "";
 
   // ─── Render ───────────────────────────────────────────────────
   root.innerHTML = `
@@ -692,8 +785,17 @@ async function renderInto(root, _me) {
     <div class="aj-page anim-slide-up">
 
       <header class="aj-hd">
-        <h1 class="aj-h1">Aujourd'hui</h1>
+        <h1 class="aj-h1">${prenom ? `Bonjour, ${esc(prenom)}` : "Aujourd'hui"}</h1>
         <p class="aj-date">${formatDate(new Date())}</p>
+        ${
+          acquisAujourdhui > 0 || streakPro > 0
+            ? `
+        <div class="aj-xp-strip">
+          ${acquisAujourdhui > 0 ? `<span class="aj-xp-chip">+${acquisAujourdhui * 10} XP aujourd'hui</span>` : ""}
+          ${streakPro >= 2 ? `<span class="aj-streak-chip">🔥 ${streakPro} jours actifs</span>` : ""}
+        </div>`
+            : ""
+        }
       </header>
 
       ${recapWidget}
@@ -705,25 +807,26 @@ async function renderInto(root, _me) {
       <div class="aj-quickstats">
         <div class="aj-quickstat">
           <div class="aj-quickstat-val">${acquisAujourdhui}</div>
-          <div class="aj-quickstat-lbl">Validée${acquisAujourdhui > 1 ? 's' : ''} aujourd'hui</div>
+          <div class="aj-quickstat-lbl">Validée${acquisAujourdhui > 1 ? "s" : ""} aujourd'hui</div>
         </div>
         <div class="aj-quickstat">
           <div class="aj-quickstat-val">${nbElevesActifs}</div>
-          <div class="aj-quickstat-lbl">Élève${nbElevesActifs > 1 ? 's' : ''} suivi${nbElevesActifs > 1 ? 's' : ''}</div>
+          <div class="aj-quickstat-lbl">Élève${nbElevesActifs > 1 ? "s" : ""} suivi${nbElevesActifs > 1 ? "s" : ""}</div>
         </div>
       </div>
 
       <!-- Activité récente -->
       <div class="aj-section">
         <div class="aj-section-title">Activité récente</div>
-        ${recentVals.length === 0
-          ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;">
-               <span style="opacity:.5;color:var(--mu)" aria-hidden="true">${icon('clipboard',{size:34})}</span>
+        ${
+          recentVals.length === 0
+            ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;">
+               <span style="opacity:.5;color:var(--mu)" aria-hidden="true">${icon("clipboard", { size: 34 })}</span>
                <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Pas encore de validation</strong>
                <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Enregistre ta première séance<br>pour voir l'activité ici.</span>
              </div>`
-          : `<div class="aj-activity-list">
-              ${recentVals.map(v => renderActRow(v, elevesMap)).join('')}
+            : `<div class="aj-activity-list">
+              ${recentVals.map((v) => renderActRow(v, elevesMap)).join("")}
             </div>`
         }
       </div>
@@ -731,14 +834,15 @@ async function renderInto(root, _me) {
       <!-- Mes élèves -->
       <div class="aj-section">
         <div class="aj-section-title">Mes élèves</div>
-        ${mesElevesActifs.length === 0
-          ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;">
-               <span style="opacity:.5;color:var(--mu)" aria-hidden="true">${icon('users',{size:34})}</span>
+        ${
+          mesElevesActifs.length === 0
+            ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;">
+               <span style="opacity:.5;color:var(--mu)" aria-hidden="true">${icon("users", { size: 34 })}</span>
                <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Aucun élève assigné</strong>
                <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Tes élèves apparaîtront ici<br>une fois affectés par le gérant.</span>
              </div>`
-          : `<div class="aj-eleves-list">
-              ${mesElevesActifs.map(e => renderEleveRow(e)).join('')}
+            : `<div class="aj-eleves-list">
+              ${mesElevesActifs.map((e) => renderEleveRow(e)).join("")}
             </div>`
         }
       </div>
@@ -751,24 +855,27 @@ async function renderInto(root, _me) {
   // Hero « prochaine action » → navigue vers la cible priorisée
   if (hero.href) {
     const goHero = () => {
-      track(hero.ev || 'hero.clicked');
+      track(hero.ev || "hero.clicked");
       navigate(hero.href);
     };
-    root.querySelector('#aj-hero-cta')?.addEventListener('click', goHero);
-    root.querySelector('#aj-hero')?.addEventListener('click', (e) => {
+    root.querySelector("#aj-hero-cta")?.addEventListener("click", goHero);
+    root.querySelector("#aj-hero")?.addEventListener("click", (e) => {
       // tap sur la carte (hors bouton, déjà géré) = même action
-      if (!e.target.closest('#aj-hero-cta')) goHero();
+      if (!e.target.closest("#aj-hero-cta")) goHero();
     });
   }
 
   // Recap soir / prompt log → page dédiée plein écran
-  const goLogSession = () => { track('log_prompt.soir.clicked'); navigate('#/log-session'); };
-  root.querySelector('#aj-recap-soir')?.addEventListener('click', goLogSession);
+  const goLogSession = () => {
+    track("log_prompt.soir.clicked");
+    navigate("#/log-session");
+  };
+  root.querySelector("#aj-recap-soir")?.addEventListener("click", goLogSession);
 
-  root.querySelectorAll('.aj-eleve-row[data-eleve-id]').forEach(row => {
-    row.addEventListener('click', () => {
+  root.querySelectorAll(".aj-eleve-row[data-eleve-id]").forEach((row) => {
+    row.addEventListener("click", () => {
       const id = row.dataset.eleveId;
-      track('eleve.livret.open', { eleve_id: id, from: 'aujourdhui' });
+      track("eleve.livret.open", { eleve_id: id, from: "aujourdhui" });
       navigate(`#/livret/${id}`);
     });
   });
@@ -776,18 +883,20 @@ async function renderInto(root, _me) {
 
 // ─── Sub-renders ──────────────────────────────────────────────────
 function renderActRow(val, elevesMap) {
-  const eleve = elevesMap[val.eleve_id] || { prenom: 'Élève', nom: '', idx: 0 };
-  const fullNom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(' ') || '—');
+  const eleve = elevesMap[val.eleve_id] || { prenom: "Élève", nom: "", idx: 0 };
+  const fullNom = esc(
+    [eleve.prenom, eleve.nom].filter(Boolean).join(" ") || "—",
+  );
   const cfg = statutCfg(val.statut);
 
   return `
     <div class="aj-act-row">
       <div class="aj-act-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
       <div class="aj-act-info">
-        <div class="aj-act-name">${fullNom || '—'}</div>
+        <div class="aj-act-name">${fullNom || "—"}</div>
         <div class="aj-act-comp">
           <span class="aj-act-comp-label">${esc(labelComp(val.competence_id))}</span>
-          <span class="aj-act-comp-code">${esc(val.competence_id || '—')}</span>
+          <span class="aj-act-comp-code">${esc(val.competence_id || "—")}</span>
         </div>
       </div>
       <div class="aj-act-right">
@@ -801,14 +910,17 @@ function renderActRow(val, elevesMap) {
 }
 
 function renderEleveRow(eleve) {
-  const fullNom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(' ') || '—');
-  const pct = REMC_TOTAL > 0 ? Math.round((eleve.acquis / REMC_TOTAL) * 100) : 0;
+  const fullNom = esc(
+    [eleve.prenom, eleve.nom].filter(Boolean).join(" ") || "—",
+  );
+  const pct =
+    REMC_TOTAL > 0 ? Math.round((eleve.acquis / REMC_TOTAL) * 100) : 0;
 
   return `
     <div class="aj-eleve-row" data-eleve-id="${esc(eleve.id)}"
          role="button" tabindex="0" aria-label="Livret de ${fullNom}">
       <div class="aj-eleve-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
-      <span class="aj-eleve-nom">${fullNom || '—'}</span>
+      <span class="aj-eleve-nom">${fullNom || "—"}</span>
       <span class="aj-eleve-prog">${eleve.acquis}/${REMC_TOTAL}</span>
       <span class="aj-eleve-chev" aria-hidden="true">›</span>
     </div>
