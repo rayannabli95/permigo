@@ -416,9 +416,24 @@ async function loadData() {
     .order("prenom");
 
   if (e1) {
+    console.error("[mes-eleves] query error", e1);
     toast("Impossible de charger les élèves", "error");
     _eleves = [];
     return;
+  }
+
+  if (!elevesRaw || elevesRaw.length === 0) {
+    const {
+      data: { session },
+    } = await sb.auth.getSession();
+    console.warn(
+      "[mes-eleves] 0 élèves retournés. Session active:",
+      !!session,
+      "| CUR_USER:",
+      _me?.id,
+      "| auto_ecole_id:",
+      _me?.auto_ecole_id,
+    );
   }
 
   // Tag "attitré" sur chaque élève — affichage UI peut prioriser

@@ -10,22 +10,46 @@
 // Le choix est mémorisé en localStorage (clé `permigo_cookie_consent`).
 // ═══════════════════════════════════════════════════════════════
 
-const KEY = 'permigo_cookie_consent';
+const KEY = "permigo_cookie_consent";
+const COOKIE_NAME = "pg_consent";
+const COOKIE_DAYS = 365;
+
+function _getCookie() {
+  try {
+    const m = document.cookie.match("(?:^|;)\\s*" + COOKIE_NAME + "=([^;]+)");
+    return m ? decodeURIComponent(m[1]) : null;
+  } catch {
+    return null;
+  }
+}
+
+function _setCookie(value) {
+  try {
+    const exp = new Date(Date.now() + COOKIE_DAYS * 864e5).toUTCString();
+    document.cookie = `${COOKIE_NAME}=${encodeURIComponent(value)};expires=${exp};path=/;SameSite=Lax`;
+  } catch {}
+}
 
 /** @returns {'all'|'essential'|null} */
 export function getConsent() {
-  try { return localStorage.getItem(KEY); } catch { return null; }
+  try {
+    return localStorage.getItem(KEY) || _getCookie();
+  } catch {
+    return _getCookie();
+  }
 }
 
 /** L'analytics produit n'est autorisé que si l'utilisateur a accepté "all". */
 export function analyticsConsentGranted() {
-  return getConsent() === 'all';
+  return getConsent() === "all";
 }
 
 function setConsent(value) {
-  try { localStorage.setItem(KEY, value); } catch { /* mode privé : pas de persistance */ }
-  // Permet à analytics.js (et autres) de réagir immédiatement.
-  window.dispatchEvent(new CustomEvent('permigo:consent', { detail: value }));
+  try {
+    localStorage.setItem(KEY, value);
+  } catch {}
+  _setCookie(value); // double persistance : cookie survit au clear localStorage (Safari ITP)
+  window.dispatchEvent(new CustomEvent("permigo:consent", { detail: value }));
 }
 
 const STYLE = `<style>
@@ -69,10 +93,10 @@ const STYLE = `<style>
 export function mountCookieBanner() {
   // Choix déjà fait → rien à afficher.
   if (getConsent()) return;
-  if (document.getElementById('ck-banner-root')) return;
+  if (document.getElementById("ck-banner-root")) return;
 
-  const root = document.createElement('div');
-  root.id = 'ck-banner-root';
+  const root = document.createElement("div");
+  root.id = "ck-banner-root";
   root.innerHTML = `${STYLE}
     <div class="ck-banner" role="dialog" aria-label="Préférences cookies" aria-live="polite">
       <div class="ck-ttl">Cookies & confidentialité</div>
@@ -88,17 +112,19 @@ export function mountCookieBanner() {
     </div>`;
   document.body.appendChild(root);
 
-  const banner = root.querySelector('.ck-banner');
-  requestAnimationFrame(() => banner.classList.add('on'));
+  const banner = root.querySelector(".ck-banner");
+  requestAnimationFrame(() => banner.classList.add("on"));
 
   const close = (value) => {
     setConsent(value);
-    banner.classList.remove('on');
+    banner.classList.remove("on");
     const done = () => root.remove();
-    banner.addEventListener('transitionend', done, { once: true });
+    banner.addEventListener("transitionend", done, { once: true });
     setTimeout(done, 500); // fallback si transitionend ne se déclenche pas
   };
 
-  root.querySelector('#ck-all').addEventListener('click', () => close('all'));
-  root.querySelector('#ck-essential').addEventListener('click', () => close('essential'));
+  root.querySelector("#ck-all").addEventListener("click", () => close("all"));
+  root
+    .querySelector("#ck-essential")
+    .addEventListener("click", () => close("essential"));
 }
