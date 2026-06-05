@@ -15,11 +15,11 @@
  *   - notifications (UPDATE read = true)
  */
 
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { toast } from '@/components/common/toast.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { toast } from "@/components/common/toast.js";
 
 let _notifs = [];
 
@@ -65,7 +65,7 @@ export async function mountNotifBell(container) {
     </style>
     <div class="nb-wrap">
       <button class="nb-btn" id="nb-toggle" aria-label="Notifications" title="Notifications">
-        🔔
+        ${icon("bell", { size: 20, strokeWidth: 2 })}
         <span class="nb-badge" id="nb-badge" style="display:none">0</span>
       </button>
       <div class="nb-panel" id="nb-panel">
@@ -74,7 +74,7 @@ export async function mountNotifBell(container) {
           <div class="ct" id="nb-count">…</div>
         </div>
         <div class="nb-list" id="nb-list">
-          <div class="nb-empty"><div class="em">⏳</div>Chargement…</div>
+          <div class="nb-empty"><div class="em">${icon("clock", { size: 22, strokeWidth: 1.5 })}</div>Chargement…</div>
         </div>
         <div class="nb-foot" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
           <button id="nb-readall" disabled>Tout marquer lu</button>
@@ -89,65 +89,77 @@ export async function mountNotifBell(container) {
 }
 
 async function refreshBell(container, me) {
-  const { data, error } = await sb.from('notifications')
-    .select('id, type, title, body, read, created_at, data')
-    .eq('user_id', me.id)
-    .order('created_at', { ascending: false })
+  const { data, error } = await sb
+    .from("notifications")
+    .select("id, type, title, body, read, created_at, data")
+    .eq("user_id", me.id)
+    .order("created_at", { ascending: false })
     .limit(20);
-  if (error) { console.warn('[notif-bell] err', error); return; }
+  if (error) {
+    console.warn("[notif-bell] err", error);
+    return;
+  }
   _notifs = data || [];
   renderList(container);
 }
 
 function renderList(container) {
-  const badge = container.querySelector('#nb-badge');
-  const count = container.querySelector('#nb-count');
-  const list = container.querySelector('#nb-list');
-  const readall = container.querySelector('#nb-readall');
+  const badge = container.querySelector("#nb-badge");
+  const count = container.querySelector("#nb-count");
+  const list = container.querySelector("#nb-list");
+  const readall = container.querySelector("#nb-readall");
 
-  const unread = _notifs.filter(n => !n.read).length;
+  const unread = _notifs.filter((n) => !n.read).length;
   if (unread > 0) {
-    badge.style.display = 'flex';
-    badge.textContent = unread > 99 ? '99+' : String(unread);
+    badge.style.display = "flex";
+    badge.textContent = unread > 99 ? "99+" : String(unread);
   } else {
-    badge.style.display = 'none';
+    badge.style.display = "none";
   }
-  count.textContent = `${unread} non lue${unread > 1 ? 's' : ''} / ${_notifs.length}`;
+  count.textContent = `${unread} non lue${unread > 1 ? "s" : ""} / ${_notifs.length}`;
   readall.disabled = unread === 0;
 
   if (_notifs.length === 0) {
-    list.innerHTML = `<div class="nb-empty"><div class="em">${icon('bell',{size:26})}</div>Aucune notification</div>`;
+    list.innerHTML = `<div class="nb-empty"><div class="em">${icon("bell", { size: 26 })}</div>Aucune notification</div>`;
     return;
   }
 
-  list.innerHTML = _notifs.map(n => `
-    <div class="nb-item ${n.read ? '' : 'unread'}" data-id="${esc(n.id)}">
+  list.innerHTML = _notifs
+    .map(
+      (n) => `
+    <div class="nb-item ${n.read ? "" : "unread"}" data-id="${esc(n.id)}">
       <div class="nm">${esc(n.title)}</div>
-      ${n.body ? `<div class="bd">${esc(n.body)}</div>` : ''}
+      ${n.body ? `<div class="bd">${esc(n.body)}</div>` : ""}
       <div class="dt">${timeAgo(n.created_at)}</div>
     </div>
-  `).join('');
+  `,
+    )
+    .join("");
 
   // Click sur une notif → mark read + navigate vers l'action liée
-  list.querySelectorAll('.nb-item').forEach(it => {
-    it.addEventListener('click', async () => {
+  list.querySelectorAll(".nb-item").forEach((it) => {
+    it.addEventListener("click", async () => {
       const id = it.dataset.id;
-      const n = _notifs.find(x => x.id === id);
+      const n = _notifs.find((x) => x.id === id);
       if (!n) return;
       // Mark read (si pas déjà lu)
       if (!n.read) {
-        const { error } = await sb.rpc('mark_notif_read', { p_notif_id: id });
-        if (!error) { n.read = true; renderList(container); }
-        else console.warn('[notif read]', error);
+        const { error } = await sb.rpc("mark_notif_read", { p_notif_id: id });
+        if (!error) {
+          n.read = true;
+          renderList(container);
+        } else console.warn("[notif read]", error);
       }
       // Navigation contextuelle selon type + data
       const route = notifRoute(n);
       if (route) {
-        container.querySelector('#nb-panel')?.classList.remove('show');
+        container.querySelector("#nb-panel")?.classList.remove("show");
         try {
-          const { navigate } = await import('@/router.js');
+          const { navigate } = await import("@/router.js");
           navigate(route);
-        } catch (_) { window.location.hash = route.startsWith('#') ? route : `#${route}`; }
+        } catch (_) {
+          window.location.hash = route.startsWith("#") ? route : `#${route}`;
+        }
       }
     });
   });
@@ -157,52 +169,70 @@ function renderList(container) {
 function notifRoute(n) {
   const d = n.data || {};
   switch (n.type) {
-    case 'post_validation_quiz': return d.competence_id ? `/quiz/${d.competence_id}/post_validation` : '/parcours';
-    case 'consolidation_quiz':   return d.competence_id ? `/quiz/${d.competence_id}/consolidation`   : '/parcours';
-    case 'session_confirmation': return d.session_id    ? `/sessions/${d.session_id}` : '/';
-    case 'session_confirmed':    return '/';
-    case 'emotional_nudge':      return '/parcours';
-    default: return '/notifications';
+    case "post_validation_quiz":
+      return d.competence_id
+        ? `/quiz/${d.competence_id}/post_validation`
+        : "/parcours";
+    case "consolidation_quiz":
+      return d.competence_id
+        ? `/quiz/${d.competence_id}/consolidation`
+        : "/parcours";
+    case "session_confirmation":
+      return d.session_id ? `/sessions/${d.session_id}` : "/";
+    case "session_confirmed":
+      return "/";
+    case "emotional_nudge":
+      return "/parcours";
+    default:
+      return "/notifications";
   }
 }
 
 function wireBell(container, me) {
-  const btn = container.querySelector('#nb-toggle');
-  const panel = container.querySelector('#nb-panel');
-  const readall = container.querySelector('#nb-readall');
+  const btn = container.querySelector("#nb-toggle");
+  const panel = container.querySelector("#nb-panel");
+  const readall = container.querySelector("#nb-readall");
 
-  btn.addEventListener('click', (e) => {
+  btn.addEventListener("click", (e) => {
     e.stopPropagation();
-    panel.classList.toggle('show');
-    if (panel.classList.contains('show')) refreshBell(container, me);
+    panel.classList.toggle("show");
+    if (panel.classList.contains("show")) refreshBell(container, me);
   });
 
   // Click outside → close
-  document.addEventListener('click', (e) => {
-    if (!container.contains(e.target)) panel.classList.remove('show');
+  document.addEventListener("click", (e) => {
+    if (!container.contains(e.target)) panel.classList.remove("show");
   });
 
   // Voir tout → page /notifications
-  container.querySelector('#nb-seeall')?.addEventListener('click', async () => {
-    panel.classList.remove('show');
+  container.querySelector("#nb-seeall")?.addEventListener("click", async () => {
+    panel.classList.remove("show");
     try {
-      const { navigate } = await import('@/router.js');
-      navigate('/notifications');
+      const { navigate } = await import("@/router.js");
+      navigate("/notifications");
     } catch (e) {
-      console.warn('[notif-bell] navigate failed', e);
-      window.location.hash = '#/notifications';
+      console.warn("[notif-bell] navigate failed", e);
+      window.location.hash = "#/notifications";
     }
   });
 
-  readall.addEventListener('click', async () => {
-    readall.disabled = true; readall.textContent = '…';
-    const hasUnread = _notifs.some(n => !n.read);
+  readall.addEventListener("click", async () => {
+    readall.disabled = true;
+    readall.textContent = "…";
+    const hasUnread = _notifs.some((n) => !n.read);
     if (!hasUnread) return;
-    const { error } = await sb.rpc('mark_all_notifs_read');
-    if (error) { toast('Erreur marquage', 'error'); readall.disabled = false; readall.textContent = 'Tout marquer comme lu'; return; }
-    _notifs.forEach(n => { n.read = true; });
+    const { error } = await sb.rpc("mark_all_notifs_read");
+    if (error) {
+      toast("Erreur marquage", "error");
+      readall.disabled = false;
+      readall.textContent = "Tout marquer comme lu";
+      return;
+    }
+    _notifs.forEach((n) => {
+      n.read = true;
+    });
     renderList(container);
-    toast('Tout marqué comme lu', 'success');
+    toast("Tout marqué comme lu", "success");
   });
 }
 
@@ -217,5 +247,5 @@ function timeAgo(iso) {
   if (h < 24) return `il y a ${h}h`;
   const j = Math.floor(h / 24);
   if (j < 7) return `il y a ${j}j`;
-  return d.toLocaleDateString('fr-FR');
+  return d.toLocaleDateString("fr-FR");
 }
