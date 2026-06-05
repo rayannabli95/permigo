@@ -13,6 +13,7 @@ import { labelComp } from "@/utils/remc-label.js";
 import { statutCfg } from "@/utils/statut-label.js";
 import { icon, iconBadge } from "@/utils/icons.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
+import { openInviteEleveModal } from "@/services/invite-eleve.js";
 
 // ─── Statuts labels : mapping centralisé @/utils/statut-label.js ──
 
@@ -778,18 +779,19 @@ async function renderInto(root, _me) {
   } else {
     hero = {
       tone: "neutral",
-      ico: "users",
+      ico: "user-plus",
       kicker: "Démarrage",
-      title: "Aucun élève assigné",
-      sub: "Tes élèves apparaîtront ici une fois affectés par le gérant.",
-      cta: null,
+      title: "Invite ton premier élève",
+      sub: "Envoie un lien d'inscription par SMS ou WhatsApp. Ton élève crée son compte en 30 secondes.",
+      cta: "Inviter un élève",
       href: null,
-      ev: null,
+      action: "invite",
+      ev: "hero.invite_eleve",
     };
   }
 
   const heroHtml = `
-    <div class="aj-hero tone-${hero.tone}"${hero.href ? ` id="aj-hero" data-href="${esc(hero.href)}" data-ev="${esc(hero.ev)}"` : ""}>
+    <div class="aj-hero tone-${hero.tone}"${hero.href || hero.action ? ` id="aj-hero"` : ""}${hero.href ? ` data-href="${esc(hero.href)}" data-ev="${esc(hero.ev)}"` : ""}>
       <div class="aj-hero-top">
         <div class="aj-hero-ico">${iconBadge(hero.ico, { color: hero.tone === "warn" ? "var(--amk)" : hero.tone === "ok" ? "var(--grd)" : "var(--a)", size: 44 })}</div>
         <div class="aj-hero-body">
@@ -912,10 +914,14 @@ async function renderInto(root, _me) {
         <div class="aj-section-title">Mes élèves</div>
         ${
           mesElevesActifs.length === 0
-            ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;">
-               <span style="opacity:.5;color:var(--mu)" aria-hidden="true">${icon("users", { size: 34 })}</span>
-               <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Aucun élève assigné</strong>
-               <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Tes élèves apparaîtront ici<br>une fois affectés par le gérant.</span>
+            ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 20px;">
+               <span style="opacity:.45;color:var(--mu)" aria-hidden="true">${icon("users", { size: 34 })}</span>
+               <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Invite ton premier élève</strong>
+               <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Envoie un lien par SMS ou WhatsApp —<br>ton élève crée son compte en 30 secondes.</span>
+               <button id="aj-invite-btn" style="display:inline-flex;align-items:center;gap:7px;padding:11px 20px;background:var(--a);color:#fff;border:0;border-radius:12px;font:600 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
+                 ${icon("user-plus", { size: 14, strokeWidth: 2.2 })} Inviter un élève
+               </button>
+               <span style="font:500 11px/1.4 'Inter',sans-serif;color:var(--mu2);text-align:center;max-width:240px">Tu travailles en auto-école ? Tes élèves peuvent aussi être affectés par le gérant.</span>
              </div>`
             : `<div class="aj-eleves-list">
               ${mesElevesActifs.map((e) => renderEleveRow(e)).join("")}
@@ -933,18 +939,31 @@ async function renderInto(root, _me) {
   `;
 
   // Wire listeners
-  // Hero « prochaine action » → navigue vers la cible priorisée
-  if (hero.href) {
+  if (hero.action === "invite") {
+    const doInvite = () => {
+      track(hero.ev || "hero.invite_eleve");
+      openInviteEleveModal(_me);
+    };
+    root.querySelector("#aj-hero-cta")?.addEventListener("click", doInvite);
+    root.querySelector("#aj-hero")?.addEventListener("click", (e) => {
+      if (!e.target.closest("#aj-hero-cta")) doInvite();
+    });
+  } else if (hero.href) {
     const goHero = () => {
       track(hero.ev || "hero.clicked");
       navigate(hero.href);
     };
     root.querySelector("#aj-hero-cta")?.addEventListener("click", goHero);
     root.querySelector("#aj-hero")?.addEventListener("click", (e) => {
-      // tap sur la carte (hors bouton, déjà géré) = même action
       if (!e.target.closest("#aj-hero-cta")) goHero();
     });
   }
+
+  // Bouton "Inviter" dans la section Mes élèves (état vide)
+  root.querySelector("#aj-invite-btn")?.addEventListener("click", () => {
+    track("invite.empty.aujourdhui.clicked");
+    openInviteEleveModal(_me);
+  });
 
   // Recap soir / prompt log → page dédiée plein écran
   const goLogSession = () => {
