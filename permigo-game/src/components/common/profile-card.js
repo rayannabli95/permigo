@@ -8,12 +8,19 @@
 //  - Bouton Partager natif (Web Share API + fallback)
 //  - Badge prestige avec accent color du tier
 // ═══════════════════════════════════════════════════════════════
-import { esc } from '@/utils/escape.js';
-import { sb } from '@/auth/auth.js';
-import { getPrestige } from '@/data/prestige.js';
-import { haptic } from '@/utils/haptic.js';
-import { wrapAnimatedBorder, BORDER_PRESETS } from '@/components/common/animated-border.js';
-import { openAvatarPicker, AVATAR_PICKER_UPLOAD } from '@/components/common/avatar-picker.js';
+import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
+import { sb } from "@/auth/auth.js";
+import { getPrestige } from "@/data/prestige.js";
+import { haptic } from "@/utils/haptic.js";
+import {
+  wrapAnimatedBorder,
+  BORDER_PRESETS,
+} from "@/components/common/animated-border.js";
+import {
+  openAvatarPicker,
+  AVATAR_PICKER_UPLOAD,
+} from "@/components/common/avatar-picker.js";
 
 const STYLE = `<style>
 .pcc { width: 100%; max-width: 380px; margin: 0 auto; padding: 0; }
@@ -183,7 +190,7 @@ const STYLE = `<style>
   margin-bottom: 12px;
   border: 1px solid;
 }
-.pcc-prestige-ico { font-size: 13px; line-height: 1; }
+.pcc-prestige-ico { display: flex; align-items: center; line-height: 1; }
 .pcc-prestige-num {
   font: 700 10px/1 'Inter', sans-serif;
   background: rgba(0,0,0,.06);
@@ -273,31 +280,43 @@ const STYLE = `<style>
  * @param {{label:string, value:number|string}[]} opts.stats - 3 stats à afficher
  * @param {string} opts.bio - sous-titre / bio courte
  */
-export function renderProfileCard({ me, avatarUrl, bannerUrl, count = 0, stats = [], bio = '' }) {
-  const role = me.role || 'eleve';
+export function renderProfileCard({
+  me,
+  avatarUrl,
+  bannerUrl,
+  count = 0,
+  stats = [],
+  bio = "",
+}) {
+  const role = me.role || "eleve";
   const { current, next, pctToNext } = getPrestige(role, count);
-  const xpBarClass = role === 'enseignant' ? 'gradient-indigo' : 'gradient-rainbow';
-  const initials = ((me.prenom || '')[0] || '') + ((me.nom || '')[0] || '');
-  const displayName = `${me.prenom || ''} ${me.nom || ''}`.trim() || 'Élève';
+  const xpBarClass =
+    role === "enseignant" ? "gradient-indigo" : "gradient-rainbow";
+  const initials = ((me.prenom || "")[0] || "") + ((me.nom || "")[0] || "");
+  const displayName = `${me.prenom || ""} ${me.nom || ""}`.trim() || "Élève";
 
   const stats3 = stats.slice(0, 3);
-  while (stats3.length < 3) stats3.push({ label: '—', value: 0 });
+  while (stats3.length < 3) stats3.push({ label: "—", value: 0 });
 
   // Avatar : url uploadée (photo ou avatar réaliste) > initiales
   const avatarInner = avatarUrl
     ? `<img src="${esc(avatarUrl)}" alt="${esc(displayName)}" />`
-    : esc((initials || '?').toUpperCase());
+    : esc((initials || "?").toUpperCase());
 
   // Border preset selon le rôle : moniteur=cyan / élève=violet / gerant=gold
-  const borderPreset = role === 'enseignant' ? BORDER_PRESETS.cyan
-                     : role === 'gerant'     ? BORDER_PRESETS.gold
-                     : BORDER_PRESETS.violet;
+  const borderPreset =
+    role === "enseignant"
+      ? BORDER_PRESETS.cyan
+      : role === "gerant"
+        ? BORDER_PRESETS.gold
+        : BORDER_PRESETS.violet;
 
   return `${STYLE}
 <div class="pcc">
-  ${wrapAnimatedBorder(`<div class="pcc-card">
+  ${wrapAnimatedBorder(
+    `<div class="pcc-card">
     <div class="pcc-banner">
-      ${bannerUrl ? `<img src="${esc(bannerUrl)}" alt="" />` : ''}
+      ${bannerUrl ? `<img src="${esc(bannerUrl)}" alt="" />` : ""}
       <button class="pcc-banner-edit" data-action="edit-banner" aria-label="Modifier la bannière" title="Modifier la bannière">✎</button>
       <button class="pcc-share" data-action="share" aria-label="Partager mon profil">
         <span class="pcc-share-ico">↗</span> Partager
@@ -313,31 +332,35 @@ export function renderProfileCard({ me, avatarUrl, bannerUrl, count = 0, stats =
       </div>
 
       <div class="pcc-prestige" style="color:${esc(current.accent)};background:${esc(current.accent)}1a;border-color:${esc(current.accent)}40">
-        <span class="pcc-prestige-ico">${current.emoji}</span>
+        <span class="pcc-prestige-ico">${icon(current.iconName, { size: 13, strokeWidth: 2 })}</span>
         <span>${esc(current.name)}</span>
         <span class="pcc-prestige-num">P${current.p}</span>
       </div>
 
       <h2 class="pcc-name">${esc(displayName)}</h2>
-      ${bio ? `<p class="pcc-bio">${esc(bio)}</p>` : ''}
+      ${bio ? `<p class="pcc-bio">${esc(bio)}</p>` : ""}
 
       <div class="pcc-xp">
         <div class="pcc-xp-row">
-          <span class="pcc-xp-lbl">${next ? 'Prog.' : 'Max'}</span>
+          <span class="pcc-xp-lbl">${next ? "Prog." : "Max"}</span>
           <div class="pcc-xp-bar">
             <div class="pcc-xp-fill ${xpBarClass}" style="width:${pctToNext}%"></div>
           </div>
-          <span class="pcc-xp-val">${next ? `→ ${esc(next.name)}` : '✓ Élite'}</span>
+          <span class="pcc-xp-val">${next ? `→ ${esc(next.name)}` : "✓ Élite"}</span>
         </div>
       </div>
 
       <div class="pcc-stats">
-        ${stats3.map(s => `
+        ${stats3
+          .map(
+            (s) => `
           <div class="pcc-stat">
             <div class="pcc-stat-val" data-target="${s.value}">0</div>
             <div class="pcc-stat-lbl">${esc(s.label)}</div>
           </div>
-        `).join('')}
+        `,
+          )
+          .join("")}
       </div>
 
       <div class="pcc-social">
@@ -352,7 +375,9 @@ export function renderProfileCard({ me, avatarUrl, bannerUrl, count = 0, stats =
         </button>
       </div>
     </div>
-  </div>`, { ...borderPreset, radius: 28, borderWidth: 2.5, bg: '#fff' })}
+  </div>`,
+    { ...borderPreset, radius: 28, borderWidth: 2.5, bg: "#fff" },
+  )}
 
   <input type="file" class="pcc-file-input" accept="image/*" data-target="avatar" />
   <input type="file" class="pcc-file-input" accept="image/*" data-target="banner" />
@@ -363,25 +388,29 @@ export function renderProfileCard({ me, avatarUrl, bannerUrl, count = 0, stats =
  * Anime les compteurs de 0 vers leur valeur cible.
  */
 function animateStats(root) {
-  if (matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-    root.querySelectorAll('[data-target]').forEach(el => {
+  if (matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    root.querySelectorAll("[data-target]").forEach((el) => {
       el.textContent = formatNum(parseFloat(el.dataset.target));
     });
     return;
   }
   const duration = 1200;
   const start = performance.now();
-  const items = [...root.querySelectorAll('[data-target]')].map(el => ({
-    el, target: parseFloat(el.dataset.target) || 0,
+  const items = [...root.querySelectorAll("[data-target]")].map((el) => ({
+    el,
+    target: parseFloat(el.dataset.target) || 0,
   }));
   function frame(now) {
     const t = Math.min(1, (now - start) / duration);
     const eased = 1 - Math.pow(1 - t, 3);
-    items.forEach(it => {
+    items.forEach((it) => {
       it.el.textContent = formatNum(Math.round(it.target * eased));
     });
     if (t < 1) requestAnimationFrame(frame);
-    else items.forEach(it => { it.el.textContent = formatNum(it.target); });
+    else
+      items.forEach((it) => {
+        it.el.textContent = formatNum(it.target);
+      });
   }
   requestAnimationFrame(frame);
 }
@@ -395,47 +424,56 @@ function formatNum(n) {
 /**
  * Upload une image dans le bucket user-media et update profiles.{column}_url
  */
-async function uploadAndSet(userId, file, kind /* 'avatar' | 'banner' */, onProgress) {
+async function uploadAndSet(
+  userId,
+  file,
+  kind /* 'avatar' | 'banner' */,
+  onProgress,
+) {
   if (!file) return null;
   if (file.size > 5 * 1024 * 1024) {
-    const { toast } = await import('@/components/common/toast.js');
-    toast('Image trop grosse (max 5 MB)', 'error');
+    const { toast } = await import("@/components/common/toast.js");
+    toast("Image trop grosse (max 5 MB)", "error");
     return null;
   }
-  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
   const path = `${userId}/${kind}-${Date.now()}.${ext}`;
 
-  const { error } = await sb.storage.from('user-media').upload(path, file, {
-    cacheControl: '3600',
+  const { error } = await sb.storage.from("user-media").upload(path, file, {
+    cacheControl: "3600",
     upsert: true,
     contentType: file.type,
   });
   if (error) {
-    const { toast } = await import('@/components/common/toast.js');
-    toast('Échec upload : ' + (error.message || ''), 'error');
+    const { toast } = await import("@/components/common/toast.js");
+    toast("Échec upload : " + (error.message || ""), "error");
     return null;
   }
-  const { data } = sb.storage.from('user-media').getPublicUrl(path);
+  const { data } = sb.storage.from("user-media").getPublicUrl(path);
   const publicUrl = data?.publicUrl;
   if (!publicUrl) return null;
 
-  const column = kind === 'avatar' ? 'avatar_url' : 'banner_url';
-  const { error: errUpd } = await sb.from('profiles').update({ [column]: publicUrl }).eq('id', userId);
+  const column = kind === "avatar" ? "avatar_url" : "banner_url";
+  const { error: errUpd } = await sb
+    .from("profiles")
+    .update({ [column]: publicUrl })
+    .eq("id", userId);
   if (errUpd) {
-    const { toast } = await import('@/components/common/toast.js');
-    toast('URL non persistée — réessaie', 'error');
+    const { toast } = await import("@/components/common/toast.js");
+    toast("URL non persistée — réessaie", "error");
     return null;
   }
   return publicUrl;
 }
 
 // Helper : enveloppe un handler async pour capturer les rejets
-async function safeRun(fn, label = 'handler') {
-  try { await fn(); }
-  catch (e) {
+async function safeRun(fn, label = "handler") {
+  try {
+    await fn();
+  } catch (e) {
     console.error(`[profile-card] ${label} failed`, e);
-    const { toast } = await import('@/components/common/toast.js');
-    toast('Action impossible — réessaie', 'error');
+    const { toast } = await import("@/components/common/toast.js");
+    toast("Action impossible — réessaie", "error");
   }
 }
 
@@ -445,7 +483,7 @@ async function safeRun(fn, label = 'handler') {
 export function mountProfileCard(container, opts) {
   const { me, shareUrl, shareText, avatarUrl } = opts;
   container.innerHTML = renderProfileCard(opts);
-  const card = container.querySelector('.pcc');
+  const card = container.querySelector(".pcc");
   if (!card) return;
 
   // Anime les stats
@@ -453,110 +491,134 @@ export function mountProfileCard(container, opts) {
 
   // Edit avatar — ouvre d'abord le picker (6 défauts + option "Ma photo")
   const avInput = card.querySelector('.pcc-file-input[data-target="avatar"]');
-  card.querySelector('[data-action="edit-avatar"]').addEventListener('click', async () => {
-    haptic('select');
-    try {
-      const choice = await openAvatarPicker({ currentUrl: avatarUrl ?? me.avatar_url ?? null });
-      if (!choice) return; // annulé
-      if (choice === AVATAR_PICKER_UPLOAD) {
-        avInput.click(); // déclenche le file picker existant
-        return;
+  card
+    .querySelector('[data-action="edit-avatar"]')
+    .addEventListener("click", async () => {
+      haptic("select");
+      try {
+        const choice = await openAvatarPicker({
+          currentUrl: avatarUrl ?? me.avatar_url ?? null,
+        });
+        if (!choice) return; // annulé
+        if (choice === AVATAR_PICKER_UPLOAD) {
+          avInput.click(); // déclenche le file picker existant
+          return;
+        }
+        // Avatar par défaut sélectionné — persist direct, pas d'upload
+        await safeRun(async () => {
+          const { error } = await sb
+            .from("profiles")
+            .update({ avatar_url: choice })
+            .eq("id", me.id);
+          if (error) throw error;
+          const avEl = card.querySelector(".pcc-av");
+          avEl.innerHTML = `<img src="${esc(choice)}" alt="" />`;
+          haptic("success");
+          const { toast } = await import("@/components/common/toast.js");
+          toast("Avatar mis à jour ✓", "success", 2500);
+        }, "avatar default pick");
+      } catch (e) {
+        console.warn("[profile-card] avatar picker failed", e);
       }
-      // Avatar par défaut sélectionné — persist direct, pas d'upload
-      await safeRun(async () => {
-        const { error } = await sb.from('profiles').update({ avatar_url: choice }).eq('id', me.id);
-        if (error) throw error;
-        const avEl = card.querySelector('.pcc-av');
-        avEl.innerHTML = `<img src="${esc(choice)}" alt="" />`;
-        haptic('success');
-        const { toast } = await import('@/components/common/toast.js');
-        toast('Avatar mis à jour ✓', 'success', 2500);
-      }, 'avatar default pick');
-    } catch (e) {
-      console.warn('[profile-card] avatar picker failed', e);
-    }
-  });
-  avInput.addEventListener('change', (e) => {
+    });
+  avInput.addEventListener("change", (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     safeRun(async () => {
-      const url = await uploadAndSet(me.id, file, 'avatar');
+      const url = await uploadAndSet(me.id, file, "avatar");
       if (url) {
-        const avEl = card.querySelector('.pcc-av');
+        const avEl = card.querySelector(".pcc-av");
         avEl.innerHTML = `<img src="${url}" alt="" />`;
-        haptic('success');
-        const { toast } = await import('@/components/common/toast.js');
-        toast('Photo mise à jour ✓', 'success', 2500);
+        haptic("success");
+        const { toast } = await import("@/components/common/toast.js");
+        toast("Photo mise à jour ✓", "success", 2500);
       }
-    }, 'avatar upload').finally(() => { avInput.value = ''; });
+    }, "avatar upload").finally(() => {
+      avInput.value = "";
+    });
   });
 
   // Edit banner
   const bnInput = card.querySelector('.pcc-file-input[data-target="banner"]');
-  card.querySelector('[data-action="edit-banner"]').addEventListener('click', () => {
-    haptic('select');
-    bnInput.click();
-  });
-  bnInput.addEventListener('change', (e) => {
+  card
+    .querySelector('[data-action="edit-banner"]')
+    .addEventListener("click", () => {
+      haptic("select");
+      bnInput.click();
+    });
+  bnInput.addEventListener("change", (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     safeRun(async () => {
-      const url = await uploadAndSet(me.id, file, 'banner');
+      const url = await uploadAndSet(me.id, file, "banner");
       if (url) {
-        const bnEl = card.querySelector('.pcc-banner');
-        const existing = bnEl.querySelector('img');
+        const bnEl = card.querySelector(".pcc-banner");
+        const existing = bnEl.querySelector("img");
         if (existing) existing.src = url;
-        else bnEl.insertAdjacentHTML('afterbegin', `<img src="${url}" alt="" />`);
-        haptic('success');
-        const { toast } = await import('@/components/common/toast.js');
-        toast('Bannière mise à jour ✓', 'success', 2500);
+        else
+          bnEl.insertAdjacentHTML("afterbegin", `<img src="${url}" alt="" />`);
+        haptic("success");
+        const { toast } = await import("@/components/common/toast.js");
+        toast("Bannière mise à jour ✓", "success", 2500);
       }
-    }, 'banner upload').finally(() => { bnInput.value = ''; });
+    }, "banner upload").finally(() => {
+      bnInput.value = "";
+    });
   });
 
   // Share natif
   const shareData = {
-    title: 'PermiGo',
-    text: shareText || 'Suis ma progression sur PermiGo',
+    title: "PermiGo",
+    text: shareText || "Suis ma progression sur PermiGo",
     url: shareUrl || window.location.origin,
   };
 
-  card.querySelector('[data-action="share"]').addEventListener('click', async () => {
-    haptic('select');
-    if (navigator.share) {
-      try { await navigator.share(shareData); } catch {}
-    } else {
+  card
+    .querySelector('[data-action="share"]')
+    .addEventListener("click", async () => {
+      haptic("select");
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+        } catch {}
+      } else {
+        await copyLink(shareData.url, card);
+      }
+    });
+
+  card
+    .querySelector('[data-action="share-whatsapp"]')
+    .addEventListener("click", () => {
+      haptic("tap");
+      const url = `https://wa.me/?text=${encodeURIComponent(shareData.text + " " + shareData.url)}`;
+      window.open(url, "_blank", "noopener");
+    });
+
+  card
+    .querySelector('[data-action="share-instagram"]')
+    .addEventListener("click", async () => {
+      haptic("tap");
+      // Instagram n'a pas d'URL share direct → on copie le lien
       await copyLink(shareData.url, card);
-    }
-  });
+      const { toast } = await import("@/components/common/toast.js");
+      toast("Lien copié — colle-le dans Instagram", "info", 3000);
+    });
 
-  card.querySelector('[data-action="share-whatsapp"]').addEventListener('click', () => {
-    haptic('tap');
-    const url = `https://wa.me/?text=${encodeURIComponent(shareData.text + ' ' + shareData.url)}`;
-    window.open(url, '_blank', 'noopener');
-  });
-
-  card.querySelector('[data-action="share-instagram"]').addEventListener('click', async () => {
-    haptic('tap');
-    // Instagram n'a pas d'URL share direct → on copie le lien
-    await copyLink(shareData.url, card);
-    const { toast } = await import('@/components/common/toast.js');
-    toast('Lien copié — colle-le dans Instagram', 'info', 3000);
-  });
-
-  card.querySelector('[data-action="copy-link"]').addEventListener('click', async () => {
-    haptic('tap');
-    await copyLink(shareData.url, card);
-  });
+  card
+    .querySelector('[data-action="copy-link"]')
+    .addEventListener("click", async () => {
+      haptic("tap");
+      await copyLink(shareData.url, card);
+    });
 }
 
 async function copyLink(url, card) {
   try {
     await navigator.clipboard.writeText(url);
-    const { toast } = await import('@/components/common/toast.js');
-    toast('Lien copié ✓', 'success', 2000);
+    const { toast } = await import("@/components/common/toast.js");
+    toast("Lien copié ✓", "success", 2000);
   } catch {
-    const { toast } = await import('@/components/common/toast.js');
-    toast('Impossible de copier', 'error');
+    const { toast } = await import("@/components/common/toast.js");
+    toast("Impossible de copier", "error");
   }
 }
