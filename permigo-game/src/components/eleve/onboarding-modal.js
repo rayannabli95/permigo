@@ -6,6 +6,7 @@
 import { sb } from "@/auth/auth.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
+import { icon } from "@/utils/icons.js";
 
 const SLIDES = [
   {
@@ -17,7 +18,9 @@ const SLIDES = [
         </linearGradient>
       </defs>
       <circle cx="40" cy="40" r="38" fill="url(#ob1g)" opacity="0.1"/>
-      <text x="40" y="54" text-anchor="middle" font-size="36">🛣️</text>
+      <path d="M20 50 Q30 20 40 40 Q50 60 60 30" stroke="url(#ob1g)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="20" cy="50" r="4" fill="url(#ob1g)"/>
+      <circle cx="60" cy="30" r="4" fill="url(#ob1g)"/>
     </svg>`,
     title: "Bienvenue dans PermiGo",
     body: "L'app qui transforme l'apprentissage du permis en habitude quotidienne.",
@@ -29,7 +32,7 @@ const SLIDES = [
         .map(
           (l, i) => `
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
-          <div style="width:52px;height:52px;border-radius:14px;background:${["rgba(88,204,2,.12)", "rgba(16,185,129,.12)", "rgba(245,158,11,.12)"][i]};display:flex;align-items:center;justify-content:center;font-size:22px">${["📖", "⚡", "🏆"][i]}</div>
+          <div style="width:52px;height:52px;border-radius:14px;background:${["rgba(88,204,2,.12)", "rgba(16,185,129,.12)", "rgba(245,158,11,.12)"][i]};display:flex;align-items:center;justify-content:center;color:${["var(--a)", "var(--gr)", "var(--am)"][i]}">${[icon("book", { size: 22, strokeWidth: 2 }), icon("zap", { size: 22, strokeWidth: 2 }), icon("trophy", { size: 22, strokeWidth: 2 })][i]}</div>
           <span style="font:700 10px/1 'Inter',sans-serif;color:var(--mu3);letter-spacing:.04em;text-transform:uppercase">${l}</span>
         </div>
         ${i < 2 ? `<div style="font:700 18px/1 'Plus Jakarta Sans',sans-serif;color:#d1d8ee">→</div>` : ""}

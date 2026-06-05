@@ -1,16 +1,16 @@
 // ═══════════════════════════════════════════════════════════════
 // Settings — préférences utilisateur (notifs, confidentialité, compte)
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
-import { toast } from '@/components/common/toast.js';
-import { track } from '@/services/analytics.js';
-import { navigate } from '@/router.js';
-import { applyTheme, getTheme } from '@/utils/theme.js';
-import { isSoundEnabled, setSoundEnabled, playBack } from '@/utils/sound.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
+import { toast } from "@/components/common/toast.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { applyTheme, getTheme } from "@/utils/theme.js";
+import { isSoundEnabled, setSoundEnabled, playBack } from "@/utils/sound.js";
 
 const STYLE = `<style>
 .st {
@@ -271,26 +271,34 @@ export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track('page_view', { page: 'settings', role: me.role });
+  track("page_view", { page: "settings", role: me.role });
 
   // Load current profile prefs + RGPD preferences in parallel
   const [{ data: profile }, { data: myPrefs }] = await Promise.all([
-    sb.from('profiles')
-      .select('prenom, notif_push, notif_email, show_in_ranking, dnd_start, dnd_end')
-      .eq('id', me.id)
+    sb
+      .from("profiles")
+      .select(
+        "prenom, notif_push, notif_email, show_in_ranking, dnd_start, dnd_end",
+      )
+      .eq("id", me.id)
       .maybeSingle(),
-    sb.rpc('get_my_preferences'),
+    sb.rpc("get_my_preferences"),
   ]);
 
   const prefs = {
     notifPush: profile?.notif_push ?? true,
     notifEmail: profile?.notif_email ?? true,
     showInRanking: profile?.show_in_ranking ?? false,
-    dndStart: (profile?.dnd_start ?? '22:00:00').slice(0, 5),
-    dndEnd: (profile?.dnd_end ?? '07:00:00').slice(0, 5),
-    prenom: profile?.prenom ?? '',
+    dndStart: (profile?.dnd_start ?? "22:00:00").slice(0, 5),
+    dndEnd: (profile?.dnd_end ?? "07:00:00").slice(0, 5),
+    prenom: profile?.prenom ?? "",
     marketingOptin: myPrefs?.marketing_optin ?? false,
-    theme: (myPrefs?.theme === 'light' || myPrefs?.theme === 'dark' || myPrefs?.theme === 'auto') ? myPrefs.theme : getTheme(),
+    theme:
+      myPrefs?.theme === "light" ||
+      myPrefs?.theme === "dark" ||
+      myPrefs?.theme === "auto"
+        ? myPrefs.theme
+        : getTheme(),
   };
 
   render(root, me, prefs);
@@ -319,7 +327,7 @@ function render(root, me, prefs) {
       </div>
       <div class="st-row-action">
         <label class="st-tgl" aria-label="Activer notifications push">
-          <input type="checkbox" id="tgl-push" ${prefs.notifPush ? 'checked' : ''}>
+          <input type="checkbox" id="tgl-push" ${prefs.notifPush ? "checked" : ""}>
           <span class="st-tgl-t"></span>
         </label>
       </div>
@@ -331,7 +339,7 @@ function render(root, me, prefs) {
       </div>
       <div class="st-row-action">
         <label class="st-tgl" aria-label="Activer notifications email">
-          <input type="checkbox" id="tgl-email" ${prefs.notifEmail ? 'checked' : ''}>
+          <input type="checkbox" id="tgl-email" ${prefs.notifEmail ? "checked" : ""}>
           <span class="st-tgl-t"></span>
         </label>
       </div>
@@ -354,11 +362,11 @@ function render(root, me, prefs) {
     <div class="st-row">
       <div class="st-row-left">
         <div class="st-row-title">Classement national</div>
-        <div class="st-row-sub">Apparaître dans le classement (disponible V2)</div>
+        <div class="st-row-sub">Apparaître dans les classements de ton école</div>
       </div>
       <div class="st-row-action">
         <label class="st-tgl" aria-label="Apparaître dans le classement">
-          <input type="checkbox" id="tgl-ranking" ${prefs.showInRanking ? 'checked' : ''}>
+          <input type="checkbox" id="tgl-ranking" ${prefs.showInRanking ? "checked" : ""}>
           <span class="st-tgl-t"></span>
         </label>
       </div>
@@ -395,9 +403,9 @@ function render(root, me, prefs) {
         <div class="st-row-sub">Apparence de l'application</div>
       </div>
       <div class="st-theme-seg" id="theme-seg" role="group" aria-label="Choisir le thème">
-        <button class="st-theme-btn ${prefs.theme === 'light' ? 'active' : ''}" data-theme="light" aria-pressed="${prefs.theme === 'light'}">${icon('sun',{size:16})} Clair</button>
-        <button class="st-theme-btn ${prefs.theme === 'dark'  ? 'active' : ''}" data-theme="dark"  aria-pressed="${prefs.theme === 'dark'}">${icon('moon',{size:16})} Sombre</button>
-        <button class="st-theme-btn ${prefs.theme === 'auto'  ? 'active' : ''}" data-theme="auto"  aria-pressed="${prefs.theme === 'auto'}">Système</button>
+        <button class="st-theme-btn ${prefs.theme === "light" ? "active" : ""}" data-theme="light" aria-pressed="${prefs.theme === "light"}">${icon("sun", { size: 16 })} Clair</button>
+        <button class="st-theme-btn ${prefs.theme === "dark" ? "active" : ""}" data-theme="dark"  aria-pressed="${prefs.theme === "dark"}">${icon("moon", { size: 16 })} Sombre</button>
+        <button class="st-theme-btn ${prefs.theme === "auto" ? "active" : ""}" data-theme="auto"  aria-pressed="${prefs.theme === "auto"}">Système</button>
       </div>
     </div>
     <div class="st-row">
@@ -407,7 +415,7 @@ function render(root, me, prefs) {
       </div>
       <div class="st-row-action">
         <label class="st-tgl" aria-label="Activer les sons d'interface">
-          <input type="checkbox" id="tgl-sound" ${isSoundEnabled() ? 'checked' : ''}>
+          <input type="checkbox" id="tgl-sound" ${isSoundEnabled() ? "checked" : ""}>
           <span class="st-tgl-t"></span>
         </label>
       </div>
@@ -416,7 +424,7 @@ function render(root, me, prefs) {
 
   <!-- 🔐 MES DONNÉES (RGPD) -->
   <div class="st-section">
-    <div class="st-section-label">${icon('lock',{size:14})} Mes données</div>
+    <div class="st-section-label">${icon("lock", { size: 14 })} Mes données</div>
 
     <!-- Export -->
     <div class="st-row">
@@ -437,7 +445,7 @@ function render(root, me, prefs) {
       </div>
       <div class="st-row-action">
         <label class="st-tgl" aria-label="Recevoir les emails marketing">
-          <input type="checkbox" id="tgl-marketing" ${prefs.marketingOptin ? 'checked' : ''}>
+          <input type="checkbox" id="tgl-marketing" ${prefs.marketingOptin ? "checked" : ""}>
           <span class="st-tgl-t"></span>
         </label>
       </div>
@@ -480,144 +488,197 @@ function render(root, me, prefs) {
 }
 
 function wire(root, me, prefs) {
-  root.querySelector('#st-back')?.addEventListener('click', () => { playBack(); navigate('/'); });
+  root.querySelector("#st-back")?.addEventListener("click", () => {
+    playBack();
+    navigate("/");
+  });
 
   // Toggle changes — save debounced
   const savePrefs = _debounce(async () => {
-    const push    = root.querySelector('#tgl-push')?.checked ?? prefs.notifPush;
-    const email   = root.querySelector('#tgl-email')?.checked ?? prefs.notifEmail;
-    const ranking = root.querySelector('#tgl-ranking')?.checked ?? prefs.showInRanking;
-    const { error } = await sb.from('profiles')
-      .update({ notif_push: push, notif_email: email, show_in_ranking: ranking })
-      .eq('id', me.id);
+    const push = root.querySelector("#tgl-push")?.checked ?? prefs.notifPush;
+    const email = root.querySelector("#tgl-email")?.checked ?? prefs.notifEmail;
+    const ranking =
+      root.querySelector("#tgl-ranking")?.checked ?? prefs.showInRanking;
+    const { error } = await sb
+      .from("profiles")
+      .update({
+        notif_push: push,
+        notif_email: email,
+        show_in_ranking: ranking,
+      })
+      .eq("id", me.id);
     if (!error) {
-      track('settings.prefs_saved', {});
-      toast('Préférences enregistrées', 'success', 2000);
+      track("settings.prefs_saved", {});
+      toast("Préférences enregistrées", "success", 2000);
     }
   }, 800);
 
-  root.querySelector('#tgl-push')?.addEventListener('change', savePrefs);
-  root.querySelector('#tgl-email')?.addEventListener('change', savePrefs);
-  root.querySelector('#tgl-ranking')?.addEventListener('change', savePrefs);
+  root.querySelector("#tgl-push")?.addEventListener("change", savePrefs);
+  root.querySelector("#tgl-email")?.addEventListener("change", savePrefs);
+  root.querySelector("#tgl-ranking")?.addEventListener("change", savePrefs);
 
   // Save DND times
-  root.querySelector('#btn-save-dnd')?.addEventListener('click', async () => {
-    const start = root.querySelector('#inp-dnd-start')?.value;
-    const end   = root.querySelector('#inp-dnd-end')?.value;
+  root.querySelector("#btn-save-dnd")?.addEventListener("click", async () => {
+    const start = root.querySelector("#inp-dnd-start")?.value;
+    const end = root.querySelector("#inp-dnd-end")?.value;
     if (!start || !end) return;
-    const { error } = await sb.from('profiles')
+    const { error } = await sb
+      .from("profiles")
       .update({ dnd_start: start, dnd_end: end })
-      .eq('id', me.id);
+      .eq("id", me.id);
     if (!error) {
-      toast('Plage Ne pas déranger enregistrée', 'success', 2000);
-      track('settings.dnd_saved', {});
+      toast("Plage Ne pas déranger enregistrée", "success", 2000);
+      track("settings.dnd_saved", {});
     }
   });
 
   // Save prénom
-  root.querySelector('#btn-save-prenom')?.addEventListener('click', async () => {
-    const val = root.querySelector('#inp-prenom')?.value?.trim();
-    if (!val) { toast('Le prénom ne peut pas être vide', 'error'); return; }
-    const btn = root.querySelector('#btn-save-prenom');
-    btn.disabled = true; btn.textContent = '…';
-    const { error } = await sb.from('profiles').update({ prenom: val }).eq('id', me.id);
-    btn.disabled = false; btn.textContent = 'Enregistrer';
-    if (error) { toast('Erreur de sauvegarde', 'error'); return; }
-    toast(`Prénom mis à jour : ${esc(val)}`, 'success');
-    track('settings.prenom_updated', {});
-  });
+  root
+    .querySelector("#btn-save-prenom")
+    ?.addEventListener("click", async () => {
+      const val = root.querySelector("#inp-prenom")?.value?.trim();
+      if (!val) {
+        toast("Le prénom ne peut pas être vide", "error");
+        return;
+      }
+      const btn = root.querySelector("#btn-save-prenom");
+      btn.disabled = true;
+      btn.textContent = "…";
+      const { error } = await sb
+        .from("profiles")
+        .update({ prenom: val })
+        .eq("id", me.id);
+      btn.disabled = false;
+      btn.textContent = "Enregistrer";
+      if (error) {
+        toast("Erreur de sauvegarde", "error");
+        return;
+      }
+      toast(`Prénom mis à jour : ${esc(val)}`, "success");
+      track("settings.prenom_updated", {});
+    });
 
   // Reset password
-  root.querySelector('#btn-reset-pwd')?.addEventListener('click', async () => {
+  root.querySelector("#btn-reset-pwd")?.addEventListener("click", async () => {
     const email = me.email;
-    if (!email) { toast('Email non disponible', 'error'); return; }
+    if (!email) {
+      toast("Email non disponible", "error");
+      return;
+    }
     const { error } = await sb.auth.resetPasswordForEmail(email, {
       redirectTo: `${location.origin}/#/settings`,
     });
-    if (error) { toast('Erreur d\'envoi de l\'email', 'error'); return; }
-    toast('Email de réinitialisation envoyé !', 'success', 5000);
-    track('settings.pwd_reset_requested', {});
+    if (error) {
+      toast("Erreur d'envoi de l'email", "error");
+      return;
+    }
+    toast("Email de réinitialisation envoyé !", "success", 5000);
+    track("settings.pwd_reset_requested", {});
   });
 
   // Theme segmented control
-  root.querySelector('#theme-seg')?.addEventListener('click', async (e) => {
-    const btn = e.target.closest('.st-theme-btn');
+  root.querySelector("#theme-seg")?.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".st-theme-btn");
     if (!btn) return;
     const mode = btn.dataset.theme;
-    root.querySelectorAll('.st-theme-btn').forEach(b => {
-      b.classList.toggle('active', b === btn);
-      b.setAttribute('aria-pressed', String(b === btn));
+    root.querySelectorAll(".st-theme-btn").forEach((b) => {
+      b.classList.toggle("active", b === btn);
+      b.setAttribute("aria-pressed", String(b === btn));
     });
     applyTheme(mode);
-    track('settings.theme_changed', { theme: mode });
+    track("settings.theme_changed", { theme: mode });
     try {
-      await sb.rpc('set_my_preferences', { theme: mode });
+      await sb.rpc("set_my_preferences", { theme: mode });
     } catch (e) {
-      console.error('[settings] theme save', e);
+      console.error("[settings] theme save", e);
     }
   });
 
   // Sound toggle (localStorage only, no DB write)
-  root.querySelector('#tgl-sound')?.addEventListener('change', (e) => {
+  root.querySelector("#tgl-sound")?.addEventListener("change", (e) => {
     setSoundEnabled(e.target.checked);
-    track('settings.sound_toggled', { enabled: e.target.checked });
+    track("settings.sound_toggled", { enabled: e.target.checked });
   });
 
   // Export mes données
-  root.querySelector('#btn-export-data')?.addEventListener('click', async () => {
-    const btn = root.querySelector('#btn-export-data');
-    btn.textContent = '…';
-    btn.style.pointerEvents = 'none';
-    try {
-      const { data, error } = await sb.rpc('export_my_data');
-      if (error || data?.error) { toast(data?.error || 'Export impossible', 'error'); return; }
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      const date = new Date().toISOString().slice(0, 10);
-      a.href = url;
-      a.download = `permigo-export-${date}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      toast('Téléchargement lancé', 'success', 3000);
-      track('rgpd.data_exported', {});
-    } catch (e) {
-      console.error('[settings] export', e);
-      toast('Erreur lors de l\'export', 'error');
-    } finally {
-      btn.textContent = 'Exporter →';
-      btn.style.pointerEvents = '';
-    }
-  });
+  root
+    .querySelector("#btn-export-data")
+    ?.addEventListener("click", async () => {
+      const btn = root.querySelector("#btn-export-data");
+      btn.textContent = "…";
+      btn.style.pointerEvents = "none";
+      try {
+        const { data, error } = await sb.rpc("export_my_data");
+        if (error || data?.error) {
+          toast(data?.error || "Export impossible", "error");
+          return;
+        }
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const date = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `permigo-export-${date}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        toast("Téléchargement lancé", "success", 3000);
+        track("rgpd.data_exported", {});
+      } catch (e) {
+        console.error("[settings] export", e);
+        toast("Erreur lors de l'export", "error");
+      } finally {
+        btn.textContent = "Exporter →";
+        btn.style.pointerEvents = "";
+      }
+    });
 
   // Marketing toggle
-  root.querySelector('#tgl-marketing')?.addEventListener('change', async (e) => {
-    const val = e.target.checked;
-    try {
-      const { error } = await sb.rpc('set_my_preferences', { marketing_optin: val });
-      if (error) { toast('Erreur de sauvegarde', 'error'); return; }
-      toast(val ? 'Emails marketing activés' : 'Emails marketing désactivés', 'success', 2000);
-      track('rgpd.marketing_optin_changed', { value: val });
-    } catch { toast('Erreur de connexion', 'error'); }
-  });
+  root
+    .querySelector("#tgl-marketing")
+    ?.addEventListener("change", async (e) => {
+      const val = e.target.checked;
+      try {
+        const { error } = await sb.rpc("set_my_preferences", {
+          marketing_optin: val,
+        });
+        if (error) {
+          toast("Erreur de sauvegarde", "error");
+          return;
+        }
+        toast(
+          val ? "Emails marketing activés" : "Emails marketing désactivés",
+          "success",
+          2000,
+        );
+        track("rgpd.marketing_optin_changed", { value: val });
+      } catch {
+        toast("Erreur de connexion", "error");
+      }
+    });
 
   // Legal links
-  root.querySelector('#btn-privacy')?.addEventListener('click', () => navigate('#/legal/privacy'));
-  root.querySelector('#btn-cgu')?.addEventListener('click', () => navigate('#/legal/cgu'));
+  root
+    .querySelector("#btn-privacy")
+    ?.addEventListener("click", () => navigate("#/legal/privacy"));
+  root
+    .querySelector("#btn-cgu")
+    ?.addEventListener("click", () => navigate("#/legal/cgu"));
 
   // Delete account — modal avec saisie de confirmation
-  root.querySelector('#btn-delete-account')?.addEventListener('click', () => {
+  root.querySelector("#btn-delete-account")?.addEventListener("click", () => {
     _showDeleteModal(root, me);
   });
 }
 
-const CONFIRM_TEXT = 'SUPPRIMER MON COMPTE';
+const CONFIRM_TEXT = "SUPPRIMER MON COMPTE";
 
 function _showDeleteModal(root, me) {
-  const overlay = document.createElement('div');
-  overlay.className = 'st-modal-overlay';
+  const overlay = document.createElement("div");
+  overlay.className = "st-modal-overlay";
   overlay.innerHTML = `
 <div class="st-modal-box" role="dialog" aria-modal="true" aria-labelledby="del-modal-title">
   <div class="st-modal-handle"></div>
@@ -637,38 +698,50 @@ function _showDeleteModal(root, me) {
 
   document.body.appendChild(overlay);
 
-  const inp     = overlay.querySelector('#del-confirm-inp');
-  const confirm = overlay.querySelector('#del-confirm');
-  const cancel  = overlay.querySelector('#del-cancel');
+  const inp = overlay.querySelector("#del-confirm-inp");
+  const confirm = overlay.querySelector("#del-confirm");
+  const cancel = overlay.querySelector("#del-cancel");
 
   inp.focus();
-  inp.addEventListener('input', () => {
+  inp.addEventListener("input", () => {
     confirm.disabled = inp.value !== CONFIRM_TEXT;
   });
 
-  cancel.addEventListener('click', () => overlay.remove());
-  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
-  enableSheetSwipe(overlay.querySelector('.st-modal-box'), () => overlay.remove(), { overlay });
+  cancel.addEventListener("click", () => overlay.remove());
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+  enableSheetSwipe(
+    overlay.querySelector(".st-modal-box"),
+    () => overlay.remove(),
+    { overlay },
+  );
 
-  confirm.addEventListener('click', async () => {
+  confirm.addEventListener("click", async () => {
     if (inp.value !== CONFIRM_TEXT) return;
     confirm.disabled = true;
-    confirm.textContent = '…';
-    track('account.delete_confirmed', {});
+    confirm.textContent = "…";
+    track("account.delete_confirmed", {});
     try {
-      const { data, error } = await sb.rpc('delete_my_account', { p_confirm_text: CONFIRM_TEXT });
+      const { data, error } = await sb.rpc("delete_my_account", {
+        p_confirm_text: CONFIRM_TEXT,
+      });
       if (error || data?.error) {
-        toast(data?.error || 'Suppression impossible — contacte dpo@permigo.fr', 'error', 6000);
+        toast(
+          data?.error || "Suppression impossible — contacte dpo@permigo.fr",
+          "error",
+          6000,
+        );
         overlay.remove();
         return;
       }
       overlay.remove();
       await sb.auth.signOut();
-      location.hash = '#/';
+      location.hash = "#/";
       location.reload();
     } catch (e) {
-      console.error('[settings] delete_account', e);
-      toast('Erreur — contacte dpo@permigo.fr', 'error', 6000);
+      console.error("[settings] delete_account", e);
+      toast("Erreur — contacte dpo@permigo.fr", "error", 6000);
       overlay.remove();
     }
   });
@@ -676,5 +749,8 @@ function _showDeleteModal(root, me) {
 
 function _debounce(fn, ms) {
   let t;
-  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
 }
