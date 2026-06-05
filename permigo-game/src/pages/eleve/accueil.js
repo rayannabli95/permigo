@@ -763,11 +763,31 @@ export async function mount(root) {
       prenom: me.prenom || "Toi",
       xp: 0,
     };
-    const streak = streakRes.value?.data || {
+    const rawStreak = streakRes.value?.data || {
       current_streak: 0,
       last_activity_date: null,
       longest_streak: 0,
     };
+    // get_today_quests (called above) bumps the streak server-side on first visit
+    // of the day. Reflect that immediately in the UI without an extra round-trip.
+    const _todayStr = new Date().toISOString().slice(0, 10);
+    const _questsOk =
+      todayQuestsRes.status === "fulfilled" && !todayQuestsRes.value?.error;
+    let streak = rawStreak;
+    if (_questsOk && rawStreak.last_activity_date !== _todayStr) {
+      const _yesterday = new Date(Date.now() - 86400000)
+        .toISOString()
+        .slice(0, 10);
+      const _bumped =
+        rawStreak.last_activity_date === _yesterday
+          ? (rawStreak.current_streak || 0) + 1
+          : 1;
+      streak = {
+        current_streak: _bumped,
+        longest_streak: Math.max(rawStreak.longest_streak || 0, _bumped),
+        last_activity_date: _todayStr,
+      };
+    }
     const allValRows = validRes.value?.data || [];
     const validated = new Set(
       allValRows
@@ -957,9 +977,18 @@ function render({
     : renderNextReward(totalValidated, worlds, trophees);
 
   // ── BLOC 3 content ──
-  // Les quêtes du jour ont leur propre carrousel (mountDailyQuests). L'action
-  // du jour reste contextuelle (quiz en attente / 1re compétence / examen).
-  const bloc3 = renderActionDuJour(null, pendingNotif, totalValidated);
+  // Priorité : notif quiz > quête du jour > première comp > exam blanc.
+  // mountDailyQuests gère le carrousel claim séparé (sous ce bloc).
+  const _pendingQuest = !pendingNotif
+    ? (todayQuests.find(
+        (q) => !q.completed && !q.claimed && q.quest_id !== "quest_login",
+      ) ?? null)
+    : null;
+  const bloc3 = renderActionDuJour(
+    _pendingQuest ? _normalizeQuest(_pendingQuest) : null,
+    pendingNotif,
+    totalValidated,
+  );
 
   return `${STYLE}
 <div class="acc2">
@@ -1177,11 +1206,11 @@ function renderActionDuJour(quest, pendingNotif, totalValidated) {
   // Le quiz n'est plus une porte de validation : on ne pousse plus 'a_valider' en URGENT.
   // L'invitation au quiz-récap (optionnel) vient d'une notif quiz non lue.
   if (quest) {
-    title = quest.label ?? "Quiz disponible";
+    title = quest.label ?? "Quête du jour";
     sub = quest.sub ?? "";
-    btnText = "Commencer →";
+    btnText = quest.btnText ?? "Commencer →";
     href = quest.href ?? "#/parcours";
-    urgent = quest.type === "consolidation_quiz";
+    urgent = false;
   } else if (pendingNotif?.data?.competence_id) {
     const isConsolid = pendingNotif.type === "consolidation_quiz";
     title = isConsolid ? "Quiz de consolidation" : "Quiz-récap (optionnel)";
@@ -1680,6 +1709,32 @@ async function _loadAndInjectFlashQuiz(root, me) {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────
+const _QUEST_HREF = {
+  quest_validate_1: "#/parcours",
+  quest_quiz_1: "#/parcours",
+  quest_quiz_3: "#/parcours",
+  quest_quiz_perfect: "#/parcours",
+  quest_streak_keep: "#/",
+};
+const _QUEST_BTN = {
+  quest_validate_1: "Valider une compétence →",
+  quest_quiz_1: "Faire un quiz →",
+  quest_quiz_3: "Faire 3 quiz →",
+  quest_quiz_perfect: "Viser 100% →",
+  quest_streak_keep: "Voir mon accueil →",
+};
+
+function _normalizeQuest(q) {
+  const reward = `+${q.reward_xp} XP · ${q.reward_gemmes} gemmes`;
+  return {
+    label: q.title,
+    sub: reward,
+    href: _QUEST_HREF[q.quest_id] ?? "#/parcours",
+    btnText: _QUEST_BTN[q.quest_id] ?? "Commencer →",
+    type: q.quest_id,
+  };
+}
+
 function _dKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }

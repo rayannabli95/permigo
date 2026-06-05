@@ -5,46 +5,52 @@
 // 1 idée par écran, copy orientée bénéfice, transitions fluides,
 // swipe natif, progression claire, perso (prénom + avatar), skippable.
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser, setCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { ASSETS } from '@/utils/assets.js';
-import { haptic } from '@/utils/haptic.js';
-import { isStandalone, guessPlatform, canPromptInstall, promptInstall } from '@/utils/pwa.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { getCurUser, setCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { ASSETS } from "@/utils/assets.js";
+import { haptic } from "@/utils/haptic.js";
+import {
+  isStandalone,
+  guessPlatform,
+  canPromptInstall,
+  promptInstall,
+} from "@/utils/pwa.js";
+import { unlockChest } from "@/utils/game-state.js";
 
 // Pictos inline pour le tuto "ajouter à l'écran d'accueil"
 const A2HS_SHARE = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg>`;
-const A2HS_DOTS  = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>`;
-const A2HS_PLUS  = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`;
+const A2HS_DOTS = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>`;
+const A2HS_PLUS = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`;
 
 // ─── Contenu des 4 écrans narratifs (le 5e = avatar) ─────────────
 const SLIDES = [
   {
-    emoji: '🚗',
-    badge: 'PermiGo',
+    emoji: "🚗",
+    badge: "PermiGo",
     title: 'Bienvenue, <span class="accent">{prenom}</span> !',
-    body: 'Ton permis, une victoire par jour. On avance ensemble : toi, ton moniteur, et un parcours clair.',
-    cta: 'Commencer',
+    body: "Ton permis, une victoire par jour. On avance ensemble : toi, ton moniteur, et un parcours clair.",
+    cta: "Commencer",
   },
   {
-    emoji: '🗺️',
-    title: '31 compétences, zéro brouillard',
+    emoji: "🗺️",
+    title: "31 compétences, zéro brouillard",
     body: "Le programme officiel du permis transformé en parcours. Tu avances compétence par compétence, et ton moniteur valide ce que tu maîtrises en séance.",
-    cta: 'Continuer',
+    cta: "Continuer",
   },
   {
-    emoji: '⚡',
-    title: 'Ancre ce que tu apprends',
+    emoji: "⚡",
+    title: "Ancre ce que tu apprends",
     body: "Après chaque compétence, un quiz éclair de 30 secondes. Une question ratée ? On te la represente quelques jours plus tard, pile au bon moment. C'est la mémoire qui dure.",
-    cta: 'Continuer',
+    cta: "Continuer",
   },
   {
-    emoji: '🔥',
-    title: 'Reviens chaque jour',
+    emoji: "🔥",
+    title: "Reviens chaque jour",
     body: "Chaque jour de pratique fait monter ton streak, débloque des trophées et te place dans le classement de ton auto-école. Du jeu, pour de vrais résultats.",
-    cta: 'Continuer',
+    cta: "Continuer",
   },
   // 5e écran : choix d'avatar (interactif) + CTA final, géré à part.
 ];
@@ -53,17 +59,20 @@ export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track('onboarding.start', { role: me.role });
+  track("onboarding.start", { role: me.role });
 
   // Dernière étape = tuto "ajouter à l'écran d'accueil" (sauf si déjà installée)
   const showA2HS = !isStandalone();
   const AVATAR_I = SLIDES.length;
-  const A2HS_I   = SLIDES.length + 1;
-  const TOTAL    = SLIDES.length + 1 + (showA2HS ? 1 : 0);
+  const A2HS_I = SLIDES.length + 1;
+  const TOTAL = SLIDES.length + 1 + (showA2HS ? 1 : 0);
 
   let idx = 0;
-  let avatar = (me.avatar_url && ASSETS.avatar?.includes(me.avatar_url)) ? me.avatar_url : (ASSETS.avatar?.[0] || null);
-  let a2hsPlat = guessPlatform() === 'android' ? 'android' : 'ios';
+  let avatar =
+    me.avatar_url && ASSETS.avatar?.includes(me.avatar_url)
+      ? me.avatar_url
+      : ASSETS.avatar?.[0] || null;
+  let a2hsPlat = guessPlatform() === "android" ? "android" : "ios";
   let finishing = false;
 
   root.innerHTML = `
@@ -71,34 +80,42 @@ export async function mount(root) {
     <div class="ob" role="dialog" aria-modal="true" aria-label="Tour de bienvenue">
       <div class="ob-head">
         <div class="ob-dots" id="ob-dots">
-          ${Array.from({ length: TOTAL }, (_, i) => `<span class="ob-dot${i === 0 ? ' active' : ''}" data-i="${i}"></span>`).join('')}
+          ${Array.from({ length: TOTAL }, (_, i) => `<span class="ob-dot${i === 0 ? " active" : ""}" data-i="${i}"></span>`).join("")}
         </div>
         <button class="ob-skip" id="ob-skip" type="button">Passer</button>
       </div>
 
       <div class="ob-viewport" id="ob-viewport">
         <div class="ob-track" id="ob-track" style="width:${TOTAL * 100}%">
-          ${SLIDES.map((s, i) => `
+          ${SLIDES.map(
+            (s, i) => `
             <section class="ob-slide" data-i="${i}">
               <div class="ob-emoji" aria-hidden="true">${s.emoji}</div>
-              ${s.badge ? `<div class="ob-badge">Permi<span>Go</span></div>` : ''}
-              <h1 class="ob-title">${s.title.replace('{prenom}', esc(me.prenom || me.nom || 'toi'))}</h1>
+              ${s.badge ? `<div class="ob-badge">Permi<span>Go</span></div>` : ""}
+              <h1 class="ob-title">${s.title.replace("{prenom}", esc(me.prenom || me.nom || "toi"))}</h1>
               <p class="ob-body-txt">${esc(s.body)}</p>
             </section>
-          `).join('')}
+          `,
+          ).join("")}
           <section class="ob-slide ob-slide-avatar" data-i="${AVATAR_I}">
-            <div class="ob-emoji" aria-hidden="true">${icon('palette',{size:34})}</div>
+            <div class="ob-emoji" aria-hidden="true">${icon("palette", { size: 34 })}</div>
             <h1 class="ob-title">Choisis ta tête</h1>
             <p class="ob-body-txt">Tu pourras en changer quand tu veux depuis ton profil.</p>
             <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="Choix de l'avatar">
-              ${(ASSETS.avatar || []).map((url, i) => `
-                <button class="ob-av-card${url === avatar ? ' sel' : ''}" data-url="${esc(url)}" role="radio" aria-checked="${url === avatar}" aria-label="Avatar ${i + 1}" type="button">
+              ${(ASSETS.avatar || [])
+                .map(
+                  (url, i) => `
+                <button class="ob-av-card${url === avatar ? " sel" : ""}" data-url="${esc(url)}" role="radio" aria-checked="${url === avatar}" aria-label="Avatar ${i + 1}" type="button">
                   <img class="ob-av-img" src="${esc(url)}" alt="" loading="lazy" />
                   <span class="ob-av-check" aria-hidden="true">✓</span>
-                </button>`).join('')}
+                </button>`,
+                )
+                .join("")}
             </div>
           </section>
-          ${showA2HS ? `
+          ${
+            showA2HS
+              ? `
           <section class="ob-slide ob-slide-a2hs" data-i="${A2HS_I}">
             <img class="ob-a2hs-badge" src="/skins/avatars/permigo-badge-icon.png" alt="" />
             <h1 class="ob-title">Garde PermiGo à portée de main</h1>
@@ -108,7 +125,9 @@ export async function mount(root) {
               <button class="ob-seg-btn" data-plat="android" type="button">Android</button>
             </div>
             <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
-          </section>` : ''}
+          </section>`
+              : ""
+          }
         </div>
       </div>
 
@@ -118,68 +137,78 @@ export async function mount(root) {
     </div>
   `;
 
-  const track$ = root.querySelector('#ob-track');
-  const ctaBtn = root.querySelector('#ob-cta');
-  const dotsEl = root.querySelector('#ob-dots');
-  const viewport = root.querySelector('#ob-viewport');
+  const track$ = root.querySelector("#ob-track");
+  const ctaBtn = root.querySelector("#ob-cta");
+  const dotsEl = root.querySelector("#ob-dots");
+  const viewport = root.querySelector("#ob-viewport");
 
   const lastIdx = TOTAL - 1;
-  function isLast()   { return idx === lastIdx; }
-  function isAvatar() { return idx === AVATAR_I; }
-  function isA2HS()   { return showA2HS && idx === A2HS_I; }
+  function isLast() {
+    return idx === lastIdx;
+  }
+  function isAvatar() {
+    return idx === AVATAR_I;
+  }
+  function isA2HS() {
+    return showA2HS && idx === A2HS_I;
+  }
 
   function update() {
     track$.style.transform = `translateX(-${(idx * 100) / TOTAL}%)`;
-    dotsEl.querySelectorAll('.ob-dot').forEach((d, i) => {
-      d.classList.toggle('active', i === idx);
-      d.classList.toggle('done', i < idx);
+    dotsEl.querySelectorAll(".ob-dot").forEach((d, i) => {
+      d.classList.toggle("active", i === idx);
+      d.classList.toggle("done", i < idx);
     });
     // Ré-anime l'emoji du slide actif
-    root.querySelectorAll('.ob-slide').forEach((s, i) => {
-      s.classList.toggle('on', i === idx);
-      s.setAttribute('aria-hidden', i === idx ? 'false' : 'true');
+    root.querySelectorAll(".ob-slide").forEach((s, i) => {
+      s.classList.toggle("on", i === idx);
+      s.setAttribute("aria-hidden", i === idx ? "false" : "true");
     });
     if (isLast()) {
-      ctaBtn.innerHTML = 'Voir mon parcours';
+      ctaBtn.innerHTML = "Voir mon parcours";
     } else if (isAvatar()) {
       ctaBtn.innerHTML = 'Continuer <span aria-hidden="true">→</span>';
     } else {
       ctaBtn.innerHTML = `${esc(SLIDES[idx].cta)} <span aria-hidden="true">→</span>`;
     }
-    track('onboarding.step_viewed', { step: idx + 1 });
+    track("onboarding.step_viewed", { step: idx + 1 });
   }
 
   function goTo(i) {
     idx = Math.max(0, Math.min(TOTAL - 1, i));
-    haptic?.('tap');
+    haptic?.("tap");
     update();
   }
-  function next() { isLast() ? finish() : goTo(idx + 1); }
-  function prev() { if (idx > 0) goTo(idx - 1); }
+  function next() {
+    isLast() ? finish() : goTo(idx + 1);
+  }
+  function prev() {
+    if (idx > 0) goTo(idx - 1);
+  }
 
-  ctaBtn.addEventListener('click', next);
+  ctaBtn.addEventListener("click", next);
 
   // Dots cliquables (retour en arrière possible)
-  dotsEl.querySelectorAll('.ob-dot').forEach(d => {
-    d.addEventListener('click', () => goTo(parseInt(d.dataset.i, 10)));
+  dotsEl.querySelectorAll(".ob-dot").forEach((d) => {
+    d.addEventListener("click", () => goTo(parseInt(d.dataset.i, 10)));
   });
 
   // Avatar
-  root.querySelectorAll('.ob-av-card').forEach(card => {
-    card.addEventListener('click', () => {
+  root.querySelectorAll(".ob-av-card").forEach((card) => {
+    card.addEventListener("click", () => {
       avatar = card.dataset.url;
-      haptic?.('select');
-      root.querySelectorAll('.ob-av-card').forEach(c => {
+      haptic?.("select");
+      root.querySelectorAll(".ob-av-card").forEach((c) => {
         const on = c.dataset.url === avatar;
-        c.classList.toggle('sel', on);
-        c.setAttribute('aria-checked', on ? 'true' : 'false');
+        c.classList.toggle("sel", on);
+        c.setAttribute("aria-checked", on ? "true" : "false");
       });
     });
   });
 
   // ─── Tuto "ajouter à l'écran d'accueil" (dernière slide) ──────────
   if (showA2HS) {
-    const stepsEl = root.querySelector('#ob-a2hs-steps');
+    const stepsEl = root.querySelector("#ob-a2hs-steps");
 
     const stepsIOS = () => `
       <div class="ob-a2hs-step"><span class="ob-a2hs-num">1</span><span>Dans <strong>Safari</strong>, touche le bouton Partager <span class="ob-a2hs-glyph">${A2HS_SHARE}</span> en bas.</span></div>
@@ -188,7 +217,8 @@ export async function mount(root) {
 
     const stepsAndroid = () => {
       const btn = canPromptInstall()
-        ? `<button class="ob-a2hs-install" id="ob-a2hs-install" type="button">Installer l'app en 1 tap</button>` : '';
+        ? `<button class="ob-a2hs-install" id="ob-a2hs-install" type="button">Installer l'app en 1 tap</button>`
+        : "";
       return `${btn}
       <div class="ob-a2hs-step"><span class="ob-a2hs-num">1</span><span>Dans <strong>Chrome</strong>, touche le menu <span class="ob-a2hs-glyph">${A2HS_DOTS}</span> en haut à droite.</span></div>
       <div class="ob-a2hs-step"><span class="ob-a2hs-num">2</span><span>Choisis <strong>« Ajouter à l'écran d'accueil »</strong> <span class="ob-a2hs-glyph">${A2HS_PLUS}</span>.</span></div>
@@ -196,70 +226,113 @@ export async function mount(root) {
     };
 
     const renderA2HSSteps = () => {
-      root.querySelectorAll('.ob-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.plat === a2hsPlat));
-      stepsEl.innerHTML = a2hsPlat === 'android' ? stepsAndroid() : stepsIOS();
-      const ib = root.querySelector('#ob-a2hs-install');
-      if (ib) ib.addEventListener('click', async () => {
-        ib.disabled = true; ib.textContent = 'Installation…';
-        const outcome = await promptInstall();
-        track('a2hs.install_prompt', { outcome, source: 'onboarding' });
-        if (outcome === 'accepted') { finish(); return; }
-        ib.disabled = false; ib.textContent = "Installer l'app en 1 tap";
-      });
+      root
+        .querySelectorAll(".ob-seg-btn")
+        .forEach((b) =>
+          b.classList.toggle("active", b.dataset.plat === a2hsPlat),
+        );
+      stepsEl.innerHTML = a2hsPlat === "android" ? stepsAndroid() : stepsIOS();
+      const ib = root.querySelector("#ob-a2hs-install");
+      if (ib)
+        ib.addEventListener("click", async () => {
+          ib.disabled = true;
+          ib.textContent = "Installation…";
+          const outcome = await promptInstall();
+          track("a2hs.install_prompt", { outcome, source: "onboarding" });
+          if (outcome === "accepted") {
+            finish();
+            return;
+          }
+          ib.disabled = false;
+          ib.textContent = "Installer l'app en 1 tap";
+        });
     };
 
-    root.querySelectorAll('.ob-seg-btn').forEach(b => b.addEventListener('click', () => {
-      a2hsPlat = b.dataset.plat;
-      track('a2hs.platform_selected', { platform: a2hsPlat, source: 'onboarding' });
-      renderA2HSSteps();
-    }));
+    root.querySelectorAll(".ob-seg-btn").forEach((b) =>
+      b.addEventListener("click", () => {
+        a2hsPlat = b.dataset.plat;
+        track("a2hs.platform_selected", {
+          platform: a2hsPlat,
+          source: "onboarding",
+        });
+        renderA2HSSteps();
+      }),
+    );
 
     renderA2HSSteps();
   }
 
   // Skip → termine direct
-  root.querySelector('#ob-skip').addEventListener('click', () => {
-    track('onboarding.skipped', { at_step: idx + 1 });
+  root.querySelector("#ob-skip").addEventListener("click", () => {
+    track("onboarding.skipped", { at_step: idx + 1 });
     finish();
   });
 
   // Swipe horizontal (mobile natif)
-  let startX = 0, startY = 0, swiping = false;
-  viewport.addEventListener('touchstart', e => {
-    const t = e.changedTouches[0]; startX = t.clientX; startY = t.clientY; swiping = true;
-  }, { passive: true });
-  viewport.addEventListener('touchend', e => {
-    if (!swiping) return; swiping = false;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - startX, dy = t.clientY - startY;
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-      dx < 0 ? next() : prev();
-    }
-  }, { passive: true });
+  let startX = 0,
+    startY = 0,
+    swiping = false;
+  viewport.addEventListener(
+    "touchstart",
+    (e) => {
+      const t = e.changedTouches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+      swiping = true;
+    },
+    { passive: true },
+  );
+  viewport.addEventListener(
+    "touchend",
+    (e) => {
+      if (!swiping) return;
+      swiping = false;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX,
+        dy = t.clientY - startY;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+        dx < 0 ? next() : prev();
+      }
+    },
+    { passive: true },
+  );
 
   // Clavier (flèches)
   function onKey(e) {
-    if (e.key === 'ArrowRight') next();
-    else if (e.key === 'ArrowLeft') prev();
+    if (e.key === "ArrowRight") next();
+    else if (e.key === "ArrowLeft") prev();
   }
-  document.addEventListener('keydown', onKey);
+  document.addEventListener("keydown", onKey);
 
   async function finish() {
     if (finishing) return;
     finishing = true;
-    document.removeEventListener('keydown', onKey);
-    track('onboarding.completed', { last_step: idx + 1, avatar_chosen: !!avatar });
+    document.removeEventListener("keydown", onKey);
+    track("onboarding.completed", {
+      last_step: idx + 1,
+      avatar_chosen: !!avatar,
+    });
     ctaBtn.disabled = true;
-    ctaBtn.innerHTML = 'Lancement…';
+    ctaBtn.innerHTML = "Lancement…";
     try {
       const now = new Date().toISOString();
       const patch = { first_value_action_at: now };
       if (avatar) patch.avatar_url = avatar;
-      await sb.from('profiles').update(patch).eq('id', me.id);
+      await sb.from("profiles").update(patch).eq("id", me.id);
       setCurUser({ ...me, ...patch });
-    } catch (e) { console.error('[onboarding] finish update failed', e); }
-    // Reboot complet → monte le chrome + flow normal, atterrit sur le parcours
-    location.hash = '#/parcours';
+    } catch (e) {
+      console.error("[onboarding] finish update failed", e);
+    }
+    // Coffre de bienvenue — crédité une seule fois, idempotent côté serveur.
+    // L'élève le trouvera sur l'accueil dès son arrivée (teaser coffres).
+    unlockChest("welcome", {
+      xp: 50,
+      gemmes: 25,
+      title: "Bienvenu·e dans PermiGo !",
+    }).catch(() => {});
+    // Reboot complet → monte le chrome + flow normal, atterrit sur l'accueil
+    // (le teaser "coffre à ouvrir" s'affiche immédiatement).
+    location.hash = "#/";
     location.reload();
   }
 

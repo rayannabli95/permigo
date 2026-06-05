@@ -82,6 +82,14 @@ const CHEST_META = {
     xp: 100,
     gemmes: 25,
   },
+  welcome: {
+    label: "Coffre de bienvenue",
+    image: "/skins/chests/chest_welcome.png",
+    emoji: "🎁",
+    tier: "bronze",
+    xp: 50,
+    gemmes: 25,
+  },
 };
 
 const TIER_GRADIENT = {
