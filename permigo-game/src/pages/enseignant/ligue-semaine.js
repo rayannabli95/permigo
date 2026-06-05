@@ -196,8 +196,8 @@ function _render(root, rows) {
       </div>
     </div>
     <div class="ls-w-pts-legend">
-      <span class="ls-w-pts-pill">1 pt par validation donnée</span>
-      <span class="ls-w-pts-pill">💎 ≥40 · 🏆 ≥20 · 🥈 ≥8 · 🥉 ≥1</span>
+      <span class="ls-w-pts-pill">1 pt = 1 validation</span>
+      ${LEAGUES.map((l) => `<span class="ls-w-pts-pill" style="border-color:${l.border};color:${l.color}">${l.name} ≥${l.minPts}</span>`).join("")}
     </div>
   </div>`;
 
@@ -218,7 +218,7 @@ function _render(root, rows) {
         if (prevLeagueId !== null) listHtml += `<div style="height:6px"></div>`;
         const lObj = LEAGUES.find((l) => l.id === lid);
         listHtml += `<div class="ls-w-league-hd">
-          ${lObj ? `<span class="ls-w-league-dot" style="background:${lObj.color}"></span>${lObj.emoji} Ligue ${esc(lObj.name)}` : "Hors ligue"}
+          ${lObj ? `<span class="ls-w-league-dot" style="background:${lObj.color}"></span>${icon(lObj.iconName, { size: 12, strokeWidth: 2, color: lObj.color })} Ligue ${esc(lObj.name)}` : "Hors ligue"}
         </div>`;
         prevLeagueId = lid;
       }

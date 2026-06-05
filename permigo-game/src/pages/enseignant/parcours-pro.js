@@ -422,69 +422,35 @@ const STYLE = `<style>
 }
 .pcp-saison-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
-/* ── Trophées shortcut card ── */
-.pcp-trophees-card {
-  margin: 16px 16px 0;
-  padding: 16px;
-  background: var(--su);
-  border: 1.5px solid var(--bo);
-  border-radius: 20px;
-  display: flex; align-items: center; gap: 14px;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04);
-  animation: pcpBlockIn .5s 360ms cubic-bezier(.2,.7,.3,1) both;
+/* ── Shortcuts row (trophées + ligue) ── visible sans scroller ── */
+.pcp-shortcuts {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin: 14px 16px 0;
+  animation: pcpBlockIn .5s 200ms cubic-bezier(.2,.7,.3,1) both;
+}
+.pcp-shortcut {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 12px 12px 10px;
+  background: var(--su); border: 1.5px solid var(--bo); border-radius: 16px;
+  cursor: pointer; box-shadow: 0 1px 2px rgba(10,13,26,.04);
   transition: border-color .15s, transform .12s;
   -webkit-tap-highlight-color: transparent;
 }
-.pcp-trophees-card:active { transform: scale(.98); }
-.pcp-trophees-card:hover { border-color: var(--a); }
-.pcp-trophees-ico {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: rgba(245,158,11,.1); border: 1.5px solid rgba(245,158,11,.25);
+.pcp-shortcut:active { transform: scale(.97); }
+.pcp-shortcut-ico {
+  width: 36px; height: 36px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  color: #f59e0b; flex-shrink: 0;
+  flex-shrink: 0;
 }
-.pcp-trophees-body { flex: 1; min-width: 0; }
-.pcp-trophees-title {
-  font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
-  margin-bottom: 3px;
+.pcp-shortcut-ico--trophy {
+  background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.25); color: #f59e0b;
 }
-.pcp-trophees-sub {
-  font: 500 12px/1 'Inter', sans-serif;
-  color: var(--mu2);
+.pcp-shortcut-ico--ligue {
+  background: rgba(167,139,250,.12); border: 1px solid rgba(167,139,250,.25); color: #a78bfa;
 }
-.pcp-trophees-badge {
-  font: 700 12px/1 'IBM Plex Mono', monospace;
-  color: #f59e0b;
-  background: rgba(245,158,11,.1);
-  padding: 4px 8px; border-radius: 8px;
-  white-space: nowrap; flex-shrink: 0;
-}
-
-/* ── Ligue shortcut card ── */
-.pcp-ligue-card {
-  margin: 16px 16px 0;
-  padding: 15px 16px;
-  background: var(--su); border: 1.5px solid var(--bo); border-radius: 20px;
-  display: flex; align-items: center; gap: 14px;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04);
-  animation: pcpBlockIn .5s 400ms cubic-bezier(.2,.7,.3,1) both;
-  transition: border-color .15s, transform .12s;
-  -webkit-tap-highlight-color: transparent;
-}
-.pcp-ligue-card:active { transform: scale(.98); }
-.pcp-ligue-card:hover { border-color: #f59e0b; }
-.pcp-ligue-ico {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: rgba(245,158,11,.1); border: 1.5px solid rgba(245,158,11,.25);
-  display: flex; align-items: center; justify-content: center;
-  color: #f59e0b; flex-shrink: 0; font-size: 22px; line-height: 1;
-}
-.pcp-ligue-body { flex: 1; min-width: 0; }
-.pcp-ligue-title { font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 3px; }
-.pcp-ligue-sub { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); }
+.pcp-shortcut-body { flex: 1; min-width: 0; }
+.pcp-shortcut-title { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
+.pcp-shortcut-sub { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
 </style>`;
 
 // ─── State ──────────────────────────────────────────────────────
@@ -633,32 +599,31 @@ function render(
         </div>
       </div>
 
-      <!-- ══ BLOC 2 — NEXT UNLOCK ══ -->
+      <!-- ══ BLOC 2 — SHORTCUTS (trophées + ligue) visibles sans scroller ══ -->
+      <div class="pcp-shortcuts">
+        <div class="pcp-shortcut" id="pcp-trophees" role="button" tabindex="0" aria-label="Voir mes trophées">
+          <div class="pcp-shortcut-ico pcp-shortcut-ico--trophy">${icon("award", { size: 18, strokeWidth: 2 })}</div>
+          <div class="pcp-shortcut-body">
+            <div class="pcp-shortcut-title">Trophées</div>
+            <div class="pcp-shortcut-sub">${trophyUnlocked}/${trophyTotal} débloqués</div>
+          </div>
+          ${icon("chevron-right", { size: 14, strokeWidth: 2.5, color: "var(--mu2)" })}
+        </div>
+        <div class="pcp-shortcut" id="pcp-ligue" role="button" tabindex="0" aria-label="Voir la ligue de la semaine">
+          <div class="pcp-shortcut-ico pcp-shortcut-ico--ligue">${icon("trophy", { size: 18, strokeWidth: 2 })}</div>
+          <div class="pcp-shortcut-body">
+            <div class="pcp-shortcut-title">Ligue</div>
+            <div class="pcp-shortcut-sub">Cette semaine</div>
+          </div>
+          ${icon("chevron-right", { size: 14, strokeWidth: 2.5, color: "var(--mu2)" })}
+        </div>
+      </div>
+
+      <!-- ══ BLOC 3 — NEXT UNLOCK ══ -->
       ${renderNextUnlock(state)}
 
-      <!-- ══ BLOC 3 — ROADMAP MINI ══ -->
+      <!-- ══ BLOC 4 — ROADMAP MINI ══ -->
       ${renderRoadmapMini(stops, totalVals)}
-
-      <!-- ══ BLOC 4 — TROPHÉES ══ -->
-      <div class="pcp-trophees-card" id="pcp-trophees" role="button" tabindex="0" aria-label="Voir mes trophées">
-        <div class="pcp-trophees-ico">${icon("award", { size: 20, strokeWidth: 2 })}</div>
-        <div class="pcp-trophees-body">
-          <div class="pcp-trophees-title">Trophées professionnels</div>
-          <div class="pcp-trophees-sub">Jalons pédagogiques débloqués</div>
-        </div>
-        <div class="pcp-trophees-badge">${trophyUnlocked}/${trophyTotal}</div>
-        ${icon("chevron-right", { size: 16, strokeWidth: 2.5, color: "var(--mu2)" })}
-      </div>
-
-      <!-- ══ BLOC 5 — LIGUE SEMAINE ══ -->
-      <div class="pcp-ligue-card" id="pcp-ligue" role="button" tabindex="0" aria-label="Voir la ligue de la semaine">
-        <div class="pcp-ligue-ico">🏆</div>
-        <div class="pcp-ligue-body">
-          <div class="pcp-ligue-title">Ligue de la semaine</div>
-          <div class="pcp-ligue-sub">Classement hebdo par validations</div>
-        </div>
-        ${icon("chevron-right", { size: 16, strokeWidth: 2.5, color: "var(--mu2)" })}
-      </div>
 
     </div>`;
 

@@ -6,33 +6,89 @@
 //   - Déjà ouverts
 //   - Prochains jalons (streak / mondes)
 // ═══════════════════════════════════════════════════════════════
-import { getCurUser }  from '@/auth/cur-user.js';
-import { esc }         from '@/utils/escape.js';
-import { track }       from '@/services/analytics.js';
-import { navigate }    from '@/router.js';
-import { icon }        from '@/utils/icons.js';
-import { toast }       from '@/components/common/toast.js';
-import { getMyChests, openChest } from '@/utils/game-state.js';
-import { playCoin } from '@/utils/sound.js';
-import { openChestModal, ensureChestStyles }   from '@/components/eleve/chest.js';
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { icon } from "@/utils/icons.js";
+import { toast } from "@/components/common/toast.js";
+import { getMyChests, openChest } from "@/utils/game-state.js";
+import { playCoin } from "@/utils/sound.js";
+import { openChestModal, ensureChestStyles } from "@/components/eleve/chest.js";
 
 // ─── Metadata par type de coffre ─────────────────────────────────
 const CHEST_META = {
-  world_1:      { label: 'Monde 1 — Sécurité',  image: '/skins/chests/chest_world_1.png',      emoji: '🛡️', tier: 'bronze',     xp: 200,  gemmes: 50  },
-  world_2:      { label: 'Monde 2 — Manœuvres', image: '/skins/chests/chest_world_2.png',      emoji: '🔧', tier: 'argent',     xp: 400,  gemmes: 100 },
-  world_3:      { label: 'Monde 3 — Conduite',  image: '/skins/chests/chest_world_3.png',      emoji: '🚗', tier: 'or',         xp: 700,  gemmes: 175 },
-  world_4:      { label: 'Monde 4 — Maîtrise',  image: '/skins/chests/chest_world_4.png',      emoji: '🏆', tier: 'legendaire', xp: 1200, gemmes: 300 },
-  streak_7:     { label: 'Streak 7 jours',      image: '/skins/chests/chest_streak_7.png',     emoji: '🔥', tier: 'argent',     xp: 150,  gemmes: 30  },
-  streak_14:    { label: 'Streak 14 jours',     image: '/skins/chests/chest_streak_14.png',    emoji: '⚡', tier: 'or',         xp: 350,  gemmes: 80  },
-  streak_30:    { label: 'Streak 30 jours',     image: '/skins/chests/chest_streak_30.png',    emoji: '👑', tier: 'legendaire', xp: 800,  gemmes: 200 },
-  perfect_quiz: { label: 'Quiz parfait',        image: '/skins/chests/chest_perfect_quiz.png', emoji: '✨', tier: 'or',         xp: 100,  gemmes: 25  },
+  world_1: {
+    label: "Monde 1 — Sécurité",
+    image: "/skins/chests/chest_world_1.png",
+    emoji: "🛡️",
+    tier: "bronze",
+    xp: 200,
+    gemmes: 50,
+  },
+  world_2: {
+    label: "Monde 2 — Manœuvres",
+    image: "/skins/chests/chest_world_2.png",
+    emoji: "🔧",
+    tier: "argent",
+    xp: 400,
+    gemmes: 100,
+  },
+  world_3: {
+    label: "Monde 3 — Conduite",
+    image: "/skins/chests/chest_world_3.png",
+    emoji: "🚗",
+    tier: "or",
+    xp: 700,
+    gemmes: 175,
+  },
+  world_4: {
+    label: "Monde 4 — Maîtrise",
+    image: "/skins/chests/chest_world_4.png",
+    emoji: "🏆",
+    tier: "legendaire",
+    xp: 1200,
+    gemmes: 300,
+  },
+  streak_7: {
+    label: "Streak 7 jours",
+    image: "/skins/chests/chest_streak_7.png",
+    emoji: "🔥",
+    tier: "argent",
+    xp: 150,
+    gemmes: 30,
+  },
+  streak_14: {
+    label: "Streak 14 jours",
+    image: "/skins/chests/chest_streak_14.png",
+    emoji: "⚡",
+    tier: "or",
+    xp: 350,
+    gemmes: 80,
+  },
+  streak_30: {
+    label: "Streak 30 jours",
+    image: "/skins/chests/chest_streak_30.png",
+    emoji: "👑",
+    tier: "legendaire",
+    xp: 800,
+    gemmes: 200,
+  },
+  perfect_quiz: {
+    label: "Quiz parfait",
+    image: "/skins/chests/chest_perfect_quiz.png",
+    emoji: "✨",
+    tier: "or",
+    xp: 100,
+    gemmes: 25,
+  },
 };
 
 const TIER_GRADIENT = {
-  bronze:     'linear-gradient(135deg,var(--amk),#7c2d12)',
-  argent:     'linear-gradient(135deg,var(--mu2),var(--mu4))',
-  or:         'linear-gradient(135deg,#facc15,#a16207)',
-  legendaire: 'linear-gradient(135deg,var(--pul),#581c87)',
+  bronze: "linear-gradient(135deg,var(--amk),#7c2d12)",
+  argent: "linear-gradient(135deg,var(--mu2),var(--mu4))",
+  or: "linear-gradient(135deg,#facc15,#a16207)",
+  legendaire: "linear-gradient(135deg,var(--pul),#581c87)",
 };
 
 const STYLE = `<style>
@@ -205,17 +261,26 @@ const STYLE = `<style>
 </style>`;
 
 function relTime(ts) {
-  if (!ts) return '';
+  if (!ts) return "";
   const diff = Date.now() - new Date(ts).getTime();
   const d = Math.floor(diff / 86400000);
-  if (d === 0) return 'aujourd\'hui';
-  if (d === 1) return 'hier';
+  if (d === 0) return "aujourd'hui";
+  if (d === 1) return "hier";
   if (d < 7) return `il y a ${d}j`;
-  return new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  return new Date(ts).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "short",
+  });
 }
 
 function renderCard(chest) {
-  const meta = CHEST_META[chest.chest_type] || { label: chest.chest_type, emoji: '📦', tier: 'bronze', xp: 0, gemmes: 0 };
+  const meta = CHEST_META[chest.chest_type] || {
+    label: chest.chest_type,
+    emoji: "📦",
+    tier: "bronze",
+    xp: 0,
+    gemmes: 0,
+  };
   const grad = TIER_GRADIENT[meta.tier] || TIER_GRADIENT.bronze;
   const canOpen = !chest.opened_at;
   const rew = chest.rewards || {};
@@ -223,31 +288,36 @@ function renderCard(chest) {
   const gemmes = rew.gemmes || meta.gemmes;
 
   return `
-  <div class="mc-card${canOpen ? ' mc-can-open' : ' mc-opened'}"
+  <div class="mc-card${canOpen ? " mc-can-open" : " mc-opened"}"
        data-chest-type="${esc(chest.chest_type)}"
        data-chest-id="${esc(chest.id)}"
        data-tier="${esc(meta.tier)}"
-       role="${canOpen ? 'button' : 'article'}"
-       tabindex="${canOpen ? '0' : '-1'}"
+       role="${canOpen ? "button" : "article"}"
+       tabindex="${canOpen ? "0" : "-1"}"
        aria-label="${canOpen ? `Ouvrir : ${esc(meta.label)}` : `Déjà ouvert : ${esc(meta.label)}`}">
     <div class="mc-thumb" style="background:${grad}">
       <img src="${meta.image}" alt="${esc(meta.label)}" loading="lazy"
            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
            style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))">
-      <span style="font-size:32px;display:none" aria-hidden="true">${meta.emoji ?? '🎁'}</span>
+      <span style="font-size:32px;display:none" aria-hidden="true">${meta.emoji ?? "🎁"}</span>
       <div class="mc-icon-glow" style="background:${grad}"></div>
     </div>
     <div class="mc-info">
       <div class="mc-label">${esc(meta.label)}</div>
-      <div class="mc-sub">${canOpen ? 'Débloqué ' + relTime(chest.unlocked_at) : 'Ouvert ' + relTime(chest.opened_at)}</div>
-      ${canOpen ? `<div class="mc-rewards">
-        <span class="mc-rew-chip">${icon('zap',{size:13})} +${xp} XP</span>
-        <span class="mc-rew-chip">${icon('gem',{size:13})} +${gemmes}</span>
-      </div>` : ''}
+      <div class="mc-sub">${canOpen ? "Débloqué " + relTime(chest.unlocked_at) : "Ouvert " + relTime(chest.opened_at)}</div>
+      ${
+        canOpen
+          ? `<div class="mc-rewards">
+        <span class="mc-rew-chip">${icon("zap", { size: 13 })} +${xp} XP</span>
+        <span class="mc-rew-chip">${icon("gem", { size: 13 })} +${gemmes}</span>
+      </div>`
+          : ""
+      }
     </div>
-    ${canOpen
-      ? `<button class="mc-open-btn" aria-label="Ouvrir le coffre">Ouvrir</button>`
-      : `<div class="mc-badge mc-badge-opened" aria-hidden="true">${icon('check', { size: 14, strokeWidth: 2.5 })}</div>`
+    ${
+      canOpen
+        ? `<button class="mc-open-btn" aria-label="Ouvrir le coffre">Ouvrir</button>`
+        : `<div class="mc-badge mc-badge-opened" aria-hidden="true">${icon("check", { size: 14, strokeWidth: 2.5 })}</div>`
     }
   </div>`;
 }
@@ -256,7 +326,7 @@ export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track('page.view', { page: 'mes_coffres', role: me.role });
+  track("page.view", { page: "mes_coffres", role: me.role });
 
   root.innerHTML = `
     ${STYLE}
@@ -273,7 +343,9 @@ export async function mount(root) {
     </div>
   `;
 
-  root.querySelector('#mc-back')?.addEventListener('click', () => navigate('#/'));
+  root
+    .querySelector("#mc-back")
+    ?.addEventListener("click", () => navigate("#/"));
 
   ensureChestStyles();
 
@@ -282,66 +354,66 @@ export async function mount(root) {
   try {
     chests = await getMyChests({ throwOnError: true });
   } catch (e) {
-    console.error('[mes-coffres] load failed', e);
+    console.error("[mes-coffres] load failed", e);
     loadFailed = true;
   }
 
-  const toOpen   = chests.filter(c => !c.opened_at);
-  const opened   = chests.filter(c =>  c.opened_at);
+  const toOpen = chests.filter((c) => !c.opened_at);
+  const opened = chests.filter((c) => c.opened_at);
 
-  const page = root.querySelector('.mc-page');
+  const page = root.querySelector(".mc-page");
   if (!page) return;
 
-  let html = '';
+  let html = "";
 
   if (toOpen.length > 0) {
     html += `<div class="mc-section">À ouvrir (${toOpen.length})</div>`;
-    html += `<div class="mc-list">${toOpen.map(renderCard).join('')}</div>`;
+    html += `<div class="mc-list">${toOpen.map(renderCard).join("")}</div>`;
   }
 
   if (opened.length > 0) {
     html += `<div class="mc-section">Déjà ouverts</div>`;
-    html += `<div class="mc-list">${opened.map(renderCard).join('')}</div>`;
+    html += `<div class="mc-list">${opened.map(renderCard).join("")}</div>`;
   }
 
   if (chests.length === 0) {
     html = loadFailed
-      ? `<div class="mc-empty"><div class="mc-empty-ico">${icon('alert-circle',{size:30})}</div>Impossible de charger tes coffres.<br>
+      ? `<div class="mc-empty"><div class="mc-empty-ico">${icon("alert-circle", { size: 30 })}</div>Impossible de charger tes coffres.<br>
          <button class="mc-open-btn" id="mc-retry" style="margin-top:12px">Réessayer</button></div>`
-      : `<div class="mc-empty"><div class="mc-empty-ico">🎁</div>Aucun coffre encore — complète des mondes<br>et construis ton streak !</div>`;
+      : `<div class="mc-empty"><div class="mc-empty-ico">${icon("package", { size: 32, strokeWidth: 1.5 })}</div>Aucun coffre encore — complète des mondes<br>et construis ton streak !</div>`;
   }
 
   // Replace skeleton with real content
-  page.querySelector('.mc-list')?.remove();
-  page.insertAdjacentHTML('beforeend', html);
-  page.querySelector('#mc-retry')?.addEventListener('click', () => mount(root));
+  page.querySelector(".mc-list")?.remove();
+  page.insertAdjacentHTML("beforeend", html);
+  page.querySelector("#mc-retry")?.addEventListener("click", () => mount(root));
 
   // Wire click on "can open" cards
-  page.querySelectorAll('.mc-card.mc-can-open').forEach(card => {
+  page.querySelectorAll(".mc-card.mc-can-open").forEach((card) => {
     const chestType = card.dataset.chestType;
     const meta = CHEST_META[chestType] || { label: chestType };
 
     const triggerOpen = async () => {
-      track('chest.opened_from_page', { chest_type: chestType });
+      track("chest.opened_from_page", { chest_type: chestType });
       playCoin();
 
       const markOpened = () => {
-        card.classList.remove('mc-can-open');
-        card.classList.add('mc-opened');
+        card.classList.remove("mc-can-open");
+        card.classList.add("mc-opened");
         card.tabIndex = -1;
-        card.querySelector('.mc-open-btn')?.replaceWith(
-          Object.assign(document.createElement('div'), {
-            className: 'mc-badge mc-badge-opened',
-            innerHTML: icon('check', { size: 14, strokeWidth: 2.5 }),
-          })
+        card.querySelector(".mc-open-btn")?.replaceWith(
+          Object.assign(document.createElement("div"), {
+            className: "mc-badge mc-badge-opened",
+            innerHTML: icon("check", { size: 14, strokeWidth: 2.5 }),
+          }),
         );
-        const sub = card.querySelector('.mc-sub');
-        if (sub) sub.textContent = 'Ouvert aujourd\'hui';
-        card.querySelector('.mc-rewards')?.remove();
+        const sub = card.querySelector(".mc-sub");
+        if (sub) sub.textContent = "Ouvert aujourd'hui";
+        card.querySelector(".mc-rewards")?.remove();
       };
 
       const migrateCard = () => {
-        const fromList = card.closest('.mc-list');
+        const fromList = card.closest(".mc-list");
         const sectionHdr = fromList?.previousElementSibling;
         card.remove();
 
@@ -357,14 +429,19 @@ export async function mount(root) {
 
         // Find or create the "Déjà ouverts" section
         let openedList = null;
-        page.querySelectorAll('.mc-section').forEach(hdr => {
-          if (hdr.textContent.startsWith('Déjà ouverts')) {
+        page.querySelectorAll(".mc-section").forEach((hdr) => {
+          if (hdr.textContent.startsWith("Déjà ouverts")) {
             openedList = hdr.nextElementSibling;
           }
         });
         if (!openedList) {
-          const hdr = Object.assign(document.createElement('div'), { className: 'mc-section', textContent: 'Déjà ouverts' });
-          openedList = Object.assign(document.createElement('div'), { className: 'mc-list' });
+          const hdr = Object.assign(document.createElement("div"), {
+            className: "mc-section",
+            textContent: "Déjà ouverts",
+          });
+          openedList = Object.assign(document.createElement("div"), {
+            className: "mc-list",
+          });
           page.appendChild(hdr);
           page.appendChild(openedList);
         }
@@ -379,14 +456,17 @@ export async function mount(root) {
           migrateCard();
           if (!silent) {
             navigator.vibrate?.([30, 50, 30]);
-            toast(`${meta.label} ouvert ! +${meta.xp ?? 0} XP +${meta.gemmes ?? 0} gemmes`, 'success');
+            toast(
+              `${meta.label} ouvert ! +${meta.xp ?? 0} XP +${meta.gemmes ?? 0} gemmes`,
+              "success",
+            );
           }
-        } else if (result.error === 'already_opened') {
+        } else if (result.error === "already_opened") {
           markOpened();
           migrateCard();
         } else {
-          console.error('[mes-coffres] openChest error:', result.error);
-          toast(result.error || 'Erreur ouverture coffre — réessaie', 'error');
+          console.error("[mes-coffres] openChest error:", result.error);
+          toast(result.error || "Erreur ouverture coffre — réessaie", "error");
         }
       };
 
@@ -394,7 +474,13 @@ export async function mount(root) {
       const worldMatch = chestType.match(/^world_(\d+)$/);
       if (worldMatch) {
         const worldNum = parseInt(worldMatch[1], 10);
-        const WORLD_NAMES = ['', 'Sécurité', 'Manœuvres', 'Conduite', 'Maîtrise'];
+        const WORLD_NAMES = [
+          "",
+          "Sécurité",
+          "Manœuvres",
+          "Conduite",
+          "Maîtrise",
+        ];
         openChestModal({
           worldNum,
           worldName: WORLD_NAMES[worldNum] || `Monde ${worldNum}`,
@@ -404,14 +490,28 @@ export async function mount(root) {
       }
 
       // Coffres non-monde (streak, quiz) → ouverture directe
-      const btn = card.querySelector('.mc-open-btn');
-      if (btn) { btn.disabled = true; btn.textContent = '…'; }
+      const btn = card.querySelector(".mc-open-btn");
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "…";
+      }
       await persistOpen(false);
-      if (btn && card.classList.contains('mc-can-open')) { btn.disabled = false; btn.textContent = 'Ouvrir'; }
+      if (btn && card.classList.contains("mc-can-open")) {
+        btn.disabled = false;
+        btn.textContent = "Ouvrir";
+      }
     };
 
-    card.addEventListener('click', triggerOpen);
-    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerOpen(); } });
-    card.querySelector('.mc-open-btn')?.addEventListener('click', e => { e.stopPropagation(); triggerOpen(); });
+    card.addEventListener("click", triggerOpen);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        triggerOpen();
+      }
+    });
+    card.querySelector(".mc-open-btn")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      triggerOpen();
+    });
   });
 }

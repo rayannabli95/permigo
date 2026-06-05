@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
+import { icon } from "@/utils/icons.js";
 
 // 4 ligues ordonnées du plus haut au plus bas
 export const LEAGUES = [
@@ -10,7 +11,7 @@ export const LEAGUES = [
     id: "diamant",
     name: "Diamant",
     minPts: 40,
-    emoji: "💎",
+    iconName: "gem",
     color: "#a78bfa",
     bg: "rgba(167,139,250,.12)",
     border: "rgba(167,139,250,.35)",
@@ -20,7 +21,7 @@ export const LEAGUES = [
     id: "or",
     name: "Or",
     minPts: 20,
-    emoji: "🏆",
+    iconName: "trophy",
     color: "#f59e0b",
     bg: "rgba(245,158,11,.12)",
     border: "rgba(245,158,11,.35)",
@@ -30,7 +31,7 @@ export const LEAGUES = [
     id: "argent",
     name: "Argent",
     minPts: 8,
-    emoji: "🥈",
+    iconName: "shield",
     color: "#9ca3af",
     bg: "rgba(156,163,175,.12)",
     border: "rgba(156,163,175,.35)",
@@ -40,7 +41,7 @@ export const LEAGUES = [
     id: "bronze",
     name: "Bronze",
     minPts: 1,
-    emoji: "🥉",
+    iconName: "award",
     color: "#cd7f32",
     bg: "rgba(205,127,50,.12)",
     border: "rgba(205,127,50,.35)",
@@ -61,15 +62,16 @@ export function getLeague(pts) {
 export function renderLeagueBadge(league, pts, size = "md") {
   if (!league) {
     return `<div class="lg-badge lg-badge-${size} lg-badge-none">
-      <span class="lg-badge-emoji">🏁</span>
+      <div class="lg-badge-ico">${icon("flag", { size: size === "lg" ? 36 : size === "sm" ? 18 : 26, strokeWidth: 1.5 })}</div>
       <div>
         <div class="lg-badge-name">Hors-ligue</div>
         <div class="lg-badge-pts">0 pt cette semaine</div>
       </div>
     </div>`;
   }
+  const icoSize = size === "lg" ? 36 : size === "sm" ? 18 : 26;
   return `<div class="lg-badge lg-badge-${size}" style="--lc:${league.color};--lb:${league.bg};--lbr:${league.border}">
-    <span class="lg-badge-emoji">${league.emoji}</span>
+    <div class="lg-badge-ico" style="background:${league.gradient};border-radius:10px;padding:6px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0">${icon(league.iconName, { size: icoSize, strokeWidth: 1.5 })}</div>
     <div>
       <div class="lg-badge-name">Ligue ${esc(league.name)}</div>
       <div class="lg-badge-pts">${pts} pt${pts > 1 ? "s" : ""} cette semaine</div>
@@ -80,10 +82,7 @@ export function renderLeagueBadge(league, pts, size = "md") {
 /** Rendu d'une ligne de classement. */
 export function renderLeagueRow(entry, showPts = true) {
   const league = getLeague(entry.weekly_pts);
-  const rankStr =
-    entry.rank_pos <= 3
-      ? ["🥇", "🥈", "🥉"][entry.rank_pos - 1]
-      : `#${entry.rank_pos}`;
+  const rankStr = `#${entry.rank_pos}`;
   const isMe = entry.is_me;
 
   const avatar = renderUserAvatar(
@@ -112,7 +111,7 @@ export const LEAGUE_CSS = `
   box-shadow: 0 2px 12px -4px rgba(10,13,26,.08);
 }
 .lg-badge-none { --lc:var(--mu2); --lb:var(--bg2); --lbr:var(--bo); }
-.lg-badge-emoji { font-size: 32px; line-height: 1; flex-shrink: 0; }
+.lg-badge-ico { flex-shrink: 0; }
 .lg-badge-name {
   font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif;
   color: var(--lc, var(--ink));
@@ -122,10 +121,8 @@ export const LEAGUE_CSS = `
   color: var(--mu2);
   margin-top: 3px;
 }
-.lg-badge-sm .lg-badge-emoji { font-size: 22px; }
 .lg-badge-sm .lg-badge-name { font-size: 13px; }
 .lg-badge-sm .lg-badge-pts { font-size: 11px; }
-.lg-badge-lg .lg-badge-emoji { font-size: 44px; }
 .lg-badge-lg .lg-badge-name { font-size: 20px; }
 
 /* ─── League row ─── */

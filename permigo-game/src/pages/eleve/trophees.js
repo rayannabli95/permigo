@@ -2,16 +2,16 @@
 // Élève — Trophées (Clash Royale ADN)
 // RPC : get_my_achievements()
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { navigate } from '@/router.js';
-import { haptic } from '@/utils/haptic.js';
-import { toast } from '@/components/common/toast.js';
-import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
-import { CATALOG, RARITY_META, shortProgress } from '@/data/achievements.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { haptic } from "@/utils/haptic.js";
+import { toast } from "@/components/common/toast.js";
+import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
+import { CATALOG, RARITY_META, shortProgress } from "@/data/achievements.js";
 
 // ─── CSS ──────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -250,7 +250,7 @@ const STYLE = `<style>
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
-  track('page.view', { page: 'trophees' });
+  track("page.view", { page: "trophees" });
 
   root.innerHTML = `${STYLE}
 <div class="tr2 anim-slide-up">
@@ -275,31 +275,43 @@ export async function mount(root) {
     <span class="tr2-galerie-arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
   </a>
   <div id="tr2-body">
-    ${[...Array(3)].map(() => `
+    ${[...Array(3)]
+      .map(
+        () => `
       <div class="tr2-group-label"><div class="tr2-skel" style="height:11px;width:80px;display:inline-block"></div></div>
-      <div class="tr2-grid">${[...Array(6)].map(() => `<div class="tr2-skel" style="min-height:100px"></div>`).join('')}</div>
-    `).join('')}
+      <div class="tr2-grid">${[...Array(6)].map(() => `<div class="tr2-skel" style="min-height:100px"></div>`).join("")}</div>
+    `,
+      )
+      .join("")}
   </div>
 </div>`;
 
   try {
     const [achRes, cntRes, strkRes] = await Promise.allSettled([
-      sb.rpc('get_my_achievements'),
-      sb.from('validations').select('id', { count: 'exact', head: true }).eq('eleve_id', me.id).eq('statut', 'acquis'),
-      sb.from('streaks').select('current_streak').eq('user_id', me.id).maybeSingle(),
+      sb.rpc("get_my_achievements"),
+      sb
+        .from("validations")
+        .select("id", { count: "exact", head: true })
+        .eq("eleve_id", me.id)
+        .eq("statut", "acquis"),
+      sb
+        .from("streaks")
+        .select("current_streak")
+        .eq("user_id", me.id)
+        .maybeSingle(),
     ]);
     if (achRes.value?.error) throw achRes.value.error;
     const stats = {
       compCount: cntRes.value?.count ?? 0,
-      streak:    strkRes.value?.data?.current_streak ?? 0,
+      streak: strkRes.value?.data?.current_streak ?? 0,
     };
     renderAll(root, achRes.value?.data ?? [], stats);
   } catch (e) {
-    console.error('[trophees]', e);
-    toast('Impossible de charger les trophées', 'error');
-    root.querySelector('#tr2-body').innerHTML = `
+    console.error("[trophees]", e);
+    toast("Impossible de charger les trophées", "error");
+    root.querySelector("#tr2-body").innerHTML = `
       <div style="text-align:center;padding:56px 24px;color:var(--mu)">
-        <div style="margin-bottom:12px;color:var(--am)">${icon('trophy',{size:44})}</div>
+        <div style="margin-bottom:12px;color:var(--am)">${icon("trophy", { size: 44 })}</div>
         <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Continue à apprendre</div>
         <div style="font:500 13px/1.5 'Inter',sans-serif">Tes premiers trophées arrivent</div>
       </div>`;
@@ -308,30 +320,37 @@ export async function mount(root) {
 
 // ─── Render all ───────────────────────────────────────────────
 function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
-  const unlockedMap = new Map(unlocked.map(u => [u.achievement_key, u]));
-  const unlockedCount = CATALOG.filter(t => unlockedMap.has(t.key)).length;
+  const unlockedMap = new Map(unlocked.map((u) => [u.achievement_key, u]));
+  const unlockedCount = CATALOG.filter((t) => unlockedMap.has(t.key)).length;
 
   // Hero
-  root.querySelector('#tr2-count').textContent = `${unlockedCount} / ${CATALOG.length}`;
-  const pct = Math.round(100 * unlockedCount / CATALOG.length);
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const fill = root.querySelector('#tr2-fill');
+  root.querySelector("#tr2-count").textContent =
+    `${unlockedCount} / ${CATALOG.length}`;
+  const pct = Math.round((100 * unlockedCount) / CATALOG.length);
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+  const fill = root.querySelector("#tr2-fill");
   if (reduceMotion) {
     // Pas de remplissage progressif : on pose directement la valeur réelle
-    if (fill) { fill.style.transition = 'none'; fill.style.width = pct + '%'; }
+    if (fill) {
+      fill.style.transition = "none";
+      fill.style.width = pct + "%";
+    }
   } else {
     requestAnimationFrame(() => {
-      if (fill) fill.style.width = pct + '%';
+      if (fill) fill.style.width = pct + "%";
     });
   }
-  root.querySelector('#tr2-hint').textContent = unlockedCount === 0
-    ? 'Commence à valider des compétences pour débloquer tes premiers trophées !'
-    : `${pct}% du parcours — ${CATALOG.length - unlockedCount} restant${CATALOG.length - unlockedCount > 1 ? 's' : ''}`;
+  root.querySelector("#tr2-hint").textContent =
+    unlockedCount === 0
+      ? "Commence à valider des compétences pour débloquer tes premiers trophées !"
+      : `${pct}% du parcours — ${CATALOG.length - unlockedCount} restant${CATALOG.length - unlockedCount > 1 ? "s" : ""}`;
 
   // Add entry keyframe
-  if (!document.head.querySelector('#tr2-kf')) {
-    const s = document.createElement('style');
-    s.id = 'tr2-kf';
+  if (!document.head.querySelector("#tr2-kf")) {
+    const s = document.createElement("style");
+    s.id = "tr2-kf";
     s.textContent = `@keyframes tr2CardIn{from{opacity:0;transform:translateY(12px) scale(.92)}to{opacity:1;transform:none}}`;
     document.head.appendChild(s);
   }
@@ -347,41 +366,45 @@ function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
   // (grisée + "???" + progression) — ADN Clash Royale/Duolingo : montrer les
   // objectifs à viser crée le désir. Pas d'empty state qui tue la motivation.
 
-  let html = '';
+  let html = "";
   let globalIdx = 0;
   for (const [group, items] of Object.entries(groups)) {
     html += `<div class="tr2-group-label">${esc(group)}</div><div class="tr2-grid">`;
     for (const t of items) {
       const u = unlockedMap.get(t.key);
-      const cssClass = u ? t.rarity : 'locked';
+      const cssClass = u ? t.rarity : "locked";
       // For unlocked: subtle drop-shadow. For locked: CSS class .locked already handles grayscale/opacity on the parent .tr2-card-emoji
-      const imgFilter = u ? 'drop-shadow(0 2px 8px rgba(0,0,0,.25))' : 'none';
+      const imgFilter = u ? "drop-shadow(0 2px 8px rgba(0,0,0,.25))" : "none";
       html += `
         <div class="tr2-card ${cssClass}" data-key="${esc(t.key)}"
           style="animation:tr2CardIn .4s ${globalIdx * 50}ms cubic-bezier(.34,1.56,.64,1) both">
-          ${u ? `<div class="tr2-card-rarity"></div>` : ''}
+          ${u ? `<div class="tr2-card-rarity"></div>` : ""}
           <div class="tr2-card-emoji">
-            ${t.image ? `
+            ${
+              t.image
+                ? `
               <img src="${t.image}" alt="${esc(t.title)}" loading="lazy"
                    onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"
                    style="width:56px;height:56px;object-fit:contain;filter:${imgFilter}">
               <span style="display:none;font-size:36px">${t.emoji}</span>
-            ` : `<span style="font-size:36px">${t.emoji}</span>`}
+            `
+                : `<span style="font-size:36px">${t.emoji}</span>`
+            }
           </div>
-          <div class="tr2-card-name">${u ? esc(t.title) : '???'}</div>
-          ${!u ? `<div class="tr2-card-mystery">${esc(shortProgress(t.key, stats))}</div>` : ''}
+          <div class="tr2-card-name">${u ? esc(t.title) : "???"}</div>
+          ${!u ? `<div class="tr2-card-mystery">${esc(shortProgress(t.key, stats))}</div>` : ""}
         </div>`;
       globalIdx++;
     }
     html += `</div>`;
   }
-  root.querySelector('#tr2-body').innerHTML = html;
+  root.querySelector("#tr2-body").innerHTML = html;
 
-  root.querySelectorAll('.tr2-card').forEach(el => {
-    el.addEventListener('click', () => {
-      haptic('select');
+  root.querySelectorAll(".tr2-card").forEach((el) => {
+    el.addEventListener("click", () => {
+      haptic("select");
       const key = el.dataset.key;
-      const def = CATALOG.find(t => t.key === key);
+      const def = CATALOG.find((t) => t.key === key);
       const unlockData = unlockedMap.get(key) ?? null;
       if (def) showModal(def, unlockData, unlockedCount);
     });
@@ -393,18 +416,25 @@ function showModal(def, unlockData, totalUnlocked) {
   const rm = RARITY_META[def.rarity];
   const isUnlocked = !!unlockData;
   const dateStr = unlockData?.unlocked_at
-    ? new Date(unlockData.unlocked_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(unlockData.unlocked_at).toLocaleDateString("fr-FR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
     : null;
 
-  const overlay = document.createElement('div');
-  overlay.className = 'tr2-modal-bg';
-  overlay.innerHTML = isUnlocked ? `
+  const overlay = document.createElement("div");
+  overlay.className = "tr2-modal-bg";
+  overlay.innerHTML = isUnlocked
+    ? `
     <div class="tr2-modal" style="background:var(--su)">
       <div class="tr2-modal-glow" style="background:${rm.gradient}">
         <div class="tr2-modal-handle"></div>
-        <div class="tr2-modal-emoji">${def.image
-          ? `<img src="${def.image}" alt="${esc(def.title)}" loading="lazy" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:64px">${def.emoji}</span>`
-          : `<span style="font-size:64px">${def.emoji}</span>`}</div>
+        <div class="tr2-modal-emoji">${
+          def.image
+            ? `<img src="${def.image}" alt="${esc(def.title)}" loading="lazy" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:64px">${def.emoji}</span>`
+            : `<span style="font-size:64px">${def.emoji}</span>`
+        }</div>
         <div class="tr2-rarity-chip">${esc(rm.label)}</div>
       </div>
       <div class="tr2-modal-body">
@@ -412,33 +442,38 @@ function showModal(def, unlockData, totalUnlocked) {
         <div class="tr2-modal-desc">${esc(def.body)}</div>
         <div class="tr2-modal-meta">
           <div class="tr2-modal-chip xp">+${def.xp} XP</div>
-          <div class="tr2-modal-chip gems">+${def.gemmes} ${icon('gem',{size:13})}</div>
-          ${dateStr ? `<div class="tr2-modal-chip date">${icon('calendar',{size:13})} ${esc(dateStr)}</div>` : ''}
+          <div class="tr2-modal-chip gems">+${def.gemmes} ${icon("gem", { size: 13 })}</div>
+          ${dateStr ? `<div class="tr2-modal-chip date">${icon("calendar", { size: 13 })} ${esc(dateStr)}</div>` : ""}
         </div>
-        <div class="tr2-modal-social">${totalUnlocked > 1
-          ? `Tu es parmi les élèves les plus avancés de ton école ✨`
-          : 'Continue pour débloquer plus de trophées !'}</div>
+        <div class="tr2-modal-social">${
+          totalUnlocked > 1
+            ? `Tu es parmi les élèves les plus avancés de ton école`
+            : "Continue pour débloquer plus de trophées !"
+        }</div>
       </div>
       <div class="tr2-modal-actions">
         <button class="tr2-modal-share" id="tr2-share-btn" aria-label="Partager ce trophée"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg><span>Partager</span></button>
         <button class="tr2-modal-close" id="tr2-close-btn">Fermer</button>
       </div>
     </div>
-  ` : `
+  `
+    : `
     <div class="tr2-modal" style="background:var(--su)">
       <div class="tr2-modal-locked-hd">
         <div class="tr2-modal-locked-handle"></div>
-        <div class="tr2-modal-locked-ico">${def.image
-          ? `<img src="${def.image}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) opacity(.5)" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:64px">${def.emoji}</span>`
-          : `<span style="font-size:64px">${def.emoji}</span>`}</div>
-        <div class="tr2-modal-locked-lbl">${icon('lock',{size:14})} Trophée verrouillé</div>
+        <div class="tr2-modal-locked-ico">${
+          def.image
+            ? `<img src="${def.image}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) opacity(.5)" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:64px">${def.emoji}</span>`
+            : `<span style="font-size:64px">${def.emoji}</span>`
+        }</div>
+        <div class="tr2-modal-locked-lbl">${icon("lock", { size: 14 })} Trophée verrouillé</div>
       </div>
       <div class="tr2-modal-body">
         <h2 class="tr2-modal-title">${esc(def.title)}</h2>
         <div class="tr2-modal-desc">${esc(def.body)}</div>
         <div class="tr2-modal-meta">
           <div class="tr2-modal-chip xp">+${def.xp} XP à débloquer</div>
-          <div class="tr2-modal-chip gems">+${def.gemmes} ${icon('gem',{size:13})} à débloquer</div>
+          <div class="tr2-modal-chip gems">+${def.gemmes} ${icon("gem", { size: 13 })} à débloquer</div>
           <div class="tr2-modal-chip date">${esc(rm.label)}</div>
         </div>
         <div class="tr2-modal-social">Objectif : ${esc(shortProgress(def.key))}</div>
@@ -451,31 +486,51 @@ function showModal(def, unlockData, totalUnlocked) {
   `;
 
   document.body.appendChild(overlay);
-  track('trophy.modal_opened', { key: def.key, unlocked: isUnlocked });
+  track("trophy.modal_opened", { key: def.key, unlocked: isUnlocked });
 
-  const closeModal = () => { haptic('select'); overlay.remove(); };
-  overlay.querySelector('#tr2-close-btn')?.addEventListener('click', closeModal);
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  const closeModal = () => {
+    haptic("select");
+    overlay.remove();
+  };
+  overlay
+    .querySelector("#tr2-close-btn")
+    ?.addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeModal();
+  });
 
   // Swipe-to-dismiss : glisser la feuille vers le bas pour fermer
-  const sheet = overlay.querySelector('.tr2-modal');
+  const sheet = overlay.querySelector(".tr2-modal");
   if (sheet) enableSheetSwipe(sheet, closeModal, { overlay });
 
   if (isUnlocked) {
-    overlay.querySelector('#tr2-share-btn')?.addEventListener('click', async () => {
-      const text = `J'ai débloqué "${def.title}" sur PermiGo !\n+${def.xp} XP`;
-      if (navigator.share) {
-        try { await navigator.share({ title: 'Mon trophée PermiGo', text, url: window.location.origin }); }
-        catch { /* cancelled */ }
-      } else {
-        try { await navigator.clipboard.writeText(text); toast('Texte copié', 'success'); }
-        catch { /* unavailable */ }
-      }
-    });
+    overlay
+      .querySelector("#tr2-share-btn")
+      ?.addEventListener("click", async () => {
+        const text = `J'ai débloqué "${def.title}" sur PermiGo !\n+${def.xp} XP`;
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "Mon trophée PermiGo",
+              text,
+              url: window.location.origin,
+            });
+          } catch {
+            /* cancelled */
+          }
+        } else {
+          try {
+            await navigator.clipboard.writeText(text);
+            toast("Texte copié", "success");
+          } catch {
+            /* unavailable */
+          }
+        }
+      });
   } else {
-    overlay.querySelector('#tr2-goto-btn')?.addEventListener('click', () => {
+    overlay.querySelector("#tr2-goto-btn")?.addEventListener("click", () => {
       overlay.remove();
-      navigate('#/parcours');
+      navigate("#/parcours");
     });
   }
 }

@@ -4,24 +4,30 @@
 // Bloc 2 : NEXT MILESTONE (session à confirmer OU récompense)
 // Bloc 3 : ACTION DU JOUR (1 quête / quiz)
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { REMC } from '@/data/remc.js';
-import { renderHeatmap, ensureHeatmapStyles } from '@/components/eleve/activity-heatmap.js';
-import { maybeSoftRequestPush, maybeSendStreakRiskNotif } from '@/services/web-push.js';
-import { maybePlayWeeklyReplay } from '@/components/eleve/weekly-replay.js';
-import { icon } from '@/utils/icons.js';
-import { ASSETS } from '@/utils/assets.js';
-import { emotionalBanner } from '@/components/eleve/emotional-banner.js';
-import { getMyChests, getEquippedAsset } from '@/utils/game-state.js';
-import { mountFeedbackFeed } from '@/components/eleve/feedback-feed.js';
-import { mountRevisionCards } from '@/components/eleve/revision-cards.js';
-import { mountDailyQuests } from '@/components/eleve/daily-quests.js';
-import { toast } from '@/components/common/toast.js';
-import { navigate } from '@/router.js';
-import { haptic } from '@/utils/haptic.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { REMC } from "@/data/remc.js";
+import {
+  renderHeatmap,
+  ensureHeatmapStyles,
+} from "@/components/eleve/activity-heatmap.js";
+import {
+  maybeSoftRequestPush,
+  maybeSendStreakRiskNotif,
+} from "@/services/web-push.js";
+import { maybePlayWeeklyReplay } from "@/components/eleve/weekly-replay.js";
+import { icon } from "@/utils/icons.js";
+import { ASSETS } from "@/utils/assets.js";
+import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
+import { getMyChests, getEquippedAsset } from "@/utils/game-state.js";
+import { mountFeedbackFeed } from "@/components/eleve/feedback-feed.js";
+import { mountRevisionCards } from "@/components/eleve/revision-cards.js";
+import { mountDailyQuests } from "@/components/eleve/daily-quests.js";
+import { toast } from "@/components/common/toast.js";
+import { navigate } from "@/router.js";
+import { haptic } from "@/utils/haptic.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -674,12 +680,30 @@ const STYLE = `<style>
 
 // ─── Constantes ──────────────────────────────────────────────────
 const XP_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2200, 3000];
-const LEVEL_NAMES   = ['', 'Débutant', 'Apprenti', 'Conducteur', 'Confirmé', 'Expert', 'Pro', 'As du Volant'];
-const WORLD_IMAGES  = [ASSETS.worldC1, ASSETS.worldC2, ASSETS.worldC3, ASSETS.worldC4];
+const LEVEL_NAMES = [
+  "",
+  "Débutant",
+  "Apprenti",
+  "Conducteur",
+  "Confirmé",
+  "Expert",
+  "Pro",
+  "As du Volant",
+];
+const WORLD_IMAGES = [
+  ASSETS.worldC1,
+  ASSETS.worldC2,
+  ASSETS.worldC3,
+  ASSETS.worldC4,
+];
 const WORLDS = REMC.map((cat, i) => ({
-  id: cat.id, ico: cat.ico, image: WORLD_IMAGES[i] || null,
-  name: cat.name, subs: cat.subs, total: cat.subs.length,
-  color: ['var(--gr2)', 'var(--bl2)', '#eab308', 'var(--pul)'][i],
+  id: cat.id,
+  ico: cat.ico,
+  image: WORLD_IMAGES[i] || null,
+  name: cat.name,
+  subs: cat.subs,
+  total: cat.subs.length,
+  color: ["var(--gr2)", "var(--bl2)", "#eab308", "var(--pul)"][i],
 }));
 
 // ─── Entry point ─────────────────────────────────────────────────
@@ -687,72 +711,140 @@ export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track('page.view', { page: 'eleve_accueil' });
+  track("page.view", { page: "eleve_accueil" });
 
   root.innerHTML = SKELETON;
 
   try {
     // Core fetches en parallèle
-    const [profileRes, streakRes, validRes, notifRes, attemptsRes] = await Promise.allSettled([
-      sb.from('profiles').select('prenom, xp, last_active_at, first_value_action_at, gemmes').eq('id', me.id).maybeSingle(),
-      sb.from('streaks').select('current_streak, last_activity_date, longest_streak').eq('user_id', me.id).maybeSingle(),
-      sb.from('validations').select('competence_id, statut').eq('eleve_id', me.id).in('statut', ['acquis', 'a_valider']),
-      sb.from('notifications').select('id, data, type').eq('user_id', me.id).eq('read', false)
-        .in('type', ['consolidation_quiz', 'post_validation_quiz']).order('created_at', { ascending: false }).limit(1),
-      sb.from('quiz_attempts').select('completed_at').eq('user_id', me.id)
-        .gte('completed_at', new Date(Date.now() - 35 * 86400000).toISOString()).order('completed_at', { ascending: true }),
-    ]);
+    const [profileRes, streakRes, validRes, notifRes, attemptsRes] =
+      await Promise.allSettled([
+        sb
+          .from("profiles")
+          .select("prenom, xp, last_active_at, first_value_action_at, gemmes")
+          .eq("id", me.id)
+          .maybeSingle(),
+        sb
+          .from("streaks")
+          .select("current_streak, last_activity_date, longest_streak")
+          .eq("user_id", me.id)
+          .maybeSingle(),
+        sb
+          .from("validations")
+          .select("competence_id, statut")
+          .eq("eleve_id", me.id)
+          .in("statut", ["acquis", "a_valider"]),
+        sb
+          .from("notifications")
+          .select("id, data, type")
+          .eq("user_id", me.id)
+          .eq("read", false)
+          .in("type", ["consolidation_quiz", "post_validation_quiz"])
+          .order("created_at", { ascending: false })
+          .limit(1),
+        sb
+          .from("quiz_attempts")
+          .select("completed_at")
+          .eq("user_id", me.id)
+          .gte(
+            "completed_at",
+            new Date(Date.now() - 35 * 86400000).toISOString(),
+          )
+          .order("completed_at", { ascending: true }),
+      ]);
 
     // RPCs optionnels (peuvent ne pas exister encore)
     const [pendingSessionsRes, todayQuestsRes] = await Promise.allSettled([
-      sb.rpc('get_pending_sessions_eleve'),
-      sb.rpc('get_today_quests'),
+      sb.rpc("get_pending_sessions_eleve"),
+      sb.rpc("get_today_quests"),
     ]);
 
-    const profile        = profileRes.value?.data  || { prenom: me.prenom || 'Toi', xp: 0 };
-    const streak         = streakRes.value?.data   || { current_streak: 0, last_activity_date: null, longest_streak: 0 };
-    const allValRows     = validRes.value?.data || [];
-    const validated      = new Set(allValRows.filter(v => v.statut === 'acquis').map(v => v.competence_id));
-    const pendingNotif   = notifRes.value?.data?.[0] || null;
-    const activityDays   = buildActivityData(attemptsRes.value?.data || [], streak);
+    const profile = profileRes.value?.data || {
+      prenom: me.prenom || "Toi",
+      xp: 0,
+    };
+    const streak = streakRes.value?.data || {
+      current_streak: 0,
+      last_activity_date: null,
+      longest_streak: 0,
+    };
+    const allValRows = validRes.value?.data || [];
+    const validated = new Set(
+      allValRows
+        .filter((v) => v.statut === "acquis")
+        .map((v) => v.competence_id),
+    );
+    const pendingNotif = notifRes.value?.data?.[0] || null;
+    const activityDays = buildActivityData(
+      attemptsRes.value?.data || [],
+      streak,
+    );
     const pendingSessions = pendingSessionsRes.value?.data || [];
-    const todayQuests    = todayQuestsRes.value?.data || [];
+    const todayQuests = todayQuestsRes.value?.data || [];
 
     ensureHeatmapStyles();
 
-    const lvl      = computeLevel(profile.xp || 0);
-    const worlds   = computeWorlds(validated);
+    const lvl = computeLevel(profile.xp || 0);
+    const worlds = computeWorlds(validated);
     const trophees = computeTrophees(worlds);
     const streakSt = streakStatus(streak);
-    const gemmes   = profile.gemmes || 0;
+    const gemmes = profile.gemmes || 0;
 
-    track('streak.viewed', { days: streak.current_streak, status: streakSt });
+    track("streak.viewed", { days: streak.current_streak, status: streakSt });
 
-    root.innerHTML = render({ me, profile, lvl, streak, streakSt, worlds, trophees,
-                              activityDays, gemmes, pendingSessions, todayQuests, pendingNotif });
-    wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, todayQuests, pendingNotif });
+    root.innerHTML = render({
+      me,
+      profile,
+      lvl,
+      streak,
+      streakSt,
+      worlds,
+      trophees,
+      activityDays,
+      gemmes,
+      pendingSessions,
+      todayQuests,
+      pendingNotif,
+    });
+    wire(root, {
+      streak,
+      streakSt,
+      gemmes,
+      activityDays,
+      pendingSessions,
+      todayQuests,
+      pendingNotif,
+    });
 
-    const accDiv = root.querySelector('.acc2');
+    const accDiv = root.querySelector(".acc2");
 
     // Composants non-bloquants injectés sous le fold
     if (accDiv) {
       // Quêtes du jour — carrousel réclamable, juste sous l'action du jour
-      const actionEl = accDiv.querySelector('.acc2-action');
+      const actionEl = accDiv.querySelector(".acc2-action");
       if (actionEl) {
-        const dqHost = document.createElement('div');
-        dqHost.style.cssText = 'margin:16px 16px 0';
-        actionEl.insertAdjacentElement('afterend', dqHost);
-        Promise.resolve().then(() => mountDailyQuests(dqHost)).catch(() => {});
+        const dqHost = document.createElement("div");
+        dqHost.style.cssText = "margin:16px 16px 0";
+        actionEl.insertAdjacentElement("afterend", dqHost);
+        Promise.resolve()
+          .then(() => mountDailyQuests(dqHost))
+          .catch(() => {});
       }
-      Promise.resolve().then(() => mountFeedbackFeed(accDiv, { eleveId: me.id, limit: 5 })).catch(() => {});
-      Promise.resolve().then(() => mountRevisionCards(accDiv, { eleveId: me.id, limit: 3 })).catch(() => {});
+      Promise.resolve()
+        .then(() => mountFeedbackFeed(accDiv, { eleveId: me.id, limit: 5 }))
+        .catch(() => {});
+      Promise.resolve()
+        .then(() => mountRevisionCards(accDiv, { eleveId: me.id, limit: 3 }))
+        .catch(() => {});
     }
 
     // Leaderboard async
     _loadAndInjectLeaderboard(root);
 
     // Bannière émotionnelle — insérée juste après le hero
-    emotionalBanner.checkAndRender(root, { afterSelector: '.acc2-hero' }).catch(() => {});
+    emotionalBanner
+      .checkAndRender(root, { afterSelector: ".acc2-hero" })
+      .catch(() => {});
 
     // Quiz éclair actif poussé par le moniteur — bandeau prioritaire
     _loadAndInjectFlashQuiz(root, me).catch(() => {});
@@ -771,16 +863,22 @@ export async function mount(root) {
       maybeSoftRequestPush();
       maybeSendStreakRiskNotif();
       const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
-      maybePlayWeeklyReplay({ compsValidated: totalValidated, monsReview: null, streak: streak.current_streak });
+      maybePlayWeeklyReplay({
+        compsValidated: totalValidated,
+        monsReview: null,
+        streak: streak.current_streak,
+      });
     }
   } catch (e) {
-    console.error('[accueil] mount failed', e);
+    console.error("[accueil] mount failed", e);
     root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:var(--mu3);font-family:'Inter',sans-serif">
       <div style="font:800 18px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">Oups, ton accueil a du mal à charger</div>
       <p style="font-size:14px;margin:0 0 20px">Vérifie ta connexion et réessaie.</p>
       <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color:#fff;border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Recharger</button>
     </div>`;
-    root.querySelector('#acc-reload')?.addEventListener('click', () => location.reload());
+    root
+      .querySelector("#acc-reload")
+      ?.addEventListener("click", () => location.reload());
   }
 }
 
@@ -793,40 +891,64 @@ function computeLevel(xp) {
   }
   const min = XP_THRESHOLDS[level - 1] ?? 0;
   const max = XP_THRESHOLDS[level] ?? XP_THRESHOLDS.at(-1);
-  const pct = max > min ? Math.min(100, Math.round(((xp - min) / (max - min)) * 100)) : 100;
-  return { level, name: LEVEL_NAMES[level] ?? `Niv. ${level}`, xp, min, max, pct };
+  const pct =
+    max > min
+      ? Math.min(100, Math.round(((xp - min) / (max - min)) * 100))
+      : 100;
+  return {
+    level,
+    name: LEVEL_NAMES[level] ?? `Niv. ${level}`,
+    xp,
+    min,
+    max,
+    pct,
+  };
 }
 
 function computeWorlds(validatedIds) {
-  return WORLDS.map(w => {
-    const done = w.subs.filter(s => validatedIds.has(s.c)).length;
-    const pct  = w.total > 0 ? Math.round((done / w.total) * 100) : 0;
+  return WORLDS.map((w) => {
+    const done = w.subs.filter((s) => validatedIds.has(s.c)).length;
+    const pct = w.total > 0 ? Math.round((done / w.total) * 100) : 0;
     return { ...w, done, pct, complete: w.total > 0 && done === w.total };
   });
 }
 
 function computeTrophees(worlds) {
-  const unlocked   = worlds.filter(w => w.complete);
-  const inProgress = worlds.filter(w => !w.complete).sort((a, b) => b.pct - a.pct);
+  const unlocked = worlds.filter((w) => w.complete);
+  const inProgress = worlds
+    .filter((w) => !w.complete)
+    .sort((a, b) => b.pct - a.pct);
   return { unlocked, nextUp: inProgress[0] ?? null };
 }
 
 function streakStatus(streak) {
-  if (!streak.current_streak) return 'broken';
+  if (!streak.current_streak) return "broken";
   const today = new Date().toISOString().slice(0, 10);
-  if (streak.last_activity_date === today) return 'saved';
+  if (streak.last_activity_date === today) return "saved";
   const hoursLeft = 24 - new Date().getHours() - new Date().getMinutes() / 60;
-  return hoursLeft < 6 ? 'critical' : 'at_risk';
+  return hoursLeft < 6 ? "critical" : "at_risk";
 }
 
 // ─── Render ───────────────────────────────────────────────────────
-function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
-                  activityDays, gemmes, pendingSessions, todayQuests, pendingNotif }) {
+function render({
+  me,
+  profile,
+  lvl,
+  streak,
+  streakSt,
+  worlds,
+  trophees,
+  activityDays,
+  gemmes,
+  pendingSessions,
+  todayQuests,
+  pendingNotif,
+}) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
-  const prenom   = profile.prenom || me.prenom || 'Toi';
+  const prenom = profile.prenom || me.prenom || "Toi";
   const initials = prenom.slice(0, 2).toUpperCase();
-  const heroAv   = getEquippedAsset('avatar') || me.avatar_url || null;
-  const isActive = streakSt !== 'broken';
+  const heroAv = getEquippedAsset("avatar") || me.avatar_url || null;
+  const isActive = streakSt !== "broken";
 
   // ── BLOC 2 content ──
   const pendingSession = pendingSessions?.[0] ?? null;
@@ -849,27 +971,31 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
         <div class="acc2-hero-av">${heroAv ? `<img src="${esc(heroAv)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block">` : esc(initials)}</div>
         <span class="acc2-hero-hi">Bonjour ${esc(prenom)}</span>
         <button class="acc2-hero-notif-btn" id="notif-btn" aria-label="Notifications">
-          ${icon('bell', { size: 18 })}
+          ${icon("bell", { size: 18 })}
         </button>
       </div>
       <h1 class="acc2-hero-title" tabindex="-1"><span class="acc2-hero-niv-badge">${esc(lvl.name)}</span></h1>
       <div class="acc2-hero-meta">
         <div class="acc2-hero-xp-pill">
-          ${icon('zap', { size: 13 })}
+          ${icon("zap", { size: 13 })}
           ${lvl.xp} XP · Niv. ${lvl.level}
         </div>
-        ${streak.current_streak > 0 ? `
-        <div class="acc2-hero-streak ${isActive ? 'active' : ''}" id="streak-badge-btn" role="button" tabindex="0" aria-label="Streak ${streak.current_streak} jours">
-          <span class="acc2-hero-streak-fire">${icon('flame',{size:16})}</span>
+        ${
+          streak.current_streak > 0
+            ? `
+        <div class="acc2-hero-streak ${isActive ? "active" : ""}" id="streak-badge-btn" role="button" tabindex="0" aria-label="Streak ${streak.current_streak} jours">
+          <span class="acc2-hero-streak-fire">${icon("flame", { size: 16 })}</span>
           <span class="acc2-hero-streak-val">${streak.current_streak}</span>
           <span class="acc2-hero-streak-lbl">jours</span>
-        </div>` : ''}
+        </div>`
+            : ""
+        }
       </div>
       <div class="acc2-xp-bar-wrap">
         <div class="acc2-xp-bar">
           <div class="acc2-xp-fill" style="width:0%" data-target="${lvl.pct}"></div>
         </div>
-        <span class="acc2-xp-hint">${lvl.pct}% vers ${esc(LEVEL_NAMES[lvl.level + 1] ?? 'max')}</span>
+        <span class="acc2-xp-hint">${lvl.pct}% vers ${esc(LEVEL_NAMES[lvl.level + 1] ?? "max")}</span>
       </div>
     </div>
   </div>
@@ -883,20 +1009,26 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
   <!-- ══ BELOW FOLD ══ -->
   <div class="acc2-section-title">Mon parcours REMC</div>
   <div class="worlds-grid">
-    ${worlds.map(w => `
-      <div class="world-card" data-world="${esc(w.id)}" data-complete="${w.complete ? 'true' : 'false'}">
+    ${worlds
+      .map(
+        (w) => `
+      <div class="world-card" data-world="${esc(w.id)}" data-complete="${w.complete ? "true" : "false"}">
         <div class="world-top">
-          ${w.image
-            ? `<img class="world-img" src="${esc(w.image)}" alt="${esc(w.name)}" loading="lazy">`
-            : `<span class="world-ico">${w.ico}</span>`}
+          ${
+            w.image
+              ? `<img class="world-img" src="${esc(w.image)}" alt="${esc(w.name)}" loading="lazy">`
+              : `<span class="world-ico">${w.ico}</span>`
+          }
           <span class="world-pct" style="color:${w.color}">${w.pct}%</span>
         </div>
         <div class="world-name">${esc(w.name)}</div>
         <div class="world-track"><div class="world-fill" style="width:${w.pct}%;background:${w.color}"></div></div>
         <div class="world-count">${w.done}/${w.total}</div>
-        ${w.complete ? `<div class="world-crown">${icon('award', { size: 14 })}</div>` : ''}
+        ${w.complete ? `<div class="world-crown">${icon("award", { size: 14 })}</div>` : ""}
       </div>
-    `).join('')}
+    `,
+      )
+      .join("")}
   </div>
 
   <!-- Leaderboard slot -->
@@ -923,34 +1055,44 @@ function render({ me, profile, lvl, streak, streakSt, worlds, trophees,
   <div class="bs-handle"></div>
   <div class="bs-hd">
     <div class="bs-hd-title">Série d'apprentissage</div>
-    <div class="bs-hd-sub">Record : ${streak.longest_streak} jour${streak.longest_streak > 1 ? 's' : ''} · En cours : ${streak.current_streak}</div>
+    <div class="bs-hd-sub">Record : ${streak.longest_streak} jour${streak.longest_streak > 1 ? "s" : ""} · En cours : ${streak.current_streak}</div>
   </div>
   <div class="bs-hmap-wrap">
     <div class="bs-hmap-head">
       <span class="bs-hmap-title">Mon mois</span>
-      <span class="bs-hmap-sub">${activityDays.totalActive} jour${activityDays.totalActive > 1 ? 's' : ''} actif${activityDays.totalActive > 1 ? 's' : ''}</span>
+      <span class="bs-hmap-sub">${activityDays.totalActive} jour${activityDays.totalActive > 1 ? "s" : ""} actif${activityDays.totalActive > 1 ? "s" : ""}</span>
     </div>
-    ${renderHeatmap({ activeDates: activityDays.activeDates, activityLevels: activityDays.levels, activityDetails: activityDays.details, weeks: 5, title: '' })}
+    ${renderHeatmap({ activeDates: activityDays.activeDates, activityLevels: activityDays.levels, activityDetails: activityDays.details, weeks: 5, title: "" })}
     <div class="hmap-tap-info" id="hmap-info" style="opacity:0"> </div>
   </div>
-  ${(streakSt === 'critical' || streakSt === 'at_risk') && gemmes >= 50 ? `
+  ${
+    (streakSt === "critical" || streakSt === "at_risk") && gemmes >= 50
+      ? `
   <div class="bs-freeze-wrap">
-    <button class="bs-freeze-btn" id="bs-freeze-btn">Geler ma série · 50 ${icon('gem',{size:14})}</button>
+    <button class="bs-freeze-btn" id="bs-freeze-btn">Geler ma série · 50 ${icon("gem", { size: 14 })}</button>
     <div class="bs-freeze-desc">Protège ta série pour les prochaines 24h</div>
-  </div>` : ''}
+  </div>`
+      : ""
+  }
 </div>`;
 }
 
 // ─── Bloc 2 renderers ────────────────────────────────────────────
 
 function renderSessionConfirm(session) {
-  const prenom   = session.moniteur_prenom ?? 'Ton moniteur';
+  const prenom = session.moniteur_prenom ?? "Ton moniteur";
   const initials = prenom.slice(0, 2).toUpperCase();
-  const dateStr  = session.session_date
-    ? new Date(session.session_date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' })
-    : 'Récemment';
-  const durStr   = session.duration_minutes ? `${session.duration_minutes} min` : '';
-  const sub      = [dateStr, durStr].filter(Boolean).join(' · ');
+  const dateStr = session.session_date
+    ? new Date(session.session_date).toLocaleDateString("fr-FR", {
+        weekday: "short",
+        day: "numeric",
+        month: "long",
+      })
+    : "Récemment";
+  const durStr = session.duration_minutes
+    ? `${session.duration_minutes} min`
+    : "";
+  const sub = [dateStr, durStr].filter(Boolean).join(" · ");
 
   return `
     <div class="acc2-ms-session">
@@ -963,7 +1105,7 @@ function renderSessionConfirm(session) {
         </div>
       </div>
       <button class="acc2-ms-session-btn" id="confirm-session-btn" data-session-id="${esc(session.id)}">
-        ${icon('check', { size: 16, strokeWidth: 2.8 })}
+        ${icon("check", { size: 16, strokeWidth: 2.8 })}
         Confirmer la séance
       </button>
     </div>`;
@@ -978,21 +1120,21 @@ function renderNextReward(totalValidated, worlds, trophees) {
         <div class="acc2-ms-reward-inner">
           <div class="acc2-ms-reward-label">Parcours complété !</div>
           <div class="acc2-ms-reward-top">
-            <div class="acc2-ms-reward-icon">${icon('award', { size: 28 })}</div>
+            <div class="acc2-ms-reward-icon">${icon("award", { size: 28 })}</div>
             <div class="acc2-ms-reward-info">
               <div class="acc2-ms-reward-remaining"><span>Tous les mondes maîtrisés</span></div>
               <div class="acc2-ms-reward-name">Tu es prêt pour l'examen</div>
             </div>
           </div>
           <button class="acc2-ms-cta-btn" data-href="#/trophees">
-            Voir mes trophées ${icon('arrow-right', { size: 14 })}
+            Voir mes trophées ${icon("arrow-right", { size: 14 })}
           </button>
         </div>
       </div>`;
   }
 
-  const remaining  = nextWorld.total - nextWorld.done;
-  const pct        = nextWorld.pct;
+  const remaining = nextWorld.total - nextWorld.done;
+  const pct = nextWorld.pct;
 
   return `
     <div class="acc2-ms-reward">
@@ -1005,7 +1147,7 @@ function renderNextReward(totalValidated, worlds, trophees) {
           <div class="acc2-ms-reward-info">
             <div class="acc2-ms-reward-remaining">
               ${remaining}
-              <span>compétence${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}</span>
+              <span>compétence${remaining > 1 ? "s" : ""} restante${remaining > 1 ? "s" : ""}</span>
             </div>
             <div class="acc2-ms-reward-name">Trophée ${esc(nextWorld.name)}</div>
           </div>
@@ -1018,151 +1160,206 @@ function renderNextReward(totalValidated, worlds, trophees) {
           <span>${pct}%</span>
         </div>
         <button class="acc2-ms-cta-btn" data-href="#/parcours">
-          Continuer le parcours ${icon('arrow-right', { size: 14 })}
+          Continuer le parcours ${icon("arrow-right", { size: 14 })}
         </button>
       </div>
     </div>`;
 }
 
 function renderActionDuJour(quest, pendingNotif, totalValidated) {
-  let label = 'Action du jour';
-  let title, sub, btnText, href, urgent = false;
+  let label = "Action du jour";
+  let title,
+    sub,
+    btnText,
+    href,
+    urgent = false;
 
   // Le quiz n'est plus une porte de validation : on ne pousse plus 'a_valider' en URGENT.
   // L'invitation au quiz-récap (optionnel) vient d'une notif quiz non lue.
   if (quest) {
-    title   = quest.label ?? 'Quiz disponible';
-    sub     = quest.sub ?? '';
-    btnText = 'Commencer →';
-    href    = quest.href ?? '#/parcours';
-    urgent  = quest.type === 'consolidation_quiz';
+    title = quest.label ?? "Quiz disponible";
+    sub = quest.sub ?? "";
+    btnText = "Commencer →";
+    href = quest.href ?? "#/parcours";
+    urgent = quest.type === "consolidation_quiz";
   } else if (pendingNotif?.data?.competence_id) {
-    const isConsolid = pendingNotif.type === 'consolidation_quiz';
-    title   = isConsolid ? 'Quiz de consolidation' : 'Quiz-récap (optionnel)';
-    sub     = isConsolid ? '2 questions · 30 secondes · Renforce ta mémoire' : 'Compétence déjà acquise — un petit récap pour le plaisir.';
-    btnText = isConsolid ? 'Commencer →' : 'Faire le récap →';
-    href    = `#/quiz/${pendingNotif.data.competence_id}/${isConsolid ? 'consolidation' : 'post_validation'}`;
-    urgent  = isConsolid;
+    const isConsolid = pendingNotif.type === "consolidation_quiz";
+    title = isConsolid ? "Quiz de consolidation" : "Quiz-récap (optionnel)";
+    sub = isConsolid
+      ? "2 questions · 30 secondes · Renforce ta mémoire"
+      : "Compétence déjà acquise — un petit récap pour le plaisir.";
+    btnText = isConsolid ? "Commencer →" : "Faire le récap →";
+    href = `#/quiz/${pendingNotif.data.competence_id}/${isConsolid ? "consolidation" : "post_validation"}`;
+    urgent = isConsolid;
   } else if (totalValidated === 0) {
-    title   = 'Lance ton parcours REMC';
-    sub     = 'Découvre les 31 compétences à maîtriser avant l\'examen';
-    btnText = 'Voir le parcours →';
-    href    = '#/parcours';
+    title = "Lance ton parcours REMC";
+    sub = "Découvre les 31 compétences à maîtriser avant l'examen";
+    btnText = "Voir le parcours →";
+    href = "#/parcours";
   } else {
-    title   = 'Ton parcours d\'examen';
-    sub     = '5 parcours · 15 questions · estime tes chances au permis';
-    btnText = 'Démarrer l\'examen →';
-    href    = '#/exam-blanc';
+    title = "Ton parcours d'examen";
+    sub = "5 parcours · 15 questions · estime tes chances au permis";
+    btnText = "Démarrer l'examen →";
+    href = "#/exam-blanc";
   }
 
   return `
     <div class="acc2-action">
       <div class="acc2-action-tag">
-        <div class="acc2-action-tag-dot${urgent ? ' urgent' : ''}"></div>
+        <div class="acc2-action-tag-dot${urgent ? " urgent" : ""}"></div>
         ${esc(label)}
-        ${urgent ? `<span style="color:var(--rd);font-weight:700">URGENT</span>` : ''}
+        ${urgent ? `<span style="color:var(--rd);font-weight:700">URGENT</span>` : ""}
       </div>
       <div class="acc2-action-title">${esc(title)}</div>
       <div class="acc2-action-sub">${esc(sub)}</div>
       <button class="acc2-action-btn" id="action-cta-btn" data-href="${esc(href)}">
         ${esc(btnText)}
-        ${icon('arrow-right', { size: 16 })}
+        ${icon("arrow-right", { size: 16 })}
       </button>
     </div>`;
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
-function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, todayQuests, pendingNotif }) {
+function wire(
+  root,
+  {
+    streak,
+    streakSt,
+    gemmes,
+    activityDays,
+    pendingSessions,
+    todayQuests,
+    pendingNotif,
+  },
+) {
   // XP bar animation
-  const xpFill = root.querySelector('.acc2-xp-fill[data-target]');
-  if (xpFill) setTimeout(() => { xpFill.style.width = xpFill.dataset.target + '%'; }, 120);
+  const xpFill = root.querySelector(".acc2-xp-fill[data-target]");
+  if (xpFill)
+    setTimeout(() => {
+      xpFill.style.width = xpFill.dataset.target + "%";
+    }, 120);
 
   // BLOC 2 progress bar animation
-  const msFill = root.querySelector('.acc2-ms-prog-fill[data-target]');
-  if (msFill) setTimeout(() => { msFill.style.width = msFill.dataset.target + '%'; }, 300);
+  const msFill = root.querySelector(".acc2-ms-prog-fill[data-target]");
+  if (msFill)
+    setTimeout(() => {
+      msFill.style.width = msFill.dataset.target + "%";
+    }, 300);
 
   // Notif btn → notifications
-  root.querySelector('#notif-btn')?.addEventListener('click', () => {
-    track('cta.clicked', { cta_type: 'notif_btn' });
-    navigate('#/notifications');
+  root.querySelector("#notif-btn")?.addEventListener("click", () => {
+    track("cta.clicked", { cta_type: "notif_btn" });
+    navigate("#/notifications");
   });
 
   // Streak badge → bottom sheet
-  const bsBg     = root.querySelector('#bs-bg');
-  const bsSheet  = root.querySelector('#bs-streak');
-  const openBS   = () => { bsSheet?.classList.add('open'); bsBg?.classList.add('open'); track('streak.detail_opened', { days: streak?.current_streak }); };
-  const closeBS  = () => { bsSheet?.classList.remove('open'); bsBg?.classList.remove('open'); };
-  root.querySelector('#streak-badge-btn')?.addEventListener('click', openBS);
-  bsBg?.addEventListener('click', closeBS);
+  const bsBg = root.querySelector("#bs-bg");
+  const bsSheet = root.querySelector("#bs-streak");
+  const openBS = () => {
+    bsSheet?.classList.add("open");
+    bsBg?.classList.add("open");
+    track("streak.detail_opened", { days: streak?.current_streak });
+  };
+  const closeBS = () => {
+    bsSheet?.classList.remove("open");
+    bsBg?.classList.remove("open");
+  };
+  root.querySelector("#streak-badge-btn")?.addEventListener("click", openBS);
+  bsBg?.addEventListener("click", closeBS);
 
   // Streak freeze
-  root.querySelector('#bs-freeze-btn')?.addEventListener('click', async () => {
-    const btn = root.querySelector('#bs-freeze-btn');
+  root.querySelector("#bs-freeze-btn")?.addEventListener("click", async () => {
+    const btn = root.querySelector("#bs-freeze-btn");
     if (!btn || btn.disabled) return;
-    btn.disabled = true; btn.textContent = '⏳ Gel en cours…';
+    btn.disabled = true;
+    btn.textContent = "⏳ Gel en cours…";
     try {
-      const { data, error } = await sb.rpc('use_streak_freeze');
+      const { data, error } = await sb.rpc("use_streak_freeze");
       if (error || data?.error) {
-        toast('Pas assez de gemmes pour geler ta série. Il t\'en faut 50 gemmes', 'error');
-        setTimeout(() => { btn.disabled = false; btn.innerHTML = `Geler ma série · 50 ${icon('gem',{size:14})}`; }, 1800);
+        toast(
+          "Pas assez de gemmes pour geler ta série. Il t'en faut 50 gemmes",
+          "error",
+        );
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = `Geler ma série · 50 ${icon("gem", { size: 14 })}`;
+        }, 1800);
         return;
       }
-      track('streak.freeze_used', {});
-      toast('Série gelée pour 24h', 'success');
-      btn.textContent = '✓ Série gelée';   // évite de laisser "⏳ Gel en cours…" figé
+      track("streak.freeze_used", {});
+      toast("Série gelée pour 24h", "success");
+      btn.textContent = "✓ Série gelée"; // évite de laisser "⏳ Gel en cours…" figé
       closeBS();
-    } catch { toast('Erreur lors du gel', 'error'); btn.disabled = false; btn.innerHTML = `Geler ma série · 50 ${icon('gem',{size:14})}`; }
+    } catch {
+      toast("Erreur lors du gel", "error");
+      btn.disabled = false;
+      btn.innerHTML = `Geler ma série · 50 ${icon("gem", { size: 14 })}`;
+    }
   });
 
   // Heatmap tap
-  const infoEl = root.querySelector('#hmap-info');
-  root.querySelectorAll('.hmap-cell').forEach(cell => {
-    cell.addEventListener('click', () => {
-      const label  = cell.dataset.label;
-      const detail = cell.dataset.detail ? decodeURIComponent(cell.dataset.detail) : null;
+  const infoEl = root.querySelector("#hmap-info");
+  root.querySelectorAll(".hmap-cell").forEach((cell) => {
+    cell.addEventListener("click", () => {
+      const label = cell.dataset.label;
+      const detail = cell.dataset.detail
+        ? decodeURIComponent(cell.dataset.detail)
+        : null;
       if (!label || !infoEl) return;
       infoEl.textContent = detail || label;
-      infoEl.style.opacity = '1';
+      infoEl.style.opacity = "1";
       clearTimeout(infoEl._t);
-      infoEl._t = setTimeout(() => { infoEl.style.opacity = '0'; }, 2500);
+      infoEl._t = setTimeout(() => {
+        infoEl.style.opacity = "0";
+      }, 2500);
     });
   });
 
   // Session confirm btn
-  root.querySelector('#confirm-session-btn')?.addEventListener('click', async (e) => {
-    const btn       = e.currentTarget;
-    const sessionId = btn.dataset.sessionId;
-    if (!sessionId) return;
-    haptic('select');
-    track('session.confirm_tapped', { session_id: sessionId });
-    navigate(`#/sessions/${sessionId}`);
-  });
+  root
+    .querySelector("#confirm-session-btn")
+    ?.addEventListener("click", async (e) => {
+      const btn = e.currentTarget;
+      const sessionId = btn.dataset.sessionId;
+      if (!sessionId) return;
+      haptic("select");
+      track("session.confirm_tapped", { session_id: sessionId });
+      navigate(`#/sessions/${sessionId}`);
+    });
 
   // BLOC 2 CTA (next reward btn)
-  root.querySelector('.acc2-ms-cta-btn')?.addEventListener('click', (e) => {
+  root.querySelector(".acc2-ms-cta-btn")?.addEventListener("click", (e) => {
     const href = e.currentTarget.dataset.href;
-    if (href) { haptic('tap'); track('cta.clicked', { cta_type: 'ms_cta' }); navigate(href); }
+    if (href) {
+      haptic("tap");
+      track("cta.clicked", { cta_type: "ms_cta" });
+      navigate(href);
+    }
   });
 
   // BLOC 3 action btn
-  root.querySelector('#action-cta-btn')?.addEventListener('click', (e) => {
+  root.querySelector("#action-cta-btn")?.addEventListener("click", (e) => {
     const href = e.currentTarget.dataset.href;
-    if (href) { haptic('select'); track('cta.clicked', { cta_type: 'action_btn' }); navigate(href); }
+    if (href) {
+      haptic("select");
+      track("cta.clicked", { cta_type: "action_btn" });
+      navigate(href);
+    }
   });
 
   // World cards → parcours
-  root.querySelectorAll('[data-world]').forEach(el => {
-    el.addEventListener('click', () => {
-      track('cta.clicked', { cta_type: 'world_card', world: el.dataset.world });
-      navigate('#/parcours');
+  root.querySelectorAll("[data-world]").forEach((el) => {
+    el.addEventListener("click", () => {
+      track("cta.clicked", { cta_type: "world_card", world: el.dataset.world });
+      navigate("#/parcours");
     });
   });
 
   // Trophy cards → trophées
-  root.querySelectorAll('.trophy-card').forEach(card => {
-    card.addEventListener('click', () => {
-      track('cta.clicked', { cta_type: 'trophy_card' });
-      navigate('#/trophees');
+  root.querySelectorAll(".trophy-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      track("cta.clicked", { cta_type: "trophy_card" });
+      navigate("#/trophees");
     });
   });
 }
@@ -1170,21 +1367,28 @@ function wire(root, { streak, streakSt, gemmes, activityDays, pendingSessions, t
 // ─── Leaderboard async ───────────────────────────────────────────
 async function _loadAndInjectLeaderboard(root) {
   try {
-    const { data, error } = await sb.rpc('get_my_leaderboard_position');
+    const { data, error } = await sb.rpc("get_my_leaderboard_position");
     if (error || !data || data?.error) return;
-    const slot = root.querySelector('#acc-lb-slot');
+    const slot = root.querySelector("#acc-lb-slot");
     if (!slot) return;
-    const rank = data.my_rank, total = data.total_eleves, pct = data.percentile;
-    const ranked = (rank !== null && total !== null && total > 1);
+    const rank = data.my_rank,
+      total = data.total_eleves,
+      pct = data.percentile;
+    const ranked = rank !== null && total !== null && total > 1;
 
     const badge = ranked
       ? `<div class="acc-lb-rank"><span class="acc-lb-rank-hash">#</span>${esc(String(rank))}</div>`
       : `<div class="acc-lb-rank img"><img src="/skins/badge-3d-ultimate.png" alt="" width="52" height="52" loading="lazy"></div>`;
-    const chip = pct !== null ? `<span class="acc-lb-chip">Top ${100 - pct}%</span>` : '';
-    const bodyText = ranked ? `Tu es #${rank} sur ${total}` : 'Clique pour voir ton classement';
+    const chip =
+      pct !== null ? `<span class="acc-lb-chip">Top ${100 - pct}%</span>` : "";
+    const bodyText = ranked
+      ? `Tu es #${rank} sur ${total}`
+      : "Clique pour voir ton classement";
     const sub = ranked
-      ? (pct !== null ? `Dans le top ${100 - pct}% de ton auto-école` : 'Garde le rythme pour grimper')
-      : 'Invite tes potes pour lancer le classement';
+      ? pct !== null
+        ? `Dans le top ${100 - pct}% de ton auto-école`
+        : "Garde le rythme pour grimper"
+      : "Invite tes potes pour lancer le classement";
 
     const ARROW = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
 
@@ -1199,31 +1403,39 @@ async function _loadAndInjectLeaderboard(root) {
         <div class="acc-lb-arrow">${ARROW}</div>
       </div>`;
 
-    const card = slot.querySelector('#acc-lb-card');
+    const card = slot.querySelector("#acc-lb-card");
     const open = () => {
-      track('leaderboard.tapped', { rank: data.my_rank, percentile: data.percentile });
-      navigate('#/classement');
+      track("leaderboard.tapped", {
+        rank: data.my_rank,
+        percentile: data.percentile,
+      });
+      navigate("#/classement");
     };
-    card?.addEventListener('click', open);
-    card?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+    card?.addEventListener("click", open);
+    card?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
     });
-  } catch (e) { console.error('[accueil] leaderboard', e); }
+  } catch (e) {
+    console.error("[accueil] leaderboard", e);
+  }
 }
 
 async function _loadAndInjectCrystalBall(root) {
   try {
-    if (root.querySelector('#acc-crystal')) return; // anti double-mount
-    const { data } = await sb.rpc('get_my_prediction');
+    if (root.querySelector("#acc-crystal")) return; // anti double-mount
+    const { data } = await sb.rpc("get_my_prediction");
     const p = Array.isArray(data) ? data[0] : data;
     if (!p) return;
 
-    const anchor = root.querySelector('.acc2-section-title');
+    const anchor = root.querySelector(".acc2-section-title");
     if (!anchor) return;
 
-    if (!document.getElementById('acc-crystal-styles')) {
-      const st = document.createElement('style');
-      st.id = 'acc-crystal-styles';
+    if (!document.getElementById("acc-crystal-styles")) {
+      const st = document.createElement("style");
+      st.id = "acc-crystal-styles";
       st.textContent = `
         .acc2-crystal{margin:18px 16px 0;padding:20px 20px 24px;border-radius:22px;color:#fff;position:relative;overflow:hidden;
           background:linear-gradient(160deg,#3b1f8f 0%,#5b21b6 45%,#2e2a72 100%);box-shadow:0 14px 40px -12px rgba(91,33,182,.7);
@@ -1270,21 +1482,32 @@ async function _loadAndInjectCrystalBall(root) {
     const pct = Math.max(0, Math.min(99, p.prediction_pct ?? 0));
 
     if ((p.validated_count ?? 0) === 0) {
-      anchor.insertAdjacentHTML('beforebegin',
-        `<div class="acc2-cb-empty" id="acc-crystal"><span style="font-size:22px">🔮</span><span>Valide ta 1ʳᵉ compétence pour débloquer ta boule de cristal.</span></div>`);
-      track('crystal_ball.viewed', { prediction_pct: 0, validated_count: 0 });
+      anchor.insertAdjacentHTML(
+        "beforebegin",
+        `<div class="acc2-cb-empty" id="acc-crystal"><span style="display:flex;align-items:center;color:var(--mu2)">${icon("eye", { size: 22, strokeWidth: 1.5 })}</span><span>Valide ta 1ʳᵉ compétence pour débloquer ta boule de cristal.</span></div>`,
+      );
+      track("crystal_ball.viewed", { prediction_pct: 0, validated_count: 0 });
       return;
     }
 
-    const CAT_NAMES = Object.fromEntries((REMC || []).map(c => [c.id, c.name]));
-    const axes = (p.axes_to_improve || []).map(code => CAT_NAMES[code] || code);
-    const msg = pct >= 80 ? "de chances de décrocher ton permis au 1er coup 🔥"
-              : pct >= 55 ? "de chances de réussir ton permis au 1er coup"
-              : "de chances pour l'instant — chaque jour compte";
+    const CAT_NAMES = Object.fromEntries(
+      (REMC || []).map((c) => [c.id, c.name]),
+    );
+    const axes = (p.axes_to_improve || []).map(
+      (code) => CAT_NAMES[code] || code,
+    );
+    const msg =
+      pct >= 80
+        ? "de chances de décrocher ton permis au 1er coup"
+        : pct >= 55
+          ? "de chances de réussir ton permis au 1er coup"
+          : "de chances pour l'instant — chaque jour compte";
 
-    anchor.insertAdjacentHTML('beforebegin', `
+    anchor.insertAdjacentHTML(
+      "beforebegin",
+      `
       <div class="acc2-crystal" id="acc-crystal">
-        <div class="acc2-cb-head"><span aria-hidden="true">🔮</span> Boule de cristal</div>
+        <div class="acc2-cb-head"><span aria-hidden="true" style="display:inline-flex;vertical-align:middle">${icon("eye", { size: 14, strokeWidth: 1.5 })}</span> Boule de cristal</div>
         <div class="cb-stage">
           <div class="cb-orb">
             <div class="cb-orb-glow" aria-hidden="true"></div>
@@ -1295,17 +1518,23 @@ async function _loadAndInjectCrystalBall(root) {
           </div>
         </div>
         <p class="acc2-cb-msg">${esc(msg)}</p>
-      </div>`);
+      </div>`,
+    );
 
-    track('crystal_ball.viewed', { prediction_pct: pct, validated_count: p.validated_count });
+    track("crystal_ball.viewed", {
+      prediction_pct: pct,
+      validated_count: p.validated_count,
+    });
 
     // Count-up
-    const valEl = root.querySelector('#acc-crystal .acc2-cb-val');
+    const valEl = root.querySelector("#acc-crystal .acc2-cb-val");
     if (valEl) {
-      const reduce = matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-      if (reduce) { valEl.textContent = String(pct); }
-      else {
-        const t0 = performance.now(), dur = 1100;
+      const reduce = matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) {
+        valEl.textContent = String(pct);
+      } else {
+        const t0 = performance.now(),
+          dur = 1100;
         const tick = (now) => {
           const k = Math.min(1, (now - t0) / dur);
           const eased = 1 - Math.pow(1 - k, 3);
@@ -1315,65 +1544,80 @@ async function _loadAndInjectCrystalBall(root) {
         requestAnimationFrame(tick);
       }
     }
-  } catch (e) { /* silent */ }
+  } catch (e) {
+    /* silent */
+  }
 }
 
 async function _loadAndInjectChests(root) {
   try {
     const chests = await getMyChests();
-    const pending = chests.filter(c => !c.opened_at);
+    const pending = chests.filter((c) => !c.opened_at);
     if (!pending.length) return;
 
     // Inject a teaser card just before the worlds grid
-    const anchor = root.querySelector('.acc2-section-title');
+    const anchor = root.querySelector(".acc2-section-title");
     if (!anchor) return;
 
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.innerHTML = `
       <div class="acc2-chest-teaser" id="acc-chest-teaser" role="button" tabindex="0"
-           aria-label="${pending.length} coffre${pending.length > 1 ? 's' : ''} à ouvrir">
-        <span class="acc2-ct-ico">${icon('gift',{size:18})}</span>
+           aria-label="${pending.length} coffre${pending.length > 1 ? "s" : ""} à ouvrir">
+        <span class="acc2-ct-ico">${icon("gift", { size: 18 })}</span>
         <div class="acc2-ct-text">
-          <div class="acc2-ct-title">${pending.length} coffre${pending.length > 1 ? 's' : ''} à ouvrir</div>
+          <div class="acc2-ct-title">${pending.length} coffre${pending.length > 1 ? "s" : ""} à ouvrir</div>
           <div class="acc2-ct-sub">Réclame tes récompenses</div>
         </div>
-        <div class="acc2-ct-arrow">${icon('chevron-right', { size: 16, strokeWidth: 2.5, color: 'var(--a)' })}</div>
+        <div class="acc2-ct-arrow">${icon("chevron-right", { size: 16, strokeWidth: 2.5, color: "var(--a)" })}</div>
       </div>`;
 
     const el = div.firstElementChild;
     anchor.parentNode.insertBefore(el, anchor);
 
-    const open = () => { track('chest_teaser.tapped', { count: pending.length }); navigate('#/mes-coffres'); };
-    el.addEventListener('click', open);
-    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
-  } catch (e) { /* silent */ }
+    const open = () => {
+      track("chest_teaser.tapped", { count: pending.length });
+      navigate("#/mes-coffres");
+    };
+    el.addEventListener("click", open);
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
+    });
+  } catch (e) {
+    /* silent */
+  }
 }
 
 async function _loadAndInjectFlashQuiz(root, me) {
   try {
     const nowIso = new Date().toISOString();
     const { data } = await sb
-      .from('flash_quizzes')
-      .select('id, expires_at')
-      .eq('sent_to', me.id)
-      .is('responded_at', null)
-      .gt('expires_at', nowIso)
-      .order('sent_at', { ascending: false })
+      .from("flash_quizzes")
+      .select("id, expires_at")
+      .eq("sent_to", me.id)
+      .is("responded_at", null)
+      .gt("expires_at", nowIso)
+      .order("sent_at", { ascending: false })
       .limit(1);
 
     const fq = data?.[0];
     if (!fq) return;
 
-    const hero = root.querySelector('.acc2-hero');
+    const hero = root.querySelector(".acc2-hero");
     if (!hero) return;
-    if (root.querySelector('#acc-flashq')) return; // déjà injecté (garde anti double-mount)
+    if (root.querySelector("#acc-flashq")) return; // déjà injecté (garde anti double-mount)
 
     const expiresMs = new Date(fq.expires_at).getTime();
-    const fmt = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+    const fmt = (ms) => {
+      const s = Math.max(0, Math.ceil(ms / 1000));
+      return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    };
 
-    if (!document.getElementById('acc-flashq-styles')) {
-      const st = document.createElement('style');
-      st.id = 'acc-flashq-styles';
+    if (!document.getElementById("acc-flashq-styles")) {
+      const st = document.createElement("style");
+      st.id = "acc-flashq-styles";
       st.textContent = `
         .acc2-flashq{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 16px;border-radius:16px;cursor:pointer;
           background:linear-gradient(135deg,#f59e0b,#f97316);box-shadow:0 6px 20px rgba(249,115,22,.32);animation:fqBannerIn .4s cubic-bezier(.23,1,.32,1)}
@@ -1389,65 +1633,96 @@ async function _loadAndInjectFlashQuiz(root, me) {
       document.head.appendChild(st);
     }
 
-    hero.insertAdjacentHTML('afterend', `
+    hero.insertAdjacentHTML(
+      "afterend",
+      `
       <div class="acc2-flashq" id="acc-flashq" role="button" tabindex="0" aria-label="Quiz éclair de ton moniteur, réponds maintenant">
-        <span class="acc2-fq-ico" aria-hidden="true">${icon('zap',{size:18})}</span>
+        <span class="acc2-fq-ico" aria-hidden="true">${icon("zap", { size: 18 })}</span>
         <div class="acc2-fq-text">
           <div class="acc2-fq-title">Quiz éclair de ton moniteur</div>
           <div class="acc2-fq-sub">3 questions · réponds maintenant</div>
         </div>
         <span class="acc2-fq-clock" id="acc-fq-clock">${esc(fmt(expiresMs - Date.now()))}</span>
-      </div>`);
+      </div>`,
+    );
 
-    const el = root.querySelector('#acc-flashq');
+    const el = root.querySelector("#acc-flashq");
     if (!el) return;
-    const clockEl = el.querySelector('#acc-fq-clock');
+    const clockEl = el.querySelector("#acc-fq-clock");
     const iv = setInterval(() => {
-      if (!document.body.contains(el)) { clearInterval(iv); return; }
+      if (!document.body.contains(el)) {
+        clearInterval(iv);
+        return;
+      }
       const left = expiresMs - Date.now();
-      if (left <= 0) { clearInterval(iv); el.remove(); return; }
+      if (left <= 0) {
+        clearInterval(iv);
+        el.remove();
+        return;
+      }
       clockEl.textContent = fmt(left);
     }, 500);
 
-    const open = () => { track('flash_quiz.banner_tapped', { flash_quiz_id: fq.id }); navigate(`#/flash-quiz/${fq.id}`); };
-    el.addEventListener('click', open);
-    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
-  } catch (e) { /* silent */ }
+    const open = () => {
+      track("flash_quiz.banner_tapped", { flash_quiz_id: fq.id });
+      navigate(`#/flash-quiz/${fq.id}`);
+    };
+    el.addEventListener("click", open);
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
+    });
+  } catch (e) {
+    /* silent */
+  }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────
 function _dKey(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function buildActivityData(attempts, streak) {
-  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const counts = {};
   for (const a of attempts) {
-    const key = (a.completed_at || a.created_at || '').slice(0, 10);
+    const key = (a.completed_at || a.created_at || "").slice(0, 10);
     counts[key] = (counts[key] || 0) + 1;
   }
   if (!attempts.length && streak?.current_streak > 0) {
     const n = Math.min(streak.current_streak, 7);
     for (let i = 0; i < n; i++) {
-      const d = new Date(today); d.setDate(d.getDate() - i);
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
       counts[_dKey(d)] = 1;
     }
   }
   const activeDates = Object.keys(counts);
-  const levels = {}, details = {};
+  const levels = {},
+    details = {};
   for (const [k, v] of Object.entries(counts)) {
     levels[k] = v >= 4 ? 4 : v >= 3 ? 3 : v >= 2 ? 2 : 1;
-    const dt = new Date(k + 'T12:00:00');
-    details[k] = `${dt.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} — ${v} quiz${v > 1 ? 's' : ''}`;
+    const dt = new Date(k + "T12:00:00");
+    details[k] =
+      `${dt.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} — ${v} quiz${v > 1 ? "s" : ""}`;
   }
   const days7 = [];
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(today); d.setDate(d.getDate() - i);
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
     const key = _dKey(d);
     days7.push({ key, count: counts[key] || 0 });
   }
-  return { activeDates, levels, details, days7, totalActive: activeDates.length };
+  return {
+    activeDates,
+    levels,
+    details,
+    days7,
+    totalActive: activeDates.length,
+  };
 }
 
 // ─── Skeleton ────────────────────────────────────────────────────

@@ -425,6 +425,33 @@ const STYLE = `<style>
     color: var(--a);
     flex-shrink: 0;
   }
+
+  /* ── FAB Séance ── */
+  .aj-fab {
+    position: fixed;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px) + 16px);
+    right: 16px;
+    z-index: 50;
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 20px 0 16px;
+    height: 52px;
+    background: var(--a);
+    color: #fff;
+    border: none; border-radius: 26px;
+    font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 4px 18px -4px rgba(88,204,2,.55), 0 2px 6px rgba(0,0,0,.12);
+    transition: transform .14s cubic-bezier(.34,1.56,.64,1), box-shadow .14s;
+    -webkit-tap-highlight-color: transparent;
+    animation: ajFabIn .5s .35s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .aj-fab:active { transform: scale(.94); box-shadow: 0 2px 8px -2px rgba(88,204,2,.4); }
+  @keyframes ajFabIn {
+    from { opacity: 0; transform: translateY(20px) scale(.9); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .aj-fab-ico { flex-shrink: 0; display: flex; }
+  @media (prefers-reduced-motion: reduce) { .aj-fab { animation: none; } }
 </style>`;
 
 // ─── Helpers ──────────────────────────────────────────────────────
@@ -792,7 +819,7 @@ async function renderInto(root, _me) {
             ? `
         <div class="aj-xp-strip">
           ${acquisAujourdhui > 0 ? `<span class="aj-xp-chip">+${acquisAujourdhui * 10} XP aujourd'hui</span>` : ""}
-          ${streakPro >= 2 ? `<span class="aj-streak-chip">🔥 ${streakPro} jours actifs</span>` : ""}
+          ${streakPro >= 2 ? `<span class="aj-streak-chip">${icon("flame", { size: 12, strokeWidth: 2 })} ${streakPro} jours actifs</span>` : ""}
         </div>`
             : ""
         }
@@ -849,6 +876,11 @@ async function renderInto(root, _me) {
 
     </div>
 
+    <button class="aj-fab" id="aj-fab" aria-label="Enregistrer une séance">
+      <span class="aj-fab-ico">${icon("plus", { size: 20, strokeWidth: 2.5 })}</span>
+      Séance
+    </button>
+
   `;
 
   // Wire listeners
@@ -878,6 +910,11 @@ async function renderInto(root, _me) {
       track("eleve.livret.open", { eleve_id: id, from: "aujourdhui" });
       navigate(`#/livret/${id}`);
     });
+  });
+
+  root.querySelector("#aj-fab")?.addEventListener("click", () => {
+    track("fab.seance.clicked", { from: "aujourdhui" });
+    navigate("#/log-session");
   });
 }
 

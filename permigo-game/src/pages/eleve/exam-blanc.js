@@ -3,19 +3,33 @@
 // 100 % statique — pas de Supabase
 // Seuil : 12/15 (80 %) — verdict CEPC
 // ═══════════════════════════════════════════════════════════════
-import { getCurUser }            from '@/auth/cur-user.js';
-import { esc }                   from '@/utils/escape.js';
-import { track }                 from '@/services/analytics.js';
-import { navigate }              from '@/router.js';
-import { PARCOURS, questionsForParcours } from '@/data/parcours-quiz.js';
-import { haptic }                from '@/utils/haptic.js';
-import { playPageturn, playCorrect, playWrong, playVictory, playDefeat } from '@/utils/sound.js';
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { PARCOURS, questionsForParcours } from "@/data/parcours-quiz.js";
+import { haptic } from "@/utils/haptic.js";
+import {
+  playPageturn,
+  playCorrect,
+  playWrong,
+  playVictory,
+  playDefeat,
+} from "@/utils/sound.js";
 
 const PASS_THRESHOLD = 12; // / 15
 
 // Trophées DÉCORATIFS (pas de déblocage ici — pur design)
-const TROPHY_START = { img: '/skins/trophy-first-validation.png', emoji: '⚡', nom: 'Première étincelle' };
-const TROPHY_END   = { img: '/skins/trophy-streak-30d.png',       emoji: '💎', nom: 'Mois sans rater' };
+const TROPHY_START = {
+  img: "/skins/trophy-first-validation.png",
+  emoji: "⚡",
+  nom: "Première étincelle",
+};
+const TROPHY_END = {
+  img: "/skins/trophy-streak-30d.png",
+  emoji: "💎",
+  nom: "Mois sans rater",
+};
 
 function renderTrophy(t, variant) {
   return `
@@ -29,12 +43,15 @@ function renderTrophy(t, variant) {
 
 // Parcours visuel : 15 points reliés, vert (juste) / rouge (faux) / courant
 function renderTrack(questions, answers, currentIdx) {
-  return `<div class="exb-track" id="exb-track">${questions.map((q, i) => {
-    let cls = '';
-    if (answers[i] === null || answers[i] === undefined) cls = (i === currentIdx ? 'is-current' : '');
-    else cls = (answers[i] === q.correct ? 'is-correct' : 'is-wrong');
-    return `<span class="exb-node ${cls}" data-node="${i}"></span>`;
-  }).join('')}</div>`;
+  return `<div class="exb-track" id="exb-track">${questions
+    .map((q, i) => {
+      let cls = "";
+      if (answers[i] === null || answers[i] === undefined)
+        cls = i === currentIdx ? "is-current" : "";
+      else cls = answers[i] === q.correct ? "is-correct" : "is-wrong";
+      return `<span class="exb-node ${cls}" data-node="${i}"></span>`;
+    })
+    .join("")}</div>`;
 }
 
 // ─── Mount ───────────────────────────────────────────────────
@@ -43,14 +60,14 @@ export async function mount(root) {
   if (!me) return;
 
   // Masque la bottom nav pendant le quiz (anti-distraction)
-  document.getElementById('bottom-nav')?.setAttribute('hidden', '');
+  document.getElementById("bottom-nav")?.setAttribute("hidden", "");
   const _restoreNav = () => {
-    document.getElementById('bottom-nav')?.removeAttribute('hidden');
-    window.removeEventListener('hashchange', _restoreNav);
+    document.getElementById("bottom-nav")?.removeAttribute("hidden");
+    window.removeEventListener("hashchange", _restoreNav);
   };
-  window.addEventListener('hashchange', _restoreNav);
+  window.addEventListener("hashchange", _restoreNav);
 
-  track('page_view', { page: 'parcours_quiz', user_role: me.role });
+  track("page_view", { page: "parcours_quiz", user_role: me.role });
 
   root.innerHTML = renderStyles() + renderSelection();
   wireSelection(root);
@@ -58,8 +75,9 @@ export async function mount(root) {
 
 // ─── Écran 1 : sélection du parcours ─────────────────────────
 function renderSelection() {
-  const stars = (n) => '★'.repeat(n) + '☆'.repeat(5 - n);
-  const cards = PARCOURS.map(p => `
+  const stars = (n) => "★".repeat(n) + "☆".repeat(5 - n);
+  const cards = PARCOURS.map(
+    (p) => `
     <button class="exb-pcard" data-pid="${p.id}" aria-label="Démarrer le parcours ${esc(p.nom)}">
       <div class="exb-pcard-top">
         <span class="exb-pcard-num">Parcours ${p.id}</span>
@@ -69,13 +87,14 @@ function renderSelection() {
       <div class="exb-pcard-ctx">${esc(p.contexte)}</div>
       <div class="exb-pcard-meta">15 questions · seuil 12/15</div>
     </button>
-  `).join('');
+  `,
+  ).join("");
 
   return `
 <div class="exb anim-slide-up" id="exb-screen">
   <div class="exb-sel-header">
     <button class="exb-quit-btn" id="exb-back" aria-label="Retour">←</button>
-    ${renderTrophy(TROPHY_START, 'exb-trophy--start')}
+    ${renderTrophy(TROPHY_START, "exb-trophy--start")}
     <h1 class="exb-sel-title">Ton parcours d'examen</h1>
     <p class="exb-sel-sub">5 parcours · 15 questions · estime tes chances au permis</p>
   </div>
@@ -86,15 +105,15 @@ function renderSelection() {
 }
 
 function wireSelection(root) {
-  root.querySelector('#exb-back')?.addEventListener('click', () => {
-    haptic('tap');
-    navigate('/');
+  root.querySelector("#exb-back")?.addEventListener("click", () => {
+    haptic("tap");
+    navigate("/");
   });
 
-  root.querySelectorAll('.exb-pcard').forEach(btn => {
-    btn.addEventListener('click', () => {
+  root.querySelectorAll(".exb-pcard").forEach((btn) => {
+    btn.addEventListener("click", () => {
       const pid = parseInt(btn.dataset.pid, 10);
-      haptic('select');
+      haptic("select");
       startParcours(root, pid);
     });
   });
@@ -102,60 +121,73 @@ function wireSelection(root) {
 
 // ─── Écran 2 : quiz ──────────────────────────────────────────
 function startParcours(root, parcours_id) {
-  const parcours   = PARCOURS.find(p => p.id === parcours_id);
-  const questions  = questionsForParcours(parcours_id);
-  const answers    = new Array(questions.length).fill(null); // null = non répondu
-  let currentIdx   = 0;
-  let answered     = false; // flag pour éviter le double-clic
+  const parcours = PARCOURS.find((p) => p.id === parcours_id);
+  const questions = questionsForParcours(parcours_id);
+  const answers = new Array(questions.length).fill(null); // null = non répondu
+  let currentIdx = 0;
+  let answered = false; // flag pour éviter le double-clic
 
-  track('parcours_quiz.started', { parcours_id, nom: parcours?.nom });
+  track("parcours_quiz.started", { parcours_id, nom: parcours?.nom });
 
   function renderQuestion() {
     answered = false;
-    const q   = questions[currentIdx];
+    const q = questions[currentIdx];
     const num = currentIdx + 1;
 
-    root.querySelector('#exb-screen').innerHTML = `
+    root.querySelector("#exb-screen").innerHTML = `
       <div class="exb-quiz-header">
         <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
         <div class="exb-track-wrap">
           ${renderTrack(questions, answers, currentIdx)}
           <span class="exb-progress-label">${num} / ${questions.length}</span>
         </div>
-        <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? '')}</span>
+        <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? "")}</span>
       </div>
 
       <div class="exb-qbody" id="exb-qbody">
         <p class="exb-qnum">Question ${num}</p>
         <p class="exb-qtext">${esc(q.enonce)}</p>
         <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
-          ${q.options.map((opt, i) => `
+          ${q.options
+            .map(
+              (opt, i) => `
             <button class="exb-choice" data-idx="${i}" aria-pressed="false">
               <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
               <span class="exb-choice-text">${esc(opt)}</span>
             </button>
-          `).join('')}
+          `,
+            )
+            .join("")}
         </div>
         <div class="exb-feedback" id="exb-feedback" hidden></div>
       </div>
     `;
 
-    root.querySelector('#exb-quit')?.addEventListener('click', () => {
-      if (confirm('Quitter ce parcours ? Ta progression sera perdue.')) {
-        haptic('tap');
-        track('parcours_quiz.quit', { parcours_id, question: num });
+    root.querySelector("#exb-quit")?.addEventListener("click", () => {
+      if (confirm("Quitter ce parcours ? Ta progression sera perdue.")) {
+        haptic("tap");
+        track("parcours_quiz.quit", { parcours_id, question: num });
         root.innerHTML = renderStyles() + renderSelection();
         wireSelection(root);
       }
     });
 
-    root.querySelectorAll('.exb-choice').forEach(btn => {
-      btn.addEventListener('click', () => {
+    root.querySelectorAll(".exb-choice").forEach((btn) => {
+      btn.addEventListener("click", () => {
         if (answered) return;
         answered = true;
         const chosen = parseInt(btn.dataset.idx, 10);
         answers[currentIdx] = chosen;
-        showFeedback(root, q, chosen, questions, currentIdx, parcours_id, answers, renderQuestion);
+        showFeedback(
+          root,
+          q,
+          chosen,
+          questions,
+          currentIdx,
+          parcours_id,
+          answers,
+          renderQuestion,
+        );
       });
     });
   }
@@ -163,47 +195,61 @@ function startParcours(root, parcours_id) {
   renderQuestion();
 }
 
-function showFeedback(root, q, chosen, questions, currentIdx, parcours_id, answers, renderQuestion) {
+function showFeedback(
+  root,
+  q,
+  chosen,
+  questions,
+  currentIdx,
+  parcours_id,
+  answers,
+  renderQuestion,
+) {
   const isCorrect = chosen === q.correct;
-  const isFaute   = q.tags?.includes('faute_eliminatoire');
+  const isFaute = q.tags?.includes("faute_eliminatoire");
 
-  if (isCorrect) { haptic('success'); playCorrect(); }
-  else           { haptic('warning'); playWrong(); }
+  if (isCorrect) {
+    haptic("success");
+    playCorrect();
+  } else {
+    haptic("warning");
+    playWrong();
+  }
 
   // Colorie les boutons
-  root.querySelectorAll('.exb-choice').forEach(btn => {
+  root.querySelectorAll(".exb-choice").forEach((btn) => {
     const idx = parseInt(btn.dataset.idx, 10);
     btn.disabled = true;
-    btn.setAttribute('aria-pressed', idx === chosen ? 'true' : 'false');
-    if (idx === q.correct)   btn.classList.add('exb-choice--correct');
-    if (idx === chosen && !isCorrect) btn.classList.add('exb-choice--wrong');
+    btn.setAttribute("aria-pressed", idx === chosen ? "true" : "false");
+    if (idx === q.correct) btn.classList.add("exb-choice--correct");
+    if (idx === chosen && !isCorrect) btn.classList.add("exb-choice--wrong");
   });
 
   // Colorie le point du parcours correspondant à cette question
   const node = root.querySelector(`.exb-node[data-node="${currentIdx}"]`);
   if (node) {
-    node.classList.remove('is-current');
-    node.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+    node.classList.remove("is-current");
+    node.classList.add(isCorrect ? "is-correct" : "is-wrong");
   }
 
-  const feedbackEl = root.querySelector('#exb-feedback');
+  const feedbackEl = root.querySelector("#exb-feedback");
   feedbackEl.hidden = false;
   feedbackEl.innerHTML = `
-    ${!isCorrect && isFaute ? '<div class="exb-faute-banner">⚠️ Faute éliminatoire à l\'examen</div>' : ''}
-    <div class="exb-feedback-verdict ${isCorrect ? 'exb-feedback-verdict--ok' : 'exb-feedback-verdict--ko'}">
-      ${isCorrect ? '✓ Bonne réponse' : '✗ Mauvaise réponse — Réponse : ' + esc(String.fromCharCode(65 + q.correct))}
+    ${!isCorrect && isFaute ? '<div class="exb-faute-banner">⚠️ Faute éliminatoire à l\'examen</div>' : ""}
+    <div class="exb-feedback-verdict ${isCorrect ? "exb-feedback-verdict--ok" : "exb-feedback-verdict--ko"}">
+      ${isCorrect ? "✓ Bonne réponse" : "✗ Mauvaise réponse — Réponse : " + esc(String.fromCharCode(65 + q.correct))}
     </div>
     <p class="exb-feedback-explication">${esc(q.explication)}</p>
     <button class="exb-next-btn" id="exb-next">
-      ${currentIdx + 1 < questions.length ? 'Question suivante →' : 'Voir les résultats →'}
+      ${currentIdx + 1 < questions.length ? "Question suivante →" : "Voir les résultats →"}
     </button>
   `;
 
-  root.querySelector('#exb-next')?.addEventListener('click', () => {
+  root.querySelector("#exb-next")?.addEventListener("click", () => {
     playPageturn();
     if (currentIdx + 1 < questions.length) {
       // Remplace uniquement le contenu du qbody pour éviter de recréer les listeners du header
-      const exbScreen = root.querySelector('#exb-screen');
+      const exbScreen = root.querySelector("#exb-screen");
       // Incrément puis re-render complet (simple et fiable)
       const nextIdx = currentIdx + 1;
       // On réaffecte currentIdx via closure dans renderQuestion — passer via callback
@@ -215,55 +261,68 @@ function showFeedback(root, q, chosen, questions, currentIdx, parcours_id, answe
 }
 
 function renderNextQuestion(root, questions, answers, idx, parcours_id) {
-  const parcours = PARCOURS.find(p => p.id === parcours_id);
-  let answered   = false;
+  const parcours = PARCOURS.find((p) => p.id === parcours_id);
+  let answered = false;
 
   function renderAt(currentIdx) {
     answered = false;
-    const q   = questions[currentIdx];
+    const q = questions[currentIdx];
     const num = currentIdx + 1;
 
-    root.querySelector('#exb-screen').innerHTML = `
+    root.querySelector("#exb-screen").innerHTML = `
       <div class="exb-quiz-header">
         <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
         <div class="exb-track-wrap">
           ${renderTrack(questions, answers, currentIdx)}
           <span class="exb-progress-label">${num} / ${questions.length}</span>
         </div>
-        <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? '')}</span>
+        <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? "")}</span>
       </div>
 
       <div class="exb-qbody" id="exb-qbody">
         <p class="exb-qnum">Question ${num}</p>
         <p class="exb-qtext">${esc(q.enonce)}</p>
         <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
-          ${q.options.map((opt, i) => `
+          ${q.options
+            .map(
+              (opt, i) => `
             <button class="exb-choice" data-idx="${i}" aria-pressed="false">
               <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
               <span class="exb-choice-text">${esc(opt)}</span>
             </button>
-          `).join('')}
+          `,
+            )
+            .join("")}
         </div>
         <div class="exb-feedback" id="exb-feedback" hidden></div>
       </div>
     `;
 
-    root.querySelector('#exb-quit')?.addEventListener('click', () => {
-      if (confirm('Quitter ce parcours ? Ta progression sera perdue.')) {
-        haptic('tap');
-        track('parcours_quiz.quit', { parcours_id, question: num });
+    root.querySelector("#exb-quit")?.addEventListener("click", () => {
+      if (confirm("Quitter ce parcours ? Ta progression sera perdue.")) {
+        haptic("tap");
+        track("parcours_quiz.quit", { parcours_id, question: num });
         root.innerHTML = renderStyles() + renderSelection();
         wireSelection(root);
       }
     });
 
-    root.querySelectorAll('.exb-choice').forEach(btn => {
-      btn.addEventListener('click', () => {
+    root.querySelectorAll(".exb-choice").forEach((btn) => {
+      btn.addEventListener("click", () => {
         if (answered) return;
         answered = true;
         const chosen = parseInt(btn.dataset.idx, 10);
         answers[currentIdx] = chosen;
-        showFeedback(root, q, chosen, questions, currentIdx, parcours_id, answers, () => renderAt(currentIdx + 1));
+        showFeedback(
+          root,
+          q,
+          chosen,
+          questions,
+          currentIdx,
+          parcours_id,
+          answers,
+          () => renderAt(currentIdx + 1),
+        );
       });
     });
   }
@@ -273,61 +332,84 @@ function renderNextQuestion(root, questions, answers, idx, parcours_id) {
 
 // ─── Écran 3 : résultats ─────────────────────────────────────
 function showResults(root, questions, answers, parcours_id) {
-  const parcours = PARCOURS.find(p => p.id === parcours_id);
-  const score    = answers.filter((a, i) => a === questions[i].correct).length;
-  const total    = questions.length;
-  const pct      = Math.round(score / total * 100);
+  const parcours = PARCOURS.find((p) => p.id === parcours_id);
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const total = questions.length;
+  const pct = Math.round((score / total) * 100);
 
   const wrongItems = questions
-    .map((q, i) => ({ q, chosen: answers[i], isCorrect: answers[i] === q.correct }))
-    .filter(x => !x.isCorrect);
+    .map((q, i) => ({
+      q,
+      chosen: answers[i],
+      isCorrect: answers[i] === q.correct,
+    }))
+    .filter((x) => !x.isCorrect);
 
   // Faute éliminatoire ratée → recalé direct, quel que soit le score (comme au vrai CEPC)
-  const fauteRatee = wrongItems.some(({ q }) => q.tags?.includes('faute_eliminatoire'));
-  const passed     = score >= PASS_THRESHOLD && !fauteRatee;
+  const fauteRatee = wrongItems.some(({ q }) =>
+    q.tags?.includes("faute_eliminatoire"),
+  );
+  const passed = score >= PASS_THRESHOLD && !fauteRatee;
 
-  track('parcours_quiz.completed', { parcours_id, nom: parcours?.nom, score, total, passed, faute_eliminatoire: fauteRatee });
+  track("parcours_quiz.completed", {
+    parcours_id,
+    nom: parcours?.nom,
+    score,
+    total,
+    passed,
+    faute_eliminatoire: fauteRatee,
+  });
 
-  if (passed) playVictory(); else playDefeat();
+  if (passed) playVictory();
+  else playDefeat();
 
-  const wrongHtml = wrongItems.length === 0
-    ? `<p class="exb-perfect">Parfait ! Aucune erreur.</p>`
-    : `
+  const wrongHtml =
+    wrongItems.length === 0
+      ? `<p class="exb-perfect">Parfait ! Aucune erreur.</p>`
+      : `
       <h2 class="exb-recap-title">Questions ratées</h2>
       <div class="exb-recap-list">
-        ${wrongItems.map(({ q, chosen }) => `
+        ${wrongItems
+          .map(
+            ({ q, chosen }) => `
           <div class="exb-recap-item">
             <p class="exb-recap-enonce">${esc(q.enonce)}</p>
-            ${chosen !== null ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>` : ''}
+            ${chosen !== null ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>` : ""}
             <p class="exb-recap-correct">Bonne réponse : <strong>${esc(q.options[q.correct])}</strong></p>
             <p class="exb-recap-explication">${esc(q.explication)}</p>
           </div>
-        `).join('')}
+        `,
+          )
+          .join("")}
       </div>
     `;
 
-  root.querySelector('#exb-screen').innerHTML = `
+  root.querySelector("#exb-screen").innerHTML = `
     <div class="exb-results">
-      ${renderTrophy(TROPHY_END, 'exb-trophy--end')}
-      <div class="exb-res-top ${passed ? 'exb-res-top--pass' : 'exb-res-top--fail'}">
-        <div class="exb-res-ico">${passed ? '🎉' : (fauteRatee ? '🛑' : '💪')}</div>
+      ${renderTrophy(TROPHY_END, "exb-trophy--end")}
+      <div class="exb-res-top ${passed ? "exb-res-top--pass" : "exb-res-top--fail"}">
+        <div class="exb-res-ico">${passed ? "✓" : fauteRatee ? "✗" : "↻"}</div>
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
         <div class="exb-res-pct">${pct} %</div>
         <div class="exb-res-verdict">${
-          fauteRatee ? 'Recalé — faute éliminatoire'
-          : passed ? 'Admis — tu es dans les clous !'
-          : 'Non admis — encore un peu d\'entraînement'
+          fauteRatee
+            ? "Recalé — faute éliminatoire"
+            : passed
+              ? "Admis — tu es dans les clous !"
+              : "Non admis — encore un peu d'entraînement"
         }</div>
         <div class="exb-res-cepc">${
-          fauteRatee ? 'Une faute éliminatoire = échec direct à l\'examen, peu importe le reste du score.'
-          : passed ? 'Tu décrocherais ton permis. Continue comme ça !'
-          : 'Il te faut au moins 12 / 15 sans faute éliminatoire. Reviens t\'entraîner !'
+          fauteRatee
+            ? "Une faute éliminatoire = échec direct à l'examen, peu importe le reste du score."
+            : passed
+              ? "Tu décrocherais ton permis. Continue comme ça !"
+              : "Il te faut au moins 12 / 15 sans faute éliminatoire. Reviens t'entraîner !"
         }</div>
       </div>
 
       <div class="exb-res-body">
         <div class="exb-res-bar">
-          <div class="exb-res-bar-fill ${passed ? 'exb-res-bar-fill--pass' : ''}" style="width:${pct}%"></div>
+          <div class="exb-res-bar-fill ${passed ? "exb-res-bar-fill--pass" : ""}" style="width:${pct}%"></div>
         </div>
         ${wrongHtml}
       </div>
@@ -340,21 +422,21 @@ function showResults(root, questions, answers, parcours_id) {
     </div>
   `;
 
-  root.querySelector('#exb-retry')?.addEventListener('click', () => {
-    haptic('tap');
-    track('parcours_quiz.retry', { parcours_id });
+  root.querySelector("#exb-retry")?.addEventListener("click", () => {
+    haptic("tap");
+    track("parcours_quiz.retry", { parcours_id });
     startParcours(root, parcours_id);
   });
 
-  root.querySelector('#exb-other')?.addEventListener('click', () => {
-    haptic('tap');
+  root.querySelector("#exb-other")?.addEventListener("click", () => {
+    haptic("tap");
     root.innerHTML = renderStyles() + renderSelection();
     wireSelection(root);
   });
 
-  root.querySelector('#exb-home')?.addEventListener('click', () => {
-    haptic('tap');
-    navigate('/');
+  root.querySelector("#exb-home")?.addEventListener("click", () => {
+    haptic("tap");
+    navigate("/");
   });
 }
 

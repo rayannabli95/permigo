@@ -20,7 +20,7 @@ import {
 } from "@/utils/league-shared.js";
 
 const LIMIT = 50;
-const MEDALS = { 1: "🥇", 2: "🥈", 3: "🥉" };
+const MEDALS = { 1: "#1", 2: "#2", 3: "#3" };
 
 // ─── Countdown : temps restant jusqu'au lundi 00:00 ────────────
 function msToNextMonday() {
@@ -208,14 +208,14 @@ function _render(scope, data) {
     <h1 class="clt-title">Classement</h1>
     ${pill}
     <div class="clt-tabs">
-      <button class="clt-tab clt-tab-ligue ${scope === "semaine" ? "on" : ""}" data-scope="semaine">🏆 Ligue</button>
+      <button class="clt-tab clt-tab-ligue ${scope === "semaine" ? "on" : ""}" data-scope="semaine">${icon("trophy", { size: 13, strokeWidth: 2 })} Ligue</button>
       <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">Mon école</button>
       <button class="clt-tab ${scope === "national" ? "on" : ""}" data-scope="national">National</button>
     </div>
   </div>
   <div id="clt-body">${_renderBody(scope, rows)}</div>
   <a class="clt-pseudo" href="#/profil">
-    <span class="clt-pseudo-ico" aria-hidden="true">🎭</span>
+    <span class="clt-pseudo-ico" aria-hidden="true">${icon("user", { size: 16, strokeWidth: 2 })}</span>
     <div class="clt-pseudo-body">
       <div class="clt-pseudo-ttl">Choisis ton pseudo public</div>
       <div class="clt-pseudo-sub">Sinon tu apparais en « Apprenti »</div>
@@ -250,7 +250,7 @@ function _renderLeagueBody(rows) {
     <div class="clt-pts-legend">
       <span class="clt-pts-pill">Quiz réussi +2 pts</span>
       <span class="clt-pts-pill">Compétence acquise +5 pts</span>
-      <span class="clt-pts-pill">💎 ≥40 · 🏆 ≥20 · 🥈 ≥8 · 🥉 ≥1</span>
+      <span class="clt-pts-pill">Diamant ≥40 · Or ≥20 · Argent ≥8 · Bronze ≥1</span>
     </div>
   </div>`;
 
