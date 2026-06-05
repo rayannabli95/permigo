@@ -2,11 +2,11 @@
 // Élève — Mon examen B
 // Countdown · Checklist "Suis-je prêt ?" · Conseils
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { icon } from '@/utils/icons.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { icon } from "@/utils/icons.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -304,16 +304,28 @@ const STYLE = `<style>
 </style>`;
 
 // ─── Constants ───────────────────────────────────────────────────
-const LS_KEY_DATE    = 'permigo:exam_date';
-const LS_KEY_REVISED = 'permigo:has_revised';
-const COMPS_TARGET   = 16; // > 50% of 31
-const QUIZ_TARGET    = 70;
+const LS_KEY_DATE = "permigo:exam_date";
+const LS_KEY_REVISED = "permigo:has_revised";
+const COMPS_TARGET = 16; // > 50% of 31
+const QUIZ_TARGET = 70;
 
 const TIPS = [
-  { ico: '😴', txt: 'Dors 8h la veille — le cerveau consolide la mémoire pendant le sommeil.' },
-  { ico: '🥗', txt: 'Mange léger le matin. Évite le sucre rapide avant l\'examen.' },
-  { ico: '⏰', txt: 'Arrive 15 min en avance pour te détendre et vérifier le matériel.' },
-  { ico: '🧘', txt: 'Respire par le ventre avant de démarrer. 4 sec inspiré, 4 sec expiré.' },
+  {
+    ico: icon("moon", { size: 20, strokeWidth: 1.5 }),
+    txt: "Dors 8h la veille — le cerveau consolide la mémoire pendant le sommeil.",
+  },
+  {
+    ico: icon("zap", { size: 20, strokeWidth: 1.5 }),
+    txt: "Mange léger le matin. Évite le sucre rapide avant l'examen.",
+  },
+  {
+    ico: icon("clock", { size: 20, strokeWidth: 1.5 }),
+    txt: "Arrive 15 min en avance pour te détendre et vérifier le matériel.",
+  },
+  {
+    ico: icon("activity", { size: 20, strokeWidth: 1.5 }),
+    txt: "Respire par le ventre avant de démarrer. 4 sec inspiré, 4 sec expiré.",
+  },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────
@@ -323,62 +335,78 @@ function parseSavedDate() {
     if (!v) return null;
     const d = new Date(v);
     return isNaN(d.getTime()) ? null : d;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 function saveExamDate(iso) {
-  try { localStorage.setItem(LS_KEY_DATE, iso); } catch {}
+  try {
+    localStorage.setItem(LS_KEY_DATE, iso);
+  } catch {}
 }
 
 function countdown(examDate) {
   const now = Date.now();
   const diff = examDate.getTime() - now;
   if (diff < 0) return { days: 0, hours: 0, minutes: 0, passed: true };
-  const totalSec  = Math.floor(diff / 1000);
-  const days      = Math.floor(totalSec / 86400);
-  const hours     = Math.floor((totalSec % 86400) / 3600);
-  const minutes   = Math.floor((totalSec % 3600) / 60);
+  const totalSec = Math.floor(diff / 1000);
+  const days = Math.floor(totalSec / 86400);
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
   return { days, hours, minutes, passed: false };
 }
 
 function fmtDate(d) {
-  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  return d.toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 function isRevised() {
-  try { return !!localStorage.getItem(LS_KEY_REVISED); } catch { return false; }
+  try {
+    return !!localStorage.getItem(LS_KEY_REVISED);
+  } catch {
+    return false;
+  }
 }
 
 // ─── Data ────────────────────────────────────────────────────────
 async function loadData(meId) {
   const [validRes, streakRes, quizRes, predictRes] = await Promise.allSettled([
-    sb.from('validations')
-      .select('competence_id', { count: 'exact' })
-      .eq('eleve_id', meId)
-      .eq('statut', 'acquis'),
+    sb
+      .from("validations")
+      .select("competence_id", { count: "exact" })
+      .eq("eleve_id", meId)
+      .eq("statut", "acquis"),
 
-    sb.from('streaks')
-      .select('current_streak')
-      .eq('user_id', meId)
+    sb
+      .from("streaks")
+      .select("current_streak")
+      .eq("user_id", meId)
       .maybeSingle(),
 
-    sb.from('quiz_attempts')
-      .select('score')
-      .eq('user_id', meId)
-      .not('score', 'is', null),
+    sb
+      .from("quiz_attempts")
+      .select("score")
+      .eq("user_id", meId)
+      .not("score", "is", null),
 
-    sb.rpc('predict_exam_ready_date'),
+    sb.rpc("predict_exam_ready_date"),
   ]);
 
-  const compsCount = validRes.value?.count  ?? 0;
-  const streak     = streakRes.value?.data?.current_streak ?? 0;
-  const scores     = quizRes.value?.data    ?? [];
-  const avgScore   = scores.length
+  const compsCount = validRes.value?.count ?? 0;
+  const streak = streakRes.value?.data?.current_streak ?? 0;
+  const scores = quizRes.value?.data ?? [];
+  const avgScore = scores.length
     ? Math.round(scores.reduce((s, r) => s + (r.score ?? 0), 0) / scores.length)
     : null;
 
   const predictRaw = predictRes.value?.data;
-  const predict    = predictRaw?.error ? null : (predictRaw || null);
+  const predict = predictRaw?.error ? null : predictRaw || null;
 
   return { compsCount, streak, avgScore, predict };
 }
@@ -388,10 +416,10 @@ function renderCountdown(examDate) {
   if (!examDate) {
     return `
 <div class="exam-no-date">
-  <span class="exam-no-date-emoji">${icon('calendar',{size:26})}</span>
+  <span class="exam-no-date-emoji">${icon("calendar", { size: 26 })}</span>
   <div class="exam-no-date-txt">Renseigne ta date d'examen pour voir le compte à rebours.</div>
   <button class="exam-choose-btn" id="exam-btn-choose">
-    ${icon('calendar', { size: 16 })} Choisir ma date
+    ${icon("calendar", { size: 16 })} Choisir ma date
   </button>
   <div class="exam-date-input-wrap" id="exam-date-wrap">
     <input type="date" class="exam-date-input" id="exam-date-input" />
@@ -402,16 +430,16 @@ function renderCountdown(examDate) {
 
   const cd = countdown(examDate);
   const urgent = !cd.passed && cd.days < 7;
-  const tileClass = cd.passed ? 'done' : urgent ? 'urgent' : '';
+  const tileClass = cd.passed ? "done" : urgent ? "urgent" : "";
 
   if (cd.passed) {
     return `
 <div style="text-align:center;padding:8px 0">
-  <div style="margin-bottom:8px;color:var(--gr)">${icon('check-circle',{size:34})}</div>
+  <div style="margin-bottom:8px;color:var(--gr)">${icon("check-circle", { size: 34 })}</div>
   <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:4px">Ton examen est passé !</div>
   <div style="font:500 13px/1.4 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">Bonne chance pour les résultats.</div>
   <button class="exam-choose-btn" id="exam-btn-choose" style="background:var(--gr)">
-    ${icon('calendar', { size: 16 })} Changer la date
+    ${icon("calendar", { size: 16 })} Changer la date
   </button>
   <div class="exam-date-input-wrap" id="exam-date-wrap">
     <input type="date" class="exam-date-input" id="exam-date-input" />
@@ -423,23 +451,23 @@ function renderCountdown(examDate) {
   return `
 <div class="exam-countdown-tiles">
   <div class="exam-tile ${tileClass}">
-    <span class="exam-tile-num">${String(cd.days).padStart(2,'0')}</span>
+    <span class="exam-tile-num">${String(cd.days).padStart(2, "0")}</span>
     <span class="exam-tile-lbl">Jours</span>
   </div>
   <div class="exam-tile ${tileClass}">
-    <span class="exam-tile-num">${String(cd.hours).padStart(2,'0')}</span>
+    <span class="exam-tile-num">${String(cd.hours).padStart(2, "0")}</span>
     <span class="exam-tile-lbl">Heures</span>
   </div>
   <div class="exam-tile ${tileClass}">
-    <span class="exam-tile-num">${String(cd.minutes).padStart(2,'0')}</span>
+    <span class="exam-tile-num">${String(cd.minutes).padStart(2, "0")}</span>
     <span class="exam-tile-lbl">Minutes</span>
   </div>
 </div>
 <div style="text-align:center;font:500 12px/1.4 'Inter',sans-serif;color:var(--mu3);margin-bottom:14px">
-  ${urgent ? '' : ''}${esc(fmtDate(examDate))}
+  ${urgent ? "" : ""}${esc(fmtDate(examDate))}
 </div>
 <div class="exam-date-row">
-  <input type="date" class="exam-date-input" id="exam-date-input" value="${examDate.toISOString().slice(0,10)}" />
+  <input type="date" class="exam-date-input" id="exam-date-input" value="${examDate.toISOString().slice(0, 10)}" />
   <button class="exam-date-save" id="exam-date-save">Modifier</button>
 </div>`;
 }
@@ -452,7 +480,7 @@ function renderPredict({ compsCount, predict }) {
   if (compsCount >= PREDICT_TARGET) {
     return `
 <div class="exam-predict-ready">
-  <span aria-hidden="true" style="color:var(--gr)">${icon('check-circle',{size:26})}</span>
+  <span aria-hidden="true" style="color:var(--gr)">${icon("check-circle", { size: 26 })}</span>
   <div>
     <div class="exam-predict-title">Tu es prêt pour l'examen !</div>
     <div class="exam-predict-sub">${compsCount}/31 compétences validées — objectif atteint</div>
@@ -461,15 +489,20 @@ function renderPredict({ compsCount, predict }) {
   }
 
   const dateStr = predict?.predicted_date
-    ? new Date(predict.predicted_date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(predict.predicted_date + "T12:00:00").toLocaleDateString(
+        "fr-FR",
+        { day: "numeric", month: "long", year: "numeric" },
+      )
     : null;
-  const advice = predict?.advice || `Encore ${PREDICT_TARGET - compsCount} compétences à valider`;
+  const advice =
+    predict?.advice ||
+    `Encore ${PREDICT_TARGET - compsCount} compétences à valider`;
 
   return `
 <div class="exam-predict">
-  <div class="exam-predict-ico">${icon('calendar', { size: 18, color: 'var(--a)' })}</div>
+  <div class="exam-predict-ico">${icon("calendar", { size: 18, color: "var(--a)" })}</div>
   <div class="exam-predict-body">
-    <div class="exam-predict-title">${dateStr ? `Prêt vers le ${esc(dateStr)}` : 'Estimation en cours…'}</div>
+    <div class="exam-predict-title">${dateStr ? `Prêt vers le ${esc(dateStr)}` : "Estimation en cours…"}</div>
     <div class="exam-predict-sub">${esc(advice)}</div>
   </div>
 </div>
@@ -488,53 +521,68 @@ function renderChecklist({ compsCount, streak, avgScore }) {
 
   const criteria = [
     {
-      label:  'Parcours REMC > 50%',
-      sub:    `${compsCount} compétences validées sur 31`,
-      pass:   compsCount >= COMPS_TARGET,
-      badge:  `${Math.round((compsCount / 31) * 100)}%`,
-      ico:    icon('map',{size:20}),
+      label: "Parcours REMC > 50%",
+      sub: `${compsCount} compétences validées sur 31`,
+      pass: compsCount >= COMPS_TARGET,
+      badge: `${Math.round((compsCount / 31) * 100)}%`,
+      ico: icon("map", { size: 20 }),
     },
     {
-      label:  'Streak actif',
-      sub:    streak > 0 ? `${streak} jours d'affilée` : 'Reprends l\'application aujourd\'hui',
-      pass:   streak > 0,
-      badge:  streak > 0 ? `${streak}j` : '0j',
-      ico:    icon('flame',{size:20}),
+      label: "Streak actif",
+      sub:
+        streak > 0
+          ? `${streak} jours d'affilée`
+          : "Reprends l'application aujourd'hui",
+      pass: streak > 0,
+      badge: streak > 0 ? `${streak}j` : "0j",
+      ico: icon("flame", { size: 20 }),
     },
     {
-      label:  'Score quiz > 70%',
-      sub:    avgScore !== null ? `Moyenne : ${avgScore}%` : 'Aucun quiz enregistré',
-      pass:   avgScore !== null && avgScore >= QUIZ_TARGET,
+      label: "Score quiz > 70%",
+      sub:
+        avgScore !== null ? `Moyenne : ${avgScore}%` : "Aucun quiz enregistré",
+      pass: avgScore !== null && avgScore >= QUIZ_TARGET,
       neutral: avgScore === null,
-      badge:  avgScore !== null ? `${avgScore}%` : '—',
-      ico:    icon('lightbulb',{size:20}),
+      badge: avgScore !== null ? `${avgScore}%` : "—",
+      ico: icon("lightbulb", { size: 20 }),
     },
     {
-      label:  'Révision complète',
-      sub:    revised ? 'Fiches de révision consultées' : 'Consulte les fiches résumé',
-      pass:   revised,
-      badge:  revised ? '✓' : '—',
-      ico:    icon('book',{size:20}),
+      label: "Révision complète",
+      sub: revised
+        ? "Fiches de révision consultées"
+        : "Consulte les fiches résumé",
+      pass: revised,
+      badge: revised ? "✓" : "—",
+      ico: icon("book", { size: 20 }),
     },
   ];
 
-  const passCount = criteria.filter(c => c.pass).length;
+  const passCount = criteria.filter((c) => c.pass).length;
   let readinessClass, readinessTxt;
-  if (passCount >= 3) { readinessClass = 'high'; readinessTxt = `${icon('check-circle', { size: 14 })} Tu es bien préparé${passCount === 4 ? ' · Excellent !' : ' · Encore un effort !'}`; }
-  else if (passCount >= 2) { readinessClass = 'mid';  readinessTxt = `${icon('alert-triangle', { size: 14 })} Progression correcte · Continue !`; }
-  else                    { readinessClass = 'low';  readinessTxt = `${icon('alert-circle', { size: 14 })} Encore du travail · Ne lâche pas !`; }
+  if (passCount >= 3) {
+    readinessClass = "high";
+    readinessTxt = `${icon("check-circle", { size: 14 })} Tu es bien préparé${passCount === 4 ? " · Excellent !" : " · Encore un effort !"}`;
+  } else if (passCount >= 2) {
+    readinessClass = "mid";
+    readinessTxt = `${icon("alert-triangle", { size: 14 })} Progression correcte · Continue !`;
+  } else {
+    readinessClass = "low";
+    readinessTxt = `${icon("alert-circle", { size: 14 })} Encore du travail · Ne lâche pas !`;
+  }
 
-  const rows = criteria.map(c => {
-    const cls = c.neutral ? 'neutral' : c.pass ? 'pass' : 'fail';
-    return `<div class="exam-check-row ${cls}" role="listitem">
-  <div class="exam-check-ico" aria-hidden="true">${esc(c.ico)}</div>
+  const rows = criteria
+    .map((c) => {
+      const cls = c.neutral ? "neutral" : c.pass ? "pass" : "fail";
+      return `<div class="exam-check-row ${cls}" role="listitem">
+  <div class="exam-check-ico" aria-hidden="true">${c.ico}</div>
   <div class="exam-check-body">
     <div class="exam-check-label">${esc(c.label)}</div>
     <div class="exam-check-sub">${esc(c.sub)}</div>
   </div>
   <span class="exam-check-badge">${esc(c.badge)}</span>
 </div>`;
-  }).join('');
+    })
+    .join("");
 
   return `
 <div class="exam-readiness ${readinessClass}" role="status">${readinessTxt}</div>
@@ -542,31 +590,33 @@ function renderChecklist({ compsCount, streak, avgScore }) {
 }
 
 function renderTips() {
-  return TIPS.map(t => `
+  return TIPS.map(
+    (t) => `
 <div class="exam-tip">
   <span class="exam-tip-ico" aria-hidden="true">${t.ico}</span>
   <div class="exam-tip-txt">${esc(t.txt)}</div>
-</div>`).join('');
+</div>`,
+  ).join("");
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
 function wire(root) {
   // "Choisir ma date" button → reveal input
-  root.querySelector('#exam-btn-choose')?.addEventListener('click', () => {
-    const wrap = root.querySelector('#exam-date-wrap');
-    wrap?.classList.add('open');
-    root.querySelector('#exam-date-input')?.focus();
+  root.querySelector("#exam-btn-choose")?.addEventListener("click", () => {
+    const wrap = root.querySelector("#exam-date-wrap");
+    wrap?.classList.add("open");
+    root.querySelector("#exam-date-input")?.focus();
   });
 
   // Save / Modifier date
-  root.querySelector('#exam-date-save')?.addEventListener('click', () => {
-    const input = root.querySelector('#exam-date-input');
-    const val   = input?.value;
+  root.querySelector("#exam-date-save")?.addEventListener("click", () => {
+    const input = root.querySelector("#exam-date-input");
+    const val = input?.value;
     if (!val) return;
     saveExamDate(val);
-    track('exam.date_set', { date: val });
+    track("exam.date_set", { date: val });
     // Re-render countdown section only
-    const countdownEl = root.querySelector('#exam-countdown-body');
+    const countdownEl = root.querySelector("#exam-countdown-body");
     if (countdownEl) {
       const d = new Date(val);
       countdownEl.innerHTML = renderCountdown(d);
@@ -581,11 +631,14 @@ export async function mount(root) {
   if (!me) return;
 
   // #11 — plein écran d'épreuve : masque la bottom nav (anti-triche, anti-distraction)
-  document.getElementById('bottom-nav')?.setAttribute('hidden', '');
-  const _restoreNav = () => { document.getElementById('bottom-nav')?.removeAttribute('hidden'); window.removeEventListener('hashchange', _restoreNav); };
-  window.addEventListener('hashchange', _restoreNav);
+  document.getElementById("bottom-nav")?.setAttribute("hidden", "");
+  const _restoreNav = () => {
+    document.getElementById("bottom-nav")?.removeAttribute("hidden");
+    window.removeEventListener("hashchange", _restoreNav);
+  };
+  window.addEventListener("hashchange", _restoreNav);
 
-  track('page.view', { page: 'eleve_examen' });
+  track("page.view", { page: "eleve_examen" });
 
   root.innerHTML = `
 <div class="exam-skel">
@@ -595,7 +648,7 @@ export async function mount(root) {
   <div class="exam-skel-block" style="height:160px"></div>
 </div>`;
 
-  const data     = await loadData(me.id);
+  const data = await loadData(me.id);
   const examDate = parseSavedDate();
 
   root.innerHTML = `${STYLE}
@@ -603,7 +656,7 @@ export async function mount(root) {
 
   <!-- 1. HEADER -->
   <div class="exam-hd exam-card" style="background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:16px">
-    <div class="exam-hd-ico" aria-hidden="true">${icon('graduation-cap',{size:34})}</div>
+    <div class="exam-hd-ico" aria-hidden="true">${icon("graduation-cap", { size: 34 })}</div>
     <div>
       <h1 class="exam-hd-title">Ton examen blanc</h1>
       <div class="exam-hd-sub">Prépare-toi sereinement pour le grand jour.</div>

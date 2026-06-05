@@ -2,20 +2,20 @@
 // Enseignant — Valider une compétence REMC pour un élève
 // Flow: Choisir élève → Choisir compétence → Confirmer → Notif quiz
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { toast } from '@/components/common/toast.js';
-import { esc } from '@/utils/escape.js';
-import { renderUserAvatar } from '@/components/common/avatar.js';
-import { track } from '@/services/analytics.js';
-import { REMC } from '@/data/remc.js';
-import { labelComp } from '@/utils/remc-label.js';
-import { badge, Badges } from '@/components/common/badge.js';
-import { icon } from '@/utils/icons.js';
-import { navigate } from '@/router.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { toast } from "@/components/common/toast.js";
+import { esc } from "@/utils/escape.js";
+import { renderUserAvatar } from "@/components/common/avatar.js";
+import { track } from "@/services/analytics.js";
+import { REMC } from "@/data/remc.js";
+import { labelComp } from "@/utils/remc-label.js";
+import { badge, Badges } from "@/components/common/badge.js";
+import { icon } from "@/utils/icons.js";
+import { navigate } from "@/router.js";
 
 // Liste plate des compétences REMC dans l'ordre (C1a → C4g)
-const ORDERED_COMPS = REMC.flatMap(c => c.subs.map(s => s.c));
+const ORDERED_COMPS = REMC.flatMap((c) => c.subs.map((s) => s.c));
 
 /**
  * Retourne la prochaine compétence à valider dans l'ordre REMC,
@@ -24,7 +24,10 @@ const ORDERED_COMPS = REMC.flatMap(c => c.subs.map(s => s.c));
  * @returns {string|null}
  */
 function getNextUnlockable(validatedIds, aValiderIds = new Set()) {
-  return ORDERED_COMPS.find(c => !validatedIds.has(c) && !aValiderIds.has(c)) || null;
+  return (
+    ORDERED_COMPS.find((c) => !validatedIds.has(c) && !aValiderIds.has(c)) ||
+    null
+  );
 }
 
 // ─── CSS ────────────────────────────────────────────────────────
@@ -214,7 +217,7 @@ let _root, _me;
 let _eleves = [];
 let _eleve = null;
 let _validatedIds = new Set();
-let _aValiderIds  = new Set();
+let _aValiderIds = new Set();
 let _selectedComp = null; // { c: string, n: string }
 
 // ─── Entry point ────────────────────────────────────────────────
@@ -223,23 +226,26 @@ export async function mount(root) {
   _me = getCurUser();
   if (!_me) return;
 
-  track('page.view', { page: 'enseignant_validation' });
+  track("page.view", { page: "enseignant_validation" });
 
   _eleve = null;
   _selectedComp = null;
   _validatedIds = new Set();
-  _aValiderIds  = new Set();
+  _aValiderIds = new Set();
 
   root.innerHTML = `<div class="v-loading"><div class="skel skel-card"></div><div class="skel skel-card"></div></div>`;
 
   const { data, error } = await sb
-    .from('profiles')
-    .select('id, prenom, nom_initial, avatar_url')
-    .eq('enseignant_id', _me.id)
-    .eq('role', 'eleve')
-    .order('prenom');
+    .from("profiles")
+    .select("id, prenom, nom_initial, avatar_url")
+    .eq("enseignant_id", _me.id)
+    .eq("role", "eleve")
+    .order("prenom");
 
-  if (error) { toast('Impossible de charger vos élèves', 'error'); return; }
+  if (error) {
+    toast("Impossible de charger vos élèves", "error");
+    return;
+  }
   _eleves = data || [];
 
   render();
@@ -262,25 +268,35 @@ async function selectEleve(eleve) {
   // Charger les validations existantes de cet élève (avec garde-fou réseau)
   try {
     const { data, error } = await sb
-      .from('validations')
-      .select('competence_id, statut')
-      .eq('eleve_id', eleve.id);
+      .from("validations")
+      .select("competence_id, statut")
+      .eq("eleve_id", eleve.id);
 
     if (error) throw error;
-    _validatedIds = new Set((data || []).filter(v => v.statut === 'acquis').map(v => v.competence_id));
-    _aValiderIds  = new Set((data || []).filter(v => v.statut === 'a_valider').map(v => v.competence_id));
+    _validatedIds = new Set(
+      (data || [])
+        .filter((v) => v.statut === "acquis")
+        .map((v) => v.competence_id),
+    );
+    _aValiderIds = new Set(
+      (data || [])
+        .filter((v) => v.statut === "a_valider")
+        .map((v) => v.competence_id),
+    );
   } catch (e) {
-    console.error('[selectEleve] fetch validations failed', e);
-    toast('Impossible de charger les compétences de l\'élève', 'error');
+    console.error("[selectEleve] fetch validations failed", e);
+    toast("Impossible de charger les compétences de l'élève", "error");
     _validatedIds = new Set();
-    _aValiderIds  = new Set();
+    _aValiderIds = new Set();
   }
 
   render();
   wire();
   // Amener step 2 en vue
   requestAnimationFrame(() =>
-    _root.querySelector('.step-2')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    _root
+      .querySelector(".step-2")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" }),
   );
 }
 
@@ -291,8 +307,8 @@ function selectComp(compId, compNom) {
   _selectedComp = clickedSame ? null : { c: compId, n: compNom };
 
   // Partial DOM update — évite un full re-render + perte de scroll
-  _root.querySelectorAll('[data-comp-id]').forEach(el => {
-    el.classList.toggle('comp-sel', el.dataset.compId === _selectedComp?.c);
+  _root.querySelectorAll("[data-comp-id]").forEach((el) => {
+    el.classList.toggle("comp-sel", el.dataset.compId === _selectedComp?.c);
   });
   renderCta();
 }
@@ -300,24 +316,30 @@ function selectComp(compId, compNom) {
 async function doValidate() {
   if (!_eleve || !_selectedComp) return;
 
-  const btn = _root.querySelector('.btn-validate');
-  if (btn) { btn.disabled = true; btn.textContent = 'En cours…'; }
+  const btn = _root.querySelector(".btn-validate");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "En cours…";
+  }
 
   // Moniteur = source de vérité : la compétence est VALIDÉE immédiatement (acquis).
   // Le quiz élève est désormais un rappel optionnel, il ne conditionne plus rien.
-  const { error } = await sb.from('validations').upsert(
+  const { error } = await sb.from("validations").upsert(
     {
       eleve_id: _eleve.id,
       competence_id: _selectedComp.c,
       validated_by: _me.id,
-      statut: 'acquis',
+      statut: "acquis",
     },
-    { onConflict: 'eleve_id,competence_id' }
+    { onConflict: "eleve_id,competence_id" },
   );
 
   if (error) {
-    toast('Erreur lors de la validation', 'error');
-    if (btn) { btn.disabled = false; btn.textContent = 'Valider ✓'; }
+    toast("Erreur lors de la validation", "error");
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Valider ✓";
+    }
     return;
   }
 
@@ -325,37 +347,37 @@ async function doValidate() {
   // faire le quiz ne change pas son statut (already_acquired) — c'est juste un rappel.
   // Via RPC SECURITY DEFINER : la policy notifications_insert interdit d'insérer
   // une notif pour autrui, donc le moniteur ne peut pas notifier l'élève en direct.
-  const { error: errNotif } = await sb.rpc('send_quiz_notification', {
+  const { error: errNotif } = await sb.rpc("send_quiz_notification", {
     p_eleve_id: _eleve.id,
     p_competence_id: _selectedComp.c,
     p_comp_nom: _selectedComp.n,
   });
   if (errNotif) {
     // La validation est OK, mais l'élève ne recevra pas l'invitation quiz-récap
-    console.error('[validation] send_quiz_notification failed', errNotif);
-    toast('Validé, mais invitation quiz non envoyée', 'warning');
+    console.error("[validation] send_quiz_notification failed", errNotif);
+    toast("Validé, mais invitation quiz non envoyée", "warning");
   }
 
-  track('competence.validated', {
+  track("competence.validated", {
     competence_id: _selectedComp.c,
     eleve_id: _eleve.id,
     auto_ecole_id: _me.auto_ecole_id,
   });
 
   // Feedback haptique + toast riche avec avatar élève
-  const { haptic } = await import('@/utils/haptic.js');
-  const { toastAvatar } = await import('@/components/common/toast.js');
-  haptic('success');
+  const { haptic } = await import("@/utils/haptic.js");
+  const { toastAvatar } = await import("@/components/common/toast.js");
+  haptic("success");
 
-  const prenom = _eleve.prenom || '';
-  const nom = _eleve.nom || '';
-  const ini = ((prenom[0] || '') + (nom[0] || '')).toUpperCase() || '?';
+  const prenom = _eleve.prenom || "";
+  const nom = _eleve.nom || "";
+  const ini = ((prenom[0] || "") + (nom[0] || "")).toUpperCase() || "?";
   toastAvatar({
-    title: `${prenom} ${nom}`.trim() + ' — compétence validée',
+    title: `${prenom} ${nom}`.trim() + " — compétence validée",
     sub: `${_selectedComp.c} · ${_selectedComp.n}`,
     initials: ini,
-    color: 'var(--a)',
-    type: 'success',
+    color: "var(--a)",
+    type: "success",
     duration: 4000,
   });
 
@@ -382,13 +404,16 @@ function render() {
       <section class="step step-1">
         <div class="step-lbl">Étape 1</div>
         <div class="step-ttl">Choisir un élève</div>
-        ${_eleves.length === 0
-          ? `<div class="empty">Aucun élève n'est encore assigné à votre compte.</div>`
-          : `<div class="eleves-grid">${_eleves.map(renderEleveCard).join('')}</div>`
+        ${
+          _eleves.length === 0
+            ? `<div class="empty">Aucun élève n'est encore assigné à votre compte.</div>`
+            : `<div class="eleves-grid">${_eleves.map(renderEleveCard).join("")}</div>`
         }
       </section>
 
-      ${_eleve ? `
+      ${
+        _eleve
+          ? `
         <section class="step step-2">
           <div class="step-lbl">Étape 2</div>
           <div class="step-ttl">
@@ -397,10 +422,12 @@ function render() {
             <span class="step-progress">${_validatedIds.size}/31 acquises</span>
           </div>
           <div class="comp-sections">
-            ${REMC.map(renderCategory).join('')}
+            ${REMC.map(renderCategory).join("")}
           </div>
         </section>
-      ` : ''}
+      `
+          : ""
+      }
 
       <div class="cta-slot"></div>
     </div>
@@ -411,47 +438,63 @@ function render() {
 function renderEleveCard(eleve) {
   const selected = _eleve?.id === eleve.id;
   return `
-    <div class="eleve-card${selected ? ' selected' : ''}" data-eleve-id="${esc(eleve.id)}"
+    <div class="eleve-card${selected ? " selected" : ""}" data-eleve-id="${esc(eleve.id)}"
          role="button" tabindex="0"
-         aria-label="${esc(eleve.prenom || '—')} ${esc(eleve.nom_initial || '')}"
+         aria-label="${esc(eleve.prenom || "—")} ${esc(eleve.nom_initial || "")}"
          aria-pressed="${selected}">
       <div class="eleve-av" aria-hidden="true" style="background:transparent">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom_initial }, 48)}</div>
-      <div class="eleve-prenom">${esc(eleve.prenom || '—')}</div>
+      <div class="eleve-prenom">${esc(eleve.prenom || "—")}</div>
     </div>
   `;
 }
 
 function renderCategory(cat) {
-  const doneCount = cat.subs.filter(s => _validatedIds.has(s.c)).length;
+  const doneCount = cat.subs.filter((s) => _validatedIds.has(s.c)).length;
   const allDone = doneCount === cat.subs.length;
   const nextUnlock = getNextUnlockable(_validatedIds, _aValiderIds);
   return `
-    <div class="cat-section${allDone ? ' cat-done' : ''}">
+    <div class="cat-section${allDone ? " cat-done" : ""}">
       <div class="cat-hd">
-        <span class="cat-ico">${cat.ico}</span>
+        <span class="cat-ico">${icon(cat.ico, { size: 20, strokeWidth: 1.5 })}</span>
         <span class="cat-nm">${esc(cat.name)}</span>
         <span class="cat-cnt">${doneCount}/${cat.subs.length}</span>
       </div>
       <div class="comp-list">
-        ${cat.subs.map(sub => {
-          const done    = _validatedIds.has(sub.c);
-          const pending = _aValiderIds.has(sub.c);
-          const isNext  = !done && !pending && sub.c === nextUnlock;
-          const sel     = _selectedComp?.c === sub.c;
-          const cls = [
-            done    && 'comp-done',
-            pending && 'comp-a-valider',
-            isNext  && 'comp-next',
-            sel     && 'comp-sel',
-          ].filter(Boolean).join(' ');
-          let badgeHtml = '';
-          if (done)         badgeHtml = Badges.acquis();
-          else if (pending) badgeHtml = Badges.acquis();
-          else if (sel)     badgeHtml = badge('Sélectionné', { variant: 'primary', appearance: 'light', size: 'sm', shape: 'circle', dot: true });
-          else if (isNext)  badgeHtml = Badges.toValidate();
-          else              badgeHtml = badge('À valider', { variant: 'secondary', appearance: 'light', size: 'sm', shape: 'circle' });
-          const isBlocked = done || pending;
-          return `
+        ${cat.subs
+          .map((sub) => {
+            const done = _validatedIds.has(sub.c);
+            const pending = _aValiderIds.has(sub.c);
+            const isNext = !done && !pending && sub.c === nextUnlock;
+            const sel = _selectedComp?.c === sub.c;
+            const cls = [
+              done && "comp-done",
+              pending && "comp-a-valider",
+              isNext && "comp-next",
+              sel && "comp-sel",
+            ]
+              .filter(Boolean)
+              .join(" ");
+            let badgeHtml = "";
+            if (done) badgeHtml = Badges.acquis();
+            else if (pending) badgeHtml = Badges.acquis();
+            else if (sel)
+              badgeHtml = badge("Sélectionné", {
+                variant: "primary",
+                appearance: "light",
+                size: "sm",
+                shape: "circle",
+                dot: true,
+              });
+            else if (isNext) badgeHtml = Badges.toValidate();
+            else
+              badgeHtml = badge("À valider", {
+                variant: "secondary",
+                appearance: "light",
+                size: "sm",
+                shape: "circle",
+              });
+            const isBlocked = done || pending;
+            return `
             <div class="comp-row ${cls}"
               data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
               ${isBlocked ? `aria-disabled="true" aria-label="${esc(sub.n)}"` : `role="button" tabindex="0" aria-label="${esc(sub.n)}" aria-pressed="${sel}"`}>
@@ -460,28 +503,32 @@ function renderCategory(cat) {
               <span class="comp-status">${badgeHtml}</span>
             </div>
           `;
-        }).join('')}
+          })
+          .join("")}
       </div>
     </div>
   `;
 }
 
 function renderCta() {
-  const slot = _root?.querySelector('.cta-slot');
+  const slot = _root?.querySelector(".cta-slot");
   if (!slot) return;
-  if (!_selectedComp) { slot.innerHTML = ''; return; }
+  if (!_selectedComp) {
+    slot.innerHTML = "";
+    return;
+  }
   slot.innerHTML = `
     <div class="cta-strip">
       <button class="btn-cancel-cta" type="button" id="btn-cancel-cta" aria-label="Annuler">✕</button>
       <div class="cta-info">
         <div class="cta-comp-nm">${esc(labelComp(_selectedComp.c))}</div>
-        <div class="cta-for">pour <strong>${esc(_eleve?.prenom || '')}</strong></div>
+        <div class="cta-for">pour <strong>${esc(_eleve?.prenom || "")}</strong></div>
       </div>
       <button class="btn-validate" type="button">Valider ✓</button>
     </div>
   `;
-  slot.querySelector('.btn-validate').addEventListener('click', doValidate);
-  slot.querySelector('#btn-cancel-cta').addEventListener('click', () => {
+  slot.querySelector(".btn-validate").addEventListener("click", doValidate);
+  slot.querySelector("#btn-cancel-cta").addEventListener("click", () => {
     _selectedComp = null;
     renderCta();
   });
@@ -491,29 +538,33 @@ function renderCta() {
 // Cleanup avant ré-attache pour éviter les listeners cumulés à chaque render
 function wire() {
   // Clone-replace pour réinitialiser les listeners sur chaque élément
-  _root.querySelectorAll('[data-eleve-id]').forEach(el => {
+  _root.querySelectorAll("[data-eleve-id]").forEach((el) => {
     const fresh = el.cloneNode(true);
     el.parentNode?.replaceChild(fresh, el);
     const act = () => {
-      const eleve = _eleves.find(e => e.id === fresh.dataset.eleveId);
+      const eleve = _eleves.find((e) => e.id === fresh.dataset.eleveId);
       if (eleve) selectEleve(eleve);
     };
-    fresh.addEventListener('click', act);
-    fresh.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); }
+    fresh.addEventListener("click", act);
+    fresh.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        act();
+      }
     });
   });
 
-  _root.querySelectorAll('[data-comp-id]').forEach(el => {
+  _root.querySelectorAll("[data-comp-id]").forEach((el) => {
     const fresh = el.cloneNode(true);
     el.parentNode?.replaceChild(fresh, el);
-    if (fresh.getAttribute('aria-disabled') === 'true') return;
+    if (fresh.getAttribute("aria-disabled") === "true") return;
     const act = () => selectComp(fresh.dataset.compId, fresh.dataset.compNom);
-    fresh.addEventListener('click', act);
-    fresh.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); }
+    fresh.addEventListener("click", act);
+    fresh.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        act();
+      }
     });
   });
 }
-
-

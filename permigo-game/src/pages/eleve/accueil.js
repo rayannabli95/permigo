@@ -495,7 +495,7 @@ const STYLE = `<style>
 }
 .world-card:active { transform: scale(.97); }
 .world-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; min-height: 56px; }
-.world-ico  { font-size: 22px; line-height: 1; }
+.world-ico  { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; }
 .world-img  { width: 56px; height: 56px; object-fit: contain; display: block; filter: drop-shadow(0 2px 6px rgba(11,13,26,.12)); transition: transform .3s; }
 .world-card[data-world="C2"] .world-img { transform: scale(1.18); }
 .world-card:hover .world-img { transform: scale(1.1) rotate(-3deg); }
@@ -1017,7 +1017,7 @@ function render({
           ${
             w.image
               ? `<img class="world-img" src="${esc(w.image)}" alt="${esc(w.name)}" loading="lazy">`
-              : `<span class="world-ico">${w.ico}</span>`
+              : `<span class="world-ico">${icon(w.ico, { size: 22, strokeWidth: 1.5 })}</span>`
           }
           <span class="world-pct" style="color:${w.color}">${w.pct}%</span>
         </div>
@@ -1142,7 +1142,7 @@ function renderNextReward(totalValidated, worlds, trophees) {
         <div class="acc2-ms-reward-label">Prochain objectif</div>
         <div class="acc2-ms-reward-top">
           <div class="acc2-ms-reward-icon">
-            <span style="font-size:28px;line-height:1">${nextWorld.ico}</span>
+            ${icon(nextWorld.ico, { size: 28, strokeWidth: 1.5 })}
           </div>
           <div class="acc2-ms-reward-info">
             <div class="acc2-ms-reward-remaining">

@@ -3,16 +3,16 @@
 // mount(root, { competenceId, type })
 // type: 'post_validation' (3 questions) | 'consolidation' (2 questions)
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { toast } from '@/components/common/toast.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { lancerQuiz } from '@/services/quiz-engine.js';
-import { findSubComp, findCategory } from '@/data/remc.js';
-import { unlockChest } from '@/utils/game-state.js';
-import { playVictory } from '@/utils/sound.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { toast } from "@/components/common/toast.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { lancerQuiz } from "@/services/quiz-engine.js";
+import { findSubComp, findCategory } from "@/data/remc.js";
+import { unlockChest } from "@/utils/game-state.js";
+import { playVictory } from "@/utils/sound.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -158,15 +158,18 @@ export async function mount(root, params = {}) {
   if (!me) return;
 
   // #11 — plein écran d'épreuve : masque la bottom nav (anti-triche, anti-distraction)
-  document.getElementById('bottom-nav')?.setAttribute('hidden', '');
-  const _restoreNav = () => { document.getElementById('bottom-nav')?.removeAttribute('hidden'); window.removeEventListener('hashchange', _restoreNav); };
-  window.addEventListener('hashchange', _restoreNav);
+  document.getElementById("bottom-nav")?.setAttribute("hidden", "");
+  const _restoreNav = () => {
+    document.getElementById("bottom-nav")?.removeAttribute("hidden");
+    window.removeEventListener("hashchange", _restoreNav);
+  };
+  window.addEventListener("hashchange", _restoreNav);
 
   // Params viennent soit d'un appel direct, soit du hash #/quiz/C1a/post_validation
-  const hashParts = location.hash.replace(/^#\/?/, '').split('/');
+  const hashParts = location.hash.replace(/^#\/?/, "").split("/");
   const competenceId = params.competenceId || hashParts[1] || null;
-  const type = params.type || hashParts[2] || 'post_validation';
-  const autoStart = params.autoStart || hashParts[3] === 'auto';
+  const type = params.type || hashParts[2] || "post_validation";
+  const autoStart = params.autoStart || hashParts[3] === "auto";
 
   if (!competenceId) {
     root.innerHTML = `<div style="padding:32px;text-align:center;color:var(--mu2)">Aucune compétence à réviser.</div>`;
@@ -175,21 +178,26 @@ export async function mount(root, params = {}) {
 
   const sub = findSubComp(competenceId);
   const cat = findCategory(competenceId);
-  const nbQuestions = type === 'post_validation' ? 3 : 2;
-  const typeLabel = type === 'post_validation' ? 'Quiz post-validation' : 'Consolidation 48h';
+  const nbQuestions = type === "post_validation" ? 3 : 2;
+  const typeLabel =
+    type === "post_validation" ? "Quiz post-validation" : "Consolidation 48h";
 
-  track('page.view', { page: 'eleve_quiz', competence_id: competenceId, quiz_type: type });
+  track("page.view", {
+    page: "eleve_quiz",
+    competence_id: competenceId,
+    quiz_type: type,
+  });
 
   root.innerHTML = `
     ${STYLE}
     <div class="qp anim-slide-up">
       <div class="qp-card" id="qp-welcome">
         <div class="qp-badge">${esc(typeLabel)}</div>
-        <div class="qp-cat-row">${cat?.ico || ''} <span>${esc(cat?.name || '')}</span></div>
+        <div class="qp-cat-row">${cat?.ico ? icon(cat.ico, { size: 18, strokeWidth: 1.5 }) : ""} <span>${esc(cat?.name || "")}</span></div>
         <h1 class="qp-comp" tabindex="-1">${esc(sub?.n || competenceId)}</h1>
         <div class="qp-meta">
-          <span class="qp-meta-item">${icon('file-text',{size:14})} ${nbQuestions} questions</span>
-          <span class="qp-meta-item">${icon('zap',{size:14})} ~30 secondes</span>
+          <span class="qp-meta-item">${icon("file-text", { size: 14 })} ${nbQuestions} questions</span>
+          <span class="qp-meta-item">${icon("zap", { size: 14 })} ~30 secondes</span>
         </div>
         <button class="btn-start" id="btn-start">Commencer</button>
         <button class="btn-skip" id="btn-skip">Plus tard</button>
@@ -198,7 +206,7 @@ export async function mount(root, params = {}) {
   `;
 
   const startQuiz = async () => {
-    root.querySelector('#btn-start').disabled = true;
+    root.querySelector("#btn-start").disabled = true;
     const startTs = Date.now();
 
     await lancerQuiz({
@@ -207,15 +215,21 @@ export async function mount(root, params = {}) {
       nbQuestions,
       onComplete: async (score, total) => {
         const duration = Math.round((Date.now() - startTs) / 1000);
-        await handleComplete(root, me, { competenceId, type, score, total, duration });
+        await handleComplete(root, me, {
+          competenceId,
+          type,
+          score,
+          total,
+          duration,
+        });
       },
     });
   };
 
-  root.querySelector('#btn-start').addEventListener('click', startQuiz);
-  root.querySelector('#btn-skip').addEventListener('click', () => {
-    track('quiz.skipped', { competence_id: competenceId, type });
-    location.hash = '#/';
+  root.querySelector("#btn-start").addEventListener("click", startQuiz);
+  root.querySelector("#btn-skip").addEventListener("click", () => {
+    track("quiz.skipped", { competence_id: competenceId, type });
+    location.hash = "#/";
   });
 
   // Lancement automatique (depuis notif-listener)
@@ -225,33 +239,49 @@ export async function mount(root, params = {}) {
 }
 
 // ─── Fin de quiz ─────────────────────────────────────────────────
-async function handleComplete(root, me, { competenceId, type, score, total, duration }) {
+async function handleComplete(
+  root,
+  me,
+  { competenceId, type, score, total, duration },
+) {
   const scorePct = Math.round((score / total) * 100);
 
   // Coffre quiz parfait (100%) — idempotent
   if (scorePct === 100) {
-    unlockChest('perfect_quiz', { xp: 100, gemmes: 25, title: 'Précision' }).catch(() => {});
+    unlockChest("perfect_quiz", {
+      xp: 100,
+      gemmes: 25,
+      title: "Précision",
+    }).catch(() => {});
   }
 
   // Appel RPC central — gère quiz_attempts + transition statut + XP
-  const { data, error } = await sb.rpc('submit_competence_quiz', {
+  const { data, error } = await sb.rpc("submit_competence_quiz", {
     p_competence_id: competenceId,
     p_score: scorePct,
     p_type: type,
   });
 
   if (error) {
-    console.warn('[quiz] submit_competence_quiz error', error);
-    toast('Erreur lors de la sauvegarde — réessaie', 'error');
+    console.warn("[quiz] submit_competence_quiz error", error);
+    toast("Erreur lors de la sauvegarde — réessaie", "error");
     // Fallback : afficher le résultat quand même
-    renderResult(root, { score, total, scorePct, validated: false, passed: scorePct >= 70, reason: null, type });
+    renderResult(root, {
+      score,
+      total,
+      scorePct,
+      validated: false,
+      passed: scorePct >= 70,
+      reason: null,
+      type,
+    });
     return;
   }
 
   const result = data?.[0] ?? data ?? {};
   const { passed, validated, reason } = result;
 
-  track('quiz.result_saved', {
+  track("quiz.result_saved", {
     competence_id: competenceId,
     type,
     score_pct: scorePct,
@@ -260,47 +290,64 @@ async function handleComplete(root, me, { competenceId, type, score, total, dura
     duration_seconds: duration,
   });
 
-  if (reason === 'no_competence_unlocked') {
-    toast('Cette compétence n\'est pas encore débloquée par ton moniteur.', 'info');
+  if (reason === "no_competence_unlocked") {
+    toast(
+      "Cette compétence n'est pas encore débloquée par ton moniteur.",
+      "info",
+    );
   } else if (validated) {
-    toast('Compétence validée !', 'success');
+    toast("Compétence validée !", "success");
     navigator.vibrate?.([30, 50, 30]);
     playVictory();
   } else if (!passed) {
-    toast('Presque ! Il te faut 70% pour valider. Réessaie.', 'info');
+    toast("Presque ! Il te faut 70% pour valider. Réessaie.", "info");
   } else {
-    toast('Quiz enregistré.', 'success');
+    toast("Quiz enregistré.", "success");
   }
 
-  renderResult(root, { score, total, scorePct, validated: !!validated, passed: !!passed, reason, type });
+  renderResult(root, {
+    score,
+    total,
+    scorePct,
+    validated: !!validated,
+    passed: !!passed,
+    reason,
+    type,
+  });
 }
 
-function renderResult(root, { score, total, scorePct, validated, passed, reason, type }) {
+function renderResult(
+  root,
+  { score, total, scorePct, validated, passed, reason, type },
+) {
   const success = validated || passed;
   const msg = validated
-    ? 'Compétence validée ! Continue comme ça'
+    ? "Compétence validée ! Continue comme ça"
     : passed
-      ? 'Bien joué ! Quiz réussi.'
-      : reason === 'no_competence_unlocked'
-        ? 'Compétence pas encore débloquée par ton moniteur.'
-        : 'Continue à pratiquer — revoir avec ton moniteur avant la prochaine leçon.';
+      ? "Bien joué ! Quiz réussi."
+      : reason === "no_competence_unlocked"
+        ? "Compétence pas encore débloquée par ton moniteur."
+        : "Continue à pratiquer — revoir avec ton moniteur avant la prochaine leçon.";
 
   root.innerHTML = `
     ${STYLE}
     <div class="qp anim-slide-up">
       <div class="qp-card qp-result-card" role="status" aria-live="polite">
-        <div class="qp-score-ring ${success ? 'ring-ok' : 'ring-warn'}">
+        <div class="qp-score-ring ${success ? "ring-ok" : "ring-warn"}">
           <span class="qp-score-num">${score}/${total}</span>
           <span class="qp-score-pct">${scorePct}%</span>
         </div>
         <p class="qp-result-msg">${esc(msg)}</p>
         <button class="btn-parcours" id="btn-parcours">Voir mon parcours →</button>
-        ${!success ? `<button class="btn-home" id="btn-home">Retour accueil</button>` : ''}
+        ${!success ? `<button class="btn-home" id="btn-home">Retour accueil</button>` : ""}
       </div>
     </div>
   `;
 
-  root.querySelector('#btn-parcours')?.addEventListener('click', () => { location.hash = '#/parcours'; });
-  root.querySelector('#btn-home')?.addEventListener('click', () => { location.hash = '#/'; });
+  root.querySelector("#btn-parcours")?.addEventListener("click", () => {
+    location.hash = "#/parcours";
+  });
+  root.querySelector("#btn-home")?.addEventListener("click", () => {
+    location.hash = "#/";
+  });
 }
-

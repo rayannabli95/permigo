@@ -4,12 +4,12 @@
 // RPC   : get_bilan_data(p_eleve_id, p_trimestre_start?)
 // Print-friendly · @media print
 // ═══════════════════════════════════════════════════════════════
-import { sb }         from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { toast }      from '@/components/common/toast.js';
-import { esc }        from '@/utils/escape.js';
-import { track }      from '@/services/analytics.js';
-import { icon }       from '@/utils/icons.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { toast } from "@/components/common/toast.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { icon } from "@/utils/icons.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -252,60 +252,89 @@ const STYLE = `<style>
 
 // ─── Monde metadata ──────────────────────────────────────────────
 const MONDES = {
-  C1: { name: 'Contrôle & Sécurité', color: 'var(--gr2)', ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--gr2);vertical-align:middle"></span>', short: 'C1' },
-  C2: { name: 'Manœuvres',           color: 'var(--bl2)', ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--bl2);vertical-align:middle"></span>', short: 'C2' },
-  C3: { name: 'Circulation',         color: '#eab308', ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#eab308;vertical-align:middle"></span>', short: 'C3' },
-  C4: { name: 'Situations complexes', color: 'var(--pul)', ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--pul);vertical-align:middle"></span>', short: 'C4' },
+  C1: {
+    name: "Contrôle & Sécurité",
+    color: "var(--gr2)",
+    ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--gr2);vertical-align:middle"></span>',
+    short: "C1",
+  },
+  C2: {
+    name: "Manœuvres",
+    color: "var(--bl2)",
+    ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--bl2);vertical-align:middle"></span>',
+    short: "C2",
+  },
+  C3: {
+    name: "Circulation",
+    color: "#eab308",
+    ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#eab308;vertical-align:middle"></span>',
+    short: "C3",
+  },
+  C4: {
+    name: "Situations complexes",
+    color: "var(--pul)",
+    ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--pul);vertical-align:middle"></span>',
+    short: "C4",
+  },
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────
 function fmtDateShort(iso) {
-  if (!iso) return '';
+  if (!iso) return "";
   const d = new Date(iso);
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
 function fmtTrimestre(start, end) {
   const d1 = new Date(start);
   const d2 = new Date(end);
-  const monthFmt = d => d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const monthFmt = (d) =>
+    d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
   return `${monthFmt(d1)} → ${monthFmt(d2)}`;
 }
 
 function deltaClass(pct) {
-  if (pct == null || pct === 0) return 'flat';
-  return pct > 0 ? 'up' : 'down';
+  if (pct == null || pct === 0) return "flat";
+  return pct > 0 ? "up" : "down";
 }
 
 function deltaLabel(pct) {
-  if (pct == null || pct === 0) return '= Stable';
+  if (pct == null || pct === 0) return "= Stable";
   return pct > 0 ? `+${pct}%` : `${pct}%`;
 }
 
 // ─── Render helpers ───────────────────────────────────────────────
 function renderKPI(kpi) {
-  const delta = kpi.delta_pct != null ? `<span class="bl-kpi-delta ${deltaClass(kpi.delta_pct)}">${esc(deltaLabel(kpi.delta_pct))}</span>` : '';
-  const scoreColor = kpi.score_moyen >= 70 ? 'var(--grk)' : kpi.score_moyen >= 50 ? '#a16207' : 'var(--rdk)';
+  const delta =
+    kpi.delta_pct != null
+      ? `<span class="bl-kpi-delta ${deltaClass(kpi.delta_pct)}">${esc(deltaLabel(kpi.delta_pct))}</span>`
+      : "";
+  const scoreColor =
+    kpi.score_moyen >= 70
+      ? "var(--grk)"
+      : kpi.score_moyen >= 50
+        ? "#a16207"
+        : "var(--rdk)";
 
   return `
 <div class="bl-kpi-grid">
   <div class="bl-kpi">
-    <div class="bl-kpi-val">${kpi.acquises_now ?? '—'}<span class="bl-kpi-unit">/31</span></div>
+    <div class="bl-kpi-val">${kpi.acquises_now ?? "—"}<span class="bl-kpi-unit">/31</span></div>
     <div class="bl-kpi-label">Compétences acquises</div>
     ${delta}
   </div>
   <div class="bl-kpi">
-    <div class="bl-kpi-val" style="color:${esc(scoreColor)}">${kpi.score_moyen != null ? kpi.score_moyen + '%' : '—'}</div>
+    <div class="bl-kpi-val" style="color:${esc(scoreColor)}">${kpi.score_moyen != null ? kpi.score_moyen + "%" : "—"}</div>
     <div class="bl-kpi-label">Score moyen quiz</div>
-    <span class="bl-kpi-delta ${kpi.score_moyen >= 70 ? 'up' : 'flat'}">${kpi.quiz_reussis ?? 0}/${kpi.quiz_total ?? 0} réussis</span>
+    <span class="bl-kpi-delta ${kpi.score_moyen >= 70 ? "up" : "flat"}">${kpi.quiz_reussis ?? 0}/${kpi.quiz_total ?? 0} réussis</span>
   </div>
   <div class="bl-kpi">
-    <div class="bl-kpi-val">${kpi.jours_actifs ?? '—'}</div>
+    <div class="bl-kpi-val">${kpi.jours_actifs ?? "—"}</div>
     <div class="bl-kpi-label">Jours actifs</div>
     <span class="bl-kpi-delta flat">sur ${kpi.jours_total ?? 90} jours</span>
   </div>
   <div class="bl-kpi">
-    <div class="bl-kpi-val">${kpi.acquises_prev ?? '—'}</div>
+    <div class="bl-kpi-val">${kpi.acquises_prev ?? "—"}</div>
     <div class="bl-kpi-label">Trimestre précédent</div>
     <span class="bl-kpi-delta flat">Compétences</span>
   </div>
@@ -313,64 +342,73 @@ function renderKPI(kpi) {
 }
 
 function renderByMonde(byMonde) {
-  return Object.entries(MONDES).map(([key, m]) => {
-    const comps = byMonde[key] ?? [];
-    const rows = comps.length > 0
-      ? comps.map(c => `<div class="bl-comp-row">
+  return Object.entries(MONDES)
+    .map(([key, m]) => {
+      const comps = byMonde[key] ?? [];
+      const rows =
+        comps.length > 0
+          ? comps
+              .map(
+                (c) => `<div class="bl-comp-row">
   <div class="bl-comp-check" aria-hidden="true">✓</div>
   <div class="bl-comp-name">${esc(c.competence_id)}</div>
   <div class="bl-comp-date">${esc(fmtDateShort(c.validated_at))}</div>
-</div>`).join('')
-      : `<div class="bl-comp-none">Aucune compétence acquise ce trimestre</div>`;
+</div>`,
+              )
+              .join("")
+          : `<div class="bl-comp-none">Aucune compétence acquise ce trimestre</div>`;
 
-    return `
+      return `
 <div class="bl-section">
   <div class="bl-section-hd">
     <div class="bl-section-title">
-      <span aria-hidden="true">${m.ico}</span> ${esc(m.name)}
+      ${icon(m.ico, { size: 16, strokeWidth: 1.5 })} ${esc(m.name)}
     </div>
-    <span class="bl-section-badge">${comps.length} acquise${comps.length > 1 ? 's' : ''}</span>
+    <span class="bl-section-badge">${comps.length} acquise${comps.length > 1 ? "s" : ""}</span>
   </div>
   <div class="bl-comp-list" role="list">${rows}</div>
 </div>`;
-  }).join('');
+    })
+    .join("");
 }
 
 function renderEvolution(evolution) {
   if (!evolution || evolution.length === 0) {
     return `<div class="bl-section">
   <div class="bl-section-hd">
-    <div class="bl-section-title">${icon('trending-up', { size: 16 })} Évolution mensuelle</div>
+    <div class="bl-section-title">${icon("trending-up", { size: 16 })} Évolution mensuelle</div>
   </div>
   <div class="bl-comp-none">Aucune donnée d'évolution disponible</div>
 </div>`;
   }
 
-  const max = Math.max(1, ...evolution.map(e => e.count));
+  const max = Math.max(1, ...evolution.map((e) => e.count));
 
-  const bars = evolution.map(e => {
-    const h = Math.max(4, Math.round((e.count / max) * 68));
-    return `<div class="bl-bar-col">
+  const bars = evolution
+    .map((e) => {
+      const h = Math.max(4, Math.round((e.count / max) * 68));
+      return `<div class="bl-bar-col">
   <div class="bl-bar-val">${e.count}</div>
   <div class="bl-bar" style="height:${h}px" role="presentation"></div>
   <div class="bl-bar-lbl">${esc(e.month)}</div>
 </div>`;
-  }).join('');
+    })
+    .join("");
 
   return `
 <div class="bl-section">
   <div class="bl-section-hd">
-    <div class="bl-section-title">${icon('trending-up', { size: 16 })} Évolution mensuelle</div>
+    <div class="bl-section-title">${icon("trending-up", { size: 16 })} Évolution mensuelle</div>
   </div>
   <div class="bl-chart" role="img" aria-label="Graphique d'évolution mensuelle">${bars}</div>
 </div>`;
 }
 
 function renderComment(comment) {
-  if (!comment) return '';
+  if (!comment) return "";
   return `
 <div class="bl-comment">
-  <div class="bl-comment-label">${icon('message-circle', { size: 12 })} Commentaire pédagogique auto-généré</div>
+  <div class="bl-comment-label">${icon("message-circle", { size: 12 })} Commentaire pédagogique auto-généré</div>
   <div class="bl-comment-txt">${esc(comment)}</div>
 </div>`;
 }
@@ -385,30 +423,40 @@ export async function mount(root, eleveId) {
     return;
   }
 
-  track('page.view', { page: 'enseignant_bilan', eleve_id: eleveId });
+  track("page.view", { page: "enseignant_bilan", eleve_id: eleveId });
 
   root.innerHTML = `${STYLE}
 <div class="bl">
   <div style="display:flex;flex-direction:column;gap:10px;padding:40px 0">
-    ${[160,80,120,120,120].map(h => `<div style="height:${h}px;background:linear-gradient(90deg,var(--bg3) 0%,var(--bg5) 50%,var(--bg3) 100%);background-size:200% 100%;animation:blShimmer 1.4s infinite;border-radius:16px"></div>`).join('')}
+    ${[160, 80, 120, 120, 120].map((h) => `<div style="height:${h}px;background:linear-gradient(90deg,var(--bg3) 0%,var(--bg5) 50%,var(--bg3) 100%);background-size:200% 100%;animation:blShimmer 1.4s infinite;border-radius:16px"></div>`).join("")}
   </div>
   <style>@keyframes blShimmer{to{background-position:-200% 0}}</style>
 </div>`;
 
-  const { data, error } = await sb.rpc('get_bilan_data', { p_eleve_id: eleveId });
+  const { data, error } = await sb.rpc("get_bilan_data", {
+    p_eleve_id: eleveId,
+  });
 
   if (error || !data) {
-    toast('Impossible de charger le bilan', 'error');
+    toast("Impossible de charger le bilan", "error");
     root.innerHTML = `${STYLE}<div class="bl"><div class="bl-no-data">
-      <div style="margin-bottom:12px;color:var(--mu)">${icon('clipboard',{size:30})}</div>
+      <div style="margin-bottom:12px;color:var(--mu)">${icon("clipboard", { size: 30 })}</div>
       Bilan indisponible. Vérifie que cet élève est bien rattaché à ton compte.
     </div></div>`;
     return;
   }
 
-  const { eleve, trimestre_start, trimestre_end, kpi, by_monde, evolution, comment } = data;
-  const prenom = eleve?.prenom ?? '';
-  const nom    = eleve?.nom    ?? '';
+  const {
+    eleve,
+    trimestre_start,
+    trimestre_end,
+    kpi,
+    by_monde,
+    evolution,
+    comment,
+  } = data;
+  const prenom = eleve?.prenom ?? "";
+  const nom = eleve?.nom ?? "";
 
   root.innerHTML = `${STYLE}
 <div class="bl">
@@ -421,13 +469,13 @@ export async function mount(root, eleveId) {
       <div class="bl-subtitle">Rapport trimestriel · Permis B</div>
     </div>
     <button class="bl-print-btn" id="bl-btn-print" aria-label="Imprimer le bilan">
-      ${icon('printer', { size: 15 })} Imprimer
+      ${icon("printer", { size: 15 })} Imprimer
     </button>
   </div>
 
   <!-- TRIMESTRE BADGE -->
   <div class="bl-trimestre">
-    ${icon('calendar', { size: 12 })}
+    ${icon("calendar", { size: 12 })}
     ${esc(fmtTrimestre(trimestre_start, trimestre_end))}
   </div>
 
@@ -445,8 +493,8 @@ export async function mount(root, eleveId) {
 
 </div>`;
 
-  root.querySelector('#bl-btn-print')?.addEventListener('click', () => {
-    track('bilan.print', { eleve_id: eleveId });
+  root.querySelector("#bl-btn-print")?.addEventListener("click", () => {
+    track("bilan.print", { eleve_id: eleveId });
     window.print();
   });
 }

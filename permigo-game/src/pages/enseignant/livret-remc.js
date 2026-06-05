@@ -660,7 +660,7 @@ function renderMonde(cat) {
   return `
     <div class="lr-monde" role="group" aria-label="${esc(cat.name)} — ${acquis}/${cat.subs.length} acquises">
       <div class="lr-monde-hd" style="background:${col.bg}; border-color:${col.border};">
-        <span class="lr-monde-ico">${cat.ico}</span>
+        <span class="lr-monde-ico">${icon(cat.ico, { size: 18, strokeWidth: 1.5 })}</span>
         <span class="lr-monde-nm">${esc(cat.name)}</span>
         <span class="lr-monde-prog">${acquis}/${cat.subs.length}</span>
       </div>
