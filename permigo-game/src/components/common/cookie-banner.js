@@ -75,8 +75,8 @@ const STYLE = `<style>
     color: var(--ink); margin: 0 0 6px;
     display: flex; align-items: center; gap: 7px;
   }
-  .ck-txt { font: 500 12.5px/1.55 'Inter', sans-serif; color: var(--mu, var(--mu3)); margin: 0 0 14px; }
-  .ck-txt a { color: var(--a); text-decoration: underline; }
+  .ck-txt { font: 500 12.5px/1.55 'Inter', sans-serif; color: var(--ink); margin: 0 0 14px; }
+  .ck-txt a { color: var(--ink, #1a2800); text-decoration: underline; }
   .ck-row { display: flex; gap: 8px; }
   .ck-btn {
     flex: 1; padding: 12px 14px; border-radius: 12px;
@@ -86,8 +86,8 @@ const STYLE = `<style>
     -webkit-tap-highlight-color: transparent;
   }
   .ck-btn:active { transform: scale(.97); }
-  .ck-btn-accept { background: var(--a); color: #fff; box-shadow: 0 6px 18px -6px rgba(88,204,2,.5); }
-  .ck-btn-refuse { background: var(--bg); color: var(--mu, var(--mu4)); border-color: var(--bo); }
+  .ck-btn-accept { background: var(--a); color: #1a2800; box-shadow: 0 6px 18px -6px rgba(88,204,2,.5); }
+  .ck-btn-refuse { background: var(--bg); color: var(--ink, #1e293b); border-color: var(--bo); }
 </style>`;
 
 export function mountCookieBanner() {

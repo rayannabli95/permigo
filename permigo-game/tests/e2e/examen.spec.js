@@ -14,7 +14,7 @@ const LS_KEY_DATE    = 'permigo:exam_date';
 const LS_KEY_REVISED = 'permigo:has_revised';
 
 async function loginAsEleve(page) {
-  await page.goto('/');
+  await page.goto('/#/login');
   await page.waitForSelector('#lg-email', { timeout: 12_000 });
   await page.fill('#lg-email', EMAIL);
   await page.fill('#lg-pwd', PWD);

@@ -11,7 +11,7 @@ const EMAIL = 'latifa.sahli@autopilot.fr';
 const PWD   = 'Autopilot2025!';
 
 async function loginAsEleve(page) {
-  await page.goto('/');
+  await page.goto('/#/login');
   await page.waitForSelector('#lg-email', { timeout: 12_000 });
   await page.fill('#lg-email', EMAIL);
   await page.fill('#lg-pwd', PWD);
@@ -22,7 +22,7 @@ async function loginAsEleve(page) {
 // ─── Login ──────────────────────────────────────────────────────────
 test.describe('Login', () => {
   test('formulaire login visible au démarrage', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/login');
     await expect(page.locator('#lg-email')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('#lg-pwd')).toBeVisible();
     await expect(page.locator('#lg-submit')).toBeVisible();

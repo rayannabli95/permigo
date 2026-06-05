@@ -14,7 +14,7 @@ const ELEVE    = { email: 'latifa.sahli@autopilot.fr',    pwd: 'Autopilot2025!' 
 const MONITEUR = { email: 'rayan.nabli@autopilot.fr',     pwd: 'Autopilot2025!' };
 
 async function loginAs(page, { email, pwd }) {
-  await page.goto('/');
+  await page.goto('/#/login');
   await page.waitForSelector('#lg-email', { timeout: 12_000 });
   await page.fill('#lg-email', email);
   await page.fill('#lg-pwd', pwd);

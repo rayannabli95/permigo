@@ -15,7 +15,7 @@ const EMAIL_ENSEIGNANT = 'rayan.nabli@autopilot.fr';
 const PWD              = 'Autopilot2025!';
 
 async function loginAs(page, email) {
-  await page.goto('/');
+  await page.goto('/#/login');
   await page.waitForSelector('#lg-email', { timeout: 12_000 });
   await page.fill('#lg-email', email);
   await page.fill('#lg-pwd', PWD);
@@ -35,7 +35,7 @@ function formatViolation(v) {
 
 // ─── Page : Login ────────────────────────────────────────────────────
 test('a11y · login page', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/login');
   await page.waitForSelector('#lg-email', { timeout: 10_000 });
 
   const results = await new AxeBuilder({ page })

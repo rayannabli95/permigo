@@ -15,7 +15,7 @@ const PWD   = 'Autopilot2025!';
 let ELEVE_ID = null;
 
 async function loginAsEnseignant(page) {
-  await page.goto('/');
+  await page.goto('/#/login');
   await page.waitForSelector('#lg-email', { timeout: 12_000 });
   await page.fill('#lg-email', EMAIL);
   await page.fill('#lg-pwd', PWD);
