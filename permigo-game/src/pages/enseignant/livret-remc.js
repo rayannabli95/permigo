@@ -150,7 +150,7 @@ const STYLE = `<style>
     padding: 16px 20px;
     border-bottom: 1px solid var(--bo2);
   }
-  .lr-monde-ico { font-size: 20px; line-height: 1; }
+  .lr-monde-ico { display: flex; align-items: center; flex-shrink: 0; }
   .lr-monde-nm {
     font: 600 14px/1.3 'Plus Jakarta Sans', sans-serif;
     color: var(--ink);
