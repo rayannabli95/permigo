@@ -2,19 +2,19 @@
 // Enseignant — Insights
 // KPI perso + heatmap + top élèves + difficulté comps + reco IA
 // ═══════════════════════════════════════════════════════════════
-import { sb }          from '@/auth/auth.js';
-import { getCurUser }  from '@/auth/cur-user.js';
-import { toast }       from '@/components/common/toast.js';
-import { esc }         from '@/utils/escape.js';
-import { track }       from '@/services/analytics.js';
-import { navigate }    from '@/router.js';
-import { REMC }        from '@/data/remc.js';
-import { labelComp }   from '@/utils/remc-label.js';
-import { iconBadge, icon } from '@/utils/icons.js';
-import { renderUserAvatar } from '@/components/common/avatar.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { toast } from "@/components/common/toast.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { REMC } from "@/data/remc.js";
+import { labelComp } from "@/utils/remc-label.js";
+import { iconBadge, icon } from "@/utils/icons.js";
+import { renderUserAvatar } from "@/components/common/avatar.js";
 
 // ─── Constantes ───────────────────────────────────────────────
-const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+const JOURS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
 // ─── CSS ──────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -117,56 +117,62 @@ const STYLE = `<style>
   .ins-widget-delta.down { color: var(--rd); }
   .ins-widget-delta.flat { color: var(--mu2); }
 
-  /* Heatmap */
-  .ins-heatmap-wrap {
+  /* Bar chart activité par jour */
+  .ins-chart-wrap {
     background: var(--su);
     border: 1.5px solid var(--bo);
     border-radius: 20px;
-    padding: 16px;
+    padding: 16px 14px 14px;
     box-shadow: 0 1px 2px rgba(10,13,26,.04);
-    overflow-x: auto;
   }
-  .ins-heatmap-grid {
-    display: grid;
-    grid-template-columns: 28px repeat(24, 11px);
-    gap: 2px;
-    min-width: 316px;
-  }
-  .ins-hmap-day-lbl {
-    font: 500 10px/11px 'Inter', sans-serif;
-    color: var(--mu2);
+  .ins-chart-bars {
     display: flex;
+    align-items: stretch;
+    gap: 6px;
+    height: 88px;
+  }
+  .ins-chart-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    padding-right: 4px;
+    gap: 3px;
   }
-  .ins-hmap-hour-lbl {
-    font: 500 9px/1 'Inter', sans-serif;
+  .ins-chart-val {
+    font: 600 10px/1 'IBM Plex Mono', monospace;
+    color: var(--mu2);
+    min-height: 12px;
+    text-align: center;
+  }
+  .ins-chart-bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: rgba(88,204,2,.22);
+  }
+  .ins-chart-col--peak .ins-chart-bar {
+    background: var(--a);
+    box-shadow: 0 4px 10px -2px rgba(88,204,2,.35);
+  }
+  .ins-chart-col--peak .ins-chart-val { color: var(--adk); font-weight: 700; }
+  .ins-chart-lbl {
+    font: 500 10px/1 'Inter', sans-serif;
     color: var(--mu2);
     text-align: center;
   }
-  .ins-hmap-cell {
-    width: 11px;
-    height: 11px;
-    border-radius: 2px;
-    background: rgba(88,204,2,.07);
-    cursor: default;
-  }
-  .ins-heatmap-legend {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 10px;
-    font: 500 10px/1 'Inter', sans-serif;
+  .ins-chart-col--peak .ins-chart-lbl { color: var(--ink); font-weight: 600; }
+  .ins-chart-divider { height: 1px; background: var(--bo2); margin: 0 0 8px; }
+  .ins-chart-peak-note {
+    font: 500 11px/1.3 'Inter', sans-serif;
     color: var(--mu2);
+    text-align: center;
+    margin: 0;
   }
-  .ins-heatmap-legend-scale {
-    display: flex;
-    gap: 2px;
-  }
-  .ins-heatmap-legend-cell {
-    width: 11px; height: 11px;
-    border-radius: 2px;
+  .ins-chart-empty {
+    padding: 24px 0;
+    text-align: center;
+    font: 500 13px/1.5 'Inter', sans-serif;
+    color: var(--mu2);
   }
 
   /* Top élèves rows */
@@ -351,7 +357,7 @@ function monthBounds(offset = 0) {
   const y = now.getFullYear();
   const m = now.getMonth() + offset;
   const start = new Date(y, m, 1);
-  const end   = new Date(y, m + 1, 0, 23, 59, 59, 999);
+  const end = new Date(y, m + 1, 0, 23, 59, 59, 999);
   return { start: start.toISOString(), end: end.toISOString() };
 }
 
@@ -360,14 +366,14 @@ function daysAgoISO(n) {
 }
 
 // ─── Module state ─────────────────────────────────────────────
-let _tab = 'progressent'; // 'progressent' | 'stagnent'
+let _tab = "progressent"; // 'progressent' | 'stagnent'
 
 // ─── Entry ────────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track('page.view', { page: 'insights', role: me.role });
+  track("page.view", { page: "insights", role: me.role });
 
   // Skeleton
   root.innerHTML = `
@@ -397,10 +403,10 @@ export async function mount(root) {
 
 // ─── Data loading ─────────────────────────────────────────────
 async function loadData(me) {
-  const thisMonth  = monthBounds(0);
-  const prevMonth  = monthBounds(-1);
-  const ago60      = daysAgoISO(60);
-  const ago14      = daysAgoISO(14);
+  const thisMonth = monthBounds(0);
+  const prevMonth = monthBounds(-1);
+  const ago60 = daysAgoISO(60);
+  const ago14 = daysAgoISO(14);
 
   const [
     valsCeMois,
@@ -408,142 +414,138 @@ async function loadData(me) {
     vals60j,
     mesEleves,
     myProfile,
-    quizAttempts,
     valsARetravailler,
   ] = await Promise.all([
     // Validations ce mois
-    sb.from('validations')
-      .select('eleve_id, competence_id, statut, validated_at')
-      .eq('validated_by', me.id)
-      .gte('validated_at', thisMonth.start)
-      .lte('validated_at', thisMonth.end),
+    sb
+      .from("validations")
+      .select("eleve_id, competence_id, statut, validated_at")
+      .eq("validated_by", me.id)
+      .gte("validated_at", thisMonth.start)
+      .lte("validated_at", thisMonth.end),
 
     // Validations mois précédent (pour delta)
-    sb.from('validations')
-      .select('id', { count: 'exact', head: true })
-      .eq('validated_by', me.id)
-      .gte('validated_at', prevMonth.start)
-      .lte('validated_at', prevMonth.end),
+    sb
+      .from("validations")
+      .select("id", { count: "exact", head: true })
+      .eq("validated_by", me.id)
+      .gte("validated_at", prevMonth.start)
+      .lte("validated_at", prevMonth.end),
 
-    // Validations 60 derniers jours (heatmap)
-    sb.from('validations')
-      .select('validated_at')
-      .eq('validated_by', me.id)
-      .gte('validated_at', ago60),
+    // Validations 60 derniers jours (graphe activité par jour)
+    sb
+      .from("validations")
+      .select("validated_at")
+      .eq("validated_by", me.id)
+      .gte("validated_at", ago60),
 
     // Mes élèves attitrés
-    sb.from('profiles')
-      .select('id, prenom, nom, last_active_at, avatar_url')
-      .eq('enseignant_id', me.id)
-      .eq('role', 'eleve'),
+    sb
+      .from("profiles")
+      .select("id, prenom, nom, last_active_at, avatar_url")
+      .eq("enseignant_id", me.id)
+      .eq("role", "eleve"),
 
     // Mon profil (streak_pro_days si la colonne existe)
-    sb.from('profiles')
-      .select('streak_pro_days, xp')
-      .eq('id', me.id)
-      .single(),
-
-    // Quiz attempts de mes élèves (taux réussite)
-    sb.from('quiz_attempts')
-      .select('user_id, score, created_at')
-      .in('user_id', [me.id]) // sera remplacé après avoir les IDs élèves
-      .limit(1), // placeholder, on refera la query plus bas
+    sb.from("profiles").select("streak_pro_days, xp").eq("id", me.id).single(),
 
     // Validations "à retravailler" par moi (difficulté)
-    sb.from('validations')
-      .select('competence_id, eleve_id')
-      .eq('validated_by', me.id)
-      .eq('statut', 'a_retravailler'),
+    sb
+      .from("validations")
+      .select("competence_id, eleve_id")
+      .eq("validated_by", me.id)
+      .eq("statut", "a_retravailler"),
   ]);
 
-  const elevesData    = mesEleves.data || [];
-  const eleveIds      = elevesData.map(e => e.id);
+  const elevesData = mesEleves.data || [];
+  const eleveIds = elevesData.map((e) => e.id);
   const valsThisMonth = valsCeMois.data || [];
-  const vals60Data    = vals60j.data || [];
+  const vals60Data = vals60j.data || [];
 
   // Quiz attempts réels pour mes élèves
   let quizData = [];
   if (eleveIds.length > 0) {
     const { data: qa } = await sb
-      .from('quiz_attempts')
-      .select('user_id, score, created_at')
-      .in('user_id', eleveIds)
-      .gte('created_at', daysAgoISO(30));
+      .from("quiz_attempts")
+      .select("user_id, score, created_at")
+      .in("user_id", eleveIds)
+      .gte("created_at", daysAgoISO(30));
     quizData = qa || [];
   }
 
   // Validations ce mois par élève (pour top progressent)
   const compsCeMoisByEleve = {};
-  valsThisMonth.forEach(v => {
+  valsThisMonth.forEach((v) => {
     if (!compsCeMoisByEleve[v.eleve_id]) compsCeMoisByEleve[v.eleve_id] = 0;
-    if (v.statut === 'acquis') compsCeMoisByEleve[v.eleve_id]++;
-  });
-
-  // Last validation par élève (pour stagnation)
-  const lastValByEleve = {};
-  vals60Data.forEach(v => {
-    // On a besoin de la date par élève → on fetch séparément
+    if (v.statut === "acquis") compsCeMoisByEleve[v.eleve_id]++;
   });
 
   // Fetch last validation per élève pour stagnation
   let lastValMap = {};
   if (eleveIds.length > 0) {
     const { data: lastVals } = await sb
-      .from('validations')
-      .select('eleve_id, validated_at')
-      .eq('validated_by', me.id)
-      .in('eleve_id', eleveIds)
-      .order('validated_at', { ascending: false });
+      .from("validations")
+      .select("eleve_id, validated_at")
+      .eq("validated_by", me.id)
+      .in("eleve_id", eleveIds)
+      .order("validated_at", { ascending: false });
 
-    (lastVals || []).forEach(v => {
+    (lastVals || []).forEach((v) => {
       if (!lastValMap[v.eleve_id]) lastValMap[v.eleve_id] = v.validated_at;
     });
   }
 
   // ── KPI calculs ──────────────────────────────────────────────
-  const valsCeMoisCount = valsThisMonth.filter(v => v.statut === 'acquis').length;
-  const valsPrevCount   = valsMoisPrev.count ?? 0;
-  const delta = valsPrevCount > 0
-    ? Math.round(((valsCeMoisCount - valsPrevCount) / valsPrevCount) * 100)
-    : null;
+  const valsCeMoisCount = valsThisMonth.filter(
+    (v) => v.statut === "acquis",
+  ).length;
+  const valsPrevCount = valsMoisPrev.count ?? 0;
+  const delta =
+    valsPrevCount > 0
+      ? Math.round(((valsCeMoisCount - valsPrevCount) / valsPrevCount) * 100)
+      : null;
 
   const nbElevesAccompagnes = eleveIds.length;
 
-  const quizTotal   = quizData.length;
-  const quizSuccess = quizData.filter(q => (q.score ?? 0) >= 60).length;
-  const tauxQuiz    = quizTotal > 0 ? Math.round((quizSuccess / quizTotal) * 100) : null;
+  const quizTotal = quizData.length;
+  const quizSuccess = quizData.filter((q) => (q.score ?? 0) >= 60).length;
+  const tauxQuiz =
+    quizTotal > 0 ? Math.round((quizSuccess / quizTotal) * 100) : null;
 
   const streakPro = myProfile.data?.streak_pro_days ?? null;
 
-  // ── Heatmap [jour 0-6][heure 0-23] ───────────────────────────
+  // ── Activité par jour [jour 0-6][heure 0-23] ─────────────────
+  // Réutilisé dans renderActivityChartSection : on somme par jour
   const heatmap = Array.from({ length: 7 }, () => new Array(24).fill(0));
-  let heatmapMax = 0;
-  vals60Data.forEach(v => {
+  vals60Data.forEach((v) => {
     const d = new Date(v.validated_at);
     const jour = (d.getDay() + 6) % 7; // Lun=0 ... Dim=6
-    const heure = d.getHours();
-    heatmap[jour][heure]++;
-    if (heatmap[jour][heure] > heatmapMax) heatmapMax = heatmap[jour][heure];
+    heatmap[jour][d.getHours()]++;
   });
 
   // ── Top élèves ────────────────────────────────────────────────
   const elevesAvecPrenom = elevesData.map((e, i) => ({ ...e, idx: i }));
 
   const topProgressent = elevesAvecPrenom
-    .filter(e => (compsCeMoisByEleve[e.id] || 0) >= 2)
-    .sort((a, b) => (compsCeMoisByEleve[b.id] || 0) - (compsCeMoisByEleve[a.id] || 0))
+    .filter((e) => (compsCeMoisByEleve[e.id] || 0) >= 2)
+    .sort(
+      (a, b) =>
+        (compsCeMoisByEleve[b.id] || 0) - (compsCeMoisByEleve[a.id] || 0),
+    )
     .slice(0, 3)
-    .map(e => ({ ...e, compsThisMonth: compsCeMoisByEleve[e.id] || 0 }));
+    .map((e) => ({ ...e, compsThisMonth: compsCeMoisByEleve[e.id] || 0 }));
 
   const topStagnent = elevesAvecPrenom
-    .filter(e => {
+    .filter((e) => {
       const lastVal = lastValMap[e.id];
       const hasActivity = lastVal != null || e.last_active_at != null;
       const inactive14j = !lastVal || lastVal < ago14;
-      return hasActivity && inactive14j && (compsCeMoisByEleve[e.id] || 0) === 0;
+      return (
+        hasActivity && inactive14j && (compsCeMoisByEleve[e.id] || 0) === 0
+      );
     })
     .slice(0, 3)
-    .map(e => {
+    .map((e) => {
       const lastVal = lastValMap[e.id];
       const daysAgo = lastVal
         ? Math.floor((Date.now() - new Date(lastVal).getTime()) / 86400000)
@@ -553,7 +555,7 @@ async function loadData(me) {
 
   // ── Carte difficulté ──────────────────────────────────────────
   const diffByComp = {};
-  (valsARetravailler.data || []).forEach(v => {
+  (valsARetravailler.data || []).forEach((v) => {
     if (!diffByComp[v.competence_id]) diffByComp[v.competence_id] = new Set();
     diffByComp[v.competence_id].add(v.eleve_id);
   });
@@ -567,18 +569,22 @@ async function loadData(me) {
   const recos = [];
   if (streakPro !== null && streakPro < 3) {
     recos.push({
-      icon: icon('target', { size: 18, strokeWidth: 2, color: 'var(--a)' }),
-      ttl: 'Lance ta semaine',
-      txt: 'Valide 1 compétence avec un élève actif pour relancer ton streak pro.',
-      route: '#/log-session',
+      icon: icon("target", { size: 18, strokeWidth: 2, color: "var(--a)" }),
+      ttl: "Lance ta semaine",
+      txt: "Valide 1 compétence avec un élève actif pour relancer ton streak pro.",
+      route: "#/log-session",
     });
   }
   if (topStagnent.length > 0) {
     const e = topStagnent[0];
-    const nm = esc(`${e.prenom || ''} ${e.nom || ''}`.trim());
-    const since = e.daysAgo ? `depuis ${e.daysAgo}j` : 'depuis un moment';
+    const nm = esc(`${e.prenom || ""} ${e.nom || ""}`.trim());
+    const since = e.daysAgo ? `depuis ${e.daysAgo}j` : "depuis un moment";
     recos.push({
-      icon: icon('alert-triangle', { size: 18, strokeWidth: 2, color: 'var(--amk)' }),
+      icon: icon("alert-triangle", {
+        size: 18,
+        strokeWidth: 2,
+        color: "var(--amk)",
+      }),
       ttl: `Relance ${nm}`,
       txt: `${nm} n'a plus validé ${since}. Un point en leçon peut débloquer la progression.`,
       route: `#/livret/${e.id}`,
@@ -588,28 +594,37 @@ async function loadData(me) {
     const d = topDiff[0];
     const nm = esc(labelComp(d.compId));
     recos.push({
-      icon: icon('search', { size: 18, strokeWidth: 2, color: 'var(--blk)' }),
+      icon: icon("search", { size: 18, strokeWidth: 2, color: "var(--blk)" }),
       ttl: `Débrief sur ${d.compId}`,
-      txt: `${d.count} élève${d.count > 1 ? 's' : ''} bloqué${d.count > 1 ? 's' : ''} sur "${nm}". Prévois un point pédagogique dédié.`,
+      txt: `${d.count} élève${d.count > 1 ? "s" : ""} bloqué${d.count > 1 ? "s" : ""} sur "${nm}". Prévois un point pédagogique dédié.`,
       route: `#/eleves?bloque_sur=${encodeURIComponent(d.compId)}`,
     });
   }
   if (recos.length === 0) {
     recos.push({
-      icon: icon('check-circle', { size: 18, strokeWidth: 2, color: 'var(--grd)' }),
-      ttl: 'Tout roule',
-      txt: 'Tes élèves progressent bien. Continue sur cette lancée !',
+      icon: icon("check-circle", {
+        size: 18,
+        strokeWidth: 2,
+        color: "var(--grd)",
+      }),
+      ttl: "Tout roule",
+      txt: "Tes élèves progressent bien. Continue sur cette lancée !",
       route: null,
     });
   }
 
   return {
-    valsCeMoisCount, valsPrevCount, delta,
+    valsCeMoisCount,
+    valsPrevCount,
+    delta,
     nbElevesAccompagnes,
-    tauxQuiz, streakPro,
-    heatmap, heatmapMax,
-    topProgressent, topStagnent,
-    topDiff, maxDiff,
+    tauxQuiz,
+    streakPro,
+    heatmap,
+    topProgressent,
+    topStagnent,
+    topDiff,
+    maxDiff,
     recos,
     eleveIds,
     elevesAvecPrenom,
@@ -627,7 +642,7 @@ function renderAll(root, me, data) {
       </header>
 
       ${renderKpis(data)}
-      ${renderHeatmapSection(data)}
+      ${renderActivityChartSection(data)}
       ${renderTopElevesSection(data)}
       ${renderDiffSection(data)}
       ${renderRecoSection(data)}
@@ -636,23 +651,31 @@ function renderAll(root, me, data) {
 }
 
 // ── KPI 2×2 ───────────────────────────────────────────────────
-function renderKpis({ valsCeMoisCount, valsPrevCount, delta, nbElevesAccompagnes, tauxQuiz, streakPro }) {
-  const deltaHtml = delta === null
-    ? `<p class="ins-widget-delta flat">Premier mois</p>`
-    : delta > 0
-      ? `<p class="ins-widget-delta up">▲ ${delta}% vs mois précédent</p>`
-      : delta < 0
-        ? `<p class="ins-widget-delta down">▼ ${Math.abs(delta)}% vs mois précédent</p>`
-        : `<p class="ins-widget-delta flat">= Stable vs mois précédent</p>`;
+function renderKpis({
+  valsCeMoisCount,
+  valsPrevCount,
+  delta,
+  nbElevesAccompagnes,
+  tauxQuiz,
+  streakPro,
+}) {
+  const deltaHtml =
+    delta === null
+      ? `<p class="ins-widget-delta flat">Premier mois</p>`
+      : delta > 0
+        ? `<p class="ins-widget-delta up">▲ ${delta}% vs mois précédent</p>`
+        : delta < 0
+          ? `<p class="ins-widget-delta down">▼ ${Math.abs(delta)}% vs mois précédent</p>`
+          : `<p class="ins-widget-delta flat">= Stable vs mois précédent</p>`;
 
-  const streakVal  = streakPro !== null ? streakPro : '—';
-  const tauxVal    = tauxQuiz !== null  ? `${tauxQuiz}%` : '—';
+  const streakVal = streakPro !== null ? streakPro : "—";
+  const tauxVal = tauxQuiz !== null ? `${tauxQuiz}%` : "—";
 
   return `
     <div class="ins-widgets" id="ins-kpi-grid">
       <div class="ins-widget">
         <div class="ins-widget-head">
-          ${iconBadge('check', { color: 'var(--gr)', size: 32 })}
+          ${iconBadge("check", { color: "var(--gr)", size: 32 })}
           <span class="ins-widget-lbl">Validées</span>
         </div>
         <p class="ins-widget-val">${valsCeMoisCount}</p>
@@ -662,7 +685,7 @@ function renderKpis({ valsCeMoisCount, valsPrevCount, delta, nbElevesAccompagnes
 
       <div class="ins-widget">
         <div class="ins-widget-head">
-          ${iconBadge('users', { color: 'var(--a)', size: 32 })}
+          ${iconBadge("users", { color: "var(--a)", size: 32 })}
           <span class="ins-widget-lbl">Élèves</span>
         </div>
         <p class="ins-widget-val">${nbElevesAccompagnes}</p>
@@ -671,7 +694,7 @@ function renderKpis({ valsCeMoisCount, valsPrevCount, delta, nbElevesAccompagnes
 
       <div class="ins-widget">
         <div class="ins-widget-head">
-          ${iconBadge('target', { color: 'var(--pu)', size: 32 })}
+          ${iconBadge("target", { color: "var(--pu)", size: 32 })}
           <span class="ins-widget-lbl">Taux quiz</span>
         </div>
         <p class="ins-widget-val">${tauxVal}</p>
@@ -680,7 +703,7 @@ function renderKpis({ valsCeMoisCount, valsPrevCount, delta, nbElevesAccompagnes
 
       <div class="ins-widget">
         <div class="ins-widget-head">
-          ${iconBadge('flame', { color: 'var(--am)', size: 32 })}
+          ${iconBadge("flame", { color: "var(--am)", size: 32 })}
           <span class="ins-widget-lbl">Streak pro</span>
         </div>
         <p class="ins-widget-val">${streakVal}</p>
@@ -690,51 +713,47 @@ function renderKpis({ valsCeMoisCount, valsPrevCount, delta, nbElevesAccompagnes
   `;
 }
 
-// ── Heatmap ───────────────────────────────────────────────────
-function renderHeatmapSection({ heatmap, heatmapMax }) {
-  // Ligne header heures (toutes les 4h)
-  const headerCells = [];
-  headerCells.push(`<div></div>`); // espace pour label jour
-  for (let h = 0; h < 24; h++) {
-    headerCells.push(
-      h % 4 === 0
-        ? `<div class="ins-hmap-hour-lbl">${h}h</div>`
-        : `<div></div>`
-    );
+// ── Graphe activité par jour ──────────────────────────────────
+function renderActivityChartSection({ heatmap }) {
+  const JOURS_COURT = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+  const BAR_MAX_H = 60; // px — hauteur max dans le container de 88px
+
+  const totals = heatmap.map((row) => row.reduce((s, n) => s + n, 0));
+  const maxTotal = Math.max(...totals);
+
+  if (maxTotal === 0) {
+    return `
+      <div class="ins-section">
+        <div class="ins-section-title">Tes jours d'activité · 60 derniers jours</div>
+        <div class="ins-chart-wrap">
+          <div class="ins-chart-empty">Aucune validation sur les 60 derniers jours encore.<br>Enregistre ta première séance pour voir tes patterns.</div>
+        </div>
+      </div>
+    `;
   }
 
-  // Rows jours
-  const rows = JOURS.map((jour, j) => {
-    const cells = heatmap[j].map((count, h) => {
-      const intensity = heatmapMax > 0 ? count / heatmapMax : 0;
-      const alpha = 0.07 + intensity * 0.88;
-      const bg = count === 0
-        ? 'rgba(88,204,2,.07)'
-        : `rgba(88,204,2,${alpha.toFixed(2)})`;
-      const title = count > 0 ? `${jour} ${h}h — ${count} validation${count > 1 ? 's' : ''}` : '';
-      return `<div class="ins-hmap-cell" style="background:${bg}" ${title ? `title="${title}"` : ''}></div>`;
-    }).join('');
-    return `<div class="ins-hmap-day-lbl">${jour}</div>${cells}`;
-  }).join('');
+  const peakIdx = totals.indexOf(maxTotal);
 
-  // Légende
-  const legendCells = [.07, .25, .45, .65, .90].map(a =>
-    `<div class="ins-heatmap-legend-cell" style="background:rgba(88,204,2,${a})"></div>`
-  ).join('');
+  const bars = totals
+    .map((n, j) => {
+      const isPeak = j === peakIdx;
+      const h = n > 0 ? Math.max(4, Math.round((n / maxTotal) * BAR_MAX_H)) : 3;
+      return `
+      <div class="ins-chart-col${isPeak ? " ins-chart-col--peak" : ""}">
+        <span class="ins-chart-val">${n > 0 ? n : ""}</span>
+        <div class="ins-chart-bar" style="height:${h}px"></div>
+        <span class="ins-chart-lbl">${JOURS_COURT[j]}</span>
+      </div>`;
+    })
+    .join("");
 
   return `
     <div class="ins-section">
-      <div class="ins-section-title">Quand je valide — 60 derniers jours</div>
-      <div class="ins-heatmap-wrap">
-        <div class="ins-heatmap-grid">
-          ${headerCells.join('')}
-          ${rows}
-        </div>
-        <div class="ins-heatmap-legend">
-          <span>Moins</span>
-          <div class="ins-heatmap-legend-scale">${legendCells}</div>
-          <span>Plus</span>
-        </div>
+      <div class="ins-section-title">Tes jours d'activité · 60 derniers jours</div>
+      <div class="ins-chart-wrap">
+        <div class="ins-chart-bars">${bars}</div>
+        <div class="ins-chart-divider"></div>
+        <p class="ins-chart-peak-note">Jour le plus actif : <strong>${esc(JOURS_COURT[peakIdx])}</strong> — ${maxTotal} validation${maxTotal > 1 ? "s" : ""}</p>
       </div>
     </div>
   `;
@@ -748,37 +767,41 @@ function renderTopElevesSection({ topProgressent, topStagnent }) {
       <div class="ins-tabs" role="tablist">
         <button class="ins-tab active" data-tab="progressent" role="tab"
                 style="display:flex;align-items:center;gap:5px;">
-          ${icon('trending-up', { size: 14, strokeWidth: 2.2 })} Progressent (${topProgressent.length})
+          ${icon("trending-up", { size: 14, strokeWidth: 2.2 })} Progressent (${topProgressent.length})
         </button>
         <button class="ins-tab" data-tab="stagnent" role="tab"
                 style="display:flex;align-items:center;gap:5px;">
-          ${icon('alert-triangle', { size: 14, strokeWidth: 2.2 })} Stagnent (${topStagnent.length})
+          ${icon("alert-triangle", { size: 14, strokeWidth: 2.2 })} Stagnent (${topStagnent.length})
         </button>
       </div>
       <div id="ins-eleves-list">
-        ${renderElevesList('progressent', topProgressent, topStagnent)}
+        ${renderElevesList("progressent", topProgressent, topStagnent)}
       </div>
     </div>
   `;
 }
 
 function renderElevesList(tab, topProgressent, topStagnent) {
-  const list = tab === 'progressent' ? topProgressent : topStagnent;
+  const list = tab === "progressent" ? topProgressent : topStagnent;
   if (list.length === 0) {
-    const empty = tab === 'progressent'
-      ? 'Aucun élève avec ≥ 2 compétences ce mois encore.'
-      : 'Aucun élève en stagnation — tout le monde progresse !';
+    const empty =
+      tab === "progressent"
+        ? "Aucun élève avec ≥ 2 compétences ce mois encore."
+        : "Aucun élève en stagnation — tout le monde progresse !";
     return `<div class="ins-empty">${empty}</div>`;
   }
-  return list.map((e, i) => {
-    const nom   = esc(`${e.prenom || ''} ${e.nom || ''}`.trim() || 'Élève');
-    const badge = tab === 'progressent'
-      ? `<span class="ins-badge ins-badge-green">+${e.compsThisMonth} ce mois</span>`
-      : `<span class="ins-badge ins-badge-orange">${e.daysAgo ? `${e.daysAgo}j inactif` : 'Inactif'}</span>`;
-    const meta  = tab === 'progressent'
-      ? `${e.compsThisMonth} compétence${e.compsThisMonth > 1 ? 's' : ''} acquise${e.compsThisMonth > 1 ? 's' : ''} ce mois`
-      : `Aucune validation depuis ${e.daysAgo ? `${e.daysAgo} jours` : 'longtemps'}`;
-    return `
+  return list
+    .map((e, i) => {
+      const nom = esc(`${e.prenom || ""} ${e.nom || ""}`.trim() || "Élève");
+      const badge =
+        tab === "progressent"
+          ? `<span class="ins-badge ins-badge-green">+${e.compsThisMonth} ce mois</span>`
+          : `<span class="ins-badge ins-badge-orange">${e.daysAgo ? `${e.daysAgo}j inactif` : "Inactif"}</span>`;
+      const meta =
+        tab === "progressent"
+          ? `${e.compsThisMonth} compétence${e.compsThisMonth > 1 ? "s" : ""} acquise${e.compsThisMonth > 1 ? "s" : ""} ce mois`
+          : `Aucune validation depuis ${e.daysAgo ? `${e.daysAgo} jours` : "longtemps"}`;
+      return `
       <div class="ins-eleve-row" data-eleve-id="${esc(e.id)}" data-tab="${tab}"
            role="button" tabindex="0" aria-label="Livret de ${nom}"
            style="animation: insWidgetIn .3s cubic-bezier(.23,1,.32,1) ${i * 50}ms both">
@@ -791,7 +814,8 @@ function renderElevesList(tab, topProgressent, topStagnent) {
         <span aria-hidden="true" style="color:var(--mu2);font-size:14px">›</span>
       </div>
     `;
-  }).join('');
+    })
+    .join("");
 }
 
 // ── Difficulté comps ──────────────────────────────────────────
@@ -804,11 +828,12 @@ function renderDiffSection({ topDiff, maxDiff }) {
       </div>
     `;
   }
-  const rows = topDiff.map(({ compId, count }) => {
-    const pct = Math.round((count / maxDiff) * 100);
-    const r = Math.round(239 - (count / maxDiff) * 120);
-    const color = `rgb(${r}, 68, 68)`;
-    return `
+  const rows = topDiff
+    .map(({ compId, count }) => {
+      const pct = Math.round((count / maxDiff) * 100);
+      const r = Math.round(239 - (count / maxDiff) * 120);
+      const color = `rgb(${r}, 68, 68)`;
+      return `
       <div class="ins-diff-row" data-comp-id="${esc(compId)}" role="button" tabindex="0" style="cursor:pointer;">
         <span class="ins-diff-code">${esc(compId)}</span>
         <div class="ins-diff-info">
@@ -817,10 +842,11 @@ function renderDiffSection({ topDiff, maxDiff }) {
             <div class="ins-diff-bar-fill" style="width:${pct}%;background:${color}"></div>
           </div>
         </div>
-        <span class="ins-diff-count">${count} élève${count > 1 ? 's' : ''}</span>
+        <span class="ins-diff-count">${count} élève${count > 1 ? "s" : ""}</span>
       </div>
     `;
-  }).join('');
+    })
+    .join("");
 
   return `
     <div class="ins-section">
@@ -832,16 +858,20 @@ function renderDiffSection({ topDiff, maxDiff }) {
 
 // ── Recommandations ───────────────────────────────────────────
 function renderRecoSection({ recos }) {
-  const cards = recos.map(r => `
-    <div class="ins-reco-card${r.route ? ' ins-reco-card--link' : ''}"
-         ${r.route ? `data-route="${esc(r.route)}" role="button" tabindex="0" style="cursor:pointer;"` : ''}>
+  const cards = recos
+    .map(
+      (r) => `
+    <div class="ins-reco-card${r.route ? " ins-reco-card--link" : ""}"
+         ${r.route ? `data-route="${esc(r.route)}" role="button" tabindex="0" style="cursor:pointer;"` : ""}>
       <span class="ins-reco-icon">${r.icon}</span>
       <div class="ins-reco-body">
         <div class="ins-reco-ttl">${esc(r.ttl)}</div>
         <div class="ins-reco-txt">${r.txt}</div>
       </div>
     </div>
-  `).join('');
+  `,
+    )
+    .join("");
 
   return `
     <div class="ins-section">
@@ -854,16 +884,22 @@ function renderRecoSection({ recos }) {
 // ─── Wire ─────────────────────────────────────────────────────
 function wireAll(root, me, data) {
   // Tabs progressent/stagnent
-  root.querySelectorAll('.ins-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
+  root.querySelectorAll(".ins-tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
       _tab = btn.dataset.tab;
-      root.querySelectorAll('.ins-tab').forEach(b => b.classList.toggle('active', b === btn));
-      const listEl = root.querySelector('#ins-eleves-list');
+      root
+        .querySelectorAll(".ins-tab")
+        .forEach((b) => b.classList.toggle("active", b === btn));
+      const listEl = root.querySelector("#ins-eleves-list");
       if (listEl) {
-        listEl.innerHTML = renderElevesList(_tab, data.topProgressent, data.topStagnent);
+        listEl.innerHTML = renderElevesList(
+          _tab,
+          data.topProgressent,
+          data.topStagnent,
+        );
         wireEleveRows(listEl);
       }
-      track('insights.tab.click', { tab: _tab });
+      track("insights.tab.click", { tab: _tab });
     });
   });
 
@@ -871,39 +907,51 @@ function wireAll(root, me, data) {
   wireEleveRows(root);
 
   // Reco cards → navigate to route
-  root.querySelectorAll('.ins-reco-card--link[data-route]').forEach(card => {
+  root.querySelectorAll(".ins-reco-card--link[data-route]").forEach((card) => {
     const handler = () => {
-      track('insights.reco.click', { route: card.dataset.route });
+      track("insights.reco.click", { route: card.dataset.route });
       navigate(card.dataset.route);
     };
-    card.addEventListener('click', handler);
-    card.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+    card.addEventListener("click", handler);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handler();
+      }
     });
   });
 
   // Diff rows → filtre élèves bloqués sur cette comp
-  root.querySelectorAll('.ins-diff-row[data-comp-id]').forEach(row => {
+  root.querySelectorAll(".ins-diff-row[data-comp-id]").forEach((row) => {
     const handler = () => {
-      track('insights.diff.click', { comp_id: row.dataset.compId });
+      track("insights.diff.click", { comp_id: row.dataset.compId });
       navigate(`#/eleves?bloque_sur=${encodeURIComponent(row.dataset.compId)}`);
     };
-    row.addEventListener('click', handler);
-    row.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+    row.addEventListener("click", handler);
+    row.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handler();
+      }
     });
   });
 }
 
 function wireEleveRows(container) {
-  container.querySelectorAll('.ins-eleve-row[data-eleve-id]').forEach(row => {
+  container.querySelectorAll(".ins-eleve-row[data-eleve-id]").forEach((row) => {
     const handler = () => {
-      track('insights.eleve.open', { eleve_id: row.dataset.eleveId, tab: _tab });
+      track("insights.eleve.open", {
+        eleve_id: row.dataset.eleveId,
+        tab: _tab,
+      });
       navigate(`#/livret/${row.dataset.eleveId}`);
     };
-    row.addEventListener('click', handler);
-    row.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+    row.addEventListener("click", handler);
+    row.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handler();
+      }
     });
   });
 }
