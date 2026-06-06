@@ -801,6 +801,12 @@ export async function mount(root) {
     );
     const pendingSessions = pendingSessionsRes.value?.data || [];
     const todayQuests = todayQuestsRes.value?.data || [];
+    if (todayQuestsRes.status === "rejected" || todayQuestsRes.value?.error) {
+      console.error(
+        "[accueil] get_today_quests:",
+        todayQuestsRes.reason ?? todayQuestsRes.value?.error,
+      );
+    }
 
     ensureHeatmapStyles();
 
@@ -847,7 +853,9 @@ export async function mount(root) {
         dqHost.style.cssText = "margin:16px 16px 0";
         actionEl.insertAdjacentElement("afterend", dqHost);
         Promise.resolve()
-          .then(() => mountDailyQuests(dqHost))
+          .then(() =>
+            mountDailyQuests(dqHost, { prefetchedQuests: todayQuests }),
+          )
           .catch(() => {});
       }
       Promise.resolve()

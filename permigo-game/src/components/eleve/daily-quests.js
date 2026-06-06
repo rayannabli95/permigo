@@ -132,15 +132,20 @@ function ensureStyle() {
   document.head.appendChild(s);
 }
 
-export async function mountDailyQuests(root) {
-  let quests = [];
-  try {
-    const { data, error } = await sb.rpc("get_today_quests");
-    if (error || data?.error) return;
-    quests = Array.isArray(data) ? data : [];
-  } catch (e) {
-    console.warn("[daily-quests] fetch error", e);
-    return;
+export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
+  let quests = prefetchedQuests ?? null;
+  if (quests === null) {
+    try {
+      const { data, error } = await sb.rpc("get_today_quests");
+      if (error || data?.error) {
+        console.error("[daily-quests] get_today_quests error:", error);
+        return;
+      }
+      quests = Array.isArray(data) ? data : [];
+    } catch (e) {
+      console.warn("[daily-quests] fetch error", e);
+      return;
+    }
   }
 
   // Hide section if every quest is already claimed (réclamée, pas juste complétée)
