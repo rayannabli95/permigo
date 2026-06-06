@@ -290,10 +290,16 @@ function _renderStep(root, dir = "fwd") {
   const pill = root.querySelector("#ls-step-pill");
   if (!screen || !footer) return;
 
-  if (pill) pill.textContent = `${_step}/3`;
+  if (pill) pill.textContent = `${_step}/4`;
 
   screen.innerHTML =
-    _step === 1 ? _step1Html() : _step === 2 ? _step2Html() : _step3Html();
+    _step === 1
+      ? _step1Html()
+      : _step === 2
+        ? _step2Html()
+        : _step === 3
+          ? _step3Html()
+          : _step4Html();
 
   screen.style.animation = "none";
   screen.offsetWidth; // reflow
@@ -302,8 +308,10 @@ function _renderStep(root, dir = "fwd") {
       ? "ls-bwd .22s cubic-bezier(.22,1,.32,1) both"
       : "ls-fwd .22s cubic-bezier(.22,1,.32,1) both";
 
-  if (_step < 3) {
-    footer.innerHTML = `<button class="ls-btn-next" id="ls-btn-next" type="button"${!_eleve ? " disabled" : ""}>
+  if (_step === 1) {
+    footer.innerHTML = "";
+  } else if (_step < 4) {
+    footer.innerHTML = `<button class="ls-btn-next" id="ls-btn-next" type="button">
       Suivant ${icon("arrow-right", { size: 16, strokeWidth: 2.5 })}
     </button>`;
   } else {
@@ -323,7 +331,7 @@ function _renderStep(root, dir = "fwd") {
   _wireStep(root);
 }
 
-// ─── Étape 1 : Élève + durée + date ───────────────────────────
+// ─── Étape 1 : Sélection élève ────────────────────────────────
 function _step1Html() {
   const filtered = _query
     ? _eleves.filter((e) =>
@@ -362,7 +370,12 @@ function _step1Html() {
         }
       </div>
     </div>
+    <div style="height:8px"></div>`;
+}
 
+// ─── Étape 2 : Sélection durée ────────────────────────────────
+function _step2Html() {
+  return `
     <div class="ls-card" id="ls-dur-card">
       <div class="ls-sec-title">${icon("clock", { size: 13, strokeWidth: 2.4 })} Durée</div>
       <div class="ls-dur-chips" id="ls-dur-chips">
@@ -391,7 +404,12 @@ function _step1Html() {
           : ""
       }
     </div>
+    <div style="height:8px"></div>`;
+}
 
+// ─── Étape 3 : Sélection date ─────────────────────────────────
+function _step3Html() {
+  return `
     <div class="ls-card">
       <div class="ls-sec-title">${icon("calendar", { size: 13, strokeWidth: 2.4 })} Date</div>
       <div class="ls-date-row" id="ls-date-row">
@@ -409,8 +427,8 @@ function _step1Html() {
     <div style="height:8px"></div>`;
 }
 
-// ─── Étape 2 : Compétences accordéons ─────────────────────────
-function _step2Html() {
+// ─── Étape 4 : Compétences (flat, toutes visibles) ─────────────
+function _step4Html() {
   const byMonde = {};
   for (const c of _allComps) {
     if (!byMonde[c.monde]) byMonde[c.monde] = [];
@@ -419,30 +437,21 @@ function _step2Html() {
   const acquis = _acquis();
   const summary = _compsSummary();
 
-  const accordeons = Object.entries(byMonde)
+  const sections = Object.entries(byMonde)
     .sort(([a], [b]) => +a - +b)
     .map(([monde, comps]) => {
       const m = +monde;
-      const isOpen = _openMondes.has(m);
       const active = comps.filter((c) => _comps.has(c.id)).length;
       return `
-      <div class="ls-acc-item${isOpen ? " ls-acc-open" : ""}">
-        <button class="ls-acc-hdr" data-monde="${m}" type="button" aria-expanded="${isOpen}">
+      <div class="ls-c-section">
+        <div class="ls-c-section-hdr">
           <span class="ls-acc-dot c${m}"></span>
-          <span class="ls-acc-name">C${m} — ${esc(MONDE_LABELS[m] || `Monde ${m}`)}</span>
-          ${active > 0 ? `<span class="ls-acc-badge">${active}</span>` : ""}
-          <span class="ls-acc-chevron">${icon("chevron-down", { size: 16, strokeWidth: 2.5 })}</span>
-        </button>
-        ${
-          isOpen
-            ? `
-          <div class="ls-acc-body">
-            <div class="ls-comp-chips ls-comps-list" data-monde="${m}">
-              ${comps.map((c) => _renderCompChip(c, acquis)).join("")}
-            </div>
-          </div>`
-            : ""
-        }
+          <span class="ls-c-section-name">C${m} — ${esc(MONDE_LABELS[m] || `Monde ${m}`)}</span>
+          <span class="ls-acc-badge ls-c-badge" data-monde-badge="${m}"${active === 0 ? ' style="display:none"' : ""}>${active}</span>
+        </div>
+        <div class="ls-comp-chips ls-comps-list" data-monde="${m}">
+          ${comps.map((c) => _renderCompChip(c, acquis)).join("")}
+        </div>
       </div>`;
     })
     .join("");
@@ -459,61 +468,9 @@ function _step2Html() {
         <span class="ls-leg-pill ls-leg-en_cours">${icon("refresh-cw", { size: 10, strokeWidth: 2.4 })} En cours</span>
         <span class="ls-leg-pill ls-leg-a_retravailler">${icon("alert-triangle", { size: 10, strokeWidth: 2.4 })} À retravailler</span>
       </div>
-      <div class="ls-acc-list" id="ls-acc-list">
-        ${_allComps.length === 0 ? `<div class="ls-empty-hint">Aucune compétence disponible.</div>` : accordeons}
+      <div id="ls-comps-flat">
+        ${_allComps.length === 0 ? `<div class="ls-empty-hint">Aucune compétence disponible.</div>` : sections}
       </div>
-    </div>
-    <div style="height:8px"></div>`;
-}
-
-// ─── Étape 3 : Commentaire ────────────────────────────────────
-function _step3Html() {
-  const eleveObj = _eleves.find((e) => e.id === _eleve);
-  const summary = _compsSummary();
-  const unlockedTpls = _templates
-    .filter((t) => t.unlocked !== false)
-    .slice(0, 4);
-
-  return `
-    <div class="ls-recap-card">
-      <div class="ls-recap-row">
-        ${renderUserAvatar({ avatar_url: eleveObj?.avatar_url, prenom: eleveObj?.prenom, nom: eleveObj?.nom }, 32)}
-        <span class="ls-recap-name">${esc(eleveObj?.prenom || "")} ${esc(eleveObj?.nom || "")}</span>
-        <span class="ls-recap-sep">·</span>
-        <span class="ls-recap-meta">${fmtDur(_duration)}</span>
-        <span class="ls-recap-sep">·</span>
-        <span class="ls-recap-meta">${isoToFr(_date)}</span>
-      </div>
-      ${_comps.size > 0 ? `<div class="ls-recap-comps">${esc(summary)}</div>` : ""}
-    </div>
-
-    <div class="ls-card">
-      <div class="ls-sec-title">${icon("message-square", { size: 13, strokeWidth: 2.4 })} Commentaire <span class="ls-optional">optionnel</span></div>
-      <div class="ls-visibility-tag">${icon("eye", { size: 11, strokeWidth: 2, color: "var(--mu2)" })} Visible par l'élève et l'auto-école</div>
-      <div class="ls-ta-wrap">
-        <textarea class="ls-textarea" id="ls-textarea" maxlength="${MAX_COMMENT}"
-                  aria-label="Commentaire de séance"
-                  placeholder="Observations, points à travailler, encouragements…"
-                  rows="4">${esc(_comment)}</textarea>
-        <span class="ls-char-count${_comment.length > MAX_COMMENT * 0.85 ? " ls-near" : ""}"
-              id="ls-char-count">${_comment.length}/${MAX_COMMENT}</span>
-      </div>
-      ${
-        unlockedTpls.length > 0
-          ? `
-      <div class="ls-tpl-list" id="ls-tpl-list">
-        ${unlockedTpls
-          .map(
-            (
-              t,
-            ) => `<button class="ls-tpl-chip" data-body="${esc(t.body || "")}" type="button">
-          ${esc(t.title || t.body || "Template")}
-        </button>`,
-          )
-          .join("")}
-      </div>`
-          : ""
-      }
     </div>
     <div style="height:8px"></div>`;
 }
@@ -533,13 +490,12 @@ function _wireStep(root) {
       _renderEleveList(root);
     });
     _wireEleveList(root);
-    _wireDuration(root);
-    _wireDate(root);
   } else if (_step === 2) {
-    _wireAccordeons(root);
-    _wireComps(root);
+    _wireDuration(root);
+  } else if (_step === 3) {
+    _wireDate(root);
   } else {
-    _wireTextarea(root);
+    _wireComps(root);
   }
 }
 
@@ -548,28 +504,11 @@ function _wireEleveList(root) {
   root.querySelectorAll(".ls-eleve-row").forEach((row) => {
     row.addEventListener("click", async () => {
       const id = row.dataset.eleve;
-      if (_eleve === id) return;
       _eleve = id;
       _comps = new Map();
       _saveDraft();
-
-      root.querySelectorAll(".ls-eleve-row").forEach((r) => {
-        const sel = r.dataset.eleve === id;
-        r.classList.toggle("ls-sel", sel);
-        r.setAttribute("aria-checked", sel);
-        const chk = r.querySelector(".ls-eleve-check");
-        if (chk) {
-          chk.className = `ls-eleve-check${sel ? " ls-eleve-check-on" : ""}`;
-          chk.innerHTML = sel
-            ? icon("check", { size: 12, strokeWidth: 3, color: "#fff" })
-            : "";
-        }
-      });
-
-      const btn = root.querySelector("#ls-btn-next");
-      if (btn) btn.disabled = false;
-
       await _fetchCompData(id);
+      _goNext(root);
     });
   });
 }
@@ -757,25 +696,26 @@ function _refreshStep2Counters(root) {
     countEl.style.display = _comps.size === 0 ? "none" : "";
     countEl.textContent = summary;
   }
-  root.querySelectorAll(".ls-acc-hdr").forEach((hdr) => {
-    const m = +hdr.dataset.monde;
+  root.querySelectorAll("[data-monde-badge]").forEach((badge) => {
+    const m = +badge.dataset.mondeBadge;
     const active = _allComps.filter(
       (c) => +c.monde === m && _comps.has(c.id),
     ).length;
-    let badge = hdr.querySelector(".ls-acc-badge");
-    if (active > 0) {
-      if (badge) {
-        badge.textContent = active;
-      } else {
-        const b = document.createElement("span");
-        b.className = "ls-acc-badge";
-        b.textContent = active;
-        hdr.querySelector(".ls-acc-chevron")?.before(b);
-      }
-    } else {
-      badge?.remove();
-    }
+    badge.textContent = active;
+    badge.style.display = active > 0 ? "" : "none";
   });
+
+  // also update the submit button label live
+  const submitLbl = root.querySelector("#ls-submit-lbl");
+  if (submitLbl) {
+    const acquisCount = [..._comps.values()].filter(
+      (s) => s === "acquis",
+    ).length;
+    submitLbl.textContent =
+      acquisCount > 0
+        ? `Enregistrer · ${acquisCount} comp.${acquisCount > 1 ? "s" : ""} validée${acquisCount > 1 ? "s" : ""}`
+        : "Enregistrer la session";
+  }
 }
 
 // ─── Étape 3 : textarea + templates ──────────────────────────
@@ -1245,6 +1185,17 @@ const CSS = `
 .ls-comp-acquis[disabled] .ls-comp-code { background: #bbf7d0; color: var(--grd); }
 .ls-comp-check-ico, .ls-comp-statut-ico { flex-shrink: 0; display: inline-flex; }
 .ls-comp-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+
+/* Flat sections step 4 */
+.ls-c-section { margin-bottom: 16px; }
+.ls-c-section:last-child { margin-bottom: 0; }
+.ls-c-section-hdr {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.ls-c-section-name {
+  flex: 1; font: 600 13px/1 'Inter', sans-serif; color: var(--ink);
+}
+.ls-c-badge { flex-shrink: 0; }
 
 /* Légende */
 .ls-comp-legend {
