@@ -61,7 +61,6 @@ const STYLE = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
     padding: 6px 4px 8px;
     cursor: pointer;
     color: var(--mu2);
@@ -90,10 +89,27 @@ const STYLE = `
     transform: translateX(-50%) scaleX(1);
   }
   .bn-tab svg { display: block; flex-shrink: 0; }
+  /* Label : visible sous l'onglet actif uniquement. Positionné en absolu
+     pour que le picto reste centré — aucun reflow au changement d'onglet. */
   .bn-label {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 5px;
+    text-align: center;
     font: 700 10px/1 'Inter', sans-serif;
     letter-spacing: .01em;
     white-space: nowrap;
+    opacity: 0;
+    transform: translateY(3px);
+    pointer-events: none;
+    transition: opacity .18s ease, transform .2s cubic-bezier(.34,1.56,.64,1);
+  }
+  .bn-tab.active .bn-label {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bn-label { transition: opacity .12s ease; transform: none; }
   }
   .bn-tab:active { transform: scale(.93); transition: transform .12s; }
 
