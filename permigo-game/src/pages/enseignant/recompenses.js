@@ -179,23 +179,24 @@ export async function mount(root) {
     return;
   }
 
-  // Récupérer gemmes + unlocked_avatars
-  const { data: profile, error: profileErr } = await sb
-    .from("profiles")
-    .select("gemmes, unlocked_avatars")
-    .eq("id", me.id)
-    .single();
+  // Récupérer gemmes + count de validations pour calculer les badges
+  const [profileRes, valCountRes] = await Promise.all([
+    sb.from("profiles").select("gemmes").eq("id", me.id).single(),
+    sb
+      .from("validations")
+      .select("id", { count: "exact", head: true })
+      .eq("validated_by", me.id),
+  ]);
 
-  if (profileErr) {
-    console.error("[recompenses]", profileErr);
+  if (profileRes.error) {
+    console.error("[recompenses]", profileRes.error);
     toast("Impossible de charger les récompenses", "error");
     return;
   }
 
-  const gemmes = profile?.gemmes || 0;
-  const unlockedList = Array.isArray(profile?.unlocked_avatars)
-    ? profile.unlocked_avatars
-    : [];
+  const gemmes = profileRes.data?.gemmes || 0;
+  // Badges débloqués selon seuils de validations (10 / 50 / 100 / 200)
+  const totalValidations = valCountRes.count ?? 0;
 
   // Rendre
   root.innerHTML = `
@@ -217,7 +218,7 @@ export async function mount(root) {
       <h2 class="rec-section-title">Mes badges</h2>
       <div class="rec-badges-grid">
         ${BADGES.map((badge) => {
-          const unlocked = unlockedList.includes(badge.id);
+          const unlocked = totalValidations >= badge.threshold;
           return `
             <div class="rec-badge-card ${unlocked ? "unlocked" : ""}">
               <div class="rec-badge-icon" style="background: ${badge.color}; opacity: ${unlocked ? 1 : 0.3}">
@@ -225,7 +226,7 @@ export async function mount(root) {
               </div>
               <div class="rec-badge-name">${esc(badge.name)}</div>
               <div class="rec-badge-desc">${esc(badge.desc)}</div>
-              ${!unlocked ? '<div class="rec-locked-overlay">Bloqué</div>' : ""}
+              ${!unlocked ? `<div class="rec-locked-overlay">${totalValidations}/${badge.threshold}</div>` : ""}
             </div>
           `;
         }).join("")}
