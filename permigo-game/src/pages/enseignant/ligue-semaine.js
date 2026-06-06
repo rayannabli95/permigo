@@ -263,7 +263,7 @@ function _render(root, rows) {
   const motiv =
     prevLeague && ptsToNext > 0
       ? `<div class="ls-w-motivation">
-        <div class="ls-w-motivation-title">Plus que ${ptsToNext} pt${ptsToNext > 1 ? "s" : ""} pour la Ligue ${esc(prevLeague.name)} ${prevLeague.emoji}</div>
+        <div class="ls-w-motivation-title">Plus que ${ptsToNext} pt${ptsToNext > 1 ? "s" : ""} pour la Ligue ${esc(prevLeague.name)}</div>
         <div class="ls-w-motivation-sub">Enregistre une séance pour valider des compétences et monter en ligue.</div>
         <button class="ls-w-motivation-cta" id="ls-seance-cta">
           ${icon("plus", { size: 16, strokeWidth: 2.5 })} Enregistrer une séance

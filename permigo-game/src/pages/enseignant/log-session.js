@@ -115,7 +115,7 @@ export async function mount(root) {
     <div class="ls-header">
       <button class="ls-back" id="ls-back" aria-label="Retour">${icon("arrow-left", { size: 20, strokeWidth: 2.5 })}</button>
       <h1 class="ls-header-title" tabindex="-1">Séance</h1>
-      <span class="ls-step-pill" id="ls-step-pill">1/3</span>
+      <span class="ls-step-pill" id="ls-step-pill">1/4</span>
     </div>
     <div class="ls-screen" id="ls-screen">
       ${[1, 2, 3].map(() => `<div class="ls-card"><div class="skel" style="height:80px;border-radius:12px"></div></div>`).join("")}

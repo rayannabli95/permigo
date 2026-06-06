@@ -682,7 +682,7 @@ function renderNextUnlock(state) {
           </div>
           <div class="pcp-next-info">
             <div class="pcp-next-remaining">
-              ${remaining}<span>validation${remaining > 1 ? "s" : ""} restantes</span>
+              ${remaining} <span>validation${remaining > 1 ? "s" : ""} restantes</span>
             </div>
             <div class="pcp-next-reward-label">${esc(label)}</div>
             <div class="pcp-next-reward-desc">${esc(title)}</div>

@@ -10,6 +10,7 @@ import { toast } from "@/components/common/toast.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
+import { navigate } from "@/router.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -305,10 +306,13 @@ function deltaLabel(pct) {
 
 // ─── Render helpers ───────────────────────────────────────────────
 function renderKPI(kpi) {
+  const noPrev = kpi.acquises_prev == null || kpi.acquises_prev === 0;
   const delta =
-    kpi.delta_pct != null
+    kpi.delta_pct != null && !noPrev
       ? `<span class="bl-kpi-delta ${deltaClass(kpi.delta_pct)}">${esc(deltaLabel(kpi.delta_pct))}</span>`
-      : "";
+      : noPrev
+        ? `<span class="bl-kpi-delta flat">Premier trimestre</span>`
+        : "";
   const scoreColor =
     kpi.score_moyen >= 70
       ? "var(--grk)"
@@ -464,6 +468,9 @@ export async function mount(root, eleveId) {
   <!-- HEADER -->
   <div class="bl-hd">
     <div class="bl-hd-left">
+      <button class="bl-print-btn" id="bl-btn-back" aria-label="Retour" style="margin-bottom:10px">
+        ${icon("arrow-left", { size: 15 })} Retour
+      </button>
       <div class="bl-school-logo">PermiGo Autopilot</div>
       <h1 class="bl-title" tabindex="-1">Bilan de ${esc(prenom)} ${esc(nom)}</h1>
       <div class="bl-subtitle">Rapport trimestriel · Permis B</div>
@@ -492,6 +499,10 @@ export async function mount(root, eleveId) {
   ${renderByMonde(by_monde ?? {})}
 
 </div>`;
+
+  root.querySelector("#bl-btn-back")?.addEventListener("click", () => {
+    navigate(`#/livret/${eleveId}`);
+  });
 
   root.querySelector("#bl-btn-print")?.addEventListener("click", () => {
     track("bilan.print", { eleve_id: eleveId });

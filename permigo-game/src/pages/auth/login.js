@@ -34,6 +34,9 @@ const AUTH_ERRORS_FR = {
     "Trop de codes envoyés — réessaie dans 60 secondes.",
   "For security purposes, you can only request this once every 60 seconds":
     "Attends 60 secondes avant de renvoyer un code.",
+  "Signups not allowed for otp":
+    "Cette adresse email n'est pas enregistrée. Vérifie l'adresse saisie.",
+  "Unable to validate email address: invalid format": "Adresse email invalide.",
 };
 function translateAuthError(msg) {
   if (!msg) return null;

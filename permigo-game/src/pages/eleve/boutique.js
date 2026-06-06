@@ -3,35 +3,43 @@
 // RPCs : get_items_catalog() · purchase_item(p_item_id)
 // Onglets : Skins (avatars = voitures) · Autres (thèmes + fonds permis)
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { toast } from '@/components/common/toast.js';
-import { haptic } from '@/utils/haptic.js';
-import { equipItem, unequipItem, setEquippedAsset, getEquipped, getEquippedAsset } from '@/utils/game-state.js';
-import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { toast } from "@/components/common/toast.js";
+import { haptic } from "@/utils/haptic.js";
+import {
+  equipItem,
+  unequipItem,
+  setEquippedAsset,
+  getEquipped,
+  getEquippedAsset,
+} from "@/utils/game-state.js";
+import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 
 const TABS = [
-  { key: 'skins', label: 'Skins',  emoji: '🚗' },
-  { key: 'autres', label: 'Autres', emoji: '🎁' },
+  { key: "skins", label: "Skins", emoji: "🚗" },
+  { key: "autres", label: "Autres", emoji: "🎁" },
 ];
 
 // Types regroupés sous chaque onglet
 const TAB_TYPES = {
-  skins:  ['avatar'],
-  autres: ['theme', 'permis_bg'],
+  skins: ["avatar"],
+  autres: ["theme", "permis_bg"],
 };
 
 // Néon par rareté — couleurs explicites (indépendantes du thème)
 const RARITY_META = {
-  commun:     { label: 'Commun',     c: '#3b82f6', order: 0 },
-  rare:       { label: 'Rare',       c: '#8b5cf6', order: 1 },
-  epique:     { label: 'Épique',     c: '#f97316', order: 2 },
-  legendaire: { label: 'Légendaire', c: '#fbbf24', order: 3 },
+  commun: { label: "Commun", c: "#3b82f6", order: 0 },
+  rare: { label: "Rare", c: "#8b5cf6", order: 1 },
+  epique: { label: "Épique", c: "#f97316", order: 2 },
+  legendaire: { label: "Légendaire", c: "#fbbf24", order: 3 },
 };
-function rm(rarity) { return RARITY_META[rarity] ?? RARITY_META.commun; }
+function rm(rarity) {
+  return RARITY_META[rarity] ?? RARITY_META.commun;
+}
 
 // ─── CSS ──────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -252,25 +260,31 @@ const STYLE = `<style>
 // Sans ça, l'équipement vit en localStorage → invisible du serveur, donc le
 // classement affiche toujours l'avatar d'inscription au lieu du skin équipé.
 async function syncAvatarUrlToProfile(slot, assetUrl) {
-  if (slot !== 'avatar') return;
+  if (slot !== "avatar") return;
   const me = getCurUser();
   if (!me) return;
   try {
-    await sb.from('profiles').update({ avatar_url: assetUrl || null }).eq('id', me.id);
+    await sb
+      .from("profiles")
+      .update({ avatar_url: assetUrl || null })
+      .eq("id", me.id);
     me.avatar_url = assetUrl || null;
-  } catch (e) { console.warn('[boutique] sync avatar_url failed', e); }
+  } catch (e) {
+    console.warn("[boutique] sync avatar_url failed", e);
+  }
 }
 
 // ─── Mount ────────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
-  track('page.view', { page: 'boutique' });
+  track("page.view", { page: "boutique" });
 
   // Réconciliation : un avatar équipé en local mais absent de la base (ancien
   // équipement) → on le pousse dans profiles.avatar_url pour le classement.
-  const equippedAv = getEquippedAsset('avatar');
-  if (equippedAv && equippedAv !== me.avatar_url) syncAvatarUrlToProfile('avatar', equippedAv);
+  const equippedAv = getEquippedAsset("avatar");
+  if (equippedAv && equippedAv !== me.avatar_url)
+    syncAvatarUrlToProfile("avatar", equippedAv);
 
   root.innerHTML = `${STYLE}
 <div class="bo2 anim-slide-up">
@@ -278,33 +292,36 @@ export async function mount(root) {
     <div class="bo2-hd-row">
       <h1 class="bo2-hd-title" tabindex="-1">Boutique</h1>
       <div class="bo2-gems" id="bo2-gems-badge">
-        <span class="bo2-gems-ico">${icon('gem',{size:13})}</span>
+        <span class="bo2-gems-ico">${icon("gem", { size: 13 })}</span>
         <span class="bo2-gems-val" id="bo2-gems-val">…</span>
       </div>
     </div>
     <div class="bo2-tabs" id="bo2-tabs">
-      ${TABS.map((t, i) => `
-        <button class="bo2-tab ${i === 0 ? 'active' : ''}" data-tab="${esc(t.key)}">${t.emoji} ${esc(t.label)}</button>
-      `).join('')}
+      ${TABS.map(
+        (t, i) => `
+        <button class="bo2-tab ${i === 0 ? "active" : ""}" data-tab="${esc(t.key)}">${t.emoji} ${esc(t.label)}</button>
+      `,
+      ).join("")}
     </div>
   </div>
   <div id="bo2-content">
     <div class="bo2-list">
-      ${[...Array(4)].map(() => `<div class="bo2-skel" style="height:92px"></div>`).join('')}
+      ${[...Array(4)].map(() => `<div class="bo2-skel" style="height:92px"></div>`).join("")}
     </div>
   </div>
 </div>`;
 
   const [profileRes, itemsRes] = await Promise.allSettled([
-    sb.from('profiles').select('gemmes').eq('id', me.id).maybeSingle(),
-    sb.rpc('get_items_catalog'),
+    sb.from("profiles").select("gemmes").eq("id", me.id).maybeSingle(),
+    sb.rpc("get_items_catalog"),
   ]);
 
   let gemmes = profileRes.value?.data?.gemmes ?? 0;
-  const catalogFailed = itemsRes.status === 'rejected' || !!itemsRes.value?.error;
+  const catalogFailed =
+    itemsRes.status === "rejected" || !!itemsRes.value?.error;
   const allItems = itemsRes.value?.data ?? [];
 
-  const gemsVal = root.querySelector('#bo2-gems-val');
+  const gemsVal = root.querySelector("#bo2-gems-val");
   if (gemsVal) gemsVal.textContent = gemmes;
 
   let activeTab = TABS[0].key;
@@ -312,11 +329,16 @@ export async function mount(root) {
   // Source unique du solde après achat.
   function applyPurchase(result, item) {
     if (!result || result.ok === false) return false;
-    const fallback = (typeof gemmes === 'number') ? gemmes - item.cost_gemmes : gemmes;
-    gemmes = (typeof result.new_balance === 'number') ? result.new_balance : fallback;
-    const target = allItems.find(i => i.id === item.id);
-    if (target) { target.owned = true; target.acquired_at = new Date().toISOString(); }
-    const gv = root.querySelector('#bo2-gems-val');
+    const fallback =
+      typeof gemmes === "number" ? gemmes - item.cost_gemmes : gemmes;
+    gemmes =
+      typeof result.new_balance === "number" ? result.new_balance : fallback;
+    const target = allItems.find((i) => i.id === item.id);
+    if (target) {
+      target.owned = true;
+      target.acquired_at = new Date().toISOString();
+    }
+    const gv = root.querySelector("#bo2-gems-val");
     if (gv) gv.textContent = gemmes;
     return true;
   }
@@ -337,30 +359,30 @@ export async function mount(root) {
       unequipItem(item.type);
       setEquippedAsset(item.type, null);
       syncAvatarUrlToProfile(item.type, null);
-      toast(`${item.name} retiré`, 'info');
+      toast(`${item.name} retiré`, "info");
     } else {
       equipItem(item.type, item.id);
       setEquippedAsset(item.type, item.asset_url || null);
       syncAvatarUrlToProfile(item.type, item.asset_url || null);
-      toast(`${item.name} équipé ✓`, 'success');
+      toast(`${item.name} équipé ✓`, "success");
     }
     renderTab(activeTab);
   }
 
   function renderTab(tabKey) {
     const types = TAB_TYPES[tabKey] || [];
-    const items = allItems.filter(i => types.includes(i.type));
-    const content = root.querySelector('#bo2-content');
+    const items = allItems.filter((i) => types.includes(i.type));
+    const content = root.querySelector("#bo2-content");
     if (!content) return;
 
     if (!items.length) {
       content.innerHTML = catalogFailed
-        ? `<div class="bo2-empty"><div class="bo2-empty-ico">${icon('alert-circle',{size:30})}</div><div class="bo2-empty-t">Boutique indisponible</div><div class="bo2-empty-d">Vérifie ta connexion et réessaie.</div></div>`
-        : `<div class="bo2-empty"><div class="bo2-empty-ico">${icon('shopping-bag',{size:30})}</div><div class="bo2-empty-t">Bientôt disponible</div><div class="bo2-empty-d">Ces items arrivent dans la prochaine mise à jour !</div></div>`;
+        ? `<div class="bo2-empty"><div class="bo2-empty-ico">${icon("alert-circle", { size: 30 })}</div><div class="bo2-empty-t">Boutique indisponible</div><div class="bo2-empty-d">Vérifie ta connexion et réessaie.</div></div>`
+        : `<div class="bo2-empty"><div class="bo2-empty-ico">${icon("shopping-bag", { size: 30 })}</div><div class="bo2-empty-t">Bientôt disponible</div><div class="bo2-empty-d">Ces items arrivent dans la prochaine mise à jour !</div></div>`;
       return;
     }
 
-    if (tabKey === 'skins') {
+    if (tabKey === "skins") {
       renderSkins(content, items);
     } else {
       renderGrid(content, items);
@@ -369,22 +391,26 @@ export async function mount(root) {
 
   // ── Onglet Skins : liste verticale néon ──
   function renderSkins(content, items) {
-    const sorted = [...items].sort((a, b) => rm(a.rarity).order - rm(b.rarity).order || a.cost_gemmes - b.cost_gemmes);
+    const sorted = [...items].sort(
+      (a, b) =>
+        rm(a.rarity).order - rm(b.rarity).order ||
+        a.cost_gemmes - b.cost_gemmes,
+    );
     content.innerHTML = `
       <div class="bo2-sec">
         <div class="bo2-sec-title">Skins de profil</div>
         <div class="bo2-sec-sub">Affiche ton style sur PermiGo</div>
       </div>
       <div class="bo2-list">
-        ${sorted.map((item, idx) => renderSkinCard(item, gemmes, idx)).join('')}
+        ${sorted.map((item, idx) => renderSkinCard(item, gemmes, idx)).join("")}
       </div>
       ${renderRarityScale(sorted)}`;
 
-    content.querySelectorAll('.bo2-skin').forEach(el => {
-      el.addEventListener('click', () => {
-        haptic('select');
-        const item = allItems.find(i => i.id === el.dataset.itemId);
-        if (item) buyFlow(item);   // ouvre la fiche détail (achat OU équiper depuis la fiche)
+    content.querySelectorAll(".bo2-skin").forEach((el) => {
+      el.addEventListener("click", () => {
+        haptic("select");
+        const item = allItems.find((i) => i.id === el.dataset.itemId);
+        if (item) buyFlow(item); // ouvre la fiche détail (achat OU équiper depuis la fiche)
       });
     });
   }
@@ -392,23 +418,28 @@ export async function mount(root) {
   // ── Onglet Autres : grille (thèmes + fonds) ──
   function renderGrid(content, items) {
     content.innerHTML = `<div class="bo2-grid">
-      ${items.map((item, idx) => renderGridCard(item, gemmes, idx)).join('')}
+      ${items.map((item, idx) => renderGridCard(item, gemmes, idx)).join("")}
     </div>`;
 
-    content.querySelectorAll('.bo2-card').forEach(el => {
-      el.addEventListener('click', () => {
-        haptic('select');
-        const item = allItems.find(i => i.id === el.dataset.itemId);
+    content.querySelectorAll(".bo2-card").forEach((el) => {
+      el.addEventListener("click", () => {
+        haptic("select");
+        const item = allItems.find((i) => i.id === el.dataset.itemId);
         if (!item) return;
-        if (item.owned) { toggleEquip(item); return; }
+        if (item.owned) {
+          toggleEquip(item);
+          return;
+        }
         buyFlow(item);
       });
     });
-    content.querySelectorAll('.bo2-price-btn:not(:disabled)').forEach(btn => {
-      btn.addEventListener('click', e => {
+    content.querySelectorAll(".bo2-price-btn:not(:disabled)").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        haptic('select');
-        const item = allItems.find(i => i.id === btn.closest('.bo2-card')?.dataset.itemId);
+        haptic("select");
+        const item = allItems.find(
+          (i) => i.id === btn.closest(".bo2-card")?.dataset.itemId,
+        );
         if (item && !item.owned) buyFlow(item);
       });
     });
@@ -416,14 +447,16 @@ export async function mount(root) {
 
   renderTab(activeTab);
 
-  root.querySelector('#bo2-tabs')?.addEventListener('click', e => {
-    const btn = e.target.closest('.bo2-tab');
+  root.querySelector("#bo2-tabs")?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".bo2-tab");
     if (!btn) return;
-    haptic('tap');
+    haptic("tap");
     activeTab = btn.dataset.tab;
-    root.querySelectorAll('.bo2-tab').forEach(b => b.classList.toggle('active', b === btn));
+    root
+      .querySelectorAll(".bo2-tab")
+      .forEach((b) => b.classList.toggle("active", b === btn));
     requestAnimationFrame(() => renderTab(activeTab));
-    track('boutique.tab_changed', { tab: activeTab });
+    track("boutique.tab_changed", { tab: activeTab });
   });
 }
 
@@ -440,10 +473,10 @@ function renderSkinCard(item, gemmes, idx) {
   } else if (item.owned) {
     cta = `<button class="bo2-equip-btn">Équiper</button>`;
   } else if (canAfford) {
-    cta = `<button class="bo2-buy" style="background:${r.c};box-shadow:0 4px 14px -4px ${r.c}">${icon('gem',{size:13})} ${item.cost_gemmes}</button>`;
+    cta = `<button class="bo2-buy" style="background:${r.c};box-shadow:0 4px 14px -4px ${r.c}">${icon("gem", { size: 13 })} ${item.cost_gemmes}</button>`;
   } else {
-    cta = `<div class="bo2-lock" style="background:${r.c}55">${icon('lock',{size:14})}</div>
-           <span class="bo2-buy" style="background:transparent;color:var(--mu);padding-left:8px">${icon('gem',{size:13})} ${item.cost_gemmes}</span>`;
+    cta = `<div class="bo2-lock" style="background:${r.c}55">${icon("lock", { size: 14 })}</div>
+           <span class="bo2-buy" style="background:transparent;color:var(--mu);padding-left:8px">${icon("gem", { size: 13 })} ${item.cost_gemmes}</span>`;
   }
 
   return `
@@ -455,7 +488,7 @@ function renderSkinCard(item, gemmes, idx) {
       <div class="bo2-skin-mid">
         <div class="bo2-skin-name">${esc(item.name)}</div>
         <span class="bo2-pill" style="background:${r.c}">${esc(r.label)}</span>
-        ${isEquipped ? `<div class="bo2-skin-sub">✓ Équipé</div>` : (item.owned ? `<div class="bo2-skin-sub" style="color:var(--mu2)">Débloqué</div>` : '')}
+        ${isEquipped ? `<div class="bo2-skin-sub">✓ Équipé</div>` : item.owned ? `<div class="bo2-skin-sub" style="color:var(--mu2)">Débloqué</div>` : ""}
       </div>
       <div class="bo2-cta">${cta}</div>
     </div>`;
@@ -464,23 +497,27 @@ function renderSkinCard(item, gemmes, idx) {
 // ─── Rarity scale footer ──────────────────────────────────────
 function renderRarityScale(items) {
   // Prix par rareté tirés des items présents (fallback ordre des paliers)
-  const order = ['commun', 'rare', 'epique', 'legendaire'];
+  const order = ["commun", "rare", "epique", "legendaire"];
   const byRarity = {};
-  items.forEach(i => { if (!byRarity[i.rarity]) byRarity[i.rarity] = i.cost_gemmes; });
-  const icons = { commun: '🚙', rare: '🏎', epique: '🚐', legendaire: '🏆' };
+  items.forEach((i) => {
+    if (!byRarity[i.rarity]) byRarity[i.rarity] = i.cost_gemmes;
+  });
+  const icons = { commun: "🚙", rare: "🏎", epique: "🚐", legendaire: "🏆" };
   return `
     <div class="bo2-scale">
       <div class="bo2-scale-title">Les raretés</div>
       <div class="bo2-scale-row">
-        ${order.map(k => {
-          const r = RARITY_META[k];
-          const price = byRarity[k];
-          return `<div class="bo2-scale-item">
+        ${order
+          .map((k) => {
+            const r = RARITY_META[k];
+            const price = byRarity[k];
+            return `<div class="bo2-scale-item">
             <div class="bo2-scale-dot" style="background:${r.c}26;border:2px solid ${r.c};box-shadow:0 0 12px ${r.c}66">${icons[k]}</div>
             <div class="bo2-scale-lbl" style="color:${r.c}">${esc(r.label)}</div>
-            ${price != null ? `<div class="bo2-scale-price">${icon('gem',{size:13})} ${price}</div>` : ''}
+            ${price != null ? `<div class="bo2-scale-price">${icon("gem", { size: 13 })} ${price}</div>` : ""}
           </div>`;
-        }).join('')}
+          })
+          .join("")}
       </div>
     </div>`;
 }
@@ -494,8 +531,8 @@ function renderGridCard(item, gemmes, idx) {
   const isEquipped = item.owned && getEquipped()[item.type] === item.id;
 
   const preview = imgUrl
-    ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-      + `<div class="bo2-card-preview-circle" style="background:${esc(color)}20;color:${esc(color)};display:none">${typeEmoji(item.type)}</div>`
+    ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` +
+      `<div class="bo2-card-preview-circle" style="background:${esc(color)}20;color:${esc(color)};display:none">${typeEmoji(item.type)}</div>`
     : `<div class="bo2-card-preview-circle" style="background:${esc(color)}20;color:${esc(color)}">${typeEmoji(item.type)}</div>`;
 
   return `
@@ -503,15 +540,18 @@ function renderGridCard(item, gemmes, idx) {
       style="border:1.5px solid ${r.c}66; box-shadow:0 0 12px ${r.c}1f; animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
       <div class="bo2-card-preview">
         ${preview}
-        ${item.owned ? `<div class="bo2-card-owned-badge">✓ Débloqué</div>` : ''}
+        ${item.owned ? `<div class="bo2-card-owned-badge">✓ Débloqué</div>` : ""}
       </div>
       <div class="bo2-card-info">
         <div class="bo2-card-name">${esc(item.name)}</div>
         <div class="bo2-card-footer">
           <span class="bo2-pill" style="background:${r.c}">${esc(r.label)}</span>
-          ${item.owned
-            ? (isEquipped ? `<div class="bo2-owned-txt">✓ Équipé</div>` : `<div class="bo2-owned-txt" style="color:var(--mu2)">Équiper</div>`)
-            : `<button class="bo2-price-btn ${canAfford ? '' : 'cant-afford'}" style="${canAfford ? `background:${r.c}` : ''}" ${!canAfford ? 'disabled' : ''}>${icon('gem',{size:13})} ${item.cost_gemmes}</button>`
+          ${
+            item.owned
+              ? isEquipped
+                ? `<div class="bo2-owned-txt">✓ Équipé</div>`
+                : `<div class="bo2-owned-txt" style="color:var(--mu2)">Équiper</div>`
+              : `<button class="bo2-price-btn ${canAfford ? "" : "cant-afford"}" style="${canAfford ? `background:${r.c}` : ""}" ${!canAfford ? "disabled" : ""}>${icon("gem", { size: 13 })} ${item.cost_gemmes}</button>`
           }
         </div>
       </div>
@@ -522,25 +562,27 @@ function renderGridCard(item, gemmes, idx) {
 function thumbHtml(item, r, size) {
   const imgUrl = item.asset_url ?? null;
   if (imgUrl) {
-    return `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`
-      + `<span class="bo2-fallback" style="display:none">${typeEmoji(item.type)}</span>`;
+    return (
+      `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">` +
+      `<span class="bo2-fallback" style="display:none">${typeEmoji(item.type)}</span>`
+    );
   }
   return `<span class="bo2-fallback">${typeEmoji(item.type)}</span>`;
 }
 
 function typeEmoji(type) {
-  if (type === 'avatar')    return '🚗';
-  if (type === 'theme')     return '🎨';
-  if (type === 'permis_bg') return '🖼';
-  return '🎁';
+  if (type === "avatar") return "🚗";
+  if (type === "theme") return "🎨";
+  if (type === "permis_bg") return "🖼";
+  return "🎁";
 }
 
 // ─── Gem float animation ──────────────────────────────────────
 function showGemsFloat(root, text) {
-  const badge = root.querySelector('#bo2-gems-badge');
+  const badge = root.querySelector("#bo2-gems-badge");
   if (!badge) return;
-  const el = document.createElement('div');
-  el.className = 'bo2-gems-float';
+  const el = document.createElement("div");
+  el.className = "bo2-gems-float";
   el.textContent = text;
   badge.appendChild(el);
   setTimeout(() => el.remove(), 900);
@@ -548,6 +590,7 @@ function showGemsFloat(root, text) {
 
 // ─── Detail modal (fiche skin / item) ─────────────────────────
 function showDetailModal(item, gemmes, onConfirm) {
+  if (document.querySelector(".bo2-modal-bg")) return; // one modal at a time
   const r = rm(item.rarity);
   const afterBalance = gemmes - item.cost_gemmes;
   const canAfford = afterBalance >= 0;
@@ -558,25 +601,28 @@ function showDetailModal(item, gemmes, onConfirm) {
     ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="bo2-fallback" style="display:none">${typeEmoji(item.type)}</span>`
     : `<span class="bo2-fallback">${typeEmoji(item.type)}</span>`;
 
-  let cta, balanceLine = '';
+  let cta,
+    balanceLine = "";
   // Bloc Prix / Solde — visible seulement pour un item pas encore possédé
-  const priceBlock = item.owned ? '' : `
+  const priceBlock = item.owned
+    ? ""
+    : `
       <div class="bo2-modal-price">
-        <div class="bo2-price-row"><span>Prix</span><strong>${icon('gem',{size:13})} ${item.cost_gemmes}</strong></div>
-        <div class="bo2-price-row sub"><span>Ton solde</span><span>${icon('gem',{size:13})} ${gemmes}</span></div>
+        <div class="bo2-price-row"><span>Prix</span><strong>${icon("gem", { size: 13 })} ${item.cost_gemmes}</strong></div>
+        <div class="bo2-price-row sub"><span>Ton solde</span><span>${icon("gem", { size: 13 })} ${gemmes}</span></div>
       </div>`;
   if (item.owned) {
-    cta = `<button class="bo2-modal-cta equip" id="bo2-cta">${isEquipped ? '✓ Équipé — retirer' : 'Équiper'}</button>`;
+    cta = `<button class="bo2-modal-cta equip" id="bo2-cta">${isEquipped ? "✓ Équipé — retirer" : "Équiper"}</button>`;
   } else if (canAfford) {
-    cta = `<button class="bo2-modal-cta buy" id="bo2-cta">Acheter — ${item.cost_gemmes} ${icon('gem',{size:13})}</button>`;
-    balanceLine = `<div class="bo2-modal-balance">Il te restera <strong>${afterBalance} ${icon('gem',{size:13})}</strong> après l'achat</div>`;
+    cta = `<button class="bo2-modal-cta buy" id="bo2-cta">Acheter — ${item.cost_gemmes} ${icon("gem", { size: 13 })}</button>`;
+    balanceLine = `<div class="bo2-modal-balance">Il te restera <strong>${afterBalance} ${icon("gem", { size: 13 })}</strong> après l'achat</div>`;
   } else {
-    cta = `<button class="bo2-modal-cta locked" disabled>${icon('lock',{size:14})} Pas assez de gemmes</button>`;
-    balanceLine = `<div class="bo2-modal-balance" style="color:#f87171">Il te manque ${item.cost_gemmes - gemmes} ${icon('gem',{size:13})}</div>`;
+    cta = `<button class="bo2-modal-cta locked" disabled>${icon("lock", { size: 14 })} Pas assez de gemmes</button>`;
+    balanceLine = `<div class="bo2-modal-balance" style="color:#f87171">Il te manque ${item.cost_gemmes - gemmes} ${icon("gem", { size: 13 })}</div>`;
   }
 
-  const overlay = document.createElement('div');
-  overlay.className = 'bo2-modal-bg';
+  const overlay = document.createElement("div");
+  overlay.className = "bo2-modal-bg";
   overlay.innerHTML = `
     <div class="bo2-modal">
       <div class="bo2-modal-handle"></div>
@@ -588,7 +634,7 @@ function showDetailModal(item, gemmes, onConfirm) {
       <div class="bo2-modal-body">
         <div class="bo2-modal-pill" style="background:${r.c}">${esc(r.label)}</div>
         <div class="bo2-modal-name">${esc(item.name)}</div>
-        <div class="bo2-modal-desc">${esc(item.description || '')}</div>
+        <div class="bo2-modal-desc">${esc(item.description || "")}</div>
       </div>
       ${priceBlock}
       ${cta}
@@ -597,27 +643,42 @@ function showDetailModal(item, gemmes, onConfirm) {
     </div>`;
 
   document.body.appendChild(overlay);
-  track('boutique.detail_opened', { item_id: item.id });
+  track("boutique.detail_opened", { item_id: item.id });
 
-  const close = () => { haptic('select'); overlay.remove(); };
-  enableSheetSwipe(overlay.querySelector('.bo2-modal'), close, { overlay });
-  overlay.querySelector('#bo2-modal-cancel')?.addEventListener('click', close);
-  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  const close = () => {
+    haptic("select");
+    overlay.remove();
+  };
+  enableSheetSwipe(overlay.querySelector(".bo2-modal"), close, { overlay });
+  overlay.querySelector("#bo2-modal-cancel")?.addEventListener("click", close);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) close();
+  });
 
-  const ctaBtn = overlay.querySelector('#bo2-cta');
+  const ctaBtn = overlay.querySelector("#bo2-cta");
   if (ctaBtn && !ctaBtn.disabled) {
-    ctaBtn.addEventListener('click', async () => {
+    ctaBtn.addEventListener("click", async () => {
       if (item.owned) {
         // équiper / retirer directement
         const eq = getEquipped();
         if (eq[item.type] === item.id) {
-          unequipItem(item.type); setEquippedAsset(item.type, null); syncAvatarUrlToProfile(item.type, null); toast(`${item.name} retiré`, 'info');
+          unequipItem(item.type);
+          setEquippedAsset(item.type, null);
+          syncAvatarUrlToProfile(item.type, null);
+          toast(`${item.name} retiré`, "info");
         } else {
-          equipItem(item.type, item.id); setEquippedAsset(item.type, item.asset_url || null); syncAvatarUrlToProfile(item.type, item.asset_url || null); toast(`${item.name} équipé ✓`, 'success');
+          equipItem(item.type, item.id);
+          setEquippedAsset(item.type, item.asset_url || null);
+          syncAvatarUrlToProfile(item.type, item.asset_url || null);
+          toast(`${item.name} équipé ✓`, "success");
         }
         overlay.remove();
         // force refresh de la liste sous-jacente
-        window.dispatchEvent(new CustomEvent('pg-equipped-changed', { detail: { slot: item.type, itemId: item.id } }));
+        window.dispatchEvent(
+          new CustomEvent("pg-equipped-changed", {
+            detail: { slot: item.type, itemId: item.id },
+          }),
+        );
         return;
       }
       overlay.remove();
@@ -629,29 +690,46 @@ function showDetailModal(item, gemmes, onConfirm) {
 // ─── Execute purchase ─────────────────────────────────────────
 async function doPurchase(item, root, allItems) {
   try {
-    const { data, error } = await sb.rpc('purchase_item', { p_item_id: item.id });
-    if (error) { toast('Erreur lors de l\'achat', 'error'); return null; }
-    if (data?.error === 'insufficient_gemmes') { toast('Pas assez de gemmes gemmes', 'error'); return null; }
-    if (data?.error === 'already_owned')       { toast('Déjà dans ton inventaire', 'info'); return null; }
-    if (data?.error)                           { toast('Achat impossible', 'error'); return null; }
-    haptic('success');
+    const { data, error } = await sb.rpc("purchase_item", {
+      p_item_id: item.id,
+    });
+    if (error) {
+      toast("Erreur lors de l'achat", "error");
+      return null;
+    }
+    if (data?.error === "insufficient_gemmes") {
+      toast("Pas assez de gemmes gemmes", "error");
+      return null;
+    }
+    if (data?.error === "already_owned") {
+      toast("Déjà dans ton inventaire", "info");
+      return null;
+    }
+    if (data?.error) {
+      toast("Achat impossible", "error");
+      return null;
+    }
+    haptic("success");
 
     // Auto-équipement de l'item acheté
     try {
       equipItem(item.type, item.id);
       setEquippedAsset(item.type, item.asset_url || null);
       syncAvatarUrlToProfile(item.type, item.asset_url || null);
-      toast(`${item.name} équipé !`, 'success', 3000);
+      toast(`${item.name} équipé !`, "success", 3000);
     } catch (eqErr) {
-      console.warn('[boutique] auto-equip failed', eqErr);
-      toast(`${item.name} débloqué !`, 'success', 3000);
+      console.warn("[boutique] auto-equip failed", eqErr);
+      toast(`${item.name} débloqué !`, "success", 3000);
     }
 
-    track('boutique.item_purchased', { item_id: item.id, cost: item.cost_gemmes });
+    track("boutique.item_purchased", {
+      item_id: item.id,
+      cost: item.cost_gemmes,
+    });
     return data;
   } catch (e) {
-    console.error('[boutique] purchase', e);
-    toast('Erreur lors de l\'achat', 'error');
+    console.error("[boutique] purchase", e);
+    toast("Erreur lors de l'achat", "error");
     return null;
   }
 }
