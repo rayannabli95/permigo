@@ -1080,7 +1080,7 @@ function render({
     <div class="footer-sep"></div>
     <div class="footer-stat">
       <div class="footer-val">${Math.max(0, 28 - totalValidated)}</div>
-      <div class="footer-lbl">avant l'examen blanc</div>
+      <div class="footer-lbl">avant le seuil examen blanc (28/31)</div>
     </div>
   </div>
 
@@ -1234,10 +1234,12 @@ function renderActionDuJour(quest, pendingNotif, totalValidated) {
     btnText = "Voir le parcours →";
     href = "#/parcours";
   } else {
-    title = "Ton parcours d'examen";
-    sub = "5 parcours · 15 questions · estime tes chances au permis";
-    btnText = "Démarrer l'examen →";
-    href = "#/exam-blanc";
+    // L'examen blanc est désormais le point d'entrée unique via la Boule de
+    // cristal (cf. C8). L'action du jour reste sur la continuation du parcours.
+    title = "Continue ton parcours";
+    sub = "Avance vers ta prochaine compétence REMC";
+    btnText = "Voir le parcours →";
+    href = "#/parcours";
   }
 
   return `
@@ -1501,6 +1503,13 @@ async function _loadAndInjectCrystalBall(root) {
         .cb-orb-num .cb-pct{font-size:24px;opacity:.92;margin-left:1px}
         @keyframes cbPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(196,181,253,.5))}50%{filter:drop-shadow(0 0 13px rgba(224,210,255,.95))}}
         .acc2-cb-msg{font:600 14.5px/1.4 'Inter',sans-serif;color:rgba(255,255,255,.94);margin:8px 0 0;text-align:center;position:relative;z-index:2}
+        .acc2-crystal[role=button]{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .15s ease}
+        .acc2-crystal[role=button]:active{transform:scale(.985)}
+        .acc2-crystal[role=button]:focus-visible{outline:2px solid #c4b5fd;outline-offset:3px}
+        @media(hover:hover) and (pointer:fine){.acc2-crystal[role=button]:hover{box-shadow:0 18px 46px -12px rgba(91,33,182,.85)}}
+        .acc2-cb-cta{display:flex;align-items:center;justify-content:center;gap:6px;margin:16px auto 0;padding:11px 18px;
+          background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:14px;
+          font:700 13.5px/1 'Plus Jakarta Sans',sans-serif;color:#fff;position:relative;z-index:2;backdrop-filter:blur(6px)}
         .acc2-cb-axes-lbl{font:600 12px/1 'Inter',sans-serif;color:rgba(255,255,255,.8);margin:16px 0 8px;text-align:center;position:relative;z-index:2}
         .acc2-cb-chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;position:relative;z-index:2}
         .acc2-cb-chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);border-radius:999px;padding:6px 12px;font:700 12.5px/1 'Inter',sans-serif;color:#fff}
@@ -1537,7 +1546,7 @@ async function _loadAndInjectCrystalBall(root) {
     anchor.insertAdjacentHTML(
       "beforebegin",
       `
-      <div class="acc2-crystal" id="acc-crystal">
+      <div class="acc2-crystal" id="acc-crystal" role="button" tabindex="0" aria-label="Boule de cristal — passer l'examen blanc">
         <div class="acc2-cb-head"><span aria-hidden="true" style="display:inline-flex;vertical-align:middle">${icon("eye", { size: 14, strokeWidth: 1.5 })}</span> Boule de cristal</div>
         <div class="cb-stage">
           <div class="cb-orb">
@@ -1549,8 +1558,26 @@ async function _loadAndInjectCrystalBall(root) {
           </div>
         </div>
         <p class="acc2-cb-msg">${esc(msg)}</p>
+        <div class="acc2-cb-cta">Passer l'examen blanc ${icon("arrow-right", { size: 14 })}</div>
       </div>`,
     );
+
+    // C8 — la Boule de cristal est le point d'entrée examen unique
+    const cbCard = root.querySelector("#acc-crystal");
+    if (cbCard) {
+      const openExam = () => {
+        haptic("select");
+        track("crystal_ball.tapped", { prediction_pct: pct });
+        navigate("#/exam-blanc");
+      };
+      cbCard.addEventListener("click", openExam);
+      cbCard.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openExam();
+        }
+      });
+    }
 
     track("crystal_ball.viewed", {
       prediction_pct: pct,
