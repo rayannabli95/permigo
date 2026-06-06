@@ -43,6 +43,7 @@ const ROUTES = {
     bilan: () => import("@/pages/enseignant/bilan.js"),
     "trophees-moniteur": () =>
       import("@/pages/enseignant/trophees-moniteur.js"),
+    "badges-moniteur": () => import("@/pages/enseignant/badges-moniteur.js"),
     "ligue-semaine": () => import("@/pages/enseignant/ligue-semaine.js"),
     boutique: () => import("@/pages/enseignant/shop-moniteur.js"),
     "log-session": () => import("@/pages/enseignant/log-session.js"),
