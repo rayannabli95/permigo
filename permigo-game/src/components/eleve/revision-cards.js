@@ -10,17 +10,17 @@
 // → [{ competence_id, reason, score, nom, monde, ordre }]
 // reasons : quiz_fails | old_validation | consolidation_due
 // ═══════════════════════════════════════════════════════════════
-import { sb }          from '@/auth/auth.js';
-import { esc }         from '@/utils/escape.js';
-import { track }       from '@/services/analytics.js';
-import { navigate }    from '@/router.js';
-import { icon }        from '@/utils/icons.js';
+import { sb } from "@/auth/auth.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { icon } from "@/utils/icons.js";
 
-const STYLE_ID = 'revision-cards-style';
+const STYLE_ID = "revision-cards-style";
 
 function ensureStyle() {
   if (document.head.querySelector(`#${STYLE_ID}`)) return;
-  const s = document.createElement('style');
+  const s = document.createElement("style");
   s.id = STYLE_ID;
   s.textContent = `
   .rc-section {
@@ -117,15 +117,15 @@ function ensureStyle() {
 }
 
 const REASON_LABELS = {
-  quiz_fails:        'Quiz raté — à retravailler',
-  old_validation:    'Acquis il y a longtemps — à rafraîchir',
-  consolidation_due: 'Quiz de révision à refaire',
+  quiz_fails: "Quiz raté — à retravailler",
+  old_validation: "Acquis il y a longtemps — à rafraîchir",
+  consolidation_due: "Quiz de révision à refaire",
 };
 
 const REASON_ICONS = {
-  quiz_fails:        'alert-circle',
-  old_validation:    'clock',
-  consolidation_due: 'refresh-cw',
+  quiz_fails: "alert-circle",
+  old_validation: "clock",
+  consolidation_due: "refresh-cw",
 };
 
 /**
@@ -138,53 +138,59 @@ const REASON_ICONS = {
 export async function mountRevisionCards(root, { eleveId, limit = 3 }) {
   let recos = [];
   try {
-    const { data } = await sb.rpc('get_revision_recommendations', {
+    const { data, error } = await sb.rpc("get_revision_recommendations", {
       p_eleve_id: eleveId,
       p_limit: limit,
     });
+    if (error) {
+      console.error("[revision-cards] get_revision_recommendations:", error);
+      return;
+    }
     recos = data || [];
   } catch (e) {
-    console.warn('[revision-cards] fetch error', e);
+    console.warn("[revision-cards] fetch error", e);
     return;
   }
 
   if (recos.length === 0) return;
 
   ensureStyle();
-  track('revision_cards.shown', { count: recos.length, eleve_id: eleveId });
+  track("revision_cards.shown", { count: recos.length, eleve_id: eleveId });
 
-  const section = document.createElement('div');
-  section.className = 'rc-section';
+  const section = document.createElement("div");
+  section.className = "rc-section";
   section.innerHTML = `
     <div class="rc-hd">
       <div class="rc-title">
-        ${icon('book-open', { size: 14, strokeWidth: 2.2, color: 'var(--a)' })}
+        ${icon("book-open", { size: 14, strokeWidth: 2.2, color: "var(--a)" })}
         Mes révisions
       </div>
       <span class="rc-count">${recos.length}</span>
     </div>
     <div class="rc-list">
-      ${recos.map(r => {
-        const reasonKey = r.reason || 'old_validation';
-        const icoName   = REASON_ICONS[reasonKey] || 'clock';
-        return `
+      ${recos
+        .map((r) => {
+          const reasonKey = r.reason || "old_validation";
+          const icoName = REASON_ICONS[reasonKey] || "clock";
+          return `
           <div class="rc-card" data-comp-id="${esc(r.competence_id)}" role="button" tabindex="0">
             <div class="rc-dot rc-dot--${esc(reasonKey)}">
               ${icon(icoName, { size: 18, strokeWidth: 2.2 })}
             </div>
             <div class="rc-body">
-              <div class="rc-comp">${esc(r.nom || r.competence_id)}</div>
+              <div class="rc-comp">${esc(r.competence_nom || r.competence_id)}</div>
               <div class="rc-reason rc-reason--${esc(reasonKey)}">${esc(REASON_LABELS[reasonKey] || reasonKey)}</div>
             </div>
-            <div class="rc-arrow">${icon('chevron-right', { size: 16, strokeWidth: 2.5 })}</div>
+            <div class="rc-arrow">${icon("chevron-right", { size: 16, strokeWidth: 2.5 })}</div>
           </div>
         `;
-      }).join('')}
+        })
+        .join("")}
     </div>
   `;
 
   // Inject avant .acc-footer ou en fin du root
-  const footer = root.querySelector('.acc-footer');
+  const footer = root.querySelector(".acc-footer");
   if (footer) {
     root.insertBefore(section, footer);
   } else {
@@ -192,16 +198,24 @@ export async function mountRevisionCards(root, { eleveId, limit = 3 }) {
   }
 
   // Wire tap
-  section.querySelectorAll('.rc-card').forEach(card => {
+  section.querySelectorAll(".rc-card").forEach((card) => {
     const handler = () => {
       const compId = card.dataset.compId;
-      track('revision_cards.card_tapped', { competence_id: compId, eleve_id: eleveId });
-      try { localStorage.setItem('permigo:has_revised', '1'); } catch {}
+      track("revision_cards.card_tapped", {
+        competence_id: compId,
+        eleve_id: eleveId,
+      });
+      try {
+        localStorage.setItem("permigo:has_revised", "1");
+      } catch {}
       navigate(`#/quiz/${compId}/post_validation`);
     };
-    card.addEventListener('click', handler);
-    card.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+    card.addEventListener("click", handler);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handler();
+      }
     });
   });
 }

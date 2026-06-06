@@ -167,12 +167,16 @@ export async function mount(root, params = {}) {
 
   // Params viennent soit d'un appel direct, soit du hash #/quiz/C1a/post_validation
   const hashParts = location.hash.replace(/^#\/?/, "").split("/");
-  const competenceId = params.competenceId || hashParts[1] || null;
-  const type = params.type || hashParts[2] || "post_validation";
-  const autoStart = params.autoStart || hashParts[3] === "auto";
+  const competenceId = params?.competenceId || hashParts[1] || null;
+  const type = params?.type || hashParts[2] || "post_validation";
+  const autoStart = params?.autoStart || hashParts[3] === "auto";
 
   if (!competenceId) {
-    root.innerHTML = `<div style="padding:32px;text-align:center;color:var(--mu2)">Aucune compétence à réviser.</div>`;
+    root.innerHTML = `<div style="padding:48px 24px;text-align:center;font-family:'Inter',sans-serif;color:var(--mu2)">
+      <div style="font:700 16px/1.4 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">Quiz non disponible</div>
+      <p style="font-size:14px;margin:0 0 20px">Sélectionne une compétence depuis ton parcours pour démarrer un quiz.</p>
+      <a href="#/parcours" style="display:inline-block;padding:12px 24px;background:var(--a);color:#fff;border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;text-decoration:none">Retour au parcours</a>
+    </div>`;
     return;
   }
 
