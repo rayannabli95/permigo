@@ -730,6 +730,8 @@ async function renderInto(root, _me) {
     acquis: tousByEleve[id]?.acquis || 0,
   }));
 
+  // Total école (cohérent avec mes-eleves qui montre tous les élèves RLS)
+  const nbElevesEcole = (elevesAll.data || []).length;
   const nbElevesActifs = mesElevesActifs.length;
 
   // Consolidations à relancer (quizzes 48h overdue)
@@ -920,8 +922,8 @@ async function renderInto(root, _me) {
           <div class="aj-quickstat-lbl">Validée${acquisAujourdhui > 1 ? "s" : ""} aujourd'hui</div>
         </div>
         <div class="aj-quickstat">
-          <div class="aj-quickstat-val">${nbElevesActifs}</div>
-          <div class="aj-quickstat-lbl">Élève${nbElevesActifs > 1 ? "s" : ""} suivi${nbElevesActifs > 1 ? "s" : ""}</div>
+          <div class="aj-quickstat-val">${nbElevesEcole}</div>
+          <div class="aj-quickstat-lbl">Élève${nbElevesEcole > 1 ? "s" : ""} dans l'école</div>
         </div>
       </div>
 
