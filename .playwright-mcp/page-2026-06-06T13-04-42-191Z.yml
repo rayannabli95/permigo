@@ -1,0 +1,28 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e3]:
+    - button "Accueil PermiGo" [ref=e4] [cursor=pointer]:
+      - generic [ref=e5]: PermiGo
+    - generic [ref=e6]:
+      - button "Notifications" [ref=e9] [cursor=pointer]:
+        - img [ref=e10]
+      - button "Mon profil" [ref=e13] [cursor=pointer]:
+        - img "Latifa Sahli"
+  - main [active] [ref=e14]
+  - navigation "Navigation principale" [ref=e18]:
+    - button "Accueil" [ref=e19] [cursor=pointer]:
+      - img [ref=e20]
+      - generic [ref=e23]: Accueil
+    - button "Parcours" [ref=e24] [cursor=pointer]:
+      - img [ref=e25]
+      - generic [ref=e27]: Parcours
+    - button "Boutique" [ref=e28] [cursor=pointer]:
+      - img [ref=e29]
+      - generic [ref=e32]: Boutique
+    - button "Trophées" [ref=e33] [cursor=pointer]:
+      - img [ref=e34]
+      - generic [ref=e40]: Trophées
+    - button "Profil" [ref=e41] [cursor=pointer]:
+      - img [ref=e42]
+      - generic [ref=e45]: Profil

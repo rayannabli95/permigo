@@ -1,0 +1,44 @@
+- generic [active] [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e6]: PermiGo
+        - generic [ref=e7]:
+          - heading "Connexion" [level=2] [ref=e8]
+          - paragraph [ref=e9]: Élève, enseignant ou gérant — accède à ton espace
+          - generic [ref=e10]:
+            - generic:
+              - generic:
+                - text: Laisser vide
+                - textbox
+              - generic:
+                - text: Laisser vide
+                - textbox
+            - generic [ref=e11]:
+              - generic [ref=e12]: Email
+              - generic [ref=e13]:
+                - img [ref=e14]
+                - textbox "Email" [ref=e17]:
+                  - /placeholder: vous@exemple.fr
+                  - text: notanemail
+            - button "Envoyer le code" [ref=e51] [cursor=pointer]
+            - paragraph [ref=e35]: Signups not allowed for otp
+          - button "← Utiliser mon mot de passe" [ref=e52] [cursor=pointer]
+          - generic [ref=e37]: Démos rapides
+          - generic [ref=e38]:
+            - button "🎓 Élève" [ref=e39] [cursor=pointer]:
+              - generic [ref=e40]: 🎓
+              - generic [ref=e41]: Élève
+            - button "🚗 Enseignant" [ref=e42] [cursor=pointer]:
+              - generic [ref=e43]: 🚗
+              - generic [ref=e44]: Enseignant
+            - button "👑 Gérant" [ref=e45] [cursor=pointer]:
+              - generic [ref=e46]: 👑
+              - generic [ref=e47]: Gérant
+          - generic [ref=e48]:
+            - text: Pas encore de compte ?
+            - link "Créer un compte gratuit →" [ref=e49] [cursor=pointer]:
+              - /url: "#/signup"
+      - generic [ref=e50]: PermiGo · v7

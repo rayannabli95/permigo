@@ -1,0 +1,230 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e52]:
+    - button "Accueil PermiGo" [ref=e53] [cursor=pointer]:
+      - generic [ref=e54]: PermiGo
+    - generic [ref=e55]:
+      - button "Notifications" [ref=e58] [cursor=pointer]:
+        - img [ref=e59]
+      - button "Mon profil" [ref=e62] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e63]:
+    - generic [ref=e64]:
+      - generic [ref=e65]:
+        - heading "Bonjour, Rayan" [active] [level=1] [ref=e66]
+        - paragraph [ref=e67]: samedi 6 juin 2026
+        - generic [ref=e68]:
+          - generic [ref=e69]: +400 XP aujourd'hui
+          - generic [ref=e70]:
+            - img [ref=e71]
+            - text: 6 jours actifs
+      - generic [ref=e73] [cursor=pointer]:
+        - generic [ref=e74]:
+          - img [ref=e77]
+          - generic [ref=e82]:
+            - generic [ref=e83]: À relancer
+            - heading "4 élèves sans activité depuis 14 j" [level=2] [ref=e84]
+            - paragraph [ref=e85]: Dont Betty, Latifa…
+        - button "Voir qui relancer" [ref=e86]:
+          - text: Voir qui relancer
+          - img [ref=e87]
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - generic [ref=e91]: "40"
+          - generic [ref=e92]: Validées aujourd'hui
+        - generic [ref=e93]:
+          - generic [ref=e94]: "22"
+          - generic [ref=e95]: Élèves suivis
+      - 'link "Progression palier : Référent pédagogique" [ref=e96] [cursor=pointer]':
+        - /url: "#/parcours"
+        - img [ref=e98]
+        - generic [ref=e101]:
+          - generic [ref=e102]: Palier
+          - generic [ref=e103]: Référent pédagogique
+          - generic [ref=e106]: "Prochain : Mentorat de nouveaux moniteurs"
+        - img [ref=e108]
+      - generic [ref=e110]:
+        - generic [ref=e111]: Activité récente
+        - generic [ref=e112]:
+          - generic [ref=e113]:
+            - img "Leo Calvo" [ref=e115]
+            - generic [ref=e116]:
+              - generic [ref=e117]: Leo Calvo
+              - generic [ref=e118]:
+                - generic [ref=e119]: Organes, commandes, vérifications
+                - generic [ref=e120]: C1a
+            - generic [ref=e121]:
+              - generic [ref=e122]: Acquis
+              - generic [ref=e123]: 13:47
+          - generic [ref=e124]:
+            - img "Leo Calvo" [ref=e126]
+            - generic [ref=e127]:
+              - generic [ref=e128]: Leo Calvo
+              - generic [ref=e129]:
+                - generic [ref=e130]: S'installer au poste de conduite
+                - generic [ref=e131]: C1b
+            - generic [ref=e132]:
+              - generic [ref=e133]: Acquis
+              - generic [ref=e134]: 13:47
+          - generic [ref=e135]:
+            - img "Leo Calvo" [ref=e137]
+            - generic [ref=e138]:
+              - generic [ref=e139]: Leo Calvo
+              - generic [ref=e140]:
+                - generic [ref=e141]: Tenir le volant, trajectoire
+                - generic [ref=e142]: C1c
+            - generic [ref=e143]:
+              - generic [ref=e144]: Acquis
+              - generic [ref=e145]: 13:47
+          - generic [ref=e146]:
+            - img "Leo Calvo" [ref=e148]
+            - generic [ref=e149]:
+              - generic [ref=e150]: Leo Calvo
+              - generic [ref=e151]:
+                - generic [ref=e152]: Démarrer et s'arrêter
+                - generic [ref=e153]: C1d
+            - generic [ref=e154]:
+              - generic [ref=e155]: Acquis
+              - generic [ref=e156]: 13:47
+          - generic [ref=e157]:
+            - img "Leo Calvo" [ref=e159]
+            - generic [ref=e160]:
+              - generic [ref=e161]: Leo Calvo
+              - generic [ref=e162]:
+                - generic [ref=e163]: Doser accélération et freinage
+                - generic [ref=e164]: C1e
+            - generic [ref=e165]:
+              - generic [ref=e166]: Acquis
+              - generic [ref=e167]: 13:47
+      - generic [ref=e168]:
+        - generic [ref=e169]: Mes élèves
+        - generic [ref=e170]:
+          - button "Livret de Simon Léonardi" [ref=e171] [cursor=pointer]:
+            - img "Simon Léonardi" [ref=e173]
+            - generic [ref=e174]: Simon Léonardi
+            - generic [ref=e175]: 0/31
+            - generic [ref=e176]: ›
+          - button "Livret de Lakika" [ref=e177] [cursor=pointer]:
+            - img "Lakika" [ref=e179]
+            - generic [ref=e180]: Lakika
+            - generic [ref=e181]: 2/31
+            - generic [ref=e182]: ›
+          - button "Livret de Manon" [ref=e183] [cursor=pointer]:
+            - img "Manon" [ref=e185]
+            - generic [ref=e186]: Manon
+            - generic [ref=e187]: 4/31
+            - generic [ref=e188]: ›
+          - button "Livret de TestEleve2" [ref=e189] [cursor=pointer]:
+            - img "TestEleve2" [ref=e191]
+            - generic [ref=e192]: TestEleve2
+            - generic [ref=e193]: 0/31
+            - generic [ref=e194]: ›
+          - button "Livret de Pierre" [ref=e195] [cursor=pointer]:
+            - img "Pierre" [ref=e197]
+            - generic [ref=e198]: Pierre
+            - generic [ref=e199]: 9/31
+            - generic [ref=e200]: ›
+          - button "Livret de CADET BENOÎT Mendy" [ref=e201] [cursor=pointer]:
+            - img "CADET BENOÎT Mendy" [ref=e203]
+            - generic [ref=e204]: CADET BENOÎT Mendy
+            - generic [ref=e205]: 31/31
+            - generic [ref=e206]: ›
+          - button "Livret de Mehdi Suares" [ref=e207] [cursor=pointer]:
+            - img "Mehdi Suares" [ref=e209]
+            - generic [ref=e210]: Mehdi Suares
+            - generic [ref=e211]: 0/31
+            - generic [ref=e212]: ›
+          - button "Livret de Nahomie" [ref=e213] [cursor=pointer]:
+            - img "Nahomie" [ref=e215]
+            - generic [ref=e216]: Nahomie
+            - generic [ref=e217]: 7/31
+            - generic [ref=e218]: ›
+          - button "Livret de Lucas Dutron" [ref=e219] [cursor=pointer]:
+            - img "Lucas Dutron" [ref=e221]
+            - generic [ref=e222]: Lucas Dutron
+            - generic [ref=e223]: 3/31
+            - generic [ref=e224]: ›
+          - button "Livret de Hayder Sahli" [ref=e225] [cursor=pointer]:
+            - img "Hayder Sahli" [ref=e227]
+            - generic [ref=e228]: Hayder Sahli
+            - generic [ref=e229]: 9/31
+            - generic [ref=e230]: ›
+          - button "Livret de Leo Calvo" [ref=e231] [cursor=pointer]:
+            - img "Leo Calvo" [ref=e233]
+            - generic [ref=e234]: Leo Calvo
+            - generic [ref=e235]: 31/31
+            - generic [ref=e236]: ›
+          - button "Livret de Betty Ntoni Ndo" [ref=e237] [cursor=pointer]:
+            - generic [ref=e239]: BN
+            - generic [ref=e240]: Betty Ntoni Ndo
+            - generic [ref=e241]: 16/31
+            - generic [ref=e242]: ›
+          - button "Livret de Delphine Tourneur" [ref=e243] [cursor=pointer]:
+            - img "Delphine Tourneur" [ref=e245]
+            - generic [ref=e246]: Delphine Tourneur
+            - generic [ref=e247]: 18/31
+            - generic [ref=e248]: ›
+          - button "Livret de Lucas Trimbe" [ref=e249] [cursor=pointer]:
+            - img "Lucas Trimbe" [ref=e251]
+            - generic [ref=e252]: Lucas Trimbe
+            - generic [ref=e253]: 0/31
+            - generic [ref=e254]: ›
+          - button "Livret de Amine" [ref=e255] [cursor=pointer]:
+            - img "Amine" [ref=e257]
+            - generic [ref=e258]: Amine
+            - generic [ref=e259]: 6/31
+            - generic [ref=e260]: ›
+          - button "Livret de emine el abed" [ref=e261] [cursor=pointer]:
+            - img "emine el abed" [ref=e263]
+            - generic [ref=e264]: emine el abed
+            - generic [ref=e265]: 1/31
+            - generic [ref=e266]: ›
+          - button "Livret de Nazim" [ref=e267] [cursor=pointer]:
+            - img "Nazim" [ref=e269]
+            - generic [ref=e270]: Nazim
+            - generic [ref=e271]: 6/31
+            - generic [ref=e272]: ›
+          - button "Livret de Latifa Sahli" [ref=e273] [cursor=pointer]:
+            - img "Latifa Sahli" [ref=e275]
+            - generic [ref=e276]: Latifa Sahli
+            - generic [ref=e277]: 16/31
+            - generic [ref=e278]: ›
+          - button "Livret de Rezah Bensalem" [ref=e279] [cursor=pointer]:
+            - generic [ref=e281]: RB
+            - generic [ref=e282]: Rezah Bensalem
+            - generic [ref=e283]: 2/31
+            - generic [ref=e284]: ›
+          - button "Livret de loic.tse@gmail.com" [ref=e285] [cursor=pointer]:
+            - img "loic.tse@gmail.com" [ref=e287]
+            - generic [ref=e288]: loic.tse@gmail.com
+            - generic [ref=e289]: 1/31
+            - generic [ref=e290]: ›
+          - button "Livret de Sherine Nabli" [ref=e291] [cursor=pointer]:
+            - generic [ref=e293]: SN
+            - generic [ref=e294]: Sherine Nabli
+            - generic [ref=e295]: 1/31
+            - generic [ref=e296]: ›
+          - button "Livret de Tomomi" [ref=e297] [cursor=pointer]:
+            - img "Tomomi" [ref=e299]
+            - generic [ref=e300]: Tomomi
+            - generic [ref=e301]: 1/31
+            - generic [ref=e302]: ›
+  - navigation "Navigation principale" [ref=e303]:
+    - button "Aujourd'hui" [ref=e304] [cursor=pointer]:
+      - img [ref=e305]
+      - generic [ref=e307]: Aujourd'hui
+    - button "Mes élèves" [ref=e308] [cursor=pointer]:
+      - img [ref=e309]
+      - generic [ref=e314]: Mes élèves
+    - button "Parcours" [ref=e315] [cursor=pointer]:
+      - img [ref=e316]
+      - generic [ref=e318]: Parcours
+    - button "Stats" [ref=e319] [cursor=pointer]:
+      - img [ref=e320]
+      - generic [ref=e321]: Stats
+    - button "Récompenses" [ref=e322] [cursor=pointer]:
+      - img [ref=e323]
+      - generic [ref=e326]: Récompenses
+  - button "Enregistrer une séance" [ref=e327] [cursor=pointer]:
+    - img [ref=e328]

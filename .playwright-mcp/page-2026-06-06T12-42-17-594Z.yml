@@ -1,0 +1,123 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [active] [ref=e65]:
+    - generic [ref=e3480]:
+      - generic [ref=e3481]:
+        - button "Retour" [ref=e3482] [cursor=pointer]:
+          - img [ref=e3483]
+        - generic [ref=e3485]: Notifications
+        - button "Tout lu" [disabled] [ref=e3486]
+      - generic: Actualisation…
+      - generic [ref=e3488]:
+        - generic [ref=e3515]: Hier
+        - generic [ref=e3517]:
+          - generic "Supprimer" [ref=e3518]:
+            - img [ref=e3519]
+            - text: Suppr.
+          - generic [ref=e3522] [cursor=pointer]:
+            - img [ref=e3524]
+            - generic [ref=e3527]:
+              - generic [ref=e3528]: 🎉 Ta semaine PermiGo
+              - generic [ref=e3529]: 10h · 86 validations · 5 élèves. Bon week-end Rayan !
+              - generic [ref=e3530]: il y a 19h
+        - generic [ref=e3531]: Cette semaine
+        - generic [ref=e3532]:
+          - generic [ref=e3533]:
+            - generic "Supprimer" [ref=e3534]:
+              - img [ref=e3535]
+              - text: Suppr.
+            - generic [ref=e3538] [cursor=pointer]:
+              - img [ref=e3540]
+              - generic [ref=e3543]:
+                - generic [ref=e3544]: ⚠️ Élève à relancer
+                - generic [ref=e3545]: Latifa n'a pas pratiqué depuis 16 jours.
+                - generic [ref=e3546]: 1 juin
+          - generic [ref=e3547]:
+            - generic "Supprimer" [ref=e3548]:
+              - img [ref=e3549]
+              - text: Suppr.
+            - generic [ref=e3552] [cursor=pointer]:
+              - img [ref=e3554]
+              - generic [ref=e3557]:
+                - generic [ref=e3558]: "👑 #1 ce mois-ci"
+                - generic [ref=e3559]: 3h · 47 validations · 2 élèves · 2 jours actifs. Bravo Rayan !
+                - generic [ref=e3560]: 1 juin
+        - generic [ref=e3561]: Plus ancien
+        - generic [ref=e3562]:
+          - generic [ref=e3563]:
+            - generic "Supprimer" [ref=e3564]:
+              - img [ref=e3565]
+              - text: Suppr.
+            - generic [ref=e3568] [cursor=pointer]:
+              - img [ref=e3570]
+              - generic [ref=e3573]:
+                - generic [ref=e3574]: 🎉 Ta semaine PermiGo
+                - generic [ref=e3575]: 9h · 15 validations · 3 élèves. Bon week-end Rayan !
+                - generic [ref=e3576]: 29 mai
+          - generic [ref=e3577]:
+            - generic "Supprimer" [ref=e3578]:
+              - img [ref=e3579]
+              - text: Suppr.
+            - generic [ref=e3582] [cursor=pointer]:
+              - img [ref=e3584]
+              - generic [ref=e3587]:
+                - generic [ref=e3588]: 🎉 Ta semaine PermiGo
+                - generic [ref=e3589]: 7h · 4 validations · 2 élèves. Bon week-end Rayan !
+                - generic [ref=e3590]: 22 mai
+          - generic [ref=e3591]:
+            - generic "Supprimer" [ref=e3592]:
+              - img [ref=e3593]
+              - text: Suppr.
+            - generic [ref=e3596] [cursor=pointer]:
+              - img [ref=e3598]
+              - generic [ref=e3600]:
+                - generic [ref=e3601]: Séance confirmée
+                - generic [ref=e3602]: L'élève a confirmé la séance du 20/05.
+                - generic [ref=e3603]: 20 mai
+          - generic [ref=e3604]:
+            - generic "Supprimer" [ref=e3605]:
+              - img [ref=e3606]
+              - text: Suppr.
+            - generic [ref=e3609] [cursor=pointer]:
+              - img [ref=e3611]
+              - generic [ref=e3613]:
+                - generic [ref=e3614]: Séance confirmée
+                - generic [ref=e3615]: L'élève a confirmé la séance du 19/05.
+                - generic [ref=e3616]: 20 mai
+          - generic [ref=e3617]:
+            - generic "Supprimer" [ref=e3618]:
+              - img [ref=e3619]
+              - text: Suppr.
+            - generic [ref=e3622] [cursor=pointer]:
+              - img [ref=e3624]
+              - generic [ref=e3626]:
+                - generic [ref=e3627]: Séance confirmée
+                - generic [ref=e3628]: L'élève a confirmé la séance du 19/05.
+                - generic [ref=e3629]: 19 mai
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

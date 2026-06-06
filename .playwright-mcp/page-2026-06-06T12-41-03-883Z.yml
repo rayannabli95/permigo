@@ -1,0 +1,36 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [active] [ref=e65]:
+    - generic [ref=e2979]:
+      - button "Retour" [ref=e2980] [cursor=pointer]:
+        - img [ref=e2981]
+      - generic [ref=e2983]:
+        - generic [ref=e2984]: Ligue de la semaine
+        - generic [ref=e2985]: Validations données
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

@@ -1,0 +1,47 @@
+- generic [active] [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e2180]:
+      - generic [ref=e2181]:
+        - button "Retour" [ref=e2182] [cursor=pointer]:
+          - img [ref=e2183]
+        - heading "Séance" [level=1] [ref=e2185]
+        - generic [ref=e2186]: 3/4
+      - generic [ref=e2324]:
+        - generic [ref=e2325]:
+          - img [ref=e2326]
+          - text: Date
+        - generic [ref=e2328] [cursor=pointer]:
+          - generic [ref=e2329]: Aujourd'hui · sam. 6 juin
+          - generic [ref=e2330]: Modifier
+          - textbox "Date de la séance": 2026-06-06
+      - button "Suivant" [ref=e2332] [cursor=pointer]:
+        - text: Suivant
+        - img [ref=e2333]
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

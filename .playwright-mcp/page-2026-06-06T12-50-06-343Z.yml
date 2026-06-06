@@ -1,0 +1,64 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [active] [ref=e65]:
+    - generic [ref=e5106]:
+      - generic [ref=e5107]:
+        - button "Retour" [ref=e5108] [cursor=pointer]:
+          - img [ref=e5109]
+        - generic [ref=e5111]:
+          - generic [ref=e5112]: Ligue de la semaine
+          - generic [ref=e5113]: 0 enseignant cette semaine
+      - generic [ref=e5114]:
+        - generic [ref=e5115]:
+          - generic [ref=e5116]:
+            - img [ref=e5118]
+            - generic [ref=e5120]:
+              - generic [ref=e5121]: Hors-ligue
+              - generic [ref=e5122]: 0 pt cette semaine
+          - generic [ref=e5123]:
+            - generic [ref=e5124]: Remise à zéro dans
+            - generic [ref=e5125]: 1j 9h
+        - generic [ref=e5126]:
+          - generic [ref=e5127]: 1 pt = 1 validation
+          - generic [ref=e5128]: Diamant ≥40
+          - generic [ref=e5129]: Or ≥20
+          - generic [ref=e5130]: Argent ≥8
+          - generic [ref=e5131]: Bronze ≥1
+      - generic [ref=e5133]:
+        - img [ref=e5135]
+        - generic [ref=e5137]:
+          - text: Aucune validation cette semaine.
+          - text: Enregistre une séance pour entrer en ligue.
+      - generic [ref=e5138]:
+        - generic [ref=e5139]: Plus que 1 pt pour la Ligue Bronze undefined
+        - generic [ref=e5140]: Enregistre une séance pour valider des compétences et monter en ligue.
+        - button "Enregistrer une séance" [ref=e5141] [cursor=pointer]:
+          - img [ref=e5142]
+          - text: Enregistrer une séance
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

@@ -1,0 +1,98 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e256]:
+    - button "Accueil PermiGo" [ref=e257] [cursor=pointer]:
+      - generic [ref=e258]: PermiGo
+    - generic [ref=e259]:
+      - button "Notifications" [ref=e262] [cursor=pointer]:
+        - img [ref=e263]
+      - button "Mon profil" [ref=e266] [cursor=pointer]:
+        - img "Latifa Sahli"
+  - main [ref=e243]:
+    - generic [ref=e860]:
+      - generic [ref=e861]:
+        - generic [ref=e862]:
+          - heading "Boutique" [active] [level=1] [ref=e863]
+          - generic [ref=e864]:
+            - img [ref=e866]
+            - generic [ref=e869]: "489"
+        - generic [ref=e870]:
+          - button "🚗 Skins" [ref=e871] [cursor=pointer]
+          - button "🎁 Autres" [ref=e872] [cursor=pointer]
+      - generic [ref=e873]:
+        - generic [ref=e874]:
+          - generic [ref=e875]: Skins de profil
+          - generic [ref=e876]: Affiche ton style sur PermiGo
+        - generic [ref=e877]:
+          - generic [ref=e878] [cursor=pointer]:
+            - img "Citadine" [ref=e880]
+            - generic [ref=e881]:
+              - generic [ref=e882]: Citadine
+              - generic [ref=e883]: Commun
+              - generic [ref=e884]: Débloqué
+            - button "Équiper" [ref=e886]
+          - generic [ref=e887] [cursor=pointer]:
+            - img "Sportive" [ref=e889]
+            - generic [ref=e890]:
+              - generic [ref=e891]: Sportive
+              - generic [ref=e892]: Rare
+              - generic [ref=e893]: Débloqué
+            - button "Équiper" [ref=e895]
+          - generic [ref=e896] [cursor=pointer]:
+            - img "SUV Prestige" [ref=e898]
+            - generic [ref=e899]:
+              - generic [ref=e900]: SUV Prestige
+              - generic [ref=e901]: Épique
+              - generic [ref=e902]: Débloqué
+            - button "Équiper" [ref=e904]
+          - generic [ref=e905] [cursor=pointer]:
+            - img "Supercar" [ref=e907]
+            - generic [ref=e908]:
+              - generic [ref=e909]: Supercar
+              - generic [ref=e910]: Légendaire
+              - generic [ref=e911]: Débloqué
+            - button "Équiper" [ref=e913]
+        - generic [ref=e914]:
+          - generic [ref=e915]: Les raretés
+          - generic [ref=e916]:
+            - generic [ref=e917]:
+              - generic [ref=e918]: 🚙
+              - generic [ref=e919]: Commun
+              - generic [ref=e920]:
+                - img [ref=e921]
+                - text: "150"
+            - generic [ref=e924]:
+              - generic [ref=e925]: 🏎
+              - generic [ref=e926]: Rare
+              - generic [ref=e927]:
+                - img [ref=e928]
+                - text: "600"
+            - generic [ref=e931]:
+              - generic [ref=e932]: 🚐
+              - generic [ref=e933]: Épique
+              - generic [ref=e934]:
+                - img [ref=e935]
+                - text: "1500"
+            - generic [ref=e938]:
+              - generic [ref=e939]: 🏆
+              - generic [ref=e940]: Légendaire
+              - generic [ref=e941]:
+                - img [ref=e942]
+                - text: "6000"
+  - navigation "Navigation principale" [ref=e580]:
+    - button "Accueil" [ref=e581] [cursor=pointer]:
+      - img [ref=e582]
+      - generic [ref=e585]: Accueil
+    - button "Parcours" [ref=e586] [cursor=pointer]:
+      - img [ref=e587]
+      - generic [ref=e589]: Parcours
+    - button "Boutique" [ref=e590] [cursor=pointer]:
+      - img [ref=e591]
+      - generic [ref=e594]: Boutique
+    - button "Trophées" [ref=e595] [cursor=pointer]:
+      - img [ref=e596]
+      - generic [ref=e602]: Trophées
+    - button "Profil" [ref=e603] [cursor=pointer]:
+      - img [ref=e604]
+      - generic [ref=e607]: Profil

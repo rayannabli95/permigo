@@ -1,0 +1,339 @@
+- generic [active] [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e1263]:
+      - generic [ref=e1264]:
+        - generic [ref=e1265]:
+          - heading "Mes élèves" [level=1] [ref=e1266]
+          - button "Inviter un élève" [ref=e1267] [cursor=pointer]:
+            - img [ref=e1268]
+            - text: Inviter
+        - paragraph [ref=e1270]: 26 élèves · 26 actifs
+      - generic [ref=e1271]:
+        - paragraph [ref=e1272]:
+          - img [ref=e1273]
+          - text: 4 élèves à relancer cette semaine
+        - paragraph [ref=e1275]: Sans activité depuis 14 jours ou plus — un point en leçon peut débloquer la progression.
+      - generic [ref=e1276]:
+        - generic:
+          - img
+        - searchbox "Rechercher un élève" [ref=e1277]
+      - tablist [ref=e1278]:
+        - tab "Tous (26)" [ref=e1279] [cursor=pointer]
+        - tab "Actifs (26)" [ref=e1280] [cursor=pointer]
+        - tab "À relancer (4)" [ref=e1281] [cursor=pointer]:
+          - img [ref=e1282]
+          - text: À relancer (4)
+      - button "Enregistrer une séance" [ref=e1284] [cursor=pointer]:
+        - img [ref=e1285]
+        - text: Séance
+      - generic [ref=e1286]:
+        - button "Fiche de Amine — 6/31 compétences acquises, actif" [ref=e1287] [cursor=pointer]:
+          - img "Amine" [ref=e1289]
+          - generic [ref=e1290]:
+            - generic [ref=e1291]:
+              - text: Amine
+              - generic [ref=e1292]: attitré
+            - generic [ref=e1293]:
+              - generic [ref=e1294]: Actif
+              - generic [ref=e1295]: 6 validations
+          - generic [ref=e1299]: 6/31
+          - generic [ref=e1300]: ›
+        - button "Fiche de Betty Ntoni Ndo — 16/31 compétences acquises, actif" [ref=e1301] [cursor=pointer]:
+          - generic [ref=e1303]: BN
+          - generic [ref=e1304]:
+            - generic [ref=e1305]:
+              - text: Betty Ntoni Ndo
+              - generic [ref=e1306]: attitré
+            - generic [ref=e1307]:
+              - generic [ref=e1308]: Actif
+              - generic [ref=e1309]:
+                - img [ref=e1310]
+                - text: 17j
+              - generic [ref=e1312]: 16 validations
+          - generic [ref=e1316]: 16/31
+          - generic [ref=e1317]: ›
+        - button "Fiche de CADET BENOÎT Mendy — 31/31 compétences acquises, actif" [ref=e1318] [cursor=pointer]:
+          - img "CADET BENOÎT Mendy" [ref=e1320]
+          - generic [ref=e1321]:
+            - generic [ref=e1322]:
+              - text: CADET BENOÎT Mendy
+              - generic [ref=e1323]: attitré
+            - generic [ref=e1324]:
+              - generic [ref=e1325]: Actif
+              - generic [ref=e1326]: 31 validations
+          - generic [ref=e1330]: 31/31
+          - generic [ref=e1331]: ›
+        - button "Fiche de Delphine Tourneur — 18/31 compétences acquises, actif" [ref=e1332] [cursor=pointer]:
+          - img "Delphine Tourneur" [ref=e1334]
+          - generic [ref=e1335]:
+            - generic [ref=e1336]:
+              - text: Delphine Tourneur
+              - generic [ref=e1337]: attitré
+            - generic [ref=e1338]:
+              - generic [ref=e1339]: Actif
+              - generic [ref=e1340]: 18 validations
+          - generic [ref=e1344]: 18/31
+          - generic [ref=e1345]: ›
+        - button "Fiche de emine el abed — 1/31 compétences acquises, actif" [ref=e1346] [cursor=pointer]:
+          - img "emine el abed" [ref=e1348]
+          - generic [ref=e1349]:
+            - generic [ref=e1350]:
+              - text: emine el abed
+              - generic [ref=e1351]: attitré
+            - generic [ref=e1352]:
+              - generic [ref=e1353]: Actif
+              - generic [ref=e1354]: 1 validation
+          - generic [ref=e1358]: 1/31
+          - generic [ref=e1359]: ›
+        - button "Fiche de Hayder Sahli — 9/31 compétences acquises, actif" [ref=e1360] [cursor=pointer]:
+          - img "Hayder Sahli" [ref=e1362]
+          - generic [ref=e1363]:
+            - generic [ref=e1364]:
+              - text: Hayder Sahli
+              - generic [ref=e1365]: attitré
+            - generic [ref=e1366]:
+              - generic [ref=e1367]: Actif
+              - generic [ref=e1368]: 9 validations
+          - generic [ref=e1372]: 9/31
+          - generic [ref=e1373]: ›
+        - button "Fiche de Lakika — 2/31 compétences acquises, actif" [ref=e1374] [cursor=pointer]:
+          - img "Lakika" [ref=e1376]
+          - generic [ref=e1377]:
+            - generic [ref=e1378]:
+              - text: Lakika
+              - generic [ref=e1379]: attitré
+            - generic [ref=e1380]:
+              - generic [ref=e1381]: Actif
+              - generic [ref=e1382]: 2 validations
+          - generic [ref=e1386]: 2/31
+          - generic [ref=e1387]: ›
+        - button "Fiche de Latifa Sahli — 31/31 compétences acquises, actif" [ref=e1388] [cursor=pointer]:
+          - img "Latifa Sahli" [ref=e1390]
+          - generic [ref=e1391]:
+            - generic [ref=e1392]:
+              - text: Latifa Sahli
+              - generic [ref=e1393]: attitré
+            - generic [ref=e1394]:
+              - generic [ref=e1395]: Actif
+              - generic [ref=e1396]:
+                - img [ref=e1397]
+                - text: 21j
+              - generic [ref=e1399]: 31 validations
+          - generic [ref=e1403]: 31/31
+          - generic [ref=e1404]: ›
+        - button "Fiche de Leo Calvo — 31/31 compétences acquises, actif" [ref=e1405] [cursor=pointer]:
+          - img "Leo Calvo" [ref=e1407]
+          - generic [ref=e1408]:
+            - generic [ref=e1409]:
+              - text: Leo Calvo
+              - generic [ref=e1410]: attitré
+            - generic [ref=e1411]:
+              - generic [ref=e1412]: Actif
+              - generic [ref=e1413]: 31 validations
+          - generic [ref=e1417]: 31/31
+          - generic [ref=e1418]: ›
+        - button "Fiche de Lucas Dutron — 3/31 compétences acquises, actif" [ref=e1419] [cursor=pointer]:
+          - img "Lucas Dutron" [ref=e1421]
+          - generic [ref=e1422]:
+            - generic [ref=e1423]:
+              - text: Lucas Dutron
+              - generic [ref=e1424]: attitré
+            - generic [ref=e1425]:
+              - generic [ref=e1426]: Actif
+              - generic [ref=e1427]: 3 validations
+          - generic [ref=e1431]: 3/31
+          - generic [ref=e1432]: ›
+        - button "Fiche de Manon — 4/31 compétences acquises, actif" [ref=e1433] [cursor=pointer]:
+          - img "Manon" [ref=e1435]
+          - generic [ref=e1436]:
+            - generic [ref=e1437]:
+              - text: Manon
+              - generic [ref=e1438]: attitré
+            - generic [ref=e1439]:
+              - generic [ref=e1440]: Actif
+              - generic [ref=e1441]: 4 validations
+          - generic [ref=e1445]: 4/31
+          - generic [ref=e1446]: ›
+        - button "Fiche de Nahomie — 7/31 compétences acquises, actif" [ref=e1447] [cursor=pointer]:
+          - img "Nahomie" [ref=e1449]
+          - generic [ref=e1450]:
+            - generic [ref=e1451]:
+              - text: Nahomie
+              - generic [ref=e1452]: attitré
+            - generic [ref=e1453]:
+              - generic [ref=e1454]: Actif
+              - generic [ref=e1455]: 7 validations
+          - generic [ref=e1459]: 7/31
+          - generic [ref=e1460]: ›
+        - button "Fiche de Nazim — 6/31 compétences acquises, actif" [ref=e1461] [cursor=pointer]:
+          - img "Nazim" [ref=e1463]
+          - generic [ref=e1464]:
+            - generic [ref=e1465]:
+              - text: Nazim
+              - generic [ref=e1466]: attitré
+            - generic [ref=e1467]:
+              - generic [ref=e1468]: Actif
+              - generic [ref=e1469]: 6 validations
+          - generic [ref=e1473]: 6/31
+          - generic [ref=e1474]: ›
+        - button "Fiche de Pierre — 9/31 compétences acquises, actif" [ref=e1475] [cursor=pointer]:
+          - img "Pierre" [ref=e1477]
+          - generic [ref=e1478]:
+            - generic [ref=e1479]:
+              - text: Pierre
+              - generic [ref=e1480]: attitré
+            - generic [ref=e1481]:
+              - generic [ref=e1482]: Actif
+              - generic [ref=e1483]: 9 validations
+          - generic [ref=e1487]: 9/31
+          - generic [ref=e1488]: ›
+        - button "Fiche de Lucas Trimbe — 0/31 compétences acquises, actif" [ref=e1489] [cursor=pointer]:
+          - img "Lucas Trimbe" [ref=e1491]
+          - generic [ref=e1492]:
+            - generic [ref=e1493]:
+              - text: Lucas Trimbe
+              - generic [ref=e1494]: attitré
+            - generic [ref=e1495]:
+              - generic [ref=e1496]: Actif
+              - generic [ref=e1497]: 0 validation
+          - generic [ref=e1500]: 0/31
+          - generic [ref=e1501]: ›
+        - button "Fiche de Mehdi Suares — 0/31 compétences acquises, actif" [ref=e1502] [cursor=pointer]:
+          - img "Mehdi Suares" [ref=e1504]
+          - generic [ref=e1505]:
+            - generic [ref=e1506]:
+              - text: Mehdi Suares
+              - generic [ref=e1507]: attitré
+            - generic [ref=e1508]:
+              - generic [ref=e1509]: Actif
+              - generic [ref=e1510]: 0 validation
+          - generic [ref=e1513]: 0/31
+          - generic [ref=e1514]: ›
+        - button "Fiche de Simon Léonardi — 0/31 compétences acquises, actif" [ref=e1515] [cursor=pointer]:
+          - img "Simon Léonardi" [ref=e1517]
+          - generic [ref=e1518]:
+            - generic [ref=e1519]:
+              - text: Simon Léonardi
+              - generic [ref=e1520]: attitré
+            - generic [ref=e1521]:
+              - generic [ref=e1522]: Actif
+              - generic [ref=e1523]: 0 validation
+          - generic [ref=e1526]: 0/31
+          - generic [ref=e1527]: ›
+        - button "Fiche de TestEleve2 — 0/31 compétences acquises, actif" [ref=e1528] [cursor=pointer]:
+          - img "TestEleve2" [ref=e1530]
+          - generic [ref=e1531]:
+            - generic [ref=e1532]:
+              - text: TestEleve2
+              - generic [ref=e1533]: attitré
+            - generic [ref=e1534]:
+              - generic [ref=e1535]: Actif
+              - generic [ref=e1536]: 0 validation
+          - generic [ref=e1539]: 0/31
+          - generic [ref=e1540]: ›
+        - button "Fiche de loic.tse@gmail.com — 1/31 compétences acquises, actif" [ref=e1541] [cursor=pointer]:
+          - img "loic.tse@gmail.com" [ref=e1543]
+          - generic [ref=e1544]:
+            - generic [ref=e1545]: loic.tse@gmail.com
+            - generic [ref=e1546]:
+              - generic [ref=e1547]: Actif
+              - generic [ref=e1548]: 1 validation
+          - generic [ref=e1552]: 1/31
+          - generic [ref=e1553]: ›
+        - button "Fiche de Rezah Bensalem — 4/31 compétences acquises, actif" [ref=e1554] [cursor=pointer]:
+          - generic [ref=e1556]: RB
+          - generic [ref=e1557]:
+            - generic [ref=e1558]: Rezah Bensalem
+            - generic [ref=e1559]:
+              - generic [ref=e1560]: Actif
+              - generic [ref=e1561]:
+                - img [ref=e1562]
+                - text: 17j
+              - generic [ref=e1564]: 4 validations
+          - generic [ref=e1568]: 4/31
+          - generic [ref=e1569]: ›
+        - button "Fiche de Sherine Nabli — 1/31 compétences acquises, actif" [ref=e1570] [cursor=pointer]:
+          - generic [ref=e1572]: SN
+          - generic [ref=e1573]:
+            - generic [ref=e1574]: Sherine Nabli
+            - generic [ref=e1575]:
+              - generic [ref=e1576]: Actif
+              - generic [ref=e1577]:
+                - img [ref=e1578]
+                - text: 18j
+              - generic [ref=e1580]: 1 validation
+          - generic [ref=e1584]: 1/31
+          - generic [ref=e1585]: ›
+        - button "Fiche de Tomomi — 1/31 compétences acquises, actif" [ref=e1586] [cursor=pointer]:
+          - img "Tomomi" [ref=e1588]
+          - generic [ref=e1589]:
+            - generic [ref=e1590]: Tomomi
+            - generic [ref=e1591]:
+              - generic [ref=e1592]: Actif
+              - generic [ref=e1593]: 1 validation
+          - generic [ref=e1597]: 1/31
+          - generic [ref=e1598]: ›
+        - button "Fiche de Aime — 0/31 compétences acquises, actif" [ref=e1599] [cursor=pointer]:
+          - img "Aime" [ref=e1601]
+          - generic [ref=e1602]:
+            - generic [ref=e1603]: Aime
+            - generic [ref=e1604]:
+              - generic [ref=e1605]: Actif
+              - generic [ref=e1606]: 0 validation
+          - generic [ref=e1609]: 0/31
+          - generic [ref=e1610]: ›
+        - button "Fiche de Betty — 0/31 compétences acquises, actif" [ref=e1611] [cursor=pointer]:
+          - generic [ref=e1613]: B
+          - generic [ref=e1614]:
+            - generic [ref=e1615]: Betty
+            - generic [ref=e1616]:
+              - generic [ref=e1617]: Actif
+              - generic [ref=e1618]: 0 validation
+          - generic [ref=e1621]: 0/31
+          - generic [ref=e1622]: ›
+        - button "Fiche de Latifa Sahli — 0/31 compétences acquises, actif" [ref=e1623] [cursor=pointer]:
+          - generic [ref=e1625]: LS
+          - generic [ref=e1626]:
+            - generic [ref=e1627]: Latifa Sahli
+            - generic [ref=e1628]:
+              - generic [ref=e1629]: Actif
+              - generic [ref=e1630]: 0 validation
+          - generic [ref=e1633]: 0/31
+          - generic [ref=e1634]: ›
+        - button "Fiche de Sherine — 0/31 compétences acquises, actif" [ref=e1635] [cursor=pointer]:
+          - generic [ref=e1637]: S
+          - generic [ref=e1638]:
+            - generic [ref=e1639]: Sherine
+            - generic [ref=e1640]:
+              - generic [ref=e1641]: Actif
+              - generic [ref=e1642]: 0 validation
+          - generic [ref=e1645]: 0/31
+          - generic [ref=e1646]: ›
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

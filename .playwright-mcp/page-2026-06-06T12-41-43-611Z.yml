@@ -1,0 +1,44 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [active] [ref=e65]:
+    - generic [ref=e3319]:
+      - generic [ref=e3320]:
+        - button "Retour" [ref=e3321] [cursor=pointer]:
+          - img [ref=e3322]
+        - generic [ref=e3324]:
+          - generic [ref=e3325]: Mes badges
+          - generic [ref=e3326]: Chargement…
+      - generic [ref=e3329]:
+        - generic [ref=e3330]:
+          - generic [ref=e3331]: —
+          - generic [ref=e3332]: /16
+        - generic [ref=e3333]:
+          - generic [ref=e3334]: Chargement…
+          - generic [ref=e3335]: badges débloqués
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

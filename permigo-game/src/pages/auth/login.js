@@ -229,8 +229,7 @@ function template() {
           </div>
 
           <div class="lg-foot">
-            Pas encore de compte ?
-            <a href="#/signup">Créer un compte gratuit →</a>
+            Pas encore de compte ? Contacte ton auto-école pour une invitation
           </div>
         </div>
       </div>
@@ -354,6 +353,7 @@ function wire(root) {
     b.addEventListener("click", () => {
       emailIn.value = b.dataset.email;
       pwdIn.value = "Autopilot2025!";
+      errEl.textContent = ""; // Clear error message when demo filled
       pwdIn.focus();
     });
   });

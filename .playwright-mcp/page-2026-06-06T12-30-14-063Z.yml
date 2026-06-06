@@ -1,0 +1,109 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e334]:
+      - generic [ref=e335]:
+        - generic [ref=e336]:
+          - heading "Mes élèves" [level=1] [ref=e337]
+          - button "Inviter un élève" [ref=e338] [cursor=pointer]:
+            - img [ref=e339]
+            - text: Inviter
+        - paragraph [ref=e341]: 26 élèves · 26 actifs
+      - generic [ref=e342]:
+        - paragraph [ref=e343]:
+          - img [ref=e344]
+          - text: 4 élèves à relancer cette semaine
+        - paragraph [ref=e346]: Sans activité depuis 14 jours ou plus — un point en leçon peut débloquer la progression.
+      - generic [ref=e347]:
+        - generic:
+          - img
+        - searchbox "Rechercher un élève" [ref=e348]
+      - tablist [ref=e349]:
+        - tab "Tous (26)" [ref=e350] [cursor=pointer]
+        - tab "Actifs (26)" [ref=e351] [cursor=pointer]
+        - tab "À relancer (4)" [active] [ref=e352] [cursor=pointer]:
+          - img [ref=e353]
+          - text: À relancer (4)
+      - button "Enregistrer une séance" [ref=e355] [cursor=pointer]:
+        - img [ref=e356]
+        - text: Séance
+      - generic [ref=e357]:
+        - button "Fiche de Betty Ntoni Ndo — 16/31 compétences acquises, actif" [ref=e718] [cursor=pointer]:
+          - generic [ref=e720]: BN
+          - generic [ref=e721]:
+            - generic [ref=e722]:
+              - text: Betty Ntoni Ndo
+              - generic [ref=e723]: attitré
+            - generic [ref=e724]:
+              - generic [ref=e725]: Actif
+              - generic [ref=e726]:
+                - img [ref=e727]
+                - text: 17j
+              - generic [ref=e729]: 16 validations
+          - generic [ref=e733]: 16/31
+          - generic [ref=e734]: ›
+        - button "Fiche de Latifa Sahli — 31/31 compétences acquises, actif" [ref=e735] [cursor=pointer]:
+          - img "Latifa Sahli" [ref=e737]
+          - generic [ref=e738]:
+            - generic [ref=e739]:
+              - text: Latifa Sahli
+              - generic [ref=e740]: attitré
+            - generic [ref=e741]:
+              - generic [ref=e742]: Actif
+              - generic [ref=e743]:
+                - img [ref=e744]
+                - text: 21j
+              - generic [ref=e746]: 31 validations
+          - generic [ref=e750]: 31/31
+          - generic [ref=e751]: ›
+        - button "Fiche de Rezah Bensalem — 4/31 compétences acquises, actif" [ref=e752] [cursor=pointer]:
+          - generic [ref=e754]: RB
+          - generic [ref=e755]:
+            - generic [ref=e756]: Rezah Bensalem
+            - generic [ref=e757]:
+              - generic [ref=e758]: Actif
+              - generic [ref=e759]:
+                - img [ref=e760]
+                - text: 17j
+              - generic [ref=e762]: 4 validations
+          - generic [ref=e766]: 4/31
+          - generic [ref=e767]: ›
+        - button "Fiche de Sherine Nabli — 1/31 compétences acquises, actif" [ref=e768] [cursor=pointer]:
+          - generic [ref=e770]: SN
+          - generic [ref=e771]:
+            - generic [ref=e772]: Sherine Nabli
+            - generic [ref=e773]:
+              - generic [ref=e774]: Actif
+              - generic [ref=e775]:
+                - img [ref=e776]
+                - text: 18j
+              - generic [ref=e778]: 1 validation
+          - generic [ref=e782]: 1/31
+          - generic [ref=e783]: ›
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

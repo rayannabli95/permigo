@@ -1,0 +1,100 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e2180]:
+      - generic [ref=e2181]:
+        - button "Retour" [ref=e2182] [cursor=pointer]:
+          - img [ref=e2183]
+        - heading "Séance" [active] [level=1] [ref=e2185]
+        - generic [ref=e2186]: 1/4
+      - generic [ref=e2188]:
+        - generic [ref=e2189]:
+          - img [ref=e2190]
+          - text: Avec qui ?
+        - generic [ref=e2195]:
+          - generic:
+            - img
+          - searchbox "Chercher un élève" [ref=e2196]
+        - generic [ref=e2197]:
+          - radio "Leo Calvo Leo Calvo" [checked] [ref=e2198] [cursor=pointer]:
+            - img "Leo Calvo" [ref=e2200]
+            - generic [ref=e2202]: Leo Calvo
+            - img [ref=e2204]
+          - radio "Lucas Dutron Lucas Dutron" [ref=e2206] [cursor=pointer]:
+            - img "Lucas Dutron" [ref=e2208]
+            - generic [ref=e2210]: Lucas Dutron
+          - radio "emine el abed emine el abed" [ref=e2212] [cursor=pointer]:
+            - img "emine el abed" [ref=e2214]
+            - generic [ref=e2216]: emine el abed
+          - radio "Simon Léonardi Simon Léonardi" [ref=e2218] [cursor=pointer]:
+            - img "Simon Léonardi" [ref=e2220]
+            - generic [ref=e2222]: Simon Léonardi
+          - radio "CADET BENOÎT Mendy CADET BENOÎT Mendy" [ref=e2224] [cursor=pointer]:
+            - img "CADET BENOÎT Mendy" [ref=e2226]
+            - generic [ref=e2228]: CADET BENOÎT Mendy
+          - radio "BN Betty Ntoni Ndo" [ref=e2230] [cursor=pointer]:
+            - generic [ref=e2232]: BN
+            - generic [ref=e2234]: Betty Ntoni Ndo
+          - radio "Latifa Sahli Latifa Sahli" [ref=e2236] [cursor=pointer]:
+            - img "Latifa Sahli" [ref=e2238]
+            - generic [ref=e2240]: Latifa Sahli
+          - radio "Hayder Sahli Hayder Sahli" [ref=e2242] [cursor=pointer]:
+            - img "Hayder Sahli" [ref=e2244]
+            - generic [ref=e2246]: Hayder Sahli
+          - radio "Mehdi Suares Mehdi Suares" [ref=e2248] [cursor=pointer]:
+            - img "Mehdi Suares" [ref=e2250]
+            - generic [ref=e2252]: Mehdi Suares
+          - radio "Delphine Tourneur Delphine Tourneur" [ref=e2254] [cursor=pointer]:
+            - img "Delphine Tourneur" [ref=e2256]
+            - generic [ref=e2258]: Delphine Tourneur
+          - radio "Lucas Trimbe Lucas Trimbe" [ref=e2260] [cursor=pointer]:
+            - img "Lucas Trimbe" [ref=e2262]
+            - generic [ref=e2264]: Lucas Trimbe
+          - radio "TestEleve2 TestEleve2" [ref=e2266] [cursor=pointer]:
+            - img "TestEleve2" [ref=e2268]
+            - generic [ref=e2270]: TestEleve2
+          - radio "Pierre Pierre" [ref=e2272] [cursor=pointer]:
+            - img "Pierre" [ref=e2274]
+            - generic [ref=e2276]: Pierre
+          - radio "Lakika Lakika" [ref=e2278] [cursor=pointer]:
+            - img "Lakika" [ref=e2280]
+            - generic [ref=e2282]: Lakika
+          - radio "Amine Amine" [ref=e2284] [cursor=pointer]:
+            - img "Amine" [ref=e2286]
+            - generic [ref=e2288]: Amine
+          - radio "Manon Manon" [ref=e2290] [cursor=pointer]:
+            - img "Manon" [ref=e2292]
+            - generic [ref=e2294]: Manon
+          - radio "Nazim Nazim" [ref=e2296] [cursor=pointer]:
+            - img "Nazim" [ref=e2298]
+            - generic [ref=e2300]: Nazim
+          - radio "Nahomie Nahomie" [ref=e2302] [cursor=pointer]:
+            - img "Nahomie" [ref=e2304]
+            - generic [ref=e2306]: Nahomie
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

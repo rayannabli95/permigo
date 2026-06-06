@@ -1,0 +1,191 @@
+- generic [active] [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e2180]:
+      - generic [ref=e2181]:
+        - button "Retour" [ref=e2182] [cursor=pointer]:
+          - img [ref=e2183]
+        - heading "Séance" [level=1] [ref=e2185]
+        - generic [ref=e2186]: 4/4
+      - generic [ref=e2335]:
+        - generic [ref=e2337]:
+          - img [ref=e2338]
+          - text: Compétences travaillées
+        - generic "Légende des statuts" [ref=e2341]:
+          - generic [ref=e2342]: "Appuie pour cycler :"
+          - generic [ref=e2343]:
+            - img [ref=e2344]
+            - text: Acquis
+          - generic [ref=e2346]:
+            - img [ref=e2347]
+            - text: En cours
+          - generic [ref=e2352]:
+            - img [ref=e2353]
+            - text: À retravailler
+        - generic [ref=e2355]:
+          - generic [ref=e2356]:
+            - generic [ref=e2359]: C1 — Maîtrise du véhicule
+            - generic [ref=e2360]:
+              - button "C1a Organes, commandes, vérifications" [disabled] [ref=e2361]:
+                - img [ref=e2363]
+                - generic [ref=e2365]: C1a
+                - generic [ref=e2366]: Organes, commandes, vérifications
+              - button "C1b S'installer au poste de conduite" [disabled] [ref=e2367]:
+                - img [ref=e2369]
+                - generic [ref=e2371]: C1b
+                - generic [ref=e2372]: S'installer au poste de conduite
+              - button "C1c Tenir le volant, trajectoire" [disabled] [ref=e2373]:
+                - img [ref=e2375]
+                - generic [ref=e2377]: C1c
+                - generic [ref=e2378]: Tenir le volant, trajectoire
+              - button "C1d Démarrer et s'arrêter" [disabled] [ref=e2379]:
+                - img [ref=e2381]
+                - generic [ref=e2383]: C1d
+                - generic [ref=e2384]: Démarrer et s'arrêter
+              - button "C1e Doser accélération et freinage" [disabled] [ref=e2385]:
+                - img [ref=e2387]
+                - generic [ref=e2389]: C1e
+                - generic [ref=e2390]: Doser accélération et freinage
+              - button "C1f Utiliser la boîte de vitesses" [disabled] [ref=e2391]:
+                - img [ref=e2393]
+                - generic [ref=e2395]: C1f
+                - generic [ref=e2396]: Utiliser la boîte de vitesses
+              - button "C1g Contrôles de sécurité extérieure" [disabled] [ref=e2397]:
+                - img [ref=e2399]
+                - generic [ref=e2401]: C1g
+                - generic [ref=e2402]: Contrôles de sécurité extérieure
+              - 'button "C1h Manœuvres : créneau, demi-tour" [disabled] [ref=e2403]':
+                - img [ref=e2405]
+                - generic [ref=e2407]: C1h
+                - generic [ref=e2408]: "Manœuvres : créneau, demi-tour"
+              - button "C1i Marche arrière" [disabled] [ref=e2409]:
+                - img [ref=e2411]
+                - generic [ref=e2413]: C1i
+                - generic [ref=e2414]: Marche arrière
+          - generic [ref=e2415]:
+            - generic [ref=e2418]: C2 — Appréhension de la route
+            - generic [ref=e2419]:
+              - button "C2a Rechercher la signalisation" [disabled] [ref=e2420]:
+                - img [ref=e2422]
+                - generic [ref=e2424]: C2a
+                - generic [ref=e2425]: Rechercher la signalisation
+              - button "C2b Positionnement sur la chaussée" [disabled] [ref=e2426]:
+                - img [ref=e2428]
+                - generic [ref=e2430]: C2b
+                - generic [ref=e2431]: Positionnement sur la chaussée
+              - button "C2c Adapter son allure" [disabled] [ref=e2432]:
+                - img [ref=e2434]
+                - generic [ref=e2436]: C2c
+                - generic [ref=e2437]: Adapter son allure
+              - button "C2d Tourner à droite/gauche" [disabled] [ref=e2438]:
+                - img [ref=e2440]
+                - generic [ref=e2442]: C2d
+                - generic [ref=e2443]: Tourner à droite/gauche
+              - button "C2e Intersections" [disabled] [ref=e2444]:
+                - img [ref=e2446]
+                - generic [ref=e2448]: C2e
+                - generic [ref=e2449]: Intersections
+              - button "C2f Ronds-points" [disabled] [ref=e2450]:
+                - img [ref=e2452]
+                - generic [ref=e2454]: C2f
+                - generic [ref=e2455]: Ronds-points
+              - button "C2g Stationnement" [disabled] [ref=e2456]:
+                - img [ref=e2458]
+                - generic [ref=e2460]: C2g
+                - generic [ref=e2461]: Stationnement
+              - button "C2h Communiquer avec les usagers" [disabled] [ref=e2462]:
+                - img [ref=e2464]
+                - generic [ref=e2466]: C2h
+                - generic [ref=e2467]: Communiquer avec les usagers
+          - generic [ref=e2468]:
+            - generic [ref=e2471]: C3 — Circulation
+            - generic [ref=e2472]:
+              - button "C3a Distances de sécurité" [disabled] [ref=e2473]:
+                - img [ref=e2475]
+                - generic [ref=e2477]: C3a
+                - generic [ref=e2478]: Distances de sécurité
+              - button "C3b Croisements et dépassements" [disabled] [ref=e2479]:
+                - img [ref=e2481]
+                - generic [ref=e2483]: C3b
+                - generic [ref=e2484]: Croisements et dépassements
+              - button "C3c Virages et déclivité" [disabled] [ref=e2485]:
+                - img [ref=e2487]
+                - generic [ref=e2489]: C3c
+                - generic [ref=e2490]: Virages et déclivité
+              - button "C3d Adhérence et freinage d'urgence" [disabled] [ref=e2491]:
+                - img [ref=e2493]
+                - generic [ref=e2495]: C3d
+                - generic [ref=e2496]: Adhérence et freinage d'urgence
+              - button "C3e Voies rapides et autoroutes" [disabled] [ref=e2497]:
+                - img [ref=e2499]
+                - generic [ref=e2501]: C3e
+                - generic [ref=e2502]: Voies rapides et autoroutes
+              - button "C3f Tunnels, ponts, zones spécifiques" [disabled] [ref=e2503]:
+                - img [ref=e2505]
+                - generic [ref=e2507]: C3f
+                - generic [ref=e2508]: Tunnels, ponts, zones spécifiques
+              - button "C3g Conduite en zones urbaines denses" [disabled] [ref=e2509]:
+                - img [ref=e2511]
+                - generic [ref=e2513]: C3g
+                - generic [ref=e2514]: Conduite en zones urbaines denses
+          - generic [ref=e2515]:
+            - generic [ref=e2518]: C4 — En autonomie
+            - generic [ref=e2519]:
+              - button "C4a Planifier un trajet" [disabled] [ref=e2520]:
+                - img [ref=e2522]
+                - generic [ref=e2524]: C4a
+                - generic [ref=e2525]: Planifier un trajet
+              - button "C4b Suivre un itinéraire" [disabled] [ref=e2526]:
+                - img [ref=e2528]
+                - generic [ref=e2530]: C4b
+                - generic [ref=e2531]: Suivre un itinéraire
+              - button "C4c Conduite éco-responsable" [disabled] [ref=e2532]:
+                - img [ref=e2534]
+                - generic [ref=e2536]: C4c
+                - generic [ref=e2537]: Conduite éco-responsable
+              - button "C4d Anticipation et stress" [disabled] [ref=e2538]:
+                - img [ref=e2540]
+                - generic [ref=e2542]: C4d
+                - generic [ref=e2543]: Anticipation et stress
+              - button "C4e Partage de la route" [disabled] [ref=e2544]:
+                - img [ref=e2546]
+                - generic [ref=e2548]: C4e
+                - generic [ref=e2549]: Partage de la route
+              - button "C4f Présentation à l'examen" [disabled] [ref=e2550]:
+                - img [ref=e2552]
+                - generic [ref=e2554]: C4f
+                - generic [ref=e2555]: Présentation à l'examen
+              - button "C4g Conduite après examen" [disabled] [ref=e2556]:
+                - img [ref=e2558]
+                - generic [ref=e2560]: C4g
+                - generic [ref=e2561]: Conduite après examen
+      - button "Enregistrer la session" [ref=e2563] [cursor=pointer]:
+        - img [ref=e2564]
+        - generic [ref=e2566]: Enregistrer la session
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

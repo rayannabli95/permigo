@@ -1,0 +1,77 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - generic: RN
+  - main [ref=e65]:
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - heading "Bonjour, Rayan" [active] [level=1] [ref=e68]
+        - paragraph [ref=e69]: samedi 6 juin 2026
+      - generic [ref=e70] [cursor=pointer]:
+        - generic [ref=e71]:
+          - img [ref=e74]
+          - generic [ref=e76]:
+            - generic [ref=e77]: Tout est à jour
+            - heading "Aucune relance en attente" [level=2] [ref=e78]
+            - paragraph [ref=e79]: "Prochain élève à faire avancer : Latifa"
+        - button "Ouvrir son livret" [ref=e80]:
+          - text: Ouvrir son livret
+          - img [ref=e81]
+      - generic [ref=e83]:
+        - generic [ref=e84]:
+          - generic [ref=e85]: "0"
+          - generic [ref=e86]: Validée aujourd'hui
+        - generic [ref=e87]:
+          - generic [ref=e88]: "1"
+          - generic [ref=e89]: Élève suivi
+      - 'link "Progression palier : Enseignant — Démarrage" [ref=e90] [cursor=pointer]':
+        - /url: "#/parcours"
+        - img [ref=e92]
+        - generic [ref=e95]:
+          - generic [ref=e96]: Palier
+          - generic [ref=e97]: Enseignant — Démarrage
+          - generic [ref=e99]: "Prochain : Export PDF du livret élève"
+        - img [ref=e101]
+      - generic [ref=e103]:
+        - generic [ref=e104]: Activité récente
+        - generic [ref=e105]:
+          - img [ref=e107]
+          - strong [ref=e110]: Pas encore de validation
+          - generic [ref=e111]:
+            - text: Enregistre ta première séance
+            - text: pour voir l'activité ici.
+      - generic [ref=e112]:
+        - generic [ref=e113]: Mes élèves
+        - button "Livret de Latifa Sahli" [ref=e115] [cursor=pointer]:
+          - generic [ref=e117]: LS
+          - generic [ref=e118]: Latifa Sahli
+          - generic [ref=e119]: 0/31
+          - generic [ref=e120]: ›
+  - status [ref=e121]:
+    - generic [ref=e122]: Bonjour Nabli
+    - button "Fermer la notification" [ref=e123] [cursor=pointer]: ×
+  - navigation "Navigation principale" [ref=e124]:
+    - button "Aujourd'hui" [ref=e125] [cursor=pointer]:
+      - img [ref=e126]
+      - generic [ref=e128]: Aujourd'hui
+    - button "Mes élèves" [ref=e129] [cursor=pointer]:
+      - img [ref=e130]
+      - generic [ref=e135]: Mes élèves
+    - button "Parcours" [ref=e136] [cursor=pointer]:
+      - img [ref=e137]
+      - generic [ref=e139]: Parcours
+    - button "Stats" [ref=e140] [cursor=pointer]:
+      - img [ref=e141]
+      - generic [ref=e142]: Stats
+    - button "Récompenses" [ref=e143] [cursor=pointer]:
+      - img [ref=e144]
+      - generic [ref=e147]: Récompenses
+  - button "Enregistrer une séance" [ref=e148] [cursor=pointer]:
+    - img [ref=e149]

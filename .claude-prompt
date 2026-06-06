@@ -1,0 +1,115 @@
+# PermiGo — Prompt Claude for VS Code
+
+## Stack
+- **Frontend**: Vanilla JS (ES modules) + Vite + Supabase
+- **No TypeScript, no React, no frameworks**
+- **Build**: `npm run build` (non-negotiable check)
+
+## Architecture
+
+### File Structure
+```
+permigo-game/src/
+├── pages/              # Entry points: export mount(root, param)
+├── services/           # Business logic & API calls
+├── utils/              # Utilities (esc, helpers)
+├── auth/               # Auth & Supabase client (sb singleton)
+├── router.js           # Hash router (#/route/{param})
+└── config/             # env.js (VITE_* prefixed)
+```
+
+### Responsibilities
+- **Pages** (`src/pages/*.js`): UI assembly only. Import services, call `mount()`.
+- **Services** (`src/services/*.js`): All Supabase calls, data fetching, business rules.
+- **Utils** (`src/utils/escape.js`): `esc(data)` for innerHTML injection, helper functions.
+- **Auth** (`src/auth/`): `sb` singleton, `cur-user()` for current user.
+
+## Non-Negotiable Rules
+
+### 1. XSS Prevention
+- **Every** data injected into `innerHTML` must pass through `esc()` from `src/utils/escape.js`.
+- Exception: HTML you write directly (not user data).
+```js
+import { esc } from '@/utils/escape.js';
+el.innerHTML = `<p>${esc(userName)}</p>`;
+```
+
+### 2. Supabase Pattern
+```js
+const { data, error } = await sb.from('table').select().eq('id', id);
+if (error) throw error;
+```
+- Always check `error`.
+- Use `sb` singleton from `src/auth/auth.js`.
+- **Never** export or pass SERVICE_ROLE_KEY to client.
+
+### 3. RLS Everywhere
+- All tables have RLS enabled.
+- No exceptions on `public` schema.
+- Test with actual user session, never bypass RLS for "debug".
+
+### 4. Pages Structure
+```js
+// src/pages/example.js
+export function mount(root, param) {
+  // Build DOM
+  // Fetch data via services
+  // Attach listeners
+  root.innerHTML = `<div>${esc(data)}</div>`;
+}
+```
+
+### 5. Environment Variables
+- **Client-side**: `VITE_*` prefix only (Vite exposes these).
+- **Server-side**: Use `supabase/functions/` for sensitive keys.
+
+## Before Commit
+```bash
+npm run build    # Must succeed (real check, unlike lint stub)
+npm run test     # If touching critical flow
+```
+
+## Common Patterns
+
+### Service Call + UI Update
+```js
+// src/services/quiz.js
+export async function submitQuiz(quizId, answers) {
+  const { data, error } = await sb.from('quiz_submissions').insert({ quiz_id: quizId, answers });
+  if (error) throw error;
+  return data;
+}
+
+// src/pages/quiz.js
+import { submitQuiz } from '@/services/quiz.js';
+export async function mount(root, quizId) {
+  try {
+    const result = await submitQuiz(quizId, userAnswers);
+    root.innerHTML = `<p>${esc(result.message)}</p>`;
+  } catch (e) {
+    console.error('Quiz submission failed:', e);
+    root.innerHTML = '<p>Erreur</p>';
+  }
+}
+```
+
+### Routing & Navigation
+```js
+// src/router.js sends user to #/quiz/123
+// src/pages/quiz.js intercepts via mount(root, '123')
+window.location.hash = '#/quiz/123';
+```
+
+## Language
+- **UI text**: French
+- **Code comments, variable names**: English
+
+## Debug / Logging
+- No central logger yet → `console.log` / `console.error` acceptable (future: `src/utils/logger.js`).
+- On errors: always `console.error(error)` in catch blocks.
+
+## When Stuck
+1. Check `npm run build` output.
+2. Verify XSS: is user data in `innerHTML`? → use `esc()`.
+3. Verify RLS: test with actual user session in DevTools.
+4. Read CLAUDE.md in project root for domaine métier (REMC, compétences C1-C4, etc.).

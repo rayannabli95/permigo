@@ -1,0 +1,218 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e3635]:
+      - generic [ref=e3636]:
+        - button "Retour liste élèves" [ref=e3637] [cursor=pointer]: ←
+        - generic [ref=e3638]:
+          - heading "Livret REMC — Élève" [active] [level=1] [ref=e3639]
+          - paragraph [ref=e3640]: 0/31 compétences acquises
+        - button "Voir le bilan trimestriel" [ref=e3641] [cursor=pointer]:
+          - img [ref=e3642]
+          - text: Bilan
+      - generic [ref=e3646]:
+        - generic [ref=e3647]: Progression globale
+        - generic [ref=e3648]: 0 / 31 · 0%
+      - generic [ref=e3650]:
+        - group "Maîtrise du véhicule — 0/9 acquises" [ref=e3651]:
+          - generic [ref=e3652]:
+            - img [ref=e3654]
+            - generic [ref=e3656]: Maîtrise du véhicule
+            - generic [ref=e3657]: 0/9
+          - button "Organes, commandes, vérifications — Non évalué. Appuyer pour évaluer" [ref=e3659] [cursor=pointer]:
+            - generic [ref=e3661]: C1a
+            - generic [ref=e3662]: Organes, commandes, vérifications
+            - generic [ref=e3663]: Non évalué
+            - generic [ref=e3664]: ›
+          - button "S'installer au poste de conduite — Non évalué. Appuyer pour évaluer" [ref=e3665] [cursor=pointer]:
+            - generic [ref=e3667]: C1b
+            - generic [ref=e3668]: S'installer au poste de conduite
+            - generic [ref=e3669]: Non évalué
+            - generic [ref=e3670]: ›
+          - button "Tenir le volant, trajectoire — Non évalué. Appuyer pour évaluer" [ref=e3671] [cursor=pointer]:
+            - generic [ref=e3673]: C1c
+            - generic [ref=e3674]: Tenir le volant, trajectoire
+            - generic [ref=e3675]: Non évalué
+            - generic [ref=e3676]: ›
+          - button "Démarrer et s'arrêter — Non évalué. Appuyer pour évaluer" [ref=e3677] [cursor=pointer]:
+            - generic [ref=e3679]: C1d
+            - generic [ref=e3680]: Démarrer et s'arrêter
+            - generic [ref=e3681]: Non évalué
+            - generic [ref=e3682]: ›
+          - button "Doser accélération et freinage — Non évalué. Appuyer pour évaluer" [ref=e3683] [cursor=pointer]:
+            - generic [ref=e3685]: C1e
+            - generic [ref=e3686]: Doser accélération et freinage
+            - generic [ref=e3687]: Non évalué
+            - generic [ref=e3688]: ›
+          - button "Utiliser la boîte de vitesses — Non évalué. Appuyer pour évaluer" [ref=e3689] [cursor=pointer]:
+            - generic [ref=e3691]: C1f
+            - generic [ref=e3692]: Utiliser la boîte de vitesses
+            - generic [ref=e3693]: Non évalué
+            - generic [ref=e3694]: ›
+          - button "Contrôles de sécurité extérieure — Non évalué. Appuyer pour évaluer" [ref=e3695] [cursor=pointer]:
+            - generic [ref=e3697]: C1g
+            - generic [ref=e3698]: Contrôles de sécurité extérieure
+            - generic [ref=e3699]: Non évalué
+            - generic [ref=e3700]: ›
+          - 'button "Manœuvres : créneau, demi-tour — Non évalué. Appuyer pour évaluer" [ref=e3701] [cursor=pointer]':
+            - generic [ref=e3703]: C1h
+            - generic [ref=e3704]: "Manœuvres : créneau, demi-tour"
+            - generic [ref=e3705]: Non évalué
+            - generic [ref=e3706]: ›
+          - button "Autonomie sur manœuvres de base — Non évalué. Appuyer pour évaluer" [ref=e3707] [cursor=pointer]:
+            - generic [ref=e3709]: C1i
+            - generic [ref=e3710]: Autonomie sur manœuvres de base
+            - generic [ref=e3711]: Non évalué
+            - generic [ref=e3712]: ›
+        - group "Circulation normale — 0/8 acquises" [ref=e3713]:
+          - generic [ref=e3714]:
+            - img [ref=e3716]
+            - generic [ref=e3719]: Circulation normale
+            - generic [ref=e3720]: 0/8
+          - button "Infos visuelles — Non évalué. Appuyer pour évaluer" [ref=e3722] [cursor=pointer]:
+            - generic [ref=e3724]: C2a
+            - generic [ref=e3725]: Infos visuelles
+            - generic [ref=e3726]: Non évalué
+            - generic [ref=e3727]: ›
+          - button "Adapter sa conduite — Non évalué. Appuyer pour évaluer" [ref=e3728] [cursor=pointer]:
+            - generic [ref=e3730]: C2b
+            - generic [ref=e3731]: Adapter sa conduite
+            - generic [ref=e3732]: Non évalué
+            - generic [ref=e3733]: ›
+          - button "Trajectoire et placement — Non évalué. Appuyer pour évaluer" [ref=e3734] [cursor=pointer]:
+            - generic [ref=e3736]: C2c
+            - generic [ref=e3737]: Trajectoire et placement
+            - generic [ref=e3738]: Non évalué
+            - generic [ref=e3739]: ›
+          - button "Vitesse et trajectoire en virage — Non évalué. Appuyer pour évaluer" [ref=e3740] [cursor=pointer]:
+            - generic [ref=e3742]: C2d
+            - generic [ref=e3743]: Vitesse et trajectoire en virage
+            - generic [ref=e3744]: Non évalué
+            - generic [ref=e3745]: ›
+          - button "Croisements et dépassements — Non évalué. Appuyer pour évaluer" [ref=e3746] [cursor=pointer]:
+            - generic [ref=e3748]: C2e
+            - generic [ref=e3749]: Croisements et dépassements
+            - generic [ref=e3750]: Non évalué
+            - generic [ref=e3751]: ›
+          - button "Intersections, ronds-points — Non évalué. Appuyer pour évaluer" [ref=e3752] [cursor=pointer]:
+            - generic [ref=e3754]: C2f
+            - generic [ref=e3755]: Intersections, ronds-points
+            - generic [ref=e3756]: Non évalué
+            - generic [ref=e3757]: ›
+          - button "Communication avec les autres usagers — Non évalué. Appuyer pour évaluer" [ref=e3758] [cursor=pointer]:
+            - generic [ref=e3760]: C2g
+            - generic [ref=e3761]: Communication avec les autres usagers
+            - generic [ref=e3762]: Non évalué
+            - generic [ref=e3763]: ›
+          - button "Conduite en autonomie — Non évalué. Appuyer pour évaluer" [ref=e3764] [cursor=pointer]:
+            - generic [ref=e3766]: C2h
+            - generic [ref=e3767]: Conduite en autonomie
+            - generic [ref=e3768]: Non évalué
+            - generic [ref=e3769]: ›
+        - group "Conditions difficiles — 0/7 acquises" [ref=e3770]:
+          - generic [ref=e3771]:
+            - img [ref=e3773]
+            - generic [ref=e3775]: Conditions difficiles
+            - generic [ref=e3776]: 0/7
+          - button "Conduite de nuit — Non évalué. Appuyer pour évaluer" [ref=e3778] [cursor=pointer]:
+            - generic [ref=e3780]: C3a
+            - generic [ref=e3781]: Conduite de nuit
+            - generic [ref=e3782]: Non évalué
+            - generic [ref=e3783]: ›
+          - button "Conduite par mauvaise visibilité — Non évalué. Appuyer pour évaluer" [ref=e3784] [cursor=pointer]:
+            - generic [ref=e3786]: C3b
+            - generic [ref=e3787]: Conduite par mauvaise visibilité
+            - generic [ref=e3788]: Non évalué
+            - generic [ref=e3789]: ›
+          - button "Conduite sur chaussée glissante — Non évalué. Appuyer pour évaluer" [ref=e3790] [cursor=pointer]:
+            - generic [ref=e3792]: C3c
+            - generic [ref=e3793]: Conduite sur chaussée glissante
+            - generic [ref=e3794]: Non évalué
+            - generic [ref=e3795]: ›
+          - button "Adhérence et freinage d'urgence — Non évalué. Appuyer pour évaluer" [ref=e3796] [cursor=pointer]:
+            - generic [ref=e3798]: C3d
+            - generic [ref=e3799]: Adhérence et freinage d'urgence
+            - generic [ref=e3800]: Non évalué
+            - generic [ref=e3801]: ›
+          - button "Voies rapides et autoroutes — Non évalué. Appuyer pour évaluer" [ref=e3802] [cursor=pointer]:
+            - generic [ref=e3804]: C3e
+            - generic [ref=e3805]: Voies rapides et autoroutes
+            - generic [ref=e3806]: Non évalué
+            - generic [ref=e3807]: ›
+          - button "Tunnels, ponts, zones spécifiques — Non évalué. Appuyer pour évaluer" [ref=e3808] [cursor=pointer]:
+            - generic [ref=e3810]: C3f
+            - generic [ref=e3811]: Tunnels, ponts, zones spécifiques
+            - generic [ref=e3812]: Non évalué
+            - generic [ref=e3813]: ›
+          - button "Conduite en zones urbaines denses — Non évalué. Appuyer pour évaluer" [ref=e3814] [cursor=pointer]:
+            - generic [ref=e3816]: C3g
+            - generic [ref=e3817]: Conduite en zones urbaines denses
+            - generic [ref=e3818]: Non évalué
+            - generic [ref=e3819]: ›
+        - group "Conduite autonome — 0/7 acquises" [ref=e3820]:
+          - generic [ref=e3821]:
+            - img [ref=e3823]
+            - generic [ref=e3825]: Conduite autonome
+            - generic [ref=e3826]: 0/7
+          - button "Planifier un trajet — Non évalué. Appuyer pour évaluer" [ref=e3828] [cursor=pointer]:
+            - generic [ref=e3830]: C4a
+            - generic [ref=e3831]: Planifier un trajet
+            - generic [ref=e3832]: Non évalué
+            - generic [ref=e3833]: ›
+          - button "Suivre un itinéraire — Non évalué. Appuyer pour évaluer" [ref=e3834] [cursor=pointer]:
+            - generic [ref=e3836]: C4b
+            - generic [ref=e3837]: Suivre un itinéraire
+            - generic [ref=e3838]: Non évalué
+            - generic [ref=e3839]: ›
+          - button "Conduite éco-responsable — Non évalué. Appuyer pour évaluer" [ref=e3840] [cursor=pointer]:
+            - generic [ref=e3842]: C4c
+            - generic [ref=e3843]: Conduite éco-responsable
+            - generic [ref=e3844]: Non évalué
+            - generic [ref=e3845]: ›
+          - button "Anticipation et stress — Non évalué. Appuyer pour évaluer" [ref=e3846] [cursor=pointer]:
+            - generic [ref=e3848]: C4d
+            - generic [ref=e3849]: Anticipation et stress
+            - generic [ref=e3850]: Non évalué
+            - generic [ref=e3851]: ›
+          - button "Partage de la route — Non évalué. Appuyer pour évaluer" [ref=e3852] [cursor=pointer]:
+            - generic [ref=e3854]: C4e
+            - generic [ref=e3855]: Partage de la route
+            - generic [ref=e3856]: Non évalué
+            - generic [ref=e3857]: ›
+          - button "Présentation à l'examen — Non évalué. Appuyer pour évaluer" [ref=e3858] [cursor=pointer]:
+            - generic [ref=e3860]: C4f
+            - generic [ref=e3861]: Présentation à l'examen
+            - generic [ref=e3862]: Non évalué
+            - generic [ref=e3863]: ›
+          - button "Conduite après examen — Non évalué. Appuyer pour évaluer" [ref=e3864] [cursor=pointer]:
+            - generic [ref=e3866]: C4g
+            - generic [ref=e3867]: Conduite après examen
+            - generic [ref=e3868]: Non évalué
+            - generic [ref=e3869]: ›
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

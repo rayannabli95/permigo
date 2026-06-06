@@ -1,0 +1,139 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e2567]:
+      - generic [ref=e2568]:
+        - heading "Analyses" [active] [level=1] [ref=e2569]
+        - paragraph [ref=e2570]: Votre activité pédagogique · 60 derniers jours
+      - generic [ref=e2571]:
+        - generic [ref=e2572]:
+          - generic [ref=e2573]:
+            - img [ref=e2575]
+            - generic [ref=e2577]: Validées
+          - paragraph [ref=e2578]: "117"
+          - paragraph [ref=e2579]: Ce mois
+          - paragraph [ref=e2580]: ▲ 149% vs mois précédent
+        - generic [ref=e2581]:
+          - generic [ref=e2582]:
+            - img [ref=e2584]
+            - generic [ref=e2589]: Élèves
+          - paragraph [ref=e2590]: "18"
+          - paragraph [ref=e2591]: Attitrés
+        - generic [ref=e2592]:
+          - generic [ref=e2593]:
+            - img [ref=e2595]
+            - generic [ref=e2599]: Taux quiz
+          - paragraph [ref=e2600]: —
+          - paragraph [ref=e2601]: Score ≥ 60% (30j)
+        - generic [ref=e2602]:
+          - generic [ref=e2603]:
+            - img [ref=e2605]
+            - generic [ref=e2607]: Streak pro
+          - paragraph [ref=e2608]: "6"
+          - paragraph [ref=e2609]: Jours consécutifs
+      - generic [ref=e2610]:
+        - generic [ref=e2611]: Tes jours d'activité · 60 derniers jours
+        - generic [ref=e2612]:
+          - generic [ref=e2613]:
+            - generic [ref=e2614]:
+              - generic [ref=e2615]: "22"
+              - generic [ref=e2617]: Lun
+            - generic [ref=e2618]:
+              - generic [ref=e2619]: "2"
+              - generic [ref=e2621]: Mar
+            - generic [ref=e2622]:
+              - generic [ref=e2623]: "53"
+              - generic [ref=e2625]: Mer
+            - generic [ref=e2626]:
+              - generic [ref=e2627]: "20"
+              - generic [ref=e2629]: Jeu
+            - generic [ref=e2630]:
+              - generic [ref=e2631]: "18"
+              - generic [ref=e2633]: Ven
+            - generic [ref=e2634]:
+              - generic [ref=e2635]: "47"
+              - generic [ref=e2637]: Sam
+            - generic [ref=e2638]:
+              - generic [ref=e2639]: "3"
+              - generic [ref=e2641]: Dim
+          - paragraph [ref=e2643]:
+            - text: "Jour le plus actif :"
+            - strong [ref=e2644]: Mer
+            - text: — 53 validations
+      - generic [ref=e2645]:
+        - generic [ref=e2646]: Élèves
+        - tablist [ref=e2647]:
+          - tab "Progressent (3)" [ref=e2648] [cursor=pointer]:
+            - img [ref=e2649]
+            - text: Progressent (3)
+          - tab "Stagnent (3)" [ref=e2652] [cursor=pointer]:
+            - img [ref=e2653]
+            - text: Stagnent (3)
+        - generic [ref=e2655]:
+          - button "Livret de CADET BENOÎT Mendy" [ref=e2656] [cursor=pointer]:
+            - img "CADET BENOÎT Mendy" [ref=e2658]
+            - generic [ref=e2659]:
+              - generic [ref=e2660]: CADET BENOÎT Mendy
+              - generic [ref=e2661]: 31 compétences acquises ce mois
+            - generic [ref=e2662]: +31 ce mois
+            - generic [ref=e2663]: ›
+          - button "Livret de Leo Calvo" [ref=e2664] [cursor=pointer]:
+            - img "Leo Calvo" [ref=e2666]
+            - generic [ref=e2667]:
+              - generic [ref=e2668]: Leo Calvo
+              - generic [ref=e2669]: 31 compétences acquises ce mois
+            - generic [ref=e2670]: +31 ce mois
+            - generic [ref=e2671]: ›
+          - button "Livret de Delphine Tourneur" [ref=e2672] [cursor=pointer]:
+            - img "Delphine Tourneur" [ref=e2674]
+            - generic [ref=e2675]:
+              - generic [ref=e2676]: Delphine Tourneur
+              - generic [ref=e2677]: 18 compétences acquises ce mois
+            - generic [ref=e2678]: +18 ce mois
+            - generic [ref=e2679]: ›
+      - generic [ref=e2680]:
+        - generic [ref=e2681]: Compétences difficiles
+        - button "C2a Infos visuelles 1 élève" [ref=e2682] [cursor=pointer]:
+          - generic [ref=e2683]: C2a
+          - generic [ref=e2685]: Infos visuelles
+          - generic [ref=e2688]: 1 élève
+      - generic [ref=e2689]:
+        - generic [ref=e2690]: Recommandations
+        - generic [ref=e2691]:
+          - button "Relance Simon Léonardi Simon Léonardi n'a plus validé depuis un moment. Un point en leçon peut débloquer la progression." [ref=e2692] [cursor=pointer]:
+            - img [ref=e2694]
+            - generic [ref=e2696]:
+              - generic [ref=e2697]: Relance Simon Léonardi
+              - generic [ref=e2698]: Simon Léonardi n'a plus validé depuis un moment. Un point en leçon peut débloquer la progression.
+          - button "Débrief sur C2a 1 élève bloqué sur \"Infos visuelles\". Prévois un point pédagogique dédié." [ref=e2699] [cursor=pointer]:
+            - img [ref=e2701]
+            - generic [ref=e2704]:
+              - generic [ref=e2705]: Débrief sur C2a
+              - generic [ref=e2706]: 1 élève bloqué sur "Infos visuelles". Prévois un point pédagogique dédié.
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

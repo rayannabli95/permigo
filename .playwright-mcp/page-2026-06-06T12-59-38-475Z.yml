@@ -1,0 +1,152 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e256]:
+    - button "Accueil PermiGo" [ref=e257] [cursor=pointer]:
+      - generic [ref=e258]: PermiGo
+    - generic [ref=e259]:
+      - button "Notifications" [ref=e262] [cursor=pointer]:
+        - img [ref=e263]
+      - button "Mon profil" [ref=e266] [cursor=pointer]:
+        - img "Latifa Sahli"
+  - main [ref=e243]:
+    - generic [ref=e1159]:
+      - generic [ref=e1163]:
+        - generic [ref=e1164]:
+          - button "Modifier la bannière" [ref=e1165] [cursor=pointer]: ✎
+          - button "Partager mon profil" [ref=e1166] [cursor=pointer]:
+            - generic [ref=e1167]: ↗
+            - text: Partager
+        - generic [ref=e1168]:
+          - generic [ref=e1169]:
+            - img "Latifa Sahli" [ref=e1171]
+            - button "Modifier la photo" [ref=e1172] [cursor=pointer]: ✎
+          - generic [ref=e1173]:
+            - img [ref=e1175]
+            - generic [ref=e1177]: Expert
+            - generic [ref=e1178]: P3
+          - heading "Latifa Sahli" [level=2] [ref=e1179]
+          - paragraph [ref=e1180]: Apprenti permis B · 31/31 compétences
+          - generic [ref=e1182]:
+            - generic [ref=e1183]: Max
+            - generic [ref=e1186]: ✓ Élite
+          - generic [ref=e1187]:
+            - generic [ref=e1188]:
+              - generic [ref=e1189]: "31"
+              - generic [ref=e1190]: Compétences
+            - generic [ref=e1191]:
+              - generic [ref=e1192]: "60"
+              - generic [ref=e1193]: Streak
+            - generic [ref=e1194]:
+              - generic [ref=e1195]: 63K
+              - generic [ref=e1196]: XP
+          - generic [ref=e1197]:
+            - button "Partager sur WhatsApp" [ref=e1198] [cursor=pointer]:
+              - img [ref=e1199]
+            - button "Partager sur Instagram" [ref=e1201] [cursor=pointer]:
+              - img [ref=e1202]
+            - button "Copier le lien" [ref=e1205] [cursor=pointer]:
+              - img [ref=e1206]
+      - generic [ref=e1209]:
+        - img "Carte permis - Validé" [ref=e1211] [cursor=pointer]:
+          - generic [ref=e1212]:
+            - generic [ref=e1215]: PermiGo
+            - generic [ref=e1216]: Permis de conduire
+            - generic [ref=e1217]: Catégorie B
+            - generic [ref=e1218]: Véhicules légers · Apprentissage
+            - generic [ref=e1219]:
+              - generic [ref=e1220]: LS
+              - generic [ref=e1221]:
+                - generic [ref=e1222]: Sahli
+                - generic [ref=e1223]: Latifa
+            - generic [ref=e1224]:
+              - generic [ref=e1225]:
+                - generic [ref=e1226]: Début formation
+                - generic [ref=e1227]: 16/05/2026
+              - generic [ref=e1228]:
+                - generic [ref=e1229]: Compétences
+                - generic [ref=e1230]: 31 / 31
+            - generic [ref=e1231]:
+              - generic [ref=e1233]:
+                - generic [ref=e1234]: Prêt examen
+                - generic [ref=e1235]: 100%
+              - generic [ref=e1238]:
+                - generic [ref=e1239]: ✓
+                - generic [ref=e1240]: Validé
+        - generic [ref=e1241]: Ta carte évolue à chaque compétence validée. Vise les 100% pour la passer en or.
+      - link "Ouvrir ta galerie" [ref=e1243] [cursor=pointer]:
+        - /url: "#/galerie"
+        - img [ref=e1245]
+        - generic [ref=e1249]: Ta galerie
+      - generic [ref=e1251]:
+        - heading "Pseudo public" [level=2] [ref=e1252]
+        - paragraph [ref=e1253]: Visible dans le classement. Laisse vide pour rester anonyme. 3 à 16 caractères, lettres/chiffres/_
+        - generic [ref=e1254]:
+          - 'textbox "ex: speedy_lea" [ref=e1255]': <img src=x onerr
+          - button "Enregistrer" [active] [ref=e1256] [cursor=pointer]
+        - generic [ref=e1257]: "3 à 16 caractères : lettres, chiffres ou _ uniquement."
+      - generic [ref=e1259]:
+        - heading "Parrainage · +200 XP par filleul" [level=2] [ref=e1260]
+        - generic [ref=e1261]:
+          - generic [ref=e1262]: F24JR8
+          - button "Copier le code" [ref=e1263] [cursor=pointer]:
+            - img [ref=e1264]
+        - generic [ref=e1267]:
+          - generic [ref=e1268]:
+            - generic [ref=e1269]: "0"
+            - generic [ref=e1270]: filleuls
+          - generic [ref=e1271]:
+            - generic [ref=e1272]: "0"
+            - generic [ref=e1273]: XP gagnés
+        - button "Partager mon code" [ref=e1274] [cursor=pointer]
+        - generic [ref=e1275]:
+          - textbox "Code d'un ami…" [ref=e1276]
+          - button "Appliquer" [ref=e1277] [cursor=pointer]
+      - generic [ref=e1278]:
+        - generic [ref=e1279]:
+          - img [ref=e1281]
+          - generic [ref=e1284]:
+            - generic [ref=e1285]: Email
+            - generic [ref=e1286]: eleve@test.fr
+        - generic [ref=e1287]:
+          - img [ref=e1289]
+          - generic [ref=e1292]:
+            - generic [ref=e1293]: Rôle
+            - generic [ref=e1294]: Élève
+        - generic [ref=e1295]:
+          - img [ref=e1297]
+          - generic [ref=e1299]:
+            - generic [ref=e1300]: XP total
+            - generic [ref=e1301]: 63130 XP
+        - generic [ref=e1302]:
+          - img [ref=e1304]
+          - generic [ref=e1308]:
+            - generic [ref=e1309]: ID profil
+            - generic [ref=e1310]: 184b3d3c-a5c3-4c63-8db4-510116d6048a
+      - button "Notifications désactivées" [ref=e1312] [cursor=pointer]:
+        - img [ref=e1314]
+        - generic [ref=e1317]:
+          - generic [ref=e1318]: Notifications
+          - generic [ref=e1319]: Désactivées
+      - button "Revoir le tour de bienvenue" [ref=e1320] [cursor=pointer]:
+        - img [ref=e1321]
+        - text: Revoir le tour de bienvenue
+      - button "Se déconnecter" [ref=e1324] [cursor=pointer]
+      - button "Supprimer mon compte" [ref=e1325] [cursor=pointer]
+      - generic [ref=e1326]: PermiGo v7 · Sprint 2
+  - navigation "Navigation principale" [ref=e580]:
+    - button "Accueil" [ref=e581] [cursor=pointer]:
+      - img [ref=e582]
+      - generic [ref=e585]: Accueil
+    - button "Parcours" [ref=e586] [cursor=pointer]:
+      - img [ref=e587]
+      - generic [ref=e589]: Parcours
+    - button "Boutique" [ref=e590] [cursor=pointer]:
+      - img [ref=e591]
+      - generic [ref=e594]: Boutique
+    - button "Trophées" [ref=e595] [cursor=pointer]:
+      - img [ref=e596]
+      - generic [ref=e602]: Trophées
+    - button "Profil" [ref=e603] [cursor=pointer]:
+      - img [ref=e604]
+      - generic [ref=e607]: Profil

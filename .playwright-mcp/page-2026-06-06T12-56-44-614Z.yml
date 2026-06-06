@@ -1,0 +1,7 @@
+- generic [active] [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e55]
+  - status [ref=e61]:
+    - generic [ref=e62]: Bonjour Nabli
+    - button "Fermer la notification" [ref=e63] [cursor=pointer]: ×

@@ -1,0 +1,166 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e58]:
+    - button "Accueil PermiGo" [ref=e59] [cursor=pointer]:
+      - generic [ref=e60]: PermiGo
+    - generic [ref=e61]:
+      - button "Notifications" [ref=e64] [cursor=pointer]:
+        - img [ref=e65]
+      - button "Mon profil" [ref=e68] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [active] [ref=e69]:
+    - generic [ref=e335]:
+      - generic [ref=e339]:
+        - generic [ref=e340]:
+          - button "Modifier la bannière" [ref=e341] [cursor=pointer]: ✎
+          - button "Partager mon profil" [ref=e342] [cursor=pointer]:
+            - generic [ref=e343]: ↗
+            - text: Partager
+        - generic [ref=e344]:
+          - generic [ref=e345]:
+            - img "Rayan Nabli" [ref=e347]
+            - button "Modifier la photo" [ref=e348] [cursor=pointer]: ✎
+          - generic [ref=e349]:
+            - img [ref=e351]
+            - generic [ref=e353]: Coach
+            - generic [ref=e354]: P4
+          - heading "Rayan Nabli" [level=2] [ref=e355]
+          - paragraph [ref=e356]: Enseignant · 22 élèves suivis
+          - generic [ref=e358]:
+            - generic [ref=e359]: Prog.
+            - generic [ref=e362]: → Maître
+          - generic [ref=e363]:
+            - generic [ref=e364]:
+              - generic [ref=e365]: "165"
+              - generic [ref=e366]: Validations
+            - generic [ref=e367]:
+              - generic [ref=e368]: "22"
+              - generic [ref=e369]: Élèves
+            - generic [ref=e370]:
+              - generic [ref=e371]: "6"
+              - generic [ref=e372]: Streak
+          - generic [ref=e373]:
+            - button "Partager sur WhatsApp" [ref=e374] [cursor=pointer]:
+              - img [ref=e375]
+            - button "Partager sur Instagram" [ref=e377] [cursor=pointer]:
+              - img [ref=e378]
+            - button "Copier le lien" [ref=e381] [cursor=pointer]:
+              - img [ref=e382]
+      - link "Ouvrir la boutique" [ref=e386] [cursor=pointer]:
+        - /url: "#/boutique"
+        - img [ref=e388]
+        - generic [ref=e392]: Boutique
+      - generic [ref=e394]:
+        - generic [ref=e395]:
+          - img [ref=e396]
+          - text: Classement · juin 2026
+        - generic [ref=e399]:
+          - generic [ref=e400]:
+            - generic [ref=e401]: "#1"
+            - img "Rayan Nabli" [ref=e403]
+            - generic [ref=e404]: Ma position
+            - generic [ref=e405]:
+              - generic [ref=e406]: "29.25"
+              - generic [ref=e407]: pts
+          - generic [ref=e408]:
+            - generic [ref=e409]:
+              - generic [ref=e410]: 117 val. · pas encore de session enregistrée
+              - generic [ref=e411]: Enregistre une session pour débloquer ce compteur
+            - generic [ref=e412]:
+              - generic [ref=e413]: "0"
+              - generic [ref=e414]: élèves
+            - generic [ref=e415]:
+              - generic [ref=e416]: 0j
+              - generic [ref=e417]: actifs
+          - generic [ref=e418]:
+            - img [ref=e419]
+            - text: Tu es en tête ce mois-ci !
+        - generic [ref=e425]:
+          - generic [ref=e426]:
+            - generic [ref=e427]: "#1"
+            - img "Rayan Nabli" [ref=e429]
+            - generic [ref=e430]:
+              - generic [ref=e431]: Rayan (toi)
+              - generic [ref=e432]: 0h · 117 val. · 0 élèves
+            - generic [ref=e433]: 29.25 pts
+          - generic [ref=e434]:
+            - generic [ref=e435]: "#2"
+            - generic [ref=e437]: R
+            - generic [ref=e438]:
+              - generic [ref=e439]: Rayan
+              - generic [ref=e440]: 0h · 0 val. · 0 élèves
+            - generic [ref=e441]: 0 pts
+          - generic [ref=e442]:
+            - generic [ref=e443]: "#3"
+            - generic [ref=e445]: LS
+            - generic [ref=e446]:
+              - generic [ref=e447]: Lassaad
+              - generic [ref=e448]: 0h · 0 val. · 0 élèves
+            - generic [ref=e449]: 0 pts
+      - generic [ref=e450]:
+        - img [ref=e452]
+        - generic [ref=e454]:
+          - generic [ref=e455]: 6 jours
+          - generic [ref=e456]: d'affilée cette semaine
+      - generic [ref=e457]:
+        - heading "Ma chasse en 2026" [level=2] [ref=e458]
+        - generic [ref=e459]:
+          - generic [ref=e460]:
+            - generic [ref=e461]: "165"
+            - generic [ref=e462]: compétences validées
+          - generic [ref=e463]:
+            - generic [ref=e464]: "22"
+            - generic [ref=e465]: élèves suivis
+          - generic [ref=e466]:
+            - generic [ref=e467]: "19"
+            - generic [ref=e468]: C3 Maîtrise atteints
+          - generic [ref=e469]:
+            - generic [ref=e470]: "18"
+            - generic [ref=e471]: élèves actifs 30j
+      - generic [ref=e472]:
+        - generic [ref=e473]:
+          - img [ref=e475]
+          - generic [ref=e478]:
+            - generic [ref=e479]: Email
+            - generic [ref=e480]: enseignant@test.fr
+        - generic [ref=e481]:
+          - img [ref=e483]
+          - generic [ref=e486]:
+            - generic [ref=e487]: Rôle
+            - generic [ref=e488]: Enseignant
+        - generic [ref=e489]:
+          - img [ref=e491]
+          - generic [ref=e493]:
+            - generic [ref=e494]: XP total
+            - generic [ref=e495]: 7970 XP
+        - generic [ref=e496]:
+          - img [ref=e498]
+          - generic [ref=e502]:
+            - generic [ref=e503]: ID profil
+            - generic [ref=e504]: 352dc54b-6aa2-46a2-b355-a7b54408816e
+      - button "Notifications désactivées" [ref=e506] [cursor=pointer]:
+        - img [ref=e508]
+        - generic [ref=e511]:
+          - generic [ref=e512]: Notifications
+          - generic [ref=e513]: Désactivées
+      - button "Se déconnecter" [ref=e514] [cursor=pointer]
+      - generic [ref=e515]: PermiGo v7 · Sprint 2
+  - navigation "Navigation principale" [ref=e309]:
+    - button "Aujourd'hui" [ref=e310] [cursor=pointer]:
+      - img [ref=e311]
+      - generic [ref=e313]: Aujourd'hui
+    - button "Mes élèves" [ref=e314] [cursor=pointer]:
+      - img [ref=e315]
+      - generic [ref=e320]: Mes élèves
+    - button "Parcours" [ref=e321] [cursor=pointer]:
+      - img [ref=e322]
+      - generic [ref=e324]: Parcours
+    - button "Stats" [ref=e325] [cursor=pointer]:
+      - img [ref=e326]
+      - generic [ref=e327]: Stats
+    - button "Récompenses" [ref=e328] [cursor=pointer]:
+      - img [ref=e329]
+      - generic [ref=e332]: Récompenses
+  - button "Enregistrer une séance" [ref=e333] [cursor=pointer]:
+    - img [ref=e334]

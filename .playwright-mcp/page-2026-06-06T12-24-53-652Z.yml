@@ -1,0 +1,30 @@
+- generic [active] [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e52]:
+    - button "Accueil PermiGo" [ref=e53] [cursor=pointer]:
+      - generic [ref=e54]: PermiGo
+    - generic [ref=e55]:
+      - button "Notifications" [ref=e58] [cursor=pointer]:
+        - img [ref=e59]
+      - button "Mon profil" [ref=e62] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e63]
+  - navigation "Navigation principale" [ref=e303]:
+    - button "Aujourd'hui" [ref=e304] [cursor=pointer]:
+      - img [ref=e305]
+      - generic [ref=e307]: Aujourd'hui
+    - button "Mes élèves" [ref=e308] [cursor=pointer]:
+      - img [ref=e309]
+      - generic [ref=e314]: Mes élèves
+    - button "Parcours" [ref=e315] [cursor=pointer]:
+      - img [ref=e316]
+      - generic [ref=e318]: Parcours
+    - button "Stats" [ref=e319] [cursor=pointer]:
+      - img [ref=e320]
+      - generic [ref=e321]: Stats
+    - button "Récompenses" [ref=e322] [cursor=pointer]:
+      - img [ref=e323]
+      - generic [ref=e326]: Récompenses
+  - button "Enregistrer une séance" [ref=e327] [cursor=pointer]:
+    - img [ref=e328]

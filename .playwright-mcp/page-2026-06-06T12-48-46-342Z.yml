@@ -1,0 +1,56 @@
+- generic [active] [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main:
+    - generic [ref=e147]:
+      - generic [ref=e148]:
+        - generic [ref=e150]: PermiGo
+        - generic [ref=e151]:
+          - heading "Connexion" [level=2] [ref=e152]
+          - paragraph [ref=e153]: Élève, enseignant ou gérant — accède à ton espace
+          - generic [ref=e154]:
+            - generic:
+              - generic:
+                - text: Laisser vide
+                - textbox
+              - generic:
+                - text: Laisser vide
+                - textbox
+            - generic [ref=e155]:
+              - generic [ref=e156]: Email
+              - generic [ref=e157]:
+                - img [ref=e158]
+                - textbox "Email" [ref=e161]:
+                  - /placeholder: vous@exemple.fr
+            - generic [ref=e162]:
+              - generic [ref=e163]: Mot de passe
+              - generic [ref=e164]:
+                - img [ref=e165]
+                - textbox "Mot de passe" [ref=e168]:
+                  - /placeholder: ••••••••
+                - button "Afficher le mot de passe" [ref=e169] [cursor=pointer]:
+                  - img [ref=e170]
+            - generic [ref=e173]:
+              - generic [ref=e174] [cursor=pointer]:
+                - checkbox "Se souvenir de moi" [ref=e175]
+                - generic [ref=e176]: Se souvenir de moi
+              - button "Mot de passe oublié ?" [ref=e177] [cursor=pointer]
+            - button "Se connecter" [ref=e178] [cursor=pointer]
+            - paragraph [ref=e179]
+          - button "Recevoir un code par email" [ref=e180] [cursor=pointer]
+          - generic [ref=e181]: Démos rapides
+          - generic [ref=e182]:
+            - button "🎓 Élève" [ref=e183] [cursor=pointer]:
+              - generic [ref=e184]: 🎓
+              - generic [ref=e185]: Élève
+            - button "🚗 Enseignant" [ref=e186] [cursor=pointer]:
+              - generic [ref=e187]: 🚗
+              - generic [ref=e188]: Enseignant
+            - button "👑 Gérant" [ref=e189] [cursor=pointer]:
+              - generic [ref=e190]: 👑
+              - generic [ref=e191]: Gérant
+          - generic [ref=e192]:
+            - text: Pas encore de compte ?
+            - link "Créer un compte gratuit →" [ref=e193] [cursor=pointer]:
+              - /url: "#/signup"
+      - generic [ref=e194]: PermiGo · v7

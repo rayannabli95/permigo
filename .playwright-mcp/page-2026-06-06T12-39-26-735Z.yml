@@ -1,0 +1,65 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e2707]:
+      - heading "Mes récompenses" [active] [level=1] [ref=e2708]
+      - generic [ref=e2709]:
+        - heading "Mes gemmes" [level=2] [ref=e2710]
+        - generic [ref=e2711]:
+          - generic [ref=e2712]: "550"
+          - generic [ref=e2713]: Gemmes
+        - paragraph [ref=e2714]:
+          - text: Gagnées via validations (+10 par séance).
+          - text: Utilisables pour débloquer cosmétiques premium.
+      - heading "Mes badges" [level=2] [ref=e2715]
+      - generic [ref=e2716]:
+        - generic [ref=e2717]:
+          - generic [ref=e2718]: ✓
+          - generic [ref=e2719]: Validateur
+          - generic [ref=e2720]: 10 validations
+          - generic [ref=e2721]: Bloqué
+        - generic [ref=e2722]:
+          - generic [ref=e2723]: 👥
+          - generic [ref=e2724]: Mentor
+          - generic [ref=e2725]: 50 validations
+          - generic [ref=e2726]: Bloqué
+        - generic [ref=e2727]:
+          - generic [ref=e2728]: ⭐
+          - generic [ref=e2729]: Expert
+          - generic [ref=e2730]: 100 validations
+          - generic [ref=e2731]: Bloqué
+        - generic [ref=e2732]:
+          - generic [ref=e2733]: 👑
+          - generic [ref=e2734]: Maître
+          - generic [ref=e2735]: 200 validations
+          - generic [ref=e2736]: Bloqué
+      - generic [ref=e2737]:
+        - heading "Shop (bientôt)" [level=2] [ref=e2738]
+        - paragraph [ref=e2739]: Dépensez vos gemmes pour débloquer des cosmétiques premium.
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

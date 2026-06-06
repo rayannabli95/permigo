@@ -1,0 +1,87 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e256]:
+    - button "Accueil PermiGo" [ref=e257] [cursor=pointer]:
+      - generic [ref=e258]: PermiGo
+    - generic [ref=e259]:
+      - button "Notifications" [ref=e262] [cursor=pointer]:
+        - img [ref=e263]
+      - button "Mon profil" [ref=e266] [cursor=pointer]:
+        - img "Latifa Sahli"
+  - main [ref=e243]:
+    - generic [ref=e1065]:
+      - generic [ref=e1067]:
+        - generic [ref=e1068]:
+          - heading "Mes trophées" [active] [level=1] [ref=e1069]
+          - generic [ref=e1070]: 13 / 13
+        - generic [ref=e1074]: 100% du parcours — 0 restant
+      - link "Ouvrir ta galerie de récompenses" [ref=e1075] [cursor=pointer]:
+        - /url: "#/galerie"
+        - img [ref=e1077]
+        - generic [ref=e1081]:
+          - generic [ref=e1082]: Ta galerie
+          - generic [ref=e1083]: Tes skins et badges débloqués
+        - img [ref=e1085]
+      - generic [ref=e1087]:
+        - generic [ref=e1088]: Compétences
+        - generic [ref=e1089]:
+          - generic [ref=e1090] [cursor=pointer]:
+            - img "Premières racines" [ref=e1093]
+            - generic [ref=e1094]: Premières racines
+          - generic [ref=e1095] [cursor=pointer]:
+            - img "10/31" [ref=e1098]
+            - generic [ref=e1099]: 10/31
+          - generic [ref=e1100] [cursor=pointer]:
+            - img "Cap des 15" [ref=e1103]
+            - generic [ref=e1104]: Cap des 15
+          - generic [ref=e1105] [cursor=pointer]:
+            - img "20 acquises" [ref=e1108]
+            - generic [ref=e1109]: 20 acquises
+          - generic [ref=e1110] [cursor=pointer]:
+            - img "25/31" [ref=e1113]
+            - generic [ref=e1114]: 25/31
+          - generic [ref=e1115] [cursor=pointer]:
+            - img "Prêt examen blanc" [ref=e1118]
+            - generic [ref=e1119]: Prêt examen blanc
+          - generic [ref=e1120] [cursor=pointer]:
+            - img "31/31 — Complet !" [ref=e1123]
+            - generic [ref=e1124]: 31/31 — Complet !
+        - generic [ref=e1125]: Séries
+        - generic [ref=e1126]:
+          - generic [ref=e1127] [cursor=pointer]:
+            - img "3 jours" [ref=e1130]
+            - generic [ref=e1131]: 3 jours
+          - generic [ref=e1132] [cursor=pointer]:
+            - img "Deux semaines" [ref=e1135]
+            - generic [ref=e1136]: Deux semaines
+          - generic [ref=e1137] [cursor=pointer]:
+            - img "30 jours d'affilée" [ref=e1140]
+            - generic [ref=e1141]: 30 jours d'affilée
+        - generic [ref=e1142]: Quiz
+        - generic [ref=e1143]:
+          - generic [ref=e1144] [cursor=pointer]:
+            - img "5 quiz réussis" [ref=e1147]
+            - generic [ref=e1148]: 5 quiz réussis
+          - generic [ref=e1149] [cursor=pointer]:
+            - img "20 quiz réussis" [ref=e1152]
+            - generic [ref=e1153]: 20 quiz réussis
+          - generic [ref=e1154] [cursor=pointer]:
+            - img "5 quiz parfaits" [ref=e1157]
+            - generic [ref=e1158]: 5 quiz parfaits
+  - navigation "Navigation principale" [ref=e580]:
+    - button "Accueil" [ref=e581] [cursor=pointer]:
+      - img [ref=e582]
+      - generic [ref=e585]: Accueil
+    - button "Parcours" [ref=e586] [cursor=pointer]:
+      - img [ref=e587]
+      - generic [ref=e589]: Parcours
+    - button "Boutique" [ref=e590] [cursor=pointer]:
+      - img [ref=e591]
+      - generic [ref=e594]: Boutique
+    - button "Trophées" [ref=e595] [cursor=pointer]:
+      - img [ref=e596]
+      - generic [ref=e602]: Trophées
+    - button "Profil" [ref=e603] [cursor=pointer]:
+      - img [ref=e604]
+      - generic [ref=e607]: Profil

@@ -1,0 +1,260 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e256]:
+    - button "Accueil PermiGo" [ref=e257] [cursor=pointer]:
+      - generic [ref=e258]: PermiGo
+    - generic [ref=e259]:
+      - button "Notifications" [ref=e262] [cursor=pointer]:
+        - img [ref=e263]
+      - button "Mon profil" [ref=e266] [cursor=pointer]:
+        - img "Latifa Sahli"
+  - main [ref=e243]:
+    - generic [ref=e267]:
+      - generic [ref=e269]:
+        - generic [ref=e270]:
+          - generic [ref=e272]: Bonjour Latifa
+          - button "Notifications" [ref=e273] [cursor=pointer]:
+            - img [ref=e274]
+        - heading "Niv. 8" [active] [level=1] [ref=e277]:
+          - generic [ref=e278]: Niv. 8
+        - generic [ref=e279]:
+          - generic [ref=e280]:
+            - img [ref=e281]
+            - text: 63130 XP · Niv. 8
+          - button "Streak 60 jours" [ref=e283] [cursor=pointer]:
+            - img [ref=e285]
+            - generic [ref=e287]: "60"
+            - generic [ref=e288]: jours
+        - generic [ref=e292]: 100% vers max
+      - generic [ref=e295]:
+        - generic [ref=e296]: Parcours complété !
+        - generic [ref=e297]:
+          - img [ref=e299]
+          - generic [ref=e302]:
+            - generic [ref=e303]: Tous les mondes maîtrisés
+            - generic [ref=e304]: Tu es prêt pour l'examen
+        - button "Voir mes trophées" [ref=e305] [cursor=pointer]:
+          - text: Voir mes trophées
+          - img [ref=e306]
+      - generic [ref=e308]:
+        - generic [ref=e309]: Action du jour
+        - generic [ref=e311]: Ton parcours d'examen
+        - generic [ref=e312]: 5 parcours · 15 questions · estime tes chances au permis
+        - button "Démarrer l'examen →" [ref=e313] [cursor=pointer]:
+          - text: Démarrer l'examen →
+          - img [ref=e314]
+      - generic [ref=e316]:
+        - generic [ref=e317]:
+          - img [ref=e319]
+          - text: Boule de cristal
+        - generic [ref=e326]:
+          - generic [ref=e327]: "92"
+          - generic [ref=e328]: "%"
+        - paragraph [ref=e329]: de chances de décrocher ton permis au 1er coup
+      - generic [ref=e330]:
+        - generic [ref=e331]:
+          - img [ref=e333]
+          - text: Boule de cristal
+        - generic [ref=e340]:
+          - generic [ref=e341]: "0"
+          - generic [ref=e342]: "%"
+        - paragraph [ref=e343]: de chances de décrocher ton permis au 1er coup
+      - generic [ref=e344]: Mon parcours REMC
+      - generic [ref=e345]:
+        - generic [ref=e346] [cursor=pointer]:
+          - generic [ref=e347]:
+            - img "Maîtrise du véhicule" [ref=e348]
+            - generic [ref=e349]: 100%
+          - generic [ref=e350]: Maîtrise du véhicule
+          - generic [ref=e353]: 9/9
+          - img [ref=e355]
+        - generic [ref=e358] [cursor=pointer]:
+          - generic [ref=e359]:
+            - img "Circulation normale" [ref=e360]
+            - generic [ref=e361]: 100%
+          - generic [ref=e362]: Circulation normale
+          - generic [ref=e365]: 8/8
+          - img [ref=e367]
+        - generic [ref=e370] [cursor=pointer]:
+          - generic [ref=e371]:
+            - img "Conditions difficiles" [ref=e372]
+            - generic [ref=e373]: 100%
+          - generic [ref=e374]: Conditions difficiles
+          - generic [ref=e377]: 7/7
+          - img [ref=e379]
+        - generic [ref=e382] [cursor=pointer]:
+          - generic [ref=e383]:
+            - img "Conduite autonome" [ref=e384]
+            - generic [ref=e385]: 100%
+          - generic [ref=e386]: Conduite autonome
+          - generic [ref=e389]: 7/7
+          - img [ref=e391]
+      - button "Voir le classement de l'école" [ref=e395] [cursor=pointer]:
+        - generic [ref=e397]:
+          - generic [ref=e398]: Classement de l'école
+          - generic [ref=e399]: Clique pour voir ton classement
+          - generic [ref=e400]: Invite tes potes pour lancer le classement
+        - img [ref=e402]
+      - generic [ref=e404]:
+        - generic [ref=e405]:
+          - generic [ref=e406]: 31/31
+          - generic [ref=e407]: compétences acquises
+        - generic [ref=e409]:
+          - generic [ref=e410]: "0"
+          - generic [ref=e411]: avant l'examen blanc
+      - generic [ref=e412]:
+        - generic [ref=e413]:
+          - generic [ref=e414]: Retours de tes moniteurs
+          - button "Voir tout le fil" [ref=e415] [cursor=pointer]:
+            - text: Tout voir
+            - img [ref=e416]
+        - generic [ref=e418]:
+          - 'button "RN Rayan Nabli 19 mai 1h30 de conduite avec toi ✓ confirmée \"Belle progression aujourd''hui\" mardi 19 mai Durée : 1h30" [ref=e419] [cursor=pointer]':
+            - generic [ref=e420]:
+              - generic [ref=e421]: RN
+              - generic [ref=e422]:
+                - generic [ref=e423]: Rayan Nabli
+                - generic [ref=e424]: 19 mai
+              - img [ref=e426]
+            - generic [ref=e429]:
+              - generic [ref=e430]:
+                - strong [ref=e431]: 1h30
+                - text: de conduite avec toi ✓ confirmée
+              - generic [ref=e432]: "\"Belle progression aujourd'hui\""
+            - generic [ref=e433]:
+              - generic [ref=e434]:
+                - img [ref=e435]
+                - text: mardi 19 mai
+              - generic [ref=e437]:
+                - img [ref=e438]
+                - text: "Durée : 1h30"
+          - 'button "RN Rayan Nabli 14 mai A validé : Intersections, ronds-points jeudi 14 mai" [ref=e441] [cursor=pointer]':
+            - generic [ref=e442]:
+              - generic [ref=e443]: RN
+              - generic [ref=e444]:
+                - generic [ref=e445]: Rayan Nabli
+                - generic [ref=e446]: 14 mai
+              - img [ref=e448]
+            - generic [ref=e452]:
+              - text: "A validé :"
+              - strong [ref=e453]: Intersections, ronds-points
+            - generic [ref=e455]:
+              - img [ref=e456]
+              - text: jeudi 14 mai
+          - 'button "RN Rayan Nabli 14 mai A validé : Conduite en autonomie jeudi 14 mai" [ref=e458] [cursor=pointer]':
+            - generic [ref=e459]:
+              - generic [ref=e460]: RN
+              - generic [ref=e461]:
+                - generic [ref=e462]: Rayan Nabli
+                - generic [ref=e463]: 14 mai
+              - img [ref=e465]
+            - generic [ref=e469]:
+              - text: "A validé :"
+              - strong [ref=e470]: Conduite en autonomie
+            - generic [ref=e472]:
+              - img [ref=e473]
+              - text: jeudi 14 mai
+          - 'button "RN Rayan Nabli 14 mai A validé : Organes, commandes, vérifications jeudi 14 mai" [ref=e475] [cursor=pointer]':
+            - generic [ref=e476]:
+              - generic [ref=e477]: RN
+              - generic [ref=e478]:
+                - generic [ref=e479]: Rayan Nabli
+                - generic [ref=e480]: 14 mai
+              - img [ref=e482]
+            - generic [ref=e486]:
+              - text: "A validé :"
+              - strong [ref=e487]: Organes, commandes, vérifications
+            - generic [ref=e489]:
+              - img [ref=e490]
+              - text: jeudi 14 mai
+          - 'button "RN Rayan Nabli 14 mai A validé : Vitesse et trajectoire en virage jeudi 14 mai" [ref=e492] [cursor=pointer]':
+            - generic [ref=e493]:
+              - generic [ref=e494]: RN
+              - generic [ref=e495]:
+                - generic [ref=e496]: Rayan Nabli
+                - generic [ref=e497]: 14 mai
+              - img [ref=e499]
+            - generic [ref=e503]:
+              - text: "A validé :"
+              - strong [ref=e504]: Vitesse et trajectoire en virage
+            - generic [ref=e506]:
+              - img [ref=e507]
+              - text: jeudi 14 mai
+    - dialog "Détail série" [ref=e509]:
+      - generic [ref=e511]:
+        - generic [ref=e512]: Série d'apprentissage
+        - generic [ref=e513]: "Record : 90 jours · En cours : 60"
+      - generic [ref=e514]:
+        - generic [ref=e515]:
+          - generic [ref=e516]: Mon mois
+          - generic [ref=e517]: 11 jours actifs
+        - generic [ref=e518]:
+          - generic [ref=e521]: 11 jours actifs · 2 cette semaine
+          - generic [ref=e522]:
+            - generic [ref=e523]:
+              - generic [ref=e524]: Avr.
+              - generic [ref=e525]: Mai
+            - generic [ref=e526]:
+              - generic "27 avril" [ref=e527]
+              - generic "4 mai" [ref=e528]
+              - generic "11 mai" [ref=e529]
+              - generic "18 mai — actif" [ref=e530]
+              - generic "25 mai — actif" [ref=e531]
+              - generic [ref=e532]: M
+              - generic "28 avril" [ref=e533]
+              - generic "5 mai" [ref=e534]
+              - generic "12 mai" [ref=e535]
+              - generic "19 mai — actif" [ref=e536]
+              - generic "26 mai" [ref=e537]
+              - generic "29 avril" [ref=e538]
+              - generic "6 mai" [ref=e539]
+              - generic "13 mai" [ref=e540]
+              - generic "20 mai — actif" [ref=e541]
+              - generic "27 mai" [ref=e542]
+              - generic [ref=e543]: J
+              - generic "30 avril" [ref=e544]
+              - generic "7 mai" [ref=e545]
+              - generic "14 mai — actif" [ref=e546]
+              - generic "21 mai" [ref=e547]
+              - generic "28 mai" [ref=e548]
+              - generic "1 mai" [ref=e549]
+              - generic "8 mai" [ref=e550]
+              - generic "15 mai — actif" [ref=e551]
+              - generic "22 mai" [ref=e552]
+              - generic "29 mai — actif" [ref=e553]
+              - generic [ref=e554]: S
+              - generic "2 mai" [ref=e555]
+              - generic "9 mai" [ref=e556]
+              - generic "16 mai — actif" [ref=e557]
+              - generic "23 mai" [ref=e558]
+              - generic "30 mai" [ref=e559]
+              - generic "3 mai" [ref=e560]
+              - generic "10 mai" [ref=e561]
+              - generic "17 mai — actif" [ref=e562]
+              - generic "24 mai" [ref=e563]
+              - generic "31 mai" [ref=e564]
+          - generic [ref=e565]:
+            - generic [ref=e566]: Moins
+            - generic [ref=e572]: Plus
+      - generic [ref=e574]:
+        - button "Geler ma série · 50" [ref=e575] [cursor=pointer]:
+          - text: Geler ma série · 50
+          - img [ref=e576]
+        - generic [ref=e579]: Protège ta série pour les prochaines 24h
+  - navigation "Navigation principale" [ref=e580]:
+    - button "Accueil" [ref=e581] [cursor=pointer]:
+      - img [ref=e582]
+      - generic [ref=e585]: Accueil
+    - button "Parcours" [ref=e586] [cursor=pointer]:
+      - img [ref=e587]
+      - generic [ref=e589]: Parcours
+    - button "Boutique" [ref=e590] [cursor=pointer]:
+      - img [ref=e591]
+      - generic [ref=e594]: Boutique
+    - button "Trophées" [ref=e595] [cursor=pointer]:
+      - img [ref=e596]
+      - generic [ref=e602]: Trophées
+    - button "Profil" [ref=e603] [cursor=pointer]:
+      - img [ref=e604]
+      - generic [ref=e607]: Profil

@@ -1,0 +1,15 @@
+- generic [active] [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e256]:
+    - button "Accueil PermiGo" [ref=e257] [cursor=pointer]:
+      - generic [ref=e258]: PermiGo
+    - generic [ref=e259]:
+      - button "Notifications" [ref=e262] [cursor=pointer]:
+        - img [ref=e263]
+      - button "Mon profil" [ref=e266] [cursor=pointer]:
+        - img "Latifa Sahli"
+  - main [ref=e243]:
+    - generic [ref=e2149]:
+      - paragraph [ref=e2150]: Cette page n'a pas pu être chargée.
+      - button "Recharger" [ref=e2151] [cursor=pointer]

@@ -1,0 +1,335 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e256]:
+    - button "Accueil PermiGo" [ref=e257] [cursor=pointer]:
+      - generic [ref=e258]: PermiGo
+    - generic [ref=e259]:
+      - button "Notifications" [ref=e262] [cursor=pointer]:
+        - img [ref=e263]
+      - button "Mon profil" [ref=e266] [cursor=pointer]:
+        - img "Latifa Sahli"
+  - main [ref=e243]:
+    - generic [ref=e608]:
+      - link "Aller à la carte" [ref=e609] [cursor=pointer]:
+        - /url: "#prc-map-scroll"
+      - generic [ref=e610]:
+        - generic [ref=e611]:
+          - heading "Mon parcours" [active] [level=1] [ref=e612]
+          - generic [ref=e613]: 31 compétences · Permis B
+        - generic [ref=e614]:
+          - generic [ref=e615]: 31/31
+          - generic [ref=e616]: acquises
+      - generic [ref=e617]:
+        - 'progressbar "Progression du parcours : 100%, 31 compétences sur 31" [ref=e618]'
+        - generic [ref=e620]:
+          - generic [ref=e621]: 100% du chemin
+          - generic [ref=e622]: 0 restantes
+      - list "Légende des statuts" [ref=e623]:
+        - listitem [ref=e624]: Acquis
+        - listitem [ref=e626]: En cours
+        - listitem [ref=e628]: À faire
+        - listitem [ref=e630]: Verrouillé
+      - generic [ref=e632]:
+        - generic: CARTE D'APPRENTISSAGE
+        - region "Carte d'apprentissage REMC" [ref=e634]:
+          - generic [ref=e635]:
+            - generic [ref=e636]:
+              - generic [ref=e637]:
+                - generic [ref=e638]: "1"
+                - text: Campagne
+              - generic [ref=e639]: Maîtriser le véhicule
+              - generic [ref=e640]: "Les bases : démarrer, freiner, diriger."
+              - generic [ref=e641]:
+                - text: 9 / 9 compétences
+                - img [ref=e642]
+            - generic [ref=e648]:
+              - img [ref=e649]
+              - button "Organes, commandes, vérifications — Acquis" [ref=e654] [cursor=pointer]:
+                - generic [ref=e655]:
+                  - img
+                - generic:
+                  - generic: Organes, commandes, vérifications
+                  - generic: Acquis
+              - button "S'installer au poste de conduite — Acquis" [ref=e656] [cursor=pointer]:
+                - generic [ref=e657]:
+                  - img
+                - generic:
+                  - generic: S'installer au poste de conduite
+                  - generic: Acquis
+              - button "Tenir le volant, trajectoire — Acquis" [ref=e658] [cursor=pointer]:
+                - generic [ref=e659]:
+                  - img
+                - generic:
+                  - generic: Tenir le volant, trajectoire
+                  - generic: Acquis
+              - button "Démarrer et s'arrêter — Acquis" [ref=e660] [cursor=pointer]:
+                - generic [ref=e661]:
+                  - img
+                - generic:
+                  - generic: Démarrer et s'arrêter
+                  - generic: Acquis
+              - button "Doser accélération et freinage — Acquis" [ref=e662] [cursor=pointer]:
+                - generic [ref=e663]:
+                  - img
+                - generic:
+                  - generic: Doser accélération et freinage
+                  - generic: Acquis
+              - button "Utiliser la boîte de vitesses — Acquis" [ref=e664] [cursor=pointer]:
+                - generic [ref=e665]:
+                  - img
+                - generic:
+                  - generic: Utiliser la boîte de vitesses
+                  - generic: Acquis
+              - button "Contrôles de sécurité extérieure — Acquis" [ref=e666] [cursor=pointer]:
+                - generic [ref=e667]:
+                  - img
+                - generic:
+                  - generic: Contrôles de sécurité extérieure
+                  - generic: Acquis
+              - 'button "Manœuvres : créneau, demi-tour — Acquis" [ref=e668] [cursor=pointer]':
+                - generic [ref=e669]:
+                  - img
+                - generic:
+                  - generic: "Manœuvres : créneau, demi-tour"
+                  - generic: Acquis
+              - button "Autonomie sur manœuvres de base — Acquis" [ref=e670] [cursor=pointer]:
+                - generic [ref=e671]:
+                  - img
+                - generic:
+                  - generic: Autonomie sur manœuvres de base
+                  - generic: Acquis
+            - generic [ref=e672]:
+              - img [ref=e674]
+              - generic [ref=e680]: ✓ Monde terminé
+              - heading "Monde 1 terminé !" [level=3] [ref=e681]
+              - paragraph [ref=e682]: Le monde 2 t'attend.
+            - button "COFFRE DE BRONZE déjà ouvert" [ref=e683]:
+              - generic [ref=e686]:
+                - generic [ref=e687]: ✓ OUVERT
+                - generic [ref=e688]: Campagne
+          - generic [ref=e690]:
+            - generic [ref=e691]:
+              - generic [ref=e692]:
+                - generic [ref=e693]: "2"
+                - text: Ville
+              - generic [ref=e694]: Circuler en conditions normales
+              - generic [ref=e695]: Intersections, ronds-points, partage de la route.
+              - generic [ref=e696]:
+                - text: 8 / 8 compétences
+                - img [ref=e697]
+            - generic [ref=e703]:
+              - img [ref=e704]
+              - button "Infos visuelles — Acquis" [ref=e709] [cursor=pointer]:
+                - generic [ref=e710]:
+                  - img
+                - generic:
+                  - generic: Infos visuelles
+                  - generic: Acquis
+              - button "Adapter sa conduite — Acquis" [ref=e711] [cursor=pointer]:
+                - generic [ref=e712]:
+                  - img
+                - generic:
+                  - generic: Adapter sa conduite
+                  - generic: Acquis
+              - button "Trajectoire et placement — Acquis" [ref=e713] [cursor=pointer]:
+                - generic [ref=e714]:
+                  - img
+                - generic:
+                  - generic: Trajectoire et placement
+                  - generic: Acquis
+              - button "Vitesse et trajectoire en virage — Acquis" [ref=e715] [cursor=pointer]:
+                - generic [ref=e716]:
+                  - img
+                - generic:
+                  - generic: Vitesse et trajectoire en virage
+                  - generic: Acquis
+              - button "Croisements et dépassements — Acquis" [ref=e717] [cursor=pointer]:
+                - generic [ref=e718]:
+                  - img
+                - generic:
+                  - generic: Croisements et dépassements
+                  - generic: Acquis
+              - button "Intersections, ronds-points — Acquis" [ref=e719] [cursor=pointer]:
+                - generic [ref=e720]:
+                  - img
+                - generic:
+                  - generic: Intersections, ronds-points
+                  - generic: Acquis
+              - button "Communication avec les autres usagers — Acquis" [ref=e721] [cursor=pointer]:
+                - generic [ref=e722]:
+                  - img
+                - generic:
+                  - generic: Communication avec les autres usagers
+                  - generic: Acquis
+              - button "Conduite en autonomie — Acquis" [ref=e723] [cursor=pointer]:
+                - generic [ref=e724]:
+                  - img
+                - generic:
+                  - generic: Conduite en autonomie
+                  - generic: Acquis
+            - generic [ref=e725]:
+              - img [ref=e727]
+              - generic [ref=e733]: ✓ Monde terminé
+              - heading "Monde 2 terminé !" [level=3] [ref=e734]
+              - paragraph [ref=e735]: Le monde 3 t'attend.
+            - button "COFFRE D'ARGENT déjà ouvert" [ref=e736]:
+              - generic [ref=e739]:
+                - generic [ref=e740]: ✓ OUVERT
+                - generic [ref=e741]: Ville
+          - generic [ref=e743]:
+            - generic [ref=e744]:
+              - generic [ref=e745]:
+                - generic [ref=e746]: "3"
+                - text: Montagne
+              - generic [ref=e747]: Conditions difficiles
+              - generic [ref=e748]: Autoroute, nuit, intempéries, dépassements.
+              - generic [ref=e749]:
+                - text: 7 / 7 compétences
+                - img [ref=e750]
+            - generic [ref=e756]:
+              - img [ref=e757]
+              - button "Conduite de nuit — Acquis" [ref=e762] [cursor=pointer]:
+                - generic [ref=e763]:
+                  - img
+                - generic:
+                  - generic: Conduite de nuit
+                  - generic: Acquis
+              - button "Conduite par mauvaise visibilité — Acquis" [ref=e764] [cursor=pointer]:
+                - generic [ref=e765]:
+                  - img
+                - generic:
+                  - generic: Conduite par mauvaise visibilité
+                  - generic: Acquis
+              - button "Conduite sur chaussée glissante — Acquis" [ref=e766] [cursor=pointer]:
+                - generic [ref=e767]:
+                  - img
+                - generic:
+                  - generic: Conduite sur chaussée glissante
+                  - generic: Acquis
+              - button "Adhérence et freinage d'urgence — Acquis" [ref=e768] [cursor=pointer]:
+                - generic [ref=e769]:
+                  - img
+                - generic:
+                  - generic: Adhérence et freinage d'urgence
+                  - generic: Acquis
+              - button "Voies rapides et autoroutes — Acquis" [ref=e770] [cursor=pointer]:
+                - generic [ref=e771]:
+                  - img
+                - generic:
+                  - generic: Voies rapides et autoroutes
+                  - generic: Acquis
+              - button "Tunnels, ponts, zones spécifiques — Acquis" [ref=e772] [cursor=pointer]:
+                - generic [ref=e773]:
+                  - img
+                - generic:
+                  - generic: Tunnels, ponts, zones spécifiques
+                  - generic: Acquis
+              - button "Conduite en zones urbaines denses — Acquis" [ref=e774] [cursor=pointer]:
+                - generic [ref=e775]:
+                  - img
+                - generic:
+                  - generic: Conduite en zones urbaines denses
+                  - generic: Acquis
+            - generic [ref=e776]:
+              - img [ref=e778]
+              - generic [ref=e784]: ✓ Monde terminé
+              - heading "Monde 3 terminé !" [level=3] [ref=e785]
+              - paragraph [ref=e786]: Le monde 4 t'attend.
+            - button "COFFRE D'OR déjà ouvert" [ref=e787]:
+              - generic [ref=e790]:
+                - generic [ref=e791]: ✓ OUVERT
+                - generic [ref=e792]: Montagne
+          - generic [ref=e794]:
+            - generic [ref=e795]:
+              - generic [ref=e796]:
+                - generic [ref=e797]: "4"
+                - text: Sommet
+              - generic [ref=e798]: Conduite autonome & sûre
+              - generic [ref=e799]: Voyage longue distance, éco-conduite, sécurité.
+              - generic [ref=e800]:
+                - text: 7 / 7 compétences
+                - img [ref=e801]
+            - generic [ref=e807]:
+              - img [ref=e808]
+              - button "Planifier un trajet — Acquis" [ref=e813] [cursor=pointer]:
+                - generic [ref=e814]:
+                  - img
+                - generic:
+                  - generic: Planifier un trajet
+                  - generic: Acquis
+              - button "Suivre un itinéraire — Acquis" [ref=e815] [cursor=pointer]:
+                - generic [ref=e816]:
+                  - img
+                - generic:
+                  - generic: Suivre un itinéraire
+                  - generic: Acquis
+              - button "Conduite éco-responsable — Acquis" [ref=e817] [cursor=pointer]:
+                - generic [ref=e818]:
+                  - img
+                - generic:
+                  - generic: Conduite éco-responsable
+                  - generic: Acquis
+              - button "Anticipation et stress — Acquis" [ref=e819] [cursor=pointer]:
+                - generic [ref=e820]:
+                  - img
+                - generic:
+                  - generic: Anticipation et stress
+                  - generic: Acquis
+              - button "Partage de la route — Acquis" [ref=e821] [cursor=pointer]:
+                - generic [ref=e822]:
+                  - img
+                - generic:
+                  - generic: Partage de la route
+                  - generic: Acquis
+              - button "Présentation à l'examen — Acquis" [ref=e823] [cursor=pointer]:
+                - generic [ref=e824]:
+                  - img
+                - generic:
+                  - generic: Présentation à l'examen
+                  - generic: Acquis
+              - button "Conduite après examen — Acquis" [ref=e825] [cursor=pointer]:
+                - generic [ref=e826]:
+                  - img
+                - generic:
+                  - generic: Conduite après examen
+                  - generic: Acquis
+            - generic [ref=e827]:
+              - img [ref=e829]
+              - generic [ref=e835]: ✓ Monde terminé
+              - heading "Monde 4 terminé !" [level=3] [ref=e836]
+              - paragraph [ref=e837]: Tu as conquis tous les mondes !
+            - button "COFFRE LÉGENDAIRE déjà ouvert" [ref=e838]:
+              - generic [ref=e841]:
+                - generic [ref=e842]: ✓ OUVERT
+                - generic [ref=e843]: Sommet
+          - generic [ref=e844]:
+            - 'heading "Bout du voyage : l''Examen" [level=3] [ref=e845]'
+            - paragraph [ref=e846]: Quand toutes tes compétences sont acquises, tu seras prêt(e) pour l'épreuve.
+            - generic [ref=e847]:
+              - generic [ref=e848]:
+                - generic [ref=e849]: 31/31
+                - generic [ref=e850]: Compétences
+              - generic [ref=e851]:
+                - generic [ref=e852]: 100%
+                - generic [ref=e853]: Progression
+              - generic [ref=e854]:
+                - generic [ref=e855]: "775"
+                - generic [ref=e856]: XP gagnés
+    - dialog [ref=e858]
+  - navigation "Navigation principale" [ref=e580]:
+    - button "Accueil" [ref=e581] [cursor=pointer]:
+      - img [ref=e582]
+      - generic [ref=e585]: Accueil
+    - button "Parcours" [ref=e586] [cursor=pointer]:
+      - img [ref=e587]
+      - generic [ref=e589]: Parcours
+    - button "Boutique" [ref=e590] [cursor=pointer]:
+      - img [ref=e591]
+      - generic [ref=e594]: Boutique
+    - button "Trophées" [ref=e595] [cursor=pointer]:
+      - img [ref=e596]
+      - generic [ref=e602]: Trophées
+    - button "Profil" [ref=e603] [cursor=pointer]:
+      - img [ref=e604]
+      - generic [ref=e607]: Profil

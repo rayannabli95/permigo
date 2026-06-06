@@ -1,0 +1,119 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e5147]:
+      - generic [ref=e5149]:
+        - generic [ref=e5150]: Niveau actuel
+        - heading "Référent pédagogique" [level=1] [ref=e5151]
+        - generic [ref=e5152]:
+          - generic [ref=e5153]:
+            - generic [ref=e5154]: "165"
+            - generic [ref=e5155]: validations
+          - generic [ref=e5157]:
+            - generic [ref=e5158]: 7 970
+            - generic [ref=e5159]: XP total
+          - generic [ref=e5161]:
+            - img [ref=e5163]
+            - generic [ref=e5165]: "6"
+            - generic [ref=e5166]: j. de suite
+        - generic [ref=e5167]: Juin — Examen blanc
+      - generic [ref=e5169]:
+        - button "Voir mes trophées" [ref=e5170] [cursor=pointer]:
+          - img [ref=e5172]
+          - generic [ref=e5175]:
+            - generic [ref=e5176]: Trophées
+            - generic [ref=e5177]: 8/12 débloqués
+          - img [ref=e5178]
+        - button "Voir la ligue de la semaine" [ref=e5180] [cursor=pointer]:
+          - img [ref=e5182]
+          - generic [ref=e5188]:
+            - generic [ref=e5189]: Ligue
+            - generic [ref=e5190]: Cette semaine
+          - img [ref=e5191]
+      - generic [ref=e5194]:
+        - generic [ref=e5195]: Prochaine récompense
+        - generic [ref=e5196]:
+          - img [ref=e5198]
+          - generic [ref=e5203]:
+            - generic [ref=e5204]: 5validations restantes
+            - generic [ref=e5205]: Mentorat de nouveaux moniteurs
+            - generic [ref=e5206]: Référent pédagogique
+        - generic [ref=e5210]:
+          - generic [ref=e5211]: Progression
+          - strong [ref=e5212]: 90%
+      - generic [ref=e5213]:
+        - generic [ref=e5214]: Ma route
+        - generic [ref=e5215]:
+          - button "Détail du palier 7" [active] [ref=e5216] [cursor=pointer]:
+            - img [ref=e5218]
+            - generic [ref=e5220]:
+              - generic [ref=e5221]: Palier 7
+              - generic [ref=e5222]: Référent pédagogique
+              - generic [ref=e5223]:
+                - img [ref=e5224]
+                - text: Formation continue
+            - generic [ref=e5227]: Atteint
+          - button "Détail du palier 8" [ref=e5228] [cursor=pointer]:
+            - img [ref=e5230]
+            - generic [ref=e5235]:
+              - generic [ref=e5236]: Palier 8
+              - generic [ref=e5237]: Référent pédagogique
+              - generic [ref=e5238]:
+                - img [ref=e5239]
+                - text: Mentorat de nouveaux moniteurs
+            - generic [ref=e5244]: Prochain
+          - button "Détail du palier 9" [ref=e5245] [cursor=pointer]:
+            - img [ref=e5247]
+            - generic [ref=e5249]:
+              - generic [ref=e5250]: Palier 9
+              - generic [ref=e5251]: Expert REMC
+              - generic [ref=e5252]:
+                - img [ref=e5253]
+                - text: Communauté privée experts REMC
+            - generic [ref=e5255]: Palier 9
+        - button "Voir tous les paliers" [ref=e5256] [cursor=pointer]:
+          - text: Voir tous les paliers
+          - img [ref=e5257]
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]
+  - dialog [ref=e5259]:
+    - document [ref=e5260]:
+      - generic [ref=e5262]:
+        - img [ref=e5264]
+        - generic [ref=e5267]:
+          - generic [ref=e5268]: Palier 7
+          - heading "Référent pédagogique" [level=2] [ref=e5269]
+        - generic [ref=e5270]: Atteint
+      - generic [ref=e5271]: Récompense débloquée
+      - generic [ref=e5272]: Formation continue
+      - generic [ref=e5273]: "Accès aux modules de formation continue PermiGo : mises à jour REMC, pédagogie et nouveautés réglementaires."
+      - generic [ref=e5274]:
+        - text: Palier débloqué à
+        - strong [ref=e5275]: 120 validations
+        - text: .
+      - button "Fermer" [ref=e5276] [cursor=pointer]

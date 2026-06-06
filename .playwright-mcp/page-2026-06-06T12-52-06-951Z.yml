@@ -1,0 +1,278 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e5848]:
+      - generic [ref=e5849]:
+        - button "Retour liste élèves" [ref=e5850] [cursor=pointer]: ←
+        - generic [ref=e5851]:
+          - heading "Livret REMC — Amine" [active] [level=1] [ref=e5852]
+          - paragraph [ref=e5853]: 6/31 compétences acquises
+        - button "Voir le bilan trimestriel" [ref=e5854] [cursor=pointer]:
+          - img [ref=e5855]
+          - text: Bilan
+      - generic [ref=e5859]:
+        - generic [ref=e5860]: Progression globale
+        - generic [ref=e5861]: 6 / 31 · 19%
+      - generic [ref=e5864]:
+        - group "Maîtrise du véhicule — 5/9 acquises" [ref=e5865]:
+          - generic [ref=e5866]:
+            - img [ref=e5868]
+            - generic [ref=e5870]: Maîtrise du véhicule
+            - generic [ref=e5871]: 5/9
+          - button "Organes, commandes, vérifications — Acquis. Appuyer pour évaluer" [ref=e5874] [cursor=pointer]:
+            - generic [ref=e5876]: C1a
+            - generic [ref=e5877]: Organes, commandes, vérifications
+            - generic [ref=e5878]: Acquis
+            - generic [ref=e5879]: ›
+          - button "S'installer au poste de conduite — Acquis. Appuyer pour évaluer" [ref=e5880] [cursor=pointer]:
+            - generic [ref=e5882]: C1b
+            - generic [ref=e5883]: S'installer au poste de conduite
+            - generic [ref=e5884]: Acquis
+            - generic [ref=e5885]: ›
+          - button "Tenir le volant, trajectoire — Acquis. Appuyer pour évaluer" [ref=e5886] [cursor=pointer]:
+            - generic [ref=e5888]: C1c
+            - generic [ref=e5889]: Tenir le volant, trajectoire
+            - generic [ref=e5890]: Acquis
+            - generic [ref=e5891]: ›
+          - button "Démarrer et s'arrêter — Acquis. Appuyer pour évaluer" [ref=e5892] [cursor=pointer]:
+            - generic [ref=e5894]: C1d
+            - generic [ref=e5895]: Démarrer et s'arrêter
+            - generic [ref=e5896]: Acquis
+            - generic [ref=e5897]: ›
+          - button "Doser accélération et freinage — Acquis. Appuyer pour évaluer" [ref=e5898] [cursor=pointer]:
+            - generic [ref=e5900]: C1e
+            - generic [ref=e5901]: Doser accélération et freinage
+            - generic [ref=e5902]: Acquis
+            - generic [ref=e5903]: ›
+          - button "Utiliser la boîte de vitesses — Non évalué. Appuyer pour évaluer" [ref=e5904] [cursor=pointer]:
+            - generic [ref=e5906]: C1f
+            - generic [ref=e5907]: Utiliser la boîte de vitesses
+            - generic [ref=e5908]: Non évalué
+            - generic [ref=e5909]: ›
+          - button "Contrôles de sécurité extérieure — Non évalué. Appuyer pour évaluer" [ref=e5910] [cursor=pointer]:
+            - generic [ref=e5912]: C1g
+            - generic [ref=e5913]: Contrôles de sécurité extérieure
+            - generic [ref=e5914]: Non évalué
+            - generic [ref=e5915]: ›
+          - 'button "Manœuvres : créneau, demi-tour — Non évalué. Appuyer pour évaluer" [ref=e5916] [cursor=pointer]':
+            - generic [ref=e5918]: C1h
+            - generic [ref=e5919]: "Manœuvres : créneau, demi-tour"
+            - generic [ref=e5920]: Non évalué
+            - generic [ref=e5921]: ›
+          - button "Autonomie sur manœuvres de base — Non évalué. Appuyer pour évaluer" [ref=e5922] [cursor=pointer]:
+            - generic [ref=e5924]: C1i
+            - generic [ref=e5925]: Autonomie sur manœuvres de base
+            - generic [ref=e5926]: Non évalué
+            - generic [ref=e5927]: ›
+        - group "Circulation normale — 0/8 acquises" [ref=e5928]:
+          - generic [ref=e5929]:
+            - img [ref=e5931]
+            - generic [ref=e5934]: Circulation normale
+            - generic [ref=e5935]: 0/8
+          - button "Infos visuelles — Non évalué. Appuyer pour évaluer" [ref=e5937] [cursor=pointer]:
+            - generic [ref=e5939]: C2a
+            - generic [ref=e5940]: Infos visuelles
+            - generic [ref=e5941]: Non évalué
+            - generic [ref=e5942]: ›
+          - button "Adapter sa conduite — Non évalué. Appuyer pour évaluer" [ref=e5943] [cursor=pointer]:
+            - generic [ref=e5945]: C2b
+            - generic [ref=e5946]: Adapter sa conduite
+            - generic [ref=e5947]: Non évalué
+            - generic [ref=e5948]: ›
+          - button "Trajectoire et placement — Non évalué. Appuyer pour évaluer" [ref=e5949] [cursor=pointer]:
+            - generic [ref=e5951]: C2c
+            - generic [ref=e5952]: Trajectoire et placement
+            - generic [ref=e5953]: Non évalué
+            - generic [ref=e5954]: ›
+          - button "Vitesse et trajectoire en virage — Non évalué. Appuyer pour évaluer" [ref=e5955] [cursor=pointer]:
+            - generic [ref=e5957]: C2d
+            - generic [ref=e5958]: Vitesse et trajectoire en virage
+            - generic [ref=e5959]: Non évalué
+            - generic [ref=e5960]: ›
+          - button "Croisements et dépassements — Non évalué. Appuyer pour évaluer" [ref=e5961] [cursor=pointer]:
+            - generic [ref=e5963]: C2e
+            - generic [ref=e5964]: Croisements et dépassements
+            - generic [ref=e5965]: Non évalué
+            - generic [ref=e5966]: ›
+          - button "Intersections, ronds-points — Non évalué. Appuyer pour évaluer" [ref=e5967] [cursor=pointer]:
+            - generic [ref=e5969]: C2f
+            - generic [ref=e5970]: Intersections, ronds-points
+            - generic [ref=e5971]: Non évalué
+            - generic [ref=e5972]: ›
+          - button "Communication avec les autres usagers — Non évalué. Appuyer pour évaluer" [ref=e5973] [cursor=pointer]:
+            - generic [ref=e5975]: C2g
+            - generic [ref=e5976]: Communication avec les autres usagers
+            - generic [ref=e5977]: Non évalué
+            - generic [ref=e5978]: ›
+          - button "Conduite en autonomie — Non évalué. Appuyer pour évaluer" [ref=e5979] [cursor=pointer]:
+            - generic [ref=e5981]: C2h
+            - generic [ref=e5982]: Conduite en autonomie
+            - generic [ref=e5983]: Non évalué
+            - generic [ref=e5984]: ›
+        - group "Conditions difficiles — 0/7 acquises" [ref=e5985]:
+          - generic [ref=e5986]:
+            - img [ref=e5988]
+            - generic [ref=e5990]: Conditions difficiles
+            - generic [ref=e5991]: 0/7
+          - button "Conduite de nuit — Non évalué. Appuyer pour évaluer" [ref=e5993] [cursor=pointer]:
+            - generic [ref=e5995]: C3a
+            - generic [ref=e5996]: Conduite de nuit
+            - generic [ref=e5997]: Non évalué
+            - generic [ref=e5998]: ›
+          - button "Conduite par mauvaise visibilité — Non évalué. Appuyer pour évaluer" [ref=e5999] [cursor=pointer]:
+            - generic [ref=e6001]: C3b
+            - generic [ref=e6002]: Conduite par mauvaise visibilité
+            - generic [ref=e6003]: Non évalué
+            - generic [ref=e6004]: ›
+          - button "Conduite sur chaussée glissante — Non évalué. Appuyer pour évaluer" [ref=e6005] [cursor=pointer]:
+            - generic [ref=e6007]: C3c
+            - generic [ref=e6008]: Conduite sur chaussée glissante
+            - generic [ref=e6009]: Non évalué
+            - generic [ref=e6010]: ›
+          - button "Adhérence et freinage d'urgence — Non évalué. Appuyer pour évaluer" [ref=e6011] [cursor=pointer]:
+            - generic [ref=e6013]: C3d
+            - generic [ref=e6014]: Adhérence et freinage d'urgence
+            - generic [ref=e6015]: Non évalué
+            - generic [ref=e6016]: ›
+          - button "Voies rapides et autoroutes — Non évalué. Appuyer pour évaluer" [ref=e6017] [cursor=pointer]:
+            - generic [ref=e6019]: C3e
+            - generic [ref=e6020]: Voies rapides et autoroutes
+            - generic [ref=e6021]: Non évalué
+            - generic [ref=e6022]: ›
+          - button "Tunnels, ponts, zones spécifiques — Non évalué. Appuyer pour évaluer" [ref=e6023] [cursor=pointer]:
+            - generic [ref=e6025]: C3f
+            - generic [ref=e6026]: Tunnels, ponts, zones spécifiques
+            - generic [ref=e6027]: Non évalué
+            - generic [ref=e6028]: ›
+          - button "Conduite en zones urbaines denses — Non évalué. Appuyer pour évaluer" [ref=e6029] [cursor=pointer]:
+            - generic [ref=e6031]: C3g
+            - generic [ref=e6032]: Conduite en zones urbaines denses
+            - generic [ref=e6033]: Non évalué
+            - generic [ref=e6034]: ›
+        - group "Conduite autonome — 1/7 acquises" [ref=e6035]:
+          - generic [ref=e6036]:
+            - img [ref=e6038]
+            - generic [ref=e6040]: Conduite autonome
+            - generic [ref=e6041]: 1/7
+          - button "Planifier un trajet — Non évalué. Appuyer pour évaluer" [ref=e6044] [cursor=pointer]:
+            - generic [ref=e6046]: C4a
+            - generic [ref=e6047]: Planifier un trajet
+            - generic [ref=e6048]: Non évalué
+            - generic [ref=e6049]: ›
+          - button "Suivre un itinéraire — Non évalué. Appuyer pour évaluer" [ref=e6050] [cursor=pointer]:
+            - generic [ref=e6052]: C4b
+            - generic [ref=e6053]: Suivre un itinéraire
+            - generic [ref=e6054]: Non évalué
+            - generic [ref=e6055]: ›
+          - button "Conduite éco-responsable — Acquis. Appuyer pour évaluer" [ref=e6056] [cursor=pointer]:
+            - generic [ref=e6058]: C4c
+            - generic [ref=e6059]: Conduite éco-responsable
+            - generic [ref=e6060]: Acquis
+            - generic [ref=e6061]: ›
+          - button "Anticipation et stress — Non évalué. Appuyer pour évaluer" [ref=e6062] [cursor=pointer]:
+            - generic [ref=e6064]: C4d
+            - generic [ref=e6065]: Anticipation et stress
+            - generic [ref=e6066]: Non évalué
+            - generic [ref=e6067]: ›
+          - button "Partage de la route — Non évalué. Appuyer pour évaluer" [ref=e6068] [cursor=pointer]:
+            - generic [ref=e6070]: C4e
+            - generic [ref=e6071]: Partage de la route
+            - generic [ref=e6072]: Non évalué
+            - generic [ref=e6073]: ›
+          - button "Présentation à l'examen — Non évalué. Appuyer pour évaluer" [ref=e6074] [cursor=pointer]:
+            - generic [ref=e6076]: C4f
+            - generic [ref=e6077]: Présentation à l'examen
+            - generic [ref=e6078]: Non évalué
+            - generic [ref=e6079]: ›
+          - button "Conduite après examen — Non évalué. Appuyer pour évaluer" [ref=e6080] [cursor=pointer]:
+            - generic [ref=e6082]: C4g
+            - generic [ref=e6083]: Conduite après examen
+            - generic [ref=e6084]: Non évalué
+            - generic [ref=e6085]: ›
+      - generic [ref=e6087]:
+        - generic [ref=e6088]:
+          - img [ref=e6089]
+          - text: Fil des moniteurs
+        - generic [ref=e6092]:
+          - generic [ref=e6093]:
+            - img [ref=e6095]
+            - generic [ref=e6097]:
+              - generic [ref=e6098]: Rayan Nabli
+              - generic [ref=e6099]: C1e validée
+            - generic [ref=e6100]: aujourd'hui
+          - generic [ref=e6101]:
+            - img [ref=e6103]
+            - generic [ref=e6105]:
+              - generic [ref=e6106]: Rayan Nabli
+              - generic [ref=e6107]: C1d validée
+            - generic [ref=e6108]: hier
+          - generic [ref=e6109]:
+            - img [ref=e6111]
+            - generic [ref=e6113]:
+              - generic [ref=e6114]: Rayan Nabli
+              - generic [ref=e6115]: C1b validée
+            - generic [ref=e6116]: hier
+          - generic [ref=e6117]:
+            - img [ref=e6119]
+            - generic [ref=e6121]:
+              - generic [ref=e6122]: Rayan Nabli
+              - generic [ref=e6123]: C1c validée
+            - generic [ref=e6124]: 30 mai
+          - generic [ref=e6125]:
+            - img [ref=e6127]
+            - generic [ref=e6131]:
+              - generic [ref=e6132]: Rayan Nabli
+              - generic [ref=e6133]: 1h de conduite
+            - generic [ref=e6134]: 30 mai
+          - generic [ref=e6135]:
+            - img [ref=e6137]
+            - generic [ref=e6139]:
+              - generic [ref=e6140]: Rayan Nabli
+              - generic [ref=e6141]: C1a validée
+            - generic [ref=e6142]: 30 mai
+          - generic [ref=e6143]:
+            - img [ref=e6145]
+            - generic [ref=e6149]:
+              - generic [ref=e6150]: Rayan Nabli
+              - generic [ref=e6151]: 2h de conduite
+            - generic [ref=e6152]: 30 mai
+          - generic [ref=e6153]:
+            - img [ref=e6155]
+            - generic [ref=e6159]:
+              - generic [ref=e6160]: Rayan Nabli
+              - generic [ref=e6161]: 1h de conduite
+              - generic [ref=e6162]: "\"Plus que quelques séances avant l'examen blanc\""
+            - generic [ref=e6163]: 29 mai
+          - generic [ref=e6164]:
+            - img [ref=e6166]
+            - generic [ref=e6168]:
+              - generic [ref=e6169]: Rayan Nabli
+              - generic [ref=e6170]: C4c validée
+            - generic [ref=e6171]: 29 mai
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

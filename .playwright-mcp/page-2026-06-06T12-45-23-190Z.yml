@@ -1,0 +1,122 @@
+- generic [active] [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e3871]:
+      - generic [ref=e3872]:
+        - button "Retour" [ref=e3873] [cursor=pointer]:
+          - img [ref=e3874]
+        - generic [ref=e3876]: Préférences
+      - generic [ref=e3877]:
+        - generic [ref=e3878]: Notifications
+        - generic [ref=e3879]:
+          - generic [ref=e3880]:
+            - generic [ref=e3881]: Notifications push
+            - generic [ref=e3882]: Rappels et mises à jour dans le navigateur
+          - generic "Activer notifications push" [ref=e3884] [cursor=pointer]
+        - generic [ref=e3886]:
+          - generic [ref=e3887]:
+            - generic [ref=e3888]: Notifications email
+            - generic [ref=e3889]: Résumé hebdomadaire par email
+          - generic "Activer notifications email" [ref=e3891] [cursor=pointer]
+        - generic [ref=e3893]:
+          - generic [ref=e3894]: Ne pas déranger
+          - generic [ref=e3895]:
+            - generic [ref=e3896]: De
+            - textbox [ref=e3897]: 22:00
+            - generic [ref=e3898]: à
+            - textbox [ref=e3899]: 07:00
+            - button "OK" [ref=e3900] [cursor=pointer]
+      - generic [ref=e3901]:
+        - generic [ref=e3902]: Confidentialité
+        - generic [ref=e3903]:
+          - generic [ref=e3904]:
+            - generic [ref=e3905]: Classement national
+            - generic [ref=e3906]: Apparaître dans les classements de ton école
+          - generic "Apparaître dans le classement" [ref=e3908] [cursor=pointer]
+      - generic [ref=e3910]:
+        - generic [ref=e3911]: Mon compte
+        - generic [ref=e3912]:
+          - generic [ref=e3913]: Prénom affiché
+          - textbox "Ton prénom" [ref=e3915]: <script>alert(1)</script>
+          - button "Enregistrer" [ref=e3916] [cursor=pointer]
+        - generic [ref=e3917]:
+          - generic [ref=e3918]:
+            - generic [ref=e3919]: Mot de passe
+            - generic [ref=e3920]: Modifier via email de réinitialisation
+          - button "Modifier →" [ref=e3922] [cursor=pointer]
+      - generic [ref=e3923]:
+        - generic [ref=e3924]: Apparence
+        - generic [ref=e3925]:
+          - generic [ref=e3926]:
+            - generic [ref=e3927]: Thème
+            - generic [ref=e3928]: Apparence de l'application
+          - group "Choisir le thème" [ref=e3929]:
+            - button "Clair" [ref=e3930] [cursor=pointer]:
+              - img [ref=e3931]
+              - text: Clair
+            - button "Sombre" [ref=e3937] [cursor=pointer]:
+              - img [ref=e3938]
+              - text: Sombre
+            - button "Système" [pressed] [ref=e3940] [cursor=pointer]
+        - generic [ref=e3941]:
+          - generic [ref=e3942]:
+            - generic [ref=e3943]: Sons d'interface
+            - generic [ref=e3944]: Retours sonores sur les actions et récompenses
+          - generic "Activer les sons d'interface" [ref=e3946] [cursor=pointer]
+      - generic [ref=e3948]:
+        - generic [ref=e3949]:
+          - img [ref=e3950]
+          - text: Mes données
+        - generic [ref=e3953]:
+          - generic [ref=e3954]:
+            - generic [ref=e3955]: Exporter mes données
+            - generic [ref=e3956]: Télécharge un fichier JSON de toutes tes données
+          - button "Exporter →" [ref=e3958] [cursor=pointer]
+        - generic [ref=e3959]:
+          - generic [ref=e3960]:
+            - generic [ref=e3961]: Emails marketing
+            - generic [ref=e3962]: Conseils, nouveautés et offres PermiGo
+          - generic "Recevoir les emails marketing" [ref=e3964] [cursor=pointer]
+        - generic [ref=e3966]:
+          - generic [ref=e3968]: Politique de confidentialité
+          - button "Lire →" [ref=e3970] [cursor=pointer]
+        - generic [ref=e3971]:
+          - generic [ref=e3973]: Conditions générales d'utilisation
+          - button "Lire →" [ref=e3975] [cursor=pointer]
+      - generic [ref=e3976]:
+        - generic [ref=e3977]: Zone critique
+        - generic [ref=e3978]:
+          - generic [ref=e3979]:
+            - generic [ref=e3980]: Supprimer mon compte
+            - generic [ref=e3981]: Irréversible — toutes tes données seront effacées
+          - button "Supprimer" [ref=e3983] [cursor=pointer]
+  - status [ref=e3998]:
+    - generic [ref=e3999]: "Prénom mis à jour : &lt;script&gt;alert(1)&lt;/script&gt;"
+    - button "Fermer la notification" [ref=e4000] [cursor=pointer]: ×
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

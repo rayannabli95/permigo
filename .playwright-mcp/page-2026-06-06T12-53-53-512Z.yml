@@ -1,0 +1,133 @@
+- generic [ref=e1]:
+  - link "Aller au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - banner [ref=e54]:
+    - button "Accueil PermiGo" [ref=e55] [cursor=pointer]:
+      - generic [ref=e56]: PermiGo
+    - generic [ref=e57]:
+      - button "Notifications" [ref=e60] [cursor=pointer]:
+        - img [ref=e61]
+      - button "Mon profil" [ref=e64] [cursor=pointer]:
+        - img "Rayan Nabli"
+  - main [ref=e65]:
+    - generic [ref=e6179]:
+      - generic [ref=e6180]:
+        - generic [ref=e6181]:
+          - generic [ref=e6182]: PermiGo Autopilot
+          - heading "Bilan de Amine" [level=1] [ref=e6183]
+          - generic [ref=e6184]: Rapport trimestriel · Permis B
+        - button "Imprimer le bilan" [active] [ref=e6185] [cursor=pointer]:
+          - img [ref=e6186]
+          - text: Imprimer
+      - generic [ref=e6190]:
+        - img [ref=e6191]
+        - text: avril 2026 → juillet 2026
+      - generic [ref=e6193]:
+        - generic [ref=e6194]:
+          - generic [ref=e6195]: 6/31
+          - generic [ref=e6196]: Compétences acquises
+          - generic [ref=e6197]: +100%
+        - generic [ref=e6198]:
+          - generic [ref=e6199]: 0%
+          - generic [ref=e6200]: Score moyen quiz
+          - generic [ref=e6201]: 0/0 réussis
+        - generic [ref=e6202]:
+          - generic [ref=e6203]: "0"
+          - generic [ref=e6204]: Jours actifs
+          - generic [ref=e6205]: sur 66 jours
+        - generic [ref=e6206]:
+          - generic [ref=e6207]: "0"
+          - generic [ref=e6208]: Trimestre précédent
+          - generic [ref=e6209]: Compétences
+      - generic [ref=e6210]:
+        - text: "\""
+        - generic [ref=e6211]:
+          - img [ref=e6212]
+          - text: Commentaire pédagogique auto-généré
+        - generic [ref=e6214]: Rythme à intensifier. 6 compétences acquises ce trimestre. Une leçon supplémentaire par semaine ferait la différence.
+      - generic [ref=e6215]:
+        - generic [ref=e6217]:
+          - img [ref=e6218]
+          - text: Évolution mensuelle
+        - img "Graphique d'évolution mensuelle" [ref=e6221]:
+          - generic [ref=e6222]:
+            - generic [ref=e6223]: "0"
+            - generic [ref=e6224]: Apr
+          - generic [ref=e6225]:
+            - generic [ref=e6226]: "3"
+            - generic [ref=e6227]: May
+          - generic [ref=e6228]:
+            - generic [ref=e6229]: "3"
+            - generic [ref=e6230]: Jun
+      - generic [ref=e6231]:
+        - generic [ref=e6232]:
+          - generic [ref=e6233]:
+            - img [ref=e6234]
+            - text: Contrôle & Sécurité
+          - generic [ref=e6236]: 5 acquises
+        - list [ref=e6237]:
+          - generic [ref=e6238]:
+            - generic [ref=e6239]: ✓
+            - generic [ref=e6240]: C1a
+            - generic [ref=e6241]: 30 mai
+          - generic [ref=e6242]:
+            - generic [ref=e6243]: ✓
+            - generic [ref=e6244]: C1c
+            - generic [ref=e6245]: 30 mai
+          - generic [ref=e6246]:
+            - generic [ref=e6247]: ✓
+            - generic [ref=e6248]: C1b
+            - generic [ref=e6249]: 4 juin
+          - generic [ref=e6250]:
+            - generic [ref=e6251]: ✓
+            - generic [ref=e6252]: C1d
+            - generic [ref=e6253]: 5 juin
+          - generic [ref=e6254]:
+            - generic [ref=e6255]: ✓
+            - generic [ref=e6256]: C1e
+            - generic [ref=e6257]: 6 juin
+      - generic [ref=e6258]:
+        - generic [ref=e6259]:
+          - generic [ref=e6260]:
+            - img [ref=e6261]
+            - text: Manœuvres
+          - generic [ref=e6263]: 0 acquise
+        - list [ref=e6264]:
+          - generic [ref=e6265]: Aucune compétence acquise ce trimestre
+      - generic [ref=e6266]:
+        - generic [ref=e6267]:
+          - generic [ref=e6268]:
+            - img [ref=e6269]
+            - text: Circulation
+          - generic [ref=e6271]: 0 acquise
+        - list [ref=e6272]:
+          - generic [ref=e6273]: Aucune compétence acquise ce trimestre
+      - generic [ref=e6274]:
+        - generic [ref=e6275]:
+          - generic [ref=e6276]:
+            - img [ref=e6277]
+            - text: Situations complexes
+          - generic [ref=e6279]: 1 acquise
+        - list [ref=e6280]:
+          - generic [ref=e6281]:
+            - generic [ref=e6282]: ✓
+            - generic [ref=e6283]: C4c
+            - generic [ref=e6284]: 29 mai
+  - navigation "Navigation principale" [ref=e308]:
+    - button "Aujourd'hui" [ref=e309] [cursor=pointer]:
+      - img [ref=e310]
+      - generic [ref=e312]: Aujourd'hui
+    - button "Mes élèves" [ref=e313] [cursor=pointer]:
+      - img [ref=e314]
+      - generic [ref=e319]: Mes élèves
+    - button "Parcours" [ref=e320] [cursor=pointer]:
+      - img [ref=e321]
+      - generic [ref=e323]: Parcours
+    - button "Stats" [ref=e324] [cursor=pointer]:
+      - img [ref=e325]
+      - generic [ref=e326]: Stats
+    - button "Récompenses" [ref=e327] [cursor=pointer]:
+      - img [ref=e328]
+      - generic [ref=e331]: Récompenses
+  - button "Enregistrer une séance" [ref=e332] [cursor=pointer]:
+    - img [ref=e333]

@@ -156,8 +156,14 @@ export async function mount(root) {
   </div>`;
 
   const [ecoleRes, nationalRes, ligueRes] = await Promise.all([
-    sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: LIMIT }),
-    sb.rpc("get_eleve_leaderboard", { p_scope: "national", p_limit: LIMIT }),
+    sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: LIMIT }).then(
+      (r) => r,
+      () => ({ data: null, error: true }),
+    ),
+    sb.rpc("get_eleve_leaderboard", { p_scope: "national", p_limit: LIMIT }).then(
+      (r) => r,
+      () => ({ data: null, error: true }),
+    ),
     sb.rpc("get_league_leaderboard", { p_role: "eleve", p_limit: LIMIT }).then(
       (r) => r,
       () => ({ data: null, error: true }),
