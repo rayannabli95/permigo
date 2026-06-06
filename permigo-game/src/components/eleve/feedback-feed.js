@@ -3,24 +3,24 @@
 // Usage : mountFeedbackFeed(root, { eleveId, limit, anchorEl })
 //   Injecte avant `anchorEl` (ou en dernier dans root si absent)
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { icon } from '@/utils/icons.js';
-import { navigate } from '@/router.js';
-import { findSubComp } from '@/data/remc.js';
+import { sb } from "@/auth/auth.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { icon } from "@/utils/icons.js";
+import { navigate } from "@/router.js";
+import { findSubComp } from "@/data/remc.js";
 
 // "C2f" → "Intersections, ronds-points" (fallback : code brut)
 function compLabel(compId) {
   const sub = findSubComp(compId);
-  return sub ? sub.n : (compId || '—');
+  return sub ? sub.n : compId || "—";
 }
 
-const STYLE_ID = 'feedback-feed-style';
+const STYLE_ID = "feedback-feed-style";
 
 function ensureStyle() {
   if (document.head.querySelector(`#${STYLE_ID}`)) return;
-  const s = document.createElement('style');
+  const s = document.createElement("style");
   s.id = STYLE_ID;
   s.textContent = `
   @keyframes ffCardIn {
@@ -28,7 +28,7 @@ function ensureStyle() {
     to   { opacity:1; transform:translateY(0) scale(1); }
   }
 
-  .ff-section { margin-bottom: 20px; }
+  .ff-section { margin: 40px 16px 0; }
 
   .ff-sec-hd {
     display: flex; align-items: center; justify-content: space-between;
@@ -151,63 +151,71 @@ function ensureStyle() {
 
 // ─── Helpers ─────────────────────────────────────────────────
 const GRADS = [
-  'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,var(--blk),#155e75)',
-  'linear-gradient(135deg,var(--puk),#4c1d95)',
-  'linear-gradient(135deg,var(--grd),#064e3b)',
-  'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
+  "linear-gradient(135deg,#5b5bd6,#3a3a8e)",
+  "linear-gradient(135deg,var(--blk),#155e75)",
+  "linear-gradient(135deg,var(--puk),#4c1d95)",
+  "linear-gradient(135deg,var(--grd),#064e3b)",
+  "linear-gradient(135deg,#9333ea,#6b21a8)",
+  "linear-gradient(135deg,var(--rdk),#7f1d1d)",
 ];
 function gradFor(str) {
   let h = 0;
-  for (let i = 0; i < (str || '').length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  for (let i = 0; i < (str || "").length; i++)
+    h = (h * 31 + str.charCodeAt(i)) >>> 0;
   return GRADS[h % GRADS.length];
 }
 function relTime(ts) {
-  if (!ts) return '';
+  if (!ts) return "";
   const diff = Date.now() - new Date(ts).getTime();
   const min = Math.floor(diff / 60000);
   if (min < 60) return `il y a ${min}min`;
   const h = Math.floor(min / 60);
   if (h < 24) return `il y a ${h}h`;
   const d = Math.floor(h / 24);
-  if (d === 1) return 'hier';
+  if (d === 1) return "hier";
   if (d < 7) return `il y a ${d}j`;
-  return new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  return new Date(ts).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "short",
+  });
 }
 function fmtDuration(min) {
-  if (!min) return '';
-  const h = Math.floor(min / 60), m = min % 60;
+  if (!min) return "";
+  const h = Math.floor(min / 60),
+    m = min % 60;
   if (h === 0) return `${m}min`;
   return m === 0 ? `${h}h` : `${h}h${m}`;
 }
 
 // ─── Render une carte event ───────────────────────────────────
 function renderCard(evt, idx) {
-  const isSession    = evt.kind === 'session';
-  const prenom       = esc(evt.moniteur_prenom || 'Moniteur');
-  const nom          = esc(evt.moniteur_nom   || '');
-  const nameKey      = `${evt.moniteur_prenom || ''}${evt.moniteur_nom || ''}`;
-  const initials     = ((evt.moniteur_prenom || '')[0] || '') + ((evt.moniteur_nom || '')[0] || '');
-  const badgeCls     = isSession ? 'ff-kind-session' : 'ff-kind-validation';
-  const badgeIcon    = isSession
-    ? icon('clock', { size: 14, strokeWidth: 2.2 })
-    : icon('check-circle', { size: 14, strokeWidth: 2.2 });
+  const isSession = evt.kind === "session";
+  const prenom = esc(evt.moniteur_prenom || "Moniteur");
+  const nom = esc(evt.moniteur_nom || "");
+  const nameKey = `${evt.moniteur_prenom || ""}${evt.moniteur_nom || ""}`;
+  const initials =
+    ((evt.moniteur_prenom || "")[0] || "") +
+    ((evt.moniteur_nom || "")[0] || "");
+  const badgeCls = isSession ? "ff-kind-session" : "ff-kind-validation";
+  const badgeIcon = isSession
+    ? icon("clock", { size: 14, strokeWidth: 2.2 })
+    : icon("check-circle", { size: 14, strokeWidth: 2.2 });
 
   const eventLine = isSession
     ? `<strong>${fmtDuration(evt.duration_minutes)}</strong> de conduite avec toi`
     : `A validé : <strong>${esc(compLabel(evt.competence_id))}</strong>`;
 
-  const statusBit = isSession && evt.confirmation_status
-    ? `<span style="font-size:10px;color:${evt.confirmation_status === 'confirmed' ? 'var(--grd)' : 'var(--mu2)'}">
-        ${evt.confirmation_status === 'confirmed' ? '✓ confirmée' : evt.confirmation_status === 'refused' ? '✗ refusée' : 'en attente'}
+  const statusBit =
+    isSession && evt.confirmation_status
+      ? `<span style="font-size:10px;color:${evt.confirmation_status === "confirmed" ? "var(--grd)" : "var(--mu2)"}">
+        ${evt.confirmation_status === "confirmed" ? "✓ confirmée" : evt.confirmation_status === "refused" ? "✗ refusée" : "en attente"}
        </span>`
-    : '';
+      : "";
 
   return `
   <div class="ff-card" data-idx="${idx}" role="button" tabindex="0" aria-expanded="false">
     <div class="ff-card-top">
-      <div class="ff-av" style="background:${gradFor(nameKey)}">${esc(initials.toUpperCase() || '?')}</div>
+      <div class="ff-av" style="background:${gradFor(nameKey)}">${esc(initials.toUpperCase() || "?")}</div>
       <div class="ff-meta">
         <div class="ff-author">${prenom} ${nom}</div>
         <div class="ff-time">${relTime(evt.ts)}</div>
@@ -216,13 +224,13 @@ function renderCard(evt, idx) {
     </div>
     <div class="ff-card-body">
       <div class="ff-event-line">${eventLine} ${statusBit}</div>
-      ${evt.comment ? `<div class="ff-comment">"${esc(evt.comment)}"</div>` : ''}
+      ${evt.comment ? `<div class="ff-comment">"${esc(evt.comment)}"</div>` : ""}
     </div>
     <div class="ff-card-extra">
       <div class="ff-extra-content">
-        <div class="ff-extra-row">${icon('calendar', { size: 12, color: 'var(--mu2)', strokeWidth: 2 })} ${new Date(evt.ts).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
-        ${isSession ? `<div class="ff-extra-row">${icon('clock', { size: 12, color: 'var(--mu2)', strokeWidth: 2 })} Durée : ${fmtDuration(evt.duration_minutes)}</div>` : ''}
-        ${!isSession && evt.comment ? '' : ''}
+        <div class="ff-extra-row">${icon("calendar", { size: 12, color: "var(--mu2)", strokeWidth: 2 })} ${new Date(evt.ts).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</div>
+        ${isSession ? `<div class="ff-extra-row">${icon("clock", { size: 12, color: "var(--mu2)", strokeWidth: 2 })} Durée : ${fmtDuration(evt.duration_minutes)}</div>` : ""}
+        ${!isSession && evt.comment ? "" : ""}
       </div>
     </div>
   </div>`;
@@ -233,37 +241,40 @@ function renderCard(evt, idx) {
  * @param {HTMLElement} root — container parent
  * @param {{ eleveId: string, limit?: number, anchorEl?: Element }} opts
  */
-export async function mountFeedbackFeed(root, { eleveId, limit = 5, anchorEl } = {}) {
+export async function mountFeedbackFeed(
+  root,
+  { eleveId, limit = 5, anchorEl } = {},
+) {
   ensureStyle();
 
   let events = [];
   try {
-    const { data } = await sb.rpc('get_eleve_feedback_feed', {
+    const { data } = await sb.rpc("get_eleve_feedback_feed", {
       p_eleve_id: eleveId || null,
       p_limit: limit,
     });
     events = data || [];
   } catch (e) {
-    console.error('[feedback-feed] fetch error', e);
+    console.error("[feedback-feed] fetch error", e);
     return;
   }
 
   if (events.length === 0) return;
 
-  track('feedback_feed.shown', { count: events.length, eleve_id: eleveId });
+  track("feedback_feed.shown", { count: events.length, eleve_id: eleveId });
 
-  const wrap = document.createElement('div');
-  wrap.className = 'ff-section';
-  wrap.id = 'ff-section';
+  const wrap = document.createElement("div");
+  wrap.className = "ff-section";
+  wrap.id = "ff-section";
   wrap.innerHTML = `
     <div class="ff-sec-hd">
       <div class="ff-sec-title">Retours de tes moniteurs</div>
       <button class="ff-see-all" id="ff-see-all" aria-label="Voir tout le fil">
-        Tout voir ${icon('chevron-right', { size: 13, strokeWidth: 2.5 })}
+        Tout voir ${icon("chevron-right", { size: 13, strokeWidth: 2.5 })}
       </button>
     </div>
     <div class="ff-list" id="ff-list">
-      ${events.map((e, i) => renderCard(e, i)).join('')}
+      ${events.map((e, i) => renderCard(e, i)).join("")}
     </div>
   `;
 
@@ -271,23 +282,23 @@ export async function mountFeedbackFeed(root, { eleveId, limit = 5, anchorEl } =
   if (anchorEl && anchorEl.parentNode === root) {
     root.insertBefore(wrap, anchorEl);
   } else {
-    const footer = root.querySelector('.acc-footer');
+    const footer = root.querySelector(".acc-footer");
     if (footer) root.insertBefore(wrap, footer);
     else root.appendChild(wrap);
   }
 
   // Wire expand on tap
-  wrap.querySelectorAll('.ff-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const expanded = card.classList.toggle('ff-expanded');
-      card.setAttribute('aria-expanded', expanded);
-      track('feedback_feed.card_expanded', { idx: card.dataset.idx });
+  wrap.querySelectorAll(".ff-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      const expanded = card.classList.toggle("ff-expanded");
+      card.setAttribute("aria-expanded", expanded);
+      track("feedback_feed.card_expanded", { idx: card.dataset.idx });
     });
   });
 
   // Wire "Voir tout"
-  wrap.querySelector('#ff-see-all')?.addEventListener('click', () => {
-    track('feedback_feed.see_all_clicked');
-    navigate('#/feedback');
+  wrap.querySelector("#ff-see-all")?.addEventListener("click", () => {
+    track("feedback_feed.see_all_clicked");
+    navigate("#/feedback");
   });
 }
