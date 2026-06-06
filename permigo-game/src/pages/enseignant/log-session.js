@@ -1006,7 +1006,8 @@ const CSS = `
 .ls-screen {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 16px 0;
+  padding: 16px 16px;
+  padding-bottom: calc(16px + 60px + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: column; gap: 12px;
 }
 
