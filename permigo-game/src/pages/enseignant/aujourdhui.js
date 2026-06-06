@@ -14,6 +14,7 @@ import { statutCfg } from "@/utils/statut-label.js";
 import { icon, iconBadge } from "@/utils/icons.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
+import { getMoniteurState } from "@/data/moniteur-levels.js";
 
 // ─── Statuts labels : mapping centralisé @/utils/statut-label.js ──
 
@@ -246,6 +247,59 @@ const STYLE = `<style>
   /* Section block */
   .aj-section { margin-bottom: 28px; }
 
+  /* Card progression palier */
+  .aj-prog {
+    background: var(--su);
+    border: 1px solid rgba(99,102,241,.12);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color .15s, transform .15s;
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .aj-prog:hover { border-color: rgba(99,102,241,.3); transform: translateY(-1px); }
+  .aj-prog:active { transform: scale(.99); }
+  .aj-prog:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+  .aj-prog-ico {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(99,102,241,.1), rgba(139,92,246,.1));
+    border: 1px solid rgba(99,102,241,.15);
+    display: flex; align-items: center; justify-content: center;
+    color: #6366f1; flex-shrink: 0;
+  }
+  .aj-prog-body { flex: 1; min-width: 0; }
+  .aj-prog-label {
+    font: 600 11px/1 'Inter', sans-serif;
+    text-transform: uppercase; letter-spacing: .08em;
+    color: var(--mu2); margin-bottom: 3px;
+  }
+  .aj-prog-title {
+    font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
+    color: var(--ink); letter-spacing: -.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .aj-prog-bar-wrap {
+    height: 4px; background: var(--bg3);
+    border-radius: 2px; margin-top: 8px; overflow: hidden;
+  }
+  .aj-prog-bar {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+  }
+  .aj-prog-next {
+    font: 500 11px/1 'Inter', sans-serif;
+    color: var(--mu2); margin-top: 5px;
+  }
+  .aj-prog-arrow { color: var(--mu2); flex-shrink: 0; }
+
   /* Activité récente */
   .aj-activity-list {
     background: var(--su);
@@ -471,37 +525,6 @@ const STYLE = `<style>
     flex-shrink: 0;
   }
 
-  /* ── FAB Séance ── */
-  .aj-fab {
-    position: fixed;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px) + 16px);
-    right: 16px;
-    z-index: 50;
-    display: flex; align-items: center; gap: 8px;
-    padding: 0 20px 0 16px;
-    height: 52px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: #fff;
-    border: none; border-radius: 26px;
-    font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
-    cursor: pointer;
-    box-shadow: 0 4px 18px -4px rgba(99,102,241,.6), 0 2px 6px rgba(0,0,0,.12);
-    transition: transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
-    -webkit-tap-highlight-color: transparent;
-    animation: ajFabIn .5s .35s cubic-bezier(.34,1.56,.64,1) both;
-  }
-  .aj-fab:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px -4px rgba(99,102,241,.65), 0 2px 8px rgba(0,0,0,.14);
-  }
-  .aj-fab:active { transform: scale(.94); box-shadow: 0 2px 8px -2px rgba(99,102,241,.4); }
-  .aj-fab:focus-visible { outline: 2px solid #6366f1; outline-offset: 3px; }
-  @keyframes ajFabIn {
-    from { opacity: 0; transform: translateY(20px) scale(.9); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .aj-fab-ico { flex-shrink: 0; display: flex; }
-  @media (prefers-reduced-motion: reduce) { .aj-fab { animation: none; } }
 </style>`;
 
 // ─── Helpers ──────────────────────────────────────────────────────
@@ -605,6 +628,7 @@ async function renderInto(root, _me) {
     consolidRes,
     todaySessionsRes,
     profileRes,
+    totalValsRes,
   ] = await Promise.all([
     // Validations d'aujourd'hui (faites par moi)
     sb
@@ -650,6 +674,12 @@ async function renderInto(root, _me) {
       .select("prenom, streak_pro_days")
       .eq("id", _me.id)
       .maybeSingle(),
+
+    // Total validations cumulées (pour la card de progression)
+    sb
+      .from("validations")
+      .select("id", { count: "exact", head: true })
+      .eq("validated_by", _me.id),
   ]);
 
   if (valsToday.error || valsAll.error) {
@@ -665,6 +695,8 @@ async function renderInto(root, _me) {
 
   const prenom = profileRes?.data?.prenom || "";
   const streakPro = profileRes?.data?.streak_pro_days ?? 0;
+  const totalValsCount = totalValsRes?.count ?? 0;
+  const moniteurState = getMoniteurState(totalValsCount);
 
   // KPI
   const acquisAujourdhui = todayVals.filter(
@@ -893,6 +925,30 @@ async function renderInto(root, _me) {
         </div>
       </div>
 
+      <!-- Progression palier — card cliquable vers parcours-pro -->
+      ${(() => {
+        const s = moniteurState;
+        const tierTitle = s.tier?.title ?? "Enseignant — Démarrage";
+        const pct = s.isMax ? 100 : s.pctToNextReward;
+        const nextLabel = s.isMax
+          ? "Palier maximum atteint"
+          : s.nextReward
+            ? `Prochain : ${esc(s.nextReward.label)}`
+            : "";
+        return `<a class="aj-prog" href="#/parcours" id="aj-prog-card" aria-label="Progression palier : ${esc(tierTitle)}">
+          <div class="aj-prog-ico">${icon("trending-up", { size: 18, strokeWidth: 2 })}</div>
+          <div class="aj-prog-body">
+            <div class="aj-prog-label">Palier</div>
+            <div class="aj-prog-title">${esc(tierTitle)}</div>
+            <div class="aj-prog-bar-wrap">
+              <div class="aj-prog-bar" style="width:${pct}%"></div>
+            </div>
+            ${nextLabel ? `<div class="aj-prog-next">${nextLabel}</div>` : ""}
+          </div>
+          <div class="aj-prog-arrow">${icon("chevron-right", { size: 16, strokeWidth: 2 })}</div>
+        </a>`;
+      })()}
+
       <!-- Activité récente -->
       <div class="aj-section">
         <div class="aj-section-title">Activité récente</div>
@@ -930,11 +986,6 @@ async function renderInto(root, _me) {
       </div>
 
     </div>
-
-    <button class="aj-fab" id="aj-fab" aria-label="Enregistrer une séance">
-      <span class="aj-fab-ico">${icon("plus", { size: 20, strokeWidth: 2.5 })}</span>
-      Séance
-    </button>
 
   `;
 
@@ -978,11 +1029,6 @@ async function renderInto(root, _me) {
       track("eleve.livret.open", { eleve_id: id, from: "aujourdhui" });
       navigate(`#/livret/${id}`);
     });
-  });
-
-  root.querySelector("#aj-fab")?.addEventListener("click", () => {
-    track("fab.seance.clicked", { from: "aujourdhui" });
-    navigate("#/log-session");
   });
 }
 

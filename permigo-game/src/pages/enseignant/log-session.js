@@ -134,7 +134,7 @@ export async function mount(root) {
       .select("id, prenom, nom, avatar_url, last_active_at")
       .eq("role", "eleve")
       .eq("enseignant_id", _me.id)
-      .order("last_active_at", { ascending: false }),
+      .order("nom", { ascending: true }),
     sb
       .from("competences_remc")
       .select("id, nom, code, monde")
@@ -893,12 +893,10 @@ async function _handleSubmit(root) {
           statut,
           note_enseignant: noteVal,
         }));
-        const { error: upErr } = await sb
-          .from("validations")
-          .upsert(rows, {
-            onConflict: "eleve_id,competence_id",
-            ignoreDuplicates: false,
-          });
+        const { error: upErr } = await sb.from("validations").upsert(rows, {
+          onConflict: "eleve_id,competence_id",
+          ignoreDuplicates: false,
+        });
         if (!upErr) extraCreated = extraIds.length;
         else console.error("[log-session] upsert extra error", upErr);
       } catch (e) {
@@ -1121,6 +1119,7 @@ const CSS = `
   cursor: pointer; background: var(--su); min-height: 52px;
   transition: border-color .12s, background .12s, transform .1s;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .ls-eleve-row:active { transform: scale(.99); }
 .ls-eleve-row.ls-sel { border-color: var(--a); background: rgba(88,204,2,.04); }
@@ -1228,6 +1227,7 @@ const CSS = `
   font: 500 12px/1 'Inter', sans-serif; color: #4b5563; background: var(--su);
   cursor: pointer; transition: border-color .12s, background .12s, color .12s, transform .1s;
   min-height: 34px; text-align: left;
+  touch-action: manipulation;
 }
 .ls-comp-chip:active { transform: scale(.96); }
 .ls-comp-chip.ls-comp-sel { font-weight: 600; }

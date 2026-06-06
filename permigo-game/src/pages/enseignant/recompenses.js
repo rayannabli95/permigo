@@ -106,8 +106,8 @@ const STYLE = `<style>
   }
 
   .rec-badge-card {
-    background: var(--surface);
-    border: 2px solid var(--border);
+    background: var(--su);
+    border: 2px solid var(--bo);
     border-radius: 12px;
     padding: 12px;
     text-align: center;
@@ -116,8 +116,8 @@ const STYLE = `<style>
   }
 
   .rec-badge-card.unlocked {
-    border-color: var(--primary);
-    background: var(--primary-light);
+    border-color: #6366f1;
+    background: rgba(99,102,241,.05);
   }
 
   .rec-badge-icon {
@@ -139,7 +139,7 @@ const STYLE = `<style>
 
   .rec-badge-desc {
     font-size: 11px;
-    color: var(--text-secondary);
+    color: var(--mu2);
     margin-top: 4px;
   }
 
@@ -157,8 +157,8 @@ const STYLE = `<style>
   }
 
   .rec-shop-preview {
-    background: var(--surface);
-    border: 1px dashed var(--border);
+    background: var(--su);
+    border: 1px dashed var(--bo);
     border-radius: 8px;
     padding: 20px;
     text-align: center;
@@ -166,7 +166,7 @@ const STYLE = `<style>
   }
 
   .rec-shop-preview p {
-    color: var(--text-secondary);
+    color: var(--mu2);
     font-size: 13px;
     margin: 0;
   }

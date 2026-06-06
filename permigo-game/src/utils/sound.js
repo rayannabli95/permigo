@@ -84,7 +84,7 @@ export function playLaunch() {
   sessionStorage.setItem(LAUNCH_KEY, "1");
   if (!isSoundEnabled()) return;
   try {
-    const a = _get("transition", 0.3);
+    const a = _get("transition", 0.1);
     a.currentTime = 0;
     a.play().catch(() => {});
     setTimeout(() => {

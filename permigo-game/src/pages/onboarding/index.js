@@ -323,6 +323,10 @@ export async function mount(root) {
     } catch (e) {
       console.error("[onboarding] finish update failed", e);
     }
+    // Fallback localStorage : évite re-affichage si la mise à jour DB échoue
+    try {
+      localStorage.setItem("permigo_eleve_onboarding_done", "1");
+    } catch {}
     // Coffre de bienvenue — crédité une seule fois, idempotent côté serveur.
     // L'élève le trouvera sur l'accueil dès son arrivée (teaser coffres).
     unlockChest("welcome", {
