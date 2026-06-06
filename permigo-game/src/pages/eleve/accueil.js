@@ -103,19 +103,6 @@ const STYLE = `<style>
   color: rgba(255,255,255,.75);
   flex: 1;
 }
-.acc2-hero-notif-btn {
-  width: 44px; height: 44px;
-  border-radius: 12px;
-  background: rgba(255,255,255,.12);
-  border: none;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: rgba(255,255,255,.8);
-  flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-  transition: background .12s;
-}
-.acc2-hero-notif-btn:active { background: rgba(255,255,255,.2); }
 .acc2-hero-title {
   font: 800 40px/1.05 var(--fd), sans-serif;
   color: #fff;
@@ -191,6 +178,10 @@ const STYLE = `<style>
   background: rgba(255,255,255,.85);
   border-radius: 99px;
   transition: width 1s cubic-bezier(.2,.7,.3,1);
+}
+.acc2-xp-fill.is-max {
+  background: var(--am);
+  box-shadow: 0 0 10px rgba(245,158,11,.7);
 }
 .acc2-xp-hint {
   font: 500 10.5px/1 'Inter', sans-serif;
@@ -332,11 +323,21 @@ const STYLE = `<style>
   font: 500 13px/1 'Inter', sans-serif;
   color: rgba(255,255,255,.65);
   letter-spacing: 0;
-  margin-left: 4px;
 }
 .acc2-ms-reward-name {
   font: 600 13px/1.3 'Inter', sans-serif;
   color: rgba(255,255,255,.8);
+}
+/* État terminal « Parcours complété » — contraste renforcé sur fond vert */
+.acc2-ms-done-title {
+  font: 800 19px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  letter-spacing: -.02em;
+  margin-bottom: 4px;
+}
+.acc2-ms-done-sub {
+  font: 600 13.5px/1.4 'Inter', sans-serif;
+  color: rgba(255,255,255,.95);
 }
 .acc2-ms-prog-bar {
   height: 8px;
@@ -977,6 +978,8 @@ function render({
   const initials = prenom.slice(0, 2).toUpperCase();
   const heroAv = getEquippedAsset("avatar") || me.avatar_url || null;
   const isActive = streakSt !== "broken";
+  // État terminal : dernier niveau atteint (pas de palier suivant) ET barre pleine
+  const isMaxLevel = !LEVEL_NAMES[lvl.level + 1] && lvl.pct === 100;
 
   // ── BLOC 2 content ──
   const pendingSession = pendingSessions?.[0] ?? null;
@@ -1007,9 +1010,6 @@ function render({
       <div class="acc2-hero-top">
         <div class="acc2-hero-av">${heroAv ? `<img src="${esc(heroAv)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block">` : esc(initials)}</div>
         <span class="acc2-hero-hi">Bonjour ${esc(prenom)}</span>
-        <button class="acc2-hero-notif-btn" id="notif-btn" aria-label="Notifications">
-          ${icon("bell", { size: 18 })}
-        </button>
       </div>
       <h1 class="acc2-hero-title" tabindex="-1"><span class="acc2-hero-niv-badge">${esc(lvl.name)}</span></h1>
       <div class="acc2-hero-meta">
@@ -1030,9 +1030,9 @@ function render({
       </div>
       <div class="acc2-xp-bar-wrap">
         <div class="acc2-xp-bar">
-          <div class="acc2-xp-fill" style="width:0%" data-target="${lvl.pct}"></div>
+          <div class="acc2-xp-fill${isMaxLevel ? " is-max" : ""}" style="width:0%" data-target="${lvl.pct}"></div>
         </div>
-        <span class="acc2-xp-hint">${lvl.pct}% vers ${esc(LEVEL_NAMES[lvl.level + 1] ?? "max")}</span>
+        <span class="acc2-xp-hint">${isMaxLevel ? "Niveau max atteint" : `${lvl.pct}% vers ${esc(LEVEL_NAMES[lvl.level + 1] ?? "max")}`}</span>
       </div>
     </div>
   </div>
@@ -1159,8 +1159,8 @@ function renderNextReward(totalValidated, worlds, trophees) {
           <div class="acc2-ms-reward-top">
             <div class="acc2-ms-reward-icon">${icon("award", { size: 28 })}</div>
             <div class="acc2-ms-reward-info">
-              <div class="acc2-ms-reward-remaining"><span>Tous les mondes maîtrisés</span></div>
-              <div class="acc2-ms-reward-name">Tu es prêt pour l'examen</div>
+              <div class="acc2-ms-done-title">Tous les mondes maîtrisés</div>
+              <div class="acc2-ms-done-sub">Tu es prêt pour l'examen</div>
             </div>
           </div>
           <button class="acc2-ms-cta-btn" data-href="#/trophees">
@@ -1282,12 +1282,6 @@ function wire(
     setTimeout(() => {
       msFill.style.width = msFill.dataset.target + "%";
     }, 300);
-
-  // Notif btn → notifications
-  root.querySelector("#notif-btn")?.addEventListener("click", () => {
-    track("cta.clicked", { cta_type: "notif_btn" });
-    navigate("#/notifications");
-  });
 
   // Streak badge → bottom sheet
   const bsBg = root.querySelector("#bs-bg");
