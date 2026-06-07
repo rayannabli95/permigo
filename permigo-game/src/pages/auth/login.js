@@ -122,7 +122,7 @@ function template() {
       .lg-forgot:hover{color:var(--al2)}
 
       /* CTA primary */
-      .lg-cta{width:100%;height:50px;border-radius:12px;border:0;background:linear-gradient(to bottom,#6fe016 0%,var(--a) 48%,var(--adk) 100%);color:#fff;font-family:var(--fd);font-weight:800;font-size:15px;letter-spacing:.01em;cursor:pointer;transition:transform .12s,box-shadow .12s;box-shadow:0 12px 32px -10px rgba(88,204,2,.65),0 1.5px 0 0 rgba(255,255,255,.28) inset,0 -2px 8px 0 rgba(70,163,2,.5) inset}
+      .lg-cta{width:100%;height:50px;border-radius:12px;border:0;background:linear-gradient(to bottom,#6fe016 0%,var(--a) 48%,var(--adk) 100%);color:#1a2800;font-family:var(--fd);font-weight:800;font-size:15px;letter-spacing:.01em;cursor:pointer;transition:transform .12s,box-shadow .12s;box-shadow:0 12px 32px -10px rgba(88,204,2,.65),0 1.5px 0 0 rgba(255,255,255,.28) inset,0 -2px 8px 0 rgba(70,163,2,.5) inset}
       .lg-cta:hover{transform:translateY(-1px);box-shadow:0 16px 40px -10px rgba(88,204,2,.8)}
       .lg-cta:disabled{opacity:.6;cursor:wait;transform:none}
 

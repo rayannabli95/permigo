@@ -356,7 +356,7 @@ const STYLE = `<style>
     padding: 0 20px 0 16px;
     height: 52px;
     background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
-    color: #fff;
+    color: #1a2800;
     border: none; border-radius: 26px;
     font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
@@ -1199,7 +1199,7 @@ const DIALOG_STYLE = `
       background: var(--bg); color: var(--ink); -webkit-tap-highlight-color: transparent;
     }
     .me-cf-btn:active { transform: scale(.98); }
-    .me-cf-btn.confirm { border: 0; color: #fff; background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset; }
+    .me-cf-btn.confirm { border: 0; color: #1a2800; background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset; }
   </style>`;
 
 /** Confirmation avant d'archiver un élève en « reçu ». */
@@ -1367,7 +1367,7 @@ function openMissingPanel(eleve) {
       .me-miss-item { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; font: 500 14px/1.3 'Inter', sans-serif; color: var(--ink); border-bottom: 1px solid var(--bg2); }
       .me-miss-code { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu); background: var(--bg2); padding: 3px 6px; border-radius: 6px; flex-shrink: 0; }
       .me-miss-empty { text-align: center; padding: 32px 16px; color: var(--grd); font: 600 14px/1.5 'Inter', sans-serif; }
-      .me-miss-cta { margin-top: 16px; width: 100%; min-height: 48px; border: 0; border-radius: 12px; color: #fff; font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset; }
+      .me-miss-cta { margin-top: 16px; width: 100%; min-height: 48px; border: 0; border-radius: 12px; color: #1a2800; font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset; }
       .me-miss-cta:active { transform: scale(.98); }
     </style>
     <div class="me-miss-bg" data-close="1"></div>
