@@ -51,7 +51,7 @@ function letterize(text) {
  * Affiche l'écran de lancement avec gate au tap. No-op si déjà vu dans la session.
  * @param {{ duration?: number }} opts  durée de l'anim après le tap
  */
-export function showLaunchSplash({ duration = 2400 } = {}) {
+export function showLaunchSplash({ duration = 2800 } = {}) {
   try {
     if (sessionStorage.getItem(SESSION_KEY)) return;
     sessionStorage.setItem(SESSION_KEY, "1");
@@ -72,15 +72,15 @@ export function showLaunchSplash({ duration = 2400 } = {}) {
       #pg-launch-splash .ls-badge svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));}
 
       /* ── « PERMIGO » en cubes 3D ── */
-      #pg-launch-splash .ls-cubes{display:flex;gap:7px;perspective:700px;}
-      #pg-launch-splash .ls-cube{position:relative;width:34px;height:34px;transform-style:preserve-3d;animation:lsCubeFlip 2s ease-in-out infinite;}
-      #pg-launch-splash .ls-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 19px/1 'Plus Jakarta Sans','Nunito',sans-serif;color:#fff;border-radius:8px;backface-visibility:hidden;box-shadow:0 2px 6px rgba(70,163,2,.25) inset,0 1px 0 rgba(255,255,255,.18) inset;}
-      #pg-launch-splash .f-front {background:linear-gradient(180deg,#6fe016,#58CC02);transform:translateZ(17px);}
-      #pg-launch-splash .f-back  {background:linear-gradient(180deg,#58CC02,#46A302);transform:rotateY(180deg) translateZ(17px);}
-      #pg-launch-splash .f-right {background:#46A302;transform:rotateY(90deg) translateZ(17px);}
-      #pg-launch-splash .f-left  {background:#46A302;transform:rotateY(-90deg) translateZ(17px);}
-      #pg-launch-splash .f-top   {background:#7be81e;transform:rotateX(90deg) translateZ(17px);}
-      #pg-launch-splash .f-bottom{background:#3a8a00;transform:rotateX(-90deg) translateZ(17px);}
+      #pg-launch-splash .ls-cubes{display:flex;gap:9px;perspective:800px;}
+      #pg-launch-splash .ls-cube{position:relative;width:46px;height:46px;transform-style:preserve-3d;animation:lsCubeFlip 2s ease-in-out infinite;}
+      #pg-launch-splash .ls-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 26px/1 'Plus Jakarta Sans','Nunito',sans-serif;color:#fff;border-radius:10px;backface-visibility:hidden;box-shadow:0 2px 6px rgba(70,163,2,.25) inset,0 1px 0 rgba(255,255,255,.18) inset;}
+      #pg-launch-splash .f-front {background:linear-gradient(180deg,#6fe016,#58CC02);transform:translateZ(23px);}
+      #pg-launch-splash .f-back  {background:linear-gradient(180deg,#58CC02,#46A302);transform:rotateY(180deg) translateZ(23px);}
+      #pg-launch-splash .f-right {background:#46A302;transform:rotateY(90deg) translateZ(23px);}
+      #pg-launch-splash .f-left  {background:#46A302;transform:rotateY(-90deg) translateZ(23px);}
+      #pg-launch-splash .f-top   {background:#7be81e;transform:rotateX(90deg) translateZ(23px);}
+      #pg-launch-splash .f-bottom{background:#3a8a00;transform:rotateX(-90deg) translateZ(23px);}
 
       /* ── Pill « text-flip » (phrases sous les cubes) ── */
       #pg-launch-splash .ls-flip{position:relative;display:inline-block;border-radius:12px;padding:8px 16px 10px;min-height:38px;font:800 17px/1.15 'Plus Jakarta Sans','Nunito',sans-serif;color:#1a2800;text-align:center;background:linear-gradient(to bottom,#ffffff,#edf2ea);box-shadow:inset 0 -1px #d6e3cf, inset 0 0 0 1px #d8e6d0, 0 4px 10px rgba(70,163,2,.12);}
@@ -102,15 +102,16 @@ export function showLaunchSplash({ duration = 2400 } = {}) {
         #pg-launch-splash .ls-cta{animation:none}
         #pg-launch-splash .ls-flip span{animation:none}
       }
-      @media (max-width:360px){
-        #pg-launch-splash .ls-cube{width:30px;height:30px}
-        #pg-launch-splash .f-front,#pg-launch-splash .f-back{font-size:17px}
-        #pg-launch-splash .f-front {transform:translateZ(15px)}
-        #pg-launch-splash .f-back  {transform:rotateY(180deg) translateZ(15px)}
-        #pg-launch-splash .f-right {transform:rotateY(90deg) translateZ(15px)}
-        #pg-launch-splash .f-left  {transform:rotateY(-90deg) translateZ(15px)}
-        #pg-launch-splash .f-top   {transform:rotateX(90deg) translateZ(15px)}
-        #pg-launch-splash .f-bottom{transform:rotateX(-90deg) translateZ(15px)}
+      @media (max-width:380px){
+        #pg-launch-splash .ls-cubes{gap:6px}
+        #pg-launch-splash .ls-cube{width:38px;height:38px}
+        #pg-launch-splash .f-front,#pg-launch-splash .f-back{font-size:22px}
+        #pg-launch-splash .f-front {transform:translateZ(19px)}
+        #pg-launch-splash .f-back  {transform:rotateY(180deg) translateZ(19px)}
+        #pg-launch-splash .f-right {transform:rotateY(90deg) translateZ(19px)}
+        #pg-launch-splash .f-left  {transform:rotateY(-90deg) translateZ(19px)}
+        #pg-launch-splash .f-top   {transform:rotateX(90deg) translateZ(19px)}
+        #pg-launch-splash .f-bottom{transform:rotateX(-90deg) translateZ(19px)}
       }
     </style>
     <div class="ls-badge">${icon("map-pin", { size: 46, strokeWidth: 2.2, color: "#fff" })}</div>
@@ -140,7 +141,7 @@ export function showLaunchSplash({ duration = 2400 } = {}) {
     const tid = setInterval(() => {
       i = (i + 1) % MSGS.length;
       setMsg(i);
-    }, 620);
+    }, 1300);
 
     // Fin : coupe le son, fond, retire
     setTimeout(() => {
