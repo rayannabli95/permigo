@@ -131,16 +131,18 @@ const STYLE = `
     z-index: 310;
     width: 56px; height: 56px;
     border-radius: 50%;
-    background: var(--ink, #0a0d1a);
-    color: #fff;
+    /* Vert plastique : visible en clair ET en nuit (var(--ink) s'inversait en
+       blanc en dark → « + » blanc invisible sur cercle blanc). */
+    background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
+    color: #1a2800;
     border: none; padding: 0;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     -webkit-tap-highlight-color: transparent;
     box-shadow:
-      0 8px 20px -6px rgba(10,13,26,.55),
+      0 8px 20px -6px rgba(70,163,2,.5),
       0 3px 8px -2px rgba(10,13,26,.2),
-      inset 0 0 0 1px rgba(255,255,255,.08);
+      inset 0 1.5px 0 0 rgba(255,255,255,.28);
     animation: bnFabIn .3s cubic-bezier(.34,1.56,.64,1) both;
     transition: transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s ease;
   }
