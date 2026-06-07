@@ -46,6 +46,8 @@ let _picked = new Map(); // competence_id → statut choisi cette séance
 let _note = "";
 let _query = "";
 let _submitting = false;
+let _eleveDDOpen = false; // dropdown élève ouvert
+let _openMondes = new Set(); // cat.id des accordéons ouverts
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -59,24 +61,34 @@ const STYLE = `<style>
   .vs-card { background: var(--su); border: 1px solid var(--bo); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
   .vs-card-ttl { font: 700 12px/1 'Inter', sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--mu2); margin: 0 0 12px; display: flex; align-items: center; gap: 6px; }
 
-  /* Sélecteur élève */
-  .vs-search-wrap { position: relative; margin-bottom: 10px; }
+  /* Dropdown élève */
   .vs-search-ico { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--mu2); pointer-events: none; }
   .vs-search { width: 100%; box-sizing: border-box; padding: 10px 12px 10px 36px; background: var(--bg); border: 1px solid var(--bo); border-radius: 10px; font: 500 14px/1 'Inter', sans-serif; color: var(--ink); outline: none; }
   .vs-search:focus { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
-  .vs-eleve-list { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
-  .vs-eleve-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--bo); background: var(--bg); cursor: pointer; min-height: 44px; }
-  .vs-eleve-row:active { transform: scale(.99); }
-  .vs-eleve-row.sel { border-color: var(--a); background: rgba(88,204,2,.06); }
-  .vs-eleve-name { font: 600 14px/1.2 'Inter', sans-serif; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .vs-eleve-check { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--a); color: #fff; }
 
-  /* Bandeau élève sélectionné */
-  .vs-eleve-banner { display: flex; align-items: center; gap: 12px; }
-  .vs-eleve-banner .vs-eb-info { flex: 1; min-width: 0; }
-  .vs-eb-name { font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif; }
-  .vs-eb-prog { font: 600 12px/1 'IBM Plex Mono', monospace; color: var(--mu2); margin-top: 3px; }
-  .vs-eb-change { font: 600 12px/1 'Inter', sans-serif; color: var(--a); background: rgba(88,204,2,.1); border: 0; border-radius: 8px; padding: 8px 10px; cursor: pointer; flex-shrink: 0; min-height: 36px; }
+  .vs-dd { position: relative; margin-bottom: 16px; z-index: 30; }
+  .vs-dd-backdrop { position: fixed; inset: 0; z-index: 20; }
+  .vs-dd-trigger { position: relative; z-index: 31; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 60px; background: var(--su); border: 1.5px solid var(--bo); border-radius: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color .15s, box-shadow .15s; }
+  .vs-dd.open .vs-dd-trigger { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
+  .vs-dd-cur { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+  .vs-dd-av { flex-shrink: 0; display: inline-flex; }
+  .vs-dd-txt { display: flex; flex-direction: column; min-width: 0; text-align: left; }
+  .vs-dd-name { font: 700 14.5px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vs-dd-ph { color: var(--mu2); font-weight: 600; }
+  .vs-dd-sub { font: 600 11.5px/1 'IBM Plex Mono', monospace; color: var(--mu2); margin-top: 3px; }
+  .vs-dd-chev { flex-shrink: 0; color: var(--mu2); display: inline-flex; transition: transform .25s cubic-bezier(.4,0,.2,1); }
+  .vs-dd.open .vs-dd-chev { transform: rotate(180deg); }
+  .vs-dd-panel { position: absolute; z-index: 31; top: calc(100% + 6px); left: 0; right: 0; background: var(--su); border: 1.5px solid var(--bo); border-radius: 14px; box-shadow: 0 16px 40px -10px rgba(10,13,26,.22); padding: 6px; max-height: 0; overflow: hidden; opacity: 0; transform: translateY(-6px); pointer-events: none; transition: max-height .25s cubic-bezier(.4,0,.2,1), opacity .18s, transform .2s; }
+  .vs-dd.open .vs-dd-panel { max-height: min(62vh, 420px); overflow-y: auto; opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .vs-dd-search { position: relative; margin: 4px 4px 8px; }
+  .vs-dd-list { display: flex; flex-direction: column; gap: 2px; }
+  .vs-dd-opt { display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding: 9px 10px; min-height: 44px; border: 0; background: transparent; border-radius: 10px; cursor: pointer; text-align: left; color: var(--ink); -webkit-tap-highlight-color: transparent; opacity: 0; animation: vsDdIn .22s ease forwards; }
+  .vs-dd-opt:hover { background: var(--bg); }
+  .vs-dd-opt.sel { background: rgba(88,204,2,.08); }
+  .vs-dd-opt .vs-dd-name { font: 600 14px/1.2 'Inter', sans-serif; flex: 1; }
+  .vs-dd-check { flex-shrink: 0; color: var(--a); display: inline-flex; }
+  @keyframes vsDdIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+  @media (prefers-reduced-motion: reduce) { .vs-dd-opt { animation: none; opacity: 1; } .vs-dd-chev, .vs-dd-panel { transition: none; } }
 
   /* Légende */
   .vs-comps { margin-bottom: 4px; }
@@ -86,13 +98,20 @@ const STYLE = `<style>
   .vs-leg.en_cours { color: #6366f1; }
   .vs-leg.a_retravailler { color: var(--amx); }
 
-  /* Sections par monde */
-  .vs-monde { margin-bottom: 20px; }
-  .vs-monde-hd { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
+  /* Sections par monde — accordéons */
+  .vs-monde { margin-bottom: 8px; border: 1px solid var(--bo); border-radius: 12px; background: var(--su); overflow: hidden; }
+  .vs-monde.open { border-color: var(--bo4); }
+  .vs-monde-hd { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; margin: 0; padding: 13px 14px; min-height: 52px; background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .vs-monde-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .vs-monde-nom { font: 700 13.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); flex: 1; min-width: 0; }
+  .vs-monde-nom { font: 700 13.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); flex: 1; min-width: 0; text-align: left; }
   .vs-monde-cnt { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
-  .vs-chips { display: flex; flex-direction: column; gap: 4px; }
+  .vs-monde-chev { color: var(--mu2); display: inline-flex; transition: transform .25s cubic-bezier(.4,0,.2,1); }
+  .vs-monde.open .vs-monde-chev { transform: rotate(180deg); }
+  .vs-monde-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s cubic-bezier(.4,0,.2,1); }
+  .vs-monde.open .vs-monde-body { grid-template-rows: 1fr; }
+  .vs-monde-body > .vs-chips { overflow: hidden; min-height: 0; }
+  .vs-chips { display: flex; flex-direction: column; gap: 4px; padding: 0 12px 12px; }
+  @media (prefers-reduced-motion: reduce) { .vs-monde-chev, .vs-monde-body { transition: none; } }
   .vs-chip { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; padding: 8px 11px; min-height: 42px; border: 1px solid var(--bo); background: var(--su); border-radius: 11px; cursor: pointer; font: 500 13px/1.25 'Inter', sans-serif; color: var(--ink); text-align: left; -webkit-tap-highlight-color: transparent; transition: border-color .12s, background .12s; }
   .vs-chip:active { transform: scale(.99); }
   .vs-chip-ico { width: 15px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--bo4); }
@@ -138,6 +157,8 @@ export async function mount(root) {
   _note = "";
   _query = "";
   _submitting = false;
+  _eleveDDOpen = false;
+  _openMondes = new Set();
 
   track("page_view", { page: "valider_seance", user_role: _me.role });
 
@@ -198,6 +219,13 @@ async function selectEleve(id, doRender = true) {
   } catch (e) {
     console.error("[valider-seance] fetch validations", e);
   }
+  // Ouvre par défaut le 1er monde ayant encore des compétences à valider
+  _openMondes = new Set();
+  const firstOpen = REMC.find((cat) =>
+    cat.subs.some((s) => !_acquisSet.has(s.c)),
+  );
+  if (firstOpen) _openMondes.add(firstOpen.id);
+  _eleveDDOpen = false;
   if (doRender) render();
 }
 
@@ -214,17 +242,19 @@ function render() {
         <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
         <div>
           <h1 class="vs-h1">Valider une séance</h1>
-          <p class="vs-sub">Tu coches le référentiel REMC — l'élève est notifié.</p>
+          <p class="vs-sub">Choisis l'élève, déroule un monde, coche ce qui est validé.</p>
         </div>
       </div>
-      ${el ? renderEleveBanner(el) : renderEleveSelector()}
+      ${renderEleveDropdown()}
       ${el ? renderComps() + renderNote() : ""}
     </div>
     ${el ? renderFooter() : ""}`;
   wire();
 }
 
-function renderEleveSelector() {
+function renderEleveDropdown() {
+  const el = eleveById(_eleve);
+  const open = _eleveDDOpen || !el;
   const list = _query
     ? _eleves.filter((e) =>
         `${e.prenom || ""} ${e.nom || ""}`
@@ -232,45 +262,40 @@ function renderEleveSelector() {
           .includes(_query.toLowerCase()),
       )
     : _eleves;
-  return `
-    <div class="vs-card">
-      <div class="vs-card-ttl">${icon("users", { size: 13, strokeWidth: 2.4 })} Avec qui ?</div>
-      ${
-        _eleves.length > 6
-          ? `<div class="vs-search-wrap">
-               <span class="vs-search-ico">${icon("search", { size: 14, strokeWidth: 2.2 })}</span>
-               <input class="vs-search" id="vs-search" type="search" placeholder="Chercher un élève…" value="${esc(_query)}" autocomplete="off" aria-label="Chercher un élève">
-             </div>`
-          : ""
-      }
-      <div class="vs-eleve-list">
-        ${
-          list.length === 0
-            ? `<div class="vs-empty">${_eleves.length === 0 ? "Aucun élève attitré." : "Aucun résultat."}</div>`
-            : list
-                .map(
-                  (e) => `
-          <div class="vs-eleve-row" data-eleve="${esc(e.id)}" role="button" tabindex="0">
-            <div style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 38)}</div>
-            <div class="vs-eleve-name">${esc(e.prenom || "")} ${esc(e.nom || "")}</div>
-          </div>`,
-                )
-                .join("")
-        }
-      </div>
-    </div>`;
-}
 
-function renderEleveBanner(el) {
-  const acquis = _acquisSet.size;
+  const trigger = el
+    ? `<span class="vs-dd-av">${renderUserAvatar({ avatar_url: el.avatar_url, prenom: el.prenom, nom: el.nom }, 34)}</span>
+       <span class="vs-dd-txt"><span class="vs-dd-name">${esc(el.prenom || "")} ${esc(el.nom || "")}</span><span class="vs-dd-sub">${_acquisSet.size}/${REMC_TOTAL} acquises</span></span>`
+    : `<span class="vs-dd-txt"><span class="vs-dd-name vs-dd-ph">Choisir un élève…</span></span>`;
+
+  const search =
+    _eleves.length > 6
+      ? `<div class="vs-dd-search"><span class="vs-search-ico">${icon("search", { size: 14, strokeWidth: 2.2 })}</span>
+         <input class="vs-search" id="vs-dd-search" type="search" placeholder="Chercher…" value="${esc(_query)}" autocomplete="off" aria-label="Chercher un élève"></div>`
+      : "";
+
+  const opts =
+    list.length === 0
+      ? `<div class="vs-empty">${_eleves.length === 0 ? "Aucun élève attitré." : "Aucun résultat."}</div>`
+      : list
+          .map((e, i) => {
+            const sel = e.id === _eleve;
+            return `<button class="vs-dd-opt${sel ? " sel" : ""}" type="button" data-eleve="${esc(e.id)}" style="animation-delay:${Math.min(i, 8) * 28}ms">
+              <span class="vs-dd-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 32)}</span>
+              <span class="vs-dd-name">${esc(e.prenom || "")} ${esc(e.nom || "")}</span>
+              ${sel ? `<span class="vs-dd-check">${icon("check", { size: 15, strokeWidth: 2.8 })}</span>` : ""}
+            </button>`;
+          })
+          .join("");
+
   return `
-    <div class="vs-card vs-eleve-banner">
-      <div style="flex-shrink:0">${renderUserAvatar({ avatar_url: el.avatar_url, prenom: el.prenom, nom: el.nom }, 44)}</div>
-      <div class="vs-eb-info">
-        <div class="vs-eb-name">${esc(el.prenom || "")} ${esc(el.nom || "")}</div>
-        <div class="vs-eb-prog">${acquis}/${REMC_TOTAL} acquises</div>
-      </div>
-      <button class="vs-eb-change" id="vs-change-eleve" type="button">Changer</button>
+    ${open ? `<div class="vs-dd-backdrop" id="vs-dd-backdrop"></div>` : ""}
+    <div class="vs-dd${open ? " open" : ""}">
+      <button class="vs-dd-trigger" id="vs-dd-trigger" type="button" aria-expanded="${open}" aria-haspopup="listbox">
+        <span class="vs-dd-cur">${trigger}</span>
+        <span class="vs-dd-chev">${icon("chevron-down", { size: 18, strokeWidth: 2.4 })}</span>
+      </button>
+      <div class="vs-dd-panel" role="listbox">${search}<div class="vs-dd-list">${opts}</div></div>
     </div>`;
 }
 
@@ -304,14 +329,16 @@ function renderComps() {
         </button>`;
       })
       .join("");
+    const isOpen = _openMondes.has(cat.id);
     return `
-      <section class="vs-monde">
-        <header class="vs-monde-hd">
+      <section class="vs-monde${isOpen ? " open" : ""}">
+        <button class="vs-monde-hd" type="button" data-monde="${esc(cat.id)}" aria-expanded="${isOpen}">
           <span class="vs-monde-dot" style="background:${color}"></span>
           <span class="vs-monde-nom">${esc(cat.name)}</span>
-          <span class="vs-monde-cnt" data-cat="${esc(cat.id)}">${acquisInCat + pickedInCat}/${cat.subs.length}</span>
-        </header>
-        <div class="vs-chips">${chips}</div>
+          <span class="vs-monde-cnt">${acquisInCat + pickedInCat}/${cat.subs.length}</span>
+          <span class="vs-monde-chev">${icon("chevron-down", { size: 16, strokeWidth: 2.4 })}</span>
+        </button>
+        <div class="vs-monde-body"><div class="vs-chips">${chips}</div></div>
       </section>`;
   }).join("");
 
@@ -353,39 +380,68 @@ function renderFooter() {
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
+function updateCounts() {
+  _root.querySelectorAll(".vs-monde-hd[data-monde]").forEach((hd) => {
+    const cat = REMC.find((c) => c.id === hd.dataset.monde);
+    if (!cat) return;
+    const n = cat.subs.filter(
+      (s) => _acquisSet.has(s.c) || _picked.has(s.c),
+    ).length;
+    const cnt = hd.querySelector(".vs-monde-cnt");
+    if (cnt) cnt.textContent = `${n}/${cat.subs.length}`;
+  });
+  const lbl = _root.querySelector("#vs-submit-lbl");
+  if (lbl) {
+    const { acquis } = pickedCounts();
+    lbl.textContent =
+      acquis > 0
+        ? `Valider · ${acquis} compétence${acquis > 1 ? "s" : ""}`
+        : "Enregistrer la séance";
+  }
+}
+
 function wire() {
   _root.querySelector("#vs-back")?.addEventListener("click", goBack);
 
-  // Sélecteur élève
-  _root.querySelector("#vs-search")?.addEventListener("input", (e) => {
+  // ── Dropdown élève ──
+  _root.querySelector("#vs-dd-trigger")?.addEventListener("click", () => {
+    _eleveDDOpen = !_eleveDDOpen;
+    render();
+  });
+  _root.querySelector("#vs-dd-backdrop")?.addEventListener("click", () => {
+    if (_eleve) {
+      _eleveDDOpen = false;
+      render();
+    }
+  });
+  _root.querySelector("#vs-dd-search")?.addEventListener("input", (e) => {
     _query = e.target.value;
     render();
-    // refocus
-    const s = _root.querySelector("#vs-search");
+    const s = _root.querySelector("#vs-dd-search");
     if (s) {
       s.focus();
       s.setSelectionRange(s.value.length, s.value.length);
     }
   });
-  _root.querySelectorAll(".vs-eleve-row[data-eleve]").forEach((row) => {
-    const act = () => selectEleve(row.dataset.eleve);
-    row.addEventListener("click", act);
-    row.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        act();
-      }
+  _root.querySelectorAll(".vs-dd-opt[data-eleve]").forEach((opt) => {
+    opt.addEventListener("click", () => {
+      _query = "";
+      selectEleve(opt.dataset.eleve); // remet _eleveDDOpen=false + render
     });
   });
 
-  // Changer d'élève
-  _root.querySelector("#vs-change-eleve")?.addEventListener("click", () => {
-    _eleve = null;
-    _picked = new Map();
-    render();
+  // ── Accordéons mondes ──
+  _root.querySelectorAll(".vs-monde-hd[data-monde]").forEach((hd) => {
+    hd.addEventListener("click", () => {
+      const id = hd.dataset.monde;
+      if (_openMondes.has(id)) _openMondes.delete(id);
+      else _openMondes.add(id);
+      haptic("tap");
+      render();
+    });
   });
 
-  // Chips compétences (délégation)
+  // ── Chips compétences (maj en place, pas de full re-render) ──
   _root.querySelectorAll(".vs-chips").forEach((list) => {
     list.addEventListener("click", (e) => {
       const chip = e.target.closest(".vs-chip[data-comp]");
@@ -395,11 +451,17 @@ function wire() {
       if (next === null) _picked.delete(id);
       else _picked.set(id, next);
       haptic(next === "acquis" ? "success" : next ? "select" : "tap");
-      render();
+      chip.className = "vs-chip" + (next ? " " + next : "");
+      const ico = chip.querySelector(".vs-chip-ico");
+      if (ico)
+        ico.innerHTML = next
+          ? icon(statutMeta(next).ico, { size: 12, strokeWidth: 2.8 })
+          : "";
+      updateCounts();
     });
   });
 
-  // Note
+  // ── Note ──
   const ta = _root.querySelector("#vs-note");
   ta?.addEventListener("input", () => {
     _note = ta.value;
@@ -407,7 +469,7 @@ function wire() {
     if (c) c.textContent = `${_note.length}/${MAX_NOTE}`;
   });
 
-  // Submit
+  // ── Submit ──
   _root.querySelector("#vs-submit")?.addEventListener("click", submit);
 }
 
