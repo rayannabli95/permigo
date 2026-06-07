@@ -60,7 +60,10 @@ const STYLE = `<style>
 /* ── Hero : compteur de validations + palier + prochain outil ── */
 .ppr-hero {
   position: relative; overflow: hidden; padding: 18px 18px 20px;
-  background: linear-gradient(160deg, var(--ink2) 0%, var(--ink3) 60%, var(--ink) 100%);
+  background:
+    linear-gradient(160deg, rgba(11,13,26,.78) 0%, rgba(11,13,26,.58) 50%, rgba(11,13,26,.84) 100%),
+    url('/skins/fond-parcours-enseignant.png') center 18% / cover no-repeat,
+    linear-gradient(160deg, var(--ink2) 0%, var(--ink3) 60%, var(--ink) 100%);
 }
 .ppr-hero::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
