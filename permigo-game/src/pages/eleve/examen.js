@@ -161,18 +161,19 @@ const STYLE = `<style>
   align-items: center;
   gap: 6px;
   padding: 12px 20px;
-  background: var(--a);
+  background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
+  box-shadow: 0 2px 10px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset;
   color: #fff;
   border: 0;
   border-radius: 14px;
   font: 600 14px/1 'Plus Jakarta Sans',sans-serif;
   cursor: pointer;
   min-height: 44px;
-  transition: transform .16s cubic-bezier(.23,1,.32,1);
+  transition: transform .16s cubic-bezier(.23,1,.32,1), filter .16s;
 }
 .exam-choose-btn:active { transform: scale(.97); }
 @media (hover:hover) and (pointer:fine) {
-  .exam-choose-btn:hover { background: var(--adk); }
+  .exam-choose-btn:hover { filter: brightness(1.05); }
 }
 .exam-date-input-wrap { display: none; margin-top: 12px; }
 .exam-date-input-wrap.open { display: flex; align-items: center; gap: 10px; }
