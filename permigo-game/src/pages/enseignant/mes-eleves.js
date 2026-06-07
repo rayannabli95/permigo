@@ -215,6 +215,13 @@ const STYLE = `<style>
     align-items: center;
     gap: 3px;
   }
+  .me-badge.planifie {
+    color: #6366f1;
+    background: rgba(99,102,241,.12);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
 
   /* Progression REMC */
   .me-prog {
@@ -385,6 +392,19 @@ function missingComps(acquisSet) {
   return out;
 }
 
+/** Date du jour au format ISO court (YYYY-MM-DD). */
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** Format court FR d'une date ISO d'examen (ex: "15 juin"). */
+function fmtExamDate(iso) {
+  if (!iso) return "planifié";
+  const d = new Date(iso + "T12:00:00");
+  if (Number.isNaN(d.getTime())) return "planifié";
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
 // ─── State ───────────────────────────────────────────────────────
 let _root = null;
 let _me = null;
@@ -397,6 +417,8 @@ let _drillComp = null; // competence_id si mode drill bloque_sur
 export async function unmount() {
   document.querySelector(".me-qm")?.remove();
   document.querySelector(".me-miss")?.remove();
+  document.querySelector(".me-confirm")?.remove();
+  document.querySelector(".me-undo")?.remove();
 }
 
 export async function mount(root) {
@@ -782,6 +804,7 @@ function renderRow(eleve) {
               ? `<span class="me-badge recu">${icon("check", { size: 11, strokeWidth: 2.6 })} Reçu</span>`
               : `<span class="me-badge ${eleve.actif ? "actif" : "inactif"}">${eleve.actif ? "Actif" : "Inactif"}</span>
                  ${eleve.readiness === "pret" ? `<span class="me-badge pret">${icon("check", { size: 11, strokeWidth: 2.6 })} Prêt</span>` : ""}
+                 ${eleve.examStatut === "planifie" ? `<span class="me-badge planifie">${icon("calendar", { size: 11, strokeWidth: 2.4 })} ${esc(fmtExamDate(eleve.examDate))}</span>` : ""}
                  ${
                    eleve.aRelancer
                      ? `<span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">${icon("alert-circle", { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `${eleve.joursInactif}j` : "À relancer"}</span>`
@@ -1030,44 +1053,240 @@ function openQuickMenu(eleveId, anchorRow) {
       if (action === "valider") navigate(`#/log-session?eleveId=${eleveId}`);
       else if (action === "livret") navigate(`#/livret/${eleveId}`);
       else if (action === "manque" && eleve) openMissingPanel(eleve);
-      else if (action === "exam-planifie") recordExam(eleveId, "planifie");
-      else if (action === "exam-recu") recordExam(eleveId, "recu");
-      else if (action === "exam-rate") recordExam(eleveId, "rate");
+      else if (action === "exam-planifie") openPlanifieDialog(eleveId);
+      else if (action === "exam-recu") confirmRecu(eleveId);
+      else if (action === "exam-rate") recordExam(eleveId, "rate", todayIso());
     });
   });
 }
 
 // ─── Enregistrement d'un résultat d'examen ───────────────────────
-async function recordExam(eleveId, statut) {
-  const { error } = await sb.from("examens").insert({
-    eleve_id: eleveId,
-    statut,
-    created_by: _me.id,
-  });
+// dateExamen : ISO court. Planifié = date choisie ; reçu/raté = aujourd'hui.
+async function recordExam(eleveId, statut, dateExamen) {
+  const el = _eleves.find((e) => e.id === eleveId);
+  const prevStatut = el ? el.examStatut : null;
+  const prevDate = el ? el.examDate : null;
+
+  const { data, error } = await sb
+    .from("examens")
+    .insert({
+      eleve_id: eleveId,
+      statut,
+      date_examen: dateExamen || todayIso(),
+      created_by: _me.id,
+    })
+    .select("id")
+    .single();
   if (error) {
     console.error("[mes-eleves] examen insert error", error);
     toast("Impossible d'enregistrer l'examen", "error");
     return;
   }
+  const newId = data ? data.id : null;
 
   // MAJ locale → recalcul readiness sans refetch
-  const el = _eleves.find((e) => e.id === eleveId);
   if (el) {
     el.examStatut = statut;
+    el.examDate = dateExamen || todayIso();
     el.readiness = computeReadiness(el.acquis, statut);
   }
-
-  const msg = {
-    planifie: "Examen planifié enregistré",
-    recu: "Élève marqué reçu — archivé dans « Reçus »",
-    rate: "Résultat d'examen enregistré",
-  };
-  toast(msg[statut] || "Enregistré", "success");
   track("examen.record", { eleve_id: eleveId, statut });
 
   // Re-render complet : badges + compteurs d'onglets
   render();
   wire();
+
+  // Snackbar avec undo (supprime la ligne créée, restaure l'état précédent)
+  const msg = {
+    planifie: "Examen planifié",
+    recu: "Marqué reçu — archivé dans « Reçus »",
+    rate: "Résultat d'examen enregistré",
+  };
+  showUndoSnackbar(msg[statut] || "Enregistré", async () => {
+    if (newId) {
+      const { error: delErr } = await sb
+        .from("examens")
+        .delete()
+        .eq("id", newId);
+      if (delErr) {
+        console.error("[mes-eleves] examen undo error", delErr);
+        toast("Annulation impossible", "error");
+        return;
+      }
+    }
+    if (el) {
+      el.examStatut = prevStatut;
+      el.examDate = prevDate;
+      el.readiness = computeReadiness(el.acquis, prevStatut);
+    }
+    track("examen.undo", { eleve_id: eleveId, statut });
+    render();
+    wire();
+  });
+}
+
+// ─── Styles partagés des dialogs (confirm + date) ────────────────
+const DIALOG_STYLE = `
+  <style>
+    .me-cf-bg {
+      position: fixed; inset: 0; z-index: 600;
+      background: rgba(10,13,26,.4);
+      backdrop-filter: blur(3px);
+      animation: meqmIn .15s ease;
+    }
+    .me-cf-card {
+      position: fixed; z-index: 601;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: calc(100% - 40px); max-width: 360px;
+      background: var(--su);
+      border: 1px solid var(--bo);
+      border-radius: 18px;
+      box-shadow: 0 16px 40px -8px rgba(10,13,26,.28);
+      padding: 22px 20px 18px;
+      font-family: 'Inter', sans-serif;
+      animation: meqmPanel .2s cubic-bezier(.34,1.56,.64,1);
+    }
+    @media (prefers-reduced-motion: reduce) { .me-cf-bg, .me-cf-card { animation: none; } }
+    .me-cf-title { font: 700 17px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin: 0 0 6px; }
+    .me-cf-body { font: 500 13.5px/1.5 'Inter', sans-serif; color: var(--mu2); margin: 0 0 18px; }
+    .me-cf-date {
+      width: 100%; box-sizing: border-box; margin: 0 0 18px;
+      padding: 12px 14px; border: 1px solid var(--bo); border-radius: 12px;
+      background: var(--bg); color: var(--ink);
+      font: 500 15px/1 'Inter', sans-serif; outline: none;
+    }
+    .me-cf-date:focus { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
+    .me-cf-actions { display: flex; gap: 8px; }
+    .me-cf-btn {
+      flex: 1; min-height: 46px; border-radius: 12px; cursor: pointer;
+      font: 700 14px/1 'Plus Jakarta Sans', sans-serif; border: 1px solid var(--bo);
+      background: var(--bg); color: var(--ink); -webkit-tap-highlight-color: transparent;
+    }
+    .me-cf-btn:active { transform: scale(.98); }
+    .me-cf-btn.confirm { border: 0; background: var(--a); color: #fff; }
+  </style>`;
+
+/** Confirmation avant d'archiver un élève en « reçu ». */
+function confirmRecu(eleveId) {
+  const el = _eleves.find((e) => e.id === eleveId);
+  const prenom = esc(el && el.prenom ? el.prenom : "cet élève");
+  document.querySelector(".me-confirm")?.remove();
+
+  const wrap = document.createElement("div");
+  wrap.className = "me-confirm";
+  wrap.innerHTML = `
+    ${DIALOG_STYLE}
+    <div class="me-cf-bg" data-close="1"></div>
+    <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Confirmer la réussite">
+      <div class="me-cf-title">Marquer ${prenom} reçu ?</div>
+      <div class="me-cf-body">Il quittera ta liste active et sera archivé dans l'onglet « Reçus ». Tu pourras annuler juste après.</div>
+      <div class="me-cf-actions">
+        <button class="me-cf-btn" data-close="1" type="button">Annuler</button>
+        <button class="me-cf-btn confirm" id="me-cf-ok" type="button">Marquer reçu</button>
+      </div>
+    </div>`;
+  document.body.appendChild(wrap);
+
+  const close = () => wrap.remove();
+  wrap
+    .querySelectorAll("[data-close]")
+    .forEach((x) => x.addEventListener("click", close));
+  wrap.querySelector("#me-cf-ok").addEventListener("click", () => {
+    close();
+    recordExam(eleveId, "recu", todayIso());
+  });
+}
+
+/** Saisie de la date d'un examen planifié. */
+function openPlanifieDialog(eleveId) {
+  const el = _eleves.find((e) => e.id === eleveId);
+  const prenom = esc(el && el.prenom ? el.prenom : "l'élève");
+  const today = todayIso();
+  document.querySelector(".me-confirm")?.remove();
+
+  const wrap = document.createElement("div");
+  wrap.className = "me-confirm";
+  wrap.innerHTML = `
+    ${DIALOG_STYLE}
+    <div class="me-cf-bg" data-close="1"></div>
+    <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Date de l'examen">
+      <div class="me-cf-title">Examen de ${prenom}</div>
+      <div class="me-cf-body">Quelle est la date prévue de l'examen ?</div>
+      <input class="me-cf-date" id="me-cf-date" type="date" value="${today}" min="${today}" aria-label="Date de l'examen" />
+      <div class="me-cf-actions">
+        <button class="me-cf-btn" data-close="1" type="button">Annuler</button>
+        <button class="me-cf-btn confirm" id="me-cf-ok" type="button">Planifier</button>
+      </div>
+    </div>`;
+  document.body.appendChild(wrap);
+
+  const input = wrap.querySelector("#me-cf-date");
+  const close = () => wrap.remove();
+  wrap
+    .querySelectorAll("[data-close]")
+    .forEach((x) => x.addEventListener("click", close));
+  wrap.querySelector("#me-cf-ok").addEventListener("click", () => {
+    const date = (input && input.value) || today;
+    close();
+    recordExam(eleveId, "planifie", date);
+  });
+}
+
+/** Snackbar bas d'écran avec action « Annuler » (auto-dismiss 6 s). */
+function showUndoSnackbar(msg, onUndo, duration = 6000) {
+  document.querySelector(".me-undo")?.remove();
+
+  const bar = document.createElement("div");
+  bar.className = "me-undo";
+  bar.setAttribute("role", "status");
+  bar.innerHTML = `
+    <style>
+      .me-undo {
+        position: fixed; z-index: 550;
+        left: 50%; transform: translate(-50%, 16px);
+        bottom: calc(72px + env(safe-area-inset-bottom, 0px) + 80px);
+        display: flex; align-items: center; gap: 14px;
+        max-width: min(90vw, 380px);
+        padding: 12px 12px 12px 16px;
+        background: var(--ink); color: #fff;
+        border-radius: 14px;
+        box-shadow: 0 12px 32px -8px rgba(10,13,26,.4);
+        font: 500 13.5px/1.3 'Inter', sans-serif;
+        opacity: 0;
+        transition: opacity .22s ease, transform .22s cubic-bezier(.34,1.56,.64,1);
+      }
+      .me-undo.on { opacity: 1; transform: translate(-50%, 0); }
+      .me-undo-msg { flex: 1; min-width: 0; }
+      .me-undo-btn {
+        flex-shrink: 0; border: 0; cursor: pointer;
+        padding: 8px 14px; min-height: 36px; border-radius: 9px;
+        background: rgba(255,255,255,.16); color: #fff;
+        font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .me-undo-btn:active { background: rgba(255,255,255,.28); }
+      @media (prefers-reduced-motion: reduce) { .me-undo { transition: none; } }
+    </style>
+    <span class="me-undo-msg">${esc(msg)}</span>
+    <button class="me-undo-btn" type="button">Annuler</button>
+  `;
+  document.body.appendChild(bar);
+  requestAnimationFrame(() => bar.classList.add("on"));
+
+  let done = false;
+  const remove = () => {
+    if (done) return;
+    done = true;
+    bar.classList.remove("on");
+    setTimeout(() => bar.remove(), 250);
+  };
+  const timer = setTimeout(remove, duration);
+  bar.querySelector(".me-undo-btn").addEventListener("click", () => {
+    clearTimeout(timer);
+    remove();
+    onUndo();
+  });
 }
 
 // ─── Panneau « ce qu'il manque » (écran à montrer à l'élève) ─────
