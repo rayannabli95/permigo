@@ -1458,7 +1458,12 @@ async function _loadAndInjectLeaderboard(root) {
 
 async function _loadAndInjectCrystalBall(root) {
   try {
-    if (root.querySelector("#acc-crystal")) return; // anti double-mount
+    // Verrou SYNCHRONE avant le await : sans lui, deux appels concurrents
+    // passent tous deux la garde #acc-crystal avant que l'un n'insère la carte
+    // → double injection (HTML invalide, id dupliqué). Le flag est posé
+    // de façon synchrone, donc un 2e appel sort immédiatement.
+    if (root.querySelector("#acc-crystal") || root.dataset.cbLoading) return;
+    root.dataset.cbLoading = "1";
     const { data } = await sb.rpc("get_my_prediction");
     const p = Array.isArray(data) ? data[0] : data;
     if (!p) return;
