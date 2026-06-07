@@ -191,18 +191,20 @@ const TROPHEES = [
 // Badge 3D par jalon (assets public/skins/badge-3d-*.png). Réutilise les
 // badges existants — l'icône lucide reste le repli mystère/erreur.
 // Pour changer un visuel : édite juste le nom de fichier ci-dessous.
+// N.B. badge-3d-05 / 07 / 09 sont SANS transparence (fond blanc) → exclus.
+// On n'utilise que les badges transparents : 01,02,03,04,06,08,ultimate.
 const BADGE_IMG = {
   premiere_seance: "badge-3d-01",
   dix_comps: "badge-3d-02",
   premier_eleve: "badge-3d-03",
   streak_7: "badge-3d-04",
-  cinquante_comps: "badge-3d-05",
-  cinq_eleves: "badge-3d-06",
-  cent_comps: "badge-3d-07",
-  streak_30: "badge-3d-08",
-  dix_eleves: "badge-3d-09",
-  deux_cent_comps: "badge-3d-09",
-  classe_complete: "badge-3d-06",
+  cinquante_comps: "badge-3d-06",
+  cinq_eleves: "badge-3d-08",
+  cent_comps: "badge-3d-02",
+  streak_30: "badge-3d-04",
+  dix_eleves: "badge-3d-06",
+  deux_cent_comps: "badge-3d-08",
+  classe_complete: "badge-3d-01",
   expert_remc: "badge-3d-ultimate",
 };
 const badgeSrc = (id) => `/skins/${BADGE_IMG[id] || "badge-3d-01"}.png`;
