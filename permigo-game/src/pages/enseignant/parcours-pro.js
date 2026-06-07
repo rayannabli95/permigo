@@ -1,834 +1,408 @@
 // ═══════════════════════════════════════════════════════════════
-// Enseignant — Parcours Pro (refonte 3 blocs)
-// Bloc 1 : HERO immersif (niveau, XP, streak)
-// Bloc 2 : NEXT UNLOCK — 1 seul palier visible via RPC
-// Bloc 3 : ROADMAP MINI — 3 stops (current / next / blurred)
+// Enseignant — Parcours Pro (route sinueuse à badges)
+// Moteur visuel de la route élève (src/pages/eleve/parcours.js) porté
+// au moniteur : path SVG 4 couches, portion parcourue en vert, nodes
+// animés, états done/next/todo/locked, badge « PROCHAIN OUTIL », fiche
+// palier en bottom-sheet au clic.
+//
+// Jalons = UNIQUEMENT le nombre de validations cumulées (décision figée).
+// Source de données = MONITEUR_TIERS / getMoniteurState (moniteur-levels.js).
+// Chaque node = un outil utile débloqué. ZÉRO gemme / monnaie virtuelle.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
-import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
-import {
-  getMoniteurState,
-  buildTimelineStops,
-  SAISONS,
-} from "@/data/moniteur-levels.js";
+import { getMoniteurState, MONITEUR_TIERS } from "@/data/moniteur-levels.js";
 import { animateCounter } from "@/utils/gestures.js";
 import { icon } from "@/utils/icons.js";
 import { openPalierSheet } from "@/components/common/palier-sheet.js";
 import { playParcours } from "@/utils/sound.js";
 
-// ─── CSS ────────────────────────────────────────────────────────
+// ─── Géométrie de la route (viewBox 396 × 1240) ──────────────────
+// x maintenu dans ~[100,290] pour que les étiquettes centrées (≤150px)
+// ne débordent pas du cadre à 375–420px (correction n°3 du brief).
+const VBW = 396;
+const VBH = 1240;
+const PTS = [
+  { x: 198, y: 80 },
+  { x: 290, y: 200 },
+  { x: 250, y: 330 },
+  { x: 120, y: 450 },
+  { x: 100, y: 580 },
+  { x: 180, y: 710 },
+  { x: 290, y: 830 },
+  { x: 280, y: 960 },
+  { x: 150, y: 1080 },
+  { x: 110, y: 1190 },
+];
+
+// ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
-.pcp {
-  max-width: 580px;
-  margin: 0 auto;
-  padding: 0 0 100px;
-  background: var(--bg);
+.ppr {
+  max-width: 480px; margin: 0 auto;
+  padding: 0 0 calc(100px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg); color: var(--ink);
   font-family: 'Inter', sans-serif;
-  color: var(--ink);
 }
 
-/* ═══════════════════════════ BLOC 1 — HERO ═══════════════════════ */
-.pcp-hero {
-  position: relative;
-  overflow: hidden;
-  padding: 48px 24px 32px;
-  min-height: 260px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  /* Ton sobre « Linear » : slate profond neutre, pas de néon */
-  background: linear-gradient(165deg, var(--ink4) 0%, var(--ink) 100%);
-  border-bottom: 1px solid rgba(255,255,255,.06);
-}
-
-/* Fine ligne d'accent en haut — discrète, pas de mesh ni de grain */
-.pcp-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(88,204,2,.6), transparent);
-  pointer-events: none;
-}
-
-.pcp-hero-content { position: relative; z-index: 1; }
-
-.pcp-hero-label {
-  font: 600 11px/1 'Inter', sans-serif;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.55);
-  margin-bottom: 8px;
-}
-.pcp-hero-title {
-  font: 800 44px/1.05 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  letter-spacing: -0.03em;
-  margin: 0 0 20px;
-  text-shadow: 0 2px 24px rgba(0,0,0,.3);
-}
-.pcp-hero-stats {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.pcp-hero-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.pcp-hero-stat-val {
-  font: 700 24px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  letter-spacing: -0.02em;
-}
-.pcp-hero-stat-lbl {
-  font: 500 11px/1 'Inter', sans-serif;
-  color: rgba(255,255,255,.6);
-}
-.pcp-hero-sep {
-  width: 1px; height: 32px;
-  background: rgba(255,255,255,.2);
-  flex-shrink: 0;
-}
-.pcp-streak-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.2);
-  border-radius: 99px;
-  padding: 6px 12px;
-  backdrop-filter: blur(8px);
-}
-.pcp-streak-fire {
-  font-size: 16px;
-  line-height: 1;
-  filter: drop-shadow(0 0 6px rgba(251,146,60,.8));
-}
-.pcp-streak-val {
-  font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-}
-.pcp-streak-lbl {
-  font: 500 11px/1 'Inter', sans-serif;
-  color: rgba(255,255,255,.7);
-}
-
-/* ═══════════════════════ BLOC 2 — NEXT UNLOCK ════════════════════ */
-.pcp-next {
-  margin: 20px 16px 0;
-  border-radius: 28px;
-  overflow: hidden;
-  position: relative;
-  min-height: 220px;
-  /* Accent indigo sobre — outil utile, pas une loot box */
-  background: linear-gradient(150deg, var(--adk) 0%, var(--a) 100%);
-  box-shadow:
-    0 12px 28px -14px rgba(79,70,229,.45),
-    0 4px 10px -4px rgba(10,13,26,.12);
-  animation: pcpNextIn .6s .1s cubic-bezier(.34,1.56,.64,1) both;
-}
-@keyframes pcpNextIn {
-  from { opacity: 0; transform: translateY(16px) scale(.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.pcp-next::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 70% 80% at 85% 20%, rgba(255,255,255,.18) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 15% 90%, rgba(255,255,255,.1) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.pcp-next-inner {
-  position: relative;
-  z-index: 1;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-.pcp-next-label {
-  font: 600 10px/1 'Inter', sans-serif;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.6);
-  margin-bottom: 20px;
-}
-.pcp-next-top {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.pcp-next-icon-wrap {
-  width: 64px; height: 64px;
-  border-radius: 20px;
-  background: rgba(255,255,255,.18);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,.28);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: #fff;
-}
-.pcp-next-info { flex: 1; min-width: 0; }
-.pcp-next-remaining {
-  font: 800 28px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  letter-spacing: -0.03em;
-  margin-bottom: 6px;
-}
-.pcp-next-remaining span {
-  font: 500 13px/1 'Inter', sans-serif;
-  color: rgba(255,255,255,.7);
-  letter-spacing: 0;
-  margin-left: 4px;
-}
-.pcp-next-reward-label {
-  font: 700 16px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  margin-bottom: 3px;
-}
-.pcp-next-reward-desc {
-  font: 500 12px/1.4 'Inter', sans-serif;
-  color: rgba(255,255,255,.7);
-}
-
-/* Mystery mode */
-.pcp-next-mystery .pcp-next-icon-wrap {
-  filter: blur(2px);
-}
-.pcp-next-mystery .pcp-next-reward-label,
-.pcp-next-mystery .pcp-next-reward-desc {
-  filter: blur(5px);
-  user-select: none;
-}
-.pcp-mystery-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(255,255,255,.15);
-  border: 1px solid rgba(255,255,255,.25);
-  border-radius: 99px;
-  padding: 4px 10px;
-  font: 700 11px/1 'Inter', sans-serif;
-  color: #fff;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  margin-top: 8px;
-}
-
-/* Barre de progression */
-.pcp-next-prog {
-  margin-top: 4px;
-}
-.pcp-next-prog-track {
-  height: 8px;
-  background: rgba(255,255,255,.18);
-  border-radius: 99px;
-  overflow: hidden;
-}
-.pcp-next-prog-fill {
-  height: 100%;
-  background: linear-gradient(90deg, rgba(255,255,255,.9), #fff);
-  border-radius: 99px;
-  width: 0; /* animé via JS */
-  transition: width .9s cubic-bezier(.2,.7,.3,1);
-  box-shadow: 0 0 12px rgba(255,255,255,.6);
-}
-.pcp-next-prog-meta {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
-  font: 500 11px/1 'Inter', sans-serif;
-  color: rgba(255,255,255,.7);
-}
-.pcp-next-prog-meta strong { color: #fff; }
-
-/* All done */
-.pcp-next-alldone {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 40px 24px;
-  color: rgba(255,255,255,.9);
-  text-align: center;
-}
-.pcp-next-alldone-ico {
-  font-size: 48px;
-  line-height: 1;
-}
-.pcp-next-alldone-title {
-  font: 700 20px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-}
-.pcp-next-alldone-sub {
-  font: 500 13px/1.4 'Inter', sans-serif;
-  color: rgba(255,255,255,.7);
-}
-
-/* ═══════════════════════ BLOC 3 — ROADMAP MINI ═══════════════════ */
-.pcp-road {
-  margin: 20px 16px 0;
-}
-.pcp-road-title {
-  font: 600 11px/1 'Inter', sans-serif;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--mu2);
-  margin-bottom: 12px;
-}
-.pcp-road-stops {
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(10,13,26,.06);
-}
-.pcp-road-stop {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px;
-  position: relative;
-  border-bottom: 1px solid var(--bo2);
-  transition: background .15s cubic-bezier(.4,0,.2,1);
-}
-.pcp-road-stop:last-of-type { border-bottom: none; }
-.pcp-road-stop[role="button"] { cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.pcp-road-stop[role="button"]:hover { background: rgba(99,102,241,.03); }
-.pcp-road-stop[role="button"]:active { background: rgba(99,102,241,.07); }
-.pcp-road-stop:focus-visible { outline: 2px solid #6366f1; outline-offset: -2px; }
-.pcp-road-stop.pcp-now { background: rgba(99,102,241,.04); }
-.pcp-road-stop.pcp-blurred { opacity: .45; filter: blur(1.5px); pointer-events: none; user-select: none; }
-
-.pcp-road-dot {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-}
-.pcp-road-dot.done  { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; }
-.pcp-road-dot.now   { background: #fff; border: 2.5px solid #6366f1; color: #6366f1;
-                       box-shadow: 0 0 0 4px rgba(99,102,241,.15); }
-.pcp-road-dot.todo  { background: var(--bg2); border: 2px solid var(--bo); color: var(--mu2); }
-
-.pcp-road-body { flex: 1; min-width: 0; }
-.pcp-road-tier {
-  font: 600 10px/1 'Inter', sans-serif;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--mu2);
-  margin-bottom: 4px;
-}
-.pcp-road-stop.done .pcp-road-tier  { color: #8b5cf6; }
-.pcp-road-stop.pcp-now .pcp-road-tier { color: #6366f1; }
-
-.pcp-road-name {
-  font: 600 14px/1.3 'Inter', sans-serif;
-  color: var(--ink);
-}
-.pcp-road-stop.done .pcp-road-name { color: var(--mu3); }
-
-.pcp-road-reward {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: 5px;
-  font: 500 11.5px/1 'Inter', sans-serif;
-  color: #6366f1;
-  background: rgba(99,102,241,.08);
-  border-radius: 8px;
-  padding: 3px 8px;
-}
-.pcp-road-stop.done .pcp-road-reward { color: #10b981; background: rgba(16,185,129,.08); }
-
-.pcp-road-badge {
-  flex-shrink: 0;
-  font: 600 11px/1 'Inter', sans-serif;
-  padding: 4px 8px;
-  border-radius: 99px;
-}
-.pcp-road-badge.done  { color: #10b981; background: rgba(16,185,129,.1); }
-.pcp-road-badge.now   { color: #fff; background: linear-gradient(135deg, #6366f1, #8b5cf6); }
-.pcp-road-badge.todo  { color: var(--mu2); background: var(--bg2); }
-
-/* Bouton voir tout */
-.pcp-see-all {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  margin-top: 12px;
-  padding: 14px;
-  background: none;
-  border: 1px solid rgba(99,102,241,.2);
-  border-radius: 12px;
-  color: var(--mu);
-  font: 600 13px/1 'Inter', sans-serif;
-  cursor: pointer;
-  transition: border-color .15s cubic-bezier(.4,0,.2,1), color .15s cubic-bezier(.4,0,.2,1), background .15s cubic-bezier(.4,0,.2,1), transform .15s cubic-bezier(.4,0,.2,1);
-}
-.pcp-see-all:hover { border-color: #6366f1; color: #6366f1; background: rgba(99,102,241,.04); transform: translateY(-1px); }
-.pcp-see-all:active { transform: scale(.98); }
-.pcp-see-all:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
-
-/* Skeletons */
-.pcp-skel {
-  background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
-  background-size: 200% 100%;
-  animation: pcpShim 1.4s ease-in-out infinite;
-  border-radius: 20px;
-}
-@keyframes pcpShim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-
-/* Hero : slide only — toujours visible (pas de flash opacity: 0) */
-.pcp-hero { animation: pcpHeroIn .4s cubic-bezier(.2,.7,.3,1) forwards; }
-@keyframes pcpHeroIn {
-  from { transform: translateY(10px); }
-  to   { transform: translateY(0); }
-}
-/* Next + Road : fade-up séquentiels (.pcp-next garde pcpNextIn défini plus haut) */
-.pcp-road { animation: pcpBlockIn .5s 240ms cubic-bezier(.2,.7,.3,1) both; }
-@keyframes pcpBlockIn {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .pcp-hero, .pcp-next, .pcp-road { animation: none; }
-  .pcp-next-prog-fill { transition: none; }
-}
-
-/* ── Saison chip ── */
-.pcp-saison {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 12px;
-  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
-  border-radius: 999px;
-  font: 600 11px/1 'Inter', sans-serif;
-  color: rgba(255,255,255,.8);
-  margin-top: 16px;
-}
-.pcp-saison-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-
-/* ── Shortcuts row (trophées + ligue) ── visible sans scroller ── */
-.pcp-shortcuts {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-  margin: 14px 16px 0;
-  animation: pcpBlockIn .5s 200ms cubic-bezier(.2,.7,.3,1) both;
-}
-.pcp-shortcut {
-  display: flex; align-items: center; gap: 10px;
-  padding: 14px 12px 14px 12px;
-  background: var(--su);
-  border: 1px solid rgba(99,102,241,.12);
-  border-radius: 12px;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(10,13,26,.04);
-  transition: border-color .15s cubic-bezier(.4,0,.2,1), transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
+/* ── Segmented « Progression » (Parcours · Trophées · Ligue) ── */
+.ppr-tabs { display: flex; gap: 4px; padding: 10px 14px 0; background: var(--su); border-bottom: 1px solid var(--bo); }
+.ppr-tab {
+  flex: 1; text-align: center; padding: 11px 4px 12px; min-height: 44px;
+  font: 800 13px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu2);
+  background: none; border: 0; border-bottom: 2.5px solid transparent; cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.pcp-shortcut:hover {
-  border-color: rgba(99,102,241,.28);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px -4px rgba(10,13,26,.1);
+.ppr-tab.on { color: var(--ink); border-bottom-color: var(--a); }
+.ppr-tab:focus-visible { outline: 3px solid var(--a); outline-offset: -3px; border-radius: 8px; }
+
+/* ── Hero : compteur de validations + palier + prochain outil ── */
+.ppr-hero {
+  position: relative; overflow: hidden; padding: 18px 18px 20px;
+  background: linear-gradient(160deg, var(--ink2) 0%, var(--ink3) 60%, var(--ink) 100%);
 }
-.pcp-shortcut:active { transform: scale(.97); }
-.pcp-shortcut:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
-.pcp-shortcut-ico {
-  width: 38px; height: 38px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+.ppr-hero::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 75% 70% at 14% 25%, color-mix(in srgb, var(--a) 30%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 55% at 88% 80%, color-mix(in srgb, var(--am) 14%, transparent) 0%, transparent 55%);
 }
-.pcp-shortcut-ico--trophy {
-  background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.2); color: #f59e0b;
+.ppr-hero-in { position: relative; z-index: 1; }
+.ppr-hero-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+.ppr-hero-title { font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: -.03em; }
+.ppr-hero-sub { font: 600 12px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.62); margin-top: 5px; }
+.ppr-hero-count { text-align: right; flex-shrink: 0; }
+.ppr-hero-count .v { font: 800 30px/1 'Plus Jakarta Sans', sans-serif; color: #fff; }
+.ppr-hero-count .l { font: 600 10px/1 'Inter', sans-serif; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }
+.ppr-next { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: 14px; padding: 12px 13px; }
+.ppr-next-lbl { font: 800 9.5px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--a); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+.ppr-next-tool { font: 800 13.5px/1.3 'Plus Jakarta Sans', sans-serif; color: #fff; margin-bottom: 9px; }
+.ppr-next-bar { height: 7px; background: rgba(255,255,255,.16); border-radius: 99px; overflow: hidden; }
+.ppr-next-fill { height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, var(--a), #9ae831); box-shadow: 0 0 8px color-mix(in srgb, var(--a) 60%, transparent); transition: width 1s cubic-bezier(.2,.7,.3,1); }
+.ppr-next-meta { font: 600 10.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.66); margin-top: 7px; }
+.ppr-next.done { display: flex; align-items: center; gap: 10px; }
+.ppr-next.done .ppr-next-tool { margin: 0; }
+
+/* ── Légende ── */
+.ppr-legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 18px 2px; font: 600 10.5px/1.4 'Inter', sans-serif; color: var(--mu3); }
+.ppr-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.ppr-legend i { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Route ── */
+.ppr-route { position: relative; margin: 4px 0 0; padding: 6px 8px 30px; }
+.ppr-route svg.path { display: block; width: 100%; height: auto; overflow: visible; }
+.p-shadow { stroke: rgba(11,13,26,.10); stroke-width: 30; fill: none; stroke-linecap: round; }
+.p-edge { stroke: var(--bo4); stroke-width: 27; fill: none; stroke-linecap: round; }
+.p-surface { stroke: var(--mu2); stroke-width: 20; fill: none; stroke-linecap: round; }
+.p-dash { stroke: #fff; stroke-width: 2.5; stroke-dasharray: 6 12; stroke-linecap: round; fill: none; opacity: .85; }
+.p-done { stroke: var(--a); stroke-width: 20; fill: none; stroke-linecap: round; }
+.p-done-dash { stroke: #fff; stroke-width: 2.5; stroke-dasharray: 6 12; stroke-linecap: round; fill: none; opacity: .9; }
+
+.ppr-nodes { position: absolute; inset: 0; }
+.ppr-node {
+  position: absolute; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center;
+  border: 0; background: none; font-family: inherit; padding: 0; cursor: pointer;
+  opacity: 0; animation: ndPop .5s cubic-bezier(.34,1.56,.64,1) both;
+  -webkit-tap-highlight-color: transparent;
 }
-.pcp-shortcut-ico--ligue {
-  background: rgba(139,92,246,.12); border: 1px solid rgba(139,92,246,.2); color: #8b5cf6;
+@keyframes ndPop {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(.3); }
+  65% { opacity: 1; transform: translate(-50%,-50%) scale(1.08); }
+  100% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
 }
-.pcp-shortcut-body { flex: 1; min-width: 0; }
-.pcp-shortcut-title { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.01em; }
-.pcp-shortcut-sub { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
+.ppr-node:focus-visible { outline: none; }
+.ppr-node:focus-visible .nd-circle { outline: 3px solid var(--a); outline-offset: 4px; }
+.nd-circle {
+  width: 62px; height: 62px; border-radius: 50%; border: 4px solid #fff;
+  display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0;
+  box-shadow: 0 5px 14px rgba(11,13,26,.12); transition: transform .15s;
+}
+@media (max-width: 380px) { .nd-circle { width: 54px; height: 54px; border-width: 3px; } }
+.ppr-node:active .nd-circle { transform: scale(.94); }
+.nd-circle svg { width: 28px; height: 28px; }
+
+/* done */
+.ppr-node.done .nd-circle { background: var(--a); color: #fff; box-shadow: 0 5px 14px color-mix(in srgb, var(--a) 40%, transparent); }
+.nd-check { position: absolute; bottom: -3px; right: -3px; width: 24px; height: 24px; border-radius: 50%; background: var(--gr); border: 3px solid var(--su); color: #fff; display: flex; align-items: center; justify-content: center; }
+.nd-check svg { width: 12px; height: 12px; }
+
+/* next */
+.ppr-node.next .nd-circle { background: var(--a); color: #fff; box-shadow: 0 6px 20px color-mix(in srgb, var(--a) 50%, transparent); animation: ndHalo 2s ease-in-out infinite; }
+@keyframes ndHalo {
+  0%,100% { box-shadow: 0 6px 20px color-mix(in srgb, var(--a) 45%, transparent); }
+  50% { box-shadow: 0 6px 26px color-mix(in srgb, var(--a) 75%, transparent), 0 0 0 6px color-mix(in srgb, var(--a) 18%, transparent); }
+}
+.ppr-node.next .nd-circle::after { content: ''; position: absolute; inset: -14px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--a) 30%, transparent); animation: ndRing 1.9s ease-out infinite; }
+@keyframes ndRing { 0% { transform: scale(.85); opacity: .7; } 100% { transform: scale(1.4); opacity: 0; } }
+
+/* todo / locked */
+.ppr-node.todo .nd-circle { background: var(--su); border-color: var(--bo); border-style: dashed; color: var(--mu2); box-shadow: 0 2px 8px rgba(11,13,26,.06); }
+.ppr-node.locked .nd-circle { background: var(--bg2); border-color: var(--bg3); color: var(--mu5); box-shadow: none; }
+
+/* labels */
+.nd-lbl { margin-top: 11px; background: var(--su); border: 1px solid var(--bo); border-radius: 13px; padding: 6px 11px 7px; width: max-content; max-width: 150px; text-align: center; box-shadow: 0 5px 14px rgba(11,13,26,.09); }
+@media (max-width: 380px) { .nd-lbl { max-width: 132px; } }
+.nd-name { display: block; font: 800 12px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.01em; }
+.nd-thr { display: block; font: 700 9.5px/1 'IBM Plex Mono', monospace; color: var(--mu3); margin-top: 3px; }
+.ppr-node.todo .nd-name, .ppr-node.locked .nd-name { color: var(--mu3); }
+.ppr-node.done .nd-lbl { border-color: color-mix(in srgb, var(--a) 28%, transparent); }
+.ppr-node.next .nd-lbl { border-color: color-mix(in srgb, var(--a) 40%, transparent); box-shadow: 0 8px 22px color-mix(in srgb, var(--a) 18%, transparent), 0 0 0 2px color-mix(in srgb, var(--a) 20%, transparent); position: relative; }
+.nd-stt { display: inline-block; margin-top: 7px; padding: 6px 13px; background: var(--a); color: #fff; font: 800 11px/1 'Inter', sans-serif; border-radius: 99px; box-shadow: 0 3px 0 var(--adk); }
+.ppr-node.next .nd-lbl::before {
+  content: 'PROCHAIN OUTIL'; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: var(--a); color: #fff; font: 800 8px/1 'Inter', sans-serif; padding: 4px 10px; border-radius: 99px;
+  letter-spacing: .14em; white-space: nowrap; box-shadow: 0 3px 10px color-mix(in srgb, var(--a) 40%, transparent);
+  animation: ndBob 1.6s ease-in-out infinite;
+}
+@keyframes ndBob { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-3px); } }
+
+/* ── Final ── */
+.ppr-final { margin: 8px 14px 0; padding: 22px 18px; background: var(--su); border: 1.5px solid var(--bo); border-radius: 20px; text-align: center; box-shadow: var(--s1); position: relative; overflow: hidden; }
+.ppr-final::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 30% 20%, rgba(167,139,250,.10), transparent 55%), radial-gradient(ellipse at 80% 90%, color-mix(in srgb, var(--a) 7%, transparent), transparent 55%); }
+.ppr-final .crown { width: 48px; height: 48px; border-radius: 14px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: #fff; position: relative; background: linear-gradient(145deg,#5b21b6,#c4b5fd); box-shadow: 0 6px 18px -4px rgba(167,139,250,.6); }
+.ppr-final h3 { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; margin: 0 0 5px; color: var(--ink); position: relative; }
+.ppr-final p { font: 500 12.5px/1.45 'Inter', sans-serif; color: var(--mu3); margin: 0; position: relative; }
+
+/* ── Skeleton ── */
+.ppr-skel { background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%); background-size: 200% 100%; animation: pprShim 1.4s ease-in-out infinite; }
+@keyframes pprShim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ppr-node, .ppr-node.next .nd-circle, .ppr-node.next .nd-circle::after, .ppr-node.next .nd-lbl::before,
+  .ppr-next-fill, .ppr-skel { animation: none !important; transition: none !important; opacity: 1 !important; }
+}
 </style>`;
 
-// ─── State ──────────────────────────────────────────────────────
+// ─── State ───────────────────────────────────────────────────────
 let _root = null;
-let _me = null;
 
-// ─── Entry point ────────────────────────────────────────────────
+// ─── Entry point ─────────────────────────────────────────────────
 export async function mount(root) {
   _root = root;
-  _me = getCurUser();
-  if (!_me || _me.role !== "enseignant") return;
+  const me = getCurUser();
+  if (!me || me.role !== "enseignant") {
+    root.innerHTML = `<p style="padding:32px;text-align:center;color:var(--mu)">Accès enseignant requis</p>`;
+    return;
+  }
 
   track("page.view", { page: "parcours_pro" });
   playParcours();
 
   root.innerHTML = `${STYLE}
-    <div class="pcp">
-      <div class="pcp-skel" style="height:300px;margin:0;border-radius:0"></div>
-      <div class="pcp-skel" style="height:260px;margin:20px 16px 0"></div>
-      <div class="pcp-skel" style="height:180px;margin:20px 16px 0"></div>
+    <div class="ppr">
+      ${_tabsHtml()}
+      <div class="ppr-skel" style="height:200px"></div>
+      <div class="ppr-skel" style="height:480px;margin-top:10px"></div>
     </div>`;
+  _wireTabs(root);
 
-  // ─── Fetch en parallèle ──────────────────────────────────────
-  // ⚠️ La progression (titre, prochain palier, %) est dérivée du VRAI compte
-  // de validations via getMoniteurState() — source de vérité = table
-  // `validations` + `moniteur-levels.js`. On n'utilise plus le RPC
-  // get_my_next_unlock_moniteur (paliers DB) pour l'affichage, afin d'éviter
-  // toute désynchro avec les seuils du fichier local.
-  const since30d = new Date(Date.now() - 30 * 86400000).toISOString();
+  // Source de vérité = compte réel de validations (validated_by).
+  const { count, error } = await sb
+    .from("validations")
+    .select("id", { count: "exact", head: true })
+    .eq("validated_by", me.id);
 
-  const [profileRes, countRes, studentsRes, activeRes] = await Promise.all([
-    sb
-      .from("profiles")
-      .select("prenom, xp, streak_pro_days")
-      .eq("id", _me.id)
-      .maybeSingle(),
-    sb
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("validated_by", _me.id),
-    sb
-      .from("profiles")
-      .select("id", { count: "exact", head: true })
-      .eq("enseignant_id", _me.id)
-      .eq("role", "eleve"),
-    sb
-      .from("validations")
-      .select("eleve_id")
-      .eq("validated_by", _me.id)
-      .gte("validated_at", since30d),
-  ]);
+  if (error) {
+    root.innerHTML = `${STYLE}<div class="ppr">${_tabsHtml()}
+      <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
+        <div style="margin-bottom:12px">${icon("alert-circle", { size: 30 })}</div>
+        <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
+        <button id="ppr-retry" style="margin-top:14px;padding:12px 24px;min-height:44px;border:0;background:var(--a);color:#fff;border-radius:12px;cursor:pointer;font:800 14px/1 'Plus Jakarta Sans',sans-serif">Réessayer</button>
+      </div></div>`;
+    _wireTabs(root);
+    root
+      .querySelector("#ppr-retry")
+      ?.addEventListener("click", () => mount(root));
+    return;
+  }
 
-  const me = profileRes.data || {};
-  const streak = me.streak_pro_days ?? 0;
-  const totalVals = countRes.count ?? 0;
-  const studentsTotal = studentsRes.count ?? 0;
-  const studentsActive = new Set(
-    (activeRes.data || []).map((v) => v.eleve_id).filter(Boolean),
-  ).size;
-  const state = getMoniteurState(totalVals);
-  const stops = buildTimelineStops();
-
-  render(root, {
-    me,
-    streak,
-    totalVals,
-    studentsTotal,
-    studentsActive,
-    state,
-    stops,
-  });
+  const totalVals = count ?? 0;
+  _render(root, totalVals, getMoniteurState(totalVals));
 }
 
 // ─── Render ──────────────────────────────────────────────────────
-function render(
-  root,
-  {
-    me,
-    streak,
-    totalVals,
-    studentsTotal = 0,
-    studentsActive = 0,
-    state,
-    stops,
-  },
-) {
-  const currentTitle = state.tier?.title ?? "Débutant";
-  const displayVals = totalVals;
-  const xp = me.xp ?? totalVals * 10;
+function _render(root, totalVals, state) {
+  const tiers = MONITEUR_TIERS;
+  const palierNum = state.tier?.tier ?? 0;
+  const title = state.tier?.title ?? "Premiers pas";
 
-  // Saison courante (mois)
-  const saison = SAISONS[new Date().getMonth()];
-
-  // Comptage rapide des trophées débloqués (miroir de trophees-moniteur.js)
-  const trophyChecks = [
-    totalVals >= 1,
-    totalVals >= 10,
-    studentsActive >= 1,
-    streak >= 7,
-    totalVals >= 50,
-    studentsTotal >= 5,
-    totalVals >= 100,
-    streak >= 30,
-    studentsTotal >= 10,
-    totalVals >= 200,
-    studentsTotal >= 3 && studentsActive >= studentsTotal,
-    totalVals >= 300,
-  ];
-  const trophyUnlocked = trophyChecks.filter(Boolean).length;
-  const trophyTotal = trophyChecks.length;
-
-  root.innerHTML = `${STYLE}
-    <div class="pcp">
-
-      <!-- ══ BLOC 1 — HERO ══ -->
-      <div class="pcp-hero">
-        <div class="pcp-hero-content">
-          <div class="pcp-hero-label">Niveau actuel</div>
-          <h1 class="pcp-hero-title">${esc(currentTitle)}</h1>
-          <div class="pcp-hero-stats">
-            <div class="pcp-hero-stat">
-              <span class="pcp-hero-stat-val" data-counter="${displayVals}">0</span>
-              <span class="pcp-hero-stat-lbl">validations</span>
-            </div>
-            <div class="pcp-hero-sep"></div>
-            <div class="pcp-hero-stat">
-              <span class="pcp-hero-stat-val">${xp.toLocaleString("fr-FR")}</span>
-              <span class="pcp-hero-stat-lbl">XP total</span>
-            </div>
-            ${
-              streak > 0
-                ? `
-            <div class="pcp-hero-sep"></div>
-            <div class="pcp-streak-badge">
-              <span class="pcp-streak-fire">${icon("flame", { size: 16 })}</span>
-              <span class="pcp-streak-val">${streak}</span>
-              <span class="pcp-streak-lbl">j. de suite</span>
-            </div>`
-                : ""
-            }
-          </div>
-          <div class="pcp-saison">
-            <span class="pcp-saison-dot" style="background:${saison.accent}"></span>
-            ${esc(saison.name)}
-          </div>
-        </div>
-      </div>
-
-      <!-- ══ BLOC 2 — SHORTCUTS (trophées + ligue) visibles sans scroller ══ -->
-      <div class="pcp-shortcuts">
-        <div class="pcp-shortcut" id="pcp-trophees" role="button" tabindex="0" aria-label="Voir mes trophées">
-          <div class="pcp-shortcut-ico pcp-shortcut-ico--trophy">${icon("award", { size: 18, strokeWidth: 2 })}</div>
-          <div class="pcp-shortcut-body">
-            <div class="pcp-shortcut-title">Trophées</div>
-            <div class="pcp-shortcut-sub">${trophyUnlocked}/${trophyTotal} débloqués</div>
-          </div>
-          ${icon("chevron-right", { size: 14, strokeWidth: 2.5, color: "var(--mu2)" })}
-        </div>
-        <div class="pcp-shortcut" id="pcp-ligue" role="button" tabindex="0" aria-label="Voir la ligue de la semaine">
-          <div class="pcp-shortcut-ico pcp-shortcut-ico--ligue">${icon("trophy", { size: 18, strokeWidth: 2 })}</div>
-          <div class="pcp-shortcut-body">
-            <div class="pcp-shortcut-title">Ligue</div>
-            <div class="pcp-shortcut-sub">Cette semaine</div>
-          </div>
-          ${icon("chevron-right", { size: 14, strokeWidth: 2.5, color: "var(--mu2)" })}
-        </div>
-      </div>
-
-      <!-- CTA premier démarrage — affiché uniquement si 0 validations -->
-      ${
-        totalVals === 0
-          ? `<div style="margin:16px 16px 0;padding:16px 18px;background:var(--su);border:1px solid rgba(99,102,241,.18);border-radius:16px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 3px rgba(10,13,26,.04);">
-        <div style="flex:1;font:500 13px/1.45 'Inter',sans-serif;color:var(--mu);">Enregistre ta première séance pour commencer à progresser.</div>
-        <button id="pcp-start-btn" style="padding:11px 16px;min-height:44px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font:700 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 4px 12px -4px rgba(99,102,241,.45);">Première séance</button>
-      </div>`
-          : ""
-      }
-
-      <!-- ══ BLOC 3 — NEXT UNLOCK ══ -->
-      ${renderNextUnlock(state)}
-
-      <!-- ══ BLOC 4 — ROADMAP MINI ══ -->
-      ${renderRoadmapMini(stops, totalVals)}
-
-    </div>`;
-
-  wire(root, state.pctToNextReward ?? 0, stops, totalVals);
-}
-
-// ─── Render Bloc 2 — Next Unlock ────────────────────────────────
-function renderNextUnlock(state) {
-  // state.nextReward null → tous les paliers débloqués
-  if (!state.nextReward) {
-    return `
-      <div class="pcp-next">
-        <div class="pcp-next-inner pcp-next-alldone">
-          <div class="pcp-next-alldone-ico">${icon("trophy", { size: 28 })}</div>
-          <div class="pcp-next-alldone-title">Tous les paliers atteints</div>
-          <div class="pcp-next-alldone-sub">Statut Expert REMC certifié débloqué.</div>
-        </div>
-      </div>`;
-  }
-
-  const nextTier = state.nextReward.data; // palier cible (objet MONITEUR_TIERS)
-  const iconName = nextTier.unlock.iconName ?? "star";
-  const label = nextTier.unlock.name ?? "—";
-  const title = nextTier.title ?? "—";
-  const remaining = state.nextReward.missing ?? 0;
-  const pct = state.pctToNextReward ?? 0;
-
-  return `
-    <div class="pcp-next">
-      <div class="pcp-next-inner">
-        <div class="pcp-next-label">Prochaine récompense</div>
-        <div class="pcp-next-top">
-          <div class="pcp-next-icon-wrap">
-            ${icon(iconName, { size: 28, strokeWidth: 2 })}
-          </div>
-          <div class="pcp-next-info">
-            <div class="pcp-next-remaining">
-              ${remaining} <span>validation${remaining > 1 ? "s" : ""} restantes</span>
-            </div>
-            <div class="pcp-next-reward-label">${esc(label)}</div>
-            <div class="pcp-next-reward-desc">${esc(title)}</div>
-          </div>
-        </div>
-        <div class="pcp-next-prog">
-          <div class="pcp-next-prog-track">
-            <div class="pcp-next-prog-fill" id="pcp-prog-fill" style="width:0%"></div>
-          </div>
-          <div class="pcp-next-prog-meta">
-            <span>Progression</span>
-            <strong>${pct}%</strong>
-          </div>
-        </div>
-      </div>
-    </div>`;
-}
-
-// ─── Render Bloc 3 — Roadmap mini ───────────────────────────────
-function renderRoadmapMini(stops, totalVals) {
-  // Trouve l'index du prochain stop non atteint
-  const nextIdx = stops.findIndex((s) => totalVals < s.threshold);
-  if (nextIdx === -1) return ""; // tout débloqué → pas de roadmap
-
-  // 3 stops : précédent (done) + prochain (now) + suivant (blurred)
-  const toShow = [];
-  if (nextIdx > 0) toShow.push({ ...stops[nextIdx - 1], state: "done" });
-  toShow.push({ ...stops[nextIdx], state: "now" });
-  if (nextIdx + 1 < stops.length)
-    toShow.push({ ...stops[nextIdx + 1], state: "todo" });
-
-  return `
-    <div class="pcp-road">
-      <div class="pcp-road-title">Ma route</div>
-      <div class="pcp-road-stops">
-        ${toShow.map((s) => renderRoadStop(s)).join("")}
-      </div>
-      <button class="pcp-see-all" id="pcp-see-all">
-        Voir tous les paliers ${icon("chevron-right", { size: 14, strokeWidth: 2.5 })}
-      </button>
-    </div>`;
-}
-
-function renderRoadStop(s) {
-  // Tiers uniquement (plus de skin) — récompense = outil utile
-  const label = `Palier ${s.tier.tier}`;
-  const name = s.tier.title;
-  const reward = s.tier.unlock.name;
-  const iconName = s.tier.unlock.iconName;
-  const badgeTxt =
-    s.state === "done" ? "Atteint" : s.state === "now" ? "Prochain" : label;
-
-  const dotState = s.state;
-  const dotIcon =
-    s.state === "done"
-      ? icon("check", { size: 15, strokeWidth: 3 })
-      : icon(iconName, { size: 15, strokeWidth: 2 });
-
-  return `
-    <div class="pcp-road-stop ${dotState} ${s.state === "now" ? "pcp-now" : ""}" data-tier="${s.tier.tier}" role="button" tabindex="0" aria-label="Détail du palier ${s.tier.tier}">
-      <div class="pcp-road-dot ${dotState}">${dotIcon}</div>
-      <div class="pcp-road-body">
-        <div class="pcp-road-tier">${esc(label)}</div>
-        <div class="pcp-road-name">${esc(name)}</div>
-        <div class="pcp-road-reward">
-          ${icon(iconName, { size: 11, strokeWidth: 2.4 })} ${esc(reward)}
-        </div>
-      </div>
-      <span class="pcp-road-badge ${dotState}">${esc(badgeTxt)}</span>
-    </div>`;
-}
-
-// ─── Wire ────────────────────────────────────────────────────────
-function wire(root, progressPct, stops = [], totalVals = 0) {
-  // Anime la barre de progression Bloc 2
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      const fill = root.querySelector("#pcp-prog-fill");
-      if (fill) fill.style.width = `${Math.min(100, progressPct)}%`;
-    }, 150);
+  // États par node
+  const nextIdx = tiers.findIndex((t) => totalVals < t.threshold);
+  const items = tiers.map((t, i) => {
+    let st;
+    if (totalVals >= t.threshold) st = "done";
+    else if (i === nextIdx) st = "next";
+    else if (nextIdx !== -1 && i <= nextIdx + 2) st = "todo";
+    else st = "locked";
+    return { tier: t, state: st };
   });
 
-  // Anime le compteur validations dans le hero
+  const doneCount = items.filter((it) => it.state === "done").length;
+
+  root.innerHTML = `${STYLE}
+    <div class="ppr">
+      ${_tabsHtml()}
+
+      <div class="ppr-hero">
+        <div class="ppr-hero-in">
+          <div class="ppr-hero-top">
+            <div>
+              <div class="ppr-hero-title">Mon parcours pro</div>
+              <div class="ppr-hero-sub">${esc(title)} · palier ${palierNum}/${tiers.length}</div>
+            </div>
+            <div class="ppr-hero-count">
+              <div class="v" data-counter="${totalVals}">0</div>
+              <div class="l">validations</div>
+            </div>
+          </div>
+          ${_nextHtml(state)}
+        </div>
+      </div>
+
+      <div class="ppr-legend">
+        <span><i style="background:var(--a)"></i>Débloqué</span>
+        <span><i style="background:var(--a);box-shadow:0 0 0 3px color-mix(in srgb,var(--a) 25%,transparent)"></i>Prochain</span>
+        <span><i style="background:var(--su);border:1.5px dashed var(--bo4)"></i>À venir</span>
+        <span><i style="background:var(--bg2);border:1px solid var(--bo)"></i>Verrouillé</span>
+      </div>
+
+      <div class="ppr-route">
+        <svg class="path" viewBox="0 0 ${VBW} ${VBH}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" id="ppr-svg"></svg>
+        <div class="ppr-nodes" id="ppr-nodes"></div>
+      </div>
+
+      <div class="ppr-final">
+        <div class="crown">${icon("crown", { size: 26, strokeWidth: 2 })}</div>
+        <h3>${esc(tiers[tiers.length - 1].title)}</h3>
+        <p>${tiers[tiers.length - 1].threshold} validations — le palier ultime. Chaque séance t'en rapproche.</p>
+      </div>
+    </div>`;
+
+  _wireTabs(root);
+  _renderPath(root, doneCount);
+  _renderNodes(root, items, totalVals);
+
+  // Animations différées
+  requestAnimationFrame(() => {
+    const fill = root.querySelector("#ppr-next-fill");
+    if (fill)
+      fill.style.width = `${Math.min(100, state.pctToNextReward ?? 0)}%`;
+  });
   setTimeout(() => {
     const el = root.querySelector("[data-counter]");
     if (el) animateCounter(el, 0, parseInt(el.dataset.counter, 10) || 0, 800);
   }, 100);
+}
 
-  // Clic / clavier sur un palier de la roadmap → sheet de détail
-  const openFromStop = (el) => {
-    const tierNum = parseInt(el.dataset.tier, 10);
-    const stop = stops.find((s) => s.tier.tier === tierNum);
-    if (!stop) return;
-    track("parcours_pro.tier_detail", { tier: tierNum });
-    openPalierSheet(stop.tier, totalVals);
-  };
-  root.querySelectorAll(".pcp-road-stop[data-tier]").forEach((el) => {
-    el.addEventListener("click", () => openFromStop(el));
-    el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openFromStop(el);
-      }
-    });
-  });
-
-  // CTA premier démarrage (visible uniquement si totalVals === 0)
-  root.querySelector("#pcp-start-btn")?.addEventListener("click", () => {
-    navigate("#/log-session");
-  });
-
-  // Bouton "Voir tous les paliers →"
-  root.querySelector("#pcp-see-all")?.addEventListener("click", () => {
-    track("parcours_pro.see_all");
-    navigate("#/parcours-complet");
-  });
-
-  // Trophées card
-  const tCard = root.querySelector("#pcp-trophees");
-  if (tCard) {
-    const goTrophees = () => {
-      track("parcours_pro.trophees_open");
-      navigate("#/trophees-moniteur");
-    };
-    tCard.addEventListener("click", goTrophees);
-    tCard.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        goTrophees();
-      }
-    });
+// ─── Hero : bloc prochain outil ──────────────────────────────────
+function _nextHtml(state) {
+  if (!state.nextReward) {
+    return `<div class="ppr-next done">
+      <span style="color:var(--a)">${icon("check-circle", { size: 22, strokeWidth: 2 })}</span>
+      <div class="ppr-next-tool">Tous les outils débloqués — Expert REMC certifié.</div>
+    </div>`;
   }
+  const t = state.nextReward.data;
+  const missing = state.nextReward.missing ?? 0;
+  return `<div class="ppr-next">
+    <div class="ppr-next-lbl">${icon(t.unlock.iconName, { size: 12, strokeWidth: 2 })} Prochain outil</div>
+    <div class="ppr-next-tool">${esc(t.unlock.name)}</div>
+    <div class="ppr-next-bar"><div class="ppr-next-fill" id="ppr-next-fill"></div></div>
+    <div class="ppr-next-meta">Plus que ${missing} validation${missing > 1 ? "s" : ""} — palier ${t.threshold}</div>
+  </div>`;
+}
 
-  // Ligue de la semaine
-  const ligueCard = root.querySelector("#pcp-ligue");
-  if (ligueCard) {
-    const goLigue = () => {
-      track("parcours_pro.ligue_open");
-      navigate("#/ligue-semaine");
-    };
-    ligueCard.addEventListener("click", goLigue);
-    ligueCard.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        goLigue();
-      }
-    });
+// ─── SVG path (Catmull-Rom → Bézier) ─────────────────────────────
+function _smooth(pts) {
+  if (pts.length < 2) return pts.length ? `M ${pts[0].x} ${pts[0].y}` : "";
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] || pts[i + 1];
+    const c1x = p1.x + (p2.x - p0.x) / 6,
+      c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6,
+      c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x} ${p2.y}`;
   }
+  return d;
+}
+
+function _renderPath(root, doneCount) {
+  const full = _smooth(PTS);
+  // Portion parcourue : jusqu'au node « next » inclus (doneCount + 1 points)
+  const donePath = _smooth(PTS.slice(0, Math.min(PTS.length, doneCount + 1)));
+  const svg = root.querySelector("#ppr-svg");
+  if (svg) {
+    svg.innerHTML = `
+      <path class="p-shadow" d="${full}" transform="translate(0,4)"/>
+      <path class="p-edge" d="${full}"/>
+      <path class="p-surface" d="${full}"/>
+      <path class="p-dash" d="${full}"/>
+      <path class="p-done" d="${donePath}"/>
+      <path class="p-done-dash" d="${donePath}"/>`;
+  }
+}
+
+// ─── Nodes ───────────────────────────────────────────────────────
+function _renderNodes(root, items, totalVals) {
+  const nodesEl = root.querySelector("#ppr-nodes");
+  if (!nodesEl) return;
+
+  nodesEl.innerHTML = items
+    .map((it, i) => {
+      const p = PTS[i];
+      const left = ((p.x / VBW) * 100).toFixed(2);
+      const top = ((p.y / VBH) * 100).toFixed(2);
+      const inner =
+        it.state === "locked"
+          ? icon("lock", { size: 26, strokeWidth: 2 })
+          : icon(it.tier.unlock.iconName, { size: 28, strokeWidth: 2 });
+      const check =
+        it.state === "done"
+          ? `<div class="nd-check">${icon("check", { size: 12, strokeWidth: 3 })}</div>`
+          : "";
+      const cta =
+        it.state === "next" ? `<span class="nd-stt">Voir l'outil →</span>` : "";
+      return `<button class="ppr-node ${it.state}" style="left:${left}%;top:${top}%;animation-delay:${i * 70}ms" data-i="${i}" aria-label="Palier ${i + 1} sur ${items.length} : ${esc(it.tier.unlock.name)} — ${it.state === "done" ? "débloqué" : it.state === "next" ? "prochain palier" : "à débloquer à " + it.tier.threshold + " validations"}">
+        <div class="nd-circle">${inner}${check}</div>
+        <div class="nd-lbl">
+          <span class="nd-name">${esc(it.tier.unlock.name)}</span>
+          <span class="nd-thr">${it.tier.threshold} validations</span>
+          ${cta}
+        </div>
+      </button>`;
+    })
+    .join("");
+
+  nodesEl.querySelectorAll(".ppr-node").forEach((el) => {
+    el.addEventListener("click", () => {
+      const i = parseInt(el.dataset.i, 10);
+      const it = items[i];
+      if (!it) return;
+      track("parcours_pro.tier_detail", { tier: it.tier.tier });
+      openPalierSheet(it.tier, totalVals);
+    });
+  });
+}
+
+// ─── Onglet Progression (Parcours · Trophées · Ligue) ────────────
+function _tabsHtml() {
+  return `
+  <div class="ppr-tabs" role="tablist" aria-label="Progression">
+    <button class="ppr-tab on" role="tab" aria-selected="true">Parcours</button>
+    <button class="ppr-tab" role="tab" aria-selected="false" data-go="#/trophees-moniteur">Trophées</button>
+    <button class="ppr-tab" role="tab" aria-selected="false" data-go="#/ligue-semaine">Ligue</button>
+  </div>`;
+}
+
+function _wireTabs(root) {
+  root.querySelectorAll(".ppr-tab[data-go]").forEach((el) => {
+    el.addEventListener("click", () => navigate(el.dataset.go));
+  });
 }
