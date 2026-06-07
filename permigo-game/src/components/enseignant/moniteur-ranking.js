@@ -4,17 +4,17 @@
 //   → `root` est le nœud où injecter le bloc
 //   → `myId` est l'ID du moniteur connecté
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { icon } from '@/utils/icons.js';
-import { renderUserAvatar } from '@/components/common/avatar.js';
+import { sb } from "@/auth/auth.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { icon } from "@/utils/icons.js";
+import { renderUserAvatar } from "@/components/common/avatar.js";
 
-const STYLE_ID = 'moniteur-ranking-style';
+const STYLE_ID = "moniteur-ranking-style";
 
 function ensureStyle() {
   if (document.head.querySelector(`#${STYLE_ID}`)) return;
-  const s = document.createElement('style');
+  const s = document.createElement("style");
   s.id = STYLE_ID;
   s.textContent = `
   @keyframes mrIn {
@@ -40,7 +40,7 @@ function ensureStyle() {
 
   /* Ma position highlight */
   .mr-my-position {
-    background: #fff;
+    background: var(--su);
     border: 1.5px solid rgba(88,204,2,.3);
     border-radius: 20px;
     padding: 16px;
@@ -116,7 +116,7 @@ function ensureStyle() {
 
   /* Top 3 leaderboard */
   .mr-list {
-    background: #fff;
+    background: var(--su);
     border: 1.5px solid var(--bo);
     border-radius: 20px;
     overflow: hidden;
@@ -166,23 +166,23 @@ function ensureStyle() {
 
 // ─── Helpers ──────────────────────────────────────────────────
 function rankClass(rank) {
-  if (rank === 1) return 'rank-1';
-  if (rank === 2) return 'rank-2';
-  if (rank === 3) return 'rank-3';
-  return 'rank-other';
+  if (rank === 1) return "rank-1";
+  if (rank === 2) return "rank-2";
+  if (rank === 3) return "rank-3";
+  return "rank-other";
 }
 function rankRowClass(rank) {
-  if (rank === 1) return 'r1';
-  if (rank === 2) return 'r2';
-  if (rank === 3) return 'r3';
-  return 'rn';
+  if (rank === 1) return "r1";
+  if (rank === 2) return "r2";
+  if (rank === 3) return "r3";
+  return "rn";
 }
 function rankLabel(rank) {
   // Affichage textuel cohérent (emojis 🥇🥈🥉 abandonnés car rendu inégal sur certains Android)
   return `#${rank}`;
 }
 function fmtHours(h) {
-  if (!h) return '0h';
+  if (!h) return "0h";
   const val = parseFloat(h);
   if (val < 1) return `${Math.round(val * 60)}min`;
   return Number.isInteger(val) ? `${val}h` : `${val.toFixed(1)}h`;
@@ -200,12 +200,12 @@ export async function mountMoniteurRanking(root, { myId }) {
 
   let ranking = [];
   try {
-    const month = new Date().toISOString().slice(0, 7) + '-01';
-    const { data } = await sb.rpc('get_moniteur_ranking', { p_month: month });
+    const month = new Date().toISOString().slice(0, 7) + "-01";
+    const { data } = await sb.rpc("get_moniteur_ranking", { p_month: month });
     ranking = data || [];
   } catch (e) {
-    console.error('[moniteur-ranking] error', e);
-    root.innerHTML = '';
+    console.error("[moniteur-ranking] error", e);
+    root.innerHTML = "";
     return;
   }
 
@@ -214,25 +214,31 @@ export async function mountMoniteurRanking(root, { myId }) {
     return;
   }
 
-  track('moniteur_ranking.viewed', { user_id: myId });
+  track("moniteur_ranking.viewed", { user_id: myId });
 
-  const mine     = ranking.find(r => r.moniteur_id === myId);
-  const top3     = ranking.slice(0, 3);
-  const mineIdx  = mine ? ranking.findIndex(r => r.moniteur_id === myId) : -1;
-  const prev     = mineIdx > 0 ? ranking[mineIdx - 1] : null; // personne au-dessus
+  const mine = ranking.find((r) => r.moniteur_id === myId);
+  const top3 = ranking.slice(0, 3);
+  const mineIdx = mine ? ranking.findIndex((r) => r.moniteur_id === myId) : -1;
+  const prev = mineIdx > 0 ? ranking[mineIdx - 1] : null; // personne au-dessus
 
-  const monthLabel = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const monthLabel = new Date().toLocaleDateString("fr-FR", {
+    month: "long",
+    year: "numeric",
+  });
 
-  const noHours = !mine?.hours_confirmed || parseFloat(mine.hours_confirmed) === 0;
+  const noHours =
+    !mine?.hours_confirmed || parseFloat(mine.hours_confirmed) === 0;
 
   root.innerHTML = `
   <div class="mr-wrap">
     <div class="mr-sec-title">
-      ${icon('award', { size: 12, strokeWidth: 2.4 })}
+      ${icon("award", { size: 12, strokeWidth: 2.4 })}
       Classement · ${esc(monthLabel)}
     </div>
 
-    ${mine ? `
+    ${
+      mine
+        ? `
     <div class="mr-my-position">
       <div class="mr-my-top">
         <div class="mr-rank-badge ${rankClass(mine.rank)}">${rankLabel(mine.rank)}</div>
@@ -244,11 +250,14 @@ export async function mountMoniteurRanking(root, { myId }) {
         </div>
       </div>
       <div class="mr-metrics">
-        ${noHours ? `
+        ${
+          noHours
+            ? `
         <div class="mr-metric" style="grid-column:span 2">
           <div class="mr-metric-val" style="color:var(--mu2);font-size:13px">${mine.n_validations ?? 0} val. · pas encore de session enregistrée</div>
           <div class="mr-metric-lbl" style="margin-top:4px">Enregistre une session pour débloquer ce compteur</div>
-        </div>` : `
+        </div>`
+            : `
         <div class="mr-metric">
           <div class="mr-metric-val">${fmtHours(mine.hours_confirmed)}</div>
           <div class="mr-metric-lbl">confirmées</div>
@@ -256,7 +265,8 @@ export async function mountMoniteurRanking(root, { myId }) {
         <div class="mr-metric">
           <div class="mr-metric-val">${mine.n_validations ?? 0}</div>
           <div class="mr-metric-lbl">validations</div>
-        </div>`}
+        </div>`
+        }
         <div class="mr-metric">
           <div class="mr-metric-val">${mine.n_eleves_diff ?? 0}</div>
           <div class="mr-metric-lbl">élèves</div>
@@ -266,26 +276,42 @@ export async function mountMoniteurRanking(root, { myId }) {
           <div class="mr-metric-lbl">actifs</div>
         </div>
       </div>
-      ${prev ? `
+      ${
+        prev
+          ? `
       <div class="mr-compare">
-        ${icon('trending-up', { size: 12, strokeWidth: 2.4 })}
+        ${icon("trending-up", { size: 12, strokeWidth: 2.4 })}
         Tu es à <strong>${Math.round((prev.score_total - mine.score_total) * 10) / 10} pts</strong> derrière ${esc(prev.moniteur_prenom)}
-      </div>` : (mine.rank === 1 ? `<div class="mr-compare">${icon('trophy',{size:16})} Tu es en tête ce mois-ci !</div>` : '')}
-    </div>` : ''}
+      </div>`
+          : mine.rank === 1
+            ? `<div class="mr-compare">${icon("trophy", { size: 16 })} Tu es en tête ce mois-ci !</div>`
+            : ""
+      }
+    </div>`
+        : ""
+    }
 
-    ${top3.length > 0 ? `
+    ${
+      top3.length > 0
+        ? `
     <div class="mr-list">
-      ${top3.map(r => `
-        <div class="mr-row${r.moniteur_id === myId ? ' mr-row-me' : ''}">
+      ${top3
+        .map(
+          (r) => `
+        <div class="mr-row${r.moniteur_id === myId ? " mr-row-me" : ""}">
           <span class="mr-row-rank ${rankRowClass(r.rank)}">${rankLabel(r.rank)}</span>
           <div class="mr-row-av">${renderUserAvatar({ avatar_url: r.moniteur_avatar, prenom: r.moniteur_prenom, nom: r.moniteur_nom }, 32)}</div>
           <div class="mr-row-info">
-            <div class="mr-row-name">${esc(r.moniteur_prenom)}${r.moniteur_id === myId ? ' <span style="font-size:10px;color:var(--a)">(toi)</span>' : ''}</div>
+            <div class="mr-row-name">${esc(r.moniteur_prenom)}${r.moniteur_id === myId ? ' <span style="font-size:10px;color:var(--a)">(toi)</span>' : ""}</div>
             <div class="mr-row-sub">${fmtHours(r.hours_confirmed)} · ${r.n_validations ?? 0} val. · ${r.n_eleves_diff ?? 0} élèves</div>
           </div>
           <div class="mr-row-score">${r.score_total} pts</div>
         </div>
-      `).join('')}
-    </div>` : ''}
+      `,
+        )
+        .join("")}
+    </div>`
+        : ""
+    }
   </div>`;
 }
