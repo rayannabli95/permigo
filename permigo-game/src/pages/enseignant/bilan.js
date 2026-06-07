@@ -294,25 +294,13 @@ function fmtTrimestre(start, end) {
   return `${monthFmt(d1)} → ${monthFmt(d2)}`;
 }
 
-function deltaClass(pct) {
-  if (pct == null || pct === 0) return "flat";
-  return pct > 0 ? "up" : "down";
-}
-
-function deltaLabel(pct) {
-  if (pct == null || pct === 0) return "= Stable";
-  return pct > 0 ? `+${pct}%` : `${pct}%`;
-}
-
 // ─── Render helpers ───────────────────────────────────────────────
 function renderKPI(kpi) {
-  const noPrev = kpi.acquises_prev == null || kpi.acquises_prev === 0;
-  const delta =
-    kpi.delta_pct != null && !noPrev
-      ? `<span class="bl-kpi-delta ${deltaClass(kpi.delta_pct)}">${esc(deltaLabel(kpi.delta_pct))}</span>`
-      : noPrev
-        ? `<span class="bl-kpi-delta flat">Premier trimestre</span>`
-        : "";
+  const trim = kpi.acquises_trimestre ?? 0;
+  const trimBadge =
+    trim > 0
+      ? `<span class="bl-kpi-delta up">+${trim} ce trimestre</span>`
+      : `<span class="bl-kpi-delta flat">Total acquis</span>`;
   const scoreColor =
     kpi.score_moyen >= 70
       ? "var(--grk)"
@@ -325,7 +313,7 @@ function renderKPI(kpi) {
   <div class="bl-kpi">
     <div class="bl-kpi-val">${kpi.acquises_now ?? "—"}<span class="bl-kpi-unit">/31</span></div>
     <div class="bl-kpi-label">Compétences acquises</div>
-    ${delta}
+    ${trimBadge}
   </div>
   <div class="bl-kpi">
     <div class="bl-kpi-val" style="color:${esc(scoreColor)}">${kpi.score_moyen != null ? kpi.score_moyen + "%" : "—"}</div>
@@ -338,9 +326,9 @@ function renderKPI(kpi) {
     <span class="bl-kpi-delta flat">sur ${kpi.jours_total ?? 90} jours</span>
   </div>
   <div class="bl-kpi">
-    <div class="bl-kpi-val">${kpi.acquises_prev ?? "—"}</div>
-    <div class="bl-kpi-label">Trimestre précédent</div>
-    <span class="bl-kpi-delta flat">Compétences</span>
+    <div class="bl-kpi-val">${kpi.acquises_trimestre ?? "—"}</div>
+    <div class="bl-kpi-label">Acquises ce trimestre</div>
+    <span class="bl-kpi-delta flat">Trimestre en cours</span>
   </div>
 </div>`;
 }
@@ -360,7 +348,7 @@ function renderByMonde(byMonde) {
 </div>`,
               )
               .join("")
-          : `<div class="bl-comp-none">Aucune compétence acquise ce trimestre</div>`;
+          : `<div class="bl-comp-none">Aucune compétence acquise</div>`;
 
       return `
 <div class="bl-section">
