@@ -18,7 +18,7 @@ import { getMoniteurState, MONITEUR_TIERS } from "@/data/moniteur-levels.js";
 import { animateCounter } from "@/utils/gestures.js";
 import { icon } from "@/utils/icons.js";
 import { openPalierSheet } from "@/components/common/palier-sheet.js";
-import { playParcours } from "@/utils/sound.js";
+import { playParcoursIntro } from "@/utils/sound.js";
 
 // ─── Géométrie de la route (viewBox 396 × 1240) ──────────────────
 // x maintenu dans ~[100,290] pour que les étiquettes centrées (≤150px)
@@ -189,15 +189,12 @@ export async function mount(root) {
   }
 
   track("page.view", { page: "parcours_pro" });
-  playParcours();
 
-  root.innerHTML = `${STYLE}
-    <div class="ppr">
-      ${_tabsHtml()}
-      <div class="ppr-skel" style="height:200px"></div>
-      <div class="ppr-skel" style="height:480px;margin-top:10px"></div>
-    </div>`;
-  _wireTabs(root);
+  // ── Écran de chargement 3 s : badge PermiGo vert + jingle + messages ──
+  const stopIntro = playParcoursIntro(3200);
+  const loadStart = Date.now();
+  root.innerHTML = renderLoadingSplash();
+  const stopMessages = cycleLoadingMessages(root);
 
   // Source de vérité = compte réel de validations (validated_by).
   const { count, error } = await sb
@@ -206,6 +203,8 @@ export async function mount(root) {
     .eq("validated_by", me.id);
 
   if (error) {
+    stopMessages();
+    stopIntro();
     root.innerHTML = `${STYLE}<div class="ppr">${_tabsHtml()}
       <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
         <div style="margin-bottom:12px">${icon("alert-circle", { size: 30 })}</div>
@@ -219,8 +218,65 @@ export async function mount(root) {
     return;
   }
 
+  // Maintenir le splash visible ~3 s minimum
+  const elapsed = Date.now() - loadStart;
+  if (elapsed < 3000) await new Promise((r) => setTimeout(r, 3000 - elapsed));
+  stopMessages();
+  stopIntro();
+
   const totalVals = count ?? 0;
   _render(root, totalVals, getMoniteurState(totalVals));
+}
+
+// ─── Écran de chargement (3 s, jingle + messages qui défilent) ──────
+const LOADING_MSGS = [
+  "Préparation de tes outils pro…",
+  "Calage des tableaux de bord…",
+  "Synchronisation des validations…",
+  "On chauffe le moteur…",
+  "Vérification de l'angle mort…",
+];
+
+function renderLoadingSplash() {
+  return `
+  <div class="ppr-splash" role="status" aria-label="Chargement du parcours">
+    <style>
+      .ppr-splash{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:var(--bg);padding:24px;}
+      .ppr-splash-badge{width:96px;height:96px;border-radius:28px;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(180deg,#6fe016 0%,var(--a) 48%,var(--adk) 100%);box-shadow:0 14px 34px -8px rgba(70,163,2,.5),0 1.5px 0 0 rgba(255,255,255,.3) inset,0 -2px 8px 0 rgba(70,163,2,.5) inset;animation:pprSplashPop .5s cubic-bezier(.34,1.56,.64,1) both,pprSplashFloat 2.4s ease-in-out .5s infinite;}
+      .ppr-splash-badge svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));}
+      .ppr-splash-word{font:900 30px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;background:linear-gradient(90deg,var(--a),var(--adk));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+      .ppr-splash-msg{font:600 14px/1.4 'Inter',sans-serif;color:var(--mu);min-height:20px;text-align:center;transition:opacity .22s;}
+      .ppr-splash-dots{display:flex;gap:6px;}
+      .ppr-splash-dots i{width:8px;height:8px;border-radius:50%;background:var(--a);opacity:.3;animation:pprSplashDot 1.2s ease-in-out infinite;}
+      .ppr-splash-dots i:nth-child(2){animation-delay:.2s}
+      .ppr-splash-dots i:nth-child(3){animation-delay:.4s}
+      @keyframes pprSplashPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+      @keyframes pprSplashFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+      @keyframes pprSplashDot{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+      @media (prefers-reduced-motion:reduce){.ppr-splash-badge{animation:pprSplashPop .5s both}.ppr-splash-dots i{animation:none}}
+    </style>
+    <div class="ppr-splash-badge">${icon("map-pin", { size: 46, strokeWidth: 2.2, color: "#fff" })}</div>
+    <div class="ppr-splash-word">PermiGo</div>
+    <div class="ppr-splash-msg" id="ppr-splash-msg">${LOADING_MSGS[0]}</div>
+    <div class="ppr-splash-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+  </div>`;
+}
+
+function cycleLoadingMessages(root) {
+  let i = 0;
+  const id = setInterval(() => {
+    const m = root.querySelector("#ppr-splash-msg");
+    if (!m) return;
+    i = (i + 1) % LOADING_MSGS.length;
+    m.style.opacity = "0";
+    setTimeout(() => {
+      if (m) {
+        m.textContent = LOADING_MSGS[i];
+        m.style.opacity = "1";
+      }
+    }, 220);
+  }, 800);
+  return () => clearInterval(id);
 }
 
 // ─── Render ──────────────────────────────────────────────────────
