@@ -90,7 +90,14 @@ const STYLE = `<style>
 .ppr-legend i { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
 /* ── Route ── */
-.ppr-route { position: relative; margin: 4px 0 0; padding: 6px 8px 30px; }
+.ppr-route {
+  position: relative; margin: 10px 10px 0; padding: 18px 8px 30px;
+  border-radius: 20px; overflow: hidden;
+  background:
+    linear-gradient(to bottom, rgba(11,13,26,.58) 0%, rgba(11,13,26,.74) 60%, rgba(11,13,26,.86) 100%),
+    url('/skins/fond-parcours-enseignant.png') center top / cover no-repeat;
+  box-shadow: var(--s1);
+}
 .ppr-route svg.path { display: block; width: 100%; height: auto; overflow: visible; }
 .p-shadow { stroke: rgba(11,13,26,.10); stroke-width: 30; fill: none; stroke-linecap: round; }
 .p-edge { stroke: var(--bo4); stroke-width: 27; fill: none; stroke-linecap: round; }
