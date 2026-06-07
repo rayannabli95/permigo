@@ -1,7 +1,14 @@
 // ═══════════════════════════════════════════════════════════════
-// Enseignant — Trophées professionnels
-// 12 jalons pédagogiques tiérés bronze → diamant
-// Design : iOS game + Clash Royale ADN + pédagogie d'engagement
+// Enseignant — Trophées (écran unifié)
+// Moteur visuel des trophées élève (tr2-*) porté au moniteur :
+// hero accent pro (encre/sombre) + halo vert de marque, grille 3 col
+// par médaille (rareté), états verrouillés visibles (ADN Clash Royale),
+// bottom-sheet de détail. ZÉRO gemme / monnaie virtuelle (décision figée).
+//
+// Contenu = 12 jalons pédagogiques. Absorbe badges-moniteur.js et
+// recompenses.js (mêmes seuils de validations) → un seul écran.
+// Données réelles : validations.validated_by, profiles.streak_pro_days,
+// élèves suivis (enseignant_id) + actifs 30j. Tout existe déjà en base.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -11,69 +18,53 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
+import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 
-// ─── Tiers visuels (iOS game design) ─────────────────────────
+// ─── Médailles (raretés) — couleurs de médaille, pas couleurs de marque ──
 const TIERS = {
   bronze: {
     label: "Bronze",
-    iconName: "award",
-    color: "#cd7f32",
-    glow: "rgba(205,127,50,.45)",
-    bg: "rgba(205,127,50,.10)",
-    border: "rgba(205,127,50,.30)",
     gradient: "linear-gradient(145deg,#92400e,#d97706)",
-    shimmer: "rgba(205,127,50,.15)",
+    color: "#cd7f32",
+    glow: "rgba(205,127,50,.55)",
   },
   argent: {
     label: "Argent",
-    iconName: "shield",
-    color: "#94a3b8",
-    glow: "rgba(148,163,184,.45)",
-    bg: "rgba(148,163,184,.10)",
-    border: "rgba(148,163,184,.30)",
     gradient: "linear-gradient(145deg,#475569,#cbd5e1)",
-    shimmer: "rgba(148,163,184,.15)",
+    color: "#94a3b8",
+    glow: "rgba(148,163,184,.5)",
   },
   or: {
     label: "Or",
-    iconName: "trophy",
-    color: "#f59e0b",
-    glow: "rgba(245,158,11,.55)",
-    bg: "rgba(245,158,11,.10)",
-    border: "rgba(245,158,11,.35)",
     gradient: "linear-gradient(145deg,#b45309,#fbbf24)",
-    shimmer: "rgba(245,158,11,.20)",
+    color: "#d97706",
+    glow: "rgba(245,158,11,.6)",
   },
   platine: {
     label: "Platine",
-    iconName: "star",
-    color: "#38bdf8",
-    glow: "rgba(56,189,248,.50)",
-    bg: "rgba(56,189,248,.08)",
-    border: "rgba(56,189,248,.30)",
     gradient: "linear-gradient(145deg,#0369a1,#7dd3fc)",
-    shimmer: "rgba(56,189,248,.15)",
+    color: "#0ea5e9",
+    glow: "rgba(56,189,248,.55)",
   },
   diamant: {
     label: "Diamant",
-    iconName: "gem",
-    color: "#a78bfa",
-    glow: "rgba(167,139,250,.60)",
-    bg: "rgba(167,139,250,.12)",
-    border: "rgba(167,139,250,.40)",
     gradient: "linear-gradient(145deg,#5b21b6,#c4b5fd)",
-    shimmer: "rgba(167,139,250,.20)",
+    color: "var(--pu)",
+    glow: "rgba(167,139,250,.7)",
   },
 };
+const TIER_ORDER = ["bronze", "argent", "or", "platine", "diamant"];
 
-// ─── Les 12 trophées ─────────────────────────────────────────
+// ─── Les 12 trophées (jalons pédagogiques) ───────────────────────
+// iconName : uniquement des icônes présentes dans utils/icons.js.
 const TROPHEES = [
   // ─ Bronze
   {
     id: "premiere_seance",
     tier: "bronze",
-    iconName: "play",
+    iconName: "car",
     name: "Premier pas",
+    goal: "1 séance",
     desc: "Première séance enregistrée dans PermiGo.",
     check: (d) => d.totalVals >= 1,
     progress: (d) => ({ v: Math.min(1, d.totalVals), max: 1 }),
@@ -82,7 +73,8 @@ const TROPHEES = [
     id: "dix_comps",
     tier: "bronze",
     iconName: "check-circle",
-    name: "10 compétences",
+    name: "10 validations",
+    goal: "10 validations",
     desc: "Un début qui compte — 10 acquisitions validées.",
     check: (d) => d.totalVals >= 10,
     progress: (d) => ({ v: Math.min(10, d.totalVals), max: 10 }),
@@ -90,8 +82,9 @@ const TROPHEES = [
   {
     id: "premier_eleve",
     tier: "bronze",
-    iconName: "user-check",
+    iconName: "user",
     name: "Premier élève mobilisé",
+    goal: "1 élève actif",
     desc: "Ton premier élève actif dans l'app ces 30 derniers jours.",
     check: (d) => d.studentsActive >= 1,
     progress: (d) => ({ v: Math.min(1, d.studentsActive), max: 1 }),
@@ -102,6 +95,7 @@ const TROPHEES = [
     tier: "argent",
     iconName: "flame",
     name: "Semaine active",
+    goal: "7 jours d'affilée",
     desc: "7 jours consécutifs d'activité pédagogique.",
     check: (d) => d.streak >= 7,
     progress: (d) => ({ v: Math.min(7, d.streak), max: 7 }),
@@ -110,7 +104,8 @@ const TROPHEES = [
     id: "cinquante_comps",
     tier: "argent",
     iconName: "trending-up",
-    name: "50 compétences",
+    name: "50 validations",
+    goal: "50 validations",
     desc: "La régularité commence à faire une vraie différence.",
     check: (d) => d.totalVals >= 50,
     progress: (d) => ({ v: Math.min(50, d.totalVals), max: 50 }),
@@ -120,6 +115,7 @@ const TROPHEES = [
     tier: "argent",
     iconName: "users",
     name: "Classe en formation",
+    goal: "5 élèves suivis",
     desc: "5 élèves suivis simultanément dans PermiGo.",
     check: (d) => d.studentsTotal >= 5,
     progress: (d) => ({ v: Math.min(5, d.studentsTotal), max: 5 }),
@@ -129,7 +125,8 @@ const TROPHEES = [
     id: "cent_comps",
     tier: "or",
     iconName: "award",
-    name: "100 compétences",
+    name: "100 validations",
+    goal: "100 validations",
     desc: "Référent pédagogique — 100 acquisitions accompagnées.",
     check: (d) => d.totalVals >= 100,
     progress: (d) => ({ v: Math.min(100, d.totalVals), max: 100 }),
@@ -139,6 +136,7 @@ const TROPHEES = [
     tier: "or",
     iconName: "zap",
     name: "Mois sans faille",
+    goal: "30 jours d'affilée",
     desc: "30 jours consécutifs actifs sans interruption.",
     check: (d) => d.streak >= 30,
     progress: (d) => ({ v: Math.min(30, d.streak), max: 30 }),
@@ -148,6 +146,7 @@ const TROPHEES = [
     tier: "or",
     iconName: "users",
     name: "Portefeuille solide",
+    goal: "10 élèves suivis",
     desc: "10 élèves accompagnés en parallèle.",
     check: (d) => d.studentsTotal >= 10,
     progress: (d) => ({ v: Math.min(10, d.studentsTotal), max: 10 }),
@@ -157,8 +156,9 @@ const TROPHEES = [
     id: "deux_cent_comps",
     tier: "platine",
     iconName: "shield",
-    name: "200 compétences",
-    desc: "Expertise pédagogique avérée — tu formes des conducteurs solides.",
+    name: "200 validations",
+    goal: "200 validations",
+    desc: "Expertise avérée — tu formes des conducteurs solides.",
     check: (d) => d.totalVals >= 200,
     progress: (d) => ({ v: Math.min(200, d.totalVals), max: 200 }),
   },
@@ -167,6 +167,7 @@ const TROPHEES = [
     tier: "platine",
     iconName: "check-circle",
     name: "Classe au complet",
+    goal: "Toute la classe active",
     desc: "Tous tes élèves actifs sur les 30 derniers jours.",
     check: (d) => d.studentsTotal >= 3 && d.studentsActive >= d.studentsTotal,
     progress: (d) => ({
@@ -178,318 +179,250 @@ const TROPHEES = [
   {
     id: "expert_remc",
     tier: "diamant",
-    iconName: "star",
+    iconName: "crown",
     name: "Expert REMC certifié",
+    goal: "300 validations",
     desc: "300 validations — le palier ultime. Statut Expert REMC débloqué.",
     check: (d) => d.totalVals >= 300,
     progress: (d) => ({ v: Math.min(300, d.totalVals), max: 300 }),
   },
 ];
 
-// ─── CSS ─────────────────────────────────────────────────────
+// ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
-/* ── Layout ── */
-.tm {
-  max-width: 580px; margin: 0 auto;
-  padding-bottom: 110px;
+.tr2 {
+  max-width: 480px; margin: 0 auto;
+  padding: 0 0 calc(100px + env(safe-area-inset-bottom, 0px));
   background: var(--bg); color: var(--ink);
   font-family: 'Inter', sans-serif;
 }
 
-/* ── Header ── */
-.tm-hd {
-  padding: 18px 16px 16px;
-  background: var(--su); border-bottom: 1px solid var(--bo);
+/* ── Header simple ── */
+.tr2-hd {
   display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; background: var(--su);
+  border-bottom: 1px solid var(--bo);
 }
-.tm-back {
-  width: 44px; height: 44px; border-radius: 10px;
-  border: 1px solid rgba(99,102,241,.15); background: var(--su);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  color: var(--ink); flex-shrink: 0;
-  transition: background .15s cubic-bezier(.4,0,.2,1), border-color .15s cubic-bezier(.4,0,.2,1);
+.tr2-back {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  border: 1px solid var(--bo); background: var(--su); color: var(--ink);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: background .15s var(--t, cubic-bezier(.4,0,.2,1)), border-color .15s;
   -webkit-tap-highlight-color: transparent;
 }
-.tm-back:hover { background: rgba(99,102,241,.06); border-color: rgba(99,102,241,.3); }
-.tm-back:active { background: var(--bg2); }
-.tm-back:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
-.tm-hd-info { flex: 1; min-width: 0; }
-.tm-hd-title {
-  font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink); letter-spacing: -.025em;
-}
-.tm-hd-sub { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
+@media (hover:hover) { .tr2-back:hover { background: var(--bg2); border-color: var(--bo4); } }
+.tr2-back:active { background: var(--bg2); }
+.tr2-back:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
+.tr2-hd-info { flex: 1; min-width: 0; }
+.tr2-hd-title { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.025em; }
+.tr2-hd-sub { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 
-/* ── Hero (dark gradient comme trophées élève) ── */
-.tm-hero {
-  position: relative;
-  background: linear-gradient(160deg,#1a0533 0%,#1e1b4b 55%,#0c1a2e 100%);
-  padding: 24px 20px 22px;
-  overflow: hidden;
+/* ── Hero : accent pro (encre/sombre) + halo vert de marque ── */
+.tr2-hero {
+  position: relative; overflow: hidden; padding: 20px 20px 22px;
+  background: linear-gradient(160deg, var(--ink2) 0%, var(--ink3) 60%, var(--ink) 100%);
 }
-.tm-hero::before {
-  content: '';
-  position: absolute; inset: 0; pointer-events: none;
+.tr2-hero::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 60% at 15% 20%, rgba(167,139,250,.30) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 50% at 85% 80%, rgba(245,158,11,.18) 0%, transparent 55%),
-    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(56,189,248,.08) 0%, transparent 60%);
+    radial-gradient(ellipse 80% 70% at 12% 25%, color-mix(in srgb, var(--a) 30%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 60% at 90% 85%, color-mix(in srgb, var(--am) 16%, transparent) 0%, transparent 55%);
 }
-.tm-hero-inner { position: relative; z-index: 1; }
+.tr2-hero-in { position: relative; z-index: 1; }
+.tr2-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.tr2-hero-title { font: 800 22px/1.1 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: -.03em; }
+.tr2-hero-count {
+  font: 700 12px/1 'IBM Plex Mono', monospace; color: rgba(255,255,255,.82);
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+  border-radius: 99px; padding: 6px 12px; white-space: nowrap;
+}
+.tr2-prog { display: flex; flex-direction: column; gap: 7px; }
+.tr2-prog-bar { height: 7px; background: rgba(255,255,255,.18); border-radius: 99px; overflow: hidden; }
+.tr2-prog-fill {
+  height: 100%; width: 0; border-radius: 99px;
+  background: linear-gradient(90deg, var(--a), #9ae831);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--a) 60%, transparent);
+  transition: width 1s cubic-bezier(.2,.7,.3,1);
+}
+.tr2-prog-hint { font: 500 11.5px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.62); }
 
-.tm-hero-row {
-  display: flex; align-items: center; gap: 18px;
-  margin-bottom: 16px;
+/* ── CTA premier démarrage ── */
+.tr2-cta {
+  margin: 16px 16px 0; padding: 14px 16px;
+  background: var(--su); border: 1px solid var(--bo); border-radius: 16px;
+  display: flex; align-items: center; gap: 14px; box-shadow: var(--s0);
 }
-/* Ring SVG */
-.tm-hero-ring { width: 72px; height: 72px; flex-shrink: 0; position: relative; }
-.tm-ring-svg { display: block; }
-.tm-ring-track { fill: none; stroke: rgba(255,255,255,.12); stroke-width: 5; }
-.tm-ring-fill {
-  fill: none; stroke-width: 5; stroke-linecap: round;
-  transform: rotate(-90deg); transform-origin: 50% 50%;
-  transition: stroke-dasharray .9s cubic-bezier(.2,.7,.3,1) .3s;
+.tr2-cta-txt { flex: 1; font: 500 13px/1.45 'Inter', sans-serif; color: var(--mu); }
+.tr2-cta-btn {
+  flex-shrink: 0; padding: 12px 16px; min-height: 44px;
+  border: 0; border-radius: 12px; background: var(--a); color: #fff;
+  font: 800 13px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+  box-shadow: 0 4px 0 0 var(--adk); white-space: nowrap;
 }
-.tm-ring-count {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.tm-ring-val { font: 800 18px/1 'Plus Jakarta Sans', sans-serif; color: #fff; }
-.tm-ring-max { font: 500 10px/1 'Inter', sans-serif; color: rgba(255,255,255,.55); margin-top: 2px; }
+.tr2-cta-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 0 var(--adk); }
+.tr2-cta-btn:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
 
-.tm-hero-txt { flex: 1; }
-.tm-hero-headline {
-  font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #fff; letter-spacing: -.02em; margin-bottom: 4px;
+/* ── Section label par médaille ── */
+.tr2-group {
+  padding: 22px 16px 10px; display: flex; align-items: center; gap: 8px;
+  font: 800 11px/1 'Inter', sans-serif; letter-spacing: .09em;
+  text-transform: uppercase;
 }
-.tm-hero-caption { font: 500 12px/1 'Inter', sans-serif; color: rgba(255,255,255,.55); }
-
-/* Barre progression globale */
-.tm-global-bar {
-  height: 6px; background: rgba(255,255,255,.12);
-  border-radius: 99px; overflow: hidden; margin-bottom: 14px;
-}
-.tm-global-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #6366f1, #a78bfa, #f59e0b);
-  border-radius: 99px;
-  transition: width .9s cubic-bezier(.2,.7,.3,1) .4s;
-  box-shadow: 0 0 8px rgba(167,139,250,.5);
-}
-
-/* Chips de tier dans le hero */
-.tm-tier-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.tm-tier-chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 4px 10px; border-radius: 99px;
-  font: 600 11px/1 'Inter', sans-serif;
-  border: 1px solid; backdrop-filter: blur(4px);
+.tr2-group .gcount {
+  margin-left: auto; font: 700 11px/1 'IBM Plex Mono', monospace;
+  color: var(--mu2); text-transform: none; letter-spacing: 0;
 }
 
-/* ── Sections par tier ── */
-.tm-section { padding: 0 16px; margin-top: 20px; }
-.tm-tier-hd {
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 10px;
-}
-.tm-tier-hd-ico { display: flex; align-items: center; flex-shrink: 0; }
-.tm-tier-lbl {
-  font: 700 12px/1 'Inter', sans-serif;
-  text-transform: uppercase; letter-spacing: .08em; color: var(--mu2);
-}
-.tm-tier-count {
-  margin-left: auto;
-  font: 600 11px/1 'IBM Plex Mono', monospace; color: var(--mu2);
-}
+/* ── Grille 3 colonnes ── */
+.tr2-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 12px; }
 
-/* ── Grid cards ── */
-.tm-cards { display: flex; flex-direction: column; gap: 10px; }
+/* ── Carte trophée ── */
+.tr2-card {
+  position: relative; border-radius: 18px; padding: 14px 8px 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  min-height: 122px; width: 100%; border: 0; background: none; cursor: pointer;
+  text-align: center; font-family: inherit; overflow: hidden;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+  transition: transform .14s cubic-bezier(.34,1.56,.64,1);
+  animation: tr2In .45s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes tr2In { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: none; } }
+.tr2-card:active { transform: scale(.93); }
+.tr2-card:focus-visible { outline: 3px solid var(--a); outline-offset: 3px; }
+.tr2-card.locked { background: var(--su); border: 1px solid var(--bo); }
+.tr2-card.unlocked { color: #fff; }
+.tr2-card.bronze  { background: var(--tc-grad); box-shadow: 0 4px 16px -4px var(--tc-glow); }
+.tr2-card.argent  { background: var(--tc-grad); box-shadow: 0 4px 16px -4px var(--tc-glow); }
+.tr2-card.or      { background: var(--tc-grad); box-shadow: 0 4px 16px -4px var(--tc-glow); }
+.tr2-card.platine { background: var(--tc-grad); box-shadow: 0 4px 16px -4px var(--tc-glow); }
+.tr2-card.diamant { background: var(--tc-grad); animation: tr2In .45s cubic-bezier(.2,.7,.3,1) both, diamGlow 2.6s ease-in-out infinite alternate; }
+@keyframes diamGlow {
+  from { box-shadow: 0 4px 22px -4px rgba(167,139,250,.6); }
+  to   { box-shadow: 0 4px 32px -2px rgba(196,181,253,.95), 0 0 0 1px rgba(196,181,253,.4); }
+}
+.tr2-card-dot {
+  position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 7px rgba(255,255,255,.8);
+}
+.tr2-card-ico {
+  width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; transition: transform .2s;
+}
+.tr2-card.unlocked .tr2-card-ico { background: rgba(255,255,255,.22); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.4); }
+.tr2-card.locked .tr2-card-ico { background: var(--bg2); color: var(--mu2); border: 1px solid var(--bo); }
+.tr2-card.unlocked:active .tr2-card-ico { transform: scale(1.12); }
+.tr2-card-name {
+  font: 800 10.5px/1.2 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.tr2-card.unlocked .tr2-card-name { color: rgba(255,255,255,.96); }
+.tr2-card.locked .tr2-card-name { color: var(--mu2); }
+.tr2-card-prog { font: 700 9.5px/1 'IBM Plex Mono', monospace; color: var(--mu3); background: var(--bg2); padding: 3px 7px; border-radius: 99px; }
 
-/* ── Card base ── */
-.tm-card {
-  position: relative;
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(99,102,241,.1);
-  background: var(--su);
-  transition: transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1), border-color .15s cubic-bezier(.4,0,.2,1);
-  -webkit-tap-highlight-color: transparent;
-  animation: tmCardIn .45s cubic-bezier(.2,.7,.3,1) both;
-  overflow: hidden;
-}
-@keyframes tmCardIn {
-  from { opacity: 0; transform: translateY(10px) scale(.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.tm-card:active { transform: scale(.975); }
-@media (prefers-reduced-motion: reduce) { .tm-card { animation: none; } }
-
-/* ── Card unlocked: glow + shimmer ── */
-.tm-card.tm-unlocked {
-  border-color: var(--tc-border);
-  background: var(--tc-bg);
-  box-shadow:
-    0 0 0 0 transparent,
-    0 2px 12px -4px var(--tc-glow),
-    inset 0 1px 0 rgba(255,255,255,.08);
-}
-.tm-card.tm-unlocked:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px -6px var(--tc-glow), inset 0 1px 0 rgba(255,255,255,.1);
-}
-/* Shimmer diagonal sur card débloquée — Or et Diamant uniquement via JS .tm-shimmer */
-.tm-card.tm-unlocked::after {
-  content: '';
-  position: absolute;
-  top: -50%; left: -60%;
-  width: 50%; height: 200%;
-  background: linear-gradient(105deg, transparent 40%, var(--tc-shimmer) 50%, transparent 60%);
-  transform: skewX(-15deg);
-  animation: tmShimmer 3.5s ease-in-out infinite;
-}
-@keyframes tmShimmer {
-  0%,100% { left: -60%; opacity: .7; }
-  50% { left: 120%; opacity: 1; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .tm-card.tm-unlocked::after { animation: none; }
-  .tm-card.tm-unlocked:hover { transform: none; }
+  .tr2-card, .tr2-prog-fill { animation: none !important; transition: none !important; }
+  .tr2-card.diamant { animation: none !important; }
 }
 
-/* ── Card locked ── */
-.tm-card.tm-locked { opacity: .72; }
-.tm-card.tm-locked-mystery { opacity: .5; filter: saturate(.4); }
-
-/* ── Icône ── */
-.tm-card-ico {
-  width: 48px; height: 48px; border-radius: 14px;
+/* ── Bottom sheet (détail trophée) ── */
+.tr2-sheet-bg {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(11,13,26,0); backdrop-filter: blur(0);
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .22s, background .22s;
+}
+.tr2-sheet-bg.open { opacity: 1; pointer-events: auto; background: rgba(11,13,26,.6); backdrop-filter: blur(6px); }
+.tr2-sheet {
+  width: 100%; max-width: 480px; background: var(--su);
+  border-radius: 26px 26px 0 0; overflow: hidden;
+  transform: translateY(100%); transition: transform .3s cubic-bezier(.32,.72,0,1);
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+}
+.tr2-sheet-bg.open .tr2-sheet { transform: translateY(0); }
+.tr2-sheet-glow {
+  height: 162px; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 10px; position: relative;
+}
+.tr2-sheet-handle {
+  width: 36px; height: 4px; background: rgba(255,255,255,.5); border-radius: 2px;
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+}
+.tr2-sheet-ico {
+  width: 96px; height: 96px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  position: relative; overflow: hidden;
+  background: rgba(255,255,255,.2); color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 8px 24px rgba(0,0,0,.25);
+  animation: tr2IcoIn .5s .08s cubic-bezier(.34,1.56,.64,1) both;
 }
-/* Icône débloquée : gradient du tier */
-.tm-card.tm-unlocked .tm-card-ico {
-  background: var(--tc-gradient);
-  color: #fff;
-  box-shadow: 0 4px 14px -4px var(--tc-glow);
+@keyframes tr2IcoIn { from { transform: scale(.4) rotate(-12deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.tr2-sheet-tier {
+  font: 800 11px/1 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase;
+  color: #fff; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.32);
+  border-radius: 99px; padding: 4px 11px;
 }
-/* Icône verrouillée */
-.tm-card.tm-locked .tm-card-ico,
-.tm-card.tm-locked-mystery .tm-card-ico {
-  background: var(--bg3, var(--bg2));
-  color: var(--mu5, var(--mu2));
-  border: 1px solid var(--bo);
+.tr2-sheet-body { padding: 20px 20px 8px; }
+.tr2-sheet-title { font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.025em; margin: 0 0 8px; }
+.tr2-sheet-desc { font: 500 14px/1.55 'Inter', sans-serif; color: var(--mu); margin: 0 0 16px; }
+.tr2-sheet-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.tr2-sheet-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px;
+  border-radius: 99px; font: 700 12px/1 'Inter', sans-serif;
 }
-/* Mystery : silhouette floue — mystérieux mais pas terne */
-.tm-card.tm-locked-mystery .tm-card-ico {
-  filter: blur(1px) brightness(.4);
+.tr2-sheet-chip.val { background: var(--ag); color: var(--adk); }
+.tr2-sheet-chip.prog { background: var(--bg2); color: var(--mu3); font-family: 'IBM Plex Mono', monospace; }
+.tr2-sheet-social { font: 500 12.5px/1.45 'Inter', sans-serif; color: var(--mu2); margin-bottom: 18px; }
+.tr2-sheet-actions { display: flex; gap: 8px; padding: 0 20px 8px; }
+.tr2-sheet-share {
+  flex: 1; padding: 14px; min-height: 50px; border: 0; border-radius: 14px;
+  background: var(--a); color: #fff; font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer; box-shadow: 0 4px 0 0 var(--adk);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
 }
-
-/* ── Body texte ── */
-.tm-card-body { flex: 1; min-width: 0; }
-.tm-card-name {
-  font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink); margin-bottom: 3px;
+.tr2-sheet-share:active { transform: translateY(3px); box-shadow: 0 1px 0 0 var(--adk); }
+.tr2-sheet-share:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.tr2-sheet-close {
+  padding: 14px 20px; min-height: 50px; border: 1px solid var(--bo); border-radius: 14px;
+  background: var(--bg); color: var(--mu3); font: 700 14px/1 'Inter', sans-serif; cursor: pointer;
 }
-.tm-card.tm-unlocked .tm-card-name { color: var(--tc-color); }
-.tm-card.tm-locked .tm-card-name,
-.tm-card.tm-locked-mystery .tm-card-name { color: var(--mu2); }
-.tm-card-desc {
-  font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu2);
-}
-.tm-card.tm-locked-mystery .tm-card-desc { color: transparent; text-shadow: 0 0 8px var(--mu2); }
-
-/* ── Progress bar ── */
-.tm-card-prog {
-  margin-top: 9px; display: flex; align-items: center; gap: 8px;
-}
-.tm-card-prog-bar {
-  flex: 1; height: 4px; background: var(--bo2); border-radius: 2px; overflow: hidden;
-}
-.tm-card-prog-fill {
-  height: 100%; border-radius: 2px;
-  transition: width .6s cubic-bezier(.2,.7,.3,1) .1s;
-}
-.tm-card-prog-txt {
-  font: 600 10px/1 'IBM Plex Mono', monospace; color: var(--mu2); white-space: nowrap;
-}
-
-/* ── Badge check / lock ── */
-.tm-card-badge {
-  width: 30px; height: 30px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; align-self: flex-start; margin-top: 1px;
-}
-.tm-card-badge.done {
-  background: var(--tc-gradient, var(--a));
-  color: #fff;
-  box-shadow: 0 2px 8px -2px var(--tc-glow, transparent);
-}
-.tm-card-badge.locked {
-  background: var(--bg2); color: var(--mu5, var(--mu2));
-}
-
-/* ── Tier label badge sur card débloquée ── */
-.tm-card-tier-tag {
-  display: inline-flex; align-items: center; gap: 3px;
-  font: 700 10px/1 'Inter', sans-serif;
-  padding: 3px 7px; border-radius: 99px;
-  border: 1px solid var(--tc-border);
-  color: var(--tc-color);
-  background: var(--tc-bg);
-  margin-bottom: 3px;
+.tr2-sheet-close:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
+.tr2-sheet-glow.locked { background: var(--bg2); border-bottom: 1px solid var(--bo); }
+.tr2-sheet-glow.locked .tr2-sheet-ico { background: var(--su); color: var(--mu2); border: 1px solid var(--bo); box-shadow: none; }
+.tr2-sheet-glow.locked .tr2-sheet-handle { background: var(--bo4); }
+.tr2-sheet-glow.locked .tr2-sheet-tier { background: var(--su); color: var(--mu3); border-color: var(--bo); }
+@media (prefers-reduced-motion: reduce) {
+  .tr2-sheet-bg, .tr2-sheet, .tr2-sheet-ico { transition: none !important; animation: none !important; }
 }
 </style>`;
 
-// ─── Mount ────────────────────────────────────────────────────
+// ─── État module (sheet) ─────────────────────────────────────────
+let _results = [];
+let _onKeydown = null;
+let _lastFocus = null;
+
+// ─── Mount ────────────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
-  if (!me || me.role !== "enseignant") return;
+  if (!me || me.role !== "enseignant") {
+    root.innerHTML = `<p style="padding:32px;text-align:center;color:var(--mu)">Accès enseignant requis</p>`;
+    return;
+  }
 
   track("page_view", { page: "trophees_moniteur" });
 
   root.innerHTML = `${STYLE}
-<div class="tm anim-slide-up">
-  <div class="tm-hd">
-    <button class="tm-back" id="tm-back" aria-label="Retour">${icon("arrow-left", { size: 20, strokeWidth: 2.5 })}</button>
-    <div class="tm-hd-info">
-      <div class="tm-hd-title" tabindex="-1">Trophées</div>
-      <div class="tm-hd-sub">Jalons pédagogiques</div>
-    </div>
-  </div>
-  <div class="tm-hero">
-    <div class="tm-hero-inner">
-      <div class="tm-hero-row">
-        <div class="tm-hero-ring">
-          <svg class="tm-ring-svg" width="72" height="72" viewBox="0 0 72 72" aria-hidden="true">
-            <circle class="tm-ring-track" cx="36" cy="36" r="28"/>
-            <circle class="tm-ring-fill" cx="36" cy="36" r="28" stroke="#a78bfa" stroke-dasharray="0 176"/>
-          </svg>
-          <div class="tm-ring-count">
-            <span class="tm-ring-val">—</span>
-            <span class="tm-ring-max">/12</span>
-          </div>
-        </div>
-        <div class="tm-hero-txt">
-          <div class="tm-hero-headline">Chargement…</div>
-          <div class="tm-hero-caption">trophées professionnels</div>
-        </div>
-      </div>
-      <div class="tm-global-bar"><div class="tm-global-fill" id="tm-gfill" style="width:0%"></div></div>
-      <div class="tm-tier-chips" id="tm-chips"></div>
+<div class="tr2 anim-slide-up">
+  ${_headerHtml("Chargement…")}
+  <div class="tr2-hero">
+    <div class="tr2-hero-in">
+      <div class="tr2-hero-top"><h1 class="tr2-hero-title">Mes trophées</h1><div class="tr2-hero-count">—</div></div>
+      <div class="tr2-prog"><div class="tr2-prog-bar"><div class="tr2-prog-fill"></div></div></div>
     </div>
   </div>
 </div>`;
-
-  root.querySelector("#tm-back")?.addEventListener("click", () => {
-    haptic("tap");
-    navigate("#/parcours");
-  });
+  _wireBack(root);
 
   try {
     const since30d = new Date(Date.now() - 30 * 86400000).toISOString();
-
     const [profileRes, countRes, studentsRes, activeRes] = await Promise.all([
       sb
         .from("profiles")
@@ -521,7 +454,6 @@ export async function mount(root) {
       ).size,
       prenom: profileRes.data?.prenom ?? "",
     };
-
     _render(root, d);
   } catch (e) {
     console.error("[trophees-moniteur]", e);
@@ -529,223 +461,228 @@ export async function mount(root) {
   }
 }
 
-// ─── Render ──────────────────────────────────────────────────
-function _render(root, d) {
-  const results = TROPHEES.map((t) => ({
-    ...t,
-    unlocked: t.check(d),
-    prog: t.progress(d),
-  }));
-
-  const unlockedCount = results.filter((t) => t.unlocked).length;
-  const total = results.length;
-  const pct = Math.round((unlockedCount / total) * 100);
-
-  // Ring : c = 2πr = 2π×28 ≈ 175.9
-  const C = 2 * Math.PI * 28;
-  const filled = (pct / 100) * C;
-
-  // Group by tier
-  const byTier = {};
-  for (const key of Object.keys(TIERS)) byTier[key] = [];
-  results.forEach((t) => byTier[t.tier]?.push(t));
-
-  // Chips de tier dans le hero (flat icon + label)
-  const chipsHtml = Object.entries(TIERS)
-    .map(([key, cfg]) => {
-      const list = byTier[key] || [];
-      const done = list.filter((t) => t.unlocked).length;
-      const ico = icon(cfg.iconName, {
-        size: 11,
-        strokeWidth: 2,
-        color: cfg.color,
-      });
-      return `<span class="tm-tier-chip" style="color:${cfg.color};border-color:${cfg.border};background:${cfg.bg}">
-        ${ico} ${done}/${list.length}
-      </span>`;
-    })
-    .join("");
-
-  // Sections
-  const sectionsHtml = Object.entries(TIERS)
-    .map(([key, cfg]) => {
-      const list = byTier[key] || [];
-      if (list.length === 0) return "";
-      const doneCount = list.filter((t) => t.unlocked).length;
-      const tierIco = icon(cfg.iconName, {
-        size: 14,
-        strokeWidth: 2,
-        color: cfg.color,
-      });
-      return `
-      <div class="tm-section">
-        <div class="tm-tier-hd">
-          <span class="tm-tier-hd-ico">${tierIco}</span>
-          <span class="tm-tier-lbl" style="color:${cfg.color}">${cfg.label}</span>
-          <span class="tm-tier-count">${doneCount}/${list.length}</span>
-        </div>
-        <div class="tm-cards">
-          ${list.map((t, i) => _renderCard(t, cfg, i)).join("")}
-        </div>
-      </div>`;
-    })
-    .join("");
-
-  root.innerHTML = `${STYLE}
-<div class="tm anim-slide-up">
-
-<div class="tm-hd">
-  <button class="tm-back" id="tm-back" aria-label="Retour">${icon("arrow-left", { size: 20, strokeWidth: 2.5 })}</button>
-  <div class="tm-hd-info">
-    <div class="tm-hd-title" tabindex="-1">Trophées</div>
-    <div class="tm-hd-sub">${unlockedCount} débloqué${unlockedCount > 1 ? "s" : ""} sur ${total}</div>
-  </div>
-</div>
-
-<div class="tm-hero">
-  <div class="tm-hero-inner">
-    <div class="tm-hero-row">
-      <div class="tm-hero-ring">
-        <svg class="tm-ring-svg" width="72" height="72" viewBox="0 0 72 72" aria-hidden="true">
-          <circle class="tm-ring-track" cx="36" cy="36" r="28"/>
-          <circle class="tm-ring-fill" id="tm-ring" cx="36" cy="36" r="28"
-            stroke="url(#tmGrad)"
-            stroke-dasharray="0 ${C.toFixed(1)}"/>
-          <defs>
-            <linearGradient id="tmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#a78bfa"/>
-              <stop offset="100%" stop-color="#f59e0b"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <div class="tm-ring-count">
-          <span class="tm-ring-val">${unlockedCount}</span>
-          <span class="tm-ring-max">/${total}</span>
-        </div>
-      </div>
-      <div class="tm-hero-txt">
-        <div class="tm-hero-headline">${_headline(unlockedCount, total, d)}</div>
-        <div class="tm-hero-caption">${pct}% des jalons atteints</div>
-      </div>
-    </div>
-    <div class="tm-global-bar">
-      <div class="tm-global-fill" id="tm-gfill" style="width:0%"></div>
-    </div>
-    <div class="tm-tier-chips">${chipsHtml}</div>
-  </div>
-</div>
-
-${
-  unlockedCount === 0
-    ? `
-<div style="margin:16px 16px 0;padding:16px 18px;background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.15);border-radius:16px;display:flex;align-items:center;gap:14px;">
-  <div style="flex:1;font:500 13px/1.45 'Inter',sans-serif;color:var(--mu);">
-    Enregistre ta première séance pour débloquer tes premiers trophées.
-  </div>
-  <button id="tm-start-btn" style="padding:11px 16px;min-height:44px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font:700 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px -4px rgba(99,102,241,.45);">
-    Première séance
-  </button>
-</div>`
-    : ""
+export function unmount() {
+  _closeSheet();
 }
 
-${sectionsHtml}
+// ─── Render ──────────────────────────────────────────────────────
+function _render(root, d) {
+  _results = TROPHEES.map((t) => {
+    const prog = t.progress(d);
+    const unlocked = t.check(d);
+    const pct = prog.max > 0 ? Math.round((prog.v / prog.max) * 100) : 0;
+    const close = !unlocked && pct >= 25;
+    return { ...t, prog, unlocked, pct, close, mystery: !unlocked && !close };
+  });
 
+  const unlockedCount = _results.filter((t) => t.unlocked).length;
+  const total = _results.length;
+  const pct = Math.round((unlockedCount / total) * 100);
+  const remaining = total - unlockedCount;
+
+  let gridHtml = "";
+  for (const key of TIER_ORDER) {
+    const cfg = TIERS[key];
+    const list = _results.filter((t) => t.tier === key);
+    if (!list.length) continue;
+    const done = list.filter((t) => t.unlocked).length;
+    gridHtml += `
+      <div class="tr2-group" style="color:${cfg.color}">${cfg.label}<span class="gcount">${done}/${list.length}</span></div>
+      <div class="tr2-grid">${list.map((t) => _cardHtml(t)).join("")}</div>`;
+  }
+
+  const cta =
+    d.totalVals === 0
+      ? `<div class="tr2-cta">
+          <div class="tr2-cta-txt">Enregistre ta première séance pour débloquer tes premiers trophées.</div>
+          <button class="tr2-cta-btn" id="tr2-start">Première séance</button>
+        </div>`
+      : "";
+
+  root.innerHTML = `${STYLE}
+<div class="tr2 anim-slide-up">
+  ${_headerHtml(`${unlockedCount} débloqué${unlockedCount > 1 ? "s" : ""} sur ${total}`)}
+  <div class="tr2-hero">
+    <div class="tr2-hero-in">
+      <div class="tr2-hero-top">
+        <h1 class="tr2-hero-title">Mes trophées</h1>
+        <div class="tr2-hero-count">${unlockedCount} / ${total}</div>
+      </div>
+      <div class="tr2-prog">
+        <div class="tr2-prog-bar"><div class="tr2-prog-fill" id="tr2-fill"></div></div>
+        <div class="tr2-prog-hint">${pct}&nbsp;% des jalons atteints${remaining > 0 ? ` — ${remaining} restant${remaining > 1 ? "s" : ""} à débloquer` : " — collection complète"}</div>
+      </div>
+    </div>
+  </div>
+  ${cta}
+  ${gridHtml}
+</div>
+<div class="tr2-sheet-bg" id="tr2-sheet-bg" role="dialog" aria-modal="true" aria-label="Détail du trophée">
+  <div class="tr2-sheet" id="tr2-sheet"></div>
 </div>`;
 
-  root.querySelector("#tm-back")?.addEventListener("click", () => {
+  _wireBack(root);
+  root
+    .querySelector("#tr2-start")
+    ?.addEventListener("click", () => navigate("#/log-session"));
+
+  root.querySelectorAll(".tr2-card").forEach((el) => {
+    el.addEventListener("click", () => {
+      haptic("tap");
+      _openSheet(root, parseInt(el.dataset.i, 10));
+    });
+  });
+
+  const bg = root.querySelector("#tr2-sheet-bg");
+  bg?.addEventListener("click", (e) => {
+    if (e.target === bg) _closeSheet();
+  });
+
+  requestAnimationFrame(() => {
+    const fill = root.querySelector("#tr2-fill");
+    if (fill) fill.style.width = `${pct}%`;
+  });
+}
+
+// ─── Header ──────────────────────────────────────────────────────
+function _headerHtml(sub) {
+  return `
+  <div class="tr2-hd">
+    <button class="tr2-back" id="tr2-back" aria-label="Retour au parcours">${icon("arrow-left", { size: 20, strokeWidth: 2.5 })}</button>
+    <div class="tr2-hd-info">
+      <div class="tr2-hd-title" tabindex="-1">Trophées</div>
+      <div class="tr2-hd-sub">${esc(sub)}</div>
+    </div>
+  </div>`;
+}
+
+function _wireBack(root) {
+  root.querySelector("#tr2-back")?.addEventListener("click", () => {
     haptic("tap");
     navigate("#/parcours");
   });
-
-  root.querySelector("#tm-start-btn")?.addEventListener("click", () => {
-    navigate("#/log-session");
-  });
-
-  // Animer la ring et la barre après rendu
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      const ring = root.querySelector("#tm-ring");
-      if (ring)
-        ring.setAttribute(
-          "stroke-dasharray",
-          `${filled.toFixed(1)} ${C.toFixed(1)}`,
-        );
-      const gfill = root.querySelector("#tm-gfill");
-      if (gfill) gfill.style.width = `${pct}%`;
-    });
-  });
 }
 
-// ─── Card render ─────────────────────────────────────────────
-function _renderCard(t, cfg, i) {
-  const delay = `${i * 60}ms`;
-  const prog = t.prog;
-  const pct = prog.max > 0 ? Math.round((prog.v / prog.max) * 100) : 0;
-  const isClose = !t.unlocked && pct >= 25;
-  // Far-locked : on masque les détails (effet "mystère" Clash Royale)
-  const isMystery = !t.unlocked && !isClose;
-
-  const cssVars = `--tc-color:${cfg.color};--tc-glow:${cfg.glow};--tc-bg:${cfg.bg};--tc-border:${cfg.border};--tc-gradient:${cfg.gradient};--tc-shimmer:${cfg.shimmer}`;
-
-  const cls = t.unlocked
-    ? "tm-card tm-unlocked"
-    : isMystery
-      ? "tm-card tm-locked-mystery"
-      : "tm-card tm-locked";
-
-  // Icône: locked mystery → cadenas, sinon icône réelle
-  const icoContent = isMystery
-    ? icon("lock", { size: 18, strokeWidth: 2 })
-    : icon(t.iconName, { size: 20, strokeWidth: 2 });
-
-  // Badge droit
-  const badge = t.unlocked
-    ? `<div class="tm-card-badge done" aria-label="Débloqué">${icon("check", { size: 13, strokeWidth: 3 })}</div>`
-    : isClose
-      ? `<div class="tm-card-badge locked" aria-label="Verrouillé">${icon("lock", { size: 12, strokeWidth: 2 })}</div>`
-      : "";
-
-  // Label tier sur card débloquée
-  const tierTag = t.unlocked
-    ? `<div class="tm-card-tier-tag">${icon(cfg.iconName, { size: 10, strokeWidth: 2 })} ${cfg.label}</div>`
+// ─── Carte ───────────────────────────────────────────────────────
+function _cardHtml(t) {
+  const i = _results.indexOf(t);
+  const cfg = TIERS[t.tier];
+  const cls = t.unlocked ? `unlocked ${t.tier}` : "locked";
+  const icoName = t.mystery ? "lock" : t.iconName;
+  const name = t.mystery ? "???" : esc(t.name);
+  const sub = t.unlocked
+    ? `<div class="tr2-card-dot"></div>`
+    : t.close
+      ? `<div class="tr2-card-prog">${t.prog.v}/${t.prog.max}</div>`
+      : `<div class="tr2-card-prog">${cfg.label}</div>`;
+  const styleVars = t.unlocked
+    ? `--tc-grad:${cfg.gradient};--tc-glow:${cfg.glow}`
     : "";
+  return `<button class="tr2-card ${cls}" style="${styleVars}" data-i="${i}" aria-label="${name}${t.unlocked ? " — débloqué" : " — verrouillé"}">
+    <div class="tr2-card-ico">${icon(icoName, { size: t.unlocked ? 24 : 20, strokeWidth: 2 })}</div>
+    <div class="tr2-card-name">${name}</div>
+    ${sub}
+  </button>`;
+}
 
-  // Nom (masqué en mystery)
-  const nameHtml = isMystery
-    ? `<div class="tm-card-name" style="color:var(--mu5,var(--mu2));letter-spacing:.04em">??? ${cfg.label}</div>`
-    : `<div class="tm-card-name">${esc(t.name)}</div>`;
+// ─── Bottom sheet ────────────────────────────────────────────────
+function _openSheet(root, i) {
+  const t = _results[i];
+  if (!t) return;
+  const cfg = TIERS[t.tier];
+  const sheet = root.querySelector("#tr2-sheet");
+  const bg = root.querySelector("#tr2-sheet-bg");
+  if (!sheet || !bg) return;
 
-  // Barre de progression (uniquement si proche et non débloqué)
-  const progBar = isClose
-    ? `<div class="tm-card-prog">
-        <div class="tm-card-prog-bar">
-          <div class="tm-card-prog-fill" style="width:${pct}%;background:${cfg.color}"></div>
+  track("trophees_moniteur.detail", { id: t.id, unlocked: t.unlocked });
+
+  if (t.unlocked) {
+    sheet.innerHTML = `
+      <div class="tr2-sheet-glow" style="background:${cfg.gradient}">
+        <div class="tr2-sheet-handle"></div>
+        <div class="tr2-sheet-ico">${icon(t.iconName, { size: 46, strokeWidth: 2 })}</div>
+        <div class="tr2-sheet-tier">${cfg.label}</div>
+      </div>
+      <div class="tr2-sheet-body">
+        <h2 class="tr2-sheet-title">${esc(t.name)}</h2>
+        <p class="tr2-sheet-desc">${esc(t.desc)}</p>
+        <div class="tr2-sheet-meta">
+          <div class="tr2-sheet-chip val">${icon("check", { size: 13, strokeWidth: 3 })} ${esc(t.goal)}</div>
         </div>
-        <span class="tm-card-prog-txt">${prog.v}/${prog.max}</span>
-      </div>`
-    : "";
+        <div class="tr2-sheet-social">Une preuve de plus de ton travail au quotidien.</div>
+      </div>
+      <div class="tr2-sheet-actions">
+        <button class="tr2-sheet-share" id="tr2-share">${icon("share", { size: 18, strokeWidth: 2 })} Partager</button>
+        <button class="tr2-sheet-close" id="tr2-close">Fermer</button>
+      </div>`;
+  } else {
+    sheet.innerHTML = `
+      <div class="tr2-sheet-glow locked">
+        <div class="tr2-sheet-handle"></div>
+        <div class="tr2-sheet-ico">${icon("lock", { size: 40, strokeWidth: 2 })}</div>
+        <div class="tr2-sheet-tier">Verrouillé · ${cfg.label}</div>
+      </div>
+      <div class="tr2-sheet-body">
+        <h2 class="tr2-sheet-title">${t.mystery ? "À découvrir" : esc(t.name)}</h2>
+        <p class="tr2-sheet-desc">${t.mystery ? "Continue à valider des compétences pour révéler ce trophée." : esc(t.desc)}</p>
+        <div class="tr2-sheet-meta">
+          <div class="tr2-sheet-chip val">Objectif : ${esc(t.goal)}</div>
+          ${t.close ? `<div class="tr2-sheet-chip prog">${t.prog.v}/${t.prog.max} — ${t.pct}%</div>` : ""}
+        </div>
+        <div class="tr2-sheet-social">Chaque validation te rapproche de ce jalon.</div>
+      </div>
+      <div class="tr2-sheet-actions">
+        <button class="tr2-sheet-share" id="tr2-goto">Voir mon parcours ${icon("chevron-right", { size: 16, strokeWidth: 2.5 })}</button>
+        <button class="tr2-sheet-close" id="tr2-close">Fermer</button>
+      </div>`;
+  }
 
-  return `
-<div class="${cls}" style="${cssVars};animation-delay:${delay}">
-  <div class="tm-card-ico">${icoContent}</div>
-  <div class="tm-card-body">
-    ${tierTag}
-    ${nameHtml}
-    <div class="tm-card-desc">${isMystery ? "Continue à progresser pour révéler ce trophée." : esc(t.desc)}</div>
-    ${progBar}
-  </div>
-  ${badge}
-</div>`;
+  _lastFocus = document.activeElement;
+  bg.classList.add("open");
+
+  sheet.querySelector("#tr2-close")?.addEventListener("click", _closeSheet);
+  sheet.querySelector("#tr2-goto")?.addEventListener("click", () => {
+    _closeSheet();
+    navigate("#/parcours");
+  });
+  sheet
+    .querySelector("#tr2-share")
+    ?.addEventListener("click", () => _shareTrophy(t));
+
+  enableSheetSwipe(sheet, _closeSheet, { overlay: bg });
+
+  _onKeydown = (e) => {
+    if (e.key === "Escape") _closeSheet();
+  };
+  document.addEventListener("keydown", _onKeydown);
+
+  // focus le premier bouton actionnable pour la nav clavier
+  requestAnimationFrame(() => sheet.querySelector("button")?.focus());
 }
 
-// ─── Headline contextuel ─────────────────────────────────────
-function _headline(unlocked, total, d) {
-  if (unlocked === 0) return "Lance-toi — enregistre ta première séance";
-  if (unlocked === total) return "Collection complète — Expert REMC";
-  if (unlocked >= total * 0.75)
-    return `Presque complet — ${total - unlocked} trophée${total - unlocked > 1 ? "s" : ""} restant`;
-  if (d.prenom)
-    return `${esc(d.prenom)}, ${unlocked} trophée${unlocked > 1 ? "s" : ""} débloqué${unlocked > 1 ? "s" : ""}`;
-  return `${unlocked} trophée${unlocked > 1 ? "s" : ""} débloqué${unlocked > 1 ? "s" : ""}`;
+function _closeSheet() {
+  if (_onKeydown) {
+    document.removeEventListener("keydown", _onKeydown);
+    _onKeydown = null;
+  }
+  const bg = document.querySelector("#tr2-sheet-bg.open");
+  if (bg) bg.classList.remove("open");
+  if (_lastFocus && typeof _lastFocus.focus === "function") {
+    _lastFocus.focus();
+    _lastFocus = null;
+  }
+}
+
+async function _shareTrophy(t) {
+  const text = `J'ai débloqué le trophée « ${t.name} » sur PermiGo 🏆`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: "Trophée PermiGo", text });
+    } else if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+      toast("Copié dans le presse-papier", "success");
+    }
+  } catch {
+    /* partage annulé par l'utilisateur — silencieux */
+  }
 }
