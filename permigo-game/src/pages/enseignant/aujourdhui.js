@@ -737,48 +737,22 @@ async function renderInto(root, _me) {
   // ─── Widget récap soir ────────────────────────────────────────
   const isEvening = new Date().getHours() >= 18;
   const todaySessions = todaySessionsRes?.data || [];
-  const totalSessionMinutes = todaySessions.reduce(
-    (s, r) => s + (r.duration_minutes || 0),
-    0,
-  );
-  const confirmedCount = todaySessions.filter(
-    (r) => r.confirmation_status === "confirmed",
-  ).length;
-
-  function _fmtMin(min) {
-    if (!min) return "0h";
-    const h = Math.floor(min / 60),
-      m = min % 60;
-    if (h === 0) return `${m}min`;
-    return m === 0 ? `${h}h` : `${h}h${m}`;
-  }
-  function _statusLabel(s) {
-    if (s === "confirmed")
-      return '<span class="aj-recap-row-status s-confirmed">Confirmée</span>';
-    if (s === "refused")
-      return '<span class="aj-recap-row-status s-refused">Refusée</span>';
-    if (s === "auto")
-      return '<span class="aj-recap-row-status s-auto">Auto</span>';
-    return '<span class="aj-recap-row-status s-pending">En attente</span>';
-  }
 
   const recapWidget =
     isEvening && todaySessions.length > 0
       ? `
-    <div class="aj-recap" id="aj-recap-soir" role="button" tabindex="0" aria-label="Ouvrir le log de session">
+    <div class="aj-recap" id="aj-recap-soir" role="button" tabindex="0" aria-label="Ouvrir la validation de séance">
       <div class="aj-recap-head">
         <span class="aj-recap-title">Ta journée</span>
-        <span class="aj-recap-kpi">${_fmtMin(totalSessionMinutes)}</span>
+        <span class="aj-recap-kpi">${todaySessions.length}</span>
       </div>
-      <div class="aj-recap-sub">${todaySessions.length} session${todaySessions.length > 1 ? "s" : ""} enregistrée${todaySessions.length > 1 ? "s" : ""}${confirmedCount > 0 ? ` · ${confirmedCount} confirmée${confirmedCount > 1 ? "s" : ""} par tes élèves` : ""}</div>
+      <div class="aj-recap-sub">${todaySessions.length} séance${todaySessions.length > 1 ? "s" : ""} enregistrée${todaySessions.length > 1 ? "s" : ""}</div>
       <div class="aj-recap-rows">
         ${todaySessions
           .map(
             (s) => `
           <div class="aj-recap-row">
             <span class="aj-recap-row-name">${esc(s.eleve_prenom || "Élève")}</span>
-            <span class="aj-recap-row-dur">${_fmtMin(s.duration_minutes)}</span>
-            ${_statusLabel(s.confirmation_status)}
           </div>
         `,
           )
