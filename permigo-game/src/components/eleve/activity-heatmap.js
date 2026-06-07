@@ -12,21 +12,41 @@
  * activityLevels : optional map { 'YYYY-MM-DD': 1|2|3|4 } pour intensité (1=light, 4=darkest)
  */
 
-const DAYS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-const MONTHS_FR = ['Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai', 'Juin', 'Juil.', 'Août', 'Sept.', 'Oct.', 'Nov.', 'Déc.'];
+const DAYS_FR = ["L", "M", "M", "J", "V", "S", "D"];
+const MONTHS_FR = [
+  "Janv.",
+  "Févr.",
+  "Mars",
+  "Avr.",
+  "Mai",
+  "Juin",
+  "Juil.",
+  "Août",
+  "Sept.",
+  "Oct.",
+  "Nov.",
+  "Déc.",
+];
 
 function dateKey(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export function renderHeatmap({ activeDates = [], activityLevels = null, activityDetails = {}, weeks = 14, title = "Mon activité" } = {}) {
+export function renderHeatmap({
+  activeDates = [],
+  activityLevels = null,
+  activityDetails = {},
+  weeks = 14,
+  title = "Mon activité",
+} = {}) {
   const active = new Set(activeDates);
   const levels = activityLevels || {};
-  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   // Démarre N semaines avant aujourd'hui, sur un lundi
   const startDate = new Date(today);
-  startDate.setDate(startDate.getDate() - (weeks * 7));
+  startDate.setDate(startDate.getDate() - weeks * 7);
   // Aller au lundi suivant (ou rester si on est lundi)
   const dayIdx = (startDate.getDay() + 6) % 7;
   startDate.setDate(startDate.getDate() - dayIdx);
@@ -58,12 +78,18 @@ export function renderHeatmap({ activeDates = [], activityLevels = null, activit
         level,
         isToday,
         detail,
-        dateLabel: cellDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }),
+        dateLabel: cellDate.toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "long",
+        }),
       });
 
       // Label du mois quand on change (et seulement sur la 1ère ligne)
       if (day === 0 && cellDate.getMonth() !== lastMonth) {
-        monthsLabels.push({ weekIdx: w, monthName: MONTHS_FR[cellDate.getMonth()] });
+        monthsLabels.push({
+          weekIdx: w,
+          monthName: MONTHS_FR[cellDate.getMonth()],
+        });
         lastMonth = cellDate.getMonth();
       }
     }
@@ -71,8 +97,8 @@ export function renderHeatmap({ activeDates = [], activityLevels = null, activit
 
   // Compteurs
   const totalActive = activeDates.length;
-  const last7Active = activeDates.filter(d => {
-    const dd = new Date(d + 'T00:00:00');
+  const last7Active = activeDates.filter((d) => {
+    const dd = new Date(d + "T00:00:00");
     return (today - dd) / 86400000 < 7;
   }).length;
 
@@ -86,20 +112,29 @@ export function renderHeatmap({ activeDates = [], activityLevels = null, activit
       </div>
       <div class="hmap-scroll">
         <div class="hmap-months">
-          ${monthsLabels.map(m => `<span style="grid-column-start:${m.weekIdx + 2}">${m.monthName}</span>`).join('')}
+          ${monthsLabels.map((m) => `<span style="grid-column-start:${m.weekIdx + 2}">${m.monthName}</span>`).join("")}
         </div>
         <div class="hmap-grid" style="grid-template-columns:auto repeat(${weeks},1fr)">
-          ${grid.map((row, dayIdx) => `
-            <div class="hmap-daylbl" style="grid-row:${dayIdx + 1}">${dayIdx % 2 === 1 ? DAYS_FR[dayIdx] : ''}</div>
-            ${row.map((cell, weekIdx) => `
-              <div class="hmap-cell lv-${cell.level} ${cell.isFuture ? 'future' : ''} ${cell.isToday ? 'today' : ''}"
+          ${grid
+            .map(
+              (row, dayIdx) => `
+            <div class="hmap-daylbl" style="grid-row:${dayIdx + 1}">${dayIdx % 2 === 1 ? DAYS_FR[dayIdx] : ""}</div>
+            ${row
+              .map(
+                (cell, weekIdx) => `
+              <div class="hmap-cell lv-${cell.level} ${cell.isFuture ? "future" : ""} ${cell.isToday ? "today" : ""}"
+                   role="img"
                    style="grid-row:${dayIdx + 1};grid-column:${weekIdx + 2}"
                    data-key="${cell.key}"
                    data-label="${cell.dateLabel}"
-                   data-detail="${cell.detail ? encodeURIComponent(cell.detail) : ''}"
-                   aria-label="${cell.dateLabel}${cell.isActive ? ' — actif' : ''}"></div>
-            `).join('')}
-          `).join('')}
+                   data-detail="${cell.detail ? encodeURIComponent(cell.detail) : ""}"
+                   aria-label="${cell.dateLabel}${cell.isActive ? " — actif" : ""}"></div>
+            `,
+              )
+              .join("")}
+          `,
+            )
+            .join("")}
         </div>
       </div>
       <div class="hmap-legend">
@@ -119,7 +154,7 @@ let _hmapCssInjected = false;
 export function ensureHeatmapStyles() {
   if (_hmapCssInjected) return;
   _hmapCssInjected = true;
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = `
     .hmap{padding:16px;background:var(--su);border:1px solid var(--bo);border-radius:14px;box-shadow:var(--s0)}
     .hmap-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
