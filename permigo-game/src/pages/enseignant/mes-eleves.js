@@ -253,7 +253,9 @@ const STYLE = `<style>
   /* Bouton actions rapides */
   .me-more {
     flex-shrink: 0;
+    align-self: center;
     width: 36px; height: 36px;
+    margin: 0 -6px 0 -2px; /* recale optiquement sur le bord droit de la carte */
     display: flex; align-items: center; justify-content: center;
     border: none; background: transparent; border-radius: 9px;
     color: var(--mu2); cursor: pointer;
@@ -720,10 +722,16 @@ function render() {
       <header class="me-hd">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
           <h1 class="me-h1">Mes élèves</h1>
-          <button id="me-invite-btn" class="me-invite-btn" type="button"
-                  aria-label="Inviter un élève">
-            ${icon("user-plus", { size: 14, strokeWidth: 2.2 })} Inviter
-          </button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button id="me-rank-btn" class="me-invite-btn" type="button"
+                    aria-label="Classement des élèves">
+              ${icon("award", { size: 14, strokeWidth: 2.2 })} Classement
+            </button>
+            <button id="me-invite-btn" class="me-invite-btn" type="button"
+                    aria-label="Inviter un élève">
+              ${icon("user-plus", { size: 14, strokeWidth: 2.2 })} Inviter
+            </button>
+          </div>
         </div>
         <p class="me-sub">${total} élève${total > 1 ? "s" : ""} · ${actifs} actif${actifs > 1 ? "s" : ""}</p>
       </header>
@@ -862,6 +870,11 @@ function wire() {
   _root
     .querySelector("#me-invite-btn")
     ?.addEventListener("click", () => openInviteEleveModal(_me));
+
+  _root.querySelector("#me-rank-btn")?.addEventListener("click", () => {
+    track("mes_eleves.classement.click");
+    navigate("#/classement-eleves");
+  });
 
   // Bouton CTA dans l'état vide (0 élève)
   _root.querySelector("#me-invite-empty-btn")?.addEventListener("click", () => {
