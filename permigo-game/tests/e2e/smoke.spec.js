@@ -3,12 +3,13 @@
  * Couvre : login → accueil → parcours → fiche compétence → notifications push
  *
  * Pré-requis : compte Supabase prod actif
- *   latifa.sahli@autopilot.fr / Autopilot2025!
+ *   eleve@test.fr / Autopilot2025!
  */
 import { test, expect } from "@playwright/test";
+import { ELEVE } from "./_creds.js";
 
-const EMAIL = "latifa.sahli@autopilot.fr";
-const PWD = "Autopilot2025!";
+const EMAIL = ELEVE.email;
+const PWD = ELEVE.pwd;
 
 async function loginAsEleve(page) {
   await page.goto("/#/login");

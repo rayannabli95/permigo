@@ -11,9 +11,10 @@
  * et tester son comportement indépendamment de la condition DB.
  */
 import { test, expect } from '@playwright/test';
+import { ELEVE } from './_creds.js';
 
-const EMAIL = 'latifa.sahli@autopilot.fr';
-const PWD   = 'Autopilot2025!';
+const EMAIL = ELEVE.email;
+const PWD   = ELEVE.pwd;
 
 async function loginAsEleve(page) {
   await page.goto('/#/login');
@@ -135,7 +136,7 @@ test.describe('Onboarding modal', () => {
     // On teste que notre compte test (profil existant avec date) n'affiche PAS le modal auto
     await loginAsEleve(page);
     await page.waitForTimeout(1_000); // laisser le temps au boot
-    // Le compte latifa a déjà fait l'onboarding → .ob-overlay ne doit pas être là
+    // Le compte élève de test a déjà fait l'onboarding → .ob-overlay ne doit pas être là
     await expect(page.locator('.ob-overlay')).toHaveCount(0);
   });
 });

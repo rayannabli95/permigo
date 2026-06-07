@@ -1,14 +1,15 @@
 /**
  * E2E — Enseignant : page Insights
  *
- * Compte test : rayan.nabli@autopilot.fr / Autopilot2025!
+ * Compte test : enseignant@test.fr / Autopilot2025!
  * Note : la route #/insights doit être câblée dans router.js par Cowork.
  * En attendant, on teste en injectant le mount() directement.
  */
 import { test, expect } from '@playwright/test';
+import { ENSEIGNANT } from './_creds.js';
 
-const EMAIL = 'rayan.nabli@autopilot.fr';
-const PWD   = 'Autopilot2025!';
+const EMAIL = ENSEIGNANT.email;
+const PWD   = ENSEIGNANT.pwd;
 
 async function loginAsEnseignant(page) {
   await page.goto('/#/login');

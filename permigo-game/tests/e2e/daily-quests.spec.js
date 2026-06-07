@@ -4,12 +4,13 @@
  * Valide le fix du commit 6eb9420 : avant la correction, data-quest-id valait
  * "undefined" (q.id au lieu de q.quest_id) et le claim échouait silencieusement.
  *
- * Compte test : latifa.sahli@autopilot.fr / Autopilot2025!
+ * Compte test : eleve@test.fr / Autopilot2025!
  */
 import { test, expect } from "@playwright/test";
+import { ELEVE } from "./_creds.js";
 
-const EMAIL = "latifa.sahli@autopilot.fr";
-const PWD = "Autopilot2025!";
+const EMAIL = ELEVE.email;
+const PWD = ELEVE.pwd;
 
 async function loginAsEleve(page) {
   // Le form de login est sur #/login (/ affiche la landing)

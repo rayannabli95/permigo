@@ -1,14 +1,15 @@
 /**
  * E2E — Bilan trimestriel enseignant (#/bilan/:eleveId)
  *
- * Compte test enseignant : rayan.nabli@autopilot.fr / Autopilot2025!
+ * Compte test enseignant : enseignant@test.fr / Autopilot2025!
  * Note : la RPC get_bilan_data doit être déployée par Cowork.
  * Si la RPC n'existe pas encore → certains tests passent en skip gracieux.
  */
 import { test, expect } from '@playwright/test';
+import { ENSEIGNANT } from './_creds.js';
 
-const EMAIL = 'rayan.nabli@autopilot.fr';
-const PWD   = 'Autopilot2025!';
+const EMAIL = ENSEIGNANT.email;
+const PWD   = ENSEIGNANT.pwd;
 
 // Remplace par un vrai UUID d'élève rattaché au moniteur de test
 // On tentera de le récupérer dynamiquement depuis mes-eleves si possible

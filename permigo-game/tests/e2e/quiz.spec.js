@@ -7,13 +7,14 @@
  *
  * Le quiz étant lancé depuis un overlay DOM, on peut l'interagir directement.
  *
- * Compte test : latifa.sahli@autopilot.fr (élève)
+ * Compte test : eleve@test.fr (élève)
  */
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
+import { ELEVE } from './_creds.js';
 
-const EMAIL = 'latifa.sahli@autopilot.fr';
-const PWD   = 'Autopilot2025!';
+const EMAIL = ELEVE.email;
+const PWD   = ELEVE.pwd;
 
 const SUPABASE_URL    = process.env.VITE_SUPABASE_URL    || 'https://yijlvzqbfxzjqmjmjmjm.supabase.co';
 const SUPABASE_ANON   = process.env.VITE_SUPABASE_ANON_KEY || '';
