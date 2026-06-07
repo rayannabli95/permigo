@@ -24,7 +24,6 @@ import {
   getMyChests,
   markChestOpened,
 } from "@/utils/game-state.js";
-import { playParcoursIntro } from "@/utils/sound.js";
 
 const isNight = (() => {
   const h = new Date().getHours();
@@ -1279,58 +1278,6 @@ const UNLOCK_REQ = [null, 5, 6, 6];
 const NOW_MS = Date.now();
 const NEW_BADGE_MS = 24 * 60 * 60 * 1000;
 
-// ─── Écran de chargement (3 s, jingle + messages qui défilent) ──────
-const LOADING_MSGS = [
-  "Réglage des rétroviseurs…",
-  "Vérification de l'angle mort…",
-  "On gonfle les pneus…",
-  "Calage du siège et de la ceinture…",
-  "Contrôle technique express…",
-  "Démarrage du moteur…",
-];
-
-function renderLoadingSplash() {
-  return `
-  <div class="prc-splash" role="status" aria-label="Chargement du parcours">
-    <style>
-      .prc-splash{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:var(--bg);padding:24px;}
-      .prc-splash-badge{width:96px;height:96px;border-radius:28px;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(180deg,#6fe016 0%,var(--a) 48%,var(--adk) 100%);box-shadow:0 14px 34px -8px rgba(70,163,2,.5),0 1.5px 0 0 rgba(255,255,255,.3) inset,0 -2px 8px 0 rgba(70,163,2,.5) inset;animation:prcSplashPop .5s cubic-bezier(.34,1.56,.64,1) both,prcSplashFloat 2.4s ease-in-out .5s infinite;}
-      .prc-splash-badge svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));}
-      .prc-splash-word{font:900 30px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;background:linear-gradient(90deg,var(--a),var(--adk));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-      .prc-splash-msg{font:600 14px/1.4 'Inter',sans-serif;color:var(--mu);min-height:20px;text-align:center;transition:opacity .22s;}
-      .prc-splash-dots{display:flex;gap:6px;}
-      .prc-splash-dots i{width:8px;height:8px;border-radius:50%;background:var(--a);opacity:.3;animation:prcSplashDot 1.2s ease-in-out infinite;}
-      .prc-splash-dots i:nth-child(2){animation-delay:.2s}
-      .prc-splash-dots i:nth-child(3){animation-delay:.4s}
-      @keyframes prcSplashPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
-      @keyframes prcSplashFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-      @keyframes prcSplashDot{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
-      @media (prefers-reduced-motion:reduce){.prc-splash-badge{animation:prcSplashPop .5s both}.prc-splash-dots i{animation:none}}
-    </style>
-    <div class="prc-splash-badge">${icon("map-pin", { size: 46, strokeWidth: 2.2, color: "#fff" })}</div>
-    <div class="prc-splash-word">PermiGo</div>
-    <div class="prc-splash-msg" id="prc-splash-msg">${LOADING_MSGS[0]}</div>
-    <div class="prc-splash-dots" aria-hidden="true"><i></i><i></i><i></i></div>
-  </div>`;
-}
-
-function cycleLoadingMessages(root) {
-  let i = 0;
-  const id = setInterval(() => {
-    const m = root.querySelector("#prc-splash-msg");
-    if (!m) return;
-    i = (i + 1) % LOADING_MSGS.length;
-    m.style.opacity = "0";
-    setTimeout(() => {
-      if (m) {
-        m.textContent = LOADING_MSGS[i];
-        m.style.opacity = "1";
-      }
-    }, 220);
-  }, 800);
-  return () => clearInterval(id);
-}
-
 // ─── Entry point ─────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
@@ -1338,11 +1285,7 @@ export async function mount(root) {
 
   track("page.view", { page: "eleve_parcours" });
 
-  // ── Écran de chargement 3 s : badge PermiGo vert + jingle + messages ──
-  const stopIntro = playParcoursIntro(3200);
-  const loadStart = Date.now();
-  root.innerHTML = renderLoadingSplash();
-  const stopMessages = cycleLoadingMessages(root);
+  root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div><div class="prc-subtitle">31 compétences · Permis B</div></div></div><div style="padding:32px;text-align:center;color:var(--mu2)">Chargement…</div></div>`;
 
   const { data: valData, error: valErr } = await sb
     .from("validations")
@@ -1351,8 +1294,6 @@ export async function mount(root) {
     )
     .eq("eleve_id", me.id);
   if (valErr) {
-    stopMessages();
-    stopIntro();
     root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div></div></div>
       <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
         <div style="font-size:40px;margin-bottom:12px">${icon("alert-circle", { size: 30 })}</div>
@@ -1398,12 +1339,6 @@ export async function mount(root) {
   } catch (_) {
     /* fallback : aucun coffre marqué ouvert si la DB échoue */
   }
-
-  // Maintenir le splash visible ~3 s minimum (le temps que le jingle respire)
-  const elapsed = Date.now() - loadStart;
-  if (elapsed < 3000) await new Promise((r) => setTimeout(r, 3000 - elapsed));
-  stopMessages();
-  stopIntro();
 
   ensureChestStyles();
   root.innerHTML = renderPage(
