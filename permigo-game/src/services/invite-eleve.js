@@ -129,6 +129,24 @@ export function openInviteEleveModal(me) {
       }
       .me-inv-copy:active { background:rgba(88,204,2,.2); }
       .me-inv-copy.copied { background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.2); color:var(--grd); }
+      .me-inv-share-row { display:flex; gap:8px; margin-top:10px; }
+      .me-inv-act {
+        flex:1; padding:11px 8px; border-radius:11px; border:0; cursor:pointer;
+        font:700 12.5px/1 'Plus Jakarta Sans',sans-serif; font-family:inherit;
+        display:inline-flex; align-items:center; justify-content:center; gap:6px;
+        text-decoration:none; -webkit-tap-highlight-color:transparent;
+        transition:transform .12s, filter .12s, background .12s;
+      }
+      .me-inv-act:active { transform:scale(.96); }
+      .me-inv-act.share {
+        color:#fff;
+        background:linear-gradient(to bottom,#6fe016 0%,var(--a) 48%,var(--adk) 100%);
+        box-shadow:0 2px 8px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 6px 0 rgba(70,163,2,.5) inset;
+      }
+      .me-inv-act.share:hover { filter:brightness(1.04); }
+      .me-inv-act.wa { color:#fff; background:#25D366; box-shadow:0 2px 8px 0 rgba(37,211,102,.3); }
+      .me-inv-act.copy2 { color:var(--ink); background:var(--bg2,var(--bg4)); border:1px solid var(--bo); }
+      .me-inv-act.copy2.copied { color:var(--grd); background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.2); }
       .me-inv-err-msg {
         font:500 12px/1.4 'Inter',sans-serif; color:var(--rd);
         margin-top:4px;
@@ -274,9 +292,11 @@ export function openInviteEleveModal(me) {
           <div class="me-inv-link-email ${r.error ? "err" : ""}">${esc(r.email)}</div>
           ${
             r.link
-              ? `<div class="me-inv-link-wrap">
-                 <input class="me-inv-link-input" type="text" value="${esc(r.link)}" readonly />
-                 <button class="me-inv-copy" type="button" data-link="${esc(r.link)}">Copier</button>
+              ? `<div class="me-inv-link-input" title="${esc(r.link)}">${esc(r.link)}</div>
+               <div class="me-inv-share-row">
+                 <button class="me-inv-act share" type="button" data-link="${esc(r.link)}">Partager</button>
+                 <a class="me-inv-act wa" href="https://wa.me/?text=${encodeURIComponent("Voici ton accès à PermiGo pour suivre ta progression au permis 🚗\n" + r.link)}" target="_blank" rel="noopener">WhatsApp</a>
+                 <button class="me-inv-act copy2" type="button" data-link="${esc(r.link)}">Copier</button>
                </div>`
               : `<div class="me-inv-err-msg">${esc(r.error || "Erreur inconnue")}</div>`
           }
@@ -289,25 +309,53 @@ export function openInviteEleveModal(me) {
 
     sheet.querySelector(".me-inv-close-btn").addEventListener("click", close);
 
-    sheet.querySelectorAll(".me-inv-copy").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const link = btn.dataset.link;
-        try {
-          await navigator.clipboard.writeText(link);
+    const SHARE_TEXT =
+      "Voici ton accès à PermiGo pour suivre ta progression au permis 🚗";
+    const doCopy = async (link, btn) => {
+      try {
+        await navigator.clipboard.writeText(link);
+        if (btn) {
           btn.textContent = "Copié ✓";
           btn.classList.add("copied");
           setTimeout(() => {
             btn.textContent = "Copier";
             btn.classList.remove("copied");
           }, 2000);
-        } catch {
-          const input = btn.previousElementSibling;
-          input?.select?.();
-          toast(
-            "Sélectionne le lien manuellement (clipboard indisponible)",
-            "error",
-            3500,
-          );
+        }
+        return true;
+      } catch {
+        toast(
+          "Copie indisponible — sélectionne le lien à la main",
+          "error",
+          3500,
+        );
+        return false;
+      }
+    };
+
+    sheet.querySelectorAll(".me-inv-act.copy2").forEach((btn) => {
+      btn.addEventListener("click", () => doCopy(btn.dataset.link, btn));
+    });
+
+    // Partager : feuille de partage native (WhatsApp/SMS/Mail…) en 1 tap.
+    // Fallback desktop sans navigator.share → copie.
+    sheet.querySelectorAll(".me-inv-act.share").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const link = btn.dataset.link;
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "PermiGo",
+              text: SHARE_TEXT,
+              url: link,
+            });
+            track("invite_eleve.shared", { method: "native" });
+          } catch {
+            /* partage annulé par l'utilisateur */
+          }
+        } else {
+          const ok = await doCopy(link, null);
+          if (ok) toast("Lien copié — colle-le où tu veux", "info", 3000);
         }
       });
     });
