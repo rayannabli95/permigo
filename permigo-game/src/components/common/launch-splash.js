@@ -2,7 +2,8 @@
 // Launch splash — écran d'accueil au lancement de l'app
 // Gate « Appuie pour démarrer » : le tap débloque le jingle (politique
 // autoplay) puis joue l'anim avant de révéler l'app.
-// Badge PermiGo en haut + « PERMIGO » en cubes 3D animés (vague).
+// Badge PermiGo en haut + « PERMIGO » en cubes 3D animés (vague) +
+// phrases qui défilent dans une pill « text-flip » (lettres flou→net).
 // Overlay fixe au-dessus de #app, affiché 1×/session (= un lancement).
 // ═══════════════════════════════════════════════════════════════
 import { icon } from "@/utils/icons.js";
@@ -10,6 +11,7 @@ import { playParcoursIntro } from "@/utils/sound.js";
 
 const SESSION_KEY = "permigo-launch-splash";
 const LETTERS = ["P", "E", "R", "M", "I", "G", "O"];
+const ACCROCHE = "Prêt à reprendre ta route ?";
 
 const MSGS = [
   "Démarrage du moteur…",
@@ -31,6 +33,18 @@ function cube(letter, i) {
       <div class="ls-face f-top"></div>
       <div class="ls-face f-bottom"></div>
     </div>`;
+}
+
+// « text-flip » : chaque lettre apparaît en flou→net, décalée (effet vague).
+// Recréer les <span> rejoue l'animation à chaque changement de phrase.
+function letterize(text) {
+  return text
+    .split("")
+    .map(
+      (ch, i) =>
+        `<span style="animation-delay:${(i * 0.025).toFixed(3)}s">${ch === " " ? "&nbsp;" : ch}</span>`,
+    )
+    .join("");
 }
 
 /**
@@ -68,19 +82,16 @@ export function showLaunchSplash({ duration = 2400 } = {}) {
       #pg-launch-splash .f-top   {background:#7be81e;transform:rotateX(90deg) translateZ(17px);}
       #pg-launch-splash .f-bottom{background:#3a8a00;transform:rotateX(-90deg) translateZ(17px);}
 
-      #pg-launch-splash .ls-msg{font:600 14px/1.4 'Inter','Nunito',sans-serif;color:var(--mu,#5f6788);min-height:20px;text-align:center;transition:opacity .22s;}
+      /* ── Pill « text-flip » (phrases sous les cubes) ── */
+      #pg-launch-splash .ls-flip{position:relative;display:inline-block;border-radius:12px;padding:8px 16px 10px;min-height:38px;font:800 17px/1.15 'Plus Jakarta Sans','Nunito',sans-serif;color:#1a2800;text-align:center;background:linear-gradient(to bottom,#ffffff,#edf2ea);box-shadow:inset 0 -1px #d6e3cf, inset 0 0 0 1px #d8e6d0, 0 4px 10px rgba(70,163,2,.12);}
+      #pg-launch-splash .ls-flip span{display:inline-block;animation:lsLetterIn .5s both;}
       #pg-launch-splash .ls-cta{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:99px;background:color-mix(in srgb,#58CC02 12%,transparent);border:1.5px solid color-mix(in srgb,#58CC02 30%,transparent);color:#46A302;font:800 14px/1 'Plus Jakarta Sans','Nunito',sans-serif;animation:lsPulse 1.6s ease-in-out infinite;}
-      #pg-launch-splash .ls-dots{display:none;gap:6px;}
       #pg-launch-splash.go .ls-cta{display:none;}
-      #pg-launch-splash.go .ls-dots{display:flex;}
-      #pg-launch-splash .ls-dots i{width:8px;height:8px;border-radius:50%;background:#58CC02;opacity:.3;animation:lsDot 1.2s ease-in-out infinite;}
-      #pg-launch-splash .ls-dots i:nth-child(2){animation-delay:.2s}
-      #pg-launch-splash .ls-dots i:nth-child(3){animation-delay:.4s}
 
       @keyframes lsPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
       @keyframes lsFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
       @keyframes lsPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.04);opacity:.85}}
-      @keyframes lsDot{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+      @keyframes lsLetterIn{from{opacity:0;filter:blur(10px)}to{opacity:1;filter:blur(0)}}
       /* La lettre reste face avant ~45% du temps, puis flip complet → effet vague */
       @keyframes lsCubeFlip{0%,45%{transform:rotateX(0)}70%,100%{transform:rotateX(360deg)}}
 
@@ -88,7 +99,8 @@ export function showLaunchSplash({ duration = 2400 } = {}) {
       @media (prefers-reduced-motion:reduce){
         #pg-launch-splash .ls-badge{animation:lsPop .55s both}
         #pg-launch-splash .ls-cube{animation:none}
-        #pg-launch-splash .ls-cta,#pg-launch-splash .ls-dots i{animation:none}
+        #pg-launch-splash .ls-cta{animation:none}
+        #pg-launch-splash .ls-flip span{animation:none}
       }
       @media (max-width:360px){
         #pg-launch-splash .ls-cube{width:30px;height:30px}
@@ -103,9 +115,8 @@ export function showLaunchSplash({ duration = 2400 } = {}) {
     </style>
     <div class="ls-badge">${icon("map-pin", { size: 46, strokeWidth: 2.2, color: "#fff" })}</div>
     <div class="ls-cubes" aria-label="PermiGo" role="img">${LETTERS.map(cube).join("")}</div>
-    <div class="ls-msg" id="pg-ls-msg">Prêt à reprendre ta route ?</div>
+    <p class="ls-flip" id="pg-ls-msg" aria-live="polite">${letterize(ACCROCHE)}</p>
     <div class="ls-cta">Appuie pour démarrer ${icon("chevron-right", { size: 15, strokeWidth: 2.8, color: "#46A302" })}</div>
-    <div class="ls-dots" aria-hidden="true"><i></i><i></i><i></i></div>
   `;
   document.body.appendChild(host);
   host.focus({ preventScroll: true });
@@ -119,22 +130,17 @@ export function showLaunchSplash({ duration = 2400 } = {}) {
     // Jingle — déclenché par le geste utilisateur → autoplay autorisé
     const stopMusic = playParcoursIntro(duration);
 
-    // Messages qui défilent
+    // Phrases qui défilent dans la pill « text-flip »
     let i = 0;
-    const msgEl = host.querySelector("#pg-ls-msg");
-    if (msgEl) msgEl.textContent = MSGS[0];
+    const setMsg = (n) => {
+      const el = host.querySelector("#pg-ls-msg");
+      if (el) el.innerHTML = letterize(MSGS[n]);
+    };
+    setMsg(0);
     const tid = setInterval(() => {
-      const m = host.querySelector("#pg-ls-msg");
-      if (!m) return;
       i = (i + 1) % MSGS.length;
-      m.style.opacity = "0";
-      setTimeout(() => {
-        if (m) {
-          m.textContent = MSGS[i];
-          m.style.opacity = "1";
-        }
-      }, 200);
-    }, 560);
+      setMsg(i);
+    }, 620);
 
     // Fin : coupe le son, fond, retire
     setTimeout(() => {
