@@ -522,7 +522,6 @@ async function renderInto(root, _me) {
     valsToday,
     valsAll,
     elevesAll,
-    consolidRes,
     todaySessionsRes,
     profileRes,
     totalValsRes,
@@ -549,15 +548,6 @@ async function renderInto(root, _me) {
       .from("profiles")
       .select("id, prenom, nom, last_active_at, enseignant_id, avatar_url")
       .eq("role", "eleve"),
-
-    // Quiz de consolidation en attente pour mes élèves
-    sb
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("validated_by", _me.id)
-      .not("consolidation_due_at", "is", null)
-      .lt("consolidation_due_at", new Date().toISOString())
-      .is("consolidation_done_at", null),
 
     // Sessions loggées aujourd'hui (pour le widget récap soir)
     // Note : Supabase rpc ne supporte pas .catch() direct → on wrap dans Promise.resolve
@@ -639,17 +629,7 @@ async function renderInto(root, _me) {
   const nbElevesEcole = (elevesAll.data || []).length;
   const nbElevesActifs = mesElevesActifs.length;
 
-  // Consolidations à relancer (quizzes 48h overdue)
-  const consolidCount = consolidRes.count ?? 0;
-
-  // Élèves inactifs depuis 7+ jours parmi mes élèves
-  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
-  const inactifCount = mesElevesActifs.filter((e) => {
-    const p = elevesMap[e.id];
-    return !p?.last_active_at || p.last_active_at < sevenDaysAgo;
-  }).length;
-
-  // Élèves à reconnecter : inactifs depuis 14j+ parmi mes élèves suivis
+  // Élèves à reconnecter : SEUL signal de relance, à 14 j d'inactivité pile.
   const fourteenDaysAgo = new Date(Date.now() - 14 * 86400000).toISOString();
   const reconnectList = mesElevesActifs.filter((e) => {
     const p = elevesMap[e.id];
@@ -658,8 +638,8 @@ async function renderInto(root, _me) {
   const reconnectCount = reconnectList.length;
 
   // ─── Hero « prochaine action » — 1 action utile priorisée ──────
-  // Priorité : relancer (14j+) → consolidation due → inactifs 7j → faire
-  // avancer le prochain élève → fallback démarrage. Ton factuel, pas d'emoji.
+  // Priorité : relancer (14 j, seul signal) → valider une compétence →
+  // fallback démarrage. Pas de relance quiz / inactif 7 j sur l'accueil.
   let hero;
   if (reconnectCount > 0) {
     const noms = reconnectList
@@ -676,44 +656,22 @@ async function renderInto(root, _me) {
       href: "#/eleves?tab=arelancer",
       ev: "hero.reconnect",
     };
-  } else if (consolidCount > 0) {
-    hero = {
-      tone: "warn",
-      ico: "refresh",
-      kicker: "Côté élève",
-      title: `${consolidCount} quiz pas encore refait${consolidCount > 1 ? "s" : ""} par tes élèves`,
-      sub: "Le quiz de révision aide l'élève à mémoriser ses acquis. Un petit rappel oral en leçon suffit.",
-      cta: "Voir mes élèves",
-      href: "#/eleves",
-      ev: "hero.consolidation",
-    };
-  } else if (inactifCount > 0) {
-    hero = {
-      tone: "neutral",
-      ico: "clock",
-      kicker: "Suivi",
-      title: `${inactifCount} élève${inactifCount > 1 ? "s" : ""} inactif${inactifCount > 1 ? "s" : ""} cette semaine`,
-      sub: "Un message peut les remettre en route.",
-      cta: "Voir mes élèves",
-      href: "#/eleves",
-      ev: "hero.inactifs",
-    };
   } else if (nbElevesActifs > 0) {
-    // Tout est à jour → proposer de faire avancer l'élève le moins avancé
+    // Pas de relance en attente → action positive : valider une compétence
     const next = mesElevesActifs
       .slice()
       .sort((a, b) => (a.acquis || 0) - (b.acquis || 0))[0];
     hero = {
       tone: "ok",
-      ico: "check",
-      kicker: "Tout est à jour",
-      title: "Aucune relance en attente",
+      ico: "check-circle",
+      kicker: "Action du jour",
+      title: "Valide une compétence",
       sub: next
-        ? `Prochain élève à faire avancer : ${esc(next.prenom || "Élève")}`
-        : "Enregistre ta prochaine séance.",
-      cta: next ? "Ouvrir son livret" : "Enregistrer une séance",
+        ? `Fais avancer ${esc(next.prenom || "un élève")} — ouvre son livret REMC.`
+        : "Ouvre un livret et valide ce qui est acquis en séance.",
+      cta: next ? "Ouvrir le livret" : "Enregistrer une séance",
       href: next ? `#/livret/${next.id}` : "#/log-session",
-      ev: "hero.next_eleve",
+      ev: "hero.valider_competence",
     };
   } else {
     hero = {
