@@ -118,9 +118,8 @@ const STYLE = `<style>
 
   /* Footer sticky — posé JUSTE AU-DESSUS de la nav du bas (≈60px) */
   .vs-footer { position: fixed; bottom: calc(60px + env(safe-area-inset-bottom,0px)); left: 0; right: 0; z-index: 45; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(12px); border-top: 1px solid var(--bo); }
-  .vs-submit { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 600px; margin: 0 auto; min-height: 52px; border: 0; border-radius: 14px; background: var(--a); color: #fff; font: 800 15px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--a) 60%, transparent); }
-  .vs-submit:disabled { opacity: .5; cursor: not-allowed; }
-  .vs-submit:not(:disabled):active { transform: scale(.98); }
+  /* layout seulement — l'apparence vient de .pg-btn (global) */
+  .vs-submit { width: 100%; max-width: 600px; margin: 0 auto; min-height: 52px; font-size: 15px; }
 
   .vs-empty { padding: 32px 16px; text-align: center; color: var(--mu2); font: 500 14px/1.5 'Inter', sans-serif; }
   .vs-skel { height: 64px; border-radius: 12px; background: var(--su); border: 1px solid var(--bo); animation: vsPulse 1.4s ease-in-out infinite; margin-bottom: 8px; }
@@ -349,7 +348,7 @@ function renderFooter() {
         ? `Enregistrer la séance`
         : `Enregistrer la séance`;
   return `<div class="vs-footer">
-    <button class="vs-submit" id="vs-submit" type="button">${icon("check", { size: 18, strokeWidth: 2.6 })} <span id="vs-submit-lbl">${esc(lbl)}</span></button>
+    <button class="vs-submit pg-btn" id="vs-submit" type="button">${icon("check", { size: 18, strokeWidth: 2.6 })} <span id="vs-submit-lbl">${esc(lbl)}</span></button>
   </div>`;
 }
 
