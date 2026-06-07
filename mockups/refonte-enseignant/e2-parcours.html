@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Maquette E2 — Parcours-pro (route à badges) · PermiGo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --a:#58CC02; --adk:#46A302; --ap:rgba(88,204,2,.09); --ag:rgba(88,204,2,.14);
+  --gr:#22c55e; --grk:#16a34a; --grp2:#dcfce7;
+  --am:#f59e0b; --amk:#d97706; --amx:#b45309;
+  --pu:#8b5cf6; --bl:#0ea5e9;
+  --bg:#f4f5fb; --bg2:#eceef8; --bg3:#f0f2f8;
+  --su:#fff; --su2:#f8f9fd;
+  --bo:#e2e6f2; --bo2:#edf0f9; --bo4:#cbd5e1;
+  --ink:#0b0d1a; --ink2:#1a1d2e; --ink3:#2d3050; --ink4:#1e293b;
+  --mu:#7880a4; --mu2:#94a3b8; --mu3:#64748b; --mu4:#475569; --mu5:#c4ccd8;
+  --fd:'Nunito',-apple-system,system-ui,sans-serif;
+  --fb:'Nunito',-apple-system,system-ui,sans-serif;
+  --fn:'JetBrains Mono','SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:#1a1d2e;font-family:var(--fb);color:var(--ink);
+  -webkit-font-smoothing:antialiased;display:flex;justify-content:center;
+  padding:24px 12px 64px;min-height:100vh;}
+.phone{width:100%;max-width:420px;background:var(--bg);border-radius:34px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.55);position:relative;}
+.phone-bar{height:44px;background:var(--ink);display:flex;align-items:center;
+  justify-content:space-between;padding:0 22px;color:#fff;font:800 13px/1 var(--fn);}
+.phone-bar .dots{display:flex;gap:6px;}
+.phone-bar .dots i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.3);}
+
+/* onglet Progression */
+.tabbar{display:flex;gap:4px;padding:12px 14px 0;background:var(--su);}
+.tab{flex:1;text-align:center;padding:9px 4px 12px;font:800 13px/1 var(--fd);
+  color:var(--mu2);border-bottom:2.5px solid transparent;cursor:pointer;}
+.tab.on{color:var(--ink);border-bottom-color:var(--a);}
+
+/* ── Hero compteur de validations (accent pro encre + vert marque) ── */
+.prc-hero{position:relative;overflow:hidden;padding:18px 18px 20px;
+  background:linear-gradient(160deg,var(--ink2) 0%,var(--ink3) 60%,var(--ink) 100%);}
+.prc-hero::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 75% 70% at 14% 25%,rgba(88,204,2,.30) 0%,transparent 55%),
+            radial-gradient(ellipse 50% 55% at 88% 80%,rgba(245,158,11,.14) 0%,transparent 55%);}
+.prc-hero-in{position:relative;z-index:1;}
+.prc-hero-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;}
+.prc-hero-title{font:900 20px/1.1 var(--fd);color:#fff;letter-spacing:-.03em;}
+.prc-hero-sub{font:700 12px/1 var(--fb);color:rgba(255,255,255,.6);margin-top:4px;}
+.prc-hero-count{text-align:right;}
+.prc-hero-count .v{font:900 30px/1 var(--fd);color:#fff;}
+.prc-hero-count .l{font:700 10px/1 var(--fb);color:rgba(255,255,255,.55);
+  text-transform:uppercase;letter-spacing:.1em;margin-top:3px;}
+.prc-next{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  border-radius:14px;padding:11px 13px;}
+.prc-next-lbl{font:800 9.5px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--a);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.prc-next-tool{font:800 13.5px/1.3 var(--fd);color:#fff;margin-bottom:9px;}
+.prc-next-bar{height:7px;background:rgba(255,255,255,.16);border-radius:99px;overflow:hidden;}
+.prc-next-fill{height:100%;width:40%;border-radius:99px;
+  background:linear-gradient(90deg,var(--a),#9ae831);box-shadow:0 0 8px rgba(88,204,2,.6);
+  transition:width 1s cubic-bezier(.2,.7,.3,1);}
+.prc-next-meta{font:700 10.5px/1 var(--fb);color:rgba(255,255,255,.65);margin-top:6px;}
+
+.benef{margin:14px 14px 4px;padding:11px 13px;border-radius:13px;
+  background:var(--ap);border:1px dashed rgba(88,204,2,.35);
+  font:600 11.5px/1.45 var(--fb);color:var(--adk);display:flex;gap:8px;}
+.benef b{color:var(--ink);}
+
+/* légende */
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:8px 18px 2px;
+  font:700 10.5px/1 var(--fb);color:var(--mu3);}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:9px;height:9px;border-radius:50%;}
+
+/* ── Route ── */
+.route{position:relative;margin:4px 0 0;padding:6px 0 30px;}
+.route svg.path{display:block;width:100%;height:auto;overflow:visible;}
+.p-shadow{stroke:rgba(11,13,26,.10);stroke-width:30;fill:none;stroke-linecap:round;}
+.p-edge{stroke:var(--bo4);stroke-width:27;fill:none;stroke-linecap:round;}
+.p-surface{stroke:var(--mu2);stroke-width:20;fill:none;stroke-linecap:round;}
+.p-dash{stroke:#fff;stroke-width:2.5;stroke-dasharray:6 12;stroke-linecap:round;fill:none;opacity:.85;}
+/* portion déjà parcourue = verte */
+.p-done{stroke:var(--a);stroke-width:20;fill:none;stroke-linecap:round;}
+.p-done-dash{stroke:#fff;stroke-width:2.5;stroke-dasharray:6 12;stroke-linecap:round;fill:none;opacity:.9;}
+
+.nodes{position:absolute;inset:0;}
+.node{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;
+  align-items:center;cursor:pointer;border:0;background:none;font-family:inherit;padding:0;
+  opacity:0;animation:pop .5s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3);}
+  65%{opacity:1;transform:translate(-50%,-50%) scale(1.08);}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+.node:focus-visible{outline:none;}
+.node:focus-visible .nd-circle{outline:3px solid var(--a);outline-offset:4px;}
+.nd-circle{width:62px;height:62px;border-radius:50%;border:4px solid #fff;
+  display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;
+  box-shadow:0 5px 14px rgba(11,13,26,.12);transition:transform .15s;}
+.node:active .nd-circle{transform:scale(.94);}
+.nd-circle svg{width:28px;height:28px;}
+
+/* done */
+.node.done .nd-circle{background:var(--a);color:#fff;box-shadow:0 5px 14px rgba(88,204,2,.4);}
+.nd-check{position:absolute;bottom:-3px;right:-3px;width:24px;height:24px;border-radius:50%;
+  background:var(--gr);border:3px solid var(--su);color:#fff;display:flex;align-items:center;justify-content:center;}
+.nd-check svg{width:12px;height:12px;}
+
+/* next */
+.node.next .nd-circle{background:var(--a);color:#fff;
+  box-shadow:0 6px 20px rgba(88,204,2,.5);animation:halo 2s ease-in-out infinite;}
+@keyframes halo{0%,100%{box-shadow:0 6px 20px rgba(88,204,2,.45);}
+  50%{box-shadow:0 6px 26px rgba(88,204,2,.75),0 0 0 6px rgba(88,204,2,.18);}}
+.node.next .nd-circle::after{content:'';position:absolute;inset:-14px;border-radius:50%;
+  border:2px solid rgba(88,204,2,.3);animation:ring 1.9s ease-out infinite;}
+@keyframes ring{0%{transform:scale(.85);opacity:.7;}100%{transform:scale(1.4);opacity:0;}}
+
+/* todo */
+.node.todo .nd-circle{background:var(--su);border-color:var(--bo);border-style:dashed;color:var(--mu2);
+  box-shadow:0 2px 8px rgba(11,13,26,.06);}
+/* locked */
+.node.locked{cursor:pointer;}
+.node.locked .nd-circle{background:var(--bg2);border-color:var(--bg3);color:var(--mu5);box-shadow:none;}
+
+/* labels */
+.nd-lbl{margin-top:11px;background:rgba(255,255,255,.97);border:1px solid var(--bo);
+  border-radius:13px;padding:6px 11px 7px;width:max-content;max-width:158px;text-align:center;
+  box-shadow:0 5px 14px rgba(11,13,26,.09);}
+.nd-name{display:block;font:800 12px/1.25 var(--fd);color:var(--ink);letter-spacing:-.01em;}
+.nd-thr{display:block;font:700 9.5px/1 var(--fn);color:var(--mu3);margin-top:3px;}
+.node.todo .nd-name,.node.locked .nd-name{color:var(--mu3);}
+.node.done .nd-lbl{border-color:rgba(88,204,2,.28);}
+/* next label = CTA */
+.node.next .nd-lbl{border-color:rgba(88,204,2,.4);box-shadow:0 8px 22px rgba(88,204,2,.18),0 0 0 2px rgba(88,204,2,.2);
+  position:relative;padding-bottom:11px;}
+.node.next .nd-stt{display:inline-block;margin-top:7px;padding:6px 13px;background:var(--a);color:#fff;
+  font:800 11px/1 var(--fb);border-radius:99px;box-shadow:0 3px 0 var(--adk);}
+.node.next .nd-lbl::before{content:'PROCHAIN OUTIL';position:absolute;bottom:calc(100% + 6px);
+  left:50%;transform:translateX(-50%);background:var(--a);color:#fff;font:900 8px/1 var(--fb);
+  padding:4px 10px;border-radius:99px;letter-spacing:.14em;white-space:nowrap;
+  box-shadow:0 3px 10px rgba(88,204,2,.4);animation:bob 1.6s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-3px);}}
+
+/* final */
+.final{margin:8px 14px 0;padding:22px 18px;background:var(--su);border:1.5px solid var(--bo);
+  border-radius:20px;text-align:center;box-shadow:0 4px 16px rgba(11,13,26,.07);position:relative;overflow:hidden;}
+.final::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 30% 20%,rgba(167,139,250,.10),transparent 55%),
+            radial-gradient(ellipse at 80% 90%,rgba(88,204,2,.07),transparent 55%);}
+.final .crown{width:48px;height:48px;border-radius:14px;margin:0 auto 10px;display:flex;
+  align-items:center;justify-content:center;color:#fff;position:relative;
+  background:linear-gradient(145deg,#5b21b6,#c4b5fd);box-shadow:0 6px 18px -4px rgba(167,139,250,.6);}
+.final h3{font:900 17px/1.2 var(--fd);margin:0 0 5px;color:var(--ink);position:relative;}
+.final p{font:600 12.5px/1.45 var(--fb);color:var(--mu3);margin:0;position:relative;}
+
+/* ── bottom sheet (fiche palier) ── */
+.sheet-bg{position:absolute;inset:0;background:rgba(11,13,26,.6);backdrop-filter:blur(6px);
+  z-index:50;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .22s;}
+.sheet-bg.open{opacity:1;pointer-events:auto;}
+.sheet{width:100%;background:var(--su);border-radius:26px 26px 0 0;overflow:hidden;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);
+  padding-bottom:22px;max-height:84%;overflow-y:auto;}
+.sheet-bg.open .sheet{transform:translateY(0);}
+.sheet-handle{width:36px;height:4px;background:var(--bo4);border-radius:2px;margin:12px auto 0;}
+.sheet-hero{padding:18px 20px 6px;text-align:center;}
+.sheet-cat{font:800 9.5px/1 var(--fb);letter-spacing:.16em;text-transform:uppercase;color:var(--mu2);margin-bottom:12px;}
+.sheet-ico{width:66px;height:66px;border-radius:50%;margin:0 auto 12px;display:flex;
+  align-items:center;justify-content:center;color:#fff;}
+.sheet-ico svg{width:30px;height:30px;}
+.sheet-ico.done{background:var(--a);box-shadow:0 8px 22px -6px rgba(88,204,2,.55);}
+.sheet-ico.next{background:var(--a);box-shadow:0 8px 22px -6px rgba(88,204,2,.55);}
+.sheet-ico.todo,.sheet-ico.locked{background:var(--bg2);color:var(--mu2);border:1px solid var(--bo);box-shadow:none;}
+.sheet-title{font:900 20px/1.2 var(--fd);color:var(--ink);margin:0 0 5px;}
+.sheet-thr{font:800 11px/1 var(--fn);color:var(--mu3);}
+.sheet-pill{display:inline-flex;align-items:center;gap:5px;margin-top:11px;padding:5px 13px;
+  border-radius:99px;font:800 10px/1 var(--fb);letter-spacing:.1em;text-transform:uppercase;}
+.sheet-pill.done{background:var(--grp2);color:var(--grk);}
+.sheet-pill.next{background:var(--ag);color:var(--adk);}
+.sheet-pill.todo,.sheet-pill.locked{background:var(--bg2);color:var(--mu3);}
+.sheet-body{padding:14px 20px 0;}
+.sheet-block{background:var(--bg);border:1px solid var(--bo);border-radius:14px;padding:14px;margin-bottom:12px;}
+.sheet-block-lbl{font:800 9.5px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mu2);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.sheet-block-lbl svg{color:var(--a);}
+.sheet-tool{font:800 15px/1.3 var(--fd);color:var(--ink);margin-bottom:6px;}
+.sheet-desc{font:600 13px/1.55 var(--fb);color:var(--mu);}
+.sheet-cta{display:block;width:100%;margin-top:4px;padding:14px;border:0;border-radius:14px;
+  background:var(--a);color:#fff;font:800 14px/1 var(--fd);cursor:pointer;min-height:50px;
+  box-shadow:0 4px 0 0 var(--adk);}
+.sheet-cta:active{transform:translateY(3px);box-shadow:0 1px 0 0 var(--adk);}
+.sheet-cta.ghost{background:var(--bg);color:var(--mu3);border:1px solid var(--bo);box-shadow:none;}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;}
+}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="phone-bar"><span>9:41</span><span class="dots"><i></i><i></i><i></i></span></div>
+
+  <div class="tabbar" role="tablist" aria-label="Progression">
+    <div class="tab on" role="tab" aria-selected="true">Parcours</div>
+    <div class="tab" role="tab">Trophées</div>
+    <div class="tab" role="tab">Ligue</div>
+  </div>
+
+  <div class="prc-hero">
+    <div class="prc-hero-in">
+      <div class="prc-hero-top">
+        <div>
+          <div class="prc-hero-title">Mon parcours pro</div>
+          <div class="prc-hero-sub">Enseignant chevronné · palier 4/10</div>
+        </div>
+        <div class="prc-hero-count"><div class="v">38</div><div class="l">validations</div></div>
+      </div>
+      <div class="prc-next">
+        <div class="prc-next-lbl"><span id="next-ico"></span> Prochain outil</div>
+        <div class="prc-next-tool">Vue d’ensemble de tous tes élèves</div>
+        <div class="prc-next-bar"><div class="prc-next-fill" id="nfill"></div></div>
+        <div class="prc-next-meta">Plus que 12 validations — palier 50</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="benef"><span>★</span><div><b>Bénéfice moniteur :</b> rend visible et gratifiant un parcours sinon abstrait — chaque palier débloque un <b>outil concret</b> qui lui fait gagner du temps. Jalons = validations cumulées (décision figée).</div></div>
+
+  <div class="legend">
+    <span><i style="background:var(--a)"></i>Débloqué</span>
+    <span><i style="background:var(--a);box-shadow:0 0 0 3px rgba(88,204,2,.25)"></i>Prochain</span>
+    <span><i style="background:var(--su);border:1.5px dashed var(--bo4)"></i>À venir</span>
+    <span><i style="background:var(--bg2);border:1px solid var(--bo)"></i>Verrouillé</span>
+  </div>
+
+  <div class="route">
+    <svg class="path" viewBox="0 0 396 1240" preserveAspectRatio="xMidYMid meet" aria-hidden="true" id="svg"></svg>
+    <div class="nodes" id="nodes"></div>
+  </div>
+
+  <div class="final">
+    <div class="crown"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+    <h3>Expert REMC certifié</h3>
+    <p>300 validations — le palier ultime. Encore loin, mais chaque séance t’en rapproche.</p>
+  </div>
+
+  <div class="sheet-bg" id="sheetbg">
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Détail du palier"></div>
+  </div>
+</div>
+
+<script>
+const P={
+  'file-text':'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  'chart-bar':'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  clipboard:'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
+  target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  'trending-up':'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+};
+const ic=(n,s=24,w=2)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||''}</svg>`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ── MONITEUR_TIERS (repris de src/data/moniteur-levels.js) ──
+const TIERS=[
+  {thr:3,  title:'Enseignant — Démarrage',     ico:'file-text',   tool:'Export PDF du livret élève',           desc:'Génère un PDF propre du livret REMC d’un élève (compétences, dates, commentaires). Pratique pour un point parent ou un dossier examen.'},
+  {thr:8,  title:'Enseignant confirmé',        ico:'chart-bar',   tool:'Tableaux de bord par élève',           desc:'Une vue par élève : progression compétence par compétence, rythme d’acquisition et points à retravailler.'},
+  {thr:15, title:'Enseignant confirmé',        ico:'clipboard',   tool:'Modèles de bilans mensuels',           desc:'Des trames prêtes à remplir pour le bilan mensuel d’un élève. Tu gagnes du temps et gardes une trace structurée.'},
+  {thr:30, title:'Enseignant chevronné',       ico:'target',      tool:'Mode préparation à l’examen',          desc:'Un mode dédié à l’approche de l’examen : check-list des points sensibles et suivi des dernières compétences à sécuriser.'},
+  {thr:50, title:'Enseignant chevronné',       ico:'users',       tool:'Vue d’ensemble de tes élèves',         desc:'Un tableau agrégé de toute ta classe : qui avance, qui stagne, qui est à relancer. D’un coup d’œil.'},
+  {thr:80, title:'Référent pédagogique',       ico:'file-text',   tool:'Export groupé des livrets',            desc:'Génère les PDF des livrets de plusieurs élèves en une fois. Idéal pour un bilan de fin de mois.'},
+  {thr:120,title:'Référent pédagogique',       ico:'book',        tool:'Formation continue',                   desc:'Accès aux modules de formation continue PermiGo : mises à jour REMC, pédagogie et nouveautés réglementaires.'},
+  {thr:170,title:'Référent pédagogique',       ico:'users',       tool:'Mentorat de nouveaux moniteurs',       desc:'Tu peux accompagner les enseignants débutants de ton réseau : partage de méthodes et suivi.'},
+  {thr:230,title:'Expert REMC',                ico:'shield',      tool:'Communauté privée experts REMC',       desc:'Rejoins l’espace privé des enseignants experts : échanges de cas concrets et entraide entre pairs.'},
+  {thr:300,title:'Expert REMC certifié',       ico:'trending-up', tool:'Comparaison anonyme avec d’autres écoles', desc:'Le palier ultime. Situe tes indicateurs par rapport à d’autres auto-écoles, de façon totalement anonyme.'},
+];
+const VALIDATIONS=38;
+// états
+TIERS.forEach((t,i)=>{
+  t.done = VALIDATIONS>=t.thr;
+});
+const nextIdx=TIERS.findIndex(t=>!t.done);
+TIERS.forEach((t,i)=>{
+  if(t.done) t.state='done';
+  else if(i===nextIdx) t.state='next';
+  else if(i<=nextIdx+2) t.state='todo';
+  else t.state='locked';
+});
+
+// ── Positions des nodes (coordonnées viewBox 396×1240) ──
+const PTS=[
+  {x:198,y:80},{x:300,y:200},{x:250,y:330},{x:120,y:450},{x:80,y:580},
+  {x:170,y:710},{x:300,y:830},{x:290,y:960},{x:160,y:1080},{x:110,y:1190},
+];
+const VBW=396,VBH=1240;
+
+// ── Path lisse (Catmull-Rom → Bézier) ──
+function smooth(pts){
+  let d=`M ${pts[0].x} ${pts[0].y}`;
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||pts[i+1];
+    const c1x=p1.x+(p2.x-p0.x)/6, c1y=p1.y+(p2.y-p0.y)/6;
+    const c2x=p2.x-(p3.x-p1.x)/6, c2y=p2.y-(p3.y-p1.y)/6;
+    d+=` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
+const full=smooth(PTS);
+// portion "done" = jusqu'au node next (inclus le segment vers next)
+const doneCount=TIERS.filter(t=>t.done).length; // 4
+const donePts=PTS.slice(0,doneCount+1); // jusqu'au node next
+const donePath=smooth(donePts);
+
+document.getElementById('svg').innerHTML=`
+  <path class="p-shadow" d="${full}" transform="translate(0,4)"/>
+  <path class="p-edge" d="${full}"/>
+  <path class="p-surface" d="${full}"/>
+  <path class="p-dash" d="${full}"/>
+  <path class="p-done" d="${donePath}"/>
+  <path class="p-done-dash" d="${donePath}"/>
+`;
+
+// ── Nodes ──
+let nh='';
+TIERS.forEach((t,i)=>{
+  const p=PTS[i];
+  const left=(p.x/VBW*100).toFixed(2), top=(p.y/VBH*100).toFixed(2);
+  const inner = t.state==='locked' ? ic('lock',26)
+              : t.state==='todo'   ? ic(t.ico,26)
+              : ic(t.ico,28);
+  const check = t.state==='done' ? `<div class="nd-check">${ic('check',12,3)}</div>` : '';
+  const cta   = t.state==='next' ? `<span class="nd-stt">Voir l’outil →</span>` : '';
+  nh+=`<button class="node ${t.state}" style="left:${left}%;top:${top}%;animation-delay:${i*70}ms" data-i="${i}" aria-label="Palier ${i+1} : ${esc(t.tool)}">
+    <div class="nd-circle">${inner}${check}</div>
+    <div class="nd-lbl">
+      <span class="nd-name">${esc(t.tool)}</span>
+      <span class="nd-thr">${t.thr} validations</span>
+      ${cta}
+    </div>
+  </button>`;
+});
+document.getElementById('nodes').innerHTML=nh;
+
+// hero next icon + fill
+document.getElementById('next-ico').innerHTML=ic('users',12);
+requestAnimationFrame(()=>{document.getElementById('nfill').style.width='40%';});
+
+// ── Bottom sheet ──
+const bg=document.getElementById('sheetbg'),sheet=document.getElementById('sheet');
+const STT={done:'Débloqué',next:'Prochain palier',todo:'À venir',locked:'Verrouillé'};
+function open(i){
+  const t=TIERS[i];
+  const cta = t.state==='done' ? `<button class="sheet-cta" onclick="closeSheet()">Ouvrir l’outil →</button>`
+            : t.state==='next' ? `<button class="sheet-cta" onclick="closeSheet()">Plus que ${t.thr-VALIDATIONS} validations →</button>`
+            : `<button class="sheet-cta ghost" onclick="closeSheet()">Atteins ${t.thr} validations pour débloquer</button>`;
+  sheet.innerHTML=`
+    <div class="sheet-handle"></div>
+    <div class="sheet-hero">
+      <div class="sheet-cat">Palier ${i+1} / 10 · ${esc(t.title)}</div>
+      <div class="sheet-ico ${t.state}">${ic(t.ico,30)}</div>
+      <h2 class="sheet-title">${esc(t.tool)}</h2>
+      <div class="sheet-thr">${t.thr} validations cumulées</div>
+      <div class="sheet-pill ${t.state}">${STT[t.state]}</div>
+    </div>
+    <div class="sheet-body">
+      <div class="sheet-block">
+        <div class="sheet-block-lbl">${ic('check',12,3)} Ce que ça débloque</div>
+        <div class="sheet-tool">${esc(t.tool)}</div>
+        <div class="sheet-desc">${esc(t.desc)}</div>
+      </div>
+      ${cta}
+    </div>`;
+  bg.classList.add('open');
+}
+window.closeSheet=()=>bg.classList.remove('open');
+bg.addEventListener('click',e=>{if(e.target===bg)closeSheet();});
+document.querySelectorAll('.node').forEach(el=>el.addEventListener('click',()=>open(+el.dataset.i)));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});
+</script>
+</body>
+</html>

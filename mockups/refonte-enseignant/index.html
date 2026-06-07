@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Maquettes — Refonte espace enseignant · PermiGo</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--a:#58CC02;--adk:#46A302;--ink:#0b0d1a;--mu:#7880a4;--bg:#f4f5fb;--su:#fff;--bo:#e2e6f2;
+  --fd:'Nunito',system-ui,sans-serif;}
+*{box-sizing:border-box;}
+body{margin:0;font-family:var(--fd);background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;padding:40px 20px 80px;}
+.wrap{max-width:760px;margin:0 auto;}
+.kicker{font:800 11px/1 var(--fd);letter-spacing:.16em;text-transform:uppercase;color:var(--a);margin-bottom:10px;}
+h1{font:900 30px/1.15 var(--fd);letter-spacing:-.03em;margin:0 0 10px;}
+.lede{font:600 15px/1.6 var(--fd);color:var(--mu);margin:0 0 28px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:560px){.grid{grid-template-columns:1fr;}}
+.card{display:block;background:var(--su);border:1px solid var(--bo);border-radius:18px;padding:22px;
+  text-decoration:none;color:inherit;box-shadow:0 4px 16px rgba(11,13,26,.05);
+  transition:transform .15s,box-shadow .15s,border-color .15s;}
+.card:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(11,13,26,.1);border-color:var(--a);}
+.card .tag{display:inline-block;font:800 10px/1 var(--fd);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--a);background:rgba(88,204,2,.1);padding:5px 10px;border-radius:99px;margin-bottom:12px;}
+.card h2{font:900 19px/1.2 var(--fd);margin:0 0 6px;letter-spacing:-.02em;}
+.card p{font:600 13px/1.5 var(--fd);color:var(--mu);margin:0;}
+.card .go{margin-top:14px;font:800 13px/1 var(--fd);color:var(--a);}
+.note{margin-top:30px;background:var(--su);border:1px solid var(--bo);border-radius:16px;padding:20px 22px;}
+.note h3{font:900 14px/1 var(--fd);margin:0 0 12px;}
+.note ul{margin:0;padding-left:18px;}
+.note li{font:600 13px/1.7 var(--fd);color:var(--mu);}
+.note li b{color:var(--ink);}
+.foot{margin-top:24px;font:600 12px/1.6 var(--fd);color:var(--mu);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">PermiGo · TEMPS 1 — Exploration</div>
+  <h1>Refonte de l’espace enseignant — maquettes</h1>
+  <p class="lede">Prototypes statiques pour validation <b>avant</b> toute implémentation lourde. Ouvre chaque maquette sur mobile (ou réduis la fenêtre à ~420px). Toutes deux respectent les décisions figées par le fondateur et les tokens réels du projet (vert de marque <code>#58CC02</code>, accent pro encre/sombre, Nunito).</p>
+
+  <div class="grid">
+    <a class="card" href="e1-trophees.html">
+      <span class="tag">E1 · Trophées</span>
+      <h2>Trophées enseignant</h2>
+      <p>Le « beau » des trophées élève (hero, barre de progression, grille 3 colonnes, cartes par tier avec glow, bottom-sheet). 12 jalons pédagogiques. Aucune gemme, aucune boutique — récompense = validations.</p>
+      <div class="go">Ouvrir la maquette →</div>
+    </a>
+    <a class="card" href="e2-parcours.html">
+      <span class="tag">E2 · Parcours-pro</span>
+      <h2>Route sinueuse à badges</h2>
+      <p>La route à badges de l’élève portée au moniteur. 10 paliers = nombre de validations cumulées ; chaque jalon débloque un outil concret. Node « PROCHAIN OUTIL », fiche palier au clic.</p>
+      <div class="go">Ouvrir la maquette →</div>
+    </a>
+  </div>
+
+  <div class="note">
+    <h3>Décisions figées respectées</h3>
+    <ul>
+      <li><b>Monnaie = validations</b> — pas de gemmes ni boutique de skins.</li>
+      <li><b>Jalons = validations cumulées</b> (3 → 300, <code>MONITEUR_TIERS</code>) — aucun autre type de jalon.</li>
+      <li><b>Palette = langage visuel élève</b> (vert de marque) + accent pro discret (ton encre/sombre sur les surfaces moniteur).</li>
+      <li><b>Nav « Progression »</b> — onglet unique regroupant Parcours · Trophées · Ligue (visible en tête des maquettes).</li>
+    </ul>
+    <h3 style="margin-top:18px">Contraintes techniques tenues</h3>
+    <ul>
+      <li>Mobile-first (≤ 480px), cibles ≥ 44px, <code>prefers-reduced-motion</code> géré.</li>
+      <li>Données réelles reprises de <code>moniteur-levels.js</code> et <code>trophees-moniteur.js</code> (rien réinventé).</li>
+      <li>Échappement <code>esc()</code> simulé dans le rendu ; en prod, <code>esc()</code> du projet sur toute donnée.</li>
+    </ul>
+  </div>
+
+  <p class="foot">⚠️ Ce sont des maquettes statiques de présentation (cadre téléphone + ruban « Bénéfice moniteur »). Le code final sera du Vanilla JS intégré dans <code>src/pages/enseignant/</code>, branché sur Supabase. Rien ici n’est destiné au build de l’app.</p>
+</div>
+</body>
+</html>
