@@ -647,7 +647,7 @@ async function _loadFeedSection() {
               : icon("check", { size: 12, strokeWidth: 2.5 });
             const dotCls = isSession ? "k-session" : "k-validation";
             const desc = isSession
-              ? `${_fmtMin(evt.duration_minutes)} de conduite`
+              ? `Séance`
               : `${esc(evt.competence_id || "—")} validée`;
             return `
           <div class="lr-feed-item">
