@@ -188,6 +188,25 @@ const TROPHEES = [
   },
 ];
 
+// Badge 3D par jalon (assets public/skins/badge-3d-*.png). Réutilise les
+// badges existants — l'icône lucide reste le repli mystère/erreur.
+// Pour changer un visuel : édite juste le nom de fichier ci-dessous.
+const BADGE_IMG = {
+  premiere_seance: "badge-3d-01",
+  dix_comps: "badge-3d-02",
+  premier_eleve: "badge-3d-03",
+  streak_7: "badge-3d-04",
+  cinquante_comps: "badge-3d-05",
+  cinq_eleves: "badge-3d-06",
+  cent_comps: "badge-3d-07",
+  streak_30: "badge-3d-08",
+  dix_eleves: "badge-3d-09",
+  deux_cent_comps: "badge-3d-09",
+  classe_complete: "badge-3d-06",
+  expert_remc: "badge-3d-ultimate",
+};
+const badgeSrc = (id) => `/skins/${BADGE_IMG[id] || "badge-3d-01"}.png`;
+
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
 .tr2 {
@@ -311,6 +330,12 @@ const STYLE = `<style>
 .tr2-card.unlocked .tr2-card-ico { background: rgba(255,255,255,.22); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.4); }
 .tr2-card.locked .tr2-card-ico { background: var(--bg2); color: var(--mu2); border: 1px solid var(--bo); }
 .tr2-card.unlocked:active .tr2-card-ico { transform: scale(1.12); }
+/* Badge 3D image (remplace l'icône lucide) */
+.tr2-card.unlocked .tr2-card-ico,
+.tr2-card.locked .tr2-card-ico { background: transparent; border: 0; box-shadow: none; }
+.tr2-card-img { width: 48px; height: 48px; object-fit: contain; display: block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.2)); }
+.tr2-card-img.locked { filter: grayscale(1) opacity(.4); }
+.tr2-sheet-img { width: 92px; height: 92px; object-fit: contain; display: block; filter: drop-shadow(0 5px 12px rgba(0,0,0,.28)); }
 .tr2-card-name {
   font: 800 10.5px/1.2 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -568,7 +593,9 @@ function _cardHtml(t) {
   const i = _results.indexOf(t);
   const cfg = TIERS[t.tier];
   const cls = t.unlocked ? `unlocked ${t.tier}` : "locked";
-  const icoName = t.mystery ? "lock" : t.iconName;
+  const icoHtml = t.mystery
+    ? icon("lock", { size: 22, strokeWidth: 2 })
+    : `<img src="${badgeSrc(t.id)}" alt="" class="tr2-card-img${t.unlocked ? "" : " locked"}" loading="lazy">`;
   const name = t.mystery ? "???" : esc(t.name);
   const sub = t.unlocked
     ? `<div class="tr2-card-dot"></div>`
@@ -579,7 +606,7 @@ function _cardHtml(t) {
     ? `--tc-grad:${cfg.gradient};--tc-glow:${cfg.glow}`
     : "";
   return `<button class="tr2-card ${cls}" style="${styleVars}" data-i="${i}" aria-label="${name}${t.unlocked ? " — débloqué" : " — verrouillé"}">
-    <div class="tr2-card-ico">${icon(icoName, { size: t.unlocked ? 24 : 20, strokeWidth: 2 })}</div>
+    <div class="tr2-card-ico">${icoHtml}</div>
     <div class="tr2-card-name">${name}</div>
     ${sub}
   </button>`;
@@ -600,7 +627,7 @@ function _openSheet(root, i) {
     sheet.innerHTML = `
       <div class="tr2-sheet-glow" style="background:${cfg.gradient}">
         <div class="tr2-sheet-handle"></div>
-        <div class="tr2-sheet-ico">${icon(t.iconName, { size: 46, strokeWidth: 2 })}</div>
+        <div class="tr2-sheet-ico" style="background:transparent;border:0;box-shadow:none"><img src="${badgeSrc(t.id)}" alt="" class="tr2-sheet-img"></div>
         <div class="tr2-sheet-tier">${cfg.label}</div>
       </div>
       <div class="tr2-sheet-body">
