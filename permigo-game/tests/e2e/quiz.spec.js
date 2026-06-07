@@ -25,7 +25,7 @@ async function loginAsEleve(page) {
   await page.fill('#lg-email', EMAIL);
   await page.fill('#lg-pwd', PWD);
   await page.click('#lg-submit');
-  await page.waitForSelector('.acc-bonjour', { timeout: 20_000 });
+  await page.waitForSelector('.acc2-hero-hi', { timeout: 20_000 });
 }
 
 test.describe('Quiz — overlay UI', () => {
@@ -132,7 +132,7 @@ test.describe('Quiz — composant quiz-engine (smoke)', () => {
     // mais on peut vérifier que la page charge sans erreur JS
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await page.goto('/');
+    await page.goto('/#/login');
     await page.waitForSelector('#lg-email', { timeout: 10_000 });
     expect(errors.filter(e => e.includes('quiz-engine'))).toHaveLength(0);
   });
