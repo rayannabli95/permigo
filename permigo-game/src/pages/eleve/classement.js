@@ -20,7 +20,24 @@ import {
 } from "@/utils/league-shared.js";
 
 const LIMIT = 50;
-const MEDALS = { 1: "#1", 2: "#2", 3: "#3" };
+// Médailles top 3 : dégradé + icône + halo (or / argent / bronze)
+const MEDALS = {
+  1: {
+    grad: "linear-gradient(145deg,#fde68a,#f59e0b)",
+    ico: "crown",
+    glow: "rgba(245,158,11,.4)",
+  },
+  2: {
+    grad: "linear-gradient(145deg,#f1f5f9,#94a3b8)",
+    ico: "award",
+    glow: "rgba(148,163,184,.35)",
+  },
+  3: {
+    grad: "linear-gradient(145deg,#fcd34d,#b45309)",
+    ico: "award",
+    glow: "rgba(180,83,9,.35)",
+  },
+};
 
 // ─── Countdown : temps restant jusqu'au lundi 00:00 ────────────
 function msToNextMonday() {
@@ -113,7 +130,15 @@ ${LEAGUE_CSS}
 .clt-row.me { border: 2px solid #6366f1; background: rgba(99,102,241,.06); }
 .clt-rank { flex-shrink: 0; min-width: 30px; text-align: center;
   font: 800 13px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
-.clt-rank.medal { font-size: 20px; }
+.clt-rank.medal {
+  width: 32px; height: 32px; min-width: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  background: var(--mg);
+  box-shadow: 0 3px 10px -2px var(--mglow), inset 0 1px 0 rgba(255,255,255,.45);
+}
+.clt-row.top1 { border-color: color-mix(in srgb, #f59e0b 45%, transparent); box-shadow: 0 4px 16px -6px rgba(245,158,11,.4); }
+.clt-row.top2 { border-color: color-mix(in srgb, #94a3b8 45%, transparent); }
+.clt-row.top3 { border-color: color-mix(in srgb, #b45309 40%, transparent); }
 .clt-av { flex-shrink: 0; }
 .clt-name { flex: 1; min-width: 0; font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -160,10 +185,12 @@ export async function mount(root) {
       (r) => r,
       () => ({ data: null, error: true }),
     ),
-    sb.rpc("get_eleve_leaderboard", { p_scope: "national", p_limit: LIMIT }).then(
-      (r) => r,
-      () => ({ data: null, error: true }),
-    ),
+    sb
+      .rpc("get_eleve_leaderboard", { p_scope: "national", p_limit: LIMIT })
+      .then(
+        (r) => r,
+        () => ({ data: null, error: true }),
+      ),
     sb.rpc("get_league_leaderboard", { p_role: "eleve", p_limit: LIMIT }).then(
       (r) => r,
       () => ({ data: null, error: true }),
@@ -315,10 +342,13 @@ function _renderAllTimeBody(rows) {
 }
 
 function _rowHtml(r) {
-  const medal = MEDALS[r.rang];
+  const m = MEDALS[r.rang];
+  const rankCell = m
+    ? `<div class="clt-rank medal" style="--mg:${m.grad};--mglow:${m.glow}" aria-label="Rang ${r.rang}">${icon(m.ico, { size: 17, strokeWidth: 2.2, color: "#fff" })}</div>`
+    : `<div class="clt-rank" aria-label="Rang ${r.rang}">${r.rang}</div>`;
   return `
-  <div class="clt-row ${r.is_me ? "me" : ""}">
-    <div class="clt-rank ${medal ? "medal" : ""}" aria-label="Rang ${r.rang}">${medal || r.rang}</div>
+  <div class="clt-row ${r.is_me ? "me" : ""} ${m ? "top" + r.rang : ""}">
+    ${rankCell}
     <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 34)}</div>
     <div class="clt-name">${esc(r.display_name)}</div>
     ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ""}
