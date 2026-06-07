@@ -77,6 +77,28 @@ export function playParcours() {
   play("parcours", 0.15);
 }
 
+// Jingle de l'écran de chargement parcours. Joue puis s'arrête après
+// `durationMs`. Retourne une fonction stop() (appelée à la fermeture du splash).
+export function playParcoursIntro(durationMs = 3000) {
+  if (!isSoundEnabled()) return () => {};
+  try {
+    const a = _get("parcours", 0.18);
+    a.currentTime = 0;
+    a.play().catch(() => {});
+    const t = setTimeout(() => {
+      a.pause();
+      a.currentTime = 0;
+    }, durationMs);
+    return () => {
+      clearTimeout(t);
+      a.pause();
+      a.currentTime = 0;
+    };
+  } catch {
+    return () => {};
+  }
+}
+
 // Joué une seule fois par session, après le 1er geste user (autoplay safe)
 // Durée limitée à 2 secondes
 export function playLaunch() {

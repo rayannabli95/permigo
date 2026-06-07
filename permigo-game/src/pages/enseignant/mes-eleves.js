@@ -171,6 +171,8 @@ const STYLE = `<style>
     font: 600 14px/1.2 'Inter', sans-serif;
     color: var(--ink);
     margin: 0 0 4px;
+    text-transform: uppercase;
+    letter-spacing: .01em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -251,7 +253,9 @@ const STYLE = `<style>
   /* Bouton actions rapides */
   .me-more {
     flex-shrink: 0;
+    align-self: center;
     width: 36px; height: 36px;
+    margin: 0 -6px 0 -2px; /* recale optiquement sur le bord droit de la carte */
     display: flex; align-items: center; justify-content: center;
     border: none; background: transparent; border-radius: 9px;
     color: var(--mu2); cursor: pointer;
@@ -697,7 +701,8 @@ function render() {
   const recusCount = _eleves.filter((e) => e.readiness === "recu").length;
   const roster = _eleves.filter((e) => e.readiness !== "recu");
   const total = roster.length;
-  const actifs = roster.filter((e) => e.actif).length;
+  // « Actifs » = actifs hors ceux à relancer (les deux compteurs ne se chevauchent pas)
+  const actifs = roster.filter((e) => e.actif && !e.aRelancer).length;
   const prets = roster.filter((e) => e.readiness === "pret").length;
   const aRelancerList = roster.filter((e) => e.aRelancer);
 
@@ -717,10 +722,16 @@ function render() {
       <header class="me-hd">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
           <h1 class="me-h1">Mes élèves</h1>
-          <button id="me-invite-btn" class="me-invite-btn" type="button"
-                  aria-label="Inviter un élève">
-            ${icon("user-plus", { size: 14, strokeWidth: 2.2 })} Inviter
-          </button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button id="me-rank-btn" class="me-invite-btn" type="button"
+                    aria-label="Classement des élèves">
+              ${icon("award", { size: 14, strokeWidth: 2.2 })} Classement
+            </button>
+            <button id="me-invite-btn" class="me-invite-btn" type="button"
+                    aria-label="Inviter un élève">
+              ${icon("user-plus", { size: 14, strokeWidth: 2.2 })} Inviter
+            </button>
+          </div>
         </div>
         <p class="me-sub">${total} élève${total > 1 ? "s" : ""} · ${actifs} actif${actifs > 1 ? "s" : ""}</p>
       </header>
@@ -789,7 +800,7 @@ function filterList() {
   } else {
     // tous les autres onglets excluent les élèves reçus (archivés)
     list = list.filter((e) => e.readiness !== "recu");
-    if (_tab === "actifs") list = list.filter((e) => e.actif);
+    if (_tab === "actifs") list = list.filter((e) => e.actif && !e.aRelancer);
     if (_tab === "arelancer") list = list.filter((e) => e.aRelancer);
     if (_tab === "prets") list = list.filter((e) => e.readiness === "pret");
   }
@@ -821,7 +832,6 @@ function renderRow(eleve) {
       <div class="me-info">
         <div class="me-nom">
           ${fullNom || "—"}
-          ${eleve.isMine ? `<span style="margin-left:6px;display:inline-block;font:700 9px/1 'Inter',sans-serif;padding:3px 6px;border-radius:4px;background:rgba(88,204,2,.12);color:var(--adk);letter-spacing:.04em;text-transform:uppercase;vertical-align:middle">attitré</span>` : ""}
         </div>
         <div class="me-meta">
           ${
@@ -860,6 +870,11 @@ function wire() {
   _root
     .querySelector("#me-invite-btn")
     ?.addEventListener("click", () => openInviteEleveModal(_me));
+
+  _root.querySelector("#me-rank-btn")?.addEventListener("click", () => {
+    track("mes_eleves.classement.click");
+    navigate("#/classement-eleves");
+  });
 
   // Bouton CTA dans l'état vide (0 élève)
   _root.querySelector("#me-invite-empty-btn")?.addEventListener("click", () => {
@@ -1060,7 +1075,7 @@ function openQuickMenu(eleveId, anchorRow) {
         <span class="me-qm-ico">${icon("calendar", { size: 14, strokeWidth: 2.5 })}</span> Examen planifié
       </button>
       <button class="me-qm-item ok" data-action="exam-recu">
-        <span class="me-qm-ico">${icon("award", { size: 14, strokeWidth: 2.5 })}</span> Marquer reçu
+        <span class="me-qm-ico">${icon("award", { size: 14, strokeWidth: 2.5 })}</span> Permis obtenu
       </button>
       <button class="me-qm-item danger" data-action="exam-rate">
         <span class="me-qm-ico">${icon("x", { size: 14, strokeWidth: 2.5 })}</span> Examen raté
@@ -1134,7 +1149,7 @@ async function recordExam(eleveId, statut, dateExamen) {
   // Snackbar avec undo (supprime la ligne créée, restaure l'état précédent)
   const msg = {
     planifie: "Examen planifié",
-    recu: "Marqué reçu — archivé dans « Reçus »",
+    recu: "Permis obtenu — archivé dans « Reçus »",
     rate: "Résultat d'examen enregistré",
   };
   showUndoSnackbar(msg[statut] || "Enregistré", async () => {
@@ -1214,11 +1229,11 @@ function confirmRecu(eleveId) {
     ${DIALOG_STYLE}
     <div class="me-cf-bg" data-close="1"></div>
     <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Confirmer la réussite">
-      <div class="me-cf-title">Marquer ${prenom} reçu ?</div>
+      <div class="me-cf-title">${prenom} a obtenu le permis ?</div>
       <div class="me-cf-body">Il quittera ta liste active et sera archivé dans l'onglet « Reçus ». Tu pourras annuler juste après.</div>
       <div class="me-cf-actions">
         <button class="me-cf-btn" data-close="1" type="button">Annuler</button>
-        <button class="me-cf-btn confirm" id="me-cf-ok" type="button">Marquer reçu</button>
+        <button class="me-cf-btn confirm" id="me-cf-ok" type="button">Permis obtenu</button>
       </div>
     </div>`;
   document.body.appendChild(wrap);
@@ -1415,7 +1430,7 @@ function renderList() {
   const recusCount = _eleves.filter((e) => e.readiness === "recu").length;
   const roster = _eleves.filter((e) => e.readiness !== "recu");
   const total = roster.length;
-  const actifs = roster.filter((e) => e.actif).length;
+  const actifs = roster.filter((e) => e.actif && !e.aRelancer).length;
   const prets = roster.filter((e) => e.readiness === "pret").length;
   const arelancer = roster.filter((e) => e.aRelancer).length;
 

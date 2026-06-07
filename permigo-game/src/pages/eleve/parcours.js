@@ -3,22 +3,35 @@
 // Inspiration : Apple Health × Duolingo × ancien permigo-v7
 // Route SVG sinueuse · Images monde · Nodes animés · Light theme
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { REMC } from '@/data/remc.js';
-import { WORLDS } from '@/data/worlds.js';
-import { ASSETS } from '@/utils/assets.js';
-import { getCompDetail } from '@/data/remc-details.js';
-import { icon } from '@/utils/icons.js';
-import { renderChest, openChestModal, ensureChestStyles } from '@/components/eleve/chest.js';
-import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
-import { unlockChest, openChest, getMyChests, markChestOpened } from '@/utils/game-state.js';
-import { playParcours } from '@/utils/sound.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { REMC } from "@/data/remc.js";
+import { WORLDS } from "@/data/worlds.js";
+import { ASSETS } from "@/utils/assets.js";
+import { getCompDetail } from "@/data/remc-details.js";
+import { icon } from "@/utils/icons.js";
+import {
+  renderChest,
+  openChestModal,
+  ensureChestStyles,
+} from "@/components/eleve/chest.js";
+import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
+import {
+  unlockChest,
+  openChest,
+  getMyChests,
+  markChestOpened,
+} from "@/utils/game-state.js";
+import { playParcoursIntro } from "@/utils/sound.js";
 
-const isNight = (() => { const h = new Date().getHours(); return h >= 20 || h < 7; })();
-const WORLD_BG = (num) => `/skins/landing/monde${num}${isNight ? 'nuit' : 'jour'}.webp`;
+const isNight = (() => {
+  const h = new Date().getHours();
+  return h >= 20 || h < 7;
+})();
+const WORLD_BG = (num) =>
+  `/skins/landing/monde${num}${isNight ? "nuit" : "jour"}.webp`;
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -1234,36 +1247,115 @@ const STYLE = `<style>
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
 const WORLDS_META = [
-  { num: 1, color: 'var(--gr)', glow: 'rgba(16,185,129,.35)',  img: '/skins/permigo-remc-maitrise-vehicule-flag-v1.png' },
-  { num: 2, color: '#06b6d4', glow: 'rgba(6,182,212,.35)',   img: ASSETS.worldC2 },
-  { num: 3, color: 'var(--pu)', glow: 'rgba(139,92,246,.35)',  img: ASSETS.worldC3 },
-  { num: 4, color: 'var(--am)', glow: 'rgba(245,158,11,.35)',  img: ASSETS.worldC4 },
+  {
+    num: 1,
+    color: "var(--gr)",
+    glow: "rgba(16,185,129,.35)",
+    img: "/skins/permigo-remc-maitrise-vehicule-flag-v1.png",
+  },
+  {
+    num: 2,
+    color: "#06b6d4",
+    glow: "rgba(6,182,212,.35)",
+    img: ASSETS.worldC2,
+  },
+  {
+    num: 3,
+    color: "var(--pu)",
+    glow: "rgba(139,92,246,.35)",
+    img: ASSETS.worldC3,
+  },
+  {
+    num: 4,
+    color: "var(--am)",
+    glow: "rgba(245,158,11,.35)",
+    img: ASSETS.worldC4,
+  },
 ];
 
 // Combien de compétences du monde N-1 pour débloquer le monde N
 const UNLOCK_REQ = [null, 5, 6, 6];
 
-const NOW_MS       = Date.now();
+const NOW_MS = Date.now();
 const NEW_BADGE_MS = 24 * 60 * 60 * 1000;
+
+// ─── Écran de chargement (3 s, jingle + messages qui défilent) ──────
+const LOADING_MSGS = [
+  "Réglage des rétroviseurs…",
+  "Vérification de l'angle mort…",
+  "On gonfle les pneus…",
+  "Calage du siège et de la ceinture…",
+  "Contrôle technique express…",
+  "Démarrage du moteur…",
+];
+
+function renderLoadingSplash() {
+  return `
+  <div class="prc-splash" role="status" aria-label="Chargement du parcours">
+    <style>
+      .prc-splash{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:var(--bg);padding:24px;}
+      .prc-splash-badge{width:96px;height:96px;border-radius:28px;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(180deg,#6fe016 0%,var(--a) 48%,var(--adk) 100%);box-shadow:0 14px 34px -8px rgba(70,163,2,.5),0 1.5px 0 0 rgba(255,255,255,.3) inset,0 -2px 8px 0 rgba(70,163,2,.5) inset;animation:prcSplashPop .5s cubic-bezier(.34,1.56,.64,1) both,prcSplashFloat 2.4s ease-in-out .5s infinite;}
+      .prc-splash-badge svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));}
+      .prc-splash-word{font:900 30px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;background:linear-gradient(90deg,var(--a),var(--adk));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+      .prc-splash-msg{font:600 14px/1.4 'Inter',sans-serif;color:var(--mu);min-height:20px;text-align:center;transition:opacity .22s;}
+      .prc-splash-dots{display:flex;gap:6px;}
+      .prc-splash-dots i{width:8px;height:8px;border-radius:50%;background:var(--a);opacity:.3;animation:prcSplashDot 1.2s ease-in-out infinite;}
+      .prc-splash-dots i:nth-child(2){animation-delay:.2s}
+      .prc-splash-dots i:nth-child(3){animation-delay:.4s}
+      @keyframes prcSplashPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+      @keyframes prcSplashFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+      @keyframes prcSplashDot{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+      @media (prefers-reduced-motion:reduce){.prc-splash-badge{animation:prcSplashPop .5s both}.prc-splash-dots i{animation:none}}
+    </style>
+    <div class="prc-splash-badge">${icon("map-pin", { size: 46, strokeWidth: 2.2, color: "#fff" })}</div>
+    <div class="prc-splash-word">PermiGo</div>
+    <div class="prc-splash-msg" id="prc-splash-msg">${LOADING_MSGS[0]}</div>
+    <div class="prc-splash-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+  </div>`;
+}
+
+function cycleLoadingMessages(root) {
+  let i = 0;
+  const id = setInterval(() => {
+    const m = root.querySelector("#prc-splash-msg");
+    if (!m) return;
+    i = (i + 1) % LOADING_MSGS.length;
+    m.style.opacity = "0";
+    setTimeout(() => {
+      if (m) {
+        m.textContent = LOADING_MSGS[i];
+        m.style.opacity = "1";
+      }
+    }, 220);
+  }, 800);
+  return () => clearInterval(id);
+}
 
 // ─── Entry point ─────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track('page.view', { page: 'eleve_parcours' });
-  playParcours();
+  track("page.view", { page: "eleve_parcours" });
 
-  root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div><div class="prc-subtitle">31 compétences · Permis B</div></div></div><div style="padding:32px;text-align:center;color:var(--mu2)">Chargement…</div></div>`;
+  // ── Écran de chargement 3 s : badge PermiGo vert + jingle + messages ──
+  const stopIntro = playParcoursIntro(3200);
+  const loadStart = Date.now();
+  root.innerHTML = renderLoadingSplash();
+  const stopMessages = cycleLoadingMessages(root);
 
   const { data: valData, error: valErr } = await sb
-    .from('validations')
-    .select('competence_id, validated_at, statut, score_cognitif, score_consolidation, teacher:profiles!validated_by(prenom, nom)')
-    .eq('eleve_id', me.id);
+    .from("validations")
+    .select(
+      "competence_id, validated_at, statut, score_cognitif, score_consolidation, teacher:profiles!validated_by(prenom, nom)",
+    )
+    .eq("eleve_id", me.id);
   if (valErr) {
+    stopMessages();
+    stopIntro();
     root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div></div></div>
       <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
-        <div style="font-size:40px;margin-bottom:12px">${icon('alert-circle',{size:30})}</div>
+        <div style="font-size:40px;margin-bottom:12px">${icon("alert-circle", { size: 30 })}</div>
         <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
         <button onclick="location.reload()" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:#fff;border-radius:12px;cursor:pointer">Réessayer</button>
       </div></div>`;
@@ -1273,16 +1365,16 @@ export async function mount(root) {
   // validatedMap : { compId → entry }  — acquis seulement
   // pendingMap   : { compId → true }   — a_valider (quiz à faire)
   const validatedMap = {};
-  const pendingMap   = {};
-  for (const v of (valData || [])) {
-    if (v.statut === 'acquis') {
+  const pendingMap = {};
+  for (const v of valData || []) {
+    if (v.statut === "acquis") {
       validatedMap[v.competence_id] = {
-        validated_at:        v.validated_at,
-        teacherName:         v.teacher?.prenom ?? null,
-        score_cognitif:      v.score_cognitif ?? null,
+        validated_at: v.validated_at,
+        teacherName: v.teacher?.prenom ?? null,
+        score_cognitif: v.score_cognitif ?? null,
         score_consolidation: v.score_consolidation ?? null,
       };
-    } else if (v.statut === 'a_valider') {
+    } else if (v.statut === "a_valider") {
       pendingMap[v.competence_id] = true;
     }
   }
@@ -1295,31 +1387,47 @@ export async function mount(root) {
   const openedWorlds = new Set();
   try {
     const myChests = await getMyChests();
-    for (const c of (myChests || [])) {
-      const m = /^world_(\d+)$/.exec(c?.chest_type || '');
+    for (const c of myChests || []) {
+      const m = /^world_(\d+)$/.exec(c?.chest_type || "");
       if (m && c.opened_at) {
         const n = parseInt(m[1], 10);
         openedWorlds.add(n);
         markChestOpened(n); // sync cache LS ← DB
       }
     }
-  } catch (_) { /* fallback : aucun coffre marqué ouvert si la DB échoue */ }
+  } catch (_) {
+    /* fallback : aucun coffre marqué ouvert si la DB échoue */
+  }
+
+  // Maintenir le splash visible ~3 s minimum (le temps que le jingle respire)
+  const elapsed = Date.now() - loadStart;
+  if (elapsed < 3000) await new Promise((r) => setTimeout(r, 3000 - elapsed));
+  stopMessages();
+  stopIntro();
 
   ensureChestStyles();
-  root.innerHTML = renderPage(worldStates, validatedMap, pendingMap, openedWorlds);
+  root.innerHTML = renderPage(
+    worldStates,
+    validatedMap,
+    pendingMap,
+    openedWorlds,
+  );
   wire(root, worldStates, validatedMap, pendingMap, me);
 
   // Persister en DB les coffres des mondes complétés (idempotent)
   const CHEST_REWARDS = [
-    { xp: 200, gemmes: 50  },
+    { xp: 200, gemmes: 50 },
     { xp: 400, gemmes: 100 },
     { xp: 700, gemmes: 175 },
     { xp: 1200, gemmes: 300 },
   ];
   worldStates.forEach((ws, i) => {
-    if (ws.status === 'complete') {
+    if (ws.status === "complete") {
       const num = i + 1;
-      unlockChest(`world_${num}`, CHEST_REWARDS[i] ?? { xp: 200, gemmes: 50 }).catch(() => {});
+      unlockChest(
+        `world_${num}`,
+        CHEST_REWARDS[i] ?? { xp: 200, gemmes: 50 },
+      ).catch(() => {});
     }
   });
 
@@ -1331,7 +1439,8 @@ export async function mount(root) {
     if (!entry.validated_at) continue;
     const ts = new Date(entry.validated_at).getTime();
     if (Date.now() - ts < FRESH_MS && ts > freshTs) {
-      fresh = cid; freshTs = ts;
+      fresh = cid;
+      freshTs = ts;
     }
   }
   if (fresh) {
@@ -1347,7 +1456,7 @@ function flashFreshComp(root, compId) {
   if (!node) return;
 
   // Scroll smooth vers le node
-  node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  node.scrollIntoView({ behavior: "smooth", block: "center" });
 
   // Crée l'overlay flèche après le scroll
   setTimeout(() => spawnArrow(node, compId), 600);
@@ -1355,10 +1464,10 @@ function flashFreshComp(root, compId) {
 
 function spawnArrow(node, compId) {
   // Évite doublon
-  document.querySelector('.fresh-arrow')?.remove();
+  document.querySelector(".fresh-arrow")?.remove();
 
-  const ind = document.createElement('div');
-  ind.className = 'fresh-arrow';
+  const ind = document.createElement("div");
+  ind.className = "fresh-arrow";
   ind.innerHTML = `
     <style>
       .fresh-arrow {
@@ -1426,20 +1535,20 @@ function spawnArrow(node, compId) {
     ind.style.top = `${rect.top - 8}px`;
   }
   position();
-  window.addEventListener('scroll', position, { passive: true });
-  window.addEventListener('resize', position);
+  window.addEventListener("scroll", position, { passive: true });
+  window.addEventListener("resize", position);
 
   const dismiss = () => {
-    ind.classList.add('dismiss');
+    ind.classList.add("dismiss");
     setTimeout(() => {
       ind.remove();
-      window.removeEventListener('scroll', position);
-      window.removeEventListener('resize', position);
+      window.removeEventListener("scroll", position);
+      window.removeEventListener("resize", position);
     }, 280);
   };
 
   // Tap node = disparaît
-  node.addEventListener('click', dismiss, { once: true });
+  node.addEventListener("click", dismiss, { once: true });
   // Auto-dismiss après 8s
   setTimeout(dismiss, 8000);
 }
@@ -1447,31 +1556,48 @@ function spawnArrow(node, compId) {
 // ─── Logique métier ───────────────────────────────────────────────
 function computeWorldStates(validatedMap) {
   const states = REMC.map((cat, idx) => {
-    const world  = WORLDS[idx];
-    const subs   = cat.subs;
-    const done   = subs.filter(s => validatedMap[s.c]).length;
-    const total  = subs.length;
-    const pct    = Math.round((done / total) * 100);
+    const world = WORLDS[idx];
+    const subs = cat.subs;
+    const done = subs.filter((s) => validatedMap[s.c]).length;
+    const total = subs.length;
+    const pct = Math.round((done / total) * 100);
     const complete = done === total;
 
     let status;
     if (idx === 0) {
-      status = complete ? 'complete' : 'in_progress';
+      status = complete ? "complete" : "in_progress";
     } else {
-      const prevDone = REMC[idx - 1].subs.filter(s => validatedMap[s.c]).length;
-      const req      = UNLOCK_REQ[idx];
-      status = prevDone < req ? 'locked' : (complete ? 'complete' : 'in_progress');
+      const prevDone = REMC[idx - 1].subs.filter(
+        (s) => validatedMap[s.c],
+      ).length;
+      const req = UNLOCK_REQ[idx];
+      status =
+        prevDone < req ? "locked" : complete ? "complete" : "in_progress";
     }
 
-    const nextChallenge = status !== 'locked' && !complete
-      ? subs.find(s => !validatedMap[s.c])?.c ?? null
-      : null;
+    const nextChallenge =
+      status !== "locked" && !complete
+        ? (subs.find((s) => !validatedMap[s.c])?.c ?? null)
+        : null;
 
-    const prevDoneCount = idx > 0
-      ? REMC[idx - 1].subs.filter(s => validatedMap[s.c]).length
-      : null;
+    const prevDoneCount =
+      idx > 0
+        ? REMC[idx - 1].subs.filter((s) => validatedMap[s.c]).length
+        : null;
 
-    return { idx, world, cat, subs, done, total, pct, complete, status, nextChallenge, prevDoneCount };
+    return {
+      idx,
+      world,
+      cat,
+      subs,
+      done,
+      total,
+      pct,
+      complete,
+      status,
+      nextChallenge,
+      prevDoneCount,
+    };
   });
 
   // ─ Garde UN SEUL nextChallenge global (le 1er monde in_progress dans l'ordre) ─
@@ -1489,28 +1615,39 @@ function computeWorldStates(validatedMap) {
 
 /** Résout le nom humain d'une compétence depuis son ID (ex: C1A → "Manœuvres : créneau") */
 function resolveCompName(compId) {
-  if (!compId) return '';
+  if (!compId) return "";
   const normalized = compId.toLowerCase();
   for (const cat of REMC) {
-    const sub = cat.subs.find(s => s.c.toLowerCase() === normalized);
+    const sub = cat.subs.find((s) => s.c.toLowerCase() === normalized);
     if (sub) return sub.n;
   }
   return compId;
 }
 
-function compStatus(compId, worldStatus, nextChallenge, validatedMap, pendingMap) {
-  if (worldStatus === 'locked') return 'locked';
-  if (validatedMap[compId])     return 'done';
-  if (pendingMap?.[compId])     return 'a_valider';
-  if (compId === nextChallenge) return 'next';
-  return 'todo';
+function compStatus(
+  compId,
+  worldStatus,
+  nextChallenge,
+  validatedMap,
+  pendingMap,
+) {
+  if (worldStatus === "locked") return "locked";
+  if (validatedMap[compId]) return "done";
+  if (pendingMap?.[compId]) return "a_valider";
+  if (compId === nextChallenge) return "next";
+  return "todo";
 }
 
 // ─── Render principal ─────────────────────────────────────────────
-function renderPage(worldStates, validatedMap, pendingMap, openedWorlds = new Set()) {
-  const totalDone  = worldStates.reduce((s, w) => s + w.done, 0);
+function renderPage(
+  worldStates,
+  validatedMap,
+  pendingMap,
+  openedWorlds = new Set(),
+) {
+  const totalDone = worldStates.reduce((s, w) => s + w.done, 0);
   const totalComps = worldStates.reduce((s, w) => s + w.total, 0);
-  const globalPct  = Math.round((totalDone / totalComps) * 100);
+  const globalPct = Math.round((totalDone / totalComps) * 100);
 
   return `${STYLE}
 <div class="prc">
@@ -1563,7 +1700,7 @@ function renderPage(worldStates, validatedMap, pendingMap, openedWorlds = new Se
       <span class="prc-map-badge-dot"></span> CARTE D'APPRENTISSAGE
     </div>
     <div class="prc-map" id="prc-map-scroll" tabindex="-1" role="region" aria-label="Carte d'apprentissage REMC">
-      ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1, openedWorlds)).join('')}
+      ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1, openedWorlds)).join("")}
       ${renderFinal(totalDone, totalComps)}
       <div style="height: 24px"></div>
     </div>
@@ -1582,12 +1719,18 @@ function renderPage(worldStates, validatedMap, pendingMap, openedWorlds = new Se
 }
 
 // ─── Render d'un monde avec route SVG + nodes ─────────────────────
-function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds = new Set()) {
+function renderWorldSection(
+  ws,
+  validatedMap,
+  pendingMap,
+  hasNext,
+  openedWorlds = new Set(),
+) {
   const { idx, cat, subs, done, total, status, nextChallenge } = ws;
   const meta = WORLDS_META[idx];
   const world = WORLDS[idx];
-  const isLocked = status === 'locked';
-  const isComplete = status === 'complete';
+  const isLocked = status === "locked";
+  const isComplete = status === "complete";
 
   // ─ Génération route SVG sinueuse ─
   // W ≈ largeur réelle rendue (≈ conteneur 480) pour éviter la distorsion
@@ -1605,38 +1748,46 @@ function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds 
 
   let pathD = `M ${points[0].x} 0 L ${points[0].x} ${points[0].y}`;
   for (let i = 1; i < points.length; i++) {
-    const p = points[i], pp = points[i - 1];
+    const p = points[i],
+      pp = points[i - 1];
     const my = (pp.y + p.y) / 2;
     pathD += ` C ${pp.x} ${my}, ${p.x} ${my}, ${p.x} ${p.y}`;
   }
   pathD += ` L ${points[points.length - 1].x} ${H}`;
 
-  const nodesHTML = points.map((p, i) => {
-    const st = compStatus(p.c, status, nextChallenge, validatedMap, pendingMap);
-    const xp = (p.x / W * 100).toFixed(2);
-    const yp = (p.y / H * 100).toFixed(2);
-    const delay = (i * 0.07 + 0.12).toFixed(2);
-    const sttLabel = {
-      done:      'Acquis',
-      a_valider: 'À valider',
-      next:      'Appuie pour commencer',
-      todo:      'À débloquer',
-      locked:    'Verrouillé',
-    }[st];
+  const nodesHTML = points
+    .map((p, i) => {
+      const st = compStatus(
+        p.c,
+        status,
+        nextChallenge,
+        validatedMap,
+        pendingMap,
+      );
+      const xp = ((p.x / W) * 100).toFixed(2);
+      const yp = ((p.y / H) * 100).toFixed(2);
+      const delay = (i * 0.07 + 0.12).toFixed(2);
+      const sttLabel = {
+        done: "Acquis",
+        a_valider: "À valider",
+        next: "Appuie pour commencer",
+        todo: "À débloquer",
+        locked: "Verrouillé",
+      }[st];
 
-    // Icône node = badge PermiGo (remplace l'ancien volant). Le badge est une
-    // image pleine couleur : on joue sur l'opacité/grayscale selon le statut.
-    const BADGE = '/skins/avatars/permigo-badge-icon.png';
-    const icon = {
-      done:      `<img class="nd-badge" src="${BADGE}" alt="" aria-hidden="true"/>`,
-      a_valider: `<div class="nd-wheel-pending" aria-hidden="true"></div>`,
-      next:      `<img class="nd-badge nd-badge-next" src="${BADGE}" alt="" aria-hidden="true"/>`,
-      todo:      `<img class="nd-badge nd-badge-dim" src="${BADGE}" alt="" aria-hidden="true"/>`,
-      locked:    `<img class="nd-badge nd-badge-locked" src="${BADGE}" alt="" aria-hidden="true"/>`,
-    }[st];
+      // Icône node = badge PermiGo (remplace l'ancien volant). Le badge est une
+      // image pleine couleur : on joue sur l'opacité/grayscale selon le statut.
+      const BADGE = "/skins/avatars/permigo-badge-icon.png";
+      const icon = {
+        done: `<img class="nd-badge" src="${BADGE}" alt="" aria-hidden="true"/>`,
+        a_valider: `<div class="nd-wheel-pending" aria-hidden="true"></div>`,
+        next: `<img class="nd-badge nd-badge-next" src="${BADGE}" alt="" aria-hidden="true"/>`,
+        todo: `<img class="nd-badge nd-badge-dim" src="${BADGE}" alt="" aria-hidden="true"/>`,
+        locked: `<img class="nd-badge nd-badge-locked" src="${BADGE}" alt="" aria-hidden="true"/>`,
+      }[st];
 
-    const isLocked = st === 'locked';
-    return `
+      const isLocked = st === "locked";
+      return `
       <div class="prc-node ${st}" data-comp="${esc(p.c)}" data-world-idx="${idx}"
            style="left:${xp}%;top:${yp}%;--wc:${meta.color};--wg:${meta.glow};--nd-delay:${delay}s"
            ${!isLocked ? `role="button" tabindex="0"` : 'aria-hidden="true"'}
@@ -1648,22 +1799,25 @@ function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds 
           <span class="nd-stt">${esc(sttLabel)}</span>
         </div>
       </div>`;
-  }).join('');
+    })
+    .join("");
 
   // Message monde verrouillé
-  const lockMsg = isLocked ? (() => {
-    const req = UNLOCK_REQ[idx];
-    const prevDone = ws.prevDoneCount ?? 0;
-    const need = req - prevDone;
-    return `<div style="position:relative;z-index:9;text-align:center;padding:12px 16px;font:500 13px/1.4 'Inter',sans-serif;color:var(--mu3)">Débloque <strong style="color:var(--ink)">${need} compétence${need > 1 ? 's' : ''}</strong> dans le monde précédent pour accéder.</div>`;
-  })() : '';
+  const lockMsg = isLocked
+    ? (() => {
+        const req = UNLOCK_REQ[idx];
+        const prevDone = ws.prevDoneCount ?? 0;
+        const need = req - prevDone;
+        return `<div style="position:relative;z-index:9;text-align:center;padding:12px 16px;font:500 13px/1.4 'Inter',sans-serif;color:var(--mu3)">Débloque <strong style="color:var(--ink)">${need} compétence${need > 1 ? "s" : ""}</strong> dans le monde précédent pour accéder.</div>`;
+      })()
+    : "";
 
-  const isActive = status === 'in_progress';
+  const isActive = status === "in_progress";
   return `
-<section class="prc-world ${isLocked ? 'locked' : ''} ${isComplete ? 'complete' : ''}"
+<section class="prc-world ${isLocked ? "locked" : ""} ${isComplete ? "complete" : ""}"
          data-world-idx="${idx}"
          style="--wc:${meta.color};--wg:${meta.glow}">
-  <img src="${WORLD_BG(meta.num)}" alt="" class="prc-world-bg${isActive ? ' prc-world-bg--active' : ''}" ${isActive ? 'loading="eager"' : 'loading="lazy"'} draggable="false">
+  <img src="${WORLD_BG(meta.num)}" alt="" class="prc-world-bg${isActive ? " prc-world-bg--active" : ""}" ${isActive ? 'loading="eager"' : 'loading="lazy"'} draggable="false">
   <!-- Petit visuel décoratif top-right (au lieu de fond plein) -->
   <img src="${meta.img}" alt="" class="prc-world-decor" loading="lazy" draggable="false">
 
@@ -1678,7 +1832,7 @@ function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds 
     <div class="prc-world-tagline">${esc(world.description)}</div>
     <div class="prc-world-count">
       ${done} / ${total} compétences
-      ${isComplete ? ' ' + icon('trophy',{size:15}) : ''}
+      ${isComplete ? " " + icon("trophy", { size: 15 }) : ""}
     </div>
   </div>
 
@@ -1698,20 +1852,30 @@ function renderWorldSection(ws, validatedMap, pendingMap, hasNext, openedWorlds 
   <!-- Portail de fin de monde -->
   <div class="prc-portal">
     ${renderPortalArch(meta.color, isComplete)}
-    <div class="pbadge">${isComplete ? '✓ Monde terminé' : `${total - done} à débloquer`}</div>
+    <div class="pbadge">${isComplete ? "✓ Monde terminé" : `${total - done} à débloquer`}</div>
     <h3>${isComplete ? `Monde ${meta.num} terminé !` : `Continue l'aventure`}</h3>
-    <p>${isComplete
-      ? (hasNext ? `Le monde ${idx + 2} t'attend.` : `Tu as conquis tous les mondes !`)
-      : (hasNext ? `Termine ce monde pour débloquer le suivant.` : `Le sommet est proche.`)}</p>
+    <p>${
+      isComplete
+        ? hasNext
+          ? `Le monde ${idx + 2} t'attend.`
+          : `Tu as conquis tous les mondes !`
+        : hasNext
+          ? `Termine ce monde pour débloquer le suivant.`
+          : `Le sommet est proche.`
+    }</p>
   </div>
 
-  ${isComplete ? renderChest({
-    worldNum: meta.num,
-    worldName: world.nom,
-    opened: openedWorlds.has(meta.num),
-  }) : ''}
+  ${
+    isComplete
+      ? renderChest({
+          worldNum: meta.num,
+          worldName: world.nom,
+          opened: openedWorlds.has(meta.num),
+        })
+      : ""
+  }
 
-  ${hasNext ? '<div class="prc-bridge"></div>' : ''}
+  ${hasNext ? '<div class="prc-bridge"></div>' : ""}
 </section>`;
 }
 
@@ -1722,12 +1886,16 @@ function renderPortalArch(color, isComplete) {
     <path class="arch-bg" d="M 20 170 L 20 80 Q 20 20, 65 20 Q 110 20, 110 80 L 110 170 Z" />
     <path class="arch-stroke" d="M 20 170 L 20 80 Q 20 20, 65 20 Q 110 20, 110 80 L 110 170" />
     <path class="arch-light"  d="M 30 170 L 30 80 Q 30 30, 65 30 Q 100 30, 100 80 L 100 170" />
-    ${isComplete ? `
+    ${
+      isComplete
+        ? `
       <circle cx="65" cy="70" r="5" fill="${color}" opacity=".9"/>
       <circle cx="65" cy="70" r="12" fill="none" stroke="${color}" stroke-width="1.5" opacity=".5">
         <animate attributeName="r" values="6;20" dur="2s" repeatCount="indefinite"/>
         <animate attributeName="opacity" values=".8;0" dur="2s" repeatCount="indefinite"/>
-      </circle>` : ''}
+      </circle>`
+        : ""
+    }
   </svg>
 </div>`;
 }
@@ -1758,40 +1926,44 @@ function renderFinal(done, total) {
 // ─── Wire & bottom sheet ──────────────────────────────────────────
 function wire(root, worldStates, validatedMap, pendingMap, me) {
   // Back via hashchange
-  root.querySelector('#prc-back')?.addEventListener('click', () => {
-    location.hash = '#/';
+  root.querySelector("#prc-back")?.addEventListener("click", () => {
+    location.hash = "#/";
   });
 
   // Auto-scroll vers le monde en cours
   requestAnimationFrame(() => {
-    const target = worldStates.find(w => w.status === 'in_progress');
+    const target = worldStates.find((w) => w.status === "in_progress");
     if (target) {
-      root.querySelector(`[data-world-idx="${target.idx}"]`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      root
+        .querySelector(`[data-world-idx="${target.idx}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   });
 
   // Coffres → modal cinématique
-  root.querySelectorAll('.chest-card:not(.opened)').forEach(card => {
+  root.querySelectorAll(".chest-card:not(.opened)").forEach((card) => {
     const worldNum = parseInt(card.dataset.chestWorld, 10);
     const ws = worldStates[worldNum - 1];
     const open = () => {
-      if (card.classList.contains('opened')) return; // déjà ouvert → pas de re-clic
-      track('parcours.chest_open', { worldNum });
+      if (card.classList.contains("opened")) return; // déjà ouvert → pas de re-clic
+      track("parcours.chest_open", { worldNum });
       openChestModal({
         worldNum,
         worldName: ws?.world?.nom ?? `Monde ${worldNum}`,
         // Persiste l'ouverture + crédite les gemmes côté serveur (idempotent),
         // puis verrouille la carte pour empêcher toute réouverture/re-crédit.
         onClaim: async () => {
-          await openChest('world_' + worldNum);
-          card.classList.add('opened');
+          await openChest("world_" + worldNum);
+          card.classList.add("opened");
         },
       });
     };
-    card.addEventListener('click', open);
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+    card.addEventListener("click", open);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
     });
   });
 
@@ -1799,36 +1971,46 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
   let lastTrigger = null;
 
   // Nodes → ouvre la fiche (click + Enter/Space pour keyboard nav)
-  root.querySelectorAll('.prc-node:not(.locked)').forEach(n => {
+  root.querySelectorAll(".prc-node:not(.locked)").forEach((n) => {
     const open = () => {
       lastTrigger = n;
-      const compId   = n.dataset.comp;
+      const compId = n.dataset.comp;
       const worldIdx = parseInt(n.dataset.worldIdx, 10);
       // Le quiz n'est plus une porte : on ouvre toujours la fiche.
       // Le quiz-récap (optionnel) se lance depuis la fiche d'une compétence acquise.
       openFiche(root, compId, worldStates[worldIdx], validatedMap, pendingMap);
-      track('parcours.node_tap', { compId, worldIdx });
+      track("parcours.node_tap", { compId, worldIdx });
     };
-    n.addEventListener('click', open);
-    n.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+    n.addEventListener("click", open);
+    n.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
     });
   });
 
   // Bottom sheet — close
-  const bg    = root.querySelector('#bsheet-bg') ?? document.getElementById('bsheet-bg');
-  const sheet = root.querySelector('#bsheet')    ?? document.getElementById('bsheet');
-  const isOpen = () => sheet?.classList.contains('open');
+  const bg =
+    root.querySelector("#bsheet-bg") ?? document.getElementById("bsheet-bg");
+  const sheet =
+    root.querySelector("#bsheet") ?? document.getElementById("bsheet");
+  const isOpen = () => sheet?.classList.contains("open");
   const closeFn = () => {
     const wasOpen = isOpen();
-    sheet?.classList.remove('open');
-    bg?.classList.remove('open');
-    sheet?.setAttribute('aria-hidden', 'true');
+    sheet?.classList.remove("open");
+    bg?.classList.remove("open");
+    sheet?.setAttribute("aria-hidden", "true");
     // Rend le focus au node déclencheur (sinon le focus part dans le vide).
-    if (wasOpen && lastTrigger) { lastTrigger.focus(); lastTrigger = null; }
+    if (wasOpen && lastTrigger) {
+      lastTrigger.focus();
+      lastTrigger = null;
+    }
   };
-  bg?.addEventListener('click', closeFn);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) closeFn(); });
+  bg?.addEventListener("click", closeFn);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isOpen()) closeFn();
+  });
   // Swipe-to-dismiss : glisser la fiche vers le bas pour la fermer
   if (sheet) enableSheetSwipe(sheet, closeFn, { overlay: bg });
 }
@@ -1837,24 +2019,37 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   const { idx, cat, status, nextChallenge } = ws;
   const meta = WORLDS_META[idx];
   const world = WORLDS[idx];
-  const sub = cat.subs.find(s => s.c === compId);
+  const sub = cat.subs.find((s) => s.c === compId);
   if (!sub) return;
 
-  const st = compStatus(compId, status, nextChallenge, validatedMap, pendingMap);
+  const st = compStatus(
+    compId,
+    status,
+    nextChallenge,
+    validatedMap,
+    pendingMap,
+  );
   const val = validatedMap[compId];
-  const stLabel = { done: 'Acquise', a_valider: 'À valider', next: 'En cours', todo: 'À travailler', locked: 'Verrouillée' }[st];
-  const compNum = cat.subs.findIndex(s => s.c === compId) + 1;
+  const stLabel = {
+    done: "Acquise",
+    a_valider: "À valider",
+    next: "En cours",
+    todo: "À travailler",
+    locked: "Verrouillée",
+  }[st];
+  const compNum = cat.subs.findIndex((s) => s.c === compId) + 1;
   const total = cat.subs.length;
   const detail = getCompDetail(compId);
 
   // Icône SVG selon statut (au lieu d'emoji)
-  const stIcon = {
-    done:      icon('check', { size: 36 }),
-    a_valider: icon('clipboard-check', { size: 32 }),
-    next:      icon('zap', { size: 32 }),
-    todo:      icon('clock', { size: 30 }),
-    locked:    icon('lock', { size: 28 }),
-  }[st] ?? icon('clock', { size: 30 });
+  const stIcon =
+    {
+      done: icon("check", { size: 36 }),
+      a_valider: icon("clipboard-check", { size: 32 }),
+      next: icon("zap", { size: 32 }),
+      todo: icon("clock", { size: 30 }),
+      locked: icon("lock", { size: 28 }),
+    }[st] ?? icon("clock", { size: 30 });
 
   // Progression visuelle dans le monde (n / total)
   const pctInWorld = Math.round((compNum / total) * 100);
@@ -1864,64 +2059,68 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   const recapBtn = `
     <a href="#/quiz/${esc(compId)}/post_validation" role="button"
        style="display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:15px;background:var(--a);border:none;color:#fff;border-radius:14px;font:800 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;box-shadow:0 6px 16px -4px color-mix(in srgb, var(--a) 60%, transparent);min-height:52px;">
-      ${icon('refresh-cw', { size: 16 })} Refaire le quiz-récap <span style="opacity:.8;font-weight:600">(optionnel)</span>
+      ${icon("refresh-cw", { size: 16 })} Refaire le quiz-récap <span style="opacity:.8;font-weight:600">(optionnel)</span>
     </a>`;
 
   // Bloc status contextuel selon état
   const statusBlock = (() => {
-    if (st === 'done' && val) {
+    if (st === "done" && val) {
       const dateStr = val.validated_at
-        ? new Date(val.validated_at).toLocaleDateString('fr-FR', { day:'numeric', month:'long' })
+        ? new Date(val.validated_at).toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "long",
+          })
         : null;
       const parts = [];
       if (dateStr) parts.push(`Validée le ${dateStr}`);
       if (val.teacherName) parts.push(`par ${val.teacherName}`);
-      if (val.score_cognitif != null) parts.push(`Quiz : ${Math.round(val.score_cognitif)}%`);
+      if (val.score_cognitif != null)
+        parts.push(`Quiz : ${Math.round(val.score_cognitif)}%`);
       return `
         <div class="fiche-status done">
-          <div class="fiche-status-ico">${icon('check', { size: 18 })}</div>
+          <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Compétence acquise</div>
-            <div class="fiche-status-sub">${esc(parts.join(' · ') || 'Bravo, tu maîtrises cette compétence !')}</div>
+            <div class="fiche-status-sub">${esc(parts.join(" · ") || "Bravo, tu maîtrises cette compétence !")}</div>
           </div>
         </div>${recapBtn}`;
     }
-    if (st === 'done') {
+    if (st === "done") {
       return `
         <div class="fiche-status done">
-          <div class="fiche-status-ico">${icon('check', { size: 18 })}</div>
+          <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Compétence acquise</div>
             <div class="fiche-status-sub">Bravo, tu maîtrises cette compétence.</div>
           </div>
         </div>${recapBtn}`;
     }
-    if (st === 'a_valider') {
+    if (st === "a_valider") {
       // Legacy : ne devrait plus apparaître (validation moniteur = acquis direct).
       // Affiché comme acquise + quiz-récap optionnel.
       return `
         <div class="fiche-status done">
-          <div class="fiche-status-ico">${icon('check', { size: 18 })}</div>
+          <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Compétence acquise</div>
             <div class="fiche-status-sub">Validée par ton moniteur.</div>
           </div>
         </div>${recapBtn}`;
     }
-    if (st === 'next') {
+    if (st === "next") {
       return `
         <div class="fiche-status next" style="--wc:${meta.color}">
-          <div class="fiche-status-ico">${icon('zap', { size: 18 })}</div>
+          <div class="fiche-status-ico">${icon("zap", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Prochaine étape</div>
             <div class="fiche-status-sub">Pratique cette compétence avec ton moniteur — il la validera dans ton livret.</div>
           </div>
         </div>`;
     }
-    if (st === 'locked') {
+    if (st === "locked") {
       return `
         <div class="fiche-status locked">
-          <div class="fiche-status-ico">${icon('lock', { size: 18 })}</div>
+          <div class="fiche-status-ico">${icon("lock", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Verrouillée</div>
             <div class="fiche-status-sub">Termine les compétences précédentes pour débloquer celle-ci.</div>
@@ -1930,7 +2129,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
     }
     return `
       <div class="fiche-status next" style="--wc:${meta.color}">
-        <div class="fiche-status-ico">${icon('clock', { size: 18 })}</div>
+        <div class="fiche-status-ico">${icon("clock", { size: 18 })}</div>
         <div class="fiche-status-body">
           <div class="fiche-status-title">À travailler</div>
           <div class="fiche-status-sub">Cette compétence reste à pratiquer. Continue à avancer dans ton parcours.</div>
@@ -1938,17 +2137,19 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
       </div>`;
   })();
 
-  const body = root.querySelector('#bsheet-body') ?? document.getElementById('bsheet-body');
+  const body =
+    root.querySelector("#bsheet-body") ??
+    document.getElementById("bsheet-body");
   body.innerHTML = `
     <div class="fiche-hero" style="--wc:${meta.color}">
       <button class="fiche-close" type="button" aria-label="Fermer">×</button>
       <div class="fiche-badge-cat">MONDE ${meta.num} · ${esc(world.nom).toUpperCase()}</div>
-      <div class="fiche-circle ${st === 'done' ? 'done' : ''}" style="background:${st === 'done' ? 'var(--gr)' : meta.color}">
+      <div class="fiche-circle ${st === "done" ? "done" : ""}" style="background:${st === "done" ? "var(--gr)" : meta.color}">
         ${stIcon}
       </div>
       <h3 id="bsheet-title">${esc(sub.n)}</h3>
       <div class="fiche-id">${esc(compId.toUpperCase())} · ${compNum}/${total}</div>
-      ${st === 'done' ? '' : `<div><span class="stt-pill ${st}" style="--wc:${meta.color}">${esc(stLabel)}</span></div>`}
+      ${st === "done" ? "" : `<div><span class="stt-pill ${st}" style="--wc:${meta.color}">${esc(stLabel)}</span></div>`}
     </div>
     <div class="fiche-body">
 
@@ -1974,17 +2175,17 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
       <!-- 4. POINTS CLÉS -->
       <div class="fiche-block" style="--wc:${meta.color}">
         <div class="fiche-block-title">
-          ${icon('target', { size: 14 })}
-          ${st === 'done' ? 'Ce que tu maîtrises' : 'Ce que tu vas maîtriser'}
+          ${icon("target", { size: 14 })}
+          ${st === "done" ? "Ce que tu maîtrises" : "Ce que tu vas maîtriser"}
         </div>
         <ul class="fiche-block-list">
-          ${detail.keyPoints.map(kp => `<li><span class="kp-check">${icon('check', { size: 12, strokeWidth: 3 })}</span>${esc(kp)}</li>`).join('')}
+          ${detail.keyPoints.map((kp) => `<li><span class="kp-check">${icon("check", { size: 12, strokeWidth: 3 })}</span>${esc(kp)}</li>`).join("")}
         </ul>
       </div>
 
       <!-- 5. CONSEIL DU COACH -->
       <div class="fiche-tip">
-        <div class="fiche-tip-ico">${icon('sparkle', { size: 16 })}</div>
+        <div class="fiche-tip-ico">${icon("sparkle", { size: 16 })}</div>
         <div class="fiche-tip-body">
           <div class="fiche-tip-label">Conseil du coach</div>
           <div class="fiche-tip-text">${esc(detail.tip)}</div>
@@ -1993,20 +2194,20 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
 
     </div>`;
 
-  body.querySelector('.fiche-close')?.addEventListener('click', () => {
-    const bg    = document.getElementById('bsheet-bg');
-    const sheet = document.getElementById('bsheet');
-    sheet?.classList.remove('open');
-    bg?.classList.remove('open');
+  body.querySelector(".fiche-close")?.addEventListener("click", () => {
+    const bg = document.getElementById("bsheet-bg");
+    const sheet = document.getElementById("bsheet");
+    sheet?.classList.remove("open");
+    bg?.classList.remove("open");
   });
 
-  const bg    = document.getElementById('bsheet-bg');
-  const sheet = document.getElementById('bsheet');
-  sheet?.classList.add('open');
-  bg?.classList.add('open');
-  sheet?.setAttribute('aria-hidden', 'false');
+  const bg = document.getElementById("bsheet-bg");
+  const sheet = document.getElementById("bsheet");
+  sheet?.classList.add("open");
+  bg?.classList.add("open");
+  sheet?.setAttribute("aria-hidden", "false");
   // Move focus into the dialog for keyboard/screen reader users
   requestAnimationFrame(() => {
-    sheet?.querySelector('.fiche-close')?.focus();
+    sheet?.querySelector(".fiche-close")?.focus();
   });
 }

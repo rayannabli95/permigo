@@ -56,7 +56,7 @@ const STYLE = `<style>
     position: sticky;
     top: calc(52px + env(safe-area-inset-top, 0px));
     z-index: 20;
-    background: rgba(248,249,252,.96);
+    background: color-mix(in srgb, var(--su2) 94%, transparent);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: 14px 16px 12px;
