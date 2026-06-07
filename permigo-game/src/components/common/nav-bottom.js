@@ -30,9 +30,15 @@ const TABS = {
   enseignant: [
     { id: "default", label: "Aujourd'hui", icon: ICO.activity },
     { id: "eleves", label: "Mes élèves", icon: ICO.users },
-    { id: "parcours", label: "Parcours", icon: ICO.map },
+    // « Progression » regroupe Parcours + Trophées + Ligue (décision figée).
+    // L'onglet « Récompenses » (gemmes) a été retiré : monnaie = validations.
+    {
+      id: "parcours",
+      label: "Progression",
+      icon: ICO.trophy,
+      match: ["parcours-complet", "trophees-moniteur", "ligue-semaine"],
+    },
     { id: "insights", label: "Stats", icon: ICO.chart },
-    { id: "recompenses", label: "Récompenses", icon: ICO.gift },
   ],
   gerant: [
     { id: "default", label: "Pulse", icon: ICO.activity },
@@ -179,7 +185,7 @@ export function mountBottomNav(role) {
   nav.innerHTML = tabs
     .map(
       (t) => `
-      <button class="bn-tab" data-id="${t.id}" aria-label="${t.label}">
+      <button class="bn-tab" data-id="${t.id}"${t.match ? ` data-match="${t.match.join(",")}"` : ""} aria-label="${t.label}">
         ${t.icon}
         <span class="bn-label">${t.label}</span>
       </button>
@@ -229,7 +235,8 @@ function _updateActive() {
   const section =
     (location.hash || "").replace(/^#\/?/, "").split("/")[0] || "default";
   nav.querySelectorAll("[data-id]").forEach((btn) => {
-    const active = btn.dataset.id === section;
+    const matches = (btn.dataset.match || "").split(",").filter(Boolean);
+    const active = btn.dataset.id === section || matches.includes(section);
     btn.classList.toggle("active", active);
     btn.setAttribute("aria-current", active ? "page" : "false");
   });
