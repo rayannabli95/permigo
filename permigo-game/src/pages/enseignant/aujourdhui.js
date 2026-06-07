@@ -794,12 +794,8 @@ async function renderInto(root, _me) {
       <!-- Hero : prochaine action utile -->
       ${heroHtml}
 
-      <!-- Stats compactes du jour (factuelles, pas de gros zéros) -->
+      <!-- Stat compacte : élèves dans l'école -->
       <div class="aj-quickstats">
-        <div class="aj-quickstat">
-          <div class="aj-quickstat-val">${acquisAujourdhui}</div>
-          <div class="aj-quickstat-lbl">Validée${acquisAujourdhui > 1 ? "s" : ""} aujourd'hui</div>
-        </div>
         <div class="aj-quickstat">
           <div class="aj-quickstat-val">${nbElevesEcole}</div>
           <div class="aj-quickstat-lbl">Élève${nbElevesEcole > 1 ? "s" : ""} dans l'école</div>
@@ -842,26 +838,6 @@ async function renderInto(root, _me) {
              </div>`
             : `<div class="aj-activity-list">
               ${recentVals.map((v) => renderActRow(v, elevesMap)).join("")}
-            </div>`
-        }
-      </div>
-
-      <!-- Mes élèves -->
-      <div class="aj-section">
-        <div class="aj-section-title">Mes élèves</div>
-        ${
-          mesElevesActifs.length === 0
-            ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 20px;">
-               <span style="opacity:.45;color:var(--mu)" aria-hidden="true">${icon("users", { size: 34 })}</span>
-               <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Invite ton premier élève</strong>
-               <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Envoie un lien par SMS ou WhatsApp —<br>ton élève crée son compte en 30 secondes.</span>
-               <button id="aj-invite-btn" style="display:inline-flex;align-items:center;gap:7px;padding:11px 20px;background:var(--a);color:#fff;border:0;border-radius:12px;font:600 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
-                 ${icon("user-plus", { size: 14, strokeWidth: 2.2 })} Inviter un élève
-               </button>
-               <span style="font:500 11px/1.4 'Inter',sans-serif;color:var(--mu2);text-align:center;max-width:240px">Tu travailles en auto-école ? Tes élèves peuvent aussi être affectés par le gérant.</span>
-             </div>`
-            : `<div class="aj-eleves-list">
-              ${mesElevesActifs.map((e) => renderEleveRow(e)).join("")}
             </div>`
         }
       </div>
