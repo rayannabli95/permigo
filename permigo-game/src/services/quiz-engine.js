@@ -2,11 +2,17 @@
 // Quiz Engine — moteur générique pour quizzes Triple Validation
 // Utilisé par post-validation (3 questions) + consolidation (2 questions)
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { burstConfetti } from '@/components/common/confetti.js';
-import { playCorrect, playWrong, playStreak, playVictory, playDefeat } from '@/utils/sound.js';
+import { sb } from "@/auth/auth.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { burstConfetti } from "@/components/common/confetti.js";
+import {
+  playCorrect,
+  playWrong,
+  playStreak,
+  playVictory,
+  playDefeat,
+} from "@/utils/sound.js";
 
 /**
  * @param {Object} opts
@@ -15,16 +21,23 @@ import { playCorrect, playWrong, playStreak, playVictory, playDefeat } from '@/u
  * @param {number} opts.nbQuestions
  * @param {(score, total) => void} opts.onComplete
  */
-export async function lancerQuiz({ competenceId, type, nbQuestions, onComplete }) {
+export async function lancerQuiz({
+  competenceId,
+  type,
+  nbQuestions,
+  onComplete,
+}) {
   const { data: questions, error } = await sb
-    .from('questions_competence')
-    .select('id, competence_id, type, question, options, correct_index, explanation, difficulty')
-    .eq('competence_id', competenceId)
-    .eq('type', type)
+    .from("questions_competence")
+    .select(
+      "id, competence_id, type, question, options, correct_index, explanation, difficulty",
+    )
+    .eq("competence_id", competenceId)
+    .eq("type", type)
     .limit(nbQuestions);
 
   if (error || !questions?.length) {
-    console.error('[quiz]', error);
+    console.error("[quiz]", error);
     return null;
   }
 
@@ -34,7 +47,11 @@ export async function lancerQuiz({ competenceId, type, nbQuestions, onComplete }
   let score = 0;
   let streak = 0; // compteur de bonnes réponses consécutives (pour le son d'escalade)
 
-  track('quiz.started', { competence_id: competenceId, quiz_type: type, nb_questions: pool.length });
+  track("quiz.started", {
+    competence_id: competenceId,
+    quiz_type: type,
+    nb_questions: pool.length,
+  });
 
   const overlay = renderOverlay();
   document.body.appendChild(overlay);
@@ -42,34 +59,46 @@ export async function lancerQuiz({ competenceId, type, nbQuestions, onComplete }
   // Esc + transforme **mot** en <strong>mot</strong> (markdown light)
   // pour mettre en valeur les passages importants des questions REMC
   function richEsc(str) {
-    return esc(String(str ?? ''))
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      // Auto-bold sur les mots clés courants (chiffres, unités, mots-piège)
-      .replace(/\b(\d+(?:[.,]\d+)?\s*(?:%|km\/h|m|sec|secondes?|min|minutes?|heures?|jours?|mois|g\/L))\b/gi,
-               '<strong>$1</strong>')
-      .replace(/\b(JAMAIS|TOUJOURS|OBLIGATOIRE|INTERDIT|IMPÉRATIF|AUCUN)\b/g,
-               '<strong>$1</strong>');
+    return (
+      esc(String(str ?? ""))
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        // Auto-bold sur les mots clés courants (chiffres, unités, mots-piège)
+        .replace(
+          /\b(\d+(?:[.,]\d+)?\s*(?:%|km\/h|m|sec|secondes?|min|minutes?|heures?|jours?|mois|g\/L))\b/gi,
+          "<strong>$1</strong>",
+        )
+        .replace(
+          /\b(JAMAIS|TOUJOURS|OBLIGATOIRE|INTERDIT|IMPÉRATIF|AUCUN)\b/g,
+          "<strong>$1</strong>",
+        )
+    );
   }
 
   function renderQuestion() {
     const q = pool[idx];
     if (!q) return finish();
 
-    overlay.querySelector('.quiz-body').innerHTML = `
+    overlay.querySelector(".quiz-body").innerHTML = `
       <div class="quiz-progress">
         <span>${idx + 1} / ${pool.length}</span>
-        <div class="quiz-bar"><div class="quiz-bar-fill" style="width:${((idx) / pool.length) * 100}%"></div></div>
+        <div class="quiz-bar"><div class="quiz-bar-fill" style="width:${(idx / pool.length) * 100}%"></div></div>
       </div>
       <h3 class="quiz-q">${richEsc(q.question)}</h3>
       <div class="quiz-options">
-        ${q.options.map((opt, i) => `
+        ${q.options
+          .map(
+            (opt, i) => `
           <button class="quiz-opt" data-i="${i}">${richEsc(opt)}</button>
-        `).join('')}
+        `,
+          )
+          .join("")}
       </div>
     `;
 
-    overlay.querySelectorAll('.quiz-opt').forEach(btn => {
-      btn.addEventListener('click', () => handleAnswer(parseInt(btn.dataset.i, 10), q, btn));
+    overlay.querySelectorAll(".quiz-opt").forEach((btn) => {
+      btn.addEventListener("click", () =>
+        handleAnswer(parseInt(btn.dataset.i, 10), q, btn),
+      );
     });
   }
 
@@ -79,49 +108,56 @@ export async function lancerQuiz({ competenceId, type, nbQuestions, onComplete }
       score++;
       streak++;
       playCorrect();
-      if (streak >= 2) playStreak();  // escalade à partir de la 2e bonne d'affilée
+      if (streak >= 2) playStreak(); // escalade à partir de la 2e bonne d'affilée
     } else {
       streak = 0;
       playWrong();
     }
 
-    overlay.querySelectorAll('.quiz-opt').forEach(b => {
+    overlay.querySelectorAll(".quiz-opt").forEach((b) => {
       b.disabled = true;
       const i = parseInt(b.dataset.i, 10);
-      if (i === q.correct_index) b.classList.add('ok');
-      else if (i === chosen) b.classList.add('ko');
+      if (i === q.correct_index) b.classList.add("ok");
+      else if (i === chosen) b.classList.add("ko");
     });
 
     if (q.explanation) {
-      const expl = document.createElement('div');
-      expl.className = `quiz-expl ${correct ? 'expl-ok' : 'expl-ko'}`;
+      const expl = document.createElement("div");
+      expl.className = `quiz-expl ${correct ? "expl-ok" : "expl-ko"}`;
       expl.innerHTML = `
-        <div class="expl-head">${correct ? 'Bien joué !' : 'À retenir'}</div>
+        <div class="expl-head">${correct ? "Bien joué !" : "À retenir"}</div>
         <div class="expl-body">${richEsc(q.explanation)}</div>
       `;
-      overlay.querySelector('.quiz-options').appendChild(expl);
+      overlay.querySelector(".quiz-options").appendChild(expl);
     }
 
-    track('quiz.question_answered', {
+    track("quiz.question_answered", {
       competence_id: competenceId,
       quiz_type: type,
       correct,
       question_id: q.id,
     });
 
-    // Tempo généreux pour laisser le temps de lire l'explication
-    // Avant : 900ms / 1800ms (trop rapide, frustrant)
-    // Après : 2400ms / 4500ms — l'utilisateur peut absorber
-    setTimeout(() => {
+    // Pas d'auto-avance : l'élève lit la correction à son rythme et clique
+    // « Suivant » quand il a fini (les timers fixes étaient trop courts/longs).
+    const isLast = idx >= pool.length - 1;
+    const nextBtn = document.createElement("button");
+    nextBtn.className = "quiz-close-btn quiz-next-btn";
+    nextBtn.style.marginTop = "14px";
+    nextBtn.textContent = isLast ? "Voir mon résultat" : "Suivant";
+    nextBtn.addEventListener("click", () => {
       idx++;
       renderQuestion();
-    }, correct ? 2400 : 4500);
+    });
+    overlay.querySelector(".quiz-options").appendChild(nextBtn);
+    nextBtn.focus({ preventScroll: true });
+    nextBtn.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 
   async function finish() {
     const total = pool.length;
     const perfect = score === total;
-    track('quiz.completed', {
+    track("quiz.completed", {
       competence_id: competenceId,
       quiz_type: type,
       score,
@@ -132,16 +168,17 @@ export async function lancerQuiz({ competenceId, type, nbQuestions, onComplete }
     // Musique de fin : victoire si réussi (>=60%), défaite sinon. Confetti en plus sur sans-faute.
     const passed = score >= total * 0.6;
     if (perfect) burstConfetti({ count: 100, power: 16 });
-    if (passed) playVictory(); else playDefeat();
+    if (passed) playVictory();
+    else playDefeat();
 
-    overlay.querySelector('.quiz-body').innerHTML = `
+    overlay.querySelector(".quiz-body").innerHTML = `
       <div class="quiz-result">
         <div class="quiz-score">${score}/${total}</div>
-        <p>${perfect ? 'Parfait !' : score >= total * 0.6 ? 'Bien !' : 'À revoir'}</p>
+        <p>${perfect ? "Parfait !" : score >= total * 0.6 ? "Bien !" : "À revoir"}</p>
         <button class="quiz-close-btn">Continuer</button>
       </div>
     `;
-    overlay.querySelector('.quiz-close-btn').addEventListener('click', () => {
+    overlay.querySelector(".quiz-close-btn").addEventListener("click", () => {
       overlay.remove();
       onComplete?.(score, total);
     });
@@ -161,8 +198,8 @@ function shuffle(a) {
 }
 
 function renderOverlay() {
-  const el = document.createElement('div');
-  el.className = 'quiz-overlay';
+  const el = document.createElement("div");
+  el.className = "quiz-overlay";
   el.innerHTML = `
     <style>
       .quiz-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,13,26,.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;animation:quizIn .3s cubic-bezier(.23,1,.32,1)}
@@ -201,6 +238,7 @@ function renderOverlay() {
       .quiz-result p{font:600 17px/1.4 'Inter';color:#cbd5e1;margin:0 0 24px}
       .quiz-close-btn{padding:14px 32px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:0;border-radius:14px;color:#fff;font:700 15px/1 'Inter';cursor:pointer;transition:transform .12s,opacity .12s;min-height:44px}
       .quiz-close-btn:active{transform:scale(.97);opacity:.9}
+      .quiz-next-btn{width:100%;color:#1a2800;background:linear-gradient(to bottom,#6fe016 0%,#58CC02 48%,#46A302 100%);box-shadow:0 2px 10px 0 rgba(70,163,2,.35),0 1.5px 0 0 rgba(255,255,255,.28) inset,0 -2px 8px 0 rgba(70,163,2,.5) inset}
     </style>
     <div class="quiz-body"></div>
   `;
