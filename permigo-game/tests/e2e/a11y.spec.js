@@ -9,10 +9,11 @@
  */
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { ELEVE, ENSEIGNANT } from './_creds.js';
 
-const EMAIL_ELEVE      = 'latifa.sahli@autopilot.fr';
-const EMAIL_ENSEIGNANT = 'rayan.nabli@autopilot.fr';
-const PWD              = 'Autopilot2025!';
+const EMAIL_ELEVE      = ELEVE.email;
+const EMAIL_ENSEIGNANT = ENSEIGNANT.email;
+const PWD              = ELEVE.pwd;
 
 async function loginAs(page, email) {
   await page.goto('/#/login');

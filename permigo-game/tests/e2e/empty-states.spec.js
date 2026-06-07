@@ -5,13 +5,11 @@
  * dans parcours, trophées, accueil (mini) et mes-élèves.
  *
  * Comptes test :
- *   Élève  : latifa.sahli@autopilot.fr  / Autopilot2025!
- *   Moniteur : rayan.nabli@autopilot.fr / Autopilot2025!
+ *   Élève  : eleve@test.fr      / Autopilot2025!
+ *   Moniteur : enseignant@test.fr / Autopilot2025!
  */
 import { test, expect } from '@playwright/test';
-
-const ELEVE    = { email: 'latifa.sahli@autopilot.fr',    pwd: 'Autopilot2025!' };
-const MONITEUR = { email: 'rayan.nabli@autopilot.fr',     pwd: 'Autopilot2025!' };
+import { ELEVE, ENSEIGNANT as MONITEUR } from './_creds.js';
 
 async function loginAs(page, { email, pwd }) {
   await page.goto('/#/login');

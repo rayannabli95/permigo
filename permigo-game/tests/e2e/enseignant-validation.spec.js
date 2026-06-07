@@ -10,12 +10,13 @@
  *  6. Vérifie que la notification a été insérée en DB (via Supabase JS)
  *
  * Comptes test :
- *  - Enseignant : rayan.nabli@autopilot.fr / Autopilot2025!
+ *  - Enseignant : enseignant@test.fr / Autopilot2025!
  */
 import { test, expect } from '@playwright/test';
+import { ENSEIGNANT } from './_creds.js';
 
-const EMAIL_ENSEIGNANT = 'rayan.nabli@autopilot.fr';
-const PWD              = 'Autopilot2025!';
+const EMAIL_ENSEIGNANT = ENSEIGNANT.email;
+const PWD              = ENSEIGNANT.pwd;
 
 async function loginAsEnseignant(page) {
   await page.goto('/#/login');

@@ -1,14 +1,15 @@
 /**
  * E2E — Page "Mon examen B" (élève)
  *
- * Compte test : latifa.sahli@autopilot.fr / Autopilot2025!
+ * Compte test : eleve@test.fr / Autopilot2025!
  * Note : la route #/examen doit être câblée dans router.js par Cowork.
  * En attendant, on teste en injectant le mount() directement.
  */
 import { test, expect } from '@playwright/test';
+import { ELEVE } from './_creds.js';
 
-const EMAIL = 'latifa.sahli@autopilot.fr';
-const PWD   = 'Autopilot2025!';
+const EMAIL = ELEVE.email;
+const PWD   = ELEVE.pwd;
 
 const LS_KEY_DATE    = 'permigo:exam_date';
 const LS_KEY_REVISED = 'permigo:has_revised';
