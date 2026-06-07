@@ -380,18 +380,29 @@ const STYLE = `<style>
 
 const INACTIF_SEUIL_MS = 14 * 86400000; // 14 jours
 
-// Seuils readiness examen (sur REMC_TOTAL = 31 sous-compétences)
-const PRET_SEUIL = 25; // >= 25 acquis → prêt pour l'examen
-const APPROCHE_SEUIL = 18; // 18–24 → en approche ; < 18 → en cours
+// « Prêt » pour l'examen = 100% des compétences de BASE (C1+C2+C3, 24
+// sous-compétences). C4 (conduite autonome) ne conditionne pas la
+// présentation au permis. Règle métier validée avec le moniteur.
+const BASE_CATS = ["C1", "C2", "C3"];
+const BASE_COMPS = REMC.filter((c) => BASE_CATS.includes(c.id)).flatMap((c) =>
+  c.subs.map((s) => s.c),
+);
+const APPROCHE_SEUIL = 18; // < bases complètes mais bien avancé → en approche
+
+/** Sous-compétences de base (C1-C3) non encore acquises. */
+function baseManquantes(acquisSet) {
+  return BASE_COMPS.filter((c) => !acquisSet.has(c));
+}
 
 /**
  * État de readiness d'un élève vis-à-vis de l'examen.
+ * @param {Set<string>} acquisSet  compétences acquises (école)
  * @returns {'recu'|'pret'|'en_approche'|'en_cours'}
  */
-function computeReadiness(acquis, examStatut) {
+function computeReadiness(acquisSet, examStatut) {
   if (examStatut === "recu") return "recu";
-  if (acquis >= PRET_SEUIL) return "pret";
-  if (acquis >= APPROCHE_SEUIL) return "en_approche";
+  if (baseManquantes(acquisSet).length === 0) return "pret";
+  if (acquisSet.size >= APPROCHE_SEUIL) return "en_approche";
   return "en_cours";
 }
 
@@ -584,7 +595,7 @@ async function loadData() {
         joursInactif,
         examStatut,
         examDate,
-        readiness: computeReadiness(acquis, examStatut),
+        readiness: computeReadiness(acquisSet, examStatut),
       };
     })
     // Mes élèves attitrés en haut, puis ceux que j'ai déjà validé, puis le reste
@@ -1112,7 +1123,7 @@ async function recordExam(eleveId, statut, dateExamen) {
   if (el) {
     el.examStatut = statut;
     el.examDate = dateExamen || todayIso();
-    el.readiness = computeReadiness(el.acquis, statut);
+    el.readiness = computeReadiness(el.acquisSet, statut);
   }
   track("examen.record", { eleve_id: eleveId, statut });
 
@@ -1141,7 +1152,7 @@ async function recordExam(eleveId, statut, dateExamen) {
     if (el) {
       el.examStatut = prevStatut;
       el.examDate = prevDate;
-      el.readiness = computeReadiness(el.acquis, prevStatut);
+      el.readiness = computeReadiness(el.acquisSet, prevStatut);
     }
     track("examen.undo", { eleve_id: eleveId, statut });
     render();
@@ -1319,7 +1330,7 @@ function openMissingPanel(eleve) {
 
   const missing = missingComps(eleve.acquisSet);
   const nom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(" ") || "—");
-  const restantesAvantSeuil = Math.max(0, PRET_SEUIL - eleve.acquis);
+  const baseRestantes = baseManquantes(eleve.acquisSet).length;
 
   const wrap = document.createElement("div");
   wrap.className = "me-miss";
@@ -1362,7 +1373,7 @@ function openMissingPanel(eleve) {
     <div class="me-miss-bg" data-close="1"></div>
     <div class="me-miss-card" role="dialog" aria-modal="true" aria-label="Compétences manquantes de ${nom}">
       <div class="me-miss-title">Il manque à ${nom}</div>
-      <div class="me-miss-sub">${eleve.acquis}/${eleve.total} acquises · ${restantesAvantSeuil > 0 ? `${restantesAvantSeuil} de plus pour atteindre le seuil examen (${PRET_SEUIL})` : "seuil examen atteint"}</div>
+      <div class="me-miss-sub">${eleve.acquis}/${eleve.total} acquises · ${baseRestantes > 0 ? `${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base (C1-C3) à valider pour être prêt` : "bases C1-C3 acquises — prêt pour l'examen"}</div>
       <div class="me-miss-list">
         ${
           missing.length === 0

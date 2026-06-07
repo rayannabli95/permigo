@@ -49,7 +49,7 @@ let _submitting = false;
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
-  .vs { padding: 16px 16px calc(96px + env(safe-area-inset-bottom,0px)); max-width: 600px; margin: 0 auto; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; }
+  .vs { padding: 16px 16px calc(152px + env(safe-area-inset-bottom,0px)); max-width: 600px; margin: 0 auto; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; }
   .vs-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
   .vs-back { width: 40px; height: 40px; flex-shrink: 0; border: 1px solid var(--bo); background: var(--su); border-radius: 10px; color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .vs-back:active { transform: scale(.95); }
@@ -79,35 +79,46 @@ const STYLE = `<style>
   .vs-eb-change { font: 600 12px/1 'Inter', sans-serif; color: var(--a); background: rgba(88,204,2,.1); border: 0; border-radius: 8px; padding: 8px 10px; cursor: pointer; flex-shrink: 0; min-height: 36px; }
 
   /* Légende */
-  .vs-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-bottom: 12px; }
-  .vs-leg { display: inline-flex; align-items: center; gap: 3px; padding: 3px 7px; border-radius: 8px; }
-  .vs-leg.acquis { color: var(--grd); background: rgba(16,185,129,.1); }
-  .vs-leg.en_cours { color: #6366f1; background: rgba(99,102,241,.1); }
-  .vs-leg.a_retravailler { color: var(--amx); background: rgba(245,158,11,.1); }
+  .vs-comps { margin-bottom: 4px; }
+  .vs-legend { font: 500 12px/1.5 'Inter', sans-serif; color: var(--mu2); margin: 0 2px 18px; }
+  .vs-leg { font-weight: 700; }
+  .vs-leg.acquis { color: var(--grd); }
+  .vs-leg.en_cours { color: #6366f1; }
+  .vs-leg.a_retravailler { color: var(--amx); }
 
   /* Sections par monde */
-  .vs-monde { margin-bottom: 14px; }
-  .vs-monde-hd { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font: 700 13px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
-  .vs-monde-cnt { font: 600 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
-  .vs-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .vs-chip { display: inline-flex; align-items: center; gap: 5px; padding: 8px 10px; min-height: 38px; border: 1px solid var(--bo); background: var(--bg); border-radius: 10px; cursor: pointer; font: 500 12.5px/1.1 'Inter', sans-serif; color: var(--ink); text-align: left; -webkit-tap-highlight-color: transparent; }
-  .vs-chip:active { transform: scale(.97); }
+  .vs-monde { margin-bottom: 20px; }
+  .vs-monde-hd { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
+  .vs-monde-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .vs-monde-nom { font: 700 13.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); flex: 1; min-width: 0; }
+  .vs-monde-cnt { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
+  .vs-chips { display: flex; flex-direction: column; gap: 4px; }
+  .vs-chip { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; padding: 8px 11px; min-height: 42px; border: 1px solid var(--bo); background: var(--su); border-radius: 11px; cursor: pointer; font: 500 13px/1.25 'Inter', sans-serif; color: var(--ink); text-align: left; -webkit-tap-highlight-color: transparent; transition: border-color .12s, background .12s; }
+  .vs-chip:active { transform: scale(.99); }
+  .vs-chip-ico { width: 15px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--bo4); }
   .vs-chip-code { font: 700 10px/1 'IBM Plex Mono', monospace; color: var(--mu); background: var(--bg2); padding: 3px 5px; border-radius: 5px; flex-shrink: 0; }
-  .vs-chip.locked { opacity: .55; cursor: default; border-style: dashed; }
-  .vs-chip.locked .vs-chip-code { color: var(--grd); background: rgba(16,185,129,.12); }
-  .vs-chip.acquis { border-color: var(--grd); background: rgba(16,185,129,.1); color: var(--grd); }
-  .vs-chip.acquis .vs-chip-code { color: var(--grd); background: rgba(16,185,129,.16); }
-  .vs-chip.en_cours { border-color: #6366f1; background: rgba(99,102,241,.1); color: #6366f1; }
-  .vs-chip.a_retravailler { border-color: var(--amx); background: rgba(245,158,11,.1); color: var(--amx); }
+  .vs-chip-nom { flex: 1; min-width: 0; }
+  /* déjà acquis → s'efface (focus sur ce qu'il reste) */
+  .vs-chip.locked { cursor: default; border-color: transparent; background: transparent; min-height: 30px; padding: 4px 11px; opacity: .55; }
+  .vs-chip.locked .vs-chip-ico { color: var(--grd); }
+  .vs-chip.locked .vs-chip-code { background: transparent; color: var(--grd); padding-left: 0; }
+  .vs-chip.locked .vs-chip-nom { color: var(--mu2); }
+  /* sélection en séance */
+  .vs-chip.acquis { border-color: var(--grd); background: rgba(16,185,129,.08); }
+  .vs-chip.acquis .vs-chip-ico { color: var(--grd); }
+  .vs-chip.en_cours { border-color: #6366f1; background: rgba(99,102,241,.08); }
+  .vs-chip.en_cours .vs-chip-ico { color: #6366f1; }
+  .vs-chip.a_retravailler { border-color: var(--amx); background: rgba(245,158,11,.08); }
+  .vs-chip.a_retravailler .vs-chip-ico { color: var(--amx); }
 
   /* Note */
   .vs-note { width: 100%; box-sizing: border-box; min-height: 72px; resize: vertical; padding: 12px; background: var(--bg); border: 1px solid var(--bo); border-radius: 12px; font: 500 14px/1.5 'Inter', sans-serif; color: var(--ink); outline: none; }
   .vs-note:focus { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
   .vs-note-count { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); text-align: right; margin-top: 6px; }
 
-  /* Footer sticky */
-  .vs-footer { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; padding: 12px 16px calc(12px + env(safe-area-inset-bottom,0px)); background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(12px); border-top: 1px solid var(--bo); }
-  .vs-submit { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 600px; margin: 0 auto; min-height: 52px; border: 0; border-radius: 14px; background: var(--a); color: #fff; font: 800 15px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
+  /* Footer sticky — posé JUSTE AU-DESSUS de la nav du bas (≈60px) */
+  .vs-footer { position: fixed; bottom: calc(60px + env(safe-area-inset-bottom,0px)); left: 0; right: 0; z-index: 45; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(12px); border-top: 1px solid var(--bo); }
+  .vs-submit { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 600px; margin: 0 auto; min-height: 52px; border: 0; border-radius: 14px; background: var(--a); color: #fff; font: 800 15px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--a) 60%, transparent); }
   .vs-submit:disabled { opacity: .5; cursor: not-allowed; }
   .vs-submit:not(:disabled):active { transform: scale(.98); }
 
@@ -264,40 +275,51 @@ function renderEleveBanner(el) {
     </div>`;
 }
 
+const MONDE_COLOR = {
+  C1: "var(--a)",
+  C2: "#3b82f6",
+  C3: "#eab308",
+  C4: "#8b5cf6",
+};
+
 function renderComps() {
   const sections = REMC.map((cat) => {
+    const color = MONDE_COLOR[cat.id] || "var(--mu)";
+    const acquisInCat = cat.subs.filter((s) => _acquisSet.has(s.c)).length;
     const pickedInCat = cat.subs.filter((s) => _picked.has(s.c)).length;
-    const chips = cat.subs
+    // À valider d'abord, déjà acquises (effacées) en bas
+    const ordered = [
+      ...cat.subs.filter((s) => !_acquisSet.has(s.c)),
+      ...cat.subs.filter((s) => _acquisSet.has(s.c)),
+    ];
+    const chips = ordered
       .map((s) => {
         const locked = _acquisSet.has(s.c);
         const st = _picked.get(s.c) || null;
         const cls = locked ? "locked" : st ? st : "";
         const meta = locked ? { ico: "check" } : statutMeta(st);
-        const ico = meta
-          ? `${icon(meta.ico, { size: 11, strokeWidth: 2.8 })}`
-          : "";
+        const ico = meta ? icon(meta.ico, { size: 12, strokeWidth: 2.8 }) : "";
         return `<button class="vs-chip ${cls}" type="button" ${locked ? 'disabled aria-disabled="true"' : `data-comp="${esc(s.c)}"`}
                   title="${esc(s.n)}${locked ? " — déjà acquis" : ""}">
-          ${ico}<span class="vs-chip-code">${esc(s.c)}</span><span>${esc(s.n)}</span>
+          <span class="vs-chip-ico">${ico}</span><span class="vs-chip-code">${esc(s.c)}</span><span class="vs-chip-nom">${esc(s.n)}</span>
         </button>`;
       })
       .join("");
     return `
-      <div class="vs-monde">
-        <div class="vs-monde-hd">${esc(cat.name)} <span class="vs-monde-cnt" data-cat="${esc(cat.id)}">${pickedInCat > 0 ? `+${pickedInCat}` : ""}</span></div>
+      <section class="vs-monde">
+        <header class="vs-monde-hd">
+          <span class="vs-monde-dot" style="background:${color}"></span>
+          <span class="vs-monde-nom">${esc(cat.name)}</span>
+          <span class="vs-monde-cnt" data-cat="${esc(cat.id)}">${acquisInCat + pickedInCat}/${cat.subs.length}</span>
+        </header>
         <div class="vs-chips">${chips}</div>
-      </div>`;
+      </section>`;
   }).join("");
 
   return `
-    <div class="vs-card">
-      <div class="vs-card-ttl">${icon("book-open", { size: 13, strokeWidth: 2.4 })} Compétences travaillées</div>
-      <div class="vs-legend">
-        <span>Appuie pour cycler :</span>
-        <span class="vs-leg acquis">${icon("check", { size: 10, strokeWidth: 3 })} Acquis</span>
-        <span class="vs-leg en_cours">${icon("refresh-cw", { size: 10, strokeWidth: 2.4 })} En cours</span>
-        <span class="vs-leg a_retravailler">${icon("alert-triangle", { size: 10, strokeWidth: 2.4 })} À retravailler</span>
-      </div>
+    <div class="vs-comps">
+      <p class="vs-legend">Appuie sur une compétence — chaque appui change l'état :
+        <b class="vs-leg acquis">acquis</b> → <b class="vs-leg en_cours">en cours</b> → <b class="vs-leg a_retravailler">à retravailler</b>.</p>
       ${sections}
     </div>`;
 }
