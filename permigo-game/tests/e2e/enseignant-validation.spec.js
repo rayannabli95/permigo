@@ -25,7 +25,7 @@ async function loginAsEnseignant(page) {
   await page.fill('#lg-pwd', PWD);
   await page.click('#lg-submit');
   // Attendre la page enseignant (aujourd'hui ou mes-eleves)
-  await page.waitForSelector('.aj-grid, .me-list, .vp', { timeout: 20_000 });
+  await page.waitForSelector('.aj-page, .me-list, .vp', { timeout: 20_000 });
 }
 
 async function goToValidation(page) {

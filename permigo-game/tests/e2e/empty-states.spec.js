@@ -17,7 +17,7 @@ async function loginAs(page, { email, pwd }) {
   await page.fill('#lg-email', email);
   await page.fill('#lg-pwd', pwd);
   await page.click('#lg-submit');
-  await page.waitForSelector('.acc, .me-list, .vp, [data-page]', { timeout: 20_000 });
+  await page.waitForSelector('.acc2-hero-hi, .aj-page, .me-list, .vp', { timeout: 20_000 });
 }
 
 async function goTo(page, hash) {
@@ -41,7 +41,7 @@ test.describe('Empty states — composant', () => {
     await loginAs(page, ELEVE);
 
     await page.evaluate(async () => {
-      const { renderEmptyState } = await import('/src/components/empty-state.js');
+      const { renderEmptyState } = await import('/src/components/common/empty-state.js');
       // Appeler deux fois pour vérifier l'injection unique
       renderEmptyState({ illustration: '/skins/empty-parcours.png', title: 'Test' });
       renderEmptyState({ illustration: '/skins/empty-parcours.png', title: 'Test 2' });
@@ -62,13 +62,13 @@ test.describe('Empty state — Trophées élève (0 trophée)', () => {
     await goTo(page, '#/trophees');
 
     // Injecter si route pas câblée
-    const found = await page.waitForSelector('.trp', { timeout: 8_000 }).catch(() => null);
+    const found = await page.waitForSelector('.tr2', { timeout: 8_000 }).catch(() => null);
     if (!found) await injectPage(page, '/src/pages/eleve/trophees.js');
-    await page.waitForSelector('.trp', { timeout: 8_000 });
+    await page.waitForSelector('.tr2', { timeout: 8_000 });
 
     // Si 0 trophée → l'empty state doit s'afficher
     const hasEmpty = await page.locator('.es-wrap').isVisible({ timeout: 3_000 }).catch(() => false);
-    const hasCards = await page.locator('.trp-grid').count().then(n => n > 0).catch(() => false);
+    const hasCards = await page.locator('.tr2-grid').count().then(n => n > 0).catch(() => false);
 
     // L'un ou l'autre : soit des trophées, soit l'empty state
     const valid = hasEmpty || hasCards;
