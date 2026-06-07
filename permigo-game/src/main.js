@@ -13,12 +13,16 @@ import { mountBottomNav } from "@/components/common/nav-bottom.js";
 import { initThemeEarly, syncFromPrefs } from "@/utils/theme.js";
 import { initGameState, initEquippedTheme } from "@/utils/game-state.js";
 import { mountCookieBanner } from "@/components/common/cookie-banner.js";
+import { showLaunchSplash } from "@/components/common/launch-splash.js";
 import { initPosthog } from "@/services/posthog.js";
 import { initVercelAnalytics } from "@/services/vercel-analytics.js";
 import "@/utils/pwa.js"; // capte beforeinstallprompt très tôt
 
 // Apply saved/system theme before any rendering (reads localStorage, synchronous)
 initThemeEarly();
+
+// Écran d'accueil global au lancement (overlay, 1×/session)
+showLaunchSplash();
 
 const app = document.getElementById("app");
 
