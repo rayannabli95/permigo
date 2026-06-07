@@ -104,6 +104,8 @@ const STYLE = `<style>
   margin-bottom: 4px;
 }
 .bl-kpi-val .bl-kpi-unit { font-size: .55em; color: var(--mu2); }
+.bl-kpi-streak { grid-column: 1 / -1; }
+.bl-kpi-streak .bl-kpi-val { display: inline-flex; align-items: center; gap: 8px; }
 .bl-kpi-label { font: 500 11px/1.4 'Inter', sans-serif; color: var(--mu3); text-transform: uppercase; letter-spacing: .04em; }
 .bl-kpi-delta {
   display: inline-flex;
@@ -286,21 +288,8 @@ function fmtDateShort(iso) {
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
-function fmtTrimestre(start, end) {
-  const d1 = new Date(start);
-  const d2 = new Date(end);
-  const monthFmt = (d) =>
-    d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
-  return `${monthFmt(d1)} → ${monthFmt(d2)}`;
-}
-
 // ─── Render helpers ───────────────────────────────────────────────
 function renderKPI(kpi) {
-  const trim = kpi.acquises_trimestre ?? 0;
-  const trimBadge =
-    trim > 0
-      ? `<span class="bl-kpi-delta up">+${trim} ce trimestre</span>`
-      : `<span class="bl-kpi-delta flat">Total acquis</span>`;
   const scoreColor =
     kpi.score_moyen >= 70
       ? "var(--grk)"
@@ -313,22 +302,16 @@ function renderKPI(kpi) {
   <div class="bl-kpi">
     <div class="bl-kpi-val">${kpi.acquises_now ?? "—"}<span class="bl-kpi-unit">/31</span></div>
     <div class="bl-kpi-label">Compétences acquises</div>
-    ${trimBadge}
+    <span class="bl-kpi-delta flat">Total acquis</span>
   </div>
   <div class="bl-kpi">
     <div class="bl-kpi-val" style="color:${esc(scoreColor)}">${kpi.score_moyen != null ? kpi.score_moyen + "%" : "—"}</div>
     <div class="bl-kpi-label">Score moyen quiz</div>
     <span class="bl-kpi-delta ${kpi.score_moyen >= 70 ? "up" : "flat"}">${kpi.quiz_reussis ?? 0}/${kpi.quiz_total ?? 0} réussis</span>
   </div>
-  <div class="bl-kpi">
-    <div class="bl-kpi-val">${kpi.jours_actifs ?? "—"}</div>
+  <div class="bl-kpi bl-kpi-streak">
+    <div class="bl-kpi-val" style="color:var(--or)">${icon("flame", { size: 22, strokeWidth: 2.2, color: "var(--or)" })} ${kpi.jours_actifs ?? "—"}</div>
     <div class="bl-kpi-label">Jours actifs</div>
-    <span class="bl-kpi-delta flat">sur ${kpi.jours_total ?? 90} jours</span>
-  </div>
-  <div class="bl-kpi">
-    <div class="bl-kpi-val">${kpi.acquises_trimestre ?? "—"}</div>
-    <div class="bl-kpi-label">Acquises ce trimestre</div>
-    <span class="bl-kpi-delta flat">Trimestre en cours</span>
   </div>
 </div>`;
 }
@@ -438,15 +421,7 @@ export async function mount(root, eleveId) {
     return;
   }
 
-  const {
-    eleve,
-    trimestre_start,
-    trimestre_end,
-    kpi,
-    by_monde,
-    evolution,
-    comment,
-  } = data;
+  const { eleve, kpi, by_monde, evolution, comment } = data;
   const prenom = eleve?.prenom ?? "";
   const nom = eleve?.nom ?? "";
 
@@ -461,20 +436,14 @@ export async function mount(root, eleveId) {
       </button>
       <div class="bl-school-logo">PermiGo Autopilot</div>
       <h1 class="bl-title" tabindex="-1">Bilan de ${esc(prenom)} ${esc(nom)}</h1>
-      <div class="bl-subtitle">Rapport trimestriel · Permis B</div>
+      <div class="bl-subtitle">Suivi de progression · Permis B</div>
     </div>
     <button class="bl-print-btn" id="bl-btn-print" aria-label="Imprimer le bilan">
       ${icon("printer", { size: 15 })} Imprimer
     </button>
   </div>
 
-  <!-- TRIMESTRE BADGE -->
-  <div class="bl-trimestre">
-    ${icon("calendar", { size: 12 })}
-    ${esc(fmtTrimestre(trimestre_start, trimestre_end))}
-  </div>
-
-  <!-- KPI 2×2 -->
+  <!-- KPI -->
   ${renderKPI(kpi)}
 
   <!-- COMMENTAIRE AUTO -->
