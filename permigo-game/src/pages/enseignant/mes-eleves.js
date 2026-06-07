@@ -248,7 +248,21 @@ const STYLE = `<style>
     text-align: right;
   }
 
-  /* Chevron */
+  /* Bouton actions rapides */
+  .me-more {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: transparent; border-radius: 9px;
+    color: var(--mu2); cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .12s, color .12s;
+  }
+  .me-more:hover { background: var(--bg2); color: var(--ink); }
+  .me-more:active { transform: scale(.92); }
+  .me-more:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+
+  /* Chevron (legacy) */
   .me-chev {
     color: var(--mu2);
     font-size: 16px;
@@ -824,7 +838,8 @@ function renderRow(eleve) {
         <div class="me-prog-txt">${eleve.acquis}/${eleve.total}</div>
       </div>
 
-      <span class="me-chev" aria-hidden="true">›</span>
+      <button class="me-more" data-more type="button"
+              aria-label="Actions rapides pour ${fullNom}">${icon("more-vertical", { size: 18, strokeWidth: 2 })}</button>
     </div>
   `;
 }
@@ -929,7 +944,16 @@ async function wireRows() {
       },
     });
 
-    // ── Long press → menu rapide ──
+    // ── Bouton « ⋯ » visible → menu rapide (n'ouvre PAS le livret) ──
+    const moreBtn = row.querySelector("[data-more]");
+    moreBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      haptic("tap");
+      track("eleve.more_menu", { eleve_id: id });
+      openQuickMenu(id, row);
+    });
+
+    // ── Long press → menu rapide (raccourci, en plus du bouton) ──
     attachLongPress(row, {
       holdMs: 480,
       onLongPress: () => {
@@ -948,10 +972,10 @@ function openQuickMenu(eleveId, anchorRow) {
   document.querySelector(".me-qm")?.remove();
 
   const eleve = _eleves.find((e) => e.id === eleveId) || null;
-  const showManque =
-    eleve &&
-    (eleve.readiness === "en_approche" || eleve.readiness === "en_cours");
   const nMissing = eleve ? eleve.total - eleve.acquis : 0;
+  // Toujours proposer « ce qu'il manque » tant qu'il reste des compétences —
+  // y compris pour un élève « prêt » : c'est PILE lui qui réclame une date.
+  const showManque = eleve && eleve.readiness !== "recu" && nMissing > 0;
 
   const rect = anchorRow.getBoundingClientRect();
   const menu = document.createElement("div");
