@@ -398,7 +398,16 @@ async function loadData(meId) {
     sb.rpc("predict_exam_ready_date"),
   ]);
 
-  const compsCount = validRes.value?.count ?? 0;
+  // Compétences acquises (distinctes). On dérive les BASES C1-C3 (24)
+  // pour aligner la readiness élève sur la règle moniteur (« prêt » =
+  // 100% des bases validées par le moniteur).
+  const validRows = validRes.value?.data ?? [];
+  const acquisSet = new Set(
+    validRows.map((v) => v.competence_id).filter(Boolean),
+  );
+  const compsCount = acquisSet.size;
+  const baseAcquis = [...acquisSet].filter((c) => /^C[123]/.test(c)).length;
+
   const streak = streakRes.value?.data?.current_streak ?? 0;
   const scores = quizRes.value?.data ?? [];
   const avgScore = scores.length
@@ -408,7 +417,7 @@ async function loadData(meId) {
   const predictRaw = predictRes.value?.data;
   const predict = predictRaw?.error ? null : predictRaw || null;
 
-  return { compsCount, streak, avgScore, predict };
+  return { compsCount, baseAcquis, streak, avgScore, predict };
 }
 
 // ─── Render helpers ───────────────────────────────────────────────
@@ -516,8 +525,11 @@ function renderPredict({ compsCount, predict }) {
 </div>`;
 }
 
-function renderChecklist({ compsCount, streak, avgScore }) {
+const BASE_TOTAL = 24; // C1+C2+C3 (mêmes bases que la readiness moniteur)
+
+function renderChecklist({ compsCount, baseAcquis = 0, streak, avgScore }) {
   const revised = isRevised();
+  const baseRestantes = Math.max(0, BASE_TOTAL - baseAcquis);
 
   const criteria = [
     {
@@ -557,17 +569,19 @@ function renderChecklist({ compsCount, streak, avgScore }) {
     },
   ];
 
-  const passCount = criteria.filter((c) => c.pass).length;
+  // Verdict ALIGNÉ sur le moniteur : « prêt » = 100% des bases C1-C3
+  // validées par le moniteur (source de vérité). Les critères ci-dessous
+  // (quiz, streak, révision) restent des conseils de préparation perso.
   let readinessClass, readinessTxt;
-  if (passCount >= 3) {
+  if (baseAcquis >= BASE_TOTAL) {
     readinessClass = "high";
-    readinessTxt = `${icon("check-circle", { size: 14 })} Tu es bien préparé${passCount === 4 ? " · Excellent !" : " · Encore un effort !"}`;
-  } else if (passCount >= 2) {
+    readinessTxt = `${icon("check-circle", { size: 14 })} Prêt pour l'examen — ton moniteur a validé tes ${BASE_TOTAL} compétences de base`;
+  } else if (baseAcquis >= 18) {
     readinessClass = "mid";
-    readinessTxt = `${icon("alert-triangle", { size: 14 })} Progression correcte · Continue !`;
+    readinessTxt = `${icon("alert-triangle", { size: 14 })} Bientôt prêt — ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à faire valider par ton moniteur`;
   } else {
     readinessClass = "low";
-    readinessTxt = `${icon("alert-circle", { size: 14 })} Encore du travail · Ne lâche pas !`;
+    readinessTxt = `${icon("alert-circle", { size: 14 })} En préparation — tes compétences se valident en leçon avec ton moniteur`;
   }
 
   const rows = criteria
