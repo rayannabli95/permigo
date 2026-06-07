@@ -8,7 +8,7 @@ import { toast } from "@/components/common/toast.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
-import { REMC_TOTAL } from "@/data/remc.js";
+import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import {
   renderEmptyState,
   emptyState,
@@ -103,15 +103,16 @@ const STYLE = `<style>
   }
   .me-tab {
     flex: 1;
-    padding: 8px 4px;
+    padding: 8px 2px;
     border: none;
     background: transparent;
     border-radius: 8px;
-    font: 600 13px/1 'Inter', sans-serif;
+    font: 600 11.5px/1 'Inter', sans-serif;
     color: var(--mu2);
     cursor: pointer;
     transition: background .15s cubic-bezier(.4,0,.2,1), color .15s cubic-bezier(.4,0,.2,1);
     min-height: 36px;
+    white-space: nowrap;
   }
   .me-tab.active {
     background: var(--su);
@@ -199,6 +200,20 @@ const STYLE = `<style>
   .me-badge.inactif {
     color: var(--mu2);
     background: rgba(148,163,184,.1);
+  }
+  .me-badge.pret {
+    color: var(--grd);
+    background: rgba(16,185,129,.12);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .me-badge.recu {
+    color: var(--adk);
+    background: rgba(88,204,2,.14);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
   }
 
   /* Progression REMC */
@@ -344,17 +359,44 @@ const STYLE = `<style>
 
 const INACTIF_SEUIL_MS = 14 * 86400000; // 14 jours
 
+// Seuils readiness examen (sur REMC_TOTAL = 31 sous-compétences)
+const PRET_SEUIL = 25; // >= 25 acquis → prêt pour l'examen
+const APPROCHE_SEUIL = 18; // 18–24 → en approche ; < 18 → en cours
+
+/**
+ * État de readiness d'un élève vis-à-vis de l'examen.
+ * @returns {'recu'|'pret'|'en_approche'|'en_cours'}
+ */
+function computeReadiness(acquis, examStatut) {
+  if (examStatut === "recu") return "recu";
+  if (acquis >= PRET_SEUIL) return "pret";
+  if (acquis >= APPROCHE_SEUIL) return "en_approche";
+  return "en_cours";
+}
+
+/** Liste des sous-compétences non encore acquises pour un élève. */
+function missingComps(acquisSet) {
+  const out = [];
+  for (const cat of REMC) {
+    for (const s of cat.subs) {
+      if (!acquisSet.has(s.c)) out.push(s);
+    }
+  }
+  return out;
+}
+
 // ─── State ───────────────────────────────────────────────────────
 let _root = null;
 let _me = null;
 let _eleves = []; // { id, prenom, nom, acquis, total, actif }
 let _query = "";
-let _tab = "tous"; // 'tous' | 'actifs' | 'inactifs' | 'arelancer'
+let _tab = "tous"; // 'tous' | 'actifs' | 'arelancer' | 'prets' | 'recus'
 let _drillComp = null; // competence_id si mode drill bloque_sur
 
 // ─── Entry point ─────────────────────────────────────────────────
 export async function unmount() {
   document.querySelector(".me-qm")?.remove();
+  document.querySelector(".me-miss")?.remove();
 }
 
 export async function mount(root) {
@@ -446,25 +488,43 @@ async function loadData() {
   //    La barre "X/31" doit refléter l'avancement permis de l'élève, pas la
   //    seule contribution du moniteur courant (sinon 0/31 trompeur pour un
   //    élève suivi par un collègue). RLS partage déjà les validations école.
-  const { data: valsRaw } = await sb
+  const { data: valsRaw, error: e2 } = await sb
     .from("validations")
-    .select("eleve_id, statut")
+    .select("eleve_id, competence_id")
     .eq("statut", "acquis");
 
-  // Map : eleve_id → count acquis (total école)
-  const acquisByEleve = {};
+  if (e2) console.error("[mes-eleves] validations query error", e2);
+
+  // Map : eleve_id → Set des competence_id acquis (total école).
+  // Le Set alimente à la fois le count et la liste des compétences manquantes.
+  const acquisSetByEleve = {};
   (valsRaw || []).forEach((v) => {
-    if (!acquisByEleve[v.eleve_id]) acquisByEleve[v.eleve_id] = 0;
-    acquisByEleve[v.eleve_id]++;
+    if (!v.competence_id) return;
+    (acquisSetByEleve[v.eleve_id] ||= new Set()).add(v.competence_id);
+  });
+
+  // 3. Dernier examen par élève (le plus récent fait foi).
+  const { data: examsRaw, error: e3 } = await sb
+    .from("examens")
+    .select("eleve_id, statut, date_examen, created_at")
+    .order("created_at", { ascending: false });
+
+  if (e3) console.error("[mes-eleves] examens query error", e3);
+
+  const lastExamByEleve = {};
+  (examsRaw || []).forEach((ex) => {
+    // ordonné desc → la première ligne vue par élève est la plus récente
+    if (!lastExamByEleve[ex.eleve_id]) lastExamByEleve[ex.eleve_id] = ex;
   });
 
   // Set des élèves ayant au moins 1 compétence acquise
-  const touchedEleves = new Set(Object.keys(acquisByEleve));
+  const touchedEleves = new Set(Object.keys(acquisSetByEleve));
 
   const now = Date.now();
   _eleves = rawList
     .map((e, i) => {
-      const acquis = acquisByEleve[e.id] || 0;
+      const acquisSet = acquisSetByEleve[e.id] || new Set();
+      const acquis = acquisSet.size;
       const actif = touchedEleves.has(e.id) || !!e.last_active_at;
       const lastActive = e.last_active_at
         ? new Date(e.last_active_at).getTime()
@@ -474,14 +534,21 @@ async function loadData() {
       const joursInactif = lastActive
         ? Math.floor((now - lastActive) / 86400000)
         : null;
+      const lastExam = lastExamByEleve[e.id] || null;
+      const examStatut = lastExam ? lastExam.statut : null;
+      const examDate = lastExam ? lastExam.date_examen : null;
       return {
         ...e,
         acquis,
+        acquisSet,
         total: REMC_TOTAL,
         actif,
         idx: i,
         aRelancer,
         joursInactif,
+        examStatut,
+        examDate,
+        readiness: computeReadiness(acquis, examStatut),
       };
     })
     // Mes élèves attitrés en haut, puis ceux que j'ai déjà validé, puis le reste
@@ -578,10 +645,14 @@ function renderDrill() {
 // ─── Render ──────────────────────────────────────────────────────
 function render() {
   const filtered = filterList();
-  const total = _eleves.length;
-  const actifs = _eleves.filter((e) => e.actif).length;
-  const inactifs = total - actifs;
-  const aRelancerList = _eleves.filter((e) => e.aRelancer);
+  // Les élèves reçus sont archivés : ils sortent du roster actif et n'entrent
+  // que dans l'onglet « Reçus ».
+  const recusCount = _eleves.filter((e) => e.readiness === "recu").length;
+  const roster = _eleves.filter((e) => e.readiness !== "recu");
+  const total = roster.length;
+  const actifs = roster.filter((e) => e.actif).length;
+  const prets = roster.filter((e) => e.readiness === "pret").length;
+  const aRelancerList = roster.filter((e) => e.aRelancer);
 
   const relancerSection =
     aRelancerList.length > 0
@@ -623,17 +694,13 @@ function render() {
       </div>
 
       <div class="me-tabs" role="tablist">
-        <button class="me-tab${_tab === "tous" ? " active" : ""}" data-tab="tous" role="tab">
-          Tous (${total})
-        </button>
-        <button class="me-tab${_tab === "actifs" ? " active" : ""}" data-tab="actifs" role="tab">
-          Actifs (${actifs})
-        </button>
+        <button class="me-tab${_tab === "tous" ? " active" : ""}" data-tab="tous" role="tab">Tous (${total})</button>
+        <button class="me-tab${_tab === "actifs" ? " active" : ""}" data-tab="actifs" role="tab">Actifs (${actifs})</button>
+        <button class="me-tab${_tab === "prets" ? " active" : ""}" data-tab="prets" role="tab"
+                style="${prets > 0 && _tab !== "prets" ? "color:var(--grd)" : ""}">Prêts (${prets})</button>
         <button class="me-tab${_tab === "arelancer" ? " active" : ""}" data-tab="arelancer" role="tab"
-                style="display:flex;align-items:center;gap:4px;${aRelancerList.length > 0 && _tab !== "arelancer" ? "color:var(--amx)" : ""}">
-          ${aRelancerList.length > 0 ? icon("alert-circle", { size: 13, strokeWidth: 2.2 }) : ""}
-          À relancer (${aRelancerList.length})
-        </button>
+                style="${aRelancerList.length > 0 && _tab !== "arelancer" ? "color:var(--amx)" : ""}">Relance (${aRelancerList.length})</button>
+        <button class="me-tab${_tab === "recus" ? " active" : ""}" data-tab="recus" role="tab">Reçus (${recusCount})</button>
       </div>
 
       <button class="me-fab" id="me-fab" aria-label="Enregistrer une séance">
@@ -670,9 +737,15 @@ function render() {
 function filterList() {
   let list = _eleves;
 
-  if (_tab === "actifs") list = list.filter((e) => e.actif);
-  if (_tab === "inactifs") list = list.filter((e) => !e.actif);
-  if (_tab === "arelancer") list = list.filter((e) => e.aRelancer);
+  if (_tab === "recus") {
+    list = list.filter((e) => e.readiness === "recu");
+  } else {
+    // tous les autres onglets excluent les élèves reçus (archivés)
+    list = list.filter((e) => e.readiness !== "recu");
+    if (_tab === "actifs") list = list.filter((e) => e.actif);
+    if (_tab === "arelancer") list = list.filter((e) => e.aRelancer);
+    if (_tab === "prets") list = list.filter((e) => e.readiness === "pret");
+  }
 
   if (_query.trim()) {
     const q = _query.toLowerCase().trim();
@@ -704,17 +777,16 @@ function renderRow(eleve) {
           ${eleve.isMine ? `<span style="margin-left:6px;display:inline-block;font:700 9px/1 'Inter',sans-serif;padding:3px 6px;border-radius:4px;background:rgba(88,204,2,.12);color:var(--adk);letter-spacing:.04em;text-transform:uppercase;vertical-align:middle">attitré</span>` : ""}
         </div>
         <div class="me-meta">
-          <span class="me-badge ${eleve.actif ? "actif" : "inactif"}">
-            ${eleve.actif ? "Actif" : "Inactif"}
-          </span>
           ${
-            eleve.aRelancer
-              ? `
-            <span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">
-              ${icon("alert-circle", { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `${eleve.joursInactif}j` : "À relancer"}
-            </span>
-          `
-              : ""
+            eleve.readiness === "recu"
+              ? `<span class="me-badge recu">${icon("check", { size: 11, strokeWidth: 2.6 })} Reçu</span>`
+              : `<span class="me-badge ${eleve.actif ? "actif" : "inactif"}">${eleve.actif ? "Actif" : "Inactif"}</span>
+                 ${eleve.readiness === "pret" ? `<span class="me-badge pret">${icon("check", { size: 11, strokeWidth: 2.6 })} Prêt</span>` : ""}
+                 ${
+                   eleve.aRelancer
+                     ? `<span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">${icon("alert-circle", { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `${eleve.joursInactif}j` : "À relancer"}</span>`
+                     : ""
+                 }`
           }
           <span class="me-meta-count">
             ${eleve.acquis} validation${eleve.acquis > 1 ? "s" : ""}
@@ -852,6 +924,12 @@ function openQuickMenu(eleveId, anchorRow) {
   // Retire menu existant
   document.querySelector(".me-qm")?.remove();
 
+  const eleve = _eleves.find((e) => e.id === eleveId) || null;
+  const showManque =
+    eleve &&
+    (eleve.readiness === "en_approche" || eleve.readiness === "en_cours");
+  const nMissing = eleve ? eleve.total - eleve.acquis : 0;
+
   const rect = anchorRow.getBoundingClientRect();
   const menu = document.createElement("div");
   menu.className = "me-qm";
@@ -891,26 +969,55 @@ function openQuickMenu(eleveId, anchorRow) {
       }
       .me-qm-item:hover { background: var(--bg); }
       .me-qm-item:active { background: var(--bg2); }
-      .me-qm-ico { font-size: 16px; line-height: 1; }
+      .me-qm-ico { font-size: 16px; line-height: 1; display: inline-flex; }
       .me-qm-item.danger { color: var(--rd); }
+      .me-qm-item.ok { color: var(--grd); }
+      .me-qm-sep { height: 1px; background: var(--bo); margin: 6px 8px; }
+      .me-qm-label {
+        font: 700 10px/1 'Inter', sans-serif;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+        color: var(--mu2);
+        padding: 8px 14px 4px;
+      }
     </style>
     <div class="me-qm-bg" data-close="1"></div>
     <div class="me-qm-panel">
+      ${
+        showManque
+          ? `<button class="me-qm-item" data-action="manque">
+               <span class="me-qm-ico">${icon("clipboard", { size: 14, strokeWidth: 2.5 })}</span> Voir ce qu'il manque (${nMissing})
+             </button>`
+          : ""
+      }
       <button class="me-qm-item" data-action="valider">
         <span class="me-qm-ico">${icon("check", { size: 14, strokeWidth: 2.5 })}</span> Enregistrer une séance
       </button>
       <button class="me-qm-item" data-action="livret">
         <span class="me-qm-ico">${icon("arrow-right", { size: 14, strokeWidth: 2.5 })}</span> Ouvrir le livret REMC
       </button>
+      <div class="me-qm-sep"></div>
+      <div class="me-qm-label">Examen</div>
+      <button class="me-qm-item" data-action="exam-planifie">
+        <span class="me-qm-ico">${icon("calendar", { size: 14, strokeWidth: 2.5 })}</span> Examen planifié
+      </button>
+      <button class="me-qm-item ok" data-action="exam-recu">
+        <span class="me-qm-ico">${icon("award", { size: 14, strokeWidth: 2.5 })}</span> Marquer reçu
+      </button>
+      <button class="me-qm-item danger" data-action="exam-rate">
+        <span class="me-qm-ico">${icon("x", { size: 14, strokeWidth: 2.5 })}</span> Examen raté
+      </button>
     </div>
   `;
   document.body.appendChild(menu);
 
-  // Position du panel sous la row
+  // Position du panel sous la row (clamp pour rester dans le viewport)
   const panel = menu.querySelector(".me-qm-panel");
-  const top = Math.min(rect.bottom + 8, window.innerHeight - 220);
+  panel.style.maxHeight = "min(70vh, 440px)";
+  panel.style.overflowY = "auto";
+  const top = Math.min(rect.bottom + 8, window.innerHeight - 360);
   const left = Math.min(rect.left + 16, window.innerWidth - 240);
-  panel.style.top = `${top}px`;
+  panel.style.top = `${Math.max(8, top)}px`;
   panel.style.left = `${left}px`;
 
   const close = () => menu.remove();
@@ -922,7 +1029,126 @@ function openQuickMenu(eleveId, anchorRow) {
       close();
       if (action === "valider") navigate(`#/log-session?eleveId=${eleveId}`);
       else if (action === "livret") navigate(`#/livret/${eleveId}`);
+      else if (action === "manque" && eleve) openMissingPanel(eleve);
+      else if (action === "exam-planifie") recordExam(eleveId, "planifie");
+      else if (action === "exam-recu") recordExam(eleveId, "recu");
+      else if (action === "exam-rate") recordExam(eleveId, "rate");
     });
+  });
+}
+
+// ─── Enregistrement d'un résultat d'examen ───────────────────────
+async function recordExam(eleveId, statut) {
+  const { error } = await sb.from("examens").insert({
+    eleve_id: eleveId,
+    statut,
+    created_by: _me.id,
+  });
+  if (error) {
+    console.error("[mes-eleves] examen insert error", error);
+    toast("Impossible d'enregistrer l'examen", "error");
+    return;
+  }
+
+  // MAJ locale → recalcul readiness sans refetch
+  const el = _eleves.find((e) => e.id === eleveId);
+  if (el) {
+    el.examStatut = statut;
+    el.readiness = computeReadiness(el.acquis, statut);
+  }
+
+  const msg = {
+    planifie: "Examen planifié enregistré",
+    recu: "Élève marqué reçu — archivé dans « Reçus »",
+    rate: "Résultat d'examen enregistré",
+  };
+  toast(msg[statut] || "Enregistré", "success");
+  track("examen.record", { eleve_id: eleveId, statut });
+
+  // Re-render complet : badges + compteurs d'onglets
+  render();
+  wire();
+}
+
+// ─── Panneau « ce qu'il manque » (écran à montrer à l'élève) ─────
+function openMissingPanel(eleve) {
+  document.querySelector(".me-miss")?.remove();
+
+  const missing = missingComps(eleve.acquisSet);
+  const nom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(" ") || "—");
+  const restantesAvantSeuil = Math.max(0, PRET_SEUIL - eleve.acquis);
+
+  const wrap = document.createElement("div");
+  wrap.className = "me-miss";
+  wrap.innerHTML = `
+    <style>
+      .me-miss-bg {
+        position: fixed; inset: 0; z-index: 500;
+        background: rgba(10,13,26,.4);
+        backdrop-filter: blur(3px);
+        animation: meqmIn .15s ease;
+      }
+      .me-miss-card {
+        position: fixed; z-index: 501;
+        left: 50%; bottom: 0;
+        transform: translateX(-50%);
+        width: 100%; max-width: 480px;
+        max-height: 82vh;
+        display: flex; flex-direction: column;
+        background: var(--su);
+        border: 1px solid var(--bo);
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -8px 32px -8px rgba(10,13,26,.25);
+        padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 0px));
+        font-family: 'Inter', sans-serif;
+        animation: meMissUp .24s cubic-bezier(.34,1.4,.64,1);
+      }
+      @keyframes meMissUp { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
+      @media (prefers-reduced-motion: reduce) { .me-miss-bg, .me-miss-card { animation: none; } }
+      .me-miss-title { font: 700 18px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin: 0 0 4px; }
+      .me-miss-sub { font: 500 13px/1.4 'Inter', sans-serif; color: var(--mu2); margin: 0 0 16px; }
+      .me-miss-list { overflow-y: auto; flex: 1; margin: 0 -4px; padding: 0 4px; }
+      .me-miss-cat { font: 700 11px/1 'Inter', sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--a); margin: 14px 0 8px; }
+      .me-miss-cat:first-child { margin-top: 0; }
+      .me-miss-item { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; font: 500 14px/1.3 'Inter', sans-serif; color: var(--ink); border-bottom: 1px solid var(--bg2); }
+      .me-miss-code { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu); background: var(--bg2); padding: 3px 6px; border-radius: 6px; flex-shrink: 0; }
+      .me-miss-empty { text-align: center; padding: 32px 16px; color: var(--grd); font: 600 14px/1.5 'Inter', sans-serif; }
+      .me-miss-cta { margin-top: 16px; width: 100%; min-height: 48px; border: 0; border-radius: 12px; background: var(--a); color: #fff; font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
+      .me-miss-cta:active { transform: scale(.98); }
+    </style>
+    <div class="me-miss-bg" data-close="1"></div>
+    <div class="me-miss-card" role="dialog" aria-modal="true" aria-label="Compétences manquantes de ${nom}">
+      <div class="me-miss-title">Il manque à ${nom}</div>
+      <div class="me-miss-sub">${eleve.acquis}/${eleve.total} acquises · ${restantesAvantSeuil > 0 ? `${restantesAvantSeuil} de plus pour atteindre le seuil examen (${PRET_SEUIL})` : "seuil examen atteint"}</div>
+      <div class="me-miss-list">
+        ${
+          missing.length === 0
+            ? `<div class="me-miss-empty">${icon("check-circle", { size: 28, strokeWidth: 2 })}<br>Toutes les compétences sont acquises.</div>`
+            : REMC.map((cat) => {
+                const subs = cat.subs.filter((s) => !eleve.acquisSet.has(s.c));
+                if (!subs.length) return "";
+                return (
+                  `<div class="me-miss-cat">${esc(cat.name)}</div>` +
+                  subs
+                    .map(
+                      (s) =>
+                        `<div class="me-miss-item"><span class="me-miss-code">${esc(s.c)}</span> ${esc(s.n)}</div>`,
+                    )
+                    .join("")
+                );
+              }).join("")
+        }
+      </div>
+      <button class="me-miss-cta" data-livret="1">Ouvrir le livret REMC</button>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+
+  const close = () => wrap.remove();
+  wrap.querySelector("[data-close]").addEventListener("click", close);
+  wrap.querySelector("[data-livret]").addEventListener("click", () => {
+    close();
+    navigate(`#/livret/${eleve.id}`);
   });
 }
 
@@ -932,16 +1158,21 @@ function renderList() {
   if (!listEl) return;
 
   const filtered = filterList();
-  const total = _eleves.length;
-  const actifs = _eleves.filter((e) => e.actif).length;
-  const inactifs = total - actifs;
+  const recusCount = _eleves.filter((e) => e.readiness === "recu").length;
+  const roster = _eleves.filter((e) => e.readiness !== "recu");
+  const total = roster.length;
+  const actifs = roster.filter((e) => e.actif).length;
+  const prets = roster.filter((e) => e.readiness === "pret").length;
+  const arelancer = roster.filter((e) => e.aRelancer).length;
 
   // Mettre à jour les tabs count (les boutons eux-mêmes)
   _root.querySelectorAll(".me-tab").forEach((btn) => {
     const tab = btn.dataset.tab;
     if (tab === "tous") btn.textContent = `Tous (${total})`;
     if (tab === "actifs") btn.textContent = `Actifs (${actifs})`;
-    if (tab === "inactifs") btn.textContent = `Inactifs (${inactifs})`;
+    if (tab === "prets") btn.textContent = `Prêts (${prets})`;
+    if (tab === "arelancer") btn.textContent = `Relance (${arelancer})`;
+    if (tab === "recus") btn.textContent = `Reçus (${recusCount})`;
   });
 
   if (filtered.length === 0) {
