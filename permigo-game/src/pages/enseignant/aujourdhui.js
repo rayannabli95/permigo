@@ -600,16 +600,24 @@ async function renderInto(root, _me) {
     (v) => v.statut === "acquis",
   ).length;
 
-  // Élèves que j'ai validé au moins une fois (tous statuts)
+  // Élèves que j'ai validé au moins une fois (appartenance « mes élèves »)
   const { data: elevesValides } = await sb
     .from("validations")
-    .select("eleve_id, competence_id, statut")
+    .select("eleve_id")
     .eq("validated_by", _me.id);
+  const validatedByMe = new Set((elevesValides || []).map((v) => v.eleve_id));
 
-  const tousByEleve = {};
-  (elevesValides || []).forEach((v) => {
-    if (!tousByEleve[v.eleve_id]) tousByEleve[v.eleve_id] = { acquis: 0 };
-    if (v.statut === "acquis") tousByEleve[v.eleve_id].acquis++;
+  // Avancement RÉEL par élève = compétences acquises DISTINCTES, toutes
+  // validations école confondues (pas seulement les miennes). Cohérent avec
+  // mes-eleves.js — sinon un élève suivi par un collègue paraît en retard.
+  const { data: acquisAll } = await sb
+    .from("validations")
+    .select("eleve_id, competence_id")
+    .eq("statut", "acquis");
+  const acquisSetByEleve = {};
+  (acquisAll || []).forEach((v) => {
+    if (!v.competence_id) return;
+    (acquisSetByEleve[v.eleve_id] ||= new Set()).add(v.competence_id);
   });
 
   // Union : élèves directement attitrés (enseignant_id = me) + élèves déjà validés
@@ -619,12 +627,12 @@ async function renderInto(root, _me) {
       .filter((e) => e.enseignant_id === _me.id)
       .map((e) => e.id),
   );
-  for (const id of Object.keys(tousByEleve)) mesIds.add(id);
+  for (const id of validatedByMe) mesIds.add(id);
 
   const mesElevesActifs = Array.from(mesIds).map((id) => ({
     id,
     ...(elevesMap[id] || { prenom: "Élève", nom: "", idx: 0 }),
-    acquis: tousByEleve[id]?.acquis || 0,
+    acquis: acquisSetByEleve[id]?.size || 0,
   }));
 
   // Total école (cohérent avec mes-eleves qui montre tous les élèves RLS)
