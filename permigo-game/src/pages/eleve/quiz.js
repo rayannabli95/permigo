@@ -74,13 +74,13 @@ const STYLE = `<style>
   .btn-start {
     width: 100%;
     padding: 18px;
-    background: var(--a);
+    background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
     border: 0;
     border-radius: 16px;
     color: #fff;
     font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
-    box-shadow: 0 8px 24px rgba(88,204,2,.4);
+    box-shadow: 0 8px 24px rgba(88,204,2,.4), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset;
     transition: transform .15s, opacity .15s, box-shadow .15s;
     margin-bottom: 12px;
   }
@@ -130,7 +130,7 @@ const STYLE = `<style>
   .btn-parcours {
     width: 100%;
     padding: 16px;
-    background: var(--a);
+    background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
     border: 0;
     border-radius: 14px;
     color: #fff;
@@ -138,7 +138,7 @@ const STYLE = `<style>
     cursor: pointer;
     margin-bottom: 12px;
     transition: transform .15s, opacity .15s;
-    box-shadow: 0 6px 20px rgba(88,204,2,.25);
+    box-shadow: 0 6px 20px rgba(88,204,2,.25), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset;
   }
   .btn-parcours:active { transform: scale(.98); }
   .btn-home {
