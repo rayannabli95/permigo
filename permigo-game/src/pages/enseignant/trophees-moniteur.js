@@ -19,6 +19,7 @@ import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
+import { getPermisBg } from "@/utils/assets.js";
 
 // ─── Médailles (raretés) — couleurs de médaille, pas couleurs de marque ──
 const TIERS = {
@@ -217,10 +218,19 @@ const STYLE = `<style>
 .tr2-hd-title { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.025em; }
 .tr2-hd-sub { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 
-/* ── Hero : accent pro (encre/sombre) + halo vert de marque ── */
+/* ── Hero : accent pro (encre/sombre) + halo vert de marque ──
+   Couche basse = fond permis évolutif (--tr2-bg). Scrim sombre neutre
+   (rgba figé) par-dessus → texte blanc lisible ≥4.5:1 dans les 2 thèmes. */
 .tr2-hero {
   position: relative; overflow: hidden; padding: 20px 20px 22px;
-  background: linear-gradient(160deg, var(--ink2) 0%, var(--ink3) 60%, var(--ink) 100%);
+  background-color: #12152b;
+  background-image:
+    linear-gradient(160deg, rgba(13,16,34,.74) 0%, rgba(11,13,26,.82) 55%, rgba(8,10,22,.92) 100%),
+    var(--tr2-bg, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 14px 30px -20px rgba(11,13,26,.55);
 }
 .tr2-hero::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -502,7 +512,7 @@ function _render(root, d) {
   root.innerHTML = `${STYLE}
 <div class="tr2 anim-slide-up">
   ${_headerHtml(`${unlockedCount} débloqué${unlockedCount > 1 ? "s" : ""} sur ${total}`)}
-  <div class="tr2-hero">
+  <div class="tr2-hero" style="--tr2-bg:url('${getPermisBg(d.totalVals, "enseignant")}')">
     <div class="tr2-hero-in">
       <div class="tr2-hero-top">
         <h1 class="tr2-hero-title">Mes trophées</h1>

@@ -70,11 +70,28 @@ export const playLevelup = () => play("unlock"); // compétence validée
 export const playFanfare = () => play("horn", 0.45); // exam réussi / monde débloqué
 export const playStar = () => play("coin"); // quête réclamée
 
-// Joué une seule fois par session (jingle long ~2-3s, page souvent revisitée)
+// Joué une seule fois par session (jingle long ~2-3s, page souvent revisitée).
+// On ne garde que la fin (~2s) + la transition, à volume bas.
 export function playParcours() {
   if (sessionStorage.getItem(PARCOURS_KEY)) return;
   sessionStorage.setItem(PARCOURS_KEY, "1");
-  play("parcours", 0.15);
+  if (!isSoundEnabled()) return;
+  try {
+    const a = _get("parcours", 0.08);
+    a.volume = 0.08; // volume moins fort
+    const TAIL = 2; // on ne garde que les 2 dernières secondes
+    const start = () => {
+      const d = a.duration;
+      a.currentTime = isFinite(d) && d > TAIL ? d - TAIL : 0;
+      a.play().catch(() => {});
+      setTimeout(() => {
+        a.pause();
+        a.currentTime = 0;
+      }, TAIL * 1000);
+    };
+    if (isFinite(a.duration) && a.duration > 0) start();
+    else a.addEventListener("loadedmetadata", start, { once: true });
+  } catch {}
 }
 
 // Joué une seule fois par session, après le 1er geste user (autoplay safe)

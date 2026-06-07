@@ -19,6 +19,7 @@ import { animateCounter } from "@/utils/gestures.js";
 import { icon } from "@/utils/icons.js";
 import { openPalierSheet } from "@/components/common/palier-sheet.js";
 import { playParcours } from "@/utils/sound.js";
+import { getPermisBg } from "@/utils/assets.js";
 
 // ─── Géométrie de la route (viewBox 396 × 1240) ──────────────────
 // x maintenu dans ~[100,290] pour que les étiquettes centrées (≤150px)
@@ -58,10 +59,21 @@ const STYLE = `<style>
 .ppr-tab.on { color: var(--ink); border-bottom-color: var(--a); }
 .ppr-tab:focus-visible { outline: 3px solid var(--a); outline-offset: -3px; border-radius: 8px; }
 
-/* ── Hero : compteur de validations + palier + prochain outil ── */
+/* ── Hero : compteur de validations + palier + prochain outil ──
+   Couche basse = fond permis évolutif (--ppr-bg, posé inline par rôle).
+   Scrim sombre neutre (rgba) par-dessus → texte blanc lisible ≥4.5:1
+   dans les 2 thèmes (les tokens --ink* s'inversent en dark, donc on
+   garde un scrim figé comme le fait l'élève avec ses rgba(11,13,26,…)). */
 .ppr-hero {
   position: relative; overflow: hidden; padding: 18px 18px 20px;
-  background: linear-gradient(160deg, var(--ink2) 0%, var(--ink3) 60%, var(--ink) 100%);
+  background-color: #12152b;
+  background-image:
+    linear-gradient(160deg, rgba(13,16,34,.74) 0%, rgba(11,13,26,.82) 55%, rgba(8,10,22,.92) 100%),
+    var(--ppr-bg, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 14px 30px -20px rgba(11,13,26,.55);
 }
 .ppr-hero::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -92,8 +104,23 @@ const STYLE = `<style>
 
 /* ── Route ── */
 .ppr-route { position: relative; margin: 4px 0 0; padding: 6px 8px 30px; }
-.ppr-route svg.path { display: block; width: 100%; height: auto; overflow: visible; }
-.p-shadow { stroke: rgba(11,13,26,.10); stroke-width: 30; fill: none; stroke-linecap: round; }
+/* Fond permis en filigrane derrière la route → matière, pas un aplat */
+.ppr-route::before {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: var(--ppr-bg, none) center / cover no-repeat;
+  opacity: .10;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 80%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 80%, transparent 100%);
+}
+/* Vignette de bas de page : ancre la route sur le fond */
+.ppr-route::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 90px;
+  z-index: 0; pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--bg));
+}
+.ppr-route svg.path { position: relative; z-index: 1; display: block; width: 100%; height: auto; overflow: visible; }
+.ppr-nodes { z-index: 2; }
+.p-shadow { stroke: rgba(11,13,26,.12); stroke-width: 30; fill: none; stroke-linecap: round; filter: blur(3px); }
 .p-edge { stroke: var(--bo4); stroke-width: 27; fill: none; stroke-linecap: round; }
 .p-surface { stroke: var(--mu2); stroke-width: 20; fill: none; stroke-linecap: round; }
 .p-dash { stroke: #fff; stroke-width: 2.5; stroke-dasharray: 6 12; stroke-linecap: round; fill: none; opacity: .85; }
@@ -242,8 +269,12 @@ function _render(root, totalVals, state) {
 
   const doneCount = items.filter((it) => it.state === "done").length;
 
+  // Fond permis évolutif (mesh < 100 ≤ route < 230 ≤ holographic) — hérité
+  // par le hero + la zone route via la variable CSS --ppr-bg.
+  const permisBg = getPermisBg(totalVals, "enseignant");
+
   root.innerHTML = `${STYLE}
-    <div class="ppr">
+    <div class="ppr" style="--ppr-bg:url('${permisBg}')">
       ${_tabsHtml()}
 
       <div class="ppr-hero">
