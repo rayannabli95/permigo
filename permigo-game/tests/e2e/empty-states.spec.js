@@ -17,7 +17,7 @@ async function loginAs(page, { email, pwd }) {
   await page.fill('#lg-email', email);
   await page.fill('#lg-pwd', pwd);
   await page.click('#lg-submit');
-  await page.waitForSelector('.acc, .me-list, .vp, [data-page]', { timeout: 20_000 });
+  await page.waitForSelector('.acc2-hero-hi, .aj-page, .me-list, .vp', { timeout: 20_000 });
 }
 
 async function goTo(page, hash) {

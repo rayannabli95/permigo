@@ -20,7 +20,7 @@ async function loginAsEleve(page) {
   await page.fill('#lg-email', EMAIL);
   await page.fill('#lg-pwd', PWD);
   await page.click('#lg-submit');
-  await page.waitForSelector('.acc, [data-page]', { timeout: 20_000 });
+  await page.waitForSelector('.acc2-hero-hi', { timeout: 20_000 });
 }
 
 async function goToExamen(page) {

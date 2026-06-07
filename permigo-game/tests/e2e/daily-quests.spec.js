@@ -19,7 +19,7 @@ async function loginAsEleve(page) {
   await page.fill("#lg-email", EMAIL);
   await page.fill("#lg-pwd", PWD);
   await page.click("#lg-submit");
-  await page.waitForSelector(".acc2, .acc-bonjour", { timeout: 20_000 });
+  await page.waitForSelector(".acc2, .acc2-hero-hi", { timeout: 20_000 });
 }
 
 /** Attend que mountDailyQuests ait eu le temps de s'exécuter (async, non-bloquant). */

@@ -21,7 +21,7 @@ async function loginAsEnseignant(page) {
   await page.fill('#lg-email', EMAIL);
   await page.fill('#lg-pwd', PWD);
   await page.click('#lg-submit');
-  await page.waitForSelector('.me-list, .vp, [data-page]', { timeout: 20_000 });
+  await page.waitForSelector('.aj-page, .me-list, .vp', { timeout: 20_000 });
 }
 
 async function getFirstEleveId(page) {
