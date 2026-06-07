@@ -222,7 +222,7 @@ button:active:not(:disabled),
   gap: 8px;
   border: 0;
   border-radius: 14px;
-  color: #fff;
+  color: #1a2800;
   font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;

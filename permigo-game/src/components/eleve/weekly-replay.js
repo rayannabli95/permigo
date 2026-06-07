@@ -153,8 +153,8 @@ export function playReplay(stats) {
     </div>
     <button class="wrep-close" id="wrep-close" type="button" aria-label="Fermer">×</button>
     <div class="wrep-stage" id="wrep-stage"></div>
-    <div class="wrep-tap-left" id="wrep-tap-left" aria-label="Précédent"></div>
-    <div class="wrep-tap-right" id="wrep-tap-right" aria-label="Suivant"></div>
+    <div class="wrep-tap-left" id="wrep-tap-left" role="button" tabindex="0" aria-label="Précédent"></div>
+    <div class="wrep-tap-right" id="wrep-tap-right" role="button" tabindex="0" aria-label="Suivant"></div>
   `;
   document.body.appendChild(overlay);
 

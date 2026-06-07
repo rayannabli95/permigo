@@ -163,7 +163,7 @@ const STYLE = `<style>
   padding: 12px 20px;
   background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
   box-shadow: 0 2px 10px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset;
-  color: #fff;
+  color: #1a2800;
   border: 0;
   border-radius: 14px;
   font: 600 14px/1 'Plus Jakarta Sans',sans-serif;

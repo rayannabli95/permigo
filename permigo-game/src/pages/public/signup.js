@@ -105,7 +105,7 @@ const STYLE = `<style>
     width: 100%;
     margin-top: 18px;
     padding: 16px;
-    color: #fff;
+    color: #1a2800;
     border: 0;
     border-radius: 14px;
     font: 800 15px/1 'Plus Jakarta Sans', sans-serif;

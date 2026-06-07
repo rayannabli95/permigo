@@ -24,7 +24,9 @@
 
   /* ─ Texte ─ */
   --ink:#0b0d1a; --ink2:#1a1d2e; --ink3:#2d3050; --ink4:#1e293b; --ink5:#374151;
-  --mu:#7880a4; --mu2:#94a3b8; --mu3:#64748b; --mu4:#475569;
+  /* Gris muets — assombris pour le contraste AA (axe : #94a3b8 ne passait pas
+     sur fond clair, ~2.5:1 ; les nouveaux valeurs clairent 4.5:1 sur #fff et #f4f5fb) */
+  --mu:#5f6788; --mu2:#5e6e82; --mu3:#556070; --mu4:#475569;
   /* ─ Vert complémentaire ─ */
   --gr2:#22c55e; --grk:#16a34a; --grk2:#15803d; --grdk:#047857;
   --grp2:#dcfce7; /* success bg très clair */
