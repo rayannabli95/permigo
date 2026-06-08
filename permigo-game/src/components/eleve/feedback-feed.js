@@ -61,7 +61,7 @@ function ensureStyle() {
   .ff-list { display: flex; flex-direction: column; gap: 6px; }
 
   .ff-card {
-    background: #fff;
+    background: var(--su);
     border: 1.5px solid var(--bo);
     border-radius: 18px;
     padding: 12px 14px;
