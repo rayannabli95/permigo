@@ -6,6 +6,7 @@
 import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
+import { playTutoMusic, playWhoosh } from "@/utils/sound.js";
 
 const SEEN_KEY = "permigo-parcours-tuto-v1";
 
@@ -38,6 +39,7 @@ const SLIDES = [
 
 let _overlay = null;
 let _onKey = null;
+let _stopMusic = null;
 
 function slideHtml(s, i) {
   return `
@@ -105,6 +107,9 @@ export function showParcoursTuto() {
   document.body.appendChild(ov);
   requestAnimationFrame(() => ov.classList.add("on"));
 
+  // Mélodie de fond (coupée à la fermeture)
+  _stopMusic = playTutoMusic();
+
   const stage = ov.querySelector("#pt-stage");
   const nextBtn = ov.querySelector("#pt-next");
   const dots = ov.querySelectorAll(".pt-dot");
@@ -118,6 +123,7 @@ export function showParcoursTuto() {
   nextBtn.addEventListener("click", () => {
     if (idx < total - 1) {
       idx++;
+      playWhoosh();
       sync();
     } else {
       track("parcours_tuto.completed");
@@ -140,6 +146,10 @@ function close() {
   const ov = _overlay;
   if (!ov) return;
   _overlay = null;
+  if (_stopMusic) {
+    _stopMusic();
+    _stopMusic = null;
+  }
   if (_onKey) {
     document.removeEventListener("keydown", _onKey);
     _onKey = null;

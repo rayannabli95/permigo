@@ -106,6 +106,24 @@ export const playParcoursIntro = (durationMs = 3000) =>
 export const playConnexionIntro = (durationMs = 2800) =>
   _playIntro("connexion", 0.28, durationMs);
 
+// Mélodie de fond du tuto parcours — bouclée, faible volume. Retourne stop().
+export function playTutoMusic(vol = 0.16) {
+  if (!isSoundEnabled()) return () => {};
+  try {
+    const a = _get("tuto", vol);
+    a.loop = true;
+    a.currentTime = 0;
+    a.play().catch(() => {});
+    return () => {
+      a.loop = false;
+      a.pause();
+      a.currentTime = 0;
+    };
+  } catch {
+    return () => {};
+  }
+}
+
 // Joué une seule fois par session, après le 1er geste user (autoplay safe)
 // Durée limitée à 2 secondes
 export function playLaunch() {
