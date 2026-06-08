@@ -606,6 +606,12 @@ export async function mount(root) {
       : ""
   }
 
+  <div class="prf-nav-tiles">
+    <a class="prf-nav-tile" href="#/settings" aria-label="Ouvrir les réglages">
+      <span class="prf-nav-ico" aria-hidden="true">${icon("settings", { size: 18 })}</span><span>Réglages</span>
+    </a>
+  </div>
+
   ${me.role === "eleve" ? `<div id="prf-pseudo-section">${_renderPseudo(profile?.username)}</div>` : ""}
 
   ${referralStats !== null ? `<div id="prf-ref-section">${_renderReferral(referralStats)}</div>` : ""}
