@@ -4,7 +4,7 @@
 //           compact (illustration 60px + titre court)
 // Animation : scale(0.96→1) cubic-bezier(.34,1.56,.64,1) 350ms
 // ═══════════════════════════════════════════════════════════════
-import { esc } from '@/utils/escape.js';
+import { esc } from "@/utils/escape.js";
 
 const SHARED_STYLES = `
 .es-wrap {
@@ -91,7 +91,7 @@ let _stylesInjected = false;
 function ensureStyles() {
   if (_stylesInjected) return;
   _stylesInjected = true;
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = SHARED_STYLES;
   document.head.appendChild(style);
 }
@@ -106,14 +106,16 @@ function ensureStyles() {
  * @returns {string} HTML
  */
 export function emptyState({ image, title, body, cta }) {
+  // Mascotte par défaut quand l'appelant ne fournit pas d'illustration
+  const img = image || "/skins/mascot-wait.png";
   return `
     <div style="text-align:center;padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:16px">
-      <img src="${image}" alt="" loading="lazy"
+      <img src="${img}" alt="" loading="lazy"
            style="width:140px;height:140px;object-fit:contain;opacity:.92"
            onerror="this.style.display='none'">
       <div style="font:700 18px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)">${esc(title)}</div>
       <div style="font:500 14px/1.5 'Inter',sans-serif;color:var(--mu);max-width:280px">${esc(body)}</div>
-      ${cta ?? ''}
+      ${cta ?? ""}
     </div>
   `;
 }
@@ -130,22 +132,31 @@ export function emptyState({ image, title, body, cta }) {
  * @param {boolean}[opts.compact]      — Mode compact : illustration 60px, layout horizontal
  * @returns {string} HTML
  */
-export function renderEmptyState({ illustration, title, subtitle, ctaLabel, ctaHref, compact = false }) {
+export function renderEmptyState({
+  illustration,
+  title,
+  subtitle,
+  ctaLabel,
+  ctaHref,
+  compact = false,
+}) {
   ensureStyles();
 
-  const img = illustration
-    ? `<img class="es-img" src="${esc(illustration)}" alt="" role="presentation" loading="lazy" />`
-    : '';
+  const ill = illustration || "/skins/mascot-wait.png";
+  const img = `<img class="es-img" src="${esc(ill)}" alt="" role="presentation" loading="lazy" />`;
 
-  const sub = (!compact && subtitle)
-    ? `<div class="es-sub">${esc(subtitle)}</div>`
-    : (compact && subtitle ? `<div class="es-sub">${esc(subtitle)}</div>` : '');
+  const sub =
+    !compact && subtitle
+      ? `<div class="es-sub">${esc(subtitle)}</div>`
+      : compact && subtitle
+        ? `<div class="es-sub">${esc(subtitle)}</div>`
+        : "";
 
   const cta = ctaLabel
-    ? `<a class="es-cta" href="${esc(ctaHref || '#')}" role="button">${esc(ctaLabel)}</a>`
-    : '';
+    ? `<a class="es-cta" href="${esc(ctaHref || "#")}" role="button">${esc(ctaLabel)}</a>`
+    : "";
 
-  const wrapClass = `es-wrap${compact ? ' es-compact' : ''}`;
+  const wrapClass = `es-wrap${compact ? " es-compact" : ""}`;
 
   if (compact) {
     return `<div class="${wrapClass}">

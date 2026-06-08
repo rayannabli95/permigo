@@ -87,7 +87,7 @@ export function toastAvatar({ title, sub = '', initials = '?', color = 'var(--a)
         align-items: center;
         gap: 12px;
         padding: 12px 14px !important;
-        background: #fff !important;
+        background: var(--su) !important;
         border: 1px solid var(--bo) !important;
         box-shadow: 0 12px 32px -8px rgba(10,13,26,.18) !important;
         min-width: 260px;

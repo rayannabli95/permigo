@@ -32,7 +32,7 @@ function ensureStyle() {
     margin-bottom: 16px;
   }
   .scb-card {
-    background: #fff;
+    background: var(--su);
     border: 1.5px solid color-mix(in srgb, var(--a) 25%, transparent);
     border-radius: 20px;
     padding: 14px 16px;

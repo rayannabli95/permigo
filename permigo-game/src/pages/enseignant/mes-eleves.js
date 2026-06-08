@@ -645,7 +645,7 @@ function renderDrill() {
       </div>
     </header>
     <button class="me-drill-back" id="me-drill-back"
-            style="display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:8px 12px;background:#fff;border:1.5px solid var(--bo);border-radius:10px;font:600 13px/1 'Inter',sans-serif;color:var(--a);cursor:pointer;">
+            style="display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:8px 12px;background:var(--su);border:1.5px solid var(--bo);border-radius:10px;font:600 13px/1 'Inter',sans-serif;color:var(--a);cursor:pointer;">
       ${icon("arrow-left", { size: 14, strokeWidth: 2.5 })} Voir tous les élèves
     </button>
     <div class="me-list">

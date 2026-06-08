@@ -19,7 +19,7 @@ const STYLE = `
   .xpt-wrap.xpt-visible { right: 16px; }
 
   .xpt-card {
-    background: #fff;
+    background: var(--su);
     border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
     border-radius: 16px;
     padding: 12px 16px;

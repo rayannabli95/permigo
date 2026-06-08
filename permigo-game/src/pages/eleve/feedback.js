@@ -142,7 +142,7 @@ const STYLE = `<style>
 
 /* Skel */
 .fb-skel-card {
-  height: 80px; background: #fff;
+  height: 80px; background: var(--su);
   border: 1.5px solid var(--bo); border-radius: 18px;
   animation: fbPulse 1.4s ease-in-out infinite;
 }

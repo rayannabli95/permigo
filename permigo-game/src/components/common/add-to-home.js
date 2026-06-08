@@ -35,13 +35,13 @@ const STYLE = `<style>
   @keyframes a2hsPop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .a2hs-title { font: 800 24px/1.2 'Plus Jakarta Sans', sans-serif; text-align: center; margin: 18px 0 6px; }
   .a2hs-sub   { font-size: 15px; line-height: 1.5; text-align: center; color: var(--mu2, #5b6072); max-width: 340px; margin-bottom: 24px; }
-  .a2hs-card  { width: 100%; max-width: 400px; background: #fff; border: 1px solid rgba(0,0,0,.07);
+  .a2hs-card  { width: 100%; max-width: 400px; background: var(--su); border: 1px solid rgba(0,0,0,.07);
                 border-radius: 20px; padding: 18px; box-shadow: 0 6px 24px rgba(20,20,50,.06); }
   /* Sélecteur plateforme */
   .a2hs-seg { display: flex; gap: 8px; background: var(--su2, #eef1ff); padding: 5px; border-radius: 14px; margin-bottom: 18px; }
   .a2hs-seg-btn { flex: 1; border: 0; background: transparent; padding: 11px 8px; border-radius: 10px;
                   font: 700 14px/1 'Inter', sans-serif; color: var(--mu2, #5b6072); cursor: pointer; transition: .15s; }
-  .a2hs-seg-btn.active { background: #fff; color: var(--ink, #11131f); box-shadow: 0 2px 8px rgba(20,20,50,.1); }
+  .a2hs-seg-btn.active { background: var(--su); color: var(--ink, #11131f); box-shadow: 0 2px 8px rgba(20,20,50,.1); }
   /* Étapes */
   .a2hs-step { display: flex; gap: 13px; align-items: flex-start; padding: 11px 0; }
   .a2hs-step + .a2hs-step { border-top: 1px solid rgba(0,0,0,.06); }
