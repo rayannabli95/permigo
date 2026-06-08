@@ -3,10 +3,10 @@
 // Usage : await mountHeader() depuis main.js après route()
 // ═══════════════════════════════════════════════════════════════
 
-import { mountNotifBell } from '@/components/common/notif-bell.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { renderUserAvatar } from '@/components/common/avatar.js';
-import { getEquippedAsset } from '@/utils/game-state.js';
+import { mountNotifBell } from "@/components/common/notif-bell.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { renderUserAvatar } from "@/components/common/avatar.js";
+import { getEquippedAsset } from "@/utils/game-state.js";
 
 const STYLE = `
   #header-bar {
@@ -38,6 +38,7 @@ const STYLE = `
     align-items: center;
   }
   .pg-logo-btn:active { background: color-mix(in srgb, var(--a) 8%, transparent); }
+  .pg-logo-img { width: 36px; height: 36px; display: block; object-fit: contain; }
   #ht-right { display: flex; align-items: center; gap: 4px; }
   .ht-icon-btn {
     width: 40px; height: 40px;
@@ -68,56 +69,59 @@ const STYLE = `
 `;
 
 export async function mountHeader() {
-  if (!document.head.querySelector('#ht-style')) {
-    const s = document.createElement('style');
-    s.id = 'ht-style';
+  if (!document.head.querySelector("#ht-style")) {
+    const s = document.createElement("style");
+    s.id = "ht-style";
     s.textContent = STYLE;
     document.head.appendChild(s);
   }
 
-  document.querySelector('#header-bar')?.remove();
+  document.querySelector("#header-bar")?.remove();
 
-  const bar = document.createElement('header');
-  bar.id = 'header-bar';
-  bar.setAttribute('role', 'banner');
+  const bar = document.createElement("header");
+  bar.id = "header-bar";
+  bar.setAttribute("role", "banner");
   const me = getCurUser();
   bar.innerHTML = `
     <button class="pg-logo-btn" id="ht-logo" aria-label="Accueil PermiGo">
-      <span class="pg-logo-txt sm">PermiGo</span>
+      <img class="pg-logo-img" src="/skins/avatars/permigo-badge-icon.png" alt="PermiGo" width="36" height="36" />
     </button>
     <div id="ht-right">
       <div id="ht-bell"></div>
-      ${me ? `<button class="ht-avatar-btn" id="ht-avatar" aria-label="Mon profil" title="Mon profil">${renderUserAvatar({ ...me, avatar_url: getEquippedAsset('avatar') || me.avatar_url }, 36)}</button>` : ''}
+      ${me ? `<button class="ht-avatar-btn" id="ht-avatar" aria-label="Mon profil" title="Mon profil">${renderUserAvatar({ ...me, avatar_url: getEquippedAsset("avatar") || me.avatar_url }, 36)}</button>` : ""}
     </div>
   `;
 
-  const appEl = document.getElementById('app');
+  const appEl = document.getElementById("app");
   document.body.insertBefore(bar, appEl);
 
-  bar.querySelector('#ht-logo')?.addEventListener('click', () => {
-    location.hash = '#/';
+  bar.querySelector("#ht-logo")?.addEventListener("click", () => {
+    location.hash = "#/";
   });
 
-  bar.querySelector('#ht-avatar')?.addEventListener('click', () => {
-    location.hash = '#/profil';
+  bar.querySelector("#ht-avatar")?.addEventListener("click", () => {
+    location.hash = "#/profil";
   });
 
   // Rafraîchit l'avatar de l'en-tête dès qu'un cosmétique est équipé (sans reload).
   // Listener enregistré une seule fois au niveau window.
   if (!window.__pgHeaderCosmeticListener) {
     window.__pgHeaderCosmeticListener = true;
-    window.addEventListener('pg:cosmetics-changed', () => {
+    window.addEventListener("pg:cosmetics-changed", () => {
       const cur = getCurUser();
-      const avBtn = document.querySelector('#ht-avatar');
+      const avBtn = document.querySelector("#ht-avatar");
       if (cur && avBtn) {
-        avBtn.innerHTML = renderUserAvatar({ ...cur, avatar_url: getEquippedAsset('avatar') || cur.avatar_url }, 36);
+        avBtn.innerHTML = renderUserAvatar(
+          { ...cur, avatar_url: getEquippedAsset("avatar") || cur.avatar_url },
+          36,
+        );
       }
     });
   }
 
-  await mountNotifBell(bar.querySelector('#ht-bell'));
+  await mountNotifBell(bar.querySelector("#ht-bell"));
 }
 
 export function unmountHeader() {
-  document.querySelector('#header-bar')?.remove();
+  document.querySelector("#header-bar")?.remove();
 }
