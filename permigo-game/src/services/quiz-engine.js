@@ -12,6 +12,8 @@ import {
   playStreak,
   playVictory,
   playDefeat,
+  playWhoosh,
+  playQuizMusic,
 } from "@/utils/sound.js";
 
 /**
@@ -56,6 +58,9 @@ export async function lancerQuiz({
   const overlay = renderOverlay();
   document.body.appendChild(overlay);
 
+  // Mélodie de fond pendant le quiz (coupée à la fin / fermeture)
+  const stopMusic = playQuizMusic();
+
   // Esc + transforme **mot** en <strong>mot</strong> (markdown light)
   // pour mettre en valeur les passages importants des questions REMC
   function richEsc(str) {
@@ -79,6 +84,7 @@ export async function lancerQuiz({
     if (!q) return finish();
 
     overlay.querySelector(".quiz-body").innerHTML = `
+      <img class="quiz-mascot" src="/skins/mascot-think.png" alt="" aria-hidden="true" />
       <div class="quiz-progress">
         <span>${idx + 1} / ${pool.length}</span>
         <div class="quiz-bar"><div class="quiz-bar-fill" style="width:${(idx / pool.length) * 100}%"></div></div>
@@ -147,6 +153,7 @@ export async function lancerQuiz({
     nextBtn.textContent = isLast ? "Voir mon résultat" : "Suivant";
     nextBtn.addEventListener("click", () => {
       idx++;
+      playWhoosh();
       renderQuestion();
     });
     overlay.querySelector(".quiz-options").appendChild(nextBtn);
@@ -167,12 +174,14 @@ export async function lancerQuiz({
 
     // Musique de fin : victoire si réussi (>=60%), défaite sinon. Confetti en plus sur sans-faute.
     const passed = score >= total * 0.6;
+    stopMusic(); // coupe la mélodie de fond avant le jingle de fin
     if (perfect) burstConfetti({ count: 100, power: 16 });
     if (passed) playVictory();
     else playDefeat();
 
     overlay.querySelector(".quiz-body").innerHTML = `
       <div class="quiz-result">
+        <img class="quiz-mascot quiz-mascot-result" src="/skins/${passed ? "mascot-celebrate" : "mascot-think"}.png" alt="" aria-hidden="true" />
         <div class="quiz-score">${score}/${total}</div>
         <p>${perfect ? "Parfait !" : score >= total * 0.6 ? "Bien !" : "À revoir"}</p>
         <button class="quiz-close-btn">Continuer</button>
@@ -204,7 +213,12 @@ function renderOverlay() {
     <style>
       .quiz-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,13,26,.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;animation:quizIn .3s cubic-bezier(.23,1,.32,1)}
       @keyframes quizIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
-      .quiz-body{width:100%;max-width:480px;background:linear-gradient(180deg,#1a1d2e,#0f1220);border:1px solid rgba(99,102,241,.3);border-radius:24px;padding:28px;color:#fff}
+      .quiz-body{position:relative;width:100%;max-width:480px;background:linear-gradient(180deg,#1a1d2e,#0f1220);border:1px solid rgba(99,102,241,.3);border-radius:24px;padding:28px;color:#fff}
+      .quiz-mascot{position:absolute;top:-30px;right:16px;width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 8px 16px rgba(0,0,0,.35));animation:quizMascotIn .4s cubic-bezier(.34,1.56,.64,1) both,quizMascotFloat 3s ease-in-out .4s infinite;pointer-events:none;z-index:2}
+      .quiz-mascot-result{position:static;display:block;margin:0 auto 6px;width:96px;height:96px;animation:quizMascotIn .45s cubic-bezier(.34,1.56,.64,1) both}
+      @keyframes quizMascotIn{from{opacity:0;transform:scale(.5) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+      @keyframes quizMascotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+      @media (prefers-reduced-motion:reduce){.quiz-mascot{animation:quizMascotIn .4s both}}
       .quiz-body *{color:inherit}
       .quiz-progress{display:flex;align-items:center;gap:12px;font:600 13px/1 'Inter';color:#94a3b8 !important;margin-bottom:20px}
       .quiz-bar{flex:1;height:6px;background:rgba(148,163,184,.15);border-radius:3px;overflow:hidden}

@@ -106,11 +106,11 @@ export const playParcoursIntro = (durationMs = 3000) =>
 export const playConnexionIntro = (durationMs = 2800) =>
   _playIntro("connexion", 0.28, durationMs);
 
-// Mélodie de fond du tuto parcours — bouclée, faible volume. Retourne stop().
-export function playTutoMusic(vol = 0.16) {
+// Mélodie de fond bouclée, faible volume. Retourne stop().
+function _loopTrack(name, vol) {
   if (!isSoundEnabled()) return () => {};
   try {
-    const a = _get("tuto", vol);
+    const a = _get(name, vol);
     a.loop = true;
     a.currentTime = 0;
     a.play().catch(() => {});
@@ -123,6 +123,10 @@ export function playTutoMusic(vol = 0.16) {
     return () => {};
   }
 }
+
+// Tuto parcours + quizz : même mélodie douce de fond (sons/tuto.mp3).
+export const playTutoMusic = (vol = 0.16) => _loopTrack("tuto", vol);
+export const playQuizMusic = (vol = 0.12) => _loopTrack("tuto", vol);
 
 // Joué une seule fois par session, après le 1er geste user (autoplay safe)
 // Durée limitée à 2 secondes

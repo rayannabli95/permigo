@@ -15,9 +15,19 @@ import {
   playWrong,
   playVictory,
   playDefeat,
+  playQuizMusic,
 } from "@/utils/sound.js";
 
 const PASS_THRESHOLD = 12; // / 15
+
+// Mélodie de fond de l'examen (module-level : start au parcours, stop en sortie)
+let _examStopMusic = null;
+function stopExamMusic() {
+  if (_examStopMusic) {
+    _examStopMusic();
+    _examStopMusic = null;
+  }
+}
 
 // Trophées DÉCORATIFS (pas de déblocage ici — pur design)
 const TROPHY_START = {
@@ -63,6 +73,7 @@ export async function mount(root) {
   document.getElementById("bottom-nav")?.setAttribute("hidden", "");
   const _restoreNav = () => {
     document.getElementById("bottom-nav")?.removeAttribute("hidden");
+    stopExamMusic();
     window.removeEventListener("hashchange", _restoreNav);
   };
   window.addEventListener("hashchange", _restoreNav);
@@ -129,6 +140,10 @@ function startParcours(root, parcours_id) {
 
   track("parcours_quiz.started", { parcours_id, nom: parcours?.nom });
 
+  // Mélodie de fond pendant le parcours d'examen
+  stopExamMusic();
+  _examStopMusic = playQuizMusic();
+
   function renderQuestion() {
     answered = false;
     const q = questions[currentIdx];
@@ -145,6 +160,7 @@ function startParcours(root, parcours_id) {
       </div>
 
       <div class="exb-qbody" id="exb-qbody">
+        <img class="exb-mascot" src="/skins/mascot-think.png" alt="" aria-hidden="true" />
         <p class="exb-qnum">Question ${num}</p>
         <p class="exb-qtext">${esc(q.enonce)}</p>
         <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
@@ -280,6 +296,7 @@ function renderNextQuestion(root, questions, answers, idx, parcours_id) {
       </div>
 
       <div class="exb-qbody" id="exb-qbody">
+        <img class="exb-mascot" src="/skins/mascot-think.png" alt="" aria-hidden="true" />
         <p class="exb-qnum">Question ${num}</p>
         <p class="exb-qtext">${esc(q.enonce)}</p>
         <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
@@ -332,6 +349,7 @@ function renderNextQuestion(root, questions, answers, idx, parcours_id) {
 
 // ─── Écran 3 : résultats ─────────────────────────────────────
 function showResults(root, questions, answers, parcours_id) {
+  stopExamMusic(); // coupe la mélodie de fond avant le jingle de résultat
   const parcours = PARCOURS.find((p) => p.id === parcours_id);
   const score = answers.filter((a, i) => a === questions[i].correct).length;
   const total = questions.length;
@@ -591,6 +609,13 @@ function renderStyles() {
   padding: 20px 16px 32px;
   flex: 1;
 }
+.exb-mascot {
+  display: block; width: 56px; height: 56px; object-fit: contain;
+  margin: 0 0 8px; filter: drop-shadow(0 5px 12px rgba(10,13,26,.16));
+  animation: exbMascotIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes exbMascotIn { from { opacity: 0; transform: scale(.6) } to { opacity: 1; transform: scale(1) } }
+@media (prefers-reduced-motion: reduce) { .exb-mascot { animation: none } }
 .exb-qnum {
   font: 700 11px/1 'Inter', sans-serif;
   color: var(--a);
