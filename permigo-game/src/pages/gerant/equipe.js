@@ -40,7 +40,7 @@ const STYLE = `<style>
 .eq-count {
   font: 600 12px/1 'Inter', sans-serif;
   color: var(--a);
-  background: rgba(88,204,2,.1);
+  background: color-mix(in srgb, var(--a) 10%, transparent);
   padding: 6px 12px;
   border-radius: 99px;
 }
@@ -76,7 +76,7 @@ const STYLE = `<style>
 .eq-search:focus {
   border-color: var(--a);
   background: var(--su);
-  box-shadow: 0 0 0 3px rgba(88,204,2,.12);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--a) 12%, transparent);
 }
 
 /* Liste */
@@ -177,7 +177,7 @@ const STYLE = `<style>
 }
 .eq-add-btn:hover {
   border-color: var(--a);
-  background: rgba(88,204,2,.06);
+  background: color-mix(in srgb, var(--a) 6%, transparent);
   color: var(--a);
 }
 .eq-add-ico { font-size: 18px; }

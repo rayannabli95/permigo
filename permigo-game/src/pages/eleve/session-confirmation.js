@@ -80,7 +80,7 @@ const STYLE = `<style>
 .sc-hero::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse 70% 60% at 80% 20%, rgba(88,204,2,.3) 0%, transparent 55%);
+  background: radial-gradient(ellipse 70% 60% at 80% 20%, color-mix(in srgb, var(--a) 30%, transparent) 0%, transparent 55%);
   pointer-events: none;
 }
 .sc-hero-content { position: relative; z-index: 1; }
@@ -93,8 +93,8 @@ const STYLE = `<style>
 .sc-hero-av {
   width: 60px; height: 60px;
   border-radius: 18px;
-  background: rgba(88,204,2,.3);
-  border: 1.5px solid rgba(88,204,2,.5);
+  background: color-mix(in srgb, var(--a) 30%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--a) 50%, transparent);
   display: flex; align-items: center; justify-content: center;
   font: 700 22px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
@@ -143,7 +143,7 @@ const STYLE = `<style>
 .sc-recap-ico {
   width: 34px; height: 34px;
   border-radius: 10px;
-  background: rgba(88,204,2,.08);
+  background: color-mix(in srgb, var(--a) 8%, transparent);
   display: flex; align-items: center; justify-content: center;
   color: var(--a);
   flex-shrink: 0;
@@ -211,8 +211,8 @@ const STYLE = `<style>
 /* ── Commentaire moniteur ── */
 .sc-comment {
   margin: 0 16px 16px;
-  background: linear-gradient(135deg, rgba(88,204,2,.07) 0%, rgba(88,204,2,.04) 100%);
-  border: 1.5px solid rgba(88,204,2,.15);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--a) 7%, transparent) 0%, color-mix(in srgb, var(--a) 4%, transparent) 100%);
+  border: 1.5px solid color-mix(in srgb, var(--a) 15%, transparent);
   border-radius: 24px;
   padding: 20px;
 }
@@ -251,7 +251,7 @@ const STYLE = `<style>
   color: #fff;
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; min-height: 54px;
-  box-shadow: 0 8px 24px -6px rgba(88,204,2,.45);
+  box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--a) 45%, transparent);
   -webkit-tap-highlight-color: transparent;
   transition: transform .14s cubic-bezier(.34,1.56,.64,1), opacity .12s;
 }

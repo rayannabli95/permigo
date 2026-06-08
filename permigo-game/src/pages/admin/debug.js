@@ -24,7 +24,7 @@ const STYLE = `<style>
   position: sticky; top: 0; z-index: 10;
   padding: 16px 20px;
   background: linear-gradient(180deg, var(--ink) 0%, rgba(10,13,26,.92) 100%);
-  border-bottom: 1px solid rgba(88,204,2,.3);
+  border-bottom: 1px solid color-mix(in srgb, var(--a) 30%, transparent);
   backdrop-filter: blur(12px);
   display: flex; align-items: center; justify-content: space-between;
 }
@@ -47,7 +47,7 @@ const STYLE = `<style>
 }
 .dbg-refresh {
   background: transparent;
-  border: 1px solid rgba(88,204,2,.4);
+  border: 1px solid color-mix(in srgb, var(--a) 40%, transparent);
   color: var(--a);
   border-radius: 6px;
   padding: 5px 10px;
@@ -58,14 +58,14 @@ const STYLE = `<style>
   transition: background .15s;
   font-family: inherit;
 }
-.dbg-refresh:hover { background: rgba(88,204,2,.12); }
+.dbg-refresh:hover { background: color-mix(in srgb, var(--a) 12%, transparent); }
 
 .dbg-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1px;
   padding: 0;
-  background: rgba(88,204,2,.08);
+  background: color-mix(in srgb, var(--a) 8%, transparent);
 }
 @media (max-width: 540px) {
   .dbg-grid { grid-template-columns: 1fr; }
@@ -94,7 +94,7 @@ const STYLE = `<style>
 
 .dbg-section {
   padding: 16px 20px;
-  border-top: 1px solid rgba(88,204,2,.18);
+  border-top: 1px solid color-mix(in srgb, var(--a) 18%, transparent);
 }
 .dbg-section-hd {
   font: 700 10px/1 'IBM Plex Mono', monospace;
@@ -106,7 +106,7 @@ const STYLE = `<style>
 .dbg-row {
   display: flex; justify-content: space-between; align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(88,204,2,.1);
+  border-bottom: 1px solid color-mix(in srgb, var(--a) 10%, transparent);
   font: 500 12px/1.4 'IBM Plex Mono', monospace;
 }
 .dbg-row:last-of-type { border-bottom: 0; }
@@ -147,7 +147,7 @@ const STYLE = `<style>
 .dbg-action-row { display: flex; gap: 8px; }
 .dbg-action.secondary {
   background: transparent;
-  border: 1px solid rgba(88,204,2,.4);
+  border: 1px solid color-mix(in srgb, var(--a) 40%, transparent);
   color: var(--a);
 }
 

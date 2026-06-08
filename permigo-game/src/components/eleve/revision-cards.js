@@ -44,7 +44,7 @@ function ensureStyle() {
   .rc-count {
     font: 700 11px/1 'Inter', sans-serif;
     color: var(--a);
-    background: rgba(88,204,2,.1);
+    background: color-mix(in srgb, var(--a) 10%, transparent);
     border-radius: 99px;
     padding: 2px 8px;
   }
@@ -75,7 +75,7 @@ function ensureStyle() {
     to   { opacity:1; transform:translateY(0)   scale(1); }
   }
   @media (hover:hover) and (pointer:fine) {
-    .rc-card:hover { border-color: rgba(88,204,2,.3); }
+    .rc-card:hover { border-color: color-mix(in srgb, var(--a) 30%, transparent); }
   }
   .rc-card:active { transform: scale(.98); }
 

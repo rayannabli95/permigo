@@ -212,7 +212,7 @@ const STYLE = `<style>
   }
   .me-badge.recu {
     color: var(--adk);
-    background: rgba(88,204,2,.14);
+    background: color-mix(in srgb, var(--a) 14%, transparent);
     display: inline-flex;
     align-items: center;
     gap: 3px;
@@ -240,7 +240,7 @@ const STYLE = `<style>
   }
   .me-prog-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--a), #9ae831);
+    background: linear-gradient(90deg, var(--a), var(--a-lt));
     border-radius: 2px;
     transition: width .6s cubic-bezier(.4,0,.2,1);
   }
@@ -305,14 +305,14 @@ const STYLE = `<style>
   .me-invite-btn {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 8px 14px; min-height: 44px; border-radius: 10px;
-    background: rgba(88,204,2,.1); border: 1px solid rgba(88,204,2,.2);
+    background: color-mix(in srgb, var(--a) 10%, transparent); border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
     color: var(--a); font: 600 13px/1 'Inter', sans-serif;
     cursor: pointer; flex-shrink: 0;
     transition: background .12s, border-color .12s;
     -webkit-tap-highlight-color: transparent;
   }
-  .me-invite-btn:hover { background: rgba(88,204,2,.18); border-color: rgba(88,204,2,.4); }
-  .me-invite-btn:active { background: rgba(88,204,2,.22); }
+  .me-invite-btn:hover { background: color-mix(in srgb, var(--a) 18%, transparent); border-color: color-mix(in srgb, var(--a) 40%, transparent); }
+  .me-invite-btn:active { background: color-mix(in srgb, var(--a) 22%, transparent); }
 
   /* Anti-décrochage */
   .me-relancer-section {
@@ -359,12 +359,12 @@ const STYLE = `<style>
     display: flex; align-items: center; gap: 8px;
     padding: 0 20px 0 16px;
     height: 52px;
-    background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
-    color: #1a2800;
+    background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
+    color: var(--a-ink);
     border: none; border-radius: 26px;
     font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
-    box-shadow: 0 4px 18px -4px color-mix(in srgb, var(--a) 60%, transparent), 0 2px 6px rgba(0,0,0,.12), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset;
+    box-shadow: 0 4px 18px -4px color-mix(in srgb, var(--a) 60%, transparent), 0 2px 6px rgba(0,0,0,.12), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
     transition: transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
     -webkit-tap-highlight-color: transparent;
     animation: meFabIn .5s .3s cubic-bezier(.34,1.56,.64,1) both;
@@ -957,7 +957,7 @@ async function wireRows() {
       follow: (dx) => {
         const clamped = Math.max(0, Math.min(100, dx));
         row.style.transform = `translateX(${clamped}px)`;
-        row.style.background = dx > 30 ? "rgba(88,204,2,.06)" : "";
+        row.style.background = dx > 30 ? "color-mix(in srgb, var(--a) 6%, transparent)" : "";
       },
       onSwipeRight: () => {
         haptic("select");
@@ -1214,7 +1214,7 @@ const DIALOG_STYLE = `
       background: var(--bg); color: var(--ink); -webkit-tap-highlight-color: transparent;
     }
     .me-cf-btn:active { transform: scale(.98); }
-    .me-cf-btn.confirm { border: 0; color: #1a2800; background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset; }
+    .me-cf-btn.confirm { border: 0; color: var(--a-ink); background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset; }
   </style>`;
 
 /** Confirmation avant d'archiver un élève en « reçu ». */
@@ -1382,7 +1382,7 @@ function openMissingPanel(eleve) {
       .me-miss-item { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; font: 500 14px/1.3 'Inter', sans-serif; color: var(--ink); border-bottom: 1px solid var(--bg2); }
       .me-miss-code { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu); background: var(--bg2); padding: 3px 6px; border-radius: 6px; flex-shrink: 0; }
       .me-miss-empty { text-align: center; padding: 32px 16px; color: var(--grd); font: 600 14px/1.5 'Inter', sans-serif; }
-      .me-miss-cta { margin-top: 16px; width: 100%; min-height: 48px; border: 0; border-radius: 12px; color: #1a2800; font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset; }
+      .me-miss-cta { margin-top: 16px; width: 100%; min-height: 48px; border: 0; border-radius: 12px; color: var(--a-ink); font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset; }
       .me-miss-cta:active { transform: scale(.98); }
     </style>
     <div class="me-miss-bg" data-close="1"></div>

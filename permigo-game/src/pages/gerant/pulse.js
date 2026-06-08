@@ -153,7 +153,7 @@ const STYLE = `<style>
   background: linear-gradient(180deg, var(--a), var(--adk));
   border-radius: 6px 6px 0 0;
   transition: height .6s cubic-bezier(.2,.7,.3,1);
-  box-shadow: 0 -2px 6px rgba(88,204,2,.18);
+  box-shadow: 0 -2px 6px color-mix(in srgb, var(--a) 18%, transparent);
 }
 .spark-bar.today {
   background: linear-gradient(180deg, var(--am), var(--or));
@@ -251,7 +251,7 @@ const STYLE = `<style>
 .team-badge {
   font: 600 12px/1 'Inter', sans-serif;
   color: var(--a);
-  background: rgba(88,204,2,.1);
+  background: color-mix(in srgb, var(--a) 10%, transparent);
   border-radius: 99px;
   padding: 6px 12px;
   white-space: nowrap;
@@ -1136,9 +1136,9 @@ function renderHeatmap({ days, total }) {
   ];
   const COLOR = [
     "var(--bg2)",
-    "rgba(88,204,2,.28)",
-    "rgba(88,204,2,.52)",
-    "rgba(88,204,2,.76)",
+    "color-mix(in srgb, var(--a) 28%, transparent)",
+    "color-mix(in srgb, var(--a) 52%, transparent)",
+    "color-mix(in srgb, var(--a) 76%, transparent)",
     "var(--a)",
   ];
 

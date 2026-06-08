@@ -29,7 +29,7 @@ const STYLE = `<style>
   .pc-check input { width:22px; height:22px; flex-shrink:0; margin-top:1px; accent-color:var(--a); }
   .pc-check span { font:500 14px/1.45 'Inter',sans-serif; color:var(--ink); }
   .pc-btn { width:100%; padding:16px; background:var(--a); color:#fff; border:0; border-radius:14px;
-    font:800 15px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; box-shadow:0 8px 24px rgba(88,204,2,.35);
+    font:800 15px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; box-shadow:0 8px 24px color-mix(in srgb, var(--a) 35%, transparent);
     transition:transform .12s,opacity .15s; min-height:54px; }
   .pc-btn:active { transform:scale(.98); }
   .pc-btn:disabled { opacity:.4; cursor:default; box-shadow:none; }

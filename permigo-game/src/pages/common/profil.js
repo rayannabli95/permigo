@@ -43,7 +43,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   font: 700 32px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
-  box-shadow: 0 8px 24px rgba(88,204,2,.25);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--a) 25%, transparent);
 }
 .prf-name {
   font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -56,7 +56,7 @@ const STYLE = `<style>
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--a);
-  background: rgba(88,204,2,.1);
+  background: color-mix(in srgb, var(--a) 10%, transparent);
   border-radius: 99px;
   padding: 6px 12px;
 }
@@ -287,7 +287,7 @@ const STYLE = `<style>
   border-radius: 8px;
   transition: background .12s;
 }
-.prf-ref-copy-btn:active { background: rgba(88,204,2,.1); }
+.prf-ref-copy-btn:active { background: color-mix(in srgb, var(--a) 10%, transparent); }
 .prf-ref-stats {
   display: flex;
   gap: 8px;
@@ -327,8 +327,8 @@ const STYLE = `<style>
 .prf-ref-gen-btn {
   width: 100%;
   padding: 13px;
-  background: rgba(88,204,2,.08);
-  border: 1.5px solid rgba(88,204,2,.2);
+  background: color-mix(in srgb, var(--a) 8%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--a) 20%, transparent);
   border-radius: 12px;
   color: var(--a);
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
@@ -336,7 +336,7 @@ const STYLE = `<style>
   transition: background .15s;
   min-height: 46px;
 }
-.prf-ref-gen-btn:active { background: rgba(88,204,2,.15); }
+.prf-ref-gen-btn:active { background: color-mix(in srgb, var(--a) 15%, transparent); }
 .prf-ref-apply {
   margin-top: 14px;
   display: flex;

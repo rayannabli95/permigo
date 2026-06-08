@@ -174,7 +174,7 @@ const STYLE = `<style>
 
 /* Coins décoratifs */
 .prc-map-corners { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
-.prc-corner { position: absolute; width: 16px; height: 16px; border: 2px solid rgba(88,204,2,.35); border-radius: 2px; }
+.prc-corner { position: absolute; width: 16px; height: 16px; border: 2px solid color-mix(in srgb, var(--a) 35%, transparent); border-radius: 2px; }
 .prc-corner.tl { top: 14px; left: 14px; border-right: 0; border-bottom: 0; }
 .prc-corner.tr { top: 14px; right: 14px; border-left: 0; border-bottom: 0; }
 .prc-corner.bl { bottom: 14px; left: 14px; border-right: 0; border-top: 0; }
@@ -222,12 +222,12 @@ const STYLE = `<style>
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: rgba(88,204,2,.2) transparent;
+  scrollbar-color: color-mix(in srgb, var(--a) 20%, transparent) transparent;
   padding-top: 40px;
 }
 .prc-map::-webkit-scrollbar { width: 4px; }
 .prc-map::-webkit-scrollbar-track { background: transparent; }
-.prc-map::-webkit-scrollbar-thumb { background: rgba(88,204,2,.2); border-radius: 99px; }
+.prc-map::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--a) 20%, transparent); border-radius: 99px; }
 @media (max-width: 560px) { .prc-map { max-height: 65vh; } }
 @media (min-height: 900px) { .prc-map { max-height: 75vh; } }
 
@@ -462,14 +462,14 @@ const STYLE = `<style>
 /* ─ NEXT — couleur monde, éclair, halo pulsant ─ */
 .prc-node.next .nd-circle {
   background: var(--a);
-  box-shadow: 0 4px 18px rgba(88,204,2,.45);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--a) 45%, transparent);
   animation: ndPulseValid 2.4s ease-in-out infinite;
 }
 /* Pulse blanc → vert pour indiquer "prêt à valider" */
 @keyframes ndPulseValid {
   0%, 100% {
     background: var(--a);
-    box-shadow: 0 4px 18px rgba(88,204,2,.45);
+    box-shadow: 0 4px 18px color-mix(in srgb, var(--a) 45%, transparent);
   }
   40% {
     background: #ffffff;
@@ -562,7 +562,7 @@ const STYLE = `<style>
   position: absolute;
   inset: -12px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(88,204,2,.22) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--a) 22%, transparent) 0%, transparent 70%);
   animation: nd-halo 1.8s ease-in-out infinite;
 }
 @keyframes nd-halo {
@@ -574,7 +574,7 @@ const STYLE = `<style>
   position: absolute;
   inset: -18px;
   border-radius: 50%;
-  border: 1.5px solid rgba(88,204,2,.25);
+  border: 1.5px solid color-mix(in srgb, var(--a) 25%, transparent);
   animation: nd-ring-pulse 1.8s ease-out infinite;
 }
 
@@ -665,8 +665,8 @@ const STYLE = `<style>
 .prc-node.done .nd-lbl .nd-stt { color: var(--gr); }
 
 .prc-node.next .nd-lbl {
-  border-color: rgba(88,204,2,.3);
-  box-shadow: 0 8px 22px rgba(88,204,2,.15), 0 0 0 2px rgba(88,204,2,.2);
+  border-color: color-mix(in srgb, var(--a) 30%, transparent);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--a) 15%, transparent), 0 0 0 2px color-mix(in srgb, var(--a) 20%, transparent);
 }
 .prc-node.next .nd-lbl { padding-bottom: 11px; }
 .prc-node.next .nd-lbl .nd-name { color: var(--ink); }
@@ -680,13 +680,13 @@ const STYLE = `<style>
   font: 800 11px/1 'Inter', sans-serif;
   font-style: normal;
   border-radius: 99px;
-  box-shadow: 0 3px 10px var(--wg, rgba(88,204,2,.4));
+  box-shadow: 0 3px 10px var(--wg, color-mix(in srgb, var(--a) 40%, transparent));
   animation: nd-cta-pulse 1.8s ease-in-out infinite;
 }
 .prc-node.next .nd-lbl .nd-stt::after { content: ' →'; }
 @keyframes nd-cta-pulse {
-  0%,100% { transform: scale(1); box-shadow: 0 3px 10px var(--wg, rgba(88,204,2,.4)); }
-  50%     { transform: scale(1.06); box-shadow: 0 5px 16px var(--wg, rgba(88,204,2,.6)); }
+  0%,100% { transform: scale(1); box-shadow: 0 3px 10px var(--wg, color-mix(in srgb, var(--a) 40%, transparent)); }
+  50%     { transform: scale(1.06); box-shadow: 0 5px 16px var(--wg, color-mix(in srgb, var(--a) 60%, transparent)); }
 }
 @media (prefers-reduced-motion: reduce) {
   .prc-node.next .nd-lbl .nd-stt { animation: none !important; }
@@ -705,7 +705,7 @@ const STYLE = `<style>
   border-radius: 99px;
   letter-spacing: .14em;
   white-space: nowrap;
-  box-shadow: 0 3px 10px rgba(88,204,2,.35);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--a) 35%, transparent);
   animation: tu-bounce 1.6s ease-in-out infinite;
 }
 @keyframes tu-bounce {
@@ -865,7 +865,7 @@ const STYLE = `<style>
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(88,204,2,.06), transparent 50%),
+    radial-gradient(ellipse at 30% 20%, color-mix(in srgb, var(--a) 6%, transparent), transparent 50%),
     radial-gradient(ellipse at 80% 80%, rgba(245,158,11,.05), transparent 50%);
   pointer-events: none;
 }
@@ -1423,7 +1423,7 @@ function spawnArrow(node, compId) {
         border-radius: 14px;
         font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
         white-space: nowrap;
-        box-shadow: 0 12px 32px -8px rgba(88,204,2,.6);
+        box-shadow: 0 12px 32px -8px color-mix(in srgb, var(--a) 60%, transparent);
         margin-bottom: 6px;
         position: relative;
       }
@@ -1442,7 +1442,7 @@ function spawnArrow(node, compId) {
         margin: 0 auto;
         color: var(--a);
         animation: faBounce 1.2s ease-in-out infinite;
-        filter: drop-shadow(0 4px 8px rgba(88,204,2,.4));
+        filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--a) 40%, transparent));
       }
       @keyframes faBounce {
         0%, 100% { transform: translateY(0); }

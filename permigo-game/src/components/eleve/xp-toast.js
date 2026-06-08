@@ -20,7 +20,7 @@ const STYLE = `
 
   .xpt-card {
     background: #fff;
-    border: 1px solid rgba(88,204,2,.2);
+    border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
     border-radius: 16px;
     padding: 12px 16px;
     display: flex;

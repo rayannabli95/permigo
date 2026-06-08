@@ -134,7 +134,7 @@ export const LEAGUE_CSS = `
 }
 .lg-row-me {
   border: 2px solid var(--a);
-  background: rgba(88,204,2,.04);
+  background: color-mix(in srgb, var(--a) 4%, transparent);
 }
 .lg-row-rank {
   flex-shrink: 0; min-width: 28px; text-align: center;
@@ -150,7 +150,7 @@ export const LEAGUE_CSS = `
 }
 .lg-row-you {
   font: 700 10px/1 'Inter', sans-serif; color: var(--a);
-  background: rgba(88,204,2,.1); padding: 2px 6px; border-radius: 4px;
+  background: color-mix(in srgb, var(--a) 10%, transparent); padding: 2px 6px; border-radius: 4px;
   text-transform: uppercase; letter-spacing: .04em;
 }
 .lg-row-league-dot {

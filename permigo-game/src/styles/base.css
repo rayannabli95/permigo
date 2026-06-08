@@ -6,9 +6,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap');
 
 :root {
-  /* ─ Accent principal (Duo green) ─ */
+  /* ─ Accent principal (Duo green par défaut — surchargé par le preset choisi
+     dans le profil, cf. src/utils/accent.js). 4 tokens = toute l'UI suit. ─ */
   --a:#58CC02; --adk:#46A302;
-  --ap:rgba(88,204,2,.09); --ag:rgba(88,204,2,.14);
+  --a-lt:#6fe016;   /* stop clair du dégradé plastique */
+  --a-ink:#1a2800;  /* texte/icône posé SUR l'accent (contraste) */
+  --ap:color-mix(in srgb, var(--a) 9%, transparent); --ag:color-mix(in srgb, var(--a) 14%, transparent);
 
   /* ─ États ─ */
   --gr:#22c55e; --grd:#16a34a; --grp:rgba(34,197,94,.09);   /* succès / succès dark */
@@ -90,7 +93,7 @@
   --mu:#9da3c0;    --mu2:#727896;
 
   /* ─ Accents : opacités plus marquées sur fond sombre ─ */
-  --ap:rgba(88,204,2,.15);     --ag:rgba(88,204,2,.22);
+  --ap:color-mix(in srgb, var(--a) 15%, transparent);     --ag:color-mix(in srgb, var(--a) 22%, transparent);
   --grp:rgba(34,197,94,.15);
   --rdp:rgba(239,68,68,.15);
   --amp:rgba(245,158,11,.15);
@@ -115,7 +118,7 @@
     --bo:#2a2e48;    --bo2:#23263c;
     --ink:#f3f4f8;   --ink2:#e2e5ee;   --ink3:#c9cde0;
     --mu:#9da3c0;    --mu2:#727896;
-    --ap:rgba(88,204,2,.15);     --ag:rgba(88,204,2,.22);
+    --ap:color-mix(in srgb, var(--a) 15%, transparent);     --ag:color-mix(in srgb, var(--a) 22%, transparent);
     --grp:rgba(34,197,94,.15);   --rdp:rgba(239,68,68,.15);
     --amp:rgba(245,158,11,.15);  --blp:rgba(14,165,233,.15);
     --pup:rgba(139,92,246,.15);

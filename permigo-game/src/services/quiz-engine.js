@@ -238,7 +238,7 @@ function renderOverlay() {
       .quiz-result p{font:600 17px/1.4 'Inter';color:#cbd5e1;margin:0 0 24px}
       .quiz-close-btn{padding:14px 32px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:0;border-radius:14px;color:#fff;font:700 15px/1 'Inter';cursor:pointer;transition:transform .12s,opacity .12s;min-height:44px}
       .quiz-close-btn:active{transform:scale(.97);opacity:.9}
-      .quiz-next-btn{width:100%;color:#1a2800;background:linear-gradient(to bottom,#6fe016 0%,#58CC02 48%,#46A302 100%);box-shadow:0 2px 10px 0 rgba(70,163,2,.35),0 1.5px 0 0 rgba(255,255,255,.28) inset,0 -2px 8px 0 rgba(70,163,2,.5) inset}
+      .quiz-next-btn{width:100%;color:var(--a-ink);background:linear-gradient(to bottom,var(--a-lt) 0%,var(--a) 48%,var(--adk) 100%);box-shadow:0 2px 10px 0 color-mix(in srgb, var(--adk) 35%, transparent),0 1.5px 0 0 rgba(255,255,255,.28) inset,0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset}
     </style>
     <div class="quiz-body"></div>
   `;

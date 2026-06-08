@@ -38,7 +38,7 @@ function ensureStyle() {
   }
   .dq-count {
     font: 700 11px/1 'Inter', sans-serif;
-    color: var(--a); background: rgba(88,204,2,.1);
+    color: var(--a); background: color-mix(in srgb, var(--a) 10%, transparent);
     border-radius: 99px; padding: 2px 8px;
   }
   .dq-scroll {
@@ -64,12 +64,12 @@ function ensureStyle() {
     to   { opacity:1; transform:translateY(0)    scale(1); }
   }
   @media (hover:hover) and (pointer:fine) {
-    .dq-card--ready:hover { border-color: rgba(88,204,2,.4); }
+    .dq-card--ready:hover { border-color: color-mix(in srgb, var(--a) 40%, transparent); }
   }
   .dq-card:active { transform: scale(.97); }
   .dq-card--ready {
-    border-color: rgba(88,204,2,.3);
-    background: linear-gradient(145deg, rgba(88,204,2,.06), rgba(88,204,2,.03));
+    border-color: color-mix(in srgb, var(--a) 30%, transparent);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--a) 6%, transparent), color-mix(in srgb, var(--a) 3%, transparent));
   }
   .dq-card--claimed {
     border-color: rgba(16,185,129,.22);

@@ -33,10 +33,10 @@ function ensureStyle() {
   }
   .scb-card {
     background: #fff;
-    border: 1.5px solid rgba(88,204,2,.25);
+    border: 1.5px solid color-mix(in srgb, var(--a) 25%, transparent);
     border-radius: 20px;
     padding: 14px 16px;
-    box-shadow: 0 2px 12px -4px rgba(88,204,2,.2), 0 1px 3px rgba(10,13,26,.06);
+    box-shadow: 0 2px 12px -4px color-mix(in srgb, var(--a) 20%, transparent), 0 1px 3px rgba(10,13,26,.06);
     animation: scbSlideIn .3s cubic-bezier(.34,1.56,.64,1) both;
     overflow: hidden;
   }
@@ -55,7 +55,7 @@ function ensureStyle() {
   .scb-icon-wrap {
     width: 36px; height: 36px;
     border-radius: 50%;
-    background: rgba(88,204,2,.1);
+    background: color-mix(in srgb, var(--a) 10%, transparent);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
     color: var(--a);

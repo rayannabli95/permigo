@@ -98,7 +98,7 @@ const STYLE = `<style>
   }
   .ce-row-bar { width: 70px; flex-shrink: 0; }
   .ce-row-bar-t { height: 4px; background: var(--bo); border-radius: 2px; overflow: hidden; margin-bottom: 3px; }
-  .ce-row-bar-f { height: 100%; background: linear-gradient(90deg, var(--a), #9ae831); border-radius: 2px; }
+  .ce-row-bar-f { height: 100%; background: linear-gradient(90deg, var(--a), var(--a-lt)); border-radius: 2px; }
   .ce-row-score { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); text-align: right; }
 
   /* Hall of fame (permis obtenu) */
@@ -108,7 +108,7 @@ const STYLE = `<style>
   }
   .ce-hof-title::after { content: ''; flex: 1; height: 1px; background: var(--bo); }
   .ce-hof-row {
-    background: rgba(88,204,2,.06); border: 1px solid rgba(88,204,2,.2);
+    background: color-mix(in srgb, var(--a) 6%, transparent); border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
     border-radius: 12px; padding: 12px 14px;
     display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
   }
@@ -121,7 +121,7 @@ const STYLE = `<style>
   .ce-hof-badge {
     display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
     font: 700 11px/1 'Inter', sans-serif; color: var(--adk);
-    background: rgba(88,204,2,.14); padding: 4px 8px; border-radius: 10px;
+    background: color-mix(in srgb, var(--a) 14%, transparent); padding: 4px 8px; border-radius: 10px;
   }
 
   .ce-empty {

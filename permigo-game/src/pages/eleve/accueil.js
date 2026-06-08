@@ -65,8 +65,8 @@ const STYLE = `<style>
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 15% 35%, rgba(88,204,2,.20) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 85% 75%, rgba(70,163,2,.14) 0%, transparent 55%);
+    radial-gradient(ellipse 80% 60% at 15% 35%, color-mix(in srgb, var(--a) 20%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 75%, color-mix(in srgb, var(--adk) 14%, transparent) 0%, transparent 55%);
   pointer-events: none;
 }
 .acc2-hero::after {
@@ -74,9 +74,9 @@ const STYLE = `<style>
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg,
-    rgba(70,163,2,.55) 0%,
+    color-mix(in srgb, var(--adk) 55%, transparent) 0%,
     rgba(46,122,0,.35) 50%,
-    rgba(70,163,2,.55) 100%);
+    color-mix(in srgb, var(--adk) 55%, transparent) 100%);
   mix-blend-mode: multiply;
   pointer-events: none;
 }
@@ -215,7 +215,7 @@ const STYLE = `<style>
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 70% 60% at 90% 20%, rgba(88,204,2,.25) 0%, transparent 55%);
+  background: radial-gradient(ellipse 70% 60% at 90% 20%, color-mix(in srgb, var(--a) 25%, transparent) 0%, transparent 55%);
   pointer-events: none;
 }
 .acc2-ms-session-label {
@@ -236,8 +236,8 @@ const STYLE = `<style>
 .acc2-ms-session-av {
   width: 48px; height: 48px;
   border-radius: 14px;
-  background: rgba(88,204,2,.3);
-  border: 1px solid rgba(88,204,2,.4);
+  background: color-mix(in srgb, var(--a) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--a) 40%, transparent);
   display: flex; align-items: center; justify-content: center;
   font: 700 16px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
@@ -277,7 +277,7 @@ const STYLE = `<style>
   padding: 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 20px 40px -12px rgba(88,204,2,.35), 0 6px 16px rgba(10,13,26,.15);
+  box-shadow: 0 20px 40px -12px color-mix(in srgb, var(--a) 35%, transparent), 0 6px 16px rgba(10,13,26,.15);
 }
 .acc2-ms-reward::before {
   content: '';
@@ -428,11 +428,11 @@ const STYLE = `<style>
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   min-height: 52px;
-  box-shadow: 0 8px 24px -6px rgba(88,204,2,.45);
+  box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--a) 45%, transparent);
   -webkit-tap-highlight-color: transparent;
   transition: transform .14s cubic-bezier(.34,1.56,.64,1), box-shadow .14s;
 }
-.acc2-action-btn:active { transform: scale(.96); box-shadow: 0 4px 12px -4px rgba(88,204,2,.4); }
+.acc2-action-btn:active { transform: scale(.96); box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--a) 40%, transparent); }
 
 /* ═══════════════════════ BELOW FOLD ═══════════════════════════ */
 .acc2-section-title {
@@ -446,8 +446,8 @@ const STYLE = `<style>
 /* ── Chest teaser ── */
 .acc2-chest-teaser {
   margin: 0 16px 16px;
-  background: linear-gradient(135deg, rgba(88,204,2,.08), rgba(88,204,2,.04));
-  border: 1.5px solid rgba(88,204,2,.2);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--a) 8%, transparent), color-mix(in srgb, var(--a) 4%, transparent));
+  border: 1.5px solid color-mix(in srgb, var(--a) 20%, transparent);
   border-radius: 18px;
   padding: 14px 16px;
   display: flex; align-items: center; gap: 12px;
@@ -460,7 +460,7 @@ const STYLE = `<style>
   to   { opacity:1; transform:translateY(0) scale(1); }
 }
 @media (hover:hover) and (pointer:fine) {
-  .acc2-chest-teaser:hover { border-color: rgba(88,204,2,.4); }
+  .acc2-chest-teaser:hover { border-color: color-mix(in srgb, var(--a) 40%, transparent); }
 }
 .acc2-chest-teaser:active { transform: scale(.98); }
 .acc2-ct-ico { font-size: 28px; flex-shrink: 0; }
@@ -576,26 +576,26 @@ const STYLE = `<style>
 .acc-lb {
   display: flex; align-items: center; gap: 14px;
   margin: 0 16px 16px;
-  background: linear-gradient(135deg, rgba(88,204,2,.15) 0%, rgba(88,204,2,.05) 100%);
-  border: 1.5px solid rgba(88,204,2,.28);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--a) 15%, transparent) 0%, color-mix(in srgb, var(--a) 5%, transparent) 100%);
+  border: 1.5px solid color-mix(in srgb, var(--a) 28%, transparent);
   border-radius: 20px;
   padding: 14px 16px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 14px -6px rgba(88,204,2,.35);
+  box-shadow: 0 4px 14px -6px color-mix(in srgb, var(--a) 35%, transparent);
   -webkit-tap-highlight-color: transparent;
   transition: transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s ease, border-color .15s ease;
 }
 .acc-lb::before {
   content: ''; position: absolute; top: -45%; right: -12%;
   width: 130px; height: 130px; pointer-events: none;
-  background: radial-gradient(circle, rgba(88,204,2,.20), transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--a) 20%, transparent), transparent 70%);
 }
 .acc-lb:hover {
   transform: translateY(-2px);
-  box-shadow: 0 9px 22px -7px rgba(88,204,2,.45);
-  border-color: rgba(88,204,2,.45);
+  box-shadow: 0 9px 22px -7px color-mix(in srgb, var(--a) 45%, transparent);
+  border-color: color-mix(in srgb, var(--a) 45%, transparent);
 }
 .acc-lb:active { transform: scale(.98); }
 .acc-lb:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
@@ -604,11 +604,11 @@ const STYLE = `<style>
   flex-shrink: 0; width: 52px; height: 52px; border-radius: 15px;
   display: flex; align-items: center; justify-content: center;
   background: var(--a); color: #fff;
-  box-shadow: 0 5px 13px -3px rgba(88,204,2,.6);
+  box-shadow: 0 5px 13px -3px color-mix(in srgb, var(--a) 60%, transparent);
   font: 800 19px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.03em;
   position: relative; z-index: 1;
 }
-.acc-lb-rank.empty { background: rgba(88,204,2,.16); color: var(--a); font-size: 24px; box-shadow: none; }
+.acc-lb-rank.empty { background: color-mix(in srgb, var(--a) 16%, transparent); color: var(--a); font-size: 24px; box-shadow: none; }
 .acc-lb-rank.img { background: transparent; box-shadow: none; padding: 0; }
 .acc-lb-rank.img img { width: 52px; height: 52px; object-fit: contain; display: block; }
 .acc-lb-rank-hash { font-size: 12px; font-weight: 700; opacity: .75; margin-right: 1px; }

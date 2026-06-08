@@ -347,7 +347,7 @@ const STYLE = `<style>
   .ob {
     position: fixed; inset: 0; z-index: 9999;
     background:
-      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(88,204,2,.14) 0%, transparent 55%),
+      radial-gradient(ellipse 90% 60% at 50% 0%, color-mix(in srgb, var(--a) 14%, transparent) 0%, transparent 55%),
       linear-gradient(180deg, var(--ink) 0%, var(--ink4, #0f1424) 100%);
     display: flex; flex-direction: column;
     font-family: 'Inter', sans-serif;
@@ -372,7 +372,7 @@ const STYLE = `<style>
     border: 0; padding: 0;
   }
   .ob-dot.active { width: 22px; border-radius: 4px; background: var(--a); }
-  .ob-dot.done { background: rgba(88,204,2,.45); }
+  .ob-dot.done { background: color-mix(in srgb, var(--a) 45%, transparent); }
   .ob-skip {
     background: none; border: 0; color: rgba(255,255,255,.55);
     font: 600 13px/1 'Inter', sans-serif; cursor: pointer;
@@ -455,11 +455,11 @@ const STYLE = `<style>
   }
   .ob-cta {
     width: 100%; padding: 17px;
-    background: linear-gradient(135deg, var(--a), var(--adk, #46a302));
+    background: linear-gradient(135deg, var(--a), var(--adk, var(--adk)));
     border: 0; border-radius: 16px; color: #fff;
     font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer; min-height: 56px;
-    box-shadow: 0 10px 28px -8px rgba(88,204,2,.55);
+    box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--a) 55%, transparent);
     transition: transform .12s, opacity .15s;
   }
   .ob-cta:active { transform: scale(.98); }
@@ -497,9 +497,9 @@ const STYLE = `<style>
   }
   .ob-a2hs-install {
     width: 100%; margin-bottom: 14px; border: 0; border-radius: 13px;
-    background: linear-gradient(135deg, var(--a), var(--adk, #46a302)); color: #fff;
+    background: linear-gradient(135deg, var(--a), var(--adk, var(--adk))); color: #fff;
     font: 800 15px/1 'Inter'; padding: 14px; cursor: pointer;
-    box-shadow: 0 8px 20px -6px rgba(88,204,2,.55);
+    box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--a) 55%, transparent);
   }
   .ob-a2hs-install:active { transform: translateY(1px); }
   .ob-a2hs-install:disabled { opacity: .6; cursor: wait; }

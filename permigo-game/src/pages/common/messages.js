@@ -309,7 +309,7 @@ function renderStyles() {
   flex: 1;
 }
 .msg-count {
-  background: rgba(88,204,2,.2);
+  background: color-mix(in srgb, var(--a) 20%, transparent);
   color: var(--al);
   border-radius: 10px;
   font: 600 12px/1 'IBM Plex Mono', monospace;
@@ -451,7 +451,7 @@ function renderStyles() {
   transition: border-color 140ms;
   min-height: 44px;
 }
-.msg-input:focus { border-color: rgba(88,204,2,.5); }
+.msg-input:focus { border-color: color-mix(in srgb, var(--a) 50%, transparent); }
 .msg-input::placeholder { color: var(--mu4); }
 .msg-send-btn {
   width: 44px;
@@ -530,8 +530,8 @@ function renderStyles() {
 .msg-retry-btn {
   margin-top: 12px;
   padding: 10px 20px;
-  background: rgba(88,204,2,.15);
-  border: 1px solid rgba(88,204,2,.3);
+  background: color-mix(in srgb, var(--a) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--a) 30%, transparent);
   border-radius: 10px;
   color: var(--al);
   font: 600 14px/1 'Inter', sans-serif;

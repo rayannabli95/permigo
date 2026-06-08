@@ -76,8 +76,8 @@ const STYLE = `<style>
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  background: rgba(88,204,2,.08);
-  border: 1px solid rgba(88,204,2,.2);
+  background: color-mix(in srgb, var(--a) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
   border-radius: 20px;
   font: 600 12px/1 'Plus Jakarta Sans', sans-serif;
   color: var(--adk);
@@ -122,8 +122,8 @@ const STYLE = `<style>
 
 /* ── Auto comment ── */
 .bl-comment {
-  background: linear-gradient(135deg,rgba(88,204,2,.06),rgba(139,92,246,.06));
-  border: 1.5px solid rgba(88,204,2,.18);
+  background: linear-gradient(135deg,color-mix(in srgb, var(--a) 6%, transparent),rgba(139,92,246,.06));
+  border: 1.5px solid color-mix(in srgb, var(--a) 18%, transparent);
   border-radius: 18px;
   padding: 18px;
   margin-bottom: 16px;
@@ -134,7 +134,7 @@ const STYLE = `<style>
   position: absolute;
   top: 10px; left: 18px;
   font: 700 48px/1 Georgia,serif;
-  color: rgba(88,204,2,.15);
+  color: color-mix(in srgb, var(--a) 15%, transparent);
   line-height: 1;
 }
 .bl-comment-label {

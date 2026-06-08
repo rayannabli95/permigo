@@ -326,8 +326,8 @@ const STYLE = `<style>
 .ck-mon-av {
   width: 36px; height: 36px;
   border-radius: 10px;
-  background: rgba(88,204,2,.2);
-  border: 1px solid rgba(88,204,2,.3);
+  background: color-mix(in srgb, var(--a) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--a) 30%, transparent);
   display: flex; align-items: center; justify-content: center;
   font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
   color: ${ACC};

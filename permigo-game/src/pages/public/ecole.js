@@ -31,13 +31,13 @@ const STYLE = `<style>
   .ec-hero::before {
     content: '';
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(88,204,2,.3) 0%, transparent 70%);
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--a) 30%, transparent) 0%, transparent 70%);
     pointer-events: none;
   }
   .ec-hero-badge {
     display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(88,204,2,.15);
-    border: 1px solid rgba(88,204,2,.3);
+    background: color-mix(in srgb, var(--a) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--a) 30%, transparent);
     border-radius: 99px;
     padding: 5px 14px;
     font: 600 11px/1 'Inter', sans-serif;
@@ -164,7 +164,7 @@ const STYLE = `<style>
   .ec-mon-tag {
     font: 500 11px/1 'Inter', sans-serif;
     color: var(--a);
-    background: rgba(88,204,2,.12);
+    background: color-mix(in srgb, var(--a) 12%, transparent);
     padding: 3px 8px;
     border-radius: 99px;
     display: inline-block;
@@ -185,7 +185,7 @@ const STYLE = `<style>
     content: '"';
     position: absolute; top: 12px; left: 16px;
     font-size: 40px; line-height: 1;
-    color: rgba(88,204,2,.3);
+    color: color-mix(in srgb, var(--a) 30%, transparent);
     font-family: Georgia, serif;
   }
   .ec-temo-text {

@@ -161,9 +161,9 @@ const STYLE = `<style>
   align-items: center;
   gap: 6px;
   padding: 12px 20px;
-  background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
-  box-shadow: 0 2px 10px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset;
-  color: #1a2800;
+  background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
+  box-shadow: 0 2px 10px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
+  color: var(--a-ink);
   border: 0;
   border-radius: 14px;
   font: 600 14px/1 'Plus Jakarta Sans',sans-serif;
@@ -227,8 +227,8 @@ const STYLE = `<style>
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  background: linear-gradient(135deg,rgba(88,204,2,.07),rgba(88,204,2,.05));
-  border: 1.5px solid rgba(88,204,2,.18);
+  background: linear-gradient(135deg,color-mix(in srgb, var(--a) 7%, transparent),color-mix(in srgb, var(--a) 5%, transparent));
+  border: 1.5px solid color-mix(in srgb, var(--a) 18%, transparent);
   border-radius: 16px;
   margin-top: -2px;
   margin-bottom: 4px;
@@ -262,7 +262,7 @@ const STYLE = `<style>
 }
 .exam-predict-ico {
   width: 40px; height: 40px; flex-shrink: 0;
-  background: linear-gradient(135deg,rgba(88,204,2,.1),rgba(88,204,2,.07));
+  background: linear-gradient(135deg,color-mix(in srgb, var(--a) 10%, transparent),color-mix(in srgb, var(--a) 7%, transparent));
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
 }

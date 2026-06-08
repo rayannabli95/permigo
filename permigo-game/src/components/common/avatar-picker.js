@@ -81,7 +81,7 @@ const STYLE = `<style>
 .avpk-opt:active { transform: scale(.94); }
 .avpk-opt.selected {
   border-color: var(--a);
-  box-shadow: 0 0 0 4px rgba(88,204,2,.18);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--a) 18%, transparent);
 }
 .avpk-opt img {
   width: 100%; height: 100%;

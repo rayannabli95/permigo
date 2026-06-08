@@ -111,7 +111,7 @@ const STYLE = `<style>
   background:
     linear-gradient(135deg, var(--adk) 0%, var(--a) 45%, #3a9000 100%);
   box-shadow:
-    0 16px 40px -12px rgba(88,204,2,.55),
+    0 16px 40px -12px color-mix(in srgb, var(--a) 55%, transparent),
     0 4px 12px rgba(10,13,26,.1);
 }
 .pc.s-valide {

@@ -76,7 +76,7 @@ function ensureStyle() {
   .ff-card:nth-child(4) { animation-delay:.12s; }
   .ff-card:nth-child(5) { animation-delay:.16s; }
   @media (hover:hover) and (pointer:fine) {
-    .ff-card:hover { border-color: rgba(88,204,2,.3); }
+    .ff-card:hover { border-color: color-mix(in srgb, var(--a) 30%, transparent); }
   }
   .ff-card:active { transform: scale(.985); }
 
@@ -108,7 +108,7 @@ function ensureStyle() {
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  .ff-kind-session  { background: rgba(88,204,2,.1); color: var(--a); }
+  .ff-kind-session  { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a); }
   .ff-kind-validation { background: rgba(16,185,129,.1); color: var(--grd); }
 
   .ff-card-body { margin-top: 8px; }
