@@ -77,12 +77,12 @@ export function playParcours() {
   play("parcours", 0.15);
 }
 
-// Jingle de l'écran de chargement parcours. Joue puis s'arrête après
+// Jingle/musique de l'écran de chargement. Joue puis s'arrête après
 // `durationMs`. Retourne une fonction stop() (appelée à la fermeture du splash).
-export function playParcoursIntro(durationMs = 3000) {
+function _playIntro(name, vol, durationMs) {
   if (!isSoundEnabled()) return () => {};
   try {
-    const a = _get("parcours", 0.18);
+    const a = _get(name, vol);
     a.currentTime = 0;
     a.play().catch(() => {});
     const t = setTimeout(() => {
@@ -98,6 +98,13 @@ export function playParcoursIntro(durationMs = 3000) {
     return () => {};
   }
 }
+
+export const playParcoursIntro = (durationMs = 3000) =>
+  _playIntro("parcours", 0.18, durationMs);
+
+// Musique d'accueil PermiGo — écran de lancement (sons/connexion.mp3).
+export const playConnexionIntro = (durationMs = 2800) =>
+  _playIntro("connexion", 0.28, durationMs);
 
 // Joué une seule fois par session, après le 1er geste user (autoplay safe)
 // Durée limitée à 2 secondes
