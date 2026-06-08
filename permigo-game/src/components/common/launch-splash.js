@@ -7,7 +7,7 @@
 // Overlay fixe au-dessus de #app, affiché 1×/session (= un lancement).
 // ═══════════════════════════════════════════════════════════════
 import { icon } from "@/utils/icons.js";
-import { playConnexionIntro } from "@/utils/sound.js";
+import { playLaunchSound } from "@/utils/sound.js";
 
 const SESSION_KEY = "permigo-launch-splash";
 const LETTERS = ["P", "E", "R", "M", "I", "G", "O"];
@@ -129,7 +129,7 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
     host.classList.add("go");
 
     // Jingle — déclenché par le geste utilisateur → autoplay autorisé
-    const stopMusic = playConnexionIntro(duration);
+    const stopMusic = playLaunchSound(duration);
 
     // Phrases qui défilent dans la pill « text-flip »
     let i = 0;

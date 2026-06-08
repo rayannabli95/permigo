@@ -102,9 +102,13 @@ function _playIntro(name, vol, durationMs) {
 export const playParcoursIntro = (durationMs = 3000) =>
   _playIntro("parcours", 0.18, durationMs);
 
-// Musique d'accueil PermiGo — écran de lancement (sons/connexion.mp3).
+// Musique d'accueil PermiGo (réserve).
 export const playConnexionIntro = (durationMs = 2800) =>
   _playIntro("connexion", 0.28, durationMs);
+
+// Son de lancement de l'app — « voiture qui démarre » (sons/launch.mp3).
+export const playLaunchSound = (durationMs = 2800) =>
+  _playIntro("launch", 0.45, durationMs);
 
 // Mélodie de fond bouclée, faible volume. Retourne stop().
 function _loopTrack(name, vol) {
