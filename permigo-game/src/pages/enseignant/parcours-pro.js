@@ -82,7 +82,7 @@ const STYLE = `<style>
 .ppr-next-lbl { font: 800 9.5px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--a); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
 .ppr-next-tool { font: 800 13.5px/1.3 'Plus Jakarta Sans', sans-serif; color: #fff; margin-bottom: 9px; }
 .ppr-next-bar { height: 7px; background: rgba(255,255,255,.16); border-radius: 99px; overflow: hidden; }
-.ppr-next-fill { height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, var(--a), #9ae831); box-shadow: 0 0 8px color-mix(in srgb, var(--a) 60%, transparent); transition: width 1s cubic-bezier(.2,.7,.3,1); }
+.ppr-next-fill { height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, var(--a), var(--a-lt)); box-shadow: 0 0 8px color-mix(in srgb, var(--a) 60%, transparent); transition: width 1s cubic-bezier(.2,.7,.3,1); }
 .ppr-next-meta { font: 600 10.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.66); margin-top: 7px; }
 .ppr-next.done { display: flex; align-items: center; gap: 10px; }
 .ppr-next.done .ppr-next-tool { margin: 0; }

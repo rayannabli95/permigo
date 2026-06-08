@@ -211,7 +211,7 @@ const STYLE = `<style>
   }
   .aj-prog-bar {
     height: 100%; border-radius: 99px;
-    background: linear-gradient(90deg, var(--a), #9ae831);
+    background: linear-gradient(90deg, var(--a), var(--a-lt));
     transition: width .5s cubic-bezier(.2,.7,.3,1);
   }
   .aj-prog-next {

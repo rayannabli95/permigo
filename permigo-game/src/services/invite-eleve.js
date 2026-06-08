@@ -72,7 +72,7 @@ export function openInviteEleveModal(me) {
       }
       .me-inv-textarea:focus {
         outline:0; border-color:var(--a);
-        box-shadow:0 0 0 3px rgba(88,204,2,.12);
+        box-shadow:0 0 0 3px color-mix(in srgb, var(--a) 12%, transparent);
       }
       .me-inv-counter {
         font:500 12px/1 'Inter',sans-serif; color:var(--mu2);
@@ -94,9 +94,9 @@ export function openInviteEleveModal(me) {
       .me-inv-cancel:hover { background:var(--bo); }
       .me-inv-go {
         background:var(--a);
-        color:#fff; box-shadow:0 6px 18px -6px rgba(88,204,2,.45);
+        color:#fff; box-shadow:0 6px 18px -6px color-mix(in srgb, var(--a) 45%, transparent);
       }
-      .me-inv-go:hover { box-shadow:0 8px 22px -6px rgba(88,204,2,.55); }
+      .me-inv-go:hover { box-shadow:0 8px 22px -6px color-mix(in srgb, var(--a) 55%, transparent); }
       .me-inv-go:disabled { opacity:.35; cursor:default; box-shadow:none; }
       .me-inv-result-ttl {
         font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;
@@ -123,11 +123,11 @@ export function openInviteEleveModal(me) {
       }
       .me-inv-copy {
         flex-shrink:0; padding:9px 14px; border-radius:10px;
-        background:rgba(88,204,2,.1); border:1px solid rgba(88,204,2,.2);
+        background:color-mix(in srgb, var(--a) 10%, transparent); border:1px solid color-mix(in srgb, var(--a) 20%, transparent);
         color:var(--a); font:600 12px/1 'Inter',sans-serif;
         cursor:pointer; white-space:nowrap; transition:background .12s;
       }
-      .me-inv-copy:active { background:rgba(88,204,2,.2); }
+      .me-inv-copy:active { background:color-mix(in srgb, var(--a) 20%, transparent); }
       .me-inv-copy.copied { background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.2); color:var(--grd); }
       .me-inv-share-row { display:flex; gap:8px; margin-top:10px; }
       .me-inv-act {
@@ -139,9 +139,9 @@ export function openInviteEleveModal(me) {
       }
       .me-inv-act:active { transform:scale(.96); }
       .me-inv-act.share {
-        color:#1a2800;
-        background:linear-gradient(to bottom,#6fe016 0%,var(--a) 48%,var(--adk) 100%);
-        box-shadow:0 2px 8px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 6px 0 rgba(70,163,2,.5) inset;
+        color:var(--a-ink);
+        background:linear-gradient(to bottom,var(--a-lt) 0%,var(--a) 48%,var(--adk) 100%);
+        box-shadow:0 2px 8px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 6px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
       }
       .me-inv-act.share:hover { filter:brightness(1.04); }
       .me-inv-act.wa { color:#fff; background:#25D366; box-shadow:0 2px 8px 0 rgba(37,211,102,.3); }

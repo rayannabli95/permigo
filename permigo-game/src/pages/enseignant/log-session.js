@@ -84,7 +84,7 @@ const STYLE = `<style>
   .vs-dd-list { display: flex; flex-direction: column; gap: 2px; }
   .vs-dd-opt { display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding: 9px 10px; min-height: 44px; border: 0; background: transparent; border-radius: 10px; cursor: pointer; text-align: left; color: var(--ink); -webkit-tap-highlight-color: transparent; opacity: 0; animation: vsDdIn .22s ease forwards; }
   .vs-dd-opt:hover { background: var(--bg); }
-  .vs-dd-opt.sel { background: rgba(88,204,2,.08); }
+  .vs-dd-opt.sel { background: color-mix(in srgb, var(--a) 8%, transparent); }
   .vs-dd-opt .vs-dd-name { font: 600 14px/1.2 'Inter', sans-serif; flex: 1; }
   .vs-dd-check { flex-shrink: 0; color: var(--a); display: inline-flex; }
   @keyframes vsDdIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }

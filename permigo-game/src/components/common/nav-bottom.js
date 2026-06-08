@@ -133,14 +133,14 @@ const STYLE = `
     border-radius: 50%;
     /* Vert plastique : visible en clair ET en nuit (var(--ink) s'inversait en
        blanc en dark → « + » blanc invisible sur cercle blanc). */
-    background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
-    color: #1a2800;
+    background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
+    color: var(--a-ink);
     border: none; padding: 0;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     -webkit-tap-highlight-color: transparent;
     box-shadow:
-      0 8px 20px -6px rgba(70,163,2,.5),
+      0 8px 20px -6px color-mix(in srgb, var(--adk) 50%, transparent),
       0 3px 8px -2px rgba(10,13,26,.2),
       inset 0 1.5px 0 0 rgba(255,255,255,.28);
     animation: bnFabIn .3s cubic-bezier(.34,1.56,.64,1) both;

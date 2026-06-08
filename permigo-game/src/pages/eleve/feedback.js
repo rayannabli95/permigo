@@ -66,7 +66,7 @@ const STYLE = `<style>
   to   { opacity:1; transform:translateY(0); }
 }
 .fb-card:nth-child(n+6) { animation: none; }
-@media (hover:hover) and (pointer:fine) { .fb-card:hover { border-color: rgba(88,204,2,.3); } }
+@media (hover:hover) and (pointer:fine) { .fb-card:hover { border-color: color-mix(in srgb, var(--a) 30%, transparent); } }
 .fb-card:active { transform: scale(.985); }
 
 .fb-card-top { display: flex; align-items: center; gap: 10px; }
@@ -84,7 +84,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.fb-badge-session    { background: rgba(88,204,2,.1); color: var(--a); }
+.fb-badge-session    { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a); }
 .fb-badge-validation { background: rgba(16,185,129,.1); color: var(--grd); }
 
 .fb-body { margin-top: 8px; }

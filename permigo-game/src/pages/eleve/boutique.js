@@ -235,7 +235,7 @@ const STYLE = `<style>
   font: 800 17px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; min-height: 56px;
   transition: transform .14s cubic-bezier(.34,1.56,.64,1), opacity .12s;
 }
-.bo2-modal-cta.buy { background: #58cc02; color: #fff; box-shadow: 0 8px 24px -6px rgba(88,204,2,.5); }
+.bo2-modal-cta.buy { background: var(--a); color: #fff; box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--a) 50%, transparent); }
 .bo2-modal-cta.equip { background: #fff; color: #1e1b4b; }
 .bo2-modal-cta.locked { background: rgba(255,255,255,.12); color: rgba(255,255,255,.5); cursor: default; }
 .bo2-modal-cta:not(.locked):active { transform: scale(.97); opacity: .9; }

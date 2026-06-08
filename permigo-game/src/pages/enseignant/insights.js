@@ -148,11 +148,11 @@ const STYLE = `<style>
   .ins-chart-bar {
     width: 100%;
     border-radius: 4px 4px 0 0;
-    background: rgba(88,204,2,.22);
+    background: color-mix(in srgb, var(--a) 22%, transparent);
   }
   .ins-chart-col--peak .ins-chart-bar {
     background: var(--a);
-    box-shadow: 0 4px 10px -2px rgba(88,204,2,.35);
+    box-shadow: 0 4px 10px -2px color-mix(in srgb, var(--a) 35%, transparent);
   }
   .ins-chart-col--peak .ins-chart-val { color: var(--adk); font-weight: 700; }
   .ins-chart-lbl {
@@ -265,7 +265,7 @@ const STYLE = `<style>
   .ins-diff-code {
     font: 600 11px/1 'IBM Plex Mono', monospace;
     color: var(--a);
-    background: rgba(88,204,2,.1);
+    background: color-mix(in srgb, var(--a) 10%, transparent);
     padding: 4px 7px;
     border-radius: 6px;
     flex-shrink: 0;

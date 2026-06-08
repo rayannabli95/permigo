@@ -103,9 +103,9 @@
 
 /* ─── World pulse (quand une compétence arrive via notif) ─── */
 @keyframes worldPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(88,204,2,.6); }
-  70%  { box-shadow: 0 0 0 14px rgba(88,204,2,0); }
-  100% { box-shadow: 0 0 0 0 rgba(88,204,2,0); }
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--a) 60%, transparent); }
+  70%  { box-shadow: 0 0 0 14px color-mix(in srgb, var(--a) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--a) 0%, transparent); }
 }
 .anim-world-pulse { animation: worldPulse .8s ease both; }
 
@@ -149,7 +149,7 @@
 @keyframes ring-rotate { to { transform: rotate(360deg); } }
 .ring-rotate {
   position: absolute;
-  border: 1px dashed rgba(88,204,2,.25);
+  border: 1px dashed color-mix(in srgb, var(--a) 25%, transparent);
   border-radius: 50%;
   inset: -10%;
   animation: ring-rotate 18s linear infinite;
@@ -218,8 +218,8 @@
 
 /* ─── Glow pulse (boutons CTA primaires) ─── */
 @keyframes cta-glow {
-  0%, 100% { box-shadow: 0 8px 28px -8px rgba(88,204,2,.5); }
-  50%      { box-shadow: 0 12px 36px -8px rgba(88,204,2,.75); }
+  0%, 100% { box-shadow: 0 8px 28px -8px color-mix(in srgb, var(--a) 50%, transparent); }
+  50%      { box-shadow: 0 12px 36px -8px color-mix(in srgb, var(--a) 75%, transparent); }
 }
 .btn-glow { animation: cta-glow 2.6s ease-in-out infinite; }
 

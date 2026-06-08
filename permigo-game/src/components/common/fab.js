@@ -21,7 +21,7 @@ const STYLE = `
     line-height: 1;
     cursor: pointer;
     box-shadow:
-      0 12px 32px -8px rgba(88,204,2,.55),
+      0 12px 32px -8px color-mix(in srgb, var(--a) 55%, transparent),
       0 4px 12px rgba(10,13,26,.1);
     display: flex; align-items: center; justify-content: center;
     transition: transform .15s ease, box-shadow .15s ease;
@@ -34,7 +34,7 @@ const STYLE = `
   }
   .fab:hover {
     box-shadow:
-      0 16px 40px -8px rgba(88,204,2,.7),
+      0 16px 40px -8px color-mix(in srgb, var(--a) 70%, transparent),
       0 4px 12px rgba(10,13,26,.12);
   }
   .fab:active { transform: scale(.92); }

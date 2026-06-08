@@ -10,6 +10,7 @@ import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { applyTheme, getTheme } from "@/utils/theme.js";
+import { ACCENTS, getAccent, setAccent } from "@/utils/accent.js";
 import { isSoundEnabled, setSoundEnabled, playBack } from "@/utils/sound.js";
 
 const STYLE = `<style>
@@ -155,7 +156,7 @@ const STYLE = `<style>
   padding: 6px 12px;
   border-radius: 20px;
   border: 1.5px solid var(--a);
-  background: rgba(88,204,2,.08);
+  background: color-mix(in srgb, var(--a) 8%, transparent);
   font: 700 12px/1 'IBM Plex Mono', monospace;
   color: var(--a);
 }
@@ -264,6 +265,24 @@ const STYLE = `<style>
   background: var(--su);
   color: var(--a);
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
+}
+/* Accent color swatches */
+.st-accent-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.st-accent-sw {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 0; cursor: pointer; padding: 0;
+  background: var(--sw);
+  box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--sw) 55%, transparent), inset 0 1.5px 0 rgba(255,255,255,.3);
+  position: relative;
+  transition: transform .12s cubic-bezier(.34,1.56,.64,1);
+  -webkit-tap-highlight-color: transparent;
+}
+.st-accent-sw:active { transform: scale(.9); }
+.st-accent-sw[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--su), 0 0 0 5px var(--sw); }
+.st-accent-sw[aria-pressed="true"]::after {
+  content: ''; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: center/16px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
 }
 </style>`;
 
@@ -406,6 +425,15 @@ function render(root, me, prefs) {
         <button class="st-theme-btn ${prefs.theme === "light" ? "active" : ""}" data-theme="light" aria-pressed="${prefs.theme === "light"}">${icon("sun", { size: 16 })} Clair</button>
         <button class="st-theme-btn ${prefs.theme === "dark" ? "active" : ""}" data-theme="dark"  aria-pressed="${prefs.theme === "dark"}">${icon("moon", { size: 16 })} Sombre</button>
         <button class="st-theme-btn ${prefs.theme === "auto" ? "active" : ""}" data-theme="auto"  aria-pressed="${prefs.theme === "auto"}">Système</button>
+      </div>
+    </div>
+    <div class="st-row" style="flex-direction:column;align-items:flex-start;gap:12px">
+      <div>
+        <div class="st-row-title">Couleur d'accent</div>
+        <div class="st-row-sub">Le vert ne te plaît pas ? Choisis ta couleur.</div>
+      </div>
+      <div class="st-accent-row" id="accent-row" role="group" aria-label="Choisir la couleur d'accent">
+        ${ACCENTS.map((p) => `<button class="st-accent-sw" type="button" data-accent="${p.id}" aria-pressed="${getAccent() === p.id}" aria-label="${esc(p.name)}" title="${esc(p.name)}" style="--sw:${p.a}"></button>`).join("")}
       </div>
     </div>
     <div class="st-row">
@@ -592,6 +620,18 @@ function wire(root, me, prefs) {
     } catch (e) {
       console.error("[settings] theme save", e);
     }
+  });
+
+  // Couleur d'accent (localStorage + application live)
+  root.querySelector("#accent-row")?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".st-accent-sw");
+    if (!btn) return;
+    const id = btn.dataset.accent;
+    root.querySelectorAll(".st-accent-sw").forEach((b) => {
+      b.setAttribute("aria-pressed", String(b === btn));
+    });
+    setAccent(id);
+    track("settings.accent_changed", { accent: id });
   });
 
   // Sound toggle (localStorage only, no DB write)

@@ -37,7 +37,7 @@ const STYLE = `
     display: flex;
     align-items: center;
   }
-  .pg-logo-btn:active { background: rgba(88,204,2,.08); }
+  .pg-logo-btn:active { background: color-mix(in srgb, var(--a) 8%, transparent); }
   #ht-right { display: flex; align-items: center; gap: 4px; }
   .ht-icon-btn {
     width: 40px; height: 40px;
@@ -50,7 +50,7 @@ const STYLE = `
     transition: transform .12s, background .12s;
     -webkit-tap-highlight-color: transparent;
   }
-  .ht-icon-btn:active { transform: scale(.92); background: var(--bg2, rgba(88,204,2,.08)); }
+  .ht-icon-btn:active { transform: scale(.92); background: var(--bg2, color-mix(in srgb, var(--a) 8%, transparent)); }
   .ht-avatar-btn {
     width: 36px; height: 36px;
     padding: 0;

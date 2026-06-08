@@ -134,7 +134,7 @@ export const STACKED_CARDS_CSS = `
   .sc-stage.sc-spread .sc-card:hover{
     transform:translateY(-12px) scale(1.04) rotate(0deg) !important;
     z-index:40;
-    box-shadow:0 16px 40px -8px rgba(0,0,0,.28), 0 0 0 1px rgba(88,204,2,.4);
+    box-shadow:0 16px 40px -8px rgba(0,0,0,.28), 0 0 0 1px color-mix(in srgb, var(--a) 40%, transparent);
   }
 
   /* Si une seule carte → pas d'écart */

@@ -68,24 +68,24 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
     <style>
       #pg-launch-splash{position:fixed;inset:0;z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:var(--bg,#f4f5fb);padding:24px;opacity:1;transition:opacity .35s ease;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;}
       #pg-launch-splash.out{opacity:0;pointer-events:none;}
-      #pg-launch-splash .ls-badge{width:96px;height:96px;border-radius:28px;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(180deg,#6fe016 0%,#58CC02 48%,#46A302 100%);box-shadow:0 16px 38px -8px rgba(70,163,2,.5),0 1.5px 0 0 rgba(255,255,255,.3) inset,0 -2px 8px 0 rgba(70,163,2,.5) inset;animation:lsPop .55s cubic-bezier(.34,1.56,.64,1) both,lsFloat 2.4s ease-in-out .55s infinite;}
+      #pg-launch-splash .ls-badge{width:96px;height:96px;border-radius:28px;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(180deg,var(--a-lt) 0%,var(--a) 48%,var(--adk) 100%);box-shadow:0 16px 38px -8px color-mix(in srgb, var(--adk) 50%, transparent),0 1.5px 0 0 rgba(255,255,255,.3) inset,0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;animation:lsPop .55s cubic-bezier(.34,1.56,.64,1) both,lsFloat 2.4s ease-in-out .55s infinite;}
       #pg-launch-splash .ls-badge svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));}
 
       /* ── « PERMIGO » en cubes 3D ── */
       #pg-launch-splash .ls-cubes{display:flex;gap:9px;perspective:800px;}
       #pg-launch-splash .ls-cube{position:relative;width:46px;height:46px;transform-style:preserve-3d;animation:lsCubeFlip 2s ease-in-out infinite;}
-      #pg-launch-splash .ls-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 26px/1 'Plus Jakarta Sans','Nunito',sans-serif;color:#fff;border-radius:10px;backface-visibility:hidden;box-shadow:0 2px 6px rgba(70,163,2,.25) inset,0 1px 0 rgba(255,255,255,.18) inset;}
-      #pg-launch-splash .f-front {background:linear-gradient(180deg,#6fe016,#58CC02);transform:translateZ(23px);}
-      #pg-launch-splash .f-back  {background:linear-gradient(180deg,#58CC02,#46A302);transform:rotateY(180deg) translateZ(23px);}
-      #pg-launch-splash .f-right {background:#46A302;transform:rotateY(90deg) translateZ(23px);}
-      #pg-launch-splash .f-left  {background:#46A302;transform:rotateY(-90deg) translateZ(23px);}
+      #pg-launch-splash .ls-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 26px/1 'Plus Jakarta Sans','Nunito',sans-serif;color:#fff;border-radius:10px;backface-visibility:hidden;box-shadow:0 2px 6px color-mix(in srgb, var(--adk) 25%, transparent) inset,0 1px 0 rgba(255,255,255,.18) inset;}
+      #pg-launch-splash .f-front {background:linear-gradient(180deg,var(--a-lt),var(--a));transform:translateZ(23px);}
+      #pg-launch-splash .f-back  {background:linear-gradient(180deg,var(--a),var(--adk));transform:rotateY(180deg) translateZ(23px);}
+      #pg-launch-splash .f-right {background:var(--adk);transform:rotateY(90deg) translateZ(23px);}
+      #pg-launch-splash .f-left  {background:var(--adk);transform:rotateY(-90deg) translateZ(23px);}
       #pg-launch-splash .f-top   {background:#7be81e;transform:rotateX(90deg) translateZ(23px);}
       #pg-launch-splash .f-bottom{background:#3a8a00;transform:rotateX(-90deg) translateZ(23px);}
 
       /* ── Pill « text-flip » (phrases sous les cubes) ── */
-      #pg-launch-splash .ls-flip{position:relative;display:inline-block;border-radius:12px;padding:8px 16px 10px;min-height:38px;font:800 17px/1.15 'Plus Jakarta Sans','Nunito',sans-serif;color:#1a2800;text-align:center;background:linear-gradient(to bottom,#ffffff,#edf2ea);box-shadow:inset 0 -1px #d6e3cf, inset 0 0 0 1px #d8e6d0, 0 4px 10px rgba(70,163,2,.12);}
+      #pg-launch-splash .ls-flip{position:relative;display:inline-block;border-radius:12px;padding:8px 16px 10px;min-height:38px;font:800 17px/1.15 'Plus Jakarta Sans','Nunito',sans-serif;color:var(--a-ink);text-align:center;background:linear-gradient(to bottom,#ffffff,#edf2ea);box-shadow:inset 0 -1px #d6e3cf, inset 0 0 0 1px #d8e6d0, 0 4px 10px color-mix(in srgb, var(--adk) 12%, transparent);}
       #pg-launch-splash .ls-flip span{display:inline-block;animation:lsLetterIn .5s both;}
-      #pg-launch-splash .ls-cta{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:99px;background:color-mix(in srgb,#58CC02 12%,transparent);border:1.5px solid color-mix(in srgb,#58CC02 30%,transparent);color:#46A302;font:800 14px/1 'Plus Jakarta Sans','Nunito',sans-serif;animation:lsPulse 1.6s ease-in-out infinite;}
+      #pg-launch-splash .ls-cta{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:99px;background:color-mix(in srgb,var(--a) 12%,transparent);border:1.5px solid color-mix(in srgb,var(--a) 30%,transparent);color:var(--adk);font:800 14px/1 'Plus Jakarta Sans','Nunito',sans-serif;animation:lsPulse 1.6s ease-in-out infinite;}
       #pg-launch-splash.go .ls-cta{display:none;}
 
       @keyframes lsPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
@@ -95,7 +95,7 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
       /* La lettre reste face avant ~45% du temps, puis flip complet → effet vague */
       @keyframes lsCubeFlip{0%,45%{transform:rotateX(0)}70%,100%{transform:rotateX(360deg)}}
 
-      #pg-launch-splash:focus-visible{box-shadow:inset 0 0 0 3px color-mix(in srgb,#58CC02 40%,transparent);}
+      #pg-launch-splash:focus-visible{box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--a) 40%,transparent);}
       @media (prefers-reduced-motion:reduce){
         #pg-launch-splash .ls-badge{animation:lsPop .55s both}
         #pg-launch-splash .ls-cube{animation:none}
@@ -117,7 +117,7 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
     <div class="ls-badge">${icon("map-pin", { size: 46, strokeWidth: 2.2, color: "#fff" })}</div>
     <div class="ls-cubes" aria-label="PermiGo" role="img">${LETTERS.map(cube).join("")}</div>
     <p class="ls-flip" id="pg-ls-msg" aria-live="polite">${letterize(ACCROCHE)}</p>
-    <div class="ls-cta">Appuie pour démarrer ${icon("chevron-right", { size: 15, strokeWidth: 2.8, color: "#46A302" })}</div>
+    <div class="ls-cta">Appuie pour démarrer ${icon("chevron-right", { size: 15, strokeWidth: 2.8, color: "var(--adk)" })}</div>
   `;
   document.body.appendChild(host);
   host.focus({ preventScroll: true });

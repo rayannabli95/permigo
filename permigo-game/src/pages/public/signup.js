@@ -42,14 +42,14 @@ const STYLE = `<style>
   }
   .sg-logo {
     width: 56px; height: 56px;
-    background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
+    background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
     border-radius: 16px;
     margin: 0 auto 16px;
     display: flex; align-items: center; justify-content: center;
     color: #fff;
     font: 800 22px/1 'Plus Jakarta Sans', sans-serif;
     letter-spacing: -.02em;
-    box-shadow: 0 8px 24px rgba(88,204,2,.3), 0 1.5px 0 0 rgba(255,255,255,.3) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset;
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--a) 30%, transparent), 0 1.5px 0 0 rgba(255,255,255,.3) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
   }
   .sg-title {
     font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -85,7 +85,7 @@ const STYLE = `<style>
   .sg-input:focus {
     outline: 0;
     border-color: var(--a);
-    box-shadow: 0 0 0 4px rgba(88,204,2,.12);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--a) 12%, transparent);
   }
   .sg-input[readonly] { background: var(--bg); color: var(--mu3); cursor: default; }
   .sg-input.error { border-color: var(--rd); }
@@ -106,13 +106,13 @@ const STYLE = `<style>
     width: 100%;
     margin-top: 18px;
     padding: 16px;
-    color: #1a2800;
+    color: var(--a-ink);
     border: 0;
     border-radius: 14px;
     font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
-    background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
-    box-shadow: 0 8px 24px rgba(88,204,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset;
+    background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--a) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
     transition: transform .12s, box-shadow .15s, filter .15s;
     font-family: inherit;
   }
@@ -142,7 +142,7 @@ const STYLE = `<style>
     display: inline-block;
     margin: 0 0 18px;
     padding: 5px 12px;
-    background: rgba(88,204,2,.12);
+    background: color-mix(in srgb, var(--a) 12%, transparent);
     color: var(--adk);
     border-radius: 99px;
     font: 700 11px/1 'Inter', sans-serif;

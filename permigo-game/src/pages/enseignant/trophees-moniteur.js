@@ -261,7 +261,7 @@ const STYLE = `<style>
 .tr2-prog-bar { height: 7px; background: rgba(255,255,255,.18); border-radius: 99px; overflow: hidden; }
 .tr2-prog-fill {
   height: 100%; width: 0; border-radius: 99px;
-  background: linear-gradient(90deg, var(--a), #9ae831);
+  background: linear-gradient(90deg, var(--a), var(--a-lt));
   box-shadow: 0 0 8px color-mix(in srgb, var(--a) 60%, transparent);
   transition: width 1s cubic-bezier(.2,.7,.3,1);
 }

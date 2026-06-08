@@ -71,7 +71,7 @@ const STYLE = `<style>
 .epc-full-pill {
   font: 700 12px/1 'IBM Plex Mono', monospace;
   color: var(--a);
-  background: rgba(88,204,2,.1);
+  background: color-mix(in srgb, var(--a) 10%, transparent);
   padding: 6px 10px;
   border-radius: 99px;
   flex-shrink: 0;
@@ -126,7 +126,7 @@ const STYLE = `<style>
 .epcf-stop.now .epcf-stop-dot {
   background: var(--su);
   border-color: var(--a);
-  box-shadow: 0 0 0 4px rgba(88,204,2,.2);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--a) 20%, transparent);
   width: 44px; height: 44px;
   margin-left: -4px;
   margin-top: -2px;
@@ -170,8 +170,8 @@ const STYLE = `<style>
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  background: rgba(88,204,2,.08);
-  border: 1px solid rgba(88,204,2,.2);
+  background: color-mix(in srgb, var(--a) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
   border-radius: 10px;
   color: var(--a);
   margin-top: 4px;
@@ -194,7 +194,7 @@ const STYLE = `<style>
 
 /* Stop cliquable → ouvre le détail du palier */
 .epcf-stop[role="button"] { cursor: pointer; -webkit-tap-highlight-color: transparent; border-radius: 12px; transition: background .12s; }
-.epcf-stop[role="button"]:active { background: rgba(88,204,2,.06); }
+.epcf-stop[role="button"]:active { background: color-mix(in srgb, var(--a) 6%, transparent); }
 .epcf-stop:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
 
 /* Cercle Or halo */

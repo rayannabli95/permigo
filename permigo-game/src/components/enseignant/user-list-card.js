@@ -275,7 +275,7 @@ export const USER_LIST_CARD_CSS = `
     text-decoration:underline;
     text-decoration-style:dashed;
     text-underline-offset:4px;
-    text-decoration-color:rgba(88,204,2,.3);
+    text-decoration-color:color-mix(in srgb, var(--a) 30%, transparent);
   }
   .ulc-foot-btn:hover{gap:8px;text-decoration-color:var(--a)}
   .ulc-foot-arrow{transition:transform .15s}

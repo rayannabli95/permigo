@@ -57,7 +57,7 @@ function ensureRoot() {
       content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
       background:linear-gradient(180deg,#a78bfa,var(--a));
       border-radius:13px 0 0 13px;
-      box-shadow:0 0 12px rgba(88,204,2,.7);
+      box-shadow:0 0 12px color-mix(in srgb, var(--a) 70%, transparent);
     }
     .loot-toast.warm{background:linear-gradient(135deg,#7c2d12 0%,#9a3412 60%,#451a03 100%)}
     .loot-toast.warm::after{background:linear-gradient(180deg,var(--aml2),var(--am));box-shadow:0 0 12px rgba(251,191,36,.8)}

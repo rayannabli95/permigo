@@ -158,14 +158,14 @@ const STYLE = `<style>
   cursor: pointer;
   border-color: transparent;
   background: var(--su);
-  box-shadow: 0 0 0 1.5px rgba(88,204,2,.3),
-              0 8px 24px -8px rgba(88,204,2,.2);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--a) 30%, transparent),
+              0 8px 24px -8px color-mix(in srgb, var(--a) 20%, transparent);
 }
 @media (hover:hover) and (pointer:fine) {
   .mc-card.mc-can-open:hover {
     border-color: transparent;
-    box-shadow: 0 0 0 2px rgba(88,204,2,.55),
-                0 12px 32px -8px rgba(88,204,2,.3);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--a) 55%, transparent),
+                0 12px 32px -8px color-mix(in srgb, var(--a) 30%, transparent);
     transform: translateY(-2px);
   }
 }
@@ -216,7 +216,7 @@ const STYLE = `<style>
 .mc-rew-chip {
   font: 700 11px/1 'Inter', sans-serif;
   padding: 3px 8px; border-radius: 99px;
-  background: rgba(88,204,2,.08);
+  background: color-mix(in srgb, var(--a) 8%, transparent);
   color: var(--a);
 }
 
@@ -225,7 +225,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   font-size: 16px; flex-shrink: 0;
 }
-.mc-badge-open    { background: rgba(88,204,2,.12); color: var(--a); }
+.mc-badge-open    { background: color-mix(in srgb, var(--a) 12%, transparent); color: var(--a); }
 .mc-badge-opened  { background: rgba(16,185,129,.1);  color: var(--grd); }
 
 /* ── CTA open button on card ── */
@@ -235,9 +235,9 @@ const STYLE = `<style>
   border-radius: 10px;
   border: 0;
   font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
-  background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
-  box-shadow: 0 2px 8px 0 rgba(70,163,2,.35), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 6px 0 rgba(70,163,2,.5) inset;
-  color: #1a2800;
+  background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
+  box-shadow: 0 2px 8px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 6px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
+  color: var(--a-ink);
   cursor: pointer;
   transition: transform .12s, opacity .12s;
   min-height: 44px;

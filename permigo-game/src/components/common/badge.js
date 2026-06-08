@@ -50,7 +50,7 @@ const STYLE = `
   .bdg.v-outline       { background: transparent; border-color: var(--bo); color: var(--mu3); }
 
   /* Appearance LIGHT (pastel doux) */
-  .bdg.v-primary.a-light     { background: rgba(88,204,2,.12);  color: var(--adx); border-color: transparent; }
+  .bdg.v-primary.a-light     { background: color-mix(in srgb, var(--a) 12%, transparent);  color: var(--adx); border-color: transparent; }
   .bdg.v-secondary.a-light   { background: var(--su2);               color: var(--mu4); border-color: transparent; }
   .bdg.v-success.a-light     { background: rgba(16,185,129,.12);  color: var(--grdk); border-color: transparent; }
   .bdg.v-warning.a-light     { background: rgba(245,158,11,.12);  color: var(--amx); border-color: transparent; }
@@ -58,7 +58,7 @@ const STYLE = `
   .bdg.v-destructive.a-light { background: rgba(239,68,68,.12);   color: var(--rdx); border-color: transparent; }
 
   /* Appearance OUTLINE (bordure colorée) */
-  .bdg.v-primary.a-outline     { background: rgba(88,204,2,.06);  color: var(--adx); border-color: rgba(88,204,2,.3); }
+  .bdg.v-primary.a-outline     { background: color-mix(in srgb, var(--a) 6%, transparent);  color: var(--adx); border-color: color-mix(in srgb, var(--a) 30%, transparent); }
   .bdg.v-success.a-outline     { background: rgba(16,185,129,.06);  color: var(--grdk); border-color: rgba(16,185,129,.3); }
   .bdg.v-warning.a-outline     { background: rgba(245,158,11,.06);  color: var(--amx); border-color: rgba(245,158,11,.3); }
   .bdg.v-info.a-outline        { background: rgba(139,92,246,.06);  color: #6d28d9; border-color: rgba(139,92,246,.3); }

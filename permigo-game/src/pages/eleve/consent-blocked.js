@@ -22,8 +22,8 @@ const STYLE = `<style>
   .cb-btn { width:100%; max-width:420px; padding:15px; border:0; border-radius:14px; cursor:pointer;
     font:800 15px/1 'Plus Jakarta Sans',sans-serif; min-height:52px; transition:transform .12s; }
   .cb-btn:active { transform:scale(.98); }
-  .cb-btn-primary { background:linear-gradient(135deg,var(--a),var(--adk,#46a302)); color:#fff;
-    box-shadow:0 8px 24px -8px rgba(88,204,2,.55); margin-bottom:12px; }
+  .cb-btn-primary { background:linear-gradient(135deg,var(--a),var(--adk,var(--adk))); color:#fff;
+    box-shadow:0 8px 24px -8px color-mix(in srgb, var(--a) 55%, transparent); margin-bottom:12px; }
   .cb-btn-ghost { background:transparent; color:rgba(255,255,255,.6); border:1px solid rgba(255,255,255,.18); }
 </style>`;
 
