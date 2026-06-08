@@ -17,7 +17,6 @@ import {
   maybeSoftRequestPush,
   maybeSendStreakRiskNotif,
 } from "@/services/web-push.js";
-import { maybePlayWeeklyReplay } from "@/components/eleve/weekly-replay.js";
 import { icon } from "@/utils/icons.js";
 import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
@@ -891,12 +890,6 @@ export async function mount(root) {
     if (profile.first_value_action_at) {
       maybeSoftRequestPush();
       maybeSendStreakRiskNotif();
-      const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
-      maybePlayWeeklyReplay({
-        compsValidated: totalValidated,
-        monsReview: null,
-        streak: streak.current_streak,
-      });
     }
   } catch (e) {
     console.error("[accueil] mount failed", e);

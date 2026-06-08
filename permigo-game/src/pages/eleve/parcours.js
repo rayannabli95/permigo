@@ -625,7 +625,7 @@ const STYLE = `<style>
   top: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(255,255,255,.97);
+  background: color-mix(in srgb, var(--su) 96%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--bo);
