@@ -401,13 +401,12 @@ function _renderNodes(root, items, totalVals) {
   });
 }
 
-// ─── Onglet Progression (Parcours · Trophées · Ligue) ────────────
+// ─── Onglet Progression (Parcours · Trophées) — ligue moniteur abandonnée ──
 function _tabsHtml() {
   return `
   <div class="ppr-tabs" role="tablist" aria-label="Progression">
     <button class="ppr-tab on" role="tab" aria-selected="true">Parcours</button>
     <button class="ppr-tab" role="tab" aria-selected="false" data-go="#/trophees-moniteur">Trophées</button>
-    <button class="ppr-tab" role="tab" aria-selected="false" data-go="#/ligue-semaine">Ligue</button>
   </div>`;
 }
 

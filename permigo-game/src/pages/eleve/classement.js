@@ -180,7 +180,7 @@ export async function mount(root) {
       .join("")}</div>
   </div>`;
 
-  const [ecoleRes, nationalRes, ligueRes] = await Promise.all([
+  const [ecoleRes, nationalRes] = await Promise.all([
     sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: LIMIT }).then(
       (r) => r,
       () => ({ data: null, error: true }),
@@ -191,19 +191,15 @@ export async function mount(root) {
         (r) => r,
         () => ({ data: null, error: true }),
       ),
-    sb.rpc("get_league_leaderboard", { p_role: "eleve", p_limit: LIMIT }).then(
-      (r) => r,
-      () => ({ data: null, error: true }),
-    ),
   ]);
 
   const data = {
     ecole: ecoleRes.data || [],
     national: nationalRes.data || [],
-    semaine: ligueRes.data || [],
   };
 
-  let scope = "semaine";
+  // Défaut = Mon école (la ligue hebdo est abandonnée → plus d'onglet vide)
+  let scope = "ecole";
   root.innerHTML = `${STYLE}${_render(scope, data)}`;
   _wire(root, data, (s) => {
     scope = s;
@@ -242,8 +238,7 @@ function _render(scope, data) {
     <h1 class="clt-title">Classement</h1>
     ${pill}
     <div class="clt-tabs">
-      <button class="clt-tab clt-tab-ligue ${scope === "semaine" ? "on" : ""}" data-scope="semaine">${icon("trophy", { size: 13, strokeWidth: 2 })} Ligue</button>
-      <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">Mon école</button>
+      <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">${icon("trophy", { size: 13, strokeWidth: 2 })} Mon école</button>
       <button class="clt-tab ${scope === "national" ? "on" : ""}" data-scope="national">National</button>
     </div>
   </div>
