@@ -68,8 +68,8 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
     <style>
       #pg-launch-splash{position:fixed;inset:0;z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:var(--bg,#f4f5fb);padding:24px;opacity:1;transition:opacity .35s ease;cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;}
       #pg-launch-splash.out{opacity:0;pointer-events:none;}
-      #pg-launch-splash .ls-badge{width:96px;height:96px;border-radius:28px;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(180deg,var(--a-lt) 0%,var(--a) 48%,var(--adk) 100%);box-shadow:0 16px 38px -8px color-mix(in srgb, var(--adk) 50%, transparent),0 1.5px 0 0 rgba(255,255,255,.3) inset,0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;animation:lsPop .55s cubic-bezier(.34,1.56,.64,1) both,lsFloat 2.4s ease-in-out .55s infinite;}
-      #pg-launch-splash .ls-badge svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));}
+      #pg-launch-splash .ls-badge{width:108px;height:108px;display:flex;align-items:center;justify-content:center;animation:lsPop .55s cubic-bezier(.34,1.56,.64,1) both,lsFloat 2.4s ease-in-out .55s infinite;}
+      #pg-launch-splash .ls-badge img{width:108px;height:108px;object-fit:contain;filter:drop-shadow(0 12px 26px color-mix(in srgb, var(--adk) 40%, transparent));}
 
       /* ── « PERMIGO » en cubes 3D ── */
       #pg-launch-splash .ls-cubes{display:flex;gap:9px;perspective:800px;}
@@ -114,7 +114,7 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
         #pg-launch-splash .f-bottom{transform:rotateX(-90deg) translateZ(19px)}
       }
     </style>
-    <div class="ls-badge">${icon("map-pin", { size: 46, strokeWidth: 2.2, color: "#fff" })}</div>
+    <div class="ls-badge"><img src="/skins/avatars/permigo-badge-icon.png" alt="PermiGo" width="108" height="108" /></div>
     <div class="ls-cubes" aria-label="PermiGo" role="img">${LETTERS.map(cube).join("")}</div>
     <p class="ls-flip" id="pg-ls-msg" aria-live="polite">${letterize(ACCROCHE)}</p>
     <div class="ls-cta">Appuie pour démarrer ${icon("chevron-right", { size: 15, strokeWidth: 2.8, color: "var(--adk)" })}</div>
