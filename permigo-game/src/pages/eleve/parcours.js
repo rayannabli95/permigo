@@ -2005,7 +2005,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   const recapBtn = `
     <a href="#/quiz/${esc(compId)}/post_validation" role="button"
        style="display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:15px;background:var(--a);border:none;color:#fff;border-radius:14px;font:800 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;box-shadow:0 6px 16px -4px color-mix(in srgb, var(--a) 60%, transparent);min-height:52px;">
-      ${icon("refresh-cw", { size: 16 })} Refaire le quiz-récap <span style="opacity:.8;font-weight:600">(optionnel)</span>
+      ${icon("zap", { size: 16 })} Clique pour te tester sur la compétence !
     </a>`;
 
   // Bloc status contextuel selon état
