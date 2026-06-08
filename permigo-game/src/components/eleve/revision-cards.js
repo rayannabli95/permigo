@@ -56,7 +56,7 @@ function ensureStyle() {
     gap: 8px;
   }
   .rc-card {
-    background: #fff;
+    background: var(--su);
     border-radius: 16px;
     padding: 14px 16px;
     display: flex;

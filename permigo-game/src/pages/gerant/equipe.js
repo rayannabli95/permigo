@@ -340,7 +340,7 @@ function openInviteModal(me) {
     <style>
       @keyframes invFadeIn { from { opacity: 0; } to { opacity: 1; } }
       @keyframes invSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-      .inv-sheet { width:100%; max-width:480px; background:#fff; border-radius:32px 32px 0 0; padding:24px 24px max(32px, env(safe-area-inset-bottom)); animation: invSlideUp .3s cubic-bezier(.2,.7,.3,1); font-family:'Inter',sans-serif; }
+      .inv-sheet { width:100%; max-width:480px; background:var(--su); border-radius:32px 32px 0 0; padding:24px 24px max(32px, env(safe-area-inset-bottom)); animation: invSlideUp .3s cubic-bezier(.2,.7,.3,1); font-family:'Inter',sans-serif; }
       .inv-handle { width:36px; height:4px; background:var(--bo); border-radius:2px; margin:0 auto 20px; }
       .inv-title { font:800 22px/1.2 'Plus Jakarta Sans',sans-serif; color:var(--ink); margin:0 0 6px; letter-spacing:-.02em; }
       .inv-sub { font:500 14px/1.4 'Inter',sans-serif; color:var(--mu3); margin:0 0 20px; }

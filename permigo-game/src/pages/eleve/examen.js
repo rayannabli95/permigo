@@ -131,7 +131,7 @@ const STYLE = `<style>
   transition: border-color .18s ease;
   min-height: 44px;
 }
-.exam-date-input:focus { border-color: var(--a); background: #fff; }
+.exam-date-input:focus { border-color: var(--a); background: var(--su); }
 .exam-date-save {
   padding: 10px 18px;
   background: var(--a);

@@ -111,7 +111,7 @@ export const STACKED_CARDS_CSS = `
   .sc-card{
     position:absolute;
     inset:0;
-    background:#fff;
+    background:var(--su);
     border-radius:22px;
     box-shadow:0 4px 24px -6px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.06);
     overflow:hidden;

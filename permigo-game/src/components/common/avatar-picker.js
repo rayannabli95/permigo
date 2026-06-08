@@ -31,7 +31,7 @@ const STYLE = `<style>
   position: fixed;
   bottom: 0; left: 0; right: 0;
   z-index: 9991;
-  background: #fff;
+  background: var(--su);
   border-radius: 28px 28px 0 0;
   transform: translateY(100%);
   transition: transform .32s cubic-bezier(.32,.72,0,1);

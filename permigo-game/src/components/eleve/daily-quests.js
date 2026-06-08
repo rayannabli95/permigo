@@ -50,7 +50,7 @@ function ensureStyle() {
 
   .dq-card {
     flex-shrink: 0; width: 156px;
-    background: #fff; border: 1.5px solid var(--bo);
+    background: var(--su); border: 1.5px solid var(--bo);
     border-radius: 16px; padding: 14px 14px 12px;
     cursor: pointer; position: relative; overflow: hidden;
     transition: transform .15s cubic-bezier(.23,1,.32,1), border-color .15s;

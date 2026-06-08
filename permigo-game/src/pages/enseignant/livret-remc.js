@@ -318,7 +318,7 @@ const STYLE = `<style>
     align-items: center;
     gap: 6px;
   }
-  .lr-statut-btn:hover { border-color: var(--a); background: #fff; }
+  .lr-statut-btn:hover { border-color: var(--a); background: var(--su); }
   .lr-statut-btn.selected-acquis {
     border-color: var(--gr);
     background: rgba(16,185,129,.08);

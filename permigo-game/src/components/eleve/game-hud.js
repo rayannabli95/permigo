@@ -258,7 +258,7 @@ export function renderGameHUD(stats, me) {
       .ghud-streak-day.active .dl,.ghud-streak-day.active .dn{color:#fff}
       .ghud-streak-day.active::before{content:'🔥';font-size:13px;line-height:1}
       .ghud-streak-day.today{box-shadow:0 0 0 2px #fff}
-      .ghud-streak-close{margin-top:22px;padding:12px 26px;border-radius:99px;background:#fff;color:var(--ink);border:0;font-family:var(--fd);font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.3px;width:100%}
+      .ghud-streak-close{margin-top:22px;padding:12px 26px;border-radius:99px;background:var(--su);color:var(--ink);border:0;font-family:var(--fd);font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.3px;width:100%}
     </style>
 
     <div class="ghud" role="status" aria-label="Tableau de bord du joueur">

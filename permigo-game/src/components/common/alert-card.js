@@ -226,7 +226,7 @@ export const ALERT_CARD_CSS = `
     padding:14px 18px;
     border-radius:99px;
     border:0;
-    background:#fff;
+    background:var(--su);
     color:var(--ink);
     font-family:var(--fd,system-ui);
     font-size:14.5px;
