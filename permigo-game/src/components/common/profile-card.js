@@ -25,6 +25,13 @@ import {
 const STYLE = `<style>
 .pcc { width: 100%; max-width: 380px; margin: 0 auto; padding: 0; }
 .pcc-card {
+  /* Carte de partage = toujours palette CLAIRE (fond blanc), même en mode nuit.
+     On fige les tokens localement → plus de texte clair invisible sur blanc. */
+  --ink:#0b0d1a; --ink2:#1a1d2e; --ink3:#2d3050; --ink4:#1e293b; --ink5:#374151;
+  --mu:#5f6788; --mu2:#5e6e82; --mu3:#556070; --mu4:#475569;
+  --su:#fff; --su2:#f8f9fd;
+  --bo:#e2e6f2; --bo2:#edf0f9; --bg2:#eceef8;
+  color: var(--ink);
   background: #fff;
   border: 1px solid var(--bo);
   border-radius: 28px;
