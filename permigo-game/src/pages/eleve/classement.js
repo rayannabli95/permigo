@@ -20,6 +20,40 @@ import {
 } from "@/utils/league-shared.js";
 
 const LIMIT = 50;
+
+// ─── Ligues REMC (4 mondes) — un élève « monte » en finissant chaque monde ──
+// endAt = score (/31) atteint quand le monde est terminé.
+const REMC_LEAGUES = [
+  { n: 1, id: "C1", name: "Maîtrise du véhicule", color: "#22c55e", endAt: 9 },
+  { n: 2, id: "C2", name: "Circulation normale", color: "#3b82f6", endAt: 17 },
+  {
+    n: 3,
+    id: "C3",
+    name: "Conditions difficiles",
+    color: "#eab308",
+    endAt: 24,
+  },
+  { n: 4, id: "C4", name: "Conduite autonome", color: "#8b5cf6", endAt: 31 },
+];
+function remcLeague(score) {
+  const s = Math.max(0, Math.min(31, score || 0));
+  const idx = REMC_LEAGUES.findIndex((l) => s < l.endAt);
+  if (idx === -1)
+    return {
+      elite: true,
+      league: REMC_LEAGUES[3],
+      idx: 3,
+      toNext: 0,
+      next: null,
+    };
+  return {
+    elite: false,
+    league: REMC_LEAGUES[idx],
+    idx,
+    toNext: REMC_LEAGUES[idx].endAt - s,
+    next: REMC_LEAGUES[idx + 1] || null, // null = prochain palier = Élite/permis
+  };
+}
 // Médailles top 3 : dégradé + icône + halo (or / argent / bronze)
 const MEDALS = {
   1: {
@@ -161,6 +195,32 @@ ${LEAGUE_CSS}
 .clt-pseudo-ttl { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; }
 .clt-pseudo-sub { font: 500 11px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
 @media (prefers-reduced-motion: reduce) { .clt-tab, .clt-row { transition: none; } }
+
+/* ── Ligues REMC ── */
+.clt-rl-hero { margin: 4px 16px 12px; padding: 16px; border-radius: 18px;
+  background: var(--su); border: 1px solid var(--bo); box-shadow: var(--s1);
+  border-left: 4px solid var(--lc, var(--a)); }
+.clt-rl-top { display: flex; align-items: center; gap: 12px; }
+.clt-rl-medal { width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
+  background: var(--lc, var(--a));
+  box-shadow: 0 4px 12px -2px color-mix(in srgb, var(--lc, var(--a)) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.35); }
+.clt-rl-info { flex: 1; min-width: 0; }
+.clt-rl-lbl { font: 700 10px/1 'Inter', sans-serif; text-transform: uppercase; letter-spacing: .1em; color: var(--mu2); }
+.clt-rl-name { font: 800 15px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-top: 3px; }
+.clt-rl-prog { font: 500 12.5px/1.4 'Inter', sans-serif; color: var(--mu); margin-top: 12px; }
+.clt-rl-prog strong { color: var(--lc, var(--a)); font-weight: 800; }
+.clt-rl-track { display: flex; gap: 8px; margin-top: 12px; }
+.clt-rl-dot { flex: 1; height: 6px; border-radius: 99px; background: var(--bo); position: relative; }
+.clt-rl-dot.done { background: var(--dc); }
+.clt-rl-dot.cur { background: var(--dc); box-shadow: 0 0 0 2px color-mix(in srgb, var(--dc) 35%, transparent); }
+/* Chip ligue sur chaque ligne */
+.clt-lg-chip { flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  font: 800 12px/1 'Plus Jakarta Sans', sans-serif; background: var(--lc, var(--a));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.clt-lg-chip.elite { background: linear-gradient(135deg,#f59e0b,#d97706); }
 </style>`;
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -313,6 +373,35 @@ function _renderLeagueBody(rows) {
   return `${hero}<div class="clt-list">${listHtml}</div>`;
 }
 
+// ── Hero « Ta ligue » (ligues REMC) ───────────────────────────────
+function _remcLeagueHero(mine) {
+  const sc = mine?.score ?? 0;
+  const info = remcLeague(sc);
+  const L = info.league;
+  const dots = REMC_LEAGUES.map((l) => {
+    const cls = info.elite || sc >= l.endAt ? "done" : l.n === L.n ? "cur" : "";
+    return `<div class="clt-rl-dot ${cls}" style="--dc:${l.color}"></div>`;
+  }).join("");
+  const progText = info.elite
+    ? "Tous les mondes maîtrisés — tu es prêt pour l'examen 🎓"
+    : info.next
+      ? `Encore <strong>${info.toNext}</strong> validation${info.toNext > 1 ? "s" : ""} avant la Ligue ${info.next.n} — ${esc(info.next.name)}`
+      : `Encore <strong>${info.toNext}</strong> validation${info.toNext > 1 ? "s" : ""} pour atteindre l'Élite (prêt examen)`;
+  const lc = info.elite ? "#f59e0b" : L.color;
+  return `
+  <div class="clt-rl-hero" style="--lc:${lc}">
+    <div class="clt-rl-top">
+      <div class="clt-rl-medal">${info.elite ? "★" : L.n}</div>
+      <div class="clt-rl-info">
+        <div class="clt-rl-lbl">Ta ligue</div>
+        <div class="clt-rl-name">${info.elite ? "Élite · Prêt pour l'examen" : `Ligue ${L.n} — ${esc(L.name)}`}</div>
+      </div>
+    </div>
+    <div class="clt-rl-prog">${progText}</div>
+    <div class="clt-rl-track">${dots}</div>
+  </div>`;
+}
+
 // ── Corps classement all-time ─────────────────────────────────────
 function _renderAllTimeBody(rows) {
   const active = rows.filter((r) => r.score > 0).length;
@@ -329,7 +418,7 @@ function _renderAllTimeBody(rows) {
   const mine = _myRow(rows);
   const meOutside = mine && mine.rang > LIMIT;
 
-  let html = `<div class="clt-list">${top.map(_rowHtml).join("")}</div>`;
+  let html = `${_remcLeagueHero(mine)}<div class="clt-list">${top.map(_rowHtml).join("")}</div>`;
   if (meOutside) {
     html += `<div class="clt-sep">· · ·</div><div class="clt-list">${_rowHtml(mine)}</div>`;
   }
@@ -341,12 +430,17 @@ function _rowHtml(r) {
   const rankCell = m
     ? `<div class="clt-rank medal" style="--mg:${m.grad};--mglow:${m.glow}" aria-label="Rang ${r.rang}">${icon(m.ico, { size: 17, strokeWidth: 2.2, color: "#fff" })}</div>`
     : `<div class="clt-rank" aria-label="Rang ${r.rang}">${r.rang}</div>`;
+  const info = remcLeague(r.score);
+  const chip = info.elite
+    ? `<div class="clt-lg-chip elite" title="Élite" aria-label="Ligue Élite">★</div>`
+    : `<div class="clt-lg-chip" style="--lc:${info.league.color}" title="Ligue ${info.league.n} — ${esc(info.league.name)}" aria-label="Ligue ${info.league.n}">${info.league.n}</div>`;
   return `
   <div class="clt-row ${r.is_me ? "me" : ""} ${m ? "top" + r.rang : ""}">
     ${rankCell}
     <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 34)}</div>
     <div class="clt-name">${esc(r.display_name)}</div>
     ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ""}
+    ${chip}
     <div class="clt-score">${r.score}<span class="clt-score-sub">/31</span></div>
   </div>`;
 }
