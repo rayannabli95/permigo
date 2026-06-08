@@ -42,14 +42,14 @@ const STYLE = `<style>
   }
   .sg-logo {
     width: 56px; height: 56px;
-    background: var(--a);
+    background: linear-gradient(to bottom, #6fe016 0%, var(--a) 48%, var(--adk) 100%);
     border-radius: 16px;
     margin: 0 auto 16px;
     display: flex; align-items: center; justify-content: center;
     color: #fff;
     font: 800 22px/1 'Plus Jakarta Sans', sans-serif;
     letter-spacing: -.02em;
-    box-shadow: 0 8px 24px rgba(88,204,2,.3);
+    box-shadow: 0 8px 24px rgba(88,204,2,.3), 0 1.5px 0 0 rgba(255,255,255,.3) inset, 0 -2px 8px 0 rgba(70,163,2,.5) inset;
   }
   .sg-title {
     font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -81,6 +81,7 @@ const STYLE = `<style>
     transition: border-color .15s ease, box-shadow .15s ease;
     font-family: inherit;
   }
+  .sg-input:hover:not(:focus):not([readonly]) { border-color: var(--bo4); }
   .sg-input:focus {
     outline: 0;
     border-color: var(--a);
@@ -129,6 +130,9 @@ const STYLE = `<style>
     border-radius: 8px; -webkit-tap-highlight-color: transparent;
   }
   .sg-pwd-toggle:hover { color: var(--ink); background: var(--bg2); }
+
+  /* Séparateur fin avant le footer */
+  .sg-sep { height: 1px; background: var(--bo2); margin: 22px 0 0; }
 
   /* Lien se connecter */
   .sg-login-row { text-align: center; margin-top: 16px; font: 500 13px/1.4 'Inter', sans-serif; color: var(--mu); }
@@ -327,6 +331,7 @@ function renderForm(root, invitation, token) {
         </div>
 
         <button class="sg-btn" id="sg-submit" disabled>Activer mon compte</button>
+        <div class="sg-sep"></div>
         <div class="sg-login-row">Déjà un compte&nbsp;? <a href="/#/login">Se connecter</a></div>
       </div>
     </div>
