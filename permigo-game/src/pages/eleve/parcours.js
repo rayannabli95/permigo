@@ -19,6 +19,10 @@ import {
 } from "@/components/eleve/chest.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 import {
+  maybeShowParcoursTuto,
+  showParcoursTuto,
+} from "@/components/eleve/parcours-tuto.js";
+import {
   unlockChest,
   openChest,
   getMyChests,
@@ -90,7 +94,10 @@ const STYLE = `<style>
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--bo);
 }
-.prc-title    { font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
+.prc-title    { font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; }
+.prc-help { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--bo4); background: var(--su); color: var(--mu2); font: 800 12px/1 'Inter', sans-serif; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; transition: border-color .12s, color .12s; }
+.prc-help:hover { border-color: var(--a); color: var(--a); }
+.prc-help:active { transform: scale(.9); }
 .prc-subtitle { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 .prc-hd-right { text-align: right; }
 .prc-total    { font: 800 26px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
@@ -1349,6 +1356,10 @@ export async function mount(root) {
   );
   wire(root, worldStates, validatedMap, pendingMap, me);
 
+  // Tuto : 1er passage auto + bouton « ? » pour le revoir
+  root.querySelector("#prc-help")?.addEventListener("click", showParcoursTuto);
+  maybeShowParcoursTuto();
+
   // Persister en DB les coffres des mondes complétés (idempotent)
   const CHEST_REWARDS = [
     { xp: 200, gemmes: 50 },
@@ -1592,7 +1603,7 @@ function renderPage(
   <!-- Header sticky -->
   <div class="prc-hd">
     <div>
-      <h1 class="prc-title" tabindex="-1">Mon parcours</h1>
+      <h1 class="prc-title" tabindex="-1">Mon parcours <button class="prc-help" id="prc-help" type="button" aria-label="Comment marche le parcours ?">?</button></h1>
       <div class="prc-subtitle">31 compétences · Permis B</div>
     </div>
     <div class="prc-hd-right">
