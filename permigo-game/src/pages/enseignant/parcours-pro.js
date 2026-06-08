@@ -271,7 +271,7 @@ function _render(root, totalVals, state) {
       </div>
 
       <div class="ppr-legend">
-        <span><i style="background:var(--a)"></i>Débloqué</span>
+        <span><i style="background:var(--a)"></i>Atteint</span>
         <span><i style="background:var(--a);box-shadow:0 0 0 3px color-mix(in srgb,var(--a) 25%,transparent)"></i>Prochain</span>
         <span><i style="background:var(--su);border:1.5px dashed var(--bo4)"></i>À venir</span>
         <span><i style="background:var(--bg2);border:1px solid var(--bo)"></i>Verrouillé</span>
@@ -310,16 +310,16 @@ function _nextHtml(state) {
   if (!state.nextReward) {
     return `<div class="ppr-next done">
       <span style="color:var(--a)">${icon("check-circle", { size: 22, strokeWidth: 2 })}</span>
-      <div class="ppr-next-tool">Tous les outils débloqués — Expert REMC certifié.</div>
+      <div class="ppr-next-tool">Palier maximum atteint — Expert REMC certifié.</div>
     </div>`;
   }
   const t = state.nextReward.data;
   const missing = state.nextReward.missing ?? 0;
   return `<div class="ppr-next">
-    <div class="ppr-next-lbl">${icon(t.unlock.iconName, { size: 12, strokeWidth: 2 })} Prochain outil</div>
-    <div class="ppr-next-tool">${esc(t.unlock.name)}</div>
+    <div class="ppr-next-lbl">${icon("trending-up", { size: 12, strokeWidth: 2 })} Prochain palier</div>
+    <div class="ppr-next-tool">${esc(t.title)} · ${t.threshold} validations</div>
     <div class="ppr-next-bar"><div class="ppr-next-fill" id="ppr-next-fill"></div></div>
-    <div class="ppr-next-meta">Plus que ${missing} validation${missing > 1 ? "s" : ""} — palier ${t.threshold}</div>
+    <div class="ppr-next-meta">Plus que ${missing} validation${missing > 1 ? "s" : ""}</div>
   </div>`;
 }
 
@@ -370,18 +370,20 @@ function _renderNodes(root, items, totalVals) {
       const inner =
         it.state === "locked"
           ? icon("lock", { size: 26, strokeWidth: 2 })
-          : icon(it.tier.unlock.iconName, { size: 28, strokeWidth: 2 });
+          : icon("award", { size: 28, strokeWidth: 2 });
       const check =
         it.state === "done"
           ? `<div class="nd-check">${icon("check", { size: 12, strokeWidth: 3 })}</div>`
           : "";
       const cta =
-        it.state === "next" ? `<span class="nd-stt">Voir l'outil →</span>` : "";
-      return `<button class="ppr-node ${it.state}" style="left:${left}%;top:${top}%;animation-delay:${i * 70}ms" data-i="${i}" aria-label="Palier ${i + 1} sur ${items.length} : ${esc(it.tier.unlock.name)} — ${it.state === "done" ? "débloqué" : it.state === "next" ? "prochain palier" : "à débloquer à " + it.tier.threshold + " validations"}">
+        it.state === "next"
+          ? `<span class="nd-stt">Voir le palier →</span>`
+          : "";
+      return `<button class="ppr-node ${it.state}" style="left:${left}%;top:${top}%;animation-delay:${i * 70}ms" data-i="${i}" aria-label="Palier ${i + 1} sur ${items.length} : ${esc(it.tier.title)} — ${it.state === "done" ? "atteint" : it.state === "next" ? "prochain palier" : "à atteindre à " + it.tier.threshold + " validations"}">
         <div class="nd-circle">${inner}${check}</div>
         <div class="nd-lbl">
-          <span class="nd-name">${esc(it.tier.unlock.name)}</span>
-          <span class="nd-thr">${it.tier.threshold} validations</span>
+          <span class="nd-name">${it.tier.threshold} validations</span>
+          <span class="nd-thr">${esc(it.tier.title)}</span>
           ${cta}
         </div>
       </button>`;

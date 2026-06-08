@@ -4,9 +4,9 @@
 // Sobre, mobile-first. Ouvre au clic sur un palier ; ferme via overlay,
 // bouton, ou touche Échap. Respecte prefers-reduced-motion.
 // ═══════════════════════════════════════════════════════════════
-import { esc } from '@/utils/escape.js';
-import { icon } from '@/utils/icons.js';
-import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
+import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
+import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 
 let _injectedStyle = false;
 let _activeOverlay = null;
@@ -94,33 +94,33 @@ const STYLE = `<style id="palier-sheet-style">
  */
 export function openPalierSheet(tier, totalVals = 0) {
   if (!tier) return;
-  if (!_injectedStyle && !document.getElementById('palier-sheet-style')) {
-    document.head.insertAdjacentHTML('beforeend', STYLE);
+  if (!_injectedStyle && !document.getElementById("palier-sheet-style")) {
+    document.head.insertAdjacentHTML("beforeend", STYLE);
     _injectedStyle = true;
   }
   closePalierSheet(); // un seul à la fois
 
   const done = totalVals >= tier.threshold;
   const remaining = Math.max(0, tier.threshold - totalVals);
-  const iconName = tier.unlock?.iconName ?? 'star';
+  const iconName = "award";
 
   const badge = done
     ? '<span class="psheet-badge done">Atteint</span>'
-    : `<span class="psheet-badge todo">+${remaining} validation${remaining > 1 ? 's' : ''}</span>`;
+    : `<span class="psheet-badge todo">+${remaining} validation${remaining > 1 ? "s" : ""}</span>`;
 
   const meta = done
-    ? `Palier débloqué à <strong>${tier.threshold} validation${tier.threshold > 1 ? 's' : ''}</strong>.`
-    : `Encore <strong>${remaining} validation${remaining > 1 ? 's' : ''}</strong> pour débloquer ce palier (seuil : ${tier.threshold}).`;
+    ? `Palier atteint à <strong>${tier.threshold} validation${tier.threshold > 1 ? "s" : ""}</strong>.`
+    : `Encore <strong>${remaining} validation${remaining > 1 ? "s" : ""}</strong> pour atteindre ce palier (seuil : ${tier.threshold}).`;
 
-  const ov = document.createElement('div');
-  ov.className = 'psheet-ov';
-  ov.setAttribute('role', 'dialog');
-  ov.setAttribute('aria-modal', 'true');
+  const ov = document.createElement("div");
+  ov.className = "psheet-ov";
+  ov.setAttribute("role", "dialog");
+  ov.setAttribute("aria-modal", "true");
   ov.innerHTML = `
     <div class="psheet" role="document">
       <div class="psheet-grab"></div>
       <div class="psheet-head">
-        <div class="psheet-icon ${done ? 'done' : ''}">
+        <div class="psheet-icon ${done ? "done" : ""}">
           ${icon(iconName, { size: 26, strokeWidth: 2 })}
         </div>
         <div class="psheet-head-info">
@@ -129,9 +129,9 @@ export function openPalierSheet(tier, totalVals = 0) {
         </div>
         ${badge}
       </div>
-      <div class="psheet-reward-lbl">${done ? 'Récompense débloquée' : 'Récompense à débloquer'}</div>
-      <div class="psheet-reward-name">${esc(tier.unlock?.name ?? '—')}</div>
-      <div class="psheet-reward-desc">${esc(tier.unlock?.desc ?? '')}</div>
+      <div class="psheet-reward-lbl">Statut</div>
+      <div class="psheet-reward-name">${esc(tier.title)}</div>
+      <div class="psheet-reward-desc">Palier de progression atteint en cumulant des validations REMC auprès de tes élèves.</div>
       <div class="psheet-meta">${meta}</div>
       <button class="psheet-close" type="button">Fermer</button>
     </div>`;
@@ -140,27 +140,37 @@ export function openPalierSheet(tier, totalVals = 0) {
   _activeOverlay = ov;
 
   // Ferme si clic sur l'overlay (hors du panneau) ou sur le bouton
-  ov.addEventListener('click', (e) => {
+  ov.addEventListener("click", (e) => {
     if (e.target === ov) closePalierSheet();
   });
-  ov.querySelector('.psheet-close')?.addEventListener('click', closePalierSheet);
-  enableSheetSwipe(ov.querySelector('.psheet'), closePalierSheet, { overlay: ov });
+  ov.querySelector(".psheet-close")?.addEventListener(
+    "click",
+    closePalierSheet,
+  );
+  enableSheetSwipe(ov.querySelector(".psheet"), closePalierSheet, {
+    overlay: ov,
+  });
 
-  _onKeydown = (e) => { if (e.key === 'Escape') closePalierSheet(); };
-  document.addEventListener('keydown', _onKeydown);
+  _onKeydown = (e) => {
+    if (e.key === "Escape") closePalierSheet();
+  };
+  document.addEventListener("keydown", _onKeydown);
 
   // Anime l'entrée
-  requestAnimationFrame(() => ov.classList.add('show'));
+  requestAnimationFrame(() => ov.classList.add("show"));
 }
 
 export function closePalierSheet() {
-  if (_onKeydown) { document.removeEventListener('keydown', _onKeydown); _onKeydown = null; }
+  if (_onKeydown) {
+    document.removeEventListener("keydown", _onKeydown);
+    _onKeydown = null;
+  }
   const ov = _activeOverlay;
   if (!ov) return;
   _activeOverlay = null;
-  ov.classList.remove('show');
+  ov.classList.remove("show");
   const remove = () => ov.remove();
   // Laisse l'animation de sortie se jouer, fallback si pas de transition
-  ov.addEventListener('transitionend', remove, { once: true });
+  ov.addEventListener("transitionend", remove, { once: true });
   setTimeout(remove, 320);
 }

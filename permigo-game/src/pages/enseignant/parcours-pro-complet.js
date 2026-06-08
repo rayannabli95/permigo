@@ -2,16 +2,19 @@
 // Enseignant — Tous les paliers (timeline complète)
 // Accessible depuis parcours-pro.js via "Voir tous les paliers →"
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { toast } from '@/components/common/toast.js';
-import { track } from '@/services/analytics.js';
-import { navigate } from '@/router.js';
-import { getMoniteurState, buildTimelineStops } from '@/data/moniteur-levels.js';
-import { haptic } from '@/utils/haptic.js';
-import { icon } from '@/utils/icons.js';
-import { openPalierSheet } from '@/components/common/palier-sheet.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { toast } from "@/components/common/toast.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import {
+  getMoniteurState,
+  buildTimelineStops,
+} from "@/data/moniteur-levels.js";
+import { haptic } from "@/utils/haptic.js";
+import { icon } from "@/utils/icons.js";
+import { openPalierSheet } from "@/components/common/palier-sheet.js";
 
 // ─── CSS ────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -225,15 +228,15 @@ let _root = null;
 export async function mount(root) {
   _root = root;
   const me = getCurUser();
-  if (!me || me.role !== 'enseignant') return;
+  if (!me || me.role !== "enseignant") return;
 
-  track('page.view', { page: 'enseignant_parcours_complet' });
+  track("page.view", { page: "enseignant_parcours_complet" });
 
   root.innerHTML = `${STYLE}
     <div class="epc-full">
       <div class="epc-full-hd">
         <button class="epc-full-back" aria-label="Retour au parcours" id="epcf-back">
-          ${icon('arrow-left', { size: 18, strokeWidth: 2.5 })}
+          ${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}
         </button>
         <div class="epc-full-hd-info">
           <h1 class="epc-full-h1">Tous les paliers</h1>
@@ -244,19 +247,19 @@ export async function mount(root) {
       <div class="epcf-skel" style="height:200px;margin:16px"></div>
     </div>`;
 
-  root.querySelector('#epcf-back')?.addEventListener('click', () => {
-    haptic('select');
-    navigate('#/parcours');
+  root.querySelector("#epcf-back")?.addEventListener("click", () => {
+    haptic("select");
+    navigate("#/parcours");
   });
 
   // ─── Fetch ──────────────────────────────────────────────────
   const { count, error } = await sb
-    .from('validations')
-    .select('id', { count: 'exact', head: true })
-    .eq('validated_by', me.id);
+    .from("validations")
+    .select("id", { count: "exact", head: true })
+    .eq("validated_by", me.id);
 
   if (error) {
-    toast('Impossible de charger le parcours', 'error');
+    toast("Impossible de charger le parcours", "error");
     return;
   }
 
@@ -264,54 +267,60 @@ export async function mount(root) {
   const state = getMoniteurState(totalValidations);
   const stops = buildTimelineStops();
 
-  const doneCount = stops.filter(s => totalValidations >= s.threshold).length;
+  const doneCount = stops.filter((s) => totalValidations >= s.threshold).length;
 
   root.innerHTML = `${STYLE}
     <div class="epc-full anim-slide-up">
 
       <div class="epc-full-hd">
         <button class="epc-full-back" aria-label="Retour au parcours" id="epcf-back">
-          ${icon('arrow-left', { size: 18, strokeWidth: 2.5 })}
+          ${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}
         </button>
         <div class="epc-full-hd-info">
           <h1 class="epc-full-h1">Tous les paliers</h1>
-          <p class="epc-full-sub">${esc(state.saison.name)} · ${totalValidations} validation${totalValidations > 1 ? 's' : ''}</p>
+          <p class="epc-full-sub">${esc(state.saison.name)} · ${totalValidations} validation${totalValidations > 1 ? "s" : ""}</p>
         </div>
         <div class="epc-full-pill">${doneCount}/${stops.length}</div>
       </div>
 
       <div class="epc-full-route">
-        ${stops.map(s => renderStop(s, totalValidations)).join('')}
+        ${stops.map((s) => renderStop(s, totalValidations)).join("")}
       </div>
 
     </div>`;
 
   // ─── Wire ───────────────────────────────────────────────────
-  root.querySelector('#epcf-back')?.addEventListener('click', () => {
-    haptic('select');
-    navigate('#/parcours');
+  root.querySelector("#epcf-back")?.addEventListener("click", () => {
+    haptic("select");
+    navigate("#/parcours");
   });
 
   // Clic / clavier sur un stop → sheet de détail du palier
   const openFromStop = (el) => {
     const tierNum = parseInt(el.dataset.tier, 10);
-    const stop = stops.find(s => s.tier.tier === tierNum);
+    const stop = stops.find((s) => s.tier.tier === tierNum);
     if (!stop) return;
-    haptic('select');
-    track('parcours_complet.tier_detail', { tier: tierNum });
+    haptic("select");
+    track("parcours_complet.tier_detail", { tier: tierNum });
     openPalierSheet(stop.tier, totalValidations);
   };
-  root.querySelectorAll('.epcf-stop[data-tier]').forEach(el => {
-    el.addEventListener('click', () => openFromStop(el));
-    el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFromStop(el); }
+  root.querySelectorAll(".epcf-stop[data-tier]").forEach((el) => {
+    el.addEventListener("click", () => openFromStop(el));
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openFromStop(el);
+      }
     });
   });
 
   // Scroll vers le stop "now" si présent
-  const nowStop = root.querySelector('.epcf-stop.now');
+  const nowStop = root.querySelector(".epcf-stop.now");
   if (nowStop) {
-    setTimeout(() => nowStop.scrollIntoView({ behavior: 'smooth', block: 'center' }), 400);
+    setTimeout(
+      () => nowStop.scrollIntoView({ behavior: "smooth", block: "center" }),
+      400,
+    );
   }
 }
 
@@ -320,37 +329,36 @@ export async function mount(root) {
 function renderStop(stop, totalValidations) {
   // Tiers uniquement (plus de skin, plus de blur « Mystère »)
   const tierNum = stop.tier.tier;
-  const cls = totalValidations >= stop.threshold ? 'done' : 'todo';
+  const cls = totalValidations >= stop.threshold ? "done" : "todo";
   const isCercleOr = tierNum === 10;
-  const iconName = stop.tier.unlock.iconName;
+  const iconName = "award";
 
-  const dotContent = cls === 'done'
-    ? icon('check', { size: 16, strokeWidth: 3 })
-    : icon(iconName, { size: 15, strokeWidth: 2 });
+  const dotContent =
+    cls === "done"
+      ? icon("check", { size: 16, strokeWidth: 3 })
+      : icon(iconName, { size: 15, strokeWidth: 2 });
 
   // Cost badge
   const diff = stop.threshold - totalValidations;
-  const costLine = cls === 'done'
-    ? `<span class="epcf-stop-cost done">Atteint · ${stop.threshold} valid.</span>`
-    : `<span class="epcf-stop-cost todo">+${diff} validation${diff > 1 ? 's' : ''}</span>`;
+  const costLine =
+    cls === "done"
+      ? `<span class="epcf-stop-cost done">Atteint · ${stop.threshold} valid.</span>`
+      : `<span class="epcf-stop-cost todo">+${diff} validation${diff > 1 ? "s" : ""}</span>`;
 
-  // Reward line — toujours un outil utile
+  // Ligne statut — palier de progression (plus d'« outil débloqué »)
   const rewardLine = `
-    <div class="epcf-stop-reward ${cls === 'done' ? 'unlocked' : ''}">
+    <div class="epcf-stop-reward ${cls === "done" ? "unlocked" : ""}">
       <span class="epcf-stop-reward-ico">${icon(iconName, { size: 14, strokeWidth: 2.4 })}</span>
       <span class="epcf-stop-reward-txt">
-        ${cls === 'done' ? 'Débloqué : ' : 'Débloque : '}
-        <strong>${esc(stop.tier.unlock.name)}</strong>
+        ${cls === "done" ? "Statut : " : "Palier : "}
+        <strong>${esc(stop.tier.title)}</strong>
       </span>
     </div>
   `;
 
-  const classList = [
-    'epcf-stop',
-    cls,
-    'tier',
-    isCercleOr ? 'cercle-or' : '',
-  ].filter(Boolean).join(' ');
+  const classList = ["epcf-stop", cls, "tier", isCercleOr ? "cercle-or" : ""]
+    .filter(Boolean)
+    .join(" ");
 
   return `
     <div class="${classList}" data-tier="${stop.tier.tier}" role="button" tabindex="0" aria-label="Détail du palier ${stop.tier.tier}">
