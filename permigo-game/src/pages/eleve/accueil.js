@@ -311,6 +311,14 @@ const STYLE = `<style>
   flex-shrink: 0;
   color: #fff;
 }
+.acc2-ms-mascot {
+  width: 76px; height: 76px; object-fit: contain; flex-shrink: 0;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,.28));
+  animation: acc2MascotIn .5s cubic-bezier(.34,1.56,.64,1) both, acc2MascotFloat 3s ease-in-out .5s infinite;
+}
+@keyframes acc2MascotIn { from { opacity: 0; transform: scale(.5) } to { opacity: 1; transform: scale(1) } }
+@keyframes acc2MascotFloat { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
+@media (prefers-reduced-motion: reduce) { .acc2-ms-mascot { animation: acc2MascotIn .5s both } }
 .acc2-ms-reward-info { flex: 1; min-width: 0; }
 .acc2-ms-reward-remaining {
   font: 800 26px/1 'Plus Jakarta Sans', sans-serif;
@@ -1150,7 +1158,7 @@ function renderNextReward(totalValidated, worlds, trophees) {
         <div class="acc2-ms-reward-inner">
           <div class="acc2-ms-reward-label">Parcours complété !</div>
           <div class="acc2-ms-reward-top">
-            <div class="acc2-ms-reward-icon">${icon("award", { size: 28 })}</div>
+            <img class="acc2-ms-mascot" src="/skins/mascot-celebrate.png" alt="" aria-hidden="true" />
             <div class="acc2-ms-reward-info">
               <div class="acc2-ms-done-title">Tous les mondes maîtrisés</div>
               <div class="acc2-ms-done-sub">Tu es prêt pour l'examen</div>
