@@ -12,6 +12,7 @@ import { navigate } from "@/router.js";
 import { applyTheme, getTheme } from "@/utils/theme.js";
 import { ACCENTS, getAccent, setAccent } from "@/utils/accent.js";
 import { isSoundEnabled, setSoundEnabled, playBack } from "@/utils/sound.js";
+import { optInPush, optOutPush, isPushEnabled } from "@/services/web-push.js";
 
 const STYLE = `<style>
 .st {
@@ -541,7 +542,45 @@ function wire(root, me, prefs) {
     }
   }, 800);
 
-  root.querySelector("#tgl-push")?.addEventListener("change", savePrefs);
+  // ── Notifications push : déclenche la VRAIE demande d'autorisation +
+  //    l'abonnement (avant ce fix, le toggle ne faisait que sauver un flag,
+  //    donc aucun ding ne pouvait arriver — surtout sur iPhone). ──
+  const pushTgl = root.querySelector("#tgl-push");
+  if (pushTgl) {
+    // Reflète l'état RÉEL d'abonnement (pas juste la préférence DB).
+    if ("Notification" in window) pushTgl.checked = isPushEnabled();
+    pushTgl.addEventListener("change", async () => {
+      if (pushTgl.checked) {
+        if (!("Notification" in window)) {
+          // iOS hors PWA : pas d'API notif tant que l'app n'est pas installée.
+          pushTgl.checked = false;
+          toast(
+            "Installe d'abord PermiGo sur ton écran d'accueil pour activer les notifications.",
+            "info",
+            4500,
+          );
+          return;
+        }
+        // optInPush() appelle Notification.requestPermission() de façon
+        // synchrone dans ce gestionnaire de clic → iOS accepte la demande.
+        const granted = await optInPush();
+        if (!granted) {
+          pushTgl.checked = false;
+          if (Notification.permission === "denied")
+            toast(
+              "Notifications bloquées — autorise-les dans les réglages du téléphone.",
+              "error",
+              4500,
+            );
+          return;
+        }
+        toast("Notifications activées ✓", "success", 2000);
+      } else {
+        await optOutPush();
+      }
+      savePrefs();
+    });
+  }
   root.querySelector("#tgl-email")?.addEventListener("change", savePrefs);
   root.querySelector("#tgl-ranking")?.addEventListener("change", savePrefs);
 
