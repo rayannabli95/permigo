@@ -267,6 +267,11 @@ async function handleComplete(
       competence_id: competenceId,
       score_pct: scorePct,
     });
+    // Moment d'opt-in idéal : l'élève vient de vivre la boucle → on propose
+    // le rappel quotidien (banner soft, 1 seule fois, jamais re-demandé).
+    import("@/services/web-push.js")
+      .then((m) => m.maybeSoftRequestPush({ skipValidatedGate: true }))
+      .catch(() => {});
   }
 
   // Coffre quiz parfait (100%) — idempotent

@@ -28,9 +28,11 @@ export function markHasValidated() {
  * Appelé depuis accueil.js après le chargement, si first_value_action_at est set.
  * Montre le banner soft seulement si l'élève a ≥1 validation (sinon no-op).
  */
-export function maybeSoftRequestPush() {
+export function maybeSoftRequestPush({ skipValidatedGate = false } = {}) {
   if (!('Notification' in window)) return;
-  if (!localStorage.getItem(HAS_VALIDATED)) return; // pas encore validé
+  // Gate « a déjà ≥1 validation » — sautée après la question du jour
+  // (l'élève vient de vivre la valeur : moment d'opt-in idéal).
+  if (!skipValidatedGate && !localStorage.getItem(HAS_VALIDATED)) return;
   if (localStorage.getItem(PUSH_ASKED_KEY)) return;
   if (localStorage.getItem(PUSH_OPTED_OUT)) return;
   if (Notification.permission === 'granted') {
@@ -204,7 +206,7 @@ function _createSoftBanner() {
         position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
         z-index: 8000; width: calc(100% - 32px); max-width: 420px;
         background: linear-gradient(135deg, #1a1d2e, #0f1220);
-        border: 1px solid rgba(99,102,241,.3); border-radius: 18px;
+        border: 1px solid color-mix(in srgb, var(--a) 35%, transparent); border-radius: 18px;
         padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;
         box-shadow: 0 16px 48px rgba(0,0,0,.6);
         animation: psb-in .4s cubic-bezier(.23,1,.32,1) both;
@@ -218,8 +220,8 @@ function _createSoftBanner() {
       #push-soft-banner .pb-btns { display: flex; gap: 10px; }
       #push-soft-banner .pb-ok {
         flex: 1; padding: 12px;
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        border: 0; border-radius: 12px; color: #fff;
+        background: linear-gradient(to bottom, var(--a-lt), var(--a) 55%, var(--adk));
+        border: 0; border-radius: 12px; color: var(--a-ink);
         font: 700 13px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
         transition: transform .12s, opacity .12s; min-height: 44px;
       }
@@ -233,7 +235,7 @@ function _createSoftBanner() {
       #push-soft-banner .pb-skip:active { background: rgba(255,255,255,.1); }
     </style>
     <div class="pb-ttl">Reste dans ton parcours</div>
-    <p class="pb-sub">Active les notifications pour ne jamais rater un quiz ou une compétence validée.</p>
+    <p class="pb-sub">Active le rappel quotidien : ta question du jour, chaque soir, 2 minutes.</p>
     <div class="pb-btns">
       <button class="pb-ok"   id="pb-allow">Activer</button>
       <button class="pb-skip" id="pb-skip">Pas maintenant</button>
