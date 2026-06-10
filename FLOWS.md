@@ -122,3 +122,6 @@ Toute écriture qui doit notifier quelqu'un d'un autre rôle passe par `notifica
 > Format : `[YYYY-MM-DD] avant → après | raison`
 
 (vide)
+
+### Changements en cours — 2026-06-10 (bot élève)
+- **Ajout additif** `permigo-game/src/services/daily-quiz.js` (sélection « question du jour ») + flag `daily` sur la route `#/quiz/{comp}/{type}/daily` + carte action du jour dans `accueil.js`. Lecture seule de `validations`/`quiz_attempts` (RLS own). Aucun impact moniteur/gérant.

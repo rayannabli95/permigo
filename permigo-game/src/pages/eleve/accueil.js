@@ -855,6 +855,20 @@ export async function mount(root) {
     const streakSt = streakStatus(streak);
     const gemmes = profile.gemmes || 0;
 
+    // Question du jour — la boucle solo quotidienne (plan rétention).
+    // Découverte (monde 1) tant que rien n'est acquis, sinon consolidation
+    // de l'acquise la moins récemment quizzée.
+    let dailyQuiz = null;
+    try {
+      const { isDailyDone, pickDailyQuiz } =
+        await import("@/services/daily-quiz.js");
+      const done = isDailyDone();
+      const pick = done ? null : await pickDailyQuiz(me.id, [...validated]);
+      dailyQuiz = { done, ...(pick || {}) };
+    } catch {
+      /* service indisponible → l'action du jour retombe sur le parcours */
+    }
+
     track("streak.viewed", { days: streak.current_streak, status: streakSt });
 
     root.innerHTML = render({
@@ -870,6 +884,7 @@ export async function mount(root) {
       pendingSessions,
       todayQuests,
       pendingNotif,
+      dailyQuiz,
     });
     wire(root, {
       streak,
@@ -1004,6 +1019,7 @@ function render({
   pendingSessions,
   todayQuests,
   pendingNotif,
+  dailyQuiz,
 }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom = profile.prenom || me.prenom || "Toi";
@@ -1020,7 +1036,7 @@ function render({
     : renderNextReward(totalValidated, worlds, trophees);
 
   // ── BLOC 3 content ──
-  // Priorité : notif quiz > quête du jour > première comp > exam blanc.
+  // Priorité : quête > notif quiz > QUESTION DU JOUR (boucle quotidienne) > parcours.
   // mountDailyQuests gère le carrousel claim séparé (sous ce bloc).
   const _pendingQuest = !pendingNotif
     ? (todayQuests.find(
@@ -1031,6 +1047,7 @@ function render({
     _pendingQuest ? _normalizeQuest(_pendingQuest) : null,
     pendingNotif,
     totalValidated,
+    dailyQuiz,
   );
 
   return `${STYLE}
@@ -1244,7 +1261,7 @@ function renderNextReward(totalValidated, worlds, trophees) {
     </div>`;
 }
 
-function renderActionDuJour(quest, pendingNotif, totalValidated) {
+function renderActionDuJour(quest, pendingNotif, totalValidated, dailyQuiz) {
   let label = "Action du jour";
   let title,
     sub,
@@ -1269,6 +1286,28 @@ function renderActionDuJour(quest, pendingNotif, totalValidated) {
     btnText = isConsolid ? "Commencer →" : "Faire le récap →";
     href = `#/quiz/${pendingNotif.data.competence_id}/${isConsolid ? "consolidation" : "post_validation"}`;
     urgent = isConsolid;
+  } else if (dailyQuiz && !dailyQuiz.done && dailyQuiz.competenceId) {
+    // Question du jour — LA boucle solo quotidienne (plan rétention).
+    // Récompense vedette = la ligue théorique (l'anim de gain est déjà
+    // branchée dans le quiz-engine) ; la série monte en silence.
+    label = "Question du jour";
+    title =
+      dailyQuiz.mode === "decouverte"
+        ? "Découvre une compétence"
+        : "Ne perds pas ce que tu maîtrises";
+    sub =
+      dailyQuiz.mode === "decouverte"
+        ? "3 questions · 2 min · Sans pression, on apprend ensemble"
+        : "3 questions · 2 min · Garde ton avance dans la ligue Théorie";
+    btnText = "Je joue →";
+    href = `#/quiz/${dailyQuiz.competenceId}/post_validation/daily`;
+  } else if (dailyQuiz?.done) {
+    label = "Question du jour";
+    title = "C'est fait pour aujourd'hui ✓";
+    sub =
+      "Ta question du jour est dans la boîte. Reviens demain — ou avance sur ton parcours.";
+    btnText = "Voir le parcours →";
+    href = "#/parcours";
   } else if (totalValidated === 0) {
     title = "Lance ton parcours REMC";
     sub = "Découvre les 31 compétences à maîtriser avant l'examen";

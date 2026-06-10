@@ -166,10 +166,13 @@ export async function mount(root, params = {}) {
   window.addEventListener("hashchange", _restoreNav);
 
   // Params viennent soit d'un appel direct, soit du hash #/quiz/C1a/post_validation
+  // Segment 3 optionnel : "auto" (lancement direct) ou "daily" (question du
+  // jour : lancement direct + habillage dédié + marquage fait/track).
   const hashParts = location.hash.replace(/^#\/?/, "").split("/");
   const competenceId = params?.competenceId || hashParts[1] || null;
   const type = params?.type || hashParts[2] || "post_validation";
-  const autoStart = params?.autoStart || hashParts[3] === "auto";
+  const isDaily = hashParts[3] === "daily";
+  const autoStart = params?.autoStart || hashParts[3] === "auto" || isDaily;
 
   if (!competenceId) {
     root.innerHTML = `<div style="padding:48px 24px;text-align:center;font-family:'Inter',sans-serif;color:var(--mu2)">
@@ -183,13 +186,17 @@ export async function mount(root, params = {}) {
   const sub = findSubComp(competenceId);
   const cat = findCategory(competenceId);
   const nbQuestions = type === "post_validation" ? 3 : 2;
-  const typeLabel =
-    type === "post_validation" ? "Quiz post-validation" : "Consolidation 48h";
+  const typeLabel = isDaily
+    ? "Question du jour"
+    : type === "post_validation"
+      ? "Quiz post-validation"
+      : "Consolidation 48h";
 
   track("page.view", {
     page: "eleve_quiz",
     competence_id: competenceId,
     quiz_type: type,
+    daily: isDaily,
   });
 
   root.innerHTML = `
@@ -225,6 +232,7 @@ export async function mount(root, params = {}) {
           score,
           total,
           duration,
+          isDaily,
         });
       },
     });
@@ -246,9 +254,20 @@ export async function mount(root, params = {}) {
 async function handleComplete(
   root,
   me,
-  { competenceId, type, score, total, duration },
+  { competenceId, type, score, total, duration, isDaily = false },
 ) {
   const scorePct = Math.round((score / total) * 100);
+
+  // Question du jour : terminée = faite (réussie ou non — la métrique
+  // mesure le rendez-vous quotidien, pas la performance).
+  if (isDaily) {
+    const { markDailyDone } = await import("@/services/daily-quiz.js");
+    markDailyDone();
+    track("daily_quiz.completed", {
+      competence_id: competenceId,
+      score_pct: scorePct,
+    });
+  }
 
   // Coffre quiz parfait (100%) — idempotent
   if (scorePct === 100) {
@@ -295,10 +314,13 @@ async function handleComplete(
   });
 
   if (reason === "no_competence_unlocked") {
-    toast(
-      "Cette compétence n'est pas encore débloquée par ton moniteur.",
-      "info",
-    );
+    // En mode découverte (question du jour sur une compétence pas encore
+    // travaillée), c'est le cas NORMAL — pas de message « bloqué ».
+    if (!isDaily)
+      toast(
+        "Cette compétence n'est pas encore débloquée par ton moniteur.",
+        "info",
+      );
   } else if (validated) {
     toast("Compétence validée !", "success");
     navigator.vibrate?.([30, 50, 30]);
@@ -317,21 +339,28 @@ async function handleComplete(
     passed: !!passed,
     reason,
     type,
+    isDaily,
   });
 }
 
 function renderResult(
   root,
-  { score, total, scorePct, validated, passed, reason, type },
+  { score, total, scorePct, validated, passed, reason, type, isDaily = false },
 ) {
   const success = validated || passed;
   const msg = validated
     ? "Compétence validée ! Continue comme ça"
     : passed
-      ? "Bien joué ! Quiz réussi."
+      ? isDaily
+        ? "Question du jour réussie — à demain !"
+        : "Bien joué ! Quiz réussi."
       : reason === "no_competence_unlocked"
-        ? "Compétence pas encore débloquée par ton moniteur."
-        : "Continue à pratiquer — revoir avec ton moniteur avant la prochaine leçon.";
+        ? isDaily
+          ? "Belle découverte ! Tu viens d'explorer une compétence à venir — ton moniteur la travaillera avec toi."
+          : "Compétence pas encore débloquée par ton moniteur."
+        : isDaily
+          ? "C'est fait pour aujourd'hui — chaque question t'apprend quelque chose. À demain !"
+          : "Continue à pratiquer — revoir avec ton moniteur avant la prochaine leçon.";
 
   root.innerHTML = `
     ${STYLE}
