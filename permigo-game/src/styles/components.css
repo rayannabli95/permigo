@@ -46,13 +46,15 @@
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .btn:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
 
-.btn-p { background: var(--a); color: var(--ink); border-color: var(--a); }
+/* Texte sur accent = --a-ink (contraste garanti quel que soit le preset
+   d'accent ET le mode — var(--ink) devenait blanc sur accent clair en dark). */
+.btn-p { background: var(--a); color: var(--a-ink); border-color: var(--a); }
 .btn-p:hover { background: var(--adk); border-color: var(--adk); }
 
 /* ─── Bouton primaire Duo — ombre solide 3D ─── */
 .btn-primary {
   background: var(--a);
-  color: var(--ink);
+  color: var(--a-ink);
   border: none;
   border-radius: var(--r);
   box-shadow: var(--s-btn-rest);
@@ -159,7 +161,7 @@ button:active:not(:disabled),
 
 /* ─── Progress bar ─── */
 .pt { height: 6px; background: var(--bo2); border-radius: 3px; overflow: hidden; }
-.pf { height: 100%; background: var(--a); border-radius: 3px; transition: width .5s ease; }
+.pf { height: 100%; background: var(--a); border-radius: 3px; transition: width .8s cubic-bezier(.2,.7,.3,1); }
 
 /* ─── Toast ─── */
 #toast-root {
