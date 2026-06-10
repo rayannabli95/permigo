@@ -8,15 +8,20 @@
 //   - root   : élément hôte (on remplace son innerHTML)
 //   - onDone : callback appelé quand l'utilisateur continue vers l'app
 // ═══════════════════════════════════════════════════════════════
-import { isStandalone, guessPlatform, canPromptInstall, promptInstall } from '@/utils/pwa.js';
-import { track } from '@/services/analytics.js';
+import {
+  isStandalone,
+  guessPlatform,
+  canPromptInstall,
+  promptInstall,
+} from "@/utils/pwa.js";
+import { track } from "@/services/analytics.js";
 
-const BADGE = '/skins/avatars/permigo-badge-icon.png';
+const BADGE = "/skins/avatars/permigo-badge-icon.png";
 
 // ─── Petits pictos inline (le jeu d'icônes n'a pas "partager") ──────
 const SHARE_SVG = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg>`;
-const DOTS_SVG  = `<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>`;
-const PLUS_SVG  = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`;
+const DOTS_SVG = `<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>`;
+const PLUS_SVG = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`;
 
 const STYLE = `<style>
   .a2hs {
@@ -64,27 +69,51 @@ const STYLE = `<style>
 </style>`;
 
 export function renderAddToHome(root, { onDone } = {}) {
-  const done = () => { try { onDone?.(); } catch {} };
+  const done = () => {
+    try {
+      onDone?.();
+    } catch {}
+  };
 
   // Déjà installée → on saute le tuto.
-  if (isStandalone()) { done(); return; }
+  if (isStandalone()) {
+    done();
+    return;
+  }
 
-  let platform = guessPlatform();
-  if (platform === 'other') platform = 'ios'; // défaut raisonnable
+  // Détection AUTO : si la plateforme est identifiée, pas de question —
+  // on montre directement les bonnes étapes. Le sélecteur manuel ne sert
+  // que de filet ('other' = desktop/inconnu) + lien discret pour corriger.
+  const guessed = guessPlatform();
+  const detected = guessed !== "other";
+  let platform = detected ? guessed : "ios";
 
-  track('a2hs.shown', { guessed: guessPlatform() });
+  track("a2hs.shown", { guessed, autodetected: detected });
+
+  const platPicker = detected
+    ? `<div class="a2hs-detected" id="a2hs-detected">
+         Détecté : <strong>${platform === "ios" ? "iPhone (iOS)" : "Android"}</strong>
+         <button class="a2hs-switch" id="a2hs-switch" type="button">Ce n'est pas mon téléphone</button>
+       </div>`
+    : `<div class="a2hs-seg" role="tablist">
+         <button class="a2hs-seg-btn" data-plat="ios" type="button">iPhone (iOS)</button>
+         <button class="a2hs-seg-btn" data-plat="android" type="button">Android</button>
+       </div>`;
 
   root.innerHTML = `${STYLE}
+    <style>
+      .a2hs-detected { display: flex; align-items: center; justify-content: space-between; gap: 8px;
+                       padding: 8px 4px 14px; font: 600 13px/1.3 'Inter', sans-serif; color: var(--mu2, #5b6072); }
+      .a2hs-switch { background: none; border: 0; padding: 8px 0; color: var(--mu2, #5b6072);
+                     font: 600 12px/1 'Inter', sans-serif; text-decoration: underline; cursor: pointer; }
+    </style>
     <div class="a2hs">
       <img class="a2hs-badge" src="${BADGE}" alt="PermiGo" />
       <h1 class="a2hs-title">Ajoute PermiGo à ton écran d'accueil</h1>
       <p class="a2hs-sub">Ouvre l'app d'un seul geste, comme une vraie appli — et garde ta progression à portée de main chaque jour.</p>
 
       <div class="a2hs-card">
-        <div class="a2hs-seg" role="tablist">
-          <button class="a2hs-seg-btn" data-plat="ios" type="button">iPhone (iOS)</button>
-          <button class="a2hs-seg-btn" data-plat="android" type="button">Android</button>
-        </div>
+        ${platPicker}
         <div class="a2hs-steps" id="a2hs-steps"></div>
       </div>
 
@@ -92,7 +121,7 @@ export function renderAddToHome(root, { onDone } = {}) {
       <button class="a2hs-later" id="a2hs-later" type="button">Je le ferai plus tard</button>
     </div>`;
 
-  const stepsEl = root.querySelector('#a2hs-steps');
+  const stepsEl = root.querySelector("#a2hs-steps");
 
   function stepsIOS() {
     return `
@@ -104,7 +133,7 @@ export function renderAddToHome(root, { onDone } = {}) {
   function stepsAndroid() {
     const installBtn = canPromptInstall()
       ? `<button class="a2hs-install" id="a2hs-install" type="button">Installer l'app en 1 tap</button>`
-      : '';
+      : "";
     return `${installBtn}
       <div class="a2hs-step"><div class="a2hs-num">1</div><div class="a2hs-step-txt">Dans <strong>Chrome</strong>, touche le menu <span class="a2hs-glyph">${DOTS_SVG}</span> en haut à droite.</div></div>
       <div class="a2hs-step"><div class="a2hs-num">2</div><div class="a2hs-step-txt">Choisis <strong>« Ajouter à l'écran d'accueil »</strong> <span class="a2hs-glyph">${PLUS_SVG}</span> (ou « Installer l'application »).</div></div>
@@ -112,34 +141,55 @@ export function renderAddToHome(root, { onDone } = {}) {
   }
 
   function renderSteps() {
-    root.querySelectorAll('.a2hs-seg-btn').forEach(b =>
-      b.classList.toggle('active', b.dataset.plat === platform));
-    stepsEl.innerHTML = platform === 'android' ? stepsAndroid() : stepsIOS();
+    root
+      .querySelectorAll(".a2hs-seg-btn")
+      .forEach((b) =>
+        b.classList.toggle("active", b.dataset.plat === platform),
+      );
+    stepsEl.innerHTML = platform === "android" ? stepsAndroid() : stepsIOS();
 
-    const installBtn = root.querySelector('#a2hs-install');
+    const installBtn = root.querySelector("#a2hs-install");
     if (installBtn) {
-      installBtn.addEventListener('click', async () => {
+      installBtn.addEventListener("click", async () => {
         installBtn.disabled = true;
-        installBtn.textContent = 'Installation…';
+        installBtn.textContent = "Installation…";
         const outcome = await promptInstall();
-        track('a2hs.install_prompt', { outcome });
-        if (outcome === 'accepted') { done(); return; }
+        track("a2hs.install_prompt", { outcome });
+        if (outcome === "accepted") {
+          done();
+          return;
+        }
         installBtn.disabled = false;
         installBtn.textContent = "Installer l'app en 1 tap";
       });
     }
   }
 
-  root.querySelectorAll('.a2hs-seg-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+  root.querySelectorAll(".a2hs-seg-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
       platform = btn.dataset.plat;
-      track('a2hs.platform_selected', { platform });
+      track("a2hs.platform_selected", { platform });
       renderSteps();
     });
   });
 
-  root.querySelector('#a2hs-continue').addEventListener('click', () => { track('a2hs.continue'); done(); });
-  root.querySelector('#a2hs-later').addEventListener('click', () => { track('a2hs.later'); done(); });
+  // Mauvaise détection → bascule iOS ↔ Android d'un tap
+  root.querySelector("#a2hs-switch")?.addEventListener("click", () => {
+    platform = platform === "ios" ? "android" : "ios";
+    track("a2hs.platform_switched", { platform });
+    const lbl = root.querySelector("#a2hs-detected strong");
+    if (lbl) lbl.textContent = platform === "ios" ? "iPhone (iOS)" : "Android";
+    renderSteps();
+  });
+
+  root.querySelector("#a2hs-continue").addEventListener("click", () => {
+    track("a2hs.continue");
+    done();
+  });
+  root.querySelector("#a2hs-later").addEventListener("click", () => {
+    track("a2hs.later");
+    done();
+  });
 
   renderSteps();
 }

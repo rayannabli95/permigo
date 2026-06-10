@@ -105,6 +105,12 @@ async function boot() {
     document.body.classList.add("has-chrome");
 
     startNotifListener();
+
+    // Nudge "Installe PermiGo" — auto-détection iOS/Android, install natif
+    // en 1 tap si dispo, snooze 3 jours. No-op si déjà installée / desktop.
+    import("@/components/common/install-nudge.js")
+      .then((m) => m.maybeShowInstallNudge(me))
+      .catch(() => {});
   } catch (e) {
     console.error("[boot]", e);
     track("app.crashed", { error: e?.message });
