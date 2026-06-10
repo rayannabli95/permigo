@@ -9,6 +9,10 @@ import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { PARCOURS, questionsForParcours } from "@/data/parcours-quiz.js";
+import {
+  computeTheoryGain,
+  renderTheoryGain,
+} from "@/components/eleve/theory-gain.js";
 import { haptic } from "@/utils/haptic.js";
 import {
   playPageturn,
@@ -379,6 +383,18 @@ function showResults(root, questions, answers, parcours_id) {
     faute_eliminatoire: fauteRatee,
   });
 
+  // Gain ligue théorique — le SELECT part AVANT l'insert ci-dessous pour
+  // mesurer le score « avant ». En cas de course (insert déjà visible),
+  // delta=0 → pas d'animation : fail-safe, jamais de faux +4.
+  const gainPromise = passed
+    ? computeTheoryGain({
+        kind: "exam",
+        refId: parcours_id,
+        scorePct: pct,
+        passed,
+      })
+    : Promise.resolve(null);
+
   // Persistance ligue théorique — fire-and-forget (RLS : élève insère les siens)
   const me = getCurUser();
   if (me?.id) {
@@ -459,6 +475,18 @@ function showResults(root, questions, answers, parcours_id) {
       </div>
     </div>
   `;
+
+  // Injecte le bloc « +4 pts Théorie » sous le verdict quand le gain est réel
+  gainPromise
+    .then((gain) => {
+      if (!gain) return;
+      const host = root.querySelector(".exb-res-top");
+      if (!host) return; // l'élève a déjà quitté l'écran
+      const slot = document.createElement("div");
+      host.appendChild(slot);
+      renderTheoryGain(slot, gain);
+    })
+    .catch(() => {});
 
   root.querySelector("#exb-retry")?.addEventListener("click", () => {
     haptic("tap");
