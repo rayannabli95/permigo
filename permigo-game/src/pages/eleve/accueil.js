@@ -102,6 +102,18 @@ const STYLE = `<style>
   color: rgba(255,255,255,.75);
   flex: 1;
 }
+/* Welcome-back : sous-ligne après ≥3 jours d'absence */
+.acc2-hero-back {
+  display: block;
+  width: 100%;
+  font: 600 12.5px/1.4 'Inter', sans-serif;
+  color: rgba(255,255,255,.85);
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-top: 10px;
+}
 .acc2-hero-title {
   font: 800 40px/1.05 var(--fd), sans-serif;
   color: #fff;
@@ -714,12 +726,31 @@ const WORLDS = REMC.map((cat, i) => ({
   color: ["var(--gr2)", "var(--bl2)", "#eab308", "var(--pul)"][i],
 }));
 
+// Jours d'absence depuis la visite précédente (calculé au mount, lu au render)
+let _awayDays = 0;
+
 // ─── Entry point ─────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
   track("page.view", { page: "eleve_accueil" });
+
+  // Welcome-back : jours écoulés depuis la visite précédente (localStorage,
+  // plus fiable que last_active_at qui est touché par trigger à l'ouverture).
+  let awayDays = 0;
+  try {
+    const prev = parseInt(
+      localStorage.getItem("permigo-last-visit") || "0",
+      10,
+    );
+    if (prev) awayDays = Math.floor((Date.now() - prev) / 86_400_000);
+    localStorage.setItem("permigo-last-visit", String(Date.now()));
+  } catch {
+    /* localStorage indisponible → pas de welcome-back, pas grave */
+  }
+  _awayDays = awayDays;
+  if (awayDays >= 3) track("eleve.welcome_back", { awayDays });
 
   root.innerHTML = SKELETON;
 
@@ -1010,8 +1041,17 @@ function render({
     <div class="acc2-hero-content">
       <div class="acc2-hero-top">
         <div class="acc2-hero-av">${heroAv ? `<img src="${esc(heroAv)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block">` : esc(initials)}</div>
-        <span class="acc2-hero-hi">Bonjour ${esc(prenom)}</span>
+        <span class="acc2-hero-hi">${
+          _awayDays >= 3
+            ? `Content de te revoir, ${esc(prenom)}`
+            : `Bonjour ${esc(prenom)}`
+        }</span>
       </div>
+      ${
+        _awayDays >= 3
+          ? `<div class="acc2-hero-back">Ta route t'attend depuis ${_awayDays} jours — reprends là où tu t'étais arrêté.</div>`
+          : ""
+      }
       <h1 class="acc2-hero-title" tabindex="-1"><span class="acc2-hero-niv-badge">${esc(lvl.name)}</span></h1>
       <div class="acc2-hero-meta">
         <div class="acc2-hero-xp-pill">
@@ -1412,7 +1452,7 @@ async function _loadAndInjectLeaderboard(root) {
 
     const badge = ranked
       ? `<div class="acc-lb-rank"><span class="acc-lb-rank-hash">#</span>${esc(String(rank))}</div>`
-      : `<div class="acc-lb-rank img"><img src="/skins/badge-3d-ultimate.png" alt="" width="52" height="52" loading="lazy"></div>`;
+      : `<div class="acc-lb-rank img"><img src="/skins/badge-3d-ultimate.webp" alt="" width="52" height="52" loading="lazy"></div>`;
     const chip =
       pct !== null ? `<span class="acc-lb-chip">Top ${100 - pct}%</span>` : "";
     const bodyText = ranked

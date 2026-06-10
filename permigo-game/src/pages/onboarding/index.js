@@ -28,26 +28,26 @@ const A2HS_PLUS = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" s
 // ─── Contenu des 4 écrans narratifs (le 5e = avatar) ─────────────
 const SLIDES = [
   {
-    emoji: "🚗",
+    ico: "car",
     badge: "PermiGo",
     title: 'Bienvenue, <span class="accent">{prenom}</span> !',
     body: "Ton permis, une victoire par jour. On avance ensemble : toi, ton moniteur, et un parcours clair.",
     cta: "Commencer",
   },
   {
-    emoji: "🗺️",
+    ico: "map",
     title: "31 compétences, zéro brouillard",
     body: "Le programme officiel du permis transformé en parcours. Tu avances compétence par compétence, et ton moniteur valide ce que tu maîtrises en séance.",
     cta: "Continuer",
   },
   {
-    emoji: "⚡",
+    ico: "zap",
     title: "Ancre ce que tu apprends",
     body: "Après chaque compétence, un quiz éclair de 30 secondes. Une question ratée ? On te la represente quelques jours plus tard, pile au bon moment. C'est la mémoire qui dure.",
     cta: "Continuer",
   },
   {
-    emoji: "🔥",
+    ico: "flame",
     title: "Reviens chaque jour",
     body: "Chaque jour de pratique fait monter ton streak, débloque des trophées et te place dans le classement de ton auto-école. Du jeu, pour de vrais résultats.",
     cta: "Continuer",
@@ -90,7 +90,7 @@ export async function mount(root) {
           ${SLIDES.map(
             (s, i) => `
             <section class="ob-slide" data-i="${i}">
-              <div class="ob-emoji" aria-hidden="true">${s.emoji}</div>
+              <div class="ob-emoji" aria-hidden="true">${icon(s.ico, { size: 44 })}</div>
               ${s.badge ? `<div class="ob-badge">Permi<span>Go</span></div>` : ""}
               <h1 class="ob-title">${s.title.replace("{prenom}", esc(me.prenom || me.nom || "toi"))}</h1>
               <p class="ob-body-txt">${esc(s.body)}</p>

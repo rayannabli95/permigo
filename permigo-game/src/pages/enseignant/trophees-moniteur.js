@@ -207,7 +207,7 @@ const BADGE_IMG = {
   classe_complete: "badge-3d-01",
   expert_remc: "badge-3d-ultimate",
 };
-const badgeSrc = (id) => `/skins/${BADGE_IMG[id] || "badge-3d-01"}.png`;
+const badgeSrc = (id) => `/skins/${BADGE_IMG[id] || "badge-3d-01"}.webp`;
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>

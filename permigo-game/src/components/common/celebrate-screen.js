@@ -193,7 +193,7 @@ const STYLE = `
  */
 export const CELEBRATE_PRESETS = {
   firstValidation: {
-    illustration: '/skins/success-first-validation.png',
+    illustration: '/skins/trophy-first-validation.webp',
     fallbackEmoji: '🎉',
     title: 'Première compétence !',
     subtitle: 'Ton aventure a officiellement commencé. La route est longue mais belle.',
@@ -201,7 +201,7 @@ export const CELEBRATE_PRESETS = {
     trackKey: 'celebrate.first_validation',
   },
   tenComps: {
-    illustration: '/skins/success-10-comps.png',
+    illustration: '/skins/trophy-10-comps.webp',
     fallbackEmoji: '🏔️',
     title: 'Tiers du chemin',
     subtitle: '10 compétences validées sur 31. Tu prends de l\'avance, garde le rythme.',
@@ -209,7 +209,7 @@ export const CELEBRATE_PRESETS = {
     trackKey: 'celebrate.ten_comps',
   },
   readyExam: {
-    illustration: '/skins/success-ready-exam.png',
+    illustration: '/skins/badge-3d-ultimate.webp',
     fallbackEmoji: '🎯',
     title: 'Prêt pour l\'examen',
     subtitle: '28 compétences acquises. Tu peux passer ton examen quand tu veux.',
@@ -217,7 +217,7 @@ export const CELEBRATE_PRESETS = {
     trackKey: 'celebrate.ready_exam',
   },
   permisEarned: {
-    illustration: '/skins/success-permis-earned.png',
+    illustration: '/skins/trophy-permis-virtuel.webp',
     fallbackEmoji: '👑',
     title: 'Permis virtuel obtenu',
     subtitle: 'Les 31 compétences REMC validées. Bravo, tu maîtrises la route.',

@@ -6,6 +6,7 @@
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { PARCOURS, questionsForParcours } from "@/data/parcours-quiz.js";
@@ -36,13 +37,13 @@ function stopExamMusic() {
 
 // Trophées DÉCORATIFS (pas de déblocage ici — pur design)
 const TROPHY_START = {
-  img: "/skins/trophy-first-validation.png",
-  emoji: "⚡",
+  img: "/skins/trophy-first-validation.webp",
+  ico: "zap",
   nom: "Première étincelle",
 };
 const TROPHY_END = {
-  img: "/skins/trophy-streak-30d.png",
-  emoji: "💎",
+  img: "/skins/trophy-streak-30d.webp",
+  ico: "gem",
   nom: "Mois sans rater",
 };
 
@@ -51,7 +52,7 @@ function renderTrophy(t, variant) {
     <div class="exb-trophy ${variant}">
       <img class="exb-trophy-img" src="${esc(t.img)}" alt="${esc(t.nom)}"
            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <span class="exb-trophy-emoji" style="display:none">${t.emoji}</span>
+      <span class="exb-trophy-emoji" style="display:none">${icon(t.ico, { size: 28 })}</span>
       <span class="exb-trophy-cap">${esc(t.nom)}</span>
     </div>`;
 }

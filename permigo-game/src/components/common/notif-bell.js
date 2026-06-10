@@ -116,6 +116,16 @@ function renderList(container) {
   } else {
     badge.style.display = "none";
   }
+  // App Badging API : pastille sur l'icône de l'app installée (PWA).
+  // Seul rappel visuel hors-app tant que le push n'est pas câblé.
+  try {
+    if ("setAppBadge" in navigator) {
+      if (unread > 0) navigator.setAppBadge(unread);
+      else navigator.clearAppBadge();
+    }
+  } catch {
+    /* non supporté → silencieux */
+  }
   count.textContent = `${unread} non lue${unread > 1 ? "s" : ""} / ${_notifs.length}`;
   readall.disabled = unread === 0;
 

@@ -6,10 +6,30 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0b0d1a",
-  "theme_color": "#6366f1",
+  "theme_color": "#58CC02",
   "scope": "./",
   "lang": "fr",
   "categories": ["education", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Mon parcours",
+      "short_name": "Parcours",
+      "url": "./#/parcours",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Classement",
+      "short_name": "Classement",
+      "url": "./#/classement",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mes notifications",
+      "short_name": "Notifications",
+      "url": "./#/notifications",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "icon-192.png",

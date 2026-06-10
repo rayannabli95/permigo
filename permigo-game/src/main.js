@@ -111,6 +111,26 @@ async function boot() {
     import("@/components/common/install-nudge.js")
       .then((m) => m.maybeShowInstallNudge(me))
       .catch(() => {});
+
+    // Prefetch idle des routes chaudes (navigation instantanée au tap).
+    // requestIdleCallback → jamais en concurrence avec le rendu initial.
+    const HOT = {
+      eleve: [
+        () => import("@/pages/eleve/parcours.js"),
+        () => import("@/pages/eleve/quiz.js"),
+        () => import("@/pages/eleve/classement.js"),
+      ],
+      enseignant: [
+        () => import("@/pages/enseignant/mes-eleves.js"),
+        () => import("@/pages/enseignant/log-session.js"),
+      ],
+      gerant: [() => import("@/pages/gerant/pulse.js")],
+    };
+    const prefetch = () =>
+      (HOT[me.role] || []).forEach((load) => load().catch(() => {}));
+    if ("requestIdleCallback" in window)
+      requestIdleCallback(prefetch, { timeout: 4000 });
+    else setTimeout(prefetch, 2500);
   } catch (e) {
     console.error("[boot]", e);
     track("app.crashed", { error: e?.message });

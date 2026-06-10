@@ -6,36 +6,36 @@
 
 export const ASSETS = {
   // ── Streak (remplace emoji 🔥) ─────────────────────────────────
-  streakFlame: '/skins/permigo-streak-flame-v1.png',
+  streakFlame: '/skins/permigo-streak-flame-v1.webp',
 
   // ── Décor parcours élève ────────────────────────────────────────
-  parcoursMap: '/skins/permigo-parcours-map-v1.png',
+  parcoursMap: '/skins/permigo-parcours-map-v1.webp',
 
   // ── 4 mondes REMC (illustrations premium) ──────────────────────
   // Monde 1 (Maîtrise du véhicule) = volant 3D (remplace le drapeau de course)
-  worldC1: '/skins/permigo-volant-bg.png',
-  worldC2: '/skins/permigo-remc-circulation-normale-v3.png',
-  worldC3: '/skins/permigo-remc-conditions-difficiles-v1.png',
-  worldC4: '/skins/permigo-autonomie-crown-v1.png',
+  worldC1: '/skins/permigo-volant-bg.webp',
+  worldC2: '/skins/permigo-remc-circulation-normale-v3.webp',
+  worldC3: '/skins/permigo-remc-conditions-difficiles-v1.webp',
+  worldC4: '/skins/permigo-autonomie-crown-v1.webp',
 
   // ── Volant — background filigrane du parcours (1 image qui rapproche tout) ──
-  volantBg: '/skins/permigo-volant-bg.png',
+  volantBg: '/skins/permigo-volant-bg.webp',
 
   // ── Badges 3D (9 skins + Cercle Or) ─────────────────────────────
   // déjà câblés dans MONITEUR_SKINS et ELEVE_SKINS
-  badge: n => `/skins/badge-3d-${String(n).padStart(2, '0')}.png`,
-  badgeUltimate: '/skins/badge-3d-ultimate.png',
+  badge: n => `/skins/badge-3d-${String(n).padStart(2, '0')}.webp`,
+  badgeUltimate: '/skins/badge-3d-ultimate.webp',
 
   // ── Trophées élève (8 visuels premium — streak_3 utilise emoji fallback) ───
   trophy: {
-    firstValidation:  '/skins/trophy-first-validation.png',
-    streak7d:         '/skins/trophy-streak-7d.png',
-    streak30d:        '/skins/trophy-streak-30d.png',
-    firstQuizPerfect: '/skins/trophy-first-quiz-perfect.png',
-    nightRider:       '/skins/trophy-night-rider.png',
-    ecoDriver:        '/skins/trophy-eco-driver.png',
-    tenComps:         '/skins/trophy-10-comps.png',
-    permisVirtuel:    '/skins/trophy-permis-virtuel.png',
+    firstValidation:  '/skins/trophy-first-validation.webp',
+    streak7d:         '/skins/trophy-streak-7d.webp',
+    streak30d:        '/skins/trophy-streak-30d.webp',
+    firstQuizPerfect: '/skins/trophy-first-quiz-perfect.webp',
+    nightRider:       '/skins/trophy-night-rider.webp',
+    ecoDriver:        '/skins/trophy-eco-driver.webp',
+    tenComps:         '/skins/trophy-10-comps.webp',
+    permisVirtuel:    '/skins/trophy-permis-virtuel.webp',
   },
 
   // ── Avatars par défaut (6 choix au signup) ─────────────────────

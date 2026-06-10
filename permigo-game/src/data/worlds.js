@@ -10,7 +10,7 @@ export const WORLDS = [
     description: 'Les bases : démarrer, freiner, diriger.',
     couleur: 'var(--gr)', // emerald
     emoji: '🌾', // legacy fallback
-    image: '/skins/permigo-remc-maitrise-vehicule-flag-v1.png',
+    image: '/skins/permigo-remc-maitrise-vehicule-flag-v1.webp',
     sousCompetences: 9, // C1a → C1i
   },
   {
@@ -32,7 +32,7 @@ export const WORLDS = [
     description: 'Autoroute, nuit, intempéries, dépassements.',
     couleur: 'var(--pu)', // violet
     emoji: '⛰️',
-    image: '/skins/permigo-remc-conditions-difficiles-v1.png',
+    image: '/skins/permigo-remc-conditions-difficiles-v1.webp',
     sousCompetences: 7, // C3a → C3g
   },
   {
@@ -43,7 +43,7 @@ export const WORLDS = [
     description: 'Voyage longue distance, éco-conduite, sécurité.',
     couleur: 'var(--am)', // amber
     emoji: '🏔️',
-    image: '/skins/permigo-autonomie-crown-v1.png',
+    image: '/skins/permigo-autonomie-crown-v1.webp',
     sousCompetences: 7, // C4a → C4g
   },
 ];

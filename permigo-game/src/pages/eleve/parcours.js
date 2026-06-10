@@ -1286,7 +1286,7 @@ const WORLDS_META = [
     num: 1,
     color: "var(--gr)",
     glow: "rgba(16,185,129,.35)",
-    img: "/skins/permigo-remc-maitrise-vehicule-flag-v1.png",
+    img: "/skins/permigo-remc-maitrise-vehicule-flag-v1.webp",
   },
   {
     num: 2,
