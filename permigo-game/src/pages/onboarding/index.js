@@ -1,9 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
-// Onboarding élève — tour de bienvenue 5 écrans (carrousel swipe)
+// Onboarding élève — tour de bienvenue (carrousel swipe)
 // Déclenché par main.js quand profiles.first_value_action_at IS NULL
 // Inspiré des meilleurs onboardings mobiles (Duolingo/Notion) :
 // 1 idée par écran, copy orientée bénéfice, transitions fluides,
 // swipe natif, progression claire, perso (prénom + avatar), skippable.
+// Écrans : 4 narratifs → avatar → notifs (opt-in réel) → écran d'accueil.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
@@ -18,6 +19,7 @@ import {
   canPromptInstall,
   promptInstall,
 } from "@/utils/pwa.js";
+import { optInPush } from "@/services/web-push.js";
 import { unlockChest } from "@/utils/game-state.js";
 
 // Pictos inline pour le tuto "ajouter à l'écran d'accueil"
@@ -25,13 +27,13 @@ const A2HS_SHARE = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" 
 const A2HS_DOTS = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>`;
 const A2HS_PLUS = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`;
 
-// ─── Contenu des 4 écrans narratifs (le 5e = avatar) ─────────────
+// ─── Contenu des 4 écrans narratifs ──────────────────────────────
 const SLIDES = [
   {
     ico: "car",
     badge: "PermiGo",
-    title: 'Bienvenue, <span class="accent">{prenom}</span> !',
-    body: "Ton permis, une victoire par jour. On avance ensemble : toi, ton moniteur, et un parcours clair.",
+    title: 'Bienvenue, <span class="accent">{prenom}</span> !',
+    body: "Ton permis, une victoire par jour. On avance ensemble : toi, ton moniteur, et un parcours clair.",
     cta: "Commencer",
   },
   {
@@ -43,7 +45,7 @@ const SLIDES = [
   {
     ico: "zap",
     title: "Ancre ce que tu apprends",
-    body: "Après chaque compétence, un quiz éclair de 30 secondes. Une question ratée ? On te la represente quelques jours plus tard, pile au bon moment. C'est la mémoire qui dure.",
+    body: "Après chaque compétence, un quiz éclair de 30 secondes. Une question ratée ? On te la represente quelques jours plus tard, pile au bon moment. C'est la mémoire qui dure.",
     cta: "Continuer",
   },
   {
@@ -52,7 +54,7 @@ const SLIDES = [
     body: "Chaque jour de pratique fait monter ton streak, débloque des trophées et te place dans le classement de ton auto-école. Du jeu, pour de vrais résultats.",
     cta: "Continuer",
   },
-  // 5e écran : choix d'avatar (interactif) + CTA final, géré à part.
+  // Écrans suivants (avatar / notifs / A2HS) gérés à part.
 ];
 
 export async function mount(root) {
@@ -61,11 +63,19 @@ export async function mount(root) {
 
   track("onboarding.start", { role: me.role });
 
+  // Étape notifs : seulement si l'API existe (iOS hors PWA = pas dispo)
+  // et que la permission n'est pas déjà accordée.
+  const showNotif =
+    "Notification" in window &&
+    "serviceWorker" in navigator &&
+    Notification.permission !== "granted";
   // Dernière étape = tuto "ajouter à l'écran d'accueil" (sauf si déjà installée)
   const showA2HS = !isStandalone();
+
   const AVATAR_I = SLIDES.length;
-  const A2HS_I = SLIDES.length + 1;
-  const TOTAL = SLIDES.length + 1 + (showA2HS ? 1 : 0);
+  const NOTIF_I = showNotif ? AVATAR_I + 1 : -1;
+  const A2HS_I = AVATAR_I + 1 + (showNotif ? 1 : 0);
+  const TOTAL = SLIDES.length + 1 + (showNotif ? 1 : 0) + (showA2HS ? 1 : 0);
 
   let idx = 0;
   let avatar =
@@ -73,11 +83,17 @@ export async function mount(root) {
       ? me.avatar_url
       : ASSETS.avatar?.[0] || null;
   let a2hsPlat = guessPlatform() === "android" ? "android" : "ios";
+  let notifDone = false; // opt-in tenté (accordé OU refusé) → on peut avancer
+  let notifBusy = false;
   let finishing = false;
+
+  const prenom = esc(me.prenom || me.nom || "toi");
 
   root.innerHTML = `
     ${STYLE}
     <div class="ob" role="dialog" aria-modal="true" aria-label="Tour de bienvenue">
+      <div class="ob-orb ob-orb-a" aria-hidden="true"></div>
+      <div class="ob-orb ob-orb-b" aria-hidden="true"></div>
       <div class="ob-head">
         <div class="ob-dots" id="ob-dots">
           ${Array.from({ length: TOTAL }, (_, i) => `<span class="ob-dot${i === 0 ? " active" : ""}" data-i="${i}"></span>`).join("")}
@@ -90,15 +106,15 @@ export async function mount(root) {
           ${SLIDES.map(
             (s, i) => `
             <section class="ob-slide" data-i="${i}">
-              <div class="ob-emoji" aria-hidden="true">${icon(s.ico, { size: 44 })}</div>
+              <div class="ob-halo" aria-hidden="true"><div class="ob-emoji">${icon(s.ico, { size: 44 })}</div></div>
               ${s.badge ? `<div class="ob-badge">Permi<span>Go</span></div>` : ""}
-              <h1 class="ob-title">${s.title.replace("{prenom}", esc(me.prenom || me.nom || "toi"))}</h1>
+              <h1 class="ob-title">${s.title.replace("{prenom}", prenom)}</h1>
               <p class="ob-body-txt">${esc(s.body)}</p>
             </section>
           `,
           ).join("")}
           <section class="ob-slide ob-slide-avatar" data-i="${AVATAR_I}">
-            <div class="ob-emoji" aria-hidden="true">${icon("palette", { size: 34 })}</div>
+            <div class="ob-halo" aria-hidden="true"><div class="ob-emoji">${icon("palette", { size: 34 })}</div></div>
             <h1 class="ob-title">Choisis ta tête</h1>
             <p class="ob-body-txt">Tu pourras en changer quand tu veux depuis ton profil.</p>
             <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="Choix de l'avatar">
@@ -113,6 +129,25 @@ export async function mount(root) {
                 .join("")}
             </div>
           </section>
+          ${
+            showNotif
+              ? `
+          <section class="ob-slide ob-slide-notif" data-i="${NOTIF_I}">
+            <div class="ob-halo ob-halo-bell" aria-hidden="true"><div class="ob-emoji ob-bell">${icon("bell", { size: 40 })}</div></div>
+            <h1 class="ob-title">Ton rappel quotidien</h1>
+            <p class="ob-body-txt">Chaque soir, 3 questions, 2 minutes. C'est comme ça qu'on garde une longueur d'avance sur l'examen.</p>
+            <div class="ob-notif-preview" aria-hidden="true">
+              <img class="ob-notif-ico" src="/skins/avatars/permigo-badge-icon.png" alt="" />
+              <div class="ob-notif-txt">
+                <div class="ob-notif-app">PermiGo <span>maintenant</span></div>
+                <div class="ob-notif-title">Ta question du jour t'attend</div>
+                <div class="ob-notif-body">3 questions · 2 minutes — garde ton avance.</div>
+              </div>
+            </div>
+            <p class="ob-notif-note" id="ob-notif-note">1 seul rappel par jour, jamais plus. Désactivable quand tu veux.</p>
+          </section>`
+              : ""
+          }
           ${
             showA2HS
               ? `
@@ -133,12 +168,14 @@ export async function mount(root) {
 
       <div class="ob-footer">
         <button class="ob-cta" id="ob-cta" type="button">${esc(SLIDES[0].cta)} <span aria-hidden="true">→</span></button>
+        <button class="ob-later" id="ob-later" type="button" hidden>Plus tard</button>
       </div>
     </div>
   `;
 
   const track$ = root.querySelector("#ob-track");
   const ctaBtn = root.querySelector("#ob-cta");
+  const laterBtn = root.querySelector("#ob-later");
   const dotsEl = root.querySelector("#ob-dots");
   const viewport = root.querySelector("#ob-viewport");
 
@@ -149,8 +186,8 @@ export async function mount(root) {
   function isAvatar() {
     return idx === AVATAR_I;
   }
-  function isA2HS() {
-    return showA2HS && idx === A2HS_I;
+  function isNotif() {
+    return showNotif && idx === NOTIF_I;
   }
 
   function update() {
@@ -159,18 +196,21 @@ export async function mount(root) {
       d.classList.toggle("active", i === idx);
       d.classList.toggle("done", i < idx);
     });
-    // Ré-anime l'emoji du slide actif
+    // Ré-anime le contenu du slide actif (cascade title/body)
     root.querySelectorAll(".ob-slide").forEach((s, i) => {
       s.classList.toggle("on", i === idx);
       s.setAttribute("aria-hidden", i === idx ? "false" : "true");
     });
-    if (isLast()) {
+    if (isNotif() && !notifDone) {
+      ctaBtn.innerHTML = "Activer mes rappels 🔔";
+    } else if (isLast()) {
       ctaBtn.innerHTML = "Voir mon parcours";
-    } else if (isAvatar()) {
+    } else if (isAvatar() || isNotif()) {
       ctaBtn.innerHTML = 'Continuer <span aria-hidden="true">→</span>';
     } else {
       ctaBtn.innerHTML = `${esc(SLIDES[idx].cta)} <span aria-hidden="true">→</span>`;
     }
+    laterBtn.hidden = !(isNotif() && !notifDone);
     track("onboarding.step_viewed", { step: idx + 1 });
   }
 
@@ -179,14 +219,67 @@ export async function mount(root) {
     haptic?.("tap");
     update();
   }
-  function next() {
+  function advance() {
     isLast() ? finish() : goTo(idx + 1);
   }
   function prev() {
     if (idx > 0) goTo(idx - 1);
   }
 
+  // ─── Opt-in notifications — DOIT rester synchrone dans le tap
+  // (iOS exige le user gesture pour Notification.requestPermission)
+  async function handleNotifOptIn() {
+    if (notifBusy) return;
+    notifBusy = true;
+    ctaBtn.disabled = true;
+    const note = root.querySelector("#ob-notif-note");
+    try {
+      const granted = await optInPush();
+      track("onboarding.push_optin", {
+        outcome: granted ? "granted" : Notification.permission,
+      });
+      notifDone = true;
+      if (granted) {
+        haptic?.("success");
+        root.querySelector(".ob-slide-notif")?.classList.add("granted");
+        if (note) note.textContent = "Rappels activés ✓ À ce soir !";
+        // Petite pause pour laisser la célébration se voir, puis on avance.
+        setTimeout(() => {
+          ctaBtn.disabled = false;
+          advance();
+        }, 900);
+        return;
+      }
+      if (note && Notification.permission === "denied") {
+        note.textContent =
+          "Notifications bloquées — tu pourras les autoriser dans les réglages du téléphone.";
+      }
+      ctaBtn.disabled = false;
+      update();
+    } catch (e) {
+      console.error("[onboarding] push opt-in failed", e);
+      notifDone = true;
+      ctaBtn.disabled = false;
+      update();
+    } finally {
+      notifBusy = false;
+    }
+  }
+
+  function next() {
+    if (isNotif() && !notifDone) {
+      handleNotifOptIn();
+      return;
+    }
+    advance();
+  }
+
   ctaBtn.addEventListener("click", next);
+  laterBtn.addEventListener("click", () => {
+    track("onboarding.push_optin", { outcome: "later" });
+    notifDone = true;
+    advance();
+  });
 
   // Dots cliquables (retour en arrière possible)
   dotsEl.querySelectorAll(".ob-dot").forEach((d) => {
@@ -291,7 +384,14 @@ export async function mount(root) {
       const dx = t.clientX - startX,
         dy = t.clientY - startY;
       if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-        dx < 0 ? next() : prev();
+        // Le swipe avant ne court-circuite pas l'opt-in : il "passe" l'étape
+        if (dx < 0 && isNotif() && !notifDone) {
+          track("onboarding.push_optin", { outcome: "swiped_past" });
+          notifDone = true;
+          advance();
+          return;
+        }
+        dx < 0 ? advance() : prev();
       }
     },
     { passive: true },
@@ -299,7 +399,7 @@ export async function mount(root) {
 
   // Clavier (flèches)
   function onKey(e) {
-    if (e.key === "ArrowRight") next();
+    if (e.key === "ArrowRight") advance();
     else if (e.key === "ArrowLeft") prev();
   }
   document.addEventListener("keydown", onKey);
@@ -358,11 +458,30 @@ const STYLE = `<style>
   }
   @keyframes obFade { from { opacity: 0; } to { opacity: 1; } }
 
+  /* Orbes lumineux flottants (profondeur, sans surcharger le GPU) */
+  .ob-orb {
+    position: absolute; border-radius: 50%; pointer-events: none;
+    filter: blur(60px); opacity: .35; will-change: transform;
+  }
+  .ob-orb-a {
+    width: 260px; height: 260px; top: -60px; right: -80px;
+    background: color-mix(in srgb, var(--a) 55%, transparent);
+    animation: obFloatA 11s ease-in-out infinite alternate;
+  }
+  .ob-orb-b {
+    width: 220px; height: 220px; bottom: 6%; left: -90px;
+    background: color-mix(in srgb, var(--adk, var(--a)) 45%, transparent);
+    animation: obFloatB 14s ease-in-out infinite alternate;
+  }
+  @keyframes obFloatA { from { transform: translate(0,0) scale(1); } to { transform: translate(-30px,40px) scale(1.15); } }
+  @keyframes obFloatB { from { transform: translate(0,0) scale(1.1); } to { transform: translate(35px,-30px) scale(.95); } }
+  @media (prefers-reduced-motion: reduce) { .ob-orb { animation: none; } }
+
   /* Header : dots + skip */
   .ob-head {
     display: flex; align-items: center; justify-content: space-between;
     padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 8px;
-    flex-shrink: 0;
+    flex-shrink: 0; position: relative; z-index: 1;
   }
   .ob-dots { display: flex; align-items: center; gap: 7px; }
   .ob-dot {
@@ -371,7 +490,7 @@ const STYLE = `<style>
     transition: background .3s, width .3s; cursor: pointer;
     border: 0; padding: 0;
   }
-  .ob-dot.active { width: 22px; border-radius: 4px; background: var(--a); }
+  .ob-dot.active { width: 22px; border-radius: 4px; background: var(--a); box-shadow: 0 0 10px color-mix(in srgb, var(--a) 60%, transparent); }
   .ob-dot.done { background: color-mix(in srgb, var(--a) 45%, transparent); }
   .ob-skip {
     background: none; border: 0; color: rgba(255,255,255,.55);
@@ -381,7 +500,7 @@ const STYLE = `<style>
   .ob-skip:active { color: #fff; }
 
   /* Viewport + track (carrousel) */
-  .ob-viewport { flex: 1; overflow: hidden; position: relative; }
+  .ob-viewport { flex: 1; overflow: hidden; position: relative; z-index: 1; }
   .ob-track {
     display: flex; height: 100%;
     transition: transform .42s cubic-bezier(.4,0,.2,1);
@@ -396,13 +515,35 @@ const STYLE = `<style>
     overflow-y: auto;
   }
 
+  /* Halo pulsant derrière l'icône du slide */
+  .ob-halo {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    width: 124px; height: 124px; margin-bottom: 16px; flex-shrink: 0;
+  }
+  .ob-halo::before {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--a) 26%, transparent) 0%, transparent 70%);
+  }
+  .ob-slide.on .ob-halo::before { animation: obHalo 2.6s ease-in-out infinite; }
+  @keyframes obHalo { 0%, 100% { transform: scale(1); opacity: .8; } 50% { transform: scale(1.18); opacity: 1; } }
   .ob-emoji {
-    font-size: 76px; line-height: 1; margin-bottom: 20px;
+    font-size: 76px; line-height: 1; position: relative;
     filter: drop-shadow(0 12px 28px rgba(0,0,0,.45));
   }
   .ob-slide.on .ob-emoji { animation: obPop .55s cubic-bezier(.34,1.56,.64,1) both; }
   @keyframes obPop { 0% { transform: scale(.5) translateY(10px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { .ob-slide.on .ob-emoji { animation: none; } }
+
+  /* Cascade d'entrée : titre puis texte (re-jouée à chaque slide) */
+  .ob-slide .ob-title, .ob-slide .ob-body-txt { opacity: 0; }
+  .ob-slide.on .ob-title { animation: obRise .5s cubic-bezier(.22,1,.36,1) .1s both; }
+  .ob-slide.on .ob-body-txt { animation: obRise .5s cubic-bezier(.22,1,.36,1) .2s both; }
+  .ob-slide.on .ob-badge { animation: obRise .5s cubic-bezier(.22,1,.36,1) .05s both; }
+  @keyframes obRise { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .ob-slide.on .ob-emoji, .ob-slide.on .ob-halo::before,
+    .ob-slide.on .ob-title, .ob-slide.on .ob-body-txt, .ob-slide.on .ob-badge { animation: none; }
+    .ob-slide .ob-title, .ob-slide .ob-body-txt { opacity: 1; }
+  }
 
   .ob-badge {
     font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
@@ -448,12 +589,54 @@ const STYLE = `<style>
   }
   .ob-av-card.sel .ob-av-check { opacity: 1; transform: scale(1); }
 
+  /* Slide notifications : cloche qui sonne + faux aperçu de notif */
+  .ob-halo-bell::before {
+    background: radial-gradient(circle, color-mix(in srgb, var(--a) 32%, transparent) 0%, transparent 70%);
+  }
+  .ob-slide.on .ob-bell { animation: obPop .55s cubic-bezier(.34,1.56,.64,1) both, obRing 2.4s ease-in-out 1s infinite; transform-origin: 50% 8%; }
+  @keyframes obRing {
+    0%, 60%, 100% { rotate: 0deg; }
+    64% { rotate: 12deg; } 68% { rotate: -10deg; }
+    72% { rotate: 7deg; } 76% { rotate: -5deg; } 80% { rotate: 2deg; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ob-slide.on .ob-bell { animation: none; } }
+  .ob-notif-preview {
+    display: flex; gap: 11px; align-items: center; text-align: left;
+    width: 100%; max-width: 340px; margin-top: 22px;
+    padding: 13px 14px; border-radius: 18px;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.14);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 18px 40px -14px rgba(0,0,0,.55);
+    opacity: 0;
+  }
+  .ob-slide.on .ob-notif-preview { animation: obDropIn .6s cubic-bezier(.22,1.4,.36,1) .35s both; }
+  @keyframes obDropIn { from { transform: translateY(-22px) scale(.92); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .ob-slide.on .ob-notif-preview { animation: none; opacity: 1; } }
+  .ob-notif-ico { width: 40px; height: 40px; border-radius: 10px; object-fit: contain; flex-shrink: 0; }
+  .ob-notif-txt { min-width: 0; }
+  .ob-notif-app { font: 700 11.5px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.65); text-transform: uppercase; letter-spacing: .02em; }
+  .ob-notif-app span { font-weight: 500; text-transform: none; float: right; }
+  .ob-notif-title { font: 700 14px/1.35 'Inter', sans-serif; color: #fff; margin-top: 2px; }
+  .ob-notif-body { font: 400 13px/1.4 'Inter', sans-serif; color: rgba(255,255,255,.75); }
+  .ob-notif-note {
+    font: 500 13px/1.5 'Inter', sans-serif; color: rgba(255,255,255,.5);
+    margin: 16px 0 0; max-width: 30ch;
+  }
+  .ob-slide-notif.granted .ob-notif-preview {
+    border-color: color-mix(in srgb, var(--a) 65%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--a) 30%, transparent), 0 18px 40px -14px rgba(0,0,0,.55);
+  }
+  .ob-slide-notif.granted .ob-notif-note { color: var(--a); font-weight: 700; }
+
   /* Footer CTA */
   .ob-footer {
-    flex-shrink: 0;
+    flex-shrink: 0; position: relative; z-index: 1;
     padding: 12px 24px calc(env(safe-area-inset-bottom, 0px) + 20px);
+    display: flex; flex-direction: column; gap: 4px;
   }
   .ob-cta {
+    position: relative; overflow: hidden;
     width: 100%; padding: 17px;
     background: linear-gradient(135deg, var(--a), var(--adk, var(--adk)));
     border: 0; border-radius: 16px; color: #fff;
@@ -462,8 +645,22 @@ const STYLE = `<style>
     box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--a) 55%, transparent);
     transition: transform .12s, opacity .15s;
   }
+  .ob-cta::after {
+    content: ""; position: absolute; top: 0; bottom: 0; width: 46%;
+    left: -60%; transform: skewX(-18deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
+    animation: obShine 3.4s ease-in-out infinite;
+  }
+  @keyframes obShine { 0%, 55% { left: -60%; } 85%, 100% { left: 130%; } }
+  @media (prefers-reduced-motion: reduce) { .ob-cta::after { animation: none; display: none; } }
   .ob-cta:active { transform: scale(.98); }
   .ob-cta:disabled { opacity: .6; cursor: wait; }
+  .ob-later {
+    background: none; border: 0; color: rgba(255,255,255,.55);
+    font: 600 14px/1 'Inter', sans-serif; cursor: pointer;
+    padding: 12px; min-height: 44px;
+  }
+  .ob-later:active { color: #fff; }
 
   /* Slide "ajouter à l'écran d'accueil" */
   .ob-a2hs-badge {
