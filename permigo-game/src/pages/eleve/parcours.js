@@ -1249,6 +1249,58 @@ const STYLE = `<style>
 }
 .prc-skip:focus { transform: translateX(-50%) translateY(0); outline: 2px solid #fff; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .prc-skip { transition: none; } }
+
+/* ── Carte vivante (gated par .prc-anim, ajoutée en JS si IO dispo
+   et prefers-reduced-motion absent → fallback 100% statique sinon) ── */
+/* Route qui « se dessine » à l'entrée du monde dans le viewport.
+   pathLength="1" sur les 3 couches pleines ; la ligne pointillée
+   (dasharray absolu) fade-in après le tracé. */
+.prc-anim .prc-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: prcRouteDraw 1.1s cubic-bezier(.5,.05,.3,1) both;
+  animation-play-state: paused;
+}
+.prc-anim .prc-world.in .prc-draw { animation-play-state: running; }
+@keyframes prcRouteDraw { to { stroke-dashoffset: 0; } }
+.prc-anim .prc-path-light { opacity: 0; transition: opacity .6s ease .8s; }
+.prc-anim .prc-world.in .prc-path-light { opacity: .9; }
+/* Nodes en cascade APRÈS le tracé : on garde nd-pop + --nd-delay,
+   simplement mis en pause tant que le monde n'est pas visible. */
+.prc-anim .prc-node { animation-play-state: paused; animation-delay: calc(var(--nd-delay, 0s) + .45s); }
+.prc-anim .prc-world.in .prc-node { animation-play-state: running; }
+/* En-tête et portail du monde glissent doucement */
+.prc-anim .prc-world-hd, .prc-anim .prc-portal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .55s ease, transform .55s cubic-bezier(.2,.7,.3,1);
+}
+.prc-anim .prc-world.in .prc-world-hd,
+.prc-anim .prc-world.in .prc-portal { opacity: 1; transform: none; }
+.prc-anim .prc-world.in .prc-portal { transition-delay: .25s; }
+/* Parallax léger sur le fond photo (transform piloté en JS) */
+.prc-anim .prc-world-bg { transform: scale(1.08); will-change: transform; }
+
+/* Halo vivant derrière le node courant (respire, couleur du monde) */
+.prc-node.next::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 96px; height: 96px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--wc, var(--a)) 32%, transparent) 0%, transparent 70%);
+  animation: ndHaloLive 2.2s ease-in-out infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+@keyframes ndHaloLive {
+  0%, 100% { transform: translate(-50%,-50%) scale(.82); opacity: .65; }
+  50%      { transform: translate(-50%,-50%) scale(1.18); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prc-node.next::before { animation: none; }
+}
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
@@ -1787,9 +1839,9 @@ function renderWorldSection(
   <!-- Route + nodes -->
   <div class="prc-route" style="min-height:${H}px">
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:${H}px">
-      <path class="prc-path-shadow" d="${pathD}" />
-      <path class="prc-path-edge"   d="${pathD}" />
-      <path class="prc-path"        d="${pathD}" />
+      <path class="prc-path-shadow prc-draw" d="${pathD}" pathLength="1" />
+      <path class="prc-path-edge prc-draw"   d="${pathD}" pathLength="1" />
+      <path class="prc-path prc-draw"        d="${pathD}" pathLength="1" />
       <path class="prc-path-light"  d="${pathD}" />
     </svg>
     ${nodesHTML}
@@ -1875,6 +1927,55 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
   root.querySelector("#prc-back")?.addEventListener("click", () => {
     location.hash = "#/";
   });
+
+  // ── Carte vivante : route dessinée + cascade de nodes + parallax ──
+  // Gated : IntersectionObserver dispo ET pas de reduced-motion.
+  // Sans la classe .prc-anim, tout reste statique (fallback).
+  const reduced = window.matchMedia?.(
+    "(prefers-reduced-motion: reduce)",
+  )?.matches;
+  const mapEl = root.querySelector(".prc-map");
+  if (!reduced && "IntersectionObserver" in window && mapEl) {
+    root.querySelector(".prc")?.classList.add("prc-anim");
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { root: mapEl, threshold: 0.1 },
+    );
+    root.querySelectorAll(".prc-world").forEach((sec) => io.observe(sec));
+
+    // Parallax léger : le fond photo glisse de ±18px selon la position
+    // du monde dans le viewport de la carte (rAF, transform only).
+    let ticking = false;
+    const parallax = () => {
+      ticking = false;
+      const mr = mapEl.getBoundingClientRect();
+      root.querySelectorAll(".prc-world").forEach((sec) => {
+        const r = sec.getBoundingClientRect();
+        if (r.bottom < mr.top || r.top > mr.bottom) return;
+        const prog = (mr.top + mr.height / 2 - r.top) / (r.height + mr.height);
+        const bgEl = sec.querySelector(".prc-world-bg");
+        if (bgEl)
+          bgEl.style.transform = `translateY(${((prog - 0.5) * 36).toFixed(1)}px) scale(1.08)`;
+      });
+    };
+    mapEl.addEventListener(
+      "scroll",
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(parallax);
+      },
+      { passive: true },
+    );
+    requestAnimationFrame(parallax);
+  }
 
   // Auto-scroll vers le monde en cours
   requestAnimationFrame(() => {
