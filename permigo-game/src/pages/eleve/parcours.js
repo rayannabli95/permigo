@@ -157,19 +157,17 @@ const STYLE = `<style>
     0 4px 16px rgba(11,13,26,.06);
   isolation: isolate;
 }
-/* Bordure gradient animée */
+/* Bordure gradient STATIQUE — les 4 couleurs = les 4 mondes C1→C4.
+   (L'ancienne version tournait en boucle : motion sans signification.) */
 .prc-map-border {
   position: absolute;
   inset: -2px;
   border-radius: 26px;
-  background: conic-gradient(from 0deg,
-    var(--gr), #06b6d4, var(--pu), var(--am), var(--gr));
-  animation: prc-border-spin 12s linear infinite;
+  background: linear-gradient(135deg,
+    var(--gr), #06b6d4, var(--pu), var(--am));
   z-index: 0;
-  opacity: .5;
+  opacity: .45;
 }
-@keyframes prc-border-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .prc-map-border { animation: none; } }
 .prc-map-frame::before {
   content: '';
   position: absolute;
@@ -215,9 +213,7 @@ const STYLE = `<style>
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--gr);
   box-shadow: 0 0 6px var(--gr);
-  animation: prc-dot-pulse 1.8s ease-in-out infinite;
 }
-@keyframes prc-dot-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(.7); } }
 
 /* Scroll container */
 .prc-map {
@@ -279,16 +275,7 @@ const STYLE = `<style>
   transition: transform .4s cubic-bezier(.23,1,.32,1);
   pointer-events: none;
 }
-.prc-world.complete .prc-world-decor {
-  animation: decorFloat 2.6s ease-in-out infinite;
-}
-@keyframes decorFloat {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50%      { transform: translateY(-4px) rotate(3deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .prc-world.complete .prc-world-decor { animation: none; }
-}
+.prc-world.complete .prc-world-decor { opacity: 1; }
 /* ── Fond photographique jour/nuit ── */
 .prc-world-bg {
   position: absolute;
@@ -496,17 +483,15 @@ const STYLE = `<style>
   pointer-events: none;
   filter: drop-shadow(0 1px 3px rgba(0,0,0,.28));
 }
-/* Node actif : badge légèrement plus grand + pulsation douce */
+/* Node actif : badge légèrement plus grand. Le mouvement est porté par le
+   halo qui respire + « TU ES ICI » (max 2 signaux animés sur le node). */
 .nd-badge-next {
   width: 90%; height: 90%;
-  animation: ndBadgePulse 1.8s ease-in-out infinite;
   transform-origin: 50% 50%;
 }
-@keyframes ndBadgePulse { 0%,100% { transform: scale(.94); } 50% { transform: scale(1.06); } }
 /* À débloquer : badge désaturé et atténué */
 .nd-badge-dim    { filter: grayscale(.85) opacity(.45); }
 .nd-badge-locked { filter: grayscale(1) opacity(.3); }
-@media (prefers-reduced-motion: reduce) { .nd-badge-next { animation: none !important; } }
 
 /* ── On garde QUE le badge : on retire le rond vert/blanc du node
    (fond, bordure, ombre, anneaux pulsants). Le badge a déjà son halo blanc. ── */
@@ -688,16 +673,8 @@ const STYLE = `<style>
   font-style: normal;
   border-radius: 99px;
   box-shadow: 0 3px 10px var(--wg, color-mix(in srgb, var(--a) 40%, transparent));
-  animation: nd-cta-pulse 1.8s ease-in-out infinite;
 }
 .prc-node.next .nd-lbl .nd-stt::after { content: ' →'; }
-@keyframes nd-cta-pulse {
-  0%,100% { transform: scale(1); box-shadow: 0 3px 10px var(--wg, color-mix(in srgb, var(--a) 40%, transparent)); }
-  50%     { transform: scale(1.06); box-shadow: 0 5px 16px var(--wg, color-mix(in srgb, var(--a) 60%, transparent)); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .prc-node.next .nd-lbl .nd-stt { animation: none !important; }
-}
 /* Badge "TU ES ICI" */
 .prc-node.next .nd-lbl::before {
   content: 'TU ES ICI';

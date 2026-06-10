@@ -72,7 +72,7 @@ export function mount(root) {
             <div class="lp-phone-screen">
               <img src="${BADGE}" alt="" class="lp-phone-badge" />
               <div class="lp-phone-lvl">Niveau 4 · Maîtrise du véhicule</div>
-              <div class="lp-phone-streak">🔥 <strong>12</strong> jours de suite</div>
+              <div class="lp-phone-streak">${icon("flame", { size: 14 })} <strong>12</strong> jours de suite</div>
               <div class="lp-phone-bar"><div class="lp-phone-fill"></div></div>
               <div class="lp-phone-stats">
                 <div class="lp-pstat"><div class="lp-pstat-val">22</div><div class="lp-pstat-lbl">compétences</div></div>
@@ -83,11 +83,11 @@ export function mount(root) {
           </div>
           <!-- Floating cards -->
           <div class="lp-fcard lp-fcard-1">
-            <span class="lp-fcard-ico">🏆</span>
+            <span class="lp-fcard-ico" style="color:#f59e0b">${icon("trophy", { size: 19 })}</span>
             <div><div class="lp-fcard-val">+89 XP</div><div class="lp-fcard-sub">Compétence acquise</div></div>
           </div>
           <div class="lp-fcard lp-fcard-2">
-            <span class="lp-fcard-ico">🔥</span>
+            <span class="lp-fcard-ico" style="color:#fb923c">${icon("flame", { size: 19 })}</span>
             <div><div class="lp-fcard-val">Streak actif</div><div class="lp-fcard-sub">12 jours d'affilée</div></div>
           </div>
         </div>
@@ -98,9 +98,9 @@ export function mount(root) {
     <section class="lp-sec lp-problem lp-rev">
       <h2 class="lp-h2">Le suivi du permis, version papier, ça démotive tout le monde</h2>
       <div class="lp-cards3">
-        <div class="lp-card"><div class="lp-card-ic">📉</div><h3>Les élèves décrochent</h3><p>Entre deux leçons, rien ne les fait revenir. Pas de feedback, pas de progression visible.</p></div>
-        <div class="lp-card"><div class="lp-card-ic">🗂️</div><h3>Le suivi se perd</h3><p>Livrets papier, fichiers Excel, post-its : impossible de savoir qui en est où d'un coup d'œil.</p></div>
-        <div class="lp-card"><div class="lp-card-ic">😮‍💨</div><h3>Les moniteurs s'usent</h3><p>Aucune reconnaissance de leur travail, aucune émulation entre eux.</p></div>
+        <div class="lp-card"><div class="lp-card-ic">${icon("activity", { size: 26 })}</div><h3>Les élèves décrochent</h3><p>Entre deux leçons, rien ne les fait revenir. Pas de feedback, pas de progression visible.</p></div>
+        <div class="lp-card"><div class="lp-card-ic">${icon("clipboard", { size: 26 })}</div><h3>Le suivi se perd</h3><p>Livrets papier, fichiers Excel, post-its : impossible de savoir qui en est où d'un coup d'œil.</p></div>
+        <div class="lp-card"><div class="lp-card-ic">${icon("users", { size: 26 })}</div><h3>Les moniteurs s'usent</h3><p>Aucune reconnaissance de leur travail, aucune émulation entre eux.</p></div>
       </div>
     </section>
 
@@ -539,7 +539,8 @@ const STYLE = `<style>
   }
   .lp-phone-badge { width: 64px; height: 64px; object-fit: contain; filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--a) 45%, transparent)); }
   .lp-phone-lvl { font: 600 9px/1 'Inter', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: color-mix(in srgb, var(--a) 70%, transparent); }
-  .lp-phone-streak { font: 700 13px/1 'Plus Jakarta Sans', sans-serif; color: #fff; }
+  .lp-phone-streak { font: 700 13px/1 'Plus Jakarta Sans', sans-serif; color: #fff; display: inline-flex; align-items: center; gap: 5px; }
+  .lp-phone-streak svg { color: #fb923c; }
   .lp-phone-streak strong { color: #f59e0b; font-size: 16px; }
   .lp-phone-bar { width: 74%; height: 7px; background: rgba(255,255,255,.1); border-radius: 9px; overflow: hidden; }
   .lp-phone-fill {
@@ -567,7 +568,7 @@ const STYLE = `<style>
     border: 1px solid rgba(255,255,255,.15);
     box-shadow: 0 8px 28px rgba(0,0,0,.35);
   }
-  .lp-fcard-ico { font-size: 19px; }
+  .lp-fcard-ico { display: inline-flex; align-items: center; }
   .lp-fcard-val { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: #fff; }
   .lp-fcard-sub { font: 500 10px/1 'Inter', sans-serif; color: rgba(255,255,255,.46); margin-top: 2px; }
   .lp-fcard-1 { top: 14%; right: -20px; animation: fc1 5.5s ease-in-out infinite; }
@@ -584,7 +585,7 @@ const STYLE = `<style>
   /* Problème (3 cartes) */
   .lp-cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
   .lp-card { background: #f7f8fb; border: 1px solid var(--lp-line); border-radius: 18px; padding: 22px; color: var(--lp-ink); }
-  .lp-card-ic { font-size: 30px; margin-bottom: 10px; }
+  .lp-card-ic { display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 13px; background: color-mix(in srgb, var(--lp-green) 11%, transparent); color: var(--lp-green); margin-bottom: 12px; }
   .lp-card h3 { font: 700 17px/1.2 'Plus Jakarta Sans'; margin: 0 0 6px; color: var(--lp-ink); }
   .lp-card p { font: 400 14.5px/1.5 'Inter'; color: var(--lp-mut); margin: 0; }
 
