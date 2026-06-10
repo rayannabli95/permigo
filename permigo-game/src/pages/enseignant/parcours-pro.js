@@ -1,13 +1,14 @@
 // ═══════════════════════════════════════════════════════════════
 // Enseignant — Parcours Pro (route sinueuse à badges)
 // Moteur visuel de la route élève (src/pages/eleve/parcours.js) porté
-// au moniteur : path SVG 4 couches, portion parcourue en vert, nodes
-// animés, états done/next/todo/locked, badge « PROCHAIN OUTIL », fiche
-// palier en bottom-sheet au clic.
+// au moniteur : path SVG 4 couches, portion parcourue teintée accent,
+// nodes animés, états done/next/todo/locked, badge « PROCHAIN PALIER »,
+// fiche palier en bottom-sheet au clic.
 //
 // Jalons = UNIQUEMENT le nombre de validations cumulées (décision figée).
 // Source de données = MONITEUR_TIERS / getMoniteurState (moniteur-levels.js).
-// Chaque node = un outil utile débloqué. ZÉRO gemme / monnaie virtuelle.
+// Chaque node = un palier de STATUT (pas d'« outils débloqués »).
+// ZÉRO gemme / monnaie virtuelle / mascotte — ton pro sobre.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -108,6 +109,16 @@ const STYLE = `<style>
 .p-dash { stroke: #fff; stroke-width: 2.5; stroke-dasharray: 6 12; stroke-linecap: round; fill: none; opacity: .85; }
 .p-done { stroke: var(--a); stroke-width: 20; fill: none; stroke-linecap: round; }
 .p-done-dash { stroke: #fff; stroke-width: 2.5; stroke-dasharray: 6 12; stroke-linecap: round; fill: none; opacity: .9; }
+/* Portion atteinte : remplissage doux au chargement (pathLength=1 →
+   dashoffset), marquage central en fondu après. Statique si reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .p-done[pathLength] { stroke-dasharray: 1; stroke-dashoffset: 1; animation: pprDraw 1s cubic-bezier(.45,.1,.3,1) .3s both; }
+  .p-done-dash { opacity: 0; animation: pprFadeDash .45s ease 1.2s both; }
+  .ppr-hero-in { animation: pprHeroIn .45s cubic-bezier(.2,.7,.3,1) both; }
+}
+@keyframes pprDraw { to { stroke-dashoffset: 0; } }
+@keyframes pprFadeDash { to { opacity: .9; } }
+@keyframes pprHeroIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 .ppr-nodes { position: absolute; inset: 0; }
 .ppr-node {
@@ -139,34 +150,39 @@ const STYLE = `<style>
 .nd-check svg { width: 12px; height: 12px; }
 
 /* next */
-.ppr-node.next .nd-circle { background: var(--a); color: #fff; box-shadow: 0 6px 20px color-mix(in srgb, var(--a) 50%, transparent); animation: ndHalo 2s ease-in-out infinite; }
+.ppr-node.next .nd-circle { background: var(--a); color: var(--a-ink, #fff); box-shadow: 0 6px 20px color-mix(in srgb, var(--a) 50%, transparent); animation: ndHalo 3.2s ease-in-out infinite; }
 @keyframes ndHalo {
-  0%,100% { box-shadow: 0 6px 20px color-mix(in srgb, var(--a) 45%, transparent); }
-  50% { box-shadow: 0 6px 26px color-mix(in srgb, var(--a) 75%, transparent), 0 0 0 6px color-mix(in srgb, var(--a) 18%, transparent); }
+  0%,100% { box-shadow: 0 6px 20px color-mix(in srgb, var(--a) 40%, transparent); }
+  50% { box-shadow: 0 6px 24px color-mix(in srgb, var(--a) 60%, transparent), 0 0 0 5px color-mix(in srgb, var(--a) 12%, transparent); }
 }
-.ppr-node.next .nd-circle::after { content: ''; position: absolute; inset: -14px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--a) 30%, transparent); animation: ndRing 1.9s ease-out infinite; }
-@keyframes ndRing { 0% { transform: scale(.85); opacity: .7; } 100% { transform: scale(1.4); opacity: 0; } }
+.ppr-node.next .nd-circle::after { content: ''; position: absolute; inset: -14px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--a) 22%, transparent); animation: ndRing 3.2s ease-out infinite; }
+@keyframes ndRing { 0% { transform: scale(.88); opacity: .5; } 100% { transform: scale(1.32); opacity: 0; } }
 
 /* todo / locked */
 .ppr-node.todo .nd-circle { background: var(--su); border-color: var(--bo); border-style: dashed; color: var(--mu2); box-shadow: 0 2px 8px rgba(11,13,26,.06); }
 .ppr-node.locked .nd-circle { background: var(--bg2); border-color: var(--bg3); color: var(--mu5); box-shadow: none; }
 
 /* labels */
-.nd-lbl { margin-top: 11px; background: var(--su); border: 1px solid var(--bo); border-radius: 13px; padding: 6px 11px 7px; width: max-content; max-width: 150px; text-align: center; box-shadow: 0 5px 14px rgba(11,13,26,.09); }
+.nd-lbl { margin-top: 11px; background: var(--su); border: 1px solid var(--bo); border-radius: 13px; padding: 6px 11px 7px; width: max-content; max-width: 150px; text-align: center; box-shadow: 0 5px 14px rgba(11,13,26,.09); transition: border-color .18s, box-shadow .18s; }
 @media (max-width: 380px) { .nd-lbl { max-width: 132px; } }
 .nd-name { display: block; font: 800 12px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.01em; }
 .nd-thr { display: block; font: 700 9.5px/1 'IBM Plex Mono', monospace; color: var(--mu3); margin-top: 3px; }
 .ppr-node.todo .nd-name, .ppr-node.locked .nd-name { color: var(--mu3); }
 .ppr-node.done .nd-lbl { border-color: color-mix(in srgb, var(--a) 28%, transparent); }
 .ppr-node.next .nd-lbl { border-color: color-mix(in srgb, var(--a) 40%, transparent); box-shadow: 0 8px 22px color-mix(in srgb, var(--a) 18%, transparent), 0 0 0 2px color-mix(in srgb, var(--a) 20%, transparent); position: relative; }
-.nd-stt { display: inline-block; margin-top: 7px; padding: 6px 13px; background: var(--a); color: #fff; font: 800 11px/1 'Inter', sans-serif; border-radius: 99px; box-shadow: 0 3px 0 var(--adk); }
-.ppr-node.next .nd-lbl::before {
-  content: 'PROCHAIN OUTIL'; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-  background: var(--a); color: #fff; font: 800 8px/1 'Inter', sans-serif; padding: 4px 10px; border-radius: 99px;
-  letter-spacing: .14em; white-space: nowrap; box-shadow: 0 3px 10px color-mix(in srgb, var(--a) 40%, transparent);
-  animation: ndBob 1.6s ease-in-out infinite;
+.nd-stt { display: inline-block; margin-top: 7px; padding: 6px 13px; background: var(--a); color: var(--a-ink, #fff); font: 800 11px/1 'Inter', sans-serif; border-radius: 99px; box-shadow: 0 2px 8px color-mix(in srgb, var(--a) 35%, transparent); }
+
+/* Hover desktop discret — lift léger, jamais de spectacle */
+@media (hover: hover) {
+  .ppr-node:not(.locked):hover .nd-circle { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(11,13,26,.16); }
+  .ppr-node.done:hover .nd-circle, .ppr-node.next:hover .nd-circle { box-shadow: 0 8px 22px color-mix(in srgb, var(--a) 45%, transparent); }
+  .ppr-node:not(.locked):hover .nd-lbl { border-color: color-mix(in srgb, var(--a) 32%, transparent); box-shadow: 0 8px 18px rgba(11,13,26,.12); }
 }
-@keyframes ndBob { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-3px); } }
+.ppr-node.next .nd-lbl::before {
+  content: 'PROCHAIN PALIER'; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: var(--a); color: var(--a-ink, #fff); font: 800 8px/1 'Inter', sans-serif; padding: 4px 10px; border-radius: 99px;
+  letter-spacing: .14em; white-space: nowrap; box-shadow: 0 3px 10px color-mix(in srgb, var(--a) 40%, transparent);
+}
 
 /* ── Final ── */
 .ppr-final { margin: 8px 14px 0; padding: 22px 18px; background: var(--su); border: 1.5px solid var(--bo); border-radius: 20px; text-align: center; box-shadow: var(--s1); position: relative; overflow: hidden; }
@@ -352,7 +368,7 @@ function _renderPath(root, doneCount) {
       <path class="p-edge" d="${full}"/>
       <path class="p-surface" d="${full}"/>
       <path class="p-dash" d="${full}"/>
-      <path class="p-done" d="${donePath}"/>
+      <path class="p-done" d="${donePath}" pathLength="1"/>
       <path class="p-done-dash" d="${donePath}"/>`;
   }
 }
