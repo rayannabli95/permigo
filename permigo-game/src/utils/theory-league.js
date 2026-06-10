@@ -9,6 +9,11 @@
 // Aucun libellé ne doit mentionner « code » / « ETG ».
 // ═══════════════════════════════════════════════════════════════
 
+// Barème — SOURCE DE VÉRITÉ unique (UI : légende, tuto, animation de gain)
+export const THEORY_PTS = { quiz: 1, exam: 4 };
+// Seuil de réussite d'un quiz compétence pour marquer le point théorie
+export const THEORY_QUIZ_PASS_PCT = 70;
+
 export const THEORY_LEAGUES = [
   { n: 1, name: "Novice", color: "#22c55e", startAt: 1 },
   { n: 2, name: "Apprenti", color: "#3b82f6", startAt: 8 },
@@ -49,13 +54,13 @@ export function computeTheoryScore(attempts) {
   for (const a of attempts || []) {
     if (a.type === "exam_blanc") {
       if (a.passed && a.ref_id != null) exams.add(a.ref_id);
-    } else if (a.competence_id && (a.score ?? 0) >= 70) {
+    } else if (a.competence_id && (a.score ?? 0) >= THEORY_QUIZ_PASS_PCT) {
       comps.add(a.competence_id);
     }
   }
   return {
     nComp: comps.size,
     nExams: exams.size,
-    score: comps.size + exams.size * 4,
+    score: comps.size * THEORY_PTS.quiz + exams.size * THEORY_PTS.exam,
   };
 }

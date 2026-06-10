@@ -7,6 +7,10 @@ import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { burstConfetti } from "@/components/common/confetti.js";
 import {
+  computeTheoryGain,
+  renderTheoryGain,
+} from "@/components/eleve/theory-gain.js";
+import {
   playCorrect,
   playWrong,
   playStreak,
@@ -191,6 +195,25 @@ export async function lancerQuiz({
       overlay.remove();
       onComplete?.(score, total);
     });
+
+    // Gain ligue théorique — calculé AVANT la persistance (faite par le
+    // caller via submit_competence_quiz). Affiché seulement si le point
+    // est nouveau ; sinon rien (pas d'incitation à re-farmer).
+    computeTheoryGain({
+      kind: "quiz",
+      competenceId,
+      scorePct: Math.round((score / total) * 100),
+    })
+      .then((gain) => {
+        if (!gain || !overlay.isConnected) return;
+        const res = overlay.querySelector(".quiz-result");
+        const closeBtn = overlay.querySelector(".quiz-close-btn");
+        if (!res || !closeBtn) return;
+        const slot = document.createElement("div");
+        res.insertBefore(slot, closeBtn);
+        renderTheoryGain(slot, gain);
+      })
+      .catch(() => {});
   }
 
   renderQuestion();

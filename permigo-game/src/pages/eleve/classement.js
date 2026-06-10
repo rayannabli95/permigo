@@ -18,7 +18,16 @@ import {
   renderLeagueRow,
   LEAGUE_CSS,
 } from "@/utils/league-shared.js";
-import { THEORY_LEAGUES, theoryLeague } from "@/utils/theory-league.js";
+import {
+  THEORY_LEAGUES,
+  THEORY_PTS,
+  THEORY_QUIZ_PASS_PCT,
+  theoryLeague,
+} from "@/utils/theory-league.js";
+import {
+  showTheoryTuto,
+  maybeShowTheoryTuto,
+} from "@/components/eleve/theory-tuto.js";
 
 const LIMIT = 50;
 
@@ -236,6 +245,25 @@ ${LEAGUE_CSS}
   box-sizing: border-box;
 }
 .clt-th-cta:active { transform: scale(.98); }
+/* Bouton « ? » — revoir le tuto (cible 44px) */
+.clt-th-help {
+  flex-shrink: 0; width: 44px; height: 44px; margin: -6px -6px -6px 0;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.clt-th-help span {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg2); border: 1px solid var(--bo);
+  color: var(--mu); font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+  transition: color .15s, border-color .15s;
+}
+.clt-th-help:hover span, .clt-th-help:active span { color: var(--a); border-color: var(--a); }
+/* Légende « Comment gagner des points ? » */
+.clt-th-how-ttl {
+  width: 100%; font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--mu); margin-bottom: 2px;
+}
 </style>`;
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -353,6 +381,20 @@ function _theoryPill(mine) {
     : `<div class="clt-mepill"><span class="clt-mepill-ico">${icon("zap", { size: 14 })}</span>Ton premier quiz t'ouvre la ligue</div>`;
 }
 
+// ── Légende explicite — dérivée du barème (theory-league.js) ────
+function _theoryHowLegend() {
+  return `
+    <div class="clt-pts-legend">
+      <span class="clt-th-how-ttl">Comment gagner des points ?</span>
+      <span class="clt-pts-pill">${icon("check", { size: 11, strokeWidth: 2.4 })} Quiz d'une compétence réussi (≥${THEORY_QUIZ_PASS_PCT} %) → +${THEORY_PTS.quiz} pt</span>
+      <span class="clt-pts-pill">${icon("zap", { size: 11, strokeWidth: 2.4 })} Parcours d'examen réussi → +${THEORY_PTS.exam} pts</span>
+    </div>`;
+}
+
+function _theoryHelpBtn() {
+  return `<button class="clt-th-help" id="clt-th-help" type="button" aria-label="Revoir comment fonctionne la ligue théorique"><span aria-hidden="true">?</span></button>`;
+}
+
 // ── Hero « Ta ligue théorique » ──────────────────────────────────
 function _theoryLeagueHero(mine) {
   const sc = mine?.score ?? 0;
@@ -370,8 +412,10 @@ function _theoryLeagueHero(mine) {
         <div class="clt-rl-lbl">Ta ligue théorique</div>
         <div class="clt-rl-name">Pas encore classé</div>
       </div>
+      ${_theoryHelpBtn()}
     </div>
     <div class="clt-rl-prog">Remplis ton premier quiz pour entrer dans la ligue théorique — chaque compétence travaillée compte.</div>
+    ${_theoryHowLegend()}
     <a class="clt-th-cta" href="#/parcours">Faire mon premier quiz</a>
   </div>`;
   }
@@ -392,12 +436,14 @@ function _theoryLeagueHero(mine) {
         <div class="clt-rl-lbl">Ta ligue théorique</div>
         <div class="clt-rl-name">Ligue ${L.n} — ${esc(L.name)}</div>
       </div>
+      ${_theoryHelpBtn()}
     </div>
     <div class="clt-rl-prog">${progText}</div>
     <div class="clt-rl-track">${dots}</div>
-    <div class="clt-pts-legend">
-      <span class="clt-pts-pill">${nComp} compétence${nComp > 1 ? "s" : ""} en quiz réussi (+1 pt)</span>
-      <span class="clt-pts-pill">${nExams} parcours d'examen réussi${nExams > 1 ? "s" : ""} (+4 pts)</span>
+    ${_theoryHowLegend()}
+    <div class="clt-pts-legend" style="border-top:0;padding-top:6px">
+      <span class="clt-pts-pill">${nComp} compétence${nComp > 1 ? "s" : ""} en quiz réussi (+${THEORY_PTS.quiz} pt)</span>
+      <span class="clt-pts-pill">${nExams} parcours d'examen réussi${nExams > 1 ? "s" : ""} (+${THEORY_PTS.exam} pts)</span>
     </div>
   </div>`;
 }
@@ -577,6 +623,14 @@ function _rowHtml(r) {
 
 // ─── Wire ────────────────────────────────────────────────────────
 function _wire(root, data, setScope) {
+  // « ? » du hero théorie (délégation : le body est re-rendu via innerHTML)
+  root.addEventListener("click", (e) => {
+    if (e.target.closest("#clt-th-help")) {
+      playClick();
+      showTheoryTuto();
+    }
+  });
+
   root.querySelectorAll(".clt-tab").forEach((tab) => {
     tab.addEventListener("click", () => {
       const next = tab.dataset.scope;
@@ -614,6 +668,9 @@ function _wire(root, data, setScope) {
         playPop();
       }
       track("classement.scope_changed", { scope: next });
+
+      // 1er passage sur l'onglet Théorie → tuto (re-consultable via « ? »)
+      if (next === "theorie") maybeShowTheoryTuto();
     });
   });
 }
