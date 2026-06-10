@@ -62,9 +62,9 @@ const _isNight = (() => {
 const _landingBg = `/skins/landing/monde4${_isNight ? "nuit" : "jour"}.webp`;
 
 const DEMO_ACCOUNTS = [
-  { role: "Élève", email: "eleve@test.fr", emoji: "🎓" },
-  { role: "Enseignant", email: "enseignant@test.fr", emoji: "🚗" },
-  { role: "Gérant", email: "gerant@test.fr", emoji: "👑" },
+  { role: "Élève", email: "eleve@test.fr", ico: "school" },
+  { role: "Enseignant", email: "enseignant@test.fr", ico: "car" },
+  { role: "Gérant", email: "gerant@test.fr", ico: "crown" },
 ];
 
 export function mount(root) {
@@ -223,7 +223,7 @@ function template() {
             ${DEMO_ACCOUNTS.map(
               (a) => `
               <button class="lg-demo" type="button" data-email="${esc(a.email)}">
-                <span class="em">${a.emoji}</span>
+                <span class="em">${icon(a.ico, { size: 17 })}</span>
                 <span class="nm">${esc(a.role)}</span>
               </button>
             `,

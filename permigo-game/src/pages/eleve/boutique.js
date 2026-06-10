@@ -20,8 +20,8 @@ import {
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 
 const TABS = [
-  { key: "skins", label: "Skins", emoji: "🚗" },
-  { key: "autres", label: "Autres", emoji: "🎁" },
+  { key: "skins", label: "Skins", ico: "car" },
+  { key: "autres", label: "Autres", ico: "gift" },
 ];
 
 // Types regroupés sous chaque onglet
@@ -299,7 +299,7 @@ export async function mount(root) {
     <div class="bo2-tabs" id="bo2-tabs">
       ${TABS.map(
         (t, i) => `
-        <button class="bo2-tab ${i === 0 ? "active" : ""}" data-tab="${esc(t.key)}">${t.emoji} ${esc(t.label)}</button>
+        <button class="bo2-tab ${i === 0 ? "active" : ""}" data-tab="${esc(t.key)}">${icon(t.ico, { size: 14 })} ${esc(t.label)}</button>
       `,
       ).join("")}
     </div>
@@ -502,7 +502,7 @@ function renderRarityScale(items) {
   items.forEach((i) => {
     if (!byRarity[i.rarity]) byRarity[i.rarity] = i.cost_gemmes;
   });
-  const icons = { commun: "🚙", rare: "🏎", epique: "🚐", legendaire: "🏆" };
+  const icons = { commun: "car", rare: "zap", epique: "gem", legendaire: "crown" };
   return `
     <div class="bo2-scale">
       <div class="bo2-scale-title">Les raretés</div>
@@ -512,7 +512,7 @@ function renderRarityScale(items) {
             const r = RARITY_META[k];
             const price = byRarity[k];
             return `<div class="bo2-scale-item">
-            <div class="bo2-scale-dot" style="background:${r.c}26;border:2px solid ${r.c};box-shadow:0 0 12px ${r.c}66">${icons[k]}</div>
+            <div class="bo2-scale-dot" style="background:${r.c}26;border:2px solid ${r.c};box-shadow:0 0 12px ${r.c}66;color:${r.c}">${icon(icons[k], { size: 17 })}</div>
             <div class="bo2-scale-lbl" style="color:${r.c}">${esc(r.label)}</div>
             ${price != null ? `<div class="bo2-scale-price">${icon("gem", { size: 13 })} ${price}</div>` : ""}
           </div>`;

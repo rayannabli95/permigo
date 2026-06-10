@@ -115,11 +115,11 @@ async function boot() {
     console.error("[boot]", e);
     track("app.crashed", { error: e?.message });
     app.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100dvh;gap:14px;padding:32px;text-align:center">
-        <div style="font-size:42px">⚠️</div>
-        <div style="font:800 17px/1.3 'Plus Jakarta Sans',sans-serif;color:#0b0d1a;letter-spacing:-.02em">Quelque chose a planté</div>
-        <div style="font:500 13px/1.5 'Inter',sans-serif;color:#64748b">Une erreur inattendue est survenue.<br>Recharge la page pour réessayer.</div>
-        <button onclick="location.reload()" style="margin-top:6px;padding:13px 28px;background:#6366f1;color:#fff;border:none;border-radius:10px;font:700 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer;letter-spacing:-.01em">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100dvh;gap:14px;padding:32px;text-align:center;background:var(--bg);color:var(--ink)">
+        <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="var(--am)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        <div style="font:800 17px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);letter-spacing:-.02em">Quelque chose a planté</div>
+        <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu)">Une erreur inattendue est survenue.<br>Recharge la page pour réessayer.</div>
+        <button onclick="location.reload()" style="margin-top:6px;padding:13px 28px;min-height:44px;background:var(--a);color:var(--a-ink);border:none;border-radius:12px;font:700 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer;letter-spacing:-.01em">
           Recharger l'app
         </button>
       </div>
