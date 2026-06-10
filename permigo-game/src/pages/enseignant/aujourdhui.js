@@ -15,6 +15,7 @@ import { icon, iconBadge } from "@/utils/icons.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
 import { getMoniteurState } from "@/data/moniteur-levels.js";
+import { getLeague } from "@/utils/league-shared.js";
 
 // ─── Statuts labels : mapping centralisé @/utils/statut-label.js ──
 
@@ -126,24 +127,102 @@ const STYLE = `<style>
   .aj-hero-cta:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
 
   /* ── Stats compactes ── */
-  .aj-quickstats { display: flex; gap: 12px; margin-bottom: 26px; }
+  .aj-quickstats { display: flex; gap: 10px; margin-bottom: 14px; }
   .aj-quickstat {
     flex: 1;
     background: var(--su);
     border: 1px solid var(--bo);
     border-radius: 14px;
-    padding: 14px 16px;
+    padding: 14px 14px;
     box-shadow: var(--s0);
+    min-width: 0;
   }
   .aj-quickstat-val {
     font: 800 22px/1 'Plus Jakarta Sans', sans-serif;
     color: var(--ink);
     letter-spacing: -.025em;
+    white-space: nowrap;
+  }
+  .aj-quickstat-val small {
+    font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
+    color: var(--mu2);
   }
   .aj-quickstat-lbl {
     font: 500 11px/1.3 'Inter', sans-serif;
     color: var(--mu2);
     margin-top: 5px;
+  }
+  .aj-quickstat-bar {
+    height: 4px; background: var(--bg2);
+    border-radius: 99px; margin-top: 8px; overflow: hidden;
+  }
+  .aj-quickstat-bar > div {
+    height: 100%; border-radius: 99px; background: var(--a);
+    transition: width .5s cubic-bezier(.2,.7,.3,1);
+  }
+
+  /* ── Actions rapides ── */
+  .aj-actions { display: flex; gap: 10px; margin-bottom: 26px; }
+  .aj-action {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 7px;
+    padding: 13px 8px;
+    background: var(--su);
+    border: 1px solid var(--bo);
+    border-radius: 14px;
+    box-shadow: var(--s0);
+    cursor: pointer;
+    color: var(--ink);
+    font: 600 11.5px/1.2 'Inter', sans-serif;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color .15s, transform .15s;
+    min-height: 44px;
+  }
+  .aj-action:hover { border-color: var(--bo4); transform: translateY(-1px); }
+  .aj-action:active { transform: scale(.97); }
+  .aj-action:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
+  .aj-action-ico {
+    width: 34px; height: 34px; border-radius: 11px;
+    background: var(--ap); color: var(--adk);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── Cartes ligues ── */
+  .aj-ligues { display: flex; gap: 10px; }
+  .aj-ligue {
+    flex: 1; min-width: 0;
+    background: var(--su);
+    border: 1px solid var(--bo);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: var(--s0);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color .15s, transform .15s;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  a.aj-ligue, a.aj-ligue:visited, a.aj-ligue:hover, a.aj-ligue:active,
+  a.aj-prog, a.aj-prog:visited { text-decoration: none; }
+  .aj-ligue:hover { border-color: var(--bo4); transform: translateY(-1px); }
+  .aj-ligue:active { transform: scale(.98); }
+  .aj-ligue:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
+  .aj-ligue-kicker {
+    font: 700 10px/1 'Inter', sans-serif;
+    text-transform: uppercase; letter-spacing: .08em;
+    color: var(--mu2);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .aj-ligue-main {
+    font: 800 15px/1.2 'Plus Jakarta Sans', sans-serif;
+    color: var(--ink); letter-spacing: -.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .aj-ligue-sub {
+    font: 500 11px/1.35 'Inter', sans-serif;
+    color: var(--mu2);
   }
 
   /* Section title */
@@ -525,6 +604,7 @@ async function renderInto(root, _me) {
     todaySessionsRes,
     profileRes,
     totalValsRes,
+    leagueRes,
   ] = await Promise.all([
     // Validations d'aujourd'hui (faites par moi)
     sb
@@ -567,6 +647,11 @@ async function renderInto(root, _me) {
       .from("validations")
       .select("id", { count: "exact", head: true })
       .eq("validated_by", _me.id),
+
+    // Ligue de la semaine (rang + points) — best-effort, la card dégrade bien
+    Promise.resolve(
+      sb.rpc("get_league_leaderboard", { p_role: "enseignant", p_limit: 50 }),
+    ).catch(() => ({ data: null })),
   ]);
 
   if (valsToday.error || valsAll.error) {
@@ -636,6 +721,32 @@ async function renderInto(root, _me) {
     return !p?.last_active_at || p.last_active_at < fourteenDaysAgo;
   });
   const reconnectCount = reconnectList.length;
+
+  // ─── KPI engagement & complétude livret (sur MES élèves) ──────
+  // Actif = ouvert l'app dans les 7 derniers jours (last_active_at).
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  const actifs7j = mesElevesActifs.filter((e) => {
+    const p = elevesMap[e.id];
+    return p?.last_active_at && p.last_active_at >= sevenDaysAgo;
+  }).length;
+  const engagementPct =
+    nbElevesActifs > 0 ? Math.round((actifs7j / nbElevesActifs) * 100) : 0;
+
+  // Complétude livret moyenne = moyenne des % d'acquis de mes élèves
+  const livretPct =
+    nbElevesActifs > 0
+      ? Math.round(
+          (mesElevesActifs.reduce((s, e) => s + (e.acquis || 0), 0) /
+            (nbElevesActifs * REMC_TOTAL)) *
+            100,
+        )
+      : 0;
+
+  // Ma ligue de la semaine (rang réel parmi les enseignants)
+  const leagueRows = leagueRes?.data || [];
+  const myLeagueRow = leagueRows.find((r) => r.is_me) || null;
+  const myWeeklyPts = myLeagueRow?.weekly_pts ?? 0;
+  const myLeague = getLeague(myWeeklyPts);
 
   // ─── Hero « prochaine action » — 1 action utile priorisée ──────
   // Priorité : relancer (14 j, seul signal) → valider une compétence →
@@ -752,12 +863,38 @@ async function renderInto(root, _me) {
       <!-- Hero : prochaine action utile -->
       ${heroHtml}
 
-      <!-- Stat compacte : élèves dans l'école -->
+      <!-- KPI : mes élèves / engagement 7 j / complétude livret -->
       <div class="aj-quickstats">
         <div class="aj-quickstat">
-          <div class="aj-quickstat-val">${nbElevesEcole}</div>
-          <div class="aj-quickstat-lbl">Élève${nbElevesEcole > 1 ? "s" : ""} dans l'école</div>
+          <div class="aj-quickstat-val">${nbElevesActifs}<small> / ${nbElevesEcole} école</small></div>
+          <div class="aj-quickstat-lbl">Mes élèves</div>
         </div>
+        <div class="aj-quickstat">
+          <div class="aj-quickstat-val">${nbElevesActifs > 0 ? `${engagementPct}<small> %</small>` : "—"}</div>
+          <div class="aj-quickstat-lbl">Actifs ces 7 jours${nbElevesActifs > 0 ? ` (${actifs7j}/${nbElevesActifs})` : ""}</div>
+          <div class="aj-quickstat-bar"><div style="width:${engagementPct}%"></div></div>
+        </div>
+        <div class="aj-quickstat">
+          <div class="aj-quickstat-val">${nbElevesActifs > 0 ? `${livretPct}<small> %</small>` : "—"}</div>
+          <div class="aj-quickstat-lbl">Livret moyen</div>
+          <div class="aj-quickstat-bar"><div style="width:${livretPct}%"></div></div>
+        </div>
+      </div>
+
+      <!-- Actions rapides -->
+      <div class="aj-actions">
+        <button class="aj-action" id="aj-act-invite" type="button">
+          <span class="aj-action-ico">${icon("user-plus", { size: 16, strokeWidth: 2 })}</span>
+          Inviter un élève
+        </button>
+        <button class="aj-action" id="aj-act-eleves" type="button">
+          <span class="aj-action-ico">${icon("users", { size: 16, strokeWidth: 2 })}</span>
+          Mes élèves
+        </button>
+        <button class="aj-action" id="aj-act-session" type="button">
+          <span class="aj-action-ico">${icon("check-circle", { size: 16, strokeWidth: 2 })}</span>
+          Valider une séance
+        </button>
       </div>
 
       <!-- Progression palier — card cliquable vers parcours-pro -->
@@ -783,6 +920,34 @@ async function renderInto(root, _me) {
           <div class="aj-prog-arrow">${icon("chevron-right", { size: 16, strokeWidth: 2 })}</div>
         </a>`;
       })()}
+
+      <!-- Accès ligues -->
+      <div class="aj-section">
+        <div class="aj-section-title">Classements</div>
+        <div class="aj-ligues">
+          <a class="aj-ligue" href="#/ligue-semaine" id="aj-ligue-moi">
+            <span class="aj-ligue-kicker">
+              ${myLeague ? `<span style="width:7px;height:7px;border-radius:50%;background:${myLeague.color};display:inline-block" aria-hidden="true"></span>` : ""}
+              Ma ligue
+            </span>
+            <span class="aj-ligue-main">${
+              myLeague
+                ? `${esc(myLeague.name)}${myLeagueRow?.rank_pos ? ` · ${myLeagueRow.rank_pos}ᵉ` : ""}`
+                : "Pas encore classé"
+            }</span>
+            <span class="aj-ligue-sub">${
+              myWeeklyPts > 0
+                ? `${myWeeklyPts} validation${myWeeklyPts > 1 ? "s" : ""} cette semaine`
+                : "1 validation = 1 point"
+            }</span>
+          </a>
+          <a class="aj-ligue" href="#/classement-eleves" id="aj-ligue-eleves">
+            <span class="aj-ligue-kicker">${icon("award", { size: 11, strokeWidth: 2 })} Mes élèves</span>
+            <span class="aj-ligue-main">Ligue théorie</span>
+            <span class="aj-ligue-sub">Qui révise en autonomie ?</span>
+          </a>
+        </div>
+      </div>
 
       <!-- Activité récente -->
       <div class="aj-section">
@@ -829,6 +994,26 @@ async function renderInto(root, _me) {
   root.querySelector("#aj-invite-btn")?.addEventListener("click", () => {
     track("invite.empty.aujourdhui.clicked");
     openInviteEleveModal(_me);
+  });
+
+  // Actions rapides
+  root.querySelector("#aj-act-invite")?.addEventListener("click", () => {
+    track("quick_action.invite");
+    openInviteEleveModal(_me);
+  });
+  root.querySelector("#aj-act-eleves")?.addEventListener("click", () => {
+    track("quick_action.eleves");
+    navigate("#/eleves");
+  });
+  root.querySelector("#aj-act-session")?.addEventListener("click", () => {
+    track("quick_action.log_session");
+    navigate("#/log-session");
+  });
+  root.querySelector("#aj-ligue-moi")?.addEventListener("click", () => {
+    track("ligue.open", { from: "aujourdhui", which: "moniteur" });
+  });
+  root.querySelector("#aj-ligue-eleves")?.addEventListener("click", () => {
+    track("ligue.open", { from: "aujourdhui", which: "eleves" });
   });
 
   // Recap soir / prompt log → page dédiée plein écran
