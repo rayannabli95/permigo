@@ -12,6 +12,7 @@ import { navigate } from "@/router.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { icon } from "@/utils/icons.js";
 import { STATUT_CFG } from "@/utils/statut-label.js";
+import { theoryLeague, computeTheoryScore } from "@/utils/theory-league.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 
 // ─── Couleurs par monde ───────────────────────────────────────────
@@ -417,6 +418,7 @@ let _me = null;
 let _eleveId = null;
 let _eleveProfil = null; // { prenom, nom }
 let _validationsMap = {}; // competence_id → { statut, note }
+let _theory = null; // { score, nComp, nExams } — ligue théorique (autonomie)
 let _sheetComp = null; // { c, n } la comp ouverte dans le sheet
 let _sheetStatut = null;
 let _sheetNote = "";
@@ -488,6 +490,41 @@ async function loadData() {
       note: v.note_enseignant || "",
     };
   });
+
+  // Ligue théorique (autonomie élève) — lecture seule, RLS : enseignant
+  // voit les tentatives des élèves de son école.
+  try {
+    const { data: qa, error } = await sb
+      .from("quiz_attempts")
+      .select("competence_id, type, score, ref_id, passed")
+      .eq("user_id", _eleveId);
+    _theory = error ? null : computeTheoryScore(qa);
+  } catch (e) {
+    _theory = null;
+  }
+}
+
+// ─── Ligne « Ligue théorique » (KPI, lecture seule, ton factuel) ──
+// Hook conversation moniteur : « t'en es où sur tes quiz ? »
+function _renderTheoryRow() {
+  if (!_theory) return "";
+  const info = theoryLeague(_theory.score);
+  const label = info.league
+    ? `Ligue ${info.league.n} — ${esc(info.league.name)} · ${_theory.score} pts`
+    : "Pas encore commencé";
+  const detail = info.league
+    ? `${_theory.nComp} quiz de compétence réussi${_theory.nComp > 1 ? "s" : ""} · ${_theory.nExams} examen${_theory.nExams > 1 ? "s" : ""} blanc${_theory.nExams > 1 ? "s" : ""} réussi${_theory.nExams > 1 ? "s" : ""}`
+    : "Aucun quiz réussi en autonomie pour l'instant";
+  const dotColor = info.league ? info.league.color : "var(--mu2)";
+  return `
+    <div class="lr-kpi-row" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bo2)">
+      <span class="lr-kpi-label">Théorie (autonomie)</span>
+      <span style="display:inline-flex;align-items:center;gap:6px">
+        <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};display:inline-block" aria-hidden="true"></span>
+        <span class="lr-kpi-pct">${label}</span>
+      </span>
+    </div>
+    <div style="font:500 11px/1.4 'Inter',sans-serif;color:var(--mu2);margin-top:4px">${detail}</div>`;
 }
 
 // ─── Render principal ─────────────────────────────────────────────
@@ -529,6 +566,7 @@ function render() {
         <div class="lr-global-bar">
           <div class="lr-global-fill" style="width:${pct}%"></div>
         </div>
+        ${_renderTheoryRow()}
       </div>
 
       <div class="lr-body">
