@@ -43,13 +43,13 @@ export function mount(root) {
         <div class="lp-hero-txt">
           <div class="lp-hero-badge">
             <span class="lp-badge-pulse"></span>
-            Bêta ouverte · 47 auto-écoles rejointes
+            Bêta ouverte aux auto-écoles pionnières
           </div>
           <h1 class="lp-h1">
             Le permis, transformé<br>
             en <em class="lp-h1-em">parcours qui accroche</em>
           </h1>
-          <p class="lp-lead">Streaks quotidiens, quiz, classement moniteurs — PermiGo engage tes élèves entre les leçons et valorise le travail de tes enseignants. Plus d'abandons, plus de réussite.</p>
+          <p class="lp-lead">Streaks quotidiens, quiz, classement moniteurs — PermiGo engage vos élèves entre les leçons et valorise le travail de vos enseignants. Plus d'abandons, plus de réussite.</p>
           <div class="lp-hero-cta">
             <button class="lp-btn lp-btn-primary" data-scroll="lp-lead" type="button">
               Être recontacté
@@ -66,6 +66,7 @@ export function mount(root) {
 
         <!-- Visuel droit -->
         <div class="lp-hero-visual" aria-hidden="true">
+          <img class="lp-mascot" src="/skins/mascot-hello.png" alt="" loading="lazy" />
           <div class="lp-phone">
             <div class="lp-phone-notch"></div>
             <div class="lp-phone-screen">
@@ -94,7 +95,7 @@ export function mount(root) {
     </section>
 
     <!-- ── Problème ── -->
-    <section class="lp-sec lp-problem">
+    <section class="lp-sec lp-problem lp-rev">
       <h2 class="lp-h2">Le suivi du permis, version papier, ça démotive tout le monde</h2>
       <div class="lp-cards3">
         <div class="lp-card"><div class="lp-card-ic">📉</div><h3>Les élèves décrochent</h3><p>Entre deux leçons, rien ne les fait revenir. Pas de feedback, pas de progression visible.</p></div>
@@ -104,16 +105,16 @@ export function mount(root) {
     </section>
 
     <!-- ── Features ── -->
-    <section class="lp-sec lp-features">
-      <h2 class="lp-h2">Ce que PermiGo apporte à ton auto-école</h2>
+    <section class="lp-sec lp-features lp-rev">
+      <h2 class="lp-h2">Ce que PermiGo apporte à votre auto-école</h2>
       <div class="lp-feat">
         <div class="lp-feat-row">
           <div class="lp-feat-ic">${icon("map", { size: 28, strokeWidth: 1.5 })}</div>
-          <div><h3>Un parcours qui accroche</h3><p>Le programme officiel REMC (31 compétences) transformé en aventure : mondes à débloquer, quiz éclair, streaks quotidiens et récompenses. Tes élèves reviennent tous les jours.</p></div>
+          <div><h3>Un parcours qui accroche</h3><p>Le programme officiel REMC (31 compétences) transformé en aventure : mondes à débloquer, quiz éclair, streaks quotidiens et récompenses. Vos élèves reviennent tous les jours.</p></div>
         </div>
         <div class="lp-feat-row">
           <div class="lp-feat-ic">${icon("trophy", { size: 28, strokeWidth: 1.5 })}</div>
-          <div><h3>Un classement qui motive les moniteurs</h3><p>Classement local (au sein de ton école) et national. Tes enseignants se challengent, et leur travail devient enfin visible et valorisé.</p></div>
+          <div><h3>Un classement qui motive les moniteurs</h3><p>Classement local (au sein de votre école) et national. Vos enseignants se challengent, et leur travail devient enfin visible et valorisé.</p></div>
         </div>
         <div class="lp-feat-row">
           <div class="lp-feat-ic">${icon("check-circle", { size: 28, strokeWidth: 1.5 })}</div>
@@ -121,15 +122,15 @@ export function mount(root) {
         </div>
         <div class="lp-feat-row">
           <div class="lp-feat-ic">${icon("bar-chart-2", { size: 28, strokeWidth: 1.5 })}</div>
-          <div><h3>Une vision claire pour toi</h3><p>En tant que gérant, tu vois la progression de toute ton école, l'activité de chaque moniteur et chaque élève, en temps réel.</p></div>
+          <div><h3>Une vision claire pour vous</h3><p>En tant que gérant, vous voyez la progression de toute votre école, l'activité de chaque moniteur et chaque élève, en temps réel.</p></div>
         </div>
       </div>
     </section>
 
     <!-- ── Témoignages ── -->
-    <section class="lp-sec lp-testi">
-      <h2 class="lp-h2">Ce que disent les premiers utilisateurs</h2>
-      <p class="lp-sub">Gérants, moniteurs, élèves — ils ont testé PermiGo en beta.</p>
+    <section class="lp-sec lp-testi lp-rev">
+      <h2 class="lp-h2">Ce que PermiGo change au quotidien</h2>
+      <p class="lp-sub">Scénarios illustratifs<span class="lp-testi-note"> — exemples fictifs représentatifs des usages visés, la bêta est en cours</span>.</p>
       <div class="lp-testicards">
         <div class="lp-tc">
           <div class="lp-tc-stars">★★★★★</div>
@@ -137,8 +138,8 @@ export function mount(root) {
           <div class="lp-tc-author">
             <div class="lp-tc-av lp-tc-av-g">KB</div>
             <div>
-              <div class="lp-tc-name">Karim B.</div>
-              <div class="lp-tc-role">Gérant · Auto-École Victoire, Lyon</div>
+              <div class="lp-tc-name">Karim, gérant</div>
+              <div class="lp-tc-role">Exemple illustratif</div>
             </div>
           </div>
         </div>
@@ -148,19 +149,19 @@ export function mount(root) {
           <div class="lp-tc-author">
             <div class="lp-tc-av lp-tc-av-b">SM</div>
             <div>
-              <div class="lp-tc-name">Sophie M.</div>
-              <div class="lp-tc-role">Monitrice · Auto-École du Centre, Marseille</div>
+              <div class="lp-tc-name">Sophie, monitrice</div>
+              <div class="lp-tc-role">Exemple illustratif</div>
             </div>
           </div>
         </div>
         <div class="lp-tc">
           <div class="lp-tc-stars">★★★★★</div>
-          <p class="lp-tc-quote">« Mon streak c'est devenu un rituel. Chaque soir, 2 questions pour ne pas le perdre. J'ai eu 18 à l'examen — je suis convaincu que PermiGo m'y a aidé. »</p>
+          <p class="lp-tc-quote">« Mon streak c'est devenu un rituel. Chaque soir, 2 questions pour ne pas le perdre. Le jour de l'examen, j'étais prêt — et je l'ai eu du premier coup. »</p>
           <div class="lp-tc-author">
             <div class="lp-tc-av lp-tc-av-p">LT</div>
             <div>
-              <div class="lp-tc-name">Lucas T.</div>
-              <div class="lp-tc-role">Élève · Paris</div>
+              <div class="lp-tc-name">Lucas, élève</div>
+              <div class="lp-tc-role">Exemple illustratif</div>
             </div>
           </div>
         </div>
@@ -168,17 +169,17 @@ export function mount(root) {
     </section>
 
     <!-- ── Comment ça marche ── -->
-    <section class="lp-sec lp-how" id="lp-how">
+    <section class="lp-sec lp-how lp-rev" id="lp-how">
       <h2 class="lp-h2">Comment ça marche</h2>
       <div class="lp-steps">
-        <div class="lp-step"><div class="lp-step-n">1</div><h3>Tu crées ton école</h3><p>Tu ajoutes tes moniteurs en quelques clics.</p></div>
-        <div class="lp-step"><div class="lp-step-n">2</div><h3>Tes moniteurs invitent leurs élèves</h3><p>Un lien à partager, l'élève installe l'app sur son téléphone.</p></div>
-        <div class="lp-step"><div class="lp-step-n">3</div><h3>Tout le monde progresse</h3><p>Les élèves s'entraînent, les moniteurs valident, toi tu pilotes.</p></div>
+        <div class="lp-step"><div class="lp-step-n">1</div><h3>Créez votre école</h3><p>Ajoutez vos moniteurs en quelques clics.</p></div>
+        <div class="lp-step"><div class="lp-step-n">2</div><h3>Vos moniteurs invitent leurs élèves</h3><p>Un lien à partager, l'élève installe l'app sur son téléphone.</p></div>
+        <div class="lp-step"><div class="lp-step-n">3</div><h3>Tout le monde progresse</h3><p>Les élèves s'entraînent, les moniteurs valident, vous pilotez.</p></div>
       </div>
     </section>
 
     <!-- ── Pricing ── -->
-    <section class="lp-sec lp-pricing" id="lp-pricing">
+    <section class="lp-sec lp-pricing lp-rev" id="lp-pricing">
       <h2 class="lp-h2">Un tarif simple, par auto-école</h2>
       <p class="lp-sub">Sans engagement. Annulable à tout moment.</p>
       <div class="lp-plans">
@@ -221,21 +222,21 @@ export function mount(root) {
     </section>
 
     <!-- ── FAQ ── -->
-    <section class="lp-sec lp-faq">
+    <section class="lp-sec lp-faq lp-rev">
       <h2 class="lp-h2">Questions fréquentes</h2>
       <div class="lp-faq-list">
         <details class="lp-faq-item"><summary>Mes élèves doivent-ils télécharger quelque chose ?</summary><p>Non. PermiGo s'ouvre dans le navigateur et s'ajoute à l'écran d'accueil du téléphone comme une app, sans passer par un store.</p></details>
         <details class="lp-faq-item"><summary>Est-ce conforme au programme officiel ?</summary><p>Oui. Le parcours suit le référentiel REMC et ses 31 compétences (arrêté du 13/05/2013).</p></details>
-        <details class="lp-faq-item"><summary>Combien de temps pour mettre en place ?</summary><p>Quelques minutes : tu crées ton école, tu ajoutes tes moniteurs, ils invitent leurs élèves.</p></details>
+        <details class="lp-faq-item"><summary>Combien de temps pour mettre en place ?</summary><p>Quelques minutes : vous créez votre école, vous ajoutez vos moniteurs, ils invitent leurs élèves.</p></details>
         <details class="lp-faq-item"><summary>Y a-t-il un engagement ?</summary><p>Non, l'abonnement est sans engagement et annulable à tout moment.</p></details>
       </div>
     </section>
 
     <!-- ── Formulaire lead ── -->
-    <section class="lp-sec lp-leadsec" id="lp-lead">
+    <section class="lp-sec lp-leadsec lp-rev" id="lp-lead">
       <div class="lp-lead-card">
-        <h2 class="lp-h2">Parlons de ton auto-école</h2>
-        <p class="lp-sub">Laisse-nous tes coordonnées, on te recontacte rapidement pour te montrer PermiGo.</p>
+        <h2 class="lp-h2">Parlons de votre auto-école</h2>
+        <p class="lp-sub">Laissez-nous vos coordonnées, on vous recontacte rapidement pour vous montrer PermiGo.</p>
         <form class="lp-form" id="lp-form" novalidate>
           <div class="lp-field">
             <label for="lp-ecole">Nom de l'auto-école *</label>
@@ -263,7 +264,7 @@ export function mount(root) {
         <div class="lp-form-ok" id="lp-form-ok" hidden>
           <div class="lp-ok-ic">✓</div>
           <h3>Bien reçu !</h3>
-          <p>On revient vers toi très vite. Merci de ton intérêt pour PermiGo.</p>
+          <p>On revient vers vous très vite. Merci de votre intérêt pour PermiGo.</p>
         </div>
       </div>
     </section>
@@ -278,6 +279,28 @@ export function mount(root) {
       <div class="lp-foot-copy">© ${new Date().getFullYear()} PermiGo</div>
     </footer>
   </div>`;
+
+  // ── Reveal au scroll — IntersectionObserver ajoute .in une seule fois ──
+  const reduced = window.matchMedia?.(
+    "(prefers-reduced-motion: reduce)",
+  )?.matches;
+  const revEls = root.querySelectorAll(".lp-rev");
+  if (reduced || !("IntersectionObserver" in window)) {
+    revEls.forEach((el) => el.classList.add("in"));
+  } else {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.08 },
+    );
+    revEls.forEach((el) => io.observe(el));
+  }
 
   // ── Navigation interne (scroll doux) ──
   root.querySelectorAll("[data-scroll]").forEach((el) => {
@@ -331,7 +354,7 @@ export function mount(root) {
 
     if (!ecole_nom || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       errEl.textContent =
-        "Renseigne au moins le nom de l'auto-école et un email valide.";
+        "Renseignez au moins le nom de l'auto-école et un email valide.";
       errEl.hidden = false;
       return;
     }
@@ -359,7 +382,7 @@ export function mount(root) {
     } catch (err) {
       console.error("[landing] lead insert failed", err);
       errEl.textContent =
-        "Une erreur est survenue. Réessaie, ou écris-nous directement.";
+        "Une erreur est survenue. Réessayez, ou écrivez-nous directement.";
       errEl.hidden = false;
       submitBtn.disabled = false;
       submitBtn.textContent = "Être recontacté";
@@ -656,6 +679,51 @@ const STYLE = `<style>
   .lp-tc-name { font: 700 14px/1.2 'Plus Jakarta Sans'; color: var(--lp-ink); }
   .lp-tc-role { font: 400 12px/1.3 'Inter'; color: var(--lp-mut); margin-top: 2px; }
 
+  /* ── Reveal au scroll (IntersectionObserver ajoute .in) ── */
+  .lp-rev { opacity: 0; transform: translateY(22px); transition: opacity .65s cubic-bezier(.2,.7,.3,1), transform .65s cubic-bezier(.2,.7,.3,1); }
+  .lp-rev.in { opacity: 1; transform: none; }
+  /* Stagger des cartes à l'intérieur d'une section révélée */
+  .lp-rev .lp-card, .lp-rev .lp-feat-row, .lp-rev .lp-tc, .lp-rev .lp-step, .lp-rev .lp-plan {
+    opacity: 0; transform: translateY(14px);
+    transition: opacity .55s cubic-bezier(.2,.7,.3,1), transform .55s cubic-bezier(.2,.7,.3,1),
+                box-shadow .25s ease, border-color .25s ease; }
+  .lp-rev.in .lp-card, .lp-rev.in .lp-feat-row, .lp-rev.in .lp-tc, .lp-rev.in .lp-step, .lp-rev.in .lp-plan { opacity: 1; transform: none; }
+  .lp-rev.in > * > :nth-child(2), .lp-rev.in .lp-cards3 > :nth-child(2), .lp-rev.in .lp-feat > :nth-child(2),
+  .lp-rev.in .lp-testicards > :nth-child(2), .lp-rev.in .lp-steps > :nth-child(2), .lp-rev.in .lp-plans > :nth-child(2) { transition-delay: .12s; }
+  .lp-rev.in .lp-cards3 > :nth-child(3), .lp-rev.in .lp-feat > :nth-child(3),
+  .lp-rev.in .lp-testicards > :nth-child(3), .lp-rev.in .lp-steps > :nth-child(3), .lp-rev.in .lp-plans > :nth-child(3) { transition-delay: .24s; }
+  .lp-rev.in .lp-feat > :nth-child(4) { transition-delay: .36s; }
+
+  /* ── Hover lift (desktop) ── */
+  @media (hover: hover) and (pointer: fine) {
+    .lp-card:hover, .lp-feat-row:hover, .lp-tc:hover, .lp-plan:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 40px -18px rgba(11,16,32,.18);
+      border-color: rgba(11,16,32,.16);
+    }
+    .lp-plan-feat:hover { border-color: var(--lp-green); }
+  }
+
+  /* ── Mascotte hero ── */
+  .lp-mascot {
+    position: absolute; bottom: -14px; left: -34px; z-index: 2;
+    width: 130px; height: 130px; object-fit: contain;
+    filter: drop-shadow(0 16px 30px rgba(0,0,0,.45));
+    animation: mascotIn .7s cubic-bezier(.34,1.56,.64,1) .5s both, mascotFloat 4.5s ease-in-out 1.2s infinite;
+    pointer-events: none;
+  }
+  @keyframes mascotIn { from { opacity: 0; transform: scale(.5) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  @keyframes mascotFloat { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+
+  .lp-testi-note { font-size: .86em; color: var(--lp-mut); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lp-rev, .lp-rev .lp-card, .lp-rev .lp-feat-row, .lp-rev .lp-tc, .lp-rev .lp-step, .lp-rev .lp-plan {
+      opacity: 1; transform: none; transition: none; }
+    .lp-mascot { animation: none; }
+    .lp-card:hover, .lp-feat-row:hover, .lp-tc:hover, .lp-plan:hover { transform: none; }
+  }
+
   /* Responsive */
   @media (max-width: 860px) {
     .lp-hero-inner { grid-template-columns: 1fr; text-align: center; padding: 56px 22px 0; gap: 40px; }
@@ -667,6 +735,7 @@ const STYLE = `<style>
     .lp-hero-visual { margin-top: 10px; }
     .lp-fcard-1 { right: -8px; top: 8%; }
     .lp-fcard-2 { left: -8px; bottom: 8%; }
+    .lp-mascot { width: 96px; height: 96px; left: 0; bottom: -10px; }
     .lp-cards3, .lp-steps, .lp-plans, .lp-testicards { grid-template-columns: 1fr; }
     .lp-feat-row { flex-direction: column; }
     .lp-plan-feat { order: -1; }
