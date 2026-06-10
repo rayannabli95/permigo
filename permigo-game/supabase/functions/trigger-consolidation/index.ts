@@ -15,11 +15,15 @@
 // ═══════════════════════════════════════════════════════════════
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
+// Supabase injecte SUPABASE_SERVICE_ROLE_KEY / SUPABASE_URL automatiquement.
+const SERVICE_KEY =
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ??
+  Deno.env.get("SERVICE_ROLE_KEY") ??
+  "";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+
 Deno.serve(async () => {
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SERVICE_ROLE_KEY")!,
-  );
+  const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
   const now = new Date().toISOString();
 
@@ -87,16 +91,14 @@ Deno.serve(async () => {
   // Relais Web Push (best-effort) : la notif in-app seule n'est vue qu'à la
   // prochaine ouverture — le push, lui, fait revenir. dispatch-push gère
   // silencieusement les élèves sans subscription / clés VAPID absentes.
-  const fnBase = Deno.env.get("SUPABASE_URL")!;
-  const serviceKey = Deno.env.get("SERVICE_ROLE_KEY")!;
   let pushed = 0;
   for (const v of toProcess) {
     try {
-      const r = await fetch(`${fnBase}/functions/v1/dispatch-push`, {
+      const r = await fetch(`${SUPABASE_URL}/functions/v1/dispatch-push`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${serviceKey}`,
+          Authorization: `Bearer ${SERVICE_KEY}`,
         },
         body: JSON.stringify({
           user_id: v.eleve_id,
