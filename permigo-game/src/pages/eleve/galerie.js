@@ -336,7 +336,7 @@ export async function mount(root) {
     const color = t.color || 'var(--mu2)';
     const visual = t.image
       ? `<img src="${esc(t.image)}" alt="${esc(t.nom)}" loading="lazy" />`
-      : `<span class="gal-emoji">${esc(t.ico || '🏆')}</span>`;
+      : `<span class="gal-emoji">${t.ico ? esc(t.ico) : icon('trophy', { size: 26 })}</span>`;
     return `
       <div class="gal-card ${unlocked ? 'acquis' : 'locked'}" style="--gc:${color}"
            data-id="${esc(t.id)}" role="button" tabindex="0"
@@ -382,7 +382,7 @@ export async function mount(root) {
     const rarityLabel = RARITY_LABEL[t.rarity] || t.rarity || '';
     const visual = t.image
       ? `<img src="${esc(t.image)}" alt="${esc(t.nom)}" />`
-      : `<span class="gal-emoji">${esc(t.ico || '🏆')}</span>`;
+      : `<span class="gal-emoji">${t.ico ? esc(t.ico) : icon('trophy', { size: 26 })}</span>`;
 
     const overlay = document.createElement('div');
     overlay.className = 'gal-modal-bg';

@@ -21,7 +21,7 @@ const CHEST_META = {
   world_1: {
     label: "Monde 1 — Sécurité",
     image: "/skins/chests/chest_world_1.png",
-    emoji: "🛡️",
+    ico: "shield",
     tier: "bronze",
     xp: 200,
     gemmes: 50,
@@ -29,7 +29,7 @@ const CHEST_META = {
   world_2: {
     label: "Monde 2 — Manœuvres",
     image: "/skins/chests/chest_world_2.png",
-    emoji: "🔧",
+    ico: "settings",
     tier: "argent",
     xp: 400,
     gemmes: 100,
@@ -37,7 +37,7 @@ const CHEST_META = {
   world_3: {
     label: "Monde 3 — Conduite",
     image: "/skins/chests/chest_world_3.png",
-    emoji: "🚗",
+    ico: "car",
     tier: "or",
     xp: 700,
     gemmes: 175,
@@ -45,7 +45,7 @@ const CHEST_META = {
   world_4: {
     label: "Monde 4 — Maîtrise",
     image: "/skins/chests/chest_world_4.png",
-    emoji: "🏆",
+    ico: "trophy",
     tier: "legendaire",
     xp: 1200,
     gemmes: 300,
@@ -53,7 +53,7 @@ const CHEST_META = {
   streak_7: {
     label: "Streak 7 jours",
     image: "/skins/chests/chest_streak_7.png",
-    emoji: "🔥",
+    ico: "flame",
     tier: "argent",
     xp: 150,
     gemmes: 30,
@@ -61,7 +61,7 @@ const CHEST_META = {
   streak_14: {
     label: "Streak 14 jours",
     image: "/skins/chests/chest_streak_14.png",
-    emoji: "⚡",
+    ico: "zap",
     tier: "or",
     xp: 350,
     gemmes: 80,
@@ -69,7 +69,7 @@ const CHEST_META = {
   streak_30: {
     label: "Streak 30 jours",
     image: "/skins/chests/chest_streak_30.png",
-    emoji: "👑",
+    ico: "crown",
     tier: "legendaire",
     xp: 800,
     gemmes: 200,
@@ -85,7 +85,7 @@ const CHEST_META = {
   welcome: {
     label: "Coffre de bienvenue",
     image: "/skins/chests/chest_welcome.png",
-    emoji: "🎁",
+    ico: "gift",
     tier: "bronze",
     xp: 50,
     gemmes: 25,
@@ -285,7 +285,7 @@ function relTime(ts) {
 function renderCard(chest) {
   const meta = CHEST_META[chest.chest_type] || {
     label: chest.chest_type,
-    emoji: "📦",
+    ico: "inbox",
     tier: "bronze",
     xp: 0,
     gemmes: 0,
@@ -308,7 +308,7 @@ function renderCard(chest) {
       <img src="${meta.image}" alt="${esc(meta.label)}" loading="lazy"
            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
            style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))">
-      <span style="font-size:32px;display:none" aria-hidden="true">${meta.emoji ?? "🎁"}</span>
+      <span style="display:none;color:#fff" aria-hidden="true">${icon(meta.ico ?? "gift", { size: 32 })}</span>
       <div class="mc-icon-glow" style="background:${grad}"></div>
     </div>
     <div class="mc-info">

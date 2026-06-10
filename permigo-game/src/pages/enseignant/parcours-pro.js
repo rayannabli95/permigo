@@ -63,7 +63,7 @@ const STYLE = `<style>
   position: relative; overflow: hidden; padding: 18px 18px 20px;
   background:
     linear-gradient(160deg, rgba(11,13,26,.78) 0%, rgba(11,13,26,.58) 50%, rgba(11,13,26,.84) 100%),
-    url('/skins/fond-parcours-enseignant.png') center 18% / cover no-repeat,
+    url('/skins/fond-parcours-enseignant.webp') center 18% / cover no-repeat,
     linear-gradient(160deg, var(--ink2) 0%, var(--ink3) 60%, var(--ink) 100%);
 }
 .ppr-hero::before {
@@ -99,7 +99,7 @@ const STYLE = `<style>
   border-radius: 20px; overflow: hidden;
   background:
     linear-gradient(to bottom, rgba(11,13,26,.58) 0%, rgba(11,13,26,.74) 60%, rgba(11,13,26,.86) 100%),
-    url('/skins/fond-parcours-enseignant.png') center top / cover no-repeat;
+    url('/skins/fond-parcours-enseignant.webp') center top / cover no-repeat;
   box-shadow: var(--s1);
 }
 .ppr-route svg.path { display: block; width: 100%; height: auto; overflow: visible; }

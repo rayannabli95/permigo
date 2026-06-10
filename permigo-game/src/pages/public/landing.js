@@ -20,7 +20,7 @@ export function mount(root) {
     <!-- ── Barre haute ── -->
     <header class="lp-nav">
       <a class="lp-brand" href="#/" aria-label="PermiGo">
-        <img src="${BADGE}" alt="" class="lp-brand-badge" />
+        <img src="${BADGE}" alt="" class="lp-brand-badge" width="34" height="34" />
         <span>Permi<span class="g">Go</span></span>
       </a>
       <div class="lp-nav-actions">
@@ -66,11 +66,11 @@ export function mount(root) {
 
         <!-- Visuel droit -->
         <div class="lp-hero-visual" aria-hidden="true">
-          <img class="lp-mascot" src="/skins/mascot-hello.png" alt="" loading="lazy" />
+          <img class="lp-mascot" src="/skins/mascot-hello.png" alt="" loading="lazy" decoding="async" width="120" height="120" />
           <div class="lp-phone">
             <div class="lp-phone-notch"></div>
             <div class="lp-phone-screen">
-              <img src="${BADGE}" alt="" class="lp-phone-badge" />
+              <img src="${BADGE}" alt="" class="lp-phone-badge" width="54" height="54" />
               <div class="lp-phone-lvl">Niveau 4 · Maîtrise du véhicule</div>
               <div class="lp-phone-streak">🔥 <strong>12</strong> jours de suite</div>
               <div class="lp-phone-bar"><div class="lp-phone-fill"></div></div>
@@ -271,7 +271,7 @@ export function mount(root) {
 
     <!-- ── Footer ── -->
     <footer class="lp-foot">
-      <div class="lp-foot-brand"><img src="${BADGE}" alt="" /> Permi<span class="g">Go</span></div>
+      <div class="lp-foot-brand"><img src="${BADGE}" alt="" width="22" height="22" loading="lazy" /> Permi<span class="g">Go</span></div>
       <div class="lp-foot-links">
         <a href="#/legal" id="lp-legal">Mentions légales</a>
         <button class="lp-foot-login" id="lp-login2" type="button">Se connecter</button>
