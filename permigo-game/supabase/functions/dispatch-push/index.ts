@@ -100,9 +100,16 @@ async function sendTo(supabase: any, sub: any, payload: object) {
   }
 }
 
+// Supabase injecte SUPABASE_SERVICE_ROLE_KEY / SUPABASE_URL automatiquement —
+// PAS de secret nommé SERVICE_ROLE_KEY (fallback gardé par sécurité).
+const SERVICE_KEY =
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ??
+  Deno.env.get("SERVICE_ROLE_KEY") ??
+  "";
+
 Deno.serve(async (req) => {
   // ── Auth : cron secret OU service role ──
-  const serviceKey = Deno.env.get("SERVICE_ROLE_KEY")!;
+  const serviceKey = SERVICE_KEY;
   const cronSecret = Deno.env.get("CRON_SECRET") ?? "";
   const gotCron = req.headers.get("x-cron-secret") ?? "";
   const gotAuth = req.headers.get("authorization") ?? "";
