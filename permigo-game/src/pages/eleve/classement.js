@@ -18,6 +18,7 @@ import {
   renderLeagueRow,
   LEAGUE_CSS,
 } from "@/utils/league-shared.js";
+import { THEORY_LEAGUES, theoryLeague } from "@/utils/theory-league.js";
 
 const LIMIT = 50;
 
@@ -221,6 +222,20 @@ ${LEAGUE_CSS}
   font: 800 12px/1 'Plus Jakarta Sans', sans-serif; background: var(--lc, var(--a));
   box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
 .clt-lg-chip.elite { background: linear-gradient(135deg,#f59e0b,#d97706); }
+
+/* ── Ligue théorique (dimension autonomie — visuellement distincte) ── */
+.clt-th-hero { border-style: dashed; border-left-style: solid; }
+.clt-th-hero .clt-pts-legend { margin-top: 12px; }
+.clt-th-cta {
+  display: block; margin-top: 14px; padding: 12px;
+  text-align: center; text-decoration: none; border-radius: 12px;
+  color: var(--a-ink);
+  background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
+  box-shadow: 0 2px 10px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset;
+  font: 700 14px/1 'Plus Jakarta Sans', sans-serif; min-height: 44px;
+  box-sizing: border-box;
+}
+.clt-th-cta:active { transform: scale(.98); }
 </style>`;
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -240,7 +255,7 @@ export async function mount(root) {
       .join("")}</div>
   </div>`;
 
-  const [ecoleRes, nationalRes] = await Promise.all([
+  const [ecoleRes, nationalRes, theorieRes] = await Promise.all([
     sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: LIMIT }).then(
       (r) => r,
       () => ({ data: null, error: true }),
@@ -251,11 +266,18 @@ export async function mount(root) {
         (r) => r,
         () => ({ data: null, error: true }),
       ),
+    sb
+      .rpc("get_theory_leaderboard", { p_scope: "ecole", p_limit: LIMIT })
+      .then(
+        (r) => r,
+        () => ({ data: null, error: true }),
+      ),
   ]);
 
   const data = {
     ecole: ecoleRes.data || [],
     national: nationalRes.data || [],
+    theorie: theorieRes.data || [],
   };
 
   // Défaut = Mon école (la ligue hebdo est abandonnée → plus d'onglet vide)
@@ -277,7 +299,9 @@ function _render(scope, data) {
 
   // Pill header selon scope
   let pill = "";
-  if (scope === "semaine") {
+  if (scope === "theorie") {
+    pill = _theoryPill(mine);
+  } else if (scope === "semaine") {
     const myLeague = getLeague(mine?.weekly_pts ?? 0);
     if (myLeague) {
       pill = `<div class="clt-mepill"><span class="clt-mepill-ico">${myLeague.emoji}</span>Ligue ${esc(myLeague.name)} · ${mine?.weekly_pts ?? 0} pts</div>`;
@@ -300,6 +324,7 @@ function _render(scope, data) {
     <div class="clt-tabs">
       <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">${icon("trophy", { size: 13, strokeWidth: 2 })} Mon école</button>
       <button class="clt-tab ${scope === "national" ? "on" : ""}" data-scope="national">National</button>
+      <button class="clt-tab ${scope === "theorie" ? "on" : ""}" data-scope="theorie">${icon("zap", { size: 13, strokeWidth: 2 })} Théorie</button>
     </div>
   </div>
   <div id="clt-body">${_renderBody(scope, rows)}</div>
@@ -316,7 +341,112 @@ function _render(scope, data) {
 
 function _renderBody(scope, rows) {
   if (scope === "semaine") return _renderLeagueBody(rows);
+  if (scope === "theorie") return _renderTheoryBody(rows);
   return _renderAllTimeBody(rows);
+}
+
+// ── Pill théorie ─────────────────────────────────────────────────
+function _theoryPill(mine) {
+  const info = theoryLeague(mine?.score ?? 0);
+  return info.league
+    ? `<div class="clt-mepill"><span class="clt-mepill-ico">${icon("zap", { size: 14 })}</span>Ligue ${esc(info.league.name)} · ${mine?.score ?? 0} pts</div>`
+    : `<div class="clt-mepill"><span class="clt-mepill-ico">${icon("zap", { size: 14 })}</span>Ton premier quiz t'ouvre la ligue</div>`;
+}
+
+// ── Hero « Ta ligue théorique » ──────────────────────────────────
+function _theoryLeagueHero(mine) {
+  const sc = mine?.score ?? 0;
+  const nComp = mine?.n_comp ?? 0;
+  const nExams = mine?.n_exams ?? 0;
+  const info = theoryLeague(sc);
+
+  // Onboarding : pas encore dans la ligue → CTA premier quiz
+  if (!info.league) {
+    return `
+  <div class="clt-rl-hero clt-th-hero" style="--lc:${THEORY_LEAGUES[0].color}">
+    <div class="clt-rl-top">
+      <div class="clt-rl-medal">?</div>
+      <div class="clt-rl-info">
+        <div class="clt-rl-lbl">Ta ligue théorique</div>
+        <div class="clt-rl-name">Pas encore classé</div>
+      </div>
+    </div>
+    <div class="clt-rl-prog">Remplis ton premier quiz pour entrer dans la ligue théorique — chaque compétence travaillée compte.</div>
+    <a class="clt-th-cta" href="#/parcours">Faire mon premier quiz</a>
+  </div>`;
+  }
+
+  const L = info.league;
+  const dots = THEORY_LEAGUES.map((l) => {
+    const cls = sc >= l.startAt ? (l.n === L.n && !info.top ? "cur" : "done") : "";
+    return `<div class="clt-rl-dot ${cls}" style="--dc:${l.color}"></div>`;
+  }).join("");
+  const progText = info.top
+    ? "Théorie maîtrisée — montre ça à ton moniteur en leçon"
+    : `Encore <strong>${info.toNext}</strong> pt${info.toNext > 1 ? "s" : ""} avant la Ligue ${info.next.n} — ${esc(info.next.name)}`;
+  return `
+  <div class="clt-rl-hero clt-th-hero" style="--lc:${L.color}">
+    <div class="clt-rl-top">
+      <div class="clt-rl-medal">${info.top ? "★" : L.n}</div>
+      <div class="clt-rl-info">
+        <div class="clt-rl-lbl">Ta ligue théorique</div>
+        <div class="clt-rl-name">Ligue ${L.n} — ${esc(L.name)}</div>
+      </div>
+    </div>
+    <div class="clt-rl-prog">${progText}</div>
+    <div class="clt-rl-track">${dots}</div>
+    <div class="clt-pts-legend">
+      <span class="clt-pts-pill">${nComp} compétence${nComp > 1 ? "s" : ""} en quiz réussi (+1 pt)</span>
+      <span class="clt-pts-pill">${nExams} parcours d'examen réussi${nExams > 1 ? "s" : ""} (+4 pts)</span>
+    </div>
+  </div>`;
+}
+
+// ── Corps ligue théorique ────────────────────────────────────────
+function _renderTheoryBody(rows) {
+  const mine = _myRow(rows);
+  const hero = _theoryLeagueHero(mine);
+  const active = rows.filter((r) => r.score > 0);
+
+  if (active.length < 2) {
+    return `${hero}<div class="clt-empty">
+      <div class="clt-empty-ico">${icon("zap", { size: 30 })}</div>
+      <div class="clt-empty-txt">Le classement s'anime quand 2+ élèves ont des points théorie. Quiz et examens blancs comptent.</div>
+    </div>`;
+  }
+
+  const top = active
+    .filter((r) => r.rang <= LIMIT)
+    .sort((a, b) => a.rang - b.rang);
+  const meOutside = mine && mine.rang > LIMIT;
+
+  let html = `${hero}<div class="clt-list">${top.map(_theoryRowHtml).join("")}</div>`;
+  if (meOutside) {
+    html += `<div class="clt-sep">· · ·</div><div class="clt-list">${_theoryRowHtml(mine)}</div>`;
+  }
+  return html;
+}
+
+function _theoryRowHtml(r) {
+  const m = MEDALS[r.rang];
+  const rankCell = m
+    ? `<div class="clt-rank medal" style="--mg:${m.grad};--mglow:${m.glow}" aria-label="Rang ${r.rang}">${icon(m.ico, { size: 17, strokeWidth: 2.2, color: "#fff" })}</div>`
+    : `<div class="clt-rank" aria-label="Rang ${r.rang}">${r.rang}</div>`;
+  const info = theoryLeague(r.score);
+  const chip = !info.league
+    ? ""
+    : info.top
+      ? `<div class="clt-lg-chip elite" title="${esc(info.league.name)}" aria-label="Ligue ${esc(info.league.name)}">★</div>`
+      : `<div class="clt-lg-chip" style="--lc:${info.league.color}" title="Ligue ${info.league.n} — ${esc(info.league.name)}" aria-label="Ligue ${info.league.n}">${info.league.n}</div>`;
+  return `
+  <div class="clt-row ${r.is_me ? "me" : ""} ${m ? "top" + r.rang : ""}">
+    ${rankCell}
+    <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 34)}</div>
+    <div class="clt-name">${esc(r.display_name)}</div>
+    ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ""}
+    ${chip}
+    <div class="clt-score">${r.score}<span class="clt-score-sub">pts</span></div>
+  </div>`;
 }
 
 // ── Corps ligue semaine ──────────────────────────────────────────
@@ -464,7 +594,9 @@ function _wire(root, data, setScope) {
       const mine = _myRow(rows);
       const pill = root.querySelector(".clt-mepill");
       if (pill) {
-        if (next === "semaine") {
+        if (next === "theorie") {
+          pill.outerHTML = _theoryPill(mine);
+        } else if (next === "semaine") {
           const lg = getLeague(mine?.weekly_pts ?? 0);
           pill.innerHTML = lg
             ? `<span class="clt-mepill-ico">${lg.emoji}</span>Ligue ${esc(lg.name)} · ${mine?.weekly_pts ?? 0} pts`

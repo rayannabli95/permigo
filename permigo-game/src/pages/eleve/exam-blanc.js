@@ -3,6 +3,7 @@
 // 100 % statique — pas de Supabase
 // Seuil : 12/15 (80 %) — verdict CEPC
 // ═══════════════════════════════════════════════════════════════
+import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -377,6 +378,25 @@ function showResults(root, questions, answers, parcours_id) {
     passed,
     faute_eliminatoire: fauteRatee,
   });
+
+  // Persistance ligue théorique — fire-and-forget (RLS : élève insère les siens)
+  const me = getCurUser();
+  if (me?.id) {
+    sb.from("quiz_attempts")
+      .insert({
+        user_id: me.id,
+        competence_id: null,
+        type: "exam_blanc",
+        ref_id: String(parcours_id),
+        score: pct,
+        passed,
+        questions_ids: [],
+        answers_indices: answers.map((a) => a ?? -1),
+      })
+      .then(({ error }) => {
+        if (error) console.error("[exam-blanc] persist attempt", error);
+      });
+  }
 
   if (passed) playVictory();
   else playDefeat();
