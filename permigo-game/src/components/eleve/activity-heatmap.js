@@ -110,7 +110,7 @@ export function renderHeatmap({
           <span><b>${totalActive}</b> jours actifs · <b>${last7Active}</b> cette semaine</span>
         </div>
       </div>
-      <div class="hmap-scroll">
+      <div class="hmap-scroll" tabindex="0" role="region" aria-label="Historique d'activité, défilement horizontal">
         <div class="hmap-months">
           ${monthsLabels.map((m) => `<span style="grid-column-start:${m.weekIdx + 2}">${m.monthName}</span>`).join("")}
         </div>

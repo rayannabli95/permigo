@@ -37,13 +37,20 @@ async function loginAsEnseignant(page) {
   await page.click("#lg-submit");
   // Attendre la page enseignant (aujourd'hui ou mes-eleves)
   await page.waitForSelector(".aj-page, .me-list, .vs", { timeout: 20_000 });
+  // afterLogin() force le hash sur "#/" en différé (setTimeout 600ms) et pose
+  // body.has-chrome en dernier : naviguer avant = se faire écraser le hash.
+  await page.waitForSelector("body.has-chrome", { timeout: 20_000 });
 }
 
 async function goToValidation(page) {
-  await page.evaluate(() => {
-    location.hash = "#/validation";
-  });
-  await page.waitForSelector(".vs", { timeout: 15_000 });
+  // Le boot post-login peut écraser un hash posé trop tôt → on re-pose le
+  // hash et on re-vérifie jusqu'à ce que la page validation soit montée.
+  await expect(async () => {
+    await page.evaluate(() => {
+      location.hash = "#/validation";
+    });
+    await page.waitForSelector(".vs", { timeout: 4_000 });
+  }).toPass({ timeout: 25_000 });
 }
 
 // Sélectionne le premier élève dans le dropdown (auto-ouvert si aucun choisi)
@@ -59,18 +66,17 @@ async function pickFirstEleve(page) {
   await page.waitForSelector(".vs-monde-hd[data-monde]", { timeout: 10_000 });
 }
 
-// Ouvre le premier monde contenant une chip non verrouillée et la retourne
+// Ouvre les mondes un à un jusqu'à trouver une chip non verrouillée.
+// ⚠️ Cliquer un monde re-render TOUTE la page (render() complet) : il faut
+// re-query après chaque clic, jamais garder un handle d'avant.
 async function pickFreeChip(page) {
-  const mondes = page.locator(".vs-monde-hd[data-monde]");
-  const n = await mondes.count();
+  const n = await page.locator(".vs-monde-hd[data-monde]").count();
   for (let i = 0; i < n; i++) {
-    const monde = mondes.nth(i);
-    const section = monde.locator(".."); // section.vs-monde
-    const isOpen = await section.evaluate((el) =>
-      el.classList.contains("open"),
-    );
-    if (!isOpen) await monde.click();
-    const chip = section.locator(".vs-chip[data-comp]").first();
+    const hd = page.locator(".vs-monde-hd[data-monde]").nth(i);
+    if ((await hd.getAttribute("aria-expanded")) !== "true") {
+      await hd.evaluate((el) => el.click());
+    }
+    const chip = page.locator(".vs-monde.open .vs-chip[data-comp]").first();
     if (await chip.isVisible({ timeout: 1_500 }).catch(() => false))
       return chip;
   }

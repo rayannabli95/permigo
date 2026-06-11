@@ -15,12 +15,29 @@ const EMAIL_ELEVE = ELEVE.email;
 const EMAIL_ENSEIGNANT = ENSEIGNANT.email;
 const PWD = ELEVE.pwd;
 
+// Consentement cookies pré-posé : sinon le banner + son scrim translucide
+// recouvrent la page et axe calcule les contrastes À TRAVERS le scrim.
+async function prepPage(page) {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem("permigo_cookie_consent", "essential");
+    } catch {
+      /* ignore */
+    }
+  });
+}
+
 async function loginAs(page, email) {
+  await prepPage(page);
   await page.goto("/#/login");
   await page.waitForSelector("#lg-email", { timeout: 12_000 });
   await page.fill("#lg-email", email);
   await page.fill("#lg-pwd", PWD);
   await page.click("#lg-submit");
+  // afterLogin() force le hash sur "#/" en différé et pose body.has-chrome
+  // en dernier : attendre ce signal avant toute navigation hash.
+  await page.waitForSelector("body.has-chrome", { timeout: 25_000 });
 }
 
 function splitViolations(violations) {
@@ -45,6 +62,7 @@ function formatViolation(v) {
 
 // ─── Page : Login ────────────────────────────────────────────────────
 test("a11y · login page", async ({ page }) => {
+  await prepPage(page);
   await page.goto("/#/login");
   await page.waitForSelector("#lg-email", { timeout: 10_000 });
 
@@ -128,8 +146,12 @@ test("a11y · fiche compétence dialog", async ({ page }) => {
     location.hash = "#/parcours";
   });
   await page.waitForSelector(".prc-node", { timeout: 15_000 });
-  // Ouvre la première fiche
-  await page.locator(".prc-node:not(.locked)").first().click();
+  // Ouvre la première fiche (clic via evaluate : les nodes ont une animation
+  // continue qui les rend « not stable » pour l'auto-wait Playwright)
+  await page
+    .locator(".prc-node:not(.locked)")
+    .first()
+    .evaluate((el) => el.click());
   await page.waitForSelector("#bsheet.open", { timeout: 6_000 });
 
   const results = await new AxeBuilder({ page })

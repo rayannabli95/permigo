@@ -113,6 +113,8 @@ const STYLE = `
   .bn-tab.active .bn-label {
     opacity: 1;
     transform: translateY(0);
+    /* Label 10px : l'accent pur ne tient pas le 4.5:1 — on l'ancre vers l'encre */
+    color: color-mix(in srgb, var(--adk) 55%, var(--ink));
   }
   @media (prefers-reduced-motion: reduce) {
     .bn-label { transition: opacity .12s ease; transform: none; }

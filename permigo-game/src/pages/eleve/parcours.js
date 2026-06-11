@@ -1221,7 +1221,7 @@ const STYLE = `<style>
 .prc-skip {
   position: absolute; left: 50%; top: 8px; transform: translateX(-50%) translateY(-200%);
   z-index: 60; padding: 10px 16px; border-radius: 10px;
-  background: var(--a); color: #fff; font: 700 13px/1 'Inter', sans-serif;
+  background: var(--a); color: var(--a-ink); font: 700 13px/1 'Inter', sans-serif;
   text-decoration: none; transition: transform .15s ease;
 }
 .prc-skip:focus { transform: translateX(-50%) translateY(0); outline: 2px solid #fff; outline-offset: 2px; }
@@ -2082,7 +2082,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   // Ne change pas le statut (already_acquired) — joue l'animation + crédite l'XP d'engagement.
   const recapBtn = `
     <a href="#/quiz/${esc(compId)}/post_validation" role="button"
-       style="display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:15px;background:var(--a);border:none;color:#fff;border-radius:14px;font:800 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;box-shadow:0 6px 16px -4px color-mix(in srgb, var(--a) 60%, transparent);min-height:52px;">
+       style="display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:15px;background:var(--a);border:none;color:var(--a-ink);border-radius:14px;font:800 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;box-shadow:0 6px 16px -4px color-mix(in srgb, var(--a) 60%, transparent);min-height:52px;">
       ${icon("zap", { size: 16 })} Clique pour te tester sur la compétence !
     </a>`;
 
