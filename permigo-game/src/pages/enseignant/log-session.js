@@ -56,7 +56,7 @@ const STYLE = `<style>
   .vs-back { width: 40px; height: 40px; flex-shrink: 0; border: 1px solid var(--bo); background: var(--su); border-radius: 10px; color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .vs-back:active { transform: scale(.95); }
   .vs-h1 { font: 800 19px/1.2 'Plus Jakarta Sans', sans-serif; margin: 0; letter-spacing: -.02em; }
-  .vs-sub { font: 500 12.5px/1.3 'Inter', sans-serif; color: var(--mu2); margin: 2px 0 0; }
+  .vs-sub { font: 500 12.5px/1.3 'Inter', sans-serif; color: color-mix(in srgb, var(--mu) 45%, var(--ink)); margin: 2px 0 0; }
 
   .vs-card { background: var(--su); border: 1px solid var(--bo); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
   .vs-card-ttl { font: 700 12px/1 'Inter', sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--mu2); margin: 0 0 12px; display: flex; align-items: center; gap: 6px; }
@@ -280,7 +280,7 @@ function renderEleveDropdown() {
       : list
           .map((e, i) => {
             const sel = e.id === _eleve;
-            return `<button class="vs-dd-opt${sel ? " sel" : ""}" type="button" data-eleve="${esc(e.id)}" style="animation-delay:${Math.min(i, 8) * 28}ms">
+            return `<button class="vs-dd-opt${sel ? " sel" : ""}" type="button" role="option" aria-selected="${sel}" data-eleve="${esc(e.id)}" style="animation-delay:${Math.min(i, 8) * 28}ms">
               <span class="vs-dd-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 32)}</span>
               <span class="vs-dd-name">${esc(e.prenom || "")} ${esc(e.nom || "")}</span>
               ${sel ? `<span class="vs-dd-check">${icon("check", { size: 15, strokeWidth: 2.8 })}</span>` : ""}
@@ -295,7 +295,7 @@ function renderEleveDropdown() {
         <span class="vs-dd-cur">${trigger}</span>
         <span class="vs-dd-chev">${icon("chevron-down", { size: 18, strokeWidth: 2.4 })}</span>
       </button>
-      <div class="vs-dd-panel" role="listbox">${search}<div class="vs-dd-list">${opts}</div></div>
+      <div class="vs-dd-panel">${search}<div class="vs-dd-list"${list.length ? ' role="listbox" aria-label="Choisir un élève"' : ""}>${opts}</div></div>
     </div>`;
 }
 

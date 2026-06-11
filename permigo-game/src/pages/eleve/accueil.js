@@ -414,7 +414,8 @@ const STYLE = `<style>
   font: 600 10px/1 'Inter', sans-serif;
   letter-spacing: .1em;
   text-transform: uppercase;
-  color: var(--mu2);
+  /* 10px uppercase : mu2 seul ne tient pas le contraste AA */
+  color: color-mix(in srgb, var(--mu) 45%, var(--ink));
   margin-bottom: 12px;
 }
 .acc2-action-tag-dot {
@@ -443,7 +444,7 @@ const STYLE = `<style>
   background: var(--a);
   border: none;
   border-radius: 16px;
-  color: #fff;
+  color: var(--a-ink); /* encre prévue pour l'accent : 4.5:1 garanti par accent.js */
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   min-height: 52px;
@@ -723,7 +724,7 @@ const WORLDS = REMC.map((cat, i) => ({
   name: cat.name,
   subs: cat.subs,
   total: cat.subs.length,
-  color: ["var(--gr2)", "var(--bl2)", "#eab308", "var(--pul)"][i],
+  color: ["var(--grk2)", "var(--blk2)", "var(--amx)", "var(--puk)"][i], // variantes foncées : % lisible (AA) sur fond clair
 }));
 
 // Jours d'absence depuis la visite précédente (calculé au mount, lu au render)

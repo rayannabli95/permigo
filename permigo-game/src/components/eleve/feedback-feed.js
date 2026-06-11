@@ -49,7 +49,9 @@ function ensureStyle() {
   }
   .ff-see-all {
     font: 600 12px/1 'Inter', sans-serif;
-    color: var(--a);
+    color: var(--ink3); /* l'accent pur ne tient pas le 4.5:1 à 12px */
+    text-decoration: underline;
+    text-underline-offset: 3px;
     background: none; border: none;
     cursor: pointer; padding: 4px 0;
     display: flex; align-items: center; gap: 4px;
@@ -207,7 +209,7 @@ function renderCard(evt, idx) {
 
   const statusBit =
     isSession && evt.confirmation_status
-      ? `<span style="font-size:10px;color:${evt.confirmation_status === "confirmed" ? "var(--grd)" : "var(--mu2)"}">
+      ? `<span style="font-size:10px;color:${evt.confirmation_status === "confirmed" ? "var(--grdk)" : "var(--ink3)"}">
         ${evt.confirmation_status === "confirmed" ? "✓ confirmée" : evt.confirmation_status === "refused" ? "✗ refusée" : "en attente"}
        </span>`
       : "";

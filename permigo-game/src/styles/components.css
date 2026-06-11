@@ -186,8 +186,9 @@ button:active:not(:disabled),
   max-width: 90vw;
 }
 .toast.on { opacity: 1; transform: translateY(0) scale(1); }
-.toast-error { background: var(--rd); color: #fff; border-color: var(--rd); }
-.toast-success { background: var(--gr); color: #fff; border-color: var(--gr); }
+/* Fonds assombris (--rdx/--grdk) : blanc dessus passe le 4.5:1 WCAG AA */
+.toast-error { background: var(--rdx); color: #fff; border-color: var(--rdx); }
+.toast-success { background: var(--grdk); color: #fff; border-color: var(--grdk); }
 .toast .toast-msg { flex: 1; }
 .toast .toast-close {
   width: 22px; height: 22px;
