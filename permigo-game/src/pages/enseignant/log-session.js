@@ -15,6 +15,7 @@ import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
+import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
 
 const MAX_NOTE = 300;
 
@@ -48,6 +49,7 @@ let _query = "";
 let _submitting = false;
 let _eleveDDOpen = false; // dropdown élève ouvert
 let _openMondes = new Set(); // cat.id des accordéons ouverts
+let _showSub = false; // coach-hint mode d'emploi (1re visite seulement)
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -90,10 +92,11 @@ const STYLE = `<style>
   @keyframes vsDdIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
   @media (prefers-reduced-motion: reduce) { .vs-dd-opt { animation: none; opacity: 1; } .vs-dd-chev, .vs-dd-panel { transition: none; } }
 
-  /* Légende */
+  /* Légende — 3 pastilles, le geste (tap qui cycle) s'auto-explique */
   .vs-comps { margin-bottom: 4px; }
-  .vs-legend { font: 500 12px/1.5 'Inter', sans-serif; color: var(--mu2); margin: 0 2px 18px; }
-  .vs-leg { font-weight: 700; }
+  .vs-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font: 600 12px/1 'Inter', sans-serif; color: var(--mu2); margin: 0 2px 16px; }
+  .vs-leg { display: inline-flex; align-items: center; gap: 5px; }
+  .vs-leg::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
   .vs-leg.acquis { color: var(--grd); }
   .vs-leg.en_cours { color: #6366f1; }
   .vs-leg.a_retravailler { color: var(--amx); }
@@ -159,6 +162,10 @@ export async function mount(root) {
   _submitting = false;
   _eleveDDOpen = false;
   _openMondes = new Set();
+  // Figé au mount : render() re-tourne à chaque interaction, le hint ne doit
+  // pas disparaître au premier tap.
+  _showSub = shouldShowHint("validation-sub");
+  if (_showSub) markHintSeen("validation-sub");
 
   track("page_view", { page: "valider_seance", user_role: _me.role });
 
@@ -242,7 +249,7 @@ function render() {
         <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
         <div>
           <h1 class="vs-h1">Valider une séance</h1>
-          <p class="vs-sub">Choisis l'élève, déroule un monde, coche ce qui est validé.</p>
+          ${_showSub ? `<p class="vs-sub">Choisis l'élève, déroule un monde, coche ce qui est validé.</p>` : ""}
         </div>
       </div>
       ${renderEleveDropdown()}
@@ -344,8 +351,8 @@ function renderComps() {
 
   return `
     <div class="vs-comps">
-      <p class="vs-legend">Appuie sur une compétence — chaque appui change l'état :
-        <b class="vs-leg acquis">acquis</b> → <b class="vs-leg en_cours">en cours</b> → <b class="vs-leg a_retravailler">à retravailler</b>.</p>
+      <p class="vs-legend" aria-label="Chaque appui sur une compétence change son état : acquis, en cours, à retravailler">
+        <span class="vs-leg acquis">acquis</span><span class="vs-leg en_cours">en cours</span><span class="vs-leg a_retravailler">à retravailler</span></p>
       ${sections}
     </div>`;
 }

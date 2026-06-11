@@ -865,13 +865,13 @@ async function renderInto(root, _me) {
 
       <!-- KPI : mes élèves / engagement 7 j / complétude livret -->
       <div class="aj-quickstats">
-        <div class="aj-quickstat">
-          <div class="aj-quickstat-val">${nbElevesActifs}<small> / ${nbElevesEcole} école</small></div>
+        <div class="aj-quickstat" title="${nbElevesEcole} élèves dans l'école">
+          <div class="aj-quickstat-val">${nbElevesActifs}</div>
           <div class="aj-quickstat-lbl">Mes élèves</div>
         </div>
-        <div class="aj-quickstat">
+        <div class="aj-quickstat"${nbElevesActifs > 0 ? ` title="${actifs7j} élèves sur ${nbElevesActifs}"` : ""}>
           <div class="aj-quickstat-val">${nbElevesActifs > 0 ? `${engagementPct}<small> %</small>` : "—"}</div>
-          <div class="aj-quickstat-lbl">Actifs ces 7 jours${nbElevesActifs > 0 ? ` (${actifs7j}/${nbElevesActifs})` : ""}</div>
+          <div class="aj-quickstat-lbl">Actifs cette semaine</div>
           <div class="aj-quickstat-bar"><div style="width:${engagementPct}%"></div></div>
         </div>
         <div class="aj-quickstat">
@@ -881,19 +881,12 @@ async function renderInto(root, _me) {
         </div>
       </div>
 
-      <!-- Actions rapides -->
+      <!-- Action rapide : Inviter seulement — « Mes élèves » est dans la nav,
+           « Valider une séance » a déjà le FAB + le hero -->
       <div class="aj-actions">
         <button class="aj-action" id="aj-act-invite" type="button">
           <span class="aj-action-ico">${icon("user-plus", { size: 16, strokeWidth: 2 })}</span>
           Inviter un élève
-        </button>
-        <button class="aj-action" id="aj-act-eleves" type="button">
-          <span class="aj-action-ico">${icon("users", { size: 16, strokeWidth: 2 })}</span>
-          Mes élèves
-        </button>
-        <button class="aj-action" id="aj-act-session" type="button">
-          <span class="aj-action-ico">${icon("check-circle", { size: 16, strokeWidth: 2 })}</span>
-          Valider une séance
         </button>
       </div>
 
@@ -1000,14 +993,6 @@ async function renderInto(root, _me) {
   root.querySelector("#aj-act-invite")?.addEventListener("click", () => {
     track("quick_action.invite");
     openInviteEleveModal(_me);
-  });
-  root.querySelector("#aj-act-eleves")?.addEventListener("click", () => {
-    track("quick_action.eleves");
-    navigate("#/eleves");
-  });
-  root.querySelector("#aj-act-session")?.addEventListener("click", () => {
-    track("quick_action.log_session");
-    navigate("#/log-session");
   });
   root.querySelector("#aj-ligue-moi")?.addEventListener("click", () => {
     track("ligue.open", { from: "aujourdhui", which: "moniteur" });

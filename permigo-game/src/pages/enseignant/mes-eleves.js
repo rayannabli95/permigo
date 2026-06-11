@@ -16,6 +16,7 @@ import {
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { icon } from "@/utils/icons.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
+import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -322,7 +323,10 @@ const STYLE = `<style>
     padding: 14px 16px;
     margin-bottom: 16px;
     animation: skel-pulse 0s; /* reset */
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
+  .me-relancer-section:focus-visible { outline: 3px solid var(--amx); outline-offset: 2px; }
   .me-relancer-title {
     font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
     color: var(--amx);
@@ -706,12 +710,17 @@ function render() {
   const prets = roster.filter((e) => e.readiness === "pret").length;
   const aRelancerList = roster.filter((e) => e.aRelancer);
 
+  // Bandeau 1 ligne cliquable ; l'explication n'apparaît qu'à la 1re visite
+  const showRelancerHint =
+    aRelancerList.length > 0 && shouldShowHint("relancer");
+  if (showRelancerHint) markHintSeen("relancer");
   const relancerSection =
     aRelancerList.length > 0
       ? `
-    <div class="me-relancer-section" id="me-relancer-section">
-      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;">${icon("alert-circle", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} à relancer cette semaine</p>
-      <p class="me-relancer-sub">Sans activité depuis 14 jours ou plus — un point en leçon peut débloquer la progression.</p>
+    <div class="me-relancer-section" id="me-relancer-section" role="button" tabindex="0"
+         aria-label="${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} sans activité depuis 14 jours ou plus — voir la liste">
+      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;margin:0;">${icon("alert-circle", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} à relancer <span style="margin-left:auto;display:inline-flex">${icon("chevron-right", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })}</span></p>
+      ${showRelancerHint ? `<p class="me-relancer-sub">Sans activité depuis 14 jours ou plus — un point en leçon peut débloquer la progression.</p>` : ""}
     </div>
   `
       : "";
@@ -824,32 +833,35 @@ function renderRow(eleve) {
     [eleve.prenom, eleve.nom].filter(Boolean).join(" ") || "—",
   );
 
+  // Badges d'exception uniquement : un « Actif » répété sur 25 lignes
+  // n'est plus un signal. Le détail (validations, dates) vit dans la fiche.
+  const badges =
+    eleve.readiness === "recu"
+      ? `<span class="me-badge recu">${icon("check", { size: 11, strokeWidth: 2.6 })} Reçu</span>`
+      : [
+          eleve.readiness === "pret"
+            ? `<span class="me-badge pret">${icon("check", { size: 11, strokeWidth: 2.6 })} Prêt</span>`
+            : "",
+          eleve.examStatut === "planifie"
+            ? `<span class="me-badge planifie">${icon("calendar", { size: 11, strokeWidth: 2.4 })} ${esc(fmtExamDate(eleve.examDate))}</span>`
+            : "",
+          eleve.aRelancer
+            ? `<span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">${icon("alert-circle", { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `${eleve.joursInactif}j` : "À relancer"}</span>`
+            : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+
   return `
     <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="button" tabindex="0"
-         aria-label="Fiche de ${fullNom} — ${eleve.acquis}/${eleve.total} compétences acquises, ${eleve.actif ? "actif" : "inactif"}">
+         aria-label="Fiche de ${fullNom} — ${eleve.acquis}/${eleve.total} compétences acquises${eleve.actif ? "" : ", inactif"}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 44)}</div>
 
       <div class="me-info">
         <div class="me-nom">
           ${fullNom || "—"}
         </div>
-        <div class="me-meta">
-          ${
-            eleve.readiness === "recu"
-              ? `<span class="me-badge recu">${icon("check", { size: 11, strokeWidth: 2.6 })} Reçu</span>`
-              : `<span class="me-badge ${eleve.actif ? "actif" : "inactif"}">${eleve.actif ? "Actif" : "Inactif"}</span>
-                 ${eleve.readiness === "pret" ? `<span class="me-badge pret">${icon("check", { size: 11, strokeWidth: 2.6 })} Prêt</span>` : ""}
-                 ${eleve.examStatut === "planifie" ? `<span class="me-badge planifie">${icon("calendar", { size: 11, strokeWidth: 2.4 })} ${esc(fmtExamDate(eleve.examDate))}</span>` : ""}
-                 ${
-                   eleve.aRelancer
-                     ? `<span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">${icon("alert-circle", { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `${eleve.joursInactif}j` : "À relancer"}</span>`
-                     : ""
-                 }`
-          }
-          <span class="me-meta-count">
-            ${eleve.acquis} validation${eleve.acquis > 1 ? "s" : ""}
-          </span>
-        </div>
+        ${badges ? `<div class="me-meta">${badges}</div>` : ""}
       </div>
 
       <div class="me-prog">
@@ -957,7 +969,8 @@ async function wireRows() {
       follow: (dx) => {
         const clamped = Math.max(0, Math.min(100, dx));
         row.style.transform = `translateX(${clamped}px)`;
-        row.style.background = dx > 30 ? "color-mix(in srgb, var(--a) 6%, transparent)" : "";
+        row.style.background =
+          dx > 30 ? "color-mix(in srgb, var(--a) 6%, transparent)" : "";
       },
       onSwipeRight: () => {
         haptic("select");

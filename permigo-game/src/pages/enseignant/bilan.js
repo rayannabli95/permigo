@@ -290,8 +290,12 @@ function fmtDateShort(iso) {
 
 // ─── Render helpers ───────────────────────────────────────────────
 function renderKPI(kpi) {
-  const scoreColor =
-    kpi.score_moyen >= 70
+  // Donnée vide ≠ échec : aucun quiz fait → état neutre, pas un 0 % rouge
+  // (le bilan est montrable aux parents).
+  const noQuiz = !kpi.quiz_total;
+  const scoreColor = noQuiz
+    ? "var(--mu2)"
+    : kpi.score_moyen >= 70
       ? "var(--grk)"
       : kpi.score_moyen >= 50
         ? "#a16207"
@@ -305,9 +309,9 @@ function renderKPI(kpi) {
     <span class="bl-kpi-delta flat">Total acquis</span>
   </div>
   <div class="bl-kpi">
-    <div class="bl-kpi-val" style="color:${esc(scoreColor)}">${kpi.score_moyen != null ? kpi.score_moyen + "%" : "—"}</div>
+    <div class="bl-kpi-val" style="color:${esc(scoreColor)}">${noQuiz ? "—" : kpi.score_moyen != null ? kpi.score_moyen + "%" : "—"}</div>
     <div class="bl-kpi-label">Score moyen quiz</div>
-    <span class="bl-kpi-delta ${kpi.score_moyen >= 70 ? "up" : "flat"}">${kpi.quiz_reussis ?? 0}/${kpi.quiz_total ?? 0} réussis</span>
+    <span class="bl-kpi-delta ${!noQuiz && kpi.score_moyen >= 70 ? "up" : "flat"}">${noQuiz ? "Pas encore de quiz" : `${kpi.quiz_reussis ?? 0}/${kpi.quiz_total} réussis`}</span>
   </div>
   <div class="bl-kpi bl-kpi-streak">
     <div class="bl-kpi-val" style="color:var(--or)">${icon("flame", { size: 22, strokeWidth: 2.2, color: "var(--or)" })} ${kpi.jours_actifs ?? "—"}</div>
@@ -408,9 +412,23 @@ export async function mount(root, eleveId) {
   <style>@keyframes blShimmer{to{background-position:-200% 0}}</style>
 </div>`;
 
-  const { data, error } = await sb.rpc("get_bilan_data", {
-    p_eleve_id: eleveId,
-  });
+  // Document montrable aux parents → en-tête au nom de l'auto-école, pas du produit
+  const [bilanRes, ecoleRes] = await Promise.allSettled([
+    sb.rpc("get_bilan_data", { p_eleve_id: eleveId }),
+    me.auto_ecole_id
+      ? sb
+          .from("auto_ecoles")
+          .select("nom")
+          .eq("id", me.auto_ecole_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  const { data, error } =
+    bilanRes.status === "fulfilled"
+      ? bilanRes.value
+      : { data: null, error: bilanRes.reason };
+  const ecoleNom =
+    (ecoleRes.status === "fulfilled" && ecoleRes.value?.data?.nom) || "PermiGo";
 
   if (error || !data) {
     toast("Impossible de charger le bilan", "error");
@@ -434,7 +452,7 @@ export async function mount(root, eleveId) {
       <button class="bl-print-btn" id="bl-btn-back" aria-label="Retour" style="margin-bottom:10px">
         ${icon("arrow-left", { size: 15 })} Retour
       </button>
-      <div class="bl-school-logo">PermiGo Autopilot</div>
+      <div class="bl-school-logo">${esc(ecoleNom)}</div>
       <h1 class="bl-title" tabindex="-1">Bilan de ${esc(prenom)} ${esc(nom)}</h1>
       <div class="bl-subtitle">Suivi de progression · Permis B</div>
     </div>
