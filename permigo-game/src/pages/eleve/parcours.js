@@ -82,17 +82,14 @@ const STYLE = `<style>
 .prc > * { position: relative; z-index: 1; }
 
 /* ── Header sticky (sous le header global fixe de 52px) ── */
+/* Header en flux normal : la page scrolle entière (plus de sticky qui
+   se faisait chevaucher par la barre de progression). */
 .prc-hd {
-  position: sticky;
-  top: calc(52px + env(safe-area-inset-top, 0px));
-  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px 14px;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--bg);
   border-bottom: 1px solid var(--bo);
 }
 .prc-title    { font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; }
@@ -146,112 +143,11 @@ const STYLE = `<style>
 .prc-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .prc-legend i { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-/* ── Map frame (contenant la carte des 4 mondes) ── */
-.prc-map-frame {
-  position: relative;
-  margin: 14px 12px 24px;
-  border-radius: 24px;
-  overflow: hidden;
-  background: var(--su);
-  box-shadow:
-    0 24px 60px -20px rgba(11,13,26,.12),
-    0 4px 16px rgba(11,13,26,.06);
-  isolation: isolate;
-}
-/* Bordure gradient STATIQUE — les 4 couleurs = les 4 mondes C1→C4.
-   (L'ancienne version tournait en boucle : motion sans signification.) */
-.prc-map-border {
-  position: absolute;
-  inset: -2px;
-  border-radius: 26px;
-  background: linear-gradient(135deg,
-    var(--gr), #06b6d4, var(--pu), var(--am));
-  z-index: 0;
-  opacity: .45;
-}
-.prc-map-frame::before {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  border-radius: 22px;
-  background: var(--bg);
-  z-index: 1;
-}
-
-/* Coins décoratifs */
-.prc-map-corners { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
-.prc-corner { position: absolute; width: 16px; height: 16px; border: 2px solid color-mix(in srgb, var(--a) 35%, transparent); border-radius: 2px; }
-.prc-corner.tl { top: 14px; left: 14px; border-right: 0; border-bottom: 0; }
-.prc-corner.tr { top: 14px; right: 14px; border-left: 0; border-bottom: 0; }
-.prc-corner.bl { bottom: 14px; left: 14px; border-right: 0; border-top: 0; }
-.prc-corner.br { bottom: 14px; right: 14px; border-left: 0; border-top: 0; }
-
-/* Badge "CARTE D'APPRENTISSAGE" */
-.prc-map-badge {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  background: color-mix(in srgb, var(--bg) 95%, transparent);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--bo);
-  border-radius: 99px;
-  font-family: 'Inter', sans-serif;
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: var(--mu);
-  box-shadow: 0 4px 12px rgba(11,13,26,.08);
-  pointer-events: none;
-  white-space: nowrap;
-}
-.prc-map-badge-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--gr);
-  box-shadow: 0 0 6px var(--gr);
-}
-
-/* Scroll container */
+/* ── Carte des mondes — pleine page, le scroll de la page fait tout ── */
 .prc-map {
   position: relative;
   z-index: 2;
-  max-height: 70vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--a) 20%, transparent) transparent;
-  padding-top: 40px;
-}
-.prc-map::-webkit-scrollbar { width: 4px; }
-.prc-map::-webkit-scrollbar-track { background: transparent; }
-.prc-map::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--a) 20%, transparent); border-radius: 99px; }
-@media (max-width: 560px) { .prc-map { max-height: 65vh; } }
-@media (min-height: 900px) { .prc-map { max-height: 75vh; } }
-
-/* Fades haut/bas */
-.prc-map-fade-top, .prc-map-fade-bottom {
-  position: absolute;
-  left: 2px; right: 2px;
-  height: 38px;
-  pointer-events: none;
-  z-index: 3;
-}
-.prc-map-fade-top {
-  top: 2px;
-  background: linear-gradient(to bottom, var(--bg), transparent);
-  border-radius: 22px 22px 0 0;
-}
-.prc-map-fade-bottom {
-  bottom: 2px;
-  background: linear-gradient(to top, var(--bg), transparent);
-  border-radius: 0 0 22px 22px;
+  margin-top: 6px;
 }
 
 /* ── Sections Monde — fond photo z:0, gradient ::before z:1, contenu z:3+ ── */
@@ -1698,25 +1594,11 @@ function renderPage(
     <span role="listitem"><i style="background:var(--bo4)" aria-hidden="true"></i>Verrouillé</span>
   </div>
 
-  <!-- Carte des mondes -->
-  <div class="prc-map-frame">
-    <div class="prc-map-border" aria-hidden="true"></div>
-    <div class="prc-map-corners" aria-hidden="true">
-      <span class="prc-corner tl"></span>
-      <span class="prc-corner tr"></span>
-      <span class="prc-corner bl"></span>
-      <span class="prc-corner br"></span>
-    </div>
-    <div class="prc-map-badge" aria-hidden="true">
-      <span class="prc-map-badge-dot"></span> CARTE D'APPRENTISSAGE
-    </div>
-    <div class="prc-map" id="prc-map-scroll" tabindex="-1" role="region" aria-label="Carte d'apprentissage REMC">
-      ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1, openedWorlds)).join("")}
-      ${renderFinal(totalDone, totalComps)}
-      <div style="height: 24px"></div>
-    </div>
-    <div class="prc-map-fade-top"  aria-hidden="true"></div>
-    <div class="prc-map-fade-bottom" aria-hidden="true"></div>
+  <!-- Carte des mondes — pleine page, scroll naturel (plus d'encadré interne) -->
+  <div class="prc-map" id="prc-map-scroll" tabindex="-1" role="region" aria-label="Carte d'apprentissage REMC">
+    ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1, openedWorlds)).join("")}
+    ${renderFinal(totalDone, totalComps)}
+    <div style="height: 24px"></div>
   </div>
 
 </div>
@@ -1951,6 +1833,7 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
   const mapEl = root.querySelector(".prc-map");
   if (!reduced && "IntersectionObserver" in window && mapEl) {
     root.querySelector(".prc")?.classList.add("prc-anim");
+    // Pleine page : le viewport est la racine d'observation
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -1960,34 +1843,31 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
           }
         }
       },
-      { root: mapEl, threshold: 0.1 },
+      { threshold: 0.1 },
     );
     root.querySelectorAll(".prc-world").forEach((sec) => io.observe(sec));
 
-    // Parallax léger : le fond photo glisse de ±18px selon la position
-    // du monde dans le viewport de la carte (rAF, transform only).
+    // Parallax léger : le fond photo glisse selon la position du monde
+    // dans le viewport (scroll de page, rAF, transform only).
     let ticking = false;
+    const vh = () => window.innerHeight || 800;
     const parallax = () => {
       ticking = false;
-      const mr = mapEl.getBoundingClientRect();
       root.querySelectorAll(".prc-world").forEach((sec) => {
         const r = sec.getBoundingClientRect();
-        if (r.bottom < mr.top || r.top > mr.bottom) return;
-        const prog = (mr.top + mr.height / 2 - r.top) / (r.height + mr.height);
+        if (r.bottom < 0 || r.top > vh()) return;
+        const prog = (vh() / 2 - r.top) / (r.height + vh());
         const bgEl = sec.querySelector(".prc-world-bg");
         if (bgEl)
           bgEl.style.transform = `translateY(${((prog - 0.5) * 36).toFixed(1)}px) scale(1.08)`;
       });
     };
-    mapEl.addEventListener(
-      "scroll",
-      () => {
-        if (ticking) return;
-        ticking = true;
-        requestAnimationFrame(parallax);
-      },
-      { passive: true },
-    );
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(parallax);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
     requestAnimationFrame(parallax);
   }
 
