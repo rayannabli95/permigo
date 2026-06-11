@@ -120,6 +120,11 @@ const STYLE = `
     .bn-label { transition: opacity .12s ease; transform: none; }
   }
   .bn-tab:active { transform: scale(.93); transition: transform .12s; }
+  @keyframes bnTabIntro {
+    0%   { transform: translateY(14px) scale(.7); opacity: 0; }
+    60%  { transform: translateY(-4px) scale(1.12); opacity: 1; }
+    100% { transform: translateY(0) scale(1); }
+  }
 
   /* ── FAB flottant "Séance" (enseignant seulement) ── */
   @keyframes bnFabIn {
@@ -199,6 +204,24 @@ export function mountBottomNav(role) {
 
   document.body.appendChild(nav);
   _updateActive();
+
+  // Intro : petit rebond en cascade des onglets, UNE fois par session —
+  // fait comprendre qu'il y a plusieurs interfaces (découvrabilité).
+  try {
+    if (!sessionStorage.getItem("pg-nav-intro-done")) {
+      sessionStorage.setItem("pg-nav-intro-done", "1");
+      const reduced = window.matchMedia?.(
+        "(prefers-reduced-motion: reduce)",
+      )?.matches;
+      if (!reduced) {
+        nav.querySelectorAll(".bn-tab").forEach((t, i) => {
+          t.style.animation = `bnTabIntro .55s ${200 + i * 110}ms cubic-bezier(.34,1.56,.64,1) both`;
+        });
+      }
+    }
+  } catch {
+    /* sessionStorage indispo → pas d'intro */
+  }
 
   nav.querySelectorAll("[data-id]").forEach((btn) => {
     btn.addEventListener("click", () => {

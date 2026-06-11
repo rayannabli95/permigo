@@ -97,10 +97,20 @@ const STYLE = `<style>
   color: #fff;
   flex-shrink: 0;
 }
+.acc2-hero-greet { flex: 1; min-width: 0; }
 .acc2-hero-hi {
-  font: 500 15px/1.2 'Inter', sans-serif;
-  color: rgba(255,255,255,.75);
-  flex: 1;
+  display: block;
+  font: 500 14px/1.25 'Inter', sans-serif;
+  color: rgba(255,255,255,.78);
+}
+/* Le prénom = LA star du hero */
+.acc2-hero-name {
+  font: 800 34px/1.05 var(--fd), 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  letter-spacing: -.03em;
+  margin: 2px 0 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 2px 12px rgba(11,13,26,.35);
 }
 /* Welcome-back : sous-ligne après ≥3 jours d'absence */
 .acc2-hero-back {
@@ -113,22 +123,6 @@ const STYLE = `<style>
   border-radius: 10px;
   padding: 8px 12px;
   margin-top: 10px;
-}
-.acc2-hero-title {
-  font: 800 40px/1.05 var(--fd), sans-serif;
-  color: #fff;
-  letter-spacing: -0.03em;
-  margin: 0 0 16px;
-}
-.acc2-hero-niv-badge {
-  display: inline-block;
-  background: var(--a);
-  color: #fff;
-  padding: 10px 22px;
-  border-radius: var(--rl);
-  font-weight: 900;
-  box-shadow: var(--s-btn-rest);
-  text-shadow: none;
 }
 .acc2-hero-meta {
   display: flex;
@@ -146,37 +140,33 @@ const STYLE = `<style>
   font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
 }
+/* Streak EN VEDETTE : la flamme 3D (asset) + compteur, en haut à droite */
 .acc2-hero-streak {
-  display: flex; align-items: center; gap: 5px;
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.2);
-  border-radius: 99px;
-  padding: 7px 12px;
-  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  cursor: pointer; flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
-  transition: background .12s;
+  transition: transform .15s cubic-bezier(.34,1.56,.64,1);
 }
-.acc2-hero-streak:active { background: rgba(255,255,255,.22); }
-.acc2-hero-streak-fire {
-  font-size: 15px;
-  line-height: 1;
-  filter: drop-shadow(0 0 5px rgba(251,146,60,.8));
+.acc2-hero-streak:active { transform: scale(.92); }
+.acc2-hero-streak-img {
+  width: 44px; height: 44px; object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(251,146,60,.75));
 }
-.acc2-hero-streak.active .acc2-hero-streak-fire {
-  animation: heroFirePulse .7s ease-in-out infinite alternate;
+.acc2-hero-streak.active .acc2-hero-streak-img {
+  animation: heroFirePulse .8s ease-in-out infinite alternate;
 }
 @keyframes heroFirePulse {
-  from { transform: scale(1) rotate(-4deg); }
-  to   { transform: scale(1.18) rotate(4deg); }
+  from { transform: scale(1) rotate(-3deg); }
+  to   { transform: scale(1.12) rotate(3deg); }
 }
-.acc2-hero-streak-val {
-  font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
+.acc2-hero-streak-num {
+  display: flex; align-items: baseline; gap: 3px; margin-top: -4px;
+  background: rgba(11,13,26,.45); border-radius: 99px; padding: 2px 9px 3px;
+  backdrop-filter: blur(6px);
 }
-.acc2-hero-streak-lbl {
-  font: 500 11px/1 'Inter', sans-serif;
-  color: rgba(255,255,255,.7);
-}
+.acc2-hero-streak-num b { font: 800 14px/1 'Plus Jakarta Sans', sans-serif; color: #ffb35c; }
+.acc2-hero-streak-num i { font: 600 9.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.85); font-style: normal; }
+@media (prefers-reduced-motion: reduce) { .acc2-hero-streak-img { animation: none !important; } }
 .acc2-xp-bar-wrap { display: flex; flex-direction: column; gap: 5px; }
 .acc2-xp-bar {
   height: 5px;
@@ -730,6 +720,30 @@ const WORLDS = REMC.map((cat, i) => ({
 // Jours d'absence depuis la visite précédente (calculé au mount, lu au render)
 let _awayDays = 0;
 
+// XP lisible : « 63 200 » au lieu de « 63200 »
+function _fmtXp(n) {
+  return (n ?? 0).toLocaleString("fr-FR");
+}
+
+// Salutation contextuelle. Revisite dans la même journée → message chaleureux.
+const LS_LAST_VISIT = "pg-last-visit";
+function _greeting(awayDays) {
+  if (awayDays >= 3) return "Content de te revoir,";
+  let revisitToday = false;
+  try {
+    const today = new Date().toDateString();
+    const last = localStorage.getItem(LS_LAST_VISIT);
+    revisitToday = last === today;
+    localStorage.setItem(LS_LAST_VISIT, today);
+  } catch {
+    /* ignore */
+  }
+  if (revisitToday) return "Ça fait plaisir de te revoir aujourd'hui,";
+  const h = new Date().getHours();
+  if (h >= 18 || h < 5) return "Bonsoir";
+  return "Bonjour";
+}
+
 // ─── Entry point ─────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
@@ -1059,39 +1073,40 @@ function render({
     <div class="acc2-hero-content">
       <div class="acc2-hero-top">
         <div class="acc2-hero-av">${heroAv ? `<img src="${esc(heroAv)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block">` : esc(initials)}</div>
-        <span class="acc2-hero-hi">${
-          _awayDays >= 3
-            ? `Content de te revoir, ${esc(prenom)}`
-            : `Bonjour ${esc(prenom)}`
-        }</span>
+        <div class="acc2-hero-greet">
+          <span class="acc2-hero-hi">${esc(_greeting(_awayDays))}</span>
+          <h1 class="acc2-hero-name" tabindex="-1">${esc(prenom)}</h1>
+        </div>
+        ${
+          streak.current_streak > 0
+            ? `
+        <div class="acc2-hero-streak ${isActive ? "active" : ""}" id="streak-badge-btn" role="button" tabindex="0" aria-label="Streak ${streak.current_streak} jours">
+          <img class="acc2-hero-streak-img" src="/skins/permigo-streak-flame-v1.webp" alt="" />
+          <span class="acc2-hero-streak-num">
+            <b>${streak.current_streak}</b>
+            <i>jours</i>
+          </span>
+        </div>`
+            : ""
+        }
       </div>
       ${
         _awayDays >= 3
           ? `<div class="acc2-hero-back">Ta route t'attend depuis ${_awayDays} jours — reprends là où tu t'étais arrêté.</div>`
           : ""
       }
-      <h1 class="acc2-hero-title" tabindex="-1"><span class="acc2-hero-niv-badge">${esc(lvl.name)}</span></h1>
       <div class="acc2-hero-meta">
-        <div class="acc2-hero-xp-pill">
-          ${icon("zap", { size: 13 })}
-          ${lvl.xp} XP · Niv. ${lvl.level}
-        </div>
-        ${
-          streak.current_streak > 0
-            ? `
-        <div class="acc2-hero-streak ${isActive ? "active" : ""}" id="streak-badge-btn" role="button" tabindex="0" aria-label="Streak ${streak.current_streak} jours">
-          <span class="acc2-hero-streak-fire">${icon("flame", { size: 16 })}</span>
-          <span class="acc2-hero-streak-val">${streak.current_streak}</span>
-          <span class="acc2-hero-streak-lbl">jours</span>
-        </div>`
-            : ""
-        }
+        <div class="acc2-hero-xp-pill">${lvl.name && !/^Niv\./.test(lvl.name) ? `Niv. ${lvl.level} · ${esc(lvl.name)}` : `Niv. ${lvl.level}`}</div>
       </div>
       <div class="acc2-xp-bar-wrap">
         <div class="acc2-xp-bar">
           <div class="acc2-xp-fill${isMaxLevel ? " is-max" : ""}" style="width:0%" data-target="${lvl.pct}"></div>
         </div>
-        <span class="acc2-xp-hint">${isMaxLevel ? "Niveau max atteint" : `${lvl.pct}% vers ${esc(LEVEL_NAMES[lvl.level + 1] ?? "max")}`}</span>
+        <span class="acc2-xp-hint">${
+          isMaxLevel
+            ? `${_fmtXp(lvl.xp)} XP · niveau max atteint`
+            : `${_fmtXp(lvl.xp)} XP · ${lvl.pct}% vers ${esc(LEVEL_NAMES[lvl.level + 1] ?? "max")}`
+        }</span>
       </div>
     </div>
   </div>
