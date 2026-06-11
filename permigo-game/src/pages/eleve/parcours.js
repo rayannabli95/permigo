@@ -29,6 +29,14 @@ import {
   markChestOpened,
 } from "@/utils/game-state.js";
 
+// Fond photo immersif par monde, variante jour/nuit selon l'heure.
+const isNight = (() => {
+  const h = new Date().getHours();
+  return h >= 20 || h < 7;
+})();
+const WORLD_BG = (num) =>
+  `/skins/landing/monde${num}${isNight ? "nuit" : "jour"}.webp`;
+
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
 /* ── Layout global avec volant filigrane fixe ── */
@@ -270,54 +278,31 @@ const STYLE = `<style>
 }
 .prc-world.complete .prc-world-decor { opacity: 1; }
 
-/* ── Déco CSS par monde (remplace le fond photo) ──
-   Voile teinté à la couleur du monde + formes flottantes douces. */
-.prc-world {
-  background:
-    radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--wc, var(--a)) 13%, transparent) 0%, transparent 60%),
-    var(--bg);
+/* ── Fond photographique immersif jour/nuit par monde ── */
+.prc-world { background: var(--bg); }
+.prc-world-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: .7;
+  filter: saturate(1.05);
+  transition: opacity .6s ease;
+  pointer-events: none;
 }
-.prc-world.active {
-  background:
-    radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--wc, var(--a)) 20%, transparent) 0%, transparent 62%),
-    var(--bg);
+.prc-world-bg--active { opacity: 1; }
+.prc-world.locked .prc-world-bg { opacity: .18; filter: grayscale(.5) saturate(.7); }
+[data-theme="dark"] .prc-world-bg         { opacity: .3; }
+[data-theme="dark"] .prc-world-bg--active { opacity: .7; }
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .prc-world-bg         { opacity: .3; }
+  html:not([data-theme="light"]) .prc-world-bg--active { opacity: .7; }
 }
-.prc-world.locked { background: var(--bg); }
-.prc-world-deco { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.prc-blob {
-  position: absolute; border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--wc, var(--a)) 38%, transparent), transparent 70%);
-  filter: blur(8px); opacity: .5;
-  animation: prcFloat 9s ease-in-out infinite;
-  will-change: transform;
-}
-.prc-blob.b1 { width: 150px; height: 150px; top: 4%;  left: -40px; }
-.prc-blob.b2 { width: 110px; height: 110px; top: 42%; right: -34px; animation-delay: -3s; animation-duration: 11s; }
-.prc-blob.b3 { width: 90px;  height: 90px;  bottom: 8%; left: 12%;  animation-delay: -6s; animation-duration: 13s; }
-.prc-deco-dot {
-  position: absolute; width: 10px; height: 10px; border-radius: 3px;
-  background: color-mix(in srgb, var(--wc, var(--a)) 55%, transparent);
-  transform: rotate(45deg); opacity: .35;
-  animation: prcFloat 7s ease-in-out infinite;
-}
-.prc-deco-dot.d1 { top: 18%; right: 16%; }
-.prc-deco-dot.d2 { top: 60%; left: 10%;  width: 7px; height: 7px; animation-delay: -2s; }
-.prc-deco-dot.d3 { bottom: 22%; right: 22%; width: 13px; height: 13px; animation-delay: -4s; }
-.prc-deco-ring {
-  position: absolute; top: 30%; left: 50%; width: 200px; height: 200px;
-  margin: -100px 0 0 -100px; border-radius: 50%;
-  border: 1.5px dashed color-mix(in srgb, var(--wc, var(--a)) 22%, transparent);
-  opacity: .4;
-}
-@keyframes prcFloat {
-  0%,100% { transform: translateY(0) translateX(0); }
-  50%     { transform: translateY(-16px) translateX(6px); }
-}
-.prc-world.locked .prc-world-deco { opacity: .25; filter: grayscale(.6); }
-[data-theme="dark"] .prc-blob { opacity: .35; }
-@media (prefers-reduced-motion: reduce) {
-  .prc-blob, .prc-deco-dot { animation: none; }
-}
+@media (prefers-reduced-motion: reduce) { .prc-world-bg { transition: none; } }
+/* Filigrane volant atténué quand fond photo présent */
+.prc:has(.prc-world-bg)::before { opacity: .08; }
 
 /* En-tête du monde */
 .prc-world-hd {
@@ -432,19 +417,17 @@ const STYLE = `<style>
 }
 .prc-node.next { animation-name: nd-pop-next; }
 
-/* ── Tuile 3D brillante (style « learning game ») ──
-   Carré arrondi avec brillance + arête 3D portée (box-shadow décalée vers
-   le bas dans une teinte foncée). Couleur pilotée par --tile / --tile-dk. */
+/* ── Tuile 3D brillante portant le badge PermiGo (le P vert) ──
+   Tuile blanche brillante avec arête 3D portée (--tile-dk) colorée selon le
+   statut, le badge PermiGo posé dessus + une pastille de statut. */
 .nd-circle {
   width: 60px; height: 60px;
   border-radius: 20px;
-  --tile: var(--wc, var(--a));
-  --tile-dk: color-mix(in srgb, var(--wc, var(--a)) 60%, #000);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--tile) 78%, #fff) 0%, var(--tile) 55%, var(--tile-dk) 100%);
-  box-shadow: 0 6px 0 0 var(--tile-dk), 0 12px 18px -6px color-mix(in srgb, var(--tile) 55%, transparent);
+  --tile-dk: #c2c8da;
+  background: linear-gradient(160deg, #ffffff 0%, #eef1f8 100%);
+  box-shadow: 0 6px 0 0 var(--tile-dk), 0 12px 18px -6px rgba(11,13,26,.28);
   display: flex; align-items: center; justify-content: center;
   position: relative;
-  color: #fff;
   transition: box-shadow .18s, transform .15s cubic-bezier(.2,.7,.3,1);
   flex-shrink: 0;
 }
@@ -453,31 +436,43 @@ const STYLE = `<style>
   content: '';
   position: absolute; top: 5px; left: 9px; right: 9px; height: 38%;
   border-radius: 14px 14px 50% 50%;
-  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0));
-  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0));
+  pointer-events: none; z-index: 2;
 }
-.nd-circle svg { position: relative; z-index: 1; filter: drop-shadow(0 1px 1px rgba(0,0,0,.22)); }
+/* Badge PermiGo (le P vert) */
+.nd-badge {
+  display: block; width: 70%; height: 70%; object-fit: contain;
+  position: relative; z-index: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.22));
+}
+/* Pastille de statut (coin bas-droite) */
+.nd-stamp {
+  position: absolute; bottom: -5px; right: -5px; z-index: 3;
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2.5px solid var(--su);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+.nd-stamp.done   { background: var(--gr); }
+.nd-stamp.next   { background: var(--a); }
+.nd-stamp.locked { background: var(--mu2); }
 @media (max-width: 400px) {
   .nd-circle { width: 52px; height: 52px; border-radius: 17px; }
 }
 .prc-node:not(.locked):active .nd-circle {
   transform: translateY(4px);
-  box-shadow: 0 2px 0 0 var(--tile-dk), 0 5px 10px -4px color-mix(in srgb, var(--tile) 55%, transparent);
+  box-shadow: 0 2px 0 0 var(--tile-dk), 0 5px 10px -4px rgba(11,13,26,.25);
 }
 .prc-node:not(.locked):hover .nd-circle {
   transform: translateY(-2px);
-  box-shadow: 0 8px 0 0 var(--tile-dk), 0 16px 22px -6px color-mix(in srgb, var(--tile) 55%, transparent);
+  box-shadow: 0 8px 0 0 var(--tile-dk), 0 16px 22px -6px rgba(11,13,26,.3);
 }
 
-/* ─ DONE — tuile verte, étoile ─ */
-.prc-node.done .nd-circle {
-  --tile: var(--gr); --tile-dk: var(--grdk, #047857);
-}
-/* Anneau pulse discret sur done */
+/* ─ DONE — arête verte + halo discret ─ */
+.prc-node.done .nd-circle { --tile-dk: var(--grdk, #047857); }
 .prc-node.done .nd-circle::after {
   content: '';
-  position: absolute; inset: -7px;
-  border-radius: 24px;
+  position: absolute; inset: -7px; border-radius: 24px;
   border: 2px solid color-mix(in srgb, var(--gr) 45%, transparent);
   animation: nd-ring-pulse 2.6s ease-out infinite;
   pointer-events: none;
@@ -487,48 +482,35 @@ const STYLE = `<style>
   100% { transform: scale(1.3); opacity: 0; }
 }
 
-/* ─ NEXT — tuile couleur monde, éclair, rebond « tu es ici » ─ */
-.prc-node.next .nd-circle {
-  animation: nd-bob 1.8s ease-in-out infinite;
-}
+/* ─ NEXT — arête accent, rebond « tu es ici » + anneau ─ */
+.prc-node.next .nd-circle { --tile-dk: var(--adk, var(--a)); animation: nd-bob 1.8s ease-in-out infinite; }
 @keyframes nd-bob {
   0%,100% { transform: translateY(0); }
   50%     { transform: translateY(-5px); }
 }
 .prc-node.next .nd-circle::after {
   content: '';
-  position: absolute; inset: -8px;
-  border-radius: 26px;
-  border: 2.5px solid color-mix(in srgb, var(--tile) 55%, transparent);
+  position: absolute; inset: -8px; border-radius: 26px;
+  border: 2.5px solid color-mix(in srgb, var(--a) 55%, transparent);
   animation: nd-ring-pulse 1.9s ease-out infinite;
   pointer-events: none;
 }
 
-/* ─ TODO — tuile claire teintée, petit point ─ */
-.prc-node.todo .nd-circle {
-  --tile: #ffffff;
-  --tile-dk: color-mix(in srgb, var(--wc, var(--a)) 30%, #d6dae8);
-  background: linear-gradient(160deg, #fff, color-mix(in srgb, var(--wc, var(--a)) 12%, #fff));
-  color: color-mix(in srgb, var(--wc, var(--a)) 70%, #6b7280);
-}
-.prc-node.todo .nd-circle svg { filter: none; }
+/* ─ TODO — badge légèrement atténué ─ */
+.prc-node.todo .nd-badge { filter: grayscale(.25) opacity(.85); }
 
-/* ─ LOCKED — tuile grise plate, cadenas ─ */
-.prc-node.locked .nd-circle {
-  --tile: #e2e6f2; --tile-dk: #c2c8da;
-  color: var(--mu2);
-}
+/* ─ LOCKED — tuile grise, badge désaturé ─ */
+.prc-node.locked .nd-circle { --tile-dk: #c2c8da; background: linear-gradient(160deg, #eef1f8, #dde2ee); }
+.prc-node.locked .nd-badge { filter: grayscale(1) opacity(.45); }
 .prc-node.locked .nd-circle::before { opacity: .4; }
 
-/* (legacy badge image — neutralisé, on utilise des icônes SVG) */
-.nd-badge { display: none; }
 .nd-wheel-pending { display: none; }
 
 /* ── Case sélectionnée : se soulève vers le haut ── */
 .prc-node.selected { z-index: 8; }
 .prc-node.selected .nd-circle {
   transform: translateY(-12px) scale(1.12);
-  box-shadow: 0 14px 0 0 var(--tile-dk), 0 22px 26px -6px color-mix(in srgb, var(--tile) 60%, transparent);
+  box-shadow: 0 14px 0 0 var(--tile-dk), 0 22px 26px -6px rgba(11,13,26,.3);
   animation: none;
 }
 .prc-node.selected .nd-lbl { transform: translateY(-8px); }
@@ -1310,7 +1292,7 @@ const STYLE = `<style>
 .prc-anim .prc-world.in .prc-portal { opacity: 1; transform: none; }
 .prc-anim .prc-world.in .prc-portal { transition-delay: .25s; }
 /* Parallax léger sur le fond photo (transform piloté en JS) */
-.prc-anim .prc-world-deco { will-change: transform; }
+.prc-anim .prc-world-bg { transform: scale(1.08); will-change: transform; }
 
 /* Halo vivant derrière le node courant (respire, couleur du monde) */
 .prc-node.next::before {
@@ -1804,13 +1786,14 @@ function renderWorldSection(
         locked: "Verrouillé",
       }[st];
 
-      // Icône de la tuile selon le statut (SVG, plus de badge image).
-      const iconHtml = {
-        done: icon("star", { size: 26, strokeWidth: 2.4 }),
-        a_valider: icon("clipboard", { size: 24, strokeWidth: 2.4 }),
-        next: icon("zap", { size: 26, strokeWidth: 2.6 }),
-        todo: icon("circle", { size: 13, strokeWidth: 3 }),
-        locked: icon("lock", { size: 22, strokeWidth: 2.4 }),
+      // Badge PermiGo (le P vert) dans la tuile, + pastille de statut.
+      const BADGE = "/skins/avatars/permigo-badge-icon.png";
+      const stamp = {
+        done: `<span class="nd-stamp done">${icon("check", { size: 12, strokeWidth: 3 })}</span>`,
+        a_valider: `<span class="nd-stamp done">${icon("check", { size: 12, strokeWidth: 3 })}</span>`,
+        next: `<span class="nd-stamp next">${icon("zap", { size: 11, strokeWidth: 2.6 })}</span>`,
+        todo: "",
+        locked: `<span class="nd-stamp locked">${icon("lock", { size: 10, strokeWidth: 2.6 })}</span>`,
       }[st];
 
       const isLocked = st === "locked";
@@ -1819,7 +1802,7 @@ function renderWorldSection(
            style="left:${xp}%;top:${yp}%;--wc:${meta.color};--wg:${meta.glow};--nd-delay:${delay}s"
            ${!isLocked ? `role="button" tabindex="0"` : 'aria-hidden="true"'}
            aria-label="${esc(p.n)} — ${esc(sttLabel)}">
-        <div class="nd-circle">${iconHtml}</div>
+        <div class="nd-circle"><img class="nd-badge" src="${BADGE}" alt="" aria-hidden="true"/>${stamp}</div>
         <div class="nd-lbl" aria-hidden="true">
           <span class="nd-name">${esc(p.n)}</span>
           <span class="nd-code">${esc(p.c.toUpperCase())}</span>
@@ -1844,16 +1827,8 @@ function renderWorldSection(
 <section class="prc-world ${isLocked ? "locked" : ""} ${isComplete ? "complete" : ""} ${isActive ? "active" : ""}"
          data-world-idx="${idx}"
          style="--wc:${meta.color};--wg:${meta.glow}">
-  <!-- Déco CSS par monde (remplace l'ancienne photo de fond) : voile teinté + formes flottantes -->
-  <div class="prc-world-deco" aria-hidden="true">
-    <span class="prc-blob b1"></span>
-    <span class="prc-blob b2"></span>
-    <span class="prc-blob b3"></span>
-    <span class="prc-deco-dot d1"></span>
-    <span class="prc-deco-dot d2"></span>
-    <span class="prc-deco-dot d3"></span>
-    <span class="prc-deco-ring"></span>
-  </div>
+  <!-- Fond photo immersif jour/nuit du monde -->
+  <img src="${WORLD_BG(meta.num)}" alt="" class="prc-world-bg${isActive ? " prc-world-bg--active" : ""}" ${isActive ? 'loading="eager"' : 'loading="lazy"'} draggable="false">
   <!-- Petit visuel décoratif top-right -->
   <img src="${meta.img}" alt="" class="prc-world-decor" loading="lazy" draggable="false">
 
@@ -1999,9 +1974,9 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
         const r = sec.getBoundingClientRect();
         if (r.bottom < mr.top || r.top > mr.bottom) return;
         const prog = (mr.top + mr.height / 2 - r.top) / (r.height + mr.height);
-        const bgEl = sec.querySelector(".prc-world-deco");
+        const bgEl = sec.querySelector(".prc-world-bg");
         if (bgEl)
-          bgEl.style.transform = `translateY(${((prog - 0.5) * 28).toFixed(1)}px)`;
+          bgEl.style.transform = `translateY(${((prog - 0.5) * 36).toFixed(1)}px) scale(1.08)`;
       });
     };
     mapEl.addEventListener(
