@@ -315,6 +315,17 @@ const STYLE = `<style>
     border-bottom: 1px solid var(--bo2);
   }
   .aj-act-row:last-child { border-bottom: none; }
+  #aj-activity-more { margin-top: 8px; }
+  .aj-activity-all {
+    width: 100%; margin-top: 8px; padding: 11px;
+    min-height: 44px;
+    background: none; border: 1.5px dashed var(--bo);
+    border-radius: 12px;
+    font: 600 12.5px/1 'Inter', sans-serif; color: var(--mu);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .aj-activity-all:hover { border-color: var(--bo4); color: var(--ink5); }
 
   .aj-act-av {
     width: 36px; height: 36px;
@@ -615,13 +626,13 @@ async function renderInto(root, _me) {
       .lte("validated_at", today + "T23:59:59.999Z")
       .order("validated_at", { ascending: false }),
 
-    // 5 dernières validations (activité récente)
+    // Dernières validations (activité récente) — 3 visibles + « voir tout »
     sb
       .from("validations")
       .select("id, competence_id, statut, eleve_id, validated_at")
       .eq("validated_by", _me.id)
       .order("validated_at", { ascending: false })
-      .limit(5),
+      .limit(8),
 
     // Tous les élèves de l'école (RLS filtre par école automatiquement)
     sb
@@ -953,8 +964,22 @@ async function renderInto(root, _me) {
                <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Enregistre ta première séance<br>pour voir l'activité ici.</span>
              </div>`
             : `<div class="aj-activity-list">
-              ${recentVals.map((v) => renderActRow(v, elevesMap)).join("")}
-            </div>`
+              ${recentVals
+                .slice(0, 3)
+                .map((v) => renderActRow(v, elevesMap))
+                .join("")}
+            </div>
+            ${
+              recentVals.length > 3
+                ? `<div class="aj-activity-list" id="aj-activity-more" hidden>
+                     ${recentVals
+                       .slice(3)
+                       .map((v) => renderActRow(v, elevesMap))
+                       .join("")}
+                   </div>
+                   <button class="aj-activity-all" id="aj-activity-all" type="button">Voir tout</button>`
+                : ""
+            }`
         }
       </div>
 
@@ -993,6 +1018,12 @@ async function renderInto(root, _me) {
   root.querySelector("#aj-act-invite")?.addEventListener("click", () => {
     track("quick_action.invite");
     openInviteEleveModal(_me);
+  });
+  const activityAllBtn = root.querySelector("#aj-activity-all");
+  activityAllBtn?.addEventListener("click", () => {
+    root.querySelector("#aj-activity-more")?.removeAttribute("hidden");
+    activityAllBtn.remove();
+    track("aujourdhui.activity.voir_tout");
   });
   root.querySelector("#aj-ligue-moi")?.addEventListener("click", () => {
     track("ligue.open", { from: "aujourdhui", which: "moniteur" });

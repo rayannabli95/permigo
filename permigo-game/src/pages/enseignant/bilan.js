@@ -11,6 +11,7 @@ import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
 import { navigate } from "@/router.js";
+import { REMC } from "@/data/remc.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -41,7 +42,8 @@ const STYLE = `<style>
   margin-bottom: 8px;
 }
 .bl-title {
-  font: 800 24px/1.2 'Plus Jakarta Sans', sans-serif;
+  /* Titre de page moniteur unifié : 24px / 700 / -.02em (cf. mes-eleves, analyses) */
+  font: 700 24px/1.2 'Plus Jakarta Sans', sans-serif;
   color: var(--ink);
   letter-spacing: -.02em;
 }
@@ -254,32 +256,28 @@ const STYLE = `<style>
 </style>`;
 
 // ─── Monde metadata ──────────────────────────────────────────────
-const MONDES = {
-  C1: {
-    name: "Contrôle & Sécurité",
-    color: "var(--gr2)",
-    ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--gr2);vertical-align:middle"></span>',
-    short: "C1",
-  },
-  C2: {
-    name: "Manœuvres",
-    color: "var(--bl2)",
-    ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--bl2);vertical-align:middle"></span>',
-    short: "C2",
-  },
-  C3: {
-    name: "Circulation",
-    color: "#eab308",
-    ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#eab308;vertical-align:middle"></span>',
-    short: "C3",
-  },
-  C4: {
-    name: "Situations complexes",
-    color: "var(--pul)",
-    ico: '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--pul);vertical-align:middle"></span>',
-    short: "C4",
-  },
+// Les NOMS viennent de REMC (src/data/remc.js) — source unique, pour que le
+// bilan montrable aux parents emploie exactement les intitulés du livret.
+const MONDE_COLORS = {
+  C1: "var(--gr2)",
+  C2: "var(--bl2)",
+  C3: "#eab308",
+  C4: "var(--pul)",
 };
+const MONDES = Object.fromEntries(
+  REMC.map((cat) => {
+    const color = MONDE_COLORS[cat.id] || "var(--mu)";
+    return [
+      cat.id,
+      {
+        name: cat.name,
+        color,
+        ico: `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${color};vertical-align:middle"></span>`,
+        short: cat.id,
+      },
+    ];
+  }),
+);
 
 // ─── Helpers ─────────────────────────────────────────────────────
 function fmtDateShort(iso) {
