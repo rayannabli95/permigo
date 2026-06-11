@@ -101,6 +101,21 @@ const STYLE = `<style>
   .ce-row-bar-f { height: 100%; background: linear-gradient(90deg, var(--a), var(--a-lt)); border-radius: 2px; }
   .ce-row-score { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); text-align: right; }
 
+  /* Streak 🔥 — chip discret, ton factuel (pas de pression) */
+  .ce-streak {
+    display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;
+    font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--amx);
+    background: var(--amp); border: 1px solid color-mix(in srgb, var(--am) 22%, transparent);
+    padding: 4px 7px; border-radius: 8px;
+  }
+  .ce-streak.off { color: var(--mu2); background: var(--bg2); border-color: var(--bo); }
+  .ce-streak svg { flex-shrink: 0; }
+  .ce-pod-streak {
+    display: inline-flex; align-items: center; gap: 3px; margin-top: 5px;
+    font: 700 10px/1 'IBM Plex Mono', monospace; color: var(--amx);
+  }
+  .ce-pod-streak.off { color: var(--mu2); }
+
   /* Hall of fame (permis obtenu) */
   .ce-hof-title {
     font: 700 11px/1 'Inter', sans-serif; text-transform: uppercase; letter-spacing: .1em;
@@ -142,8 +157,8 @@ export async function mount(root) {
 
   root.innerHTML = `${STYLE}<div class="ce-page"><div class="ce-empty">Chargement du classement…</div></div>`;
 
-  // ── Fetch : élèves de l'école, mes validations, examens « reçu » ──
-  const [elevesRes, valsRes, examsRes] = await Promise.all([
+  // ── Fetch : élèves de l'école, mes validations, examens « reçu », streaks ──
+  const [elevesRes, valsRes, examsRes, streaksRes] = await Promise.all([
     sb
       .from("profiles")
       .select("id, prenom, nom, enseignant_id, avatar_url")
@@ -153,6 +168,8 @@ export async function mount(root) {
       .select("eleve_id, competence_id, validated_by, statut")
       .eq("statut", "acquis"),
     sb.from("examens").select("eleve_id, statut, created_at"),
+    // Streak d'activité (RLS : l'enseignant lit les streaks de son école)
+    sb.from("streaks").select("user_id, current_streak"),
   ]);
 
   if (elevesRes.error) {
@@ -162,6 +179,12 @@ export async function mount(root) {
 
   const elevesMap = {};
   (elevesRes.data || []).forEach((e) => (elevesMap[e.id] = e));
+
+  // Streak courant par élève (0 si aucune ligne)
+  const streakByEleve = {};
+  (streaksRes.data || []).forEach((s) => {
+    streakByEleve[s.user_id] = s.current_streak || 0;
+  });
 
   // Acquis distincts par élève + ensemble des élèves que j'ai validés
   const acquisByEleve = {};
@@ -197,6 +220,7 @@ export async function mount(root) {
       nom: e.nom,
       avatar_url: e.avatar_url,
       acquis: acquisByEleve[id]?.size || 0,
+      streak: streakByEleve[id] || 0,
       recu: lastExam[id] === "recu",
     };
   });
@@ -272,6 +296,9 @@ function renderPod(e, visualIdx) {
       <div class="ce-pod-nom">${esc(e.prenom || "Élève")}</div>
       <div class="ce-pod-score">${e.acquis}<span>/${REMC_TOTAL}</span></div>
       <div style="font:500 10px/1 'Inter',sans-serif;color:var(--mu2);margin-top:3px">${pct}%</div>
+      <div class="ce-pod-streak${e.streak > 0 ? "" : " off"}" title="${e.streak} jour${e.streak > 1 ? "s" : ""} d'activité d'affilée">
+        ${icon("flame", { size: 11, strokeWidth: 2 })} ${e.streak}j
+      </div>
     </div>`;
 }
 
@@ -280,10 +307,13 @@ function renderRow(e, rank) {
   const nom = esc([e.prenom, e.nom].filter(Boolean).join(" ") || "Élève");
   return `
     <div class="ce-row" data-eleve-id="${esc(e.id)}" role="button" tabindex="0"
-         aria-label="${nom} — rang ${rank}, ${e.acquis} sur ${REMC_TOTAL}">
+         aria-label="${nom} — rang ${rank}, ${e.acquis} sur ${REMC_TOTAL}, série ${e.streak} jour${e.streak > 1 ? "s" : ""}">
       <span class="ce-row-rank">${rank}</span>
       <div style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 36)}</div>
       <span class="ce-row-nom">${nom}</span>
+      <span class="ce-streak${e.streak > 0 ? "" : " off"}" title="${e.streak} jour${e.streak > 1 ? "s" : ""} d'activité d'affilée">
+        ${icon("flame", { size: 12, strokeWidth: 2 })} ${e.streak}j
+      </span>
       <div class="ce-row-bar">
         <div class="ce-row-bar-t"><div class="ce-row-bar-f" style="width:${pct}%"></div></div>
         <div class="ce-row-score">${e.acquis}/${REMC_TOTAL}</div>
