@@ -88,8 +88,9 @@
 .skel-text { height: 14px; margin: 6px 0; }
 .skel-card { height: 80px; margin-bottom: 12px; }
 @keyframes shimmer {
-  from { background-position: 200% 0; }
-  to   { background-position: -200% 0; }
+  from { background-position: 200% 0; filter: brightness(1); }
+  50%  { filter: brightness(1.12); }
+  to   { background-position: -200% 0; filter: brightness(1); }
 }
 
 /* ─── Streak flame bump (déclenché via JS : classList.add / setTimeout remove) ─── */
