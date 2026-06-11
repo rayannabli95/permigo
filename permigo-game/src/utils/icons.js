@@ -126,7 +126,11 @@ const PATHS = {
     '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
 
   // ── Ajouts (remplacement emojis) ──
-  gem: '<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/><path d="M9 3 7 9l5 12 5-12-2-6"/>',
+  // « gem » = la monnaie du jeu, désormais des VOLANTS (volant de direction).
+  // On garde la clé gem pour ne pas toucher tous les call-sites.
+  gem: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/><path d="M3.2 10.6 9.5 11.5"/><path d="M20.8 10.6 14.5 11.5"/><path d="M12 14.6V21"/>',
+  volant:
+    '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/><path d="M3.2 10.6 9.5 11.5"/><path d="M20.8 10.6 14.5 11.5"/><path d="M12 14.6V21"/>',
   crown: '<path d="M2 18h20"/><path d="M3 7l4 4 5-7 5 7 4-4-2 11H5z"/>',
   "map-pin":
     '<path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',

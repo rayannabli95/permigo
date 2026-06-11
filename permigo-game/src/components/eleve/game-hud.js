@@ -285,7 +285,7 @@ export function renderGameHUD(stats, me) {
                   aria-label="Ligue ${league.name}">
             ${rosetteIconSVG(league.color)}
           </button>
-          <button class="ghud-pill gemmes" id="ghud-gemmes-btn" type="button" aria-label="Boutique — ${gemmes} gemmes">
+          <button class="ghud-pill gemmes" id="ghud-gemmes-btn" type="button" aria-label="Boutique — ${gemmes} volants">
             ${gemIconSVG()}
             <span class="ghud-pill-v">${gemmes}</span>
           </button>
@@ -356,7 +356,7 @@ export function wireGameHUD(root, callbacks = {}) {
     if (typeof bal !== 'number') return;
     const v = gemmesBtn?.querySelector('.ghud-pill-v');
     if (v) v.textContent = String(bal);
-    gemmesBtn?.setAttribute('aria-label', `Boutique — ${bal} gemmes`);
+    gemmesBtn?.setAttribute('aria-label', `Boutique — ${bal} volants`);
   });
 }
 

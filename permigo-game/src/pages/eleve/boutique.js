@@ -551,7 +551,7 @@ function renderIntro() {
         <div class="bo2-intro-title">Ta voiture, ta signature</div>
         <div class="bo2-intro-steps">
           <span>${icon("users", { size: 13 })} Elle s'affiche à côté de ton nom dans le classement</span>
-          <span>${icon("gem", { size: 13 })} Débloque des skins avec tes gemmes</span>
+          <span>${icon("gem", { size: 13 })} Débloque des skins avec tes volants</span>
           <span>${icon("check", { size: 13, strokeWidth: 3 })} Touche une voiture pour l'équiper en 1 tap</span>
         </div>
       </div>
@@ -584,7 +584,7 @@ function renderRarityScale(items) {
   const icons = {
     commun: "car",
     rare: "zap",
-    epique: "gem",
+    epique: "sparkle",
     legendaire: "crown",
   };
   return `
@@ -701,7 +701,7 @@ function showDetailModal(item, gemmes, onConfirm) {
     cta = `<button class="bo2-modal-cta buy" id="bo2-cta">Acheter — ${item.cost_gemmes} ${icon("gem", { size: 13 })}</button>`;
     balanceLine = `<div class="bo2-modal-balance">Il te restera <strong>${afterBalance} ${icon("gem", { size: 13 })}</strong> après l'achat</div>`;
   } else {
-    cta = `<button class="bo2-modal-cta locked" disabled>${icon("lock", { size: 14 })} Pas assez de gemmes</button>`;
+    cta = `<button class="bo2-modal-cta locked" disabled>${icon("lock", { size: 14 })} Pas assez de volants</button>`;
     balanceLine = `<div class="bo2-modal-balance" style="color:#f87171">Il te manque ${item.cost_gemmes - gemmes} ${icon("gem", { size: 13 })}</div>`;
   }
 
@@ -782,7 +782,7 @@ async function doPurchase(item, root, allItems) {
       return null;
     }
     if (data?.error === "insufficient_gemmes") {
-      toast("Pas assez de gemmes gemmes", "error");
+      toast("Pas assez de volants", "error");
       return null;
     }
     if (data?.error === "already_owned") {
