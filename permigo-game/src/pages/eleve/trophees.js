@@ -128,10 +128,22 @@ const STYLE = `<style>
 }
 .tr2-card:active { transform: scale(.93); opacity: .9; }
 .tr2-card.locked { background: var(--su); border: 1px solid var(--bo); }
+/* Pastille « NOUVEAU » sur un trophée fraîchement débloqué */
+.tr2-new-dot {
+  position: absolute; top: 6px; right: 6px; z-index: 3;
+  background: var(--rd); color: #fff;
+  font: 800 7.5px/1 'Inter', sans-serif; letter-spacing: .08em;
+  padding: 4px 7px; border-radius: 99px;
+  box-shadow: 0 3px 10px rgba(239,68,68,.5);
+  animation: tr2NewPulse 1.4s ease-in-out infinite;
+}
+@keyframes tr2NewPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+@media (prefers-reduced-motion: reduce) { .tr2-new-dot { animation: none; } }
 .tr2-card.locked .tr2-card-emoji { filter: grayscale(1) brightness(.4); opacity: .5; }
 /* Mix-blend-mode multiply pour les PNG avec fond blanc (le blanc devient invisible sur card colorée) */
 .tr2-card-emoji img { mix-blend-mode: multiply; }
-.tr2-card.commun    { background: linear-gradient(145deg,var(--mu4),var(--mu3)); box-shadow: 0 4px 16px -4px rgba(100,116,139,.5); }
+/* Commun = VERT accent (l'ancien dégradé gris se confondait avec locked) */
+.tr2-card.commun    { background: linear-gradient(145deg,var(--adk),var(--a)); box-shadow: 0 4px 16px -4px color-mix(in srgb, var(--a) 55%, transparent); }
 .tr2-card.rare      { background: linear-gradient(145deg,var(--blk2),#60a5fa); box-shadow: 0 4px 16px -4px rgba(59,130,246,.6); }
 .tr2-card.epique    { background: linear-gradient(145deg,#6d28d9,#a78bfa); box-shadow: 0 4px 16px -4px rgba(139,92,246,.6); }
 .tr2-card.legendaire {
@@ -319,8 +331,35 @@ export async function mount(root) {
 }
 
 // ─── Render all ───────────────────────────────────────────────
+// Trophées déjà « vus » : tout débloqué absent de ce set porte une pastille
+// NOUVEAU à l'affichage, puis le set est mis à jour (vu = affiché ici).
+const LS_TROPH_SEEN = "pg-troph-seen";
+function getSeenSet() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(LS_TROPH_SEEN) || "[]"));
+  } catch {
+    return new Set();
+  }
+}
+function saveSeenSet(keys) {
+  try {
+    localStorage.setItem(LS_TROPH_SEEN, JSON.stringify([...keys]));
+  } catch {
+    /* ignore */
+  }
+}
+
 function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
   const unlockedMap = new Map(unlocked.map((u) => [u.achievement_key, u]));
+  // Nouveautés = débloqués jamais affichés ici
+  const seen = getSeenSet();
+  const freshKeys = new Set(
+    unlocked.map((u) => u.achievement_key).filter((k) => !seen.has(k)),
+  );
+  // Marque tout comme vu (la pastille ne s'affiche qu'une fois) + signale
+  // à la nav que la page a été visitée.
+  saveSeenSet(new Set([...seen, ...freshKeys]));
+  window.dispatchEvent(new CustomEvent("pg-trophees-seen"));
   const unlockedCount = CATALOG.filter((t) => unlockedMap.has(t.key)).length;
 
   // Hero
@@ -378,6 +417,7 @@ function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
       html += `
         <div class="tr2-card ${cssClass}" data-key="${esc(t.key)}"
           style="animation:tr2CardIn .4s ${globalIdx * 50}ms cubic-bezier(.34,1.56,.64,1) both">
+          ${u && freshKeys.has(t.key) ? `<span class="tr2-new-dot" aria-label="Nouveau trophée">NOUVEAU</span>` : ""}
           ${u ? `<div class="tr2-card-rarity"></div>` : ""}
           <div class="tr2-card-emoji">
             ${
