@@ -473,11 +473,14 @@ async function loadData(me) {
   // Quiz attempts réels pour mes élèves
   let quizData = [];
   if (eleveIds.length > 0) {
-    const { data: qa } = await sb
+    // NB : la colonne s'appelle completed_at (pas created_at) — l'ancien
+    // nom renvoyait un 400, d'où une carte « Taux quiz » toujours vide.
+    const { data: qa, error: qaErr } = await sb
       .from("quiz_attempts")
-      .select("user_id, score, created_at")
+      .select("user_id, score, completed_at")
       .in("user_id", eleveIds)
-      .gte("created_at", daysAgoISO(30));
+      .gte("completed_at", daysAgoISO(30));
+    if (qaErr) console.error("[insights] quiz_attempts query error", qaErr);
     quizData = qa || [];
   }
 
