@@ -617,11 +617,62 @@ async function _loadFeedSection() {
       month: "short",
     });
   }
-  function _fmtMin(m) {
-    if (!m) return "";
-    const h = Math.floor(m / 60),
-      r = m % 60;
-    return h === 0 ? `${r}min` : r === 0 ? `${h}h` : `${h}h${r}`;
+
+  // Groupé par jour × moniteur : 20 cartes « a validé X » à la suite = mur
+  // de texte. Un groupe = « 8 compétences validées ✓ », dépliable.
+  const groups = [];
+  const byKey = new Map();
+  for (const evt of events) {
+    const day = evt.ts ? new Date(evt.ts).toDateString() : "";
+    const moniteur =
+      `${evt.moniteur_prenom || ""} ${evt.moniteur_nom || ""}`.trim();
+    const key = `${day}|${moniteur}`;
+    let g = byKey.get(key);
+    if (!g) {
+      g = { ts: evt.ts, moniteur, items: [] };
+      byKey.set(key, g);
+      groups.push(g);
+    }
+    g.items.push(evt);
+  }
+
+  const MAX_GROUPS = 5;
+
+  function _renderGroup(g) {
+    const nValid = g.items.filter((e) => e.kind !== "session").length;
+    const nSession = g.items.length - nValid;
+    const summary = [
+      nValid
+        ? `${nValid} compétence${nValid > 1 ? "s" : ""} validée${nValid > 1 ? "s" : ""}`
+        : "",
+      nSession ? `${nSession} séance${nSession > 1 ? "s" : ""}` : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    const detail = g.items
+      .map((evt) => {
+        const isSession = evt.kind === "session";
+        return `<div class="lr-feed-item">
+          <div class="lr-feed-dot ${isSession ? "k-session" : "k-validation"}">${isSession ? icon("car", { size: 12, strokeWidth: 2 }) : icon("check", { size: 12, strokeWidth: 2.5 })}</div>
+          <div class="lr-feed-content">
+            <div class="lr-feed-desc">${isSession ? "Séance" : `${esc(evt.competence_id || "—")} validée`}</div>
+            ${evt.comment ? `<div class="lr-feed-comment">"${esc(evt.comment)}"</div>` : ""}
+          </div>
+        </div>`;
+      })
+      .join("");
+    return `
+      <details class="lr-feed-grp">
+        <summary>
+          <span class="lr-feed-dot k-validation">${icon("check", { size: 12, strokeWidth: 2.5 })}</span>
+          <span class="lr-feed-grp-txt">
+            <span class="lr-feed-grp-ttl">${esc(_relTime(g.ts))} — ${esc(summary || "activité")}</span>
+            <span class="lr-feed-grp-sub">${esc(g.moniteur)}</span>
+          </span>
+          <span class="lr-feed-grp-chev">${icon("chevron-down", { size: 14, strokeWidth: 2.2 })}</span>
+        </summary>
+        <div class="lr-feed-grp-body">${detail}</div>
+      </details>`;
   }
 
   host.innerHTML = `
@@ -673,35 +724,52 @@ async function _loadFeedSection() {
         flex-shrink: 0;
         margin-top: 4px;
       }
+      .lr-feed-grp { border-bottom: 1px solid var(--bo2); }
+      .lr-feed-grp:last-child { border-bottom: none; }
+      .lr-feed-grp summary {
+        display: flex; align-items: center; gap: 12px;
+        padding: 11px 0;
+        min-height: 44px; box-sizing: border-box;
+        cursor: pointer; list-style: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .lr-feed-grp summary::-webkit-details-marker { display: none; }
+      .lr-feed-grp-txt { flex: 1; min-width: 0; }
+      .lr-feed-grp-ttl { display: block; font: 600 12.5px/1.3 'Inter', sans-serif; color: var(--ink); }
+      .lr-feed-grp-sub { display: block; font: 500 11px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 1px; }
+      .lr-feed-grp-chev { color: var(--mu2); display: inline-flex; flex-shrink: 0; transition: transform .2s; }
+      .lr-feed-grp[open] .lr-feed-grp-chev { transform: rotate(180deg); }
+      .lr-feed-grp-body { padding: 0 0 8px 40px; }
+      .lr-feed-grp-body .lr-feed-item { padding: 6px 0; border-bottom: none; }
+      .lr-feed-all {
+        width: 100%; margin-top: 8px; padding: 11px;
+        min-height: 44px;
+        background: none; border: 1.5px dashed var(--bo);
+        border-radius: 12px;
+        font: 600 12.5px/1 'Inter', sans-serif; color: var(--mu);
+        cursor: pointer;
+      }
+      .lr-feed-all:hover { border-color: var(--bo4); color: var(--ink5); }
     </style>
     <div class="lr-feed">
       <div class="lr-feed-hd" style="display:flex;align-items:center;gap:6px;">${icon("clock", { size: 14, strokeWidth: 2.2, color: "var(--a)" })} Fil des moniteurs</div>
       <div class="lr-feed-list">
-        ${events
-          .map((evt) => {
-            const isSession = evt.kind === "session";
-            const dot = isSession
-              ? icon("car", { size: 12, strokeWidth: 2 })
-              : icon("check", { size: 12, strokeWidth: 2.5 });
-            const dotCls = isSession ? "k-session" : "k-validation";
-            const desc = isSession
-              ? `Séance`
-              : `${esc(evt.competence_id || "—")} validée`;
-            return `
-          <div class="lr-feed-item">
-            <div class="lr-feed-dot ${dotCls}">${dot}</div>
-            <div class="lr-feed-content">
-              <div class="lr-feed-author">${esc(evt.moniteur_prenom || "")} ${esc(evt.moniteur_nom || "")}</div>
-              <div class="lr-feed-desc">${desc}</div>
-              ${evt.comment ? `<div class="lr-feed-comment">"${esc(evt.comment)}"</div>` : ""}
-            </div>
-            <div class="lr-feed-ts">${_relTime(evt.ts)}</div>
-          </div>`;
-          })
-          .join("")}
+        ${groups.slice(0, MAX_GROUPS).map(_renderGroup).join("")}
       </div>
+      ${
+        groups.length > MAX_GROUPS
+          ? `<div class="lr-feed-list" id="lr-feed-more" hidden>${groups.slice(MAX_GROUPS).map(_renderGroup).join("")}</div>
+             <button class="lr-feed-all" id="lr-feed-all" type="button">Voir tout (${groups.length})</button>`
+          : ""
+      }
     </div>
   `;
+
+  const moreBtn = host.querySelector("#lr-feed-all");
+  moreBtn?.addEventListener("click", () => {
+    host.querySelector("#lr-feed-more")?.removeAttribute("hidden");
+    moreBtn.remove();
+  });
 }
 
 function renderMonde(cat) {

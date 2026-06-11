@@ -140,6 +140,9 @@ const STYLE = `
     from { opacity: 0; transform: scale(.85) translateY(6px); }
     to   { opacity: 1; transform: scale(1)   translateY(0);   }
   }
+  /* Masqué sur la page validation : on y EST déjà (le FAB recouvrait le
+     bouton « Enregistrer la séance »). Idem quand un footer CTA est présent. */
+  body:has(.vs) #bn-seance-fab { display: none; }
   #bn-seance-fab {
     position: fixed;
     right: 20px;
