@@ -112,7 +112,7 @@ const STYLE = `<style>
     color: var(--mu2);
     cursor: pointer;
     transition: background .15s cubic-bezier(.4,0,.2,1), color .15s cubic-bezier(.4,0,.2,1);
-    min-height: 36px;
+    min-height: 44px; /* cible tactile a11y */
     white-space: nowrap;
   }
   .me-tab.active {
@@ -246,8 +246,8 @@ const STYLE = `<style>
     transition: width .6s cubic-bezier(.4,0,.2,1);
   }
   .me-prog-txt {
-    font: 700 11px/1 'IBM Plex Mono', monospace;
-    color: var(--mu2);
+    font: 700 12px/1 'IBM Plex Mono', monospace;
+    color: var(--ink3);
     text-align: right;
   }
 
@@ -255,8 +255,8 @@ const STYLE = `<style>
   .me-more {
     flex-shrink: 0;
     align-self: center;
-    width: 36px; height: 36px;
-    margin: 0 -6px 0 -2px; /* recale optiquement sur le bord droit de la carte */
+    width: 44px; height: 44px; /* cible tactile a11y */
+    margin: 0 -8px 0 -2px; /* recale optiquement sur le bord droit de la carte */
     display: flex; align-items: center; justify-content: center;
     border: none; background: transparent; border-radius: 9px;
     color: var(--mu2); cursor: pointer;
@@ -761,13 +761,13 @@ function render() {
       </div>
 
       <div class="me-tabs" role="tablist">
-        <button class="me-tab${_tab === "tous" ? " active" : ""}" data-tab="tous" role="tab">Tous (${total})</button>
-        <button class="me-tab${_tab === "actifs" ? " active" : ""}" data-tab="actifs" role="tab">Actifs (${actifs})</button>
-        <button class="me-tab${_tab === "prets" ? " active" : ""}" data-tab="prets" role="tab"
+        <button class="me-tab${_tab === "tous" ? " active" : ""}" data-tab="tous" role="tab" aria-selected="${_tab === "tous"}">Tous (${total})</button>
+        <button class="me-tab${_tab === "actifs" ? " active" : ""}" data-tab="actifs" role="tab" aria-selected="${_tab === "actifs"}">Actifs (${actifs})</button>
+        <button class="me-tab${_tab === "prets" ? " active" : ""}" data-tab="prets" role="tab" aria-selected="${_tab === "prets"}"
                 style="${prets > 0 && _tab !== "prets" ? "color:var(--grd)" : ""}">Prêts (${prets})</button>
-        <button class="me-tab${_tab === "arelancer" ? " active" : ""}" data-tab="arelancer" role="tab"
+        <button class="me-tab${_tab === "arelancer" ? " active" : ""}" data-tab="arelancer" role="tab" aria-selected="${_tab === "arelancer"}"
                 style="${aRelancerList.length > 0 && _tab !== "arelancer" ? "color:var(--amx)" : ""}">Relance (${aRelancerList.length})</button>
-        <button class="me-tab${_tab === "recus" ? " active" : ""}" data-tab="recus" role="tab">Reçus (${recusCount})</button>
+        <button class="me-tab${_tab === "recus" ? " active" : ""}" data-tab="recus" role="tab" aria-selected="${_tab === "recus"}">Reçus (${recusCount})</button>
       </div>
 
       <button class="me-fab" id="me-fab" aria-label="Enregistrer une séance">
@@ -902,11 +902,11 @@ function wire() {
   // Section relancer → filtre tab arelancer
   _root.querySelector("#me-relancer-section")?.addEventListener("click", () => {
     _tab = "arelancer";
-    _root
-      .querySelectorAll(".me-tab")
-      .forEach((b) =>
-        b.classList.toggle("active", b.dataset.tab === "arelancer"),
-      );
+    _root.querySelectorAll(".me-tab").forEach((b) => {
+      const on = b.dataset.tab === "arelancer";
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-selected", String(on));
+    });
     renderList();
     track("mes_eleves.relancer_section.click");
   });
@@ -931,9 +931,11 @@ function wire() {
   _root.querySelectorAll(".me-tab").forEach((btn) =>
     btn.addEventListener("click", () => {
       _tab = btn.dataset.tab;
-      _root
-        .querySelectorAll(".me-tab")
-        .forEach((b) => b.classList.toggle("active", b === btn));
+      _root.querySelectorAll(".me-tab").forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-selected", String(on));
+      });
       track("mes_eleves.tab.click", { tab: _tab });
       renderList();
     }),

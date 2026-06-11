@@ -202,7 +202,7 @@ const STYLE = `<style>
   font-size: 11px;
 }
 .bl-comp-name { font: 500 13px/1.3 'Inter', sans-serif; color: var(--ink5); flex: 1; min-width: 0; }
-.bl-comp-date { font: 500 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); flex-shrink: 0; }
+.bl-comp-date { font: 500 12px/1 'IBM Plex Mono', monospace; color: var(--ink3); flex-shrink: 0; }
 .bl-comp-none { font: 500 13px/1.4 'Inter',sans-serif; color: var(--mu2); text-align: center; padding: 12px 0; }
 
 /* ── Evolution chart ── */
