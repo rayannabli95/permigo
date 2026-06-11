@@ -30,10 +30,11 @@ const STYLE = `<style>
   /* Header */
   .ins-hd { margin-bottom: 24px; }
   .ins-h1 {
-    font: 700 26px/1.15 'Plus Jakarta Sans', sans-serif;
+    /* Titre de page moniteur unifié : 24px / 700 / -.02em (cf. mes-eleves, bilan) */
+    font: 700 24px/1.2 'Plus Jakarta Sans', sans-serif;
     color: var(--ink);
     margin: 0 0 4px;
-    letter-spacing: -.025em;
+    letter-spacing: -.02em;
   }
   .ins-sub {
     font: 500 13px/1 'Inter', sans-serif;
@@ -108,6 +109,13 @@ const STYLE = `<style>
     font: 500 11px/1.3 'Inter', sans-serif;
     color: var(--mu);
     margin-top: 4px;
+  }
+  /* Carte quiz sans donnée : nudge actionnable au lieu d'un « — » mort */
+  .ins-widget-empty { background: color-mix(in srgb, var(--pu) 5%, var(--su)); }
+  .ins-widget-nudge {
+    font: 500 12px/1.4 'Inter', sans-serif;
+    color: var(--mu);
+    margin: 8px 0 0;
   }
   .ins-widget-delta {
     font: 700 12px/1 'IBM Plex Mono', monospace;
@@ -669,7 +677,8 @@ function renderKpis({
           : `<p class="ins-widget-delta flat">= Stable vs mois précédent</p>`;
 
   const streakVal = streakPro !== null ? streakPro : "—";
-  const tauxVal = tauxQuiz !== null ? `${tauxQuiz}%` : "—";
+  const tauxVide = tauxQuiz === null;
+  const tauxVal = tauxVide ? "—" : `${tauxQuiz}%`;
 
   return `
     <div class="ins-widgets" id="ins-kpi-grid">
@@ -692,13 +701,17 @@ function renderKpis({
         <p class="ins-widget-sub">Attitrés</p>
       </div>
 
-      <div class="ins-widget">
+      <div class="ins-widget${tauxVide ? " ins-widget-empty" : ""}">
         <div class="ins-widget-head">
           ${iconBadge("target", { color: "var(--pu)", size: 32 })}
           <span class="ins-widget-lbl">Taux quiz</span>
         </div>
-        <p class="ins-widget-val">${tauxVal}</p>
-        <p class="ins-widget-sub">Score ≥ 60% (30j)</p>
+        ${
+          tauxVide
+            ? `<p class="ins-widget-nudge">Aucun quiz ce mois — incite tes élèves à réviser entre deux leçons.</p>`
+            : `<p class="ins-widget-val">${tauxVal}</p>
+               <p class="ins-widget-sub">Score ≥ 60% (30j)</p>`
+        }
       </div>
 
       <div class="ins-widget">
