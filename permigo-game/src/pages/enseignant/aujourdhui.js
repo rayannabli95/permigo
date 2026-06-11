@@ -16,6 +16,59 @@ import { renderUserAvatar } from "@/components/common/avatar.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
 import { getMoniteurState } from "@/data/moniteur-levels.js";
 import { getLeague } from "@/utils/league-shared.js";
+import { startTour } from "@/components/common/guided-tour.js";
+
+// Tour guidé enseignant — affiché 1× à la première connexion
+const TOUR_KEY = "pg-tour-moniteur-v1";
+const MONITEUR_TOUR_STEPS = [
+  {
+    title: "Bienvenue sur PermiGo 👋",
+    text: "30 secondes pour prendre l'app en main. Tu peux passer à tout moment.",
+  },
+  {
+    sel: "#aj-act-invite",
+    title: "Invite tes élèves",
+    text: "Tout commence ici : ajoute un élève, il reçoit un lien pour créer son compte et te sera rattaché automatiquement.",
+  },
+  {
+    sel: "#bn-seance-fab",
+    title: "Enregistre une séance",
+    text: "Après chaque leçon, coche les compétences travaillées. C'est ce qui fait avancer le livret REMC de l'élève.",
+  },
+  {
+    sel: '.bn-tab[data-id="eleves"]',
+    title: "Tes élèves",
+    text: "Retrouve chaque élève, sa progression et sa fiche détaillée. Les élèves à relancer remontent en haut.",
+  },
+  {
+    sel: '.bn-tab[data-id="insights"]',
+    title: "Tes stats",
+    text: "Suis l'engagement de tes élèves et leur progression moyenne, mois après mois.",
+  },
+];
+
+function maybeStartMoniteurTour() {
+  try {
+    if (localStorage.getItem(TOUR_KEY)) return;
+  } catch {
+    return;
+  }
+  // Laisse le DOM (FAB, nav) se poser avant de mesurer les ancres
+  setTimeout(() => {
+    if (!document.querySelector("#aj-act-invite")) return;
+    track("moniteur.tour.start");
+    startTour(MONITEUR_TOUR_STEPS, {
+      onDone: () => {
+        try {
+          localStorage.setItem(TOUR_KEY, "1");
+        } catch {
+          /* stockage indispo — le tour pourra réapparaître, sans gravité */
+        }
+        track("moniteur.tour.done");
+      },
+    });
+  }, 450);
+}
 
 // ─── Statuts labels : mapping centralisé @/utils/statut-label.js ──
 
@@ -1062,6 +1115,9 @@ async function renderInto(root, _me) {
       }
     });
   });
+
+  // Tour guidé à la première connexion (après le wiring, ancres en place)
+  maybeStartMoniteurTour();
 }
 
 // ─── Sub-renders ──────────────────────────────────────────────────
