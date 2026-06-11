@@ -368,8 +368,8 @@ const STYLE = `<style>
     border-radius: 8px;
   }
   .aj-act-time {
-    font: 500 11px/1 'IBM Plex Mono', monospace;
-    color: var(--mu2);
+    font: 500 12px/1 'IBM Plex Mono', monospace;
+    color: var(--ink3);
   }
 
   /* Élèves compacts */
