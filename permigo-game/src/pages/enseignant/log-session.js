@@ -92,22 +92,23 @@ let _showSub = false; // coach-hint mode d'emploi (1re visite seulement)
 const STYLE = `<style>
   .vs { padding: 16px 16px calc(152px + env(safe-area-inset-bottom,0px)); max-width: 600px; margin: 0 auto; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; }
   .vs-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-  .vs-back { width: 40px; height: 40px; flex-shrink: 0; border: 1px solid var(--bo); background: var(--su); border-radius: 10px; color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .vs-back { width: 40px; height: 40px; flex-shrink: 0; border: 1px solid var(--bo); background: var(--su); border-radius: var(--r); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .vs-back:active { transform: scale(.95); }
   .vs-h1 { font: 800 19px/1.2 'Plus Jakarta Sans', sans-serif; margin: 0; letter-spacing: -.02em; }
   .vs-sub { font: 500 12.5px/1.3 'Inter', sans-serif; color: color-mix(in srgb, var(--mu) 45%, var(--ink)); margin: 2px 0 0; }
 
-  .vs-card { background: var(--su); border: 1px solid var(--bo); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+  .vs-card { background: var(--su); border: 1px solid var(--bo); border-radius: var(--r-lg); padding: 14px; margin-bottom: 12px; }
   .vs-card-ttl { font: 700 12px/1 'Inter', sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--mu2); margin: 0 0 12px; display: flex; align-items: center; gap: 6px; }
 
   /* Dropdown élève */
   .vs-search-ico { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--mu2); pointer-events: none; }
-  .vs-search { width: 100%; box-sizing: border-box; padding: 10px 12px 10px 36px; background: var(--bg); border: 1px solid var(--bo); border-radius: 10px; font: 500 14px/1 'Inter', sans-serif; color: var(--ink); outline: none; }
+  .vs-search { width: 100%; box-sizing: border-box; padding: 10px 12px 10px 36px; background: var(--bg); border: 1px solid var(--bo); border-radius: var(--r); font: 500 14px/1 'Inter', sans-serif; color: var(--ink); outline: none; }
   .vs-search:focus { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
 
   .vs-dd { position: relative; margin-bottom: 16px; z-index: 30; }
   .vs-dd-backdrop { position: fixed; inset: 0; z-index: 20; }
-  .vs-dd-trigger { position: relative; z-index: 31; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 60px; background: var(--su); border: 1.5px solid var(--bo); border-radius: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color .15s, box-shadow .15s; }
+  .vs-dd-trigger { position: relative; z-index: 31; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 60px; background: var(--su); border: 1.5px solid var(--bo); border-radius: var(--r-md); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color .15s, box-shadow .15s, transform .14s var(--ease-snap); }
+  .vs-dd-trigger:active { transform: scale(.98); }
   .vs-dd.open .vs-dd-trigger { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
   .vs-dd-cur { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
   .vs-dd-av { flex-shrink: 0; display: inline-flex; }
@@ -115,13 +116,13 @@ const STYLE = `<style>
   .vs-dd-name { font: 700 14.5px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .vs-dd-ph { color: var(--mu2); font-weight: 600; }
   .vs-dd-sub { font: 600 11.5px/1 'IBM Plex Mono', monospace; color: var(--mu2); margin-top: 3px; }
-  .vs-dd-chev { flex-shrink: 0; color: var(--mu2); display: inline-flex; transition: transform .25s cubic-bezier(.4,0,.2,1); }
+  .vs-dd-chev { flex-shrink: 0; color: var(--mu2); display: inline-flex; transition: transform .25s var(--ease); }
   .vs-dd.open .vs-dd-chev { transform: rotate(180deg); }
-  .vs-dd-panel { position: absolute; z-index: 31; top: calc(100% + 6px); left: 0; right: 0; background: var(--su); border: 1.5px solid var(--bo); border-radius: 14px; box-shadow: 0 16px 40px -10px rgba(10,13,26,.22); padding: 6px; max-height: 0; overflow: hidden; opacity: 0; transform: translateY(-6px); pointer-events: none; transition: max-height .25s cubic-bezier(.4,0,.2,1), opacity .18s, transform .2s; }
+  .vs-dd-panel { position: absolute; z-index: 31; top: calc(100% + 6px); left: 0; right: 0; background: var(--su); border: 1.5px solid var(--bo); border-radius: var(--r-md); box-shadow: 0 16px 40px -10px rgba(10,13,26,.22); padding: 6px; max-height: 0; overflow: hidden; opacity: 0; transform: translateY(-6px); pointer-events: none; transition: max-height .25s var(--ease), opacity .18s, transform .2s; }
   .vs-dd.open .vs-dd-panel { max-height: min(62vh, 420px); overflow-y: auto; opacity: 1; transform: translateY(0); pointer-events: auto; }
   .vs-dd-search { position: relative; margin: 4px 4px 8px; }
   .vs-dd-list { display: flex; flex-direction: column; gap: 2px; }
-  .vs-dd-opt { display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding: 9px 10px; min-height: 44px; border: 0; background: transparent; border-radius: 10px; cursor: pointer; text-align: left; color: var(--ink); -webkit-tap-highlight-color: transparent; opacity: 0; animation: vsDdIn .22s ease forwards; }
+  .vs-dd-opt { display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding: 9px 10px; min-height: 44px; border: 0; background: transparent; border-radius: var(--r); cursor: pointer; text-align: left; color: var(--ink); -webkit-tap-highlight-color: transparent; opacity: 0; animation: vsDdIn .22s ease forwards; }
   .vs-dd-opt:hover { background: var(--bg); }
   .vs-dd-opt.sel { background: color-mix(in srgb, var(--a) 8%, transparent); }
   .vs-dd-opt .vs-dd-name { font: 600 14px/1.2 'Inter', sans-serif; flex: 1; }
@@ -139,20 +140,21 @@ const STYLE = `<style>
   .vs-leg.a_retravailler { color: var(--amx); }
 
   /* Sections par monde — accordéons */
-  .vs-monde { margin-bottom: 8px; border: 1px solid var(--bo); border-radius: 12px; background: var(--su); overflow: hidden; }
+  .vs-monde { margin-bottom: 8px; border: 1px solid var(--bo); border-radius: var(--r); background: var(--su); overflow: hidden; }
   .vs-monde.open { border-color: var(--bo4); }
-  .vs-monde-hd { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; margin: 0; padding: 13px 14px; min-height: 52px; background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .vs-monde-hd { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; margin: 0; padding: 13px 14px; min-height: 52px; background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform .14s var(--ease-snap); }
+  .vs-monde-hd:active { transform: scale(.98); }
   .vs-monde-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .vs-monde-nom { font: 700 13.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); flex: 1; min-width: 0; text-align: left; }
   .vs-monde-cnt { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
-  .vs-monde-chev { color: var(--mu2); display: inline-flex; transition: transform .25s cubic-bezier(.4,0,.2,1); }
+  .vs-monde-chev { color: var(--mu2); display: inline-flex; transition: transform .25s var(--ease); }
   .vs-monde.open .vs-monde-chev { transform: rotate(180deg); }
-  .vs-monde-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s cubic-bezier(.4,0,.2,1); }
+  .vs-monde-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s var(--ease); }
   .vs-monde.open .vs-monde-body { grid-template-rows: 1fr; }
   .vs-monde-body > .vs-chips { overflow: hidden; min-height: 0; }
   .vs-chips { display: flex; flex-direction: column; gap: 4px; padding: 0 12px 12px; }
   @media (prefers-reduced-motion: reduce) { .vs-monde-chev, .vs-monde-body { transition: none; } }
-  .vs-chip { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; padding: 8px 11px; min-height: 42px; border: 1px solid var(--bo); background: var(--su); border-radius: 11px; cursor: pointer; font: 500 13px/1.25 'Inter', sans-serif; color: var(--ink); text-align: left; -webkit-tap-highlight-color: transparent; transition: border-color .12s, background .12s; }
+  .vs-chip { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; padding: 8px 11px; min-height: 42px; border: 1px solid var(--bo); background: var(--su); border-radius: var(--r); cursor: pointer; font: 500 13px/1.25 'Inter', sans-serif; color: var(--ink); text-align: left; -webkit-tap-highlight-color: transparent; transition: border-color .12s, background .12s; }
   .vs-chip:active { transform: scale(.99); }
   .vs-chip-ico { width: 15px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--bo4); }
   .vs-chip-code { font: 700 10px/1 'IBM Plex Mono', monospace; color: var(--mu); background: var(--bg2); padding: 3px 5px; border-radius: 5px; flex-shrink: 0; }
@@ -171,7 +173,7 @@ const STYLE = `<style>
   .vs-chip.a_retravailler .vs-chip-ico { color: var(--amx); }
 
   /* Note */
-  .vs-note { width: 100%; box-sizing: border-box; min-height: 72px; resize: vertical; padding: 12px; background: var(--bg); border: 1px solid var(--bo); border-radius: 12px; font: 500 14px/1.5 'Inter', sans-serif; color: var(--ink); outline: none; }
+  .vs-note { width: 100%; box-sizing: border-box; min-height: 72px; resize: vertical; padding: 12px; background: var(--bg); border: 1px solid var(--bo); border-radius: var(--r); font: 500 14px/1.5 'Inter', sans-serif; color: var(--ink); outline: none; }
   .vs-note:focus { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
   .vs-note-count { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); text-align: right; margin-top: 6px; }
 
@@ -181,7 +183,7 @@ const STYLE = `<style>
   .vs-submit { width: 100%; max-width: 600px; margin: 0 auto; min-height: 52px; font-size: 15px; }
 
   .vs-empty { padding: 32px 16px; text-align: center; color: var(--mu2); font: 500 14px/1.5 'Inter', sans-serif; }
-  .vs-skel { height: 64px; border-radius: 12px; background: var(--su); border: 1px solid var(--bo); animation: vsPulse 1.4s ease-in-out infinite; margin-bottom: 8px; }
+  .vs-skel { height: 64px; border-radius: var(--r); background: var(--su); border: 1px solid var(--bo); animation: vsPulse 1.4s ease-in-out infinite; margin-bottom: 8px; }
   @keyframes vsPulse { 0%,100%{opacity:1} 50%{opacity:.5} }
 </style>`;
 

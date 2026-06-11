@@ -71,10 +71,10 @@ const STYLE = `<style>
   .ins-widget {
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 24px;
+    border-radius: var(--rx);
     padding: 18px;
-    box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 6px 16px -8px rgba(10,13,26,.08);
-    animation: insWidgetIn .45s cubic-bezier(.23,1,.32,1) both;
+    box-shadow: var(--s1);
+    animation: insWidgetIn .45s var(--ease-snap) both;
   }
   .ins-widget:nth-child(1) { animation-delay: .04s; }
   .ins-widget:nth-child(2) { animation-delay: .10s; }
@@ -129,9 +129,9 @@ const STYLE = `<style>
   .ins-chart-wrap {
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: 20px;
+    border-radius: var(--r-xl);
     padding: 16px 14px 14px;
-    box-shadow: 0 1px 2px rgba(10,13,26,.04);
+    box-shadow: var(--s0);
   }
   .ins-chart-bars {
     display: flex;
@@ -187,15 +187,15 @@ const STYLE = `<style>
   .ins-eleve-row {
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     padding: 12px 14px;
     display: flex;
     align-items: center;
     gap: 12px;
     cursor: pointer;
     min-height: 44px;
-    transition: border-color .15s cubic-bezier(.23,1,.32,1),
-                transform .15s cubic-bezier(.23,1,.32,1);
+    transition: border-color .15s var(--ease-snap),
+                transform .15s var(--ease-snap);
     margin-bottom: 6px;
   }
   @media (hover: hover) and (pointer: fine) {
@@ -224,7 +224,7 @@ const STYLE = `<style>
   .ins-badge {
     font: 600 11px/1 'Inter', sans-serif;
     padding: 3px 9px;
-    border-radius: 12px;
+    border-radius: var(--r);
     flex-shrink: 0;
   }
   .ins-badge-green  { color: var(--grd); background: rgba(16,185,129,.1); }
@@ -237,7 +237,7 @@ const STYLE = `<style>
     gap: 4px;
     background: var(--bg2);
     padding: 4px;
-    border-radius: 12px;
+    border-radius: var(--r);
     margin-bottom: 12px;
   }
   .ins-tab {
@@ -245,7 +245,7 @@ const STYLE = `<style>
     padding: 8px 6px;
     border: none;
     background: transparent;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     font: 600 12px/1 'Inter', sans-serif;
     color: var(--mu2);
     cursor: pointer;
@@ -255,14 +255,14 @@ const STYLE = `<style>
   .ins-tab.active {
     background: var(--su);
     color: var(--a);
-    box-shadow: 0 1px 2px rgba(10,13,26,.06);
+    box-shadow: var(--s0);
   }
 
   /* Difficulté comps */
   .ins-diff-row {
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     padding: 12px 14px;
     margin-bottom: 6px;
     display: flex;
@@ -294,7 +294,7 @@ const STYLE = `<style>
   .ins-diff-bar-fill {
     height: 100%;
     border-radius: 2px;
-    transition: width .5s cubic-bezier(.23,1,.32,1);
+    transition: width .5s var(--ease-snap);
   }
   .ins-diff-count {
     font: 600 12px/1 'Inter', sans-serif;
@@ -307,7 +307,7 @@ const STYLE = `<style>
   .ins-reco-card {
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     padding: 14px 16px;
     display: flex;
     gap: 12px;
@@ -338,7 +338,7 @@ const STYLE = `<style>
     height: 80px;
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: 20px;
+    border-radius: var(--r-xl);
     animation: insSkelPulse 1.4s ease-in-out infinite;
   }
   .ins-skel-block.tall { height: 160px; }
@@ -355,7 +355,7 @@ const STYLE = `<style>
     font: 500 13px/1.5 'Inter', sans-serif;
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
   }
 </style>`;
 

@@ -53,8 +53,16 @@
   --th:52px;  /* topbar height */
   --bh:64px;  /* bottom nav height */
 
-  /* ─ Radius ─ */
-  --r:12px; --rl:18px; --rx:24px;
+  /* ─ Radius — échelle complète. Toute nouvelle règle DOIT consommer un token
+     (audit 2026-06 : 10 valeurs hardcodées différentes diluaient la marque). ─ */
+  --r-sm:8px;   /* badges, mini-éléments */
+  --r:12px;     /* boutons, inputs (alias historique de --r-md) */
+  --r-md:14px;  /* boutons larges, CTA */
+  --r-lg:16px;  /* cartes moyennes */
+  --rl:18px;    /* cartes larges (historique) */
+  --r-xl:20px;  /* héros, sections */
+  --rx:24px;    /* grands containers (historique) */
+  --r-full:999px; /* pills */
 
   /* ─ Shadows ─ */
   --s0:0 1px 3px rgba(11,13,26,.05);
@@ -62,14 +70,24 @@
   --s2:0 6px 22px rgba(11,13,26,.09), 0 2px 8px rgba(11,13,26,.05);
   --s3:0 14px 40px rgba(11,13,26,.13), 0 4px 12px rgba(11,13,26,.07);
   --s4:0 28px 60px rgba(11,13,26,.17), 0 8px 22px rgba(11,13,26,.08);
+  /* ─ Ombres colorées (glow contextuel — suit le preset accent) ─ */
+  --s-a:0 8px 24px -6px color-mix(in srgb, var(--a) 45%, transparent);
+  --s-a-lg:0 12px 32px -8px color-mix(in srgb, var(--a) 60%, transparent);
+  --s-am:0 6px 18px -4px rgba(245,158,11,.35);
+  --s-gr:0 6px 18px -4px rgba(34,197,94,.30);
+  --s-pu:0 6px 18px -4px rgba(139,92,246,.30);
   /* ─ Bouton 3D Duo-style ─ */
   --s-btn-rest:0 4px 0 0 var(--adk);
   --s-btn-active:0 1px 0 0 var(--adk);
 
-  /* ─ Motion ─ */
+  /* ─ Motion — 4 courbes canoniques, ne pas en inventer d'autres ─ */
   --t:.16s cubic-bezier(.4,0,.2,1);
   --t-slow:.35s cubic-bezier(.4,0,.2,1);
-  --ease-bounce:cubic-bezier(.5,1.8,.5,1);
+  --ease:cubic-bezier(.4,0,.2,1);        /* standard (layout, couleurs) */
+  --ease-out:cubic-bezier(.2,.7,.3,1);   /* reveals, entrées de page */
+  --ease-snap:cubic-bezier(.23,1,.32,1); /* micro-interactions vives */
+  --ease-spring:cubic-bezier(.34,1.56,.64,1); /* press/pop avec rebond */
+  --ease-bounce:cubic-bezier(.5,1.8,.5,1);    /* rebond fort (célébrations) */
 
   /* ─ Fonts ─ */
   --fd:'Nunito','Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;

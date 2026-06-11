@@ -53,7 +53,7 @@ const STYLE = `<style>
 /* ── Skeleton ── */
 .bo2-skel {
   background: linear-gradient(90deg, var(--bg2) 0%, var(--bo) 50%, var(--bg2) 100%);
-  background-size: 200% 100%; animation: bo2Shim 1.4s ease-in-out infinite; border-radius: 18px;
+  background-size: 200% 100%; animation: bo2Shim 1.4s ease-in-out infinite; border-radius: var(--rl);
 }
 @keyframes bo2Shim { from{background-position:200% 0} to{background-position:-200% 0} }
 
@@ -76,7 +76,7 @@ const STYLE = `<style>
 .bo2-gems {
   display: flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
-  border-radius: 99px; padding: 7px 14px; position: relative; overflow: hidden;
+  border-radius: var(--r-full); padding: 7px 14px; position: relative; overflow: hidden;
 }
 .bo2-gems-ico { font-size: 16px; line-height: 1; }
 .bo2-gems-val { font: 800 15px/1 'IBM Plex Mono', monospace; color: #fff; letter-spacing: -.02em; }
@@ -90,12 +90,13 @@ const STYLE = `<style>
 /* ── Tabs ── */
 .bo2-tabs { position: relative; z-index: 1; display: flex; gap: 8px; padding-bottom: 14px; }
 .bo2-tab {
-  flex: 1; padding: 9px 8px; border-radius: 12px;
+  flex: 1; padding: 9px 8px; border-radius: var(--r);
   background: rgba(255,255,255,.06); border: 1px solid transparent;
   font: 700 13px/1 'Inter', sans-serif; color: rgba(255,255,255,.6);
   cursor: pointer; -webkit-tap-highlight-color: transparent;
-  transition: color .15s, background .15s, border-color .15s; font-family: inherit; white-space: nowrap;
+  transition: color .15s, background .15s, border-color .15s, transform .14s var(--ease-snap); font-family: inherit; white-space: nowrap;
 }
+.bo2-tab:active { transform: scale(.97); }
 .bo2-tab.active { color: #1e1b4b; background: #fff; border-color: #fff; }
 
 /* ── Section heading ── */
@@ -109,13 +110,13 @@ const STYLE = `<style>
 .bo2-list { display: flex; flex-direction: column; gap: 12px; padding: 12px 16px 0; }
 .bo2-skin {
   display: flex; align-items: center; gap: 14px; padding: 13px 14px;
-  border-radius: 20px; background: var(--su); position: relative;
+  border-radius: var(--r-xl); background: var(--su); position: relative;
   cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none;
-  transition: transform .14s cubic-bezier(.34,1.56,.64,1);
+  transition: transform .14s var(--ease-spring);
 }
 .bo2-skin:active { transform: scale(.98); }
 .bo2-skin-thumb {
-  width: 66px; height: 66px; border-radius: 16px; flex-shrink: 0; overflow: hidden;
+  width: 66px; height: 66px; border-radius: var(--r-lg); flex-shrink: 0; overflow: hidden;
   display: flex; align-items: center; justify-content: center; position: relative;
 }
 .bo2-skin-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -125,27 +126,27 @@ const STYLE = `<style>
 .bo2-pill {
   display: inline-block; margin-top: 6px;
   font: 800 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase;
-  padding: 4px 8px; border-radius: 99px; color: #fff;
+  padding: 4px 8px; border-radius: var(--r-full); color: #fff;
 }
 .bo2-skin-sub { font: 500 11px/1.3 'Inter', sans-serif; color: var(--gr); margin-top: 5px; }
 /* CTA (droite) */
 .bo2-cta { flex-shrink: 0; display: flex; align-items: center; }
 .bo2-buy {
-  display: flex; align-items: center; gap: 5px; padding: 9px 13px; border: none; border-radius: 12px;
+  display: flex; align-items: center; gap: 5px; padding: 9px 13px; border: none; border-radius: var(--r);
   color: #fff; font: 800 13px/1 'IBM Plex Mono', monospace; cursor: pointer; min-height: 44px;
   white-space: nowrap; -webkit-tap-highlight-color: transparent; transition: transform .12s, opacity .12s;
 }
 .bo2-buy:active { transform: scale(.94); opacity: .9; }
 .bo2-lock {
-  width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: var(--r); display: flex; align-items: center; justify-content: center;
   font-size: 17px; color: #fff; flex-shrink: 0;
 }
 .bo2-check {
-  width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: var(--r); display: flex; align-items: center; justify-content: center;
   font-size: 20px; color: #fff; flex-shrink: 0;
 }
 .bo2-equip-btn {
-  padding: 9px 13px; border: 1.5px solid var(--bo); border-radius: 12px; background: var(--bg2);
+  padding: 9px 13px; border: 1.5px solid var(--bo); border-radius: var(--r); background: var(--bg2);
   color: var(--ink); font: 700 12px/1 'Inter', sans-serif; cursor: pointer; min-height: 44px;
   white-space: nowrap; -webkit-tap-highlight-color: transparent; transition: transform .12s;
 }
@@ -154,7 +155,7 @@ const STYLE = `<style>
 /* ── Intro / tuto (pourquoi la boutique) ── */
 .bo2-intro {
   position: relative; margin: 14px 16px 4px; padding: 14px 16px;
-  border-radius: 18px; overflow: hidden;
+  border-radius: var(--rl); overflow: hidden;
   display: flex; gap: 13px; align-items: flex-start;
   background: linear-gradient(150deg, color-mix(in srgb, var(--a) 14%, var(--su)) 0%, var(--su) 70%);
   border: 1px solid color-mix(in srgb, var(--a) 26%, transparent);
@@ -167,7 +168,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
 }
 .bo2-intro-ico {
-  flex-shrink: 0; width: 40px; height: 40px; border-radius: 13px;
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: var(--r-md);
   background: var(--a); color: var(--a-ink);
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 5px 14px -4px color-mix(in srgb, var(--a) 55%, transparent);
@@ -180,7 +181,7 @@ const STYLE = `<style>
 
 /* ── Rarity scale footer ── */
 .bo2-scale {
-  margin: 22px 16px 0; padding: 16px; border-radius: 20px; background: var(--su);
+  margin: 22px 16px 0; padding: 16px; border-radius: var(--r-xl); background: var(--su);
 }
 .bo2-scale-title { font: 700 13px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 14px; text-align: center; }
 .bo2-scale-row { display: flex; justify-content: space-around; gap: 8px; }
@@ -195,34 +196,34 @@ const STYLE = `<style>
 /* ── Grid (onglet Autres) ── */
 .bo2-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px 16px 0; }
 .bo2-card {
-  background: var(--su); border-radius: 20px; overflow: hidden; cursor: pointer;
-  -webkit-tap-highlight-color: transparent; transition: transform .14s cubic-bezier(.34,1.56,.64,1);
+  background: var(--su); border-radius: var(--r-xl); overflow: hidden; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: transform .14s var(--ease-spring);
   user-select: none; position: relative;
 }
 .bo2-card:active { transform: scale(.95); }
 .bo2-card-preview {
   height: 118px; display: flex; align-items: center; justify-content: center; background: var(--bg); overflow: hidden; position: relative;
 }
-.bo2-card-preview img { width: 86px; height: 86px; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(11,13,26,.28)); transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
+.bo2-card-preview img { width: 86px; height: 86px; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(11,13,26,.28)); transition: transform .25s var(--ease-spring); }
 .bo2-card:active .bo2-card-preview img { transform: scale(.92); }
 @media (hover: hover) { .bo2-card:hover .bo2-card-preview img { transform: scale(1.08) translateY(-2px); } }
 .bo2-card-preview-circle { width: 66px; height: 66px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; }
 /* Étiquette de rareté en haut à gauche de la preview */
 .bo2-card-rarity-tag {
   position: absolute; top: 8px; left: 8px; z-index: 2;
-  padding: 3px 8px; border-radius: 99px; color: #fff;
+  padding: 3px 8px; border-radius: var(--r-full); color: #fff;
   font: 800 8.5px/1 'Inter', sans-serif; letter-spacing: .08em; text-transform: uppercase;
   box-shadow: 0 2px 6px rgba(11,13,26,.25);
 }
 .bo2-card-owned-badge {
-  position: absolute; top: 8px; right: 8px; background: rgba(16,185,129,.92); border-radius: 99px;
+  position: absolute; top: 8px; right: 8px; background: rgba(16,185,129,.92); border-radius: var(--r-full);
   padding: 3px 8px; font: 700 9px/1 'IBM Plex Mono', monospace; color: #fff; letter-spacing: .04em; text-transform: uppercase;
 }
 .bo2-card-info { padding: 10px 12px 12px; }
 .bo2-card-name { font: 800 13.5px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bo2-card-footer { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .bo2-price-btn {
-  display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; padding: 9px 12px; border: none; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; padding: 9px 12px; border: none; border-radius: var(--r);
   color: #fff; font: 800 12.5px/1 'IBM Plex Mono', monospace; cursor: pointer; min-height: 40px;
   white-space: nowrap; transition: transform .12s, opacity .12s; -webkit-tap-highlight-color: transparent;
 }
@@ -258,11 +259,11 @@ const STYLE = `<style>
 .bo2-modal-body { padding: 4px 24px 0; text-align: center; }
 .bo2-modal-pill {
   display: inline-block; font: 800 10px/1 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase;
-  padding: 5px 12px; border-radius: 99px; color: #fff; margin-bottom: 10px;
+  padding: 5px 12px; border-radius: var(--r-full); color: #fff; margin-bottom: 10px;
 }
 .bo2-modal-name { font: 800 26px/1.1 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: -.03em; margin-bottom: 8px; }
 .bo2-modal-desc { font: 500 14px/1.5 'Inter', sans-serif; color: rgba(255,255,255,.7); margin-bottom: 18px; max-width: 320px; margin-left: auto; margin-right: auto; }
-.bo2-modal-price { margin: 0 24px 18px; padding: 12px 16px; border-radius: 16px; background: rgba(255,255,255,.08); }
+.bo2-modal-price { margin: 0 24px 18px; padding: 12px 16px; border-radius: var(--r-lg); background: rgba(255,255,255,.08); }
 .bo2-price-row { display: flex; align-items: center; justify-content: space-between; font: 600 14px/1.3 'Inter', sans-serif; color: #fff; }
 .bo2-price-row strong { font: 800 19px/1 'IBM Plex Mono', monospace; }
 .bo2-price-row.sub { color: rgba(255,255,255,.6); font-weight: 500; font-size: 13px; margin-top: 8px; }
@@ -270,11 +271,11 @@ const STYLE = `<style>
 .bo2-modal-balance { font: 500 12px/1 'Inter', sans-serif; color: rgba(255,255,255,.55); text-align: center; margin: 14px 0 0; }
 .bo2-modal-cta {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: calc(100% - 48px); margin: 0 24px; padding: 17px; border: none; border-radius: 99px;
+  width: calc(100% - 48px); margin: 0 24px; padding: 17px; border: none; border-radius: var(--r-full);
   font: 800 17px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; min-height: 56px;
-  transition: transform .14s cubic-bezier(.34,1.56,.64,1), opacity .12s;
+  transition: transform .14s var(--ease-spring), opacity .12s;
 }
-.bo2-modal-cta.buy { background: var(--a); color: #fff; box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--a) 50%, transparent); }
+.bo2-modal-cta.buy { background: var(--a); color: #fff; box-shadow: var(--s-a-lg); }
 .bo2-modal-cta.equip { background: #fff; color: #1e1b4b; }
 .bo2-modal-cta.locked { background: rgba(255,255,255,.12); color: rgba(255,255,255,.5); cursor: default; }
 .bo2-modal-cta:not(.locked):active { transform: scale(.97); opacity: .9; }

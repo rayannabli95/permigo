@@ -29,7 +29,7 @@ const STYLE = `<style>
   background: linear-gradient(90deg, var(--bg2) 0%, var(--bo) 50%, var(--bg2) 100%);
   background-size: 200% 100%;
   animation: tr2Shim 1.4s ease-in-out infinite;
-  border-radius: 16px;
+  border-radius: var(--r-lg);
 }
 @keyframes tr2Shim { from{background-position:200% 0} to{background-position:-200% 0} }
 
@@ -63,18 +63,18 @@ const STYLE = `<style>
   color: rgba(255,255,255,.7);
   background: rgba(255,255,255,.12);
   border: 1px solid rgba(255,255,255,.18);
-  border-radius: 99px; padding: 5px 10px;
+  border-radius: var(--r-full); padding: 5px 10px;
 }
 .tr2-progress-wrap { display: flex; flex-direction: column; gap: 5px; }
 .tr2-progress-bar {
   height: 6px; background: rgba(255,255,255,.2);
-  border-radius: 99px; overflow: hidden;
+  border-radius: var(--r-full); overflow: hidden;
 }
 .tr2-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,.6) 100%);
-  border-radius: 99px;
-  transition: width 1s cubic-bezier(.2,.7,.3,1);
+  border-radius: var(--r-full);
+  transition: width 1s var(--ease-out);
 }
 .tr2-progress-hint {
   font: 500 11px/1 'Inter', sans-serif;
@@ -86,13 +86,13 @@ const STYLE = `<style>
   display: flex; align-items: center; gap: 12px;
   margin: 14px 16px 0; padding: 12px 14px;
   background: var(--bg2); border: 1px solid var(--bo);
-  border-radius: 16px; cursor: pointer; text-decoration: none; color: inherit;
+  border-radius: var(--r-lg); cursor: pointer; text-decoration: none; color: inherit;
   transition: transform .15s, border-color .15s;
 }
 .tr2-galerie:hover { transform: translateY(-1px); border-color: #a78bfa; }
 .tr2-galerie:active { transform: scale(.99); }
 .tr2-galerie-ico {
-  flex-shrink: 0; width: 40px; height: 40px; border-radius: 11px;
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: var(--r);
   display: flex; align-items: center; justify-content: center;
   background: rgba(167,139,250,.16); color: #a78bfa;
 }
@@ -119,11 +119,11 @@ const STYLE = `<style>
 /* ── Card trophée ── */
 .tr2-card {
   position: relative;
-  border-radius: 18px;
+  border-radius: var(--rl);
   padding: 14px 8px 12px;
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   cursor: pointer; -webkit-tap-highlight-color: transparent;
-  transition: transform .14s cubic-bezier(.34,1.56,.64,1), opacity .12s;
+  transition: transform .14s var(--ease-spring), opacity .12s;
   overflow: hidden; min-height: 100px; user-select: none;
 }
 .tr2-card:active { transform: scale(.93); opacity: .9; }
@@ -133,7 +133,7 @@ const STYLE = `<style>
   position: absolute; top: 6px; right: 6px; z-index: 3;
   background: var(--rd); color: #fff;
   font: 800 7.5px/1 'Inter', sans-serif; letter-spacing: .08em;
-  padding: 4px 7px; border-radius: 99px;
+  padding: 4px 7px; border-radius: var(--r-full);
   box-shadow: 0 3px 10px rgba(239,68,68,.5);
   animation: tr2NewPulse 1.4s ease-in-out infinite;
 }
@@ -145,7 +145,7 @@ const STYLE = `<style>
 /* Commun = VERT accent (l'ancien dégradé gris se confondait avec locked) */
 .tr2-card.commun    { background: linear-gradient(145deg,var(--adk),var(--a)); box-shadow: 0 4px 16px -4px color-mix(in srgb, var(--a) 55%, transparent); }
 .tr2-card.rare      { background: linear-gradient(145deg,var(--blk2),#60a5fa); box-shadow: 0 4px 16px -4px rgba(59,130,246,.6); }
-.tr2-card.epique    { background: linear-gradient(145deg,#6d28d9,#a78bfa); box-shadow: 0 4px 16px -4px rgba(139,92,246,.6); }
+.tr2-card.epique    { background: linear-gradient(145deg,#6d28d9,#a78bfa); box-shadow: var(--s-pu); }
 .tr2-card.legendaire {
   background: linear-gradient(145deg,var(--amx),var(--aml2));
   animation: tr2GoldGlow 2.5s ease-in-out infinite alternate;
@@ -198,7 +198,7 @@ const STYLE = `<style>
 .tr2-modal-locked-handle { width: 36px; height: 4px; background: var(--bo); border-radius: 2px; margin: 14px auto 0; cursor: grab; }
 .tr2-modal-emoji {
   font-size: 60px; position: relative; z-index: 1;
-  animation: tr2EmojiIn .5s .1s cubic-bezier(.34,1.56,.64,1) both;
+  animation: tr2EmojiIn .5s .1s var(--ease-spring) both;
   filter: drop-shadow(0 0 18px rgba(255,255,255,.6));
 }
 /* PNG badge cadré en cercle (cache le damier de transparence baked dans l'asset) */
@@ -218,7 +218,7 @@ const STYLE = `<style>
   position: relative; z-index: 1;
   font: 700 11px/1 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase;
   color: #fff; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3);
-  border-radius: 99px; padding: 4px 10px;
+  border-radius: var(--r-full); padding: 4px 10px;
 }
 .tr2-modal-locked-hd {
   height: 140px; background: var(--bg);
@@ -231,7 +231,7 @@ const STYLE = `<style>
 .tr2-modal-title { font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.025em; margin-bottom: 8px; }
 .tr2-modal-desc { font: 500 14px/1.55 'Inter', sans-serif; color: var(--mu); margin-bottom: 16px; }
 .tr2-modal-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.tr2-modal-chip { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 99px; font: 700 12px/1 'IBM Plex Mono', monospace; }
+.tr2-modal-chip { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: var(--r-full); font: 700 12px/1 'IBM Plex Mono', monospace; }
 .tr2-modal-chip.xp   { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a); }
 .tr2-modal-chip.gems { background: rgba(16,185,129,.1); color: var(--gr); }
 .tr2-modal-chip.date { background: var(--bg); color: var(--mu); }
@@ -240,13 +240,13 @@ const STYLE = `<style>
 .tr2-modal-share {
   flex: 1; padding: 14px;
   background: var(--a);
-  border: none; border-radius: 14px; color: #fff;
+  border: none; border-radius: var(--r-md); color: #fff;
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; min-height: 50px;
   transition: transform .12s, opacity .12s;
 }
 .tr2-modal-share:active { transform: scale(.97); opacity: .9; }
 .tr2-modal-close {
-  padding: 14px 20px; background: var(--bg); border: 1px solid var(--bo); border-radius: 14px;
+  padding: 14px 20px; background: var(--bg); border: 1px solid var(--bo); border-radius: var(--r-md);
   color: var(--mu); font: 600 14px/1 'Inter', sans-serif; cursor: pointer; min-height: 50px;
   transition: background .12s;
 }

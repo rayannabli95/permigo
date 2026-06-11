@@ -62,11 +62,11 @@ const STYLE = `<style>
     padding: 12px 12px 12px 40px;
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 12px;
+    border-radius: var(--r);
     font: 500 14px/1 'Inter', sans-serif;
     color: var(--ink);
     outline: none;
-    transition: border-color .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
+    transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
     box-sizing: border-box;
   }
   .me-search::placeholder { color: var(--mu2); }
@@ -100,25 +100,25 @@ const STYLE = `<style>
     margin-bottom: 16px;
     background: var(--bg2);
     padding: 4px;
-    border-radius: 12px;
+    border-radius: var(--r);
   }
   .me-tab {
     flex: 1;
     padding: 8px 2px;
     border: none;
     background: transparent;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     font: 600 11.5px/1 'Inter', sans-serif;
     color: var(--mu2);
     cursor: pointer;
-    transition: background .15s cubic-bezier(.4,0,.2,1), color .15s cubic-bezier(.4,0,.2,1);
+    transition: background .15s var(--ease), color .15s var(--ease);
     min-height: 44px; /* cible tactile a11y */
     white-space: nowrap;
   }
   .me-tab.active {
     background: var(--su);
     color: var(--adk);
-    box-shadow: 0 1px 3px rgba(10,13,26,.06), 0 2px 6px -2px rgba(10,13,26,.08);
+    box-shadow: var(--s1);
   }
 
   /* Liste */
@@ -132,13 +132,13 @@ const STYLE = `<style>
   .me-row {
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 12px;
+    border-radius: var(--r);
     padding: 14px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 1px 2px rgba(10,13,26,.03);
-    transition: border-color .15s cubic-bezier(.4,0,.2,1), transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
+    box-shadow: var(--s0);
+    transition: border-color .15s var(--ease), transform .15s var(--ease), box-shadow .15s var(--ease);
     cursor: pointer;
     min-height: 44px;
   }
@@ -146,12 +146,12 @@ const STYLE = `<style>
     .me-row:hover {
       border-color: var(--bo4);
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px -4px rgba(10,13,26,.1);
+      box-shadow: var(--s2);
     }
   }
   .me-row:active { transform: scale(.985); }
   .me-row:focus { outline: none; }
-  .me-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; border-radius: 12px; }
+  .me-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; border-radius: var(--r); }
 
   /* Avatar */
   .me-av {
@@ -193,7 +193,7 @@ const STYLE = `<style>
   .me-badge {
     font: 600 11px/1 'Inter', sans-serif;
     padding: 3px 8px;
-    border-radius: 12px;
+    border-radius: var(--r);
     flex-shrink: 0;
   }
   .me-badge.actif {
@@ -243,7 +243,7 @@ const STYLE = `<style>
     height: 100%;
     background: linear-gradient(90deg, var(--a), var(--a-lt));
     border-radius: 2px;
-    transition: width .6s cubic-bezier(.4,0,.2,1);
+    transition: width .6s var(--ease);
   }
   .me-prog-txt {
     font: 700 12px/1 'IBM Plex Mono', monospace;
@@ -258,7 +258,7 @@ const STYLE = `<style>
     width: 44px; height: 44px; /* cible tactile a11y */
     margin: 0 -8px 0 -2px; /* recale optiquement sur le bord droit de la carte */
     display: flex; align-items: center; justify-content: center;
-    border: none; background: transparent; border-radius: 9px;
+    border: none; background: transparent; border-radius: var(--r);
     color: var(--mu2); cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: background .12s, color .12s;
@@ -294,7 +294,7 @@ const STYLE = `<style>
     height: 72px;
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: 20px;
+    border-radius: var(--r-xl);
     animation: skel-pulse 1.4s ease-in-out infinite;
   }
   @keyframes skel-pulse {
@@ -305,7 +305,7 @@ const STYLE = `<style>
   /* Bouton Inviter */
   .me-invite-btn {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 14px; min-height: 44px; border-radius: 10px;
+    padding: 8px 14px; min-height: 44px; border-radius: var(--r);
     background: color-mix(in srgb, var(--a) 10%, transparent); border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
     color: var(--a); font: 600 13px/1 'Inter', sans-serif;
     cursor: pointer; flex-shrink: 0;
@@ -319,13 +319,16 @@ const STYLE = `<style>
   .me-relancer-section {
     background: rgba(245,158,11,.06);
     border: 1.5px solid rgba(245,158,11,.25);
-    border-radius: 20px;
+    border-radius: var(--r-xl);
     padding: 14px 16px;
     margin-bottom: 16px;
     animation: skel-pulse 0s; /* reset */
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    box-shadow: var(--s-am);
+    transition: transform .14s var(--ease-snap);
   }
+  .me-relancer-section:active { transform: scale(.98); }
   .me-relancer-section:focus-visible { outline: 3px solid var(--amx); outline-offset: 2px; }
   .me-relancer-title {
     font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -345,7 +348,7 @@ const STYLE = `<style>
   .me-badge-relancer {
     font: 600 10px/1 'Inter', sans-serif;
     padding: 3px 7px;
-    border-radius: 10px;
+    border-radius: var(--r);
     color: var(--amx);
     background: rgba(245,158,11,.12);
     flex-shrink: 0;
@@ -369,9 +372,9 @@ const STYLE = `<style>
     font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
     box-shadow: 0 4px 18px -4px color-mix(in srgb, var(--a) 60%, transparent), 0 2px 6px rgba(0,0,0,.12), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
-    transition: transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
+    transition: transform .15s var(--ease), box-shadow .15s var(--ease);
     -webkit-tap-highlight-color: transparent;
-    animation: meFabIn .5s .3s cubic-bezier(.34,1.56,.64,1) both;
+    animation: meFabIn .5s .3s var(--ease-spring) both;
   }
   .me-fab:hover {
     transform: translateY(-1px);
@@ -1034,19 +1037,19 @@ function openQuickMenu(eleveId, anchorRow) {
         position: fixed; z-index: 401;
         background: var(--su);
         border: 1px solid var(--bo);
-        border-radius: 16px;
+        border-radius: var(--r-lg);
         box-shadow: 0 12px 32px -8px rgba(10,13,26,.2);
         padding: 6px;
         min-width: 220px;
         font-family: 'Inter', sans-serif;
-        animation: meqmPanel .2s cubic-bezier(.34,1.56,.64,1);
+        animation: meqmPanel .2s var(--ease-spring);
       }
       @keyframes meqmPanel { from { opacity: 0; transform: translateY(-4px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
       @media (prefers-reduced-motion: reduce) { .me-qm-bg, .me-qm-panel { animation: none; } }
       .me-qm-item {
         display: flex; align-items: center; gap: 10px;
         padding: 12px 14px;
-        border-radius: 10px;
+        border-radius: var(--r);
         cursor: pointer;
         font: 500 14px/1.2 'Inter', sans-serif;
         color: var(--ink);
@@ -1206,25 +1209,25 @@ const DIALOG_STYLE = `
       width: calc(100% - 40px); max-width: 360px;
       background: var(--su);
       border: 1px solid var(--bo);
-      border-radius: 18px;
+      border-radius: var(--rl);
       box-shadow: 0 16px 40px -8px rgba(10,13,26,.28);
       padding: 22px 20px 18px;
       font-family: 'Inter', sans-serif;
-      animation: meqmPanel .2s cubic-bezier(.34,1.56,.64,1);
+      animation: meqmPanel .2s var(--ease-spring);
     }
     @media (prefers-reduced-motion: reduce) { .me-cf-bg, .me-cf-card { animation: none; } }
     .me-cf-title { font: 700 17px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin: 0 0 6px; }
     .me-cf-body { font: 500 13.5px/1.5 'Inter', sans-serif; color: var(--mu2); margin: 0 0 18px; }
     .me-cf-date {
       width: 100%; box-sizing: border-box; margin: 0 0 18px;
-      padding: 12px 14px; border: 1px solid var(--bo); border-radius: 12px;
+      padding: 12px 14px; border: 1px solid var(--bo); border-radius: var(--r);
       background: var(--bg); color: var(--ink);
       font: 500 15px/1 'Inter', sans-serif; outline: none;
     }
     .me-cf-date:focus { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
     .me-cf-actions { display: flex; gap: 8px; }
     .me-cf-btn {
-      flex: 1; min-height: 46px; border-radius: 12px; cursor: pointer;
+      flex: 1; min-height: 46px; border-radius: var(--r); cursor: pointer;
       font: 700 14px/1 'Plus Jakarta Sans', sans-serif; border: 1px solid var(--bo);
       background: var(--bg); color: var(--ink); -webkit-tap-highlight-color: transparent;
     }
@@ -1315,17 +1318,17 @@ function showUndoSnackbar(msg, onUndo, duration = 6000) {
         max-width: min(90vw, 380px);
         padding: 12px 12px 12px 16px;
         background: var(--ink); color: #fff;
-        border-radius: 14px;
+        border-radius: var(--r-md);
         box-shadow: 0 12px 32px -8px rgba(10,13,26,.4);
         font: 500 13.5px/1.3 'Inter', sans-serif;
         opacity: 0;
-        transition: opacity .22s ease, transform .22s cubic-bezier(.34,1.56,.64,1);
+        transition: opacity .22s ease, transform .22s var(--ease-spring);
       }
       .me-undo.on { opacity: 1; transform: translate(-50%, 0); }
       .me-undo-msg { flex: 1; min-width: 0; }
       .me-undo-btn {
         flex-shrink: 0; border: 0; cursor: pointer;
-        padding: 8px 14px; min-height: 36px; border-radius: 9px;
+        padding: 8px 14px; min-height: 36px; border-radius: var(--r);
         background: rgba(255,255,255,.16); color: #fff;
         font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
         -webkit-tap-highlight-color: transparent;
@@ -1397,7 +1400,7 @@ function openMissingPanel(eleve) {
       .me-miss-item { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; font: 500 14px/1.3 'Inter', sans-serif; color: var(--ink); border-bottom: 1px solid var(--bg2); }
       .me-miss-code { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu); background: var(--bg2); padding: 3px 6px; border-radius: 6px; flex-shrink: 0; }
       .me-miss-empty { text-align: center; padding: 32px 16px; color: var(--grd); font: 600 14px/1.5 'Inter', sans-serif; }
-      .me-miss-cta { margin-top: 16px; width: 100%; min-height: 48px; border: 0; border-radius: 12px; color: var(--a-ink); font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset; }
+      .me-miss-cta { margin-top: 16px; width: 100%; min-height: 48px; border: 0; border-radius: var(--r); color: var(--a-ink); font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset; }
       .me-miss-cta:active { transform: scale(.98); }
     </style>
     <div class="me-miss-bg" data-close="1"></div>

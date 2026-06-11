@@ -31,7 +31,7 @@ const STYLE = `
     border: none;
     padding: 6px 4px;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     transition: background .12s;
     min-height: 44px;
     display: flex;
@@ -42,7 +42,7 @@ const STYLE = `
   #ht-right { display: flex; align-items: center; gap: 4px; }
   .ht-icon-btn {
     width: 40px; height: 40px;
-    border-radius: 10px;
+    border-radius: var(--r);
     border: 1px solid var(--bo);
     background: var(--su, #fff);
     color: var(--ink);

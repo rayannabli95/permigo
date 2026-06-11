@@ -119,7 +119,7 @@ const STYLE = `<style>
   height: 100%;
   background: linear-gradient(90deg, var(--gr), #06b6d4, var(--pu), var(--am));
   border-radius: 3px;
-  transition: width 1s cubic-bezier(.2,.7,.3,1);
+  transition: width 1s var(--ease-out);
 }
 .prc-global-meta {
   display: flex;
@@ -169,7 +169,7 @@ const STYLE = `<style>
   z-index: 4;
   filter: drop-shadow(0 4px 12px rgba(11,13,26,.15));
   opacity: .8;
-  transition: transform .4s cubic-bezier(.23,1,.32,1);
+  transition: transform .4s var(--ease-snap);
   pointer-events: none;
 }
 .prc-world.complete .prc-world-decor { opacity: 1; }
@@ -212,7 +212,7 @@ const STYLE = `<style>
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
   background: rgba(255,255,255,.95);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255,255,255,.8);
@@ -258,7 +258,7 @@ const STYLE = `<style>
   color: #fff;
   background: var(--wc, var(--gr));
   padding: 4px 12px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
   box-shadow: 0 3px 10px color-mix(in srgb, var(--wc, var(--gr)) 40%, transparent);
 }
 
@@ -290,7 +290,7 @@ const STYLE = `<style>
   transform: translate(-50%, -50%);
   z-index: 6;
   opacity: 0;
-  animation: nd-pop .55s cubic-bezier(.34,1.56,.64,1) both;
+  animation: nd-pop .55s var(--ease-spring) both;
   animation-delay: var(--nd-delay, 0s);
   cursor: pointer;
   display: flex;
@@ -318,13 +318,13 @@ const STYLE = `<style>
    statut, le badge PermiGo posé dessus + une pastille de statut. */
 .nd-circle {
   width: 60px; height: 60px;
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   --tile-dk: #c2c8da;
   background: linear-gradient(160deg, #ffffff 0%, #eef1f8 100%);
   box-shadow: 0 6px 0 0 var(--tile-dk), 0 12px 18px -6px rgba(11,13,26,.28);
   display: flex; align-items: center; justify-content: center;
   position: relative;
-  transition: box-shadow .18s, transform .15s cubic-bezier(.2,.7,.3,1);
+  transition: box-shadow .18s, transform .15s var(--ease-out);
   flex-shrink: 0;
 }
 /* Reflet brillant en haut */
@@ -353,7 +353,7 @@ const STYLE = `<style>
 .nd-stamp.next   { background: var(--a); }
 .nd-stamp.locked { background: var(--mu2); }
 @media (max-width: 400px) {
-  .nd-circle { width: 52px; height: 52px; border-radius: 17px; }
+  .nd-circle { width: 52px; height: 52px; border-radius: var(--rl); }
 }
 .prc-node:not(.locked):active .nd-circle {
   transform: translateY(4px);
@@ -368,7 +368,7 @@ const STYLE = `<style>
 .prc-node.done .nd-circle { --tile-dk: var(--grdk, #047857); }
 .prc-node.done .nd-circle::after {
   content: '';
-  position: absolute; inset: -7px; border-radius: 24px;
+  position: absolute; inset: -7px; border-radius: var(--rx);
   border: 2px solid color-mix(in srgb, var(--gr) 45%, transparent);
   animation: nd-ring-pulse 2.6s ease-out infinite;
   pointer-events: none;
@@ -515,7 +515,7 @@ const STYLE = `<style>
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--bo);
-  border-radius: 12px;
+  border-radius: var(--r);
   padding: 6px 10px 7px;
   width: max-content;
   max-width: 168px;
@@ -572,7 +572,7 @@ const STYLE = `<style>
   color: #fff;
   font: 800 11px/1 'Inter', sans-serif;
   font-style: normal;
-  border-radius: 99px;
+  border-radius: var(--r-full);
   box-shadow: 0 3px 10px var(--wg, color-mix(in srgb, var(--a) 40%, transparent));
 }
 .prc-node.next .nd-lbl .nd-stt::after { content: ' →'; }
@@ -587,7 +587,7 @@ const STYLE = `<style>
   color: #fff;
   font: 800 8px/1 'Inter', sans-serif;
   padding: 3px 9px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
   letter-spacing: .14em;
   white-space: nowrap;
   box-shadow: 0 3px 10px color-mix(in srgb, var(--a) 35%, transparent);
@@ -621,7 +621,7 @@ const STYLE = `<style>
   color: #fff;
   font: 800 8px/1 'Inter', sans-serif;
   padding: 3px 9px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
   letter-spacing: .14em;
   white-space: nowrap;
   box-shadow: 0 3px 10px rgba(245,158,11,.35);
@@ -671,7 +671,7 @@ const STYLE = `<style>
   align-items: center;
   gap: 5px;
   padding: 5px 11px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
   background: rgba(255,255,255,.9);
   border: 1px solid var(--bo);
   font-family: 'Inter', sans-serif;
@@ -716,7 +716,7 @@ const STYLE = `<style>
   width: 12px;
   transform: translateX(-50%);
   background: rgba(11,13,26,.05);
-  border-radius: 99px;
+  border-radius: var(--r-full);
 }
 .prc-bridge::after {
   content: '';
@@ -738,7 +738,7 @@ const STYLE = `<style>
   background: var(--su);
   border: 1.5px solid var(--bo);
   color: var(--ink);
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   text-align: center;
   box-shadow: 0 4px 16px rgba(11,13,26,.07);
   position: relative;
@@ -821,7 +821,9 @@ const STYLE = `<style>
   font-size: 18px;
   cursor: pointer;
   border: 0;
+  transition: transform .14s var(--ease-snap);
 }
+.fiche-hero .fiche-close:active { transform: scale(.97); }
 .fiche-badge-cat {
   font: 700 9.5px/1 'Inter', sans-serif;
   letter-spacing: 1.8px;
@@ -832,7 +834,7 @@ const STYLE = `<style>
 }
 .fiche-circle {
   width: 50px; height: 50px;
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   margin: 0 auto 10px;
   border: 0;
   display: flex; align-items: center; justify-content: center;
@@ -865,7 +867,7 @@ const STYLE = `<style>
   align-items: center;
   gap: 5px;
   padding: 5px 12px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
   font-family: 'Inter', sans-serif;
   font-size: 10px;
   font-weight: 900;
@@ -887,7 +889,7 @@ const STYLE = `<style>
   color: var(--mu); margin: 0; text-align: center;
 }
 .fiche-acc {
-  border: 1px solid var(--bo); border-radius: 14px;
+  border: 1px solid var(--bo); border-radius: var(--r-md);
   background: var(--bg); overflow: hidden;
 }
 .fiche-acc > summary {
@@ -904,7 +906,7 @@ const STYLE = `<style>
 .fiche-acc .fiche-block-list { padding: 0 14px 4px; }
 .fiche-acc-tip {
   margin: 4px 12px 12px; padding: 10px 12px;
-  background: var(--amp); border-radius: 10px;
+  background: var(--amp); border-radius: var(--r);
   font: 500 12px/1.45 'Inter', sans-serif; color: var(--amx);
   display: flex; gap: 7px; align-items: flex-start;
 }
@@ -915,7 +917,7 @@ const STYLE = `<style>
 .fiche-section {
   background: var(--bg);
   border: 1px solid var(--bo);
-  border-radius: 14px;
+  border-radius: var(--r-md);
   padding: 14px;
   margin-bottom: 10px;
 }
@@ -1003,22 +1005,22 @@ const STYLE = `<style>
   flex: 1;
   height: 8px;
   background: var(--bg2);
-  border-radius: 99px;
+  border-radius: var(--r-full);
   overflow: hidden;
   position: relative;
 }
 .fiche-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--wc, var(--a)), color-mix(in srgb, var(--wc, var(--a)) 70%, #fff));
-  border-radius: 99px;
-  transition: width .6s cubic-bezier(.4,0,.2,1);
+  border-radius: var(--r-full);
+  transition: width .6s var(--ease);
 }
 
 /* Bloc "Ce que tu vas maîtriser" */
 .fiche-block {
   background: var(--bg2);
   border: 0;
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   padding: 16px 16px 8px;
   margin: 0;
 }
@@ -1062,13 +1064,13 @@ const STYLE = `<style>
   padding: 14px 16px;
   background: linear-gradient(135deg, #fef9e7, #fffbeb);
   border: 0;
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   margin: 0;
 }
 .fiche-tip-ico {
   flex-shrink: 0;
   width: 32px; height: 32px;
-  border-radius: 10px;
+  border-radius: var(--r);
   background: var(--am);
   color: #fff;
   display: grid;
@@ -1093,7 +1095,7 @@ const STYLE = `<style>
 /* Bloc status contextuel (acquise / next / locked) */
 .fiche-status {
   padding: 14px 16px;
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   margin: 0;
   display: flex;
   align-items: center;
@@ -1147,12 +1149,12 @@ const STYLE = `<style>
 #prc-back:focus-visible {
   outline: 3px solid var(--a);
   outline-offset: 2px;
-  border-radius: 12px;
+  border-radius: var(--r);
 }
 /* Lien d'évitement clavier vers la carte */
 .prc-skip {
   position: absolute; left: 50%; top: 8px; transform: translateX(-50%) translateY(-200%);
-  z-index: 60; padding: 10px 16px; border-radius: 10px;
+  z-index: 60; padding: 10px 16px; border-radius: var(--r);
   background: var(--a); color: var(--a-ink); font: 700 13px/1 'Inter', sans-serif;
   text-decoration: none; transition: transform .15s ease;
 }
@@ -1182,7 +1184,7 @@ const STYLE = `<style>
 .prc-anim .prc-world-hd, .prc-anim .prc-portal {
   opacity: 0;
   transform: translateY(14px);
-  transition: opacity .55s ease, transform .55s cubic-bezier(.2,.7,.3,1);
+  transition: opacity .55s ease, transform .55s var(--ease-out);
 }
 .prc-anim .prc-world.in .prc-world-hd,
 .prc-anim .prc-world.in .prc-portal { opacity: 1; transform: none; }
@@ -1382,7 +1384,7 @@ function spawnArrow(node, compId) {
         z-index: 320;
         pointer-events: none;
         transform: translate(-50%, -100%);
-        animation: faIn .35s cubic-bezier(.34,1.56,.64,1);
+        animation: faIn .35s var(--ease-spring);
       }
       @keyframes faIn {
         from { opacity: 0; transform: translate(-50%, -130%) scale(.85); }
@@ -1392,7 +1394,7 @@ function spawnArrow(node, compId) {
         background: var(--a);
         color: #fff;
         padding: 10px 16px;
-        border-radius: 14px;
+        border-radius: var(--r-md);
         font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
         white-space: nowrap;
         box-shadow: 0 12px 32px -8px color-mix(in srgb, var(--a) 60%, transparent);
