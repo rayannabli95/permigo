@@ -103,12 +103,14 @@ const STYLE = `<style>
   box-shadow: var(--s1);
 }
 .ppr-route svg.path { display: block; width: 100%; height: auto; overflow: visible; }
-.p-shadow { stroke: rgba(11,13,26,.10); stroke-width: 30; fill: none; stroke-linecap: round; }
-.p-edge { stroke: var(--bo4); stroke-width: 27; fill: none; stroke-linecap: round; }
-.p-surface { stroke: var(--mu2); stroke-width: 20; fill: none; stroke-linecap: round; }
-.p-dash { stroke: #fff; stroke-width: 2.5; stroke-dasharray: 6 12; stroke-linecap: round; fill: none; opacity: .85; }
-.p-done { stroke: var(--a); stroke-width: 20; fill: none; stroke-linecap: round; }
-.p-done-dash { stroke: #fff; stroke-width: 2.5; stroke-dasharray: 6 12; stroke-linecap: round; fill: none; opacity: .9; }
+/* Route 3D : arête foncée décalée (épaisseur) + surface claire + marquage */
+.p-shadow { stroke: rgba(0,0,0,.32); stroke-width: 28; fill: none; stroke-linecap: round; filter: blur(4px); transform: translateY(7px); }
+.p-edge { stroke: rgba(11,13,26,.55); stroke-width: 26; fill: none; stroke-linecap: round; transform: translateY(6px); }
+.p-surface { stroke: #cdd4e6; stroke-width: 23; fill: none; stroke-linecap: round; }
+.p-dash { stroke: #fff; stroke-width: 3; stroke-dasharray: 7 13; stroke-linecap: round; fill: none; opacity: .9; }
+/* Portion atteinte : arête + surface accent */
+.p-done { stroke: var(--a); stroke-width: 23; fill: none; stroke-linecap: round; }
+.p-done-dash { stroke: #fff; stroke-width: 3; stroke-dasharray: 7 13; stroke-linecap: round; fill: none; opacity: .95; }
 /* Portion atteinte : remplissage doux au chargement (pathLength=1 →
    dashoffset), marquage central en fondu après. Statique si reduced-motion. */
 @media (prefers-reduced-motion: no-preference) {
@@ -135,32 +137,38 @@ const STYLE = `<style>
 }
 .ppr-node:focus-visible { outline: none; }
 .ppr-node:focus-visible .nd-circle { outline: 3px solid var(--a); outline-offset: 4px; }
+/* Tuile 3D brillante (cohérence avec le parcours élève, ton sobre) */
 .nd-circle {
-  width: 62px; height: 62px; border-radius: 50%; border: 4px solid #fff;
+  width: 62px; height: 62px; border-radius: 20px; border: 0;
+  --tile: var(--a); --tile-dk: var(--adk, color-mix(in srgb, var(--a) 60%, #000));
   display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0;
-  box-shadow: 0 5px 14px rgba(11,13,26,.12); transition: transform .15s;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--tile) 78%, #fff) 0%, var(--tile) 55%, var(--tile-dk) 100%);
+  box-shadow: 0 6px 0 0 var(--tile-dk), 0 12px 18px -6px color-mix(in srgb, var(--tile) 50%, transparent);
+  color: #fff; transition: transform .15s, box-shadow .18s;
 }
-@media (max-width: 380px) { .nd-circle { width: 54px; height: 54px; border-width: 3px; } }
-.ppr-node:active .nd-circle { transform: scale(.94); }
-.nd-circle svg { width: 28px; height: 28px; }
-
-/* done */
-.ppr-node.done .nd-circle { background: var(--a); color: #fff; box-shadow: 0 5px 14px color-mix(in srgb, var(--a) 40%, transparent); }
-.nd-check { position: absolute; bottom: -3px; right: -3px; width: 24px; height: 24px; border-radius: 50%; background: var(--gr); border: 3px solid var(--su); color: #fff; display: flex; align-items: center; justify-content: center; }
+.nd-circle::before { content: ''; position: absolute; top: 5px; left: 9px; right: 9px; height: 38%; border-radius: 13px 13px 50% 50%; background: linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,0)); pointer-events: none; }
+.nd-circle svg { position: relative; z-index: 1; width: 28px; height: 28px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.2)); }
+@media (max-width: 380px) { .nd-circle { width: 54px; height: 54px; border-radius: 17px; } }
+.ppr-node:active .nd-circle { transform: translateY(4px); box-shadow: 0 2px 0 0 var(--tile-dk), 0 5px 10px -4px color-mix(in srgb, var(--tile) 50%, transparent); }
+.nd-check { position: absolute; bottom: -5px; right: -5px; width: 24px; height: 24px; border-radius: 50%; background: var(--gr); border: 3px solid var(--su); color: #fff; display: flex; align-items: center; justify-content: center; z-index: 2; }
 .nd-check svg { width: 12px; height: 12px; }
 
-/* next */
-.ppr-node.next .nd-circle { background: var(--a); color: var(--a-ink, #fff); box-shadow: 0 6px 20px color-mix(in srgb, var(--a) 50%, transparent); animation: ndHalo 3.2s ease-in-out infinite; }
-@keyframes ndHalo {
-  0%,100% { box-shadow: 0 6px 20px color-mix(in srgb, var(--a) 40%, transparent); }
-  50% { box-shadow: 0 6px 24px color-mix(in srgb, var(--a) 60%, transparent), 0 0 0 5px color-mix(in srgb, var(--a) 12%, transparent); }
-}
-.ppr-node.next .nd-circle::after { content: ''; position: absolute; inset: -14px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--a) 22%, transparent); animation: ndRing 3.2s ease-out infinite; }
-@keyframes ndRing { 0% { transform: scale(.88); opacity: .5; } 100% { transform: scale(1.32); opacity: 0; } }
+/* next — rebond doux + halo (sobre) */
+.ppr-node.next .nd-circle { animation: ndBob 2s ease-in-out infinite; }
+@keyframes ndBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.ppr-node.next .nd-circle::after { content: ''; position: absolute; inset: -10px; border-radius: 28px; border: 2.5px solid color-mix(in srgb, var(--a) 30%, transparent); animation: ndRing 2.4s ease-out infinite; }
+@keyframes ndRing { 0% { transform: scale(.9); opacity: .5; } 100% { transform: scale(1.3); opacity: 0; } }
 
-/* todo / locked */
-.ppr-node.todo .nd-circle { background: var(--su); border-color: var(--bo); border-style: dashed; color: var(--mu2); box-shadow: 0 2px 8px rgba(11,13,26,.06); }
-.ppr-node.locked .nd-circle { background: var(--bg2); border-color: var(--bg3); color: var(--mu5); box-shadow: none; }
+/* todo / locked — tuiles claires/grises */
+.ppr-node.todo .nd-circle {
+  --tile: #ffffff; --tile-dk: #c5cbdc;
+  background: linear-gradient(160deg, #fff, #eef1f8); color: var(--mu2);
+}
+.ppr-node.todo .nd-circle svg { filter: none; }
+.ppr-node.locked .nd-circle {
+  --tile: #e2e6f2; --tile-dk: #c2c8da;
+  background: linear-gradient(160deg, #eef1f8, #dde2ee); color: var(--mu5);
+}
 
 /* labels */
 .nd-lbl { margin-top: 11px; background: var(--su); border: 1px solid var(--bo); border-radius: 13px; padding: 6px 11px 7px; width: max-content; max-width: 150px; text-align: center; box-shadow: 0 5px 14px rgba(11,13,26,.09); transition: border-color .18s, box-shadow .18s; }
@@ -174,8 +182,7 @@ const STYLE = `<style>
 
 /* Hover desktop discret — lift léger, jamais de spectacle */
 @media (hover: hover) {
-  .ppr-node:not(.locked):hover .nd-circle { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(11,13,26,.16); }
-  .ppr-node.done:hover .nd-circle, .ppr-node.next:hover .nd-circle { box-shadow: 0 8px 22px color-mix(in srgb, var(--a) 45%, transparent); }
+  .ppr-node:not(.locked):hover .nd-circle { transform: translateY(-2px); box-shadow: 0 8px 0 0 var(--tile-dk), 0 16px 22px -6px color-mix(in srgb, var(--tile) 50%, transparent); }
   .ppr-node:not(.locked):hover .nd-lbl { border-color: color-mix(in srgb, var(--a) 32%, transparent); box-shadow: 0 8px 18px rgba(11,13,26,.12); }
 }
 .ppr-node.next .nd-lbl::before {
