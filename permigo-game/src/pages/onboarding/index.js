@@ -503,7 +503,7 @@ const STYLE = `<style>
   .ob-viewport { flex: 1; overflow: hidden; position: relative; z-index: 1; }
   .ob-track {
     display: flex; height: 100%;
-    transition: transform .42s cubic-bezier(.4,0,.2,1);
+    transition: transform .42s var(--ease);
   }
   @media (prefers-reduced-motion: reduce) { .ob-track { transition: none; } }
   .ob-slide {
@@ -530,7 +530,7 @@ const STYLE = `<style>
     font-size: 76px; line-height: 1; position: relative;
     filter: drop-shadow(0 12px 28px rgba(0,0,0,.45));
   }
-  .ob-slide.on .ob-emoji { animation: obPop .55s cubic-bezier(.34,1.56,.64,1) both; }
+  .ob-slide.on .ob-emoji { animation: obPop .55s var(--ease-spring) both; }
   @keyframes obPop { 0% { transform: scale(.5) translateY(10px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
 
   /* Cascade d'entrée : titre puis texte (re-jouée à chaque slide) */
@@ -571,7 +571,7 @@ const STYLE = `<style>
   }
   .ob-av-card {
     position: relative; aspect-ratio: 1;
-    border-radius: 18px; overflow: hidden; cursor: pointer;
+    border-radius: var(--rl); overflow: hidden; cursor: pointer;
     border: 2.5px solid transparent;
     background: rgba(255,255,255,.06);
     padding: 0; transition: border-color .15s, transform .12s;
@@ -593,7 +593,7 @@ const STYLE = `<style>
   .ob-halo-bell::before {
     background: radial-gradient(circle, color-mix(in srgb, var(--a) 32%, transparent) 0%, transparent 70%);
   }
-  .ob-slide.on .ob-bell { animation: obPop .55s cubic-bezier(.34,1.56,.64,1) both, obRing 2.4s ease-in-out 1s infinite; transform-origin: 50% 8%; }
+  .ob-slide.on .ob-bell { animation: obPop .55s var(--ease-spring) both, obRing 2.4s ease-in-out 1s infinite; transform-origin: 50% 8%; }
   @keyframes obRing {
     0%, 60%, 100% { rotate: 0deg; }
     64% { rotate: 12deg; } 68% { rotate: -10deg; }
@@ -603,7 +603,7 @@ const STYLE = `<style>
   .ob-notif-preview {
     display: flex; gap: 11px; align-items: center; text-align: left;
     width: 100%; max-width: 340px; margin-top: 22px;
-    padding: 13px 14px; border-radius: 18px;
+    padding: 13px 14px; border-radius: var(--rl);
     background: rgba(255,255,255,.1);
     border: 1px solid rgba(255,255,255,.14);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -613,7 +613,7 @@ const STYLE = `<style>
   .ob-slide.on .ob-notif-preview { animation: obDropIn .6s cubic-bezier(.22,1.4,.36,1) .35s both; }
   @keyframes obDropIn { from { transform: translateY(-22px) scale(.92); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { .ob-slide.on .ob-notif-preview { animation: none; opacity: 1; } }
-  .ob-notif-ico { width: 40px; height: 40px; border-radius: 10px; object-fit: contain; flex-shrink: 0; }
+  .ob-notif-ico { width: 40px; height: 40px; border-radius: var(--r); object-fit: contain; flex-shrink: 0; }
   .ob-notif-txt { min-width: 0; }
   .ob-notif-app { font: 700 11.5px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.65); text-transform: uppercase; letter-spacing: .02em; }
   .ob-notif-app span { font-weight: 500; text-transform: none; float: right; }
@@ -639,7 +639,7 @@ const STYLE = `<style>
     position: relative; overflow: hidden;
     width: 100%; padding: 17px;
     background: linear-gradient(135deg, var(--a), var(--adk, var(--adk)));
-    border: 0; border-radius: 16px; color: #fff;
+    border: 0; border-radius: var(--r-lg); color: #fff;
     font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer; min-height: 56px;
     box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--a) 55%, transparent);
@@ -667,13 +667,13 @@ const STYLE = `<style>
     width: 84px; height: 84px; object-fit: contain; margin-bottom: 18px;
     filter: drop-shadow(0 12px 26px rgba(16,185,129,.4));
   }
-  .ob-slide.on .ob-a2hs-badge { animation: obPop .55s cubic-bezier(.34,1.56,.64,1) both; }
+  .ob-slide.on .ob-a2hs-badge { animation: obPop .55s var(--ease-spring) both; }
   .ob-seg {
     display: flex; gap: 6px; background: rgba(255,255,255,.07);
-    padding: 5px; border-radius: 14px; margin: 22px 0 16px; width: 100%; max-width: 320px;
+    padding: 5px; border-radius: var(--r-md); margin: 22px 0 16px; width: 100%; max-width: 320px;
   }
   .ob-seg-btn {
-    flex: 1; border: 0; background: transparent; padding: 11px 8px; border-radius: 10px;
+    flex: 1; border: 0; background: transparent; padding: 11px 8px; border-radius: var(--r);
     font: 700 14px/1 'Inter', sans-serif; color: rgba(255,255,255,.6); cursor: pointer; transition: .15s;
   }
   .ob-seg-btn.active { background: rgba(255,255,255,.16); color: #fff; }
@@ -693,7 +693,7 @@ const STYLE = `<style>
     border-radius: 6px; background: rgba(255,255,255,.12); color: #fff;
   }
   .ob-a2hs-install {
-    width: 100%; margin-bottom: 14px; border: 0; border-radius: 13px;
+    width: 100%; margin-bottom: 14px; border: 0; border-radius: var(--r-md);
     background: linear-gradient(135deg, var(--a), var(--adk, var(--adk))); color: #fff;
     font: 800 15px/1 'Inter'; padding: 14px; cursor: pointer;
     box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--a) 55%, transparent);

@@ -76,7 +76,7 @@ const STYLE = `
     position: relative;
     -webkit-tap-highlight-color: transparent;
     min-height: 44px;
-    transition: color .15s cubic-bezier(.4,0,.2,1);
+    transition: color .15s var(--ease);
   }
   .bn-tab::after {
     content: '';
@@ -86,7 +86,7 @@ const STYLE = `
     width: 32px; height: 2.5px;
     background: var(--a);
     border-radius: 0 0 3px 3px;
-    transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+    transition: transform .2s var(--ease-spring);
   }
   .bn-tab.active {
     color: var(--a);
@@ -108,7 +108,7 @@ const STYLE = `
     opacity: 0;
     transform: translateY(3px);
     pointer-events: none;
-    transition: opacity .18s ease, transform .2s cubic-bezier(.34,1.56,.64,1);
+    transition: opacity .18s ease, transform .2s var(--ease-spring);
   }
   .bn-tab.active .bn-label {
     opacity: 1;
@@ -162,8 +162,8 @@ const STYLE = `
       0 8px 20px -6px color-mix(in srgb, var(--adk) 50%, transparent),
       0 3px 8px -2px rgba(10,13,26,.2),
       inset 0 1.5px 0 0 rgba(255,255,255,.28);
-    animation: bnFabIn .3s cubic-bezier(.34,1.56,.64,1) both;
-    transition: transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s ease;
+    animation: bnFabIn .3s var(--ease-spring) both;
+    transition: transform .15s var(--ease-spring), box-shadow .15s ease;
   }
   #bn-seance-fab:active {
     transform: scale(.9);
@@ -234,7 +234,7 @@ export function mountBottomNav(role) {
       )?.matches;
       if (!reduced) {
         nav.querySelectorAll(".bn-tab").forEach((t, i) => {
-          t.style.animation = `bnTabIntro .55s ${200 + i * 110}ms cubic-bezier(.34,1.56,.64,1) both`;
+          t.style.animation = `bnTabIntro .55s ${200 + i * 110}ms var(--ease-spring) both`;
         });
       }
     }
