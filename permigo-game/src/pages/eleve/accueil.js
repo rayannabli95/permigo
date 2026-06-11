@@ -595,7 +595,7 @@ const STYLE = `<style>
 /* Leaderboard slot */
 .acc-lb {
   display: flex; align-items: center; gap: 14px;
-  margin: 0 16px 16px;
+  margin: 16px 16px 4px;
   background: linear-gradient(135deg, color-mix(in srgb, var(--a) 15%, transparent) 0%, color-mix(in srgb, var(--a) 5%, transparent) 100%);
   border: 1.5px solid color-mix(in srgb, var(--a) 28%, transparent);
   border-radius: 20px;
@@ -1096,6 +1096,9 @@ function render({
     </div>
   </div>
 
+  <!-- Classement de l'école — remonté en haut (ligue en vedette) -->
+  <div id="acc-lb-slot"></div>
+
   <!-- ══ BLOC 2 — NEXT MILESTONE ══ -->
   <div class="acc2-ms">${bloc2}</div>
 
@@ -1126,9 +1129,6 @@ function render({
       )
       .join("")}
   </div>
-
-  <!-- Leaderboard slot -->
-  <div id="acc-lb-slot"></div>
 
   <!-- Stats footer -->
   <div class="acc2-footer">

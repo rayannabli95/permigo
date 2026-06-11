@@ -21,13 +21,15 @@ import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 
 const TABS = [
   { key: "skins", label: "Skins", ico: "car" },
-  { key: "autres", label: "Autres", ico: "gift" },
+  { key: "autres", label: "Fonds", ico: "image" },
 ];
 
-// Types regroupés sous chaque onglet
+// Types regroupés sous chaque onglet.
+// Les thèmes ne sont plus vendus ici : le changement de couleur/thème est
+// gratuit (F2P) dans les Réglages. La boutique reste cosmétique « flex ».
 const TAB_TYPES = {
   skins: ["avatar"],
-  autres: ["theme", "permis_bg"],
+  autres: ["permis_bg"],
 };
 
 // Néon par rareté — couleurs explicites (indépendantes du thème)
@@ -149,6 +151,33 @@ const STYLE = `<style>
 }
 .bo2-equip-btn:active { transform: scale(.94); }
 
+/* ── Intro / tuto (pourquoi la boutique) ── */
+.bo2-intro {
+  position: relative; margin: 14px 16px 4px; padding: 14px 16px;
+  border-radius: 18px; overflow: hidden;
+  display: flex; gap: 13px; align-items: flex-start;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--a) 14%, var(--su)) 0%, var(--su) 70%);
+  border: 1px solid color-mix(in srgb, var(--a) 26%, transparent);
+  transition: height .26s ease, opacity .26s ease, margin .26s ease, padding .26s ease;
+}
+.bo2-intro.out { opacity: 0; height: 0 !important; margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
+.bo2-intro-x {
+  position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border: 0;
+  background: var(--bg2); color: var(--mu); border-radius: 50%; font-size: 17px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.bo2-intro-ico {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 13px;
+  background: var(--a); color: var(--a-ink);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 5px 14px -4px color-mix(in srgb, var(--a) 55%, transparent);
+}
+.bo2-intro-body { flex: 1; min-width: 0; padding-right: 24px; }
+.bo2-intro-title { font: 800 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 8px; }
+.bo2-intro-steps { display: flex; flex-direction: column; gap: 6px; }
+.bo2-intro-steps span { display: flex; align-items: center; gap: 7px; font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu); }
+.bo2-intro-steps span svg { color: var(--a); flex-shrink: 0; }
+
 /* ── Rarity scale footer ── */
 .bo2-scale {
   margin: 22px 16px 0; padding: 16px; border-radius: 20px; background: var(--su);
@@ -172,26 +201,36 @@ const STYLE = `<style>
 }
 .bo2-card:active { transform: scale(.95); }
 .bo2-card-preview {
-  height: 100px; display: flex; align-items: center; justify-content: center; background: var(--bg); overflow: hidden;
+  height: 118px; display: flex; align-items: center; justify-content: center; background: var(--bg); overflow: hidden; position: relative;
 }
-.bo2-card-preview img { width: 70px; height: 70px; object-fit: contain; }
-.bo2-card-preview-circle { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+.bo2-card-preview img { width: 86px; height: 86px; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(11,13,26,.28)); transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
+.bo2-card:active .bo2-card-preview img { transform: scale(.92); }
+@media (hover: hover) { .bo2-card:hover .bo2-card-preview img { transform: scale(1.08) translateY(-2px); } }
+.bo2-card-preview-circle { width: 66px; height: 66px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+/* Étiquette de rareté en haut à gauche de la preview */
+.bo2-card-rarity-tag {
+  position: absolute; top: 8px; left: 8px; z-index: 2;
+  padding: 3px 8px; border-radius: 99px; color: #fff;
+  font: 800 8.5px/1 'Inter', sans-serif; letter-spacing: .08em; text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(11,13,26,.25);
+}
 .bo2-card-owned-badge {
-  position: absolute; top: 8px; right: 8px; background: rgba(16,185,129,.9); border-radius: 99px;
+  position: absolute; top: 8px; right: 8px; background: rgba(16,185,129,.92); border-radius: 99px;
   padding: 3px 8px; font: 700 9px/1 'IBM Plex Mono', monospace; color: #fff; letter-spacing: .04em; text-transform: uppercase;
 }
 .bo2-card-info { padding: 10px 12px 12px; }
-.bo2-card-name { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 8px; }
-.bo2-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.bo2-card-name { font: 800 13.5px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bo2-card-footer { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .bo2-price-btn {
-  display: flex; align-items: center; gap: 5px; padding: 7px 12px; border: none; border-radius: 10px;
-  color: #fff; font: 700 12px/1 'IBM Plex Mono', monospace; cursor: pointer; min-height: 44px;
-  white-space: nowrap; flex-shrink: 0; transition: transform .12s, opacity .12s; -webkit-tap-highlight-color: transparent;
+  display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; padding: 9px 12px; border: none; border-radius: 11px;
+  color: #fff; font: 800 12.5px/1 'IBM Plex Mono', monospace; cursor: pointer; min-height: 40px;
+  white-space: nowrap; transition: transform .12s, opacity .12s; -webkit-tap-highlight-color: transparent;
 }
 .bo2-price-btn:active { transform: scale(.95); opacity: .9; }
 .bo2-price-btn:disabled { opacity: .5; cursor: default; }
 .bo2-price-btn.cant-afford { background: var(--bg2); color: var(--mu2); }
-.bo2-owned-txt { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--gr); padding: 7px 0; }
+.bo2-equip-cta { background: var(--a); color: var(--a-ink); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; }
+.bo2-owned-txt { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--gr); padding: 9px 0; min-height: 40px; }
 
 /* ── Detail modal (skins) ── */
 .bo2-modal-bg {
@@ -389,38 +428,8 @@ export async function mount(root) {
     }
   }
 
-  // ── Onglet Skins : liste verticale néon ──
-  function renderSkins(content, items) {
-    const sorted = [...items].sort(
-      (a, b) =>
-        rm(a.rarity).order - rm(b.rarity).order ||
-        a.cost_gemmes - b.cost_gemmes,
-    );
-    content.innerHTML = `
-      <div class="bo2-sec">
-        <div class="bo2-sec-title">Skins de profil</div>
-        <div class="bo2-sec-sub">Affiche ton style sur PermiGo</div>
-      </div>
-      <div class="bo2-list">
-        ${sorted.map((item, idx) => renderSkinCard(item, gemmes, idx)).join("")}
-      </div>
-      ${renderRarityScale(sorted)}`;
-
-    content.querySelectorAll(".bo2-skin").forEach((el) => {
-      el.addEventListener("click", () => {
-        haptic("select");
-        const item = allItems.find((i) => i.id === el.dataset.itemId);
-        if (item) buyFlow(item); // ouvre la fiche détail (achat OU équiper depuis la fiche)
-      });
-    });
-  }
-
-  // ── Onglet Autres : grille (thèmes + fonds) ──
-  function renderGrid(content, items) {
-    content.innerHTML = `<div class="bo2-grid">
-      ${items.map((item, idx) => renderGridCard(item, gemmes, idx)).join("")}
-    </div>`;
-
+  // Wire commun aux grilles (skins + autres) : clic carte = équiper/acheter.
+  function wireGrid(content) {
     content.querySelectorAll(".bo2-card").forEach((el) => {
       el.addEventListener("click", () => {
         haptic("select");
@@ -443,6 +452,35 @@ export async function mount(root) {
         if (item && !item.owned) buyFlow(item);
       });
     });
+  }
+
+  // ── Onglet Skins : grille de cartes premium ──
+  function renderSkins(content, items) {
+    const sorted = [...items].sort(
+      (a, b) =>
+        rm(a.rarity).order - rm(b.rarity).order ||
+        a.cost_gemmes - b.cost_gemmes,
+    );
+    content.innerHTML = `
+      ${renderIntro()}
+      <div class="bo2-sec">
+        <div class="bo2-sec-title">Skins de profil</div>
+        <div class="bo2-sec-sub">Affiche ton style sur PermiGo</div>
+      </div>
+      <div class="bo2-grid">
+        ${sorted.map((item, idx) => renderGridCard(item, gemmes, idx)).join("")}
+      </div>
+      ${renderRarityScale(sorted)}`;
+    wireGrid(content);
+    wireIntro(content);
+  }
+
+  // ── Onglet Autres : grille (thèmes + fonds) ──
+  function renderGrid(content, items) {
+    content.innerHTML = `<div class="bo2-grid">
+      ${items.map((item, idx) => renderGridCard(item, gemmes, idx)).join("")}
+    </div>`;
+    wireGrid(content);
   }
 
   renderTab(activeTab);
@@ -494,6 +532,47 @@ function renderSkinCard(item, gemmes, idx) {
     </div>`;
 }
 
+// ─── Tuto / intro (pourquoi la boutique) ─────────────────────
+const INTRO_KEY = "pg-boutique-intro-seen";
+function introSeen() {
+  try {
+    return localStorage.getItem(INTRO_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+function renderIntro() {
+  if (introSeen()) return "";
+  return `
+    <div class="bo2-intro" id="bo2-intro">
+      <button class="bo2-intro-x" id="bo2-intro-x" type="button" aria-label="J'ai compris">×</button>
+      <div class="bo2-intro-ico">${icon("car", { size: 22 })}</div>
+      <div class="bo2-intro-body">
+        <div class="bo2-intro-title">Ta voiture, ta signature</div>
+        <div class="bo2-intro-steps">
+          <span>${icon("users", { size: 13 })} Elle s'affiche à côté de ton nom dans le classement</span>
+          <span>${icon("gem", { size: 13 })} Débloque des skins avec tes gemmes</span>
+          <span>${icon("check", { size: 13, strokeWidth: 3 })} Touche une voiture pour l'équiper en 1 tap</span>
+        </div>
+      </div>
+    </div>`;
+}
+function wireIntro(content) {
+  content.querySelector("#bo2-intro-x")?.addEventListener("click", () => {
+    try {
+      localStorage.setItem(INTRO_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    const el = content.querySelector("#bo2-intro");
+    if (el) {
+      el.style.height = el.offsetHeight + "px";
+      requestAnimationFrame(() => el.classList.add("out"));
+      setTimeout(() => el.remove(), 280);
+    }
+  });
+}
+
 // ─── Rarity scale footer ──────────────────────────────────────
 function renderRarityScale(items) {
   // Prix par rareté tirés des items présents (fallback ordre des paliers)
@@ -502,7 +581,12 @@ function renderRarityScale(items) {
   items.forEach((i) => {
     if (!byRarity[i.rarity]) byRarity[i.rarity] = i.cost_gemmes;
   });
-  const icons = { commun: "car", rare: "zap", epique: "gem", legendaire: "crown" };
+  const icons = {
+    commun: "car",
+    rare: "zap",
+    epique: "gem",
+    legendaire: "crown",
+  };
   return `
     <div class="bo2-scale">
       <div class="bo2-scale-title">Les raretés</div>
@@ -537,20 +621,20 @@ function renderGridCard(item, gemmes, idx) {
 
   return `
     <div class="bo2-card" data-item-id="${esc(item.id)}"
-      style="border:1.5px solid ${r.c}66; box-shadow:0 0 12px ${r.c}1f; animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
-      <div class="bo2-card-preview">
+      style="border:1.5px solid ${r.c}66; box-shadow:0 0 14px ${r.c}26; animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
+      <div class="bo2-card-preview" style="background:radial-gradient(120% 90% at 50% 12%, ${r.c}26 0%, ${r.c}0d 55%, var(--bg) 100%)">
+        <span class="bo2-card-rarity-tag" style="background:${r.c}">${esc(r.label)}</span>
         ${preview}
         ${item.owned ? `<div class="bo2-card-owned-badge">✓ Débloqué</div>` : ""}
       </div>
       <div class="bo2-card-info">
         <div class="bo2-card-name">${esc(item.name)}</div>
         <div class="bo2-card-footer">
-          <span class="bo2-pill" style="background:${r.c}">${esc(r.label)}</span>
           ${
             item.owned
               ? isEquipped
-                ? `<div class="bo2-owned-txt">✓ Équipé</div>`
-                : `<div class="bo2-owned-txt" style="color:var(--mu2)">Équiper</div>`
+                ? `<div class="bo2-owned-txt">${icon("check", { size: 13, strokeWidth: 3 })} Équipé</div>`
+                : `<button class="bo2-price-btn bo2-equip-cta">Équiper</button>`
               : `<button class="bo2-price-btn ${canAfford ? "" : "cant-afford"}" style="${canAfford ? `background:${r.c}` : ""}" ${!canAfford ? "disabled" : ""}>${icon("gem", { size: 13 })} ${item.cost_gemmes}</button>`
           }
         </div>
