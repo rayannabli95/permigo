@@ -29,13 +29,6 @@ import {
   markChestOpened,
 } from "@/utils/game-state.js";
 
-const isNight = (() => {
-  const h = new Date().getHours();
-  return h >= 20 || h < 7;
-})();
-const WORLD_BG = (num) =>
-  `/skins/landing/monde${num}${isNight ? "nuit" : "jour"}.webp`;
-
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
 /* ── Layout global avec volant filigrane fixe ── */
@@ -276,31 +269,55 @@ const STYLE = `<style>
   pointer-events: none;
 }
 .prc-world.complete .prc-world-decor { opacity: 1; }
-/* ── Fond photographique jour/nuit ── */
-.prc-world-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  opacity: .68;
-  filter: saturate(1.05);
-  transition: opacity .6s ease;
-  pointer-events: none;
+
+/* ── Déco CSS par monde (remplace le fond photo) ──
+   Voile teinté à la couleur du monde + formes flottantes douces. */
+.prc-world {
+  background:
+    radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--wc, var(--a)) 13%, transparent) 0%, transparent 60%),
+    var(--bg);
 }
-.prc-world-bg--active { opacity: 1; }
-[data-theme="dark"] .prc-world-bg         { opacity: .28; }
-[data-theme="dark"] .prc-world-bg--active { opacity: .68; }
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"]) .prc-world-bg         { opacity: .28; }
-  html:not([data-theme="light"]) .prc-world-bg--active { opacity: .68; }
+.prc-world.active {
+  background:
+    radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--wc, var(--a)) 20%, transparent) 0%, transparent 62%),
+    var(--bg);
 }
+.prc-world.locked { background: var(--bg); }
+.prc-world-deco { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.prc-blob {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--wc, var(--a)) 38%, transparent), transparent 70%);
+  filter: blur(8px); opacity: .5;
+  animation: prcFloat 9s ease-in-out infinite;
+  will-change: transform;
+}
+.prc-blob.b1 { width: 150px; height: 150px; top: 4%;  left: -40px; }
+.prc-blob.b2 { width: 110px; height: 110px; top: 42%; right: -34px; animation-delay: -3s; animation-duration: 11s; }
+.prc-blob.b3 { width: 90px;  height: 90px;  bottom: 8%; left: 12%;  animation-delay: -6s; animation-duration: 13s; }
+.prc-deco-dot {
+  position: absolute; width: 10px; height: 10px; border-radius: 3px;
+  background: color-mix(in srgb, var(--wc, var(--a)) 55%, transparent);
+  transform: rotate(45deg); opacity: .35;
+  animation: prcFloat 7s ease-in-out infinite;
+}
+.prc-deco-dot.d1 { top: 18%; right: 16%; }
+.prc-deco-dot.d2 { top: 60%; left: 10%;  width: 7px; height: 7px; animation-delay: -2s; }
+.prc-deco-dot.d3 { bottom: 22%; right: 22%; width: 13px; height: 13px; animation-delay: -4s; }
+.prc-deco-ring {
+  position: absolute; top: 30%; left: 50%; width: 200px; height: 200px;
+  margin: -100px 0 0 -100px; border-radius: 50%;
+  border: 1.5px dashed color-mix(in srgb, var(--wc, var(--a)) 22%, transparent);
+  opacity: .4;
+}
+@keyframes prcFloat {
+  0%,100% { transform: translateY(0) translateX(0); }
+  50%     { transform: translateY(-16px) translateX(6px); }
+}
+.prc-world.locked .prc-world-deco { opacity: .25; filter: grayscale(.6); }
+[data-theme="dark"] .prc-blob { opacity: .35; }
 @media (prefers-reduced-motion: reduce) {
-  .prc-world-bg { transition: none; }
+  .prc-blob, .prc-deco-dot { animation: none; }
 }
-/* Filigrane volant atténué quand fond photo présent */
-.prc:has(.prc-world-bg)::before { opacity: .08; }
 
 /* En-tête du monde */
 .prc-world-hd {
@@ -371,11 +388,20 @@ const STYLE = `<style>
   z-index: 3;
 }
 .prc-route svg { display: block; width: 100%; height: auto; overflow: visible; }
-/* 4 layers route : ombre, bord, surface, marquage */
-.prc-path-shadow { stroke: rgba(11,13,26,.12); stroke-width: 28; fill: none; stroke-linecap: round; filter: blur(4px); transform: translateY(3px); }
-.prc-path-edge   { stroke: rgba(71,85,105,.3);  stroke-width: 26; fill: none; stroke-linecap: round; }
-.prc-path        { stroke: var(--mu2);              stroke-width: 20; fill: none; stroke-linecap: round; }
-.prc-path-light  { stroke: var(--am); stroke-width: 1.5; stroke-dasharray: 5 10; stroke-linecap: round; fill: none; opacity: .9; }
+/* Route 3D : ombre portée + arête épaisse foncée (profondeur) + surface claire + marquage.
+   L'arête est nettement décalée vers le bas et plus foncée → effet « rail » relevé. */
+.prc-path-shadow { stroke: rgba(11,13,26,.18); stroke-width: 28; fill: none; stroke-linecap: round; filter: blur(5px); transform: translateY(11px); }
+/* Arête 3D : trait foncé épais, bien décalé → c'est l'épaisseur visible de la route */
+.prc-path-edge   { stroke: color-mix(in srgb, var(--wc, var(--a)) 55%, #1c2536); stroke-width: 26; fill: none; stroke-linecap: round; transform: translateY(7px); }
+/* Surface : dégradé clair → teinté monde pour le volume */
+.prc-path        { stroke: color-mix(in srgb, var(--wc, var(--a)) 22%, #f3f5fb); stroke-width: 24; fill: none; stroke-linecap: round; }
+/* Liseré clair en haut de la surface (lumière) */
+.prc-path-edge2  { stroke: rgba(255,255,255,.55); stroke-width: 24; fill: none; stroke-linecap: round; transform: translateY(-2px); opacity: .5; }
+/* Marquage central pointillé */
+.prc-path-light  { stroke: #fff; stroke-width: 3; stroke-dasharray: 7 13; stroke-linecap: round; fill: none; opacity: .92; }
+[data-theme="dark"] .prc-path { stroke: color-mix(in srgb, var(--wc, var(--a)) 34%, #2a3346); }
+[data-theme="dark"] .prc-path-edge2 { opacity: .12; }
+[data-theme="dark"] .prc-path-light { opacity: .55; }
 
 /* ── Nodes (style Duolingo path) ── */
 .prc-node {
@@ -406,112 +432,109 @@ const STYLE = `<style>
 }
 .prc-node.next { animation-name: nd-pop-next; }
 
-/* Cercle principal */
+/* ── Tuile 3D brillante (style « learning game ») ──
+   Carré arrondi avec brillance + arête 3D portée (box-shadow décalée vers
+   le bas dans une teinte foncée). Couleur pilotée par --tile / --tile-dk. */
 .nd-circle {
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  border: 4px solid #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  width: 60px; height: 60px;
+  border-radius: 20px;
+  --tile: var(--wc, var(--a));
+  --tile-dk: color-mix(in srgb, var(--wc, var(--a)) 60%, #000);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--tile) 78%, #fff) 0%, var(--tile) 55%, var(--tile-dk) 100%);
+  box-shadow: 0 6px 0 0 var(--tile-dk), 0 12px 18px -6px color-mix(in srgb, var(--tile) 55%, transparent);
   display: flex; align-items: center; justify-content: center;
   position: relative;
-  transition: box-shadow .2s, transform .15s cubic-bezier(.2,.7,.3,1);
+  color: #fff;
+  transition: box-shadow .18s, transform .15s cubic-bezier(.2,.7,.3,1);
   flex-shrink: 0;
 }
+/* Reflet brillant en haut */
+.nd-circle::before {
+  content: '';
+  position: absolute; top: 5px; left: 9px; right: 9px; height: 38%;
+  border-radius: 14px 14px 50% 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0));
+  pointer-events: none;
+}
+.nd-circle svg { position: relative; z-index: 1; filter: drop-shadow(0 1px 1px rgba(0,0,0,.22)); }
 @media (max-width: 400px) {
-  .nd-circle { width: 48px; height: 48px; border-width: 3px; }
+  .nd-circle { width: 52px; height: 52px; border-radius: 17px; }
 }
 .prc-node:not(.locked):active .nd-circle {
-  transform: scale(.95);
-  box-shadow: 0 6px 16px rgba(0,0,0,.14);
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 0 var(--tile-dk), 0 5px 10px -4px color-mix(in srgb, var(--tile) 55%, transparent);
 }
 .prc-node:not(.locked):hover .nd-circle {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,.12);
+  box-shadow: 0 8px 0 0 var(--tile-dk), 0 16px 22px -6px color-mix(in srgb, var(--tile) 55%, transparent);
 }
 
-/* ─ DONE — cercle vert, check SVG ─ */
+/* ─ DONE — tuile verte, étoile ─ */
 .prc-node.done .nd-circle {
-  background: var(--gr);
-  box-shadow: 0 4px 12px rgba(16,185,129,.35);
-  animation: nd-breathe-done 3s ease-in-out infinite;
+  --tile: var(--gr); --tile-dk: var(--grdk, #047857);
 }
-@keyframes nd-breathe-done {
-  0%,100% { box-shadow: 0 4px 12px rgba(16,185,129,.35); }
-  50%     { box-shadow: 0 4px 20px rgba(16,185,129,.55); }
-}
-/* Anneau pulse sur done */
+/* Anneau pulse discret sur done */
 .prc-node.done .nd-circle::after {
   content: '';
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  border: 2px solid rgba(16,185,129,.4);
-  animation: nd-ring-pulse 2.4s ease-out infinite;
+  position: absolute; inset: -7px;
+  border-radius: 24px;
+  border: 2px solid color-mix(in srgb, var(--gr) 45%, transparent);
+  animation: nd-ring-pulse 2.6s ease-out infinite;
+  pointer-events: none;
 }
 @keyframes nd-ring-pulse {
-  0%   { transform: scale(.85); opacity: .6; }
-  100% { transform: scale(1.35); opacity: 0; }
+  0%   { transform: scale(.85); opacity: .55; }
+  100% { transform: scale(1.3); opacity: 0; }
 }
 
-/* ─ NEXT — couleur monde, éclair, halo pulsant ─ */
+/* ─ NEXT — tuile couleur monde, éclair, rebond « tu es ici » ─ */
 .prc-node.next .nd-circle {
-  background: var(--a);
-  box-shadow: 0 4px 18px color-mix(in srgb, var(--a) 45%, transparent);
-  animation: ndPulseValid 2.4s ease-in-out infinite;
+  animation: nd-bob 1.8s ease-in-out infinite;
 }
-/* Pulse blanc → vert pour indiquer "prêt à valider" */
-@keyframes ndPulseValid {
-  0%, 100% {
-    background: var(--a);
-    box-shadow: 0 4px 18px color-mix(in srgb, var(--a) 45%, transparent);
-  }
-  40% {
-    background: #ffffff;
-    box-shadow: 0 4px 22px rgba(255,255,255,.7), inset 0 0 0 2.5px var(--a);
-  }
-  70% {
-    background: var(--gr);
-    box-shadow: 0 4px 22px rgba(16,185,129,.55);
-  }
+@keyframes nd-bob {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-5px); }
 }
-/* ── Badge PermiGo dans les nodes (remplace l'ancien volant) ── */
-.nd-badge {
-  display: block;
-  width: 84%;
-  height: 84%;
-  object-fit: contain;
+.prc-node.next .nd-circle::after {
+  content: '';
+  position: absolute; inset: -8px;
+  border-radius: 26px;
+  border: 2.5px solid color-mix(in srgb, var(--tile) 55%, transparent);
+  animation: nd-ring-pulse 1.9s ease-out infinite;
   pointer-events: none;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,.28));
 }
-/* Node actif : badge légèrement plus grand. Le mouvement est porté par le
-   halo qui respire + « TU ES ICI » (max 2 signaux animés sur le node). */
-.nd-badge-next {
-  width: 90%; height: 90%;
-  transform-origin: 50% 50%;
-}
-/* À débloquer : badge désaturé et atténué */
-.nd-badge-dim    { filter: grayscale(.85) opacity(.45); }
-.nd-badge-locked { filter: grayscale(1) opacity(.3); }
 
-/* ── On garde QUE le badge : on retire le rond vert/blanc du node
-   (fond, bordure, ombre, anneaux pulsants). Le badge a déjà son halo blanc. ── */
-.prc-node.done .nd-circle,
-.prc-node.next .nd-circle,
-.prc-node.todo .nd-circle,
-.prc-node.locked .nd-circle {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  animation: none !important;
+/* ─ TODO — tuile claire teintée, petit point ─ */
+.prc-node.todo .nd-circle {
+  --tile: #ffffff;
+  --tile-dk: color-mix(in srgb, var(--wc, var(--a)) 30%, #d6dae8);
+  background: linear-gradient(160deg, #fff, color-mix(in srgb, var(--wc, var(--a)) 12%, #fff));
+  color: color-mix(in srgb, var(--wc, var(--a)) 70%, #6b7280);
 }
-.prc-node.done .nd-circle::after,
-.prc-node.next .nd-circle::before,
-.prc-node.next .nd-circle::after { display: none !important; }
-/* Le badge occupe tout le node (un poil débordant pour compenser l'absence de cercle) */
-.prc-node.done .nd-badge,
-.prc-node.todo .nd-badge,
-.prc-node.locked .nd-badge { width: 150%; height: 150%; }
-.nd-badge-next { width: 165%; height: 165%; }
+.prc-node.todo .nd-circle svg { filter: none; }
+
+/* ─ LOCKED — tuile grise plate, cadenas ─ */
+.prc-node.locked .nd-circle {
+  --tile: #e2e6f2; --tile-dk: #c2c8da;
+  color: var(--mu2);
+}
+.prc-node.locked .nd-circle::before { opacity: .4; }
+
+/* (legacy badge image — neutralisé, on utilise des icônes SVG) */
+.nd-badge { display: none; }
+.nd-wheel-pending { display: none; }
+
+/* ── Case sélectionnée : se soulève vers le haut ── */
+.prc-node.selected { z-index: 8; }
+.prc-node.selected .nd-circle {
+  transform: translateY(-12px) scale(1.12);
+  box-shadow: 0 14px 0 0 var(--tile-dk), 0 22px 26px -6px color-mix(in srgb, var(--tile) 60%, transparent);
+  animation: none;
+}
+.prc-node.selected .nd-lbl { transform: translateY(-8px); }
+@media (prefers-reduced-motion: reduce) {
+  .prc-node.selected .nd-circle { transform: scale(1.08); }
+}
 
 /* Volant qui oscille gauche-droite sur le prochain défi (image PNG) */
 .nd-wheel {
@@ -797,7 +820,6 @@ const STYLE = `<style>
   pointer-events: none;
 }
 .prc-world.locked { background: var(--bg2); }
-.prc-world.locked .prc-world-bg   { opacity: .18; filter: grayscale(.5) saturate(.7); }
 .prc-world.locked .prc-world-decor { filter: grayscale(.9) opacity(.4); }
 
 /* Pont entre mondes */
@@ -873,30 +895,32 @@ const STYLE = `<style>
   pointer-events: auto;
   backdrop-filter: blur(4px);
 }
+/* Fiche compétence : descend du HAUT de l'écran */
 .bsheet {
   position: fixed;
-  bottom: 0; left: 0; right: 0;
+  top: 0; left: 0; right: 0;
   z-index: 99;
   background: var(--su);
-  border-radius: 24px 24px 0 0;
-  border-top: 1px solid var(--bo);
-  box-shadow: 0 -4px 32px rgba(11,13,26,.1);
-  transform: translateY(100%);
-  transition: transform .32s cubic-bezier(.32,.72,0,1);
+  border-radius: 0 0 24px 24px;
+  border-bottom: 1px solid var(--bo);
+  box-shadow: 0 8px 32px rgba(11,13,26,.16);
+  transform: translateY(-100%);
+  transition: transform .34s cubic-bezier(.32,.72,0,1);
   touch-action: pan-y;
-  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  padding-top: max(8px, env(safe-area-inset-top));
   will-change: transform;
-  max-height: 86vh;
+  max-height: 88vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
 .bsheet.open { transform: translateY(0); }
+/* Poignée en BAS du panneau (il descend du haut) */
 .bsheet-handle {
-  width: 36px; height: 4px;
+  width: 40px; height: 4px;
   background: var(--bo);
   border-radius: 2px;
-  margin: 12px auto 0;
+  margin: 4px auto 10px;
   flex-shrink: 0;
   touch-action: none;
   cursor: grab;
@@ -905,7 +929,7 @@ const STYLE = `<style>
 /* Fiche compétence (bottom sheet content) */
 .fiche-hero {
   position: relative;
-  padding: 20px 20px 18px;
+  padding: 14px 18px 12px;
   text-align: center;
 }
 .fiche-hero .fiche-close {
@@ -929,13 +953,13 @@ const STYLE = `<style>
   text-align: center;
 }
 .fiche-circle {
-  width: 66px; height: 66px;
-  border-radius: 50%;
-  margin: 0 auto 14px;
+  width: 50px; height: 50px;
+  border-radius: 16px;
+  margin: 0 auto 10px;
   border: 0;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 8px 22px -6px color-mix(in srgb, var(--wc, var(--a)) 55%, transparent);
-  font-size: 24px;
+  font-size: 22px;
   background: var(--wc, var(--a));
   color: #fff;
 }
@@ -947,10 +971,11 @@ const STYLE = `<style>
   100%{ transform: scale(1) rotate(0); }
 }
 .fiche-hero h3 {
-  font: 800 20px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif;
   color: var(--ink);
-  margin: 0 0 4px;
+  margin: 0 0 3px;
 }
+.fiche-circle svg { width: 26px; height: 26px; }
 .fiche-hero .fiche-id {
   font: 600 10.5px/1 'Inter', sans-serif;
   color: var(--mu2);
@@ -976,7 +1001,36 @@ const STYLE = `<style>
 
 /* padding-bottom large : le dernier bloc (conseil du coach) doit pouvoir
    défiler entièrement au-dessus de la barre de nav fixe (~60px). */
-.fiche-body { padding: 0 18px calc(84px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 16px; }
+.fiche-body { padding: 0 18px calc(28px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 12px; }
+
+/* ── Fiche compacte (mobile) ── */
+.fiche-summary-txt {
+  font: 500 13.5px/1.5 'Inter', sans-serif;
+  color: var(--mu); margin: 0; text-align: center;
+}
+.fiche-acc {
+  border: 1px solid var(--bo); border-radius: 14px;
+  background: var(--bg); overflow: hidden;
+}
+.fiche-acc > summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; gap: 7px;
+  padding: 12px 14px;
+  font: 700 12px/1 'Inter', sans-serif; color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+.fiche-acc > summary::-webkit-details-marker { display: none; }
+.fiche-acc > summary svg { color: var(--wc, var(--a)); }
+.fiche-acc-chev { margin-left: auto; color: var(--mu2); transition: transform .2s; }
+.fiche-acc[open] .fiche-acc-chev { transform: rotate(180deg); }
+.fiche-acc .fiche-block-list { padding: 0 14px 4px; }
+.fiche-acc-tip {
+  margin: 4px 12px 12px; padding: 10px 12px;
+  background: var(--amp); border-radius: 10px;
+  font: 500 12px/1.45 'Inter', sans-serif; color: var(--amx);
+  display: flex; gap: 7px; align-items: flex-start;
+}
+.fiche-acc-tip svg { color: var(--amx); flex-shrink: 0; margin-top: 1px; }
 /* Rythme vertical homogène : on neutralise les marges hétérogènes des blocs
    (14px/10px) au profit d'un gap unique → fiche mieux répartie. */
 .fiche-body > * { margin-bottom: 0; }
@@ -1256,7 +1310,7 @@ const STYLE = `<style>
 .prc-anim .prc-world.in .prc-portal { opacity: 1; transform: none; }
 .prc-anim .prc-world.in .prc-portal { transition-delay: .25s; }
 /* Parallax léger sur le fond photo (transform piloté en JS) */
-.prc-anim .prc-world-bg { transform: scale(1.08); will-change: transform; }
+.prc-anim .prc-world-deco { will-change: transform; }
 
 /* Halo vivant derrière le node courant (respire, couleur du monde) */
 .prc-node.next::before {
@@ -1688,8 +1742,8 @@ function renderPage(
 <!-- Bottom sheet -->
 <div class="bsheet-bg" id="bsheet-bg" aria-hidden="true"></div>
 <div class="bsheet" id="bsheet" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="bsheet-title">
-  <div class="bsheet-handle" aria-hidden="true"></div>
   <div id="bsheet-body"></div>
+  <div class="bsheet-handle" aria-hidden="true"></div>
 </div>`;
 }
 
@@ -1750,15 +1804,13 @@ function renderWorldSection(
         locked: "Verrouillé",
       }[st];
 
-      // Icône node = badge PermiGo (remplace l'ancien volant). Le badge est une
-      // image pleine couleur : on joue sur l'opacité/grayscale selon le statut.
-      const BADGE = "/skins/avatars/permigo-badge-icon.png";
-      const icon = {
-        done: `<img class="nd-badge" src="${BADGE}" alt="" aria-hidden="true"/>`,
-        a_valider: `<div class="nd-wheel-pending" aria-hidden="true"></div>`,
-        next: `<img class="nd-badge nd-badge-next" src="${BADGE}" alt="" aria-hidden="true"/>`,
-        todo: `<img class="nd-badge nd-badge-dim" src="${BADGE}" alt="" aria-hidden="true"/>`,
-        locked: `<img class="nd-badge nd-badge-locked" src="${BADGE}" alt="" aria-hidden="true"/>`,
+      // Icône de la tuile selon le statut (SVG, plus de badge image).
+      const iconHtml = {
+        done: icon("star", { size: 26, strokeWidth: 2.4 }),
+        a_valider: icon("clipboard", { size: 24, strokeWidth: 2.4 }),
+        next: icon("zap", { size: 26, strokeWidth: 2.6 }),
+        todo: icon("circle", { size: 13, strokeWidth: 3 }),
+        locked: icon("lock", { size: 22, strokeWidth: 2.4 }),
       }[st];
 
       const isLocked = st === "locked";
@@ -1767,7 +1819,7 @@ function renderWorldSection(
            style="left:${xp}%;top:${yp}%;--wc:${meta.color};--wg:${meta.glow};--nd-delay:${delay}s"
            ${!isLocked ? `role="button" tabindex="0"` : 'aria-hidden="true"'}
            aria-label="${esc(p.n)} — ${esc(sttLabel)}">
-        <div class="nd-circle">${icon}</div>
+        <div class="nd-circle">${iconHtml}</div>
         <div class="nd-lbl" aria-hidden="true">
           <span class="nd-name">${esc(p.n)}</span>
           <span class="nd-code">${esc(p.c.toUpperCase())}</span>
@@ -1789,11 +1841,20 @@ function renderWorldSection(
 
   const isActive = status === "in_progress";
   return `
-<section class="prc-world ${isLocked ? "locked" : ""} ${isComplete ? "complete" : ""}"
+<section class="prc-world ${isLocked ? "locked" : ""} ${isComplete ? "complete" : ""} ${isActive ? "active" : ""}"
          data-world-idx="${idx}"
          style="--wc:${meta.color};--wg:${meta.glow}">
-  <img src="${WORLD_BG(meta.num)}" alt="" class="prc-world-bg${isActive ? " prc-world-bg--active" : ""}" ${isActive ? 'loading="eager"' : 'loading="lazy"'} draggable="false">
-  <!-- Petit visuel décoratif top-right (au lieu de fond plein) -->
+  <!-- Déco CSS par monde (remplace l'ancienne photo de fond) : voile teinté + formes flottantes -->
+  <div class="prc-world-deco" aria-hidden="true">
+    <span class="prc-blob b1"></span>
+    <span class="prc-blob b2"></span>
+    <span class="prc-blob b3"></span>
+    <span class="prc-deco-dot d1"></span>
+    <span class="prc-deco-dot d2"></span>
+    <span class="prc-deco-dot d3"></span>
+    <span class="prc-deco-ring"></span>
+  </div>
+  <!-- Petit visuel décoratif top-right -->
   <img src="${meta.img}" alt="" class="prc-world-decor" loading="lazy" draggable="false">
 
 
@@ -1819,6 +1880,7 @@ function renderWorldSection(
       <path class="prc-path-shadow prc-draw" d="${pathD}" pathLength="1" />
       <path class="prc-path-edge prc-draw"   d="${pathD}" pathLength="1" />
       <path class="prc-path prc-draw"        d="${pathD}" pathLength="1" />
+      <path class="prc-path-edge2"  d="${pathD}" />
       <path class="prc-path-light"  d="${pathD}" />
     </svg>
     ${nodesHTML}
@@ -1937,9 +1999,9 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
         const r = sec.getBoundingClientRect();
         if (r.bottom < mr.top || r.top > mr.bottom) return;
         const prog = (mr.top + mr.height / 2 - r.top) / (r.height + mr.height);
-        const bgEl = sec.querySelector(".prc-world-bg");
+        const bgEl = sec.querySelector(".prc-world-deco");
         if (bgEl)
-          bgEl.style.transform = `translateY(${((prog - 0.5) * 36).toFixed(1)}px) scale(1.08)`;
+          bgEl.style.transform = `translateY(${((prog - 0.5) * 28).toFixed(1)}px)`;
       });
     };
     mapEl.addEventListener(
@@ -1995,9 +2057,16 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
   let lastTrigger = null;
 
   // Nodes → ouvre la fiche (click + Enter/Space pour keyboard nav)
+  // La case cliquée se « soulève » (classe .selected) tant que la fiche est ouverte.
+  const clearSelected = () =>
+    root
+      .querySelectorAll(".prc-node.selected")
+      .forEach((el) => el.classList.remove("selected"));
   root.querySelectorAll(".prc-node:not(.locked)").forEach((n) => {
     const open = () => {
       lastTrigger = n;
+      clearSelected();
+      n.classList.add("selected");
       const compId = n.dataset.comp;
       const worldIdx = parseInt(n.dataset.worldIdx, 10);
       // Le quiz n'est plus une porte : on ouvre toujours la fiche.
@@ -2025,6 +2094,7 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
     sheet?.classList.remove("open");
     bg?.classList.remove("open");
     sheet?.setAttribute("aria-hidden", "true");
+    clearSelected();
     // Rend le focus au node déclencheur (sinon le focus part dans le vide).
     if (wasOpen && lastTrigger) {
       lastTrigger.focus();
@@ -2035,8 +2105,8 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && isOpen()) closeFn();
   });
-  // Swipe-to-dismiss : glisser la fiche vers le bas pour la fermer
-  if (sheet) enableSheetSwipe(sheet, closeFn, { overlay: bg });
+  // Swipe-to-dismiss vers le HAUT (le panneau descend du haut)
+  if (sheet) enableSheetSwipe(sheet, closeFn, { overlay: bg, direction: "up" });
 }
 
 function openFiche(root, compId, ws, validatedMap, pendingMap) {
@@ -2177,44 +2247,24 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
     </div>
     <div class="fiche-body">
 
-      <!-- 1. SUMMARY — le pitch -->
-      <div class="fiche-summary" style="--wc:${meta.color}">
-        <p>${esc(detail.summary)}</p>
-      </div>
+      <!-- SUMMARY — une phrase -->
+      <p class="fiche-summary-txt">${esc(detail.summary)}</p>
 
-      <!-- 2. PROGRESSION dans le monde -->
-      <div class="fiche-progress" style="--wc:${meta.color}">
-        <div class="fiche-progress-info">
-          <div class="fiche-progress-step">Étape</div>
-          <div class="fiche-progress-val">${compNum}<span class="of">/${total}</span></div>
-        </div>
-        <div class="fiche-progress-track">
-          <div class="fiche-progress-fill" style="width:${pctInWorld}%"></div>
-        </div>
-      </div>
-
-      <!-- 3. STATUS contextuel -->
+      <!-- STATUS contextuel (+ CTA quiz si acquise) -->
       ${statusBlock}
 
-      <!-- 4. POINTS CLÉS -->
-      <div class="fiche-block" style="--wc:${meta.color}">
-        <div class="fiche-block-title">
-          ${icon("target", { size: 14 })}
+      <!-- POINTS CLÉS — repliés par défaut (mobile : moins de texte) -->
+      <details class="fiche-acc" style="--wc:${meta.color}">
+        <summary>
+          ${icon("target", { size: 13 })}
           ${st === "done" ? "Ce que tu maîtrises" : "Ce que tu vas maîtriser"}
-        </div>
+          <span class="fiche-acc-chev">${icon("chevron-down", { size: 15 })}</span>
+        </summary>
         <ul class="fiche-block-list">
-          ${detail.keyPoints.map((kp) => `<li><span class="kp-check">${icon("check", { size: 12, strokeWidth: 3 })}</span>${esc(kp)}</li>`).join("")}
+          ${detail.keyPoints.map((kp) => `<li><span class="kp-check">${icon("check", { size: 11, strokeWidth: 3 })}</span>${esc(kp)}</li>`).join("")}
         </ul>
-      </div>
-
-      <!-- 5. CONSEIL DU COACH -->
-      <div class="fiche-tip">
-        <div class="fiche-tip-ico">${icon("sparkle", { size: 16 })}</div>
-        <div class="fiche-tip-body">
-          <div class="fiche-tip-label">Conseil du coach</div>
-          <div class="fiche-tip-text">${esc(detail.tip)}</div>
-        </div>
-      </div>
+        <div class="fiche-acc-tip">${icon("sparkle", { size: 13 })} ${esc(detail.tip)}</div>
+      </details>
 
     </div>`;
 
@@ -2223,6 +2273,11 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
     const sheet = document.getElementById("bsheet");
     sheet?.classList.remove("open");
     bg?.classList.remove("open");
+    sheet?.setAttribute("aria-hidden", "true");
+    // Rend la case à sa position (retire le « lift »)
+    root
+      .querySelectorAll(".prc-node.selected")
+      .forEach((el) => el.classList.remove("selected"));
   });
 
   const bg = document.getElementById("bsheet-bg");
