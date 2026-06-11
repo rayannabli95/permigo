@@ -28,7 +28,7 @@ const STYLE = `<style>
   .qp-card {
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: 24px;
+    border-radius: var(--rx);
     padding: 32px 24px;
     text-align: center;
     box-shadow: 0 4px 20px rgba(11,13,26,.07);
@@ -40,7 +40,7 @@ const STYLE = `<style>
     text-transform: uppercase;
     color: var(--a);
     background: color-mix(in srgb, var(--a) 10%, transparent);
-    border-radius: 20px;
+    border-radius: var(--r-xl);
     padding: 5px 12px;
     margin-bottom: 20px;
   }
@@ -68,7 +68,7 @@ const STYLE = `<style>
     font: 600 12px/1 'Inter', sans-serif;
     color: var(--mu);
     background: var(--bg2);
-    border-radius: 20px;
+    border-radius: var(--r-xl);
     padding: 6px 12px;
   }
   .btn-start {
@@ -76,7 +76,7 @@ const STYLE = `<style>
     padding: 18px;
     background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
     border: 0;
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     color: var(--a-ink);
     font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
@@ -94,10 +94,12 @@ const STYLE = `<style>
     cursor: pointer;
     padding: 8px;
     width: 100%;
+    transition: transform .14s var(--ease-snap);
   }
+  .btn-skip:active { transform: scale(.97); }
 
   /* Result */
-  .qp-result-card { animation: pop .35s cubic-bezier(.23,1,.32,1); }
+  .qp-result-card { animation: pop .35s var(--ease-snap); }
   @keyframes pop { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { .qp-result-card { animation: none; } }
   .qp-score-ring {
@@ -132,7 +134,7 @@ const STYLE = `<style>
     padding: 16px;
     background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
     border: 0;
-    border-radius: 14px;
+    border-radius: var(--r-md);
     color: var(--a-ink);
     font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
@@ -146,11 +148,13 @@ const STYLE = `<style>
     padding: 14px;
     background: var(--bg);
     border: 1.5px solid var(--bo);
-    border-radius: 14px;
+    border-radius: var(--r-md);
     color: var(--mu4);
     font: 600 14px/1 'Inter', sans-serif;
     cursor: pointer;
+    transition: transform .14s var(--ease-snap);
   }
+  .btn-home:active { transform: scale(.97); }
 </style>`;
 
 export async function mount(root, params = {}) {

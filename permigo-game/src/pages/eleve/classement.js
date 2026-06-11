@@ -120,14 +120,14 @@ ${LEAGUE_CSS}
 .clt-mepill {
   display: inline-flex; align-items: center; gap: 8px;
   background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.25);
-  color: #6366f1; border-radius: 99px; padding: 7px 14px;
+  color: #6366f1; border-radius: var(--r-full); padding: 7px 14px;
   font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
 }
 .clt-mepill-ico { font-size: 15px; }
 .clt-tabs { display: flex; gap: 6px; margin-top: 12px; }
 .clt-tab {
   flex: 1; min-height: 44px; padding: 9px 6px;
-  background: var(--su); border: 1px solid var(--bo); border-radius: 10px;
+  background: var(--su); border: 1px solid var(--bo); border-radius: var(--r);
   color: var(--mu2); font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; transition: background .15s, color .15s, border-color .15s;
   white-space: nowrap;
@@ -140,7 +140,7 @@ ${LEAGUE_CSS}
 .clt-league-hero {
   margin: 14px 16px 0;
   padding: 16px;
-  background: var(--su); border: 1.5px solid var(--bo); border-radius: 20px;
+  background: var(--su); border: 1.5px solid var(--bo); border-radius: var(--r-xl);
   box-shadow: 0 1px 2px rgba(10,13,26,.04);
 }
 .clt-league-hero-top {
@@ -168,7 +168,7 @@ ${LEAGUE_CSS}
 .clt-list { padding: 10px 16px 0; display: flex; flex-direction: column; gap: 6px; }
 .clt-row {
   display: flex; align-items: center; gap: 12px;
-  background: var(--su); border: 1px solid var(--bo); border-radius: 14px;
+  background: var(--su); border: 1px solid var(--bo); border-radius: var(--r-md);
   padding: 11px 14px;
 }
 .clt-row.me { border: 2px solid #6366f1; background: rgba(99,102,241,.06); }
@@ -187,7 +187,7 @@ ${LEAGUE_CSS}
 .clt-name { flex: 1; min-width: 0; font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .clt-me-tag { flex-shrink: 0; font: 700 10px/1 'Inter', sans-serif; letter-spacing: .04em;
-  background: #6366f1; color: #fff; border-radius: 99px; padding: 3px 7px; text-transform: uppercase; }
+  background: #6366f1; color: #fff; border-radius: var(--r-full); padding: 3px 7px; text-transform: uppercase; }
 .clt-score { flex-shrink: 0; font: 700 13px/1 'IBM Plex Mono', monospace; color: var(--a);
   display: flex; align-items: baseline; gap: 2px; }
 .clt-score-sub { font-size: 11px; color: var(--mu2); }
@@ -196,7 +196,7 @@ ${LEAGUE_CSS}
 .clt-empty-ico { font-size: 36px; opacity: .35; margin-bottom: 10px; }
 .clt-empty-txt { font: 500 13px/1.5 'Inter', sans-serif; max-width: 280px; margin: 0 auto; }
 .clt-pseudo { margin: 14px 16px 0; padding: 13px 16px;
-  background: var(--su); border: 1px solid var(--bo); border-radius: 14px;
+  background: var(--su); border: 1px solid var(--bo); border-radius: var(--r-md);
   display: flex; align-items: center; gap: 12px;
   text-decoration: none; color: var(--ink); }
 .clt-pseudo:active { transform: scale(.99); }
@@ -207,11 +207,11 @@ ${LEAGUE_CSS}
 @media (prefers-reduced-motion: reduce) { .clt-tab, .clt-row { transition: none; } }
 
 /* ── Ligues REMC ── */
-.clt-rl-hero { margin: 4px 16px 12px; padding: 16px; border-radius: 18px;
+.clt-rl-hero { margin: 4px 16px 12px; padding: 16px; border-radius: var(--rl);
   background: var(--su); border: 1px solid var(--bo); box-shadow: var(--s1);
   border-left: 4px solid var(--lc, var(--a)); }
 .clt-rl-top { display: flex; align-items: center; gap: 12px; }
-.clt-rl-medal { width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
+.clt-rl-medal { width: 44px; height: 44px; border-radius: var(--r-md); flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; color: #fff;
   font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
   background: var(--lc, var(--a));
@@ -222,11 +222,11 @@ ${LEAGUE_CSS}
 .clt-rl-prog { font: 500 12.5px/1.4 'Inter', sans-serif; color: var(--mu); margin-top: 12px; }
 .clt-rl-prog strong { color: var(--lc, var(--a)); font-weight: 800; }
 .clt-rl-track { display: flex; gap: 8px; margin-top: 12px; }
-.clt-rl-dot { flex: 1; height: 6px; border-radius: 99px; background: var(--bo); position: relative; }
+.clt-rl-dot { flex: 1; height: 6px; border-radius: var(--r-full); background: var(--bo); position: relative; }
 .clt-rl-dot.done { background: var(--dc); }
 .clt-rl-dot.cur { background: var(--dc); box-shadow: 0 0 0 2px color-mix(in srgb, var(--dc) 35%, transparent); }
 /* Chip ligue sur chaque ligne */
-.clt-lg-chip { flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px;
+.clt-lg-chip { flex-shrink: 0; width: 26px; height: 26px; border-radius: var(--r-sm);
   display: flex; align-items: center; justify-content: center; color: #fff;
   font: 800 12px/1 'Plus Jakarta Sans', sans-serif; background: var(--lc, var(--a));
   box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
@@ -237,7 +237,7 @@ ${LEAGUE_CSS}
 .clt-th-hero .clt-pts-legend { margin-top: 12px; }
 .clt-th-cta {
   display: block; margin-top: 14px; padding: 12px;
-  text-align: center; text-decoration: none; border-radius: 12px;
+  text-align: center; text-decoration: none; border-radius: var(--r);
   color: var(--a-ink);
   background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
   box-shadow: 0 2px 10px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset;
@@ -294,12 +294,10 @@ export async function mount(root) {
         (r) => r,
         () => ({ data: null, error: true }),
       ),
-    sb
-      .rpc("get_theory_leaderboard", { p_scope: "ecole", p_limit: LIMIT })
-      .then(
-        (r) => r,
-        () => ({ data: null, error: true }),
-      ),
+    sb.rpc("get_theory_leaderboard", { p_scope: "ecole", p_limit: LIMIT }).then(
+      (r) => r,
+      () => ({ data: null, error: true }),
+    ),
   ]);
 
   const data = {
@@ -422,7 +420,8 @@ function _theoryLeagueHero(mine) {
 
   const L = info.league;
   const dots = THEORY_LEAGUES.map((l) => {
-    const cls = sc >= l.startAt ? (l.n === L.n && !info.top ? "cur" : "done") : "";
+    const cls =
+      sc >= l.startAt ? (l.n === L.n && !info.top ? "cur" : "done") : "";
     return `<div class="clt-rl-dot ${cls}" style="--dc:${l.color}"></div>`;
   }).join("");
   const progText = info.top

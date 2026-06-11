@@ -44,7 +44,7 @@ const STYLE = `<style>
   background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
   background-size: 200% 100%;
   animation: skel2Shim 1.4s ease-in-out infinite;
-  border-radius: 20px;
+  border-radius: var(--r-xl);
 }
 @keyframes skel2Shim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
@@ -88,7 +88,7 @@ const STYLE = `<style>
 }
 .acc2-hero-av {
   width: 52px; height: 52px;
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   background: rgba(255,255,255,.18);
   border: 1.5px solid rgba(255,255,255,.28);
   backdrop-filter: blur(12px);
@@ -120,7 +120,7 @@ const STYLE = `<style>
   color: rgba(255,255,255,.85);
   background: rgba(255,255,255,.1);
   border: 1px solid rgba(255,255,255,.16);
-  border-radius: 10px;
+  border-radius: var(--r);
   padding: 8px 12px;
   margin-top: 10px;
 }
@@ -135,7 +135,7 @@ const STYLE = `<style>
   display: flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,.14);
   border: 1px solid rgba(255,255,255,.2);
-  border-radius: 99px;
+  border-radius: var(--r-full);
   padding: 7px 12px;
   font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
@@ -145,7 +145,7 @@ const STYLE = `<style>
   display: flex; flex-direction: column; align-items: center; gap: 0;
   cursor: pointer; flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
-  transition: transform .15s cubic-bezier(.34,1.56,.64,1);
+  transition: transform .15s var(--ease-spring);
 }
 .acc2-hero-streak:active { transform: scale(.92); }
 .acc2-hero-streak-img {
@@ -161,7 +161,8 @@ const STYLE = `<style>
 }
 .acc2-hero-streak-num {
   display: flex; align-items: baseline; gap: 3px; margin-top: -4px;
-  background: rgba(11,13,26,.45); border-radius: 99px; padding: 2px 9px 3px;
+  background: rgba(11,13,26,.45); border-radius: var(--r-full); padding: 2px 9px 3px;
+  box-shadow: var(--s-am);
   backdrop-filter: blur(6px);
 }
 .acc2-hero-streak-num b { font: 800 14px/1 'Plus Jakarta Sans', sans-serif; color: #ffb35c; }
@@ -171,14 +172,14 @@ const STYLE = `<style>
 .acc2-xp-bar {
   height: 5px;
   background: rgba(255,255,255,.2);
-  border-radius: 99px;
+  border-radius: var(--r-full);
   overflow: hidden;
 }
 .acc2-xp-fill {
   height: 100%;
   background: rgba(255,255,255,.85);
-  border-radius: 99px;
-  transition: width 1s cubic-bezier(.2,.7,.3,1);
+  border-radius: var(--r-full);
+  transition: width 1s var(--ease-out);
 }
 .acc2-xp-fill.is-max {
   background: var(--am);
@@ -196,7 +197,7 @@ const STYLE = `<style>
   overflow: hidden;
   position: relative;
   min-height: 200px;
-  animation: acc2MsIn .55s .1s cubic-bezier(.34,1.56,.64,1) both;
+  animation: acc2MsIn .55s .1s var(--ease-spring) both;
 }
 @keyframes acc2MsIn {
   from { opacity: 0; transform: translateY(14px) scale(.97); }
@@ -236,7 +237,7 @@ const STYLE = `<style>
 }
 .acc2-ms-session-av {
   width: 48px; height: 48px;
-  border-radius: 14px;
+  border-radius: var(--r-md);
   background: color-mix(in srgb, var(--a) 30%, transparent);
   border: 1px solid color-mix(in srgb, var(--a) 40%, transparent);
   display: flex; align-items: center; justify-content: center;
@@ -261,13 +262,13 @@ const STYLE = `<style>
   padding: 14px 20px;
   background: var(--a);
   border: none;
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   color: #fff;
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   min-height: 52px;
   -webkit-tap-highlight-color: transparent;
-  transition: transform .14s cubic-bezier(.34,1.56,.64,1), opacity .12s;
+  transition: transform .14s var(--ease-spring), opacity .12s;
   position: relative; z-index: 1;
 }
 .acc2-ms-session-btn:active { transform: scale(.96); opacity: .9; }
@@ -305,7 +306,7 @@ const STYLE = `<style>
 }
 .acc2-ms-reward-icon {
   width: 60px; height: 60px;
-  border-radius: 18px;
+  border-radius: var(--rl);
   background: rgba(255,255,255,.18);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,.25);
@@ -316,7 +317,7 @@ const STYLE = `<style>
 .acc2-ms-mascot {
   width: 76px; height: 76px; object-fit: contain; flex-shrink: 0;
   filter: drop-shadow(0 6px 14px rgba(0,0,0,.28));
-  animation: acc2MascotIn .5s cubic-bezier(.34,1.56,.64,1) both, acc2MascotFloat 3s ease-in-out .5s infinite;
+  animation: acc2MascotIn .5s var(--ease-spring) both, acc2MascotFloat 3s ease-in-out .5s infinite;
 }
 @keyframes acc2MascotIn { from { opacity: 0; transform: scale(.5) } to { opacity: 1; transform: scale(1) } }
 @keyframes acc2MascotFloat { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
@@ -351,15 +352,15 @@ const STYLE = `<style>
 .acc2-ms-prog-bar {
   height: 8px;
   background: rgba(255,255,255,.2);
-  border-radius: 99px;
+  border-radius: var(--r-full);
   overflow: hidden;
   margin-bottom: 8px;
 }
 .acc2-ms-prog-fill {
   height: 100%;
   background: rgba(255,255,255,.9);
-  border-radius: 99px;
-  transition: width 1s .15s cubic-bezier(.2,.7,.3,1);
+  border-radius: var(--r-full);
+  transition: width 1s .15s var(--ease-out);
 }
 .acc2-ms-prog-meta {
   display: flex;
@@ -374,7 +375,7 @@ const STYLE = `<style>
   padding: 14px 20px;
   background: rgba(255,255,255,.16);
   border: 1.5px solid rgba(255,255,255,.3);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   color: #fff;
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
@@ -390,10 +391,10 @@ const STYLE = `<style>
   margin: 16px 16px 0;
   background: var(--su);
   border: 1.5px solid var(--bo);
-  border-radius: 24px;
+  border-radius: var(--rx);
   padding: 20px;
   box-shadow: 0 2px 4px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
-  animation: acc2ActionIn .55s .22s cubic-bezier(.34,1.56,.64,1) both;
+  animation: acc2ActionIn .55s .22s var(--ease-spring) both;
 }
 @keyframes acc2ActionIn {
   from { opacity: 0; transform: translateY(12px) scale(.97); }
@@ -433,14 +434,14 @@ const STYLE = `<style>
   padding: 16px 24px;
   background: var(--a);
   border: none;
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   color: var(--a-ink); /* encre prévue pour l'accent : 4.5:1 garanti par accent.js */
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   min-height: 52px;
-  box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--a) 45%, transparent);
+  box-shadow: var(--s-a-lg);
   -webkit-tap-highlight-color: transparent;
-  transition: transform .14s cubic-bezier(.34,1.56,.64,1), box-shadow .14s;
+  transition: transform .14s var(--ease-spring), box-shadow .14s;
 }
 .acc2-action-btn:active { transform: scale(.96); box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--a) 40%, transparent); }
 
@@ -458,12 +459,12 @@ const STYLE = `<style>
   margin: 0 16px 16px;
   background: linear-gradient(135deg, color-mix(in srgb, var(--a) 8%, transparent), color-mix(in srgb, var(--a) 4%, transparent));
   border: 1.5px solid color-mix(in srgb, var(--a) 20%, transparent);
-  border-radius: 18px;
+  border-radius: var(--rl);
   padding: 14px 16px;
   display: flex; align-items: center; gap: 12px;
   cursor: pointer;
   transition: border-color .14s, transform .14s;
-  animation: acc2ChestIn .4s cubic-bezier(.34,1.56,.64,1) both;
+  animation: acc2ChestIn .4s var(--ease-spring) both;
 }
 @keyframes acc2ChestIn {
   from { opacity:0; transform:translateY(8px) scale(.97); }
@@ -496,7 +497,7 @@ const STYLE = `<style>
 .world-card {
   background: var(--su);
   border: 1.5px solid var(--bo);
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   padding: 16px;
   cursor: pointer;
   position: relative;
@@ -534,12 +535,14 @@ const STYLE = `<style>
   flex-shrink: 0; width: 120px;
   background: var(--su);
   border: 1.5px solid var(--bo);
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   padding: 14px 10px;
   text-align: center;
   box-shadow: 0 1px 2px rgba(10,13,26,.04);
   cursor: pointer;
+  transition: transform .14s var(--ease-snap);
 }
+.trophy-card:active { transform: scale(.97); }
 .trophy-unlocked {
   border-color: color-mix(in srgb, var(--tc) 35%, transparent);
   background: color-mix(in srgb, var(--tc) 6%, #fff);
@@ -563,7 +566,7 @@ const STYLE = `<style>
 .trophees-empty {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;
   padding: 20px; background: var(--bg); border: 1.5px dashed #d1d8ee;
-  border-radius: 20px; text-align: center;
+  border-radius: var(--r-xl); text-align: center;
 }
 .trophees-empty-ico { font-size: 28px; opacity: .3; }
 .trophees-empty-txt { font: 500 12px/1.5 'Inter', sans-serif; color: var(--mu2); }
@@ -573,7 +576,7 @@ const STYLE = `<style>
   padding: 16px 20px;
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   margin: 0 16px;
   box-shadow: 0 1px 2px rgba(10,13,26,.04);
 }
@@ -588,14 +591,14 @@ const STYLE = `<style>
   margin: 16px 16px 4px;
   background: linear-gradient(135deg, color-mix(in srgb, var(--a) 15%, transparent) 0%, color-mix(in srgb, var(--a) 5%, transparent) 100%);
   border: 1.5px solid color-mix(in srgb, var(--a) 28%, transparent);
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   padding: 14px 16px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 14px -6px color-mix(in srgb, var(--a) 35%, transparent);
   -webkit-tap-highlight-color: transparent;
-  transition: transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s ease, border-color .15s ease;
+  transition: transform .15s var(--ease-spring), box-shadow .15s ease, border-color .15s ease;
 }
 .acc-lb::before {
   content: ''; position: absolute; top: -45%; right: -12%;
@@ -611,7 +614,7 @@ const STYLE = `<style>
 .acc-lb:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
 
 .acc-lb-rank {
-  flex-shrink: 0; width: 52px; height: 52px; border-radius: 15px;
+  flex-shrink: 0; width: 52px; height: 52px; border-radius: var(--r-lg);
   display: flex; align-items: center; justify-content: center;
   background: var(--a); color: #fff;
   box-shadow: 0 5px 13px -3px color-mix(in srgb, var(--a) 60%, transparent);
@@ -634,7 +637,7 @@ const STYLE = `<style>
 }
 .acc-lb-chip {
   font: 700 11px/1 'Inter', sans-serif; color: var(--am);
-  background: rgba(245,158,11,.14); border-radius: 99px; padding: 4px 9px;
+  background: rgba(245,158,11,.14); border-radius: var(--r-full); padding: 4px 9px;
 }
 .acc-lb-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 
@@ -679,7 +682,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; padding: 14px 20px;
   background: linear-gradient(135deg,#dbeafe,#e0f2fe);
-  border: 1.5px solid #bfdbfe; border-radius: 16px;
+  border: 1.5px solid #bfdbfe; border-radius: var(--r-lg);
   color: var(--blk2); font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; min-height: 52px;
   transition: transform .15s, opacity .15s;
@@ -1571,9 +1574,9 @@ async function _loadAndInjectCrystalBall(root) {
       const st = document.createElement("style");
       st.id = "acc-crystal-styles";
       st.textContent = `
-        .acc2-crystal{margin:18px 16px 0;padding:20px 20px 24px;border-radius:22px;color:#fff;position:relative;overflow:hidden;
+        .acc2-crystal{margin:18px 16px 0;padding:20px 20px 24px;border-radius:var(--rx);color:#fff;position:relative;overflow:hidden;
           background:linear-gradient(160deg,#3b1f8f 0%,#5b21b6 45%,#2e2a72 100%);box-shadow:0 14px 40px -12px rgba(91,33,182,.7);
-          animation:cbIn .45s cubic-bezier(.23,1,.32,1)}
+          animation:cbIn .45s var(--ease-snap)}
         @keyframes cbIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         .acc2-crystal::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.7;
           background:radial-gradient(1px 1px at 18% 24%,rgba(255,255,255,.55),transparent),
@@ -1604,17 +1607,17 @@ async function _loadAndInjectCrystalBall(root) {
         .cb-orb-num .cb-pct{font-size:24px;opacity:.92;margin-left:1px}
         @keyframes cbPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(196,181,253,.5))}50%{filter:drop-shadow(0 0 13px rgba(224,210,255,.95))}}
         .acc2-cb-msg{font:600 14.5px/1.4 'Inter',sans-serif;color:rgba(255,255,255,.94);margin:8px 0 0;text-align:center;position:relative;z-index:2}
-        .acc2-crystal[role=button]{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .15s ease}
+        .acc2-crystal[role=button]{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s var(--ease-spring),box-shadow .15s ease}
         .acc2-crystal[role=button]:active{transform:scale(.985)}
         .acc2-crystal[role=button]:focus-visible{outline:2px solid #c4b5fd;outline-offset:3px}
         @media(hover:hover) and (pointer:fine){.acc2-crystal[role=button]:hover{box-shadow:0 18px 46px -12px rgba(91,33,182,.85)}}
         .acc2-cb-cta{display:flex;align-items:center;justify-content:center;gap:6px;margin:16px auto 0;padding:11px 18px;
-          background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:14px;
+          background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:var(--r-md);
           font:700 13.5px/1 'Plus Jakarta Sans',sans-serif;color:#fff;position:relative;z-index:2;backdrop-filter:blur(6px)}
         .acc2-cb-axes-lbl{font:600 12px/1 'Inter',sans-serif;color:rgba(255,255,255,.8);margin:16px 0 8px;text-align:center;position:relative;z-index:2}
         .acc2-cb-chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;position:relative;z-index:2}
-        .acc2-cb-chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);border-radius:999px;padding:6px 12px;font:700 12.5px/1 'Inter',sans-serif;color:#fff}
-        .acc2-cb-empty{margin:18px 16px 0;padding:18px 20px;border-radius:18px;background:var(--bg3);color:var(--mu2);font:600 13.5px/1.4 'Inter',sans-serif;display:flex;align-items:center;gap:10px}
+        .acc2-cb-chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);border-radius:var(--r-full);padding:6px 12px;font:700 12.5px/1 'Inter',sans-serif;color:#fff}
+        .acc2-cb-empty{margin:18px 16px 0;padding:18px 20px;border-radius:var(--rl);background:var(--bg3);color:var(--mu2);font:600 13.5px/1.4 'Inter',sans-serif;display:flex;align-items:center;gap:10px}
         @media (prefers-reduced-motion:reduce){.cb-orb-glow,.cb-orb-shine,.cb-orb-num{animation:none}}
       `;
       document.head.appendChild(st);
@@ -1778,8 +1781,8 @@ async function _loadAndInjectFlashQuiz(root, me) {
       const st = document.createElement("style");
       st.id = "acc-flashq-styles";
       st.textContent = `
-        .acc2-flashq{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 16px;border-radius:16px;cursor:pointer;
-          background:linear-gradient(135deg,#f59e0b,#f97316);box-shadow:0 6px 20px rgba(249,115,22,.32);animation:fqBannerIn .4s cubic-bezier(.23,1,.32,1)}
+        .acc2-flashq{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 16px;border-radius:var(--r-lg);cursor:pointer;
+          background:linear-gradient(135deg,#f59e0b,#f97316);box-shadow:0 6px 20px rgba(249,115,22,.32);animation:fqBannerIn .4s var(--ease-snap)}
         @keyframes fqBannerIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
         .acc2-flashq:active{transform:scale(.99)}
         .acc2-fq-ico{font-size:24px;line-height:1;animation:fqWiggle 1.4s ease-in-out infinite}
@@ -1787,7 +1790,7 @@ async function _loadAndInjectFlashQuiz(root, me) {
         .acc2-fq-text{flex:1;min-width:0}
         .acc2-fq-title{font:800 15px/1.2 'Plus Jakarta Sans',sans-serif;color:#fff}
         .acc2-fq-sub{font:600 12.5px/1.3 'Inter',sans-serif;color:rgba(255,255,255,.88);margin-top:2px}
-        .acc2-fq-clock{font:800 18px/1 'IBM Plex Mono',monospace;color:#fff;background:rgba(0,0,0,.18);padding:8px 12px;border-radius:10px;flex-shrink:0}
+        .acc2-fq-clock{font:800 18px/1 'IBM Plex Mono',monospace;color:#fff;background:rgba(0,0,0,.18);padding:8px 12px;border-radius:var(--r);flex-shrink:0}
         @media(prefers-reduced-motion:reduce){.acc2-fq-ico{animation:none}}`;
       document.head.appendChild(st);
     }
