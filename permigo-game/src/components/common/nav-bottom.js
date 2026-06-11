@@ -125,6 +125,15 @@ const STYLE = `
     60%  { transform: translateY(-4px) scale(1.12); opacity: 1; }
     100% { transform: translateY(0) scale(1); }
   }
+  /* Pastille rouge « il y a du nouveau ici » */
+  .bn-dot {
+    position: absolute; top: 6px; right: calc(50% - 16px);
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--rd); border: 2px solid var(--su);
+    animation: bnDotPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes bnDotPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }
+  @media (prefers-reduced-motion: reduce) { .bn-dot { animation: none; } }
 
   /* ── FAB flottant "Séance" (enseignant seulement) ── */
   @keyframes bnFabIn {
@@ -205,6 +214,13 @@ export function mountBottomNav(role) {
   document.body.appendChild(nav);
   _updateActive();
 
+  // Pastille rouge sur « Trophées » (élève) si un trophée débloqué n'a pas
+  // encore été vu sur la page trophées (set localStorage pg-troph-seen).
+  if (role === "eleve") _checkTropheesDot(nav);
+  window.addEventListener("pg-trophees-seen", () => {
+    nav.querySelector('.bn-tab[data-id="trophees"] .bn-dot')?.remove();
+  });
+
   // Intro : petit rebond en cascade des onglets, UNE fois par session —
   // fait comprendre qu'il y a plusieurs interfaces (découvrabilité).
   try {
@@ -254,6 +270,29 @@ export function unmountBottomNav() {
   document.getElementById("bn-seance-fab")?.remove();
   document.body.classList.remove("has-enseignant-fab");
   window.removeEventListener("hashchange", _updateActive);
+}
+
+// Vérifie s'il existe des trophées débloqués jamais vus → pastille rouge.
+// Import dynamique du client (nav = composant léger, pas de dépendance dure).
+async function _checkTropheesDot(nav) {
+  try {
+    const seen = new Set(
+      JSON.parse(localStorage.getItem("pg-troph-seen") || "[]"),
+    );
+    const { sb } = await import("@/auth/auth.js");
+    const { data } = await sb.rpc("get_my_achievements");
+    const hasNew = (data || []).some((a) => !seen.has(a.achievement_key));
+    if (!hasNew) return;
+    const tab = nav.querySelector('.bn-tab[data-id="trophees"]');
+    if (tab && !tab.querySelector(".bn-dot")) {
+      const dot = document.createElement("span");
+      dot.className = "bn-dot";
+      dot.setAttribute("aria-label", "Nouveau trophée débloqué");
+      tab.appendChild(dot);
+    }
+  } catch {
+    /* best-effort : pas de pastille si l'appel échoue */
+  }
 }
 
 function _updateActive() {
