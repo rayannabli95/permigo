@@ -59,13 +59,13 @@ const STYLE = `<style>
   padding: 10px 16px;
   background: var(--su);
   border: 1.5px solid var(--bo);
-  border-radius: 12px;
+  border-radius: var(--r);
   font: 600 13px/1 'Plus Jakarta Sans', sans-serif;
   color: var(--ink5);
   cursor: pointer;
   min-height: 44px;
   flex-shrink: 0;
-  transition: border-color .16s, transform .16s cubic-bezier(.23,1,.32,1);
+  transition: border-color .16s, transform .16s var(--ease-snap);
 }
 .bl-print-btn:active { transform: scale(.97); }
 @media (hover:hover) and (pointer:fine) {
@@ -80,7 +80,7 @@ const STYLE = `<style>
   padding: 5px 12px;
   background: color-mix(in srgb, var(--a) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   font: 600 12px/1 'Plus Jakarta Sans', sans-serif;
   color: var(--adk);
   margin-bottom: 20px;
@@ -96,9 +96,9 @@ const STYLE = `<style>
 .bl-kpi {
   background: var(--su);
   border: 1.5px solid var(--bo);
-  border-radius: 18px;
+  border-radius: var(--rl);
   padding: 16px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04);
+  box-shadow: var(--s0);
 }
 .bl-kpi-val {
   font: 800 28px/1 'IBM Plex Mono', monospace;
@@ -115,7 +115,7 @@ const STYLE = `<style>
   gap: 3px;
   font: 600 11px/1 'Plus Jakarta Sans', sans-serif;
   padding: 3px 7px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   margin-top: 6px;
 }
 .bl-kpi-delta.up   { background: var(--grp2); color: var(--grk); }
@@ -126,7 +126,7 @@ const STYLE = `<style>
 .bl-comment {
   background: linear-gradient(135deg,color-mix(in srgb, var(--a) 6%, transparent),rgba(139,92,246,.06));
   border: 1.5px solid color-mix(in srgb, var(--a) 18%, transparent);
-  border-radius: 18px;
+  border-radius: var(--rl);
   padding: 18px;
   margin-bottom: 16px;
   position: relative;
@@ -156,10 +156,10 @@ const STYLE = `<style>
 .bl-section {
   background: var(--su);
   border: 1.5px solid var(--bo);
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   padding: 18px;
   margin-bottom: 12px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04);
+  box-shadow: var(--s0);
 }
 .bl-section-hd {
   display: flex;
@@ -177,7 +177,7 @@ const STYLE = `<style>
 .bl-section-badge {
   font: 700 11px/1 'IBM Plex Mono', monospace;
   padding: 3px 8px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   background: var(--bg4);
   color: var(--mu4);
 }
@@ -189,7 +189,7 @@ const STYLE = `<style>
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  border-radius: 10px;
+  border-radius: var(--r);
   background: var(--bg);
 }
 .bl-comp-check {
@@ -213,7 +213,7 @@ const STYLE = `<style>
   background: linear-gradient(180deg, var(--a), var(--adk));
   border-radius: 4px 4px 0 0;
   min-height: 4px;
-  transition: height .3s cubic-bezier(.23,1,.32,1);
+  transition: height .3s var(--ease-snap);
 }
 .bl-bar-lbl { font: 500 9px/1 'Inter', sans-serif; color: var(--mu2); text-align: center; white-space: nowrap; }
 .bl-bar-val { font: 600 10px/1 'IBM Plex Mono', monospace; color: var(--mu3); }

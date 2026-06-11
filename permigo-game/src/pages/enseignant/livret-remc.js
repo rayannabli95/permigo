@@ -95,8 +95,8 @@ const STYLE = `<style>
     padding: 20px;
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 20px;
-    box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+    border-radius: var(--r-xl);
+    box-shadow: var(--s1);
   }
   .lr-kpi-row {
     display: flex;
@@ -123,14 +123,14 @@ const STYLE = `<style>
   .lr-global-bar {
     height: 6px;
     background: var(--bo3);
-    border-radius: 99px;
+    border-radius: var(--r-full);
     overflow: hidden;
   }
   .lr-global-fill {
     height: 100%;
     background: var(--a);
-    border-radius: 99px;
-    transition: width .8s cubic-bezier(.2,.7,.3,1);
+    border-radius: var(--r-full);
+    transition: width .8s var(--ease-out);
   }
 
   /* Corps */
@@ -140,9 +140,9 @@ const STYLE = `<style>
   .lr-monde {
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 20px;
+    border-radius: var(--r-xl);
     overflow: hidden;
-    box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+    box-shadow: var(--s0);
   }
   .lr-monde-hd {
     display: flex;
@@ -170,7 +170,7 @@ const STYLE = `<style>
   }
   .lr-monde-bar-fill {
     height: 100%;
-    transition: width .6s cubic-bezier(.2,.7,.3,1);
+    transition: width .6s var(--ease-out);
   }
 
   /* Ligne sous-compétence */
@@ -210,7 +210,7 @@ const STYLE = `<style>
   .lr-comp-badge {
     font: 600 11px/1 'Inter', sans-serif;
     padding: 5px 10px;
-    border-radius: 99px;
+    border-radius: var(--r-full);
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -219,7 +219,7 @@ const STYLE = `<style>
   /* Bouton bilan trimestriel */
   .lr-bilan-btn {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 8px 12px; min-height: 44px; border-radius: 10px;
+    padding: 8px 12px; min-height: 44px; border-radius: var(--r);
     background: transparent; border: 1px solid var(--bo);
     color: var(--mu); font: 600 12px/1 'Inter', sans-serif;
     cursor: pointer; flex-shrink: 0; white-space: nowrap;
@@ -308,7 +308,7 @@ const STYLE = `<style>
   }
   .lr-statut-btn {
     padding: 14px 8px;
-    border-radius: 12px;
+    border-radius: var(--r);
     border: 1.5px solid var(--bo);
     background: var(--bg);
     cursor: pointer;
@@ -320,6 +320,7 @@ const STYLE = `<style>
     gap: 6px;
   }
   .lr-statut-btn:hover { border-color: var(--a); background: var(--su); }
+  .lr-statut-btn:active { transform: scale(.98); }
   .lr-statut-btn.selected-acquis {
     border-color: var(--gr);
     background: rgba(16,185,129,.08);
@@ -352,7 +353,7 @@ const STYLE = `<style>
     padding: 14px;
     background: var(--bg);
     border: 1px solid var(--bo);
-    border-radius: 12px;
+    border-radius: var(--r);
     font: 500 14px/1.5 'Inter', sans-serif;
     color: var(--ink);
     resize: vertical;
@@ -381,7 +382,7 @@ const STYLE = `<style>
     padding: 16px;
     background: var(--a);
     border: none;
-    border-radius: 12px;
+    border-radius: var(--r);
     color: #fff;
     font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
@@ -398,8 +399,8 @@ const STYLE = `<style>
 
   /* Skeleton */
   .lr-skel { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
-  .lr-skel-hd { height: 100px; background: linear-gradient(90deg,var(--bg2) 0%,var(--bo) 50%,var(--bg2) 100%); background-size: 200% 100%; border-radius: 20px; animation: lr-pulse 1.4s ease-in-out infinite; }
-  .lr-skel-bloc { height: 220px; background: linear-gradient(90deg,var(--bg2) 0%,var(--bo) 50%,var(--bg2) 100%); background-size: 200% 100%; border-radius: 20px; animation: lr-pulse 1.4s ease-in-out infinite; animation-delay: .1s; }
+  .lr-skel-hd { height: 100px; background: linear-gradient(90deg,var(--bg2) 0%,var(--bo) 50%,var(--bg2) 100%); background-size: 200% 100%; border-radius: var(--r-xl); animation: lr-pulse 1.4s ease-in-out infinite; }
+  .lr-skel-bloc { height: 220px; background: linear-gradient(90deg,var(--bg2) 0%,var(--bo) 50%,var(--bg2) 100%); background-size: 200% 100%; border-radius: var(--r-xl); animation: lr-pulse 1.4s ease-in-out infinite; animation-delay: .1s; }
   @keyframes lr-pulse { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
   /* Message erreur */
@@ -745,11 +746,13 @@ async function _loadFeedSection() {
         width: 100%; margin-top: 8px; padding: 11px;
         min-height: 44px;
         background: none; border: 1.5px dashed var(--bo);
-        border-radius: 12px;
+        border-radius: var(--r);
         font: 600 12.5px/1 'Inter', sans-serif; color: var(--mu);
         cursor: pointer;
+        transition: transform .14s var(--ease-snap);
       }
       .lr-feed-all:hover { border-color: var(--bo4); color: var(--ink5); }
+      .lr-feed-all:active { transform: scale(.98); }
     </style>
     <div class="lr-feed">
       <div class="lr-feed-hd" style="display:flex;align-items:center;gap:6px;">${icon("clock", { size: 14, strokeWidth: 2.2, color: "var(--a)" })} Fil des moniteurs</div>

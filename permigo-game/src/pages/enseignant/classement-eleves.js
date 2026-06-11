@@ -38,7 +38,7 @@ const STYLE = `<style>
   .ce-pod {
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: 18px;
+    border-radius: var(--rl);
     padding: 14px 8px 12px;
     text-align: center;
     box-shadow: var(--s1);
@@ -78,7 +78,7 @@ const STYLE = `<style>
   .ce-list { display: flex; flex-direction: column; gap: 8px; }
   .ce-row {
     background: var(--su); border: 1px solid var(--bo);
-    border-radius: 12px; padding: 12px 14px;
+    border-radius: var(--r); padding: 12px 14px;
     display: flex; align-items: center; gap: 12px;
     box-shadow: var(--s0); cursor: pointer; min-height: 44px;
     transition: border-color .15s, transform .15s;
@@ -106,7 +106,7 @@ const STYLE = `<style>
     display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;
     font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--amx);
     background: var(--amp); border: 1px solid color-mix(in srgb, var(--am) 22%, transparent);
-    padding: 4px 7px; border-radius: 8px;
+    padding: 4px 7px; border-radius: var(--r-sm);
   }
   .ce-streak.off { color: var(--mu2); background: var(--bg2); border-color: var(--bo); }
   .ce-streak svg { flex-shrink: 0; }
@@ -124,7 +124,7 @@ const STYLE = `<style>
   .ce-hof-title::after { content: ''; flex: 1; height: 1px; background: var(--bo); }
   .ce-hof-row {
     background: color-mix(in srgb, var(--a) 6%, transparent); border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
-    border-radius: 12px; padding: 12px 14px;
+    border-radius: var(--r); padding: 12px 14px;
     display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
   }
   .ce-hof-nom {
@@ -136,13 +136,13 @@ const STYLE = `<style>
   .ce-hof-badge {
     display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
     font: 700 11px/1 'Inter', sans-serif; color: var(--adk);
-    background: color-mix(in srgb, var(--a) 14%, transparent); padding: 4px 8px; border-radius: 10px;
+    background: color-mix(in srgb, var(--a) 14%, transparent); padding: 4px 8px; border-radius: var(--r);
   }
 
   .ce-empty {
     padding: 40px 20px; text-align: center; color: var(--mu2);
     font: 500 14px/1.6 'Inter', sans-serif;
-    background: var(--su); border: 1px solid var(--bo); border-radius: 16px;
+    background: var(--su); border: 1px solid var(--bo); border-radius: var(--r-lg);
   }
 </style>`;
 

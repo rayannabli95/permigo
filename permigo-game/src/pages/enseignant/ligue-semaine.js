@@ -54,11 +54,11 @@ ${LEAGUE_CSS}
   display: flex; align-items: center; gap: 12px;
 }
 .ls-w-back {
-  width: 44px; height: 44px; border-radius: 10px;
+  width: 44px; height: 44px; border-radius: var(--r);
   border: 1px solid rgba(99,102,241,.15); background: var(--su);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   color: var(--ink); flex-shrink: 0;
-  transition: background .15s cubic-bezier(.4,0,.2,1), border-color .15s cubic-bezier(.4,0,.2,1);
+  transition: background .15s var(--ease), border-color .15s var(--ease);
   -webkit-tap-highlight-color: transparent;
 }
 .ls-w-back:hover { background: rgba(99,102,241,.06); border-color: rgba(99,102,241,.3); }
@@ -74,11 +74,8 @@ ${LEAGUE_CSS}
   padding: 18px;
   background: var(--su);
   border: 1px solid rgba(99,102,241,.15);
-  border-radius: 16px;
-  box-shadow:
-    0 1px 3px rgba(10,13,26,.04),
-    0 8px 24px -8px rgba(10,13,26,.08),
-    inset 0 1px 0 rgba(255,255,255,.06);
+  border-radius: var(--r-lg);
+  box-shadow: var(--s2), inset 0 1px 0 rgba(255,255,255,.06);
 }
 .ls-w-hero-top {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
@@ -95,9 +92,9 @@ ${LEAGUE_CSS}
 }
 .ls-w-pts-pill {
   font: 500 10px/1 'Inter', sans-serif; color: var(--mu2);
-  padding: 4px 9px; border-radius: 8px;
+  padding: 4px 9px; border-radius: var(--r-sm);
   background: var(--bg2); border: 1px solid var(--bo);
-  transition: border-color .15s cubic-bezier(.4,0,.2,1);
+  transition: border-color .15s var(--ease);
 }
 
 /* Ligues header dans la liste */
@@ -129,21 +126,21 @@ ${LEAGUE_CSS}
   padding: 18px;
   background: var(--su);
   border: 1px solid rgba(99,102,241,.15);
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(10,13,26,.04), 0 4px 12px -4px rgba(10,13,26,.06);
+  border-radius: var(--r-lg);
+  box-shadow: var(--s1);
   display: flex; flex-direction: column; gap: 10px;
 }
 .ls-w-motivation-title { font: 700 14px/1.3 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.01em; }
 .ls-w-motivation-sub { font: 500 12px/1.5 'Inter', sans-serif; color: var(--mu2); }
 .ls-w-motivation-cta {
   display: flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 13px; border: none; border-radius: 12px;
+  padding: 13px; border: none; border-radius: var(--r);
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: #fff;
   font: 700 13px/1 'Inter', sans-serif; cursor: pointer;
   min-height: 44px;
   -webkit-tap-highlight-color: transparent;
-  transition: transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
+  transition: transform .15s var(--ease), box-shadow .15s var(--ease);
   box-shadow: 0 4px 14px -4px rgba(99,102,241,.45);
 }
 .ls-w-motivation-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px -4px rgba(99,102,241,.55); }

@@ -225,10 +225,10 @@ const STYLE = `<style>
   border-bottom: 1px solid var(--bo);
 }
 .tr2-back {
-  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: var(--r); flex-shrink: 0;
   border: 1px solid var(--bo); background: var(--su); color: var(--ink);
   display: flex; align-items: center; justify-content: center; cursor: pointer;
-  transition: background .15s var(--t, cubic-bezier(.4,0,.2,1)), border-color .15s;
+  transition: background .15s var(--t, var(--ease)), border-color .15s;
   -webkit-tap-highlight-color: transparent;
 }
 @media (hover:hover) { .tr2-back:hover { background: var(--bg2); border-color: var(--bo4); } }
@@ -255,28 +255,28 @@ const STYLE = `<style>
 .tr2-hero-count {
   font: 700 12px/1 'IBM Plex Mono', monospace; color: rgba(255,255,255,.82);
   background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
-  border-radius: 99px; padding: 6px 12px; white-space: nowrap;
+  border-radius: var(--r-full); padding: 6px 12px; white-space: nowrap;
 }
 .tr2-prog { display: flex; flex-direction: column; gap: 7px; }
-.tr2-prog-bar { height: 7px; background: rgba(255,255,255,.18); border-radius: 99px; overflow: hidden; }
+.tr2-prog-bar { height: 7px; background: rgba(255,255,255,.18); border-radius: var(--r-full); overflow: hidden; }
 .tr2-prog-fill {
-  height: 100%; width: 0; border-radius: 99px;
+  height: 100%; width: 0; border-radius: var(--r-full);
   background: linear-gradient(90deg, var(--a), var(--a-lt));
   box-shadow: 0 0 8px color-mix(in srgb, var(--a) 60%, transparent);
-  transition: width 1s cubic-bezier(.2,.7,.3,1);
+  transition: width 1s var(--ease-out);
 }
 .tr2-prog-hint { font: 500 11.5px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.62); }
 
 /* ── CTA premier démarrage ── */
 .tr2-cta {
   margin: 16px 16px 0; padding: 14px 16px;
-  background: var(--su); border: 1px solid var(--bo); border-radius: 16px;
+  background: var(--su); border: 1px solid var(--bo); border-radius: var(--r-lg);
   display: flex; align-items: center; gap: 14px; box-shadow: var(--s0);
 }
 .tr2-cta-txt { flex: 1; font: 500 13px/1.45 'Inter', sans-serif; color: var(--mu); }
 .tr2-cta-btn {
   flex-shrink: 0; padding: 12px 16px; min-height: 44px;
-  border: 0; border-radius: 12px; background: var(--a); color: #fff;
+  border: 0; border-radius: var(--r); background: var(--a); color: #fff;
   font: 800 13px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
   box-shadow: 0 4px 0 0 var(--adk); white-space: nowrap;
 }
@@ -299,13 +299,13 @@ const STYLE = `<style>
 
 /* ── Carte trophée ── */
 .tr2-card {
-  position: relative; border-radius: 18px; padding: 14px 8px 12px;
+  position: relative; border-radius: var(--rl); padding: 14px 8px 12px;
   display: flex; flex-direction: column; align-items: center; gap: 7px;
   min-height: 122px; width: 100%; border: 0; background: none; cursor: pointer;
   text-align: center; font-family: inherit; overflow: hidden;
   -webkit-tap-highlight-color: transparent; user-select: none;
-  transition: transform .14s cubic-bezier(.34,1.56,.64,1);
-  animation: tr2In .45s cubic-bezier(.2,.7,.3,1) both;
+  transition: transform .14s var(--ease-spring);
+  animation: tr2In .45s var(--ease-out) both;
 }
 @keyframes tr2In { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: none; } }
 .tr2-card:active { transform: scale(.93); }
@@ -316,7 +316,7 @@ const STYLE = `<style>
 .tr2-card.argent  { background: var(--tc-grad); box-shadow: 0 4px 16px -4px var(--tc-glow); }
 .tr2-card.or      { background: var(--tc-grad); box-shadow: 0 4px 16px -4px var(--tc-glow); }
 .tr2-card.platine { background: var(--tc-grad); box-shadow: 0 4px 16px -4px var(--tc-glow); }
-.tr2-card.diamant { background: var(--tc-grad); animation: tr2In .45s cubic-bezier(.2,.7,.3,1) both, diamGlow 2.6s ease-in-out infinite alternate; }
+.tr2-card.diamant { background: var(--tc-grad); animation: tr2In .45s var(--ease-out) both, diamGlow 2.6s ease-in-out infinite alternate; }
 @keyframes diamGlow {
   from { box-shadow: 0 4px 22px -4px rgba(167,139,250,.6); }
   to   { box-shadow: 0 4px 32px -2px rgba(196,181,253,.95), 0 0 0 1px rgba(196,181,253,.4); }
@@ -344,7 +344,7 @@ const STYLE = `<style>
 }
 .tr2-card.unlocked .tr2-card-name { color: rgba(255,255,255,.96); }
 .tr2-card.locked .tr2-card-name { color: var(--mu2); }
-.tr2-card-prog { font: 700 9.5px/1 'IBM Plex Mono', monospace; color: var(--mu3); background: var(--bg2); padding: 3px 7px; border-radius: 99px; }
+.tr2-card-prog { font: 700 9.5px/1 'IBM Plex Mono', monospace; color: var(--mu3); background: var(--bg2); padding: 3px 7px; border-radius: var(--r-full); }
 
 @media (prefers-reduced-motion: reduce) {
   .tr2-card, .tr2-prog-fill { animation: none !important; transition: none !important; }
@@ -379,13 +379,13 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   background: rgba(255,255,255,.2); color: #fff;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 8px 24px rgba(0,0,0,.25);
-  animation: tr2IcoIn .5s .08s cubic-bezier(.34,1.56,.64,1) both;
+  animation: tr2IcoIn .5s .08s var(--ease-spring) both;
 }
 @keyframes tr2IcoIn { from { transform: scale(.4) rotate(-12deg); opacity: 0; } to { transform: none; opacity: 1; } }
 .tr2-sheet-tier {
   font: 800 11px/1 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase;
   color: #fff; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.32);
-  border-radius: 99px; padding: 4px 11px;
+  border-radius: var(--r-full); padding: 4px 11px;
 }
 .tr2-sheet-body { padding: 20px 20px 8px; }
 .tr2-sheet-title { font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.025em; margin: 0 0 8px; }
@@ -393,14 +393,14 @@ const STYLE = `<style>
 .tr2-sheet-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .tr2-sheet-chip {
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px;
-  border-radius: 99px; font: 700 12px/1 'Inter', sans-serif;
+  border-radius: var(--r-full); font: 700 12px/1 'Inter', sans-serif;
 }
 .tr2-sheet-chip.val { background: var(--ag); color: var(--adk); }
 .tr2-sheet-chip.prog { background: var(--bg2); color: var(--mu3); font-family: 'IBM Plex Mono', monospace; }
 .tr2-sheet-social { font: 500 12.5px/1.45 'Inter', sans-serif; color: var(--mu2); margin-bottom: 18px; }
 .tr2-sheet-actions { display: flex; gap: 8px; padding: 0 20px 8px; }
 .tr2-sheet-share {
-  flex: 1; padding: 14px; min-height: 50px; border: 0; border-radius: 14px;
+  flex: 1; padding: 14px; min-height: 50px; border: 0; border-radius: var(--r-md);
   background: var(--a); color: #fff; font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; box-shadow: 0 4px 0 0 var(--adk);
   display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -408,7 +408,7 @@ const STYLE = `<style>
 .tr2-sheet-share:active { transform: translateY(3px); box-shadow: 0 1px 0 0 var(--adk); }
 .tr2-sheet-share:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 .tr2-sheet-close {
-  padding: 14px 20px; min-height: 50px; border: 1px solid var(--bo); border-radius: 14px;
+  padding: 14px 20px; min-height: 50px; border: 1px solid var(--bo); border-radius: var(--r-md);
   background: var(--bg); color: var(--mu3); font: 700 14px/1 'Inter', sans-serif; cursor: pointer;
 }
 .tr2-sheet-close:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }

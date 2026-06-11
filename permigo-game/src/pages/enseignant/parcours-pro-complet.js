@@ -43,7 +43,7 @@ const STYLE = `<style>
 }
 .epc-full-back {
   width: 44px; height: 44px;
-  border-radius: 10px;
+  border-radius: var(--r);
   background: var(--bg2);
   border: none;
   cursor: pointer;
@@ -73,7 +73,7 @@ const STYLE = `<style>
   color: var(--a);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   padding: 6px 10px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
   flex-shrink: 0;
   white-space: nowrap;
 }
@@ -84,8 +84,8 @@ const STYLE = `<style>
   padding: 20px;
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 24px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 2px 4px rgba(10,13,26,.06);
+  border-radius: var(--rx);
+  box-shadow: var(--s1);
 }
 
 /* ── Stops timeline (mêmes règles que parcours.js) ── */
@@ -151,7 +151,7 @@ const STYLE = `<style>
 .epcf-stop-cost {
   font: 600 11px/1 'Inter', sans-serif;
   padding: 4px 8px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -172,7 +172,7 @@ const STYLE = `<style>
   padding: 6px 10px;
   background: color-mix(in srgb, var(--a) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
-  border-radius: 10px;
+  border-radius: var(--r);
   color: var(--a);
   margin-top: 4px;
 }
@@ -193,7 +193,7 @@ const STYLE = `<style>
 .epcf-stop-reward-txt strong { font-weight: 700; }
 
 /* Stop cliquable → ouvre le détail du palier */
-.epcf-stop[role="button"] { cursor: pointer; -webkit-tap-highlight-color: transparent; border-radius: 12px; transition: background .12s; }
+.epcf-stop[role="button"] { cursor: pointer; -webkit-tap-highlight-color: transparent; border-radius: var(--r); transition: background .12s; }
 .epcf-stop[role="button"]:active { background: color-mix(in srgb, var(--a) 6%, transparent); }
 .epcf-stop:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
 
@@ -212,7 +212,7 @@ const STYLE = `<style>
   background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
   background-size: 200% 100%;
   animation: epcfShim 1.4s ease-in-out infinite;
-  border-radius: 20px;
+  border-radius: var(--r-xl);
 }
 @keyframes epcfShim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 

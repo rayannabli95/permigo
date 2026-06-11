@@ -100,13 +100,13 @@ const STYLE = `<style>
   .aj-xp-strip { display: flex; align-items: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
   .aj-xp-chip {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 12px; border-radius: 99px;
+    padding: 5px 12px; border-radius: var(--r-full);
     background: var(--ap); border: 1px solid color-mix(in srgb, var(--a) 22%, transparent);
     font: 700 12px/1 'Inter', sans-serif; color: var(--adk);
   }
   .aj-streak-chip {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 12px; border-radius: 99px;
+    padding: 5px 12px; border-radius: var(--r-full);
     background: var(--amp); border: 1px solid color-mix(in srgb, var(--am) 25%, transparent);
     font: 700 12px/1 'Inter', sans-serif; color: var(--amk);
   }
@@ -120,22 +120,23 @@ const STYLE = `<style>
   .aj-hero {
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 18px;
+    border-radius: var(--rl);
     padding: 20px;
     margin-bottom: 22px;
     display: flex;
     flex-direction: column;
     gap: 16px;
     box-shadow: var(--s2);
-    animation: ajIn .5s cubic-bezier(.4,0,.2,1) both;
-    transition: border-color .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
+    animation: ajIn .5s var(--ease) both;
+    transition: border-color .15s var(--ease), box-shadow .15s var(--ease), transform .14s var(--ease-snap);
     cursor: pointer;
   }
   .aj-hero:hover { border-color: var(--bo4); box-shadow: var(--s3); }
+  .aj-hero:active { transform: scale(.98); }
   .aj-hero-top { display: flex; align-items: flex-start; gap: 14px; }
   .aj-hero-ico {
     width: 46px; height: 46px;
-    border-radius: 13px;
+    border-radius: var(--r-md);
     flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
   }
@@ -166,13 +167,13 @@ const STYLE = `<style>
     width: 100%;
     padding: 14px;
     border: none;
-    border-radius: 13px;
+    border-radius: var(--r-md);
     background: var(--a);
     color: #fff;
     font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: transform .12s cubic-bezier(.4,0,.2,1), box-shadow .12s;
+    transition: transform .12s var(--ease), box-shadow .12s;
     min-height: 50px;
     box-shadow: 0 4px 0 0 var(--adk);
   }
@@ -185,7 +186,7 @@ const STYLE = `<style>
     flex: 1;
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 14px;
+    border-radius: var(--r-md);
     padding: 14px 14px;
     box-shadow: var(--s0);
     min-width: 0;
@@ -207,11 +208,11 @@ const STYLE = `<style>
   }
   .aj-quickstat-bar {
     height: 4px; background: var(--bg2);
-    border-radius: 99px; margin-top: 8px; overflow: hidden;
+    border-radius: var(--r-full); margin-top: 8px; overflow: hidden;
   }
   .aj-quickstat-bar > div {
-    height: 100%; border-radius: 99px; background: var(--a);
-    transition: width .5s cubic-bezier(.2,.7,.3,1);
+    height: 100%; border-radius: var(--r-full); background: var(--a);
+    transition: width .5s var(--ease-out);
   }
 
   /* ── Actions rapides ── */
@@ -222,7 +223,7 @@ const STYLE = `<style>
     padding: 13px 8px;
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 14px;
+    border-radius: var(--r-md);
     box-shadow: var(--s0);
     cursor: pointer;
     color: var(--ink);
@@ -236,7 +237,7 @@ const STYLE = `<style>
   .aj-action:active { transform: scale(.97); }
   .aj-action:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
   .aj-action-ico {
-    width: 34px; height: 34px; border-radius: 11px;
+    width: 34px; height: 34px; border-radius: var(--r);
     background: var(--ap); color: var(--adk);
     display: flex; align-items: center; justify-content: center;
   }
@@ -247,7 +248,7 @@ const STYLE = `<style>
     flex: 1; min-width: 0;
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 14px;
+    border-radius: var(--r-md);
     padding: 14px;
     box-shadow: var(--s0);
     cursor: pointer;
@@ -303,7 +304,7 @@ const STYLE = `<style>
   .aj-prog {
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 14px;
+    border-radius: var(--r-md);
     padding: 14px 16px;
     margin-bottom: 22px;
     display: flex;
@@ -320,7 +321,7 @@ const STYLE = `<style>
   .aj-prog:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
   .aj-prog-ico {
     width: 36px; height: 36px;
-    border-radius: 11px;
+    border-radius: var(--r);
     background: var(--ap);
     border: 1px solid color-mix(in srgb, var(--a) 18%, transparent);
     display: flex; align-items: center; justify-content: center;
@@ -339,12 +340,12 @@ const STYLE = `<style>
   }
   .aj-prog-bar-wrap {
     height: 5px; background: var(--bg2);
-    border-radius: 99px; margin-top: 8px; overflow: hidden;
+    border-radius: var(--r-full); margin-top: 8px; overflow: hidden;
   }
   .aj-prog-bar {
-    height: 100%; border-radius: 99px;
+    height: 100%; border-radius: var(--r-full);
     background: linear-gradient(90deg, var(--a), var(--a-lt));
-    transition: width .5s cubic-bezier(.2,.7,.3,1);
+    transition: width .5s var(--ease-out);
   }
   .aj-prog-next {
     font: 500 11px/1 'Inter', sans-serif;
@@ -356,7 +357,7 @@ const STYLE = `<style>
   .aj-activity-list {
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     overflow: hidden;
     box-shadow: var(--s0);
   }
@@ -373,12 +374,14 @@ const STYLE = `<style>
     width: 100%; margin-top: 8px; padding: 11px;
     min-height: 44px;
     background: none; border: 1.5px dashed var(--bo);
-    border-radius: 12px;
+    border-radius: var(--r);
     font: 600 12.5px/1 'Inter', sans-serif; color: var(--mu);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    transition: transform .14s var(--ease-snap);
   }
   .aj-activity-all:hover { border-color: var(--bo4); color: var(--ink5); }
+  .aj-activity-all:active { transform: scale(.98); }
 
   .aj-act-av {
     width: 36px; height: 36px;
@@ -418,7 +421,7 @@ const STYLE = `<style>
   .aj-act-badge {
     font: 600 11px/1 'Inter', sans-serif;
     padding: 3px 8px;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
   }
   .aj-act-time {
     font: 500 12px/1 'IBM Plex Mono', monospace;
@@ -434,14 +437,14 @@ const STYLE = `<style>
   .aj-eleve-row {
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 12px;
+    border-radius: var(--r);
     padding: 12px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
     box-shadow: var(--s0);
     cursor: pointer;
-    transition: border-color .15s cubic-bezier(.4,0,.2,1), transform .15s cubic-bezier(.4,0,.2,1), box-shadow .15s cubic-bezier(.4,0,.2,1);
+    transition: border-color .15s var(--ease), transform .15s var(--ease), box-shadow .15s var(--ease);
     min-height: 44px;
   }
   .aj-eleve-row:hover {
@@ -450,7 +453,7 @@ const STYLE = `<style>
     box-shadow: var(--s1);
   }
   .aj-eleve-row:active { transform: scale(.985); }
-  .aj-eleve-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; border-radius: 12px; }
+  .aj-eleve-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; border-radius: var(--r); }
 
   .aj-eleve-av {
     width: 36px; height: 36px;
@@ -482,7 +485,7 @@ const STYLE = `<style>
     font: 500 13px/1.5 'Inter', sans-serif;
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
   }
 
   /* Skeleton — shimmer */
@@ -491,14 +494,14 @@ const STYLE = `<style>
     height: 90px;
     background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
     background-size: 200% 100%;
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     animation: aj-shimmer 1.4s ease-in-out infinite;
   }
   .aj-skel-bloc {
     height: 160px;
     background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
     background-size: 200% 100%;
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     animation: aj-shimmer 1.4s ease-in-out infinite;
     animation-delay: .1s;
   }
@@ -511,13 +514,13 @@ const STYLE = `<style>
   .aj-recap {
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     padding: 18px;
     margin-bottom: 22px;
     cursor: pointer;
     box-shadow: var(--s0);
-    transition: border-color .15s cubic-bezier(.4,0,.2,1), transform .15s cubic-bezier(.4,0,.2,1);
-    animation: ajIn .5s cubic-bezier(.4,0,.2,1) both;
+    transition: border-color .15s var(--ease), transform .15s var(--ease);
+    animation: ajIn .5s var(--ease) both;
   }
   .aj-recap:hover { border-color: var(--bo4); transform: translateY(-1px); }
   .aj-recap:active { transform: scale(.985); }
@@ -545,7 +548,7 @@ const STYLE = `<style>
     display: flex; align-items: center; gap: 10px;
     padding: 8px 10px;
     background: var(--bg2);
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     font: 500 12px/1 'Inter', sans-serif;
     color: var(--ink);
   }
