@@ -52,6 +52,9 @@ function letterize(text) {
  * @param {{ duration?: number }} opts  durée de l'anim après le tap
  */
 export function showLaunchSplash({ duration = 2800 } = {}) {
+  // Sous WebDriver (tests e2e), le gate au tap bloque tous les parcours
+  // Playwright → on saute le splash, il n'apporte rien à un robot.
+  if (navigator.webdriver) return;
   try {
     if (sessionStorage.getItem(SESSION_KEY)) return;
     sessionStorage.setItem(SESSION_KEY, "1");
@@ -106,7 +109,7 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
       /* ── Pill « text-flip » (phrases sous les cubes) ── */
       #pg-launch-splash .ls-flip{position:relative;display:inline-block;border-radius:12px;padding:8px 16px 10px;min-height:38px;font:800 17px/1.15 'Plus Jakarta Sans','Nunito',sans-serif;color:var(--a-ink);text-align:center;background:linear-gradient(to bottom,var(--su,#fff),color-mix(in srgb, var(--a) 8%, var(--su,#fff)));box-shadow:inset 0 -1px color-mix(in srgb, var(--adk) 18%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--adk) 14%, transparent), 0 4px 10px color-mix(in srgb, var(--adk) 12%, transparent);}
       #pg-launch-splash .ls-flip span{display:inline-block;animation:lsLetterIn .5s both;}
-      #pg-launch-splash .ls-cta{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:99px;background:color-mix(in srgb,var(--a) 12%,transparent);border:1.5px solid color-mix(in srgb,var(--a) 30%,transparent);color:var(--adk);font:800 14px/1 'Plus Jakarta Sans','Nunito',sans-serif;animation:lsPulse 1.6s ease-in-out infinite;transition:opacity .2s,transform .2s;}
+      #pg-launch-splash .ls-cta{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:99px;background:color-mix(in srgb,var(--a) 12%,transparent);border:1.5px solid color-mix(in srgb,var(--a) 30%,transparent);color:var(--ink);font:800 14px/1 'Plus Jakarta Sans','Nunito',sans-serif;animation:lsPulse 1.6s ease-in-out infinite;transition:opacity .2s,transform .2s;}
       #pg-launch-splash.go .ls-cta{opacity:0;transform:scale(.9);pointer-events:none;}
 
       @keyframes lsPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
