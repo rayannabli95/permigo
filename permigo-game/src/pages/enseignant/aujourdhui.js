@@ -86,7 +86,7 @@ const STYLE = `<style>
   /* Header */
   .aj-hd { margin-bottom: 22px; }
   .aj-h1 {
-    font: 800 28px/1.1 'Plus Jakarta Sans', sans-serif;
+    font: 800 clamp(24px, 7.2vw, 28px)/1.1 'Plus Jakarta Sans', sans-serif;
     color: var(--ink);
     margin: 0 0 4px;
     letter-spacing: -0.03em;

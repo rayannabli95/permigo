@@ -72,7 +72,7 @@ const STYLE = `<style>
   position: relative; z-index: 1; display: flex; align-items: center;
   justify-content: space-between; margin-bottom: 14px;
 }
-.bo2-hd-title { font: 800 22px/1.1 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: -.03em; }
+.bo2-hd-title { font: 800 clamp(19px, 5.6vw, 22px)/1.1 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: -.03em; }
 .bo2-gems {
   display: flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);

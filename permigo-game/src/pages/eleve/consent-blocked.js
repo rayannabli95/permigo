@@ -3,10 +3,10 @@
 // Monté par main.js avant le chrome tant que parental_consent_required
 // est vrai et parental_consent_given_at est null.
 // ═══════════════════════════════════════════════════════════════
-import { esc } from '@/utils/escape.js';
-import { icon } from '@/utils/icons.js';
-import { track } from '@/services/analytics.js';
-import { logout } from '@/auth/auth.js';
+import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
+import { track } from "@/services/analytics.js";
+import { logout } from "@/auth/auth.js";
 
 const STYLE = `<style>
   .cb { position:fixed; inset:0; z-index:9000; overflow-y:auto;
@@ -22,40 +22,54 @@ const STYLE = `<style>
   .cb-btn { width:100%; max-width:420px; padding:15px; border:0; border-radius:14px; cursor:pointer;
     font:800 15px/1 'Plus Jakarta Sans',sans-serif; min-height:52px; transition:transform .12s; }
   .cb-btn:active { transform:scale(.98); }
-  .cb-btn-primary { background:linear-gradient(135deg,var(--a),var(--adk,var(--adk))); color:#fff;
-    box-shadow:0 8px 24px -8px color-mix(in srgb, var(--a) 55%, transparent); margin-bottom:12px; }
+  /* Recette plastic de marque (cf. .pg-btn) — même CTA que login/app */
+  .cb-btn-primary { background:linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%); color:var(--a-ink);
+    box-shadow:0 8px 24px -8px color-mix(in srgb, var(--a) 55%, transparent),
+      0 1.5px 0 0 rgba(255,255,255,.28) inset,
+      0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset; margin-bottom:12px; }
   .cb-btn-ghost { background:transparent; color:rgba(255,255,255,.6); border:1px solid rgba(255,255,255,.18); }
 </style>`;
 
 export function mountConsentBlocked(root, me) {
-  track('consent_blocked.viewed');
-  const token = me?.parental_consent_token || '';
-  const link = token ? `${location.origin}/#/parental-consent?token=${encodeURIComponent(token)}` : '';
+  track("consent_blocked.viewed");
+  const token = me?.parental_consent_token || "";
+  const link = token
+    ? `${location.origin}/#/parental-consent?token=${encodeURIComponent(token)}`
+    : "";
 
   root.innerHTML = `${STYLE}
     <div class="cb">
-      <div class="cb-ico">${icon('users',{size:34})}</div>
+      <div class="cb-ico">${icon("users", { size: 34 })}</div>
       <h1 class="cb-title">En attente de l'accord de ton parent</h1>
       <p class="cb-sub">Tu as moins de 15 ans : un parent ou tuteur doit valider ton inscription avant que tu puisses utiliser PermiGo. Renvoie-lui le lien ci-dessous si besoin.</p>
-      ${link ? `
+      ${
+        link
+          ? `
         <div class="cb-link-row"><input class="cb-input" id="cb-link" type="text" readonly value="${esc(link)}" /></div>
-        <button class="cb-btn cb-btn-primary" id="cb-copy" type="button">${icon('copy',{size:16})} Copier le lien pour mon parent</button>
-      ` : `<p class="cb-sub">Demande à ton auto-école de relancer la validation.</p>`}
+        <button class="cb-btn cb-btn-primary" id="cb-copy" type="button">${icon("copy", { size: 16 })} Copier le lien pour mon parent</button>
+      `
+          : `<p class="cb-sub">Demande à ton auto-école de relancer la validation.</p>`
+      }
       <button class="cb-btn cb-btn-ghost" id="cb-logout" type="button">Se déconnecter</button>
     </div>`;
 
-  root.querySelector('#cb-copy')?.addEventListener('click', async () => {
+  root.querySelector("#cb-copy")?.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(link);
-      const b = root.querySelector('#cb-copy'); b.textContent = '✓ Lien copié';
-      setTimeout(() => { b.textContent = 'Copier le lien pour mon parent'; }, 2000);
+      const b = root.querySelector("#cb-copy");
+      b.textContent = "✓ Lien copié";
+      setTimeout(() => {
+        b.textContent = "Copier le lien pour mon parent";
+      }, 2000);
     } catch {
-      root.querySelector('#cb-link')?.select();
+      root.querySelector("#cb-link")?.select();
     }
   });
 
-  root.querySelector('#cb-logout')?.addEventListener('click', async () => {
-    try { await logout(); } catch {}
+  root.querySelector("#cb-logout")?.addEventListener("click", async () => {
+    try {
+      await logout();
+    } catch {}
     location.reload();
   });
 }

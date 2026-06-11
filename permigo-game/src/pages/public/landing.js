@@ -407,8 +407,11 @@ const STYLE = `<style>
     border: 0; border-radius: 13px; font: 700 15px/1 'Inter', sans-serif; cursor: pointer;
     padding: 14px 22px; transition: transform .1s, box-shadow .15s, background .15s; }
   .lp-btn:active { transform: translateY(1px); }
-  .lp-btn-primary { background: linear-gradient(135deg, var(--lp-green), var(--lp-green-dk)); color: #fff;
-    box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--a) 60%, transparent); }
+  /* Recette plastic de marque (cf. .pg-btn) — même CTA que login/app */
+  .lp-btn-primary { background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%); color: var(--a-ink);
+    box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--a) 60%, transparent),
+      0 1.5px 0 0 rgba(255,255,255,.28) inset,
+      0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset; }
   .lp-btn-soft { background: rgba(99,102,241,.1); color: var(--lp-indigo-dk); }
   .lp-btn-ghost { background: transparent; color: var(--lp-ink); padding: 10px 16px; }
 
@@ -477,7 +480,7 @@ const STYLE = `<style>
 
   /* Headline */
   .lp-h1 {
-    font: 900 60px/1.05 'Plus Jakarta Sans', sans-serif;
+    font: 900 clamp(36px, 9.5vw, 60px)/1.05 'Plus Jakarta Sans', sans-serif;
     letter-spacing: -.038em; color: #fff;
     margin: 0 0 22px;
   }
@@ -728,7 +731,7 @@ const STYLE = `<style>
   /* Responsive */
   @media (max-width: 860px) {
     .lp-hero-inner { grid-template-columns: 1fr; text-align: center; padding: 56px 22px 0; gap: 40px; }
-    .lp-h1 { font-size: 38px; max-width: none; margin-inline: auto; }
+    .lp-h1 { max-width: none; margin-inline: auto; }
     .lp-lead { margin-inline: auto; }
     .lp-hero-badge { margin-left: auto; margin-right: auto; }
     .lp-hero-cta { justify-content: center; }

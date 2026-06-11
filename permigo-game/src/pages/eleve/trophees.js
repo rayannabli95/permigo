@@ -55,7 +55,7 @@ const STYLE = `<style>
   margin-bottom: 12px;
 }
 .tr2-hero-title {
-  font: 800 22px/1.1 'Plus Jakarta Sans', sans-serif;
+  font: 800 clamp(19px, 5.6vw, 22px)/1.1 'Plus Jakarta Sans', sans-serif;
   color: #fff; letter-spacing: -.03em;
 }
 .tr2-hero-count {

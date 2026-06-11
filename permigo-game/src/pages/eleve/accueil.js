@@ -105,7 +105,7 @@ const STYLE = `<style>
 }
 /* Le prénom = LA star du hero */
 .acc2-hero-name {
-  font: 800 34px/1.05 var(--fd), 'Plus Jakarta Sans', sans-serif;
+  font: 800 clamp(26px, 8.5vw, 34px)/1.05 var(--fd), 'Plus Jakarta Sans', sans-serif;
   color: #fff;
   letter-spacing: -.03em;
   margin: 2px 0 0;

@@ -46,31 +46,11 @@
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .btn:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
 
-/* Texte sur accent = --a-ink (contraste garanti quel que soit le preset
-   d'accent ET le mode — var(--ink) devenait blanc sur accent clair en dark). */
-.btn-p { background: var(--a); color: var(--a-ink); border-color: var(--a); }
-.btn-p:hover { background: var(--adk); border-color: var(--adk); }
-
-/* ─── Bouton primaire Duo — ombre solide 3D ─── */
-.btn-primary {
-  background: var(--a);
-  color: var(--a-ink);
-  border: none;
-  border-radius: var(--r);
-  box-shadow: var(--s-btn-rest);
-  font-weight: 800;
-  transform: translateY(0);
-  transition: transform var(--t), box-shadow var(--t), background var(--t);
-}
-.btn-primary:hover { background: var(--adk); }
-.btn-primary:active {
-  transform: translateY(3px);
-  box-shadow: var(--s-btn-active);
-}
-.btn-primary:disabled { opacity: .5; box-shadow: none; transform: none; }
-
-.btn-g { background: var(--gr); color: #fff; border-color: var(--gr); }
-.btn-r { background: var(--rd); color: #fff; border-color: var(--rd); }
+/* Système de boutons : 2 variants canoniques.
+   1. .pg-btn / .btn-primary (alias) — CTA plastic de marque (défini plus bas)
+   2. .btn — secondaire neutre (surface + bordure, ci-dessus)
+   Audit 2026-06 : .btn-p / .btn-g / .btn-r / .btn-primary Duo 3D étaient
+   du code mort → supprimés. Ne pas réinventer de CTA par page. */
 
 .btn-sm { min-height: 36px; padding: 6px 12px; font-size: 12px; }
 .btn-lg { min-height: 48px; padding: 14px 22px; font-size: 14px; }
@@ -215,7 +195,7 @@ button:active:not(:disabled),
    internes. Adapté du composant 21st.dev (bleu) à la marque (vert).
    Usage : <button class="pg-btn">…</button>  (texte direct ou <span>)
    ───────────────────────────────────────────────────────────── */
-.pg-btn {
+.pg-btn, .btn-primary {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -236,23 +216,23 @@ button:active:not(:disabled),
     0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
   transition: transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s, filter .15s;
 }
-.pg-btn:hover {
+.pg-btn:hover, .btn-primary:hover {
   filter: brightness(1.04);
   box-shadow:
     var(--s-a-lg),
     0 1.5px 0 0 rgba(255,255,255,.28) inset,
     0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
 }
-.pg-btn:active {
+.pg-btn:active, .btn-primary:active {
   transform: scale(.98);
   box-shadow:
     0 1px 4px 0 color-mix(in srgb, var(--adk) 30%, transparent),
     0 1.5px 0 0 rgba(255,255,255,.2) inset;
 }
-.pg-btn:focus-visible { outline: 3px solid var(--a); outline-offset: 3px; }
-.pg-btn:disabled { opacity: .55; cursor: not-allowed; filter: grayscale(.15); }
+.pg-btn:focus-visible, .btn-primary:focus-visible { outline: 3px solid var(--a); outline-offset: 3px; }
+.pg-btn:disabled, .btn-primary:disabled { opacity: .55; cursor: not-allowed; filter: grayscale(.15); }
 /* reflet brillant en haut */
-.pg-btn::before {
+.pg-btn::before, .btn-primary::before {
   content: "";
   position: absolute; left: 50%; top: 0; z-index: 0;
   width: 82%; height: 42%;
@@ -262,5 +242,5 @@ button:active:not(:disabled),
   filter: blur(1.5px);
   pointer-events: none;
 }
-.pg-btn > * { position: relative; z-index: 1; }
+.pg-btn > *, .btn-primary > * { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) { .pg-btn { transition: none; } }
