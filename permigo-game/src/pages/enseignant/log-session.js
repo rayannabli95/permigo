@@ -16,6 +16,43 @@ import { haptic } from "@/utils/haptic.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
+import { startTour } from "@/components/common/guided-tour.js";
+
+// Tour guidé validation — 1× à la première séance, quand l'UI complète existe
+const TOUR_KEY = "pg-tour-validation-v1";
+const VALIDATION_TOUR_STEPS = [
+  {
+    sel: ".vs-monde-hd",
+    title: "Les mondes REMC",
+    text: "Les 30 compétences officielles sont rangées en 4 mondes. Déroule-les d'un appui.",
+  },
+  {
+    sel: ".vs-chip:not(.locked)",
+    title: "Coche ce qui est travaillé",
+    text: "Chaque appui change l'état : acquis → en cours → à retravailler. Re-appuie pour corriger.",
+  },
+  {
+    sel: "#vs-submit",
+    title: "Enregistre la séance",
+    text: "Le livret de l'élève se met à jour immédiatement — il voit sa progression dès sa prochaine connexion.",
+  },
+];
+
+function maybeStartValidationTour() {
+  try {
+    if (localStorage.getItem(TOUR_KEY)) return;
+    localStorage.setItem(TOUR_KEY, "1");
+  } catch {
+    return;
+  }
+  setTimeout(() => {
+    if (!document.querySelector("#vs-submit")) return;
+    track("validation.tour.start");
+    startTour(VALIDATION_TOUR_STEPS, {
+      onDone: () => track("validation.tour.done"),
+    });
+  }, 500);
+}
 
 const MAX_NOTE = 300;
 
@@ -233,7 +270,12 @@ async function selectEleve(id, doRender = true) {
   );
   if (firstOpen) _openMondes.add(firstOpen.id);
   _eleveDDOpen = false;
-  if (doRender) render();
+  if (doRender) {
+    render();
+    // L'UI complète (mondes, chips, footer) vient d'apparaître : bon moment
+    // pour le tour de première séance.
+    maybeStartValidationTour();
+  }
 }
 
 // ─── Render ──────────────────────────────────────────────────────
