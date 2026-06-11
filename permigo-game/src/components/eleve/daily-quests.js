@@ -197,7 +197,7 @@ export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
         const rect = card.getBoundingClientRect();
         const pop = document.createElement("div");
         pop.className = "dq-xp-pop";
-        pop.textContent = `+${xpGained} XP${gemGained > 0 ? ` · +${gemGained} gemmes` : ""}`;
+        pop.textContent = `+${xpGained} XP${gemGained > 0 ? ` · +${gemGained} volants` : ""}`;
         pop.style.cssText = `left:${rect.left + rect.width / 2}px;top:${rect.top}px`;
         document.body.appendChild(pop);
         setTimeout(() => pop.remove(), 800);
