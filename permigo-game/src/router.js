@@ -131,9 +131,14 @@ export async function route(root, me) {
 
   try {
     const mod = await loader();
+    // Transition d'entrée unifiée : fade léger sur #app à chaque route.
+    // Les animations propres aux pages (slide-up, staggers) s'y superposent.
+    root.classList.remove("route-enter");
     // Pour les pages qui attendent (root, eleveId) on passe param en 2e arg
     // Les autres pages ignorent les args supplémentaires
     await mod.mount(root, param);
+    void root.offsetWidth; // reflow → l'animation rejoue à chaque navigation
+    root.classList.add("route-enter");
     const heading = root.querySelector("h1") || root;
     heading.setAttribute("tabindex", "-1");
     heading.focus({ preventScroll: false });
