@@ -91,7 +91,7 @@ ${LEAGUE_CSS}
   padding-top: 14px; border-top: 1px solid var(--bo2);
 }
 .ls-w-pts-pill {
-  font: 500 10px/1 'Inter', sans-serif; color: var(--mu2);
+  font: 500 10px/1 'Inter', sans-serif; color: var(--mu);
   padding: 4px 9px; border-radius: var(--r-sm);
   background: var(--bg2); border: 1px solid var(--bo);
   transition: border-color .15s var(--ease);

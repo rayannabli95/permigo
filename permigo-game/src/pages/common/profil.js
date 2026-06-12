@@ -55,7 +55,7 @@ const STYLE = `<style>
   font: 600 11px/1 'Inter', sans-serif;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: var(--a);
+  color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   border-radius: 99px;
   padding: 6px 12px;
@@ -270,7 +270,7 @@ const STYLE = `<style>
 .prf-ref-code {
   flex: 1;
   font: 700 18px/1 'IBM Plex Mono', monospace;
-  color: var(--a);
+  color: var(--a-txt);
   letter-spacing: .1em;
 }
 .prf-ref-copy-btn {
@@ -364,7 +364,7 @@ const STYLE = `<style>
   background: var(--ink);
   border: none;
   border-radius: 12px;
-  color: #fff;
+  color: var(--bg);
   font: 700 13px/1 'Inter', sans-serif;
   cursor: pointer;
   min-height: 44px;

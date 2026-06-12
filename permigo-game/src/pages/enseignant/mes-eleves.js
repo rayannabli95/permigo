@@ -307,7 +307,7 @@ const STYLE = `<style>
     display: inline-flex; align-items: center; gap: 6px;
     padding: 8px 14px; min-height: 44px; border-radius: var(--r);
     background: color-mix(in srgb, var(--a) 10%, transparent); border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
-    color: var(--a); font: 600 13px/1 'Inter', sans-serif;
+    color: var(--a-txt); font: 600 13px/1 'Inter', sans-serif;
     cursor: pointer; flex-shrink: 0;
     transition: background .12s, border-color .12s;
     -webkit-tap-highlight-color: transparent;
@@ -1317,7 +1317,7 @@ function showUndoSnackbar(msg, onUndo, duration = 6000) {
         display: flex; align-items: center; gap: 14px;
         max-width: min(90vw, 380px);
         padding: 12px 12px 12px 16px;
-        background: var(--ink); color: #fff;
+        background: var(--ink); color: var(--bg);
         border-radius: var(--r-md);
         box-shadow: 0 12px 32px -8px rgba(10,13,26,.4);
         font: 500 13.5px/1.3 'Inter', sans-serif;

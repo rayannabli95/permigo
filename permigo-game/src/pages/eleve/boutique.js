@@ -33,11 +33,13 @@ const TAB_TYPES = {
 };
 
 // Néon par rareté — couleurs explicites (indépendantes du thème)
+// tagBg/tagFg : le blanc 8.5px ne tenait pas le contraste sur les couleurs
+// pures (1.6:1 sur l'or) — fond assombri à teinte égale, l'or garde un texte sombre.
 const RARITY_META = {
-  commun: { label: "Commun", c: "#3b82f6", order: 0 },
-  rare: { label: "Rare", c: "#8b5cf6", order: 1 },
-  epique: { label: "Épique", c: "#f97316", order: 2 },
-  legendaire: { label: "Légendaire", c: "#fbbf24", order: 3 },
+  commun: { label: "Commun", c: "#3b82f6", tagBg: "color-mix(in srgb, #3b82f6 75%, #000)", tagFg: "#fff", order: 0 },
+  rare: { label: "Rare", c: "#8b5cf6", tagBg: "color-mix(in srgb, #8b5cf6 75%, #000)", tagFg: "#fff", order: 1 },
+  epique: { label: "Épique", c: "#f97316", tagBg: "color-mix(in srgb, #f97316 70%, #000)", tagFg: "#fff", order: 2 },
+  legendaire: { label: "Légendaire", c: "#fbbf24", tagBg: "#fbbf24", tagFg: "#1a1208", order: 3 },
 };
 function rm(rarity) {
   return RARITY_META[rarity] ?? RARITY_META.commun;
@@ -599,7 +601,7 @@ function renderRarityScale(items) {
             const price = byRarity[k];
             return `<div class="bo2-scale-item">
             <div class="bo2-scale-dot" style="background:${r.c}26;border:2px solid ${r.c};box-shadow:0 0 12px ${r.c}66;color:${r.c}">${icon(icons[k], { size: 17 })}</div>
-            <div class="bo2-scale-lbl" style="color:${r.c}">${esc(r.label)}</div>
+            <div class="bo2-scale-lbl" style="color:${r.tagBg === r.c ? "#8a6d03" : r.tagBg}">${esc(r.label)}</div>
             ${price != null ? `<div class="bo2-scale-price">${icon("gem", { size: 13 })} ${price}</div>` : ""}
           </div>`;
           })
@@ -625,7 +627,7 @@ function renderGridCard(item, gemmes, idx) {
     <div class="bo2-card" data-item-id="${esc(item.id)}"
       style="border:1.5px solid ${r.c}66; box-shadow:0 0 14px ${r.c}26; animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
       <div class="bo2-card-preview" style="background:radial-gradient(120% 90% at 50% 12%, ${r.c}26 0%, ${r.c}0d 55%, var(--bg) 100%)">
-        <span class="bo2-card-rarity-tag" style="background:${r.c}">${esc(r.label)}</span>
+        <span class="bo2-card-rarity-tag" style="background:${r.tagBg};color:${r.tagFg}">${esc(r.label)}</span>
         ${preview}
         ${item.owned ? `<div class="bo2-card-owned-badge">✓ Débloqué</div>` : ""}
       </div>
