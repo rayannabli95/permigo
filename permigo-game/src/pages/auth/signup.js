@@ -27,7 +27,7 @@ function template() {
       .su-field label{font-size:10.5px;font-weight:800;color:rgba(255,255,255,.78);letter-spacing:1.2px;text-transform:uppercase}
       .su-input-wrap{display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);transition:all .15s}
       .su-input-wrap:focus-within{border-color:var(--al3);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px color-mix(in srgb, var(--a) 18%, transparent)}
-      .su-input-wrap input{flex:1;background:transparent;border:0;outline:0;color:#fff;font-size:14px;font-family:inherit;min-width:0}
+      .su-input-wrap input{flex:1;background:transparent;border:0;outline:0;color:#fff;font-size:16px;font-family:inherit;min-width:0}
       .su-input-wrap input::placeholder{color:rgba(255,255,255,.35)}
       .su-cta{width:100%;height:48px;border-radius:12px;border:0;background:var(--a);color:var(--a-ink);font-family:var(--fd);font-weight:800;font-size:15px;cursor:pointer;transition:transform .12s,box-shadow .12s;box-shadow:0 12px 32px -10px color-mix(in srgb, var(--a) 65%, transparent)}
       .su-cta:hover{transform:translateY(-1px);box-shadow:0 16px 40px -10px color-mix(in srgb, var(--a) 80%, transparent)}
@@ -133,7 +133,9 @@ function wire(root) {
       });
 
       if (error) {
-        errEl.textContent = esc(error.message || "Erreur lors de l'inscription");
+        errEl.textContent = esc(
+          error.message || "Erreur lors de l'inscription",
+        );
         submitBtn.disabled = false;
         submitBtn.textContent = "S'inscrire";
         return;

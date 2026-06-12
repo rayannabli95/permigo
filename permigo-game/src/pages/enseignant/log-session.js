@@ -102,7 +102,7 @@ const STYLE = `<style>
 
   /* Dropdown élève */
   .vs-search-ico { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--mu2); pointer-events: none; }
-  .vs-search { width: 100%; box-sizing: border-box; padding: 10px 12px 10px 36px; background: var(--bg); border: 1px solid var(--bo); border-radius: var(--r); font: 500 14px/1 'Inter', sans-serif; color: var(--ink); outline: none; }
+  .vs-search { width: 100%; box-sizing: border-box; padding: 10px 12px 10px 36px; background: var(--bg); border: 1px solid var(--bo); border-radius: var(--r); font: 500 16px/1 'Inter', sans-serif; color: var(--ink); outline: none; }
   .vs-search:focus { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
 
   .vs-dd { position: relative; margin-bottom: 16px; z-index: 30; }
