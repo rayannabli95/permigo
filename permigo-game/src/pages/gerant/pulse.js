@@ -233,7 +233,7 @@ const STYLE = `<style>
   width: 40px; height: 40px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font: 600 14px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
+  color: var(--a-ink);
   flex-shrink: 0;
   background: var(--a);
 }

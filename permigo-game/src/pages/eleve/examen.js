@@ -135,7 +135,7 @@ const STYLE = `<style>
 .exam-date-save {
   padding: 10px 18px;
   background: var(--a);
-  color: #fff;
+  color: var(--a-ink);
   border: 0;
   border-radius: 12px;
   font: 600 14px/1 'Plus Jakarta Sans',sans-serif;

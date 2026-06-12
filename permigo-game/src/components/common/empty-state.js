@@ -62,7 +62,7 @@ const SHARED_STYLES = `
   justify-content: center;
   padding: 11px 22px;
   background: var(--a);
-  color: #fff;
+  color: var(--a-ink);
   border: 0;
   border-radius: 14px;
   font: 600 14px/1 'Plus Jakarta Sans', sans-serif;

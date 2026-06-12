@@ -140,7 +140,7 @@ const STYLE = `<style>
   padding: 13px;
   min-height: 44px;
   background: var(--a);
-  color: #fff;
+  color: var(--a-ink);
   border: none;
   border-radius: 12px;
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;

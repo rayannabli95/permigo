@@ -156,7 +156,7 @@ const STYLE = `<style>
   flex-shrink: 0;
 }
 .epcf-stop-cost.done { color: var(--grd); background: rgba(16,185,129,.12); }
-.epcf-stop-cost.now  { color: #fff; background: var(--a); }
+.epcf-stop-cost.now  { color: var(--a-ink); background: var(--a); }
 .epcf-stop-cost.todo { color: var(--mu3); background: var(--bg2); }
 .epcf-stop-title {
   font: 600 14px/1.3 'Inter', sans-serif;

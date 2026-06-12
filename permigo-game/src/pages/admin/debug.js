@@ -132,7 +132,7 @@ const STYLE = `<style>
   margin-top: 8px;
   padding: 12px 14px;
   background: linear-gradient(135deg, var(--a), var(--adk));
-  color: #fff;
+  color: var(--a-ink);
   border: 0;
   border-radius: 8px;
   font: 700 12px/1 'IBM Plex Mono', monospace;

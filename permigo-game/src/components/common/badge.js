@@ -41,7 +41,7 @@ const STYLE = `
   .bdg.bdg-circle { border-radius: 999px; }
 
   /* Variants DEFAULT (solide) */
-  .bdg.v-primary       { background: var(--a); color: #fff; }
+  .bdg.v-primary       { background: var(--a); color: var(--a-ink); }
   .bdg.v-secondary     { background: var(--bg3); color: var(--ink); }
   .bdg.v-success       { background: var(--gr); color: #fff; }
   .bdg.v-warning       { background: var(--am); color: #fff; }

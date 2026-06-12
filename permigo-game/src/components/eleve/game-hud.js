@@ -66,7 +66,7 @@ export function renderGameHUD(stats, me) {
         border-radius:14px;
         background:linear-gradient(135deg,var(--a) 0%,var(--adx) 50%,#1e1b4b 100%);
         display:flex;align-items:center;justify-content:center;
-        font-family:var(--fd);font-weight:900;font-size:17px;color:#fff;
+        font-family:var(--fd);font-weight:900;font-size:17px;color: var(--a-ink);
         box-shadow:
           0 6px 18px -4px color-mix(in srgb, var(--a) 60%, transparent),
           0 0 0 2px rgba(255,255,255,.12) inset,

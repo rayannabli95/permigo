@@ -248,7 +248,7 @@ const STYLE = `<style>
   width: 100%; padding: 16px 24px;
   background: var(--a);
   border: none; border-radius: 16px;
-  color: #fff;
+  color: var(--a-ink);
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; min-height: 54px;
   box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--a) 45%, transparent);

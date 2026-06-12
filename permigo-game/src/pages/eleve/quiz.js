@@ -192,7 +192,7 @@ export async function mount(root, params = {}) {
     root.innerHTML = `<div style="padding:48px 24px;text-align:center;font-family:'Inter',sans-serif;color:var(--mu2)">
       <div style="font:700 16px/1.4 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">Quiz non disponible</div>
       <p style="font-size:14px;margin:0 0 20px">Sélectionne une compétence depuis ton parcours pour démarrer un quiz.</p>
-      <a href="#/parcours" style="display:inline-block;padding:15px 24px;background:var(--a);color:#fff;border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;text-decoration:none">Retour au parcours</a>
+      <a href="#/parcours" style="display:inline-block;padding:15px 24px;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;text-decoration:none">Retour au parcours</a>
     </div>`;
     return;
   }

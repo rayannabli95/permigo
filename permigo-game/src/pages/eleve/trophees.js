@@ -240,7 +240,7 @@ const STYLE = `<style>
 .tr2-modal-share {
   flex: 1; padding: 14px;
   background: var(--a);
-  border: none; border-radius: var(--r-md); color: #fff;
+  border: none; border-radius: var(--r-md); color: var(--a-ink);
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; min-height: 50px;
   transition: transform .12s, opacity .12s;
 }

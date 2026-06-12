@@ -16,7 +16,7 @@ const STYLE = `
     border-radius: 50%;
     border: 0;
     background: var(--a);
-    color: #fff;
+    color: var(--a-ink);
     font-size: 26px;
     line-height: 1;
     cursor: pointer;

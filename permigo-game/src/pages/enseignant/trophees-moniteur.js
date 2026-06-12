@@ -276,7 +276,7 @@ const STYLE = `<style>
 .tr2-cta-txt { flex: 1; font: 500 13px/1.45 'Inter', sans-serif; color: var(--mu); }
 .tr2-cta-btn {
   flex-shrink: 0; padding: 12px 16px; min-height: 44px;
-  border: 0; border-radius: var(--r); background: var(--a); color: #fff;
+  border: 0; border-radius: var(--r); background: var(--a); color: var(--a-ink);
   font: 800 13px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
   box-shadow: 0 4px 0 0 var(--adk); white-space: nowrap;
 }
@@ -401,7 +401,7 @@ const STYLE = `<style>
 .tr2-sheet-actions { display: flex; gap: 8px; padding: 0 20px 8px; }
 .tr2-sheet-share {
   flex: 1; padding: 14px; min-height: 50px; border: 0; border-radius: var(--r-md);
-  background: var(--a); color: #fff; font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
+  background: var(--a); color: var(--a-ink); font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; box-shadow: 0 4px 0 0 var(--adk);
   display: flex; align-items: center; justify-content: center; gap: 8px;
 }

@@ -133,7 +133,7 @@ const STYLE = `<style>
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font: 600 16px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
+  color: var(--a-ink);
   flex-shrink: 0;
   background: var(--a);
 }
@@ -470,7 +470,7 @@ async function openQuickView(eleveId, anchorCard) {
       .elqv-row:first-of-type { border-top:0; }
       .elqv-row .l { color:var(--mu); }
       .elqv-row .v { color:var(--ink); font-weight:700; }
-      .elqv-btn { width:100%; margin-top:16px; padding:14px; background:var(--a); color:#fff; border:0; border-radius:var(--r-md); font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s; }
+      .elqv-btn { width:100%; margin-top:16px; padding:14px; background:var(--a); color: var(--a-ink); border:0; border-radius:var(--r-md); font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s; }
       .elqv-btn:active { transform: scale(.97); }
     </style>
     <div class="elqv-card">

@@ -316,7 +316,7 @@ const STYLE = `<style>
   background: var(--a);
   border: none;
   border-radius: var(--r-lg);
-  color: #fff;
+  color: var(--a-ink);
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   min-height: 52px;
@@ -669,7 +669,7 @@ const STYLE = `<style>
 .acc-lb-rank {
   flex-shrink: 0; width: 52px; height: 52px; border-radius: var(--r-lg);
   display: flex; align-items: center; justify-content: center;
-  background: var(--a); color: #fff;
+  background: var(--a); color: var(--a-ink);
   box-shadow: 0 5px 13px -3px color-mix(in srgb, var(--a) 60%, transparent);
   font: 800 19px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.03em;
   position: relative; z-index: 1;
@@ -1026,7 +1026,7 @@ export async function mount(root) {
     root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:var(--mu3);font-family:'Inter',sans-serif">
       <div style="font:800 18px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">Oups, ton accueil a du mal à charger</div>
       <p style="font-size:14px;margin:0 0 20px">Vérifie ta connexion et réessaie.</p>
-      <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color:#fff;border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Recharger</button>
+      <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Recharger</button>
     </div>`;
     root
       .querySelector("#acc-reload")
