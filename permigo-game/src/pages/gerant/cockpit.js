@@ -2,33 +2,52 @@
 // Gérant — Cockpit Bloomberg (dark theme)
 // RPC : get_gerant_cockpit → { kpis, cohorts, top_moniteurs, alerts }
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
-import { esc } from '@/utils/escape.js';
-import { toast } from '@/components/common/toast.js';
-import { track } from '@/services/analytics.js';
-import { icon } from '@/utils/icons.js';
-import { navigate } from '@/router.js';
-import { haptic } from '@/utils/haptic.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
+import { esc } from "@/utils/escape.js";
+import { toast } from "@/components/common/toast.js";
+import { track } from "@/services/analytics.js";
+import { icon } from "@/utils/icons.js";
+import { navigate } from "@/router.js";
+import { haptic } from "@/utils/haptic.js";
 
 // ─── Design tokens ────────────────────────────────────────────────
-const BG   = 'var(--ink)';
-const SURF = 'var(--ink)';
-const SURF2 = '#1a2236';
-const BORD = 'var(--ink4)';
-const TEXT = 'var(--bg4)';
-const MUTED = 'var(--mu3)';
-const ACC  = 'var(--a)';
+const BG = "var(--ink)";
+const SURF = "var(--ink)";
+const SURF2 = "#1a2236";
+const BORD = "var(--ink4)";
+const TEXT = "var(--bg4)";
+// La surface du cockpit = var(--ink), qui s'inverse avec le thème (sombre en
+// light, clair en dark). Les --mu* globaux ne suivent PAS cette inversion →
+// ~3:1. On dérive le muted du texte (var(--bg4), qui s'inverse comme la
+// surface) mixé vers la surface : 7.6:1 en light, 5.4:1 en dark.
+const MUTED = "color-mix(in srgb, var(--bg4) 65%, var(--ink))";
+const ACC = "var(--a)";
 
 // KPI definitions — used to normalize RPC object → array
 const KPI_DEFS = [
-  { key: 'eleves_actifs',    label: 'Élèves actifs',    color: ACC,       unit: null },
-  { key: 'moniteurs_actifs', label: 'Moniteurs actifs', color: 'var(--gr)', unit: null },
-  { key: 'taux_reussite_90j', label: 'Taux réussite 90j', color: 'var(--gr)', unit: '%'  },
-  { key: 'heures_30j',       label: 'Heures 30j',       color: 'var(--am)', unit: 'h'  },
-  { key: 'nouveaux_30j',     label: 'Nouveaux 30j',     color: 'var(--pu)', unit: null },
-  { key: 'validations_30j',  label: 'Validations 30j',  color: ACC,       unit: null },
+  { key: "eleves_actifs", label: "Élèves actifs", color: ACC, unit: null },
+  {
+    key: "moniteurs_actifs",
+    label: "Moniteurs actifs",
+    color: "var(--gr)",
+    unit: null,
+  },
+  {
+    key: "taux_reussite_90j",
+    label: "Taux réussite 90j",
+    color: "var(--gr)",
+    unit: "%",
+  },
+  { key: "heures_30j", label: "Heures 30j", color: "var(--am)", unit: "h" },
+  {
+    key: "nouveaux_30j",
+    label: "Nouveaux 30j",
+    color: "var(--pu)",
+    unit: null,
+  },
+  { key: "validations_30j", label: "Validations 30j", color: ACC, unit: null },
 ];
 
 // Normalize RPC response which can return kpis/cohorts as objects instead of arrays
@@ -38,34 +57,45 @@ function normalizeRpcData(data) {
   let kpis = data.kpis;
   if (kpis && !Array.isArray(kpis)) {
     const obj = kpis;
-    kpis = KPI_DEFS
-      .filter(def => obj[def.key] !== undefined && obj[def.key] !== null)
-      .map(def => ({ key: def.key, label: def.label, color: def.color, unit: def.unit, value: obj[def.key], delta: null }));
+    kpis = KPI_DEFS.filter(
+      (def) => obj[def.key] !== undefined && obj[def.key] !== null,
+    ).map((def) => ({
+      key: def.key,
+      label: def.label,
+      color: def.color,
+      unit: def.unit,
+      value: obj[def.key],
+      delta: null,
+    }));
   }
 
   let cohorts = data.cohorts;
   if (cohorts && !Array.isArray(cohorts)) {
     cohorts = Object.entries(cohorts)
       .filter(([k]) => COHORT_ORDER.includes(k))
-      .map(([k, v]) => ({ cohort: k, key: k, count: typeof v === 'number' ? v : (v?.count ?? 0) }));
+      .map(([k, v]) => ({
+        cohort: k,
+        key: k,
+        count: typeof v === "number" ? v : (v?.count ?? 0),
+      }));
   }
 
   return {
-    kpis:          kpis ?? [],
-    cohorts:       cohorts ?? [],
+    kpis: kpis ?? [],
+    cohorts: cohorts ?? [],
     top_moniteurs: Array.isArray(data.top_moniteurs) ? data.top_moniteurs : [],
-    alerts:        Array.isArray(data.alerts) ? data.alerts : [],
+    alerts: Array.isArray(data.alerts) ? data.alerts : [],
   };
 }
 
 const COHORT_META = {
-  champion: { label: 'Champion',  color: 'var(--gr)', icon: 'award' },
-  engage:   { label: 'Engagé',    color: 'var(--a)', icon: 'zap' },
-  a_risque: { label: 'À risque',  color: 'var(--am)', icon: 'alert-triangle' },
-  inactif:  { label: 'Inactif',   color: 'var(--mu3)', icon: 'moon' },
-  bloque:   { label: 'Bloqué',    color: 'var(--rd)', icon: 'x-circle' },
+  champion: { label: "Champion", color: "var(--gr)", icon: "award" },
+  engage: { label: "Engagé", color: "var(--a)", icon: "zap" },
+  a_risque: { label: "À risque", color: "var(--am)", icon: "alert-triangle" },
+  inactif: { label: "Inactif", color: "var(--mu3)", icon: "moon" },
+  bloque: { label: "Bloqué", color: "var(--rd)", icon: "x-circle" },
 };
-const COHORT_ORDER = ['champion', 'engage', 'a_risque', 'inactif', 'bloque'];
+const COHORT_ORDER = ["champion", "engage", "a_risque", "inactif", "bloque"];
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -203,8 +233,10 @@ const STYLE = `<style>
   padding: 3px 7px;
   border-radius: var(--r-full);
 }
-.ck-kpi-delta.up   { color: var(--gr-txt); background: rgba(16,185,129,.12); }
-.ck-kpi-delta.down { color: var(--rd-txt); background: rgba(239,68,68,.12); }
+/* Surface cockpit sombre en light mode → couleurs de statut PURES (claires),
+   pas les -txt assombris. Flèches ▲▼ portent le sens (WCAG 1.4.1). */
+.ck-kpi-delta.up   { color: var(--gr); background: rgba(16,185,129,.12); }
+.ck-kpi-delta.down { color: var(--rd); background: rgba(239,68,68,.12); }
 .ck-kpi-delta.flat { color: ${MUTED}; background: ${SURF2}; }
 
 /* ═══════════ COHORTES ═══════════ */
@@ -415,9 +447,9 @@ let _cockpitData = null;
 
 export async function mount(root) {
   const me = getCurUser();
-  if (!me || me.role !== 'gerant') return;
+  if (!me || me.role !== "gerant") return;
 
-  track('page.view', { page: 'gerant_cockpit' });
+  track("page.view", { page: "gerant_cockpit" });
 
   root.innerHTML = renderSkeleton();
   await loadAndRender(root, me);
@@ -425,14 +457,14 @@ export async function mount(root) {
 
 async function loadAndRender(root, me) {
   try {
-    const { data, error } = await sb.rpc('get_gerant_cockpit');
+    const { data, error } = await sb.rpc("get_gerant_cockpit");
     if (error) throw error;
     const normalized = normalizeRpcData(data);
     _cockpitData = normalized;
     root.innerHTML = render(normalized, me);
     wire(root, me);
   } catch (err) {
-    console.error('[cockpit] load failed', err);
+    console.error("[cockpit] load failed", err);
     // Fallback: charge quand même les KPI depuis les tables directes
     await loadFallback(root, me);
   }
@@ -440,20 +472,63 @@ async function loadAndRender(root, me) {
 
 async function loadFallback(root, me) {
   try {
-    const { data: profile } = await sb.from('profiles').select('ecole_id').eq('id', me.id).maybeSingle();
+    const { data: profile } = await sb
+      .from("profiles")
+      .select("ecole_id")
+      .eq("id", me.id)
+      .maybeSingle();
     const ecoleId = profile?.ecole_id;
 
     const [elevesRes, valsRes] = await Promise.allSettled([
-      ecoleId ? sb.from('profiles').select('id', { count: 'exact', head: true }).eq('ecole_id', ecoleId).eq('role', 'eleve') : Promise.resolve({ count: 0 }),
-      ecoleId ? sb.from('validations').select('id', { count: 'exact', head: true }).gte('validated_at', new Date(Date.now() - 30 * 86400000).toISOString()) : Promise.resolve({ count: 0 }),
+      ecoleId
+        ? sb
+            .from("profiles")
+            .select("id", { count: "exact", head: true })
+            .eq("ecole_id", ecoleId)
+            .eq("role", "eleve")
+        : Promise.resolve({ count: 0 }),
+      ecoleId
+        ? sb
+            .from("validations")
+            .select("id", { count: "exact", head: true })
+            .gte(
+              "validated_at",
+              new Date(Date.now() - 30 * 86400000).toISOString(),
+            )
+        : Promise.resolve({ count: 0 }),
     ]);
 
     const fallbackData = {
       kpis: [
-        { key: 'eleves_actifs',    label: 'Élèves actifs',   value: elevesRes.value?.count ?? '—', delta: null, color: ACC },
-        { key: 'taux_reussite',    label: 'Taux réussite',   value: '—',  unit: '%', delta: null, color: 'var(--gr)' },
-        { key: 'heures_30j',       label: 'Heures 30j',      value: '—',  delta: null, color: 'var(--am)' },
-        { key: 'nouveaux_30j',     label: 'Nouveaux 30j',    value: valsRes.value?.count ?? '—', delta: null, color: 'var(--pu)' },
+        {
+          key: "eleves_actifs",
+          label: "Élèves actifs",
+          value: elevesRes.value?.count ?? "—",
+          delta: null,
+          color: ACC,
+        },
+        {
+          key: "taux_reussite",
+          label: "Taux réussite",
+          value: "—",
+          unit: "%",
+          delta: null,
+          color: "var(--gr)",
+        },
+        {
+          key: "heures_30j",
+          label: "Heures 30j",
+          value: "—",
+          delta: null,
+          color: "var(--am)",
+        },
+        {
+          key: "nouveaux_30j",
+          label: "Nouveaux 30j",
+          value: valsRes.value?.count ?? "—",
+          delta: null,
+          color: "var(--pu)",
+        },
       ],
       cohorts: [],
       top_moniteurs: [],
@@ -473,17 +548,29 @@ async function loadFallback(root, me) {
 
 // ─── Render ───────────────────────────────────────────────────────
 function render(data, me) {
-  const kpis         = data?.kpis          ?? [];
-  const cohorts      = data?.cohorts        ?? [];
-  const topMons      = data?.top_moniteurs  ?? [];
-  const alerts       = (data?.alerts ?? []).sort((a, b) => {
+  const kpis = data?.kpis ?? [];
+  const cohorts = data?.cohorts ?? [];
+  const topMons = data?.top_moniteurs ?? [];
+  const alerts = (data?.alerts ?? []).sort((a, b) => {
     const order = { high: 0, medium: 1, low: 2 };
     return (order[a.severity] ?? 3) - (order[b.severity] ?? 3);
   });
 
   const now = new Date();
-  const dateStr = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-  const maxMon  = Math.max(1, ...topMons.map(m => (m.n_validations ?? m.validations_count) || (m.heures_30j ?? m.heures) || 1));
+  const dateStr = now.toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+  const maxMon = Math.max(
+    1,
+    ...topMons.map(
+      (m) =>
+        (m.n_validations ?? m.validations_count) ||
+        (m.heures_30j ?? m.heures) ||
+        1,
+    ),
+  );
 
   return `${STYLE}
 <div class="ck">
@@ -491,10 +578,10 @@ function render(data, me) {
   <!-- HEADER -->
   <div class="ck-hd">
     <div class="ck-hd-logo">PermiGo</div>
-    <div class="ck-hd-school">${esc(me.school_name ?? me.prenom ?? 'Mon école')}</div>
+    <div class="ck-hd-school">${esc(me.school_name ?? me.prenom ?? "Mon école")}</div>
     <div class="ck-hd-date">${esc(dateStr)}</div>
     <button class="ck-refresh-btn" id="ck-refresh" aria-label="Actualiser">
-      ${icon('refresh-cw', { size: 14 })}
+      ${icon("refresh-cw", { size: 14 })}
     </button>
   </div>
 
@@ -504,7 +591,7 @@ function render(data, me) {
       <span class="ck-section-title">Indicateurs</span>
     </div>
     <div class="ck-kpi-grid">
-      ${kpis.map((k, i) => renderKpi(k, i)).join('')}
+      ${kpis.map((k, i) => renderKpi(k, i)).join("")}
     </div>
   </div>
 
@@ -522,23 +609,35 @@ function render(data, me) {
   <div class="ck-section">
     <div class="ck-section-hd">
       <span class="ck-section-title">Alertes</span>
-      ${alerts.length > 0 ? `<span class="ck-kpi-delta down">${alerts.filter(a => a.severity === 'high').length} urgentes</span>` : ''}
+      ${alerts.length > 0 ? `<span class="ck-kpi-delta down">${alerts.filter((a) => a.severity === "high").length} urgentes</span>` : ""}
     </div>
-    ${alerts.length > 0
-      ? alerts.slice(0, 5).map(a => renderAlert(a)).join('')
-      : `<div class="ck-alerts-empty">${icon('check-circle', { size: 16, strokeWidth: 2 })} Aucune alerte — tout va bien</div>`}
+    ${
+      alerts.length > 0
+        ? alerts
+            .slice(0, 5)
+            .map((a) => renderAlert(a))
+            .join("")
+        : `<div class="ck-alerts-empty">${icon("check-circle", { size: 16, strokeWidth: 2 })} Aucune alerte — tout va bien</div>`
+    }
   </div>
 
   <!-- BLOC 4 — TOP MONITEURS -->
-  ${topMons.length > 0 ? `
+  ${
+    topMons.length > 0
+      ? `
   <div class="ck-section">
     <div class="ck-section-hd">
       <span class="ck-section-title">Top moniteurs</span>
     </div>
     <div class="ck-mon-list">
-      ${topMons.slice(0, 5).map((m, i) => renderMon(m, i, maxMon)).join('')}
+      ${topMons
+        .slice(0, 5)
+        .map((m, i) => renderMon(m, i, maxMon))
+        .join("")}
     </div>
-  </div>` : ''}
+  </div>`
+      : ""
+  }
 
 </div>
 
@@ -559,15 +658,18 @@ function render(data, me) {
 // ─── KPI renderer ────────────────────────────────────────────────
 function renderKpi(kpi, idx) {
   const color = kpi.color ?? ACC;
-  const val   = kpi.value !== null && kpi.value !== undefined ? String(kpi.value) : '—';
-  const unit  = kpi.unit ? `<span style="font-size:.45em;font-weight:500;color:${MUTED};margin-left:2px">${esc(kpi.unit)}</span>` : '';
+  const val =
+    kpi.value !== null && kpi.value !== undefined ? String(kpi.value) : "—";
+  const unit = kpi.unit
+    ? `<span style="font-size:.45em;font-weight:500;color:${MUTED};margin-left:2px">${esc(kpi.unit)}</span>`
+    : "";
 
-  let deltaHtml = '';
+  let deltaHtml = "";
   if (kpi.delta !== null && kpi.delta !== undefined) {
-    const up  = kpi.delta >= 0;
-    const cls = kpi.delta > 0 ? 'up' : kpi.delta < 0 ? 'down' : 'flat';
+    const up = kpi.delta >= 0;
+    const cls = kpi.delta > 0 ? "up" : kpi.delta < 0 ? "down" : "flat";
     deltaHtml = `<div class="ck-kpi-delta ${cls}">
-      ${kpi.delta > 0 ? '↑' : kpi.delta < 0 ? '↓' : '→'} ${Math.abs(kpi.delta)}${kpi.delta_unit ?? '%'}
+      ${kpi.delta > 0 ? "↑" : kpi.delta < 0 ? "↓" : "→"} ${Math.abs(kpi.delta)}${kpi.delta_unit ?? "%"}
     </div>`;
   }
 
@@ -581,26 +683,36 @@ function renderKpi(kpi, idx) {
 
 // ─── Donut SVG renderer ──────────────────────────────────────────
 function renderDonut(cohorts) {
-  const R = 60, r = 38, cx = 80, cy = 80;
+  const R = 60,
+    r = 38,
+    cx = 80,
+    cy = 80;
   const total = cohorts.reduce((s, c) => s + (c.count ?? 0), 0) || 1;
   const circumference = 2 * Math.PI * R;
 
   let offsetDeg = -90;
-  const segments = COHORT_ORDER.map(key => {
-    const found  = cohorts.find(c => c.cohort === key || c.key === key);
-    const count  = found?.count ?? 0;
-    const pct    = total > 0 ? count / total : 0;
-    const meta   = COHORT_META[key] ?? { label: key, color: MUTED };
-    const start  = offsetDeg;
-    offsetDeg   += pct * 360;
-    return { key, count, pct, color: meta.color, label: meta.label, startDeg: start };
-  }).filter(s => s.count > 0);
+  const segments = COHORT_ORDER.map((key) => {
+    const found = cohorts.find((c) => c.cohort === key || c.key === key);
+    const count = found?.count ?? 0;
+    const pct = total > 0 ? count / total : 0;
+    const meta = COHORT_META[key] ?? { label: key, color: MUTED };
+    const start = offsetDeg;
+    offsetDeg += pct * 360;
+    return {
+      key,
+      count,
+      pct,
+      color: meta.color,
+      label: meta.label,
+      startDeg: start,
+    };
+  }).filter((s) => s.count > 0);
 
-  let svgPaths = '';
+  let svgPaths = "";
   let cumulPct = 0;
   for (const seg of segments) {
-    const startAngle = (cumulPct * 2 * Math.PI) - Math.PI / 2;
-    const endAngle   = ((cumulPct + seg.pct) * 2 * Math.PI) - Math.PI / 2;
+    const startAngle = cumulPct * 2 * Math.PI - Math.PI / 2;
+    const endAngle = (cumulPct + seg.pct) * 2 * Math.PI - Math.PI / 2;
     cumulPct += seg.pct;
 
     const x1 = cx + R * Math.cos(startAngle);
@@ -616,12 +728,12 @@ function renderDonut(cohorts) {
     }
   }
 
-  const legendRows = COHORT_ORDER.map(key => {
-    const found = cohorts.find(c => c.cohort === key || c.key === key);
+  const legendRows = COHORT_ORDER.map((key) => {
+    const found = cohorts.find((c) => c.cohort === key || c.key === key);
     const count = found?.count ?? 0;
-    if (count === 0) return '';
-    const meta  = COHORT_META[key] ?? { label: key, color: MUTED };
-    const pct   = total > 0 ? Math.round((count / total) * 100) : 0;
+    if (count === 0) return "";
+    const meta = COHORT_META[key] ?? { label: key, color: MUTED };
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
     return `
       <div class="ck-legend-row" data-cohort="${esc(key)}">
         <div class="ck-legend-dot" style="background:${esc(meta.color)}"></div>
@@ -629,7 +741,7 @@ function renderDonut(cohorts) {
         <div class="ck-legend-val">${count}</div>
         <div class="ck-legend-pct">${pct}%</div>
       </div>`;
-  }).join('');
+  }).join("");
 
   return `
     <div class="ck-donut-row">
@@ -647,36 +759,36 @@ function renderDonut(cohorts) {
 // ─── Alert renderer ──────────────────────────────────────────────
 function renderAlert(alert) {
   const colors = {
-    high:   { color: 'var(--rd)', rgb: '239,68,68',   icon: 'alert-octagon' },
-    medium: { color: 'var(--am)', rgb: '245,158,11',   icon: 'alert-triangle' },
-    low:    { color: '#eab308', rgb: '234,179,8',    icon: 'info' },
+    high: { color: "var(--rd)", rgb: "239,68,68", icon: "alert-octagon" },
+    medium: { color: "var(--am)", rgb: "245,158,11", icon: "alert-triangle" },
+    low: { color: "#eab308", rgb: "234,179,8", icon: "info" },
   };
   const c = colors[alert.severity] ?? colors.low;
   return `
-    <div class="ck-alert" data-alert-id="${esc(alert.id ?? '')}" style="--alert-color:${c.color};--alert-rgb:${c.rgb}">
+    <div class="ck-alert" data-alert-id="${esc(alert.id ?? "")}" style="--alert-color:${c.color};--alert-rgb:${c.rgb}">
       <div class="ck-alert-ico">${icon(c.icon, { size: 16 })}</div>
       <div class="ck-alert-body">
-        <div class="ck-alert-title">${esc(alert.label ?? alert.title ?? alert.message ?? 'Alerte')}</div>
-        ${alert.count != null ? `<div class="ck-alert-sub">${alert.count} concerné${alert.count > 1 ? 's' : ''}</div>` : (alert.sub ?? alert.detail ? `<div class="ck-alert-sub">${esc(alert.sub ?? alert.detail)}</div>` : '')}
+        <div class="ck-alert-title">${esc(alert.label ?? alert.title ?? alert.message ?? "Alerte")}</div>
+        ${alert.count != null ? `<div class="ck-alert-sub">${alert.count} concerné${alert.count > 1 ? "s" : ""}</div>` : (alert.sub ?? alert.detail) ? `<div class="ck-alert-sub">${esc(alert.sub ?? alert.detail)}</div>` : ""}
       </div>
-      <div class="ck-alert-arrow">${icon('chevron-right', { size: 14 })}</div>
+      <div class="ck-alert-arrow">${icon("chevron-right", { size: 14 })}</div>
     </div>`;
 }
 
 // ─── Moniteur renderer ───────────────────────────────────────────
 function renderMon(mon, idx, maxVal) {
-  const prenom   = mon.prenom ?? mon.first_name ?? 'Moniteur';
-  const nom      = mon.nom ?? mon.last_name ?? '';
-  const initials = ((prenom[0] ?? '') + (nom[0] ?? '')).toUpperCase() || 'M';
+  const prenom = mon.prenom ?? mon.first_name ?? "Moniteur";
+  const nom = mon.nom ?? mon.last_name ?? "";
+  const initials = ((prenom[0] ?? "") + (nom[0] ?? "")).toUpperCase() || "M";
   // RPC renvoie n_validations + heures_30j (anciens noms validations_count/heures gardés en fallback)
-  const nVal     = mon.n_validations ?? mon.validations_count ?? 0;
-  const hrs      = mon.heures_30j ?? mon.heures ?? 0;
-  const val      = nVal > 0 ? nVal : hrs;
-  const pct      = maxVal > 0 ? Math.round((val / maxVal) * 100) : 0;
+  const nVal = mon.n_validations ?? mon.validations_count ?? 0;
+  const hrs = mon.heures_30j ?? mon.heures ?? 0;
+  const val = nVal > 0 ? nVal : hrs;
+  const pct = maxVal > 0 ? Math.round((val / maxVal) * 100) : 0;
   const valLabel = nVal > 0 ? `${nVal} valid.` : `${hrs}h`;
 
   return `
-    <div class="ck-mon-row" data-moniteur-id="${esc(mon.id ?? '')}">
+    <div class="ck-mon-row" data-moniteur-id="${esc(mon.id ?? "")}">
       <div class="ck-mon-rank">${idx + 1}</div>
       <div class="ck-mon-av">${esc(initials)}</div>
       <div class="ck-mon-info">
@@ -694,77 +806,96 @@ function renderMon(mon, idx, maxVal) {
 // ─── Wire ────────────────────────────────────────────────────────
 function wire(root, me) {
   // Animate moniteur bars
-  root.querySelectorAll('.ck-mon-bar-fill[data-target]').forEach(el => {
-    setTimeout(() => { el.style.width = el.dataset.target + '%'; }, 300);
+  root.querySelectorAll(".ck-mon-bar-fill[data-target]").forEach((el) => {
+    setTimeout(() => {
+      el.style.width = el.dataset.target + "%";
+    }, 300);
   });
 
   // Refresh button
-  root.querySelector('#ck-refresh')?.addEventListener('click', async () => {
-    haptic('select');
-    const btn = root.querySelector('#ck-refresh');
-    btn?.classList.add('spinning');
+  root.querySelector("#ck-refresh")?.addEventListener("click", async () => {
+    haptic("select");
+    const btn = root.querySelector("#ck-refresh");
+    btn?.classList.add("spinning");
     await loadAndRender(root, me);
-    btn?.classList.remove('spinning');
+    btn?.classList.remove("spinning");
   });
 
   // Bottom sheet logic
-  const bsBg   = root.querySelector('#ck-bs-bg');
-  const bsSheet = root.querySelector('#ck-bs');
-  const openBS  = () => { bsSheet?.classList.add('open'); bsBg?.classList.add('open'); };
-  const closeBS = () => { bsSheet?.classList.remove('open'); bsBg?.classList.remove('open'); };
-  bsBg?.addEventListener('click', closeBS);
+  const bsBg = root.querySelector("#ck-bs-bg");
+  const bsSheet = root.querySelector("#ck-bs");
+  const openBS = () => {
+    bsSheet?.classList.add("open");
+    bsBg?.classList.add("open");
+  };
+  const closeBS = () => {
+    bsSheet?.classList.remove("open");
+    bsBg?.classList.remove("open");
+  };
+  bsBg?.addEventListener("click", closeBS);
   if (bsSheet) enableSheetSwipe(bsSheet, closeBS, { overlay: bsBg });
 
   // Donut segments + legend rows → drill cohorte
-  root.querySelectorAll('[data-cohort]').forEach(el => {
-    el.addEventListener('click', async () => {
+  root.querySelectorAll("[data-cohort]").forEach((el) => {
+    el.addEventListener("click", async () => {
       const cohort = el.dataset.cohort;
       if (!cohort) return;
-      haptic('select');
-      track('cockpit.cohort.drill', { cohort });
+      haptic("select");
+      track("cockpit.cohort.drill", { cohort });
       const meta = COHORT_META[cohort] ?? { label: cohort, color: MUTED };
-      const titleEl = root.querySelector('#ck-bs-title');
-      const subEl   = root.querySelector('#ck-bs-sub');
-      const listEl  = root.querySelector('#ck-bs-list');
+      const titleEl = root.querySelector("#ck-bs-title");
+      const subEl = root.querySelector("#ck-bs-sub");
+      const listEl = root.querySelector("#ck-bs-list");
       if (titleEl) titleEl.style.color = meta.color;
       if (titleEl) titleEl.textContent = `Groupe : ${meta.label}`;
-      if (subEl)   subEl.textContent = 'Chargement…';
-      if (listEl)  listEl.innerHTML = `<div style="padding:20px;text-align:center;color:${MUTED}">Chargement…</div>`;
+      if (subEl) subEl.textContent = "Chargement…";
+      if (listEl)
+        listEl.innerHTML = `<div style="padding:20px;text-align:center;color:${MUTED}">Chargement…</div>`;
       openBS();
       try {
-        const { data, error } = await sb.rpc('get_gerant_cohort_details', { p_cohort: cohort, p_limit: 50 });
+        const { data, error } = await sb.rpc("get_gerant_cohort_details", {
+          p_cohort: cohort,
+          p_limit: 50,
+        });
         const eleves = data ?? [];
-        if (subEl) subEl.textContent = `${eleves.length} élève${eleves.length > 1 ? 's' : ''}`;
+        if (subEl)
+          subEl.textContent = `${eleves.length} élève${eleves.length > 1 ? "s" : ""}`;
         if (listEl) {
-          listEl.innerHTML = eleves.length === 0
-            ? `<div style="padding:20px;text-align:center;color:${MUTED}">Aucun élève dans ce groupe</div>`
-            : eleves.map(e => {
-                const p = e.prenom ?? '?'; const n = e.nom ?? '';
-                const ini = ((p[0] ?? '') + (n[0] ?? '')).toUpperCase() || '?';
-                const val = e.validations_acquis ?? e.competences ?? 0;
-                return `<div class="ck-bs-eleve" data-eleve-id="${esc(e.id ?? '')}">
+          listEl.innerHTML =
+            eleves.length === 0
+              ? `<div style="padding:20px;text-align:center;color:${MUTED}">Aucun élève dans ce groupe</div>`
+              : eleves
+                  .map((e) => {
+                    const p = e.prenom ?? "?";
+                    const n = e.nom ?? "";
+                    const ini =
+                      ((p[0] ?? "") + (n[0] ?? "")).toUpperCase() || "?";
+                    const val = e.validations_acquis ?? e.competences ?? 0;
+                    return `<div class="ck-bs-eleve" data-eleve-id="${esc(e.id ?? "")}">
                   <div class="ck-bs-av">${esc(ini)}</div>
                   <div class="ck-bs-eleve-name">${esc(p)} ${esc(n)}</div>
                   <div class="ck-bs-eleve-val">${val}/31</div>
                 </div>`;
-              }).join('');
-          listEl.querySelectorAll('[data-eleve-id]').forEach(row => {
-            row.addEventListener('click', () => {
+                  })
+                  .join("");
+          listEl.querySelectorAll("[data-eleve-id]").forEach((row) => {
+            row.addEventListener("click", () => {
               closeBS();
               navigate(`#/livret/${row.dataset.eleveId}`);
             });
           });
         }
       } catch (err) {
-        if (subEl) subEl.textContent = 'Erreur de chargement';
-        if (listEl) listEl.innerHTML = `<div style="padding:20px;text-align:center;color:var(--rd)">Impossible de charger les données</div>`;
+        if (subEl) subEl.textContent = "Erreur de chargement";
+        if (listEl)
+          listEl.innerHTML = `<div style="padding:20px;text-align:center;color:var(--rd)">Impossible de charger les données</div>`;
       }
     });
   });
 
   // Top moniteurs → livret de l'équipe
-  root.querySelectorAll('.ck-mon-row[data-moniteur-id]').forEach(row => {
-    row.addEventListener('click', () => {
+  root.querySelectorAll(".ck-mon-row[data-moniteur-id]").forEach((row) => {
+    row.addEventListener("click", () => {
       const id = row.dataset.moniteurId;
       if (id) navigate(`#/equipe`);
     });

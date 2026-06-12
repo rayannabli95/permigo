@@ -152,3 +152,17 @@ Après #170, attaque de la queue contraste documentée :
 1. **Cockpit gérant** (`.ck-*`, ~8 sigs light+dark) : la page a une palette « terminal » sombre **fixe** (`SURF=var(--ink)`), donc les `--mu*` globaux (pensés pour fond clair) y tombent à ~3:1. Demande des muted tunés pour sa surface, pas le token global. Sous-chantier propre, page unique.
 2. **Texte muet sur chips teintées** (`me-tab`, `st-theme-btn` inactif, `tr2-group`, `aj-streak-chip`, `ce-hof-*`…) : `--mu/--mu2/--mu5` à petit corps sur fonds non-blancs → 2.1–3.4:1. Axe « muted-as-text » distinct, mériterait un `--mu-txt` ou un durcissement ciblé.
 3. **Faux positifs confirmés** : login (`lg-forgot`/`lg-otp-toggle` 1.81) — fond réel posé par un layer `position:fixed` frère que l'instrument ne remonte pas ; vérifié lisible à l'œil.
+
+---
+
+## Itération 3 — palette cockpit
+
+Le cockpit gérant inverse sa surface avec le thème (`SURF=var(--ink)` : sombre en light, clair en dark). Les gris `--mu*` globaux ne suivent pas → labels à ~3:1 dans les deux modes.
+
+- **`MUTED`** redéfini `color-mix(in srgb, var(--bg4) 65%, var(--ink))` : dérivé du texte (`--bg4`, qui s'inverse comme la surface) → **7.6:1 light / 5.4:1 dark**.
+- **Deltas KPI** (`.ck-kpi-delta.up/.down`) : la conversion #171 les avait passés en `-txt` sombres → régression sur la surface sombre (2.0). Rétablis en **statut pur** (clair, 8.5:1 sur surface sombre) ; les flèches ▲▼ portent le sens (WCAG 1.4.1).
+
+**Résultat** : cockpit **0 sig light, 0 sig dark** (re-run vérifié).
+
+### Axe restant unique : badges/labels sur fonds teintés ou artwork
+Les ~25 sigs light restantes ne sont plus systémiques mais cas-par-cas : badges de monde sur plate d'artwork (`prc-world-badge`, `pbadge`), groupes de trophées (`tr2-group`), badge « débloqué » boutique, label de bouton thème inactif (`st-theme-btn`), `h3` milestone. Chacun a son propre fond (image, tint de rareté, surface neutre) → pas de token unique, jugement requis par cas. Faux positifs persistants : login (layer fixed), badges sur artwork (mesure non fiable sur image).
