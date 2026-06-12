@@ -95,7 +95,7 @@ const STYLE = `<style>
 .prc-title    { font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; }
 .prc-help { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--bo4); background: var(--su); color: var(--mu2); font: 800 12px/1 'Inter', sans-serif; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; transition: border-color .12s, color .12s; position: relative; }
 .prc-help::after { content: ''; position: absolute; inset: -11px; }
-.prc-help:hover { border-color: var(--a); color: var(--a); }
+.prc-help:hover { border-color: var(--a); color: var(--a-txt); }
 .prc-help:active { transform: scale(.9); }
 .prc-subtitle { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 .prc-hd-right { text-align: right; }
@@ -1417,7 +1417,7 @@ function spawnArrow(node, compId) {
         width: 28px;
         height: 40px;
         margin: 0 auto;
-        color: var(--a);
+        color: var(--a-txt);
         animation: faBounce 1.2s ease-in-out infinite;
         filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--a) 40%, transparent));
       }

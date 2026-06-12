@@ -69,7 +69,7 @@ const STYLE = `<style id="inn-style">
            background: var(--a); color: var(--a-ink); font: 800 12px/22px 'Inter', sans-serif; text-align: center; }
 .inn-step-txt { font: 500 13px/1.45 'Inter', sans-serif; color: var(--ink); padding-top: 2px; }
 .inn-glyph { display: inline-flex; vertical-align: -4px; margin: 0 2px; padding: 2px;
-             border-radius: 6px; background: var(--su); color: var(--a); border: 1px solid var(--bo); }
+             border-radius: 6px; background: var(--su); color: var(--a-txt); border: 1px solid var(--bo); }
 .inn-install { width: 100%; min-height: 50px; border: 0; border-radius: 14px;
                background: linear-gradient(to bottom, var(--a-lt), var(--a) 55%, var(--adk));
                color: var(--a-ink); font: 800 15px/1 'Plus Jakarta Sans', sans-serif;

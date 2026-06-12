@@ -180,7 +180,7 @@ const STYLE = `<style>
 .bo2-intro-title { font: 800 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 8px; }
 .bo2-intro-steps { display: flex; flex-direction: column; gap: 6px; }
 .bo2-intro-steps span { display: flex; align-items: center; gap: 7px; font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu); }
-.bo2-intro-steps span svg { color: var(--a); flex-shrink: 0; }
+.bo2-intro-steps span svg { color: var(--a-txt); flex-shrink: 0; }
 
 /* ── Rarity scale footer ── */
 .bo2-scale {

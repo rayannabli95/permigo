@@ -276,11 +276,11 @@ const STYLE = `<style>
 .prf-ref-copy-btn {
   background: none;
   border: none;
-  color: var(--a);
+  color: var(--a-txt);
   font-size: 18px;
   cursor: pointer;
-  padding: 13px;
-  margin: -9px;
+  padding: 14px;
+  margin: -10px;
   min-width: 32px;
   min-height: 32px;
   display: flex;

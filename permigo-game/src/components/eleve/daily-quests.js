@@ -107,7 +107,7 @@ function ensureStyle() {
   .dq-fill { height: 100%; border-radius: 2px; transition: width .4s ease; }
   .dq-foot { display: flex; align-items: center; justify-content: space-between; }
   .dq-prog { font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
-  .dq-reward { font: 600 10px/1 'Inter', sans-serif; color: var(--a); }
+  .dq-reward { font: 600 10px/1 'Inter', sans-serif; color: var(--a-txt); }
   .dq-card--ready .dq-reward { color: var(--puk); }
 
   /* XP popup */

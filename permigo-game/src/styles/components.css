@@ -78,7 +78,7 @@
 .bg { background: var(--grp); color: var(--gr); }
 .bam { background: var(--amp); color: var(--am); }
 .br { background: var(--rdp); color: var(--rd); }
-.ba { background: var(--ap); color: var(--a); }
+.ba { background: var(--ap); color: var(--a-txt); }
 
 /* ─── Inputs / textareas ─── */
 .fi {

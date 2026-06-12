@@ -188,7 +188,7 @@ ${LEAGUE_CSS}
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .clt-me-tag { flex-shrink: 0; font: 700 10px/1 'Inter', sans-serif; letter-spacing: .04em;
   background: #6366f1; color: #fff; border-radius: var(--r-full); padding: 3px 7px; text-transform: uppercase; }
-.clt-score { flex-shrink: 0; font: 700 13px/1 'IBM Plex Mono', monospace; color: var(--a);
+.clt-score { flex-shrink: 0; font: 700 13px/1 'IBM Plex Mono', monospace; color: var(--a-txt);
   display: flex; align-items: baseline; gap: 2px; }
 .clt-score-sub { font-size: 11px; color: var(--mu2); }
 .clt-sep { text-align: center; color: var(--mu2); font: 600 12px/1 'Inter', sans-serif; padding: 6px 0 2px; }
@@ -258,7 +258,7 @@ ${LEAGUE_CSS}
   color: var(--mu); font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   transition: color .15s, border-color .15s;
 }
-.clt-th-help:hover span, .clt-th-help:active span { color: var(--a); border-color: var(--a); }
+.clt-th-help:hover span, .clt-th-help:active span { color: var(--a-txt); border-color: var(--a); }
 /* Légende « Comment gagner des points ? » */
 .clt-th-how-ttl {
   width: 100%; font: 700 11px/1 'Plus Jakarta Sans', sans-serif;

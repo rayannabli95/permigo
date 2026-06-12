@@ -70,7 +70,7 @@ function ensureStyle() {
   }
   .mr-score {
     font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
-    color: var(--a);
+    color: var(--a-txt);
     letter-spacing: -.02em;
     flex-shrink: 0;
   }
@@ -157,7 +157,7 @@ function ensureStyle() {
   }
   .mr-row-score {
     font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
-    color: var(--a);
+    color: var(--a-txt);
     flex-shrink: 0;
   }
   `;

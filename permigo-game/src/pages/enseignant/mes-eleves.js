@@ -1395,7 +1395,7 @@ function openMissingPanel(eleve) {
       .me-miss-title { font: 700 18px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin: 0 0 4px; }
       .me-miss-sub { font: 500 13px/1.4 'Inter', sans-serif; color: var(--mu2); margin: 0 0 16px; }
       .me-miss-list { overflow-y: auto; flex: 1; margin: 0 -4px; padding: 0 4px; }
-      .me-miss-cat { font: 700 11px/1 'Inter', sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--a); margin: 14px 0 8px; }
+      .me-miss-cat { font: 700 11px/1 'Inter', sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--a-txt); margin: 14px 0 8px; }
       .me-miss-cat:first-child { margin-top: 0; }
       .me-miss-item { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; font: 500 14px/1.3 'Inter', sans-serif; color: var(--ink); border-bottom: 1px solid var(--bg2); }
       .me-miss-code { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu); background: var(--bg2); padding: 3px 6px; border-radius: 6px; flex-shrink: 0; }

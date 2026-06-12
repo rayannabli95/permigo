@@ -66,7 +66,7 @@ const STYLE = `
 
   /* Appearance GHOST (texte seul) */
   .bdg.a-ghost { background: transparent !important; border-color: transparent; padding: 0 !important; }
-  .bdg.v-primary.a-ghost       { color: var(--a); }
+  .bdg.v-primary.a-ghost       { color: var(--a-txt); }
   .bdg.v-secondary.a-ghost     { color: var(--mu4); }
   .bdg.v-success.a-ghost       { color: var(--gr); }
   .bdg.v-warning.a-ghost       { color: var(--am); }

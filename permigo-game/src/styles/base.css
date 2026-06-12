@@ -232,7 +232,7 @@ button, a, [role="button"], label, select, summary {
   }
 }
 
-a { color: var(--a); text-decoration: none; }
+a { color: var(--a-txt); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* ─── Touches premium globales ─── */

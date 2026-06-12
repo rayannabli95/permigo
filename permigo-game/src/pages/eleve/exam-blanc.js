@@ -667,7 +667,7 @@ function renderStyles() {
 @media (prefers-reduced-motion: reduce) { .exb-mascot { animation: none } }
 .exb-qnum {
   font: 700 11px/1 'Inter', sans-serif;
-  color: var(--a);
+  color: var(--a-txt);
   text-transform: uppercase;
   letter-spacing: .1em;
   margin: 0 0 10px;
