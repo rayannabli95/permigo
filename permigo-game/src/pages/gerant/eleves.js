@@ -42,7 +42,7 @@ const STYLE = `<style>
   color: var(--a);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   padding: 6px 12px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
 }
 
 /* Search */
@@ -64,7 +64,7 @@ const STYLE = `<style>
   height: 44px;
   padding: 0 16px 0 40px;
   border: 1px solid var(--bo);
-  border-radius: 12px;
+  border-radius: var(--r);
   background: var(--bg);
   color: var(--ink);
   font: 500 14px/1 'Inter', sans-serif;
@@ -85,7 +85,7 @@ const STYLE = `<style>
   gap: 0;
   margin-top: 16px;
   background: var(--bg2);
-  border-radius: 12px;
+  border-radius: var(--r);
   padding: 4px;
 }
 .el-tab {
@@ -95,14 +95,14 @@ const STYLE = `<style>
   background: transparent;
   color: var(--mu);
   font: 600 13px/1 'Inter', sans-serif;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   cursor: pointer;
   transition: background .15s ease, color .15s ease, box-shadow .15s ease;
 }
 .el-tab.active {
   background: var(--su);
   color: var(--ink);
-  box-shadow: 0 1px 2px rgba(10,13,26,.06);
+  box-shadow: var(--s0);
 }
 
 /* Liste */
@@ -117,9 +117,9 @@ const STYLE = `<style>
 .el-card {
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   padding: 20px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+  box-shadow: var(--s0);
   cursor: pointer;
   transition: border-color .15s ease;
   display: flex;
@@ -152,7 +152,7 @@ const STYLE = `<style>
   font: 600 11px/1 'Inter', sans-serif;
   color: var(--a);
   background: color-mix(in srgb, var(--a) 10%, transparent);
-  border-radius: 99px;
+  border-radius: var(--r-full);
   padding: 4px 10px;
   margin-top: 6px;
 }
@@ -182,15 +182,15 @@ const STYLE = `<style>
 .el-remc-bar {
   height: 4px;
   background: var(--bo3);
-  border-radius: 99px;
+  border-radius: var(--r-full);
   overflow: hidden;
 }
 .el-remc-fill {
   height: 100%;
   background: var(--a);
-  border-radius: 99px;
+  border-radius: var(--r-full);
   min-width: 4px;
-  transition: width 1s cubic-bezier(.2,.7,.3,1);
+  transition: width 1s var(--ease-out);
 }
 
 /* Derniere validation */
@@ -208,7 +208,7 @@ const STYLE = `<style>
   font: 500 13px/1.6 'Inter', sans-serif;
   background: var(--su);
   border: 1px dashed var(--bo);
-  border-radius: 12px;
+  border-radius: var(--r);
   margin: 16px;
 }
 .el-empty-ico { font-size: 36px; margin-bottom: 10px; }
@@ -218,7 +218,7 @@ const STYLE = `<style>
   background: linear-gradient(90deg, var(--bg2) 0%, var(--bo) 50%, var(--bg2) 100%);
   background-size: 200% 100%;
   animation: elShimmer 1.4s ease-in-out infinite;
-  border-radius: 20px;
+  border-radius: var(--r-xl);
 }
 @keyframes elShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 </style>`;
@@ -464,13 +464,13 @@ async function openQuickView(eleveId, anchorCard) {
   overlay.innerHTML = `
     <style>
       @keyframes elqvIn { from { opacity:0; } to { opacity:1; } }
-      .elqv-card { width:100%; max-width:420px; background:var(--su); border-radius:24px; padding:24px; font-family:'Inter',sans-serif; }
+      .elqv-card { width:100%; max-width:420px; background:var(--su); border-radius:var(--rx); padding:24px; font-family:'Inter',sans-serif; }
       .elqv-card h3 { font:800 18px/1.2 'Plus Jakarta Sans',sans-serif; color:var(--ink); margin:0 0 10px; }
       .elqv-row { display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid var(--bo); font:500 13px/1.4 'Inter',sans-serif; }
       .elqv-row:first-of-type { border-top:0; }
       .elqv-row .l { color:var(--mu); }
       .elqv-row .v { color:var(--ink); font-weight:700; }
-      .elqv-btn { width:100%; margin-top:16px; padding:14px; background:var(--a); color:#fff; border:0; border-radius:14px; font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s; }
+      .elqv-btn { width:100%; margin-top:16px; padding:14px; background:var(--a); color:#fff; border:0; border-radius:var(--r-md); font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s; }
       .elqv-btn:active { transform: scale(.97); }
     </style>
     <div class="elqv-card">
