@@ -257,9 +257,9 @@ function showFeedback(
   const feedbackEl = root.querySelector("#exb-feedback");
   feedbackEl.hidden = false;
   feedbackEl.innerHTML = `
-    ${!isCorrect && isFaute ? '<div class="exb-faute-banner">⚠️ Faute éliminatoire à l\'examen</div>' : ""}
+    ${!isCorrect && isFaute ? '<div class="exb-faute-banner">⚠️ À l\'examen, ce serait éliminatoire — autant le savoir ici</div>' : ""}
     <div class="exb-feedback-verdict ${isCorrect ? "exb-feedback-verdict--ok" : "exb-feedback-verdict--ko"}">
-      ${isCorrect ? "✓ Bonne réponse" : "✗ Mauvaise réponse — Réponse : " + esc(String.fromCharCode(65 + q.correct))}
+      ${isCorrect ? "✓ Bonne réponse" : "La bonne réponse était " + esc(String.fromCharCode(65 + q.correct))}
     </div>
     <p class="exb-feedback-explication">${esc(q.explication)}</p>
     <button class="exb-next-btn" id="exb-next">
