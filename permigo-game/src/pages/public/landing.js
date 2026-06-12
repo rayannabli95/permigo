@@ -644,7 +644,7 @@ const STYLE = `<style>
   .lp-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .lp-field { display: flex; flex-direction: column; gap: 6px; }
   .lp-field label { font: 600 13px/1 'Inter'; color: var(--lp-ink); }
-  .lp-field input, .lp-field textarea { font: 400 15px/1.4 'Inter'; color: var(--lp-ink);
+  .lp-field input, .lp-field textarea { font: 400 16px/1.4 'Inter'; color: var(--lp-ink);
     border: 1.5px solid var(--lp-line); border-radius: 12px; padding: 13px 14px; background: #fff; width: 100%; box-sizing: border-box; }
   .lp-field input:focus, .lp-field textarea:focus { outline: none; border-color: var(--lp-indigo); box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
   .lp-form-submit { width: 100%; margin-top: 4px; }

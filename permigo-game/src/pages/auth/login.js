@@ -107,7 +107,7 @@ function template() {
       .lg-input-wrap{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);transition:all .15s}
       .lg-input-wrap:focus-within{border-color:var(--al3);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px color-mix(in srgb, var(--a) 18%, transparent)}
       .lg-input-wrap svg{width:18px;height:18px;color:rgba(255,255,255,.5);flex-shrink:0}
-      .lg-input-wrap input{flex:1;background:transparent;border:0;outline:0;color:#fff;font-size:14.5px;font-family:inherit;min-width:0}
+      .lg-input-wrap input{flex:1;background:transparent;border:0;outline:0;color:#fff;font-size:16px;font-family:inherit;min-width:0}
       .lg-input-wrap input::placeholder{color:rgba(255,255,255,.35)}
       .lg-pw-eye{background:transparent;border:0;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;font-size:16px;line-height:1;border-radius:6px}
       .lg-pw-eye:hover{background:rgba(255,255,255,.06);color:#fff}

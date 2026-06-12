@@ -210,6 +210,18 @@ code, kbd, samp, pre,
 
 button, input, select, textarea { font-family: var(--fb); }
 
+/* Anti-zoom iOS : Safari zoome automatiquement au focus d'un champ < 16px
+   et ne revient pas en arrière → l'utilisateur doit dézoomer à la main.
+   Filet global sur écrans tactiles : aucun champ texte ne descend sous 16px.
+   (!important assumé : doit gagner contre les styles scoped des pages.) */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: max(16px, 1em) !important;
+  }
+}
+
 a { color: var(--a); text-decoration: none; }
 a:hover { text-decoration: underline; }
 

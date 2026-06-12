@@ -2,13 +2,13 @@
 // Gérant — Équipe (light theme)
 // Liste enseignants + stats ce mois + recherche
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { enableSheetSwipe } from '@/utils/sheet-swipe.js';
-import { toast } from '@/components/common/toast.js';
-import { track } from '@/services/analytics.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
+import { toast } from "@/components/common/toast.js";
+import { track } from "@/services/analytics.js";
 
 // ─── CSS scoped (cohérent avec pulse.js — cockpit gérant) ────────
 const STYLE = `<style>
@@ -206,20 +206,20 @@ const STYLE = `<style>
 </style>`;
 
 const AVATARS = [
-  'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,var(--blk),#155e75)',
-  'linear-gradient(135deg,var(--puk),#4c1d95)',
-  'linear-gradient(135deg,#0e7c66,#064e3b)',
-  'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
+  "linear-gradient(135deg,#5b5bd6,#3a3a8e)",
+  "linear-gradient(135deg,var(--blk),#155e75)",
+  "linear-gradient(135deg,var(--puk),#4c1d95)",
+  "linear-gradient(135deg,#0e7c66,#064e3b)",
+  "linear-gradient(135deg,#9333ea,#6b21a8)",
+  "linear-gradient(135deg,var(--rdk),#7f1d1d)",
 ];
 
 // ─── Entry point ─────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
-  if (!me || me.role !== 'gerant') return;
+  if (!me || me.role !== "gerant") return;
 
-  track('page_view', { page: 'gerant_equipe', user_role: me.role });
+  track("page_view", { page: "gerant_equipe", user_role: me.role });
 
   // Skeleton
   root.innerHTML = `${STYLE}
@@ -231,25 +231,29 @@ export async function mount(root) {
     <div class="eq-skel" style="height:42px;margin-top:14px;border-radius:var(--r)"></div>
   </div>
   <div class="eq-list">
-    ${[1,2,3].map(() => `<div class="eq-skel" style="height:100px"></div>`).join('')}
+    ${[1, 2, 3].map(() => `<div class="eq-skel" style="height:100px"></div>`).join("")}
   </div>
 </div>`;
 
   try {
     const startOfMonth = new Date(
-      new Date().getFullYear(), new Date().getMonth(), 1
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      1,
     ).toISOString();
 
     // Fetch enseignants + validations ce mois
     const [teachersRes, valsRes] = await Promise.all([
-      sb.from('profiles')
-        .select('id, prenom, nom, email, created_at')
-        .eq('role', 'enseignant')
-        .order('prenom', { ascending: true }),
-      sb.from('validations')
-        .select('validated_by, eleve_id')
-        .gte('validated_at', startOfMonth)
-        .not('validated_by', 'is', null),
+      sb
+        .from("profiles")
+        .select("id, prenom, nom, email, created_at")
+        .eq("role", "enseignant")
+        .order("prenom", { ascending: true }),
+      sb
+        .from("validations")
+        .select("validated_by, eleve_id")
+        .gte("validated_at", startOfMonth)
+        .not("validated_by", "is", null),
     ]);
 
     if (teachersRes.error) throw teachersRes.error;
@@ -259,7 +263,7 @@ export async function mount(root) {
 
     // Calcul stats par enseignant
     const teacherStats = {};
-    vals.forEach(v => {
+    vals.forEach((v) => {
       if (!v.validated_by) return;
       if (!teacherStats[v.validated_by]) {
         teacherStats[v.validated_by] = { valCount: 0, eleveIds: new Set() };
@@ -269,10 +273,9 @@ export async function mount(root) {
     });
 
     render(root, teachers, teacherStats);
-
   } catch (e) {
-    console.error('[equipe]', e);
-    toast('Erreur de chargement', 'error');
+    console.error("[equipe]", e);
+    toast("Erreur de chargement", "error");
     root.innerHTML = `${STYLE}<div class="eq-page"><p style="padding:32px;color:var(--rd)">Erreur de chargement.</p></div>`;
   }
 }
@@ -284,10 +287,10 @@ function render(root, teachers, teacherStats) {
   <div class="eq-hd">
     <div class="eq-hd-top">
       <div class="eq-title">Équipe</div>
-      <div class="eq-count">${teachers.length} enseignant${teachers.length > 1 ? 's' : ''}</div>
+      <div class="eq-count">${teachers.length} enseignant${teachers.length > 1 ? "s" : ""}</div>
     </div>
     <div class="eq-search-wrap">
-      <span class="eq-search-ico">${icon('search',{size:16})}</span>
+      <span class="eq-search-ico">${icon("search", { size: 16 })}</span>
       <input
         id="eq-search"
         class="eq-search"
@@ -312,30 +315,33 @@ function render(root, teachers, teacherStats) {
 </div>`;
 
   // Recherche en temps reel
-  const searchInput = root.querySelector('#eq-search');
-  const listEl = root.querySelector('#eq-list');
+  const searchInput = root.querySelector("#eq-search");
+  const listEl = root.querySelector("#eq-list");
 
-  searchInput?.addEventListener('input', () => {
+  searchInput?.addEventListener("input", () => {
     const q = searchInput.value.trim().toLowerCase();
-    const filtered = q === ''
-      ? teachers
-      : teachers.filter(t => {
-          const full = `${t.prenom || ''} ${t.nom || ''} ${t.email || ''}`.toLowerCase();
-          return full.includes(q);
-        });
+    const filtered =
+      q === ""
+        ? teachers
+        : teachers.filter((t) => {
+            const full =
+              `${t.prenom || ""} ${t.nom || ""} ${t.email || ""}`.toLowerCase();
+            return full.includes(q);
+          });
     listEl.innerHTML = renderCards(filtered, teacherStats);
   });
 
   // Bouton ajouter — vrai modal d'invitation (utilise table invitations)
-  root.querySelector('#eq-add-btn')?.addEventListener('click', () => {
+  root.querySelector("#eq-add-btn")?.addEventListener("click", () => {
     openInviteModal(getCurUser());
   });
 }
 
 // ─── Modal d'invitation enseignant ──────────────────────────────
 function openInviteModal(me) {
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;animation:invFadeIn .25s ease;';
+  const overlay = document.createElement("div");
+  overlay.style.cssText =
+    "position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;animation:invFadeIn .25s ease;";
   overlay.innerHTML = `
     <style>
       @keyframes invFadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -345,7 +351,7 @@ function openInviteModal(me) {
       .inv-title { font:800 22px/1.2 'Plus Jakarta Sans',sans-serif; color:var(--ink); margin:0 0 6px; letter-spacing:-.02em; }
       .inv-sub { font:500 14px/1.4 'Inter',sans-serif; color:var(--mu3); margin:0 0 20px; }
       .inv-label { display:block; font:600 12px/1 'Inter',sans-serif; color:var(--mu3); text-transform:uppercase; letter-spacing:.08em; margin:14px 0 6px; }
-      .inv-input { width:100%; padding:14px 16px; border:1.5px solid var(--bo); border-radius:var(--r-md); font:500 15px/1.3 'Inter',sans-serif; color:var(--ink); transition:border-color .15s; font-family:inherit; }
+      .inv-input { width:100%; padding:14px 16px; border:1.5px solid var(--bo); border-radius:var(--r-md); font:500 16px/1.3 'Inter',sans-serif; color:var(--ink); transition:border-color .15s; font-family:inherit; }
       .inv-input:focus { outline:0; border-color:var(--a); }
       .inv-actions { display:flex; gap:10px; margin-top:24px; }
       .inv-btn { flex:1; padding:16px; border-radius:var(--r-md); font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s, background .15s; font-family:inherit; }
@@ -372,62 +378,83 @@ function openInviteModal(me) {
   `;
   document.body.appendChild(overlay);
 
-  const emailEl = overlay.querySelector('#inv-email');
-  const prenomEl = overlay.querySelector('#inv-prenom');
-  const sendBtn = overlay.querySelector('#inv-send');
+  const emailEl = overlay.querySelector("#inv-email");
+  const prenomEl = overlay.querySelector("#inv-prenom");
+  const sendBtn = overlay.querySelector("#inv-send");
   const close = () => {
-    overlay.style.animation = 'invFadeIn .2s ease reverse';
+    overlay.style.animation = "invFadeIn .2s ease reverse";
     setTimeout(() => overlay.remove(), 200);
   };
 
-  emailEl.addEventListener('input', () => {
-    const ok = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(emailEl.value.trim());
+  emailEl.addEventListener("input", () => {
+    const ok = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(
+      emailEl.value.trim(),
+    );
     sendBtn.disabled = !ok;
   });
 
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-  overlay.querySelector('#inv-cancel').addEventListener('click', close);
-  enableSheetSwipe(overlay.querySelector('.inv-sheet'), close, { overlay });
-  sendBtn.addEventListener('click', async () => {
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) close();
+  });
+  overlay.querySelector("#inv-cancel").addEventListener("click", close);
+  enableSheetSwipe(overlay.querySelector(".inv-sheet"), close, { overlay });
+  sendBtn.addEventListener("click", async () => {
     sendBtn.disabled = true;
-    sendBtn.textContent = 'Envoi…';
+    sendBtn.textContent = "Envoi…";
     try {
       // Génère un token sécurisé (UUID v4 + timestamp en suffix pour unicité)
-      const token = crypto.randomUUID() + '-' + Date.now().toString(36);
+      const token = crypto.randomUUID() + "-" + Date.now().toString(36);
       // Expire dans 7 jours
       const expiresAt = new Date(Date.now() + 7 * 86400000).toISOString();
 
-      const { data, error } = await sb.from('invitations').insert({
-        email: emailEl.value.trim().toLowerCase(),
-        role: 'enseignant',
-        token,
-        expires_at: expiresAt,
-        auto_ecole_id: me.auto_ecole_id,
-      }).select().maybeSingle();
+      const { data, error } = await sb
+        .from("invitations")
+        .insert({
+          email: emailEl.value.trim().toLowerCase(),
+          role: "enseignant",
+          token,
+          expires_at: expiresAt,
+          auto_ecole_id: me.auto_ecole_id,
+        })
+        .select()
+        .maybeSingle();
 
       if (error) throw error;
 
       // Déclenche l'envoi d'email via Edge Function (best-effort, ne bloque pas l'UX)
       try {
-        await sb.functions.invoke('send-invitation-email', {
-          body: { invitation_id: data?.id, token, email: data?.email, role: 'enseignant' },
+        await sb.functions.invoke("send-invitation-email", {
+          body: {
+            invitation_id: data?.id,
+            token,
+            email: data?.email,
+            role: "enseignant",
+          },
         });
       } catch (emailErr) {
         // Email a échoué mais l'invitation est créée en DB → on garde
-        console.warn('[invite] email send failed (invitation still created)', emailErr);
+        console.warn(
+          "[invite] email send failed (invitation still created)",
+          emailErr,
+        );
       }
 
-      const { toast } = await import('@/components/common/toast.js');
-      const { playNotify } = await import('@/utils/sound.js');
+      const { toast } = await import("@/components/common/toast.js");
+      const { playNotify } = await import("@/utils/sound.js");
       playNotify();
-      toast('Invitation envoyée ✓', 'success');
+      toast("Invitation envoyée ✓", "success");
       close();
     } catch (e) {
-      console.error('[invite] failed', e);
-      const { toast } = await import('@/components/common/toast.js');
-      toast(e.message?.includes('duplicate') ? 'Cet email est déjà invité' : 'Erreur lors de l\'envoi', 'error');
+      console.error("[invite] failed", e);
+      const { toast } = await import("@/components/common/toast.js");
+      toast(
+        e.message?.includes("duplicate")
+          ? "Cet email est déjà invité"
+          : "Erreur lors de l'envoi",
+        "error",
+      );
       sendBtn.disabled = false;
-      sendBtn.textContent = 'Envoyer l\'invitation';
+      sendBtn.textContent = "Envoyer l'invitation";
     }
   });
   setTimeout(() => emailEl.focus(), 100);
@@ -436,44 +463,53 @@ function openInviteModal(me) {
 function renderCards(teachers, teacherStats) {
   if (teachers.length === 0) {
     return `<div class="eq-empty">
-      <div class="eq-empty-ico">${icon('users',{size:30})}</div>
+      <div class="eq-empty-ico">${icon("users", { size: 30 })}</div>
       Aucun enseignant trouvé
     </div>`;
   }
 
-  const monthLabel = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const monthLabel = new Date().toLocaleDateString("fr-FR", {
+    month: "long",
+    year: "numeric",
+  });
 
-  return teachers.map((t, i) => {
-    const initials = initials2(t.prenom, t.nom);
-    const gradient = AVATARS[i % AVATARS.length];
-    const stats = teacherStats[t.id] || { valCount: 0, eleveIds: new Set() };
-    const actif = stats.valCount > 0;
-    const fullName = [t.prenom, t.nom].filter(Boolean).join(' ') || '—';
+  return teachers
+    .map((t, i) => {
+      const initials = initials2(t.prenom, t.nom);
+      const gradient = AVATARS[i % AVATARS.length];
+      const stats = teacherStats[t.id] || { valCount: 0, eleveIds: new Set() };
+      const actif = stats.valCount > 0;
+      const fullName = [t.prenom, t.nom].filter(Boolean).join(" ") || "—";
 
-    return `
+      return `
     <div class="eq-card">
       <div class="eq-av" style="background:${gradient}">${esc(initials)}</div>
       <div class="eq-info">
         <div class="eq-name">${esc(fullName)}</div>
-        <div class="eq-email">${esc(t.email || '—')}</div>
+        <div class="eq-email">${esc(t.email || "—")}</div>
         <div class="eq-stats">
           <div class="eq-stat"><strong>${stats.valCount}</strong> valid. ${esc(monthLabel)}</div>
-          <div class="eq-stat"><strong>${stats.eleveIds.size}</strong> élève${stats.eleveIds.size > 1 ? 's' : ''}</div>
-          <span class="eq-badge ${actif ? 'actif' : 'inactif'}">${actif ? 'Actif' : 'Inactif'}</span>
+          <div class="eq-stat"><strong>${stats.eleveIds.size}</strong> élève${stats.eleveIds.size > 1 ? "s" : ""}</div>
+          <span class="eq-badge ${actif ? "actif" : "inactif"}">${actif ? "Actif" : "Inactif"}</span>
         </div>
       </div>
     </div>`;
-  }).join('');
+    })
+    .join("");
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
 function initials2(prenom, nom) {
-  const p = (prenom || '').trim()[0] || '';
+  const p = (prenom || "").trim()[0] || "";
   // Initiale prénom + initiale du nom (dernier mot du nom).
   // Fallback : 2e lettre du prénom si pas de nom.
-  const parts = (nom || '').trim().replace(/\./g, '').split(/\s+/).filter(Boolean);
+  const parts = (nom || "")
+    .trim()
+    .replace(/\./g, "")
+    .split(/\s+/)
+    .filter(Boolean);
   const n = parts.length
-    ? (parts[parts.length - 1][0] || '')
-    : ((prenom || '').trim()[1] || '');
-  return (p + n).toUpperCase() || '?';
+    ? parts[parts.length - 1][0] || ""
+    : (prenom || "").trim()[1] || "";
+  return (p + n).toUpperCase() || "?";
 }

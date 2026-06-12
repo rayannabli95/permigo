@@ -63,7 +63,7 @@ const STYLE = `<style>
     background: var(--su);
     border: 1px solid var(--bo);
     border-radius: var(--r);
-    font: 500 14px/1 'Inter', sans-serif;
+    font: 500 16px/1 'Inter', sans-serif;
     color: var(--ink);
     outline: none;
     transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
