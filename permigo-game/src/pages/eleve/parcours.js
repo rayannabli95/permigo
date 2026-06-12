@@ -93,7 +93,8 @@ const STYLE = `<style>
   border-bottom: 1px solid var(--bo);
 }
 .prc-title    { font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; }
-.prc-help { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--bo4); background: var(--su); color: var(--mu2); font: 800 12px/1 'Inter', sans-serif; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; transition: border-color .12s, color .12s; }
+.prc-help { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--bo4); background: var(--su); color: var(--mu2); font: 800 12px/1 'Inter', sans-serif; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; transition: border-color .12s, color .12s; position: relative; }
+.prc-help::after { content: ''; position: absolute; inset: -11px; }
 .prc-help:hover { border-color: var(--a); color: var(--a); }
 .prc-help:active { transform: scale(.9); }
 .prc-subtitle { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
@@ -298,6 +299,8 @@ const STYLE = `<style>
   align-items: center;
   gap: 0;
 }
+/* Hit-area tactile etendue des nodes de la carte (les pastilles restent petites) */
+.prc-node::after { content: ''; position: absolute; inset: -10px; }
 @keyframes nd-pop {
   0%   { opacity: 0; transform: translate(-50%,-50%) scale(.25); filter: blur(4px); }
   65%  { opacity: 1; transform: translate(-50%,-50%) scale(1.08); filter: blur(0); }

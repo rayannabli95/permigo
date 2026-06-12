@@ -23,7 +23,7 @@ function slideHtml(s, i) {
 const CSS = `
   .it-tuto{position:fixed;inset:0;z-index:8500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:24px;background:var(--bg);opacity:0;transition:opacity .3s ease;}
   .it-tuto.on{opacity:1;}
-  .it-tuto .it-skip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;border:0;background:none;color:var(--ink3);font:600 13px/1 'Inter',sans-serif;cursor:pointer;padding:8px 10px;border-radius:8px;-webkit-tap-highlight-color:transparent;}
+  .it-tuto .it-skip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;border:0;background:none;color:var(--ink3);font:600 13px/1 'Inter',sans-serif;cursor:pointer;padding:16px 14px;border-radius:8px;-webkit-tap-highlight-color:transparent;}
   .it-tuto .it-skip:hover{color:var(--ink);background:var(--bg2);}
   .it-tuto .it-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;max-width:420px;width:100%;}
   .it-tuto .it-slide{display:flex;flex-direction:column;align-items:center;gap:8px;animation:itIn .35s cubic-bezier(.34,1.4,.64,1);}

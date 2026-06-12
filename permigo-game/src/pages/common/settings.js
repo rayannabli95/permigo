@@ -46,7 +46,10 @@ const STYLE = `<style>
   color: var(--ink);
   font-family: inherit;
   padding: 0;
+  position: relative;
 }
+/* Hit-area 44×44 sans grossir le visuel (cible tactile) */
+.st-back::before { content: ''; position: absolute; inset: -4px; }
 .st-back:hover { background: var(--bg); }
 .st-page-title {
   font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -109,7 +112,8 @@ const STYLE = `<style>
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px 0;
+  padding: 16px 8px;
+  margin: -10px -8px;
   font-family: inherit;
 }
 .st-btn-txt.danger { color: var(--rd); }
@@ -117,7 +121,8 @@ const STYLE = `<style>
 /* Input inline */
 .st-inp {
   width: 100%;
-  padding: 10px 12px;
+  padding: 14px 12px;
+  min-height: 44px;
   font: 500 14px/1 'Inter', sans-serif;
   color: var(--ink);
   background: var(--bg);
@@ -133,6 +138,7 @@ const STYLE = `<style>
   width: calc(100% - 32px);
   margin: 10px 16px 0;
   padding: 13px;
+  min-height: 44px;
   background: var(--a);
   color: #fff;
   border: none;
@@ -259,7 +265,7 @@ const STYLE = `<style>
   cursor: pointer;
   transition: background .15s cubic-bezier(.23,1,.32,1), color .15s, box-shadow .15s;
   white-space: nowrap;
-  min-height: 34px;
+  min-height: 44px;
   font-family: inherit;
 }
 .st-theme-btn.active {
@@ -270,7 +276,7 @@ const STYLE = `<style>
 /* Accent color swatches */
 .st-accent-row { display: flex; gap: 12px; flex-wrap: wrap; }
 .st-accent-sw {
-  width: 38px; height: 38px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   border: 0; cursor: pointer; padding: 0;
   background: var(--sw);
   box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--sw) 55%, transparent), inset 0 1.5px 0 rgba(255,255,255,.3);

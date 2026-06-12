@@ -90,7 +90,7 @@ const STYLE = `<style>
 }
 .el-tab {
   flex: 1;
-  height: 36px;
+  height: 44px;
   border: none;
   background: transparent;
   color: var(--mu);

@@ -63,7 +63,10 @@ const STYLE = `
     transition: transform .12s;
     -webkit-tap-highlight-color: transparent;
     flex-shrink: 0;
+    position: relative;
   }
+  /* Hit-area 44x44 sans grossir le visuel */
+  .ht-avatar-btn::before { content: ''; position: absolute; inset: -4px; }
   .ht-avatar-btn:active { transform: scale(.92); }
   .ht-avatar-btn > * { pointer-events: none; }
 `;

@@ -107,18 +107,18 @@ function template() {
       .lg-input-wrap{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);transition:all .15s}
       .lg-input-wrap:focus-within{border-color:var(--al3);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px color-mix(in srgb, var(--a) 18%, transparent)}
       .lg-input-wrap svg{width:18px;height:18px;color:rgba(255,255,255,.5);flex-shrink:0}
-      .lg-input-wrap input{flex:1;background:transparent;border:0;outline:0;color:#fff;font-size:16px;font-family:inherit;min-width:0}
+      .lg-input-wrap input{flex:1;align-self:stretch;background:transparent;border:0;outline:0;color:#fff;font-size:16px;font-family:inherit;min-width:0}
       .lg-input-wrap input::placeholder{color:rgba(255,255,255,.35)}
-      .lg-pw-eye{background:transparent;border:0;color:rgba(255,255,255,.5);cursor:pointer;padding:4px;font-size:16px;line-height:1;border-radius:6px}
+      .lg-pw-eye{background:transparent;border:0;color:rgba(255,255,255,.5);cursor:pointer;padding:13px;margin:-9px;font-size:16px;line-height:1;border-radius:6px}
       .lg-pw-eye:hover{background:rgba(255,255,255,.06);color:#fff}
 
       /* Remember + Forgot row */
       .lg-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;margin-top:-4px}
-      .lg-remember{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.8);cursor:pointer;user-select:none}
+      .lg-remember{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.8);cursor:pointer;user-select:none;min-height:44px}
       .lg-remember input{appearance:none;width:16px;height:16px;border:1.5px solid rgba(255,255,255,.3);border-radius:4px;cursor:pointer;position:relative;flex-shrink:0;transition:all .15s}
       .lg-remember input:checked{background:var(--a);border-color:var(--a)}
       .lg-remember input:checked::after{content:'✓';position:absolute;top:-1px;left:2px;font-size:13px;color:#fff;font-weight:900}
-      .lg-forgot{background:transparent;border:0;color:var(--al3);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:2px}
+      .lg-forgot{background:transparent;border:0;color:var(--al3);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:2px;padding:15px 6px;margin:-15px -6px}
       .lg-forgot:hover{color:var(--al2)}
 
       /* CTA primary */
@@ -140,7 +140,7 @@ function template() {
       .lg-oauth.apple svg{color:#fff}
 
       /* OTP mode toggle */
-      .lg-otp-toggle{background:transparent;border:0;color:var(--al3);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px;letter-spacing:.2px;display:block;margin:-4px auto 0}
+      .lg-otp-toggle{background:transparent;border:0;color:var(--al3);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px;letter-spacing:.2px;display:block;padding:15px 8px;margin:-19px auto -15px}
       .lg-otp-toggle:hover{color:var(--al2)}
 
       /* Demo accounts (toujours utile en dev) */

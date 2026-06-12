@@ -243,6 +243,7 @@ const STYLE = `<style>
   .ins-tab {
     flex: 1;
     padding: 8px 6px;
+    min-height: 44px;
     border: none;
     background: transparent;
     border-radius: var(--r-sm);

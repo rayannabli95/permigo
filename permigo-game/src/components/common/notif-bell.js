@@ -37,6 +37,8 @@ export async function mountNotifBell(container) {
       .nb-wrap{position:relative;display:inline-block}
       .nb-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--bo);background:var(--su);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:background .12s,border-color .12s;font-family:inherit;padding:0}
       .nb-btn:hover{background:var(--bg2);border-color:var(--mu2)}
+      /* Hit-area 44x44 sans grossir le visuel (bouton le plus tape de l'app) */
+      .nb-btn::after{content:'';position:absolute;inset:-4px}
       .nb-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--rd);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);line-height:1;font-family:var(--fn)}
       .nb-panel{position:absolute;top:calc(100% + 6px);right:0;width:340px;max-height:480px;background:var(--bg);border:1px solid var(--bo);border-radius:var(--rl);box-shadow:var(--s3);z-index:80;display:none;overflow:hidden;flex-direction:column}
       .nb-panel.show{display:flex;animation:nbSlide .18s ease}

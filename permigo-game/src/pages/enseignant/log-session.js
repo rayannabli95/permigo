@@ -92,7 +92,8 @@ let _showSub = false; // coach-hint mode d'emploi (1re visite seulement)
 const STYLE = `<style>
   .vs { padding: 16px 16px calc(152px + env(safe-area-inset-bottom,0px)); max-width: 600px; margin: 0 auto; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; }
   .vs-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-  .vs-back { width: 40px; height: 40px; flex-shrink: 0; border: 1px solid var(--bo); background: var(--su); border-radius: var(--r); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .vs-back { position: relative; width: 40px; height: 40px; flex-shrink: 0; border: 1px solid var(--bo); background: var(--su); border-radius: var(--r); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .vs-back::before { content: ''; position: absolute; inset: -2px; }
   .vs-back:active { transform: scale(.95); }
   .vs-h1 { font: 800 19px/1.2 'Plus Jakarta Sans', sans-serif; margin: 0; letter-spacing: -.02em; }
   .vs-sub { font: 500 12.5px/1.3 'Inter', sans-serif; color: color-mix(in srgb, var(--mu) 45%, var(--ink)); margin: 2px 0 0; }
@@ -102,7 +103,7 @@ const STYLE = `<style>
 
   /* Dropdown élève */
   .vs-search-ico { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--mu2); pointer-events: none; }
-  .vs-search { width: 100%; box-sizing: border-box; padding: 10px 12px 10px 36px; background: var(--bg); border: 1px solid var(--bo); border-radius: var(--r); font: 500 16px/1 'Inter', sans-serif; color: var(--ink); outline: none; }
+  .vs-search { width: 100%; box-sizing: border-box; min-height: 44px; padding: 10px 12px 10px 36px; background: var(--bg); border: 1px solid var(--bo); border-radius: var(--r); font: 500 16px/1 'Inter', sans-serif; color: var(--ink); outline: none; }
   .vs-search:focus { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
 
   .vs-dd { position: relative; margin-bottom: 16px; z-index: 30; }

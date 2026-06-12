@@ -159,7 +159,10 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; color: var(--ink); padding: 0; font-family: inherit;
   transition: background .12s;
+  position: relative;
 }
+/* Hit-area 44x44 sans grossir le visuel */
+.nf2-back::before { content: ''; position: absolute; inset: -4px; }
 .nf2-back:active { background: var(--bg); }
 .nf2-title { font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; color: var(--ink); flex: 1; }
 .nf2-unread-badge {

@@ -53,7 +53,7 @@ function ensureStyle() {
     text-decoration: underline;
     text-underline-offset: 3px;
     background: none; border: none;
-    cursor: pointer; padding: 4px 0;
+    cursor: pointer; padding: 16px 8px; margin: -12px -8px;
     display: flex; align-items: center; gap: 4px;
     transition: opacity .12s;
     white-space: nowrap;
