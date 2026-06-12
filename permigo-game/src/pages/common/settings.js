@@ -287,6 +287,14 @@ const STYLE = `<style>
 }
 </style>`;
 
+// Tours relançables depuis les Réglages : flag localStorage à effacer + page
+// hôte où le tour se redéclenche au mount. Pas d'entrée pour le gérant (pas
+// de tour). [[guided-tour]]
+const TOUR_CFG = {
+  eleve: { key: "pg-tour-eleve-v1", route: "/" },
+  enseignant: { key: "pg-tour-moniteur-v1", route: "/" },
+};
+
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
@@ -450,6 +458,24 @@ function render(root, me, prefs) {
       </div>
     </div>
   </div>
+
+  ${
+    TOUR_CFG[me.role]
+      ? `<!-- AIDE -->
+  <div class="st-section">
+    <div class="st-section-label">Aide</div>
+    <div class="st-row">
+      <div class="st-row-left">
+        <div class="st-row-title">Revoir le guide de démarrage</div>
+        <div class="st-row-sub">Relance la visite guidée pas à pas</div>
+      </div>
+      <div class="st-row-action">
+        <button class="st-btn-txt" id="btn-replay-tour">Relancer →</button>
+      </div>
+    </div>
+  </div>`
+      : ""
+  }
 
   <!-- 🔐 MES DONNÉES (RGPD) -->
   <div class="st-section">
@@ -746,6 +772,20 @@ function wire(root, me, prefs) {
   root
     .querySelector("#btn-cgu")
     ?.addEventListener("click", () => navigate("#/legal/cgu"));
+
+  // Revoir le guide : on efface le flag puis on rejoint la page hôte —
+  // le tour se redéclenche tout seul au mount.
+  root.querySelector("#btn-replay-tour")?.addEventListener("click", () => {
+    const cfg = TOUR_CFG[me.role];
+    if (!cfg) return;
+    try {
+      localStorage.removeItem(cfg.key);
+    } catch {
+      /* stockage indispo */
+    }
+    track("settings.replay_tour", { role: me.role });
+    navigate(cfg.route);
+  });
 
   // Delete account — modal avec saisie de confirmation
   root.querySelector("#btn-delete-account")?.addEventListener("click", () => {
