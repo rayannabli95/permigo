@@ -24,7 +24,11 @@ import { openPalierSheet } from "@/components/common/palier-sheet.js";
 // x maintenu dans ~[100,290] pour que les étiquettes centrées (≤150px)
 // ne débordent pas du cadre à 375–420px (correction n°3 du brief).
 const VBW = 396;
-const VBH = 1240;
+// VBH laisse ~140 unités sous le dernier nœud : sa tuile + son étiquette +
+// le badge « PROCHAIN PALIER » doivent tenir DANS le panneau photo (avant :
+// dernier nœud à 50 unités du bord → étiquette coupée, badge chevauchant
+// l'étiquette du nœud précédent).
+const VBH = 1340;
 const PTS = [
   { x: 198, y: 80 },
   { x: 290, y: 200 },
@@ -34,8 +38,8 @@ const PTS = [
   { x: 180, y: 710 },
   { x: 290, y: 830 },
   { x: 280, y: 960 },
-  { x: 150, y: 1080 },
-  { x: 110, y: 1190 },
+  { x: 150, y: 1060 },
+  { x: 110, y: 1200 },
 ];
 
 // ─── CSS ─────────────────────────────────────────────────────────
