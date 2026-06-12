@@ -6,7 +6,7 @@
 const STYLE = `
   .xpt-wrap {
     position: fixed;
-    top: 24px;
+    top: calc(env(safe-area-inset-top, 0px) + 24px);
     right: -320px;
     z-index: 9998;
     display: flex;

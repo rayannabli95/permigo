@@ -117,7 +117,7 @@ body.has-chrome #app {
     max-width: 480px;
     margin: 0 auto;
     background: var(--su2);
-    min-height: 100vh;
+    min-height: 100dvh;
     box-shadow:
       0 0 0 1px var(--bo),
       0 24px 64px -16px rgba(11,13,26,.08);

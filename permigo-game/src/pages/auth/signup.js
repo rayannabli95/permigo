@@ -25,7 +25,7 @@ function template() {
       .su-card h2{font-family:var(--fd);font-weight:900;font-size:22px;letter-spacing:-.02em;margin:0;text-align:center}
       .su-field{display:flex;flex-direction:column;gap:6px}
       .su-field label{font-size:10.5px;font-weight:800;color:rgba(255,255,255,.78);letter-spacing:1.2px;text-transform:uppercase}
-      .su-input-wrap{display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);transition:all .15s}
+      .su-input-wrap{display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);transition:border-color .15s,background .15s,box-shadow .15s}
       .su-input-wrap:focus-within{border-color:var(--al3);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px color-mix(in srgb, var(--a) 18%, transparent)}
       .su-input-wrap input{flex:1;align-self:stretch;background:transparent;border:0;outline:0;color:#fff;font-size:16px;font-family:inherit;min-width:0}
       .su-input-wrap input::placeholder{color:rgba(255,255,255,.35)}

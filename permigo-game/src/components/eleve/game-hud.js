@@ -166,7 +166,7 @@ export function renderGameHUD(stats, me) {
         border:1px solid rgba(255,255,255,.16);
         font-family:var(--fd);font-size:14px;font-weight:900;color:#fff;
         letter-spacing:.3px;cursor:pointer;
-        transition:all .18s cubic-bezier(.2,.7,.3,1);
+        transition:transform .18s cubic-bezier(.2,.7,.3,1),box-shadow .18s cubic-bezier(.2,.7,.3,1),background .18s cubic-bezier(.2,.7,.3,1);
         line-height:1;white-space:nowrap;
         box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 -1px 0 rgba(0,0,0,.25) inset,0 4px 10px -2px rgba(0,0,0,.3);
       }

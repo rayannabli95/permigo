@@ -711,6 +711,8 @@ const STYLE = `<style>
 .bs-streak {
   position: fixed; bottom: 0; left: 0; right: 0;
   z-index: 495; background: var(--su);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  overscroll-behavior: contain;
   border-radius: 28px 28px 0 0;
   border-top: 1px solid var(--bo);
   transform: translateY(100%) !important;

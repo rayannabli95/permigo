@@ -18,7 +18,7 @@ const STYLE = `<style>
   background: var(--ink);
   color: var(--bo3);
   font-family: 'IBM Plex Mono', 'Menlo', monospace;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 .dbg-hd {
   position: sticky; top: 0; z-index: 10;

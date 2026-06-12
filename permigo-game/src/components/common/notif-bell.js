@@ -43,7 +43,7 @@ export async function mountNotifBell(container) {
       .nb-panel{position:absolute;top:calc(100% + 6px);right:0;width:340px;max-height:480px;background:var(--bg);border:1px solid var(--bo);border-radius:var(--rl);box-shadow:var(--s3);z-index:80;display:none;overflow:hidden;flex-direction:column}
       .nb-panel.show{display:flex;animation:nbSlide .18s ease}
       @keyframes nbSlide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-      @media (max-width:560px){.nb-panel{position:fixed;top:64px;right:12px;left:12px;width:auto;max-width:none}}
+      @media (max-width:560px){.nb-panel{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 64px);right:12px;left:12px;width:auto;max-width:none}}
       .nb-h{padding:12px 14px;border-bottom:1px solid var(--bo2);display:flex;align-items:center;justify-content:space-between}
       .nb-h .ti{font-family:var(--fd);font-weight:800;font-size:14px;letter-spacing:-.01em}
       .nb-h .ct{font-size:10.5px;color:var(--mu);font-weight:700}

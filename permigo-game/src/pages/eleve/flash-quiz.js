@@ -265,7 +265,7 @@ function renderClosed(root, message) {
 // Coquille de page uniquement — tout le rendu question/réponse/résultat
 // vient de QUIZ_STYLE (quiz-ui.js).
 const STYLE = `${QUIZ_STYLE}<style>
-.fqz{min-height:100vh;background:radial-gradient(120% 80% at 50% 0%,#1a1d2e 0%,#0a0d1a 60%);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);font-family:'Inter',sans-serif}
+.fqz{min-height:100dvh;background:radial-gradient(120% 80% at 50% 0%,#1a1d2e 0%,#0a0d1a 60%);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);font-family:'Inter',sans-serif}
 .fqz-top{display:flex;align-items:center;justify-content:space-between;max-width:480px;width:100%;margin:0 auto 22px}
 .fqz-tag{display:inline-flex;align-items:center;gap:6px;font:800 14px/1 'Plus Jakarta Sans',sans-serif;color:#fde68a;background:rgba(253,224,71,.12);padding:8px 14px;border-radius:999px}
 .fqz-clock{font:800 20px/1 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;color:#a7f3d0;background:rgba(16,185,129,.14);padding:8px 14px;border-radius:12px;min-width:64px;text-align:center}

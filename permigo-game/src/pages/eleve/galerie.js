@@ -184,7 +184,7 @@ const STYLE = `<style>
 .gal-modal-bg {
   position: fixed; inset: 0; z-index: 200;
   display: flex; align-items: center; justify-content: center;
-  padding: 24px;
+  padding: calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px);
   background: rgba(11,13,26,.62);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   animation: galFade .2s ease;

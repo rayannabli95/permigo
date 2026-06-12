@@ -210,6 +210,13 @@ code, kbd, samp, pre,
 
 button, input, select, textarea { font-family: var(--fb); }
 
+/* Tap immédiat : pas de délai double-tap-zoom sur les interactifs.
+   Les pages qui gèrent leur propre geste (pan-y/none) gardent la main
+   (leurs styles, chargés après, sont plus spécifiques ou égaux + postérieurs). */
+button, a, [role="button"], label, select, summary {
+  touch-action: manipulation;
+}
+
 /* Anti-zoom iOS : Safari zoome automatiquement au focus d'un champ < 16px
    et ne revient pas en arrière → l'utilisateur doit dézoomer à la main.
    Filet global sur écrans tactiles : aucun champ texte ne descend sous 16px.
