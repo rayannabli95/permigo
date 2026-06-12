@@ -460,7 +460,7 @@ function wireCardClicks(container) {
 // Quick view fallback si la nav livret est cassée
 async function openQuickView(eleveId, anchorCard) {
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;animation:elqvIn .2s ease;';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top, 0px) + 20px) 20px calc(env(safe-area-inset-bottom, 0px) + 20px);animation:elqvIn .2s ease;';
   overlay.innerHTML = `
     <style>
       @keyframes elqvIn { from { opacity:0; } to { opacity:1; } }

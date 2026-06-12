@@ -69,7 +69,7 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
   host.setAttribute("aria-label", "Appuie pour démarrer PermiGo");
   host.innerHTML = `
     <style>
-      #pg-launch-splash{position:fixed;inset:0;z-index:10100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:var(--bg,#f4f5fb);padding:24px;opacity:1;transform:scale(1);transition:opacity .45s ease,transform .45s cubic-bezier(.4,0,.7,1);cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;overflow:hidden;}
+      #pg-launch-splash{position:fixed;inset:0;z-index:10100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:var(--bg,#f4f5fb);padding:calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px);opacity:1;transform:scale(1);transition:opacity .45s ease,transform .45s cubic-bezier(.4,0,.7,1);cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;overflow:hidden;}
       /* Sortie : zoom-fade — l'app « émerge » du splash au lieu d'un cut */
       #pg-launch-splash.out{opacity:0;transform:scale(1.06);pointer-events:none;}
 

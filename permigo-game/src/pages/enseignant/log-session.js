@@ -119,7 +119,7 @@ const STYLE = `<style>
   .vs-dd-sub { font: 600 11.5px/1 'IBM Plex Mono', monospace; color: var(--mu2); margin-top: 3px; }
   .vs-dd-chev { flex-shrink: 0; color: var(--mu2); display: inline-flex; transition: transform .25s var(--ease); }
   .vs-dd.open .vs-dd-chev { transform: rotate(180deg); }
-  .vs-dd-panel { position: absolute; z-index: 31; top: calc(100% + 6px); left: 0; right: 0; background: var(--su); border: 1.5px solid var(--bo); border-radius: var(--r-md); box-shadow: 0 16px 40px -10px rgba(10,13,26,.22); padding: 6px; max-height: 0; overflow: hidden; opacity: 0; transform: translateY(-6px); pointer-events: none; transition: max-height .25s var(--ease), opacity .18s, transform .2s; }
+  .vs-dd-panel { position: absolute; z-index: 31; top: calc(100% + 6px); left: 0; right: 0; background: var(--su); border: 1.5px solid var(--bo); border-radius: var(--r-md); box-shadow: 0 16px 40px -10px rgba(10,13,26,.22); padding: 6px; max-height: 0; overflow: hidden; overscroll-behavior: contain; opacity: 0; transform: translateY(-6px); pointer-events: none; transition: max-height .25s var(--ease), opacity .18s, transform .2s; }
   .vs-dd.open .vs-dd-panel { max-height: min(62vh, 420px); overflow-y: auto; opacity: 1; transform: translateY(0); pointer-events: auto; }
   .vs-dd-search { position: relative; margin: 4px 4px 8px; }
   .vs-dd-list { display: flex; flex-direction: column; gap: 2px; }

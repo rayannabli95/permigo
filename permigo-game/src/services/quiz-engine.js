@@ -216,7 +216,7 @@ function renderOverlay() {
   el.innerHTML = `
     ${QUIZ_STYLE}
     <style>
-      .quiz-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,13,26,.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;animation:quizIn .3s cubic-bezier(.23,1,.32,1);overflow-y:auto}
+      .quiz-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,13,26,.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top, 0px) + 20px) 20px calc(env(safe-area-inset-bottom, 0px) + 20px);animation:quizIn .3s cubic-bezier(.23,1,.32,1);overflow-y:auto}
       @keyframes quizIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
       .quiz-body{position:relative;width:100%;max-width:480px;background:linear-gradient(180deg,#1a1d2e,#0f1220);border:1px solid rgba(99,102,241,.3);border-radius:24px;padding:28px;color:#fff;margin:auto}
       @media (prefers-reduced-motion:reduce){.quiz-overlay{animation:none}}

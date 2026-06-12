@@ -353,7 +353,7 @@ function ensureStyles() {
       border-radius:99px;
       font-family:var(--fn);font-size:11px;font-weight:700;
       cursor:pointer;letter-spacing:.2em;text-transform:uppercase;
-      opacity:0;transition:all .15s;
+      opacity:0;transition:opacity .15s,color .15s;
       animation:fadein-late 1s ease 3s forwards;
     }
     @keyframes fadein-late{to{opacity:1}}

@@ -81,7 +81,7 @@ export function unmount() {
 function template() {
   return `
     <style>
-      .lg-root{position:fixed;inset:0;overflow:auto;background:var(--ink);display:flex;align-items:center;justify-content:center;padding:24px 16px;font-family:var(--fb)}
+      .lg-root{position:fixed;inset:0;overflow:auto;overscroll-behavior:contain;background:var(--ink);display:flex;align-items:center;justify-content:center;padding:24px 16px;font-family:var(--fb)}
       .lg-bg{position:absolute;inset:0;z-index:0;pointer-events:none}
       .lg-bg::before{content:'';position:absolute;inset:-50%;background:radial-gradient(ellipse at 20% 20%,var(--a) 0%,transparent 40%),radial-gradient(ellipse at 80% 30%,var(--pu) 0%,transparent 40%),radial-gradient(ellipse at 50% 80%,var(--blk) 0%,transparent 40%);filter:blur(60px);opacity:.5;animation:lg-float 22s ease-in-out infinite alternate}
       @keyframes lg-float{0%{transform:translate(0,0) rotate(0deg) scale(1)}50%{transform:translate(40px,-30px) rotate(180deg) scale(1.08)}100%{transform:translate(-30px,40px) rotate(360deg) scale(.96)}}
@@ -104,7 +104,7 @@ function template() {
       /* Field — icone + input bordured */
       .lg-field{display:flex;flex-direction:column;gap:6px}
       .lg-field label{font-size:10.5px;font-weight:800;color:rgba(255,255,255,.78);letter-spacing:1.2px;text-transform:uppercase}
-      .lg-input-wrap{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);transition:all .15s}
+      .lg-input-wrap{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);transition:border-color .15s,background .15s,box-shadow .15s}
       .lg-input-wrap:focus-within{border-color:var(--al3);background:rgba(255,255,255,.08);box-shadow:0 0 0 3px color-mix(in srgb, var(--a) 18%, transparent)}
       .lg-input-wrap svg{width:18px;height:18px;color:rgba(255,255,255,.5);flex-shrink:0}
       .lg-input-wrap input{flex:1;align-self:stretch;background:transparent;border:0;outline:0;color:#fff;font-size:16px;font-family:inherit;min-width:0}
@@ -115,7 +115,7 @@ function template() {
       /* Remember + Forgot row */
       .lg-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;margin-top:-4px}
       .lg-remember{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.8);cursor:pointer;user-select:none;min-height:44px}
-      .lg-remember input{appearance:none;width:16px;height:16px;border:1.5px solid rgba(255,255,255,.3);border-radius:4px;cursor:pointer;position:relative;flex-shrink:0;transition:all .15s}
+      .lg-remember input{appearance:none;width:16px;height:16px;border:1.5px solid rgba(255,255,255,.3);border-radius:4px;cursor:pointer;position:relative;flex-shrink:0;transition:background .15s,border-color .15s}
       .lg-remember input:checked{background:var(--a);border-color:var(--a)}
       .lg-remember input:checked::after{content:'✓';position:absolute;top:-1px;left:2px;font-size:13px;color:#fff;font-weight:900}
       .lg-forgot{background:transparent;border:0;color:var(--al3);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:2px;padding:15px 6px;margin:-15px -6px}
@@ -134,7 +134,7 @@ function template() {
 
       /* Social OAuth buttons */
       .lg-social{display:flex;flex-direction:column;gap:8px}
-      .lg-oauth{display:flex;align-items:center;justify-content:center;gap:10px;height:46px;border-radius:11px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#fff;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .15s}
+      .lg-oauth{display:flex;align-items:center;justify-content:center;gap:10px;height:46px;border-radius:11px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#fff;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;transition:border-color .15s,background .15s}
       .lg-oauth:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);transform:translateY(-1px)}
       .lg-oauth svg,.lg-oauth img{width:18px;height:18px}
       .lg-oauth.apple svg{color:#fff}
@@ -145,7 +145,7 @@ function template() {
 
       /* Demo accounts (toujours utile en dev) */
       .lg-demos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:-4px}
-      .lg-demo{padding:9px 4px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit;color:#fff;transition:all .15s}
+      .lg-demo{padding:9px 4px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit;color:#fff;transition:border-color .15s,background .15s}
       .lg-demo:hover{background:rgba(255,255,255,.08);transform:translateY(-1px)}
       .lg-demo .em{font-size:16px;line-height:1}
       .lg-demo .nm{font-size:10px;font-weight:700;letter-spacing:.04em}

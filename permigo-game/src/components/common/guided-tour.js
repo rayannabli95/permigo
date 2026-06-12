@@ -22,7 +22,7 @@ const STYLE = `<style>
     border-radius: 14px;
     box-shadow: 0 0 0 9999px rgba(8,10,20,.6), 0 0 0 2px var(--a, #6366f1) inset;
     pointer-events: none;
-    transition: ${REDUCED ? "none" : "all .28s cubic-bezier(.4,0,.2,1)"};
+    transition: ${REDUCED ? "none" : "left .28s cubic-bezier(.4,0,.2,1), top .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1), height .28s cubic-bezier(.4,0,.2,1)"};
   }
   .gt-bubble {
     position: fixed; z-index: 10002;
@@ -139,12 +139,21 @@ export function startTour(steps, opts = {}) {
       spot.style.width = `${r.width + pad * 2}px`;
       spot.style.height = `${r.height + pad * 2}px`;
 
-      // Bulle sous la cible si la place le permet, sinon au-dessus
+      // Bulle sous la cible si la place le permet, sinon au-dessus.
+      // La marge basse integre la home bar iOS (env() lisible via une sonde).
       const vh = window.innerHeight;
       const bubbleH = bubble.offsetHeight || 170;
       const below = r.bottom + 14;
+      const safeBottom = (() => {
+        const probe = document.createElement("div");
+        probe.style.cssText = "position:fixed;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden";
+        document.body.appendChild(probe);
+        const v = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+        probe.remove();
+        return v;
+      })();
       bubble.style.top =
-        below + bubbleH < vh - 12
+        below + bubbleH < vh - 12 - safeBottom
           ? `${below}px`
           : `${Math.max(12, r.top - bubbleH - 14)}px`;
     });
