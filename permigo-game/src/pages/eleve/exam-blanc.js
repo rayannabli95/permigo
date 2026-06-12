@@ -569,7 +569,7 @@ function renderStyles() {
 }
 .exb-pcard-num {
   font: 700 11px/1 'Inter', sans-serif;
-  color: var(--a);
+  color: var(--a-txt);
   letter-spacing: .08em;
   text-transform: uppercase;
 }

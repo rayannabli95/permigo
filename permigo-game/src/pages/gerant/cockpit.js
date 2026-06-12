@@ -102,7 +102,7 @@ const STYLE = `<style>
 }
 .ck-hd-logo {
   font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
-  color: ${ACC};
+  color: var(--a-txt);
   letter-spacing: -.02em;
   flex-shrink: 0;
 }

@@ -54,7 +54,7 @@ const STYLE = `<style>
 }
 .gal-tab.active {
   background: var(--su);
-  color: var(--a);
+  color: var(--a-txt);
   border-color: color-mix(in srgb, var(--a) 25%, transparent);
   box-shadow: 0 1px 3px rgba(11,13,26,.06);
 }
@@ -66,7 +66,7 @@ const STYLE = `<style>
   padding: 14px 20px 8px;
 }
 .gal-section-title { font: 700 13px/1 'Inter', sans-serif; color: var(--mu3); letter-spacing: .08em; text-transform: uppercase; }
-.gal-section-count { font: 700 12px/1 'Inter', sans-serif; color: var(--a); background: color-mix(in srgb, var(--a) 10%, transparent); border-radius: 20px; padding: 3px 10px; }
+.gal-section-count { font: 700 12px/1 'Inter', sans-serif; color: var(--a-txt); background: color-mix(in srgb, var(--a) 10%, transparent); border-radius: 20px; padding: 3px 10px; }
 
 /* Grid */
 .gal-grid {

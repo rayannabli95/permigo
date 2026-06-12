@@ -132,7 +132,7 @@ ${LEAGUE_CSS}
   cursor: pointer; transition: background .15s, color .15s, border-color .15s;
   white-space: nowrap;
 }
-.clt-tab.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.clt-tab.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 .clt-tab-ligue.on { background: linear-gradient(135deg,#d97706,#fbbf24); border-color: transparent; color: #fff; }
 .clt-tab:active { transform: scale(.97); }
 

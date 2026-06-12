@@ -70,7 +70,7 @@ const STYLE = `<style>
 /* Progress pill */
 .epc-full-pill {
   font: 700 12px/1 'IBM Plex Mono', monospace;
-  color: var(--a);
+  color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   padding: 6px 10px;
   border-radius: var(--r-full);
