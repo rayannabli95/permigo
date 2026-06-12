@@ -48,7 +48,7 @@ export function renderChest({ worldNum, worldName, opened = false }) {
       <div class="chest-label">
         <div class="chest-tier">${opened ? '✓ OUVERT' : tier.name}</div>
         <div class="chest-name">${esc(worldName)}</div>
-        ${!opened ? `<div class="chest-cta">${icon('zap',{size:18})} +${tier.xp} XP &nbsp;·&nbsp; ${icon('gem',{size:13})} +${tier.gemmes}</div>` : ''}
+        ${!opened ? `<div class="chest-cta">${icon('gem',{size:13})} +${tier.gemmes} volants</div>` : ''}
       </div>
     </div>
   `;
@@ -130,9 +130,8 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
 
       // Phase 4 : Cascade de récompenses (1300ms+)
       const list = [
-        { icon: icon('zap',{size:20}), label: `+${tier.xp} XP`, delay: 150 },
-        { icon: icon('gem',{size:20}), label: `+${tier.gemmes} Gemmes`, delay: 450 },
-        { icon: icon('trophy',{size:20}), label: `Titre "Maître ${worldName}"`, delay: 800 },
+        { icon: icon('gem',{size:20}), label: `+${tier.gemmes} volants`, delay: 200 },
+        { icon: icon('trophy',{size:20}), label: `Titre "Maître ${worldName}"`, delay: 600 },
       ];
       list.forEach((r) => {
         setTimeout(() => {

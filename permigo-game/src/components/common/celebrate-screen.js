@@ -220,7 +220,7 @@ export const CELEBRATE_PRESETS = {
     illustration: '/skins/trophy-permis-virtuel.webp',
     fallbackEmoji: '👑',
     title: 'Permis virtuel obtenu',
-    subtitle: 'Les 31 compétences REMC validées. Bravo, tu maîtrises la route.',
+    subtitle: 'Les 31 compétences validées. Bravo, tu maîtrises la route.',
     ctaLabel: 'Partager ma victoire',
     trackKey: 'celebrate.permis_earned',
   },

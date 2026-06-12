@@ -36,10 +36,34 @@ const TAB_TYPES = {
 // tagBg/tagFg : le blanc 8.5px ne tenait pas le contraste sur les couleurs
 // pures (1.6:1 sur l'or) — fond assombri à teinte égale, l'or garde un texte sombre.
 const RARITY_META = {
-  commun: { label: "Commun", c: "#3b82f6", tagBg: "color-mix(in srgb, #3b82f6 75%, #000)", tagFg: "#fff", order: 0 },
-  rare: { label: "Rare", c: "#8b5cf6", tagBg: "color-mix(in srgb, #8b5cf6 75%, #000)", tagFg: "#fff", order: 1 },
-  epique: { label: "Épique", c: "#f97316", tagBg: "color-mix(in srgb, #f97316 70%, #000)", tagFg: "#fff", order: 2 },
-  legendaire: { label: "Légendaire", c: "#fbbf24", tagBg: "#fbbf24", tagFg: "#1a1208", order: 3 },
+  commun: {
+    label: "Commun",
+    c: "#3b82f6",
+    tagBg: "color-mix(in srgb, #3b82f6 75%, #000)",
+    tagFg: "#fff",
+    order: 0,
+  },
+  rare: {
+    label: "Rare",
+    c: "#8b5cf6",
+    tagBg: "color-mix(in srgb, #8b5cf6 75%, #000)",
+    tagFg: "#fff",
+    order: 1,
+  },
+  epique: {
+    label: "Épique",
+    c: "#f97316",
+    tagBg: "color-mix(in srgb, #f97316 70%, #000)",
+    tagFg: "#fff",
+    order: 2,
+  },
+  legendaire: {
+    label: "Légendaire",
+    c: "#fbbf24",
+    tagBg: "#fbbf24",
+    tagFg: "#1a1208",
+    order: 3,
+  },
 };
 function rm(rarity) {
   return RARITY_META[rarity] ?? RARITY_META.commun;
@@ -181,20 +205,6 @@ const STYLE = `<style>
 .bo2-intro-steps { display: flex; flex-direction: column; gap: 6px; }
 .bo2-intro-steps span { display: flex; align-items: center; gap: 7px; font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu); }
 .bo2-intro-steps span svg { color: var(--a-txt); flex-shrink: 0; }
-
-/* ── Rarity scale footer ── */
-.bo2-scale {
-  margin: 22px 16px 0; padding: 16px; border-radius: var(--r-xl); background: var(--su);
-}
-.bo2-scale-title { font: 700 13px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 14px; text-align: center; }
-.bo2-scale-row { display: flex; justify-content: space-around; gap: 8px; }
-.bo2-scale-item { display: flex; flex-direction: column; align-items: center; gap: 7px; flex: 1; }
-.bo2-scale-dot {
-  width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 17px;
-}
-.bo2-scale-lbl { font: 700 9.5px/1 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: .03em; }
-.bo2-scale-price { font: 600 10px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
 
 /* ── Grid (onglet Autres) ── */
 .bo2-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px 16px 0; }
@@ -473,8 +483,7 @@ export async function mount(root) {
       </div>
       <div class="bo2-grid">
         ${sorted.map((item, idx) => renderGridCard(item, gemmes, idx)).join("")}
-      </div>
-      ${renderRarityScale(sorted)}`;
+      </div>`;
     wireGrid(content);
     wireIntro(content);
   }
@@ -575,39 +584,6 @@ function wireIntro(content) {
       setTimeout(() => el.remove(), 280);
     }
   });
-}
-
-// ─── Rarity scale footer ──────────────────────────────────────
-function renderRarityScale(items) {
-  // Prix par rareté tirés des items présents (fallback ordre des paliers)
-  const order = ["commun", "rare", "epique", "legendaire"];
-  const byRarity = {};
-  items.forEach((i) => {
-    if (!byRarity[i.rarity]) byRarity[i.rarity] = i.cost_gemmes;
-  });
-  const icons = {
-    commun: "car",
-    rare: "zap",
-    epique: "sparkle",
-    legendaire: "crown",
-  };
-  return `
-    <div class="bo2-scale">
-      <div class="bo2-scale-title">Les raretés</div>
-      <div class="bo2-scale-row">
-        ${order
-          .map((k) => {
-            const r = RARITY_META[k];
-            const price = byRarity[k];
-            return `<div class="bo2-scale-item">
-            <div class="bo2-scale-dot" style="background:${r.c}26;border:2px solid ${r.c};box-shadow:0 0 12px ${r.c}66;color:${r.c}">${icon(icons[k], { size: 17 })}</div>
-            <div class="bo2-scale-lbl" style="color:${r.tagBg === r.c ? "#8a6d03" : r.tagBg}">${esc(r.label)}</div>
-            ${price != null ? `<div class="bo2-scale-price">${icon("gem", { size: 13 })} ${price}</div>` : ""}
-          </div>`;
-          })
-          .join("")}
-      </div>
-    </div>`;
 }
 
 // ─── Grid card (Autres) ───────────────────────────────────────

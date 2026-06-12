@@ -7,6 +7,7 @@ import { mountNotifBell } from "@/components/common/notif-bell.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { getEquippedAsset } from "@/utils/game-state.js";
+import { icon } from "@/utils/icons.js";
 
 const STYLE = `
   #header-bar {
@@ -39,19 +40,29 @@ const STYLE = `
   }
   .pg-logo-btn:active { background: color-mix(in srgb, var(--a) 8%, transparent); }
   .pg-logo-img { width: 36px; height: 36px; display: block; object-fit: contain; }
-  #ht-right { display: flex; align-items: center; gap: 4px; }
+  #ht-right { display: flex; align-items: center; gap: 6px; }
   .ht-icon-btn {
-    width: 40px; height: 40px;
-    border-radius: var(--r);
+    width: 36px; height: 36px;
+    border-radius: 8px;
     border: 1px solid var(--bo);
     background: var(--su, #fff);
     color: var(--ink);
     cursor: pointer;
+    padding: 0;
     display: flex; align-items: center; justify-content: center;
-    transition: transform .12s, background .12s;
+    transition: transform .12s, background .12s, color .12s;
     -webkit-tap-highlight-color: transparent;
+    position: relative;
   }
+  /* Hit-area 44x44 sans grossir le visuel */
+  .ht-icon-btn::before { content: ''; position: absolute; inset: -4px; }
   .ht-icon-btn:active { transform: scale(.92); background: var(--bg2, color-mix(in srgb, var(--a) 8%, transparent)); }
+  /* Réglages ouverts → l'icône prend la couleur du thème */
+  .ht-icon-btn.active {
+    color: var(--a);
+    border-color: color-mix(in srgb, var(--a) 40%, transparent);
+    background: color-mix(in srgb, var(--a) 10%, transparent);
+  }
   .ht-avatar-btn {
     width: 36px; height: 36px;
     padding: 0;
@@ -91,6 +102,7 @@ export async function mountHeader() {
     </button>
     <div id="ht-right">
       <div id="ht-bell"></div>
+      ${me ? `<button class="ht-icon-btn" id="ht-settings" aria-label="Réglages" title="Réglages">${icon("settings", { size: 19 })}</button>` : ""}
       ${me ? `<button class="ht-avatar-btn" id="ht-avatar" aria-label="Mon profil" title="Mon profil">${renderUserAvatar({ ...me, avatar_url: getEquippedAsset("avatar") || me.avatar_url }, 36)}</button>` : ""}
     </div>
   `;
@@ -105,6 +117,26 @@ export async function mountHeader() {
   bar.querySelector("#ht-avatar")?.addEventListener("click", () => {
     location.hash = "#/profil";
   });
+
+  // Réglages : accès direct + état actif à la couleur du thème.
+  // Le header est recréé à chaque route → listener window enregistré 1 seule
+  // fois (même pattern que le listener cosmétique), bouton requêté en live.
+  bar.querySelector("#ht-settings")?.addEventListener("click", () => {
+    location.hash = "#/settings";
+  });
+  const syncSettingsActive = () => {
+    document
+      .querySelector("#ht-settings")
+      ?.classList.toggle(
+        "active",
+        (location.hash || "").startsWith("#/settings"),
+      );
+  };
+  syncSettingsActive();
+  if (!window.__pgHeaderSettingsListener) {
+    window.__pgHeaderSettingsListener = true;
+    window.addEventListener("hashchange", syncSettingsActive);
+  }
 
   // Rafraîchit l'avatar de l'en-tête dès qu'un cosmétique est équipé (sans reload).
   // Listener enregistré une seule fois au niveau window.

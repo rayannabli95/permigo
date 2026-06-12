@@ -197,7 +197,7 @@ export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
         const rect = card.getBoundingClientRect();
         const pop = document.createElement("div");
         pop.className = "dq-xp-pop";
-        pop.textContent = `+${xpGained} XP${gemGained > 0 ? ` · +${gemGained} volants` : ""}`;
+        pop.textContent = gemGained > 0 ? `+${gemGained} volants` : "Quête validée ✓";
         pop.style.cssText = `left:${rect.left + rect.width / 2}px;top:${rect.top}px`;
         document.body.appendChild(pop);
         setTimeout(() => pop.remove(), 800);
@@ -270,12 +270,7 @@ function renderCard(q) {
       ? `<span class="dq-badge dq-badge--claim">Réclamer</span>`
       : "";
 
-  const reward =
-    q.reward_xp > 0
-      ? `+${q.reward_xp} XP${q.reward_gemmes > 0 ? ` · +${q.reward_gemmes} gemmes` : ""}`
-      : q.reward_gemmes > 0
-        ? `+${q.reward_gemmes} gemmes`
-        : "";
+  const reward = q.reward_gemmes > 0 ? `+${q.reward_gemmes} volants` : "";
 
   return `
     <div class="dq-card ${stCls}" data-quest-id="${esc(String(q.quest_id))}"

@@ -72,13 +72,15 @@ const STYLE = `<style>
 }
 .tr2-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,.6) 100%);
+  /* Couleur du thème (pas de blanc) — cohérence avec parcours/nav */
+  background: linear-gradient(90deg, var(--a-lt, var(--a)) 0%, var(--a) 100%);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--a) 60%, transparent);
   border-radius: var(--r-full);
   transition: width 1s var(--ease-out);
 }
 .tr2-progress-hint {
-  font: 500 11px/1 'Inter', sans-serif;
-  color: rgba(255,255,255,.5);
+  font: 500 12px/1.3 'Inter', sans-serif;
+  color: rgba(255,255,255,.65);
 }
 
 /* ── Accès Galerie ── */
@@ -489,7 +491,6 @@ function showModal(def, unlockData, totalUnlocked) {
         <h2 class="tr2-modal-title">${esc(def.title)}</h2>
         <div class="tr2-modal-desc">${esc(def.body)}</div>
         <div class="tr2-modal-meta">
-          <div class="tr2-modal-chip xp">+${def.xp} XP</div>
           <div class="tr2-modal-chip gems">+${def.gemmes} ${icon("gem", { size: 13 })}</div>
           ${dateStr ? `<div class="tr2-modal-chip date">${icon("calendar", { size: 13 })} ${esc(dateStr)}</div>` : ""}
         </div>
@@ -520,7 +521,6 @@ function showModal(def, unlockData, totalUnlocked) {
         <h2 class="tr2-modal-title">${esc(def.title)}</h2>
         <div class="tr2-modal-desc">${esc(def.body)}</div>
         <div class="tr2-modal-meta">
-          <div class="tr2-modal-chip xp">+${def.xp} XP à débloquer</div>
           <div class="tr2-modal-chip gems">+${def.gemmes} ${icon("gem", { size: 13 })} à débloquer</div>
           <div class="tr2-modal-chip date">${esc(rm.label)}</div>
         </div>
@@ -555,7 +555,7 @@ function showModal(def, unlockData, totalUnlocked) {
     overlay
       .querySelector("#tr2-share-btn")
       ?.addEventListener("click", async () => {
-        const text = `J'ai débloqué "${def.title}" sur PermiGo !\n+${def.xp} XP`;
+        const text = `J'ai débloqué "${def.title}" sur PermiGo !`;
         if (navigator.share) {
           try {
             await navigator.share({

@@ -19,32 +19,46 @@ const ICO = {
   gift: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 21 12 13 4 21"/><polyline points="4 3 12 11 20 3"/><line x1="12" y1="11" x2="12" y2="21"/><line x1="4" y1="3" x2="20" y2="3"/><line x1="4" y1="3" x2="4" y2="13"/><line x1="20" y1="3" x2="20" y2="13"/></svg>`,
 };
 
+// Variantes PLEINES (état actif) — remplies à la couleur du thème (--a).
+// currentColor : la couleur vient du .bn-tab.active.
+const ICO_FILL = {
+  home: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.6 2.5 10.5V21a1 1 0 0 0 1 1H9.5v-6.5h5V22h6a1 1 0 0 0 1-1V10.5L12 2.6z"/></svg>`,
+  map: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="1 6 7.5 2.3 7.5 18.3 1 22"/><polygon points="9 2.5 15 5.5 15 21.5 9 18.5"/><polygon points="16.5 6 23 2.3 23 18.3 16.5 22"/></svg>`,
+  trophy: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6v2H2.5a.5.5 0 0 0-.5.5V6a4.5 4.5 0 0 0 4.36 4.5A6 6 0 0 0 11 14.92V18H8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-3v-3.08a6 6 0 0 0 4.64-4.42A4.5 4.5 0 0 0 22 6V4.5a.5.5 0 0 0-.5-.5H18V2zM4 6v-.5h2v2.9A2.5 2.5 0 0 1 4 6zm16 0a2.5 2.5 0 0 1-2 2.4V5.5h2V6z"/></svg>`,
+  user: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.42 0-8 2.24-8 5v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2c0-2.76-3.58-5-8-5z"/></svg>`,
+  users: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M9 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-3.87 0-7 1.92-7 4.3V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.7c0-2.38-3.13-4.3-7-4.3zm7-2.1a4 4 0 0 0 0-7.75 5.96 5.96 0 0 1 0 7.75zM17.5 13.4c1.99.96 3.5 2.5 3.5 4.9V21h2a1 1 0 0 0 1-1v-2.7c0-2-2.21-3.66-5.1-4.18-.45-.08-.93.07-1.4.28z"/></svg>`,
+  bag: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6zm.9 2h10.2l1.5 2H5.4l1.5-2zM12 13a4 4 0 0 1-4-4h2a2 2 0 1 0 4 0h2a4 4 0 0 1-4 4z"/></svg>`,
+  chart: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="16" y="9" width="4" height="11" rx="1"/><rect x="10" y="3" width="4" height="17" rx="1"/><rect x="4" y="13" width="4" height="7" rx="1"/></svg>`,
+  // Tracé non remplissable : version épaissie (le passage à la couleur thème suffit)
+  activity: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+};
+
 const TABS = {
   eleve: [
-    { id: "default", label: "Accueil", icon: ICO.home },
-    { id: "parcours", label: "Parcours", icon: ICO.map },
-    { id: "boutique", label: "Boutique", icon: ICO.bag },
-    { id: "trophees", label: "Trophées", icon: ICO.trophy },
-    { id: "profil", label: "Profil", icon: ICO.user },
+    { id: "default", label: "Accueil", ico: "home" },
+    { id: "parcours", label: "Parcours", ico: "map" },
+    { id: "boutique", label: "Boutique", ico: "bag" },
+    { id: "trophees", label: "Trophées", ico: "trophy" },
+    { id: "profil", label: "Profil", ico: "user" },
   ],
   enseignant: [
-    { id: "default", label: "Aujourd'hui", icon: ICO.activity },
-    { id: "eleves", label: "Mes élèves", icon: ICO.users },
+    { id: "default", label: "Aujourd'hui", ico: "activity" },
+    { id: "eleves", label: "Mes élèves", ico: "users" },
     // « Progression » regroupe Parcours + Trophées + Ligue (décision figée).
     // L'onglet « Récompenses » (gemmes) a été retiré : monnaie = validations.
     {
       id: "parcours",
       label: "Progression",
-      icon: ICO.trophy,
+      ico: "trophy",
       match: ["parcours-complet", "trophees-moniteur", "ligue-semaine"],
     },
-    { id: "insights", label: "Stats", icon: ICO.chart },
+    { id: "insights", label: "Stats", ico: "chart" },
   ],
   gerant: [
-    { id: "default", label: "Pulse", icon: ICO.activity },
-    { id: "equipe", label: "Équipe", icon: ICO.users },
-    { id: "eleves", label: "Élèves", icon: ICO.users },
-    { id: "profil", label: "Profil", icon: ICO.user },
+    { id: "default", label: "Pulse", ico: "activity" },
+    { id: "equipe", label: "Équipe", ico: "users" },
+    { id: "eleves", label: "Élèves", ico: "users" },
+    { id: "profil", label: "Profil", ico: "user" },
   ],
 };
 
@@ -78,23 +92,19 @@ const STYLE = `
     min-height: 44px;
     transition: color .15s var(--ease);
   }
-  .bn-tab::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 50%;
-    transform: translateX(-50%) scaleX(0);
-    width: 32px; height: 2.5px;
-    background: var(--a);
-    border-radius: 0 0 3px 3px;
-    transition: transform .2s var(--ease-spring);
-  }
+  /* Actif = icône PLEINE à la couleur du thème. Pas d'autre indicateur :
+     un seul signal suffit. */
   .bn-tab.active {
-    color: var(--a-txt);
-  }
-  .bn-tab.active::after {
-    transform: translateX(-50%) scaleX(1);
+    color: var(--a);
   }
   .bn-tab svg { display: block; flex-shrink: 0; }
+  .bn-ico-fill { display: none; }
+  .bn-tab.active .bn-ico-line { display: none; }
+  .bn-tab.active .bn-ico-fill { display: block; }
+  .bn-ico-line, .bn-ico-fill { line-height: 0; }
+  .bn-tab.active .bn-ico-fill svg { animation: bnFillPop .25s var(--ease-spring); }
+  @keyframes bnFillPop { from { transform: scale(.82); } to { transform: scale(1); } }
+  @media (prefers-reduced-motion: reduce) { .bn-tab.active .bn-ico-fill svg { animation: none; } }
   /* Label : visible sous l'onglet actif uniquement. Positionné en absolu
      pour que le picto reste centré — aucun reflow au changement d'onglet. */
   .bn-label {
@@ -207,7 +217,8 @@ export function mountBottomNav(role) {
     .map(
       (t) => `
       <button class="bn-tab" data-id="${t.id}"${t.match ? ` data-match="${t.match.join(",")}"` : ""} aria-label="${t.label}">
-        ${t.icon}
+        <span class="bn-ico-line">${ICO[t.ico]}</span>
+        <span class="bn-ico-fill">${ICO_FILL[t.ico] || ICO[t.ico]}</span>
         <span class="bn-label">${t.label}</span>
       </button>
     `,

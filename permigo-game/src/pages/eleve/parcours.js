@@ -97,7 +97,7 @@ const STYLE = `<style>
 .prc-help::after { content: ''; position: absolute; inset: -11px; }
 .prc-help:hover { border-color: var(--a); color: var(--a-txt); }
 .prc-help:active { transform: scale(.9); }
-.prc-subtitle { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
+.prc-subtitle { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 .prc-hd-right { text-align: right; }
 .prc-total    { font: 800 26px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
 .prc-total-denom { font-size: 15px; color: var(--mu2); }
@@ -118,7 +118,8 @@ const STYLE = `<style>
 }
 .prc-global-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--gr), #06b6d4, var(--pu), var(--am));
+  /* Couleur unique : variations du thème choisi (pas d'arc-en-ciel) */
+  background: linear-gradient(90deg, var(--adk), var(--a));
   border-radius: 3px;
   transition: width 1s var(--ease-out);
 }
@@ -126,23 +127,9 @@ const STYLE = `<style>
   display: flex;
   justify-content: space-between;
   margin-top: 5px;
-  font: 600 10.5px/1 'Inter', sans-serif;
+  font: 600 11px/1 'Inter', sans-serif;
   color: var(--mu2);
 }
-
-/* ── Légende ── */
-.prc-legend {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 10px 20px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--bo);
-  font: 600 11px/1 'Inter', sans-serif;
-  color: var(--mu);
-}
-.prc-legend span { display: inline-flex; align-items: center; gap: 5px; }
-.prc-legend i { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
 /* ── Carte des mondes — pleine page, le scroll de la page fait tout ── */
 .prc-map {
@@ -1591,16 +1578,8 @@ function renderPage(
     </div>
   </div>
 
-  <!-- Légende -->
-  <div class="prc-legend" role="list" aria-label="Légende des statuts">
-    <span role="listitem"><i style="background:var(--gr)" aria-hidden="true"></i>Acquis</span>
-    <span role="listitem"><i style="background:var(--a)" aria-hidden="true"></i>En cours</span>
-    <span role="listitem"><i style="background:var(--bo)" aria-hidden="true"></i>À faire</span>
-    <span role="listitem"><i style="background:var(--bo4)" aria-hidden="true"></i>Verrouillé</span>
-  </div>
-
   <!-- Carte des mondes — pleine page, scroll naturel (plus d'encadré interne) -->
-  <div class="prc-map" id="prc-map-scroll" tabindex="-1" role="region" aria-label="Carte d'apprentissage REMC">
+  <div class="prc-map" id="prc-map-scroll" tabindex="-1" role="region" aria-label="Carte d'apprentissage">
     ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1, openedWorlds)).join("")}
     ${renderFinal(totalDone, totalComps)}
     <div style="height: 24px"></div>
@@ -1815,8 +1794,8 @@ function renderFinal(done, total) {
       <div class="l">Progression</div>
     </div>
     <div class="prc-final-stat">
-      <div class="v">${done * 25}</div>
-      <div class="l">XP gagnés</div>
+      <div class="v">${total - done}</div>
+      <div class="l">Restantes</div>
     </div>
   </div>
 </div>`;

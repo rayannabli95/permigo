@@ -534,7 +534,7 @@ function renderChecklist({ compsCount, baseAcquis = 0, streak, avgScore }) {
 
   const criteria = [
     {
-      label: "Parcours REMC > 50%",
+      label: "Parcours > 50%",
       sub: `${compsCount} compétences validées sur 31`,
       pass: compsCount >= COMPS_TARGET,
       badge: `${Math.round((compsCount / 31) * 100)}%`,

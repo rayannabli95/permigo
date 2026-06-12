@@ -35,70 +35,99 @@ function notifRoute(n) {
 }
 
 // ─── Icon map ────────────────────────────────────────────────
+// label = étiquette courte affichée au-dessus du titre : l'élève sait en
+// 1 mot de quoi il s'agit (valorisant > générique).
 const TYPE_META = {
-  xp: { iconName: "zap", bg: "color-mix(in srgb, var(--a) 12%, transparent)", color: "var(--a)" },
+  xp: {
+    iconName: "zap",
+    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    color: "var(--a)",
+    label: "Récompense",
+  },
   trophy: {
     iconName: "trophy",
     bg: "rgba(245,158,11,.12)",
     color: "var(--am)",
+    label: "Trophée",
   },
   achievement_unlocked: {
     iconName: "trophy",
     bg: "rgba(245,158,11,.12)",
     color: "var(--am)",
+    label: "Trophée débloqué",
   },
   validation: {
     iconName: "check-circle",
     bg: "rgba(16,185,129,.12)",
     color: "var(--gr)",
+    label: "Compétence validée",
   },
   session_confirmation: {
     iconName: "check-circle",
     bg: "color-mix(in srgb, var(--a) 12%, transparent)",
     color: "var(--a)",
+    label: "Séance à confirmer",
   },
   session_logged: {
     iconName: "check-circle",
     bg: "color-mix(in srgb, var(--a) 12%, transparent)",
     color: "var(--a)",
+    label: "Séance",
   },
   session_confirmed: {
     iconName: "check",
     bg: "rgba(16,185,129,.12)",
     color: "var(--gr)",
+    label: "Séance confirmée",
   },
   session_refused: {
     iconName: "x-circle",
     bg: "rgba(239,68,68,.12)",
     color: "var(--rd)",
+    label: "Séance",
   },
   streak_at_risk: {
     iconName: "flame",
     bg: "rgba(239,68,68,.12)",
     color: "var(--rd)",
+    label: "Ta série",
   },
-  streak: { iconName: "flame", bg: "rgba(239,68,68,.12)", color: "var(--rd)" },
+  streak: {
+    iconName: "flame",
+    bg: "rgba(239,68,68,.12)",
+    color: "var(--rd)",
+    label: "Ta série",
+  },
   consolidation_quiz: {
     iconName: "target",
     bg: "rgba(139,92,246,.12)",
     color: "var(--pu)",
+    label: "Quiz",
   },
   post_validation_quiz: {
     iconName: "target",
     bg: "rgba(139,92,246,.12)",
     color: "var(--pu)",
+    label: "Quiz",
   },
   new_message: {
     iconName: "message-circle",
     bg: "rgba(14,165,233,.12)",
     color: "var(--bl)",
+    label: "Message",
   },
   reminder: {
     iconName: "bell",
     bg: "rgba(14,165,233,.12)",
     color: "var(--bl)",
+    label: "Rappel",
   },
-  info: { iconName: "bell", bg: "rgba(100,116,139,.12)", color: "var(--mu3)" },
+  info: {
+    iconName: "bell",
+    bg: "rgba(100,116,139,.12)",
+    color: "var(--mu3)",
+    label: "Info",
+  },
 };
 function typeMeta(t) {
   return TYPE_META[t] || TYPE_META.info;
@@ -194,63 +223,83 @@ const STYLE = `<style>
 
 /* ── Group label ── */
 .nf2-group-label {
-  padding: 16px 16px 6px;
-  font: 700 11px/1 'Inter', sans-serif; letter-spacing: .05em;
+  padding: 22px 20px 8px;
+  font: 700 11.5px/1 'Inter', sans-serif; letter-spacing: .06em;
   text-transform: uppercase; color: var(--mu2);
-  position: sticky; top: calc(52px + env(safe-area-inset-top,0px) + 58px); z-index: 5;
-  background: var(--bg);
 }
 
-/* ── List ── */
-.nf2-list { background: var(--su); border-top: 1px solid var(--bo); border-bottom: 1px solid var(--bo); }
+/* ── List : cartes aérées (plus de liste plate) ── */
+.nf2-list {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 0 16px;
+}
 
-/* ── Item (swipe container) ── */
+/* ── Item (swipe container = la carte) ── */
 .nf2-item-wrap {
   position: relative; overflow: hidden;
-  border-bottom: 1px solid var(--bo2);
+  border-radius: 16px;
+  border: 1px solid var(--bo);
+  background: var(--su);
+  box-shadow: 0 1px 2px rgba(10,13,26,.04);
 }
-.nf2-item-wrap:last-child { border-bottom: 0; }
 
-/* Delete reveal */
+/* Delete reveal — invisible au repos (sinon le rouge bave sous le bord
+   arrondi de la carte), révélé pendant le swipe uniquement */
 .nf2-delete-bg {
   position: absolute; right: 0; top: 0; bottom: 0;
   width: 72px; background: var(--rd);
   display: flex; align-items: center; justify-content: center;
   color: #fff; font: 600 11px/1 'Inter', sans-serif; gap: 4px;
   flex-direction: column;
-  border-radius: 0;
+  opacity: 0;
 }
+.nf2-item-wrap.swiping .nf2-delete-bg { opacity: 1; }
 
 /* Item row */
 .nf2-item {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 13px 16px; cursor: pointer;
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px; cursor: pointer;
   transition: transform .25s cubic-bezier(.32,.72,0,1), background .1s;
   position: relative; background: var(--su);
   -webkit-tap-highlight-color: transparent;
   user-select: none; touch-action: pan-y;
 }
 .nf2-item:active { background: var(--bg); }
-.nf2-item.unread { background: linear-gradient(90deg, color-mix(in srgb, var(--a) 6%, transparent) 0%, var(--su) 40%); }
-.nf2-item.unread:active { background: linear-gradient(90deg, color-mix(in srgb, var(--a) 10%, transparent) 0%, var(--bg) 60%); }
+/* Non lue : liseré accent à gauche, rien d'autre — un seul signal */
+.nf2-item.unread::before {
+  content: ''; position: absolute; left: 0; top: 10px; bottom: 10px;
+  width: 3px; border-radius: 0 3px 3px 0; background: var(--a);
+}
 .nf2-item-ico {
-  width: 38px; height: 38px; border-radius: 10px;
+  width: 42px; height: 42px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 17px; flex-shrink: 0; margin-top: 1px;
+  flex-shrink: 0;
 }
 .nf2-item-body { flex: 1; min-width: 0; }
+.nf2-item-eyebrow {
+  font: 700 10.5px/1 'Inter', sans-serif;
+  letter-spacing: .06em; text-transform: uppercase;
+  display: flex; align-items: baseline; gap: 6px;
+  margin-bottom: 4px;
+}
+.nf2-item-eyebrow .nf2-when {
+  font: 600 10.5px/1 'Inter', sans-serif;
+  letter-spacing: 0; text-transform: none; color: var(--mu2);
+}
 .nf2-item-title {
-  font: 700 13.5px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink); letter-spacing: -.005em;
-  display: flex; align-items: center; gap: 6px;
+  font: 700 15px/1.3 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink); letter-spacing: -.01em;
+  overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
-.nf2-item-title::before {
-  content: ''; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--a); flex-shrink: 0; opacity: 0; transition: opacity .15s;
+.nf2-item.unread .nf2-item-title { color: var(--ink); }
+.nf2-item:not(.unread) .nf2-item-title { font-weight: 600; color: color-mix(in srgb, var(--ink) 80%, var(--mu)); }
+.nf2-item-desc {
+  font: 500 13px/1.45 'Inter', sans-serif; color: var(--mu); margin-top: 3px;
+  overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
-.nf2-item.unread .nf2-item-title::before { opacity: 1; }
-.nf2-item-desc { font: 500 12px/1.45 'Inter', sans-serif; color: var(--mu); margin-top: 3px; }
-.nf2-item-time { font: 700 10.5px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 5px; }
+.nf2-item-go { flex-shrink: 0; color: var(--mu2); display: flex; }
 
 /* ── Empty ── */
 .nf2-empty {
@@ -365,19 +414,22 @@ async function loadNotifs(root, me) {
     html += `<div class="nf2-group-label">${label}</div><div class="nf2-list">`;
     for (const n of groups[key]) {
       const m = typeMeta(n.type);
+      const route = notifRoute(n);
+      const actionable = route && route !== "#/";
       html += `
         <div class="nf2-item-wrap" data-id="${esc(n.id)}">
           <div class="nf2-delete-bg" aria-label="Supprimer">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             Suppr.
           </div>
-          <div class="nf2-item ${n.read ? "" : "unread"}" data-id="${esc(n.id)}" data-read="${n.read}" data-route="${esc(notifRoute(n))}">
-            <div class="nf2-item-ico" style="background:${m.bg};color:${m.color}">${icon(m.iconName, { size: 18 })}</div>
+          <div class="nf2-item ${n.read ? "" : "unread"}" data-id="${esc(n.id)}" data-read="${n.read}" data-route="${esc(route)}">
+            <div class="nf2-item-ico" style="background:${m.bg};color:${m.color}">${icon(m.iconName, { size: 19 })}</div>
             <div class="nf2-item-body">
+              <div class="nf2-item-eyebrow" style="color:color-mix(in srgb, ${m.color} 65%, var(--ink))">${esc(m.label)} <span class="nf2-when">· ${fmtTime(n.created_at)}</span></div>
               <div class="nf2-item-title">${esc(n.title)}</div>
               ${n.body ? `<div class="nf2-item-desc">${esc(n.body)}</div>` : ""}
-              <div class="nf2-item-time">${fmtTime(n.created_at)}</div>
             </div>
+            ${actionable ? `<div class="nf2-item-go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>` : ""}
           </div>
         </div>`;
     }
@@ -519,9 +571,11 @@ function wireSwipeDelete(wrap, onDelete) {
       const dx = e.touches[0].clientX - startX;
       if (dx > 0) {
         swiping = false;
+        wrap.classList.remove("swiping");
         return;
       } // only left swipe
       curX = Math.max(-80, dx);
+      if (curX < -4) wrap.classList.add("swiping");
       item.style.transition = "none";
       item.style.transform = `translateX(${curX}px)`;
     },
@@ -540,16 +594,18 @@ function wireSwipeDelete(wrap, onDelete) {
         const deleteBg = wrap.querySelector(".nf2-delete-bg");
         if (deleteBg) {
           deleteBg.addEventListener("click", onDelete, { once: true });
-          // Auto-delete after 400ms if not tapped
+          // Auto-retour après 3s si pas tapé
           setTimeout(() => {
             if (!wrap.parentNode) return;
             item.style.transition = "transform .2s ease";
             item.style.transform = "";
+            wrap.classList.remove("swiping");
           }, 3000);
         }
       } else {
         item.style.transition = "transform .2s cubic-bezier(.23,1,.32,1)";
         item.style.transform = "";
+        wrap.classList.remove("swiping");
       }
     },
     { passive: true },

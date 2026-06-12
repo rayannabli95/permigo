@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — Accueil (refonte 3 blocs immersifs)
-// Bloc 1 : HERO (gradient, niveau, XP, streak)
-// Bloc 2 : NEXT MILESTONE (session à confirmer OU récompense)
-// Bloc 3 : ACTION DU JOUR (1 quête / quiz)
+// Élève — Accueil. 3 questions, 3 secondes :
+// 1. Où j'en suis ?        → hero + PERMIS VIRTUEL (dominant)
+// 2. Que dois-je faire ?   → ACTION DU JOUR (1 seul CTA)
+// 3. Mon objectif actuel ? → ligue + mondes + examen blanc
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -28,6 +28,7 @@ import { toast } from "@/components/common/toast.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { startTour } from "@/components/common/guided-tour.js";
+import { renderPermisMini } from "@/components/eleve/permis-card.js";
 
 // Tour guidé élève — 1× à la première arrivée sur l'accueil (l'onboarding
 // plein écran est déjà passé : main.js le monte AVANT cette page).
@@ -50,7 +51,7 @@ const ELEVE_TOUR_STEPS = [
   {
     sel: '.bn-tab[data-id="parcours"]',
     title: "Ton parcours",
-    text: "Ta carte du permis : 4 mondes à traverser, 30 compétences à valider avec ton moniteur.",
+    text: "Ta carte du permis : 4 mondes à traverser, 31 compétences à valider avec ton moniteur.",
   },
   {
     sel: '.bn-tab[data-id="boutique"]',
@@ -102,14 +103,12 @@ const STYLE = `<style>
 @keyframes skel2Shim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
 /* ════════════════════════ BLOC 1 — HERO ═══════════════════════ */
+/* Compact : salutation + flamme. Le permis virtuel (juste dessous,
+   en chevauchement) est L'élément dominant de l'écran. */
 .acc2-hero {
   position: relative;
   overflow: hidden;
-  padding: calc(env(safe-area-inset-top, 0px) + 56px) 24px 32px;
-  min-height: 300px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  padding: calc(env(safe-area-inset-top, 0px) + 68px) 20px 72px;
   background: linear-gradient(160deg, rgba(11,13,26,.72) 0%, rgba(20,35,5,.55) 40%, rgba(11,13,26,.68) 100%), url('/skins/landing/monde4jour.webp') center/cover no-repeat;
 }
 .acc2-hero::before {
@@ -137,18 +136,6 @@ const STYLE = `<style>
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
-}
-.acc2-hero-av {
-  width: 52px; height: 52px;
-  border-radius: var(--r-lg);
-  background: rgba(255,255,255,.18);
-  border: 1.5px solid rgba(255,255,255,.28);
-  backdrop-filter: blur(12px);
-  display: flex; align-items: center; justify-content: center;
-  font: 700 20px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  flex-shrink: 0;
 }
 .acc2-hero-greet { flex: 1; min-width: 0; }
 .acc2-hero-hi {
@@ -176,22 +163,6 @@ const STYLE = `<style>
   border-radius: var(--r);
   padding: 8px 12px;
   margin-top: 10px;
-}
-.acc2-hero-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-.acc2-hero-xp-pill {
-  display: flex; align-items: center; gap: 6px;
-  background: rgba(255,255,255,.14);
-  border: 1px solid rgba(255,255,255,.2);
-  border-radius: var(--r-full);
-  padding: 7px 12px;
-  font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
 }
 /* Streak EN VEDETTE : la flamme 3D (asset) + compteur, en haut à droite */
 .acc2-hero-streak {
@@ -221,35 +192,25 @@ const STYLE = `<style>
 .acc2-hero-streak-num b { font: 800 14px/1 'Plus Jakarta Sans', sans-serif; color: #ffb35c; }
 .acc2-hero-streak-num i { font: 600 9.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.85); font-style: normal; }
 @media (prefers-reduced-motion: reduce) { .acc2-hero-streak-img { animation: none !important; } }
-.acc2-xp-bar-wrap { display: flex; flex-direction: column; gap: 5px; }
-.acc2-xp-bar {
-  height: 5px;
-  background: rgba(255,255,255,.2);
-  border-radius: var(--r-full);
-  overflow: hidden;
+
+/* ═══════════ PERMIS VIRTUEL — l'élément dominant ═══════════════ */
+.acc2-permis {
+  margin: -52px 16px 0;
+  position: relative;
+  z-index: 2;
+  animation: acc2PermisIn .55s .05s var(--ease-spring) both;
 }
-.acc2-xp-fill {
-  height: 100%;
-  background: rgba(255,255,255,.85);
-  border-radius: var(--r-full);
-  transition: width 1s var(--ease-out);
-}
-.acc2-xp-fill.is-max {
-  background: var(--am);
-  box-shadow: 0 0 10px rgba(245,158,11,.7);
-}
-.acc2-xp-hint {
-  font: 500 10.5px/1 'Inter', sans-serif;
-  color: rgba(255,255,255,.55);
+@keyframes acc2PermisIn {
+  from { opacity: 0; transform: translateY(14px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ══════════════════ BLOC 2 — NEXT MILESTONE ════════════════════ */
+/* ══════════ BLOC 2 — SÉANCE À CONFIRMER (si en attente) ════════ */
 .acc2-ms {
-  margin: 20px 16px 0;
+  margin: 24px 16px 0;
   border-radius: 28px;
   overflow: hidden;
   position: relative;
-  min-height: 200px;
   animation: acc2MsIn .55s .1s var(--ease-spring) both;
 }
 @keyframes acc2MsIn {
@@ -326,122 +287,9 @@ const STYLE = `<style>
 }
 .acc2-ms-session-btn:active { transform: scale(.96); opacity: .9; }
 
-/* Next reward */
-.acc2-ms-reward {
-  background: linear-gradient(135deg, var(--a) 0%, var(--adk) 100%);
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 20px 40px -12px color-mix(in srgb, var(--a) 35%, transparent), 0 6px 16px rgba(10,13,26,.15);
-}
-.acc2-ms-reward::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 70% 80% at 85% 20%, rgba(255,255,255,.16) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 15% 90%, rgba(255,255,255,.08) 0%, transparent 50%);
-  pointer-events: none;
-}
-.acc2-ms-reward-inner { position: relative; z-index: 1; }
-.acc2-ms-reward-label {
-  font: 600 10px/1 'Inter', sans-serif;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.55);
-  margin-bottom: 16px;
-}
-.acc2-ms-reward-top {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-.acc2-ms-reward-icon {
-  width: 60px; height: 60px;
-  border-radius: var(--rl);
-  background: rgba(255,255,255,.18);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,.25);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  color: #fff;
-}
-.acc2-ms-mascot {
-  width: 76px; height: 76px; object-fit: contain; flex-shrink: 0;
-  filter: drop-shadow(0 6px 14px rgba(0,0,0,.28));
-  animation: acc2MascotIn .5s var(--ease-spring) both, acc2MascotFloat 3s ease-in-out .5s infinite;
-}
-@keyframes acc2MascotIn { from { opacity: 0; transform: scale(.5) } to { opacity: 1; transform: scale(1) } }
-@keyframes acc2MascotFloat { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
-@media (prefers-reduced-motion: reduce) { .acc2-ms-mascot { animation: acc2MascotIn .5s both } }
-.acc2-ms-reward-info { flex: 1; min-width: 0; }
-.acc2-ms-reward-remaining {
-  font: 800 26px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  letter-spacing: -0.03em;
-  margin-bottom: 4px;
-}
-.acc2-ms-reward-remaining span {
-  font: 500 13px/1 'Inter', sans-serif;
-  color: rgba(255,255,255,.65);
-  letter-spacing: 0;
-}
-.acc2-ms-reward-name {
-  font: 600 13px/1.3 'Inter', sans-serif;
-  color: rgba(255,255,255,.8);
-}
-/* État terminal « Parcours complété » — contraste renforcé sur fond vert */
-.acc2-ms-done-title {
-  font: 800 19px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  letter-spacing: -.02em;
-  margin-bottom: 4px;
-}
-.acc2-ms-done-sub {
-  font: 600 13.5px/1.4 'Inter', sans-serif;
-  color: rgba(255,255,255,.95);
-}
-.acc2-ms-prog-bar {
-  height: 8px;
-  background: rgba(255,255,255,.2);
-  border-radius: var(--r-full);
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-.acc2-ms-prog-fill {
-  height: 100%;
-  background: rgba(255,255,255,.9);
-  border-radius: var(--r-full);
-  transition: width 1s .15s var(--ease-out);
-}
-.acc2-ms-prog-meta {
-  display: flex;
-  justify-content: space-between;
-  font: 500 11px/1 'Inter', sans-serif;
-  color: rgba(255,255,255,.6);
-  margin-bottom: 16px;
-}
-.acc2-ms-cta-btn {
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  width: 100%;
-  padding: 14px 20px;
-  background: rgba(255,255,255,.16);
-  border: 1.5px solid rgba(255,255,255,.3);
-  border-radius: var(--r-lg);
-  color: #fff;
-  font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
-  cursor: pointer;
-  min-height: 50px;
-  backdrop-filter: blur(8px);
-  -webkit-tap-highlight-color: transparent;
-  transition: background .12s, transform .12s;
-}
-.acc2-ms-cta-btn:active { background: rgba(255,255,255,.25); transform: scale(.98); }
-
 /* ═══════════════════ BLOC 3 — ACTION DU JOUR ══════════════════ */
 .acc2-action {
-  margin: 16px 16px 0;
+  margin: 24px 16px 0;
   background: var(--su);
   border: 1.5px solid var(--bo);
   border-radius: var(--rx);
@@ -477,13 +325,13 @@ const STYLE = `<style>
   margin-bottom: 6px;
 }
 .acc2-action-sub {
-  font: 500 13px/1.4 'Inter', sans-serif;
+  font: 500 13.5px/1.4 'Inter', sans-serif;
   color: var(--mu);
-  margin-bottom: 18px;
 }
 .acc2-action-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%;
+  margin-top: 16px;
   padding: 16px 24px;
   background: var(--a);
   border: none;
@@ -500,11 +348,11 @@ const STYLE = `<style>
 
 /* ═══════════════════════ BELOW FOLD ═══════════════════════════ */
 .acc2-section-title {
-  font: 600 11px/1 'Inter', sans-serif;
+  font: 600 12px/1 'Inter', sans-serif;
   text-transform: uppercase;
   letter-spacing: .1em;
   color: var(--mu2);
-  margin: 28px 20px 12px;
+  margin: 32px 20px 14px;
 }
 
 /* ── Chest teaser ── */
@@ -534,7 +382,7 @@ const STYLE = `<style>
   color: var(--ink);
 }
 .acc2-ct-sub {
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 500 12.5px/1 'Inter', sans-serif;
   color: var(--mu);
   margin-top: 3px;
 }
@@ -569,74 +417,47 @@ const STYLE = `<style>
 @keyframes worldFloat2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 @media (prefers-reduced-motion: reduce) { .world-card[data-complete="true"] .world-img { animation: none; } }
 .world-pct  { font: 700 13px/1 'Inter', sans-serif; }
-.world-name { font: 600 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-bottom: 8px; }
+.world-name { font: 600 12.5px/1.3 'Inter', sans-serif; color: var(--mu2); margin-bottom: 8px; }
 .world-track { height: 4px; background: var(--bo); border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
 .world-fill  { height: 100%; border-radius: 2px; transition: width .5s ease; }
-.world-count { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); }
+.world-count { font: 500 11.5px/1 'Inter', sans-serif; color: var(--mu2); }
 .world-crown { position: absolute; top: 10px; right: 10px; }
 
-.trophees-row {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding: 0 16px 6px;
-  margin-bottom: 8px;
-  scrollbar-width: none;
+/* ── Examen blanc — verrouillé jusqu'au monde 3, sinon CTA ── */
+.acc2-exam {
+  margin: 28px 16px 0;
+  padding: 18px;
+  border-radius: var(--rx);
+  display: flex; align-items: center; gap: 14px;
+  -webkit-tap-highlight-color: transparent;
 }
-.trophees-row::-webkit-scrollbar { display: none; }
-.trophy-card {
-  flex-shrink: 0; width: 120px;
+.acc2-exam.locked {
   background: var(--su);
-  border: 1.5px solid var(--bo);
-  border-radius: var(--r-xl);
-  padding: 14px 10px;
-  text-align: center;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04);
+  border: 1.5px dashed var(--bo4);
+}
+.acc2-exam.unlocked {
+  background: linear-gradient(135deg, var(--adk) 0%, var(--a) 100%);
   cursor: pointer;
-  transition: transform .14s var(--ease-snap);
+  box-shadow: 0 12px 28px -10px color-mix(in srgb, var(--a) 50%, transparent);
+  transition: transform .15s var(--ease-spring);
 }
-.trophy-card:active { transform: scale(.97); }
-.trophy-unlocked {
-  border-color: color-mix(in srgb, var(--tc) 35%, transparent);
-  background: color-mix(in srgb, var(--tc) 6%, #fff);
-  position: relative; overflow: hidden;
+.acc2-exam.unlocked:active { transform: scale(.98); }
+.acc2-exam-ico {
+  width: 44px; height: 44px;
+  border-radius: var(--r-lg);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.trophy-unlocked::after {
-  content: '';
-  position: absolute; top: -50%; left: -50%;
-  width: 200%; height: 200%;
-  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.14) 50%, transparent 60%);
-  animation: shimmerTrophy 2.5s ease-in-out infinite;
-}
-@keyframes shimmerTrophy { 0% { transform: translateX(-100%) rotate(15deg); } 100% { transform: translateX(100%) rotate(15deg); } }
-.trophy-ico     { font-size: 28px; line-height: 1; margin-bottom: 8px; display: block; }
-.trophy-ico-dim { opacity: .35; filter: grayscale(1); }
-.trophy-label   { font: 600 11px/1.3 'Inter', sans-serif; color: var(--ink); margin-bottom: 4px; }
-.trophy-state   { font: 500 10px/1 'Inter', sans-serif; color: var(--mu2); }
-.trophy-unlocked .trophy-state { color: var(--tc); }
-.trophy-next-bar { height: 3px; background: var(--bo); border-radius: 2px; overflow: hidden; margin: 5px 0 4px; }
-.trophy-next-fill { height: 100%; border-radius: 2px; }
-.trophees-empty {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;
-  padding: 20px; background: var(--bg); border: 1.5px dashed #d1d8ee;
-  border-radius: var(--r-xl); text-align: center;
-}
-.trophees-empty-ico { font-size: 28px; opacity: .3; }
-.trophees-empty-txt { font: 500 12px/1.5 'Inter', sans-serif; color: var(--mu2); }
-
-.acc2-footer {
-  display: flex; align-items: center; gap: 16px;
-  padding: 16px 20px;
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: var(--r-xl);
-  margin: 0 16px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04);
-}
-.footer-stat { flex: 1; }
-.footer-val  { font: 800 20px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 3px; }
-.footer-lbl  { font: 500 11px/1.3 'Inter', sans-serif; color: var(--mu2); }
-.footer-sep  { width: 1px; height: 38px; background: var(--bo); flex-shrink: 0; }
+.acc2-exam.locked .acc2-exam-ico { background: var(--bg3); color: var(--mu2); }
+.acc2-exam.unlocked .acc2-exam-ico { background: rgba(255,255,255,.18); color: #fff; }
+.acc2-exam-tx { flex: 1; min-width: 0; }
+.acc2-exam-t { font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif; }
+.acc2-exam.locked .acc2-exam-t { color: var(--mu); }
+.acc2-exam.unlocked .acc2-exam-t { color: #fff; }
+.acc2-exam-s { font: 500 13px/1.35 'Inter', sans-serif; margin-top: 3px; }
+.acc2-exam.locked .acc2-exam-s { color: var(--mu2); }
+.acc2-exam.unlocked .acc2-exam-s { color: rgba(255,255,255,.85); }
+.acc2-exam-arrow { flex-shrink: 0; color: #fff; display: flex; }
 
 /* Leaderboard slot */
 .acc-lb {
@@ -692,7 +513,7 @@ const STYLE = `<style>
   font: 700 11px/1 'Inter', sans-serif; color: var(--am-txt);
   background: rgba(245,158,11,.14); border-radius: var(--r-full); padding: 4px 9px;
 }
-.acc-lb-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
+.acc-lb-sub { font: 500 12.5px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 
 .acc-lb-arrow {
   flex-shrink: 0; color: var(--a-txt); display: flex; align-items: center;
@@ -748,17 +569,6 @@ const STYLE = `<style>
 </style>`;
 
 // ─── Constantes ──────────────────────────────────────────────────
-const XP_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2200, 3000];
-const LEVEL_NAMES = [
-  "",
-  "Débutant",
-  "Apprenti",
-  "Conducteur",
-  "Confirmé",
-  "Expert",
-  "Pro",
-  "As du Volant",
-];
 const WORLD_IMAGES = [
   ASSETS.worldC1,
   ASSETS.worldC2,
@@ -772,16 +582,16 @@ const WORLDS = REMC.map((cat, i) => ({
   name: cat.name,
   subs: cat.subs,
   total: cat.subs.length,
-  color: ["var(--grk2)", "var(--blk2)", "var(--amx)", "var(--puk)"][i], // variantes foncées : % lisible (AA) sur fond clair
+  // Une seule couleur (le thème) : la couleur guide l'attention, elle ne décore pas.
+  color: "var(--adk)",
 }));
+
+// L'examen blanc s'ouvre quand le monde 3 devient accessible
+// (même règle que le parcours : 6 compétences du monde 2 acquises).
+const EXAM_UNLOCK_WORLD2_DONE = 6;
 
 // Jours d'absence depuis la visite précédente (calculé au mount, lu au render)
 let _awayDays = 0;
-
-// XP lisible : « 63 200 » au lieu de « 63200 »
-function _fmtXp(n) {
-  return (n ?? 0).toLocaleString("fr-FR");
-}
 
 // Salutation contextuelle. Revisite dans la même journée → message chaleureux.
 const LS_LAST_VISIT = "pg-last-visit";
@@ -833,7 +643,9 @@ export async function mount(root) {
       await Promise.allSettled([
         sb
           .from("profiles")
-          .select("prenom, xp, last_active_at, first_value_action_at, gemmes")
+          .select(
+            "prenom, nom, created_at, last_active_at, first_value_action_at, gemmes",
+          )
           .eq("id", me.id)
           .maybeSingle(),
         sb
@@ -873,7 +685,6 @@ export async function mount(root) {
 
     const profile = profileRes.value?.data || {
       prenom: me.prenom || "Toi",
-      xp: 0,
     };
     const rawStreak = streakRes.value?.data || {
       current_streak: 0,
@@ -922,9 +733,7 @@ export async function mount(root) {
 
     ensureHeatmapStyles();
 
-    const lvl = computeLevel(profile.xp || 0);
     const worlds = computeWorlds(validated);
-    const trophees = computeTrophees(worlds);
     const streakSt = streakStatus(streak);
     const gemmes = profile.gemmes || 0;
 
@@ -947,11 +756,9 @@ export async function mount(root) {
     root.innerHTML = render({
       me,
       profile,
-      lvl,
       streak,
       streakSt,
       worlds,
-      trophees,
       activityDays,
       gemmes,
       pendingSessions,
@@ -1007,9 +814,6 @@ export async function mount(root) {
     // Coffres disponibles — teaser non-bloquant injecté sous l'action du jour
     _loadAndInjectChests(root);
 
-    // Crystal Ball — prédiction de réussite (au-dessus du parcours REMC)
-    _loadAndInjectCrystalBall(root).catch(() => {});
-
     // Onboarding premier login : géré en amont par main.js (page plein écran
     // pages/onboarding/index.js, gate first_value_action_at). Rien à faire ici.
 
@@ -1035,42 +839,12 @@ export async function mount(root) {
 }
 
 // ─── Logique métier ───────────────────────────────────────────────
-function computeLevel(xp) {
-  let level = 1;
-  for (let i = 1; i < XP_THRESHOLDS.length; i++) {
-    if (xp >= XP_THRESHOLDS[i]) level = i + 1;
-    else break;
-  }
-  const min = XP_THRESHOLDS[level - 1] ?? 0;
-  const max = XP_THRESHOLDS[level] ?? XP_THRESHOLDS.at(-1);
-  const pct =
-    max > min
-      ? Math.min(100, Math.round(((xp - min) / (max - min)) * 100))
-      : 100;
-  return {
-    level,
-    name: LEVEL_NAMES[level] ?? `Niv. ${level}`,
-    xp,
-    min,
-    max,
-    pct,
-  };
-}
-
 function computeWorlds(validatedIds) {
   return WORLDS.map((w) => {
     const done = w.subs.filter((s) => validatedIds.has(s.c)).length;
     const pct = w.total > 0 ? Math.round((done / w.total) * 100) : 0;
     return { ...w, done, pct, complete: w.total > 0 && done === w.total };
   });
-}
-
-function computeTrophees(worlds) {
-  const unlocked = worlds.filter((w) => w.complete);
-  const inProgress = worlds
-    .filter((w) => !w.complete)
-    .sort((a, b) => b.pct - a.pct);
-  return { unlocked, nextUp: inProgress[0] ?? null };
 }
 
 function streakStatus(streak) {
@@ -1085,11 +859,9 @@ function streakStatus(streak) {
 function render({
   me,
   profile,
-  lvl,
   streak,
   streakSt,
   worlds,
-  trophees,
   activityDays,
   gemmes,
   pendingSessions,
@@ -1099,19 +871,12 @@ function render({
 }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom = profile.prenom || me.prenom || "Toi";
-  const initials = prenom.slice(0, 2).toUpperCase();
-  const heroAv = getEquippedAsset("avatar") || me.avatar_url || null;
   const isActive = streakSt !== "broken";
-  // État terminal : dernier niveau atteint (pas de palier suivant) ET barre pleine
-  const isMaxLevel = !LEVEL_NAMES[lvl.level + 1] && lvl.pct === 100;
 
-  // ── BLOC 2 content ──
+  // ── Séance à confirmer (priorité absolue quand présente) ──
   const pendingSession = pendingSessions?.[0] ?? null;
-  const bloc2 = pendingSession
-    ? renderSessionConfirm(pendingSession)
-    : renderNextReward(totalValidated, worlds, trophees);
 
-  // ── BLOC 3 content ──
+  // ── ACTION DU JOUR ──
   // Priorité : quête > notif quiz > QUESTION DU JOUR (boucle quotidienne) > parcours.
   // mountDailyQuests gère le carrousel claim séparé (sous ce bloc).
   const _pendingQuest = !pendingNotif
@@ -1126,14 +891,16 @@ function render({
     dailyQuiz,
   );
 
+  // Examen blanc : s'ouvre quand le monde 3 devient accessible.
+  const examUnlocked = (worlds[1]?.done ?? 0) >= EXAM_UNLOCK_WORLD2_DONE;
+
   return `${STYLE}
 <div class="acc2">
 
-  <!-- ══ BLOC 1 — HERO ══ -->
+  <!-- ══ HERO compact — salutation + flamme ══ -->
   <div class="acc2-hero">
     <div class="acc2-hero-content">
       <div class="acc2-hero-top">
-        <div class="acc2-hero-av">${heroAv ? `<img src="${esc(heroAv)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block">` : esc(initials)}</div>
         <div class="acc2-hero-greet">
           <span class="acc2-hero-hi">${esc(_greeting(_awayDays))}</span>
           <h1 class="acc2-hero-name" tabindex="-1">${esc(prenom)}</h1>
@@ -1156,33 +923,30 @@ function render({
           ? `<div class="acc2-hero-back">Ta route t'attend depuis ${_awayDays} jours — reprends là où tu t'étais arrêté.</div>`
           : ""
       }
-      <div class="acc2-hero-meta">
-        <div class="acc2-hero-xp-pill">${lvl.name && !/^Niv\./.test(lvl.name) ? `Niv. ${lvl.level} · ${esc(lvl.name)}` : `Niv. ${lvl.level}`}</div>
-      </div>
-      <div class="acc2-xp-bar-wrap">
-        <div class="acc2-xp-bar">
-          <div class="acc2-xp-fill${isMaxLevel ? " is-max" : ""}" style="width:0%" data-target="${lvl.pct}"></div>
-        </div>
-        <span class="acc2-xp-hint">${
-          isMaxLevel
-            ? `${_fmtXp(lvl.xp)} XP · niveau max atteint`
-            : `${_fmtXp(lvl.xp)} XP · ${lvl.pct}% vers ${esc(LEVEL_NAMES[lvl.level + 1] ?? "max")}`
-        }</span>
-      </div>
     </div>
   </div>
 
-  <!-- ══ ACTION DU JOUR — la boucle quotidienne, PREMIÈRE chose visible ══ -->
+  <!-- ══ PERMIS VIRTUEL — où j'en suis, en 1 coup d'œil ══ -->
+  <div class="acc2-permis" id="acc-permis">
+    ${renderPermisMini({
+      prenom,
+      nom: profile.nom || me.nom || "",
+      created_at: profile.created_at || me.created_at || null,
+      validated: totalValidated,
+      total: 31,
+    })}
+  </div>
+
+  ${pendingSession ? `<div class="acc2-ms">${renderSessionConfirm(pendingSession)}</div>` : ""}
+
+  <!-- ══ ACTION DU JOUR — le seul bouton à presser ══ -->
   ${bloc3}
 
   <!-- Classement de l'école (ligue en vedette) -->
   <div id="acc-lb-slot"></div>
 
-  <!-- ══ NEXT MILESTONE ══ -->
-  <div class="acc2-ms">${bloc2}</div>
-
   <!-- ══ BELOW FOLD ══ -->
-  <div class="acc2-section-title">Mon parcours REMC</div>
+  <div class="acc2-section-title">Mon parcours</div>
   <div class="worlds-grid">
     ${worlds
       .map(
@@ -1206,23 +970,27 @@ function render({
       .join("")}
   </div>
 
-  <!-- Stats footer -->
-  <div class="acc2-footer">
-    <div class="footer-stat">
-      <div class="footer-val">${totalValidated}<span style="font-size:.55em;color:var(--mu2)">/31</span></div>
-      <div class="footer-lbl">compétences acquises</div>
+  <!-- ══ EXAMEN BLANC — verrouillé jusqu'au monde 3 ══ -->
+  ${
+    examUnlocked
+      ? `
+  <div class="acc2-exam unlocked" id="acc-exam" role="button" tabindex="0" aria-label="Passer l'examen blanc">
+    <div class="acc2-exam-ico">${icon("target", { size: 20 })}</div>
+    <div class="acc2-exam-tx">
+      <div class="acc2-exam-t">Examen blanc</div>
+      <div class="acc2-exam-s">Mets-toi en conditions réelles</div>
     </div>
-    <div class="footer-sep"></div>
-    <div class="footer-stat">
-      ${
-        totalValidated >= 28
-          ? `<div class="footer-val" style="color:var(--gr-txt)">✓</div>
-      <div class="footer-lbl">examen blanc débloqué</div>`
-          : `<div class="footer-val">${28 - totalValidated}</div>
-      <div class="footer-lbl">avant l'examen blanc</div>`
-      }
+    <div class="acc2-exam-arrow">${icon("arrow-right", { size: 18 })}</div>
+  </div>`
+      : `
+  <div class="acc2-exam locked" aria-label="Examen blanc verrouillé — se débloque au monde 3">
+    <div class="acc2-exam-ico">${icon("lock", { size: 18 })}</div>
+    <div class="acc2-exam-tx">
+      <div class="acc2-exam-t">Examen blanc</div>
+      <div class="acc2-exam-s">Se débloque au monde 3</div>
     </div>
-  </div>
+  </div>`
+  }
 
 </div>
 
@@ -1288,61 +1056,6 @@ function renderSessionConfirm(session) {
     </div>`;
 }
 
-function renderNextReward(totalValidated, worlds, trophees) {
-  // Calcule la prochaine récompense : monde le plus avancé non terminé
-  const nextWorld = trophees.nextUp;
-  if (!nextWorld) {
-    return `
-      <div class="acc2-ms-reward">
-        <div class="acc2-ms-reward-inner">
-          <div class="acc2-ms-reward-label">Parcours complété !</div>
-          <div class="acc2-ms-reward-top">
-            <img class="acc2-ms-mascot" src="/skins/mascot-celebrate.png" alt="" aria-hidden="true" />
-            <div class="acc2-ms-reward-info">
-              <div class="acc2-ms-done-title">Tous les mondes maîtrisés</div>
-              <div class="acc2-ms-done-sub">Tu es prêt pour l'examen</div>
-            </div>
-          </div>
-          <button class="acc2-ms-cta-btn" data-href="#/trophees">
-            Voir mes trophées ${icon("arrow-right", { size: 14 })}
-          </button>
-        </div>
-      </div>`;
-  }
-
-  const remaining = nextWorld.total - nextWorld.done;
-  const pct = nextWorld.pct;
-
-  return `
-    <div class="acc2-ms-reward">
-      <div class="acc2-ms-reward-inner">
-        <div class="acc2-ms-reward-label">Prochain objectif</div>
-        <div class="acc2-ms-reward-top">
-          <div class="acc2-ms-reward-icon">
-            ${icon(nextWorld.ico, { size: 28, strokeWidth: 1.5 })}
-          </div>
-          <div class="acc2-ms-reward-info">
-            <div class="acc2-ms-reward-remaining">
-              ${remaining}
-              <span>compétence${remaining > 1 ? "s" : ""} restante${remaining > 1 ? "s" : ""}</span>
-            </div>
-            <div class="acc2-ms-reward-name">Trophée ${esc(nextWorld.name)}</div>
-          </div>
-        </div>
-        <div class="acc2-ms-prog-bar">
-          <div class="acc2-ms-prog-fill" style="width:0%" data-target="${pct}"></div>
-        </div>
-        <div class="acc2-ms-prog-meta">
-          <span>${nextWorld.done}/${nextWorld.total} compétences</span>
-          <span>${pct}%</span>
-        </div>
-        <button class="acc2-ms-cta-btn" data-href="#/parcours">
-          Continuer le parcours ${icon("arrow-right", { size: 14 })}
-        </button>
-      </div>
-    </div>`;
-}
-
 function renderActionDuJour(quest, pendingNotif, totalValidated, dailyQuiz) {
   let label = "Action du jour";
   let title,
@@ -1361,45 +1074,35 @@ function renderActionDuJour(quest, pendingNotif, totalValidated, dailyQuiz) {
     urgent = false;
   } else if (pendingNotif?.data?.competence_id) {
     const isConsolid = pendingNotif.type === "consolidation_quiz";
-    title = isConsolid ? "Quiz de consolidation" : "Quiz-récap (optionnel)";
-    sub = isConsolid
-      ? "2 questions · 30 secondes · Renforce ta mémoire"
-      : "Compétence déjà acquise — un petit récap pour le plaisir.";
+    title = isConsolid ? "Quiz de consolidation" : "Quiz-récap";
+    sub = isConsolid ? "2 questions · 30 sec" : "3 questions · optionnel";
     btnText = isConsolid ? "Commencer →" : "Faire le récap →";
     href = `#/quiz/${pendingNotif.data.competence_id}/${isConsolid ? "consolidation" : "post_validation"}`;
     urgent = isConsolid;
   } else if (dailyQuiz && !dailyQuiz.done && dailyQuiz.competenceId) {
     // Question du jour — LA boucle solo quotidienne (plan rétention).
-    // Récompense vedette = la ligue théorique (l'anim de gain est déjà
-    // branchée dans le quiz-engine) ; la série monte en silence.
     label = "Question du jour";
     title =
       dailyQuiz.mode === "decouverte"
         ? "Découvre une compétence"
         : "Ne perds pas ce que tu maîtrises";
-    sub =
-      dailyQuiz.mode === "decouverte"
-        ? "3 questions · 2 min · Sans pression, on apprend ensemble"
-        : "3 questions · 2 min · Garde ton avance dans la ligue Théorie";
+    sub = "3 questions · 2 min";
     btnText = "Je joue";
     href = `#/quiz/${dailyQuiz.competenceId}/post_validation/daily`;
   } else if (dailyQuiz?.done) {
     label = "Question du jour";
     title = "C'est fait pour aujourd'hui ✓";
-    sub =
-      "Ta question du jour est dans la boîte. Reviens demain — ou avance sur ton parcours.";
+    sub = "Reviens demain — ou avance sur ton parcours.";
     btnText = "Voir le parcours";
     href = "#/parcours";
   } else if (totalValidated === 0) {
-    title = "Lance ton parcours REMC";
-    sub = "Découvre les 31 compétences à maîtriser avant l'examen";
+    title = "Lance ton parcours";
+    sub = "31 compétences à valider avec ton moniteur";
     btnText = "Voir le parcours";
     href = "#/parcours";
   } else {
-    // L'examen blanc est désormais le point d'entrée unique via la Boule de
-    // cristal (cf. C8). L'action du jour reste sur la continuation du parcours.
     title = "Continue ton parcours";
-    sub = "Avance vers ta prochaine compétence REMC";
+    sub = "";
     btnText = "Voir le parcours";
     href = "#/parcours";
   }
@@ -1412,7 +1115,7 @@ function renderActionDuJour(quest, pendingNotif, totalValidated, dailyQuiz) {
         ${urgent ? `<span style="color: var(--rd-txt);font-weight:700">URGENT</span>` : ""}
       </div>
       <div class="acc2-action-title">${esc(title)}</div>
-      <div class="acc2-action-sub">${esc(sub)}</div>
+      ${sub ? `<div class="acc2-action-sub">${esc(sub)}</div>` : ""}
       <button class="acc2-action-btn" id="action-cta-btn" data-href="${esc(href)}">
         ${esc(btnText)}
         ${icon("arrow-right", { size: 16 })}
@@ -1433,19 +1136,44 @@ function wire(
     pendingNotif,
   },
 ) {
-  // XP bar animation
-  const xpFill = root.querySelector(".acc2-xp-fill[data-target]");
-  if (xpFill)
+  // Permis virtuel : barre animée + tap → parcours
+  const pcmFill = root.querySelector(".pcm-fill[data-target]");
+  if (pcmFill)
     setTimeout(() => {
-      xpFill.style.width = xpFill.dataset.target + "%";
-    }, 120);
+      pcmFill.style.width = pcmFill.dataset.target + "%";
+    }, 150);
+  const permisCard = root.querySelector("#acc-permis .pcm");
+  if (permisCard) {
+    const openParcours = () => {
+      haptic("tap");
+      track("cta.clicked", { cta_type: "permis_card" });
+      navigate("#/parcours");
+    };
+    permisCard.addEventListener("click", openParcours);
+    permisCard.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openParcours();
+      }
+    });
+  }
 
-  // BLOC 2 progress bar animation
-  const msFill = root.querySelector(".acc2-ms-prog-fill[data-target]");
-  if (msFill)
-    setTimeout(() => {
-      msFill.style.width = msFill.dataset.target + "%";
-    }, 300);
+  // Examen blanc (carte déverrouillée uniquement)
+  const examCard = root.querySelector("#acc-exam");
+  if (examCard) {
+    const openExam = () => {
+      haptic("select");
+      track("cta.clicked", { cta_type: "exam_blanc_card" });
+      navigate("#/exam-blanc");
+    };
+    examCard.addEventListener("click", openExam);
+    examCard.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openExam();
+      }
+    });
+  }
 
   // Streak badge → bottom sheet
   const bsBg = root.querySelector("#bs-bg");
@@ -1522,16 +1250,6 @@ function wire(
       navigate(`#/sessions/${sessionId}`);
     });
 
-  // BLOC 2 CTA (next reward btn)
-  root.querySelector(".acc2-ms-cta-btn")?.addEventListener("click", (e) => {
-    const href = e.currentTarget.dataset.href;
-    if (href) {
-      haptic("tap");
-      track("cta.clicked", { cta_type: "ms_cta" });
-      navigate(href);
-    }
-  });
-
   // BLOC 3 action btn
   root.querySelector("#action-cta-btn")?.addEventListener("click", (e) => {
     const href = e.currentTarget.dataset.href;
@@ -1547,14 +1265,6 @@ function wire(
     el.addEventListener("click", () => {
       track("cta.clicked", { cta_type: "world_card", world: el.dataset.world });
       navigate("#/parcours");
-    });
-  });
-
-  // Trophy cards → trophées
-  root.querySelectorAll(".trophy-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      track("cta.clicked", { cta_type: "trophy_card" });
-      navigate("#/trophees");
     });
   });
 }
@@ -1579,9 +1289,10 @@ async function _loadAndInjectLeaderboard(root) {
     const bodyText = ranked
       ? `Tu es #${rank} sur ${total}`
       : "Personne devant toi… pour l'instant";
+    // Une seule ligne secondaire : le chip « Top X% » dit déjà l'essentiel
     const sub = ranked
       ? pct !== null
-        ? `Dans le top ${100 - pct}% de ton auto-école`
+        ? ""
         : "Garde le rythme pour grimper"
       : "Invite tes potes pour lancer la course";
 
@@ -1593,7 +1304,7 @@ async function _loadAndInjectLeaderboard(root) {
         <div class="acc-lb-main">
           <div class="acc-lb-eyebrow">Classement de l'école</div>
           <div class="acc-lb-body">${esc(bodyText)}${chip}</div>
-          <div class="acc-lb-sub">${esc(sub)}</div>
+          ${sub ? `<div class="acc-lb-sub">${esc(sub)}</div>` : ""}
         </div>
         <div class="acc-lb-arrow">${ARROW}</div>
       </div>`;
@@ -1615,162 +1326,6 @@ async function _loadAndInjectLeaderboard(root) {
     });
   } catch (e) {
     console.error("[accueil] leaderboard", e);
-  }
-}
-
-async function _loadAndInjectCrystalBall(root) {
-  try {
-    // Verrou SYNCHRONE avant le await : sans lui, deux appels concurrents
-    // passent tous deux la garde #acc-crystal avant que l'un n'insère la carte
-    // → double injection (HTML invalide, id dupliqué). Le flag est posé
-    // de façon synchrone, donc un 2e appel sort immédiatement.
-    if (root.querySelector("#acc-crystal") || root.dataset.cbLoading) return;
-    root.dataset.cbLoading = "1";
-    const { data } = await sb.rpc("get_my_prediction");
-    const p = Array.isArray(data) ? data[0] : data;
-    if (!p) return;
-
-    const anchor = root.querySelector(".acc2-section-title");
-    if (!anchor) return;
-
-    if (!document.getElementById("acc-crystal-styles")) {
-      const st = document.createElement("style");
-      st.id = "acc-crystal-styles";
-      st.textContent = `
-        .acc2-crystal{margin:18px 16px 0;padding:20px 20px 24px;border-radius:var(--rx);color:#fff;position:relative;overflow:hidden;
-          background:linear-gradient(160deg,#3b1f8f 0%,#5b21b6 45%,#2e2a72 100%);box-shadow:0 14px 40px -12px rgba(91,33,182,.7);
-          animation:cbIn .45s var(--ease-snap)}
-        @keyframes cbIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        .acc2-crystal::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.7;
-          background:radial-gradient(1px 1px at 18% 24%,rgba(255,255,255,.55),transparent),
-                     radial-gradient(1px 1px at 72% 16%,rgba(255,255,255,.45),transparent),
-                     radial-gradient(1.5px 1.5px at 88% 58%,rgba(255,255,255,.4),transparent),
-                     radial-gradient(1px 1px at 38% 82%,rgba(255,255,255,.32),transparent),
-                     radial-gradient(1px 1px at 60% 90%,rgba(255,255,255,.3),transparent)}
-        .acc2-cb-head{display:flex;align-items:center;gap:8px;font:700 12px/1 'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:14px;position:relative;z-index:2}
-        /* ── Boule de cristal (CSS) ── */
-        .cb-stage{display:flex;justify-content:center;position:relative;z-index:2}
-        .cb-orb{position:relative;width:150px;height:150px;display:flex;align-items:center;justify-content:center}
-        .cb-orb-glow{position:absolute;inset:-20%;border-radius:50%;filter:blur(7px);
-          background:radial-gradient(circle,rgba(167,139,250,.7) 0%,rgba(139,92,246,.28) 45%,transparent 70%);
-          animation:cbAura 3.4s ease-in-out infinite}
-        @keyframes cbAura{0%,100%{opacity:.5;transform:scale(.95)}50%{opacity:1;transform:scale(1.07)}}
-        .cb-orb-glass{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;border:1px solid rgba(255,255,255,.18);
-          background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.6) 0%,rgba(255,255,255,0) 24%),
-                     radial-gradient(circle at 50% 48%,rgba(196,181,253,.55) 0%,rgba(124,58,237,.6) 55%,rgba(72,28,140,.92) 100%);
-          box-shadow:inset 0 -14px 30px rgba(46,16,101,.85),inset 0 12px 24px rgba(255,255,255,.22),
-            0 0 32px rgba(167,139,250,.55),0 10px 20px rgba(18,9,38,.5)}
-        .cb-orb-shine{position:absolute;top:-60%;width:55%;height:220%;pointer-events:none;
-          background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
-          transform:rotate(18deg);animation:cbSweep 4.4s ease-in-out infinite}
-        @keyframes cbSweep{0%{left:-45%}60%{left:125%}100%{left:125%}}
-        .cb-orb-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;font:800 46px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;color:#fff;
-          text-shadow:0 1px 0 rgba(255,255,255,.55),0 -1px 1px rgba(72,28,140,.6),0 3px 8px rgba(18,9,38,.55);
-          animation:cbPulse 3.4s ease-in-out infinite}
-        .cb-orb-num .cb-pct{font-size:24px;opacity:.92;margin-left:1px}
-        @keyframes cbPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(196,181,253,.5))}50%{filter:drop-shadow(0 0 13px rgba(224,210,255,.95))}}
-        .acc2-cb-msg{font:600 14.5px/1.4 'Inter',sans-serif;color:rgba(255,255,255,.94);margin:8px 0 0;text-align:center;position:relative;z-index:2}
-        .acc2-crystal[role=button]{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s var(--ease-spring),box-shadow .15s ease}
-        .acc2-crystal[role=button]:active{transform:scale(.985)}
-        .acc2-crystal[role=button]:focus-visible{outline:2px solid #c4b5fd;outline-offset:3px}
-        @media(hover:hover) and (pointer:fine){.acc2-crystal[role=button]:hover{box-shadow:0 18px 46px -12px rgba(91,33,182,.85)}}
-        .acc2-cb-cta{display:flex;align-items:center;justify-content:center;gap:6px;margin:16px auto 0;padding:11px 18px;
-          background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:var(--r-md);
-          font:700 13.5px/1 'Plus Jakarta Sans',sans-serif;color:#fff;position:relative;z-index:2;backdrop-filter:blur(6px)}
-        .acc2-cb-axes-lbl{font:600 12px/1 'Inter',sans-serif;color:rgba(255,255,255,.8);margin:16px 0 8px;text-align:center;position:relative;z-index:2}
-        .acc2-cb-chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;position:relative;z-index:2}
-        .acc2-cb-chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);border-radius:var(--r-full);padding:6px 12px;font:700 12.5px/1 'Inter',sans-serif;color:#fff}
-        .acc2-cb-empty{margin:18px 16px 0;padding:18px 20px;border-radius:var(--rl);background:var(--bg3);color:var(--mu2);font:600 13.5px/1.4 'Inter',sans-serif;display:flex;align-items:center;gap:10px}
-        @media (prefers-reduced-motion:reduce){.cb-orb-glow,.cb-orb-shine,.cb-orb-num{animation:none}}
-      `;
-      document.head.appendChild(st);
-    }
-
-    const pct = Math.max(0, Math.min(99, p.prediction_pct ?? 0));
-
-    if ((p.validated_count ?? 0) === 0) {
-      anchor.insertAdjacentHTML(
-        "beforebegin",
-        `<div class="acc2-cb-empty" id="acc-crystal"><span style="display:flex;align-items:center;color:var(--mu2)">${icon("eye", { size: 22, strokeWidth: 1.5 })}</span><span>Valide ta 1ʳᵉ compétence pour débloquer ta boule de cristal.</span></div>`,
-      );
-      track("crystal_ball.viewed", { prediction_pct: 0, validated_count: 0 });
-      return;
-    }
-
-    const CAT_NAMES = Object.fromEntries(
-      (REMC || []).map((c) => [c.id, c.name]),
-    );
-    const axes = (p.axes_to_improve || []).map(
-      (code) => CAT_NAMES[code] || code,
-    );
-    const msg =
-      pct >= 80
-        ? "de chances de décrocher ton permis au 1er coup"
-        : pct >= 55
-          ? "de chances de réussir ton permis au 1er coup"
-          : "de chances pour l'instant — chaque jour compte";
-
-    anchor.insertAdjacentHTML(
-      "beforebegin",
-      `
-      <div class="acc2-crystal" id="acc-crystal" role="button" tabindex="0" aria-label="Boule de cristal — passer l'examen blanc">
-        <div class="acc2-cb-head"><span aria-hidden="true" style="display:inline-flex;vertical-align:middle">${icon("eye", { size: 14, strokeWidth: 1.5 })}</span> Boule de cristal</div>
-        <div class="cb-stage">
-          <div class="cb-orb">
-            <div class="cb-orb-glow" aria-hidden="true"></div>
-            <div class="cb-orb-glass">
-              <div class="cb-orb-shine" aria-hidden="true"></div>
-              <div class="cb-orb-num"><span class="acc2-cb-val">0</span><span class="cb-pct">%</span></div>
-            </div>
-          </div>
-        </div>
-        <p class="acc2-cb-msg">${esc(msg)}</p>
-        <div class="acc2-cb-cta">Passer l'examen blanc ${icon("arrow-right", { size: 14 })}</div>
-      </div>`,
-    );
-
-    // C8 — la Boule de cristal est le point d'entrée examen unique
-    const cbCard = root.querySelector("#acc-crystal");
-    if (cbCard) {
-      const openExam = () => {
-        haptic("select");
-        track("crystal_ball.tapped", { prediction_pct: pct });
-        navigate("#/exam-blanc");
-      };
-      cbCard.addEventListener("click", openExam);
-      cbCard.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openExam();
-        }
-      });
-    }
-
-    track("crystal_ball.viewed", {
-      prediction_pct: pct,
-      validated_count: p.validated_count,
-    });
-
-    // Count-up
-    const valEl = root.querySelector("#acc-crystal .acc2-cb-val");
-    if (valEl) {
-      const reduce = matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) {
-        valEl.textContent = String(pct);
-      } else {
-        const t0 = performance.now(),
-          dur = 1100;
-        const tick = (now) => {
-          const k = Math.min(1, (now - t0) / dur);
-          const eased = 1 - Math.pow(1 - k, 3);
-          valEl.textContent = String(Math.round(pct * eased));
-          if (k < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-      }
-    }
-  } catch (e) {
-    /* silent */
   }
 }
 
@@ -1921,7 +1476,7 @@ const _QUEST_BTN = {
 };
 
 function _normalizeQuest(q) {
-  const reward = `+${q.reward_xp} XP · ${q.reward_gemmes} gemmes`;
+  const reward = q.reward_gemmes > 0 ? `+${q.reward_gemmes} volants` : "";
   return {
     label: q.title,
     sub: reward,
@@ -1979,9 +1534,9 @@ function buildActivityData(attempts, streak) {
 // ─── Skeleton ────────────────────────────────────────────────────
 const SKELETON = `${STYLE}
 <div class="acc2" aria-busy="true">
-  <div class="skel2" style="height:300px;border-radius:0;margin-bottom:0"></div>
-  <div class="skel2" style="height:200px;border-radius:28px;margin:20px 16px 0"></div>
-  <div class="skel2" style="height:130px;border-radius:24px;margin:16px 16px 0"></div>
+  <div class="skel2" style="height:200px;border-radius:0;margin-bottom:0"></div>
+  <div class="skel2" style="height:170px;border-radius:20px;margin:-52px 16px 0;position:relative;z-index:2"></div>
+  <div class="skel2" style="height:130px;border-radius:24px;margin:24px 16px 0"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-top:40px">
     <div class="skel2" style="height:90px"></div>
     <div class="skel2" style="height:90px"></div>
