@@ -575,7 +575,7 @@ function renderStyles() {
 }
 .exb-pcard-stars {
   font-size: 13px;
-  color: var(--am);
+  color: var(--am-txt);
   letter-spacing: 2px;
 }
 .exb-pcard-nom {
@@ -709,7 +709,7 @@ function renderStyles() {
   height: 26px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--a) 10%, transparent);
-  color: var(--a);
+  color: var(--a-txt);
   font: 700 13px/26px 'Inter', sans-serif;
   text-align: center;
 }
@@ -732,7 +732,7 @@ function renderStyles() {
   border-radius: 10px;
   padding: 10px 14px;
   font: 700 13px/1.4 'Inter', sans-serif;
-  color: var(--rd);
+  color: var(--rd-txt);
 }
 .exb-feedback-verdict {
   font: 700 14px/1.3 'Plus Jakarta Sans', sans-serif;

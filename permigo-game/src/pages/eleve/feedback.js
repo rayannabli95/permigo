@@ -86,7 +86,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.fb-badge-session    { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a); }
+.fb-badge-session    { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a-txt); }
 .fb-badge-validation { background: rgba(16,185,129,.1); color: var(--grd); }
 
 .fb-body { margin-top: 8px; }

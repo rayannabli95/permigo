@@ -62,7 +62,7 @@ function ensureStyle() {
   .mr-rank-badge.rank-1 { background: linear-gradient(135deg,var(--am),var(--amk)); color:#fff; }
   .mr-rank-badge.rank-2 { background: linear-gradient(135deg,var(--mu2),var(--mu3)); color:#fff; }
   .mr-rank-badge.rank-3 { background: linear-gradient(135deg,var(--amx),#92400e); color:#fff; }
-  .mr-rank-badge.rank-other { background: color-mix(in srgb, var(--a) 10%, transparent); color:var(--a); border:1.5px solid color-mix(in srgb, var(--a) 20%, transparent); }
+  .mr-rank-badge.rank-other { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a-txt); border:1.5px solid color-mix(in srgb, var(--a) 20%, transparent); }
   .mr-name {
     font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif;
     color: var(--ink);
@@ -106,7 +106,7 @@ function ensureStyle() {
   /* Comparaison vs n+1 */
   .mr-compare {
     font: 500 12px/1.4 'Inter', sans-serif;
-    color: var(--a);
+    color: var(--a-txt);
     background: color-mix(in srgb, var(--a) 5%, transparent);
     border-radius: 10px;
     padding: 8px 12px;
@@ -302,7 +302,7 @@ export async function mountMoniteurRanking(root, { myId }) {
           <span class="mr-row-rank ${rankRowClass(r.rank)}">${rankLabel(r.rank)}</span>
           <div class="mr-row-av">${renderUserAvatar({ avatar_url: r.moniteur_avatar, prenom: r.moniteur_prenom, nom: r.moniteur_nom }, 32)}</div>
           <div class="mr-row-info">
-            <div class="mr-row-name">${esc(r.moniteur_prenom)}${r.moniteur_id === myId ? ' <span style="font-size:10px;color:var(--a)">(toi)</span>' : ""}</div>
+            <div class="mr-row-name">${esc(r.moniteur_prenom)}${r.moniteur_id === myId ? ' <span style="font-size:10px;color:var(--a-txt)">(toi)</span>' : ""}</div>
             <div class="mr-row-sub">${fmtHours(r.hours_confirmed)} · ${r.n_validations ?? 0} val. · ${r.n_eleves_diff ?? 0} élèves</div>
           </div>
           <div class="mr-row-score">${r.score_total} pts</div>

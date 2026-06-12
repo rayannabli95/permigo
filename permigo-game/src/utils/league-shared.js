@@ -149,7 +149,7 @@ export const LEAGUE_CSS = `
   display: flex; align-items: center; gap: 6px;
 }
 .lg-row-you {
-  font: 700 10px/1 'Inter', sans-serif; color: var(--a);
+  font: 700 10px/1 'Inter', sans-serif; color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent); padding: 2px 6px; border-radius: 4px;
   text-transform: uppercase; letter-spacing: .04em;
 }

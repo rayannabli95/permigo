@@ -40,7 +40,7 @@ const STYLE = `<style id="palier-sheet-style">
 .psheet-icon {
   width: 52px; height: 52px; border-radius: 16px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a);
+  background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a-txt);
 }
 .psheet-icon.done { background: rgba(16,185,129,.1); color: var(--grd); }
 .psheet-head-info { flex: 1; min-width: 0; }

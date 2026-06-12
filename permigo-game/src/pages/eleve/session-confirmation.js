@@ -145,7 +145,7 @@ const STYLE = `<style>
   border-radius: 10px;
   background: color-mix(in srgb, var(--a) 8%, transparent);
   display: flex; align-items: center; justify-content: center;
-  color: var(--a);
+  color: var(--a-txt);
   flex-shrink: 0;
 }
 .sc-recap-lbl {
@@ -195,7 +195,7 @@ const STYLE = `<style>
 }
 .sc-comp-status {
   font: 500 11px/1 'Inter', sans-serif;
-  color: var(--gr);
+  color: var(--gr-txt);
   background: rgba(16,185,129,.1);
   border-radius: 99px;
   padding: 3px 8px;
@@ -261,7 +261,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center; gap: 6px;
   width: 100%; padding: 12px 24px;
   background: none; border: 1.5px solid #fca5a5;
-  border-radius: 14px; color: var(--rd);
+  border-radius: 14px; color: var(--rd-txt);
   font: 600 13px/1 'Inter', sans-serif;
   cursor: pointer; min-height: 44px;
   -webkit-tap-highlight-color: transparent;

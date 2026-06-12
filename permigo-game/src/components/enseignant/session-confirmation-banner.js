@@ -58,7 +58,7 @@ function ensureStyle() {
     background: color-mix(in srgb, var(--a) 10%, transparent);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    color: var(--a);
+    color: var(--a-txt);
   }
   .scb-info { flex: 1; }
   .scb-title {

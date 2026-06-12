@@ -130,7 +130,7 @@ const STYLE = `<style>
   font: 800 9.5px/1 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase;
   padding: 4px 8px; border-radius: var(--r-full); color: #fff;
 }
-.bo2-skin-sub { font: 500 11px/1.3 'Inter', sans-serif; color: var(--gr); margin-top: 5px; }
+.bo2-skin-sub { font: 500 11px/1.3 'Inter', sans-serif; color: var(--gr-txt); margin-top: 5px; }
 /* CTA (droite) */
 .bo2-cta { flex-shrink: 0; display: flex; align-items: center; }
 .bo2-buy {
@@ -234,7 +234,7 @@ const STYLE = `<style>
 .bo2-price-btn:disabled { opacity: .5; cursor: default; }
 .bo2-price-btn.cant-afford { background: var(--bg2); color: var(--mu2); }
 .bo2-equip-cta { background: var(--a); color: var(--a-ink); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; }
-.bo2-owned-txt { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--gr); padding: 9px 0; min-height: 40px; }
+.bo2-owned-txt { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--gr-txt); padding: 9px 0; min-height: 40px; }
 
 /* ── Detail modal (skins) ── */
 .bo2-modal-bg {

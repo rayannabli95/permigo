@@ -75,9 +75,9 @@
   border-radius: 6px;
   background: var(--bg2); color: var(--mu);
 }
-.bg { background: var(--grp); color: var(--gr); }
-.bam { background: var(--amp); color: var(--am); }
-.br { background: var(--rdp); color: var(--rd); }
+.bg { background: var(--grp); color: var(--gr-txt); }
+.bam { background: var(--amp); color: var(--am-txt); }
+.br { background: var(--rdp); color: var(--rd-txt); }
 .ba { background: var(--ap); color: var(--a-txt); }
 
 /* ─── Inputs / textareas ─── */

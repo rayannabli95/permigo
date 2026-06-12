@@ -31,7 +31,7 @@ const STYLE = `<style>
 .dbg-title {
   font: 800 15px/1 'IBM Plex Mono', monospace;
   letter-spacing: .1em;
-  color: var(--a);
+  color: var(--a-txt);
   text-transform: uppercase;
 }
 .dbg-pulse {
@@ -48,7 +48,7 @@ const STYLE = `<style>
 .dbg-refresh {
   background: transparent;
   border: 1px solid color-mix(in srgb, var(--a) 40%, transparent);
-  color: var(--a);
+  color: var(--a-txt);
   border-radius: 6px;
   padding: 5px 10px;
   font: 700 10px/1 'IBM Plex Mono', monospace;
@@ -78,7 +78,7 @@ const STYLE = `<style>
   font: 600 9.5px/1 'IBM Plex Mono', monospace;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--a);
+  color: var(--a-txt);
   margin-bottom: 6px;
 }
 .dbg-card-val {
@@ -122,9 +122,9 @@ const STYLE = `<style>
   border-radius: 4px;
   text-transform: uppercase;
 }
-.dbg-tag.ok    { background: rgba(16,185,129,.18); color: var(--gr); }
-.dbg-tag.warn  { background: rgba(245,158,11,.18); color: var(--am); }
-.dbg-tag.error { background: rgba(239,68,68,.18); color: var(--rd); }
+.dbg-tag.ok    { background: rgba(16,185,129,.18); color: var(--gr-txt); }
+.dbg-tag.warn  { background: rgba(245,158,11,.18); color: var(--am-txt); }
+.dbg-tag.error { background: rgba(239,68,68,.18); color: var(--rd-txt); }
 
 .dbg-action {
   display: block;
@@ -148,14 +148,14 @@ const STYLE = `<style>
 .dbg-action.secondary {
   background: transparent;
   border: 1px solid color-mix(in srgb, var(--a) 40%, transparent);
-  color: var(--a);
+  color: var(--a-txt);
 }
 
 .dbg-err {
   padding: 32px 20px;
   text-align: center;
   font: 600 14px/1.5 'IBM Plex Mono', monospace;
-  color: var(--rd);
+  color: var(--rd-txt);
 }
 </style>`;
 

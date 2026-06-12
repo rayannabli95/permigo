@@ -51,7 +51,7 @@ const STYLE = `<style>
   }
   .ce-crown {
     position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-    color: var(--am);
+    color: var(--am-txt);
     filter: drop-shadow(0 2px 4px rgba(245,158,11,.4));
   }
   .ce-pod-av { display: inline-flex; margin-bottom: 8px; }

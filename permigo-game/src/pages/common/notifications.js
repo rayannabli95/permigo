@@ -167,7 +167,7 @@ const STYLE = `<style>
 .nf2-title { font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; color: var(--ink); flex: 1; }
 .nf2-unread-badge {
   font: 700 11px/1 'IBM Plex Mono', monospace;
-  color: var(--a); background: color-mix(in srgb, var(--a) 10%, transparent);
+  color: var(--a-txt); background: color-mix(in srgb, var(--a) 10%, transparent);
   border-radius: 99px; padding: 4px 8px; flex-shrink: 0;
 }
 .nf2-mark-all {
@@ -265,7 +265,7 @@ const STYLE = `<style>
 .nf2-empty-cta {
   display: inline-block; padding: 12px 24px;
   background: color-mix(in srgb, var(--a) 8%, transparent); border: 1.5px solid color-mix(in srgb, var(--a) 20%, transparent);
-  border-radius: 12px; color: var(--a); font: 600 13px/1 'Inter', sans-serif;
+  border-radius: 12px; color: var(--a-txt); font: 600 13px/1 'Inter', sans-serif;
   cursor: pointer; min-height: 44px; transition: background .12s;
 }
 .nf2-empty-cta:active { background: color-mix(in srgb, var(--a) 15%, transparent); }

@@ -147,7 +147,7 @@ const STYLE = `<style>
   letter-spacing: .06em;
 }
 .epcf-stop.now .epcf-stop-lvl  { color: var(--a-txt); }
-.epcf-stop.done .epcf-stop-lvl { color: var(--gr); }
+.epcf-stop.done .epcf-stop-lvl { color: var(--gr-txt); }
 .epcf-stop-cost {
   font: 600 11px/1 'Inter', sans-serif;
   padding: 4px 8px;
@@ -173,7 +173,7 @@ const STYLE = `<style>
   background: color-mix(in srgb, var(--a) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
   border-radius: var(--r);
-  color: var(--a);
+  color: var(--a-txt);
   margin-top: 4px;
 }
 .epcf-stop-reward.unlocked {

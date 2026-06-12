@@ -112,7 +112,7 @@ export function openInviteEleveModal(me) {
         font:600 12px/1 'Inter',sans-serif; color:var(--mu,var(--mu3));
         text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px;
       }
-      .me-inv-link-email.err { color:var(--rd); }
+      .me-inv-link-email.err { color: var(--rd-txt); }
       .me-inv-link-wrap { display:flex; gap:8px; align-items:center; }
       .me-inv-link-input {
         flex:1; padding:9px 12px; border-radius:10px;
@@ -124,7 +124,7 @@ export function openInviteEleveModal(me) {
       .me-inv-copy {
         flex-shrink:0; padding:9px 14px; border-radius:10px;
         background:color-mix(in srgb, var(--a) 10%, transparent); border:1px solid color-mix(in srgb, var(--a) 20%, transparent);
-        color:var(--a); font:600 12px/1 'Inter',sans-serif;
+        color: var(--a-txt); font:600 12px/1 'Inter',sans-serif;
         cursor:pointer; white-space:nowrap; transition:background .12s;
       }
       .me-inv-copy:active { background:color-mix(in srgb, var(--a) 20%, transparent); }
@@ -148,7 +148,7 @@ export function openInviteEleveModal(me) {
       .me-inv-act.copy2 { color:var(--ink); background:var(--bg2,var(--bg4)); border:1px solid var(--bo); }
       .me-inv-act.copy2.copied { color:var(--grd); background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.2); }
       .me-inv-err-msg {
-        font:500 12px/1.4 'Inter',sans-serif; color:var(--rd);
+        font:500 12px/1.4 'Inter',sans-serif; color: var(--rd-txt);
         margin-top:4px;
       }
       .me-inv-close-btn {

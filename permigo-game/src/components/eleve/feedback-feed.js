@@ -110,7 +110,7 @@ function ensureStyle() {
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  .ff-kind-session  { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a); }
+  .ff-kind-session  { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a-txt); }
   .ff-kind-validation { background: rgba(16,185,129,.1); color: var(--grd); }
 
   .ff-card-body { margin-top: 8px; }

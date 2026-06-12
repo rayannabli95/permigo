@@ -20,6 +20,9 @@
   --gr:#22c55e; --grd:#16a34a; --grp:rgba(34,197,94,.09);   /* succès / succès dark */
   --rd:#ef4444; --rdk:#dc2626; --rdx:#b91c1c; --rdp:rgba(239,68,68,.09); /* danger / dark / darker */
   --am:#f59e0b; --amk:#d97706; --amx:#b45309; --aml:#fde68a; --aml2:#fbbf24; --amp:rgba(245,158,11,.09); /* warning variants */
+  /* États utilisés COMME texte sur fond clair : les couleurs pures font 2.1–3.8:1.
+     Versions assombries (~5.5:1). En dark, les couleurs pures passent (≥7:1) → réassignées plus bas. */
+  --gr-txt:#147638; --am-txt:#935e06; --rd-txt:#9b2c2c;
   --bl:#0ea5e9; --blk:#0891b2; --blp:rgba(14,165,233,.09);  /* info / info dark */
   --pu:#8b5cf6; --puk:#7c3aed; --pul:#a855f7; --pup:rgba(139,92,246,.09); /* violet variants */
 
@@ -115,6 +118,7 @@
      bilan, fiche-status) — les flipper = texte clair sur fond clair. */
   --ink:#f3f4f8;   --ink2:#e2e5ee;   --ink3:#c9cde0;  --ink4:#aab2c8;  --ink5:#98a2b8;
   --a-txt:var(--a-lt, var(--a)); /* en dark, l'accent clair passe sur fond sombre */
+  --gr-txt:var(--gr); --am-txt:var(--am); --rd-txt:var(--rd); /* purs : passent sur fond sombre */
   --mu:#9da3c0;    --mu2:#727896;    --mu3:#8f96b5;   --mu4:#aab0ca;   --mu5:#4d5478;
 
   /* ─ Accents : opacités plus marquées sur fond sombre ─ */
@@ -143,6 +147,7 @@
     --bo:#2a2e48;    --bo2:#23263c;   --bo3:#2a2e48;  --bo4:#3d4263;
     --ink:#f3f4f8;   --ink2:#e2e5ee;   --ink3:#c9cde0;  --ink4:#aab2c8;  --ink5:#98a2b8;
   --a-txt:var(--a-lt, var(--a)); /* en dark, l'accent clair passe sur fond sombre */
+  --gr-txt:var(--gr); --am-txt:var(--am); --rd-txt:var(--rd); /* purs : passent sur fond sombre */
     --mu:#9da3c0;    --mu2:#727896;    --mu3:#8f96b5;   --mu4:#aab0ca;   --mu5:#4d5478;
     --ap:color-mix(in srgb, var(--a) 15%, transparent);     --ag:color-mix(in srgb, var(--a) 22%, transparent);
     --grp:rgba(34,197,94,.15);   --rdp:rgba(239,68,68,.15);

@@ -203,8 +203,8 @@ const STYLE = `<style>
   padding: 3px 7px;
   border-radius: var(--r-full);
 }
-.ck-kpi-delta.up   { color: var(--gr); background: rgba(16,185,129,.12); }
-.ck-kpi-delta.down { color: var(--rd); background: rgba(239,68,68,.12); }
+.ck-kpi-delta.up   { color: var(--gr-txt); background: rgba(16,185,129,.12); }
+.ck-kpi-delta.down { color: var(--rd-txt); background: rgba(239,68,68,.12); }
 .ck-kpi-delta.flat { color: ${MUTED}; background: ${SURF2}; }
 
 /* ═══════════ COHORTES ═══════════ */

@@ -250,7 +250,7 @@ const STYLE = `<style>
 }
 .team-badge {
   font: 600 12px/1 'Inter', sans-serif;
-  color: var(--a);
+  color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   border-radius: var(--r-full);
   padding: 6px 12px;

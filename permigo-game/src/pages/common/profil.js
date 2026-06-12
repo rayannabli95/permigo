@@ -104,7 +104,7 @@ const STYLE = `<style>
   background: rgba(239,68,68,.08);
   border: 1.5px solid rgba(239,68,68,.25);
   border-radius: 16px;
-  color: var(--rd);
+  color: var(--rd-txt);
   font: 700 15px/1 var(--fd);
   cursor: pointer;
   transition: background .2s, transform .15s;
@@ -332,7 +332,7 @@ const STYLE = `<style>
   background: color-mix(in srgb, var(--a) 8%, transparent);
   border: 1.5px solid color-mix(in srgb, var(--a) 20%, transparent);
   border-radius: 12px;
-  color: var(--a);
+  color: var(--a-txt);
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   transition: background .15s;
@@ -401,7 +401,7 @@ const STYLE = `<style>
 }
 .prf-pseudo-save:active { transform: scale(.97); }
 .prf-pseudo-save:disabled { opacity: .5; cursor: not-allowed; }
-.prf-pseudo-err { font: 500 12px/1.3 'Inter', sans-serif; color: var(--rd); margin-top: 8px; min-height: 14px; }
+.prf-pseudo-err { font: 500 12px/1.3 'Inter', sans-serif; color: var(--rd-txt); margin-top: 8px; min-height: 14px; }
 </style>`;
 
 const ROLE_LABELS = {
@@ -680,7 +680,7 @@ export async function mount(root) {
       <span class="prf-row-ico">${icon("zap", { size: 18 })}</span>
       <div class="prf-row-body">
         <div class="prf-row-lbl">XP total</div>
-        <div class="prf-row-val" style="color:var(--a)">${esc(String(profile.xp))} XP</div>
+        <div class="prf-row-val" style="color:var(--a-txt)">${esc(String(profile.xp))} XP</div>
       </div>
     </div>`
         : ""

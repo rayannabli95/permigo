@@ -136,3 +136,19 @@ Vérification : re-run `scripts/audit-mobile.mjs` après chaque PR, rapport avan
 - Ratio ≈1 : texte gradient-clipped (`background-clip:text`).
 - Login/onboarding : fond réel posé par un layer `position:fixed` frère — le walker d'ancêtres ne le voit pas.
 - Overflow transitoire pendant les skeletons de chargement.
+
+---
+
+## Itération 2 — tokens de statut + accent interpolé (suite)
+
+Après #170, attaque de la queue contraste documentée :
+- **Tokens `--gr-txt` / `--am-txt` / `--rd-txt`** créés (assombris ~5.5:1 en light, couleurs pures en dark où elles passent à ≥7:1). Modèle identique à `--a-txt`.
+- **35 spots statut-as-text** convertis (`color:var(--gr|am|rd)` hors fond plein de même couleur) : badges, deltas KPI, bannières faute, boutons danger, utilitaires `.bg/.bam/.br`.
+- **35 spots accent-as-text** rattrapés : mon parser regex précédent excluait à tort les blocs dont le *fond* était un `color-mix(var(--a) N%, transparent)` (chips teintées) — corrigé en ne testant que les fonds **pleins**. + 3 styles inline (`(toi)`, XP profil, bouton « voir tous les élèves »).
+
+**Résultat mesuré** : contraste light **48 → 27**, dark **89 → 61** signatures réelles (>1.45). Touch targets 0, overflow 0 (inchangés).
+
+### Queue restante (2 axes, hors périmètre token)
+1. **Cockpit gérant** (`.ck-*`, ~8 sigs light+dark) : la page a une palette « terminal » sombre **fixe** (`SURF=var(--ink)`), donc les `--mu*` globaux (pensés pour fond clair) y tombent à ~3:1. Demande des muted tunés pour sa surface, pas le token global. Sous-chantier propre, page unique.
+2. **Texte muet sur chips teintées** (`me-tab`, `st-theme-btn` inactif, `tr2-group`, `aj-streak-chip`, `ce-hof-*`…) : `--mu/--mu2/--mu5` à petit corps sur fonds non-blancs → 2.1–3.4:1. Axe « muted-as-text » distinct, mériterait un `--mu-txt` ou un durcissement ciblé.
+3. **Faux positifs confirmés** : login (`lg-forgot`/`lg-otp-toggle` 1.81) — fond réel posé par un layer `position:fixed` frère que l'instrument ne remonte pas ; vérifié lisible à l'œil.

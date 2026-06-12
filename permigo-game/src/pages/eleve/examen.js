@@ -110,7 +110,7 @@ const STYLE = `<style>
   margin-top: 6px;
 }
 .exam-tile.urgent { border-color: #fca5a5; background: linear-gradient(145deg,#fff5f5,var(--rdp2)); }
-.exam-tile.urgent .exam-tile-num { color: var(--rd); }
+.exam-tile.urgent .exam-tile-num { color: var(--rd-txt); }
 .exam-tile.done { border-color: #bbf7d0; background: linear-gradient(145deg,#f0fdf4,var(--grp2)); }
 .exam-tile.done .exam-tile-num { color: var(--grk); }
 

@@ -652,7 +652,7 @@ function renderDrill() {
       </div>
     </header>
     <button class="me-drill-back" id="me-drill-back"
-            style="display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:8px 12px;background:var(--su);border:1.5px solid var(--bo);border-radius:10px;font:600 13px/1 'Inter',sans-serif;color:var(--a);cursor:pointer;">
+            style="display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:8px 12px;background:var(--su);border:1.5px solid var(--bo);border-radius:10px;font:600 13px/1 'Inter',sans-serif;color:var(--a-txt);cursor:pointer;">
       ${icon("arrow-left", { size: 14, strokeWidth: 2.5 })} Voir tous les élèves
     </button>
     <div class="me-list">
@@ -1061,7 +1061,7 @@ function openQuickMenu(eleveId, anchorRow) {
       .me-qm-item:hover { background: var(--bg); }
       .me-qm-item:active { background: var(--bg2); }
       .me-qm-ico { font-size: 16px; line-height: 1; display: inline-flex; }
-      .me-qm-item.danger { color: var(--rd); }
+      .me-qm-item.danger { color: var(--rd-txt); }
       .me-qm-item.ok { color: var(--grd); }
       .me-qm-sep { height: 1px; background: var(--bo); margin: 6px 8px; }
       .me-qm-label {
