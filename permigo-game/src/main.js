@@ -106,10 +106,21 @@ async function boot() {
 
     startNotifListener();
 
-    // Nudge "Installe PermiGo" — auto-détection iOS/Android, install natif
-    // en 1 tap si dispo, snooze 3 jours. No-op si déjà installée / desktop.
-    import("@/components/common/install-nudge.js")
-      .then((m) => m.maybeShowInstallNudge(me))
+    // Boucle d'engagement notifs — 2 états exclusifs :
+    //  - app installée (standalone) → primer « active tes rappels » (sur iOS,
+    //    l'API Notification n'existe QUE là, et le storage est neuf → c'est
+    //    l'UNIQUE moment où on peut obtenir la permission)
+    //  - navigateur mobile → nudge « installe l'app » (étape 1 de la boucle)
+    import("@/utils/pwa.js")
+      .then(({ isStandalone }) =>
+        isStandalone()
+          ? import("@/components/common/push-prime.js").then((m) =>
+              m.maybeShowPushPrime(me),
+            )
+          : import("@/components/common/install-nudge.js").then((m) =>
+              m.maybeShowInstallNudge(me),
+            ),
+      )
       .catch(() => {});
 
     // Prefetch idle des routes chaudes (navigation instantanée au tap).

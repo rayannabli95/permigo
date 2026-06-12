@@ -22,10 +22,7 @@ import {
 import { optInPush } from "@/services/web-push.js";
 import { unlockChest } from "@/utils/game-state.js";
 
-// Pictos inline pour le tuto "ajouter à l'écran d'accueil"
-const A2HS_SHARE = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg>`;
-const A2HS_DOTS = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>`;
-const A2HS_PLUS = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>`;
+import { a2hsStepsHTML, A2HS_STYLE } from "@/components/common/a2hs-steps.js";
 
 // ─── Contenu des 4 écrans narratifs ──────────────────────────────
 const SLIDES = [
@@ -153,13 +150,10 @@ export async function mount(root) {
               ? `
           <section class="ob-slide ob-slide-a2hs" data-i="${A2HS_I}">
             <img class="ob-a2hs-badge" src="/skins/avatars/permigo-badge-icon.png" alt="" />
-            <h1 class="ob-title">Garde PermiGo à portée de main</h1>
-            <p class="ob-body-txt">Ajoute l'app à ton écran d'accueil pour l'ouvrir d'un seul geste, chaque jour.</p>
-            <div class="ob-seg" role="tablist">
-              <button class="ob-seg-btn" data-plat="ios" type="button">iPhone (iOS)</button>
-              <button class="ob-seg-btn" data-plat="android" type="button">Android</button>
-            </div>
+            <h1 class="ob-title">Mets PermiGo sur ton écran d'accueil</h1>
+            <p class="ob-body-txt">2 gestes, 10 secondes — c'est ce qui permet de recevoir tes rappels 🔔</p>
             <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
+            <button class="ob-plat-switch" id="ob-plat-switch" type="button"></button>
           </section>`
               : ""
           }
@@ -303,28 +297,17 @@ export async function mount(root) {
   if (showA2HS) {
     const stepsEl = root.querySelector("#ob-a2hs-steps");
 
-    const stepsIOS = () => `
-      <div class="ob-a2hs-step"><span class="ob-a2hs-num">1</span><span>Dans <strong>Safari</strong>, touche le bouton Partager <span class="ob-a2hs-glyph">${A2HS_SHARE}</span> en bas.</span></div>
-      <div class="ob-a2hs-step"><span class="ob-a2hs-num">2</span><span>Choisis <strong>« Sur l'écran d'accueil »</strong>.</span></div>
-      <div class="ob-a2hs-step"><span class="ob-a2hs-num">3</span><span>Touche <strong>« Ajouter »</strong>. C'est fait !</span></div>`;
-
-    const stepsAndroid = () => {
-      const btn = canPromptInstall()
-        ? `<button class="ob-a2hs-install" id="ob-a2hs-install" type="button">Installer l'app en 1 tap</button>`
-        : "";
-      return `${btn}
-      <div class="ob-a2hs-step"><span class="ob-a2hs-num">1</span><span>Dans <strong>Chrome</strong>, touche le menu <span class="ob-a2hs-glyph">${A2HS_DOTS}</span> en haut à droite.</span></div>
-      <div class="ob-a2hs-step"><span class="ob-a2hs-num">2</span><span>Choisis <strong>« Ajouter à l'écran d'accueil »</strong> <span class="ob-a2hs-glyph">${A2HS_PLUS}</span>.</span></div>
-      <div class="ob-a2hs-step"><span class="ob-a2hs-num">3</span><span>Confirme avec <strong>« Ajouter »</strong>. C'est fait !</span></div>`;
-    };
-
     const renderA2HSSteps = () => {
-      root
-        .querySelectorAll(".ob-seg-btn")
-        .forEach((b) =>
-          b.classList.toggle("active", b.dataset.plat === a2hsPlat),
-        );
-      stepsEl.innerHTML = a2hsPlat === "android" ? stepsAndroid() : stepsIOS();
+      // Install natif Android en 1 tap quand dispo, sinon marche visuelle
+      const nativeBtn =
+        a2hsPlat === "android" && canPromptInstall()
+          ? `<button class="ob-a2hs-install" id="ob-a2hs-install" type="button">Installer l'app en 1 tap</button>`
+          : "";
+      stepsEl.innerHTML = `${nativeBtn}${a2hsStepsHTML(a2hsPlat)}`;
+      const sw = root.querySelector("#ob-plat-switch");
+      if (sw)
+        sw.textContent =
+          a2hsPlat === "ios" ? "Tu es sur Android ?" : "Tu es sur iPhone ?";
       const ib = root.querySelector("#ob-a2hs-install");
       if (ib)
         ib.addEventListener("click", async () => {
@@ -341,16 +324,14 @@ export async function mount(root) {
         });
     };
 
-    root.querySelectorAll(".ob-seg-btn").forEach((b) =>
-      b.addEventListener("click", () => {
-        a2hsPlat = b.dataset.plat;
-        track("a2hs.platform_selected", {
-          platform: a2hsPlat,
-          source: "onboarding",
-        });
-        renderA2HSSteps();
-      }),
-    );
+    root.querySelector("#ob-plat-switch")?.addEventListener("click", () => {
+      a2hsPlat = a2hsPlat === "ios" ? "android" : "ios";
+      track("a2hs.platform_selected", {
+        platform: a2hsPlat,
+        source: "onboarding",
+      });
+      renderA2HSSteps();
+    });
 
     renderA2HSSteps();
   }
@@ -668,30 +649,7 @@ const STYLE = `<style>
     filter: drop-shadow(0 12px 26px rgba(16,185,129,.4));
   }
   .ob-slide.on .ob-a2hs-badge { animation: obPop .55s var(--ease-spring) both; }
-  .ob-seg {
-    display: flex; gap: 6px; background: rgba(255,255,255,.07);
-    padding: 5px; border-radius: var(--r-md); margin: 22px 0 16px; width: 100%; max-width: 320px;
-  }
-  .ob-seg-btn {
-    flex: 1; border: 0; background: transparent; padding: 11px 8px; border-radius: var(--r);
-    font: 700 14px/1 'Inter', sans-serif; color: rgba(255,255,255,.6); cursor: pointer; transition: .15s;
-  }
-  .ob-seg-btn.active { background: rgba(255,255,255,.16); color: #fff; }
   .ob-a2hs-steps { width: 100%; max-width: 340px; text-align: left; }
-  .ob-a2hs-step {
-    display: flex; gap: 11px; align-items: flex-start; padding: 9px 0;
-    font: 500 14.5px/1.45 'Inter', sans-serif; color: rgba(255,255,255,.85);
-  }
-  .ob-a2hs-step + .ob-a2hs-step { border-top: 1px solid rgba(255,255,255,.08); }
-  .ob-a2hs-step strong { color: #fff; font-weight: 700; }
-  .ob-a2hs-num {
-    flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%;
-    background: var(--a); color: var(--a-ink); font: 800 13px/24px 'Inter'; text-align: center;
-  }
-  .ob-a2hs-glyph {
-    display: inline-flex; vertical-align: -5px; margin: 0 2px; padding: 2px;
-    border-radius: 6px; background: rgba(255,255,255,.12); color: #fff;
-  }
   .ob-a2hs-install {
     width: 100%; margin-bottom: 14px; border: 0; border-radius: var(--r-md);
     background: linear-gradient(135deg, var(--a), var(--adk, var(--adk))); color: var(--a-ink);
