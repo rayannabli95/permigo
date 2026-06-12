@@ -55,7 +55,7 @@ const STYLE = `
   }
   .xpt-xp {
     font: 800 15px/1 'IBM Plex Mono', monospace;
-    color: var(--a);
+    color: var(--a-txt);
     flex-shrink: 0;
   }
 `;

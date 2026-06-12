@@ -265,7 +265,7 @@ const STYLE = `<style>
   color: var(--ink);
   transition: background .12s ease, border-color .12s ease, transform .12s ease;
 }
-.pcc-social-btn:hover { background: #fff; border-color: var(--a); color: var(--a); }
+.pcc-social-btn:hover { background: #fff; border-color: var(--a); color: var(--a-txt); }
 .pcc-social-btn:active { transform: scale(.94); }
 .pcc-social-btn svg { width: 18px; height: 18px; }
 

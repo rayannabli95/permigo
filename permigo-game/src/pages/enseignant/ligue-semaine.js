@@ -224,7 +224,7 @@ function _render(root, rows) {
     </div>
     <div class="ls-w-pts-legend">
       <span class="ls-w-pts-pill">1 pt = 1 validation</span>
-      ${LEAGUES.map((l) => `<span class="ls-w-pts-pill" style="border-color:${l.border};color:${l.color}">${l.name} ≥${l.minPts}</span>`).join("")}
+      ${LEAGUES.map((l) => `<span class="ls-w-pts-pill" style="border-color:${l.border};color:color-mix(in srgb, ${l.color} 60%, var(--ink))">${l.name} ≥${l.minPts}</span>`).join("")}
     </div>
   </div>`;
 

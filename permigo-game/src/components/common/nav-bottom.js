@@ -89,7 +89,7 @@ const STYLE = `
     transition: transform .2s var(--ease-spring);
   }
   .bn-tab.active {
-    color: var(--a);
+    color: var(--a-txt);
   }
   .bn-tab.active::after {
     transform: translateX(-50%) scaleX(1);

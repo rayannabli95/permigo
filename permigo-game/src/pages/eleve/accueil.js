@@ -681,7 +681,7 @@ const STYLE = `<style>
 
 .acc-lb-main { flex: 1; min-width: 0; position: relative; z-index: 1; }
 .acc-lb-eyebrow {
-  font: 700 10px/1 'Inter', sans-serif; color: var(--a);
+  font: 700 10px/1 'Inter', sans-serif; color: var(--a-txt);
   letter-spacing: .08em; text-transform: uppercase; margin-bottom: 5px;
 }
 .acc-lb-body {
@@ -695,7 +695,7 @@ const STYLE = `<style>
 .acc-lb-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
 
 .acc-lb-arrow {
-  flex-shrink: 0; color: var(--a); display: flex; align-items: center;
+  flex-shrink: 0; color: var(--a-txt); display: flex; align-items: center;
   opacity: .9; position: relative; z-index: 1; transition: transform .15s ease;
 }
 .acc-lb:hover .acc-lb-arrow { transform: translateX(3px); }

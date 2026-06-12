@@ -220,7 +220,7 @@ const STYLE = `<style>
   font: 600 11px/1 'Inter', sans-serif;
   text-transform: uppercase;
   letter-spacing: .1em;
-  color: var(--a);
+  color: var(--a-txt);
   margin-bottom: 10px;
 }
 .sc-comment-text {

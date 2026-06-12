@@ -171,7 +171,7 @@ const STYLE = `<style>
   border-radius: 99px; padding: 4px 8px; flex-shrink: 0;
 }
 .nf2-mark-all {
-  font: 700 12px/1 'Inter', sans-serif; color: var(--a);
+  font: 700 12px/1 'Inter', sans-serif; color: var(--a-txt);
   background: none; border: none; cursor: pointer; padding: 8px 4px;
   border-radius: 6px; transition: background .12s; font-family: inherit;
 }

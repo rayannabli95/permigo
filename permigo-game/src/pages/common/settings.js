@@ -108,7 +108,7 @@ const STYLE = `<style>
 /* Text button */
 .st-btn-txt {
   font: 600 13px/1 'Inter', sans-serif;
-  color: var(--a);
+  color: var(--a-txt);
   background: none;
   border: none;
   cursor: pointer;
@@ -243,7 +243,7 @@ const STYLE = `<style>
   text-align: center;
   margin-top: 12px;
 }
-.st-dpo-note a { color: var(--a); }
+.st-dpo-note a { color: var(--a-txt); }
 
 /* Theme segmented control */
 .st-theme-seg {
@@ -270,7 +270,7 @@ const STYLE = `<style>
 }
 .st-theme-btn.active {
   background: var(--su);
-  color: var(--a);
+  color: var(--a-txt);
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
 }
 /* Accent color swatches */

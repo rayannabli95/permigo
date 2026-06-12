@@ -262,7 +262,7 @@ export const USER_LIST_CARD_CSS = `
   .ulc-foot-btn{
     background:none;
     border:0;
-    color:var(--a);
+    color: var(--a-txt);
     font-family:inherit;
     font-weight:700;
     font-size:13px;

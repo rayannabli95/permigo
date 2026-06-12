@@ -296,7 +296,7 @@ const STYLE = `<style>
     flex-shrink: 0;
     transition: border-color .15s ease, color .15s ease;
   }
-  .lr-sheet-close:hover { border-color: var(--a); color: var(--a); }
+  .lr-sheet-close:hover { border-color: var(--a); color: var(--a-txt); }
 
   .lr-sheet-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
 

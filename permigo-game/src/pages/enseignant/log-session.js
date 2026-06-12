@@ -127,7 +127,7 @@ const STYLE = `<style>
   .vs-dd-opt:hover { background: var(--bg); }
   .vs-dd-opt.sel { background: color-mix(in srgb, var(--a) 8%, transparent); }
   .vs-dd-opt .vs-dd-name { font: 600 14px/1.2 'Inter', sans-serif; flex: 1; }
-  .vs-dd-check { flex-shrink: 0; color: var(--a); display: inline-flex; }
+  .vs-dd-check { flex-shrink: 0; color: var(--a-txt); display: inline-flex; }
   @keyframes vsDdIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
   @media (prefers-reduced-motion: reduce) { .vs-dd-opt { animation: none; opacity: 1; } .vs-dd-chev, .vs-dd-panel { transition: none; } }
 

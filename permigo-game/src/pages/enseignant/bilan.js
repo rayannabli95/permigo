@@ -143,7 +143,7 @@ const STYLE = `<style>
   font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
   text-transform: uppercase;
   letter-spacing: .08em;
-  color: var(--a);
+  color: var(--a-txt);
   margin-bottom: 8px;
 }
 .bl-comment-txt {

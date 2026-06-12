@@ -126,7 +126,7 @@ const STYLE = `<style>
   border-radius: 14px;
   background: var(--su);
   font: 600 14px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--a);
+  color: var(--a-txt);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 8px;
   transition: border-color .12s, transform .12s;

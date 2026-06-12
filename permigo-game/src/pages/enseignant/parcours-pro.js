@@ -84,7 +84,7 @@ const STYLE = `<style>
 .ppr-hero-count .v { font: 800 30px/1 'Plus Jakarta Sans', sans-serif; color: #fff; }
 .ppr-hero-count .l { font: 600 10px/1 'Inter', sans-serif; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }
 .ppr-next { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: var(--r-md); padding: 12px 13px; }
-.ppr-next-lbl { font: 800 9.5px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--a); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+.ppr-next-lbl { font: 800 9.5px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--a-txt); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
 .ppr-next-tool { font: 800 13.5px/1.3 'Plus Jakarta Sans', sans-serif; color: #fff; margin-bottom: 9px; }
 .ppr-next-bar { height: 7px; background: rgba(255,255,255,.16); border-radius: var(--r-full); overflow: hidden; }
 .ppr-next-fill { height: 100%; width: 0; border-radius: var(--r-full); background: linear-gradient(90deg, var(--a), var(--a-lt)); box-shadow: 0 0 8px color-mix(in srgb, var(--a) 60%, transparent); transition: width 1s var(--ease-out); }

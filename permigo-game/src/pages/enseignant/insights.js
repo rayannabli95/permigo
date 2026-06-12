@@ -250,12 +250,11 @@ const STYLE = `<style>
     font: 600 12px/1 'Inter', sans-serif;
     color: var(--mu2);
     cursor: pointer;
-    min-height: 36px;
     transition: background .15s, color .15s;
   }
   .ins-tab.active {
     background: var(--su);
-    color: var(--a);
+    color: var(--a-txt);
     box-shadow: var(--s0);
   }
 

@@ -146,7 +146,7 @@ const STYLE = `<style>
   text-transform: uppercase;
   letter-spacing: .06em;
 }
-.epcf-stop.now .epcf-stop-lvl  { color: var(--a); }
+.epcf-stop.now .epcf-stop-lvl  { color: var(--a-txt); }
 .epcf-stop.done .epcf-stop-lvl { color: var(--gr); }
 .epcf-stop-cost {
   font: 600 11px/1 'Inter', sans-serif;

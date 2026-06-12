@@ -60,7 +60,7 @@ export async function mountNotifBell(container) {
       .nb-empty{padding:32px 16px;text-align:center;color:var(--mu);font-size:12.5px}
       .nb-empty .em{font-size:28px;margin-bottom:6px}
       .nb-foot{padding:10px 12px;border-top:1px solid var(--bo2);background:var(--bg2)}
-      .nb-foot button{width:100%;height:32px;border:0;background:transparent;color:var(--a);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;border-radius:6px;transition:background .12s}
+      .nb-foot button{width:100%;height:32px;border:0;background:transparent;color: var(--a-txt);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;border-radius:6px;transition:background .12s}
       .nb-foot button:hover{background:var(--ap)}
       .nb-foot button:disabled{color:var(--mu2);cursor:default}
       .nb-foot button:disabled:hover{background:transparent}
