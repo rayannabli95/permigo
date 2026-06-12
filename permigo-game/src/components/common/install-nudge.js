@@ -111,6 +111,19 @@ function shouldShow() {
 export function maybeShowInstallNudge(me) {
   if (!shouldShow()) return;
 
+  // Tour guidé / tuto en cours → on attend qu'il se termine (une seule
+  // couche à la fois, sinon l'utilisateur est perdu dès l'arrivée).
+  const TOUR_SEL = ".it-tuto, .gt-bubble, .ob";
+  if (document.querySelector(TOUR_SEL)) {
+    const iv = setInterval(() => {
+      if (document.querySelector(TOUR_SEL)) return;
+      clearInterval(iv);
+      setTimeout(() => shouldShow() && show(me), 1200);
+    }, 2000);
+    setTimeout(() => clearInterval(iv), 5 * 60 * 1000); // garde-fou
+    return;
+  }
+
   // Une seule demande à la fois : si le bandeau cookies est à l'écran,
   // on attend le choix avant de proposer l'installation.
   if (document.querySelector(".ck-banner")) {

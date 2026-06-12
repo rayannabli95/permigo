@@ -117,7 +117,7 @@ function ensureStyle() {
 }
 
 const REASON_LABELS = {
-  quiz_fails: "Quiz raté — à retravailler",
+  quiz_fails: "À consolider",
   old_validation: "Acquis il y a longtemps — à rafraîchir",
   consolidation_due: "Quiz de révision à refaire",
 };

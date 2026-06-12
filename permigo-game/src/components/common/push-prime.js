@@ -99,6 +99,19 @@ function shouldShow() {
 /** Affiche la sheet d'activation des rappels si pertinent (PWA installée). */
 export function maybeShowPushPrime(me) {
   if (!shouldShow()) return;
+  // Tour guidé / tuto en cours → on attend qu'il se termine (une seule
+  // couche à la fois, sinon l'utilisateur est perdu dès l'arrivée).
+  const TOUR_SEL = ".it-tuto, .gt-bubble, .ob";
+  if (document.querySelector(TOUR_SEL)) {
+    const iv = setInterval(() => {
+      if (document.querySelector(TOUR_SEL)) return;
+      clearInterval(iv);
+      setTimeout(() => shouldShow() && show(me), 1200);
+    }, 2000);
+    setTimeout(() => clearInterval(iv), 5 * 60 * 1000); // garde-fou
+    return;
+  }
+
   // Premier lancement standalone = storage neuf (iOS) → le bandeau cookies
   // peut être à l'écran en même temps. Une seule demande à la fois :
   // cookies d'abord, rappels juste après le choix.

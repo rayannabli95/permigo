@@ -1145,7 +1145,7 @@ function render({
           <img class="acc2-hero-streak-img" src="/skins/permigo-streak-flame-v1.webp" alt="" />
           <span class="acc2-hero-streak-num">
             <b>${streak.current_streak}</b>
-            <i>jours</i>
+            <i>jour${streak.current_streak > 1 ? "s" : ""}</i>
           </span>
         </div>`
             : ""
@@ -1172,14 +1172,14 @@ function render({
     </div>
   </div>
 
-  <!-- Classement de l'école — remonté en haut (ligue en vedette) -->
+  <!-- ══ ACTION DU JOUR — la boucle quotidienne, PREMIÈRE chose visible ══ -->
+  ${bloc3}
+
+  <!-- Classement de l'école (ligue en vedette) -->
   <div id="acc-lb-slot"></div>
 
-  <!-- ══ BLOC 2 — NEXT MILESTONE ══ -->
+  <!-- ══ NEXT MILESTONE ══ -->
   <div class="acc2-ms">${bloc2}</div>
-
-  <!-- ══ BLOC 3 — ACTION DU JOUR ══ -->
-  ${bloc3}
 
   <!-- ══ BELOW FOLD ══ -->
   <div class="acc2-section-title">Mon parcours REMC</div>
@@ -1214,8 +1214,13 @@ function render({
     </div>
     <div class="footer-sep"></div>
     <div class="footer-stat">
-      <div class="footer-val">${Math.max(0, 28 - totalValidated)}</div>
-      <div class="footer-lbl">avant le seuil examen blanc (28/31)</div>
+      ${
+        totalValidated >= 28
+          ? `<div class="footer-val" style="color:var(--gr-txt)">✓</div>
+      <div class="footer-lbl">examen blanc débloqué</div>`
+          : `<div class="footer-val">${28 - totalValidated}</div>
+      <div class="footer-lbl">avant l'examen blanc</div>`
+      }
     </div>
   </div>
 
@@ -1376,26 +1381,26 @@ function renderActionDuJour(quest, pendingNotif, totalValidated, dailyQuiz) {
       dailyQuiz.mode === "decouverte"
         ? "3 questions · 2 min · Sans pression, on apprend ensemble"
         : "3 questions · 2 min · Garde ton avance dans la ligue Théorie";
-    btnText = "Je joue →";
+    btnText = "Je joue";
     href = `#/quiz/${dailyQuiz.competenceId}/post_validation/daily`;
   } else if (dailyQuiz?.done) {
     label = "Question du jour";
     title = "C'est fait pour aujourd'hui ✓";
     sub =
       "Ta question du jour est dans la boîte. Reviens demain — ou avance sur ton parcours.";
-    btnText = "Voir le parcours →";
+    btnText = "Voir le parcours";
     href = "#/parcours";
   } else if (totalValidated === 0) {
     title = "Lance ton parcours REMC";
     sub = "Découvre les 31 compétences à maîtriser avant l'examen";
-    btnText = "Voir le parcours →";
+    btnText = "Voir le parcours";
     href = "#/parcours";
   } else {
     // L'examen blanc est désormais le point d'entrée unique via la Boule de
     // cristal (cf. C8). L'action du jour reste sur la continuation du parcours.
     title = "Continue ton parcours";
     sub = "Avance vers ta prochaine compétence REMC";
-    btnText = "Voir le parcours →";
+    btnText = "Voir le parcours";
     href = "#/parcours";
   }
 
@@ -1573,12 +1578,12 @@ async function _loadAndInjectLeaderboard(root) {
       pct !== null ? `<span class="acc-lb-chip">Top ${100 - pct}%</span>` : "";
     const bodyText = ranked
       ? `Tu es #${rank} sur ${total}`
-      : "Clique pour voir ton classement";
+      : "Personne devant toi… pour l'instant";
     const sub = ranked
       ? pct !== null
         ? `Dans le top ${100 - pct}% de ton auto-école`
         : "Garde le rythme pour grimper"
-      : "Invite tes potes pour lancer le classement";
+      : "Invite tes potes pour lancer la course";
 
     const ARROW = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
 
