@@ -69,7 +69,7 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
   host.setAttribute("aria-label", "Appuie pour démarrer PermiGo");
   host.innerHTML = `
     <style>
-      #pg-launch-splash{position:fixed;inset:0;z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:var(--bg,#f4f5fb);padding:24px;opacity:1;transform:scale(1);transition:opacity .45s ease,transform .45s cubic-bezier(.4,0,.7,1);cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;overflow:hidden;}
+      #pg-launch-splash{position:fixed;inset:0;z-index:10100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:var(--bg,#f4f5fb);padding:24px;opacity:1;transform:scale(1);transition:opacity .45s ease,transform .45s cubic-bezier(.4,0,.7,1);cursor:pointer;-webkit-tap-highlight-color:transparent;outline:none;overflow:hidden;}
       /* Sortie : zoom-fade — l'app « émerge » du splash au lieu d'un cut */
       #pg-launch-splash.out{opacity:0;transform:scale(1.06);pointer-events:none;}
 
@@ -95,9 +95,9 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
 
       /* ── « PERMIGO » en cubes 3D ── */
       #pg-launch-splash .ls-cubes{position:relative;display:flex;gap:9px;perspective:800px;}
-      #pg-launch-splash .ls-cube{position:relative;width:46px;height:46px;transform-style:preserve-3d;animation:lsCubeFlip 2s ease-in-out infinite;will-change:transform;}
+      #pg-launch-splash .ls-cube{position:relative;width:46px;height:46px;transform-style:preserve-3d;animation:lsCubeFloat 3s ease-in-out infinite;will-change:transform;}
       /* Au tap : chaque cube bondit en cascade (délai inline réutilisé), puis la vague reprend */
-      #pg-launch-splash.go .ls-cube{animation:lsCubeJump .5s cubic-bezier(.34,1.56,.64,1) both,lsCubeFlip 2s ease-in-out .5s infinite;}
+      #pg-launch-splash.go .ls-cube{animation:lsCubeJump .5s cubic-bezier(.34,1.56,.64,1) both,lsCubeFloat 3s ease-in-out .5s infinite;}
       #pg-launch-splash .ls-face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 26px/1 'Plus Jakarta Sans','Nunito',sans-serif;color:#fff;border-radius:10px;backface-visibility:hidden;box-shadow:0 2px 6px color-mix(in srgb, var(--adk) 25%, transparent) inset,0 1px 0 rgba(255,255,255,.18) inset;}
       #pg-launch-splash .f-front {background:linear-gradient(180deg,var(--a-lt),var(--a));transform:translateZ(23px);}
       #pg-launch-splash .f-back  {background:linear-gradient(180deg,var(--a),var(--adk));transform:rotateY(180deg) translateZ(23px);}
@@ -107,7 +107,7 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
       #pg-launch-splash .f-bottom{background:color-mix(in srgb, var(--adk) 80%, #000);transform:rotateX(-90deg) translateZ(23px);}
 
       /* ── Pill « text-flip » (phrases sous les cubes) ── */
-      #pg-launch-splash .ls-flip{position:relative;display:inline-block;border-radius:12px;padding:8px 16px 10px;min-height:38px;font:800 17px/1.15 'Plus Jakarta Sans','Nunito',sans-serif;color:var(--a-ink);text-align:center;background:linear-gradient(to bottom,var(--su,#fff),color-mix(in srgb, var(--a) 8%, var(--su,#fff)));box-shadow:inset 0 -1px color-mix(in srgb, var(--adk) 18%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--adk) 14%, transparent), 0 4px 10px color-mix(in srgb, var(--adk) 12%, transparent);}
+      #pg-launch-splash .ls-flip{position:relative;display:inline-block;border-radius:12px;padding:8px 16px 10px;min-height:38px;font:800 17px/1.15 'Plus Jakarta Sans','Nunito',sans-serif;color:var(--ink);text-align:center;background:linear-gradient(to bottom,var(--su,#fff),color-mix(in srgb, var(--a) 8%, var(--su,#fff)));box-shadow:inset 0 -1px color-mix(in srgb, var(--adk) 18%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--adk) 14%, transparent), 0 4px 10px color-mix(in srgb, var(--adk) 12%, transparent);}
       #pg-launch-splash .ls-flip span{display:inline-block;animation:lsLetterIn .5s both;}
       #pg-launch-splash .ls-cta{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:99px;background:color-mix(in srgb,var(--a) 12%,transparent);border:1.5px solid color-mix(in srgb,var(--a) 30%,transparent);color:var(--ink);font:800 14px/1 'Plus Jakarta Sans','Nunito',sans-serif;animation:lsPulse 1.6s ease-in-out infinite;transition:opacity .2s,transform .2s;}
       #pg-launch-splash.go .ls-cta{opacity:0;transform:scale(.9);pointer-events:none;}
@@ -120,8 +120,8 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
       @keyframes lsRoadDraw{from{stroke-dashoffset:400}to{stroke-dashoffset:0}}
       @keyframes lsStreak{0%{opacity:0;transform:translateX(-60vw)}25%{opacity:.9}100%{opacity:0;transform:translateX(60vw)}}
       @keyframes lsCubeJump{0%{transform:translateY(0)}45%{transform:translateY(-16px)}100%{transform:translateY(0)}}
-      /* La lettre reste face avant ~45% du temps, puis flip complet → effet vague */
-      @keyframes lsCubeFlip{0%,45%{transform:rotateX(0)}70%,100%{transform:rotateX(360deg)}}
+      /* Float doux : légère translation Y + micro-rotation (jamais >20° → pas de face edge-on visible) */
+      @keyframes lsCubeFloat{0%,100%{transform:translateY(0) rotateX(0deg) rotateY(0deg)}40%{transform:translateY(-6px) rotateX(10deg) rotateY(8deg)}70%{transform:translateY(-3px) rotateX(-4deg) rotateY(-5deg)}}
 
       #pg-launch-splash:focus-visible{box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--a) 40%,transparent);}
       @media (prefers-reduced-motion:reduce){
