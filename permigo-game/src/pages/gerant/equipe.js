@@ -105,7 +105,7 @@ const STYLE = `<style>
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font: 600 16px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
+  color: var(--a-ink);
   flex-shrink: 0;
   background: var(--a);
 }
@@ -358,7 +358,7 @@ function openInviteModal(me) {
       .inv-btn:active { transform: scale(.97); }
       .inv-btn-cancel { background:var(--su2); border:1.5px solid var(--bo); color:var(--mu4); }
       .inv-btn-cancel:hover { background:var(--bg3); }
-      .inv-btn-go { background:var(--a); border:0; color:#fff; }
+      .inv-btn-go { background:var(--a); border:0; color: var(--a-ink); }
       .inv-btn-go:hover { background:var(--adk); }
       .inv-btn-go:disabled { opacity:.4; cursor:default; }
     </style>

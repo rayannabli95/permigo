@@ -245,7 +245,7 @@ export async function mount(root) {
       <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
         <div style="margin-bottom:12px">${icon("alert-circle", { size: 30 })}</div>
         <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
-        <button id="ppr-retry" style="margin-top:14px;padding:12px 24px;min-height:44px;border:0;background:var(--a);color:#fff;border-radius:12px;cursor:pointer;font:800 14px/1 'Plus Jakarta Sans',sans-serif">Réessayer</button>
+        <button id="ppr-retry" style="margin-top:14px;padding:12px 24px;min-height:44px;border:0;background:var(--a);color:var(--a-ink);border-radius:12px;cursor:pointer;font:800 14px/1 'Plus Jakarta Sans',sans-serif">Réessayer</button>
       </div></div>`;
     _wireTabs(root);
     root

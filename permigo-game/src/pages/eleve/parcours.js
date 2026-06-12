@@ -587,7 +587,7 @@ const STYLE = `<style>
   left: 50%;
   transform: translateX(-50%);
   background: var(--a);
-  color: #fff;
+  color: var(--a-ink);
   font: 800 8px/1 'Inter', sans-serif;
   padding: 3px 9px;
   border-radius: var(--r-full);
@@ -1271,7 +1271,7 @@ export async function mount(root) {
       <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
         <div style="font-size:40px;margin-bottom:12px">${icon("alert-circle", { size: 30 })}</div>
         <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
-        <button onclick="location.reload()" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:#fff;border-radius:12px;cursor:pointer">Réessayer</button>
+        <button onclick="location.reload()" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:var(--a-ink);border-radius:12px;cursor:pointer">Réessayer</button>
       </div></div>`;
     return;
   }
@@ -1395,7 +1395,7 @@ function spawnArrow(node, compId) {
       }
       .fa-bubble {
         background: var(--a);
-        color: #fff;
+        color: var(--a-ink);
         padding: 10px 16px;
         border-radius: var(--r-md);
         font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;

@@ -383,7 +383,7 @@ const STYLE = `<style>
     background: var(--a);
     border: none;
     border-radius: var(--r);
-    color: #fff;
+    color: var(--a-ink);
     font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
     transition: opacity .15s ease, transform .12s ease;

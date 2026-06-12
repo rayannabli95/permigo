@@ -59,7 +59,7 @@ const STYLE = `<style>
   }
   .gt-skip:hover { color: var(--ink5, #3a3f52); }
   .gt-next {
-    background: var(--a, #6366f1); color: #fff; border: none; cursor: pointer;
+    background: var(--a, #6366f1); color: var(--a-ink); border: none; cursor: pointer;
     font: 700 13.5px/1 'Plus Jakarta Sans', sans-serif;
     padding: 0 20px; min-height: 44px; border-radius: 12px;
     box-shadow: 0 4px 12px color-mix(in srgb, var(--a, #6366f1) 35%, transparent);

@@ -121,7 +121,7 @@ const STYLE = `<style>
   box-shadow: 0 4px 14px rgba(10,13,26,.12);
   display: flex; align-items: center; justify-content: center;
   font: 700 28px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
+  color: var(--a-ink);
 }
 .pcc-av img {
   width: 100%; height: 100%;
@@ -135,7 +135,7 @@ const STYLE = `<style>
   width: 28px; height: 28px;
   border-radius: 50%;
   background: var(--a);
-  color: #fff;
+  color: var(--a-ink);
   border: 2.5px solid #fff;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;

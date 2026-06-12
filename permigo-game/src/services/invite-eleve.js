@@ -94,7 +94,7 @@ export function openInviteEleveModal(me) {
       .me-inv-cancel:hover { background:var(--bo); }
       .me-inv-go {
         background:var(--a);
-        color:#fff; box-shadow:0 6px 18px -6px color-mix(in srgb, var(--a) 45%, transparent);
+        color: var(--a-ink); box-shadow:0 6px 18px -6px color-mix(in srgb, var(--a) 45%, transparent);
       }
       .me-inv-go:hover { box-shadow:0 8px 22px -6px color-mix(in srgb, var(--a) 55%, transparent); }
       .me-inv-go:disabled { opacity:.35; cursor:default; box-shadow:none; }

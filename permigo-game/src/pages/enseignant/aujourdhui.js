@@ -169,7 +169,7 @@ const STYLE = `<style>
     border: none;
     border-radius: var(--r-md);
     background: var(--a);
-    color: #fff;
+    color: var(--a-ink);
     font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;

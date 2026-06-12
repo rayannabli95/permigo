@@ -348,7 +348,7 @@
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  color: #fff;
+  color: var(--a-ink);
 }
 .update-badge .pill {
   background: #fff;

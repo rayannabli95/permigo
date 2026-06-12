@@ -94,7 +94,7 @@ const STYLE = `<style>
   top: 4px; right: 4px;
   width: 22px; height: 22px;
   background: var(--a);
-  color: #fff;
+  color: var(--a-ink);
   border-radius: 50%;
   display: grid; place-items: center;
   font: 800 13px/1 'Inter', sans-serif;
@@ -119,7 +119,7 @@ const STYLE = `<style>
 .avpk-btn.primary {
   background: var(--a);
   border-color: var(--a);
-  color: #fff;
+  color: var(--a-ink);
 }
 .avpk-btn.primary:hover { background: var(--adk); }
 .avpk-btn:disabled { opacity: .45; cursor: default; }

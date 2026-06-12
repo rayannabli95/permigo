@@ -786,7 +786,7 @@ function render() {
                   title: "Invite ton premier élève",
                   body: "Envoie un lien d'inscription par SMS ou WhatsApp. Ton élève crée son compte en 30 secondes.",
                   cta: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:4px">
-                    <button id="me-invite-empty-btn" style="display:inline-flex;align-items:center;gap:7px;padding:12px 22px;background:var(--a);color:#fff;border:0;border-radius:12px;font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
+                    <button id="me-invite-empty-btn" style="display:inline-flex;align-items:center;gap:7px;padding:12px 22px;background:var(--a);color:var(--a-ink);border:0;border-radius:12px;font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
                       ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter ton premier élève
                     </button>
                     <span style="font:500 12px/1.4 'Inter',sans-serif;color:var(--mu2);max-width:260px;text-align:center">Tu travailles en auto-école ? Tes élèves peuvent aussi être affectés par le gérant.</span>
@@ -1470,7 +1470,7 @@ function renderList() {
             title: "Invite ton premier élève",
             body: "Envoie un lien d'inscription par SMS ou WhatsApp. Ton élève crée son compte en 30 secondes.",
             cta: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:4px">
-              <button id="me-invite-empty-btn" style="display:inline-flex;align-items:center;gap:7px;padding:12px 22px;background:var(--a);color:#fff;border:0;border-radius:12px;font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
+              <button id="me-invite-empty-btn" style="display:inline-flex;align-items:center;gap:7px;padding:12px 22px;background:var(--a);color:var(--a-ink);border:0;border-radius:12px;font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
                 ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter ton premier élève
               </button>
               <span style="font:500 12px/1.4 'Inter',sans-serif;color:var(--mu2);max-width:260px;text-align:center">Tu travailles en auto-école ? Tes élèves peuvent aussi être affectés par le gérant.</span>

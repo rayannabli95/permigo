@@ -46,7 +46,7 @@ const STYLE = `<style>
     border-radius: 16px;
     margin: 0 auto 16px;
     display: flex; align-items: center; justify-content: center;
-    color: #fff;
+    color: var(--a-ink);
     font: 800 22px/1 'Plus Jakarta Sans', sans-serif;
     letter-spacing: -.02em;
     box-shadow: 0 8px 24px color-mix(in srgb, var(--a) 30%, transparent), 0 1.5px 0 0 rgba(255,255,255,.3) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;

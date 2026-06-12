@@ -42,7 +42,7 @@ const STYLE = `<style>
   background: var(--a);
   display: flex; align-items: center; justify-content: center;
   font: 700 32px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
+  color: var(--a-ink);
   box-shadow: 0 8px 24px color-mix(in srgb, var(--a) 25%, transparent);
 }
 .prf-name {
@@ -319,7 +319,7 @@ const STYLE = `<style>
   background: var(--a);
   border: none;
   border-radius: 12px;
-  color: #fff;
+  color: var(--a-ink);
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   transition: transform 120ms cubic-bezier(.23,1,.32,1), opacity 120ms;
@@ -395,7 +395,7 @@ const STYLE = `<style>
 .prf-pseudo-input:focus { border-color: var(--a); }
 .prf-pseudo-input.invalid { border-color: var(--rd); }
 .prf-pseudo-save {
-  padding: 0 18px; background: var(--a); border: none; border-radius: 12px; color: #fff;
+  padding: 0 18px; background: var(--a); border: none; border-radius: 12px; color: var(--a-ink);
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; min-height: 44px;
   white-space: nowrap; transition: opacity .12s, transform .12s;
 }

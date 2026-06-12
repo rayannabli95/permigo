@@ -582,7 +582,7 @@ const STYLE = `<style>
   .ob-av-check {
     position: absolute; top: 5px; right: 5px;
     width: 22px; height: 22px; border-radius: 50%;
-    background: var(--a); color: #fff;
+    background: var(--a); color: var(--a-ink);
     font-size: 13px; font-weight: 800;
     display: flex; align-items: center; justify-content: center;
     opacity: 0; transform: scale(.5); transition: opacity .15s, transform .15s;
@@ -639,7 +639,7 @@ const STYLE = `<style>
     position: relative; overflow: hidden;
     width: 100%; padding: 17px;
     background: linear-gradient(135deg, var(--a), var(--adk, var(--adk)));
-    border: 0; border-radius: var(--r-lg); color: #fff;
+    border: 0; border-radius: var(--r-lg); color: var(--a-ink);
     font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer; min-height: 56px;
     box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--a) 55%, transparent);
@@ -686,7 +686,7 @@ const STYLE = `<style>
   .ob-a2hs-step strong { color: #fff; font-weight: 700; }
   .ob-a2hs-num {
     flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%;
-    background: var(--a); color: #fff; font: 800 13px/24px 'Inter'; text-align: center;
+    background: var(--a); color: var(--a-ink); font: 800 13px/24px 'Inter'; text-align: center;
   }
   .ob-a2hs-glyph {
     display: inline-flex; vertical-align: -5px; margin: 0 2px; padding: 2px;
@@ -694,7 +694,7 @@ const STYLE = `<style>
   }
   .ob-a2hs-install {
     width: 100%; margin-bottom: 14px; border: 0; border-radius: var(--r-md);
-    background: linear-gradient(135deg, var(--a), var(--adk, var(--adk))); color: #fff;
+    background: linear-gradient(135deg, var(--a), var(--adk, var(--adk))); color: var(--a-ink);
     font: 800 15px/1 'Inter'; padding: 14px; cursor: pointer;
     box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--a) 55%, transparent);
   }

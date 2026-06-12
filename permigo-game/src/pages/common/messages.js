@@ -338,7 +338,7 @@ function renderStyles() {
   align-items: center;
   justify-content: center;
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
+  color: var(--a-ink);
   flex-shrink: 0;
 }
 .msg-thread-body { flex: 1; overflow: hidden; }
@@ -375,7 +375,7 @@ function renderStyles() {
 }
 .msg-badge {
   background: var(--a);
-  color: #fff;
+  color: var(--a-ink);
   border-radius: 10px;
   font: 700 11px/1 'IBM Plex Mono', monospace;
   padding: 3px 7px;
@@ -459,7 +459,7 @@ function renderStyles() {
   border-radius: 50%;
   background: var(--a);
   border: none;
-  color: #fff;
+  color: var(--a-ink);
   font-size: 18px;
   cursor: pointer;
   flex-shrink: 0;
@@ -493,7 +493,7 @@ function renderStyles() {
 }
 .msg-bubble--mine {
   background: var(--a);
-  color: #fff;
+  color: var(--a-ink);
   border-bottom-right-radius: 4px;
 }
 .msg-bubble--pending { opacity: .6; }
