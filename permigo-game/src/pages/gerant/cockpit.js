@@ -84,7 +84,7 @@ const STYLE = `<style>
   background: linear-gradient(90deg, ${SURF} 0%, ${SURF2} 50%, ${SURF} 100%);
   background-size: 200% 100%;
   animation: ckShim 1.6s ease-in-out infinite;
-  border-radius: 16px;
+  border-radius: var(--r-lg);
 }
 @keyframes ckShim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
@@ -122,7 +122,7 @@ const STYLE = `<style>
 }
 .ck-refresh-btn {
   width: 32px; height: 32px;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   border: 1px solid ${BORD};
   background: ${SURF};
   cursor: pointer;
@@ -166,7 +166,7 @@ const STYLE = `<style>
 .ck-kpi {
   background: ${SURF};
   border: 1px solid ${BORD};
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   padding: 18px 16px;
   position: relative;
   overflow: hidden;
@@ -199,7 +199,7 @@ const STYLE = `<style>
   display: inline-flex; align-items: center; gap: 3px;
   font: 600 11px/1 'Inter', sans-serif;
   padding: 3px 7px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
 }
 .ck-kpi-delta.up   { color: var(--gr); background: rgba(16,185,129,.12); }
 .ck-kpi-delta.down { color: var(--rd); background: rgba(239,68,68,.12); }
@@ -209,7 +209,7 @@ const STYLE = `<style>
 .ck-cohort-wrap {
   background: ${SURF};
   border: 1px solid ${BORD};
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   padding: 20px;
 }
 .ck-donut-row {
@@ -260,7 +260,7 @@ const STYLE = `<style>
   background: ${SURF};
   border: 1px solid ${BORD};
   border-left: 3px solid var(--alert-color);
-  border-radius: 14px;
+  border-radius: var(--r-md);
   padding: 14px 16px;
   margin-bottom: 8px;
   cursor: pointer;
@@ -273,7 +273,7 @@ const STYLE = `<style>
 .ck-alert:active { background: ${SURF2}; }
 .ck-alert-ico {
   width: 32px; height: 32px;
-  border-radius: 10px;
+  border-radius: var(--r);
   background: rgba(var(--alert-rgb), .12);
   display: flex; align-items: center; justify-content: center;
   color: var(--alert-color);
@@ -301,7 +301,7 @@ const STYLE = `<style>
 .ck-mon-list {
   background: ${SURF};
   border: 1px solid ${BORD};
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   overflow: hidden;
 }
 .ck-mon-row {
@@ -325,7 +325,7 @@ const STYLE = `<style>
 }
 .ck-mon-av {
   width: 36px; height: 36px;
-  border-radius: 10px;
+  border-radius: var(--r);
   background: color-mix(in srgb, var(--a) 20%, transparent);
   border: 1px solid color-mix(in srgb, var(--a) 30%, transparent);
   display: flex; align-items: center; justify-content: center;
@@ -344,14 +344,14 @@ const STYLE = `<style>
   flex: 1;
   height: 3px;
   background: ${BORD};
-  border-radius: 99px;
+  border-radius: var(--r-full);
   overflow: hidden;
 }
 .ck-mon-bar-fill {
   height: 100%;
   background: ${ACC};
-  border-radius: 99px;
-  transition: width 1s cubic-bezier(.2,.7,.3,1);
+  border-radius: var(--r-full);
+  transition: width 1s var(--ease-out);
 }
 .ck-mon-val {
   font: 600 11px/1 'IBM Plex Mono', monospace;
@@ -395,7 +395,7 @@ const STYLE = `<style>
 .ck-bs-eleve:last-child { border-bottom: none; }
 .ck-bs-eleve:active { background: ${SURF2}; }
 .ck-bs-av {
-  width: 36px; height: 36px; border-radius: 10px;
+  width: 36px; height: 36px; border-radius: var(--r);
   background: ${SURF2}; border: 1px solid ${BORD};
   display: flex; align-items: center; justify-content: center;
   font: 700 13px/1 'Plus Jakarta Sans', sans-serif; color: ${TEXT};
@@ -464,7 +464,7 @@ async function loadFallback(root, me) {
     root.innerHTML = `${STYLE}<div style="padding:60px 24px;text-align:center;color:${MUTED}">
       <div style="font:700 18px/1.3 'Plus Jakarta Sans',sans-serif;color:${TEXT};margin-bottom:8px">Cockpit indisponible</div>
       <p style="font-size:13px;margin:0 0 20px">Vérifie ta connexion.</p>
-      <button onclick="location.reload()" style="padding:12px 24px;border:0;background:${ACC};color:#fff;border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Recharger</button>
+      <button onclick="location.reload()" style="padding:12px 24px;border:0;background:${ACC};color:#fff;border-radius:var(--r);font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Recharger</button>
     </div>`;
   }
 }
@@ -782,7 +782,7 @@ function renderSkeleton() {
       <div class="ck-skel" style="height:96px"></div>
     </div>
   </div>
-  <div class="ck-section"><div class="ck-skel" style="height:180px;border-radius:20px"></div></div>
-  <div class="ck-section"><div class="ck-skel" style="height:120px;border-radius:20px"></div></div>
+  <div class="ck-section"><div class="ck-skel" style="height:180px;border-radius:var(--r-xl)"></div></div>
+  <div class="ck-section"><div class="ck-skel" style="height:120px;border-radius:var(--r-xl)"></div></div>
 </div>`;
 }

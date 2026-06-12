@@ -49,9 +49,9 @@ const STYLE = `<style>
 .kpi-card {
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   padding: 20px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+  box-shadow: var(--s0);
   position: relative;
   overflow: hidden;
   animation: kpiIn .4s ease both;
@@ -134,9 +134,9 @@ const STYLE = `<style>
   padding: 16px;
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   height: 96px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+  box-shadow: var(--s0);
 }
 .spark-col {
   flex: 1;
@@ -152,7 +152,7 @@ const STYLE = `<style>
   max-width: 28px;
   background: linear-gradient(180deg, var(--a), var(--adk));
   border-radius: 6px 6px 0 0;
-  transition: height .6s cubic-bezier(.2,.7,.3,1);
+  transition: height .6s var(--ease-out);
   box-shadow: 0 -2px 6px color-mix(in srgb, var(--a) 18%, transparent);
 }
 .spark-bar.today {
@@ -174,7 +174,7 @@ const STYLE = `<style>
   padding: 12px 16px;
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 12px;
+  border-radius: var(--r);
   cursor: pointer;
   transition: border-color .15s, transform .12s;
 }
@@ -199,14 +199,14 @@ const STYLE = `<style>
   width: 70px;
   height: 6px;
   background: var(--bg2);
-  border-radius: 99px;
+  border-radius: var(--r-full);
   overflow: hidden;
 }
 .exam-prog-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--am), var(--aml2));
-  border-radius: 99px;
-  transition: width .6s cubic-bezier(.2,.7,.3,1);
+  border-radius: var(--r-full);
+  transition: width .6s var(--ease-out);
 }
 .exam-prog-val {
   font: 700 12px/1 'IBM Plex Mono', monospace;
@@ -224,8 +224,8 @@ const STYLE = `<style>
   padding: 12px 16px;
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+  border-radius: var(--r);
+  box-shadow: var(--s0);
   transition: border-color .15s ease;
 }
 .team-row:hover { border-color: var(--a); }
@@ -252,7 +252,7 @@ const STYLE = `<style>
   font: 600 12px/1 'Inter', sans-serif;
   color: var(--a);
   background: color-mix(in srgb, var(--a) 10%, transparent);
-  border-radius: 99px;
+  border-radius: var(--r-full);
   padding: 6px 12px;
   white-space: nowrap;
 }
@@ -266,8 +266,8 @@ const STYLE = `<style>
   padding: 12px 16px;
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+  border-radius: var(--r);
+  box-shadow: var(--s0);
 }
 .activity-dot {
   width: 8px; height: 8px;
@@ -293,7 +293,7 @@ const STYLE = `<style>
   background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
   background-size: 200% 100%;
   animation: shimmerP 1.4s ease-in-out infinite;
-  border-radius: 12px;
+  border-radius: var(--r);
 }
 @keyframes shimmerP { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
@@ -305,16 +305,16 @@ const STYLE = `<style>
   font: 500 13px/1.5 'Inter', sans-serif;
   background: var(--su);
   border: 1px dashed var(--bo);
-  border-radius: 12px;
+  border-radius: var(--r);
 }
 
 /* ─── Tendance 30j (Bloomberg style multi-séries) ─── */
 .trend-card {
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   padding: 16px 16px 12px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+  box-shadow: var(--s0);
 }
 .trend-legend {
   display: flex; gap: 14px; flex-wrap: wrap;
@@ -360,9 +360,9 @@ const STYLE = `<style>
 .heat-card {
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   padding: 14px 16px 10px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+  box-shadow: var(--s0);
   overflow: hidden;
 }
 .heat-scroll {
@@ -698,13 +698,13 @@ function render({
   ${
     elevesARisque > 0
       ? `
-    <div style="margin:12px 16px 0;padding:14px 16px;background:linear-gradient(135deg,#fef9e7,#fffbeb);border:1px solid var(--aml);border-radius:14px;display:flex;align-items:center;gap:12px">
+    <div style="margin:12px 16px 0;padding:14px 16px;background:linear-gradient(135deg,#fef9e7,#fffbeb);border:1px solid var(--aml);border-radius:var(--r-md);display:flex;align-items:center;gap:12px">
       <div style="width:36px;height:36px;border-radius:50%;background:var(--am);color:#fff;display:grid;place-items:center;flex-shrink:0">${icon("alert-circle", { size: 18 }) || "⚠️"}</div>
       <div style="flex:1">
         <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:2px">${elevesARisque} élève${elevesARisque > 1 ? "s" : ""} à relancer</div>
         <div style="font:500 12px/1.4 'Inter',sans-serif;color:var(--mu3)">Pas d'activité depuis 14 jours ou plus.</div>
       </div>
-      <a href="#/eleves" style="font:700 11px/1 'Inter',sans-serif;color:var(--amx);text-decoration:none;padding:8px 12px;background:rgba(245,158,11,.15);border-radius:8px;white-space:nowrap">Voir</a>
+      <a href="#/eleves" style="font:700 11px/1 'Inter',sans-serif;color:var(--amx);text-decoration:none;padding:8px 12px;background:rgba(245,158,11,.15);border-radius:var(--r-sm);white-space:nowrap">Voir</a>
     </div>
   `
       : ""

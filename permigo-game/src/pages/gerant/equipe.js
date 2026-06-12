@@ -42,7 +42,7 @@ const STYLE = `<style>
   color: var(--a);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   padding: 6px 12px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
 }
 
 /* Search */
@@ -64,7 +64,7 @@ const STYLE = `<style>
   height: 44px;
   padding: 0 16px 0 40px;
   border: 1px solid var(--bo);
-  border-radius: 12px;
+  border-radius: var(--r);
   background: var(--bg);
   color: var(--ink);
   font: 500 14px/1 'Inter', sans-serif;
@@ -91,9 +91,9 @@ const STYLE = `<style>
 .eq-card {
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   padding: 20px;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
+  box-shadow: var(--s0);
   display: flex;
   align-items: flex-start;
   gap: 14px;
@@ -133,7 +133,7 @@ const STYLE = `<style>
   color: var(--mu);
   background: var(--bg);
   border: 1px solid var(--bo);
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   padding: 6px 10px;
 }
 .eq-stat strong {
@@ -143,7 +143,7 @@ const STYLE = `<style>
 .eq-badge {
   font: 600 11px/1 'Inter', sans-serif;
   padding: 5px 10px;
-  border-radius: 99px;
+  border-radius: var(--r-full);
   letter-spacing: .2px;
 }
 .eq-badge.actif {
@@ -168,7 +168,7 @@ const STYLE = `<style>
   gap: 8px;
   height: 48px;
   border: 1.5px dashed var(--bo4);
-  border-radius: 12px;
+  border-radius: var(--r);
   background: transparent;
   color: var(--mu);
   font: 600 14px/1 'Inter', sans-serif;
@@ -190,7 +190,7 @@ const STYLE = `<style>
   font: 500 13px/1.6 'Inter', sans-serif;
   background: var(--su);
   border: 1px dashed var(--bo);
-  border-radius: 12px;
+  border-radius: var(--r);
   margin: 16px;
 }
 .eq-empty-ico { font-size: 36px; margin-bottom: 10px; }
@@ -200,7 +200,7 @@ const STYLE = `<style>
   background: linear-gradient(90deg, var(--bg2) 0%, var(--bo) 50%, var(--bg2) 100%);
   background-size: 200% 100%;
   animation: eqShimmer 1.4s ease-in-out infinite;
-  border-radius: 20px;
+  border-radius: var(--r-xl);
 }
 @keyframes eqShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 </style>`;
@@ -340,15 +340,15 @@ function openInviteModal(me) {
     <style>
       @keyframes invFadeIn { from { opacity: 0; } to { opacity: 1; } }
       @keyframes invSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-      .inv-sheet { width:100%; max-width:480px; background:var(--su); border-radius:32px 32px 0 0; padding:24px 24px max(32px, env(safe-area-inset-bottom)); animation: invSlideUp .3s cubic-bezier(.2,.7,.3,1); font-family:'Inter',sans-serif; }
+      .inv-sheet { width:100%; max-width:480px; background:var(--su); border-radius:32px 32px 0 0; padding:24px 24px max(32px, env(safe-area-inset-bottom)); animation: invSlideUp .3s var(--ease-out); font-family:'Inter',sans-serif; }
       .inv-handle { width:36px; height:4px; background:var(--bo); border-radius:2px; margin:0 auto 20px; }
       .inv-title { font:800 22px/1.2 'Plus Jakarta Sans',sans-serif; color:var(--ink); margin:0 0 6px; letter-spacing:-.02em; }
       .inv-sub { font:500 14px/1.4 'Inter',sans-serif; color:var(--mu3); margin:0 0 20px; }
       .inv-label { display:block; font:600 12px/1 'Inter',sans-serif; color:var(--mu3); text-transform:uppercase; letter-spacing:.08em; margin:14px 0 6px; }
-      .inv-input { width:100%; padding:14px 16px; border:1.5px solid var(--bo); border-radius:14px; font:500 15px/1.3 'Inter',sans-serif; color:var(--ink); transition:border-color .15s; font-family:inherit; }
+      .inv-input { width:100%; padding:14px 16px; border:1.5px solid var(--bo); border-radius:var(--r-md); font:500 15px/1.3 'Inter',sans-serif; color:var(--ink); transition:border-color .15s; font-family:inherit; }
       .inv-input:focus { outline:0; border-color:var(--a); }
       .inv-actions { display:flex; gap:10px; margin-top:24px; }
-      .inv-btn { flex:1; padding:16px; border-radius:14px; font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s, background .15s; font-family:inherit; }
+      .inv-btn { flex:1; padding:16px; border-radius:var(--r-md); font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s, background .15s; font-family:inherit; }
       .inv-btn:active { transform: scale(.97); }
       .inv-btn-cancel { background:var(--su2); border:1.5px solid var(--bo); color:var(--mu4); }
       .inv-btn-cancel:hover { background:var(--bg3); }
