@@ -27,6 +27,59 @@ import { mountDailyQuests } from "@/components/eleve/daily-quests.js";
 import { toast } from "@/components/common/toast.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
+import { startTour } from "@/components/common/guided-tour.js";
+
+// Tour guidé élève — 1× à la première arrivée sur l'accueil (l'onboarding
+// plein écran est déjà passé : main.js le monte AVANT cette page).
+const TOUR_KEY = "pg-tour-eleve-v1";
+const ELEVE_TOUR_STEPS = [
+  {
+    title: "Bienvenue sur PermiGo 👋",
+    text: "Ton permis, étape par étape. Petite visite en 30 secondes — tu peux passer quand tu veux.",
+  },
+  {
+    sel: ".acc2-hero-streak",
+    title: "Ta flamme 🔥",
+    text: "Reviens chaque jour : ta série grandit et te rapporte des volants à dépenser.",
+  },
+  {
+    sel: ".acc2-action",
+    title: "Ton action du jour",
+    text: "Un petit quiz par jour, et l'examen devient beaucoup plus facile. C'est ici que ça se passe.",
+  },
+  {
+    sel: '.bn-tab[data-id="parcours"]',
+    title: "Ton parcours",
+    text: "Ta carte du permis : 4 mondes à traverser, 30 compétences à valider avec ton moniteur.",
+  },
+  {
+    sel: '.bn-tab[data-id="boutique"]',
+    title: "La boutique",
+    text: "Skins de voiture, fonds de permis… dépense tes volants et montre ton style au classement.",
+  },
+];
+
+function maybeStartEleveTour() {
+  try {
+    if (localStorage.getItem(TOUR_KEY)) return;
+  } catch {
+    return;
+  }
+  setTimeout(() => {
+    if (!document.querySelector(".acc2-hero-streak")) return;
+    track("eleve.tour.start");
+    startTour(ELEVE_TOUR_STEPS, {
+      onDone: () => {
+        try {
+          localStorage.setItem(TOUR_KEY, "1");
+        } catch {
+          /* stockage indispo */
+        }
+        track("eleve.tour.done");
+      },
+    });
+  }, 600);
+}
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -963,6 +1016,9 @@ export async function mount(root) {
       maybeSoftRequestPush();
       maybeSendStreakRiskNotif();
     }
+
+    // Tour guidé première arrivée (après le wiring, ancres en place)
+    maybeStartEleveTour();
   } catch (e) {
     console.error("[accueil] mount failed", e);
     root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:var(--mu3);font-family:'Inter',sans-serif">

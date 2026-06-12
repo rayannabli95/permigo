@@ -444,6 +444,14 @@ function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
     el.addEventListener("click", () => {
       haptic("select");
       const key = el.dataset.key;
+      // Consulté = plus « nouveau » : la pastille s'efface au clic
+      const dot = el.querySelector(".tr2-new-dot");
+      if (dot) {
+        dot.style.transition = "opacity .25s, transform .25s";
+        dot.style.opacity = "0";
+        dot.style.transform = "scale(.6)";
+        setTimeout(() => dot.remove(), 260);
+      }
       const def = CATALOG.find((t) => t.key === key);
       const unlockData = unlockedMap.get(key) ?? null;
       if (def) showModal(def, unlockData, unlockedCount);
