@@ -14,6 +14,7 @@ import { esc } from '@/utils/escape.js';
 import { icon } from '@/utils/icons.js';
 import { markChestOpened } from '@/utils/game-state.js';
 import { burstConfetti } from '@/components/common/confetti.js';
+import { playWhoosh, playUnlock, playGold, playCoin } from '@/utils/sound.js';
 import { lootToast } from '@/components/eleve/loot-toast.js';
 
 // 4 mondes = 4 tiers de coffres avec leur identité visuelle
@@ -106,12 +107,14 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
 
   // Phase 1 : 3 vibrations (0-900ms)
   stage.classList.add('cm-shaking');
+  playWhoosh();
   try { navigator.vibrate?.([50, 80, 50, 80, 50]); } catch (_) {}
 
   setTimeout(() => {
     stage.classList.remove('cm-shaking');
 
     // Phase 2 : pop du coffre + flash + burst de lumière (900ms)
+    playUnlock();
     if (imgEl) imgEl.classList.add('cm-img-pop');
     if (burstEl) burstEl.classList.add('go');
     document.body.classList.add('cm-flash');
@@ -122,6 +125,7 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
       try { navigator.vibrate?.(120); } catch (_) {}
 
       // Burst confetti depuis le centre (couleurs du tier)
+      playGold();
       burstConfetti({ x: 0.5, y: 0.4, count: 180, power: 22, spread: Math.PI });
 
       // Phase 4 : Cascade de récompenses (1300ms+)
@@ -136,6 +140,7 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
           d.className = 'chest-reward';
           d.innerHTML = `<span class="ic">${r.icon}</span><span class="lb">${esc(r.label)}</span><span class="shine"></span>`;
           rewards.appendChild(d);
+          playCoin();
           lootToast({ icon: r.icon, label: r.label, subLabel: tier.name, kind: 'gold' });
           try { navigator.vibrate?.(30); } catch (_) {}
         }, r.delay);

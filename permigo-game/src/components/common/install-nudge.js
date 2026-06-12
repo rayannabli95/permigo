@@ -18,6 +18,7 @@ import {
   promptInstall,
 } from "@/utils/pwa.js";
 import { track } from "@/services/analytics.js";
+import { a2hsStepsHTML, A2HS_STYLE } from "@/components/common/a2hs-steps.js";
 
 const BADGE = "/skins/avatars/permigo-badge-icon.png";
 const LS_NEXT = "permigo-a2hs-next"; // timestamp avant lequel on se tait
@@ -25,10 +26,9 @@ const LS_OFF = "permigo-a2hs-off"; // "1" = ne plus jamais proposer
 const SNOOZE_MS = 3 * 24 * 60 * 60 * 1000; // 3 jours
 const FIRST_DELAY_MS = 1800; // laisse la page respirer avant la sheet
 
-const SHARE_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg>`;
-const DOTS_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>`;
 
 const STYLE = `<style id="inn-style">
+${A2HS_STYLE}
 .inn-bg {
   position: fixed; inset: 0; z-index: 240;
   background: rgba(11,13,26,.45);
@@ -62,14 +62,7 @@ const STYLE = `<style id="inn-style">
              border: 0; border-radius: 50%; background: var(--bg2); color: var(--mu);
              font-size: 18px; line-height: 1; cursor: pointer;
              display: flex; align-items: center; justify-content: center; }
-.inn-steps { background: var(--bg2); border-radius: 14px; padding: 4px 14px; margin-bottom: 14px; }
-.inn-step { display: flex; gap: 11px; align-items: flex-start; padding: 10px 0; }
-.inn-step + .inn-step { border-top: 1px solid var(--bo2); }
-.inn-num { flex: 0 0 22px; width: 22px; height: 22px; border-radius: 50%;
-           background: var(--a); color: var(--a-ink); font: 800 12px/22px 'Inter', sans-serif; text-align: center; }
-.inn-step-txt { font: 500 13px/1.45 'Inter', sans-serif; color: var(--ink); padding-top: 2px; }
-.inn-glyph { display: inline-flex; vertical-align: -4px; margin: 0 2px; padding: 2px;
-             border-radius: 6px; background: var(--su); color: var(--a-txt); border: 1px solid var(--bo); }
+.inn-steps { margin-bottom: 14px; }
 .inn-install { width: 100%; min-height: 50px; border: 0; border-radius: 14px;
                background: linear-gradient(to bottom, var(--a-lt), var(--a) 55%, var(--adk));
                color: var(--a-ink); font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
@@ -110,16 +103,6 @@ function shouldShow() {
   return true;
 }
 
-function stepsHtml(platform) {
-  if (platform === "ios") {
-    return `
-      <div class="inn-step"><div class="inn-num">1</div><div class="inn-step-txt">Dans <strong>Safari</strong>, touche Partager <span class="inn-glyph">${SHARE_SVG}</span> en bas de l'écran.</div></div>
-      <div class="inn-step"><div class="inn-num">2</div><div class="inn-step-txt">Choisis <strong>« Sur l'écran d'accueil »</strong>, puis <strong>« Ajouter »</strong>.</div></div>`;
-  }
-  return `
-      <div class="inn-step"><div class="inn-num">1</div><div class="inn-step-txt">Dans <strong>Chrome</strong>, touche le menu <span class="inn-glyph">${DOTS_SVG}</span> en haut à droite.</div></div>
-      <div class="inn-step"><div class="inn-num">2</div><div class="inn-step-txt">Choisis <strong>« Ajouter à l'écran d'accueil »</strong>, puis confirme.</div></div>`;
-}
 
 /**
  * Affiche la bottom-sheet d'install si les conditions sont réunies.
@@ -127,6 +110,17 @@ function stepsHtml(platform) {
  */
 export function maybeShowInstallNudge(me) {
   if (!shouldShow()) return;
+
+  // Une seule demande à la fois : si le bandeau cookies est à l'écran,
+  // on attend le choix avant de proposer l'installation.
+  if (document.querySelector(".ck-banner")) {
+    window.addEventListener(
+      "permigo:consent",
+      () => setTimeout(() => shouldShow() && show(me), 900),
+      { once: true },
+    );
+    return;
+  }
 
   setTimeout(() => {
     // Re-check : l'install a pu se faire entre-temps (event natif Chrome)
@@ -150,15 +144,15 @@ function show(me) {
       <div class="inn-hd">
         <img class="inn-badge" src="${BADGE}" alt="" aria-hidden="true"/>
         <div>
-          <div class="inn-title" id="inn-title">${tu ? "Installe PermiGo sur ton téléphone" : "Installez PermiGo sur votre téléphone"}</div>
-          <div class="inn-sub">${tu ? "Ouvre l'app en 1 tap depuis ton écran d'accueil." : "Ouvrez l'app en 1 tap depuis votre écran d'accueil."}</div>
+          <div class="inn-title" id="inn-title">${tu ? "Mets PermiGo sur ton écran d'accueil" : "Mettez PermiGo sur votre écran d'accueil"}</div>
+          <div class="inn-sub">${tu ? "10 secondes — et tu reçois tes rappels 🔔" : "10 secondes — et vous recevez vos notifications 🔔"}</div>
         </div>
         <button class="inn-close" id="inn-close" type="button" aria-label="Fermer">×</button>
       </div>
       ${
         native
           ? `<button class="inn-install" id="inn-install" type="button">Installer l'app en 1 tap</button>`
-          : `<div class="inn-steps">${stepsHtml(platform)}</div>`
+          : `<div class="inn-steps">${a2hsStepsHTML(platform)}</div>`
       }
       <div class="inn-row">
         <button class="inn-later" id="inn-later" type="button">Plus tard</button>
@@ -221,7 +215,7 @@ function show(me) {
       return;
     }
     // Refusé / indispo → on montre la marche à suivre manuelle à la place
-    btn.outerHTML = `<div class="inn-steps">${stepsHtml("android")}</div>`;
+    btn.outerHTML = `<div class="inn-steps">${a2hsStepsHTML("android")}</div>`;
   });
 
   requestAnimationFrame(() => host.querySelector("#inn-close")?.focus());
