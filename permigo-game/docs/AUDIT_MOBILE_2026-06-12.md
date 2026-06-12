@@ -110,3 +110,29 @@ Idem ratio 1 = texte gradient-clipped.
 | **D** | Contraste non-ambigus (badges, compteurs, méta dark). Blanc-sur-vert : **après décision** | 0 paire < 4.5:1 hors décision |
 
 Vérification : re-run `scripts/audit-mobile.mjs` après chaque PR, rapport avant/après chiffré.
+
+---
+
+## Résultats après correction (preuve — re-run du 2026-06-12 soir)
+
+5 PR mergées : #166 (touch targets) · #167 (safe-areas + hygiène) · #168 (contraste systémique) · #169 (CTA → a-ink, décision Rayan) · #170 (passe finale).
+
+| Axe | Avant | Après |
+|---|---|---|
+| Touch targets < 44px | 48 signatures | **0** ✓ |
+| Boutons sans :active | (artefact d'instrument — déjà couvert par le scale(.96) global) | **0** ✓ |
+| Débordement horizontal | 1 (profil 360) | **0** réel (1 mesure transitoire pendant le skeleton, vérifiée saine en ciblé) |
+| Safe-areas PWA | 3 composants + 6 overlays | **0** — toast, bell, tour, overlays patchés |
+| `transition:all` / `100vh` / scroll traps | 7 / 3 / 3 | **0** ✓ |
+| Contraste accent-texte | systémique (2.09:1) | token `--a-txt` créé + ~85 spots convertis (CTA, liens globaux, nav, badges) |
+
+### Reste à traiter (contraste — queue documentée)
+~45 spots light encore à 1.9–2.1, **deux causes connues** :
+1. Le script de conversion parse les blocs CSS `{…}` des template literals — les blocs contenant des interpolations `${…}` sont sautés (braces imbriquées). Spots connus : `prf-row-val`, `mr-compare`, `epcf-stop-reward-txt`, `ins-diff-code`, h3 milestone parcours, `(toi)`.
+2. Couleurs **statut** utilisées comme texte (`--gr`, `--am` purs sur fond clair) : `nd-stt`, `team-badge`, `kpi-delta`. Mérite des tokens `--gr-txt`/`--am-txt` sur le modèle de `--a-txt`.
+3. Badges sur **artwork** (plates des mondes parcours) : mesure non fiable sur image — vérifier à l'œil, probablement OK avec leur plate sombre.
+
+### Limites d'instrument (faux positifs connus)
+- Ratio ≈1 : texte gradient-clipped (`background-clip:text`).
+- Login/onboarding : fond réel posé par un layer `position:fixed` frère — le walker d'ancêtres ne le voit pas.
+- Overflow transitoire pendant les skeletons de chargement.
