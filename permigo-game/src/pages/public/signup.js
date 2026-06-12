@@ -94,7 +94,7 @@ const STYLE = `<style>
     color: var(--mu2);
     margin-top: 2px;
   }
-  .sg-help.error { color: var(--rd); }
+  .sg-help.error { color: var(--rd-txt); }
   .sg-help.ok { color: var(--adk); }
   .sg-italic {
     font: italic 500 12px/1.45 'Inter', sans-serif;

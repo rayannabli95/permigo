@@ -116,7 +116,7 @@ const STYLE = `<style>
   margin: -10px -8px;
   font-family: inherit;
 }
-.st-btn-txt.danger { color: var(--rd); }
+.st-btn-txt.danger { color: var(--rd-txt); }
 
 /* Input inline */
 .st-inp {
@@ -153,7 +153,7 @@ const STYLE = `<style>
 
 /* Danger zone */
 .st-danger { border-color: rgba(239,68,68,.2); }
-.st-danger .st-section-label { color: var(--rd); background: rgba(239,68,68,.04); border-color: rgba(239,68,68,.12); }
+.st-danger .st-section-label { color: var(--rd-txt); background: rgba(239,68,68,.04); border-color: rgba(239,68,68,.12); }
 
 /* Appearance chip */
 .st-chip {
@@ -165,7 +165,7 @@ const STYLE = `<style>
   border: 1.5px solid var(--a);
   background: color-mix(in srgb, var(--a) 8%, transparent);
   font: 700 12px/1 'IBM Plex Mono', monospace;
-  color: var(--a);
+  color: var(--a-txt);
 }
 
 /* Delete modal overlay */

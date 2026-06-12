@@ -232,8 +232,8 @@ const STYLE = `<style>
 .tr2-modal-desc { font: 500 14px/1.55 'Inter', sans-serif; color: var(--mu); margin-bottom: 16px; }
 .tr2-modal-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .tr2-modal-chip { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: var(--r-full); font: 700 12px/1 'IBM Plex Mono', monospace; }
-.tr2-modal-chip.xp   { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a); }
-.tr2-modal-chip.gems { background: rgba(16,185,129,.1); color: var(--gr); }
+.tr2-modal-chip.xp   { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a-txt); }
+.tr2-modal-chip.gems { background: rgba(16,185,129,.1); color: var(--gr-txt); }
 .tr2-modal-chip.date { background: var(--bg); color: var(--mu); }
 .tr2-modal-social { font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu2); margin-bottom: 20px; }
 .tr2-modal-actions { display: flex; gap: 8px; padding: 0 20px; background: var(--su); }

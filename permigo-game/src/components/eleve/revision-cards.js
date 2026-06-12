@@ -43,7 +43,7 @@ function ensureStyle() {
   }
   .rc-count {
     font: 700 11px/1 'Inter', sans-serif;
-    color: var(--a);
+    color: var(--a-txt);
     background: color-mix(in srgb, var(--a) 10%, transparent);
     border-radius: 99px;
     padding: 2px 8px;

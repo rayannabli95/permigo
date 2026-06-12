@@ -195,7 +195,7 @@ const STYLE = `<style>
   }
   .lr-comp-code {
     font: 600 11px/1 'Inter', sans-serif;
-    color: var(--a);
+    color: var(--a-txt);
     background: color-mix(in srgb, var(--a) 10%, transparent);
     border-radius: 6px;
     padding: 4px 8px;
@@ -700,8 +700,8 @@ async function _loadFeedSection() {
         margin-top: 2px;
         display: flex; align-items: center; justify-content: center;
       }
-      .lr-feed-dot.k-session { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a); }
-      .lr-feed-dot.k-validation { background: rgba(16,185,129,.1); color: var(--gr); }
+      .lr-feed-dot.k-session { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a-txt); }
+      .lr-feed-dot.k-validation { background: rgba(16,185,129,.1); color: var(--gr-txt); }
       .lr-feed-content { flex: 1; min-width: 0; }
       .lr-feed-author {
         font: 600 12px/1.2 'Inter', sans-serif;

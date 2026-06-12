@@ -38,7 +38,7 @@ function ensureStyle() {
   }
   .dq-count {
     font: 700 11px/1 'Inter', sans-serif;
-    color: var(--a); background: color-mix(in srgb, var(--a) 10%, transparent);
+    color: var(--a-txt); background: color-mix(in srgb, var(--a) 10%, transparent);
     border-radius: 99px; padding: 2px 8px;
   }
   .dq-scroll {

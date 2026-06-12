@@ -234,7 +234,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center; gap: 8px;
   font: 700 12px/1 'Inter', sans-serif;
 }
-.gal-modal-xp { color: var(--a); background: color-mix(in srgb, var(--a) 10%, transparent); padding: 6px 12px; border-radius: 99px; }
+.gal-modal-xp { color: var(--a-txt); background: color-mix(in srgb, var(--a) 10%, transparent); padding: 6px 12px; border-radius: 99px; }
 .gal-modal-state { padding: 6px 12px; border-radius: 99px; }
 .gal-modal-state.on  { color: var(--grdk); background: rgba(16,185,129,.12); }
 .gal-modal-state.off { color: var(--mu2); background: var(--bg2, var(--bg3)); }

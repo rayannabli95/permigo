@@ -68,10 +68,10 @@ const STYLE = `
   .bdg.a-ghost { background: transparent !important; border-color: transparent; padding: 0 !important; }
   .bdg.v-primary.a-ghost       { color: var(--a-txt); }
   .bdg.v-secondary.a-ghost     { color: var(--mu4); }
-  .bdg.v-success.a-ghost       { color: var(--gr); }
-  .bdg.v-warning.a-ghost       { color: var(--am); }
+  .bdg.v-success.a-ghost       { color: var(--gr-txt); }
+  .bdg.v-warning.a-ghost       { color: var(--am-txt); }
   .bdg.v-info.a-ghost          { color: var(--pu); }
-  .bdg.v-destructive.a-ghost   { color: var(--rd); }
+  .bdg.v-destructive.a-ghost   { color: var(--rd-txt); }
 
   .bdg[aria-disabled="true"] { opacity: .5; pointer-events: none; }
 

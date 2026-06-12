@@ -39,7 +39,7 @@ const STYLE = `<style>
 }
 .el-count {
   font: 600 12px/1 'Inter', sans-serif;
-  color: var(--a);
+  color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   padding: 6px 12px;
   border-radius: var(--r-full);
@@ -150,7 +150,7 @@ const STYLE = `<style>
   align-items: center;
   gap: 4px;
   font: 600 11px/1 'Inter', sans-serif;
-  color: var(--a);
+  color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   border-radius: var(--r-full);
   padding: 4px 10px;

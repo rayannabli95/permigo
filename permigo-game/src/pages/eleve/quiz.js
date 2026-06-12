@@ -48,7 +48,7 @@ const STYLE = `<style>
     font: 700 11px/1 'Inter', sans-serif;
     letter-spacing: .1em;
     text-transform: uppercase;
-    color: var(--a);
+    color: var(--a-txt);
     background: color-mix(in srgb, var(--a) 10%, transparent);
     border-radius: var(--r-xl);
     padding: 5px 12px;

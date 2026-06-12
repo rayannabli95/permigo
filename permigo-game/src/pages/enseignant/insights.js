@@ -121,8 +121,8 @@ const STYLE = `<style>
     font: 700 12px/1 'IBM Plex Mono', monospace;
     margin-top: 5px;
   }
-  .ins-widget-delta.up   { color: var(--gr); }
-  .ins-widget-delta.down { color: var(--rd); }
+  .ins-widget-delta.up   { color: var(--gr-txt); }
+  .ins-widget-delta.down { color: var(--rd-txt); }
   .ins-widget-delta.flat { color: var(--mu2); }
 
   /* Bar chart activité par jour */
@@ -272,7 +272,7 @@ const STYLE = `<style>
   }
   .ins-diff-code {
     font: 600 11px/1 'IBM Plex Mono', monospace;
-    color: var(--a);
+    color: var(--a-txt);
     background: color-mix(in srgb, var(--a) 10%, transparent);
     padding: 4px 7px;
     border-radius: 6px;

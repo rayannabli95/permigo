@@ -219,7 +219,7 @@ const STYLE = `<style>
   font: 700 11px/1 'Inter', sans-serif;
   padding: 3px 8px; border-radius: 99px;
   background: color-mix(in srgb, var(--a) 8%, transparent);
-  color: var(--a);
+  color: var(--a-txt);
 }
 
 .mc-badge {
@@ -227,7 +227,7 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   font-size: 16px; flex-shrink: 0;
 }
-.mc-badge-open    { background: color-mix(in srgb, var(--a) 12%, transparent); color: var(--a); }
+.mc-badge-open    { background: color-mix(in srgb, var(--a) 12%, transparent); color: var(--a-txt); }
 .mc-badge-opened  { background: rgba(16,185,129,.1);  color: var(--grd); }
 
 /* ── CTA open button on card ── */

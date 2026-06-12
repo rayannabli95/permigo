@@ -674,7 +674,7 @@ const STYLE = `<style>
   font: 800 19px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.03em;
   position: relative; z-index: 1;
 }
-.acc-lb-rank.empty { background: color-mix(in srgb, var(--a) 16%, transparent); color: var(--a); font-size: 24px; box-shadow: none; }
+.acc-lb-rank.empty { background: color-mix(in srgb, var(--a) 16%, transparent); color: var(--a-txt); font-size: 24px; box-shadow: none; }
 .acc-lb-rank.img { background: transparent; box-shadow: none; padding: 0; }
 .acc-lb-rank.img img { width: 52px; height: 52px; object-fit: contain; display: block; }
 .acc-lb-rank-hash { font-size: 12px; font-weight: 700; opacity: .75; margin-right: 1px; }
@@ -689,7 +689,7 @@ const STYLE = `<style>
   letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
 .acc-lb-chip {
-  font: 700 11px/1 'Inter', sans-serif; color: var(--am);
+  font: 700 11px/1 'Inter', sans-serif; color: var(--am-txt);
   background: rgba(245,158,11,.14); border-radius: var(--r-full); padding: 4px 9px;
 }
 .acc-lb-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
@@ -1404,7 +1404,7 @@ function renderActionDuJour(quest, pendingNotif, totalValidated, dailyQuiz) {
       <div class="acc2-action-tag">
         <div class="acc2-action-tag-dot${urgent ? " urgent" : ""}"></div>
         ${esc(label)}
-        ${urgent ? `<span style="color:var(--rd);font-weight:700">URGENT</span>` : ""}
+        ${urgent ? `<span style="color: var(--rd-txt);font-weight:700">URGENT</span>` : ""}
       </div>
       <div class="acc2-action-title">${esc(title)}</div>
       <div class="acc2-action-sub">${esc(sub)}</div>

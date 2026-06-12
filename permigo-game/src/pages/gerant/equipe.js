@@ -39,7 +39,7 @@ const STYLE = `<style>
 }
 .eq-count {
   font: 600 12px/1 'Inter', sans-serif;
-  color: var(--a);
+  color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   padding: 6px 12px;
   border-radius: var(--r-full);
@@ -178,7 +178,7 @@ const STYLE = `<style>
 .eq-add-btn:hover {
   border-color: var(--a);
   background: color-mix(in srgb, var(--a) 6%, transparent);
-  color: var(--a);
+  color: var(--a-txt);
 }
 .eq-add-ico { font-size: 18px; }
 

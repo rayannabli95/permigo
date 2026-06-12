@@ -558,7 +558,7 @@ const STYLE = `<style>
   border-color: rgba(16,185,129,.25);
   box-shadow: 0 6px 18px rgba(16,185,129,.12), 0 0 0 1px rgba(16,185,129,.12);
 }
-.prc-node.done .nd-lbl .nd-stt { color: var(--gr); }
+.prc-node.done .nd-lbl .nd-stt { color: var(--gr-txt); }
 
 .prc-node.next .nd-lbl {
   border-color: color-mix(in srgb, var(--a) 30%, transparent);
