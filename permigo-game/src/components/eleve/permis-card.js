@@ -4,9 +4,9 @@
 // Couleurs + sceau changent selon le % de compétences validées
 // Pas de NEPH, pas de mention "République" (règle PermiGo)
 // ═══════════════════════════════════════════════════════════════
-import { esc } from '@/utils/escape.js';
-import { getPermisBg } from '@/utils/assets.js';
-import { getEquippedAsset } from '@/utils/game-state.js';
+import { esc } from "@/utils/escape.js";
+import { getPermisBg } from "@/utils/assets.js";
+import { getEquippedAsset } from "@/utils/game-state.js";
 
 const STYLE = `<style>
 .pc-wrap {
@@ -321,29 +321,35 @@ const STYLE = `<style>
  * Détermine l'état visuel selon le % de complétion
  */
 function getState(pct) {
-  if (pct >= 70) return { key: 'valide', label: 'Validé', ico: '✓' };
-  if (pct >= 30) return { key: 'pret',   label: "Prêt à l'examen", ico: '◐' };
-  return { key: 'formation', label: 'En formation', ico: '◯' };
+  if (pct >= 70) return { key: "valide", label: "Validé", ico: "✓" };
+  if (pct >= 30) return { key: "pret", label: "Prêt à l'examen", ico: "◐" };
+  return { key: "formation", label: "En formation", ico: "◯" };
 }
 
 /**
  * Génère les initiales depuis prenom+nom
  */
 function initials(prenom, nom) {
-  const p = (prenom || '').trim()[0] || '';
-  const n = (nom || '').trim()[0] || '';
-  return (p + n).toUpperCase() || '?';
+  const p = (prenom || "").trim()[0] || "";
+  const n = (nom || "").trim()[0] || "";
+  return (p + n).toUpperCase() || "?";
 }
 
 /**
  * Formate date YYYY-MM-DD → DD/MM/YYYY
  */
 function formatDate(iso) {
-  if (!iso) return '—';
+  if (!iso) return "—";
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  } catch { return '—'; }
+    return d.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch {
+    return "—";
+  }
 }
 
 /**
@@ -355,11 +361,18 @@ function formatDate(iso) {
  * @param {number} opts.validated  - nb compétences validées
  * @param {number} opts.total      - total compétences REMC (31)
  */
-export function renderPermisCard({ prenom = '', nom = '', created_at = null, validated = 0, total = 31 }) {
+export function renderPermisCard({
+  prenom = "",
+  nom = "",
+  created_at = null,
+  validated = 0,
+  total = 31,
+}) {
   const pct = Math.min(100, Math.round((validated / total) * 100));
   const state = getState(pct);
   const ini = initials(prenom, nom);
-  const bgUrl = getEquippedAsset('permis_bg') || getPermisBg(validated, 'eleve');
+  const bgUrl =
+    getEquippedAsset("permis_bg") || getPermisBg(validated, "eleve");
 
   return `${STYLE}
 <div class="pc-wrap">
@@ -379,8 +392,8 @@ export function renderPermisCard({ prenom = '', nom = '', created_at = null, val
       <div class="pc-id">
         <div class="pc-av">${esc(ini)}</div>
         <div class="pc-id-info">
-          <div class="pc-nom">${esc(nom || prenom || '—')}</div>
-          <div class="pc-prenom">${esc(prenom || '')}</div>
+          <div class="pc-nom">${esc(nom || prenom || "—")}</div>
+          <div class="pc-prenom">${esc(prenom || "")}</div>
         </div>
       </div>
 
@@ -422,13 +435,14 @@ export function renderPermisCard({ prenom = '', nom = '', created_at = null, val
  * Stocke en localStorage le dernier palier vu pour ne notifier qu'une fois.
  */
 function detectBgMilestone(validated) {
-  if (typeof localStorage === 'undefined') return null;
-  const KEY = 'permigo:permis_bg_milestone_seen';
+  if (typeof localStorage === "undefined") return null;
+  const KEY = "permigo:permis_bg_milestone_seen";
   let tier = 0;
-  if (validated >= 20) tier = 2;       // Holographic
-  else if (validated >= 10) tier = 1;  // Route
+  if (validated >= 20)
+    tier = 2; // Holographic
+  else if (validated >= 10) tier = 1; // Route
   // tier 0 = Mesh (défaut)
-  const seen = parseInt(localStorage.getItem(KEY) || '0', 10);
+  const seen = parseInt(localStorage.getItem(KEY) || "0", 10);
   if (tier > seen) {
     localStorage.setItem(KEY, String(tier));
     return tier; // 1 = Route, 2 = Holographic
@@ -441,12 +455,18 @@ function detectBgMilestone(validated) {
  */
 function showBgMilestoneToast(card, tier) {
   const labels = {
-    1: { title: 'Fond Route débloqué', sub: 'Tu progresses bien — déjà 10 compétences acquises.' },
-    2: { title: 'Fond Holographic débloqué', sub: '20 compétences acquises. Plus que la ligne d\'arrivée !' },
+    1: {
+      title: "Fond Route débloqué",
+      sub: "Tu progresses bien — déjà 10 compétences acquises.",
+    },
+    2: {
+      title: "Fond Holographic débloqué",
+      sub: "20 compétences acquises. Plus que la ligne d'arrivée !",
+    },
   };
   const conf = labels[tier];
   if (!conf) return;
-  const toast = document.createElement('div');
+  const toast = document.createElement("div");
   toast.style.cssText = `
     position: absolute; left: 50%; top: -8px; transform: translate(-50%, -100%);
     background: rgba(15, 23, 42, .94); color: #fff; padding: 12px 16px; border-radius: 14px;
@@ -459,17 +479,121 @@ function showBgMilestoneToast(card, tier) {
     <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;margin-bottom:3px;color:var(--aml)">🎴 ${conf.title}</div>
     <div style="font:500 11px/1.4 'Inter',sans-serif;color:var(--bo4)">${conf.sub}</div>
   `;
-  card.style.position = card.style.position || 'relative';
+  card.style.position = card.style.position || "relative";
   card.appendChild(toast);
   requestAnimationFrame(() => {
-    toast.style.opacity = '1';
-    toast.style.transform = 'translate(-50%, -110%)';
+    toast.style.opacity = "1";
+    toast.style.transform = "translate(-50%, -110%)";
   });
   setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translate(-50%, -100%)';
+    toast.style.opacity = "0";
+    toast.style.transform = "translate(-50%, -100%)";
     setTimeout(() => toast.remove(), 380);
   }, 4500);
+}
+
+// ─── Variante MINI (paysage, format carte bancaire) ──────────────
+// Pensée pour l'accueil : l'élève voit en 1 coup d'œil où il en est,
+// depuis quand il est inscrit, et sa progression globale.
+const MINI_STYLE = `<style>
+.pcm {
+  position: relative;
+  border-radius: 20px;
+  padding: 16px 18px;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 18px 40px -14px rgba(10,13,26,.5), 0 4px 12px rgba(10,13,26,.12);
+  transition: transform .15s var(--ease-spring, ease);
+}
+.pcm:active { transform: scale(.98); }
+.pcm.s-formation { background: linear-gradient(135deg, #3e4961 0%, #262f47 100%); }
+.pcm.s-pret      { background: linear-gradient(135deg, var(--adk) 0%, var(--a) 100%); }
+.pcm.s-valide    { background: linear-gradient(135deg, var(--amk, #b45309) 0%, var(--am, #f59e0b) 100%); }
+.pcm-bg {
+  position: absolute; inset: 0;
+  background-position: center; background-size: cover;
+  opacity: .45; mix-blend-mode: overlay; pointer-events: none;
+}
+.pcm-top { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; position: relative; }
+.pcm-flag {
+  width: 22px; height: 15px; border-radius: 3px; flex-shrink: 0;
+  background: linear-gradient(90deg, #002395 33.33%, #fff 33.33% 66.66%, #ED2939 66.66%);
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.pcm-label {
+  flex: 1; font: 700 10px/1 'Inter', sans-serif;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(255,255,255,.85);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pcm-state {
+  font: 800 9.5px/1 'Inter', sans-serif; letter-spacing: .06em;
+  text-transform: uppercase; padding: 5px 9px; border-radius: 99px;
+  background: rgba(255,255,255,.94); flex-shrink: 0;
+}
+.pcm.s-formation .pcm-state { color: #334155; }
+.pcm.s-pret      .pcm-state { color: var(--adk); }
+.pcm.s-valide    .pcm-state { color: #92400e; }
+.pcm-name {
+  font: 800 19px/1.15 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.02em; text-transform: uppercase; position: relative;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pcm-since { font: 500 12.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.78); margin-top: 5px; position: relative; }
+.pcm-foot { margin-top: 18px; position: relative; }
+.pcm-prog-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+.pcm-count { font: 600 13px/1 'Inter', sans-serif; color: rgba(255,255,255,.92); }
+.pcm-count b { font: 800 16px/1 'Plus Jakarta Sans', sans-serif; }
+.pcm-pct { font: 800 24px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; }
+.pcm-bar { height: 6px; background: rgba(0,0,0,.25); border-radius: 99px; overflow: hidden; }
+.pcm-fill {
+  height: 100%; background: #fff; border-radius: 99px;
+  transition: width 1s .25s cubic-bezier(.2,.7,.3,1);
+}
+@media (prefers-reduced-motion: reduce) { .pcm, .pcm-fill { transition: none !important; } }
+</style>`;
+
+/**
+ * Render la carte permis compacte (paysage) pour l'accueil.
+ * Le remplissage de la barre est animé par le parent via [data-target].
+ */
+export function renderPermisMini({
+  prenom = "",
+  nom = "",
+  created_at = null,
+  validated = 0,
+  total = 31,
+}) {
+  const pct = Math.min(100, Math.round((validated / total) * 100));
+  const state = getState(pct);
+  const bgUrl =
+    getEquippedAsset("permis_bg") || getPermisBg(validated, "eleve");
+  const fullName = [prenom, nom].filter(Boolean).join(" ") || "—";
+
+  return `${MINI_STYLE}
+<div class="pcm s-${state.key}" role="button" tabindex="0"
+     aria-label="Mon permis virtuel — ${esc(state.label)}, ${pct}% de progression. Voir mon parcours.">
+  <div class="pcm-bg" style="background-image:url('${esc(bgUrl)}')"></div>
+  <div class="pcm-top">
+    <div class="pcm-flag" aria-hidden="true"></div>
+    <div class="pcm-label">Permis de conduire · B</div>
+    <div class="pcm-state">${esc(state.label)}</div>
+  </div>
+  <div class="pcm-name">${esc(fullName)}</div>
+  ${created_at ? `<div class="pcm-since">Inscrit·e le ${esc(formatDate(created_at))}</div>` : ""}
+  <div class="pcm-foot">
+    <div class="pcm-prog-row">
+      <span class="pcm-count"><b>${validated}</b> / ${total} compétences</span>
+      <span class="pcm-pct">${pct}%</span>
+    </div>
+    <div class="pcm-bar"><div class="pcm-fill" style="width:0%" data-target="${pct}"></div></div>
+  </div>
+</div>`;
 }
 
 /**
@@ -477,24 +601,27 @@ function showBgMilestoneToast(card, tier) {
  */
 export function mountPermisCard(container, opts) {
   container.innerHTML = renderPermisCard(opts);
-  const card = container.querySelector('.pc');
+  const card = container.querySelector(".pc");
   if (!card) return;
 
   // Toast palier au mount (max une fois par franchissement)
   const milestone = detectBgMilestone(opts?.validated ?? 0);
   if (milestone) {
-    setTimeout(() => showBgMilestoneToast(card.parentElement || card, milestone), 700);
+    setTimeout(
+      () => showBgMilestoneToast(card.parentElement || card, milestone),
+      700,
+    );
   }
 
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   let raf = null;
   function onMove(e) {
     const rect = card.getBoundingClientRect();
     const x = (e.touches?.[0]?.clientX ?? e.clientX) - rect.left;
     const y = (e.touches?.[0]?.clientY ?? e.clientY) - rect.top;
-    const rx = ((y / rect.height) - 0.5) * -8;
-    const ry = ((x / rect.width)  - 0.5) *  8;
+    const rx = (y / rect.height - 0.5) * -8;
+    const ry = (x / rect.width - 0.5) * 8;
     cancelAnimationFrame(raf);
     raf = requestAnimationFrame(() => {
       card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
@@ -502,10 +629,10 @@ export function mountPermisCard(container, opts) {
   }
   function onLeave() {
     cancelAnimationFrame(raf);
-    card.style.transform = '';
+    card.style.transform = "";
   }
-  card.addEventListener('mousemove', onMove);
-  card.addEventListener('mouseleave', onLeave);
-  card.addEventListener('touchmove', onMove, { passive: true });
-  card.addEventListener('touchend', onLeave);
+  card.addEventListener("mousemove", onMove);
+  card.addEventListener("mouseleave", onLeave);
+  card.addEventListener("touchmove", onMove, { passive: true });
+  card.addEventListener("touchend", onLeave);
 }

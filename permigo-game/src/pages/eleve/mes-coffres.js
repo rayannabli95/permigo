@@ -319,8 +319,7 @@ function renderCard(chest) {
       ${
         canOpen
           ? `<div class="mc-rewards">
-        <span class="mc-rew-chip">${icon("zap", { size: 13 })} +${xp} XP</span>
-        <span class="mc-rew-chip">${icon("gem", { size: 13 })} +${gemmes}</span>
+        <span class="mc-rew-chip">${icon("gem", { size: 13 })} +${gemmes} volants</span>
       </div>`
           : ""
       }
@@ -468,7 +467,7 @@ export async function mount(root) {
           if (!silent) {
             navigator.vibrate?.([30, 50, 30]);
             toast(
-              `${meta.label} ouvert ! +${meta.xp ?? 0} XP +${meta.gemmes ?? 0} gemmes`,
+              `${meta.label} ouvert ! +${meta.gemmes ?? 0} volants`,
               "success",
             );
           }

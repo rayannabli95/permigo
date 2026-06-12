@@ -16,7 +16,7 @@ const SLIDES = [
     mascot: "/skins/mascot-point.png",
     extra: "/skins/drapeau.png",
     title: "Suis tes compétences",
-    text: "Chaque étape de la carte = une compétence REMC à valider avec ton moniteur.",
+    text: "Chaque étape de la carte = une compétence à valider avec ton moniteur.",
   },
   {
     mascot: "/skins/mascot-celebrate.png",

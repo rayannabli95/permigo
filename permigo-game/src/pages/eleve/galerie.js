@@ -394,7 +394,6 @@ export async function mount(root) {
         <div class="gal-modal-nom">${esc(t.nom)}</div>
         <div class="gal-modal-desc">${esc(t.desc || '')}</div>
         <div class="gal-modal-foot">
-          ${t.xp ? `<span class="gal-modal-xp">+${t.xp} XP</span>` : ''}
           ${t.gemmes ? `<span class="gal-modal-xp" style="color:var(--gr);background:rgba(16,185,129,.1)">+${t.gemmes} ${icon('gem',{size:13})}</span>` : ''}
           <span class="gal-modal-state ${unlocked ? 'on' : 'off'}">${unlocked ? '✓ Débloqué' : esc(t.objectif || '🔒 Verrouillé')}</span>
         </div>

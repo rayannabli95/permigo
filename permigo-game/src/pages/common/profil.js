@@ -548,7 +548,7 @@ export async function mount(root) {
       stats: [
         { label: "Compétences", value: permisData.validated },
         { label: "Streak", value: eleveStreak },
-        { label: "XP", value: profile?.xp || 0 },
+        { label: "Restantes", value: REMC_TOTAL - permisData.validated },
       ],
       shareUrl: window.location.origin,
       shareText: `Je suis à ${permisData.validated}/${REMC_TOTAL} compétences validées sur PermiGo`,
@@ -569,7 +569,7 @@ export async function mount(root) {
         { label: "Streak", value: anneeStats.streakDays },
       ],
       shareUrl: window.location.origin,
-      shareText: `${anneeStats.totalValidations} validations REMC sur PermiGo cette année`,
+      shareText: `${anneeStats.totalValidations} validations sur PermiGo cette année`,
     };
   }
 
@@ -608,12 +608,6 @@ export async function mount(root) {
   </div>`
       : ""
   }
-
-  <div class="prf-nav-tiles">
-    <a class="prf-nav-tile" href="#/settings" aria-label="Ouvrir les réglages">
-      <span class="prf-nav-ico" aria-hidden="true">${icon("settings", { size: 18 })}</span><span>Réglages</span>
-    </a>
-  </div>
 
   ${me.role === "eleve" ? `<div id="prf-pseudo-section">${_renderPseudo(profile?.username)}</div>` : ""}
 
@@ -674,7 +668,7 @@ export async function mount(root) {
       </div>
     </div>
     ${
-      profile?.xp != null
+      me.role !== "eleve" && profile?.xp != null
         ? `
     <div class="prf-row">
       <span class="prf-row-ico">${icon("zap", { size: 18 })}</span>
@@ -869,11 +863,12 @@ function _wirePseudo(root, me) {
 function _renderReferral(stats) {
   const code = stats?.code;
   const nRefs = stats?.n_referrals ?? 0;
-  const xpEarned = stats?.xp_earned ?? 0;
+  // 50 volants par filleul (même barème que le RPC apply_referral_code)
+  const volantsEarned = nRefs * 50;
 
   return `
 <div class="prf-ref">
-  <h2 class="prf-ref-ttl">Parrainage · +200 XP par filleul</h2>
+  <h2 class="prf-ref-ttl">Parrainage · +50 volants par filleul</h2>
 
   ${
     code
@@ -888,8 +883,8 @@ function _renderReferral(stats) {
       <div class="prf-ref-stat-lbl">filleul${nRefs !== 1 ? "s" : ""}</div>
     </div>
     <div class="prf-ref-stat">
-      <span class="prf-ref-stat-n">${xpEarned}</span>
-      <div class="prf-ref-stat-lbl">XP gagnés</div>
+      <span class="prf-ref-stat-n">${volantsEarned}</span>
+      <div class="prf-ref-stat-lbl">volants gagnés</div>
     </div>
   </div>
   <button class="prf-ref-share-btn" id="prf-ref-share">Partager mon code</button>
@@ -942,7 +937,7 @@ function _wireReferral(root, me) {
         try {
           await navigator.share({
             title: "Rejoins PermiGo !",
-            text: `Utilise mon code ${code} sur PermiGo et gagne 200 XP`,
+            text: `Utilise mon code ${code} sur PermiGo et gagne 50 volants`,
             url: window.location.origin,
           });
           track("referral.shared", { code });
@@ -1004,7 +999,7 @@ function _wireReferral(root, me) {
       if (error || data?.error) {
         _toast(data?.error || "Code invalide ou déjà utilisé", "error");
       } else {
-        _toast("Code appliqué ! +200 XP et +50 gemmes", "success", 4000);
+        _toast("Code appliqué ! +50 volants", "success", 4000);
         track("referral.applied", { code });
         if (applyInput) applyInput.value = "";
       }
