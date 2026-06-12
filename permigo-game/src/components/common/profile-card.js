@@ -58,6 +58,7 @@ const STYLE = `<style>
   background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(255,255,255,.0) 100%);
   pointer-events: none;
 }
+.pcc-banner-edit::after { content: ''; position: absolute; inset: -5px; }
 .pcc-banner-edit {
   position: absolute;
   top: 12px; left: 12px;
@@ -80,7 +81,7 @@ const STYLE = `<style>
 .pcc-share {
   position: absolute;
   top: 12px; right: 12px;
-  padding: 9px 18px 9px 14px;
+  padding: 15px 18px 15px 14px;
   border-radius: 99px;
   background: rgba(255,255,255,.95);
   backdrop-filter: blur(10px);
@@ -143,6 +144,7 @@ const STYLE = `<style>
   transition: transform .15s ease;
 }
 .pcc-av-edit:hover { transform: scale(1.1); }
+.pcc-av-edit::after { content: ''; position: absolute; inset: -8px; }
 .pcc-av-edit:active { transform: scale(.94); }
 
 /* ── Barre XP ── */
@@ -254,7 +256,7 @@ const STYLE = `<style>
   gap: 20px;
 }
 .pcc-social-btn {
-  width: 40px; height: 40px;
+  width: 44px; height: 44px;
   border-radius: 12px;
   background: var(--su2);
   border: 1px solid var(--bo);

@@ -704,7 +704,7 @@ function render({
         <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:2px">${elevesARisque} élève${elevesARisque > 1 ? "s" : ""} à relancer</div>
         <div style="font:500 12px/1.4 'Inter',sans-serif;color:var(--mu3)">Pas d'activité depuis 14 jours ou plus.</div>
       </div>
-      <a href="#/eleves" style="font:700 11px/1 'Inter',sans-serif;color:var(--amx);text-decoration:none;padding:8px 12px;background:rgba(245,158,11,.15);border-radius:var(--r-sm);white-space:nowrap">Voir</a>
+      <a href="#/eleves" style="font:700 11px/1 'Inter',sans-serif;color:var(--amx);text-decoration:none;padding:17px 12px;margin:-9px 0;background:rgba(245,158,11,.15);border-radius:var(--r-sm);white-space:nowrap">Voir</a>
     </div>
   `
       : ""

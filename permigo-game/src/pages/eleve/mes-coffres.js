@@ -111,7 +111,9 @@ const STYLE = `<style>
   display: flex; align-items: center; gap: 12px;
   margin-bottom: 24px;
 }
+.mc-back::before { content: ''; position: absolute; inset: -4px; }
 .mc-back {
+  position: relative;
   width: 36px; height: 36px; border-radius: 50%;
   border: 1.5px solid var(--bo);
   background: var(--su);

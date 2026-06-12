@@ -90,7 +90,7 @@ const STYLE = `<style>
 /* ── Tabs ── */
 .bo2-tabs { position: relative; z-index: 1; display: flex; gap: 8px; padding-bottom: 14px; }
 .bo2-tab {
-  flex: 1; padding: 9px 8px; border-radius: var(--r);
+  flex: 1; padding: 9px 8px; border-radius: var(--r); min-height: 44px;
   background: rgba(255,255,255,.06); border: 1px solid transparent;
   font: 700 13px/1 'Inter', sans-serif; color: rgba(255,255,255,.6);
   cursor: pointer; -webkit-tap-highlight-color: transparent;
@@ -162,6 +162,7 @@ const STYLE = `<style>
   transition: height .26s ease, opacity .26s ease, margin .26s ease, padding .26s ease;
 }
 .bo2-intro.out { opacity: 0; height: 0 !important; margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
+.bo2-intro-x::before { content: ''; position: absolute; inset: -7px; }
 .bo2-intro-x {
   position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border: 0;
   background: var(--bg2); color: var(--mu); border-radius: 50%; font-size: 17px; line-height: 1; cursor: pointer;
@@ -224,7 +225,7 @@ const STYLE = `<style>
 .bo2-card-footer { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .bo2-price-btn {
   display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; padding: 9px 12px; border: none; border-radius: var(--r);
-  color: #fff; font: 800 12.5px/1 'IBM Plex Mono', monospace; cursor: pointer; min-height: 40px;
+  color: #fff; font: 800 12.5px/1 'IBM Plex Mono', monospace; cursor: pointer; min-height: 44px;
   white-space: nowrap; transition: transform .12s, opacity .12s; -webkit-tap-highlight-color: transparent;
 }
 .bo2-price-btn:active { transform: scale(.95); opacity: .9; }

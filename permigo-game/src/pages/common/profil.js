@@ -117,6 +117,7 @@ const STYLE = `<style>
 .prf-btn-delete {
   width: 100%;
   padding: 14px;
+  min-height: 44px;
   background: none;
   border: 0;
   color: var(--mu2);
@@ -278,7 +279,8 @@ const STYLE = `<style>
   color: var(--a);
   font-size: 18px;
   cursor: pointer;
-  padding: 4px;
+  padding: 13px;
+  margin: -9px;
   min-width: 32px;
   min-height: 32px;
   display: flex;
@@ -384,6 +386,7 @@ const STYLE = `<style>
 }
 .prf-pseudo-help { font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu2); margin: 0 0 12px; }
 .prf-pseudo-row { display: flex; gap: 8px; }
+.prf-pseudo-row .prf-pseudo-input { min-width: 0; }
 .prf-pseudo-input {
   flex: 1; padding: 12px 14px; background: var(--bg); border: 1.5px solid var(--bo);
   border-radius: 12px; font: 600 14px/1 'IBM Plex Mono', monospace; color: var(--ink);

@@ -120,7 +120,9 @@ const STYLE = `<style>
   white-space: nowrap;
   flex-shrink: 0;
 }
+.ck-refresh-btn::before { content: ''; position: absolute; inset: -6px; }
 .ck-refresh-btn {
+  position: relative;
   width: 32px; height: 32px;
   border-radius: var(--r-sm);
   border: 1px solid ${BORD};

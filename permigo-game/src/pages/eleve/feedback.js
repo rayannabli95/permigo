@@ -42,6 +42,8 @@ const STYLE = `<style>
   flex-shrink: 0;
 }
 .fb-back:active { transform: scale(.93); }
+.fb-back { position: relative; }
+.fb-back::before { content: ''; position: absolute; inset: -4px; }
 .fb-h1 {
   font: 700 22px/1.15 'Plus Jakarta Sans', sans-serif;
   color: var(--ink);

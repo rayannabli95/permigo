@@ -60,7 +60,9 @@ export async function mount(root, param = 'privacy') {
   top: calc(52px + env(safe-area-inset-top, 0px));
   z-index: 10;
 }
+.legal-back::before { content: ''; position: absolute; inset: -4px; }
 .legal-back {
+  position: relative;
   width: 36px; height: 36px;
   border-radius: 8px;
   border: 1px solid var(--bo);

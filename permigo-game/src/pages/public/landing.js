@@ -405,7 +405,7 @@ const STYLE = `<style>
   /* Boutons */
   .lp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     border: 0; border-radius: 13px; font: 700 15px/1 'Inter', sans-serif; cursor: pointer;
-    padding: 14px 22px; transition: transform .1s, box-shadow .15s, background .15s; }
+    padding: 14px 22px; min-height: 44px; transition: transform .1s, box-shadow .15s, background .15s; }
   .lp-btn:active { transform: translateY(1px); }
   /* Recette plastic de marque (cf. .pg-btn) — même CTA que login/app */
   .lp-btn-primary { background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%); color: var(--a-ink);
@@ -419,10 +419,10 @@ const STYLE = `<style>
   .lp-nav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between;
     padding: 14px max(20px, env(safe-area-inset-left)); background: rgba(255,255,255,.82);
     backdrop-filter: saturate(160%) blur(12px); border-bottom: 1px solid var(--lp-line); }
-  .lp-brand { display: flex; align-items: center; gap: 9px; font: 800 19px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; color: var(--lp-ink); }
+  .lp-brand { display: flex; align-items: center; gap: 9px; font: 800 19px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; color: var(--lp-ink); padding: 8px 0; }
   .lp-brand-badge { width: 28px; height: 28px; object-fit: contain; }
   .lp-nav-actions { display: flex; align-items: center; gap: 6px; }
-  .lp-nav-link { font: 600 14px/1 'Inter'; color: var(--lp-mut); padding: 10px 12px; }
+  .lp-nav-link { font: 600 14px/1 'Inter'; color: var(--lp-mut); padding: 15px 12px; }
 
   /* ─── HERO dark immersif ─── */
   .lp-hero {
@@ -661,7 +661,7 @@ const STYLE = `<style>
   .lp-foot-brand { display: flex; align-items: center; gap: 8px; font: 800 16px/1 'Plus Jakarta Sans'; }
   .lp-foot-brand img { width: 22px; height: 22px; }
   .lp-foot-links { display: flex; align-items: center; gap: 18px; }
-  .lp-foot-links a, .lp-foot-login { font: 600 14px/1 'Inter'; color: var(--lp-mut); background: none; border: 0; cursor: pointer; }
+  .lp-foot-links a, .lp-foot-login { font: 600 14px/1 'Inter'; color: var(--lp-mut); background: none; border: 0; cursor: pointer; padding: 15px 4px; margin: -15px -4px; }
   .lp-foot-copy { font: 400 12.5px/1 'Inter'; color: var(--lp-mut); }
 
   /* Témoignages */
