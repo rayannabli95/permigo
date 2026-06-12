@@ -33,6 +33,16 @@ const STYLE = `<style>
     text-align: center;
     box-shadow: 0 4px 20px rgba(11,13,26,.07);
   }
+  .qp-mascot {
+    display: block;
+    width: 92px;
+    height: 92px;
+    object-fit: contain;
+    margin: 0 auto 14px;
+    animation: qpMascotIn .45s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes qpMascotIn { from { opacity: 0; transform: scale(.85) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .qp-mascot { animation: none; } }
   .qp-badge {
     display: inline-block;
     font: 700 11px/1 'Inter', sans-serif;
@@ -116,7 +126,7 @@ const STYLE = `<style>
   .ring-ok { border-color: var(--gr); background: rgba(16,185,129,.08); }
   .ring-warn { border-color: var(--am); background: rgba(245,158,11,.08); }
   .qp-score-num {
-    font: 800 28px/1 'Plus Jakarta Sans', sans-serif;
+    font: 600 30px/1 'Fredoka', 'Plus Jakarta Sans', sans-serif;
     color: var(--ink);
   }
   .qp-score-pct {
@@ -207,6 +217,7 @@ export async function mount(root, params = {}) {
     ${STYLE}
     <div class="qp anim-slide-up">
       <div class="qp-card" id="qp-welcome">
+        <img class="qp-mascot" src="/skins/mascot-hello.png" alt="" aria-hidden="true" />
         <div class="qp-badge">${esc(typeLabel)}</div>
         <div class="qp-cat-row">${cat?.ico ? icon(cat.ico, { size: 18, strokeWidth: 1.5 }) : ""} <span>${esc(cat?.name || "")}</span></div>
         <h1 class="qp-comp" tabindex="-1">${esc(sub?.n || competenceId)}</h1>
@@ -369,7 +380,7 @@ function renderResult(
           : "Compétence pas encore débloquée par ton moniteur."
         : isDaily
           ? "C'est fait pour aujourd'hui — chaque question t'apprend quelque chose. À demain !"
-          : "Continue à pratiquer — revoir avec ton moniteur avant la prochaine leçon.";
+          : "Tu y es presque — un dernier tour avec ton moniteur et c'est dans la poche.";
 
   root.innerHTML = `
     ${STYLE}
