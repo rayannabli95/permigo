@@ -16,6 +16,7 @@ import { isStandalone } from "@/utils/pwa.js";
 import { requestPushPermission } from "@/services/web-push.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
+import { notifyPopupOpen, notifyPopupSettled } from "@/utils/intro-overlays.js";
 
 const LS_NEXT = "permigo-push-prime-next";
 const SNOOZE_MS = 2 * 24 * 60 * 60 * 1000; // 2 jours
@@ -98,20 +99,12 @@ function shouldShow() {
 
 /** Affiche la sheet d'activation des rappels si pertinent (PWA installée). */
 export function maybeShowPushPrime(me) {
-  if (!shouldShow()) return;
-  // Tour guidé / tuto en cours → on attend qu'il se termine (une seule
-  // couche à la fois, sinon l'utilisateur est perdu dès l'arrivée).
-  const TOUR_SEL = ".it-tuto, .gt-bubble, .ob";
-  if (document.querySelector(TOUR_SEL)) {
-    const iv = setInterval(() => {
-      if (document.querySelector(TOUR_SEL)) return;
-      clearInterval(iv);
-      setTimeout(() => shouldShow() && show(me), 1200);
-    }, 2000);
-    setTimeout(() => clearInterval(iv), 5 * 60 * 1000); // garde-fou
+  if (!shouldShow()) {
+    notifyPopupSettled();
     return;
   }
 
+  // Le tuto guidé attend déjà ce popup (intro-overlays) → priorité au popup.
   // Premier lancement standalone = storage neuf (iOS) → le bandeau cookies
   // peut être à l'écran en même temps. Une seule demande à la fois :
   // cookies d'abord, rappels juste après le choix.
@@ -119,13 +112,17 @@ export function maybeShowPushPrime(me) {
   if (cookieBannerUp) {
     window.addEventListener(
       "permigo:consent",
-      () => setTimeout(() => shouldShow() && show(me), 800),
+      () =>
+        setTimeout(() => (shouldShow() ? show(me) : notifyPopupSettled()), 800),
       { once: true },
     );
     return;
   }
   setTimeout(() => {
-    if (!shouldShow()) return;
+    if (!shouldShow()) {
+      notifyPopupSettled();
+      return;
+    }
     show(me);
   }, SHOW_DELAY_MS);
 }
@@ -160,6 +157,7 @@ function show(me) {
       <button class="ppr-later" id="ppr-later" type="button">Plus tard</button>
     </div>`;
   document.body.appendChild(host);
+  notifyPopupOpen(); // le tuto guidé attend que cette sheet soit fermée
 
   const sheet = host.querySelector(".ppr");
   const bg = host.querySelector("#ppr-bg");
@@ -170,6 +168,7 @@ function show(me) {
 
   const close = (reason) => {
     track("push_prime.closed", { reason });
+    notifyPopupSettled(); // libère le tuto guidé
     if (reason === "later" || reason === "backdrop") {
       try {
         localStorage.setItem(LS_NEXT, String(Date.now() + SNOOZE_MS));

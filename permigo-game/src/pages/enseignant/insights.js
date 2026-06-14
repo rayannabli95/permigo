@@ -10,7 +10,7 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { REMC } from "@/data/remc.js";
 import { labelComp } from "@/utils/remc-label.js";
-import { iconBadge, icon } from "@/utils/icons.js";
+import { icon } from "@/utils/icons.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 
 // ─── Constantes ───────────────────────────────────────────────
@@ -124,6 +124,53 @@ const STYLE = `<style>
   .ins-widget-delta.up   { color: var(--gr-txt); }
   .ins-widget-delta.down { color: var(--rd-txt); }
   .ins-widget-delta.flat { color: var(--mu2); }
+
+  /* ── Métrique vedette (star) + 3 secondaires ── */
+  .ins-star {
+    background: var(--su);
+    border: 1px solid var(--bo);
+    border-radius: var(--rx);
+    padding: 20px;
+    box-shadow: var(--s1);
+    margin-bottom: 10px;
+    animation: insWidgetIn .45s var(--ease-snap) both;
+  }
+  .ins-star-top { display: flex; align-items: flex-start; gap: 16px; }
+  .ins-star-num {
+    font: 800 clamp(40px, 13vw, 52px)/1 'Plus Jakarta Sans', sans-serif;
+    color: var(--ink); letter-spacing: -.04em; flex-shrink: 0;
+  }
+  .ins-star-meta { padding-top: 4px; min-width: 0; }
+  .ins-star-lbl {
+    font: 700 13px/1.2 'Inter', sans-serif; color: var(--ink);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .ins-star-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
+  .ins-star-spark { height: 44px; margin-top: 14px; }
+  .ins-spark-svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+  .ins-sec {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 28px;
+  }
+  .ins-sec-card {
+    background: var(--su); border: 1px solid var(--bo);
+    border-radius: var(--rx); padding: 14px;
+    box-shadow: var(--s0);
+    animation: insWidgetIn .45s var(--ease-snap) both;
+  }
+  .ins-sec-card:nth-child(1) { animation-delay: .06s; }
+  .ins-sec-card:nth-child(2) { animation-delay: .12s; }
+  .ins-sec-card:nth-child(3) { animation-delay: .18s; }
+  .ins-sec-val {
+    font: 800 24px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+    letter-spacing: -.03em; display: flex; align-items: center; gap: 5px;
+  }
+  .ins-sec-val svg { flex-shrink: 0; }
+  .ins-sec-lbl {
+    font: 600 10.5px/1.2 'Inter', sans-serif; color: var(--mu2);
+    text-transform: uppercase; letter-spacing: .05em; margin-top: 6px;
+  }
 
   /* Bar chart activité par jour */
   .ins-chart-wrap {
@@ -491,6 +538,17 @@ async function loadData(me) {
     heatmap[jour][d.getHours()]++;
   });
 
+  // Série quotidienne (30 j) → sparkline de la métrique vedette
+  const SPARK_DAYS = 30;
+  const spark = new Array(SPARK_DAYS).fill(0);
+  const sparkStart = Date.now() - (SPARK_DAYS - 1) * 864e5;
+  vals60Data.forEach((v) => {
+    const idx = Math.floor(
+      (new Date(v.validated_at).getTime() - sparkStart) / 864e5,
+    );
+    if (idx >= 0 && idx < SPARK_DAYS) spark[idx]++;
+  });
+
   // ── Top élèves ────────────────────────────────────────────────
   const elevesAvecPrenom = elevesData.map((e, i) => ({ ...e, idx: i }));
 
@@ -590,6 +648,7 @@ async function loadData(me) {
     tauxQuiz,
     streakPro,
     heatmap,
+    spark,
     topProgressent,
     topStagnent,
     topDiff,
@@ -621,14 +680,14 @@ function renderAll(root, me, data) {
   `;
 }
 
-// ── KPI 2×2 ───────────────────────────────────────────────────
+// ── Métrique vedette (star) + 3 secondaires ───────────────────
 function renderKpis({
   valsCeMoisCount,
-  valsPrevCount,
   delta,
   nbElevesAccompagnes,
   tauxQuiz,
   streakPro,
+  spark,
 }) {
   const deltaHtml =
     delta === null
@@ -640,53 +699,54 @@ function renderKpis({
           : `<p class="ins-widget-delta flat">= Stable vs mois précédent</p>`;
 
   const streakVal = streakPro !== null ? streakPro : "—";
-  const tauxVide = tauxQuiz === null;
-  const tauxVal = tauxVide ? "—" : `${tauxQuiz}%`;
+  const tauxVal = tauxQuiz === null ? "—" : `${tauxQuiz}%`;
+  const hasSpark = Array.isArray(spark) && spark.some((n) => n > 0);
 
   return `
-    <div class="ins-widgets" id="ins-kpi-grid">
-      <div class="ins-widget">
-        <div class="ins-widget-head">
-          ${iconBadge("check", { color: "var(--gr)", size: 32 })}
-          <span class="ins-widget-lbl">Validées</span>
+    <div class="ins-star">
+      <div class="ins-star-top">
+        <div class="ins-star-num">${valsCeMoisCount}</div>
+        <div class="ins-star-meta">
+          <div class="ins-star-lbl">Compétences validées</div>
+          <div class="ins-star-sub">Ce mois</div>
+          ${deltaHtml}
         </div>
-        <p class="ins-widget-val">${valsCeMoisCount}</p>
-        <p class="ins-widget-sub">Ce mois</p>
-        ${deltaHtml}
       </div>
+      ${hasSpark ? `<div class="ins-star-spark">${sparkline(spark)}</div>` : ""}
+    </div>
 
-      <div class="ins-widget">
-        <div class="ins-widget-head">
-          ${iconBadge("users", { color: "var(--a)", size: 32 })}
-          <span class="ins-widget-lbl">Élèves</span>
-        </div>
-        <p class="ins-widget-val">${nbElevesAccompagnes}</p>
-        <p class="ins-widget-sub">Attitrés</p>
+    <div class="ins-sec">
+      <div class="ins-sec-card">
+        <div class="ins-sec-val">${nbElevesAccompagnes}</div>
+        <div class="ins-sec-lbl">Élèves</div>
       </div>
-
-      <div class="ins-widget${tauxVide ? " ins-widget-empty" : ""}">
-        <div class="ins-widget-head">
-          ${iconBadge("target", { color: "var(--pu)", size: 32 })}
-          <span class="ins-widget-lbl">Taux quiz</span>
-        </div>
-        ${
-          tauxVide
-            ? `<p class="ins-widget-nudge">Aucun quiz ce mois — incite tes élèves à réviser entre deux leçons.</p>`
-            : `<p class="ins-widget-val">${tauxVal}</p>
-               <p class="ins-widget-sub">Score ≥ 60% (30j)</p>`
-        }
+      <div class="ins-sec-card">
+        <div class="ins-sec-val">${tauxVal}</div>
+        <div class="ins-sec-lbl">Taux quiz</div>
       </div>
-
-      <div class="ins-widget">
-        <div class="ins-widget-head">
-          ${iconBadge("flame", { color: "var(--am)", size: 32 })}
-          <span class="ins-widget-lbl">Streak pro</span>
-        </div>
-        <p class="ins-widget-val">${streakVal}</p>
-        <p class="ins-widget-sub">Jours consécutifs</p>
+      <div class="ins-sec-card">
+        <div class="ins-sec-val">${streakVal}${streakPro ? ` ${icon("flame", { size: 15, strokeWidth: 2, color: "var(--amk)" })}` : ""}</div>
+        <div class="ins-sec-lbl">Streak pro</div>
       </div>
     </div>
   `;
+}
+
+// Sparkline SVG étirée à la largeur du conteneur (preserveAspectRatio=none).
+function sparkline(values, { w = 300, h = 44 } = {}) {
+  const max = Math.max(1, ...values);
+  const n = values.length;
+  const step = n > 1 ? w / (n - 1) : 0;
+  const y = (v) => h - 3 - (v / max) * (h - 6);
+  const pts = values
+    .map((v, i) => `${(i * step).toFixed(1)},${y(v).toFixed(1)}`)
+    .join(" ");
+  const lastX = ((n - 1) * step).toFixed(1);
+  const lastY = y(values[n - 1]).toFixed(1);
+  return `<svg class="ins-spark-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+    <polyline points="${pts}" fill="none" stroke="var(--a)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lastX}" cy="${lastY}" r="3.5" fill="var(--a)"/>
+  </svg>`;
 }
 
 // ── Graphe activité par jour ──────────────────────────────────

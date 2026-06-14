@@ -13,10 +13,12 @@ import { labelComp } from "@/utils/remc-label.js";
 import { statutCfg } from "@/utils/statut-label.js";
 import { icon } from "@/utils/icons.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
+import { fmtName } from "@/utils/fmt-name.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
 import { getMoniteurState } from "@/data/moniteur-levels.js";
 import { getLeague } from "@/utils/league-shared.js";
 import { startTour } from "@/components/common/guided-tour.js";
+import { onPopupsSettled } from "@/utils/intro-overlays.js";
 
 // Tour guidé enseignant — affiché 1× à la première connexion
 const TOUR_KEY = "pg-tour-moniteur-v1";
@@ -53,21 +55,25 @@ function maybeStartMoniteurTour() {
   } catch {
     return;
   }
-  // Laisse le DOM (FAB, nav) se poser avant de mesurer les ancres
-  setTimeout(() => {
-    if (!document.querySelector("#aj-act-invite")) return;
-    track("moniteur.tour.start");
-    startTour(MONITEUR_TOUR_STEPS, {
-      onDone: () => {
-        try {
-          localStorage.setItem(TOUR_KEY, "1");
-        } catch {
-          /* stockage indispo — le tour pourra réapparaître, sans gravité */
-        }
-        track("moniteur.tour.done");
-      },
-    });
-  }, 450);
+  // Le tuto attend que le popup d'engagement (A2HS / rappels) soit fermé :
+  // sinon il s'affiche dessous et le spotlight se mesure au mauvais endroit.
+  onPopupsSettled(() => {
+    // Laisse le DOM (FAB, nav) se poser avant de mesurer les ancres
+    setTimeout(() => {
+      if (!document.querySelector("#aj-act-invite")) return;
+      track("moniteur.tour.start");
+      startTour(MONITEUR_TOUR_STEPS, {
+        onDone: () => {
+          try {
+            localStorage.setItem(TOUR_KEY, "1");
+          } catch {
+            /* stockage indispo — le tour pourra réapparaître, sans gravité */
+          }
+          track("moniteur.tour.done");
+        },
+      });
+    }, 450);
+  });
 }
 
 // ─── Statuts labels : mapping centralisé @/utils/statut-label.js ──
@@ -87,8 +93,11 @@ const STYLE = `<style>
   /* ── HERO visuel (parité accueil élève, ton sobre/pro) ── */
   .aj-hero2 {
     position: relative; overflow: hidden;
-    margin: -24px -16px 22px;            /* full-bleed : déborde le padding de .aj-page */
-    padding: calc(env(safe-area-inset-top, 0px) + 36px) 24px 28px;
+    /* Full-bleed jusqu'en haut : on remonte derrière le header fixe
+       (var(--th)=52px + safe-area, posé par body.has-chrome #app) ET on annule
+       le padding-top 24px de .aj-page → fini la bande sombre au-dessus de l'image. */
+    margin: calc(-1 * (var(--th) + env(safe-area-inset-top, 0px)) - 24px) -16px 22px;
+    padding: calc(env(safe-area-inset-top, 0px) + var(--th) + 24px) 24px 28px;
     color: #fff;
     background: linear-gradient(158deg, rgba(11,13,26,.80) 0%, rgba(20,35,5,.52) 46%, rgba(11,13,26,.78) 100%), url('/skins/landing/monde4jour.webp') center/cover no-repeat;
     animation: ajIn .5s var(--ease) both;
@@ -228,6 +237,14 @@ const STYLE = `<style>
 
   /* ── Cartes ligues ── */
   .aj-ligues { display: flex; gap: 10px; }
+  /* Sous-libellé « Mes élèves » : sépare ma ligue des classements élèves */
+  .aj-ligues-sublbl {
+    display: flex; align-items: center; gap: 6px;
+    margin: 16px 0 8px;
+    font: 700 11px/1 'Inter', sans-serif;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--mu2);
+  }
+  .aj-ligues-sublbl svg { flex-shrink: 0; }
   .aj-ligue {
     flex: 1; min-width: 0;
     background: var(--su);
@@ -572,10 +589,6 @@ function formatHeure(isoStr) {
   });
 }
 
-function todayISO() {
-  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-}
-
 // ─── Entry point ──────────────────────────────────────────────────
 let _ptrCleanup = null;
 
@@ -646,10 +659,7 @@ export async function mount(root) {
 // ─── Render principal (factorisé pour pull-to-refresh) ─────────────────
 async function renderInto(root, _me) {
   // ─── Fetch en parallèle ────────────────────────────────────────
-  const today = todayISO();
-
   const [
-    valsToday,
     valsAll,
     elevesAll,
     todaySessionsRes,
@@ -657,15 +667,6 @@ async function renderInto(root, _me) {
     totalValsRes,
     leagueRes,
   ] = await Promise.all([
-    // Validations d'aujourd'hui (faites par moi)
-    sb
-      .from("validations")
-      .select("id, competence_id, statut, eleve_id, validated_at")
-      .eq("validated_by", _me.id)
-      .gte("validated_at", today + "T00:00:00.000Z")
-      .lte("validated_at", today + "T23:59:59.999Z")
-      .order("validated_at", { ascending: false }),
-
     // Dernières validations (activité récente) — 3 visibles + « voir tout »
     sb
       .from("validations")
@@ -705,11 +706,10 @@ async function renderInto(root, _me) {
     ).catch(() => ({ data: null })),
   ]);
 
-  if (valsToday.error || valsAll.error) {
+  if (valsAll.error) {
     toast("Impossible de charger les données", "error");
   }
 
-  const todayVals = valsToday.data || [];
   const recentVals = valsAll.data || [];
   const elevesMap = {};
   (elevesAll.data || []).forEach((e, i) => {
@@ -720,11 +720,6 @@ async function renderInto(root, _me) {
   const streakPro = profileRes?.data?.streak_pro_days ?? 0;
   const totalValsCount = totalValsRes?.count ?? 0;
   const moniteurState = getMoniteurState(totalValsCount);
-
-  // KPI
-  const acquisAujourdhui = todayVals.filter(
-    (v) => v.statut === "acquis",
-  ).length;
 
   // Élèves que j'ai validé au moins une fois (appartenance « mes élèves »)
   const { data: elevesValides } = await sb
@@ -821,7 +816,9 @@ async function renderInto(root, _me) {
       <div class="aj-validate-list">
         ${toValidate
           .map((e) => {
-            const nom = esc([e.prenom, e.nom].filter(Boolean).join(" ") || "—");
+            const nom = esc(
+              fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "—",
+            );
             return `<button class="aj-validate-row" data-eleve-id="${esc(e.id)}" type="button" aria-label="Ouvrir le livret de ${nom}">
             <span class="aj-validate-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 38)}</span>
             <span class="aj-validate-nom">${nom}</span>
@@ -852,7 +849,7 @@ async function renderInto(root, _me) {
           .map(
             (s) => `
           <div class="aj-recap-row">
-            <span class="aj-recap-row-name">${esc(s.eleve_prenom || "Élève")}</span>
+            <span class="aj-recap-row-name">${esc(fmtName(s.eleve_prenom) || "Élève")}</span>
           </div>
         `,
           )
@@ -871,17 +868,16 @@ async function renderInto(root, _me) {
       <div class="aj-hero2">
         <div class="aj-hero2-content">
           <p class="aj-hero2-date">${formatDate(new Date())}</p>
-          <h1 class="aj-hero2-name" tabindex="-1">${prenom ? `Bonjour, ${esc(prenom)}` : "Aujourd'hui"}</h1>
+          <h1 class="aj-hero2-name" tabindex="-1">${prenom ? `Bonjour, ${esc(fmtName(prenom))}` : "Aujourd'hui"}</h1>
           ${
             nbElevesActifs > 0
               ? `<p class="aj-hero2-value">Tu accompagnes <b>${nbElevesActifs} élève${nbElevesActifs > 1 ? "s" : ""}</b> vers le permis. Leur livret se remplit à chaque compétence que tu valides.</p>`
               : `<p class="aj-hero2-value">Ton livret numérique remplace le papier. Invite un élève pour démarrer.</p>`
           }
           ${
-            acquisAujourdhui > 0 || streakPro >= 2
+            streakPro >= 2
               ? `<div class="aj-hero2-chips">
-            ${acquisAujourdhui > 0 ? `<span class="aj-hero2-chip">+${acquisAujourdhui * 10} XP aujourd'hui</span>` : ""}
-            ${streakPro >= 2 ? `<span class="aj-hero2-chip">${icon("flame", { size: 12, strokeWidth: 2 })} ${streakPro} jours actifs</span>` : ""}
+            <span class="aj-hero2-chip">${icon("flame", { size: 12, strokeWidth: 2 })} ${streakPro} jours actifs</span>
           </div>`
               : ""
           }
@@ -965,10 +961,20 @@ async function renderInto(root, _me) {
                 : "1 validation = 1 point"
             }</span>
           </a>
-          <a class="aj-ligue" href="#/classement-eleves" id="aj-ligue-eleves">
-            <span class="aj-ligue-kicker">${icon("award", { size: 11, strokeWidth: 2 })} Mes élèves</span>
+        </div>
+
+        <!-- Classements élèves : théorie (quiz) + pratique (compétences) -->
+        <div class="aj-ligues-sublbl">${icon("award", { size: 11, strokeWidth: 2 })} Mes élèves</div>
+        <div class="aj-ligues">
+          <a class="aj-ligue" href="#/classement-eleves/theorie" id="aj-ligue-theorie">
+            <span class="aj-ligue-kicker">${icon("book-open", { size: 11, strokeWidth: 2 })} Théorie</span>
             <span class="aj-ligue-main">Ligue théorie</span>
             <span class="aj-ligue-sub">Qui révise en autonomie ?</span>
+          </a>
+          <a class="aj-ligue" href="#/classement-eleves/pratique" id="aj-ligue-pratique">
+            <span class="aj-ligue-kicker">${icon("check-circle", { size: 11, strokeWidth: 2 })} Pratique</span>
+            <span class="aj-ligue-main">Ligue pratique</span>
+            <span class="aj-ligue-sub">Compétences acquises</span>
           </a>
         </div>
       </div>
@@ -1044,8 +1050,11 @@ async function renderInto(root, _me) {
   root.querySelector("#aj-ligue-moi")?.addEventListener("click", () => {
     track("ligue.open", { from: "aujourdhui", which: "moniteur" });
   });
-  root.querySelector("#aj-ligue-eleves")?.addEventListener("click", () => {
-    track("ligue.open", { from: "aujourdhui", which: "eleves" });
+  root.querySelector("#aj-ligue-theorie")?.addEventListener("click", () => {
+    track("ligue.open", { from: "aujourdhui", which: "eleves_theorie" });
+  });
+  root.querySelector("#aj-ligue-pratique")?.addEventListener("click", () => {
+    track("ligue.open", { from: "aujourdhui", which: "eleves_pratique" });
   });
 
   // Recap soir / prompt log → page dédiée plein écran
@@ -1087,7 +1096,7 @@ async function renderInto(root, _me) {
 function renderActRow(val, elevesMap) {
   const eleve = elevesMap[val.eleve_id] || { prenom: "Élève", nom: "", idx: 0 };
   const fullNom = esc(
-    [eleve.prenom, eleve.nom].filter(Boolean).join(" ") || "—",
+    fmtName([eleve.prenom, eleve.nom].filter(Boolean).join(" ")) || "—",
   );
   const cfg = statutCfg(val.statut);
 
@@ -1113,7 +1122,7 @@ function renderActRow(val, elevesMap) {
 
 function renderEleveRow(eleve) {
   const fullNom = esc(
-    [eleve.prenom, eleve.nom].filter(Boolean).join(" ") || "—",
+    fmtName([eleve.prenom, eleve.nom].filter(Boolean).join(" ")) || "—",
   );
   const pct =
     REMC_TOTAL > 0 ? Math.round((eleve.acquis / REMC_TOTAL) * 100) : 0;

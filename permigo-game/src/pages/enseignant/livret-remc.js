@@ -144,25 +144,30 @@ const STYLE = `<style>
     overflow: hidden;
     box-shadow: var(--s0);
   }
+  /* Header centré (écran 2) : titre au centre, compteur ancré en absolu à
+     droite pour ne pas casser le centrage. Icône catégorie retirée. */
   .lr-monde-hd {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
     padding: 16px 20px;
     border-bottom: 1px solid var(--bo2);
   }
-  .lr-monde-ico { display: flex; align-items: center; flex-shrink: 0; }
   .lr-monde-nm {
     font: 600 14px/1.3 'Plus Jakarta Sans', sans-serif;
     color: var(--ink);
-    flex: 1;
-    min-width: 0;
+    text-align: center;
+    padding: 0 40px;            /* clearance symétrique pour le compteur droit */
     letter-spacing: -0.01em;
   }
   .lr-monde-prog {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
     font: 600 12px/1 'Inter', sans-serif;
     color: var(--mu2);
-    flex-shrink: 0;
   }
   .lr-monde-bar-wrap {
     height: 3px;
@@ -231,10 +236,12 @@ const STYLE = `<style>
   .lr-bilan-btn:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
   /* ─── Bottom sheet overlay ────────────────────────────────── */
+  /* z-index 350 : au-dessus du FAB enseignant (#bn-seance-fab, 310) et de
+     la bottom-nav (300), sinon le « + » flottant recouvre « Enregistrer ». */
   .lr-overlay {
     position: fixed;
     inset: 0;
-    z-index: 200;
+    z-index: 350;
     background: rgba(10,13,26,.45);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -246,6 +253,9 @@ const STYLE = `<style>
     from { opacity: 0; }
     to   { opacity: 1; }
   }
+  /* Sheet ouverte → on masque le FAB « + » (même parti pris que body:has(.vs)
+     sur log-session) : il flottait par-dessus le bouton « Enregistrer ». */
+  body:has(.lr-overlay) #bn-seance-fab { display: none !important; }
   .lr-sheet {
     width: 100%;
     max-width: 600px;
@@ -830,7 +840,6 @@ function renderMonde(cat) {
   return `
     <div class="lr-monde" role="group" aria-label="${esc(cat.name)} — ${acquis}/${cat.subs.length} acquises">
       <div class="lr-monde-hd" style="background:${col.bg}; border-color:${col.border};">
-        <span class="lr-monde-ico">${icon(cat.ico, { size: 18, strokeWidth: 1.5 })}</span>
         <span class="lr-monde-nm">${esc(cat.name)}</span>
         <span class="lr-monde-prog">${acquis}/${cat.subs.length}</span>
       </div>

@@ -14,6 +14,7 @@ import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
+import { fmtName } from "@/utils/fmt-name.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
 import { startTour } from "@/components/common/guided-tour.js";
@@ -332,7 +333,7 @@ function renderEleveDropdown() {
 
   const trigger = el
     ? `<span class="vs-dd-av">${renderUserAvatar({ avatar_url: el.avatar_url, prenom: el.prenom, nom: el.nom }, 34)}</span>
-       <span class="vs-dd-txt"><span class="vs-dd-name">${esc(el.prenom || "")} ${esc(el.nom || "")}</span><span class="vs-dd-sub">${_acquisSet.size}/${REMC_TOTAL} acquises</span></span>`
+       <span class="vs-dd-txt"><span class="vs-dd-name">${esc(fmtName(`${el.prenom || ""} ${el.nom || ""}`))}</span><span class="vs-dd-sub">${_acquisSet.size}/${REMC_TOTAL} acquises</span></span>`
     : `<span class="vs-dd-txt"><span class="vs-dd-name vs-dd-ph">Choisir un élève…</span></span>`;
 
   const search =
@@ -349,7 +350,7 @@ function renderEleveDropdown() {
             const sel = e.id === _eleve;
             return `<button class="vs-dd-opt${sel ? " sel" : ""}" type="button" role="option" aria-selected="${sel}" data-eleve="${esc(e.id)}" style="animation-delay:${Math.min(i, 8) * 28}ms">
               <span class="vs-dd-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 32)}</span>
-              <span class="vs-dd-name">${esc(e.prenom || "")} ${esc(e.nom || "")}</span>
+              <span class="vs-dd-name">${esc(fmtName(`${e.prenom || ""} ${e.nom || ""}`))}</span>
               ${sel ? `<span class="vs-dd-check">${icon("check", { size: 15, strokeWidth: 2.8 })}</span>` : ""}
             </button>`;
           })
@@ -592,7 +593,7 @@ async function submit() {
     // Acquis = moment de valeur : on PROUVE l'avancée avant de quitter.
     if (nNew > 0) {
       const el = _eleves.find((e) => e.id === _eleve);
-      const prenom = el?.prenom || "Ton élève";
+      const prenom = el?.prenom ? fmtName(el.prenom) : "Ton élève";
       const totalAcquis = _acquisSet.size + nNew;
       showSessionSuccess(prenom, nNew, totalAcquis);
     } else {

@@ -14,6 +14,7 @@ import {
   emptyState,
 } from "@/components/common/empty-state.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
+import { fmtName } from "@/utils/fmt-name.js";
 import { icon } from "@/utils/icons.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
@@ -663,7 +664,9 @@ function renderDrill() {
            </div>`
           : _drillEleves
               .map((e) => {
-                const nm = esc(`${e.prenom || ""} ${e.nom || ""}`.trim());
+                const nm = esc(
+                  fmtName(`${e.prenom || ""} ${e.nom || ""}`.trim()),
+                );
                 return `
               <div class="me-row" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
                 <div class="me-ava" style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 44)}</div>
@@ -836,7 +839,7 @@ function renderRow(eleve) {
   const pct =
     eleve.total > 0 ? Math.round((eleve.acquis / eleve.total) * 100) : 0;
   const fullNom = esc(
-    [eleve.prenom, eleve.nom].filter(Boolean).join(" ") || "—",
+    fmtName([eleve.prenom, eleve.nom].filter(Boolean).join(" ")) || "—",
   );
 
   // Onglet « Tous » = liste épurée (nom + progression). Les infos contextuelles
@@ -1243,7 +1246,7 @@ const DIALOG_STYLE = `
 /** Confirmation avant d'archiver un élève en « reçu ». */
 function confirmRecu(eleveId) {
   const el = _eleves.find((e) => e.id === eleveId);
-  const prenom = esc(el && el.prenom ? el.prenom : "cet élève");
+  const prenom = esc(el && el.prenom ? fmtName(el.prenom) : "cet élève");
   document.querySelector(".me-confirm")?.remove();
 
   const wrap = document.createElement("div");
@@ -1274,7 +1277,7 @@ function confirmRecu(eleveId) {
 /** Saisie de la date d'un examen planifié. */
 function openPlanifieDialog(eleveId) {
   const el = _eleves.find((e) => e.id === eleveId);
-  const prenom = esc(el && el.prenom ? el.prenom : "l'élève");
+  const prenom = esc(el && el.prenom ? fmtName(el.prenom) : "l'élève");
   const today = todayIso();
   document.querySelector(".me-confirm")?.remove();
 
@@ -1367,7 +1370,9 @@ function openMissingPanel(eleve) {
   document.querySelector(".me-miss")?.remove();
 
   const missing = missingComps(eleve.acquisSet);
-  const nom = esc([eleve.prenom, eleve.nom].filter(Boolean).join(" ") || "—");
+  const nom = esc(
+    fmtName([eleve.prenom, eleve.nom].filter(Boolean).join(" ")) || "—",
+  );
   const baseRestantes = baseManquantes(eleve.acquisSet).length;
 
   const wrap = document.createElement("div");

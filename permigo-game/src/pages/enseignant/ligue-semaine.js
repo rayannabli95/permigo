@@ -185,6 +185,10 @@ export async function mount(root) {
   });
 
   try {
+    // TODO multi-moniteurs : aujourd'hui le classement ne fait remonter que
+    // l'enseignant courant (cohorte = 1 moniteur seedé par école). Quand
+    // plusieurs moniteurs partageront une école, get_league_leaderboard devra
+    // renvoyer toute la cohorte intra-école pour un vrai classement.
     const { data, error } = await sb.rpc("get_league_leaderboard", {
       p_role: "enseignant",
       p_limit: 50,

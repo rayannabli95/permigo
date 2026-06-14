@@ -19,13 +19,13 @@ import {
 } from "@/utils/pwa.js";
 import { track } from "@/services/analytics.js";
 import { a2hsStepsHTML, A2HS_STYLE } from "@/components/common/a2hs-steps.js";
+import { notifyPopupOpen, notifyPopupSettled } from "@/utils/intro-overlays.js";
 
 const BADGE = "/skins/avatars/permigo-badge-icon.png";
 const LS_NEXT = "permigo-a2hs-next"; // timestamp avant lequel on se tait
 const LS_OFF = "permigo-a2hs-off"; // "1" = ne plus jamais proposer
 const SNOOZE_MS = 3 * 24 * 60 * 60 * 1000; // 3 jours
 const FIRST_DELAY_MS = 1800; // laisse la page respirer avant la sheet
-
 
 const STYLE = `<style id="inn-style">
 ${A2HS_STYLE}
@@ -103,33 +103,24 @@ function shouldShow() {
   return true;
 }
 
-
 /**
  * Affiche la bottom-sheet d'install si les conditions sont réunies.
  * @param {object} me — user courant (le ton suit le rôle : tutoiement élève)
  */
 export function maybeShowInstallNudge(me) {
-  if (!shouldShow()) return;
-
-  // Tour guidé / tuto en cours → on attend qu'il se termine (une seule
-  // couche à la fois, sinon l'utilisateur est perdu dès l'arrivée).
-  const TOUR_SEL = ".it-tuto, .gt-bubble, .ob";
-  if (document.querySelector(TOUR_SEL)) {
-    const iv = setInterval(() => {
-      if (document.querySelector(TOUR_SEL)) return;
-      clearInterval(iv);
-      setTimeout(() => shouldShow() && show(me), 1200);
-    }, 2000);
-    setTimeout(() => clearInterval(iv), 5 * 60 * 1000); // garde-fou
+  if (!shouldShow()) {
+    notifyPopupSettled();
     return;
   }
 
-  // Une seule demande à la fois : si le bandeau cookies est à l'écran,
-  // on attend le choix avant de proposer l'installation.
+  // Le tuto guidé attend déjà ce popup (intro-overlays) → priorité au popup,
+  // une seule couche à la fois. On gère juste le bandeau cookies : une seule
+  // demande à la fois, donc cookies d'abord puis installation.
   if (document.querySelector(".ck-banner")) {
     window.addEventListener(
       "permigo:consent",
-      () => setTimeout(() => shouldShow() && show(me), 900),
+      () =>
+        setTimeout(() => (shouldShow() ? show(me) : notifyPopupSettled()), 900),
       { once: true },
     );
     return;
@@ -137,7 +128,10 @@ export function maybeShowInstallNudge(me) {
 
   setTimeout(() => {
     // Re-check : l'install a pu se faire entre-temps (event natif Chrome)
-    if (!shouldShow()) return;
+    if (!shouldShow()) {
+      notifyPopupSettled();
+      return;
+    }
     show(me);
   }, FIRST_DELAY_MS);
 }
@@ -173,6 +167,7 @@ function show(me) {
       </div>
     </div>`;
   document.body.appendChild(host);
+  notifyPopupOpen(); // le tuto guidé attend que cette sheet soit fermée
 
   const sheet = host.querySelector(".inn");
   const bg = host.querySelector("#inn-bg");
@@ -183,6 +178,7 @@ function show(me) {
 
   const close = (reason) => {
     track("a2hs.nudge_closed", { reason });
+    notifyPopupSettled(); // libère le tuto guidé
     if (reason === "never") {
       try {
         localStorage.setItem(LS_OFF, "1");

@@ -28,6 +28,7 @@ import { toast } from "@/components/common/toast.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { startTour } from "@/components/common/guided-tour.js";
+import { onPopupsSettled } from "@/utils/intro-overlays.js";
 import { renderPermisMini } from "@/components/eleve/permis-card.js";
 
 // Tour guidé élève — 1× à la première arrivée sur l'accueil (l'onboarding
@@ -66,20 +67,24 @@ function maybeStartEleveTour() {
   } catch {
     return;
   }
-  setTimeout(() => {
-    if (!document.querySelector(".acc2-hero-streak")) return;
-    track("eleve.tour.start");
-    startTour(ELEVE_TOUR_STEPS, {
-      onDone: () => {
-        try {
-          localStorage.setItem(TOUR_KEY, "1");
-        } catch {
-          /* stockage indispo */
-        }
-        track("eleve.tour.done");
-      },
-    });
-  }, 600);
+  // Le tuto attend que le popup d'engagement (A2HS / rappels) soit fermé :
+  // sinon il s'affiche dessous et le spotlight se mesure au mauvais endroit.
+  onPopupsSettled(() => {
+    setTimeout(() => {
+      if (!document.querySelector(".acc2-hero-streak")) return;
+      track("eleve.tour.start");
+      startTour(ELEVE_TOUR_STEPS, {
+        onDone: () => {
+          try {
+            localStorage.setItem(TOUR_KEY, "1");
+          } catch {
+            /* stockage indispo */
+          }
+          track("eleve.tour.done");
+        },
+      });
+    }, 600);
+  });
 }
 
 // ─── CSS ─────────────────────────────────────────────────────────

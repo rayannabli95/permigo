@@ -241,7 +241,11 @@ const STYLE = `<style>
 /* ── Hero : accent pro (encre/sombre) + halo vert de marque ── */
 .tr2-hero {
   position: relative; overflow: hidden; padding: 20px 20px 22px;
-  background: linear-gradient(160deg, var(--ink2) 0%, var(--ink3) 60%, var(--ink) 100%);
+  /* Parité accueil : image route au coucher de soleil + overlay sombre pour
+     garder le texte blanc lisible (même asset que le hero « Aujourd'hui »). */
+  background:
+    linear-gradient(158deg, rgba(11,13,26,.82) 0%, rgba(20,35,5,.58) 46%, rgba(11,13,26,.82) 100%),
+    url('/skins/landing/monde4jour.webp') center/cover no-repeat;
 }
 .tr2-hero::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
