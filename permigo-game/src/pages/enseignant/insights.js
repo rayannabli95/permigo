@@ -649,7 +649,11 @@ function renderAll(root, me, data) {
     <div class="ins-page anim-slide-up">
       <header class="ins-hd">
         <h1 class="ins-h1">Analyses</h1>
-        <p class="ins-sub">Votre activité pédagogique · 60 derniers jours</p>
+        <p class="ins-sub">${
+          data.valsCeMoisCount > 0
+            ? `Ce mois, tu as fait valider <b style="color:var(--adk);font-weight:800">${data.valsCeMoisCount} compétence${data.valsCeMoisCount > 1 ? "s" : ""}</b> à tes ${data.nbElevesAccompagnes} élève${data.nbElevesAccompagnes > 1 ? "s" : ""}.`
+            : "Ton impact sur tes élèves · 60 derniers jours"
+        }</p>
       </header>
 
       ${renderKpis(data)}
