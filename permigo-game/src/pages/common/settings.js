@@ -13,7 +13,7 @@ import { applyTheme, getTheme } from "@/utils/theme.js";
 import { ACCENTS, getAccent, setAccent } from "@/utils/accent.js";
 import { isSoundEnabled, setSoundEnabled, playBack } from "@/utils/sound.js";
 import { optInPush, optOutPush, isPushEnabled } from "@/services/web-push.js";
-import { isStandalone } from "@/utils/pwa.js";
+import { isStandalone, guessPlatform } from "@/utils/pwa.js";
 import { openInstallSheet } from "@/components/common/install-nudge.js";
 
 const STYLE = `<style>
@@ -353,10 +353,10 @@ function render(root, me, prefs) {
     <div class="st-page-title">Préférences</div>
   </div>
 ${
-  isStandalone()
+  isStandalone() || guessPlatform() === "other"
     ? ""
     : `
-  <!-- APPLICATION : install écran d'accueil (masqué si déjà installée) -->
+  <!-- APPLICATION : install écran d'accueil (masqué si déjà installée / desktop) -->
   <div class="st-section" style="margin-top:20px">
     <div class="st-section-label">Application</div>
     <div class="st-row" id="st-install-row" role="button" tabindex="0" aria-label="Ajouter PermiGo à l'écran d'accueil">

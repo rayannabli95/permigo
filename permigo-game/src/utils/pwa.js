@@ -51,7 +51,9 @@ export function guessPlatform() {
 // DM, réseaux) s'ouvrent dans ce type de webview.
 export function isInAppBrowser() {
   const ua = navigator.userAgent || "";
-  return /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Line\/|MicroMessenger|TikTok|musical_ly|BytedanceWebview|Snapchat|Pinterest|LinkedInApp|Twitter|GSA\/|DuckDuckGo|YJApp/i.test(
+  // NB : uniquement des webviews embarquées (pas les navigateurs autonomes type
+  // DuckDuckGo qui, eux, savent installer) → on évite les faux positifs.
+  return /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Line\/|MicroMessenger|TikTok|musical_ly|BytedanceWebview|Snapchat|Pinterest|LinkedInApp|Twitter|GSA\//i.test(
     ua,
   );
 }
