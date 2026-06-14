@@ -144,26 +144,20 @@ const STYLE = `<style>
 .tr2-card.locked .tr2-card-emoji { filter: grayscale(1) brightness(.4); opacity: .5; }
 /* Mix-blend-mode multiply pour les PNG avec fond blanc (le blanc devient invisible sur card colorée) */
 .tr2-card-emoji img { mix-blend-mode: multiply; }
-/* Commun = VERT accent (l'ancien dégradé gris se confondait avec locked) */
-.tr2-card.commun    { background: linear-gradient(145deg,var(--adk),var(--a)); box-shadow: 0 4px 16px -4px color-mix(in srgb, var(--a) 55%, transparent); }
-.tr2-card.rare      { background: linear-gradient(145deg,var(--blk2),#60a5fa); box-shadow: 0 4px 16px -4px rgba(59,130,246,.6); }
-.tr2-card.epique    { background: linear-gradient(145deg,#6d28d9,#a78bfa); box-shadow: var(--s-pu); }
-.tr2-card.legendaire {
-  background: linear-gradient(145deg,var(--amx),var(--aml2));
-  animation: tr2GoldGlow 2.5s ease-in-out infinite alternate;
-}
-@keyframes tr2GoldGlow {
-  from { box-shadow: 0 4px 24px -4px rgba(245,158,11,.7); }
-  to   { box-shadow: 0 4px 32px -2px rgba(251,191,36,1), 0 0 0 1px rgba(251,191,36,.4); }
-}
+/* Cartes débloquées — PREMIUM, économie chromatique : surface claire + teinte
+   légère + liseré + pastille de la rareté, au lieu d'un gradient plein vif.
+   La rareté reste signalée par la couleur ET la pastille (color-not-only).
+   Fini le patchwork multicolore qui saturait l'écran. */
+.tr2-card.commun     { --rc: var(--a);  background: color-mix(in srgb, var(--a) 7%, var(--su));  border: 1.5px solid color-mix(in srgb, var(--a) 28%, transparent); }
+.tr2-card.rare       { --rc: #3b82f6;   background: color-mix(in srgb, #3b82f6 7%, var(--su));   border: 1.5px solid color-mix(in srgb, #3b82f6 28%, transparent); }
+.tr2-card.epique     { --rc: #8b5cf6;   background: color-mix(in srgb, #8b5cf6 8%, var(--su));   border: 1.5px solid color-mix(in srgb, #8b5cf6 30%, transparent); }
+.tr2-card.legendaire { --rc: #f59e0b;   background: color-mix(in srgb, #f59e0b 10%, var(--su)); border: 1.5px solid color-mix(in srgb, #f59e0b 40%, transparent); box-shadow: 0 4px 16px -7px rgba(245,158,11,.45); }
 .tr2-card-rarity {
-  position: absolute; top: 7px; right: 7px;
-  width: 6px; height: 6px; border-radius: 50%;
+  position: absolute; top: 8px; right: 8px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--rc);
 }
-.tr2-card.commun    .tr2-card-rarity { background: rgba(255,255,255,.5); }
-.tr2-card.rare      .tr2-card-rarity { background: rgba(255,255,255,.7); }
-.tr2-card.epique    .tr2-card-rarity { background: rgba(255,255,255,.8); box-shadow: 0 0 6px rgba(255,255,255,.6); }
-.tr2-card.legendaire .tr2-card-rarity { background: #fff; box-shadow: 0 0 8px rgba(255,255,255,.9); }
+.tr2-card.legendaire .tr2-card-rarity { box-shadow: 0 0 6px var(--rc); }
 .tr2-card-emoji { font-size: 28px; line-height: 1; transition: transform .2s; }
 .tr2-card:not(.locked):active .tr2-card-emoji { transform: scale(1.15); }
 .tr2-card-name {
@@ -173,7 +167,7 @@ const STYLE = `<style>
   -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
 .tr2-card.locked .tr2-card-name { color: var(--mu2); }
-.tr2-card:not(.locked) .tr2-card-name { color: rgba(255,255,255,.9); }
+.tr2-card:not(.locked) .tr2-card-name { color: var(--ink); }
 .tr2-card-mystery { font: 700 10px/1 'IBM Plex Mono', monospace; color: var(--mu); }
 
 /* ── Modal ── */

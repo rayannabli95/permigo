@@ -520,7 +520,7 @@ function renderSkinCard(item, gemmes, idx) {
 
   let cta;
   if (isEquipped) {
-    cta = `<div class="bo2-check" style="background:${r.c};box-shadow:0 0 14px ${r.c}99">✓</div>`;
+    cta = `<div class="bo2-check" style="background:${r.c}">✓</div>`;
   } else if (item.owned) {
     cta = `<button class="bo2-equip-btn">Équiper</button>`;
   } else if (canAfford) {
@@ -532,8 +532,8 @@ function renderSkinCard(item, gemmes, idx) {
 
   return `
     <div class="bo2-skin" data-item-id="${esc(item.id)}"
-      style="border:1.5px solid ${r.c}66; box-shadow:0 0 18px ${r.c}26; animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
-      <div class="bo2-skin-thumb" style="background:${r.c}1a; box-shadow:0 0 16px ${r.c}55">
+      style="border:1px solid ${r.c}3a; box-shadow:var(--s0); animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
+      <div class="bo2-skin-thumb" style="background:${r.c}14">
         ${thumb}
       </div>
       <div class="bo2-skin-mid">
@@ -601,8 +601,8 @@ function renderGridCard(item, gemmes, idx) {
 
   return `
     <div class="bo2-card" data-item-id="${esc(item.id)}"
-      style="border:1.5px solid ${r.c}66; box-shadow:0 0 14px ${r.c}26; animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
-      <div class="bo2-card-preview" style="background:radial-gradient(120% 90% at 50% 12%, ${r.c}26 0%, ${r.c}0d 55%, var(--bg) 100%)">
+      style="border:1px solid ${r.c}3a; box-shadow:var(--s0); animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
+      <div class="bo2-card-preview" style="background:radial-gradient(120% 90% at 50% 12%, ${r.c}14 0%, transparent 60%), var(--su)">
         <span class="bo2-card-rarity-tag" style="background:${r.tagBg};color:${r.tagFg}">${esc(r.label)}</span>
         ${preview}
         ${item.owned ? `<div class="bo2-card-owned-badge">✓ Débloqué</div>` : ""}
@@ -691,7 +691,7 @@ function showDetailModal(item, gemmes, onConfirm) {
     <div class="bo2-modal">
       <div class="bo2-modal-handle"></div>
       <div class="bo2-halo">
-        <div class="bo2-halo-ring" style="background:${r.c}1a; box-shadow:0 0 50px ${r.c}66">
+        <div class="bo2-halo-ring" style="background:${r.c}12; box-shadow:0 0 30px ${r.c}33">
           ${halo}
         </div>
       </div>
