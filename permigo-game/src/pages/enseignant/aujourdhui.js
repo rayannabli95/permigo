@@ -11,7 +11,7 @@ import { navigate } from "@/router.js";
 import { REMC_TOTAL } from "@/data/remc.js";
 import { labelComp } from "@/utils/remc-label.js";
 import { statutCfg } from "@/utils/statut-label.js";
-import { icon, iconBadge } from "@/utils/icons.js";
+import { icon } from "@/utils/icons.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
 import { getMoniteurState } from "@/data/moniteur-levels.js";
@@ -83,109 +83,86 @@ const STYLE = `<style>
     color: var(--ink);
   }
 
-  /* Header */
-  .aj-hd { margin-bottom: 22px; }
-  .aj-h1 {
-    font: 800 clamp(24px, 7.2vw, 28px)/1.1 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink);
-    margin: 0 0 4px;
-    letter-spacing: -0.03em;
+
+  /* ── HERO visuel (parité accueil élève, ton sobre/pro) ── */
+  .aj-hero2 {
+    position: relative; overflow: hidden;
+    margin: -24px -16px 22px;            /* full-bleed : déborde le padding de .aj-page */
+    padding: calc(env(safe-area-inset-top, 0px) + 36px) 24px 28px;
+    color: #fff;
+    background: linear-gradient(158deg, rgba(11,13,26,.80) 0%, rgba(20,35,5,.52) 46%, rgba(11,13,26,.78) 100%), url('/skins/landing/monde4jour.webp') center/cover no-repeat;
+    animation: ajIn .5s var(--ease) both;
   }
-  .aj-date {
-    font: 500 13px/1 'Inter', sans-serif;
-    color: var(--mu2);
-    margin: 0;
-    text-transform: capitalize;
+  .aj-hero2-content { position: relative; z-index: 1; }
+  .aj-hero2-date {
+    font: 600 12px/1 'Inter', sans-serif; color: rgba(255,255,255,.72);
+    text-transform: capitalize; margin: 0 0 8px;
   }
-  /* Ligne de valeur : pose le POURQUOI dès le 1er regard */
-  .aj-value {
-    font: 600 14px/1.4 'Inter', sans-serif;
-    color: var(--ink);
-    margin: 10px 0 0;
+  .aj-hero2-name {
+    font: 800 clamp(26px, 8vw, 32px)/1.05 'Plus Jakarta Sans', sans-serif;
+    color: #fff; letter-spacing: -.03em; margin: 0;
+    text-shadow: 0 2px 12px rgba(11,13,26,.4);
   }
-  .aj-value b { color: var(--adk); font-weight: 800; }
-  .aj-xp-strip { display: flex; align-items: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
-  .aj-xp-chip {
+  .aj-hero2-value {
+    font: 600 13.5px/1.5 'Inter', sans-serif; color: rgba(255,255,255,.9);
+    margin: 12px 0 0; max-width: 40ch;
+  }
+  .aj-hero2-value b { color: #fff; font-weight: 800; }
+  .aj-hero2-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .aj-hero2-chip {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 5px 12px; border-radius: var(--r-full);
-    background: var(--ap); border: 1px solid color-mix(in srgb, var(--a) 22%, transparent);
-    font: 700 12px/1 'Inter', sans-serif; color: var(--adk);
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+    font: 700 12px/1 'Inter', sans-serif; color: #fff;
   }
-  .aj-streak-chip {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 12px; border-radius: var(--r-full);
-    background: var(--amp); border: 1px solid color-mix(in srgb, var(--am) 25%, transparent);
-    font: 700 12px/1 'Inter', sans-serif; color: var(--amk);
+
+  /* ── Widget DOMINANT : valider une compétence ── */
+  .aj-validate {
+    background: var(--su); border: 1px solid var(--bo); border-radius: var(--rl);
+    padding: 18px 16px; margin-bottom: 26px; box-shadow: var(--s2);
+    animation: ajIn .5s .06s var(--ease) both;
   }
+  .aj-validate-hd { display: flex; align-items: center; gap: 8px; }
+  .aj-validate-ttl { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; }
+  .aj-validate-sub { font: 500 12.5px/1.4 'Inter', sans-serif; color: var(--mu); margin: 4px 0 12px; }
+  .aj-validate-list { display: flex; flex-direction: column; }
+  .aj-validate-row {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    padding: 11px 6px; background: none; border: 0; border-radius: var(--r);
+    cursor: pointer; text-align: left; font-family: inherit; min-height: 44px;
+    -webkit-tap-highlight-color: transparent; transition: background .12s;
+  }
+  .aj-validate-row + .aj-validate-row { border-top: 1px solid var(--bo2); }
+  .aj-validate-row:active { background: var(--bg2); }
+  .aj-validate-av { width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; display: flex; }
+  .aj-validate-nom { flex: 1; min-width: 0; font: 600 14px/1.2 'Inter', sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .aj-validate-prog { font: 700 12px/1 'IBM Plex Mono', monospace; color: var(--mu2); flex-shrink: 0; }
+  .aj-validate-chev { color: var(--mu2); flex-shrink: 0; display: flex; }
+  .aj-validate-other {
+    width: 100%; margin-top: 12px; padding: 12px; min-height: 44px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    background: none; border: 1.5px solid var(--bo); border-radius: var(--r-md);
+    color: var(--ink); font: 700 13.5px/1 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent;
+    transition: border-color .12s, transform .12s;
+  }
+  .aj-validate-other:active { transform: scale(.98); border-color: var(--bo4); }
+  .aj-validate-cta {
+    width: 100%; padding: 14px; min-height: 50px;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    background: var(--a); color: var(--a-ink); border: 0; border-radius: var(--r-md);
+    font: 800 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+    font-family: inherit; -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 4px 0 0 var(--adk); transition: transform .12s, box-shadow .12s;
+  }
+  .aj-validate-cta:active { transform: translateY(3px); box-shadow: 0 1px 0 0 var(--adk); }
+  @media (prefers-reduced-motion: reduce) { .aj-hero2, .aj-validate { animation: none !important; } }
 
   @keyframes ajIn {
     from { opacity: 0; transform: translateY(12px) scale(.98); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  /* ── Hero « prochaine action » — la pièce maîtresse, mise en avant ── */
-  .aj-hero {
-    background: var(--su);
-    border: 1px solid var(--bo);
-    border-radius: var(--rl);
-    padding: 20px;
-    margin-bottom: 22px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    box-shadow: var(--s2);
-    animation: ajIn .5s var(--ease) both;
-    transition: border-color .15s var(--ease), box-shadow .15s var(--ease), transform .14s var(--ease-snap);
-    cursor: pointer;
-  }
-  .aj-hero:hover { border-color: var(--bo4); box-shadow: var(--s3); }
-  .aj-hero:active { transform: scale(.98); }
-  .aj-hero-top { display: flex; align-items: flex-start; gap: 14px; }
-  .aj-hero-ico {
-    width: 46px; height: 46px;
-    border-radius: var(--r-md);
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .aj-hero.tone-warn    .aj-hero-ico { background: var(--amp); color: var(--amk); }
-  .aj-hero.tone-ok      .aj-hero-ico { background: var(--grp); color: var(--grd); }
-  .aj-hero.tone-neutral .aj-hero-ico { background: var(--ap); color: var(--adk); }
-  .aj-hero-body { flex: 1; min-width: 0; }
-  .aj-hero-kicker {
-    font: 700 11px/1 'Inter', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: var(--mu2);
-    margin-bottom: 6px;
-  }
-  .aj-hero-title {
-    font: 800 17px/1.3 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink);
-    letter-spacing: -.02em;
-    margin: 0 0 4px;
-  }
-  .aj-hero-sub {
-    font: 500 13px/1.45 'Inter', sans-serif;
-    color: var(--mu);
-    margin: 0;
-  }
-  .aj-hero-cta {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: var(--r-md);
-    background: var(--a);
-    color: var(--a-ink);
-    font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform .12s var(--ease), box-shadow .12s;
-    min-height: 50px;
-    box-shadow: 0 4px 0 0 var(--adk);
-  }
-  .aj-hero-cta:active { transform: translateY(3px); box-shadow: 0 1px 0 0 var(--adk); }
-  .aj-hero-cta:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
 
   /* ── Stats compactes ── */
   .aj-quickstats { display: flex; gap: 10px; margin-bottom: 14px; }
@@ -787,14 +764,8 @@ async function renderInto(root, _me) {
   // Total école (cohérent avec mes-eleves qui montre tous les élèves RLS)
   const nbElevesEcole = (elevesAll.data || []).length;
   const nbElevesActifs = mesElevesActifs.length;
-
-  // Élèves à reconnecter : SEUL signal de relance, à 14 j d'inactivité pile.
-  const fourteenDaysAgo = new Date(Date.now() - 14 * 86400000).toISOString();
-  const reconnectList = mesElevesActifs.filter((e) => {
-    const p = elevesMap[e.id];
-    return !p?.last_active_at || p.last_active_at < fourteenDaysAgo;
-  });
-  const reconnectCount = reconnectList.length;
+  // « À relancer » n'est plus en vedette sur l'accueil : ça vit dans le filtre
+  // Relance de la page Élèves (cf. décision refonte). On ne le calcule plus ici.
 
   // ─── KPI engagement & complétude livret (sur MES élèves) ──────
   // Actif = ouvert l'app dans les 7 derniers jours (last_active_at).
@@ -822,67 +793,45 @@ async function renderInto(root, _me) {
   const myWeeklyPts = myLeagueRow?.weekly_pts ?? 0;
   const myLeague = getLeague(myWeeklyPts);
 
-  // ─── Hero « prochaine action » — 1 action utile priorisée ──────
-  // Priorité : relancer (14 j, seul signal) → valider une compétence →
-  // fallback démarrage. Pas de relance quiz / inactif 7 j sur l'accueil.
-  let hero;
-  if (reconnectCount > 0) {
-    const noms = reconnectList
-      .slice(0, 2)
-      .map((e) => e.prenom || "Élève")
-      .join(", ");
-    hero = {
-      tone: "warn",
-      ico: "users",
-      kicker: "À relancer",
-      title: `${reconnectCount} élève${reconnectCount > 1 ? "s" : ""} sans activité depuis 14 j`,
-      sub: noms ? `Dont ${esc(noms)}${reconnectCount > 2 ? "…" : ""}` : "",
-      cta: "Voir qui relancer",
-      href: "#/eleves?tab=arelancer",
-      ev: "hero.reconnect",
-    };
-  } else if (nbElevesActifs > 0) {
-    // Pas de relance en attente → action positive : valider une compétence
-    const next = mesElevesActifs
-      .slice()
-      .sort((a, b) => (a.acquis || 0) - (b.acquis || 0))[0];
-    hero = {
-      tone: "ok",
-      ico: "check-circle",
-      kicker: "Ton geste du jour",
-      title: "Valide une compétence",
-      sub: next
-        ? `${esc(next.prenom || "Un élève")} est à ${next.acquis}/${REMC_TOTAL} compétences. Coche ce qu'il a réussi en séance — il le voit aussitôt.`
-        : "Ouvre un livret et valide ce qui est acquis en séance — l'élève le voit aussitôt.",
-      cta: next ? "Ouvrir le livret" : "Enregistrer une séance",
-      href: next ? `#/livret/${next.id}` : "#/log-session",
-      ev: "hero.valider_competence",
-    };
-  } else {
-    hero = {
-      tone: "neutral",
-      ico: "user-plus",
-      kicker: "Démarrage",
-      title: "Invite ton premier élève",
-      sub: "Envoie un lien d'inscription par SMS ou WhatsApp. Ton élève crée son compte en 30 secondes.",
-      cta: "Inviter un élève",
-      href: null,
-      action: "invite",
-      ev: "hero.invite_eleve",
-    };
-  }
+  // ─── Widget DOMINANT : Valider une compétence ──────────────────
+  // L'élément reine de l'accueil = le geste qui crée la valeur (pas « à
+  // relancer », qui vit dans le filtre Relance des élèves). Liste d'élèves à
+  // faire avancer (vus récemment d'abord, non terminés) → tap → leur livret.
+  const toValidate = mesElevesActifs
+    .filter((e) => (e.acquis || 0) < REMC_TOTAL)
+    .sort((a, b) =>
+      (elevesMap[b.id]?.last_active_at || "").localeCompare(
+        elevesMap[a.id]?.last_active_at || "",
+      ),
+    )
+    .slice(0, 4);
 
-  const heroHtml = `
-    <div class="aj-hero tone-${hero.tone}"${hero.href || hero.action ? ` id="aj-hero"` : ""}${hero.href ? ` data-href="${esc(hero.href)}" data-ev="${esc(hero.ev)}"` : ""}>
-      <div class="aj-hero-top">
-        <div class="aj-hero-ico">${iconBadge(hero.ico, { color: hero.tone === "warn" ? "var(--amk)" : hero.tone === "ok" ? "var(--grd)" : "var(--a)", size: 44 })}</div>
-        <div class="aj-hero-body">
-          <div class="aj-hero-kicker">${esc(hero.kicker)}</div>
-          <h2 class="aj-hero-title">${hero.title}</h2>
-          ${hero.sub ? `<p class="aj-hero-sub">${hero.sub}</p>` : ""}
-        </div>
+  const validateWidget =
+    nbElevesActifs === 0
+      ? `
+    <div class="aj-validate" id="aj-validate">
+      <div class="aj-validate-hd"><span class="aj-validate-ttl">Commence ici</span></div>
+      <p class="aj-validate-sub">Invite ton premier élève : il crée son compte, et son livret se remplit à chaque compétence que tu valides.</p>
+      <button class="aj-validate-cta" id="aj-validate-invite" type="button">${icon("user-plus", { size: 16, strokeWidth: 2.2 })} Inviter un élève</button>
+    </div>`
+      : `
+    <div class="aj-validate" id="aj-validate">
+      <div class="aj-validate-hd"><span class="aj-validate-ttl">Valider une compétence</span></div>
+      <p class="aj-validate-sub">Touche un élève pour ouvrir son livret et cocher ce qu'il a réussi.</p>
+      <div class="aj-validate-list">
+        ${toValidate
+          .map((e) => {
+            const nom = esc([e.prenom, e.nom].filter(Boolean).join(" ") || "—");
+            return `<button class="aj-validate-row" data-eleve-id="${esc(e.id)}" type="button" aria-label="Ouvrir le livret de ${nom}">
+            <span class="aj-validate-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 38)}</span>
+            <span class="aj-validate-nom">${nom}</span>
+            <span class="aj-validate-prog">${e.acquis}/${REMC_TOTAL}</span>
+            <span class="aj-validate-chev">${icon("chevron-right", { size: 18, strokeWidth: 2 })}</span>
+          </button>`;
+          })
+          .join("")}
       </div>
-      ${hero.cta ? `<button class="aj-hero-cta" type="button" id="aj-hero-cta">${esc(hero.cta)} ${icon("chevron-right", { size: 16, strokeWidth: 2.5 })}</button>` : ""}
+      <button class="aj-validate-other" id="aj-validate-other" type="button">Un autre élève ${icon("arrow-right", { size: 15, strokeWidth: 2.5 })}</button>
     </div>`;
 
   // ─── Widget récap soir ────────────────────────────────────────
@@ -918,29 +867,31 @@ async function renderInto(root, _me) {
     ${STYLE}
     <div class="aj-page anim-slide-up">
 
-      <header class="aj-hd">
-        <h1 class="aj-h1">${prenom ? `Bonjour, ${esc(prenom)}` : "Aujourd'hui"}</h1>
-        <p class="aj-date">${formatDate(new Date())}</p>
-        ${
-          nbElevesActifs > 0
-            ? `<p class="aj-value">Tu accompagnes <b>${nbElevesActifs} élève${nbElevesActifs > 1 ? "s" : ""}</b> vers le permis. Leur livret se remplit à chaque compétence que tu valides.</p>`
-            : `<p class="aj-value">Ton livret numérique remplace le papier. Invite un élève pour démarrer.</p>`
-        }
-        ${
-          acquisAujourdhui > 0 || streakPro > 0
-            ? `
-        <div class="aj-xp-strip">
-          ${acquisAujourdhui > 0 ? `<span class="aj-xp-chip">+${acquisAujourdhui * 10} XP aujourd'hui</span>` : ""}
-          ${streakPro >= 2 ? `<span class="aj-streak-chip">${icon("flame", { size: 12, strokeWidth: 2 })} ${streakPro} jours actifs</span>` : ""}
-        </div>`
-            : ""
-        }
-      </header>
+      <!-- HERO visuel (parité accueil élève) : prestance + valeur posée -->
+      <div class="aj-hero2">
+        <div class="aj-hero2-content">
+          <p class="aj-hero2-date">${formatDate(new Date())}</p>
+          <h1 class="aj-hero2-name" tabindex="-1">${prenom ? `Bonjour, ${esc(prenom)}` : "Aujourd'hui"}</h1>
+          ${
+            nbElevesActifs > 0
+              ? `<p class="aj-hero2-value">Tu accompagnes <b>${nbElevesActifs} élève${nbElevesActifs > 1 ? "s" : ""}</b> vers le permis. Leur livret se remplit à chaque compétence que tu valides.</p>`
+              : `<p class="aj-hero2-value">Ton livret numérique remplace le papier. Invite un élève pour démarrer.</p>`
+          }
+          ${
+            acquisAujourdhui > 0 || streakPro >= 2
+              ? `<div class="aj-hero2-chips">
+            ${acquisAujourdhui > 0 ? `<span class="aj-hero2-chip">+${acquisAujourdhui * 10} XP aujourd'hui</span>` : ""}
+            ${streakPro >= 2 ? `<span class="aj-hero2-chip">${icon("flame", { size: 12, strokeWidth: 2 })} ${streakPro} jours actifs</span>` : ""}
+          </div>`
+              : ""
+          }
+        </div>
+      </div>
 
       ${recapWidget}
 
-      <!-- Hero : prochaine action utile -->
-      ${heroHtml}
+      <!-- Widget dominant : valider une compétence -->
+      ${validateWidget}
 
       <!-- KPI cadrés en valeur : mes élèves / engagement 7 j / progression -->
       <div class="aj-section-title">Ce que tu fais avancer</div>
@@ -1056,26 +1007,22 @@ async function renderInto(root, _me) {
 
   `;
 
-  // Wire listeners
-  if (hero.action === "invite") {
-    const doInvite = () => {
-      track(hero.ev || "hero.invite_eleve");
-      openInviteEleveModal(_me);
-    };
-    root.querySelector("#aj-hero-cta")?.addEventListener("click", doInvite);
-    root.querySelector("#aj-hero")?.addEventListener("click", (e) => {
-      if (!e.target.closest("#aj-hero-cta")) doInvite();
+  // Wire listeners — widget dominant « valider une compétence »
+  root.querySelectorAll(".aj-validate-row[data-eleve-id]").forEach((row) => {
+    row.addEventListener("click", () => {
+      const id = row.dataset.eleveId;
+      track("validate_widget.eleve_tapped", { eleve_id: id });
+      navigate(`#/livret/${id}`);
     });
-  } else if (hero.href) {
-    const goHero = () => {
-      track(hero.ev || "hero.clicked");
-      navigate(hero.href);
-    };
-    root.querySelector("#aj-hero-cta")?.addEventListener("click", goHero);
-    root.querySelector("#aj-hero")?.addEventListener("click", (e) => {
-      if (!e.target.closest("#aj-hero-cta")) goHero();
-    });
-  }
+  });
+  root.querySelector("#aj-validate-other")?.addEventListener("click", () => {
+    track("validate_widget.other_tapped");
+    navigate("#/eleves");
+  });
+  root.querySelector("#aj-validate-invite")?.addEventListener("click", () => {
+    track("validate_widget.invite_tapped");
+    openInviteEleveModal(_me);
+  });
 
   // Bouton "Inviter" dans la section Mes élèves (état vide)
   root.querySelector("#aj-invite-btn")?.addEventListener("click", () => {
