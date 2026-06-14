@@ -243,7 +243,7 @@ export async function mount(root) {
     .order("prenom", { ascending: true });
 
   if (error) {
-    toast("Impossible de charger vos élèves", "error");
+    toast("Impossible de charger tes élèves", "error");
     _eleves = [];
   } else {
     _eleves = data || [];
