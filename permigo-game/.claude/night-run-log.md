@@ -33,3 +33,9 @@ mergeable au réveil, PAS de merge auto, choix safe).
 
 ## Journal
 - 00:00 — log créé, contexte lu (pwa, install-nudge, push-prime, a2hs-steps, add-to-home), recherche faite. Démarrage Lever 1.
+- Lever 1 ✅ rescue contextes non-installables (aaedce2)
+- Lever 4 ✅ copy bénéfice/perte (d1c9eba)
+- Lever 2 ✅ value-moment + openInstallSheet, câblé succès séance moniteur (76eba03)
+- Lever 3 ✅ entrée permanente Réglages (64b049a)
+- Kaizen ✅ faux positifs in-app + desktop (83b0eee)
+- Clôture : FLOWS.md annoncé, report écrit, build OK partout. PR (pas de merge).
