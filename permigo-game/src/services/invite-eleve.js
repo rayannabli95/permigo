@@ -34,18 +34,21 @@ export function openInviteEleveModal(me) {
   }
 
   const ov = document.createElement("div");
+  ov.id = "me-inv-overlay";
   ov.style.cssText =
-    "position:fixed;inset:0;z-index:9990;background:rgba(10,13,26,.55);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;";
+    "position:fixed;inset:0;z-index:9990;background:rgba(10,13,26,.55);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;animation:meInvFade .28s ease;";
   ov.innerHTML = `
     <style>
       @keyframes meInvSlide { from { transform:translateY(100%); } to { transform:translateY(0); } }
       @keyframes meInvFade  { from { opacity:0; } to { opacity:1; } }
+      @keyframes meInvRowIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+      @keyframes meInvTtlIn { from { opacity:0; transform:scale(.94); } to { opacity:1; transform:scale(1); } }
       .me-inv-sheet {
         width:100%; max-width:520px;
         background:var(--su,#fff);
         border-radius:28px 28px 0 0;
         padding:8px 20px calc(28px + env(safe-area-inset-bottom,0px));
-        animation: meInvSlide .3s cubic-bezier(.2,.7,.3,1);
+        animation: meInvSlide .36s cubic-bezier(.32,.72,0,1);
         font-family:'Inter',sans-serif; color:var(--ink);
         box-shadow:0 -8px 32px rgba(10,13,26,.14);
       }
@@ -102,10 +105,16 @@ export function openInviteEleveModal(me) {
         font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;
         color:var(--grd); margin:0 0 16px;
         display:flex; align-items:center; gap:8px;
+        animation:meInvTtlIn .34s cubic-bezier(.32,.72,0,1) both;
+      }
+      .me-inv-result-hint {
+        font:500 12.5px/1.45 'Inter',sans-serif; color:var(--mu,var(--mu3));
+        margin:0 0 16px;
       }
       .me-inv-link-row {
         margin-bottom:14px; padding-bottom:14px;
         border-bottom:1px solid var(--bo2,#eef1f7);
+        animation:meInvRowIn .4s cubic-bezier(.32,.72,0,1) both;
       }
       .me-inv-link-row:last-of-type { border-bottom:0; }
       .me-inv-link-email {
@@ -160,13 +169,17 @@ export function openInviteEleveModal(me) {
         transition:background .12s;
       }
       .me-inv-close-btn:hover { background:var(--bo); }
+      @media (prefers-reduced-motion: reduce) {
+        .me-inv-sheet, .me-inv-result-ttl, .me-inv-link-row { animation:none !important; }
+        #me-inv-overlay { animation:none !important; }
+      }
     </style>
     <div class="me-inv-sheet">
       <div class="me-inv-grab"></div>
       <h2 class="me-inv-title">Inviter des élèves</h2>
       <p class="me-inv-sub">
-        Colle une liste d'emails ou entre-les un par ligne.<br>
-        Chaque élève sera rattaché à toi automatiquement.
+        Un email par ligne. PermiGo crée un lien d'accès pour chacun —
+        ton élève clique, crée son compte, et apparaît dans ta liste.
       </p>
       <textarea
         class="me-inv-textarea"
@@ -285,10 +298,15 @@ export function openInviteEleveModal(me) {
             : `${icon("alert-circle", { size: 18, strokeWidth: 2, color: "var(--rd)" })} Aucune invitation créée`
         }
       </p>
+      ${
+        ok > 0
+          ? `<p class="me-inv-result-hint">Envoie le lien à chaque élève. Dès qu'il l'ouvre et crée son compte, il apparaît dans ta liste.</p>`
+          : ""
+      }
       ${results
         .map(
-          (r) => `
-        <div class="me-inv-link-row">
+          (r, i) => `
+        <div class="me-inv-link-row" style="animation-delay:${0.06 + i * 0.05}s">
           <div class="me-inv-link-email ${r.error ? "err" : ""}">${esc(r.email)}</div>
           ${
             r.link

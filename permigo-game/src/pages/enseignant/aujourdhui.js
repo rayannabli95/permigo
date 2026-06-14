@@ -97,6 +97,13 @@ const STYLE = `<style>
     margin: 0;
     text-transform: capitalize;
   }
+  /* Ligne de valeur : pose le POURQUOI dès le 1er regard */
+  .aj-value {
+    font: 600 14px/1.4 'Inter', sans-serif;
+    color: var(--ink);
+    margin: 10px 0 0;
+  }
+  .aj-value b { color: var(--adk); font-weight: 800; }
   .aj-xp-strip { display: flex; align-items: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
   .aj-xp-chip {
     display: inline-flex; align-items: center; gap: 5px;
@@ -842,11 +849,11 @@ async function renderInto(root, _me) {
     hero = {
       tone: "ok",
       ico: "check-circle",
-      kicker: "Action du jour",
+      kicker: "Ton geste du jour",
       title: "Valide une compétence",
       sub: next
-        ? `Fais avancer ${esc(next.prenom || "un élève")} — ouvre son livret REMC.`
-        : "Ouvre un livret et valide ce qui est acquis en séance.",
+        ? `${esc(next.prenom || "Un élève")} est à ${next.acquis}/${REMC_TOTAL} compétences. Coche ce qu'il a réussi en séance — il le voit aussitôt.`
+        : "Ouvre un livret et valide ce qui est acquis en séance — l'élève le voit aussitôt.",
       cta: next ? "Ouvrir le livret" : "Enregistrer une séance",
       href: next ? `#/livret/${next.id}` : "#/log-session",
       ev: "hero.valider_competence",
@@ -915,6 +922,11 @@ async function renderInto(root, _me) {
         <h1 class="aj-h1">${prenom ? `Bonjour, ${esc(prenom)}` : "Aujourd'hui"}</h1>
         <p class="aj-date">${formatDate(new Date())}</p>
         ${
+          nbElevesActifs > 0
+            ? `<p class="aj-value">Tu accompagnes <b>${nbElevesActifs} élève${nbElevesActifs > 1 ? "s" : ""}</b> vers le permis. Leur livret se remplit à chaque compétence que tu valides.</p>`
+            : `<p class="aj-value">Ton livret numérique remplace le papier. Invite un élève pour démarrer.</p>`
+        }
+        ${
           acquisAujourdhui > 0 || streakPro > 0
             ? `
         <div class="aj-xp-strip">
@@ -930,7 +942,8 @@ async function renderInto(root, _me) {
       <!-- Hero : prochaine action utile -->
       ${heroHtml}
 
-      <!-- KPI : mes élèves / engagement 7 j / complétude livret -->
+      <!-- KPI cadrés en valeur : mes élèves / engagement 7 j / progression -->
+      <div class="aj-section-title">Ce que tu fais avancer</div>
       <div class="aj-quickstats">
         <div class="aj-quickstat" title="${nbElevesEcole} élèves dans l'école">
           <div class="aj-quickstat-val">${nbElevesActifs}</div>
@@ -943,7 +956,7 @@ async function renderInto(root, _me) {
         </div>
         <div class="aj-quickstat">
           <div class="aj-quickstat-val">${nbElevesActifs > 0 ? `${livretPct}<small> %</small>` : "—"}</div>
-          <div class="aj-quickstat-lbl">Livret moyen</div>
+          <div class="aj-quickstat-lbl">Progression moyenne</div>
           <div class="aj-quickstat-bar"><div style="width:${livretPct}%"></div></div>
         </div>
       </div>
