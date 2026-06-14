@@ -113,7 +113,9 @@ Toute écriture qui doit notifier quelqu'un d'un autre rôle passe par `notifica
 
 > Format : `[YYYY-MM-DD bot-X] changement | impact | status`
 
-(vide — premier bot qui ajoute du partagé écrit ici)
+- `[2026-06-14 bot-moniteur]` **Ajout additif** `permigo-game/src/utils/fmt-name.js` (`fmtName` — Title Case d'affichage, ne touche pas la DB) | importé seulement par des pages `src/pages/enseignant/**` (log-session, aujourdhui, mes-eleves, classement-eleves, bilan) | done. Réutilisable par les bots élève/admin pour normaliser l'affichage des noms.
+- `[2026-06-14 bot-moniteur]` **Lecture seule** `quiz_attempts` (user_id, score, completed_at) ajoutée dans `classement-eleves.js` pour la nouvelle « Ligue théorie » (mode `#/classement-eleves/theorie`) — même requête RLS que la KPI « Taux quiz » d'Analyses | aucun écrit | done.
+- `[2026-06-14 bot-moniteur]` **Coordination overlays 1er lancement** : nouvel util partagé `permigo-game/src/utils/intro-overlays.js` + `main.js` (appel `armPopupPhase()` avant `route()`). Le tuto guidé (élève `accueil.js` + enseignant `aujourdhui.js`) attend désormais que le popup d'engagement soit fermé (`onPopupsSettled`). `install-nudge.js` / `push-prime.js` signalent `notifyPopupOpen/Settled` (l'ancien deferral popup→tuto, racy, est retiré). | Impact : élève + enseignant + boot partagé | done.
 
 ---
 

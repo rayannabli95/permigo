@@ -12,6 +12,7 @@ import { navigate } from "@/router.js";
 import { REMC_TOTAL } from "@/data/remc.js";
 import { icon } from "@/utils/icons.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
+import { fmtName } from "@/utils/fmt-name.js";
 
 const STYLE = `<style>
   .ce-page {
@@ -102,14 +103,20 @@ const STYLE = `<style>
   }
 </style>`;
 
-export async function mount(root) {
+// mode = "pratique" (compétences REMC validées, défaut) | "theorie" (quiz)
+export async function mount(root, mode) {
   const me = getCurUser();
   if (!me || (me.role !== "enseignant" && me.role !== "moniteur")) {
     root.innerHTML = "<p>Accès enseignant requis</p>";
     return;
   }
 
-  track("page.view", { page: "classement_eleves", role: me.role });
+  const isTheorie = mode === "theorie";
+  track("page.view", {
+    page: "classement_eleves",
+    role: me.role,
+    mode: isTheorie ? "theorie" : "pratique",
+  });
 
   root.innerHTML = `${STYLE}<div class="ce-page"><div class="ce-empty">Chargement du classement…</div></div>`;
 
@@ -168,32 +175,62 @@ export async function mount(root) {
   );
   validatedByMe.forEach((id) => mesIds.add(id));
 
+  // ── Mode théorie : quiz des élèves (30 j) → volume de révision + score moyen ──
+  // Le moniteur lit quiz_attempts de ses élèves (même requête que la KPI
+  // « Taux quiz » d'Analyses). score sur 100, réussite ≥ 60.
+  const quizByEleve = {};
+  if (isTheorie && mesIds.size > 0) {
+    const ago30 = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+    const { data: qa, error: qaErr } = await sb
+      .from("quiz_attempts")
+      .select("user_id, score, completed_at")
+      .in("user_id", Array.from(mesIds))
+      .gte("completed_at", ago30);
+    if (qaErr) console.error("[classement-eleves] quiz_attempts", qaErr);
+    (qa || []).forEach((q) => {
+      const b = (quizByEleve[q.user_id] ||= { count: 0, sum: 0 });
+      b.count++;
+      b.sum += q.score ?? 0;
+    });
+  }
+
   const all = Array.from(mesIds).map((id) => {
     const e = elevesMap[id] || { prenom: "Élève", nom: "" };
+    const q = quizByEleve[id];
     return {
       id,
       prenom: e.prenom,
       nom: e.nom,
       avatar_url: e.avatar_url,
       acquis: acquisByEleve[id]?.size || 0,
+      quizCount: q?.count || 0,
+      avgScore: q && q.count ? Math.round(q.sum / q.count) : 0,
       streak: streakByEleve[id] || 0,
       recu: lastExam[id] === "recu",
     };
   });
 
-  // Hall of fame = permis obtenu ; classement = les autres, triés par acquis
+  // Hall of fame = permis obtenu ; classement = les autres.
+  // Tri : pratique → compétences acquises ; théorie → volume de quiz puis score.
   const hof = all.filter((e) => e.recu);
   const ranked = all
     .filter((e) => !e.recu)
-    .sort(
-      (a, b) =>
-        b.acquis - a.acquis || (a.prenom || "").localeCompare(b.prenom || ""),
+    .sort((a, b) =>
+      isTheorie
+        ? b.quizCount - a.quizCount ||
+          b.avgScore - a.avgScore ||
+          (a.prenom || "").localeCompare(b.prenom || "")
+        : b.acquis - a.acquis || (a.prenom || "").localeCompare(b.prenom || ""),
     );
 
   if (ranked.length === 0 && hof.length === 0) {
     root.innerHTML = `${STYLE}<div class="ce-page anim-slide-up">
-      ${header(ranked.length)}
-      <div class="ce-empty">Aucun élève à classer pour l'instant.<br>Enregistre des séances pour faire monter ton classement.</div>
+      ${header(ranked.length, isTheorie)}
+      <div class="ce-empty">${
+        isTheorie
+          ? "Aucun quiz fait par tes élèves ces 30 derniers jours.<br>Incite-les à réviser en autonomie entre deux leçons."
+          : "Aucun élève à classer pour l'instant.<br>Enregistre des séances pour faire monter ton classement."
+      }</div>
     </div>`;
     wireBack(root);
     return;
@@ -201,9 +238,9 @@ export async function mount(root) {
 
   root.innerHTML = `${STYLE}
     <div class="ce-page anim-slide-up">
-      ${header(ranked.length)}
+      ${header(ranked.length, isTheorie)}
 
-      ${ranked.length > 0 ? `<div class="ce-list">${ranked.map((e, i) => renderRow(e, i + 1)).join("")}</div>` : ""}
+      ${ranked.length > 0 ? `<div class="ce-list">${ranked.map((e, i) => renderRow(e, i + 1, isTheorie)).join("")}</div>` : ""}
 
       ${
         hof.length > 0
@@ -221,10 +258,14 @@ export async function mount(root) {
   });
 }
 
-function header(n) {
+function header(n, isTheorie) {
   return `<header class="ce-hd">
-    <h1 class="ce-h1">Classement de tes élèves</h1>
-    <p class="ce-sub">${n} élève${n > 1 ? "s" : ""} en course · classés par compétences acquises</p>
+    <h1 class="ce-h1">${isTheorie ? "Ligue théorie" : "Ligue pratique"}</h1>
+    <p class="ce-sub">${n} élève${n > 1 ? "s" : ""} en course · ${
+      isTheorie
+        ? "classés par révision quiz (30 j)"
+        : "classés par compétences acquises"
+    }</p>
   </header>`;
 }
 
@@ -247,16 +288,30 @@ const MEDALS = {
   },
 };
 
-function renderRow(e, rank) {
-  const pct = REMC_TOTAL > 0 ? Math.round((e.acquis / REMC_TOTAL) * 100) : 0;
-  const nom = esc([e.prenom, e.nom].filter(Boolean).join(" ") || "Élève");
+function renderRow(e, rank, isTheorie) {
+  // pratique : barre = % de compétences acquises, score = X/31.
+  // théorie  : barre = score moyen quiz, score = nombre de quiz révisés.
+  const pct = isTheorie
+    ? e.avgScore
+    : REMC_TOTAL > 0
+      ? Math.round((e.acquis / REMC_TOTAL) * 100)
+      : 0;
+  const scoreLabel = isTheorie
+    ? `${e.quizCount} quiz`
+    : `${e.acquis}/${REMC_TOTAL}`;
+  const ariaScore = isTheorie
+    ? `${e.quizCount} quiz révisés, ${e.avgScore}% de moyenne`
+    : `${e.acquis} sur ${REMC_TOTAL}`;
+  const nom = esc(
+    fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "Élève",
+  );
   const m = MEDALS[rank];
   const rankEl = m
     ? `<div class="ce-rank medal" style="--mg:${m.grad};--mglow:${m.glow}">${m.ico ? icon(m.ico, { size: 15, strokeWidth: 2.2, color: "#fff" }) : rank}</div>`
     : `<div class="ce-rank">${rank}</div>`;
   return `
     <div class="ce-row ${rank === 1 ? "top1" : ""}" data-eleve-id="${esc(e.id)}" role="button" tabindex="0"
-         aria-label="${nom} — rang ${rank}, ${e.acquis} sur ${REMC_TOTAL}, série ${e.streak} jour${e.streak > 1 ? "s" : ""}">
+         aria-label="${nom} — rang ${rank}, ${ariaScore}, série ${e.streak} jour${e.streak > 1 ? "s" : ""}">
       ${rankEl}
       <div style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 36)}</div>
       <span class="ce-row-nom">${nom}</span>
@@ -265,13 +320,15 @@ function renderRow(e, rank) {
       </span>
       <div class="ce-row-bar">
         <div class="ce-row-bar-t"><div class="ce-row-bar-f" style="width:${pct}%"></div></div>
-        <div class="ce-row-score">${e.acquis}/${REMC_TOTAL}</div>
+        <div class="ce-row-score">${scoreLabel}</div>
       </div>
     </div>`;
 }
 
 function renderHof(e) {
-  const nom = esc([e.prenom, e.nom].filter(Boolean).join(" ") || "Élève");
+  const nom = esc(
+    fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "Élève",
+  );
   return `
     <div class="ce-hof-row" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
       <div style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 36)}</div>

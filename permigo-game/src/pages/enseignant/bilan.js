@@ -8,6 +8,7 @@ import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { toast } from "@/components/common/toast.js";
 import { esc } from "@/utils/escape.js";
+import { fmtName } from "@/utils/fmt-name.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
 import { navigate } from "@/router.js";
@@ -438,8 +439,8 @@ export async function mount(root, eleveId) {
   }
 
   const { eleve, kpi, by_monde, evolution, comment } = data;
-  const prenom = eleve?.prenom ?? "";
-  const nom = eleve?.nom ?? "";
+  const prenom = fmtName(eleve?.prenom ?? "");
+  const nom = fmtName(eleve?.nom ?? "");
 
   root.innerHTML = `${STYLE}
 <div class="bl">

@@ -10,6 +10,7 @@ import { startNotifListener } from "@/services/notif-listener.js";
 import { toast } from "@/components/common/toast.js";
 import { mountHeader } from "@/components/common/header-top.js";
 import { mountBottomNav } from "@/components/common/nav-bottom.js";
+import { armPopupPhase } from "@/utils/intro-overlays.js";
 import { initThemeEarly, syncFromPrefs } from "@/utils/theme.js";
 import { initAccentEarly } from "@/utils/accent.js";
 import { initGameState, initEquippedTheme } from "@/utils/game-state.js";
@@ -96,6 +97,11 @@ async function boot() {
       await mount(app);
       return; // pas de chrome pendant l'onboarding
     }
+
+    // Coordination overlays 1er lancement : on arme la phase popup AVANT le
+    // rendu de la page, pour que le tuto guidé (lancé pendant route()) attende
+    // que le popup d'engagement soit résolu avant de démarrer.
+    armPopupPhase();
 
     await route(app, me);
 
