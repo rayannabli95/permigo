@@ -411,6 +411,50 @@ const STYLE = `<style>
     font: 500 14px/1.6 'Inter', sans-serif;
   }
   .lr-err-ico { font-size: 40px; display: block; margin-bottom: 12px; }
+
+  /* État succès après validation acquise — referme la boucle de valeur.
+     Sobre (pas de confetti) : on PROUVE que l'élève vient d'avancer. */
+  .lr-success {
+    padding: 28px 24px calc(24px + env(safe-area-inset-bottom, 0px));
+    text-align: center;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .lr-success-check {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: var(--grp);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    animation: lr-pop .42s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes lr-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .lr-success-comp {
+    font: 600 13px/1.3 'Inter', sans-serif; color: var(--mu);
+    margin-bottom: 6px;
+  }
+  .lr-success-title {
+    font: 800 19px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+    letter-spacing: -.02em; margin-bottom: 18px;
+  }
+  .lr-success-bar {
+    width: 100%; height: 8px; background: var(--bo);
+    border-radius: 99px; overflow: hidden; margin-bottom: 10px;
+  }
+  .lr-success-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--a), var(--a-lt));
+    transition: width .8s .1s cubic-bezier(.2,.7,.3,1);
+  }
+  .lr-success-meta {
+    font: 600 13px/1 'Inter', sans-serif; color: var(--ink); margin-bottom: 6px;
+  }
+  .lr-success-meta b { font-weight: 800; color: var(--adk); }
+  .lr-success-note {
+    font: 500 13px/1.45 'Inter', sans-serif; color: var(--mu2); margin-bottom: 22px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lr-success-check { animation: none; }
+    .lr-success-fill { transition: none; }
+  }
 </style>`;
 
 // ─── State ────────────────────────────────────────────────────────
@@ -999,15 +1043,53 @@ async function doSave(overlay) {
   // Mettre à jour le state local
   _validationsMap[_sheetComp.c] = { statut: _sheetStatut, note: _sheetNote }; // note = note_enseignant mapped locally
 
-  toast(
-    _sheetStatut === "acquis"
-      ? "Compétence acquise — quiz envoyé !"
-      : "Évaluation enregistrée.",
-    "success",
-  );
+  // Acquis = moment de valeur : on PROUVE l'avancée de l'élève dans le sheet.
+  // Autres statuts (en cours / à retravailler) = pas de célébration, toast neutre.
+  if (_sheetStatut === "acquis") {
+    showSuccessState(overlay);
+  } else {
+    toast("Évaluation enregistrée.", "success");
+    closeSheet(overlay);
+    render();
+  }
+}
 
-  closeSheet(overlay);
+// État succès : referme la boucle « je valide → l'élève avance → il le voit ».
+function showSuccessState(overlay) {
+  const acquisCount = Object.values(_validationsMap).filter(
+    (v) => v.statut === "acquis",
+  ).length;
+  const pct = REMC_TOTAL > 0 ? Math.round((acquisCount / REMC_TOTAL) * 100) : 0;
+  const prenom = esc(_eleveProfil?.prenom || "Ton élève");
+  const complete = acquisCount >= REMC_TOTAL;
 
-  // Re-render la page pour refléter le changement
-  render();
+  const sheet = overlay.querySelector(".lr-sheet");
+  if (!sheet) {
+    closeSheet(overlay);
+    render();
+    return;
+  }
+
+  sheet.innerHTML = `
+    <div class="lr-success">
+      <div class="lr-success-check">${icon("check", { size: 32, strokeWidth: 3, color: "var(--grd)" })}</div>
+      <div class="lr-success-comp">${esc(_sheetComp.n)} · acquis</div>
+      <div class="lr-success-title">${complete ? `${prenom} a tout validé` : `${prenom} vient d'avancer`}</div>
+      <div class="lr-success-bar"><div class="lr-success-fill" style="width:0%"></div></div>
+      <div class="lr-success-meta"><b>${acquisCount}/${REMC_TOTAL}</b> compétences · ${pct}%</div>
+      <div class="lr-success-note">${complete ? `${prenom} est prêt pour l'examen.` : `${prenom} le voit déjà dans son appli.`}</div>
+      <button class="lr-btn-save" id="lr-success-continue" type="button">Continuer</button>
+    </div>
+  `;
+
+  // Anime la barre vers la progression réelle (l'avancée se voit)
+  const fill = sheet.querySelector(".lr-success-fill");
+  requestAnimationFrame(() => {
+    if (fill) fill.style.width = pct + "%";
+  });
+
+  sheet.querySelector("#lr-success-continue")?.addEventListener("click", () => {
+    closeSheet(overlay);
+    render();
+  });
 }
