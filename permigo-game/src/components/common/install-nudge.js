@@ -27,6 +27,8 @@ const LS_NEXT = "permigo-a2hs-next"; // timestamp avant lequel on se tait
 const LS_OFF = "permigo-a2hs-off"; // "1" = ne plus jamais proposer
 const SNOOZE_MS = 3 * 24 * 60 * 60 * 1000; // 3 jours
 const FIRST_DELAY_MS = 1800; // laisse la page respirer avant la sheet
+const LS_VM_NEXT = "permigo-a2hs-vm-next"; // cadence des prompts « moment de valeur »
+const VM_SNOOZE_MS = 24 * 60 * 60 * 1000; // 1 prompt valeur / 24 h max
 
 const STYLE = `<style id="inn-style">
 ${A2HS_STYLE}
@@ -135,6 +137,38 @@ export function maybeShowInstallNudge(me) {
     }
     show(me);
   }, FIRST_DELAY_MS);
+}
+
+// Ouvre la sheet d'install à la demande (entrée permanente Réglages) — ignore
+// le snooze, mais reste no-op si déjà installée. Route vers « ouvre dans ton
+// navigateur » si le contexte ne permet pas l'A2HS.
+export function openInstallSheet(me) {
+  if (isStandalone()) return;
+  if (document.querySelector(".inn")) return; // déjà ouverte
+  show(me);
+}
+
+// Déclencheur « moment de valeur » : à appeler après une VRAIE victoire (séance
+// validée, quiz réussi, palier…). Convertit bien mieux qu'un prompt froid au
+// boot. Cadence propre (1/24 h), respecte l'opt-out définitif, jamais sur
+// desktop ni si déjà installée. Bypasse le snooze de boot (le moment est meilleur).
+export function promptInstallAtValueMoment(me, reason) {
+  if (isStandalone()) return;
+  if (guessPlatform() === "other") return; // desktop : non pertinent
+  if (document.querySelector(".inn")) return; // une sheet est déjà à l'écran
+  try {
+    if (localStorage.getItem(LS_OFF) === "1") return; // opt-out respecté
+    if (Date.now() < parseInt(localStorage.getItem(LS_VM_NEXT) || "0", 10))
+      return;
+    localStorage.setItem(LS_VM_NEXT, String(Date.now() + VM_SNOOZE_MS));
+  } catch {
+    /* sans localStorage : on tente une fois */
+  }
+  track("a2hs.value_moment", { reason, role: me?.role });
+  // Laisse la victoire (toast/anim de succès) respirer avant la sheet.
+  setTimeout(() => {
+    if (!isStandalone() && !document.querySelector(".inn")) show(me);
+  }, 1400);
 }
 
 function show(me) {

@@ -7,6 +7,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { promptInstallAtValueMoment } from "@/components/common/install-nudge.js";
 import { toast } from "@/components/common/toast.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -596,6 +597,9 @@ async function submit() {
       const prenom = el?.prenom ? fmtName(el.prenom) : "Ton élève";
       const totalAcquis = _acquisSet.size + nNew;
       showSessionSuccess(prenom, nNew, totalAcquis);
+      // Vraie victoire moniteur → meilleur moment pour proposer l'install écran
+      // d'accueil (bien plus convertissant qu'un prompt froid au boot).
+      promptInstallAtValueMoment(getCurUser(), "moniteur_session_validee");
     } else {
       toast("Séance enregistrée", "success");
       navigate("#/eleves");
