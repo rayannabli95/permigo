@@ -23,7 +23,7 @@ const TOUR_KEY = "pg-tour-moniteur-v1";
 const MONITEUR_TOUR_STEPS = [
   {
     title: "Bienvenue sur PermiGo 👋",
-    text: "30 secondes pour prendre l'app en main. Tu peux passer à tout moment.",
+    text: "Ton livret papier devient numérique et vivant : tes élèves voient leur progression en temps réel, et toi tu sais où en est chacun en un coup d'œil.",
   },
   {
     sel: "#aj-act-invite",
@@ -33,7 +33,7 @@ const MONITEUR_TOUR_STEPS = [
   {
     sel: "#bn-seance-fab",
     title: "Enregistre une séance",
-    text: "Après chaque leçon, coche les compétences travaillées. C'est ce qui fait avancer le livret REMC de l'élève.",
+    text: "Après chaque leçon, coche ce que ton élève a réussi. Son livret se remplit tout seul, et il le voit aussitôt — fini le papier.",
   },
   {
     sel: '.bn-tab[data-id="eleves"]',
