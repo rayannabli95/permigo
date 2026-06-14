@@ -997,40 +997,47 @@ async function doSave(overlay) {
   btn.disabled = true;
   btn.textContent = "Enregistrement…";
 
-  const payload = {
-    eleve_id: _eleveId,
-    competence_id: _sheetComp.c,
-    validated_by: _me.id,
-    statut: _sheetStatut,
-    validated_at: new Date().toISOString(),
-  };
-  if (_sheetNote.trim()) payload.note_enseignant = _sheetNote.trim();
+  const note = _sheetNote.trim() || null;
+  let saveError = null;
 
-  const { error } = await sb
-    .from("validations")
-    .upsert(payload, { onConflict: "eleve_id,competence_id" });
+  if (_sheetStatut === "acquis") {
+    // « Acquis » passe par validate_session (SECURITY DEFINER) : il écrit la
+    // validation ET notifie l'élève côté serveur (comp_acquise). L'INSERT
+    // notif direct du client était bloqué par la RLS notifications_insert
+    // (WITH CHECK user_id = get_my_id() → un moniteur ne peut pas notifier
+    // un autre user). Aucun effet de bord : validate_session n'écrit pas
+    // dans sessions_moniteur.
+    const { data, error } = await sb.rpc("validate_session", {
+      p_eleve_id: _eleveId,
+      p_session_date: new Date().toISOString().slice(0, 10),
+      p_note: note,
+      p_acquis: [_sheetComp.c],
+    });
+    saveError = error || (data?.error ? new Error(data.error) : null);
+  } else {
+    // « En cours » / « à retravailler » : upsert direct. Pas de notif, et il
+    // faut pouvoir RÉTROGRADER une compétence acquise (correction), ce que
+    // validate_session interdit volontairement. Pas de RLS bloquante ici.
+    const payload = {
+      eleve_id: _eleveId,
+      competence_id: _sheetComp.c,
+      validated_by: _me.id,
+      statut: _sheetStatut,
+      validated_at: new Date().toISOString(),
+    };
+    if (note) payload.note_enseignant = note;
+    const { error } = await sb
+      .from("validations")
+      .upsert(payload, { onConflict: "eleve_id,competence_id" });
+    saveError = error;
+  }
 
-  if (error) {
+  if (saveError) {
+    console.error("[livret-remc] save failed", saveError);
     toast("Erreur lors de la sauvegarde", "error");
     btn.disabled = false;
     btn.textContent = "Enregistrer";
     return;
-  }
-
-  // Notification élève si compétence acquise
-  if (_sheetStatut === "acquis") {
-    const { error: errNotif } = await sb.from("notifications").insert({
-      user_id: _eleveId,
-      type: "post_validation_quiz",
-      title: "Compétence validée !",
-      body: `${_sheetComp.n} — Fais le quiz en 30 sec`,
-      data: { competence_id: _sheetComp.c },
-      read: false,
-    });
-    if (errNotif) {
-      console.error("[livret-remc] notification insert failed", errNotif);
-      toast("Validé, mais notification non envoyée", "warning");
-    }
   }
 
   track("competence.evaluated", {
