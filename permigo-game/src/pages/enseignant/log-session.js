@@ -186,6 +186,21 @@ const STYLE = `<style>
   .vs-empty { padding: 32px 16px; text-align: center; color: var(--mu2); font: 500 14px/1.5 'Inter', sans-serif; }
   .vs-skel { height: 64px; border-radius: var(--r); background: var(--su); border: 1px solid var(--bo); animation: vsPulse 1.4s ease-in-out infinite; margin-bottom: 8px; }
   @keyframes vsPulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+  /* État succès après séance — referme la boucle de valeur (sobre, cohérent livret) */
+  .vs-success { max-width: 480px; margin: 0 auto; padding: 44px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .vs-success-check { width: 64px; height: 64px; border-radius: 50%; background: var(--grp); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; animation: vs-pop .42s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes vs-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .vs-success-comp { font: 600 13px/1.3 'Inter', sans-serif; color: var(--mu); margin-bottom: 6px; }
+  .vs-success-title { font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; margin-bottom: 6px; }
+  .vs-success-count { font: 700 14px/1.3 'Inter', sans-serif; color: var(--grd); margin-bottom: 22px; }
+  .vs-success-bar { width: 100%; max-width: 320px; height: 8px; background: var(--bo); border-radius: 99px; overflow: hidden; margin-bottom: 10px; }
+  .vs-success-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--a), var(--a-lt)); transition: width .8s .1s cubic-bezier(.2,.7,.3,1); }
+  .vs-success-meta { font: 600 13px/1 'Inter', sans-serif; color: var(--ink); margin-bottom: 6px; }
+  .vs-success-meta b { font-weight: 800; color: var(--adk); }
+  .vs-success-note { font: 500 13px/1.45 'Inter', sans-serif; color: var(--mu2); margin-bottom: 28px; }
+  .vs-success-done { max-width: 320px !important; }
+  @media (prefers-reduced-motion: reduce) { .vs-success-check { animation: none; } .vs-success-fill { transition: none; } }
 </style>`;
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -574,13 +589,16 @@ async function submit() {
 
     haptic("success");
     const nNew = data?.n_acquis_new ?? acquis.length;
-    toast(
-      nNew > 0
-        ? `Séance enregistrée · ${nNew} compétence${nNew > 1 ? "s" : ""} validée${nNew > 1 ? "s" : ""}`
-        : "Séance enregistrée",
-      "success",
-    );
-    navigate("#/eleves");
+    // Acquis = moment de valeur : on PROUVE l'avancée avant de quitter.
+    if (nNew > 0) {
+      const el = _eleves.find((e) => e.id === _eleve);
+      const prenom = el?.prenom || "Ton élève";
+      const totalAcquis = _acquisSet.size + nNew;
+      showSessionSuccess(prenom, nNew, totalAcquis);
+    } else {
+      toast("Séance enregistrée", "success");
+      navigate("#/eleves");
+    }
   } catch (e) {
     console.error("[valider-seance] submit crash", e);
     toast("Erreur réseau", "error");
@@ -590,4 +608,37 @@ async function submit() {
       btn.querySelector("#vs-submit-lbl").textContent = "Réessayer";
     }
   }
+}
+
+// Écran succès : referme la boucle « je valide → l'élève avance → il le voit ».
+function showSessionSuccess(prenom, nNew, totalAcquis) {
+  // Ferme un tour guidé 1re-visite qui aurait pu s'afficher pendant la RPC
+  // (sinon il se superpose à l'écran succès). Le tour est appendé à <body>.
+  document.querySelector(".gt-root")?.remove();
+
+  const pct = REMC_TOTAL > 0 ? Math.round((totalAcquis / REMC_TOTAL) * 100) : 0;
+  const complete = totalAcquis >= REMC_TOTAL;
+
+  _root.innerHTML = `${STYLE}
+    <div class="vs anim-slide-up">
+      <div class="vs-success">
+        <div class="vs-success-check">${icon("check", { size: 34, strokeWidth: 3, color: "var(--grd)" })}</div>
+        <div class="vs-success-comp">Séance enregistrée</div>
+        <div class="vs-success-title">${complete ? `${esc(prenom)} a tout validé` : `${esc(prenom)} a progressé`}</div>
+        <div class="vs-success-count">${nNew} compétence${nNew > 1 ? "s" : ""} validée${nNew > 1 ? "s" : ""} aujourd'hui</div>
+        <div class="vs-success-bar"><div class="vs-success-fill" style="width:0%"></div></div>
+        <div class="vs-success-meta"><b>${totalAcquis}/${REMC_TOTAL}</b> compétences · ${pct}%</div>
+        <div class="vs-success-note">${complete ? `${esc(prenom)} est prêt pour l'examen.` : `${esc(prenom)} le voit déjà dans son appli.`}</div>
+        <button class="vs-submit pg-btn vs-success-done" id="vs-success-done" type="button">Voir mes élèves</button>
+      </div>
+    </div>`;
+
+  const fill = _root.querySelector(".vs-success-fill");
+  requestAnimationFrame(() => {
+    if (fill) fill.style.width = pct + "%";
+  });
+
+  _root
+    .querySelector("#vs-success-done")
+    ?.addEventListener("click", () => navigate("#/eleves"));
 }
