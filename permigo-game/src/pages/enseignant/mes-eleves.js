@@ -169,11 +169,10 @@ const STYLE = `<style>
   /* Infos */
   .me-info { flex: 1; min-width: 0; }
   .me-nom {
-    font: 600 14px/1.2 'Inter', sans-serif;
+    font: 700 14.5px/1.2 'Plus Jakarta Sans', sans-serif;
     color: var(--ink);
     margin: 0 0 4px;
-    text-transform: uppercase;
-    letter-spacing: .01em;
+    letter-spacing: -0.01em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -745,7 +744,11 @@ function render() {
             </button>
           </div>
         </div>
-        <p class="me-sub">${total} élève${total > 1 ? "s" : ""} · ${actifs} actif${actifs > 1 ? "s" : ""}</p>
+        <p class="me-sub">${
+          prets > 0
+            ? `${total} élève${total > 1 ? "s" : ""} · <b style="color:var(--grd);font-weight:800">${prets} prêt${prets > 1 ? "s" : ""} pour l'examen</b>`
+            : `${total} élève${total > 1 ? "s" : ""} · ${actifs} actif${actifs > 1 ? "s" : ""}`
+        }</p>
       </header>
 
       ${relancerSection}
