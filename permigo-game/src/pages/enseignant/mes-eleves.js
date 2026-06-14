@@ -721,7 +721,7 @@ function render() {
       ? `
     <div class="me-relancer-section" id="me-relancer-section" role="button" tabindex="0"
          aria-label="${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} sans activité depuis 14 jours ou plus — voir la liste">
-      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;margin:0;">${icon("alert-circle", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} à relancer <span style="margin-left:auto;display:inline-flex">${icon("chevron-right", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })}</span></p>
+      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;margin:0;">${icon("alert-circle", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} inactif${aRelancerList.length > 1 ? "s" : ""} <span style="margin-left:auto;display:inline-flex">${icon("chevron-right", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })}</span></p>
       ${showRelancerHint ? `<p class="me-relancer-sub">Sans activité depuis 14 jours ou plus — un point en leçon peut débloquer la progression.</p>` : ""}
     </div>
   `
@@ -772,8 +772,8 @@ function render() {
         <button class="me-tab${_tab === "prets" ? " active" : ""}" data-tab="prets" role="tab" aria-selected="${_tab === "prets"}"
                 style="${prets > 0 && _tab !== "prets" ? "color:var(--grd)" : ""}">Prêts (${prets})</button>
         <button class="me-tab${_tab === "arelancer" ? " active" : ""}" data-tab="arelancer" role="tab" aria-selected="${_tab === "arelancer"}"
-                style="${aRelancerList.length > 0 && _tab !== "arelancer" ? "color:var(--amx)" : ""}">Relance (${aRelancerList.length})</button>
-        <button class="me-tab${_tab === "recus" ? " active" : ""}" data-tab="recus" role="tab" aria-selected="${_tab === "recus"}">Reçus (${recusCount})</button>
+                style="${aRelancerList.length > 0 && _tab !== "arelancer" ? "color:var(--amx)" : ""}">Inactifs (${aRelancerList.length})</button>
+        <button class="me-tab${_tab === "recus" ? " active" : ""}" data-tab="recus" role="tab" aria-selected="${_tab === "recus"}">Diplômés (${recusCount})</button>
       </div>
 
       <button class="me-fab" id="me-fab" aria-label="Enregistrer une séance">
@@ -839,20 +839,22 @@ function renderRow(eleve) {
     [eleve.prenom, eleve.nom].filter(Boolean).join(" ") || "—",
   );
 
-  // Badges d'exception uniquement : un « Actif » répété sur 25 lignes
-  // n'est plus un signal. Le détail (validations, dates) vit dans la fiche.
+  // Onglet « Tous » = liste épurée (nom + progression). Les infos contextuelles
+  // — date d'examen, jours d'inactivité — vivent dans leurs FILTRES dédiés
+  // (Examen / Inactifs), pas en doublon sur chaque ligne de « Tous ».
+  const epure = _tab === "tous";
   const badges =
     eleve.readiness === "recu"
-      ? `<span class="me-badge recu">${icon("check", { size: 11, strokeWidth: 2.6 })} Reçu</span>`
+      ? `<span class="me-badge recu">${icon("check", { size: 11, strokeWidth: 2.6 })} Diplômé</span>`
       : [
           eleve.readiness === "pret"
             ? `<span class="me-badge pret">${icon("check", { size: 11, strokeWidth: 2.6 })} Prêt</span>`
             : "",
-          eleve.examStatut === "planifie"
+          !epure && eleve.examStatut === "planifie"
             ? `<span class="me-badge planifie">${icon("calendar", { size: 11, strokeWidth: 2.4 })} ${esc(fmtExamDate(eleve.examDate))}</span>`
             : "",
-          eleve.aRelancer
-            ? `<span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">${icon("alert-circle", { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `${eleve.joursInactif}j` : "À relancer"}</span>`
+          !epure && eleve.aRelancer
+            ? `<span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">${icon("alert-circle", { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `${eleve.joursInactif}j` : "Inactif"}</span>`
             : "",
         ]
           .filter(Boolean)
@@ -1461,8 +1463,8 @@ function renderList() {
     if (tab === "tous") btn.textContent = `Tous (${total})`;
     if (tab === "actifs") btn.textContent = `Actifs (${actifs})`;
     if (tab === "prets") btn.textContent = `Prêts (${prets})`;
-    if (tab === "arelancer") btn.textContent = `Relance (${arelancer})`;
-    if (tab === "recus") btn.textContent = `Reçus (${recusCount})`;
+    if (tab === "arelancer") btn.textContent = `Inactifs (${arelancer})`;
+    if (tab === "recus") btn.textContent = `Diplômés (${recusCount})`;
   });
 
   if (filtered.length === 0) {
