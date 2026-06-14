@@ -163,7 +163,7 @@ function show(me) {
         <img class="inn-badge" src="${BADGE}" alt="" aria-hidden="true"/>
         <div>
           <div class="inn-title" id="inn-title">${tu ? "Mets PermiGo sur ton écran d'accueil" : "Mettez PermiGo sur votre écran d'accueil"}</div>
-          <div class="inn-sub">${tu ? "10 secondes — et tu reçois tes rappels 🔔" : "10 secondes — et vous recevez vos notifications 🔔"}</div>
+          <div class="inn-sub">${tu ? "Ouvre l'app d'un geste, garde ta série 🔥 et reçois tes rappels." : "Vos validations à confirmer en 1 tap — comme une vraie app, sans store."}</div>
         </div>
         <button class="inn-close" id="inn-close" type="button" aria-label="Fermer">×</button>
       </div>
