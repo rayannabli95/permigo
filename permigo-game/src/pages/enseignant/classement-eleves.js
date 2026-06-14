@@ -27,76 +27,37 @@ const STYLE = `<style>
   }
   .ce-sub { font: 500 13px/1.4 'Inter', sans-serif; color: var(--mu2); margin: 0; }
 
-  /* Podium */
-  .ce-podium {
-    display: grid;
-    grid-template-columns: 1fr 1.15fr 1fr;
-    align-items: end;
-    gap: 10px;
-    margin-bottom: 22px;
-  }
-  .ce-pod {
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: var(--rl);
-    padding: 14px 8px 12px;
-    text-align: center;
-    box-shadow: var(--s1);
-    position: relative;
-  }
-  .ce-pod.p1 {
-    border-color: color-mix(in srgb, var(--am) 45%, transparent);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--am) 12%, var(--su)), var(--su));
-    padding-top: 26px;
-  }
-  .ce-crown {
-    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-    color: var(--am-txt);
-    filter: drop-shadow(0 2px 4px rgba(245,158,11,.4));
-  }
-  .ce-pod-av { display: inline-flex; margin-bottom: 8px; }
-  .ce-pod-rank {
-    position: absolute; top: 8px; left: 8px;
-    width: 22px; height: 22px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font: 800 11px/1 'Plus Jakarta Sans', sans-serif; color: #fff;
-  }
-  .ce-pod.p1 .ce-pod-rank { background: linear-gradient(135deg,var(--am),var(--amk)); }
-  .ce-pod.p2 .ce-pod-rank { background: linear-gradient(135deg,var(--mu2),var(--mu3)); }
-  .ce-pod.p3 .ce-pod-rank { background: linear-gradient(135deg,var(--amx),#92400e); }
-  .ce-pod-nom {
-    font: 700 13px/1.2 'Inter', sans-serif; color: var(--ink);
-    text-transform: uppercase; letter-spacing: .01em;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .ce-pod-score {
-    font: 800 16px/1 'IBM Plex Mono', monospace; color: var(--adk); margin-top: 4px;
-  }
-  .ce-pod-score span { font-size: .65em; color: var(--mu2); }
-
-  /* Liste */
+  /* Leaderboard unifié (parité design côté élève) : médailles top-3 inline,
+     lignes épurées, score à droite. Plus de podium séparé. */
   .ce-list { display: flex; flex-direction: column; gap: 8px; }
   .ce-row {
     background: var(--su); border: 1px solid var(--bo);
-    border-radius: var(--r); padding: 12px 14px;
+    border-radius: var(--r-lg); padding: 11px 14px;
     display: flex; align-items: center; gap: 12px;
     box-shadow: var(--s0); cursor: pointer; min-height: 44px;
     transition: border-color .15s, transform .15s;
   }
+  .ce-row.top1 { border-color: color-mix(in srgb, var(--am) 40%, transparent); background: linear-gradient(100deg, color-mix(in srgb, var(--am) 9%, var(--su)), var(--su) 55%); }
   .ce-row:hover { border-color: var(--bo4); transform: translateY(-1px); }
   .ce-row:active { transform: scale(.985); }
   .ce-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
-  .ce-row-rank {
-    font: 800 14px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu2);
-    width: 26px; text-align: center; flex-shrink: 0;
+
+  /* Rang : numéro neutre, ou médaille pour le top 3 */
+  .ce-rank {
+    width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font: 800 13px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu2);
+    background: var(--bg2);
   }
+  .ce-rank.medal { color: #fff; background: var(--mg); box-shadow: 0 3px 10px -2px var(--mglow); }
+
   .ce-row-nom {
     flex: 1; min-width: 0;
-    font: 600 13px/1.2 'Inter', sans-serif; color: var(--ink);
-    text-transform: uppercase; letter-spacing: .01em;
+    font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+    letter-spacing: -.01em;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .ce-row-bar { width: 70px; flex-shrink: 0; }
+  .ce-row-bar { width: 64px; flex-shrink: 0; }
   .ce-row-bar-t { height: 4px; background: var(--bo); border-radius: 2px; overflow: hidden; margin-bottom: 3px; }
   .ce-row-bar-f { height: 100%; background: linear-gradient(90deg, var(--a), var(--a-lt)); border-radius: 2px; }
   .ce-row-score { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); text-align: right; }
@@ -110,11 +71,6 @@ const STYLE = `<style>
   }
   .ce-streak.off { color: var(--mu2); background: var(--bg2); border-color: var(--bo); }
   .ce-streak svg { flex-shrink: 0; }
-  .ce-pod-streak {
-    display: inline-flex; align-items: center; gap: 3px; margin-top: 5px;
-    font: 700 10px/1 'IBM Plex Mono', monospace; color: var(--amx);
-  }
-  .ce-pod-streak.off { color: var(--mu2); }
 
   /* Hall of fame (permis obtenu) */
   .ce-hof-title {
@@ -243,22 +199,11 @@ export async function mount(root) {
     return;
   }
 
-  const top3 = ranked.slice(0, 3);
-  const rest = ranked.slice(3);
-  // Ordre visuel du podium : 2 - 1 - 3
-  const podiumOrder = [top3[1], top3[0], top3[2]];
-
   root.innerHTML = `${STYLE}
     <div class="ce-page anim-slide-up">
       ${header(ranked.length)}
 
-      ${
-        top3.length > 0
-          ? `<div class="ce-podium">${podiumOrder.map((e, i) => renderPod(e, i)).join("")}</div>`
-          : ""
-      }
-
-      ${rest.length > 0 ? `<div class="ce-list">${rest.map((e, i) => renderRow(e, i + 4)).join("")}</div>` : ""}
+      ${ranked.length > 0 ? `<div class="ce-list">${ranked.map((e, i) => renderRow(e, i + 1)).join("")}</div>` : ""}
 
       ${
         hof.length > 0
@@ -283,32 +228,36 @@ function header(n) {
   </header>`;
 }
 
-function renderPod(e, visualIdx) {
-  if (!e) return `<div></div>`;
-  // visualIdx : 0 = #2 (gauche), 1 = #1 (centre), 2 = #3 (droite)
-  const rank = visualIdx === 0 ? 2 : visualIdx === 1 ? 1 : 3;
-  const pct = REMC_TOTAL > 0 ? Math.round((e.acquis / REMC_TOTAL) * 100) : 0;
-  return `
-    <div class="ce-pod p${rank}" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
-      ${rank === 1 ? `<span class="ce-crown">${icon("crown", { size: 26, strokeWidth: 2 })}</span>` : ""}
-      <span class="ce-pod-rank">${rank}</span>
-      <div class="ce-pod-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, rank === 1 ? 52 : 44)}</div>
-      <div class="ce-pod-nom">${esc(e.prenom || "Élève")}</div>
-      <div class="ce-pod-score">${e.acquis}<span>/${REMC_TOTAL}</span></div>
-      <div style="font:500 10px/1 'Inter',sans-serif;color:var(--mu2);margin-top:3px">${pct}%</div>
-      <div class="ce-pod-streak${e.streak > 0 ? "" : " off"}" title="${e.streak} jour${e.streak > 1 ? "s" : ""} d'activité d'affilée">
-        ${icon("flame", { size: 11, strokeWidth: 2 })} ${e.streak}j
-      </div>
-    </div>`;
-}
+// Médailles top-3 (parité côté élève : badge rond coloré + glow)
+const MEDALS = {
+  1: {
+    grad: "linear-gradient(135deg,var(--am),var(--amk))",
+    glow: "rgba(245,158,11,.5)",
+    ico: "crown",
+  },
+  2: {
+    grad: "linear-gradient(135deg,#cbd5e1,#94a3b8)",
+    glow: "rgba(148,163,184,.45)",
+    ico: null,
+  },
+  3: {
+    grad: "linear-gradient(135deg,#d97706,#92400e)",
+    glow: "rgba(217,119,6,.4)",
+    ico: null,
+  },
+};
 
 function renderRow(e, rank) {
   const pct = REMC_TOTAL > 0 ? Math.round((e.acquis / REMC_TOTAL) * 100) : 0;
   const nom = esc([e.prenom, e.nom].filter(Boolean).join(" ") || "Élève");
+  const m = MEDALS[rank];
+  const rankEl = m
+    ? `<div class="ce-rank medal" style="--mg:${m.grad};--mglow:${m.glow}">${m.ico ? icon(m.ico, { size: 15, strokeWidth: 2.2, color: "#fff" }) : rank}</div>`
+    : `<div class="ce-rank">${rank}</div>`;
   return `
-    <div class="ce-row" data-eleve-id="${esc(e.id)}" role="button" tabindex="0"
+    <div class="ce-row ${rank === 1 ? "top1" : ""}" data-eleve-id="${esc(e.id)}" role="button" tabindex="0"
          aria-label="${nom} — rang ${rank}, ${e.acquis} sur ${REMC_TOTAL}, série ${e.streak} jour${e.streak > 1 ? "s" : ""}">
-      <span class="ce-row-rank">${rank}</span>
+      ${rankEl}
       <div style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 36)}</div>
       <span class="ce-row-nom">${nom}</span>
       <span class="ce-streak${e.streak > 0 ? "" : " off"}" title="${e.streak} jour${e.streak > 1 ? "s" : ""} d'activité d'affilée">
