@@ -258,49 +258,6 @@ const STYLE = `<style>
     box-shadow: var(--s0);
   }
 
-  /* Difficulté comps */
-  .ins-diff-row {
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: var(--r-lg);
-    padding: 12px 14px;
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 44px;
-  }
-  .ins-diff-code {
-    font: 600 11px/1 'IBM Plex Mono', monospace;
-    color: var(--a-txt);
-    background: color-mix(in srgb, var(--a) 10%, transparent);
-    padding: 4px 7px;
-    border-radius: 6px;
-    flex-shrink: 0;
-  }
-  .ins-diff-info { flex: 1; min-width: 0; }
-  .ins-diff-name {
-    font: 500 13px/1.3 'Inter', sans-serif;
-    color: var(--ink);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    margin-bottom: 5px;
-  }
-  .ins-diff-bar-wrap {
-    height: 4px;
-    background: var(--bg2);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .ins-diff-bar-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width .5s var(--ease-snap);
-  }
-  .ins-diff-count {
-    font: 600 12px/1 'Inter', sans-serif;
-    color: var(--rdk);
-    flex-shrink: 0;
-  }
 
   /* Recommandations */
   .ins-reco-list { display: flex; flex-direction: column; gap: 8px; }
@@ -574,9 +531,10 @@ async function loadData(me) {
     .map(([compId, elevesSet]) => ({ compId, count: elevesSet.size }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
-  const maxDiff = topDiff[0]?.count || 1;
 
-  // ── Recommandations IA (algo simple) ─────────────────────────
+  // ── À faire cette semaine — règles métier simples (PAS de l'IA) :
+  //    relancer son streak / un élève en pause / débrief sur une compétence
+  //    qui bloque plusieurs élèves. Chaque carte est actionnable (route).
   const recos = [];
   if (streakPro !== null && streakPro < 3) {
     recos.push({
@@ -635,7 +593,6 @@ async function loadData(me) {
     topProgressent,
     topStagnent,
     topDiff,
-    maxDiff,
     recos,
     eleveIds,
     elevesAvecPrenom,
@@ -659,7 +616,6 @@ function renderAll(root, me, data) {
       ${renderKpis(data)}
       ${renderActivityChartSection(data)}
       ${renderTopElevesSection(data)}
-      ${renderDiffSection(data)}
       ${renderRecoSection(data)}
     </div>
   `;
@@ -783,15 +739,15 @@ function renderActivityChartSection({ heatmap }) {
 function renderTopElevesSection({ topProgressent, topStagnent }) {
   return `
     <div class="ins-section" id="ins-top-section">
-      <div class="ins-section-title">Élèves</div>
+      <div class="ins-section-title">Tes élèves ce mois</div>
       <div class="ins-tabs" role="tablist">
         <button class="ins-tab active" data-tab="progressent" role="tab"
                 style="display:flex;align-items:center;gap:5px;">
-          ${icon("trending-up", { size: 14, strokeWidth: 2.2 })} Progressent (${topProgressent.length})
+          ${icon("trending-up", { size: 14, strokeWidth: 2.2 })} Avancent (${topProgressent.length})
         </button>
         <button class="ins-tab" data-tab="stagnent" role="tab"
                 style="display:flex;align-items:center;gap:5px;">
-          ${icon("alert-triangle", { size: 14, strokeWidth: 2.2 })} Stagnent (${topStagnent.length})
+          ${icon("alert-triangle", { size: 14, strokeWidth: 2.2 })} En pause (${topStagnent.length})
         </button>
       </div>
       <div id="ins-eleves-list">
@@ -807,7 +763,7 @@ function renderElevesList(tab, topProgressent, topStagnent) {
     const empty =
       tab === "progressent"
         ? "Aucun élève avec ≥ 2 compétences ce mois encore."
-        : "Aucun élève en stagnation — tout le monde progresse !";
+        : "Personne en pause — tout le monde avance !";
     return `<div class="ins-empty">${empty}</div>`;
   }
   return list
@@ -839,44 +795,7 @@ function renderElevesList(tab, topProgressent, topStagnent) {
 }
 
 // ── Difficulté comps ──────────────────────────────────────────
-function renderDiffSection({ topDiff, maxDiff }) {
-  if (topDiff.length === 0) {
-    return `
-      <div class="ins-section">
-        <div class="ins-section-title">Compétences difficiles</div>
-        <div class="ins-empty">Aucune compétence en difficulté détectée.</div>
-      </div>
-    `;
-  }
-  const rows = topDiff
-    .map(({ compId, count }) => {
-      const pct = Math.round((count / maxDiff) * 100);
-      const r = Math.round(239 - (count / maxDiff) * 120);
-      const color = `rgb(${r}, 68, 68)`;
-      return `
-      <div class="ins-diff-row" data-comp-id="${esc(compId)}" role="button" tabindex="0" style="cursor:pointer;">
-        <span class="ins-diff-code">${esc(compId)}</span>
-        <div class="ins-diff-info">
-          <div class="ins-diff-name">${esc(labelComp(compId))}</div>
-          <div class="ins-diff-bar-wrap">
-            <div class="ins-diff-bar-fill" style="width:${pct}%;background:${color}"></div>
-          </div>
-        </div>
-        <span class="ins-diff-count">${count} élève${count > 1 ? "s" : ""}</span>
-      </div>
-    `;
-    })
-    .join("");
-
-  return `
-    <div class="ins-section">
-      <div class="ins-section-title">Compétences difficiles</div>
-      ${rows}
-    </div>
-  `;
-}
-
-// ── Recommandations ───────────────────────────────────────────
+// ── À faire cette semaine ─────────────────────────────────────
 function renderRecoSection({ recos }) {
   const cards = recos
     .map(
@@ -895,7 +814,7 @@ function renderRecoSection({ recos }) {
 
   return `
     <div class="ins-section">
-      <div class="ins-section-title">Recommandations</div>
+      <div class="ins-section-title">À faire cette semaine</div>
       <div class="ins-reco-list">${cards}</div>
     </div>
   `;
@@ -934,21 +853,6 @@ function wireAll(root, me, data) {
     };
     card.addEventListener("click", handler);
     card.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        handler();
-      }
-    });
-  });
-
-  // Diff rows → filtre élèves bloqués sur cette comp
-  root.querySelectorAll(".ins-diff-row[data-comp-id]").forEach((row) => {
-    const handler = () => {
-      track("insights.diff.click", { comp_id: row.dataset.compId });
-      navigate(`#/eleves?bloque_sur=${encodeURIComponent(row.dataset.compId)}`);
-    };
-    row.addEventListener("click", handler);
-    row.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         handler();
