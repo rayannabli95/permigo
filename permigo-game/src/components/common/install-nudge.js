@@ -16,6 +16,7 @@ import {
   guessPlatform,
   canPromptInstall,
   promptInstall,
+  installBlockedReason,
 } from "@/utils/pwa.js";
 import { track } from "@/services/analytics.js";
 import { a2hsStepsHTML, A2HS_STYLE } from "@/components/common/a2hs-steps.js";
@@ -137,6 +138,16 @@ export function maybeShowInstallNudge(me) {
 }
 
 function show(me) {
+  // Contexte où l'A2HS est IMPOSSIBLE (webview Insta/FB/TikTok…, ou iPhone hors
+  // Safari) → on ne montre pas des étapes qui ne marcheront pas : on guide vers
+  // le vrai navigateur. C'est LE tunnel qui sauve les ouvertures de liens
+  // partagés (Le Bon Coin, DM, réseaux).
+  const blocked = installBlockedReason();
+  if (blocked) {
+    showOpenInBrowser(me, blocked);
+    return;
+  }
+
   const platform = guessPlatform(); // 'ios' | 'android' (jamais 'other' ici)
   const tu = me?.role === "eleve";
   const native = platform === "android" && canPromptInstall();
@@ -228,4 +239,111 @@ function show(me) {
   });
 
   requestAnimationFrame(() => host.querySelector("#inn-close")?.focus());
+}
+
+// ─── Variante « ouvre dans le vrai navigateur » ───────────────────
+// Affichée quand l'A2HS est IMPOSSIBLE dans le contexte (webview d'une autre
+// app, ou iPhone hors Safari). On explique comment rejoindre le navigateur et
+// on copie le lien pour un collage en 1 geste. Sans ça, ces utilisateurs
+// (liens partagés via Le Bon Coin / DM / réseaux) sont perdus à 100 %.
+function showOpenInBrowser(me, reason) {
+  const tu = me?.role === "eleve";
+  track("a2hs.open_in_browser_shown", { reason, role: me?.role });
+
+  const title =
+    reason === "ios-browser"
+      ? tu
+        ? "Ouvre PermiGo dans Safari"
+        : "Ouvrez PermiGo dans Safari"
+      : tu
+        ? "Ouvre PermiGo dans ton navigateur"
+        : "Ouvrez PermiGo dans votre navigateur";
+  const why =
+    reason === "ios-browser"
+      ? "Sur iPhone, l'ajout à l'écran d'accueil ne marche que dans Safari."
+      : "Tu es dans le navigateur d'une autre app. Ouvre la page dans ton vrai navigateur pour installer PermiGo.";
+  const stepIco =
+    reason === "ios-browser"
+      ? `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>`
+      : `<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`;
+  const stepTxt =
+    reason === "ios-browser"
+      ? `Colle le lien dans <b>Safari</b>, puis ajoute-le à l'écran d'accueil.`
+      : `Touche le menu <b>⋯</b>, puis <b>« Ouvrir dans le navigateur »</b>.`;
+
+  const host = document.createElement("div");
+  host.innerHTML = `${STYLE}
+    <style>
+      .inn-oib-step { display:flex; align-items:center; gap:11px; font:600 14px/1.4 'Inter',sans-serif; color:var(--ink); background:var(--bg2); border:1px solid var(--bo2); border-radius:14px; padding:13px 14px; margin:2px 0 12px; }
+      .inn-oib-ico { flex-shrink:0; display:flex; color:var(--a-txt); }
+      .inn-oib-url { width:100%; box-sizing:border-box; font:600 12.5px/1.3 'IBM Plex Mono',monospace; color:var(--mu); background:var(--bg2); border:1px solid var(--bo); border-radius:10px; padding:10px 12px; margin-top:10px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    </style>
+    <div class="inn-bg" id="inn-bg"></div>
+    <div class="inn" role="dialog" aria-modal="true" aria-labelledby="inn-title">
+      <div class="inn-handle" aria-hidden="true"></div>
+      <div class="inn-hd">
+        <img class="inn-badge" src="${BADGE}" alt="" aria-hidden="true"/>
+        <div>
+          <div class="inn-title" id="inn-title">${title}</div>
+          <div class="inn-sub">${why}</div>
+        </div>
+        <button class="inn-close" id="inn-close" type="button" aria-label="Fermer">×</button>
+      </div>
+      <div class="inn-oib-step"><span class="inn-oib-ico">${stepIco}</span><span>${stepTxt}</span></div>
+      <button class="inn-install" id="inn-copy" type="button">Copier le lien</button>
+      <div class="inn-oib-url" id="inn-url"></div>
+      <div class="inn-row">
+        <button class="inn-later" id="inn-later" type="button">Plus tard</button>
+      </div>
+    </div>`;
+  document.body.appendChild(host);
+  notifyPopupOpen(); // le tuto guidé attend que cette sheet soit fermée
+
+  // URL en textContent (jamais en innerHTML) → zéro risque XSS.
+  host.querySelector("#inn-url").textContent = location.href;
+
+  const sheet = host.querySelector(".inn");
+  const bg = host.querySelector("#inn-bg");
+  requestAnimationFrame(() => {
+    sheet.classList.add("on");
+    bg.classList.add("on");
+  });
+
+  const close = (r) => {
+    track("a2hs.open_in_browser_closed", { reason, how: r });
+    notifyPopupSettled();
+    if (r !== "copied") snooze();
+    sheet.classList.remove("on");
+    bg.classList.remove("on");
+    document.removeEventListener("keydown", onKey);
+    setTimeout(() => host.remove(), 380);
+  };
+  const onKey = (e) => {
+    if (e.key === "Escape") close("esc");
+  };
+  document.addEventListener("keydown", onKey);
+
+  bg.addEventListener("click", () => close("backdrop"));
+  host.querySelector("#inn-close").addEventListener("click", () => close("x"));
+  host
+    .querySelector("#inn-later")
+    .addEventListener("click", () => close("later"));
+
+  const copyBtn = host.querySelector("#inn-copy");
+  copyBtn.addEventListener("click", async () => {
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(location.href);
+      ok = true;
+    } catch {
+      ok = false;
+    }
+    track("a2hs.open_in_browser_copy", { reason, ok });
+    copyBtn.textContent = ok
+      ? "Lien copié ✓"
+      : "Sélectionne le lien ci-dessous";
+    // On laisse la sheet ouverte : l'utilisateur va coller dans son navigateur.
+  });
+
+  requestAnimationFrame(() => host.querySelector("#inn-copy")?.focus());
 }
