@@ -13,6 +13,7 @@ import { lancerQuiz } from "@/services/quiz-engine.js";
 import { findSubComp, findCategory } from "@/data/remc.js";
 import { unlockChest } from "@/utils/game-state.js";
 import { playVictory } from "@/utils/sound.js";
+import { promptInstallAtValueMoment } from "@/components/common/install-nudge.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -349,6 +350,17 @@ async function handleComplete(
     toast("Presque ! Il te faut 70% pour valider. Réessaie.", "info");
   } else {
     toast("Quiz enregistré.", "success");
+  }
+
+  // Victoire élève (hors question du jour — qui a déjà son opt-in push — et hors
+  // compétence non débloquée) → meilleur moment pour proposer l'install écran
+  // d'accueil. Cap 1/24h + no-op si déjà installée (géré dans l'export).
+  if (
+    (validated || passed) &&
+    !isDaily &&
+    reason !== "no_competence_unlocked"
+  ) {
+    promptInstallAtValueMoment(me, "eleve_quiz_reussi");
   }
 
   renderResult(root, {
