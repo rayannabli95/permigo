@@ -13,6 +13,8 @@ import { applyTheme, getTheme } from "@/utils/theme.js";
 import { ACCENTS, getAccent, setAccent } from "@/utils/accent.js";
 import { isSoundEnabled, setSoundEnabled, playBack } from "@/utils/sound.js";
 import { optInPush, optOutPush, isPushEnabled } from "@/services/web-push.js";
+import { isStandalone, guessPlatform } from "@/utils/pwa.js";
+import { openInstallSheet } from "@/components/common/install-nudge.js";
 
 const STYLE = `<style>
 .st {
@@ -350,6 +352,22 @@ function render(root, me, prefs) {
     </button>
     <div class="st-page-title">Préférences</div>
   </div>
+${
+  isStandalone() || guessPlatform() === "other"
+    ? ""
+    : `
+  <!-- APPLICATION : install écran d'accueil (masqué si déjà installée / desktop) -->
+  <div class="st-section" style="margin-top:20px">
+    <div class="st-section-label">Application</div>
+    <div class="st-row" id="st-install-row" role="button" tabindex="0" aria-label="Ajouter PermiGo à l'écran d'accueil">
+      <div class="st-row-left">
+        <div class="st-row-title">Ajouter à l'écran d'accueil</div>
+        <div class="st-row-sub">Ouvre PermiGo d'un geste, comme une vraie app</div>
+      </div>
+      <div class="st-row-action">${icon("chevron-right", { size: 18, strokeWidth: 2.2, color: "var(--mu2)" })}</div>
+    </div>
+  </div>`
+}
 
   <!-- NOTIFICATIONS -->
   <div class="st-section" style="margin-top:20px">
@@ -553,6 +571,22 @@ function wire(root, me, prefs) {
     playBack();
     navigate("/");
   });
+
+  // Entrée permanente « Ajouter à l'écran d'accueil »
+  const installRow = root.querySelector("#st-install-row");
+  if (installRow) {
+    const openInstall = () => {
+      track("a2hs.from_settings", { role: me?.role });
+      openInstallSheet(me);
+    };
+    installRow.addEventListener("click", openInstall);
+    installRow.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openInstall();
+      }
+    });
+  }
 
   // Toggle changes — save debounced
   const savePrefs = _debounce(async () => {

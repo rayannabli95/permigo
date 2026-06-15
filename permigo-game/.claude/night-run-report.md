@@ -1,111 +1,78 @@
-# 🌅 Night Run Report — 2026-05-18
+# 🌅 Night Run Report — 2026-06-15
 
-## ⏱ Temps
-- Start : 03:14 CEST
-- Fin : 04:05 CEST
-- Durée réelle code : ~50 min
-- Phases complétées : 4/4
+## 🎯 Objectif imposé
+« Faire vraiment installer l'app à l'écran d'accueil — c'est la clé du métier. »
+→ Night run mono-objectif : **maximiser la conversion A2HS**.
 
----
+## ⏱ Résumé
+- Branche : `feat/a2hs-install-conversion` (depuis `main` @ 56dca16)
+- 6 commits, build OK à chaque étape, **PR ouverte, PAS mergée** (à toi de merger au réveil)
+- Recherche web faite (web.dev / MDN) pour valider les leviers
+- 0 changement DB, 0 schema, tout additif
 
-## ✅ Fait
+## ✅ Fait — 4 leviers de conversion
 
-### Bugs fixés (0 critique)
-Build était déjà propre. Aucun bug critique trouvé — le travail de refacto précédent (accueil, mes-eleves, validation, aujourdhui) était solide.
+### Lever 1 — Rescue des contextes non-installables  ⭐ le plus gros levier GTM
+`feat(a2hs): rescue les contextes non-installables` (aaedce2)
+- **Le problème invisible** : un lien ouvert depuis Instagram / Facebook / TikTok /
+  WhatsApp / un DM Le Bon Coin s'ouvre dans une **webview** où « Ajouter à l'écran
+  d'accueil » est **impossible**. Idem iPhone hors Safari (Chrome/Firefox iOS).
+  Ces gens voyaient des étapes qui ne marchent jamais → 100 % de perte.
+- **Fix** : `pwa.js` détecte (`isInAppBrowser`, `isIosNonSafari`, `installBlockedReason`),
+  et l'install-nudge affiche alors **« Ouvre PermiGo dans ton navigateur / Safari »**
+  + bouton **Copier le lien**. C'est LE tunnel qui sauve l'acquisition par liens partagés.
 
-### Polish appliqué (5 fichiers)
+### Lever 2 — Prompt au moment de valeur  (vs prompt froid au boot)
+`feat(a2hs): déclencheur install au moment de valeur` (76eba03)
+- `promptInstallAtValueMoment(me, reason)` : propose l'install après une **vraie
+  victoire** (cadence 1/24 h, respecte l'opt-out, bypasse le snooze de boot).
+- Câblé sur le **succès de validation de séance moniteur** (log-session).
+- `openInstallSheet(me)` exporté aussi (pour l'entrée Réglages, Lever 3).
 
-- **`polish(quiz): transition: all → spécifique + animation résultat améliorée`**
-  - `.btn-start` : `transition: all .2s` → `transition: transform .15s, opacity .15s, box-shadow .15s`
-  - `.btn-parcours` : `transition: all .2s` → `transition: transform .15s, opacity .15s`
-  - Animation `pop` (résultat quiz) : `scale(.9)` → `scale(.95)` (moins dramatique), timing `.4s` → `.35s`, easing custom `cubic-bezier(.23,1,.32,1)`
-  - Ajout `@media (prefers-reduced-motion)` sur `.qp-result-card`
+### Lever 3 — Entrée permanente dans Réglages
+`feat(a2hs): entrée permanente « Ajouter à l'écran d'accueil »` (64b049a)
+- Section **Application → « Ajouter à l'écran d'accueil »** (masquée si déjà
+  installée / sur desktop). Les motivés peuvent installer quand ils veulent.
 
-- **`polish(profil): transition: all → spécifique`**
-  - `.prf-btn-logout` : `transition: all .2s` → `transition: background .2s, transform .15s`
+### Lever 4 — Copy bénéfice / aversion à la perte
+`polish(a2hs): copy bénéfice/aversion à la perte` (d1c9eba)
+- Élève : « Ouvre l'app d'un geste, garde ta série 🔥 et reçois tes rappels. »
+- Moniteur : « Vos validations à confirmer en 1 tap — comme une vraie app, sans store. »
+- **Pas de faux chiffres / faux social proof** (cf. ton audit : on ne refait pas
+  l'erreur des faux témoignages).
 
-- **`polish(livret-remc): transition: all → spécifique`**
-  - `.lr-statut-btn` : `transition: all .15s ease` → `transition: border-color .15s ease, background .15s ease, color .15s ease, transform .15s ease`
+### Kaizen
+`fix(a2hs): évite faux positifs in-app (DuckDuckGo) + masque entrée desktop` (83b0eee)
 
-- **`polish(onboarding-modal): transition: all → spécifique`**
-  - `.ob-dot` : `transition: all .3s cubic-bezier(...)` → `transition: width .3s ..., background .3s ...`
+## 🧪 À tester au réveil (mobile réel, le timing ne se simule pas en CI)
+- [ ] Ouvre la preview depuis un **DM Instagram / WhatsApp** → tu dois voir
+      « Ouvre dans ton navigateur » + Copier le lien (pas les étapes A2HS).
+- [ ] iPhone **Chrome** (pas Safari) → même écran « Ouvre dans Safari ».
+- [ ] iPhone **Safari** normal → les étapes A2HS animées (inchangé).
+- [ ] **Réglages → Application → Ajouter à l'écran d'accueil** ouvre bien la sheet.
+- [ ] **Valide une séance** (moniteur) → ~1,4 s après le succès, la sheet install
+      apparaît (1×/24 h max). Reset `localStorage` `permigo-a2hs-*` pour rejouer.
+- [ ] Déjà installée (standalone) → aucune sheet, entrée Réglages masquée.
 
-- **`polish(aujourdhui): prefers-reduced-motion + mes-eleves modal`**
-  - Ajout `@media (prefers-reduced-motion: reduce) { .aj-widget { animation: none; } }` dans `aujourdhui.js`
-  - Ajout de même règle pour `.me-qm-bg, .me-qm-panel` dans `mes-eleves.js`
+## 🤔 Décisions prises seul (sans te réveiller)
+- **PR, pas merge** : je ne merge jamais en autonomie. Tu valides au réveil.
+- **Value-moment câblé côté moniteur uniquement** (tu as dit « focus enseignant ;
+  l'élève est royal » → je n'ai pas touché au flow élève la nuit). Voir follow-up.
+- **Pas de social proof chiffré** : risque de faux (ton audit). Copy bénéfice only.
+- **Snooze de boot inchangé (3 j)** : le value-moment (1/24 h) gère la relance.
+- **DuckDuckGo retiré** de la liste in-app (c'est un vrai navigateur, il sait installer).
 
----
+## ⏭ Follow-ups (faciles — pour quand tu veux)
+1. **Câbler le value-moment côté élève** (le plus gros volume retention) : 1 appel
+   `promptInstallAtValueMoment(me, 'quiz_reussi')` après une victoire quiz/récompense.
+   Volontairement laissé de côté cette nuit (ne pas toucher l'élève sans toi).
+2. Bouton natif d'install desktop (Chrome desktop sait via `beforeinstallprompt`).
+3. A/B le wording du moment de valeur.
 
-### Feature nouvelle — Widgets actionnables "Aujourd'hui"
-
-**2 nouveaux widgets Apple Health dans la page enseignant `aujourd'hui.js`**
-
-Layout passé de 2+1 (2 small + 1 wide) à 2×2 grid :
-```
-┌─────────────┬─────────────┐
-│  ✓ Validées │  👥 Élèves  │
-│    (today)  │   (suivis)  │
-├─────────────┼─────────────┤
-│ 🔄 Consoli- │  🕐 Inactifs │
-│  dation (X) │   7j+ (X)  │
-└─────────────┴─────────────┘
-```
-
-**Widget "Consolidation à relancer"**
-- Query : `validations WHERE validated_by = me AND consolidation_due_at < now() AND consolidation_done_at IS NULL`
-- Si count > 0 → bordure ambre + icône colorée
-- Cliquable → navigue vers `#/eleves`
-- Tracking : `widget.consolidation.clicked`
-
-**Widget "Inactifs 7j+"**
-- Calcule parmi mes élèves ceux dont `profiles.last_active_at < now - 7 days`
-- Si count > 0 → bordure ambre + icône violette
-- Cliquable → navigue vers `#/eleves`
-- Tracking : `widget.inactifs.clicked`
-
-**A11y :** `role="button"`, `tabindex="0"`, `aria-label` dynamique sur les 2 nouveaux widgets.
-
-**CSS nettoyé :** Suppression des classes orphelines `.aj-widget-wide`, `.aj-widget-trend`, `.aj-widget-trend-bar`, `.aj-widget-trend-fill` (remplacées par le 2×2 grid).
-
----
-
-## 🧪 À tester au réveil
-
-- [ ] **Connexion moniteur** → page "Aujourd'hui" : vérifier que les 4 widgets s'affichent (2+2 grid)
-- [ ] **Widget consolidation** : si `consolidation_due_at` est passé sans `consolidation_done_at` → doit afficher un chiffre > 0 avec couleur ambre
-- [ ] **Widget inactifs** : pour les élèves sans `last_active_at` récent → doit afficher le bon count
-- [ ] **Clic sur widgets consolidation/inactifs** → doit naviguer vers `#/eleves`
-- [ ] **Quiz résultat** : animation `pop` plus subtile (scale .95 au lieu de .90) — vérifier visuellement
-
----
-
-## 🤔 Décisions prises seul
-
-- J'ai choisi d'utiliser `icon('refresh')` pour "Consolidation" et `icon('clock')` pour "Inactifs" — `refresh-cw` et `moon` n'existent pas dans `icons.js`
-- J'ai gardé le `consolidation_due_at` query côté moniteur (validated_by = me) plutôt que de faire une query globale — respecte l'isolation des données moniteur
-- J'ai navigué vers `#/eleves` pour les actions directes (plus simple que filtrer) — un filtre actif pourrait être une V2 de cette feature
-- Phase 3 feature choisie : widgets actionables plutôt qu'onboarding (déjà codé) ou système de rappels (scope trop large)
-
----
-
-## ⏸ Non fait + raison
-
-- **Onboarding élève** : déjà codé (`showOnboarding` dans `accueil.js`) → skippé
-- **Kaizen profil.js complet** : `var(--fd)` dans logout button → laissé tel quel car `--fd` EST défini dans `base.css`, pas un vrai bug
-- **Tests E2E** : skip (npm install playwright = risque casse node_modules, pas de git pour rollback)
-- **Lighthouse** : nécessite serveur en prod, skip pour night run
-
----
-
-## 📂 Fichiers modifiés
-
-| Fichier | Type | Changement |
-|---|---|---|
-| `src/pages/eleve/quiz.js` | polish | transition: all → spécifique, pop animation, prefers-reduced-motion |
-| `src/pages/common/profil.js` | polish | transition: all → spécifique |
-| `src/pages/enseignant/livret-remc.js` | polish | transition: all → spécifique |
-| `src/pages/enseignant/mes-eleves.js` | polish | prefers-reduced-motion modal |
-| `src/pages/enseignant/aujourdhui.js` | feat+polish | 2 nouveaux widgets, layout 2×2, prefers-reduced-motion |
-| `src/components/onboarding-modal.js` | polish | transition: all → spécifique |
-
-Build final : ✅ 101 modules, 0 erreurs, 0 warnings
+## 🔗 Commits (6)
+- aaedce2 feat(a2hs): rescue les contextes non-installables vers le vrai navigateur
+- d1c9eba polish(a2hs): copy bénéfice/aversion à la perte
+- 76eba03 feat(a2hs): déclencheur install au moment de valeur + entrée à la demande
+- 64b049a feat(a2hs): entrée permanente « Ajouter à l'écran d'accueil » dans Réglages
+- 83b0eee fix(a2hs): évite faux positifs in-app + masque entrée desktop
+- (+ commit FLOWS/log/report de clôture)
