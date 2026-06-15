@@ -1,22 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
 // Edge Function : stripe-webhook
-// Reçoit les events Stripe, vérifie la signature, et met à jour la table
-// public.subscriptions (service role → bypass RLS). C'est la SEULE source qui
-// écrit l'état d'abonnement : le client ne peut jamais s'auto-débloquer.
+// Vérifie la signature Stripe et met à jour public.subscriptions (service role).
+// Seule source qui écrit l'état d'abonnement : le client ne peut pas s'auto-débloquer.
 //
-// Events gérés :
-//   checkout.session.completed              → 1er paiement OK
-//   customer.subscription.created/updated   → changement d'état / renouvellement
-//   customer.subscription.deleted           → résiliation
-//
-// Secrets requis :
-//   STRIPE_SECRET_KEY        sk_test_… / sk_live_…
-//   STRIPE_WEBHOOK_SECRET    whsec_… (donné par Stripe à la création du endpoint)
-//
-// Deploy : supabase functions deploy stripe-webhook --no-verify-jwt
-//   (Stripe appelle sans JWT Supabase → la sécurité vient de la signature.)
-// Endpoint à déclarer dans Stripe :
-//   https://<project>.supabase.co/functions/v1/stripe-webhook
+// Events : checkout.session.completed + customer.subscription.created/updated/deleted
+// Secrets : STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+// Deploy  : supabase functions deploy stripe-webhook --no-verify-jwt
+// Endpoint Stripe : https://<project>.supabase.co/functions/v1/stripe-webhook
 // ═══════════════════════════════════════════════════════════════
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@^17";
@@ -27,7 +17,8 @@ const SERVICE_KEY =
   "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
+// .trim() : robustesse si un \n / espace s'est glissé en collant les secrets.
+const stripe = new Stripe((Deno.env.get("STRIPE_SECRET_KEY") ?? "").trim(), {
   httpClient: Stripe.createFetchHttpClient(),
 });
 
@@ -37,7 +28,6 @@ async function upsertFromSubscription(admin: any, sub: any) {
   const customerId =
     typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
 
-  // Résout le user : metadata d'abord, sinon via le customer déjà connu.
   let resolvedUserId = userId;
   if (!resolvedUserId && customerId) {
     const { data } = await admin
@@ -53,11 +43,10 @@ async function upsertFromSubscription(admin: any, sub: any) {
   }
 
   const item = sub.items?.data?.[0];
-  // Depuis l'API Stripe 2025+, current_period_end a migré de la subscription
-  // vers la ligne (item). On lit les deux pour être robuste aux versions.
+  // API Stripe 2025+ : current_period_end a migré vers la ligne (item).
   const periodEnd = sub.current_period_end ?? item?.current_period_end ?? null;
   const row = {
-    user_id: resolvedUserId,
+    user_id: resolvedUserId, // = auth.uid() (FK → auth.users, cf. migration)
     stripe_customer_id: customerId ?? null,
     stripe_subscription_id: sub.id,
     status: sub.status,
@@ -70,11 +59,15 @@ async function upsertFromSubscription(admin: any, sub: any) {
   const { error } = await admin
     .from("subscriptions")
     .upsert(row, { onConflict: "user_id" });
-  if (error) console.error("[stripe-webhook] upsert error", error);
+  if (error) {
+    console.error("[stripe-webhook] upsert error", error);
+    // On throw → 500 → Stripe re-tente la livraison (auto-healing).
+    throw new Error(`upsert failed: ${error.message}`);
+  }
 }
 
 Deno.serve(async (req) => {
-  const secret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  const secret = (Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? "").trim();
   if (!secret) return new Response("webhook_secret_missing", { status: 500 });
 
   const sig = req.headers.get("stripe-signature") ?? "";
@@ -98,7 +91,6 @@ Deno.serve(async (req) => {
           const sub = await stripe.subscriptions.retrieve(
             session.subscription as string,
           );
-          // Garde le user_id du checkout si la sub n'a pas encore son metadata.
           if (!sub.metadata?.user_id && session.client_reference_id) {
             sub.metadata = {
               ...sub.metadata,
@@ -116,7 +108,7 @@ Deno.serve(async (req) => {
         break;
       }
       default:
-        break; // events non gérés : on accuse réception (200) sans rien faire
+        break; // events non gérés : 200 sans rien faire
     }
   } catch (e) {
     console.error("[stripe-webhook] handler error", (e as Error)?.message);
