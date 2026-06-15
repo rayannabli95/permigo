@@ -52,14 +52,18 @@ async function upsertFromSubscription(admin: any, sub: any) {
     return;
   }
 
+  const item = sub.items?.data?.[0];
+  // Depuis l'API Stripe 2025+, current_period_end a migré de la subscription
+  // vers la ligne (item). On lit les deux pour être robuste aux versions.
+  const periodEnd = sub.current_period_end ?? item?.current_period_end ?? null;
   const row = {
     user_id: resolvedUserId,
     stripe_customer_id: customerId ?? null,
     stripe_subscription_id: sub.id,
     status: sub.status,
-    price_id: sub.items?.data?.[0]?.price?.id ?? null,
-    current_period_end: sub.current_period_end
-      ? new Date(sub.current_period_end * 1000).toISOString()
+    price_id: item?.price?.id ?? null,
+    current_period_end: periodEnd
+      ? new Date(periodEnd * 1000).toISOString()
       : null,
     cancel_at_period_end: !!sub.cancel_at_period_end,
   };
