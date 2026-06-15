@@ -15,6 +15,11 @@ import { isSoundEnabled, setSoundEnabled, playBack } from "@/utils/sound.js";
 import { optInPush, optOutPush, isPushEnabled } from "@/services/web-push.js";
 import { isStandalone, guessPlatform } from "@/utils/pwa.js";
 import { openInstallSheet } from "@/components/common/install-nudge.js";
+import {
+  startCheckout,
+  getSubscription,
+  isActive,
+} from "@/services/billing.js";
 
 const STYLE = `<style>
 .st {
@@ -368,6 +373,19 @@ ${
     </div>
   </div>`
 }
+${
+  me.role === "enseignant"
+    ? `
+  <!-- ABONNEMENT (bêta moniteur indé) — statut chargé en async dans wire() -->
+  <div class="st-section" style="margin-top:20px">
+    <div class="st-section-label">Abonnement</div>
+    <div class="st-row" style="flex-direction:column;align-items:stretch;gap:12px">
+      <div id="st-sub-status" class="st-row-sub">Chargement…</div>
+      <button class="st-save-btn" id="st-subscribe" style="margin:0;display:none">S'abonner — 9,99 €/mois</button>
+    </div>
+  </div>`
+    : ""
+}
 
   <!-- NOTIFICATIONS -->
   <div class="st-section" style="margin-top:20px">
@@ -584,6 +602,52 @@ function wire(root, me, prefs) {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         openInstall();
+      }
+    });
+  }
+
+  // ── Abonnement (bêta moniteur indé) ──
+  const subBtn = root.querySelector("#st-subscribe");
+  const subStatus = root.querySelector("#st-sub-status");
+  if (subStatus) {
+    // Retour de Stripe Checkout (#/settings?checkout=success|cancel)
+    const checkout = (location.hash.split("?")[1] || "")
+      .split("&")
+      .find((p) => p.startsWith("checkout="))
+      ?.split("=")[1];
+    if (checkout === "success")
+      toast("Merci ! Ton abonnement est en cours d'activation.", "success");
+    else if (checkout === "cancel") toast("Paiement annulé.", "info");
+
+    getSubscription().then((sub) => {
+      if (isActive(sub)) {
+        const until = sub.current_period_end
+          ? new Date(sub.current_period_end).toLocaleDateString("fr-FR")
+          : null;
+        subStatus.textContent = sub.cancel_at_period_end
+          ? `Abonnement actif — se termine le ${until}`
+          : until
+            ? `Abonnement actif — prochain renouvellement le ${until}`
+            : "Abonnement actif";
+        if (subBtn) subBtn.style.display = "none";
+      } else {
+        subStatus.textContent =
+          "PermiGo Pro — livret REMC numérique, suivi élèves, sans pub.";
+        if (subBtn) subBtn.style.display = "";
+      }
+    });
+
+    subBtn?.addEventListener("click", async () => {
+      subBtn.disabled = true;
+      subBtn.textContent = "Redirection…";
+      track("billing.checkout_start", { role: me?.role });
+      try {
+        await startCheckout(); // redirige vers Stripe si OK
+      } catch (e) {
+        console.error("[settings] checkout", e);
+        toast("Paiement indisponible pour le moment.", "error");
+        subBtn.disabled = false;
+        subBtn.textContent = "S'abonner — 9,99 €/mois";
       }
     });
   }
