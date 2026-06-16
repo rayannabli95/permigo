@@ -1,11 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — « Ton centre d'examen »
-// Fiche par centre d'examen du permis B : difficulté, accès, pièges
-// du parcours, conseils, FAQ. Contenu dans src/data/centres-examen.js.
+// Élève — « Ton centre d'examen » — Variant A (CINÉMATIQUE / PREMIUM)
+// Réécriture visuelle drop-in : aucun autre fichier modifié.
 //
-// 💎 Futur module premium : flip CENTRES_PREMIUM_LOCKED à `true` le jour
-//    où PermiGo+ élève est en place → la fiche se grise et propose l'achat.
-//    Tant que c'est `false`, les fiches sont gratuites (pour donner envie).
+// Direction : hero teinté par la difficulté (vert→ambre→rouge),
+// jauge animée en cascade, reveals au scroll, FAQ accordéon fluide,
+// cartes pièges avec glow, sélecteur chips premium.
 // ═══════════════════════════════════════════════════════════════
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
@@ -16,260 +15,881 @@ import {
   getCentre,
   listCentres,
 } from "@/data/centres-examen.js";
+import { haptic } from "@/utils/haptic.js";
+import { setupReveals } from "@/utils/reveal-on-scroll.js";
 
 const CENTRES_PREMIUM_LOCKED = false;
 
+// ─── Couleur de difficulté (1-5) ─────────────────────────────
+// Vert clair (1) → ambre (3) → rouge (5)
+function diffColor(n) {
+  if (n <= 1) return { h: "145deg", s: "60%", l: "42%", name: "vert" };
+  if (n === 2) return { h: "160deg", s: "55%", l: "38%", name: "vert" };
+  if (n === 3) return { h: "38deg", s: "88%", l: "46%", name: "ambre" };
+  if (n === 4) return { h: "22deg", s: "90%", l: "48%", name: "orange" };
+  return { h: "0deg", s: "78%", l: "50%", name: "rouge" };
+}
+
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
-.ce {
-  padding: 18px 16px calc(100px + env(safe-area-inset-bottom));
+/* ─────────────────────────────────────────────────
+   CEA — Centre Examen Variant A
+   Tout préfixé .cea- pour zéro collision.
+───────────────────────────────────────────────── */
+.cea {
   max-width: 480px;
   margin: 0 auto;
+  padding: 0 0 calc(110px + env(safe-area-inset-bottom));
   background: var(--bg);
   color: var(--ink);
   font-family: 'Inter', sans-serif;
+  position: relative;
 }
-@keyframes ceUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
-.ce-card { animation: ceUp .35s cubic-bezier(.23,1,.32,1) both; }
-.ce-card:nth-child(2){animation-delay:.05s}
-.ce-card:nth-child(3){animation-delay:.10s}
-.ce-card:nth-child(4){animation-delay:.15s}
-.ce-card:nth-child(5){animation-delay:.20s}
-@media (prefers-reduced-motion:reduce){ .ce-card{animation:none;opacity:1} }
 
-/* ── Header ── */
-.ce-hd { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-top:4px; }
-.ce-hd-ico {
-  width:40px; height:40px; background:var(--a); border-radius:12px;
-  display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0;
+/* ── Reveal au scroll ── */
+.cea .reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .5s cubic-bezier(.23,1,.32,1), transform .5s cubic-bezier(.23,1,.32,1);
 }
-.ce-hd-tit { font-size:20px; font-weight:800; letter-spacing:-.02em; line-height:1.1; }
-.ce-hd-sub { font-size:13px; color:var(--mu2); margin-top:1px; }
-
-/* ── Sélecteur centre ── */
-.ce-chips { display:flex; gap:8px; overflow-x:auto; padding:2px 0 10px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
-.ce-chips::-webkit-scrollbar { display:none; }
-.ce-chip {
-  flex:0 0 auto; min-height:44px; padding:10px 16px; border-radius:999px;
-  border:1.5px solid var(--bo); background:var(--bg3); color:var(--ink);
-  font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap;
-  transition:transform .12s, border-color .12s, background .12s;
+.cea .reveal.revealed {
+  opacity: 1;
+  transform: none;
 }
-.ce-chip:active { transform:scale(.95); }
-.ce-chip.active { border-color:var(--a); background:var(--a); color:#fff; }
-.ce-chip.soon { opacity:.55; cursor:default; font-weight:600; }
-
-/* ── Cartes ── */
-.ce-block {
-  background:var(--bg3); border:1px solid var(--bo); border-radius:18px;
-  padding:18px; margin-bottom:14px;
+/* stagger automatique via nth-child */
+.cea .reveal:nth-child(2) { transition-delay: .06s; }
+.cea .reveal:nth-child(3) { transition-delay: .12s; }
+.cea .reveal:nth-child(4) { transition-delay: .18s; }
+.cea .reveal:nth-child(5) { transition-delay: .24s; }
+.cea .reveal:nth-child(6) { transition-delay: .30s; }
+@media (prefers-reduced-motion: reduce) {
+  .cea .reveal { opacity: 1; transform: none; transition: none; }
 }
-.ce-block-tit { font-size:16px; font-weight:800; letter-spacing:-.01em; margin:0 0 12px; display:flex; align-items:center; gap:8px; }
 
-/* ── Hero centre ── */
-.ce-hero { background:linear-gradient(135deg,var(--bg5),var(--bg3)); }
-.ce-hero-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
-.ce-hero-nom { font-size:24px; font-weight:900; letter-spacing:-.02em; line-height:1.05; }
-.ce-hero-dep { display:inline-flex; align-items:center; gap:5px; margin-top:6px; font-size:13px; font-weight:700; color:var(--mu2); }
-.ce-hero-dep b { color:var(--ink); }
-.ce-diff { text-align:right; flex-shrink:0; }
-.ce-diff-dots { display:flex; gap:4px; justify-content:flex-end; }
-.ce-dot { width:9px; height:9px; border-radius:50%; background:var(--bo); }
-.ce-dot.on { background:var(--am); }
-.ce-diff-lbl { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--mu3); margin-top:6px; }
-.ce-resume { font-size:14.5px; line-height:1.55; color:var(--ink5); margin:14px 0 0; }
-
-/* ── Accès / adresse ── */
-.ce-addr { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700; margin-bottom:12px; }
-.ce-addr svg { color:var(--a); flex-shrink:0; }
-.ce-acces-li { display:flex; gap:10px; align-items:flex-start; font-size:14px; line-height:1.45; color:var(--ink5); padding:7px 0; }
-.ce-acces-li svg { color:var(--mu3); flex-shrink:0; margin-top:1px; }
-.ce-maps {
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  width:100%; min-height:46px; margin-top:12px; border-radius:12px;
-  background:var(--a); color:#fff; font-size:15px; font-weight:800;
-  text-decoration:none; transition:transform .12s, filter .12s;
+/* ── Page header ── */
+.cea-hd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 16px 8px;
 }
-.ce-maps:active { transform:scale(.98); filter:brightness(.96); }
-
-/* ── Pièges ── */
-.ce-piege { display:flex; gap:12px; padding:12px 0; border-top:1px solid var(--bo); }
-.ce-piege:first-of-type { border-top:none; padding-top:0; }
-.ce-piege-ico {
-  width:38px; height:38px; border-radius:11px; flex-shrink:0;
-  background:var(--amp); color:var(--amk);
-  display:flex; align-items:center; justify-content:center;
+.cea-hd-ico {
+  width: 42px; height: 42px;
+  border-radius: 13px;
+  background: var(--a);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--a) 45%, transparent);
 }
-.ce-piege-tit { font-size:15px; font-weight:800; margin-bottom:3px; }
-.ce-piege-txt { font-size:13.5px; line-height:1.5; color:var(--ink5); }
+.cea-hd-tit {
+  font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.025em;
+  color: var(--ink);
+}
+.cea-hd-sub {
+  font: 500 12px/1.3 'Inter', sans-serif;
+  color: var(--mu2);
+  margin-top: 2px;
+}
+/* Badge « Fiche centre » premium */
+.cea-badge-premium {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font: 800 9px/1 'Inter', sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--a);
+  background: color-mix(in srgb, var(--a) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--a) 25%, transparent);
+  margin-top: 5px;
+}
+
+/* ── Sélecteur chips segmenté ── */
+.cea-chips-wrap {
+  padding: 6px 16px 0;
+  position: relative;
+}
+.cea-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+}
+.cea-chips::-webkit-scrollbar { display: none; }
+.cea-chip {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--bo);
+  background: var(--bg3);
+  color: var(--ink);
+  font: 700 13px/1 'Inter', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .14s cubic-bezier(.23,1,.32,1),
+              border-color .16s,
+              background .16s,
+              box-shadow .16s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cea-chip:active { transform: scale(.93); }
+.cea-chip.active {
+  border-color: var(--a);
+  background: var(--a);
+  color: #fff;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--a) 38%, transparent);
+}
+.cea-chip.soon {
+  opacity: .5;
+  cursor: default;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+/* ── Hero cinématique centre ── */
+.cea-hero {
+  margin: 6px 12px 0;
+  border-radius: 22px;
+  position: relative;
+  overflow: hidden;
+  padding: 22px 20px 20px;
+  /* La couleur vient d'une variable CSS injectée inline */
+  background: var(--cea-hero-bg, linear-gradient(140deg, #0a1a10 0%, #132d1c 100%));
+  box-shadow: 0 8px 32px -8px var(--cea-hero-glow, rgba(16,185,129,.35));
+}
+/* Shimmer / sheen premium — bande lumineuse qui défile */
+.cea-hero::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -80%;
+  width: 60%;
+  height: 220%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255,255,255,.06) 45%,
+    rgba(255,255,255,.12) 50%,
+    rgba(255,255,255,.06) 55%,
+    transparent 100%
+  );
+  pointer-events: none;
+  animation: ceaSheen 4s ease-in-out 1s infinite;
+}
+@keyframes ceaSheen {
+  0%   { left: -80%; opacity: 0; }
+  10%  { opacity: 1; }
+  60%  { left: 160%; opacity: 1; }
+  65%  { opacity: 0; }
+  100% { left: 160%; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .cea-hero::after { animation: none; } }
+
+/* Grain texture sur le hero */
+.cea-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .04;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.cea-hero-inner { position: relative; z-index: 1; }
+
+/* Badge département */
+.cea-hero-dept {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font: 700 11px/1 'Inter', sans-serif;
+  letter-spacing: .05em;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.85);
+  margin-bottom: 12px;
+  backdrop-filter: blur(4px);
+}
+
+/* Nom du centre — entrée animée */
+.cea-hero-nom {
+  font: 900 clamp(24px,7vw,32px)/1.05 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.03em;
+  color: #fff;
+  margin-bottom: 14px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .5s .15s cubic-bezier(.23,1,.32,1),
+              transform .5s .15s cubic-bezier(.23,1,.32,1);
+}
+.cea-hero.in .cea-hero-nom {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cea-hero-nom { opacity: 1; transform: none; transition: none; }
+}
+
+/* Difficulté — jauge segments */
+.cea-diff-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.cea-diff-label {
+  font: 800 10px/1 'Inter', sans-serif;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.55);
+  white-space: nowrap;
+}
+.cea-diff-gauge {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+}
+.cea-diff-seg {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.15);
+  overflow: hidden;
+}
+/* Rempli via JS : on anime un fill intérieur */
+.cea-diff-seg-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--cea-diff-color, rgba(255,255,255,.8));
+  transition: width .45s cubic-bezier(.34,1.56,.64,1);
+}
+.cea-diff-val {
+  font: 900 12px/1 'IBM Plex Mono', monospace;
+  color: rgba(255,255,255,.8);
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cea-diff-seg-fill { transition: none; }
+}
+
+/* Résumé */
+.cea-hero-resume {
+  font: 500 14px/1.6 'Inter', sans-serif;
+  color: rgba(255,255,255,.72);
+  margin: 0;
+}
+
+/* ── Section (carte blanche) ── */
+.cea-section {
+  margin: 10px 12px 0;
+  background: var(--bg3);
+  border: 1px solid var(--bo);
+  border-radius: 20px;
+  padding: 18px;
+  overflow: hidden;
+}
+.cea-section-tit {
+  font: 800 15px/1.2 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.cea-section-tit svg { color: var(--a); flex-shrink: 0; }
+
+/* ── Adresse / accès ── */
+.cea-addr-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 12px;
+  font: 700 14px/1.3 'Inter', sans-serif;
+  color: var(--ink);
+  border-bottom: 1px solid var(--bo);
+  margin-bottom: 12px;
+}
+.cea-addr-row svg { color: var(--a); flex-shrink: 0; }
+.cea-acces-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 0;
+  font: 500 13.5px/1.5 'Inter', sans-serif;
+  color: var(--mu);
+}
+.cea-acces-item svg { color: var(--mu3); flex-shrink: 0; margin-top: 2px; }
+
+/* Bouton carte premium */
+.cea-maps-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 14px;
+  border-radius: 14px;
+  background: var(--a);
+  color: #fff;
+  font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--a) 38%, transparent);
+  transition: transform .12s cubic-bezier(.23,1,.32,1),
+              filter .12s,
+              box-shadow .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cea-maps-btn:active {
+  transform: scale(.97);
+  filter: brightness(.95);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--a) 25%, transparent);
+}
+
+/* ── Pièges — cartes premium ── */
+.cea-pieges-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.cea-piege {
+  display: flex;
+  gap: 13px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--bo);
+  position: relative;
+  transition: background .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cea-piege:last-child { border-bottom: none; padding-bottom: 2px; }
+.cea-piege:first-child { padding-top: 2px; }
+/* Glow hover subtil sur mobile (press state) */
+.cea-piege:active { background: color-mix(in srgb, var(--amp) 30%, transparent); border-radius: 12px; }
+
+.cea-piege-ico {
+  width: 42px; height: 42px;
+  border-radius: 13px;
+  flex-shrink: 0;
+  background: var(--amp);
+  color: var(--amk);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--am) 25%, transparent);
+  transition: transform .14s cubic-bezier(.23,1,.32,1), box-shadow .14s;
+}
+.cea-piege:active .cea-piege-ico {
+  transform: scale(.9);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--am) 15%, transparent);
+}
+.cea-piege-body { flex: 1; min-width: 0; }
+.cea-piege-tit {
+  font: 800 14.5px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.cea-piege-txt {
+  font: 500 13px/1.55 'Inter', sans-serif;
+  color: var(--mu);
+}
 
 /* ── Conseils ── */
-.ce-tip { display:flex; gap:10px; align-items:flex-start; padding:8px 0; font-size:14px; line-height:1.5; color:var(--ink5); }
-.ce-tip svg { color:var(--gr); flex-shrink:0; margin-top:2px; }
-
-/* ── FAQ ── */
-.ce-faq { border-top:1px solid var(--bo); }
-.ce-faq[open] .ce-faq-q svg { transform:rotate(180deg); }
-.ce-faq-q {
-  list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between;
-  gap:10px; padding:13px 0; font-size:14.5px; font-weight:700; min-height:44px;
+.cea-tip {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 9px 0;
+  font: 500 13.5px/1.5 'Inter', sans-serif;
+  color: var(--mu);
+  border-bottom: 1px solid var(--bo);
 }
-.ce-faq-q::-webkit-details-marker { display:none; }
-.ce-faq-q svg { color:var(--mu3); flex-shrink:0; transition:transform .2s; }
-.ce-faq-a { font-size:13.5px; line-height:1.55; color:var(--ink5); padding:0 0 13px; }
+.cea-tip:last-child { border-bottom: none; padding-bottom: 2px; }
+.cea-tip:first-child { padding-top: 2px; }
+.cea-tip-ico {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--gr) 15%, transparent);
+  color: var(--gr);
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+}
 
-/* ── Disclaimer ── */
-.ce-note { font-size:12px; line-height:1.5; color:var(--mu3); text-align:center; margin-top:6px; padding:0 8px; }
+/* ── FAQ accordéon fluide ── */
+.cea-faq-item {
+  border-bottom: 1px solid var(--bo);
+  overflow: hidden;
+}
+.cea-faq-item:last-child { border-bottom: none; }
+.cea-faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  font: 700 14px/1.35 'Inter', sans-serif;
+  color: var(--ink);
+  cursor: pointer;
+  min-height: 48px;
+  -webkit-tap-highlight-color: transparent;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.cea-faq-chev {
+  flex-shrink: 0;
+  color: var(--mu3);
+  transition: transform .28s cubic-bezier(.23,1,.32,1);
+  display: flex;
+}
+.cea-faq-item.open .cea-faq-chev { transform: rotate(180deg); }
+.cea-faq-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .38s cubic-bezier(.23,1,.32,1);
+}
+.cea-faq-body-inner {
+  padding: 0 0 14px;
+  font: 500 13.5px/1.6 'Inter', sans-serif;
+  color: var(--mu);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cea-faq-chev { transition: none; }
+  .cea-faq-body { transition: none; }
+}
 
 /* ── Verrou premium ── */
-.ce-lock { text-align:center; padding:28px 18px; }
-.ce-lock-ico { width:56px; height:56px; border-radius:16px; background:var(--amp); color:var(--amk); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
-.ce-lock-tit { font-size:18px; font-weight:900; letter-spacing:-.01em; }
-.ce-lock-sub { font-size:14px; line-height:1.55; color:var(--ink5); margin:8px 0 16px; }
-.ce-lock-cta { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:0 22px; border-radius:12px; background:var(--a); color:#fff; font-size:15px; font-weight:800; border:none; cursor:pointer; }
-.ce-lock-cta:active { transform:scale(.98); }
+.cea-lock-wrap {
+  margin: 10px 12px 0;
+}
+.cea-lock {
+  text-align: center;
+  padding: 36px 24px;
+  background: var(--bg3);
+  border: 1px solid var(--bo);
+  border-radius: 22px;
+  position: relative;
+  overflow: hidden;
+}
+/* Halo derrière le cadenas */
+.cea-lock::before {
+  content: '';
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--a) 18%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+  animation: ceaLockHalo 3s ease-in-out infinite;
+}
+@keyframes ceaLockHalo {
+  0%,100% { transform: translate(-50%,-50%) scale(.85); opacity: .7; }
+  50%     { transform: translate(-50%,-50%) scale(1.15); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cea-lock::before { animation: none; }
+}
+.cea-lock-ico {
+  width: 64px; height: 64px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--a) 14%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--a) 28%, transparent);
+  color: var(--a);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  position: relative;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--a) 22%, transparent);
+}
+.cea-lock-badge {
+  position: absolute;
+  top: -6px; right: -6px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--am);
+  display: flex; align-items: center; justify-content: center;
+  font: 900 9px/1 'Inter', sans-serif;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(245,158,11,.5);
+  animation: ceaLockBadge 1.6s ease-in-out infinite;
+}
+@keyframes ceaLockBadge {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.2); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cea-lock-badge { animation: none; }
+}
+.cea-lock-tit {
+  font: 900 20px/1.2 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.cea-lock-sub {
+  font: 500 14px/1.6 'Inter', sans-serif;
+  color: var(--mu);
+  margin: 0 auto 20px;
+  max-width: 320px;
+}
+/* Chips "bénéfices" */
+.cea-lock-perks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+.cea-lock-perk {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font: 700 12px/1 'Inter', sans-serif;
+  background: var(--bg5, var(--bg2));
+  color: var(--ink);
+  border: 1px solid var(--bo);
+}
+.cea-lock-perk svg { color: var(--a); }
+.cea-lock-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 52px;
+  padding: 0 28px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--adk, #4f46e5), var(--a));
+  color: #fff;
+  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 22px color-mix(in srgb, var(--a) 42%, transparent);
+  transition: transform .12s cubic-bezier(.23,1,.32,1),
+              filter .12s,
+              box-shadow .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cea-lock-cta:active {
+  transform: scale(.97);
+  filter: brightness(.95);
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--a) 28%, transparent);
+}
+
+/* ── Note bas de page ── */
+.cea-note {
+  font: 500 11.5px/1.55 'Inter', sans-serif;
+  color: var(--mu3);
+  text-align: center;
+  padding: 14px 20px 0;
+}
+
+/* ── Skeleton ── */
+.cea-skel-block {
+  margin: 10px 12px 0;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(90deg, var(--bg2) 0%, var(--bo) 50%, var(--bg2) 100%);
+  background-size: 200% 100%;
+  animation: ceaSkim 1.4s ease-in-out infinite;
+}
+@keyframes ceaSkim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .cea-skel-block { animation: none; background: var(--bg2); }
+}
 </style>`;
 
-// ─── Skeleton ────────────────────────────────────────────────────
-function skeleton() {
-  return `${STYLE}<div class="ce">
-    <div class="ce-hd">
-      <div class="ce-hd-ico">${icon("map", { size: 22 })}</div>
-      <div><div class="ce-hd-tit">Ton centre d'examen</div></div>
-    </div>
-    <div class="ce-block ce-hero" style="height:160px"></div>
-    <div class="ce-block" style="height:120px"></div>
+// ─── Helpers couleur difficulté ──────────────────────────────
+function diffCss(c, alpha = 1) {
+  return `hsl(${c.h} ${c.s} ${c.l} / ${alpha})`;
+}
+
+function heroBg(c) {
+  const base = diffCss(c, 1);
+  const dark = `hsl(${c.h} ${c.s} ${parseFloat(c.l) - 18}%)`;
+  return `linear-gradient(145deg, ${dark} 0%, ${base} 100%)`;
+}
+
+// ─── Jauge de difficulté (HTML) ──────────────────────────────
+function diffGauge(n, label, colCss) {
+  const segs = Array.from(
+    { length: 5 },
+    (_, i) =>
+      `<div class="cea-diff-seg">
+       <div class="cea-diff-seg-fill" data-filled="${i < n ? "1" : "0"}"></div>
+     </div>`,
+  ).join("");
+  return `
+  <div class="cea-diff-wrap">
+    <span class="cea-diff-label">Difficulté</span>
+    <div class="cea-diff-gauge" style="--cea-diff-color:${colCss}">${segs}</div>
+    <span class="cea-diff-val">${n}/5</span>
   </div>`;
 }
 
-// ─── Render ──────────────────────────────────────────────────────
-function diffDots(n) {
-  let s = "";
-  for (let i = 1; i <= 5; i++)
-    s += `<span class="ce-dot${i <= n ? " on" : ""}"></span>`;
-  return s;
-}
-
+// ─── Maps URL ────────────────────────────────────────────────
 function mapsUrl(c) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.mapsQuery)}`;
 }
 
+// ─── Chips sélecteur ─────────────────────────────────────────
 function renderChips(activeSlug) {
   const chips = listCentres()
     .map(
       (c) =>
-        `<button class="ce-chip${c.slug === activeSlug ? " active" : ""}" data-slug="${esc(c.slug)}">${esc(c.nom)} <span style="opacity:.7">${esc(c.deptNum)}</span></button>`,
+        `<button class="cea-chip${c.slug === activeSlug ? " active" : ""}" data-slug="${esc(c.slug)}" type="button">
+           ${esc(c.nom)} <span style="opacity:.65;font-weight:600">${esc(c.deptNum)}</span>
+         </button>`,
     )
     .join("");
-  // Indice "autres centres à venir" — la promesse premium se construit ici.
-  const soon = `<span class="ce-chip soon">Autres centres bientôt</span>`;
-  return `<div class="ce-chips">${chips}${soon}</div>`;
+  const soon = `<span class="cea-chip soon">${icon("plus", { size: 13 })} Autres bientôt</span>`;
+  return `<div class="cea-chips-wrap"><div class="cea-chips">${chips}${soon}</div></div>`;
 }
 
+// ─── Fiche pleine ────────────────────────────────────────────
 function renderFiche(c) {
+  const col = diffColor(c.difficulte);
+  const colCss = diffCss(col);
+  const glow = diffCss(col, 0.38);
+
+  const heroCss = `
+    --cea-hero-bg: ${heroBg(col)};
+    --cea-hero-glow: ${glow};
+  `.trim();
+
   return `
-  <div class="ce-block ce-hero ce-card">
-    <div class="ce-hero-top">
-      <div>
-        <div class="ce-hero-nom">${esc(c.nom)}</div>
-        <div class="ce-hero-dep">${icon("map", { size: 14 })} <b>${esc(c.departement)}</b> · ${esc(c.deptNum)}</div>
+  <!-- HERO -->
+  <div class="cea-hero reveal" style="${heroCss}">
+    <div class="cea-hero-inner">
+      <div class="cea-hero-dept">
+        ${icon("map-pin", { size: 12 })} ${esc(c.departement)} &nbsp;·&nbsp; ${esc(c.deptNum)}
       </div>
-      <div class="ce-diff">
-        <div class="ce-diff-dots">${diffDots(c.difficulte)}</div>
-        <div class="ce-diff-lbl">${esc(c.difficulteLabel)}</div>
-      </div>
+      <h1 class="cea-hero-nom">${esc(c.nom)}</h1>
+      ${diffGauge(c.difficulte, c.difficulteLabel, colCss)}
+      <p class="cea-hero-resume">${esc(c.resume)}</p>
     </div>
-    <p class="ce-resume">${esc(c.resume)}</p>
   </div>
 
-  <div class="ce-block ce-card">
-    <div class="ce-addr">${icon("map", { size: 18 })} ${esc(c.adresse)}</div>
+  <!-- ACCÈS -->
+  <div class="cea-section reveal">
+    <h2 class="cea-section-tit">${icon("map-pin", { size: 17 })} Accès &amp; adresse</h2>
+    <div class="cea-addr-row">${icon("map-pin", { size: 17 })} ${esc(c.adresse)}</div>
     ${c.acces
       .map(
         (a) =>
-          `<div class="ce-acces-li">${icon(a.ico, { size: 17 })} <span>${esc(a.texte)}</span></div>`,
+          `<div class="cea-acces-item">${icon(a.ico, { size: 16 })} <span>${esc(a.texte)}</span></div>`,
       )
       .join("")}
-    <a class="ce-maps" href="${esc(mapsUrl(c))}" target="_blank" rel="noopener" data-act="maps">
+    <a class="cea-maps-btn" href="${esc(mapsUrl(c))}" target="_blank" rel="noopener" data-act="maps">
       ${icon("compass", { size: 18 })} Voir sur la carte
     </a>
   </div>
 
-  <div class="ce-block ce-card">
-    <h2 class="ce-block-tit">${icon("alert-triangle", { size: 18 })} Les pièges à ${esc(c.nom)}</h2>
-    ${c.pieges
+  <!-- PIÈGES -->
+  <div class="cea-section reveal">
+    <h2 class="cea-section-tit">${icon("alert-triangle", { size: 17 })} Les pièges à ${esc(c.nom)}</h2>
+    <div class="cea-pieges-list">
+      ${c.pieges
+        .map(
+          (p) => `
+        <div class="cea-piege">
+          <div class="cea-piege-ico">${icon(p.ico, { size: 20 })}</div>
+          <div class="cea-piege-body">
+            <div class="cea-piege-tit">${esc(p.titre)}</div>
+            <div class="cea-piege-txt">${esc(p.texte)}</div>
+          </div>
+        </div>`,
+        )
+        .join("")}
+    </div>
+  </div>
+
+  <!-- CONSEILS -->
+  <div class="cea-section reveal">
+    <h2 class="cea-section-tit">${icon("target", { size: 17 })} Nos conseils</h2>
+    ${c.conseils
       .map(
-        (p) => `<div class="ce-piege">
-          <div class="ce-piege-ico">${icon(p.ico, { size: 19 })}</div>
-          <div><div class="ce-piege-tit">${esc(p.titre)}</div><div class="ce-piege-txt">${esc(p.texte)}</div></div>
+        (t) => `<div class="cea-tip">
+          <span class="cea-tip-ico">${icon("check", { size: 13 })}</span>
+          <span>${esc(t)}</span>
         </div>`,
       )
       .join("")}
   </div>
 
-  <div class="ce-block ce-card">
-    <h2 class="ce-block-tit">${icon("target", { size: 18 })} Nos conseils</h2>
-    ${c.conseils
-      .map(
-        (t) =>
-          `<div class="ce-tip">${icon("check-circle", { size: 17 })} <span>${esc(t)}</span></div>`,
-      )
-      .join("")}
-  </div>
-
-  <div class="ce-block ce-card">
-    <h2 class="ce-block-tit">${icon("message-circle", { size: 18 })} Questions fréquentes</h2>
+  <!-- FAQ -->
+  <div class="cea-section reveal">
+    <h2 class="cea-section-tit">${icon("message-circle", { size: 17 })} Questions fréquentes</h2>
     ${c.faq
       .map(
-        (f) => `<details class="ce-faq">
-          <summary class="ce-faq-q">${esc(f.q)} ${icon("chevron-down", { size: 18 })}</summary>
-          <div class="ce-faq-a">${esc(f.r)}</div>
-        </details>`,
+        (f, idx) => `
+      <div class="cea-faq-item" data-faq="${idx}">
+        <button class="cea-faq-q" type="button" aria-expanded="false">
+          <span>${esc(f.q)}</span>
+          <span class="cea-faq-chev">${icon("chevron-down", { size: 18 })}</span>
+        </button>
+        <div class="cea-faq-body" role="region">
+          <div class="cea-faq-body-inner">${esc(f.r)}</div>
+        </div>
+      </div>`,
       )
       .join("")}
   </div>
 
-  <p class="ce-note">Infos données à titre indicatif pour t'aider à préparer. Vérifie toujours l'adresse exacte sur ta convocation officielle.</p>`;
+  <p class="cea-note">Infos données à titre indicatif pour t'aider à préparer. Vérifie toujours l'adresse exacte sur ta convocation officielle.</p>`;
 }
 
+// ─── Écran verrou premium ────────────────────────────────────
 function renderLocked(c) {
   return `
-  <div class="ce-block ce-card ce-lock">
-    <div class="ce-lock-ico">${icon("lock", { size: 26 })}</div>
-    <div class="ce-lock-tit">Fiche centre — ${esc(c.nom)}</div>
-    <div class="ce-lock-sub">Difficulté, pièges du parcours, conseils et FAQ de ton centre d'examen. Débloque les fiches centre avec PermiGo+.</div>
-    <button class="ce-lock-cta" id="ce-unlock">${icon("sparkle", { size: 18 })} Débloquer</button>
+  <div class="cea-lock-wrap">
+    <div class="cea-lock reveal">
+      <div class="cea-lock-ico">
+        ${icon("lock", { size: 28 })}
+        <span class="cea-lock-badge">${icon("sparkle", { size: 10 })}</span>
+      </div>
+      <div class="cea-lock-tit">Fiche centre — ${esc(c.nom)}</div>
+      <p class="cea-lock-sub">Difficulté, pièges du parcours, conseils personnalisés et FAQ de ton centre d'examen. Débloque les fiches avec PermiGo+.</p>
+      <div class="cea-lock-perks">
+        <span class="cea-lock-perk">${icon("alert-triangle", { size: 13 })} Pièges du parcours</span>
+        <span class="cea-lock-perk">${icon("target", { size: 13 })} Conseils experts</span>
+        <span class="cea-lock-perk">${icon("message-circle", { size: 13 })} FAQ centre</span>
+      </div>
+      <button class="cea-lock-cta" id="cea-unlock" type="button">
+        ${icon("sparkle", { size: 18 })} Débloquer PermiGo+
+      </button>
+    </div>
   </div>`;
 }
 
+// ─── Template complet ────────────────────────────────────────
 function template(activeSlug) {
   const c = getCentre(activeSlug) || CENTRES_EXAMEN[0];
   const body = CENTRES_PREMIUM_LOCKED ? renderLocked(c) : renderFiche(c);
-  return `${STYLE}<div class="ce anim-slide-up">
-    <div class="ce-hd">
-      <div class="ce-hd-ico">${icon("map", { size: 22 })}</div>
-      <div>
-        <div class="ce-hd-tit">Ton centre d'examen</div>
-        <div class="ce-hd-sub">Connais le terrain avant le jour J</div>
-      </div>
+
+  return `${STYLE}
+<div class="cea anim-slide-up">
+  <!-- En-tête page -->
+  <div class="cea-hd">
+    <div class="cea-hd-ico">${icon("map", { size: 22 })}</div>
+    <div>
+      <div class="cea-hd-tit">Ton centre d'examen</div>
+      <div class="cea-hd-sub">Connais le terrain avant le jour J</div>
+      <div class="cea-badge-premium">${icon("gem", { size: 10 })} Fiche centre</div>
     </div>
-    ${renderChips(c.slug)}
-    <div id="ce-fiche">${body}</div>
-  </div>`;
+  </div>
+
+  <!-- Sélecteur de centre -->
+  ${renderChips(c.slug)}
+
+  <!-- Corps (fiche ou lock) -->
+  <div id="cea-fiche">${body}</div>
+</div>`;
 }
 
-// ─── Mount ───────────────────────────────────────────────────────
+// ─── Skeleton ────────────────────────────────────────────────
+function skeleton() {
+  return `${STYLE}
+<div class="cea">
+  <div class="cea-hd">
+    <div class="cea-hd-ico">${icon("map", { size: 22 })}</div>
+    <div><div class="cea-hd-tit">Ton centre d'examen</div></div>
+  </div>
+  <div class="cea-chips-wrap"><div class="cea-chips" style="gap:8px">
+    ${[120, 100, 90].map((w) => `<div class="cea-skel-block" style="width:${w}px;height:44px;border-radius:999px;flex-shrink:0;margin:0"></div>`).join("")}
+  </div></div>
+  <div class="cea-skel-block" style="height:220px"></div>
+  <div class="cea-skel-block" style="height:140px"></div>
+</div>`;
+}
+
+// ─── Animation : jauge + hero entry ─────────────────────────
+function animateHero(root) {
+  // Entrée du nom (délai microtask pour forcer la transition CSS)
+  requestAnimationFrame(() => {
+    root.querySelector(".cea-hero")?.classList.add("in");
+  });
+
+  // Remplissage des segments de difficulté en cascade
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  root.querySelectorAll(".cea-diff-seg-fill").forEach((seg, i) => {
+    const filled = seg.dataset.filled === "1";
+    if (reduced) {
+      seg.style.width = filled ? "100%" : "0%";
+    } else {
+      setTimeout(
+        () => {
+          seg.style.width = filled ? "100%" : "0%";
+        },
+        180 + i * 90,
+      );
+    }
+  });
+}
+
+// ─── FAQ accordéon fluide ────────────────────────────────────
+function wireAccordion(root, activeSlug) {
+  root.querySelectorAll(".cea-faq-item").forEach((item) => {
+    const btn = item.querySelector(".cea-faq-q");
+    const body = item.querySelector(".cea-faq-body");
+    if (!btn || !body) return;
+
+    btn.addEventListener("click", () => {
+      haptic("tap");
+      const isOpen = item.classList.contains("open");
+
+      // Ferme les autres
+      root.querySelectorAll(".cea-faq-item.open").forEach((other) => {
+        if (other !== item) {
+          other.classList.remove("open");
+          other.querySelector(".cea-faq-body").style.maxHeight = "0px";
+          other
+            .querySelector(".cea-faq-q")
+            ?.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      if (isOpen) {
+        item.classList.remove("open");
+        body.style.maxHeight = "0px";
+        btn.setAttribute("aria-expanded", "false");
+      } else {
+        item.classList.add("open");
+        body.style.maxHeight = body.scrollHeight + "px";
+        btn.setAttribute("aria-expanded", "true");
+        track("centre_examen_faq_open", { centre: activeSlug });
+      }
+    });
+  });
+}
+
+// ─── Mount ───────────────────────────────────────────────────
 export async function mount(root, param) {
   const me = getCurUser();
   if (!me) {
-    root.innerHTML = "<p>Non connecté</p>";
+    root.innerHTML = "<p style='padding:24px;color:var(--mu)'>Non connecté</p>";
     return;
   }
 
   root.innerHTML = skeleton();
 
-  // Slug depuis l'URL (#/centre-examen/cergy), sinon premier centre.
-  let active = getCentre(param) ? param : CENTRES_EXAMEN[0].slug;
+  const active = getCentre(param) ? param : CENTRES_EXAMEN[0].slug;
 
   track("page_view", {
     page: "centre-examen",
@@ -278,37 +898,43 @@ export async function mount(root, param) {
   });
 
   root.innerHTML = template(active);
+  animateHero(root);
+  setupReveals(root);
   wire(root, active);
 }
 
+// ─── Wire ────────────────────────────────────────────────────
 function wire(root, active) {
-  // Sélecteur de centre → re-render de la fiche sans reload.
-  root.querySelectorAll(".ce-chip[data-slug]").forEach((btn) => {
+  // Sélecteur de centre
+  root.querySelectorAll(".cea-chip[data-slug]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const slug = btn.dataset.slug;
       if (!slug || slug === active) return;
+      haptic("select");
       active = slug;
       track("centre_examen_switch", { centre: slug });
-      // Maj URL (deep-link) sans déclencher de navigation lourde.
       if (location.hash !== `#/centre-examen/${slug}`) {
         history.replaceState(null, "", `#/centre-examen/${slug}`);
       }
       root.innerHTML = template(active);
+      animateHero(root);
+      setupReveals(root);
       wire(root, active);
     });
   });
 
+  // Bouton carte
   root.querySelector('[data-act="maps"]')?.addEventListener("click", () => {
+    haptic("tap");
     track("centre_examen_maps", { centre: active });
   });
 
-  root.querySelectorAll(".ce-faq").forEach((d) => {
-    d.addEventListener("toggle", () => {
-      if (d.open) track("centre_examen_faq_open", { centre: active });
-    });
-  });
+  // Accordéon FAQ
+  wireAccordion(root, active);
 
-  root.querySelector("#ce-unlock")?.addEventListener("click", () => {
+  // Verrou premium
+  root.querySelector("#cea-unlock")?.addEventListener("click", () => {
+    haptic("select");
     track("centre_examen_unlock_click", { centre: active });
     location.hash = "#/boutique";
   });
