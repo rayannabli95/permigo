@@ -264,6 +264,29 @@ ${LEAGUE_CSS}
   width: 100%; font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
   color: var(--mu); margin-bottom: 2px;
 }
+
+/* ── Hall of Fame (lauréats permis) ── */
+.clt-hof-title {
+  display: flex; align-items: center; gap: 8px;
+  margin: 22px 16px 0; padding-bottom: 6px;
+  font: 700 11px/1 'Inter', sans-serif; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--mu2);
+}
+.clt-hof-title::after { content: ''; flex: 1; height: 1px; background: var(--bo); }
+.clt-hof-row {
+  display: flex; align-items: center; gap: 12px;
+  margin: 6px 16px 0; padding: 11px 14px;
+  background: color-mix(in srgb, var(--a) 6%, var(--su));
+  border: 1px solid color-mix(in srgb, var(--a) 22%, var(--bo));
+  border-radius: var(--r-md);
+}
+.clt-hof-row.me { border-color: #6366f1; }
+.clt-hof-badge {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;
+  font: 700 11px/1 'Inter', sans-serif; color: var(--a-txt);
+  background: color-mix(in srgb, var(--a) 14%, transparent);
+  padding: 4px 8px; border-radius: var(--r-full);
+}
 </style>`;
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -283,7 +306,7 @@ export async function mount(root) {
       .join("")}</div>
   </div>`;
 
-  const [ecoleRes, nationalRes, theorieRes] = await Promise.all([
+  const [ecoleRes, nationalRes, theorieRes, hofRes] = await Promise.all([
     sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: LIMIT }).then(
       (r) => r,
       () => ({ data: null, error: true }),
@@ -298,12 +321,18 @@ export async function mount(root) {
       (r) => r,
       () => ({ data: null, error: true }),
     ),
+    // Hall of Fame : lauréats (permis obtenu) de l'école — prénom réel.
+    sb.rpc("get_hall_of_fame", { p_scope: "ecole", p_limit: 100 }).then(
+      (r) => r,
+      () => ({ data: null, error: true }),
+    ),
   ]);
 
   const data = {
     ecole: ecoleRes.data || [],
     national: nationalRes.data || [],
     theorie: theorieRes.data || [],
+    hof: hofRes.data || [],
   };
 
   // Défaut = Mon école (la ligue hebdo est abandonnée → plus d'onglet vide)
@@ -353,7 +382,7 @@ function _render(scope, data) {
       <button class="clt-tab ${scope === "theorie" ? "on" : ""}" data-scope="theorie">${icon("zap", { size: 13, strokeWidth: 2 })} Théorie</button>
     </div>
   </div>
-  <div id="clt-body">${_renderBody(scope, rows)}</div>
+  <div id="clt-body">${_renderBody(scope, rows, data.hof)}</div>
   <a class="clt-pseudo" href="#/profil">
     <span class="clt-pseudo-ico" aria-hidden="true">${icon("user", { size: 16, strokeWidth: 2 })}</span>
     <div class="clt-pseudo-body">
@@ -365,10 +394,28 @@ function _render(scope, data) {
 </div>`;
 }
 
-function _renderBody(scope, rows) {
+function _renderBody(scope, rows, hof) {
   if (scope === "semaine") return _renderLeagueBody(rows);
   if (scope === "theorie") return _renderTheoryBody(rows);
-  return _renderAllTimeBody(rows);
+  return _renderAllTimeBody(rows, scope, hof);
+}
+
+// ── Hall of Fame (lauréats — prénom seul, ni rang ni pseudo ni « Toi ») ──
+function _hofSection(hof) {
+  if (!hof || hof.length === 0) return "";
+  const rows = hof
+    .map(
+      (g) => `
+    <div class="clt-hof-row${g.is_me ? " me" : ""}">
+      <div class="clt-av">${renderUserAvatar({ avatar_url: g.avatar, prenom: g.prenom }, 34)}</div>
+      <div class="clt-name">${esc(g.prenom)}</div>
+      <span class="clt-hof-badge">${icon("award", { size: 12, strokeWidth: 2.4 })} Permis obtenu</span>
+    </div>`,
+    )
+    .join("");
+  return `
+    <div class="clt-hof-title">${icon("award", { size: 13, strokeWidth: 2.2 })} Hall of Fame — permis obtenu</div>
+    <div class="clt-list">${rows}</div>`;
 }
 
 // ── Pill théorie ─────────────────────────────────────────────────
@@ -578,13 +625,15 @@ function _remcLeagueHero(mine) {
 }
 
 // ── Corps classement all-time ─────────────────────────────────────
-function _renderAllTimeBody(rows) {
+function _renderAllTimeBody(rows, scope, hof) {
+  // Hall of Fame : seulement sur l'onglet « Mon école » (données école-scoped).
+  const hofHtml = scope === "ecole" ? _hofSection(hof) : "";
   const active = rows.filter((r) => r.score > 0).length;
   if (active < 2) {
     return `<div class="clt-empty">
       <div class="clt-empty-ico">${icon("target", { size: 30 })}</div>
       <div class="clt-empty-txt">Le classement s'anime quand 2+ élèves ont validé des compétences.</div>
-    </div>`;
+    </div>${hofHtml}`;
   }
 
   const top = rows
@@ -597,7 +646,7 @@ function _renderAllTimeBody(rows) {
   if (meOutside) {
     html += `<div class="clt-sep">· · ·</div><div class="clt-list">${_rowHtml(mine)}</div>`;
   }
-  return html;
+  return html + hofHtml;
 }
 
 function _rowHtml(r) {
@@ -663,7 +712,7 @@ function _wire(root, data, setScope) {
 
       const body = root.querySelector("#clt-body");
       if (body) {
-        body.innerHTML = _renderBody(next, rows);
+        body.innerHTML = _renderBody(next, rows, data.hof);
         playPop();
       }
       track("classement.scope_changed", { scope: next });
