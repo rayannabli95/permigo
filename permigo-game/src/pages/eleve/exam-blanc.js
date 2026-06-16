@@ -9,7 +9,13 @@ import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
-import { PARCOURS, questionsForParcours } from "@/data/parcours-quiz.js";
+import { getMyChests } from "@/utils/game-state.js";
+import {
+  PARCOURS,
+  QUESTIONS,
+  questionsForParcours,
+} from "@/data/parcours-quiz.js";
+import { toast } from "@/components/common/toast.js";
 import {
   computeTheoryGain,
   renderTheoryGain,
@@ -25,6 +31,32 @@ import {
 } from "@/utils/sound.js";
 
 const PASS_THRESHOLD = 12; // / 15
+
+// ── Mode « Examen officiel » ──────────────────────────────────
+// 40 questions tirées au hasard dans TOUTE la banque, chrono par question,
+// verdict comme le vrai ETG : admis si 5 fautes maximum (≥ 35/40).
+const OFFICIEL_TOTAL = 40;
+const OFFICIEL_MAX_FAUTES = 5;
+const OFFICIEL_SECONDS = 20; // temps par question
+// Verrou premium : passe à `true` le jour où PermiGo+ élève (paiement) est en
+// place → la carte se grise et l'achat se déclenche. Tant que c'est `false`,
+// le mode est GRATUIT : il doit être goûté pour donner envie d'acheter
+// (cf. docs/AUDIT-EXAMEN-BLANC-2026-06-16.md).
+const EXAMEN_OFFICIEL_LOCKED = false;
+
+// Timer du mode officiel — module-level pour pouvoir le couper à la sortie.
+let _examTimer = null;
+function clearExamTimer() {
+  if (_examTimer) {
+    clearInterval(_examTimer);
+    _examTimer = null;
+  }
+}
+
+// Déblocage par progression : l'examen officiel s'ouvre une fois que l'élève a
+// validé sa compétence 1 — concrètement quand il a OUVERT le coffre `world_1`
+// (son premier coffre, qui annonce « Examen blanc débloqué »). Recalculé au mount.
+let _examenUnlocked = false;
 
 // Mélodie de fond de l'examen (module-level : start au parcours, stop en sortie)
 let _examStopMusic = null;
@@ -80,11 +112,23 @@ export async function mount(root) {
   const _restoreNav = () => {
     document.getElementById("bottom-nav")?.removeAttribute("hidden");
     stopExamMusic();
+    clearExamTimer();
     window.removeEventListener("hashchange", _restoreNav);
   };
   window.addEventListener("hashchange", _restoreNav);
 
   track("page_view", { page: "parcours_quiz", user_role: me.role });
+
+  // Déblocage de l'examen officiel = coffre de la compétence 1 (world_1) ouvert.
+  _examenUnlocked = false;
+  try {
+    const chests = await getMyChests();
+    _examenUnlocked = (chests || []).some(
+      (c) => c?.chest_type === "world_1" && c?.opened_at,
+    );
+  } catch (_) {
+    /* DB indispo → on reste prudemment verrouillé */
+  }
 
   root.innerHTML = renderStyles() + renderSelection();
   wireSelection(root);
@@ -107,14 +151,35 @@ function renderSelection() {
   `,
   ).join("");
 
+  const locked = EXAMEN_OFFICIEL_LOCKED || !_examenUnlocked;
+  const lockBadge = EXAMEN_OFFICIEL_LOCKED ? "🔒 PermiGo+" : "🔒 Compétence 1";
+  const lockSub = EXAMEN_OFFICIEL_LOCKED
+    ? "Débloque le vrai examen blanc avec PermiGo+"
+    : "Valide ta compétence 1 pour débloquer le vrai examen blanc";
+  const officiel = locked
+    ? `<button class="exo-hero is-locked" id="exb-officiel" aria-label="Examen officiel verrouillé">
+        <span class="exo-hero-lock">${lockBadge}</span>
+        <span class="exo-hero-kicker">Examen officiel</span>
+        <span class="exo-hero-title">40 questions · chrono · comme le vrai</span>
+        <span class="exo-hero-sub">${lockSub}</span>
+      </button>`
+    : `<button class="exo-hero" id="exb-officiel" aria-label="Démarrer l'examen officiel">
+        <span class="exo-hero-kicker">Examen officiel</span>
+        <span class="exo-hero-title">40 questions · chrono · comme le vrai</span>
+        <span class="exo-hero-sub">Admis si 5 fautes maximum. Tu es prêt ?</span>
+        <span class="exo-hero-cta">Commencer →</span>
+      </button>`;
+
   return `
 <div class="exb anim-slide-up" id="exb-screen">
   <div class="exb-sel-header">
     <button class="exb-quit-btn" id="exb-back" aria-label="Retour">←</button>
     ${renderTrophy(TROPHY_START, "exb-trophy--start")}
     <h1 class="exb-sel-title">Ton parcours d'examen</h1>
-    <p class="exb-sel-sub">5 parcours · 15 questions · estime tes chances au permis</p>
+    <p class="exb-sel-sub">L'examen comme le vrai, ou entraîne-toi par thème</p>
   </div>
+  ${officiel}
+  <p class="exb-sel-sub2">Ou entraîne-toi par thème · ${PARCOURS.length} parcours de 15 questions</p>
   <div class="exb-pcards" id="exb-pcards">
     ${cards}
   </div>
@@ -125,6 +190,24 @@ function wireSelection(root) {
   root.querySelector("#exb-back")?.addEventListener("click", () => {
     haptic("tap");
     navigate("/");
+  });
+
+  root.querySelector("#exb-officiel")?.addEventListener("click", () => {
+    haptic("select");
+    if (EXAMEN_OFFICIEL_LOCKED) {
+      // Le jour J : ouvrir ici la feuille d'achat PermiGo+ (Stripe élève).
+      toast("Bientôt : débloque l'examen officiel avec PermiGo+", "info", 3500);
+      return;
+    }
+    if (!_examenUnlocked) {
+      toast(
+        "Valide ta compétence 1 pour débloquer l'examen blanc 🔒",
+        "info",
+        3500,
+      );
+      return;
+    }
+    startExamenOfficiel(root);
   });
 
   root.querySelectorAll(".exb-pcard").forEach((btn) => {
@@ -501,6 +584,245 @@ function showResults(root, questions, answers, parcours_id) {
     wireSelection(root);
   });
 
+  root.querySelector("#exb-home")?.addEventListener("click", () => {
+    haptic("tap");
+    navigate("/");
+  });
+}
+
+// ─── Mode « Examen officiel » : 40 questions chrono ──────────
+function pickOfficielQuestions() {
+  const pool = QUESTIONS.slice();
+  // Fisher-Yates
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, Math.min(OFFICIEL_TOTAL, pool.length));
+}
+
+function startExamenOfficiel(root) {
+  const questions = pickOfficielQuestions();
+  const answers = new Array(questions.length).fill(null); // null = non répondu
+  let idx = 0;
+  const startedAt = Date.now();
+
+  track("examen_officiel.started", { total: questions.length });
+  stopExamMusic();
+  _examStopMusic = playQuizMusic();
+
+  function renderQ() {
+    clearExamTimer();
+    const q = questions[idx];
+    const num = idx + 1;
+    let remaining = OFFICIEL_SECONDS;
+
+    root.querySelector("#exb-screen").innerHTML = `
+      <div class="exb-quiz-header">
+        <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
+        <div class="exo-run-bar">
+          <span class="exo-chrono" id="exo-chrono"><span id="exo-time">${remaining}</span>s</span>
+          <div class="exo-prog"><div class="exo-prog-fill" style="width:${(num / questions.length) * 100}%"></div></div>
+          <span class="exb-progress-label">${num} / ${questions.length}</span>
+        </div>
+        <span class="exb-quiz-parcours-name">Examen officiel</span>
+      </div>
+      <div class="exb-qbody" id="exb-qbody">
+        <p class="exb-qnum">Question ${num}</p>
+        <p class="exb-qtext">${esc(q.enonce)}</p>
+        <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
+          ${q.options
+            .map(
+              (opt, i) => `
+            <button class="exb-choice" data-idx="${i}" aria-pressed="false">
+              <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
+              <span class="exb-choice-text">${esc(opt)}</span>
+            </button>`,
+            )
+            .join("")}
+        </div>
+        <div class="exb-feedback" id="exb-feedback" hidden></div>
+      </div>`;
+
+    root.querySelector("#exb-quit")?.addEventListener("click", () => {
+      if (confirm("Quitter l'examen ? Ta progression sera perdue.")) {
+        clearExamTimer();
+        haptic("tap");
+        track("examen_officiel.quit", { question: num });
+        root.innerHTML = renderStyles() + renderSelection();
+        wireSelection(root);
+      }
+    });
+
+    _examTimer = setInterval(() => {
+      remaining--;
+      const t = root.querySelector("#exo-time");
+      if (t) t.textContent = String(Math.max(remaining, 0));
+      if (remaining <= 5)
+        root.querySelector("#exo-chrono")?.classList.add("is-urgent");
+      if (remaining <= 0) {
+        clearExamTimer();
+        answer(null); // temps écoulé = faute
+      }
+    }, 1000);
+
+    root.querySelectorAll(".exb-choice").forEach((btn) => {
+      btn.addEventListener("click", () =>
+        answer(parseInt(btn.dataset.idx, 10)),
+      );
+    });
+
+    function answer(chosen) {
+      clearExamTimer();
+      if (answers[idx] !== null) return; // déjà répondu
+      answers[idx] = chosen === null ? -1 : chosen;
+      const isCorrect = chosen === q.correct;
+      if (isCorrect) {
+        haptic("success");
+        playCorrect();
+      } else {
+        haptic("warning");
+        playWrong();
+      }
+      root.querySelectorAll(".exb-choice").forEach((b) => {
+        const i = parseInt(b.dataset.idx, 10);
+        b.disabled = true;
+        if (i === q.correct) b.classList.add("exb-choice--correct");
+        if (i === chosen && !isCorrect) b.classList.add("exb-choice--wrong");
+      });
+      const fb = root.querySelector("#exb-feedback");
+      fb.hidden = false;
+      fb.innerHTML = `
+        <div class="exb-feedback-verdict ${isCorrect ? "exb-feedback-verdict--ok" : "exb-feedback-verdict--ko"}">
+          ${
+            isCorrect
+              ? "✓ Bonne réponse"
+              : (chosen === null ? "⏱ Temps écoulé — " : "") +
+                "La bonne réponse était " +
+                esc(String.fromCharCode(65 + q.correct))
+          }
+        </div>
+        <p class="exb-feedback-explication">${esc(q.explication)}</p>
+        <button class="exb-next-btn" id="exb-next">
+          ${idx + 1 < questions.length ? "Question suivante →" : "Voir le résultat →"}
+        </button>`;
+      root.querySelector("#exb-next")?.addEventListener("click", () => {
+        playPageturn();
+        if (idx + 1 < questions.length) {
+          idx++;
+          renderQ();
+        } else {
+          showOfficielResults(root, questions, answers, startedAt);
+        }
+      });
+    }
+  }
+
+  renderQ();
+}
+
+function showOfficielResults(root, questions, answers, startedAt) {
+  stopExamMusic();
+  clearExamTimer();
+  const total = questions.length;
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const fautes = total - score;
+  const pct = Math.round((score / total) * 100);
+  const passed = fautes <= OFFICIEL_MAX_FAUTES;
+  const durationSec = Math.round((Date.now() - startedAt) / 1000);
+
+  track("examen_officiel.completed", {
+    score,
+    total,
+    fautes,
+    passed,
+    duration: durationSec,
+  });
+
+  const me = getCurUser();
+  if (me?.id) {
+    sb.from("quiz_attempts")
+      .insert({
+        user_id: me.id,
+        competence_id: null,
+        type: "exam_officiel",
+        ref_id: "officiel",
+        score: pct,
+        passed,
+        duration_seconds: durationSec,
+        questions_ids: questions.map((q) => q.id),
+        answers_indices: answers.map((a) => a ?? -1),
+      })
+      .then(({ error }) => {
+        if (error) console.error("[exam-officiel] persist attempt", error);
+      });
+  }
+
+  if (passed) playVictory();
+  else playDefeat();
+
+  const wrongItems = questions
+    .map((q, i) => ({ q, chosen: answers[i] }))
+    .filter((x) => x.chosen !== x.q.correct);
+
+  const wrongHtml =
+    wrongItems.length === 0
+      ? `<p class="exb-perfect">Sans-faute. Impressionnant !</p>`
+      : `
+      <h2 class="exb-recap-title">À revoir (${wrongItems.length})</h2>
+      <div class="exb-recap-list">
+        ${wrongItems
+          .map(
+            ({ q, chosen }) => `
+          <div class="exb-recap-item">
+            <p class="exb-recap-enonce">${esc(q.enonce)}</p>
+            ${
+              chosen != null && chosen >= 0
+                ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>`
+                : `<p class="exb-recap-wrong">Pas de réponse (temps écoulé)</p>`
+            }
+            <p class="exb-recap-correct">Bonne réponse : <strong>${esc(q.options[q.correct])}</strong></p>
+            <p class="exb-recap-explication">${esc(q.explication)}</p>
+          </div>`,
+          )
+          .join("")}
+      </div>`;
+
+  root.querySelector("#exb-screen").innerHTML = `
+    <div class="exb-results">
+      <div class="exb-res-top ${passed ? "exb-res-top--pass" : "exb-res-top--fail"}">
+        <div class="exb-res-ico">${passed ? "✓" : "✗"}</div>
+        <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
+        <div class="exb-res-pct">${fautes} faute${fautes > 1 ? "s" : ""} · ${pct} %</div>
+        <div class="exb-res-verdict">${passed ? "Admis — tu es prêt !" : "Recalé — plus de 5 fautes"}</div>
+        <div class="exb-res-cepc">${
+          passed
+            ? "Au vrai examen, il faut 35/40. Tu y es — continue comme ça !"
+            : "Il faut au moins 35/40 (5 fautes max). Reviens t'entraîner !"
+        }</div>
+      </div>
+      <div class="exb-res-body">
+        <div class="exb-res-bar">
+          <div class="exb-res-bar-fill ${passed ? "exb-res-bar-fill--pass" : ""}" style="width:${pct}%"></div>
+        </div>
+        ${wrongHtml}
+      </div>
+      <div class="exb-res-actions">
+        <button class="exb-start-btn" id="exo-retry">Refaire un examen officiel</button>
+        <button class="exb-retry-btn" id="exb-other">Choisir un entraînement</button>
+        <button class="exb-quit-btn-text" id="exb-home">← Accueil</button>
+      </div>
+    </div>`;
+
+  root.querySelector("#exo-retry")?.addEventListener("click", () => {
+    haptic("tap");
+    startExamenOfficiel(root);
+  });
+  root.querySelector("#exb-other")?.addEventListener("click", () => {
+    haptic("tap");
+    root.innerHTML = renderStyles() + renderSelection();
+    wireSelection(root);
+  });
   root.querySelector("#exb-home")?.addEventListener("click", () => {
     haptic("tap");
     navigate("/");
@@ -966,6 +1288,105 @@ function renderStyles() {
   color: var(--mu2); margin-top: 7px;
 }
 @keyframes exbTrophyFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+/* ── Hero « Examen officiel » ── */
+.exb-sel-sub2 {
+  font: 700 11px/1 'Inter', sans-serif;
+  color: var(--mu2);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin: 22px 16px 10px;
+}
+.exo-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: calc(100% - 32px);
+  margin: 0 16px;
+  padding: 18px 18px 16px;
+  text-align: left;
+  border: 0;
+  border-radius: 20px;
+  cursor: pointer;
+  color: var(--a-ink);
+  background: linear-gradient(145deg, var(--a-lt) 0%, var(--a) 50%, var(--adk) 100%);
+  box-shadow: 0 14px 36px -12px color-mix(in srgb, var(--a) 65%, transparent),
+    0 1.5px 0 rgba(255,255,255,.28) inset;
+  transition: transform .12s, box-shadow .12s;
+  position: relative;
+  overflow: hidden;
+}
+.exo-hero::after {
+  content: '';
+  position: absolute; right: -30px; top: -30px;
+  width: 130px; height: 130px; border-radius: 50%;
+  background: rgba(255,255,255,.12);
+}
+.exo-hero:active { transform: scale(.99); }
+.exo-hero:hover { box-shadow: 0 18px 44px -12px color-mix(in srgb, var(--a) 80%, transparent); }
+.exo-hero-kicker {
+  font: 800 10.5px/1 'Inter', sans-serif;
+  letter-spacing: .12em; text-transform: uppercase;
+  opacity: .85;
+}
+.exo-hero-title {
+  font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.02em;
+}
+.exo-hero-sub {
+  font: 500 13px/1.45 'Inter', sans-serif;
+  opacity: .9;
+}
+.exo-hero-cta {
+  margin-top: 10px;
+  font: 800 13px/1 'Plus Jakarta Sans', sans-serif;
+  padding: 9px 16px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.18);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.25) inset;
+}
+/* Verrou premium (grisé) */
+.exo-hero.is-locked {
+  background: linear-gradient(145deg, var(--bo) 0%, var(--mu2) 120%);
+  color: var(--ink);
+  box-shadow: 0 8px 24px -14px rgba(0,0,0,.4);
+  filter: grayscale(.4);
+}
+.exo-hero.is-locked .exo-hero-kicker,
+.exo-hero.is-locked .exo-hero-sub { opacity: .75; }
+.exo-hero-lock {
+  position: absolute; top: 12px; right: 12px;
+  font: 800 11px/1 'Plus Jakarta Sans', sans-serif;
+  background: rgba(0,0,0,.18); color: #fff;
+  padding: 6px 10px; border-radius: 99px;
+}
+
+/* ── Barre chrono du mode officiel ── */
+.exo-run-bar { display: flex; align-items: center; gap: 10px; }
+.exo-chrono {
+  font: 800 13px/1 'IBM Plex Mono', monospace;
+  color: var(--ink);
+  background: var(--su);
+  border: 1.5px solid var(--bo);
+  border-radius: 10px;
+  padding: 6px 9px;
+  min-width: 44px; text-align: center;
+  transition: color .2s, border-color .2s, background .2s;
+}
+.exo-chrono.is-urgent {
+  color: #fff; background: var(--rd); border-color: var(--rd);
+  animation: exoPulse 1s ease-in-out infinite;
+}
+@keyframes exoPulse { 0%,100%{ transform: scale(1) } 50%{ transform: scale(1.08) } }
+.exo-prog {
+  flex: 1; height: 6px; background: var(--bo);
+  border-radius: 3px; overflow: hidden;
+}
+.exo-prog-fill {
+  height: 100%; background: var(--a); border-radius: 3px;
+  transition: width .3s cubic-bezier(.23,1,.32,1);
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
