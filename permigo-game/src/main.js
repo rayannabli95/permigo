@@ -75,6 +75,16 @@ async function boot() {
       return mount(app);
     }
 
+    // Définition du mot de passe (lien de récupération reçu par email) →
+    // priorité absolue, AVANT tout gating (consentement, onboarding). La
+    // session est déjà établie par detectSessionInUrl ; on monte l'écran
+    // focalisé sans chrome. Sinon un élève tout neuf tomberait sur l'onboarding.
+    if (location.hash.startsWith("#/nouveau-mdp")) {
+      const { mount } = await import("@/pages/auth/nouveau-mdp.js");
+      await mount(app);
+      return;
+    }
+
     // RGPD : élève mineur (<15 ans) en attente du consentement parental → bloqué
     if (
       me.role === "eleve" &&
