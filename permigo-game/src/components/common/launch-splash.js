@@ -10,6 +10,11 @@ import { icon } from "@/utils/icons.js";
 import { playLaunchSound } from "@/utils/sound.js";
 
 const SESSION_KEY = "permigo-launch-splash";
+// On ne joue QUE le « démarrage » (le vroom de launch.mp3), pas la partie
+// musicale qui suit (jugée gênante, élève comme enseignant). Le son est coupé
+// après START_SOUND_MS, indépendamment de la durée visuelle du splash.
+// Ajuste cette valeur si le démarrage est coupé trop tôt / trop tard.
+const START_SOUND_MS = 1400;
 const LETTERS = ["P", "E", "R", "M", "I", "G", "O"];
 const ACCROCHE = "Prêt à reprendre ta route ?";
 
@@ -166,8 +171,9 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
     launched = true;
     host.classList.add("go");
 
-    // Jingle — déclenché par le geste utilisateur → autoplay autorisé
-    const stopMusic = playLaunchSound(duration);
+    // Démarrage seulement (vroom) — déclenché par le geste user → autoplay OK.
+    // Coupé après START_SOUND_MS pour ne PAS jouer la musique qui suit.
+    const stopMusic = playLaunchSound(START_SOUND_MS);
 
     // Phrases qui défilent dans la pill « text-flip »
     let i = 0;
