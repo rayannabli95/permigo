@@ -49,6 +49,34 @@ export const PARCOURS = [
       "Les bases qui tombent à tous les examens : alcool, vitesse, équipement, secours, signalisation.",
     difficulte: 2,
   },
+  {
+    id: 7,
+    nom: "Nuit & météo difficile",
+    contexte:
+      "Conduite de nuit, pluie, brouillard, neige et verglas : voir et être vu, adapter sa vitesse.",
+    difficulte: 4,
+  },
+  {
+    id: 8,
+    nom: "Panneaux & signalisation",
+    contexte:
+      "Lire vite et juste : interdiction, danger, obligation, marquages au sol et feux.",
+    difficulte: 2,
+  },
+  {
+    id: 9,
+    nom: "Montagne & routes sinueuses",
+    contexte:
+      "Descentes, épingles, frein moteur, priorité en montagne et chaussées glissantes.",
+    difficulte: 4,
+  },
+  {
+    id: 10,
+    nom: "Partage de la route",
+    contexte:
+      "Vélos, deux-roues, piétons fragiles, bus, poids lourds et angles morts.",
+    difficulte: 3,
+  },
 ];
 
 export const QUESTIONS = [
@@ -1283,6 +1311,841 @@ export const QUESTIONS = [
     explication:
       "1,50 m hors agglomération (1 m en ville). Plus tu roules vite, plus il faut d'espace.",
     tags: ["cycliste"],
+  },
+
+  // ── Parcours 7 : Nuit & météo difficile ───────────────────────
+  {
+    id: "p7q1",
+    parcours_id: 7,
+    enonce: "Brouillard épais en plein jour. Quels feux tu allumes ?",
+    options: [
+      "Les pleins phares pour percer le brouillard",
+      "Feux de croisement (+ feux de brouillard avant)",
+      "Juste les feux de position",
+    ],
+    correct: 1,
+    explication:
+      "Croisement + éventuellement feux de brouillard avant. Surtout PAS les pleins phares : le brouillard renvoie la lumière et t'éblouit.",
+    tags: ["verification_interieure"],
+  },
+  {
+    id: "p7q2",
+    parcours_id: 7,
+    enonce: "Tu vois à moins de 50 m (brouillard épais). Ta vitesse max ?",
+    options: ["50 km/h partout", "70 km/h", "90 km/h"],
+    correct: 0,
+    explication:
+      "Visibilité inférieure à 50 m = 50 km/h maximum, même sur autoroute. La règle est la même partout.",
+    tags: ["vitesse"],
+  },
+  {
+    id: "p7q3",
+    parcours_id: 7,
+    enonce: "Quand utilises-tu les pleins phares (feux de route) ?",
+    options: [
+      "En ville bien éclairée",
+      "Hors agglo, route non éclairée et personne en face",
+      "Toujours, dès qu'il fait nuit",
+    ],
+    correct: 1,
+    explication:
+      "Pleins phares = route non éclairée et personne en face. Tu repasses en codes dès qu'un véhicule arrive ou que tu en suis un.",
+    tags: ["verification_interieure"],
+  },
+  {
+    id: "p7q4",
+    parcours_id: 7,
+    enonce: "La nuit, un véhicule en face t'éblouit. Tu fais quoi ?",
+    options: [
+      "Je fixe ses phares pour le suivre",
+      "Je regarde le bord droit de ma voie et je ralentis",
+      "Je mets mes pleins phares aussi",
+    ],
+    correct: 1,
+    explication:
+      "Jamais fixer les phares : tu prends le bord droit de ta voie comme repère et tu ralentis le temps de récupérer ta vue.",
+    tags: ["verification_interieure"],
+  },
+  {
+    id: "p7q5",
+    parcours_id: 7,
+    enonce: "Neige : sur quelles roues monter les chaînes ?",
+    options: [
+      "Les roues motrices (avant si traction avant)",
+      "N'importe lesquelles",
+      "Les roues arrière, toujours",
+    ],
+    correct: 0,
+    explication:
+      "Les chaînes se montent sur les roues motrices. Le panneau B26 (pneu + chaîne) les rend obligatoires.",
+    tags: ["verification_exterieure"],
+  },
+  {
+    id: "p7q6",
+    parcours_id: 7,
+    enonce: "Par grand froid, où le verglas apparaît-il en premier ?",
+    options: [
+      "Sur les ponts et les zones à l'ombre",
+      "En plein soleil",
+      "Uniquement dans les descentes",
+    ],
+    correct: 0,
+    explication:
+      "Ponts, viaducs et zones ombragées gèlent en premier (l'air circule dessous). Méfiance même si la route semble sèche.",
+    tags: ["vitesse"],
+  },
+  {
+    id: "p7q7",
+    parcours_id: 7,
+    enonce: "Comment éviter l'aquaplaning sous la pluie ?",
+    options: [
+      "Rouler vite pour « fendre » l'eau",
+      "Réduire sa vitesse et garder de bons pneus",
+      "Freiner par à-coups",
+    ],
+    correct: 1,
+    explication:
+      "Vitesse réduite + pneus avec assez de gomme. Au-delà d'une certaine vitesse, l'eau ne s'évacue plus et tu flottes.",
+    tags: ["vitesse", "verification_exterieure"],
+  },
+  {
+    id: "p7q8",
+    parcours_id: 7,
+    enonce:
+      "Forte rafale de vent latéral (sortie de tunnel, pont). Tu fais quoi ?",
+    options: [
+      "J'accélère pour passer vite",
+      "Je tiens le volant fermement et je ralentis",
+      "Je relâche un peu le volant",
+    ],
+    correct: 1,
+    explication:
+      "Volant tenu ferme, vitesse réduite. Les rafales surprennent surtout en sortie de tunnel et sur les ponts.",
+    tags: ["vitesse"],
+  },
+  {
+    id: "p7q9",
+    parcours_id: 7,
+    enonce: "Quel signe annonce un endormissement au volant ?",
+    options: [
+      "Bâillements répétés et paupières lourdes",
+      "Une petite faim",
+      "L'envie d'écouter de la musique",
+    ],
+    correct: 0,
+    explication:
+      "Bâillements, paupières lourdes, regard fixe = micro-sommeil imminent. Seul remède : s'arrêter et dormir 15-20 min.",
+    tags: ["verification_interieure"],
+  },
+  {
+    id: "p7q10",
+    parcours_id: 7,
+    enonce:
+      "Les feux de position (veilleuses) suffisent-ils pour rouler la nuit ?",
+    options: [
+      "Oui, en ville",
+      "Non, jamais pour circuler",
+      "Oui, hors agglomération",
+    ],
+    correct: 1,
+    explication:
+      "Les feux de position servent à être vu à l'arrêt, pas à éclairer la route. Pour rouler la nuit : feux de croisement au minimum.",
+    tags: ["verification_interieure"],
+  },
+  {
+    id: "p7q11",
+    parcours_id: 7,
+    enonce: "Sous la pluie, ta distance de sécurité ?",
+    options: [
+      "La même qu'au sec",
+      "Au moins doublée",
+      "Réduite, car on roule moins vite",
+    ],
+    correct: 1,
+    explication:
+      "Sol mouillé = freinage plus long. Tu doubles ta distance : la règle des 2 secondes passe à environ 4 secondes.",
+    tags: ["vitesse"],
+  },
+  {
+    id: "p7q12",
+    parcours_id: 7,
+    enonce: "Tu vas sortir d'un tunnel en plein jour. Quel piège ?",
+    options: [
+      "Aucun, je garde ma vitesse",
+      "L'éblouissement : j'ai ralenti avant et je laisse mes yeux s'adapter",
+      "Mettre des lunettes de soleil dans le tunnel",
+    ],
+    correct: 1,
+    explication:
+      "Le passage ombre → lumière éblouit : tu anticipes en ralentissant avant la sortie, le temps que tes yeux s'adaptent.",
+    tags: ["vitesse"],
+  },
+  {
+    id: "p7q13",
+    parcours_id: 7,
+    enonce: "Arrêt forcé dans un tunnel. Que fais-tu ?",
+    options: [
+      "Je reste dans la voiture, moteur allumé",
+      "Warnings, je me range, moteur coupé, je gagne une sortie de secours",
+      "Je fais demi-tour",
+    ],
+    correct: 1,
+    explication:
+      "En tunnel : warnings, se ranger à droite, couper le moteur, rejoindre une issue de secours à pied. Jamais de demi-tour.",
+    tags: ["premiers_secours"],
+  },
+  {
+    id: "p7q14",
+    parcours_id: 7,
+    enonce: "Sur route enneigée, comment freines-tu ?",
+    options: [
+      "Freinage brusque",
+      "J'anticipe, je freine en douceur, j'utilise le frein moteur",
+      "Je ne freine jamais",
+    ],
+    correct: 1,
+    explication:
+      "Tout en douceur : on anticipe et on utilise le frein moteur. Un coup de frein brusque bloque les roues et fait glisser.",
+    tags: ["vitesse"],
+  },
+  {
+    id: "p7q15",
+    parcours_id: 7,
+    enonce: "La nuit, à quelle vitesse rouler par rapport à ta visibilité ?",
+    options: [
+      "À la vitesse autorisée, quoi qu'il arrive",
+      "De façon à pouvoir m'arrêter dans la zone éclairée par mes phares",
+      "Au feeling",
+    ],
+    correct: 1,
+    explication:
+      "Règle d'or de nuit : ta vitesse doit te permettre de t'arrêter dans la distance éclairée. Sinon tu roules « plus vite que ta vue ».",
+    tags: ["vitesse"],
+  },
+
+  // ── Parcours 8 : Panneaux & signalisation ─────────────────────
+  {
+    id: "p8q1",
+    parcours_id: 8,
+    enonce: "Un panneau rond à bord rouge, ça veut dire ?",
+    options: ["Danger", "Interdiction", "Obligation"],
+    correct: 1,
+    explication:
+      "Rond à bord rouge = interdiction (sens interdit, vitesse max…). Le rond bleu = obligation, le triangle = danger.",
+    tags: ["signalisation"],
+  },
+  {
+    id: "p8q2",
+    parcours_id: 8,
+    enonce: "Un panneau rond entièrement bleu, ça veut dire ?",
+    options: ["Interdiction", "Obligation", "Simple indication"],
+    correct: 1,
+    explication:
+      "Rond bleu = obligation (sens obligatoire, piste cyclable obligatoire…).",
+    tags: ["signalisation"],
+  },
+  {
+    id: "p8q3",
+    parcours_id: 8,
+    enonce: "Un panneau triangulaire à bord rouge, ça annonce ?",
+    options: ["Un danger", "Une interdiction", "Une direction"],
+    correct: 0,
+    explication:
+      "Triangle à bord rouge = danger : il annonce, tu lèves le pied et tu restes vigilant.",
+    tags: ["signalisation"],
+  },
+  {
+    id: "p8q4",
+    parcours_id: 8,
+    enonce: "Au STOP, où t'arrêtes-tu exactement ?",
+    options: [
+      "Au niveau du panneau",
+      "À la ligne blanche transversale au sol",
+      "Au milieu du carrefour",
+    ],
+    correct: 1,
+    explication:
+      "Arrêt complet à la ligne au sol. Pas de ligne ? Tu t'arrêtes à l'aplomb du panneau, avant l'intersection.",
+    tags: ["signalisation", "priorite"],
+  },
+  {
+    id: "p8q5",
+    parcours_id: 8,
+    enonce:
+      "Des flèches obliques au sol pointent vers la droite. Ça signifie ?",
+    options: [
+      "Tu peux encore doubler",
+      "Rabats-toi : une ligne continue arrive",
+      "Voie réservée aux bus",
+    ],
+    correct: 1,
+    explication:
+      "Ces flèches de rabattement annoncent une ligne continue : termine ton dépassement et reviens à droite.",
+    tags: ["signalisation", "manoeuvre"],
+  },
+  {
+    id: "p8q6",
+    parcours_id: 8,
+    enonce: "Différence entre « Cédez le passage » et « STOP » ?",
+    options: [
+      "Aucune",
+      "Le cédez n'impose pas l'arrêt, le STOP si",
+      "Le STOP n'impose pas l'arrêt",
+    ],
+    correct: 1,
+    explication:
+      "STOP = arrêt total obligatoire. Cédez le passage = tu ralentis et tu cèdes, sans t'arrêter si c'est libre.",
+    tags: ["signalisation", "priorite"],
+  },
+  {
+    id: "p8q7",
+    parcours_id: 8,
+    enonce: "Un feu orange clignotant, ça veut dire ?",
+    options: [
+      "Arrêt obligatoire",
+      "Prudence : tu passes en respectant les priorités",
+      "Voie fermée",
+    ],
+    correct: 1,
+    explication:
+      "Orange clignotant = carrefour à prudence : tu franchis en cédant le passage selon les règles de priorité du lieu.",
+    tags: ["signalisation"],
+  },
+  {
+    id: "p8q8",
+    parcours_id: 8,
+    enonce: "Un feu rouge clignotant (passage à niveau), tu fais quoi ?",
+    options: [
+      "Je passe si je ne vois pas de train",
+      "Arrêt absolu, je ne franchis pas",
+      "Je ralentis seulement",
+    ],
+    correct: 1,
+    explication:
+      "Rouge clignotant = arrêt absolu, typiquement aux passages à niveau. On ne franchit jamais.",
+    tags: ["signalisation"],
+  },
+  {
+    id: "p8q9",
+    parcours_id: 8,
+    enonce: "Une ligne blanche continue, tu peux la franchir ?",
+    options: ["Non, jamais", "Oui, pour doubler", "Oui, pour se garer"],
+    correct: 0,
+    explication:
+      "Ligne continue = on ne la franchit ni ne la chevauche. La forcer est une faute lourde.",
+    tags: ["signalisation", "manoeuvre"],
+  },
+  {
+    id: "p8q10",
+    parcours_id: 8,
+    enonce: "Un panneau triangle avec deux enfants, ça annonce ?",
+    options: [
+      "Une aire de jeux",
+      "Un endroit fréquenté par des enfants (école)",
+      "Une interdiction aux enfants",
+    ],
+    correct: 1,
+    explication:
+      "Danger : passage fréquenté par des enfants (sortie d'école). Vitesse réduite et vigilance maximale.",
+    tags: ["signalisation", "pieton"],
+  },
+  {
+    id: "p8q11",
+    parcours_id: 8,
+    enonce: "Le panneau d'entrée d'agglomération (nom de la ville) impose ?",
+    options: [
+      "50 km/h sauf indication contraire",
+      "30 km/h",
+      "Aucune limitation",
+    ],
+    correct: 0,
+    explication:
+      "Entrer en agglomération = 50 km/h par défaut, jusqu'au panneau de sortie (le même, barré).",
+    tags: ["signalisation", "vitesse"],
+  },
+  {
+    id: "p8q12",
+    parcours_id: 8,
+    enonce: "Une zone hachurée (zébra) au sol, tu peux rouler dessus ?",
+    options: [
+      "Oui, si je suis pressé",
+      "Non, c'est une zone interdite à la circulation",
+      "Oui, pour doubler",
+    ],
+    correct: 1,
+    explication:
+      "Les zébras délimitent une zone interdite : on n'y roule pas et on ne s'y arrête pas.",
+    tags: ["signalisation", "manoeuvre"],
+  },
+  {
+    id: "p8q13",
+    parcours_id: 8,
+    enonce: "Un panneau rond gris barré d'une diagonale, ça veut dire ?",
+    options: [
+      "Début d'une interdiction",
+      "Fin de l'interdiction précédente",
+      "Stationnement autorisé",
+    ],
+    correct: 1,
+    explication:
+      "Rond gris barré = fin de la limitation ou interdiction qui précédait (ex : fin de la zone à 70).",
+    tags: ["signalisation"],
+  },
+  {
+    id: "p8q14",
+    parcours_id: 8,
+    enonce: "Un panneau carré bleu avec un grand « P », ça veut dire ?",
+    options: [
+      "Stationnement interdit",
+      "Stationnement autorisé",
+      "Parking payant obligatoire",
+    ],
+    correct: 1,
+    explication:
+      "Carré bleu « P » = stationnement autorisé. Les conditions (payant, durée) sont précisées par un panonceau en dessous.",
+    tags: ["signalisation"],
+  },
+  {
+    id: "p8q15",
+    parcours_id: 8,
+    enonce: "Une bande cyclable, c'est quoi exactement ?",
+    options: [
+      "Une voie séparée physiquement de la route",
+      "Une voie sur la chaussée, juste marquée au sol",
+      "Un chemin réservé aux piétons",
+    ],
+    correct: 1,
+    explication:
+      "La bande cyclable est sur la chaussée (une simple ligne). La piste, elle, est séparée. Les deux sont réservées aux vélos.",
+    tags: ["signalisation", "cycliste"],
+  },
+
+  // ── Parcours 9 : Montagne & routes sinueuses ──────────────────
+  {
+    id: "p9q1",
+    parcours_id: 9,
+    enonce: "Longue descente de montagne : comment freiner sans risque ?",
+    options: [
+      "Le pied sur le frein en continu",
+      "Frein moteur (rapport inférieur) + freinages courts",
+      "Au point mort pour économiser",
+    ],
+    correct: 1,
+    explication:
+      "Rapport inférieur pour le frein moteur, et freinages brefs. Le frein en continu surchauffe et finit par lâcher.",
+    tags: ["manoeuvre", "vitesse"],
+  },
+  {
+    id: "p9q2",
+    parcours_id: 9,
+    enonce: "Qu'est-ce qui est dangereux en descente ?",
+    options: [
+      "Rouler au point mort ou moteur coupé",
+      "Garder un rapport engagé",
+      "Anticiper les virages",
+    ],
+    correct: 0,
+    explication:
+      "Point mort ou moteur coupé = perte du frein moteur (et parfois de la direction assistée). Interdit et dangereux.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p9q3",
+    parcours_id: 9,
+    enonce:
+      "Croisement difficile sur une route de montagne étroite. Qui se range ?",
+    options: ["Celui qui descend", "Celui qui monte", "Le plus gros véhicule"],
+    correct: 0,
+    explication:
+      "Priorité à celui qui monte (plus dur de redémarrer en côte). Celui qui descend se range ou recule.",
+    tags: ["priorite"],
+  },
+  {
+    id: "p9q4",
+    parcours_id: 9,
+    enonce: "Virage sans visibilité : où te places-tu ?",
+    options: [
+      "Je coupe le virage pour aller plus vite",
+      "Je serre à droite, bien sur ma voie",
+      "Je roule au milieu",
+    ],
+    correct: 1,
+    explication:
+      "Tu restes serré à droite sur ta voie : un véhicule peut surgir en face. Couper un virage est une faute grave.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p9q5",
+    parcours_id: 9,
+    enonce: "Un panneau indique « 10 % » en descente. Ça veut dire ?",
+    options: [
+      "La distance restante",
+      "L'inclinaison de la pente",
+      "La vitesse conseillée",
+    ],
+    correct: 1,
+    explication:
+      "Le pourcentage indique l'inclinaison de la pente. Plus c'est élevé, plus tu anticipes le frein moteur.",
+    tags: ["signalisation"],
+  },
+  {
+    id: "p9q6",
+    parcours_id: 9,
+    enonce:
+      "Panneau « chaussée glissante » (voiture qui dérape). Tu fais quoi ?",
+    options: [
+      "J'accélère",
+      "Je ralentis et j'évite les gestes brusques",
+      "Je freine fort par sécurité",
+    ],
+    correct: 1,
+    explication:
+      "Danger de glissance : vitesse réduite, trajectoire souple, ni freinage ni braquage brusque.",
+    tags: ["vitesse"],
+  },
+  {
+    id: "p9q7",
+    parcours_id: 9,
+    enonce: "Derrière un poids lourd lent en montée, tu doubles quand ?",
+    options: [
+      "Dès que possible, même en courbe",
+      "Sur une ligne droite avec bonne visibilité",
+      "En le collant pour le presser",
+    ],
+    correct: 1,
+    explication:
+      "On ne double qu'avec visibilité et voie libre. En montagne, les courbes masquent les véhicules en face.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p9q8",
+    parcours_id: 9,
+    enonce: "Tu entres dans un tunnel de montagne en plein jour. Tu allumes ?",
+    options: [
+      "Les feux de croisement",
+      "Les pleins phares",
+      "Rien, il fait jour",
+    ],
+    correct: 0,
+    explication:
+      "Feux de croisement obligatoires en tunnel, même de jour : pour voir et être vu.",
+    tags: ["verification_interieure"],
+  },
+  {
+    id: "p9q9",
+    parcours_id: 9,
+    enonce: "Une odeur de freins brûlés apparaît en descente. Que fais-tu ?",
+    options: [
+      "Rien, c'est normal",
+      "Frein moteur davantage, et je m'arrête si besoin pour les laisser refroidir",
+      "J'accélère pour finir la descente",
+    ],
+    correct: 1,
+    explication:
+      "Odeur = freins en surchauffe : tu utilises plus le frein moteur, et si besoin tu t'arrêtes en sécurité pour les laisser refroidir.",
+    tags: ["verification_exterieure"],
+  },
+  {
+    id: "p9q10",
+    parcours_id: 9,
+    enonce:
+      "Panneau annonçant des passages d'animaux (cerf). Quand redoubler de vigilance ?",
+    options: [
+      "À l'aube et au crépuscule",
+      "En plein midi",
+      "Jamais, c'est rare",
+    ],
+    correct: 0,
+    explication:
+      "Les animaux traversent surtout à l'aube et au crépuscule. Tu ralentis et tu scrutes les bas-côtés.",
+    tags: ["vitesse"],
+  },
+  {
+    id: "p9q11",
+    parcours_id: 9,
+    enonce: "Un car manœuvre dans une épingle serrée. Tu fais quoi ?",
+    options: [
+      "Je force le passage",
+      "J'attends qu'il ait terminé sa manœuvre",
+      "Je klaxonne pour le presser",
+    ],
+    correct: 1,
+    explication:
+      "Dans une épingle, un car a besoin de toute la largeur : tu attends plutôt que de te coincer.",
+    tags: ["courtoisie", "manoeuvre"],
+  },
+  {
+    id: "p9q12",
+    parcours_id: 9,
+    enonce: "Où le verglas est-il le plus tenace en montagne ?",
+    options: [
+      "En plein soleil au sommet",
+      "Sur les ponts et les versants à l'ombre",
+      "Sur les lignes droites dégagées",
+    ],
+    correct: 1,
+    explication:
+      "Ombre et altitude = verglas tenace, surtout sur les ponts et versants nord. Méfiance même par beau temps.",
+    tags: ["vitesse"],
+  },
+  {
+    id: "p9q13",
+    parcours_id: 9,
+    enonce: "Démarrage en côte : comment éviter de reculer ?",
+    options: [
+      "Je coordonne frein, embrayage et accélérateur (ou j'utilise l'aide au démarrage)",
+      "Je lâche tout d'un coup",
+      "Je recule un peu volontairement",
+    ],
+    correct: 0,
+    explication:
+      "En côte, tu doses frein/embrayage/accélérateur (ou tu utilises l'aide au démarrage) pour ne pas reculer sur le véhicule de derrière.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p9q14",
+    parcours_id: 9,
+    enonce: "Un brouillard épais surgit en montagne. Tu fais quoi ?",
+    options: [
+      "Pleins phares et vitesse normale",
+      "Feux de croisement, je ralentis, j'augmente les distances",
+      "Je m'arrête sur la voie",
+    ],
+    correct: 1,
+    explication:
+      "Croisement (+ brouillard avant), vitesse réduite, distances augmentées. Jamais de pleins phares ni d'arrêt sur la chaussée.",
+    tags: ["vitesse", "verification_interieure"],
+  },
+  {
+    id: "p9q15",
+    parcours_id: 9,
+    enonce: "Hors agglo, un virage sans visibilité : peux-tu klaxonner ?",
+    options: [
+      "Non, c'est interdit partout",
+      "Oui, un bref coup pour signaler ta présence",
+      "Oui, en continu",
+    ],
+    correct: 1,
+    explication:
+      "Hors agglomération, un bref coup d'avertisseur est admis pour signaler ta présence dans un virage sans visibilité. En ville, il est réservé au danger immédiat.",
+    tags: ["courtoisie"],
+  },
+
+  // ── Parcours 10 : Partage de la route ─────────────────────────
+  {
+    id: "p10q1",
+    parcours_id: 10,
+    enonce: "Où se trouvent les angles morts dangereux d'un poids lourd ?",
+    options: [
+      "Seulement loin derrière",
+      "Devant tout près, à droite, et juste derrière",
+      "Uniquement sur sa gauche au large",
+    ],
+    correct: 1,
+    explication:
+      "Devant tout près, à droite et juste derrière : si tu ne vois pas ses rétros, lui ne te voit pas.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p10q2",
+    parcours_id: 10,
+    enonce:
+      "En ville, un bus met son clignotant pour quitter son arrêt. Tu fais quoi ?",
+    options: [
+      "Je passe vite avant lui",
+      "Je le laisse se réinsérer",
+      "Je klaxonne",
+    ],
+    correct: 1,
+    explication:
+      "En agglomération, tu dois laisser un bus repartir de son arrêt quand il signale. Lève le pied.",
+    tags: ["courtoisie", "priorite"],
+  },
+  {
+    id: "p10q3",
+    parcours_id: 10,
+    enonce: "À un feu, à quoi sert le sas vélo pour le cycliste ?",
+    options: [
+      "À rien de particulier",
+      "À se placer devant les voitures pour démarrer en sécurité",
+      "À griller le feu",
+    ],
+    correct: 1,
+    explication:
+      "Le sas (zone avant la ligne) laisse les cyclistes se positionner devant, visibles, à l'abri des angles morts au démarrage.",
+    tags: ["cycliste"],
+  },
+  {
+    id: "p10q4",
+    parcours_id: 10,
+    enonce: "En ville, où circule une trottinette électrique ?",
+    options: [
+      "Sur le trottoir",
+      "Sur les pistes cyclables ou la chaussée, pas le trottoir",
+      "N'importe où",
+    ],
+    correct: 1,
+    explication:
+      "Trottinettes : pistes cyclables ou chaussée (ville ≤ 50 km/h), jamais le trottoir. Tu leur laisses de l'espace comme à un vélo.",
+    tags: ["cycliste"],
+  },
+  {
+    id: "p10q5",
+    parcours_id: 10,
+    enonce: "Tu dépasses un scooter (deux-roues motorisé). Quelle marge ?",
+    options: [
+      "Comme une voiture, je peux serrer",
+      "1 m en ville, 1,5 m hors agglo, comme un vélo",
+      "Aucune marge nécessaire",
+    ],
+    correct: 1,
+    explication:
+      "Mêmes marges qu'un vélo : 1 m en ville, 1,5 m hors agglo. Un deux-roues est déstabilisé par les remous d'air.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p10q6",
+    parcours_id: 10,
+    enonce:
+      "Des motos remontent la file à l'arrêt. Avant de changer de voie, tu ?",
+    options: [
+      "Je change de file pour les bloquer",
+      "Je vérifie mes rétros et angles morts, je reste prévisible",
+      "J'ouvre ma portière",
+    ],
+    correct: 1,
+    explication:
+      "Tu restes prévisible et tu contrôles rétros/angles morts avant tout mouvement. Une portière ouverte sans regarder peut tuer un motard.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p10q7",
+    parcours_id: 10,
+    enonce: "Un piéton avec une canne blanche veut traverser. Tu fais quoi ?",
+    options: [
+      "Je klaxonne pour le prévenir",
+      "Je m'arrête et je le laisse traverser",
+      "Je passe vite",
+    ],
+    correct: 1,
+    explication:
+      "Canne blanche = personne malvoyante, priorité absolue. Tu t'arrêtes sans klaxonner (le bruit la désoriente).",
+    tags: ["pieton"],
+  },
+  {
+    id: "p10q8",
+    parcours_id: 10,
+    enonce: "Un convoi exceptionnel avec voiture pilote arrive. Tu fais quoi ?",
+    options: [
+      "Je double dès que possible",
+      "Je suis les consignes de la voiture pilote (ralentir, me ranger)",
+      "Je l'ignore",
+    ],
+    correct: 1,
+    explication:
+      "La voiture pilote fait autorité : tu respectes ses signaux. Doubler un convoi exceptionnel est très encadré.",
+    tags: ["courtoisie", "priorite"],
+  },
+  {
+    id: "p10q9",
+    parcours_id: 10,
+    enonce:
+      "Une ambulance arrive derrière toi, sirène et gyrophare allumés. Tu fais quoi ?",
+    options: [
+      "Je continue normalement",
+      "Je me range et je lui cède le passage en sécurité",
+      "Je franchis le feu rouge devant pour dégager",
+    ],
+    correct: 1,
+    explication:
+      "Véhicule prioritaire : tu te ranges et tu t'arrêtes si besoin, sans manœuvre dangereuse ni franchissement de feu rouge à l'aveugle.",
+    tags: ["priorite"],
+  },
+  {
+    id: "p10q10",
+    parcours_id: 10,
+    enonce:
+      "Tu ouvres ta portière côté rue après t'être garé. Le bon réflexe ?",
+    options: [
+      "J'ouvre vite",
+      "Je regarde derrière (vélos, voitures) avant d'ouvrir",
+      "J'ouvre en grand d'un coup",
+    ],
+    correct: 1,
+    explication:
+      "Réflexe « main croisée » : ouvrir avec la main opposée t'oblige à regarder derrière. Une portière ouverte sur un cycliste = accident grave.",
+    tags: ["manoeuvre", "cycliste"],
+  },
+  {
+    id: "p10q11",
+    parcours_id: 10,
+    enonce: "Un engin agricole lent te précède hors agglo. Tu fais quoi ?",
+    options: [
+      "Je le colle en klaxonnant",
+      "Je garde mes distances et je double avec une vraie visibilité",
+      "Je double en courbe",
+    ],
+    correct: 1,
+    explication:
+      "Engin lent = patience : distance de sécurité, puis dépassement uniquement avec une visibilité dégagée.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p10q12",
+    parcours_id: 10,
+    enonce: "Un enfant de moins de 8 ans roule à vélo sur le trottoir. C'est ?",
+    options: [
+      "Interdit, jamais autorisé",
+      "Autorisé, à l'allure du pas",
+      "Autorisé à pleine vitesse",
+    ],
+    correct: 1,
+    explication:
+      "Un enfant de moins de 8 ans peut circuler à vélo sur le trottoir, à l'allure du pas. Redouble de prudence à proximité.",
+    tags: ["cycliste", "pieton"],
+  },
+  {
+    id: "p10q13",
+    parcours_id: 10,
+    enonce: "Tu croises des chevaux montés sur la route. Tu fais quoi ?",
+    options: [
+      "Je klaxonne et je passe vite",
+      "Je ralentis fortement et je passe au large, sans bruit",
+      "Je fais comme avec une voiture",
+    ],
+    correct: 1,
+    explication:
+      "Animal imprévisible : tu ralentis beaucoup, tu passes très au large, sans klaxonner ni accélérer (le bruit l'effraie).",
+    tags: ["courtoisie"],
+  },
+  {
+    id: "p10q14",
+    parcours_id: 10,
+    enonce:
+      "Tu approches d'un transport d'enfants à l'arrêt (panneau + feux). Tu fais quoi ?",
+    options: [
+      "Je passe normalement",
+      "Je ralentis et je me tiens prêt à m'arrêter",
+      "J'accélère pour passer avant eux",
+    ],
+    correct: 1,
+    explication:
+      "Près d'un bus d'enfants à l'arrêt, tu ralentis, prêt à stopper : un enfant peut surgir devant ou derrière.",
+    tags: ["pieton"],
+  },
+  {
+    id: "p10q15",
+    parcours_id: 10,
+    enonce: "Une personne âgée traverse lentement devant toi. Tu fais quoi ?",
+    options: [
+      "Je klaxonne pour la presser",
+      "Je patiente jusqu'à ce qu'elle ait fini",
+      "Je passe vite derrière elle",
+    ],
+    correct: 1,
+    explication:
+      "Tu patientes calmement qu'elle ait fini de traverser. Klaxonner ou forcer met en danger un piéton vulnérable.",
+    tags: ["pieton"],
   },
 ];
 
