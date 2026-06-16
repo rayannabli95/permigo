@@ -11,6 +11,7 @@ import { track } from "@/services/analytics.js";
 import { playPop, playClick } from "@/utils/sound.js";
 import { haptic } from "@/utils/haptic.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
+import { fmtName } from "@/utils/fmt-name.js";
 import {
   LEAGUES,
   getLeague,
@@ -408,7 +409,7 @@ function _hofSection(hof) {
       (g) => `
     <div class="clt-hof-row${g.is_me ? " me" : ""}">
       <div class="clt-av">${renderUserAvatar({ avatar_url: g.avatar, prenom: g.prenom }, 34)}</div>
-      <div class="clt-name">${esc(g.prenom)}</div>
+      <div class="clt-name">${esc(fmtName(g.prenom))}</div>
       <span class="clt-hof-badge">${icon("award", { size: 12, strokeWidth: 2.4 })} Permis obtenu</span>
     </div>`,
     )
