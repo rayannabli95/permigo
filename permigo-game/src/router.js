@@ -25,6 +25,7 @@ const ROUTES = {
     profil: () => import("@/pages/common/profil.js"),
     notifications: () => import("@/pages/common/notifications.js"),
     settings: () => import("@/pages/common/settings.js"),
+    "nouveau-mdp": () => import("@/pages/auth/nouveau-mdp.js"),
   },
   enseignant: {
     default: () => import("@/pages/enseignant/aujourdhui.js"),
@@ -52,6 +53,7 @@ const ROUTES = {
     profil: () => import("@/pages/common/profil.js"),
     notifications: () => import("@/pages/common/notifications.js"),
     settings: () => import("@/pages/common/settings.js"),
+    "nouveau-mdp": () => import("@/pages/auth/nouveau-mdp.js"),
   },
   gerant: {
     default: () => import("@/pages/gerant/cockpit.js"),
@@ -68,6 +70,7 @@ const ROUTES = {
     profil: () => import("@/pages/common/profil.js"),
     notifications: () => import("@/pages/common/notifications.js"),
     settings: () => import("@/pages/common/settings.js"),
+    "nouveau-mdp": () => import("@/pages/auth/nouveau-mdp.js"),
   },
 };
 
@@ -104,6 +107,7 @@ const ROUTE_TITLES = {
   profil: "Profil",
   notifications: "Notifications",
   settings: "Réglages",
+  "nouveau-mdp": "Nouveau mot de passe",
   pulse: "Pulse",
   equipe: "Équipe",
   dbg: "Debug",

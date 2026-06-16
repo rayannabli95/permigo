@@ -2,8 +2,8 @@
 // Edge Function : eleve-recovery
 // Un enseignant/gérant déclenche l'envoi d'un email de récupération d'accès
 // À UN ÉLÈVE de SON école. Le moniteur ne voit jamais le lien (envoyé direct
-// à l'élève). L'élève reçoit un lien/code magique → reprend la main → peut
-// redéfinir son mot de passe dans Réglages.
+// à l'élève). L'élève reçoit un email de réinitialisation → arrive sur l'écran
+// "Nouveau mot de passe" (#/nouveau-mdp) et CHOISIT LUI-MÊME son mot de passe.
 //
 // Sécurité :
 //   - JWT obligatoire (verify_jwt=true) → on identifie l'appelant.
@@ -97,18 +97,23 @@ Deno.serve(async (req) => {
     }
     if (!email) return json({ error: "no_email" }, 422);
 
-    // 5. Envoi du lien/code de connexion À L'ÉLÈVE (réutilise le flux OTP existant).
+    // 5. Envoi d'un email de RÉINITIALISATION de mot de passe À L'ÉLÈVE.
+    //    Le lien le ramène dans l'app sur #/nouveau-mdp (la session est établie
+    //    par detectSessionInUrl côté front) → il choisit lui-même son mot de
+    //    passe. Le moniteur ne voit jamais le lien ni le mot de passe.
     const origin =
       req.headers.get("origin") ??
       Deno.env.get("APP_URL") ??
       "https://permigo.vercel.app";
-    const { error: otpErr } = await userClient.auth.signInWithOtp({
+    // Client anon "propre" (sans le JWT de l'appelant) pour l'appel public.
+    const anonClient = createClient(SUPABASE_URL, ANON_KEY);
+    const { error: resetErr } = await anonClient.auth.resetPasswordForEmail(
       email,
-      options: { shouldCreateUser: false, emailRedirectTo: origin },
-    });
-    if (otpErr) {
-      console.error("[eleve-recovery] otp send error", otpErr.message);
-      return json({ error: "send_failed", detail: otpErr.message }, 502);
+      { redirectTo: `${origin}/#/nouveau-mdp` },
+    );
+    if (resetErr) {
+      console.error("[eleve-recovery] reset send error", resetErr.message);
+      return json({ error: "send_failed", detail: resetErr.message }, 502);
     }
 
     return json({ ok: true });

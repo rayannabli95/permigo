@@ -755,22 +755,13 @@ function wire(root, me, prefs) {
       track("settings.prenom_updated", {});
     });
 
-  // Reset password
-  root.querySelector("#btn-reset-pwd")?.addEventListener("click", async () => {
-    const email = me.email;
-    if (!email) {
-      toast("Email non disponible", "error");
-      return;
-    }
-    const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: `${location.origin}/#/settings`,
-    });
-    if (error) {
-      toast("Erreur d'envoi de l'email", "error");
-      return;
-    }
-    toast("Email de réinitialisation envoyé !", "success", 5000);
-    track("settings.pwd_reset_requested", {});
+  // Modifier le mot de passe → écran dédié "Nouveau mot de passe".
+  // L'utilisateur est déjà connecté → updateUser fonctionne directement,
+  // sans aller-retour email (l'ancien flux resetPasswordForEmail bouclait
+  // sur Réglages sans jamais proposer de champ mot de passe).
+  root.querySelector("#btn-reset-pwd")?.addEventListener("click", () => {
+    track("settings.pwd_change_opened", {});
+    location.hash = "#/nouveau-mdp";
   });
 
   // Theme segmented control
