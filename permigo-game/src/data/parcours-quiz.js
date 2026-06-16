@@ -77,6 +77,13 @@ export const PARCOURS = [
       "Vélos, deux-roues, piétons fragiles, bus, poids lourds et angles morts.",
     difficulte: 3,
   },
+  {
+    id: 11,
+    nom: "Stationnement & manœuvres",
+    contexte:
+      "Arrêt ou stationnement ? Créneau, demi-tour, places interdites et marquages au sol.",
+    difficulte: 3,
+  },
 ];
 
 export const QUESTIONS = [
@@ -2146,6 +2153,220 @@ export const QUESTIONS = [
     explication:
       "Tu patientes calmement qu'elle ait fini de traverser. Klaxonner ou forcer met en danger un piéton vulnérable.",
     tags: ["pieton"],
+  },
+
+  // ── Parcours 11 : Stationnement & manœuvres ───────────────────
+  {
+    id: "p11q1",
+    parcours_id: 11,
+    enonce: "Quelle est la différence entre un arrêt et un stationnement ?",
+    options: [
+      "Aucune, c'est pareil",
+      "L'arrêt est bref, conducteur au volant ; le stationnement immobilise le véhicule",
+      "Le stationnement est plus court que l'arrêt",
+    ],
+    correct: 1,
+    explication:
+      "Arrêt = court, le conducteur reste au volant prêt à repartir. Stationnement = véhicule immobilisé, conducteur parti ou indisponible.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p11q2",
+    parcours_id: 11,
+    enonce: "Tu peux stationner devant une entrée de garage (un « bateau ») ?",
+    options: [
+      "Oui si c'est bref",
+      "Non, c'est interdit, même devant chez soi",
+      "Oui la nuit",
+    ],
+    correct: 1,
+    explication:
+      "Stationner devant un bateau / une entrée carrossable est interdit (gênant), même devant ta propre entrée.",
+    tags: ["manoeuvre", "signalisation"],
+  },
+  {
+    id: "p11q3",
+    parcours_id: 11,
+    enonce: "Te garer sur un trottoir, c'est ?",
+    options: [
+      "Autorisé si je laisse de la place",
+      "Interdit : stationnement gênant",
+      "Autorisé pour les livraisons",
+    ],
+    correct: 1,
+    explication:
+      "Sur un trottoir = stationnement gênant : tu bloques piétons, poussettes et fauteuils. Interdit.",
+    tags: ["manoeuvre", "pieton"],
+  },
+  {
+    id: "p11q4",
+    parcours_id: 11,
+    enonce: "Stationner sur un passage piéton, c'est ?",
+    options: [
+      "Toléré quelques minutes",
+      "Interdit : stationnement dangereux",
+      "OK avec les feux de détresse",
+    ],
+    correct: 1,
+    explication:
+      "Sur un passage piéton = stationnement dangereux : tu masques les piétons aux autres conducteurs. Interdit.",
+    tags: ["manoeuvre", "pieton"],
+  },
+  {
+    id: "p11q5",
+    parcours_id: 11,
+    enonce: "En agglomération, de quel côté te gares-tu par défaut ?",
+    options: [
+      "À droite, dans le sens de la circulation",
+      "N'importe quel côté",
+      "À gauche, toujours",
+    ],
+    correct: 0,
+    explication:
+      "Par défaut, à droite et dans le sens de circulation. (Dans une rue à sens unique, les deux côtés peuvent être autorisés.)",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p11q6",
+    parcours_id: 11,
+    enonce: "Pour réussir un créneau, comment te places-tu au départ ?",
+    options: [
+      "Loin devant la place, collé au trottoir",
+      "À hauteur de la voiture devant la place, à environ 1 m",
+      "Directement dans la place en marche avant",
+    ],
+    correct: 1,
+    explication:
+      "Tu te mets parallèle à la voiture située devant la place, à ~1 m, puis tu braques en reculant. Contrôle l'arrière et les piétons pendant toute la manœuvre.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p11q7",
+    parcours_id: 11,
+    enonce: "Que risques-tu pour un stationnement gênant ?",
+    options: [
+      "Rien du tout",
+      "Une amende, voire la mise en fourrière",
+      "Juste un avertissement oral",
+    ],
+    correct: 1,
+    explication:
+      "Stationnement gênant = amende, et le véhicule peut partir en fourrière. Dangereux ou très gênant = sanction plus lourde.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p11q8",
+    parcours_id: 11,
+    enonce: "Une ligne jaune continue le long du trottoir signifie ?",
+    options: [
+      "Stationnement autorisé",
+      "Arrêt ET stationnement interdits",
+      "Stationnement payant",
+    ],
+    correct: 1,
+    explication:
+      "Jaune continu = arrêt et stationnement interdits. Jaune discontinu = stationnement interdit (arrêt bref toléré).",
+    tags: ["signalisation", "manoeuvre"],
+  },
+  {
+    id: "p11q9",
+    parcours_id: 11,
+    enonce: "Le demi-tour, où est-il formellement interdit ?",
+    options: [
+      "Partout en ville",
+      "Sur autoroute, sur ligne continue et sans visibilité",
+      "Nulle part, c'est toujours permis",
+    ],
+    correct: 1,
+    explication:
+      "Demi-tour interdit sur autoroute, en franchissant une ligne continue, et partout où il gêne ou manque de visibilité.",
+    tags: ["manoeuvre", "signalisation"],
+  },
+  {
+    id: "p11q10",
+    parcours_id: 11,
+    enonce: "La marche arrière, tu l'utilises comment ?",
+    options: [
+      "Sur de longues distances sans souci",
+      "Sur une courte distance, pour une manœuvre seulement",
+      "Y compris sur autoroute si besoin",
+    ],
+    correct: 1,
+    explication:
+      "La marche arrière sert à manœuvrer sur une courte distance. Reculer longtemps est dangereux — et c'est strictement interdit sur autoroute.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p11q11",
+    parcours_id: 11,
+    enonce: "Tu stationnes en haut d'une côte (boîte manuelle). Tu fais quoi ?",
+    options: [
+      "Je laisse au point mort",
+      "Frein à main, une vitesse engagée, roues braquées vers le trottoir",
+      "Rien de particulier",
+    ],
+    correct: 1,
+    explication:
+      "Frein à main serré, une vitesse engagée et roues braquées vers le trottoir : si la voiture bouge, elle bute au lieu de dévaler.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p11q12",
+    parcours_id: 11,
+    enonce: "T'immobiliser en double file pour décharger, c'est ?",
+    options: [
+      "OK quelques minutes",
+      "Interdit : stationnement gênant",
+      "OK avec les feux de détresse",
+    ],
+    correct: 1,
+    explication:
+      "La double file = gênant et interdit. Seul un arrêt très bref, toi au volant prêt à repartir, peut être toléré.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p11q13",
+    parcours_id: 11,
+    enonce: "Te garer juste au coin d'une intersection, c'est ?",
+    options: [
+      "Sans problème",
+      "À éviter : tu masques la visibilité (gênant)",
+      "Obligatoire à 1 m du carrefour",
+    ],
+    correct: 1,
+    explication:
+      "Trop près d'un carrefour, tu masques la visibilité des autres usagers : c'est gênant. Laisse de la marge.",
+    tags: ["manoeuvre"],
+  },
+  {
+    id: "p11q14",
+    parcours_id: 11,
+    enonce:
+      "Une place réservée (PMR) alors que tu n'as pas de carte. Tu fais quoi ?",
+    options: [
+      "Je me gare 5 minutes",
+      "Je ne m'y gare jamais : interdit, amende lourde",
+      "Je m'y gare s'il n'y a pas d'autre place",
+    ],
+    correct: 1,
+    explication:
+      "Place PMR sans carte mobilité inclusion = interdiction stricte et amende lourde. Jamais, même « juste 5 minutes ».",
+    tags: ["manoeuvre", "signalisation"],
+  },
+  {
+    id: "p11q15",
+    parcours_id: 11,
+    enonce:
+      "Voiture à l'arrêt la nuit, hors agglo non éclairée. Tu signales comment ?",
+    options: [
+      "Je n'allume rien",
+      "J'allume mes feux de position",
+      "Je laisse les pleins phares",
+    ],
+    correct: 1,
+    explication:
+      "Hors agglomération non éclairée, tu signales ton véhicule arrêté avec les feux de position pour être vu de loin.",
+    tags: ["verification_interieure", "manoeuvre"],
   },
 ];
 
