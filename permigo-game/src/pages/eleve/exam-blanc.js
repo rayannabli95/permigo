@@ -9,6 +9,7 @@ import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
+import { getMyChests } from "@/utils/game-state.js";
 import {
   PARCOURS,
   QUESTIONS,
@@ -51,6 +52,11 @@ function clearExamTimer() {
     _examTimer = null;
   }
 }
+
+// Déblocage par progression : l'examen officiel s'ouvre une fois que l'élève a
+// validé sa compétence 1 — concrètement quand il a OUVERT le coffre `world_1`
+// (son premier coffre, qui annonce « Examen blanc débloqué »). Recalculé au mount.
+let _examenUnlocked = false;
 
 // Mélodie de fond de l'examen (module-level : start au parcours, stop en sortie)
 let _examStopMusic = null;
@@ -113,6 +119,17 @@ export async function mount(root) {
 
   track("page_view", { page: "parcours_quiz", user_role: me.role });
 
+  // Déblocage de l'examen officiel = coffre de la compétence 1 (world_1) ouvert.
+  _examenUnlocked = false;
+  try {
+    const chests = await getMyChests();
+    _examenUnlocked = (chests || []).some(
+      (c) => c?.chest_type === "world_1" && c?.opened_at,
+    );
+  } catch (_) {
+    /* DB indispo → on reste prudemment verrouillé */
+  }
+
   root.innerHTML = renderStyles() + renderSelection();
   wireSelection(root);
 }
@@ -134,12 +151,17 @@ function renderSelection() {
   `,
   ).join("");
 
-  const officiel = EXAMEN_OFFICIEL_LOCKED
-    ? `<button class="exo-hero is-locked" id="exb-officiel" aria-label="Examen officiel — réservé à PermiGo+">
-        <span class="exo-hero-lock">🔒 PermiGo+</span>
+  const locked = EXAMEN_OFFICIEL_LOCKED || !_examenUnlocked;
+  const lockBadge = EXAMEN_OFFICIEL_LOCKED ? "🔒 PermiGo+" : "🔒 Compétence 1";
+  const lockSub = EXAMEN_OFFICIEL_LOCKED
+    ? "Débloque le vrai examen blanc avec PermiGo+"
+    : "Valide ta compétence 1 pour débloquer le vrai examen blanc";
+  const officiel = locked
+    ? `<button class="exo-hero is-locked" id="exb-officiel" aria-label="Examen officiel verrouillé">
+        <span class="exo-hero-lock">${lockBadge}</span>
         <span class="exo-hero-kicker">Examen officiel</span>
         <span class="exo-hero-title">40 questions · chrono · comme le vrai</span>
-        <span class="exo-hero-sub">Débloque le vrai examen blanc avec PermiGo+</span>
+        <span class="exo-hero-sub">${lockSub}</span>
       </button>`
     : `<button class="exo-hero" id="exb-officiel" aria-label="Démarrer l'examen officiel">
         <span class="exo-hero-kicker">Examen officiel</span>
@@ -175,6 +197,14 @@ function wireSelection(root) {
     if (EXAMEN_OFFICIEL_LOCKED) {
       // Le jour J : ouvrir ici la feuille d'achat PermiGo+ (Stripe élève).
       toast("Bientôt : débloque l'examen officiel avec PermiGo+", "info", 3500);
+      return;
+    }
+    if (!_examenUnlocked) {
+      toast(
+        "Valide ta compétence 1 pour débloquer l'examen blanc 🔒",
+        "info",
+        3500,
+      );
       return;
     }
     startExamenOfficiel(root);

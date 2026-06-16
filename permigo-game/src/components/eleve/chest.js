@@ -10,19 +10,51 @@
  *   `<div>${renderChest({ worldNum: 1, worldName: '...', opened: false })}</div>`
  */
 
-import { esc } from '@/utils/escape.js';
-import { icon } from '@/utils/icons.js';
-import { markChestOpened } from '@/utils/game-state.js';
-import { burstConfetti } from '@/components/common/confetti.js';
-import { playWhoosh, playUnlock, playGold, playCoin } from '@/utils/sound.js';
-import { lootToast } from '@/components/eleve/loot-toast.js';
+import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
+import { markChestOpened } from "@/utils/game-state.js";
+import { burstConfetti } from "@/components/common/confetti.js";
+import { playWhoosh, playUnlock, playGold, playCoin } from "@/utils/sound.js";
+import { lootToast } from "@/components/eleve/loot-toast.js";
 
 // 4 mondes = 4 tiers de coffres avec leur identité visuelle
 const TIERS = {
-  1: { name: 'COFFRE DE BRONZE',  primary: 'var(--amk)', secondary: '#7c2d12', accent: 'var(--aml)', gem: 'var(--gr2)', xp: 200, gemmes: 50 },
-  2: { name: 'COFFRE D\'ARGENT',  primary: 'var(--mu2)', secondary: 'var(--mu4)', accent: 'var(--bg4)', gem: '#a78bfa', xp: 400, gemmes: 100 },
-  3: { name: 'COFFRE D\'OR',      primary: '#facc15', secondary: '#a16207', accent: '#fef9c3', gem: 'var(--or)', xp: 700, gemmes: 175 },
-  4: { name: 'COFFRE LÉGENDAIRE', primary: 'var(--pul)', secondary: '#581c87', accent: '#f3e8ff', gem: '#ec4899', xp: 1200, gemmes: 300 },
+  1: {
+    name: "COFFRE DE BRONZE",
+    primary: "var(--amk)",
+    secondary: "#7c2d12",
+    accent: "var(--aml)",
+    gem: "var(--gr2)",
+    xp: 200,
+    gemmes: 50,
+  },
+  2: {
+    name: "COFFRE D'ARGENT",
+    primary: "var(--mu2)",
+    secondary: "var(--mu4)",
+    accent: "var(--bg4)",
+    gem: "#a78bfa",
+    xp: 400,
+    gemmes: 100,
+  },
+  3: {
+    name: "COFFRE D'OR",
+    primary: "#facc15",
+    secondary: "#a16207",
+    accent: "#fef9c3",
+    gem: "var(--or)",
+    xp: 700,
+    gemmes: 175,
+  },
+  4: {
+    name: "COFFRE LÉGENDAIRE",
+    primary: "var(--pul)",
+    secondary: "#581c87",
+    accent: "#f3e8ff",
+    gem: "#ec4899",
+    xp: 1200,
+    gemmes: 300,
+  },
 };
 
 /** Image PNG premium du coffre par monde (fournie par Rayan). */
@@ -34,11 +66,11 @@ function chestImage(worldNum) {
 export function renderChest({ worldNum, worldName, opened = false }) {
   const tier = TIERS[worldNum] || TIERS[1];
   return `
-    <div class="chest-card ${opened ? 'opened' : 'unlocked'}"
+    <div class="chest-card ${opened ? "opened" : "unlocked"}"
          data-chest-world="${worldNum}" role="button" tabindex="0"
          aria-label="${opened ? `${tier.name} déjà ouvert` : `Ouvrir le ${tier.name}`}"
          style="--ch-1:${tier.primary};--ch-2:${tier.secondary};--ch-3:${tier.accent};--ch-gem:${tier.gem}">
-      ${!opened ? '<div class="chest-rays" aria-hidden="true"></div>' : ''}
+      ${!opened ? '<div class="chest-rays" aria-hidden="true"></div>' : ""}
       <div class="chest-halo" aria-hidden="true"></div>
       <div class="chest-icon" aria-hidden="true">
         <img class="chest-icon-img" src="${chestImage(worldNum)}" alt="" loading="lazy"
@@ -46,9 +78,9 @@ export function renderChest({ worldNum, worldName, opened = false }) {
         <span class="chest-icon-emoji" style="display:none">🎁</span>
       </div>
       <div class="chest-label">
-        <div class="chest-tier">${opened ? '✓ OUVERT' : tier.name}</div>
+        <div class="chest-tier">${opened ? "✓ OUVERT" : tier.name}</div>
         <div class="chest-name">${esc(worldName)}</div>
-        ${!opened ? `<div class="chest-cta">${icon('gem',{size:13})} +${tier.gemmes} volants</div>` : ''}
+        ${!opened ? `<div class="chest-cta">${icon("gem", { size: 13 })} +${tier.gemmes} volants</div>` : ""}
       </div>
     </div>
   `;
@@ -56,18 +88,20 @@ export function renderChest({ worldNum, worldName, opened = false }) {
 
 /** Modal cinématique d'ouverture. onClaim() est appelé quand l'user clique "Réclamer". */
 export function openChestModal({ worldNum, worldName, onClaim }) {
-  if (document.querySelector('.chest-modal')) return;
+  if (document.querySelector(".chest-modal")) return;
   const tier = TIERS[worldNum] || TIERS[1];
 
   // Haptique mobile
-  try { navigator.vibrate?.([60, 40, 80]); } catch (_) {}
+  try {
+    navigator.vibrate?.([60, 40, 80]);
+  } catch (_) {}
 
-  const modal = document.createElement('div');
-  modal.className = 'chest-modal';
-  modal.style.setProperty('--ch-1', tier.primary);
-  modal.style.setProperty('--ch-2', tier.secondary);
-  modal.style.setProperty('--ch-3', tier.accent);
-  modal.style.setProperty('--ch-gem', tier.gem);
+  const modal = document.createElement("div");
+  modal.className = "chest-modal";
+  modal.style.setProperty("--ch-1", tier.primary);
+  modal.style.setProperty("--ch-2", tier.secondary);
+  modal.style.setProperty("--ch-3", tier.accent);
+  modal.style.setProperty("--ch-gem", tier.gem);
   modal.innerHTML = `
     <div class="chest-modal-bg" aria-hidden="true"></div>
     <div class="chest-modal-rays" aria-hidden="true"></div>
@@ -90,13 +124,13 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
   `;
   document.body.appendChild(modal);
 
-  const stage = modal.querySelector('.chest-modal-stage');
-  const imgEl = modal.querySelector('.chest-modal-img');
-  const burstEl = modal.querySelector('.chest-modal-burst');
-  const rewards = modal.querySelector('#chest-rewards');
-  const closeBtn = modal.querySelector('#chest-modal-close');
-  closeBtn.style.opacity = '0';
-  closeBtn.style.pointerEvents = 'none';
+  const stage = modal.querySelector(".chest-modal-stage");
+  const imgEl = modal.querySelector(".chest-modal-img");
+  const burstEl = modal.querySelector(".chest-modal-burst");
+  const rewards = modal.querySelector("#chest-rewards");
+  const closeBtn = modal.querySelector("#chest-modal-close");
+  closeBtn.style.opacity = "0";
+  closeBtn.style.pointerEvents = "none";
 
   // ─── SÉQUENCE D'OUVERTURE CINÉMATIQUE ───
 
@@ -106,23 +140,27 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
   // L'animation ci-dessous n'affiche que les récompenses (barème = serveur).
 
   // Phase 1 : 3 vibrations (0-900ms)
-  stage.classList.add('cm-shaking');
+  stage.classList.add("cm-shaking");
   playWhoosh();
-  try { navigator.vibrate?.([50, 80, 50, 80, 50]); } catch (_) {}
+  try {
+    navigator.vibrate?.([50, 80, 50, 80, 50]);
+  } catch (_) {}
 
   setTimeout(() => {
-    stage.classList.remove('cm-shaking');
+    stage.classList.remove("cm-shaking");
 
     // Phase 2 : pop du coffre + flash + burst de lumière (900ms)
     playUnlock();
-    if (imgEl) imgEl.classList.add('cm-img-pop');
-    if (burstEl) burstEl.classList.add('go');
-    document.body.classList.add('cm-flash');
-    setTimeout(() => document.body.classList.remove('cm-flash'), 240);
+    if (imgEl) imgEl.classList.add("cm-img-pop");
+    if (burstEl) burstEl.classList.add("go");
+    document.body.classList.add("cm-flash");
+    setTimeout(() => document.body.classList.remove("cm-flash"), 240);
 
     // Phase 3 : light burst massif + confettis (1100ms)
     setTimeout(() => {
-      try { navigator.vibrate?.(120); } catch (_) {}
+      try {
+        navigator.vibrate?.(120);
+      } catch (_) {}
 
       // Burst confetti depuis le centre (couleurs du tier)
       playGold();
@@ -130,26 +168,47 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
 
       // Phase 4 : Cascade de récompenses (1300ms+)
       const list = [
-        { icon: icon('gem',{size:20}), label: `+${tier.gemmes} volants`, delay: 200 },
-        { icon: icon('trophy',{size:20}), label: `Titre "Maître ${worldName}"`, delay: 600 },
+        {
+          icon: icon("gem", { size: 20 }),
+          label: `+${tier.gemmes} volants`,
+          delay: 200,
+        },
+        {
+          icon: icon("trophy", { size: 20 }),
+          label: `Titre "Maître ${worldName}"`,
+          delay: 600,
+        },
       ];
+      // Compétence 1 franchie → on débloque le vrai examen blanc (mode officiel).
+      // C'est le « premier coffre » : moment idéal pour l'annoncer.
+      if (worldNum === 1) {
+        list.push({ icon: "📝", label: "Examen blanc débloqué", delay: 1000 });
+      }
       list.forEach((r) => {
         setTimeout(() => {
-          const d = document.createElement('div');
-          d.className = 'chest-reward';
+          const d = document.createElement("div");
+          d.className = "chest-reward";
           d.innerHTML = `<span class="ic">${r.icon}</span><span class="lb">${esc(r.label)}</span><span class="shine"></span>`;
           rewards.appendChild(d);
           playCoin();
-          lootToast({ icon: r.icon, label: r.label, subLabel: tier.name, kind: 'gold' });
-          try { navigator.vibrate?.(30); } catch (_) {}
+          lootToast({
+            icon: r.icon,
+            label: r.label,
+            subLabel: tier.name,
+            kind: "gold",
+          });
+          try {
+            navigator.vibrate?.(30);
+          } catch (_) {}
         }, r.delay);
       });
 
       // Phase 5 : Bouton "Réclamer" apparaît (≈1150ms après lid)
       setTimeout(() => {
-        closeBtn.style.transition = 'opacity .4s ease,transform .4s cubic-bezier(.5,1.6,.4,1)';
-        closeBtn.style.opacity = '1';
-        closeBtn.style.pointerEvents = '';
+        closeBtn.style.transition =
+          "opacity .4s ease,transform .4s cubic-bezier(.5,1.6,.4,1)";
+        closeBtn.style.opacity = "1";
+        closeBtn.style.pointerEvents = "";
       }, 1150);
     }, 240);
   }, 900);
@@ -160,20 +219,34 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
     // Persistance DB + UI uniquement si l'user a réclamé (clic bouton), pas si fermeture via bg
     if (viaClaim && !claimed) {
       claimed = true;
-      try { onClaim?.(); } catch (e) { console.warn('[chest] onClaim error', e); }
+      try {
+        onClaim?.();
+      } catch (e) {
+        console.warn("[chest] onClaim error", e);
+      }
     }
-    modal.classList.add('cm-closing');
+    modal.classList.add("cm-closing");
     setTimeout(() => modal.remove(), 280);
   };
-  closeBtn.addEventListener('click', () => dismiss(true));
-  modal.querySelector('.chest-modal-bg').addEventListener('click', () => dismiss(true));
+  closeBtn.addEventListener("click", () => dismiss(true));
+  modal
+    .querySelector(".chest-modal-bg")
+    .addEventListener("click", () => dismiss(true));
 }
 
 /** SVG illustré du coffre — multi-layered avec reflets et détails. */
-function chestSVG({ id, primary, secondary, accent, gem, opened = false, big = false }) {
+function chestSVG({
+  id,
+  primary,
+  secondary,
+  accent,
+  gem,
+  opened = false,
+  big = false,
+}) {
   const size = big ? 260 : 100;
   return `
-    <svg viewBox="0 0 100 110" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style="${big ? 'max-width:' + size + 'px;' : ''}">
+    <svg viewBox="0 0 100 110" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style="${big ? "max-width:" + size + "px;" : ""}">
       <defs>
         <!-- Gradient body : sombre en bas, clair en haut -->
         <linearGradient id="${id}-body" x1="0" y1="0" x2="0" y2="1">
@@ -235,16 +308,22 @@ function chestSVG({ id, primary, secondary, accent, gem, opened = false, big = f
       </g>
 
       <!-- LOCK (cadenas) — au centre, entre lid et body -->
-      ${!opened ? `
+      ${
+        !opened
+          ? `
         <g class="cm-lock" style="transform-origin:50% 50%">
           <rect x="42" y="48" width="16" height="20" rx="3" fill="#1a1208" stroke="${accent}" stroke-width="1"/>
           <path d="M 46 48 L 46 44 Q 46 40 50 40 Q 54 40 54 44 L 54 48" fill="none" stroke="${accent}" stroke-width="1.8"/>
           <circle cx="50" cy="58" r="2.5" fill="${gem}" filter="url(#${id}-glow)"/>
         </g>
-      ` : ''}
+      `
+          : ""
+      }
 
       <!-- Particules sparkle pour les coffres fermés -->
-      ${!opened ? `
+      ${
+        !opened
+          ? `
         <g class="chest-sparks">
           <circle class="csp s1" cx="20" cy="30" r="1.8" fill="${accent}"/>
           <circle class="csp s2" cx="80" cy="26" r="1.5" fill="${accent}"/>
@@ -252,7 +331,9 @@ function chestSVG({ id, primary, secondary, accent, gem, opened = false, big = f
           <circle class="csp s4" cx="32" cy="14" r="1.5" fill="${accent}"/>
           <circle class="csp s5" cx="68" cy="40" r="1" fill="${accent}"/>
         </g>
-      ` : ''}
+      `
+          : ""
+      }
     </svg>
   `;
 }
@@ -262,7 +343,7 @@ let _chestCssInjected = false;
 export function ensureChestStyles() {
   if (_chestCssInjected) return;
   _chestCssInjected = true;
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = `
     /* ╔══ COFFRE INLINE ══════════════════════════════════════════╗ */
     .chest-card{
