@@ -15,6 +15,7 @@ import {
 } from "@/components/common/empty-state.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
+import { triggerEleveRecovery } from "@/services/eleve-recovery.js";
 import { icon } from "@/utils/icons.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
@@ -1106,6 +1107,11 @@ function openQuickMenu(eleveId, anchorRow) {
       <button class="me-qm-item danger" data-action="exam-rate">
         <span class="me-qm-ico">${icon("x", { size: 14, strokeWidth: 2.5 })}</span> Examen raté
       </button>
+      <div class="me-qm-sep"></div>
+      <div class="me-qm-label">Compte</div>
+      <button class="me-qm-item" data-action="reset-access">
+        <span class="me-qm-ico">${icon("refresh-cw", { size: 14, strokeWidth: 2.5 })}</span> Réinitialiser l'accès
+      </button>
     </div>
   `;
   document.body.appendChild(menu);
@@ -1132,7 +1138,49 @@ function openQuickMenu(eleveId, anchorRow) {
       else if (action === "exam-planifie") openPlanifieDialog(eleveId);
       else if (action === "exam-recu") confirmRecu(eleveId);
       else if (action === "exam-rate") recordExam(eleveId, "rate", todayIso());
+      else if (action === "reset-access") confirmResetAccess(eleveId);
     });
+  });
+}
+
+// Réinitialiser l'accès d'un élève : le moniteur déclenche l'envoi d'un email de
+// récupération À L'ÉLÈVE (il ne voit jamais le lien). Edge function `eleve-recovery`
+// (service role) vérifie que l'élève est bien de son école.
+function confirmResetAccess(eleveId) {
+  const el = _eleves.find((e) => e.id === eleveId);
+  const prenom = esc(el && el.prenom ? fmtName(el.prenom) : "cet élève");
+  document.querySelector(".me-confirm")?.remove();
+
+  const wrap = document.createElement("div");
+  wrap.className = "me-confirm";
+  wrap.innerHTML = `${DIALOG_STYLE}
+    <div class="me-cf-bg" data-close="1"></div>
+    <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Réinitialiser l'accès">
+      <div class="me-cf-title">Réinitialiser l'accès de ${prenom} ?</div>
+      <div class="me-cf-body">Un email de connexion sera envoyé directement à ${prenom}. Tu ne vois jamais le lien — c'est lui qui reprend la main sur son compte.</div>
+      <div class="me-cf-actions">
+        <button class="me-cf-btn" data-close="1" type="button">Annuler</button>
+        <button class="me-cf-btn confirm" id="me-reset-ok" type="button">Envoyer l'email</button>
+      </div>
+    </div>`;
+  document.body.appendChild(wrap);
+  wrap
+    .querySelectorAll("[data-close]")
+    .forEach((b) => b.addEventListener("click", () => wrap.remove()));
+
+  wrap.querySelector("#me-reset-ok").addEventListener("click", async () => {
+    const btn = wrap.querySelector("#me-reset-ok");
+    btn.disabled = true;
+    btn.textContent = "Envoi…";
+    track("eleve.reset_access", { eleve_id: eleveId });
+    const ok = await triggerEleveRecovery(eleveId);
+    wrap.remove();
+    toast(
+      ok
+        ? `Email de connexion envoyé à ${prenom}.`
+        : "Envoi impossible pour le moment.",
+      ok ? "success" : "error",
+    );
   });
 }
 
