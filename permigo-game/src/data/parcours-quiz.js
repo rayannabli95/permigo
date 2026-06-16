@@ -42,6 +42,13 @@ export const PARCOURS = [
       "Insertion sur l'A86, conduite à haute vitesse, voies de dépassement, bande d'arrêt d'urgence.",
     difficulte: 4,
   },
+  {
+    id: 6,
+    nom: "Révisions essentielles",
+    contexte:
+      "Les bases qui tombent à tous les examens : alcool, vitesse, équipement, secours, signalisation.",
+    difficulte: 2,
+  },
 ];
 
 export const QUESTIONS = [
@@ -196,16 +203,17 @@ export const QUESTIONS = [
   {
     id: "p1q12",
     parcours_id: 1,
-    enonce: "En zone 30, les piétons sont prioritaires sur la chaussée ?",
+    enonce:
+      "En zone 30, un piéton s'apprête à traverser hors d'un passage. Tu fais quoi ?",
     options: [
-      "Non, ils doivent rester sur les trottoirs",
-      "Oui, sur toute la chaussée",
-      "Seulement aux passages piétons",
+      "Je continue, il n'est pas sur un passage piéton",
+      "Je ralentis et je le laisse traverser",
+      "Je klaxonne pour qu'il attende",
     ],
     correct: 1,
     explication:
-      "Oui, partout sur la chaussée — pas seulement aux passages. La zone 30 est pensée pour eux.",
-    tags: ["pieton", "signalisation"],
+      "À 30 km/h, le piéton est vulnérable : tu ralentis et tu le laisses traverser, même hors passage. Sa sécurité prime.",
+    tags: ["pieton"],
   },
   {
     id: "p1q13",
@@ -749,7 +757,8 @@ export const QUESTIONS = [
   {
     id: "p4q6",
     parcours_id: 4,
-    enonce: "En zone 30, les piétons peuvent traverser hors des passages ?",
+    enonce:
+      "Dans une zone de rencontre, les piétons peuvent traverser hors des passages ?",
     options: [
       "Non, ils doivent utiliser les passages",
       "Oui, mais ils laissent passer les voitures",
@@ -757,7 +766,7 @@ export const QUESTIONS = [
     ],
     correct: 2,
     explication:
-      "En zone 30, les piétons traversent où ils veulent et tu leur cèdes le passage.",
+      "En zone de rencontre (20 km/h), les piétons sont prioritaires sur toute la chaussée. Attention : en zone 30, ils n'ont PAS cette priorité générale — c'est le piège classique.",
     tags: ["pieton", "signalisation"],
   },
   {
@@ -1088,6 +1097,192 @@ export const QUESTIONS = [
     explication:
       "Après 2 h à 130, le 50 en ville paraît ultra lent. Ta perception est faussée : fie-toi au compteur, pas à tes sensations.",
     tags: ["vitesse", "eco_conduite"],
+  },
+
+  // ── Parcours 6 : Révisions essentielles ───────────────────────
+  {
+    id: "p6q1",
+    parcours_id: 6,
+    enonce: "Au volant, le taux d'alcool maximum autorisé dans le sang ?",
+    options: ["0,2 g/L", "0,5 g/L", "0,8 g/L"],
+    correct: 1,
+    explication:
+      "0,5 g/L de sang (soit 0,25 mg/L d'air expiré). En permis probatoire, c'est 0,2 g/L — quasiment zéro.",
+    tags: ["alcool"],
+  },
+  {
+    id: "p6q2",
+    parcours_id: 6,
+    enonce: "En permis probatoire, combien de points as-tu au départ ?",
+    options: ["6 points", "8 points", "12 points"],
+    correct: 0,
+    explication:
+      "6 points au début. Tu montes à 12 après 3 ans sans infraction (2 ans en conduite accompagnée).",
+    tags: ["permis"],
+  },
+  {
+    id: "p6q3",
+    parcours_id: 6,
+    enonce: "Qui doit attacher sa ceinture en voiture ?",
+    options: [
+      "Seulement à l'avant",
+      "Tous les passagers, avant comme arrière",
+      "Seulement le conducteur",
+    ],
+    correct: 1,
+    explication:
+      "Tout le monde, à toutes les places. Le conducteur est responsable des passagers mineurs non attachés.",
+    tags: ["equipement"],
+  },
+  {
+    id: "p6q4",
+    parcours_id: 6,
+    enonce: "Profondeur minimale des rainures d'un pneu ?",
+    options: ["1 mm", "1,6 mm", "3 mm"],
+    correct: 1,
+    explication:
+      "1,6 mm minimum. En dessous, le pneu n'évacue plus l'eau et le risque d'aquaplaning grimpe.",
+    tags: ["verification_exterieure"],
+  },
+  {
+    id: "p6q5",
+    parcours_id: 6,
+    enonce: "Sur un long trajet, à quelle fréquence faire une pause ?",
+    options: [
+      "Toutes les 2 heures environ",
+      "Toutes les 5 heures",
+      "Seulement si je me sens fatigué",
+    ],
+    correct: 0,
+    explication:
+      "Une pause d'au moins 15 minutes toutes les 2 heures, même sans fatigue ressentie. La somnolence arrive sans prévenir.",
+    tags: ["verification_interieure"],
+  },
+  {
+    id: "p6q6",
+    parcours_id: 6,
+    enonce: "Un siège bébé dos à la route, installé à l'avant : et l'airbag ?",
+    options: [
+      "On le laisse activé",
+      "On le désactive d'abord",
+      "Peu importe après 6 mois",
+    ],
+    correct: 1,
+    explication:
+      "Jamais d'airbag passager actif face à un siège dos à la route : en cas de choc il blesserait gravement le bébé. On le désactive avant.",
+    tags: ["equipement"],
+  },
+  {
+    id: "p6q7",
+    parcours_id: 6,
+    enonce: "Un panneau triangulaire, pointe vers le bas, signifie ?",
+    options: ["Stop", "Cédez le passage", "Sens interdit"],
+    correct: 1,
+    explication:
+      "Triangle pointe en bas = cédez le passage : tu ralentis et tu laisses passer, sans forcément t'arrêter (à la différence du STOP).",
+    tags: ["signalisation"],
+  },
+  {
+    id: "p6q8",
+    parcours_id: 6,
+    enonce: "En plein jour, sous une forte pluie, tu allumes quels feux ?",
+    options: [
+      "Aucun, il fait jour",
+      "Les feux de croisement",
+      "Les pleins phares",
+    ],
+    correct: 1,
+    explication:
+      "Feux de croisement dès que la visibilité baisse (pluie, brouillard), même de jour : pour voir et surtout être vu.",
+    tags: ["verification_interieure"],
+  },
+  {
+    id: "p6q9",
+    parcours_id: 6,
+    enonce: "Tu utilises les feux de brouillard arrière dans quel cas ?",
+    options: [
+      "Sous une forte pluie",
+      "Par brouillard ou neige épais seulement",
+      "La nuit sur autoroute",
+    ],
+    correct: 1,
+    explication:
+      "Réservés au brouillard ou à la neige denses. Sous la pluie ils éblouissent ceux qui te suivent — c'est même interdit.",
+    tags: ["signalisation", "verification_interieure"],
+  },
+  {
+    id: "p6q10",
+    parcours_id: 6,
+    enonce: "Pour consommer moins de carburant, le bon réflexe ?",
+    options: [
+      "Rouler à haut régime",
+      "Anticiper et lever le pied tôt",
+      "Accélérer puis freiner souvent",
+    ],
+    correct: 1,
+    explication:
+      "Anticiper, lever le pied tôt et utiliser le frein moteur : moins de carburant, moins d'usure, moins de CO₂.",
+    tags: ["eco_conduite"],
+  },
+  {
+    id: "p6q11",
+    parcours_id: 6,
+    enonce: "En France, quel numéro pour joindre les pompiers ?",
+    options: ["15", "17", "18"],
+    correct: 2,
+    explication:
+      "18 = pompiers. 15 = SAMU, 17 = police/gendarmerie, 112 = numéro d'urgence européen.",
+    tags: ["premiers_secours"],
+  },
+  {
+    id: "p6q12",
+    parcours_id: 6,
+    enonce: "Conduire après avoir consommé du cannabis, c'est ?",
+    options: [
+      "Toléré en petite quantité",
+      "Interdit, tolérance zéro",
+      "Autorisé après quelques heures",
+    ],
+    correct: 1,
+    explication:
+      "Tolérance zéro pour les stupéfiants au volant, quelle que soit la quantité. Les sanctions sont lourdes.",
+    tags: ["stupefiants"],
+  },
+  {
+    id: "p6q13",
+    parcours_id: 6,
+    enonce:
+      "Arrêt d'urgence hors agglo : que fais-tu avant de sortir de la voiture ?",
+    options: [
+      "J'enfile mon gilet jaune",
+      "Je sors vite poser le triangle",
+      "J'attends les secours à l'intérieur",
+    ],
+    correct: 0,
+    explication:
+      "Gilet AVANT de sortir, puis triangle ~30 m en amont, et tout le monde derrière la glissière. L'ordre compte.",
+    tags: ["premiers_secours"],
+  },
+  {
+    id: "p6q14",
+    parcours_id: 6,
+    enonce: "En permis probatoire, ta vitesse max sur autoroute ?",
+    options: ["110 km/h", "120 km/h", "130 km/h"],
+    correct: 0,
+    explication:
+      "110 km/h au lieu de 130 pendant la période probatoire. Tu dois aussi afficher le disque « A » à l'arrière.",
+    tags: ["vitesse", "permis"],
+  },
+  {
+    id: "p6q15",
+    parcours_id: 6,
+    enonce:
+      "Hors agglomération, tu doubles un cycliste en laissant quelle marge ?",
+    options: ["0,5 m", "1 m", "1,5 m"],
+    correct: 2,
+    explication:
+      "1,50 m hors agglomération (1 m en ville). Plus tu roules vite, plus il faut d'espace.",
+    tags: ["cycliste"],
   },
 ];
 
