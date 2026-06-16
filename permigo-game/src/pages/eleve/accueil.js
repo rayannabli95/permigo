@@ -464,6 +464,29 @@ const STYLE = `<style>
 .acc2-exam.unlocked .acc2-exam-s { color: rgba(255,255,255,.85); }
 .acc2-exam-arrow { flex-shrink: 0; color: #fff; display: flex; }
 
+/* Entrée compacte « centre d'examen » — volontairement discrète */
+.acc2-centre {
+  margin: 12px 16px 0;
+  padding: 12px 14px;
+  border-radius: var(--r-lg);
+  background: var(--su);
+  border: 1px solid var(--bo);
+  display: flex; align-items: center; gap: 12px;
+  text-decoration: none; color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .12s;
+}
+.acc2-centre:active { transform: scale(.98); }
+.acc2-centre-ico {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  background: var(--bg3); color: var(--a);
+  display: flex; align-items: center; justify-content: center;
+}
+.acc2-centre-tx { flex: 1; min-width: 0; }
+.acc2-centre-t { font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
+.acc2-centre-s { font: 500 12px/1.3 'Inter', sans-serif; margin-top: 2px; color: var(--mu2); }
+.acc2-centre > svg { color: var(--mu3); flex-shrink: 0; }
+
 /* Leaderboard slot */
 .acc-lb {
   display: flex; align-items: center; gap: 14px;
@@ -997,6 +1020,16 @@ function render({
   </div>`
   }
 
+  <!-- CENTRE D'EXAMEN (entrée compacte) -->
+  <a class="acc2-centre" id="acc-centre" href="#/centre-examen" aria-label="Découvre ton centre d'examen">
+    <div class="acc2-centre-ico">${icon("map", { size: 18 })}</div>
+    <div class="acc2-centre-tx">
+      <div class="acc2-centre-t">Ton centre d'examen</div>
+      <div class="acc2-centre-s">Pièges &amp; conseils sur place</div>
+    </div>
+    ${icon("chevron-right", { size: 18 })}
+  </a>
+
 </div>
 
 <!-- STREAK BOTTOM SHEET -->
@@ -1179,6 +1212,12 @@ function wire(
       }
     });
   }
+
+  // Centre d'examen (entrée compacte — navigation native via href)
+  root.querySelector("#acc-centre")?.addEventListener("click", () => {
+    haptic("tap");
+    track("cta.clicked", { cta_type: "centre_examen_card" });
+  });
 
   // Streak badge → bottom sheet
   const bsBg = root.querySelector("#bs-bg");

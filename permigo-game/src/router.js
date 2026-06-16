@@ -15,6 +15,7 @@ const ROUTES = {
     classement: () => import("@/pages/eleve/classement.js"),
     galerie: () => import("@/pages/eleve/galerie.js"),
     examen: () => import("@/pages/eleve/examen.js"),
+    "centre-examen": () => import("@/pages/eleve/centre-examen.js"),
     feedback: () => import("@/pages/eleve/feedback.js"),
     boutique: () => import("@/pages/eleve/boutique.js"),
     "exam-blanc": () => import("@/pages/eleve/exam-blanc.js"),

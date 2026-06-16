@@ -638,6 +638,11 @@ function wire(root) {
       wire(root);
     }
   });
+
+  // Entrée vers la fiche centre d'examen
+  root.querySelector("#exam-centre-link")?.addEventListener("click", () => {
+    track("exam.centre_open", {});
+  });
 }
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -705,6 +710,19 @@ export async function mount(root) {
       ${renderTips()}
     </div>
   </div>
+
+  <!-- 6. CENTRE D'EXAMEN -->
+  <a href="#/centre-examen" class="exam-card exam-centre" id="exam-centre-link"
+     style="display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;cursor:pointer">
+    <div style="width:44px;height:44px;border-radius:12px;background:var(--a);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      ${icon("map", { size: 22 })}
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:15px;font-weight:800">Connais ton centre d'examen</div>
+      <div style="font-size:13px;color:var(--mu2);margin-top:2px">Difficulté, pièges du parcours, conseils sur place.</div>
+    </div>
+    ${icon("chevron-right", { size: 20, color: "var(--mu3)" })}
+  </a>
 
 </div>`;
 
