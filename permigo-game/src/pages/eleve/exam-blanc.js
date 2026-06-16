@@ -10,6 +10,7 @@ import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { getMyChests } from "@/utils/game-state.js";
+import { recordAnswer, getWeakPoints } from "@/utils/weak-points.js";
 import {
   PARCOURS,
   QUESTIONS,
@@ -170,6 +171,27 @@ function renderSelection() {
         <span class="exo-hero-cta">Commencer →</span>
       </button>`;
 
+  const weak = getWeakPoints({ minSeen: 3, limit: 3 });
+  const weakSection = weak.length
+    ? `<div class="exb-weak">
+    <p class="exb-weak-title">🎯 Tes points faibles</p>
+    <div class="exb-weak-list">
+      ${weak
+        .map(
+          (w) => `
+        <button class="exb-weak-btn" data-tag="${esc(w.tag)}" data-label="${esc(w.label)}" aria-label="Réviser ${esc(w.label)}">
+          <span class="exb-weak-info">
+            <span class="exb-weak-nom">${esc(w.label)}</span>
+            <span class="exb-weak-stat">${w.wrong} erreur${w.wrong > 1 ? "s" : ""} · ${Math.round(w.rate * 100)} % ratées</span>
+          </span>
+          <span class="exb-weak-cta">Réviser →</span>
+        </button>`,
+        )
+        .join("")}
+    </div>
+  </div>`
+    : "";
+
   return `
 <div class="exb anim-slide-up" id="exb-screen">
   <div class="exb-sel-header">
@@ -179,6 +201,7 @@ function renderSelection() {
     <p class="exb-sel-sub">L'examen comme le vrai, ou entraîne-toi par thème</p>
   </div>
   ${officiel}
+  ${weakSection}
   <p class="exb-sel-sub2">Ou entraîne-toi par thème · ${PARCOURS.length} parcours de 15 questions</p>
   <div class="exb-pcards" id="exb-pcards">
     ${cards}
@@ -208,6 +231,13 @@ function wireSelection(root) {
       return;
     }
     startExamenOfficiel(root);
+  });
+
+  root.querySelectorAll(".exb-weak-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      haptic("select");
+      startThemeRevision(root, btn.dataset.tag, btn.dataset.label);
+    });
   });
 
   root.querySelectorAll(".exb-pcard").forEach((btn) => {
@@ -311,6 +341,7 @@ function showFeedback(
   renderQuestion,
 ) {
   const isCorrect = chosen === q.correct;
+  recordAnswer(q.tags, isCorrect);
   const isFaute = q.tags?.includes("faute_eliminatoire");
 
   if (isCorrect) {
@@ -677,6 +708,7 @@ function startExamenOfficiel(root) {
       if (answers[idx] !== null) return; // déjà répondu
       answers[idx] = chosen === null ? -1 : chosen;
       const isCorrect = chosen === q.correct;
+      recordAnswer(q.tags, isCorrect);
       if (isCorrect) {
         haptic("success");
         playCorrect();
@@ -817,6 +849,181 @@ function showOfficielResults(root, questions, answers, startedAt) {
   root.querySelector("#exo-retry")?.addEventListener("click", () => {
     haptic("tap");
     startExamenOfficiel(root);
+  });
+  root.querySelector("#exb-other")?.addEventListener("click", () => {
+    haptic("tap");
+    root.innerHTML = renderStyles() + renderSelection();
+    wireSelection(root);
+  });
+  root.querySelector("#exb-home")?.addEventListener("click", () => {
+    haptic("tap");
+    navigate("/");
+  });
+}
+
+// ─── Révision ciblée d'un thème (points faibles) ─────────────
+function startThemeRevision(root, tag, label) {
+  const pool = QUESTIONS.filter((q) => (q.tags || []).includes(tag));
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const questions = pool.slice(0, Math.min(12, pool.length));
+  if (!questions.length) {
+    toast("Pas encore de questions sur ce thème", "info");
+    return;
+  }
+  const answers = new Array(questions.length).fill(null);
+  let idx = 0;
+
+  track("revision_theme.started", { tag, total: questions.length });
+  stopExamMusic();
+  _examStopMusic = playQuizMusic();
+
+  function renderQ() {
+    const q = questions[idx];
+    const num = idx + 1;
+    let answered = false;
+
+    root.querySelector("#exb-screen").innerHTML = `
+      <div class="exb-quiz-header">
+        <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
+        <div class="exo-run-bar">
+          <div class="exo-prog"><div class="exo-prog-fill" style="width:${(num / questions.length) * 100}%"></div></div>
+          <span class="exb-progress-label">${num} / ${questions.length}</span>
+        </div>
+        <span class="exb-quiz-parcours-name">Révision · ${esc(label)}</span>
+      </div>
+      <div class="exb-qbody" id="exb-qbody">
+        <p class="exb-qnum">Question ${num}</p>
+        <p class="exb-qtext">${esc(q.enonce)}</p>
+        <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
+          ${q.options
+            .map(
+              (opt, i) => `
+            <button class="exb-choice" data-idx="${i}" aria-pressed="false">
+              <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
+              <span class="exb-choice-text">${esc(opt)}</span>
+            </button>`,
+            )
+            .join("")}
+        </div>
+        <div class="exb-feedback" id="exb-feedback" hidden></div>
+      </div>`;
+
+    root.querySelector("#exb-quit")?.addEventListener("click", () => {
+      haptic("tap");
+      stopExamMusic();
+      track("revision_theme.quit", { tag, question: num });
+      root.innerHTML = renderStyles() + renderSelection();
+      wireSelection(root);
+    });
+
+    root.querySelectorAll(".exb-choice").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (answered) return;
+        answered = true;
+        const chosen = parseInt(btn.dataset.idx, 10);
+        answers[idx] = chosen;
+        const isCorrect = chosen === q.correct;
+        recordAnswer(q.tags, isCorrect);
+        if (isCorrect) {
+          haptic("success");
+          playCorrect();
+        } else {
+          haptic("warning");
+          playWrong();
+        }
+        root.querySelectorAll(".exb-choice").forEach((b) => {
+          const i = parseInt(b.dataset.idx, 10);
+          b.disabled = true;
+          if (i === q.correct) b.classList.add("exb-choice--correct");
+          if (i === chosen && !isCorrect) b.classList.add("exb-choice--wrong");
+        });
+        const fb = root.querySelector("#exb-feedback");
+        fb.hidden = false;
+        fb.innerHTML = `
+          <div class="exb-feedback-verdict ${isCorrect ? "exb-feedback-verdict--ok" : "exb-feedback-verdict--ko"}">
+            ${isCorrect ? "✓ Bonne réponse" : "La bonne réponse était " + esc(String.fromCharCode(65 + q.correct))}
+          </div>
+          <p class="exb-feedback-explication">${esc(q.explication)}</p>
+          <button class="exb-next-btn" id="exb-next">
+            ${idx + 1 < questions.length ? "Question suivante →" : "Voir le bilan →"}
+          </button>`;
+        root.querySelector("#exb-next")?.addEventListener("click", () => {
+          playPageturn();
+          if (idx + 1 < questions.length) {
+            idx++;
+            renderQ();
+          } else {
+            showRevisionResults(root, questions, answers, tag, label);
+          }
+        });
+      });
+    });
+  }
+
+  renderQ();
+}
+
+function showRevisionResults(root, questions, answers, tag, label) {
+  stopExamMusic();
+  const total = questions.length;
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / total) * 100);
+  const perfect = score === total;
+
+  track("revision_theme.completed", { tag, score, total });
+  if (perfect) playVictory();
+  else playDefeat();
+
+  const wrongItems = questions
+    .map((q, i) => ({ q, chosen: answers[i] }))
+    .filter((x) => x.chosen !== x.q.correct);
+
+  const wrongHtml = perfect
+    ? `<p class="exb-perfect">Sans-faute sur ce thème — tu le maîtrises !</p>`
+    : `
+      <h2 class="exb-recap-title">À revoir (${wrongItems.length})</h2>
+      <div class="exb-recap-list">
+        ${wrongItems
+          .map(
+            ({ q, chosen }) => `
+          <div class="exb-recap-item">
+            <p class="exb-recap-enonce">${esc(q.enonce)}</p>
+            ${chosen != null ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>` : ""}
+            <p class="exb-recap-correct">Bonne réponse : <strong>${esc(q.options[q.correct])}</strong></p>
+            <p class="exb-recap-explication">${esc(q.explication)}</p>
+          </div>`,
+          )
+          .join("")}
+      </div>`;
+
+  root.querySelector("#exb-screen").innerHTML = `
+    <div class="exb-results">
+      <div class="exb-res-top ${perfect ? "exb-res-top--pass" : "exb-res-top--fail"}">
+        <div class="exb-res-ico">${perfect ? "✓" : "↻"}</div>
+        <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
+        <div class="exb-res-pct">${esc(label)} · ${pct} %</div>
+        <div class="exb-res-verdict">Révision terminée</div>
+        <div class="exb-res-cepc">Refais ce thème jusqu'à le maîtriser, puis tente l'examen officiel.</div>
+      </div>
+      <div class="exb-res-body">
+        <div class="exb-res-bar">
+          <div class="exb-res-bar-fill ${perfect ? "exb-res-bar-fill--pass" : ""}" style="width:${pct}%"></div>
+        </div>
+        ${wrongHtml}
+      </div>
+      <div class="exb-res-actions">
+        <button class="exb-start-btn" id="exo-revretry">Refaire ce thème</button>
+        <button class="exb-retry-btn" id="exb-other">Retour</button>
+        <button class="exb-quit-btn-text" id="exb-home">← Accueil</button>
+      </div>
+    </div>`;
+
+  root.querySelector("#exo-revretry")?.addEventListener("click", () => {
+    haptic("tap");
+    startThemeRevision(root, tag, label);
   });
   root.querySelector("#exb-other")?.addEventListener("click", () => {
     haptic("tap");
@@ -1297,6 +1504,41 @@ function renderStyles() {
   text-transform: uppercase;
   margin: 22px 16px 10px;
 }
+
+/* ── Section « Tes points faibles » ── */
+.exb-weak {
+  margin: 16px 16px 0;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
+  border-radius: 18px;
+  padding: 14px 14px 8px;
+}
+.exb-weak-title {
+  font: 800 13px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  margin: 0 0 10px;
+  letter-spacing: -.01em;
+}
+.exb-weak-list { display: flex; flex-direction: column; gap: 8px; }
+.exb-weak-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; text-align: left;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1.5px solid var(--bo);
+  border-left: 3px solid var(--am, #f59e0b);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color .12s, transform .1s;
+}
+.exb-weak-btn:active { transform: scale(.98); }
+.exb-weak-btn:hover { border-color: var(--a); }
+.exb-weak-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.exb-weak-nom { font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
+.exb-weak-stat { font: 500 12px/1.2 'Inter', sans-serif; color: var(--mu); }
+.exb-weak-cta { flex-shrink: 0; font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-txt); }
+
 .exo-hero {
   display: flex;
   flex-direction: column;
