@@ -16,6 +16,7 @@ import {
   QUESTIONS,
   questionsForParcours,
 } from "@/data/parcours-quiz.js";
+import { getCentre } from "@/data/centres-examen.js";
 import { toast } from "@/components/common/toast.js";
 import {
   computeTheoryGain,
@@ -104,7 +105,7 @@ function renderTrack(questions, answers, currentIdx) {
 }
 
 // ─── Mount ───────────────────────────────────────────────────
-export async function mount(root) {
+export async function mount(root, param) {
   const me = getCurUser();
   if (!me) return;
 
@@ -129,6 +130,18 @@ export async function mount(root) {
     );
   } catch (_) {
     /* DB indispo → on reste prudemment verrouillé */
+  }
+
+  // Deep-link depuis la fiche centre : #/exam-blanc/c-<slug>
+  // → lance directement la révision du centre sans afficher la sélection.
+  if (param && param.startsWith("c-")) {
+    const slug = param.slice(2);
+    const centre = getCentre(slug);
+    if (centre) {
+      root.innerHTML = renderStyles() + renderSelection();
+      startCentreRevision(root, slug);
+      return;
+    }
   }
 
   root.innerHTML = renderStyles() + renderSelection();
@@ -861,22 +874,21 @@ function showOfficielResults(root, questions, answers, startedAt) {
   });
 }
 
-// ─── Révision ciblée d'un thème (points faibles) ─────────────
-function startThemeRevision(root, tag, label) {
-  const pool = QUESTIONS.filter((q) => (q.tags || []).includes(tag));
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  const questions = pool.slice(0, Math.min(12, pool.length));
-  if (!questions.length) {
-    toast("Pas encore de questions sur ce thème", "info");
-    return;
-  }
+// ─── Révision générique (coeur réutilisable) ──────────────────
+// questions : tableau déjà mélangé + slicé
+// opts.label       : affiché dans le header du quiz + le bilan
+// opts.trackName   : nom de l'event analytics ("revision_theme" | "revision_centre")
+// opts.trackMeta   : objet fusionné dans les events analytics
+// opts.retryFn     : callback appelé par le bouton « Refaire »
+function runRevision(
+  root,
+  questions,
+  { label, trackName, trackMeta, retryFn, backRoute = null },
+) {
   const answers = new Array(questions.length).fill(null);
   let idx = 0;
 
-  track("revision_theme.started", { tag, total: questions.length });
+  track(`${trackName}.started`, { ...trackMeta, total: questions.length });
   stopExamMusic();
   _examStopMusic = playQuizMusic();
 
@@ -914,9 +926,13 @@ function startThemeRevision(root, tag, label) {
     root.querySelector("#exb-quit")?.addEventListener("click", () => {
       haptic("tap");
       stopExamMusic();
-      track("revision_theme.quit", { tag, question: num });
-      root.innerHTML = renderStyles() + renderSelection();
-      wireSelection(root);
+      track(`${trackName}.quit`, { ...trackMeta, question: num });
+      if (backRoute) {
+        navigate(backRoute);
+      } else {
+        root.innerHTML = renderStyles() + renderSelection();
+        wireSelection(root);
+      }
     });
 
     root.querySelectorAll(".exb-choice").forEach((btn) => {
@@ -956,7 +972,12 @@ function startThemeRevision(root, tag, label) {
             idx++;
             renderQ();
           } else {
-            showRevisionResults(root, questions, answers, tag, label);
+            showRevisionResults(root, questions, answers, label, {
+              trackName,
+              trackMeta,
+              retryFn,
+              backRoute,
+            });
           }
         });
       });
@@ -966,14 +987,70 @@ function startThemeRevision(root, tag, label) {
   renderQ();
 }
 
-function showRevisionResults(root, questions, answers, tag, label) {
+// ─── Révision ciblée d'un thème (points faibles) ─────────────
+function startThemeRevision(root, tag, label) {
+  const pool = QUESTIONS.filter((q) => (q.tags || []).includes(tag));
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const questions = pool.slice(0, Math.min(12, pool.length));
+  if (!questions.length) {
+    toast("Pas encore de questions sur ce thème", "info");
+    return;
+  }
+  runRevision(root, questions, {
+    label,
+    trackName: "revision_theme",
+    trackMeta: { tag },
+    retryFn: () => startThemeRevision(root, tag, label),
+  });
+}
+
+// ─── Révision multi-tags par centre d'examen ─────────────────
+function startCentreRevision(root, slug) {
+  const c = getCentre(slug);
+  if (!c) {
+    toast("Centre inconnu", "info");
+    return;
+  }
+  const tags = c.quizTags || [];
+  const pool = QUESTIONS.filter((q) =>
+    (q.tags || []).some((t) => tags.includes(t)),
+  );
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const questions = pool.slice(0, Math.min(15, pool.length));
+  if (!questions.length) {
+    toast("Pas encore de questions pour ce centre", "info");
+    return;
+  }
+  const label = `Pièges de ${c.nom}`;
+  runRevision(root, questions, {
+    label,
+    trackName: "revision_centre",
+    trackMeta: { centre: slug },
+    retryFn: () => startCentreRevision(root, slug),
+    backRoute: `/centre-examen/${slug}`,
+  });
+}
+
+function showRevisionResults(
+  root,
+  questions,
+  answers,
+  label,
+  { trackName, trackMeta, retryFn, backRoute = null },
+) {
   stopExamMusic();
   const total = questions.length;
   const score = answers.filter((a, i) => a === questions[i].correct).length;
   const pct = Math.round((score / total) * 100);
   const perfect = score === total;
 
-  track("revision_theme.completed", { tag, score, total });
+  track(`${trackName}.completed`, { ...trackMeta, score, total });
   if (perfect) playVictory();
   else playDefeat();
 
@@ -1006,7 +1083,7 @@ function showRevisionResults(root, questions, answers, tag, label) {
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
         <div class="exb-res-pct">${esc(label)} · ${pct} %</div>
         <div class="exb-res-verdict">Révision terminée</div>
-        <div class="exb-res-cepc">Refais ce thème jusqu'à le maîtriser, puis tente l'examen officiel.</div>
+        <div class="exb-res-cepc">Refais cette série jusqu'à la maîtriser, puis tente l'examen officiel.</div>
       </div>
       <div class="exb-res-body">
         <div class="exb-res-bar">
@@ -1015,7 +1092,7 @@ function showRevisionResults(root, questions, answers, tag, label) {
         ${wrongHtml}
       </div>
       <div class="exb-res-actions">
-        <button class="exb-start-btn" id="exo-revretry">Refaire ce thème</button>
+        <button class="exb-start-btn" id="exo-revretry">Refaire</button>
         <button class="exb-retry-btn" id="exb-other">Retour</button>
         <button class="exb-quit-btn-text" id="exb-home">← Accueil</button>
       </div>
@@ -1023,12 +1100,16 @@ function showRevisionResults(root, questions, answers, tag, label) {
 
   root.querySelector("#exo-revretry")?.addEventListener("click", () => {
     haptic("tap");
-    startThemeRevision(root, tag, label);
+    if (retryFn) retryFn();
   });
   root.querySelector("#exb-other")?.addEventListener("click", () => {
     haptic("tap");
-    root.innerHTML = renderStyles() + renderSelection();
-    wireSelection(root);
+    if (backRoute) {
+      navigate(backRoute);
+    } else {
+      root.innerHTML = renderStyles() + renderSelection();
+      wireSelection(root);
+    }
   });
   root.querySelector("#exb-home")?.addEventListener("click", () => {
     haptic("tap");

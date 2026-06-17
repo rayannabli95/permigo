@@ -24,6 +24,8 @@ export const CENTRES_EXAMEN = [
     mapsQuery: "Centre d'examen permis 2 rue des Gémeaux 95800 Cergy",
     difficulte: 3, // sur 5
     difficulteLabel: "Intermédiaire",
+    // Tags du pool de questions ciblant les pièges de ce centre
+    quizTags: ["rond_point", "cycliste", "vitesse"],
 
     resume:
       "Cergy a la réputation d'un examen « piège mais juste » : pas de difficulté extrême, " +
@@ -116,6 +118,7 @@ export const CENTRES_EXAMEN = [
     mapsQuery: "Centre d'examen permis 235 rue d'Epinay 95100 Argenteuil",
     difficulte: 4,
     difficulteLabel: "Difficile",
+    quizTags: ["vitesse", "priorite", "cycliste", "manoeuvre"],
     resume:
       "Argenteuil est considéré comme le centre le plus exigeant du Val-d'Oise : tu passes en quelques secondes d'un quartier résidentiel calme à un grand axe à fort trafic, avec des insertions sur voie rapide en prime. L'environnement urbain dense, les comportements imprévisibles des usagers et la diversité des situations de conduite t'imposent une vigilance de tous les instants. Pas de panique : avec un entraînement sérieux sur le secteur, tu transformes cette réputation intimidante en vraie longueur d'avance le jour J.",
     acces: [
@@ -195,6 +198,7 @@ export const CENTRES_EXAMEN = [
       "Centre d'examen permis 320 avenue Paul Vaillant Couturier 93000 Bobigny",
     difficulte: 5,
     difficulteLabel: "Très difficile",
+    quizTags: ["vitesse", "priorite", "manoeuvre"],
     resume:
       "Bobigny fait partie des centres les plus exigeants d'Île-de-France. Entre les boulevards à fort trafic, les insertions sur voies rapides type A86 ou A3 et la densité urbaine permanente du 93, l'examen ici ne laisse aucune place à l'improvisation. Si tu maîtrises Bobigny, tu peux conduire n'importe où — alors autant en faire une force et arriver le jour J vraiment prêt.",
     acces: [
@@ -273,6 +277,7 @@ export const CENTRES_EXAMEN = [
     mapsQuery: "Centre d'examen permis 12 rue des Archives 94000 Créteil",
     difficulte: 4,
     difficulteLabel: "Difficile",
+    quizTags: ["vitesse", "rond_point", "priorite"],
     resume:
       "Créteil t'emmène sur un terrain varié et exigeant : tu vas enchaîner les quartiers résidentiels denses, les grands axes à fort trafic, puis des insertions sur voies rapides à 90 km/h (A4, A86). Les giratoires sont omniprésents et la circulation hachée te demande de rester concentré de la première à la dernière seconde. Pas de panique — avec une bonne préparation et des automatismes solides, c'est tout à fait gérable. C'est le type de centre qui valorise les candidats vraiment à l'aise en conditions réelles.",
     acces: [
@@ -352,6 +357,7 @@ export const CENTRES_EXAMEN = [
       "Centre d'examen permis 27-29 avenue Jules Quentin 92000 Nanterre",
     difficulte: 4,
     difficulteLabel: "Difficile",
+    quizTags: ["vitesse", "priorite", "cycliste"],
     resume:
       "Nanterre, c'est un examen qui ne te laisse pas le temps de souffler. Tu passes d'un centre-ville animé et serré à des axes rapides comme l'A86 ou l'A14, en bordure directe du quartier d'affaires de La Défense. Le trafic est dense, les poids lourds sont présents sur la rocade, et les limites de vitesse changent sans toujours être annoncées clairement. Un centre qui récompense vraiment ceux qui ont roulé sur place avant le jour J.",
     acces: [
@@ -431,6 +437,7 @@ export const CENTRES_EXAMEN = [
       "Centre d'examen permis 7 rue Léon Teisserenc de Bort 78190 Trappes",
     difficulte: 3,
     difficulteLabel: "Intermédiaire",
+    quizTags: ["vitesse", "priorite", "rond_point"],
     resume:
       "Trappes, c'est un centre qui te fait vivre plusieurs visages de la route en une seule sortie : zones résidentielles calmes, boulevard urbain, et insertions sur grand axe. Le tout sans te prévenir de l'ordre. La N10 impose des changements de limitation rapides à maîtriser, et les quartiers de Pissaloup et de La Boissière réservent des priorités à droite qui surprennent ceux qui ne les ont pas travaillées. Bien préparé, ce centre est tout à fait accessible.",
     acces: [
