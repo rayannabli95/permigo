@@ -428,64 +428,82 @@ const STYLE = `<style>
 .world-count { font: 500 11.5px/1 'Inter', sans-serif; color: var(--mu2); }
 .world-crown { position: absolute; top: 10px; right: 10px; }
 
-/* ── Examen blanc — verrouillé jusqu'au monde 3, sinon CTA ── */
-.acc2-exam {
+/* ══ PermiGo+ — zone premium (examen blanc + centre d'examen) ══ */
+/* Billboard sombre premium : fait ressortir le glass en light ET dark,
+   et signale visuellement le palier payant. Rien à voir avec les autres widgets. */
+.pplus {
+  position: relative;
   margin: 28px 16px 0;
-  padding: 18px;
-  border-radius: var(--rx);
-  display: flex; align-items: center; gap: 14px;
-  -webkit-tap-highlight-color: transparent;
+  padding: 15px 13px 13px;
+  border-radius: 22px;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 85% at 0% 0%, rgba(139,92,246,.36) 0%, transparent 55%),
+    radial-gradient(130% 95% at 100% 100%, rgba(245,158,11,.20) 0%, transparent 52%),
+    linear-gradient(152deg, #221a3d 0%, #171232 46%, #0d0a1f 100%);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow:
+    0 18px 44px -16px rgba(76,29,149,.6),
+    inset 0 1px 0 rgba(255,255,255,.10);
 }
-.acc2-exam.locked {
-  background: var(--su);
-  border: 1.5px dashed var(--bo4);
+.pplus::before {
+  content: "";
+  position: absolute; left: -18%; top: -55%;
+  width: 180px; height: 180px;
+  background: radial-gradient(circle, rgba(251,191,36,.28), transparent 70%);
+  filter: blur(22px); pointer-events: none; z-index: -1;
 }
-.acc2-exam.unlocked {
-  background: linear-gradient(135deg, var(--adk) 0%, var(--a) 100%);
-  cursor: pointer;
-  box-shadow: 0 12px 28px -10px color-mix(in srgb, var(--a) 50%, transparent);
-  transition: transform .15s var(--ease-spring);
+.pplus-head { display: flex; align-items: center; gap: 11px; padding: 2px 4px 12px; }
+.pplus-crown {
+  width: 34px; height: 34px; object-fit: contain; flex-shrink: 0;
+  filter: drop-shadow(0 4px 10px rgba(251,191,36,.45));
 }
-.acc2-exam.unlocked:active { transform: scale(.98); }
-.acc2-exam-ico {
-  width: 44px; height: 44px;
-  border-radius: var(--r-lg);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+.pplus-title {
+  font: 800 17px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em;
+  background: linear-gradient(100deg, #fde68a, #fbbf24 55%, #f59e0b);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.acc2-exam.locked .acc2-exam-ico { background: var(--bg3); color: var(--mu2); }
-.acc2-exam.unlocked .acc2-exam-ico { background: rgba(255,255,255,.18); color: #fff; }
-.acc2-exam-tx { flex: 1; min-width: 0; }
-.acc2-exam-t { font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif; }
-.acc2-exam.locked .acc2-exam-t { color: var(--mu); }
-.acc2-exam.unlocked .acc2-exam-t { color: #fff; }
-.acc2-exam-s { font: 500 13px/1.35 'Inter', sans-serif; margin-top: 3px; }
-.acc2-exam.locked .acc2-exam-s { color: var(--mu2); }
-.acc2-exam.unlocked .acc2-exam-s { color: rgba(255,255,255,.85); }
-.acc2-exam-arrow { flex-shrink: 0; color: #fff; display: flex; }
+.pplus-title span { -webkit-text-fill-color: #a855f7; color: #a855f7; }
+.pplus-sub { font: 500 12px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.62); margin-top: 3px; }
 
-/* Entrée compacte « centre d'examen » — volontairement discrète */
-.acc2-centre {
-  margin: 12px 16px 0;
-  padding: 12px 14px;
-  border-radius: var(--r-lg);
-  background: var(--su);
-  border: 1px solid var(--bo);
-  display: flex; align-items: center; gap: 12px;
-  text-decoration: none; color: inherit;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .12s;
+.pplus-cards { display: flex; flex-direction: column; gap: 10px; }
+.pplus-card {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; gap: 13px;
+  min-height: 64px; padding: 11px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.07);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid rgba(255,255,255,.13);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px -10px rgba(0,0,0,.5);
+  text-decoration: none; -webkit-tap-highlight-color: transparent;
+  transition: transform .15s var(--ease-spring), background .2s, border-color .2s;
 }
-.acc2-centre:active { transform: scale(.98); }
-.acc2-centre-ico {
-  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-  background: var(--bg3); color: var(--a);
-  display: flex; align-items: center; justify-content: center;
+.pplus-card.tappable { cursor: pointer; }
+.pplus-card.tappable:active { transform: scale(.98); }
+.pplus-card.tappable:hover { background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.22); }
+.pplus-card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.16) 50%, transparent 65%);
+  transform: translateX(-120%); transition: transform .7s ease;
 }
-.acc2-centre-tx { flex: 1; min-width: 0; }
-.acc2-centre-t { font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
-.acc2-centre-s { font: 500 12px/1.3 'Inter', sans-serif; margin-top: 2px; color: var(--mu2); }
-.acc2-centre > svg { color: var(--mu3); flex-shrink: 0; }
+.pplus-card.tappable:hover::after { transform: translateX(120%); }
+.pplus-badge {
+  width: 48px; height: 48px; object-fit: contain; flex-shrink: 0;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.4));
+}
+.pplus-tx { flex: 1; min-width: 0; }
+.pplus-t { font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif; color: #fff; }
+.pplus-s { font: 500 12.5px/1.35 'Inter', sans-serif; color: rgba(255,255,255,.66); margin-top: 2px; }
+.pplus-arrow { flex-shrink: 0; color: rgba(255,255,255,.5); display: flex; }
+.pplus-card.locked { opacity: .58; }
+.pplus-card.locked .pplus-badge { filter: grayscale(.7) drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
+.pplus-lock { flex-shrink: 0; color: rgba(255,255,255,.5); display: flex; }
+@media (prefers-reduced-motion: reduce) {
+  .pplus-card, .pplus-card::after { transition: none; }
+}
 
 /* Leaderboard slot */
 .acc-lb {
@@ -998,37 +1016,47 @@ function render({
       .join("")}
   </div>
 
-  <!-- ══ EXAMEN BLANC — verrouillé jusqu'au monde 3 ══ -->
-  ${
-    examUnlocked
-      ? `
-  <div class="acc2-exam unlocked" id="acc-exam" role="button" tabindex="0" aria-label="Passer l'examen blanc">
-    <div class="acc2-exam-ico">${icon("target", { size: 20 })}</div>
-    <div class="acc2-exam-tx">
-      <div class="acc2-exam-t">Examen blanc</div>
-      <div class="acc2-exam-s">Mets-toi en conditions réelles</div>
+  <!-- ══ PERMIGO+ — fiches premium (examen blanc + centre d'examen) ══ -->
+  <section class="pplus" aria-label="PermiGo+ — prépa examen premium">
+    <div class="pplus-head">
+      <img class="pplus-crown" src="/skins/couronne.png" alt="" aria-hidden="true" loading="lazy">
+      <div>
+        <div class="pplus-title">PermiGo<span>+</span></div>
+        <div class="pplus-sub">Ta prépa examen, version premium</div>
+      </div>
     </div>
-    <div class="acc2-exam-arrow">${icon("arrow-right", { size: 18 })}</div>
-  </div>`
-      : `
-  <div class="acc2-exam locked" aria-label="Examen blanc verrouillé — se débloque au monde 3">
-    <div class="acc2-exam-ico">${icon("lock", { size: 18 })}</div>
-    <div class="acc2-exam-tx">
-      <div class="acc2-exam-t">Examen blanc</div>
-      <div class="acc2-exam-s">Se débloque au monde 3</div>
+    <div class="pplus-cards">
+      ${
+        examUnlocked
+          ? `
+      <div class="pplus-card tappable" id="acc-exam" role="button" tabindex="0" aria-label="Passer l'examen blanc">
+        <img class="pplus-badge" src="/skins/badge-3d-ultimate.webp" alt="" aria-hidden="true" loading="lazy">
+        <div class="pplus-tx">
+          <div class="pplus-t">Examen blanc</div>
+          <div class="pplus-s">Mets-toi en conditions réelles</div>
+        </div>
+        <span class="pplus-arrow">${icon("arrow-right", { size: 18 })}</span>
+      </div>`
+          : `
+      <div class="pplus-card locked" aria-label="Examen blanc — se débloque au monde 3">
+        <img class="pplus-badge" src="/skins/badge-3d-ultimate.webp" alt="" aria-hidden="true" loading="lazy">
+        <div class="pplus-tx">
+          <div class="pplus-t">Examen blanc</div>
+          <div class="pplus-s">Se débloque au monde 3</div>
+        </div>
+        <span class="pplus-lock">${icon("lock", { size: 16 })}</span>
+      </div>`
+      }
+      <a class="pplus-card tappable" id="acc-centre" href="#/centre-examen" aria-label="Découvre ton centre d'examen">
+        <img class="pplus-badge" src="/skins/badge-3d-05.webp" alt="" aria-hidden="true" loading="lazy">
+        <div class="pplus-tx">
+          <div class="pplus-t">Ton centre d'examen</div>
+          <div class="pplus-s">Pièges &amp; conseils sur ton centre</div>
+        </div>
+        <span class="pplus-arrow">${icon("chevron-right", { size: 18 })}</span>
+      </a>
     </div>
-  </div>`
-  }
-
-  <!-- CENTRE D'EXAMEN (entrée compacte) -->
-  <a class="acc2-centre" id="acc-centre" href="#/centre-examen" aria-label="Découvre ton centre d'examen">
-    <div class="acc2-centre-ico">${icon("map", { size: 18 })}</div>
-    <div class="acc2-centre-tx">
-      <div class="acc2-centre-t">Ton centre d'examen</div>
-      <div class="acc2-centre-s">Pièges &amp; conseils sur place</div>
-    </div>
-    ${icon("chevron-right", { size: 18 })}
-  </a>
+  </section>
 
 </div>
 
