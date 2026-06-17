@@ -383,41 +383,47 @@ async function handleComplete(
         "info",
       );
   } else if (validated) {
-    // Écran plein écran premium "Nouvelle compétence acquise" (Nike/COD/Strava).
-    // Compte le total de compétences acquises pour le bloc stats + la barre.
-    let acquiredCount = null;
-    try {
-      const { count } = await sb
-        .from("validations")
-        .select("id", { count: "exact", head: true })
-        .eq("eleve_id", me.id)
-        .eq("statut", "acquis");
-      if (typeof count === "number") acquiredCount = count;
-    } catch {
-      /* best-effort — l'écran s'affiche sans le compteur */
-    }
-    // Marque la compétence comme célébrée AVANT l'écran : évite que le
-    // parcours la re-célèbre (le ledger est partagé entre les deux chemins).
+    // Marque la compétence comme célébrée (ledger partagé avec le parcours)
+    // pour éviter une double-célébration, quel que soit le mode.
     const { markCompetenceCelebrated } =
       await import("@/services/competence-celebration.js");
     markCompetenceCelebrated(competenceId);
-    const { showCompetenceUnlock } =
-      await import("@/components/eleve/competence-unlock.js");
-    showCompetenceUnlock({
-      competenceCode: competenceId,
-      scorePct,
-      validatedCount: acquiredCount,
-      ctaLabel: "Voir mon parcours",
-      source: "quiz",
-      onCta: () => {
-        location.hash = "#/parcours";
-      },
-      // L'install nudge se déclenche à la fermeture pour éviter d'empiler
-      // deux overlays (hors question du jour, déjà opt-in push).
-      onClose: () => {
-        if (!canChain) promptInstallAtValueMoment(me, "eleve_quiz_reussi");
-      },
-    });
+
+    // En ENCHAÎNEMENT de révision, on ne coupe pas la boucle avec l'écran
+    // plein écran « Compétence acquise » à chaque quiz (souvent une compétence
+    // déjà acquise qu'on re-révise) : le flux reste fluide et la célébration
+    // est réservée au récap de fin de session. Hors révision : écran premium.
+    if (!isRevision) {
+      // Compte le total de compétences acquises pour le bloc stats + la barre.
+      let acquiredCount = null;
+      try {
+        const { count } = await sb
+          .from("validations")
+          .select("id", { count: "exact", head: true })
+          .eq("eleve_id", me.id)
+          .eq("statut", "acquis");
+        if (typeof count === "number") acquiredCount = count;
+      } catch {
+        /* best-effort — l'écran s'affiche sans le compteur */
+      }
+      const { showCompetenceUnlock } =
+        await import("@/components/eleve/competence-unlock.js");
+      showCompetenceUnlock({
+        competenceCode: competenceId,
+        scorePct,
+        validatedCount: acquiredCount,
+        ctaLabel: "Voir mon parcours",
+        source: "quiz",
+        onCta: () => {
+          location.hash = "#/parcours";
+        },
+        // L'install nudge se déclenche à la fermeture pour éviter d'empiler
+        // deux overlays (hors question du jour, déjà opt-in push).
+        onClose: () => {
+          if (!canChain) promptInstallAtValueMoment(me, "eleve_quiz_reussi");
+        },
+      });
+    }
   } else if (!passed) {
     toast("Presque ! Il te faut 70% pour valider. Réessaie.", "info");
   } else {
