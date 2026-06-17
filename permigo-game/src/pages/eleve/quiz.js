@@ -192,6 +192,14 @@ export async function mount(root, params = {}) {
     params?.autoStart || hashParts[3] === "auto" || isDaily || isRevision;
   let competenceId = params?.competenceId || hashParts[1] || null;
 
+  // Session de révision : capture l'état de départ (rang ligue Révision) AVANT
+  // le 1er quiz, pour le récap de fin de session. Idempotent (no-op si déjà active).
+  if (isRevision) {
+    import("@/services/revision-session.js")
+      .then((m) => m.ensureRevisionSessionStarted())
+      .catch(() => {});
+  }
+
   // Mode révision sans cible explicite → on délègue le choix au service.
   if (isRevision && (!competenceId || competenceId === "next")) {
     try {
@@ -429,6 +437,14 @@ async function handleComplete(
     promptInstallAtValueMoment(me, "eleve_quiz_reussi");
   }
 
+  // Comptage de la session de révision (pour le récap de fin de session).
+  if (isRevision) {
+    const quizPassed = !!validated || !!passed || scorePct >= 70;
+    import("@/services/revision-session.js")
+      .then((m) => m.noteRevisionQuiz({ passed: quizPassed }))
+      .catch(() => {});
+  }
+
   renderResult(root, {
     score,
     total,
@@ -438,6 +454,7 @@ async function handleComplete(
     reason,
     type,
     isDaily,
+    isRevision,
     canChain,
     me,
     competenceId,
@@ -455,6 +472,7 @@ function renderResult(
     reason,
     type,
     isDaily = false,
+    isRevision = false,
     canChain = false,
     me = null,
     competenceId = null,
@@ -521,10 +539,40 @@ function renderResult(
     location.hash = `#/quiz/${next || "next"}/post_validation/revision/${Date.now()}`;
   });
 
-  root.querySelector("#btn-parcours")?.addEventListener("click", () => {
+  root.querySelector("#btn-parcours")?.addEventListener("click", async (e) => {
+    // En mode révision, « Voir mon parcours » = quitter l'enchaînement →
+    // on affiche d'abord le récap de session (Clash Royale), puis on navigue.
+    if (isRevision) {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      const src = await runRevisionRecap();
+      location.hash =
+        src === "secondary" ? "#/classement/revision" : "#/parcours";
+      return;
+    }
     location.hash = "#/parcours";
   });
   root.querySelector("#btn-home")?.addEventListener("click", () => {
     location.hash = "#/";
   });
+}
+
+// Récap de fin de session révision (façon Clash Royale). Retourne la source de
+// fermeture ('cta' | 'secondary' | 'close') ou null si rien n'a été affiché.
+async function runRevisionRecap() {
+  try {
+    const sess = await import("@/services/revision-session.js");
+    if (!sess.isRevisionSessionActive()) return null;
+    const summary = await sess.buildRevisionSummary();
+    sess.clearRevisionSession();
+    if (!summary || (summary.nQuiz ?? 0) === 0) return null;
+    const { showRevisionRecap } =
+      await import("@/components/eleve/revision-recap.js");
+    // onSecondary présent → fait apparaître le lien « Voir le classement » ;
+    // la navigation finale est décidée par la source de fermeture ci-dessus.
+    return await showRevisionRecap(summary, { onSecondary: () => {} });
+  } catch (e) {
+    console.warn("[quiz] revision recap failed", e);
+    return null;
+  }
 }
