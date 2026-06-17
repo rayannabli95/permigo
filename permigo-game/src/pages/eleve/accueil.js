@@ -555,11 +555,25 @@ const STYLE = `<style>
 }
 .acc-lg-rank {
   font: 800 28px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink);
-  letter-spacing: -.03em; margin: 10px 0 3px; position: relative; z-index: 1;
+  letter-spacing: -.03em; margin: 10px 0 0; position: relative; z-index: 1;
+}
+.acc-lg-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  width: 100%; margin-top: auto; padding-top: 8px;
+  position: relative; z-index: 1;
 }
 .acc-lg-sub {
   font: 500 11.5px/1.3 'Inter', sans-serif; color: var(--mu2);
-  position: relative; z-index: 1;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.acc-lg-go {
+  flex-shrink: 0; display: inline-flex; align-items: center;
+  color: var(--a-txt); opacity: .9;
+  transition: transform .15s var(--ease-spring);
+}
+.acc-lg-card:active .acc-lg-go { transform: translateX(2px); }
+@media (hover:hover) and (pointer:fine) {
+  .acc-lg-card:hover .acc-lg-go { transform: translateX(2px); }
 }
 
 /* ── Bottom sheet streak ── */
@@ -1386,13 +1400,19 @@ async function _loadAndInjectLeagues(root) {
                 aria-label="Ligue École, ${esc(ecoleRanked ? `${ecoleRank} sur ${pos.total_eleves}` : "pas encore classé")} — voir le classement">
           <span class="acc-lg-tag">${icon("trophy", { size: 13, strokeWidth: 2 })} Ligue École</span>
           <span class="acc-lg-rank">${esc(ecoleRank)}</span>
-          <span class="acc-lg-sub">${esc(ecoleSub)}</span>
+          <span class="acc-lg-foot">
+            <span class="acc-lg-sub">${esc(ecoleSub)}</span>
+            <span class="acc-lg-go">${icon("chevron-right", { size: 16, strokeWidth: 2.5 })}</span>
+          </span>
         </button>
         <button class="acc-lg-card" id="acc-lg-rev" data-go="#/classement/revision"
                 aria-label="Ligue Révision, ${esc(revClassed ? revRank : "pas encore classé")} — voir le classement">
           <span class="acc-lg-tag">${icon("zap", { size: 13, strokeWidth: 2 })} Ligue Révision</span>
           <span class="acc-lg-rank">${esc(revRank)}</span>
-          <span class="acc-lg-sub">${esc(revSub)}</span>
+          <span class="acc-lg-foot">
+            <span class="acc-lg-sub">${esc(revSub)}</span>
+            <span class="acc-lg-go">${icon("chevron-right", { size: 16, strokeWidth: 2.5 })}</span>
+          </span>
         </button>
       </div>`;
 

@@ -67,25 +67,6 @@ function remcLeague(score) {
     next: REMC_LEAGUES[idx + 1] || null, // null = prochain palier = Élite/permis
   };
 }
-// Médailles top 3 : dégradé + icône + halo (or / argent / bronze)
-const MEDALS = {
-  1: {
-    grad: "linear-gradient(145deg,#fde68a,#f59e0b)",
-    ico: "crown",
-    glow: "rgba(245,158,11,.4)",
-  },
-  2: {
-    grad: "linear-gradient(145deg,#f1f5f9,#94a3b8)",
-    ico: "award",
-    glow: "rgba(148,163,184,.35)",
-  },
-  3: {
-    grad: "linear-gradient(145deg,#fcd34d,#b45309)",
-    ico: "award",
-    glow: "rgba(180,83,9,.35)",
-  },
-};
-
 // ─── Countdown : temps restant jusqu'au lundi 00:00 ────────────
 function msToNextMonday() {
   const now = new Date();
@@ -290,6 +271,64 @@ ${LEAGUE_CSS}
   background: color-mix(in srgb, var(--a) 14%, transparent);
   padding: 4px 8px; border-radius: var(--r-full);
 }
+
+/* ── Podium top-3 ── */
+.clt-podium {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 8px; padding: 14px 16px 18px;
+}
+.clt-pod {
+  flex: 1; max-width: 33.33%; min-width: 0;
+  display: flex; flex-direction: column; align-items: center;
+}
+.clt-pod-av {
+  position: relative; border-radius: 50%; padding: 3px;
+  background: var(--ring, var(--bo));
+  box-shadow: 0 5px 14px -4px color-mix(in srgb, var(--ring, var(--mu2)) 60%, transparent);
+}
+.clt-pod.me .clt-pod-av { box-shadow: 0 0 0 2.5px #6366f1, 0 5px 14px -4px color-mix(in srgb, var(--ring) 55%, transparent); }
+.clt-pod-medal {
+  position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--ring); color: #fff; border: 2.5px solid var(--su);
+  display: flex; align-items: center; justify-content: center;
+  font: 800 11px/1 'Plus Jakarta Sans', sans-serif;
+}
+.clt-pod-name {
+  font: 700 12px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  margin: 11px 0 0; text-align: center; max-width: 100%;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.clt-pod.me .clt-pod-name { color: var(--a-txt); }
+.clt-pod-base {
+  width: 100%; margin-top: 8px; border-radius: 12px 12px 0 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
+}
+.clt-pod-1 .clt-pod-base { height: 76px; background: linear-gradient(180deg,#fcd34d,#f59e0b); }
+.clt-pod-2 .clt-pod-base { height: 56px; background: linear-gradient(180deg,#e2e8f0,#94a3b8); }
+.clt-pod-3 .clt-pod-base { height: 44px; background: linear-gradient(180deg,#fcd9a8,#c08434); }
+.clt-pod-score { font: 800 16px/1 'Plus Jakarta Sans', sans-serif; }
+.clt-pod-score span { font-size: 10px; font-weight: 600; opacity: .85; margin-left: 1px; }
+
+/* ── Rangs épurés (au-delà du podium) ── */
+.clt-row2 {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--su); border: 1px solid var(--bo);
+  border-left: 3px solid var(--lc, var(--bo));
+  border-radius: var(--r-md); padding: 9px 13px;
+}
+.clt-row2.me { border-color: #6366f1; border-left-color: #6366f1; background: rgba(99,102,241,.06); }
+.clt-rank2 {
+  flex-shrink: 0; min-width: 22px; text-align: center;
+  font: 700 13px/1 'IBM Plex Mono', monospace; color: var(--mu2);
+}
+.clt-row2 .clt-name { flex: 1; }
+.clt-score2 {
+  flex-shrink: 0; font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink); display: flex; align-items: baseline; gap: 2px;
+}
+.clt-score2 span { font: 600 10px/1 'Inter', sans-serif; color: var(--mu2); }
 </style>`;
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -506,7 +545,64 @@ function _theoryLeagueHero(mine) {
   </div>`;
 }
 
-// ── Corps ligue théorique ────────────────────────────────────────
+// ── Podium top-3 (partagé École + Révision) ──────────────────────
+// Couleurs de médaille par rang ; l'ordre visuel place le 1er au centre.
+const PODIUM = {
+  1: { ring: "#f59e0b", cls: "clt-pod-1" },
+  2: { ring: "#94a3b8", cls: "clt-pod-2" },
+  3: { ring: "#c08434", cls: "clt-pod-3" },
+};
+function _podium(top3, fmtScore) {
+  const byRang = {};
+  top3.forEach((r) => {
+    byRang[r.rang] = r;
+  });
+  const order = [byRang[2], byRang[1], byRang[3]]; // 2 · 1 · 3
+  return `<div class="clt-podium">${order
+    .map((r) => {
+      if (!r) return `<div class="clt-pod" aria-hidden="true"></div>`;
+      const p = PODIUM[r.rang];
+      return `
+      <div class="clt-pod ${p.cls} ${r.is_me ? "me" : ""}">
+        <div class="clt-pod-av" style="--ring:${p.ring}">
+          ${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 48)}
+          <span class="clt-pod-medal" aria-label="Rang ${r.rang}">${r.rang}</span>
+        </div>
+        <div class="clt-pod-name">${r.is_me ? "Toi" : esc(r.display_name)}</div>
+        <div class="clt-pod-base"><span class="clt-pod-score">${fmtScore(r)}</span></div>
+      </div>`;
+    })
+    .join("")}</div>`;
+}
+
+// ── Rang épuré : un seul accent (ligue en trait latéral), score neutre ──
+function _epureRow(r, scoreHtml, leagueColor) {
+  return `
+  <div class="clt-row2 ${r.is_me ? "me" : ""}" style="--lc:${leagueColor}">
+    <div class="clt-rank2" aria-label="Rang ${r.rang}">${r.rang}</div>
+    <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 32)}</div>
+    <div class="clt-name">${esc(r.display_name)}</div>
+    ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ""}
+    <div class="clt-score2">${scoreHtml}</div>
+  </div>`;
+}
+
+// Construit podium + liste épurée à partir des lignes triées (rang asc).
+function _rankedBody(top, mine, meOutside, fmtScore, leagueColorOf) {
+  const podiumRows = top.slice(0, 3);
+  const hasPodium = podiumRows.length >= 3;
+  const podiumHtml = hasPodium ? _podium(podiumRows, fmtScore) : "";
+  const listRows = hasPodium ? top.slice(3) : top;
+  let html = `${podiumHtml}<div class="clt-list">${listRows
+    .map((r) => _epureRow(r, fmtScore(r), leagueColorOf(r)))
+    .join("")}</div>`;
+  if (meOutside) {
+    html += `<div class="clt-sep">· · ·</div><div class="clt-list">${_epureRow(mine, fmtScore(mine), leagueColorOf(mine))}</div>`;
+  }
+  return html;
+}
+
+// ── Corps ligue Révision ─────────────────────────────────────────
 function _renderTheoryBody(rows) {
   const mine = _myRow(rows);
   const hero = _theoryLeagueHero(mine);
@@ -523,34 +619,12 @@ function _renderTheoryBody(rows) {
     .filter((r) => r.rang <= LIMIT)
     .sort((a, b) => a.rang - b.rang);
   const meOutside = mine && mine.rang > LIMIT;
-
-  let html = `${hero}<div class="clt-list">${top.map(_theoryRowHtml).join("")}</div>`;
-  if (meOutside) {
-    html += `<div class="clt-sep">· · ·</div><div class="clt-list">${_theoryRowHtml(mine)}</div>`;
-  }
-  return html;
-}
-
-function _theoryRowHtml(r) {
-  const m = MEDALS[r.rang];
-  const rankCell = m
-    ? `<div class="clt-rank medal" style="--mg:${m.grad};--mglow:${m.glow}" aria-label="Rang ${r.rang}">${icon(m.ico, { size: 17, strokeWidth: 2.2, color: "#fff" })}</div>`
-    : `<div class="clt-rank" aria-label="Rang ${r.rang}">${r.rang}</div>`;
-  const info = theoryLeague(r.score);
-  const chip = !info.league
-    ? ""
-    : info.top
-      ? `<div class="clt-lg-chip elite" title="${esc(info.league.name)}" aria-label="Ligue ${esc(info.league.name)}">★</div>`
-      : `<div class="clt-lg-chip" style="--lc:${info.league.color}" title="Ligue ${info.league.n} — ${esc(info.league.name)}" aria-label="Ligue ${info.league.n}">${info.league.n}</div>`;
-  return `
-  <div class="clt-row ${r.is_me ? "me" : ""} ${m ? "top" + r.rang : ""}">
-    ${rankCell}
-    <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 34)}</div>
-    <div class="clt-name">${esc(r.display_name)}</div>
-    ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ""}
-    ${chip}
-    <div class="clt-score">${r.score}<span class="clt-score-sub">pts</span></div>
-  </div>`;
+  const fmtScore = (r) => `${r.score}<span>pts</span>`;
+  const leagueColorOf = (r) => {
+    const info = theoryLeague(r.score);
+    return info.top ? "#f59e0b" : info.league?.color || "var(--bo)";
+  };
+  return `${hero}${_rankedBody(top, mine, meOutside, fmtScore, leagueColorOf)}`;
 }
 
 // ── Corps ligue semaine ──────────────────────────────────────────
@@ -653,32 +727,12 @@ function _renderAllTimeBody(rows, scope, hof) {
     .sort((a, b) => a.rang - b.rang);
   const mine = _myRow(rows);
   const meOutside = mine && mine.rang > LIMIT;
-
-  let html = `${_remcLeagueHero(mine)}<div class="clt-list">${top.map(_rowHtml).join("")}</div>`;
-  if (meOutside) {
-    html += `<div class="clt-sep">· · ·</div><div class="clt-list">${_rowHtml(mine)}</div>`;
-  }
-  return html + hofHtml;
-}
-
-function _rowHtml(r) {
-  const m = MEDALS[r.rang];
-  const rankCell = m
-    ? `<div class="clt-rank medal" style="--mg:${m.grad};--mglow:${m.glow}" aria-label="Rang ${r.rang}">${icon(m.ico, { size: 17, strokeWidth: 2.2, color: "#fff" })}</div>`
-    : `<div class="clt-rank" aria-label="Rang ${r.rang}">${r.rang}</div>`;
-  const info = remcLeague(r.score);
-  const chip = info.elite
-    ? `<div class="clt-lg-chip elite" title="Élite" aria-label="Ligue Élite">★</div>`
-    : `<div class="clt-lg-chip" style="--lc:${info.league.color}" title="Ligue ${info.league.n} — ${esc(info.league.name)}" aria-label="Ligue ${info.league.n}">${info.league.n}</div>`;
-  return `
-  <div class="clt-row ${r.is_me ? "me" : ""} ${m ? "top" + r.rang : ""}">
-    ${rankCell}
-    <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 34)}</div>
-    <div class="clt-name">${esc(r.display_name)}</div>
-    ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ""}
-    ${chip}
-    <div class="clt-score">${r.score}<span class="clt-score-sub">/31</span></div>
-  </div>`;
+  const fmtScore = (r) => `${r.score}<span>/31</span>`;
+  const leagueColorOf = (r) => {
+    const info = remcLeague(r.score);
+    return info.elite ? "#f59e0b" : info.league.color;
+  };
+  return `${_remcLeagueHero(mine)}${_rankedBody(top, mine, meOutside, fmtScore, leagueColorOf)}${hofHtml}`;
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
