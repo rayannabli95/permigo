@@ -1,3 +1,5 @@
+// ⚠️ DORMANT / HORS-CIBLE — cap « moniteur indépendant » (cf. CLAUDE.md racine).
+//    Ne pas y investir. Ne pas supprimer sans chantier DB (rôle `gerant` couplé au RLS leads_select).
 // ═══════════════════════════════════════════════════════════════
 // Gérant — Pulse École (light theme)
 // 4 KPI ce mois + équipe + activité récente

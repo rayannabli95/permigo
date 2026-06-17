@@ -1,14 +1,16 @@
+// ⚠️ DORMANT / HORS-CIBLE — cap « moniteur indépendant » (cf. CLAUDE.md racine).
+//    Ne pas y investir. Ne pas supprimer sans chantier DB (rôle `gerant` couplé au RLS leads_select).
 // ═══════════════════════════════════════════════════════════════
 // Gérant — Élèves (light theme)
 // Liste élèves + barre progression REMC + tabs + recherche
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { toast } from '@/components/common/toast.js';
-import { track } from '@/services/analytics.js';
-import { REMC_TOTAL } from '@/data/remc.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { toast } from "@/components/common/toast.js";
+import { track } from "@/services/analytics.js";
+import { REMC_TOTAL } from "@/data/remc.js";
 
 // ─── CSS scoped (cohérent avec pulse/equipe — cockpit gérant) ────
 const STYLE = `<style>
@@ -224,26 +226,26 @@ const STYLE = `<style>
 </style>`;
 
 const AVATARS = [
-  'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,var(--blk),#155e75)',
-  'linear-gradient(135deg,var(--puk),#4c1d95)',
-  'linear-gradient(135deg,#0e7c66,#064e3b)',
-  'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
+  "linear-gradient(135deg,#5b5bd6,#3a3a8e)",
+  "linear-gradient(135deg,var(--blk),#155e75)",
+  "linear-gradient(135deg,var(--puk),#4c1d95)",
+  "linear-gradient(135deg,#0e7c66,#064e3b)",
+  "linear-gradient(135deg,#9333ea,#6b21a8)",
+  "linear-gradient(135deg,var(--rdk),#7f1d1d)",
 ];
 
 // ─── State ───────────────────────────────────────────────────
 let _eleves = [];
-let _activeTab = 'tous'; // 'tous' | 'actifs'
+let _activeTab = "tous"; // 'tous' | 'actifs'
 
 // ─── Entry point ─────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
-  if (!me || me.role !== 'gerant') return;
+  if (!me || me.role !== "gerant") return;
 
-  track('page_view', { page: 'gerant_eleves', user_role: me.role });
+  track("page_view", { page: "gerant_eleves", user_role: me.role });
 
-  _activeTab = 'tous';
+  _activeTab = "tous";
 
   // Skeleton
   root.innerHTML = `${STYLE}
@@ -256,17 +258,17 @@ export async function mount(root) {
     <div class="el-skel" style="height:40px;margin-top:10px;border-radius:var(--r)"></div>
   </div>
   <div class="el-list">
-    ${[1,2,3].map(() => `<div class="el-skel" style="height:110px"></div>`).join('')}
+    ${[1, 2, 3].map(() => `<div class="el-skel" style="height:110px"></div>`).join("")}
   </div>
 </div>`;
 
   try {
     // 1. Tous les eleves
     const { data: eleves, error: eErr } = await sb
-      .from('profiles')
-      .select('id, prenom, nom, created_at')
-      .eq('role', 'eleve')
-      .order('prenom', { ascending: true });
+      .from("profiles")
+      .select("id, prenom, nom, created_at")
+      .eq("role", "eleve")
+      .order("prenom", { ascending: true });
 
     if (eErr) throw eErr;
 
@@ -277,38 +279,41 @@ export async function mount(root) {
     }
 
     // 2. Pour chaque eleve : nb validations acquises + derniere validation
-    const eleveIds = eleves.map(e => e.id);
+    const eleveIds = eleves.map((e) => e.id);
     const { data: valsData, error: vErr } = await sb
-      .from('validations')
-      .select('eleve_id, statut, validated_at')
-      .in('eleve_id', eleveIds);
+      .from("validations")
+      .select("eleve_id, statut, validated_at")
+      .in("eleve_id", eleveIds);
 
-    if (vErr) console.warn('[eleves] validations error', vErr);
+    if (vErr) console.warn("[eleves] validations error", vErr);
 
     // Calcul par eleve
     const valsByEleve = {};
-    (valsData || []).forEach(v => {
-      if (!valsByEleve[v.eleve_id]) valsByEleve[v.eleve_id] = { acquis: 0, lastAt: null };
-      if (v.statut === 'acquis') valsByEleve[v.eleve_id].acquis++;
+    (valsData || []).forEach((v) => {
+      if (!valsByEleve[v.eleve_id])
+        valsByEleve[v.eleve_id] = { acquis: 0, lastAt: null };
+      if (v.statut === "acquis") valsByEleve[v.eleve_id].acquis++;
       if (v.validated_at) {
-        if (!valsByEleve[v.eleve_id].lastAt || v.validated_at > valsByEleve[v.eleve_id].lastAt) {
+        if (
+          !valsByEleve[v.eleve_id].lastAt ||
+          v.validated_at > valsByEleve[v.eleve_id].lastAt
+        ) {
           valsByEleve[v.eleve_id].lastAt = v.validated_at;
         }
       }
     });
 
     // Enrichissement eleves
-    _eleves = eleves.map(e => ({
+    _eleves = eleves.map((e) => ({
       ...e,
       acquisCount: valsByEleve[e.id]?.acquis || 0,
       lastValidatedAt: valsByEleve[e.id]?.lastAt || null,
     }));
 
     renderPage(root, _eleves);
-
   } catch (e) {
-    console.error('[eleves]', e);
-    toast('Erreur de chargement', 'error');
+    console.error("[eleves]", e);
+    toast("Erreur de chargement", "error");
     root.innerHTML = `${STYLE}<div class="el-page"><p style="padding:32px;color:var(--rd)">Erreur de chargement.</p></div>`;
   }
 }
@@ -320,10 +325,10 @@ function renderPage(root, eleves) {
   <div class="el-hd">
     <div class="el-hd-top">
       <div class="el-title">Élèves</div>
-      <div class="el-count">${eleves.length} élève${eleves.length > 1 ? 's' : ''}</div>
+      <div class="el-count">${eleves.length} élève${eleves.length > 1 ? "s" : ""}</div>
     </div>
     <div class="el-search-wrap">
-      <span class="el-search-ico">${icon('search',{size:16})}</span>
+      <span class="el-search-ico">${icon("search", { size: 16 })}</span>
       <input
         id="el-search"
         class="el-search"
@@ -334,41 +339,41 @@ function renderPage(root, eleves) {
       />
     </div>
     <div class="el-tabs" role="tablist">
-      <button id="tab-tous"   class="el-tab ${_activeTab === 'tous'   ? 'active' : ''}" role="tab">Tous (${eleves.length})</button>
-      <button id="tab-actifs" class="el-tab ${_activeTab === 'actifs' ? 'active' : ''}" role="tab">Actifs</button>
+      <button id="tab-tous"   class="el-tab ${_activeTab === "tous" ? "active" : ""}" role="tab">Tous (${eleves.length})</button>
+      <button id="tab-actifs" class="el-tab ${_activeTab === "actifs" ? "active" : ""}" role="tab">Actifs</button>
     </div>
   </div>
   <div id="el-list" class="el-list">
-    ${renderCards(filterEleves(eleves, _activeTab, ''))}
+    ${renderCards(filterEleves(eleves, _activeTab, ""))}
   </div>
 </div>`;
 
   // Listeners
-  const searchInput = root.querySelector('#el-search');
-  const listEl = root.querySelector('#el-list');
-  const tabTous   = root.querySelector('#tab-tous');
-  const tabActifs = root.querySelector('#tab-actifs');
+  const searchInput = root.querySelector("#el-search");
+  const listEl = root.querySelector("#el-list");
+  const tabTous = root.querySelector("#tab-tous");
+  const tabActifs = root.querySelector("#tab-actifs");
 
   function refresh() {
-    const q = searchInput?.value.trim().toLowerCase() || '';
+    const q = searchInput?.value.trim().toLowerCase() || "";
     listEl.innerHTML = renderCards(filterEleves(eleves, _activeTab, q));
     wireCardClicks(listEl);
   }
 
-  searchInput?.addEventListener('input', refresh);
+  searchInput?.addEventListener("input", refresh);
 
-  tabTous?.addEventListener('click', () => {
-    _activeTab = 'tous';
-    tabTous.classList.add('active');
-    tabActifs.classList.remove('active');
+  tabTous?.addEventListener("click", () => {
+    _activeTab = "tous";
+    tabTous.classList.add("active");
+    tabActifs.classList.remove("active");
     tabTous.textContent = `Tous (${eleves.length})`;
     refresh();
   });
 
-  tabActifs?.addEventListener('click', () => {
-    _activeTab = 'actifs';
-    tabActifs.classList.add('active');
-    tabTous.classList.remove('active');
+  tabActifs?.addEventListener("click", () => {
+    _activeTab = "actifs";
+    tabActifs.classList.add("active");
+    tabTous.classList.remove("active");
     refresh();
   });
 
@@ -382,10 +387,10 @@ function renderPage(root, eleves) {
 // ─── Filtrage ────────────────────────────────────────────────
 function filterEleves(eleves, tab, query) {
   let list = eleves;
-  if (tab === 'actifs') list = list.filter(isActif);
+  if (tab === "actifs") list = list.filter(isActif);
   if (query) {
-    list = list.filter(e => {
-      const full = `${e.prenom || ''} ${e.nom || ''}`.toLowerCase();
+    list = list.filter((e) => {
+      const full = `${e.prenom || ""} ${e.nom || ""}`.toLowerCase();
       return full.includes(query);
     });
   }
@@ -404,21 +409,23 @@ function isActif(e) {
 function renderCards(eleves) {
   if (eleves.length === 0) {
     return `<div class="el-empty">
-      <div class="el-empty-ico">${icon('graduation-cap',{size:30})}</div>
+      <div class="el-empty-ico">${icon("graduation-cap", { size: 30 })}</div>
       Aucun élève trouvé
     </div>`;
   }
 
-  return eleves.map((e, i) => {
-    const initials = initials2(e.prenom, e.nom);
-    const gradient = AVATARS[i % AVATARS.length];
-    const fullName = [e.prenom, e.nom].filter(Boolean).join(' ') || '—';
-    const pct = REMC_TOTAL > 0 ? Math.round((e.acquisCount / REMC_TOTAL) * 100) : 0;
-    const lastLabel = e.lastValidatedAt
-      ? `Dernière validation ${relativeTime(e.lastValidatedAt)}`
-      : 'Pas encore commencé';
+  return eleves
+    .map((e, i) => {
+      const initials = initials2(e.prenom, e.nom);
+      const gradient = AVATARS[i % AVATARS.length];
+      const fullName = [e.prenom, e.nom].filter(Boolean).join(" ") || "—";
+      const pct =
+        REMC_TOTAL > 0 ? Math.round((e.acquisCount / REMC_TOTAL) * 100) : 0;
+      const lastLabel = e.lastValidatedAt
+        ? `Dernière validation ${relativeTime(e.lastValidatedAt)}`
+        : "Pas encore commencé";
 
-    return `
+      return `
     <div class="el-card" data-id="${esc(e.id)}">
       <div class="el-av" style="background:${gradient}">${esc(initials)}</div>
       <div class="el-info">
@@ -435,21 +442,22 @@ function renderCards(eleves) {
         <div class="el-last">${esc(lastLabel)}</div>
       </div>
     </div>`;
-  }).join('');
+    })
+    .join("");
 }
 
 // ─── Wire clics cards ────────────────────────────────────────
 function wireCardClicks(container) {
-  container.querySelectorAll('.el-card').forEach(card => {
-    card.addEventListener('click', async () => {
+  container.querySelectorAll(".el-card").forEach((card) => {
+    card.addEventListener("click", async () => {
       const id = card.dataset.id;
       if (!id) return;
       try {
         // Navigation vers le livret REMC de l'élève (déjà existant côté enseignant — réutilisé pour gérant)
-        const { navigate } = await import('@/router.js');
+        const { navigate } = await import("@/router.js");
         navigate(`/livret/${id}`);
       } catch (e) {
-        console.warn('[eleves] navigate failed', e);
+        console.warn("[eleves] navigate failed", e);
         // Fallback : ouvre quick view inline
         openQuickView(id, card);
       }
@@ -459,8 +467,9 @@ function wireCardClicks(container) {
 
 // Quick view fallback si la nav livret est cassée
 async function openQuickView(eleveId, anchorCard) {
-  const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top, 0px) + 20px) 20px calc(env(safe-area-inset-bottom, 0px) + 20px);animation:elqvIn .2s ease;';
+  const overlay = document.createElement("div");
+  overlay.style.cssText =
+    "position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top, 0px) + 20px) 20px calc(env(safe-area-inset-bottom, 0px) + 20px);animation:elqvIn .2s ease;";
   overlay.innerHTML = `
     <style>
       @keyframes elqvIn { from { opacity:0; } to { opacity:1; } }
@@ -481,48 +490,63 @@ async function openQuickView(eleveId, anchorCard) {
   `;
   document.body.appendChild(overlay);
   const close = () => overlay.remove();
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-  overlay.querySelector('#elqv-close').addEventListener('click', close);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) close();
+  });
+  overlay.querySelector("#elqv-close").addEventListener("click", close);
 
   try {
     const [profileRes, validRes] = await Promise.all([
-      sb.from('profiles').select('prenom, nom, email, last_active_at').eq('id', eleveId).maybeSingle(),
-      sb.from('validations').select('competence_id').eq('eleve_id', eleveId).eq('statut', 'acquis'),
+      sb
+        .from("profiles")
+        .select("prenom, nom, email, last_active_at")
+        .eq("id", eleveId)
+        .maybeSingle(),
+      sb
+        .from("validations")
+        .select("competence_id")
+        .eq("eleve_id", eleveId)
+        .eq("statut", "acquis"),
     ]);
     const p = profileRes.data;
     const v = validRes.data || [];
-    const body = overlay.querySelector('#elqv-body');
+    const body = overlay.querySelector("#elqv-body");
     if (!p) {
       body.innerHTML = '<div style="color:var(--rd)">Élève introuvable.</div>';
       return;
     }
     body.innerHTML = `
-      <div class="elqv-row"><span class="l">Nom</span><span class="v">${esc(p.nom || p.prenom || '—')}</span></div>
-      <div class="elqv-row"><span class="l">Email</span><span class="v" style="font-size:12px">${esc(p.email || '—')}</span></div>
+      <div class="elqv-row"><span class="l">Nom</span><span class="v">${esc(p.nom || p.prenom || "—")}</span></div>
+      <div class="elqv-row"><span class="l">Email</span><span class="v" style="font-size:12px">${esc(p.email || "—")}</span></div>
       <div class="elqv-row"><span class="l">Compétences</span><span class="v">${v.length}/${REMC_TOTAL}</span></div>
-      <div class="elqv-row"><span class="l">Dernière activité</span><span class="v">${p.last_active_at ? relativeTime(p.last_active_at) : 'jamais'}</span></div>
+      <div class="elqv-row"><span class="l">Dernière activité</span><span class="v">${p.last_active_at ? relativeTime(p.last_active_at) : "jamais"}</span></div>
     `;
   } catch (e) {
-    overlay.querySelector('#elqv-body').innerHTML = '<div style="color:var(--rd)">Erreur lors du chargement.</div>';
+    overlay.querySelector("#elqv-body").innerHTML =
+      '<div style="color:var(--rd)">Erreur lors du chargement.</div>';
   }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
 function initials2(prenom, nom) {
-  const p = (prenom || '').trim()[0] || '';
+  const p = (prenom || "").trim()[0] || "";
   // Initiale prénom + initiale du nom (dernier mot du nom).
   // Fallback : 2e lettre du prénom si pas de nom.
-  const parts = (nom || '').trim().replace(/\./g, '').split(/\s+/).filter(Boolean);
+  const parts = (nom || "")
+    .trim()
+    .replace(/\./g, "")
+    .split(/\s+/)
+    .filter(Boolean);
   const n = parts.length
-    ? (parts[parts.length - 1][0] || '')
-    : ((prenom || '').trim()[1] || '');
-  return (p + n).toUpperCase() || '?';
+    ? parts[parts.length - 1][0] || ""
+    : (prenom || "").trim()[1] || "";
+  return (p + n).toUpperCase() || "?";
 }
 
 function relativeTime(iso) {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60_000);
-  if (m < 1) return 'à l\'instant';
+  if (m < 1) return "à l'instant";
   if (m < 60) return `il y a ${m} min`;
   const h = Math.floor(m / 60);
   if (h < 24) return `il y a ${h}h`;

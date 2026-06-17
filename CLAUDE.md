@@ -1,6 +1,8 @@
 # Permigo (à renommer)
 
-SaaS B2B pour auto-écoles françaises. Livret REMC numérique + classement gamifié à 2 niveaux (local / national) pour les moniteurs. Acheteur = patron d'auto-école. Modèle = abonnement per-seat (par moniteur). Stack : **Vanilla JS (ES modules) + Vite + Supabase + Vercel**. Pas de framework front (pas de React).
+Couche d'engagement pédagogique pour l'apprentissage du permis en France : livret REMC numérique + parcours élève gamifié + classement moniteur (local / national). **Cible prioritaire = le moniteur indépendant** — décideur = payeur = utilisateur, cycle de vente court. L'élève est le **carburant viral** : son engagement (réviser, revenir, progresser) EST l'outil commercial du moniteur. **Modèle = abonnement individuel self-serve 9,99 €/mois** (Stripe, en place). L'offre « auto-école / per-seat » est gardée en **option lointaine**, jamais mise en avant. Stack : **Vanilla JS (ES modules) + Vite + Supabase + Vercel**. Pas de framework front (pas de React).
+
+> 🧭 **Cap produit (verrouillé 2026-06-17)** : on construit pour deux rôles — **élève** (engagement) et **moniteur indépendant** (autorité + preuve). L'espace **gérant / auto-école** (`src/pages/gerant/*`) est **dormant / hors-cible** : ne pas y investir, ne pas le router en avant. ⚠️ Ne PAS le supprimer à la légère — le rôle `gerant` est couplé à l'auth, la nav ET au RLS (la policy `leads_select` repose sur `get_my_role() = 'gerant'`, c'est ce qui permet de **lire les leads** que la landing collecte). Un retrait propre = chantier DB dédié, pas un cleanup au passage. Détails GTM : `permigo-game/docs/GTM_PREMIERS_CLIENTS.md`.
 
 > ⚠️ **Emplacement du projet** : le projet vivant est `permigo-game/`. La racine de `permigo-v7/` héberge un ancien projet Drizzle + Hono + SQLite (`dev.db`) inutilisé en prod, plus des docs legacy. NE PAS modifier le code à la racine sans validation explicite. Tous les chemins ci-dessous sont relatifs à `permigo-game/`.
 
@@ -39,9 +41,9 @@ Pas de `typecheck` (pas de TS) ni de `db:types` — ces scripts n'existent pas.
 ## Domaine métier
 - **REMC** = Référentiel pour l'Éducation à une Mobilité Citoyenne (arrêté 13/05/2013).
 - 4 compétences C1-C4. Livret officiel = **30 objectifs** (arrêté 29/07/2013, annexe III).
-- Acteurs : moniteur (enseignant) → élève (apprenti) → auto-école (entité).
-- Value-prop : livret REMC numérique + ranking moniteur local (intra-école) + national.
-- Concurrents : AGX (Harmonie/Harmobil'), Ediser, Packsolo — gestion admin, PAS de livret numérique gamifié.
+- Acteurs : **moniteur indépendant** (enseignant — cible & payeur) ↔ **élève** (apprenti — carburant viral). L'auto-école / gérant n'est plus la cible prioritaire (espace dormant, cf. cap produit ci-dessus).
+- Value-prop : **l'outil DU moniteur, à SA marque** (vs plateformes type Ornikar / En Voiture Simone qui possèdent l'élève) + **engagement élève** (réviser / revenir entre les leçons) + **preuve & autorité** (« qui est prêt », taux de réussite à son nom).
+- Concurrents : plateformes qui outillent le moniteur mais à *leur* marque (Ornikar, EVS) ; éditeurs historiques B2B école (Logipermis/Codes Rousseau, Ediser) ; SaaS modernes (Stych). Aucun n'est l'outil *propre* du moniteur avec une couche d'engagement élève — c'est le trou de marché.
 
 ## Workflow PR
 1. Une branche par feature : `feat/`, `fix/`, `chore/`. Pas de push direct sur `main`.

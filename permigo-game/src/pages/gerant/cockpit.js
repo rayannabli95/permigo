@@ -1,3 +1,5 @@
+// ⚠️ DORMANT / HORS-CIBLE — cap « moniteur indépendant » (cf. CLAUDE.md racine).
+//    Ne pas y investir. Ne pas supprimer sans chantier DB (rôle `gerant` couplé au RLS leads_select).
 // ═══════════════════════════════════════════════════════════════
 // Gérant — Cockpit Bloomberg (dark theme)
 // RPC : get_gerant_cockpit → { kpis, cohorts, top_moniteurs, alerts }
