@@ -48,8 +48,7 @@ export function mount(root) {
             Pour moniteurs indépendants · Bêta
           </div>
           <h1 class="lp-h1">
-            Ton app de permis.<br>
-            À <em class="lp-h1-em">ton</em> nom.
+            Passer le permis en jouant n'a jamais été aussi simple.
           </h1>
           <p class="lp-lead">Tes élèves révisent entre les leçons, progressent plus vite, et tu prouves tes résultats. Ton outil, ta marque — sans dépendre d'une plateforme.</p>
           <div class="lp-hero-cta">
@@ -109,21 +108,21 @@ export function mount(root) {
       <div class="lp-show-panel" data-panel="eleve">
         <div class="lp-show-strip">
           <figure class="lp-show-card">
-            <div class="lp-show-phone"><img src="/showcase/eleve-accueil.png" alt="Accueil élève : carte de permis, quêtes du jour, streak" loading="lazy" width="390" height="844" /></div>
+            <div class="lp-show-phonewrap"><div class="lp-show-phone"><img src="/showcase/eleve-accueil.png" alt="Accueil élève : carte de permis, quêtes du jour, streak" loading="lazy" width="390" height="844" /></div><img class="lp-show-mascot" src="/skins/mascot-hello.png" alt="" aria-hidden="true" loading="lazy" width="58" height="58" /></div>
             <figcaption>
               <div class="lp-show-caphead"><span class="lp-show-step">1</span><strong>Son permis devient un jeu</strong></div>
               <span class="lp-show-desc">Carte de permis, quêtes du jour, streak quotidien : il revient s'entraîner tout seul.</span>
             </figcaption>
           </figure>
           <figure class="lp-show-card">
-            <div class="lp-show-phone"><img src="/showcase/eleve-parcours.png" alt="Parcours REMC gamifié, étape par étape" loading="lazy" width="390" height="844" /></div>
+            <div class="lp-show-phonewrap"><div class="lp-show-phone"><img src="/showcase/eleve-parcours.png" alt="Parcours REMC gamifié, étape par étape" loading="lazy" width="390" height="844" /></div><img class="lp-show-mascot" src="/skins/mascot-hello.png" alt="" aria-hidden="true" loading="lazy" width="58" height="58" /></div>
             <figcaption>
               <div class="lp-show-caphead"><span class="lp-show-step">2</span><strong>Un parcours étape par étape</strong></div>
               <span class="lp-show-desc">Les 31 compétences du REMC en carte d'aventure. Il voit exactement où il en est.</span>
             </figcaption>
           </figure>
           <figure class="lp-show-card">
-            <div class="lp-show-phone"><img src="/showcase/eleve-examens.png" alt="Examens blancs chronométrés et entraînement par thème" loading="lazy" width="390" height="844" /></div>
+            <div class="lp-show-phonewrap"><div class="lp-show-phone"><img src="/showcase/eleve-examens.png" alt="Examens blancs chronométrés et entraînement par thème" loading="lazy" width="390" height="844" /></div><img class="lp-show-mascot" src="/skins/mascot-hello.png" alt="" aria-hidden="true" loading="lazy" width="58" height="58" /></div>
             <figcaption>
               <div class="lp-show-caphead"><span class="lp-show-step">3</span><strong>Il s'entraîne comme le jour J</strong></div>
               <span class="lp-show-desc">Examens blancs chronométrés et quiz par thème. Il arrive prêt à l'examen.</span>
@@ -135,21 +134,21 @@ export function mount(root) {
       <div class="lp-show-panel" data-panel="moniteur" hidden>
         <div class="lp-show-strip">
           <figure class="lp-show-card">
-            <div class="lp-show-phone"><img src="/showcase/ens-valider.png" alt="Vue moniteur : valider une compétence, liste d'élèves" loading="lazy" width="390" height="844" /></div>
+            <div class="lp-show-phonewrap"><div class="lp-show-phone"><img src="/showcase/ens-valider.png" alt="Vue moniteur : valider une compétence, liste d'élèves" loading="lazy" width="390" height="844" /></div><img class="lp-show-mascot" src="/skins/mascot-hello.png" alt="" aria-hidden="true" loading="lazy" width="58" height="58" /></div>
             <figcaption>
               <div class="lp-show-caphead"><span class="lp-show-step">1</span><strong>Tu valides en 2 taps</strong></div>
               <span class="lp-show-desc">Tu ouvres l'élève, tu coches ce qu'il a réussi. Son livret se met à jour tout seul.</span>
             </figcaption>
           </figure>
           <figure class="lp-show-card">
-            <div class="lp-show-phone"><img src="/showcase/ens-livret.png" alt="Livret REMC numérique d'un élève, compétences acquises" loading="lazy" width="390" height="844" /></div>
+            <div class="lp-show-phonewrap"><div class="lp-show-phone"><img src="/showcase/ens-livret.png" alt="Livret REMC numérique d'un élève, compétences acquises" loading="lazy" width="390" height="844" /></div><img class="lp-show-mascot" src="/skins/mascot-hello.png" alt="" aria-hidden="true" loading="lazy" width="58" height="58" /></div>
             <figcaption>
               <div class="lp-show-caphead"><span class="lp-show-step">2</span><strong>Le livret REMC, numérique</strong></div>
               <span class="lp-show-desc">Chaque compétence à jour en temps réel. Fini le papier perdu dans la voiture.</span>
             </figcaption>
           </figure>
           <figure class="lp-show-card">
-            <div class="lp-show-phone"><img src="/showcase/ens-classement.png" alt="Élèves classés par compétences acquises" loading="lazy" width="390" height="844" /></div>
+            <div class="lp-show-phonewrap"><div class="lp-show-phone"><img src="/showcase/ens-classement.png" alt="Élèves classés par compétences acquises" loading="lazy" width="390" height="844" /></div><img class="lp-show-mascot" src="/skins/mascot-hello.png" alt="" aria-hidden="true" loading="lazy" width="58" height="58" /></div>
             <figcaption>
               <div class="lp-show-caphead"><span class="lp-show-step">3</span><strong>Tu vois qui est prêt</strong></div>
               <span class="lp-show-desc">Tes élèves classés par progression. Tu sais d'un coup d'œil qui présenter.</span>
@@ -547,9 +546,9 @@ const STYLE = `<style>
 
   /* Headline */
   .lp-h1 {
-    font: 900 clamp(36px, 9.5vw, 60px)/1.05 'Plus Jakarta Sans', sans-serif;
-    letter-spacing: -.038em; color: #fff;
-    margin: 0 0 22px;
+    font: 900 clamp(30px, 6vw, 46px)/1.1 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -.03em; color: #fff;
+    margin: 0 0 22px; text-wrap: balance;
   }
   .lp-h1-em {
     font-style: normal; display: inline;
@@ -642,7 +641,7 @@ const STYLE = `<style>
   .lp-fcard-val { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: #fff; }
   .lp-fcard-sub { font: 500 10px/1 'Inter', sans-serif; color: rgba(255,255,255,.46); margin-top: 2px; }
   .lp-fcard-1 { top: 14%; right: -20px; animation: fc1 5.5s ease-in-out infinite; }
-  .lp-fcard-2 { bottom: 16%; left: -20px; animation: fc2 5.5s ease-in-out 1.4s infinite; }
+  .lp-fcard-2 { top: 40%; left: -20px; animation: fc2 5.5s ease-in-out 1.4s infinite; }
   @keyframes fc1 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
   @keyframes fc2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
   @media (prefers-reduced-motion: reduce) { .lp-fcard-1, .lp-fcard-2 { animation: none; } }
@@ -811,7 +810,7 @@ const STYLE = `<style>
     .lp-hero-chips { justify-content: center; }
     .lp-hero-visual { margin-top: 10px; }
     .lp-fcard-1 { right: -8px; top: 8%; }
-    .lp-fcard-2 { left: -8px; bottom: 8%; }
+    .lp-fcard-2 { left: -8px; top: 34%; bottom: auto; }
     .lp-mascot { width: 96px; height: 96px; left: 0; bottom: -10px; }
     .lp-cards3, .lp-steps, .lp-plans, .lp-testicards { grid-template-columns: 1fr; }
     .lp-feat-row { flex-direction: column; }
@@ -824,12 +823,19 @@ const STYLE = `<style>
 
   /* ── Showcase produit (élève / moniteur) ── */
   .lp-show { padding-top: 44px; }
-  .lp-show-tabs { display: flex; width: fit-content; gap: 4px; padding: 5px; margin: 6px auto 32px;
-    border-radius: 999px; background: #f1f2f7; border: 1px solid var(--lp-line); }
+  .lp-show-tabs { display: flex; width: fit-content; gap: 5px; padding: 6px; margin: 6px auto 34px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(240,242,248,.6));
+    backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.85);
+    box-shadow: 0 12px 34px -14px rgba(11,16,32,.28), inset 0 1px 0 rgba(255,255,255,.9); }
   .lp-show-tab { border: 0; background: transparent; cursor: pointer; border-radius: 999px;
-    padding: 11px 22px; min-height: 44px; font: 700 14.5px/1 'Inter', sans-serif; color: var(--lp-mut);
-    transition: color .2s, background .2s, box-shadow .2s; }
-  .lp-show-tab.is-active { color: var(--lp-ink); background: #fff; box-shadow: 0 2px 8px -2px rgba(11,16,32,.18); }
+    padding: 12px 24px; min-height: 44px; font: 700 14.5px/1 'Inter', sans-serif; color: var(--lp-mut);
+    transition: color .25s, background .25s, box-shadow .25s, transform .1s; }
+  .lp-show-tab:active { transform: translateY(1px); }
+  .lp-show-tab.is-active { color: var(--lp-ink);
+    background: linear-gradient(180deg, #fff, #f3f5fb);
+    box-shadow: 0 6px 16px -6px rgba(11,16,32,.28), inset 0 1px 0 rgba(255,255,255,.95); }
 
   .lp-show-panel[hidden] { display: none; }
   .lp-show-panel { animation: lpShowFade .42s cubic-bezier(.2,.7,.3,1); }
@@ -842,6 +848,11 @@ const STYLE = `<style>
     box-shadow: 0 32px 64px -30px rgba(8,12,28,.62), 0 2px 0 rgba(255,255,255,.08) inset;
     transition: transform .3s cubic-bezier(.2,.7,.3,1), box-shadow .3s; }
   .lp-show-phone img { display: block; width: 100%; height: auto; border-radius: 25px; }
+  .lp-show-phonewrap { position: relative; }
+  .lp-show-mascot { position: absolute; left: -18px; bottom: -14px; z-index: 2;
+    width: 58px; height: 58px; object-fit: contain; pointer-events: none;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.32));
+    animation: mascotFloat 4.5s ease-in-out infinite; }
   .lp-show-card figcaption { display: flex; flex-direction: column; gap: 6px; padding: 0 4px; }
   .lp-show-caphead { display: flex; align-items: center; gap: 9px; }
   .lp-show-step { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
@@ -864,6 +875,7 @@ const STYLE = `<style>
     .lp-show-panel { animation: none; }
     .lp-rev .lp-show-card { opacity: 1; transform: none; transition: none; }
     .lp-show-card:hover .lp-show-phone { transform: none; }
+    .lp-show-mascot { animation: none; }
   }
 
   /* Mobile : filmstrip horizontal scroll-snap */
