@@ -24,7 +24,6 @@ import {
 import {
   THEORY_LEAGUES,
   THEORY_PTS,
-  THEORY_QUIZ_PASS_PCT,
   theoryLeague,
 } from "@/utils/theory-league.js";
 import {
@@ -248,6 +247,28 @@ ${LEAGUE_CSS}
   width: 100%; font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
   color: var(--mu); margin-bottom: 2px;
 }
+/* ── « Comment je gagne des points ? » — version simple (2 lignes) ── */
+.clt-how { margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--bo2); }
+.clt-how-ttl {
+  font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  margin-bottom: 10px;
+}
+.clt-how-row {
+  display: flex; align-items: center; gap: 10px; padding: 5px 0;
+  font: 500 14px/1.2 'Inter', sans-serif; color: var(--ink5);
+}
+.clt-how-lbl { flex: 1; min-width: 0; }
+.clt-how-row b { font: 800 14px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-txt); flex-shrink: 0; }
+.clt-how-ico {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.clt-how-ico.ok { background: rgba(16,185,129,.14); color: var(--grdk); }
+.clt-how-ico.ex { background: color-mix(in srgb, var(--a) 14%, transparent); color: var(--a-txt); }
+.clt-mine-pts {
+  margin-top: 12px; font: 500 12.5px/1.4 'Inter', sans-serif; color: var(--mu2);
+}
+.clt-mine-pts strong { color: var(--ink); font-weight: 700; }
 
 /* ── Hall of Fame (lauréats permis) ── */
 .clt-hof-title {
@@ -477,13 +498,21 @@ function _theoryPill(mine) {
     : `<div class="clt-mepill"><span class="clt-mepill-ico">${icon("zap", { size: 14 })}</span>Ton premier quiz t'ouvre la ligue</div>`;
 }
 
-// ── Légende explicite — dérivée du barème (theory-league.js) ────
+// ── « Comment je gagne des points ? » — langage simple, 2 lignes ──
 function _theoryHowLegend() {
   return `
-    <div class="clt-pts-legend">
-      <span class="clt-th-how-ttl">Comment gagner des points ?</span>
-      <span class="clt-pts-pill">${icon("check", { size: 11, strokeWidth: 2.4 })} Quiz d'une compétence réussi (≥${THEORY_QUIZ_PASS_PCT} %) → +${THEORY_PTS.quiz} pt</span>
-      <span class="clt-pts-pill">${icon("zap", { size: 11, strokeWidth: 2.4 })} Parcours d'examen réussi → +${THEORY_PTS.exam} pts</span>
+    <div class="clt-how">
+      <div class="clt-how-ttl">Comment je gagne des points&nbsp;?</div>
+      <div class="clt-how-row">
+        <span class="clt-how-ico ok">${icon("check", { size: 14, strokeWidth: 3 })}</span>
+        <span class="clt-how-lbl">1 quiz réussi</span>
+        <b>+${THEORY_PTS.quiz} pt</b>
+      </div>
+      <div class="clt-how-row">
+        <span class="clt-how-ico ex">${icon("zap", { size: 13, strokeWidth: 2.6 })}</span>
+        <span class="clt-how-lbl">1 examen blanc réussi</span>
+        <b>+${THEORY_PTS.exam} pts</b>
+      </div>
     </div>`;
 }
 
@@ -538,10 +567,11 @@ function _theoryLeagueHero(mine) {
     <div class="clt-rl-prog">${progText}</div>
     <div class="clt-rl-track">${dots}</div>
     ${_theoryHowLegend()}
-    <div class="clt-pts-legend" style="border-top:0;padding-top:6px">
-      <span class="clt-pts-pill">${nComp} compétence${nComp > 1 ? "s" : ""} en quiz réussi (+${THEORY_PTS.quiz} pt)</span>
-      <span class="clt-pts-pill">${nExams} parcours d'examen réussi${nExams > 1 ? "s" : ""} (+${THEORY_PTS.exam} pts)</span>
-    </div>
+    ${
+      nComp || nExams
+        ? `<div class="clt-mine-pts">Déjà <strong>${nComp} quiz réussi${nComp > 1 ? "s" : ""}</strong>${nExams ? ` et ${nExams} examen${nExams > 1 ? "s" : ""} blanc${nExams > 1 ? "s" : ""}` : ""}.</div>`
+        : ""
+    }
   </div>`;
 }
 

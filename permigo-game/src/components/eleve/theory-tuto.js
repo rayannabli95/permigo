@@ -20,7 +20,7 @@ const SLIDES = [
     mascot: "/skins/mascot-point.png",
     extra: "/skins/drapeau.png",
     title: "Comment monter ?",
-    text: `Réussis le quiz d'une compétence (+${THEORY_PTS.quiz} pt) et les parcours d'examen (+${THEORY_PTS.exam} pts). Chaque compétence maîtrisée compte une seule fois.`,
+    text: `Simple : 1 quiz réussi = ${THEORY_PTS.quiz} point. 1 examen blanc réussi = ${THEORY_PTS.exam} points. Plus tu révises, plus tu montes en ligue.`,
   },
   {
     mascot: "/skins/mascot-celebrate.png",
