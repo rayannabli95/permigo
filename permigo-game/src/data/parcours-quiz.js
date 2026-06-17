@@ -2368,6 +2368,244 @@ export const QUESTIONS = [
       "Hors agglomération non éclairée, tu signales ton véhicule arrêté avec les feux de position pour être vu de loin.",
     tags: ["verification_interieure", "manoeuvre"],
   },
+
+  // ── Questions thématiques — Giratoires (révision par centre) ──
+  {
+    id: "gir1",
+    parcours_id: null,
+    enonce:
+      "Tu t'apprêtes à entrer dans un giratoire. Deux voitures y circulent déjà. Tu fais quoi ?",
+    options: [
+      "J'entre en accélérant pour me glisser entre elles",
+      "Je cède le passage à celles qui sont sur l'anneau",
+      "Je m'engage car j'arrive à droite",
+    ],
+    correct: 1,
+    explication:
+      "Priorité à ceux qui sont déjà sur l'anneau. La règle « priorité à droite » ne s'applique pas dans un giratoire signalé — tu cèdes toujours.",
+    tags: ["priorite", "rond_point"],
+  },
+  {
+    id: "gir2",
+    parcours_id: null,
+    enonce:
+      "Giratoire à deux voies. Tu veux prendre la 3e sortie (dernière avant de repasser par où tu es entré). Tu te places où à l'entrée ?",
+    options: [
+      "Voie de droite uniquement",
+      "Voie de gauche (intérieure), en suivant le marquage",
+      "N'importe laquelle, la sortie est la même",
+    ],
+    correct: 1,
+    explication:
+      "Pour les sorties éloignées (plus de la moitié de l'anneau), tu prends la voie intérieure (gauche), puis tu te rabats à droite avant ta sortie. Suis toujours le marquage au sol.",
+    tags: ["manoeuvre", "rond_point"],
+  },
+  {
+    id: "gir3",
+    parcours_id: null,
+    enonce:
+      "Tu prends la première sortie d'un giratoire à deux voies (à ta droite juste après l'entrée). Tu te places où ?",
+    options: [
+      "Voie de gauche (intérieure)",
+      "Voie de droite (extérieure)",
+      "Les deux voies sont équivalentes pour une sortie rapide",
+    ],
+    correct: 1,
+    explication:
+      "Première sortie = voie de droite. Tu entres et tu sors sans traverser la voie intérieure, ce qui est plus sûr.",
+    tags: ["manoeuvre", "rond_point"],
+  },
+  {
+    id: "gir4",
+    parcours_id: null,
+    enonce:
+      "Tu circulais sur la voie intérieure d'un giratoire à deux voies. Tu veux sortir. Tu fais quoi ?",
+    options: [
+      "Je sors directement depuis la voie intérieure",
+      "Je me rabats sur la voie extérieure (droite) avant ma sortie, avec clignotant",
+      "Je klaxonne et je coupe la voie extérieure sans clignotant",
+    ],
+    correct: 1,
+    explication:
+      "Avant ta sortie, tu mets le clignotant droit et tu te rabats sur la voie extérieure, en cédant le passage à ceux qui y circulent.",
+    tags: ["manoeuvre", "rond_point", "priorite"],
+  },
+  {
+    id: "gir5",
+    parcours_id: null,
+    enonce: "Dans un giratoire, tu dois mettre le clignotant gauche ?",
+    options: [
+      "Oui, dès l'entrée dans le giratoire",
+      "Non, pas en règle générale",
+      "Oui, si tu prends une sortie après la moitié de l'anneau",
+    ],
+    correct: 1,
+    explication:
+      "En règle générale, on ne met PAS le clignotant gauche à l'entrée d'un giratoire. On met uniquement le clignotant droit juste avant de sortir. Seuls quelques très grands carrefours à sens giratoire affichent des règles particulières, toujours signalées.",
+    tags: ["manoeuvre", "rond_point", "signalisation"],
+  },
+  {
+    id: "gir6",
+    parcours_id: null,
+    enonce:
+      "Tu roules sur l'anneau d'un giratoire. Une voiture sur ta droite (voie extérieure) veut se rabattre pour sortir. Qui est prioritaire ?",
+    options: [
+      "Elle, car elle est à ma droite",
+      "Moi, je suis sur l'anneau et je circule normalement",
+      "Personne, on négocie",
+    ],
+    correct: 1,
+    explication:
+      "À l'intérieur du giratoire, la priorité à droite ne s'applique pas entre voies : tu circules sur ta voie et tu n'as pas à céder à la voiture extérieure qui cherche à sortir.",
+    tags: ["priorite", "rond_point"],
+  },
+  {
+    id: "gir7",
+    parcours_id: null,
+    enonce: "À quelle vitesse roule-t-on en général dans un giratoire ?",
+    options: [
+      "Pas de règle, la priorité suffit",
+      "Vitesse adaptée pour pouvoir céder et s'arrêter si besoin — souvent 20-30 km/h",
+      "50 km/h comme en ville",
+    ],
+    correct: 1,
+    explication:
+      "Aucun texte ne fixe une limite propre au giratoire, mais la configuration impose une vitesse réduite. Tu dois être capable de céder et de t'arrêter à tout moment.",
+    tags: ["vitesse", "rond_point"],
+  },
+  {
+    id: "gir8",
+    parcours_id: null,
+    enonce:
+      "Un cycliste circule sur l'anneau d'un giratoire. Tu entres et il est sur ta gauche (il tourne). Tu fais quoi ?",
+    options: [
+      "Je m'engage, il est à ma gauche donc j'ai la priorité",
+      "Je cède, il est déjà sur l'anneau",
+      "Je klaxonne pour le prévenir",
+    ],
+    correct: 1,
+    explication:
+      "Peu importe qu'il soit à gauche : il est déjà sur l'anneau, donc prioritaire. Tu cèdes comme à toute voiture.",
+    tags: ["priorite", "rond_point", "cycliste"],
+  },
+  {
+    id: "gir9",
+    parcours_id: null,
+    enonce:
+      "Tu veux prendre la 2e sortie d'un giratoire à sens unique. Tu mets ton clignotant droit à quel moment ?",
+    options: [
+      "Dès l'entrée dans le giratoire",
+      "Avant la sortie qui précède la mienne, pour prévenir mes intentions",
+      "Juste avant MA sortie, en amorçant le rabattement",
+    ],
+    correct: 2,
+    explication:
+      "Le clignotant droit s'active juste avant ta propre sortie (au niveau de la sortie précédente au plus tôt), pour prévenir les usagers autour de toi.",
+    tags: ["manoeuvre", "rond_point", "signalisation"],
+  },
+  {
+    id: "gir10",
+    parcours_id: null,
+    enonce:
+      "Un giratoire avec un panneau « cédez le passage » à l'entrée. Un autre sans panneau visible. Même règle ?",
+    options: [
+      "Non, sans panneau j'ai la priorité à droite",
+      "Oui, dans un giratoire tu cèdes toujours à ceux qui sont sur l'anneau, panneau ou pas",
+      "Non, sans panneau c'est la priorité au plus rapide",
+    ],
+    correct: 1,
+    explication:
+      "En France, tout carrefour à sens giratoire est systématiquement signalisé (panneau AB25 + « cédez le passage ») : tu cèdes donc à ceux qui sont déjà sur l'anneau. La cession est due parce qu'il est signalisé — c'est la règle que tu rencontreras partout.",
+    tags: ["priorite", "rond_point", "signalisation"],
+  },
+
+  // ── Questions thématiques — Voies rapides & insertion ──────────
+  {
+    id: "vr1",
+    parcours_id: null,
+    enonce:
+      "Tu t'engages sur la bretelle d'insertion d'une voie express (2×2 voies, 110 km/h). Tu fais quoi sur la bretelle ?",
+    options: [
+      "Je roule à 50 km/h et j'attends un grand créneau",
+      "J'accélère progressivement pour atteindre la vitesse du trafic avant de m'insérer",
+      "Je m'arrête en bout de bretelle et je force le passage",
+    ],
+    correct: 1,
+    explication:
+      "La bretelle d'accélération sert à prendre la vitesse du trafic. Tu surveilles l'angle mort gauche et tu t'insères en cédant à ceux qui roulent déjà. Ne jamais s'arrêter en bout de bretelle sauf embouteillage.",
+    tags: ["manoeuvre", "vitesse", "priorite"],
+  },
+  {
+    id: "vr2",
+    parcours_id: null,
+    enonce:
+      "Sur la voie express, une voiture sur la bretelle d'insertion est sur ta droite. Dois-tu lui céder ?",
+    options: [
+      "Non, c'est elle qui cède à la voie principale",
+      "Oui, la priorité à droite s'applique",
+      "Oui, je facilite toujours l'insertion",
+    ],
+    correct: 0,
+    explication:
+      "C'est la voiture qui s'insère qui cède le passage. Cela dit, si tu peux te décaler sur la voie de gauche sans danger pour faciliter l'insertion, c'est une bonne pratique de courtoisie.",
+    tags: ["priorite", "manoeuvre"],
+  },
+  {
+    id: "vr3",
+    parcours_id: null,
+    enonce:
+      "Vitesse maximale sur une voie express (route express à 2×2 voies hors autoroute) par temps sec ?",
+    options: ["90 km/h", "110 km/h", "130 km/h"],
+    correct: 1,
+    explication:
+      "Les voies express (non autoroutes) sont limitées à 110 km/h par temps sec. L'autoroute, elle, est à 130 km/h. La différence tient à la signalisation : « route express » ≠ « autoroute ».",
+    tags: ["vitesse", "signalisation"],
+  },
+  {
+    id: "vr4",
+    parcours_id: null,
+    enonce:
+      "Tu veux quitter la voie rapide. Tu te mets sur la voie de sortie (bretelle de décélération). Tu fais quoi ?",
+    options: [
+      "Je freine fort sur la voie principale avant d'y entrer",
+      "J'entre sur la bretelle puis je décélère progressivement",
+      "J'accélère pour prendre de la marge avant de freiner",
+    ],
+    correct: 1,
+    explication:
+      "Tu rejoins d'abord la bretelle de décélération, PUIS tu freines. Freiner sur la voie principale ralentit ceux qui te suivent et crée un danger.",
+    tags: ["manoeuvre", "vitesse"],
+  },
+  {
+    id: "vr5",
+    parcours_id: null,
+    enonce:
+      "Sur une voie express à 110 km/h, quelle distance de sécurité est recommandée ?",
+    options: [
+      "30 mètres fixes",
+      "2 secondes (environ 60 m à 110 km/h)",
+      "5 mètres par dizaine de km/h (55 m)",
+    ],
+    correct: 1,
+    explication:
+      "La règle des 2 secondes s'applique partout. À 110 km/h, cela représente environ 60 m. Sur voie mouillée, double cette distance.",
+    tags: ["vitesse"],
+  },
+  {
+    id: "vr6",
+    parcours_id: null,
+    enonce:
+      "Tu arrives en bout de bretelle d'insertion et il n'y a toujours pas de créneau. Tu fais quoi ?",
+    options: [
+      "Je force le passage, j'ai la priorité d'insertion",
+      "Je m'arrête sur la voie principale pour attendre",
+      "Je m'arrête en toute sécurité sur la fin de la bretelle et j'attends un créneau",
+    ],
+    correct: 2,
+    explication:
+      "En dernier recours, tu t'immobilises à la fin de la bretelle (jamais sur la voie principale) et tu attends un créneau sûr. Forcer n'est pas une option.",
+    tags: ["manoeuvre", "priorite"],
+  },
 ];
 
 export const questionsForParcours = (pid) =>

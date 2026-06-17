@@ -17,6 +17,7 @@ import {
 } from "@/data/centres-examen.js";
 import { haptic } from "@/utils/haptic.js";
 import { setupReveals } from "@/utils/reveal-on-scroll.js";
+import { navigate } from "@/router.js";
 
 const CENTRES_PREMIUM_LOCKED = false;
 
@@ -613,6 +614,69 @@ const STYLE = `<style>
 @media (prefers-reduced-motion: reduce) {
   .cea-skel-block { animation: none; background: var(--bg2); }
 }
+
+/* ── Bouton « Révise pour ton centre » ── */
+.cea-revise-wrap {
+  margin: 10px 12px 0;
+}
+.cea-revise-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  border-radius: 18px;
+  border: none;
+  cursor: pointer;
+  font: 800 16px/1.1 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.01em;
+  color: #fff;
+  /* Gradient or/ambre premium cohérent avec le style cinématique */
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.40);
+  transition: transform .13s cubic-bezier(.23,1,.32,1),
+              filter .13s,
+              box-shadow .13s;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+.cea-revise-btn::after {
+  content: '';
+  position: absolute;
+  top: -60%; left: -70%;
+  width: 50%; height: 220%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255,255,255,.08) 45%,
+    rgba(255,255,255,.16) 50%,
+    rgba(255,255,255,.08) 55%,
+    transparent 100%
+  );
+  pointer-events: none;
+  animation: ceaReviseSheen 3.5s ease-in-out 0.8s infinite;
+}
+@keyframes ceaReviseSheen {
+  0%   { left: -70%; opacity: 0; }
+  10%  { opacity: 1; }
+  60%  { left: 140%; opacity: 1; }
+  65%  { opacity: 0; }
+  100% { left: 140%; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .cea-revise-btn::after { animation: none; } }
+.cea-revise-btn:active {
+  transform: scale(.97);
+  filter: brightness(.93);
+  box-shadow: 0 3px 12px rgba(245, 158, 11, 0.28);
+}
+.cea-revise-sub {
+  font: 500 12px/1 'Inter', sans-serif;
+  color: var(--mu2);
+  text-align: center;
+  margin: 6px 0 0;
+}
 </style>`;
 
 // ─── Helpers couleur difficulté ──────────────────────────────
@@ -719,6 +783,19 @@ function renderFiche(c) {
         .join("")}
     </div>
   </div>
+
+  <!-- BOUTON RÉVISION CENTRE (seulement si des thèmes sont mappés) -->
+  ${
+    c.quizTags?.length
+      ? `<div class="cea-revise-wrap reveal">
+    <button class="cea-revise-btn" id="cea-revise" type="button"
+      aria-label="Réviser les questions sur les pièges de ${esc(c.nom)}">
+      🎯 Révise les pièges de ${esc(c.nom)}
+    </button>
+    <p class="cea-revise-sub">Quiz d'entraînement ciblé · ~15 questions</p>
+  </div>`
+      : ""
+  }
 
   <!-- CONSEILS -->
   <div class="cea-section reveal">
@@ -931,6 +1008,13 @@ function wire(root, active) {
 
   // Accordéon FAQ
   wireAccordion(root, active);
+
+  // Bouton « Révise les pièges de <centre> »
+  root.querySelector("#cea-revise")?.addEventListener("click", () => {
+    haptic("select");
+    track("centre_examen_revise_click", { centre: active });
+    navigate(`/exam-blanc/c-${active}`);
+  });
 
   // Verrou premium
   root.querySelector("#cea-unlock")?.addEventListener("click", () => {
