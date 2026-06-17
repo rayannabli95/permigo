@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// Gain Ligue théorique — feedback « +N pts Théorie » sur les écrans
+// Gain Ligue Révision — feedback « +N pts Révision » sur les écrans
 // de résultat (quiz compétence réussi / parcours d'examen réussi).
 // Honnêteté : le bloc ne s'affiche QUE si le point est réellement
 // nouveau (compétence / parcours pas déjà compté) → on valorise la
@@ -181,8 +181,8 @@ export function renderTheoryGain(host, gain) {
 
   host.innerHTML = `
     <div class="tg-block" role="status">
-      <div class="tg-pts tg-pop">+<span class="tg-n">1</span> pt${delta > 1 ? "s" : ""} Théorie</div>
-      <div class="tg-sub">Ligue théorique</div>
+      <div class="tg-pts tg-pop">+<span class="tg-n">1</span> pt${delta > 1 ? "s" : ""} Révision</div>
+      <div class="tg-sub">Ligue Révision</div>
       <div class="tg-league">${progLine}</div>
       <div class="tg-bar"><div class="tg-fill" style="width:${fillOld}%"></div></div>
       ${upHtml}

@@ -95,3 +95,101 @@ export async function pickDailyQuiz(userId, validatedIds) {
     };
   }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// Enchaînement « Continue à réviser » — l'élève déterminé enchaîne
+// des quiz au-delà de la question du jour. Chaque quiz réussi nourrit
+// la Ligue Révision. On évite de re-proposer les dernières compétences
+// pour garder de la variété (sessionStorage, remis à zéro à la session).
+// ═══════════════════════════════════════════════════════════════
+const SS_RECENT = "pg-revision-recent"; // JSON: derniers competence_id joués
+const RECENT_KEEP = 6;
+
+function readRecent() {
+  try {
+    const arr = JSON.parse(sessionStorage.getItem(SS_RECENT) || "[]");
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Mémorise une compétence jouée en révision (pour varier la suivante). */
+export function pushRevisionRecent(competenceId) {
+  if (!competenceId) return;
+  try {
+    const next = [
+      competenceId,
+      ...readRecent().filter((c) => c !== competenceId),
+    ].slice(0, RECENT_KEEP);
+    sessionStorage.setItem(SS_RECENT, JSON.stringify(next));
+  } catch {
+    /* sessionStorage indispo → pas de mémoire de variété, pas grave */
+  }
+}
+
+const ALL_COMPETENCES = REMC.flatMap((cat) => cat.subs.map((s) => s.c));
+
+/**
+ * Choisit la prochaine compétence à réviser dans une session d'enchaînement.
+ * Priorité aux compétences acquises (consolidation, répétition espacée), puis
+ * découverte si rien d'acquis. Exclut les dernières jouées pour la variété.
+ * @param {string} userId
+ * @returns {Promise<{competenceId: string, mode: "decouverte"|"consolidation"}>}
+ */
+export async function pickRevisionQuiz(userId) {
+  const recent = new Set(readRecent());
+
+  // Compétences acquises de l'élève
+  let acquired = [];
+  try {
+    const { data, error } = await sb
+      .from("validations")
+      .select("competence_id")
+      .eq("eleve_id", userId)
+      .eq("statut", "acquis");
+    if (error) throw error;
+    acquired = (data || []).map((r) => r.competence_id);
+  } catch {
+    acquired = [];
+  }
+
+  // ─ Consolidation : acquise la moins récemment quizzée, hors « recent » ─
+  const pool = acquired.filter((c) => !recent.has(c));
+  const consolidPool = pool.length ? pool : acquired;
+  if (consolidPool.length) {
+    try {
+      const { data } = await sb
+        .from("quiz_attempts")
+        .select("competence_id, completed_at")
+        .eq("user_id", userId)
+        .in("competence_id", consolidPool)
+        .order("completed_at", { ascending: false })
+        .limit(200);
+      const lastSeen = {};
+      for (const a of data || []) {
+        if (!(a.competence_id in lastSeen))
+          lastSeen[a.competence_id] = a.completed_at;
+      }
+      const never = consolidPool.filter((c) => !(c in lastSeen));
+      const competenceId = never.length
+        ? never[Math.floor(Math.random() * never.length)]
+        : consolidPool
+            .slice()
+            .sort((a, b) => new Date(lastSeen[a]) - new Date(lastSeen[b]))[0];
+      return { competenceId, mode: "consolidation" };
+    } catch {
+      const competenceId =
+        consolidPool[Math.floor(Math.random() * consolidPool.length)];
+      return { competenceId, mode: "consolidation" };
+    }
+  }
+
+  // ─ Découverte : rien d'acquis → une compétence au hasard, hors « recent » ─
+  const disco = ALL_COMPETENCES.filter((c) => !recent.has(c));
+  const fromPool = disco.length ? disco : ALL_COMPETENCES;
+  return {
+    competenceId: fromPool[Math.floor(Math.random() * fromPool.length)],
+    mode: "decouverte",
+  };
+}

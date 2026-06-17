@@ -604,7 +604,7 @@ function showResults(root, questions, answers, parcours_id) {
     </div>
   `;
 
-  // Injecte le bloc « +4 pts Théorie » sous le verdict quand le gain est réel
+  // Injecte le bloc « +4 pts Révision » sous le verdict quand le gain est réel
   gainPromise
     .then((gain) => {
       if (!gain) return;

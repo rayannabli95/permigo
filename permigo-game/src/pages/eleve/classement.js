@@ -1,6 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-// Classement élève — 3 onglets : Ligue semaine / École / National
-// Ligues : Bronze→Diamant selon pts hebdo (quiz×2 + comp_acquis×5)
+// Classement élève — 3 onglets : Mon école / Révision / National
+//  - Mon école / National = ligue REMC (validations, score /31)
+//  - Révision = effort solo (quiz réussis + examens blancs), cf. theory-league.js
+// Deep-link possible : #/classement/ecole | /revision | /national
 // Aucun nom réel exposé : pseudo ou « Apprenti »
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
@@ -233,7 +235,7 @@ ${LEAGUE_CSS}
   box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
 .clt-lg-chip.elite { background: linear-gradient(135deg,#f59e0b,#d97706); }
 
-/* ── Ligue théorique (dimension autonomie — visuellement distincte) ── */
+/* ── Ligue Révision (dimension autonomie — visuellement distincte) ── */
 .clt-th-hero { border-style: dashed; border-left-style: solid; }
 .clt-th-hero .clt-pts-legend { margin-top: 12px; }
 .clt-th-cta {
@@ -291,7 +293,7 @@ ${LEAGUE_CSS}
 </style>`;
 
 // ─── Mount ───────────────────────────────────────────────────────
-export async function mount(root) {
+export async function mount(root, initialTab) {
   const me = getCurUser();
   if (!me) return;
 
@@ -336,12 +338,21 @@ export async function mount(root) {
     hof: hofRes.data || [],
   };
 
-  // Défaut = Mon école (la ligue hebdo est abandonnée → plus d'onglet vide)
-  let scope = "ecole";
+  // Onglet initial : deep-link depuis l'accueil (#/classement/revision →
+  // ligue Révision, #/classement/ecole → Mon école). Défaut = Mon école.
+  const TAB_MAP = {
+    ecole: "ecole",
+    national: "national",
+    revision: "theorie", // clé interne historique
+    theorie: "theorie",
+  };
+  let scope = TAB_MAP[initialTab] || "ecole";
   root.innerHTML = `${STYLE}${_render(scope, data)}`;
   _wire(root, data, (s) => {
     scope = s;
   });
+  // Deep-link direct sur la ligue Révision → tuto si jamais vu.
+  if (scope === "theorie") maybeShowTheoryTuto();
 }
 
 // ─── Render ──────────────────────────────────────────────────────
@@ -379,8 +390,8 @@ function _render(scope, data) {
     ${pill}
     <div class="clt-tabs">
       <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">${icon("trophy", { size: 13, strokeWidth: 2 })} Mon école</button>
+      <button class="clt-tab ${scope === "theorie" ? "on" : ""}" data-scope="theorie">${icon("zap", { size: 13, strokeWidth: 2 })} Révision</button>
       <button class="clt-tab ${scope === "national" ? "on" : ""}" data-scope="national">National</button>
-      <button class="clt-tab ${scope === "theorie" ? "on" : ""}" data-scope="theorie">${icon("zap", { size: 13, strokeWidth: 2 })} Théorie</button>
     </div>
   </div>
   <div id="clt-body">${_renderBody(scope, rows, data.hof)}</div>
@@ -438,7 +449,7 @@ function _theoryHowLegend() {
 }
 
 function _theoryHelpBtn() {
-  return `<button class="clt-th-help" id="clt-th-help" type="button" aria-label="Revoir comment fonctionne la ligue théorique"><span aria-hidden="true">?</span></button>`;
+  return `<button class="clt-th-help" id="clt-th-help" type="button" aria-label="Revoir comment fonctionne la ligue Révision"><span aria-hidden="true">?</span></button>`;
 }
 
 // ── Hero « Ta ligue théorique » ──────────────────────────────────
@@ -455,12 +466,12 @@ function _theoryLeagueHero(mine) {
     <div class="clt-rl-top">
       <div class="clt-rl-medal">?</div>
       <div class="clt-rl-info">
-        <div class="clt-rl-lbl">Ta ligue théorique</div>
+        <div class="clt-rl-lbl">Ta ligue révision</div>
         <div class="clt-rl-name">Pas encore classé</div>
       </div>
       ${_theoryHelpBtn()}
     </div>
-    <div class="clt-rl-prog">Remplis ton premier quiz pour entrer dans la ligue théorique — chaque compétence travaillée compte.</div>
+    <div class="clt-rl-prog">Remplis ton premier quiz pour entrer dans la ligue révision — chaque compétence travaillée compte.</div>
     ${_theoryHowLegend()}
     <a class="clt-th-cta" href="#/parcours">Faire mon premier quiz</a>
   </div>`;
@@ -473,14 +484,14 @@ function _theoryLeagueHero(mine) {
     return `<div class="clt-rl-dot ${cls}" style="--dc:${l.color}"></div>`;
   }).join("");
   const progText = info.top
-    ? "Théorie maîtrisée — montre ça à ton moniteur en leçon"
+    ? "Révision maîtrisée — montre ça à ton moniteur en leçon"
     : `Encore <strong>${info.toNext}</strong> pt${info.toNext > 1 ? "s" : ""} avant la Ligue ${info.next.n} — ${esc(info.next.name)}`;
   return `
   <div class="clt-rl-hero clt-th-hero" style="--lc:${L.color}">
     <div class="clt-rl-top">
       <div class="clt-rl-medal">${info.top ? "★" : L.n}</div>
       <div class="clt-rl-info">
-        <div class="clt-rl-lbl">Ta ligue théorique</div>
+        <div class="clt-rl-lbl">Ta ligue révision</div>
         <div class="clt-rl-name">Ligue ${L.n} — ${esc(L.name)}</div>
       </div>
       ${_theoryHelpBtn()}
@@ -504,7 +515,7 @@ function _renderTheoryBody(rows) {
   if (active.length < 2) {
     return `${hero}<div class="clt-empty">
       <div class="clt-empty-ico">${icon("zap", { size: 30 })}</div>
-      <div class="clt-empty-txt">Le classement s'anime quand 2+ élèves ont des points théorie. Quiz et examens blancs comptent.</div>
+      <div class="clt-empty-txt">Le classement s'anime quand 2+ élèves ont des points révision. Quiz et examens blancs comptent.</div>
     </div>`;
   }
 
