@@ -96,6 +96,69 @@ export function mount(root) {
       </div>
     </section>
 
+    <!-- ── Showcase produit (élève / moniteur) ── -->
+    <section class="lp-sec lp-show lp-rev" id="lp-show">
+      <h2 class="lp-h2">Vois PermiGo en vrai</h2>
+      <p class="lp-sub">Une app que tes élèves adorent, un outil qui te fait gagner du temps. Les deux faces de PermiGo.</p>
+
+      <div class="lp-show-tabs" role="tablist">
+        <button class="lp-show-tab is-active" data-tab="eleve" role="tab" aria-selected="true" type="button">Côté élève</button>
+        <button class="lp-show-tab" data-tab="moniteur" role="tab" aria-selected="false" type="button">Côté moniteur</button>
+      </div>
+
+      <div class="lp-show-panel" data-panel="eleve">
+        <div class="lp-show-strip">
+          <figure class="lp-show-card">
+            <div class="lp-show-phone"><img src="/showcase/eleve-accueil.png" alt="Accueil élève : carte de permis, quêtes du jour, streak" loading="lazy" width="390" height="844" /></div>
+            <figcaption>
+              <div class="lp-show-caphead"><span class="lp-show-step">1</span><strong>Son permis devient un jeu</strong></div>
+              <span class="lp-show-desc">Carte de permis, quêtes du jour, streak quotidien : il revient s'entraîner tout seul.</span>
+            </figcaption>
+          </figure>
+          <figure class="lp-show-card">
+            <div class="lp-show-phone"><img src="/showcase/eleve-parcours.png" alt="Parcours REMC gamifié, étape par étape" loading="lazy" width="390" height="844" /></div>
+            <figcaption>
+              <div class="lp-show-caphead"><span class="lp-show-step">2</span><strong>Un parcours étape par étape</strong></div>
+              <span class="lp-show-desc">Les 31 compétences du REMC en carte d'aventure. Il voit exactement où il en est.</span>
+            </figcaption>
+          </figure>
+          <figure class="lp-show-card">
+            <div class="lp-show-phone"><img src="/showcase/eleve-examens.png" alt="Examens blancs chronométrés et entraînement par thème" loading="lazy" width="390" height="844" /></div>
+            <figcaption>
+              <div class="lp-show-caphead"><span class="lp-show-step">3</span><strong>Il s'entraîne comme le jour J</strong></div>
+              <span class="lp-show-desc">Examens blancs chronométrés et quiz par thème. Il arrive prêt à l'examen.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="lp-show-panel" data-panel="moniteur" hidden>
+        <div class="lp-show-strip">
+          <figure class="lp-show-card">
+            <div class="lp-show-phone"><img src="/showcase/ens-valider.png" alt="Vue moniteur : valider une compétence, liste d'élèves" loading="lazy" width="390" height="844" /></div>
+            <figcaption>
+              <div class="lp-show-caphead"><span class="lp-show-step">1</span><strong>Tu valides en 2 taps</strong></div>
+              <span class="lp-show-desc">Tu ouvres l'élève, tu coches ce qu'il a réussi. Son livret se met à jour tout seul.</span>
+            </figcaption>
+          </figure>
+          <figure class="lp-show-card">
+            <div class="lp-show-phone"><img src="/showcase/ens-livret.png" alt="Livret REMC numérique d'un élève, compétences acquises" loading="lazy" width="390" height="844" /></div>
+            <figcaption>
+              <div class="lp-show-caphead"><span class="lp-show-step">2</span><strong>Le livret REMC, numérique</strong></div>
+              <span class="lp-show-desc">Chaque compétence à jour en temps réel. Fini le papier perdu dans la voiture.</span>
+            </figcaption>
+          </figure>
+          <figure class="lp-show-card">
+            <div class="lp-show-phone"><img src="/showcase/ens-classement.png" alt="Élèves classés par compétences acquises" loading="lazy" width="390" height="844" /></div>
+            <figcaption>
+              <div class="lp-show-caphead"><span class="lp-show-step">3</span><strong>Tu vois qui est prêt</strong></div>
+              <span class="lp-show-desc">Tes élèves classés par progression. Tu sais d'un coup d'œil qui présenter.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
     <!-- ── Problème ── -->
     <section class="lp-sec lp-problem lp-rev">
       <h2 class="lp-h2">Le permis se joue entre les leçons — et c'est là que tu perds tes élèves</h2>
@@ -314,6 +377,24 @@ export function mount(root) {
       track("landing.cta_signup", {});
       location.hash = "#/signup";
       location.reload();
+    });
+  });
+
+  // ── Showcase tabs (côté élève / côté moniteur) ──
+  const showTabs = root.querySelectorAll(".lp-show-tab");
+  const showPanels = root.querySelectorAll(".lp-show-panel");
+  showTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const key = tab.dataset.tab;
+      showTabs.forEach((t) => {
+        const on = t === tab;
+        t.classList.toggle("is-active", on);
+        t.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      showPanels.forEach((p) => {
+        p.hidden = p.dataset.panel !== key;
+      });
+      track("landing.showcase_tab", { tab: key });
     });
   });
   root.querySelector("#lp-legal")?.addEventListener("click", (e) => {
@@ -739,5 +820,57 @@ const STYLE = `<style>
   @media (max-width: 460px) {
     .lp-row2 { grid-template-columns: 1fr; }
     .lp-h2 { font-size: 26px; }
+  }
+
+  /* ── Showcase produit (élève / moniteur) ── */
+  .lp-show { padding-top: 44px; }
+  .lp-show-tabs { display: flex; width: fit-content; gap: 4px; padding: 5px; margin: 6px auto 32px;
+    border-radius: 999px; background: #f1f2f7; border: 1px solid var(--lp-line); }
+  .lp-show-tab { border: 0; background: transparent; cursor: pointer; border-radius: 999px;
+    padding: 11px 22px; min-height: 44px; font: 700 14.5px/1 'Inter', sans-serif; color: var(--lp-mut);
+    transition: color .2s, background .2s, box-shadow .2s; }
+  .lp-show-tab.is-active { color: var(--lp-ink); background: #fff; box-shadow: 0 2px 8px -2px rgba(11,16,32,.18); }
+
+  .lp-show-panel[hidden] { display: none; }
+  .lp-show-panel { animation: lpShowFade .42s cubic-bezier(.2,.7,.3,1); }
+  @keyframes lpShowFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  .lp-show-strip { display: flex; gap: 22px; justify-content: center; align-items: flex-start; }
+  .lp-show-card { width: 252px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; margin: 0; }
+  .lp-show-phone { border-radius: 32px; padding: 7px; overflow: hidden;
+    background: linear-gradient(160deg, #232c45, #0b1120); border: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 32px 64px -30px rgba(8,12,28,.62), 0 2px 0 rgba(255,255,255,.08) inset;
+    transition: transform .3s cubic-bezier(.2,.7,.3,1), box-shadow .3s; }
+  .lp-show-phone img { display: block; width: 100%; height: auto; border-radius: 25px; }
+  .lp-show-card figcaption { display: flex; flex-direction: column; gap: 6px; padding: 0 4px; }
+  .lp-show-caphead { display: flex; align-items: center; gap: 9px; }
+  .lp-show-step { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 8px; background: color-mix(in srgb, var(--a) 15%, transparent);
+    color: var(--adk); font: 800 12px/1 'Plus Jakarta Sans', sans-serif; }
+  .lp-show-caphead strong { font: 700 16px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--lp-ink); }
+  .lp-show-desc { font: 400 13.5px/1.5 'Inter', sans-serif; color: var(--lp-mut); }
+
+  /* Reveal + stagger des phones */
+  .lp-rev .lp-show-card { opacity: 0; transform: translateY(18px);
+    transition: opacity .6s cubic-bezier(.2,.7,.3,1), transform .6s cubic-bezier(.2,.7,.3,1); }
+  .lp-rev.in .lp-show-card { opacity: 1; transform: none; }
+  .lp-rev.in .lp-show-strip > :nth-child(2) { transition-delay: .1s; }
+  .lp-rev.in .lp-show-strip > :nth-child(3) { transition-delay: .2s; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lp-show-card:hover .lp-show-phone { transform: translateY(-7px); box-shadow: 0 44px 78px -32px rgba(8,12,28,.7); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lp-show-panel { animation: none; }
+    .lp-rev .lp-show-card { opacity: 1; transform: none; transition: none; }
+    .lp-show-card:hover .lp-show-phone { transform: none; }
+  }
+
+  /* Mobile : filmstrip horizontal scroll-snap */
+  @media (max-width: 760px) {
+    .lp-show-strip { justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory;
+      margin: 0 -22px; padding: 4px 22px 14px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .lp-show-strip::-webkit-scrollbar { display: none; }
+    .lp-show-card { scroll-snap-align: center; width: 76vw; max-width: 300px; }
   }
 </style>`;
