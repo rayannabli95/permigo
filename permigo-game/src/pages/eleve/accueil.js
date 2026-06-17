@@ -486,10 +486,17 @@ const STYLE = `<style>
 .pplus-card.tappable:hover { background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.22); }
 .pplus-card::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.16) 50%, transparent 65%);
-  transform: translateX(-120%); transition: transform .7s ease;
+  background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.24) 50%, transparent 62%);
+  transform: translateX(-150%);
+  animation: pplusShine 5.5s ease-in-out infinite;
 }
-.pplus-card.tappable:hover::after { transform: translateX(120%); }
+/* décale la 2e carte pour que les reflets ne brillent pas en même temps */
+.pplus-cards .pplus-card:nth-child(2)::after { animation-delay: 2.75s; }
+@keyframes pplusShine {
+  0%   { transform: translateX(-150%); }
+  18%  { transform: translateX(150%); }
+  100% { transform: translateX(150%); }
+}
 .pplus-badge {
   width: 48px; height: 48px; object-fit: contain; flex-shrink: 0;
   filter: drop-shadow(0 4px 8px rgba(0,0,0,.4));
@@ -502,7 +509,7 @@ const STYLE = `<style>
 .pplus-card.locked .pplus-badge { filter: grayscale(.7) drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
 .pplus-lock { flex-shrink: 0; color: rgba(255,255,255,.5); display: flex; }
 @media (prefers-reduced-motion: reduce) {
-  .pplus-card, .pplus-card::after { transition: none; }
+  .pplus-card, .pplus-card::after { transition: none; animation: none; }
 }
 
 /* Leaderboard slot */
@@ -1048,7 +1055,7 @@ function render({
       </div>`
       }
       <a class="pplus-card tappable" id="acc-centre" href="#/centre-examen" aria-label="Découvre ton centre d'examen">
-        <img class="pplus-badge" src="/skins/badge-3d-05.webp" alt="" aria-hidden="true" loading="lazy">
+        <img class="pplus-badge" src="/skins/badge-3d-06.webp" alt="" aria-hidden="true" loading="lazy">
         <div class="pplus-tx">
           <div class="pplus-t">Ton centre d'examen</div>
           <div class="pplus-s">Pièges &amp; conseils sur ton centre</div>
