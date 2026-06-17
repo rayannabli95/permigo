@@ -9,7 +9,8 @@
   },
   "scripts": {
     "dev": "vite --port 5173",
-    "build": "vite build",
+    "build": "vite build && node scripts/build-seo.mjs",
+    "build:seo": "node scripts/build-seo.mjs",
     "preview": "vite preview",
     "lint": "echo 'No lint configured yet'",
     "test": "playwright test",
