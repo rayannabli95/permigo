@@ -235,50 +235,69 @@ const STYLE = `<style>
     display: flex; align-items: center; justify-content: center;
   }
 
-  /* ── Cartes ligues ── */
-  .aj-ligues { display: flex; gap: 10px; }
-  /* Sous-libellé « Mes élèves » : sépare ma ligue des classements élèves */
-  .aj-ligues-sublbl {
-    display: flex; align-items: center; gap: 6px;
-    margin: 16px 0 8px;
-    font: 700 11px/1 'Inter', sans-serif;
-    letter-spacing: .06em; text-transform: uppercase; color: var(--mu2);
-  }
-  .aj-ligues-sublbl svg { flex-shrink: 0; }
-  .aj-ligue {
-    flex: 1; min-width: 0;
+  /* ── Carte Classements (repliable) ── */
+  a.aj-prog, a.aj-prog:visited { text-decoration: none; }
+  .aj-ranks {
     background: var(--su);
     border: 1px solid var(--bo);
     border-radius: var(--r-md);
-    padding: 14px;
     box-shadow: var(--s0);
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
+    overflow: hidden;
+  }
+  .aj-ranks[open] { border-color: var(--bo4); }
+  .aj-ranks-sum {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; cursor: pointer; list-style: none;
     -webkit-tap-highlight-color: transparent;
-    transition: border-color .15s, transform .15s;
-    display: flex; flex-direction: column; gap: 6px;
+    min-height: 44px;
   }
-  a.aj-ligue, a.aj-ligue:visited, a.aj-ligue:hover, a.aj-ligue:active,
-  a.aj-prog, a.aj-prog:visited { text-decoration: none; }
-  .aj-ligue:hover { border-color: var(--bo4); transform: translateY(-1px); }
-  .aj-ligue:active { transform: scale(.98); }
-  .aj-ligue:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
-  .aj-ligue-kicker {
-    font: 700 10px/1 'Inter', sans-serif;
-    text-transform: uppercase; letter-spacing: .08em;
-    color: var(--mu2);
-    display: flex; align-items: center; gap: 5px;
+  .aj-ranks-sum::-webkit-details-marker { display: none; }
+  .aj-ranks-sum:focus-visible { outline: 3px solid var(--a); outline-offset: -3px; }
+  .aj-ranks-ico {
+    width: 34px; height: 34px; border-radius: var(--r);
+    background: var(--ap); color: var(--adk); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
   }
-  .aj-ligue-main {
-    font: 800 15px/1.2 'Plus Jakarta Sans', sans-serif;
+  .aj-ranks-hd { flex: 1; min-width: 0; }
+  .aj-ranks-ttl {
+    font: 800 14px/1.2 'Plus Jakarta Sans', sans-serif;
+    color: var(--ink); letter-spacing: -.01em;
+  }
+  .aj-ranks-meta {
+    display: flex; align-items: center; gap: 6px; margin-top: 3px;
+    font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2);
+  }
+  .aj-ranks-chev {
+    color: var(--mu2); flex-shrink: 0; display: flex;
+    transition: transform .2s var(--ease);
+  }
+  .aj-ranks[open] .aj-ranks-chev { transform: rotate(180deg); }
+  .aj-ranks-body { border-top: 1px solid var(--bo2); }
+  .aj-rank-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 16px; text-decoration: none; color: inherit;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .12s; min-height: 44px;
+  }
+  .aj-rank-row + .aj-rank-row { border-top: 1px solid var(--bo2); }
+  .aj-rank-row:active { background: var(--bg2); }
+  .aj-rank-row:focus-visible { outline: 3px solid var(--a); outline-offset: -3px; }
+  .aj-rank-row-ico {
+    width: 30px; height: 30px; border-radius: var(--r-sm);
+    background: var(--bg2); color: var(--mu); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .aj-rank-row-body { flex: 1; min-width: 0; }
+  .aj-rank-row-main {
+    font: 700 13.5px/1.2 'Plus Jakarta Sans', sans-serif;
     color: var(--ink); letter-spacing: -.01em;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .aj-ligue-sub {
-    font: 500 11px/1.35 'Inter', sans-serif;
-    color: var(--mu2);
+  .aj-rank-row-sub {
+    font: 500 11px/1.35 'Inter', sans-serif; color: var(--mu2);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  .aj-rank-row-chev { color: var(--mu2); flex-shrink: 0; display: flex; }
 
   /* Section title */
   .aj-section-title {
@@ -941,42 +960,60 @@ async function renderInto(root, _me) {
         </a>`;
       })()}
 
-      <!-- Accès ligues -->
+      <!-- Accès classements (1 carte repliable : ma ligue + ligues élèves) -->
       <div class="aj-section">
         <div class="aj-section-title">Classements</div>
-        <div class="aj-ligues">
-          <a class="aj-ligue" href="#/ligue-semaine" id="aj-ligue-moi">
-            <span class="aj-ligue-kicker">
-              ${myLeague ? `<span style="width:7px;height:7px;border-radius:50%;background:${myLeague.color};display:inline-block" aria-hidden="true"></span>` : ""}
-              Ma ligue
+        <details class="aj-ranks" id="aj-ranks">
+          <summary class="aj-ranks-sum">
+            <span class="aj-ranks-ico">${icon("award", { size: 17, strokeWidth: 2 })}</span>
+            <span class="aj-ranks-hd">
+              <div class="aj-ranks-ttl">Classements</div>
+              <div class="aj-ranks-meta">
+                ${myLeague ? `<span style="width:7px;height:7px;border-radius:50%;background:${myLeague.color};display:inline-block;flex-shrink:0" aria-hidden="true"></span>` : ""}
+                <span>${
+                  myLeague
+                    ? `Ma ligue ${esc(myLeague.name)}${myLeagueRow?.rank_pos ? ` · ${myLeagueRow.rank_pos}ᵉ` : ""}`
+                    : "Pas encore classé"
+                }</span>
+              </div>
             </span>
-            <span class="aj-ligue-main">${
-              myLeague
-                ? `${esc(myLeague.name)}${myLeagueRow?.rank_pos ? ` · ${myLeagueRow.rank_pos}ᵉ` : ""}`
-                : "Pas encore classé"
-            }</span>
-            <span class="aj-ligue-sub">${
-              myWeeklyPts > 0
-                ? `${myWeeklyPts} validation${myWeeklyPts > 1 ? "s" : ""} cette semaine`
-                : "1 validation = 1 point"
-            }</span>
-          </a>
-        </div>
-
-        <!-- Classements élèves : théorie (quiz) + pratique (compétences) -->
-        <div class="aj-ligues-sublbl">${icon("award", { size: 11, strokeWidth: 2 })} Mes élèves</div>
-        <div class="aj-ligues">
-          <a class="aj-ligue" href="#/classement-eleves/theorie" id="aj-ligue-theorie">
-            <span class="aj-ligue-kicker">${icon("book-open", { size: 11, strokeWidth: 2 })} Théorie</span>
-            <span class="aj-ligue-main">Ligue théorie</span>
-            <span class="aj-ligue-sub">Qui révise en autonomie ?</span>
-          </a>
-          <a class="aj-ligue" href="#/classement-eleves/pratique" id="aj-ligue-pratique">
-            <span class="aj-ligue-kicker">${icon("check-circle", { size: 11, strokeWidth: 2 })} Pratique</span>
-            <span class="aj-ligue-main">Ligue pratique</span>
-            <span class="aj-ligue-sub">Compétences acquises</span>
-          </a>
-        </div>
+            <span class="aj-ranks-chev">${icon("chevron-down", { size: 18, strokeWidth: 2 })}</span>
+          </summary>
+          <div class="aj-ranks-body">
+            <a class="aj-rank-row" href="#/ligue-semaine" id="aj-ligue-moi">
+              <span class="aj-rank-row-ico">${myLeague ? `<span style="width:9px;height:9px;border-radius:50%;background:${myLeague.color};display:inline-block" aria-hidden="true"></span>` : icon("flame", { size: 14, strokeWidth: 2 })}</span>
+              <span class="aj-rank-row-body">
+                <span class="aj-rank-row-main">${
+                  myLeague
+                    ? `Ma ligue · ${esc(myLeague.name)}${myLeagueRow?.rank_pos ? ` · ${myLeagueRow.rank_pos}ᵉ` : ""}`
+                    : "Ma ligue"
+                }</span>
+                <span class="aj-rank-row-sub">${
+                  myWeeklyPts > 0
+                    ? `${myWeeklyPts} validation${myWeeklyPts > 1 ? "s" : ""} cette semaine`
+                    : "1 validation = 1 point"
+                }</span>
+              </span>
+              <span class="aj-rank-row-chev">${icon("chevron-right", { size: 16, strokeWidth: 2 })}</span>
+            </a>
+            <a class="aj-rank-row" href="#/classement-eleves/theorie" id="aj-ligue-theorie">
+              <span class="aj-rank-row-ico">${icon("book-open", { size: 14, strokeWidth: 2 })}</span>
+              <span class="aj-rank-row-body">
+                <span class="aj-rank-row-main">Ligue théorie · mes élèves</span>
+                <span class="aj-rank-row-sub">Qui révise en autonomie ?</span>
+              </span>
+              <span class="aj-rank-row-chev">${icon("chevron-right", { size: 16, strokeWidth: 2 })}</span>
+            </a>
+            <a class="aj-rank-row" href="#/classement-eleves/pratique" id="aj-ligue-pratique">
+              <span class="aj-rank-row-ico">${icon("check-circle", { size: 14, strokeWidth: 2 })}</span>
+              <span class="aj-rank-row-body">
+                <span class="aj-rank-row-main">Ligue pratique · mes élèves</span>
+                <span class="aj-rank-row-sub">Compétences acquises</span>
+              </span>
+              <span class="aj-rank-row-chev">${icon("chevron-right", { size: 16, strokeWidth: 2 })}</span>
+            </a>
+          </div>
+        </details>
       </div>
 
       <!-- Activité récente -->

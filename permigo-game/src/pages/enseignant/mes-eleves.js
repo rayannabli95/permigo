@@ -246,11 +246,17 @@ const STYLE = `<style>
     border-radius: 2px;
     transition: width .6s var(--ease);
   }
+  /* Lecture instantanée par état : vert = prêt/diplômé (objectif),
+     ambre = à relancer (attention). Défaut accent = en cours. */
+  .me-prog-fill.is-pret { background: linear-gradient(90deg, var(--grd), var(--gr)); }
+  .me-prog-fill.is-relancer { background: var(--am); }
   .me-prog-txt {
     font: 700 12px/1 'IBM Plex Mono', monospace;
     color: var(--ink3);
     text-align: right;
   }
+  .me-prog-txt.is-pret { color: var(--gr-txt); }
+  .me-prog-txt.is-relancer { color: var(--am-txt); }
 
   /* Bouton actions rapides */
   .me-more {
@@ -847,6 +853,13 @@ function renderRow(eleve) {
   // — date d'examen, jours d'inactivité — vivent dans leurs FILTRES dédiés
   // (Examen / Inactifs), pas en doublon sur chaque ligne de « Tous ».
   const epure = _tab === "tous";
+  // Couleur de progression = état actionnable (vert prêt / ambre relancer / accent en cours)
+  const progState =
+    eleve.readiness === "pret" || eleve.readiness === "recu"
+      ? "is-pret"
+      : eleve.aRelancer
+        ? "is-relancer"
+        : "";
   const badges =
     eleve.readiness === "recu"
       ? `<span class="me-badge recu">${icon("check", { size: 11, strokeWidth: 2.6 })} Diplômé</span>`
@@ -878,9 +891,9 @@ function renderRow(eleve) {
 
       <div class="me-prog">
         <div class="me-prog-bar">
-          <div class="me-prog-fill" style="width:${pct}%"></div>
+          <div class="me-prog-fill ${progState}" style="width:${pct}%"></div>
         </div>
-        <div class="me-prog-txt">${eleve.acquis}/${eleve.total}</div>
+        <div class="me-prog-txt ${progState}">${eleve.acquis}/${eleve.total}</div>
       </div>
 
       <button class="me-more" data-more type="button"
