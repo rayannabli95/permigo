@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // Revision Recap — écran plein écran de fin de session « Révision ».
 //
-// Affiche le résumé du jour : X quizz réussis, +N places gagnées, +P points,
+// Affiche le résumé du jour : X quiz réussis, +N places gagnées, +P points,
 // avec un VISUEL DE DÉPASSEMENT façon Clash Royale (mon avatar passe au-dessus
 // d'un autre élève sur l'échelle de la ligue Révision).
 //
@@ -242,7 +242,7 @@ export function showRevisionRecap(summary = {}, opts = {}) {
 
   const title =
     nPassed > 0
-      ? `${nPassed} quizz réussi${nPassed > 1 ? "s" : ""}`
+      ? `${nPassed} quiz réussi${nPassed > 1 ? "s" : ""}`
       : "Session terminée";
   const sub =
     nQuiz > 0
@@ -269,7 +269,7 @@ export function showRevisionRecap(summary = {}, opts = {}) {
 
   const stats = [
     { v: nPassed, suffix: `/${nQuiz || nPassed}`, l: "Réussis" },
-    { v: `+${pointsGained}`, l: "Points" },
+    { v: `+${pointsGained}`, l: pointsGained > 1 ? "Points" : "Point" },
     {
       v:
         ranksGained > 0
