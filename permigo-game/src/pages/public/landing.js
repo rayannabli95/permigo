@@ -1,7 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-// Landing / page de vente — visiteur non connecté (patron d'auto-école)
-// Positionnement : gamification + classement (pas "livret").
-// CTA principal : formulaire "être recontacté" → table public.leads (insert anon).
+// Landing / page de vente — visiteur non connecté
+// Cible : MONITEUR INDÉPENDANT (école = porte discrète via le formulaire).
+// Positionnement : "ton app à ton nom" + engagement élève + preuve/autorité.
+// CTA principal : "Créer mon compte" → #/signup (self-serve 9,99€/mois).
+// CTA secondaire : formulaire "qu'on te montre" → table public.leads (insert anon).
 // Montée par main.js quand !me et hash racine.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
@@ -43,22 +45,22 @@ export function mount(root) {
         <div class="lp-hero-txt">
           <div class="lp-hero-badge">
             <span class="lp-badge-pulse"></span>
-            Bêta ouverte aux auto-écoles pionnières
+            Pour moniteurs indépendants · Bêta
           </div>
           <h1 class="lp-h1">
-            Le permis, transformé<br>
-            en <em class="lp-h1-em">parcours qui accroche</em>
+            Ton app de permis.<br>
+            À <em class="lp-h1-em">ton</em> nom.
           </h1>
-          <p class="lp-lead">Streaks quotidiens, quiz, classement moniteurs — PermiGo engage vos élèves entre les leçons et valorise le travail de vos enseignants. Plus d'abandons, plus de réussite.</p>
+          <p class="lp-lead">Tes élèves révisent entre les leçons, progressent plus vite, et tu prouves tes résultats. Ton outil, ta marque — sans dépendre d'une plateforme.</p>
           <div class="lp-hero-cta">
-            <button class="lp-btn lp-btn-primary" data-scroll="lp-lead" type="button">
-              Être recontacté
+            <button class="lp-btn lp-btn-primary" data-go="signup" type="button">
+              Créer mon compte · 9,99€/mois
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
             <a class="lp-btn lp-btn-ghost-hero" href="#lp-how">Comment ça marche</a>
           </div>
           <div class="lp-hero-chips">
-            <span class="lp-chip">✓ Conforme REMC officiel</span>
+            <span class="lp-chip">✓ À ta marque</span>
             <span class="lp-chip">✓ Sans installation</span>
             <span class="lp-chip">✓ Sans engagement</span>
           </div>
@@ -96,33 +98,33 @@ export function mount(root) {
 
     <!-- ── Problème ── -->
     <section class="lp-sec lp-problem lp-rev">
-      <h2 class="lp-h2">Le suivi du permis, version papier, ça démotive tout le monde</h2>
+      <h2 class="lp-h2">Le permis se joue entre les leçons — et c'est là que tu perds tes élèves</h2>
       <div class="lp-cards3">
-        <div class="lp-card"><div class="lp-card-ic">${icon("activity", { size: 26 })}</div><h3>Les élèves décrochent</h3><p>Entre deux leçons, rien ne les fait revenir. Pas de feedback, pas de progression visible.</p></div>
-        <div class="lp-card"><div class="lp-card-ic">${icon("clipboard", { size: 26 })}</div><h3>Le suivi se perd</h3><p>Livrets papier, fichiers Excel, post-its : impossible de savoir qui en est où d'un coup d'œil.</p></div>
-        <div class="lp-card"><div class="lp-card-ic">${icon("users", { size: 26 })}</div><h3>Les moniteurs s'usent</h3><p>Aucune reconnaissance de leur travail, aucune émulation entre eux.</p></div>
+        <div class="lp-card"><div class="lp-card-ic">${icon("activity", { size: 26 })}</div><h3>Tes élèves décrochent</h3><p>Entre deux leçons, rien ne les fait réviser. Tu repars un peu à zéro à chaque séance.</p></div>
+        <div class="lp-card"><div class="lp-card-ic">${icon("clipboard", { size: 26 })}</div><h3>Ton travail reste invisible</h3><p>Livret papier, aucune preuve de tes résultats : ta vraie valeur ne se voit nulle part.</p></div>
+        <div class="lp-card"><div class="lp-card-ic">${icon("users", { size: 26 })}</div><h3>Tu dépends des plateformes</h3><p>Quand tu passes par elles, c'est leur marque, leurs élèves, leur commission. Pas la tienne.</p></div>
       </div>
     </section>
 
     <!-- ── Features ── -->
     <section class="lp-sec lp-features lp-rev">
-      <h2 class="lp-h2">Ce que PermiGo apporte à votre auto-école</h2>
+      <h2 class="lp-h2">Ce que PermiGo te donne</h2>
       <div class="lp-feat">
         <div class="lp-feat-row">
+          <div class="lp-feat-ic">${icon("award", { size: 28, strokeWidth: 1.5 })}</div>
+          <div><h3>À ton nom, pas à celui d'une plateforme</h3><p>Ton app, ta marque, ta relation élève. Tu existes en ton nom propre — pas comme sous-traitant d'Ornikar ou d'une grosse structure.</p></div>
+        </div>
+        <div class="lp-feat-row">
           <div class="lp-feat-ic">${icon("map", { size: 28, strokeWidth: 1.5 })}</div>
-          <div><h3>Un parcours qui accroche</h3><p>Le programme officiel REMC (31 compétences) transformé en aventure : mondes à débloquer, quiz éclair, streaks quotidiens et récompenses. Vos élèves reviennent tous les jours.</p></div>
+          <div><h3>Tes élèves reviennent tout seuls</h3><p>Le programme officiel REMC transformé en parcours : quiz éclair, examens blancs, streaks quotidiens. Ils s'entraînent entre les leçons → progressent → abandonnent moins.</p></div>
         </div>
         <div class="lp-feat-row">
           <div class="lp-feat-ic">${icon("trophy", { size: 28, strokeWidth: 1.5 })}</div>
-          <div><h3>Un classement qui motive les moniteurs</h3><p>Classement local (au sein de votre école) et national. Vos enseignants se challengent, et leur travail devient enfin visible et valorisé.</p></div>
+          <div><h3>La preuve qui remplit ton agenda</h3><p>Tu vois d'un coup d'œil qui est prêt à présenter. Tes résultats parlent pour toi : réputation → bouche-à-oreille → planning plein.</p></div>
         </div>
         <div class="lp-feat-row">
           <div class="lp-feat-ic">${icon("check-circle", { size: 28, strokeWidth: 1.5 })}</div>
-          <div><h3>Une validation simple et fiable</h3><p>Le moniteur valide les compétences en séance, en deux taps. Le livret REMC numérique se met à jour tout seul — fini le papier.</p></div>
-        </div>
-        <div class="lp-feat-row">
-          <div class="lp-feat-ic">${icon("bar-chart-2", { size: 28, strokeWidth: 1.5 })}</div>
-          <div><h3>Une vision claire pour vous</h3><p>En tant que gérant, vous voyez la progression de toute votre école, l'activité de chaque moniteur et chaque élève, en temps réel.</p></div>
+          <div><h3>Validation en 2 taps</h3><p>Tu valides les compétences en séance. Le livret REMC numérique se met à jour tout seul — fini le papier perdu dans la voiture.</p></div>
         </div>
       </div>
     </section>
@@ -134,18 +136,18 @@ export function mount(root) {
       <div class="lp-testicards">
         <div class="lp-tc">
           <div class="lp-tc-stars">★★★★★</div>
-          <p class="lp-tc-quote">« Depuis PermiGo, le taux de connexion de mes élèves entre les leçons a explosé. En 3 mois, j'ai vu une vraie progression sur les compétences à risque. »</p>
+          <p class="lp-tc-quote">« Mes élèves révisent enfin entre les leçons. Je perds moins de temps à re-expliquer, et l'app porte mon nom — pas celui d'une plateforme. »</p>
           <div class="lp-tc-author">
             <div class="lp-tc-av lp-tc-av-g">KB</div>
             <div>
-              <div class="lp-tc-name">Karim, gérant</div>
+              <div class="lp-tc-name">Karim, moniteur indépendant</div>
               <div class="lp-tc-role">Exemple illustratif</div>
             </div>
           </div>
         </div>
         <div class="lp-tc">
           <div class="lp-tc-stars">★★★★★</div>
-          <p class="lp-tc-quote">« Valider les compétences en 2 taps, c'est ce dont j'avais besoin. Fini le livret papier que je perdais dans la voiture. Mes élèves voient leur progression en temps réel. »</p>
+          <p class="lp-tc-quote">« Valider les compétences en 2 taps, c'est ce dont j'avais besoin. Fini le livret papier que je perdais dans la voiture. Je vois qui est prêt en un coup d'œil. »</p>
           <div class="lp-tc-author">
             <div class="lp-tc-av lp-tc-av-b">SM</div>
             <div>
@@ -172,75 +174,58 @@ export function mount(root) {
     <section class="lp-sec lp-how lp-rev" id="lp-how">
       <h2 class="lp-h2">Comment ça marche</h2>
       <div class="lp-steps">
-        <div class="lp-step"><div class="lp-step-n">1</div><h3>Créez votre école</h3><p>Ajoutez vos moniteurs en quelques clics.</p></div>
-        <div class="lp-step"><div class="lp-step-n">2</div><h3>Vos moniteurs invitent leurs élèves</h3><p>Un lien à partager, l'élève installe l'app sur son téléphone.</p></div>
-        <div class="lp-step"><div class="lp-step-n">3</div><h3>Tout le monde progresse</h3><p>Les élèves s'entraînent, les moniteurs valident, vous pilotez.</p></div>
+        <div class="lp-step"><div class="lp-step-n">1</div><h3>Crée ton compte</h3><p>Deux minutes, à ton nom. Aucune installation.</p></div>
+        <div class="lp-step"><div class="lp-step-n">2</div><h3>Invite tes élèves</h3><p>Un lien à partager, l'élève ajoute l'app à son écran d'accueil.</p></div>
+        <div class="lp-step"><div class="lp-step-n">3</div><h3>Ils progressent, tu pilotes</h3><p>Ils s'entraînent entre les leçons, tu valides, tu vois qui est prêt.</p></div>
       </div>
     </section>
 
     <!-- ── Pricing ── -->
     <section class="lp-sec lp-pricing lp-rev" id="lp-pricing">
-      <h2 class="lp-h2">Un tarif simple, par auto-école</h2>
-      <p class="lp-sub">Sans engagement. Annulable à tout moment.</p>
-      <div class="lp-plans">
-        <div class="lp-plan">
-          <div class="lp-plan-name">Solo</div>
-          <div class="lp-plan-price">19<span>€ / mois</span></div>
-          <div class="lp-plan-for">Pour démarrer, 1 moniteur</div>
-          <ul class="lp-plan-list">
-            <li>Livret REMC numérique</li>
-            <li>Parcours élève gamifié</li>
-            <li>Validation des compétences</li>
-          </ul>
-          <button class="lp-btn lp-btn-soft lp-plan-cta" data-scroll="lp-lead" type="button">Être recontacté</button>
-        </div>
+      <h2 class="lp-h2">Un seul tarif, tout compris</h2>
+      <p class="lp-sub">Sans engagement. Résiliable en un clic, à tout moment.</p>
+      <div class="lp-plans lp-plans-solo">
         <div class="lp-plan lp-plan-feat">
-          <div class="lp-plan-tag">Le plus choisi</div>
-          <div class="lp-plan-name">Équipe</div>
-          <div class="lp-plan-price">69<span>€ / mois</span></div>
-          <div class="lp-plan-for">Pour une école active</div>
+          <div class="lp-plan-tag">Moniteur indépendant</div>
+          <div class="lp-plan-name">PermiGo</div>
+          <div class="lp-plan-price">9,99<span>€ / mois</span></div>
+          <div class="lp-plan-for">Tout l'outil, à ton nom. Élèves illimités.</div>
           <ul class="lp-plan-list">
-            <li>Tout Solo, jusqu'à 5 moniteurs</li>
-            <li>Classement local des moniteurs</li>
-            <li>Examen blanc + quiz de révision</li>
-            <li>Tableau de bord gérant</li>
+            <li>Ton app à ta marque</li>
+            <li>Parcours élève gamifié + quiz</li>
+            <li>Examens blancs illimités</li>
+            <li>Livret REMC + validation 2 taps</li>
+            <li>Tableau « qui est prêt » + classements</li>
+            <li>Élèves illimités</li>
           </ul>
-          <button class="lp-btn lp-btn-primary lp-plan-cta" data-scroll="lp-lead" type="button">Être recontacté</button>
-        </div>
-        <div class="lp-plan">
-          <div class="lp-plan-name">Réseau</div>
-          <div class="lp-plan-price">129<span>€ / mois</span></div>
-          <div class="lp-plan-for">Pour les grosses structures</div>
-          <ul class="lp-plan-list">
-            <li>Tout Équipe, moniteurs illimités</li>
-            <li>Classement national</li>
-            <li>Support prioritaire</li>
-          </ul>
-          <button class="lp-btn lp-btn-soft lp-plan-cta" data-scroll="lp-lead" type="button">Être recontacté</button>
+          <button class="lp-btn lp-btn-primary lp-plan-cta" data-go="signup" type="button">Créer mon compte</button>
         </div>
       </div>
+      <p class="lp-plan-team">Tu gères une auto-école avec plusieurs moniteurs ?
+        <button class="lp-link-btn" data-scroll="lp-lead" type="button">Parle-nous d'une offre équipe</button>.</p>
     </section>
 
     <!-- ── FAQ ── -->
     <section class="lp-sec lp-faq lp-rev">
       <h2 class="lp-h2">Questions fréquentes</h2>
       <div class="lp-faq-list">
+        <details class="lp-faq-item"><summary>C'est vraiment à ma marque ?</summary><p>Oui. L'app porte ton nom, tes élèves sont à toi, la relation reste entre vous. Aucune plateforme ne s'interpose et ne prend de commission.</p></details>
         <details class="lp-faq-item"><summary>Mes élèves doivent-ils télécharger quelque chose ?</summary><p>Non. PermiGo s'ouvre dans le navigateur et s'ajoute à l'écran d'accueil du téléphone comme une app, sans passer par un store.</p></details>
         <details class="lp-faq-item"><summary>Est-ce conforme au programme officiel ?</summary><p>Oui. Le parcours suit le référentiel REMC et ses 31 compétences (arrêté du 13/05/2013).</p></details>
-        <details class="lp-faq-item"><summary>Combien de temps pour mettre en place ?</summary><p>Quelques minutes : vous créez votre école, vous ajoutez vos moniteurs, ils invitent leurs élèves.</p></details>
-        <details class="lp-faq-item"><summary>Y a-t-il un engagement ?</summary><p>Non, l'abonnement est sans engagement et annulable à tout moment.</p></details>
+        <details class="lp-faq-item"><summary>Y a-t-il un engagement ?</summary><p>Non. 9,99€/mois, sans engagement, résiliable en un clic à tout moment.</p></details>
+        <details class="lp-faq-item"><summary>Je gère une auto-école avec plusieurs moniteurs ?</summary><p>Écris-nous via le formulaire ci-dessous : on te propose une offre adaptée à ton équipe.</p></details>
       </div>
     </section>
 
     <!-- ── Formulaire lead ── -->
     <section class="lp-sec lp-leadsec lp-rev" id="lp-lead">
       <div class="lp-lead-card">
-        <h2 class="lp-h2">Parlons de votre auto-école</h2>
-        <p class="lp-sub">Laissez-nous vos coordonnées, on vous recontacte rapidement pour vous montrer PermiGo.</p>
+        <h2 class="lp-h2">Envie qu'on te montre l'app en vrai ?</h2>
+        <p class="lp-sub">Laisse ton nom et ton email : on te fait une démo de 30 secondes, sans engagement. (Auto-école : précise-le dans le message.)</p>
         <form class="lp-form" id="lp-form" novalidate>
           <div class="lp-field">
-            <label for="lp-ecole">Nom de l'auto-école *</label>
-            <input id="lp-ecole" name="ecole_nom" type="text" required autocomplete="organization" />
+            <label for="lp-ecole">Ton nom (ou nom commercial) *</label>
+            <input id="lp-ecole" name="ecole_nom" type="text" required autocomplete="name" />
           </div>
           <div class="lp-field">
             <label for="lp-email">Email *</label>
@@ -251,14 +236,10 @@ export function mount(root) {
             <div class="lp-field"><label for="lp-tel">Téléphone</label><input id="lp-tel" name="telephone" type="tel" autocomplete="tel" inputmode="tel" /></div>
           </div>
           <div class="lp-field">
-            <label for="lp-nb">Nombre de moniteurs</label>
-            <input id="lp-nb" name="nb_enseignants" type="number" min="1" max="999" inputmode="numeric" />
-          </div>
-          <div class="lp-field">
             <label for="lp-msg">Un message (optionnel)</label>
             <textarea id="lp-msg" name="message" rows="3"></textarea>
           </div>
-          <button class="lp-btn lp-btn-primary lp-form-submit" type="submit" id="lp-submit">Être recontacté</button>
+          <button class="lp-btn lp-btn-primary lp-form-submit" type="submit" id="lp-submit">Demander ma démo</button>
           <p class="lp-form-err" id="lp-form-err" hidden></p>
         </form>
         <div class="lp-form-ok" id="lp-form-ok" hidden>
@@ -326,6 +307,15 @@ export function mount(root) {
   };
   root.querySelector("#lp-login")?.addEventListener("click", goLogin);
   root.querySelector("#lp-login2")?.addEventListener("click", goLogin);
+
+  // ── Créer mon compte (self-serve 9,99€/mois) ──
+  root.querySelectorAll('[data-go="signup"]').forEach((el) => {
+    el.addEventListener("click", () => {
+      track("landing.cta_signup", {});
+      location.hash = "#/signup";
+      location.reload();
+    });
+  });
   root.querySelector("#lp-legal")?.addEventListener("click", (e) => {
     e.preventDefault();
     location.hash = "#/legal";
@@ -347,14 +337,10 @@ export function mount(root) {
     const ville = form.ville.value.trim() || null;
     const telephone = form.telephone.value.trim() || null;
     const message = form.message.value.trim() || null;
-    const nbRaw = form.nb_enseignants.value.trim();
-    const nb_enseignants = nbRaw
-      ? Math.max(1, Math.min(999, parseInt(nbRaw, 10) || 0)) || null
-      : null;
+    const nb_enseignants = null;
 
     if (!ecole_nom || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errEl.textContent =
-        "Renseignez au moins le nom de l'auto-école et un email valide.";
+      errEl.textContent = "Renseigne au moins ton nom et un email valide.";
       errEl.hidden = false;
       return;
     }
@@ -369,7 +355,7 @@ export function mount(root) {
         telephone,
         message,
         nb_enseignants,
-        source: "landing",
+        source: "landing_moniteur",
       });
       if (error) throw error;
       track("landing.lead_submitted", {
@@ -385,7 +371,7 @@ export function mount(root) {
         "Une erreur est survenue. Réessayez, ou écrivez-nous directement.";
       errEl.hidden = false;
       submitBtn.disabled = false;
-      submitBtn.textContent = "Être recontacté";
+      submitBtn.textContent = "Demander ma démo";
     }
   });
 }
@@ -626,6 +612,12 @@ const STYLE = `<style>
   .lp-plan-list li { position: relative; padding-left: 24px; font: 400 14.5px/1.4 'Inter'; }
   .lp-plan-list li::before { content: '✓'; position: absolute; left: 0; color: var(--lp-green); font-weight: 800; }
   .lp-plan-cta { width: 100%; }
+  /* Plan unique centré (cible moniteur indé) */
+  .lp-plans-solo { grid-template-columns: minmax(0, 380px); justify-content: center; margin-top: 18px; }
+  .lp-plans-solo .lp-plan-feat { order: 0; }
+  .lp-plan-team { text-align: center; color: var(--lp-mut); font: 400 14px/1.6 'Inter'; margin: 22px auto 0; max-width: 520px; }
+  .lp-link-btn { background: none; border: 0; padding: 0; cursor: pointer; color: var(--lp-indigo-dk);
+    font: 600 14px/1.6 'Inter'; text-decoration: underline; text-underline-offset: 2px; }
 
   /* FAQ */
   .lp-faq-list { max-width: 720px; margin: 28px auto 0; display: flex; flex-direction: column; gap: 10px; }
