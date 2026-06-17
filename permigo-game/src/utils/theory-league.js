@@ -1,10 +1,11 @@
 // ═══════════════════════════════════════════════════════════════
-// Ligue THÉORIQUE — échelle de paliers partagée (élève + enseignant)
+// Ligue RÉVISION — échelle de paliers partagée (élève + enseignant)
+// (Libellée « Révision » côté UI ; identifiants internes restent theory*.)
 // Score = compétences distinctes avec quiz réussi ≥70% (+1 pt)
 //       + parcours d'examen blanc distincts réussis CEPC (+4 pts)
 // Max 30 + 20 = 50 pts. Échelle de progression, PAS de reset hebdo.
-// Dimension SÉPARÉE de la ligue REMC (pratique).
-// ⚠️ Métier : PermiGo ne couvre PAS le code/ETG — la « théorie » ici
+// Dimension SÉPARÉE de la ligue REMC (pratique / validations).
+// ⚠️ Métier : PermiGo ne couvre PAS le code/ETG — la « révision » ici
 // = connaissances REMC travaillées en autonomie (quiz + exam blanc CEPC).
 // Aucun libellé ne doit mentionner « code » / « ETG ».
 // ═══════════════════════════════════════════════════════════════
@@ -19,7 +20,7 @@ export const THEORY_LEAGUES = [
   { n: 2, name: "Apprenti", color: "#3b82f6", startAt: 8 },
   { n: 3, name: "Sérieux", color: "#eab308", startAt: 18 },
   { n: 4, name: "Confirmé", color: "#8b5cf6", startAt: 30 },
-  { n: 5, name: "Théorie maîtrisée", color: "#f59e0b", startAt: 42 },
+  { n: 5, name: "Révision maîtrisée", color: "#f59e0b", startAt: 42 },
 ];
 
 /**

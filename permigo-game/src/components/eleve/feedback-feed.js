@@ -1,7 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-// Feedback Feed — section "Retours de tes moniteurs"
+// Feedback Feed — "Retours de ton moniteur" en TIMELINE de progression.
 // Usage : mountFeedbackFeed(root, { eleveId, limit, anchorEl })
-//   Injecte avant `anchorEl` (ou en dernier dans root si absent)
+//   Injecte avant `anchorEl` (ou avant .acc-footer / en dernier).
+// Lecture comme une histoire : jalons reliés, validations célébrées en vert,
+// séances en accent neutre. Le moniteur (souvent unique) est dégroupé en tête.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { esc } from "@/utils/escape.js";
@@ -23,157 +25,108 @@ function ensureStyle() {
   const s = document.createElement("style");
   s.id = STYLE_ID;
   s.textContent = `
-  @keyframes ffCardIn {
-    from { opacity:0; transform:translateY(8px) scale(.98); }
-    to   { opacity:1; transform:translateY(0) scale(1); }
+  @keyframes fftIn {
+    from { opacity:0; transform:translateY(8px); }
+    to   { opacity:1; transform:translateY(0); }
   }
 
-  .ff-section { margin: 40px 16px 0; }
+  .fft-section { margin: 40px 16px 0; }
 
-  .ff-sec-hd {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
+  .fft-hd {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 12px; margin-bottom: 16px;
   }
-  .ff-sec-title {
-    font: 600 11px/1 'Inter', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--mu2);
+  .fft-title {
+    font: 800 16px/1.15 'Plus Jakarta Sans', sans-serif;
+    color: var(--ink); letter-spacing: -.02em;
     display: flex; align-items: center; gap: 8px;
   }
-  .ff-sec-title::after {
-    content: ''; display: inline-block;
-    width: 32px; height: 1px;
-    background: var(--bo);
-    vertical-align: middle;
+  .fft-title-ico { color: var(--a-txt); display: inline-flex; }
+  .fft-sub {
+    font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 3px;
   }
-  .ff-see-all {
-    font: 600 12px/1 'Inter', sans-serif;
-    color: var(--ink3); /* l'accent pur ne tient pas le 4.5:1 à 12px */
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    background: none; border: none;
-    cursor: pointer; padding: 16px 8px; margin: -12px -8px;
-    display: flex; align-items: center; gap: 4px;
-    transition: opacity .12s;
+  .fft-all {
+    flex-shrink: 0;
+    font: 600 12.5px/1 'Inter', sans-serif; color: var(--a-txt);
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; gap: 2px;
+    padding: 10px 8px; margin: -10px -8px;
+    -webkit-tap-highlight-color: transparent; transition: opacity .12s;
     white-space: nowrap;
   }
-  .ff-see-all:active { opacity: .7; }
+  .fft-all:active { opacity: .6; }
 
-  .ff-list { display: flex; flex-direction: column; gap: 6px; }
+  /* ── Timeline ── */
+  .fft-timeline { position: relative; }
+  .fft-item {
+    display: flex; gap: 12px; position: relative;
+    padding-bottom: 18px;
+    animation: fftIn .32s cubic-bezier(.23,1,.32,1) both;
+  }
+  .fft-item:nth-child(2) { animation-delay: .05s; }
+  .fft-item:nth-child(3) { animation-delay: .10s; }
+  .fft-item:nth-child(4) { animation-delay: .15s; }
+  .fft-item:nth-child(5) { animation-delay: .20s; }
+  .fft-item:last-child { padding-bottom: 0; }
 
-  .ff-card {
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: 18px;
-    padding: 12px 14px;
-    box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.05);
-    cursor: pointer;
-    transition: border-color .12s, transform .12s;
-    animation: ffCardIn .3s cubic-bezier(.34,1.56,.64,1) both;
-    overflow: hidden;
+  .fft-node { position: relative; flex-shrink: 0; width: 28px; display: flex; justify-content: center; }
+  /* trait reliant ce jalon au suivant */
+  .fft-node::before {
+    content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+    top: 30px; bottom: -18px; width: 2px;
+    background: linear-gradient(var(--bo), var(--bo2));
   }
-  .ff-card:nth-child(2) { animation-delay:.04s; }
-  .ff-card:nth-child(3) { animation-delay:.08s; }
-  .ff-card:nth-child(4) { animation-delay:.12s; }
-  .ff-card:nth-child(5) { animation-delay:.16s; }
-  @media (hover:hover) and (pointer:fine) {
-    .ff-card:hover { border-color: color-mix(in srgb, var(--a) 30%, transparent); }
-  }
-  .ff-card:active { transform: scale(.985); }
-
-  .ff-card-top {
-    display: flex; align-items: center; gap: 10px;
-  }
-  .ff-av {
-    width: 34px; height: 34px;
-    border-radius: 50%;
+  .fft-item:last-child .fft-node::before { display: none; }
+  .fft-dot {
+    width: 28px; height: 28px; border-radius: 50%; z-index: 1;
     display: flex; align-items: center; justify-content: center;
-    font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
-    color: #fff;
-    flex-shrink: 0;
+    background: var(--su); box-shadow: 0 1px 3px rgba(10,13,26,.08);
   }
-  .ff-meta { flex: 1; min-width: 0; }
-  .ff-author {
-    font: 600 13px/1.2 'Inter', sans-serif;
-    color: var(--ink);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  .fft-dot.val {
+    background: rgba(16,185,129,.12); color: var(--grd);
+    border: 1.5px solid rgba(16,185,129,.34);
   }
-  .ff-time {
-    font: 500 11px/1 'Inter', sans-serif;
-    color: var(--mu2);
-    margin-top: 2px;
-  }
-  .ff-kind-badge {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .ff-kind-session  { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a-txt); }
-  .ff-kind-validation { background: rgba(16,185,129,.1); color: var(--grd); }
-
-  .ff-card-body { margin-top: 8px; }
-  .ff-event-line {
-    font: 500 13px/1.4 'Inter', sans-serif;
-    color: var(--ink5);
-  }
-  .ff-event-line strong { color: var(--ink); }
-  .ff-comment {
-    font: 400 italic 12px/1.5 'Inter', sans-serif;
-    color: var(--mu3);
-    margin-top: 5px;
-    padding-left: 8px;
-    border-left: 2px solid var(--bo);
+  .fft-dot.ses {
+    background: color-mix(in srgb, var(--a) 12%, transparent); color: var(--a-txt);
+    border: 1.5px solid color-mix(in srgb, var(--a) 30%, transparent);
   }
 
-  /* Expand state */
-  .ff-card-extra {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height .25s cubic-bezier(.23,1,.32,1);
+  .fft-content { flex: 1; min-width: 0; padding-top: 2px; }
+  .fft-line {
+    font: 500 13.5px/1.4 'Inter', sans-serif; color: var(--ink5);
+    display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap;
   }
-  .ff-card.ff-expanded .ff-card-extra { max-height: 200px; }
-  .ff-extra-content {
-    padding-top: 8px;
-    font: 500 12px/1.5 'Inter', sans-serif;
-    color: var(--mu3);
-    border-top: 1px solid var(--bg3);
-    margin-top: 8px;
+  .fft-line strong { color: var(--ink); font-weight: 700; }
+  .fft-pill {
+    font: 700 10px/1 'Inter', sans-serif; letter-spacing: .03em;
+    padding: 4px 8px; border-radius: var(--r-full); white-space: nowrap;
   }
-  .ff-extra-row { display: flex; gap: 6px; align-items: center; margin-bottom: 3px; }
+  .fft-pill.val { color: var(--grdk); background: rgba(16,185,129,.13); }
+  .fft-pill.ses { color: var(--a-txt); background: color-mix(in srgb, var(--a) 12%, transparent); }
+  .fft-meta {
+    font: 500 11.5px/1.3 'Inter', sans-serif; color: var(--mu2);
+    margin-top: 4px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  }
+  .fft-meta .ok { color: var(--grdk); }
+  .fft-quote {
+    font: italic 400 12.5px/1.5 'Inter', sans-serif; color: var(--mu3);
+    margin-top: 7px; padding: 2px 0 2px 11px;
+    border-left: 2px solid color-mix(in srgb, var(--a) 32%, transparent);
+  }
 
   @media (prefers-reduced-motion: reduce) {
-    .ff-card { animation: none; }
-    .ff-card-extra { transition: none; }
+    .fft-item { animation: none; }
   }
   `;
   document.head.appendChild(s);
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
-const GRADS = [
-  "linear-gradient(135deg,#5b5bd6,#3a3a8e)",
-  "linear-gradient(135deg,var(--blk),#155e75)",
-  "linear-gradient(135deg,var(--puk),#4c1d95)",
-  "linear-gradient(135deg,var(--grd),#064e3b)",
-  "linear-gradient(135deg,#9333ea,#6b21a8)",
-  "linear-gradient(135deg,var(--rdk),#7f1d1d)",
-];
-function gradFor(str) {
-  let h = 0;
-  for (let i = 0; i < (str || "").length; i++)
-    h = (h * 31 + str.charCodeAt(i)) >>> 0;
-  return GRADS[h % GRADS.length];
-}
-function relTime(ts) {
+function relDate(ts) {
   if (!ts) return "";
   const diff = Date.now() - new Date(ts).getTime();
-  const min = Math.floor(diff / 60000);
-  if (min < 60) return `il y a ${min}min`;
-  const h = Math.floor(min / 60);
-  if (h < 24) return `il y a ${h}h`;
-  const d = Math.floor(h / 24);
+  const d = Math.floor(diff / 86400000);
+  if (d <= 0) return "aujourd'hui";
   if (d === 1) return "hier";
   if (d < 7) return `il y a ${d}j`;
   return new Date(ts).toLocaleDateString("fr-FR", {
@@ -188,58 +141,50 @@ function fmtDuration(min) {
   if (h === 0) return `${m}min`;
   return m === 0 ? `${h}h` : `${h}h${m}`;
 }
+function fullName(evt) {
+  return `${evt.moniteur_prenom || ""} ${evt.moniteur_nom || ""}`.trim();
+}
 
-// ─── Render une carte event ───────────────────────────────────
-function renderCard(evt, idx) {
+// ─── Render un jalon ─────────────────────────────────────────
+function renderItem(evt, showAuthor) {
   const isSession = evt.kind === "session";
-  const prenom = esc(evt.moniteur_prenom || "Moniteur");
-  const nom = esc(evt.moniteur_nom || "");
-  const nameKey = `${evt.moniteur_prenom || ""}${evt.moniteur_nom || ""}`;
-  const initials =
-    ((evt.moniteur_prenom || "")[0] || "") +
-    ((evt.moniteur_nom || "")[0] || "");
-  const badgeCls = isSession ? "ff-kind-session" : "ff-kind-validation";
-  const badgeIcon = isSession
+  const dotCls = isSession ? "ses" : "val";
+  const dotIcon = isSession
     ? icon("clock", { size: 14, strokeWidth: 2.2 })
-    : icon("check-circle", { size: 14, strokeWidth: 2.2 });
+    : icon("check", { size: 15, strokeWidth: 3 });
 
-  const eventLine = isSession
-    ? `<strong>${fmtDuration(evt.duration_minutes)}</strong> de conduite avec toi`
-    : `A validé : <strong>${esc(compLabel(evt.competence_id))}</strong>`;
+  const line = isSession
+    ? `<strong>${esc(fmtDuration(evt.duration_minutes))} de conduite</strong>
+       <span class="fft-pill ses">Séance</span>`
+    : `<strong>${esc(compLabel(evt.competence_id))}</strong>
+       <span class="fft-pill val">Validé ✓</span>`;
 
+  // Méta : statut (séance) + date + auteur si plusieurs moniteurs
   const statusBit =
-    isSession && evt.confirmation_status
-      ? `<span style="font-size:10px;color:${evt.confirmation_status === "confirmed" ? "var(--grdk)" : "var(--ink3)"}">
-        ${evt.confirmation_status === "confirmed" ? "✓ confirmée" : evt.confirmation_status === "refused" ? "✗ refusée" : "en attente"}
-       </span>`
-      : "";
+    isSession && evt.confirmation_status === "confirmed"
+      ? `<span class="ok">✓ confirmée</span><span>·</span>`
+      : isSession && evt.confirmation_status === "refused"
+        ? `<span>refusée</span><span>·</span>`
+        : isSession && evt.confirmation_status
+          ? `<span>en attente</span><span>·</span>`
+          : "";
+  const authorBit = showAuthor
+    ? `<span>·</span><span>${esc(fullName(evt))}</span>`
+    : "";
 
   return `
-  <div class="ff-card" data-idx="${idx}" role="button" tabindex="0" aria-expanded="false">
-    <div class="ff-card-top">
-      <div class="ff-av" style="background:${gradFor(nameKey)}">${esc(initials.toUpperCase() || "?")}</div>
-      <div class="ff-meta">
-        <div class="ff-author">${prenom} ${nom}</div>
-        <div class="ff-time">${relTime(evt.ts)}</div>
-      </div>
-      <div class="ff-kind-badge ${badgeCls}">${badgeIcon}</div>
-    </div>
-    <div class="ff-card-body">
-      <div class="ff-event-line">${eventLine} ${statusBit}</div>
-      ${evt.comment ? `<div class="ff-comment">"${esc(evt.comment)}"</div>` : ""}
-    </div>
-    <div class="ff-card-extra">
-      <div class="ff-extra-content">
-        <div class="ff-extra-row">${icon("calendar", { size: 12, color: "var(--mu2)", strokeWidth: 2 })} ${new Date(evt.ts).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</div>
-        ${isSession ? `<div class="ff-extra-row">${icon("clock", { size: 12, color: "var(--mu2)", strokeWidth: 2 })} Durée : ${fmtDuration(evt.duration_minutes)}</div>` : ""}
-        ${!isSession && evt.comment ? "" : ""}
-      </div>
+  <div class="fft-item">
+    <div class="fft-node"><div class="fft-dot ${dotCls}">${dotIcon}</div></div>
+    <div class="fft-content">
+      <div class="fft-line">${line}</div>
+      <div class="fft-meta">${statusBit}<span>${esc(relDate(evt.ts))}</span>${authorBit}</div>
+      ${evt.comment ? `<div class="fft-quote">« ${esc(evt.comment)} »</div>` : ""}
     </div>
   </div>`;
 }
 
 /**
- * Monte le feed "Retours de tes moniteurs" dans root.
+ * Monte la timeline "Retours de ton moniteur" dans root.
  * @param {HTMLElement} root — container parent
  * @param {{ eleveId: string, limit?: number, anchorEl?: Element }} opts
  */
@@ -265,18 +210,31 @@ export async function mountFeedbackFeed(
 
   track("feedback_feed.shown", { count: events.length, eleve_id: eleveId });
 
+  // Moniteur(s) : si un seul, on le sort en sous-titre et on l'enlève des items.
+  const names = [...new Set(events.map(fullName).filter(Boolean))];
+  const singleMoniteur = names.length === 1 ? names[0] : null;
+  const title = singleMoniteur
+    ? "Retours de ton moniteur"
+    : "Retours de tes moniteurs";
+
   const wrap = document.createElement("div");
-  wrap.className = "ff-section";
+  wrap.className = "fft-section";
   wrap.id = "ff-section";
   wrap.innerHTML = `
-    <div class="ff-sec-hd">
-      <div class="ff-sec-title">Retours de tes moniteurs</div>
-      <button class="ff-see-all" id="ff-see-all" aria-label="Voir tout le fil">
+    <div class="fft-hd">
+      <div>
+        <div class="fft-title">
+          <span class="fft-title-ico">${icon("message-circle", { size: 16, strokeWidth: 2.2 })}</span>
+          ${esc(title)}
+        </div>
+        ${singleMoniteur ? `<div class="fft-sub">Avec ${esc(singleMoniteur)}</div>` : ""}
+      </div>
+      <button class="fft-all" id="ff-see-all" aria-label="Voir tout le fil">
         Tout voir ${icon("chevron-right", { size: 13, strokeWidth: 2.5 })}
       </button>
     </div>
-    <div class="ff-list" id="ff-list">
-      ${events.map((e, i) => renderCard(e, i)).join("")}
+    <div class="fft-timeline">
+      ${events.map((e) => renderItem(e, !singleMoniteur)).join("")}
     </div>
   `;
 
@@ -289,16 +247,6 @@ export async function mountFeedbackFeed(
     else root.appendChild(wrap);
   }
 
-  // Wire expand on tap
-  wrap.querySelectorAll(".ff-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      const expanded = card.classList.toggle("ff-expanded");
-      card.setAttribute("aria-expanded", expanded);
-      track("feedback_feed.card_expanded", { idx: card.dataset.idx });
-    });
-  });
-
-  // Wire "Voir tout"
   wrap.querySelector("#ff-see-all")?.addEventListener("click", () => {
     track("feedback_feed.see_all_clicked");
     navigate("#/feedback");

@@ -12,7 +12,6 @@ import { track } from "@/services/analytics.js";
 import { lancerQuiz } from "@/services/quiz-engine.js";
 import { findSubComp, findCategory } from "@/data/remc.js";
 import { unlockChest } from "@/utils/game-state.js";
-import { playVictory } from "@/utils/sound.js";
 import { promptInstallAtValueMoment } from "@/components/common/install-nudge.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
@@ -181,13 +180,36 @@ export async function mount(root, params = {}) {
   window.addEventListener("hashchange", _restoreNav);
 
   // Params viennent soit d'un appel direct, soit du hash #/quiz/C1a/post_validation
-  // Segment 3 optionnel : "auto" (lancement direct) ou "daily" (question du
-  // jour : lancement direct + habillage dédié + marquage fait/track).
+  // Segment 3 optionnel : "auto" (lancement direct), "daily" (question du jour :
+  // lancement direct + habillage + marquage), "revision" (enchaînement libre :
+  // lancement direct + bouton « Continue à réviser » en boucle).
+  // Sentinel competenceId = "next" → le service choisit la compétence à réviser.
   const hashParts = location.hash.replace(/^#\/?/, "").split("/");
-  const competenceId = params?.competenceId || hashParts[1] || null;
   const type = params?.type || hashParts[2] || "post_validation";
   const isDaily = hashParts[3] === "daily";
-  const autoStart = params?.autoStart || hashParts[3] === "auto" || isDaily;
+  const isRevision = hashParts[3] === "revision";
+  const autoStart =
+    params?.autoStart || hashParts[3] === "auto" || isDaily || isRevision;
+  let competenceId = params?.competenceId || hashParts[1] || null;
+
+  // Session de révision : capture l'état de départ (rang ligue Révision) AVANT
+  // le 1er quiz, pour le récap de fin de session. Idempotent (no-op si déjà active).
+  if (isRevision) {
+    import("@/services/revision-session.js")
+      .then((m) => m.ensureRevisionSessionStarted())
+      .catch(() => {});
+  }
+
+  // Mode révision sans cible explicite → on délègue le choix au service.
+  if (isRevision && (!competenceId || competenceId === "next")) {
+    try {
+      const { pickRevisionQuiz } = await import("@/services/daily-quiz.js");
+      const pick = await pickRevisionQuiz(me.id);
+      competenceId = pick?.competenceId || null;
+    } catch {
+      competenceId = null; // → écran « quiz non disponible » ci-dessous
+    }
+  }
 
   if (!competenceId) {
     root.innerHTML = `<div style="padding:48px 24px;text-align:center;font-family:'Inter',sans-serif;color:var(--mu2)">
@@ -249,6 +271,7 @@ export async function mount(root, params = {}) {
           total,
           duration,
           isDaily,
+          isRevision,
         });
       },
     });
@@ -270,9 +293,26 @@ export async function mount(root, params = {}) {
 async function handleComplete(
   root,
   me,
-  { competenceId, type, score, total, duration, isDaily = false },
+  {
+    competenceId,
+    type,
+    score,
+    total,
+    duration,
+    isDaily = false,
+    isRevision = false,
+  },
 ) {
   const scorePct = Math.round((score / total) * 100);
+  // Enchaînement libre : question du jour OU session de révision.
+  const canChain = isDaily || isRevision;
+
+  // Mémorise la compétence jouée pour varier la suivante dans la session.
+  if (canChain) {
+    import("@/services/daily-quiz.js")
+      .then((m) => m.pushRevisionRecent(competenceId))
+      .catch(() => {});
+  }
 
   // Question du jour : terminée = faite (réussie ou non — la métrique
   // mesure le rendez-vous quotidien, pas la performance).
@@ -335,32 +375,80 @@ async function handleComplete(
   });
 
   if (reason === "no_competence_unlocked") {
-    // En mode découverte (question du jour sur une compétence pas encore
-    // travaillée), c'est le cas NORMAL — pas de message « bloqué ».
-    if (!isDaily)
+    // En mode découverte (question du jour / révision sur une compétence pas
+    // encore travaillée), c'est le cas NORMAL — pas de message « bloqué ».
+    if (!canChain)
       toast(
         "Cette compétence n'est pas encore débloquée par ton moniteur.",
         "info",
       );
   } else if (validated) {
-    toast("Compétence validée !", "success");
-    navigator.vibrate?.([30, 50, 30]);
-    playVictory();
+    // Marque la compétence comme célébrée (ledger partagé avec le parcours)
+    // pour éviter une double-célébration, quel que soit le mode.
+    const { markCompetenceCelebrated } =
+      await import("@/services/competence-celebration.js");
+    markCompetenceCelebrated(competenceId);
+
+    // En ENCHAÎNEMENT de révision, on ne coupe pas la boucle avec l'écran
+    // plein écran « Compétence acquise » à chaque quiz (souvent une compétence
+    // déjà acquise qu'on re-révise) : le flux reste fluide et la célébration
+    // est réservée au récap de fin de session. Hors révision : écran premium.
+    if (!isRevision) {
+      // Compte le total de compétences acquises pour le bloc stats + la barre.
+      let acquiredCount = null;
+      try {
+        const { count } = await sb
+          .from("validations")
+          .select("id", { count: "exact", head: true })
+          .eq("eleve_id", me.id)
+          .eq("statut", "acquis");
+        if (typeof count === "number") acquiredCount = count;
+      } catch {
+        /* best-effort — l'écran s'affiche sans le compteur */
+      }
+      const { showCompetenceUnlock } =
+        await import("@/components/eleve/competence-unlock.js");
+      showCompetenceUnlock({
+        competenceCode: competenceId,
+        scorePct,
+        validatedCount: acquiredCount,
+        ctaLabel: "Voir mon parcours",
+        source: "quiz",
+        onCta: () => {
+          location.hash = "#/parcours";
+        },
+        // L'install nudge se déclenche à la fermeture pour éviter d'empiler
+        // deux overlays (hors question du jour, déjà opt-in push).
+        onClose: () => {
+          if (!canChain) promptInstallAtValueMoment(me, "eleve_quiz_reussi");
+        },
+      });
+    }
   } else if (!passed) {
     toast("Presque ! Il te faut 70% pour valider. Réessaie.", "info");
   } else {
     toast("Quiz enregistré.", "success");
   }
 
-  // Victoire élève (hors question du jour — qui a déjà son opt-in push — et hors
-  // compétence non débloquée) → meilleur moment pour proposer l'install écran
+  // Victoire élève SANS validation de compétence (quiz réussi mais pas de
+  // transition de statut) → meilleur moment pour proposer l'install écran
   // d'accueil. Cap 1/24h + no-op si déjà installée (géré dans l'export).
+  // Le cas "validated" gère son propre nudge via onClose de l'unlock screen.
   if (
-    (validated || passed) &&
-    !isDaily &&
+    passed &&
+    !validated &&
+    !canChain &&
     reason !== "no_competence_unlocked"
   ) {
     promptInstallAtValueMoment(me, "eleve_quiz_reussi");
+  }
+
+  // Comptage de la session de révision (pour le récap de fin de session).
+  if (isRevision) {
+    const quizPassed = !!validated || !!passed || scorePct >= 70;
+    import("@/services/revision-session.js")
+      .then((m) => m.noteRevisionQuiz({ passed: quizPassed }))
+      .catch(() => {});
   }
 
   renderResult(root, {
@@ -372,27 +460,57 @@ async function handleComplete(
     reason,
     type,
     isDaily,
+    isRevision,
+    canChain,
+    me,
+    competenceId,
   });
 }
 
 function renderResult(
   root,
-  { score, total, scorePct, validated, passed, reason, type, isDaily = false },
+  {
+    score,
+    total,
+    scorePct,
+    validated,
+    passed,
+    reason,
+    type,
+    isDaily = false,
+    isRevision = false,
+    canChain = false,
+    me = null,
+    competenceId = null,
+  },
 ) {
   const success = validated || passed;
   const msg = validated
     ? "Compétence validée ! Continue comme ça"
     : passed
-      ? isDaily
-        ? "Question du jour réussie — à demain !"
+      ? canChain
+        ? "Bien joué ! Tu es chaud — on enchaîne ?"
         : "Bien joué ! Quiz réussi."
       : reason === "no_competence_unlocked"
-        ? isDaily
+        ? canChain
           ? "Belle découverte ! Tu viens d'explorer une compétence à venir — ton moniteur la travaillera avec toi."
           : "Compétence pas encore débloquée par ton moniteur."
-        : isDaily
-          ? "C'est fait pour aujourd'hui — chaque question t'apprend quelque chose. À demain !"
+        : canChain
+          ? "Pas grave — chaque question te fait progresser. On continue ?"
           : "Tu y es presque — un dernier tour avec ton moniteur et c'est dans la poche.";
+
+  // Enchaînement libre : « Continue à réviser » devient l'action principale,
+  // « Voir mon parcours » passe en secondaire.
+  const continueBtn = canChain
+    ? `<button class="btn-parcours" id="btn-continue">Continue à réviser →</button>`
+    : "";
+  const parcoursBtn = canChain
+    ? `<button class="btn-home" id="btn-parcours">Voir mon parcours</button>`
+    : `<button class="btn-parcours" id="btn-parcours">Voir mon parcours →</button>`;
+  const homeBtn =
+    !success && !canChain
+      ? `<button class="btn-home" id="btn-home">Retour accueil</button>`
+      : "";
 
   root.innerHTML = `
     ${STYLE}
@@ -403,16 +521,64 @@ function renderResult(
           <span class="qp-score-pct">${scorePct}%</span>
         </div>
         <p class="qp-result-msg">${esc(msg)}</p>
-        <button class="btn-parcours" id="btn-parcours">Voir mon parcours →</button>
-        ${!success ? `<button class="btn-home" id="btn-home">Retour accueil</button>` : ""}
+        ${continueBtn}
+        ${parcoursBtn}
+        ${homeBtn}
       </div>
     </div>
   `;
 
-  root.querySelector("#btn-parcours")?.addEventListener("click", () => {
+  const contBtn = root.querySelector("#btn-continue");
+  contBtn?.addEventListener("click", async () => {
+    contBtn.disabled = true;
+    contBtn.textContent = "On y va…";
+    track("revision_chain.continue", { from_competence: competenceId });
+    let next = null;
+    try {
+      const { pickRevisionQuiz } = await import("@/services/daily-quiz.js");
+      if (me?.id) next = (await pickRevisionQuiz(me.id))?.competenceId || null;
+    } catch {
+      /* pick échoué → on délègue le choix au mount via le sentinel */
+    }
+    // Nonce en 5e segment : garantit un hash distinct (donc un re-mount) même
+    // si la compétence suivante est identique. Le parsing ignore ce segment.
+    location.hash = `#/quiz/${next || "next"}/post_validation/revision/${Date.now()}`;
+  });
+
+  root.querySelector("#btn-parcours")?.addEventListener("click", async (e) => {
+    // En mode révision, « Voir mon parcours » = quitter l'enchaînement →
+    // on affiche d'abord le récap de session (Clash Royale), puis on navigue.
+    if (isRevision) {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      const src = await runRevisionRecap();
+      location.hash =
+        src === "secondary" ? "#/classement/revision" : "#/parcours";
+      return;
+    }
     location.hash = "#/parcours";
   });
   root.querySelector("#btn-home")?.addEventListener("click", () => {
     location.hash = "#/";
   });
+}
+
+// Récap de fin de session révision (façon Clash Royale). Retourne la source de
+// fermeture ('cta' | 'secondary' | 'close') ou null si rien n'a été affiché.
+async function runRevisionRecap() {
+  try {
+    const sess = await import("@/services/revision-session.js");
+    if (!sess.isRevisionSessionActive()) return null;
+    const summary = await sess.buildRevisionSummary();
+    sess.clearRevisionSession();
+    if (!summary || (summary.nQuiz ?? 0) === 0) return null;
+    const { showRevisionRecap } =
+      await import("@/components/eleve/revision-recap.js");
+    // onSecondary présent → fait apparaître le lien « Voir le classement » ;
+    // la navigation finale est décidée par la source de fermeture ci-dessus.
+    return await showRevisionRecap(summary, { onSecondary: () => {} });
+  } catch (e) {
+    console.warn("[quiz] revision recap failed", e);
+    return null;
+  }
 }

@@ -1,6 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-// Classement élève — 3 onglets : Ligue semaine / École / National
-// Ligues : Bronze→Diamant selon pts hebdo (quiz×2 + comp_acquis×5)
+// Classement élève — 3 onglets : Mon école / Révision / National
+//  - Mon école / National = ligue REMC (validations, score /31)
+//  - Révision = effort solo (quiz réussis + examens blancs), cf. theory-league.js
+// Deep-link possible : #/classement/ecole | /revision | /national
 // Aucun nom réel exposé : pseudo ou « Apprenti »
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
@@ -22,7 +24,6 @@ import {
 import {
   THEORY_LEAGUES,
   THEORY_PTS,
-  THEORY_QUIZ_PASS_PCT,
   theoryLeague,
 } from "@/utils/theory-league.js";
 import {
@@ -65,25 +66,6 @@ function remcLeague(score) {
     next: REMC_LEAGUES[idx + 1] || null, // null = prochain palier = Élite/permis
   };
 }
-// Médailles top 3 : dégradé + icône + halo (or / argent / bronze)
-const MEDALS = {
-  1: {
-    grad: "linear-gradient(145deg,#fde68a,#f59e0b)",
-    ico: "crown",
-    glow: "rgba(245,158,11,.4)",
-  },
-  2: {
-    grad: "linear-gradient(145deg,#f1f5f9,#94a3b8)",
-    ico: "award",
-    glow: "rgba(148,163,184,.35)",
-  },
-  3: {
-    grad: "linear-gradient(145deg,#fcd34d,#b45309)",
-    ico: "award",
-    glow: "rgba(180,83,9,.35)",
-  },
-};
-
 // ─── Countdown : temps restant jusqu'au lundi 00:00 ────────────
 function msToNextMonday() {
   const now = new Date();
@@ -233,7 +215,7 @@ ${LEAGUE_CSS}
   box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
 .clt-lg-chip.elite { background: linear-gradient(135deg,#f59e0b,#d97706); }
 
-/* ── Ligue théorique (dimension autonomie — visuellement distincte) ── */
+/* ── Ligue Révision (dimension autonomie — visuellement distincte) ── */
 .clt-th-hero { border-style: dashed; border-left-style: solid; }
 .clt-th-hero .clt-pts-legend { margin-top: 12px; }
 .clt-th-cta {
@@ -265,6 +247,28 @@ ${LEAGUE_CSS}
   width: 100%; font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
   color: var(--mu); margin-bottom: 2px;
 }
+/* ── « Comment je gagne des points ? » — version simple (2 lignes) ── */
+.clt-how { margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--bo2); }
+.clt-how-ttl {
+  font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  margin-bottom: 10px;
+}
+.clt-how-row {
+  display: flex; align-items: center; gap: 10px; padding: 5px 0;
+  font: 500 14px/1.2 'Inter', sans-serif; color: var(--ink5);
+}
+.clt-how-lbl { flex: 1; min-width: 0; }
+.clt-how-row b { font: 800 14px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-txt); flex-shrink: 0; }
+.clt-how-ico {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.clt-how-ico.ok { background: rgba(16,185,129,.14); color: var(--grdk); }
+.clt-how-ico.ex { background: color-mix(in srgb, var(--a) 14%, transparent); color: var(--a-txt); }
+.clt-mine-pts {
+  margin-top: 12px; font: 500 12.5px/1.4 'Inter', sans-serif; color: var(--mu2);
+}
+.clt-mine-pts strong { color: var(--ink); font-weight: 700; }
 
 /* ── Hall of Fame (lauréats permis) ── */
 .clt-hof-title {
@@ -288,10 +292,68 @@ ${LEAGUE_CSS}
   background: color-mix(in srgb, var(--a) 14%, transparent);
   padding: 4px 8px; border-radius: var(--r-full);
 }
+
+/* ── Podium top-3 ── */
+.clt-podium {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 8px; padding: 14px 16px 18px;
+}
+.clt-pod {
+  flex: 1; max-width: 33.33%; min-width: 0;
+  display: flex; flex-direction: column; align-items: center;
+}
+.clt-pod-av {
+  position: relative; border-radius: 50%; padding: 3px;
+  background: var(--ring, var(--bo));
+  box-shadow: 0 5px 14px -4px color-mix(in srgb, var(--ring, var(--mu2)) 60%, transparent);
+}
+.clt-pod.me .clt-pod-av { box-shadow: 0 0 0 2.5px #6366f1, 0 5px 14px -4px color-mix(in srgb, var(--ring) 55%, transparent); }
+.clt-pod-medal {
+  position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--ring); color: #fff; border: 2.5px solid var(--su);
+  display: flex; align-items: center; justify-content: center;
+  font: 800 11px/1 'Plus Jakarta Sans', sans-serif;
+}
+.clt-pod-name {
+  font: 700 12px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  margin: 11px 0 0; text-align: center; max-width: 100%;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.clt-pod.me .clt-pod-name { color: var(--a-txt); }
+.clt-pod-base {
+  width: 100%; margin-top: 8px; border-radius: 12px 12px 0 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
+}
+.clt-pod-1 .clt-pod-base { height: 76px; background: linear-gradient(180deg,#fcd34d,#f59e0b); }
+.clt-pod-2 .clt-pod-base { height: 56px; background: linear-gradient(180deg,#e2e8f0,#94a3b8); }
+.clt-pod-3 .clt-pod-base { height: 44px; background: linear-gradient(180deg,#fcd9a8,#c08434); }
+.clt-pod-score { font: 800 16px/1 'Plus Jakarta Sans', sans-serif; }
+.clt-pod-score span { font-size: 10px; font-weight: 600; opacity: .85; margin-left: 1px; }
+
+/* ── Rangs épurés (au-delà du podium) ── */
+.clt-row2 {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--su); border: 1px solid var(--bo);
+  border-left: 3px solid var(--lc, var(--bo));
+  border-radius: var(--r-md); padding: 9px 13px;
+}
+.clt-row2.me { border-color: #6366f1; border-left-color: #6366f1; background: rgba(99,102,241,.06); }
+.clt-rank2 {
+  flex-shrink: 0; min-width: 22px; text-align: center;
+  font: 700 13px/1 'IBM Plex Mono', monospace; color: var(--mu2);
+}
+.clt-row2 .clt-name { flex: 1; }
+.clt-score2 {
+  flex-shrink: 0; font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink); display: flex; align-items: baseline; gap: 2px;
+}
+.clt-score2 span { font: 600 10px/1 'Inter', sans-serif; color: var(--mu2); }
 </style>`;
 
 // ─── Mount ───────────────────────────────────────────────────────
-export async function mount(root) {
+export async function mount(root, initialTab) {
   const me = getCurUser();
   if (!me) return;
 
@@ -336,12 +398,21 @@ export async function mount(root) {
     hof: hofRes.data || [],
   };
 
-  // Défaut = Mon école (la ligue hebdo est abandonnée → plus d'onglet vide)
-  let scope = "ecole";
+  // Onglet initial : deep-link depuis l'accueil (#/classement/revision →
+  // ligue Révision, #/classement/ecole → Mon école). Défaut = Mon école.
+  const TAB_MAP = {
+    ecole: "ecole",
+    national: "national",
+    revision: "theorie", // clé interne historique
+    theorie: "theorie",
+  };
+  let scope = TAB_MAP[initialTab] || "ecole";
   root.innerHTML = `${STYLE}${_render(scope, data)}`;
   _wire(root, data, (s) => {
     scope = s;
   });
+  // Deep-link direct sur la ligue Révision → tuto si jamais vu.
+  if (scope === "theorie") maybeShowTheoryTuto();
 }
 
 // ─── Render ──────────────────────────────────────────────────────
@@ -379,8 +450,8 @@ function _render(scope, data) {
     ${pill}
     <div class="clt-tabs">
       <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">${icon("trophy", { size: 13, strokeWidth: 2 })} Mon école</button>
+      <button class="clt-tab ${scope === "theorie" ? "on" : ""}" data-scope="theorie">${icon("zap", { size: 13, strokeWidth: 2 })} Révision</button>
       <button class="clt-tab ${scope === "national" ? "on" : ""}" data-scope="national">National</button>
-      <button class="clt-tab ${scope === "theorie" ? "on" : ""}" data-scope="theorie">${icon("zap", { size: 13, strokeWidth: 2 })} Théorie</button>
     </div>
   </div>
   <div id="clt-body">${_renderBody(scope, rows, data.hof)}</div>
@@ -427,18 +498,26 @@ function _theoryPill(mine) {
     : `<div class="clt-mepill"><span class="clt-mepill-ico">${icon("zap", { size: 14 })}</span>Ton premier quiz t'ouvre la ligue</div>`;
 }
 
-// ── Légende explicite — dérivée du barème (theory-league.js) ────
+// ── « Comment je gagne des points ? » — langage simple, 2 lignes ──
 function _theoryHowLegend() {
   return `
-    <div class="clt-pts-legend">
-      <span class="clt-th-how-ttl">Comment gagner des points ?</span>
-      <span class="clt-pts-pill">${icon("check", { size: 11, strokeWidth: 2.4 })} Quiz d'une compétence réussi (≥${THEORY_QUIZ_PASS_PCT} %) → +${THEORY_PTS.quiz} pt</span>
-      <span class="clt-pts-pill">${icon("zap", { size: 11, strokeWidth: 2.4 })} Parcours d'examen réussi → +${THEORY_PTS.exam} pts</span>
+    <div class="clt-how">
+      <div class="clt-how-ttl">Comment je gagne des points&nbsp;?</div>
+      <div class="clt-how-row">
+        <span class="clt-how-ico ok">${icon("check", { size: 14, strokeWidth: 3 })}</span>
+        <span class="clt-how-lbl">1 quiz réussi</span>
+        <b>+${THEORY_PTS.quiz} pt</b>
+      </div>
+      <div class="clt-how-row">
+        <span class="clt-how-ico ex">${icon("zap", { size: 13, strokeWidth: 2.6 })}</span>
+        <span class="clt-how-lbl">1 examen blanc réussi</span>
+        <b>+${THEORY_PTS.exam} pts</b>
+      </div>
     </div>`;
 }
 
 function _theoryHelpBtn() {
-  return `<button class="clt-th-help" id="clt-th-help" type="button" aria-label="Revoir comment fonctionne la ligue théorique"><span aria-hidden="true">?</span></button>`;
+  return `<button class="clt-th-help" id="clt-th-help" type="button" aria-label="Revoir comment fonctionne la ligue Révision"><span aria-hidden="true">?</span></button>`;
 }
 
 // ── Hero « Ta ligue théorique » ──────────────────────────────────
@@ -455,12 +534,12 @@ function _theoryLeagueHero(mine) {
     <div class="clt-rl-top">
       <div class="clt-rl-medal">?</div>
       <div class="clt-rl-info">
-        <div class="clt-rl-lbl">Ta ligue théorique</div>
+        <div class="clt-rl-lbl">Ta ligue révision</div>
         <div class="clt-rl-name">Pas encore classé</div>
       </div>
       ${_theoryHelpBtn()}
     </div>
-    <div class="clt-rl-prog">Remplis ton premier quiz pour entrer dans la ligue théorique — chaque compétence travaillée compte.</div>
+    <div class="clt-rl-prog">Remplis ton premier quiz pour entrer dans la ligue révision — chaque compétence travaillée compte.</div>
     ${_theoryHowLegend()}
     <a class="clt-th-cta" href="#/parcours">Faire mon premier quiz</a>
   </div>`;
@@ -473,14 +552,14 @@ function _theoryLeagueHero(mine) {
     return `<div class="clt-rl-dot ${cls}" style="--dc:${l.color}"></div>`;
   }).join("");
   const progText = info.top
-    ? "Théorie maîtrisée — montre ça à ton moniteur en leçon"
+    ? "Révision maîtrisée — montre ça à ton moniteur en leçon"
     : `Encore <strong>${info.toNext}</strong> pt${info.toNext > 1 ? "s" : ""} avant la Ligue ${info.next.n} — ${esc(info.next.name)}`;
   return `
   <div class="clt-rl-hero clt-th-hero" style="--lc:${L.color}">
     <div class="clt-rl-top">
       <div class="clt-rl-medal">${info.top ? "★" : L.n}</div>
       <div class="clt-rl-info">
-        <div class="clt-rl-lbl">Ta ligue théorique</div>
+        <div class="clt-rl-lbl">Ta ligue révision</div>
         <div class="clt-rl-name">Ligue ${L.n} — ${esc(L.name)}</div>
       </div>
       ${_theoryHelpBtn()}
@@ -488,14 +567,72 @@ function _theoryLeagueHero(mine) {
     <div class="clt-rl-prog">${progText}</div>
     <div class="clt-rl-track">${dots}</div>
     ${_theoryHowLegend()}
-    <div class="clt-pts-legend" style="border-top:0;padding-top:6px">
-      <span class="clt-pts-pill">${nComp} compétence${nComp > 1 ? "s" : ""} en quiz réussi (+${THEORY_PTS.quiz} pt)</span>
-      <span class="clt-pts-pill">${nExams} parcours d'examen réussi${nExams > 1 ? "s" : ""} (+${THEORY_PTS.exam} pts)</span>
-    </div>
+    ${
+      nComp || nExams
+        ? `<div class="clt-mine-pts">Déjà <strong>${nComp} quiz réussi${nComp > 1 ? "s" : ""}</strong>${nExams ? ` et ${nExams} examen${nExams > 1 ? "s" : ""} blanc${nExams > 1 ? "s" : ""}` : ""}.</div>`
+        : ""
+    }
   </div>`;
 }
 
-// ── Corps ligue théorique ────────────────────────────────────────
+// ── Podium top-3 (partagé École + Révision) ──────────────────────
+// Couleurs de médaille par rang ; l'ordre visuel place le 1er au centre.
+const PODIUM = {
+  1: { ring: "#f59e0b", cls: "clt-pod-1" },
+  2: { ring: "#94a3b8", cls: "clt-pod-2" },
+  3: { ring: "#c08434", cls: "clt-pod-3" },
+};
+function _podium(top3, fmtScore) {
+  const byRang = {};
+  top3.forEach((r) => {
+    byRang[r.rang] = r;
+  });
+  const order = [byRang[2], byRang[1], byRang[3]]; // 2 · 1 · 3
+  return `<div class="clt-podium">${order
+    .map((r) => {
+      if (!r) return `<div class="clt-pod" aria-hidden="true"></div>`;
+      const p = PODIUM[r.rang];
+      return `
+      <div class="clt-pod ${p.cls} ${r.is_me ? "me" : ""}">
+        <div class="clt-pod-av" style="--ring:${p.ring}">
+          ${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 48)}
+          <span class="clt-pod-medal" aria-label="Rang ${r.rang}">${r.rang}</span>
+        </div>
+        <div class="clt-pod-name">${r.is_me ? "Toi" : esc(r.display_name)}</div>
+        <div class="clt-pod-base"><span class="clt-pod-score">${fmtScore(r)}</span></div>
+      </div>`;
+    })
+    .join("")}</div>`;
+}
+
+// ── Rang épuré : un seul accent (ligue en trait latéral), score neutre ──
+function _epureRow(r, scoreHtml, leagueColor) {
+  return `
+  <div class="clt-row2 ${r.is_me ? "me" : ""}" style="--lc:${leagueColor}">
+    <div class="clt-rank2" aria-label="Rang ${r.rang}">${r.rang}</div>
+    <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 32)}</div>
+    <div class="clt-name">${esc(r.display_name)}</div>
+    ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ""}
+    <div class="clt-score2">${scoreHtml}</div>
+  </div>`;
+}
+
+// Construit podium + liste épurée à partir des lignes triées (rang asc).
+function _rankedBody(top, mine, meOutside, fmtScore, leagueColorOf) {
+  const podiumRows = top.slice(0, 3);
+  const hasPodium = podiumRows.length >= 3;
+  const podiumHtml = hasPodium ? _podium(podiumRows, fmtScore) : "";
+  const listRows = hasPodium ? top.slice(3) : top;
+  let html = `${podiumHtml}<div class="clt-list">${listRows
+    .map((r) => _epureRow(r, fmtScore(r), leagueColorOf(r)))
+    .join("")}</div>`;
+  if (meOutside) {
+    html += `<div class="clt-sep">· · ·</div><div class="clt-list">${_epureRow(mine, fmtScore(mine), leagueColorOf(mine))}</div>`;
+  }
+  return html;
+}
+
+// ── Corps ligue Révision ─────────────────────────────────────────
 function _renderTheoryBody(rows) {
   const mine = _myRow(rows);
   const hero = _theoryLeagueHero(mine);
@@ -504,7 +641,7 @@ function _renderTheoryBody(rows) {
   if (active.length < 2) {
     return `${hero}<div class="clt-empty">
       <div class="clt-empty-ico">${icon("zap", { size: 30 })}</div>
-      <div class="clt-empty-txt">Le classement s'anime quand 2+ élèves ont des points théorie. Quiz et examens blancs comptent.</div>
+      <div class="clt-empty-txt">Le classement s'anime quand 2+ élèves ont des points révision. Quiz et examens blancs comptent.</div>
     </div>`;
   }
 
@@ -512,34 +649,12 @@ function _renderTheoryBody(rows) {
     .filter((r) => r.rang <= LIMIT)
     .sort((a, b) => a.rang - b.rang);
   const meOutside = mine && mine.rang > LIMIT;
-
-  let html = `${hero}<div class="clt-list">${top.map(_theoryRowHtml).join("")}</div>`;
-  if (meOutside) {
-    html += `<div class="clt-sep">· · ·</div><div class="clt-list">${_theoryRowHtml(mine)}</div>`;
-  }
-  return html;
-}
-
-function _theoryRowHtml(r) {
-  const m = MEDALS[r.rang];
-  const rankCell = m
-    ? `<div class="clt-rank medal" style="--mg:${m.grad};--mglow:${m.glow}" aria-label="Rang ${r.rang}">${icon(m.ico, { size: 17, strokeWidth: 2.2, color: "#fff" })}</div>`
-    : `<div class="clt-rank" aria-label="Rang ${r.rang}">${r.rang}</div>`;
-  const info = theoryLeague(r.score);
-  const chip = !info.league
-    ? ""
-    : info.top
-      ? `<div class="clt-lg-chip elite" title="${esc(info.league.name)}" aria-label="Ligue ${esc(info.league.name)}">★</div>`
-      : `<div class="clt-lg-chip" style="--lc:${info.league.color}" title="Ligue ${info.league.n} — ${esc(info.league.name)}" aria-label="Ligue ${info.league.n}">${info.league.n}</div>`;
-  return `
-  <div class="clt-row ${r.is_me ? "me" : ""} ${m ? "top" + r.rang : ""}">
-    ${rankCell}
-    <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 34)}</div>
-    <div class="clt-name">${esc(r.display_name)}</div>
-    ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ""}
-    ${chip}
-    <div class="clt-score">${r.score}<span class="clt-score-sub">pts</span></div>
-  </div>`;
+  const fmtScore = (r) => `${r.score}<span>pts</span>`;
+  const leagueColorOf = (r) => {
+    const info = theoryLeague(r.score);
+    return info.top ? "#f59e0b" : info.league?.color || "var(--bo)";
+  };
+  return `${hero}${_rankedBody(top, mine, meOutside, fmtScore, leagueColorOf)}`;
 }
 
 // ── Corps ligue semaine ──────────────────────────────────────────
@@ -642,32 +757,12 @@ function _renderAllTimeBody(rows, scope, hof) {
     .sort((a, b) => a.rang - b.rang);
   const mine = _myRow(rows);
   const meOutside = mine && mine.rang > LIMIT;
-
-  let html = `${_remcLeagueHero(mine)}<div class="clt-list">${top.map(_rowHtml).join("")}</div>`;
-  if (meOutside) {
-    html += `<div class="clt-sep">· · ·</div><div class="clt-list">${_rowHtml(mine)}</div>`;
-  }
-  return html + hofHtml;
-}
-
-function _rowHtml(r) {
-  const m = MEDALS[r.rang];
-  const rankCell = m
-    ? `<div class="clt-rank medal" style="--mg:${m.grad};--mglow:${m.glow}" aria-label="Rang ${r.rang}">${icon(m.ico, { size: 17, strokeWidth: 2.2, color: "#fff" })}</div>`
-    : `<div class="clt-rank" aria-label="Rang ${r.rang}">${r.rang}</div>`;
-  const info = remcLeague(r.score);
-  const chip = info.elite
-    ? `<div class="clt-lg-chip elite" title="Élite" aria-label="Ligue Élite">★</div>`
-    : `<div class="clt-lg-chip" style="--lc:${info.league.color}" title="Ligue ${info.league.n} — ${esc(info.league.name)}" aria-label="Ligue ${info.league.n}">${info.league.n}</div>`;
-  return `
-  <div class="clt-row ${r.is_me ? "me" : ""} ${m ? "top" + r.rang : ""}">
-    ${rankCell}
-    <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 34)}</div>
-    <div class="clt-name">${esc(r.display_name)}</div>
-    ${r.is_me ? '<span class="clt-me-tag">Toi</span>' : ""}
-    ${chip}
-    <div class="clt-score">${r.score}<span class="clt-score-sub">/31</span></div>
-  </div>`;
+  const fmtScore = (r) => `${r.score}<span>/31</span>`;
+  const leagueColorOf = (r) => {
+    const info = remcLeague(r.score);
+    return info.elite ? "#f59e0b" : info.league.color;
+  };
+  return `${_remcLeagueHero(mine)}${_rankedBody(top, mine, meOutside, fmtScore, leagueColorOf)}${hofHtml}`;
 }
 
 // ─── Wire ────────────────────────────────────────────────────────

@@ -30,6 +30,7 @@ import { haptic } from "@/utils/haptic.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { onPopupsSettled } from "@/utils/intro-overlays.js";
 import { renderPermisMini } from "@/components/eleve/permis-card.js";
+import { theoryLeague } from "@/utils/theory-league.js";
 
 // Tour guidé élève — 1× à la première arrivée sur l'accueil (l'onboarding
 // plein écran est déjà passé : main.js le monte AVANT cette page).
@@ -512,67 +513,68 @@ const STYLE = `<style>
   .pplus-card, .pplus-card::after { transition: none; animation: none; }
 }
 
-/* Leaderboard slot */
-.acc-lb {
-  display: flex; align-items: center; gap: 14px;
-  margin: 16px 16px 4px;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--a) 15%, transparent) 0%, color-mix(in srgb, var(--a) 5%, transparent) 100%);
-  border: 1.5px solid color-mix(in srgb, var(--a) 28%, transparent);
-  border-radius: var(--r-xl);
-  padding: 14px 16px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 14px -6px color-mix(in srgb, var(--a) 35%, transparent);
+/* ── Tes ligues — 2 cartes égales (École + Révision) ── */
+.acc-lg-head {
+  font: 600 12px/1 'Inter', sans-serif; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--mu2); margin: 26px 20px 12px;
+}
+.acc-lg-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  padding: 0 16px; margin-bottom: 4px;
+}
+.acc-lg-card {
+  display: flex; flex-direction: column; align-items: flex-start;
+  text-align: left; min-height: 106px;
+  padding: 14px; border-radius: var(--r-xl);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--a) 14%, transparent) 0%, color-mix(in srgb, var(--a) 4%, transparent) 100%);
+  border: 1.5px solid color-mix(in srgb, var(--a) 26%, transparent);
+  box-shadow: 0 4px 14px -8px color-mix(in srgb, var(--a) 35%, transparent);
+  cursor: pointer; position: relative; overflow: hidden;
   -webkit-tap-highlight-color: transparent;
   transition: transform .15s var(--ease-spring), box-shadow .15s ease, border-color .15s ease;
+  font-family: 'Inter', sans-serif;
 }
-.acc-lb::before {
-  content: ''; position: absolute; top: -45%; right: -12%;
-  width: 130px; height: 130px; pointer-events: none;
+.acc-lg-card::before {
+  content: ''; position: absolute; top: -40%; right: -16%;
+  width: 96px; height: 96px; pointer-events: none;
   background: radial-gradient(circle, color-mix(in srgb, var(--a) 20%, transparent), transparent 70%);
 }
-.acc-lb:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 9px 22px -7px color-mix(in srgb, var(--a) 45%, transparent);
-  border-color: color-mix(in srgb, var(--a) 45%, transparent);
+.acc-lg-card:active { transform: scale(.97); }
+.acc-lg-card:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+@media (hover:hover) and (pointer:fine) {
+  .acc-lg-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--a) 42%, transparent);
+    box-shadow: 0 9px 22px -9px color-mix(in srgb, var(--a) 45%, transparent);
+  }
 }
-.acc-lb:active { transform: scale(.98); }
-.acc-lb:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
-
-.acc-lb-rank {
-  flex-shrink: 0; width: 52px; height: 52px; border-radius: var(--r-lg);
-  display: flex; align-items: center; justify-content: center;
-  background: var(--a); color: var(--a-ink);
-  box-shadow: 0 5px 13px -3px color-mix(in srgb, var(--a) 60%, transparent);
-  font: 800 19px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.03em;
+.acc-lg-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font: 700 11px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-txt);
   position: relative; z-index: 1;
 }
-.acc-lb-rank.empty { background: color-mix(in srgb, var(--a) 16%, transparent); color: var(--a-txt); font-size: 24px; box-shadow: none; }
-.acc-lb-rank.img { background: transparent; box-shadow: none; padding: 0; }
-.acc-lb-rank.img img { width: 52px; height: 52px; object-fit: contain; display: block; }
-.acc-lb-rank-hash { font-size: 12px; font-weight: 700; opacity: .75; margin-right: 1px; }
-
-.acc-lb-main { flex: 1; min-width: 0; position: relative; z-index: 1; }
-.acc-lb-eyebrow {
-  font: 700 10px/1 'Inter', sans-serif; color: var(--a-txt);
-  letter-spacing: .08em; text-transform: uppercase; margin-bottom: 5px;
+.acc-lg-rank {
+  font: 800 28px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  letter-spacing: -.03em; margin: 10px 0 0; position: relative; z-index: 1;
 }
-.acc-lb-body {
-  font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
-  letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+.acc-lg-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  width: 100%; margin-top: auto; padding-top: 8px;
+  position: relative; z-index: 1;
 }
-.acc-lb-chip {
-  font: 700 11px/1 'Inter', sans-serif; color: var(--am-txt);
-  background: rgba(245,158,11,.14); border-radius: var(--r-full); padding: 4px 9px;
+.acc-lg-sub {
+  font: 500 11.5px/1.3 'Inter', sans-serif; color: var(--mu2);
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.acc-lb-sub { font: 500 12.5px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
-
-.acc-lb-arrow {
-  flex-shrink: 0; color: var(--a-txt); display: flex; align-items: center;
-  opacity: .9; position: relative; z-index: 1; transition: transform .15s ease;
+.acc-lg-go {
+  flex-shrink: 0; display: inline-flex; align-items: center;
+  color: var(--a-txt); opacity: .9;
+  transition: transform .15s var(--ease-spring);
 }
-.acc-lb:hover .acc-lb-arrow { transform: translateX(3px); }
+.acc-lg-card:active .acc-lg-go { transform: translateX(2px); }
+@media (hover:hover) and (pointer:fine) {
+  .acc-lg-card:hover .acc-lg-go { transform: translateX(2px); }
+}
 
 /* ── Bottom sheet streak ── */
 .bs-bg {
@@ -854,7 +856,7 @@ export async function mount(root) {
     }
 
     // Leaderboard async
-    _loadAndInjectLeaderboard(root);
+    _loadAndInjectLeagues(root);
 
     // Bannière émotionnelle — insérée juste après le hero
     emotionalBanner
@@ -995,7 +997,7 @@ function render({
   <!-- ══ ACTION DU JOUR — le seul bouton à presser ══ -->
   ${bloc3}
 
-  <!-- Classement de l'école (ligue en vedette) -->
+  <!-- Tes ligues : École (REMC) + Révision (quiz solo), à égalité -->
   <div id="acc-lb-slot"></div>
 
   <!-- ══ BELOW FOLD ══ -->
@@ -1163,11 +1165,12 @@ function renderActionDuJour(quest, pendingNotif, totalValidated, dailyQuiz) {
     btnText = "Je joue";
     href = `#/quiz/${dailyQuiz.competenceId}/post_validation/daily`;
   } else if (dailyQuiz?.done) {
-    label = "Question du jour";
-    title = "C'est fait pour aujourd'hui ✓";
-    sub = "Reviens demain — ou avance sur ton parcours.";
-    btnText = "Voir le parcours";
-    href = "#/parcours";
+    label = "Question du jour ✓";
+    title = "Envie de pousser plus loin ?";
+    sub =
+      "Enchaîne des révisions — chaque quiz te fait monter en Ligue Révision.";
+    btnText = "Continue à réviser";
+    href = "#/quiz/next/post_validation/revision";
   } else if (totalValidated === 0) {
     title = "Lance ton parcours";
     sub = "31 compétences à valider avec ton moniteur";
@@ -1348,63 +1351,80 @@ function wire(
   });
 }
 
-// ─── Leaderboard async ───────────────────────────────────────────
-async function _loadAndInjectLeaderboard(root) {
+// ─── Tes ligues async (École + Révision, à égalité) ──────────────
+// Deux dimensions distinctes, mises en avant pareil :
+//  - Ligue École   = classement REMC (validations moniteur)        → get_my_leaderboard_position
+//  - Ligue Révision = effort solo (quiz réussis + examens blancs)  → get_theory_leaderboard
+async function _loadAndInjectLeagues(root) {
+  const slot = root.querySelector("#acc-lb-slot");
+  if (!slot) return;
   try {
-    const { data, error } = await sb.rpc("get_my_leaderboard_position");
-    if (error || !data || data?.error) return;
-    const slot = root.querySelector("#acc-lb-slot");
-    if (!slot) return;
-    const rank = data.my_rank,
-      total = data.total_eleves,
-      pct = data.percentile;
-    const ranked = rank !== null && total !== null && total > 1;
+    const [posRes, revRes] = await Promise.allSettled([
+      sb.rpc("get_my_leaderboard_position"),
+      sb.rpc("get_theory_leaderboard", { p_scope: "ecole", p_limit: 50 }),
+    ]);
 
-    const badge = ranked
-      ? `<div class="acc-lb-rank"><span class="acc-lb-rank-hash">#</span>${esc(String(rank))}</div>`
-      : `<div class="acc-lb-rank img"><img src="/skins/badge-3d-ultimate.webp" alt="" width="52" height="52" loading="lazy"></div>`;
-    const chip =
-      pct !== null ? `<span class="acc-lb-chip">Top ${100 - pct}%</span>` : "";
-    const bodyText = ranked
-      ? `Tu es #${rank} sur ${total}`
-      : "Personne devant toi… pour l'instant";
-    // Une seule ligne secondaire : le chip « Top X% » dit déjà l'essentiel
-    const sub = ranked
-      ? pct !== null
-        ? ""
-        : "Garde le rythme pour grimper"
-      : "Invite tes potes pour lancer la course";
+    // ── Ligue École (REMC / validations) ──
+    const pos =
+      posRes.status === "fulfilled" && !posRes.value?.error
+        ? posRes.value.data
+        : null;
+    const ecoleRanked =
+      pos && pos.my_rank != null && pos.total_eleves != null
+        ? pos.total_eleves > 1
+        : false;
+    const ecoleRank = ecoleRanked ? `#${pos.my_rank}` : "—";
+    const ecoleSub = ecoleRanked
+      ? `sur ${pos.total_eleves} à l'école`
+      : "Valide une compétence pour entrer";
 
-    const ARROW = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+    // ── Ligue Révision (quiz solo) ──
+    const revRows =
+      revRes.status === "fulfilled" && Array.isArray(revRes.value?.data)
+        ? revRes.value.data
+        : [];
+    const mineRev = revRows.find((r) => r.is_me === true) || null;
+    const revScore = mineRev?.score ?? 0;
+    const revInfo = theoryLeague(revScore);
+    const revClassed =
+      !!revInfo.league && revScore > 0 && mineRev?.rang != null;
+    const revRank = revClassed ? `#${mineRev.rang}` : "—";
+    const revSub = revClassed
+      ? `Ligue ${revInfo.league.n} — ${revInfo.league.name}`
+      : "Fais un quiz pour entrer";
 
     slot.innerHTML = `
-      <div class="acc-lb" id="acc-lb-card" role="button" tabindex="0" aria-label="Voir le classement de l'école">
-        ${badge}
-        <div class="acc-lb-main">
-          <div class="acc-lb-eyebrow">Classement de l'école</div>
-          <div class="acc-lb-body">${esc(bodyText)}${chip}</div>
-          ${sub ? `<div class="acc-lb-sub">${esc(sub)}</div>` : ""}
-        </div>
-        <div class="acc-lb-arrow">${ARROW}</div>
+      <div class="acc-lg-head">Tes ligues</div>
+      <div class="acc-lg-grid">
+        <button class="acc-lg-card" id="acc-lg-ecole" data-go="#/classement/ecole"
+                aria-label="Ligue École, ${esc(ecoleRanked ? `${ecoleRank} sur ${pos.total_eleves}` : "pas encore classé")} — voir le classement">
+          <span class="acc-lg-tag">${icon("trophy", { size: 13, strokeWidth: 2 })} Ligue École</span>
+          <span class="acc-lg-rank">${esc(ecoleRank)}</span>
+          <span class="acc-lg-foot">
+            <span class="acc-lg-sub">${esc(ecoleSub)}</span>
+            <span class="acc-lg-go">${icon("chevron-right", { size: 16, strokeWidth: 2.5 })}</span>
+          </span>
+        </button>
+        <button class="acc-lg-card" id="acc-lg-rev" data-go="#/classement/revision"
+                aria-label="Ligue Révision, ${esc(revClassed ? revRank : "pas encore classé")} — voir le classement">
+          <span class="acc-lg-tag">${icon("zap", { size: 13, strokeWidth: 2 })} Ligue Révision</span>
+          <span class="acc-lg-rank">${esc(revRank)}</span>
+          <span class="acc-lg-foot">
+            <span class="acc-lg-sub">${esc(revSub)}</span>
+            <span class="acc-lg-go">${icon("chevron-right", { size: 16, strokeWidth: 2.5 })}</span>
+          </span>
+        </button>
       </div>`;
 
-    const card = slot.querySelector("#acc-lb-card");
-    const open = () => {
-      track("leaderboard.tapped", {
-        rank: data.my_rank,
-        percentile: data.percentile,
+    slot.querySelectorAll(".acc-lg-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const dest = card.dataset.go;
+        track("leaderboard.tapped", { target: dest });
+        navigate(dest);
       });
-      navigate("#/classement");
-    };
-    card?.addEventListener("click", open);
-    card?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        open();
-      }
     });
   } catch (e) {
-    console.error("[accueil] leaderboard", e);
+    console.error("[accueil] leagues", e);
   }
 }
 

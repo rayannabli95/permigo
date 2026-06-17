@@ -1330,20 +1330,36 @@ export async function mount(root) {
     }
   });
 
-  // ── Flèche "Tu viens de débloquer !" si une comp a été validée < 10 min ──
-  const FRESH_MS = 10 * 60 * 1000;
-  let fresh = null;
-  let freshTs = 0;
-  for (const [cid, entry] of Object.entries(validatedMap)) {
-    if (!entry.validated_at) continue;
-    const ts = new Date(entry.validated_at).getTime();
-    if (Date.now() - ts < FRESH_MS && ts > freshTs) {
-      fresh = cid;
-      freshTs = ts;
-    }
+  // ── Célébration plein écran des compétences acquises pas encore vues ──
+  // Couvre le cas "moniteur valide → acquis direct" (aucun moment live côté
+  // élève) : on célèbre ici, en fonction des validations du parcours.
+  // Idempotent (ledger localStorage), lecture seule, ne change aucun statut.
+  let celebrated = 0;
+  try {
+    const { celebrateNewValidations } =
+      await import("@/services/competence-celebration.js");
+    celebrated = await celebrateNewValidations({ validations: valData });
+  } catch (_) {
+    /* best-effort — l'absence de célébration ne casse pas le parcours */
   }
-  if (fresh) {
-    setTimeout(() => flashFreshComp(root, fresh), 400);
+
+  // ── Flèche "Tu viens de débloquer !" si une comp a été validée < 10 min ──
+  // Skip si on vient d'afficher l'écran plein écran (évite la redondance).
+  if (!celebrated) {
+    const FRESH_MS = 10 * 60 * 1000;
+    let fresh = null;
+    let freshTs = 0;
+    for (const [cid, entry] of Object.entries(validatedMap)) {
+      if (!entry.validated_at) continue;
+      const ts = new Date(entry.validated_at).getTime();
+      if (Date.now() - ts < FRESH_MS && ts > freshTs) {
+        fresh = cid;
+        freshTs = ts;
+      }
+    }
+    if (fresh) {
+      setTimeout(() => flashFreshComp(root, fresh), 400);
+    }
   }
 }
 

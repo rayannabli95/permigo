@@ -597,9 +597,9 @@ async function submit() {
       const prenom = el?.prenom ? fmtName(el.prenom) : "Ton élève";
       const totalAcquis = _acquisSet.size + nNew;
       showSessionSuccess(prenom, nNew, totalAcquis);
-      // Vraie victoire moniteur → meilleur moment pour proposer l'install écran
-      // d'accueil (bien plus convertissant qu'un prompt froid au boot).
-      promptInstallAtValueMoment(getCurUser(), "moniteur_session_validee");
+      // Palier moniteur (parcours-pro) + install nudge (différé après l'écran
+      // palier s'il s'affiche, pour ne pas empiler deux overlays).
+      _maybeCelebrateMoniteurTier();
     } else {
       toast("Séance enregistrée", "success");
       navigate("#/eleves");
@@ -613,6 +613,32 @@ async function submit() {
       btn.querySelector("#vs-submit-lbl").textContent = "Réessayer";
     }
   }
+}
+
+// Palier moniteur : si les validations cumulées (validated_by) franchissent un
+// seuil MONITEUR_TIERS, écran plein écran « Palier atteint » (parcours-pro).
+// Idempotent (ledger localStorage). L'install nudge est différé après la
+// fermeture de l'écran palier (sinon deux overlays s'empilent).
+async function _maybeCelebrateMoniteurTier() {
+  const me = getCurUser();
+  if (!me?.id) return;
+  try {
+    // Source de vérité = compte réel de validations (validated_by), comme parcours-pro.
+    const { count } = await sb
+      .from("validations")
+      .select("id", { count: "exact", head: true })
+      .eq("validated_by", me.id);
+    if (typeof count === "number") {
+      const { maybeCelebrateTier } =
+        await import("@/services/moniteur-tier-celebration.js");
+      // await : si un écran s'affiche, on attend sa fermeture avant l'install nudge.
+      await maybeCelebrateTier(count, { onCta: () => navigate("#/parcours") });
+    }
+  } catch (e) {
+    console.warn("[valider-seance] tier celebrate failed", e);
+  }
+  // Vraie victoire moniteur → meilleur moment pour proposer l'install écran d'accueil.
+  promptInstallAtValueMoment(me, "moniteur_session_validee");
 }
 
 // Écran succès : referme la boucle « je valide → l'élève avance → il le voit ».
