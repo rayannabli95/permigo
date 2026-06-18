@@ -228,6 +228,61 @@ ${LEAGUE_CSS}
   box-sizing: border-box;
 }
 .clt-th-cta:active { transform: scale(.98); }
+
+/* ── Raccourci quiz : bouton glass brillant + focus « lacunes » ── */
+.clt-quiz-cta { margin-top: 16px; }
+.clt-glass-btn {
+  position: relative; overflow: hidden;
+  width: 100%; min-height: 52px;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 14px 20px; border-radius: var(--r); box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, #fff 28%, var(--a));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--a) 80%, transparent), color-mix(in srgb, var(--adk) 90%, transparent));
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  color: #fff; font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    0 8px 24px -6px color-mix(in srgb, var(--adk) 55%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.42),
+    inset 0 -1px 0 rgba(0,0,0,.12);
+  transition: transform .14s var(--ease-snap), box-shadow .2s;
+}
+.clt-glass-btn:active { transform: scale(.98); }
+.clt-glass-ico { display: inline-flex; filter: drop-shadow(0 1px 2px rgba(0,0,0,.25)); }
+.clt-glass-lbl { text-shadow: 0 1px 2px rgba(0,0,0,.22); }
+/* Reflet qui balaie le bouton — l'effet « brillant » */
+.clt-glass-sheen {
+  position: absolute; top: 0; left: -60%; width: 45%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: skewX(-18deg); pointer-events: none;
+  animation: cltSheen 3.6s ease-in-out infinite;
+}
+@keyframes cltSheen {
+  0% { left: -60%; }
+  35% { left: 130%; }
+  100% { left: 130%; }
+}
+@media (prefers-reduced-motion: reduce) { .clt-glass-sheen { animation: none; opacity: 0; } }
+
+/* Toggle « cibler ce que je n'ai pas réussi » */
+.clt-quiz-focus {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 11px; padding: 4px 2px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; position: relative;
+}
+.clt-quiz-focus input { position: absolute; opacity: 0; width: 0; height: 0; }
+.clt-quiz-focus-box {
+  flex-shrink: 0; width: 20px; height: 20px; border-radius: 6px;
+  border: 1.5px solid var(--bo); background: var(--bg2);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; transition: background .15s, border-color .15s, transform .12s;
+}
+.clt-quiz-focus-box svg { opacity: 0; transition: opacity .12s; }
+.clt-quiz-focus input:checked + .clt-quiz-focus-box { background: var(--a); border-color: var(--a); transform: scale(1.05); }
+.clt-quiz-focus input:checked + .clt-quiz-focus-box svg { opacity: 1; }
+.clt-quiz-focus input:focus-visible + .clt-quiz-focus-box { outline: 2px solid var(--a); outline-offset: 2px; }
+.clt-quiz-focus-lbl { font: 500 13px/1.3 'Inter', sans-serif; color: var(--mu); }
+
 /* Bouton « ? » — revoir le tuto (cible 44px) */
 .clt-th-help {
   flex-shrink: 0; width: 44px; height: 44px; margin: -6px -6px -6px 0;
@@ -520,6 +575,29 @@ function _theoryHelpBtn() {
   return `<button class="clt-th-help" id="clt-th-help" type="button" aria-label="Revoir comment fonctionne la ligue Révision"><span aria-hidden="true">?</span></button>`;
 }
 
+// ── Raccourci quiz (bouton glass) ────────────────────────────────
+// Lance l'enchaînement révision direct. withFocus → toggle « lacunes »
+// (sentinel "unseen" : ne pioche que les compétences pas encore réussies).
+function _theoryQuizCta(label, withFocus) {
+  return `
+  <div class="clt-quiz-cta">
+    <button class="clt-glass-btn" id="clt-quiz-go" type="button">
+      <span class="clt-glass-sheen" aria-hidden="true"></span>
+      <span class="clt-glass-ico">${icon("zap", { size: 18, strokeWidth: 2.4 })}</span>
+      <span class="clt-glass-lbl">${esc(label)}</span>
+    </button>
+    ${
+      withFocus
+        ? `<label class="clt-quiz-focus">
+      <input type="checkbox" id="clt-quiz-unseen" />
+      <span class="clt-quiz-focus-box" aria-hidden="true">${icon("check", { size: 12, strokeWidth: 3 })}</span>
+      <span class="clt-quiz-focus-lbl">Cibler ce que je n'ai pas encore réussi</span>
+    </label>`
+        : ""
+    }
+  </div>`;
+}
+
 // ── Hero « Ta ligue théorique » ──────────────────────────────────
 function _theoryLeagueHero(mine) {
   const sc = mine?.score ?? 0;
@@ -540,8 +618,8 @@ function _theoryLeagueHero(mine) {
       ${_theoryHelpBtn()}
     </div>
     <div class="clt-rl-prog">Remplis ton premier quiz pour entrer dans la ligue révision — chaque compétence travaillée compte.</div>
+    ${_theoryQuizCta("Faire mon premier quiz", false)}
     ${_theoryHowLegend()}
-    <a class="clt-th-cta" href="#/parcours">Faire mon premier quiz</a>
   </div>`;
   }
 
@@ -566,6 +644,7 @@ function _theoryLeagueHero(mine) {
     </div>
     <div class="clt-rl-prog">${progText}</div>
     <div class="clt-rl-track">${dots}</div>
+    ${_theoryQuizCta("Faire un quiz", true)}
     ${_theoryHowLegend()}
     ${
       nComp || nExams
@@ -772,6 +851,16 @@ function _wire(root, data, setScope) {
     if (e.target.closest("#clt-th-help")) {
       playClick();
       showTheoryTuto();
+      return;
+    }
+    // Raccourci « Faire un quiz » → enchaînement révision direct.
+    if (e.target.closest("#clt-quiz-go")) {
+      const unseen = !!root.querySelector("#clt-quiz-unseen")?.checked;
+      haptic("tap");
+      playClick();
+      track("revision_quiz.shortcut", { focus: unseen ? "unseen" : "mixte" });
+      // Sentinel "unseen" = cible les compétences pas encore réussies.
+      location.hash = `#/quiz/${unseen ? "unseen" : "next"}/post_validation/revision/${Date.now()}`;
     }
   });
 

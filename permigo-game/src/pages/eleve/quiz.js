@@ -191,6 +191,9 @@ export async function mount(root, params = {}) {
   const autoStart =
     params?.autoStart || hashParts[3] === "auto" || isDaily || isRevision;
   let competenceId = params?.competenceId || hashParts[1] || null;
+  // Révision « ciblée » : sentinel "unseen" → ne pioche que les compétences pas
+  // encore réussies. Le focus se propage dans l'enchaînement (cf. renderResult).
+  const isUnseen = isRevision && competenceId === "unseen";
 
   // Session de révision : capture l'état de départ (rang ligue Révision) AVANT
   // le 1er quiz, pour le récap de fin de session. Idempotent (no-op si déjà active).
@@ -201,10 +204,15 @@ export async function mount(root, params = {}) {
   }
 
   // Mode révision sans cible explicite → on délègue le choix au service.
-  if (isRevision && (!competenceId || competenceId === "next")) {
+  // "unseen" = focus lacunes (compétences pas encore réussies) ; sinon mixte.
+  if (isRevision && (!competenceId || competenceId === "next" || isUnseen)) {
     try {
-      const { pickRevisionQuiz } = await import("@/services/daily-quiz.js");
-      const pick = await pickRevisionQuiz(me.id);
+      const { pickRevisionQuiz, pickUnseenRevisionQuiz } =
+        await import("@/services/daily-quiz.js");
+      const pick = isUnseen
+        ? (await pickUnseenRevisionQuiz(me.id)) ||
+          (await pickRevisionQuiz(me.id))
+        : await pickRevisionQuiz(me.id);
       competenceId = pick?.competenceId || null;
     } catch {
       competenceId = null; // → écran « quiz non disponible » ci-dessous
@@ -272,6 +280,7 @@ export async function mount(root, params = {}) {
           duration,
           isDaily,
           isRevision,
+          isUnseen,
         });
       },
     });
@@ -301,6 +310,7 @@ async function handleComplete(
     duration,
     isDaily = false,
     isRevision = false,
+    isUnseen = false,
   },
 ) {
   const scorePct = Math.round((score / total) * 100);
@@ -461,6 +471,7 @@ async function handleComplete(
     type,
     isDaily,
     isRevision,
+    isUnseen,
     canChain,
     me,
     competenceId,
@@ -479,6 +490,7 @@ function renderResult(
     type,
     isDaily = false,
     isRevision = false,
+    isUnseen = false,
     canChain = false,
     me = null,
     competenceId = null,
@@ -532,13 +544,21 @@ function renderResult(
   contBtn?.addEventListener("click", async () => {
     contBtn.disabled = true;
     contBtn.textContent = "On y va…";
-    track("revision_chain.continue", { from_competence: competenceId });
-    let next = null;
-    try {
-      const { pickRevisionQuiz } = await import("@/services/daily-quiz.js");
-      if (me?.id) next = (await pickRevisionQuiz(me.id))?.competenceId || null;
-    } catch {
-      /* pick échoué → on délègue le choix au mount via le sentinel */
+    track("revision_chain.continue", {
+      from_competence: competenceId,
+      unseen: isUnseen,
+    });
+    // Focus « lacunes » : on garde le sentinel "unseen" pour que le mount
+    // re-pioche une compétence pas encore réussie. Sinon, pré-résolution mixte.
+    let next = isUnseen ? "unseen" : null;
+    if (!isUnseen) {
+      try {
+        const { pickRevisionQuiz } = await import("@/services/daily-quiz.js");
+        if (me?.id)
+          next = (await pickRevisionQuiz(me.id))?.competenceId || null;
+      } catch {
+        /* pick échoué → on délègue le choix au mount via le sentinel */
+      }
     }
     // Nonce en 5e segment : garantit un hash distinct (donc un re-mount) même
     // si la compétence suivante est identique. Le parsing ignore ce segment.
