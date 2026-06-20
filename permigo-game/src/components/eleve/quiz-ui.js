@@ -6,6 +6,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
+import { ill } from "@/utils/illustrations.js";
 
 // ─── Texte ───────────────────────────────────────────────────────
 
@@ -137,7 +138,7 @@ export function applyReveal(container, { chosen, correctIndex }) {
       b.classList.add("ok");
       if (correct) b.classList.add("hero");
       const key = b.querySelector(".qz-key");
-      if (key) key.innerHTML = icon("check", { size: 16, strokeWidth: 3 });
+      if (key) key.innerHTML = ill("coche", { size: 20 });
     } else if (i === chosen) {
       // Mauvais choix : on grise doucement, AUCUNE animation punitive
       b.classList.add("miss");

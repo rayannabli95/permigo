@@ -168,6 +168,7 @@ function renderQuestionBody(q, num, { mascot = false } = {}) {
         ${mascot ? `<img class="exb-mascot" src="/skins/mascot-think.png" alt="" aria-hidden="true" />` : ""}
         <p class="exb-qnum">Question ${num}</p>
         <p class="exb-qtext">${esc(q.enonce)}</p>
+        ${q.image ? `<img class="exb-qimg" src="${esc(q.image)}" alt="Panneau routier à identifier" />` : ""}
         ${renderChoices(q)}
         <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
       </div>`;
@@ -1116,6 +1117,19 @@ const EXB_CSS = `
   color: var(--ink);
   margin: 0 0 20px;
   letter-spacing: -.015em;
+}
+/* Image de question (ex. panneau routier à identifier) — carte blanche pour
+   que le panneau reste lisible quel que soit le thème. */
+.exb-qimg {
+  display: block;
+  width: clamp(124px, 40vw, 168px);
+  height: clamp(124px, 40vw, 168px);
+  object-fit: contain;
+  margin: 0 auto 20px;
+  padding: 14px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.14);
 }
 .exb-choices {
   display: flex;

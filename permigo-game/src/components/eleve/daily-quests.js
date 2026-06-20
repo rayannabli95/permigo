@@ -8,17 +8,19 @@ import { sb } from "@/auth/auth.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
+import { ill, illMask } from "@/utils/illustrations.js";
 import { toast } from "@/components/common/toast.js";
 import { playStar } from "@/utils/sound.js";
 
 const STYLE_ID = "daily-quests-style";
 
+// img/mask = illustration PNG (éclair/badge/cahier) ; ico = icône SVG classique
 const CAT_CFG = {
-  quiz: { ico: "brain", color: "var(--a)" },
+  quiz: { mask: "cahier", color: "var(--a)" },
   streak: { ico: "flame", color: "var(--or)" },
-  competence: { ico: "award", color: "var(--gr2)" },
+  competence: { img: "badge", color: "var(--gr2)" },
   session: { ico: "map-pin", color: "var(--blk)" },
-  default: { ico: "zap", color: "var(--a)" },
+  default: { img: "eclair", color: "var(--a)" },
 };
 
 function ensureStyle() {
@@ -197,7 +199,8 @@ export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
         const rect = card.getBoundingClientRect();
         const pop = document.createElement("div");
         pop.className = "dq-xp-pop";
-        pop.textContent = gemGained > 0 ? `+${gemGained} volants` : "Quête validée ✓";
+        pop.textContent =
+          gemGained > 0 ? `+${gemGained} volants` : "Quête validée ✓";
         pop.style.cssText = `left:${rect.left + rect.width / 2}px;top:${rect.top}px`;
         document.body.appendChild(pop);
         setTimeout(() => pop.remove(), 800);
@@ -232,7 +235,7 @@ function renderSection(quests) {
   return `
     <div class="dq-hd">
       <div class="dq-title">
-        ${icon("zap", { size: 14, strokeWidth: 2.2, color: "var(--a)" })}
+        ${ill("eclair", { size: 18 })}
         Quêtes du jour
       </div>
       ${readyCount > 0 ? `<span class="dq-count">${readyCount} à réclamer</span>` : ""}
@@ -265,7 +268,7 @@ function renderCard(q) {
       : "dq-card--pending";
 
   const badge = done
-    ? `<span class="dq-badge dq-badge--done">${icon("check", { size: 9, strokeWidth: 3 })} Fait</span>`
+    ? `<span class="dq-badge dq-badge--done">${ill("coche", { size: 14 })} Fait</span>`
     : ready
       ? `<span class="dq-badge dq-badge--claim">Réclamer</span>`
       : "";
@@ -278,7 +281,13 @@ function renderCard(q) {
          aria-label="${esc(q.title)}">
       ${badge}
       <div class="dq-ico" style="background:${cat.color}18">
-        ${icon(cat.ico, { size: 16, strokeWidth: 2.2, color: cat.color })}
+        ${
+          cat.img
+            ? ill(cat.img, { size: 24 })
+            : cat.mask
+              ? illMask(cat.mask, { size: 22, color: cat.color })
+              : icon(cat.ico, { size: 16, strokeWidth: 2.2, color: cat.color })
+        }
       </div>
       <div class="dq-name">${esc(q.title)}</div>
       <div class="dq-track">
