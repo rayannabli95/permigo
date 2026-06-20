@@ -63,7 +63,7 @@ export const CATALOG = [
   {
     key: "comp_25",
     emoji: "💡",
-    image: "/skins/badge-3d-01.webp",
+    image: "/skins/badge-3d-07.webp",
     title: "Phares allumés",
     body: "Tu y es presque. Plus que 6 compétences !",
     rarity: "epique",
@@ -74,7 +74,7 @@ export const CATALOG = [
   {
     key: "comp_28",
     emoji: "🎓",
-    image: "/skins/badge-3d-06.webp",
+    image: "/skins/badge-3d-05.webp",
     title: "Prêt examen blanc",
     body: "28/31. La voiture est sur la route — lance l'examen blanc.",
     rarity: "legendaire",
@@ -119,7 +119,7 @@ export const CATALOG = [
   {
     key: "streak_60",
     emoji: "🏎️",
-    image: "/skins/badge-3d-ultimate.webp",
+    image: "/skins/badge-3d-09.webp",
     title: "Pilote en série",
     body: "30 jours non-stop. Inarrêtable. Respect.",
     rarity: "legendaire",
