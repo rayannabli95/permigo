@@ -142,8 +142,9 @@ const STYLE = `<style>
 @keyframes tr2NewPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
 @media (prefers-reduced-motion: reduce) { .tr2-new-dot { animation: none; } }
 .tr2-card.locked .tr2-card-emoji { filter: grayscale(1) brightness(.4); opacity: .5; }
-/* Mix-blend-mode multiply pour les PNG avec fond blanc (le blanc devient invisible sur card colorée) */
-.tr2-card-emoji img { mix-blend-mode: multiply; }
+/* Badges 3D transparents (série auto, partagée avec l'enseignant) : rendu
+   couleurs réelles, pas de multiply (réservé jadis aux PNG à fond blanc). */
+.tr2-card-emoji img { mix-blend-mode: normal; }
 /* Cartes débloquées — PREMIUM, économie chromatique : surface claire + teinte
    légère + liseré + pastille de la rareté, au lieu d'un gradient plein vif.
    La rareté reste signalée par la couleur ET la pastille (color-not-only).
@@ -197,18 +198,19 @@ const STYLE = `<style>
   animation: tr2EmojiIn .5s .1s var(--ease-spring) both;
   filter: drop-shadow(0 0 18px rgba(255,255,255,.6));
 }
-/* PNG badge cadré en cercle (cache le damier de transparence baked dans l'asset) */
+/* Badge 3D transparent : on le pose entier (contain) avec son ombre portée,
+   pas de crop circulaire — sinon les bords du badge seraient rognés. */
 .tr2-modal-emoji:has(img) {
-  width: 120px; height: 120px; border-radius: 50%; overflow: hidden;
+  width: 120px; height: 120px;
   margin: 0 auto; display: flex; align-items: center; justify-content: center;
   filter: drop-shadow(0 6px 18px rgba(0,0,0,.25));
 }
-.tr2-modal-emoji img { width: 160%; height: 160%; object-fit: cover; mix-blend-mode: normal !important; }
+.tr2-modal-emoji img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: normal !important; }
 .tr2-modal-locked-ico:has(img) {
-  width: 110px; height: 110px; border-radius: 50%; overflow: hidden;
+  width: 110px; height: 110px;
   margin: 0 auto; display: flex; align-items: center; justify-content: center;
 }
-.tr2-modal-locked-ico img { width: 160%; height: 160%; object-fit: cover; mix-blend-mode: normal !important; }
+.tr2-modal-locked-ico img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: normal !important; }
 @keyframes tr2EmojiIn { from{transform:scale(.4) rotate(-10deg);opacity:0} to{transform:scale(1) rotate(0deg);opacity:1} }
 .tr2-rarity-chip {
   position: relative; z-index: 1;
@@ -474,7 +476,7 @@ function showModal(def, unlockData, totalUnlocked) {
         <div class="tr2-modal-handle"></div>
         <div class="tr2-modal-emoji">${
           def.image
-            ? `<img src="${def.image}" alt="${esc(def.title)}" loading="lazy" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:64px">${def.emoji}</span>`
+            ? `<img src="${def.image}" alt="${esc(def.title)}" loading="lazy" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:64px">${def.emoji}</span>`
             : `<span style="font-size:64px">${def.emoji}</span>`
         }</div>
         <div class="tr2-rarity-chip">${esc(rm.label)}</div>
@@ -504,7 +506,7 @@ function showModal(def, unlockData, totalUnlocked) {
         <div class="tr2-modal-locked-handle"></div>
         <div class="tr2-modal-locked-ico">${
           def.image
-            ? `<img src="${def.image}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:grayscale(1) opacity(.5)" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:64px">${def.emoji}</span>`
+            ? `<img src="${def.image}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:contain;filter:grayscale(1) opacity(.5)" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span style="display:none;font-size:64px">${def.emoji}</span>`
             : `<span style="font-size:64px">${def.emoji}</span>`
         }</div>
         <div class="tr2-modal-locked-lbl">${icon("lock", { size: 14 })} Trophée verrouillé</div>
