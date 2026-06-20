@@ -155,6 +155,10 @@ const STYLE = `<style>
   @media (prefers-reduced-motion: reduce) { .me-row:active { transform: none; } }
   .me-row:focus { outline: none; }
   .me-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; border-radius: var(--r); }
+  /* Barre d'état à gauche — scan instantané, sans layout-shift : la bordure
+     passe de 1px à 3px et le padding-left compense (16→14px). */
+  .me-row--pret { border-left: 3px solid var(--grd); padding-left: 14px; }
+  .me-row--relancer { border-left: 3px solid var(--amx); padding-left: 14px; }
 
   /* Avatar */
   .me-av {
@@ -366,36 +370,8 @@ const STYLE = `<style>
     gap: 3px;
   }
 
-  /* FAB Séance */
-  .me-fab {
-    position: fixed;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px) + 16px);
-    right: 16px;
-    z-index: 50;
-    display: flex; align-items: center; gap: 8px;
-    padding: 0 20px 0 16px;
-    height: 52px;
-    background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
-    color: var(--a-ink);
-    border: none; border-radius: 26px;
-    font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
-    cursor: pointer;
-    box-shadow: 0 4px 18px -4px color-mix(in srgb, var(--a) 60%, transparent), 0 2px 6px rgba(0,0,0,.12), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
-    transition: transform .15s var(--ease), box-shadow .15s var(--ease);
-    -webkit-tap-highlight-color: transparent;
-    animation: meFabIn .5s .3s var(--ease-spring) both;
-  }
-  .me-fab:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px -4px color-mix(in srgb, var(--a) 65%, transparent), 0 2px 8px rgba(0,0,0,.14);
-  }
-  .me-fab:active { transform: scale(.94); box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--a) 40%, transparent); }
-  .me-fab:focus-visible { outline: 3px solid var(--a); outline-offset: 3px; }
-  @keyframes meFabIn {
-    from { opacity: 0; transform: translateY(20px) scale(.9); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  @media (prefers-reduced-motion: reduce) { .me-fab { animation: none; } }
+  /* FAB « Séance » retiré ici : le FAB global #bn-seance-fab (nav-bottom)
+     est déjà monté pour l'enseignant sur toutes ses pages. */
 </style>`;
 
 const INACTIF_SEUIL_MS = 14 * 86400000; // 14 jours
@@ -790,10 +766,6 @@ function render() {
         <button class="me-tab${_tab === "recus" ? " active" : ""}" data-tab="recus" role="tab" aria-selected="${_tab === "recus"}" title="Élèves ayant obtenu le permis">Diplômés (${recusCount})</button>
       </div>
 
-      <button class="me-fab" id="me-fab" aria-label="Enregistrer une séance">
-        ${icon("plus", { size: 20, strokeWidth: 2.5 })} Séance
-      </button>
-
       <div class="me-list">
         ${
           filtered.length === 0
@@ -863,6 +835,14 @@ function renderRow(eleve) {
       : eleve.aRelancer
         ? "is-relancer"
         : "";
+  // Barre d'état à gauche de la carte : scan instantané (vert = prêt à présenter,
+  // ambre = à relancer). Réutilise les couleurs existantes, aucune nouvelle teinte.
+  const rowState =
+    eleve.readiness === "pret"
+      ? " me-row--pret"
+      : eleve.aRelancer
+        ? " me-row--relancer"
+        : "";
   const badges =
     eleve.readiness === "recu"
       ? `<span class="me-badge recu">${icon("check", { size: 11, strokeWidth: 2.6 })} Diplômé</span>`
@@ -881,7 +861,7 @@ function renderRow(eleve) {
           .join(" ");
 
   return `
-    <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="button" tabindex="0"
+    <div class="me-row${rowState}" data-eleve-id="${esc(eleve.id)}" role="button" tabindex="0"
          aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} compétences acquises${eleve.readiness === "pret" ? ", prêt pour l'examen" : eleve.aRelancer ? ", à relancer" : ""}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 44)}</div>
 
@@ -922,10 +902,8 @@ function wire() {
     openInviteEleveModal(_me);
   });
 
-  _root.querySelector("#me-fab")?.addEventListener("click", () => {
-    track("fab.seance.clicked", { from: "mes_eleves" });
-    navigate("#/log-session");
-  });
+  // FAB « Séance » : le FAB global #bn-seance-fab (nav-bottom, enseignant)
+  // couvre déjà cette page → on a retiré le doublon local #me-fab.
 
   // Section relancer → filtre tab arelancer
   _root.querySelector("#me-relancer-section")?.addEventListener("click", () => {

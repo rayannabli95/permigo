@@ -72,7 +72,10 @@ function maybeStartEleveTour() {
   // sinon il s'affiche dessous et le spotlight se mesure au mauvais endroit.
   onPopupsSettled(() => {
     setTimeout(() => {
-      if (!document.querySelector(".acc2-hero-streak")) return;
+      // Ancré sur l'action du jour (toujours rendue) et non sur le streak :
+      // au J0 le streak vaut 0 et .acc2-hero-streak n'existe pas → le tuto
+      // s'avortait silencieusement pour les tout nouveaux élèves.
+      if (!document.querySelector(".acc2-action")) return;
       track("eleve.tour.start");
       startTour(ELEVE_TOUR_STEPS, {
         onDone: () => {
@@ -353,6 +356,11 @@ const STYLE = `<style>
 .acc2-action-btn:active { transform: scale(.96); box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--a) 40%, transparent); }
 
 /* ═══════════════════════ BELOW FOLD ═══════════════════════════ */
+/* Réserve la hauteur des ligues injectées en async : évite le layout-shift
+   à chaque retour sur l'accueil. :empty → la réserve disparaît une fois
+   le contenu monté (qui est toujours plus haut que cette valeur). */
+#acc-lb-slot:empty { display: block; min-height: 172px; }
+
 .acc2-section-title {
   font: 600 12px/1 'Inter', sans-serif;
   text-transform: uppercase;

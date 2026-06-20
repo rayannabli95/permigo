@@ -278,7 +278,9 @@
   transition: opacity .7s cubic-bezier(.2,.7,.3,1),
               transform .7s cubic-bezier(.2,.7,.3,1),
               filter .7s cubic-bezier(.2,.7,.3,1);
-  will-change: opacity, transform, filter;
+  /* filter retiré de will-change : il créait une couche GPU permanente (coût
+     mémoire vidéo sur appareils modestes), même au repos. Le blur reste animé. */
+  will-change: opacity, transform;
 }
 .reveal.revealed {
   opacity: 1;
