@@ -506,6 +506,100 @@ export const CENTRES_EXAMEN = [
       },
     ],
   },
+
+  {
+    slug: "massy",
+    nom: "Massy",
+    departement: "Essonne",
+    deptNum: "91",
+    adresse: "Quartier Opéra, avenue de France, 91300 Massy",
+    mapsQuery:
+      "Centre d'examen permis Opéra de Massy avenue de France 91300 Massy",
+    difficulte: 3,
+    difficulteLabel: "Intermédiaire",
+    quizTags: ["priorite", "rond_point", "vitesse"],
+
+    resume:
+      "Massy, c'est un examen qui ne te laisse pas le temps de chauffer : dès la sortie du " +
+      "centre, dans le quartier Opéra, tu es tout de suite dans le bain. Le secteur mélange " +
+      "centre-ville dense, intersections en pagaille et ronds-points à enchaîner — rien " +
+      "d'extrême, mais une exigence d'attention de la première à la dernière minute. Classé " +
+      "3/5 dans l'Essonne, c'est un centre « juste » : il récompense ceux qui ont roulé le " +
+      "secteur et gardé la tête froide. Bien préparé, tu en fais un terrain connu.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "RER B et RER C — gare de Massy-Palaiseau, puis quelques minutes vers le quartier Opéra.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "Gare de Massy TGV à deux pas, nombreuses lignes de bus desservant l'avenue de France.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : accès par l'A10 / la N20, stationnement autour de l'Opéra et du centre commercial.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "zap",
+        titre: "Le départ qui ne pardonne pas",
+        texte:
+          "Ici, pas d'échauffement : à peine sorti du centre, tu attaques un environnement chargé. " +
+          "L'examinateur observe ta capacité à te mettre en conduite immédiatement. Le réflexe à " +
+          "avoir : poser ta respiration, balayer du regard et te caler sur l'allure dès les premiers " +
+          "mètres, sans précipitation.",
+      },
+      {
+        ico: "alert-triangle",
+        titre: "Le festival de stops et d'intersections",
+        texte:
+          "Le centre-ville de Massy enchaîne les intersections, dont beaucoup de stops. Le piège " +
+          "classique : le stop « roulé », marqué à moitié. Arrêt complet, roues immobiles, regard " +
+          "à gauche-droite-gauche, puis tu repars. Un stop non marqué, c'est éliminatoire.",
+      },
+      {
+        ico: "refresh-cw",
+        titre: "Ronds-points et sens uniques mêlés",
+        texte:
+          "Le secteur alterne giratoires à lire vite et voies à sens unique. Le risque, c'est de " +
+          "se tromper de file ou d'engager un sens interdit sous la pression. Anticipe la " +
+          "signalisation, vérifie les flèches au sol et choisis ta voie tôt — la lecture de la route " +
+          "prime sur la vitesse.",
+      },
+    ],
+
+    conseils: [
+      "Va rouler le quartier Opéra avant le jour J : connaître le départ enlève l'essentiel du stress des premières minutes.",
+      "À chaque stop, exagère ton arrêt : mieux vaut une seconde de trop qu'un arrêt jugé incomplet.",
+      "Sur les sens uniques, fie-toi aux flèches au sol et aux panneaux plutôt qu'à ton instinct — le secteur est piégeux.",
+      "Garde une allure souple et régulière : à Massy, la constance rassure l'examinateur plus que la performance.",
+    ],
+
+    faq: [
+      {
+        q: "Massy, c'est un centre difficile ?",
+        r: "Intermédiaire (3/5). Moins corsé que Villabé, comparable à Évry ou Étampes. Rien d'insurmontable si tu as travaillé le secteur et tes contrôles.",
+      },
+      {
+        q: "Qu'est-ce qui surprend le plus le jour de l'examen ?",
+        r: "Le départ : tu es tout de suite dans la circulation dense, sans phase d'échauffement. C'est mental — préparé à ça, tu n'es plus pris de court.",
+      },
+      {
+        q: "Quelle est la cause d'échec n°1 ici ?",
+        r: "Les stops bâclés et les erreurs de file (sens unique ou mauvaise sortie de giratoire). Deux réflexes à blinder avant de passer.",
+      },
+      {
+        q: "Combien de temps dure l'épreuve ?",
+        r: "Environ 32 minutes, dont à peu près 25 minutes de conduite effective. Arrive 15 min en avance pour te poser au calme.",
+      },
+    ],
+  },
 ];
 
 // Renvoie la fiche d'un centre par son slug, ou null si inconnu.
