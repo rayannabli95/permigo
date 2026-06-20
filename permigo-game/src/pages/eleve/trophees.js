@@ -10,7 +10,7 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { toast } from "@/components/common/toast.js";
-import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
+import { openBottomSheet } from "@/components/common/bottom-sheet.js";
 import { CATALOG, RARITY_META, shortProgress } from "@/data/achievements.js";
 
 // ─── CSS ──────────────────────────────────────────────────────
@@ -467,9 +467,7 @@ function showModal(def, unlockData, totalUnlocked) {
       })
     : null;
 
-  const overlay = document.createElement("div");
-  overlay.className = "tr2-modal-bg";
-  overlay.innerHTML = isUnlocked
+  const html = isUnlocked
     ? `
     <div class="tr2-modal" style="background:var(--su)">
       <div class="tr2-modal-glow" style="background:${rm.gradient}">
@@ -527,23 +525,15 @@ function showModal(def, unlockData, totalUnlocked) {
     </div>
   `;
 
-  document.body.appendChild(overlay);
+  const { overlay, close: closeModal } = openBottomSheet({
+    bgClass: "tr2-modal-bg",
+    sheetSelector: ".tr2-modal",
+    html,
+  });
   track("trophy.modal_opened", { key: def.key, unlocked: isUnlocked });
-
-  const closeModal = () => {
-    haptic("select");
-    overlay.remove();
-  };
   overlay
     .querySelector("#tr2-close-btn")
     ?.addEventListener("click", closeModal);
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closeModal();
-  });
-
-  // Swipe-to-dismiss : glisser la feuille vers le bas pour fermer
-  const sheet = overlay.querySelector(".tr2-modal");
-  if (sheet) enableSheetSwipe(sheet, closeModal, { overlay });
 
   if (isUnlocked) {
     overlay

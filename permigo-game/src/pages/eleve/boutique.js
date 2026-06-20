@@ -17,7 +17,7 @@ import {
   getEquipped,
   getEquippedAsset,
 } from "@/utils/game-state.js";
-import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
+import { openBottomSheet } from "@/components/common/bottom-sheet.js";
 
 const TABS = [
   { key: "skins", label: "Skins", ico: "car" },
@@ -685,9 +685,7 @@ function showDetailModal(item, gemmes, onConfirm) {
     balanceLine = `<div class="bo2-modal-balance" style="color:#f87171">Il te manque ${item.cost_gemmes - gemmes} ${icon("gem", { size: 13 })}</div>`;
   }
 
-  const overlay = document.createElement("div");
-  overlay.className = "bo2-modal-bg";
-  overlay.innerHTML = `
+  const html = `
     <div class="bo2-modal">
       <div class="bo2-modal-handle"></div>
       <div class="bo2-halo">
@@ -706,18 +704,13 @@ function showDetailModal(item, gemmes, onConfirm) {
       <button class="bo2-modal-cancel" id="bo2-modal-cancel">Fermer</button>
     </div>`;
 
-  document.body.appendChild(overlay);
-  track("boutique.detail_opened", { item_id: item.id });
-
-  const close = () => {
-    haptic("select");
-    overlay.remove();
-  };
-  enableSheetSwipe(overlay.querySelector(".bo2-modal"), close, { overlay });
-  overlay.querySelector("#bo2-modal-cancel")?.addEventListener("click", close);
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) close();
+  const { overlay, close } = openBottomSheet({
+    bgClass: "bo2-modal-bg",
+    sheetSelector: ".bo2-modal",
+    html,
   });
+  track("boutique.detail_opened", { item_id: item.id });
+  overlay.querySelector("#bo2-modal-cancel")?.addEventListener("click", close);
 
   const ctaBtn = overlay.querySelector("#bo2-cta");
   if (ctaBtn && !ctaBtn.disabled) {
