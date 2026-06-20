@@ -146,6 +146,21 @@ export async function mount(root, param) {
 }
 
 // ─── Écran 1 : sélection du parcours ─────────────────────────
+// Grille de réponses A/B/C/D — markup partagé par les boucles de quiz exam-blanc.
+function renderChoices(q) {
+  return `<div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
+          ${q.options
+            .map(
+              (opt, i) => `
+            <button class="exb-choice" data-idx="${i}" aria-pressed="false">
+              <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
+              <span class="exb-choice-text">${esc(opt)}</span>
+            </button>`,
+            )
+            .join("")}
+        </div>`;
+}
+
 function renderSelection() {
   const stars = (n) => "★".repeat(n) + "☆".repeat(5 - n);
   const cards = PARCOURS.map(
@@ -292,19 +307,8 @@ function startParcours(root, parcours_id) {
         <img class="exb-mascot" src="/skins/mascot-think.png" alt="" aria-hidden="true" />
         <p class="exb-qnum">Question ${num}</p>
         <p class="exb-qtext">${esc(q.enonce)}</p>
-        <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
-          ${q.options
-            .map(
-              (opt, i) => `
-            <button class="exb-choice" data-idx="${i}" aria-pressed="false">
-              <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
-              <span class="exb-choice-text">${esc(opt)}</span>
-            </button>
-          `,
-            )
-            .join("")}
-        </div>
-        <div class="exb-feedback" id="exb-feedback" hidden></div>
+        ${renderChoices(q)}
+        <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
       </div>
     `;
 
@@ -429,19 +433,8 @@ function renderNextQuestion(root, questions, answers, idx, parcours_id) {
         <img class="exb-mascot" src="/skins/mascot-think.png" alt="" aria-hidden="true" />
         <p class="exb-qnum">Question ${num}</p>
         <p class="exb-qtext">${esc(q.enonce)}</p>
-        <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
-          ${q.options
-            .map(
-              (opt, i) => `
-            <button class="exb-choice" data-idx="${i}" aria-pressed="false">
-              <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
-              <span class="exb-choice-text">${esc(opt)}</span>
-            </button>
-          `,
-            )
-            .join("")}
-        </div>
-        <div class="exb-feedback" id="exb-feedback" hidden></div>
+        ${renderChoices(q)}
+        <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
       </div>
     `;
 
@@ -671,18 +664,8 @@ function startExamenOfficiel(root) {
       <div class="exb-qbody" id="exb-qbody">
         <p class="exb-qnum">Question ${num}</p>
         <p class="exb-qtext">${esc(q.enonce)}</p>
-        <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
-          ${q.options
-            .map(
-              (opt, i) => `
-            <button class="exb-choice" data-idx="${i}" aria-pressed="false">
-              <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
-              <span class="exb-choice-text">${esc(opt)}</span>
-            </button>`,
-            )
-            .join("")}
-        </div>
-        <div class="exb-feedback" id="exb-feedback" hidden></div>
+        ${renderChoices(q)}
+        <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
       </div>`;
 
     root.querySelector("#exb-quit")?.addEventListener("click", () => {
@@ -906,18 +889,8 @@ function runRevision(
       <div class="exb-qbody" id="exb-qbody">
         <p class="exb-qnum">Question ${num}</p>
         <p class="exb-qtext">${esc(q.enonce)}</p>
-        <div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
-          ${q.options
-            .map(
-              (opt, i) => `
-            <button class="exb-choice" data-idx="${i}" aria-pressed="false">
-              <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
-              <span class="exb-choice-text">${esc(opt)}</span>
-            </button>`,
-            )
-            .join("")}
-        </div>
-        <div class="exb-feedback" id="exb-feedback" hidden></div>
+        ${renderChoices(q)}
+        <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
       </div>`;
 
     root.querySelector("#exb-quit")?.addEventListener("click", () => {
@@ -1115,8 +1088,8 @@ function showRevisionResults(
 }
 
 // ─── Styles ──────────────────────────────────────────────────
-function renderStyles() {
-  return `<style>
+const EXB_STYLE_ID = "exb-styles";
+const EXB_CSS = `
 /* === Parcours quiz — exb-* === */
 .exb {
   min-height: 100svh;
@@ -1715,5 +1688,20 @@ function renderStyles() {
     transition-duration: .001ms !important;
   }
 }
-</style>`;
+`;
+
+// Monte le CSS une seule fois dans <head> (id-guard) au lieu de le réinjecter
+// à chaque root.innerHTML (9 sites d'appel). Renvoie "" pour rester compatible
+// avec les appels `root.innerHTML = renderStyles() + X`.
+function renderStyles() {
+  if (
+    typeof document !== "undefined" &&
+    !document.getElementById(EXB_STYLE_ID)
+  ) {
+    const el = document.createElement("style");
+    el.id = EXB_STYLE_ID;
+    el.textContent = EXB_CSS;
+    document.head.appendChild(el);
+  }
+  return "";
 }
