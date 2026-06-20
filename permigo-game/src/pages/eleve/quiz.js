@@ -13,6 +13,7 @@ import { lancerQuiz } from "@/services/quiz-engine.js";
 import { findSubComp, findCategory } from "@/data/remc.js";
 import { unlockChest } from "@/utils/game-state.js";
 import { promptInstallAtValueMoment } from "@/components/common/install-nudge.js";
+import { hideBottomNav } from "@/utils/nav.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -172,12 +173,7 @@ export async function mount(root, params = {}) {
   if (!me) return;
 
   // #11 — plein écran d'épreuve : masque la bottom nav (anti-triche, anti-distraction)
-  document.getElementById("bottom-nav")?.setAttribute("hidden", "");
-  const _restoreNav = () => {
-    document.getElementById("bottom-nav")?.removeAttribute("hidden");
-    window.removeEventListener("hashchange", _restoreNav);
-  };
-  window.addEventListener("hashchange", _restoreNav);
+  const _restoreNav = hideBottomNav();
 
   // Params viennent soit d'un appel direct, soit du hash #/quiz/C1a/post_validation
   // Segment 3 optionnel : "auto" (lancement direct), "daily" (question du jour :

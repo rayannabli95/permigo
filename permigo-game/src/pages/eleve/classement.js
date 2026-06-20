@@ -20,6 +20,8 @@ import {
   renderLeagueBadge,
   renderLeagueRow,
   LEAGUE_CSS,
+  msToNextMonday,
+  fmtCountdown,
 } from "@/utils/league-shared.js";
 import {
   THEORY_LEAGUES,
@@ -65,25 +67,6 @@ function remcLeague(score) {
     toNext: REMC_LEAGUES[idx].endAt - s,
     next: REMC_LEAGUES[idx + 1] || null, // null = prochain palier = Élite/permis
   };
-}
-// ─── Countdown : temps restant jusqu'au lundi 00:00 ────────────
-function msToNextMonday() {
-  const now = new Date();
-  const dayOfWeek = now.getDay(); // 0=dim, 1=lun … 6=sam
-  const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
-  const nextMonday = new Date(now);
-  nextMonday.setDate(now.getDate() + daysUntilMonday);
-  nextMonday.setHours(0, 0, 0, 0);
-  return nextMonday - now;
-}
-function fmtCountdown(ms) {
-  const s = Math.floor(ms / 1000);
-  const d = Math.floor(s / 86400);
-  const h = Math.floor((s % 86400) / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  if (d > 0) return `${d}j ${h}h`;
-  if (h > 0) return `${h}h ${m}min`;
-  return `${m}min`;
 }
 
 // ─── CSS ─────────────────────────────────────────────────────────

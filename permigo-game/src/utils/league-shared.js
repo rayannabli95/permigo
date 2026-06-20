@@ -100,6 +100,27 @@ export function renderLeagueRow(entry, showPts = true) {
   </div>`;
 }
 
+// ─── Countdown : temps restant jusqu'au prochain lundi 00:00 ────
+export function msToNextMonday() {
+  const now = new Date();
+  const dow = now.getDay(); // 0=dim, 1=lun … 6=sam
+  const days = dow === 0 ? 1 : 8 - dow;
+  const next = new Date(now);
+  next.setDate(now.getDate() + days);
+  next.setHours(0, 0, 0, 0);
+  return next - now;
+}
+
+export function fmtCountdown(ms) {
+  const s = Math.floor(ms / 1000);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (d > 0) return `${d}j ${h}h`;
+  if (h > 0) return `${h}h ${m}min`;
+  return `${m}min`;
+}
+
 /** CSS partagé des ligues — à injecter une seule fois par page. */
 export const LEAGUE_CSS = `
 /* ─── League badge ─── */
