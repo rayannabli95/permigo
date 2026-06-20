@@ -161,6 +161,18 @@ function renderChoices(q) {
         </div>`;
 }
 
+// Corps d'une question (énoncé + grille de réponses + conteneur feedback),
+// partagé par les 4 rendus de question. La mascotte n'apparaît qu'en parcours.
+function renderQuestionBody(q, num, { mascot = false } = {}) {
+  return `<div class="exb-qbody" id="exb-qbody">
+        ${mascot ? `<img class="exb-mascot" src="/skins/mascot-think.png" alt="" aria-hidden="true" />` : ""}
+        <p class="exb-qnum">Question ${num}</p>
+        <p class="exb-qtext">${esc(q.enonce)}</p>
+        ${renderChoices(q)}
+        <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
+      </div>`;
+}
+
 // Bloc de feedback partagé par les 3 modes (parcours / officiel / révision).
 // Variantes : bannière « faute éliminatoire » (parcours), préfixe « Temps
 // écoulé » (officiel en timeout), libellé du dernier bouton.
@@ -334,13 +346,7 @@ function startParcours(root, parcours_id) {
         <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? "")}</span>
       </div>
 
-      <div class="exb-qbody" id="exb-qbody">
-        <img class="exb-mascot" src="/skins/mascot-think.png" alt="" aria-hidden="true" />
-        <p class="exb-qnum">Question ${num}</p>
-        <p class="exb-qtext">${esc(q.enonce)}</p>
-        ${renderChoices(q)}
-        <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
-      </div>
+      ${renderQuestionBody(q, num, { mascot: true })}
     `;
 
     root.querySelector("#exb-quit")?.addEventListener("click", () => {
@@ -458,13 +464,7 @@ function renderNextQuestion(root, questions, answers, idx, parcours_id) {
         <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? "")}</span>
       </div>
 
-      <div class="exb-qbody" id="exb-qbody">
-        <img class="exb-mascot" src="/skins/mascot-think.png" alt="" aria-hidden="true" />
-        <p class="exb-qnum">Question ${num}</p>
-        <p class="exb-qtext">${esc(q.enonce)}</p>
-        ${renderChoices(q)}
-        <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
-      </div>
+      ${renderQuestionBody(q, num, { mascot: true })}
     `;
 
     root.querySelector("#exb-quit")?.addEventListener("click", () => {
@@ -690,12 +690,7 @@ function startExamenOfficiel(root) {
         </div>
         <span class="exb-quiz-parcours-name">Examen officiel</span>
       </div>
-      <div class="exb-qbody" id="exb-qbody">
-        <p class="exb-qnum">Question ${num}</p>
-        <p class="exb-qtext">${esc(q.enonce)}</p>
-        ${renderChoices(q)}
-        <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
-      </div>`;
+      ${renderQuestionBody(q, num)}`;
 
     root.querySelector("#exb-quit")?.addEventListener("click", () => {
       if (confirm("Quitter l'examen ? Ta progression sera perdue.")) {
@@ -909,12 +904,7 @@ function runRevision(
         </div>
         <span class="exb-quiz-parcours-name">Révision · ${esc(label)}</span>
       </div>
-      <div class="exb-qbody" id="exb-qbody">
-        <p class="exb-qnum">Question ${num}</p>
-        <p class="exb-qtext">${esc(q.enonce)}</p>
-        ${renderChoices(q)}
-        <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
-      </div>`;
+      ${renderQuestionBody(q, num)}`;
 
     root.querySelector("#exb-quit")?.addEventListener("click", () => {
       haptic("tap");
