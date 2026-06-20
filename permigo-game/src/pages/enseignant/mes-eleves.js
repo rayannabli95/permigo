@@ -157,8 +157,9 @@ const STYLE = `<style>
   .me-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; border-radius: var(--r); }
   /* Barre d'état à gauche — scan instantané, sans layout-shift : la bordure
      passe de 1px à 3px et le padding-left compense (16→14px). */
-  .me-row--pret { border-left: 3px solid var(--grd); padding-left: 14px; }
-  .me-row--relancer { border-left: 3px solid var(--amx); padding-left: 14px; }
+  .me-row--pret { border-left: 3px solid var(--state-pret); padding-left: 14px; }
+  .me-row--relancer { border-left: 3px solid var(--state-relancer); padding-left: 14px; }
+  .me-row--approche { border-left: 3px solid var(--state-approche); padding-left: 14px; }
 
   /* Avatar */
   .me-av {
@@ -213,6 +214,13 @@ const STYLE = `<style>
   .me-badge.pret {
     color: var(--grd);
     background: rgba(16,185,129,.12);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .me-badge.approche {
+    color: var(--state-approche);
+    background: color-mix(in srgb, var(--state-approche) 12%, transparent);
     display: inline-flex;
     align-items: center;
     gap: 3px;
@@ -836,19 +844,24 @@ function renderRow(eleve) {
         ? "is-relancer"
         : "";
   // Barre d'état à gauche de la carte : scan instantané (vert = prêt à présenter,
-  // ambre = à relancer). Réutilise les couleurs existantes, aucune nouvelle teinte.
+  // ambre = à relancer, violet = bientôt prêt / à intensifier). Tokens sémantiques.
   const rowState =
     eleve.readiness === "pret"
       ? " me-row--pret"
       : eleve.aRelancer
         ? " me-row--relancer"
-        : "";
+        : eleve.readiness === "en_approche"
+          ? " me-row--approche"
+          : "";
   const badges =
     eleve.readiness === "recu"
       ? `<span class="me-badge recu">${icon("check", { size: 11, strokeWidth: 2.6 })} Diplômé</span>`
       : [
           eleve.readiness === "pret"
             ? `<span class="me-badge pret">${icon("check", { size: 11, strokeWidth: 2.6 })} Prêt</span>`
+            : "",
+          eleve.readiness === "en_approche"
+            ? `<span class="me-badge approche">${icon("trending-up", { size: 11, strokeWidth: 2.6 })} Bientôt prêt</span>`
             : "",
           !epure && eleve.examStatut === "planifie"
             ? `<span class="me-badge planifie">${icon("calendar", { size: 11, strokeWidth: 2.4 })} ${esc(fmtExamDate(eleve.examDate))}</span>`

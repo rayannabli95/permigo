@@ -25,6 +25,11 @@
   --gr-txt:#147638; --am-txt:#935e06; --rd-txt:#9b2c2c;
   --bl:#0ea5e9; --blk:#0891b2; --blp:rgba(14,165,233,.09);  /* info / info dark */
   --pu:#8b5cf6; --puk:#7c3aed; --pul:#a855f7; --pup:rgba(139,92,246,.09); /* violet variants */
+  /* ─ Couleurs SÉMANTIQUES d'état (readiness élève côté moniteur) — alias des
+     teintes ci-dessus pour donner un NOM métier, sans inventer de hue. ─ */
+  --state-pret:var(--grd);      /* prêt à présenter à l'examen (vert) */
+  --state-relancer:var(--amx);  /* inactif / à relancer (ambre) */
+  --state-approche:var(--pu);   /* bientôt prêt / à intensifier (violet) */
 
   /* ─ Surfaces (light mode) ─ */
   --bg:#f4f5fb; --bg2:#eceef8; --bg3:#f0f2f8; --bg4:#f1f5f9; --bg5:#e4e8f4;
@@ -56,6 +61,15 @@
   --sw:248px; /* sidebar width */
   --th:52px;  /* topbar height */
   --bh:64px;  /* bottom nav height */
+
+  /* ─ Espacement — échelle canonique (audit 2026-06 : 0 token, tout en dur).
+     Toute NOUVELLE règle DOIT consommer ces tokens plutôt qu'une valeur px. ─ */
+  --sp-1:8px;
+  --sp-2:12px;
+  --sp-3:16px;
+  --sp-4:24px;
+  --sp-5:32px;
+  --sp-page:20px; /* marge latérale standard des pages */
 
   /* ─ Radius — échelle complète. Toute nouvelle règle DOIT consommer un token
      (audit 2026-06 : 10 valeurs hardcodées différentes diluaient la marque). ─ */
@@ -97,6 +111,24 @@
   --fd:'Nunito','Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   --fb:'Nunito','Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   --fn:'JetBrains Mono','IBM Plex Mono','SF Mono',Menlo,monospace;
+
+  /* ─ Échelle typographique — 6 paliers canoniques (audit 2026-06 : ~17 tailles
+     dont des fractionnels 12,5/13,5px). Nouvelles règles : viser ces paliers. ─ */
+  --fs-xs:10px;
+  --fs-sm:12px;
+  --fs-base:14px;
+  --fs-md:16px;
+  --fs-lg:20px;
+  --fs-xl:28px;
+
+  /* ─ Z-index — couches nommées (audit 2026-06 : valeurs de 1 à 99999 éparses).
+     Utiliser ces tokens au lieu de nombres magiques. ─ */
+  --z-base:1;
+  --z-sticky:10;
+  --z-drawer:100;
+  --z-modal:200;
+  --z-toast:9999;
+  --z-splash:10100;
 
   /* Scheme info pour les form controls natifs */
   color-scheme: light;
