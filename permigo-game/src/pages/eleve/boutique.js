@@ -35,6 +35,10 @@ const TAB_TYPES = {
 // Néon par rareté — couleurs explicites (indépendantes du thème)
 // tagBg/tagFg : le blanc 8.5px ne tenait pas le contraste sur les couleurs
 // pures (1.6:1 sur l'or) — fond assombri à teinte égale, l'or garde un texte sombre.
+// ⚠️ Volontairement DISTINCT de RARITY_META dans data/achievements.js : surfaces
+// différentes — ici, tags de rareté sur cartes boutique (fond sombre) = couleurs
+// néon + tri (`order`) ; là-bas, médailles de trophées = dégradés. Ne PAS
+// fusionner sans refonte visuelle assumée des deux écrans.
 const RARITY_META = {
   commun: {
     label: "Commun",

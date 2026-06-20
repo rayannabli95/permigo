@@ -163,6 +163,9 @@ export const CATALOG = [
   },
 ];
 
+// Médailles de trophées (dégradés). Volontairement DISTINCT de la RARITY_META
+// de boutique.js (tags néon + tri) — séparation visuelle assumée, pas un doublon
+// à fusionner.
 export const RARITY_META = {
   commun: {
     label: "Commun",
