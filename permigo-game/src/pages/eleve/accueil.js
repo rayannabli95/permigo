@@ -18,6 +18,7 @@ import {
   maybeSendStreakRiskNotif,
 } from "@/services/web-push.js";
 import { icon } from "@/utils/icons.js";
+import { ill, illMask } from "@/utils/illustrations.js";
 import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
 import { getMyChests, getEquippedAsset } from "@/utils/game-state.js";
@@ -1582,7 +1583,7 @@ async function _loadAndInjectLeagues(root) {
                 data-ligue="ecole"
                 ${ecolePos != null && ecolePos <= 3 ? `data-pos="${ecolePos}"` : ""}
                 aria-label="Classement conduite — ${esc(ecoleRanked ? `${ecoleRankLabel} sur ${pos.total_eleves}` : "pas encore classé")}">
-          <span class="acc-lg-tag">${icon("trophy", { size: 12, strokeWidth: 2.2 })} Conduite</span>
+          <span class="acc-lg-tag">${ill("badge", { size: 16 })} Conduite</span>
           ${
             ecoleRanked
               ? `<span class="acc-lg-rank">${esc(ecoleRankLabel)}</span>`
@@ -1597,7 +1598,7 @@ async function _loadAndInjectLeagues(root) {
                 data-ligue="revision"
                 ${revPos != null && revPos <= 3 ? `data-pos="${revPos}"` : ""}
                 aria-label="Classement révision — ${esc(revClassed ? revRankLabel : "pas encore classé")}">
-          <span class="acc-lg-tag">${icon("zap", { size: 12, strokeWidth: 2.2 })} Révision</span>
+          <span class="acc-lg-tag">${illMask("cahier", { size: 16 })} Révision</span>
           ${
             revClassed
               ? `<span class="acc-lg-rank">${esc(revRankLabel)}</span>`
@@ -1710,7 +1711,7 @@ async function _loadAndInjectFlashQuiz(root, me) {
       "afterend",
       `
       <div class="acc2-flashq" id="acc-flashq" role="button" tabindex="0" aria-label="Quiz éclair de ton moniteur, réponds maintenant">
-        <span class="acc2-fq-ico" aria-hidden="true">${icon("zap", { size: 18 })}</span>
+        <span class="acc2-fq-ico" aria-hidden="true">${ill("eclair", { size: 24 })}</span>
         <div class="acc2-fq-text">
           <div class="acc2-fq-title">Quiz éclair de ton moniteur</div>
           <div class="acc2-fq-sub">3 questions · réponds maintenant</div>

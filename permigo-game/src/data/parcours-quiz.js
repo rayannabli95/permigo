@@ -84,6 +84,13 @@ export const PARCOURS = [
       "Arrêt ou stationnement ? Créneau, demi-tour, places interdites et marquages au sol.",
     difficulte: 3,
   },
+  {
+    id: 12,
+    nom: "Panneaux & signalisation",
+    contexte:
+      "Reconnais les panneaux qui tombent à l'examen : stop, priorités, interdictions et dangers. Une image, une bonne réponse.",
+    difficulte: 2,
+  },
 ];
 
 export const QUESTIONS = [
@@ -2605,6 +2612,227 @@ export const QUESTIONS = [
     explication:
       "En dernier recours, tu t'immobilises à la fin de la bretelle (jamais sur la voie principale) et tu attends un créneau sûr. Forcer n'est pas une option.",
     tags: ["manoeuvre", "priorite"],
+  },
+
+  // ── Parcours 12 : Panneaux & signalisation ───────────────────
+  // Questions à image — panneaux officiels (Wikimedia, domaine public),
+  // servis depuis /public/signs/*.svg.
+  {
+    id: "p12q1",
+    parcours_id: 12,
+    image: "/signs/stop.svg",
+    enonce: "Devant ce panneau, que dois-tu faire ?",
+    options: [
+      "Ralentir et passer si la voie est libre",
+      "Marquer un arrêt complet, puis céder le passage",
+      "Klaxonner pour signaler ta présence",
+    ],
+    correct: 1,
+    explication:
+      "STOP = arrêt absolu à la ligne, même si tout est dégagé. Tu repars une fois la priorité cédée.",
+    tags: ["panneau", "signalisation", "priorite"],
+  },
+  {
+    id: "p12q2",
+    parcours_id: 12,
+    image: "/signs/sens-interdit.svg",
+    enonce: "Ce panneau signifie…",
+    options: [
+      "Stationnement interdit",
+      "Sens interdit à tous les véhicules",
+      "Voie réservée aux secours",
+    ],
+    correct: 1,
+    explication:
+      "Disque rouge à barre blanche : tu ne peux pas t'engager, c'est un sens interdit.",
+    tags: ["panneau", "signalisation", "interdiction"],
+  },
+  {
+    id: "p12q3",
+    parcours_id: 12,
+    image: "/signs/cedez-le-passage.svg",
+    enonce: "À l'approche de ce panneau, tu dois…",
+    options: [
+      "T'arrêter systématiquement à la ligne",
+      "Céder le passage, sans forcément t'arrêter",
+      "Passer en priorité",
+    ],
+    correct: 1,
+    explication:
+      "« Cédez le passage » : tu laisses passer les autres, mais sans obligation d'arrêt si la voie est libre.",
+    tags: ["panneau", "signalisation", "priorite"],
+  },
+  {
+    id: "p12q4",
+    parcours_id: 12,
+    image: "/signs/priorite-a-droite.svg",
+    enonce: "Ce panneau t'annonce…",
+    options: [
+      "Une intersection où tu es prioritaire",
+      "Une intersection où tu cèdes le passage à droite",
+      "Un passage pour piétons",
+    ],
+    correct: 1,
+    explication:
+      "Croix de Saint-André : à la prochaine intersection, priorité à droite — tu cèdes à celui qui vient de ta droite.",
+    tags: ["panneau", "signalisation", "priorite"],
+  },
+  {
+    id: "p12q5",
+    parcours_id: 12,
+    image: "/signs/route-prioritaire.svg",
+    enonce: "Ce panneau indique que…",
+    options: [
+      "La route est barrée plus loin",
+      "Tu roules sur une route prioritaire",
+      "C'est un sens unique",
+    ],
+    correct: 1,
+    explication:
+      "Losange jaune : tu es sur une route prioritaire, tu gardes la priorité aux intersections.",
+    tags: ["panneau", "signalisation", "priorite"],
+  },
+  {
+    id: "p12q6",
+    parcours_id: 12,
+    image: "/signs/fin-route-prioritaire.svg",
+    enonce: "Que signifie ce panneau ?",
+    options: [
+      "Début de route prioritaire",
+      "Fin de route prioritaire",
+      "Fin de toutes les interdictions",
+    ],
+    correct: 1,
+    explication:
+      "Losange jaune barré : ta priorité de route prioritaire prend fin, redeviens vigilant aux intersections.",
+    tags: ["panneau", "signalisation", "priorite"],
+  },
+  {
+    id: "p12q7",
+    parcours_id: 12,
+    image: "/signs/carrefour-giratoire.svg",
+    enonce: "Ce panneau annonce…",
+    options: [
+      "Un carrefour à sens giratoire",
+      "Un demi-tour obligatoire",
+      "Un virage dangereux",
+    ],
+    correct: 0,
+    explication:
+      "Triangle avec trois flèches en rond : un giratoire approche. Priorité à ceux qui sont déjà engagés.",
+    tags: ["panneau", "signalisation", "rond_point"],
+  },
+  {
+    id: "p12q8",
+    parcours_id: 12,
+    image: "/signs/circulation-interdite.svg",
+    enonce: "Ce panneau signifie…",
+    options: [
+      "Sens interdit uniquement",
+      "Circulation interdite à tout véhicule dans les deux sens",
+      "Stationnement interdit",
+    ],
+    correct: 1,
+    explication:
+      "Disque entièrement rouge : la circulation est interdite à tous les véhicules, dans les deux sens.",
+    tags: ["panneau", "signalisation", "interdiction"],
+  },
+  {
+    id: "p12q9",
+    parcours_id: 12,
+    image: "/signs/depassement-interdit.svg",
+    enonce: "Ce panneau t'interdit…",
+    options: ["De stationner", "De dépasser", "De klaxonner"],
+    correct: 1,
+    explication:
+      "Deux voitures dont une rouge : interdiction de dépasser les véhicules à moteur.",
+    tags: ["panneau", "signalisation", "interdiction"],
+  },
+  {
+    id: "p12q10",
+    parcours_id: 12,
+    image: "/signs/stationnement-interdit.svg",
+    enonce: "Ce panneau interdit…",
+    options: [
+      "L'arrêt et le stationnement",
+      "Le stationnement (mais l'arrêt reste permis)",
+      "La circulation",
+    ],
+    correct: 1,
+    explication:
+      "Disque bleu, une barre rouge : stationnement interdit. Tu peux t'arrêter brièvement, pas stationner.",
+    tags: ["panneau", "signalisation", "stationnement"],
+  },
+  {
+    id: "p12q11",
+    parcours_id: 12,
+    image: "/signs/arret-stationnement-interdit.svg",
+    enonce: "Ce panneau interdit…",
+    options: [
+      "Seulement le stationnement",
+      "L'arrêt ET le stationnement",
+      "Seulement la circulation",
+    ],
+    correct: 1,
+    explication:
+      "Disque bleu, croix rouge : ni arrêt ni stationnement — tu ne dois pas t'immobiliser ici.",
+    tags: ["panneau", "signalisation", "stationnement"],
+  },
+  {
+    id: "p12q12",
+    parcours_id: 12,
+    image: "/signs/sens-unique.svg",
+    enonce: "Ce panneau indique…",
+    options: [
+      "Une direction obligatoire tout droit",
+      "Une route à sens unique",
+      "Une voie sans issue",
+    ],
+    correct: 1,
+    explication:
+      "Carré bleu, flèche blanche : circulation à sens unique dans le sens de la flèche.",
+    tags: ["panneau", "signalisation", "indication"],
+  },
+  {
+    id: "p12q13",
+    parcours_id: 12,
+    image: "/signs/danger-passage-pietons.svg",
+    enonce: "Ce panneau annonce…",
+    options: [
+      "Une école",
+      "Un passage pour piétons",
+      "Une zone interdite aux voitures",
+    ],
+    correct: 1,
+    explication:
+      "Triangle de danger avec un piéton : un passage piétons approche. Ralentis et reste prêt à t'arrêter.",
+    tags: ["panneau", "signalisation", "danger"],
+  },
+  {
+    id: "p12q14",
+    parcours_id: 12,
+    image: "/signs/danger-feux-tricolores.svg",
+    enonce: "Ce panneau te prévient…",
+    options: ["D'un radar", "De feux tricolores", "D'un péage"],
+    correct: 1,
+    explication:
+      "Triangle avec un feu : des feux tricolores sont annoncés, prépare-toi à devoir t'arrêter.",
+    tags: ["panneau", "signalisation", "danger"],
+  },
+  {
+    id: "p12q15",
+    parcours_id: 12,
+    image: "/signs/fin-toutes-interdictions.svg",
+    enonce: "Ce panneau signifie…",
+    options: [
+      "Entrée d'autoroute",
+      "Fin de la route prioritaire",
+      "Fin de toutes les interdictions précédemment signalées",
+    ],
+    correct: 2,
+    explication:
+      "Disque blanc barré en diagonale : toutes les interdictions en vigueur (vitesse, dépassement…) prennent fin.",
+    tags: ["panneau", "signalisation", "interdiction"],
   },
 ];
 

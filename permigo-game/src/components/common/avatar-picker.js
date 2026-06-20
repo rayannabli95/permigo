@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// Avatar Picker — bottom sheet pour choisir parmi 6 avatars par défaut
+// Avatar Picker — bottom sheet pour choisir parmi 9 avatars par défaut
 //
 // Usage :
 //   import { openAvatarPicker } from '@/components/common/avatar-picker.js';
@@ -8,13 +8,13 @@
 //
 // Pattern : promise-based, résout avec l'URL choisie ou null si annulé.
 // ═══════════════════════════════════════════════════════════════
-import { ASSETS } from '@/utils/assets.js';
-import { icon } from '@/utils/icons.js';
-import { haptic } from '@/utils/haptic.js';
-import { esc } from '@/utils/escape.js';
+import { ASSETS } from "@/utils/assets.js";
+import { icon } from "@/utils/icons.js";
+import { haptic } from "@/utils/haptic.js";
+import { esc } from "@/utils/escape.js";
 
 /** Sentinelle exportée — utilisée par les consommateurs pour détecter le choix "upload custom" */
-export const AVATAR_PICKER_UPLOAD = '__permigo_upload_custom__';
+export const AVATAR_PICKER_UPLOAD = "__permigo_upload_custom__";
 
 const STYLE = `<style>
 .avpk-bg {
@@ -134,87 +134,100 @@ const STYLE = `<style>
  * @returns {Promise<string|null>} URL choisie ou null si annulé
  */
 export function openAvatarPicker(opts = {}) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     // Dédup style — injecté une seule fois par session
-    if (!document.getElementById('avpk-style')) {
-      const styleNode = document.createElement('div');
+    if (!document.getElementById("avpk-style")) {
+      const styleNode = document.createElement("div");
       styleNode.innerHTML = STYLE;
-      const sEl = styleNode.querySelector('style');
-      if (sEl) { sEl.id = 'avpk-style'; document.head.appendChild(sEl); }
+      const sEl = styleNode.querySelector("style");
+      if (sEl) {
+        sEl.id = "avpk-style";
+        document.head.appendChild(sEl);
+      }
     }
 
-    const container = document.createElement('div');
+    const container = document.createElement("div");
     container.innerHTML = `
       <div class="avpk-bg"></div>
       <div class="avpk-sheet" role="dialog" aria-label="Choisir un avatar">
         <div class="avpk-handle"></div>
         <div class="avpk-hd">
           <div class="avpk-title">Choisis ton avatar</div>
-          <div class="avpk-sub">6 visuels au choix — change quand tu veux</div>
+          <div class="avpk-sub">9 visuels au choix — change quand tu veux</div>
         </div>
         <div class="avpk-grid">
-          ${ASSETS.avatar.map((url, i) => `
-            <button class="avpk-opt ${url === opts.currentUrl ? 'selected' : ''}"
+          ${ASSETS.avatar
+            .map(
+              (url, i) => `
+            <button class="avpk-opt ${url === opts.currentUrl ? "selected" : ""}"
                     data-url="${esc(url)}"
                     aria-label="Avatar ${i + 1}">
               <img src="${esc(url)}" alt="" loading="lazy" />
             </button>
-          `).join('')}
+          `,
+            )
+            .join("")}
         </div>
         <div class="avpk-actions" style="flex-direction:column;gap:8px">
           <button class="avpk-btn primary" data-action="confirm" disabled>Choisir cet avatar</button>
           <div style="display:flex;gap:8px">
-            <button class="avpk-btn" data-action="upload" style="flex:1">${icon('image',{size:16})} Ma photo</button>
+            <button class="avpk-btn" data-action="upload" style="flex:1">${icon("image", { size: 16 })} Ma photo</button>
             <button class="avpk-btn" data-action="cancel" style="flex:1">Annuler</button>
           </div>
         </div>
       </div>
     `;
     document.body.appendChild(container);
-    const bg = container.querySelector('.avpk-bg');
-    const sheet = container.querySelector('.avpk-sheet');
+    const bg = container.querySelector(".avpk-bg");
+    const sheet = container.querySelector(".avpk-sheet");
     const confirmBtn = container.querySelector('[data-action="confirm"]');
 
     // Animation entrée
     requestAnimationFrame(() => {
-      bg.classList.add('show');
-      sheet.classList.add('show');
+      bg.classList.add("show");
+      sheet.classList.add("show");
     });
 
     let selected = opts.currentUrl || null;
     if (selected) confirmBtn.disabled = false;
 
     // Sélection visuelle
-    container.querySelectorAll('.avpk-opt').forEach(btn => {
-      btn.addEventListener('click', () => {
-        haptic('select');
-        container.querySelectorAll('.avpk-opt').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
+    container.querySelectorAll(".avpk-opt").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        haptic("select");
+        container
+          .querySelectorAll(".avpk-opt")
+          .forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
         selected = btn.dataset.url;
         confirmBtn.disabled = false;
       });
     });
 
     const close = (val) => {
-      bg.classList.remove('show');
-      sheet.classList.remove('show');
+      bg.classList.remove("show");
+      sheet.classList.remove("show");
       setTimeout(() => {
         container.remove();
         resolve(val);
       }, 280);
     };
 
-    bg.addEventListener('click', () => close(null));
-    container.querySelector('[data-action="cancel"]').addEventListener('click', () => {
-      haptic('tap');
-      close(null);
-    });
-    container.querySelector('[data-action="upload"]').addEventListener('click', () => {
-      haptic('select');
-      close(AVATAR_PICKER_UPLOAD); // sentinelle interceptée par profile-card
-    });
-    confirmBtn.addEventListener('click', () => {
-      haptic('success');
+    bg.addEventListener("click", () => close(null));
+    container
+      .querySelector('[data-action="cancel"]')
+      .addEventListener("click", () => {
+        haptic("tap");
+        close(null);
+      });
+    container
+      .querySelector('[data-action="upload"]')
+      .addEventListener("click", () => {
+        haptic("select");
+        close(AVATAR_PICKER_UPLOAD); // sentinelle interceptée par profile-card
+      });
+    confirmBtn.addEventListener("click", () => {
+      haptic("success");
       close(selected);
     });
   });
