@@ -155,6 +155,10 @@ const STYLE = `<style>
   @media (prefers-reduced-motion: reduce) { .me-row:active { transform: none; } }
   .me-row:focus { outline: none; }
   .me-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; border-radius: var(--r); }
+  /* Barre d'état à gauche — scan instantané, sans layout-shift : la bordure
+     passe de 1px à 3px et le padding-left compense (16→14px). */
+  .me-row--pret { border-left: 3px solid var(--grd); padding-left: 14px; }
+  .me-row--relancer { border-left: 3px solid var(--amx); padding-left: 14px; }
 
   /* Avatar */
   .me-av {
@@ -831,6 +835,14 @@ function renderRow(eleve) {
       : eleve.aRelancer
         ? "is-relancer"
         : "";
+  // Barre d'état à gauche de la carte : scan instantané (vert = prêt à présenter,
+  // ambre = à relancer). Réutilise les couleurs existantes, aucune nouvelle teinte.
+  const rowState =
+    eleve.readiness === "pret"
+      ? " me-row--pret"
+      : eleve.aRelancer
+        ? " me-row--relancer"
+        : "";
   const badges =
     eleve.readiness === "recu"
       ? `<span class="me-badge recu">${icon("check", { size: 11, strokeWidth: 2.6 })} Diplômé</span>`
@@ -849,7 +861,7 @@ function renderRow(eleve) {
           .join(" ");
 
   return `
-    <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="button" tabindex="0"
+    <div class="me-row${rowState}" data-eleve-id="${esc(eleve.id)}" role="button" tabindex="0"
          aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} compétences acquises${eleve.readiness === "pret" ? ", prêt pour l'examen" : eleve.aRelancer ? ", à relancer" : ""}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 44)}</div>
 
