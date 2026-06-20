@@ -161,6 +161,37 @@ function renderChoices(q) {
         </div>`;
 }
 
+// Bloc de feedback partagé par les 3 modes (parcours / officiel / révision).
+// Variantes : bannière « faute éliminatoire » (parcours), préfixe « Temps
+// écoulé » (officiel en timeout), libellé du dernier bouton.
+function renderFeedbackBlock({
+  isCorrect,
+  correct,
+  explication,
+  isLast,
+  lastLabel,
+  faute = false,
+  timedOut = false,
+}) {
+  const banner =
+    !isCorrect && faute
+      ? `<div class="exb-faute-banner">⚠️ À l'examen, ce serait éliminatoire — autant le savoir ici</div>`
+      : "";
+  const verdict = isCorrect
+    ? "✓ Bonne réponse"
+    : (timedOut ? "⏱ Temps écoulé — " : "") +
+      "La bonne réponse était " +
+      esc(String.fromCharCode(65 + correct));
+  return `
+    ${banner}
+    <div class="exb-feedback-verdict ${isCorrect ? "exb-feedback-verdict--ok" : "exb-feedback-verdict--ko"}">
+      ${verdict}
+    </div>
+    <p class="exb-feedback-explication">${esc(explication)}</p>
+    <button class="exb-next-btn" id="exb-next">${isLast ? esc(lastLabel) : "Question suivante →"}</button>
+  `;
+}
+
 function renderSelection() {
   const stars = (n) => "★".repeat(n) + "☆".repeat(5 - n);
   const cards = PARCOURS.map(
@@ -384,16 +415,14 @@ function showFeedback(
 
   const feedbackEl = root.querySelector("#exb-feedback");
   feedbackEl.hidden = false;
-  feedbackEl.innerHTML = `
-    ${!isCorrect && isFaute ? '<div class="exb-faute-banner">⚠️ À l\'examen, ce serait éliminatoire — autant le savoir ici</div>' : ""}
-    <div class="exb-feedback-verdict ${isCorrect ? "exb-feedback-verdict--ok" : "exb-feedback-verdict--ko"}">
-      ${isCorrect ? "✓ Bonne réponse" : "La bonne réponse était " + esc(String.fromCharCode(65 + q.correct))}
-    </div>
-    <p class="exb-feedback-explication">${esc(q.explication)}</p>
-    <button class="exb-next-btn" id="exb-next">
-      ${currentIdx + 1 < questions.length ? "Question suivante →" : "Voir les résultats →"}
-    </button>
-  `;
+  feedbackEl.innerHTML = renderFeedbackBlock({
+    isCorrect,
+    correct: q.correct,
+    explication: q.explication,
+    isLast: currentIdx + 1 >= questions.length,
+    lastLabel: "Voir les résultats →",
+    faute: isFaute,
+  });
 
   root.querySelector("#exb-next")?.addEventListener("click", () => {
     playPageturn();
@@ -717,20 +746,14 @@ function startExamenOfficiel(root) {
       });
       const fb = root.querySelector("#exb-feedback");
       fb.hidden = false;
-      fb.innerHTML = `
-        <div class="exb-feedback-verdict ${isCorrect ? "exb-feedback-verdict--ok" : "exb-feedback-verdict--ko"}">
-          ${
-            isCorrect
-              ? "✓ Bonne réponse"
-              : (chosen === null ? "⏱ Temps écoulé — " : "") +
-                "La bonne réponse était " +
-                esc(String.fromCharCode(65 + q.correct))
-          }
-        </div>
-        <p class="exb-feedback-explication">${esc(q.explication)}</p>
-        <button class="exb-next-btn" id="exb-next">
-          ${idx + 1 < questions.length ? "Question suivante →" : "Voir le résultat →"}
-        </button>`;
+      fb.innerHTML = renderFeedbackBlock({
+        isCorrect,
+        correct: q.correct,
+        explication: q.explication,
+        isLast: idx + 1 >= questions.length,
+        lastLabel: "Voir le résultat →",
+        timedOut: chosen === null,
+      });
       root.querySelector("#exb-next")?.addEventListener("click", () => {
         playPageturn();
         if (idx + 1 < questions.length) {
@@ -928,14 +951,13 @@ function runRevision(
         });
         const fb = root.querySelector("#exb-feedback");
         fb.hidden = false;
-        fb.innerHTML = `
-          <div class="exb-feedback-verdict ${isCorrect ? "exb-feedback-verdict--ok" : "exb-feedback-verdict--ko"}">
-            ${isCorrect ? "✓ Bonne réponse" : "La bonne réponse était " + esc(String.fromCharCode(65 + q.correct))}
-          </div>
-          <p class="exb-feedback-explication">${esc(q.explication)}</p>
-          <button class="exb-next-btn" id="exb-next">
-            ${idx + 1 < questions.length ? "Question suivante →" : "Voir le bilan →"}
-          </button>`;
+        fb.innerHTML = renderFeedbackBlock({
+          isCorrect,
+          correct: q.correct,
+          explication: q.explication,
+          isLast: idx + 1 >= questions.length,
+          lastLabel: "Voir le bilan →",
+        });
         root.querySelector("#exb-next")?.addEventListener("click", () => {
           playPageturn();
           if (idx + 1 < questions.length) {
