@@ -13,3 +13,10 @@ dist/
 /AUDIT_*.md
 /PROMPT_*.md
 /PROMPTS_*.md
+
+# Night-run test artifacts (never commit)
+.playwright-mcp/
+test-results/
+*.png
+!permigo-game/public/**/*.png
+!permigo-game/src/**/*.png

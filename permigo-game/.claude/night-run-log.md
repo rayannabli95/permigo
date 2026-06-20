@@ -1,41 +1,25 @@
-# 🌙 Night Run Log — 2026-06-15
+# 🌙 Night-run log — 2026-06-20
 
-## Scope imposé par Rayan
-« Trouve une méthode pour vraiment faire installer à l'écran d'accueil aux gens,
-utilise toutes les ressources nécessaires — c'est la clé du métier. »
+**Branch** `feat/nuit-polish-eleve` (off `feat/revision-quiz-shortcut`, 1 ahead of main).
+**Mission (Rayan, autonome):** polish utile + intuition (élève), vocab fixes, tuto copy, trophées thème auto, nom visible au lieu de usertag, refonte intuition accueil. Puis MÊME refonte enseignant (ton pro). Merge + push les deux sans demander.
 
-→ Night run mono-objectif : **maximiser la conversion A2HS (install écran d'accueil)**.
-Discipline NIGHT_RUN conservée (commits incrémentaux conventionnels, build, PR
-mergeable au réveil, PAS de merge auto, choix safe).
+## Wave 1 — DONE
+- Research scout: brief intuition accueil (Duolingo/NN-g patterns + microcopy FR). ✅
+- tuto-copy: réécrit intro/theory/parcours-tuto + onboarding + guided-tour (ultra-court, 1 slide filler retirée). ✅
+- trophées-auto: achievements.js renommé thème pièces auto (Premiers réglages→Route ouverte ; Freins testés ; Jante rétro). Keys/images/seuils inchangés. ✅
+- identity: ACCROCHE "Prêt à prendre la route ?" ; signup usertag→"Identifiant" + copy "ton prénom est ce que les autres voient" ; migration 20260620120000_leaderboard_nom_reel.sql (3 RPCs → "Prénom N.", À APPLIQUER MANUELLEMENT). ✅
 
-## État initial
-- Branche : main @ 56dca16 (PR #190 mergée)
-- Composants A2HS existants : install-nudge.js (bottom-sheet boot), push-prime.js
-  (standalone), add-to-home.js (signup), a2hs-steps.js (guide visuel), pwa.js
-  (détection). Coordination tuto via intro-overlays.js (PR #190).
+## Wave 2 — IN PROGRESS
+- homepage intuition (accueil.js + revision-cards.js) — gros bot, brief research embarqué
+- parcours clarté (parcours.js)
+- classement ligues clarté (classement.js)
 
-## Recherche (web.dev, MDN, retours terrain)
-1. Les prompts au **moment de valeur** (après une victoire) convertissent bien
-   mieux que les prompts froids au boot.
-2. iOS Safari : pas de beforeinstallprompt → A2HS manuel, et SEUL Safari le permet
-   (Chrome/Firefox/Edge iOS = impossible).
-3. **In-app browsers** (Instagram, Facebook, TikTok, WhatsApp webview…) : A2HS
-   IMPOSSIBLE → tunnel mort si on montre les étapes. Levier le plus négligé,
-   critique pour une acquisition par liens partagés (Le Bon Coin, DM, réseaux).
-4. Entrée d'install **permanente** (réglages) pour les motivés.
+## Lexique figé (cohérence inter-pages)
+- Hero: "Ta carte du permis" ; 0: "0 sur 31 — chaque compétence validée par ton moniteur la complète."
+- CTA 1er run: "Commence ta 1re révision" / récurrent "Continue à réviser" ; sous-texte "2 min suffisent."
+- Ligue Révision: "Classement révision" — "Plus tu fais de quiz, plus tu montes." — vide "Fais un quiz pour entrer au classement."
+- Ligue École: "Classement avec ton moniteur" — "Chaque compétence validée te fait grimper." — vide "Ta première validation te classe ici."
+- Jamais: REMC, consolidation, C1-C4.
 
-## Plan (par levier, 1 commit chacun)
-- [ ] Lever 1 — détection in-app / iOS non-Safari → écran « ouvre dans ton navigateur » + copier le lien (pwa.js + install-nudge.js). LE plus gros levier GTM.
-- [ ] Lever 2 — déclencheur « moment de valeur » (export + wiring succès séance moniteur).
-- [ ] Lever 3 — entrée permanente « Installer l'app » dans Réglages.
-- [ ] Lever 4 — copy bénéfice/aversion à la perte + social proof + cadence re-prompt.
-- [ ] QA — build + PR (pas de merge) + report.
-
-## Journal
-- 00:00 — log créé, contexte lu (pwa, install-nudge, push-prime, a2hs-steps, add-to-home), recherche faite. Démarrage Lever 1.
-- Lever 1 ✅ rescue contextes non-installables (aaedce2)
-- Lever 4 ✅ copy bénéfice/perte (d1c9eba)
-- Lever 2 ✅ value-moment + openInstallSheet, câblé succès séance moniteur (76eba03)
-- Lever 3 ✅ entrée permanente Réglages (64b049a)
-- Kaizen ✅ faux positifs in-app + desktop (83b0eee)
-- Clôture : FLOWS.md annoncé, report écrit, build OK partout. PR (pas de merge).
+## À FAIRE manuellement par Rayan
+- [ ] Appliquer migration `20260620120000_leaderboard_nom_reel.sql` (sinon classement montre encore le username).

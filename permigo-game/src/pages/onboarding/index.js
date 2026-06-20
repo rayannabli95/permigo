@@ -29,26 +29,26 @@ const SLIDES = [
   {
     ico: "car",
     badge: "PermiGo",
-    title: 'Bienvenue, <span class="accent">{prenom}</span> !',
-    body: "Ton permis, une victoire par jour. On avance ensemble : toi, ton moniteur, et un parcours clair.",
+    title: 'Salut, <span class="accent">{prenom}</span> !',
+    body: "Ton permis, étape par étape — avec ton moniteur.",
     cta: "Commencer",
   },
   {
     ico: "map",
-    title: "31 compétences, zéro brouillard",
-    body: "Le programme officiel du permis transformé en parcours. Tu avances compétence par compétence, et ton moniteur valide ce que tu maîtrises en séance.",
+    title: "Un parcours, pas un cours",
+    body: "Tu avances compétence par compétence. Ton moniteur valide ce que tu maîtrises.",
     cta: "Continuer",
   },
   {
     ico: "zap",
-    title: "Ancre ce que tu apprends",
-    body: "Après chaque compétence, un quiz éclair de 30 secondes. Une question ratée ? On te la represente quelques jours plus tard, pile au bon moment. C'est la mémoire qui dure.",
+    title: "Révise en 2 minutes",
+    body: "Un quiz rapide après chaque compétence. Raté ? On te le repose au bon moment.",
     cta: "Continuer",
   },
   {
     ico: "flame",
-    title: "Reviens chaque jour",
-    body: "Chaque jour de pratique fait monter ton streak, débloque des trophées et te place dans le classement de ton auto-école. Du jeu, pour de vrais résultats.",
+    title: "Reviens — ça paie",
+    body: "Chaque jour fait monter ton streak et tes trophées. En jeu ET en vrai.",
     cta: "Continuer",
   },
   // Écrans suivants (avatar / notifs / A2HS) gérés à part.
@@ -112,8 +112,8 @@ export async function mount(root) {
           ).join("")}
           <section class="ob-slide ob-slide-avatar" data-i="${AVATAR_I}">
             <div class="ob-halo" aria-hidden="true"><div class="ob-emoji">${icon("palette", { size: 34 })}</div></div>
-            <h1 class="ob-title">Choisis ta tête</h1>
-            <p class="ob-body-txt">Tu pourras en changer quand tu veux depuis ton profil.</p>
+            <h1 class="ob-title">C'est toi</h1>
+            <p class="ob-body-txt">Choisis ton avatar — tu peux en changer dans ton profil.</p>
             <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="Choix de l'avatar">
               ${(ASSETS.avatar || [])
                 .map(
@@ -131,17 +131,17 @@ export async function mount(root) {
               ? `
           <section class="ob-slide ob-slide-notif" data-i="${NOTIF_I}">
             <div class="ob-halo ob-halo-bell" aria-hidden="true"><div class="ob-emoji ob-bell">${icon("bell", { size: 40 })}</div></div>
-            <h1 class="ob-title">Ton rappel quotidien</h1>
-            <p class="ob-body-txt">Chaque soir, 3 questions, 2 minutes. C'est comme ça qu'on garde une longueur d'avance sur l'examen.</p>
+            <h1 class="ob-title">3 questions ce soir</h1>
+            <p class="ob-body-txt">Un rappel par jour, 2 minutes. C'est ça qui fait la différence.</p>
             <div class="ob-notif-preview" aria-hidden="true">
               <img class="ob-notif-ico" src="/skins/avatars/permigo-badge-icon.png" alt="" />
               <div class="ob-notif-txt">
                 <div class="ob-notif-app">PermiGo <span>maintenant</span></div>
-                <div class="ob-notif-title">Ta question du jour t'attend</div>
-                <div class="ob-notif-body">3 questions · 2 minutes — garde ton avance.</div>
+                <div class="ob-notif-title">Tes 3 questions t'attendent</div>
+                <div class="ob-notif-body">2 minutes — garde ton avance.</div>
               </div>
             </div>
-            <p class="ob-notif-note" id="ob-notif-note">1 seul rappel par jour, jamais plus. Désactivable quand tu veux.</p>
+            <p class="ob-notif-note" id="ob-notif-note">1 rappel/jour max. Désactivable à tout moment.</p>
           </section>`
               : ""
           }
@@ -150,8 +150,8 @@ export async function mount(root) {
               ? `
           <section class="ob-slide ob-slide-a2hs" data-i="${A2HS_I}">
             <img class="ob-a2hs-badge" src="/skins/avatars/permigo-badge-icon.png" alt="" />
-            <h1 class="ob-title">Mets PermiGo sur ton écran d'accueil</h1>
-            <p class="ob-body-txt">2 gestes, 10 secondes — c'est ce qui permet de recevoir tes rappels 🔔</p>
+            <h1 class="ob-title">Ajoute l'appli</h1>
+            <p class="ob-body-txt">2 gestes, 10 secondes — tes rappels arrivent ici.</p>
             <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
             <button class="ob-plat-switch" id="ob-plat-switch" type="button"></button>
           </section>`
@@ -196,9 +196,9 @@ export async function mount(root) {
       s.setAttribute("aria-hidden", i === idx ? "false" : "true");
     });
     if (isNotif() && !notifDone) {
-      ctaBtn.innerHTML = "Activer mes rappels 🔔";
+      ctaBtn.innerHTML = "Activer les rappels";
     } else if (isLast()) {
-      ctaBtn.innerHTML = "Voir mon parcours";
+      ctaBtn.innerHTML = "C'est parti";
     } else if (isAvatar() || isNotif()) {
       ctaBtn.innerHTML = 'Continuer <span aria-hidden="true">→</span>';
     } else {
@@ -236,7 +236,7 @@ export async function mount(root) {
       if (granted) {
         haptic?.("success");
         root.querySelector(".ob-slide-notif")?.classList.add("granted");
-        if (note) note.textContent = "Rappels activés ✓ À ce soir !";
+        if (note) note.textContent = "Rappels activés — à ce soir !";
         // Petite pause pour laisser la célébration se voir, puis on avance.
         setTimeout(() => {
           ctaBtn.disabled = false;
@@ -246,7 +246,7 @@ export async function mount(root) {
       }
       if (note && Notification.permission === "denied") {
         note.textContent =
-          "Notifications bloquées — tu pourras les autoriser dans les réglages du téléphone.";
+          "Bloquées — active-les dans les réglages si tu changes d'avis.";
       }
       ctaBtn.disabled = false;
       update();
@@ -394,7 +394,7 @@ export async function mount(root) {
       avatar_chosen: !!avatar,
     });
     ctaBtn.disabled = true;
-    ctaBtn.innerHTML = "Lancement…";
+    ctaBtn.innerHTML = "C'est parti…";
     try {
       const now = new Date().toISOString();
       const patch = { first_value_action_at: now };
@@ -413,7 +413,7 @@ export async function mount(root) {
     unlockChest("welcome", {
       xp: 50,
       gemmes: 25,
-      title: "Bienvenu·e dans PermiGo !",
+      title: "Bienvenue dans PermiGo !",
     }).catch(() => {});
     // Reboot complet → monte le chrome + flow normal, atterrit sur l'accueil
     // (le teaser "coffre à ouvrir" s'affiche immédiatement).

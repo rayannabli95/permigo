@@ -81,7 +81,7 @@ export function startTour(steps, opts = {}) {
   ov.innerHTML = `${STYLE}
     <div class="gt-catch"></div>
     <div class="gt-spot" hidden></div>
-    <div class="gt-bubble" role="dialog" aria-modal="true" aria-live="polite" aria-label="Guide de démarrage">
+    <div class="gt-bubble" role="dialog" aria-modal="true" aria-live="polite" aria-label="Guide rapide">
       <div class="gt-step"></div>
       <h3 class="gt-title"></h3>
       <p class="gt-text"></p>
@@ -146,7 +146,8 @@ export function startTour(steps, opts = {}) {
       const below = r.bottom + 14;
       const safeBottom = (() => {
         const probe = document.createElement("div");
-        probe.style.cssText = "position:fixed;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden";
+        probe.style.cssText =
+          "position:fixed;bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);visibility:hidden";
         document.body.appendChild(probe);
         const v = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
         probe.remove();

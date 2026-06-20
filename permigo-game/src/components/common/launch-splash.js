@@ -7,16 +7,12 @@
 // Overlay fixe au-dessus de #app, affiché 1×/session (= un lancement).
 // ═══════════════════════════════════════════════════════════════
 import { icon } from "@/utils/icons.js";
-import { playLaunchSound } from "@/utils/sound.js";
 
 const SESSION_KEY = "permigo-launch-splash";
-// On ne joue QUE le « démarrage » (le vroom de launch.mp3), pas la partie
-// musicale qui suit (jugée gênante, élève comme enseignant). Le son est coupé
-// après START_SOUND_MS, indépendamment de la durée visuelle du splash.
-// Ajuste cette valeur si le démarrage est coupé trop tôt / trop tard.
-const START_SOUND_MS = 1400;
+// Écran d'accueil 100% silencieux : le son de lancement (launch.mp3, jugé
+// horrible) a été retiré. On garde uniquement l'animation visuelle.
 const LETTERS = ["P", "E", "R", "M", "I", "G", "O"];
-const ACCROCHE = "Prêt à reprendre ta route ?";
+const ACCROCHE = "Prêt à prendre la route ?";
 
 const MSGS = [
   "Démarrage du moteur…",
@@ -171,10 +167,6 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
     launched = true;
     host.classList.add("go");
 
-    // Démarrage seulement (vroom) — déclenché par le geste user → autoplay OK.
-    // Coupé après START_SOUND_MS pour ne PAS jouer la musique qui suit.
-    const stopMusic = playLaunchSound(START_SOUND_MS);
-
     // Phrases qui défilent dans la pill « text-flip »
     let i = 0;
     const setMsg = (n) => {
@@ -187,10 +179,9 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
       setMsg(i);
     }, 1300);
 
-    // Fin : coupe le son, sortie zoom-fade, retire
+    // Fin : sortie zoom-fade, retire
     setTimeout(() => {
       clearInterval(tid);
-      stopMusic?.();
       host.classList.add("out");
       setTimeout(() => host.remove(), 480);
     }, duration);

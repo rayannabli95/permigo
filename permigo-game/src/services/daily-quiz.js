@@ -17,6 +17,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { REMC } from "@/data/remc.js";
+import { THEORY_QUIZ_PASS_PCT } from "@/utils/theory-league.js";
 
 const LS_DONE = "pg-daily-quiz-done"; // valeur = YYYY-MM-DD (local)
 
@@ -192,4 +193,42 @@ export async function pickRevisionQuiz(userId) {
     competenceId: fromPool[Math.floor(Math.random() * fromPool.length)],
     mode: "decouverte",
   };
+}
+
+/**
+ * Variante « cible mes lacunes » : ne pioche QUE des compétences pas encore
+ * réussies (aucun quiz à ≥ THEORY_QUIZ_PASS_PCT %) — donc « pas faites OU pas
+ * réussies ». Parcourt dans l'ordre du parcours (progressif), hors « recent ».
+ * @param {string} userId
+ * @returns {Promise<{competenceId: string, mode: "decouverte"} | null>}
+ *          null = tout est déjà réussi (l'appelant bascule sur le mode normal).
+ */
+export async function pickUnseenRevisionQuiz(userId) {
+  const recent = new Set(readRecent());
+
+  // Compétences déjà réussies (au moins un quiz à ≥ seuil de réussite)
+  let passed = new Set();
+  try {
+    const { data, error } = await sb
+      .from("quiz_attempts")
+      .select("competence_id, score")
+      .eq("user_id", userId)
+      .gte("score", THEORY_QUIZ_PASS_PCT)
+      .not("competence_id", "is", null)
+      .limit(500);
+    if (error) throw error;
+    for (const a of data || []) {
+      if (a.competence_id) passed.add(a.competence_id);
+    }
+  } catch {
+    passed = new Set(); // réseau KO → on considère que rien n'est réussi
+  }
+
+  const notPassed = ALL_COMPETENCES.filter((c) => !passed.has(c));
+  if (!notPassed.length) return null; // tout réussi → fallback côté appelant
+
+  // Priorité aux non-réussies hors « recent » ; ordre parcours = progressif.
+  const pool = notPassed.filter((c) => !recent.has(c));
+  const fromPool = pool.length ? pool : notPassed;
+  return { competenceId: fromPool[0], mode: "decouverte" };
 }

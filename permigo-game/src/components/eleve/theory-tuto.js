@@ -13,27 +13,27 @@ const SLIDES = [
   {
     mascot: "/skins/mascot-hello.png",
     extra: "/skins/avatars/permigo-badge-icon.png",
-    title: "La ligue Révision",
-    text: "Ici, tu progresses seul, chez toi, à ton rythme — sans attendre ta prochaine leçon.",
+    title: "Révise à ton rythme",
+    text: "Sans leçon, sans attente. Quelques questions par jour suffisent.",
   },
   {
     mascot: "/skins/mascot-point.png",
     extra: "/skins/drapeau.png",
-    title: "Comment monter ?",
-    text: `Simple : 1 quiz réussi = ${THEORY_PTS.quiz} point. 1 examen blanc réussi = ${THEORY_PTS.exam} points. Plus tu révises, plus tu montes en ligue.`,
+    title: "Gagne des points",
+    text: `Quiz réussi = ${THEORY_PTS.quiz} pt. Examen blanc = ${THEORY_PTS.exam} pts. Plus tu révises, plus tu montes.`,
   },
   {
     mascot: "/skins/mascot-celebrate.png",
     extra: "/skins/couronne.png",
-    title: "Vise le haut",
-    text: `Atteins « ${TOP_LEAGUE.name} » : tu sauras que tu es prêt pour l'examen — et ton moniteur le verra aussi.`,
+    title: "Prouve que tu es prêt",
+    text: `Atteins « ${TOP_LEAGUE.name} » — ton moniteur le voit en temps réel.`,
   },
 ];
 
 const tuto = createTuto({
   storageKey: "permigo-theory-tuto-v1",
   slides: SLIDES,
-  ariaLabel: "Présentation de la ligue Révision",
+  ariaLabel: "Ligue Révision",
   trackPrefix: "theory_tuto",
   lastCta: "Faire un quiz",
   onDone: () => navigate("/parcours"),
