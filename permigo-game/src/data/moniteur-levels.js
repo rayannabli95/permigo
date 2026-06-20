@@ -111,17 +111,17 @@ export const MONITEUR_TIERS = [
   {
     tier: 9,
     threshold: 230,
-    title: "Expert REMC",
+    title: "Référent",
     unlock: {
       iconName: "shield",
-      name: "Communauté privée experts REMC",
+      name: "Communauté privée des référents",
       desc: "Rejoins l'espace privé des enseignants experts : échanges de cas concrets, ressources avancées et entraide entre pairs.",
     },
   },
   {
     tier: 10,
     threshold: 300,
-    title: "Expert REMC certifié",
+    title: "Référent certifié",
     unlock: {
       iconName: "trending-up",
       name: "Comparaison avec d'autres écoles (anonyme)",

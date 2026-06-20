@@ -53,7 +53,8 @@ const STYLE = `<style>
   -webkit-tap-highlight-color: transparent;
   transition: background .12s;
 }
-.epc-full-back:active { background: var(--bo); transform: scale(.93); }
+.epc-full-back { transition: background .12s, transform .18s cubic-bezier(0.23,1,0.32,1); }
+.epc-full-back:active { background: var(--bo); transform: scale(.97); }
 .epc-full-hd-info { flex: 1; min-width: 0; }
 .epc-full-h1 {
   font: 700 18px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -218,6 +219,7 @@ const STYLE = `<style>
 
 @media (prefers-reduced-motion: reduce) {
   .epcf-stop.cercle-or.done .epcf-stop-dot { animation: none !important; }
+  .epc-full-back { transition: none !important; }
 }
 </style>`;
 
@@ -342,7 +344,7 @@ function renderStop(stop, totalValidations) {
   const diff = stop.threshold - totalValidations;
   const costLine =
     cls === "done"
-      ? `<span class="epcf-stop-cost done">Atteint · ${stop.threshold} valid.</span>`
+      ? `<span class="epcf-stop-cost done">Atteint · ${stop.threshold} validations</span>`
       : `<span class="epcf-stop-cost todo">+${diff} validation${diff > 1 ? "s" : ""}</span>`;
 
   // Ligne statut — palier de progression (plus d'« outil débloqué »)
@@ -350,7 +352,7 @@ function renderStop(stop, totalValidations) {
     <div class="epcf-stop-reward ${cls === "done" ? "unlocked" : ""}">
       <span class="epcf-stop-reward-ico">${icon(iconName, { size: 14, strokeWidth: 2.4 })}</span>
       <span class="epcf-stop-reward-txt">
-        ${cls === "done" ? "Statut : " : "Palier : "}
+        ${cls === "done" ? "Statut atteint : " : "Prochain statut : "}
         <strong>${esc(stop.tier.title)}</strong>
       </span>
     </div>
