@@ -31,14 +31,35 @@ export function setQuizMuted(muted) {
 }
 
 // ── Voix française (chargement asynchrone selon les navigateurs) ──
+// On classe les voix dispo et on prend la plus naturelle : les voix par
+// défaut « Eloquence/compact » sonnent très robot, alors que « Google
+// français » (Chrome) ou les voix « Enhanced/Premium » (Apple) sont bien
+// plus humaines.
+const VOICE_GOOD =
+  /google|natural|naturel|enhanced|premium|neural|siri|wavenet|amélie|amelie|aurélie|aurelie|audrey|virginie|marie|thomas|nicolas|sophie/i;
+const VOICE_BAD =
+  /eloquence|compact|e-speak|espeak|pico|fred|albert|whisper|zarvox|novelty|robot/i;
+function scoreVoice(v) {
+  let s = 0;
+  if (/^fr[-_]?FR/i.test(v.lang)) s += 10;
+  else if (/^fr/i.test(v.lang)) s += 6;
+  if (VOICE_GOOD.test(v.name)) s += 6;
+  if (VOICE_BAD.test(v.name)) s -= 10;
+  if (v.localService === false) s += 2; // voix distantes = souvent meilleures
+  return s;
+}
 let frVoice = null;
 function pickVoice() {
   if (!hasTTS) return null;
-  const voices = window.speechSynthesis.getVoices() || [];
-  frVoice =
-    voices.find((v) => /^fr[-_]?FR/i.test(v.lang)) ||
-    voices.find((v) => /^fr/i.test(v.lang)) ||
-    null;
+  const voices = (window.speechSynthesis.getVoices() || []).filter((v) =>
+    /^fr/i.test(v.lang),
+  );
+  if (!voices.length) {
+    frVoice = null;
+    return null;
+  }
+  voices.sort((a, b) => scoreVoice(b) - scoreVoice(a));
+  frVoice = voices[0];
   return frVoice;
 }
 if (hasTTS) {
