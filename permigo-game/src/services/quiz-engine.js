@@ -20,6 +20,7 @@ import {
   computeTheoryGain,
   renderTheoryGain,
 } from "@/components/eleve/theory-gain.js";
+import { wireQuestionSpeech, stopSpeaking } from "@/utils/speech.js";
 import {
   playCorrect,
   playWrong,
@@ -91,9 +92,12 @@ export async function lancerQuiz({
         handleAnswer(parseInt(btn.dataset.i, 10), q),
       );
     });
+
+    wireQuestionSpeech(overlay.querySelector(".quiz-zone"), q.question);
   }
 
   function handleAnswer(chosen, q) {
+    stopSpeaking();
     const zone = overlay.querySelector(".quiz-zone");
     const correct = applyReveal(zone, {
       chosen,
@@ -162,6 +166,7 @@ export async function lancerQuiz({
     // Musique de fin : victoire si réussi (>=60%), défaite sinon. Confetti en plus sur sans-faute.
     const passed = score >= total * 0.6;
     stopMusic(); // coupe la mélodie de fond avant le jingle de fin
+    stopSpeaking(); // coupe une éventuelle lecture vocale en cours
     if (perfect) burstConfetti({ count: 100, power: 16 });
     if (passed) playVictory();
     else playDefeat();

@@ -28,6 +28,7 @@ import {
   playStreak,
   playPerfect,
 } from "@/utils/sound.js";
+import { wireQuestionSpeech, stopSpeaking } from "@/utils/speech.js";
 
 let _timer = null;
 
@@ -120,6 +121,7 @@ function runQuiz(root, { quiz, pool }) {
     if (!document.body.contains(clockEl)) {
       clearInterval(_timer);
       _timer = null;
+      stopSpeaking(); // sortie de l'écran : coupe la lecture
       return;
     }
     const left = expiresMs - Date.now();
@@ -128,6 +130,7 @@ function runQuiz(root, { quiz, pool }) {
     if (left <= 0) {
       clearInterval(_timer);
       _timer = null;
+      stopSpeaking();
       renderClosed(root, "Temps écoulé — le quiz éclair est expiré.");
     }
   }
@@ -145,9 +148,11 @@ function runQuiz(root, { quiz, pool }) {
         handleAnswer(parseInt(btn.dataset.i, 10), q),
       );
     });
+    wireQuestionSpeech(bodyEl, q.question);
   }
 
   function handleAnswer(chosen, q) {
+    stopSpeaking();
     answers.push({ question_id: q.id, selected_idx: chosen });
     const correct = applyReveal(bodyEl, {
       chosen,

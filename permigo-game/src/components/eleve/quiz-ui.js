@@ -7,6 +7,7 @@
 import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { ill } from "@/utils/illustrations.js";
+import { muteButtonHTML } from "@/utils/speech.js";
 
 // ─── Texte ───────────────────────────────────────────────────────
 
@@ -113,7 +114,10 @@ export function pipsHTML(idx, total) {
 export function questionHTML({ q, idx, total }) {
   return `
     ${pipsHTML(idx, total)}
-    <h3 class="qz-q">${richEsc(q.question)}</h3>
+    <div class="qz-qhead">
+      ${muteButtonHTML()}
+      <h3 class="qz-q">${richEsc(q.question)}</h3>
+    </div>
     <div class="qz-opts">
       ${(q.options || [])
         .map(
@@ -219,6 +223,9 @@ export const QUIZ_STYLE = `<style>
   .qz-count{font:700 13px/1 'IBM Plex Mono',monospace;color:#a5b4fc;font-variant-numeric:tabular-nums}
 
   /* Énoncé */
+  .qz-qhead{display:flex;align-items:flex-start;gap:12px;margin:0 0 22px}
+  .qz-qhead .qz-q{margin:0;flex:1 1 auto}
+  .qz-mute:active{transform:scale(.92)}
   .qz-q{font:800 clamp(20px,5.2vw,25px)/1.45 'Plus Jakarta Sans',sans-serif;color:#fff;margin:0 0 22px;letter-spacing:-.015em;max-width:32em}
   .qz-q strong{font-weight:900;color:#fcd34d;background:linear-gradient(transparent 68%,rgba(252,211,77,.14) 68%);padding:0 2px;border-radius:2px}
 
