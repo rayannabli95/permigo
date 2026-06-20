@@ -359,7 +359,7 @@ const STYLE = `<style>
 /* Réserve la hauteur des ligues injectées en async : évite le layout-shift
    à chaque retour sur l'accueil. :empty → la réserve disparaît une fois
    le contenu monté (qui est toujours plus haut que cette valeur). */
-#acc-lb-slot:empty { display: block; min-height: 196px; }
+#acc-lb-slot:empty { display: block; min-height: 156px; }
 
 .acc2-section-title {
   font: 600 12px/1 'Inter', sans-serif;
@@ -539,7 +539,7 @@ const STYLE = `<style>
 /* ── Carte de base — socle commun ── */
 .acc-lg-card {
   display: flex; flex-direction: column; align-items: flex-start;
-  text-align: left; min-height: 130px;
+  text-align: left; min-height: 104px;
   padding: 14px 14px 12px; border-radius: var(--r-xl);
   cursor: pointer; position: relative; overflow: hidden;
   -webkit-tap-highlight-color: transparent;
@@ -558,14 +558,7 @@ const STYLE = `<style>
   .acc-lg-card { animation: none; }
 }
 
-/* ── Halo radial en arrière-plan (::before) — enrichi ── */
-.acc-lg-card::before {
-  content: ''; position: absolute; pointer-events: none;
-  border-radius: inherit; inset: 0;
-  opacity: 1;
-  transition: opacity .2s;
-}
-/* ── Inner highlight bord supérieur (::after) ── */
+/* ── Inner highlight bord supérieur (::after) — fine ligne, pas de halo ── */
 .acc-lg-card::after {
   content: ''; position: absolute; pointer-events: none;
   top: 0; left: 10%; right: 10%; height: 1px;
@@ -574,32 +567,21 @@ const STYLE = `<style>
   opacity: .6;
 }
 
-/* ── Variante École — registre autorité/médaille ── */
+/* ── Variante École — gradient plat, sans halo radial ── */
 .acc-lg-card[data-ligue="ecole"] {
-  background:
-    radial-gradient(ellipse 90% 80% at 80% 10%, color-mix(in srgb, var(--a) 18%, transparent), transparent 60%),
-    linear-gradient(158deg, color-mix(in srgb, var(--a) 13%, var(--su)) 0%, var(--su) 100%);
+  background: linear-gradient(158deg, color-mix(in srgb, var(--a) 13%, var(--su)) 0%, var(--su) 100%);
   border: 1.5px solid color-mix(in srgb, var(--a) 28%, var(--bo));
   box-shadow:
     0 2px 0 0 color-mix(in srgb, var(--a) 12%, transparent) inset,
     0 6px 18px -6px color-mix(in srgb, var(--a) 30%, transparent);
 }
-/* ── Variante Révision — registre énergie/mouvement ── */
+/* ── Variante Révision — gradient plat, sans halo radial ── */
 .acc-lg-card[data-ligue="revision"] {
-  background:
-    radial-gradient(ellipse 70% 100% at 85% 0%, color-mix(in srgb, var(--a) 22%, transparent), transparent 55%),
-    linear-gradient(142deg, color-mix(in srgb, var(--a) 10%, var(--su)) 0%, var(--su) 85%);
+  background: linear-gradient(142deg, color-mix(in srgb, var(--a) 10%, var(--su)) 0%, var(--su) 85%);
   border: 1.5px solid color-mix(in srgb, var(--a) 22%, var(--bo));
   box-shadow:
     0 2px 0 0 color-mix(in srgb, var(--a) 16%, transparent) inset,
     0 6px 22px -8px color-mix(in srgb, var(--a) 28%, transparent);
-}
-/* L'accent du révision est légèrement plus saturé — halo décalé */
-.acc-lg-card[data-ligue="revision"]::before {
-  background: radial-gradient(ellipse 80% 60% at 90% -10%, color-mix(in srgb, var(--a) 26%, transparent), transparent 65%);
-}
-.acc-lg-card[data-ligue="ecole"]::before {
-  background: radial-gradient(ellipse 70% 70% at 85% 5%, color-mix(in srgb, var(--a) 20%, transparent), transparent 65%);
 }
 
 .acc-lg-card:active { transform: scale(.97); box-shadow: 0 2px 8px -4px color-mix(in srgb, var(--a) 20%, transparent) !important; }
@@ -625,8 +607,8 @@ const STYLE = `<style>
 
 /* ── Le RANG — héros de la carte ── */
 .acc-lg-rank {
-  font: 800 32px/1 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -.04em; margin: 10px 0 0; position: relative; z-index: 1;
+  font: 800 40px/1 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.04em; margin: 8px 0 0; position: relative; z-index: 1;
   /* Gradient métallique dérivé de l'accent pour donner de la profondeur */
   background: linear-gradient(160deg,
     color-mix(in srgb, var(--a) 90%, #fff) 0%,
@@ -648,11 +630,11 @@ const STYLE = `<style>
   );
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
-  font-size: 36px;
+  font-size: 46px;
 }
 .acc-lg-card[data-pos="2"] .acc-lg-rank,
 .acc-lg-card[data-pos="3"] .acc-lg-rank {
-  font-size: 34px;
+  font-size: 43px;
 }
 
 /* ── Footer : contexte + chevron ── */
@@ -757,29 +739,13 @@ const STYLE = `<style>
   .acc2-action--first-run .acc2-action-btn { transition: none; }
 }
 
-/* ── Ligne de motivation sous le rang ── */
-.acc-lg-sense {
-  font: 500 11px/1.4 'Inter', sans-serif;
-  color: var(--mu2);
-  margin: 5px 0 0;
-  position: relative; z-index: 1;
-}
-/* ── État vide — invitation premium, pas un vide cassé ── */
-.acc-lg-rank--empty {
-  font: 600 12.5px/1.4 'Inter', sans-serif;
-  color: var(--mu2);
-  letter-spacing: 0;
-  margin: 10px 0 0;
-  position: relative; z-index: 1;
-  /* Petit tiret décoratif inspiré "verrou à débloquer" */
-  padding-left: 13px;
-}
-.acc-lg-rank--empty::before {
-  content: '';
-  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-  width: 6px; height: 6px; border-radius: 50%;
-  background: color-mix(in srgb, var(--a) 45%, var(--bo));
-  border: 1.5px solid color-mix(in srgb, var(--a) 25%, var(--bo));
+/* ── État vide : tiret muet dans le slot du rang (même place que le chiffre,
+   pour que l'œil trouve toujours l'info au même endroit) ── */
+.acc-lg-rank.is-empty {
+  background: none;
+  -webkit-text-fill-color: var(--mu3);
+  color: var(--mu3);
+  font-size: 40px; opacity: .7;
 }
 
 /* ── First-run progressive disclosure ── */
@@ -1582,7 +1548,9 @@ async function _loadAndInjectLeagues(root) {
         ? pos.total_eleves > 1
         : false;
     const ecoleRankLabel = ecoleRanked ? `#${pos.my_rank}` : null;
-    const ecoleSub = ecoleRanked ? `sur ${pos.total_eleves} à l'école` : null;
+    const ecoleSub = ecoleRanked
+      ? `sur ${pos.total_eleves} à l'école`
+      : "Valide pour te classer";
 
     // ── Ligue Révision (quiz solo) ──
     const revRows =
@@ -1595,9 +1563,11 @@ async function _loadAndInjectLeagues(root) {
     const revClassed =
       !!revInfo.league && revScore > 0 && mineRev?.rang != null;
     const revRankLabel = revClassed ? `#${mineRev.rang}` : null;
-    const revSub = revClassed
-      ? `Ligue ${revInfo.league.n} — ${revInfo.league.name}`
-      : null;
+    // « sur N » comme la carte Conduite : le rang seul (#1) n'a de sens
+    // qu'avec l'effectif. La ligue (absolue) reste visible sur la page détail.
+    const revTotal = revRows.filter((r) => r.rang != null).length;
+    const revSub =
+      revClassed && revTotal > 0 ? `sur ${revTotal} à l'école` : "Fais un quiz";
 
     // Render: empty state uses a premium invitation; ranked state shows
     // the number hero with podium accent for top-3 positions.
@@ -1611,13 +1581,12 @@ async function _loadAndInjectLeagues(root) {
         <button class="acc-lg-card" id="acc-lg-ecole" data-go="#/classement/ecole"
                 data-ligue="ecole"
                 ${ecolePos != null && ecolePos <= 3 ? `data-pos="${ecolePos}"` : ""}
-                aria-label="Classement avec ton moniteur — ${esc(ecoleRanked ? `${ecoleRankLabel} sur ${pos.total_eleves}` : "pas encore classé")}">
-          <span class="acc-lg-tag">${icon("trophy", { size: 12, strokeWidth: 2.2 })} Moniteur</span>
+                aria-label="Classement conduite — ${esc(ecoleRanked ? `${ecoleRankLabel} sur ${pos.total_eleves}` : "pas encore classé")}">
+          <span class="acc-lg-tag">${icon("trophy", { size: 12, strokeWidth: 2.2 })} Conduite</span>
           ${
             ecoleRanked
-              ? `<span class="acc-lg-rank">${esc(ecoleRankLabel)}</span>
-                 <span class="acc-lg-sense">Chaque compétence validée te fait grimper.</span>`
-              : `<span class="acc-lg-rank--empty">Ta première validation te classe ici.</span>`
+              ? `<span class="acc-lg-rank">${esc(ecoleRankLabel)}</span>`
+              : `<span class="acc-lg-rank is-empty">—</span>`
           }
           <span class="acc-lg-foot">
             ${ecoleSub ? `<span class="acc-lg-sub">${esc(ecoleSub)}</span>` : `<span class="acc-lg-sub">&nbsp;</span>`}
@@ -1631,9 +1600,8 @@ async function _loadAndInjectLeagues(root) {
           <span class="acc-lg-tag">${icon("zap", { size: 12, strokeWidth: 2.2 })} Révision</span>
           ${
             revClassed
-              ? `<span class="acc-lg-rank">${esc(revRankLabel)}</span>
-                 <span class="acc-lg-sense">Plus tu fais de quiz, plus tu montes.</span>`
-              : `<span class="acc-lg-rank--empty">Fais un quiz pour entrer au classement.</span>`
+              ? `<span class="acc-lg-rank">${esc(revRankLabel)}</span>`
+              : `<span class="acc-lg-rank is-empty">—</span>`
           }
           <span class="acc-lg-foot">
             ${revSub ? `<span class="acc-lg-sub">${esc(revSub)}</span>` : `<span class="acc-lg-sub">&nbsp;</span>`}
