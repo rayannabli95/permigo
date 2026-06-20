@@ -467,7 +467,12 @@ export async function mount(root) {
         const item = allItems.find(
           (i) => i.id === btn.closest(".bo2-card")?.dataset.itemId,
         );
-        if (item && !item.owned) buyFlow(item);
+        if (!item) return;
+        // Item possédé → le bouton est « Équiper » (.bo2-equip-cta). Sans ce
+        // cas, le stopPropagation ci-dessus bloquait aussi le clic carte qui
+        // équipe → le bouton Équiper ne faisait rien.
+        if (item.owned) toggleEquip(item);
+        else buyFlow(item);
       });
     });
   }
