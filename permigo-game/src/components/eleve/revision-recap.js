@@ -13,6 +13,7 @@
 import { esc } from "@/utils/escape.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { playReward } from "@/utils/sound.js";
+import { getWeakPoints } from "@/utils/weak-points.js";
 
 const STYLE_ID = "revision-recap-style";
 
@@ -155,6 +156,22 @@ const STYLE = `
 .rcp-overlay.rcp-show .rcp-league { opacity: 1; transform: translateY(0); }
 .rcp-league i { width: 9px; height: 9px; border-radius: 50%; background: var(--rcp-accent); box-shadow: 0 0 10px var(--rcp-accent); }
 
+/* Points faibles — direction concrète pour la prochaine session */
+.rcp-weak {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 6px; margin-top: 16px; max-width: 320px;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity .4s ease .55s, transform .5s ease .55s;
+}
+.rcp-overlay.rcp-show .rcp-weak { opacity: 1; transform: translateY(0); }
+.rcp-weak-lbl { font: 700 9px/1.2 var(--fd, system-ui), sans-serif; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.5); }
+.rcp-weak-tag {
+  padding: 5px 11px; border-radius: 999px;
+  font: 800 12px/1 var(--fd, system-ui), sans-serif;
+  color: #fff; background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.16);
+}
+
 .rcp-cta {
   margin-top: 26px; width: 100%; max-width: 360px; min-height: 54px; padding: 17px 28px;
   border: 0; border-radius: 16px; cursor: pointer;
@@ -186,7 +203,7 @@ const STYLE = `
 .rcp-close:hover { background: rgba(255,255,255,.2); }
 
 @media (prefers-reduced-motion: reduce) {
-  .rcp-overlay, .rcp-kicker, .rcp-title, .rcp-sub, .rcp-ladder, .rcp-rung, .rcp-stats, .rcp-league, .rcp-cta, .rcp-second, .rcp-close {
+  .rcp-overlay, .rcp-kicker, .rcp-title, .rcp-sub, .rcp-ladder, .rcp-rung, .rcp-stats, .rcp-league, .rcp-weak, .rcp-cta, .rcp-second, .rcp-close {
     transition: opacity .2s ease !important; transform: none !important;
   }
   .rcp-jump { animation: none !important; opacity: 1 !important; transform: translate(0,-50%) !important; }
@@ -243,11 +260,26 @@ export function showRevisionRecap(summary = {}, opts = {}) {
   const title =
     nPassed > 0
       ? `${nPassed} quiz réussi${nPassed > 1 ? "s" : ""}`
-      : "Session terminée";
+      : nQuiz > 0
+        ? "Tu as bossé 💪"
+        : "Session terminée";
+  // Une session sans réussite est le pire moment pour démotiver : on valorise
+  // l'effort plutôt que d'afficher un "0" sec.
   const sub =
-    nQuiz > 0
-      ? `${nQuiz} quiz joué${nQuiz > 1 ? "s" : ""} dans cette session de révision`
-      : "Reviens demain pour réviser encore";
+    nPassed === 0 && nQuiz > 0
+      ? `${nQuiz} quiz testé${nQuiz > 1 ? "s" : ""} — c'est en se trompant qu'on mémorise`
+      : nQuiz > 0
+        ? `${nQuiz} quiz joué${nQuiz > 1 ? "s" : ""} dans cette session de révision`
+        : "Reviens demain pour réviser encore";
+
+  // Points faibles (calculés localement par weak-points.js) — surfacés ici pour
+  // donner une direction concrète à la prochaine session.
+  const weak = getWeakPoints({ limit: 2 });
+  const weakHtml = weak.length
+    ? `<div class="rcp-weak"><span class="rcp-weak-lbl">À retravailler</span>${weak
+        .map((w) => `<span class="rcp-weak-tag">${esc(w.label)}</span>`)
+        .join("")}</div>`
+    : "";
 
   // Échelle : dépassement (rival + moi) ou solo (pas de dépassement)
   let ladderHtml;
@@ -309,6 +341,7 @@ export function showRevisionRecap(summary = {}, opts = {}) {
         <p class="rcp-sub">${esc(sub)}</p>
         ${ladderHtml ? `<div class="rcp-ladder">${ladderHtml}</div>` : ""}
         <div class="rcp-stats">${statsHtml}</div>
+        ${weakHtml}
         ${leagueChip}
         <button class="rcp-cta" type="button">Continuer</button>
         ${onSecondary ? `<button class="rcp-second" type="button">Voir le classement</button>` : ""}
