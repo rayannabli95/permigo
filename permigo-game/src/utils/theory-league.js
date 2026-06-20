@@ -15,12 +15,15 @@ export const THEORY_PTS = { quiz: 1, exam: 4 };
 // Seuil de réussite d'un quiz compétence pour marquer le point théorie
 export const THEORY_QUIZ_PASS_PCT = 70;
 
+// Échelle monochrome bleue : une seule teinte, 5 nuances du clair (Novice)
+// au profond (maîtrisée). La progression se lit à la saturation, pas à la
+// couleur — plus lisible et premium qu'un arc-en-ciel vert/jaune/violet.
 export const THEORY_LEAGUES = [
-  { n: 1, name: "Novice", color: "#22c55e", startAt: 1 },
-  { n: 2, name: "Apprenti", color: "#3b82f6", startAt: 8 },
-  { n: 3, name: "Sérieux", color: "#eab308", startAt: 18 },
-  { n: 4, name: "Confirmé", color: "#8b5cf6", startAt: 30 },
-  { n: 5, name: "Révision maîtrisée", color: "#f59e0b", startAt: 42 },
+  { n: 1, name: "Novice", color: "#93c5fd", startAt: 1 },
+  { n: 2, name: "Apprenti", color: "#60a5fa", startAt: 8 },
+  { n: 3, name: "Sérieux", color: "#3b82f6", startAt: 18 },
+  { n: 4, name: "Confirmé", color: "#2563eb", startAt: 30 },
+  { n: 5, name: "Révision maîtrisée", color: "#1d4ed8", startAt: 42 },
 ];
 
 /**

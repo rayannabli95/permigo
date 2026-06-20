@@ -512,7 +512,7 @@ function _render(scope, data) {
     <h1 class="clt-title">Classement</h1>
     ${pill}
     <div class="clt-tabs">
-      <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">${icon("trophy", { size: 13, strokeWidth: 2 })} Avec mon moniteur</button>
+      <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">${icon("trophy", { size: 13, strokeWidth: 2 })} Conduite</button>
       <button class="clt-tab ${scope === "theorie" ? "on" : ""}" data-scope="theorie">${icon("zap", { size: 13, strokeWidth: 2 })} Révision</button>
       <button class="clt-tab ${scope === "national" ? "on" : ""}" data-scope="national">National</button>
     </div>
@@ -740,7 +740,7 @@ function _renderTheoryBody(rows) {
   const fmtScore = (r) => `${r.score}<span>pts</span>`;
   const leagueColorOf = (r) => {
     const info = theoryLeague(r.score);
-    return info.top ? "#f59e0b" : info.league?.color || "var(--bo)";
+    return info.league?.color || "var(--bo)";
   };
   return `${hero}${_rankedBody(top, mine, meOutside, fmtScore, leagueColorOf)}`;
 }
