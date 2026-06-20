@@ -280,10 +280,10 @@ function renderForm(root, invitation, token) {
         </div>
 
         <div class="sg-row">
-          <label class="sg-label" for="sg-usertag">Usertag</label>
+          <label class="sg-label" for="sg-usertag">Identifiant</label>
           <input class="sg-input" id="sg-usertag" type="text" autocomplete="off" autocapitalize="off" placeholder="Ex : maxdu13" />
           <div class="sg-help" id="sg-usertag-help">3 caractères minimum.</div>
-          <div class="sg-italic">Ton pseudo pour voir ton niveau par rapport aux autres élèves dans le classement.</div>
+          <div class="sg-italic">Ton identifiant unique de connexion. Dans le classement, les autres élèves te voient avec ton prénom — pas avec ça.</div>
         </div>
 
         <div class="sg-row">
