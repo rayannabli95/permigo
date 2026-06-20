@@ -18,34 +18,42 @@
  * Variants badge : 'success' (vert), 'warning' (orange), 'neutral' (gris), 'danger' (rouge)
  */
 
-import { esc } from '@/utils/escape.js';
-import { icon } from '@/utils/icons.js';
+import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
 
 const AVATAR_GRADIENTS = [
-  'linear-gradient(135deg,#667eea,#764ba2)',
-  'linear-gradient(135deg,#f093fb,#f5576c)',
-  'linear-gradient(135deg,#4facfe,#00f2fe)',
-  'linear-gradient(135deg,#43e97b,#38f9d7)',
-  'linear-gradient(135deg,#fa709a,#fee140)',
-  'linear-gradient(135deg,#30cfd0,#330867)',
+  "linear-gradient(135deg,#667eea,#764ba2)",
+  "linear-gradient(135deg,#f093fb,#f5576c)",
+  "linear-gradient(135deg,#4facfe,#00f2fe)",
+  "linear-gradient(135deg,#43e97b,#38f9d7)",
+  "linear-gradient(135deg,#fa709a,#fee140)",
+  "linear-gradient(135deg,#30cfd0,#330867)",
 ];
 
-function gradientFor(seed = '') {
+function gradientFor(seed = "") {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
   return AVATAR_GRADIENTS[Math.abs(h) % AVATAR_GRADIENTS.length];
 }
 
-function initials(name = '') {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase() || '?';
+function initials(name = "") {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0])
+      .join("")
+      .toUpperCase() || "?"
+  );
 }
 
 export function renderUserListCard({
-  title = 'Liste',
+  title = "Liste",
   subtitle = null,
   items = [],
   footer = null,
-  emptyText = 'Aucun élément',
+  emptyText = "Aucun élément",
   maxHeight = 320,
 } = {}) {
   return `
@@ -53,61 +61,69 @@ export function renderUserListCard({
       <header class="ulc-h">
         <div>
           <h3 class="ulc-ti">${esc(title)}</h3>
-          ${subtitle ? `<div class="ulc-sub">${esc(subtitle)}</div>` : ''}
+          ${subtitle ? `<div class="ulc-sub">${esc(subtitle)}</div>` : ""}
         </div>
-        ${items.length > 0 ? `<div class="ulc-count">${items.length}</div>` : ''}
+        ${items.length > 0 ? `<div class="ulc-count">${items.length}</div>` : ""}
       </header>
 
       <div class="ulc-body" style="max-height:${maxHeight}px">
-        ${items.length === 0 ? `
+        ${
+          items.length === 0
+            ? `
           <div class="ulc-empty">
-            <div class="ulc-empty-em">${icon('inbox',{size:28})}</div>
+            <div class="ulc-empty-em">${icon("inbox", { size: 28 })}</div>
             <div>${esc(emptyText)}</div>
           </div>
-        ` : items.map(it => renderItem(it)).join('')}
+        `
+            : items.map((it) => renderItem(it)).join("")
+        }
       </div>
 
-      ${footer ? `
+      ${
+        footer
+          ? `
         <footer class="ulc-foot">
-          <button class="ulc-foot-btn" data-action="${esc(footer.action || 'seeAll')}" type="button">
-            ${esc(footer.label || 'Voir tous')} <span class="ulc-foot-arrow">→</span>
+          <button class="ulc-foot-btn" data-action="${esc(footer.action || "seeAll")}" type="button">
+            ${esc(footer.label || "Voir tous")} <span class="ulc-foot-arrow">→</span>
           </button>
         </footer>
-      ` : ''}
+      `
+          : ""
+      }
     </div>
   `;
 }
 
 function renderItem(it) {
-  const init = initials(it.nom || it.title || '');
-  const grad = it.gradient || gradientFor(it.id || it.nom || '');
+  const init = initials(it.nom || it.title || "");
+  const grad = it.gradient || gradientFor(it.id || it.nom || "");
   const badge = it.badge || null;
   return `
     <button class="ulc-row" data-id="${esc(it.id)}" type="button" tabindex="0">
       <div class="ulc-av" style="background:${grad}">
-        ${it.avatarUrl ? `<img src="${esc(it.avatarUrl)}" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : ''}
+        ${it.avatarUrl ? `<img src="${esc(it.avatarUrl)}" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : ""}
         <span class="ulc-av-init">${esc(init)}</span>
       </div>
       <div class="ulc-body-row">
-        <div class="ulc-nm">${esc(it.nom || it.title || '')}</div>
-        ${it.sub ? `<div class="ulc-meta">${esc(it.sub)}</div>` : ''}
+        <div class="ulc-nm">${esc(it.nom || it.title || "")}</div>
+        ${it.sub ? `<div class="ulc-meta">${esc(it.sub)}</div>` : ""}
       </div>
-      ${badge ? `<div class="ulc-badge ulc-badge-${esc(badge.variant || 'neutral')}">${esc(badge.label || '')}</div>` : ''}
+      ${badge ? `<div class="ulc-badge ulc-badge-${esc(badge.variant || "neutral")}">${esc(badge.label || "")}</div>` : ""}
     </button>
   `;
 }
 
 export function wireUserListCard(root, { onItemClick, onAction } = {}) {
-  root.querySelectorAll('.ulc-row').forEach(row => {
-    row.addEventListener('click', () => {
+  root.querySelectorAll(".ulc-row").forEach((row) => {
+    row.addEventListener("click", () => {
       const id = row.dataset.id;
-      if (typeof onItemClick === 'function') onItemClick(id);
+      if (typeof onItemClick === "function") onItemClick(id);
     });
   });
-  root.querySelectorAll('.ulc-foot-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+  root.querySelectorAll(".ulc-foot-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
       const action = btn.dataset.action;
-      if (typeof onAction === 'function') onAction(action);
+      if (typeof onAction === "function") onAction(action);
     });
   });
 }
@@ -185,6 +201,8 @@ export const USER_LIST_CARD_CSS = `
   }
   .ulc-row:last-child{border-bottom:0}
   .ulc-row:hover{background:var(--bg2,#f8fafc)}
+  .ulc-row:active{transform:scale(0.97);transition:transform 180ms cubic-bezier(0.23,1,0.32,1)}
+  @media (prefers-reduced-motion:reduce){.ulc-row:active{transform:none}}
   .ulc-row:focus-visible{outline:2px solid var(--a);outline-offset:-2px;background:var(--bg2,#f8fafc)}
 
   .ulc-av{

@@ -58,12 +58,17 @@ ${LEAGUE_CSS}
   border: 1px solid rgba(99,102,241,.15); background: var(--su);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   color: var(--ink); flex-shrink: 0;
-  transition: background .15s var(--ease), border-color .15s var(--ease);
+  transition: background .15s cubic-bezier(0.23,1,0.32,1),
+              border-color .15s cubic-bezier(0.23,1,0.32,1),
+              transform .2s cubic-bezier(0.23,1,0.32,1);
   -webkit-tap-highlight-color: transparent;
 }
 .ls-w-back:hover { background: rgba(99,102,241,.06); border-color: rgba(99,102,241,.3); }
-.ls-w-back:active { background: var(--bg2); }
+.ls-w-back:active { background: var(--bg2); transform: scale(.97); }
 .ls-w-back:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .ls-w-back { transition: none; }
+}
 .ls-w-hd-info { flex: 1; }
 .ls-w-title { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.025em; }
 .ls-w-sub { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
@@ -140,12 +145,16 @@ ${LEAGUE_CSS}
   font: 700 13px/1 'Inter', sans-serif; cursor: pointer;
   min-height: 44px;
   -webkit-tap-highlight-color: transparent;
-  transition: transform .15s var(--ease), box-shadow .15s var(--ease);
+  transition: transform .2s cubic-bezier(0.23,1,0.32,1),
+              box-shadow .2s cubic-bezier(0.23,1,0.32,1);
   box-shadow: 0 4px 14px -4px rgba(99,102,241,.45);
 }
 .ls-w-motivation-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px -4px rgba(99,102,241,.55); }
-.ls-w-motivation-cta:active { transform: scale(.98); }
+.ls-w-motivation-cta:active { transform: scale(.97); box-shadow: 0 2px 8px -4px rgba(99,102,241,.35); }
 .ls-w-motivation-cta:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .ls-w-motivation-cta { transition: none; }
+}
 
 /* Shimmer animation pour ligues Or et Diamant */
 @keyframes ls-shimmer-badge {
@@ -167,7 +176,7 @@ export async function mount(root) {
     <button class="ls-w-back" id="ls-back" aria-label="Retour">${icon("arrow-left", { size: 20, strokeWidth: 2.5 })}</button>
     <div class="ls-w-hd-info">
       <div class="ls-w-title" tabindex="-1">Ligue de la semaine</div>
-      <div class="ls-w-sub">Validations données</div>
+      <div class="ls-w-sub">1 pt = 1 compétence validée avec un élève · remise à zéro chaque lundi</div>
     </div>
   </div>
   <div class="ls-w-list">${Array.from({ length: 4 })
@@ -227,7 +236,7 @@ function _render(root, rows) {
       </div>
     </div>
     <div class="ls-w-pts-legend">
-      <span class="ls-w-pts-pill">1 pt = 1 validation</span>
+      <span class="ls-w-pts-pill">1 pt = 1 compétence validée avec un élève</span>
       ${LEAGUES.map((l) => `<span class="ls-w-pts-pill" style="border-color:${l.border};color:color-mix(in srgb, ${l.color} 60%, var(--ink))">${l.name} ≥${l.minPts}</span>`).join("")}
     </div>
   </div>`;
@@ -237,7 +246,7 @@ function _render(root, rows) {
   if (rows.length === 0) {
     listHtml = `<div class="ls-w-empty">
       <div class="ls-w-empty-ico">${icon("zap", { size: 30 })}</div>
-      <div class="ls-w-empty-txt">Aucune validation cette semaine.<br>Enregistre une séance pour entrer en ligue.</div>
+      <div class="ls-w-empty-txt">Aucune compétence validée cette semaine.<br>Enregistre une séance avec un élève pour marquer ton premier point et entrer en ligue.</div>
     </div>`;
   } else {
     const sorted = [...rows].sort((a, b) => b.weekly_pts - a.weekly_pts);
@@ -264,8 +273,8 @@ function _render(root, rows) {
   const motiv =
     prevLeague && ptsToNext > 0
       ? `<div class="ls-w-motivation">
-        <div class="ls-w-motivation-title">Plus que ${ptsToNext} pt${ptsToNext > 1 ? "s" : ""} pour la Ligue ${esc(prevLeague.name)}</div>
-        <div class="ls-w-motivation-sub">Enregistre une séance pour valider des compétences et monter en ligue.</div>
+        <div class="ls-w-motivation-title">Plus que ${ptsToNext} validation${ptsToNext > 1 ? "s" : ""} pour passer en Ligue ${esc(prevLeague.name)}</div>
+        <div class="ls-w-motivation-sub">Valide des compétences avec un élève — chaque compétence compte comme un point cette semaine.</div>
         <button class="ls-w-motivation-cta" id="ls-seance-cta">
           ${icon("plus", { size: 16, strokeWidth: 2.5 })} Enregistrer une séance
         </button>
@@ -278,7 +287,7 @@ function _render(root, rows) {
   <button class="ls-w-back" id="ls-back" aria-label="Retour">${icon("arrow-left", { size: 20, strokeWidth: 2.5 })}</button>
   <div class="ls-w-hd-info">
     <div class="ls-w-title" tabindex="-1">Ligue de la semaine</div>
-    <div class="ls-w-sub">${rows.length} enseignant${rows.length > 1 ? "s" : ""} cette semaine</div>
+    <div class="ls-w-sub">1 pt = 1 compétence validée · ${rows.length} moniteur${rows.length > 1 ? "s" : ""} en lice cette semaine</div>
   </div>
 </div>
 ${hero}

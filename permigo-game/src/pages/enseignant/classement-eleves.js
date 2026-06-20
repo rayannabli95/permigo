@@ -36,11 +36,15 @@ const STYLE = `<style>
     border-radius: var(--r-lg); padding: 11px 14px;
     display: flex; align-items: center; gap: 12px;
     box-shadow: var(--s0); cursor: pointer; min-height: 44px;
-    transition: border-color .15s, transform .15s;
+    transition: border-color .15s cubic-bezier(0.23,1,0.32,1),
+                transform .2s cubic-bezier(0.23,1,0.32,1);
   }
   .ce-row.top1 { border-color: color-mix(in srgb, var(--am) 40%, transparent); background: linear-gradient(100deg, color-mix(in srgb, var(--am) 9%, var(--su)), var(--su) 55%); }
   .ce-row:hover { border-color: var(--bo4); transform: translateY(-1px); }
-  .ce-row:active { transform: scale(.985); }
+  .ce-row:active { transform: scale(.97); }
+  @media (prefers-reduced-motion: reduce) {
+    .ce-row { transition: none; }
+  }
   .ce-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
 
   /* Rang : numéro neutre, ou médaille pour le top 3 */
@@ -100,6 +104,12 @@ const STYLE = `<style>
     padding: 40px 20px; text-align: center; color: var(--mu2);
     font: 500 14px/1.6 'Inter', sans-serif;
     background: var(--su); border: 1px solid var(--bo); border-radius: var(--r-lg);
+  }
+  .ce-cohorte-note {
+    display: inline-flex; align-items: center; gap: 5px;
+    font: 500 11px/1 'Inter', sans-serif; color: var(--mu2);
+    background: var(--bg2); border: 1px solid var(--bo);
+    padding: 4px 9px; border-radius: var(--r-sm); margin-top: 6px;
   }
 </style>`;
 
@@ -228,8 +238,8 @@ export async function mount(root, mode) {
       ${header(ranked.length, isTheorie)}
       <div class="ce-empty">${
         isTheorie
-          ? "Aucun quiz fait par tes élèves ces 30 derniers jours.<br>Incite-les à réviser en autonomie entre deux leçons."
-          : "Aucun élève à classer pour l'instant.<br>Enregistre des séances pour faire monter ton classement."
+          ? "Aucune révision enregistrée ces 30 derniers jours.<br>Partage l'app à tes élèves pour qu'ils révisent en autonomie entre deux leçons — leur score apparaîtra ici."
+          : "Aucun élève dans ta cohorte pour l'instant.<br>Attribue des élèves ou enregistre une séance — leurs compétences validées alimenteront ce classement."
       }</div>
     </div>`;
     wireBack(root);
@@ -259,13 +269,14 @@ export async function mount(root, mode) {
 }
 
 function header(n, isTheorie) {
+  // Explainer one-liner : qui est dans la liste, comment lire le score.
+  const explainer = isTheorie
+    ? `Tes élèves classés par volume de révision (30 derniers jours) · barre = score moyen`
+    : `Tes élèves classés par compétences de conduite validées · barre = progression globale`;
   return `<header class="ce-hd">
-    <h1 class="ce-h1">${isTheorie ? "Ligue théorie" : "Ligue pratique"}</h1>
-    <p class="ce-sub">${n} élève${n > 1 ? "s" : ""} en course · ${
-      isTheorie
-        ? "classés par révision quiz (30 j)"
-        : "classés par compétences acquises"
-    }</p>
+    <h1 class="ce-h1">${isTheorie ? "Ligue Révision" : "Ligue Pratique"}</h1>
+    <p class="ce-sub">${explainer}</p>
+    <span class="ce-cohorte-note">${n} élève${n > 1 ? "s" : ""} dans ta cohorte</span>
   </header>`;
 }
 
@@ -297,11 +308,11 @@ function renderRow(e, rank, isTheorie) {
       ? Math.round((e.acquis / REMC_TOTAL) * 100)
       : 0;
   const scoreLabel = isTheorie
-    ? `${e.quizCount} quiz`
+    ? `${e.quizCount} révision${e.quizCount > 1 ? "s" : ""}`
     : `${e.acquis}/${REMC_TOTAL}`;
   const ariaScore = isTheorie
-    ? `${e.quizCount} quiz révisés, ${e.avgScore}% de moyenne`
-    : `${e.acquis} sur ${REMC_TOTAL}`;
+    ? `${e.quizCount} révision${e.quizCount > 1 ? "s" : ""}, ${e.avgScore}% de moyenne`
+    : `${e.acquis} compétences validées sur ${REMC_TOTAL}`;
   const nom = esc(
     fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "Élève",
   );
@@ -315,7 +326,7 @@ function renderRow(e, rank, isTheorie) {
       ${rankEl}
       <div style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 36)}</div>
       <span class="ce-row-nom">${nom}</span>
-      <span class="ce-streak${e.streak > 0 ? "" : " off"}" title="${e.streak} jour${e.streak > 1 ? "s" : ""} d'activité d'affilée">
+      <span class="ce-streak${e.streak > 0 ? "" : " off"}" title="${e.streak > 0 ? `Actif ${e.streak} jour${e.streak > 1 ? "s" : ""} de suite` : "Inactif — aucune révision récente"}">
         ${icon("flame", { size: 12, strokeWidth: 2 })} ${e.streak}j
       </span>
       <div class="ce-row-bar">

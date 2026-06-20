@@ -68,7 +68,7 @@ export function showTierUnlock(opts = {}) {
         leftLabel: "Prochain palier",
         rightLabel: `${count}/${nextThreshold}`,
       }
-    : { pct: 100, leftLabel: "Palier max", rightLabel: "Expert REMC" };
+    : { pct: 100, leftLabel: "Palier max", rightLabel: "Référent" };
 
   const unlockName = tier.unlock?.name ? `Débloqué · ${tier.unlock.name}` : "";
 

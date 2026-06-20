@@ -75,7 +75,7 @@ const TROPHEES = [
     iconName: "check-circle",
     name: "10 validations",
     goal: "10 validations",
-    desc: "Un début qui compte — 10 acquisitions validées.",
+    desc: "Un début solide — 10 compétences validées avec tes élèves.",
     check: (d) => d.totalVals >= 10,
     progress: (d) => ({ v: Math.min(10, d.totalVals), max: 10 }),
   },
@@ -127,7 +127,7 @@ const TROPHEES = [
     iconName: "award",
     name: "100 validations",
     goal: "100 validations",
-    desc: "Référent pédagogique — 100 acquisitions accompagnées.",
+    desc: "Référent pédagogique — 100 compétences validées, un suivi qui fait la différence.",
     check: (d) => d.totalVals >= 100,
     progress: (d) => ({ v: Math.min(100, d.totalVals), max: 100 }),
   },
@@ -180,9 +180,9 @@ const TROPHEES = [
     id: "expert_remc",
     tier: "diamant",
     iconName: "crown",
-    name: "Expert REMC certifié",
+    name: "Référent certifié",
     goal: "300 validations",
-    desc: "300 validations — le palier ultime. Statut Expert REMC débloqué.",
+    desc: "300 validations — palier ultime. Tu maîtrises l'accompagnement complet de tes élèves.",
     check: (d) => d.totalVals >= 300,
     progress: (d) => ({ v: Math.min(300, d.totalVals), max: 300 }),
   },
@@ -283,8 +283,9 @@ const STYLE = `<style>
   border: 0; border-radius: var(--r); background: var(--a); color: var(--a-ink);
   font: 800 13px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
   box-shadow: 0 4px 0 0 var(--adk); white-space: nowrap;
+  transition: transform .18s cubic-bezier(0.23,1,0.32,1), box-shadow .18s cubic-bezier(0.23,1,0.32,1);
 }
-.tr2-cta-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 0 var(--adk); }
+.tr2-cta-btn:active { transform: scale(.97) translateY(2px); box-shadow: 0 1px 0 0 var(--adk); }
 .tr2-cta-btn:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
 
 /* ── Section label par médaille ── */
@@ -353,6 +354,7 @@ const STYLE = `<style>
 @media (prefers-reduced-motion: reduce) {
   .tr2-card, .tr2-prog-fill { animation: none !important; transition: none !important; }
   .tr2-card.diamant { animation: none !important; }
+  .tr2-cta-btn, .tr2-sheet-share { transition: none !important; }
 }
 
 /* ── Bottom sheet (détail trophée) ── */
@@ -408,8 +410,9 @@ const STYLE = `<style>
   background: var(--a); color: var(--a-ink); font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; box-shadow: 0 4px 0 0 var(--adk);
   display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform .18s cubic-bezier(0.23,1,0.32,1), box-shadow .18s cubic-bezier(0.23,1,0.32,1);
 }
-.tr2-sheet-share:active { transform: translateY(3px); box-shadow: 0 1px 0 0 var(--adk); }
+.tr2-sheet-share:active { transform: scale(.97) translateY(2px); box-shadow: 0 1px 0 0 var(--adk); }
 .tr2-sheet-share:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 .tr2-sheet-close {
   padding: 14px 20px; min-height: 50px; border: 1px solid var(--bo); border-radius: var(--r-md);

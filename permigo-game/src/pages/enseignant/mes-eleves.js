@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // Enseignant — Mes élèves
-// Liste filtrée + progression REMC par élève
+// Liste filtrée + progression livret par élève
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -151,7 +151,8 @@ const STYLE = `<style>
       box-shadow: var(--s2);
     }
   }
-  .me-row:active { transform: scale(.985); }
+  .me-row:active { transform: scale(0.97); transition: transform 180ms cubic-bezier(0.23,1,0.32,1); }
+  @media (prefers-reduced-motion: reduce) { .me-row:active { transform: none; } }
   .me-row:focus { outline: none; }
   .me-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; border-radius: var(--r); }
 
@@ -335,7 +336,8 @@ const STYLE = `<style>
     box-shadow: var(--s-am);
     transition: transform .14s var(--ease-snap);
   }
-  .me-relancer-section:active { transform: scale(.98); }
+  .me-relancer-section:active { transform: scale(0.98); transition: transform 180ms cubic-bezier(0.23,1,0.32,1); }
+  @media (prefers-reduced-motion: reduce) { .me-relancer-section:active { transform: none; } }
   .me-relancer-section:focus-visible { outline: 3px solid var(--amx); outline-offset: 2px; }
   .me-relancer-title {
     font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -493,7 +495,7 @@ export async function mount(root) {
     <div class="me-page anim-slide-up">
       <header class="me-hd">
         <h1 class="me-h1">${_drillComp ? `Élèves bloqués sur ${esc(_drillComp)}` : "Mes élèves"}</h1>
-        <p class="me-sub">Chargement…</p>
+        <p class="me-sub">Récupération de la liste…</p>
       </header>
       <div class="me-skel-list">
         ${[1, 2, 3, 4].map(() => `<div class="me-skel-row"></div>`).join("")}
@@ -653,9 +655,9 @@ function renderDrill() {
       <div>
         <h1 class="me-h1" style="display:flex;align-items:center;gap:8px;font-size:17px;">
           ${icon("search", { size: 16, strokeWidth: 2.2, color: "var(--a)" })}
-          Bloqués sur ${esc(_drillComp)}
+          Bloqués — compétence ${esc(_drillComp)}
         </h1>
-        <p class="me-sub">${count} élève${count !== 1 ? "s" : ""} · 30 derniers jours</p>
+        <p class="me-sub">${count} élève${count !== 1 ? "s" : ""} en difficulté sur cette compétence · 30 derniers jours</p>
       </div>
     </header>
     <button class="me-drill-back" id="me-drill-back"
@@ -667,7 +669,7 @@ function renderDrill() {
         count === 0
           ? `<div style="text-align:center;padding:40px 20px;color:var(--mu2);font:500 14px/1.6 'Inter',sans-serif;">
              ${icon("check-circle", { size: 32, strokeWidth: 1.5, color: "var(--bo)" })}
-             <br><br>Aucun élève bloqué sur cette compétence actuellement.
+             <br><br>Aucun élève en difficulté sur cette compétence ces 30 derniers jours.
            </div>`
           : _drillEleves
               .map((e) => {
@@ -730,9 +732,9 @@ function render() {
     aRelancerList.length > 0
       ? `
     <div class="me-relancer-section" id="me-relancer-section" role="button" tabindex="0"
-         aria-label="${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} sans activité depuis 14 jours ou plus — voir la liste">
-      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;margin:0;">${icon("alert-circle", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} inactif${aRelancerList.length > 1 ? "s" : ""} <span style="margin-left:auto;display:inline-flex">${icon("chevron-right", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })}</span></p>
-      ${showRelancerHint ? `<p class="me-relancer-sub">Sans activité depuis 14 jours ou plus — un point en leçon peut débloquer la progression.</p>` : ""}
+         aria-label="${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} sans activité depuis plus de 14 jours — voir la liste">
+      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;margin:0;">${icon("alert-circle", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} sans activité depuis +14 jours <span style="margin-left:auto;display:inline-flex">${icon("chevron-right", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })}</span></p>
+      ${showRelancerHint ? `<p class="me-relancer-sub">Un rappel ou un point en leçon suffit souvent à relancer la dynamique.</p>` : ""}
     </div>
   `
       : "";
@@ -757,7 +759,9 @@ function render() {
         <p class="me-sub">${
           prets > 0
             ? `${total} élève${total > 1 ? "s" : ""} · <b style="color:var(--grd);font-weight:800">${prets} prêt${prets > 1 ? "s" : ""} pour l'examen</b>`
-            : `${total} élève${total > 1 ? "s" : ""} · ${actifs} actif${actifs > 1 ? "s" : ""}`
+            : total === 0
+              ? "Invite ton premier élève pour commencer"
+              : `${total} élève${total > 1 ? "s" : ""} · ${actifs} actif${actifs > 1 ? "s" : ""} cette semaine`
         }</p>
       </header>
 
@@ -768,22 +772,22 @@ function render() {
         <input
           class="me-search"
           type="search"
-          placeholder="Rechercher un élève…"
+          placeholder="Chercher par nom ou prénom…"
           value="${esc(_query)}"
           autocomplete="off"
-          aria-label="Rechercher un élève"
+          aria-label="Chercher un élève par nom ou prénom"
         />
         <button class="me-search-clear${_query ? " visible" : ""}" id="me-search-clear" type="button" aria-label="Effacer la recherche">✕</button>
       </div>
 
       <div class="me-tabs" role="tablist">
-        <button class="me-tab${_tab === "tous" ? " active" : ""}" data-tab="tous" role="tab" aria-selected="${_tab === "tous"}">Tous (${total})</button>
-        <button class="me-tab${_tab === "actifs" ? " active" : ""}" data-tab="actifs" role="tab" aria-selected="${_tab === "actifs"}">Actifs (${actifs})</button>
+        <button class="me-tab${_tab === "tous" ? " active" : ""}" data-tab="tous" role="tab" aria-selected="${_tab === "tous"}" title="Tous tes élèves en cours">Tous (${total})</button>
+        <button class="me-tab${_tab === "actifs" ? " active" : ""}" data-tab="actifs" role="tab" aria-selected="${_tab === "actifs"}" title="Élèves qui ont validé au moins une compétence et sont actifs">En cours (${actifs})</button>
         <button class="me-tab${_tab === "prets" ? " active" : ""}" data-tab="prets" role="tab" aria-selected="${_tab === "prets"}"
-                style="${prets > 0 && _tab !== "prets" ? "color:var(--grd)" : ""}">Prêts (${prets})</button>
+                style="${prets > 0 && _tab !== "prets" ? "color:var(--grd)" : ""}" title="Élèves dont les compétences de base C1-C3 sont toutes acquises">Prêts (${prets})</button>
         <button class="me-tab${_tab === "arelancer" ? " active" : ""}" data-tab="arelancer" role="tab" aria-selected="${_tab === "arelancer"}"
-                style="${aRelancerList.length > 0 && _tab !== "arelancer" ? "color:var(--amx)" : ""}">Inactifs (${aRelancerList.length})</button>
-        <button class="me-tab${_tab === "recus" ? " active" : ""}" data-tab="recus" role="tab" aria-selected="${_tab === "recus"}">Diplômés (${recusCount})</button>
+                style="${aRelancerList.length > 0 && _tab !== "arelancer" ? "color:var(--amx)" : ""}" title="Sans activité depuis 14 jours ou plus">À relancer (${aRelancerList.length})</button>
+        <button class="me-tab${_tab === "recus" ? " active" : ""}" data-tab="recus" role="tab" aria-selected="${_tab === "recus"}" title="Élèves ayant obtenu le permis">Diplômés (${recusCount})</button>
       </div>
 
       <button class="me-fab" id="me-fab" aria-label="Enregistrer une séance">
@@ -796,13 +800,12 @@ function render() {
             ? _tab === "tous" && !_query
               ? emptyState({
                   image: "/skins/empty-states/empty_eleves.png",
-                  title: "Invite ton premier élève",
-                  body: "Envoie un lien d'inscription par SMS ou WhatsApp. Ton élève crée son compte en 30 secondes.",
+                  title: "Aucun élève pour l'instant",
+                  body: "Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes et tu suis sa progression en temps réel.",
                   cta: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:4px">
                     <button id="me-invite-empty-btn" style="display:inline-flex;align-items:center;gap:7px;padding:12px 22px;background:var(--a);color:var(--a-ink);border:0;border-radius:12px;font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
-                      ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter ton premier élève
+                      ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
                     </button>
-                    <span style="font:500 12px/1.4 'Inter',sans-serif;color:var(--mu2);max-width:260px;text-align:center">Tu travailles en auto-école ? Tes élèves peuvent aussi être affectés par le gérant.</span>
                   </div>`,
                 })
               : `<div class="me-empty">
@@ -871,7 +874,7 @@ function renderRow(eleve) {
             ? `<span class="me-badge planifie">${icon("calendar", { size: 11, strokeWidth: 2.4 })} ${esc(fmtExamDate(eleve.examDate))}</span>`
             : "",
           !epure && eleve.aRelancer
-            ? `<span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">${icon("alert-circle", { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `${eleve.joursInactif}j` : "Inactif"}</span>`
+            ? `<span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">${icon("alert-circle", { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `+${eleve.joursInactif}j sans activité` : "Inactif"}</span>`
             : "",
         ]
           .filter(Boolean)
@@ -879,7 +882,7 @@ function renderRow(eleve) {
 
   return `
     <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="button" tabindex="0"
-         aria-label="Fiche de ${fullNom} — ${eleve.acquis}/${eleve.total} compétences acquises${eleve.actif ? "" : ", inactif"}">
+         aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} compétences acquises${eleve.readiness === "pret" ? ", prêt pour l'examen" : eleve.aRelancer ? ", à relancer" : ""}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 44)}</div>
 
       <div class="me-info">
@@ -889,7 +892,7 @@ function renderRow(eleve) {
         ${badges ? `<div class="me-meta">${badges}</div>` : ""}
       </div>
 
-      <div class="me-prog">
+      <div class="me-prog" title="${eleve.acquis} compétence${eleve.acquis > 1 ? "s" : ""} acquise${eleve.acquis > 1 ? "s" : ""} sur ${eleve.total}">
         <div class="me-prog-bar">
           <div class="me-prog-fill ${progState}" style="width:${pct}%"></div>
         </div>
@@ -1099,7 +1102,7 @@ function openQuickMenu(eleveId, anchorRow) {
       ${
         showManque
           ? `<button class="me-qm-item" data-action="manque">
-               <span class="me-qm-ico">${icon("clipboard", { size: 14, strokeWidth: 2.5 })}</span> Voir ce qu'il manque (${nMissing})
+               <span class="me-qm-ico">${icon("clipboard", { size: 14, strokeWidth: 2.5 })}</span> Compétences restantes (${nMissing})
              </button>`
           : ""
       }
@@ -1107,7 +1110,7 @@ function openQuickMenu(eleveId, anchorRow) {
         <span class="me-qm-ico">${icon("check", { size: 14, strokeWidth: 2.5 })}</span> Enregistrer une séance
       </button>
       <button class="me-qm-item" data-action="livret">
-        <span class="me-qm-ico">${icon("arrow-right", { size: 14, strokeWidth: 2.5 })}</span> Ouvrir le livret REMC
+        <span class="me-qm-ico">${icon("arrow-right", { size: 14, strokeWidth: 2.5 })}</span> Ouvrir le livret de compétences
       </button>
       <div class="me-qm-sep"></div>
       <div class="me-qm-label">Examen</div>
@@ -1477,7 +1480,7 @@ function openMissingPanel(eleve) {
     <div class="me-miss-bg" data-close="1"></div>
     <div class="me-miss-card" role="dialog" aria-modal="true" aria-label="Compétences manquantes de ${nom}">
       <div class="me-miss-title">Il manque à ${nom}</div>
-      <div class="me-miss-sub">${eleve.acquis}/${eleve.total} acquises · ${baseRestantes > 0 ? `${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base (C1-C3) à valider pour être prêt` : "bases C1-C3 acquises — prêt pour l'examen"}</div>
+      <div class="me-miss-sub">${eleve.acquis}/${eleve.total} compétences acquises · ${baseRestantes > 0 ? `encore ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} essentielles avant l'examen` : "toutes les compétences essentielles acquises — prêt pour l'examen"}</div>
       <div class="me-miss-list">
         ${
           missing.length === 0
@@ -1497,7 +1500,7 @@ function openMissingPanel(eleve) {
               }).join("")
         }
       </div>
-      <button class="me-miss-cta" data-livret="1">Ouvrir le livret REMC</button>
+      <button class="me-miss-cta" data-livret="1">Ouvrir le livret de compétences</button>
     </div>
   `;
   document.body.appendChild(wrap);
@@ -1527,9 +1530,9 @@ function renderList() {
   _root.querySelectorAll(".me-tab").forEach((btn) => {
     const tab = btn.dataset.tab;
     if (tab === "tous") btn.textContent = `Tous (${total})`;
-    if (tab === "actifs") btn.textContent = `Actifs (${actifs})`;
+    if (tab === "actifs") btn.textContent = `En cours (${actifs})`;
     if (tab === "prets") btn.textContent = `Prêts (${prets})`;
-    if (tab === "arelancer") btn.textContent = `Inactifs (${arelancer})`;
+    if (tab === "arelancer") btn.textContent = `À relancer (${arelancer})`;
     if (tab === "recus") btn.textContent = `Diplômés (${recusCount})`;
   });
 
@@ -1538,13 +1541,12 @@ function renderList() {
       _tab === "tous" && !_query
         ? emptyState({
             image: "/skins/empty-states/empty_eleves.png",
-            title: "Invite ton premier élève",
-            body: "Envoie un lien d'inscription par SMS ou WhatsApp. Ton élève crée son compte en 30 secondes.",
+            title: "Aucun élève pour l'instant",
+            body: "Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes et tu suis sa progression en temps réel.",
             cta: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:4px">
               <button id="me-invite-empty-btn" style="display:inline-flex;align-items:center;gap:7px;padding:12px 22px;background:var(--a);color:var(--a-ink);border:0;border-radius:12px;font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
-                ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter ton premier élève
+                ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
               </button>
-              <span style="font:500 12px/1.4 'Inter',sans-serif;color:var(--mu2);max-width:260px;text-align:center">Tu travailles en auto-école ? Tes élèves peuvent aussi être affectés par le gérant.</span>
             </div>`,
           })
         : `<div class="me-empty">

@@ -598,7 +598,7 @@ async function loadData(me) {
     recos.push({
       icon: icon("target", { size: 18, strokeWidth: 2, color: "var(--a)" }),
       ttl: "Lance ta semaine",
-      txt: "Valide 1 compétence avec un élève actif pour relancer ton streak pro.",
+      txt: "Valide une compétence avec un élève actif pour alimenter ton streak.",
       route: "#/log-session",
     });
   }
@@ -622,8 +622,8 @@ async function loadData(me) {
     const nm = esc(labelComp(d.compId));
     recos.push({
       icon: icon("search", { size: 18, strokeWidth: 2, color: "var(--blk)" }),
-      ttl: `Débrief sur ${d.compId}`,
-      txt: `${d.count} élève${d.count > 1 ? "s" : ""} bloqué${d.count > 1 ? "s" : ""} sur "${nm}". Prévois un point pédagogique dédié.`,
+      ttl: `Point pédagogique : ${nm}`,
+      txt: `${d.count} élève${d.count > 1 ? "s" : ""} bloqué${d.count > 1 ? "s" : ""} sur cette compétence. Prévois un temps dédié en leçon.`,
       route: `#/eleves?bloque_sur=${encodeURIComponent(d.compId)}`,
     });
   }
@@ -635,7 +635,7 @@ async function loadData(me) {
         color: "var(--grd)",
       }),
       ttl: "Tout roule",
-      txt: "Tes élèves progressent bien. Continue sur cette lancée !",
+      txt: "Tes élèves progressent bien ce mois. Rien d'urgent à ce stade.",
       route: null,
     });
   }
@@ -668,7 +668,7 @@ function renderAll(root, me, data) {
         <p class="ins-sub">${
           data.valsCeMoisCount > 0
             ? `Ce mois, tu as fait valider <b style="color:var(--adk);font-weight:800">${data.valsCeMoisCount} compétence${data.valsCeMoisCount > 1 ? "s" : ""}</b> à tes ${data.nbElevesAccompagnes} élève${data.nbElevesAccompagnes > 1 ? "s" : ""}.`
-            : "Ton impact sur tes élèves · 60 derniers jours"
+            : "Vue d'ensemble de ton activité · 60 derniers jours"
         }</p>
       </header>
 
@@ -722,7 +722,7 @@ function renderKpis({
       </div>
       <div class="ins-sec-card">
         <div class="ins-sec-val">${tauxVal}</div>
-        <div class="ins-sec-lbl">Taux quiz</div>
+        <div class="ins-sec-lbl">Réussite Révision</div>
       </div>
       <div class="ins-sec-card">
         <div class="ins-sec-val">${streakVal}${streakPro ? ` ${icon("flame", { size: 15, strokeWidth: 2, color: "var(--amk)" })}` : ""}</div>
@@ -762,7 +762,7 @@ function renderActivityChartSection({ heatmap }) {
       <div class="ins-section">
         <div class="ins-section-title">Tes jours d'activité · 60 derniers jours</div>
         <div class="ins-chart-wrap">
-          <div class="ins-chart-empty">Aucune validation sur les 60 derniers jours encore.<br>Enregistre ta première séance pour voir tes patterns.</div>
+          <div class="ins-chart-empty">Aucune validation sur les 60 derniers jours.<br>Enregistre ta première séance pour voir quels jours tu es le plus actif.</div>
         </div>
       </div>
     `;
@@ -822,7 +822,7 @@ function renderElevesList(tab, topProgressent, topStagnent) {
   if (list.length === 0) {
     const empty =
       tab === "progressent"
-        ? "Aucun élève avec ≥ 2 compétences ce mois encore."
+        ? "Aucun élève avec plusieurs compétences validées ce mois."
         : "Personne en pause — tout le monde avance !";
     return `<div class="ins-empty">${empty}</div>`;
   }
@@ -832,7 +832,7 @@ function renderElevesList(tab, topProgressent, topStagnent) {
       const badge =
         tab === "progressent"
           ? `<span class="ins-badge ins-badge-green">+${e.compsThisMonth} ce mois</span>`
-          : `<span class="ins-badge ins-badge-orange">${e.daysAgo ? `${e.daysAgo}j inactif` : "Inactif"}</span>`;
+          : `<span class="ins-badge ins-badge-orange">${e.daysAgo ? `${e.daysAgo}j sans validation` : "En pause"}</span>`;
       const meta =
         tab === "progressent"
           ? `${e.compsThisMonth} compétence${e.compsThisMonth > 1 ? "s" : ""} acquise${e.compsThisMonth > 1 ? "s" : ""} ce mois`

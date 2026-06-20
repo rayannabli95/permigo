@@ -206,9 +206,15 @@ const STYLE = `<style>
 .ppr-skel { background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%); background-size: 200% 100%; animation: pprShim 1.4s ease-in-out infinite; }
 @keyframes pprShim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
+/* ── Retry button active state ── */
+#ppr-retry {
+  transition: transform .18s cubic-bezier(0.23,1,0.32,1), box-shadow .18s cubic-bezier(0.23,1,0.32,1);
+}
+#ppr-retry:active { transform: scale(.97); box-shadow: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .ppr-node, .ppr-node.next .nd-circle, .ppr-node.next .nd-circle::after, .ppr-node.next .nd-lbl::before,
-  .ppr-next-fill, .ppr-skel { animation: none !important; transition: none !important; opacity: 1 !important; }
+  .ppr-next-fill, .ppr-skel, #ppr-retry { animation: none !important; transition: none !important; opacity: 1 !important; }
 }
 </style>`;
 
@@ -312,7 +318,7 @@ function _render(root, totalVals, state) {
       <div class="ppr-final">
         <div class="crown">${icon("crown", { size: 26, strokeWidth: 2 })}</div>
         <h3>${esc(tiers[tiers.length - 1].title)}</h3>
-        <p>${tiers[tiers.length - 1].threshold} validations — le palier ultime. Chaque séance t'en rapproche.</p>
+        <p>${tiers[tiers.length - 1].threshold} validations — palier ultime. Chaque séance compte.</p>
       </div>
     </div>`;
 
@@ -337,7 +343,7 @@ function _nextHtml(state) {
   if (!state.nextReward) {
     return `<div class="ppr-next done">
       <span style="color:var(--a)">${icon("check-circle", { size: 22, strokeWidth: 2 })}</span>
-      <div class="ppr-next-tool">Palier maximum atteint — Expert REMC certifié.</div>
+      <div class="ppr-next-tool">Palier maximum atteint — référent certifié.</div>
     </div>`;
   }
   const t = state.nextReward.data;

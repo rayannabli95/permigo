@@ -79,6 +79,8 @@ const STYLE = `<style>
     transition: border-color .15s ease;
   }
   .lr-back:hover { border-color: var(--a); }
+  .lr-back:active { transform: scale(.97); transition: transform .12s cubic-bezier(.23,1,.32,1); }
+  @media (prefers-reduced-motion: reduce) { .lr-back:active { transform: none; } }
   .lr-hd-info { flex: 1; min-width: 0; }
   .lr-title {
     font: 700 17px/1.2 'Plus Jakarta Sans', sans-serif;
@@ -405,7 +407,8 @@ const STYLE = `<style>
     cursor: not-allowed;
   }
   .lr-btn-save:not(:disabled):hover { opacity: .92; }
-  .lr-btn-save:not(:disabled):active { transform: scale(.98); }
+  .lr-btn-save:not(:disabled):active { transform: scale(.97); transition: transform .12s cubic-bezier(.23,1,.32,1), opacity .15s ease; }
+  @media (prefers-reduced-motion: reduce) { .lr-btn-save:not(:disabled):active { transform: none; } }
 
   /* Skeleton */
   .lr-skel { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
@@ -473,7 +476,7 @@ let _me = null;
 let _eleveId = null;
 let _eleveProfil = null; // { prenom, nom }
 let _validationsMap = {}; // competence_id → { statut, note }
-let _theory = null; // { score, nComp, nExams } — ligue théorique (autonomie)
+let _theory = null; // { score, nComp, nExams } — ligue Révision (autonomie élève)
 let _sheetComp = null; // { c, n } la comp ouverte dans le sheet
 let _sheetStatut = null;
 let _sheetNote = "";
@@ -492,7 +495,7 @@ export async function mount(root, eleveId) {
       <div class="lr-page">
         <div class="lr-err">
           <span class="lr-err-ico">${icon("alert-circle", { size: 22 })}</span>
-          Aucun élève sélectionné. Retournez à la liste.
+          Aucun élève sélectionné — retourne à la liste.
         </div>
       </div>
     `;
@@ -546,7 +549,7 @@ async function loadData() {
     };
   });
 
-  // Ligue théorique (autonomie élève) — lecture seule, RLS : enseignant
+  // Ligue Révision (autonomie élève) — lecture seule, RLS : enseignant
   // voit les tentatives des élèves de son école.
   try {
     const { data: qa, error } = await sb
@@ -559,8 +562,8 @@ async function loadData() {
   }
 }
 
-// ─── Ligne « Ligue théorique » (KPI, lecture seule, ton factuel) ──
-// Hook conversation moniteur : « t'en es où sur tes quiz ? »
+// ─── Ligne « Révision (autonomie) » (KPI, lecture seule, ton factuel) ──
+// Donne au moniteur une vision rapide de l'engagement élève entre les leçons.
 function _renderTheoryRow() {
   if (!_theory) return "";
   const info = theoryLeague(_theory.score);
@@ -569,11 +572,11 @@ function _renderTheoryRow() {
     : "Pas encore commencé";
   const detail = info.league
     ? `${_theory.nComp} quiz de compétence réussi${_theory.nComp > 1 ? "s" : ""} · ${_theory.nExams} examen${_theory.nExams > 1 ? "s" : ""} blanc${_theory.nExams > 1 ? "s" : ""} réussi${_theory.nExams > 1 ? "s" : ""}`
-    : "Aucun quiz réussi en autonomie pour l'instant";
+    : "Pas encore de quiz réussi en autonomie";
   const dotColor = info.league ? info.league.color : "var(--mu2)";
   return `
     <div class="lr-kpi-row" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bo2)">
-      <span class="lr-kpi-label">Théorie (autonomie)</span>
+      <span class="lr-kpi-label">Révision (autonomie)</span>
       <span style="display:inline-flex;align-items:center;gap:6px">
         <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};display:inline-block" aria-hidden="true"></span>
         <span class="lr-kpi-pct">${label}</span>
@@ -602,8 +605,8 @@ function render() {
       <header class="lr-hd">
         <button class="lr-back" aria-label="Retour liste élèves">←</button>
         <div class="lr-hd-info">
-          <h1 class="lr-title" tabindex="-1">Livret REMC — ${prenomNom || "Élève"}</h1>
-          <p class="lr-subtitle">${acquis}/${REMC_TOTAL} compétences acquises</p>
+          <h1 class="lr-title" tabindex="-1">Livret — ${prenomNom || "Élève"}</h1>
+          <p class="lr-subtitle">${acquis}/${REMC_TOTAL} compétences validées</p>
         </div>
         <button class="lr-bilan-btn" id="lr-bilan-btn" aria-label="Voir le bilan trimestriel">
           ${icon("file-text", { size: 14, strokeWidth: 2 })} Bilan
@@ -612,7 +615,7 @@ function render() {
 
       <div class="lr-kpi">
         <div class="lr-kpi-row">
-          <span class="lr-kpi-label">Progression globale</span>
+          <span class="lr-kpi-label">Compétences validées</span>
           <span>
             <span class="lr-kpi-val">${acquis}</span>
             <span class="lr-kpi-pct"> / ${REMC_TOTAL} · ${pct}%</span>
@@ -858,7 +861,7 @@ function renderComp(sub, col) {
 
   return `
     <div class="lr-comp" data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
-         role="button" tabindex="0" aria-label="${esc(sub.n)} — ${cfg.label}. Appuyer pour évaluer">
+         role="button" tabindex="0" aria-label="${esc(sub.n)} — ${cfg.label}. Appuyer pour évaluer cette compétence">
       <span class="lr-comp-dot" style="background:${cfg.dot}"></span>
       <span class="lr-comp-code" style="color:${col.accent}; background:${col.bg}">${esc(sub.c)}</span>
       <span class="lr-comp-nom">${esc(sub.n)}</span>
@@ -912,7 +915,7 @@ function openSheet(compId, compNom) {
       </div>
       <div class="lr-sheet-body">
         <div>
-          <label class="lr-note-label">Statut</label>
+          <label class="lr-note-label">Évaluer cette compétence</label>
           <div class="lr-statut-grid">
             ${renderStatutBtn("acquis", icon("check-circle", { size: 16, strokeWidth: 2.2, color: "var(--grd)" }), "Acquis")}
             ${renderStatutBtn("en_cours", icon("refresh-cw", { size: 16, strokeWidth: 2.2, color: "var(--amk)" }), "En cours")}
@@ -920,18 +923,18 @@ function openSheet(compId, compNom) {
           </div>
         </div>
         <div>
-          <label class="lr-note-label" for="lr-note-ta">Note (optionnel)</label>
+          <label class="lr-note-label" for="lr-note-ta">Observations (optionnel)</label>
           <textarea
             id="lr-note-ta"
             class="lr-note"
             maxlength="280"
-            placeholder="Observations sur la séance…"
+            placeholder="Ce que tu as constaté en séance…"
             rows="3"
           >${esc(_sheetNote)}</textarea>
           <div class="lr-note-count">${_sheetNote.length}/280</div>
         </div>
         <button class="lr-btn-save" ${_sheetStatut ? "" : "disabled"}>
-          Enregistrer
+          ${_sheetStatut ? "Enregistrer" : "Choisis un statut pour valider"}
         </button>
       </div>
     </div>
@@ -962,7 +965,9 @@ function openSheet(compId, compNom) {
           (b) =>
             (b.className = `lr-statut-btn${b.dataset.statut === _sheetStatut ? " selected-" + _sheetStatut : ""}`),
         );
-      overlay.querySelector(".lr-btn-save").disabled = false;
+      const saveBtn = overlay.querySelector(".lr-btn-save");
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Enregistrer";
     });
   });
 
@@ -1089,11 +1094,11 @@ function showSuccessState(overlay) {
   sheet.innerHTML = `
     <div class="lr-success">
       <div class="lr-success-check">${icon("check", { size: 32, strokeWidth: 3, color: "var(--grd)" })}</div>
-      <div class="lr-success-comp">${esc(_sheetComp.n)} · acquis</div>
-      <div class="lr-success-title">${complete ? `${prenom} a tout validé` : `${prenom} vient d'avancer`}</div>
+      <div class="lr-success-comp">${esc(_sheetComp.n)} — validée</div>
+      <div class="lr-success-title">${complete ? `${prenom} a tout validé` : `${prenom} a progressé`}</div>
       <div class="lr-success-bar"><div class="lr-success-fill" style="width:0%"></div></div>
-      <div class="lr-success-meta"><b>${acquisCount}/${REMC_TOTAL}</b> compétences · ${pct}%</div>
-      <div class="lr-success-note">${complete ? `${prenom} est prêt pour l'examen.` : `${prenom} le voit déjà dans son appli.`}</div>
+      <div class="lr-success-meta"><b>${acquisCount}/${REMC_TOTAL}</b> compétences validées · ${pct}%</div>
+      <div class="lr-success-note">${complete ? `${prenom} est prêt·e pour l'examen.` : `${prenom} voit sa progression dans son appli.`}</div>
       <button class="lr-btn-save" id="lr-success-continue" type="button">Continuer</button>
     </div>
   `;

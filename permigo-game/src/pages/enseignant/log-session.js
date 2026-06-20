@@ -25,18 +25,18 @@ const TOUR_KEY = "pg-tour-validation-v1";
 const VALIDATION_TOUR_STEPS = [
   {
     sel: ".vs-monde-hd",
-    title: "Les mondes REMC",
-    text: "Les 30 compétences officielles sont rangées en 4 mondes. Déroule-les d'un appui.",
+    title: "4 catégories de compétences",
+    text: "Le programme officiel est découpé en 4 catégories. Déroule celle que tu veux évaluer.",
   },
   {
     sel: ".vs-chip:not(.locked)",
-    title: "Coche ce qui est travaillé",
-    text: "Chaque appui change l'état : acquis → en cours → à retravailler. Re-appuie pour corriger.",
+    title: "Évalue chaque compétence",
+    text: "Un appui change l'état : acquis → en cours → à retravailler. Rappuie pour corriger ou remettre à zéro.",
   },
   {
     sel: "#vs-submit",
     title: "Enregistre la séance",
-    text: "Le livret de l'élève se met à jour immédiatement — il voit sa progression dès sa prochaine connexion.",
+    text: "Le livret de l'élève se met à jour immédiatement. Il voit sa progression dès sa prochaine connexion.",
   },
 ];
 
@@ -96,7 +96,8 @@ const STYLE = `<style>
   .vs-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
   .vs-back { position: relative; width: 40px; height: 40px; flex-shrink: 0; border: 1px solid var(--bo); background: var(--su); border-radius: var(--r); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .vs-back::before { content: ''; position: absolute; inset: -2px; }
-  .vs-back:active { transform: scale(.95); }
+  .vs-back:active { transform: scale(.97); transition: transform .12s cubic-bezier(.23,1,.32,1); }
+  @media (prefers-reduced-motion: reduce) { .vs-back:active { transform: none; } }
   .vs-h1 { font: 800 19px/1.2 'Plus Jakarta Sans', sans-serif; margin: 0; letter-spacing: -.02em; }
   .vs-sub { font: 500 12.5px/1.3 'Inter', sans-serif; color: color-mix(in srgb, var(--mu) 45%, var(--ink)); margin: 2px 0 0; }
 
@@ -158,7 +159,8 @@ const STYLE = `<style>
   .vs-chips { display: flex; flex-direction: column; gap: 4px; padding: 0 12px 12px; }
   @media (prefers-reduced-motion: reduce) { .vs-monde-chev, .vs-monde-body { transition: none; } }
   .vs-chip { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; padding: 8px 11px; min-height: 42px; border: 1px solid var(--bo); background: var(--su); border-radius: var(--r); cursor: pointer; font: 500 13px/1.25 'Inter', sans-serif; color: var(--ink); text-align: left; -webkit-tap-highlight-color: transparent; transition: border-color .12s, background .12s; }
-  .vs-chip:active { transform: scale(.99); }
+  .vs-chip:active { transform: scale(.98); transition: transform .12s cubic-bezier(.23,1,.32,1); }
+  @media (prefers-reduced-motion: reduce) { .vs-chip:active { transform: none; } }
   .vs-chip-ico { width: 15px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--bo4); }
   .vs-chip-code { font: 700 10px/1 'IBM Plex Mono', monospace; color: var(--mu); background: var(--bg2); padding: 3px 5px; border-radius: 5px; flex-shrink: 0; }
   .vs-chip-nom { flex: 1; min-width: 0; }
@@ -311,7 +313,7 @@ function render() {
         <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
         <div>
           <h1 class="vs-h1">Valider une séance</h1>
-          ${_showSub ? `<p class="vs-sub">Choisis l'élève, déroule un monde, coche ce qui est validé.</p>` : ""}
+          ${_showSub ? `<p class="vs-sub">Choisis l'élève, déroule une catégorie, appuie sur les compétences travaillées.</p>` : ""}
         </div>
       </div>
       ${renderEleveDropdown()}
@@ -345,7 +347,7 @@ function renderEleveDropdown() {
 
   const opts =
     list.length === 0
-      ? `<div class="vs-empty">${_eleves.length === 0 ? "Aucun élève attitré." : "Aucun résultat."}</div>`
+      ? `<div class="vs-empty">${_eleves.length === 0 ? "Aucun élève attitré pour l'instant." : "Aucun résultat pour cette recherche."}</div>`
       : list
           .map((e, i) => {
             const sel = e.id === _eleve;
@@ -393,7 +395,7 @@ function renderComps() {
         const meta = locked ? { ico: "check" } : statutMeta(st);
         const ico = meta ? icon(meta.ico, { size: 12, strokeWidth: 2.8 }) : "";
         return `<button class="vs-chip ${cls}" type="button" ${locked ? 'disabled aria-disabled="true"' : `data-comp="${esc(s.c)}"`}
-                  title="${esc(s.n)}${locked ? " — déjà acquis" : ""}">
+                  title="${esc(s.n)}${locked ? " — compétence déjà validée" : ""}">
           <span class="vs-chip-ico">${ico}</span><span class="vs-chip-code">${esc(s.c)}</span><span class="vs-chip-nom">${esc(s.n)}</span>
         </button>`;
       })
@@ -413,8 +415,8 @@ function renderComps() {
 
   return `
     <div class="vs-comps">
-      <p class="vs-legend" aria-label="Chaque appui sur une compétence change son état : acquis, en cours, à retravailler">
-        <span class="vs-leg acquis">acquis</span><span class="vs-leg en_cours">en cours</span><span class="vs-leg a_retravailler">à retravailler</span></p>
+      <p class="vs-legend" aria-label="Un appui change le statut de la compétence : acquis, en cours, à retravailler. Rappuie pour corriger.">
+        <span class="vs-leg acquis">Acquis</span><span class="vs-leg en_cours">En cours</span><span class="vs-leg a_retravailler">À retravailler</span></p>
       ${sections}
     </div>`;
 }
@@ -422,8 +424,8 @@ function renderComps() {
 function renderNote() {
   return `
     <div class="vs-card">
-      <div class="vs-card-ttl">${icon("edit-3", { size: 13, strokeWidth: 2.4 })} Note (optionnel)</div>
-      <textarea class="vs-note" id="vs-note" maxlength="${MAX_NOTE}" placeholder="Un mot sur la séance…" aria-label="Note de séance">${esc(_note)}</textarea>
+      <div class="vs-card-ttl">${icon("edit-3", { size: 13, strokeWidth: 2.4 })} Observations (optionnel)</div>
+      <textarea class="vs-note" id="vs-note" maxlength="${MAX_NOTE}" placeholder="Ce que tu as observé, les points à retravailler…" aria-label="Observations de séance">${esc(_note)}</textarea>
       <div class="vs-note-count" id="vs-note-count">${_note.length}/${MAX_NOTE}</div>
     </div>`;
 }
@@ -658,8 +660,8 @@ function showSessionSuccess(prenom, nNew, totalAcquis) {
         <div class="vs-success-title">${complete ? `${esc(prenom)} a tout validé` : `${esc(prenom)} a progressé`}</div>
         <div class="vs-success-count">${nNew} compétence${nNew > 1 ? "s" : ""} validée${nNew > 1 ? "s" : ""} aujourd'hui</div>
         <div class="vs-success-bar"><div class="vs-success-fill" style="width:0%"></div></div>
-        <div class="vs-success-meta"><b>${totalAcquis}/${REMC_TOTAL}</b> compétences · ${pct}%</div>
-        <div class="vs-success-note">${complete ? `${esc(prenom)} est prêt pour l'examen.` : `${esc(prenom)} le voit déjà dans son appli.`}</div>
+        <div class="vs-success-meta"><b>${totalAcquis}/${REMC_TOTAL}</b> compétences validées · ${pct}%</div>
+        <div class="vs-success-note">${complete ? `${esc(prenom)} est prêt·e pour l'examen.` : `${esc(prenom)} voit sa progression dans son appli.`}</div>
         <button class="vs-submit pg-btn vs-success-done" id="vs-success-done" type="button">Voir mes élèves</button>
       </div>
     </div>`;

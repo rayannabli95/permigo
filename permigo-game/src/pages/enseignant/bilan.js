@@ -305,16 +305,16 @@ function renderKPI(kpi) {
   <div class="bl-kpi">
     <div class="bl-kpi-val">${kpi.acquises_now ?? "—"}<span class="bl-kpi-unit">/31</span></div>
     <div class="bl-kpi-label">Compétences acquises</div>
-    <span class="bl-kpi-delta flat">Total acquis</span>
+    <span class="bl-kpi-delta flat">Validées au total</span>
   </div>
   <div class="bl-kpi">
     <div class="bl-kpi-val" style="color:${esc(scoreColor)}">${noQuiz ? "—" : kpi.score_moyen != null ? kpi.score_moyen + "%" : "—"}</div>
-    <div class="bl-kpi-label">Score moyen quiz</div>
-    <span class="bl-kpi-delta ${!noQuiz && kpi.score_moyen >= 70 ? "up" : "flat"}">${noQuiz ? "Pas encore de quiz" : `${kpi.quiz_reussis ?? 0}/${kpi.quiz_total} réussis`}</span>
+    <div class="bl-kpi-label">Score moyen en Révision</div>
+    <span class="bl-kpi-delta ${!noQuiz && kpi.score_moyen >= 70 ? "up" : "flat"}">${noQuiz ? "Aucun quiz tenté" : `${kpi.quiz_reussis ?? 0}/${kpi.quiz_total} réussis`}</span>
   </div>
   <div class="bl-kpi bl-kpi-streak">
     <div class="bl-kpi-val" style="color:var(--or)">${icon("flame", { size: 22, strokeWidth: 2.2, color: "var(--or)" })} ${kpi.jours_actifs ?? "—"}</div>
-    <div class="bl-kpi-label">Jours actifs</div>
+    <div class="bl-kpi-label">Jours avec activité Révision</div>
   </div>
 </div>`;
 }
@@ -334,7 +334,7 @@ function renderByMonde(byMonde) {
 </div>`,
               )
               .join("")
-          : `<div class="bl-comp-none">Aucune compétence acquise</div>`;
+          : `<div class="bl-comp-none">Aucune compétence validée dans cette catégorie</div>`;
 
       return `
 <div class="bl-section">
@@ -354,9 +354,9 @@ function renderEvolution(evolution) {
   if (!evolution || evolution.length === 0) {
     return `<div class="bl-section">
   <div class="bl-section-hd">
-    <div class="bl-section-title">${icon("trending-up", { size: 16 })} Évolution mensuelle</div>
+    <div class="bl-section-title">${icon("trending-up", { size: 16 })} Compétences validées par mois</div>
   </div>
-  <div class="bl-comp-none">Aucune donnée d'évolution disponible</div>
+  <div class="bl-comp-none">Pas encore de données — les validations apparaîtront ici mois par mois.</div>
 </div>`;
   }
 
@@ -376,9 +376,9 @@ function renderEvolution(evolution) {
   return `
 <div class="bl-section">
   <div class="bl-section-hd">
-    <div class="bl-section-title">${icon("trending-up", { size: 16 })} Évolution mensuelle</div>
+    <div class="bl-section-title">${icon("trending-up", { size: 16 })} Compétences validées par mois</div>
   </div>
-  <div class="bl-chart" role="img" aria-label="Graphique d'évolution mensuelle">${bars}</div>
+  <div class="bl-chart" role="img" aria-label="Graphique compétences validées par mois">${bars}</div>
 </div>`;
 }
 
@@ -386,7 +386,7 @@ function renderComment(comment) {
   if (!comment) return "";
   return `
 <div class="bl-comment">
-  <div class="bl-comment-label">${icon("message-circle", { size: 12 })} Commentaire pédagogique auto-généré</div>
+  <div class="bl-comment-label">${icon("message-circle", { size: 12 })} Synthèse auto</div>
   <div class="bl-comment-txt">${esc(comment)}</div>
 </div>`;
 }

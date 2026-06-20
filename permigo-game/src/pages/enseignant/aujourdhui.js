@@ -24,28 +24,28 @@ import { onPopupsSettled } from "@/utils/intro-overlays.js";
 const TOUR_KEY = "pg-tour-moniteur-v1";
 const MONITEUR_TOUR_STEPS = [
   {
-    title: "Bienvenue sur PermiGo 👋",
-    text: "Ton livret papier devient numérique et vivant : tes élèves voient leur progression en temps réel, et toi tu sais où en est chacun en un coup d'œil.",
+    title: "Bienvenue sur PermiGo",
+    text: "Ton livret passe en numérique. Tes élèves voient leur progression en temps réel — toi tu sais où en est chacun en un coup d'œil.",
   },
   {
     sel: "#aj-act-invite",
-    title: "Invite tes élèves",
-    text: "Tout commence ici : ajoute un élève, il reçoit un lien pour créer son compte et te sera rattaché automatiquement.",
+    title: "Commence ici",
+    text: "Invite un élève : il reçoit un lien, crée son compte et t'est rattaché automatiquement. C'est le point de départ.",
   },
   {
     sel: "#bn-seance-fab",
-    title: "Enregistre une séance",
-    text: "Après chaque leçon, coche ce que ton élève a réussi. Son livret se remplit tout seul, et il le voit aussitôt — fini le papier.",
+    title: "Valide après chaque leçon",
+    text: "Coche les compétences réussies. Le livret de ton élève se met à jour aussitôt — fini le papier.",
   },
   {
     sel: '.bn-tab[data-id="eleves"]',
-    title: "Tes élèves",
-    text: "Retrouve chaque élève, sa progression et sa fiche détaillée. Les élèves à relancer remontent en haut.",
+    title: "Suis tes élèves",
+    text: "Retrouve chaque élève, son livret et sa progression. Les élèves à relancer remontent automatiquement.",
   },
   {
     sel: '.bn-tab[data-id="insights"]',
-    title: "Tes stats",
-    text: "Suis l'engagement de tes élèves et leur progression moyenne, mois après mois.",
+    title: "Mesure l'engagement",
+    text: "Qui révise cette semaine, qui stagne. Les chiffres sont là pour t'aider à prioriser.",
   },
 ];
 
@@ -153,19 +153,20 @@ const STYLE = `<style>
     background: none; border: 1.5px solid var(--bo); border-radius: var(--r-md);
     color: var(--ink); font: 700 13.5px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent;
-    transition: border-color .12s, transform .12s;
+    transition: border-color .15s, transform .2s cubic-bezier(.23,1,.32,1);
   }
-  .aj-validate-other:active { transform: scale(.98); border-color: var(--bo4); }
+  .aj-validate-other:active { transform: scale(.97); border-color: var(--bo4); }
   .aj-validate-cta {
     width: 100%; padding: 14px; min-height: 50px;
     display: flex; align-items: center; justify-content: center; gap: 7px;
     background: var(--a); color: var(--a-ink); border: 0; border-radius: var(--r-md);
     font: 800 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
     font-family: inherit; -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 4px 0 0 var(--adk); transition: transform .12s, box-shadow .12s;
+    box-shadow: 0 4px 0 0 var(--adk);
+    transition: transform .2s cubic-bezier(.23,1,.32,1), box-shadow .2s cubic-bezier(.23,1,.32,1);
   }
-  .aj-validate-cta:active { transform: translateY(3px); box-shadow: 0 1px 0 0 var(--adk); }
-  @media (prefers-reduced-motion: reduce) { .aj-hero2, .aj-validate { animation: none !important; } }
+  .aj-validate-cta:active { transform: translateY(3px) scale(.97); box-shadow: 0 1px 0 0 var(--adk); }
+  @media (prefers-reduced-motion: reduce) { .aj-hero2, .aj-validate { animation: none !important; transition: none !important; } }
 
   @keyframes ajIn {
     from { opacity: 0; transform: translateY(12px) scale(.98); }
@@ -227,7 +228,7 @@ const STYLE = `<style>
     min-height: 44px;
   }
   .aj-action:hover { border-color: var(--bo4); transform: translateY(-1px); }
-  .aj-action:active { transform: scale(.97); }
+  .aj-action:active { transform: scale(.97); transition: transform .18s cubic-bezier(.23,1,.32,1), border-color .15s; }
   .aj-action:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
   .aj-action-ico {
     width: 34px; height: 34px; border-radius: var(--r);
@@ -586,7 +587,11 @@ const STYLE = `<style>
   .aj-recap-row-status.s-auto      { background: var(--bg2); color: var(--mu2); }
 
   @media (prefers-reduced-motion: reduce) {
-    .aj-hero, .aj-recap, .aj-skel-kpi, .aj-skel-bloc, .aj-prog-bar { animation: none !important; transition: none !important; }
+    .aj-hero, .aj-hero2, .aj-recap, .aj-validate, .aj-skel-kpi, .aj-skel-bloc, .aj-prog-bar,
+    .aj-validate-cta, .aj-validate-other, .aj-action, .aj-eleve-row, .aj-prog, .aj-recap {
+      animation: none !important;
+      transition: none !important;
+    }
   }
 </style>`;
 
@@ -824,14 +829,14 @@ async function renderInto(root, _me) {
     nbElevesActifs === 0
       ? `
     <div class="aj-validate" id="aj-validate">
-      <div class="aj-validate-hd"><span class="aj-validate-ttl">Commence ici</span></div>
-      <p class="aj-validate-sub">Invite ton premier élève : il crée son compte, et son livret se remplit à chaque compétence que tu valides.</p>
+      <div class="aj-validate-hd"><span class="aj-validate-ttl">Par où commencer</span></div>
+      <p class="aj-validate-sub">Invite ton premier élève. Il reçoit un lien, crée son compte en 1 minute, et son livret de compétences s'ouvre automatiquement.</p>
       <button class="aj-validate-cta" id="aj-validate-invite" type="button">${icon("user-plus", { size: 16, strokeWidth: 2.2 })} Inviter un élève</button>
     </div>`
       : `
     <div class="aj-validate" id="aj-validate">
       <div class="aj-validate-hd"><span class="aj-validate-ttl">Valider une compétence</span></div>
-      <p class="aj-validate-sub">Touche un élève pour ouvrir son livret et cocher ce qu'il a réussi.</p>
+      <p class="aj-validate-sub">Sélectionne un élève pour ouvrir son livret et enregistrer ce qu'il a réussi.</p>
       <div class="aj-validate-list">
         ${toValidate
           .map((e) => {
@@ -859,10 +864,10 @@ async function renderInto(root, _me) {
       ? `
     <div class="aj-recap" id="aj-recap-soir" role="button" tabindex="0" aria-label="Ouvrir la validation de séance">
       <div class="aj-recap-head">
-        <span class="aj-recap-title">Ta journée</span>
+        <span class="aj-recap-title">Séances du jour</span>
         <span class="aj-recap-kpi">${todaySessions.length}</span>
       </div>
-      <div class="aj-recap-sub">${todaySessions.length} séance${todaySessions.length > 1 ? "s" : ""} enregistrée${todaySessions.length > 1 ? "s" : ""}</div>
+      <div class="aj-recap-sub">${todaySessions.length} séance${todaySessions.length > 1 ? "s" : ""} enregistrée${todaySessions.length > 1 ? "s" : ""} — Pense à valider les compétences.</div>
       <div class="aj-recap-rows">
         ${todaySessions
           .map(
@@ -890,8 +895,8 @@ async function renderInto(root, _me) {
           <h1 class="aj-hero2-name" tabindex="-1">${prenom ? `Bonjour, ${esc(fmtName(prenom))}` : "Aujourd'hui"}</h1>
           ${
             nbElevesActifs > 0
-              ? `<p class="aj-hero2-value">Tu accompagnes <b>${nbElevesActifs} élève${nbElevesActifs > 1 ? "s" : ""}</b> vers le permis. Leur livret se remplit à chaque compétence que tu valides.</p>`
-              : `<p class="aj-hero2-value">Ton livret numérique remplace le papier. Invite un élève pour démarrer.</p>`
+              ? `<p class="aj-hero2-value"><b>${nbElevesActifs} élève${nbElevesActifs > 1 ? "s" : ""}</b> en cours. Valide leurs compétences pour faire avancer leur livret.</p>`
+              : `<p class="aj-hero2-value">Commence par inviter un élève. Il rejoint en un clic, et son livret de compétences se remplit à chaque leçon.</p>`
           }
           ${
             streakPro >= 2
@@ -909,7 +914,7 @@ async function renderInto(root, _me) {
       ${validateWidget}
 
       <!-- KPI cadrés en valeur : mes élèves / engagement 7 j / progression -->
-      <div class="aj-section-title">Ce que tu fais avancer</div>
+      <div class="aj-section-title">Tableau de bord</div>
       <div class="aj-quickstats">
         <div class="aj-quickstat" title="${nbElevesEcole} élèves dans l'école">
           <div class="aj-quickstat-val">${nbElevesActifs}</div>
@@ -917,7 +922,7 @@ async function renderInto(root, _me) {
         </div>
         <div class="aj-quickstat"${nbElevesActifs > 0 ? ` title="${actifs7j} élèves sur ${nbElevesActifs}"` : ""}>
           <div class="aj-quickstat-val">${nbElevesActifs > 0 ? `${engagementPct}<small> %</small>` : "—"}</div>
-          <div class="aj-quickstat-lbl">Actifs cette semaine</div>
+          <div class="aj-quickstat-lbl">Actifs 7 derniers jours</div>
           <div class="aj-quickstat-bar"><div style="width:${engagementPct}%"></div></div>
         </div>
         <div class="aj-quickstat">
@@ -999,7 +1004,7 @@ async function renderInto(root, _me) {
             <a class="aj-rank-row" href="#/classement-eleves/theorie" id="aj-ligue-theorie">
               <span class="aj-rank-row-ico">${icon("book-open", { size: 14, strokeWidth: 2 })}</span>
               <span class="aj-rank-row-body">
-                <span class="aj-rank-row-main">Ligue théorie · mes élèves</span>
+                <span class="aj-rank-row-main">Ligue Révision · mes élèves</span>
                 <span class="aj-rank-row-sub">Qui révise en autonomie ?</span>
               </span>
               <span class="aj-rank-row-chev">${icon("chevron-right", { size: 16, strokeWidth: 2 })}</span>
@@ -1007,8 +1012,8 @@ async function renderInto(root, _me) {
             <a class="aj-rank-row" href="#/classement-eleves/pratique" id="aj-ligue-pratique">
               <span class="aj-rank-row-ico">${icon("check-circle", { size: 14, strokeWidth: 2 })}</span>
               <span class="aj-rank-row-body">
-                <span class="aj-rank-row-main">Ligue pratique · mes élèves</span>
-                <span class="aj-rank-row-sub">Compétences acquises</span>
+                <span class="aj-rank-row-main">Ligue Pratique · mes élèves</span>
+                <span class="aj-rank-row-sub">Progression livret de compétences</span>
               </span>
               <span class="aj-rank-row-chev">${icon("chevron-right", { size: 16, strokeWidth: 2 })}</span>
             </a>
@@ -1023,8 +1028,8 @@ async function renderInto(root, _me) {
           recentVals.length === 0
             ? `<div class="aj-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;">
                <span style="opacity:.5;color:var(--mu)" aria-hidden="true">${icon("clipboard", { size: 34 })}</span>
-               <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Pas encore de validation</strong>
-               <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Enregistre ta première séance<br>pour voir l'activité ici.</span>
+               <strong style="font:600 14px/1.2 'Inter',sans-serif;color:var(--ink)">Aucune validation pour l'instant</strong>
+               <span style="font:500 12px/1.5 'Inter',sans-serif;color:var(--mu2);text-align:center">Enregistre une séance après ta prochaine leçon.<br>L'activité apparaît ici en temps réel.</span>
              </div>`
             : `<div class="aj-activity-list">
               ${recentVals
