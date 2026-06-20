@@ -689,7 +689,10 @@ function showOfficielResults(root, questions, answers, startedAt) {
         score: pct,
         passed,
         duration_seconds: durationSec,
-        questions_ids: questions.map((q) => q.id),
+        // [] et non les IDs : la colonne est uuid[], or les questions exam-blanc
+        // ont des IDs texte locaux (ex "p4q11") → l'insert 400ait (l'historique
+        // officiel n'était jamais persisté). Aligné sur le parcours (showResults).
+        questions_ids: [],
         answers_indices: answers.map((a) => a ?? -1),
       })
       .then(({ error }) => {
