@@ -366,36 +366,8 @@ const STYLE = `<style>
     gap: 3px;
   }
 
-  /* FAB Séance */
-  .me-fab {
-    position: fixed;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px) + 16px);
-    right: 16px;
-    z-index: 50;
-    display: flex; align-items: center; gap: 8px;
-    padding: 0 20px 0 16px;
-    height: 52px;
-    background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
-    color: var(--a-ink);
-    border: none; border-radius: 26px;
-    font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
-    cursor: pointer;
-    box-shadow: 0 4px 18px -4px color-mix(in srgb, var(--a) 60%, transparent), 0 2px 6px rgba(0,0,0,.12), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
-    transition: transform .15s var(--ease), box-shadow .15s var(--ease);
-    -webkit-tap-highlight-color: transparent;
-    animation: meFabIn .5s .3s var(--ease-spring) both;
-  }
-  .me-fab:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px -4px color-mix(in srgb, var(--a) 65%, transparent), 0 2px 8px rgba(0,0,0,.14);
-  }
-  .me-fab:active { transform: scale(.94); box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--a) 40%, transparent); }
-  .me-fab:focus-visible { outline: 3px solid var(--a); outline-offset: 3px; }
-  @keyframes meFabIn {
-    from { opacity: 0; transform: translateY(20px) scale(.9); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  @media (prefers-reduced-motion: reduce) { .me-fab { animation: none; } }
+  /* FAB « Séance » retiré ici : le FAB global #bn-seance-fab (nav-bottom)
+     est déjà monté pour l'enseignant sur toutes ses pages. */
 </style>`;
 
 const INACTIF_SEUIL_MS = 14 * 86400000; // 14 jours
@@ -790,10 +762,6 @@ function render() {
         <button class="me-tab${_tab === "recus" ? " active" : ""}" data-tab="recus" role="tab" aria-selected="${_tab === "recus"}" title="Élèves ayant obtenu le permis">Diplômés (${recusCount})</button>
       </div>
 
-      <button class="me-fab" id="me-fab" aria-label="Enregistrer une séance">
-        ${icon("plus", { size: 20, strokeWidth: 2.5 })} Séance
-      </button>
-
       <div class="me-list">
         ${
           filtered.length === 0
@@ -922,10 +890,8 @@ function wire() {
     openInviteEleveModal(_me);
   });
 
-  _root.querySelector("#me-fab")?.addEventListener("click", () => {
-    track("fab.seance.clicked", { from: "mes_eleves" });
-    navigate("#/log-session");
-  });
+  // FAB « Séance » : le FAB global #bn-seance-fab (nav-bottom, enseignant)
+  // couvre déjà cette page → on a retiré le doublon local #me-fab.
 
   // Section relancer → filtre tab arelancer
   _root.querySelector("#me-relancer-section")?.addEventListener("click", () => {

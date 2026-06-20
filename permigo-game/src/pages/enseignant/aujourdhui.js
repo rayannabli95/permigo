@@ -1060,7 +1060,7 @@ async function renderInto(root, _me) {
     row.addEventListener("click", () => {
       const id = row.dataset.eleveId;
       track("validate_widget.eleve_tapped", { eleve_id: id });
-      navigate(`#/livret/${id}`);
+      navigate(`#/log-session?eleveId=${id}`);
     });
   });
   root.querySelector("#aj-validate-other")?.addEventListener("click", () => {
