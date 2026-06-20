@@ -7,6 +7,7 @@
 // Overlay fixe au-dessus de #app, affiché 1×/session (= un lancement).
 // ═══════════════════════════════════════════════════════════════
 import { icon } from "@/utils/icons.js";
+import { byId } from "@/utils/accent.js";
 
 const SESSION_KEY = "permigo-launch-splash";
 // Écran d'accueil 100% silencieux : le son de lancement (launch.mp3, jugé
@@ -65,6 +66,16 @@ export function showLaunchSplash({ duration = 2800 } = {}) {
 
   const host = document.createElement("div");
   host.id = "pg-launch-splash";
+  // Le splash de lancement est l'écran de MARQUE : il reste toujours en vert
+  // PermiGo, quelle que soit la couleur d'accent choisie par l'utilisateur.
+  // On redéfinit les 4 tokens d'accent (--a/--adk/--a-lt/--a-ink) en local sur
+  // l'overlay → tous les var(--a…) du splash se résolvent en vert sans toucher
+  // au reste de l'app (qui suit l'accent choisi). Source de vérité : accent « vert ».
+  const VERT = byId("vert");
+  host.style.setProperty("--a", VERT.a);
+  host.style.setProperty("--adk", VERT.adk);
+  host.style.setProperty("--a-lt", VERT.lt);
+  host.style.setProperty("--a-ink", VERT.ink);
   host.setAttribute("role", "button");
   host.setAttribute("tabindex", "0");
   host.setAttribute("aria-label", "Appuie pour démarrer PermiGo");
