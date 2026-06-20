@@ -25,6 +25,11 @@ import {
 import { haptic } from "@/utils/haptic.js";
 import { hideBottomNav } from "@/utils/nav.js";
 import {
+  muteButtonHTML,
+  wireQuestionSpeech,
+  stopSpeaking,
+} from "@/utils/speech.js";
+import {
   playPageturn,
   playCorrect,
   playWrong,
@@ -68,6 +73,7 @@ function stopExamMusic() {
     _examStopMusic();
     _examStopMusic = null;
   }
+  stopSpeaking(); // toute sortie de l'examen coupe la lecture vocale
 }
 
 // Trophées DÉCORATIFS (pas de déblocage ici — pur design)
@@ -167,7 +173,10 @@ function renderQuestionBody(q, num, { mascot = false } = {}) {
   return `<div class="exb-qbody" id="exb-qbody">
         ${mascot ? `<img class="exb-mascot" src="/skins/mascot-think.png" alt="" aria-hidden="true" />` : ""}
         <p class="exb-qnum">Question ${num}</p>
-        <p class="exb-qtext">${esc(q.enonce)}</p>
+        <div class="exb-qhead">
+          ${muteButtonHTML()}
+          <p class="exb-qtext">${esc(q.enonce)}</p>
+        </div>
         ${q.image ? `<img class="exb-qimg" src="${esc(q.image)}" alt="Panneau routier à identifier" />` : ""}
         ${renderChoices(q)}
         <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
@@ -378,9 +387,12 @@ function runExbQuiz(
       );
     });
 
+    wireQuestionSpeech(root.querySelector("#exb-screen"), q.enonce);
+
     function reveal(chosen) {
       if (answered) return;
       answered = true;
+      stopSpeaking();
       clearExamTimer();
       const timedOut = chosen === null;
       answers[idx] = timedOut ? -1 : chosen;
@@ -1112,6 +1124,9 @@ const EXB_CSS = `
   letter-spacing: .1em;
   margin: 0 0 10px;
 }
+.exb-qhead { display: flex; align-items: flex-start; gap: 12px; margin: 0 0 20px; }
+.exb-qhead .exb-qtext { margin: 0; flex: 1 1 auto; }
+.exb-qhead .qz-mute:active { transform: scale(.92); }
 .exb-qtext {
   font: 600 17px/1.5 'Plus Jakarta Sans', sans-serif;
   color: var(--ink);
