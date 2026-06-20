@@ -19,7 +19,7 @@ export const CATALOG = [
   {
     key: "comp_5",
     emoji: "🔧",
-    image: "/skins/achievements/ach_comp_5.png",
+    image: "/skins/badge-3d-08.webp",
     title: "Premiers réglages",
     body: "5 compétences validées. Le moteur commence à tourner !",
     rarity: "commun",
@@ -30,7 +30,7 @@ export const CATALOG = [
   {
     key: "comp_10",
     emoji: "🏗️",
-    image: "/skins/achievements/ach_comp_10.png",
+    image: "/skins/badge-3d-02.webp",
     title: "Châssis posé",
     body: "Un tiers du parcours. Les fondations sont là, continue !",
     rarity: "rare",
@@ -41,7 +41,7 @@ export const CATALOG = [
   {
     key: "comp_15",
     emoji: "⚙️",
-    image: "/skins/achievements/ach_comp_15.png",
+    image: "/skins/badge-3d-04.webp",
     title: "Moteur en place",
     body: "La moitié du chemin. Le cœur de la bête est installé.",
     rarity: "rare",
@@ -52,7 +52,7 @@ export const CATALOG = [
   {
     key: "comp_20",
     emoji: "🚗",
-    image: "/skins/achievements/ach_comp_20.png",
+    image: "/skins/badge-3d-03.webp",
     title: "Carrosserie montée",
     body: "Deux tiers du parcours. La voiture prend forme.",
     rarity: "epique",
@@ -63,7 +63,7 @@ export const CATALOG = [
   {
     key: "comp_25",
     emoji: "💡",
-    image: "/skins/achievements/ach_comp_25.png",
+    image: "/skins/badge-3d-01.webp",
     title: "Phares allumés",
     body: "Tu y es presque. Plus que 6 compétences !",
     rarity: "epique",
@@ -74,7 +74,7 @@ export const CATALOG = [
   {
     key: "comp_28",
     emoji: "🎓",
-    image: "/skins/achievements/ach_comp_28.png",
+    image: "/skins/badge-3d-06.webp",
     title: "Prêt examen blanc",
     body: "28/31. La voiture est sur la route — lance l'examen blanc.",
     rarity: "legendaire",
@@ -85,7 +85,7 @@ export const CATALOG = [
   {
     key: "comp_31",
     emoji: "🏁",
-    image: "/skins/achievements/ach_comp_31.png",
+    image: "/skins/badge-3d-ultimate.webp",
     title: "Route ouverte",
     body: "31/31. Voiture complète, route libre. Prêt pour l'officiel.",
     rarity: "legendaire",
@@ -97,7 +97,7 @@ export const CATALOG = [
   {
     key: "streak_3",
     emoji: "🔑",
-    image: "/skins/achievements/ach_streak_3.png",
+    image: "/skins/badge-3d-01.webp",
     title: "Moteur lancé",
     body: "3 jours de suite. Le contact est mis !",
     rarity: "commun",
@@ -108,7 +108,7 @@ export const CATALOG = [
   {
     key: "streak_14",
     emoji: "⛽",
-    image: "/skins/achievements/ach_streak_14.png",
+    image: "/skins/badge-3d-06.webp",
     title: "Plein d'essence",
     body: "14 jours d'affilée. Tu roules sans t'arrêter.",
     rarity: "rare",
@@ -119,7 +119,7 @@ export const CATALOG = [
   {
     key: "streak_60",
     emoji: "🏎️",
-    image: "/skins/achievements/ach_streak_60.png",
+    image: "/skins/badge-3d-ultimate.webp",
     title: "Pilote en série",
     body: "30 jours non-stop. Inarrêtable. Respect.",
     rarity: "legendaire",
@@ -131,7 +131,7 @@ export const CATALOG = [
   {
     key: "quiz_10",
     emoji: "🛑",
-    image: "/skins/achievements/ach_quiz_10.png",
+    image: "/skins/badge-3d-08.webp",
     title: "Freins testés",
     body: "5 quiz réussis. Tu sais exactement quand t'arrêter.",
     rarity: "commun",
@@ -142,7 +142,7 @@ export const CATALOG = [
   {
     key: "quiz_50",
     emoji: "🔩",
-    image: "/skins/achievements/ach_quiz_50.png",
+    image: "/skins/badge-3d-02.webp",
     title: "Direction calibrée",
     body: "20 quiz réussis. Ta précision au volant est redoutable.",
     rarity: "epique",
@@ -153,7 +153,7 @@ export const CATALOG = [
   {
     key: "quiz_perfect_5",
     emoji: "🪝",
-    image: "/skins/achievements/ach_quiz_perfect_5.png",
+    image: "/skins/badge-3d-03.webp",
     title: "Jante rétro",
     body: "5 quiz parfaits. Propre, précis, aucune rayure.",
     rarity: "epique",
