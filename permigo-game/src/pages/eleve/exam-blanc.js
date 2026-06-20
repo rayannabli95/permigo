@@ -318,185 +318,149 @@ function wireSelection(root) {
 }
 
 // ─── Écran 2 : quiz ──────────────────────────────────────────
-function startParcours(root, parcours_id) {
-  const parcours = PARCOURS.find((p) => p.id === parcours_id);
-  const questions = questionsForParcours(parcours_id);
+// ─── Moteur de quiz unifié (parcours / officiel / révision) ──────────
+// Gère l'état (answers/idx), le rendu de chaque question, la révélation de la
+// réponse (couleurs + son + feedback) et l'enchaînement → résultats. Les
+// différences de mode passent par `opts` : header, chrono, quit, résultats…
+function runExbQuiz(
+  root,
+  questions,
+  {
+    mascot = false,
+    chrono = false, // officiel : compte à rebours OFFICIEL_SECONDS / question
+    renderHeader, // ({ num, total, idx, answers }) => html (doit contenir #exb-quit)
+    onQuit, // (num) => void — confirm + nettoyage + nav/re-render
+    colorTrackNode = false, // parcours : colore le point du track à la réponse
+    feedbackLast, // libellé du bouton sur la dernière question
+    feedbackFaute = false, // parcours : bannière faute éliminatoire
+    onComplete, // (answers) => void — écran de résultats
+  },
+) {
   const answers = new Array(questions.length).fill(null); // null = non répondu
-  let currentIdx = 0;
-  let answered = false; // flag pour éviter le double-clic
+  let idx = 0;
 
-  track("parcours_quiz.started", { parcours_id, nom: parcours?.nom });
-
-  // Mélodie de fond pendant le parcours d'examen
   stopExamMusic();
   _examStopMusic = playQuizMusic();
 
-  function renderQuestion() {
-    answered = false;
-    const q = questions[currentIdx];
-    const num = currentIdx + 1;
+  function renderQ() {
+    clearExamTimer(); // sans effet si pas de chrono
+    const q = questions[idx];
+    const num = idx + 1;
+    let answered = false; // anti double-clic / anti course clic↔timeout
 
     root.querySelector("#exb-screen").innerHTML = `
-      <div class="exb-quiz-header">
-        <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
-        <div class="exb-track-wrap">
-          ${renderTrack(questions, answers, currentIdx)}
-          <span class="exb-progress-label">${num} / ${questions.length}</span>
-        </div>
-        <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? "")}</span>
-      </div>
+      ${renderHeader({ num, total: questions.length, idx, answers })}
+      ${renderQuestionBody(q, num, { mascot })}`;
 
-      ${renderQuestionBody(q, num, { mascot: true })}
-    `;
+    root
+      .querySelector("#exb-quit")
+      ?.addEventListener("click", () => onQuit(num));
 
-    root.querySelector("#exb-quit")?.addEventListener("click", () => {
-      if (confirm("Quitter ce parcours ? Ta progression sera perdue.")) {
-        haptic("tap");
-        track("parcours_quiz.quit", { parcours_id, question: num });
-        root.innerHTML = renderStyles() + renderSelection();
-        wireSelection(root);
-      }
-    });
-
-    root.querySelectorAll(".exb-choice").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        if (answered) return;
-        answered = true;
-        const chosen = parseInt(btn.dataset.idx, 10);
-        answers[currentIdx] = chosen;
-        showFeedback(
-          root,
-          q,
-          chosen,
-          questions,
-          currentIdx,
-          parcours_id,
-          answers,
-          renderQuestion,
-        );
-      });
-    });
-  }
-
-  renderQuestion();
-}
-
-function showFeedback(
-  root,
-  q,
-  chosen,
-  questions,
-  currentIdx,
-  parcours_id,
-  answers,
-  renderQuestion,
-) {
-  const isCorrect = chosen === q.correct;
-  recordAnswer(q.tags, isCorrect);
-  const isFaute = q.tags?.includes("faute_eliminatoire");
-
-  if (isCorrect) {
-    haptic("success");
-    playCorrect();
-  } else {
-    haptic("warning");
-    playWrong();
-  }
-
-  // Colorie les boutons
-  root.querySelectorAll(".exb-choice").forEach((btn) => {
-    const idx = parseInt(btn.dataset.idx, 10);
-    btn.disabled = true;
-    btn.setAttribute("aria-pressed", idx === chosen ? "true" : "false");
-    if (idx === q.correct) btn.classList.add("exb-choice--correct");
-    if (idx === chosen && !isCorrect) btn.classList.add("exb-choice--wrong");
-  });
-
-  // Colorie le point du parcours correspondant à cette question
-  const node = root.querySelector(`.exb-node[data-node="${currentIdx}"]`);
-  if (node) {
-    node.classList.remove("is-current");
-    node.classList.add(isCorrect ? "is-correct" : "is-wrong");
-  }
-
-  const feedbackEl = root.querySelector("#exb-feedback");
-  feedbackEl.hidden = false;
-  feedbackEl.innerHTML = renderFeedbackBlock({
-    isCorrect,
-    correct: q.correct,
-    explication: q.explication,
-    isLast: currentIdx + 1 >= questions.length,
-    lastLabel: "Voir les résultats →",
-    faute: isFaute,
-  });
-
-  root.querySelector("#exb-next")?.addEventListener("click", () => {
-    playPageturn();
-    if (currentIdx + 1 < questions.length) {
-      // Remplace uniquement le contenu du qbody pour éviter de recréer les listeners du header
-      const exbScreen = root.querySelector("#exb-screen");
-      // Incrément puis re-render complet (simple et fiable)
-      const nextIdx = currentIdx + 1;
-      // On réaffecte currentIdx via closure dans renderQuestion — passer via callback
-      renderNextQuestion(root, questions, answers, nextIdx, parcours_id);
-    } else {
-      showResults(root, questions, answers, parcours_id);
+    if (chrono) {
+      let remaining = OFFICIEL_SECONDS;
+      _examTimer = setInterval(() => {
+        remaining--;
+        const t = root.querySelector("#exo-time");
+        if (t) t.textContent = String(Math.max(remaining, 0));
+        if (remaining <= 5)
+          root.querySelector("#exo-chrono")?.classList.add("is-urgent");
+        if (remaining <= 0) {
+          clearExamTimer();
+          reveal(null); // temps écoulé = faute
+        }
+      }, 1000);
     }
-  });
+
+    root.querySelectorAll(".exb-choice").forEach((btn) => {
+      btn.addEventListener("click", () =>
+        reveal(parseInt(btn.dataset.idx, 10)),
+      );
+    });
+
+    function reveal(chosen) {
+      if (answered) return;
+      answered = true;
+      clearExamTimer();
+      const timedOut = chosen === null;
+      answers[idx] = timedOut ? -1 : chosen;
+      const isCorrect = chosen === q.correct;
+      recordAnswer(q.tags, isCorrect);
+      if (isCorrect) {
+        haptic("success");
+        playCorrect();
+      } else {
+        haptic("warning");
+        playWrong();
+      }
+      root.querySelectorAll(".exb-choice").forEach((b) => {
+        const i = parseInt(b.dataset.idx, 10);
+        b.disabled = true;
+        b.setAttribute("aria-pressed", i === chosen ? "true" : "false");
+        if (i === q.correct) b.classList.add("exb-choice--correct");
+        if (i === chosen && !isCorrect) b.classList.add("exb-choice--wrong");
+      });
+      if (colorTrackNode) {
+        const node = root.querySelector(`.exb-node[data-node="${idx}"]`);
+        if (node) {
+          node.classList.remove("is-current");
+          node.classList.add(isCorrect ? "is-correct" : "is-wrong");
+        }
+      }
+      const fb = root.querySelector("#exb-feedback");
+      fb.hidden = false;
+      fb.innerHTML = renderFeedbackBlock({
+        isCorrect,
+        correct: q.correct,
+        explication: q.explication,
+        isLast: idx + 1 >= questions.length,
+        lastLabel: feedbackLast,
+        faute: feedbackFaute && q.tags?.includes("faute_eliminatoire"),
+        timedOut,
+      });
+      root.querySelector("#exb-next")?.addEventListener("click", () => {
+        playPageturn();
+        if (idx + 1 < questions.length) {
+          idx++;
+          renderQ();
+        } else {
+          onComplete(answers);
+        }
+      });
+    }
+  }
+
+  renderQ();
 }
 
-function renderNextQuestion(root, questions, answers, idx, parcours_id) {
+function startParcours(root, parcours_id) {
   const parcours = PARCOURS.find((p) => p.id === parcours_id);
-  let answered = false;
+  const questions = questionsForParcours(parcours_id);
+  track("parcours_quiz.started", { parcours_id, nom: parcours?.nom });
 
-  function renderAt(currentIdx) {
-    answered = false;
-    const q = questions[currentIdx];
-    const num = currentIdx + 1;
-
-    root.querySelector("#exb-screen").innerHTML = `
+  runExbQuiz(root, questions, {
+    mascot: true,
+    colorTrackNode: true,
+    feedbackFaute: true,
+    feedbackLast: "Voir les résultats →",
+    renderHeader: ({ num, total, idx, answers }) => `
       <div class="exb-quiz-header">
         <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
         <div class="exb-track-wrap">
-          ${renderTrack(questions, answers, currentIdx)}
-          <span class="exb-progress-label">${num} / ${questions.length}</span>
+          ${renderTrack(questions, answers, idx)}
+          <span class="exb-progress-label">${num} / ${total}</span>
         </div>
         <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? "")}</span>
-      </div>
-
-      ${renderQuestionBody(q, num, { mascot: true })}
-    `;
-
-    root.querySelector("#exb-quit")?.addEventListener("click", () => {
+      </div>`,
+    onQuit: (num) => {
       if (confirm("Quitter ce parcours ? Ta progression sera perdue.")) {
         haptic("tap");
         track("parcours_quiz.quit", { parcours_id, question: num });
         root.innerHTML = renderStyles() + renderSelection();
         wireSelection(root);
       }
-    });
-
-    root.querySelectorAll(".exb-choice").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        if (answered) return;
-        answered = true;
-        const chosen = parseInt(btn.dataset.idx, 10);
-        answers[currentIdx] = chosen;
-        showFeedback(
-          root,
-          q,
-          chosen,
-          questions,
-          currentIdx,
-          parcours_id,
-          answers,
-          () => renderAt(currentIdx + 1),
-        );
-      });
-    });
-  }
-
-  renderAt(idx);
+    },
+    onComplete: (answers) => showResults(root, questions, answers, parcours_id),
+  });
 }
 
 // ─── Écran 3 : résultats ─────────────────────────────────────
@@ -666,33 +630,23 @@ function pickOfficielQuestions() {
 
 function startExamenOfficiel(root) {
   const questions = pickOfficielQuestions();
-  const answers = new Array(questions.length).fill(null); // null = non répondu
-  let idx = 0;
   const startedAt = Date.now();
-
   track("examen_officiel.started", { total: questions.length });
-  stopExamMusic();
-  _examStopMusic = playQuizMusic();
 
-  function renderQ() {
-    clearExamTimer();
-    const q = questions[idx];
-    const num = idx + 1;
-    let remaining = OFFICIEL_SECONDS;
-
-    root.querySelector("#exb-screen").innerHTML = `
+  runExbQuiz(root, questions, {
+    chrono: true,
+    feedbackLast: "Voir le résultat →",
+    renderHeader: ({ num, total }) => `
       <div class="exb-quiz-header">
         <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
         <div class="exo-run-bar">
-          <span class="exo-chrono" id="exo-chrono"><span id="exo-time">${remaining}</span>s</span>
-          <div class="exo-prog"><div class="exo-prog-fill" style="width:${(num / questions.length) * 100}%"></div></div>
-          <span class="exb-progress-label">${num} / ${questions.length}</span>
+          <span class="exo-chrono" id="exo-chrono"><span id="exo-time">${OFFICIEL_SECONDS}</span>s</span>
+          <div class="exo-prog"><div class="exo-prog-fill" style="width:${(num / total) * 100}%"></div></div>
+          <span class="exb-progress-label">${num} / ${total}</span>
         </div>
         <span class="exb-quiz-parcours-name">Examen officiel</span>
-      </div>
-      ${renderQuestionBody(q, num)}`;
-
-    root.querySelector("#exb-quit")?.addEventListener("click", () => {
+      </div>`,
+    onQuit: (num) => {
       if (confirm("Quitter l'examen ? Ta progression sera perdue.")) {
         clearExamTimer();
         haptic("tap");
@@ -700,68 +654,10 @@ function startExamenOfficiel(root) {
         root.innerHTML = renderStyles() + renderSelection();
         wireSelection(root);
       }
-    });
-
-    _examTimer = setInterval(() => {
-      remaining--;
-      const t = root.querySelector("#exo-time");
-      if (t) t.textContent = String(Math.max(remaining, 0));
-      if (remaining <= 5)
-        root.querySelector("#exo-chrono")?.classList.add("is-urgent");
-      if (remaining <= 0) {
-        clearExamTimer();
-        answer(null); // temps écoulé = faute
-      }
-    }, 1000);
-
-    root.querySelectorAll(".exb-choice").forEach((btn) => {
-      btn.addEventListener("click", () =>
-        answer(parseInt(btn.dataset.idx, 10)),
-      );
-    });
-
-    function answer(chosen) {
-      clearExamTimer();
-      if (answers[idx] !== null) return; // déjà répondu
-      answers[idx] = chosen === null ? -1 : chosen;
-      const isCorrect = chosen === q.correct;
-      recordAnswer(q.tags, isCorrect);
-      if (isCorrect) {
-        haptic("success");
-        playCorrect();
-      } else {
-        haptic("warning");
-        playWrong();
-      }
-      root.querySelectorAll(".exb-choice").forEach((b) => {
-        const i = parseInt(b.dataset.idx, 10);
-        b.disabled = true;
-        if (i === q.correct) b.classList.add("exb-choice--correct");
-        if (i === chosen && !isCorrect) b.classList.add("exb-choice--wrong");
-      });
-      const fb = root.querySelector("#exb-feedback");
-      fb.hidden = false;
-      fb.innerHTML = renderFeedbackBlock({
-        isCorrect,
-        correct: q.correct,
-        explication: q.explication,
-        isLast: idx + 1 >= questions.length,
-        lastLabel: "Voir le résultat →",
-        timedOut: chosen === null,
-      });
-      root.querySelector("#exb-next")?.addEventListener("click", () => {
-        playPageturn();
-        if (idx + 1 < questions.length) {
-          idx++;
-          renderQ();
-        } else {
-          showOfficielResults(root, questions, answers, startedAt);
-        }
-      });
-    }
-  }
-
-  renderQ();
+    },
+    onComplete: (answers) =>
+      showOfficielResults(root, questions, answers, startedAt),
+  });
 }
 
 function showOfficielResults(root, questions, answers, startedAt) {
@@ -883,30 +779,20 @@ function runRevision(
   questions,
   { label, trackName, trackMeta, retryFn, backRoute = null },
 ) {
-  const answers = new Array(questions.length).fill(null);
-  let idx = 0;
-
   track(`${trackName}.started`, { ...trackMeta, total: questions.length });
-  stopExamMusic();
-  _examStopMusic = playQuizMusic();
 
-  function renderQ() {
-    const q = questions[idx];
-    const num = idx + 1;
-    let answered = false;
-
-    root.querySelector("#exb-screen").innerHTML = `
+  runExbQuiz(root, questions, {
+    feedbackLast: "Voir le bilan →",
+    renderHeader: ({ num, total }) => `
       <div class="exb-quiz-header">
         <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
         <div class="exo-run-bar">
-          <div class="exo-prog"><div class="exo-prog-fill" style="width:${(num / questions.length) * 100}%"></div></div>
-          <span class="exb-progress-label">${num} / ${questions.length}</span>
+          <div class="exo-prog"><div class="exo-prog-fill" style="width:${(num / total) * 100}%"></div></div>
+          <span class="exb-progress-label">${num} / ${total}</span>
         </div>
         <span class="exb-quiz-parcours-name">Révision · ${esc(label)}</span>
-      </div>
-      ${renderQuestionBody(q, num)}`;
-
-    root.querySelector("#exb-quit")?.addEventListener("click", () => {
+      </div>`,
+    onQuit: (num) => {
       haptic("tap");
       stopExamMusic();
       track(`${trackName}.quit`, { ...trackMeta, question: num });
@@ -916,57 +802,15 @@ function runRevision(
         root.innerHTML = renderStyles() + renderSelection();
         wireSelection(root);
       }
-    });
-
-    root.querySelectorAll(".exb-choice").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        if (answered) return;
-        answered = true;
-        const chosen = parseInt(btn.dataset.idx, 10);
-        answers[idx] = chosen;
-        const isCorrect = chosen === q.correct;
-        recordAnswer(q.tags, isCorrect);
-        if (isCorrect) {
-          haptic("success");
-          playCorrect();
-        } else {
-          haptic("warning");
-          playWrong();
-        }
-        root.querySelectorAll(".exb-choice").forEach((b) => {
-          const i = parseInt(b.dataset.idx, 10);
-          b.disabled = true;
-          if (i === q.correct) b.classList.add("exb-choice--correct");
-          if (i === chosen && !isCorrect) b.classList.add("exb-choice--wrong");
-        });
-        const fb = root.querySelector("#exb-feedback");
-        fb.hidden = false;
-        fb.innerHTML = renderFeedbackBlock({
-          isCorrect,
-          correct: q.correct,
-          explication: q.explication,
-          isLast: idx + 1 >= questions.length,
-          lastLabel: "Voir le bilan →",
-        });
-        root.querySelector("#exb-next")?.addEventListener("click", () => {
-          playPageturn();
-          if (idx + 1 < questions.length) {
-            idx++;
-            renderQ();
-          } else {
-            showRevisionResults(root, questions, answers, label, {
-              trackName,
-              trackMeta,
-              retryFn,
-              backRoute,
-            });
-          }
-        });
-      });
-    });
-  }
-
-  renderQ();
+    },
+    onComplete: (answers) =>
+      showRevisionResults(root, questions, answers, label, {
+        trackName,
+        trackMeta,
+        retryFn,
+        backRoute,
+      }),
+  });
 }
 
 // ─── Révision ciblée d'un thème (points faibles) ─────────────
