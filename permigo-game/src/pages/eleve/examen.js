@@ -7,6 +7,7 @@ import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
+import { hideBottomNav } from "@/utils/nav.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -651,12 +652,7 @@ export async function mount(root) {
   if (!me) return;
 
   // #11 — plein écran d'épreuve : masque la bottom nav (anti-triche, anti-distraction)
-  document.getElementById("bottom-nav")?.setAttribute("hidden", "");
-  const _restoreNav = () => {
-    document.getElementById("bottom-nav")?.removeAttribute("hidden");
-    window.removeEventListener("hashchange", _restoreNav);
-  };
-  window.addEventListener("hashchange", _restoreNav);
+  const _restoreNav = hideBottomNav();
 
   track("page.view", { page: "eleve_examen" });
 

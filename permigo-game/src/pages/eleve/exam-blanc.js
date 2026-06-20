@@ -23,6 +23,7 @@ import {
   renderTheoryGain,
 } from "@/components/eleve/theory-gain.js";
 import { haptic } from "@/utils/haptic.js";
+import { hideBottomNav } from "@/utils/nav.js";
 import {
   playPageturn,
   playCorrect,
@@ -110,14 +111,10 @@ export async function mount(root, param) {
   if (!me) return;
 
   // Masque la bottom nav pendant le quiz (anti-distraction)
-  document.getElementById("bottom-nav")?.setAttribute("hidden", "");
-  const _restoreNav = () => {
-    document.getElementById("bottom-nav")?.removeAttribute("hidden");
+  const _restoreNav = hideBottomNav(() => {
     stopExamMusic();
     clearExamTimer();
-    window.removeEventListener("hashchange", _restoreNav);
-  };
-  window.addEventListener("hashchange", _restoreNav);
+  });
 
   track("page_view", { page: "parcours_quiz", user_role: me.role });
 
