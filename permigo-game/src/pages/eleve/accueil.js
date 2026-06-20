@@ -37,28 +37,28 @@ import { theoryLeague } from "@/utils/theory-league.js";
 const TOUR_KEY = "pg-tour-eleve-v1";
 const ELEVE_TOUR_STEPS = [
   {
-    title: "Bienvenue sur PermiGo 👋",
-    text: "Ton permis, étape par étape. Petite visite en 30 secondes — tu peux passer quand tu veux.",
+    title: "Bienvenue 👋",
+    text: "Visite express. Passe quand tu veux.",
   },
   {
     sel: ".acc2-hero-streak",
     title: "Ta flamme 🔥",
-    text: "Reviens chaque jour : ta série grandit et te rapporte des volants à dépenser.",
+    text: "Reviens chaque jour. Ta série monte et te rapporte des volants.",
   },
   {
     sel: ".acc2-action",
-    title: "Ton action du jour",
-    text: "Un petit quiz par jour, et l'examen devient beaucoup plus facile. C'est ici que ça se passe.",
+    title: "Par où commencer",
+    text: "Un quiz par jour. C'est ici que ça démarre.",
   },
   {
     sel: '.bn-tab[data-id="parcours"]',
-    title: "Ton parcours",
-    text: "Ta carte du permis : 4 mondes à traverser, 31 compétences à valider avec ton moniteur.",
+    title: "Ta carte du permis",
+    text: "31 compétences à valider avec ton moniteur.",
   },
   {
     sel: '.bn-tab[data-id="boutique"]',
     title: "La boutique",
-    text: "Skins de voiture, fonds de permis… dépense tes volants et montre ton style au classement.",
+    text: "Dépense tes volants : skins de voiture, fonds de permis.",
   },
 ];
 
@@ -621,6 +621,79 @@ const STYLE = `<style>
 .bs-freeze-btn:active { transform: scale(.98); opacity: .9; }
 .bs-freeze-btn:disabled { opacity: .55; cursor: default; }
 .bs-freeze-desc { font: 500 11px/1.4 'Inter', sans-serif; color: var(--mu3); text-align: center; margin-top: 7px; }
+
+/* ── First-run dominant CTA ── */
+/* When the student has never done anything, the action card takes over:
+   bigger padding, stronger shadow, btn scales up to fill width. */
+.acc2-action--first-run {
+  margin: 20px 16px 0;
+  background: var(--su);
+  border: 2px solid color-mix(in srgb, var(--a) 40%, transparent);
+  border-radius: var(--rx);
+  padding: 24px 20px 22px;
+  box-shadow: 0 8px 28px -10px color-mix(in srgb, var(--a) 35%, transparent), 0 2px 6px rgba(10,13,26,.06);
+}
+.acc2-action--first-run .acc2-action-tag {
+  font-size: 11px;
+  color: color-mix(in srgb, var(--a) 70%, var(--ink));
+}
+.acc2-action--first-run .acc2-action-title {
+  font-size: clamp(20px, 6vw, 24px);
+  margin-bottom: 8px;
+}
+.acc2-action--first-run .acc2-action-sub {
+  font-size: 14.5px;
+  color: var(--mu);
+  margin-bottom: 4px;
+}
+.acc2-action--first-run .acc2-action-btn {
+  margin-top: 20px;
+  padding: 18px 24px;
+  font-size: 16px;
+  min-height: 58px;
+  letter-spacing: -.01em;
+  box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--a) 55%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .acc2-action--first-run .acc2-action-btn { transition: none; }
+}
+
+/* ── League sense-lines ── */
+.acc-lg-sense {
+  font: 400 11px/1.35 'Inter', sans-serif;
+  color: var(--mu2);
+  margin: 4px 0 0;
+  position: relative; z-index: 1;
+}
+/* Empty-state rank: de-emphasise the dash, show the invitation instead */
+.acc-lg-rank--empty {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mu2);
+  letter-spacing: 0;
+  margin: 8px 0 0;
+  line-height: 1.35;
+}
+
+/* ── First-run progressive disclosure ── */
+/* On first run (no activity), soften/collapse the noise below the fold
+   so the student sees one thing: the CTA. Sections reveal after first action
+   (page reloads with activity → isFirstRun becomes false). */
+.acc2--first-run .acc2-section-title,
+.acc2--first-run .worlds-grid,
+.acc2--first-run .pplus {
+  opacity: 0.45;
+  pointer-events: none;
+  user-select: none;
+}
+/* Permis virtuel label below the hero for first-run */
+.acc2-permis-label {
+  text-align: center;
+  font: 500 12px/1.3 'Inter', sans-serif;
+  color: var(--mu2);
+  margin: 6px 16px 0;
+  padding: 0 4px;
+}
 </style>`;
 
 // ─── Constantes ──────────────────────────────────────────────────
@@ -927,6 +1000,8 @@ function render({
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom = profile.prenom || me.prenom || "Toi";
   const isActive = streakSt !== "broken";
+  // First-run: no competence validated AND no streak yet → student has never done anything
+  const isFirstRun = totalValidated === 0 && !streak.current_streak;
 
   // ── Séance à confirmer (priorité absolue quand présente) ──
   const pendingSession = pendingSessions?.[0] ?? null;
@@ -944,13 +1019,14 @@ function render({
     pendingNotif,
     totalValidated,
     dailyQuiz,
+    isFirstRun,
   );
 
   // Examen blanc : s'ouvre quand le monde 3 devient accessible.
   const examUnlocked = (worlds[1]?.done ?? 0) >= EXAM_UNLOCK_WORLD2_DONE;
 
   return `${STYLE}
-<div class="acc2">
+<div class="acc2${isFirstRun ? " acc2--first-run" : ""}">
 
   <!-- ══ HERO compact — salutation + flamme ══ -->
   <div class="acc2-hero">
@@ -975,8 +1051,10 @@ function render({
       </div>
       ${
         _awayDays >= 3
-          ? `<div class="acc2-hero-back">Ta route t'attend depuis ${_awayDays} jours — reprends là où tu t'étais arrêté.</div>`
-          : ""
+          ? `<div class="acc2-hero-back">Ça fait ${_awayDays} jours — continue là où tu t'étais arrêté.</div>`
+          : streak.current_streak === 1 && isActive
+            ? `<div class="acc2-hero-back">Reviens demain : ta série démarre.</div>`
+            : ""
       }
     </div>
   </div>
@@ -991,6 +1069,11 @@ function render({
       total: 31,
     })}
   </div>
+  <p class="acc2-permis-label">${
+    totalValidated === 0
+      ? "Ta carte du permis — 0 sur 31 — chaque compétence validée par ton moniteur la complète."
+      : `Ta carte du permis — ${totalValidated} sur 31 compétence${totalValidated > 1 ? "s" : ""} acquise${totalValidated > 1 ? "s" : ""}.`
+  }</p>
 
   ${pendingSession ? `<div class="acc2-ms">${renderSessionConfirm(pendingSession)}</div>` : ""}
 
@@ -1002,6 +1085,7 @@ function render({
 
   <!-- ══ BELOW FOLD ══ -->
   <div class="acc2-section-title">Mon parcours</div>
+  ${isFirstRun ? `<p class="acc2-permis-label" style="margin-bottom:10px">31 compétences à valider avec ton moniteur.</p>` : ""}
   <div class="worlds-grid">
     ${worlds
       .map(
@@ -1131,7 +1215,13 @@ function renderSessionConfirm(session) {
     </div>`;
 }
 
-function renderActionDuJour(quest, pendingNotif, totalValidated, dailyQuiz) {
+function renderActionDuJour(
+  quest,
+  pendingNotif,
+  totalValidated,
+  dailyQuiz,
+  isFirstRun,
+) {
   let label = "Action du jour";
   let title,
     sub,
@@ -1172,19 +1262,30 @@ function renderActionDuJour(quest, pendingNotif, totalValidated, dailyQuiz) {
     btnText = "Continue à réviser";
     href = "#/quiz/next/post_validation/revision";
   } else if (totalValidated === 0) {
-    title = "Lance ton parcours";
-    sub = "31 compétences à valider avec ton moniteur";
-    btnText = "Voir le parcours";
-    href = "#/parcours";
+    label = "Par où commencer ?";
+    title = "Commence ta 1re révision";
+    sub = "2 min suffisent.";
+    btnText = "Commence ta 1re révision";
+    href = "#/quiz/next/post_validation/revision";
   } else {
     title = "Continue ton parcours";
     sub = "";
-    btnText = "Voir le parcours";
-    href = "#/parcours";
+    btnText = "Continue à réviser";
+    href = "#/quiz/next/post_validation/revision";
   }
 
+  // First-run: the CTA is the only thing that matters on screen.
+  // We add a modifier class that the CSS uses to make it visually dominant.
+  const cardClass = isFirstRun
+    ? "acc2-action acc2-action--first-run"
+    : "acc2-action";
+
+  // First-run btn label uses a shorter verb-first form to fit the button width.
+  const btnLabel =
+    isFirstRun && totalValidated === 0 ? "C'est parti — 2 min" : btnText;
+
   return `
-    <div class="acc2-action">
+    <div class="${cardClass}">
       <div class="acc2-action-tag">
         <div class="acc2-action-tag-dot${urgent ? " urgent" : ""}"></div>
         ${esc(label)}
@@ -1193,7 +1294,7 @@ function renderActionDuJour(quest, pendingNotif, totalValidated, dailyQuiz) {
       <div class="acc2-action-title">${esc(title)}</div>
       ${sub ? `<div class="acc2-action-sub">${esc(sub)}</div>` : ""}
       <button class="acc2-action-btn" id="action-cta-btn" data-href="${esc(href)}">
-        ${esc(btnText)}
+        ${esc(btnLabel)}
         ${icon("arrow-right", { size: 16 })}
       </button>
     </div>`;
@@ -1373,10 +1474,8 @@ async function _loadAndInjectLeagues(root) {
       pos && pos.my_rank != null && pos.total_eleves != null
         ? pos.total_eleves > 1
         : false;
-    const ecoleRank = ecoleRanked ? `#${pos.my_rank}` : "—";
-    const ecoleSub = ecoleRanked
-      ? `sur ${pos.total_eleves} à l'école`
-      : "Valide une compétence pour entrer";
+    const ecoleRankLabel = ecoleRanked ? `#${pos.my_rank}` : null;
+    const ecoleSub = ecoleRanked ? `sur ${pos.total_eleves} à l'école` : null;
 
     // ── Ligue Révision (quiz solo) ──
     const revRows =
@@ -1388,29 +1487,41 @@ async function _loadAndInjectLeagues(root) {
     const revInfo = theoryLeague(revScore);
     const revClassed =
       !!revInfo.league && revScore > 0 && mineRev?.rang != null;
-    const revRank = revClassed ? `#${mineRev.rang}` : "—";
+    const revRankLabel = revClassed ? `#${mineRev.rang}` : null;
     const revSub = revClassed
       ? `Ligue ${revInfo.league.n} — ${revInfo.league.name}`
-      : "Fais un quiz pour entrer";
+      : null;
 
+    // Render: empty state uses an invitation line instead of a bare dash.
+    // Ranked state shows the number + a footer sub.
     slot.innerHTML = `
       <div class="acc-lg-head">Tes ligues</div>
       <div class="acc-lg-grid">
         <button class="acc-lg-card" id="acc-lg-ecole" data-go="#/classement/ecole"
-                aria-label="Ligue École, ${esc(ecoleRanked ? `${ecoleRank} sur ${pos.total_eleves}` : "pas encore classé")} — voir le classement">
-          <span class="acc-lg-tag">${icon("trophy", { size: 13, strokeWidth: 2 })} Ligue École</span>
-          <span class="acc-lg-rank">${esc(ecoleRank)}</span>
+                aria-label="Classement avec ton moniteur — ${esc(ecoleRanked ? `${ecoleRankLabel} sur ${pos.total_eleves}` : "pas encore classé")}">
+          <span class="acc-lg-tag">${icon("trophy", { size: 13, strokeWidth: 2 })} Classement avec ton moniteur</span>
+          ${
+            ecoleRanked
+              ? `<span class="acc-lg-rank">${esc(ecoleRankLabel)}</span>
+                 <span class="acc-lg-sense">Chaque compétence validée te fait grimper.</span>`
+              : `<span class="acc-lg-rank--empty">Ta première validation te classe ici.</span>`
+          }
           <span class="acc-lg-foot">
-            <span class="acc-lg-sub">${esc(ecoleSub)}</span>
+            ${ecoleSub ? `<span class="acc-lg-sub">${esc(ecoleSub)}</span>` : `<span class="acc-lg-sub">&nbsp;</span>`}
             <span class="acc-lg-go">${icon("chevron-right", { size: 16, strokeWidth: 2.5 })}</span>
           </span>
         </button>
         <button class="acc-lg-card" id="acc-lg-rev" data-go="#/classement/revision"
-                aria-label="Ligue Révision, ${esc(revClassed ? revRank : "pas encore classé")} — voir le classement">
-          <span class="acc-lg-tag">${icon("zap", { size: 13, strokeWidth: 2 })} Ligue Révision</span>
-          <span class="acc-lg-rank">${esc(revRank)}</span>
+                aria-label="Classement révision — ${esc(revClassed ? revRankLabel : "pas encore classé")}">
+          <span class="acc-lg-tag">${icon("zap", { size: 13, strokeWidth: 2 })} Classement révision</span>
+          ${
+            revClassed
+              ? `<span class="acc-lg-rank">${esc(revRankLabel)}</span>
+                 <span class="acc-lg-sense">Plus tu fais de quiz, plus tu montes.</span>`
+              : `<span class="acc-lg-rank--empty">Fais un quiz pour entrer au classement.</span>`
+          }
           <span class="acc-lg-foot">
-            <span class="acc-lg-sub">${esc(revSub)}</span>
+            ${revSub ? `<span class="acc-lg-sub">${esc(revSub)}</span>` : `<span class="acc-lg-sub">&nbsp;</span>`}
             <span class="acc-lg-go">${icon("chevron-right", { size: 16, strokeWidth: 2.5 })}</span>
           </span>
         </button>

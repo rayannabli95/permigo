@@ -187,7 +187,25 @@ ${LEAGUE_CSS}
 .clt-pseudo-body { flex: 1; }
 .clt-pseudo-ttl { font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; }
 .clt-pseudo-sub { font: 500 11px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
-@media (prefers-reduced-motion: reduce) { .clt-tab, .clt-row { transition: none; } }
+/* ── Bandeau descriptif sous les onglets ── */
+.clt-scope-desc {
+  font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu2);
+  padding: 7px 0 0; letter-spacing: .01em;
+}
+/* Transitions onglets : ease-out snap + touch feedback */
+.clt-tab {
+  transition:
+    background .18s cubic-bezier(0.23,1,0.32,1),
+    color .18s cubic-bezier(0.23,1,0.32,1),
+    border-color .18s cubic-bezier(0.23,1,0.32,1),
+    transform .15s cubic-bezier(0.23,1,0.32,1),
+    opacity .15s cubic-bezier(0.23,1,0.32,1);
+}
+.clt-tab:active { transform: scale(.97); opacity: .88; }
+@media (prefers-reduced-motion: reduce) {
+  .clt-tab, .clt-row { transition: none; }
+  .clt-tab:active { transform: none; opacity: 1; }
+}
 
 /* ── Ligues REMC ── */
 .clt-rl-hero { margin: 4px 16px 12px; padding: 16px; border-radius: var(--rl);
@@ -470,6 +488,13 @@ export async function mount(root, initialTab) {
   if (scope === "theorie") maybeShowTheoryTuto();
 }
 
+// ─── Lexique partagé (cohérence avec l'accueil) ──────────────────
+const SCOPE_DESC = {
+  ecole: "Chaque compétence validée avec ton moniteur te fait grimper.",
+  theorie: "Plus tu fais de quiz, plus tu montes.",
+  national: "Le classement national de tous les élèves PermiGo.",
+};
+
 // ─── Render ──────────────────────────────────────────────────────
 function _myRow(rows) {
   return rows.find((r) => r.is_me === true) || null;
@@ -494,7 +519,7 @@ function _render(scope, data) {
     const totalKnown = rows.filter((r) => r.rang <= LIMIT).length;
     pill = mine
       ? `<div class="clt-mepill"><span class="clt-mepill-ico">${icon("trophy", { size: 14 })}</span>Tu es #${mine.rang}</div>`
-      : `<div class="clt-mepill"><span class="clt-mepill-ico">${icon("target", { size: 14 })}</span>Valide une compétence pour entrer</div>`;
+      : `<div class="clt-mepill"><span class="clt-mepill-ico">${icon("target", { size: 14 })}</span>Ta première validation te classe ici.</div>`;
     void totalKnown;
   }
 
@@ -504,10 +529,11 @@ function _render(scope, data) {
     <h1 class="clt-title">Classement</h1>
     ${pill}
     <div class="clt-tabs">
-      <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">${icon("trophy", { size: 13, strokeWidth: 2 })} Mon école</button>
+      <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">${icon("trophy", { size: 13, strokeWidth: 2 })} Avec mon moniteur</button>
       <button class="clt-tab ${scope === "theorie" ? "on" : ""}" data-scope="theorie">${icon("zap", { size: 13, strokeWidth: 2 })} Révision</button>
       <button class="clt-tab ${scope === "national" ? "on" : ""}" data-scope="national">National</button>
     </div>
+    <p id="clt-scope-desc" class="clt-scope-desc">${SCOPE_DESC[scope] ?? ""}</p>
   </div>
   <div id="clt-body">${_renderBody(scope, rows, data.hof)}</div>
   <a class="clt-pseudo" href="#/profil">
@@ -612,12 +638,12 @@ function _theoryLeagueHero(mine) {
     <div class="clt-rl-top">
       <div class="clt-rl-medal">?</div>
       <div class="clt-rl-info">
-        <div class="clt-rl-lbl">Ta ligue révision</div>
-        <div class="clt-rl-name">Pas encore classé</div>
+        <div class="clt-rl-lbl">Classement révision</div>
+        <div class="clt-rl-name">Fais un quiz pour entrer au classement.</div>
       </div>
       ${_theoryHelpBtn()}
     </div>
-    <div class="clt-rl-prog">Remplis ton premier quiz pour entrer dans la ligue révision — chaque compétence travaillée compte.</div>
+    <div class="clt-rl-prog">Plus tu fais de quiz, plus tu montes. Chaque quiz réussi rapporte des points.</div>
     ${_theoryQuizCta("Faire mon premier quiz", false)}
     ${_theoryHowLegend()}
   </div>`;
@@ -720,7 +746,7 @@ function _renderTheoryBody(rows) {
   if (active.length < 2) {
     return `${hero}<div class="clt-empty">
       <div class="clt-empty-ico">${icon("zap", { size: 30 })}</div>
-      <div class="clt-empty-txt">Le classement s'anime quand 2+ élèves ont des points révision. Quiz et examens blancs comptent.</div>
+      <div class="clt-empty-txt">Le classement s'anime dès que deux élèves ont des points révision.</div>
     </div>`;
   }
 
@@ -810,7 +836,7 @@ function _remcLeagueHero(mine) {
     <div class="clt-rl-top">
       <div class="clt-rl-medal">${info.elite ? "★" : L.n}</div>
       <div class="clt-rl-info">
-        <div class="clt-rl-lbl">Ta ligue</div>
+        <div class="clt-rl-lbl">Classement avec ton moniteur</div>
         <div class="clt-rl-name">${info.elite ? "Élite · Prêt pour l'examen" : `Ligue ${L.n} — ${esc(L.name)}`}</div>
       </div>
     </div>
@@ -825,9 +851,13 @@ function _renderAllTimeBody(rows, scope, hof) {
   const hofHtml = scope === "ecole" ? _hofSection(hof) : "";
   const active = rows.filter((r) => r.score > 0).length;
   if (active < 2) {
+    const inviteHtml = !_myRow(rows)
+      ? `<div style="margin-top:14px;font:600 13px/1.4 'Inter',sans-serif;color:var(--a-txt)">Ta première validation te classe ici.</div>`
+      : "";
     return `<div class="clt-empty">
       <div class="clt-empty-ico">${icon("target", { size: 30 })}</div>
-      <div class="clt-empty-txt">Le classement s'anime quand 2+ élèves ont validé des compétences.</div>
+      <div class="clt-empty-txt">Le classement apparaît dès que deux élèves ont validé une compétence avec leur moniteur.</div>
+      ${inviteHtml}
     </div>${hofHtml}`;
   }
 
@@ -891,9 +921,12 @@ function _wire(root, data, setScope) {
         } else {
           pill.innerHTML = mine
             ? `<span class="clt-mepill-ico">${icon("trophy", { size: 14 })}</span>Tu es #${mine.rang}`
-            : `<span class="clt-mepill-ico">${icon("target", { size: 14 })}</span>Valide une compétence pour entrer`;
+            : `<span class="clt-mepill-ico">${icon("target", { size: 14 })}</span>Ta première validation te classe ici.`;
         }
       }
+
+      const desc = root.querySelector("#clt-scope-desc");
+      if (desc) desc.textContent = SCOPE_DESC[next] ?? "";
 
       const body = root.querySelector("#clt-body");
       if (body) {

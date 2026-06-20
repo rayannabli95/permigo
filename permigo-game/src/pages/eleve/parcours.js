@@ -1202,6 +1202,29 @@ const STYLE = `<style>
 @media (prefers-reduced-motion: reduce) {
   .prc-node.next::before { animation: none; }
 }
+
+/* ── Indice contextuel zero-state ── */
+.prc-hint {
+  margin: 0 20px 4px;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--a) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
+  border-radius: var(--r-md);
+  font: 500 13px/1.5 'Inter', sans-serif;
+  color: var(--mu);
+}
+
+/* ── Bouton recap : scale au press (fallback inline onpointerdown
+   couvre les cas où CSS :active ne déclenche pas sur iOS Safari) ── */
+@media (prefers-reduced-motion: no-preference) {
+  a[href*="post_validation"] {
+    transition: transform .2s var(--ease-snap), box-shadow .2s var(--ease-snap);
+  }
+  a[href*="post_validation"]:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--a) 35%, transparent) !important;
+  }
+}
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
@@ -1564,20 +1587,28 @@ function renderPage(
   const totalComps = worldStates.reduce((s, w) => s + w.total, 0);
   const globalPct = Math.round((totalDone / totalComps) * 100);
 
+  // Zero-state hint: shown only when the student hasn't validated any competence yet.
+  const zeroStateHint =
+    totalDone === 0
+      ? `<div style="margin:0 20px 4px;padding:12px 14px;background:color-mix(in srgb,var(--a) 8%,transparent);border:1px solid color-mix(in srgb,var(--a) 20%,transparent);border-radius:var(--r-md);font:500 13px/1.5 'Inter',sans-serif;color:var(--mu)">
+        Chaque étape = une compétence du permis.<br>Ton moniteur la valide en séance — elle s'allume ici automatiquement.
+       </div>`
+      : "";
+
   return `${STYLE}
 <div class="prc">
 
   <a href="#prc-map-scroll" class="prc-skip">Aller à la carte</a>
 
-  <!-- Header sticky -->
+  <!-- Header -->
   <div class="prc-hd">
     <div>
-      <h1 class="prc-title" tabindex="-1">Mon parcours <button class="prc-help" id="prc-help" type="button" aria-label="Comment marche le parcours ?">?</button></h1>
-      <div class="prc-subtitle">31 compétences · Permis B</div>
+      <h1 class="prc-title" tabindex="-1">Ta carte du permis <button class="prc-help" id="prc-help" type="button" aria-label="Comment marche la carte ?">?</button></h1>
+      <div class="prc-subtitle">Valide les ${totalComps} compétences pour décrocher ton permis B</div>
     </div>
     <div class="prc-hd-right">
       <div class="prc-total">${totalDone}<span class="prc-total-denom">/${totalComps}</span></div>
-      <div class="prc-total-lbl">acquises</div>
+      <div class="prc-total-lbl">compétences acquises</div>
     </div>
   </div>
 
@@ -1589,10 +1620,12 @@ function renderPage(
       <div class="prc-global-fill" style="width:${globalPct}%"></div>
     </div>
     <div class="prc-global-meta">
-      <span>${globalPct}% du chemin</span>
-      <span>${totalComps - totalDone} restantes</span>
+      <span>${totalDone === 0 ? "Commence ta première compétence" : `${globalPct}% de compétences acquises`}</span>
+      <span>${totalComps - totalDone} ${totalComps - totalDone === 1 ? "restante" : "restantes"}</span>
     </div>
   </div>
+
+  ${zeroStateHint}
 
   <!-- Carte des mondes — pleine page, scroll naturel (plus d'encadré interne) -->
   <div class="prc-map" id="prc-map-scroll" tabindex="-1" role="region" aria-label="Carte d'apprentissage">
@@ -1663,8 +1696,8 @@ function renderWorldSection(
       const sttLabel = {
         done: "Acquis",
         a_valider: "À valider",
-        next: "Appuie pour commencer",
-        todo: "À débloquer",
+        next: "Commence ici",
+        todo: "Pas encore travaillée",
         locked: "Verrouillé",
       }[st];
 
@@ -1700,7 +1733,7 @@ function renderWorldSection(
         const req = UNLOCK_REQ[idx];
         const prevDone = ws.prevDoneCount ?? 0;
         const need = req - prevDone;
-        return `<div style="position:relative;z-index:9;text-align:center;padding:12px 16px;font:500 13px/1.4 'Inter',sans-serif;color:var(--mu3)">Débloque <strong style="color:var(--ink)">${need} compétence${need > 1 ? "s" : ""}</strong> dans le monde précédent pour accéder.</div>`;
+        return `<div style="position:relative;z-index:9;text-align:center;padding:12px 16px;font:500 13px/1.4 'Inter',sans-serif;color:var(--mu3)">Valide encore <strong style="color:var(--ink)">${need} compétence${need > 1 ? "s" : ""}</strong> dans le monde précédent pour ouvrir celui-ci.</div>`;
       })()
     : "";
 
@@ -1724,7 +1757,7 @@ function renderWorldSection(
     <div class="prc-world-h2">${esc(world.titre)}</div>
     <div class="prc-world-tagline">${esc(world.description)}</div>
     <div class="prc-world-count">
-      ${done} / ${total} compétences
+      ${done} / ${total} acquises
       ${isComplete ? " " + icon("trophy", { size: 15 }) : ""}
     </div>
   </div>
@@ -1746,16 +1779,16 @@ function renderWorldSection(
   <!-- Portail de fin de monde -->
   <div class="prc-portal">
     ${renderPortalArch(meta.color, isComplete)}
-    <div class="pbadge">${isComplete ? "✓ Monde terminé" : `${total - done} à débloquer`}</div>
-    <h3>${isComplete ? `Monde ${meta.num} terminé !` : `Continue l'aventure`}</h3>
+    <div class="pbadge">${isComplete ? "✓ Toutes acquises" : `${total - done} à valider`}</div>
+    <h3>${isComplete ? `Monde ${meta.num} bouclé !` : `Continue — tu avances bien`}</h3>
     <p>${
       isComplete
         ? hasNext
-          ? `Le monde ${idx + 2} t'attend.`
-          : `Tu as conquis tous les mondes !`
+          ? `Monde ${idx + 2} débloqué — continue ta progression.`
+          : `Bravo, tu as maîtrisé toutes les compétences !`
         : hasNext
-          ? `Termine ce monde pour débloquer le suivant.`
-          : `Le sommet est proche.`
+          ? `Valide toutes les compétences de ce monde pour passer au suivant.`
+          : `Plus que ${total - done} compétence${total - done > 1 ? "s" : ""} et tu touches au but.`
     }</p>
   </div>
 
@@ -1798,12 +1831,12 @@ function renderFinal(done, total) {
   const pct = Math.round((done / total) * 100);
   return `
 <div class="prc-final">
-  <h3>Bout du voyage : l'Examen</h3>
-  <p>Quand toutes tes compétences sont acquises, tu seras prêt(e) pour l'épreuve.</p>
+  <h3>La ligne d'arrivée : l'Examen du permis</h3>
+  <p>Acquiers toutes les compétences et ton moniteur pourra te présenter à l'examen.</p>
   <div class="prc-final-stats">
     <div class="prc-final-stat">
       <div class="v">${done}<small style="font-size:13px;opacity:.6">/${total}</small></div>
-      <div class="l">Compétences</div>
+      <div class="l">Acquises</div>
     </div>
     <div class="prc-final-stat">
       <div class="v">${pct}%</div>
@@ -1982,8 +2015,8 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   const stLabel = {
     done: "Acquise",
     a_valider: "À valider",
-    next: "En cours",
-    todo: "À travailler",
+    next: "Prochaine compétence",
+    todo: "À venir",
     locked: "Verrouillée",
   }[st];
   const compNum = cat.subs.findIndex((s) => s.c === compId) + 1;
@@ -2007,8 +2040,9 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   // Ne change pas le statut (already_acquired) — joue l'animation + crédite l'XP d'engagement.
   const recapBtn = `
     <a href="#/quiz/${esc(compId)}/post_validation" role="button"
-       style="display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:15px;background:var(--a);border:none;color:var(--a-ink);border-radius:14px;font:800 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;box-shadow:0 6px 16px -4px color-mix(in srgb, var(--a) 60%, transparent);min-height:52px;">
-      ${icon("zap", { size: 16 })} Clique pour te tester sur la compétence !
+       style="display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:15px;background:var(--a);border:none;color:var(--a-ink);border-radius:14px;font:800 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;box-shadow:0 6px 16px -4px color-mix(in srgb, var(--a) 60%, transparent);min-height:52px;transition:transform .2s var(--ease-snap),box-shadow .2s var(--ease-snap);-webkit-tap-highlight-color:transparent;"
+       onpointerdown="this.style.transform='scale(0.97)'" onpointerup="this.style.transform=''" onpointerleave="this.style.transform=''">
+      ${icon("zap", { size: 16 })} Révise cette compétence
     </a>`;
 
   // Bloc status contextuel selon état
@@ -2030,7 +2064,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
           <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Compétence acquise</div>
-            <div class="fiche-status-sub">${esc(parts.join(" · ") || "Bravo, tu maîtrises cette compétence !")}</div>
+            <div class="fiche-status-sub">${esc(parts.join(" · ") || "Ton moniteur a validé cette compétence.")}</div>
           </div>
         </div>${recapBtn}`;
     }
@@ -2040,7 +2074,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
           <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Compétence acquise</div>
-            <div class="fiche-status-sub">Bravo, tu maîtrises cette compétence.</div>
+            <div class="fiche-status-sub">Ton moniteur a validé cette compétence en séance.</div>
           </div>
         </div>${recapBtn}`;
     }
@@ -2052,7 +2086,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
           <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Compétence acquise</div>
-            <div class="fiche-status-sub">Validée par ton moniteur.</div>
+            <div class="fiche-status-sub">Validée par ton moniteur en séance de conduite.</div>
           </div>
         </div>${recapBtn}`;
     }
@@ -2061,8 +2095,8 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
         <div class="fiche-status next" style="--wc:${meta.color}">
           <div class="fiche-status-ico">${icon("zap", { size: 18 })}</div>
           <div class="fiche-status-body">
-            <div class="fiche-status-title">Prochaine étape</div>
-            <div class="fiche-status-sub">Pratique cette compétence avec ton moniteur — il la validera dans ton livret.</div>
+            <div class="fiche-status-title">Prochaine à travailler</div>
+            <div class="fiche-status-sub">Entraîne-toi en séance — ton moniteur la validera quand tu es prêt(e).</div>
           </div>
         </div>`;
     }
@@ -2071,8 +2105,8 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
         <div class="fiche-status locked">
           <div class="fiche-status-ico">${icon("lock", { size: 18 })}</div>
           <div class="fiche-status-body">
-            <div class="fiche-status-title">Verrouillée</div>
-            <div class="fiche-status-sub">Termine les compétences précédentes pour débloquer celle-ci.</div>
+            <div class="fiche-status-title">Pas encore accessible</div>
+            <div class="fiche-status-sub">Valide les compétences précédentes pour débloquer celle-ci.</div>
           </div>
         </div>`;
     }
@@ -2080,8 +2114,8 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
       <div class="fiche-status next" style="--wc:${meta.color}">
         <div class="fiche-status-ico">${icon("clock", { size: 18 })}</div>
         <div class="fiche-status-body">
-          <div class="fiche-status-title">À travailler</div>
-          <div class="fiche-status-sub">Cette compétence reste à pratiquer. Continue à avancer dans ton parcours.</div>
+          <div class="fiche-status-title">À venir</div>
+          <div class="fiche-status-sub">Tu travailleras cette compétence avec ton moniteur au fil des séances.</div>
         </div>
       </div>`;
   })();
@@ -2097,7 +2131,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
         ${stIcon}
       </div>
       <h3 id="bsheet-title">${esc(sub.n)}</h3>
-      <div class="fiche-id">${esc(compId.toUpperCase())} · ${compNum}/${total}</div>
+      <div class="fiche-id">${compNum} sur ${total} dans ce monde</div>
       ${st === "done" ? "" : `<div><span class="stt-pill ${st}" style="--wc:${meta.color}">${esc(stLabel)}</span></div>`}
     </div>
     <div class="fiche-body">
