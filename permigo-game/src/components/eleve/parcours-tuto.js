@@ -9,33 +9,27 @@ const SLIDES = [
   {
     mascot: "/skins/mascot-hello.png",
     extra: "/skins/avatars/permigo-badge-icon.png",
-    title: "Bienvenue sur ton parcours !",
-    text: "Voici ta carte d'apprentissage du permis. Suis la route, étape par étape.",
+    title: "Ta route vers le permis",
+    text: "Un parcours clair, étape par étape.",
   },
   {
     mascot: "/skins/mascot-point.png",
     extra: "/skins/drapeau.png",
-    title: "Suis tes compétences",
-    text: "Chaque étape de la carte = une compétence à valider avec ton moniteur.",
+    title: "Valide avec ton moniteur",
+    text: "Chaque étape = une compétence. Ton moniteur confirme en séance.",
   },
   {
     mascot: "/skins/mascot-celebrate.png",
     extra: "/skins/chest-open.png",
-    title: "Débloque des récompenses",
-    text: "Avance pour gagner des coffres, des skins de voiture et personnaliser ton profil.",
-  },
-  {
-    mascot: "/skins/mascot-celebrate.png",
-    extra: "/skins/couronne.png",
-    title: "Grimpe dans la ligue",
-    text: "Mesure-toi aux autres élèves de ton auto-école et vise le haut du classement.",
+    title: "Gagne des coffres",
+    text: "Avance et débloque des récompenses pour personnaliser ton profil.",
   },
 ];
 
 const tuto = createTuto({
   storageKey: "permigo-parcours-tuto-v1",
   slides: SLIDES,
-  ariaLabel: "Présentation du parcours",
+  ariaLabel: "Ton parcours",
   trackPrefix: "parcours_tuto",
 });
 
