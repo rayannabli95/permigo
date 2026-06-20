@@ -564,6 +564,12 @@ const STYLE = `<style>
   font-style: normal;
   border-radius: var(--r-full);
   box-shadow: 0 3px 10px var(--wg, color-mix(in srgb, var(--a) 40%, transparent));
+  /* Le label parent a pointer-events:none (évite de bloquer les nodes voisins).
+     On le ré-active uniquement sur cette pastille CTA : le clic remonte alors
+     au .prc-node et ouvre la fiche. Sans ça, le bouton « Commence ici → »
+     n'était pas cliquable. */
+  pointer-events: auto;
+  cursor: pointer;
 }
 .prc-node.next .nd-lbl .nd-stt::after { content: ' →'; }
 /* Badge "TU ES ICI" */
