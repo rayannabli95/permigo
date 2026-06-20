@@ -17,27 +17,9 @@ import {
   renderLeagueBadge,
   renderLeagueRow,
   LEAGUE_CSS,
+  msToNextMonday,
+  fmtCountdown,
 } from "@/utils/league-shared.js";
-
-// ─── Countdown ────────────────────────────────────────────────
-function msToNextMonday() {
-  const now = new Date();
-  const dow = now.getDay();
-  const days = dow === 0 ? 1 : 8 - dow;
-  const next = new Date(now);
-  next.setDate(now.getDate() + days);
-  next.setHours(0, 0, 0, 0);
-  return next - now;
-}
-function fmtCountdown(ms) {
-  const s = Math.floor(ms / 1000);
-  const d = Math.floor(s / 86400);
-  const h = Math.floor((s % 86400) / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  if (d > 0) return `${d}j ${h}h`;
-  if (h > 0) return `${h}h ${m}min`;
-  return `${m}min`;
-}
 
 // ─── CSS ─────────────────────────────────────────────────────
 const STYLE = `<style>
