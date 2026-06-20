@@ -20,6 +20,9 @@ async function loginAsEleve(page) {
   await page.addInitScript(() => {
     try {
       localStorage.setItem("permigo_cookie_consent", "all");
+      // Désactive le tuto guidé J0 : son overlay (.gt-root) intercepte sinon
+      // les clics de façon non déterministe (flaky).
+      localStorage.setItem("pg-tour-eleve-v1", "1");
     } catch {
       /* noop */
     }
@@ -85,11 +88,62 @@ test.describe("Examen blanc — parcours", () => {
       const next = page.locator(".exb-next-btn");
       await expect(next).toBeVisible({ timeout: 5_000 });
       await next.click();
-      await page.waitForTimeout(400); // transition de question
+      // Attend le rendu de la question suivante (feedback de nouveau masqué) ou
+      // l'écran de résultats — évite un délai fixe (source de flakiness).
+      await page
+        .locator(".exb-feedback")
+        .waitFor({ state: "hidden", timeout: 6_000 })
+        .catch(() => {});
     }
 
     expect(reachedResults).toBe(true);
     await expect(page.locator(".exb-results")).toBeVisible();
     expect(errors).toEqual([]);
+  });
+
+  test("examen officiel : démarre et affiche le feedback", async ({ page }) => {
+    await loginAsEleve(page);
+    await page.evaluate(() => {
+      location.hash = "#/exam-blanc";
+    });
+    await page.waitForSelector("#exb-officiel", { timeout: 15_000 });
+    if ((await page.locator("#exb-officiel.is-locked").count()) > 0) {
+      test.skip(true, "Examen officiel verrouillé pour ce compte");
+      return;
+    }
+    await page.locator("#exb-officiel").click();
+    await expect(page.locator(".exb-choice").first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.locator(".exb-qnum")).toContainText("Question 1");
+    await page.locator(".exb-choice").first().click();
+    await expect(page.locator(".exb-feedback")).toBeVisible({ timeout: 5_000 });
+    await page.locator(".exb-next-btn").click();
+    await expect(page.locator(".exb-qnum")).toContainText("Question 2", {
+      timeout: 5_000,
+    });
+  });
+
+  test("révision (centre) : démarre et affiche le feedback", async ({
+    page,
+  }) => {
+    await loginAsEleve(page);
+    await page.evaluate(() => {
+      location.hash = "#/exam-blanc/c-cergy";
+    });
+    const q = await page
+      .waitForSelector(".exb-choice", { timeout: 12_000 })
+      .catch(() => null);
+    if (!q) {
+      test.skip(true, "Révision centre 'cergy' non disponible");
+      return;
+    }
+    await expect(page.locator(".exb-qnum")).toContainText("Question 1");
+    await page.locator(".exb-choice").first().click();
+    await expect(page.locator(".exb-feedback")).toBeVisible({ timeout: 5_000 });
+    await page.locator(".exb-next-btn").click();
+    await expect(page.locator(".exb-qnum")).toContainText("Question 2", {
+      timeout: 5_000,
+    });
   });
 });
