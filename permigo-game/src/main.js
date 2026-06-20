@@ -52,6 +52,12 @@ async function boot() {
 
     if (!me) {
       // Pages publiques accessibles sans authentification
+      // Création de compte self-serve (moniteur indépendant — flow commercial #1)
+      if (location.hash.startsWith("#/creer-compte")) {
+        const { mount } = await import("@/pages/public/creer-compte.js");
+        return mount(app);
+      }
+      // Activation de compte via invitation (token requis)
       if (location.hash.startsWith("#/signup")) {
         const { mount } = await import("@/pages/public/signup.js");
         return mount(app);

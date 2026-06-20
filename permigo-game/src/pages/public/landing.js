@@ -2,7 +2,7 @@
 // Landing / page de vente — visiteur non connecté
 // Cible : MONITEUR INDÉPENDANT (école = porte discrète via le formulaire).
 // Positionnement : "ton app à ton nom" + engagement élève + preuve/autorité.
-// CTA principal : "Créer mon compte" → #/signup (self-serve 9,99€/mois).
+// CTA principal : "Créer mon compte" → #/creer-compte (self-serve 9,99€/mois).
 // CTA secondaire : formulaire "qu'on te montre" → table public.leads (insert anon).
 // Montée par main.js quand !me et hash racine.
 // ═══════════════════════════════════════════════════════════════
@@ -370,11 +370,11 @@ export function mount(root) {
   root.querySelector("#lp-login")?.addEventListener("click", goLogin);
   root.querySelector("#lp-login2")?.addEventListener("click", goLogin);
 
-  // ── Créer mon compte (self-serve 9,99€/mois) ──
+  // ── Créer mon compte (self-serve moniteur 9,99€/mois) ──
   root.querySelectorAll('[data-go="signup"]').forEach((el) => {
     el.addEventListener("click", () => {
       track("landing.cta_signup", {});
-      location.hash = "#/signup";
+      location.hash = "#/creer-compte";
       location.reload();
     });
   });
