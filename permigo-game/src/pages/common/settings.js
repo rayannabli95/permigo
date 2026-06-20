@@ -565,6 +565,14 @@ ${
         <button class="st-btn-txt" id="btn-cgu">Lire →</button>
       </div>
     </div>
+    <div class="st-row">
+      <div class="st-row-left">
+        <div class="st-row-title">Crédits & licences</div>
+      </div>
+      <div class="st-row-action">
+        <button class="st-btn-txt" id="btn-credits">Lire →</button>
+      </div>
+    </div>
   </div>
 
   <!-- ZONE DANGER -->
@@ -867,6 +875,9 @@ function wire(root, me, prefs) {
   root
     .querySelector("#btn-cgu")
     ?.addEventListener("click", () => navigate("#/legal/cgu"));
+  root
+    .querySelector("#btn-credits")
+    ?.addEventListener("click", () => navigate("#/legal/credits"));
 
   // Revoir le guide : on efface le flag puis on rejoint la page hôte —
   // le tour se redéclenche tout seul au mount.

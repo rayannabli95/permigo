@@ -2,41 +2,99 @@
 // Legal — Politique de confidentialité + CGU
 // Route : #/legal/privacy · #/legal/cgu
 // ═══════════════════════════════════════════════════════════════
-import { track }   from '@/services/analytics.js';
-import { navigate } from '@/router.js';
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
 
 const CONTENT = {
   privacy: {
-    title: 'Politique de confidentialité',
+    title: "Politique de confidentialité",
     sections: [
-      { heading: 'Responsable du traitement', body: 'PermiGo SAS — dpo@permigo.fr' },
-      { heading: 'Données collectées', body: 'Données de progression pédagogique (compétences validées, quiz, streak), profil pseudonymisé (prénom, email), historique d\'apprentissage. Aucune donnée bancaire, NEPH ou adresse postale n\'est collectée.' },
-      { heading: 'Finalité du traitement', body: 'Suivi pédagogique de l\'apprentissage du permis de conduire, personnalisation de l\'expérience d\'apprentissage, communication pédagogique.' },
-      { heading: 'Base légale', body: 'Exécution du contrat (abonnement auto-école), intérêt légitime (amélioration du service), consentement (emails marketing — révocable à tout moment dans Paramètres).' },
+      {
+        heading: "Responsable du traitement",
+        body: "PermiGo SAS — dpo@permigo.fr",
+      },
+      {
+        heading: "Données collectées",
+        body: "Données de progression pédagogique (compétences validées, quiz, streak), profil pseudonymisé (prénom, email), historique d'apprentissage. Aucune donnée bancaire, NEPH ou adresse postale n'est collectée.",
+      },
+      {
+        heading: "Finalité du traitement",
+        body: "Suivi pédagogique de l'apprentissage du permis de conduire, personnalisation de l'expérience d'apprentissage, communication pédagogique.",
+      },
+      {
+        heading: "Base légale",
+        body: "Exécution du contrat (abonnement auto-école), intérêt légitime (amélioration du service), consentement (emails marketing — révocable à tout moment dans Paramètres).",
+      },
       // ⚠️ TEXTE À FAIRE VALIDER PAR UN JURISTE / DPO avant déploiement large.
-      { heading: 'Mineurs de moins de 15 ans', body: 'Conformément à l\'article 8 du RGPD et à la loi Informatique et Libertés, l\'inscription d\'un élève de moins de 15 ans requiert le consentement du ou des titulaires de l\'autorité parentale. Tant que ce consentement n\'a pas été recueilli, le compte de l\'élève reste bloqué. Le parent ou tuteur peut retirer son consentement à tout moment en écrivant à dpo@permigo.fr ; le compte est alors désactivé et les données supprimées ou anonymisées.' },
-      { heading: 'Conservation', body: 'Données conservées pendant la durée de l\'abonnement + 3 ans. Suppression sur demande à dpo@permigo.fr ou via Paramètres → Supprimer mon compte.' },
-      { heading: 'Vos droits', body: 'Accès, rectification, effacement, portabilité, opposition — exercez-les via dpo@permigo.fr. Réclamation possible auprès de la CNIL (cnil.fr).' },
-      { heading: 'Cookies', body: 'Cookies fonctionnels uniquement (session auth). Aucun cookie publicitaire ou de tracking tiers.' },
+      {
+        heading: "Mineurs de moins de 15 ans",
+        body: "Conformément à l'article 8 du RGPD et à la loi Informatique et Libertés, l'inscription d'un élève de moins de 15 ans requiert le consentement du ou des titulaires de l'autorité parentale. Tant que ce consentement n'a pas été recueilli, le compte de l'élève reste bloqué. Le parent ou tuteur peut retirer son consentement à tout moment en écrivant à dpo@permigo.fr ; le compte est alors désactivé et les données supprimées ou anonymisées.",
+      },
+      {
+        heading: "Conservation",
+        body: "Données conservées pendant la durée de l'abonnement + 3 ans. Suppression sur demande à dpo@permigo.fr ou via Paramètres → Supprimer mon compte.",
+      },
+      {
+        heading: "Vos droits",
+        body: "Accès, rectification, effacement, portabilité, opposition — exercez-les via dpo@permigo.fr. Réclamation possible auprès de la CNIL (cnil.fr).",
+      },
+      {
+        heading: "Cookies",
+        body: "Cookies fonctionnels uniquement (session auth). Aucun cookie publicitaire ou de tracking tiers.",
+      },
     ],
   },
   cgu: {
-    title: 'Conditions générales d\'utilisation',
+    title: "Conditions générales d'utilisation",
     sections: [
-      { heading: 'Objet', body: 'PermiGo est une plateforme d\'accompagnement pédagogique pour l\'apprentissage du permis de conduire (catégorie B). L\'accès est réservé aux élèves, moniteurs et gérants d\'auto-écoles abonnées.' },
-      { heading: 'Accès au service', body: 'L\'accès est conditionné à un abonnement souscrit par l\'auto-école. Chaque utilisateur dispose d\'un compte nominatif non cessible.' },
-      { heading: 'Utilisation', body: 'L\'application est strictement réservée à l\'apprentissage du permis de conduire. Toute utilisation frauduleuse, partage de compte ou tentative de manipulation des données pédagogiques est interdite.' },
-      { heading: 'Propriété intellectuelle', body: 'Le contenu pédagogique (questions, référentiel REMC, design) est la propriété exclusive de PermiGo SAS. La reproduction est interdite sans accord écrit.' },
-      { heading: 'Responsabilité', body: 'PermiGo est un outil d\'aide à la préparation du permis de conduire. Les résultats obtenus dans l\'application ne préjugent pas des résultats à l\'examen officiel.' },
-      { heading: 'Résiliation', body: 'L\'accès peut être résilié par l\'auto-école ou sur demande de l\'utilisateur. Les données sont supprimées selon la politique de confidentialité.' },
-      { heading: 'Contact', body: 'PermiGo SAS — contact@permigo.fr · dpo@permigo.fr' },
+      {
+        heading: "Objet",
+        body: "PermiGo est une plateforme d'accompagnement pédagogique pour l'apprentissage du permis de conduire (catégorie B). L'accès est réservé aux élèves, moniteurs et gérants d'auto-écoles abonnées.",
+      },
+      {
+        heading: "Accès au service",
+        body: "L'accès est conditionné à un abonnement souscrit par l'auto-école. Chaque utilisateur dispose d'un compte nominatif non cessible.",
+      },
+      {
+        heading: "Utilisation",
+        body: "L'application est strictement réservée à l'apprentissage du permis de conduire. Toute utilisation frauduleuse, partage de compte ou tentative de manipulation des données pédagogiques est interdite.",
+      },
+      {
+        heading: "Propriété intellectuelle",
+        body: "Le contenu pédagogique (questions, référentiel REMC, design) est la propriété exclusive de PermiGo SAS. La reproduction est interdite sans accord écrit.",
+      },
+      {
+        heading: "Responsabilité",
+        body: "PermiGo est un outil d'aide à la préparation du permis de conduire. Les résultats obtenus dans l'application ne préjugent pas des résultats à l'examen officiel.",
+      },
+      {
+        heading: "Résiliation",
+        body: "L'accès peut être résilié par l'auto-école ou sur demande de l'utilisateur. Les données sont supprimées selon la politique de confidentialité.",
+      },
+      {
+        heading: "Contact",
+        body: "PermiGo SAS — contact@permigo.fr · dpo@permigo.fr",
+      },
+    ],
+  },
+  credits: {
+    title: "Crédits & licences",
+    sections: [
+      {
+        heading: "Icônes & emojis",
+        body: "Certains pictogrammes (dont l'emoji de validation) proviennent de Twemoji © Twitter, Inc. et contributeurs, sous licence CC-BY 4.0 (creativecommons.org/licenses/by/4.0).",
+      },
+      {
+        heading: "Panneaux de signalisation",
+        body: "Les illustrations de panneaux routiers proviennent de Wikimedia Commons (domaine public).",
+      },
     ],
   },
 };
 
-export async function mount(root, param = 'privacy') {
+export async function mount(root, param = "privacy") {
   const page = CONTENT[param] || CONTENT.privacy;
-  track('page_view', { page: `legal_${param}` });
+  track("page_view", { page: `legal_${param}` });
 
   root.innerHTML = `
 <style>
@@ -106,14 +164,20 @@ export async function mount(root, param = 'privacy') {
     <div class="legal-header-title">${page.title}</div>
   </div>
   <div class="legal-body">
-    ${page.sections.map(s => `
+    ${page.sections
+      .map(
+        (s) => `
     <div class="legal-section">
       <div class="legal-section-title">${s.heading}</div>
       <div class="legal-section-body">${s.body}</div>
-    </div>`).join('')}
+    </div>`,
+      )
+      .join("")}
   </div>
   <div class="legal-footer">PermiGo v7 · ${new Date().getFullYear()}</div>
 </div>`;
 
-  root.querySelector('#legal-back')?.addEventListener('click', () => navigate('/settings'));
+  root
+    .querySelector("#legal-back")
+    ?.addEventListener("click", () => navigate("/settings"));
 }
