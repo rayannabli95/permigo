@@ -500,7 +500,7 @@ const STYLE = `<style>
   border-radius: var(--r);
   padding: 6px 10px 7px;
   width: max-content;
-  max-width: 168px;
+  max-width: 184px;
   min-width: 104px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(11,13,26,.08);
@@ -512,8 +512,11 @@ const STYLE = `<style>
   font: 600 13px/1.3 'Plus Jakarta Sans', sans-serif;
   color: var(--ink);
   white-space: normal;
-  word-wrap: break-word;
-  hyphens: auto;
+  /* Plus de coupe automatique mid-mot (« ma-nœuvres ») : on passe à la ligne
+     aux espaces ; un mot trop long casse sans tiret seulement s'il déborde. */
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
   margin-bottom: 3px;
 }
 /* Code REMC — caché sur la map (bruit visuel pour le débutant)
