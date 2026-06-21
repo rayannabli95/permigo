@@ -21,6 +21,7 @@ import {
 } from "@/utils/pwa.js";
 import { optInPush } from "@/services/web-push.js";
 import { unlockChest } from "@/utils/game-state.js";
+import { ACCENTS, getAccent, setAccent } from "@/utils/accent.js";
 
 import { a2hsStepsHTML, A2HS_STYLE } from "@/components/common/a2hs-steps.js";
 
@@ -70,15 +71,17 @@ export async function mount(root) {
   const showA2HS = !isStandalone();
 
   const AVATAR_I = SLIDES.length;
-  const NOTIF_I = showNotif ? AVATAR_I + 1 : -1;
-  const A2HS_I = AVATAR_I + 1 + (showNotif ? 1 : 0);
-  const TOTAL = SLIDES.length + 1 + (showNotif ? 1 : 0) + (showA2HS ? 1 : 0);
+  const COLOR_I = AVATAR_I + 1;
+  const NOTIF_I = showNotif ? COLOR_I + 1 : -1;
+  const A2HS_I = COLOR_I + 1 + (showNotif ? 1 : 0);
+  const TOTAL = SLIDES.length + 2 + (showNotif ? 1 : 0) + (showA2HS ? 1 : 0);
 
   let idx = 0;
   let avatar =
     me.avatar_url && ASSETS.avatar?.includes(me.avatar_url)
       ? me.avatar_url
       : ASSETS.avatar?.[0] || null;
+  let accentId = getAccent();
   let a2hsPlat = guessPlatform() === "android" ? "android" : "ios";
   let notifDone = false; // opt-in tenté (accordé OU refusé) → on peut avancer
   let notifBusy = false;
@@ -111,7 +114,7 @@ export async function mount(root) {
           `,
           ).join("")}
           <section class="ob-slide ob-slide-avatar" data-i="${AVATAR_I}">
-            <div class="ob-halo" aria-hidden="true"><div class="ob-emoji">${icon("palette", { size: 34 })}</div></div>
+            <div class="ob-halo" aria-hidden="true"><div class="ob-emoji">${icon("user", { size: 34 })}</div></div>
             <h1 class="ob-title">C'est toi</h1>
             <p class="ob-body-txt">Choisis ton avatar — tu peux en changer dans ton profil.</p>
             <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="Choix de l'avatar">
@@ -124,6 +127,20 @@ export async function mount(root) {
                 </button>`,
                 )
                 .join("")}
+            </div>
+          </section>
+          <section class="ob-slide ob-slide-color" data-i="${COLOR_I}">
+            <div class="ob-halo" aria-hidden="true"><div class="ob-emoji">${icon("palette", { size: 34 })}</div></div>
+            <h1 class="ob-title">Choisis ta couleur</h1>
+            <p class="ob-body-txt">Elle habille toute l'app — ton parcours, tes boutons, tes badges.</p>
+            <div class="ob-color-grid" id="ob-color-grid" role="radiogroup" aria-label="Choix de la couleur">
+              ${ACCENTS.map(
+                (c) => `
+                <button class="ob-color-sw${c.id === accentId ? " sel" : ""}" data-accent="${esc(c.id)}" role="radio" aria-checked="${c.id === accentId}" aria-label="${esc(c.name)}" type="button" style="--sw:${c.a};--sw-dk:${c.adk}">
+                  <span class="ob-color-dot" aria-hidden="true"></span>
+                  <span class="ob-color-name">${esc(c.name)}</span>
+                </button>`,
+              ).join("")}
             </div>
           </section>
           ${
@@ -180,6 +197,9 @@ export async function mount(root) {
   function isAvatar() {
     return idx === AVATAR_I;
   }
+  function isColor() {
+    return idx === COLOR_I;
+  }
   function isNotif() {
     return showNotif && idx === NOTIF_I;
   }
@@ -199,7 +219,7 @@ export async function mount(root) {
       ctaBtn.innerHTML = "Activer les rappels";
     } else if (isLast()) {
       ctaBtn.innerHTML = "C'est parti";
-    } else if (isAvatar() || isNotif()) {
+    } else if (isAvatar() || isColor() || isNotif()) {
       ctaBtn.innerHTML = 'Continuer <span aria-hidden="true">→</span>';
     } else {
       ctaBtn.innerHTML = `${esc(SLIDES[idx].cta)} <span aria-hidden="true">→</span>`;
@@ -289,6 +309,23 @@ export async function mount(root) {
         const on = c.dataset.url === avatar;
         c.classList.toggle("sel", on);
         c.setAttribute("aria-checked", on ? "true" : "false");
+      });
+    });
+  });
+
+  // Couleur d'accent — application live : tout l'onboarding (et l'app) se
+  // recolore instantanément car l'UI suit var(--a). Persisté en localStorage
+  // par setAccent (même source de vérité que Réglages, pas de write DB).
+  root.querySelectorAll(".ob-color-sw").forEach((sw) => {
+    sw.addEventListener("click", () => {
+      accentId = sw.dataset.accent;
+      setAccent(accentId);
+      haptic?.("select");
+      track("onboarding.accent_chosen", { accent: accentId });
+      root.querySelectorAll(".ob-color-sw").forEach((s) => {
+        const on = s.dataset.accent === accentId;
+        s.classList.toggle("sel", on);
+        s.setAttribute("aria-checked", on ? "true" : "false");
       });
     });
   });
@@ -569,6 +606,53 @@ const STYLE = `<style>
     opacity: 0; transform: scale(.5); transition: opacity .15s, transform .15s;
   }
   .ob-av-card.sel .ob-av-check { opacity: 1; transform: scale(1); }
+
+  /* Slide couleur : palette de pastilles qui glisse en cascade */
+  .ob-color-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-top: 24px; width: 100%; max-width: 340px;
+  }
+  .ob-color-sw {
+    display: flex; flex-direction: column; align-items: center; gap: 9px;
+    padding: 15px 6px; border-radius: var(--rl); cursor: pointer;
+    border: 2.5px solid transparent;
+    background: rgba(255,255,255,.06);
+    transition: border-color .15s, transform .12s, background .15s;
+  }
+  .ob-color-sw:active { transform: scale(.94); }
+  .ob-color-sw.sel { border-color: #fff; background: rgba(255,255,255,.12); }
+  .ob-color-dot {
+    position: relative;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--sw), var(--sw-dk));
+    box-shadow: 0 5px 16px -3px color-mix(in srgb, var(--sw) 65%, transparent),
+                inset 0 2px 4px rgba(255,255,255,.35);
+  }
+  .ob-color-sw.sel .ob-color-dot::after {
+    content: '✓'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font: 800 19px/1 'Inter', sans-serif;
+    text-shadow: 0 1px 3px rgba(0,0,0,.45);
+  }
+  .ob-color-name {
+    font: 600 11.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.78);
+  }
+  .ob-slide-color.on .ob-color-sw {
+    animation: obSwIn .45s cubic-bezier(.22,1,.36,1) both;
+  }
+  .ob-slide-color.on .ob-color-sw:nth-child(1) { animation-delay: .14s; }
+  .ob-slide-color.on .ob-color-sw:nth-child(2) { animation-delay: .20s; }
+  .ob-slide-color.on .ob-color-sw:nth-child(3) { animation-delay: .26s; }
+  .ob-slide-color.on .ob-color-sw:nth-child(4) { animation-delay: .32s; }
+  .ob-slide-color.on .ob-color-sw:nth-child(5) { animation-delay: .38s; }
+  .ob-slide-color.on .ob-color-sw:nth-child(6) { animation-delay: .44s; }
+  @keyframes obSwIn {
+    from { opacity: 0; transform: translateY(18px) scale(.88); }
+    to   { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ob-slide-color.on .ob-color-sw { animation: none; }
+  }
 
   /* Slide notifications : cloche qui sonne + faux aperçu de notif */
   .ob-halo-bell::before {
