@@ -508,6 +508,26 @@ const STYLE = `<style>
 .nd-wheel-locked { opacity: .45; }
 
 /* ── Labels flottants sous le node ── */
+/* Noms LÉGERS : pour tous les nodes SAUF l'actif/à valider, on retire la grosse
+   carte blanche → simple légende discrète (nom seul, gris, sans cadre).
+   Propre ET informatif. Le node actif garde sa carte + CTA + « TU ES ICI ». */
+.prc-node:not(.next):not(.a_valider) .nd-lbl {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0;
+  box-shadow: none;
+  padding: 3px 4px 0;
+  max-width: 122px;
+  min-width: 0;
+}
+.prc-node:not(.next):not(.a_valider) .nd-lbl .nd-name {
+  font: 600 11px/1.25 'Inter', sans-serif;
+  color: var(--mu2);
+  margin-bottom: 0;
+}
+.prc-node:not(.next):not(.a_valider) .nd-lbl .nd-stt { display: none; }
+.prc-node.done:not(.next) .nd-lbl .nd-name { color: var(--gr-txt); }
 .nd-lbl {
   position: absolute;
   top: calc(100% + 10px);
