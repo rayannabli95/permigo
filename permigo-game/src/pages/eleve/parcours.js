@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // Élève — Parcours REMC (Map immersive v2)
 // Inspiration : Apple Health × Duolingo × ancien permigo-v7
-// Route SVG sinueuse · Images monde · Nodes animés · Light theme
+// Route SVG sinueuse · Nodes animés · Light theme · Vue Liste (chapitres)
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -28,14 +28,6 @@ import {
   getMyChests,
   markChestOpened,
 } from "@/utils/game-state.js";
-
-// Fond photo immersif par monde, variante jour/nuit selon l'heure.
-const isNight = (() => {
-  const h = new Date().getHours();
-  return h >= 20 || h < 7;
-})();
-const WORLD_BG = (num) =>
-  `/skins/landing/monde${num}${isNight ? "nuit" : "jour"}.webp`;
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -141,9 +133,9 @@ const STYLE = `<style>
 /* ── Sections Monde — fond photo z:0, gradient ::before z:1, contenu z:3+ ── */
 .prc-world {
   position: relative;
-  padding: 0 0 70px;
+  padding: 0 0 50px;
   overflow: hidden;
-  min-height: 300px;
+  min-height: 240px;
   background: var(--bg);
 }
 /* Petit visuel décoratif en haut à droite (au lieu de fond pleine page) */
@@ -192,7 +184,7 @@ const STYLE = `<style>
 .prc-world-hd {
   position: relative;
   z-index: 5;
-  padding: 24px 16px 12px;
+  padding: 16px 16px 8px;
   text-align: center;
 }
 .prc-world-badge {
@@ -253,7 +245,7 @@ const STYLE = `<style>
 /* ── Route SVG ── */
 .prc-route {
   position: relative;
-  padding: 0 10px 60px;
+  padding: 0 10px 36px;
   z-index: 3;
 }
 .prc-route svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -1231,32 +1223,100 @@ const STYLE = `<style>
     box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--a) 35%, transparent) !important;
   }
 }
+
+/* ══ Toggle d'affichage Carte / Liste ══════════════════════════ */
+.prc-viewtoggle { display:flex; gap:4px; margin:10px 20px 0; padding:4px; background:var(--bg2); border-radius:var(--r-full); position:relative; z-index:2; }
+.prc-vt-btn { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:9px 8px; border:0; background:transparent; border-radius:var(--r-full); font:800 13px/1 'Inter',sans-serif; color:var(--mu2); cursor:pointer; -webkit-tap-highlight-color:transparent; transition:color .15s, background .15s, box-shadow .15s; }
+.prc-vt-btn svg { width:16px; height:16px; }
+.prc-vt-btn.on { background:var(--su); color:var(--ink); box-shadow:0 2px 8px rgba(11,13,26,.1); }
+.prc-vt-btn:not(.on):active { transform:scale(.97); }
+.prc-vt-btn:focus-visible { outline:3px solid var(--a); outline-offset:2px; }
+
+/* ══ Vue Liste (chapitres dépliables) ══════════════════════════ */
+.prc-list { padding:14px 14px 0; display:flex; flex-direction:column; gap:13px; position:relative; z-index:2; }
+.prc-chap { background:var(--su); border:1px solid var(--bo); border-radius:var(--r-xl); overflow:hidden; box-shadow:0 4px 16px -10px rgba(11,13,26,.14); }
+.prc-chap-hd { display:flex; align-items:center; gap:13px; padding:14px 16px; position:relative; list-style:none; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.prc-chap-hd::-webkit-details-marker { display:none; }
+.prc-chap-hd::before { content:''; position:absolute; left:0; top:13px; bottom:13px; width:4px; border-radius:0 4px 4px 0; background:var(--wc,var(--a)); }
+.prc-chap-num { width:44px; height:44px; border-radius:13px; flex-shrink:0; display:grid; place-items:center; font:900 17px/1 'Plus Jakarta Sans',sans-serif; color:#fff; background:var(--wc,var(--a)); }
+.prc-chap-num svg { color:#fff; }
+.prc-chap-main { flex:1; min-width:0; }
+.prc-chap-eyebrow { font:700 9.5px/1 'Inter',sans-serif; letter-spacing:.13em; text-transform:uppercase; color:var(--mu2); margin-bottom:4px; }
+.prc-chap-title { font:800 15.5px/1.15 'Plus Jakarta Sans',sans-serif; color:var(--ink); margin:0 0 8px; }
+.prc-chap-bar { display:flex; align-items:center; gap:9px; }
+.prc-chap-bar .track { flex:1; height:6px; background:var(--bg2); border-radius:999px; overflow:hidden; }
+.prc-chap-bar .track i { display:block; height:100%; border-radius:999px; background:var(--wc,var(--a)); transition:width .6s var(--ease-out); }
+.prc-chap-bar .frac { font:800 11px/1 'Inter',sans-serif; color:var(--mu2); white-space:nowrap; }
+.prc-chap-right { flex-shrink:0; display:flex; align-items:center; gap:8px; }
+.prc-chap-chev { color:var(--mu2); display:grid; transition:transform .22s var(--ease-out); }
+details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
+.prc-chap-badge { display:inline-flex; align-items:center; gap:4px; font:800 8.5px/1 'Inter',sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--gr-txt); background:var(--grp2); padding:5px 9px; border-radius:999px; }
+.prc-chap-lock { color:var(--mu2); display:grid; }
+.prc-chap.locked { background:var(--su2); }
+.prc-chap.locked .prc-chap-num { background:var(--bo4); }
+.prc-chap.locked .prc-chap-hd { cursor:default; }
+.prc-chap.locked .prc-chap-hd::before { background:var(--bo4); }
+.prc-chap.locked .prc-chap-title { color:var(--mu3); }
+.prc-chap-locknote { padding:0 16px 14px; font:500 12.5px/1.5 'Inter',sans-serif; color:var(--mu3); }
+.prc-chap-locknote strong { color:var(--ink); font-weight:700; }
+.prc-chap-hd:focus-visible { outline:3px solid var(--a); outline-offset:-3px; border-radius:var(--r-xl); }
+
+.prc-chap-body { padding:2px 10px 10px; }
+.prc-row { display:flex; align-items:center; gap:11px; padding:11px 10px; border-radius:var(--r-md); position:relative; -webkit-tap-highlight-color:transparent; }
+.prc-row + .prc-row { margin-top:1px; }
+.prc-row:not(.locked) { cursor:pointer; }
+.prc-row:not(.locked):active { background:var(--bg3); }
+.prc-row:focus-visible { outline:3px solid var(--a); outline-offset:-2px; }
+.prc-row-ic { width:26px; height:26px; border-radius:50%; flex-shrink:0; display:grid; place-items:center; color:#fff; }
+.prc-row-ic svg { color:#fff; }
+.prc-row.done .prc-row-ic { background:var(--gr); }
+.prc-row.a_valider .prc-row-ic { background:var(--am); }
+.prc-row.next .prc-row-ic { background:var(--a); box-shadow:0 0 0 4px color-mix(in srgb,var(--a) 18%,transparent); }
+.prc-row.todo .prc-row-ic { background:var(--bg2); }
+.prc-row.todo .prc-row-ic::after { content:''; width:7px; height:7px; border-radius:50%; background:var(--bo4); }
+.prc-row.locked .prc-row-ic { background:transparent; }
+.prc-row.locked .prc-row-ic svg { color:var(--bo4); }
+.prc-row-main { flex:1; min-width:0; }
+.prc-row-nm { font:600 13.5px/1.3 'Inter',sans-serif; color:var(--ink); }
+.prc-row.todo .prc-row-nm, .prc-row.locked .prc-row-nm { color:var(--mu3); font-weight:500; }
+.prc-row-sub { display:block; font:500 11px/1.2 'Inter',sans-serif; color:var(--mu2); margin-top:3px; }
+.prc-row-st { flex-shrink:0; font:700 11px/1 'Inter',sans-serif; color:var(--mu2); }
+.prc-row.done .prc-row-st { color:var(--gr-txt); }
+.prc-row.next { background:color-mix(in srgb,var(--a) 8%,transparent); border:1px solid color-mix(in srgb,var(--a) 26%,transparent); }
+.prc-row.next .prc-row-nm { font-weight:800; }
+.prc-row-go { flex-shrink:0; display:inline-flex; align-items:center; gap:5px; background:var(--a); color:var(--a-ink); font:800 11px/1 'Inter',sans-serif; padding:9px 13px; border-radius:999px; box-shadow:0 3px 9px color-mix(in srgb,var(--a) 40%,transparent); }
+.prc-chap .chest-card { margin-top:8px; }
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
+// Couleur = l'accent choisi par l'utilisateur (var(--a)), comme l'accueil :
+// « une seule couleur (le thème) guide l'attention ». L'identité de chaque
+// monde passe par son image, pas par sa teinte. Seul le badge « validé »
+// reste vert (var(--gr), codé en dur dans les états .done).
+const ACCENT_GLOW = "color-mix(in srgb, var(--a) 38%, transparent)";
 const WORLDS_META = [
   {
     num: 1,
-    color: "var(--gr)",
-    glow: "rgba(16,185,129,.35)",
+    color: "var(--a)",
+    glow: ACCENT_GLOW,
     img: "/skins/permigo-remc-maitrise-vehicule-flag-v1.webp",
   },
   {
     num: 2,
-    color: "#06b6d4",
-    glow: "rgba(6,182,212,.35)",
+    color: "var(--a)",
+    glow: ACCENT_GLOW,
     img: ASSETS.worldC2,
   },
   {
     num: 3,
-    color: "var(--pu)",
-    glow: "rgba(139,92,246,.35)",
+    color: "var(--a)",
+    glow: ACCENT_GLOW,
     img: ASSETS.worldC3,
   },
   {
     num: 4,
-    color: "var(--am)",
-    glow: "rgba(245,158,11,.35)",
+    color: "var(--a)",
+    glow: ACCENT_GLOW,
     img: ASSETS.worldC4,
   },
 ];
@@ -1266,6 +1326,25 @@ const UNLOCK_REQ = [null, 5, 6, 6];
 
 const NOW_MS = Date.now();
 const NEW_BADGE_MS = 24 * 60 * 60 * 1000;
+
+// ─── Vue Carte | Liste (persistée localStorage) ──────────────────
+const PARCOURS_VIEW_KEY = "permigo_parcours_view";
+function loadParcoursView() {
+  try {
+    return localStorage.getItem(PARCOURS_VIEW_KEY) === "list" ? "list" : "map";
+  } catch {
+    return "map";
+  }
+}
+function saveParcoursView(v) {
+  try {
+    localStorage.setItem(PARCOURS_VIEW_KEY, v);
+  } catch {
+    /* localStorage indispo — non bloquant */
+  }
+}
+// Escape ferme la fiche — listener global lié une seule fois (anti-empilement au re-render).
+let escBound = false;
 
 // ─── Entry point ─────────────────────────────────────────────────
 export async function mount(root) {
@@ -1330,16 +1409,37 @@ export async function mount(root) {
   }
 
   ensureChestStyles();
-  root.innerHTML = renderPage(
-    worldStates,
-    validatedMap,
-    pendingMap,
-    openedWorlds,
-  );
-  wire(root, worldStates, validatedMap, pendingMap, me);
 
-  // Tuto : 1er passage auto + bouton « ? » pour le revoir
-  root.querySelector("#prc-help")?.addEventListener("click", showParcoursTuto);
+  // Vue active (Carte | Liste), persistée. Le toggle re-rend la page in-place.
+  let view = loadParcoursView();
+  const renderAndWire = () => {
+    root.innerHTML = renderPage(
+      worldStates,
+      validatedMap,
+      pendingMap,
+      openedWorlds,
+      view,
+    );
+    wire(root, worldStates, validatedMap, pendingMap, me, view);
+    // Bouton « ? » du tuto (re-câblé à chaque rendu)
+    root
+      .querySelector("#prc-help")
+      ?.addEventListener("click", showParcoursTuto);
+    // Toggle Carte / Liste
+    root.querySelectorAll(".prc-vt-btn").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const v = btn.dataset.view;
+        if (!v || v === view) return;
+        view = v;
+        saveParcoursView(v);
+        track("parcours.view_switch", { view: v });
+        renderAndWire();
+      }),
+    );
+  };
+  renderAndWire();
+
+  // Tuto : 1er passage auto
   maybeShowParcoursTuto();
 
   // Persister en DB les coffres des mondes complétés (idempotent)
@@ -1588,6 +1688,7 @@ function renderPage(
   validatedMap,
   pendingMap,
   openedWorlds = new Set(),
+  view = "map",
 ) {
   const totalDone = worldStates.reduce((s, w) => s + w.done, 0);
   const totalComps = worldStates.reduce((s, w) => s + w.total, 0);
@@ -1631,11 +1732,35 @@ function renderPage(
     </div>
   </div>
 
+  <!-- Toggle d'affichage Carte / Liste -->
+  <div class="prc-viewtoggle" role="tablist" aria-label="Mode d'affichage du parcours">
+    <button class="prc-vt-btn ${view === "map" ? "on" : ""}" data-view="map" type="button" role="tab" aria-selected="${view === "map"}">
+      ${icon("map", { size: 16 })} Carte
+    </button>
+    <button class="prc-vt-btn ${view === "list" ? "on" : ""}" data-view="list" type="button" role="tab" aria-selected="${view === "list"}">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.2" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.2" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.2" cy="18" r="1.4" fill="currentColor" stroke="none"/></svg> Liste
+    </button>
+  </div>
+
   ${zeroStateHint}
 
   <!-- Carte des mondes — pleine page, scroll naturel (plus d'encadré interne) -->
   <div class="prc-map" id="prc-map-scroll" tabindex="-1" role="region" aria-label="Carte d'apprentissage">
-    ${worldStates.map((ws, i) => renderWorldSection(ws, validatedMap, pendingMap, i < worldStates.length - 1, openedWorlds)).join("")}
+    ${
+      view === "list"
+        ? `<div class="prc-list">${renderListView(worldStates, validatedMap, pendingMap, openedWorlds)}</div>`
+        : worldStates
+            .map((ws, i) =>
+              renderWorldSection(
+                ws,
+                validatedMap,
+                pendingMap,
+                i < worldStates.length - 1,
+                openedWorlds,
+              ),
+            )
+            .join("")
+    }
     ${renderFinal(totalDone, totalComps)}
     <div style="height: 24px"></div>
   </div>
@@ -1669,7 +1794,8 @@ function renderWorldSection(
   // horizontale du trait : avant W=280 + preserveAspectRatio="none" étirait
   // la route ~1,7× en largeur (route trop grosse/déformée).
   const W = 440;
-  const H = Math.max(420, subs.length * 150 + 70);
+  // Route plus compacte : ~125px/node (au lieu de 150) → moins étirée verticalement.
+  const H = Math.max(360, subs.length * 125 + 55);
 
   const points = subs.map((sub, i) => {
     const yPct = (i + 0.5) / subs.length;
@@ -1748,9 +1874,7 @@ function renderWorldSection(
 <section class="prc-world ${isLocked ? "locked" : ""} ${isComplete ? "complete" : ""} ${isActive ? "active" : ""}"
          data-world-idx="${idx}"
          style="--wc:${meta.color};--wg:${meta.glow}">
-  <!-- Fond photo immersif jour/nuit du monde -->
-  <img src="${WORLD_BG(meta.num)}" alt="" class="prc-world-bg${isActive ? " prc-world-bg--active" : ""}" ${isActive ? 'loading="eager"' : 'loading="lazy"'} draggable="false">
-  <!-- Petit visuel décoratif top-right -->
+  <!-- Petit visuel décoratif top-right (plus de photo plein écran : illisible + hors charte) -->
   <img src="${meta.img}" alt="" class="prc-world-decor" loading="lazy" draggable="false">
 
 
@@ -1856,23 +1980,139 @@ function renderFinal(done, total) {
 </div>`;
 }
 
+// ─── Vue Liste (chapitres) — alternative compacte à la carte ──────
+function renderListView(worldStates, validatedMap, pendingMap, openedWorlds) {
+  return worldStates
+    .map((ws) => renderWorldChapter(ws, validatedMap, pendingMap, openedWorlds))
+    .join("");
+}
+
+function renderWorldChapter(ws, validatedMap, pendingMap, openedWorlds) {
+  const { idx, cat, subs, done, total, status, nextChallenge } = ws;
+  const meta = WORLDS_META[idx];
+  const world = WORLDS[idx];
+  const isLocked = status === "locked";
+  const isComplete = status === "complete";
+  const pct = total ? Math.round((done / total) * 100) : 0;
+
+  const eyebrow = isLocked
+    ? `Compétence ${meta.num} · verrouillé`
+    : isComplete
+      ? `Compétence ${meta.num} · terminé`
+      : `Compétence ${meta.num} · en cours`;
+
+  const numCell = isComplete
+    ? `<span class="prc-chap-num">${icon("check", { size: 22, strokeWidth: 3 })}</span>`
+    : `<span class="prc-chap-num">${meta.num}</span>`;
+
+  const rightCell = isLocked
+    ? `<span class="prc-chap-lock">${icon("lock", { size: 16 })}</span>`
+    : isComplete
+      ? `<span class="prc-chap-badge">${icon("check", { size: 11, strokeWidth: 3 })} Terminé</span><span class="prc-chap-chev">${icon("chevron-down", { size: 16 })}</span>`
+      : `<span class="prc-chap-chev">${icon("chevron-down", { size: 16 })}</span>`;
+
+  const header = `
+    ${numCell}
+    <div class="prc-chap-main">
+      <div class="prc-chap-eyebrow">${esc(eyebrow)}</div>
+      <h3 class="prc-chap-title">${esc(world.titre)}</h3>
+      <div class="prc-chap-bar">
+        <div class="track"><i style="width:${pct}%"></i></div>
+        <span class="frac">${done}/${total}</span>
+      </div>
+    </div>
+    <div class="prc-chap-right">${rightCell}</div>`;
+
+  // Monde verrouillé : carte statique (header + note), pas de liste dépliable.
+  if (isLocked) {
+    const req = UNLOCK_REQ[idx];
+    const need = Math.max(0, (req ?? 0) - (ws.prevDoneCount ?? 0));
+    return `
+    <div class="prc-chap locked" data-world-idx="${idx}" style="--wc:${meta.color}">
+      <div class="prc-chap-hd">${header}</div>
+      <div class="prc-chap-locknote">Valide encore <strong>${need} compétence${need > 1 ? "s" : ""}</strong> du monde précédent pour ouvrir ce chapitre.</div>
+    </div>`;
+  }
+
+  const rowsHTML = subs
+    .map((sub) => {
+      const st = compStatus(
+        sub.c,
+        status,
+        nextChallenge,
+        validatedMap,
+        pendingMap,
+      );
+      const ic = {
+        done: icon("check", { size: 14, strokeWidth: 3 }),
+        a_valider: icon("check", { size: 14, strokeWidth: 3 }),
+        next: icon("zap", { size: 13, strokeWidth: 2.6 }),
+        todo: "",
+        locked: icon("lock", { size: 12 }),
+      }[st];
+      const label = {
+        done: "Acquis",
+        a_valider: "Acquis",
+        next: "",
+        todo: "À venir",
+        locked: "Verrouillé",
+      }[st];
+      const right =
+        st === "next"
+          ? `<span class="prc-row-go">Réviser →</span>`
+          : `<span class="prc-row-st">${esc(label)}</span>`;
+      const subLine =
+        st === "next"
+          ? `<span class="prc-row-sub">Prochaine compétence à travailler</span>`
+          : "";
+      const interactive = st !== "locked";
+      return `
+      <div class="prc-row ${st}" data-comp="${esc(sub.c)}" data-world-idx="${idx}"
+           ${interactive ? 'role="button" tabindex="0"' : 'aria-hidden="true"'}
+           aria-label="${esc(sub.n)} — ${esc(label || "à réviser")}">
+        <span class="prc-row-ic">${ic}</span>
+        <span class="prc-row-main"><span class="prc-row-nm">${esc(sub.n)}</span>${subLine}</span>
+        ${right}
+      </div>`;
+    })
+    .join("");
+
+  const chestHTML = isComplete
+    ? renderChest({
+        worldNum: meta.num,
+        worldName: world.nom,
+        opened: openedWorlds.has(meta.num),
+      })
+    : "";
+
+  // Chapitre en cours ouvert par défaut ; terminé replié (cliquable).
+  const openAttr = status === "in_progress" ? " open" : "";
+  return `
+    <details class="prc-chap ${isComplete ? "complete" : ""}" data-world-idx="${idx}" style="--wc:${meta.color}"${openAttr}>
+      <summary class="prc-chap-hd">${header}</summary>
+      <div class="prc-chap-body">
+        ${rowsHTML}
+        ${chestHTML}
+      </div>
+    </details>`;
+}
+
 // ─── Wire & bottom sheet ──────────────────────────────────────────
-function wire(root, worldStates, validatedMap, pendingMap, me) {
+function wire(root, worldStates, validatedMap, pendingMap, me, view = "map") {
   // Back via hashchange
   root.querySelector("#prc-back")?.addEventListener("click", () => {
     location.hash = "#/";
   });
 
-  // ── Carte vivante : route dessinée + cascade de nodes + parallax ──
-  // Gated : IntersectionObserver dispo ET pas de reduced-motion.
+  // ── Carte vivante (vue Carte uniquement) : route dessinée + cascade de nodes ──
+  // Gated : vue Carte ET IntersectionObserver dispo ET pas de reduced-motion.
   // Sans la classe .prc-anim, tout reste statique (fallback).
   const reduced = window.matchMedia?.(
     "(prefers-reduced-motion: reduce)",
   )?.matches;
   const mapEl = root.querySelector(".prc-map");
-  if (!reduced && "IntersectionObserver" in window && mapEl) {
+  if (view === "map" && !reduced && "IntersectionObserver" in window && mapEl) {
     root.querySelector(".prc")?.classList.add("prc-anim");
-    // Pleine page : le viewport est la racine d'observation
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -1885,29 +2125,6 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
       { threshold: 0.1 },
     );
     root.querySelectorAll(".prc-world").forEach((sec) => io.observe(sec));
-
-    // Parallax léger : le fond photo glisse selon la position du monde
-    // dans le viewport (scroll de page, rAF, transform only).
-    let ticking = false;
-    const vh = () => window.innerHeight || 800;
-    const parallax = () => {
-      ticking = false;
-      root.querySelectorAll(".prc-world").forEach((sec) => {
-        const r = sec.getBoundingClientRect();
-        if (r.bottom < 0 || r.top > vh()) return;
-        const prog = (vh() / 2 - r.top) / (r.height + vh());
-        const bgEl = sec.querySelector(".prc-world-bg");
-        if (bgEl)
-          bgEl.style.transform = `translateY(${((prog - 0.5) * 36).toFixed(1)}px) scale(1.08)`;
-      });
-    };
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(parallax);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    requestAnimationFrame(parallax);
   }
 
   // Auto-scroll vers le monde en cours
@@ -1977,6 +2194,24 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
     });
   });
 
+  // Vue Liste : chaque ligne de compétence ouvre la même fiche (bottom sheet)
+  root.querySelectorAll(".prc-row:not(.locked)").forEach((rowEl) => {
+    const open = () => {
+      lastTrigger = rowEl;
+      const compId = rowEl.dataset.comp;
+      const worldIdx = parseInt(rowEl.dataset.worldIdx, 10);
+      openFiche(root, compId, worldStates[worldIdx], validatedMap, pendingMap);
+      track("parcours.node_tap", { compId, worldIdx, view: "list" });
+    };
+    rowEl.addEventListener("click", open);
+    rowEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
+    });
+  });
+
   // Bottom sheet — close
   const bg =
     root.querySelector("#bsheet-bg") ?? document.getElementById("bsheet-bg");
@@ -1996,9 +2231,21 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
     }
   };
   bg?.addEventListener("click", closeFn);
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && isOpen()) closeFn();
-  });
+  // Escape ferme la fiche — lié une seule fois (anti-empilement au re-render du toggle).
+  if (!escBound) {
+    escBound = true;
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      const sh = document.getElementById("bsheet");
+      if (!sh?.classList.contains("open")) return;
+      sh.classList.remove("open");
+      document.getElementById("bsheet-bg")?.classList.remove("open");
+      sh.setAttribute("aria-hidden", "true");
+      document
+        .querySelectorAll(".prc-node.selected, .prc-row.selected")
+        .forEach((el) => el.classList.remove("selected"));
+    });
+  }
   // Swipe-to-dismiss vers le HAUT (le panneau descend du haut)
   if (sheet) enableSheetSwipe(sheet, closeFn, { overlay: bg, direction: "up" });
 }
