@@ -169,6 +169,45 @@ export async function route(root, me) {
   }
 }
 
+// Routage des pages PUBLIQUES (visiteur non connecté). Miroir de la branche
+// `!me` de boot() dans main.js : une navigation par hash (#/rejoindre,
+// #/creer-compte, #/ecole/…) doit monter la BONNE page, pas retomber sur login.
+async function routePublic(app) {
+  const hash = location.hash || "";
+  if (hash.startsWith("#/parental-consent")) {
+    const m = await import("@/pages/public/parental-consent.js");
+    return m.mount?.(app);
+  }
+  if (hash.startsWith("#/creer-compte")) {
+    const m = await import("@/pages/public/creer-compte.js");
+    return m.mount?.(app);
+  }
+  if (hash.startsWith("#/signup")) {
+    const m = await import("@/pages/public/signup.js");
+    return m.mount?.(app);
+  }
+  if (hash.startsWith("#/rejoindre")) {
+    const m = await import("@/pages/public/rejoindre.js");
+    return m.mount?.(app);
+  }
+  if (hash.startsWith("#/ecole/")) {
+    const slug = hash.replace("#/ecole/", "").split("?")[0];
+    const m = await import("@/pages/public/ecole.js");
+    return m.mount?.(app, slug);
+  }
+  if (hash.startsWith("#/legal")) {
+    const m = await import("@/pages/common/legal.js");
+    return m.mount?.(app);
+  }
+  if (hash.startsWith("#/login")) {
+    const m = await import("@/pages/auth/login.js");
+    return m.mount?.(app);
+  }
+  // Défaut visiteur = landing / page de vente
+  const m = await import("@/pages/public/landing.js");
+  return m.mount?.(app);
+}
+
 window.addEventListener("hashchange", () => {
   import("@/auth/cur-user.js").then(({ getCurUser }) => {
     const me = getCurUser();
@@ -176,10 +215,8 @@ window.addEventListener("hashchange", () => {
       route(document.getElementById("app"), me);
       phPageview(); // hash-router SPA : PostHog ne détecte pas les hashchanges seul
     } else {
-      // Fallback : user déconnecté → re-render la page de login plutôt qu'écran blanc
-      import("@/pages/auth/login.js").then((m) =>
-        m.mount?.(document.getElementById("app")),
-      );
+      // Visiteur déconnecté → route vers la page publique correspondant au hash
+      routePublic(document.getElementById("app"));
     }
   });
 });
