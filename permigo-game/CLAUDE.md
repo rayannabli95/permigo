@@ -116,9 +116,13 @@ Toute action utilisateur significative est trackée dans la table `events_analyt
 
 ### Quand tu ouvres une session
 1. Lis ce fichier (déjà fait)
-2. Lis `docs/PRODUCT.md` et `docs/ROADMAP.md` (pour comprendre où on en est)
-3. Vérifie `git status` (commits non poussés)
-4. Annonce à l'utilisateur : "*Je reprends sur [contexte]. Voici ce que je vais faire : [plan]*"
+2. **Lis le Vault** `.claude/loop/status.md` puis `.claude/loop/next-up.md` (source de vérité « où on en est / quoi faire » — cf. `.claude/loop/LOOP.md`)
+3. Lis `docs/PRODUCT.md` et `docs/ROADMAP.md` (pour comprendre où on en est)
+4. Vérifie `git status` (commits non poussés)
+5. Annonce à l'utilisateur : "*Je reprends sur [contexte]. Voici ce que je vais faire : [plan]*"
+
+### Avant de dire « c'est fini » (fermeture de boucle — pilier 6 « Repo remembers »)
+Tout run qui change l'état DOIT mettre à jour le Vault : `status.md` (photo), `done-log.md` (1 ligne append-only), `next-up.md` / `board.md` (file priorisée). **L'état sur disque bat l'état dans le contexte.** Un run qui n'écrit pas le Vault est un run perdu.
 
 ### Avant de coder une feature
 1. Vérifie qu'elle correspond à `docs/ROADMAP.md` (V1 / V2 / V3)
