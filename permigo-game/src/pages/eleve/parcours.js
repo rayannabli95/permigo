@@ -1566,22 +1566,62 @@ export async function mount(root) {
     }
   });
 
+  // ── Cinématique plein écran « MONDE X TERMINÉ » quand un monde vient d'être
+  //    complété (déblocage du suivant). Idempotente (localStorage pg-unlock-seen).
+  //    Prioritaire sur la célébration de compétence → évite 2 overlays empilés. ──
+  let unlockShown = false;
+  try {
+    const { detectAndPlayUnlock } =
+      await import("@/components/eleve/world-unlock-cinematic.js");
+    const unlockMeta = WORLDS.map((w, i) => ({
+      name: w.nom,
+      color: WORLDS_META[i].color,
+      glow: WORLDS_META[i].glow,
+    }));
+    const unlockStats = { byWorld: {} };
+    worldStates.forEach((ws) => {
+      if (ws.status !== "complete") return;
+      const dates = ws.subs
+        .map((s) => validatedMap[s.c]?.validated_at)
+        .filter(Boolean);
+      const days = new Set(dates.map((d) => new Date(d).toDateString())).size;
+      unlockStats.byWorld[ws.idx + 1] = { comps: ws.total, days, hours: 0 };
+    });
+    unlockShown = detectAndPlayUnlock({
+      worldsCompleted: worldStates
+        .filter((w) => w.status === "complete")
+        .map((w) => w.idx + 1),
+      worldsMeta: unlockMeta,
+      stats: unlockStats,
+      onEnter: (nextWorldNum) => {
+        root
+          .querySelector(`[data-world-idx="${nextWorldNum - 1}"]`)
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      },
+    });
+  } catch (_) {
+    /* best-effort — l'absence de cinématique ne casse pas le parcours */
+  }
+
   // ── Célébration plein écran des compétences acquises pas encore vues ──
   // Couvre le cas "moniteur valide → acquis direct" (aucun moment live côté
   // élève) : on célèbre ici, en fonction des validations du parcours.
   // Idempotent (ledger localStorage), lecture seule, ne change aucun statut.
+  // Skip si une cinématique de monde vient de s'afficher (priorité au grand moment).
   let celebrated = 0;
-  try {
-    const { celebrateNewValidations } =
-      await import("@/services/competence-celebration.js");
-    celebrated = await celebrateNewValidations({ validations: valData });
-  } catch (_) {
-    /* best-effort — l'absence de célébration ne casse pas le parcours */
+  if (!unlockShown) {
+    try {
+      const { celebrateNewValidations } =
+        await import("@/services/competence-celebration.js");
+      celebrated = await celebrateNewValidations({ validations: valData });
+    } catch (_) {
+      /* best-effort — l'absence de célébration ne casse pas le parcours */
+    }
   }
 
   // ── Flèche "Tu viens de débloquer !" si une comp a été validée < 10 min ──
-  // Skip si on vient d'afficher l'écran plein écran (évite la redondance).
-  if (!celebrated) {
+  // Skip si on vient d'afficher un plein écran (cinématique monde ou compétence).
+  if (!unlockShown && !celebrated) {
     const FRESH_MS = 10 * 60 * 1000;
     let fresh = null;
     let freshTs = 0;
