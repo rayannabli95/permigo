@@ -20,16 +20,19 @@
  *   });
  */
 
-import { esc } from '@/utils/escape.js';
-import { icon } from '@/utils/icons.js';
-import { burstConfetti } from '@/components/common/confetti.js';
-import { playFanfare } from '@/utils/sound.js';
+import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
+import { burstConfetti } from "@/components/common/confetti.js";
+import { playFanfare } from "@/utils/sound.js";
 
-const LS_KEY = 'pg-unlock-seen';
+const LS_KEY = "pg-unlock-seen";
 
 function getSeen() {
-  try { return new Set(JSON.parse(localStorage.getItem(LS_KEY) || '[]')); }
-  catch { return new Set(); }
+  try {
+    return new Set(JSON.parse(localStorage.getItem(LS_KEY) || "[]"));
+  } catch {
+    return new Set();
+  }
 }
 function markSeen(worldNum) {
   const s = getSeen();
@@ -38,15 +41,24 @@ function markSeen(worldNum) {
 }
 
 /** Vérifie si un monde vient d'être complété et lance la cinematic. */
-export function detectAndPlayUnlock({ worldsCompleted = [], worldsMeta = [], stats = {}, onEnter } = {}) {
+export function detectAndPlayUnlock({
+  worldsCompleted = [],
+  worldsMeta = [],
+  stats = {},
+  onEnter,
+} = {}) {
   const seen = getSeen();
-  const toCelebrate = worldsCompleted.find(n => !seen.has(n));
+  const toCelebrate = worldsCompleted.find((n) => !seen.has(n));
   if (!toCelebrate) return false;
 
   const meta = worldsMeta[toCelebrate - 1];
   if (!meta) return false;
 
-  const worldStats = (stats.byWorld && stats.byWorld[toCelebrate]) || { hours: 0, comps: 0, days: 0 };
+  const worldStats = (stats.byWorld && stats.byWorld[toCelebrate]) || {
+    hours: 0,
+    comps: 0,
+    days: 0,
+  };
   playUnlockCinematic({
     worldNum: toCelebrate,
     worldName: meta.name,
@@ -61,24 +73,40 @@ export function detectAndPlayUnlock({ worldsCompleted = [], worldsMeta = [], sta
 }
 
 /** Lance manuellement la cinematic pour un monde donné. */
-export function playUnlockCinematic({ worldNum, worldName, worldColor = 'var(--aml2)', worldGlow = 'rgba(251,191,36,.5)', nextWorldName, nextWorldNum, stats, onEnter } = {}) {
+export function playUnlockCinematic({
+  worldNum,
+  worldName,
+  worldColor = "var(--aml2)",
+  worldGlow = "rgba(251,191,36,.5)",
+  nextWorldName,
+  nextWorldNum,
+  stats,
+  onEnter,
+} = {}) {
   ensureStyles();
 
-  if (document.querySelector('.wuc-overlay')) return; // déjà ouvert
+  if (document.querySelector(".wuc-overlay")) return; // déjà ouvert
 
   // Haptique + fanfare
-  try { navigator.vibrate?.([80, 50, 80, 50, 200]); } catch (_) {}
+  try {
+    navigator.vibrate?.([80, 50, 80, 50, 200]);
+  } catch (_) {}
   playFanfare();
 
-  const overlay = document.createElement('div');
-  overlay.className = 'wuc-overlay';
-  overlay.style.setProperty('--wuc-c', worldColor);
-  overlay.style.setProperty('--wuc-g', worldGlow);
+  const overlay = document.createElement("div");
+  overlay.className = "wuc-overlay";
+  overlay.style.setProperty("--wuc-c", worldColor);
+  overlay.style.setProperty("--wuc-g", worldGlow);
   overlay.innerHTML = `
     <div class="wuc-bg" aria-hidden="true"></div>
     <div class="wuc-rays" aria-hidden="true"></div>
     <div class="wuc-stars" aria-hidden="true">
-      ${Array.from({ length: 24 }).map((_, i) => `<span class="wuc-star" style="--i:${i};--d:${(Math.random() * 2).toFixed(1)}s;left:${Math.random() * 100}%;top:${Math.random() * 100}%"></span>`).join('')}
+      ${Array.from({ length: 24 })
+        .map(
+          (_, i) =>
+            `<span class="wuc-star" style="--i:${i};--d:${(Math.random() * 2).toFixed(1)}s;left:${Math.random() * 100}%;top:${Math.random() * 100}%"></span>`,
+        )
+        .join("")}
     </div>
 
     <div class="wuc-content" role="dialog" aria-modal="true" aria-labelledby="wuc-title">
@@ -88,31 +116,31 @@ export function playUnlockCinematic({ worldNum, worldName, worldColor = 'var(--a
 
       <div class="wuc-stats">
         <div class="wuc-stat" style="--d:1.6s">
-          <div class="v">${stats.hours || 0}<small>h</small></div>
-          <div class="l">Conduites</div>
-        </div>
-        <div class="wuc-stat" style="--d:1.85s">
           <div class="v">${stats.comps || 0}</div>
           <div class="l">Compétences</div>
         </div>
-        <div class="wuc-stat" style="--d:2.1s">
+        <div class="wuc-stat" style="--d:1.85s">
           <div class="v">${stats.days || 0}<small>j</small></div>
           <div class="l">Jours</div>
         </div>
       </div>
 
-      ${nextWorldNum ? `
+      ${
+        nextWorldNum
+          ? `
         <button class="wuc-cta" id="wuc-cta" type="button">
           <span class="wuc-cta-lbl">ENTRER DANS LE MONDE ${nextWorldNum}</span>
-          <span class="wuc-cta-name">${esc(nextWorldName || '')}</span>
+          <span class="wuc-cta-name">${esc(nextWorldName || "")}</span>
           <span class="wuc-cta-arrow">→</span>
         </button>
-      ` : `
+      `
+          : `
         <button class="wuc-cta wuc-cta-final" id="wuc-cta" type="button">
-          <span class="wuc-cta-lbl">${icon('trophy',{size:18})} TU AS CONQUIS TOUS LES MONDES</span>
+          <span class="wuc-cta-lbl">${icon("trophy", { size: 18 })} TU AS CONQUIS TOUS LES MONDES</span>
           <span class="wuc-cta-name">Tu es prêt pour l'examen</span>
         </button>
-      `}
+      `
+      }
 
       <button class="wuc-skip" id="wuc-skip" type="button" aria-label="Passer">Passer</button>
 
@@ -128,17 +156,31 @@ export function playUnlockCinematic({ worldNum, worldName, worldColor = 'var(--a
   // Confetti burst au moment du titre
   setTimeout(() => {
     burstConfetti({ x: 0.5, y: 0.3, count: 220, power: 24, spread: Math.PI });
-    try { navigator.vibrate?.(120); } catch (_) {}
+    try {
+      navigator.vibrate?.(120);
+    } catch (_) {}
   }, 800);
 
   // Second burst au moment des stats
   setTimeout(() => {
-    burstConfetti({ x: 0.25, y: 0.4, count: 60, power: 14, spread: Math.PI * 0.6 });
-    burstConfetti({ x: 0.75, y: 0.4, count: 60, power: 14, spread: Math.PI * 0.6 });
+    burstConfetti({
+      x: 0.25,
+      y: 0.4,
+      count: 60,
+      power: 14,
+      spread: Math.PI * 0.6,
+    });
+    burstConfetti({
+      x: 0.75,
+      y: 0.4,
+      count: 60,
+      power: 14,
+      spread: Math.PI * 0.6,
+    });
   }, 1700);
 
   const closeAndEnter = (skipped = false) => {
-    overlay.classList.add('wuc-closing');
+    overlay.classList.add("wuc-closing");
     setTimeout(() => {
       overlay.remove();
       markSeen(worldNum);
@@ -146,24 +188,28 @@ export function playUnlockCinematic({ worldNum, worldName, worldColor = 'var(--a
     }, 600);
   };
 
-  overlay.querySelector('#wuc-cta')?.addEventListener('click', () => closeAndEnter(false));
-  overlay.querySelector('#wuc-skip')?.addEventListener('click', () => closeAndEnter(true));
+  overlay
+    .querySelector("#wuc-cta")
+    ?.addEventListener("click", () => closeAndEnter(false));
+  overlay
+    .querySelector("#wuc-skip")
+    ?.addEventListener("click", () => closeAndEnter(true));
 
   // ESC pour skip
   const onKey = (e) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
       closeAndEnter(true);
-      document.removeEventListener('keydown', onKey);
+      document.removeEventListener("keydown", onKey);
     }
   };
-  document.addEventListener('keydown', onKey);
+  document.addEventListener("keydown", onKey);
 }
 
 let _wucCssInjected = false;
 function ensureStyles() {
   if (_wucCssInjected) return;
   _wucCssInjected = true;
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = `
     /* ╔══ OVERLAY FULL-SCREEN ══════════════════════════════════════════╗ */
     .wuc-overlay{
@@ -261,8 +307,8 @@ function ensureStyles() {
 
     /* Stats cascade */
     .wuc-stats{
-      display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
-      max-width:420px;margin:28px auto 32px;
+      display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+      max-width:340px;margin:28px auto 32px;
     }
     .wuc-stat{
       padding:14px 8px;
