@@ -67,10 +67,18 @@ const STYLE = `<style>
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(180deg,
-    color-mix(in srgb, var(--wc, var(--gr)) 12%, transparent) 0%,
-    color-mix(in srgb, var(--wc, var(--gr)) 6%, transparent) 50%,
-    color-mix(in srgb, var(--wc, var(--gr)) 2%, transparent) 100%);
+  background:
+    /* Halo « ciel / horizon » en haut du monde → atmosphère qui évolue avec la
+       couleur du monde (vert campagne → cyan ville → violet montagne → ambre sommet). */
+    radial-gradient(140% 60% at 50% -4%,
+      color-mix(in srgb, var(--wc, var(--gr)) 32%, transparent) 0%,
+      color-mix(in srgb, var(--wc, var(--gr)) 9%, transparent) 38%,
+      transparent 66%),
+    /* Fondu vertical de la teinte monde */
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--wc, var(--gr)) 13%, transparent) 0%,
+      color-mix(in srgb, var(--wc, var(--gr)) 6%, transparent) 50%,
+      color-mix(in srgb, var(--wc, var(--gr)) 2%, transparent) 100%);
 }
 /* Tous les contenus passent au-dessus du volant */
 .prc > * { position: relative; z-index: 1; }
