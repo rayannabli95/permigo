@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
 // Page publique — Inscription élève SELF-SERVE via CODE moniteur
-// URL : #/rejoindre  (ou #/rejoindre?code=RAYAN1 pour pré-remplir)
+// URL : #/rejoindre  (ou #/rejoindre?code=PERMIS75 pour pré-remplir)
 //
 // Chemin BIS au lien d'invitation : l'élève crée son compte avec SON propre
-// email et tape le code de son moniteur (ex : "RAYAN1"). Le moniteur ne
+// email et tape le code de son moniteur (ex : "PERMIS75"). Le moniteur ne
 // manipule jamais l'email de l'élève (cf. règle non-négociable #1).
 //
 // Flow :
@@ -39,12 +39,11 @@ const STYLE = `<style>
   }
   @keyframes sgIn { from { opacity: 0; transform: translateY(12px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
   .sg-logo {
-    width: 56px; height: 56px;
-    background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
-    border-radius: 16px; margin: 0 auto 16px;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--a-ink); font: 800 22px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em;
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--a) 30%, transparent), 0 1.5px 0 0 rgba(255,255,255,.3) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
+    display: block;
+    width: 64px; height: 64px;
+    margin: 0 auto 16px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 20px color-mix(in srgb, var(--a) 28%, transparent));
   }
   .sg-title { font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); text-align: center; margin: 0 0 6px; letter-spacing: -.022em; }
   .sg-sub { font: 500 14px/1.5 'Inter', sans-serif; color: var(--mu); text-align: center; margin: 0 0 22px; }
@@ -119,7 +118,7 @@ const STYLE = `<style>
 export async function mount(root) {
   track("signup.viewed", { from: "join_code" });
 
-  // Pré-remplissage éventuel du code : #/rejoindre?code=RAYAN1
+  // Pré-remplissage éventuel du code : #/rejoindre?code=PERMIS75
   const hash = location.hash;
   const qIdx = hash.indexOf("?");
   const params = new URLSearchParams(qIdx >= 0 ? hash.slice(qIdx + 1) : "");
@@ -128,7 +127,7 @@ export async function mount(root) {
   root.innerHTML = `${STYLE}
     <div class="sg">
       <div class="sg-card">
-        <div class="sg-logo">P</div>
+        <img class="sg-logo" src="/skins/avatars/permigo-badge-icon.png" alt="PermiGo" width="64" height="64" />
         <h1 class="sg-title">Rejoins ton moniteur</h1>
         <p class="sg-sub">Entre le code que ton moniteur t'a donné, puis crée ton compte.</p>
         <div style="text-align:center"><span class="sg-role-badge">Élève</span></div>
@@ -137,7 +136,7 @@ export async function mount(root) {
           <label class="sg-label" for="sg-code">Code moniteur</label>
           <input class="sg-input sg-code-input" id="sg-code" type="text" autocomplete="off"
             autocorrect="off" autocapitalize="characters" spellcheck="false"
-            maxlength="16" placeholder="RAYAN1" value="${esc(prefillCode)}" />
+            maxlength="16" placeholder="PERMIS75" value="${esc(prefillCode)}" />
           <div class="sg-help" id="sg-code-help">Demande-le à ton moniteur.</div>
         </div>
 
