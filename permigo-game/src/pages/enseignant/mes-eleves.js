@@ -1119,6 +1119,9 @@ function openQuickMenu(eleveId, anchorRow) {
       <button class="me-qm-item" data-action="reset-access">
         <span class="me-qm-ico">${icon("refresh-cw", { size: 14, strokeWidth: 2.5 })}</span> Réinitialiser l'accès
       </button>
+      <button class="me-qm-item danger" data-action="delete-eleve">
+        <span class="me-qm-ico">${icon("trash", { size: 14, strokeWidth: 2.5 })}</span> Supprimer cet élève
+      </button>
     </div>
   `;
   document.body.appendChild(menu);
@@ -1146,6 +1149,7 @@ function openQuickMenu(eleveId, anchorRow) {
       else if (action === "exam-recu") confirmRecu(eleveId);
       else if (action === "exam-rate") recordExam(eleveId, "rate", todayIso());
       else if (action === "reset-access") confirmResetAccess(eleveId);
+      else if (action === "delete-eleve") confirmDeleteEleve(eleveId);
     });
   });
 }
@@ -1188,6 +1192,53 @@ function confirmResetAccess(eleveId) {
         : "Envoi impossible pour le moment.",
       ok ? "success" : "error",
     );
+  });
+}
+
+// ─── Suppression DÉFINITIVE d'un élève ───────────────────────────
+// Bouton rouge du menu kebab. RPC delete_eleve (SECURITY DEFINER) : supprime le
+// profil → cascade toutes ses données + purge best-effort la ligne auth.users.
+// Garde-fou serveur : seulement un élève de la propre auto-école de l'appelant.
+function confirmDeleteEleve(eleveId) {
+  const el = _eleves.find((e) => e.id === eleveId);
+  const prenom = esc(el && el.prenom ? fmtName(el.prenom) : "cet élève");
+  document.querySelector(".me-confirm")?.remove();
+
+  const wrap = document.createElement("div");
+  wrap.className = "me-confirm";
+  wrap.innerHTML = `${DIALOG_STYLE}
+    <div class="me-cf-bg" data-close="1"></div>
+    <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Supprimer l'élève">
+      <div class="me-cf-title">Supprimer ${prenom} ?</div>
+      <div class="me-cf-body">Cette action est <strong>définitive</strong>. ${prenom} perd son compte et toute sa progression (révisions, validations, examens). Impossible à annuler.</div>
+      <div class="me-cf-actions">
+        <button class="me-cf-btn" data-close="1" type="button">Annuler</button>
+        <button class="me-cf-btn danger" id="me-del-ok" type="button">Supprimer définitivement</button>
+      </div>
+    </div>`;
+  document.body.appendChild(wrap);
+  wrap
+    .querySelectorAll("[data-close]")
+    .forEach((b) => b.addEventListener("click", () => wrap.remove()));
+
+  wrap.querySelector("#me-del-ok").addEventListener("click", async () => {
+    const btn = wrap.querySelector("#me-del-ok");
+    btn.disabled = true;
+    btn.textContent = "Suppression…";
+    track("eleve.delete", { eleve_id: eleveId });
+    try {
+      const { error } = await sb.rpc("delete_eleve", { p_eleve_id: eleveId });
+      if (error) throw error;
+      _eleves = _eleves.filter((e) => e.id !== eleveId);
+      wrap.remove();
+      render();
+      wire();
+      toast(`${prenom} a été supprimé.`, "success");
+    } catch (e) {
+      console.error("[mes-eleves] delete_eleve error", e);
+      wrap.remove();
+      toast("Suppression impossible pour le moment.", "error");
+    }
   });
 }
 
@@ -1296,6 +1347,8 @@ const DIALOG_STYLE = `
     }
     .me-cf-btn:active { transform: scale(.98); }
     .me-cf-btn.confirm { border: 0; color: var(--a-ink); background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset; }
+    .me-cf-btn.danger { border: 0; color: #fff; background: linear-gradient(to bottom, var(--rd) 0%, var(--rd-txt, #dc2626) 100%); box-shadow: 0 2px 10px 0 rgba(220,38,38,.35), 0 1.5px 0 0 rgba(255,255,255,.22) inset; }
+    .me-cf-btn.danger:disabled { opacity: .6; cursor: wait; }
   </style>`;
 
 /** Confirmation avant d'archiver un élève en « reçu ». */
