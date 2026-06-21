@@ -263,6 +263,13 @@ const STYLE = `<style>
 [data-theme="dark"] .prc-path { stroke: color-mix(in srgb, var(--wc, var(--a)) 34%, #2a3346); }
 [data-theme="dark"] .prc-path-edge2 { opacity: .12; }
 [data-theme="dark"] .prc-path-light { opacity: .55; }
+/* Marquage central qui « défile » → la route avance vers les prochains nodes.
+   GPU-cheap (stroke-dashoffset seulement), coupé sous prefers-reduced-motion.
+   dasharray = 7 13 → période 20 ; on translate d'une période pour une boucle sans couture. */
+@media (prefers-reduced-motion: no-preference) {
+  .prc-path-light { animation: prcRoadFlow .9s linear infinite; }
+}
+@keyframes prcRoadFlow { to { stroke-dashoffset: -20; } }
 
 /* ── Nodes (style Duolingo path) ── */
 .prc-node {
