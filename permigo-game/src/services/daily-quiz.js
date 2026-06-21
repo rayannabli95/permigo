@@ -21,9 +21,26 @@ import { THEORY_QUIZ_PASS_PCT } from "@/utils/theory-league.js";
 
 const LS_DONE = "pg-daily-quiz-done"; // valeur = YYYY-MM-DD (local)
 
+// ─── Série quotidienne (streak boucle solo) ───────────────────────
+// Clés localStorage best-effort. Totalement indépendant de la table
+// `streaks` (qui suit la connexion / activité générale côté serveur).
+// Celui-ci ne mesure que les jours où la question du jour est FAITE.
+// Règles non-négociables :
+//  - Pas de menace de perte : JAMAIS « tu vas perdre ta série ! »
+//  - Affiché avec fierté quand >= 2 jours, ignoré à 0 ou 1
+//  - Remis à 0 silencieusement si un jour est sauté (sans bruit)
+export const LS_DAILY_STREAK = "pg-daily-streak"; // entier (jours consécutifs)
+export const LS_DAILY_STREAK_LAST = "pg-daily-streak-last"; // YYYY-MM-DD du dernier jour fait
+
 /** Clé du jour en heure locale (pas UTC : l'élève vit en heure locale). */
 export function todayKey() {
   const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** Clé du jour précédent en heure locale. */
+function yesterdayKey() {
+  const d = new Date(Date.now() - 86_400_000);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
@@ -35,9 +52,38 @@ export function isDailyDone() {
   }
 }
 
+/**
+ * Lit la série de jours consécutifs où la question du jour a été faite.
+ * Retourne 0 si la série est cassée (jour sauté) ou si pas encore fait.
+ * @returns {number}
+ */
+export function getDailyStreak() {
+  try {
+    const last = localStorage.getItem(LS_DAILY_STREAK_LAST);
+    const count = parseInt(localStorage.getItem(LS_DAILY_STREAK) || "0", 10);
+    if (!last || !count) return 0;
+    // La série est valide si le dernier jour fait = hier ou aujourd'hui
+    const today = todayKey();
+    const yesterday = yesterdayKey();
+    if (last === today || last === yesterday) return count;
+    return 0; // jour sauté → série cassée silencieusement
+  } catch {
+    return 0;
+  }
+}
+
 export function markDailyDone() {
   try {
-    localStorage.setItem(LS_DONE, todayKey());
+    const today = todayKey();
+    localStorage.setItem(LS_DONE, today);
+    // Mise à jour de la série quotidienne
+    const last = localStorage.getItem(LS_DAILY_STREAK_LAST);
+    const count = parseInt(localStorage.getItem(LS_DAILY_STREAK) || "0", 10);
+    if (last === today) return; // idempotent : déjà marqué aujourd'hui
+    const yesterday = yesterdayKey();
+    const newCount = last === yesterday ? count + 1 : 1;
+    localStorage.setItem(LS_DAILY_STREAK, String(newCount));
+    localStorage.setItem(LS_DAILY_STREAK_LAST, today);
   } catch {
     /* localStorage indisponible → la carte restera proposée, pas grave */
   }
