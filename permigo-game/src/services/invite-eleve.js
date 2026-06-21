@@ -466,11 +466,11 @@ function codeDisplayHtml(code) {
 function codeFormHtml(prefill) {
   return `
     <div class="me-inv-code-label">${prefill ? "Modifier ton code" : "Crée ton code élève"}</div>
-    <div class="me-inv-code-hint">Un code court à ta marque (ex&nbsp;: RAYAN1). Tes élèves le tapent à l'inscription — pas besoin de leur email.</div>
+    <div class="me-inv-code-hint">Un code court à ta marque (ex&nbsp;: PERMIS75). Tes élèves le tapent à l'inscription — pas besoin de leur email.</div>
     <div class="me-inv-code-form">
       <input class="me-inv-code-input" data-el="code-input" type="text" maxlength="16"
         autocapitalize="characters" autocomplete="off" spellcheck="false"
-        placeholder="RAYAN1" value="${esc(prefill)}" />
+        placeholder="PERMIS75" value="${esc(prefill)}" />
       <button class="me-inv-act share" type="button" data-act="code-save">${prefill ? "Enregistrer" : "Créer"}</button>
     </div>
     <div class="me-inv-code-msg" data-el="code-msg"></div>`;
