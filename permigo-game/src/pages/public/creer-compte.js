@@ -22,7 +22,6 @@ import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
-import { playLaunch } from "@/utils/sound.js";
 
 const STYLE = `<style>
   .sg {
@@ -299,7 +298,6 @@ export async function mount(root) {
       if (rpcErr) throw rpcErr;
 
       track("signup.completed", { role: "enseignant", from: "self_serve" });
-      playLaunch();
 
       // 3. Succès → add-to-home (comme le flow invitation moniteur) puis entrée app.
       const goToApp = () => {

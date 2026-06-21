@@ -12,7 +12,6 @@ import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
-import { playLaunch } from "@/utils/sound.js";
 
 const STYLE = `<style>
   .sg {
@@ -537,7 +536,6 @@ function renderForm(root, invitation, token) {
         from: "invitation",
         minor: !!consentToken,
       });
-      playLaunch();
 
       // 3bis. Élève mineur : compte en attente du consentement parental
       if (consentToken) {
