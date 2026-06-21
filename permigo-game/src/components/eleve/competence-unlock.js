@@ -20,6 +20,10 @@ function worldForCategory(catId) {
   return WORLDS.find((w) => w.id === n) || null;
 }
 
+// Emblème central : médaillon « acquis » net (SVG line, rendu blanc + glow accent
+// par le moteur) — remplace l'emoji de monde qui faisait cheap dans le cœur premium.
+const EMBLEM_MEDAL = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="6"/><path d="M8.6 13.4 7 22l5-3 5 3-1.6-8.6"/><path d="m9.2 8.4 1.9 1.9 3.7-3.8"/></svg>`;
+
 /**
  * Affiche l'écran plein écran "Nouvelle compétence acquise".
  * @param {Object} opts
@@ -95,7 +99,8 @@ export function showCompetenceUnlock(opts = {}) {
 
   return showUnlockScreen({
     accent,
-    emblem: emoji,
+    emblem: emoji, // fallback (le moteur priorise emblemHtml)
+    emblemHtml: EMBLEM_MEDAL,
     kicker: "Compétence acquise",
     kickerIcon: "✓",
     title: name,
