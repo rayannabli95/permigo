@@ -12,6 +12,8 @@ import { WORLDS } from "@/data/worlds.js";
 import { ASSETS } from "@/utils/assets.js";
 import { getCompDetail } from "@/data/remc-details.js";
 import { icon } from "@/utils/icons.js";
+import { haptic } from "@/utils/haptic.js";
+import { playWhoosh } from "@/utils/sound.js";
 import {
   renderChest,
   openChestModal,
@@ -2213,11 +2215,17 @@ function wire(root, worldStates, validatedMap, pendingMap, me, view = "map") {
   const mapEl = root.querySelector(".prc-map");
   if (view === "map" && !reduced && "IntersectionObserver" in window && mapEl) {
     root.querySelector(".prc")?.classList.add("prc-anim");
+    // Whoosh à l'entrée d'un nouveau monde au scroll (pas au mount initial).
+    let whooshArmed = false;
+    setTimeout(() => {
+      whooshArmed = true;
+    }, 700);
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           if (e.isIntersecting) {
             e.target.classList.add("in");
+            if (whooshArmed) playWhoosh();
             io.unobserve(e.target);
           }
         }
@@ -2275,6 +2283,7 @@ function wire(root, worldStates, validatedMap, pendingMap, me, view = "map") {
       .forEach((el) => el.classList.remove("selected"));
   root.querySelectorAll(".prc-node:not(.locked)").forEach((n) => {
     const open = () => {
+      haptic("tap");
       lastTrigger = n;
       clearSelected();
       n.classList.add("selected");
@@ -2297,6 +2306,7 @@ function wire(root, worldStates, validatedMap, pendingMap, me, view = "map") {
   // Vue Liste : chaque ligne de compétence ouvre la même fiche (bottom sheet)
   root.querySelectorAll(".prc-row:not(.locked)").forEach((rowEl) => {
     const open = () => {
+      haptic("tap");
       lastTrigger = rowEl;
       const compId = rowEl.dataset.comp;
       const worldIdx = parseInt(rowEl.dataset.worldIdx, 10);
