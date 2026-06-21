@@ -1286,6 +1286,24 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 .prc-row.next .prc-row-nm { font-weight:800; }
 .prc-row-go { flex-shrink:0; display:inline-flex; align-items:center; gap:5px; background:var(--a); color:var(--a-ink); font:800 11px/1 'Inter',sans-serif; padding:9px 13px; border-radius:999px; box-shadow:0 3px 9px color-mix(in srgb,var(--a) 40%,transparent); }
 .prc-chap .chest-card { margin-top:8px; }
+
+/* ══ Décor immersif : panneaux de signalisation (fond, gouttières) ══ */
+.prc-signs { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+.prc-sign {
+  position:absolute; height:auto; opacity:var(--op,.1);
+  filter:saturate(.85) blur(var(--blur,1px));
+  transform:rotate(var(--rot,0deg));
+  -webkit-user-select:none; user-select:none;
+}
+/* Dark mode : panneaux (souvent fond blanc) atténués pour ne pas éblouir */
+[data-theme="dark"] .prc-sign { opacity:calc(var(--op,.1) * .45); filter:grayscale(.35) blur(var(--blur,1px)); }
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .prc-sign { opacity:calc(var(--op,.1) * .45); filter:grayscale(.35) blur(var(--blur,1px)); }
+}
+/* Monde verrouillé : panneaux encore plus discrets */
+.prc-world.locked .prc-signs { opacity:.45; filter:grayscale(.6); }
+/* Filigrane volant déjà atténué par les photos retirées ; avec panneaux on le calme aussi */
+.prc:has(.prc-signs)::before { opacity:.10; }
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
@@ -1323,6 +1341,80 @@ const WORLDS_META = [
 
 // Combien de compétences du monde N-1 pour débloquer le monde N
 const UNLOCK_REQ = [null, 5, 6, 6];
+
+// ─── Décor immersif : panneaux de signalisation par monde ──────────
+// Jeux thématisés (SVG réels dans /public/signs). Rendus en gouttières
+// gauche/droite, faible opacité, derrière le contenu → immersion sans
+// jamais gêner la lisibilité du texte/des nodes.
+const WORLD_SIGNS = [
+  // C1 — Maîtriser le véhicule : panneaux fondamentaux
+  [
+    "stop",
+    "cedez-le-passage",
+    "sens-interdit",
+    "priorite-a-droite",
+    "sens-unique",
+    "circulation-interdite",
+    "route-prioritaire",
+    "fin-route-prioritaire",
+  ],
+  // C2 — Circuler en ville : intersections, ronds-points, partage
+  [
+    "carrefour-giratoire",
+    "danger-feux-tricolores",
+    "danger-passage-pietons",
+    "sens-unique",
+    "stationnement-interdit",
+    "interdiction-tourner-gauche",
+    "piste-cyclable-obligatoire",
+    "priorite-a-droite",
+  ],
+  // C3 — Conditions difficiles : virages, dépassements, dangers
+  [
+    "danger-virage-droite",
+    "depassement-interdit",
+    "route-prioritaire",
+    "danger-feux-tricolores",
+    "cedez-le-passage",
+    "arret-stationnement-interdit",
+    "stop",
+    "fin-toutes-interdictions",
+  ],
+  // C4 — Conduite autonome : mix
+  [
+    "route-prioritaire",
+    "carrefour-giratoire",
+    "danger-passage-pietons",
+    "sens-unique",
+    "priorite-a-droite",
+    "depassement-interdit",
+    "fin-toutes-interdictions",
+    "stop",
+  ],
+];
+
+// Emplacements (gouttières l/r) : top%, taille, opacité, flou, rotation.
+// Profondeur façon « atmosphère » (petits/flous au loin, plus gros/nets près).
+const SIGN_SLOTS = [
+  { side: "l", top: 4, size: 70, op: 0.32, blur: 0.4, rot: -8 },
+  { side: "r", top: 12, size: 50, op: 0.24, blur: 1.0, rot: 10 },
+  { side: "r", top: 27, size: 82, op: 0.36, blur: 0.2, rot: -5 },
+  { side: "l", top: 38, size: 54, op: 0.26, blur: 0.8, rot: 7 },
+  { side: "l", top: 56, size: 76, op: 0.34, blur: 0.3, rot: 6 },
+  { side: "r", top: 64, size: 58, op: 0.26, blur: 0.7, rot: -9 },
+  { side: "r", top: 80, size: 72, op: 0.32, blur: 0.4, rot: 8 },
+  { side: "l", top: 89, size: 52, op: 0.24, blur: 0.9, rot: -6 },
+];
+
+function renderWorldSigns(idx) {
+  const set = WORLD_SIGNS[idx] || WORLD_SIGNS[0];
+  return `<div class="prc-signs" aria-hidden="true">${SIGN_SLOTS.map((s, i) => {
+    const file = set[i % set.length];
+    const off = -8 + (i % 3) * 13; // léger décalage pour éviter l'alignement
+    const pos = s.side === "l" ? `left:${off}px` : `right:${off}px`;
+    return `<img src="/signs/${file}.svg" alt="" loading="lazy" draggable="false" class="prc-sign" style="top:${s.top}%;${pos};width:${s.size}px;--op:${s.op};--blur:${s.blur}px;--rot:${s.rot}deg">`;
+  }).join("")}</div>`;
+}
 
 const NOW_MS = Date.now();
 const NEW_BADGE_MS = 24 * 60 * 60 * 1000;
@@ -1794,13 +1886,16 @@ function renderWorldSection(
   // horizontale du trait : avant W=280 + preserveAspectRatio="none" étirait
   // la route ~1,7× en largeur (route trop grosse/déformée).
   const W = 440;
-  // Route plus compacte : ~125px/node (au lieu de 150) → moins étirée verticalement.
-  const H = Math.max(360, subs.length * 125 + 55);
+  // Zigzag franc → les virages "consomment" la distance à l'horizontale, donc
+  // on peut resserrer la verticale (~108px/node) sans empiler les étiquettes
+  // (nodes consécutifs de côtés opposés). Route plus compacte ET plus "route".
+  const H = Math.max(330, subs.length * 108 + 50);
 
+  const ZIG = 0.27; // amplitude du zigzag (part de W de chaque côté du centre)
   const points = subs.map((sub, i) => {
     const yPct = (i + 0.5) / subs.length;
-    const wave = Math.sin(i * 0.85) * 0.28;
-    const xPct = 0.5 + wave;
+    // Alternance stricte gauche/droite à chaque étape = vrais virages.
+    const xPct = 0.5 + (i % 2 === 0 ? ZIG : -ZIG);
     return { c: sub.c, n: sub.n, x: xPct * W, y: yPct * H };
   });
 
@@ -1874,6 +1969,8 @@ function renderWorldSection(
 <section class="prc-world ${isLocked ? "locked" : ""} ${isComplete ? "complete" : ""} ${isActive ? "active" : ""}"
          data-world-idx="${idx}"
          style="--wc:${meta.color};--wg:${meta.glow}">
+  <!-- Décor immersif : panneaux de signalisation en gouttières (fond, faible opacité) -->
+  ${renderWorldSigns(idx)}
   <!-- Petit visuel décoratif top-right (plus de photo plein écran : illisible + hors charte) -->
   <img src="${meta.img}" alt="" class="prc-world-decor" loading="lazy" draggable="false">
 
