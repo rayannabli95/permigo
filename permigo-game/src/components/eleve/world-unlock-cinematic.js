@@ -387,7 +387,7 @@ function ensureStyles() {
 
     /* Logo PermiGo en haut, discret, signe le moment */
     .wuc-brand{
-      position:absolute;top:calc(28px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+      position:fixed;top:calc(28px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
       opacity:0;
       animation:fadein-late 1s ease 2.4s forwards;
     }
@@ -396,7 +396,7 @@ function ensureStyles() {
 
     /* Skip discret en bas */
     .wuc-skip{
-      position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+      position:fixed;bottom:calc(28px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
       padding:8px 16px;
       background:transparent;border:1px solid rgba(255,255,255,.2);
       color:rgba(255,255,255,.6);
