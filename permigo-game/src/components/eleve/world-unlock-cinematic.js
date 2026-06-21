@@ -129,9 +129,11 @@ export function playUnlockCinematic({
         nextWorldNum
           ? `
         <button class="wuc-cta" id="wuc-cta" type="button">
-          <span class="wuc-cta-lbl">ENTRER DANS LE MONDE ${nextWorldNum}</span>
+          <span class="wuc-cta-top">
+            <span class="wuc-cta-lbl">ENTRER DANS LE MONDE ${nextWorldNum}</span>
+            <span class="wuc-cta-arrow">→</span>
+          </span>
           <span class="wuc-cta-name">${esc(nextWorldName || "")}</span>
-          <span class="wuc-cta-arrow">→</span>
         </button>
       `
           : `
@@ -224,7 +226,7 @@ function ensureStyles() {
     .wuc-bg{
       position:absolute;inset:0;
       background:
-        radial-gradient(ellipse at center, var(--wuc-c) 0%, var(--ink) 50%, #000 100%);
+        radial-gradient(ellipse at center, var(--wuc-c) 0%, #0b0d1a 50%, #000 100%);
     }
 
     /* Rayons divins rotatifs */
@@ -342,7 +344,8 @@ function ensureStyles() {
       display:flex;flex-direction:column;align-items:center;gap:3px;
       padding:18px 36px;
       background:linear-gradient(180deg,#fff 0%,var(--aml) 50%,var(--wuc-c) 100%);
-      color:var(--ink);
+      color:#10210a; /* couleur FIXE foncée : le fond du CTA est toujours clair,
+                        var(--ink) virait au blanc en dark mode = texte illisible. */
       border:0;
       border-radius:99px;
       font-family:var(--fd);font-weight:900;cursor:pointer;
@@ -364,9 +367,10 @@ function ensureStyles() {
       animation-delay:3.4s;
     }
     @keyframes wuc-cta-shine{0%{left:-100%}50%,100%{left:200%}}
+    .wuc-cta-top{display:flex;align-items:center;justify-content:center;gap:9px}
     .wuc-cta-lbl{font-size:14px;letter-spacing:.6px;text-transform:uppercase;line-height:1.1}
-    .wuc-cta-name{font-size:11px;font-weight:700;color:rgba(11,13,26,.65);letter-spacing:.3px;margin-top:2px}
-    .wuc-cta-arrow{font-size:20px;font-weight:900;margin-top:4px;animation:wuc-arrow-bounce 1.4s ease-in-out infinite}
+    .wuc-cta-name{font-size:11px;font-weight:700;color:rgba(11,13,26,.65);letter-spacing:.3px;margin-top:3px}
+    .wuc-cta-arrow{font-size:18px;font-weight:900;animation:wuc-arrow-bounce 1.4s ease-in-out infinite}
     @keyframes wuc-arrow-bounce{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
     .wuc-cta:hover{transform:translateY(-3px) scale(1.03)}
     .wuc-cta:active{transform:translateY(-1px) scale(.98)}

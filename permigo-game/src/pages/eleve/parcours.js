@@ -354,6 +354,10 @@ const STYLE = `<style>
 .nd-stamp.done   { background: var(--gr); }
 .nd-stamp.next   { background: var(--a); }
 .nd-stamp.locked { background: var(--mu2); }
+/* Node actif : la pastille de statut chevauchait le badge « TU ES ICI » et est
+   redondante (halo + « TU ES ICI » + CTA signalent déjà l'état). On la masque. */
+.prc-node.next .nd-stamp,
+.prc-node.a_valider .nd-stamp { display: none; }
 @media (max-width: 400px) {
   .nd-circle { width: 52px; height: 52px; border-radius: var(--rl); }
 }
