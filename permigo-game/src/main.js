@@ -62,6 +62,11 @@ async function boot() {
         const { mount } = await import("@/pages/public/signup.js");
         return mount(app);
       }
+      // Inscription élève self-serve via code moniteur (chemin bis à l'invitation)
+      if (location.hash.startsWith("#/rejoindre")) {
+        const { mount } = await import("@/pages/public/rejoindre.js");
+        return mount(app);
+      }
       if (location.hash.startsWith("#/ecole/")) {
         const slug = location.hash.replace("#/ecole/", "").split("?")[0];
         const { mount } = await import("@/pages/public/ecole.js");
