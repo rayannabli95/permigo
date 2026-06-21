@@ -17,9 +17,10 @@
 ## 👀 Review / décision Rayan
 - PR #215 — SEO contenu statique (merge / refondre / fermer ?)
 - Passage Stripe LIVE (go ?)
-- Heartbeat cron via /schedule (go ?)
+- Connecter GitHub (`/web-setup`) → débloque le heartbeat cloud
 
 ## ✅ Done (récent — détail dans done-log.md)
+- Heartbeat cron pilier 1 (routine quotidienne 09h Paris)
 - #243 Quiz vocal
 - #242 Centres examen (Massy/Évry/Melun)
 - #217/#218 Refonte intuition élève+enseignant

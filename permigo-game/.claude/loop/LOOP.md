@@ -70,8 +70,12 @@ Les boucles augmentent le levier **mais aussi** le coût en tokens, le risque de
 
 ---
 
-## Heartbeat récurrent (pilier 1) — OPT-IN, pas activé
+## Heartbeat récurrent (pilier 1) — ✅ ACTIF
 
-Un cron autonome (triage quotidien, résumé CI, chasse aux bugs) a un coût et tourne sans surveillance.
-**Non activé sans ton feu vert.** Si tu le veux : dis-le, je le câble via `/schedule` (ex. triage `next-up.md` chaque matin 9h).
-En attendant, le **NIGHT RUN** manuel (`.claude/NIGHT_RUN.md`) reste le heartbeat à la demande.
+**Routine cloud « Loop heartbeat — triage matinal »** (`trig_01NBuewjGcrtCq4hnKct4SfG`) :
+- **Cadence** : chaque jour à 07:00 UTC = **09:00 Europe/Paris** (été ; 08:00 en hiver). Modèle `claude-sonnet-4-6`.
+- **Mission** : lit le Vault + l'état réel du repo (`git log`, `gh pr list`, `npm run lint && build`), **rafraîchit** `status.md` / `next-up.md` / `board.md`, et **ouvre une PR `chore/loop-heartbeat`** avec le résultat.
+- **Garde-fous** : triage en lecture seule sur le code ; écrit **uniquement** `.claude/loop/` ; **ne merge pas**, ne push pas sur `main`, ne touche pas à la DB. L'humain tranche les PR.
+- Gérer / désactiver : https://claude.ai/code/routines/trig_01NBuewjGcrtCq4hnKct4SfG
+
+Le **NIGHT RUN** manuel (`.claude/NIGHT_RUN.md`) reste le heartbeat « gros œuvre » à la demande (3h autonome).

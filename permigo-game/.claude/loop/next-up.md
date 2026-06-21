@@ -5,7 +5,8 @@
 ## P0 — décisions humaines en attente (Rayan tranche)
 - [ ] **PR #215 (SEO statique)** : merge, refondre, ou fermer ? Dépend du verrou SSG (cf. `docs/SEO_STRATEGY.md`). Ne pas merger à l'aveugle.
 - [ ] **Passage Stripe LIVE** : feu vert pour brancher clés + webhook prod ?
-- [ ] **Heartbeat cron** (pilier 1) : on active un triage quotidien via `/schedule` ? (cf. `LOOP.md` bas de page).
+- [ ] **Connecter GitHub** (`/web-setup`) pour débloquer le heartbeat cloud — sinon la routine `trig_01NBuewjGcrtCq4hnKct4SfG` échoue.
+- [x] ~~Heartbeat cron (pilier 1)~~ → ✅ activé (routine quotidienne 09h Paris, cf. `LOOP.md`).
 
 ## P1 — GTM premiers clients (le vrai sujet business)
 - [ ] Landing à **refondre** (positionnement « l'outil DU moniteur, à SA marque ») — **confirmer le copy avant de coder**.
