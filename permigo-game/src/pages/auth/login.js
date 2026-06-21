@@ -233,7 +233,7 @@ function template() {
           }
 
           <div class="lg-foot">
-            Pas encore de compte ? Contacte ton auto-école pour une invitation
+            Élève avec un code moniteur ? <a href="/#/rejoindre">Rejoins ton moniteur</a>
           </div>
         </div>
       </div>

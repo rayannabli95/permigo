@@ -64,6 +64,56 @@ export function openInviteEleveModal(me) {
         font:500 13px/1.5 'Inter',sans-serif; color:var(--mu,var(--mu3));
         margin:0 0 16px;
       }
+      /* Bloc code élève — CTA principal */
+      .me-inv-code-card {
+        margin:4px 0 18px; padding:16px 16px 14px;
+        border-radius:18px;
+        background:color-mix(in srgb, var(--a) 8%, var(--su2));
+        border:1px solid color-mix(in srgb, var(--a) 22%, transparent);
+      }
+      .me-inv-code-label {
+        font:700 11px/1 'Inter',sans-serif; color:var(--a-txt);
+        text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;
+      }
+      .me-inv-code-value {
+        font:800 30px/1 'IBM Plex Mono',monospace; color:var(--ink);
+        letter-spacing:.1em; margin-bottom:6px; user-select:all;
+      }
+      .me-inv-code-hint {
+        font:500 12px/1.45 'Inter',sans-serif; color:var(--mu,var(--mu3));
+        margin-bottom:12px;
+      }
+      .me-inv-code-edit {
+        width:100%; margin-top:10px; padding:8px; border:0; background:none;
+        color:var(--mu,var(--mu3)); font:600 12px/1 'Inter',sans-serif;
+        text-decoration:underline; text-underline-offset:2px; cursor:pointer;
+        font-family:inherit;
+      }
+      .me-inv-code-edit:hover { color:var(--ink); }
+      .me-inv-code-form { display:flex; gap:8px; align-items:center; }
+      .me-inv-code-input {
+        flex:1; padding:11px 13px; border-radius:11px;
+        border:1.5px solid var(--bo); background:var(--su);
+        font:800 16px/1 'IBM Plex Mono',monospace; color:var(--ink);
+        letter-spacing:.08em; text-transform:uppercase; min-width:0;
+      }
+      .me-inv-code-input:focus {
+        outline:0; border-color:var(--a);
+        box-shadow:0 0 0 3px color-mix(in srgb, var(--a) 12%, transparent);
+      }
+      .me-inv-code-msg {
+        font:500 12px/1.4 'Inter',sans-serif; margin-top:8px; min-height:14px;
+      }
+      .me-inv-code-msg.err { color:var(--rd-txt); }
+      .me-inv-code-msg.ok { color:var(--grd); }
+      .me-inv-or {
+        display:flex; align-items:center; gap:10px;
+        font:700 10.5px/1 'Inter',sans-serif; color:var(--mu2);
+        text-transform:uppercase; letter-spacing:.1em; margin:0 0 14px;
+      }
+      .me-inv-or::before, .me-inv-or::after {
+        content:''; flex:1; height:1px; background:var(--bo2,#eef1f7);
+      }
       .me-inv-textarea {
         width:100%; min-height:110px; resize:vertical;
         padding:13px 14px; box-sizing:border-box;
@@ -177,6 +227,8 @@ export function openInviteEleveModal(me) {
     <div class="me-inv-sheet">
       <div class="me-inv-grab"></div>
       <h2 class="me-inv-title">Inviter des élèves</h2>
+      ${codeBlockHtml(me)}
+      <div class="me-inv-or">ou par email</div>
       <p class="me-inv-sub">
         Un email par ligne. PermiGo crée un lien d'accès pour chacun —
         ton élève clique, crée son compte, et apparaît dans ta liste.
@@ -217,6 +269,8 @@ export function openInviteEleveModal(me) {
   });
   ov.querySelector("#me-inv-cancel").addEventListener("click", close);
   enableSheetSwipe(sheet, close, { overlay: ov });
+
+  wireCodeBlock(sheet, me);
 
   ta.addEventListener("input", () => {
     const emails = parseEmails(ta.value);
@@ -382,4 +436,162 @@ export function openInviteEleveModal(me) {
   });
 
   setTimeout(() => ta.focus(), 120);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Bloc « code élève » du moniteur (chemin bis à l'invitation par email).
+// L'élève tape ce code à l'inscription (#/rejoindre) → rattaché au moniteur,
+// sans que le moniteur n'ait jamais son email.
+// ═══════════════════════════════════════════════════════════════
+const normJoinCode = (v) => (v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+function codeBlockHtml(me) {
+  return `<div class="me-inv-code-card" id="me-inv-code-card">${
+    me?.join_code ? codeDisplayHtml(me.join_code) : codeFormHtml("")
+  }</div>`;
+}
+
+function codeDisplayHtml(code) {
+  return `
+    <div class="me-inv-code-label">Ton code élève</div>
+    <div class="me-inv-code-value">${esc(code)}</div>
+    <div class="me-inv-code-hint">Tes élèves le tapent à l'inscription — tu n'as jamais besoin de leur email.</div>
+    <div class="me-inv-share-row">
+      <button class="me-inv-act share" type="button" data-act="code-share">Partager</button>
+      <button class="me-inv-act copy2" type="button" data-act="code-copy">Copier le code</button>
+    </div>
+    <button class="me-inv-code-edit" type="button" data-act="code-edit">Modifier mon code</button>`;
+}
+
+function codeFormHtml(prefill) {
+  return `
+    <div class="me-inv-code-label">${prefill ? "Modifier ton code" : "Crée ton code élève"}</div>
+    <div class="me-inv-code-hint">Un code court à ta marque (ex&nbsp;: RAYAN1). Tes élèves le tapent à l'inscription — pas besoin de leur email.</div>
+    <div class="me-inv-code-form">
+      <input class="me-inv-code-input" data-el="code-input" type="text" maxlength="16"
+        autocapitalize="characters" autocomplete="off" spellcheck="false"
+        placeholder="RAYAN1" value="${esc(prefill)}" />
+      <button class="me-inv-act share" type="button" data-act="code-save">${prefill ? "Enregistrer" : "Créer"}</button>
+    </div>
+    <div class="me-inv-code-msg" data-el="code-msg"></div>`;
+}
+
+function wireCodeBlock(sheet, me) {
+  const card = sheet.querySelector("#me-inv-code-card");
+  if (!card) return;
+
+  const codeLink = (code) =>
+    window.location.origin + "/#/rejoindre?code=" + encodeURIComponent(code);
+  const shareMsg = (code) =>
+    `Rejoins-moi sur PermiGo pour réviser ton permis 🚗\nEntre le code ${code} ou ouvre ce lien :`;
+
+  const renderDisplay = (code) => {
+    card.innerHTML = codeDisplayHtml(code);
+  };
+  const renderForm = (prefill) => {
+    card.innerHTML = codeFormHtml(prefill);
+    setTimeout(() => card.querySelector('[data-el="code-input"]')?.focus(), 50);
+  };
+
+  card.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-act]");
+    if (!btn) return;
+    const act = btn.dataset.act;
+
+    if (act === "code-copy") {
+      try {
+        await navigator.clipboard.writeText(me.join_code);
+        btn.textContent = "Copié ✓";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = "Copier le code";
+          btn.classList.remove("copied");
+        }, 2000);
+        track("invite_eleve.code_copied");
+      } catch {
+        toast(
+          "Copie indisponible — sélectionne le code à la main",
+          "error",
+          3500,
+        );
+      }
+      return;
+    }
+
+    if (act === "code-share") {
+      const link = codeLink(me.join_code);
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "PermiGo",
+            text: shareMsg(me.join_code),
+            url: link,
+          });
+          track("invite_eleve.code_shared", { method: "native" });
+        } catch {
+          /* partage annulé */
+        }
+      } else {
+        try {
+          await navigator.clipboard.writeText(
+            shareMsg(me.join_code) + "\n" + link,
+          );
+          toast("Message copié — colle-le où tu veux", "info", 3000);
+          track("invite_eleve.code_shared", { method: "copy" });
+        } catch {
+          toast("Partage indisponible sur cet appareil", "error", 3000);
+        }
+      }
+      return;
+    }
+
+    if (act === "code-edit") {
+      renderForm(me.join_code || "");
+      return;
+    }
+
+    if (act === "code-save") {
+      const input = card.querySelector('[data-el="code-input"]');
+      const msg = card.querySelector('[data-el="code-msg"]');
+      const code = normJoinCode(input?.value);
+      if (code.length < 3) {
+        msg.className = "me-inv-code-msg err";
+        msg.textContent = "3 caractères minimum (lettres ou chiffres).";
+        return;
+      }
+      btn.disabled = true;
+      const prev = btn.textContent;
+      btn.textContent = "…";
+      try {
+        const { data, error } = await sb.rpc("set_my_join_code", {
+          p_code: code,
+        });
+        if (error) {
+          msg.className = "me-inv-code-msg err";
+          if (/code_taken/i.test(error.message || "")) {
+            msg.textContent = "Ce code est déjà pris, choisis-en un autre.";
+          } else if (/invalid_code/i.test(error.message || "")) {
+            msg.textContent = "Code invalide (3 à 16 lettres/chiffres).";
+          } else if (/not_a_moniteur/i.test(error.message || "")) {
+            msg.textContent = "Seul un moniteur peut définir un code.";
+          } else {
+            msg.textContent = error.message || "Erreur, réessaie.";
+          }
+          btn.disabled = false;
+          btn.textContent = prev;
+          return;
+        }
+        me.join_code = data || code;
+        playNotify();
+        track("invite_eleve.code_set");
+        renderDisplay(me.join_code);
+      } catch (err) {
+        msg.className = "me-inv-code-msg err";
+        msg.textContent = err?.message || "Erreur, réessaie.";
+        btn.disabled = false;
+        btn.textContent = prev;
+      }
+      return;
+    }
+  });
 }
