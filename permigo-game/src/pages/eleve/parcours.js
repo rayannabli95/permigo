@@ -265,6 +265,16 @@ const STYLE = `<style>
 [data-theme="dark"] .prc-path { stroke: color-mix(in srgb, var(--wc, var(--a)) 34%, #2a3346); }
 [data-theme="dark"] .prc-path-edge2 { opacity: .12; }
 [data-theme="dark"] .prc-path-light { opacity: .55; }
+/* Marquage central qui « défile » → la route avance vers les prochains nodes.
+   GPU-cheap (stroke-dashoffset seulement), coupé sous prefers-reduced-motion.
+   dasharray = 7 13 → période 20 ; on translate d'une période pour une boucle sans couture. */
+@media (prefers-reduced-motion: no-preference) {
+  .prc-path-light { animation: prcRoadFlow .9s linear infinite; }
+}
+@keyframes prcRoadFlow { to { stroke-dashoffset: -20; } }
+/* Volant qui roule sur la route (monde en cours) */
+.prc-car { filter: drop-shadow(0 3px 6px rgba(11,13,26,.35)); }
+.prc-car image { opacity: .9; }
 
 /* ── Nodes (style Duolingo path) ── */
 .prc-node {
@@ -1970,6 +1980,18 @@ function renderWorldSection(
     : "";
 
   const isActive = status === "in_progress";
+
+  // Volant qui « roule » sur le tracé du monde en cours (immersion Tier 2).
+  // SVG <animateMotion> = coordonnées exactes du path (pas de souci d'échelle) ;
+  // uniquement le monde actif ; coupé sous prefers-reduced-motion.
+  const reducedMotion = window.matchMedia?.(
+    "(prefers-reduced-motion: reduce)",
+  )?.matches;
+  const carHTML =
+    isActive && !reducedMotion
+      ? `<g class="prc-car" aria-hidden="true"><image href="/worlds/volant.png" width="28" height="28" x="-14" y="-14" /><animateMotion dur="${Math.max(6, Math.round(H / 110))}s" repeatCount="indefinite" rotate="0" calcMode="linear" path="${pathD}" /></g>`
+      : "";
+
   return `
 <section class="prc-world ${isLocked ? "locked" : ""} ${isComplete ? "complete" : ""} ${isActive ? "active" : ""}"
          data-world-idx="${idx}"
@@ -2004,6 +2026,7 @@ function renderWorldSection(
       <path class="prc-path prc-draw"        d="${pathD}" pathLength="1" />
       <path class="prc-path-edge2"  d="${pathD}" />
       <path class="prc-path-light"  d="${pathD}" />
+      ${carHTML}
     </svg>
     ${nodesHTML}
   </div>
