@@ -6,7 +6,7 @@
 // Deux modes :
 //   POST { mode: "daily" }              → batch quotidien (cron ~18h Paris)
 //       · élève abonné qui a déjà fait un quiz aujourd'hui → rien
-//       · inactif ≥ 3 jours (et < 30 j) → relance « reviens » (remplace le ding)
+//       · inactif → relance « reviens » SEULEMENT aux jours 3, 7, 14 (anti-spam)
 //       · sinon                         → ding « ta question du jour t'attend »
 //   POST { user_id, type, data? }       → push événementiel à UN élève
 //       (types du spec : post_validation_quiz | consolidation_quiz | streak_risk)
@@ -64,8 +64,10 @@ const COMEBACK_PAYLOAD = (days: number) => ({
 });
 
 const DAY_MS = 86_400_000;
-const COMEBACK_AFTER_DAYS = 3; // relance à partir de 3 j d'absence (plan)
-const GIVE_UP_AFTER_DAYS = 30; // au-delà : silence (anti-fatigue, élève parti/reçu)
+// Relances d'inactivité ESPACÉES (anti-fatigue) : on ne ping un élève absent
+// QUE les jours 3, 7 et 14 — fini le matraquage quotidien (sinon il désinstalle).
+const COMEBACK_DAYS = new Set([3, 7, 14]);
+const GIVE_UP_AFTER_DAYS = 30; // au-delà : silence (élève parti / reçu)
 
 function setupVapid(): boolean {
   const pub = Deno.env.get("VAPID_PUBLIC_KEY");
@@ -225,14 +227,22 @@ Deno.serve(async (req) => {
       continue;
     }
 
-    const payload =
-      awayDays >= COMEBACK_AFTER_DAYS
-        ? COMEBACK_PAYLOAD(awayDays)
-        : DAILY_PAYLOAD;
+    // Inactif (≥3 j) : relance UNIQUEMENT aux jours 3 / 7 / 14, sinon on saute.
+    // Actif récent (<3 j) : son ding quotidien « question du jour » (la boucle).
+    let payload;
+    if (awayDays >= 3) {
+      if (!COMEBACK_DAYS.has(awayDays)) {
+        skipped++;
+        continue;
+      }
+      payload = COMEBACK_PAYLOAD(awayDays);
+    } else {
+      payload = DAILY_PAYLOAD;
+    }
     const r = await sendTo(supabase, sub, payload);
     if (r === "sent") {
       sent++;
-      if (awayDays >= COMEBACK_AFTER_DAYS) comeback++;
+      if (awayDays >= 3) comeback++;
     } else if (r === "expired") expired++;
   }
 
