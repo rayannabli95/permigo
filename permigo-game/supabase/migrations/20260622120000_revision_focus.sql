@@ -1,6 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- À RELIRE + APPLIQUER MANUELLEMENT (Rayan). NE PAS appliquer en prod
--- automatiquement — cette migration n'est pas encore déployée.
+-- ✅ APPLIQUÉE EN PROD le 2026-06-23 (via MCP apply_migration). Audit RLS OK.
 -- ════════════════════════════════════════════════════════════════
 -- 20260622120000 — revision_focus (couche 2 « Avant / Après ta leçon »)
 --
@@ -8,7 +7,7 @@
 -- (après/avant une leçon). L'élève la voit dans #/revision-conduite, la
 -- révise (3 questions), puis la marque « révisée » → le moniteur a le retour.
 --
--- Lien élève↔moniteur = profiles.enseignant_attitre_id (cf. join_code).
+-- Lien élève↔moniteur = profiles.enseignant_id (schéma prod réel).
 -- Aucune donnée sensible : juste un code compétence (ex. "C2f") + note courte.
 -- ════════════════════════════════════════════════════════════════
 
@@ -45,7 +44,7 @@ with check (
   and exists (
     select 1 from public.profiles e
     where e.id = revision_focus.eleve_id
-      and e.enseignant_attitre_id = (select public.current_profile_id())
+      and e.enseignant_id = (select public.current_profile_id())
   )
 );
 
