@@ -4,7 +4,7 @@
     "q": "Tu veux mettre le clignotant. Quel commodo ?",
     "options": ["Celui de droite", "Celui de gauche", "Le bouton au centre"],
     "correct": 1,
-    "explication": "Mémo de pro : clignotant a gauche, balais a droite. Tu ne te trompes plus."
+    "explication": "Mémo de pro : clignotant à gauche, balais à droite. Tu ne te trompes plus."
   },
   {
     "code": "C1a",
@@ -19,21 +19,21 @@
   },
   {
     "code": "C1a",
-    "q": "Contact mis, un temoin reste allume apres le test. Tu fais quoi ?",
+    "q": "Contact mis, un témoin reste allumé après le test. Tu fais quoi ?",
     "options": [
       "Tu attends et tu le signales",
-      "Tu pars, ca passera",
+      "Tu pars, ça passera",
       "Tu coupes les phares"
     ],
     "correct": 0,
-    "explication": "Un temoin qui reste allume (huile, frein, batterie) signale un vrai defaut."
+    "explication": "Un témoin qui reste allumé (huile, frein, batterie) signale un vrai défaut."
   },
   {
     "code": "C1a",
-    "q": "Avant de monter, ton tout premier reflexe ?",
+    "q": "Avant de monter, ton tout premier réflexe ?",
     "options": [
-      "Demarrer le moteur",
-      "Regler la radio",
+      "Démarrer le moteur",
+      "Régler la radio",
       "Un tour rapide de la voiture"
     ],
     "correct": 2,
@@ -41,342 +41,342 @@
   },
   {
     "code": "C1b",
-    "q": "Pourquoi garder la jambe gauche un peu pliee en reglant le siege ?",
+    "q": "Pourquoi garder la jambe gauche un peu pliée en réglant le siège ?",
     "options": [
       "Pour le confort du genou",
-      "Pour debrayer a fond",
+      "Pour débrayer à fond",
       "Pour mieux voir la route"
     ],
     "correct": 1,
-    "explication": "Jambe tendue = embrayage pas enfonce a fond, et tu cales sans comprendre."
+    "explication": "Jambe tendue = embrayage pas enfoncé à fond, et tu cales sans comprendre."
   },
   {
     "code": "C1b",
-    "q": "Tu regles le retroviseur interieur. Tu te penches ?",
+    "q": "Tu règles le rétroviseur intérieur. Tu te penches ?",
     "options": [
       "Oui, pour mieux voir",
-      "Tu inclines la tete",
-      "Non, dos et epaules colles au siege"
+      "Tu inclines la tête",
+      "Non, dos et épaules collés au siège"
     ],
     "correct": 2,
-    "explication": "Il doit montrer toute la lunette arriere sans que tu bouges de ta place."
+    "explication": "Il doit montrer toute la lunette arrière sans que tu bouges de ta place."
   },
   {
     "code": "C1b",
-    "q": "La ceinture doit passer ou sur le buste ?",
+    "q": "La ceinture doit passer où sur le buste ?",
     "options": [
-      "Sur l'epaule, jamais sur le cou",
-      "Au plus pres du cou",
+      "Sur l'épaule, jamais sur le cou",
+      "Au plus près du cou",
       "Sous le bras"
     ],
     "correct": 0,
-    "explication": "Sur l'epaule et sur le bassin, a plat, jamais vrillee. Sinon elle protege mal."
+    "explication": "Sur l'épaule et sur le bassin, à plat, jamais vrillée. Sinon elle protège mal."
   },
   {
     "code": "C1b",
-    "q": "Comment verifier vite si ta hauteur de siege est bonne ?",
+    "q": "Comment vérifier vite si ta hauteur de siège est bonne ?",
     "options": [
       "Tu baisses le pare-soleil",
       "Tu touches le plafond",
       "Tu regardes le capot"
     ],
     "correct": 0,
-    "explication": "Si tu vois la route sous le pare-soleil baisse, ta hauteur de regard est bonne."
+    "explication": "Si tu vois la route sous le pare-soleil baissé, ta hauteur de regard est bonne."
   },
   {
     "code": "C1c",
-    "q": "Ou places-tu tes mains sur le volant ?",
+    "q": "Où places-tu tes mains sur le volant ?",
     "options": [
-      "En haut, a midi",
-      "A 9h15, comme un quart a trois",
+      "En haut, à midi",
+      "À 9h15, comme un quart à trois",
       "Une seule main suffit"
     ],
     "correct": 1,
-    "explication": "Pouces poses sur la jante : tu gardes precision et force pour reagir vite."
+    "explication": "Pouces posés sur la jante : tu gardes précision et force pour réagir vite."
   },
   {
     "code": "C1c",
-    "q": "Tu viens de braquer a fond a droite. Tu remets droit comment ?",
+    "q": "Tu viens de braquer à fond à droite. Tu remets droit comment ?",
     "options": [
       "Au feeling",
-      "L'inverse exact : un tour et demi a gauche",
-      "Tu laches le volant"
+      "L'inverse exact : un tour et demi à gauche",
+      "Tu lâches le volant"
     ],
     "correct": 1,
-    "explication": "Un volant fait environ un tour et demi de chaque cote. Tu refais l'inverse."
+    "explication": "Un volant fait environ un tour et demi de chaque côté. Tu refais l'inverse."
   },
   {
     "code": "C1c",
-    "q": "En marche arriere, tu ne sais plus de quel cote tourner. Le repere ?",
+    "q": "En marche arrière, tu ne sais plus de quel côté tourner. Le repère ?",
     "options": [
-      "Tu tournes vers ou tu veux que la voiture aille",
-      "Tu tournes a l'oppose",
+      "Tu tournes vers où tu veux que la voiture aille",
+      "Tu tournes à l'opposé",
       "Tu regardes devant"
     ],
     "correct": 0,
-    "explication": "Meme logique en avant et en arriere : ca evite de te melanger droite-gauche."
+    "explication": "Même logique en avant et en arrière : ça évite de te mélanger droite-gauche."
   },
   {
     "code": "C1c",
-    "q": "La voiture part doucement de travers en manoeuvre. Tu fais quoi ?",
+    "q": "La voiture part doucement de travers en manœuvre. Tu fais quoi ?",
     "options": [
       "Plein de coups de volant",
-      "Tu accelere pour rattraper",
+      "Tu accélères pour rattraper",
       "Tu ralentis, observes, corriges doux"
     ],
     "correct": 2,
-    "explication": "Les coups de volant a repetition te perdent. Ralentir d'abord, corriger ensuite."
+    "explication": "Les coups de volant à répétition te perdent. Ralentir d'abord, corriger ensuite."
   },
   {
     "code": "C1d",
-    "q": "Tu demarres. Quel est le tempo de l'embrayage ?",
+    "q": "Tu démarres. Quel est le tempo de l'embrayage ?",
     "options": [
-      "Tout lacher d'un coup",
-      "Debraye, trouve le patinage, glisse doux",
-      "Accelerer a fond d'abord"
+      "Tout lâcher d'un coup",
+      "Débraye, trouve le patinage, glisse doux",
+      "Accélérer à fond d'abord"
     ],
     "correct": 1,
-    "explication": "Ce qui fait caler, c'est de lacher l'embrayage d'un coup au patinage."
+    "explication": "Ce qui fait caler, c'est de lâcher l'embrayage d'un coup au patinage."
   },
   {
     "code": "C1d",
-    "q": "Pourquoi un filet d'accelerateur au demarrage ?",
+    "q": "Pourquoi un filet d'accélérateur au démarrage ?",
     "options": [
       "Pour faire du bruit",
       "Pour donner de la force au moteur",
       "Ce n'est pas utile"
     ],
     "correct": 1,
-    "explication": "La voiture pese une tonne : sans un peu de gaz au demarrage, tu cales."
+    "explication": "La voiture pèse une tonne : sans un peu de gaz au démarrage, tu cales."
   },
   {
     "code": "C1d",
-    "q": "Tu freines pour t'arreter completement. Quand debrayes-tu ?",
-    "options": ["Juste avant l'arret", "Tout de suite", "Apres l'arret"],
+    "q": "Tu freines pour t'arrêter complètement. Quand débrayes-tu ?",
+    "options": ["Juste avant l'arrêt", "Tout de suite", "Après l'arrêt"],
     "correct": 0,
-    "explication": "Trop tot = roue libre, trop tard = tu cales pile avant de t'arreter."
+    "explication": "Trop tôt = roue libre, trop tard = tu cales pile avant de t'arrêter."
   },
   {
     "code": "C1d",
-    "q": "Talon decolle, semelle qui glisse sur la pedale : quel risque ?",
+    "q": "Talon décollé, semelle qui glisse sur la pédale : quel risque ?",
     "options": [
       "Aucun, c'est pareil",
       "Tu perds le point de patinage",
       "Tu freines plus fort"
     ],
     "correct": 1,
-    "explication": "Talon ancre au sol qui glisse : tu retrouves le patinage toujours au meme endroit."
+    "explication": "Talon ancré au sol qui glisse : tu retrouves le patinage toujours au même endroit."
   },
   {
     "code": "C1e",
     "q": "Un feu passe au rouge 100 m devant. Premier geste ?",
     "options": [
       "Freiner d'un coup au dernier moment",
-      "Lacher l'accelerateur, puis freiner doux",
+      "Lâcher l'accélérateur, puis freiner doux",
       "Garder le gaz"
     ],
     "correct": 1,
-    "explication": "Le frein moteur fait deja une partie du travail. Tu anticipes, tu ne piles pas."
+    "explication": "Le frein moteur fait déjà une partie du travail. Tu anticipes, tu ne piles pas."
   },
   {
     "code": "C1e",
-    "q": "C'est quoi le freinage degressif en deux temps ?",
+    "q": "C'est quoi le freinage dégressif en deux temps ?",
     "options": [
       "Freiner fort jusqu'au bout",
-      "Pomper la pedale",
-      "Fort pour ralentir, leger pour retenir"
+      "Pomper la pédale",
+      "Fort pour ralentir, léger pour retenir"
     ],
     "correct": 2,
-    "explication": "On relache juste avant l'arret : pas de a-coup, passagers pas secoues."
+    "explication": "On relâche juste avant l'arrêt : pas de à-coup, passagers pas secoués."
   },
   {
     "code": "C1e",
-    "q": "Rouler en accordeon (accelerer fort, freiner fort, en boucle), pourquoi c'est nul ?",
+    "q": "Rouler en accordéon (accélérer fort, freiner fort, en boucle), pourquoi c'est nul ?",
     "options": [
-      "Ca va plus vite",
-      "On regarde trop pres, on fatigue tout le monde",
-      "C'est plus sur"
+      "Ça va plus vite",
+      "On regarde trop près, on fatigue tout le monde",
+      "C'est plus sûr"
     ],
     "correct": 1,
     "explication": "Regarde loin : tu vois les ralentissements arriver et tu lisses ta conduite."
   },
   {
     "code": "C1e",
-    "q": "Comment travailler le dosage de l'accelerateur ?",
+    "q": "Comment travailler le dosage de l'accélérateur ?",
     "options": [
-      "Se stabiliser a differents regimes",
-      "En appuyant a fond",
+      "Se stabiliser à différents régimes",
+      "En appuyant à fond",
       "Seulement en roulant vite"
     ],
     "correct": 0,
-    "explication": "Tu vises un regime, et si tu depasses tu soulages un peu sans lacher. Meme a l'arret."
+    "explication": "Tu vises un régime, et si tu dépasses tu soulages un peu sans lâcher. Même à l'arrêt."
   },
   {
     "code": "C1f",
-    "q": "Tu changes de vitesse. Tu regardes ou ?",
+    "q": "Tu changes de vitesse. Tu regardes où ?",
     "options": ["Le levier", "La route, toujours", "Le compteur"],
     "correct": 1,
-    "explication": "Tu sens les rapports a la main, paume sur le pommeau, sans quitter la route."
+    "explication": "Tu sens les rapports à la main, paume sur le pommeau, sans quitter la route."
   },
   {
     "code": "C1f",
     "q": "Comment tiens-tu le levier de vitesses ?",
     "options": [
       "Du bout des doigts",
-      "Serre tres fort",
-      "Paume posee sur le pommeau, sans forcer"
+      "Serré très fort",
+      "Paume posée sur le pommeau, sans forcer"
     ],
     "correct": 2,
-    "explication": "C'est la position de la main qui compte, pas la force. Une erreur de boite est eliminatoire."
+    "explication": "C'est la position de la main qui compte, pas la force. Une erreur de boîte est éliminatoire."
   },
   {
     "code": "C1f",
-    "q": "Virage serre devant. Tu retrogrades avant ou pendant ?",
+    "q": "Virage serré devant. Tu rétrogrades avant ou pendant ?",
     "options": [
       "Pendant le virage",
       "Avant, une fois ralenti",
-      "Apres le virage"
+      "Après le virage"
     ],
     "correct": 1,
-    "explication": "On retrograde parce qu'on a deja ralenti, pour avoir de la reprise en sortie."
+    "explication": "On rétrograde parce qu'on a déjà ralenti, pour avoir de la reprise en sortie."
   },
   {
     "code": "C1f",
-    "q": "Tu t'arretes a un stop. En quelle vitesse ?",
-    "options": ["En 1ere", "En 2e", "Au point mort"],
+    "q": "Tu t'arrêtes à un stop. En quelle vitesse ?",
+    "options": ["En 1ère", "En 2e", "Au point mort"],
     "correct": 1,
-    "explication": "On s'arrete en 2e, puis on repasse la 1ere pour repartir. Plus fluide."
+    "explication": "On s'arrête en 2e, puis on repasse la 1ère pour repartir. Plus fluide."
   },
   {
     "code": "C1g",
-    "q": "Sur un pneu, tu verifies quoi a l'oeil avant de partir ?",
+    "q": "Sur un pneu, tu vérifies quoi à l'œil avant de partir ?",
     "options": [
-      "Degonfle, coupure, gomme usee",
+      "Dégonflé, coupure, gomme usée",
       "La couleur de la jante",
       "La marque du pneu"
     ],
     "correct": 0,
-    "explication": "Un pneu lisse ou abime freine mal et peut eclater. Regarde le temoin d'usure."
+    "explication": "Un pneu lisse ou abîmé freine mal et peut éclater. Regarde le témoin d'usure."
   },
   {
     "code": "C1g",
     "q": "L'inspecteur : montrez la commande des feux de croisement. Tu fais quoi ?",
     "options": [
-      "Tu recites par coeur",
-      "Tu la designes et l'actionnes",
+      "Tu récites par cœur",
+      "Tu la désignes et l'actionnes",
       "Tu expliques sans toucher"
     ],
     "correct": 1,
-    "explication": "On montre, on ne recite pas : tu designes le commodo de gauche et tu l'actionnes."
+    "explication": "On montre, on ne récite pas : tu désignes le commodo de gauche et tu l'actionnes."
   },
   {
     "code": "C1g",
-    "q": "Pourquoi verifier ses feux avant de rouler ?",
+    "q": "Pourquoi vérifier ses feux avant de rouler ?",
     "options": [
-      "Pour la deco",
+      "Pour la déco",
       "Un feu mort = tu n'es pas vu",
-      "Ca consomme moins"
+      "Ça consomme moins"
     ],
     "correct": 1,
     "explication": "Clignotant ou stop en panne : les autres ne lisent plus tes intentions. Danger direct."
   },
   {
     "code": "C1g",
-    "q": "A l'examen, le tour de voiture, c'est quoi exactement ?",
+    "q": "À l'examen, le tour de voiture, c'est quoi exactement ?",
     "options": [
-      "Reciter une longue liste",
+      "Réciter une longue liste",
       "Juste regarder les pneus",
-      "Une verif + securite + premiers secours"
+      "Une vérif + sécurité + premiers secours"
     ],
     "correct": 2,
-    "explication": "Tu montres l'element (le bouchon d'huile est ici) et tu fais le geste, calmement."
+    "explication": "Tu montres l'élément (le bouchon d'huile est ici) et tu fais le geste, calmement."
   },
   {
     "code": "C1h",
-    "q": "La regle d'or de toute manoeuvre lente comme le creneau ?",
+    "q": "La règle d'or de toute manœuvre lente comme le créneau ?",
     "options": [
-      "Aller tres lentement",
+      "Aller très lentement",
       "Aller vite pour finir",
       "Braquer le plus tard possible"
     ],
     "correct": 0,
-    "explication": "Tu n'es pas chronometre : la lenteur te donne le temps de braquer et corriger."
+    "explication": "Tu n'es pas chronométré : la lenteur te donne le temps de braquer et corriger."
   },
   {
     "code": "C1h",
-    "q": "Tu peux t'appuyer sur le trottoir en manoeuvre. Et monter dessus ?",
+    "q": "Tu peux t'appuyer sur le trottoir en manœuvre. Et monter dessus ?",
     "options": [
       "Oui, si c'est doux",
       "Non, taper ou monter = ajournement",
-      "Seulement avec la roue arriere"
+      "Seulement avec la roue arrière"
     ],
     "correct": 1,
-    "explication": "T'appuyer doucement, oui. Monter ou taper le trottoir, c'est elimine direct."
+    "explication": "T'appuyer doucement, oui. Monter ou taper le trottoir, c'est éliminé direct."
   },
   {
     "code": "C1h",
-    "q": "Bataille arriere : quel repere vises-tu en te retournant ?",
+    "q": "Bataille arrière : quel repère vises-tu en te retournant ?",
     "options": [
       "Le 2e feu de la voiture voisine",
-      "Le premier feu, vers le debut de la lunette",
+      "Le premier feu, vers le début de la lunette",
       "Le pare-chocs avant"
     ],
     "correct": 1,
-    "explication": "Si tu vises le 2e feu, tu t'ecartes trop. Premier feu = bonne trajectoire."
+    "explication": "Si tu vises le 2e feu, tu t'écartes trop. Premier feu = bonne trajectoire."
   },
   {
     "code": "C1h",
-    "q": "En manoeuvre, es-tu prioritaire sur les autres usagers ?",
+    "q": "En manœuvre, es-tu prioritaire sur les autres usagers ?",
     "options": [
-      "Oui, tu manoeuvres",
+      "Oui, tu manœuvres",
       "Non, jamais : tu laisses passer",
       "Seulement la nuit"
     ],
     "correct": 1,
-    "explication": "Tu securises avant, controles a 360, et tu laisses passer tout le monde."
+    "explication": "Tu sécurises avant, contrôles à 360, et tu laisses passer tout le monde."
   },
   {
     "code": "C1i",
-    "q": "Tu rates le debut d'un creneau. Bon reflexe ?",
+    "q": "Tu rates le début d'un créneau. Bon réflexe ?",
     "options": [
-      "Forcer pour rentrer quand meme",
-      "Te remettre droit, reperer l'espace, corriger",
+      "Forcer pour rentrer quand même",
+      "Te remettre droit, repérer l'espace, corriger",
       "Tout recommencer en panique"
     ],
     "correct": 1,
-    "explication": "Volant droit, roues droites, tu ramenes la voiture du cote ou tu as de la place."
+    "explication": "Volant droit, roues droites, tu ramènes la voiture du côté où tu as de la place."
   },
   {
     "code": "C1i",
-    "q": "Comment savoir qu'une manoeuvre est vraiment acquise ?",
+    "q": "Comment savoir qu'une manœuvre est vraiment acquise ?",
     "options": [
       "Quand le moniteur te guide bien",
       "Quand tu vas vite",
       "Quand tu la fais seul, sans guidage"
     ],
     "correct": 2,
-    "explication": "Si tu attends le top du moniteur a chaque geste, ce n'est pas encore acquis."
+    "explication": "Si tu attends le top du moniteur à chaque geste, ce n'est pas encore acquis."
   },
   {
     "code": "C1i",
-    "q": "Avant de te lancer en manoeuvre autonome, premier geste de securite ?",
+    "q": "Avant de te lancer en manœuvre autonome, premier geste de sécurité ?",
     "options": [
-      "Accelerer",
-      "Clignotant + controles (retros, angle mort)",
+      "Accélérer",
+      "Clignotant + contrôles (rétros, angle mort)",
       "Klaxonner"
     ],
     "correct": 1,
-    "explication": "On securise avant de bouger, et on n'est jamais prioritaire en manoeuvre."
+    "explication": "On sécurise avant de bouger, et on n'est jamais prioritaire en manœuvre."
   },
   {
     "code": "C1i",
-    "q": "Creneau a gauche : quand est-ce permis ?",
+    "q": "Créneau à gauche : quand est-ce permis ?",
     "options": [
       "Toujours, peu importe la rue",
       "Uniquement en sens unique",
       "Jamais"
     ],
     "correct": 1,
-    "explication": "A gauche hors sens unique, tu te mets a contre-sens. Choisis bien le cote."
+    "explication": "À gauche hors sens unique, tu te mets à contre-sens. Choisis bien le côté."
   }
 ]
