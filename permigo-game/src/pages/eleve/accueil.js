@@ -1300,6 +1300,14 @@ function render({
       </div>
     </div>
     <div class="pplus-cards">
+      <a class="pplus-card tappable" id="acc-revision" href="#/revision-conduite" aria-label="Réviser la conduite">
+        <img class="pplus-badge" src="/skins/badge-3d-02.webp" alt="" aria-hidden="true" loading="lazy">
+        <div class="pplus-tx">
+          <div class="pplus-t">Révision conduite</div>
+          <div class="pplus-s">Le geste, pas le code — entre tes leçons</div>
+        </div>
+        <span class="pplus-arrow">${icon("chevron-right", { size: 18 })}</span>
+      </a>
       ${
         examUnlocked
           ? `

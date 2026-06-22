@@ -14,6 +14,7 @@ import { icon } from "@/utils/icons.js";
 import { STATUT_CFG } from "@/utils/statut-label.js";
 import { theoryLeague, computeTheoryScore } from "@/utils/theory-league.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
+import { mountCiblerRevision } from "@/components/enseignant/cibler-revision.js";
 
 // ─── Couleurs par monde ───────────────────────────────────────────
 const MONDE_COLORS = {
@@ -639,6 +640,9 @@ function render() {
 
   wireMain();
   _loadFeedSection();
+  // Couche 2 : bloc « cibler une révision conduite » — ré-injecté à chaque
+  // render (idempotent) pour qu'il survive aux re-renders post-validation.
+  mountCiblerRevision(_root, _eleveId);
 }
 
 async function _loadFeedSection() {
