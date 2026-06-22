@@ -138,6 +138,13 @@ const STYLE = `<style>
 .rvc-focus-t { font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; flex:1; }
 .rvc-focus-n { font-size:12px; color:var(--muted,#64748b); }
 .rvc-focus-go { font:700 13px 'Plus Jakarta Sans',sans-serif; color:#b45309; white-space:nowrap; }
+.rvc-mlabel { font:800 12px 'Plus Jakarta Sans',sans-serif; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#94a3b8); margin:6px 0 10px; }
+.rvc-mcard { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:0; cursor:pointer; background:var(--surface,#fff); color:var(--ink); border-radius:14px; padding:15px 14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); transition: transform .15s cubic-bezier(.23,1,.32,1); }
+.rvc-mcard:active { transform: scale(0.985); }
+.rvc-mnum { width:30px; height:30px; border-radius:9px; flex-shrink:0; background:var(--a,#6366f1); color:#fff; font:800 15px 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; justify-content:center; }
+.rvc-mcard-t { font:700 15px 'Plus Jakarta Sans',sans-serif; flex:1; }
+.rvc-mcard-done { font:700 12px 'IBM Plex Mono',monospace; color:#10b981; }
+.rvc-mcard-go { font-size:22px; color:var(--muted,#cbd5e1); }
 .rvc-exam { display:flex; flex-direction:column; gap:2px; width:100%; text-align:left; border:0; cursor:pointer; border-radius:16px; padding:16px; margin:0 0 18px; color:#fff; background: linear-gradient(135deg,#0f172a,#334155); box-shadow:0 8px 20px rgba(15,23,42,.28); }
 .rvc-exam:active { transform: scale(0.985); }
 .rvc-exam-t { font:800 16px 'Plus Jakarta Sans',sans-serif; }
@@ -180,6 +187,7 @@ export async function mount(root, param) {
   let focusId = null;
   let orderPlaced = [];
   let orderPool = [];
+  let mondeN = null;
 
   // Ciblages du moniteur (couche 2). Requête gardée : si la table n'est pas
   // encore migrée / élève hors-ligne, on ignore silencieusement (pas de bannière).
@@ -210,27 +218,61 @@ export async function mount(root, param) {
     if (view === "fiche") return renderFiche();
     if (view === "quiz") return renderQuiz();
     if (view === "order") return renderOrder();
+    if (view === "monde") return renderMonde();
     return renderHome();
+  }
+
+  function renderMonde() {
+    const m = MONDES.find((x) => x.n === mondeN);
+    if (!m) {
+      view = "home";
+      return render();
+    }
+    const revised = loadRevised();
+    const items = fichesByMonde(m.n)
+      .map((f) => {
+        const on = revisedToday(f.code, revised);
+        return `<button class="rvc-card" data-code="${esc(f.code)}">
+            <span class="rvc-card-tit">${esc(f.titre)}</span>
+            <span class="rvc-chk ${on ? "on" : "off"}">${on ? "✓" : ""}</span>
+          </button>`;
+      })
+      .join("");
+    root.innerHTML = `${STYLE}<div class="rvc">
+      <div class="rvc-top">
+        <button class="rvc-back" aria-label="Retour">←</button>
+        <h1 class="rvc-h1">${esc(m.nom)}</h1>
+      </div>
+      <div class="rvc-list">${items}</div>
+    </div>`;
+    root.querySelector(".rvc-back").addEventListener("click", () => {
+      view = "home";
+      render();
+    });
+    root.querySelectorAll(".rvc-card").forEach((b) =>
+      b.addEventListener("click", () => {
+        code = b.getAttribute("data-code");
+        focusId = null;
+        view = "fiche";
+        render();
+      }),
+    );
   }
 
   function renderHome() {
     const revised = loadRevised();
     const pf = pointFaible(revised);
-    const mondes = MONDES.map((m) => {
-      const items = fichesByMonde(m.n)
-        .map((f) => {
-          const on = revisedToday(f.code, revised);
-          return `<button class="rvc-card" data-code="${esc(f.code)}">
-            <span class="rvc-card-tit">${esc(f.titre)}</span>
-            <span class="rvc-chk ${on ? "on" : "off"}">${on ? "✓" : ""}</span>
-          </button>`;
-        })
-        .join("");
-      return `<section class="rvc-monde">
-        <h2 class="rvc-monde-h">${esc(m.nom)}</h2>
-        <p class="rvc-monde-s">${esc(m.sous)}</p>
-        <div class="rvc-list">${items}</div>
-      </section>`;
+    const mondeCards = MONDES.map((m) => {
+      const total = fichesByMonde(m.n).length;
+      const done = fichesByMonde(m.n).filter((f) =>
+        revisedToday(f.code, revised),
+      ).length;
+      return `<button class="rvc-mcard" data-monde="${m.n}">
+        <span class="rvc-mnum">${m.n}</span>
+        <span class="rvc-mcard-t">${esc(m.nom)}</span>
+        ${done ? `<span class="rvc-mcard-done">${done}/${total}</span>` : ""}
+        <span class="rvc-mcard-go">›</span>
+      </button>`;
     }).join("");
 
     const focusHtml = focuses.length
@@ -246,8 +288,7 @@ export async function mount(root, param) {
     root.innerHTML = `${STYLE}<div class="rvc">
       <div class="rvc-top">
         <button class="rvc-back" aria-label="Retour à l'accueil">←</button>
-        <div><h1 class="rvc-h1">Révision conduite</h1>
-        <p class="rvc-sub">Le geste, pas le code. Révise entre tes leçons.</p></div>
+        <h1 class="rvc-h1">Révision conduite</h1>
       </div>
       ${
         pf
@@ -260,8 +301,9 @@ export async function mount(root, param) {
           : ""
       }
       ${focusHtml}
-      <button class="rvc-exam" data-exam><span class="rvc-exam-t">🏁 Examen blanc de conduite</span><span class="rvc-exam-s">Teste-toi sur tout · auto-évaluation</span></button>
-      ${mondes}
+      <button class="rvc-exam" data-exam><span class="rvc-exam-t">🏁 Examen blanc</span><span class="rvc-exam-s">Teste-toi sur tout</span></button>
+      <div class="rvc-mlabel">Par compétence</div>
+      ${mondeCards}
     </div>`;
     wireHome();
   }
@@ -280,6 +322,13 @@ export async function mount(root, param) {
       track("revision_conduite_exam_open");
       navigate("#/exam-conduite");
     });
+    root.querySelectorAll("[data-monde]").forEach((b) =>
+      b.addEventListener("click", () => {
+        mondeN = Number(b.getAttribute("data-monde"));
+        view = "monde";
+        render();
+      }),
+    );
     root.querySelectorAll("[data-focus]").forEach((b) =>
       b.addEventListener("click", () => {
         focusId = b.getAttribute("data-focus");
