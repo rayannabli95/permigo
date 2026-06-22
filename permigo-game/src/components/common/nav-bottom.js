@@ -92,8 +92,8 @@ const STYLE = `
     min-height: 44px;
     transition: color .15s var(--ease);
   }
-  /* Actif = icône PLEINE à la couleur du thème. Pas d'autre indicateur :
-     un seul signal suffit. */
+  /* Actif = icône PLEINE à la couleur du thème + label + halo « limelight »
+     (défini plus bas) qui se pose sur l'onglet et glisse de l'un à l'autre. */
   .bn-tab.active {
     color: var(--a);
   }
@@ -105,6 +105,43 @@ const STYLE = `
   .bn-tab.active .bn-ico-fill svg { animation: bnFillPop .25s var(--ease-spring); }
   @keyframes bnFillPop { from { transform: scale(.82); } to { transform: scale(1); } }
   @media (prefers-reduced-motion: reduce) { .bn-tab.active .bn-ico-fill svg { animation: none; } }
+
+  /* ── Limelight : halo « projecteur » posé sur l'onglet actif, qui GLISSE
+     quand on change de page (le repère « tu es ici »). Décoratif (aria-hidden) :
+     l'état actif reste porté par aria-current + icône pleine + label, donc on
+     ne dépend jamais de la couleur seule. Position pilotée en translateX
+     (transform only → pas de reflow), glissé spring léger. */
+  .bn-limelight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 38px;
+    height: 4px;
+    border-radius: 0 0 99px 99px;
+    background: var(--a);
+    box-shadow: 0 0 12px 1px color-mix(in srgb, var(--a) 60%, transparent);
+    transform: translateX(-999px);
+    pointer-events: none;
+    transition: transform .38s var(--ease-spring);
+  }
+  /* Le faisceau conique qui descend sous la barre (projecteur de scène) */
+  .bn-limelight::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 4px;
+    width: 58px;
+    height: 56px;
+    transform: translateX(-50%);
+    background: linear-gradient(to bottom,
+      color-mix(in srgb, var(--a) 26%, transparent),
+      transparent 80%);
+    clip-path: polygon(24% 0, 76% 0, 96% 100%, 4% 100%);
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bn-limelight { transition: none; }
+  }
   /* Label : visible sous l'onglet actif uniquement. Positionné en absolu
      pour que le picto reste centré — aucun reflow au changement d'onglet. */
   .bn-label {
@@ -207,13 +244,26 @@ export function mountBottomNav(role) {
     document.head.appendChild(s);
   }
 
-  document.querySelector("#bottom-nav")?.remove();
+  // Idempotent : main.js appelle mountBottomNav() à CHAQUE navigation.
+  // Reconstruire à chaque fois (a) détruirait le limelight → plus de glissé
+  // entre onglets, (b) relancerait des RPC inutiles (pastille trophées). Si la
+  // nav du même rôle est déjà là, on rafraîchit juste l'onglet actif (le
+  // limelight glisse via _updateActive) et on s'arrête.
+  const existing = document.querySelector("#bottom-nav");
+  if (existing && existing.dataset.role === role) {
+    _updateActive();
+    return;
+  }
+  existing?.remove();
+  document.getElementById("bn-seance-fab")?.remove();
+  document.body.classList.remove("has-enseignant-fab");
 
   const tabs = TABS[role] || TABS.eleve;
   const nav = document.createElement("nav");
   nav.id = "bottom-nav";
+  nav.dataset.role = role;
   nav.setAttribute("aria-label", "Navigation principale");
-  nav.innerHTML = tabs
+  const tabsHtml = tabs
     .map(
       (t) => `
       <button class="bn-tab" data-id="${t.id}"${t.match ? ` data-match="${t.match.join(",")}"` : ""} aria-label="${t.label}">
@@ -224,6 +274,9 @@ export function mountBottomNav(role) {
     `,
     )
     .join("");
+  // Limelight en 1er dans le DOM → les onglets (plus tard) passent au-dessus.
+  nav.innerHTML =
+    `<span class="bn-limelight" aria-hidden="true"></span>` + tabsHtml;
 
   document.body.appendChild(nav);
   _updateActive();
@@ -277,6 +330,7 @@ export function mountBottomNav(role) {
   }
 
   window.addEventListener("hashchange", _updateActive);
+  window.addEventListener("resize", _onResize);
 }
 
 export function unmountBottomNav() {
@@ -284,6 +338,7 @@ export function unmountBottomNav() {
   document.getElementById("bn-seance-fab")?.remove();
   document.body.classList.remove("has-enseignant-fab");
   window.removeEventListener("hashchange", _updateActive);
+  window.removeEventListener("resize", _onResize);
 }
 
 // Vérifie s'il existe des trophées débloqués jamais vus → pastille rouge.
@@ -319,5 +374,40 @@ function _updateActive() {
     const active = btn.dataset.id === section || matches.includes(section);
     btn.classList.toggle("active", active);
     btn.setAttribute("aria-current", active ? "page" : "false");
+  });
+  // Glisse le limelight sur l'onglet actif : snap au 1er rendu, glissé ensuite.
+  const firstPaint = !nav.dataset.limeReady;
+  nav.dataset.limeReady = "1";
+  _moveLimelight(nav, !firstPaint);
+}
+
+// Positionne le halo « limelight » sous l'onglet actif.
+// animate=false → pose sans transition (montage / resize) ;
+// animate=true  → glissé spring d'un onglet à l'autre.
+function _moveLimelight(nav, animate) {
+  const lime = nav.querySelector(".bn-limelight");
+  const active = nav.querySelector(".bn-tab.active");
+  if (!lime || !active) return;
+  const x = Math.round(
+    active.offsetLeft + active.offsetWidth / 2 - lime.offsetWidth / 2,
+  );
+  if (animate) {
+    lime.style.transform = `translateX(${x}px)`;
+  } else {
+    lime.style.transition = "none";
+    lime.style.transform = `translateX(${x}px)`;
+    void lime.offsetWidth; // reflow → fige la position avant de rendre le glissé
+    lime.style.transition = "";
+  }
+}
+
+// Recalage du limelight au resize / rotation (sans glissé). rAF anti-thrash.
+let _resizeRaf = 0;
+function _onResize() {
+  if (_resizeRaf) return;
+  _resizeRaf = requestAnimationFrame(() => {
+    _resizeRaf = 0;
+    const nav = document.querySelector("#bottom-nav");
+    if (nav) _moveLimelight(nav, false);
   });
 }
