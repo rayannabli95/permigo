@@ -1,0 +1,382 @@
+[
+  {
+    "code": "C1a",
+    "q": "Tu veux mettre le clignotant. Quel commodo ?",
+    "options": ["Celui de droite", "Celui de gauche", "Le bouton au centre"],
+    "correct": 1,
+    "explication": "Mémo de pro : clignotant a gauche, balais a droite. Tu ne te trompes plus."
+  },
+  {
+    "code": "C1a",
+    "q": "Tu veux essuyer le pare-brise. Tu actionnes quoi ?",
+    "options": [
+      "Le commodo de droite",
+      "Le commodo de gauche",
+      "L'appel de phares"
+    ],
+    "correct": 0,
+    "explication": "Droite = essuie-glaces et lave-glace. La gauche, c'est pour tes clignotants."
+  },
+  {
+    "code": "C1a",
+    "q": "Contact mis, un temoin reste allume apres le test. Tu fais quoi ?",
+    "options": [
+      "Tu attends et tu le signales",
+      "Tu pars, ca passera",
+      "Tu coupes les phares"
+    ],
+    "correct": 0,
+    "explication": "Un temoin qui reste allume (huile, frein, batterie) signale un vrai defaut."
+  },
+  {
+    "code": "C1a",
+    "q": "Avant de monter, ton tout premier reflexe ?",
+    "options": [
+      "Demarrer le moteur",
+      "Regler la radio",
+      "Un tour rapide de la voiture"
+    ],
+    "correct": 2,
+    "explication": "Rien sous les roues, pneus, feux et plaques propres : dix secondes qui sauvent."
+  },
+  {
+    "code": "C1b",
+    "q": "Pourquoi garder la jambe gauche un peu pliee en reglant le siege ?",
+    "options": [
+      "Pour le confort du genou",
+      "Pour debrayer a fond",
+      "Pour mieux voir la route"
+    ],
+    "correct": 1,
+    "explication": "Jambe tendue = embrayage pas enfonce a fond, et tu cales sans comprendre."
+  },
+  {
+    "code": "C1b",
+    "q": "Tu regles le retroviseur interieur. Tu te penches ?",
+    "options": [
+      "Oui, pour mieux voir",
+      "Tu inclines la tete",
+      "Non, dos et epaules colles au siege"
+    ],
+    "correct": 2,
+    "explication": "Il doit montrer toute la lunette arriere sans que tu bouges de ta place."
+  },
+  {
+    "code": "C1b",
+    "q": "La ceinture doit passer ou sur le buste ?",
+    "options": [
+      "Sur l'epaule, jamais sur le cou",
+      "Au plus pres du cou",
+      "Sous le bras"
+    ],
+    "correct": 0,
+    "explication": "Sur l'epaule et sur le bassin, a plat, jamais vrillee. Sinon elle protege mal."
+  },
+  {
+    "code": "C1b",
+    "q": "Comment verifier vite si ta hauteur de siege est bonne ?",
+    "options": [
+      "Tu baisses le pare-soleil",
+      "Tu touches le plafond",
+      "Tu regardes le capot"
+    ],
+    "correct": 0,
+    "explication": "Si tu vois la route sous le pare-soleil baisse, ta hauteur de regard est bonne."
+  },
+  {
+    "code": "C1c",
+    "q": "Ou places-tu tes mains sur le volant ?",
+    "options": [
+      "En haut, a midi",
+      "A 9h15, comme un quart a trois",
+      "Une seule main suffit"
+    ],
+    "correct": 1,
+    "explication": "Pouces poses sur la jante : tu gardes precision et force pour reagir vite."
+  },
+  {
+    "code": "C1c",
+    "q": "Tu viens de braquer a fond a droite. Tu remets droit comment ?",
+    "options": [
+      "Au feeling",
+      "L'inverse exact : un tour et demi a gauche",
+      "Tu laches le volant"
+    ],
+    "correct": 1,
+    "explication": "Un volant fait environ un tour et demi de chaque cote. Tu refais l'inverse."
+  },
+  {
+    "code": "C1c",
+    "q": "En marche arriere, tu ne sais plus de quel cote tourner. Le repere ?",
+    "options": [
+      "Tu tournes vers ou tu veux que la voiture aille",
+      "Tu tournes a l'oppose",
+      "Tu regardes devant"
+    ],
+    "correct": 0,
+    "explication": "Meme logique en avant et en arriere : ca evite de te melanger droite-gauche."
+  },
+  {
+    "code": "C1c",
+    "q": "La voiture part doucement de travers en manoeuvre. Tu fais quoi ?",
+    "options": [
+      "Plein de coups de volant",
+      "Tu accelere pour rattraper",
+      "Tu ralentis, observes, corriges doux"
+    ],
+    "correct": 2,
+    "explication": "Les coups de volant a repetition te perdent. Ralentir d'abord, corriger ensuite."
+  },
+  {
+    "code": "C1d",
+    "q": "Tu demarres. Quel est le tempo de l'embrayage ?",
+    "options": [
+      "Tout lacher d'un coup",
+      "Debraye, trouve le patinage, glisse doux",
+      "Accelerer a fond d'abord"
+    ],
+    "correct": 1,
+    "explication": "Ce qui fait caler, c'est de lacher l'embrayage d'un coup au patinage."
+  },
+  {
+    "code": "C1d",
+    "q": "Pourquoi un filet d'accelerateur au demarrage ?",
+    "options": [
+      "Pour faire du bruit",
+      "Pour donner de la force au moteur",
+      "Ce n'est pas utile"
+    ],
+    "correct": 1,
+    "explication": "La voiture pese une tonne : sans un peu de gaz au demarrage, tu cales."
+  },
+  {
+    "code": "C1d",
+    "q": "Tu freines pour t'arreter completement. Quand debrayes-tu ?",
+    "options": ["Juste avant l'arret", "Tout de suite", "Apres l'arret"],
+    "correct": 0,
+    "explication": "Trop tot = roue libre, trop tard = tu cales pile avant de t'arreter."
+  },
+  {
+    "code": "C1d",
+    "q": "Talon decolle, semelle qui glisse sur la pedale : quel risque ?",
+    "options": [
+      "Aucun, c'est pareil",
+      "Tu perds le point de patinage",
+      "Tu freines plus fort"
+    ],
+    "correct": 1,
+    "explication": "Talon ancre au sol qui glisse : tu retrouves le patinage toujours au meme endroit."
+  },
+  {
+    "code": "C1e",
+    "q": "Un feu passe au rouge 100 m devant. Premier geste ?",
+    "options": [
+      "Freiner d'un coup au dernier moment",
+      "Lacher l'accelerateur, puis freiner doux",
+      "Garder le gaz"
+    ],
+    "correct": 1,
+    "explication": "Le frein moteur fait deja une partie du travail. Tu anticipes, tu ne piles pas."
+  },
+  {
+    "code": "C1e",
+    "q": "C'est quoi le freinage degressif en deux temps ?",
+    "options": [
+      "Freiner fort jusqu'au bout",
+      "Pomper la pedale",
+      "Fort pour ralentir, leger pour retenir"
+    ],
+    "correct": 2,
+    "explication": "On relache juste avant l'arret : pas de a-coup, passagers pas secoues."
+  },
+  {
+    "code": "C1e",
+    "q": "Rouler en accordeon (accelerer fort, freiner fort, en boucle), pourquoi c'est nul ?",
+    "options": [
+      "Ca va plus vite",
+      "On regarde trop pres, on fatigue tout le monde",
+      "C'est plus sur"
+    ],
+    "correct": 1,
+    "explication": "Regarde loin : tu vois les ralentissements arriver et tu lisses ta conduite."
+  },
+  {
+    "code": "C1e",
+    "q": "Comment travailler le dosage de l'accelerateur ?",
+    "options": [
+      "Se stabiliser a differents regimes",
+      "En appuyant a fond",
+      "Seulement en roulant vite"
+    ],
+    "correct": 0,
+    "explication": "Tu vises un regime, et si tu depasses tu soulages un peu sans lacher. Meme a l'arret."
+  },
+  {
+    "code": "C1f",
+    "q": "Tu changes de vitesse. Tu regardes ou ?",
+    "options": ["Le levier", "La route, toujours", "Le compteur"],
+    "correct": 1,
+    "explication": "Tu sens les rapports a la main, paume sur le pommeau, sans quitter la route."
+  },
+  {
+    "code": "C1f",
+    "q": "Comment tiens-tu le levier de vitesses ?",
+    "options": [
+      "Du bout des doigts",
+      "Serre tres fort",
+      "Paume posee sur le pommeau, sans forcer"
+    ],
+    "correct": 2,
+    "explication": "C'est la position de la main qui compte, pas la force. Une erreur de boite est eliminatoire."
+  },
+  {
+    "code": "C1f",
+    "q": "Virage serre devant. Tu retrogrades avant ou pendant ?",
+    "options": [
+      "Pendant le virage",
+      "Avant, une fois ralenti",
+      "Apres le virage"
+    ],
+    "correct": 1,
+    "explication": "On retrograde parce qu'on a deja ralenti, pour avoir de la reprise en sortie."
+  },
+  {
+    "code": "C1f",
+    "q": "Tu t'arretes a un stop. En quelle vitesse ?",
+    "options": ["En 1ere", "En 2e", "Au point mort"],
+    "correct": 1,
+    "explication": "On s'arrete en 2e, puis on repasse la 1ere pour repartir. Plus fluide."
+  },
+  {
+    "code": "C1g",
+    "q": "Sur un pneu, tu verifies quoi a l'oeil avant de partir ?",
+    "options": [
+      "Degonfle, coupure, gomme usee",
+      "La couleur de la jante",
+      "La marque du pneu"
+    ],
+    "correct": 0,
+    "explication": "Un pneu lisse ou abime freine mal et peut eclater. Regarde le temoin d'usure."
+  },
+  {
+    "code": "C1g",
+    "q": "L'inspecteur : montrez la commande des feux de croisement. Tu fais quoi ?",
+    "options": [
+      "Tu recites par coeur",
+      "Tu la designes et l'actionnes",
+      "Tu expliques sans toucher"
+    ],
+    "correct": 1,
+    "explication": "On montre, on ne recite pas : tu designes le commodo de gauche et tu l'actionnes."
+  },
+  {
+    "code": "C1g",
+    "q": "Pourquoi verifier ses feux avant de rouler ?",
+    "options": [
+      "Pour la deco",
+      "Un feu mort = tu n'es pas vu",
+      "Ca consomme moins"
+    ],
+    "correct": 1,
+    "explication": "Clignotant ou stop en panne : les autres ne lisent plus tes intentions. Danger direct."
+  },
+  {
+    "code": "C1g",
+    "q": "A l'examen, le tour de voiture, c'est quoi exactement ?",
+    "options": [
+      "Reciter une longue liste",
+      "Juste regarder les pneus",
+      "Une verif + securite + premiers secours"
+    ],
+    "correct": 2,
+    "explication": "Tu montres l'element (le bouchon d'huile est ici) et tu fais le geste, calmement."
+  },
+  {
+    "code": "C1h",
+    "q": "La regle d'or de toute manoeuvre lente comme le creneau ?",
+    "options": [
+      "Aller tres lentement",
+      "Aller vite pour finir",
+      "Braquer le plus tard possible"
+    ],
+    "correct": 0,
+    "explication": "Tu n'es pas chronometre : la lenteur te donne le temps de braquer et corriger."
+  },
+  {
+    "code": "C1h",
+    "q": "Tu peux t'appuyer sur le trottoir en manoeuvre. Et monter dessus ?",
+    "options": [
+      "Oui, si c'est doux",
+      "Non, taper ou monter = ajournement",
+      "Seulement avec la roue arriere"
+    ],
+    "correct": 1,
+    "explication": "T'appuyer doucement, oui. Monter ou taper le trottoir, c'est elimine direct."
+  },
+  {
+    "code": "C1h",
+    "q": "Bataille arriere : quel repere vises-tu en te retournant ?",
+    "options": [
+      "Le 2e feu de la voiture voisine",
+      "Le premier feu, vers le debut de la lunette",
+      "Le pare-chocs avant"
+    ],
+    "correct": 1,
+    "explication": "Si tu vises le 2e feu, tu t'ecartes trop. Premier feu = bonne trajectoire."
+  },
+  {
+    "code": "C1h",
+    "q": "En manoeuvre, es-tu prioritaire sur les autres usagers ?",
+    "options": [
+      "Oui, tu manoeuvres",
+      "Non, jamais : tu laisses passer",
+      "Seulement la nuit"
+    ],
+    "correct": 1,
+    "explication": "Tu securises avant, controles a 360, et tu laisses passer tout le monde."
+  },
+  {
+    "code": "C1i",
+    "q": "Tu rates le debut d'un creneau. Bon reflexe ?",
+    "options": [
+      "Forcer pour rentrer quand meme",
+      "Te remettre droit, reperer l'espace, corriger",
+      "Tout recommencer en panique"
+    ],
+    "correct": 1,
+    "explication": "Volant droit, roues droites, tu ramenes la voiture du cote ou tu as de la place."
+  },
+  {
+    "code": "C1i",
+    "q": "Comment savoir qu'une manoeuvre est vraiment acquise ?",
+    "options": [
+      "Quand le moniteur te guide bien",
+      "Quand tu vas vite",
+      "Quand tu la fais seul, sans guidage"
+    ],
+    "correct": 2,
+    "explication": "Si tu attends le top du moniteur a chaque geste, ce n'est pas encore acquis."
+  },
+  {
+    "code": "C1i",
+    "q": "Avant de te lancer en manoeuvre autonome, premier geste de securite ?",
+    "options": [
+      "Accelerer",
+      "Clignotant + controles (retros, angle mort)",
+      "Klaxonner"
+    ],
+    "correct": 1,
+    "explication": "On securise avant de bouger, et on n'est jamais prioritaire en manoeuvre."
+  },
+  {
+    "code": "C1i",
+    "q": "Creneau a gauche : quand est-ce permis ?",
+    "options": [
+      "Toujours, peu importe la rue",
+      "Uniquement en sens unique",
+      "Jamais"
+    ],
+    "correct": 1,
+    "explication": "A gauche hors sens unique, tu te mets a contre-sens. Choisis bien le cote."
+  }
+]

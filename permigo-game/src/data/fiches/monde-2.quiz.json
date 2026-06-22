@@ -1,0 +1,354 @@
+[
+  {
+    "code": "C2a",
+    "q": "Tu roules en ville sur une ligne droite. Où poses-tu ton regard ?",
+    "options": [
+      "Loin devant, à mi-hauteur du pare-brise",
+      "Sur le capot de ta voiture",
+      "Sur la voiture juste devant toi"
+    ],
+    "correct": 0,
+    "explication": "Le regard loin te donne le temps d'anticiper au lieu de subir."
+  },
+  {
+    "code": "C2a",
+    "q": "À quelle fréquence reviens-tu au rétro intérieur ?",
+    "options": [
+      "Une fois en arrivant, c'est suffisant",
+      "Seulement avant de freiner",
+      "Toutes les 5 à 7 secondes environ"
+    ],
+    "correct": 2,
+    "explication": "Savoir qui te suit te prépare à freiner ou changer de voie sans surprise."
+  },
+  {
+    "code": "C2a",
+    "q": "Une balle traverse la route à 50 m devant toi. Ton réflexe ?",
+    "options": [
+      "Klaxonner pour prévenir",
+      "Lever le pied et balayer les trottoirs des yeux",
+      "Continuer, elle est déjà passée"
+    ],
+    "correct": 1,
+    "explication": "Derrière une balle, il y a souvent un enfant qui court après."
+  },
+  {
+    "code": "C2a",
+    "q": "Pour bien photographier la scène, tu bouges quoi ?",
+    "options": [
+      "Seulement les yeux",
+      "La tête, pas seulement les yeux",
+      "Rien, tu fixes droit devant"
+    ],
+    "correct": 1,
+    "explication": "Tourner la tête te fait voir les entrées de garage et les rues qui débouchent."
+  },
+  {
+    "code": "C2b",
+    "q": "Tu approches d'une école, enfants sur le trottoir, et tu es sous la limite. Tu fais quoi ?",
+    "options": [
+      "Tu lèves quand même le pied",
+      "Tu gardes ta vitesse, tu es dans la limite",
+      "Tu accélères pour passer vite"
+    ],
+    "correct": 0,
+    "explication": "La limite est un maximum, pas une obligation : la bonne vitesse dépend du risque réel."
+  },
+  {
+    "code": "C2b",
+    "q": "Comment vérifies-tu ta distance avec la voiture de devant ?",
+    "options": [
+      "À l'œil, une longueur de voiture",
+      "Tant que tu vois ses feux, c'est bon",
+      "La règle des 2 secondes sur un repère fixe"
+    ],
+    "correct": 2,
+    "explication": "Deux secondes, c'est ta marge pour freiner si elle s'arrête net."
+  },
+  {
+    "code": "C2b",
+    "q": "Il pleut. Quelle distance laisses-tu avec celui de devant ?",
+    "options": [
+      "La même qu'au sec",
+      "Tu doubles : au moins 4 secondes",
+      "Tu réduis pour mieux le voir"
+    ],
+    "correct": 1,
+    "explication": "Sur sol mouillé, ta distance de freinage explose : double la marge."
+  },
+  {
+    "code": "C2b",
+    "q": "Tu descends une pente assez raide. Tu gères ta vitesse comment ?",
+    "options": [
+      "Tu lâches l'accélérateur et laisses le relief te ralentir",
+      "Tu continues d'accélérer pour rester souple",
+      "Tu freines fort en continu"
+    ],
+    "correct": 0,
+    "explication": "Accélérer en descente, c'est prendre de la vitesse pour rien et freiner plus fort après."
+  },
+  {
+    "code": "C2c",
+    "q": "Tu longes des voitures garées à droite. Quelle distance ?",
+    "options": [
+      "Au moins une largeur de portière",
+      "Le plus près possible pour rester à droite",
+      "Tu colles, ça force à ralentir"
+    ],
+    "correct": 0,
+    "explication": "Une porte peut s'ouvrir ou un piéton surgir entre deux voitures."
+  },
+  {
+    "code": "C2c",
+    "q": "La rue te semble trop étroite pour ta voiture. Tu fais quoi ?",
+    "options": [
+      "Tu serres à droite à fond",
+      "Tu t'arrêtes, ça ne passe pas",
+      "Tu te fies à tes repères : la voie est plus large qu'il n'y paraît"
+    ],
+    "correct": 2,
+    "explication": "Une voie fait au moins 3 m, ta voiture 1,80 m : c'est un effet d'optique."
+  },
+  {
+    "code": "C2c",
+    "q": "Où te places-tu sur ta voie en conduite normale ?",
+    "options": [
+      "Collé à la bordure de droite",
+      "Au milieu de ta voie",
+      "À cheval sur la ligne du centre"
+    ],
+    "correct": 1,
+    "explication": "Bien centré, ta voiture est lisible et tu gardes de la marge des deux côtés."
+  },
+  {
+    "code": "C2c",
+    "q": "Tu croises un cycliste sur une route étroite. Tu te places comment ?",
+    "options": [
+      "Tu serres à droite pour l'éviter",
+      "Tu passes au plus près, il a sa bande",
+      "Tu te décales un peu à gauche, après avoir vérifié que c'est libre"
+    ],
+    "correct": 2,
+    "explication": "On serre vers la gauche quand c'est sûr, jamais on ne frôle le vélo."
+  },
+  {
+    "code": "C2d",
+    "q": "Tu abordes un virage serré. Tu freines quand ?",
+    "options": [
+      "Avant, sur la portion encore droite",
+      "En plein milieu du virage",
+      "À la sortie du virage"
+    ],
+    "correct": 0,
+    "explication": "La voiture freine bien en ligne droite ; freiner dans la courbe la déséquilibre."
+  },
+  {
+    "code": "C2d",
+    "q": "Dans le virage, où regardes-tu ?",
+    "options": [
+      "Le bord de la route, pour ne pas mordre",
+      "Loin, vers la sortie du virage",
+      "Le capot, pour suivre la ligne"
+    ],
+    "correct": 1,
+    "explication": "Le regard tire la trajectoire : si tu regardes le bord, tu vas vers le bord."
+  },
+  {
+    "code": "C2d",
+    "q": "Comment tiens-tu le volant dans un virage à gauche ?",
+    "options": [
+      "Tu forces des deux mains à fond",
+      "Tu lâches et tu laisses revenir seul",
+      "Tu tires d'une main, la gauche"
+    ],
+    "correct": 2,
+    "explication": "Tirer d'une main garde le geste souple ; forcer à deux mains crispe et déporte."
+  },
+  {
+    "code": "C2d",
+    "q": "À quel moment ré-accélères-tu dans un virage ?",
+    "options": [
+      "Dès l'entrée, pour rester dynamique",
+      "Au point le plus serré",
+      "À la sortie, quand la route se rouvre, en douceur"
+    ],
+    "correct": 2,
+    "explication": "Accélérer trop tôt rouvre la trajectoire et te déporte vers l'extérieur."
+  },
+  {
+    "code": "C2e",
+    "q": "Tu hésites à dépasser : la visibilité n'est pas parfaite. Tu fais quoi ?",
+    "options": [
+      "Tu y vas, ça va passer",
+      "Tu ne dépasses pas : tu lèves le pied et tu renonces",
+      "Tu te déportes pour mieux voir"
+    ],
+    "correct": 1,
+    "explication": "Le doute suffit à annuler le dépassement : on ne double que quand on voit loin et libre."
+  },
+  {
+    "code": "C2e",
+    "q": "Avant de déboîter pour dépasser, quel est le bon enchaînement de contrôles ?",
+    "options": [
+      "Clignotant puis on déboîte",
+      "Un coup d'œil dans le rétro et c'est parti",
+      "Rétro intérieur, rétro gauche, clignotant, angle mort, action"
+    ],
+    "correct": 2,
+    "explication": "Cette séquence garantit que personne n'est déjà en train de te doubler."
+  },
+  {
+    "code": "C2e",
+    "q": "Tu dépasses un cycliste hors agglomération. Quel écart latéral ?",
+    "options": [
+      "Au moins 1,50 m",
+      "50 cm suffisent",
+      "Tu colles pour passer vite"
+    ],
+    "correct": 0,
+    "explication": "1,50 m hors ville, 1 m en ville : un cycliste peut zigzaguer à tout moment."
+  },
+  {
+    "code": "C2e",
+    "q": "Tu viens de doubler une voiture. Quand te rabats-tu devant elle ?",
+    "options": [
+      "Dès que ton avant la dépasse",
+      "Quand tu la vois entière dans ton rétro intérieur, clignotant droit",
+      "Quand celui de derrière te le réclame"
+    ],
+    "correct": 1,
+    "explication": "Te rabattre trop tôt l'oblige à freiner : tu lui coupes la route."
+  },
+  {
+    "code": "C2f",
+    "q": "Carrefour sans aucun panneau ni feu. Qui passe en premier ?",
+    "options": [
+      "Celui qui arrive le plus vite",
+      "Toi, tu continues tout droit",
+      "Ce qui débouche de ta droite"
+    ],
+    "correct": 2,
+    "explication": "Sans signalisation, c'est la priorité à droite : tu cèdes à ce qui vient de ta droite."
+  },
+  {
+    "code": "C2f",
+    "q": "Comment distingues-tu un giratoire d'un rond-point ?",
+    "options": [
+      "À sa taille",
+      "À l'entrée : Cédez le passage = giratoire, aucun panneau = rond-point",
+      "À la couleur du marquage"
+    ],
+    "correct": 1,
+    "explication": "Giratoire : tu cèdes aux engagés. Rond-point : priorité à droite, l'entrant est prioritaire."
+  },
+  {
+    "code": "C2f",
+    "q": "Sur un giratoire, quand mets-tu ton clignotant à droite ?",
+    "options": [
+      "Dès l'entrée sur l'anneau",
+      "Jamais, c'est inutile",
+      "Juste avant ta sortie"
+    ],
+    "correct": 2,
+    "explication": "Trop tôt, le clignotant fait croire que tu sors avant et bloque les autres."
+  },
+  {
+    "code": "C2f",
+    "q": "Une voiture venant de ta droite ralentit pour te laisser passer, sans panneau. Tu passes ?",
+    "options": [
+      "Oui, elle t'a fait signe",
+      "Non : elle est prioritaire, tu la laisses passer",
+      "Tu accélères pour ne pas la gêner"
+    ],
+    "correct": 1,
+    "explication": "Si elle freine pour toi, c'est déjà un refus de priorité de ta part."
+  },
+  {
+    "code": "C2g",
+    "q": "Tu tournes à gauche dans 50 m. Quand mets-tu le clignotant ?",
+    "options": [
+      "Assez tôt, avant de tourner",
+      "Pile au moment où tu tournes",
+      "Une fois engagé dans la rue"
+    ],
+    "correct": 0,
+    "explication": "Un clignotant mis pendant le virage n'a prévenu personne."
+  },
+  {
+    "code": "C2g",
+    "q": "Un piéton attend au bord d'un passage protégé. Ton geste ?",
+    "options": [
+      "Croiser son regard et ralentir pour le laisser passer",
+      "Klaxonner pour qu'il se décide",
+      "Passer vite avant lui"
+    ],
+    "correct": 0,
+    "explication": "Le contact visuel lève le doute ; on ne force jamais le passage."
+  },
+  {
+    "code": "C2g",
+    "q": "Quelqu'un te colle et t'agace. Tu klaxonnes pour montrer ton énervement ?",
+    "options": [
+      "Oui, il comprendra",
+      "Tu freines sec pour le calmer",
+      "Non, le klaxon sert à avertir d'un danger"
+    ],
+    "correct": 2,
+    "explication": "En ville, l'usage du klaxon est même strictement limité."
+  },
+  {
+    "code": "C2g",
+    "q": "Tu as mis ton clignotant pour changer de voie. Que fais-tu ensuite ?",
+    "options": [
+      "Tu attends 50 m avant de te déporter",
+      "Tu te places dès que c'est possible",
+      "Tu coupes le clignotant et tu restes"
+    ],
+    "correct": 1,
+    "explication": "Signaler sans se placer entretient le doute chez ceux de derrière."
+  },
+  {
+    "code": "C2h",
+    "q": "Tu réalises trop tard que tu es dans la mauvaise voie au giratoire. Ton réflexe ?",
+    "options": [
+      "Tu changes de voie en force tout de suite",
+      "Tu restes dans ta voie et tu refais un tour si besoin",
+      "Tu freines net au milieu"
+    ],
+    "correct": 1,
+    "explication": "On ne change jamais de voie en force dans le trafic pour rattraper une erreur."
+  },
+  {
+    "code": "C2h",
+    "q": "Une camionnette de livraison bloque ta voie. Tu fais quoi ?",
+    "options": [
+      "Tu déboîtes vite avant qu'on arrive",
+      "Tu klaxonnes pour qu'elle bouge",
+      "Tu t'arrêtes, tu contrôles derrière et l'angle mort, puis tu contournes si c'est libre"
+    ],
+    "correct": 2,
+    "explication": "On traite l'obstacle comme un mini-dépassement, en sécurité."
+  },
+  {
+    "code": "C2h",
+    "q": "Comment sais-tu que tu maîtrises la conduite en ville ?",
+    "options": [
+      "Quand tu enchaînes une longue séquence sans intervention du moniteur",
+      "Quand tu roules vite sans caler",
+      "Quand tu connais toutes les rues"
+    ],
+    "correct": 0,
+    "explication": "Tes contrôles sont devenus automatiques : ta tête est libre pour anticiper."
+  },
+  {
+    "code": "C2h",
+    "q": "Avant de démarrer un trajet seul en ville, que fais-tu ?",
+    "options": [
+      "Tu pars et tu improvises",
+      "Tu visualises ton itinéraire et les zones difficiles",
+      "Tu attends d'avoir un GPS qui parle"
+    ],
+    "correct": 1,
+    "explication": "Visualiser le trajet libère ta tête pour décider au lieu de chercher ta route."
+  }
+]
