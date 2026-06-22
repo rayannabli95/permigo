@@ -559,7 +559,8 @@ function showResults(root, questions, answers, parcours_id) {
       })
       .then(({ error }) => {
         if (error) console.error("[exam-blanc] persist attempt", error);
-      });
+      })
+      .catch((e) => console.error("[exam-blanc] persist attempt", e));
   }
 
   if (passed) playVictory();
@@ -734,7 +735,8 @@ function showOfficielResults(root, questions, answers, startedAt) {
       })
       .then(({ error }) => {
         if (error) console.error("[exam-officiel] persist attempt", error);
-      });
+      })
+      .catch((e) => console.error("[exam-officiel] persist attempt", e));
   }
 
   if (passed) playVictory();
