@@ -1409,11 +1409,18 @@ function renderActionDuJour(
     // Priorité VISUELLE maximale : la carte est mise en avant avec un style accent.
     isDaily = true;
     label = "Question du jour";
-    title =
-      dailyQuiz.mode === "decouverte"
-        ? "Découvre une compétence"
-        : "Consolide ce que tu sais";
-    sub = "3 questions · ~2 min";
+    if (_awayDays >= 3) {
+      // Retour après absence : on abaisse la barrière (« reprise en douceur »)
+      // pour reconnecter le revenant à la boucle quotidienne sans le brusquer.
+      title = "Reprends en douceur";
+      sub = "1 question pour te remettre dedans · ~2 min";
+    } else {
+      title =
+        dailyQuiz.mode === "decouverte"
+          ? "Découvre une compétence"
+          : "Consolide ce que tu sais";
+      sub = "3 questions · ~2 min";
+    }
     btnText = "C'est parti";
     href = `#/quiz/${dailyQuiz.competenceId}/post_validation/daily`;
   } else if (dailyQuiz?.done) {
