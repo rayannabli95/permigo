@@ -1,0 +1,298 @@
+[
+  {
+    "code": "C3a",
+    "q": "Des phares arrivent en face la nuit. Tu regardes où ?",
+    "options": [
+      "Les phares d'en face",
+      "Le bord droit de ta voie",
+      "Le centre de la route"
+    ],
+    "correct": 1,
+    "explication": "Fixer les phares t'éblouit ; le bord droit te garde dans ta trajectoire."
+  },
+  {
+    "code": "C3a",
+    "q": "Route déserte, une lueur de phares apparaît au loin. Ton geste ?",
+    "options": [
+      "Repasser en feux de croisement",
+      "Rester pleins phares",
+      "Faire un appel de phares"
+    ],
+    "correct": 0,
+    "explication": "On baisse dès qu'on perçoit quelqu'un, même une simple lueur, pour ne pas l'éblouir."
+  },
+  {
+    "code": "C3a",
+    "q": "La nuit, un doute sur un piéton sombre devant toi. Tu fais quoi ?",
+    "options": [
+      "Tu accélères pour passer",
+      "Tu klaxonnes et tu fonces",
+      "Tu lèves le pied et tu vérifies"
+    ],
+    "correct": 2,
+    "explication": "Certitude = action, doute = pas de vitesse : un piéton foncé se voit très tard."
+  },
+  {
+    "code": "C3a",
+    "q": "Tu sens tes paupières tomber au volant la nuit. La bonne réaction ?",
+    "options": [
+      "Tu tiens jusqu'aux 2 h de route",
+      "Tu t'arrêtes dès le premier signe",
+      "Tu ouvres la fenêtre et tu continues"
+    ],
+    "correct": 1,
+    "explication": "Pause toutes les 2 h, mais surtout dès le moindre signe de fatigue, sans attendre."
+  },
+  {
+    "code": "C3b",
+    "q": "Sous la pluie, tu multiplies ta distance de sécurité par combien ?",
+    "options": ["Par 2", "Tu gardes la même", "Par 1,5"],
+    "correct": 0,
+    "explication": "Sol mouillé = freinage doublé : on passe de 2 à 4 secondes d'écart."
+  },
+  {
+    "code": "C3b",
+    "q": "Il pleut fort. Peux-tu allumer ton feu de brouillard arrière ?",
+    "options": [
+      "Oui, toujours sous la pluie",
+      "Non, interdit sous la pluie",
+      "Seulement la nuit"
+    ],
+    "correct": 1,
+    "explication": "L'arrière éblouit la voiture derrière : il est réservé au brouillard ou à la neige."
+  },
+  {
+    "code": "C3b",
+    "q": "Une grosse flaque barre ta voie, impossible de l'éviter. Ton geste ?",
+    "options": [
+      "Foncer dedans à vitesse normale",
+      "Freiner fort dans la flaque",
+      "Ralentir avant, traverser volant stable"
+    ],
+    "correct": 2,
+    "explication": "Foncer = aquaplaning : on ralentit avant, jamais dans la flaque, sans coup de volant."
+  },
+  {
+    "code": "C3b",
+    "q": "Sur autoroute limitée à 130, il se met à pleuvoir. Ta vitesse max ?",
+    "options": ["130 km/h", "110 km/h", "120 km/h"],
+    "correct": 1,
+    "explication": "Sous la pluie le 130 passe à 110 : moins d'adhérence, on lève le pied."
+  },
+  {
+    "code": "C3c",
+    "q": "Tu arrives sur des feuilles mortes mouillées en sortie de virage. Ton geste ?",
+    "options": [
+      "Un coup de volant pour passer vite",
+      "Lever le pied avant, volant stable",
+      "Freiner fort dessus"
+    ],
+    "correct": 1,
+    "explication": "Les feuilles humides glissent comme du savon : tout geste brusque fait partir la voiture."
+  },
+  {
+    "code": "C3c",
+    "q": "Sur chaussée glissante, quand fais-tu ton freinage avant un virage ?",
+    "options": [
+      "En ligne droite, avant le virage",
+      "En plein milieu du virage",
+      "À la sortie du virage"
+    ],
+    "correct": 0,
+    "explication": "Freiner et tourner ensemble demande trop d'adhérence : on freine droit, puis on tourne pied levé."
+  },
+  {
+    "code": "C3c",
+    "q": "L'arrière de ta voiture part légèrement sur le verglas. En premier ?",
+    "options": [
+      "Coup de frein sec",
+      "Braquer fort dans l'autre sens",
+      "Lever le pied et viser où aller"
+    ],
+    "correct": 2,
+    "explication": "La voiture suit ton regard ; un frein sec aggrave la glissade."
+  },
+  {
+    "code": "C3c",
+    "q": "Tu repères une plaque luisante à l'ombre sous les arbres. Tu fais quoi ?",
+    "options": [
+      "Tu ralentis en douceur avant d'y être",
+      "Tu freines une fois dessus",
+      "Tu accélères pour passer vite"
+    ],
+    "correct": 0,
+    "explication": "On anticipe : lever le pied avant la zone glissante, jamais dessus."
+  },
+  {
+    "code": "C3d",
+    "q": "Freinage d'urgence sur voiture à ABS. Ton premier geste ?",
+    "options": [
+      "Débrayer d'abord",
+      "Freiner à fond d'un coup",
+      "Freiner par petits à-coups"
+    ],
+    "correct": 1,
+    "explication": "Le frein d'abord, à fond : l'embrayage vient seulement après, juste avant de caler."
+  },
+  {
+    "code": "C3d",
+    "q": "En freinage d'urgence, la pédale vibre fort sous ton pied. Tu fais quoi ?",
+    "options": [
+      "Tu relâches un peu",
+      "Tu pompes la pédale",
+      "Tu continues d'appuyer fort"
+    ],
+    "correct": 2,
+    "explication": "La vibration, c'est l'ABS qui travaille : relâcher allonge la distance d'arrêt."
+  },
+  {
+    "code": "C3d",
+    "q": "Un obstacle est pile devant toi en freinage d'urgence. Tu regardes où ?",
+    "options": ["L'obstacle", "Ton échappatoire libre", "Tes rétroviseurs"],
+    "correct": 1,
+    "explication": "La voiture suit le regard : viser l'espace libre t'y emmène, fixer l'obstacle t'y envoie."
+  },
+  {
+    "code": "C3d",
+    "q": "Avec l'ABS, pendant un freinage d'urgence, peux-tu diriger la voiture ?",
+    "options": [
+      "Non, les roues sont bloquées",
+      "Oui, tu freines à fond ET tu diriges",
+      "Seulement après avoir relâché"
+    ],
+    "correct": 1,
+    "explication": "L'ABS empêche le blocage : tu gardes la direction pour éviter l'obstacle."
+  },
+  {
+    "code": "C3e",
+    "q": "Tu es sur la bande d'insertion de l'autoroute. Ton objectif de vitesse ?",
+    "options": [
+      "Ralentir pour t'insérer",
+      "Atteindre la vitesse du flux (70-80 min)",
+      "T'arrêter en bout de bande"
+    ],
+    "correct": 1,
+    "explication": "On s'insère dans un trou à leur allure ; arriver lentement force tout le monde à freiner."
+  },
+  {
+    "code": "C3e",
+    "q": "Tu viens de doubler un camion sur l'autoroute. Tu fais quoi ?",
+    "options": [
+      "Tu restes sur la voie de gauche",
+      "Tu te rabats à droite",
+      "Tu ralentis à côté de lui"
+    ],
+    "correct": 1,
+    "explication": "La voie de gauche sert à dépasser : on libère dès qu'on a doublé."
+  },
+  {
+    "code": "C3e",
+    "q": "Ta sortie d'autoroute approche. Quand ralentis-tu ?",
+    "options": [
+      "Sur la voie de circulation",
+      "Dès que tu vois le panneau",
+      "Une fois sur la voie de décélération"
+    ],
+    "correct": 2,
+    "explication": "On ne freine jamais sur l'autoroute : clignotant tôt, puis on ralentit sur la bretelle."
+  },
+  {
+    "code": "C3e",
+    "q": "Avant de t'insérer, en plus du rétro gauche, tu contrôles quoi ?",
+    "options": [
+      "Rien d'autre",
+      "L'angle mort par-dessus l'épaule",
+      "Juste le rétro intérieur"
+    ],
+    "correct": 1,
+    "explication": "Un motard ou une voiture peut se faufiler dans l'angle mort, invisible au rétro."
+  },
+  {
+    "code": "C3f",
+    "q": "Tu entres dans un tunnel en plein jour. Ton geste avant l'entrée ?",
+    "options": [
+      "Allumer les pleins phares",
+      "Allumer les feux de croisement",
+      "Ne rien allumer"
+    ],
+    "correct": 1,
+    "explication": "Les croisements te rendent visible sans aveugler ; jamais les pleins phares en tunnel."
+  },
+  {
+    "code": "C3f",
+    "q": "Dès que tu es dans le tunnel, tu repères quoi en priorité ?",
+    "options": [
+      "La sortie de secours la plus proche",
+      "La station radio",
+      "La vitesse des autres"
+    ],
+    "correct": 0,
+    "explication": "Dans un espace fermé, savoir où s'échapper change tout en cas de problème."
+  },
+  {
+    "code": "C3f",
+    "q": "Tu traverses un long pont exposé un jour de vent. Comment tiens-tu le volant ?",
+    "options": [
+      "Une main, détendu",
+      "Tu lâches en sortie de pont",
+      "Fermement des deux mains"
+    ],
+    "correct": 2,
+    "explication": "Le vent latéral pousse la voiture d'un coup : un volant mou = embardée."
+  },
+  {
+    "code": "C3f",
+    "q": "Dans un tunnel, ta voiture tombe en panne. Qu'est-ce qui est interdit ?",
+    "options": [
+      "Couper le moteur",
+      "Faire demi-tour ou marche arrière",
+      "Aller vers la sortie de secours à pied"
+    ],
+    "correct": 1,
+    "explication": "Pas de demi-tour ni marche arrière en tunnel : on coupe le moteur et on rejoint l'issue à pied."
+  },
+  {
+    "code": "C3g",
+    "q": "Tu vas tourner à droite en ville. En plus du rétro, tu contrôles quoi ?",
+    "options": [
+      "Rien d'autre",
+      "Ton angle mort droit, par-dessus l'épaule",
+      "Le rétro gauche seulement"
+    ],
+    "correct": 1,
+    "explication": "Un cycliste qui remonte à droite est invisible au rétro : le coup d'œil épaule évite l'accident."
+  },
+  {
+    "code": "C3g",
+    "q": "Un bus arrêté à droite te masque le passage piéton devant lui. Tu fais quoi ?",
+    "options": [
+      "Tu passes normalement",
+      "Tu klaxonnes et tu doubles",
+      "Tu ralentis et n'avances qu'une fois sûr"
+    ],
+    "correct": 2,
+    "explication": "Le bus cache un piéton qui peut surgir : tant que tu n'es pas certain, tu n'accélères pas."
+  },
+  {
+    "code": "C3g",
+    "q": "Tu dépasses un cycliste sur un boulevard urbain. Quel écart minimum ?",
+    "options": [
+      "Au moins 1 mètre",
+      "50 cm suffisent",
+      "Tu peux frôler si tu ralentis"
+    ],
+    "correct": 0,
+    "explication": "1 m en ville (1,50 m hors agglo) absorbe l'imprévu du vélo qui zigzague."
+  },
+  {
+    "code": "C3g",
+    "q": "Un bus redémarre de son arrêt juste devant toi. Tu fais quoi ?",
+    "options": [
+      "Tu accélères pour passer avant lui",
+      "Tu lèves le pied et tu le laisses repartir",
+      "Tu klaxonnes pour qu'il attende"
+    ],
+    "correct": 1,
+    "explication": "Le bus qui quitte son arrêt est prioritaire : on lui laisse la place."
+  }
+]

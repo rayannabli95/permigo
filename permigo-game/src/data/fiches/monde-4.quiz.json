@@ -1,0 +1,298 @@
+[
+  {
+    "code": "C4a",
+    "q": "Avant un long trajet inconnu, tu fais quoi ?",
+    "options": [
+      "Tu pars au feeling, tu verras",
+      "Tu regardes l'itinéraire entier et repères 2-3 points",
+      "Tu programmes le GPS en roulant"
+    ],
+    "correct": 1,
+    "explication": "Ce qui se prépare à l'arrêt libère ton attention pour la route."
+  },
+  {
+    "code": "C4a",
+    "q": "Le GPS, tu le règles quand ?",
+    "options": [
+      "Voiture à l'arrêt, avant de démarrer",
+      "Au premier feu rouge",
+      "Dès que tu roules"
+    ],
+    "correct": 0,
+    "explication": "2 secondes les yeux baissés à 90 km/h, c'est 50 m à l'aveugle."
+  },
+  {
+    "code": "C4a",
+    "q": "4 heures de route. Tes pauses ?",
+    "options": [
+      "Aucune si tu te sens en forme",
+      "Une seule à mi-parcours",
+      "Environ 15 min toutes les 2 heures"
+    ],
+    "correct": 2,
+    "explication": "La fatigue arrive sans prévenir : la pause régulière, c'est de la sécurité."
+  },
+  {
+    "code": "C4a",
+    "q": "Une route est annoncée coupée. Le bon réflexe ?",
+    "options": [
+      "Avoir prévu un itinéraire de secours",
+      "Forcer le passage",
+      "Improviser sur place"
+    ],
+    "correct": 0,
+    "explication": "Un plan B préparé t'évite de chercher ta sortie en panique."
+  },
+  {
+    "code": "C4b",
+    "q": "Le GPS dit gauche, mais le panneau indique sens interdit. Tu suis quoi ?",
+    "options": [
+      "Le GPS, il connaît la route",
+      "La signalisation, toujours",
+      "Tu t'arrêtes pour réfléchir"
+    ],
+    "correct": 1,
+    "explication": "Le GPS peut être périmé : ce que tu vois sur la route gagne toujours."
+  },
+  {
+    "code": "C4b",
+    "q": "Tu rates ta sortie d'autoroute. Tu fais quoi ?",
+    "options": [
+      "Tu freines pour te rabattre",
+      "Tu fais une courte marche arrière",
+      "Tu continues jusqu'à la sortie suivante"
+    ],
+    "correct": 2,
+    "explication": "Une sortie ratée coûte 10 minutes, pas ta vie : jamais de recul sur autoroute."
+  },
+  {
+    "code": "C4b",
+    "q": "Ta ville est tout en bas du panneau d'autoroute. Ça signifie ?",
+    "options": [
+      "Ta sortie est la prochaine",
+      "Ta sortie est encore loin",
+      "Tu t'es trompé de direction"
+    ],
+    "correct": 0,
+    "explication": "Plus le nom est bas, plus la sortie est proche : place-toi à droite tôt."
+  },
+  {
+    "code": "C4b",
+    "q": "Tu dois changer de plusieurs voies pour ta sortie. Quand t'y prendre ?",
+    "options": [
+      "Au dernier moment, d'un coup",
+      "Le plus tôt possible, en douceur",
+      "En forçant le rabattement"
+    ],
+    "correct": 1,
+    "explication": "Tu prends l'info tôt (rétros, clignotant) et tu glisses sans perdre de vitesse."
+  },
+  {
+    "code": "C4c",
+    "q": "En éco-conduite, tu passes tes rapports tôt ou tard ?",
+    "options": [
+      "Tard, pour avoir de la puissance",
+      "Tôt, pour rouler bas régime",
+      "Toujours en 2e en ville"
+    ],
+    "correct": 1,
+    "explication": "Un moteur bas régime consomme moins, fait moins de bruit et s'use moins."
+  },
+  {
+    "code": "C4c",
+    "q": "Un feu rouge à 100 m. Le geste le plus éco ?",
+    "options": [
+      "Garder l'allure puis freiner sec",
+      "Accélérer pour passer",
+      "Lever le pied tôt et laisser ralentir"
+    ],
+    "correct": 2,
+    "explication": "Le frein moteur évite de gaspiller le carburant que tu viens de brûler."
+  },
+  {
+    "code": "C4c",
+    "q": "Une conduite souple, ça économise combien de carburant ?",
+    "options": [
+      "Quelques gouttes, négligeable",
+      "Jusqu'à environ 20 %",
+      "Plus de la moitié"
+    ],
+    "correct": 1,
+    "explication": "La souplesse est le levier n°1 de l'éco-conduite, avant même la voiture."
+  },
+  {
+    "code": "C4c",
+    "q": "Belle ligne droite dégagée. En éco-conduite tu fais quoi ?",
+    "options": [
+      "Tu montes en 5e ou 6e",
+      "Tu restes en 3e pour la reprise",
+      "Tu accélères par à-coups"
+    ],
+    "correct": 0,
+    "explication": "Le rapport élevé en bas régime, c'est ce qui consomme le moins."
+  },
+  {
+    "code": "C4d",
+    "q": "Pour anticiper les dangers, où porte ton regard ?",
+    "options": [
+      "Sur le capot, juste devant",
+      "Loin devant, en balayant rétros et côtés",
+      "Fixe sur la voiture qui précède"
+    ],
+    "correct": 1,
+    "explication": "Plus tu vois loin, plus tu as de temps pour décider sans paniquer."
+  },
+  {
+    "code": "C4d",
+    "q": "Une voiture te colle et klaxonne. Tu fais quoi ?",
+    "options": [
+      "Tu freines pour la punir",
+      "Tu accélères au-dessus de la limite",
+      "Tu restes calme et la laisses dépasser"
+    ],
+    "correct": 2,
+    "explication": "Répondre à l'agressivité crée le risque ; rester posé le désamorce."
+  },
+  {
+    "code": "C4d",
+    "q": "Intersection sans visibilité, cachée par des voitures garées. Tu fais quoi ?",
+    "options": [
+      "Tu avances doucement, pied prêt à freiner",
+      "Tu passes, rien vu",
+      "Tu accélères pour passer vite"
+    ],
+    "correct": 0,
+    "explication": "La conscience du danger, c'est sentir le risque AVANT de le voir."
+  },
+  {
+    "code": "C4d",
+    "q": "La distance de sécurité par temps sec, c'est la règle des ?",
+    "options": [
+      "2 secondes (4 sous la pluie)",
+      "1 mètre fixe",
+      "10 secondes toujours"
+    ],
+    "correct": 0,
+    "explication": "2 s avec la voiture devant, doublé à 4 s quand la chaussée est mouillée."
+  },
+  {
+    "code": "C4e",
+    "q": "Tu dépasses un cycliste en ville. Quel écart ?",
+    "options": ["Au moins 1 mètre", "Au ras, ça passe", "30 centimètres"],
+    "correct": 0,
+    "explication": "1 m en ville, 1,5 m hors agglo : la marge s'il fait un écart soudain."
+  },
+  {
+    "code": "C4e",
+    "q": "Un piéton attend au bord d'un passage piéton. Tu fais quoi ?",
+    "options": [
+      "Tu passes tant qu'il n'a pas un pied dessus",
+      "Tu t'arrêtes, il est déjà prioritaire",
+      "Tu klaxonnes pour qu'il attende"
+    ],
+    "correct": 1,
+    "explication": "Passer devant un piéton qui veut traverser, le jour J, c'est éliminatoire."
+  },
+  {
+    "code": "C4e",
+    "q": "Route trop étroite pour laisser 1 m au cycliste. Tu fais quoi ?",
+    "options": [
+      "Tu doubles serré quand même",
+      "Tu klaxonnes pour qu'il se range",
+      "Tu patientes derrière jusqu'à pouvoir doubler"
+    ],
+    "correct": 2,
+    "explication": "Le dépassement serré par impatience, c'est l'accident vélo le plus fréquent."
+  },
+  {
+    "code": "C4e",
+    "q": "Ton feu est vert, celui du piéton est rouge. Tu t'arrêtes pour le laisser ?",
+    "options": [
+      "Non, c'est un arrêt injustifié et dangereux",
+      "Oui, par politesse",
+      "Tu klaxonnes et tu passes"
+    ],
+    "correct": 0,
+    "explication": "S'arrêter pour qui n'est PAS prioritaire est une faute : tu suis ta priorité."
+  },
+  {
+    "code": "C4f",
+    "q": "L'inspecteur demande les deux derniers chiffres du totaliseur. Pourquoi ?",
+    "options": [
+      "Pour vérifier ton kilométrage",
+      "Pour tirer le numéro de tes 3 questions",
+      "Pour noter la date"
+    ],
+    "correct": 1,
+    "explication": "Ça désigne 3 questions cadeau : vérification, sécurité routière, premiers secours."
+  },
+  {
+    "code": "C4f",
+    "q": "Tu cales au démarrage pendant l'examen. C'est terminé ?",
+    "options": [
+      "Oui, c'est éliminatoire",
+      "Non, tu redémarres calmement",
+      "Tu abandonnes l'examen"
+    ],
+    "correct": 1,
+    "explication": "Une petite erreur ne fait pas échouer : l'inspecteur regarde ta capacité à te corriger."
+  },
+  {
+    "code": "C4f",
+    "q": "Les 3 questions de l'examen portent sur quoi ?",
+    "options": [
+      "Vérification, sécurité routière, premiers secours",
+      "Code, panneaux, mécanique",
+      "Itinéraire, météo, GPS"
+    ],
+    "correct": 0,
+    "explication": "Chaque bonne réponse vaut 1 point : tu peux louper le permis à 1 point près."
+  },
+  {
+    "code": "C4f",
+    "q": "Manœuvre demandée à l'examen. Le réflexe juste ?",
+    "options": [
+      "Vite, pour montrer que tu maîtrises",
+      "Lentement, regard partout, clignotant avant",
+      "Sans clignotant, c'est juste une manœuvre"
+    ],
+    "correct": 1,
+    "explication": "Tu mets le clignotant AVANT de t'arrêter pour la manœuvre, pas après."
+  },
+  {
+    "code": "C4g",
+    "q": "Permis classique en poche. Vitesse max sur autoroute ?",
+    "options": ["130 km/h comme tout le monde", "110 km/h", "90 km/h"],
+    "correct": 1,
+    "explication": "En probatoire : 110 autoroute, 100 voie rapide, 80 route, les 3 premières années."
+  },
+  {
+    "code": "C4g",
+    "q": "Le disque A à l'arrière, tu le gardes combien de temps ?",
+    "options": ["3 ans (2 ans si conduite accompagnée)", "6 mois", "À vie"],
+    "correct": 0,
+    "explication": "Il prévient les autres que tu débutes, pour qu'ils te laissent de la marge."
+  },
+  {
+    "code": "C4g",
+    "q": "Tu démarres ton permis probatoire avec combien de points ?",
+    "options": [
+      "12 points d'office",
+      "6 points qui montent à 12",
+      "0 point au départ"
+    ],
+    "correct": 1,
+    "explication": "6 points au départ : une grosse infraction peut tout faire sauter."
+  },
+  {
+    "code": "C4g",
+    "q": "Le taux d'alcool max en jeune permis, c'est ?",
+    "options": [
+      "0,5 g/l comme les autres",
+      "0,2 g/l (en pratique, zéro)",
+      "Aucune limite"
+    ],
+    "correct": 1,
+    "explication": "0,2 g/l, donc en clair tu ne bois pas si tu conduis."
+  }
+]

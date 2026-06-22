@@ -12,6 +12,8 @@ import { navigate } from "@/router.js";
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { haptic } from "@/utils/haptic.js";
+import { mountPremiumQuiz } from "@/components/eleve/premium-quiz.js";
+import { quizByCode } from "@/data/quiz-conduite.js";
 import { track } from "@/services/analytics.js";
 import {
   FICHES,
@@ -389,7 +391,7 @@ export async function mount(root, param) {
           : ""
       }
       ${f.methode && f.methode.length >= 3 ? `<button class="rvc-go2">🧩 Remets les étapes dans l'ordre</button>` : ""}
-      <button class="rvc-go">Réviser ces ${(f.questions || []).length} questions</button>
+      <button class="rvc-go">▶ Lancer le quizz</button>
     </div>`;
     root.querySelector(".rvc-back").addEventListener("click", () => {
       view = "home";
@@ -477,75 +479,32 @@ export async function mount(root, param) {
 
   function startQuiz() {
     view = "quiz";
-    qi = 0;
-    revealed = false;
-    track("revision_conduite_quiz_start", { code });
     render();
   }
 
   function renderQuiz() {
     const f = getFiche(code);
-    const qs = (f && f.questions) || [];
-    if (!f || !qs.length) {
+    const questions = quizByCode(code);
+    if (!questions.length) {
       view = "fiche";
       return render();
     }
-    if (qi >= qs.length) {
-      markRevised(code);
-      track("revision_conduite_quiz_done", { code });
-      haptic("success");
-      if (focusId) {
-        const fid = focusId;
-        focusId = null;
-        focuses = focuses.filter((x) => x.id !== fid);
-        markFocusDone(fid);
-      }
-      root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-done">
-        <div class="rvc-done-e">🏁</div>
-        <div class="rvc-done-t">${esc(f.titre)} : révisé !</div>
-        <p class="rvc-sub">${qs.length} questions passées. Reviens demain pour le garder en tête.</p>
-        <button class="rvc-go" data-next>Continuer</button>
-      </div></div>`;
-      root.querySelector("[data-next]").addEventListener("click", () => {
+    track("revision_conduite_quiz_start", { code });
+    mountPremiumQuiz(root, {
+      questions,
+      title: f ? f.titre : "Quiz",
+      onExit: (good, total) => {
+        markRevised(code);
+        track("revision_conduite_quiz_done", { code, good, total });
+        if (focusId) {
+          const fid = focusId;
+          focusId = null;
+          focuses = focuses.filter((x) => x.id !== fid);
+          markFocusDone(fid);
+        }
         view = "home";
         render();
-      });
-      return;
-    }
-    const q = qs[qi];
-    root.innerHTML = `${STYLE}<div class="rvc">
-      <div class="rvc-top">
-        <button class="rvc-back" aria-label="Retour à la fiche">←</button>
-        <h1 class="rvc-h1" style="font-size:17px">${esc(f.titre)}</h1>
-      </div>
-      <div class="rvc-prog">Question ${qi + 1} / ${qs.length}</div>
-      <div class="rvc-q">${esc(q.q)}</div>
-      ${
-        revealed
-          ? `<div class="rvc-a">
-        <div class="rvc-a-r">${esc(q.reponse)}</div>
-        ${q.explication ? `<div class="rvc-a-e">${esc(q.explication)}</div>` : ""}
-      </div>`
-          : ""
-      }
-      <button class="rvc-go" data-act="${revealed ? "next" : "reveal"}">
-        ${revealed ? (qi + 1 >= qs.length ? "Terminer" : "Question suivante") : "Voir la réponse"}
-      </button>
-    </div>`;
-    root.querySelector(".rvc-back").addEventListener("click", () => {
-      view = "fiche";
-      render();
-    });
-    root.querySelector("[data-act]").addEventListener("click", (e) => {
-      if (e.currentTarget.getAttribute("data-act") === "reveal") {
-        revealed = true;
-        haptic("select");
-      } else {
-        qi += 1;
-        revealed = false;
-        haptic("tap");
-      }
-      render();
+      },
     });
   }
 
