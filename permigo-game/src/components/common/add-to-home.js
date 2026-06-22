@@ -125,7 +125,7 @@ export function renderAddToHome(root, { onDone } = {}) {
 
   function stepsIOS() {
     return `
-      <div class="a2hs-step"><div class="a2hs-num">1</div><div class="a2hs-step-txt">Dans <strong>Safari</strong>, touche le bouton Partager <span class="a2hs-glyph">${SHARE_SVG}</span> en bas de l'écran.</div></div>
+      <div class="a2hs-step"><div class="a2hs-num">1</div><div class="a2hs-step-txt">Dans <strong>Safari</strong>, touche le bouton Partager <span class="a2hs-glyph">${SHARE_SVG}</span> (en bas, ou en haut de l'écran selon ton Safari).</div></div>
       <div class="a2hs-step"><div class="a2hs-num">2</div><div class="a2hs-step-txt">Fais défiler et choisis <strong>« Sur l'écran d'accueil »</strong>.</div></div>
       <div class="a2hs-step"><div class="a2hs-num">3</div><div class="a2hs-step-txt">Touche <strong>« Ajouter »</strong> en haut à droite. C'est fait !</div></div>`;
   }

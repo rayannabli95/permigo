@@ -1,8 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
 // A2HS Steps — marche à suivre VISUELLE « ajouter à l'écran d'accueil ».
 // Pensée flemmards / seniors : 2 gestes max, gros pictos, 3-4 mots par
-// étape, flèche animée qui pointe vers l'emplacement RÉEL du bouton
-// (Safari iOS : barre du bas ; Chrome Android : menu en haut à droite).
+// étape. Repère = l'icône bleue Partager (reconnaissable), PAS sa position :
+// elle est en bas sur iPhone, mais en haut sur iPad ou si la barre Safari
+// est réglée en haut → on ne fige pas le côté (bug remonté : « clique en bas »
+// trompait les élèves dont la barre est en haut). Chrome Android : menu en haut.
 // Partagé par install-nudge (bottom-sheet) et l'onboarding (dernière slide).
 // ═══════════════════════════════════════════════════════════════
 
@@ -52,7 +54,6 @@ export const A2HS_STYLE = `
 @media (prefers-reduced-motion: reduce) { .a2s-point svg { animation: none !important; } }
 `;
 
-const ARROW_DOWN = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16"/><path d="m6 14 6 6 6-6"/></svg>`;
 const ARROW_UP = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V4"/><path d="m6 10 6-6 6 6"/></svg>`;
 
 /**
@@ -69,7 +70,7 @@ export function a2hsStepsHTML(platform) {
         <div class="a2s-txt">Touche <b>Partager</b></div>
         <div class="a2s-num">1</div>
       </div>
-      <div class="a2s-point down">le bouton bleu, en bas de l'écran ${ARROW_DOWN}</div>
+      <div class="a2s-point">le bouton bleu Partager — en bas, ou en haut de Safari</div>
       <div class="a2s-step">
         <div class="a2s-glyph plus">${PLUS_SVG}</div>
         <div class="a2s-txt"><b>« Sur l'écran d'accueil »</b></div>
