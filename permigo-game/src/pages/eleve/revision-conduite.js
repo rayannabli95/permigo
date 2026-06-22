@@ -138,6 +138,10 @@ const STYLE = `<style>
 .rvc-focus-t { font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; flex:1; }
 .rvc-focus-n { font-size:12px; color:var(--muted,#64748b); }
 .rvc-focus-go { font:700 13px 'Plus Jakarta Sans',sans-serif; color:#b45309; white-space:nowrap; }
+.rvc-exam { display:flex; flex-direction:column; gap:2px; width:100%; text-align:left; border:0; cursor:pointer; border-radius:16px; padding:16px; margin:0 0 18px; color:#fff; background: linear-gradient(135deg,#0f172a,#334155); box-shadow:0 8px 20px rgba(15,23,42,.28); }
+.rvc-exam:active { transform: scale(0.985); }
+.rvc-exam-t { font:800 16px 'Plus Jakarta Sans',sans-serif; }
+.rvc-exam-s { font-size:12px; opacity:.85; }
 .rvc-go2 { width:100%; border:2px solid var(--a,#6366f1); background:transparent; color:var(--a,#6366f1); border-radius:14px; padding:13px; cursor:pointer; margin-top:18px; font:800 15px 'Plus Jakarta Sans',sans-serif; }
 .rvc-go2:active { transform: scale(0.98); }
 .rvc-ohint { color:var(--muted,#64748b); font-size:13px; margin:2px 0 14px; }
@@ -253,6 +257,7 @@ export async function mount(root) {
           : ""
       }
       ${focusHtml}
+      <button class="rvc-exam" data-exam><span class="rvc-exam-t">🏁 Examen blanc de conduite</span><span class="rvc-exam-s">Teste-toi sur tout · auto-évaluation</span></button>
       ${mondes}
     </div>`;
     wireHome();
@@ -267,6 +272,10 @@ export async function mount(root) {
       focusId = null;
       track("revision_conduite_pf_start", { code });
       startQuiz();
+    });
+    root.querySelector("[data-exam]")?.addEventListener("click", () => {
+      track("revision_conduite_exam_open");
+      navigate("#/exam-conduite");
     });
     root.querySelectorAll("[data-focus]").forEach((b) =>
       b.addEventListener("click", () => {
