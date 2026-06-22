@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1200" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bgTopComp" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="50%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <radialGradient id="glowComp" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blurComp" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+  </defs>
+
+  <rect width="800" height="1200" fill="url(#bgTopComp)"/>
+
+  <!-- Halo central -->
+  <circle cx="400" cy="500" r="280" fill="url(#glowComp)" filter="url(#blurComp)"/>
+
+  <!-- Icône compétence (livre stylisé) -->
+  <g transform="translate(400 500)">
+    <rect x="-90" y="-110" width="180" height="220" rx="20" fill="#ffffff" opacity="0.95"/>
+    <rect x="-70" y="-85" width="140" height="6" rx="3" fill="#7c3aed"/>
+    <rect x="-70" y="-60" width="100" height="6" rx="3" fill="#7c3aed" opacity="0.6"/>
+    <rect x="-70" y="-35" width="120" height="6" rx="3" fill="#7c3aed" opacity="0.6"/>
+    <rect x="-70" y="-10" width="80"  height="6" rx="3" fill="#7c3aed" opacity="0.6"/>
+    <circle cx="0" cy="60" r="35" fill="#fbbf24"/>
+    <text x="0" y="72" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="34" fill="#ffffff">★</text>
+  </g>
+
+  <!-- Texte placeholder -->
+  <text x="400" y="850" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="44" fill="#ffffff" letter-spacing="-1">
+    Ta compétence
+  </text>
+  <text x="400" y="910" text-anchor="middle" font-family="Inter,sans-serif" font-weight="800" font-size="44" fill="#ffffff" letter-spacing="-1">
+    favorite
+  </text>
+  <text x="400" y="980" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600" font-size="22" fill="#ffffff" opacity="0.85">
+    [Placeholder · à remplacer par PNG]
+  </text>
+
+  <!-- Particules -->
+  <circle cx="150" cy="200" r="4" fill="#ffffff" opacity="0.7"/>
+  <circle cx="680" cy="280" r="6" fill="#ffffff" opacity="0.5"/>
+  <circle cx="120" cy="900" r="5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="700" cy="1050" r="4" fill="#ffffff" opacity="0.4"/>
+  <circle cx="500" cy="180" r="3" fill="#ffffff" opacity="0.8"/>
+</svg>

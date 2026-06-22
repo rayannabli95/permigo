@@ -394,7 +394,7 @@ const STYLE = `<style>
   padding: 4px 10px 5px;
   letter-spacing: .02em;
 }
-.acc2-daily-streak::before { content: '\1F525'; font-size: 11px; }
+.acc2-daily-streak::before { content: '🔥'; font-size: 11px; }
 
 /* ── Question du jour — etat "fait" : sobre, invitation douce ── */
 .acc2-action--daily-done {
@@ -420,7 +420,7 @@ const STYLE = `<style>
   padding: 3px 8px 4px;
   margin-left: auto;
 }
-.acc2-daily-done-badge::before { content: '\2713'; margin-right: 2px; }
+.acc2-daily-done-badge::before { content: '✓'; margin-right: 2px; }
 /* Bouton secondaire (invitation, pas prioritaire) */
 .acc2-action-btn--muted {
   background: transparent;
@@ -1422,18 +1422,18 @@ function renderActionDuJour(
     label = "Question du jour";
     title = "Fait pour aujourd'hui !";
     sub = "Reviens demain pour ta prochaine question.";
-    btnText = "Continue a reviser";
+    btnText = "Continue à réviser";
     href = "#/quiz/next/post_validation/revision";
   } else if (totalValidated === 0) {
-    label = "Par ou commencer ?";
-    title = "Commence ta 1re revision";
+    label = "Par où commencer ?";
+    title = "Commence ta 1re révision";
     sub = "2 min suffisent.";
-    btnText = "Commence ta 1re revision";
+    btnText = "Commence ta 1re révision";
     href = "#/quiz/next/post_validation/revision";
   } else {
     title = "Continue ton parcours";
     sub = "";
-    btnText = "Continue a reviser";
+    btnText = "Continue à réviser";
     href = "#/quiz/next/post_validation/revision";
   }
 
@@ -1452,13 +1452,13 @@ function renderActionDuJour(
 
   // First-run btn label uses a shorter verb-first form to fit the button width.
   const btnLabel =
-    isFirstRun && totalValidated === 0 ? "C'est parti - 2 min" : btnText;
+    isFirstRun && totalValidated === 0 ? "C'est parti — 2 min" : btnText;
 
   // Série silencieuse : affichée avec fierté quand >= 2 jours, jamais menaçante.
   // Affiché uniquement sur la carte daily (pas done), pas sur les autres états.
   const streakLine =
     isDaily && !isDailyDoneState && dailyStreakCount >= 2
-      ? `<div class="acc2-daily-streak">${dailyStreakCount} jours d'affilee</div>`
+      ? `<div class="acc2-daily-streak">${dailyStreakCount} jours d'affilée</div>`
       : "";
 
   // Etat "fait" : pastille verte + invitation douce vers demain (pas de streak).

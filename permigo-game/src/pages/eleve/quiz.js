@@ -509,29 +509,29 @@ function renderResult(
   let msg;
   if (isDaily) {
     msg = success
-      ? "Bien joue ! Question du jour cochee."
+      ? "Bien joué ! Question du jour cochée."
       : "Bonne tentative ! Reviens demain pour la suivante.";
   } else {
     msg = validated
-      ? "Competence validee ! Continue comme ca"
+      ? "Compétence validée ! Continue comme ça"
       : passed
         ? canChain
-          ? "Bien joue ! Tu es chaud - on enchaine ?"
-          : "Bien joue ! Quiz reussi."
+          ? "Bien joué ! Tu es chaud — on enchaîne ?"
+          : "Bien joué ! Quiz réussi."
         : reason === "no_competence_unlocked"
           ? canChain
-            ? "Belle decouverte ! Tu viens d'explorer une competence a venir - ton moniteur la travaillera avec toi."
-            : "Competence pas encore debloquee par ton moniteur."
+            ? "Belle découverte ! Tu viens d'explorer une compétence à venir — ton moniteur la travaillera avec toi."
+            : "Compétence pas encore débloquée par ton moniteur."
           : canChain
-            ? "Pas grave - chaque question te fait progresser. On continue ?"
-            : "Tu y es presque - un dernier tour avec ton moniteur et c'est dans la poche.";
+            ? "Pas grave — chaque question te fait progresser. On continue ?"
+            : "Tu y es presque — un dernier tour avec ton moniteur et c'est dans la poche.";
   }
 
   // Serie silencieuse sur l'ecran de resultat daily (>= 2 jours = fierté).
   // JAMAIS de mention de perte ou de pression.
   const dailyStreakHtml =
     isDaily && dailyStreakAfter >= 2
-      ? `<div class="qp-daily-streak" role="status">${dailyStreakAfter} jours d'affilee</div>`
+      ? `<div class="qp-daily-streak" role="status">${dailyStreakAfter} jours d'affilée</div>`
       : "";
 
   // Slot pour le gain Ligue Revision (injecte de facon asynchrone apres render).
@@ -543,7 +543,7 @@ function renderResult(
   // mais on propose un bouton secondaire "Continue a reviser" pour les motives.
   let continueBtn, parcoursBtn, homeBtn;
   if (isDaily) {
-    continueBtn = `<button class="btn-parcours" id="btn-continue">Continue a reviser</button>`;
+    continueBtn = `<button class="btn-parcours" id="btn-continue">Continue à réviser</button>`;
     parcoursBtn = "";
     homeBtn = `<button class="btn-home" id="btn-home">Retour accueil</button>`;
   } else {
@@ -573,7 +573,7 @@ function renderResult(
       padding: 6px 14px 7px;
       animation: qpStreakIn .4s .3s cubic-bezier(.34,1.56,.64,1) both;
     }
-    .qp-daily-streak::before { content: '\1F525'; font-size: 13px; }
+    .qp-daily-streak::before { content: '🔥'; font-size: 13px; }
     @keyframes qpStreakIn { from { opacity:0; transform:translateY(6px) scale(.9); } to { opacity:1; transform:none; } }
     @media (prefers-reduced-motion: reduce) { .qp-daily-streak { animation: none; } }
     </style>

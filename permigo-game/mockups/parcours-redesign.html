@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Mockup — Parcours élève v2 (sans photos)</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── Tokens repris de src/styles (light) ─────────────────────── */
+:root{
+  --a:#58CC02; --adk:#46A302; --a-lt:#6fe016; --a-ink:#1a2800;
+  --gr:#22c55e; --grdk:#047857; --grp2:#dcfce7; --gr-txt:#147638;
+  --am:#f59e0b; --amx:#b45309;
+  --pu:#8b5cf6; --puk:#7c3aed;
+  --cy:#06b6d4; --cydk:#0e7490;
+  --bg:#f4f5fb; --bg2:#eceef8; --su:#fff; --su2:#f8f9fd;
+  --bo:#e2e6f2; --bo2:#edf0f9; --bo4:#cbd5e1;
+  --ink:#0b0d1a; --mu:#5f6788; --mu2:#5e6e82; --mu3:#556070;
+  --r-sm:8px; --r-md:14px; --r-lg:16px; --r-xl:20px; --r-full:999px;
+  --ease-out:cubic-bezier(.2,.7,.3,1);
+  --ease-snap:cubic-bezier(.23,1,.32,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0; background:#0e1322; min-height:100vh;
+  font-family:'Inter',sans-serif; color:var(--ink);
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  padding:30px 14px 60px;
+}
+.intro{max-width:380px;text-align:center;color:#aab2c8}
+.intro h1{font:800 18px/1.3 'Plus Jakarta Sans',sans-serif;color:#fff;margin:0 0 6px}
+.intro p{font:500 13px/1.55 'Inter',sans-serif;margin:0}
+.intro .tag{display:inline-block;margin-top:8px;font:700 10px/1 'Inter';letter-spacing:.14em;text-transform:uppercase;color:#58CC02;background:rgba(88,204,2,.12);padding:5px 11px;border-radius:999px}
+
+/* ── Cadre téléphone ─────────────────────────────────────────── */
+.phone{
+  width:390px; max-width:100%; height:780px;
+  background:var(--bg); border-radius:42px;
+  border:10px solid #1c2030;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.7), 0 0 0 2px #000 inset;
+  overflow:hidden; position:relative;
+  display:flex; flex-direction:column;
+}
+
+/* ── Header global app (52px) ── */
+.appbar{
+  height:52px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px; background:var(--su); border-bottom:1px solid var(--bo);
+  position:relative; z-index:30;
+}
+.appbar .logo{display:flex;align-items:center;gap:8px;font:800 15px/1 'Plus Jakarta Sans';color:var(--ink)}
+.appbar .logo .p{width:26px;height:26px;border-radius:8px;background:var(--a);color:#fff;display:grid;place-items:center;font:900 15px/1 'Plus Jakarta Sans';box-shadow:0 3px 0 var(--adk)}
+.appbar .hud{display:flex;align-items:center;gap:12px;font:800 13px/1 'Inter'}
+.appbar .hud .chip{display:flex;align-items:center;gap:5px;color:var(--mu2)}
+.appbar .hud .fire{color:#f97316}
+.appbar .hud .gem{color:var(--cy)}
+
+/* ── Barre de progression globale (sticky sous l'appbar) ── */
+.prog{
+  flex-shrink:0; padding:13px 18px 14px; background:var(--su);
+  border-bottom:1px solid var(--bo2); position:relative; z-index:20;
+}
+.prog-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.prog-title{font:800 16px/1 'Plus Jakarta Sans';color:var(--ink)}
+.prog-count{font:700 12px/1 'Inter';color:var(--mu2)}
+.prog-count b{color:var(--a);font-weight:800}
+.prog-track{height:9px;background:var(--bg2);border-radius:999px;overflow:hidden}
+.prog-fill{height:100%;width:38%;border-radius:999px;background:linear-gradient(90deg,var(--adk),var(--a));box-shadow:0 0 12px rgba(88,204,2,.5)}
+
+/* ── Zone scrollable de la carte ── */
+.map{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:90px}
+.map::-webkit-scrollbar{width:0}
+
+/* ── Bandeau de chapitre (REMPLACE la photo plein écran) ──────── */
+.chapter{
+  margin:18px 14px 4px; border-radius:var(--r-xl);
+  padding:18px 18px 16px; color:#fff; position:relative; overflow:hidden;
+  box-shadow:0 10px 24px -10px var(--wsh,rgba(88,204,2,.55));
+}
+.chapter::after{ /* texture géométrique discrète au lieu d'une photo */
+  content:'';position:absolute;inset:0;opacity:.16;pointer-events:none;
+  background:
+    radial-gradient(circle at 88% 12%, #fff 0 1.5px, transparent 2px) 0 0/22px 22px,
+    radial-gradient(circle at 20% 80%, #fff 0 1.5px, transparent 2px) 0 0/26px 26px;
+}
+.chapter.c1{background:linear-gradient(135deg,#22c55e,#16a34a);--wc:#22c55e;--wsh:rgba(34,197,94,.5)}
+.chapter.c2{background:linear-gradient(135deg,#06b6d4,#0e7490);--wc:#06b6d4;--wsh:rgba(6,182,212,.5)}
+.chapter.c3{background:linear-gradient(135deg,#8b5cf6,#7c3aed);--wc:#8b5cf6;--wsh:rgba(139,92,246,.5)}
+.chapter.locked{background:linear-gradient(135deg,#9aa3b8,#7c8499);--wsh:rgba(120,130,150,.4);box-shadow:0 8px 20px -12px rgba(120,130,150,.5)}
+.ch-eyebrow{display:flex;align-items:center;gap:7px;font:800 10px/1 'Inter';letter-spacing:.16em;text-transform:uppercase;opacity:.9;margin-bottom:9px}
+.ch-eyebrow .n{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.25);display:grid;place-items:center;font:900 10px/1}
+.ch-title{font:800 21px/1.15 'Plus Jakarta Sans';margin:0 0 3px;position:relative}
+.ch-sub{font:500 12.5px/1.4 'Inter';opacity:.92;margin:0 0 13px;position:relative;max-width:260px}
+.ch-meta{display:flex;align-items:center;gap:10px;position:relative}
+.ch-bar{flex:1;height:7px;background:rgba(255,255,255,.28);border-radius:999px;overflow:hidden}
+.ch-bar i{display:block;height:100%;background:#fff;border-radius:999px}
+.ch-pct{font:800 12px/1 'Inter';white-space:nowrap}
+.ch-badge{position:absolute;top:16px;right:16px;display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.95);color:var(--gr-txt);font:800 10px/1 'Inter';letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.ch-lock{position:absolute;top:16px;right:16px;font-size:16px;opacity:.95}
+.chapter.locked .ch-sub,.chapter.locked .ch-title{opacity:.96}
+
+/* ── Route + nodes ───────────────────────────────────────────── */
+.route{position:relative;padding:8px 0 30px;min-height:340px}
+.route.short{min-height:200px}
+.route svg{display:block;width:100%;height:100%;position:absolute;inset:0;overflow:visible}
+.path-base{stroke:#e3e7f1;stroke-width:22;fill:none;stroke-linecap:round}
+.path-dot{stroke:#fff;stroke-width:3;stroke-dasharray:6 12;stroke-linecap:round;fill:none}
+.route.c1 .path-base{stroke:#d6f0dd}
+.route.c2 .path-base{stroke:#d3eef4}
+.route.locked .path-base{stroke:#e7e9f0}
+
+.node{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.tile{
+  width:62px;height:62px;border-radius:20px;position:relative;
+  background:linear-gradient(160deg,#fff,#eef1f8);
+  --tdk:#c2c8da;
+  box-shadow:0 6px 0 var(--tdk),0 12px 18px -6px rgba(11,13,26,.26);
+  display:grid;place-items:center;transition:transform .15s var(--ease-out),box-shadow .15s;
+}
+.tile::before{content:'';position:absolute;top:5px;left:9px;right:9px;height:38%;border-radius:14px 14px 50% 50%;background:linear-gradient(180deg,rgba(255,255,255,.7),transparent)}
+.tile .p{font:900 24px/1 'Plus Jakarta Sans';color:#cbd2e0;z-index:1}
+.node:active .tile{transform:translateY(4px);box-shadow:0 2px 0 var(--tdk),0 5px 10px -4px rgba(11,13,26,.25)}
+
+/* stamp statut */
+.stamp{position:absolute;bottom:-5px;right:-5px;width:22px;height:22px;border-radius:50%;border:3px solid var(--su);display:grid;place-items:center;color:#fff;font-size:12px;z-index:3}
+
+/* DONE */
+.node.done .tile{--tdk:#15803d}
+.node.done .tile .p{color:var(--gr)}
+.node.done .stamp{background:var(--gr)}
+.node.done .tile::after{content:'';position:absolute;inset:-7px;border-radius:26px;border:2px solid rgba(34,197,94,.35);animation:ring 2.6s ease-out infinite}
+
+/* NEXT — focal point */
+.node.next .tile{--tdk:var(--adk);background:linear-gradient(160deg,#fff,#f1fbe9);animation:bob 1.9s ease-in-out infinite}
+.node.next .tile .p{color:var(--a)}
+.node.next .stamp{background:var(--a)}
+.node.next::before{content:'';position:absolute;left:50%;top:50%;width:104px;height:104px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(88,204,2,.3),transparent 70%);animation:halo 2.1s ease-in-out infinite;z-index:-1}
+.here{position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);background:var(--a);color:#fff;font:800 8.5px/1 'Inter';letter-spacing:.14em;padding:4px 9px;border-radius:999px;white-space:nowrap;box-shadow:0 4px 10px rgba(88,204,2,.45);animation:bob 1.6s ease-in-out infinite}
+.here::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--a)}
+
+/* TODO / LOCKED */
+.node.todo .tile{background:var(--su);box-shadow:0 3px 0 #dfe3ee;--tdk:#dfe3ee;border:2px dashed var(--bo)}
+.node.todo .tile .p{color:var(--bo4)}
+.node.locked .tile{background:#e8eaf1;box-shadow:0 3px 0 #d7dae4;--tdk:#d7dae4}
+.node.locked .tile .p{color:#c2c7d6}
+.node.locked{cursor:default}
+
+/* chest node */
+.node.chest .tile{background:linear-gradient(160deg,#fff7e6,#fde9c0);--tdk:#e0a93b}
+.node.chest .tile .p{font-size:26px;color:transparent}
+.node.chest .tile .p::before{content:'🎁';color:initial}
+
+/* label */
+.lbl{margin-top:11px;background:var(--su);border:1px solid var(--bo);border-radius:14px;padding:6px 11px 7px;max-width:160px;text-align:center;box-shadow:0 4px 12px rgba(11,13,26,.07)}
+.lbl .nm{display:block;font:700 12.5px/1.25 'Plus Jakarta Sans';color:var(--ink)}
+.lbl .st{display:block;margin-top:2px;font:500 10.5px/1 'Inter';font-style:italic;color:var(--mu2)}
+.node.done .lbl{border-color:rgba(34,197,94,.3)}.node.done .lbl .st{color:var(--gr-txt);font-style:normal;font-weight:600}
+.node.next .lbl{border-color:rgba(88,204,2,.4);box-shadow:0 8px 20px rgba(88,204,2,.18)}
+.node.next .lbl .st{display:inline-block;margin-top:5px;background:var(--a);color:#fff;font-style:normal;font-weight:800;padding:6px 13px;border-radius:999px;box-shadow:0 3px 9px rgba(88,204,2,.4)}
+.node.next .lbl .st::after{content:' →'}
+.node.todo .lbl .nm,.node.locked .lbl .nm{color:var(--mu3)}
+.node.todo .lbl,.node.locked .lbl{opacity:.85}
+
+/* séparateur verrou monde */
+.gate{margin:6px 14px 0;padding:13px 16px;border-radius:var(--r-lg);background:var(--su);border:1px dashed var(--bo4);display:flex;align-items:center;gap:11px;color:var(--mu2)}
+.gate .ic{width:34px;height:34px;border-radius:10px;background:var(--bg2);display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.gate .tx{font:600 12px/1.4 'Inter'}
+.gate .tx b{color:var(--ink);font-weight:800}
+
+/* ── Nav bottom ── */
+.nav{position:absolute;left:0;right:0;bottom:0;height:72px;background:var(--su);border-top:1px solid var(--bo);display:flex;align-items:center;justify-content:space-around;padding-bottom:8px;z-index:25}
+.nav a{display:flex;flex-direction:column;align-items:center;gap:3px;font:700 10px/1 'Inter';color:var(--mu2);text-decoration:none}
+.nav a .i{font-size:20px;filter:grayscale(1) opacity(.55)}
+.nav a.on{color:var(--a)}
+.nav a.on .i{filter:none}
+
+@keyframes ring{0%{transform:scale(.85);opacity:.55}100%{transform:scale(1.3);opacity:0}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.here{animation:bobx 1.6s ease-in-out infinite}
+@keyframes bobx{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
+@keyframes halo{0%,100%{transform:translate(-50%,-50%) scale(.82);opacity:.6}50%{transform:translate(-50%,-50%) scale(1.15);opacity:1}}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <span class="tag">Mockup · proposition</span>
+  <h1>Parcours v2 — sans photos de fond</h1>
+  <p>On garde la route sinueuse (l'ADN « parcours ») mais on remplace les photos plein écran illisibles par des <b style="color:#fff">bandeaux de chapitre colorés</b> façon Duolingo. Texte net, contraste AA, 100% cohérent avec le vert #58CC02 du reste de l'app.</p>
+</div>
+
+<div class="phone">
+
+  <!-- header app -->
+  <div class="appbar">
+    <div class="logo"><span class="p">P</span> PermiGo</div>
+    <div class="hud">
+      <span class="chip fire">🔥 7</span>
+      <span class="chip gem">💎 240</span>
+    </div>
+  </div>
+
+  <!-- progression globale -->
+  <div class="prog">
+    <div class="prog-top">
+      <span class="prog-title">Mon parcours</span>
+      <span class="prog-count"><b>12</b> / 31 compétences</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill"></div></div>
+  </div>
+
+  <!-- carte scrollable -->
+  <div class="map">
+
+    <!-- ───── MONDE 1 — terminé ───── -->
+    <div class="chapter c1">
+      <div class="ch-badge">✓ Terminé</div>
+      <div class="ch-eyebrow"><span class="n">1</span> Compétence 1 · REMC</div>
+      <h2 class="ch-title">Maîtriser le véhicule</h2>
+      <p class="ch-sub">Les bases : démarrer, freiner, diriger en sécurité.</p>
+      <div class="ch-meta">
+        <div class="ch-bar"><i style="width:100%"></i></div>
+        <span class="ch-pct">9/9</span>
+      </div>
+    </div>
+
+    <div class="route c1 short">
+      <svg viewBox="0 0 390 200" preserveAspectRatio="none">
+        <path class="path-base" d="M120 30 Q260 60 270 100 Q280 150 130 170"/>
+        <path class="path-dot"  d="M120 30 Q260 60 270 100 Q280 150 130 170"/>
+      </svg>
+      <div class="node done" style="left:120px;top:30px">
+        <div class="tile"><span class="p">P</span><span class="stamp">✓</span></div>
+        <div class="lbl"><span class="nm">Le poste de conduite</span><span class="st">Acquis</span></div>
+      </div>
+      <div class="node done" style="left:270px;top:100px">
+        <div class="tile"><span class="p">P</span><span class="stamp">✓</span></div>
+        <div class="lbl"><span class="nm">Démarrer & s'arrêter</span><span class="st">Acquis</span></div>
+      </div>
+      <div class="node done" style="left:130px;top:170px">
+        <div class="tile"><span class="p">P</span><span class="stamp">✓</span></div>
+        <div class="lbl"><span class="nm">Diriger & freiner</span><span class="st">Acquis</span></div>
+      </div>
+    </div>
+
+    <!-- ───── MONDE 2 — en cours ───── -->
+    <div class="chapter c2">
+      <div class="ch-eyebrow"><span class="n">2</span> Compétence 2 · REMC</div>
+      <h2 class="ch-title">Circuler en ville</h2>
+      <p class="ch-sub">Intersections, ronds-points, partage de la route.</p>
+      <div class="ch-meta">
+        <div class="ch-bar"><i style="width:37%"></i></div>
+        <span class="ch-pct">3/8</span>
+      </div>
+    </div>
+
+    <div class="route c2" style="min-height:610px">
+      <svg viewBox="0 0 390 610" preserveAspectRatio="none">
+        <path class="path-base" d="M120 40 Q285 70 280 150 Q275 230 130 265 Q55 285 140 395 Q235 480 205 520"/>
+        <path class="path-dot"  d="M120 40 Q285 70 280 150 Q275 230 130 265 Q55 285 140 395 Q235 480 205 520"/>
+      </svg>
+      <div class="node done" style="left:120px;top:40px">
+        <div class="tile"><span class="p">P</span><span class="stamp">✓</span></div>
+        <div class="lbl"><span class="nm">Prendre l'information</span><span class="st">Acquis</span></div>
+      </div>
+      <div class="node done" style="left:280px;top:145px">
+        <div class="tile"><span class="p">P</span><span class="stamp">✓</span></div>
+        <div class="lbl"><span class="nm">Les intersections</span><span class="st">Acquis</span></div>
+      </div>
+      <div class="node next" style="left:130px;top:265px">
+        <span class="here">TU ES ICI</span>
+        <div class="tile"><span class="p">P</span><span class="stamp">▶</span></div>
+        <div class="lbl"><span class="nm">Les ronds-points</span><span class="st">Commence ici</span></div>
+      </div>
+      <div class="node chest todo" style="left:140px;top:395px">
+        <div class="tile"><span class="p"></span></div>
+        <div class="lbl"><span class="nm">Coffre surprise</span><span class="st">À 5/8</span></div>
+      </div>
+      <div class="node todo" style="left:205px;top:520px">
+        <div class="tile"><span class="p">P</span></div>
+        <div class="lbl"><span class="nm">Partager la route</span><span class="st">Bientôt</span></div>
+      </div>
+    </div>
+
+    <!-- ───── verrou monde 3 ───── -->
+    <div class="gate">
+      <div class="ic">🔒</div>
+      <div class="tx">Termine <b>6 compétences</b> de la Compétence&nbsp;2 pour débloquer le monde suivant.</div>
+    </div>
+
+    <!-- ───── MONDE 3 — verrouillé ───── -->
+    <div class="chapter c3 locked">
+      <div class="ch-lock">🔒</div>
+      <div class="ch-eyebrow"><span class="n">3</span> Compétence 3 · REMC</div>
+      <h2 class="ch-title">Conditions difficiles</h2>
+      <p class="ch-sub">Autoroute, nuit, intempéries, dépassements.</p>
+    </div>
+
+    <div class="route locked short">
+      <svg viewBox="0 0 390 200" preserveAspectRatio="none">
+        <path class="path-base" d="M130 30 Q270 55 265 105 Q260 155 140 175"/>
+      </svg>
+      <div class="node locked" style="left:130px;top:30px">
+        <div class="tile"><span class="p">P</span><span class="stamp" style="background:#aab0c0">🔒</span></div>
+      </div>
+      <div class="node locked" style="left:265px;top:105px">
+        <div class="tile"><span class="p">P</span></div>
+      </div>
+      <div class="node locked" style="left:140px;top:175px">
+        <div class="tile"><span class="p">P</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- nav -->
+  <div class="nav">
+    <a href="#"><span class="i">🏠</span>Accueil</a>
+    <a href="#" class="on"><span class="i">🗺️</span>Parcours</a>
+    <a href="#"><span class="i">🏆</span>Trophées</a>
+    <a href="#"><span class="i">🛍️</span>Boutique</a>
+    <a href="#"><span class="i">👤</span>Profil</a>
+  </div>
+
+</div>
+</body>
+</html>

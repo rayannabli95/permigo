@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Mockup — Panneaux charte (filigrane élégant)</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+/* ── Design tokens PermiGo ──────────────────────────────────────── */
+:root {
+  --a:     #58CC02;
+  --adk:   #46A302;
+  --a-lt:  #6fe016;
+  --a-ink: #1a2800;
+  --gr:    #22c55e;
+  --grdk:  #047857;
+  --grp2:  #dcfce7;
+  --gr-txt:#147638;
+  --am:    #f59e0b;
+  --amx:   #b45309;
+  --pu:    #8b5cf6;
+  --puk:   #7c3aed;
+  --cy:    #06b6d4;
+  --cydk:  #0e7490;
+  --bg:    #f4f5fb;
+  --bg2:   #eceef8;
+  --su:    #fff;
+  --su2:   #f8f9fd;
+  --bo:    #e2e6f2;
+  --bo2:   #edf0f9;
+  --bo4:   #cbd5e1;
+  --ink:   #0b0d1a;
+  --mu:    #5f6788;
+  --mu2:   #5e6e82;
+  --mu3:   #556070;
+  --r-sm:  8px;
+  --r-md:  14px;
+  --r-lg:  16px;
+  --r-xl:  20px;
+  --r-full:999px;
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+  --ease-out:    cubic-bezier(.2,.7,.3,1);
+
+  /* Opacité filigrane panneaux — ajuste ces deux curseurs */
+  --sign-xxl-opacity: 0.055;   /* grands fantômes 5-6% */
+  --sign-sm-opacity:  0.045;   /* semis petits 4-5% */
+}
+
+/* ── Dark mode — les panneaux s'atténuent encore ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:  #12141f;
+    --bg2: #1c1f30;
+    --su:  #1e2133;
+    --su2: #232740;
+    --bo:  #2c3050;
+    --bo2: #262a42;
+    --bo4: #3a3f5c;
+    --ink: #e8eaf4;
+    --mu:  #8e97bb;
+    --mu2: #7a84a8;
+    --mu3: #6b7395;
+    --sign-xxl-opacity: 0.03;
+    --sign-sm-opacity:  0.025;
+  }
+}
+
+/* ── Reset ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+/* ── Scène extérieure (fond sombre pour la mise en scène) ──────── */
+body {
+  margin: 0;
+  background: #0d1020;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 36px 16px 70px;
+}
+
+/* intro label */
+.intro {
+  max-width: 380px;
+  text-align: center;
+  color: #8895bb;
+}
+.intro h1 {
+  font: 800 17px/1.3 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  margin: 0 0 6px;
+}
+.intro p {
+  font: 500 12.5px/1.55 'Inter', sans-serif;
+  margin: 0;
+}
+.intro .tag {
+  display: inline-block;
+  margin-bottom: 10px;
+  font: 700 9px/1 'Inter';
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--a);
+  background: rgba(88,204,2,.12);
+  padding: 5px 11px;
+  border-radius: 999px;
+}
+
+/* ── Cadre téléphone ────────────────────────────────────────────── */
+.phone {
+  width: 375px;
+  max-width: 100%;
+  height: 812px;
+  background: var(--bg);
+  border-radius: 44px;
+  border: 11px solid #161929;
+  box-shadow:
+    0 0 0 2px #000 inset,
+    0 32px 90px -18px rgba(0,0,0,.8),
+    0 0 60px -20px rgba(88,204,2,.12);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   COUCHE PANNEAUX — z-index 0, tout en dessous
+   On place :
+   · 3 grands panneaux fantôme (XXL ~180-220px) ancrés aux angles
+   · 1 semis de petits panneaux (32-40px) régulièrement espacés
+   ──────────────────────────────────────────────────────────────── */
+.signs-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Grand panneau STOP en haut à gauche — fantôme monochrome */
+.sign-xxl {
+  position: absolute;
+  opacity: var(--sign-xxl-opacity);
+  filter: grayscale(1);
+}
+
+/* STOP — haut gauche */
+.sign-xxl.stop {
+  width: 210px; height: 210px;
+  top: -30px; left: -55px;
+  transform: rotate(-12deg);
+}
+
+/* GIRATOIRE — milieu droit, légèrement incliné */
+.sign-xxl.giratoire {
+  width: 190px; height: 190px;
+  top: 270px; right: -52px;
+  transform: rotate(8deg);
+}
+
+/* CÉDEZ — bas gauche */
+.sign-xxl.cedez {
+  width: 180px; height: 180px;
+  bottom: 90px; left: -44px;
+  transform: rotate(-6deg);
+}
+
+/* ── Semis de petits panneaux ── */
+.sign-sm {
+  position: absolute;
+  opacity: var(--sign-sm-opacity);
+  filter: grayscale(1);
+  width: 34px;
+  height: 34px;
+}
+
+/* grille positionnelle — 16 petits panneaux, décalés pour éviter les nodes */
+.sign-sm.s01 { top:  52px; left:  22px; transform: rotate( 5deg); }
+.sign-sm.s02 { top:  44px; right: 28px; transform: rotate(-8deg); width:30px; height:30px; }
+.sign-sm.s03 { top: 135px; left: 155px; transform: rotate( 3deg); width:28px; height:28px; }
+.sign-sm.s04 { top: 190px; left:  32px; transform: rotate(-11deg); }
+.sign-sm.s05 { top: 200px; right: 50px; transform: rotate( 7deg); width:30px; height:30px; }
+.sign-sm.s06 { top: 300px; left:  18px; transform: rotate(-4deg); width:32px; height:32px; }
+.sign-sm.s07 { top: 310px; left: 142px; transform: rotate( 9deg); width:28px; height:28px; }
+.sign-sm.s08 { top: 390px; right: 22px; transform: rotate(-7deg); }
+.sign-sm.s09 { top: 440px; left:  50px; transform: rotate( 4deg); width:30px; height:30px; }
+.sign-sm.s10 { top: 510px; left: 170px; transform: rotate(-9deg); width:28px; height:28px; }
+.sign-sm.s11 { top: 520px; right: 36px; transform: rotate( 6deg); }
+.sign-sm.s12 { top: 590px; left:  24px; transform: rotate(-5deg); width:30px; height:30px; }
+.sign-sm.s13 { top: 620px; left: 130px; transform: rotate( 11deg); width:26px; height:26px; }
+.sign-sm.s14 { top: 660px; right: 20px; transform: rotate(-10deg); }
+.sign-sm.s15 { top: 700px; left:  60px; transform: rotate( 3deg); width:30px; height:30px; }
+.sign-sm.s16 { top: 740px; left: 160px; transform: rotate(-6deg); width:28px; height:28px; }
+
+/* ── App bar ────────────────────────────────────────────────────── */
+.appbar {
+  height: 52px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  background: var(--su);
+  border-bottom: 1px solid var(--bo);
+  position: relative;
+  z-index: 30;
+}
+.appbar .logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+}
+.appbar .logo .p-badge {
+  width: 27px; height: 27px;
+  border-radius: 9px;
+  background: var(--a);
+  color: #fff;
+  display: grid; place-items: center;
+  font: 900 15px/1 'Plus Jakarta Sans', sans-serif;
+  box-shadow: 0 3px 0 var(--adk);
+}
+.appbar .hud {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.hud-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font: 700 12.5px/1 'Inter', sans-serif;
+  color: var(--mu2);
+}
+.hud-chip .fire { color: #f97316; }
+.hud-chip .gem  { color: var(--cy); }
+
+/* ── Barre de progression ── */
+.prog-bar-wrap {
+  flex-shrink: 0;
+  padding: 12px 18px 14px;
+  background: var(--su);
+  border-bottom: 1px solid var(--bo2);
+  position: relative;
+  z-index: 20;
+}
+.prog-bar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.prog-bar-title {
+  font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+}
+.prog-bar-count {
+  font: 700 11.5px/1 'Inter', sans-serif;
+  color: var(--mu2);
+}
+.prog-bar-count b { color: var(--a); font-weight: 800; }
+.prog-track {
+  height: 9px;
+  background: var(--bg2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  width: 38%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--adk), var(--a));
+  box-shadow: 0 0 10px rgba(88,204,2,.5);
+}
+
+/* ── Zone scrollable ── */
+.map-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 18px 0 90px;
+  position: relative;
+  z-index: 10; /* contenu AU-DESSUS du filigrane */
+}
+.map-scroll::-webkit-scrollbar { width: 0; }
+
+/* ── Route sinueuse (SVG path) ── */
+.route-container {
+  position: relative;
+  min-height: 560px;
+}
+.route-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.path-road {
+  stroke: #dfe3ef;
+  stroke-width: 24;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.path-center {
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-dasharray: 8 14;
+  stroke-linecap: round;
+  fill: none;
+}
+
+/* ── Nodes ── */
+.node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.tile {
+  width: 62px; height: 62px;
+  border-radius: 20px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  transition: transform .15s var(--ease-out), box-shadow .15s;
+}
+/* reflet vitré */
+.tile::before {
+  content: '';
+  position: absolute;
+  top: 5px; left: 8px; right: 8px;
+  height: 38%;
+  border-radius: 14px 14px 50% 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,.65), transparent);
+  pointer-events: none;
+}
+.tile .p-letter {
+  font: 900 24px/1 'Plus Jakarta Sans', sans-serif;
+  position: relative;
+  z-index: 1;
+}
+
+/* stamp badge (✓ ou ▶) */
+.stamp {
+  position: absolute;
+  bottom: -6px; right: -6px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 3px solid var(--su);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: #fff;
+  z-index: 3;
+}
+
+/* label sous la tuile */
+.node-label {
+  margin-top: 10px;
+  background: var(--su);
+  border: 1px solid var(--bo);
+  border-radius: 14px;
+  padding: 6px 12px 7px;
+  max-width: 150px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(11,13,26,.07);
+}
+.node-label .nm {
+  display: block;
+  font: 700 12px/1.25 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+}
+.node-label .st {
+  display: block;
+  margin-top: 2px;
+  font: 500 10px/1 'Inter', sans-serif;
+  font-style: italic;
+  color: var(--mu2);
+}
+
+/* ── Node DONE (vert) ── */
+.node.done .tile {
+  background: linear-gradient(160deg, #fff, #edfbf2);
+  box-shadow: 0 6px 0 #15803d, 0 12px 18px -6px rgba(34,197,94,.3);
+}
+.node.done .tile .p-letter { color: var(--gr); }
+.node.done .stamp { background: var(--gr); }
+.node.done .tile::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 26px;
+  border: 2px solid rgba(34,197,94,.3);
+  animation: ring 2.8s ease-out infinite;
+}
+.node.done .node-label { border-color: rgba(34,197,94,.28); }
+.node.done .node-label .st { color: var(--gr-txt); font-style: normal; font-weight: 600; }
+
+/* ── Node NEXT (vert vif — focal point) ── */
+.node.next .tile {
+  background: linear-gradient(160deg, #fff, #f1fce8);
+  box-shadow: 0 6px 0 var(--adk), 0 14px 22px -6px rgba(88,204,2,.35);
+  animation: bob 2s ease-in-out infinite;
+}
+.node.next .tile .p-letter { color: var(--a); }
+.node.next .stamp { background: var(--a); }
+/* halo radiant */
+.node.next::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 108px; height: 108px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(88,204,2,.28), transparent 70%);
+  animation: halo 2.2s ease-in-out infinite;
+  z-index: -1;
+}
+.node.next .node-label {
+  border-color: rgba(88,204,2,.4);
+  box-shadow: 0 8px 22px rgba(88,204,2,.18);
+}
+/* badge "TU ES ICI" */
+.here-badge {
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--a);
+  color: #fff;
+  font: 800 8px/1 'Inter', sans-serif;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(88,204,2,.45);
+  animation: bobx 1.7s ease-in-out infinite;
+}
+.here-badge::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--a);
+}
+/* CTA Commencer */
+.node.next .node-label .st {
+  display: inline-block;
+  margin-top: 6px;
+  background: var(--a);
+  color: #fff;
+  font-style: normal;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 999px;
+  box-shadow: 0 3px 9px rgba(88,204,2,.4);
+}
+.node.next .node-label .st::after { content: ' →'; }
+
+/* ── Node TODO (en attente) ── */
+.node.todo .tile {
+  background: var(--su);
+  box-shadow: 0 3px 0 #dce0ee;
+  border: 2px dashed var(--bo);
+}
+.node.todo .tile .p-letter { color: var(--bo4); }
+.node.todo .node-label { opacity: .82; }
+.node.todo .node-label .nm { color: var(--mu3); }
+
+/* ── Node LOCKED ── */
+.node.locked .tile {
+  background: #e9ebf2;
+  box-shadow: 0 3px 0 #d6dae6;
+}
+.node.locked .tile .p-letter { color: #c3c8d7; }
+.node.locked .node-label { opacity: .75; }
+.node.locked .node-label .nm { color: var(--mu3); }
+.node.locked { cursor: default; }
+
+/* ── Séparateur monde verrouillé ── */
+.gate {
+  margin: 14px 16px 0;
+  padding: 13px 16px;
+  border-radius: var(--r-lg);
+  background: var(--su);
+  border: 1px dashed var(--bo4);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--mu2);
+  position: relative;
+  z-index: 10;
+}
+.gate-icon {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: var(--bg2);
+  display: grid; place-items: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.gate-text {
+  font: 600 11.5px/1.45 'Inter', sans-serif;
+}
+.gate-text b { color: var(--ink); font-weight: 800; }
+
+/* ── Nav bottom ── */
+.nav-bottom {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 72px;
+  background: var(--su);
+  border-top: 1px solid var(--bo);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-bottom: 8px;
+  z-index: 25;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font: 600 10px/1 'Inter', sans-serif;
+  color: var(--mu2);
+  text-decoration: none;
+}
+.nav-item .ico { font-size: 20px; filter: grayscale(1) opacity(.5); }
+.nav-item.active { color: var(--a); }
+.nav-item.active .ico { filter: none; }
+
+/* ── Animations ──────────────────────────────────────────────────── */
+@keyframes ring {
+  0%   { transform: scale(.85); opacity: .5; }
+  100% { transform: scale(1.32); opacity: 0; }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
+@keyframes bobx {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(-3px); }
+}
+@keyframes halo {
+  0%, 100% { transform: translate(-50%,-50%) scale(.8);  opacity: .55; }
+  50%       { transform: translate(-50%,-50%) scale(1.18); opacity: 1;  }
+}
+
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <span class="tag">Mockup · charte panneaux</span>
+  <h1>Mon parcours — panneaux filigrane</h1>
+  <p>Grands fantômes XXL aux trois coins (STOP · giratoire · cédez-le-passage) + semis de 16 petits panneaux désaturés. Opacité 4-6 % — le contenu reste roi.</p>
+</div>
+
+<!-- ════════════════ CADRE TÉLÉPHONE ════════════════ -->
+<div class="phone">
+
+  <!-- COUCHE 0 : panneaux filigrane (z-index 0, derrière tout) -->
+  <div class="signs-layer">
+
+    <!-- 3 grands fantômes XXL -->
+    <img class="sign-xxl stop"
+         src="../public/signs/stop.svg"
+         alt="" aria-hidden="true" />
+    <img class="sign-xxl giratoire"
+         src="../public/signs/carrefour-giratoire.svg"
+         alt="" aria-hidden="true" />
+    <img class="sign-xxl cedez"
+         src="../public/signs/cedez-le-passage.svg"
+         alt="" aria-hidden="true" />
+
+    <!-- Semis de petits panneaux (16 pièces, types variés) -->
+    <img class="sign-sm s01" src="../public/signs/sens-interdit.svg"                 alt="" aria-hidden="true" />
+    <img class="sign-sm s02" src="../public/signs/priorite-a-droite.svg"             alt="" aria-hidden="true" />
+    <img class="sign-sm s03" src="../public/signs/route-prioritaire.svg"             alt="" aria-hidden="true" />
+    <img class="sign-sm s04" src="../public/signs/danger-virage-droite.svg"         alt="" aria-hidden="true" />
+    <img class="sign-sm s05" src="../public/signs/depassement-interdit.svg"         alt="" aria-hidden="true" />
+    <img class="sign-sm s06" src="../public/signs/stationnement-interdit.svg"       alt="" aria-hidden="true" />
+    <img class="sign-sm s07" src="../public/signs/sens-unique.svg"                  alt="" aria-hidden="true" />
+    <img class="sign-sm s08" src="../public/signs/danger-passage-pietons.svg"       alt="" aria-hidden="true" />
+    <img class="sign-sm s09" src="../public/signs/circulation-interdite.svg"        alt="" aria-hidden="true" />
+    <img class="sign-sm s10" src="../public/signs/danger-feux-tricolores.svg"       alt="" aria-hidden="true" />
+    <img class="sign-sm s11" src="../public/signs/piste-cyclable-obligatoire.svg"   alt="" aria-hidden="true" />
+    <img class="sign-sm s12" src="../public/signs/interdiction-tourner-gauche.svg"  alt="" aria-hidden="true" />
+    <img class="sign-sm s13" src="../public/signs/fin-route-prioritaire.svg"        alt="" aria-hidden="true" />
+    <img class="sign-sm s14" src="../public/signs/arret-stationnement-interdit.svg" alt="" aria-hidden="true" />
+    <img class="sign-sm s15" src="../public/signs/fin-toutes-interdictions.svg"     alt="" aria-hidden="true" />
+    <img class="sign-sm s16" src="../public/signs/priorite-a-droite.svg"            alt="" aria-hidden="true" />
+
+  </div><!-- /signs-layer -->
+
+  <!-- APPBAR (z-index 30) -->
+  <div class="appbar">
+    <div class="logo">
+      <span class="p-badge">P</span>
+      PermiGo
+    </div>
+    <div class="hud">
+      <span class="hud-chip"><span class="fire">🔥</span> 7</span>
+      <span class="hud-chip"><span class="gem">💎</span> 320</span>
+    </div>
+  </div>
+
+  <!-- BARRE DE PROGRESSION (z-index 20) -->
+  <div class="prog-bar-wrap">
+    <div class="prog-bar-label">
+      <span class="prog-bar-title">Mon parcours</span>
+      <span class="prog-bar-count"><b>4</b> / 30 validés</span>
+    </div>
+    <div class="prog-track">
+      <div class="prog-fill"></div>
+    </div>
+  </div>
+
+  <!-- ZONE SCROLLABLE (z-index 10 — contenu au-dessus du filigrane) -->
+  <div class="map-scroll">
+    <div class="route-container">
+
+      <!--
+        SVG de la route sinueuse.
+        Tracé zigzag sur 5 nœuds :
+          N1 (38%, 60px) → N2 (70%, 160px) → N3 (28%, 265px) → N4 (68%, 370px) → N5 (50%, 480px)
+        Coordonnées en % de largeur et px de hauteur pour un container 375px × 560px.
+      -->
+      <svg class="route-svg" viewBox="0 0 375 560" preserveAspectRatio="none">
+        <!-- bande de route -->
+        <path class="path-road"
+              d="M 143 60
+                 C 143 110, 263 140, 263 160
+                 C 263 200, 105 245, 105 265
+                 C 105 305, 255 345, 255 370
+                 C 255 420, 188 455, 188 480" />
+        <!-- tirets blancs centraux -->
+        <path class="path-center"
+              d="M 143 60
+                 C 143 110, 263 140, 263 160
+                 C 263 200, 105 245, 105 265
+                 C 105 305, 255 345, 255 370
+                 C 255 420, 188 455, 188 480" />
+      </svg>
+
+      <!-- ── Node 1 — DONE ── -->
+      <div class="node done" style="left:38%;top:60px;">
+        <div class="tile">
+          <span class="p-letter" style="color:var(--gr)">P</span>
+          <span class="stamp">✓</span>
+        </div>
+        <div class="node-label">
+          <span class="nm">Priorités de passage</span>
+          <span class="st">Validé</span>
+        </div>
+      </div>
+
+      <!-- ── Node 2 — DONE ── -->
+      <div class="node done" style="left:70%;top:160px;">
+        <div class="tile">
+          <span class="p-letter" style="color:var(--gr)">P</span>
+          <span class="stamp">✓</span>
+        </div>
+        <div class="node-label">
+          <span class="nm">Panneaux de danger</span>
+          <span class="st">Validé</span>
+        </div>
+      </div>
+
+      <!-- ── Node 3 — NEXT (focal, TU ES ICI) ── -->
+      <div class="node next" style="left:28%;top:265px;">
+        <span class="here-badge">Tu es ici</span>
+        <div class="tile">
+          <span class="p-letter">P</span>
+          <span class="stamp">▶</span>
+        </div>
+        <div class="node-label">
+          <span class="nm">Signalisation obligatoire</span>
+          <span class="st">Commencer</span>
+        </div>
+      </div>
+
+      <!-- ── Node 4 — TODO ── -->
+      <div class="node todo" style="left:68%;top:370px;">
+        <div class="tile">
+          <span class="p-letter">P</span>
+        </div>
+        <div class="node-label">
+          <span class="nm">Vitesses & distances</span>
+          <span class="st">À venir</span>
+        </div>
+      </div>
+
+      <!-- ── Node 5 — LOCKED ── -->
+      <div class="node locked" style="left:50%;top:480px;">
+        <div class="tile">
+          <span class="p-letter" style="font-size:22px">🔒</span>
+        </div>
+        <div class="node-label">
+          <span class="nm">Conduite en ville</span>
+          <span class="st">Verrouillé</span>
+        </div>
+      </div>
+
+    </div><!-- /route-container -->
+
+    <!-- Séparateur de monde verrouillé -->
+    <div class="gate">
+      <div class="gate-icon">🏆</div>
+      <div class="gate-text">
+        <b>Compétence 2 débloquée</b> après validation des 10 premiers objectifs.
+      </div>
+    </div>
+
+  </div><!-- /map-scroll -->
+
+  <!-- NAV BOTTOM (z-index 25) -->
+  <nav class="nav-bottom">
+    <a class="nav-item active" href="#">
+      <span class="ico">🗺️</span>
+      Parcours
+    </a>
+    <a class="nav-item" href="#">
+      <span class="ico">⚡</span>
+      Quiz
+    </a>
+    <a class="nav-item" href="#">
+      <span class="ico">🏅</span>
+      Ligue
+    </a>
+    <a class="nav-item" href="#">
+      <span class="ico">👤</span>
+      Profil
+    </a>
+  </nav>
+
+</div><!-- /phone -->
+
+<!-- Note de composition -->
+<div class="intro" style="margin-top:8px">
+  <p style="color:#5a6480;font-size:11.5px;line-height:1.6">
+    <b style="color:#8895bb">Composition :</b>
+    3 fantômes XXL ancrés hors-cadre (coins haut-gauche, milieu-droit, bas-gauche) + semis de 16 petits panneaux à
+    positions fixes décalées des nœuds. Monochrome + désaturation complète + opacité 4-6 %.
+    Les variables CSS <code style="color:var(--a)">--sign-xxl-opacity</code> et <code style="color:var(--a)">--sign-sm-opacity</code>
+    permettent de régler l'intensité en une ligne. Dark mode auto-atténué à 2-3 %.
+  </p>
+</div>
+
+</body>
+</html>
