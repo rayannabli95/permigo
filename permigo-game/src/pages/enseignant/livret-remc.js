@@ -523,8 +523,6 @@ export async function mount(root, eleveId) {
 
   await loadData();
   render();
-  // Couche 2 : le moniteur peut cibler une révision conduite pour cet élève.
-  mountCiblerRevision(root, _eleveId);
 }
 
 // ─── Data ─────────────────────────────────────────────────────────
@@ -642,6 +640,9 @@ function render() {
 
   wireMain();
   _loadFeedSection();
+  // Couche 2 : bloc « cibler une révision conduite » — ré-injecté à chaque
+  // render (idempotent) pour qu'il survive aux re-renders post-validation.
+  mountCiblerRevision(_root, _eleveId);
 }
 
 async function _loadFeedSection() {

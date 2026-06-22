@@ -11,6 +11,7 @@ import { esc } from "@/utils/escape.js";
 import { navigate } from "@/router.js";
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { haptic } from "@/utils/haptic.js";
 import { track } from "@/services/analytics.js";
 import {
   FICHES,
@@ -128,7 +129,7 @@ const STYLE = `<style>
 .rvc-a-r { font:800 16px 'Plus Jakarta Sans',sans-serif; color:#047857; }
 .rvc-a-e { font-size:14px; line-height:1.45; margin-top:6px; color:var(--ink); }
 .rvc-done { text-align:center; padding:40px 16px; }
-.rvc-done-e { font-size:54px; }
+.rvc-done-e { font-size:54px; animation: rvcrise .35s cubic-bezier(.23,1,.32,1) both; }
 .rvc-done-t { font:800 22px 'Plus Jakarta Sans',sans-serif; margin:10px 0 4px; }
 .rvc-focus { margin:0 0 18px; border:2px solid color-mix(in srgb,#f59e0b 45%, transparent); border-radius:16px; padding:14px; background: color-mix(in srgb,#f59e0b 7%, transparent); }
 .rvc-focus-k { font:800 12px 'Plus Jakarta Sans',sans-serif; text-transform:uppercase; letter-spacing:.05em; color:#b45309; margin-bottom:6px; }
@@ -343,6 +344,7 @@ export async function mount(root) {
     if (qi >= qs.length) {
       markRevised(code);
       track("revision_conduite_quiz_done", { code });
+      haptic("success");
       if (focusId) {
         const fid = focusId;
         focusId = null;
@@ -388,9 +390,11 @@ export async function mount(root) {
     root.querySelector("[data-act]").addEventListener("click", (e) => {
       if (e.currentTarget.getAttribute("data-act") === "reveal") {
         revealed = true;
+        haptic("select");
       } else {
         qi += 1;
         revealed = false;
+        haptic("tap");
       }
       render();
     });
