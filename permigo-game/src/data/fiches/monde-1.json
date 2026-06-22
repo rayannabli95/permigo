@@ -1,0 +1,341 @@
+[
+  {
+    "code": "C1a",
+    "titre": "Prendre en main le poste de conduite",
+    "monde": 1,
+    "competence": "Maniement",
+    "methode": [
+      "Fais le tour rapide de la voiture : rien sous les roues, pneus pas à plat, feux et plaques propres.",
+      "Installe-toi, ferme la portière, vérifie qu'elle est bien claquée.",
+      "Repère les commandes au tableau de bord sans démarrer : compteur, jauge d'essence, témoins.",
+      "Repère les deux commodos derrière le volant : commodo de GAUCHE = les clignotants (et les feux de croisement / route, l'appel de phare) ; commodo de DROITE = les essuie-glaces (et le lave-glace).",
+      "Repère les commandes au pied : à gauche l'embrayage, au milieu le frein, à droite l'accélérateur.",
+      "Mets le contact (sans démarrer) et regarde les témoins : ils s'allument puis s'éteignent. S'il en reste un allumé (huile, batterie, frein), tu le signales."
+    ],
+    "pourquoi": "Tu dois pouvoir actionner un clignotant ou un essuie-glace sans quitter la route des yeux. Si tu cherches une commande en roulant, tu ne regardes plus devant.",
+    "erreur": "Confondre les deux commodos et déclencher les essuie-glaces au lieu du clignotant. Mémo simple : clignotant à gauche, balais à droite.",
+    "bva": "Pas de pédale d'embrayage : à tes pieds il n'y a que frein (gauche) et accélérateur (droite), tous deux pour le pied droit. À la place du levier de vitesses, tu trouves le sélecteur P / R / N / D. Les commodos (clignotant à gauche, essuie-glaces à droite) ne changent pas.",
+    "questions": [
+      {
+        "q": "Où se trouve la commande des clignotants ?",
+        "reponse": "Sur le commodo de gauche, derrière le volant.",
+        "explication": "À droite, ce sont les essuie-glaces."
+      },
+      {
+        "q": "Tu veux mettre les essuie-glaces. Quel commodo ?",
+        "reponse": "Celui de droite.",
+        "explication": "Gauche = clignotants, droite = balais."
+      },
+      {
+        "q": "Tu mets le contact et un témoin reste allumé après le test. Que fais-tu ?",
+        "reponse": "Tu ne pars pas tout de suite et tu le signales au moniteur.",
+        "explication": "Un témoin qui reste allumé (huile, frein, batterie…) signale un défaut."
+      }
+    ],
+    "sources": ["las-de-la-route/4vKI0ny8LI8"]
+  },
+  {
+    "code": "C1b",
+    "titre": "Régler son poste de conduite",
+    "monde": 1,
+    "competence": "Maniement",
+    "methode": [
+      "Siège — distance (profondeur) : avance/recule le siège pour que ton pied gauche puisse enfoncer l'embrayage à fond avec la jambe encore un peu pliée (jamais tendue à bloc). Beaucoup d'élèves se mettent trop loin « pour avoir de la place » : si tu dois tendre la jambe, rapproche-toi.",
+      "Siège — hauteur : règle pour voir la route sans te casser le cou. Repère concret du moniteur : abaisse le pare-soleil — si tu vois la route en dessous, ta hauteur de regard est correcte ; si le pare-soleil te cache la route, tu es trop bas.",
+      "Dossier : on le règle par rapport à la tenue du volant — quand tes mains sont sur le volant, tes bras doivent rester légèrement fléchis (ni trop près, ni trop loin).",
+      "Appuie-tête : le haut de l'appuie-tête au niveau du haut du crâne.",
+      "Volant : règle-le si besoin (poignée sous le volant) pour qu'il ne te gêne pas aux genoux et que tu voies bien le compteur par-dessus.",
+      "Rétroviseurs : intérieur d'abord, de la main droite, sans décoller les épaules du siège — tu dois voir toute la lunette arrière d'un seul coup d'œil, sans bouger la tête. Puis les extérieurs : tu n'aperçois qu'un petit bout de ta voiture en bas, le reste sur la route (objectif ~90 % de la route, ta carrosserie sert juste de repère).",
+      "Ceinture : elle passe sur l'épaule (pas le cou) et sur le bassin (pas le ventre), à plat, pas vrillée."
+    ],
+    "pourquoi": "Un siège mal réglé = tu ne peux pas débrayer à fond (risque de caler) et tu te fatigues vite. Trente secondes de réglage = toute la leçon plus confortable et plus sûre.",
+    "erreur": "Régler le siège trop loin pour « avoir de la place » : la jambe gauche est tendue et n'enfonce plus l'embrayage à fond → tu cales sans comprendre pourquoi.",
+    "bva": "Comme il n'y a pas d'embrayage, le repère « jambe gauche un peu pliée sur l'embrayage » ne s'applique pas. Tu règles la distance pour que le pied droit atteigne frein et accélérateur sans tendre la jambe, et tu cales ton pied gauche au repos (sur le repose-pied à gauche). Hauteur, dossier, volant, rétros, ceinture : identiques.",
+    "questions": [
+      {
+        "q": "À quoi sert de garder la jambe gauche un peu pliée quand tu règles le siège ?",
+        "reponse": "Pour pouvoir enfoncer l'embrayage à fond.",
+        "explication": "Jambe tendue = tu ne débrayes pas complètement et tu risques de caler."
+      },
+      {
+        "q": "Tu règles le rétroviseur intérieur. Tu te penches pour mieux voir ?",
+        "reponse": "Non. On le règle dos et épaules collés au siège.",
+        "explication": "Il doit te montrer toute la lunette arrière sans bouger de ta place."
+      },
+      {
+        "q": "La ceinture doit passer où sur le buste ?",
+        "reponse": "Sur l'épaule, jamais sur le cou ; et sur le bassin, jamais sur le ventre.",
+        "explication": "À plat, pas vrillée."
+      }
+    ],
+    "sources": ["evry-village/s0yN0M5bzjA"]
+  },
+  {
+    "code": "C1c",
+    "titre": "Tenir le volant et tenir sa trajectoire",
+    "monde": 1,
+    "competence": "Maniement",
+    "methode": [
+      "Place tes mains comme sur une horloge : 9h15 (« quart à trois »), pouces posés sur la jante, pas enroulés dessous.",
+      "Regarde loin devant, pas le capot : ton regard « tire » la voiture vers où tu veux aller.",
+      "Tourne en tirant-poussant le volant sans croiser les mains : une main tire, l'autre pousse/accompagne.",
+      "Ne croise les mains que pour les manœuvres lentes (créneau, demi-tour), jamais à vitesse normale.",
+      "Laisse le volant revenir en le retenant après un virage — tu ne le lâches pas pour qu'il tourne tout seul.",
+      "Repère « combien de tours fait le volant ? » : un volant fait environ un tour et demi de chaque côté (un tour complet + un demi-tour pour aller à fond). Pour savoir si tes roues sont droites après un braquage à fond, refais exactement l'inverse.",
+      "Repère « tourne ton volant du côté où tu veux aller » : plutôt que de te perdre entre droite et gauche (surtout en marche arrière), tu tournes le volant vers le côté où tu veux que la voiture se rapproche, en marche avant comme en marche arrière."
+    ],
+    "pourquoi": "Ton regard guide tes mains. Si tu fixes le capot ou un obstacle, tu vas dessus. Si tu regardes loin où tu veux aller, ta trajectoire devient naturellement droite.",
+    "erreur": "Conduire « bras croisés » en permanence ou tenir le volant d'une seule main posée en haut : tu perds en précision et en force pour réagir vite. Autre piège fréquent en manœuvre : dès que la voiture part un peu de travers, donner des coups de volant dans tous les sens pour « rattraper » → tu te perds complètement. Le bon réflexe : avance lentement, observe où va la voiture, puis corrige doucement.",
+    "bva": null,
+    "questions": [
+      {
+        "q": "Tu viens de braquer à fond à droite. Comment remets-tu tes roues droites à coup sûr ?",
+        "reponse": "Tu fais l'inverse exact : un demi-tour + un tour complet vers la gauche (un tour et demi).",
+        "explication": "Beaucoup de voitures ont un repère central pour confirmer."
+      },
+      {
+        "q": "En marche arrière, tu es retourné et tu ne sais plus de quel côté tourner. Quel repère simple t'aide ?",
+        "reponse": "« Je tourne le volant du côté où je veux que la voiture aille. »",
+        "explication": "Même logique en marche avant et en marche arrière, ça évite de se mélanger avec droite/gauche."
+      },
+      {
+        "q": "Ta voiture part doucement de travers en manœuvre. Tu donnes plein de coups de volant ?",
+        "reponse": "Non. Tu ralentis encore, tu observes où elle va, et tu corriges d'un geste doux.",
+        "explication": "Les coups de volant à répétition = tu te perds."
+      }
+    ],
+    "sources": ["las-de-la-route/spEpsRbwVyo"]
+  },
+  {
+    "code": "C1d",
+    "titre": "Démarrer et s'arrêter en douceur",
+    "monde": 1,
+    "competence": "Maniement",
+    "methode": [
+      "Avant de démarrer : frein à main serré, levier au point mort, embrayage enfoncé à fond, contact.",
+      "Passe la 1ère.",
+      "Trouve la zone de patinage : relâche l'embrayage et passe vite la « zone morte » (entre la pédale enfoncée et le début du patinage), puis ralentis le geste dès que le moteur réagit.",
+      "Au patinage, donne un filet d'accélérateur et fais glisser le pied gauche progressivement (la voiture « veut » avancer, le bruit moteur change un peu).",
+      "Desserre le frein à main, la voiture avance.",
+      "Pour t'arrêter : lâche l'accélérateur tôt, freine progressivement, et débraye juste avant l'arrêt complet pour ne pas caler.",
+      "À l'arrêt : frein maintenu, puis point mort + frein à main si tu restes immobilisé.",
+      "Tenue du pied : appuie avec la pointe du pied, talon ancré au sol, et fais glisser le talon au sol pour remonter l'embrayage. Si tu décolles le talon ou si la semelle glisse, tu perds en précision et tu ne retrouves plus le patinage au même endroit."
+    ],
+    "pourquoi": "Le point de patinage (ou plutôt la zone de patinage), c'est le moment où l'embrayage commence à transmettre la force du moteur aux roues. Le relâcher trop vite à ce moment = la voiture sursaute ou cale. Le relâcher en douceur = départ propre.",
+    "erreur": "Relâcher l'embrayage d'un coup au point de patinage → ça cale ou ça part en à-coups. Et débrayer trop tard au freinage → ça cale juste avant l'arrêt.",
+    "bva": "Pas de point de patinage, pas d'embrayage, pas de 1ère à passer. Pour démarrer : pied sur le frein, sélecteur sur D, tu relâches le frein et la voiture avance toute seule (au ralenti), puis tu accélères doucement. Pour t'arrêter : tu freines progressivement avec le pied droit jusqu'à l'arrêt — aucun risque de caler. À l'arrêt prolongé, tu passes sur P et tu serres le frein à main.",
+    "questions": [
+      {
+        "q": "Tu démarres : quel est le tempo en 3 temps de l'embrayage ?",
+        "reponse": "1) Débrayé. 2) Je passe vite la zone morte et je trouve le patinage, je m'y tiens. 3) Je fais glisser le pied progressivement.",
+        "explication": "Ce qui fait caler, c'est de remonter trop lentement la zone morte puis de tout lâcher d'un coup."
+      },
+      {
+        "q": "Pourquoi mettre un filet d'accélérateur au démarrage ?",
+        "reponse": "Pour donner de la force au moteur : la voiture pèse ~1 tonne, l'embrayage seul ne suffit pas à la tracter en douceur.",
+        "explication": "Sans gaz, tu cales."
+      },
+      {
+        "q": "Tu freines pour t'arrêter complètement. Quand débrayes-tu ?",
+        "reponse": "Juste avant l'arrêt, pour ne pas caler.",
+        "explication": "Trop tôt = tu roules en roue libre, trop tard = tu cales."
+      }
+    ],
+    "sources": ["las-de-la-route/4vKI0ny8LI8", "las-de-la-route/sV8hlEY349g"]
+  },
+  {
+    "code": "C1e",
+    "titre": "Doser l'accélérateur et le frein",
+    "monde": 1,
+    "competence": "Maniement",
+    "methode": [
+      "Accélère progressivement, avec la pointe du pied : le pied droit pousse doucement, jamais d'à-coup.",
+      "Entraîne-toi à te stabiliser à différents régimes (ex. ~1000, ~1500, ~2500 tr/min) : plus tu appuies, plus le moteur monte ; si tu dépasses le régime visé, soulage un peu sans lâcher complètement, puis ré-ajuste. Ce dosage « par paliers » se travaille même à l'arrêt.",
+      "Regarde loin pour voir arriver les ralentissements à l'avance.",
+      "Pour ralentir, lâche d'abord l'accélérateur (le frein moteur fait déjà une partie du travail).",
+      "Freine ensuite en deux temps (freinage dégressif) : une première pression plus forte pour ralentir, puis une pression plus légère pour retenir la voiture, qu'on relâche juste avant l'arrêt. Tu joues sur la pédale de frein (un peu plus, un peu moins).",
+      "Garde le pied droit léger : un pied lourd = à-coups, sur-consommation, passagers secoués."
+    ],
+    "pourquoi": "Une conduite douce, c'est de l'anticipation : si tu regardes loin, tu n'as jamais à freiner brutalement. Bonus : passagers à l'aise, moins de carburant, meilleure note à l'examen.",
+    "erreur": "Rouler « en accordéon » : accélérer fort puis freiner fort, en boucle, parce qu'on regarde trop près. Tu fatigues tout le monde et tu uses la voiture.",
+    "bva": "Comme le même pied droit sert au frein et à l'accélérateur, le dosage se joue sur un seul pied : tu lèves du gaz, tu poses sur le frein, sans jamais utiliser les deux en même temps. En D, la voiture continue d'avancer toute seule au ralenti dès que tu lèves le frein — pense à le garder pour rester immobile en pente.",
+    "questions": [
+      {
+        "q": "Tu vois un feu passer au rouge 100 m devant. Premier geste ?",
+        "reponse": "Lâcher l'accélérateur (frein moteur), puis freiner progressivement.",
+        "explication": "Pas freiner d'un coup au dernier moment."
+      },
+      {
+        "q": "C'est quoi le freinage « dégressif » en deux temps ?",
+        "reponse": "Une première pression plus forte pour ralentir, puis une pression plus légère pour retenir, qu'on relâche juste avant l'arrêt.",
+        "explication": "Ça évite de piler et de secouer les passagers."
+      },
+      {
+        "q": "Comment travailler le dosage de l'accélérateur ?",
+        "reponse": "En se stabilisant à différents régimes : on appuie progressivement, on s'immobilise au régime voulu, et si on dépasse on soulage légèrement sans lâcher.",
+        "explication": "Ça se fait même à l'arrêt."
+      }
+    ],
+    "sources": ["las-de-la-route/sV8hlEY349g"]
+  },
+  {
+    "code": "C1f",
+    "titre": "Changer de vitesse au bon moment",
+    "monde": 1,
+    "competence": "Maniement",
+    "methode": [
+      "Écoute / regarde le régime moteur. Repère sonore d'abord (« le moteur monte ») ; chiffres indicatifs : ~2000 tr/min en diesel, ~2500 en essence.",
+      "Pour passer un rapport : lâche l'accélérateur, débraye à fond, déplace le levier, relâche l'embrayage en douceur (en deux temps), reprends l'accélérateur.",
+      "Tiens bien le levier : avec la paume de la main posée sur le pourtour du pommeau, jamais du bout des doigts ni en serrant fort. Pas besoin de force : c'est la position de la main qui compte.",
+      "Sers-toi du ressort de rappel : le levier revient toujours au point mort (entre 3e et 4e) tout seul. Place ta main du côté droit du point mort pour les rapports de droite (5/6 + marche arrière selon les modèles) et devant/derrière pour 1/2/3/4 afin de contrer ce ressort.",
+      "Reste les yeux sur la route, pas sur le levier : tu sens les rapports à la main.",
+      "Rétrograde AVANT un virage ou un freinage, jamais pendant — et on rétrograde parce qu'on a déjà ralenti, pas pour ralentir. Tu choisis le bon rapport pour avoir de la reprise en sortie.",
+      "Adapte le rapport à l'allure : trop haut à basse vitesse = le moteur « tousse » ; trop bas à haute vitesse = le moteur « hurle ». On s'arrête en 2e, pas en 1ère (puis on repasse la 1ère pour repartir)."
+    ],
+    "pourquoi": "Le bon rapport, c'est celui qui garde le moteur à l'aise : ni en train de forcer, ni de s'emballer. Rétrograder avant le virage te laisse de la reprise pour ré-accélérer proprement en sortie.",
+    "erreur": "Regarder le levier en changeant de vitesse (tu ne regardes plus la route) et caler en rétrogradant parce qu'on relâche l'embrayage trop vite à bas régime. Et se tromper de rapport par mauvaise tenue de la main (4e visée, 2e enclenchée) : une erreur de boîte est souvent éliminatoire à l'examen.",
+    "bva": "Il n'y a pas de changement de vitesse à faire : la boîte le fait pour toi. Pas d'embrayage, pas de levier de rapports : tu restes en D et tu gères tout avec l'accélérateur. Cette fiche (montée/rétrogradation manuelle) ne concerne pas un élève en boîte auto — et le risque d'erreur de boîte éliminatoire n'existe pas. Bon à savoir : certaines BVA proposent un mode manuel (+/-), mais ce n'est pas exigé au démarrage de l'apprentissage.",
+    "questions": [
+      {
+        "q": "Tu changes de vitesse. Où regardes-tu, et comment tiens-tu le levier ?",
+        "reponse": "La route, toujours. Le levier se manie paume posée sur le pommeau, sans le regarder et sans forcer.",
+        "explication": "Tu sens les rapports à la main, sans quitter la route des yeux."
+      },
+      {
+        "q": "Pourquoi une erreur de boîte (viser la 4e et passer la 2e) est-elle dangereuse ?",
+        "reponse": "Le moteur s'emballe, c'est souvent éliminatoire à l'examen et ça abîme la boîte.",
+        "explication": "On l'évite avec une bonne position de la main, en repartant du point mort."
+      },
+      {
+        "q": "Tu arrives à un virage serré. Tu rétrogrades avant ou pendant le virage ?",
+        "reponse": "Avant. On rétrograde parce qu'on a déjà ralenti, pour avoir le bon rapport en sortie.",
+        "explication": "Rétrograder en plein virage déséquilibre la voiture."
+      }
+    ],
+    "sources": ["evry-village/jK_mORq5XPU", "las-de-la-route/-c6RPXS6X-A"]
+  },
+  {
+    "code": "C1g",
+    "titre": "Les vérifications avant de rouler (tour de voiture)",
+    "monde": 1,
+    "competence": "Maniement",
+    "methode": [
+      "Pneus : pas dégonflés à l'œil, pas de coupure, gomme pas trop usée (témoin d'usure).",
+      "Feux : allume et fais vérifier phares (croisement/route), clignotants, feux stop, feux de recul.",
+      "Vitres, rétros, plaques, optiques : propres, rien de cassé, bonne visibilité.",
+      "Niveaux (si demandé) : tu sais montrer où se trouvent huile moteur, lave-glace, liquide de refroidissement.",
+      "À l'examen : l'inspecteur te demande une vérification (intérieure ou extérieure) + une question de sécurité routière + une notion de premiers secours. Tu montres/expliques calmement."
+    ],
+    "pourquoi": "Une voiture mal vérifiée, c'est un danger qui roule : un pneu lisse freine mal, un feu mort = tu n'es pas vu. Le tour de voiture, c'est dix secondes qui évitent un accident.",
+    "erreur": "Réciter une liste par cœur sans rien montrer. À l'examen comme en vrai, on attend que tu désignes l'élément (« le bouchon d'huile est ici ») et que tu fasses le geste.",
+    "bva": null,
+    "questions": [
+      {
+        "q": "Sur un pneu, qu'est-ce que tu vérifies à l'œil avant de partir ?",
+        "reponse": "Qu'il n'est pas dégonflé/à plat, pas de coupure ni de hernie, et que la gomme n'est pas trop usée (témoin d'usure).",
+        "explication": "Un pneu lisse ou abîmé freine mal et peut éclater."
+      },
+      {
+        "q": "L'inspecteur dit : « Montrez-moi la commande des feux de croisement. » Tu fais quoi ?",
+        "reponse": "Tu la désignes vraiment (sur le commodo de gauche) et tu l'actionnes.",
+        "explication": "On montre, on ne récite pas."
+      },
+      {
+        "q": "Pourquoi vérifier ses feux avant de rouler ?",
+        "reponse": "Un feu mort = les autres ne voient pas tes intentions (clignotant) ou ton freinage (stop).",
+        "explication": "C'est un risque direct d'accident."
+      }
+    ],
+    "sources": []
+  },
+  {
+    "code": "C1h",
+    "titre": "Réussir les manœuvres-test (créneau, demi-tour, stationnement)",
+    "monde": 1,
+    "competence": "Maniement",
+    "methode": [
+      "Les 6 familles (l'inspecteur en impose UNE) : marche arrière en ligne droite, marche arrière en courbe, stationnement en épi, demi-tour (en 3, 5 ou 7 temps), stationnement en bataille, créneau.",
+      "La vraie clé de TOUTES les manœuvres : savoir déplacer ta voiture en marche arrière (à droite, à gauche). Et tu n'es jamais prioritaire en manœuvre : tu sécurises avant et tu laisses passer tout usager qui arrive.",
+      "Règles communes — Sécurise : clignotant avant de t'arrêter, contrôles à 360° (rétros + vision directe), tu laisses passer les autres.",
+      "Règles communes — Allure la plus lente possible : tu n'es pas chronométré.",
+      "Règles communes — Gère les espacements : ne frôle pas les voitures à côté.",
+      "Règles communes — Tu peux t'APPUYER sur le trottoir, jamais MONTER dessus (taper/monter sur le trottoir = ajournement).",
+      "Règles communes — Contrôle 360° pendant la manœuvre, régulièrement.",
+      "Règles communes — À la fin : point mort + frein à main, voiture bien immobilisée.",
+      "Créneau — Mets-toi à hauteur de la voiture devant la place (rétro contre rétro), clignotant à droite, à bonne distance latérale.",
+      "Créneau — Passe la marche arrière, contrôle, laisse passer si besoin.",
+      "Créneau — Donne un petit quart de tour de volant à droite et va « chercher » l'espace en reculant très lentement (s'il y a 2-3 places libres derrière, profite de toute la place).",
+      "Créneau — Recule en t'appuyant doucement vers le trottoir, sans le taper. Astuce : tu peux rabattre le rétroviseur droit pour mieux voir le trottoir — pense à le remettre avant de repartir.",
+      "Créneau — Passe la 1ère, braque à droite et avance doucement pour te ranger parallèle, puis redresse vite les roues dès que tu es droit.",
+      "Bataille / épi arrière — Compte les places depuis ta cible (« compte 3-4 cases ») et arrête-toi à hauteur, en regardant aussi devant toi entre chaque case.",
+      "Bataille / épi arrière — Marche arrière, braque à fond du côté de la place, contrôle à 360°.",
+      "Bataille / épi arrière — Repère générique : quand tu te retournes, c'est le PREMIER feu / la première arête de la voiture voisine qui doit apparaître (vers le début, au plus tard le milieu de ta lunette arrière). Si tu vises le 2e feu, tu t'écartes trop.",
+      "Bataille / épi arrière — Recule lentement, attends d'être droit AVANT de redresser les roues (un demi-tour + un tour complet).",
+      "Bataille / épi arrière — Ne te fie pas aux places voisines pour t'aligner : imagine que ta ligne de place se prolonge et longe-la."
+    ],
+    "pourquoi": "La clé d'une manœuvre, ce n'est pas la force, c'est la lenteur. Plus tu roules lentement, plus tu as le temps de tourner le volant et de corriger. Vitesse lente + braquage franc.",
+    "erreur": "Aller trop vite et braquer trop tard. Résultat : tu montes sur le trottoir ou tu touches la voiture. C'est l'inverse qu'il faut : ralentir à fond, braquer tôt et franchement. Autre piège : fixer sa place en se retournant trop tôt au lieu de compter ses cases et de rester droit → tu pars de travers.",
+    "bva": "En marche arrière, tu mets le sélecteur sur R. Pas d'embrayage à doser : la voiture recule toute seule au ralenti dès que tu lèves le frein, donc tu règles ta lenteur avec le frein (tu freines un peu pour ralentir, tu lèves pour avancer). Tu gardes le pied droit sur le frein/accélérateur et tu peux braquer tranquillement. C'est souvent plus facile qu'en boîte manuelle (pas de risque de caler en pleine manœuvre).",
+    "questions": [
+      {
+        "q": "Quelle est la règle d'or de toute manœuvre lente comme le créneau ?",
+        "reponse": "Aller très lentement. Tu n'es pas chronométré.",
+        "explication": "La lenteur te donne le temps de braquer et de corriger : vitesse lente, braquage franc."
+      },
+      {
+        "q": "Pour un bataille arrière, quel repère générique vises-tu en te retournant ?",
+        "reponse": "Le PREMIER feu / la première arête de la voiture voisine, vers le début (au plus tard le milieu) de ta lunette arrière.",
+        "explication": "Le 2e feu = tu t'écartes trop."
+      },
+      {
+        "q": "Ton repère a marché sur un parking et rate sur un autre. Pourquoi, et que fais-tu ?",
+        "reponse": "Les places sont plus ou moins larges (et les phares/ta position changent la perception). Tu gardes la même base puis tu corriges.",
+        "explication": "C'est normal, le repère est une base, pas une vérité absolue."
+      }
+    ],
+    "sources": [
+      "evry-village/TTlvjKhHiSQ",
+      "evry-village/BOanq0hYi-4",
+      "las-de-la-route/rmuDYTNkaek",
+      "las-de-la-route/XWvA51Bs92g"
+    ]
+  },
+  {
+    "code": "C1i",
+    "titre": "Enchaîner les manœuvres en autonomie",
+    "monde": 1,
+    "competence": "Maniement",
+    "methode": [
+      "Analyse la situation : quelle manœuvre la place demande (créneau, bataille, épi, demi-tour) ?",
+      "Choisis toi-même la bonne manœuvre et le bon côté (rappel : créneau/bataille à gauche uniquement en sens unique, sinon tu te mets à contre-sens).",
+      "Annonce et sécurise : clignotant avant l'arrêt, contrôles rétros + angle mort + vision directe ; tu n'es pas prioritaire, tu laisses passer.",
+      "Exécute lentement, en gérant TES repères (ceux que ton moniteur t'a appris) — et en gardant la même procédure à chaque fois pour pouvoir corriger.",
+      "Si c'est raté, corrige sans paniquer : remets-toi droit (volant droit, roues droites), repère de quel côté tu as de l'espace, et ramène la voiture vers ce côté. Une correction propre vaut mieux qu'un forcing."
+    ],
+    "pourquoi": "Au permis, l'inspecteur ne te guide pas. Cette compétence prouve que tu décides et que tu te corriges seul — c'est ça, être prêt pour le Monde 2.",
+    "erreur": "Attendre le « top » du moniteur pour chaque geste. Tant que tu dépends d'un guidage, la manœuvre n'est pas acquise. L'autre piège : paniquer dès que la manœuvre n'est pas parfaite du premier coup au lieu de se replacer calmement.",
+    "bva": "Mêmes manœuvres, même autonomie attendue. Tu gères le sens avec le sélecteur (D pour avancer, R pour reculer) et ta lenteur au frein plutôt qu'à l'embrayage. Le fait de ne pas pouvoir caler t'aide à rester serein quand tu te corriges.",
+    "questions": [
+      {
+        "q": "Tu rates le début d'un créneau. Bon réflexe ?",
+        "reponse": "Tu te remets droit (volant droit, roues droites), tu repères où tu as de l'espace, et tu ramènes la voiture de ce côté.",
+        "explication": "Garde la même base et corrige doucement, ne force pas."
+      },
+      {
+        "q": "Comment sais-tu qu'une manœuvre est vraiment « acquise » ?",
+        "reponse": "Quand tu la fais seul, sans que le moniteur t'indique chaque geste.",
+        "explication": "Si tu attends le « top », ce n'est pas encore acquis."
+      },
+      {
+        "q": "Avant de te lancer dans une manœuvre en autonomie, quel est le tout premier geste de sécurité ?",
+        "reponse": "Clignotant + contrôles (rétros, angle mort, vision directe).",
+        "explication": "On sécurise avant de bouger, on n'est jamais prioritaire."
+      }
+    ],
+    "sources": [
+      "las-de-la-route/spEpsRbwVyo",
+      "las-de-la-route/XWvA51Bs92g",
+      "evry-village/BOanq0hYi-4"
+    ]
+  }
+]

@@ -1,0 +1,258 @@
+[
+  {
+    "code": "C3a",
+    "titre": "Bien voir et bien être vu la nuit",
+    "monde": 3,
+    "competence": "Conditions difficiles",
+    "methode": [
+      "Avant de partir : vérifie que tes vitres et tes phares sont propres. Une vitre sale double les reflets la nuit.",
+      "Dès que tu roules : allume tes feux de croisement. La nuit, ils sont obligatoires, même en ville éclairée.",
+      "Sur route sans éclairage et sans personne en face : passe en feux de route (pleins phares) pour voir plus loin. Hors agglo, les panneaux et les balises deviennent réfléchissants : tu vois beaucoup plus loin, tu es plus en confiance.",
+      "Tu vois arriver un véhicule en face (ou la moindre lueur de phares au loin) : repasse en feux de croisement AVANT qu'il te gêne, pour ne pas l'éblouir. Au moindre doute (une lueur derrière un mur, un virage), tu restes en croisement.",
+      "Pendant qu'on te croise : ne fixe JAMAIS les phares d'en face. Pose ton regard sur le bord droit de ta voie (ligne ou bordure) et suis-le. Tu peux même t'aider des reflets des phares d'en face sur la bordure de droite pour te situer.",
+      "Ton regard se fait plus court qu'en plein jour. C'est normal : tu vois moins loin, donc tu agis « en décalage » — tu freines un peu plus tôt, tu ré-accélères un peu plus tard.",
+      "Méfie-toi des piétons sombres et des animaux. Un piéton en habits foncés, capuche, se voit très tard la nuit. Hors agglo, un animal peut surgir. Règle simple : certitude = j'avance, doute = je n'accélère pas.",
+      "Tu te sens lourd, tes paupières tombent : tu t'arrêtes. Pause toutes les 2 h — ET dès le moindre signe de fatigue, sans attendre les 2 h."
+    ],
+    "pourquoi": "La nuit, tu vois beaucoup moins loin et tes yeux fatiguent vite. Tout l'enjeu est de voir le plus loin possible sans aveugler les autres, et de ne pas te laisser hypnotiser par les phares d'en face. Un moniteur le résume bien : la nuit, « les yeux travaillent énormément » — ils cherchent des indices en permanence, là où le jour ils se reposent.",
+    "erreur": "Rester en pleins phares face à une voiture qui arrive (tu l'éblouis, elle t'éblouit en retour) — ou fixer les phares d'en face. Si tu ne regardes plus la route ne serait-ce qu'une fraction de seconde, ça peut être dramatique : tu perds complètement le bord droit de la route.",
+    "bva": null,
+    "questions": [
+      {
+        "q": "On te croise la nuit, des phares arrivent en face. Tu regardes quoi ?",
+        "reponse": "Le bord droit de ta voie (ligne ou bordure), pas les phares.",
+        "explication": "Fixer les phares t'éblouit et t'empêche de voir où finit ta route. Le bord droit te garde dans ta trajectoire — et les reflets sur ce bord t'aident même à te situer."
+      },
+      {
+        "q": "Tu roules pleins phares sur une route déserte, une lueur de phares apparaît au loin. Quel est ton premier geste ?",
+        "reponse": "Repasser en feux de croisement, sans attendre qu'il soit proche.",
+        "explication": "Les pleins phares aveuglent le conducteur d'en face. On baisse dès qu'on perçoit quelqu'un, même une simple lueur derrière un virage ou un mur."
+      },
+      {
+        "q": "Sur une route de nuit, tu n'es pas certain qu'un piéton soit sur le passage devant toi. Tu fais quoi ?",
+        "reponse": "Je n'accélère pas tant que je ne suis pas sûr ; je lève le pied et je vérifie.",
+        "explication": "La nuit, un piéton sombre se voit très tard. La règle est simple : certitude = action, doute = pas de vitesse."
+      }
+    ],
+    "sources": ["las-de-la-route/BmR504NyLLw"]
+  },
+  {
+    "code": "C3b",
+    "titre": "Adapter ta conduite à la pluie, la neige, le brouillard",
+    "monde": 3,
+    "competence": "Conditions difficiles",
+    "methode": [
+      "Prépare la voiture dès les premières gouttes. Essuie-glaces avant (règle la vitesse selon l'intensité), essuie-glace arrière si besoin, et surtout le désembuage : clim + air chaud sur le pare-brise pour chasser la buée vite. Une vitre embuée, c'est de la visibilité en moins, comme la pluie.",
+      "Lève le pied et respecte les limitations « pluie ». Sur autoroute : 130 → 110, 110 → 100. Et dans une courbe annoncée à 50, sous la pluie on ne la prend PAS à 50 : ça peut glisser.",
+      "Allonge ta distance avec la voiture devant. Sous la pluie : ×2 (4 secondes au lieu de 2). Sur la neige : encore plus (jusqu'à ×3).",
+      "Freine doux et tôt. Sur sol mouillé, freiner prend 2× plus de distance : tu commences à freiner bien plus tôt, par petites pressions, jamais d'à-coup.",
+      "Évite les grosses flaques. Une grande flaque peut te faire perdre l'adhérence d'un coup (aquaplaning) et masquer un trou. Si tu ne peux pas l'éviter : ralentis AVANT, puis traverse à vitesse constante, sans coup de volant.",
+      "Allume les bons feux selon la visibilité : pluie / jour gris → feux de croisement pour être vu et mieux voir ; brouillard ou neige, visibilité sous 50 m → feux de brouillard avant ET arrière autorisés ; ⚠️ sous la PLUIE : feux de brouillard ARRIÈRE INTERDITS — ils éblouissent fort le conducteur derrière (jusqu'à 2,5× un feu stop), avant seulement si la pluie est dense ; éteins les feux de brouillard dès que la visibilité revient.",
+      "Pas de pleins phares sous forte pluie. La lumière se réfléchit sur les gouttes et te crée un mur d'éblouissement : tu vois encore moins bien. On reste en croisement.",
+      "Si le brouillard est épais : applique la règle des trois 50 — visibilité 50 m → vitesse 50 km/h → 50 m d'écart."
+    ],
+    "pourquoi": "L'eau, la neige et la glace réduisent l'adhérence de tes pneus : la voiture glisse et met plus de temps à s'arrêter. Plus de distance et plus de douceur compensent ce manque d'accroche. Et la visibilité, c'est l'autre moitié du problème : essuie-glaces et désembuage d'abord, sinon tu conduis « à l'aveugle ».",
+    "erreur": "Garder la même distance que par temps sec « parce qu'on voit encore bien ». La visibilité n'a rien à voir avec l'adhérence : même si tu vois, tu freines deux fois moins bien. Autre erreur fréquente : allumer le feu de brouillard arrière sous la pluie (interdit, et tu aveugles celui qui te suit).",
+    "bva": null,
+    "questions": [
+      {
+        "q": "Sous la pluie, tu multiplies ta distance de sécurité par combien ?",
+        "reponse": "Par 2 (passe de 2 à 4 secondes).",
+        "explication": "Sol mouillé = adhérence réduite = distance de freinage doublée. On double aussi l'écart devant."
+      },
+      {
+        "q": "Il pleut fort. Peux-tu allumer ton feu de brouillard arrière ?",
+        "reponse": "Non. Sous la pluie il est INTERDIT : il éblouit la voiture derrière. Le feu de brouillard arrière, c'est brouillard OU neige uniquement.",
+        "explication": "Sous 50 m de visibilité par brouillard ou neige, oui ; sous la pluie, jamais. Et on éteint dès que ça se dégage."
+      },
+      {
+        "q": "Une grosse flaque d'eau barre ta voie et tu ne peux pas l'éviter. Ton geste ?",
+        "reponse": "Ralentir AVANT la flaque, puis la traverser à vitesse constante, volant stable.",
+        "explication": "Foncer dans une grande flaque = aquaplaning, perte d'adhérence d'un coup. On ralentit avant, jamais dans la flaque."
+      }
+    ],
+    "sources": [
+      "las-de-la-route/3YEtiABilY4",
+      "evry-village/xBrV9KQpUfY",
+      "evry-village/3uSluXI7WNE"
+    ]
+  },
+  {
+    "code": "C3c",
+    "titre": "Garder le contrôle quand ça glisse",
+    "monde": 3,
+    "competence": "Conditions difficiles",
+    "methode": [
+      "Repère le danger à l'œil : zone d'ombre sous les arbres, plaque luisante, feuilles mortes, gravillons, sortie de tunnel mouillée. Tu anticipes AVANT d'y être.",
+      "Lève le pied en douceur bien avant la zone glissante, jamais dessus.",
+      "Sur la zone : tout en souplesse. Accélérateur léger, volant progressif, aucun coup sec. Sur sol mouillé, une accélération brusque suffit à faire patiner les roues.",
+      "Ralentis AVANT le virage, en ligne droite — pas dedans. Dans une courbe glissante, tu regardes le plus loin possible pour anticiper ta trajectoire, et tu tournes pied levé. Aide-toi des panneaux réfléchissants et des bordures pour viser ta sortie.",
+      "Si l'arrière commence à glisser : tu lèves le pied (sans freiner brutalement) et tu regardes là où tu veux aller — les mains suivent ton regard."
+    ],
+    "pourquoi": "Sur sol glissant, tes pneus ont très peu d'accroche. C'est le geste brusque (coup de volant, coup de frein, coup d'accélérateur) qui dépasse cette accroche et fait partir la voiture. La souplesse, elle, ménage l'adhérence.",
+    "erreur": "Freiner en plein virage sur sol glissant. Le freinage + le braquage en même temps, c'est trop pour les pneus : la voiture continue tout droit ou l'arrière décroche.",
+    "bva": null,
+    "questions": [
+      {
+        "q": "Tu arrives sur une plaque de feuilles mortes mouillées en sortie de virage. Ton geste ?",
+        "reponse": "Lever le pied en douceur avant, et garder le volant stable.",
+        "explication": "Les feuilles humides, c'est comme du savon. Tout geste brusque dessus fait glisser. On lisse tout."
+      },
+      {
+        "q": "Sur chaussée glissante, à quel moment tu fais ton freinage avant un virage ?",
+        "reponse": "En ligne droite, AVANT le virage, jamais pendant.",
+        "explication": "Freiner et tourner en même temps demande trop d'adhérence. On dissocie : freiner droit, puis tourner pied levé."
+      },
+      {
+        "q": "L'arrière de ta voiture part légèrement sur le verglas. Tu fais quoi en premier ?",
+        "reponse": "Tu lèves le pied (pas de frein brutal) et tu regardes où tu veux aller.",
+        "explication": "La voiture suit ton regard. Un coup de frein sec aggrave la glissade ; relâcher et viser la sortie la rattrape."
+      }
+    ],
+    "sources": []
+  },
+  {
+    "code": "C3d",
+    "titre": "Freinage d'urgence & adhérence (l'ABS)",
+    "monde": 3,
+    "competence": "Conditions difficiles",
+    "methode": [
+      "Un obstacle surgit. Premier geste : tu freines FORT, à fond, d'un coup. Le frein d'abord — c'est la priorité absolue.",
+      "Tu gardes le pied enfoncé, sans relâcher. Sur une voiture à ABS (toutes les voitures-école modernes), c'est l'ABS qui empêche les roues de bloquer — tu sentiras la pédale vibrer ou « tape-tape » sous ton pied : c'est normal, tu ne relâches pas.",
+      "Tu peux tourner en même temps. Avec l'ABS, tu gardes la direction : tu peux freiner à fond ET diriger la voiture vers ton échappatoire.",
+      "Tu regardes ton échappatoire, pas l'obstacle. Là où tes yeux vont, la voiture va.",
+      "Puis tu débrayes — juste avant que le moteur cale. L'ordre est important : frein en premier, embrayage ensuite. Tu enfonces l'embrayage pour ne pas caler et garder la maîtrise, mais seulement une fois le freinage engagé.",
+      "Une fois le danger passé : tu relâches progressivement et tu reprends une conduite normale."
+    ],
+    "pourquoi": "En urgence, le plus court chemin pour s'arrêter, c'est freiner au maximum. L'ABS te permet de freiner à fond sans bloquer les roues, donc sans glisser tout droit : tu gardes la possibilité de diriger pour éviter l'obstacle. On débraye après, et pas avant, pour ne pas perdre le frein moteur au tout début du freinage.",
+    "erreur": "Freiner « par à-coups » ou relâcher la pédale dès qu'elle vibre, par peur. La vibration EST le signe que l'ABS travaille : relâcher allonge la distance d'arrêt et te fait perdre le bénéfice du système. Autre erreur : débrayer AVANT de freiner — l'ordre est frein d'abord, embrayage ensuite.",
+    "bva": null,
+    "questions": [
+      {
+        "q": "Freinage d'urgence sur une voiture à ABS. Tu freines comment, et dans quel ordre avec l'embrayage ?",
+        "reponse": "Frein à fond d'abord, pied enfoncé sans lâcher ; tu débrayes ensuite, juste avant de caler.",
+        "explication": "L'ABS gère le blocage des roues. Ton boulot : appuyer fort et ne pas lâcher. L'embrayage vient après le frein."
+      },
+      {
+        "q": "Pendant le freinage d'urgence, la pédale vibre fort sous ton pied. Tu fais quoi ?",
+        "reponse": "Tu continues d'appuyer, tu ne relâches pas.",
+        "explication": "La vibration = l'ABS qui travaille, c'est bon signe. Relâcher = perdre le freinage maximal."
+      },
+      {
+        "q": "Un obstacle est pile devant toi en freinage d'urgence. Tu regardes où ?",
+        "reponse": "Vers ton échappatoire (l'espace libre où passer), pas l'obstacle.",
+        "explication": "La voiture suit le regard. Fixer l'obstacle te dirige droit dessus ; viser le trou libre t'y emmène."
+      }
+    ],
+    "sources": []
+  },
+  {
+    "code": "C3e",
+    "titre": "Voie rapide & autoroute : entrer, rouler, sortir",
+    "monde": 3,
+    "competence": "Conditions difficiles",
+    "methode": [
+      "Repérer l'insertion : le combo « Cédez le passage » + interdiction de tourner à gauche annonce une bande d'insertion dans 9 cas sur 10. Dès que tu le vois, prépare-toi.",
+      "S'insérer : mets ton clignotant à gauche.",
+      "Accélère sur toute la bande d'insertion pour atteindre une vitesse proche de celle du flux (en pratique, au minimum 70-80). Bande courte → tu restes en 3e (plus de reprise) ; bande longue → tu peux passer la 4e. Ne t'arrête JAMAIS en bout de bande.",
+      "Contrôle rétro extérieur gauche + coup d'œil par-dessus l'épaule (angle mort) et choisis la voiture devant laquelle tu vas te glisser.",
+      "Quand l'espace est libre, insère-toi souplement et coupe le clignotant. Tu ne décélères pas pour t'insérer : tu maintiens ou tu accélères.",
+      "Rouler : reste sur la voie de droite par défaut, même quand la chaussée s'élargit à 3 voies.",
+      "Pour dépasser : contrôle (intérieur → extérieur → angle mort), clignotant gauche, tu passes, tu ne décélères pas pendant le dépassement, puis tu te rabats à droite une fois doublé (clignotant droit, nouveau contrôle).",
+      "Ne reste jamais à côté d'un poids lourd : tu le dépasses franchement.",
+      "Sortir : clignotant droit ~200 m avant ta sortie, après contrôle.",
+      "Tu ne freines PAS sur l'autoroute : tu attends d'être sur la voie de décélération, une fois sorti, pour ralentir et rétrograder tranquillement."
+    ],
+    "pourquoi": "L'autoroute marche par flux rapide et régulier. Le but est de t'y fondre sans casser ce flux : arriver à la bonne vitesse pour t'insérer, et ralentir à l'écart (voie de décélération) pour en sortir, sans surprendre personne. C'est aussi pour ça qu'on contrôle l'angle mort à fond : même bien placé, quelqu'un peut se faufiler (un motard, une voiture qui force le passage).",
+    "erreur": "S'insérer trop lentement (voire s'arrêter en bout de bande d'accélération) : tu obliges les voitures à freiner pour toi et tu crées un danger. L'insertion réussie, c'est arriver à LEUR vitesse. Autre erreur : freiner sur la voie de circulation au lieu d'attendre la voie de décélération.",
+    "bva": null,
+    "questions": [
+      {
+        "q": "Tu es sur la bande d'insertion pour entrer sur l'autoroute. Ton objectif de vitesse ?",
+        "reponse": "Accélérer sur toute la bande pour atteindre une vitesse proche de celle du flux (au moins 70-80), puis t'insérer dans un espace libre.",
+        "explication": "On s'insère dans un trou à leur allure. Arriver trop lentement ou s'arrêter en bout de bande force tout le monde à freiner."
+      },
+      {
+        "q": "Tu as fini de doubler un camion sur l'autoroute. Tu fais quoi ?",
+        "reponse": "Tu te rabats sur la voie de droite (clignotant droit, contrôle), sans rester à côté de lui.",
+        "explication": "La voie de gauche sert à dépasser, pas à rester. On libère dès qu'on a doublé."
+      },
+      {
+        "q": "Ta sortie approche. À quel moment mets-tu le clignotant et quand ralentis-tu ?",
+        "reponse": "Clignotant droit ~200 m avant, et tu ralentis seulement une fois sorti, sur la voie de décélération.",
+        "explication": "On ne freine jamais sur la voie de circulation : on prévient tôt, puis on ralentit à l'écart sur la bretelle."
+      }
+    ],
+    "sources": ["evry-village/gfdmjDdbAUw"]
+  },
+  {
+    "code": "C3f",
+    "titre": "Tunnels, ponts & zones spécifiques",
+    "monde": 3,
+    "competence": "Conditions difficiles",
+    "methode": [
+      "Tunnel : avant d'entrer, allume tes feux de croisement (jamais les pleins phares dans un tunnel).",
+      "Dès l'entrée : repère mentalement la sortie de secours la plus proche et garde tes distances.",
+      "Dans le tunnel : pas de demi-tour, pas de marche arrière, on garde son allure et son écart.",
+      "En cas d'arrêt forcé / bouchon : coupe le moteur, et en cas de souci, dirige-toi à pied vers la sortie de secours repérée.",
+      "Pont / viaduc : à l'approche d'un pont exposé, tiens fermement ton volant, anticipe une rafale de vent latéral qui peut te déporter.",
+      "À la sortie du pont : attention, la chaussée peut être plus glissante (givre, humidité) qu'ailleurs."
+    ],
+    "pourquoi": "Un tunnel, c'est un espace fermé : on s'y rend visible (feux) et on garde toujours une issue en tête. Un pont, c'est un espace très exposé : le vent peut te pousser d'un coup, d'où la prise ferme du volant.",
+    "erreur": "Entrer dans un tunnel sans allumer ses feux (on « voit encore » à l'entrée mais on devient invisible au fond) — ou relâcher le volant en sortant d'un pont, juste au moment où la rafale frappe.",
+    "bva": null,
+    "questions": [
+      {
+        "q": "Tu entres dans un tunnel en plein jour. Quel geste avant l'entrée ?",
+        "reponse": "Allumer les feux de croisement.",
+        "explication": "Le contraste jour/tunnel t'aveugle un instant ; les feux te rendent visible et t'aident à voir. Jamais les pleins phares."
+      },
+      {
+        "q": "Dès que tu es dans le tunnel, qu'est-ce que tu repères en priorité ?",
+        "reponse": "La sortie de secours la plus proche (et tu gardes tes distances).",
+        "explication": "En cas de problème dans un espace fermé, savoir où s'échapper change tout. On le repère dès l'entrée."
+      },
+      {
+        "q": "Tu traverses un long pont exposé un jour de vent. Comment tiens-tu le volant ?",
+        "reponse": "Fermement des deux mains, prêt à corriger un déport.",
+        "explication": "Le vent latéral pousse la voiture d'un coup. Un volant tenu mou = embardée."
+      }
+    ],
+    "sources": []
+  },
+  {
+    "code": "C3g",
+    "titre": "Ville dense : partager la route avec piétons, vélos et bus",
+    "monde": 3,
+    "competence": "Conditions difficiles",
+    "methode": [
+      "Lève le pied. En ville dense, l'allure réduite est ta marge de sécurité numéro un : elle te laisse le temps de réagir à ce qui surgit. Les ralentisseurs, tu les prends en 2e, en douceur.",
+      "Regarde loin ET large. Tu balayes les trottoirs, entre les voitures garées, devant les bus à l'arrêt — un piéton peut surgir partout, surtout derrière un bus qui masque la vue (le piège classique : il sort pile sur le passage, caché par le bus).",
+      "Avant chaque manœuvre (tourner, te rabattre, te garer) : contrôle ton angle mort par-dessus l'épaule. Un vélo ou une trottinette qui se faufile entre toi et le trottoir s'y cache facilement. Même un simple démarrage à un feu mérite un coup d'œil.",
+      "Quand tu doubles un vélo : laisse au moins 1 mètre d'écart (1,50 m hors agglo) et ralentis. Si tu es déjà trop près quand tu le découvres, tu ne dépasses pas : tu lèves le pied et tu attends.",
+      "Devant un passage piéton : ralentis et cède toujours au piéton, même engagé d'un pas. Tant que tu n'es pas certain qu'il n'y a personne, tu n'accélères pas.",
+      "Couloir de bus : tu n'y roules pas (sauf autorisation marquée au sol) ; attention au bus qui redémarre de son arrêt, il est prioritaire — tu lèves le pied et tu le laisses repartir."
+    ],
+    "pourquoi": "En ville dense, le danger ne vient pas de la vitesse mais de l'imprévu : un piéton entre deux voitures, un vélo dans ton angle mort, une portière qui s'ouvre, un piéton caché derrière un bus. Rouler lentement et regarder partout, c'est ce qui te laisse le temps de t'arrêter à temps. Un moniteur le dit autrement : ta conduite « s'attire » ce que tes décisions provoquent — une hésitation de trop et tu te retrouves collé à un cycliste que tu ne peux plus dépasser.",
+    "erreur": "Oublier le contrôle de l'angle mort par-dessus l'épaule avant de tourner à droite : un cycliste qui remonte sur ta droite est invisible dans le rétroviseur, et c'est l'accident classique « voiture qui tourne / vélo tout droit ». Autre piège : s'engager devant un bus à l'arrêt sans imaginer le piéton qui traverse caché derrière.",
+    "bva": null,
+    "questions": [
+      {
+        "q": "Tu vas tourner à droite en ville. Juste avant, tu contrôles quoi en plus du rétro ?",
+        "reponse": "Ton angle mort droit, par-dessus l'épaule (vélos, trottinettes).",
+        "explication": "Un cycliste qui remonte à droite est invisible dans le rétroviseur. Le coup d'œil épaule évite l'accident classique."
+      },
+      {
+        "q": "Un bus est arrêté à droite et te masque la vue du passage piéton devant lui. Tu fais quoi ?",
+        "reponse": "Tu ralentis fort et tu n'avances qu'une fois sûr qu'aucun piéton ne traverse caché derrière le bus.",
+        "explication": "Le bus masque un piéton qui peut surgir pile sur le passage. Tant que tu n'es pas certain, tu n'accélères pas."
+      },
+      {
+        "q": "Tu dépasses un cycliste sur un boulevard urbain. Quel écart minimum tu laisses ?",
+        "reponse": "Au moins 1 mètre (1,50 m hors agglomération), en ralentissant.",
+        "explication": "Un vélo peut zigzaguer pour éviter un trou ou une portière. L'écart d'1 m absorbe son imprévu."
+      }
+    ],
+    "sources": ["las-de-la-route/VKZr6OCkxZI", "evry-village/Ey5EqhJNJvQ"]
+  }
+]
