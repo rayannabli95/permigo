@@ -155,7 +155,7 @@ const STYLE = `<style>
 @media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before { transition:none !important; animation:none !important; } }
 </style>`;
 
-export async function mount(root) {
+export async function mount(root, param) {
   track("page_view", { page: "revision-conduite" });
 
   // Garde-fou : si les données ne sont pas chargées (build/JSON), on n'explose pas.
@@ -170,8 +170,11 @@ export async function mount(root) {
     return;
   }
 
-  let view = "home";
-  let code = null;
+  // Deep-link : #/revision-conduite/{code} (ex. depuis « Ton centre ») ouvre
+  // directement la fiche de la compétence.
+  const deep = param && getFiche(param) ? param : null;
+  let view = deep ? "fiche" : "home";
+  let code = deep;
   let qi = 0;
   let revealed = false;
   let focusId = null;
