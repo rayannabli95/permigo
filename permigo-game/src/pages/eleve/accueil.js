@@ -23,7 +23,6 @@ import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
 import { getMyChests, getEquippedAsset } from "@/utils/game-state.js";
 import { mountFeedbackFeed } from "@/components/eleve/feedback-feed.js";
-import { mountRevisionCards } from "@/components/eleve/revision-cards.js";
 import { mountDailyQuests } from "@/components/eleve/daily-quests.js";
 import { toast } from "@/components/common/toast.js";
 import { navigate } from "@/router.js";
@@ -1078,9 +1077,6 @@ export async function mount(root) {
       }
       Promise.resolve()
         .then(() => mountFeedbackFeed(accDiv, { eleveId: me.id, limit: 5 }))
-        .catch(() => {});
-      Promise.resolve()
-        .then(() => mountRevisionCards(accDiv, { eleveId: me.id, limit: 3 }))
         .catch(() => {});
     }
 
