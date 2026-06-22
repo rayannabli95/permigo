@@ -8,7 +8,9 @@
 //
 // Flow :
 //   1. Code (pré-rempli depuis l'URL) → get_join_code_info aperçoit l'école.
-//   2. Formulaire élève (email perso + prénom + nom + usertag + naissance + mdp).
+//   2. Formulaire élève (email perso + prénom + nom + naissance + mdp).
+//      Le pseudo (username) est AUTO-GÉNÉRÉ depuis le prénom (genUsername) —
+//      plus de champ « Identifiant » : l'élève le changera dans l'app s'il veut.
 //   3. Submit : sb.auth.signUp() → join_moniteur_by_code(code)
 //      → set_eleve_signup_profile() → consentement parental si mineur.
 //   4. Redirige vers l'accueil élève.
@@ -160,13 +162,6 @@ export async function mount(root) {
         </div>
 
         <div class="sg-row">
-          <label class="sg-label" for="sg-usertag">Identifiant</label>
-          <input class="sg-input" id="sg-usertag" type="text" autocomplete="off" autocapitalize="off" placeholder="Ex : maxdu13" />
-          <div class="sg-help" id="sg-usertag-help">3 caractères minimum.</div>
-          <div class="sg-italic">Ton pseudo unique. C'est ce que les autres élèves voient dans le classement.</div>
-        </div>
-
-        <div class="sg-row">
           <label class="sg-label" for="sg-naissance">Date de naissance</label>
           <input class="sg-input" id="sg-naissance" type="date" />
         </div>
@@ -201,8 +196,6 @@ export async function mount(root) {
   const emailEl = root.querySelector("#sg-email");
   const prenomEl = root.querySelector("#sg-prenom");
   const nomEl = root.querySelector("#sg-nom");
-  const usertagEl = root.querySelector("#sg-usertag");
-  const usertagHelp = root.querySelector("#sg-usertag-help");
   const naissanceEl = root.querySelector("#sg-naissance");
   const parentBlock = root.querySelector("#sg-parent-block");
   const parentEmailEl = root.querySelector("#sg-parent-email");
@@ -229,12 +222,23 @@ export async function mount(root) {
   const emailValid = (v) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((v || "").trim());
   const normCode = (v) => (v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 
+  // Pseudo auto-généré (plus de champ « Identifiant » dans le formulaire) :
+  // slug du prénom (sans accents) + 4 chiffres → 3-24 car., quasi jamais en
+  // collision. L'élève pourra le changer plus tard dans l'app.
+  const genUsername = (prenom) => {
+    const base =
+      (prenom || "eleve")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[^a-z0-9]/g, "")
+        .slice(0, 14) || "eleve";
+    const safe = base.length >= 2 ? base : "eleve";
+    return safe + String(Math.floor(1000 + Math.random() * 9000));
+  };
+
   let codeValid = false; // résolu par get_join_code_info
   let codeChecking = false;
   let codeTimer = null;
-  let usertagAvailable = false;
-  let usertagChecking = false;
-  let checkTimer = null;
   let accountCreated = false; // permet de retenter sans recréer le compte
 
   const validate = () => {
@@ -242,10 +246,6 @@ export async function mount(root) {
     const emailOk = emailValid(emailEl.value);
     const prenomOk = prenomEl.value.trim().length >= 2;
     const nomOk = nomEl.value.trim().length >= 1;
-    const tagOk =
-      usertagEl.value.trim().length >= 3 &&
-      usertagAvailable &&
-      !usertagChecking;
     const dateOk = !!naissanceEl.value;
     const minor = isMinorDate(naissanceEl.value);
     const parentOk =
@@ -257,7 +257,6 @@ export async function mount(root) {
       emailOk &&
       prenomOk &&
       nomOk &&
-      tagOk &&
       dateOk &&
       parentOk &&
       pwdOk
@@ -337,51 +336,6 @@ export async function mount(root) {
     }, 400);
   };
 
-  // Disponibilité du usertag (debounce 450ms) — is_username_available
-  const checkUsertag = () => {
-    const v = usertagEl.value.trim();
-    usertagAvailable = false;
-    if (v.length < 3) {
-      usertagChecking = false;
-      usertagHelp.className = "sg-help";
-      usertagHelp.textContent = "3 caractères minimum.";
-      validate();
-      return;
-    }
-    usertagChecking = true;
-    usertagHelp.className = "sg-help";
-    usertagHelp.textContent = "Vérification…";
-    validate();
-    clearTimeout(checkTimer);
-    checkTimer = setTimeout(async () => {
-      if (usertagEl.value.trim() !== v) return;
-      try {
-        const { data, error } = await sb.rpc("is_username_available", {
-          p_username: v,
-        });
-        if (usertagEl.value.trim() !== v) return;
-        usertagChecking = false;
-        if (error) {
-          usertagAvailable = false;
-          usertagHelp.className = "sg-help";
-          usertagHelp.textContent = "Vérification impossible, réessaie.";
-        } else if (data === true) {
-          usertagAvailable = true;
-          usertagHelp.className = "sg-help ok";
-          usertagHelp.textContent = "✓ Disponible";
-        } else {
-          usertagAvailable = false;
-          usertagHelp.className = "sg-help error";
-          usertagHelp.textContent = "✗ Déjà pris, choisis-en un autre";
-        }
-      } catch {
-        usertagChecking = false;
-        usertagAvailable = false;
-      }
-      validate();
-    }, 450);
-  };
-
   const updateMinor = () => {
     if (!parentBlock) return;
     parentBlock.style.display = isMinorDate(naissanceEl.value) ? "" : "none";
@@ -391,7 +345,6 @@ export async function mount(root) {
   emailEl.addEventListener("input", validate);
   prenomEl.addEventListener("input", validate);
   nomEl.addEventListener("input", validate);
-  usertagEl.addEventListener("input", checkUsertag);
   naissanceEl.addEventListener("input", () => {
     updateMinor();
     validate();
@@ -447,33 +400,25 @@ export async function mount(root) {
         accountCreated = true;
       }
 
-      // 3. Pose usertag / nom / date de naissance (+ email parent si mineur)
+      // 3. Pose le profil : pseudo AUTO-GÉNÉRÉ (plus de champ « Identifiant »),
+      //    nom, date, email parent si mineur. On retente avec un autre pseudo
+      //    en cas de collision (quasi impossible, mais défensif).
       let consentToken = null;
-      const { data: profData, error: profErr } = await sb.rpc(
-        "set_eleve_signup_profile",
-        {
-          p_username: usertagEl.value.trim(),
+      let profData = null;
+      let profErr = null;
+      for (let attempt = 0; attempt < 6; attempt++) {
+        const res = await sb.rpc("set_eleve_signup_profile", {
+          p_username: genUsername(prenomEl.value.trim()),
           p_nom: nomEl.value.trim(),
           p_prenom: prenomEl.value.trim(),
           p_date_naissance: naissanceEl.value,
           p_parent_email: parentEmailEl?.value.trim() || null,
-        },
-      );
+        });
+        profData = res.data;
+        profErr = res.error;
+        if (!profErr || !/username_taken/i.test(profErr.message || "")) break;
+      }
       if (profErr) {
-        if (/username_taken/i.test(profErr.message || "")) {
-          usertagAvailable = false;
-          usertagHelp.className = "sg-help error";
-          usertagHelp.textContent =
-            "✗ Ce usertag vient d'être pris, choisis-en un autre";
-          toast(
-            "Ce usertag est déjà pris, change-le puis réessaie",
-            "error",
-            4000,
-          );
-          submitBtn.textContent = "Créer mon compte";
-          validate();
-          return;
-        }
         if (/parent_email_required/i.test(profErr.message || "")) {
           toast("Renseigne un email de parent valide", "error", 4000);
           submitBtn.disabled = false;
