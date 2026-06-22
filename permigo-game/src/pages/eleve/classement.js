@@ -37,17 +37,33 @@ const LIMIT = 50;
 
 // ─── Ligues REMC (4 mondes) — un élève « monte » en finissant chaque monde ──
 // endAt = score (/31) atteint quand le monde est terminé.
+// Échelle MONOCHROME calée sur l'accent de l'app (var(--a), cf. accent.js) :
+// 4 nuances du clair au profond, comme la ligue Révision. La progression se
+// lit à la saturation, pas à la couleur (pas d'arc-en-ciel vert/jaune/violet).
+// Suit automatiquement le preset choisi (orange → 4 oranges, etc.).
 const REMC_LEAGUES = [
-  { n: 1, id: "C1", name: "Maîtrise du véhicule", color: "#22c55e", endAt: 9 },
-  { n: 2, id: "C2", name: "Circulation normale", color: "#3b82f6", endAt: 17 },
+  {
+    n: 1,
+    id: "C1",
+    name: "Maîtrise du véhicule",
+    color: "color-mix(in srgb, var(--a) 50%, #fff)",
+    endAt: 9,
+  },
+  {
+    n: 2,
+    id: "C2",
+    name: "Circulation normale",
+    color: "color-mix(in srgb, var(--a) 78%, #fff)",
+    endAt: 17,
+  },
   {
     n: 3,
     id: "C3",
     name: "Conditions difficiles",
-    color: "#eab308",
+    color: "var(--a)",
     endAt: 24,
   },
-  { n: 4, id: "C4", name: "Conduite autonome", color: "#8b5cf6", endAt: 31 },
+  { n: 4, id: "C4", name: "Conduite autonome", color: "var(--adk)", endAt: 31 },
 ];
 function remcLeague(score) {
   const s = Math.max(0, Math.min(31, score || 0));
