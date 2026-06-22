@@ -23,7 +23,6 @@ import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
 import { getMyChests, getEquippedAsset } from "@/utils/game-state.js";
 import { mountFeedbackFeed } from "@/components/eleve/feedback-feed.js";
-import { mountRevisionCards } from "@/components/eleve/revision-cards.js";
 import { mountDailyQuests } from "@/components/eleve/daily-quests.js";
 import { toast } from "@/components/common/toast.js";
 import { navigate } from "@/router.js";
@@ -1002,7 +1001,14 @@ export async function mount(root) {
       streak,
     );
     const pendingSessions = pendingSessionsRes.value?.data || [];
-    const todayQuests = todayQuestsRes.value?.data || [];
+    // quest_validate_1 (« Valider 1 compétence ») retirée de l'affichage :
+    // l'élève ne valide JAMAIS lui-même (c'est le moniteur). Quête « morte »
+    // qu'il ne peut pas accomplir → masquée en attendant sa version reformulée
+    // (« Sois prêt pour ta prochaine compétence », branchée sur les fiches de
+    // révision, avec une vraie condition côté élève) qui doit la remplacer.
+    const todayQuests = (todayQuestsRes.value?.data || []).filter(
+      (q) => q.quest_id !== "quest_validate_1",
+    );
     if (todayQuestsRes.status === "rejected" || todayQuestsRes.value?.error) {
       console.error(
         "[accueil] get_today_quests:",
@@ -1076,11 +1082,16 @@ export async function mount(root) {
           )
           .catch(() => {});
       }
+      // Remonté AU-DESSUS de PermiGo+ : les retours du moniteur sont la preuve
+      // d'autorité de l'élève, ils ne doivent pas finir tout en bas de page.
       Promise.resolve()
-        .then(() => mountFeedbackFeed(accDiv, { eleveId: me.id, limit: 5 }))
-        .catch(() => {});
-      Promise.resolve()
-        .then(() => mountRevisionCards(accDiv, { eleveId: me.id, limit: 3 }))
+        .then(() =>
+          mountFeedbackFeed(accDiv, {
+            eleveId: me.id,
+            limit: 5,
+            anchorEl: accDiv.querySelector(".pplus"),
+          }),
+        )
         .catch(() => {});
     }
 
@@ -1265,30 +1276,8 @@ function render({
   <div id="acc-lb-slot"></div>
 
   <!-- ══ BELOW FOLD ══ -->
-  <div class="acc2-section-title">Mon parcours</div>
-  ${isFirstRun ? `<p class="acc2-permis-label" style="margin-bottom:10px">31 compétences à valider avec ton moniteur.</p>` : ""}
-  <div class="worlds-grid">
-    ${worlds
-      .map(
-        (w) => `
-      <div class="world-card" data-world="${esc(w.id)}" data-complete="${w.complete ? "true" : "false"}">
-        <div class="world-top">
-          ${
-            w.image
-              ? `<img class="world-img" src="${esc(w.image)}" alt="${esc(w.name)}" loading="lazy">`
-              : `<span class="world-ico">${icon(w.ico, { size: 22, strokeWidth: 1.5 })}</span>`
-          }
-          <span class="world-pct" style="color:${w.color}">${w.pct}%</span>
-        </div>
-        <div class="world-name">${esc(w.name)}</div>
-        <div class="world-track"><div class="world-fill" style="width:${w.pct}%;background:${w.color}"></div></div>
-        <div class="world-count">${w.done}/${w.total}</div>
-        ${w.complete ? `<div class="world-crown">${icon("award", { size: 14 })}</div>` : ""}
-      </div>
-    `,
-      )
-      .join("")}
-  </div>
+  <!-- « Mon parcours » (grille des 4 mondes) retiré : doublon du permis virtuel
+       (déjà la progression X/31) + onglet Parcours dédié dans la nav. -->
 
   <!-- ══ PERMIGO+ — fiches premium (examen blanc + centre d'examen) ══ -->
   <section class="pplus" aria-label="PermiGo+ — prépa examen premium">
@@ -1680,14 +1669,6 @@ function wire(
       navigate(href);
     }
   });
-
-  // World cards → parcours
-  root.querySelectorAll("[data-world]").forEach((el) => {
-    el.addEventListener("click", () => {
-      track("cta.clicked", { cta_type: "world_card", world: el.dataset.world });
-      navigate("#/parcours");
-    });
-  });
 }
 
 // ─── Tes ligues async (École + Révision, à égalité) ──────────────
@@ -1793,8 +1774,8 @@ async function _loadAndInjectChests(root) {
     const pending = chests.filter((c) => !c.opened_at);
     if (!pending.length) return;
 
-    // Inject a teaser card just before the worlds grid
-    const anchor = root.querySelector(".acc2-section-title");
+    // Inject a teaser card just before PermiGo+ (le bloc « Mon parcours » a été retiré)
+    const anchor = root.querySelector(".pplus");
     if (!anchor) return;
 
     const div = document.createElement("div");
@@ -1919,14 +1900,12 @@ async function _loadAndInjectFlashQuiz(root, me) {
 
 // ─── Helpers ─────────────────────────────────────────────────────
 const _QUEST_HREF = {
-  quest_validate_1: "#/parcours",
   quest_quiz_1: "#/parcours",
   quest_quiz_3: "#/parcours",
   quest_quiz_perfect: "#/parcours",
   quest_streak_keep: "#/",
 };
 const _QUEST_BTN = {
-  quest_validate_1: "Valider une compétence →",
   quest_quiz_1: "Faire un quiz →",
   quest_quiz_3: "Faire 3 quiz →",
   quest_quiz_perfect: "Viser 100% →",
