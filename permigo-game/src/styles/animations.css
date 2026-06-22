@@ -4,29 +4,8 @@
 ═══════════════════════════════════════════════════════════ */
 
 /* ─── Splash boot ─── */
-.splash {
-  position: fixed; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 24px;
-  background: var(--bg);
-  z-index: 100;
-  animation: fade-in .3s ease;
-}
-.splash-logo {
-  font: 800 32px var(--fd);
-  letter-spacing: -.02em;
-  background: linear-gradient(135deg, var(--a), var(--adk));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.splash-spin {
-  width: 32px; height: 32px;
-  border: 3px solid var(--bo);
-  border-top-color: var(--a);
-  border-radius: 50%;
-  animation: spin .8s linear infinite;
-}
+/* Le markup + CSS du splash de boot (feu vert) sont inlinés dans index.html
+   pour s'afficher avant le bundle JS. Voir <style> dans <head>. */
 
 /* ─── Keyframes ─── */
 @keyframes spin { to { transform: rotate(360deg); } }

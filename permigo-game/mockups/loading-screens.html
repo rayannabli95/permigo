@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Mockup — Écrans de chargement PermiGo (6 pistes)</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ── Tokens marque (vert PermiGo) ───────────────────────────── */
+  :root{
+    --a:#58CC02; --adk:#46A302; --a-lt:#6fe016; --a-ink:#1a2800;
+    --bg:#f4f5fb; --su:#ffffff; --ink:#1b2230; --mut:#6b7488; --bo:#e4e7f0;
+    --fd:'Plus Jakarta Sans',sans-serif; --fb:'Inter',sans-serif;
+  }
+  body.dark{
+    --bg:#0c1018; --su:#151b27; --ink:#eef2fb; --mut:#8a94aa; --bo:#26303f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--fb);background:#e9ebf3;color:#1b2230;padding:28px 18px 60px;-webkit-font-smoothing:antialiased}
+  body.dark{background:#070a10;color:#eef2fb}
+  header{max-width:1180px;margin:0 auto 26px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  h1{font-family:var(--fd);font-weight:800;font-size:22px;letter-spacing:-.02em}
+  header p{font-size:13.5px;color:#5a6478;margin-top:6px;max-width:640px;line-height:1.5}
+  body.dark header p{color:#9aa4ba}
+  .toolbar{display:flex;gap:8px;align-items:center}
+  .btn{font-family:var(--fd);font-weight:700;font-size:13px;border:1px solid #cfd4e2;background:#fff;color:#1b2230;border-radius:99px;padding:9px 16px;cursor:pointer}
+  body.dark .btn{background:#151b27;border-color:#2a3344;color:#eef2fb}
+  .btn.active{background:var(--a);border-color:var(--a);color:var(--a-ink)}
+
+  .grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px}
+  .card{display:flex;flex-direction:column;gap:12px}
+  .tag{display:flex;align-items:baseline;gap:8px}
+  .tag b{font-family:var(--fd);font-weight:800;font-size:15px}
+  .tag span{font-size:12px;color:#6b7488}
+  body.dark .tag span{color:#8a94aa}
+  .desc{font-size:12.5px;color:#5a6478;line-height:1.45;min-height:34px}
+  body.dark .desc{color:#9aa4ba}
+
+  /* ── Cadre téléphone ───────────────────────────────────────── */
+  .phone{position:relative;width:100%;aspect-ratio:9/17;border-radius:34px;background:#0a0a0a;padding:9px;box-shadow:0 20px 50px rgba(20,28,48,.28);overflow:hidden}
+  .scr{position:relative;width:100%;height:100%;border-radius:26px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+
+  /* couche fond commune : halo radial très léger derrière le contenu */
+  .halo::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 42%, color-mix(in srgb,var(--a) 14%,transparent), transparent 60%);pointer-events:none}
+
+  .wm{font-family:var(--fd);font-weight:800;letter-spacing:-.02em}
+  .cap{font-family:var(--fb);font-weight:600;font-size:13px;color:var(--mut)}
+
+  /* ════════════════ V1 — Épuré (Apple/Linear) ════════════════ */
+  .v1 .badge{width:92px;height:92px;animation:v1breathe 2.6s ease-in-out infinite;filter:drop-shadow(0 14px 28px color-mix(in srgb,var(--adk) 35%,transparent))}
+  .v1 .badge img{width:100%;height:100%;object-fit:contain}
+  .v1 .wm{font-size:25px;background:linear-gradient(135deg,var(--a),var(--adk));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .v1 .bar{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);width:128px;height:4px;border-radius:99px;background:color-mix(in srgb,var(--a) 16%,var(--bo));overflow:hidden}
+  .v1 .bar::after{content:"";position:absolute;inset:0;width:40%;border-radius:99px;background:linear-gradient(90deg,transparent,var(--a),var(--adk));animation:v1slide 1.5s cubic-bezier(.5,0,.3,1) infinite}
+  @keyframes v1breathe{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.05) translateY(-4px)}}
+  @keyframes v1slide{0%{left:-40%}100%{left:100%}}
+
+  /* ════════════════ V2 — Route qui défile ════════════════════ */
+  .v2{background:linear-gradient(180deg,var(--bg) 0%,color-mix(in srgb,var(--a) 8%,var(--bg)) 100%);justify-content:flex-start;gap:0;padding-top:84px}
+  .v2 .badge{width:78px;height:78px;z-index:3;animation:v2float 2.6s ease-in-out infinite;filter:drop-shadow(0 16px 26px color-mix(in srgb,var(--adk) 40%,transparent))}
+  .v2 .badge img{width:100%;height:100%;object-fit:contain}
+  .v2 .wm{z-index:3;margin-top:14px;font-size:22px;color:var(--ink)}
+  .v2 .cap{z-index:3;margin-top:5px}
+  .v2 .road{position:absolute;left:0;right:0;bottom:0;height:54%;overflow:hidden}
+  .v2 .road .tar{position:absolute;left:50%;bottom:0;width:240%;height:100%;transform:translateX(-50%);background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--adk) 22%,#2b3a1a) 55%);clip-path:polygon(42% 0,58% 0,100% 100%,0 100%)}
+  .v2 .road .dash{position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);width:10px;height:200%;background:repeating-linear-gradient(180deg,#fff 0 26px,transparent 26px 64px);animation:v2drive .65s linear infinite;mask:linear-gradient(180deg,transparent,#000 38%)}
+  @keyframes v2float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  @keyframes v2drive{to{transform:translateX(-50%) translateY(90px)}}
+
+  /* ════════════════ V3 — Feu tricolore (GO) ══════════════════ */
+  .v3 .badge{width:64px;height:64px}
+  .v3 .badge img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 20px color-mix(in srgb,var(--adk) 30%,transparent))}
+  .v3 .wm{font-size:20px;color:var(--ink)}
+  .v3 .light{display:flex;flex-direction:column;gap:11px;padding:13px;border-radius:20px;background:linear-gradient(180deg,#222,#0d0d0d);box-shadow:0 14px 30px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.08)}
+  .v3 .lamp{width:34px;height:34px;border-radius:50%;background:#1c1c1c;box-shadow:inset 0 2px 4px rgba(0,0,0,.6)}
+  .v3 .lamp.r{animation:v3r 3s infinite}
+  .v3 .lamp.y{animation:v3y 3s infinite}
+  .v3 .lamp.g{animation:v3g 3s infinite}
+  .v3 .go{font-family:var(--fd);font-weight:800;font-size:15px;color:var(--adk);opacity:0;animation:v3go 3s infinite}
+  @keyframes v3r{0%,28%{background:#ff4035;box-shadow:0 0 16px 3px #ff4035,inset 0 2px 4px rgba(0,0,0,.4)}33%,100%{background:#3a1413}}
+  @keyframes v3y{0%,30%{background:#2b2710}36%,46%{background:#ffc107;box-shadow:0 0 16px 3px #ffc107}52%,100%{background:#2b2710}}
+  @keyframes v3g{0%,52%{background:#12300f}60%,100%{background:#46e314;box-shadow:0 0 20px 5px color-mix(in srgb,#46e314 80%,transparent)}}
+  @keyframes v3go{0%,55%{opacity:0;transform:scale(.7)}65%,100%{opacity:1;transform:scale(1)}}
+
+  /* ════════════════ V4 — Compteur de vitesse ════════════════ */
+  .v4 .gauge{position:relative;width:152px;height:152px}
+  .v4 svg{width:100%;height:100%;transform:rotate(135deg)}
+  .v4 .track{fill:none;stroke:color-mix(in srgb,var(--a) 14%,var(--bo));stroke-width:11;stroke-linecap:round}
+  .v4 .fill{fill:none;stroke:url(--needle);stroke:var(--a);stroke-width:11;stroke-linecap:round;stroke-dasharray:330;stroke-dashoffset:330;animation:v4fill 1.9s cubic-bezier(.45,.05,.3,1) infinite}
+  .v4 .needle{position:absolute;left:50%;bottom:50%;width:3px;height:54px;background:var(--adk);border-radius:99px;transform-origin:bottom center;transform:translateX(-50%) rotate(-120deg);animation:v4nd 1.9s cubic-bezier(.45,.05,.3,1) infinite}
+  .v4 .hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:46px;height:46px}
+  .v4 .hub img{width:100%;height:100%;object-fit:contain}
+  .v4 .wm{font-size:20px;color:var(--ink)}
+  .v4 .cap{margin-top:-8px}
+  @keyframes v4fill{0%{stroke-dashoffset:330}70%,100%{stroke-dashoffset:74}}
+  @keyframes v4nd{0%{transform:translateX(-50%) rotate(-120deg)}70%,100%{transform:translateX(-50%) rotate(120deg)}}
+
+  /* ════════════════ V5 — Volant qui corrige ══════════════════ */
+  .v5 .wheel{width:118px;height:118px;animation:v5turn 2.4s cubic-bezier(.4,0,.2,1) infinite}
+  .v5 .wm{font-size:21px;background:linear-gradient(135deg,var(--a),var(--adk));-webkit-background-clip:text;background-clip:text;color:transparent}
+  @keyframes v5turn{0%,100%{transform:rotate(-26deg)}50%{transform:rotate(26deg)}}
+
+  /* ════════════════ V6 — Wordmark + soulignement ═════════════ */
+  .v6 .badge{width:58px;height:58px;margin-bottom:2px;filter:drop-shadow(0 8px 18px color-mix(in srgb,var(--adk) 28%,transparent))}
+  .v6 .badge img{width:100%;height:100%;object-fit:contain}
+  .v6 .wm{position:relative;font-size:34px;color:var(--ink);overflow:hidden}
+  .v6 .wm::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.85) 50%,transparent 65%);transform:translateX(-120%);animation:v6shine 2.2s ease-in-out infinite}
+  body.dark .v6 .wm::after{background:linear-gradient(105deg,transparent 35%,color-mix(in srgb,var(--a-lt) 70%,transparent) 50%,transparent 65%)}
+  .v6 .uline{width:148px;height:5px;border-radius:99px;background:color-mix(in srgb,var(--a) 16%,var(--bo));overflow:hidden}
+  .v6 .uline::after{content:"";display:block;height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,var(--a-lt),var(--adk));transform-origin:left;transform:scaleX(0);animation:v6load 1.8s cubic-bezier(.5,0,.2,1) infinite}
+  @keyframes v6shine{0%{transform:translateX(-120%)}55%,100%{transform:translateX(220%)}}
+  @keyframes v6load{0%{transform:scaleX(0)}75%,100%{transform:scaleX(1)}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Écrans de chargement — 6 pistes</h1>
+    <p>L'écran actuel = « PermiGo » + un rond qui tourne (spinner générique → effet cheap). Voici 6 directions, toutes animées en CSS pur (légères, s'affichent avant même que l'app charge). Dis-moi le numéro que tu préfères, on le branche.</p>
+  </div>
+  <div class="toolbar">
+    <button class="btn active" id="lt">Clair</button>
+    <button class="btn" id="dk">Sombre</button>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- V1 -->
+  <div class="card">
+    <div class="tag"><b>1 · Épuré</b><span>Apple / Linear</span></div>
+    <div class="desc">Le badge respire, une barre fine glisse. Premium, sobre, intemporel.</div>
+    <div class="phone"><div class="scr v1 halo">
+      <div class="badge"><img src="../public/skins/avatars/permigo-badge-icon.png" alt=""></div>
+      <div class="wm">PermiGo</div>
+      <div class="bar"></div>
+    </div></div>
+  </div>
+
+  <!-- V2 -->
+  <div class="card">
+    <div class="tag"><b>2 · Sur la route</b><span>immersif conduite</span></div>
+    <div class="desc">Une route qui défile vers toi, le badge flotte au-dessus. Colle au métier.</div>
+    <div class="phone"><div class="scr v2">
+      <div class="badge"><img src="../public/skins/avatars/permigo-badge-icon.png" alt=""></div>
+      <div class="wm">PermiGo</div>
+      <div class="cap">Prêt à prendre la route ?</div>
+      <div class="road"><div class="tar"></div><div class="dash"></div></div>
+    </div></div>
+  </div>
+
+  <!-- V3 -->
+  <div class="card">
+    <div class="tag"><b>3 · Feu vert</b><span>ludique &amp; on-brand</span></div>
+    <div class="desc">Le feu passe au vert : « C'est parti ». Sympa, signe la thématique permis.</div>
+    <div class="phone"><div class="scr v3 halo">
+      <div class="badge"><img src="../public/skins/avatars/permigo-badge-icon.png" alt=""></div>
+      <div class="light"><div class="lamp r"></div><div class="lamp y"></div><div class="lamp g"></div></div>
+      <div class="go">C'est parti</div>
+    </div></div>
+  </div>
+
+  <!-- V4 -->
+  <div class="card">
+    <div class="tag"><b>4 · Compteur</b><span>tableau de bord</span></div>
+    <div class="desc">Une jauge de compteur de vitesse se remplit, l'aiguille monte. Dynamique.</div>
+    <div class="phone"><div class="scr v4 halo">
+      <div class="gauge">
+        <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52" stroke-dasharray="245 330"/><circle class="fill" cx="60" cy="60" r="52"/></svg>
+        <div class="needle"></div>
+        <div class="hub"><img src="../public/skins/avatars/permigo-badge-icon.png" alt=""></div>
+      </div>
+      <div class="wm">PermiGo</div>
+      <div class="cap">Démarrage…</div>
+    </div></div>
+  </div>
+
+  <!-- V5 -->
+  <div class="card">
+    <div class="tag"><b>5 · Volant</b><span>remplace le spinner</span></div>
+    <div class="desc">Le rond générique devient un volant qui corrige sa trajectoire. Du sens, pas un spinner.</div>
+    <div class="phone"><div class="scr v5 halo">
+      <svg class="wheel" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="44" stroke="var(--a)" stroke-width="7"/>
+        <circle cx="50" cy="50" r="12" fill="var(--a)"/>
+        <path d="M50 12 V38 M50 62 V88 M88 50 H62 M38 50 H12" stroke="var(--a)" stroke-width="7" stroke-linecap="round"/>
+        <path d="M22 76 L40 60 M78 76 L60 60" stroke="var(--adk)" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+      <div class="wm">PermiGo</div>
+    </div></div>
+  </div>
+
+  <!-- V6 -->
+  <div class="card">
+    <div class="tag"><b>6 · Wordmark</b><span>minimal marque</span></div>
+    <div class="desc">Le nom en grand avec un reflet qui balaie + un trait qui se remplit dessous.</div>
+    <div class="phone"><div class="scr v6 halo">
+      <div class="badge"><img src="../public/skins/avatars/permigo-badge-icon.png" alt=""></div>
+      <div class="wm">PermiGo</div>
+      <div class="uline"></div>
+    </div></div>
+  </div>
+
+</div>
+
+<script>
+  const lt=document.getElementById('lt'),dk=document.getElementById('dk');
+  lt.onclick=()=>{document.body.classList.remove('dark');lt.classList.add('active');dk.classList.remove('active')};
+  dk.onclick=()=>{document.body.classList.add('dark');dk.classList.add('active');lt.classList.remove('active')};
+</script>
+</body>
+</html>
