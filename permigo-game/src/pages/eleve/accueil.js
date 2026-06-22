@@ -33,6 +33,8 @@ import { onPopupsSettled } from "@/utils/intro-overlays.js";
 import { renderPermisMini } from "@/components/eleve/permis-card.js";
 import { theoryLeague } from "@/utils/theory-league.js";
 import { getDailyStreak } from "@/services/daily-quiz.js";
+import { isStandalone } from "@/utils/pwa.js";
+import { openInstallSheet } from "@/components/common/install-nudge.js";
 
 // Tour guidé élève — 1× à la première arrivée sur l'accueil (l'onboarding
 // plein écran est déjà passé : main.js le monte AVANT cette page).
@@ -1154,6 +1156,29 @@ function render({
 }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom = profile.prenom || me.prenom || "Toi";
+
+  // Bandeau d'installation — visible TANT QUE l'app n'est pas installée
+  // (sur iPhone, installer = la seule façon d'avoir les notifs). Il disparaît
+  // tout seul une fois installée (isStandalone) : pas un popup qu'on oublie.
+  const installBanner = !isStandalone()
+    ? `<style>
+    .acc-install{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--a) 10%,var(--su));border:1.5px solid color-mix(in srgb,var(--a) 35%,transparent);box-shadow:0 4px 16px -6px color-mix(in srgb,var(--a) 30%,transparent)}
+    .acc-install-ico{flex:0 0 38px;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--a) 16%,transparent);color:var(--a-txt)}
+    .acc-install-txt{min-width:0;flex:1}
+    .acc-install-t{font:800 14px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
+    .acc-install-s{font:500 11.5px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
+    .acc-install-btn{flex:0 0 auto;min-height:44px;padding:0 18px;border:0;border-radius:11px;background:linear-gradient(to bottom,var(--a-lt),var(--a) 55%,var(--adk));color:var(--a-ink);font:800 13.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:0 4px 12px -3px color-mix(in srgb,var(--a) 50%,transparent)}
+    .acc-install-btn:active{transform:scale(.96)}
+    </style>
+    <div class="acc-install" id="acc-install">
+      <div class="acc-install-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></div>
+      <div class="acc-install-txt">
+        <div class="acc-install-t">Installe PermiGo sur ton téléphone</div>
+        <div class="acc-install-s">Accès direct + tes rappels. Ça prend 10 secondes.</div>
+      </div>
+      <button class="acc-install-btn" id="acc-install-btn" type="button">Installer</button>
+    </div>`
+    : "";
   const isActive = streakSt !== "broken";
   // First-run: no competence validated AND no streak yet → student has never done anything
   const isFirstRun = totalValidated === 0 && !streak.current_streak;
@@ -1183,7 +1208,7 @@ function render({
 
   return `${STYLE}
 <div class="acc2${isFirstRun ? " acc2--first-run" : ""}">
-
+  ${installBanner}
   <!-- ══ HERO compact — salutation + flamme ══ -->
   <div class="acc2-hero">
     <div class="acc2-hero-content">
@@ -1504,6 +1529,20 @@ function wire(
     pendingNotif,
   },
 ) {
+  // Bandeau « Installe l'app » (présent tant que pas installé) → ouvre la sheet
+  const installBtn = root.querySelector("#acc-install-btn");
+  if (installBtn) {
+    installBtn.addEventListener("click", () => {
+      haptic("tap");
+      try {
+        track("install.home_banner_click");
+      } catch {
+        /* best-effort */
+      }
+      openInstallSheet(getCurUser());
+    });
+  }
+
   // Permis virtuel : barre animée + tap → parcours
   const pcmFill = root.querySelector(".pcm-fill[data-target]");
   if (pcmFill)
