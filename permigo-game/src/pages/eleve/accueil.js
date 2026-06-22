@@ -32,6 +32,7 @@ import { startTour } from "@/components/common/guided-tour.js";
 import { onPopupsSettled } from "@/utils/intro-overlays.js";
 import { renderPermisMini } from "@/components/eleve/permis-card.js";
 import { theoryLeague } from "@/utils/theory-league.js";
+import { getDailyStreak } from "@/services/daily-quiz.js";
 
 // Tour guidé élève — 1× à la première arrivée sur l'accueil (l'onboarding
 // plein écran est déjà passé : main.js le monte AVANT cette page).
@@ -355,6 +356,80 @@ const STYLE = `<style>
   transition: transform .14s var(--ease-spring), box-shadow .14s;
 }
 .acc2-action-btn:active { transform: scale(.96); box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--a) 40%, transparent); }
+
+/* ── Question du jour — etat "a faire" : carte visuellement prioritaire ── */
+/* Gradient accent sur la bordure + ombre douce pour donner envie de tapper */
+.acc2-action--daily {
+  background: color-mix(in srgb, var(--a) 6%, var(--su));
+  border-color: color-mix(in srgb, var(--a) 55%, transparent);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--a) 10%, transparent),
+    0 4px 16px -4px color-mix(in srgb, var(--a) 28%, transparent);
+}
+/* Le titre de la question du jour est un peu plus grand et plus soutenu */
+.acc2-action--daily .acc2-action-title {
+  font-size: 20px;
+  color: var(--ink);
+}
+/* Tag label en couleur accent sur la version daily */
+.acc2-action--daily .acc2-action-tag {
+  color: var(--a);
+}
+.acc2-action--daily .acc2-action-tag-dot {
+  background: var(--a);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--a) 25%, transparent);
+}
+
+/* ── Série silencieuse — badge jours d'affilée (fierté, jamais menace) ── */
+.acc2-daily-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
+  color: #ffb35c;
+  background: color-mix(in srgb, #ffb35c 12%, transparent);
+  border: 1px solid color-mix(in srgb, #ffb35c 28%, transparent);
+  border-radius: var(--r-full);
+  padding: 4px 10px 5px;
+  letter-spacing: .02em;
+}
+.acc2-daily-streak::before { content: '🔥'; font-size: 11px; }
+
+/* ── Question du jour — etat "fait" : sobre, invitation douce ── */
+.acc2-action--daily-done {
+  background: color-mix(in srgb, var(--gr, #22c55e) 5%, var(--su));
+  border-color: color-mix(in srgb, var(--gr, #22c55e) 30%, transparent);
+}
+.acc2-action--daily-done .acc2-action-title {
+  color: var(--mu);
+  font-weight: 600;
+  font-size: 16px;
+}
+/* Badge "Fait" vert sobre */
+.acc2-daily-done-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 700 10px/1 'Inter', sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gr-txt, #16a34a);
+  background: color-mix(in srgb, var(--gr, #22c55e) 14%, transparent);
+  border-radius: var(--r-full);
+  padding: 3px 8px 4px;
+  margin-left: auto;
+}
+.acc2-daily-done-badge::before { content: '✓'; margin-right: 2px; }
+/* Bouton secondaire (invitation, pas prioritaire) */
+.acc2-action-btn--muted {
+  background: transparent;
+  border: 1.5px solid var(--bo);
+  color: var(--mu);
+  box-shadow: none;
+  font-weight: 600;
+}
+.acc2-action-btn--muted:active { box-shadow: none; }
 
 /* ═══════════════════════ BELOW FOLD ═══════════════════════════ */
 /* Réserve la hauteur des ligues injectées en async : évite le layout-shift
@@ -953,6 +1028,10 @@ export async function mount(root) {
       /* service indisponible → l'action du jour retombe sur le parcours */
     }
 
+    // Série quotidienne (streak question du jour) — best-effort localStorage.
+    // Indépendant du streak serveur (streaks table), purement local.
+    const dailyStreakCount = getDailyStreak();
+
     track("streak.viewed", { days: streak.current_streak, status: streakSt });
 
     root.innerHTML = render({
@@ -967,6 +1046,7 @@ export async function mount(root) {
       todayQuests,
       pendingNotif,
       dailyQuiz,
+      dailyStreakCount,
     });
     wire(root, {
       streak,
@@ -1070,6 +1150,7 @@ function render({
   todayQuests,
   pendingNotif,
   dailyQuiz,
+  dailyStreakCount = 0,
 }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom = profile.prenom || me.prenom || "Toi";
@@ -1094,6 +1175,7 @@ function render({
     totalValidated,
     dailyQuiz,
     isFirstRun,
+    dailyStreakCount,
   );
 
   // Examen blanc : s'ouvre quand le monde 3 devient accessible.
@@ -1295,6 +1377,7 @@ function renderActionDuJour(
   totalValidated,
   dailyQuiz,
   isFirstRun,
+  dailyStreakCount = 0,
 ) {
   let label = "Action du jour";
   let title,
@@ -1302,6 +1385,9 @@ function renderActionDuJour(
     btnText,
     href,
     urgent = false;
+  // isDaily = true → on active la mise en avant visuelle (carte bleue/accent)
+  let isDaily = false;
+  let isDailyDoneState = false;
 
   // Le quiz n'est plus une porte de validation : on ne pousse plus 'a_valider' en URGENT.
   // L'invitation au quiz-récap (optionnel) vient d'une notif quiz non lue.
@@ -1320,19 +1406,22 @@ function renderActionDuJour(
     urgent = isConsolid;
   } else if (dailyQuiz && !dailyQuiz.done && dailyQuiz.competenceId) {
     // Question du jour — LA boucle solo quotidienne (plan rétention).
+    // Priorité VISUELLE maximale : la carte est mise en avant avec un style accent.
+    isDaily = true;
     label = "Question du jour";
     title =
       dailyQuiz.mode === "decouverte"
         ? "Découvre une compétence"
-        : "Ne perds pas ce que tu maîtrises";
-    sub = "3 questions · 2 min";
-    btnText = "Je joue";
+        : "Consolide ce que tu sais";
+    sub = "3 questions · ~2 min";
+    btnText = "C'est parti";
     href = `#/quiz/${dailyQuiz.competenceId}/post_validation/daily`;
   } else if (dailyQuiz?.done) {
-    label = "Question du jour ✓";
-    title = "Envie de pousser plus loin ?";
-    sub =
-      "Enchaîne des révisions — chaque quiz te fait monter en Ligue Révision.";
+    isDaily = true;
+    isDailyDoneState = true;
+    label = "Question du jour";
+    title = "Fait pour aujourd'hui !";
+    sub = "Reviens demain pour ta prochaine question.";
     btnText = "Continue à réviser";
     href = "#/quiz/next/post_validation/revision";
   } else if (totalValidated === 0) {
@@ -1350,13 +1439,32 @@ function renderActionDuJour(
 
   // First-run: the CTA is the only thing that matters on screen.
   // We add a modifier class that the CSS uses to make it visually dominant.
-  const cardClass = isFirstRun
+  let cardClass = isFirstRun
     ? "acc2-action acc2-action--first-run"
     : "acc2-action";
+
+  // Daily card gets a special accent treatment when not done yet.
+  if (isDaily && !isDailyDoneState) {
+    cardClass += " acc2-action--daily";
+  } else if (isDailyDoneState) {
+    cardClass += " acc2-action--daily-done";
+  }
 
   // First-run btn label uses a shorter verb-first form to fit the button width.
   const btnLabel =
     isFirstRun && totalValidated === 0 ? "C'est parti — 2 min" : btnText;
+
+  // Série silencieuse : affichée avec fierté quand >= 2 jours, jamais menaçante.
+  // Affiché uniquement sur la carte daily (pas done), pas sur les autres états.
+  const streakLine =
+    isDaily && !isDailyDoneState && dailyStreakCount >= 2
+      ? `<div class="acc2-daily-streak">${dailyStreakCount} jours d'affilée</div>`
+      : "";
+
+  // Etat "fait" : pastille verte + invitation douce vers demain (pas de streak).
+  const doneBadge = isDailyDoneState
+    ? `<div class="acc2-daily-done-badge">Fait aujourd'hui</div>`
+    : "";
 
   return `
     <div class="${cardClass}">
@@ -1364,10 +1472,12 @@ function renderActionDuJour(
         <div class="acc2-action-tag-dot${urgent ? " urgent" : ""}"></div>
         ${esc(label)}
         ${urgent ? `<span style="color: var(--rd-txt);font-weight:700">URGENT</span>` : ""}
+        ${doneBadge}
       </div>
       <div class="acc2-action-title">${esc(title)}</div>
       ${sub ? `<div class="acc2-action-sub">${esc(sub)}</div>` : ""}
-      <button class="acc2-action-btn" id="action-cta-btn" data-href="${esc(href)}">
+      ${streakLine}
+      <button class="acc2-action-btn${isDailyDoneState ? " acc2-action-btn--muted" : ""}" id="action-cta-btn" data-href="${esc(href)}">
         ${esc(btnLabel)}
         ${icon("arrow-right", { size: 16 })}
       </button>

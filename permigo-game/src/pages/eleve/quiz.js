@@ -14,6 +14,7 @@ import { findSubComp, findCategory } from "@/data/remc.js";
 import { unlockChest } from "@/utils/game-state.js";
 import { promptInstallAtValueMoment } from "@/components/common/install-nudge.js";
 import { hideBottomNav } from "@/utils/nav.js";
+import { playSuccess } from "@/utils/sound.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -322,12 +323,18 @@ async function handleComplete(
 
   // Question du jour : terminée = faite (réussie ou non — la métrique
   // mesure le rendez-vous quotidien, pas la performance).
+  let dailyStreakAfter = 0;
   if (isDaily) {
-    const { markDailyDone } = await import("@/services/daily-quiz.js");
-    markDailyDone();
+    const { markDailyDone, getDailyStreak } =
+      await import("@/services/daily-quiz.js");
+    markDailyDone(); // met à jour LS_DONE + LS_DAILY_STREAK
+    dailyStreakAfter = getDailyStreak(); // lit la série APRES le marquage
+    // Son de succès — fluide, non intrusif (respecte le pref son de l'élève).
+    playSuccess();
     track("daily_quiz.completed", {
       competence_id: competenceId,
       score_pct: scorePct,
+      daily_streak: dailyStreakAfter,
     });
     // Moment d'opt-in idéal : l'élève vient de vivre la boucle → on propose
     // le rappel quotidien (banner soft, 1 seule fois, jamais re-demandé).
@@ -471,6 +478,7 @@ async function handleComplete(
     canChain,
     me,
     competenceId,
+    dailyStreakAfter,
   });
 }
 
@@ -490,38 +498,85 @@ function renderResult(
     canChain = false,
     me = null,
     competenceId = null,
+    dailyStreakAfter = 0,
   },
 ) {
   const success = validated || passed;
-  const msg = validated
-    ? "Compétence validée ! Continue comme ça"
-    : passed
-      ? canChain
-        ? "Bien joué ! Tu es chaud — on enchaîne ?"
-        : "Bien joué ! Quiz réussi."
-      : reason === "no_competence_unlocked"
+
+  // Message contextualisé selon le mode.
+  // Question du jour : message positif indépendamment du score (le rendez-vous
+  // compte, pas la performance).
+  let msg;
+  if (isDaily) {
+    msg = success
+      ? "Bien joué ! Question du jour cochée."
+      : "Bonne tentative ! Reviens demain pour la suivante.";
+  } else {
+    msg = validated
+      ? "Compétence validée ! Continue comme ça"
+      : passed
         ? canChain
-          ? "Belle découverte ! Tu viens d'explorer une compétence à venir — ton moniteur la travaillera avec toi."
-          : "Compétence pas encore débloquée par ton moniteur."
-        : canChain
-          ? "Pas grave — chaque question te fait progresser. On continue ?"
-          : "Tu y es presque — un dernier tour avec ton moniteur et c'est dans la poche.";
+          ? "Bien joué ! Tu es chaud — on enchaîne ?"
+          : "Bien joué ! Quiz réussi."
+        : reason === "no_competence_unlocked"
+          ? canChain
+            ? "Belle découverte ! Tu viens d'explorer une compétence à venir — ton moniteur la travaillera avec toi."
+            : "Compétence pas encore débloquée par ton moniteur."
+          : canChain
+            ? "Pas grave — chaque question te fait progresser. On continue ?"
+            : "Tu y es presque — un dernier tour avec ton moniteur et c'est dans la poche.";
+  }
+
+  // Serie silencieuse sur l'ecran de resultat daily (>= 2 jours = fierté).
+  // JAMAIS de mention de perte ou de pression.
+  const dailyStreakHtml =
+    isDaily && dailyStreakAfter >= 2
+      ? `<div class="qp-daily-streak" role="status">${dailyStreakAfter} jours d'affilée</div>`
+      : "";
+
+  // Slot pour le gain Ligue Revision (injecte de facon asynchrone apres render).
+  const theoryGainSlot = isDaily ? `<div id="qp-theory-gain-slot"></div>` : "";
 
   // Enchaînement libre : « Continue à réviser » devient l'action principale,
   // « Voir mon parcours » passe en secondaire.
-  const continueBtn = canChain
-    ? `<button class="btn-parcours" id="btn-continue">Continue à réviser →</button>`
-    : "";
-  const parcoursBtn = canChain
-    ? `<button class="btn-home" id="btn-parcours">Voir mon parcours</button>`
-    : `<button class="btn-parcours" id="btn-parcours">Voir mon parcours →</button>`;
-  const homeBtn =
-    !success && !canChain
-      ? `<button class="btn-home" id="btn-home">Retour accueil</button>`
+  // En mode daily: le bouton principal est "Retour accueil" (la boucle est terminee),
+  // mais on propose un bouton secondaire "Continue a reviser" pour les motives.
+  let continueBtn, parcoursBtn, homeBtn;
+  if (isDaily) {
+    continueBtn = `<button class="btn-parcours" id="btn-continue">Continue à réviser</button>`;
+    parcoursBtn = "";
+    homeBtn = `<button class="btn-home" id="btn-home">Retour accueil</button>`;
+  } else {
+    continueBtn = canChain
+      ? `<button class="btn-parcours" id="btn-continue">Continue a reviser</button>`
       : "";
+    parcoursBtn = canChain
+      ? `<button class="btn-home" id="btn-parcours">Voir mon parcours</button>`
+      : `<button class="btn-parcours" id="btn-parcours">Voir mon parcours</button>`;
+    homeBtn =
+      !success && !canChain
+        ? `<button class="btn-home" id="btn-home">Retour accueil</button>`
+        : "";
+  }
 
   root.innerHTML = `
     ${STYLE}
+    <style>
+    .qp-daily-streak {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin: 10px auto 0;
+      font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
+      color: #ffb35c;
+      background: color-mix(in srgb, #ffb35c 12%, transparent);
+      border: 1px solid color-mix(in srgb, #ffb35c 28%, transparent);
+      border-radius: 99px;
+      padding: 6px 14px 7px;
+      animation: qpStreakIn .4s .3s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    .qp-daily-streak::before { content: '🔥'; font-size: 13px; }
+    @keyframes qpStreakIn { from { opacity:0; transform:translateY(6px) scale(.9); } to { opacity:1; transform:none; } }
+    @media (prefers-reduced-motion: reduce) { .qp-daily-streak { animation: none; } }
+    </style>
     <div class="qp anim-slide-up">
       <div class="qp-card qp-result-card" role="status" aria-live="polite">
         <div class="qp-score-ring ${success ? "ring-ok" : "ring-warn"}">
@@ -529,12 +584,35 @@ function renderResult(
           <span class="qp-score-pct">${scorePct}%</span>
         </div>
         <p class="qp-result-msg">${esc(msg)}</p>
+        ${dailyStreakHtml}
+        ${theoryGainSlot}
         ${continueBtn}
         ${parcoursBtn}
         ${homeBtn}
       </div>
     </div>
   `;
+
+  // Gain Ligue Revision — injecte de facon asynchrone apres le RPC
+  // (le calcul a deja ete fait dans quiz-engine via computeTheoryGain, mais
+  // pour la question du jour on doit le refaire ici car quiz.js gere le flow
+  // complet et le slot est disponible maintenant).
+  if (isDaily) {
+    const gainSlot = root.querySelector("#qp-theory-gain-slot");
+    if (gainSlot) {
+      Promise.all([import("@/components/eleve/theory-gain.js")])
+        .then(([{ computeTheoryGain, renderTheoryGain }]) =>
+          computeTheoryGain({
+            kind: "quiz",
+            competenceId,
+            scorePct,
+          }).then((gain) => {
+            if (gain && gainSlot.isConnected) renderTheoryGain(gainSlot, gain);
+          }),
+        )
+        .catch(() => {});
+    }
+  }
 
   const contBtn = root.querySelector("#btn-continue");
   contBtn?.addEventListener("click", async () => {
