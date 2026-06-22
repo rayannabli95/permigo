@@ -138,6 +138,16 @@ const STYLE = `<style>
 .rvc-focus-t { font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; flex:1; }
 .rvc-focus-n { font-size:12px; color:var(--muted,#64748b); }
 .rvc-focus-go { font:700 13px 'Plus Jakarta Sans',sans-serif; color:#b45309; white-space:nowrap; }
+.rvc-go2 { width:100%; border:2px solid var(--a,#6366f1); background:transparent; color:var(--a,#6366f1); border-radius:14px; padding:13px; cursor:pointer; margin-top:18px; font:800 15px 'Plus Jakarta Sans',sans-serif; }
+.rvc-go2:active { transform: scale(0.98); }
+.rvc-ohint { color:var(--muted,#64748b); font-size:13px; margin:2px 0 14px; }
+.rvc-oslot { display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:12px; margin-bottom:8px; background: color-mix(in srgb,#10b981 12%, transparent); font-size:14px; line-height:1.35; animation: rvcrise .25s cubic-bezier(.23,1,.32,1); }
+.rvc-onum { width:22px; height:22px; border-radius:50%; background:#10b981; color:#fff; font:700 12px 'IBM Plex Mono',monospace; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.rvc-opool { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+.rvc-ochip { width:100%; text-align:left; border:1px solid var(--border,#e2e8f0); background:var(--surface,#fff); color:var(--ink); border-radius:12px; padding:12px; cursor:pointer; font:600 14px/1.35 'Inter',sans-serif; transition: transform .12s ease-out; }
+.rvc-ochip:active { transform: scale(0.985); }
+.rvc-shake { animation: rvcshake .35s; border-color:#ef4444 !important; }
+@keyframes rvcshake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
 @media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before { transition:none !important; animation:none !important; } }
 </style>`;
 
@@ -161,6 +171,8 @@ export async function mount(root) {
   let qi = 0;
   let revealed = false;
   let focusId = null;
+  let orderPlaced = [];
+  let orderPool = [];
 
   // Ciblages du moniteur (couche 2). Requête gardée : si la table n'est pas
   // encore migrée / élève hors-ligne, on ignore silencieusement (pas de bannière).
@@ -190,6 +202,7 @@ export async function mount(root) {
   function render() {
     if (view === "fiche") return renderFiche();
     if (view === "quiz") return renderQuiz();
+    if (view === "order") return renderOrder();
     return renderHome();
   }
 
@@ -314,6 +327,7 @@ export async function mount(root) {
           ? `<p class="rvc-src">🎬 D'après de vrais moniteurs : ${f.sources.map((s) => esc(s)).join(", ")}</p>`
           : ""
       }
+      ${f.methode && f.methode.length >= 3 ? `<button class="rvc-go2">🧩 Remets les étapes dans l'ordre</button>` : ""}
       <button class="rvc-go">Réviser ces ${(f.questions || []).length} questions</button>
     </div>`;
     root.querySelector(".rvc-back").addEventListener("click", () => {
@@ -324,6 +338,80 @@ export async function mount(root) {
       focusId = null;
       startQuiz();
     });
+    root.querySelector(".rvc-go2")?.addEventListener("click", () => {
+      orderPlaced = [];
+      orderPool = (f.methode || [])
+        .map((t, i) => ({ i, t }))
+        .sort(() => Math.random() - 0.5);
+      view = "order";
+      render();
+    });
+  }
+
+  function renderOrder() {
+    const f = getFiche(code);
+    const steps = (f && f.methode) || [];
+    if (!f || steps.length < 2) {
+      view = "fiche";
+      return render();
+    }
+    if (orderPlaced.length === steps.length) {
+      markRevised(code);
+      haptic("success");
+      root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-done">
+        <div class="rvc-done-e">🧩</div>
+        <div class="rvc-done-t">Dans l'ordre, nickel !</div>
+        <p class="rvc-sub">Tu as remis les ${steps.length} étapes de « ${esc(f.titre)} » dans le bon ordre.</p>
+        <button class="rvc-go" data-next>Continuer</button>
+      </div></div>`;
+      root.querySelector("[data-next]").addEventListener("click", () => {
+        view = "fiche";
+        render();
+      });
+      return;
+    }
+    const placed = orderPlaced
+      .map(
+        (p, idx) =>
+          `<div class="rvc-oslot"><span class="rvc-onum">${idx + 1}</span><span>${esc(p.t)}</span></div>`,
+      )
+      .join("");
+    const pool = orderPool
+      .map(
+        (p) =>
+          `<button class="rvc-ochip" data-oi="${p.i}">${esc(p.t)}</button>`,
+      )
+      .join("");
+    root.innerHTML = `${STYLE}<div class="rvc">
+      <div class="rvc-top">
+        <button class="rvc-back" aria-label="Retour à la fiche">←</button>
+        <h1 class="rvc-h1" style="font-size:17px">${esc(f.titre)}</h1>
+      </div>
+      <div class="rvc-prog">Étape ${orderPlaced.length + 1} / ${steps.length}</div>
+      <p class="rvc-ohint">Tape les étapes dans le bon ordre.</p>
+      ${placed}
+      <div class="rvc-opool">${pool}</div>
+    </div>`;
+    root.querySelector(".rvc-back").addEventListener("click", () => {
+      view = "fiche";
+      render();
+    });
+    root.querySelectorAll(".rvc-ochip").forEach((b) =>
+      b.addEventListener("click", (e) => {
+        const i = Number(b.getAttribute("data-oi"));
+        if (i === orderPlaced.length) {
+          orderPlaced.push(orderPool.find((x) => x.i === i));
+          orderPool = orderPool.filter((x) => x.i !== i);
+          haptic("select");
+          render();
+        } else {
+          haptic("warning");
+          const el = e.currentTarget;
+          el.classList.add("rvc-shake");
+          setTimeout(() => el.classList.remove("rvc-shake"), 350);
+        }
+      }),
+    );
   }
 
   function startQuiz() {
