@@ -198,7 +198,16 @@ export function mascotHTML(state = "think") {
 
 export function setMascot(container, state) {
   const img = container.querySelector(".qz-mascot");
-  if (img) img.src = `/skins/mascot-${state}.png`;
+  if (!img) return;
+  // Swap src only if actually different (avoids spurious reflow)
+  const next = `/skins/mascot-${state}.png`;
+  if (img.src.endsWith(next.replace(/^\//, ""))) return;
+  img.src = next;
+  // Micro-pop on state change: remove + force reflow + re-add so the
+  // animation fires even when called twice in a row with different states.
+  img.classList.remove("qz-mascot--pop");
+  void img.offsetWidth; // force reflow
+  img.classList.add("qz-mascot--pop");
 }
 
 // ─── Styles partagés ─────────────────────────────────────────────
@@ -211,6 +220,9 @@ export const QUIZ_STYLE = `<style>
   .qz-mascot-result{display:block;margin:0 auto 4px;width:104px;height:104px;object-fit:contain;animation:qzMascotIn .45s var(--qz-spring) both}
   @keyframes qzMascotIn{from{opacity:0;transform:scale(.85) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
   @keyframes qzMascotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  /* Micro-pop on state change (celebrate / coach) — léger, pas distrayant */
+  .qz-mascot--pop{animation:qzMascotPop .38s var(--qz-spring) both}
+  @keyframes qzMascotPop{0%{transform:scale(1) translateY(0)}30%{transform:scale(1.18) translateY(-5px)}70%{transform:scale(.96) translateY(1px)}100%{transform:scale(1) translateY(0)}}
 
   /* Progression — pips segmentés */
   .qz-top{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-right:62px} /* réserve l'angle à la mascotte */
@@ -287,7 +299,7 @@ export const QUIZ_STYLE = `<style>
 
   /* Reduced motion : on garde les fondus, on coupe les mouvements */
   @media (prefers-reduced-motion: reduce){
-    .qz-mascot,.qz-mascot-result{animation:none}
+    .qz-mascot,.qz-mascot-result,.qz-mascot--pop{animation:none!important}
     .qz-opt,.qz-praise,.qz-streak,.qz-expl,.qz-next{animation-duration:.01ms;animation-delay:0ms}
     .qz-opt.hero{animation:none;box-shadow:0 0 0 2px rgba(245,158,11,.4)}
     .qz-pip::after{transition:none}

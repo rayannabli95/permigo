@@ -36,6 +36,7 @@ import {
   playVictory,
   playDefeat,
   playQuizMusic,
+  playWhoosh,
 } from "@/utils/sound.js";
 
 const PASS_THRESHOLD = 12; // / 15
@@ -169,9 +170,14 @@ function renderChoices(q) {
 
 // Corps d'une question (énoncé + grille de réponses + conteneur feedback),
 // partagé par les 4 rendus de question. La mascotte n'apparaît qu'en parcours.
-function renderQuestionBody(q, num, { mascot = false } = {}) {
+// mascotState : pose initiale ("hello" 1re question, "think" sinon).
+function renderQuestionBody(
+  q,
+  num,
+  { mascot = false, mascotState = "think" } = {},
+) {
   return `<div class="exb-qbody" id="exb-qbody">
-        ${mascot ? `<img class="exb-mascot" src="/skins/mascot-think.png" alt="" aria-hidden="true" />` : ""}
+        ${mascot ? `<img class="exb-mascot" src="/skins/mascot-${esc(mascotState)}.png" alt="" aria-hidden="true" />` : ""}
         <p class="exb-qnum">Question ${num}</p>
         <div class="exb-qhead">
           ${muteButtonHTML()}
@@ -358,9 +364,11 @@ function runExbQuiz(
     const num = idx + 1;
     let answered = false; // anti double-clic / anti course clic↔timeout
 
+    // Pose d'accueil sur la 1re question, pensif ensuite
+    const mascotState = mascot && idx === 0 ? "hello" : "think";
     root.querySelector("#exb-screen").innerHTML = `
       ${renderHeader({ num, total: questions.length, idx, answers })}
-      ${renderQuestionBody(q, num, { mascot })}`;
+      ${renderQuestionBody(q, num, { mascot, mascotState })}`;
 
     root
       .querySelector("#exb-quit")
@@ -405,6 +413,19 @@ function runExbQuiz(
         haptic("warning");
         playWrong();
       }
+      // Mascotte réactive : celebrate (bonne) / coach (mauvaise) — uniquement
+      // quand la mascotte est activée (mode parcours, pas officiel / révision).
+      if (mascot) {
+        const mascotEl = root.querySelector(".exb-mascot");
+        if (mascotEl) {
+          mascotEl.src = isCorrect
+            ? "/skins/mascot-celebrate.png"
+            : "/skins/mascot-coach.png";
+          mascotEl.classList.remove("exb-mascot--pop");
+          void mascotEl.offsetWidth;
+          mascotEl.classList.add("exb-mascot--pop");
+        }
+      }
       root.querySelectorAll(".exb-choice").forEach((b) => {
         const i = parseInt(b.dataset.idx, 10);
         b.disabled = true;
@@ -431,7 +452,10 @@ function runExbQuiz(
         timedOut,
       });
       root.querySelector("#exb-next")?.addEventListener("click", () => {
-        playPageturn();
+        // Son de transition : whoosh discret en parcours (avec mascotte),
+        // pageturn neutre sinon — évite la surcharge sonore sur 40 questions.
+        if (mascot) playWhoosh();
+        else playPageturn();
         if (idx + 1 < questions.length) {
           idx++;
           renderQ();
@@ -1116,7 +1140,15 @@ const EXB_CSS = `
   animation: exbMascotIn .4s cubic-bezier(.34,1.56,.64,1) both;
 }
 @keyframes exbMascotIn { from { opacity: 0; transform: scale(.6) } to { opacity: 1; transform: scale(1) } }
-@media (prefers-reduced-motion: reduce) { .exb-mascot { animation: none } }
+/* Micro-pop sur changement d'état (celebrate / coach) */
+.exb-mascot--pop { animation: exbMascotPop .38s cubic-bezier(.34,1.56,.64,1) both }
+@keyframes exbMascotPop {
+  0%  { transform: scale(1) translateY(0) }
+  30% { transform: scale(1.22) translateY(-6px) }
+  70% { transform: scale(.96) translateY(1px) }
+  100%{ transform: scale(1) translateY(0) }
+}
+@media (prefers-reduced-motion: reduce) { .exb-mascot, .exb-mascot--pop { animation: none !important } }
 .exb-qnum {
   font: 700 11px/1 'Inter', sans-serif;
   color: var(--a-txt);
