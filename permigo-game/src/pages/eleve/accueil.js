@@ -1308,27 +1308,14 @@ function render({
         </div>
         <span class="pplus-arrow">${icon("chevron-right", { size: 18 })}</span>
       </a>
-      ${
-        examUnlocked
-          ? `
-      <div class="pplus-card tappable" id="acc-exam" role="button" tabindex="0" aria-label="Passer l'examen blanc">
+      <a class="pplus-card tappable" id="acc-exam-conduite" href="#/exam-conduite" aria-label="Examen blanc de conduite">
         <img class="pplus-badge" src="/skins/badge-3d-ultimate.webp" alt="" aria-hidden="true" loading="lazy">
         <div class="pplus-tx">
           <div class="pplus-t">Examen blanc</div>
-          <div class="pplus-s">Mets-toi en conditions réelles</div>
+          <div class="pplus-s">Teste-toi sur la conduite</div>
         </div>
         <span class="pplus-arrow">${icon("arrow-right", { size: 18 })}</span>
-      </div>`
-          : `
-      <div class="pplus-card locked" aria-label="Examen blanc — se débloque au monde 3">
-        <img class="pplus-badge" src="/skins/badge-3d-ultimate.webp" alt="" aria-hidden="true" loading="lazy">
-        <div class="pplus-tx">
-          <div class="pplus-t">Examen blanc</div>
-          <div class="pplus-s">Se débloque au monde 3</div>
-        </div>
-        <span class="pplus-lock">${icon("lock", { size: 16 })}</span>
-      </div>`
-      }
+      </a>
       <a class="pplus-card tappable" id="acc-centre" href="#/centre-examen" aria-label="Découvre ton centre d'examen">
         <img class="pplus-badge" src="/skins/badge-3d-06.webp" alt="" aria-hidden="true" loading="lazy">
         <div class="pplus-tx">
@@ -1573,22 +1560,7 @@ function wire(
     });
   }
 
-  // Examen blanc (carte déverrouillée uniquement)
-  const examCard = root.querySelector("#acc-exam");
-  if (examCard) {
-    const openExam = () => {
-      haptic("select");
-      track("cta.clicked", { cta_type: "exam_blanc_card" });
-      navigate("#/exam-blanc");
-    };
-    examCard.addEventListener("click", openExam);
-    examCard.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openExam();
-      }
-    });
-  }
+  // L'examen blanc de conduite est une tuile <a href> — pas de wiring JS.
 
   // Centre d'examen (entrée compacte — navigation native via href)
   root.querySelector("#acc-centre")?.addEventListener("click", () => {
