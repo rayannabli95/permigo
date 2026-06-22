@@ -566,9 +566,9 @@ function renderResult(
       display: inline-flex; align-items: center; gap: 5px;
       margin: 10px auto 0;
       font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
-      color: #ffb35c;
-      background: color-mix(in srgb, #ffb35c 12%, transparent);
-      border: 1px solid color-mix(in srgb, #ffb35c 28%, transparent);
+      color: var(--am-txt);
+      background: color-mix(in srgb, var(--am, #f59e0b) 12%, transparent);
+      border: 1px solid color-mix(in srgb, var(--am, #f59e0b) 28%, transparent);
       border-radius: 99px;
       padding: 6px 14px 7px;
       animation: qpStreakIn .4s .3s cubic-bezier(.34,1.56,.64,1) both;

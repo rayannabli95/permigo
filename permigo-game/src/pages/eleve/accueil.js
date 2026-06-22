@@ -387,9 +387,9 @@ const STYLE = `<style>
   gap: 4px;
   margin-top: 8px;
   font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
-  color: #ffb35c;
-  background: color-mix(in srgb, #ffb35c 12%, transparent);
-  border: 1px solid color-mix(in srgb, #ffb35c 28%, transparent);
+  color: var(--am-txt);
+  background: color-mix(in srgb, var(--am, #f59e0b) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--am, #f59e0b) 28%, transparent);
   border-radius: var(--r-full);
   padding: 4px 10px 5px;
   letter-spacing: .02em;
