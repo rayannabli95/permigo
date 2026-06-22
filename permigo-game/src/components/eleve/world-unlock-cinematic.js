@@ -342,6 +342,7 @@ function ensureStyles() {
     /* CTA principal */
     .wuc-cta{
       display:flex;flex-direction:column;align-items:center;gap:3px;
+      margin-left:auto;margin-right:auto;
       padding:18px 36px;
       background:linear-gradient(180deg,#fff 0%,var(--aml) 50%,var(--wuc-c) 100%);
       color:#10210a; /* couleur FIXE foncée : le fond du CTA est toujours clair,

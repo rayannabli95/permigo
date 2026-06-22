@@ -739,14 +739,38 @@ async function _loadFeedSection() {
 
   host.innerHTML = `
     <style>
-      .lr-feed { margin-bottom: 0; }
-      .lr-feed-hd {
-        font: 600 11px/1 'Inter', sans-serif;
-        text-transform: uppercase; letter-spacing: .08em;
-        color: var(--mu2); margin: 0 0 12px;
-        display: flex; align-items: center; gap: 8px;
+      /* ── Conteneur dépliable (chip) ── */
+      .lr-feed-wrap {
+        border: 1px solid var(--bo);
+        border-radius: var(--r);
+        background: var(--su);
+        overflow: hidden;
       }
-      .lr-feed-hd::after { content:''; flex:1; height:1px; background:var(--bo); }
+      .lr-feed-wrap > summary {
+        display: flex; align-items: center; gap: 10px;
+        padding: 12px 14px;
+        min-height: 44px; box-sizing: border-box;
+        cursor: pointer; list-style: none;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+      }
+      .lr-feed-wrap > summary::-webkit-details-marker { display: none; }
+      .lr-feed-wrap > summary:hover { background: color-mix(in srgb, var(--bo) 40%, transparent); }
+      .lr-feed-wrap-icon { color: var(--a-txt); display: inline-flex; flex-shrink: 0; }
+      .lr-feed-wrap-lbl {
+        flex: 1; min-width: 0;
+        font: 600 13px/1.2 'Inter', sans-serif;
+        color: var(--ink);
+      }
+      .lr-feed-wrap-chev { color: var(--mu2); display: inline-flex; flex-shrink: 0; transition: transform .2s; }
+      .lr-feed-wrap[open] > summary .lr-feed-wrap-chev { transform: rotate(180deg); }
+      .lr-feed-wrap-body {
+        padding: 0 14px 12px;
+        border-top: 1px solid var(--bo);
+      }
+
+      /* ── Contenu interne ── */
+      .lr-feed { margin-bottom: 0; }
       .lr-feed-list { display: flex; flex-direction: column; gap: 1px; }
       .lr-feed-item {
         display: flex; align-items: flex-start; gap: 12px;
@@ -788,19 +812,19 @@ async function _loadFeedSection() {
       }
       .lr-feed-grp { border-bottom: 1px solid var(--bo2); }
       .lr-feed-grp:last-child { border-bottom: none; }
-      .lr-feed-grp summary {
+      .lr-feed-grp > summary {
         display: flex; align-items: center; gap: 12px;
         padding: 11px 0;
         min-height: 44px; box-sizing: border-box;
         cursor: pointer; list-style: none;
         -webkit-tap-highlight-color: transparent;
       }
-      .lr-feed-grp summary::-webkit-details-marker { display: none; }
+      .lr-feed-grp > summary::-webkit-details-marker { display: none; }
       .lr-feed-grp-txt { flex: 1; min-width: 0; }
       .lr-feed-grp-ttl { display: block; font: 600 12.5px/1.3 'Inter', sans-serif; color: var(--ink); }
       .lr-feed-grp-sub { display: block; font: 500 11px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 1px; }
       .lr-feed-grp-chev { color: var(--mu2); display: inline-flex; flex-shrink: 0; transition: transform .2s; }
-      .lr-feed-grp[open] .lr-feed-grp-chev { transform: rotate(180deg); }
+      .lr-feed-grp[open] > summary .lr-feed-grp-chev { transform: rotate(180deg); }
       .lr-feed-grp-body { padding: 0 0 8px 40px; }
       .lr-feed-grp-body .lr-feed-item { padding: 6px 0; border-bottom: none; }
       .lr-feed-all {
@@ -815,18 +839,26 @@ async function _loadFeedSection() {
       .lr-feed-all:hover { border-color: var(--bo4); color: var(--ink5); }
       .lr-feed-all:active { transform: scale(.98); }
     </style>
-    <div class="lr-feed">
-      <div class="lr-feed-hd" style="display:flex;align-items:center;gap:6px;">${icon("clock", { size: 14, strokeWidth: 2.2, color: "var(--a)" })} Fil des moniteurs</div>
-      <div class="lr-feed-list">
-        ${groups.slice(0, MAX_GROUPS).map(_renderGroup).join("")}
+    <details class="lr-feed-wrap">
+      <summary>
+        <span class="lr-feed-wrap-icon">${icon("clock", { size: 14, strokeWidth: 2.2 })}</span>
+        <span class="lr-feed-wrap-lbl">Fil des moniteurs (${groups.length})</span>
+        <span class="lr-feed-wrap-chev">${icon("chevron-down", { size: 14, strokeWidth: 2.2 })}</span>
+      </summary>
+      <div class="lr-feed-wrap-body">
+        <div class="lr-feed">
+          <div class="lr-feed-list">
+            ${groups.slice(0, MAX_GROUPS).map(_renderGroup).join("")}
+          </div>
+          ${
+            groups.length > MAX_GROUPS
+              ? `<div class="lr-feed-list" id="lr-feed-more" hidden>${groups.slice(MAX_GROUPS).map(_renderGroup).join("")}</div>
+                 <button class="lr-feed-all" id="lr-feed-all" type="button">Voir tout (${groups.length})</button>`
+              : ""
+          }
+        </div>
       </div>
-      ${
-        groups.length > MAX_GROUPS
-          ? `<div class="lr-feed-list" id="lr-feed-more" hidden>${groups.slice(MAX_GROUPS).map(_renderGroup).join("")}</div>
-             <button class="lr-feed-all" id="lr-feed-all" type="button">Voir tout (${groups.length})</button>`
-          : ""
-      }
-    </div>
+    </details>
   `;
 
   const moreBtn = host.querySelector("#lr-feed-all");

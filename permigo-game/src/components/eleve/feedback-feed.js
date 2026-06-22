@@ -33,9 +33,12 @@ function ensureStyle() {
   .fft-section { margin: 40px 16px 0; }
 
   .fft-hd {
-    display: flex; align-items: flex-end; justify-content: space-between;
-    gap: 12px; margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 0;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    padding: 8px 0; user-select: none;
   }
+  .fft-hd-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
   .fft-title {
     font: 800 16px/1.15 'Plus Jakarta Sans', sans-serif;
     color: var(--ink); letter-spacing: -.02em;
@@ -45,8 +48,16 @@ function ensureStyle() {
   .fft-sub {
     font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 3px;
   }
+  .fft-count {
+    font: 600 11px/1 'Inter', sans-serif; color: var(--mu2);
+    background: var(--su); border: 1px solid var(--bo);
+    padding: 3px 8px; border-radius: var(--r-full);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .fft-hd-right {
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
   .fft-all {
-    flex-shrink: 0;
     font: 600 12.5px/1 'Inter', sans-serif; color: var(--a-txt);
     background: none; border: none; cursor: pointer;
     display: flex; align-items: center; gap: 2px;
@@ -55,8 +66,28 @@ function ensureStyle() {
     white-space: nowrap;
   }
   .fft-all:active { opacity: .6; }
+  .fft-chevron {
+    display: inline-flex; color: var(--mu2);
+    transition: transform .22s cubic-bezier(.23,1,.32,1);
+    flex-shrink: 0;
+  }
+  .fft-section.fft-open .fft-chevron { transform: rotate(180deg); }
 
-  /* ── Timeline ── */
+  /* ── Timeline (repliée par défaut) ── */
+  .fft-timeline-wrap {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height .35s cubic-bezier(.23,1,.32,1),
+                opacity .25s ease,
+                margin-top .22s ease;
+    opacity: 0;
+    margin-top: 0;
+  }
+  .fft-section.fft-open .fft-timeline-wrap {
+    max-height: 1200px;
+    opacity: 1;
+    margin-top: 16px;
+  }
   .fft-timeline { position: relative; }
   .fft-item {
     display: flex; gap: 12px; position: relative;
@@ -217,24 +248,37 @@ export async function mountFeedbackFeed(
     ? "Retours de ton moniteur"
     : "Retours de tes moniteurs";
 
+  const countLabel =
+    events.length === 1 ? "1 retour" : `${events.length} retours`;
+
   const wrap = document.createElement("div");
   wrap.className = "fft-section";
   wrap.id = "ff-section";
   wrap.innerHTML = `
-    <div class="fft-hd">
-      <div>
-        <div class="fft-title">
-          <span class="fft-title-ico">${icon("message-circle", { size: 16, strokeWidth: 2.2 })}</span>
-          ${esc(title)}
+    <div class="fft-hd" id="ff-toggle" role="button"
+         aria-expanded="false" aria-controls="ff-timeline-wrap"
+         tabindex="0">
+      <div class="fft-hd-left">
+        <div>
+          <div class="fft-title">
+            <span class="fft-title-ico">${icon("message-circle", { size: 16, strokeWidth: 2.2 })}</span>
+            ${esc(title)}
+          </div>
+          ${singleMoniteur ? `<div class="fft-sub">Avec ${esc(singleMoniteur)}</div>` : ""}
         </div>
-        ${singleMoniteur ? `<div class="fft-sub">Avec ${esc(singleMoniteur)}</div>` : ""}
+        <span class="fft-count">${esc(countLabel)}</span>
       </div>
-      <button class="fft-all" id="ff-see-all" aria-label="Voir tout le fil">
-        Tout voir ${icon("chevron-right", { size: 13, strokeWidth: 2.5 })}
-      </button>
+      <div class="fft-hd-right">
+        <button class="fft-all" id="ff-see-all" aria-label="Voir tout le fil">
+          Tout voir ${icon("chevron-right", { size: 13, strokeWidth: 2.5 })}
+        </button>
+        <span class="fft-chevron">${icon("chevron-down", { size: 16, strokeWidth: 2.2 })}</span>
+      </div>
     </div>
-    <div class="fft-timeline">
-      ${events.map((e) => renderItem(e, !singleMoniteur)).join("")}
+    <div class="fft-timeline-wrap" id="ff-timeline-wrap">
+      <div class="fft-timeline">
+        ${events.map((e) => renderItem(e, !singleMoniteur)).join("")}
+      </div>
     </div>
   `;
 
@@ -247,7 +291,26 @@ export async function mountFeedbackFeed(
     else root.appendChild(wrap);
   }
 
-  wrap.querySelector("#ff-see-all")?.addEventListener("click", () => {
+  // Toggle dépli / repli au clic sur le header
+  const toggleEl = wrap.querySelector("#ff-toggle");
+  toggleEl?.addEventListener("click", () => {
+    const isOpen = wrap.classList.toggle("fft-open");
+    toggleEl.setAttribute("aria-expanded", String(isOpen));
+    if (isOpen) {
+      track("feedback_feed.expanded", { count: events.length });
+    }
+  });
+  // Accessibilité clavier
+  toggleEl?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggleEl.click();
+    }
+  });
+
+  // "Tout voir" ne déclenche pas le toggle
+  wrap.querySelector("#ff-see-all")?.addEventListener("click", (e) => {
+    e.stopPropagation();
     track("feedback_feed.see_all_clicked");
     navigate("#/feedback");
   });
