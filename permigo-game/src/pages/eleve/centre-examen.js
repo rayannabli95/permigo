@@ -18,8 +18,48 @@ import {
 import { haptic } from "@/utils/haptic.js";
 import { setupReveals } from "@/utils/reveal-on-scroll.js";
 import { navigate } from "@/router.js";
+import { getFiche } from "@/data/fiches-conduite.js";
 
 const CENTRES_PREMIUM_LOCKED = false;
+
+// Pont « centre → révision conduite » : relie les quizTags d'un centre aux
+// fiches de révision de CONDUITE correspondantes (codes REMC).
+const TAG_TO_CODES = {
+  rond_point: ["C2f"],
+  giratoire: ["C2f"],
+  intersection: ["C2f"],
+  priorite: ["C2f"],
+  cycliste: ["C3g"],
+  pieton: ["C3g"],
+  angle_mort: ["C3g"],
+  bus: ["C3g"],
+  partage: ["C3g"],
+  ville: ["C3g"],
+  vitesse: ["C2b"],
+  allure: ["C2b"],
+  depassement: ["C2e"],
+  croisement: ["C2e"],
+  insertion: ["C3e"],
+  autoroute: ["C3e"],
+  voie_rapide: ["C3e"],
+  nuit: ["C3a"],
+  pluie: ["C3b"],
+  meteo: ["C3b"],
+  manoeuvre: ["C1h"],
+  creneau: ["C1h"],
+  stationnement: ["C1h"],
+  autonomie: ["C2h"],
+};
+
+function centreFiches(c) {
+  const codes = [];
+  (c.quizTags || []).forEach((tag) =>
+    (TAG_TO_CODES[tag] || []).forEach((code) => {
+      if (!codes.includes(code)) codes.push(code);
+    }),
+  );
+  return codes.map((code) => getFiche(code)).filter(Boolean);
+}
 
 // ─── Couleur de difficulté (1-5) ─────────────────────────────
 // Vert clair (1) → ambre (3) → rouge (5)
@@ -363,6 +403,11 @@ const STYLE = `<style>
 }
 
 /* ── Pièges — cartes premium ── */
+.cea-rev-intro { font-size:13px; color:var(--mu2,#64748b); margin:0 0 10px; }
+.cea-rev-row { display:flex; align-items:center; justify-content:space-between; gap:10px; text-decoration:none; background:var(--surface,#fff); border:1px solid var(--bo2,#e2e8f0); border-radius:12px; padding:13px 14px; margin-bottom:8px; }
+.cea-rev-row:active { transform: scale(0.99); }
+.cea-rev-t { font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; color:var(--ink,#0f172a); }
+.cea-rev-go { font:700 13px 'Plus Jakarta Sans',sans-serif; color:var(--a,#6366f1); white-space:nowrap; }
 .cea-pieges-list {
   display: flex;
   flex-direction: column;
@@ -783,6 +828,22 @@ function renderFiche(c) {
         .join("")}
     </div>
   </div>
+
+  <!-- RÉVISION CONDUITE PAR CENTRE (le geste, relié aux pièges du secteur) -->
+  ${
+    centreFiches(c).length
+      ? `<div class="cea-section reveal">
+    <h2 class="cea-section-tit">${icon("car", { size: 17 })} Révise le geste pour ${esc(c.nom)}</h2>
+    <p class="cea-rev-intro">Les compétences de conduite qui font la différence sur ce secteur :</p>
+    ${centreFiches(c)
+      .map(
+        (f) =>
+          `<a class="cea-rev-row" href="#/revision-conduite/${esc(f.code)}"><span class="cea-rev-t">${esc(f.titre)}</span><span class="cea-rev-go">Réviser →</span></a>`,
+      )
+      .join("")}
+  </div>`
+      : ""
+  }
 
   <!-- BOUTON RÉVISION CENTRE (seulement si des thèmes sont mappés) -->
   ${
