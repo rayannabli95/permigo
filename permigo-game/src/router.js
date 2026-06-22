@@ -101,7 +101,7 @@ const ROUTE_TITLES = {
   classement: "Classement",
   galerie: "Galerie",
   examen: "Examen",
-  "exam-blanc": "Examen blanc",
+  "exam-blanc": "Examen blanc du code",
   "revision-conduite": "Révision conduite",
   "exam-conduite": "Examen blanc de conduite",
   feedback: "Feedback",
