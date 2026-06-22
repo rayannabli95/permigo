@@ -14,6 +14,7 @@ import { icon } from "@/utils/icons.js";
 import { STATUT_CFG } from "@/utils/statut-label.js";
 import { theoryLeague, computeTheoryScore } from "@/utils/theory-league.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
+import { mountCiblerRevision } from "@/components/enseignant/cibler-revision.js";
 
 // ─── Couleurs par monde ───────────────────────────────────────────
 const MONDE_COLORS = {
@@ -522,6 +523,8 @@ export async function mount(root, eleveId) {
 
   await loadData();
   render();
+  // Couche 2 : le moniteur peut cibler une révision conduite pour cet élève.
+  mountCiblerRevision(root, _eleveId);
 }
 
 // ─── Data ─────────────────────────────────────────────────────────

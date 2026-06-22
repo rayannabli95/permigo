@@ -9,6 +9,8 @@
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
 import { navigate } from "@/router.js";
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
 import { track } from "@/services/analytics.js";
 import {
   FICHES,
@@ -128,6 +130,13 @@ const STYLE = `<style>
 .rvc-done { text-align:center; padding:40px 16px; }
 .rvc-done-e { font-size:54px; }
 .rvc-done-t { font:800 22px 'Plus Jakarta Sans',sans-serif; margin:10px 0 4px; }
+.rvc-focus { margin:0 0 18px; border:2px solid color-mix(in srgb,#f59e0b 45%, transparent); border-radius:16px; padding:14px; background: color-mix(in srgb,#f59e0b 7%, transparent); }
+.rvc-focus-k { font:800 12px 'Plus Jakarta Sans',sans-serif; text-transform:uppercase; letter-spacing:.05em; color:#b45309; margin-bottom:6px; }
+.rvc-focus-row { display:flex; align-items:center; gap:10px; width:100%; text-align:left; border:0; cursor:pointer; background:var(--surface,#fff); border-radius:12px; padding:12px; margin-top:8px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.rvc-focus-row:active { transform: scale(0.985); }
+.rvc-focus-t { font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; flex:1; }
+.rvc-focus-n { font-size:12px; color:var(--muted,#64748b); }
+.rvc-focus-go { font:700 13px 'Plus Jakarta Sans',sans-serif; color:#b45309; white-space:nowrap; }
 @media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before { transition:none !important; animation:none !important; } }
 </style>`;
 
@@ -150,6 +159,32 @@ export async function mount(root) {
   let code = null;
   let qi = 0;
   let revealed = false;
+  let focusId = null;
+
+  // Ciblages du moniteur (couche 2). Requête gardée : si la table n'est pas
+  // encore migrée / élève hors-ligne, on ignore silencieusement (pas de bannière).
+  let focuses = [];
+  try {
+    const me = getCurUser();
+    if (me) {
+      const { data } = await sb
+        .from("revision_focus")
+        .select("id, competence_code, note, created_at")
+        .is("done_at", null)
+        .order("created_at", { ascending: false });
+      focuses = data || [];
+    }
+  } catch {
+    focuses = [];
+  }
+
+  async function markFocusDone(id) {
+    try {
+      await sb.rpc("mark_revision_focus_done", { p_id: id });
+    } catch {
+      /* non bloquant */
+    }
+  }
 
   function render() {
     if (view === "fiche") return renderFiche();
@@ -177,6 +212,16 @@ export async function mount(root) {
       </section>`;
     }).join("");
 
+    const focusHtml = focuses.length
+      ? `<div class="rvc-focus"><div class="rvc-focus-k">🎯 Ciblé par ton moniteur</div>${focuses
+          .map((x) => {
+            const ff = getFiche(x.competence_code);
+            const t = ff ? ff.titre : x.competence_code;
+            return `<button class="rvc-focus-row" data-focus="${esc(x.id)}" data-fcode="${esc(x.competence_code)}"><span class="rvc-focus-t">${esc(t)}</span>${x.note ? `<span class="rvc-focus-n">${esc(x.note)}</span>` : ""}<span class="rvc-focus-go">Réviser →</span></button>`;
+          })
+          .join("")}</div>`
+      : "";
+
     root.innerHTML = `${STYLE}<div class="rvc">
       <div class="rvc-top">
         <button class="rvc-back" aria-label="Retour à l'accueil">←</button>
@@ -193,6 +238,7 @@ export async function mount(root) {
       </div>`
           : ""
       }
+      ${focusHtml}
       ${mondes}
     </div>`;
     wireHome();
@@ -204,9 +250,18 @@ export async function mount(root) {
       ?.addEventListener("click", () => navigate("#/"));
     root.querySelector("[data-pf]")?.addEventListener("click", (e) => {
       code = e.currentTarget.getAttribute("data-pf");
+      focusId = null;
       track("revision_conduite_pf_start", { code });
       startQuiz();
     });
+    root.querySelectorAll("[data-focus]").forEach((b) =>
+      b.addEventListener("click", () => {
+        focusId = b.getAttribute("data-focus");
+        code = b.getAttribute("data-fcode");
+        track("revision_conduite_focus_start", { code });
+        startQuiz();
+      }),
+    );
     root.querySelectorAll(".rvc-card").forEach((b) =>
       b.addEventListener("click", () => {
         code = b.getAttribute("data-code");
@@ -264,7 +319,10 @@ export async function mount(root) {
       view = "home";
       render();
     });
-    root.querySelector(".rvc-go").addEventListener("click", () => startQuiz());
+    root.querySelector(".rvc-go").addEventListener("click", () => {
+      focusId = null;
+      startQuiz();
+    });
   }
 
   function startQuiz() {
@@ -285,6 +343,12 @@ export async function mount(root) {
     if (qi >= qs.length) {
       markRevised(code);
       track("revision_conduite_quiz_done", { code });
+      if (focusId) {
+        const fid = focusId;
+        focusId = null;
+        focuses = focuses.filter((x) => x.id !== fid);
+        markFocusDone(fid);
+      }
       root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-done">
         <div class="rvc-done-e">🏁</div>
         <div class="rvc-done-t">${esc(f.titre)} : révisé !</div>
