@@ -104,6 +104,7 @@
   --ease:cubic-bezier(.4,0,.2,1);        /* standard (layout, couleurs) */
   --ease-out:cubic-bezier(.2,.7,.3,1);   /* reveals, entrées de page */
   --ease-snap:cubic-bezier(.23,1,.32,1); /* micro-interactions vives */
+  --ease-ios:cubic-bezier(.32,.72,0,1);  /* transitions de page swipe (push/pop) */
   --ease-spring:cubic-bezier(.34,1.56,.64,1); /* press/pop avec rebond */
   --ease-bounce:cubic-bezier(.5,1.8,.5,1);    /* rebond fort (célébrations) */
 
