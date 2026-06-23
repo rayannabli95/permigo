@@ -5,12 +5,16 @@
 // readiness + compétences à revoir.
 //
 // ⚠️ Ce n'est PAS la note officielle /31 (seul l'inspecteur la donne).
-// On le dit clairement : c'est un « où tu en es ». 100% front, 0 DB.
+// On le dit clairement : c'est un « où tu en es ». La seule écriture DB est
+// UNE ligne quiz_attempts (type 'exam_blanc') à la fin → +4 ligue Révision,
+// comme l'ancien examen blanc. Rien d'autre (pas de note officielle stockée).
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
 import { navigate } from "@/router.js";
 import { track } from "@/services/analytics.js";
 import { haptic, tapHaptic } from "@/utils/haptic.js";
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
 import { MONDES, fichesByMonde } from "@/data/fiches-conduite.js";
 
 const PER_MONDE = 4; // ~16 questions au total, couvre les 4 mondes
@@ -213,6 +217,28 @@ export async function mount(root) {
       }
     });
     track("exam_conduite_done", { known, total });
+    // Ligue Révision : +4 pts (ref_id 'exam-conduite' distinct des parcours du
+    // code → compté une fois par get_theory_leaderboard). Insertion directe,
+    // fire-and-forget (RLS : l'élève écrit les siens). passed ≥70% des « je savais ».
+    const me = getCurUser();
+    if (me?.id && total > 0) {
+      const scorePct = Math.round((known / total) * 100);
+      sb.from("quiz_attempts")
+        .insert({
+          user_id: me.id,
+          competence_id: null,
+          type: "exam_blanc",
+          ref_id: "exam-conduite",
+          score: scorePct,
+          passed: scorePct >= 70,
+          questions_ids: [],
+          answers_indices: [],
+        })
+        .then(({ error }) => {
+          if (error) console.error("[exam-conduite] persist attempt", error);
+        })
+        .catch((e) => console.error("[exam-conduite] persist attempt", e));
+    }
     root.innerHTML = `${STYLE}<div class="exc">
       <div class="exc-res">
         <div class="exc-res-e">${v.e}</div>
