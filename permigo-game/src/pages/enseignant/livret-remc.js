@@ -163,10 +163,10 @@ const STYLE = `<style>
     border-bottom: 1px solid var(--bo2);
   }
   .lr-monde-nm {
-    font: 700 13px/1.3 var(--ens-display, 'Fredoka'), sans-serif;
+    font: 700 15px/1.25 var(--ens-display, 'Fredoka'), sans-serif;
     color: var(--ink);
     text-align: center;
-    padding: 0 40px;
+    padding: 0 44px;
     letter-spacing: -0.01em;
   }
   .lr-monde-prog {
@@ -190,40 +190,33 @@ const STYLE = `<style>
   .lr-comp {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 14px 20px;
+    gap: 13px;
+    padding: 16px 18px;
     border-bottom: 1px solid var(--bo2);
     cursor: pointer;
     transition: background .12s ease;
-    min-height: 56px;
+    min-height: 62px;
   }
   .lr-comp:last-child { border-bottom: none; }
   .lr-comp:hover { background: var(--bg); }
   .lr-comp:active { background: var(--bg2); }
 
   .lr-comp-dot {
-    width: 8px; height: 8px;
+    width: 10px; height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
   }
-  .lr-comp-code {
-    font: 600 11px/1 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--a-txt);
-    background: color-mix(in srgb, var(--a) 10%, transparent);
-    border-radius: 6px;
-    padding: 4px 8px;
-    flex-shrink: 0;
-  }
   .lr-comp-nom {
-    font: 500 14px/1.4 var(--ens-body, 'Inter'), sans-serif;
+    font: 600 15.5px/1.35 var(--ens-body, 'Inter'), sans-serif;
     color: var(--ink);
     flex: 1;
     min-width: 0;
+    letter-spacing: -0.01em;
   }
   /* Pastilles de statut → sémantique .ens-chip */
   .lr-comp-badge {
-    font: 600 11px/1 var(--ens-body, 'Inter'), sans-serif;
-    padding: 5px 10px;
+    font: 700 12px/1 var(--ens-body, 'Inter'), sans-serif;
+    padding: 6px 11px;
     border-radius: var(--ens-r-pill, var(--r-full));
     white-space: nowrap;
     flex-shrink: 0;
@@ -900,7 +893,7 @@ function renderMonde(cat) {
       <div class="lr-monde-bar-wrap">
         <div class="lr-monde-bar-fill" style="width:${pct}%; background:${col.accent};"></div>
       </div>
-      ${cat.subs.map((sub) => renderComp(sub, col)).join("")}
+      ${cat.subs.map((sub) => renderComp(sub)).join("")}
     </div>
   `;
 }
@@ -914,7 +907,7 @@ const CHIP_CLASS = {
   null: "",
 };
 
-function renderComp(sub, col) {
+function renderComp(sub) {
   const val = _validationsMap[sub.c];
   const statut = val?.statut || null;
   const cfg = STATUT_CFG[statut] || STATUT_CFG.null;
@@ -924,7 +917,6 @@ function renderComp(sub, col) {
     <div class="lr-comp" data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
          role="button" tabindex="0" aria-label="${esc(sub.n)} — ${cfg.label}. Appuyer pour évaluer cette compétence">
       <span class="lr-comp-dot" style="background:${cfg.dot}"></span>
-      <span class="lr-comp-code" style="color:${col.accent}; background:${col.bg}">${esc(sub.c)}</span>
       <span class="lr-comp-nom">${esc(sub.n)}</span>
       <span class="lr-comp-badge ens-chip ${chipMod}">${cfg.label}</span>
       <span class="lr-comp-chev" aria-hidden="true">›</span>
