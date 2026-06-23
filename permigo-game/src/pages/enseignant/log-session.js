@@ -17,6 +17,7 @@ import { haptic } from "@/utils/haptic.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
+import { getFiche } from "@/data/fiches-conduite.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
@@ -414,6 +415,83 @@ const STYLE = `<style>
     .vs-success-fill { transition: none; }
     .vs-success-done { transition: none; }
   }
+
+  /* ── Carte « Envoie une révision ciblée » (sur l'écran de succès) ── */
+  .vs-revsugg {
+    width: 100%; max-width: 360px; margin: 4px 0 18px;
+    text-align: left;
+    background: var(--su); border: 1.5px solid var(--bo);
+    border-radius: var(--ens-r, 16px); padding: 16px 16px 14px;
+    box-shadow: var(--ens-shadow, 0 8px 22px -12px rgba(15,23,42,.22));
+  }
+  .vs-revsugg-h {
+    font: 700 15px/1.2 var(--ens-display, 'Fredoka'), sans-serif;
+    color: var(--ink); letter-spacing: -.01em; margin: 0;
+  }
+  .vs-revsugg-sub {
+    font: 500 12px/1.4 var(--ens-body, 'Inter'), sans-serif;
+    color: var(--mu); margin: 3px 0 12px;
+  }
+  .vs-revsugg-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .vs-revsugg-chip {
+    display: flex; align-items: center; gap: 11px; width: 100%;
+    padding: 11px 12px; min-height: 52px;
+    background: var(--bg, #f4f6fb); border: 1.5px solid var(--bo);
+    border-radius: 13px; cursor: pointer; text-align: left;
+    font-family: inherit; -webkit-tap-highlight-color: transparent;
+    transition: border-color .12s, background .12s;
+  }
+  .vs-revsugg-chip[aria-pressed="true"] {
+    border-color: var(--ens-go, #18a558);
+    background: color-mix(in srgb, var(--ens-go, #18a558) 8%, var(--su));
+  }
+  .vs-revsugg-check {
+    width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0;
+    border: 2px solid var(--bo4, #cbd5e1); background: var(--su);
+    display: flex; align-items: center; justify-content: center; color: #fff;
+    transition: background .12s, border-color .12s;
+  }
+  .vs-revsugg-chip[aria-pressed="true"] .vs-revsugg-check {
+    background: var(--ens-go, #18a558); border-color: var(--ens-go, #18a558);
+  }
+  .vs-revsugg-check svg { opacity: 0; transition: opacity .12s; }
+  .vs-revsugg-chip[aria-pressed="true"] .vs-revsugg-check svg { opacity: 1; }
+  .vs-revsugg-txt { flex: 1; min-width: 0; }
+  .vs-revsugg-nom {
+    display: block; font: 600 13.5px/1.25 var(--ens-body, 'Inter'), sans-serif;
+    color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .vs-revsugg-tag {
+    display: inline-block; margin-top: 3px;
+    font: 700 10px/1 var(--ens-body, 'Inter'), sans-serif;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .vs-revsugg-tag.t-now  { color: var(--ens-go, #18a558); }
+  .vs-revsugg-tag.t-back { color: var(--ens-blue-lt, #3b82f6); }
+  .vs-revsugg-tag.t-next { color: var(--am-txt, #935e06); }
+  .vs-revsugg-send {
+    width: 100%; min-height: 48px;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    border: 0; border-radius: var(--ens-r, 14px);
+    background: linear-gradient(180deg, var(--ens-go-lt, #34d27b), var(--ens-go, #18a558));
+    color: var(--ens-ink-go, #07150c);
+    font: 700 14.5px/1 var(--ens-body, 'Inter'), sans-serif; cursor: pointer;
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000);
+    transition: transform .1s ease, box-shadow .1s ease, opacity .12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .vs-revsugg-send:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000); }
+  .vs-revsugg-send:disabled { opacity: .5; cursor: default; box-shadow: none; transform: none; }
+  .vs-revsugg-skip {
+    display: block; width: 100%; margin-top: 9px; padding: 6px;
+    background: none; border: 0; cursor: pointer;
+    font: 600 12.5px/1 var(--ens-body, 'Inter'), sans-serif; color: var(--mu);
+  }
+  .vs-revsugg.is-sent { text-align: center; }
+  .vs-revsugg-sent-msg {
+    font: 600 13.5px/1.4 var(--ens-body, 'Inter'), sans-serif; color: var(--ens-go, #18a558);
+  }
+  @media (prefers-reduced-motion: reduce) { .vs-revsugg-send { transition: none; } }
 </style>`;
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -819,7 +897,7 @@ async function submit() {
       const el = _eleves.find((e) => e.id === _eleve);
       const prenom = el?.prenom ? fmtName(el.prenom) : "Ton élève";
       const totalAcquis = _acquisSet.size + nNew;
-      showSessionSuccess(prenom, nNew, totalAcquis);
+      showSessionSuccess(prenom, nNew, totalAcquis, acquis);
       // Palier moniteur (parcours-pro) + install nudge (différé après l'écran
       // palier s'il s'affiche, pour ne pas empiler deux overlays).
       _maybeCelebrateMoniteurTier();
@@ -859,13 +937,98 @@ async function _maybeCelebrateMoniteurTier() {
   promptInstallAtValueMoment(me, "moniteur_session_validee");
 }
 
+// ── Suggestion de révision après validation (ferme la boucle du wedge) ──
+// Liste plate ORDONNÉE des compétences REMC → permet « précédentes / suivante ».
+const ALL_SUBS = REMC.flatMap((c) => c.subs); // [{ c, n }]
+const REVSUGG_TAG = {
+  now: "Validé aujourd'hui",
+  back: "À renforcer",
+  next: "À préparer",
+};
+
+// À partir des compétences passées « acquis » cette séance, propose un petit set
+// à faire réviser : celles du jour (cochées), 1-2 d'avant (renfort), la suivante.
+// Ne garde que les compétences ayant une fiche de révision.
+function buildRevisionSuggestions(validatedCodes) {
+  const idxOf = (code) => ALL_SUBS.findIndex((s) => s.c === code);
+  const valid = (validatedCodes || []).filter((c) => idxOf(c) >= 0);
+  if (!valid.length) return [];
+  const anchorIdx = Math.max(...valid.map(idxOf)); // la plus avancée
+  const picked = new Map(); // idx → { tag, checked }
+  // 1) validées aujourd'hui → cochées par défaut (consolidation à chaud)
+  for (const c of valid) picked.set(idxOf(c), { tag: "now", checked: true });
+  // 2) les 2 compétences juste avant l'ancre, déjà acquises → renfort
+  for (let i = anchorIdx - 1; i >= 0 && i >= anchorIdx - 2; i--) {
+    if (!picked.has(i) && _acquisSet.has(ALL_SUBS[i].c))
+      picked.set(i, { tag: "back", checked: false });
+  }
+  // 3) la 1re compétence suivante non encore acquise → préparer la prochaine leçon
+  for (let i = anchorIdx + 1; i < ALL_SUBS.length; i++) {
+    if (!_acquisSet.has(ALL_SUBS[i].c) && !valid.includes(ALL_SUBS[i].c)) {
+      picked.set(i, { tag: "next", checked: false });
+      break;
+    }
+  }
+  return [...picked.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([idx, m]) => ({ code: ALL_SUBS[idx].c, nom: ALL_SUBS[idx].n, ...m }))
+    .filter((s) => getFiche(s.code));
+}
+
+// Insère les révisions ciblées (l'élève les voit dans #/revision-conduite).
+async function sendTargetedRevisions(codes) {
+  const me = getCurUser();
+  if (!me?.id || !_eleve || !codes.length) return false;
+  try {
+    const { error } = await sb.from("revision_focus").insert(
+      codes.map((code) => ({
+        eleve_id: _eleve,
+        moniteur_id: me.id,
+        competence_code: code,
+        note: null,
+      })),
+    );
+    if (error) throw error;
+    track("revision_focus_from_validation", { n: codes.length, codes });
+    return true;
+  } catch (e) {
+    console.error("[revsugg] insert", e);
+    return false;
+  }
+}
+
 // Écran succès arcade : referme la boucle « je valide → l'élève avance → il le voit ».
-function showSessionSuccess(prenom, nNew, totalAcquis) {
+function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes) {
   // Ferme un tour guidé 1re-visite qui aurait pu s'afficher pendant la RPC
   document.querySelector(".gt-root")?.remove();
 
   const pct = REMC_TOTAL > 0 ? Math.round((totalAcquis / REMC_TOTAL) * 100) : 0;
   const complete = totalAcquis >= REMC_TOTAL;
+  const suggestions = buildRevisionSuggestions(validatedCodes);
+
+  const revCard = suggestions.length
+    ? `<section class="vs-revsugg" id="vs-revsugg">
+        <div class="vs-revsugg-h">Envoie une révision à ${esc(prenom)}</div>
+        <div class="vs-revsugg-sub">3 questions ciblées, à réviser entre deux leçons.</div>
+        <div class="vs-revsugg-list">
+          ${suggestions
+            .map(
+              (
+                s,
+              ) => `<button type="button" class="vs-revsugg-chip" data-code="${esc(s.code)}" aria-pressed="${s.checked}">
+            <span class="vs-revsugg-check">${icon("check", { size: 14, strokeWidth: 3, color: "currentColor" })}</span>
+            <span class="vs-revsugg-txt">
+              <span class="vs-revsugg-nom">${esc(s.nom)}</span>
+              <span class="vs-revsugg-tag t-${s.tag}">${REVSUGG_TAG[s.tag]}</span>
+            </span>
+          </button>`,
+            )
+            .join("")}
+        </div>
+        <button type="button" class="vs-revsugg-send" id="vs-revsugg-send">${icon("send", { size: 15, strokeWidth: 2.2 })} <span id="vs-revsugg-send-lbl">Envoyer la révision</span></button>
+        <button type="button" class="vs-revsugg-skip" id="vs-revsugg-skip">Plus tard</button>
+      </section>`
+    : "";
 
   _root.innerHTML = `${STYLE}
     <div class="vs anim-slide-up">
@@ -877,6 +1040,7 @@ function showSessionSuccess(prenom, nNew, totalAcquis) {
         <div class="vs-success-bar"><div class="vs-success-fill" style="width:0%"></div></div>
         <div class="vs-success-meta"><b>${totalAcquis}/${REMC_TOTAL}</b> compétences validées · ${pct}%</div>
         <div class="vs-success-note">${complete ? `${esc(prenom)} est prêt·e pour l'examen.` : `${esc(prenom)} voit sa progression dans son appli.`}</div>
+        ${revCard}
         <button class="vs-success-done" id="vs-success-done" type="button">${icon("users", { size: 16, strokeWidth: 2.2 })} Voir mes élèves</button>
       </div>
     </div>`;
@@ -889,4 +1053,58 @@ function showSessionSuccess(prenom, nNew, totalAcquis) {
   _root
     .querySelector("#vs-success-done")
     ?.addEventListener("click", () => navigate("#/eleves"));
+
+  wireRevisionCard();
+}
+
+// Câblage de la carte « Envoie une révision » (chips toggle + envoi).
+function wireRevisionCard() {
+  const card = _root.querySelector("#vs-revsugg");
+  if (!card) return;
+  const sendBtn = card.querySelector("#vs-revsugg-send");
+  const sendLbl = card.querySelector("#vs-revsugg-send-lbl");
+
+  const selectedCodes = () =>
+    [...card.querySelectorAll('.vs-revsugg-chip[aria-pressed="true"]')].map(
+      (b) => b.dataset.code,
+    );
+  const refresh = () => {
+    const n = selectedCodes().length;
+    sendBtn.disabled = n === 0;
+    sendLbl.textContent =
+      n > 1 ? `Envoyer ${n} révisions` : "Envoyer la révision";
+  };
+
+  card.querySelectorAll(".vs-revsugg-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const on = chip.getAttribute("aria-pressed") === "true";
+      chip.setAttribute("aria-pressed", on ? "false" : "true");
+      haptic("select");
+      refresh();
+    });
+  });
+
+  sendBtn.addEventListener("click", async () => {
+    const codes = selectedCodes();
+    if (!codes.length) return;
+    sendBtn.disabled = true;
+    sendLbl.textContent = "Envoi…";
+    const ok = await sendTargetedRevisions(codes);
+    if (ok) {
+      haptic("confirm");
+      card.classList.add("is-sent");
+      card.innerHTML = `<div class="vs-revsugg-sent-msg">${icon("check-circle", { size: 16, strokeWidth: 2.4 })} Révision${codes.length > 1 ? "s" : ""} envoyée${codes.length > 1 ? "s" : ""} ✓</div>`;
+    } else {
+      haptic("error");
+      toast("Envoi impossible. Réessaie.", "error");
+      sendBtn.disabled = false;
+      refresh();
+    }
+  });
+
+  card.querySelector("#vs-revsugg-skip")?.addEventListener("click", () => {
+    card.remove();
+  });
+
+  refresh();
 }
