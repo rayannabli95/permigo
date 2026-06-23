@@ -610,7 +610,19 @@ const STYLE = `<style>
 .pplus-tx { flex: 1; min-width: 0; }
 .pplus-t { font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif; color: #fff; }
 .pplus-s { font: 500 12.5px/1.35 'Inter', sans-serif; color: rgba(255,255,255,.66); margin-top: 2px; }
-.pplus-arrow { flex-shrink: 0; color: rgba(255,255,255,.5); display: flex; }
+/* Pastille dorée pleine : chaque ligne se lit comme un bouton « ouvre »,
+   pas comme une liste de features passive. Couleurs figées (billboard sombre). */
+.pplus-arrow {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%; color: #1a1205;
+  background: linear-gradient(135deg, #fde68a, #fbbf24 60%, #f59e0b);
+  box-shadow: 0 4px 12px -3px rgba(245,158,11,.6);
+  transition: transform .15s var(--ease-spring);
+}
+.pplus-card.tappable:active .pplus-arrow { transform: translateX(3px) scale(.94); }
+@media (hover:hover) and (pointer:fine) {
+  .pplus-card.tappable:hover .pplus-arrow { transform: translateX(3px); }
+}
 .pplus-card.locked { opacity: .58; }
 .pplus-card.locked .pplus-badge { filter: grayscale(.7) drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
 .pplus-lock { flex-shrink: 0; color: rgba(255,255,255,.5); display: flex; }
@@ -636,8 +648,8 @@ const STYLE = `<style>
 /* ── Carte de base — socle commun ── */
 .acc-lg-card {
   display: flex; flex-direction: column; align-items: flex-start;
-  text-align: left; min-height: 104px;
-  padding: 14px 14px 12px; border-radius: var(--r-xl);
+  text-align: left; min-height: 118px;
+  padding: 15px 15px 13px; border-radius: var(--r-xl);
   cursor: pointer; position: relative; overflow: hidden;
   -webkit-tap-highlight-color: transparent;
   transition: transform .18s var(--ease-spring), box-shadow .18s ease, border-color .18s ease;
@@ -744,14 +756,31 @@ const STYLE = `<style>
   font: 500 11px/1.3 'Inter', sans-serif; color: var(--mu2);
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+/* Le chevron devient une vraie pastille « va voir » : un cercle plein accent
+   se lit comme un bouton (signifier de clic fort), pas comme une déco plate.
+   cf. NN/g « Beyond Blue Links » — un chevron + de la profondeur = affordance. */
 .acc-lg-go {
-  flex-shrink: 0; display: inline-flex; align-items: center;
-  color: var(--a-txt); opacity: .8;
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--a); color: var(--a-ink);
+  box-shadow: 0 4px 11px -3px color-mix(in srgb, var(--a) 60%, transparent);
   transition: transform .15s var(--ease-spring);
 }
-.acc-lg-card:active .acc-lg-go { transform: translateX(3px); }
+.acc-lg-card:active .acc-lg-go { transform: translateX(3px) scale(.94); }
 @media (hover:hover) and (pointer:fine) {
   .acc-lg-card:hover .acc-lg-go { transform: translateX(3px); }
+}
+/* Indice de cliquabilité : petit aller-retour horizontal, joué 2× au montage.
+   Activé seulement les 3 premières sessions via .acc2-afford-hint (cf. mount). */
+@keyframes affordNudge {
+  0%, 100% { transform: translateX(0); }
+  40%      { transform: translateX(4px); }
+  70%      { transform: translateX(0); }
+}
+.acc2-afford-hint .acc-lg-go { animation: affordNudge 1.9s var(--ease-spring) .9s 2; }
+.acc2-afford-hint .pplus-arrow { animation: affordNudge 1.9s var(--ease-spring) 1.1s 2; }
+@media (prefers-reduced-motion: reduce) {
+  .acc-lg-go, .pplus-arrow { animation: none; }
 }
 
 /* ── Bottom sheet streak ── */
@@ -1090,6 +1119,20 @@ export async function mount(root) {
     });
 
     const accDiv = root.querySelector(".acc2");
+
+    // Indice de cliquabilité : on fait « clignoter » une fois les pastilles
+    // « va voir » (ligues + PermiGo+) pour signaler qu'on tape dessus — mais
+    // seulement les 3 premières sessions, sinon ça devient du bruit pour les
+    // habitués (l'app est un rituel quotidien).
+    try {
+      const seen = +(localStorage.getItem("pg-afford-hint") || 0);
+      if (seen < 3) {
+        accDiv?.classList.add("acc2-afford-hint");
+        localStorage.setItem("pg-afford-hint", String(seen + 1));
+      }
+    } catch {
+      /* localStorage indispo : pas grave, on n'affiche juste pas l'indice */
+    }
 
     // Composants non-bloquants injectés sous le fold
     if (accDiv) {
