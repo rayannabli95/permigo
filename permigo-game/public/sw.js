@@ -7,29 +7,38 @@
  *  - Pas de tracking, juste pour permettre l'install PWA sur iOS / Android.
  */
 
-const CACHE_NAME = 'permigo-v1';
+const CACHE_NAME = "permigo-v2";
 // Scope auto-detect : ex '/permigo-v7/' sur GitHub Pages, '/' en local
-const SCOPE = self.registration ? self.registration.scope : self.location.href.replace(/sw\.js.*$/, '');
+const SCOPE = self.registration
+  ? self.registration.scope
+  : self.location.href.replace(/sw\.js.*$/, "");
 const SCOPE_PATH = new URL(SCOPE).pathname;
 const ASSETS = [
   SCOPE_PATH,
-  SCOPE_PATH + 'index.html',
-  SCOPE_PATH + 'permigo-logo.png',
-  SCOPE_PATH + 'manifest.webmanifest',
+  SCOPE_PATH + "index.html",
+  SCOPE_PATH + "permigo-logo.png",
+  SCOPE_PATH + "manifest.webmanifest",
 ];
 
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).catch(() => {})
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(ASSETS))
+      .catch(() => {}),
   );
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)),
+        ),
+      ),
   );
   self.clients.claim();
 });
@@ -39,43 +48,46 @@ self.addEventListener('activate', (event) => {
 // { type, title, body, icon?, badge?, data: { route?, competence_id? } }
 
 const NOTIF_DEFAULTS = {
-  icon:  '/icons/icon-192.png',
-  badge: '/icons/badge-72.png',
+  icon: "/icons/icon-192.png",
+  badge: "/icons/badge-72.png",
   requireInteraction: false,
 };
 
 const NOTIF_COPY = {
   post_validation_quiz: {
-    title: '🎉 Compétence validée !',
-    body:  'Ton moniteur a validé une compétence. Lance le quiz de 3 questions maintenant !',
+    title: "🎉 Compétence validée !",
+    body: "Ton moniteur a validé une compétence. Lance le quiz de 3 questions maintenant !",
   },
   consolidation_quiz: {
-    title: '🔄 Consolide tes acquis',
-    body:  'Il est temps de revoir une compétence. 2 questions, 2 minutes.',
+    title: "🔄 Consolide tes acquis",
+    body: "Il est temps de revoir une compétence. 2 questions, 2 minutes.",
   },
   streak_risk: {
-    title: '🔥 Ta série t\'attend',
-    body:  'Ne laisse pas ta flamme s\'éteindre. Une petite session suffit !',
+    title: "🔥 Ta série t'attend",
+    body: "Ne laisse pas ta flamme s'éteindre. Une petite session suffit !",
   },
 };
 
-self.addEventListener('push', (event) => {
+self.addEventListener("push", (event) => {
   let payload = {};
   try {
     payload = event.data?.json() ?? {};
   } catch {
-    payload = { type: 'generic', body: event.data?.text() ?? '' };
+    payload = { type: "generic", body: event.data?.text() ?? "" };
   }
 
-  const defaults = NOTIF_COPY[payload.type] ?? { title: 'PermiGo', body: payload.body || '' };
-  const title   = payload.title ?? defaults.title;
+  const defaults = NOTIF_COPY[payload.type] ?? {
+    title: "PermiGo",
+    body: payload.body || "",
+  };
+  const title = payload.title ?? defaults.title;
   const options = {
     ...NOTIF_DEFAULTS,
-    body:  payload.body  ?? defaults.body,
-    icon:  payload.icon  ?? NOTIF_DEFAULTS.icon,
+    body: payload.body ?? defaults.body,
+    icon: payload.icon ?? NOTIF_DEFAULTS.icon,
     badge: payload.badge ?? NOTIF_DEFAULTS.badge,
-    tag:   payload.type  ?? 'permigo',
-    data:  payload.data  ?? {},
+    tag: payload.type ?? "permigo",
+    data: payload.data ?? {},
     // Vibration douce : 200ms on, 100ms off, 100ms on
     vibrate: [200, 100, 100],
   };
@@ -83,53 +95,67 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const route = event.notification.data?.route ?? '';
-  const targetUrl = self.registration.scope + (route ? `#${route.replace(/^#/, '')}` : '');
+  const route = event.notification.data?.route ?? "";
+  const targetUrl =
+    self.registration.scope + (route ? `#${route.replace(/^#/, "")}` : "");
 
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-      // Cherche une fenêtre déjà ouverte et navigue dedans
-      for (const client of clients) {
-        if ('focus' in client) {
-          client.focus();
-          if ('navigate' in client) client.navigate(targetUrl);
-          return;
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clients) => {
+        // Cherche une fenêtre déjà ouverte et navigue dedans
+        for (const client of clients) {
+          if ("focus" in client) {
+            client.focus();
+            if ("navigate" in client) client.navigate(targetUrl);
+            return;
+          }
         }
-      }
-      // Aucune fenêtre ouverte → on ouvre l'app
-      return self.clients.openWindow(targetUrl);
-    })
+        // Aucune fenêtre ouverte → on ouvre l'app
+        return self.clients.openWindow(targetUrl);
+      }),
   );
 });
 
 // Re-subscribe automatiquement si la subscription expire
-self.addEventListener('pushsubscriptionchange', (event) => {
+self.addEventListener("pushsubscriptionchange", (event) => {
   event.waitUntil(
-    self.registration.pushManager.subscribe(event.oldSubscription.options)
+    self.registration.pushManager
+      .subscribe(event.oldSubscription.options)
       .then((sub) => {
         // Le frontend se chargera de re-synchroniser la nouvelle sub avec Supabase
         // via un BroadcastChannel au prochain boot de l'app
-        const bc = new BroadcastChannel('permigo-push');
-        bc.postMessage({ type: 'subscription_renewed', subscription: sub.toJSON() });
+        const bc = new BroadcastChannel("permigo-push");
+        bc.postMessage({
+          type: "subscription_renewed",
+          subscription: sub.toJSON(),
+        });
         bc.close();
-      })
+      }),
   );
 });
 
 // ─── Fetch (cache + network) ─────────────────────────────────────
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
   // Ne touche pas aux requêtes Supabase / API
-  if (url.hostname.includes('supabase.co') || url.hostname.includes('supabase.in')) return;
+  if (
+    url.hostname.includes("supabase.co") ||
+    url.hostname.includes("supabase.in")
+  )
+    return;
 
   // Network first pour HTML (toujours la dernière version)
-  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+  if (
+    event.request.mode === "navigate" ||
+    event.request.destination === "document"
+  ) {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(SCOPE_PATH + 'index.html'))
+      fetch(event.request).catch(() => caches.match(SCOPE_PATH + "index.html")),
     );
     return;
   }
@@ -138,13 +164,17 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
-      return fetch(event.request).then((resp) => {
-        if (resp && resp.status === 200 && resp.type === 'basic') {
-          const clone = resp.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        }
-        return resp;
-      }).catch(() => cached);
-    })
+      return fetch(event.request)
+        .then((resp) => {
+          if (resp && resp.status === 200 && resp.type === "basic") {
+            const clone = resp.clone();
+            caches
+              .open(CACHE_NAME)
+              .then((cache) => cache.put(event.request, clone));
+          }
+          return resp;
+        })
+        .catch(() => cached);
+    }),
   );
 });
