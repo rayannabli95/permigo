@@ -20,7 +20,6 @@ import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { getFiche } from "@/data/fiches-conduite.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
 import { startTour } from "@/components/common/guided-tour.js";
-import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
 import { illus } from "@/components/enseignant/illus.js";
 
 // Tour guidé validation — 1× à la première séance, quand l'UI complète existe
@@ -108,14 +107,14 @@ const STYLE = `<style>
     position: relative; overflow: hidden;
     margin: 0 -16px 18px;
     padding: 18px 16px 24px;
-    background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+    background: linear-gradient(150deg, #4f46e5, #6d6bff 60%, #8b5cf6);
     color: #fff;
     isolation: isolate;
   }
   /* liseré marquage au sol */
   .vs-hd::after {
     content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
-    background: repeating-linear-gradient(90deg, var(--ens-amber, #f59e0b) 0 18px, transparent 18px 34px);
+    background: none;
     opacity: .75;
   }
   .vs-hd-inner { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; }
@@ -518,7 +517,6 @@ export async function mount(root) {
   root.innerHTML = `${STYLE}
     <div class="vs anim-slide-up">
       <div class="vs-hd">
-        ${panneauxLayer({ variant: "section" })}
         <div class="vs-hd-inner">
           <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
           <div class="vs-hd-text">
@@ -604,7 +602,6 @@ function render() {
   _root.innerHTML = `${STYLE}
     <div class="vs anim-slide-up">
       <div class="vs-hd">
-        ${panneauxLayer({ variant: "section" })}
         <div class="vs-hd-inner">
           <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
           <div class="vs-hd-text">

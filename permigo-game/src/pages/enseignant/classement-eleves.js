@@ -13,7 +13,6 @@ import { REMC_TOTAL } from "@/data/remc.js";
 import { icon } from "@/utils/icons.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
-import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
 import { illus } from "@/components/enseignant/illus.js";
 import { haptic } from "@/utils/haptic.js";
 
@@ -29,14 +28,14 @@ const STYLE = `<style>
   .ce-hero {
     position: relative; overflow: hidden;
     padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 22px) 20px 26px;
-    background: radial-gradient(130% 150% at 100% 0%, #0e1b4a 0%, #0c1538 44%, #0b0d1a 100%);
+    background: linear-gradient(150deg, #4f46e5, #6d6bff 60%, #8b5cf6);
     color: #fff; isolation: isolate;
     animation: ceHeroIn .45s var(--ease, ease) both;
     margin: 0 0 0;
   }
   .ce-hero::after {
     content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
-    background: repeating-linear-gradient(90deg, var(--ens-amber, #f59e0b) 0 18px, transparent 18px 34px);
+    background: none;
     opacity: .85;
   }
   .ce-hero .ens-panneaux__sign { opacity: var(--o, .13); filter: saturate(1.1) brightness(1.1); }
@@ -111,7 +110,7 @@ const STYLE = `<style>
   .ce-row:hover { border-color: var(--bo4); transform: translateY(-1px); box-shadow: var(--s1); }
   .ce-row:active { transform: scale(.97); }
   @media (prefers-reduced-motion: reduce) { .ce-row { transition: none; } }
-  .ce-row:focus-visible { outline: 3px solid var(--ens-go, #18a558); outline-offset: 2px; }
+  .ce-row:focus-visible { outline: 3px solid #4f46e5; outline-offset: 2px; }
 
   /* Rang : numéro neutre, ou médaille pour le top 3 */
   .ce-rank {
@@ -130,7 +129,7 @@ const STYLE = `<style>
   }
   .ce-row-bar { width: 64px; flex-shrink: 0; }
   .ce-row-bar-t { height: 4px; background: var(--bo); border-radius: 2px; overflow: hidden; margin-bottom: 3px; }
-  .ce-row-bar-f { height: 100%; background: linear-gradient(90deg, var(--ens-go, #18a558), #34d27b); border-radius: 2px; }
+  .ce-row-bar-f { height: 100%; background: linear-gradient(90deg, #4f46e5, #34d27b); border-radius: 2px; }
   /* Score en Fredoka tabulaire (ens-stat__num spirit) */
   .ce-row-score {
     font: 700 12px/1 var(--ens-display, 'Fredoka'), sans-serif;
@@ -155,25 +154,25 @@ const STYLE = `<style>
   }
   .ce-hof-title::after { content: ''; flex: 1; height: 1px; background: var(--bo); }
   .ce-hof-row {
-    background: color-mix(in srgb, var(--ens-go, #18a558) 6%, transparent);
-    border: 1px solid color-mix(in srgb, var(--ens-go, #18a558) 22%, transparent);
+    background: color-mix(in srgb, #4f46e5 6%, transparent);
+    border: 1px solid color-mix(in srgb, #4f46e5 22%, transparent);
     border-radius: var(--ens-r, var(--r)); padding: 12px 14px;
     display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
     cursor: pointer; min-height: 44px;
     transition: border-color .12s, transform .12s;
   }
-  .ce-hof-row:hover { border-color: color-mix(in srgb, var(--ens-go, #18a558) 40%, transparent); transform: translateY(-1px); }
+  .ce-hof-row:hover { border-color: color-mix(in srgb, #4f46e5 40%, transparent); transform: translateY(-1px); }
   .ce-hof-row:active { transform: scale(.98); }
   .ce-hof-nom {
     flex: 1; min-width: 0;
     font: 700 13px/1.2 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--ens-go, #18a558);
+    color: #4f46e5;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .ce-hof-badge {
     display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
     font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: #fff;
-    background: var(--ens-go, #18a558); padding: 4px 9px; border-radius: var(--ens-r-pill, 999px);
+    background: #4f46e5; padding: 4px 9px; border-radius: var(--ens-r-pill, 999px);
   }
 
   /* Empty state arcade */
@@ -208,7 +207,6 @@ export async function mount(root, mode) {
 
   root.innerHTML = `${STYLE}<div class="ce-page">
     <div class="ce-hero">
-      ${panneauxLayer({ variant: "hero" })}
       <div class="ce-hero-content">
         <p class="ce-hero-kicker">Classement</p>
         <h1 class="ce-hero-title">${isTheorie ? "Ligue Révision" : "Ligue Pratique"}</h1>
@@ -387,7 +385,6 @@ function heroArcade(n, isTheorie) {
     : `Classés par compétences de conduite validées`;
   return `
     <div class="ce-hero">
-      ${panneauxLayer({ variant: "hero" })}
       <div class="ce-hero-content">
         <p class="ce-hero-kicker">${isTheorie ? "Ligue Révision" : "Ligue Pratique"}</p>
         <h1 class="ce-hero-title">Classement élèves</h1>
