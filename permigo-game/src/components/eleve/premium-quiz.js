@@ -9,7 +9,7 @@
 // Autonome (son propre <style>, son propre état). Aucune dépendance DB.
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
-import { haptic, hapticPulses } from "@/utils/haptic.js";
+import { haptic, hapticPulses, tapHaptic } from "@/utils/haptic.js";
 
 // Récompense VARIABLE : jamais 2× le même d'affilée (sinon le cerveau
 // s'habitue et le pic dopamine disparaît — cf. reward prediction error).
@@ -96,7 +96,7 @@ const STYLE = `<style>
 /* Résultat */
 .pq-res { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
 .pq-res-e { font-size:60px; animation: pqUp .4s cubic-bezier(.23,1,.32,1) both; }
-.pq-res-score { font:800 44px 'IBM Plex Mono',monospace; margin:4px 0 0; }
+.pq-res-score { font:800 44px 'IBM Plex Mono',monospace; margin:4px 0 0; transition: transform .12s cubic-bezier(.23,1,.32,1); }
 .pq-res-t { font:800 22px 'Plus Jakarta Sans',sans-serif; margin:6px 0 4px; }
 .pq-res-s { color:var(--muted,#64748b); font-size:14px; max-width:300px; }
 @media (prefers-reduced-motion: reduce) { .pq *, .pq *::before { transition:none !important; animation:none !important; } }
@@ -230,7 +230,7 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
       <div class="pq-top"><button class="pq-x" aria-label="Fermer">✕</button><div class="pq-seg">${segHTML()}</div><div class="pq-combo"></div></div>
       <div class="pq-res">
         <div class="pq-res-e">${e}</div>
-        <div class="pq-res-score">${correctCount}/${total}</div>
+        <div class="pq-res-score"><span data-count>0</span>/${total}</div>
         <div class="pq-res-t">${esc(t)}</div>
         <div class="pq-res-s">${esc(s)}</div>
       </div>
@@ -242,6 +242,23 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
     root
       .querySelector("[data-done]")
       .addEventListener("click", () => onExit?.(correctCount, total));
+    // Count-up du score : chaque point « monte » avec un tic haptique + un pop.
+    const countEl = root.querySelector("[data-count]");
+    if (countEl && correctCount > 0) {
+      let c = 0;
+      const box = countEl.parentElement;
+      const step = () => {
+        countEl.textContent = String(++c);
+        if (box) {
+          box.style.transform = "scale(1.09)";
+          setTimeout(() => (box.style.transform = ""), 90);
+        }
+        tapHaptic();
+        if (c < correctCount) setTimeout(step, 170);
+        else setTimeout(() => haptic("success"), 150);
+      };
+      setTimeout(step, 280);
+    }
   }
 
   renderQuestion();

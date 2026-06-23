@@ -151,6 +151,7 @@ const STYLE = `<style>
 .rvc-exam:active { transform: scale(0.985); }
 .rvc-exam-t { font:800 16px 'Plus Jakarta Sans',sans-serif; }
 .rvc-exam-s { font-size:12px; opacity:.85; }
+.rvc-faute { background: linear-gradient(135deg,#7c2d12,#c2410c) !important; box-shadow:0 8px 20px rgba(194,65,12,.30) !important; }
 .rvc-go2 { width:100%; border:2px solid var(--a,#6366f1); background:transparent; color:var(--a,#6366f1); border-radius:14px; padding:13px; cursor:pointer; margin-top:18px; font:800 15px 'Plus Jakarta Sans',sans-serif; }
 .rvc-go2:active { transform: scale(0.98); }
 .rvc-ohint { color:var(--muted,#64748b); font-size:13px; margin:2px 0 14px; }
@@ -304,6 +305,7 @@ export async function mount(root, param) {
       }
       ${focusHtml}
       <button class="rvc-exam" data-exam><span class="rvc-exam-t">🏁 Examen blanc</span><span class="rvc-exam-s">Teste-toi sur tout</span></button>
+      <button class="rvc-exam rvc-faute" data-faute><span class="rvc-exam-t">⚠️ Trouve la faute</span><span class="rvc-exam-s">Repère la faute éliminatoire</span></button>
       <div class="rvc-mlabel">Par compétence</div>
       ${mondeCards}
     </div>`;
@@ -323,6 +325,10 @@ export async function mount(root, param) {
     root.querySelector("[data-exam]")?.addEventListener("click", () => {
       track("revision_conduite_exam_open");
       navigate("#/exam-conduite");
+    });
+    root.querySelector("[data-faute]")?.addEventListener("click", () => {
+      track("revision_conduite_faute_open");
+      navigate("#/jeu-faute");
     });
     root.querySelectorAll("[data-monde]").forEach((b) =>
       b.addEventListener("click", () => {
