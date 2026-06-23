@@ -502,6 +502,30 @@ export async function mount(root, param) {
       onExit: (good, total) => {
         markRevised(code);
         track("revision_conduite_quiz_done", { code, good, total });
+        // Alimente la ligue Révision : +1 pt si ≥70% sur cette compétence.
+        // Insertion directe (RLS : l'élève écrit les siens), type 'review' →
+        // compté par get_theory_leaderboard (DISTINCT competence_id, score≥70).
+        // On n'appelle PAS submit_competence_quiz : il passe la validation à
+        // « acquis », or l'élève ne valide JAMAIS sa conduite (c'est le moniteur).
+        const me = getCurUser();
+        if (me?.id && total > 0) {
+          sb.from("quiz_attempts")
+            .insert({
+              user_id: me.id,
+              competence_id: code,
+              type: "review",
+              score: Math.round((good / total) * 100),
+              questions_ids: [],
+              answers_indices: [],
+            })
+            .then(({ error }) => {
+              if (error)
+                console.error("[revision-conduite] persist review", error);
+            })
+            .catch((e) =>
+              console.error("[revision-conduite] persist review", e),
+            );
+        }
         if (focusId) {
           const fid = focusId;
           focusId = null;
