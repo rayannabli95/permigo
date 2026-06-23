@@ -21,6 +21,9 @@ export const ASSETS = {
   // ── Volant — background filigrane du parcours (1 image qui rapproche tout) ──
   volantBg: "/skins/permigo-volant-bg.webp",
 
+  // ── Volant = LA monnaie du jeu (médaillon doré, remplace le SVG ligne) ──
+  volantCoin: "/skins/volant-coin.webp",
+
   // ── Badges 3D (9 skins + Cercle Or) ─────────────────────────────
   // déjà câblés dans MONITEUR_SKINS et ELEVE_SKINS
   badge: (n) => `/skins/badge-3d-${String(n).padStart(2, "0")}.webp`,

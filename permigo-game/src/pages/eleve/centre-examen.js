@@ -929,7 +929,7 @@ function template(activeSlug) {
     <div>
       <div class="cea-hd-tit">Ton centre d'examen</div>
       <div class="cea-hd-sub">Connais le terrain avant le jour J</div>
-      <div class="cea-badge-premium">${icon("gem", { size: 10 })} Fiche centre</div>
+      <div class="cea-badge-premium">${icon("map-pin", { size: 10 })} Fiche centre</div>
     </div>
   </div>
 

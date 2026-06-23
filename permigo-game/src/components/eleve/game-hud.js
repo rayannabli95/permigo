@@ -14,21 +14,51 @@
  *   wireGameHUD(parent);
  */
 
-import { esc } from '@/utils/escape.js';
-import { icon } from '@/utils/icons.js';
-import { getLast7Days, getEquipped, getEquippedAsset, getGemmes } from '@/utils/game-state.js';
+import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
+import {
+  getLast7Days,
+  getEquipped,
+  getEquippedAsset,
+  getGemmes,
+} from "@/utils/game-state.js";
+import { volantImg } from "@/utils/volant.js";
+import { markLevelSeen } from "@/components/eleve/level-up.js";
 
 function initials(name) {
-  return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+  return (name || "?")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join("")
+    .toUpperCase();
 }
 
 /** HTML du HUD complet. À placer en haut du parcours. */
 export function renderGameHUD(stats, me) {
-  const { level, pctLevel, xpInLevel, xpForNextLevel, league, streak, gemmes, availableChests } = stats;
-  const chestBadge = availableChests.length > 0 ? `<span class="ghud-chest-badge">${availableChests.length}</span>` : '';
+  const {
+    level,
+    pctLevel,
+    xpInLevel,
+    xpForNextLevel,
+    league,
+    streak,
+    gemmes,
+    availableChests,
+  } = stats;
+  // Cale la référence de niveau (sans fanfare) : la montée se célèbre, elle,
+  // au moment où l'élève valide une compétence (cf. level-up.js / quiz.js).
+  markLevelSeen(level);
+  const chestBadge =
+    availableChests.length > 0
+      ? `<span class="ghud-chest-badge">${availableChests.length}</span>`
+      : "";
   const equipped = getEquipped();
-  const avatarFrame = equipped.avatarFrame ? `frame-${equipped.avatarFrame.replace('frame-', '')}` : '';
-  const avatarSrc = getEquippedAsset('avatar') || me?.avatar_url || null;
+  const avatarFrame = equipped.avatarFrame
+    ? `frame-${equipped.avatarFrame.replace("frame-", "")}`
+    : "";
+  const avatarSrc = getEquippedAsset("avatar") || me?.avatar_url || null;
 
   return `
     <style>
@@ -264,9 +294,11 @@ export function renderGameHUD(stats, me) {
     <div class="ghud" role="status" aria-label="Tableau de bord du joueur">
       <div class="ghud-row">
         <button class="ghud-avatar ${avatarFrame}" id="ghud-avatar-btn" type="button" aria-label="Aller à mon profil">
-          ${avatarSrc
-            ? `<img src="${esc(avatarSrc)}" alt="" class="ghud-avatar-img" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="ghud-avatar-init" style="display:none">${esc(initials(me?.nom))}</span>`
-            : `<span class="ghud-avatar-init">${esc(initials(me?.nom))}</span>`}
+          ${
+            avatarSrc
+              ? `<img src="${esc(avatarSrc)}" alt="" class="ghud-avatar-img" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="ghud-avatar-init" style="display:none">${esc(initials(me?.nom))}</span>`
+              : `<span class="ghud-avatar-init">${esc(initials(me?.nom))}</span>`
+          }
         </button>
         <div class="ghud-xp">
           <div class="ghud-xp-meta">
@@ -276,7 +308,7 @@ export function renderGameHUD(stats, me) {
           <div class="ghud-xp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="500" aria-valuenow="${xpInLevel}"><i></i></div>
         </div>
         <div class="ghud-pills">
-          <button class="ghud-pill streak" id="ghud-streak-btn" type="button" aria-label="Streak : ${streak.count} jour${streak.count > 1 ? 's' : ''}">
+          <button class="ghud-pill streak" id="ghud-streak-btn" type="button" aria-label="Streak : ${streak.count} jour${streak.count > 1 ? "s" : ""}">
             ${flameIconSVG()}
             <span class="ghud-pill-v">${streak.count}</span>
           </button>
@@ -289,8 +321,8 @@ export function renderGameHUD(stats, me) {
             ${gemIconSVG()}
             <span class="ghud-pill-v">${gemmes}</span>
           </button>
-          <button class="ghud-pill chests ${availableChests.length > 0 ? 'has' : ''}" id="ghud-chests-btn" type="button"
-                  aria-label="${availableChests.length} coffre${availableChests.length > 1 ? 's' : ''} à ouvrir">
+          <button class="ghud-pill chests ${availableChests.length > 0 ? "has" : ""}" id="ghud-chests-btn" type="button"
+                  aria-label="${availableChests.length} coffre${availableChests.length > 1 ? "s" : ""} à ouvrir">
             ${chestIconSVG()}${chestBadge}
           </button>
         </div>
@@ -300,17 +332,21 @@ export function renderGameHUD(stats, me) {
     <!-- Modal Streak Calendar -->
     <div class="ghud-streak-modal" id="ghud-streak-modal" role="dialog" aria-modal="true" aria-labelledby="ghud-streak-title">
       <div class="ghud-streak-panel">
-        <div class="ghud-streak-flame">${icon('flame',{size:20})}</div>
+        <div class="ghud-streak-flame">${icon("flame", { size: 20 })}</div>
         <div class="ghud-streak-count" id="ghud-streak-title">${streak.count}</div>
-        <div class="ghud-streak-lbl">${streak.count > 1 ? 'JOURS DE SÉRIE' : 'JOUR DE SÉRIE'}</div>
+        <div class="ghud-streak-lbl">${streak.count > 1 ? "JOURS DE SÉRIE" : "JOUR DE SÉRIE"}</div>
         <div class="ghud-streak-msg" id="ghud-streak-msg">${streakMsg(streak.count)}</div>
         <div class="ghud-streak-cal" id="ghud-streak-cal">
-          ${getLast7Days().map(d => `
-            <div class="ghud-streak-day ${d.active ? 'active' : ''} ${d.isToday ? 'today' : ''}">
+          ${getLast7Days()
+            .map(
+              (d) => `
+            <div class="ghud-streak-day ${d.active ? "active" : ""} ${d.isToday ? "today" : ""}">
               <div class="dl">${d.label}</div>
               <div class="dn">${d.num}</div>
             </div>
-          `).join('')}
+          `,
+            )
+            .join("")}
         </div>
         <button class="ghud-streak-close" id="ghud-streak-close" type="button">Continuer →</button>
       </div>
@@ -320,43 +356,51 @@ export function renderGameHUD(stats, me) {
 
 /** Branche les événements du HUD (avatar → profil, streak modal, chest button). */
 export function wireGameHUD(root, callbacks = {}) {
-  const avatarBtn = root.querySelector('#ghud-avatar-btn');
-  const streakBtn = root.querySelector('#ghud-streak-btn');
-  const streakModal = root.querySelector('#ghud-streak-modal');
-  const closeBtn = root.querySelector('#ghud-streak-close');
-  const chestsBtn = root.querySelector('#ghud-chests-btn');
+  const avatarBtn = root.querySelector("#ghud-avatar-btn");
+  const streakBtn = root.querySelector("#ghud-streak-btn");
+  const streakModal = root.querySelector("#ghud-streak-modal");
+  const closeBtn = root.querySelector("#ghud-streak-close");
+  const chestsBtn = root.querySelector("#ghud-chests-btn");
 
   // Avatar → navigation vers /profil
-  avatarBtn?.addEventListener('click', async () => {
-    const { navigate } = await import('@/router.js');
-    navigate('/profil');
+  avatarBtn?.addEventListener("click", async () => {
+    const { navigate } = await import("@/router.js");
+    navigate("/profil");
   });
 
-  streakBtn?.addEventListener('click', () => streakModal?.classList.add('show'));
-  closeBtn?.addEventListener('click', () => streakModal?.classList.remove('show'));
-  streakModal?.addEventListener('click', (e) => {
-    if (e.target === streakModal) streakModal.classList.remove('show');
+  streakBtn?.addEventListener("click", () =>
+    streakModal?.classList.add("show"),
+  );
+  closeBtn?.addEventListener("click", () =>
+    streakModal?.classList.remove("show"),
+  );
+  streakModal?.addEventListener("click", (e) => {
+    if (e.target === streakModal) streakModal.classList.remove("show");
   });
 
-  chestsBtn?.addEventListener('click', () => {
+  chestsBtn?.addEventListener("click", () => {
     if (callbacks.onChestsClick) callbacks.onChestsClick();
   });
 
   // Gemmes → boutique
-  const gemmesBtn = root.querySelector('#ghud-gemmes-btn');
-  gemmesBtn?.addEventListener('click', async () => {
-    const { navigate } = await import('@/router.js');
-    navigate('/boutique');
+  const gemmesBtn = root.querySelector("#ghud-gemmes-btn");
+  gemmesBtn?.addEventListener("click", async () => {
+    const { navigate } = await import("@/router.js");
+    navigate("/boutique");
   });
 
   // Rafraîchit le compteur de gemmes en live après ouverture d'un coffre
   // (open_chest crédite côté serveur et émet pg-gemmes-changed avec new_balance).
-  window.addEventListener('pg-gemmes-changed', (e) => {
+  window.addEventListener("pg-gemmes-changed", (e) => {
     const bal = e?.detail?.balance;
-    if (typeof bal !== 'number') return;
-    const v = gemmesBtn?.querySelector('.ghud-pill-v');
+    if (typeof bal !== "number") return;
+    const v = gemmesBtn?.querySelector(".ghud-pill-v");
     if (v) v.textContent = String(bal);
-    gemmesBtn?.setAttribute('aria-label', `Boutique — ${bal} volants`);
+    gemmesBtn?.setAttribute("aria-label", `Boutique — ${bal} volants`);
+    // Rebond ludique de la pastille à chaque crédit/débit.
+    import("@/components/eleve/volant-reward.js")
+      .then(({ bumpVolantPill }) => bumpVolantPill(gemmesBtn))
+      .catch(() => {});
   });
 }
 
@@ -379,7 +423,7 @@ function rosetteIconSVG(color) {
   // Rosette/badge medal style FIFA — bien plus propre qu'un emoji 🥇
   return `<svg class="ghud-svg-rosette" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true">
     <defs>
-      <linearGradient id="ros-grad-${color.replace('#', '')}" x1="50%" y1="0%" x2="50%" y2="100%">
+      <linearGradient id="ros-grad-${color.replace("#", "")}" x1="50%" y1="0%" x2="50%" y2="100%">
         <stop offset="0%" stop-color="#fff" stop-opacity=".7"/>
         <stop offset="50%" stop-color="${color}"/>
         <stop offset="100%" stop-color="#000" stop-opacity=".25"/>
@@ -388,7 +432,7 @@ function rosetteIconSVG(color) {
     <!-- Étoile à 8 branches en arrière-plan -->
     <path d="M16 2 L18 8 L24 6 L22 12 L28 14 L22 17 L24 23 L18 21 L16 27 L14 21 L8 23 L10 17 L4 14 L10 12 L8 6 L14 8 Z" fill="${color}" opacity=".35"/>
     <!-- Cercle central avec gradient -->
-    <circle cx="16" cy="15" r="9" fill="url(#ros-grad-${color.replace('#', '')})" stroke="#fff" stroke-width="1.2"/>
+    <circle cx="16" cy="15" r="9" fill="url(#ros-grad-${color.replace("#", "")})" stroke="#fff" stroke-width="1.2"/>
     <!-- Inner highlight -->
     <circle cx="16" cy="15" r="7" fill="none" stroke="rgba(255,255,255,.4)" stroke-width=".6"/>
     <!-- Ruban du badge en bas -->
@@ -397,18 +441,8 @@ function rosetteIconSVG(color) {
 }
 
 function gemIconSVG() {
-  return `<svg class="ghud-svg-gem" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-    <defs>
-      <linearGradient id="gem-grad" x1="50%" y1="0%" x2="50%" y2="100%">
-        <stop offset="0%" stop-color="#fff"/>
-        <stop offset="50%" stop-color="#a78bfa"/>
-        <stop offset="100%" stop-color="#6d28d9"/>
-      </linearGradient>
-    </defs>
-    <path d="M12 2 L21 9 L12 22 L3 9 Z" fill="url(#gem-grad)" stroke="#4c1d95" stroke-width=".8"/>
-    <path d="M12 2 L21 9 L12 12 L3 9 Z" fill="#fff" opacity=".35"/>
-    <path d="M12 2 L12 22" stroke="rgba(0,0,0,.18)" stroke-width=".7"/>
-  </svg>`;
+  // La monnaie = un vrai jeton « volant » doré (médaillon), plus le diamant.
+  return volantImg(20, { drop: true });
 }
 
 function chestIconSVG() {
@@ -434,18 +468,21 @@ function chestIconSVG() {
 // ─── Helpers ───
 function streakMsg(count) {
   if (count === 0) return "Commence ta série dès aujourd'hui !";
-  if (count === 1) return 'Belle entame. Reviens demain pour continuer ta série.';
-  if (count < 7) return `Tu es sur ${count} jours d'affilée. Ne casse pas le rythme !`;
+  if (count === 1)
+    return "Belle entame. Reviens demain pour continuer ta série.";
+  if (count < 7)
+    return `Tu es sur ${count} jours d'affilée. Ne casse pas le rythme !`;
   if (count < 30) return `${count} jours de suite — tu deviens un habitué`;
-  if (count < 100) return `${count} jours — légendaire. Tu vas chercher le permis.`;
+  if (count < 100)
+    return `${count} jours — légendaire. Tu vas chercher le permis.`;
   return `${count} jours — culte. Respect total.`;
 }
 
 /** Assombrit une couleur hex de N% (négatif = plus sombre). */
 function shade(hex, percent) {
-  const num = parseInt(hex.replace('#', ''), 16);
+  const num = parseInt(hex.replace("#", ""), 16);
   const r = Math.max(0, Math.min(255, (num >> 16) + percent));
   const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00ff) + percent));
   const b = Math.max(0, Math.min(255, (num & 0x0000ff) + percent));
-  return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+  return "#" + ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
 }

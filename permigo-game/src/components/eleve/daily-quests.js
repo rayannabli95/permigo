@@ -11,6 +11,7 @@ import { icon } from "@/utils/icons.js";
 import { ill, illMask } from "@/utils/illustrations.js";
 import { toast } from "@/components/common/toast.js";
 import { playStar } from "@/utils/sound.js";
+import { flyVolants } from "@/components/eleve/volant-reward.js";
 
 const STYLE_ID = "daily-quests-style";
 
@@ -194,6 +195,11 @@ export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
           xp: xpGained,
           gems: gemGained,
         });
+
+        // Jetons dorés vers le HUD si des volants ont été crédités
+        if (gemGained > 0) {
+          flyVolants(gemGained, { from: card });
+        }
 
         // Popup XP
         const rect = card.getBoundingClientRect();

@@ -18,6 +18,7 @@ import {
   maybeSendStreakRiskNotif,
 } from "@/services/web-push.js";
 import { icon } from "@/utils/icons.js";
+import { volantImg } from "@/utils/volant.js";
 import { ill, illMask } from "@/utils/illustrations.js";
 import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
@@ -1517,7 +1518,7 @@ function render({
     (streakSt === "critical" || streakSt === "at_risk") && gemmes >= 50
       ? `
   <div class="bs-freeze-wrap">
-    <button class="bs-freeze-btn" id="bs-freeze-btn">Geler ma série · 50 ${icon("gem", { size: 14 })}</button>
+    <button class="bs-freeze-btn" id="bs-freeze-btn">Geler ma série · 50 ${volantImg(16)}</button>
     <div class="bs-freeze-desc">Protège ta série pour les prochaines 24h</div>
   </div>`
       : ""
@@ -1657,12 +1658,12 @@ function wire(
       const { data, error } = await sb.rpc("use_streak_freeze");
       if (error || data?.error) {
         toast(
-          "Pas assez de gemmes pour geler ta série. Il t'en faut 50 gemmes",
+          "Pas assez de volants pour geler ta série. Il t'en faut 50 volants",
           "error",
         );
         setTimeout(() => {
           btn.disabled = false;
-          btn.innerHTML = `Geler ma série · 50 ${icon("gem", { size: 14 })}`;
+          btn.innerHTML = `Geler ma série · 50 ${volantImg(16)}`;
         }, 1800);
         return;
       }
@@ -1673,7 +1674,7 @@ function wire(
     } catch {
       toast("Erreur lors du gel", "error");
       btn.disabled = false;
-      btn.innerHTML = `Geler ma série · 50 ${icon("gem", { size: 14 })}`;
+      btn.innerHTML = `Geler ma série · 50 ${volantImg(16)}`;
     }
   });
 
