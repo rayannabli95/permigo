@@ -17,7 +17,6 @@ import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
-import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
 import { illus } from "@/components/enseignant/illus.js";
 
 // ─── Médailles (raretés) — couleurs de médaille, pas couleurs de marque ──
@@ -228,7 +227,7 @@ const STYLE = `<style>
 }
 @media (hover:hover) { .tr2-back:hover { background: var(--bg2); border-color: var(--bo4); } }
 .tr2-back:active { background: var(--bg2); transform: translateY(1px); }
-.tr2-back:focus-visible { outline: 3px solid var(--ens-go, var(--a)); outline-offset: 2px; }
+.tr2-back:focus-visible { outline: 3px solid #4f46e5); outline-offset: 2px; }
 .tr2-hd-info { flex: 1; min-width: 0; }
 .tr2-hd-title {
   font: 700 17px/1.2 var(--ens-display, 'Fredoka'), sans-serif;
@@ -240,14 +239,14 @@ const STYLE = `<style>
 .tr2-hero-wrap {
   position: relative; overflow: hidden;
   padding: 20px 20px 32px;
-  background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+  background: linear-gradient(150deg, #4f46e5, #6d6bff 60%, #8b5cf6);
   color: #fff;
   isolation: isolate;
 }
 /* liseré marquage au sol */
 .tr2-hero-wrap::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
-  background: repeating-linear-gradient(90deg, var(--ens-amber, #f59e0b) 0 18px, transparent 18px 34px);
+  background: none;
   opacity: .85;
 }
 .tr2-hero-inner { position: relative; z-index: 2; }
@@ -274,8 +273,8 @@ const STYLE = `<style>
 .tr2-prog-bar { height: 7px; background: rgba(255,255,255,.18); border-radius: var(--ens-r-pill, 999px); overflow: hidden; }
 .tr2-prog-fill {
   height: 100%; width: 0; border-radius: var(--ens-r-pill, 999px);
-  background: linear-gradient(90deg, var(--ens-go, #18a558), var(--ens-go-lt, #34d27b));
-  box-shadow: 0 0 10px color-mix(in srgb, var(--ens-go, #18a558) 65%, transparent);
+  background: #fff;
+  box-shadow: 0 0 10px rgba(255,255,255,.5);
   transition: width 1s cubic-bezier(.2,.7,.3,1);
 }
 .tr2-prog-hint { font: 500 11.5px/1.3 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: rgba(255,255,255,.62); }
@@ -290,15 +289,15 @@ const STYLE = `<style>
 .tr2-cta-btn {
   flex-shrink: 0; padding: 12px 16px; min-height: 48px;
   border: 0; border-radius: var(--ens-r, 16px);
-  background: linear-gradient(180deg, var(--ens-go-lt, #34d27b), var(--ens-go, #18a558));
+  background: linear-gradient(180deg, #6d6bff, #4f46e5);
   color: var(--ens-ink-go, #07150c);
   font: 700 13px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; cursor: pointer;
-  box-shadow: 0 4px 0 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000), var(--ens-shadow, var(--s0));
+  box-shadow: 0 4px 0 0 color-mix(in srgb, #4f46e5 60%, #000), var(--ens-shadow, var(--s0));
   white-space: nowrap;
   transition: transform .1s ease, box-shadow .1s ease;
 }
-.tr2-cta-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000); }
-.tr2-cta-btn:focus-visible { outline: 3px solid var(--ens-go, var(--a)); outline-offset: 2px; }
+.tr2-cta-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 0 color-mix(in srgb, #4f46e5 60%, #000); }
+.tr2-cta-btn:focus-visible { outline: 3px solid #4f46e5); outline-offset: 2px; }
 
 /* ── Section label par médaille ── */
 .tr2-group {
@@ -326,7 +325,7 @@ const STYLE = `<style>
 }
 @keyframes tr2In { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: none; } }
 .tr2-card:active { transform: scale(.93); }
-.tr2-card:focus-visible { outline: 3px solid var(--ens-go, var(--a)); outline-offset: 3px; }
+.tr2-card:focus-visible { outline: 3px solid #4f46e5); outline-offset: 3px; }
 .tr2-card.locked { background: var(--su); border: 1.5px solid var(--bo); }
 .tr2-card.unlocked { color: #fff; }
 .tr2-card.bronze  { background: var(--tc-grad); box-shadow: 0 4px 16px -4px var(--tc-glow); }
@@ -427,9 +426,9 @@ const STYLE = `<style>
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px;
   border-radius: var(--ens-r-pill, 999px);
   font: 700 12px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-  background: color-mix(in srgb, var(--ens-go, #18a558) 14%, var(--su));
-  color: var(--ens-go, #18a558);
-  border: 1.5px solid color-mix(in srgb, var(--ens-go, #18a558) 28%, transparent);
+  background: color-mix(in srgb, #4f46e5 14%, var(--su));
+  color: #4f46e5;
+  border: 1.5px solid color-mix(in srgb, #4f46e5 28%, transparent);
 }
 .tr2-sheet-chip-prog {
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px;
@@ -443,15 +442,15 @@ const STYLE = `<style>
 .tr2-sheet-share {
   flex: 1; padding: 14px; min-height: 50px; border: 0;
   border-radius: var(--ens-r, 16px);
-  background: linear-gradient(180deg, var(--ens-go-lt, #34d27b), var(--ens-go, #18a558));
+  background: linear-gradient(180deg, #6d6bff, #4f46e5);
   color: var(--ens-ink-go, #07150c);
   font: 700 14px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
   cursor: pointer;
-  box-shadow: 0 4px 0 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000);
+  box-shadow: 0 4px 0 0 color-mix(in srgb, #4f46e5 60%, #000);
   display: flex; align-items: center; justify-content: center; gap: 8px;
   transition: transform .1s ease, box-shadow .1s ease;
 }
-.tr2-sheet-share:active { transform: translateY(3px); box-shadow: 0 1px 0 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000); }
+.tr2-sheet-share:active { transform: translateY(3px); box-shadow: 0 1px 0 0 color-mix(in srgb, #4f46e5 60%, #000); }
 .tr2-sheet-share:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 .tr2-sheet-close {
   padding: 14px 20px; min-height: 50px;
@@ -461,7 +460,7 @@ const STYLE = `<style>
   transition: background .15s, border-color .15s;
 }
 .tr2-sheet-close:hover { background: var(--bg2); border-color: var(--bo4); }
-.tr2-sheet-close:focus-visible { outline: 3px solid var(--ens-go, var(--a)); outline-offset: 2px; }
+.tr2-sheet-close:focus-visible { outline: 3px solid #4f46e5); outline-offset: 2px; }
 .tr2-sheet-glow.locked { background: var(--bg2); border-bottom: 1px solid var(--bo); }
 .tr2-sheet-glow.locked .tr2-sheet-ico { background: var(--su); color: var(--mu2); border: 1px solid var(--bo); box-shadow: none; }
 .tr2-sheet-glow.locked .tr2-sheet-handle { background: var(--bo4); }
@@ -490,7 +489,6 @@ export async function mount(root) {
 <div class="tr2 anim-slide-up">
   ${_headerHtml("Chargement…")}
   <div class="tr2-hero-wrap">
-    ${panneauxLayer({ variant: "hero" })}
     <div class="tr2-hero-inner">
       <div class="tr2-hero-top">
         <div class="tr2-hero-illus">${illus("trophy", { size: 64 })}</div>
@@ -597,7 +595,6 @@ function _render(root, d) {
 <div class="tr2 anim-slide-up">
   ${_headerHtml(`${unlockedCount} débloqué${unlockedCount > 1 ? "s" : ""} sur ${total}`)}
   <div class="tr2-hero-wrap">
-    ${panneauxLayer({ variant: "hero" })}
     <div class="tr2-hero-inner">
       <div class="tr2-hero-top">
         <div class="tr2-hero-illus">${illus("trophy", { size: 64 })}</div>

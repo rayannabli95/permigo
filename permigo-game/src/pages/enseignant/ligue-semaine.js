@@ -20,7 +20,6 @@ import {
   msToNextMonday,
   fmtCountdown,
 } from "@/utils/league-shared.js";
-import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
 import { illus } from "@/components/enseignant/illus.js";
 
 // ─── CSS ─────────────────────────────────────────────────────
@@ -49,7 +48,7 @@ ${LEAGUE_CSS}
 }
 .ls-w-back:hover { background: var(--bg2); border-color: var(--bo4); }
 .ls-w-back:active { background: var(--bg2); transform: scale(.97); }
-.ls-w-back:focus-visible { outline: 3px solid var(--ens-go, var(--a)); outline-offset: 2px; }
+.ls-w-back:focus-visible { outline: 3px solid #4f46e5; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .ls-w-back { transition: none; } }
 .ls-w-hd-info { flex: 1; }
 .ls-w-title {
@@ -63,7 +62,7 @@ ${LEAGUE_CSS}
   position: relative; overflow: hidden;
   margin: 16px 16px 0;
   padding: 20px;
-  background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+  background: linear-gradient(150deg, #4f46e5, #6d6bff 60%, #8b5cf6);
   border-radius: var(--ens-r-lg, 22px);
   color: #fff;
   box-shadow: var(--ens-shadow, var(--s2));
@@ -72,7 +71,7 @@ ${LEAGUE_CSS}
 /* liseré marquage au sol */
 .ls-w-hero-wrap::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
-  background: repeating-linear-gradient(90deg, var(--ens-amber, #f59e0b) 0 18px, transparent 18px 34px);
+  background: none;
   opacity: .75; border-radius: 0 0 var(--ens-r-lg, 22px) var(--ens-r-lg, 22px);
 }
 .ls-w-hero-inner { position: relative; z-index: 2; }
@@ -162,16 +161,16 @@ ${LEAGUE_CSS}
 .ls-w-motivation-cta {
   display: flex; align-items: center; justify-content: center; gap: 6px;
   padding: 14px; border: none; border-radius: var(--ens-r, 16px);
-  background: linear-gradient(180deg, var(--ens-go-lt, #34d27b), var(--ens-go, #18a558));
+  background: linear-gradient(180deg, #6d6bff, #4f46e5);
   color: var(--ens-ink-go, #07150c);
   font: 700 14px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; cursor: pointer;
   min-height: 48px;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 4px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000), var(--ens-shadow, var(--s0));
+  box-shadow: 0 4px 0 color-mix(in srgb, #4f46e5 60%, #000), var(--ens-shadow, var(--s0));
   transition: transform .1s ease, box-shadow .1s ease;
 }
-.ls-w-motivation-cta:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000); }
-.ls-w-motivation-cta:focus-visible { outline: 3px solid var(--ens-go, var(--a)); outline-offset: 2px; }
+.ls-w-motivation-cta:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, #4f46e5 60%, #000); }
+.ls-w-motivation-cta:focus-visible { outline: 3px solid #4f46e5; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   .ls-w-motivation-cta, .ls-w-back { transition: none; }
 }
@@ -255,7 +254,6 @@ function _render(root, rows) {
   // Hero arcade : podium + badge de ligue + compteur remise à zéro
   const hero = `
   <div class="ls-w-hero-wrap">
-    ${panneauxLayer({ variant: "section" })}
     <div class="ls-w-hero-inner">
       <div class="ls-w-hero-top">
         <div class="ls-w-hero-illus">${illus("podium", { size: 68 })}</div>
