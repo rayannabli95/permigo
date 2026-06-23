@@ -3,6 +3,19 @@
 // ═══════════════════════════════════════════════════════════════
 import { phPageview } from "@/services/posthog.js";
 
+// Direction de navigation → transition d'écran directionnelle (sensation « feed »).
+const _navStack = [];
+function _navDir(hash) {
+  const i = _navStack.lastIndexOf(hash);
+  if (i !== -1 && i === _navStack.length - 2) {
+    _navStack.pop();
+    return "back"; // retour vers l'écran précédent → glisse depuis la gauche
+  }
+  _navStack.push(hash);
+  if (_navStack.length > 40) _navStack.shift();
+  return "fwd"; // on avance → glisse depuis la droite
+}
+
 const ROUTES = {
   eleve: {
     default: () => import("@/pages/eleve/accueil.js"),
@@ -149,6 +162,10 @@ export async function route(root, me) {
     // Les autres pages ignorent les args supplémentaires
     await mod.mount(root, param);
     void root.offsetWidth; // reflow → l'animation rejoue à chaque navigation
+    root.classList.toggle(
+      "route-back",
+      _navDir(location.hash || "#/") === "back",
+    );
     root.classList.add("route-enter");
     const heading = root.querySelector("h1") || root;
     heading.setAttribute("tabindex", "-1");
