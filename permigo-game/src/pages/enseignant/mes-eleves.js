@@ -15,8 +15,7 @@ import { fmtName } from "@/utils/fmt-name.js";
 import { triggerEleveRecovery } from "@/services/eleve-recovery.js";
 import { icon } from "@/utils/icons.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
-import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
-import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
+// coach-hint retiré : pipeline segmenté n'a pas de bandeau relancer séparé
 import { illus } from "@/components/enseignant/illus.js";
 import { haptic } from "@/utils/haptic.js";
 
@@ -26,40 +25,33 @@ const STYLE = `<style>
     padding: 0 0 100px;
     max-width: 600px;
     margin: 0 auto;
-    background: var(--bg);
-    font-family: var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--ink);
+    background: #f6f7f9;
+    font-family: 'Inter', var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: #1a1f2b;
   }
 
-  /* ── Hero arcade (parité aujourdhui.js) ── */
+  /* ── En-tête clair (raccord dashboard indigo, plus d'arcade) ── */
   .me-hero {
-    position: relative; overflow: hidden;
-    margin: 0 0 0;
-    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 22px) 20px 26px;
-    background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
-    color: #fff;
-    isolation: isolate;
+    position: relative;
+    margin: 0;
+    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 16px) 18px 2px;
+    background: transparent;
+    color: #1a1c2e;
     animation: meHeroIn .45s var(--ease, ease) both;
   }
-  .me-hero::after {
-    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
-    background: repeating-linear-gradient(90deg, #f59e0b 0 18px, transparent 18px 34px); opacity: .85;
-  }
-  .me-hero .ens-panneaux__sign { opacity: var(--o, .15); filter: saturate(1.1) brightness(1.1); }
   .me-hero-content { position: relative; z-index: 2; }
   .me-hero-kicker {
-    font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: rgba(255,255,255,.65); text-transform: uppercase; letter-spacing: .12em;
-    margin: 0 0 7px;
+    font: 700 11px/1 'Inter', sans-serif;
+    color: #a3a9c4; text-transform: uppercase; letter-spacing: .12em;
+    margin: 0 0 6px;
   }
   .me-hero-title {
-    font: 700 clamp(26px, 8vw, 32px)/1.05 var(--ens-display, 'Fredoka'), sans-serif;
-    color: #fff; margin: 0; letter-spacing: -.02em;
-    text-shadow: 0 2px 14px rgba(11,13,26,.4);
+    font: 800 clamp(23px, 7vw, 28px)/1.1 'Manrope', sans-serif;
+    color: #1a1c2e; margin: 0; letter-spacing: -.01em;
   }
   .me-hero-sub {
-    font: 500 13px/1.5 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: rgba(255,255,255,.85); margin: 10px 0 0; max-width: 38ch;
+    font: 600 13px/1.5 'Inter', sans-serif;
+    color: #6b7095; margin: 5px 0 0; max-width: 38ch;
   }
   .me-hero-actions {
     display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;
@@ -84,7 +76,7 @@ const STYLE = `<style>
     letter-spacing: -0.02em;
   }
   .me-sub {
-    font: 500 13px/1.4 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    font: 500 13px/1.4 'Inter', sans-serif;
     color: var(--mu2);
     margin: 0;
   }
@@ -99,24 +91,24 @@ const STYLE = `<style>
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--mu2);
+    color: #a0a6b4;
     font-size: 15px;
     pointer-events: none;
   }
   .me-search {
     width: 100%;
     padding: 12px 12px 12px 40px;
-    background: var(--su);
-    border: 1px solid var(--bo);
-    border-radius: var(--r);
-    font: 500 16px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--ink);
+    background: #fff;
+    border: 1px solid #e6e9ef;
+    border-radius: 13px;
+    font: 600 15px/1 'Inter', sans-serif;
+    color: #1a1f2b;
     outline: none;
-    transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
+    transition: border-color .15s ease, box-shadow .15s ease;
     box-sizing: border-box;
   }
-  .me-search::placeholder { color: var(--mu2); }
-  .me-search:focus { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
+  .me-search::placeholder { color: #a0a6b4; }
+  .me-search:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
   .me-search::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
   .me-search-clear {
     position: absolute;
@@ -125,9 +117,9 @@ const STYLE = `<style>
     transform: translateY(-50%);
     width: 22px; height: 22px;
     border: none;
-    background: var(--bo);
+    background: #e6e9ef;
     border-radius: 50%;
-    color: var(--mu);
+    color: #6b7280;
     font-size: 12px;
     cursor: pointer;
     display: none;
@@ -139,193 +131,135 @@ const STYLE = `<style>
   }
   .me-search-clear.visible { display: flex; }
 
-  /* Tabs */
-  .me-tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 16px;
-    background: var(--bg2);
-    padding: 4px;
-    border-radius: var(--r);
-  }
-  .me-tab {
-    flex: 1;
-    padding: 8px 2px;
-    border: none;
-    background: transparent;
-    border-radius: var(--r-sm);
-    font: 600 11.5px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--mu2);
-    cursor: pointer;
-    transition: background .15s var(--ease), color .15s var(--ease);
-    min-height: 44px; /* cible tactile a11y */
-    white-space: nowrap;
-  }
-  .me-tab.active {
-    background: var(--su);
-    color: var(--ens-go, #18a558);
-    box-shadow: var(--s1);
-    font-weight: 700;
-  }
-
-  /* Liste */
-  .me-list {
+  /* ── Pipeline : groupes par statut ── */
+  .me-pipeline {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 14px;
   }
 
-  /* Card élève — arcade */
-  .me-row {
-    background: var(--su);
-    border: 1px solid var(--bo);
-    border-radius: var(--ens-r, var(--r));
-    padding: 14px 16px;
+  /* En-tête de groupe */
+  .me-grp-head {
     display: flex;
     align-items: center;
-    gap: 12px;
-    box-shadow: var(--ens-shadow, var(--s0));
-    transition: border-color .15s var(--ease), transform .15s var(--ease), box-shadow .15s var(--ease);
+    gap: 8px;
+    padding: 4px 2px 6px;
+    font: 800 11px/1 'Inter', sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .me-grp-head .me-grp-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .me-grp-head .me-grp-count {
+    margin-left: auto;
+    font: 800 11px/1 'Inter', sans-serif;
+    letter-spacing: 0;
+    color: #8b92a3;
+  }
+
+  /* Couleurs par groupe */
+  .me-grp-head--pret   { color: #15803d; }
+  .me-grp-head--appr   { color: #b45309; }
+  .me-grp-head--rel    { color: #b91c1c; }
+  .me-grp-head--cours  { color: #6b7280; }
+  .me-grp-head--recu   { color: #7c3aed; }
+
+  /* Bande blanche contenant les lignes */
+  .me-band {
+    background: #fff;
+    border: 1px solid #e6e9ef;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px -4px rgba(26,31,43,.1);
+  }
+  /* Liseré gauche coloré selon le groupe */
+  .me-band--pret  { box-shadow: inset 3px 0 0 #16a34a, 0 2px 8px -4px rgba(26,31,43,.08); }
+  .me-band--appr  { box-shadow: inset 3px 0 0 #f59e0b, 0 2px 8px -4px rgba(26,31,43,.08); }
+  .me-band--rel   { box-shadow: inset 3px 0 0 #ef4444, 0 2px 8px -4px rgba(26,31,43,.08); }
+  .me-band--cours { box-shadow: inset 3px 0 0 #d1d5db, 0 2px 8px -4px rgba(26,31,43,.08); }
+  .me-band--recu  { box-shadow: inset 3px 0 0 #7c3aed, 0 2px 8px -4px rgba(26,31,43,.08); }
+
+  /* Ligne élève dans la bande */
+  .me-row {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 13px 14px 13px 16px;
     cursor: pointer;
-    min-height: 44px;
+    transition: background .12s ease;
+    min-height: 56px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .me-row + .me-row {
+    border-top: 1px solid #f0f1f5;
   }
   @media (hover: hover) and (pointer: fine) {
-    .me-row:hover {
-      border-color: var(--bo4);
-      transform: translateY(-1px);
-      box-shadow: var(--s2);
-    }
+    .me-row:hover { background: #fafbff; }
   }
-  .me-row:active { transform: scale(0.97); transition: transform 180ms cubic-bezier(0.23,1,0.32,1); }
-  @media (prefers-reduced-motion: reduce) { .me-row:active { transform: none; } }
+  .me-row:active { background: #f3f4f8; transition: background 80ms ease; }
+  @media (prefers-reduced-motion: reduce) { .me-row:active { background: #f3f4f8; } }
   .me-row:focus { outline: none; }
-  .me-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; border-radius: var(--r); }
-  /* Barre d'état à gauche — scan instantané, sans layout-shift : la bordure
-     passe de 1px à 3px et le padding-left compense (16→14px). */
-  .me-row--pret { border-left: 3px solid var(--state-pret); padding-left: 14px; }
-  .me-row--relancer { border-left: 3px solid var(--state-relancer); padding-left: 14px; }
-  .me-row--approche { border-left: 3px solid var(--state-approche); padding-left: 14px; }
+  .me-row:focus-visible { outline: 3px solid #4f46e5; outline-offset: -3px; }
 
   /* Avatar */
   .me-av {
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font: 600 14px/1 'Plus Jakarta Sans', sans-serif;
+    font: 800 13px/1 'Manrope', sans-serif;
     color: #fff;
     flex-shrink: 0;
   }
 
-  /* Infos */
-  .me-info { flex: 1; min-width: 0; }
+  /* Nom */
   .me-nom {
-    font: 700 14.5px/1.2 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--ink);
-    margin: 0 0 4px;
-    letter-spacing: -0.01em;
+    flex: 1;
+    min-width: 0;
+    font: 700 14px/1.2 'Inter', sans-serif;
+    color: #1a1f2b;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .me-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .me-meta-count {
-    font: 500 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--mu2);
-  }
 
-  /* Badges statut — tokens arcade (ens-chip) */
-  /* Les classes .me-badge sont conservées pour compatibilité logique,
-     le visuel est surchargé ci-dessous via les modificateurs ens-chip. */
-  .me-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    padding: 4px 9px; border-radius: var(--ens-r-pill, 999px);
+  /* Valeur droite : progression ou jours inactif */
+  .me-pr {
+    font: 700 12px/1 'Inter', sans-serif;
+    color: #8b92a3;
+    font-variant-numeric: tabular-nums;
     flex-shrink: 0;
   }
-  .me-badge.actif, .me-badge.pret {
-    color: #fff; background: var(--ens-go, #18a558);
-  }
-  .me-badge.inactif {
-    color: var(--mu2); background: var(--bg2);
-  }
-  .me-badge.approche {
-    color: #fff; background: var(--ens-blue, #1d4ed8);
-  }
-  .me-badge.recu {
-    color: #07150c; background: var(--ens-go, #18a558);
-  }
-  .me-badge.planifie {
-    color: #fff; background: var(--ens-amber, #f59e0b);
-  }
-
-  /* Progression REMC */
-  .me-prog {
-    flex: 1;
-    min-width: 60px;
-    max-width: 88px;
-  }
-  .me-prog-bar {
-    height: 4px;
-    background: var(--bo);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 4px;
-  }
-  .me-prog-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--a), var(--a-lt));
-    border-radius: 2px;
-    transition: width .6s var(--ease);
-  }
-  /* Lecture instantanée par état : vert = prêt/diplômé (objectif),
-     ambre = à relancer (attention). Défaut accent = en cours. */
-  .me-prog-fill.is-pret { background: linear-gradient(90deg, var(--grd), var(--gr)); }
-  .me-prog-fill.is-relancer { background: var(--am); }
-  .me-prog-txt {
-    font: 700 12px/1 'IBM Plex Mono', monospace;
-    color: var(--ink3);
-    text-align: right;
-  }
-  .me-prog-txt.is-pret { color: var(--gr-txt); }
-  .me-prog-txt.is-relancer { color: var(--am-txt); }
+  .me-pr--warn { color: #c2410c; }
 
   /* Bouton actions rapides */
   .me-more {
     flex-shrink: 0;
     align-self: center;
-    width: 44px; height: 44px; /* cible tactile a11y */
-    margin: 0 -8px 0 -2px; /* recale optiquement sur le bord droit de la carte */
+    width: 36px; height: 36px;
+    margin-right: -4px;
     display: flex; align-items: center; justify-content: center;
-    border: none; background: transparent; border-radius: var(--r);
-    color: var(--mu2); cursor: pointer;
+    border: none; background: transparent; border-radius: 8px;
+    color: #a0a6b4; cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: background .12s, color .12s;
   }
-  .me-more:hover { background: var(--bg2); color: var(--ink); }
-  .me-more:active { transform: scale(.92); }
-  .me-more:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+  .me-more:hover { background: #f0f1f5; color: #1a1f2b; }
+  .me-more:active { transform: scale(.9); }
+  .me-more:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
 
-  /* Chevron (legacy) */
-  .me-chev {
-    color: var(--mu2);
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-
-  /* Empty state — arcade */
+  /* Empty state */
   .me-empty {
     padding: 40px 20px;
     text-align: center;
     color: var(--mu2);
-    font: 500 14px/1.6 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    font: 500 14px/1.6 'Inter', sans-serif;
     display: flex; flex-direction: column; align-items: center; gap: 10px;
   }
   .me-empty-ico {
@@ -340,7 +274,7 @@ const STYLE = `<style>
     height: 72px;
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: var(--r-xl);
+    border-radius: 16px;
     animation: skel-pulse 1.4s ease-in-out infinite;
   }
   @keyframes skel-pulse {
@@ -351,63 +285,40 @@ const STYLE = `<style>
   /* Boutons header — ghost arcade (léger, ne concurrence pas le FAB) */
   .me-invite-btn {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 14px; min-height: 44px; border-radius: var(--ens-r-pill, 999px);
-    background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.25);
-    color: #fff; font: 700 12px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    padding: 8px 14px; min-height: 44px; border-radius: 999px;
+    background: #fff; border: 1.5px solid #e6e9f7;
+    color: #4f46e5; font: 700 12px/1 'Inter', sans-serif;
     cursor: pointer; flex-shrink: 0;
+    box-shadow: 0 3px 10px -6px rgba(60,50,130,.3);
     transition: background .12s, border-color .12s, transform .12s;
     -webkit-tap-highlight-color: transparent;
   }
-  .me-invite-btn:hover { background: rgba(255,255,255,.2); }
-  .me-invite-btn:active { background: rgba(255,255,255,.28); transform: scale(.96); }
-  /* Bouton "Inviter" — accent go vert */
+  .me-invite-btn:hover { background: #f3f1fc; }
+  .me-invite-btn:active { background: #eae8ff; transform: scale(.96); }
   .me-invite-btn--go {
-    background: var(--ens-go, #18a558); border-color: transparent; color: #fff;
-    box-shadow: 0 3px 0 0 #0f6b38, var(--ens-shadow, none);
+    background: #4f46e5; border-color: #4f46e5; color: #fff;
+    box-shadow: 0 4px 0 0 #3a32c4;
   }
-  .me-invite-btn--go:hover { background: #19b660; }
-  .me-invite-btn--go:active { box-shadow: 0 1px 0 0 #0f6b38; transform: translateY(2px) scale(.97); }
+  .me-invite-btn--go:hover { background: #4338ca; }
+  .me-invite-btn--go:active { box-shadow: 0 1px 0 0 #3a32c4; transform: translateY(2px) scale(.97); }
 
-  /* Anti-décrochage — carte amber arcade */
-  .me-relancer-section {
-    background: color-mix(in srgb, var(--ens-amber, #f59e0b) 8%, var(--su));
-    border: 1.5px solid color-mix(in srgb, var(--ens-amber, #f59e0b) 35%, transparent);
-    border-radius: var(--ens-r, var(--r-xl));
-    padding: 14px 16px;
-    margin-bottom: 16px;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 2px 0 0 color-mix(in srgb, var(--ens-amber, #f59e0b) 30%, transparent);
-    transition: transform .14s var(--ease-snap);
-  }
-  .me-relancer-section:active { transform: scale(0.98); transition: transform 180ms cubic-bezier(0.23,1,0.32,1); }
-  @media (prefers-reduced-motion: reduce) { .me-relancer-section:active { transform: none; } }
-  .me-relancer-section:focus-visible { outline: 3px solid var(--ens-amber, #f59e0b); outline-offset: 2px; }
-  .me-relancer-title {
-    font: 700 13px/1.2 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: color-mix(in srgb, var(--ens-amber, #f59e0b) 80%, #7c4700);
-    margin: 0 0 4px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .me-relancer-sub {
-    font: 500 12px/1.4 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--mu2);
-    margin: 0;
-  }
-
-  /* Badge à relancer inline — amber arcade */
-  .me-badge-relancer {
-    font: 700 10px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    padding: 4px 9px;
-    border-radius: var(--ens-r-pill, 999px);
-    color: #fff;
-    background: var(--ens-amber, #f59e0b);
+  /* Badges statut (conservés pour compatibilité openQuickMenu) */
+  .me-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font: 700 11px/1 'Inter', sans-serif;
+    padding: 4px 9px; border-radius: 999px;
     flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
+  }
+  .me-badge.actif, .me-badge.pret { color: #fff; background: #16a34a; }
+  .me-badge.inactif { color: var(--mu2); background: var(--bg2); }
+  .me-badge.approche { color: #fff; background: #1d4ed8; }
+  .me-badge.recu { color: #07150c; background: #16a34a; }
+  .me-badge.planifie { color: #fff; background: #f59e0b; }
+  .me-badge-relancer {
+    font: 700 10px/1 'Inter', sans-serif;
+    padding: 4px 9px; border-radius: 999px;
+    color: #fff; background: #f59e0b; flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 3px;
   }
 
   /* FAB « Séance » retiré ici : le FAB global #bn-seance-fab (nav-bottom)
@@ -471,7 +382,6 @@ let _root = null;
 let _me = null;
 let _eleves = []; // { id, prenom, nom, acquis, total, actif }
 let _query = "";
-let _tab = "tous"; // 'tous' | 'actifs' | 'arelancer' | 'prets' | 'recus'
 let _drillComp = null; // competence_id si mode drill bloque_sur
 
 // ─── Entry point ─────────────────────────────────────────────────
@@ -488,7 +398,6 @@ export async function mount(root) {
   if (!_me) return;
 
   _query = "";
-  _tab = "tous";
   _drillComp = null;
 
   // Lire le param bloque_sur depuis le hash URL (#/eleves?bloque_sur=C2a)
@@ -510,7 +419,6 @@ export async function mount(root) {
     ${STYLE}
     <div class="me-page anim-slide-up">
       <div class="me-hero">
-        ${panneauxLayer({ variant: "hero" })}
         <div class="me-hero-content">
           <p class="me-hero-kicker">Chargement…</p>
           <h1 class="me-hero-title">${_drillComp ? `Bloqués sur ${esc(_drillComp)}` : "Mes élèves"}</h1>
@@ -737,45 +645,15 @@ function renderDrill() {
 
 // ─── Render ──────────────────────────────────────────────────────
 function render() {
-  const filtered = filterList();
-  // Les élèves reçus sont archivés : ils sortent du roster actif et n'entrent
-  // que dans l'onglet « Reçus ».
-  const recusCount = _eleves.filter((e) => e.readiness === "recu").length;
   const roster = _eleves.filter((e) => e.readiness !== "recu");
   const total = roster.length;
-  // « Actifs » = actifs hors ceux à relancer (les deux compteurs ne se chevauchent pas)
-  const actifs = roster.filter((e) => e.actif && !e.aRelancer).length;
   const prets = roster.filter((e) => e.readiness === "pret").length;
-  const aRelancerList = roster.filter((e) => e.aRelancer);
-
-  // Bandeau 1 ligne cliquable ; l'explication n'apparaît qu'à la 1re visite
-  const showRelancerHint =
-    aRelancerList.length > 0 && shouldShowHint("relancer");
-  if (showRelancerHint) markHintSeen("relancer");
-  const relancerSection =
-    aRelancerList.length > 0
-      ? `
-    <div class="me-relancer-section" id="me-relancer-section" role="button" tabindex="0"
-         aria-label="${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} sans activité depuis plus de 14 jours — voir la liste">
-      <p class="me-relancer-title" style="display:flex;align-items:center;gap:6px;margin:0;">${icon("alert-circle", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })} ${aRelancerList.length} élève${aRelancerList.length > 1 ? "s" : ""} sans activité depuis +14 jours <span style="margin-left:auto;display:inline-flex">${icon("chevron-right", { size: 15, strokeWidth: 2.2, color: "var(--amx)" })}</span></p>
-      ${showRelancerHint ? `<p class="me-relancer-sub">Un rappel ou un point en leçon suffit souvent à relancer la dynamique.</p>` : ""}
-    </div>
-  `
-      : "";
 
   // Kicker dynamique selon l'état
-  const heroKicker =
-    prets > 0
-      ? `${prets} prêt${prets > 1 ? "s" : ""} pour l'examen`
-      : total === 0
-        ? "Commence ici"
-        : `${total} élève${total > 1 ? "s" : ""} · ${actifs} actif${actifs > 1 ? "s" : ""} cette semaine`;
   const heroSub =
-    prets > 0
-      ? `${prets} élève${prets > 1 ? "s ont" : " a"} toutes les compétences C1-C3 — prêt${prets > 1 ? "s" : ""} à présenter l'examen.`
-      : total === 0
-        ? "Invite un élève — il crée son compte en 30 secondes, son livret s'ouvre aussitôt."
-        : "";
+    total === 0
+      ? null
+      : `${total} élève${total > 1 ? "s" : ""} · ${prets > 0 ? `${prets} prêt${prets > 1 ? "s" : ""} pour l'examen` : "en cours de formation"}`;
 
   _root.innerHTML = `
     ${STYLE}
@@ -783,10 +661,9 @@ function render() {
 
       <!-- Hero arcade -->
       <div class="me-hero">
-        ${panneauxLayer({ variant: "hero" })}
         <div class="me-hero-content">
-          <p class="me-hero-kicker">${esc(heroKicker)}</p>
-          <h1 class="me-hero-title">Mes élèves</h1>
+          <p class="me-hero-kicker">Mes élèves</p>
+          <h1 class="me-hero-title">${total === 0 ? "Aucun élève encore" : `${total} élève${total > 1 ? "s" : ""}`}</h1>
           ${heroSub ? `<p class="me-hero-sub">${esc(heroSub)}</p>` : ""}
           <div class="me-hero-actions">
             <button id="me-rank-btn" class="me-invite-btn" type="button"
@@ -803,10 +680,8 @@ function render() {
 
       <div class="me-body">
 
-      ${relancerSection}
-
       <div class="me-search-wrap">
-        <span class="me-search-ico">${icon("search", { size: 15, strokeWidth: 2, color: "var(--mu2)" })}</span>
+        <span class="me-search-ico">${icon("search", { size: 15, strokeWidth: 2, color: "#a0a6b4" })}</span>
         <input
           class="me-search"
           type="search"
@@ -815,37 +690,11 @@ function render() {
           autocomplete="off"
           aria-label="Chercher un élève par nom ou prénom"
         />
-        <button class="me-search-clear${_query ? " visible" : ""}" id="me-search-clear" type="button" aria-label="Effacer la recherche">✕</button>
+        <button class="me-search-clear${_query ? " visible" : ""}" id="me-search-clear" type="button" aria-label="Effacer la recherche">x</button>
       </div>
 
-      <div class="me-tabs" role="tablist">
-        <button class="me-tab${_tab === "tous" ? " active" : ""}" data-tab="tous" role="tab" aria-selected="${_tab === "tous"}" title="Tous tes élèves en cours">Tous (${total})</button>
-        <button class="me-tab${_tab === "actifs" ? " active" : ""}" data-tab="actifs" role="tab" aria-selected="${_tab === "actifs"}" title="Élèves qui ont validé au moins une compétence et sont actifs">En cours (${actifs})</button>
-        <button class="me-tab${_tab === "prets" ? " active" : ""}" data-tab="prets" role="tab" aria-selected="${_tab === "prets"}"
-                style="${prets > 0 && _tab !== "prets" ? "color:var(--grd)" : ""}" title="Élèves dont les compétences de base C1-C3 sont toutes acquises">Prêts (${prets})</button>
-        <button class="me-tab${_tab === "arelancer" ? " active" : ""}" data-tab="arelancer" role="tab" aria-selected="${_tab === "arelancer"}"
-                style="${aRelancerList.length > 0 && _tab !== "arelancer" ? "color:var(--amx)" : ""}" title="Sans activité depuis 14 jours ou plus">À relancer (${aRelancerList.length})</button>
-        <button class="me-tab${_tab === "recus" ? " active" : ""}" data-tab="recus" role="tab" aria-selected="${_tab === "recus"}" title="Élèves ayant obtenu le permis">Diplômés (${recusCount})</button>
-      </div>
-
-      <div class="me-list">
-        ${
-          filtered.length === 0
-            ? _tab === "tous" && !_query
-              ? `<div class="me-empty">
-                   <span class="me-empty-ico">${illus("school", { size: 80 })}</span>
-                   <strong style="font:700 16px/1.2 var(--ens-display,'Fredoka'),sans-serif;color:var(--ink)">Aucun élève pour l'instant</strong>
-                   <span style="font:500 13px/1.5 var(--ens-body,'Plus Jakarta Sans'),sans-serif;color:var(--mu2);max-width:30ch;text-align:center">Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes.</span>
-                   <button id="me-invite-empty-btn" class="ens-btn ens-btn--go" type="button" style="margin-top:4px;min-height:48px;padding:0 24px;font-size:14px;">
-                     ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
-                   </button>
-                 </div>`
-              : `<div class="me-empty">
-                   <span class="me-empty-ico">${illus("route", { size: 64 })}</span>
-                   ${_query ? `Aucun résultat pour <strong>"${esc(_query)}"</strong>.` : "Aucun élève dans cet onglet."}
-                 </div>`
-            : filtered.map(renderRow).join("")
-        }
+      <div class="me-pipeline" id="me-pipeline">
+        ${renderPipeline()}
       </div>
 
       </div><!-- /.me-body -->
@@ -854,100 +703,124 @@ function render() {
   `;
 }
 
-function filterList() {
-  let list = _eleves;
+// ─── Pipeline segmenté ───────────────────────────────────────────
+/**
+ * Construit le HTML des sections pipeline à partir de la liste filtrée
+ * par la recherche (le filtre de recherche s'applique à tous les groupes).
+ */
+function renderPipeline() {
+  const q = _query.toLowerCase().trim();
+  const matchQuery = (e) =>
+    !q ||
+    (e.prenom || "").toLowerCase().includes(q) ||
+    (e.nom || "").toLowerCase().includes(q);
 
-  if (_tab === "recus") {
-    list = list.filter((e) => e.readiness === "recu");
-  } else {
-    // tous les autres onglets excluent les élèves reçus (archivés)
-    list = list.filter((e) => e.readiness !== "recu");
-    if (_tab === "actifs") list = list.filter((e) => e.actif && !e.aRelancer);
-    if (_tab === "arelancer") list = list.filter((e) => e.aRelancer);
-    if (_tab === "prets") list = list.filter((e) => e.readiness === "pret");
+  const allVisible = _eleves.filter(matchQuery);
+
+  if (allVisible.length === 0 && _eleves.length === 0) {
+    return `<div class="me-empty">
+      <span class="me-empty-ico">${illus("school", { size: 80 })}</span>
+      <strong style="font:800 16px/1.2 'Manrope',sans-serif;color:#1a1f2b">Aucun élève pour l'instant</strong>
+      <span style="font:500 13px/1.5 'Inter',sans-serif;color:#8b92a3;max-width:30ch;text-align:center">Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes.</span>
+      <button id="me-invite-empty-btn" class="ens-btn ens-btn--go" type="button" style="margin-top:4px;min-height:48px;padding:0 24px;font-size:14px;">
+        ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
+      </button>
+    </div>`;
   }
 
-  if (_query.trim()) {
-    const q = _query.toLowerCase().trim();
-    list = list.filter(
-      (e) =>
-        (e.prenom || "").toLowerCase().includes(q) ||
-        (e.nom || "").toLowerCase().includes(q),
-    );
+  if (allVisible.length === 0 && q) {
+    return `<div class="me-empty">
+      <span class="me-empty-ico">${illus("route", { size: 64 })}</span>
+      Aucun résultat pour <strong>"${esc(_query)}"</strong>.
+    </div>`;
   }
 
-  return list;
+  const groups = [
+    {
+      key: "pret",
+      mod: "pret",
+      color: "#16a34a",
+      label: "Prêts",
+      filter: (e) => e.readiness === "pret" && !e.aRelancer,
+    },
+    {
+      key: "appr",
+      mod: "appr",
+      color: "#f59e0b",
+      label: "En approche",
+      filter: (e) => e.readiness === "en_approche" && !e.aRelancer,
+    },
+    {
+      key: "rel",
+      mod: "rel",
+      color: "#ef4444",
+      label: "À relancer",
+      filter: (e) => e.aRelancer && e.readiness !== "recu",
+    },
+    {
+      key: "cours",
+      mod: "cours",
+      color: "#d1d5db",
+      label: "En cours",
+      filter: (e) =>
+        e.readiness === "en_cours" && !e.aRelancer && e.readiness !== "recu",
+    },
+    {
+      key: "recu",
+      mod: "recu",
+      color: "#7c3aed",
+      label: "Reçus",
+      filter: (e) => e.readiness === "recu",
+    },
+  ];
+
+  return groups
+    .map(({ key, mod, color, label, filter }) => {
+      const list = allVisible.filter(filter);
+      if (list.length === 0) return "";
+      return `
+        <div class="me-grp" data-grp="${key}">
+          <div class="me-grp-head me-grp-head--${mod}" aria-label="${esc(label)} (${list.length})">
+            <span class="me-grp-dot" style="background:${color}"></span>
+            ${esc(label)}
+            <span class="me-grp-count">${list.length}</span>
+          </div>
+          <div class="me-band me-band--${mod}" role="list">
+            ${list.map((e) => renderBandRow(e)).join("")}
+          </div>
+        </div>
+      `;
+    })
+    .join("");
 }
 
-function renderRow(eleve) {
-  const pct =
-    eleve.total > 0 ? Math.round((eleve.acquis / eleve.total) * 100) : 0;
+/**
+ * Ligne d'un élève dans une bande du pipeline.
+ */
+function renderBandRow(eleve) {
   const fullNom = esc(
     fmtName([eleve.prenom, eleve.nom].filter(Boolean).join(" ")) || "—",
   );
 
-  // Onglet « Tous » = liste épurée (nom + progression). Les infos contextuelles
-  // — date d'examen, jours d'inactivité — vivent dans leurs FILTRES dédiés
-  // (Examen / Inactifs), pas en doublon sur chaque ligne de « Tous ».
-  const epure = _tab === "tous";
-  // Couleur de progression = état actionnable (vert prêt / ambre relancer / accent en cours)
-  const progState =
-    eleve.readiness === "pret" || eleve.readiness === "recu"
-      ? "is-pret"
-      : eleve.aRelancer
-        ? "is-relancer"
-        : "";
-  // Barre d'état à gauche de la carte : scan instantané (vert = prêt à présenter,
-  // ambre = à relancer, violet = bientôt prêt / à intensifier). Tokens sémantiques.
-  const rowState =
-    eleve.readiness === "pret"
-      ? " me-row--pret"
-      : eleve.aRelancer
-        ? " me-row--relancer"
-        : eleve.readiness === "en_approche"
-          ? " me-row--approche"
-          : "";
-  const badges =
-    eleve.readiness === "recu"
-      ? `<span class="me-badge recu">${icon("check", { size: 11, strokeWidth: 2.6 })} Diplômé</span>`
-      : [
-          eleve.readiness === "pret"
-            ? `<span class="me-badge pret">${icon("check", { size: 11, strokeWidth: 2.6 })} Prêt</span>`
-            : "",
-          eleve.readiness === "en_approche"
-            ? `<span class="me-badge approche">${icon("trending-up", { size: 11, strokeWidth: 2.6 })} Bientôt prêt</span>`
-            : "",
-          !epure && eleve.examStatut === "planifie"
-            ? `<span class="me-badge planifie">${icon("calendar", { size: 11, strokeWidth: 2.4 })} ${esc(fmtExamDate(eleve.examDate))}</span>`
-            : "",
-          !epure && eleve.aRelancer
-            ? `<span class="me-badge-relancer" style="display:inline-flex;align-items:center;gap:3px;">${icon("alert-circle", { size: 11, strokeWidth: 2.2 })} ${eleve.joursInactif ? `+${eleve.joursInactif}j sans activité` : "Inactif"}</span>`
-            : "",
-        ]
-          .filter(Boolean)
-          .join(" ");
+  // Valeur droite : jours inactif pour les relancers, sinon X/31
+  let rightLabel = "";
+  let rightClass = "me-pr";
+  if (eleve.aRelancer && eleve.readiness !== "recu") {
+    const j = eleve.joursInactif;
+    rightLabel = j != null ? `inactif ${j} j` : "inactif";
+    rightClass = "me-pr me-pr--warn";
+  } else {
+    rightLabel = `${eleve.acquis}/${eleve.total}`;
+  }
 
   return `
-    <div class="me-row${rowState}" data-eleve-id="${esc(eleve.id)}" role="button" tabindex="0"
-         aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} compétences acquises${eleve.readiness === "pret" ? ", prêt pour l'examen" : eleve.aRelancer ? ", à relancer" : ""}">
-      <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 44)}</div>
-
-      <div class="me-info">
-        <div class="me-nom">
-          ${fullNom || "—"}
-        </div>
-        ${badges ? `<div class="me-meta">${badges}</div>` : ""}
-      </div>
-
-      <div class="me-prog" title="${eleve.acquis} compétence${eleve.acquis > 1 ? "s" : ""} acquise${eleve.acquis > 1 ? "s" : ""} sur ${eleve.total}">
-        <div class="me-prog-bar">
-          <div class="me-prog-fill ${progState}" style="width:${pct}%"></div>
-        </div>
-        <div class="me-prog-txt ${progState}">${eleve.acquis}/${eleve.total}</div>
-      </div>
-
+    <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="listitem button" tabindex="0"
+         aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
+      <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
+      <span class="me-nom">${fullNom}</span>
+      <span class="${rightClass}">${esc(rightLabel)}</span>
       <button class="me-more" data-more type="button"
-              aria-label="Actions rapides pour ${fullNom}">${icon("more-vertical", { size: 18, strokeWidth: 2 })}</button>
+              aria-label="Actions rapides pour ${fullNom}">${icon("more-vertical", { size: 16, strokeWidth: 2 })}</button>
     </div>
   `;
 }
@@ -972,19 +845,7 @@ function wire() {
   // FAB « Séance » : le FAB global #bn-seance-fab (nav-bottom, enseignant)
   // couvre déjà cette page → on a retiré le doublon local #me-fab.
 
-  // Section relancer → filtre tab arelancer
-  _root.querySelector("#me-relancer-section")?.addEventListener("click", () => {
-    _tab = "arelancer";
-    _root.querySelectorAll(".me-tab").forEach((b) => {
-      const on = b.dataset.tab === "arelancer";
-      b.classList.toggle("active", on);
-      b.setAttribute("aria-selected", String(on));
-    });
-    renderList();
-    track("mes_eleves.relancer_section.click");
-  });
-
-  // Search
+  // Recherche — filtre transversal tous les groupes du pipeline
   const searchEl = _root.querySelector(".me-search");
   const clearBtn = _root.querySelector("#me-search-clear");
   searchEl?.addEventListener("input", (e) => {
@@ -999,20 +860,6 @@ function wire() {
     searchEl?.focus();
     renderList();
   });
-
-  // Tabs
-  _root.querySelectorAll(".me-tab").forEach((btn) =>
-    btn.addEventListener("click", () => {
-      _tab = btn.dataset.tab;
-      _root.querySelectorAll(".me-tab").forEach((b) => {
-        const on = b === btn;
-        b.classList.toggle("active", on);
-        b.setAttribute("aria-selected", String(on));
-      });
-      track("mes_eleves.tab.click", { tab: _tab });
-      renderList();
-    }),
-  );
 
   // Cards
   wireRows();
@@ -1610,54 +1457,19 @@ function openMissingPanel(eleve) {
   });
 }
 
-// ─── Partial re-render liste uniquement (sans recréer toute la page) ──
+// ─── Partial re-render pipeline uniquement (sans recréer toute la page) ──
 function renderList() {
-  const listEl = _root?.querySelector(".me-list");
-  if (!listEl) return;
+  const pipelineEl = _root?.querySelector("#me-pipeline");
+  if (!pipelineEl) return;
 
-  const filtered = filterList();
-  const recusCount = _eleves.filter((e) => e.readiness === "recu").length;
-  const roster = _eleves.filter((e) => e.readiness !== "recu");
-  const total = roster.length;
-  const actifs = roster.filter((e) => e.actif && !e.aRelancer).length;
-  const prets = roster.filter((e) => e.readiness === "pret").length;
-  const arelancer = roster.filter((e) => e.aRelancer).length;
-
-  // Mettre à jour les tabs count (les boutons eux-mêmes)
-  _root.querySelectorAll(".me-tab").forEach((btn) => {
-    const tab = btn.dataset.tab;
-    if (tab === "tous") btn.textContent = `Tous (${total})`;
-    if (tab === "actifs") btn.textContent = `En cours (${actifs})`;
-    if (tab === "prets") btn.textContent = `Prêts (${prets})`;
-    if (tab === "arelancer") btn.textContent = `À relancer (${arelancer})`;
-    if (tab === "recus") btn.textContent = `Diplômés (${recusCount})`;
-  });
-
-  if (filtered.length === 0) {
-    listEl.innerHTML =
-      _tab === "tous" && !_query
-        ? `<div class="me-empty">
-             <span class="me-empty-ico">${illus("school", { size: 80 })}</span>
-             <strong style="font:700 16px/1.2 var(--ens-display,'Fredoka'),sans-serif;color:var(--ink)">Aucun élève pour l'instant</strong>
-             <span style="font:500 13px/1.5 var(--ens-body,'Plus Jakarta Sans'),sans-serif;color:var(--mu2);max-width:30ch;text-align:center">Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes.</span>
-             <button id="me-invite-empty-btn" class="ens-btn ens-btn--go" type="button" style="margin-top:4px;min-height:48px;padding:0 24px;font-size:14px;">
-               ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
-             </button>
-           </div>`
-        : `<div class="me-empty">
-             <span class="me-empty-ico">${illus("route", { size: 64 })}</span>
-             ${_query ? `Aucun résultat pour <strong>"${esc(_query)}"</strong>.` : "Aucun élève dans cet onglet."}
-           </div>`;
-    // Wire the invite button if it was just rendered
-    listEl
-      .querySelector("#me-invite-empty-btn")
-      ?.addEventListener("click", () => {
-        track("invite.empty.list.clicked");
-        openInviteEleveModal(_me);
-      });
-    return;
-  }
-
-  listEl.innerHTML = filtered.map(renderRow).join("");
+  pipelineEl.innerHTML = renderPipeline();
   wireRows();
+
+  // Si l'empty state avec bouton invite vient d'être rendu
+  pipelineEl
+    .querySelector("#me-invite-empty-btn")
+    ?.addEventListener("click", () => {
+      track("invite.empty.list.clicked");
+      openInviteEleveModal(_me);
+    });
 }

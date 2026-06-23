@@ -12,7 +12,7 @@ import { mountHeader } from "@/components/common/header-top.js";
 import { mountBottomNav } from "@/components/common/nav-bottom.js";
 import { armPopupPhase } from "@/utils/intro-overlays.js";
 import { initThemeEarly, syncFromPrefs } from "@/utils/theme.js";
-import { initAccentEarly } from "@/utils/accent.js";
+import { initAccentEarly, applyAccent } from "@/utils/accent.js";
 import { initGameState, initEquippedTheme } from "@/utils/game-state.js";
 import { mountCookieBanner } from "@/components/common/cookie-banner.js";
 import { initPosthog } from "@/services/posthog.js";
@@ -31,6 +31,18 @@ async function boot() {
     await restoreSession();
     const me = getCurUser();
     track("app.opened", { role: me?.role || "guest" });
+
+    // Défaut de marque côté élève : violet (= l'accent de l'accueil refondu),
+    // pour que le chrome (header/nav, qui suit --a) soit cohérent avec l'accueil.
+    // On n'applique QUE si l'élève n'a pas explicitement choisi d'accent
+    // (un choix dans Réglages/onboarding gagne) et avant l'éventuel thème équipé.
+    if (me?.role === "eleve") {
+      try {
+        if (!localStorage.getItem("permigo-accent")) applyAccent("violet");
+      } catch {
+        /* localStorage indispo → tant pis, on garde le défaut global */
+      }
+    }
 
     // Sync theme preference from backend (non-blocking — fallback already applied by initThemeEarly)
     if (me) syncFromPrefs(sb).catch(() => {});

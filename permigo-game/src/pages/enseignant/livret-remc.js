@@ -16,7 +16,6 @@ import { theoryLeague, computeTheoryScore } from "@/utils/theory-league.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 import { mountCiblerRevision } from "@/components/enseignant/cibler-revision.js";
 import { illus } from "@/components/enseignant/illus.js";
-import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
 import { haptic } from "@/utils/haptic.js";
 
 // ─── Couleurs par monde ───────────────────────────────────────────
@@ -61,7 +60,7 @@ const STYLE = `<style>
     position: relative; overflow: hidden;
     margin: calc(-1 * (var(--th) + env(safe-area-inset-top, 0px))) -0px 0;
     padding: calc(env(safe-area-inset-top, 0px) + var(--th) + 18px) 20px 20px;
-    background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+    background: linear-gradient(150deg, #4f46e5, #6d6bff 60%, #8b5cf6);
     color: #fff;
     isolation: isolate;
   }
@@ -727,7 +726,6 @@ function render() {
     <div class="lr-page anim-slide-up">
 
       <header class="lr-hero">
-        ${panneauxLayer({ variant: "section" })}
         <div class="lr-hero-in">
           <button class="lr-back" aria-label="Retour liste élèves">←</button>
           <div class="lr-hd-info">

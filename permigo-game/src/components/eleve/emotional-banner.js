@@ -85,7 +85,7 @@ const STYLES = `
 /* CTA color per tone */
 .eb-warm     .eb-cta { background: var(--or); color: #fff; }
 .eb-urgent   .eb-cta { background: var(--rd); color: #fff; }
-.eb-celebrate .eb-cta { background: var(--puk); color: #fff; }
+.eb-celebrate .eb-cta { background: var(--a); color: var(--a-ink); }
 .eb-gentle   .eb-cta { background: var(--bl2); color: #fff; }
 
 /* ── Close button ── */

@@ -21,7 +21,7 @@ import { icon } from "@/utils/icons.js";
 import { ill, illMask } from "@/utils/illustrations.js";
 import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
-import { getMyChests, getEquippedAsset } from "@/utils/game-state.js";
+import { getMyChests } from "@/utils/game-state.js";
 import { mountFeedbackFeed } from "@/components/eleve/feedback-feed.js";
 import { mountDailyQuests } from "@/components/eleve/daily-quests.js";
 import { toast } from "@/components/common/toast.js";
@@ -29,7 +29,6 @@ import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { onPopupsSettled } from "@/utils/intro-overlays.js";
-import { renderPermisMini } from "@/components/eleve/permis-card.js";
 import { theoryLeague } from "@/utils/theory-league.js";
 import { getDailyStreak } from "@/services/daily-quiz.js";
 import { isStandalone } from "@/utils/pwa.js";
@@ -44,12 +43,12 @@ const ELEVE_TOUR_STEPS = [
     text: "Visite express. Passe quand tu veux.",
   },
   {
-    sel: ".acc2-hero-streak",
+    sel: "#streak-badge-btn",
     title: "Ta flamme 🔥",
     text: "Reviens chaque jour. Ta série monte et te rapporte des volants.",
   },
   {
-    sel: ".acc2-action",
+    sel: "#action-cta-btn",
     title: "Par où commencer",
     text: "Un quiz par jour. C'est ici que ça démarre.",
   },
@@ -75,10 +74,9 @@ function maybeStartEleveTour() {
   // sinon il s'affiche dessous et le spotlight se mesure au mauvais endroit.
   onPopupsSettled(() => {
     setTimeout(() => {
-      // Ancré sur l'action du jour (toujours rendue) et non sur le streak :
-      // au J0 le streak vaut 0 et .acc2-hero-streak n'existe pas → le tuto
-      // s'avortait silencieusement pour les tout nouveaux élèves.
-      if (!document.querySelector(".acc2-action")) return;
+      // Ancré sur le CTA king (toujours rendu) — présent quel que soit l'état
+      // (premier run, question du jour, done...). Garanti en DOM avant ce timeout.
+      if (!document.querySelector("#action-cta-btn")) return;
       track("eleve.tour.start");
       startTour(ELEVE_TOUR_STEPS, {
         onDone: () => {
@@ -105,6 +103,202 @@ const STYLE = `<style>
   color: var(--ink);
 }
 
+/* ════ ACCENT ACCUEIL — suit le token --a (l'accent choisi par l'élève) ════
+   Défaut élève = violet (cf. main.js). Tout l'accueil + le chrome (header/nav,
+   qui suivent --a) restent cohérents, et le picker de couleur recolore aussi
+   l'accueil. Neutres via --su/--ink/--mu (theme-aware) → pas d'override dark. */
+.acc2 {
+  --acc-vio: var(--a);
+  --acc-vio-dk: var(--adk);
+  --acc-vio-lt: var(--a-lt);
+  --acc-hero-bg: linear-gradient(150deg,
+    color-mix(in srgb, var(--a) 13%, var(--su)) 0%,
+    color-mix(in srgb, var(--a) 6%, var(--su)) 55%,
+    var(--su) 100%);
+  --acc-hero-border: color-mix(in srgb, var(--a) 24%, var(--su));
+  --acc-hero-kicker: var(--a-txt);
+  --acc-hero-ink: var(--ink);
+  --acc-hero-mu: var(--mu);
+  --acc-gold: #f7b32b;
+  --acc-gold-dk: #e08e0b;
+  --acc-hud-bg: var(--su);
+  --acc-hud-border: var(--bo);
+  --acc-cta-shadow: 0 6px 0 var(--adk), 0 14px 26px -6px color-mix(in srgb, var(--a) 42%, transparent);
+}
+
+/* ════════════════ HUD — rangée tout en haut ════════════════════ */
+.acc2-hud {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 18px 0;
+}
+.acc2-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--acc-hud-bg);
+  border: 1px solid var(--acc-hud-border);
+  border-radius: 999px;
+  padding: 6px 13px 6px 8px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.06);
+  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+.acc2-chip img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+.acc2-chip.streak img {
+  filter: drop-shadow(0 2px 4px rgba(255,120,0,.5));
+  animation: hudFlameFlick 1.5s ease-in-out infinite;
+  transform-origin: 50% 85%;
+}
+.acc2-chip.streak.inactive img {
+  filter: grayscale(1) brightness(.72);
+  animation: none;
+}
+.acc2-chip .num {
+  font-variant-numeric: tabular-nums;
+}
+@keyframes hudFlameFlick {
+  0%, 100% { transform: scale(1) rotate(0); }
+  50%       { transform: scale(1.08, 1.12) rotate(-2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .acc2-chip.streak img { animation: none; }
+}
+
+/* ════════════════ HERO FOCAL v2 ════════════════════════════════ */
+.acc2-hero-v2 {
+  position: relative;
+  background: var(--acc-hero-bg);
+  border: 1px solid var(--acc-hero-border);
+  border-radius: 28px;
+  margin: 12px 16px 0;
+  padding: 22px 20px 20px;
+  overflow: visible;
+  isolation: isolate;
+  box-shadow:
+    0 16px 40px -16px color-mix(in srgb, var(--a) 28%, transparent),
+    0 2px 0 rgba(255,255,255,.7) inset;
+  min-height: 196px;
+}
+.acc2-hero-halo {
+  position: absolute;
+  right: -12px;
+  top: -16px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--a-lt) 60%, transparent),
+    color-mix(in srgb, var(--a) 20%, transparent) 45%,
+    transparent 70%);
+  filter: blur(6px);
+  z-index: 0;
+  pointer-events: none;
+}
+.acc2-hero-v2-txt {
+  position: relative;
+  z-index: 2;
+  max-width: 58%;
+}
+.acc2-hero-kicker {
+  font: 800 12px/1 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: .06em;
+  color: var(--acc-hero-kicker);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.acc2-hero-h1 {
+  font: 700 30px/1.05 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.01em;
+  color: var(--acc-hero-ink);
+  margin: 0;
+}
+.acc2-hero-meta {
+  margin-top: 9px;
+  font: 700 12.5px/1.4 'Plus Jakarta Sans', sans-serif;
+  color: var(--acc-hero-mu);
+}
+.acc2-hero-floor {
+  position: absolute;
+  right: 18px;
+  bottom: 8px;
+  width: 120px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(20,30,15,.26), transparent 70%);
+  filter: blur(4px);
+  z-index: 0;
+  pointer-events: none;
+  animation: heroFloorBreathe 4.5s ease-in-out infinite;
+}
+.acc2-hero-mascot {
+  position: absolute;
+  right: -14px;
+  bottom: -4px;
+  width: 188px;
+  z-index: 1;
+  filter:
+    drop-shadow(0 3px 3px rgba(20,30,15,.18))
+    drop-shadow(0 14px 20px rgba(20,30,15,.22));
+  animation: heroFloatIdle 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes heroFloatIdle {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes heroFloorBreathe {
+  0%, 100% { transform: scale(1); opacity: .3; }
+  50%       { transform: scale(.82); opacity: .18; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .acc2-hero-mascot { animation: none; }
+  .acc2-hero-floor  { animation: none; }
+}
+
+/* ════════════ CTA ROI — gros bouton violet 3D ══════════════════ */
+.acc2-cta-king {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: calc(100% - 32px);
+  margin: 14px 16px 0;
+  border: none;
+  border-radius: 20px;
+  padding: 18px;
+  font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  background: linear-gradient(180deg, var(--acc-vio-lt), var(--acc-vio));
+  box-shadow: var(--acc-cta-shadow);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .09s, box-shadow .09s;
+}
+.acc2-cta-king:active {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 var(--acc-vio-dk), 0 6px 14px -6px color-mix(in srgb, var(--a) 30%, transparent);
+}
+.acc2-cta-king.muted {
+  background: transparent;
+  border: 1.5px solid var(--bo);
+  color: var(--mu);
+  box-shadow: none;
+}
+.acc2-cta-king.muted:active { box-shadow: none; transform: none; }
+.acc2-cta-arr { font-size: 20px; }
+@media (prefers-reduced-motion: reduce) {
+  .acc2-cta-king { transition: none; }
+}
+
 /* ── Skeletons ── */
 .skel2 {
   background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
@@ -114,116 +308,6 @@ const STYLE = `<style>
 }
 @keyframes skel2Shim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
-/* ════════════════════════ BLOC 1 — HERO ═══════════════════════ */
-/* Compact : salutation + flamme. Le permis virtuel (juste dessous,
-   en chevauchement) est L'élément dominant de l'écran. */
-.acc2-hero {
-  position: relative;
-  overflow: hidden;
-  padding: calc(env(safe-area-inset-top, 0px) + 68px) 20px 72px;
-  background: linear-gradient(160deg, rgba(11,13,26,.72) 0%, rgba(20,35,5,.55) 40%, rgba(11,13,26,.68) 100%), url('/skins/landing/monde4jour.webp') center/cover no-repeat;
-}
-.acc2-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 15% 35%, color-mix(in srgb, var(--a) 20%, transparent) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 85% 75%, color-mix(in srgb, var(--adk) 14%, transparent) 0%, transparent 55%);
-  pointer-events: none;
-}
-.acc2-hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--adk) 55%, transparent) 0%,
-    rgba(46,122,0,.35) 50%,
-    color-mix(in srgb, var(--adk) 55%, transparent) 100%);
-  mix-blend-mode: multiply;
-  pointer-events: none;
-}
-.acc2-hero-content { position: relative; z-index: 1; }
-.acc2-hero-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.acc2-hero-greet { flex: 1; min-width: 0; }
-.acc2-hero-hi {
-  display: block;
-  font: 500 14px/1.25 'Inter', sans-serif;
-  color: rgba(255,255,255,.78);
-}
-/* Le prénom = LA star du hero */
-.acc2-hero-name {
-  font: 800 clamp(26px, 8.5vw, 34px)/1.05 var(--fd), 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  letter-spacing: -.03em;
-  margin: 2px 0 0;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-shadow: 0 2px 12px rgba(11,13,26,.35);
-}
-/* Welcome-back : sous-ligne après ≥3 jours d'absence */
-.acc2-hero-back {
-  display: block;
-  width: 100%;
-  font: 600 12.5px/1.4 'Inter', sans-serif;
-  color: rgba(255,255,255,.85);
-  background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius: var(--r);
-  padding: 8px 12px;
-  margin-top: 10px;
-}
-/* Welcome-back streak CTA : « C'est ton Xe jour — maintiens ta série » */
-.acc2-hero-cta {
-  display: flex; flex-direction: column; gap: 10px;
-  margin-top: 14px;
-}
-.acc2-hero-cta-txt {
-  font: 600 13px/1.4 'Plus Jakarta Sans', sans-serif;
-  color: rgba(255,255,255,.92);
-}
-.acc2-hero-cta-txt b { color: #ffb35c; font-weight: 800; }
-.acc2-hero-cta-btn {
-  display: inline-flex; align-items: center; gap: 7px; align-self: flex-start;
-  min-height: 44px; padding: 0 17px; border: 0; border-radius: var(--r-full, 999px);
-  background: #fff; color: #0b0d1a;
-  font: 800 13.5px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 6px 18px rgba(0,0,0,.28); transition: transform .12s ease;
-}
-.acc2-hero-cta-btn:active { transform: scale(.96); }
-@media (prefers-reduced-motion: reduce) { .acc2-hero-cta-btn { transition: none; } }
-/* Streak EN VEDETTE : la flamme 3D (asset) + compteur, en haut à droite */
-.acc2-hero-streak {
-  display: flex; flex-direction: column; align-items: center; gap: 0;
-  cursor: pointer; flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .15s var(--ease-spring);
-}
-.acc2-hero-streak:active { transform: scale(.92); }
-.acc2-hero-streak-img {
-  width: 44px; height: 44px; object-fit: contain;
-  filter: drop-shadow(0 0 12px rgba(251,146,60,.75));
-}
-.acc2-hero-streak.active .acc2-hero-streak-img {
-  animation: heroFirePulse .8s ease-in-out infinite alternate;
-}
-@keyframes heroFirePulse {
-  from { transform: scale(1) rotate(-3deg); }
-  to   { transform: scale(1.12) rotate(3deg); }
-}
-.acc2-hero-streak-num {
-  display: flex; align-items: baseline; gap: 3px; margin-top: -4px;
-  background: rgba(11,13,26,.45); border-radius: var(--r-full); padding: 2px 9px 3px;
-  box-shadow: var(--s-am);
-  backdrop-filter: blur(6px);
-}
-.acc2-hero-streak-num b { font: 800 14px/1 'Plus Jakarta Sans', sans-serif; color: #ffb35c; }
-.acc2-hero-streak-num i { font: 600 9.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.85); font-style: normal; }
-@media (prefers-reduced-motion: reduce) { .acc2-hero-streak-img { animation: none !important; } }
 
 /* ═══════════ PERMIS VIRTUEL — l'élément dominant ═══════════════ */
 .acc2-permis {
@@ -306,10 +390,10 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   width: 100%;
   padding: 14px 20px;
-  background: var(--a);
+  background: var(--acc-vio);
   border: none;
   border-radius: var(--r-lg);
-  color: var(--a-ink);
+  color: #fff;
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   min-height: 52px;
@@ -319,138 +403,6 @@ const STYLE = `<style>
 }
 .acc2-ms-session-btn:active { transform: scale(.96); opacity: .9; }
 
-/* ═══════════════════ BLOC 3 — ACTION DU JOUR ══════════════════ */
-.acc2-action {
-  margin: 24px 16px 0;
-  background: var(--su);
-  border: 1.5px solid var(--bo);
-  border-radius: var(--rx);
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
-  animation: acc2ActionIn .55s .22s var(--ease-spring) both;
-}
-@keyframes acc2ActionIn {
-  from { opacity: 0; transform: translateY(12px) scale(.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.acc2-action-tag {
-  display: flex; align-items: center; gap: 6px;
-  font: 600 10px/1 'Inter', sans-serif;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  /* 10px uppercase : mu2 seul ne tient pas le contraste AA */
-  color: color-mix(in srgb, var(--mu) 45%, var(--ink));
-  margin-bottom: 12px;
-}
-.acc2-action-tag-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--a);
-  flex-shrink: 0;
-}
-.acc2-action-tag-dot.urgent { background: var(--rd); animation: urgentPulse 1s ease-in-out infinite; }
-@keyframes urgentPulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
-.acc2-action-title {
-  font: 700 18px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
-  letter-spacing: -.02em;
-  margin-bottom: 6px;
-}
-.acc2-action-sub {
-  font: 500 13.5px/1.4 'Inter', sans-serif;
-  color: var(--mu);
-}
-.acc2-action-btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%;
-  margin-top: 16px;
-  padding: 16px 24px;
-  background: var(--a);
-  border: none;
-  border-radius: var(--r-lg);
-  color: var(--a-ink); /* encre prévue pour l'accent : 4.5:1 garanti par accent.js */
-  font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
-  cursor: pointer;
-  min-height: 52px;
-  box-shadow: var(--s-a-lg);
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .14s var(--ease-spring), box-shadow .14s;
-}
-.acc2-action-btn:active { transform: scale(.96); box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--a) 40%, transparent); }
-
-/* ── Question du jour — etat "a faire" : carte visuellement prioritaire ── */
-/* Gradient accent sur la bordure + ombre douce pour donner envie de tapper */
-.acc2-action--daily {
-  background: color-mix(in srgb, var(--a) 6%, var(--su));
-  border-color: color-mix(in srgb, var(--a) 55%, transparent);
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--a) 10%, transparent),
-    0 4px 16px -4px color-mix(in srgb, var(--a) 28%, transparent);
-}
-/* Le titre de la question du jour est un peu plus grand et plus soutenu */
-.acc2-action--daily .acc2-action-title {
-  font-size: 20px;
-  color: var(--ink);
-}
-/* Tag label en couleur accent sur la version daily */
-.acc2-action--daily .acc2-action-tag {
-  color: var(--a);
-}
-.acc2-action--daily .acc2-action-tag-dot {
-  background: var(--a);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--a) 25%, transparent);
-}
-
-/* ── Série silencieuse — badge jours d'affilée (fierté, jamais menace) ── */
-.acc2-daily-streak {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 8px;
-  font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--am-txt);
-  background: color-mix(in srgb, var(--am, #f59e0b) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--am, #f59e0b) 28%, transparent);
-  border-radius: var(--r-full);
-  padding: 4px 10px 5px;
-  letter-spacing: .02em;
-}
-.acc2-daily-streak::before { content: '🔥'; font-size: 11px; }
-
-/* ── Question du jour — etat "fait" : sobre, invitation douce ── */
-.acc2-action--daily-done {
-  background: color-mix(in srgb, var(--gr, #22c55e) 5%, var(--su));
-  border-color: color-mix(in srgb, var(--gr, #22c55e) 30%, transparent);
-}
-.acc2-action--daily-done .acc2-action-title {
-  color: var(--mu);
-  font-weight: 600;
-  font-size: 16px;
-}
-/* Badge "Fait" vert sobre */
-.acc2-daily-done-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font: 700 10px/1 'Inter', sans-serif;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--gr-txt, #16a34a);
-  background: color-mix(in srgb, var(--gr, #22c55e) 14%, transparent);
-  border-radius: var(--r-full);
-  padding: 3px 8px 4px;
-  margin-left: auto;
-}
-.acc2-daily-done-badge::before { content: '✓'; margin-right: 2px; }
-/* Bouton secondaire (invitation, pas prioritaire) */
-.acc2-action-btn--muted {
-  background: transparent;
-  border: 1.5px solid var(--bo);
-  color: var(--mu);
-  box-shadow: none;
-  font-weight: 600;
-}
-.acc2-action-btn--muted:active { box-shadow: none; }
 
 /* ═══════════════════════ BELOW FOLD ═══════════════════════════ */
 /* Réserve la hauteur des ligues injectées en async : évite le layout-shift
@@ -466,157 +418,6 @@ const STYLE = `<style>
   margin: 32px 20px 14px;
 }
 
-/* ── Chest teaser ── */
-.acc2-chest-teaser {
-  margin: 0 16px 16px;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--a) 8%, transparent), color-mix(in srgb, var(--a) 4%, transparent));
-  border: 1.5px solid color-mix(in srgb, var(--a) 20%, transparent);
-  border-radius: var(--rl);
-  padding: 14px 16px;
-  display: flex; align-items: center; gap: 12px;
-  cursor: pointer;
-  transition: border-color .14s, transform .14s;
-  animation: acc2ChestIn .4s var(--ease-spring) both;
-}
-@keyframes acc2ChestIn {
-  from { opacity:0; transform:translateY(8px) scale(.97); }
-  to   { opacity:1; transform:translateY(0) scale(1); }
-}
-@media (hover:hover) and (pointer:fine) {
-  .acc2-chest-teaser:hover { border-color: color-mix(in srgb, var(--a) 40%, transparent); }
-}
-.acc2-chest-teaser:active { transform: scale(.98); }
-.acc2-ct-ico { font-size: 28px; flex-shrink: 0; }
-.acc2-ct-text { flex: 1; min-width: 0; }
-.acc2-ct-title {
-  font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
-}
-.acc2-ct-sub {
-  font: 500 12.5px/1 'Inter', sans-serif;
-  color: var(--mu);
-  margin-top: 3px;
-}
-.acc2-ct-arrow { flex-shrink: 0; }
-
-.worlds-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  padding: 0 16px;
-  margin-bottom: 8px;
-}
-.world-card {
-  background: var(--su);
-  border: 1.5px solid var(--bo);
-  border-radius: var(--r-xl);
-  padding: 16px;
-  cursor: pointer;
-  position: relative;
-  transition: transform .15s, box-shadow .15s;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(10,13,26,.04);
-}
-.world-card:active { transform: scale(.97); }
-.world-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; min-height: 56px; }
-.world-ico  { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; }
-.world-img  { width: 56px; height: 56px; object-fit: contain; display: block; filter: drop-shadow(0 2px 6px rgba(11,13,26,.12)); transition: transform .3s; }
-.world-card[data-world="C2"] .world-img { transform: scale(1.18); }
-.world-card:hover .world-img { transform: scale(1.1) rotate(-3deg); }
-.world-card[data-world="C2"]:hover .world-img { transform: scale(1.28) rotate(-3deg); }
-.world-card[data-complete="true"] .world-img { animation: worldFloat2 2.8s ease-in-out infinite; }
-@keyframes worldFloat2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-@media (prefers-reduced-motion: reduce) { .world-card[data-complete="true"] .world-img { animation: none; } }
-.world-pct  { font: 700 13px/1 'Inter', sans-serif; }
-.world-name { font: 600 12.5px/1.3 'Inter', sans-serif; color: var(--mu2); margin-bottom: 8px; }
-.world-track { height: 4px; background: var(--bo); border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
-.world-fill  { height: 100%; border-radius: 2px; transition: width .5s ease; }
-.world-count { font: 500 11.5px/1 'Inter', sans-serif; color: var(--mu2); }
-.world-crown { position: absolute; top: 10px; right: 10px; }
-
-/* ══ PermiGo+ — zone premium (examen blanc + centre d'examen) ══ */
-/* Billboard sombre premium : fait ressortir le glass en light ET dark,
-   et signale visuellement le palier payant. Rien à voir avec les autres widgets. */
-.pplus {
-  position: relative;
-  margin: 28px 16px 0;
-  padding: 15px 13px 13px;
-  border-radius: 22px;
-  overflow: hidden;
-  isolation: isolate;
-  background:
-    radial-gradient(120% 85% at 0% 0%, rgba(139,92,246,.36) 0%, transparent 55%),
-    radial-gradient(130% 95% at 100% 100%, rgba(245,158,11,.20) 0%, transparent 52%),
-    linear-gradient(152deg, #221a3d 0%, #171232 46%, #0d0a1f 100%);
-  border: 1px solid rgba(255,255,255,.10);
-  box-shadow:
-    0 18px 44px -16px rgba(76,29,149,.6),
-    inset 0 1px 0 rgba(255,255,255,.10);
-}
-.pplus::before {
-  content: "";
-  position: absolute; left: -18%; top: -55%;
-  width: 180px; height: 180px;
-  background: radial-gradient(circle, rgba(251,191,36,.28), transparent 70%);
-  filter: blur(22px); pointer-events: none; z-index: -1;
-}
-.pplus-head { display: flex; align-items: center; gap: 11px; padding: 2px 4px 12px; }
-.pplus-crown {
-  width: 34px; height: 34px; object-fit: contain; flex-shrink: 0;
-  filter: drop-shadow(0 4px 10px rgba(251,191,36,.45));
-}
-.pplus-title {
-  font: 800 17px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em;
-  background: linear-gradient(100deg, #fde68a, #fbbf24 55%, #f59e0b);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.pplus-title span { -webkit-text-fill-color: #a855f7; color: #a855f7; }
-.pplus-sub { font: 500 12px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.62); margin-top: 3px; }
-
-.pplus-cards { display: flex; flex-direction: column; gap: 10px; }
-.pplus-card {
-  position: relative; overflow: hidden;
-  display: flex; align-items: center; gap: 13px;
-  min-height: 64px; padding: 11px 14px;
-  border-radius: 16px;
-  background: rgba(255,255,255,.07);
-  -webkit-backdrop-filter: blur(14px) saturate(150%);
-  backdrop-filter: blur(14px) saturate(150%);
-  border: 1px solid rgba(255,255,255,.13);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 18px -10px rgba(0,0,0,.5);
-  text-decoration: none; -webkit-tap-highlight-color: transparent;
-  transition: transform .15s var(--ease-spring), background .2s, border-color .2s;
-}
-.pplus-card.tappable { cursor: pointer; }
-.pplus-card.tappable:active { transform: scale(.98); }
-.pplus-card.tappable:hover { background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.22); }
-.pplus-card::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.24) 50%, transparent 62%);
-  transform: translateX(-150%);
-  animation: pplusShine 5.5s ease-in-out infinite;
-}
-/* décale la 2e carte pour que les reflets ne brillent pas en même temps */
-.pplus-cards .pplus-card:nth-child(2)::after { animation-delay: 2.75s; }
-@keyframes pplusShine {
-  0%   { transform: translateX(-150%); }
-  18%  { transform: translateX(150%); }
-  100% { transform: translateX(150%); }
-}
-.pplus-badge {
-  width: 48px; height: 48px; object-fit: contain; flex-shrink: 0;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,.4));
-}
-.pplus-tx { flex: 1; min-width: 0; }
-.pplus-t { font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif; color: #fff; }
-.pplus-s { font: 500 12.5px/1.35 'Inter', sans-serif; color: rgba(255,255,255,.66); margin-top: 2px; }
-.pplus-arrow { flex-shrink: 0; color: rgba(255,255,255,.5); display: flex; }
-.pplus-card.locked { opacity: .58; }
-.pplus-card.locked .pplus-badge { filter: grayscale(.7) drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
-.pplus-lock { flex-shrink: 0; color: rgba(255,255,255,.5); display: flex; }
-@media (prefers-reduced-motion: reduce) {
-  .pplus-card, .pplus-card::after { transition: none; animation: none; }
-}
 
 /* ── Tes ligues — 2 cartes premium (École + Révision) ── */
 .acc-lg-head {
@@ -636,14 +437,13 @@ const STYLE = `<style>
 /* ── Carte de base — socle commun ── */
 .acc-lg-card {
   display: flex; flex-direction: column; align-items: flex-start;
-  text-align: left; min-height: 104px;
-  padding: 14px 14px 12px; border-radius: var(--r-xl);
+  text-align: left; min-height: 118px;
+  padding: 15px 15px 13px; border-radius: var(--r-xl);
   cursor: pointer; position: relative; overflow: hidden;
   -webkit-tap-highlight-color: transparent;
-  transition: transform .18s var(--ease-spring), box-shadow .18s ease, border-color .18s ease;
+  transition: transform .18s var(--ease-spring, cubic-bezier(.34,1.56,.64,1)), box-shadow .18s ease, border-color .18s ease;
   font-family: 'Inter', sans-serif;
-  /* Reveal animé à l'injection async — décalé carte par carte via nth-child */
-  animation: lgCardReveal .42s var(--ease-spring) both;
+  animation: lgCardReveal .42s cubic-bezier(.34,1.56,.64,1) both;
 }
 .acc-lg-card:nth-child(2) { animation-delay: .07s; }
 
@@ -660,34 +460,34 @@ const STYLE = `<style>
   content: ''; position: absolute; pointer-events: none;
   top: 0; left: 10%; right: 10%; height: 1px;
   border-radius: 0 0 50% 50%;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--a) 55%, #fff) 40%, color-mix(in srgb, var(--a) 55%, #fff) 60%, transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--a-lt) 70%, transparent) 40%, color-mix(in srgb, var(--a-lt) 70%, transparent) 60%, transparent);
   opacity: .6;
 }
 
-/* ── Variante École — gradient plat, sans halo radial ── */
+/* ── Variante École ── */
 .acc-lg-card[data-ligue="ecole"] {
-  background: linear-gradient(158deg, color-mix(in srgb, var(--a) 13%, var(--su)) 0%, var(--su) 100%);
-  border: 1.5px solid color-mix(in srgb, var(--a) 28%, var(--bo));
+  background: linear-gradient(158deg, color-mix(in srgb, var(--a) 10%, transparent) 0%, var(--su) 100%);
+  border: 1.5px solid color-mix(in srgb, var(--a) 22%, transparent);
   box-shadow:
-    0 2px 0 0 color-mix(in srgb, var(--a) 12%, transparent) inset,
-    0 6px 18px -6px color-mix(in srgb, var(--a) 30%, transparent);
+    0 2px 0 0 color-mix(in srgb, var(--a) 8%, transparent) inset,
+    0 6px 18px -6px color-mix(in srgb, var(--a) 22%, transparent);
 }
-/* ── Variante Révision — gradient plat, sans halo radial ── */
+/* ── Variante Révision ── */
 .acc-lg-card[data-ligue="revision"] {
-  background: linear-gradient(142deg, color-mix(in srgb, var(--a) 10%, var(--su)) 0%, var(--su) 85%);
-  border: 1.5px solid color-mix(in srgb, var(--a) 22%, var(--bo));
+  background: linear-gradient(142deg, color-mix(in srgb, var(--a) 8%, transparent) 0%, var(--su) 85%);
+  border: 1.5px solid color-mix(in srgb, var(--a) 18%, transparent);
   box-shadow:
-    0 2px 0 0 color-mix(in srgb, var(--a) 16%, transparent) inset,
-    0 6px 22px -8px color-mix(in srgb, var(--a) 28%, transparent);
+    0 2px 0 0 color-mix(in srgb, var(--a) 10%, transparent) inset,
+    0 6px 22px -8px color-mix(in srgb, var(--a) 20%, transparent);
 }
 
-.acc-lg-card:active { transform: scale(.97); box-shadow: 0 2px 8px -4px color-mix(in srgb, var(--a) 20%, transparent) !important; }
-.acc-lg-card:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+.acc-lg-card:active { transform: scale(.97); box-shadow: 0 2px 8px -4px color-mix(in srgb, var(--a) 18%, transparent) !important; }
+.acc-lg-card:focus-visible { outline: 2px solid var(--acc-vio); outline-offset: 2px; }
 @media (hover:hover) and (pointer:fine) {
   .acc-lg-card:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--a) 50%, var(--bo)) !important;
-    box-shadow: 0 10px 26px -8px color-mix(in srgb, var(--a) 42%, transparent) !important;
+    border-color: color-mix(in srgb, var(--a) 40%, transparent) !important;
+    box-shadow: 0 10px 26px -8px color-mix(in srgb, var(--a) 35%, transparent) !important;
   }
 }
 
@@ -695,10 +495,10 @@ const STYLE = `<style>
 .acc-lg-tag {
   display: inline-flex; align-items: center; gap: 4px;
   font: 700 10.5px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--a-txt);
+  color: var(--acc-vio);
   position: relative; z-index: 1;
   background: color-mix(in srgb, var(--a) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--a) 18%, transparent);
   border-radius: 100px; padding: 3px 7px 3px 5px;
 }
 
@@ -706,25 +506,14 @@ const STYLE = `<style>
 .acc-lg-rank {
   font: 800 40px/1 'Plus Jakarta Sans', sans-serif;
   letter-spacing: -.04em; margin: 8px 0 0; position: relative; z-index: 1;
-  /* Gradient métallique dérivé de l'accent pour donner de la profondeur */
-  background: linear-gradient(160deg,
-    color-mix(in srgb, var(--a) 90%, #fff) 0%,
-    var(--ink) 55%,
-    color-mix(in srgb, var(--a) 70%, #fff) 100%
-  );
+  background: linear-gradient(160deg, var(--acc-vio-lt) 0%, var(--ink) 55%, var(--acc-vio) 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
-  /* tabular-nums pour éviter le layout-shift quand le chiffre change */
   font-variant-numeric: tabular-nums;
 }
 /* Podium top-3 : éclat plus intense */
 .acc-lg-card[data-pos="1"] .acc-lg-rank {
-  background: linear-gradient(150deg,
-    color-mix(in srgb, var(--a) 100%, #fff) 0%,
-    color-mix(in srgb, var(--a) 60%, #fff) 40%,
-    var(--ink) 70%,
-    color-mix(in srgb, var(--a) 80%, #fff) 100%
-  );
+  background: linear-gradient(150deg, var(--acc-vio-lt) 0%, var(--acc-vio) 40%, var(--ink) 70%, var(--acc-vio-lt) 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
   font-size: 46px;
@@ -741,17 +530,32 @@ const STYLE = `<style>
   position: relative; z-index: 1;
 }
 .acc-lg-sub {
-  font: 500 11px/1.3 'Inter', sans-serif; color: var(--mu2);
+  font: 500 11px/1.3 'Inter', sans-serif; color: var(--mu);
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+/* Pastille chevron violette pleine — affordance forte */
 .acc-lg-go {
-  flex-shrink: 0; display: inline-flex; align-items: center;
-  color: var(--a-txt); opacity: .8;
-  transition: transform .15s var(--ease-spring);
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--acc-vio); color: #fff;
+  box-shadow: 0 4px 11px -3px color-mix(in srgb, var(--a) 55%, transparent);
+  transition: transform .15s var(--ease-spring, cubic-bezier(.34,1.56,.64,1));
 }
-.acc-lg-card:active .acc-lg-go { transform: translateX(3px); }
+.acc-lg-card:active .acc-lg-go { transform: translateX(3px) scale(.94); }
 @media (hover:hover) and (pointer:fine) {
   .acc-lg-card:hover .acc-lg-go { transform: translateX(3px); }
+}
+/* Indice de cliquabilité : petit aller-retour horizontal, joué 2× au montage.
+   Activé seulement les 3 premières sessions via .acc2-afford-hint (cf. mount). */
+@keyframes affordNudge {
+  0%, 100% { transform: translateX(0); }
+  40%      { transform: translateX(4px); }
+  70%      { transform: translateX(0); }
+}
+.acc2-afford-hint .acc-lg-go { animation: affordNudge 1.9s var(--ease-spring) .9s 2; }
+.acc2-afford-hint .pplus-arrow { animation: affordNudge 1.9s var(--ease-spring) 1.1s 2; }
+@media (prefers-reduced-motion: reduce) {
+  .acc-lg-go, .pplus-arrow { animation: none; }
 }
 
 /* ── Bottom sheet streak ── */
@@ -801,19 +605,17 @@ const STYLE = `<style>
 .bs-freeze-desc { font: 500 11px/1.4 'Inter', sans-serif; color: var(--mu3); text-align: center; margin-top: 7px; }
 
 /* ── First-run dominant CTA ── */
-/* When the student has never done anything, the action card takes over:
-   bigger padding, stronger shadow, btn scales up to fill width. */
 .acc2-action--first-run {
   margin: 20px 16px 0;
   background: var(--su);
-  border: 2px solid color-mix(in srgb, var(--a) 40%, transparent);
+  border: 2px solid color-mix(in srgb, var(--a) 30%, transparent);
   border-radius: var(--rx);
   padding: 24px 20px 22px;
-  box-shadow: 0 8px 28px -10px color-mix(in srgb, var(--a) 35%, transparent), 0 2px 6px rgba(10,13,26,.06);
+  box-shadow: 0 8px 28px -10px color-mix(in srgb, var(--a) 28%, transparent), 0 2px 6px rgba(10,13,26,.06);
 }
 .acc2-action--first-run .acc2-action-tag {
   font-size: 11px;
-  color: color-mix(in srgb, var(--a) 70%, var(--ink));
+  color: var(--acc-vio);
 }
 .acc2-action--first-run .acc2-action-title {
   font-size: clamp(20px, 6vw, 24px);
@@ -830,39 +632,284 @@ const STYLE = `<style>
   font-size: 16px;
   min-height: 58px;
   letter-spacing: -.01em;
-  box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--a) 55%, transparent);
+  box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--a) 48%, transparent);
 }
 @media (prefers-reduced-motion: reduce) {
   .acc2-action--first-run .acc2-action-btn { transition: none; }
 }
 
-/* ── État vide : tiret muet dans le slot du rang (même place que le chiffre,
-   pour que l'œil trouve toujours l'info au même endroit) ── */
+/* ── État vide : tiret muet dans le slot du rang ── */
 .acc-lg-rank.is-empty {
   background: none;
-  -webkit-text-fill-color: var(--mu3);
-  color: var(--mu3);
+  -webkit-text-fill-color: var(--mu);
+  color: var(--mu);
   font-size: 40px; opacity: .7;
 }
 
 /* ── First-run progressive disclosure ── */
-/* On first run (no activity), soften/collapse the noise below the fold
-   so the student sees one thing: the CTA. Sections reveal after first action
-   (page reloads with activity → isFirstRun becomes false). */
 .acc2--first-run .acc2-section-title,
 .acc2--first-run .worlds-grid,
-.acc2--first-run .pplus {
+.acc2--first-run .acc2-premium {
   opacity: 0.45;
   pointer-events: none;
   user-select: none;
 }
-/* Permis virtuel label below the hero for first-run */
-.acc2-permis-label {
-  text-align: center;
-  font: 500 12px/1.3 'Inter', sans-serif;
-  color: var(--mu2);
+
+/* ═══════════════ PERMIS COMPACT (carte maquette) ═══════════════ */
+.acc2-permis-compact {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--su); border: 1px solid var(--bo);
+  border-radius: 22px; padding: 14px; margin: 14px 16px 0;
+  text-decoration: none; cursor: pointer;
+  box-shadow: 0 8px 22px -12px color-mix(in srgb, var(--a) 22%, transparent);
+  transition: transform .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.acc2-permis-compact:active { transform: scale(.985); }
+.acc2-permis-thumb {
+  width: 62px; height: 62px; flex: none;
+  display: grid; place-items: center; position: relative; isolation: isolate;
+}
+.acc2-permis-thumb::before {
+  content: ""; position: absolute; inset: -6px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(247,179,43,.4), transparent 68%);
+  filter: blur(3px); z-index: 0;
+}
+.acc2-permis-thumb img {
+  width: 58px; height: 58px; object-fit: contain; position: relative; z-index: 1;
+  filter: drop-shadow(0 2px 2px rgba(40,20,90,.22)) drop-shadow(0 8px 12px rgba(40,20,90,.18));
+}
+.acc2-permis-body { flex: 1; min-width: 0; }
+.acc2-permis-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.acc2-permis-label2 {
+  font: 800 15px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+}
+.acc2-permis-val {
+  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--acc-vio); font-variant-numeric: tabular-nums;
+}
+.acc2-permis-bar {
+  height: 9px; border-radius: 999px; background: var(--bo);
+  overflow: hidden; margin: 9px 0 6px;
+}
+.acc2-permis-fill {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--acc-vio), var(--acc-vio-lt));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--a) 55%, transparent);
+  width: 0; transition: width .6s cubic-bezier(.34,1.56,.64,1);
+}
+.acc2-permis-sub {
+  font: 700 11.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu);
+}
+@media (prefers-reduced-motion: reduce) {
+  .acc2-permis-fill { transition: none; }
+}
+
+/* ═══════════════ PREMIUM (carte maquette) ══════════════════════ */
+.acc2-premium {
+  display: block; margin: 22px 16px 0;
+  background: linear-gradient(180deg,#fffdf8,#fdf4e6);
+  border: 1px solid #f6e6c4; border-radius: 24px;
+  overflow: hidden; text-decoration: none;
+  box-shadow: 0 14px 30px -14px rgba(224,142,11,.36);
+  position: relative; transition: transform .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.acc2-premium:active { transform: scale(.985); }
+.acc2-premium-media {
+  position: relative; height: 130px; overflow: hidden;
+}
+.acc2-premium-media > img.acc2-pm-bg {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.acc2-premium-media::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 28%, rgba(18,6,0,.58));
+}
+.acc2-premium-shine {
+  position: absolute; inset: 0; overflow: hidden; z-index: 2; pointer-events: none;
+}
+.acc2-premium-shine::after {
+  content: ""; position: absolute; top: 0; left: -130%; width: 55%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.5), transparent);
+  transform: skewX(-20deg);
+  animation: acc2PremiumShine 5s ease-in-out infinite;
+}
+@keyframes acc2PremiumShine {
+  0%       { left: -130%; }
+  55%, 100% { left: 140%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .acc2-premium-shine::after { animation: none; }
+}
+.acc2-premium-crown {
+  position: absolute; top: 10px; right: 12px; width: 44px; z-index: 3;
+  filter: drop-shadow(0 3px 6px rgba(120,70,0,.45));
+  animation: acc2CrownFloat 4s ease-in-out infinite;
+}
+@keyframes acc2CrownFloat {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .acc2-premium-crown { animation: none; }
+}
+.acc2-premium-tag {
+  position: absolute; top: 14px; left: 13px; z-index: 3;
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(28,21,51,.55); backdrop-filter: blur(6px);
+  color: #ffe9b8; font: 800 10.5px/1 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 5px 10px; border-radius: 999px;
+}
+.acc2-premium-ttl {
+  position: absolute; left: 14px; bottom: 11px; z-index: 3;
+  color: #fff; font: 700 25px/1 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  text-shadow: 0 2px 10px rgba(0,0,0,.55);
+}
+.acc2-premium-body {
+  padding: 13px 15px 15px;
+  display: flex; align-items: center; gap: 10px;
+}
+.acc2-premium-body p {
+  flex: 1; font: 700 12.5px/1.45 'Plus Jakarta Sans', sans-serif; color: #8a6a3a; margin: 0;
+}
+.acc2-premium-go {
+  flex: none; background: linear-gradient(180deg,#f8b62b,#ef9f12);
+  color: #3a2606; font: 800 13px/1 'Plus Jakarta Sans', sans-serif;
+  padding: 11px 15px; border-radius: 14px;
+  box-shadow: 0 5px 0 var(--acc-gold-dk, #e08e0b);
+  text-decoration: none;
+}
+.acc2-premium-links {
+  display: flex; flex-direction: column; gap: 0;
   margin: 6px 16px 0;
-  padding: 0 4px;
+}
+.acc2-premium-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 14px; background: var(--su);
+  border: 1px solid var(--bo); text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .12s;
+}
+.acc2-premium-link:first-child { border-radius: 18px 18px 0 0; border-bottom: none; }
+.acc2-premium-link:last-child  { border-radius: 0 0 18px 18px; }
+.acc2-premium-link:active { background: color-mix(in srgb, var(--a) 6%, transparent); }
+.acc2-premium-link-ico {
+  width: 38px; height: 38px; flex: none;
+  background: color-mix(in srgb, var(--a) 10%, transparent); border-radius: 12px;
+  display: grid; place-items: center;
+}
+.acc2-premium-link-ico img {
+  width: 26px; height: 26px; object-fit: contain;
+  filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--a) 25%, transparent));
+}
+.acc2-premium-link-txt { flex: 1; min-width: 0; }
+.acc2-premium-link-t {
+  font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+}
+.acc2-premium-link-s {
+  font: 500 11.5px/1 'Inter', sans-serif; color: var(--mu); margin-top: 2px;
+}
+.acc2-premium-link-arr {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--acc-vio); color: #fff;
+  box-shadow: 0 4px 10px -3px color-mix(in srgb, var(--a) 50%, transparent);
+  font-size: 16px; font-weight: 800;
+}
+
+/* ═══════════════ COFFRE (style maquette) ════════════════════════ */
+.acc2-chest-v2 {
+  display: flex; align-items: center; gap: 13px;
+  background: linear-gradient(120deg, var(--su), #fff7ec);
+  border: 1px solid #f4e7cf; border-radius: 20px;
+  padding: 11px 14px 11px 11px; margin: 14px 16px 0;
+  text-decoration: none; cursor: pointer;
+  box-shadow: 0 8px 22px -12px rgba(224,142,11,.3);
+  position: relative; -webkit-tap-highlight-color: transparent;
+  transition: transform .12s;
+}
+.acc2-chest-v2:active { transform: scale(.985); }
+[data-theme="dark"] .acc2-chest-v2 {
+  background: linear-gradient(120deg, var(--su), rgba(247,179,43,.07));
+  border-color: rgba(247,179,43,.22);
+}
+.acc2-chest-v2 > img {
+  width: 56px; height: 56px; object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(120,80,20,.28));
+  animation: acc2ChestFloat 3.4s ease-in-out infinite;
+}
+@keyframes acc2ChestFloat {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-7px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .acc2-chest-v2 > img { animation: none; }
+}
+.acc2-chest-v2-body { flex: 1; min-width: 0; }
+.acc2-chest-v2-title {
+  display: block; font: 800 14.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+}
+.acc2-chest-v2-sub {
+  font: 700 11.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu); margin-top: 3px;
+}
+.acc2-chest-v2-arr {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, #fde68a, #f7b32b 60%, #e08e0b);
+  color: #3a2606; font-size: 17px; font-weight: 800;
+  box-shadow: 0 4px 10px -3px rgba(224,142,11,.5);
+}
+
+/* ═══════════════ SECTION TITRE GÉNÉRIQUE ════════════════════════ */
+.acc2-sec {
+  margin-top: 22px; display: flex; align-items: baseline;
+  justify-content: space-between; padding: 0 18px 10px;
+}
+.acc2-sec h2 {
+  font: 800 16px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+}
+.acc2-sec a {
+  font: 700 12.5px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--acc-vio); text-decoration: none;
+}
+
+/* ═══════════════ BADGES TEASER ══════════════════════════════════ */
+.acc2-badges {
+  display: flex; gap: 9px; overflow: visible;
+  padding: 4px 18px 4px;
+}
+.acc2-badge-cell {
+  width: 62px; height: 62px; flex: none;
+  background: var(--su); border: 1px solid var(--bo);
+  border-radius: 18px; display: grid; place-items: center;
+  box-shadow: 0 6px 16px -8px rgba(80,50,160,.25);
+  position: relative;
+}
+.acc2-badge-cell img {
+  width: 46px; height: 46px; object-fit: contain;
+  filter: drop-shadow(0 3px 5px rgba(40,20,90,.22));
+}
+.acc2-badge-cell.acc2-badge-new {
+  border-color: var(--acc-vio-lt);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--a-lt) 32%, transparent), 0 8px 18px -7px color-mix(in srgb, var(--a) 48%, transparent);
+}
+.acc2-badge-cell.acc2-badge-new::after {
+  content: ""; position: absolute; top: -3px; right: -3px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #ff4d6d; border: 2.5px solid var(--su);
+  box-shadow: 0 2px 5px rgba(255,77,109,.45);
+}
+.acc2-badge-cell.acc2-badge-locked img {
+  filter: grayscale(1) brightness(.75) drop-shadow(0 3px 5px rgba(40,20,90,.14));
+  opacity: .82;
+}
+.acc2-badge-cell.acc2-badge-locked::after {
+  content: ""; position: absolute; inset: 0; border-radius: 18px;
+  background: rgba(0,0,0,.08);
 }
 </style>`;
 
@@ -1091,28 +1138,42 @@ export async function mount(root) {
 
     const accDiv = root.querySelector(".acc2");
 
+    // Indice de cliquabilité : on fait « clignoter » une fois les pastilles
+    // « va voir » (ligues + PermiGo+) pour signaler qu'on tape dessus — mais
+    // seulement les 3 premières sessions, sinon ça devient du bruit pour les
+    // habitués (l'app est un rituel quotidien).
+    try {
+      const seen = +(localStorage.getItem("pg-afford-hint") || 0);
+      if (seen < 3) {
+        accDiv?.classList.add("acc2-afford-hint");
+        localStorage.setItem("pg-afford-hint", String(seen + 1));
+      }
+    } catch {
+      /* localStorage indispo : pas grave, on n'affiche juste pas l'indice */
+    }
+
     // Composants non-bloquants injectés sous le fold
     if (accDiv) {
-      // Quêtes du jour — carrousel réclamable, juste sous l'action du jour
-      const actionEl = accDiv.querySelector(".acc2-action");
-      if (actionEl) {
+      // Quêtes du jour — carrousel réclamable, juste sous le CTA king
+      const anchorEl = accDiv.querySelector("#acc-action-anchor");
+      if (anchorEl) {
         const dqHost = document.createElement("div");
         dqHost.style.cssText = "margin:16px 16px 0";
-        actionEl.insertAdjacentElement("afterend", dqHost);
+        anchorEl.insertAdjacentElement("afterend", dqHost);
         Promise.resolve()
           .then(() =>
             mountDailyQuests(dqHost, { prefetchedQuests: todayQuests }),
           )
           .catch(() => {});
       }
-      // Remonté AU-DESSUS de PermiGo+ : les retours du moniteur sont la preuve
+      // Remonté AU-DESSUS de la section premium : les retours du moniteur sont la preuve
       // d'autorité de l'élève, ils ne doivent pas finir tout en bas de page.
       Promise.resolve()
         .then(() =>
           mountFeedbackFeed(accDiv, {
             eleveId: me.id,
             limit: 5,
-            anchorEl: accDiv.querySelector(".pplus"),
+            anchorEl: accDiv.querySelector(".acc2-premium"),
           }),
         )
         .catch(() => {});
@@ -1121,9 +1182,9 @@ export async function mount(root) {
     // Leaderboard async
     _loadAndInjectLeagues(root);
 
-    // Bannière émotionnelle — insérée juste après le hero
+    // Bannière émotionnelle — insérée juste après le hero v2
     emotionalBanner
-      .checkAndRender(root, { afterSelector: ".acc2-hero" })
+      .checkAndRender(root, { afterSelector: ".acc2-hero-v2" })
       .catch(() => {});
 
     // Quiz éclair actif poussé par le moniteur — bandeau prioritaire
@@ -1196,19 +1257,19 @@ function render({
   // tout seul une fois installée (isStandalone) : pas un popup qu'on oublie.
   const installBanner = !isStandalone()
     ? `<style>
-    .acc-install{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--a) 10%,var(--su));border:1.5px solid color-mix(in srgb,var(--a) 35%,transparent);box-shadow:0 4px 16px -6px color-mix(in srgb,var(--a) 30%,transparent)}
-    .acc-install-ico{flex:0 0 38px;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--a) 16%,transparent);color:var(--a-txt)}
+    .acc-install{display:flex;align-items:center;gap:10px;margin:0 16px 12px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb, var(--a) 7%, transparent);border:1px solid color-mix(in srgb, var(--a) 22%, transparent);box-shadow:0 3px 10px -4px color-mix(in srgb, var(--a) 20%, transparent)}
+    .acc-install-ico{flex:0 0 34px;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--a) 14%, transparent);color:var(--acc-vio)}
     .acc-install-txt{min-width:0;flex:1}
-    .acc-install-t{font:800 14px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
-    .acc-install-s{font:500 11.5px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
-    .acc-install-btn{flex:0 0 auto;min-height:44px;padding:0 18px;border:0;border-radius:11px;background:linear-gradient(to bottom,var(--a-lt),var(--a) 55%,var(--adk));color:var(--a-ink);font:800 13.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:0 4px 12px -3px color-mix(in srgb,var(--a) 50%,transparent)}
+    .acc-install-t{font:700 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
+    .acc-install-s{font:500 11px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
+    .acc-install-btn{flex:0 0 auto;min-height:36px;padding:0 14px;border:0;border-radius:10px;background:linear-gradient(180deg,var(--acc-vio-lt),var(--acc-vio));color:#fff;font:700 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:0 3px 8px -2px color-mix(in srgb, var(--a) 45%, transparent)}
     .acc-install-btn:active{transform:scale(.96)}
     </style>
     <div class="acc-install" id="acc-install">
-      <div class="acc-install-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></div>
+      <div class="acc-install-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></div>
       <div class="acc-install-txt">
         <div class="acc-install-t">Installe PermiGo sur ton téléphone</div>
-        <div class="acc-install-s">Accès direct + tes rappels. Ça prend 10 secondes.</div>
+        <div class="acc-install-s">Accès direct + tes rappels — 10 secondes.</div>
       </div>
       <button class="acc-install-btn" id="acc-install-btn" type="button">Installer</button>
     </div>`
@@ -1220,133 +1281,219 @@ function render({
   // ── Séance à confirmer (priorité absolue quand présente) ──
   const pendingSession = pendingSessions?.[0] ?? null;
 
-  // ── ACTION DU JOUR ──
-  // Priorité : quête > notif quiz > QUESTION DU JOUR (boucle quotidienne) > parcours.
-  // mountDailyQuests gère le carrousel claim séparé (sous ce bloc).
-  const _pendingQuest = !pendingNotif
+  // Examen blanc : s'ouvre quand le monde 3 devient accessible.
+  // (conservé pour usage futur — actuellement non affiché dans l'accueil)
+  // const examUnlocked = (worlds[1]?.done ?? 0) >= EXAM_UNLOCK_WORLD2_DONE;
+
+  // ── Hero v2 : kicker / titre / méta selon l'état de l'action du jour ──
+  // On réutilise la même logique que renderActionDuJour mais pour alimenter
+  // le hero focal. Le CTA king prend l'id action-cta-btn pour que wire()
+  // le câble sans modification (même data-href, même listener).
+  let _heroKicker = "Ta question du jour";
+  let _heroTitle = "Prêt à réviser ?";
+  let _heroMeta = "3 questions · ~2 min · sur ta dernière leçon";
+  let _heroCta = "C'est parti";
+  let _heroHref = "#/quiz/next/post_validation/revision";
+  let _heroDone = false;
+
+  const _pendingQuestForHero = !pendingNotif
     ? (todayQuests.find(
         (q) => !q.completed && !q.claimed && q.quest_id !== "quest_login",
       ) ?? null)
     : null;
-  const bloc3 = renderActionDuJour(
-    _pendingQuest ? _normalizeQuest(_pendingQuest) : null,
-    pendingNotif,
-    totalValidated,
-    dailyQuiz,
-    isFirstRun,
-    dailyStreakCount,
-  );
 
-  // Examen blanc : s'ouvre quand le monde 3 devient accessible.
-  const examUnlocked = (worlds[1]?.done ?? 0) >= EXAM_UNLOCK_WORLD2_DONE;
+  if (_pendingQuestForHero) {
+    const _qn = _normalizeQuest(_pendingQuestForHero);
+    _heroKicker = "Quête du jour";
+    _heroTitle = _qn.label ?? "Quête du jour";
+    _heroMeta = _qn.sub ?? "";
+    _heroCta = _qn.btnText ?? "Commencer";
+    _heroHref = _qn.href ?? "#/parcours";
+  } else if (pendingNotif?.data?.competence_id) {
+    const _isCons = pendingNotif.type === "consolidation_quiz";
+    _heroKicker = _isCons ? "Quiz de consolidation" : "Quiz-récap";
+    _heroTitle = _isCons
+      ? "Consolide ce que tu viens d'acquérir"
+      : "Récap sur ta compétence";
+    _heroMeta = _isCons ? "2 questions · 30 sec" : "3 questions · optionnel";
+    _heroCta = _isCons ? "Commencer" : "Faire le récap";
+    _heroHref = `#/quiz/${pendingNotif.data.competence_id}/${_isCons ? "consolidation" : "post_validation"}`;
+  } else if (dailyQuiz && !dailyQuiz.done && dailyQuiz.competenceId) {
+    _heroKicker = "Ta question du jour";
+    if (_awayDays >= 3) {
+      _heroTitle = "Reprends en douceur";
+      _heroMeta = "1 question pour te remettre dedans · ~2 min";
+    } else if (dailyQuiz.mode === "decouverte") {
+      _heroTitle = "Découvre une compétence";
+      _heroMeta = "3 questions · 2 min · sur ta prochaine leçon";
+    } else {
+      _heroTitle = "Prêt à réviser ?";
+      _heroMeta = "3 questions · 2 min · sur ta dernière leçon";
+    }
+    _heroCta = "C'est parti";
+    _heroHref = `#/quiz/${dailyQuiz.competenceId}/post_validation/daily`;
+  } else if (dailyQuiz?.done) {
+    _heroDone = true;
+    _heroKicker = "Question du jour";
+    _heroTitle = "Fait pour aujourd'hui !";
+    _heroMeta = "Reviens demain pour ta prochaine question.";
+    _heroCta = "Continue à réviser";
+    _heroHref = "#/quiz/next/post_validation/revision";
+  } else if (totalValidated === 0) {
+    _heroKicker = "Par où commencer ?";
+    _heroTitle = "Lance ta première révision";
+    _heroMeta = "2 min suffisent pour démarrer.";
+    _heroCta = "C'est parti — 2 min";
+    _heroHref = "#/quiz/next/post_validation/revision";
+  } else {
+    _heroTitle = "Continue ton parcours";
+    _heroMeta = "Une révision de plus, chaque jour compte.";
+    _heroCta = "Continue à réviser";
+    _heroHref = "#/quiz/next/post_validation/revision";
+  }
 
   return `${STYLE}
 <div class="acc2${isFirstRun ? " acc2--first-run" : ""}">
   ${installBanner}
-  <!-- ══ HERO compact — salutation + flamme ══ -->
-  <div class="acc2-hero">
-    <div class="acc2-hero-content">
-      <div class="acc2-hero-top">
-        <div class="acc2-hero-greet">
-          <span class="acc2-hero-hi">${esc(_greeting(_awayDays))}</span>
-          <h1 class="acc2-hero-name" tabindex="-1">${esc(prenom)}</h1>
-        </div>
-        ${
-          streak.current_streak > 0
-            ? `
-        <div class="acc2-hero-streak ${isActive ? "active" : ""}" id="streak-badge-btn" role="button" tabindex="0" aria-label="Streak ${streak.current_streak} jours">
-          <img class="acc2-hero-streak-img" src="/skins/permigo-streak-flame-v1.webp" alt="" />
-          <span class="acc2-hero-streak-num">
-            <b>${streak.current_streak}</b>
-            <i>jour${streak.current_streak > 1 ? "s" : ""}</i>
-          </span>
-        </div>`
-            : ""
-        }
+
+  <!-- ══ HUD — série + gemmes + avatar ══ -->
+  <div class="acc2-hud">
+    <button class="acc2-chip streak${isActive ? "" : " inactive"}" id="streak-badge-btn"
+            type="button" aria-label="Série ${streak.current_streak} jours, voir le détail">
+      <img src="/skins/permigo-streak-flame-v1.webp" alt="" aria-hidden="true">
+      <span class="num">${streak.current_streak}</span>
+    </button>
+    <span class="acc2-chip gem" aria-label="${esc(String(profile.gemmes ?? 0))} gemmes">
+      <img src="/skins/skill-shard-indigo.png" alt="" aria-hidden="true">
+      <span class="num">${esc(String(profile.gemmes ?? 0))}</span>
+    </span>
+  </div>
+
+  <!-- ══ HERO FOCAL v2 — question du jour ══ -->
+  <section class="acc2-hero-v2" aria-label="${esc(_heroKicker)}">
+    <div class="acc2-hero-halo" aria-hidden="true"></div>
+    <div class="acc2-hero-v2-txt">
+      <p class="acc2-hero-kicker">${esc(_heroKicker)}</p>
+      <h1 class="acc2-hero-h1">${esc(_heroTitle)}</h1>
+      ${_heroMeta ? `<p class="acc2-hero-meta">${esc(_heroMeta)}</p>` : ""}
+    </div>
+    <div class="acc2-hero-floor" aria-hidden="true"></div>
+    <img class="acc2-hero-mascot" src="/skins/mascot-point.png" alt="" aria-hidden="true" loading="eager">
+  </section>
+
+  <!-- ══ CTA ROI — le seul bouton à presser ══ -->
+  <button class="acc2-cta-king${_heroDone ? " muted" : ""}"
+          id="action-cta-btn" type="button" data-href="${esc(_heroHref)}">
+    ${esc(_heroCta)} <span class="acc2-cta-arr" aria-hidden="true">→</span>
+  </button>
+
+  <!-- Ancre pour les quêtes du jour (mountDailyQuests) -->
+  <div id="acc-action-anchor"></div>
+
+  <!-- ══ PERMIS VIRTUEL — carte compacte maquette ══ -->
+  <div class="acc2-permis-compact" id="acc-permis" role="button" tabindex="0"
+       aria-label="Ton permis virtuel — ${totalValidated} sur 31 compétences">
+    <div class="acc2-permis-thumb">
+      <img src="/skins/trophy-permis-virtuel.webp" alt="" aria-hidden="true" loading="eager">
+    </div>
+    <div class="acc2-permis-body">
+      <div class="acc2-permis-row">
+        <span class="acc2-permis-label2">Ton permis virtuel</span>
+        <span class="acc2-permis-val">${totalValidated}/31</span>
       </div>
-      ${
-        streak.current_streak >= 1
-          ? `<div class="acc2-hero-cta">
-               <span class="acc2-hero-cta-txt">🔥 C'est ton <b>${streak.current_streak}ᵉ</b> jour ici — garde ta série.</span>
-               <button class="acc2-hero-cta-btn" id="hero-streak-cta" type="button">Maintiens ta série · 2 questions ${icon("arrow-right", { size: 14 })}</button>
-             </div>`
-          : _awayDays >= 3
-            ? `<div class="acc2-hero-cta">
-                 <span class="acc2-hero-cta-txt">Ça fait ${_awayDays} jours — on relance en douceur ?</span>
-                 <button class="acc2-hero-cta-btn" id="hero-streak-cta" type="button">Reprends · 2 questions ${icon("arrow-right", { size: 14 })}</button>
-               </div>`
-            : `<div class="acc2-hero-cta">
-                 <span class="acc2-hero-cta-txt">Lance ta série aujourd'hui 🔥</span>
-                 <button class="acc2-hero-cta-btn" id="hero-streak-cta" type="button">Démarre · 2 questions ${icon("arrow-right", { size: 14 })}</button>
-               </div>`
-      }
+      <div class="acc2-permis-bar">
+        <span class="acc2-permis-fill" data-target="${Math.round((totalValidated / 31) * 100)}"></span>
+      </div>
+      <span class="acc2-permis-sub">${
+        totalValidated === 0
+          ? "Chaque compétence validée par ton moniteur la complète."
+          : totalValidated >= 31
+            ? "Toutes les compétences acquises — bravo !"
+            : `Plus que ${31 - totalValidated} compétence${31 - totalValidated > 1 ? "s" : ""} avant le grand jour`
+      }</span>
     </div>
   </div>
 
-  <!-- ══ PERMIS VIRTUEL — où j'en suis, en 1 coup d'œil ══ -->
-  <div class="acc2-permis" id="acc-permis">
-    ${renderPermisMini({
-      prenom,
-      nom: profile.nom || me.nom || "",
-      created_at: profile.created_at || me.created_at || null,
-      validated: totalValidated,
-      total: 31,
-    })}
-  </div>
-  <p class="acc2-permis-label">${
-    totalValidated === 0
-      ? "Ta carte du permis — 0 sur 31 — chaque compétence validée par ton moniteur la complète."
-      : `Ta carte du permis — ${totalValidated} sur 31 compétence${totalValidated > 1 ? "s" : ""} acquise${totalValidated > 1 ? "s" : ""}.`
-  }</p>
-
   ${pendingSession ? `<div class="acc2-ms">${renderSessionConfirm(pendingSession)}</div>` : ""}
-
-  <!-- ══ ACTION DU JOUR — le seul bouton à presser ══ -->
-  ${bloc3}
 
   <!-- Tes ligues : École (REMC) + Révision (quiz solo), à égalité -->
   <div id="acc-lb-slot"></div>
 
   <!-- ══ BELOW FOLD ══ -->
-  <!-- « Mon parcours » (grille des 4 mondes) retiré : doublon du permis virtuel
-       (déjà la progression X/31) + onglet Parcours dédié dans la nav. -->
 
-  <!-- ══ PERMIGO+ — fiches premium (examen blanc + centre d'examen) ══ -->
-  <section class="pplus" aria-label="PermiGo+ — prépa examen premium">
-    <div class="pplus-head">
-      <img class="pplus-crown" src="/skins/couronne.png" alt="" aria-hidden="true" loading="lazy">
-      <div>
-        <div class="pplus-title">PermiGo<span>+</span></div>
-        <div class="pplus-sub">Ta prépa examen, version premium</div>
+  <!-- ══ VA PLUS LOIN — carte premium Examen blanc en vedette ══ -->
+  <div class="acc2-sec" aria-label="Va plus loin">
+    <h2>Va plus loin</h2>
+    <a href="#/trophees" style="text-decoration:none">Tout voir</a>
+  </div>
+
+  <!-- Carte Examen blanc en vedette -->
+  <a class="acc2-premium" id="acc-exam-conduite" href="#/exam-conduite"
+     aria-label="Examen blanc PermiGo+">
+    <div class="acc2-premium-media">
+      <img class="acc2-pm-bg" src="/skins/landing/monde2jour.webp" alt="" loading="lazy">
+      <span class="acc2-premium-tag">PermiGo+</span>
+      <img class="acc2-premium-crown" src="/skins/couronne.png" alt="" aria-hidden="true" loading="lazy">
+      <span class="acc2-premium-ttl">Examen blanc</span>
+      <div class="acc2-premium-shine" aria-hidden="true"></div>
+    </div>
+    <div class="acc2-premium-body">
+      <p>Teste-toi en conditions réelles, comme le jour&nbsp;J.</p>
+      <span class="acc2-premium-go">Découvrir</span>
+    </div>
+  </a>
+
+  <!-- Deux entrées slim violettes -->
+  <div class="acc2-premium-links">
+    <a class="acc2-premium-link" id="acc-revision" href="#/revision-conduite"
+       aria-label="Révision conduite">
+      <div class="acc2-premium-link-ico">
+        <img src="/skins/badge-3d-02.webp" alt="" aria-hidden="true" loading="lazy">
       </div>
-    </div>
-    <div class="pplus-cards">
-      <a class="pplus-card tappable" id="acc-revision" href="#/revision-conduite" aria-label="Réviser la conduite">
-        <img class="pplus-badge" src="/skins/badge-3d-02.webp" alt="" aria-hidden="true" loading="lazy">
-        <div class="pplus-tx">
-          <div class="pplus-t">Révision conduite</div>
-          <div class="pplus-s">Le geste, pas le code — entre tes leçons</div>
-        </div>
-        <span class="pplus-arrow">${icon("chevron-right", { size: 18 })}</span>
-      </a>
-      <a class="pplus-card tappable" id="acc-exam-conduite" href="#/exam-conduite" aria-label="Examen blanc de conduite">
-        <img class="pplus-badge" src="/skins/badge-3d-ultimate.webp" alt="" aria-hidden="true" loading="lazy">
-        <div class="pplus-tx">
-          <div class="pplus-t">Examen blanc</div>
-          <div class="pplus-s">Teste-toi sur la conduite</div>
-        </div>
-        <span class="pplus-arrow">${icon("arrow-right", { size: 18 })}</span>
-      </a>
-      <a class="pplus-card tappable" id="acc-centre" href="#/centre-examen" aria-label="Découvre ton centre d'examen">
-        <img class="pplus-badge" src="/skins/badge-3d-06.webp" alt="" aria-hidden="true" loading="lazy">
-        <div class="pplus-tx">
-          <div class="pplus-t">Ton centre d'examen</div>
-          <div class="pplus-s">Pièges &amp; conseils sur ton centre</div>
-        </div>
-        <span class="pplus-arrow">${icon("chevron-right", { size: 18 })}</span>
-      </a>
-    </div>
-  </section>
+      <div class="acc2-premium-link-txt">
+        <div class="acc2-premium-link-t">Révision conduite</div>
+        <div class="acc2-premium-link-s">Le geste, pas le code — entre tes leçons</div>
+      </div>
+      <span class="acc2-premium-link-arr" aria-hidden="true">›</span>
+    </a>
+    <a class="acc2-premium-link" id="acc-centre" href="#/centre-examen"
+       aria-label="Ton centre d'examen">
+      <div class="acc2-premium-link-ico">
+        <img src="/skins/badge-3d-06.webp" alt="" aria-hidden="true" loading="lazy">
+      </div>
+      <div class="acc2-premium-link-txt">
+        <div class="acc2-premium-link-t">Ton centre d'examen</div>
+        <div class="acc2-premium-link-s">Pièges &amp; conseils sur ton centre</div>
+      </div>
+      <span class="acc2-premium-link-arr" aria-hidden="true">›</span>
+    </a>
+  </div>
+
+  <!-- Slot coffre (injecté async par _loadAndInjectChests) -->
+  <div id="acc-chest-slot"></div>
+
+  <!-- ══ TES BADGES — teaser vers la page trophées ══ -->
+  <div class="acc2-sec">
+    <h2>Tes badges</h2>
+    <a href="#/trophees" id="acc-badges-voir-tout">Voir tout</a>
+  </div>
+  <div class="acc2-badges" aria-label="Aperçu de tes badges">
+    <span class="acc2-badge-cell acc2-badge-new" aria-label="Badge série 7 jours">
+      <img src="/skins/trophy-streak-7d.webp" alt="" loading="lazy">
+    </span>
+    <span class="acc2-badge-cell" aria-label="Badge conduite">
+      <img src="/skins/badge-3d-03.webp" alt="" loading="lazy">
+    </span>
+    <span class="acc2-badge-cell" aria-label="Badge premier quiz parfait">
+      <img src="/skins/trophy-first-quiz-perfect.webp" alt="" loading="lazy">
+    </span>
+    <span class="acc2-badge-cell" aria-label="Badge boussole">
+      <img src="/skins/badge-3d-06.webp" alt="" loading="lazy">
+    </span>
+    <span class="acc2-badge-cell acc2-badge-locked" aria-label="Badge ultime — verrouillé">
+      <img src="/skins/badge-3d-ultimate.webp" alt="" loading="lazy">
+    </span>
+  </div>
 
 </div>
 
@@ -1412,126 +1559,6 @@ function renderSessionConfirm(session) {
     </div>`;
 }
 
-function renderActionDuJour(
-  quest,
-  pendingNotif,
-  totalValidated,
-  dailyQuiz,
-  isFirstRun,
-  dailyStreakCount = 0,
-) {
-  let label = "Action du jour";
-  let title,
-    sub,
-    btnText,
-    href,
-    urgent = false;
-  // isDaily = true → on active la mise en avant visuelle (carte bleue/accent)
-  let isDaily = false;
-  let isDailyDoneState = false;
-
-  // Le quiz n'est plus une porte de validation : on ne pousse plus 'a_valider' en URGENT.
-  // L'invitation au quiz-récap (optionnel) vient d'une notif quiz non lue.
-  if (quest) {
-    title = quest.label ?? "Quête du jour";
-    sub = quest.sub ?? "";
-    btnText = quest.btnText ?? "Commencer →";
-    href = quest.href ?? "#/parcours";
-    urgent = false;
-  } else if (pendingNotif?.data?.competence_id) {
-    const isConsolid = pendingNotif.type === "consolidation_quiz";
-    title = isConsolid ? "Quiz de consolidation" : "Quiz-récap";
-    sub = isConsolid ? "2 questions · 30 sec" : "3 questions · optionnel";
-    btnText = isConsolid ? "Commencer →" : "Faire le récap →";
-    href = `#/quiz/${pendingNotif.data.competence_id}/${isConsolid ? "consolidation" : "post_validation"}`;
-    urgent = isConsolid;
-  } else if (dailyQuiz && !dailyQuiz.done && dailyQuiz.competenceId) {
-    // Question du jour — LA boucle solo quotidienne (plan rétention).
-    // Priorité VISUELLE maximale : la carte est mise en avant avec un style accent.
-    isDaily = true;
-    label = "Question du jour";
-    if (_awayDays >= 3) {
-      // Retour après absence : on abaisse la barrière (« reprise en douceur »)
-      // pour reconnecter le revenant à la boucle quotidienne sans le brusquer.
-      title = "Reprends en douceur";
-      sub = "1 question pour te remettre dedans · ~2 min";
-    } else {
-      title =
-        dailyQuiz.mode === "decouverte"
-          ? "Découvre une compétence"
-          : "Consolide ce que tu sais";
-      sub = "3 questions · ~2 min";
-    }
-    btnText = "C'est parti";
-    href = `#/quiz/${dailyQuiz.competenceId}/post_validation/daily`;
-  } else if (dailyQuiz?.done) {
-    isDaily = true;
-    isDailyDoneState = true;
-    label = "Question du jour";
-    title = "Fait pour aujourd'hui !";
-    sub = "Reviens demain pour ta prochaine question.";
-    btnText = "Continue à réviser";
-    href = "#/quiz/next/post_validation/revision";
-  } else if (totalValidated === 0) {
-    label = "Par où commencer ?";
-    title = "Commence ta 1re révision";
-    sub = "2 min suffisent.";
-    btnText = "Commence ta 1re révision";
-    href = "#/quiz/next/post_validation/revision";
-  } else {
-    title = "Continue ton parcours";
-    sub = "";
-    btnText = "Continue à réviser";
-    href = "#/quiz/next/post_validation/revision";
-  }
-
-  // First-run: the CTA is the only thing that matters on screen.
-  // We add a modifier class that the CSS uses to make it visually dominant.
-  let cardClass = isFirstRun
-    ? "acc2-action acc2-action--first-run"
-    : "acc2-action";
-
-  // Daily card gets a special accent treatment when not done yet.
-  if (isDaily && !isDailyDoneState) {
-    cardClass += " acc2-action--daily";
-  } else if (isDailyDoneState) {
-    cardClass += " acc2-action--daily-done";
-  }
-
-  // First-run btn label uses a shorter verb-first form to fit the button width.
-  const btnLabel =
-    isFirstRun && totalValidated === 0 ? "C'est parti — 2 min" : btnText;
-
-  // Série silencieuse : affichée avec fierté quand >= 2 jours, jamais menaçante.
-  // Affiché uniquement sur la carte daily (pas done), pas sur les autres états.
-  const streakLine =
-    isDaily && !isDailyDoneState && dailyStreakCount >= 2
-      ? `<div class="acc2-daily-streak">${dailyStreakCount} jours d'affilée</div>`
-      : "";
-
-  // Etat "fait" : pastille verte + invitation douce vers demain (pas de streak).
-  const doneBadge = isDailyDoneState
-    ? `<div class="acc2-daily-done-badge">Fait aujourd'hui</div>`
-    : "";
-
-  return `
-    <div class="${cardClass}">
-      <div class="acc2-action-tag">
-        <div class="acc2-action-tag-dot${urgent ? " urgent" : ""}"></div>
-        ${esc(label)}
-        ${urgent ? `<span style="color: var(--rd-txt);font-weight:700">URGENT</span>` : ""}
-        ${doneBadge}
-      </div>
-      <div class="acc2-action-title">${esc(title)}</div>
-      ${sub ? `<div class="acc2-action-sub">${esc(sub)}</div>` : ""}
-      ${streakLine}
-      <button class="acc2-action-btn${isDailyDoneState ? " acc2-action-btn--muted" : ""}" id="action-cta-btn" data-href="${esc(href)}">
-        ${esc(btnLabel)}
-        ${icon("arrow-right", { size: 16 })}
-      </button>
-    </div>`;
-}
-
 // ─── Wire ────────────────────────────────────────────────────────
 function wire(
   root,
@@ -1559,13 +1586,13 @@ function wire(
     });
   }
 
-  // Permis virtuel : barre animée + tap → parcours
-  const pcmFill = root.querySelector(".pcm-fill[data-target]");
-  if (pcmFill)
+  // Permis virtuel compact : barre animée + tap → parcours
+  const permisFill = root.querySelector(".acc2-permis-fill[data-target]");
+  if (permisFill)
     setTimeout(() => {
-      pcmFill.style.width = pcmFill.dataset.target + "%";
+      permisFill.style.width = permisFill.dataset.target + "%";
     }, 150);
-  const permisCard = root.querySelector("#acc-permis .pcm");
+  const permisCard = root.querySelector("#acc-permis");
   if (permisCard) {
     const openParcours = () => {
       haptic("tap");
@@ -1581,12 +1608,28 @@ function wire(
     });
   }
 
-  // L'examen blanc de conduite est une tuile <a href> — pas de wiring JS.
+  // Examen blanc — tuile <a href>, tracking au clic
+  root.querySelector("#acc-exam-conduite")?.addEventListener("click", () => {
+    haptic("tap");
+    track("cta.clicked", { cta_type: "exam_conduite_card" });
+  });
 
-  // Centre d'examen (entrée compacte — navigation native via href)
+  // Centre d'examen — tuile <a href>
   root.querySelector("#acc-centre")?.addEventListener("click", () => {
     haptic("tap");
     track("cta.clicked", { cta_type: "centre_examen_card" });
+  });
+
+  // Révision conduite — tuile <a href>
+  root.querySelector("#acc-revision")?.addEventListener("click", () => {
+    haptic("tap");
+    track("cta.clicked", { cta_type: "revision_conduite_card" });
+  });
+
+  // Badges teaser — lien « Voir tout »
+  root.querySelector("#acc-badges-voir-tout")?.addEventListener("click", () => {
+    haptic("tap");
+    track("cta.clicked", { cta_type: "badges_voir_tout" });
   });
 
   // Streak badge → bottom sheet
@@ -1664,7 +1707,7 @@ function wire(
       navigate(`#/sessions/${sessionId}`);
     });
 
-  // BLOC 3 action btn
+  // CTA king (hero v2) — même id que l'ancien action-cta-btn, comportement identique
   root.querySelector("#action-cta-btn")?.addEventListener("click", (e) => {
     const href = e.currentTarget.dataset.href;
     if (href) {
@@ -1672,13 +1715,6 @@ function wire(
       track("cta.clicked", { cta_type: "action_btn" });
       navigate(href);
     }
-  });
-
-  // Hero welcome-back : « maintiens ta série » → quiz de révision court
-  root.querySelector("#hero-streak-cta")?.addEventListener("click", () => {
-    haptic("impact");
-    track("cta.clicked", { cta_type: "hero_streak" });
-    navigate("#/quiz/next/post_validation/revision");
   });
 }
 
@@ -1785,37 +1821,36 @@ async function _loadAndInjectChests(root) {
     const pending = chests.filter((c) => !c.opened_at);
     if (!pending.length) return;
 
-    // Inject a teaser card just before PermiGo+ (le bloc « Mon parcours » a été retiré)
-    const anchor = root.querySelector(".pplus");
-    if (!anchor) return;
+    const slot = root.querySelector("#acc-chest-slot");
+    if (!slot) return;
 
-    const div = document.createElement("div");
-    div.innerHTML = `
-      <div class="acc2-chest-teaser" id="acc-chest-teaser" role="button" tabindex="0"
-           aria-label="${pending.length} coffre${pending.length > 1 ? "s" : ""} à ouvrir">
-        <span class="acc2-ct-ico">${icon("gift", { size: 18 })}</span>
-        <div class="acc2-ct-text">
-          <div class="acc2-ct-title">${pending.length} coffre${pending.length > 1 ? "s" : ""} à ouvrir</div>
-          <div class="acc2-ct-sub">Réclame tes récompenses</div>
+    const n = pending.length;
+    const label = `${n} coffre${n > 1 ? "s" : ""} à ouvrir`;
+
+    slot.innerHTML = `
+      <div class="acc2-chest-v2" id="acc-chest-teaser" role="button" tabindex="0"
+           aria-label="${esc(label)}">
+        <img src="/skins/chests/chest_welcome.png" alt="" aria-hidden="true" loading="lazy">
+        <div class="acc2-chest-v2-body">
+          <strong class="acc2-chest-v2-title">${esc(label)}</strong>
+          <span class="acc2-chest-v2-sub">Réclame ta récompense du jour</span>
         </div>
-        <div class="acc2-ct-arrow">${icon("chevron-right", { size: 16, strokeWidth: 2.5, color: "var(--a)" })}</div>
+        <span class="acc2-chest-v2-arr" aria-hidden="true">›</span>
       </div>`;
 
-    const el = div.firstElementChild;
-    anchor.parentNode.insertBefore(el, anchor);
-
+    const el = slot.querySelector("#acc-chest-teaser");
     const open = () => {
-      track("chest_teaser.tapped", { count: pending.length });
+      track("chest_teaser.tapped", { count: n });
       navigate("#/mes-coffres");
     };
-    el.addEventListener("click", open);
-    el.addEventListener("keydown", (e) => {
+    el?.addEventListener("click", open);
+    el?.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         open();
       }
     });
-  } catch (e) {
+  } catch {
     /* silent */
   }
 }
@@ -1835,7 +1870,7 @@ async function _loadAndInjectFlashQuiz(root, me) {
     const fq = data?.[0];
     if (!fq) return;
 
-    const hero = root.querySelector(".acc2-hero");
+    const hero = root.querySelector(".acc2-hero-v2");
     if (!hero) return;
     if (root.querySelector("#acc-flashq")) return; // déjà injecté (garde anti double-mount)
 

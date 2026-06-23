@@ -24,6 +24,15 @@
   --ens-stop: #e11d48; /* interdiction / refus */
   --ens-ink-go: #07150c;
 
+  /* — Accent moniteur = INDIGO (refonte 2026) : la nav, le FAB et le header
+     suivent --a → ils passent en indigo, raccord avec les écrans refaits.
+     --ens-go (vert = statut « acquis »/validation) reste SÉPARÉ et inchangé.
+     Scopé [data-role="enseignant"] → aucune fuite côté élève. — */
+  --a: #4f46e5;
+  --adk: #3a32c4;
+  --a-lt: #6d6bff;
+  --a-ink: #ffffff;
+
   /* — Rayons & ombres tactiles arcade — */
   --ens-r: 16px;
   --ens-r-lg: 22px;

@@ -38,14 +38,14 @@ const STYLE = `<style>
   position: sticky;
   top: calc(52px + env(safe-area-inset-top, 0px));
   z-index: 10;
-  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, var(--adk) 100%);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--a) 22%, #14101f) 0%, color-mix(in srgb, var(--a) 42%, #14101f) 60%, var(--adk) 100%);
   padding: 16px 20px 20px;
   overflow: hidden;
 }
 .tr2-hero::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse 80% 70% at 10% 30%, rgba(167,139,250,.35) 0%, transparent 55%),
+  background: radial-gradient(ellipse 80% 70% at 10% 30%, color-mix(in srgb, var(--a-lt) 35%, transparent) 0%, transparent 55%),
               radial-gradient(ellipse 50% 60% at 90% 80%, color-mix(in srgb, var(--a) 20%, transparent) 0%, transparent 50%);
   pointer-events: none;
 }
@@ -96,7 +96,7 @@ const STYLE = `<style>
 .tr2-galerie-ico {
   flex-shrink: 0; width: 40px; height: 40px; border-radius: var(--r);
   display: flex; align-items: center; justify-content: center;
-  background: rgba(167,139,250,.16); color: #a78bfa;
+  background: color-mix(in srgb, var(--a-lt) 16%, transparent); color: #a78bfa;
 }
 .tr2-galerie-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .tr2-galerie-t { font: 800 15px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; }

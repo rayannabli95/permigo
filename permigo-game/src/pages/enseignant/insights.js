@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
-// Enseignant — Insights · DA "Arcade routière"
-// KPI perso + heatmap + top élèves + difficulté comps + reco IA
+// Enseignant — Stats (design premium indigo raccord dashboard)
+// Hero validations + bento KPI + activite 7j + qui progresse
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -12,378 +12,392 @@ import { REMC } from "@/data/remc.js";
 import { labelComp } from "@/utils/remc-label.js";
 import { icon } from "@/utils/icons.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
-import { panneauxLayer, ensHero } from "@/components/enseignant/panneaux-bg.js";
-import { illus } from "@/components/enseignant/illus.js";
 import { haptic } from "@/utils/haptic.js";
 
 // ─── Constantes ───────────────────────────────────────────────
-const JOURS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+const JOURS_COURT = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
 // ─── CSS ──────────────────────────────────────────────────────
 const STYLE = `<style>
-  /* ── Layout ── */
+  /* ── Layout global ── */
   .ins-page {
-    padding: 0 0 100px;
+    padding: 0 0 calc(96px + env(safe-area-inset-bottom, 0px));
     max-width: 600px;
     margin: 0 auto;
-    background: var(--bg);
-    font-family: var(--ens-body, 'Inter'), sans-serif;
-    color: var(--ink);
-  }
-  .ins-body {
-    padding: 20px 16px 0;
+    background: #eef1fb;
+    font-family: 'Inter', sans-serif;
+    color: #1a1c2e;
   }
 
-  /* ── Hero arcade compact (fond panneaux semés) ── */
-  .ins-hero-wrap {
-    position: relative;
-    overflow: hidden;
-    background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
-    margin-bottom: 20px;
-    /* liseré pointillé ambre en pied — signature "arcade routière" */
-    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 20px) 20px 28px;
-    isolation: isolate;
-    animation: insHeroIn .45s var(--ease, ease) both;
-  }
-  .ins-hero-wrap::after {
-    content: "";
-    position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
-    background: repeating-linear-gradient(90deg, #f59e0b 0 18px, transparent 18px 34px);
-    opacity: .85;
-  }
-  .ins-hero-wrap .ens-panneaux__sign { opacity: var(--o, .16); filter: saturate(1.1) brightness(1.08); }
-  @keyframes insHeroIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .ins-hero-wrap { animation: none !important; }
-  }
-  .ins-hero-content {
-    position: relative; z-index: 2;
-  }
-  .ins-hero-kicker {
-    font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
-    color: rgba(255,255,255,.65);
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    margin: 0 0 8px;
-  }
-  .ins-hero-title {
-    font: 700 clamp(24px, 7vw, 30px)/1.1 var(--ens-display, 'Fredoka'), sans-serif;
-    color: #fff;
-    margin: 0 0 6px;
-    letter-spacing: -.01em;
-  }
-  .ins-hero-sub {
-    font: 500 13px/1.5 var(--ens-body, 'Inter'), sans-serif;
-    color: rgba(255,255,255,.85);
-    margin: 0;
-  }
-  .ins-hero-sub b { color: #fff; font-weight: 800; }
-
-  /* Section title */
-  .ins-section-title {
-    font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: var(--mu2);
-    margin: 0 0 12px;
+  /* ── En-tête « Stats » + segment Semaine / Mois ── */
+  .ins-topbar {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
+    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 14px) 18px 0;
   }
-  .ins-section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--bo);
+  .ins-title {
+    font: 800 23px/1.15 'Manrope', 'Inter', sans-serif;
+    color: #1a1c2e;
+    letter-spacing: -.02em;
   }
-  .ins-section { margin-bottom: 28px; }
-
-  /* ── Métrique vedette (star) : chiffre Fredoka tabulaire ── */
-  .ins-star {
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: var(--ens-lg, 16px);
-    padding: 20px;
-    box-shadow: var(--ens-shadow, 0 2px 8px rgba(0,0,0,.07));
-    margin-bottom: 10px;
-    animation: insWidgetIn .45s var(--ease-snap, cubic-bezier(.23,1,.32,1)) both;
+  .ins-seg {
+    display: flex;
+    background: #fff;
+    border: 1px solid #e6e9f7;
+    border-radius: 999px;
+    padding: 3px;
   }
-  .ins-star-top { display: flex; align-items: flex-start; gap: 16px; }
-  /* KPI vedette → .ens-stat__num pour Fredoka tabulaire arcade */
-  .ins-star-num {
-    font: 800 clamp(40px, 13vw, 52px)/1 var(--ens-display, 'Fredoka'), sans-serif;
-    color: var(--ens-go, #18a558);
-    letter-spacing: -.04em;
-    flex-shrink: 0;
+  .ins-seg-btn {
+    border: none;
+    background: transparent;
+    font: 700 11px/1 'Inter', sans-serif;
+    color: #6b7095;
+    padding: 5px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    min-height: 30px;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s, color .15s;
   }
-  .ins-star-meta { padding-top: 4px; min-width: 0; }
-  .ins-star-lbl {
-    font: 700 13px/1.2 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--ink);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-  }
-  .ins-star-sub {
-    font: 500 12px/1.3 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--mu2);
-    margin-top: 3px;
-  }
-  .ins-star-spark { height: 44px; margin-top: 14px; }
-  /* SVG sparkline : conserve l'élément fonctionnel, restyle couleurs arcade */
-  .ins-spark-svg { width: 100%; height: 100%; display: block; overflow: visible; }
-
-  /* ── KPI secondaires (3 cards) ── */
-  .ins-sec {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-    margin-bottom: 28px;
-  }
-  .ins-sec-card {
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: var(--ens-r, 12px);
-    padding: 14px;
-    box-shadow: 0 1px 4px rgba(0,0,0,.05);
-    animation: insWidgetIn .45s var(--ease-snap, cubic-bezier(.23,1,.32,1)) both;
-  }
-  .ins-sec-card:nth-child(1) { animation-delay: .06s; }
-  .ins-sec-card:nth-child(2) { animation-delay: .12s; }
-  .ins-sec-card:nth-child(3) { animation-delay: .18s; }
-  /* Chiffres secondaires Fredoka */
-  .ins-sec-val {
-    font: 800 24px/1 var(--ens-display, 'Fredoka'), sans-serif;
-    color: var(--ink);
-    letter-spacing: -.03em;
-    display: flex; align-items: center; gap: 5px;
-  }
-  .ins-sec-val svg { flex-shrink: 0; }
-  .ins-sec-lbl {
-    font: 600 10.5px/1.2 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--mu2);
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    margin-top: 6px;
+  .ins-seg-btn.active {
+    background: #4f46e5;
+    color: #fff;
   }
 
-  /* Delta chip arcade */
-  .ins-widget-delta {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
-    padding: 3px 8px;
-    border-radius: var(--ens-pill, 999px);
-    margin-top: 6px;
+  /* ── Corps scrollable ── */
+  .ins-body {
+    padding: 14px 16px 0;
   }
-  .ins-widget-delta.up   { background: rgba(24,165,88,.12); color: var(--ens-go, #18a558); }
-  .ins-widget-delta.down { background: rgba(225,29,72,.1);  color: var(--ens-stop, #e11d48); }
-  .ins-widget-delta.flat { background: var(--bg2, #f1f5f9); color: var(--mu2); }
 
-  @keyframes insWidgetIn {
-    from { opacity: 0; transform: translateY(8px) scale(.97); }
+  /* ── Hero indigo ── */
+  .ins-hero {
+    position: relative;
+    background: linear-gradient(150deg, #4f46e5, #6d6bff 65%);
+    border-radius: 24px;
+    padding: 18px 18px 16px;
+    color: #fff;
+    overflow: hidden;
+    box-shadow: 0 14px 32px -14px rgba(79, 70, 229, .55);
+    animation: insHeroIn .4s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  .ins-hero::after {
+    content: "";
+    position: absolute;
+    right: -32px;
+    top: -32px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,.18), transparent 70%);
+    pointer-events: none;
+  }
+  @keyframes insHeroIn {
+    from { opacity: 0; transform: translateY(8px) scale(.98); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .ins-star, .ins-sec-card { animation: none !important; }
+    .ins-hero { animation: none !important; }
   }
 
-  /* ── Graphe barres activité ── */
-  .ins-chart-wrap {
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: var(--ens-lg, 16px);
-    padding: 16px 14px 14px;
-    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  .ins-hero-label {
+    font: 700 10.5px/1 'Inter', sans-serif;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #cdc9ff;
+    margin-bottom: 6px;
   }
-  .ins-chart-bars {
+  .ins-hero-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .ins-hero-big {
+    font: 700 56px/1 'Fredoka', 'Fredoka One', sans-serif;
+    letter-spacing: -.01em;
+    line-height: 1;
+  }
+  .ins-hero-delta {
+    font: 800 12px/1 'Inter', sans-serif;
+    padding: 5px 11px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+    align-self: flex-end;
+  }
+  .ins-hero-delta.up   { background: rgba(255,255,255,.18); color: #c7f9d8; }
+  .ins-hero-delta.down { background: rgba(255,255,255,.14); color: #fecaca; }
+  .ins-hero-delta.flat { background: rgba(255,255,255,.12); color: rgba(255,255,255,.8); }
+
+  /* Sparkline 7 barres dans le hero */
+  .ins-hero-spark {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 32px;
+    margin-top: 12px;
+  }
+  .ins-hero-spark-bar {
+    flex: 1;
+    border-radius: 3px 3px 2px 2px;
+    background: rgba(255, 255, 255, .45);
+    min-height: 4px;
+    transition: height .3s ease;
+  }
+  .ins-hero-spark-bar.peak {
+    background: #fff;
+  }
+
+  /* ── Bento 3 tuiles ── */
+  .ins-bento {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 9px;
+    margin-top: 11px;
+  }
+  .ins-bt {
+    background: #fff;
+    border: 1px solid #e6e9f7;
+    border-radius: 16px;
+    padding: 13px 11px 11px;
+    box-shadow: 0 6px 16px -12px rgba(60, 50, 130, .3);
+    animation: insBtIn .4s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  .ins-bt:nth-child(1) { animation-delay: .06s; }
+  .ins-bt:nth-child(2) { animation-delay: .11s; }
+  .ins-bt:nth-child(3) { animation-delay: .16s; }
+  @keyframes insBtIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ins-bt { animation: none !important; }
+  }
+  .ins-bt-val {
+    font: 800 24px/1 'Manrope', 'Inter', sans-serif;
+    letter-spacing: -.02em;
+  }
+  .ins-bt-val.green { color: #16a34a; }
+  .ins-bt-val.amber { color: #d97706; }
+  .ins-bt-val.red   { color: #dc2626; }
+  .ins-bt-lbl {
+    font: 600 10px/1.2 'Inter', sans-serif;
+    color: #a3a9c4;
+    margin-top: 4px;
+  }
+
+  /* ── Section titre ── */
+  .ins-sec-lbl {
+    font: 800 12px/1 'Manrope', 'Inter', sans-serif;
+    color: #3a3f63;
+    margin: 18px 0 9px 2px;
+  }
+
+  /* ── Carte blanche générique ── */
+  .ins-card {
+    background: #fff;
+    border: 1px solid #e6e9f7;
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: 0 8px 22px -14px rgba(60, 50, 130, .25);
+  }
+
+  /* ── Graphe barres activite 7 jours ── */
+  .ins-bars {
     display: flex;
     align-items: stretch;
+    justify-content: space-between;
     gap: 6px;
     height: 88px;
   }
-  .ins-chart-col {
+  .ins-bar-col {
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: flex-end;
-    gap: 3px;
+    align-items: center;
+    gap: 5px;
+    height: 100%;
   }
-  .ins-chart-val {
-    font: 600 10px/1 'IBM Plex Mono', monospace;
-    color: var(--mu2);
-    min-height: 12px;
-    text-align: center;
-  }
-  /* Barres arcade : --ens-go teinté (repos) → plein (pic) */
-  .ins-chart-bar {
+  .ins-bar-inner {
     width: 100%;
-    border-radius: 4px 4px 0 0;
-    background: color-mix(in srgb, var(--ens-go, #18a558) 22%, transparent);
+    border-radius: 6px 6px 3px 3px;
+    background: #e3e1fb;
+    min-height: 4px;
   }
-  .ins-chart-col--peak .ins-chart-bar {
-    background: var(--ens-go, #18a558);
-    box-shadow: 0 4px 10px -2px color-mix(in srgb, var(--ens-go, #18a558) 40%, transparent);
+  .ins-bar-inner.peak {
+    background: linear-gradient(180deg, #6d6bff, #4f46e5);
   }
-  .ins-chart-col--peak .ins-chart-val {
-    color: var(--ens-go, #18a558);
-    font-weight: 700;
-  }
-  .ins-chart-lbl {
-    font: 500 10px/1 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--mu2);
+  .ins-bar-day {
+    font: 700 9.5px/1 'Inter', sans-serif;
+    color: #a3a9c4;
     text-align: center;
   }
-  .ins-chart-col--peak .ins-chart-lbl { color: var(--ink); font-weight: 600; }
-  .ins-chart-divider { height: 1px; background: var(--bo2); margin: 0 0 8px; }
-  .ins-chart-peak-note {
-    font: 500 11px/1.3 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--mu2);
-    text-align: center;
-    margin: 0;
-  }
-  /* Empty state barres : illus route */
-  .ins-chart-empty {
-    padding: 28px 16px;
-    text-align: center;
-  }
-  .ins-chart-empty p {
-    font: 500 13px/1.5 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--mu2);
-    margin: 10px 0 0;
-  }
+  .ins-bar-day.peak { color: #4f46e5; }
 
-  /* ── Top élèves rows ── */
-  .ins-eleve-row {
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: var(--ens-lg, 16px);
-    padding: 12px 14px;
+  /* ── Lignes « Qui progresse » ── */
+  .ins-prog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ins-prog-row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 11px;
+    background: #fff;
+    border: 1px solid #e6e9f7;
+    border-radius: 14px;
+    padding: 10px 12px;
     cursor: pointer;
-    min-height: 44px;
-    transition: border-color .15s var(--ease-snap, cubic-bezier(.23,1,.32,1)),
-                transform .15s var(--ease-snap, cubic-bezier(.23,1,.32,1));
-    margin-bottom: 6px;
+    min-height: 52px;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .12s ease, box-shadow .12s ease;
   }
-  @media (hover: hover) and (pointer: fine) {
-    .ins-eleve-row:hover { border-color: var(--ens-go, #18a558); }
+  .ins-prog-row:active {
+    transform: scale(.975);
+    box-shadow: 0 2px 8px -4px rgba(60, 50, 130, .2);
   }
-  .ins-eleve-row:active { transform: scale(.97); }
-  .ins-eleve-av {
-    width: 36px; height: 36px;
+  .ins-prog-row:focus-visible {
+    outline: 3px solid #4f46e5;
+    outline-offset: 2px;
+  }
+  .ins-prog-av {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font: 600 13px/1 var(--ens-display, 'Fredoka'), sans-serif;
+    display: grid;
+    place-items: center;
     color: #fff;
+    font: 800 12px/1 'Manrope', sans-serif;
     flex-shrink: 0;
   }
-  .ins-eleve-info { flex: 1; min-width: 0; }
-  .ins-eleve-name {
-    font: 600 13px/1.2 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--ink);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    margin-bottom: 3px;
+  .ins-prog-nom {
+    flex: 1;
+    min-width: 0;
+    font: 700 13px/1.2 'Inter', sans-serif;
+    color: #1a1c2e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .ins-eleve-meta {
-    font: 500 11px/1 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--mu2);
+  .ins-prog-delta {
+    font: 800 13px/1 'Manrope', sans-serif;
+    color: #16a34a;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .ins-prog-delta small {
+    font: 600 10px/1 'Inter', sans-serif;
+    color: #a3a9c4;
   }
 
-  /* ── Tabs progressent/stagnent — style arcade ── */
+  /* ── Tabs eleves progressent / en pause ── */
   .ins-tabs {
     display: flex;
     gap: 4px;
-    background: var(--bg2);
+    background: #f0f2fb;
     padding: 4px;
-    border-radius: var(--ens-r, 12px);
-    margin-bottom: 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
   }
   .ins-tab {
     flex: 1;
     padding: 8px 6px;
-    min-height: 44px;
+    min-height: 40px;
     border: none;
     background: transparent;
     border-radius: 9px;
-    font: 600 12px/1 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--mu2);
+    font: 600 12px/1 'Inter', sans-serif;
+    color: #6b7095;
     cursor: pointer;
-    transition: background .15s, color .15s, box-shadow .15s;
+    transition: background .15s, color .15s;
+    -webkit-tap-highlight-color: transparent;
   }
   .ins-tab.active {
-    background: var(--su);
-    color: var(--ens-go, #18a558);
-    box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    background: #fff;
+    color: #4f46e5;
     font-weight: 700;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .1);
   }
 
-  /* ── Recommandations ── */
+  /* ── Recos ── */
   .ins-reco-list { display: flex; flex-direction: column; gap: 8px; }
   .ins-reco-card {
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: var(--ens-lg, 16px);
+    background: #fff;
+    border: 1px solid #e6e9f7;
+    border-radius: 16px;
     padding: 14px 16px;
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    transition: border-color .15s, transform .15s var(--ease-snap, cubic-bezier(.23,1,.32,1));
+    transition: transform .12s ease;
   }
-  .ins-reco-card[role="button"]:hover {
-    border-color: var(--ens-blue, #1d4ed8);
-  }
+  .ins-reco-card[role="button"] { cursor: pointer; }
   .ins-reco-card[role="button"]:active { transform: scale(.98); }
-  .ins-reco-icon {
-    font-size: 20px; line-height: 1;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
+  .ins-reco-icon { flex-shrink: 0; margin-top: 1px; }
   .ins-reco-body { flex: 1; min-width: 0; }
   .ins-reco-ttl {
-    font: 700 13px/1.3 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--ink);
+    font: 700 13px/1.3 'Inter', sans-serif;
+    color: #1a1c2e;
     margin-bottom: 3px;
   }
   .ins-reco-txt {
-    font: 400 12px/1.5 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--mu);
+    font: 400 12px/1.5 'Inter', sans-serif;
+    color: #6b7095;
   }
 
-  /* ── Empty state listes ── */
+  /* ── Empty states ── */
   .ins-empty {
     padding: 28px 16px;
     text-align: center;
-    color: var(--mu2);
-    font: 500 13px/1.5 var(--ens-body, 'Inter'), sans-serif;
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: var(--ens-lg, 16px);
+    color: #6b7095;
+    font: 500 13px/1.5 'Inter', sans-serif;
+    background: #fff;
+    border: 1px solid #e6e9f7;
+    border-radius: 16px;
   }
-  .ins-empty p { margin: 10px 0 0; }
 
   /* ── Skeleton ── */
-  .ins-skel { display: flex; flex-direction: column; gap: 16px; padding: 20px 16px; }
-  .ins-skel-kpi { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .ins-skel-block {
-    height: 80px;
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: var(--ens-lg, 16px);
-    animation: insSkelPulse 1.4s ease-in-out infinite;
+  .ins-skel {
+    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 20px) 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
   }
-  .ins-skel-block.tall { height: 160px; }
-  @keyframes insSkelPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .45; }
+  .ins-skel-block {
+    border-radius: 20px;
+    background: linear-gradient(90deg, #dde0f5 0%, #eceef8 50%, #dde0f5 100%);
+    background-size: 200% 100%;
+    animation: ins-shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes ins-shimmer {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
   }
 </style>`;
 
-// ─── Helpers ──────────────────────────────────────────────────
+// ─── Couleurs avatar deterministes ────────────────────────────
+const AV_COLORS = [
+  "#4f46e5",
+  "#0891b2",
+  "#15803d",
+  "#b45309",
+  "#7c3aed",
+  "#c026d3",
+];
+function avatarColor(id) {
+  if (!id) return AV_COLORS[0];
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return AV_COLORS[h % AV_COLORS.length];
+}
+function initiales(prenom, nom) {
+  const p = (prenom || "").trim()[0] || "";
+  const n = (nom || "").trim()[0] || "";
+  return (p + n).toUpperCase() || "?";
+}
+
+// ─── Helpers dates ────────────────────────────────────────────
 function monthBounds(offset = 0) {
   const now = new Date();
   const y = now.getFullYear();
@@ -398,7 +412,8 @@ function daysAgoISO(n) {
 }
 
 // ─── Module state ─────────────────────────────────────────────
-let _tab = "progressent"; // 'progressent' | 'stagnent'
+let _period = "semaine"; // 'semaine' | 'mois'
+let _tab = "progressent"; // 'progressent' | 'pause'
 
 // ─── Entry ────────────────────────────────────────────────────
 export async function mount(root) {
@@ -407,27 +422,16 @@ export async function mount(root) {
 
   track("page.view", { page: "insights", role: me.role });
 
-  // Skeleton avec hero arcade
+  // Skeleton
   root.innerHTML = `
     ${STYLE}
     <div class="ins-page">
-      <div class="ins-hero-wrap">
-        ${panneauxLayer({ variant: "hero" })}
-        <div class="ins-hero-content">
-          <p class="ins-hero-kicker">Analyses</p>
-          <h1 class="ins-hero-title" tabindex="-1">Vue d'ensemble</h1>
-          <p class="ins-hero-sub">Chargement…</p>
-        </div>
-      </div>
       <div class="ins-skel">
-        <div class="ins-skel-kpi">
-          <div class="ins-skel-block"></div>
-          <div class="ins-skel-block"></div>
-          <div class="ins-skel-block"></div>
-          <div class="ins-skel-block"></div>
-        </div>
-        <div class="ins-skel-block tall"></div>
-        <div class="ins-skel-block tall"></div>
+        <div class="ins-skel-block" style="height:36px"></div>
+        <div class="ins-skel-block" style="height:148px"></div>
+        <div class="ins-skel-block" style="height:80px"></div>
+        <div class="ins-skel-block" style="height:120px"></div>
+        <div class="ins-skel-block" style="height:180px"></div>
       </div>
     </div>
   `;
@@ -443,6 +447,7 @@ async function loadData(me) {
   const prevMonth = monthBounds(-1);
   const ago60 = daysAgoISO(60);
   const ago14 = daysAgoISO(14);
+  const ago7 = daysAgoISO(7);
 
   const [
     valsCeMois,
@@ -451,6 +456,8 @@ async function loadData(me) {
     mesEleves,
     myProfile,
     valsARetravailler,
+    valsSemaine,
+    valsSemainePrev,
   ] = await Promise.all([
     // Validations ce mois
     sb
@@ -460,7 +467,7 @@ async function loadData(me) {
       .gte("validated_at", thisMonth.start)
       .lte("validated_at", thisMonth.end),
 
-    // Validations mois précédent (pour delta)
+    // Validations mois precedent (pour delta mois)
     sb
       .from("validations")
       .select("id", { count: "exact", head: true })
@@ -468,41 +475,55 @@ async function loadData(me) {
       .gte("validated_at", prevMonth.start)
       .lte("validated_at", prevMonth.end),
 
-    // Validations 60 derniers jours (graphe activité par jour)
+    // Validations 60 derniers jours (graphe activite + sparkline)
     sb
       .from("validations")
       .select("validated_at")
       .eq("validated_by", me.id)
       .gte("validated_at", ago60),
 
-    // Mes élèves attitrés
+    // Mes eleves attitres
     sb
       .from("profiles")
       .select("id, prenom, nom, last_active_at, avatar_url")
       .eq("enseignant_id", me.id)
       .eq("role", "eleve"),
 
-    // Mon profil (streak_pro_days si la colonne existe)
+    // Mon profil
     sb.from("profiles").select("streak_pro_days, xp").eq("id", me.id).single(),
 
-    // Validations "à retravailler" par moi (difficulté)
+    // Validations a retravailler
     sb
       .from("validations")
       .select("competence_id, eleve_id")
       .eq("validated_by", me.id)
       .eq("statut", "a_retravailler"),
+
+    // Validations cette semaine (7 derniers jours)
+    sb
+      .from("validations")
+      .select("eleve_id, competence_id, statut, validated_at")
+      .eq("validated_by", me.id)
+      .gte("validated_at", ago7),
+
+    // Validations semaine precedente (7-14 jours)
+    sb
+      .from("validations")
+      .select("id", { count: "exact", head: true })
+      .eq("validated_by", me.id)
+      .gte("validated_at", daysAgoISO(14))
+      .lt("validated_at", ago7),
   ]);
 
   const elevesData = mesEleves.data || [];
   const eleveIds = elevesData.map((e) => e.id);
   const valsThisMonth = valsCeMois.data || [];
   const vals60Data = vals60j.data || [];
+  const valsSemaineData = valsSemaine.data || [];
 
-  // Quiz attempts réels pour mes élèves
+  // Quiz attempts reels pour mes eleves
   let quizData = [];
   if (eleveIds.length > 0) {
-    // NB : la colonne s'appelle completed_at (pas created_at) — l'ancien
-    // nom renvoyait un 400, d'où une carte « Taux quiz » toujours vide.
     const { data: qa, error: qaErr } = await sb
       .from("quiz_attempts")
       .select("user_id, score, completed_at")
@@ -512,14 +533,21 @@ async function loadData(me) {
     quizData = qa || [];
   }
 
-  // Validations ce mois par élève (pour top progressent)
+  // Validations ce mois par eleve (pour top progressent)
   const compsCeMoisByEleve = {};
   valsThisMonth.forEach((v) => {
     if (!compsCeMoisByEleve[v.eleve_id]) compsCeMoisByEleve[v.eleve_id] = 0;
     if (v.statut === "acquis") compsCeMoisByEleve[v.eleve_id]++;
   });
 
-  // Fetch last validation per élève pour stagnation
+  // Validations cette semaine par eleve
+  const compsSemaineByEleve = {};
+  valsSemaineData.forEach((v) => {
+    if (!compsSemaineByEleve[v.eleve_id]) compsSemaineByEleve[v.eleve_id] = 0;
+    if (v.statut === "acquis") compsSemaineByEleve[v.eleve_id]++;
+  });
+
+  // Derniere validation par eleve
   let lastValMap = {};
   if (eleveIds.length > 0) {
     const { data: lastVals } = await sb
@@ -534,12 +562,20 @@ async function loadData(me) {
     });
   }
 
-  // ── KPI calculs ──────────────────────────────────────────────
+  // ── KPI semaine ──────────────────────────────────────────────
+  const valsSemaineCount = valsSemaineData.filter(
+    (v) => v.statut === "acquis",
+  ).length;
+  const valsSemainePrevCount = valsSemainePrev.count ?? 0;
+  const deltaSemaine =
+    valsSemainePrevCount > 0 ? valsSemaineCount - valsSemainePrevCount : null;
+
+  // ── KPI mois ─────────────────────────────────────────────────
   const valsCeMoisCount = valsThisMonth.filter(
     (v) => v.statut === "acquis",
   ).length;
   const valsPrevCount = valsMoisPrev.count ?? 0;
-  const delta =
+  const deltaMois =
     valsPrevCount > 0
       ? Math.round(((valsCeMoisCount - valsPrevCount) / valsPrevCount) * 100)
       : null;
@@ -553,38 +589,74 @@ async function loadData(me) {
 
   const streakPro = myProfile.data?.streak_pro_days ?? null;
 
-  // ── Activité par jour [jour 0-6][heure 0-23] ─────────────────
-  // Réutilisé dans renderActivityChartSection : on somme par jour
-  const heatmap = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  // ── Activite par jour (60j) pour graphe semaine summe par jour ──
+  // Aggregation des 7 derniers jours (Lun=0 ... Dim=6)
+  const heatmapDay = new Array(7).fill(0);
+  // Granularite fine : on veut les 7 derniers jours calendaires absolus
+  const spark7 = new Array(7).fill(0);
+  const now7 = Date.now();
   vals60Data.forEach((v) => {
     const d = new Date(v.validated_at);
+    // Jours depuis maintenant (0 = aujourd'hui, 1 = hier, …)
+    const diffDays = Math.floor((now7 - d.getTime()) / 86400000);
+    if (diffDays >= 0 && diffDays < 7) {
+      spark7[6 - diffDays]++;
+    }
+    // Heatmap par jour de la semaine (pour le graphe)
     const jour = (d.getDay() + 6) % 7; // Lun=0 ... Dim=6
-    heatmap[jour][d.getHours()]++;
+    heatmapDay[jour]++;
   });
 
-  // Série quotidienne (30 j) → sparkline de la métrique vedette
+  // Sparkline 30 jours (pour periode mois)
   const SPARK_DAYS = 30;
-  const spark = new Array(SPARK_DAYS).fill(0);
+  const spark30 = new Array(SPARK_DAYS).fill(0);
   const sparkStart = Date.now() - (SPARK_DAYS - 1) * 864e5;
   vals60Data.forEach((v) => {
     const idx = Math.floor(
       (new Date(v.validated_at).getTime() - sparkStart) / 864e5,
     );
-    if (idx >= 0 && idx < SPARK_DAYS) spark[idx]++;
+    if (idx >= 0 && idx < SPARK_DAYS) spark30[idx]++;
   });
 
-  // ── Top élèves ────────────────────────────────────────────────
   const elevesAvecPrenom = elevesData.map((e, i) => ({ ...e, idx: i }));
 
+  // ── Bento KPI : actifs, en approche, a relancer ───────────────
+  // Actif = au moins 1 validation ce mois
+  const activeThisMonth = new Set(
+    valsThisMonth.filter((v) => v.statut === "acquis").map((v) => v.eleve_id),
+  );
+  const nbActifs = eleveIds.filter((id) => activeThisMonth.has(id)).length;
+
+  // A relancer = inactif depuis > 14j (aucune validation depuis 14j)
+  const nbRelancer = eleveIds.filter((id) => {
+    const last = lastValMap[id];
+    return !last || last < ago14;
+  }).length;
+
+  // En approche = actif mais pas de compétence acquise ce mois (entre les deux)
+  const nbEnApproche = Math.max(0, nbElevesAccompagnes - nbActifs - nbRelancer);
+
+  // ── Top progressent (semaine) ─────────────────────────────────
   const topProgressent = elevesAvecPrenom
+    .filter((e) => (compsSemaineByEleve[e.id] || 0) >= 1)
+    .sort(
+      (a, b) =>
+        (compsSemaineByEleve[b.id] || 0) - (compsSemaineByEleve[a.id] || 0),
+    )
+    .slice(0, 3)
+    .map((e) => ({ ...e, valsWeek: compsSemaineByEleve[e.id] || 0 }));
+
+  // Top progressent (mois)
+  const topProgressentMois = elevesAvecPrenom
     .filter((e) => (compsCeMoisByEleve[e.id] || 0) >= 2)
     .sort(
       (a, b) =>
         (compsCeMoisByEleve[b.id] || 0) - (compsCeMoisByEleve[a.id] || 0),
     )
     .slice(0, 3)
-    .map((e) => ({ ...e, compsThisMonth: compsCeMoisByEleve[e.id] || 0 }));
+    .map((e) => ({ ...e, valsMonth: compsCeMoisByEleve[e.id] || 0 }));
 
+  // Top stagnent
   const topStagnent = elevesAvecPrenom
     .filter((e) => {
       const lastVal = lastValMap[e.id];
@@ -603,7 +675,7 @@ async function loadData(me) {
       return { ...e, daysAgo };
     });
 
-  // ── Carte difficulté ──────────────────────────────────────────
+  // ── Difficulte comps ──────────────────────────────────────────
   const diffByComp = {};
   (valsARetravailler.data || []).forEach((v) => {
     if (!diffByComp[v.competence_id]) diffByComp[v.competence_id] = new Set();
@@ -614,13 +686,11 @@ async function loadData(me) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
-  // ── À faire cette semaine — règles métier simples (PAS de l'IA) :
-  //    relancer son streak / un élève en pause / débrief sur une compétence
-  //    qui bloque plusieurs élèves. Chaque carte est actionnable (route).
+  // ── Recommandations ───────────────────────────────────────────
   const recos = [];
   if (streakPro !== null && streakPro < 3) {
     recos.push({
-      icon: icon("target", { size: 18, strokeWidth: 2, color: "var(--a)" }),
+      icon: icon("target", { size: 18, strokeWidth: 2, color: "#4f46e5" }),
       ttl: "Lance ta semaine",
       txt: "Valide une compétence avec un élève actif pour alimenter ton streak.",
       route: "#/log-session",
@@ -634,7 +704,7 @@ async function loadData(me) {
       icon: icon("alert-triangle", {
         size: 18,
         strokeWidth: 2,
-        color: "var(--amk)",
+        color: "#d97706",
       }),
       ttl: `Relance ${nm}`,
       txt: `${nm} n'a plus validé ${since}. Un point en leçon peut débloquer la progression.`,
@@ -645,8 +715,8 @@ async function loadData(me) {
     const d = topDiff[0];
     const nm = esc(labelComp(d.compId));
     recos.push({
-      icon: icon("search", { size: 18, strokeWidth: 2, color: "var(--blk)" }),
-      ttl: `Point pédagogique : ${nm}`,
+      icon: icon("search", { size: 18, strokeWidth: 2, color: "#6b7095" }),
+      ttl: `Point pedagogique : ${nm}`,
       txt: `${d.count} élève${d.count > 1 ? "s" : ""} bloqué${d.count > 1 ? "s" : ""} sur cette compétence. Prévois un temps dédié en leçon.`,
       route: `#/eleves?bloque_sur=${encodeURIComponent(d.compId)}`,
     });
@@ -656,264 +726,301 @@ async function loadData(me) {
       icon: icon("check-circle", {
         size: 18,
         strokeWidth: 2,
-        color: "var(--grd)",
+        color: "#16a34a",
       }),
       ttl: "Tout roule",
-      txt: "Tes élèves progressent bien ce mois. Rien d'urgent à ce stade.",
+      txt: "Tes élèves progressent bien ce moment. Rien d'urgent.",
       route: null,
     });
   }
 
   return {
+    // Semaine
+    valsSemaineCount,
+    deltaSemaine,
+    spark7,
+    topProgressent,
+    // Mois
     valsCeMoisCount,
-    valsPrevCount,
-    delta,
+    deltaMois,
+    spark30,
+    topProgressentMois,
+    // Partage
     nbElevesAccompagnes,
+    nbActifs,
+    nbEnApproche,
+    nbRelancer,
     tauxQuiz,
     streakPro,
-    heatmap,
-    spark,
-    topProgressent,
+    heatmapDay,
     topStagnent,
     topDiff,
     recos,
     eleveIds,
     elevesAvecPrenom,
+    // Pour recalcul bento
+    compsCeMoisByEleve,
+    compsSemaineByEleve,
+    lastValMap,
+    ago14,
   };
 }
 
 // ─── Render principal ─────────────────────────────────────────
 function renderAll(root, me, data) {
-  const subTxt =
-    data.valsCeMoisCount > 0
-      ? `Ce mois : <b>${data.valsCeMoisCount} compétence${data.valsCeMoisCount > 1 ? "s" : ""}</b> validée${data.valsCeMoisCount > 1 ? "s" : ""} avec ${data.nbElevesAccompagnes} élève${data.nbElevesAccompagnes > 1 ? "s" : ""}.`
-      : "60 derniers jours · activité et progression de tes élèves";
-
   root.innerHTML = `
     ${STYLE}
     <div class="ins-page anim-slide-up">
 
-      <!-- Hero arcade routière -->
-      <div class="ins-hero-wrap">
-        ${panneauxLayer({ variant: "hero" })}
-        <div class="ins-hero-content">
-          <p class="ins-hero-kicker">Analyses</p>
-          <h1 class="ins-hero-title" tabindex="-1">Vue d'ensemble</h1>
-          <p class="ins-hero-sub">${subTxt}</p>
+      <!-- En-tete + segment -->
+      <div class="ins-topbar">
+        <h1 class="ins-title">Stats</h1>
+        <div class="ins-seg" role="group" aria-label="Periode">
+          <button class="ins-seg-btn${_period === "semaine" ? " active" : ""}"
+                  data-period="semaine" type="button">Semaine</button>
+          <button class="ins-seg-btn${_period === "mois" ? " active" : ""}"
+                  data-period="mois" type="button">Mois</button>
         </div>
       </div>
 
       <div class="ins-body">
-        ${renderKpis(data)}
-        ${renderActivityChartSection(data)}
-        ${renderTopElevesSection(data)}
-        ${renderRecoSection(data)}
+        ${renderPeriodContent(data)}
       </div>
     </div>
   `;
 }
 
-// ── Métrique vedette (star) + 3 secondaires ───────────────────
-function renderKpis({
-  valsCeMoisCount,
-  delta,
-  nbElevesAccompagnes,
-  tauxQuiz,
-  streakPro,
-  spark,
-}) {
-  const deltaHtml =
-    delta === null
-      ? `<span class="ins-widget-delta flat">Premier mois</span>`
-      : delta > 0
-        ? `<span class="ins-widget-delta up">▲ ${delta}% vs mois préc.</span>`
-        : delta < 0
-          ? `<span class="ins-widget-delta down">▼ ${Math.abs(delta)}% vs mois préc.</span>`
-          : `<span class="ins-widget-delta flat">Stable vs mois préc.</span>`;
+// ─── Contenu dependant de la periode ─────────────────────────
+function renderPeriodContent(data) {
+  const isSemaine = _period === "semaine";
 
-  const streakVal = streakPro !== null ? streakPro : "—";
-  const tauxVal = tauxQuiz === null ? "—" : `${tauxQuiz}%`;
-  const hasSpark = Array.isArray(spark) && spark.some((n) => n > 0);
+  const count = isSemaine ? data.valsSemaineCount : data.valsCeMoisCount;
+  const delta = isSemaine ? data.deltaSemaine : null; // pour mois on affiche % mais simplifions en nombre
+  const deltaMois = data.deltaMois;
+  const spark = isSemaine ? data.spark7 : data.spark30.slice(-14); // 14 derniers jours du mois
+  const topList = isSemaine ? data.topProgressent : data.topProgressentMois;
+
+  // Hero delta HTML
+  let deltaHtml = "";
+  if (isSemaine) {
+    if (delta === null) {
+      deltaHtml = `<span class="ins-hero-delta flat">Premiere semaine</span>`;
+    } else if (delta > 0) {
+      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${delta} vs S-1</span>`;
+    } else if (delta < 0) {
+      deltaHtml = `<span class="ins-hero-delta down">&#9660; ${delta} vs S-1</span>`;
+    } else {
+      deltaHtml = `<span class="ins-hero-delta flat">Stable vs S-1</span>`;
+    }
+  } else {
+    if (deltaMois === null) {
+      deltaHtml = `<span class="ins-hero-delta flat">Premier mois</span>`;
+    } else if (deltaMois > 0) {
+      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${deltaMois}% vs M-1</span>`;
+    } else if (deltaMois < 0) {
+      deltaHtml = `<span class="ins-hero-delta down">&#9660; ${Math.abs(deltaMois)}% vs M-1</span>`;
+    } else {
+      deltaHtml = `<span class="ins-hero-delta flat">Stable vs M-1</span>`;
+    }
+  }
+
+  // Sparkline barres CSS
+  const sparkMax = Math.max(1, ...spark);
+  const sparkBars = spark
+    .map((v, i) => {
+      const pct = Math.max(8, Math.round((v / sparkMax) * 100));
+      const isPeak = v === sparkMax && v > 0;
+      return `<div class="ins-hero-spark-bar${isPeak ? " peak" : ""}"
+                   style="height:${pct}%;flex:1"></div>`;
+    })
+    .join("");
+
+  // Label hero
+  const heroLabel = isSemaine
+    ? "Validations cette semaine"
+    : "Validations ce mois";
+
+  // Top qui progresse
+  const topListHtml = renderTopProgresse(topList, isSemaine);
 
   return `
-    <div class="ins-star">
-      <div class="ins-star-top">
-        <div class="ins-star-num">${valsCeMoisCount}</div>
-        <div class="ins-star-meta">
-          <div class="ins-star-lbl">Compétences validées</div>
-          <div class="ins-star-sub">Ce mois</div>
-          ${deltaHtml}
-        </div>
+    <!-- Hero indigo -->
+    <div class="ins-hero">
+      <div class="ins-hero-label">${heroLabel}</div>
+      <div class="ins-hero-row">
+        <div class="ins-hero-big">${count}</div>
+        ${deltaHtml}
       </div>
-      ${hasSpark ? `<div class="ins-star-spark">${sparkline(spark)}</div>` : ""}
+      <div class="ins-hero-spark" aria-hidden="true">
+        ${sparkBars}
+      </div>
     </div>
 
-    <div class="ins-sec">
-      <div class="ins-sec-card">
-        <div class="ins-sec-val">${nbElevesAccompagnes}</div>
-        <div class="ins-sec-lbl">Élèves</div>
+    <!-- Bento 3 tuiles -->
+    <div class="ins-bento">
+      <div class="ins-bt">
+        <div class="ins-bt-val green">${data.nbActifs}</div>
+        <div class="ins-bt-lbl">&#201;l&#232;ves actifs</div>
       </div>
-      <div class="ins-sec-card">
-        <div class="ins-sec-val">${tauxVal}</div>
-        <div class="ins-sec-lbl">Réussite Révision</div>
+      <div class="ins-bt">
+        <div class="ins-bt-val amber">${data.nbEnApproche}</div>
+        <div class="ins-bt-lbl">En approche</div>
       </div>
-      <div class="ins-sec-card">
-        <div class="ins-sec-val">${streakVal}${streakPro ? ` ${icon("flame", { size: 15, strokeWidth: 2, color: "var(--amk)" })}` : ""}</div>
-        <div class="ins-sec-lbl">Streak pro</div>
+      <div class="ins-bt">
+        <div class="ins-bt-val red">${data.nbRelancer}</div>
+        <div class="ins-bt-lbl">&#192; relancer</div>
       </div>
     </div>
+
+    <!-- Activite 7 derniers jours -->
+    <div class="ins-sec-lbl">Activit&#233; &middot; 7 derniers jours</div>
+    ${renderActivityChart(data)}
+
+    <!-- Qui progresse le plus -->
+    <div class="ins-sec-lbl">Qui progresse le plus</div>
+    ${topListHtml}
+
+    <!-- Tabs avancent / en pause -->
+    <div class="ins-sec-lbl">Tes &#233;l&#232;ves ce mois</div>
+    <div class="ins-tabs" role="tablist" id="ins-tabs">
+      <button class="ins-tab${_tab === "progressent" ? " active" : ""}"
+              data-tab="progressent" role="tab" type="button">
+        Avancent (${data.topProgressent.length})
+      </button>
+      <button class="ins-tab${_tab === "pause" ? " active" : ""}"
+              data-tab="pause" role="tab" type="button">
+        En pause (${data.topStagnent.length})
+      </button>
+    </div>
+    <div id="ins-eleves-list">
+      ${renderElevesList(_tab, data)}
+    </div>
+
+    <!-- Recommandations -->
+    <div class="ins-sec-lbl">&#192; faire cette semaine</div>
+    ${renderRecoSection(data)}
   `;
 }
 
-// Sparkline SVG arcade — trait --ens-go + remplissage dégradé léger.
-// Logique de tracé identique (ne pas modifier les calculs de coordonnées).
-function sparkline(values, { w = 300, h = 44 } = {}) {
-  const max = Math.max(1, ...values);
-  const n = values.length;
-  const step = n > 1 ? w / (n - 1) : 0;
-  const y = (v) => h - 3 - (v / max) * (h - 6);
-  const pts = values
-    .map((v, i) => `${(i * step).toFixed(1)},${y(v).toFixed(1)}`)
-    .join(" ");
-  const lastX = ((n - 1) * step).toFixed(1);
-  const lastY = y(values[n - 1]).toFixed(1);
-  // Chemin fermé (fill dégradé sous la courbe)
-  const firstX = "0";
-  const firstY = y(values[0]).toFixed(1);
-  const fillPath = `M${firstX},${firstY} ${values.map((v, i) => `${(i * step).toFixed(1)},${y(v).toFixed(1)}`).join(" L")} L${lastX},${h} L${firstX},${h} Z`;
-  return `<svg class="ins-spark-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
-    <defs>
-      <linearGradient id="ins-spark-grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="var(--ens-go, #18a558)" stop-opacity=".18"/>
-        <stop offset="100%" stop-color="var(--ens-go, #18a558)" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-    <path d="${fillPath}" fill="url(#ins-spark-grad)"/>
-    <polyline points="${pts}" fill="none" stroke="var(--ens-go, #18a558)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${lastX}" cy="${lastY}" r="3.5" fill="var(--ens-go, #18a558)"/>
-  </svg>`;
-}
+// ─── Graphe activite 7 jours ──────────────────────────────────
+function renderActivityChart({ heatmapDay, spark7 }) {
+  // On utilise spark7 pour les 7 derniers jours absolus avec labels generiques
+  const today = new Date();
+  const labels = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today.getTime() - i * 86400000);
+    labels.push(JOURS_COURT[(d.getDay() + 6) % 7]);
+  }
 
-// ── Graphe activité par jour ──────────────────────────────────
-function renderActivityChartSection({ heatmap }) {
-  const JOURS_COURT = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-  const BAR_MAX_H = 60; // px — hauteur max dans le container de 88px
-
-  const totals = heatmap.map((row) => row.reduce((s, n) => s + n, 0));
+  const totals = spark7;
   const maxTotal = Math.max(...totals);
 
   if (maxTotal === 0) {
-    return `
-      <div class="ins-section">
-        <div class="ins-section-title">Tes jours d'activité · 60 derniers jours</div>
-        <div class="ins-chart-wrap">
-          <div class="ins-chart-empty">
-            ${illus("route", { size: 64 })}
-            <p>Aucune validation sur les 60 derniers jours.<br>Enregistre ta première séance pour voir quels jours tu es le plus actif.</p>
-          </div>
-        </div>
-      </div>
-    `;
+    return `<div class="ins-card ins-empty">
+      Aucune validation sur les 7 derniers jours.
+    </div>`;
   }
 
   const peakIdx = totals.indexOf(maxTotal);
-
   const bars = totals
     .map((n, j) => {
       const isPeak = j === peakIdx;
-      const h = n > 0 ? Math.max(4, Math.round((n / maxTotal) * BAR_MAX_H)) : 3;
+      const pct = n > 0 ? Math.max(8, Math.round((n / maxTotal) * 100)) : 6;
       return `
-      <div class="ins-chart-col${isPeak ? " ins-chart-col--peak" : ""}">
-        <span class="ins-chart-val">${n > 0 ? n : ""}</span>
-        <div class="ins-chart-bar" style="height:${h}px"></div>
-        <span class="ins-chart-lbl">${JOURS_COURT[j]}</span>
+      <div class="ins-bar-col">
+        <div class="ins-bar-inner${isPeak ? " peak" : ""}"
+             style="height:${pct}%;width:100%"></div>
+        <span class="ins-bar-day${isPeak ? " peak" : ""}">${esc(labels[j])}</span>
       </div>`;
     })
     .join("");
 
-  return `
-    <div class="ins-section">
-      <div class="ins-section-title">Tes jours d'activité · 60 derniers jours</div>
-      <div class="ins-chart-wrap">
-        <div class="ins-chart-bars">${bars}</div>
-        <div class="ins-chart-divider"></div>
-        <p class="ins-chart-peak-note">Jour le plus actif : <strong>${esc(JOURS_COURT[peakIdx])}</strong> — ${maxTotal} validation${maxTotal > 1 ? "s" : ""}</p>
-      </div>
-    </div>
-  `;
+  return `<div class="ins-card">
+    <div class="ins-bars">${bars}</div>
+  </div>`;
 }
 
-// ── Top élèves ────────────────────────────────────────────────
-function renderTopElevesSection({ topProgressent, topStagnent }) {
-  return `
-    <div class="ins-section" id="ins-top-section">
-      <div class="ins-section-title">Tes élèves ce mois</div>
-      <div class="ins-tabs" role="tablist">
-        <button class="ins-tab active" data-tab="progressent" role="tab"
-                style="display:flex;align-items:center;gap:5px;">
-          ${icon("trending-up", { size: 14, strokeWidth: 2.2 })} Avancent (${topProgressent.length})
-        </button>
-        <button class="ins-tab" data-tab="stagnent" role="tab"
-                style="display:flex;align-items:center;gap:5px;">
-          ${icon("alert-triangle", { size: 14, strokeWidth: 2.2 })} En pause (${topStagnent.length})
-        </button>
-      </div>
-      <div id="ins-eleves-list">
-        ${renderElevesList("progressent", topProgressent, topStagnent)}
-      </div>
-    </div>
-  `;
-}
-
-function renderElevesList(tab, topProgressent, topStagnent) {
-  const list = tab === "progressent" ? topProgressent : topStagnent;
+// ─── Top qui progresse ────────────────────────────────────────
+function renderTopProgresse(list, isSemaine) {
   if (list.length === 0) {
-    const emptyTxt =
-      tab === "progressent"
-        ? "Aucun élève avec plusieurs compétences validées ce mois."
-        : "Personne en pause — tout le monde avance !";
     return `<div class="ins-empty">
-      ${tab === "progressent" ? illus("trophy", { size: 52 }) : illus("route", { size: 52 })}
-      <p>${emptyTxt}</p>
+      Aucun élève avec des validations ${isSemaine ? "cette semaine" : "ce mois"}.
     </div>`;
   }
-  return list
-    .map((e, i) => {
-      const nom = esc(`${e.prenom || ""} ${e.nom || ""}`.trim() || "Élève");
-      // Chips arcade : go = progression, amber = en pause
-      const badge =
-        tab === "progressent"
-          ? `<span class="ens-chip ens-chip--go">+${e.compsThisMonth} ce mois</span>`
-          : `<span class="ens-chip ens-chip--amber">${e.daysAgo ? `${e.daysAgo}j sans valid.` : "En pause"}</span>`;
-      const meta =
-        tab === "progressent"
-          ? `${e.compsThisMonth} compétence${e.compsThisMonth > 1 ? "s" : ""} acquise${e.compsThisMonth > 1 ? "s" : ""} ce mois`
-          : `Aucune validation depuis ${e.daysAgo ? `${e.daysAgo} jours` : "longtemps"}`;
-      return `
-      <div class="ins-eleve-row" data-eleve-id="${esc(e.id)}" data-tab="${tab}"
-           role="button" tabindex="0" aria-label="Livret de ${nom}"
-           style="animation: insWidgetIn .3s cubic-bezier(.23,1,.32,1) ${i * 50}ms both">
-        <div class="ins-eleve-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 36)}</div>
-        <div class="ins-eleve-info">
-          <div class="ins-eleve-name">${nom}</div>
-          <div class="ins-eleve-meta">${meta}</div>
-        </div>
-        ${badge}
-        <span aria-hidden="true" style="color:var(--mu2);font-size:14px">›</span>
-      </div>
-    `;
-    })
-    .join("");
+  return `<div class="ins-prog-list">
+    ${list
+      .map((e, i) => {
+        const nom = esc(`${e.prenom || ""} ${e.nom || ""}`.trim() || "Élève");
+        const valsCount = isSemaine ? e.valsWeek || 0 : e.valsMonth || 0;
+        const color = avatarColor(e.id);
+        const inits = esc(initiales(e.prenom, e.nom));
+        let avHtml;
+        if (e.avatar_url) {
+          avHtml = `<img src="${esc(e.avatar_url)}" alt="" width="32" height="32"
+                        style="border-radius:50%;object-fit:cover;" loading="lazy">`;
+        } else {
+          avHtml = `<span class="ins-prog-av" style="background:${color}">${inits}</span>`;
+        }
+        return `<div class="ins-prog-row" data-eleve-id="${esc(e.id)}"
+                     role="button" tabindex="0" aria-label="Livret de ${nom}"
+                     style="animation:insBtIn .3s ease ${i * 50}ms both">
+          ${avHtml}
+          <span class="ins-prog-nom">${nom}</span>
+          <span class="ins-prog-delta">+${valsCount}<small> validations</small></span>
+        </div>`;
+      })
+      .join("")}
+  </div>`;
 }
 
-// ── Difficulté comps ──────────────────────────────────────────
-// ── À faire cette semaine ─────────────────────────────────────
+// ─── Liste eleves avancent / en pause ─────────────────────────
+function renderElevesList(tab, data) {
+  const list = tab === "progressent" ? data.topProgressent : data.topStagnent;
+  if (list.length === 0) {
+    const txt =
+      tab === "progressent"
+        ? "Aucun élève avec des validations cette semaine."
+        : "Personne en pause — tout le monde avance !";
+    return `<div class="ins-empty">${txt}</div>`;
+  }
+  return `<div class="ins-prog-list">
+    ${list
+      .map((e, i) => {
+        const nom = esc(`${e.prenom || ""} ${e.nom || ""}`.trim() || "Élève");
+        const color = avatarColor(e.id);
+        const inits = esc(initiales(e.prenom, e.nom));
+        let avHtml;
+        if (e.avatar_url) {
+          avHtml = `<img src="${esc(e.avatar_url)}" alt="" width="32" height="32"
+                        style="border-radius:50%;object-fit:cover;" loading="lazy">`;
+        } else {
+          avHtml = `<span class="ins-prog-av" style="background:${color}">${inits}</span>`;
+        }
+        const meta =
+          tab === "progressent"
+            ? `+${e.valsWeek || 0} validations cette semaine`
+            : `Aucune validation depuis ${e.daysAgo ? `${e.daysAgo} jours` : "longtemps"}`;
+        return `<div class="ins-prog-row" data-eleve-id="${esc(e.id)}"
+                     role="button" tabindex="0" aria-label="Livret de ${nom}"
+                     style="animation:insBtIn .3s ease ${i * 50}ms both">
+          ${avHtml}
+          <div style="flex:1;min-width:0">
+            <div class="ins-prog-nom">${nom}</div>
+            <div style="font:500 11px/1 'Inter',sans-serif;color:#a3a9c4;margin-top:3px">${esc(meta)}</div>
+          </div>
+        </div>`;
+      })
+      .join("")}
+  </div>`;
+}
+
+// ─── Recommandations ──────────────────────────────────────────
 function renderRecoSection({ recos }) {
   const cards = recos
     .map(
       (r) => `
     <div class="ins-reco-card${r.route ? " ins-reco-card--link" : ""}"
-         ${r.route ? `data-route="${esc(r.route)}" role="button" tabindex="0" style="cursor:pointer;"` : ""}>
+         ${r.route ? `data-route="${esc(r.route)}" role="button" tabindex="0"` : ""}>
       <span class="ins-reco-icon">${r.icon}</span>
       <div class="ins-reco-body">
         <div class="ins-reco-ttl">${esc(r.ttl)}</div>
@@ -924,44 +1031,57 @@ function renderRecoSection({ recos }) {
     )
     .join("");
 
-  return `
-    <div class="ins-section">
-      <div class="ins-section-title">À faire cette semaine</div>
-      <div class="ins-reco-list">${cards}</div>
-    </div>
-  `;
+  return `<div class="ins-reco-list">${cards}</div>`;
 }
 
 // ─── Wire ─────────────────────────────────────────────────────
 function wireAll(root, me, data) {
-  // Tabs progressent/stagnent
-  root.querySelectorAll(".ins-tab").forEach((btn) => {
+  // Segment periode
+  root.querySelectorAll(".ins-seg-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      haptic("select"); // léger : changement d'onglet d'analyse
+      haptic("select");
+      _period = btn.dataset.period;
+      root
+        .querySelectorAll(".ins-seg-btn")
+        .forEach((b) => b.classList.toggle("active", b === btn));
+      // Re-render le contenu du body
+      const bodyEl = root.querySelector(".ins-body");
+      if (bodyEl) {
+        bodyEl.innerHTML = renderPeriodContent(data);
+        wireBodyEvents(root, me, data);
+      }
+      track("insights.period.click", { period: _period });
+    });
+  });
+
+  wireBodyEvents(root, me, data);
+}
+
+function wireBodyEvents(root, me, data) {
+  // Tabs avancent / en pause
+  root.querySelectorAll(".ins-tab[data-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      haptic("select");
       _tab = btn.dataset.tab;
       root
         .querySelectorAll(".ins-tab")
         .forEach((b) => b.classList.toggle("active", b === btn));
       const listEl = root.querySelector("#ins-eleves-list");
       if (listEl) {
-        listEl.innerHTML = renderElevesList(
-          _tab,
-          data.topProgressent,
-          data.topStagnent,
-        );
+        listEl.innerHTML = renderElevesList(_tab, data);
         wireEleveRows(listEl);
       }
       track("insights.tab.click", { tab: _tab });
     });
   });
 
-  // Élèves rows initials
+  // Lignes eleves (top progresse + liste tabs)
   wireEleveRows(root);
 
-  // Reco cards → navigate to route
+  // Reco cards
   root.querySelectorAll(".ins-reco-card--link[data-route]").forEach((card) => {
     const handler = () => {
-      haptic("impact"); // action métier : ouverture d'une reco
+      haptic("impact");
       track("insights.reco.click", { route: card.dataset.route });
       navigate(card.dataset.route);
     };
@@ -976,12 +1096,10 @@ function wireAll(root, me, data) {
 }
 
 function wireEleveRows(container) {
-  container.querySelectorAll(".ins-eleve-row[data-eleve-id]").forEach((row) => {
+  container.querySelectorAll(".ins-prog-row[data-eleve-id]").forEach((row) => {
     const handler = () => {
-      track("insights.eleve.open", {
-        eleve_id: row.dataset.eleveId,
-        tab: _tab,
-      });
+      haptic("impact");
+      track("insights.eleve.open", { eleve_id: row.dataset.eleveId });
       navigate(`#/livret/${row.dataset.eleveId}`);
     };
     row.addEventListener("click", handler);

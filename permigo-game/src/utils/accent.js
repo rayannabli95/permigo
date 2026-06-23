@@ -28,9 +28,9 @@ export const ACCENTS = [
   {
     id: "violet",
     name: "Violet",
-    a: "#8b5cf6",
-    adk: "#6d28d9",
-    lt: "#a78bfa",
+    a: "#6d4dff",
+    adk: "#4a2fc4",
+    lt: "#a78bff",
     ink: "#ffffff",
   },
   {

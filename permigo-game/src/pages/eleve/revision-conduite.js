@@ -71,7 +71,7 @@ const STYLE = `<style>
 
 /* Carte « point faible du jour » */
 .rvc-pf { margin:14px 0 18px; border-radius:18px; padding:18px;
-  background: linear-gradient(135deg, var(--a, #6366f1), #8b5cf6); color:#fff;
+  background: linear-gradient(135deg, var(--a), var(--a-lt)); color:#fff;
   box-shadow: 0 10px 24px color-mix(in srgb, var(--a, #6366f1) 35%, transparent); }
 .rvc-pf-k { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; opacity:.9; }
 .rvc-pf-t { font: 800 19px/1.15 'Plus Jakarta Sans', sans-serif; margin:6px 0 2px; }
@@ -110,7 +110,7 @@ const STYLE = `<style>
   width:22px; height:22px; border-radius:50%; background:var(--a,#6366f1); color:#fff;
   font:700 12px 'IBM Plex Mono',monospace; display:flex; align-items:center; justify-content:center; }
 .rvc-why, .rvc-err, .rvc-bva { border-radius:12px; padding:12px 14px; font-size:14px; line-height:1.45; }
-.rvc-why { background: color-mix(in srgb, #6366f1 8%, transparent); }
+.rvc-why { background: color-mix(in srgb, var(--a) 8%, transparent); }
 .rvc-err { background: color-mix(in srgb, #f59e0b 12%, transparent); }
 .rvc-bva { background: color-mix(in srgb, #06b6d4 10%, transparent); }
 .rvc-src { font-size:11px; color:var(--mu,#94a3b8); margin-top:14px; }
