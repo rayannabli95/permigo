@@ -1,0 +1,192 @@
+[
+  {
+    "scene": "Une voiture débouche de ta droite à un carrefour sans panneaux.",
+    "options": [
+      "Tu la laisses passer, elle vient de droite",
+      "Tu ralentis et tu observes avant de t'engager",
+      "Tu passes vite avant elle, tu as le temps"
+    ],
+    "faute_index": 2,
+    "explication": "Forcer le passage devant un véhicule prioritaire à droite, c'est un refus de priorité."
+  },
+  {
+    "scene": "Ligne blanche continue au centre, une voiture lente devant toi.",
+    "options": [
+      "Tu franchis la ligne pour la doubler",
+      "Tu restes derrière en gardant tes distances",
+      "Tu attends une ligne discontinue pour dépasser"
+    ],
+    "faute_index": 0,
+    "explication": "Franchir une ligne continue est une faute éliminatoire, même pour doubler."
+  },
+  {
+    "scene": "Un feu passe au rouge devant toi en ville.",
+    "options": [
+      "Tu lèves le pied tôt et tu t'arrêtes avant",
+      "Tu freines en douceur jusqu'à l'arrêt",
+      "Tu passes, il vient juste de changer"
+    ],
+    "faute_index": 2,
+    "explication": "Griller un feu rouge, c'est ne pas respecter un signal d'arrêt : éliminatoire."
+  },
+  {
+    "scene": "Un piéton attend au bord d'un passage protégé.",
+    "options": [
+      "Tu croises son regard et tu le laisses passer",
+      "Tu ralentis et tu t'arrêtes pour lui",
+      "Tu passes devant lui, il n'a pas encore traversé"
+    ],
+    "faute_index": 2,
+    "explication": "Un piéton qui veut traverser est déjà prioritaire ; passer devant lui est éliminatoire."
+  },
+  {
+    "scene": "Panneau STOP à une intersection peu fréquentée.",
+    "options": [
+      "Tu ralentis fortement sans t'arrêter complètement",
+      "Tu marques l'arrêt total, roues immobiles",
+      "Tu repars une fois la voie bien dégagée"
+    ],
+    "faute_index": 0,
+    "explication": "Au STOP, l'arrêt doit être total ; ne pas marquer l'arrêt est éliminatoire."
+  },
+  {
+    "scene": "Tu veux changer de voie, un véhicule arrive dans ton angle mort.",
+    "options": [
+      "Tu déboîtes maintenant pour ne pas perdre de temps",
+      "Tu contrôles l'angle mort avant de bouger",
+      "Tu attends qu'il soit passé pour changer"
+    ],
+    "faute_index": 0,
+    "explication": "Changer de voie sans contrôler l'angle mort avec un usager présent est éliminatoire."
+  },
+  {
+    "scene": "Route à double sens, ta voie est bien marquée à droite.",
+    "options": [
+      "Tu roules au milieu de ta voie de droite",
+      "Tu roules sur la voie de gauche, plus dégagée",
+      "Tu gardes ta place sans mordre le centre"
+    ],
+    "faute_index": 1,
+    "explication": "Rouler à gauche, du mauvais côté, c'est circuler à contresens : éliminatoire."
+  },
+  {
+    "scene": "Tu abordes un virage sans visibilité, une voiture lente devant.",
+    "options": [
+      "Tu attends la sortie du virage pour décider",
+      "Tu restes derrière en gardant tes distances",
+      "Tu doubles maintenant dans le virage"
+    ],
+    "faute_index": 2,
+    "explication": "Dépasser dans un virage sans visibilité est un dépassement dangereux : éliminatoire."
+  },
+  {
+    "scene": "Carrefour à sens giratoire, une voiture circule déjà sur l'anneau.",
+    "options": [
+      "Tu cèdes le passage à celle qui tourne",
+      "Tu attends un trou suffisant pour entrer",
+      "Tu t'engages devant elle, tu es plus rapide"
+    ],
+    "faute_index": 2,
+    "explication": "Forcer l'entrée devant un usager déjà sur l'anneau est un refus de priorité."
+  },
+  {
+    "scene": "Ton feu est vert, un piéton sur le côté veut traverser au rouge.",
+    "options": [
+      "Tu continues à allure normale, ton feu est vert",
+      "Tu t'arrêtes net au milieu pour le laisser passer",
+      "Tu restes vigilant en gardant ton allure"
+    ],
+    "faute_index": 1,
+    "explication": "S'arrêter sans raison quand on est prioritaire crée un risque de collision arrière : faute."
+  },
+  {
+    "scene": "Manœuvre de créneau, tu recules un peu vite vers le trottoir.",
+    "options": [
+      "Tu recules très lentement en contrôlant autour",
+      "Tu montes sur le trottoir en braquant trop tôt",
+      "Tu t'appuies doucement sans taper le trottoir"
+    ],
+    "faute_index": 1,
+    "explication": "Monter sur le trottoir rend la manœuvre dangereuse : c'est éliminatoire."
+  },
+  {
+    "scene": "Tu sors de l'autoroute, ta vitesse est encore élevée.",
+    "options": [
+      "Tu freines fort sur la voie de circulation",
+      "Tu attends la voie de décélération pour ralentir",
+      "Tu mets ton clignotant droit bien avant la sortie"
+    ],
+    "faute_index": 0,
+    "explication": "Freiner sur la voie rapide expose à un choc arrière : manœuvre dangereuse."
+  },
+  {
+    "scene": "Tu t'insères sur l'autoroute, le flux roule vite.",
+    "options": [
+      "Tu accélères pour atteindre leur allure",
+      "Tu t'arrêtes en bout de bande d'insertion",
+      "Tu te glisses dans un trou libre, souplement"
+    ],
+    "faute_index": 1,
+    "explication": "S'arrêter en bout d'insertion oblige les autres à freiner : danger immédiat."
+  },
+  {
+    "scene": "Panneau Cédez-le-passage avant une route prioritaire.",
+    "options": [
+      "Tu ralentis et tu cèdes aux véhicules sur l'axe",
+      "Tu t'engages sans regarder, la voie semble libre",
+      "Tu attends un espace sûr pour t'insérer"
+    ],
+    "faute_index": 1,
+    "explication": "S'engager sans céder le passage est un refus de priorité : éliminatoire."
+  },
+  {
+    "scene": "Tu sens la fatigue monter sur une longue route déserte.",
+    "options": [
+      "Tu accélères fort pour arriver plus vite",
+      "Tu fais une pause dès le premier signe",
+      "Tu restes vigilant et tu prévois un arrêt"
+    ],
+    "faute_index": 0,
+    "explication": "Rouler trop vite quand on lutte contre la fatigue, c'est une vitesse excessive dangereuse."
+  },
+  {
+    "scene": "Tu dépasses un cycliste sur une route étroite.",
+    "options": [
+      "Tu laisses au moins 1,50 m d'écart hors agglo",
+      "Tu le frôles au ras sans changer de trajectoire",
+      "Tu attends de pouvoir le doubler en sécurité"
+    ],
+    "faute_index": 1,
+    "explication": "Frôler un cycliste sans écart de sécurité met sa vie en danger : faute grave."
+  },
+  {
+    "scene": "Zone scolaire à 30, des enfants courent sur le trottoir.",
+    "options": [
+      "Tu ralentis bien en dessous, prêt à freiner",
+      "Tu traverses la zone à 50 comme avant",
+      "Tu restes très vigilant à allure réduite"
+    ],
+    "faute_index": 1,
+    "explication": "Rouler bien au-dessus de la limite près d'enfants, c'est une vitesse excessive dangereuse."
+  },
+  {
+    "scene": "Le moniteur doit attraper le frein pour éviter un choc.",
+    "options": [
+      "Tu avais bien contrôlé avant de t'engager",
+      "Tu t'es engagé sans voir le véhicule arriver",
+      "Tu t'étais arrêté pour laisser passer le danger"
+    ],
+    "faute_index": 1,
+    "explication": "Toute intervention de l'examinateur sur les commandes pour éviter un danger est éliminatoire."
+  },
+  {
+    "scene": "Tu tournes à droite en ville, un vélo remonte à ta droite.",
+    "options": [
+      "Tu tournes direct sans regarder par-dessus l'épaule",
+      "Tu contrôles ton angle mort droit avant de tourner",
+      "Tu attends que le vélo soit passé pour tourner"
+    ],
+    "faute_index": 0,
+    "explication": "Tourner sans contrôler l'angle mort avec un cycliste présent est éliminatoire."
+  }
+]
