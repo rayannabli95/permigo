@@ -10,7 +10,7 @@
 import { esc } from "@/utils/escape.js";
 import { navigate } from "@/router.js";
 import { track } from "@/services/analytics.js";
-import { haptic } from "@/utils/haptic.js";
+import { haptic, tapHaptic } from "@/utils/haptic.js";
 import { MONDES, fichesByMonde } from "@/data/fiches-conduite.js";
 
 const PER_MONDE = 4; // ~16 questions au total, couvre les 4 mondes
@@ -90,7 +90,7 @@ const STYLE = `<style>
 .exc-nope { background: color-mix(in srgb,#f59e0b 16%, transparent); color:#b45309; }
 .exc-res { text-align:center; padding:24px 8px; }
 .exc-res-e { font-size:54px; animation: excrise .35s cubic-bezier(.23,1,.32,1) both; }
-.exc-score { font:800 40px 'IBM Plex Mono',monospace; margin:6px 0 2px; }
+.exc-score { font:800 40px 'IBM Plex Mono',monospace; margin:6px 0 2px; transition: transform .12s cubic-bezier(.23,1,.32,1); }
 .exc-res-t { font:800 22px 'Plus Jakarta Sans',sans-serif; margin:4px 0; }
 .exc-weak { text-align:left; margin-top:20px; }
 .exc-weak-h { font:800 13px 'Plus Jakarta Sans',sans-serif; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#64748b); margin-bottom:8px; }
@@ -216,7 +216,7 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}<div class="exc">
       <div class="exc-res">
         <div class="exc-res-e">${v.e}</div>
-        <div class="exc-score">${known}/${total}</div>
+        <div class="exc-score"><span data-count>0</span>/${total}</div>
         <div class="exc-res-t">${esc(v.t)}</div>
         <p class="exc-sub">${esc(v.s)}</p>
       </div>
@@ -233,6 +233,22 @@ export async function mount(root) {
     root
       .querySelector("[data-again]")
       .addEventListener("click", () => navigate("#/revision-conduite"));
+    const countEl = root.querySelector("[data-count]");
+    if (countEl && known > 0) {
+      let c = 0;
+      const box = countEl.parentElement;
+      const step = () => {
+        countEl.textContent = String(++c);
+        if (box) {
+          box.style.transform = "scale(1.09)";
+          setTimeout(() => (box.style.transform = ""), 90);
+        }
+        tapHaptic();
+        if (c < known) setTimeout(step, 150);
+        else setTimeout(() => haptic("success"), 150);
+      };
+      setTimeout(step, 280);
+    }
   }
 
   render();
