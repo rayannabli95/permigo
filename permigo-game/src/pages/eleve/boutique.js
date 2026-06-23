@@ -90,12 +90,12 @@ const STYLE = `<style>
 /* ── Sticky header ── */
 .bo2-hd {
   position: sticky; top: calc(52px + env(safe-area-inset-top, 0px)); z-index: 20;
-  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, var(--adk) 100%);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--a) 22%, #14101f) 0%, color-mix(in srgb, var(--a) 42%, #14101f) 60%, var(--adk) 100%);
   padding: 14px 20px 0; overflow: hidden;
 }
 .bo2-hd::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse 80% 70% at 90% 20%, rgba(167,139,250,.3) 0%, transparent 55%);
+  background: radial-gradient(ellipse 80% 70% at 90% 20%, color-mix(in srgb, var(--a-lt) 30%, transparent) 0%, transparent 55%);
   pointer-events: none;
 }
 .bo2-hd-row {
