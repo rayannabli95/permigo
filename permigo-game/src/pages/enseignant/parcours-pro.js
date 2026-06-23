@@ -19,6 +19,9 @@ import { getMoniteurState, MONITEUR_TIERS } from "@/data/moniteur-levels.js";
 import { animateCounter } from "@/utils/gestures.js";
 import { icon } from "@/utils/icons.js";
 import { openPalierSheet } from "@/components/common/palier-sheet.js";
+import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
+import { illus } from "@/components/enseignant/illus.js";
+import { haptic } from "@/utils/haptic.js";
 
 // ─── Géométrie de la route (viewBox 396 × 1240) ──────────────────
 // x maintenu dans ~[100,290] pour que les étiquettes centrées (≤150px)
@@ -48,52 +51,50 @@ const STYLE = `<style>
   max-width: 480px; margin: 0 auto;
   padding: 0 0 calc(100px + env(safe-area-inset-bottom, 0px));
   background: var(--bg); color: var(--ink);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--ens-body, 'Inter'), sans-serif;
 }
 
-/* ── Segmented « Progression » (Parcours · Trophées · Ligue) ── */
+/* ── Segmented « Progression » (Parcours · Trophées) ── */
 .ppr-tabs { display: flex; gap: 4px; padding: 10px 14px 0; background: var(--su); border-bottom: 1px solid var(--bo); }
 .ppr-tab {
   flex: 1; text-align: center; padding: 11px 4px 12px; min-height: 44px;
-  font: 800 13px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu2);
+  font: 800 13px/1 var(--ens-display, 'Fredoka'), sans-serif; color: var(--mu2);
   background: none; border: 0; border-bottom: 2.5px solid transparent; cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.ppr-tab.on { color: var(--ink); border-bottom-color: var(--a); }
-.ppr-tab:focus-visible { outline: 3px solid var(--a); outline-offset: -3px; border-radius: var(--r-sm); }
+.ppr-tab.on { color: var(--ink); border-bottom-color: var(--ens-go, var(--a)); }
+.ppr-tab:focus-visible { outline: 3px solid var(--ens-go, var(--a)); outline-offset: -3px; border-radius: var(--r-sm); }
 
-/* ── Hero : compteur de validations + palier + prochain outil ── */
+/* ── Hero arcade : panneaux en fond + dégradé vert profond (= aujourdhui.js) ── */
 .ppr-hero {
-  position: relative; overflow: hidden; padding: 18px 18px 20px;
-  background:
-    linear-gradient(160deg, rgba(11,13,26,.78) 0%, rgba(11,13,26,.58) 50%, rgba(11,13,26,.84) 100%),
-    url('/skins/fond-parcours-enseignant.webp') center 18% / cover no-repeat,
-    linear-gradient(160deg, var(--ink2) 0%, var(--ink3) 60%, var(--ink) 100%);
+  position: relative; overflow: hidden; padding: 22px 18px 24px;
+  background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+  isolation: isolate;
 }
-.ppr-hero::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 75% 70% at 14% 25%, color-mix(in srgb, var(--a) 30%, transparent) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 55% at 88% 80%, color-mix(in srgb, var(--am) 14%, transparent) 0%, transparent 55%);
+/* Marquage au sol pointillé ambre — signature arcade */
+.ppr-hero::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
+  background: repeating-linear-gradient(90deg, #f59e0b 0 18px, transparent 18px 34px); opacity: .85;
 }
-.ppr-hero-in { position: relative; z-index: 1; }
+.ppr-hero .ens-panneaux__sign { opacity: var(--o, .18); filter: saturate(1.1) brightness(1.08); }
+.ppr-hero-in { position: relative; z-index: 2; }
 .ppr-hero-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
-.ppr-hero-title { font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: -.03em; }
-.ppr-hero-sub { font: 600 12px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.62); margin-top: 5px; }
+.ppr-hero-title { font: 800 clamp(20px,5.5vw,26px)/1.1 var(--ens-display, 'Fredoka'), sans-serif; color: #fff; letter-spacing: -.02em; }
+.ppr-hero-sub { font: 600 12px/1.3 var(--ens-body, 'Inter'), sans-serif; color: rgba(255,255,255,.62); margin-top: 5px; }
 .ppr-hero-count { text-align: right; flex-shrink: 0; }
-.ppr-hero-count .v { font: 800 30px/1 'Plus Jakarta Sans', sans-serif; color: #fff; }
-.ppr-hero-count .l { font: 600 10px/1 'Inter', sans-serif; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }
-.ppr-next { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: var(--r-md); padding: 12px 13px; }
-.ppr-next-lbl { font: 800 9.5px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--a-txt); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
-.ppr-next-tool { font: 800 13.5px/1.3 'Plus Jakarta Sans', sans-serif; color: #fff; margin-bottom: 9px; }
+.ppr-hero-count .v { font: 800 30px/1 var(--ens-display, 'Fredoka'), sans-serif; color: #fff; }
+.ppr-hero-count .l { font: 700 10px/1 var(--ens-body, 'Inter'), sans-serif; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }
+.ppr-next { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: var(--ens-r, var(--r-md)); padding: 12px 13px; }
+.ppr-next-lbl { font: 800 9.5px/1 var(--ens-body, 'Inter'), sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #f59e0b; margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+.ppr-next-tool { font: 800 13.5px/1.3 var(--ens-display, 'Fredoka'), sans-serif; color: #fff; margin-bottom: 9px; }
 .ppr-next-bar { height: 7px; background: rgba(255,255,255,.16); border-radius: var(--r-full); overflow: hidden; }
-.ppr-next-fill { height: 100%; width: 0; border-radius: var(--r-full); background: linear-gradient(90deg, var(--a), var(--a-lt)); box-shadow: 0 0 8px color-mix(in srgb, var(--a) 60%, transparent); transition: width 1s var(--ease-out); }
-.ppr-next-meta { font: 600 10.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.66); margin-top: 7px; }
+.ppr-next-fill { height: 100%; width: 0; border-radius: var(--r-full); background: linear-gradient(90deg, var(--ens-go, var(--a)), color-mix(in srgb, var(--ens-go, var(--a)) 70%, #fff)); box-shadow: 0 0 8px color-mix(in srgb, var(--ens-go, var(--a)) 60%, transparent); transition: width 1s var(--ease-out); }
+.ppr-next-meta { font: 600 10.5px/1 var(--ens-body, 'Inter'), sans-serif; color: rgba(255,255,255,.66); margin-top: 7px; }
 .ppr-next.done { display: flex; align-items: center; gap: 10px; }
 .ppr-next.done .ppr-next-tool { margin: 0; }
 
 /* ── Légende ── */
-.ppr-legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 18px 2px; font: 600 10.5px/1.4 'Inter', sans-serif; color: var(--mu3); }
+.ppr-legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 18px 2px; font: 600 10.5px/1.4 var(--ens-body, 'Inter'), sans-serif; color: var(--mu3); }
 .ppr-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .ppr-legend i { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
@@ -175,14 +176,14 @@ const STYLE = `<style>
 }
 
 /* labels */
-.nd-lbl { margin-top: 11px; background: var(--su); border: 1px solid var(--bo); border-radius: var(--r-md); padding: 6px 11px 7px; width: max-content; max-width: 150px; text-align: center; box-shadow: 0 5px 14px rgba(11,13,26,.09); transition: border-color .18s, box-shadow .18s; }
+.nd-lbl { margin-top: 11px; background: var(--su); border: 1px solid var(--bo); border-radius: var(--ens-r, var(--r-md)); padding: 6px 11px 7px; width: max-content; max-width: 150px; text-align: center; box-shadow: 0 5px 14px rgba(11,13,26,.09); transition: border-color .18s, box-shadow .18s; }
 @media (max-width: 380px) { .nd-lbl { max-width: 132px; } }
-.nd-name { display: block; font: 800 12px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.01em; }
+.nd-name { display: block; font: 800 12px/1.25 var(--ens-display, 'Fredoka'), sans-serif; color: var(--ink); letter-spacing: -.01em; }
 .nd-thr { display: block; font: 700 9.5px/1 'IBM Plex Mono', monospace; color: var(--mu3); margin-top: 3px; }
 .ppr-node.todo .nd-name, .ppr-node.locked .nd-name { color: var(--mu3); }
-.ppr-node.done .nd-lbl { border-color: color-mix(in srgb, var(--a) 28%, transparent); }
-.ppr-node.next .nd-lbl { border-color: color-mix(in srgb, var(--a) 40%, transparent); box-shadow: 0 8px 22px color-mix(in srgb, var(--a) 18%, transparent), 0 0 0 2px color-mix(in srgb, var(--a) 20%, transparent); position: relative; }
-.nd-stt { display: inline-block; margin-top: 7px; padding: 6px 13px; background: var(--a); color: var(--a-ink, #fff); font: 800 11px/1 'Inter', sans-serif; border-radius: var(--r-full); box-shadow: 0 2px 8px color-mix(in srgb, var(--a) 35%, transparent); }
+.ppr-node.done .nd-lbl { border-color: color-mix(in srgb, var(--ens-go, var(--a)) 28%, transparent); }
+.ppr-node.next .nd-lbl { border-color: color-mix(in srgb, var(--ens-go, var(--a)) 40%, transparent); box-shadow: 0 8px 22px color-mix(in srgb, var(--ens-go, var(--a)) 18%, transparent), 0 0 0 2px color-mix(in srgb, var(--ens-go, var(--a)) 20%, transparent); position: relative; }
+.nd-stt { display: inline-block; margin-top: 7px; padding: 6px 13px; background: var(--ens-go, var(--a)); color: #fff; font: 800 11px/1 var(--ens-body, 'Inter'), sans-serif; border-radius: var(--r-full); box-shadow: 0 2px 8px color-mix(in srgb, var(--ens-go, var(--a)) 35%, transparent); }
 
 /* Hover desktop discret — lift léger, jamais de spectacle */
 @media (hover: hover) {
@@ -191,16 +192,16 @@ const STYLE = `<style>
 }
 .ppr-node.next .nd-lbl::before {
   content: 'PROCHAIN PALIER'; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-  background: var(--a); color: var(--a-ink, #fff); font: 800 8px/1 'Inter', sans-serif; padding: 4px 10px; border-radius: var(--r-full);
-  letter-spacing: .14em; white-space: nowrap; box-shadow: 0 3px 10px color-mix(in srgb, var(--a) 40%, transparent);
+  background: var(--ens-go, var(--a)); color: #fff; font: 800 8px/1 var(--ens-body, 'Inter'), sans-serif; padding: 4px 10px; border-radius: var(--r-full);
+  letter-spacing: .14em; white-space: nowrap; box-shadow: 0 3px 10px color-mix(in srgb, var(--ens-go, var(--a)) 40%, transparent);
 }
 
 /* ── Final ── */
-.ppr-final { margin: 8px 14px 0; padding: 22px 18px; background: var(--su); border: 1.5px solid var(--bo); border-radius: var(--r-xl); text-align: center; box-shadow: var(--s1); position: relative; overflow: hidden; }
-.ppr-final::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 30% 20%, rgba(167,139,250,.10), transparent 55%), radial-gradient(ellipse at 80% 90%, color-mix(in srgb, var(--a) 7%, transparent), transparent 55%); }
-.ppr-final .crown { width: 48px; height: 48px; border-radius: var(--r-md); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: #fff; position: relative; background: linear-gradient(145deg,#5b21b6,#c4b5fd); box-shadow: 0 6px 18px -4px rgba(167,139,250,.6); }
-.ppr-final h3 { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; margin: 0 0 5px; color: var(--ink); position: relative; }
-.ppr-final p { font: 500 12.5px/1.45 'Inter', sans-serif; color: var(--mu3); margin: 0; position: relative; }
+.ppr-final { margin: 8px 14px 0; padding: 22px 18px; background: var(--su); border: 1.5px solid var(--bo); border-radius: var(--r-xl); text-align: center; box-shadow: var(--ens-shadow, var(--s1)); position: relative; overflow: hidden; }
+.ppr-final::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 30% 20%, rgba(167,139,250,.10), transparent 55%), radial-gradient(ellipse at 80% 90%, color-mix(in srgb, var(--ens-go, var(--a)) 7%, transparent), transparent 55%); }
+.ppr-final .crown { width: 56px; height: 56px; border-radius: var(--ens-r, var(--r-md)); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: #fff; position: relative; background: linear-gradient(145deg, var(--ens-go, #18a558), color-mix(in srgb, var(--ens-go, #18a558) 60%, #fff)); box-shadow: 0 6px 0 0 color-mix(in srgb, var(--ens-go, #18a558) 55%, #000), 0 12px 24px -6px color-mix(in srgb, var(--ens-go, #18a558) 45%, transparent); }
+.ppr-final h3 { font: 800 18px/1.2 var(--ens-display, 'Fredoka'), sans-serif; margin: 0 0 5px; color: var(--ink); position: relative; }
+.ppr-final p { font: 500 12.5px/1.45 var(--ens-body, 'Inter'), sans-serif; color: var(--mu3); margin: 0; position: relative; }
 
 /* ── Skeleton ── */
 .ppr-skel { background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%); background-size: 200% 100%; animation: pprShim 1.4s ease-in-out infinite; }
@@ -249,9 +250,9 @@ export async function mount(root) {
   if (error) {
     root.innerHTML = `${STYLE}<div class="ppr">${_tabsHtml()}
       <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
-        <div style="margin-bottom:12px">${icon("alert-circle", { size: 30 })}</div>
-        <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
-        <button id="ppr-retry" style="margin-top:14px;padding:12px 24px;min-height:44px;border:0;background:var(--a);color:var(--a-ink);border-radius:12px;cursor:pointer;font:800 14px/1 'Plus Jakarta Sans',sans-serif">Réessayer</button>
+        <div style="display:flex;justify-content:center;margin-bottom:16px">${illus("cone", { size: 72 })}</div>
+        <p style="font:600 15px/1.4 var(--ens-body,'Inter'),sans-serif">Ton parcours n'a pas pu se charger.</p>
+        <button id="ppr-retry" class="ens-btn ens-btn--go" style="margin-top:16px;min-height:44px;padding:12px 28px;cursor:pointer;">Réessayer</button>
       </div></div>`;
     _wireTabs(root);
     root
@@ -288,6 +289,7 @@ function _render(root, totalVals, state) {
       ${_tabsHtml()}
 
       <div class="ppr-hero">
+        ${panneauxLayer({ variant: "hero" })}
         <div class="ppr-hero-in">
           <div class="ppr-hero-top">
             <div>
@@ -316,7 +318,7 @@ function _render(root, totalVals, state) {
       </div>
 
       <div class="ppr-final">
-        <div class="crown">${icon("crown", { size: 26, strokeWidth: 2 })}</div>
+        <div class="crown">${illus("trophy", { size: 48 })}</div>
         <h3>${esc(tiers[tiers.length - 1].title)}</h3>
         <p>${tiers[tiers.length - 1].threshold} validations — palier ultime. Chaque séance compte.</p>
       </div>
@@ -428,6 +430,7 @@ function _renderNodes(root, items, totalVals) {
       const i = parseInt(el.dataset.i, 10);
       const it = items[i];
       if (!it) return;
+      haptic(it.state === "done" ? "unlock" : "impact");
       track("parcours_pro.tier_detail", { tier: it.tier.tier });
       openPalierSheet(it.tier, totalVals);
     });

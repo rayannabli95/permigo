@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// Enseignant — Insights
+// Enseignant — Insights · DA "Arcade routière"
 // KPI perso + heatmap + top élèves + difficulté comps + reco IA
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
@@ -12,46 +12,86 @@ import { REMC } from "@/data/remc.js";
 import { labelComp } from "@/utils/remc-label.js";
 import { icon } from "@/utils/icons.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
+import { panneauxLayer, ensHero } from "@/components/enseignant/panneaux-bg.js";
+import { illus } from "@/components/enseignant/illus.js";
+import { haptic } from "@/utils/haptic.js";
 
 // ─── Constantes ───────────────────────────────────────────────
 const JOURS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
 // ─── CSS ──────────────────────────────────────────────────────
 const STYLE = `<style>
+  /* ── Layout ── */
   .ins-page {
-    padding: 20px 16px 100px;
+    padding: 0 0 100px;
     max-width: 600px;
     margin: 0 auto;
     background: var(--bg);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--ens-body, 'Inter'), sans-serif;
     color: var(--ink);
+  }
+  .ins-body {
+    padding: 20px 16px 0;
   }
 
-  /* Header */
-  .ins-hd { margin-bottom: 24px; }
-  .ins-h1 {
-    /* Titre de page moniteur unifié : 24px / 700 / -.02em (cf. mes-eleves, bilan) */
-    font: 700 24px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink);
-    margin: 0 0 4px;
-    letter-spacing: -.02em;
+  /* ── Hero arcade compact (fond panneaux semés) ── */
+  .ins-hero-wrap {
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+    margin-bottom: 20px;
+    /* liseré pointillé ambre en pied — signature "arcade routière" */
+    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 20px) 20px 28px;
+    isolation: isolate;
+    animation: insHeroIn .45s var(--ease, ease) both;
   }
-  .ins-sub {
-    font: 500 13px/1 'Inter', sans-serif;
-    color: var(--mu2);
+  .ins-hero-wrap::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
+    background: repeating-linear-gradient(90deg, #f59e0b 0 18px, transparent 18px 34px);
+    opacity: .85;
+  }
+  .ins-hero-wrap .ens-panneaux__sign { opacity: var(--o, .16); filter: saturate(1.1) brightness(1.08); }
+  @keyframes insHeroIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ins-hero-wrap { animation: none !important; }
+  }
+  .ins-hero-content {
+    position: relative; z-index: 2;
+  }
+  .ins-hero-kicker {
+    font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
+    color: rgba(255,255,255,.65);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    margin: 0 0 8px;
+  }
+  .ins-hero-title {
+    font: 700 clamp(24px, 7vw, 30px)/1.1 var(--ens-display, 'Fredoka'), sans-serif;
+    color: #fff;
+    margin: 0 0 6px;
+    letter-spacing: -.01em;
+  }
+  .ins-hero-sub {
+    font: 500 13px/1.5 var(--ens-body, 'Inter'), sans-serif;
+    color: rgba(255,255,255,.85);
     margin: 0;
   }
+  .ins-hero-sub b { color: #fff; font-weight: 800; }
 
   /* Section title */
   .ins-section-title {
-    font: 600 11px/1 'Inter', sans-serif;
+    font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
     text-transform: uppercase;
-    letter-spacing: .08em;
+    letter-spacing: .1em;
     color: var(--mu2);
     margin: 0 0 12px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
   }
   .ins-section-title::after {
     content: '';
@@ -61,124 +101,101 @@ const STYLE = `<style>
   }
   .ins-section { margin-bottom: 28px; }
 
-  /* KPI widgets 2×2 */
-  .ins-widgets {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 28px;
-  }
-  .ins-widget {
-    background: var(--su);
-    border: 1px solid var(--bo);
-    border-radius: var(--rx);
-    padding: 18px;
-    box-shadow: var(--s1);
-    animation: insWidgetIn .45s var(--ease-snap) both;
-  }
-  .ins-widget:nth-child(1) { animation-delay: .04s; }
-  .ins-widget:nth-child(2) { animation-delay: .10s; }
-  .ins-widget:nth-child(3) { animation-delay: .16s; }
-  .ins-widget:nth-child(4) { animation-delay: .22s; }
-  @keyframes insWidgetIn {
-    from { opacity: 0; transform: translateY(8px) scale(.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .ins-widget { animation: none; }
-  }
-  .ins-widget-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .ins-widget-lbl {
-    font: 600 11px/1 'Inter', sans-serif;
-    color: var(--mu2);
-    text-transform: uppercase;
-    letter-spacing: .07em;
-  }
-  .ins-widget-val {
-    font: 700 30px/1 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink);
-    letter-spacing: -.025em;
-    margin: 0;
-  }
-  .ins-widget-sub {
-    font: 500 11px/1.3 'Inter', sans-serif;
-    color: var(--mu);
-    margin-top: 4px;
-  }
-  /* Carte quiz sans donnée : nudge actionnable au lieu d'un « — » mort */
-  .ins-widget-empty { background: color-mix(in srgb, var(--pu) 5%, var(--su)); }
-  .ins-widget-nudge {
-    font: 500 12px/1.4 'Inter', sans-serif;
-    color: var(--mu);
-    margin: 8px 0 0;
-  }
-  .ins-widget-delta {
-    font: 700 12px/1 'IBM Plex Mono', monospace;
-    margin-top: 5px;
-  }
-  .ins-widget-delta.up   { color: var(--gr-txt); }
-  .ins-widget-delta.down { color: var(--rd-txt); }
-  .ins-widget-delta.flat { color: var(--mu2); }
-
-  /* ── Métrique vedette (star) + 3 secondaires ── */
+  /* ── Métrique vedette (star) : chiffre Fredoka tabulaire ── */
   .ins-star {
     background: var(--su);
-    border: 1px solid var(--bo);
-    border-radius: var(--rx);
+    border: 1.5px solid var(--bo);
+    border-radius: var(--ens-lg, 16px);
     padding: 20px;
-    box-shadow: var(--s1);
+    box-shadow: var(--ens-shadow, 0 2px 8px rgba(0,0,0,.07));
     margin-bottom: 10px;
-    animation: insWidgetIn .45s var(--ease-snap) both;
+    animation: insWidgetIn .45s var(--ease-snap, cubic-bezier(.23,1,.32,1)) both;
   }
   .ins-star-top { display: flex; align-items: flex-start; gap: 16px; }
+  /* KPI vedette → .ens-stat__num pour Fredoka tabulaire arcade */
   .ins-star-num {
-    font: 800 clamp(40px, 13vw, 52px)/1 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink); letter-spacing: -.04em; flex-shrink: 0;
+    font: 800 clamp(40px, 13vw, 52px)/1 var(--ens-display, 'Fredoka'), sans-serif;
+    color: var(--ens-go, #18a558);
+    letter-spacing: -.04em;
+    flex-shrink: 0;
   }
   .ins-star-meta { padding-top: 4px; min-width: 0; }
   .ins-star-lbl {
-    font: 700 13px/1.2 'Inter', sans-serif; color: var(--ink);
-    text-transform: uppercase; letter-spacing: .06em;
+    font: 700 13px/1.2 var(--ens-body, 'Inter'), sans-serif;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: .06em;
   }
-  .ins-star-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
+  .ins-star-sub {
+    font: 500 12px/1.3 var(--ens-body, 'Inter'), sans-serif;
+    color: var(--mu2);
+    margin-top: 3px;
+  }
   .ins-star-spark { height: 44px; margin-top: 14px; }
+  /* SVG sparkline : conserve l'élément fonctionnel, restyle couleurs arcade */
   .ins-spark-svg { width: 100%; height: 100%; display: block; overflow: visible; }
 
+  /* ── KPI secondaires (3 cards) ── */
   .ins-sec {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
     margin-bottom: 28px;
   }
   .ins-sec-card {
-    background: var(--su); border: 1px solid var(--bo);
-    border-radius: var(--rx); padding: 14px;
-    box-shadow: var(--s0);
-    animation: insWidgetIn .45s var(--ease-snap) both;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
+    border-radius: var(--ens-r, 12px);
+    padding: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    animation: insWidgetIn .45s var(--ease-snap, cubic-bezier(.23,1,.32,1)) both;
   }
   .ins-sec-card:nth-child(1) { animation-delay: .06s; }
   .ins-sec-card:nth-child(2) { animation-delay: .12s; }
   .ins-sec-card:nth-child(3) { animation-delay: .18s; }
+  /* Chiffres secondaires Fredoka */
   .ins-sec-val {
-    font: 800 24px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink);
-    letter-spacing: -.03em; display: flex; align-items: center; gap: 5px;
+    font: 800 24px/1 var(--ens-display, 'Fredoka'), sans-serif;
+    color: var(--ink);
+    letter-spacing: -.03em;
+    display: flex; align-items: center; gap: 5px;
   }
   .ins-sec-val svg { flex-shrink: 0; }
   .ins-sec-lbl {
-    font: 600 10.5px/1.2 'Inter', sans-serif; color: var(--mu2);
-    text-transform: uppercase; letter-spacing: .05em; margin-top: 6px;
+    font: 600 10.5px/1.2 var(--ens-body, 'Inter'), sans-serif;
+    color: var(--mu2);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-top: 6px;
   }
 
-  /* Bar chart activité par jour */
+  /* Delta chip arcade */
+  .ins-widget-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
+    padding: 3px 8px;
+    border-radius: var(--ens-pill, 999px);
+    margin-top: 6px;
+  }
+  .ins-widget-delta.up   { background: rgba(24,165,88,.12); color: var(--ens-go, #18a558); }
+  .ins-widget-delta.down { background: rgba(225,29,72,.1);  color: var(--ens-stop, #e11d48); }
+  .ins-widget-delta.flat { background: var(--bg2, #f1f5f9); color: var(--mu2); }
+
+  @keyframes insWidgetIn {
+    from { opacity: 0; transform: translateY(8px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ins-star, .ins-sec-card { animation: none !important; }
+  }
+
+  /* ── Graphe barres activité ── */
   .ins-chart-wrap {
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: var(--r-xl);
+    border-radius: var(--ens-lg, 16px);
     padding: 16px 14px 14px;
-    box-shadow: var(--s0);
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
   }
   .ins-chart-bars {
     display: flex;
@@ -200,91 +217,90 @@ const STYLE = `<style>
     min-height: 12px;
     text-align: center;
   }
+  /* Barres arcade : --ens-go teinté (repos) → plein (pic) */
   .ins-chart-bar {
     width: 100%;
     border-radius: 4px 4px 0 0;
-    background: color-mix(in srgb, var(--a) 22%, transparent);
+    background: color-mix(in srgb, var(--ens-go, #18a558) 22%, transparent);
   }
   .ins-chart-col--peak .ins-chart-bar {
-    background: var(--a);
-    box-shadow: 0 4px 10px -2px color-mix(in srgb, var(--a) 35%, transparent);
+    background: var(--ens-go, #18a558);
+    box-shadow: 0 4px 10px -2px color-mix(in srgb, var(--ens-go, #18a558) 40%, transparent);
   }
-  .ins-chart-col--peak .ins-chart-val { color: var(--adk); font-weight: 700; }
+  .ins-chart-col--peak .ins-chart-val {
+    color: var(--ens-go, #18a558);
+    font-weight: 700;
+  }
   .ins-chart-lbl {
-    font: 500 10px/1 'Inter', sans-serif;
+    font: 500 10px/1 var(--ens-body, 'Inter'), sans-serif;
     color: var(--mu2);
     text-align: center;
   }
   .ins-chart-col--peak .ins-chart-lbl { color: var(--ink); font-weight: 600; }
   .ins-chart-divider { height: 1px; background: var(--bo2); margin: 0 0 8px; }
   .ins-chart-peak-note {
-    font: 500 11px/1.3 'Inter', sans-serif;
+    font: 500 11px/1.3 var(--ens-body, 'Inter'), sans-serif;
     color: var(--mu2);
     text-align: center;
     margin: 0;
   }
+  /* Empty state barres : illus route */
   .ins-chart-empty {
-    padding: 24px 0;
+    padding: 28px 16px;
     text-align: center;
-    font: 500 13px/1.5 'Inter', sans-serif;
+  }
+  .ins-chart-empty p {
+    font: 500 13px/1.5 var(--ens-body, 'Inter'), sans-serif;
     color: var(--mu2);
+    margin: 10px 0 0;
   }
 
-  /* Top élèves rows */
+  /* ── Top élèves rows ── */
   .ins-eleve-row {
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: var(--r-lg);
+    border-radius: var(--ens-lg, 16px);
     padding: 12px 14px;
     display: flex;
     align-items: center;
     gap: 12px;
     cursor: pointer;
     min-height: 44px;
-    transition: border-color .15s var(--ease-snap),
-                transform .15s var(--ease-snap);
+    transition: border-color .15s var(--ease-snap, cubic-bezier(.23,1,.32,1)),
+                transform .15s var(--ease-snap, cubic-bezier(.23,1,.32,1));
     margin-bottom: 6px;
   }
   @media (hover: hover) and (pointer: fine) {
-    .ins-eleve-row:hover { border-color: var(--a); }
+    .ins-eleve-row:hover { border-color: var(--ens-go, #18a558); }
   }
   .ins-eleve-row:active { transform: scale(.97); }
   .ins-eleve-av {
     width: 36px; height: 36px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font: 600 13px/1 'Plus Jakarta Sans', sans-serif;
+    font: 600 13px/1 var(--ens-display, 'Fredoka'), sans-serif;
     color: #fff;
     flex-shrink: 0;
   }
   .ins-eleve-info { flex: 1; min-width: 0; }
   .ins-eleve-name {
-    font: 600 13px/1.2 'Inter', sans-serif;
+    font: 600 13px/1.2 var(--ens-body, 'Inter'), sans-serif;
     color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     margin-bottom: 3px;
   }
   .ins-eleve-meta {
-    font: 500 11px/1 'Inter', sans-serif;
+    font: 500 11px/1 var(--ens-body, 'Inter'), sans-serif;
     color: var(--mu2);
   }
-  .ins-badge {
-    font: 600 11px/1 'Inter', sans-serif;
-    padding: 3px 9px;
-    border-radius: var(--r);
-    flex-shrink: 0;
-  }
-  .ins-badge-green  { color: var(--grd); background: rgba(16,185,129,.1); }
-  .ins-badge-orange { color: var(--amk); background: rgba(245,158,11,.1); }
-  .ins-badge-red    { color: var(--rdk); background: rgba(239,68,68,.1); }
 
-  /* Tabs progressent/stagnent */
+  /* ── Tabs progressent/stagnent — style arcade ── */
   .ins-tabs {
     display: flex;
     gap: 4px;
     background: var(--bg2);
     padding: 4px;
-    border-radius: var(--r);
+    border-radius: var(--ens-r, 12px);
     margin-bottom: 12px;
   }
   .ins-tab {
@@ -293,30 +309,35 @@ const STYLE = `<style>
     min-height: 44px;
     border: none;
     background: transparent;
-    border-radius: var(--r-sm);
-    font: 600 12px/1 'Inter', sans-serif;
+    border-radius: 9px;
+    font: 600 12px/1 var(--ens-body, 'Inter'), sans-serif;
     color: var(--mu2);
     cursor: pointer;
-    transition: background .15s, color .15s;
+    transition: background .15s, color .15s, box-shadow .15s;
   }
   .ins-tab.active {
     background: var(--su);
-    color: var(--a-txt);
-    box-shadow: var(--s0);
+    color: var(--ens-go, #18a558);
+    box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    font-weight: 700;
   }
 
-
-  /* Recommandations */
+  /* ── Recommandations ── */
   .ins-reco-list { display: flex; flex-direction: column; gap: 8px; }
   .ins-reco-card {
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: var(--r-lg);
+    border-radius: var(--ens-lg, 16px);
     padding: 14px 16px;
     display: flex;
     gap: 12px;
     align-items: flex-start;
+    transition: border-color .15s, transform .15s var(--ease-snap, cubic-bezier(.23,1,.32,1));
   }
+  .ins-reco-card[role="button"]:hover {
+    border-color: var(--ens-blue, #1d4ed8);
+  }
+  .ins-reco-card[role="button"]:active { transform: scale(.98); }
   .ins-reco-icon {
     font-size: 20px; line-height: 1;
     flex-shrink: 0;
@@ -324,42 +345,41 @@ const STYLE = `<style>
   }
   .ins-reco-body { flex: 1; min-width: 0; }
   .ins-reco-ttl {
-    font: 600 13px/1.3 'Inter', sans-serif;
+    font: 700 13px/1.3 var(--ens-body, 'Inter'), sans-serif;
     color: var(--ink);
     margin-bottom: 3px;
   }
   .ins-reco-txt {
-    font: 400 12px/1.5 'Inter', sans-serif;
+    font: 400 12px/1.5 var(--ens-body, 'Inter'), sans-serif;
     color: var(--mu);
   }
 
-  /* Skeleton */
-  .ins-skel { display: flex; flex-direction: column; gap: 16px; padding: 20px 16px; }
-  .ins-skel-kpi {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  /* ── Empty state listes ── */
+  .ins-empty {
+    padding: 28px 16px;
+    text-align: center;
+    color: var(--mu2);
+    font: 500 13px/1.5 var(--ens-body, 'Inter'), sans-serif;
+    background: var(--su);
+    border: 1.5px solid var(--bo);
+    border-radius: var(--ens-lg, 16px);
   }
+  .ins-empty p { margin: 10px 0 0; }
+
+  /* ── Skeleton ── */
+  .ins-skel { display: flex; flex-direction: column; gap: 16px; padding: 20px 16px; }
+  .ins-skel-kpi { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .ins-skel-block {
     height: 80px;
     background: var(--su);
     border: 1.5px solid var(--bo);
-    border-radius: var(--r-xl);
+    border-radius: var(--ens-lg, 16px);
     animation: insSkelPulse 1.4s ease-in-out infinite;
   }
   .ins-skel-block.tall { height: 160px; }
   @keyframes insSkelPulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: .5; }
-  }
-
-  /* Empty */
-  .ins-empty {
-    padding: 20px;
-    text-align: center;
-    color: var(--mu2);
-    font: 500 13px/1.5 'Inter', sans-serif;
-    background: var(--su);
-    border: 1.5px solid var(--bo);
-    border-radius: var(--r-lg);
+    50% { opacity: .45; }
   }
 </style>`;
 
@@ -387,14 +407,18 @@ export async function mount(root) {
 
   track("page.view", { page: "insights", role: me.role });
 
-  // Skeleton
+  // Skeleton avec hero arcade
   root.innerHTML = `
     ${STYLE}
     <div class="ins-page">
-      <header class="ins-hd">
-        <h1 class="ins-h1">Analyses</h1>
-        <p class="ins-sub">Chargement…</p>
-      </header>
+      <div class="ins-hero-wrap">
+        ${panneauxLayer({ variant: "hero" })}
+        <div class="ins-hero-content">
+          <p class="ins-hero-kicker">Analyses</p>
+          <h1 class="ins-hero-title" tabindex="-1">Vue d'ensemble</h1>
+          <p class="ins-hero-sub">Chargement…</p>
+        </div>
+      </div>
       <div class="ins-skel">
         <div class="ins-skel-kpi">
           <div class="ins-skel-block"></div>
@@ -660,22 +684,31 @@ async function loadData(me) {
 
 // ─── Render principal ─────────────────────────────────────────
 function renderAll(root, me, data) {
+  const subTxt =
+    data.valsCeMoisCount > 0
+      ? `Ce mois : <b>${data.valsCeMoisCount} compétence${data.valsCeMoisCount > 1 ? "s" : ""}</b> validée${data.valsCeMoisCount > 1 ? "s" : ""} avec ${data.nbElevesAccompagnes} élève${data.nbElevesAccompagnes > 1 ? "s" : ""}.`
+      : "60 derniers jours · activité et progression de tes élèves";
+
   root.innerHTML = `
     ${STYLE}
     <div class="ins-page anim-slide-up">
-      <header class="ins-hd">
-        <h1 class="ins-h1">Analyses</h1>
-        <p class="ins-sub">${
-          data.valsCeMoisCount > 0
-            ? `Ce mois, tu as fait valider <b style="color:var(--adk);font-weight:800">${data.valsCeMoisCount} compétence${data.valsCeMoisCount > 1 ? "s" : ""}</b> à tes ${data.nbElevesAccompagnes} élève${data.nbElevesAccompagnes > 1 ? "s" : ""}.`
-            : "Vue d'ensemble de ton activité · 60 derniers jours"
-        }</p>
-      </header>
 
-      ${renderKpis(data)}
-      ${renderActivityChartSection(data)}
-      ${renderTopElevesSection(data)}
-      ${renderRecoSection(data)}
+      <!-- Hero arcade routière -->
+      <div class="ins-hero-wrap">
+        ${panneauxLayer({ variant: "hero" })}
+        <div class="ins-hero-content">
+          <p class="ins-hero-kicker">Analyses</p>
+          <h1 class="ins-hero-title" tabindex="-1">Vue d'ensemble</h1>
+          <p class="ins-hero-sub">${subTxt}</p>
+        </div>
+      </div>
+
+      <div class="ins-body">
+        ${renderKpis(data)}
+        ${renderActivityChartSection(data)}
+        ${renderTopElevesSection(data)}
+        ${renderRecoSection(data)}
+      </div>
     </div>
   `;
 }
@@ -691,12 +724,12 @@ function renderKpis({
 }) {
   const deltaHtml =
     delta === null
-      ? `<p class="ins-widget-delta flat">Premier mois</p>`
+      ? `<span class="ins-widget-delta flat">Premier mois</span>`
       : delta > 0
-        ? `<p class="ins-widget-delta up">▲ ${delta}% vs mois précédent</p>`
+        ? `<span class="ins-widget-delta up">▲ ${delta}% vs mois préc.</span>`
         : delta < 0
-          ? `<p class="ins-widget-delta down">▼ ${Math.abs(delta)}% vs mois précédent</p>`
-          : `<p class="ins-widget-delta flat">= Stable vs mois précédent</p>`;
+          ? `<span class="ins-widget-delta down">▼ ${Math.abs(delta)}% vs mois préc.</span>`
+          : `<span class="ins-widget-delta flat">Stable vs mois préc.</span>`;
 
   const streakVal = streakPro !== null ? streakPro : "—";
   const tauxVal = tauxQuiz === null ? "—" : `${tauxQuiz}%`;
@@ -732,7 +765,8 @@ function renderKpis({
   `;
 }
 
-// Sparkline SVG étirée à la largeur du conteneur (preserveAspectRatio=none).
+// Sparkline SVG arcade — trait --ens-go + remplissage dégradé léger.
+// Logique de tracé identique (ne pas modifier les calculs de coordonnées).
 function sparkline(values, { w = 300, h = 44 } = {}) {
   const max = Math.max(1, ...values);
   const n = values.length;
@@ -743,9 +777,20 @@ function sparkline(values, { w = 300, h = 44 } = {}) {
     .join(" ");
   const lastX = ((n - 1) * step).toFixed(1);
   const lastY = y(values[n - 1]).toFixed(1);
+  // Chemin fermé (fill dégradé sous la courbe)
+  const firstX = "0";
+  const firstY = y(values[0]).toFixed(1);
+  const fillPath = `M${firstX},${firstY} ${values.map((v, i) => `${(i * step).toFixed(1)},${y(v).toFixed(1)}`).join(" L")} L${lastX},${h} L${firstX},${h} Z`;
   return `<svg class="ins-spark-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
-    <polyline points="${pts}" fill="none" stroke="var(--a)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${lastX}" cy="${lastY}" r="3.5" fill="var(--a)"/>
+    <defs>
+      <linearGradient id="ins-spark-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--ens-go, #18a558)" stop-opacity=".18"/>
+        <stop offset="100%" stop-color="var(--ens-go, #18a558)" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="${fillPath}" fill="url(#ins-spark-grad)"/>
+    <polyline points="${pts}" fill="none" stroke="var(--ens-go, #18a558)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lastX}" cy="${lastY}" r="3.5" fill="var(--ens-go, #18a558)"/>
   </svg>`;
 }
 
@@ -762,7 +807,10 @@ function renderActivityChartSection({ heatmap }) {
       <div class="ins-section">
         <div class="ins-section-title">Tes jours d'activité · 60 derniers jours</div>
         <div class="ins-chart-wrap">
-          <div class="ins-chart-empty">Aucune validation sur les 60 derniers jours.<br>Enregistre ta première séance pour voir quels jours tu es le plus actif.</div>
+          <div class="ins-chart-empty">
+            ${illus("route", { size: 64 })}
+            <p>Aucune validation sur les 60 derniers jours.<br>Enregistre ta première séance pour voir quels jours tu es le plus actif.</p>
+          </div>
         </div>
       </div>
     `;
@@ -820,19 +868,23 @@ function renderTopElevesSection({ topProgressent, topStagnent }) {
 function renderElevesList(tab, topProgressent, topStagnent) {
   const list = tab === "progressent" ? topProgressent : topStagnent;
   if (list.length === 0) {
-    const empty =
+    const emptyTxt =
       tab === "progressent"
         ? "Aucun élève avec plusieurs compétences validées ce mois."
         : "Personne en pause — tout le monde avance !";
-    return `<div class="ins-empty">${empty}</div>`;
+    return `<div class="ins-empty">
+      ${tab === "progressent" ? illus("trophy", { size: 52 }) : illus("route", { size: 52 })}
+      <p>${emptyTxt}</p>
+    </div>`;
   }
   return list
     .map((e, i) => {
       const nom = esc(`${e.prenom || ""} ${e.nom || ""}`.trim() || "Élève");
+      // Chips arcade : go = progression, amber = en pause
       const badge =
         tab === "progressent"
-          ? `<span class="ins-badge ins-badge-green">+${e.compsThisMonth} ce mois</span>`
-          : `<span class="ins-badge ins-badge-orange">${e.daysAgo ? `${e.daysAgo}j sans validation` : "En pause"}</span>`;
+          ? `<span class="ens-chip ens-chip--go">+${e.compsThisMonth} ce mois</span>`
+          : `<span class="ens-chip ens-chip--amber">${e.daysAgo ? `${e.daysAgo}j sans valid.` : "En pause"}</span>`;
       const meta =
         tab === "progressent"
           ? `${e.compsThisMonth} compétence${e.compsThisMonth > 1 ? "s" : ""} acquise${e.compsThisMonth > 1 ? "s" : ""} ce mois`
@@ -885,6 +937,7 @@ function wireAll(root, me, data) {
   // Tabs progressent/stagnent
   root.querySelectorAll(".ins-tab").forEach((btn) => {
     btn.addEventListener("click", () => {
+      haptic("select"); // léger : changement d'onglet d'analyse
       _tab = btn.dataset.tab;
       root
         .querySelectorAll(".ins-tab")
@@ -908,6 +961,7 @@ function wireAll(root, me, data) {
   // Reco cards → navigate to route
   root.querySelectorAll(".ins-reco-card--link[data-route]").forEach((card) => {
     const handler = () => {
+      haptic("impact"); // action métier : ouverture d'une reco
       track("insights.reco.click", { route: card.dataset.route });
       navigate(card.dataset.route);
     };

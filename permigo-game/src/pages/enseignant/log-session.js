@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// Enseignant — Valider une séance (REFONTE sans heures)
+// Enseignant — Valider une séance (REFONTE sans heures) — DA Arcade Routière v2
 // Un seul écran : élève → compétences REMC (multi-statut) → note → valider.
 // Moniteur = source de vérité. Zéro durée, zéro métrique de classement.
 // RPC : validate_session(p_eleve_id, p_session_date, p_note,
@@ -19,6 +19,8 @@ import { fmtName } from "@/utils/fmt-name.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
 import { startTour } from "@/components/common/guided-tour.js";
+import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
+import { illus } from "@/components/enseignant/illus.js";
 
 // Tour guidé validation — 1× à la première séance, quand l'UI complète existe
 const TOUR_KEY = "pg-tour-validation-v1";
@@ -92,119 +94,326 @@ let _showSub = false; // coach-hint mode d'emploi (1re visite seulement)
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
-  .vs { padding: 16px 16px calc(152px + env(safe-area-inset-bottom,0px)); max-width: 600px; margin: 0 auto; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; }
-  .vs-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-  .vs-back { position: relative; width: 40px; height: 40px; flex-shrink: 0; border: 1px solid var(--bo); background: var(--su); border-radius: var(--r); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-  .vs-back::before { content: ''; position: absolute; inset: -2px; }
-  .vs-back:active { transform: scale(.97); transition: transform .12s cubic-bezier(.23,1,.32,1); }
-  @media (prefers-reduced-motion: reduce) { .vs-back:active { transform: none; } }
-  .vs-h1 { font: 800 19px/1.2 'Plus Jakarta Sans', sans-serif; margin: 0; letter-spacing: -.02em; }
-  .vs-sub { font: 500 12.5px/1.3 'Inter', sans-serif; color: color-mix(in srgb, var(--mu) 45%, var(--ink)); margin: 2px 0 0; }
+  /* ── Wrapper global ── */
+  .vs {
+    padding: 0 16px calc(152px + env(safe-area-inset-bottom,0px));
+    max-width: 600px; margin: 0 auto;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+  }
 
-  .vs-card { background: var(--su); border: 1px solid var(--bo); border-radius: var(--r-lg); padding: 14px; margin-bottom: 12px; }
-  .vs-card-ttl { font: 700 12px/1 'Inter', sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--mu2); margin: 0 0 12px; display: flex; align-items: center; gap: 6px; }
+  /* ── Header arcade : mini hero presse-papier ── */
+  .vs-hd {
+    position: relative; overflow: hidden;
+    margin: 0 -16px 18px;
+    padding: 18px 16px 24px;
+    background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+    color: #fff;
+    isolation: isolate;
+  }
+  /* liseré marquage au sol */
+  .vs-hd::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
+    background: repeating-linear-gradient(90deg, var(--ens-amber, #f59e0b) 0 18px, transparent 18px 34px);
+    opacity: .75;
+  }
+  .vs-hd-inner { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; }
+  .vs-back {
+    width: 40px; height: 40px; flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,.22); background: rgba(255,255,255,.1);
+    border-radius: var(--ens-r, 16px); color: #fff;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s;
+  }
+  .vs-back:active { background: rgba(255,255,255,.2); transform: scale(.97); }
+  .vs-back:focus-visible { outline: 3px solid rgba(255,255,255,.6); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .vs-back { transition: none; } }
+  .vs-hd-text { flex: 1; min-width: 0; }
+  .vs-h1 {
+    font: 700 19px/1.15 var(--ens-display, 'Fredoka'), sans-serif;
+    color: #fff; margin: 0; letter-spacing: -.015em;
+  }
+  .vs-sub {
+    font: 500 12px/1.3 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: rgba(255,255,255,.72); margin: 3px 0 0;
+  }
+  .vs-hd-illus { flex-shrink: 0; opacity: .9; }
 
-  /* Dropdown élève */
+  /* ── Carte générique (wrapper section) ── */
+  .vs-card {
+    background: var(--su); border: 1.5px solid var(--bo);
+    border-radius: var(--ens-r, 16px); padding: 14px; margin-bottom: 12px;
+    box-shadow: var(--ens-shadow, var(--s0));
+  }
+  .vs-card-ttl {
+    font: 700 12px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    letter-spacing: .04em; text-transform: uppercase;
+    color: var(--mu2); margin: 0 0 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ── Dropdown élève ── */
   .vs-search-ico { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--mu2); pointer-events: none; }
-  .vs-search { width: 100%; box-sizing: border-box; min-height: 44px; padding: 10px 12px 10px 36px; background: var(--bg); border: 1px solid var(--bo); border-radius: var(--r); font: 500 16px/1 'Inter', sans-serif; color: var(--ink); outline: none; }
-  .vs-search:focus { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
+  .vs-search {
+    width: 100%; box-sizing: border-box; min-height: 44px;
+    padding: 10px 12px 10px 36px;
+    background: var(--bg); border: 1.5px solid var(--bo);
+    border-radius: var(--ens-r, 16px);
+    font: 500 16px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--ink); outline: none;
+  }
+  .vs-search:focus { border-color: var(--ens-go, var(--a)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ens-go, var(--a)) 18%, transparent); }
 
   .vs-dd { position: relative; margin-bottom: 16px; z-index: 30; }
   .vs-dd-backdrop { position: fixed; inset: 0; z-index: 20; }
-  .vs-dd-trigger { position: relative; z-index: 31; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 60px; background: var(--su); border: 1.5px solid var(--bo); border-radius: var(--r-md); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color .15s, box-shadow .15s, transform .14s var(--ease-snap); }
+  .vs-dd-trigger {
+    position: relative; z-index: 31; width: 100%; box-sizing: border-box;
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    min-height: 60px; background: var(--su);
+    border: 1.5px solid var(--bo); border-radius: var(--ens-r, 16px);
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: border-color .15s, box-shadow .15s, transform .14s;
+  }
   .vs-dd-trigger:active { transform: scale(.98); }
-  .vs-dd.open .vs-dd-trigger { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
+  .vs-dd.open .vs-dd-trigger {
+    border-color: var(--ens-go, var(--a));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ens-go, var(--a)) 18%, transparent);
+  }
   .vs-dd-cur { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
   .vs-dd-av { flex-shrink: 0; display: inline-flex; }
   .vs-dd-txt { display: flex; flex-direction: column; min-width: 0; text-align: left; }
-  .vs-dd-name { font: 700 14.5px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vs-dd-name { font: 700 14.5px/1.2 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .vs-dd-ph { color: var(--mu2); font-weight: 600; }
   .vs-dd-sub { font: 600 11.5px/1 'IBM Plex Mono', monospace; color: var(--mu2); margin-top: 3px; }
-  .vs-dd-chev { flex-shrink: 0; color: var(--mu2); display: inline-flex; transition: transform .25s var(--ease); }
+  .vs-dd-chev { flex-shrink: 0; color: var(--mu2); display: inline-flex; transition: transform .25s; }
   .vs-dd.open .vs-dd-chev { transform: rotate(180deg); }
-  .vs-dd-panel { position: absolute; z-index: 31; top: calc(100% + 6px); left: 0; right: 0; background: var(--su); border: 1.5px solid var(--bo); border-radius: var(--r-md); box-shadow: 0 16px 40px -10px rgba(10,13,26,.22); padding: 6px; max-height: 0; overflow: hidden; overscroll-behavior: contain; opacity: 0; transform: translateY(-6px); pointer-events: none; transition: max-height .25s var(--ease), opacity .18s, transform .2s; }
+  .vs-dd-panel {
+    position: absolute; z-index: 31; top: calc(100% + 6px); left: 0; right: 0;
+    background: var(--su); border: 1.5px solid var(--bo);
+    border-radius: var(--ens-r, 16px);
+    box-shadow: 0 16px 40px -10px rgba(10,13,26,.22);
+    padding: 6px; max-height: 0; overflow: hidden; overscroll-behavior: contain;
+    opacity: 0; transform: translateY(-6px); pointer-events: none;
+    transition: max-height .25s, opacity .18s, transform .2s;
+  }
   .vs-dd.open .vs-dd-panel { max-height: min(62vh, 420px); overflow-y: auto; opacity: 1; transform: translateY(0); pointer-events: auto; }
   .vs-dd-search { position: relative; margin: 4px 4px 8px; }
   .vs-dd-list { display: flex; flex-direction: column; gap: 2px; }
-  .vs-dd-opt { display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; padding: 9px 10px; min-height: 44px; border: 0; background: transparent; border-radius: var(--r); cursor: pointer; text-align: left; color: var(--ink); -webkit-tap-highlight-color: transparent; opacity: 0; animation: vsDdIn .22s ease forwards; }
+  .vs-dd-opt {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    box-sizing: border-box; padding: 9px 10px; min-height: 44px;
+    border: 0; background: transparent; border-radius: var(--ens-r, 16px);
+    cursor: pointer; text-align: left; color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0; animation: vsDdIn .22s ease forwards;
+  }
   .vs-dd-opt:hover { background: var(--bg); }
-  .vs-dd-opt.sel { background: color-mix(in srgb, var(--a) 8%, transparent); }
-  .vs-dd-opt .vs-dd-name { font: 600 14px/1.2 'Inter', sans-serif; flex: 1; }
-  .vs-dd-check { flex-shrink: 0; color: var(--a-txt); display: inline-flex; }
+  .vs-dd-opt.sel { background: color-mix(in srgb, var(--ens-go, var(--a)) 8%, transparent); }
+  .vs-dd-opt .vs-dd-name { font: 600 14px/1.2 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; flex: 1; }
+  .vs-dd-check { flex-shrink: 0; color: var(--ens-go, var(--a)); display: inline-flex; }
   @keyframes vsDdIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
   @media (prefers-reduced-motion: reduce) { .vs-dd-opt { animation: none; opacity: 1; } .vs-dd-chev, .vs-dd-panel { transition: none; } }
 
-  /* Légende — 3 pastilles, le geste (tap qui cycle) s'auto-explique */
+  /* ── Légende statuts ── */
   .vs-comps { margin-bottom: 4px; }
-  .vs-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font: 600 12px/1 'Inter', sans-serif; color: var(--mu2); margin: 0 2px 16px; }
+  .vs-legend {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px;
+    font: 600 12px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--mu2); margin: 0 2px 16px;
+  }
   .vs-leg { display: inline-flex; align-items: center; gap: 5px; }
   .vs-leg::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
-  .vs-leg.acquis { color: var(--grd); }
-  .vs-leg.en_cours { color: #6366f1; }
-  .vs-leg.a_retravailler { color: var(--amx); }
+  .vs-leg.acquis { color: var(--ens-go, var(--grd)); }
+  .vs-leg.en_cours { color: var(--ens-blue, #6366f1); }
+  .vs-leg.a_retravailler { color: var(--ens-amber, var(--amx)); }
 
-  /* Sections par monde — accordéons */
-  .vs-monde { margin-bottom: 8px; border: 1px solid var(--bo); border-radius: var(--r); background: var(--su); overflow: hidden; }
+  /* ── Sections accordéon par compétence REMC ── */
+  .vs-monde {
+    margin-bottom: 8px; border: 1.5px solid var(--bo);
+    border-radius: var(--ens-r, 16px); background: var(--su); overflow: hidden;
+  }
   .vs-monde.open { border-color: var(--bo4); }
-  .vs-monde-hd { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; margin: 0; padding: 13px 14px; min-height: 52px; background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform .14s var(--ease-snap); }
+  .vs-monde-hd {
+    display: flex; align-items: center; gap: 9px; width: 100%;
+    box-sizing: border-box; margin: 0; padding: 13px 14px; min-height: 52px;
+    background: none; border: 0; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .14s;
+  }
   .vs-monde-hd:active { transform: scale(.98); }
   .vs-monde-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .vs-monde-nom { font: 700 13.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); flex: 1; min-width: 0; text-align: left; }
+  .vs-monde-nom {
+    font: 700 13.5px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--ink); flex: 1; min-width: 0; text-align: left;
+  }
   .vs-monde-cnt { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
-  .vs-monde-chev { color: var(--mu2); display: inline-flex; transition: transform .25s var(--ease); }
+  .vs-monde-chev { color: var(--mu2); display: inline-flex; transition: transform .25s; }
   .vs-monde.open .vs-monde-chev { transform: rotate(180deg); }
-  .vs-monde-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s var(--ease); }
+  .vs-monde-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s; }
   .vs-monde.open .vs-monde-body { grid-template-rows: 1fr; }
   .vs-monde-body > .vs-chips { overflow: hidden; min-height: 0; }
   .vs-chips { display: flex; flex-direction: column; gap: 4px; padding: 0 12px 12px; }
   @media (prefers-reduced-motion: reduce) { .vs-monde-chev, .vs-monde-body { transition: none; } }
-  .vs-chip { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; padding: 8px 11px; min-height: 42px; border: 1px solid var(--bo); background: var(--su); border-radius: var(--r); cursor: pointer; font: 500 13px/1.25 'Inter', sans-serif; color: var(--ink); text-align: left; -webkit-tap-highlight-color: transparent; transition: border-color .12s, background .12s; }
+
+  /* ── Chip compétence ── */
+  .vs-chip {
+    display: flex; align-items: center; gap: 9px; width: 100%;
+    box-sizing: border-box; padding: 8px 11px; min-height: 44px;
+    border: 1.5px solid var(--bo); background: var(--su);
+    border-radius: var(--ens-r, 16px);
+    cursor: pointer; font: 500 13px/1.25 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--ink); text-align: left;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color .12s, background .12s;
+  }
   .vs-chip:active { transform: scale(.98); transition: transform .12s cubic-bezier(.23,1,.32,1); }
   @media (prefers-reduced-motion: reduce) { .vs-chip:active { transform: none; } }
   .vs-chip-ico { width: 15px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--bo4); }
-  .vs-chip-code { font: 700 10px/1 'IBM Plex Mono', monospace; color: var(--mu); background: var(--bg2); padding: 3px 5px; border-radius: 5px; flex-shrink: 0; }
+  .vs-chip-code {
+    font: 700 10px/1 'IBM Plex Mono', monospace;
+    color: var(--mu); background: var(--bg2); padding: 3px 5px; border-radius: 5px; flex-shrink: 0;
+  }
   .vs-chip-nom { flex: 1; min-width: 0; }
-  /* déjà acquis → s'efface (focus sur ce qu'il reste) */
-  .vs-chip.locked { cursor: default; border-color: transparent; background: transparent; min-height: 30px; padding: 4px 11px; opacity: .55; }
-  .vs-chip.locked .vs-chip-ico { color: var(--grd); }
-  .vs-chip.locked .vs-chip-code { background: transparent; color: var(--grd); padding-left: 0; }
+
+  /* déjà acquis → effacé (focus sur ce qu'il reste) */
+  .vs-chip.locked {
+    cursor: default; border-color: transparent; background: transparent;
+    min-height: 30px; padding: 4px 11px; opacity: .55;
+  }
+  .vs-chip.locked .vs-chip-ico { color: var(--ens-go, var(--grd)); }
+  .vs-chip.locked .vs-chip-code { background: transparent; color: var(--ens-go, var(--grd)); padding-left: 0; }
   .vs-chip.locked .vs-chip-nom { color: var(--mu2); }
+
   /* sélection en séance */
-  .vs-chip.acquis { border-color: var(--grd); background: rgba(16,185,129,.08); }
-  .vs-chip.acquis .vs-chip-ico { color: var(--grd); }
-  .vs-chip.en_cours { border-color: #6366f1; background: rgba(99,102,241,.08); }
-  .vs-chip.en_cours .vs-chip-ico { color: #6366f1; }
-  .vs-chip.a_retravailler { border-color: var(--amx); background: rgba(245,158,11,.08); }
-  .vs-chip.a_retravailler .vs-chip-ico { color: var(--amx); }
+  .vs-chip.acquis { border-color: var(--ens-go, var(--grd)); background: color-mix(in srgb, var(--ens-go, #18a558) 8%, var(--su)); }
+  .vs-chip.acquis .vs-chip-ico { color: var(--ens-go, var(--grd)); }
+  .vs-chip.en_cours { border-color: var(--ens-blue, #6366f1); background: color-mix(in srgb, var(--ens-blue, #1d4ed8) 8%, var(--su)); }
+  .vs-chip.en_cours .vs-chip-ico { color: var(--ens-blue-lt, #3b82f6); }
+  .vs-chip.a_retravailler { border-color: var(--ens-amber, var(--amx)); background: color-mix(in srgb, var(--ens-amber, #f59e0b) 8%, var(--su)); }
+  .vs-chip.a_retravailler .vs-chip-ico { color: var(--ens-amber, var(--amx)); }
 
-  /* Note */
-  .vs-note { width: 100%; box-sizing: border-box; min-height: 72px; resize: vertical; padding: 12px; background: var(--bg); border: 1px solid var(--bo); border-radius: var(--r); font: 500 14px/1.5 'Inter', sans-serif; color: var(--ink); outline: none; }
-  .vs-note:focus { border-color: var(--a); box-shadow: 0 0 0 3px var(--ap); }
-  .vs-note-count { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); text-align: right; margin-top: 6px; }
+  /* ── Note moniteur ── */
+  .vs-note {
+    width: 100%; box-sizing: border-box; min-height: 72px; resize: vertical; padding: 12px;
+    background: var(--bg); border: 1.5px solid var(--bo);
+    border-radius: var(--ens-r, 16px);
+    font: 500 14px/1.5 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--ink); outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .vs-note:focus {
+    border-color: var(--ens-go, var(--a));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ens-go, var(--a)) 18%, transparent);
+  }
+  .vs-note-count { font: 500 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); text-align: right; margin-top: 6px; }
 
-  /* Footer sticky — posé JUSTE AU-DESSUS de la nav du bas (≈60px) */
-  .vs-footer { position: fixed; bottom: calc(60px + env(safe-area-inset-bottom,0px)); left: 0; right: 0; z-index: 45; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(12px); border-top: 1px solid var(--bo); }
-  /* layout seulement — l'apparence vient de .pg-btn (global) */
-  .vs-submit { width: 100%; max-width: 600px; margin: 0 auto; min-height: 52px; font-size: 15px; }
+  /* ── Footer sticky ── */
+  .vs-footer {
+    position: fixed; bottom: calc(60px + env(safe-area-inset-bottom,0px)); left: 0; right: 0; z-index: 45;
+    padding: 10px 16px;
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter: blur(12px); border-top: 1px solid var(--bo);
+  }
+  .vs-submit {
+    width: 100%; max-width: 600px; margin: 0 auto; min-height: 52px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    border: 0; border-radius: var(--ens-r, 16px);
+    background: linear-gradient(180deg, var(--ens-go-lt, #34d27b), var(--ens-go, #18a558));
+    color: var(--ens-ink-go, #07150c);
+    font: 700 15px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; cursor: pointer;
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000), var(--ens-shadow, var(--s0));
+    transition: transform .1s ease, box-shadow .1s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .vs-submit:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000); }
+  .vs-submit:focus-visible { outline: 3px solid var(--ens-go, var(--a)); outline-offset: 2px; }
+  .vs-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; box-shadow: none; }
+  @media (prefers-reduced-motion: reduce) { .vs-submit { transition: none; } }
 
-  .vs-empty { padding: 32px 16px; text-align: center; color: var(--mu2); font: 500 14px/1.5 'Inter', sans-serif; }
-  .vs-skel { height: 64px; border-radius: var(--r); background: var(--su); border: 1px solid var(--bo); animation: vsPulse 1.4s ease-in-out infinite; margin-bottom: 8px; }
+  /* ── Squelettes chargement ── */
+  .vs-empty { padding: 32px 16px; text-align: center; color: var(--mu2); font: 500 14px/1.5 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; }
+  .vs-skel {
+    height: 64px; border-radius: var(--ens-r, 16px); background: var(--su);
+    border: 1.5px solid var(--bo); animation: vsPulse 1.4s ease-in-out infinite; margin-bottom: 8px;
+  }
   @keyframes vsPulse { 0%,100%{opacity:1} 50%{opacity:.5} }
 
-  /* État succès après séance — referme la boucle de valeur (sobre, cohérent livret) */
-  .vs-success { max-width: 480px; margin: 0 auto; padding: 44px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-  .vs-success-check { width: 64px; height: 64px; border-radius: 50%; background: var(--grp); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; animation: vs-pop .42s cubic-bezier(.34,1.56,.64,1) both; }
+  /* ── Écran succès après séance ── */
+  .vs-success {
+    max-width: 480px; margin: 0 auto; padding: 44px 24px;
+    text-align: center; display: flex; flex-direction: column; align-items: center;
+  }
+  /* Cercle check arcade vert */
+  .vs-success-check {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(180deg, var(--ens-go-lt, #34d27b), var(--ens-go, #18a558));
+    display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000), 0 8px 24px color-mix(in srgb, var(--ens-go, #18a558) 28%, transparent);
+    animation: vs-pop .42s cubic-bezier(.34,1.56,.64,1) both;
+  }
   @keyframes vs-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .vs-success-comp { font: 600 13px/1.3 'Inter', sans-serif; color: var(--mu); margin-bottom: 6px; }
-  .vs-success-title { font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; margin-bottom: 6px; }
-  .vs-success-count { font: 700 14px/1.3 'Inter', sans-serif; color: var(--grd); margin-bottom: 22px; }
-  .vs-success-bar { width: 100%; max-width: 320px; height: 8px; background: var(--bo); border-radius: 99px; overflow: hidden; margin-bottom: 10px; }
-  .vs-success-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--a), var(--a-lt)); transition: width .8s .1s cubic-bezier(.2,.7,.3,1); }
-  .vs-success-meta { font: 600 13px/1 'Inter', sans-serif; color: var(--ink); margin-bottom: 6px; }
-  .vs-success-meta b { font-weight: 800; color: var(--adk); }
-  .vs-success-note { font: 500 13px/1.45 'Inter', sans-serif; color: var(--mu2); margin-bottom: 28px; }
-  .vs-success-done { max-width: 320px !important; }
-  @media (prefers-reduced-motion: reduce) { .vs-success-check { animation: none; } .vs-success-fill { transition: none; } }
+  .vs-success-comp {
+    font: 600 13px/1.3 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--mu); margin-bottom: 6px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  /* Chip "Séance enregistrée" arcade */
+  .vs-success-badge {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+    border-radius: var(--ens-r-pill, 999px);
+    background: color-mix(in srgb, var(--ens-go, #18a558) 14%, var(--su));
+    border: 1.5px solid color-mix(in srgb, var(--ens-go, #18a558) 28%, transparent);
+    color: var(--ens-go, #18a558);
+    font: 700 12px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    margin-bottom: 14px;
+  }
+  .vs-success-title {
+    font: 700 24px/1.2 var(--ens-display, 'Fredoka'), sans-serif;
+    color: var(--ink); letter-spacing: -.02em; margin-bottom: 6px;
+  }
+  .vs-success-count {
+    font: 700 14px/1.3 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--ens-go, var(--grd)); margin-bottom: 22px;
+  }
+  .vs-success-bar {
+    width: 100%; max-width: 320px; height: 8px; background: var(--bo);
+    border-radius: 99px; overflow: hidden; margin-bottom: 10px;
+  }
+  .vs-success-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--ens-go, #18a558), var(--ens-go-lt, #34d27b));
+    box-shadow: 0 0 10px color-mix(in srgb, var(--ens-go, #18a558) 45%, transparent);
+    transition: width .8s .1s cubic-bezier(.2,.7,.3,1);
+  }
+  .vs-success-meta {
+    font: 600 13px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--ink); margin-bottom: 6px;
+  }
+  .vs-success-meta b { font-weight: 800; color: var(--ens-go, var(--adk)); }
+  .vs-success-note {
+    font: 500 13px/1.45 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--mu2); margin-bottom: 28px;
+  }
+  /* CTA retour arcade */
+  .vs-success-done {
+    width: 100%; max-width: 320px; min-height: 52px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    border: 0; border-radius: var(--ens-r, 16px);
+    background: linear-gradient(180deg, var(--ens-go-lt, #34d27b), var(--ens-go, #18a558));
+    color: var(--ens-ink-go, #07150c);
+    font: 700 15px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; cursor: pointer;
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000);
+    transition: transform .1s ease, box-shadow .1s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .vs-success-done:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000); }
+  .vs-success-done:focus-visible { outline: 3px solid var(--ens-go, var(--a)); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    .vs-success-check { animation: none; }
+    .vs-success-fill { transition: none; }
+    .vs-success-done { transition: none; }
+  }
 </style>`;
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -231,8 +440,15 @@ export async function mount(root) {
   root.innerHTML = `${STYLE}
     <div class="vs anim-slide-up">
       <div class="vs-hd">
-        <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
-        <div><h1 class="vs-h1">Valider une séance</h1><p class="vs-sub">Chargement…</p></div>
+        ${panneauxLayer({ variant: "section" })}
+        <div class="vs-hd-inner">
+          <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
+          <div class="vs-hd-text">
+            <h1 class="vs-h1">Valider une séance</h1>
+            <p class="vs-sub">Chargement…</p>
+          </div>
+          <div class="vs-hd-illus">${illus("clipboard", { size: 48 })}</div>
+        </div>
       </div>
       <div class="vs-skel"></div><div class="vs-skel"></div><div class="vs-skel"></div>
     </div>`;
@@ -310,10 +526,14 @@ function render() {
   _root.innerHTML = `${STYLE}
     <div class="vs anim-slide-up">
       <div class="vs-hd">
-        <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
-        <div>
-          <h1 class="vs-h1">Valider une séance</h1>
-          ${_showSub ? `<p class="vs-sub">Choisis l'élève, déroule une catégorie, appuie sur les compétences travaillées.</p>` : ""}
+        ${panneauxLayer({ variant: "section" })}
+        <div class="vs-hd-inner">
+          <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
+          <div class="vs-hd-text">
+            <h1 class="vs-h1">Valider une séance</h1>
+            ${_showSub ? `<p class="vs-sub">Choisis l'élève, déroule une catégorie, appuie sur les compétences travaillées.</p>` : ""}
+          </div>
+          <div class="vs-hd-illus">${illus("clipboard", { size: 48 })}</div>
         </div>
       </div>
       ${renderEleveDropdown()}
@@ -371,9 +591,9 @@ function renderEleveDropdown() {
 }
 
 const MONDE_COLOR = {
-  C1: "var(--a)",
-  C2: "#3b82f6",
-  C3: "#eab308",
+  C1: "var(--ens-go, var(--a))",
+  C2: "var(--ens-blue-lt, #3b82f6)",
+  C3: "var(--ens-amber, #eab308)",
   C4: "#8b5cf6",
 };
 
@@ -442,11 +662,9 @@ function renderFooter() {
   const lbl =
     acquis > 0
       ? `Valider · ${acquis} compétence${acquis > 1 ? "s" : ""}`
-      : total > 0
-        ? `Enregistrer la séance`
-        : `Enregistrer la séance`;
+      : `Enregistrer la séance`;
   return `<div class="vs-footer">
-    <button class="vs-submit pg-btn" id="vs-submit" type="button">${icon("check", { size: 18, strokeWidth: 2.6 })} <span id="vs-submit-lbl">${esc(lbl)}</span></button>
+    <button class="vs-submit" id="vs-submit" type="button">${icon("check", { size: 18, strokeWidth: 2.6 })} <span id="vs-submit-lbl">${esc(lbl)}</span></button>
   </div>`;
 }
 
@@ -497,6 +715,7 @@ function wire() {
   _root.querySelectorAll(".vs-dd-opt[data-eleve]").forEach((opt) => {
     opt.addEventListener("click", () => {
       _query = "";
+      haptic("select");
       selectEleve(opt.dataset.eleve); // remet _eleveDDOpen=false + render
     });
   });
@@ -521,7 +740,8 @@ function wire() {
       const next = nextStatut(_picked.get(id) || null);
       if (next === null) _picked.delete(id);
       else _picked.set(id, next);
-      haptic(next === "acquis" ? "success" : next ? "select" : "tap");
+      // haptic métier : validate pour acquis, select pour autre, tap pour reset
+      haptic(next === "acquis" ? "validate" : next ? "select" : "tap");
       chip.className = "vs-chip" + (next ? " " + next : "");
       const ico = chip.querySelector(".vs-chip-ico");
       if (ico)
@@ -591,7 +811,8 @@ async function submit() {
       has_note: !!_note.trim(),
     });
 
-    haptic("success");
+    // haptic confirm : leçon enregistrée/confirmée (pattern double-appui satisfaisant)
+    haptic("confirm");
     const nNew = data?.n_acquis_new ?? acquis.length;
     // Acquis = moment de valeur : on PROUVE l'avancée avant de quitter.
     if (nNew > 0) {
@@ -617,15 +838,12 @@ async function submit() {
   }
 }
 
-// Palier moniteur : si les validations cumulées (validated_by) franchissent un
-// seuil MONITEUR_TIERS, écran plein écran « Palier atteint » (parcours-pro).
-// Idempotent (ledger localStorage). L'install nudge est différé après la
-// fermeture de l'écran palier (sinon deux overlays s'empilent).
+// Palier moniteur : si les validations cumulées franchissent un seuil, écran
+// plein écran « Palier atteint » (parcours-pro). Idempotent (ledger localStorage).
 async function _maybeCelebrateMoniteurTier() {
   const me = getCurUser();
   if (!me?.id) return;
   try {
-    // Source de vérité = compte réel de validations (validated_by), comme parcours-pro.
     const { count } = await sb
       .from("validations")
       .select("id", { count: "exact", head: true })
@@ -633,20 +851,17 @@ async function _maybeCelebrateMoniteurTier() {
     if (typeof count === "number") {
       const { maybeCelebrateTier } =
         await import("@/services/moniteur-tier-celebration.js");
-      // await : si un écran s'affiche, on attend sa fermeture avant l'install nudge.
       await maybeCelebrateTier(count, { onCta: () => navigate("#/parcours") });
     }
   } catch (e) {
     console.warn("[valider-seance] tier celebrate failed", e);
   }
-  // Vraie victoire moniteur → meilleur moment pour proposer l'install écran d'accueil.
   promptInstallAtValueMoment(me, "moniteur_session_validee");
 }
 
-// Écran succès : referme la boucle « je valide → l'élève avance → il le voit ».
+// Écran succès arcade : referme la boucle « je valide → l'élève avance → il le voit ».
 function showSessionSuccess(prenom, nNew, totalAcquis) {
   // Ferme un tour guidé 1re-visite qui aurait pu s'afficher pendant la RPC
-  // (sinon il se superpose à l'écran succès). Le tour est appendé à <body>.
   document.querySelector(".gt-root")?.remove();
 
   const pct = REMC_TOTAL > 0 ? Math.round((totalAcquis / REMC_TOTAL) * 100) : 0;
@@ -655,14 +870,14 @@ function showSessionSuccess(prenom, nNew, totalAcquis) {
   _root.innerHTML = `${STYLE}
     <div class="vs anim-slide-up">
       <div class="vs-success">
-        <div class="vs-success-check">${icon("check", { size: 34, strokeWidth: 3, color: "var(--grd)" })}</div>
-        <div class="vs-success-comp">Séance enregistrée</div>
+        <div class="vs-success-check">${icon("check", { size: 36, strokeWidth: 3, color: "var(--ens-ink-go, #07150c)" })}</div>
+        <span class="vs-success-badge">${icon("check-circle", { size: 14, strokeWidth: 2.2 })} Séance enregistrée</span>
         <div class="vs-success-title">${complete ? `${esc(prenom)} a tout validé` : `${esc(prenom)} a progressé`}</div>
         <div class="vs-success-count">${nNew} compétence${nNew > 1 ? "s" : ""} validée${nNew > 1 ? "s" : ""} aujourd'hui</div>
         <div class="vs-success-bar"><div class="vs-success-fill" style="width:0%"></div></div>
         <div class="vs-success-meta"><b>${totalAcquis}/${REMC_TOTAL}</b> compétences validées · ${pct}%</div>
         <div class="vs-success-note">${complete ? `${esc(prenom)} est prêt·e pour l'examen.` : `${esc(prenom)} voit sa progression dans son appli.`}</div>
-        <button class="vs-submit pg-btn vs-success-done" id="vs-success-done" type="button">Voir mes élèves</button>
+        <button class="vs-success-done" id="vs-success-done" type="button">${icon("users", { size: 16, strokeWidth: 2.2 })} Voir mes élèves</button>
       </div>
     </div>`;
 

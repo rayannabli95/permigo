@@ -18,6 +18,8 @@ import { openInviteEleveModal } from "@/services/invite-eleve.js";
 import { getMoniteurState } from "@/data/moniteur-levels.js";
 import { getLeague } from "@/utils/league-shared.js";
 import { startTour } from "@/components/common/guided-tour.js";
+import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
+import { haptic } from "@/utils/haptic.js";
 import { onPopupsSettled } from "@/utils/intro-overlays.js";
 
 // Tour guidé enseignant — affiché 1× à la première connexion
@@ -85,7 +87,7 @@ const STYLE = `<style>
     max-width: 600px;
     margin: 0 auto;
     background: var(--bg);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--ens-body, 'Inter'), sans-serif;
     color: var(--ink);
   }
 
@@ -97,20 +99,29 @@ const STYLE = `<style>
        (var(--th)=52px + safe-area, posé par body.has-chrome #app) ET on annule
        le padding-top 24px de .aj-page → fini la bande sombre au-dessus de l'image. */
     margin: calc(-1 * (var(--th) + env(safe-area-inset-top, 0px)) - 24px) -16px 22px;
-    padding: calc(env(safe-area-inset-top, 0px) + var(--th) + 24px) 24px 28px;
+    padding: calc(env(safe-area-inset-top, 0px) + var(--th) + 24px) 24px 30px;
     color: #fff;
-    background: linear-gradient(158deg, rgba(11,13,26,.80) 0%, rgba(20,35,5,.52) 46%, rgba(11,13,26,.78) 100%), url('/skins/landing/monde4jour.webp') center/cover no-repeat;
+    /* DA arcade routière : panneaux semés en fond (via .ens-panneaux), sur dégradé vert profond */
+    background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
     animation: ajIn .5s var(--ease) both;
+    isolation: isolate;
   }
-  .aj-hero2-content { position: relative; z-index: 1; }
+  /* marquage au sol (liseré pointillé ambre) en pied de hero */
+  .aj-hero2::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
+    background: repeating-linear-gradient(90deg, #f59e0b 0 18px, transparent 18px 34px); opacity: .85;
+  }
+  /* panneaux plus lisibles sur le fond sombre du hero */
+  .aj-hero2 .ens-panneaux__sign { opacity: var(--o, .18); filter: saturate(1.1) brightness(1.08); }
+  .aj-hero2-content { position: relative; z-index: 2; }
   .aj-hero2-date {
-    font: 600 12px/1 'Inter', sans-serif; color: rgba(255,255,255,.72);
-    text-transform: capitalize; margin: 0 0 8px;
+    font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif; color: rgba(255,255,255,.7);
+    text-transform: uppercase; letter-spacing: .12em; margin: 0 0 8px;
   }
   .aj-hero2-name {
-    font: 800 clamp(26px, 8vw, 32px)/1.05 'Plus Jakarta Sans', sans-serif;
-    color: #fff; letter-spacing: -.03em; margin: 0;
-    text-shadow: 0 2px 12px rgba(11,13,26,.4);
+    font: 700 clamp(27px, 8.5vw, 34px)/1.04 var(--ens-display, 'Fredoka'), sans-serif;
+    color: #fff; letter-spacing: -.02em; margin: 0;
+    text-shadow: 0 2px 14px rgba(11,13,26,.45);
   }
   .aj-hero2-value {
     font: 600 13.5px/1.5 'Inter', sans-serif; color: rgba(255,255,255,.9);
@@ -888,8 +899,9 @@ async function renderInto(root, _me) {
     ${STYLE}
     <div class="aj-page anim-slide-up">
 
-      <!-- HERO visuel (parité accueil élève) : prestance + valeur posée -->
+      <!-- HERO arcade routière : panneaux semés en fond (cf. panneaux-bg.js) -->
       <div class="aj-hero2">
+        ${panneauxLayer({ variant: "hero" })}
         <div class="aj-hero2-content">
           <p class="aj-hero2-date">${formatDate(new Date())}</p>
           <h1 class="aj-hero2-name" tabindex="-1">${prenom ? `Bonjour, ${esc(fmtName(prenom))}` : "Aujourd'hui"}</h1>
@@ -1059,15 +1071,18 @@ async function renderInto(root, _me) {
   root.querySelectorAll(".aj-validate-row[data-eleve-id]").forEach((row) => {
     row.addEventListener("click", () => {
       const id = row.dataset.eleveId;
+      haptic("impact"); // « clac » net : on ouvre une action métier
       track("validate_widget.eleve_tapped", { eleve_id: id });
       navigate(`#/log-session?eleveId=${id}`);
     });
   });
   root.querySelector("#aj-validate-other")?.addEventListener("click", () => {
+    haptic("impact");
     track("validate_widget.other_tapped");
     navigate("#/eleves");
   });
   root.querySelector("#aj-validate-invite")?.addEventListener("click", () => {
+    haptic("impact");
     track("validate_widget.invite_tapped");
     openInviteEleveModal(_me);
   });

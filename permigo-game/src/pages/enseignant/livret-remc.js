@@ -15,6 +15,9 @@ import { STATUT_CFG } from "@/utils/statut-label.js";
 import { theoryLeague, computeTheoryScore } from "@/utils/theory-league.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 import { mountCiblerRevision } from "@/components/enseignant/cibler-revision.js";
+import { illus } from "@/components/enseignant/illus.js";
+import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
+import { haptic } from "@/utils/haptic.js";
 
 // ─── Couleurs par monde ───────────────────────────────────────────
 const MONDE_COLORS = {
@@ -42,64 +45,67 @@ const MONDE_COLORS = {
 
 // Mapping centralisé : @/utils/statut-label.js (STATUT_CFG importé)
 
-// ─── CSS (design clean — cohérent avec aujourdhui/mes-eleves/validation) ──
+// ─── CSS (DA arcade routière — cohérent avec aujourdhui/mes-eleves/validation) ──
 const STYLE = `<style>
   .lr-page {
     padding: 0 0 120px;
     max-width: 600px;
     margin: 0 auto;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--ens-body, 'Inter'), sans-serif;
     color: var(--ink);
     background: var(--bg);
   }
 
-  /* Header sticky sous le header global */
-  .lr-hd {
-    position: sticky;
-    top: calc(52px + env(safe-area-inset-top, 0px));
-    z-index: 20;
-    background: color-mix(in srgb, var(--su2) 94%, transparent);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 14px 16px 12px;
-    border-bottom: 1px solid var(--bo);
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  /* ── Hero compact arcade (en-tête livret) ── */
+  .lr-hero {
+    position: relative; overflow: hidden;
+    margin: calc(-1 * (var(--th) + env(safe-area-inset-top, 0px))) -0px 0;
+    padding: calc(env(safe-area-inset-top, 0px) + var(--th) + 18px) 20px 20px;
+    background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+    color: #fff;
+    isolation: isolate;
   }
+  .lr-hero::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; z-index: 1;
+    background: repeating-linear-gradient(90deg, #f59e0b 0 14px, transparent 14px 28px); opacity: .8;
+  }
+  .lr-hero .ens-panneaux__sign { opacity: var(--o, .14); filter: saturate(1.1) brightness(1.05); }
+  .lr-hero-in { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; }
   .lr-back {
     width: 44px; height: 44px;
     border-radius: 50%;
-    border: 1px solid var(--bo);
-    background: var(--su);
+    border: 1.5px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.1);
+    backdrop-filter: blur(6px);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
-    font-size: 16px;
-    color: var(--ink);
+    font-size: 18px;
+    color: #fff;
     flex-shrink: 0;
-    transition: border-color .15s ease;
+    transition: background .15s ease;
+    -webkit-tap-highlight-color: transparent;
   }
-  .lr-back:hover { border-color: var(--a); }
-  .lr-back:active { transform: scale(.97); transition: transform .12s cubic-bezier(.23,1,.32,1); }
+  .lr-back:hover { background: rgba(255,255,255,.2); }
+  .lr-back:active { transform: scale(.95); transition: transform .1s cubic-bezier(.23,1,.32,1); }
   @media (prefers-reduced-motion: reduce) { .lr-back:active { transform: none; } }
   .lr-hd-info { flex: 1; min-width: 0; }
   .lr-title {
-    font: 700 17px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink);
+    font: 700 clamp(16px,5vw,20px)/1.15 var(--ens-display, 'Fredoka'), sans-serif;
+    color: #fff;
     margin: 0 0 3px;
-    letter-spacing: -0.022em;
+    letter-spacing: -0.01em;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .lr-subtitle { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin: 0; }
+  .lr-subtitle { font: 500 12px/1 var(--ens-body, 'Inter'), sans-serif; color: rgba(255,255,255,.7); margin: 0; }
 
-  /* KPI global — la "barre de chaleur" du livret */
+  /* KPI global — barre de chaleur + .ens-stat */
   .lr-kpi {
     margin: 16px;
     padding: 20px;
     background: var(--su);
     border: 1px solid var(--bo);
     border-radius: var(--r-xl);
-    box-shadow: var(--s1);
+    box-shadow: var(--ens-shadow, var(--s1));
   }
   .lr-kpi-row {
     display: flex;
@@ -109,31 +115,32 @@ const STYLE = `<style>
     gap: 8px;
   }
   .lr-kpi-label {
-    font: 600 11px/1 'Inter', sans-serif;
+    font: 600 11px/1 var(--ens-body, 'Inter'), sans-serif;
     color: var(--mu2);
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
   .lr-kpi-val {
-    font: 700 22px/1 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink);
+    font: 700 22px/1 var(--ens-display, 'Fredoka'), sans-serif;
+    color: var(--ens-go, var(--a));
     letter-spacing: -0.022em;
   }
   .lr-kpi-pct {
-    font: 500 13px/1 'Inter', sans-serif;
+    font: 500 13px/1 var(--ens-body, 'Inter'), sans-serif;
     color: var(--mu2);
   }
   .lr-global-bar {
-    height: 6px;
+    height: 7px;
     background: var(--bo3);
     border-radius: var(--r-full);
     overflow: hidden;
   }
   .lr-global-fill {
     height: 100%;
-    background: var(--a);
+    background: linear-gradient(90deg, var(--ens-go, var(--a)), color-mix(in srgb, var(--ens-go, var(--a)) 70%, #fff));
     border-radius: var(--r-full);
     transition: width .8s var(--ease-out);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--ens-go, var(--a)) 50%, transparent);
   }
 
   /* Corps */
@@ -147,21 +154,19 @@ const STYLE = `<style>
     overflow: hidden;
     box-shadow: var(--s0);
   }
-  /* Header centré (écran 2) : titre au centre, compteur ancré en absolu à
-     droite pour ne pas casser le centrage. Icône catégorie retirée. */
   .lr-monde-hd {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 16px 20px;
+    padding: 14px 20px;
     border-bottom: 1px solid var(--bo2);
   }
   .lr-monde-nm {
-    font: 600 14px/1.3 'Plus Jakarta Sans', sans-serif;
+    font: 700 13px/1.3 var(--ens-display, 'Fredoka'), sans-serif;
     color: var(--ink);
     text-align: center;
-    padding: 0 40px;            /* clearance symétrique pour le compteur droit */
+    padding: 0 40px;
     letter-spacing: -0.01em;
   }
   .lr-monde-prog {
@@ -169,11 +174,11 @@ const STYLE = `<style>
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
-    font: 600 12px/1 'Inter', sans-serif;
+    font: 600 12px/1 var(--ens-body, 'Inter'), sans-serif;
     color: var(--mu2);
   }
   .lr-monde-bar-wrap {
-    height: 3px;
+    height: 4px;
     background: var(--bo3);
   }
   .lr-monde-bar-fill {
@@ -202,7 +207,7 @@ const STYLE = `<style>
     flex-shrink: 0;
   }
   .lr-comp-code {
-    font: 600 11px/1 'Inter', sans-serif;
+    font: 600 11px/1 var(--ens-body, 'Inter'), sans-serif;
     color: var(--a-txt);
     background: color-mix(in srgb, var(--a) 10%, transparent);
     border-radius: 6px;
@@ -210,15 +215,16 @@ const STYLE = `<style>
     flex-shrink: 0;
   }
   .lr-comp-nom {
-    font: 500 14px/1.4 'Inter', sans-serif;
+    font: 500 14px/1.4 var(--ens-body, 'Inter'), sans-serif;
     color: var(--ink);
     flex: 1;
     min-width: 0;
   }
+  /* Pastilles de statut → sémantique .ens-chip */
   .lr-comp-badge {
-    font: 600 11px/1 'Inter', sans-serif;
+    font: 600 11px/1 var(--ens-body, 'Inter'), sans-serif;
     padding: 5px 10px;
-    border-radius: var(--r-full);
+    border-radius: var(--ens-r-pill, var(--r-full));
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -227,16 +233,16 @@ const STYLE = `<style>
   /* Bouton bilan trimestriel */
   .lr-bilan-btn {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 8px 12px; min-height: 44px; border-radius: var(--r);
-    background: transparent; border: 1px solid var(--bo);
-    color: var(--mu); font: 600 12px/1 'Inter', sans-serif;
+    padding: 8px 12px; min-height: 44px; border-radius: var(--ens-r, var(--r));
+    background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.22);
+    color: #fff; font: 700 12px/1 var(--ens-body, 'Inter'), sans-serif;
     cursor: pointer; flex-shrink: 0; white-space: nowrap;
-    transition: border-color .15s, color .15s, background .15s;
+    transition: background .15s;
     -webkit-tap-highlight-color: transparent;
   }
-  .lr-bilan-btn:hover { border-color: #6366f1; color: #6366f1; }
-  .lr-bilan-btn:active { background: rgba(99,102,241,.06); transform: scale(.97); }
-  .lr-bilan-btn:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+  .lr-bilan-btn:hover { background: rgba(255,255,255,.2); }
+  .lr-bilan-btn:active { transform: scale(.97); }
+  .lr-bilan-btn:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
 
   /* ─── Bottom sheet overlay ────────────────────────────────── */
   /* z-index 350 : au-dessus du FAB enseignant (#bn-seance-fab, 310) et de
@@ -291,7 +297,7 @@ const STYLE = `<style>
     z-index: 2;
   }
   .lr-sheet-title {
-    font: 700 17px/1.3 'Plus Jakarta Sans', sans-serif;
+    font: 700 17px/1.3 var(--ens-display, 'Fredoka'), sans-serif;
     color: var(--ink);
     margin: 0;
     flex: 1;
@@ -348,15 +354,15 @@ const STYLE = `<style>
   }
   .lr-statut-btn-ico { font-size: 20px; line-height: 1; }
   .lr-statut-btn-lbl {
-    font: 600 12px/1.3 'Inter', sans-serif;
+    font: 600 12px/1.3 var(--ens-body, 'Inter'), sans-serif;
     color: var(--ink);
   }
 
   /* Note */
   .lr-note-label {
-    font: 600 11px/1 'Inter', sans-serif;
+    font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.09em;
     color: var(--mu2);
     margin: 0 0 8px;
     display: block;
@@ -366,8 +372,8 @@ const STYLE = `<style>
     padding: 14px;
     background: var(--bg);
     border: 1px solid var(--bo);
-    border-radius: var(--r);
-    font: 500 14px/1.5 'Inter', sans-serif;
+    border-radius: var(--ens-r, var(--r));
+    font: 500 14px/1.5 var(--ens-body, 'Inter'), sans-serif;
     color: var(--ink);
     resize: vertical;
     min-height: 80px;
@@ -378,37 +384,42 @@ const STYLE = `<style>
   }
   .lr-note::placeholder { color: var(--mu2); }
   .lr-note:focus {
-    border-color: var(--a);
+    border-color: var(--ens-go, var(--a));
     background: var(--su);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--a) 12%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ens-go, var(--a)) 12%, transparent);
   }
   .lr-note-count {
-    font: 500 11px/1 'Inter', sans-serif;
+    font: 500 11px/1 var(--ens-body, 'Inter'), sans-serif;
     color: var(--mu2);
     text-align: right;
     margin-top: 4px;
   }
 
-  /* Bouton valider — SEUL gradient de la page */
+  /* Bouton valider — arcade: fond ens-go + effet 3D */
   .lr-btn-save {
     width: 100%;
     padding: 16px;
-    background: var(--a);
+    background: var(--ens-go, var(--a));
     border: none;
-    border-radius: var(--r);
-    color: var(--a-ink);
-    font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
+    border-radius: var(--ens-r, var(--r));
+    color: #fff;
+    font: 800 15px/1 var(--ens-display, 'Fredoka'), sans-serif;
     cursor: pointer;
-    transition: opacity .15s ease, transform .12s ease;
+    transition: transform .12s cubic-bezier(.23,1,.32,1), box-shadow .12s cubic-bezier(.23,1,.32,1);
     min-height: 52px;
     letter-spacing: -0.01em;
+    box-shadow: 0 4px 0 0 color-mix(in srgb, var(--ens-go, var(--a)) 60%, #000);
   }
   .lr-btn-save:disabled {
     opacity: .45;
     cursor: not-allowed;
+    box-shadow: none;
   }
   .lr-btn-save:not(:disabled):hover { opacity: .92; }
-  .lr-btn-save:not(:disabled):active { transform: scale(.97); transition: transform .12s cubic-bezier(.23,1,.32,1), opacity .15s ease; }
+  .lr-btn-save:not(:disabled):active {
+    transform: translateY(3px) scale(.98);
+    box-shadow: 0 1px 0 0 color-mix(in srgb, var(--ens-go, var(--a)) 60%, #000);
+  }
   @media (prefers-reduced-motion: reduce) { .lr-btn-save:not(:disabled):active { transform: none; } }
 
   /* Skeleton */
@@ -422,9 +433,9 @@ const STYLE = `<style>
     padding: 60px 20px;
     text-align: center;
     color: var(--mu2);
-    font: 500 14px/1.6 'Inter', sans-serif;
+    font: 500 14px/1.6 var(--ens-body, 'Inter'), sans-serif;
   }
-  .lr-err-ico { font-size: 40px; display: block; margin-bottom: 12px; }
+  .lr-err-ico { display: flex; justify-content: center; margin-bottom: 16px; }
 
   /* État succès après validation acquise — referme la boucle de valeur.
      Sobre (pas de confetti) : on PROUVE que l'élève vient d'avancer. */
@@ -442,12 +453,12 @@ const STYLE = `<style>
   }
   @keyframes lr-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .lr-success-comp {
-    font: 600 13px/1.3 'Inter', sans-serif; color: var(--mu);
+    font: 600 13px/1.3 var(--ens-body, 'Inter'), sans-serif; color: var(--mu);
     margin-bottom: 6px;
   }
   .lr-success-title {
-    font: 800 19px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--ink);
-    letter-spacing: -.02em; margin-bottom: 18px;
+    font: 800 20px/1.2 var(--ens-display, 'Fredoka'), sans-serif; color: var(--ink);
+    letter-spacing: -.01em; margin-bottom: 18px;
   }
   .lr-success-bar {
     width: 100%; height: 8px; background: var(--bo);
@@ -455,15 +466,16 @@ const STYLE = `<style>
   }
   .lr-success-fill {
     height: 100%; border-radius: 99px;
-    background: linear-gradient(90deg, var(--a), var(--a-lt));
+    background: linear-gradient(90deg, var(--ens-go, var(--a)), color-mix(in srgb, var(--ens-go, var(--a)) 70%, #fff));
+    box-shadow: 0 0 10px color-mix(in srgb, var(--ens-go, var(--a)) 55%, transparent);
     transition: width .8s .1s cubic-bezier(.2,.7,.3,1);
   }
   .lr-success-meta {
-    font: 600 13px/1 'Inter', sans-serif; color: var(--ink); margin-bottom: 6px;
+    font: 600 13px/1 var(--ens-body, 'Inter'), sans-serif; color: var(--ink); margin-bottom: 6px;
   }
-  .lr-success-meta b { font-weight: 800; color: var(--adk); }
+  .lr-success-meta b { font-weight: 800; color: var(--ens-go, var(--adk)); }
   .lr-success-note {
-    font: 500 13px/1.45 'Inter', sans-serif; color: var(--mu2); margin-bottom: 22px;
+    font: 500 13px/1.45 var(--ens-body, 'Inter'), sans-serif; color: var(--mu2); margin-bottom: 22px;
   }
   @media (prefers-reduced-motion: reduce) {
     .lr-success-check { animation: none; }
@@ -495,7 +507,7 @@ export async function mount(root, eleveId) {
       ${STYLE}
       <div class="lr-page">
         <div class="lr-err">
-          <span class="lr-err-ico">${icon("alert-circle", { size: 22 })}</span>
+          <div class="lr-err-ico">${illus("clipboard", { size: 64 })}</div>
           Aucun élève sélectionné — retourne à la liste.
         </div>
       </div>
@@ -583,7 +595,7 @@ function _renderTheoryRow() {
         <span class="lr-kpi-pct">${label}</span>
       </span>
     </div>
-    <div style="font:500 11px/1.4 'Inter',sans-serif;color:var(--mu2);margin-top:4px">${detail}</div>`;
+    <div style="font:500 11px/1.4 var(--ens-body,'Inter'),sans-serif;color:var(--mu2);margin-top:4px">${detail}</div>`;
 }
 
 // ─── Render principal ─────────────────────────────────────────────
@@ -603,15 +615,18 @@ function render() {
     ${STYLE}
     <div class="lr-page anim-slide-up">
 
-      <header class="lr-hd">
-        <button class="lr-back" aria-label="Retour liste élèves">←</button>
-        <div class="lr-hd-info">
-          <h1 class="lr-title" tabindex="-1">Livret — ${prenomNom || "Élève"}</h1>
-          <p class="lr-subtitle">${acquis}/${REMC_TOTAL} compétences validées</p>
+      <header class="lr-hero">
+        ${panneauxLayer({ variant: "section" })}
+        <div class="lr-hero-in">
+          <button class="lr-back" aria-label="Retour liste élèves">←</button>
+          <div class="lr-hd-info">
+            <h1 class="lr-title" tabindex="-1">Livret — ${prenomNom || "Élève"}</h1>
+            <p class="lr-subtitle">${acquis}/${REMC_TOTAL} compétences validées</p>
+          </div>
+          <button class="lr-bilan-btn" id="lr-bilan-btn" aria-label="Voir le bilan trimestriel">
+            ${icon("file-text", { size: 14, strokeWidth: 2 })} Bilan
+          </button>
         </div>
-        <button class="lr-bilan-btn" id="lr-bilan-btn" aria-label="Voir le bilan trimestriel">
-          ${icon("file-text", { size: 14, strokeWidth: 2 })} Bilan
-        </button>
       </header>
 
       <div class="lr-kpi">
@@ -759,7 +774,7 @@ async function _loadFeedSection() {
       .lr-feed-wrap-icon { color: var(--a-txt); display: inline-flex; flex-shrink: 0; }
       .lr-feed-wrap-lbl {
         flex: 1; min-width: 0;
-        font: 600 13px/1.2 'Inter', sans-serif;
+        font: 600 13px/1.2 var(--ens-body, 'Inter'), sans-serif;
         color: var(--ink);
       }
       .lr-feed-wrap-chev { color: var(--mu2); display: inline-flex; flex-shrink: 0; transition: transform .2s; }
@@ -890,10 +905,20 @@ function renderMonde(cat) {
   `;
 }
 
+// Mapping statut → classe .ens-chip modificatrice
+const CHIP_CLASS = {
+  acquis: "ens-chip--go",
+  en_cours: "ens-chip--blue",
+  a_valider: "ens-chip--amber",
+  a_retravailler: "ens-chip--stop",
+  null: "",
+};
+
 function renderComp(sub, col) {
   const val = _validationsMap[sub.c];
   const statut = val?.statut || null;
   const cfg = STATUT_CFG[statut] || STATUT_CFG.null;
+  const chipMod = CHIP_CLASS[statut] || "";
 
   return `
     <div class="lr-comp" data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
@@ -901,7 +926,7 @@ function renderComp(sub, col) {
       <span class="lr-comp-dot" style="background:${cfg.dot}"></span>
       <span class="lr-comp-code" style="color:${col.accent}; background:${col.bg}">${esc(sub.c)}</span>
       <span class="lr-comp-nom">${esc(sub.n)}</span>
-      <span class="lr-comp-badge" style="color:${cfg.color}; background:${cfg.bg}">${cfg.label}</span>
+      <span class="lr-comp-badge ens-chip ${chipMod}">${cfg.label}</span>
       <span class="lr-comp-chev" aria-hidden="true">›</span>
     </div>
   `;
@@ -932,6 +957,7 @@ function wireMain() {
 
 // ─── Bottom sheet ─────────────────────────────────────────────────
 function openSheet(compId, compNom) {
+  haptic("impact");
   _sheetComp = { c: compId, n: compNom };
   const existing = _validationsMap[compId];
   _sheetStatut = existing?.statut || null;
@@ -1103,8 +1129,10 @@ async function doSave(overlay) {
   // Acquis = moment de valeur : on PROUVE l'avancée de l'élève dans le sheet.
   // Autres statuts (en cours / à retravailler) = pas de célébration, toast neutre.
   if (_sheetStatut === "acquis") {
+    haptic("validate");
     showSuccessState(overlay);
   } else {
+    haptic("confirm");
     toast("Évaluation enregistrée.", "success");
     closeSheet(overlay);
     render();

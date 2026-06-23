@@ -127,6 +127,8 @@ async function boot() {
     await mountHeader();
     mountBottomNav(me.role);
     document.body.classList.add("has-chrome");
+    // Marqueur de rôle → permet de scoper un thème par rôle (ex: arcade enseignant)
+    document.body.dataset.role = me.role || "";
 
     startNotifListener();
 

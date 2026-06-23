@@ -15,6 +15,8 @@ import {
 import { haptic } from "@/utils/haptic.js";
 import { icon } from "@/utils/icons.js";
 import { openPalierSheet } from "@/components/common/palier-sheet.js";
+import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
+import { illus } from "@/components/enseignant/illus.js";
 
 // ─── CSS ────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -23,11 +25,11 @@ const STYLE = `<style>
   margin: 0 auto;
   padding: 0 0 120px;
   background: var(--bg);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--ens-body, 'Inter'), sans-serif;
   color: var(--ink);
 }
 
-/* Header sticky */
+/* ── Header arcade — même DA que aujourdhui.js ── */
 .epc-full-hd {
   position: sticky;
   top: calc(52px + env(safe-area-inset-top, 0px));
@@ -36,47 +38,47 @@ const STYLE = `<style>
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 12px 20px 10px;
-  border-bottom: 1px solid var(--bo);
+  border-bottom: 1px solid color-mix(in srgb, var(--ens-go, var(--a)) 15%, var(--bo));
   display: flex;
   align-items: center;
   gap: 10px;
 }
 .epc-full-back {
   width: 44px; height: 44px;
-  border-radius: var(--r);
-  background: var(--bg2);
-  border: none;
+  border-radius: var(--ens-r, var(--r));
+  background: color-mix(in srgb, var(--ens-go, var(--a)) 10%, var(--bg2));
+  border: 1.5px solid color-mix(in srgb, var(--ens-go, var(--a)) 22%, transparent);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: var(--ink);
+  color: var(--ens-go, var(--a-txt));
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
-  transition: background .12s;
+  transition: background .12s, transform .18s cubic-bezier(0.23,1,0.32,1);
 }
-.epc-full-back { transition: background .12s, transform .18s cubic-bezier(0.23,1,0.32,1); }
-.epc-full-back:active { background: var(--bo); transform: scale(.97); }
+.epc-full-back:active { background: color-mix(in srgb, var(--ens-go, var(--a)) 20%, transparent); transform: scale(.97); }
 .epc-full-hd-info { flex: 1; min-width: 0; }
 .epc-full-h1 {
-  font: 700 18px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 18px/1.2 var(--ens-display, 'Fredoka'), sans-serif;
   color: var(--ink);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 .epc-full-sub {
-  font: 500 11px/1 'Inter', sans-serif;
+  font: 500 11px/1 var(--ens-body, 'Inter'), sans-serif;
   color: var(--mu2);
   margin: 3px 0 0;
 }
 
-/* Progress pill */
+/* Progress pill arcade */
 .epc-full-pill {
   font: 700 12px/1 'IBM Plex Mono', monospace;
-  color: var(--a-txt);
-  background: color-mix(in srgb, var(--a) 10%, transparent);
-  padding: 6px 10px;
+  color: #fff;
+  background: var(--ens-go, var(--a));
+  padding: 6px 12px;
   border-radius: var(--r-full);
   flex-shrink: 0;
   white-space: nowrap;
+  box-shadow: 0 3px 0 0 color-mix(in srgb, var(--ens-go, var(--a)) 55%, #000);
 }
 
 /* Route card */
@@ -85,8 +87,8 @@ const STYLE = `<style>
   padding: 20px;
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: var(--rx);
-  box-shadow: var(--s1);
+  border-radius: var(--r-xl);
+  box-shadow: var(--ens-shadow, var(--s1));
 }
 
 /* ── Stops timeline (mêmes règles que parcours.js) ── */
@@ -142,25 +144,25 @@ const STYLE = `<style>
   margin-bottom: 4px;
 }
 .epcf-stop-lvl {
-  font: 700 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
   color: var(--mu2);
   text-transform: uppercase;
   letter-spacing: .06em;
 }
-.epcf-stop.now .epcf-stop-lvl  { color: var(--a-txt); }
+.epcf-stop.now .epcf-stop-lvl  { color: var(--ens-go, var(--a-txt)); }
 .epcf-stop.done .epcf-stop-lvl { color: var(--gr-txt); }
 .epcf-stop-cost {
-  font: 600 11px/1 'Inter', sans-serif;
-  padding: 4px 8px;
+  font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
+  padding: 4px 10px;
   border-radius: var(--r-full);
   white-space: nowrap;
   flex-shrink: 0;
 }
-.epcf-stop-cost.done { color: var(--grd); background: rgba(16,185,129,.12); }
-.epcf-stop-cost.now  { color: var(--a-ink); background: var(--a); }
+.epcf-stop-cost.done { color: #fff; background: var(--ens-go, var(--gr)); }
+.epcf-stop-cost.now  { color: #fff; background: var(--ens-blue, var(--a)); }
 .epcf-stop-cost.todo { color: var(--mu3); background: var(--bg2); }
 .epcf-stop-title {
-  font: 600 14px/1.3 'Inter', sans-serif;
+  font: 700 14px/1.3 var(--ens-display, 'Fredoka'), sans-serif;
   color: var(--ink);
   margin-bottom: 6px;
 }
@@ -171,16 +173,16 @@ const STYLE = `<style>
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  background: color-mix(in srgb, var(--a) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
-  border-radius: var(--r);
-  color: var(--a-txt);
+  background: color-mix(in srgb, var(--ens-blue, var(--a)) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ens-blue, var(--a)) 20%, transparent);
+  border-radius: var(--ens-r, var(--r));
+  color: var(--ens-blue, var(--a-txt));
   margin-top: 4px;
 }
 .epcf-stop-reward.unlocked {
-  background: rgba(16,185,129,.08);
-  border-color: rgba(16,185,129,.2);
-  color: var(--grd);
+  background: color-mix(in srgb, var(--ens-go, #18a558) 9%, transparent);
+  border-color: color-mix(in srgb, var(--ens-go, #18a558) 25%, transparent);
+  color: var(--ens-go, var(--grd));
 }
 .epcf-stop-reward-ico { display: flex; align-items: center; flex-shrink: 0; }
 .epcf-stop-skin-img {
@@ -189,7 +191,7 @@ const STYLE = `<style>
   flex-shrink: 0;
 }
 .epcf-stop-reward-txt {
-  font: 500 12px/1.3 'Inter', sans-serif;
+  font: 500 12px/1.3 var(--ens-body, 'Inter'), sans-serif;
 }
 .epcf-stop-reward-txt strong { font-weight: 700; }
 
@@ -285,8 +287,11 @@ export async function mount(root) {
         <div class="epc-full-pill">${doneCount}/${stops.length}</div>
       </div>
 
-      <div class="epc-full-route">
-        ${stops.map((s) => renderStop(s, totalValidations)).join("")}
+      <div class="epc-full-route" style="position:relative;overflow:hidden;">
+        ${panneauxLayer({ variant: "section" })}
+        <div style="position:relative;z-index:2;">
+          ${stops.map((s) => renderStop(s, totalValidations)).join("")}
+        </div>
       </div>
 
     </div>`;
@@ -302,7 +307,8 @@ export async function mount(root) {
     const tierNum = parseInt(el.dataset.tier, 10);
     const stop = stops.find((s) => s.tier.tier === tierNum);
     if (!stop) return;
-    haptic("select");
+    const isDone = totalValidations >= stop.threshold;
+    haptic(isDone ? "levelup" : "impact");
     track("parcours_complet.tier_detail", { tier: tierNum });
     openPalierSheet(stop.tier, totalValidations);
   };
@@ -348,9 +354,13 @@ function renderStop(stop, totalValidations) {
       : `<span class="epcf-stop-cost todo">+${diff} validation${diff > 1 ? "s" : ""}</span>`;
 
   // Ligne statut — palier de progression (plus d'« outil débloqué »)
+  const rewardIco =
+    cls === "done"
+      ? illus("trophy", { size: 20 })
+      : icon(iconName, { size: 14, strokeWidth: 2.4 });
   const rewardLine = `
     <div class="epcf-stop-reward ${cls === "done" ? "unlocked" : ""}">
-      <span class="epcf-stop-reward-ico">${icon(iconName, { size: 14, strokeWidth: 2.4 })}</span>
+      <span class="epcf-stop-reward-ico">${rewardIco}</span>
       <span class="epcf-stop-reward-txt">
         ${cls === "done" ? "Statut atteint : " : "Prochain statut : "}
         <strong>${esc(stop.tier.title)}</strong>

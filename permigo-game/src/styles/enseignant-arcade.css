@@ -1,0 +1,218 @@
+/* ═══════════════════════════════════════════════════════════════
+   THÈME « ARCADE ROUTIÈRE » — côté enseignant uniquement
+   Scopé sous [data-role="enseignant"] (posé par main.js) → zéro fuite élève.
+
+   Esprit : vivant, mémorable, énergie « jeu » — MAIS pro adulte.
+   On respecte les antipatterns moniteur (cf. CLAUDE.md) :
+     · pas de mascotte « bravo champion », pas de confetti enfantin,
+       pas de monnaie virtuelle.
+   L'énergie vient de la TYPO (Fredoka), des PANNEAUX en fond, des
+   COULEURS de signalisation et des ombres tactiles — pas du ton.
+═══════════════════════════════════════════════════════════════ */
+
+[data-role="enseignant"] {
+  /* — Polices arcade — */
+  --ens-display: "Fredoka", "Plus Jakarta Sans", system-ui, sans-serif;
+  --ens-body: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+
+  /* — Palette signalisation (panneaux routiers) — */
+  --ens-go: #18a558; /* feu vert / acquis */
+  --ens-go-lt: #34d27b;
+  --ens-blue: #1d4ed8; /* panneau obligation (bleu) */
+  --ens-blue-lt: #3b82f6;
+  --ens-amber: #f59e0b; /* avertissement / en attente */
+  --ens-stop: #e11d48; /* interdiction / refus */
+  --ens-ink-go: #07150c;
+
+  /* — Rayons & ombres tactiles arcade — */
+  --ens-r: 16px;
+  --ens-r-lg: 22px;
+  --ens-r-pill: 999px;
+  --ens-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 8px 22px -12px rgba(15, 23, 42, 0.22);
+  --ens-shadow-press: 0 2px 0 rgba(15, 23, 42, 0.06);
+}
+
+/* ── Typographie : Fredoka sur les titres dans tout l'espace enseignant ── */
+[data-role="enseignant"] h1,
+[data-role="enseignant"] h2,
+[data-role="enseignant"] h3,
+[data-role="enseignant"] .ens-display {
+  font-family: var(--ens-display);
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+/* ════════ FOND PANNEAUX (couche décorative réutilisable) ════════ */
+/* Posée par panneaux-bg.js dans les heros/sections enseignant.        */
+.ens-panneaux {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.ens-panneaux__sign {
+  position: absolute;
+  width: var(--s, 64px);
+  height: var(--s, 64px);
+  opacity: var(--o, 0.1);
+  transform: rotate(var(--rot, 0deg));
+  filter: saturate(1.05);
+  user-select: none;
+}
+/* Sur fond sombre (hero), les panneaux restent lisibles mais discrets */
+.ens-hero .ens-panneaux__sign {
+  opacity: var(--o, 0.16);
+  filter: saturate(1.1) brightness(1.05);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ens-hero .ens-panneaux__sign {
+    animation: ensSignFloat var(--dur, 9s) ease-in-out infinite alternate;
+    animation-delay: var(--delay, 0s);
+  }
+}
+@keyframes ensSignFloat {
+  from {
+    transform: rotate(var(--rot, 0deg)) translateY(0);
+  }
+  to {
+    transform: rotate(var(--rot, 0deg)) translateY(-7px);
+  }
+}
+
+/* ════════ HERO arcade (remplace les heros à image de fond) ════════ */
+.ens-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--ens-r-lg);
+  padding: 22px 20px;
+  color: #fff;
+  background: radial-gradient(120% 140% at 0% 0%, #14391f 0%, #0c2614 42%, #0b0d1a 100%);
+  box-shadow: var(--ens-shadow);
+  isolation: isolate;
+}
+.ens-hero::after {
+  /* liseré « marquage au sol » en bas du hero */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--ens-amber) 0 18px,
+    transparent 18px 34px
+  );
+  opacity: 0.85;
+  z-index: 1;
+}
+.ens-hero > * {
+  position: relative;
+  z-index: 2;
+}
+.ens-hero__kicker {
+  font: 700 11px/1 var(--ens-body);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.66);
+  margin: 0 0 8px;
+}
+.ens-hero__title {
+  font: 700 26px/1.08 var(--ens-display);
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+  color: #fff;
+}
+.ens-hero__sub {
+  font: 500 14px/1.45 var(--ens-body);
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
+}
+
+/* ════════ Composants arcade réutilisables ════════ */
+.ens-card {
+  position: relative;
+  background: var(--su);
+  border: 1.5px solid var(--bo);
+  border-radius: var(--ens-r);
+  box-shadow: var(--ens-shadow);
+}
+
+/* Chip / pastille de signalisation */
+.ens-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--ens-r-pill);
+  font: 700 12px/1 var(--ens-body);
+  border: 1.5px solid transparent;
+  white-space: nowrap;
+}
+.ens-chip--go { background: color-mix(in srgb, var(--ens-go) 14%, var(--su)); color: var(--ens-go); border-color: color-mix(in srgb, var(--ens-go) 28%, transparent); }
+.ens-chip--blue { background: color-mix(in srgb, var(--ens-blue) 12%, var(--su)); color: var(--ens-blue-lt); border-color: color-mix(in srgb, var(--ens-blue) 26%, transparent); }
+.ens-chip--amber { background: color-mix(in srgb, var(--ens-amber) 16%, var(--su)); color: var(--am-txt); border-color: color-mix(in srgb, var(--ens-amber) 32%, transparent); }
+.ens-chip--stop { background: color-mix(in srgb, var(--ens-stop) 12%, var(--su)); color: var(--ens-stop); border-color: color-mix(in srgb, var(--ens-stop) 26%, transparent); }
+
+/* Bouton d'action arcade (tactile, ombre qui s'écrase au press) */
+.ens-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--ens-r);
+  font: 700 15px/1 var(--ens-body);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.12s ease;
+}
+.ens-btn--go {
+  background: linear-gradient(180deg, var(--ens-go-lt), var(--ens-go));
+  color: var(--ens-ink-go);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--ens-go) 60%, #000), var(--ens-shadow);
+}
+.ens-btn--go:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--ens-go) 60%, #000);
+}
+.ens-btn--ghost {
+  background: var(--su);
+  color: var(--ink);
+  border: 1.5px solid var(--bo4);
+}
+.ens-btn--ghost:active { transform: translateY(1px); }
+
+/* Stat / KPI arcade */
+.ens-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ens-stat__num {
+  font: 800 26px/1 var(--ens-display);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.ens-stat__lbl {
+  font: 600 11px/1.2 var(--ens-body);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mu);
+}
+
+/* Illustration flat — cadre cohérent (utilisé par illus.js) */
+.ens-illus {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.ens-illus--inline {
+  display: inline-block;
+  vertical-align: middle;
+}

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// Enseignant — Bilan trimestriel élève
+// Enseignant — Bilan trimestriel élève · DA "Arcade routière"
 // Route : #/bilan/:eleveId
 // RPC   : get_bilan_data(p_eleve_id, p_trimestre_start?)
 // Print-friendly · @media print
@@ -13,81 +13,127 @@ import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
 import { navigate } from "@/router.js";
 import { REMC } from "@/data/remc.js";
+import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
+import { illus } from "@/components/enseignant/illus.js";
+import { haptic } from "@/utils/haptic.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
 /* ── Layout ── */
 .bl {
-  padding: 20px 16px 80px;
+  padding: 0 0 80px;
   max-width: 640px;
   margin: 0 auto;
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--ens-body, 'Inter'), sans-serif;
+}
+.bl-body {
+  padding: 20px 16px 0;
 }
 
-/* ── Header ── */
-.bl-hd {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 24px;
+/* ── Hero arcade compact (fond panneaux semés) ── */
+.bl-hero {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 20px) 20px 30px;
+  isolation: isolate;
+  animation: blHeroIn .4s var(--ease, ease) both;
 }
-.bl-hd-left {}
-.bl-school-logo {
-  font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
+.bl-hero::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
+  background: repeating-linear-gradient(90deg, #f59e0b 0 18px, transparent 18px 34px);
+  opacity: .85;
+}
+.bl-hero .ens-panneaux__sign { opacity: var(--o, .15); filter: saturate(1.1) brightness(1.08); }
+@keyframes blHeroIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bl-hero { animation: none !important; }
+}
+.bl-hero-content { position: relative; z-index: 2; }
+.bl-hero-kicker {
+  font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
+  color: rgba(255,255,255,.65);
   text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--mu2);
-  margin-bottom: 8px;
+  letter-spacing: .12em;
+  margin: 0 0 8px;
 }
-.bl-title {
-  /* Titre de page moniteur unifié : 24px / 700 / -.02em (cf. mes-eleves, analyses) */
-  font: 700 24px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
-  letter-spacing: -.02em;
+.bl-hero-title {
+  font: 700 clamp(22px, 6.5vw, 28px)/1.1 var(--ens-display, 'Fredoka'), sans-serif;
+  color: #fff;
+  margin: 0 0 4px;
+  letter-spacing: -.01em;
 }
-.bl-subtitle {
-  font: 500 13px/1.4 'Inter', sans-serif;
-  color: var(--mu);
-  margin-top: 4px;
+.bl-hero-sub {
+  font: 500 13px/1.4 var(--ens-body, 'Inter'), sans-serif;
+  color: rgba(255,255,255,.75);
+  margin: 0 0 14px;
 }
-.bl-print-btn {
+/* Boutons dans le hero */
+.bl-hero-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Bouton retour ghost ── */
+.bl-btn-back {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 16px;
-  background: var(--su);
-  border: 1.5px solid var(--bo);
-  border-radius: var(--r);
-  font: 600 13px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink5);
+  padding: 9px 16px;
+  background: rgba(255,255,255,.12);
+  border: 1.5px solid rgba(255,255,255,.25);
+  border-radius: var(--ens-pill, 999px);
+  font: 600 13px/1 var(--ens-body, 'Inter'), sans-serif;
+  color: #fff;
   cursor: pointer;
   min-height: 44px;
   flex-shrink: 0;
-  transition: border-color .16s, transform .16s var(--ease-snap);
+  transition: background .15s, transform .15s;
+  -webkit-tap-highlight-color: transparent;
 }
-.bl-print-btn:active { transform: scale(.97); }
-@media (hover:hover) and (pointer:fine) {
-  .bl-print-btn:hover { border-color: var(--al3); color: var(--adk); }
-}
+.bl-btn-back:hover { background: rgba(255,255,255,.2); }
+.bl-btn-back:active { transform: scale(.97); }
 
-/* ── Trimestre badge ── */
-.bl-trimestre {
+/* ── Bouton imprimer (--go) ── */
+.bl-btn-print {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
-  background: color-mix(in srgb, var(--a) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
-  border-radius: var(--r-xl);
-  font: 600 12px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--adk);
-  margin-bottom: 20px;
+  padding: 9px 16px;
+  background: var(--ens-go, #18a558);
+  border: none;
+  border-radius: var(--ens-pill, 999px);
+  font: 700 13px/1 var(--ens-body, 'Inter'), sans-serif;
+  color: #fff;
+  cursor: pointer;
+  min-height: 44px;
+  flex-shrink: 0;
+  box-shadow: 0 3px 0 0 #0f7a3e;
+  transition: transform .15s, box-shadow .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.bl-btn-print:active {
+  transform: translateY(2px) scale(.98);
+  box-shadow: 0 1px 0 0 #0f7a3e;
 }
 
-/* ── KPI grid ── */
+/* ── École logo ── */
+.bl-school-logo {
+  font: 700 10px/1 var(--ens-body, 'Inter'), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: rgba(255,255,255,.5);
+  margin-bottom: 10px;
+}
+
+/* ── KPI grid — chiffres Fredoka tabulaire ── */
 .bl-kpi-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -97,37 +143,44 @@ const STYLE = `<style>
 .bl-kpi {
   background: var(--su);
   border: 1.5px solid var(--bo);
-  border-radius: var(--rl);
+  border-radius: var(--ens-lg, 16px);
   padding: 16px;
-  box-shadow: var(--s0);
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
 }
+/* Grands chiffres → Fredoka pour cohérence arcade */
 .bl-kpi-val {
-  font: 800 28px/1 'IBM Plex Mono', monospace;
+  font: 800 28px/1 var(--ens-display, 'Fredoka'), sans-serif;
   color: var(--ink);
   margin-bottom: 4px;
 }
-.bl-kpi-val .bl-kpi-unit { font-size: .55em; color: var(--mu2); }
+.bl-kpi-val .bl-kpi-unit { font-size: .55em; color: var(--mu2); font-family: var(--ens-body, 'Inter'); }
 .bl-kpi-streak { grid-column: 1 / -1; }
 .bl-kpi-streak .bl-kpi-val { display: inline-flex; align-items: center; gap: 8px; }
-.bl-kpi-label { font: 500 11px/1.4 'Inter', sans-serif; color: var(--mu3); text-transform: uppercase; letter-spacing: .04em; }
+.bl-kpi-label {
+  font: 500 11px/1.4 var(--ens-body, 'Inter'), sans-serif;
+  color: var(--mu3);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+/* Chips delta arcade */
 .bl-kpi-delta {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  font: 600 11px/1 'Plus Jakarta Sans', sans-serif;
-  padding: 3px 7px;
-  border-radius: var(--r-sm);
+  gap: 4px;
+  font: 600 11px/1 var(--ens-body, 'Inter'), sans-serif;
+  padding: 3px 9px;
+  border-radius: var(--ens-pill, 999px);
   margin-top: 6px;
 }
-.bl-kpi-delta.up   { background: var(--grp2); color: var(--grk); }
-.bl-kpi-delta.down { background: var(--rdp2); color: var(--rdk); }
-.bl-kpi-delta.flat { background: var(--bg4); color: var(--mu3); }
+.bl-kpi-delta.up   { background: rgba(24,165,88,.12); color: var(--ens-go, #18a558); }
+.bl-kpi-delta.down { background: rgba(225,29,72,.1);  color: var(--ens-stop, #e11d48); }
+.bl-kpi-delta.flat { background: var(--bg2); color: var(--mu3); }
 
 /* ── Auto comment ── */
 .bl-comment {
-  background: linear-gradient(135deg,color-mix(in srgb, var(--a) 6%, transparent),rgba(139,92,246,.06));
-  border: 1.5px solid color-mix(in srgb, var(--a) 18%, transparent);
-  border-radius: var(--rl);
+  background: linear-gradient(135deg, rgba(24,165,88,.06), rgba(29,78,216,.05));
+  border: 1.5px solid rgba(24,165,88,.2);
+  border-radius: var(--ens-lg, 16px);
   padding: 18px;
   margin-bottom: 16px;
   position: relative;
@@ -136,19 +189,19 @@ const STYLE = `<style>
   content: '"';
   position: absolute;
   top: 10px; left: 18px;
-  font: 700 48px/1 Georgia,serif;
-  color: color-mix(in srgb, var(--a) 15%, transparent);
+  font: 700 48px/1 Georgia, serif;
+  color: rgba(24,165,88,.15);
   line-height: 1;
 }
 .bl-comment-label {
-  font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
   text-transform: uppercase;
   letter-spacing: .08em;
-  color: var(--a-txt);
+  color: var(--ens-go, #18a558);
   margin-bottom: 8px;
 }
 .bl-comment-txt {
-  font: 500 14px/1.6 'Inter', sans-serif;
+  font: 500 14px/1.6 var(--ens-body, 'Inter'), sans-serif;
   color: var(--ink5);
   padding-left: 4px;
 }
@@ -157,10 +210,10 @@ const STYLE = `<style>
 .bl-section {
   background: var(--su);
   border: 1.5px solid var(--bo);
-  border-radius: var(--r-xl);
+  border-radius: var(--ens-lg, 16px);
   padding: 18px;
   margin-bottom: 12px;
-  box-shadow: var(--s0);
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
 }
 .bl-section-hd {
   display: flex;
@@ -169,18 +222,19 @@ const STYLE = `<style>
   margin-bottom: 14px;
 }
 .bl-section-title {
-  font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 15px/1 var(--ens-display, 'Fredoka'), sans-serif;
   color: var(--ink);
   display: flex;
   align-items: center;
   gap: 8px;
 }
+/* Badge nombre acquis → .ens-chip */
 .bl-section-badge {
   font: 700 11px/1 'IBM Plex Mono', monospace;
-  padding: 3px 8px;
-  border-radius: var(--r-sm);
-  background: var(--bg4);
-  color: var(--mu4);
+  padding: 3px 9px;
+  border-radius: var(--ens-pill, 999px);
+  background: rgba(24,165,88,.1);
+  color: var(--ens-go, #18a558);
 }
 
 /* ── Comp list ── */
@@ -190,52 +244,91 @@ const STYLE = `<style>
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  border-radius: var(--r);
+  border-radius: var(--ens-r, 12px);
   background: var(--bg);
 }
 .bl-comp-check {
   width: 20px; height: 20px;
   border-radius: 50%;
-  background: var(--grp2);
+  background: rgba(24,165,88,.15);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  color: var(--grk);
+  color: var(--ens-go, #18a558);
   font-size: 11px;
+  font-weight: 700;
 }
-.bl-comp-name { font: 500 13px/1.3 'Inter', sans-serif; color: var(--ink5); flex: 1; min-width: 0; }
-.bl-comp-date { font: 500 12px/1 'IBM Plex Mono', monospace; color: var(--ink3); flex-shrink: 0; }
-.bl-comp-none { font: 500 13px/1.4 'Inter',sans-serif; color: var(--mu2); text-align: center; padding: 12px 0; }
+.bl-comp-name {
+  font: 500 13px/1.3 var(--ens-body, 'Inter'), sans-serif;
+  color: var(--ink5);
+  flex: 1; min-width: 0;
+}
+.bl-comp-date {
+  font: 500 12px/1 'IBM Plex Mono', monospace;
+  color: var(--mu2);
+  flex-shrink: 0;
+}
+.bl-comp-none {
+  font: 500 13px/1.4 var(--ens-body, 'Inter'), sans-serif;
+  color: var(--mu2);
+  text-align: center;
+  padding: 12px 0;
+}
 
-/* ── Evolution chart ── */
+/* ── Evolution chart — barres arcade --ens-go ── */
 .bl-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
 .bl-bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
 .bl-bar {
   width: 100%;
-  background: linear-gradient(180deg, var(--a), var(--adk));
+  background: linear-gradient(180deg, var(--ens-go, #18a558), #0f7a3e);
   border-radius: 4px 4px 0 0;
   min-height: 4px;
-  transition: height .3s var(--ease-snap);
+  transition: height .3s var(--ease-snap, cubic-bezier(.23,1,.32,1));
 }
-.bl-bar-lbl { font: 500 9px/1 'Inter', sans-serif; color: var(--mu2); text-align: center; white-space: nowrap; }
-.bl-bar-val { font: 600 10px/1 'IBM Plex Mono', monospace; color: var(--mu3); }
+.bl-bar-lbl {
+  font: 500 9px/1 var(--ens-body, 'Inter'), sans-serif;
+  color: var(--mu2);
+  text-align: center;
+  white-space: nowrap;
+}
+.bl-bar-val {
+  font: 600 10px/1 'IBM Plex Mono', monospace;
+  color: var(--ens-go, #18a558);
+  font-weight: 700;
+}
 
-/* ── No data ── */
+/* ── Empty state / no data ── */
 .bl-no-data {
   text-align: center;
   padding: 40px 20px;
   color: var(--mu2);
-  font: 500 14px/1.5 'Inter', sans-serif;
+  font: 500 14px/1.5 var(--ens-body, 'Inter'), sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 /* ────────────────────────────── PRINT ──────────────────────────── */
 @media print {
   body { background: #fff !important; }
 
-  /* Hide non-content elements */
-  .bl-print-btn,
+  /* Masque les éléments non-contenu */
+  .bl-btn-back,
+  .bl-btn-print,
+  .bl-hero,
   nav, [role="navigation"],
   .fab, .toast-container,
   .acc, .vp, .me-page { display: none !important; }
+
+  /* Header print minimaliste à la place du hero */
+  .bl-print-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0 12px;
+    border-bottom: 2px solid #000;
+    margin-bottom: 16px;
+  }
 
   .bl {
     padding: 0 !important;
@@ -247,13 +340,14 @@ const STYLE = `<style>
   .bl-section { box-shadow: none; border-color: #ccc; break-inside: avoid; }
   .bl-comment { border-color: #ccc; }
 
-  /* KPI 2×2 dans la même ligne */
-  .bl-kpi-grid { grid-template-columns: repeat(4,1fr) !important; }
+  /* KPI sur 4 colonnes en impression */
+  .bl-kpi-grid { grid-template-columns: repeat(4, 1fr) !important; }
 
-  /* Ensure all comp rows show in print */
   .bl-comp-list { display: block !important; }
   .bl-comp-row { page-break-inside: avoid; }
 }
+/* Masqué en screen, visible en print */
+.bl-print-header { display: none; }
 </style>`;
 
 // ─── Monde metadata ──────────────────────────────────────────────
@@ -356,7 +450,10 @@ function renderEvolution(evolution) {
   <div class="bl-section-hd">
     <div class="bl-section-title">${icon("trending-up", { size: 16 })} Compétences validées par mois</div>
   </div>
-  <div class="bl-comp-none">Pas encore de données — les validations apparaîtront ici mois par mois.</div>
+  <div style="text-align:center;padding:16px 0">
+    ${illus("route", { size: 56 })}
+    <div class="bl-comp-none" style="padding:8px 0 0">Pas encore de données — les validations apparaîtront ici mois par mois.</div>
+  </div>
 </div>`;
   }
 
@@ -405,8 +502,18 @@ export async function mount(root, eleveId) {
 
   root.innerHTML = `${STYLE}
 <div class="bl">
-  <div style="display:flex;flex-direction:column;gap:10px;padding:40px 0">
-    ${[160, 80, 120, 120, 120].map((h) => `<div style="height:${h}px;background:linear-gradient(90deg,var(--bg3) 0%,var(--bg5) 50%,var(--bg3) 100%);background-size:200% 100%;animation:blShimmer 1.4s infinite;border-radius:16px"></div>`).join("")}
+  <!-- Hero skeleton -->
+  <div class="bl-hero" style="min-height:140px">
+    ${panneauxLayer({ variant: "section" })}
+    <div class="bl-hero-content">
+      <p class="bl-hero-kicker">Bilan de progression</p>
+      <h1 class="bl-hero-title">Chargement…</h1>
+    </div>
+  </div>
+  <div class="bl-body">
+    <div style="display:flex;flex-direction:column;gap:10px;padding:0 0 20px">
+      ${[80, 80, 120, 120, 120].map((h) => `<div style="height:${h}px;background:linear-gradient(90deg,var(--bg3) 0%,var(--bg5) 50%,var(--bg3) 100%);background-size:200% 100%;animation:blShimmer 1.4s infinite;border-radius:16px"></div>`).join("")}
+    </div>
   </div>
   <style>@keyframes blShimmer{to{background-position:-200% 0}}</style>
 </div>`;
@@ -431,10 +538,10 @@ export async function mount(root, eleveId) {
 
   if (error || !data) {
     toast("Impossible de charger le bilan", "error");
-    root.innerHTML = `${STYLE}<div class="bl"><div class="bl-no-data">
-      <div style="margin-bottom:12px;color:var(--mu)">${icon("clipboard", { size: 30 })}</div>
-      Bilan indisponible. Vérifie que cet élève est bien rattaché à ton compte.
-    </div></div>`;
+    root.innerHTML = `${STYLE}<div class="bl"><div class="bl-body"><div class="bl-no-data">
+      ${illus("clipboard", { size: 64 })}
+      <span>Bilan indisponible. Vérifie que cet élève est bien rattaché à ton compte.</span>
+    </div></div></div>`;
     return;
   }
 
@@ -445,40 +552,54 @@ export async function mount(root, eleveId) {
   root.innerHTML = `${STYLE}
 <div class="bl">
 
-  <!-- HEADER -->
-  <div class="bl-hd">
-    <div class="bl-hd-left">
-      <button class="bl-print-btn" id="bl-btn-back" aria-label="Retour" style="margin-bottom:10px">
-        ${icon("arrow-left", { size: 15 })} Retour
-      </button>
-      <div class="bl-school-logo">${esc(ecoleNom)}</div>
-      <h1 class="bl-title" tabindex="-1">Bilan de ${esc(prenom)} ${esc(nom)}</h1>
-      <div class="bl-subtitle">Suivi de progression · Permis B</div>
+  <!-- HERO arcade routière -->
+  <div class="bl-hero">
+    ${panneauxLayer({ variant: "section" })}
+    <div class="bl-hero-content">
+      <p class="bl-school-logo">${esc(ecoleNom)}</p>
+      <p class="bl-hero-kicker">Bilan de progression</p>
+      <h1 class="bl-hero-title" tabindex="-1">${esc(prenom)} ${esc(nom)}</h1>
+      <p class="bl-hero-sub">Suivi de progression · Permis B</p>
+      <div class="bl-hero-actions">
+        <button class="bl-btn-back" id="bl-btn-back" aria-label="Retour au livret">
+          ${icon("arrow-left", { size: 15 })} Retour
+        </button>
+        <button class="bl-btn-print" id="bl-btn-print" aria-label="Imprimer le bilan">
+          ${icon("printer", { size: 15 })} Imprimer
+        </button>
+      </div>
     </div>
-    <button class="bl-print-btn" id="bl-btn-print" aria-label="Imprimer le bilan">
-      ${icon("printer", { size: 15 })} Imprimer
-    </button>
   </div>
 
-  <!-- KPI -->
-  ${renderKPI(kpi)}
+  <!-- En-tête print-only (caché en screen, visible en @media print) -->
+  <div class="bl-print-header" aria-hidden="true">
+    <span style="font:700 14px/1 sans-serif">${esc(ecoleNom)}</span>
+    <span style="font:500 12px/1 sans-serif;color:#555">Bilan de ${esc(prenom)} ${esc(nom)} · Permis B</span>
+  </div>
 
-  <!-- COMMENTAIRE AUTO -->
-  ${renderComment(comment)}
+  <div class="bl-body">
+    <!-- KPI -->
+    ${renderKPI(kpi)}
 
-  <!-- EVOLUTION -->
-  ${renderEvolution(evolution)}
+    <!-- COMMENTAIRE AUTO -->
+    ${renderComment(comment)}
 
-  <!-- PAR MONDE -->
-  ${renderByMonde(by_monde ?? {})}
+    <!-- EVOLUTION -->
+    ${renderEvolution(evolution)}
+
+    <!-- PAR MONDE -->
+    ${renderByMonde(by_monde ?? {})}
+  </div>
 
 </div>`;
 
   root.querySelector("#bl-btn-back")?.addEventListener("click", () => {
+    haptic("tap");
     navigate(`#/livret/${eleveId}`);
   });
 
   root.querySelector("#bl-btn-print")?.addEventListener("click", () => {
+    haptic("impact"); // action métier forte : impression du document
     track("bilan.print", { eleve_id: eleveId });
     window.print();
   });
