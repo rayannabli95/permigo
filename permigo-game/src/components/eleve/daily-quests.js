@@ -85,7 +85,7 @@ function ensureStyle() {
     font: 600 9px/1 'Plus Jakarta Sans', sans-serif;
     padding: 3px 7px; border-radius: 99px; letter-spacing: .03em;
   }
-  .dq-badge--claim { background: var(--puk); color: #fff; }
+  .dq-badge--claim { background: var(--a); color: var(--a-ink); }
   .dq-badge--done  {
     background: var(--gr); color: #fff;
     display: flex; align-items: center; gap: 3px;
@@ -110,13 +110,13 @@ function ensureStyle() {
   .dq-foot { display: flex; align-items: center; justify-content: space-between; }
   .dq-prog { font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
   .dq-reward { font: 600 10px/1 'Inter', sans-serif; color: var(--a-txt); }
-  .dq-card--ready .dq-reward { color: var(--puk); }
+  .dq-card--ready .dq-reward { color: var(--a-txt); }
 
   /* XP popup */
   .dq-xp-pop {
     position: fixed; pointer-events: none; z-index: 9999;
     font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
-    color: var(--puk); text-shadow: 0 1px 8px rgba(124,58,237,.35);
+    color: var(--a-txt); text-shadow: 0 1px 8px color-mix(in srgb, var(--a) 35%, transparent);
     animation: dqXpPop .75s cubic-bezier(.23,1,.32,1) forwards;
     white-space: nowrap; transform: translateX(-50%);
   }
@@ -260,7 +260,7 @@ function renderCard(q) {
         ? "competence"
         : "default";
   const cat = CAT_CFG[_catKey];
-  const fillClr = done ? "var(--gr)" : ready ? "var(--puk)" : "var(--a)";
+  const fillClr = done ? "var(--gr)" : ready ? "var(--a)" : "var(--a)";
   const stCls = done
     ? "dq-card--claimed"
     : ready
