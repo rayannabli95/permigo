@@ -24,9 +24,6 @@ import "@/utils/pwa.js"; // capte beforeinstallprompt très tôt
 initThemeEarly();
 initAccentEarly();
 
-// Écran d'accueil global au lancement (overlay, 1×/session)
-showLaunchSplash();
-
 const app = document.getElementById("app");
 
 async function boot() {
