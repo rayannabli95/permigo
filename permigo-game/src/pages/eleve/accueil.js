@@ -29,7 +29,6 @@ import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { onPopupsSettled } from "@/utils/intro-overlays.js";
-import { renderPermisMini } from "@/components/eleve/permis-card.js";
 import { theoryLeague } from "@/utils/theory-league.js";
 import { getDailyStreak } from "@/services/daily-quiz.js";
 import { isStandalone } from "@/utils/pwa.js";
@@ -1963,126 +1962,6 @@ function renderSessionConfirm(session) {
       <button class="acc2-ms-session-btn" id="confirm-session-btn" data-session-id="${esc(session.id)}">
         ${icon("check", { size: 16, strokeWidth: 2.8 })}
         Confirmer la séance
-      </button>
-    </div>`;
-}
-
-function renderActionDuJour(
-  quest,
-  pendingNotif,
-  totalValidated,
-  dailyQuiz,
-  isFirstRun,
-  dailyStreakCount = 0,
-) {
-  let label = "Action du jour";
-  let title,
-    sub,
-    btnText,
-    href,
-    urgent = false;
-  // isDaily = true → on active la mise en avant visuelle (carte bleue/accent)
-  let isDaily = false;
-  let isDailyDoneState = false;
-
-  // Le quiz n'est plus une porte de validation : on ne pousse plus 'a_valider' en URGENT.
-  // L'invitation au quiz-récap (optionnel) vient d'une notif quiz non lue.
-  if (quest) {
-    title = quest.label ?? "Quête du jour";
-    sub = quest.sub ?? "";
-    btnText = quest.btnText ?? "Commencer →";
-    href = quest.href ?? "#/parcours";
-    urgent = false;
-  } else if (pendingNotif?.data?.competence_id) {
-    const isConsolid = pendingNotif.type === "consolidation_quiz";
-    title = isConsolid ? "Quiz de consolidation" : "Quiz-récap";
-    sub = isConsolid ? "2 questions · 30 sec" : "3 questions · optionnel";
-    btnText = isConsolid ? "Commencer →" : "Faire le récap →";
-    href = `#/quiz/${pendingNotif.data.competence_id}/${isConsolid ? "consolidation" : "post_validation"}`;
-    urgent = isConsolid;
-  } else if (dailyQuiz && !dailyQuiz.done && dailyQuiz.competenceId) {
-    // Question du jour — LA boucle solo quotidienne (plan rétention).
-    // Priorité VISUELLE maximale : la carte est mise en avant avec un style accent.
-    isDaily = true;
-    label = "Question du jour";
-    if (_awayDays >= 3) {
-      // Retour après absence : on abaisse la barrière (« reprise en douceur »)
-      // pour reconnecter le revenant à la boucle quotidienne sans le brusquer.
-      title = "Reprends en douceur";
-      sub = "1 question pour te remettre dedans · ~2 min";
-    } else {
-      title =
-        dailyQuiz.mode === "decouverte"
-          ? "Découvre une compétence"
-          : "Consolide ce que tu sais";
-      sub = "3 questions · ~2 min";
-    }
-    btnText = "C'est parti";
-    href = `#/quiz/${dailyQuiz.competenceId}/post_validation/daily`;
-  } else if (dailyQuiz?.done) {
-    isDaily = true;
-    isDailyDoneState = true;
-    label = "Question du jour";
-    title = "Fait pour aujourd'hui !";
-    sub = "Reviens demain pour ta prochaine question.";
-    btnText = "Continue à réviser";
-    href = "#/quiz/next/post_validation/revision";
-  } else if (totalValidated === 0) {
-    label = "Par où commencer ?";
-    title = "Commence ta 1re révision";
-    sub = "2 min suffisent.";
-    btnText = "Commence ta 1re révision";
-    href = "#/quiz/next/post_validation/revision";
-  } else {
-    title = "Continue ton parcours";
-    sub = "";
-    btnText = "Continue à réviser";
-    href = "#/quiz/next/post_validation/revision";
-  }
-
-  // First-run: the CTA is the only thing that matters on screen.
-  // We add a modifier class that the CSS uses to make it visually dominant.
-  let cardClass = isFirstRun
-    ? "acc2-action acc2-action--first-run"
-    : "acc2-action";
-
-  // Daily card gets a special accent treatment when not done yet.
-  if (isDaily && !isDailyDoneState) {
-    cardClass += " acc2-action--daily";
-  } else if (isDailyDoneState) {
-    cardClass += " acc2-action--daily-done";
-  }
-
-  // First-run btn label uses a shorter verb-first form to fit the button width.
-  const btnLabel =
-    isFirstRun && totalValidated === 0 ? "C'est parti — 2 min" : btnText;
-
-  // Série silencieuse : affichée avec fierté quand >= 2 jours, jamais menaçante.
-  // Affiché uniquement sur la carte daily (pas done), pas sur les autres états.
-  const streakLine =
-    isDaily && !isDailyDoneState && dailyStreakCount >= 2
-      ? `<div class="acc2-daily-streak">${dailyStreakCount} jours d'affilée</div>`
-      : "";
-
-  // Etat "fait" : pastille verte + invitation douce vers demain (pas de streak).
-  const doneBadge = isDailyDoneState
-    ? `<div class="acc2-daily-done-badge">Fait aujourd'hui</div>`
-    : "";
-
-  return `
-    <div class="${cardClass}">
-      <div class="acc2-action-tag">
-        <div class="acc2-action-tag-dot${urgent ? " urgent" : ""}"></div>
-        ${esc(label)}
-        ${urgent ? `<span style="color: var(--rd-txt);font-weight:700">URGENT</span>` : ""}
-        ${doneBadge}
-      </div>
-      <div class="acc2-action-title">${esc(title)}</div>
-      ${sub ? `<div class="acc2-action-sub">${esc(sub)}</div>` : ""}
-      ${streakLine}
-      <button class="acc2-action-btn${isDailyDoneState ? " acc2-action-btn--muted" : ""}" id="action-cta-btn" data-href="${esc(href)}">
-        ${esc(btnLabel)}
-        ${icon("arrow-right", { size: 16 })}
       </button>
     </div>`;
 }
