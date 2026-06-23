@@ -341,9 +341,7 @@ export async function mount(root, mode) {
         <div class="ce-empty">
           ${illus(isTheorie ? "route" : "podium", { size: 80 })}
           <strong style="font:700 15px/1.2 var(--ens-display,'Fredoka'),sans-serif;color:var(--ink)">${
-            isTheorie
-              ? "Aucune révision ces 30 jours"
-              : "Aucun élève dans ta cohorte"
+            isTheorie ? "Aucune révision ces 30 jours" : "Aucun élève à classer"
           }</strong>
           <span style="max-width:28ch;text-align:center">${
             isTheorie
@@ -398,7 +396,7 @@ function heroArcade(n, isTheorie) {
           <a class="ce-hero-tog ${!isTheorie ? "is-active" : ""}" href="#/classement-eleves/pratique" role="tab" aria-selected="${!isTheorie}">${icon("check-circle", { size: 13, strokeWidth: 2.2 })} Pratique</a>
           <a class="ce-hero-tog ${isTheorie ? "is-active" : ""}" href="#/classement-eleves/theorie" role="tab" aria-selected="${isTheorie}">${icon("book-open", { size: 13, strokeWidth: 2.2 })} Révision</a>
         </div>
-        ${n > 0 ? `<span class="ce-hero-chip" style="margin-top:14px">${icon("users", { size: 12, strokeWidth: 2 })} ${n} élève${n > 1 ? "s" : ""} dans ta cohorte</span>` : ""}
+        ${n > 0 ? `<span class="ce-hero-chip" style="margin-top:14px">${icon("users", { size: 12, strokeWidth: 2 })} ${n} élève${n > 1 ? "s" : ""} classé${n > 1 ? "s" : ""}</span>` : ""}
       </div>
     </div>`;
 }

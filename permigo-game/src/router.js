@@ -16,6 +16,65 @@ function _navDir(hash) {
   return "fwd"; // on avance → glisse depuis la droite
 }
 
+function _reducedMotion() {
+  try {
+    return matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch {
+    return false;
+  }
+}
+
+// Capture l'écran SORTANT dans un calque qui glissera (transition swipe iOS
+// push/pop). On fige une copie visuelle de #app AVANT de remonter le nouvel
+// écran → le nouveau (skeleton compris) s'affiche tout de suite (zéro gel),
+// pendant que l'ancien glisse. Décoratif : si quoi que ce soit échoue, la
+// navigation se fait quand même.
+function _snapshotOutgoing(root, dir) {
+  if (_reducedMotion() || !root.innerHTML.trim()) return null;
+  try {
+    const rect = root.getBoundingClientRect();
+    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    const layer = document.createElement("div");
+    layer.className =
+      "route-prev " +
+      (dir === "back" ? "route-prev--over" : "route-prev--under");
+    layer.setAttribute("aria-hidden", "true");
+    const inner = document.createElement("div");
+    inner.className = "route-prev-in";
+    inner.style.left = rect.left + "px";
+    inner.style.width = rect.width + "px";
+    inner.style.transform = `translateY(${-scrollY}px)`;
+    inner.innerHTML = root.innerHTML;
+    layer.appendChild(inner);
+    document.body.appendChild(layer);
+    root.style.position = "relative";
+    root.style.zIndex = "1";
+    return layer;
+  } catch {
+    return null;
+  }
+}
+
+function _playSwipe(root, layer, dir) {
+  if (!layer) return;
+  window.scrollTo(0, 0); // le nouvel écran démarre en haut (parité iOS push)
+  void root.offsetWidth; // reflow
+  root.classList.add(
+    dir === "back" ? "route-swipe-in-back" : "route-swipe-in-fwd",
+  );
+  layer.classList.add(
+    dir === "back" ? "route-swipe-out-back" : "route-swipe-out-fwd",
+  );
+  const cleanup = () => {
+    layer.remove();
+    root.classList.remove("route-swipe-in-fwd", "route-swipe-in-back");
+    root.style.position = "";
+    root.style.zIndex = "";
+  };
+  layer.addEventListener("animationend", cleanup, { once: true });
+  setTimeout(cleanup, 520); // filet de sécurité
+}
+
 const ROUTES = {
   eleve: {
     default: () => import("@/pages/eleve/accueil.js"),
@@ -155,18 +214,22 @@ export async function route(root, me) {
 
   try {
     const mod = await loader();
-    // Transition d'entrée unifiée : fade léger sur #app à chaque route.
-    // Les animations propres aux pages (slide-up, staggers) s'y superposent.
+    // Transition swipe iOS push/pop : on fige l'écran sortant dans un calque
+    // qui glissera, AVANT de remonter le nouvel écran (qui s'affiche aussitôt).
+    const dir = _navDir(location.hash || "#/"); // 'fwd' | 'back' (mute la pile 1×)
+    const prevLayer = _snapshotOutgoing(root, dir);
     root.classList.remove("route-enter");
     // Pour les pages qui attendent (root, eleveId) on passe param en 2e arg
     // Les autres pages ignorent les args supplémentaires
     await mod.mount(root, param);
-    void root.offsetWidth; // reflow → l'animation rejoue à chaque navigation
-    root.classList.toggle(
-      "route-back",
-      _navDir(location.hash || "#/") === "back",
-    );
-    root.classList.add("route-enter");
+    if (prevLayer) {
+      _playSwipe(root, prevLayer, dir); // glissement two-layer (sans gel)
+    } else {
+      // reduced-motion / 1er écran : fade léger existant
+      void root.offsetWidth;
+      root.classList.toggle("route-back", dir === "back");
+      root.classList.add("route-enter");
+    }
     const heading = root.querySelector("h1") || root;
     heading.setAttribute("tabindex", "-1");
     heading.focus({ preventScroll: false });

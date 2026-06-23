@@ -77,6 +77,48 @@
   .route-enter.route-back { animation: routeFade .18s var(--ease-out) both; }
 }
 
+/* ─── Transition SWIPE iOS push/pop (two-layer, posée par le router) ───
+   #app = écran ENTRANT ; .route-prev = copie figée de l'écran SORTANT.
+   fwd (push) : entrant glisse de la droite PAR-DESSUS, sortant recule un peu.
+   back (pop) : sortant glisse à droite et dégage l'entrant qui revient. */
+.route-prev {
+  position: fixed; inset: 0; height: 100dvh;
+  overflow: hidden; pointer-events: none;
+  background: var(--bg); contain: layout paint;
+}
+.route-prev--under { z-index: 0; }  /* sous #app (push) */
+.route-prev--over  { z-index: 2; }  /* au-dessus de #app (pop) */
+.route-prev-in {
+  position: absolute; top: 0;
+  padding-top: calc(52px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  will-change: transform; backface-visibility: hidden;
+}
+/* #app entrant : fond opaque PLEINE HAUTEUR le temps du glissement, sinon un
+   écran court (skeleton « Chargement… ») laisse voir le calque sortant dessous. */
+.route-swipe-in-fwd, .route-swipe-in-back {
+  background: var(--bg); min-height: 100dvh; will-change: transform;
+}
+
+@keyframes rtInFwd  { from { transform: translateX(100%); }  to { transform: translateX(0); } }
+@keyframes rtInBack { from { transform: translateX(-24%); filter: brightness(.9); } to { transform: translateX(0); filter: none; } }
+@keyframes rtOutFwd { from { transform: translateX(0); filter: brightness(1); } to { transform: translateX(-24%); filter: brightness(.88); } }
+@keyframes rtOutBack{ from { transform: translateX(0); }            to { transform: translateX(100%); } }
+
+.route-swipe-in-fwd  { animation: rtInFwd  .36s var(--ease-ios) both; }
+.route-swipe-in-back { animation: rtInBack .36s var(--ease-ios) both; }
+.route-prev.route-swipe-out-fwd  { animation: rtOutFwd  .36s var(--ease-ios) both; }
+.route-prev.route-swipe-out-back { animation: rtOutBack .36s var(--ease-ios) both; }
+
+/* Ombre portée sur le bord meneur de l'écran qui glisse (profondeur iOS) */
+.route-prev.route-swipe-out-back { box-shadow: -8px 0 24px rgba(11,13,26,.18); }
+.route-swipe-in-fwd { box-shadow: -8px 0 24px rgba(11,13,26,.18); }
+
+@media (prefers-reduced-motion: reduce) {
+  .route-prev { display: none; }
+  .route-swipe-in-fwd, .route-swipe-in-back { animation: routeFade .18s var(--ease-out) both; }
+}
+
 /* ─── Skeleton loaders (pendant les fetch DB) ─── */
 .skel {
   background: linear-gradient(90deg, var(--bo2) 0%, var(--bg2) 50%, var(--bo2) 100%);
