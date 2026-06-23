@@ -58,10 +58,23 @@
 }
 
 /* ─── Transition de page unifiée (posée par le router sur #app) ─── */
-.route-enter { animation: routeFade .25s var(--ease-out) both; }
+.route-enter { animation: routeIn .19s var(--ease-snap) both; overflow-x: clip; }
+.route-enter.route-back { animation: routeInBack .19s var(--ease-snap) both; }
+@keyframes routeIn {
+  from { opacity: 0; transform: translateX(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes routeInBack {
+  from { opacity: 0; transform: translateX(-14px); }
+  to   { opacity: 1; transform: none; }
+}
 @keyframes routeFade {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-enter,
+  .route-enter.route-back { animation: routeFade .18s var(--ease-out) both; }
 }
 
 /* ─── Skeleton loaders (pendant les fetch DB) ─── */
