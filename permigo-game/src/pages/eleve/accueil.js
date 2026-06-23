@@ -103,32 +103,27 @@ const STYLE = `<style>
   color: var(--ink);
 }
 
-/* ════ ACCENT ACCUEIL — VIOLET FIXE (indépendant du thème --a) ══════════ */
+/* ════ ACCENT ACCUEIL — suit le token --a (l'accent choisi par l'élève) ════
+   Défaut élève = violet (cf. main.js). Tout l'accueil + le chrome (header/nav,
+   qui suivent --a) restent cohérents, et le picker de couleur recolore aussi
+   l'accueil. Neutres via --su/--ink/--mu (theme-aware) → pas d'override dark. */
 .acc2 {
-  --acc-vio: #6d4dff;
-  --acc-vio-dk: #4a2fc4;
-  --acc-vio-lt: #a78bff;
-  --acc-hero-bg: linear-gradient(150deg, #efe9ff 0%, #f7f2ff 55%, #fdeede 100%);
-  --acc-hero-border: #efe7ff;
-  --acc-hero-kicker: #6d4dff;
-  --acc-hero-ink: #1c1533;
-  --acc-hero-mu: #7b7496;
+  --acc-vio: var(--a);
+  --acc-vio-dk: var(--adk);
+  --acc-vio-lt: var(--a-lt);
+  --acc-hero-bg: linear-gradient(150deg,
+    color-mix(in srgb, var(--a) 13%, var(--su)) 0%,
+    color-mix(in srgb, var(--a) 6%, var(--su)) 55%,
+    var(--su) 100%);
+  --acc-hero-border: color-mix(in srgb, var(--a) 24%, var(--su));
+  --acc-hero-kicker: var(--a-txt);
+  --acc-hero-ink: var(--ink);
+  --acc-hero-mu: var(--mu);
   --acc-gold: #f7b32b;
   --acc-gold-dk: #e08e0b;
   --acc-hud-bg: var(--su);
   --acc-hud-border: var(--bo);
-  --acc-cta-shadow: 0 6px 0 #4a2fc4, 0 14px 26px -6px rgba(109,77,255,.48);
-}
-[data-theme="dark"] .acc2 {
-  --acc-vio: #8b70ff;
-  --acc-vio-dk: #5b3ddd;
-  --acc-vio-lt: #c4b0ff;
-  --acc-hero-bg: linear-gradient(150deg, #1e1642 0%, #160f35 55%, #1c1030 100%);
-  --acc-hero-border: rgba(167,139,255,.18);
-  --acc-hero-kicker: #a78bff;
-  --acc-hero-ink: #f0ecff;
-  --acc-hero-mu: #9d92c2;
-  --acc-cta-shadow: 0 6px 0 #3a25a8, 0 14px 26px -6px rgba(109,77,255,.55);
+  --acc-cta-shadow: 0 6px 0 var(--adk), 0 14px 26px -6px color-mix(in srgb, var(--a) 42%, transparent);
 }
 
 /* ════════════════ HUD — rangée tout en haut ════════════════════ */
@@ -189,7 +184,7 @@ const STYLE = `<style>
   overflow: visible;
   isolation: isolate;
   box-shadow:
-    0 16px 40px -16px rgba(109,77,255,.28),
+    0 16px 40px -16px color-mix(in srgb, var(--a) 28%, transparent),
     0 2px 0 rgba(255,255,255,.7) inset;
   min-height: 196px;
 }
@@ -201,8 +196,8 @@ const STYLE = `<style>
   height: 220px;
   border-radius: 50%;
   background: radial-gradient(circle,
-    rgba(167,139,255,.6),
-    rgba(255,180,80,.2) 45%,
+    color-mix(in srgb, var(--a-lt) 60%, transparent),
+    color-mix(in srgb, var(--a) 20%, transparent) 45%,
     transparent 70%);
   filter: blur(6px);
   z-index: 0;
@@ -282,7 +277,7 @@ const STYLE = `<style>
   padding: 18px;
   font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
-  background: linear-gradient(180deg, #7d5fff, var(--acc-vio));
+  background: linear-gradient(180deg, var(--acc-vio-lt), var(--acc-vio));
   box-shadow: var(--acc-cta-shadow);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -290,7 +285,7 @@ const STYLE = `<style>
 }
 .acc2-cta-king:active {
   transform: translateY(5px);
-  box-shadow: 0 1px 0 var(--acc-vio-dk), 0 6px 14px -6px rgba(109,77,255,.3);
+  box-shadow: 0 1px 0 var(--acc-vio-dk), 0 6px 14px -6px color-mix(in srgb, var(--a) 30%, transparent);
 }
 .acc2-cta-king.muted {
   background: transparent;
@@ -571,19 +566,19 @@ const STYLE = `<style>
   font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
   min-height: 52px;
-  box-shadow: 0 6px 18px -6px rgba(109,77,255,.48);
+  box-shadow: 0 6px 18px -6px color-mix(in srgb, var(--a) 48%, transparent);
   -webkit-tap-highlight-color: transparent;
   transition: transform .14s var(--ease-spring), box-shadow .14s;
 }
-.acc2-action-btn:active { transform: scale(.96); box-shadow: 0 3px 8px -3px rgba(109,77,255,.3); }
+.acc2-action-btn:active { transform: scale(.96); box-shadow: 0 3px 8px -3px color-mix(in srgb, var(--a) 30%, transparent); }
 
 /* ── Question du jour — etat "a faire" : carte visuellement prioritaire ── */
 .acc2-action--daily {
-  background: rgba(109,77,255,.05);
-  border-color: rgba(109,77,255,.40);
+  background: color-mix(in srgb, var(--a) 5%, transparent);
+  border-color: color-mix(in srgb, var(--a) 40%, transparent);
   box-shadow:
-    0 0 0 3px rgba(109,77,255,.08),
-    0 4px 16px -4px rgba(109,77,255,.22);
+    0 0 0 3px color-mix(in srgb, var(--a) 8%, transparent),
+    0 4px 16px -4px color-mix(in srgb, var(--a) 22%, transparent);
 }
 .acc2-action--daily .acc2-action-title {
   font-size: 20px;
@@ -594,7 +589,7 @@ const STYLE = `<style>
 }
 .acc2-action--daily .acc2-action-tag-dot {
   background: var(--acc-vio);
-  box-shadow: 0 0 0 2px rgba(109,77,255,.20);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--a) 20%, transparent);
 }
 
 /* ── Série silencieuse — badge jours d'affilée (fierté, jamais menace) ── */
@@ -834,7 +829,7 @@ const STYLE = `<style>
 }
 .acc-lg-head::after {
   content: ''; flex: 1; height: 1px;
-  background: linear-gradient(90deg, rgba(109,77,255,.22), transparent);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--a) 22%, transparent), transparent);
 }
 .acc-lg-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
@@ -867,34 +862,34 @@ const STYLE = `<style>
   content: ''; position: absolute; pointer-events: none;
   top: 0; left: 10%; right: 10%; height: 1px;
   border-radius: 0 0 50% 50%;
-  background: linear-gradient(90deg, transparent, rgba(167,139,255,.7) 40%, rgba(167,139,255,.7) 60%, transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--a-lt) 70%, transparent) 40%, color-mix(in srgb, var(--a-lt) 70%, transparent) 60%, transparent);
   opacity: .6;
 }
 
 /* ── Variante École ── */
 .acc-lg-card[data-ligue="ecole"] {
-  background: linear-gradient(158deg, rgba(109,77,255,.10) 0%, var(--su) 100%);
-  border: 1.5px solid rgba(109,77,255,.22);
+  background: linear-gradient(158deg, color-mix(in srgb, var(--a) 10%, transparent) 0%, var(--su) 100%);
+  border: 1.5px solid color-mix(in srgb, var(--a) 22%, transparent);
   box-shadow:
-    0 2px 0 0 rgba(109,77,255,.08) inset,
-    0 6px 18px -6px rgba(109,77,255,.22);
+    0 2px 0 0 color-mix(in srgb, var(--a) 8%, transparent) inset,
+    0 6px 18px -6px color-mix(in srgb, var(--a) 22%, transparent);
 }
 /* ── Variante Révision ── */
 .acc-lg-card[data-ligue="revision"] {
-  background: linear-gradient(142deg, rgba(109,77,255,.08) 0%, var(--su) 85%);
-  border: 1.5px solid rgba(109,77,255,.18);
+  background: linear-gradient(142deg, color-mix(in srgb, var(--a) 8%, transparent) 0%, var(--su) 85%);
+  border: 1.5px solid color-mix(in srgb, var(--a) 18%, transparent);
   box-shadow:
-    0 2px 0 0 rgba(109,77,255,.10) inset,
-    0 6px 22px -8px rgba(109,77,255,.20);
+    0 2px 0 0 color-mix(in srgb, var(--a) 10%, transparent) inset,
+    0 6px 22px -8px color-mix(in srgb, var(--a) 20%, transparent);
 }
 
-.acc-lg-card:active { transform: scale(.97); box-shadow: 0 2px 8px -4px rgba(109,77,255,.18) !important; }
+.acc-lg-card:active { transform: scale(.97); box-shadow: 0 2px 8px -4px color-mix(in srgb, var(--a) 18%, transparent) !important; }
 .acc-lg-card:focus-visible { outline: 2px solid var(--acc-vio); outline-offset: 2px; }
 @media (hover:hover) and (pointer:fine) {
   .acc-lg-card:hover {
     transform: translateY(-2px);
-    border-color: rgba(109,77,255,.40) !important;
-    box-shadow: 0 10px 26px -8px rgba(109,77,255,.35) !important;
+    border-color: color-mix(in srgb, var(--a) 40%, transparent) !important;
+    box-shadow: 0 10px 26px -8px color-mix(in srgb, var(--a) 35%, transparent) !important;
   }
 }
 
@@ -904,8 +899,8 @@ const STYLE = `<style>
   font: 700 10.5px/1 'Plus Jakarta Sans', sans-serif;
   color: var(--acc-vio);
   position: relative; z-index: 1;
-  background: rgba(109,77,255,.10);
-  border: 1px solid rgba(109,77,255,.18);
+  background: color-mix(in srgb, var(--a) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--a) 18%, transparent);
   border-radius: 100px; padding: 3px 7px 3px 5px;
 }
 
@@ -913,14 +908,14 @@ const STYLE = `<style>
 .acc-lg-rank {
   font: 800 40px/1 'Plus Jakarta Sans', sans-serif;
   letter-spacing: -.04em; margin: 8px 0 0; position: relative; z-index: 1;
-  background: linear-gradient(160deg, #8b70ff 0%, #1c1533 55%, #6d4dff 100%);
+  background: linear-gradient(160deg, var(--acc-vio-lt) 0%, var(--ink) 55%, var(--acc-vio) 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
   font-variant-numeric: tabular-nums;
 }
 /* Podium top-3 : éclat plus intense */
 .acc-lg-card[data-pos="1"] .acc-lg-rank {
-  background: linear-gradient(150deg, #a78bff 0%, #6d4dff 40%, #1c1533 70%, #8b70ff 100%);
+  background: linear-gradient(150deg, var(--acc-vio-lt) 0%, var(--acc-vio) 40%, var(--ink) 70%, var(--acc-vio-lt) 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
   font-size: 46px;
@@ -945,7 +940,7 @@ const STYLE = `<style>
   flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; border-radius: 50%;
   background: var(--acc-vio); color: #fff;
-  box-shadow: 0 4px 11px -3px rgba(109,77,255,.55);
+  box-shadow: 0 4px 11px -3px color-mix(in srgb, var(--a) 55%, transparent);
   transition: transform .15s var(--ease-spring, cubic-bezier(.34,1.56,.64,1));
 }
 .acc-lg-card:active .acc-lg-go { transform: translateX(3px) scale(.94); }
@@ -1015,10 +1010,10 @@ const STYLE = `<style>
 .acc2-action--first-run {
   margin: 20px 16px 0;
   background: var(--su);
-  border: 2px solid rgba(109,77,255,.30);
+  border: 2px solid color-mix(in srgb, var(--a) 30%, transparent);
   border-radius: var(--rx);
   padding: 24px 20px 22px;
-  box-shadow: 0 8px 28px -10px rgba(109,77,255,.28), 0 2px 6px rgba(10,13,26,.06);
+  box-shadow: 0 8px 28px -10px color-mix(in srgb, var(--a) 28%, transparent), 0 2px 6px rgba(10,13,26,.06);
 }
 .acc2-action--first-run .acc2-action-tag {
   font-size: 11px;
@@ -1039,7 +1034,7 @@ const STYLE = `<style>
   font-size: 16px;
   min-height: 58px;
   letter-spacing: -.01em;
-  box-shadow: 0 10px 28px -8px rgba(109,77,255,.48);
+  box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--a) 48%, transparent);
 }
 @media (prefers-reduced-motion: reduce) {
   .acc2-action--first-run .acc2-action-btn { transition: none; }
@@ -1068,7 +1063,7 @@ const STYLE = `<style>
   background: var(--su); border: 1px solid var(--bo);
   border-radius: 22px; padding: 14px; margin: 14px 16px 0;
   text-decoration: none; cursor: pointer;
-  box-shadow: 0 8px 22px -12px rgba(109,77,255,.22);
+  box-shadow: 0 8px 22px -12px color-mix(in srgb, var(--a) 22%, transparent);
   transition: transform .12s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -1104,7 +1099,7 @@ const STYLE = `<style>
 .acc2-permis-fill {
   display: block; height: 100%; border-radius: 999px;
   background: linear-gradient(90deg, var(--acc-vio), var(--acc-vio-lt));
-  box-shadow: 0 0 10px rgba(109,77,255,.55);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--a) 55%, transparent);
   width: 0; transition: width .6s cubic-bezier(.34,1.56,.64,1);
 }
 .acc2-permis-sub {
@@ -1203,15 +1198,15 @@ const STYLE = `<style>
 }
 .acc2-premium-link:first-child { border-radius: 18px 18px 0 0; border-bottom: none; }
 .acc2-premium-link:last-child  { border-radius: 0 0 18px 18px; }
-.acc2-premium-link:active { background: rgba(109,77,255,.06); }
+.acc2-premium-link:active { background: color-mix(in srgb, var(--a) 6%, transparent); }
 .acc2-premium-link-ico {
   width: 38px; height: 38px; flex: none;
-  background: rgba(109,77,255,.10); border-radius: 12px;
+  background: color-mix(in srgb, var(--a) 10%, transparent); border-radius: 12px;
   display: grid; place-items: center;
 }
 .acc2-premium-link-ico img {
   width: 26px; height: 26px; object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(109,77,255,.25));
+  filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--a) 25%, transparent));
 }
 .acc2-premium-link-txt { flex: 1; min-width: 0; }
 .acc2-premium-link-t {
@@ -1224,7 +1219,7 @@ const STYLE = `<style>
   flex: none; display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; border-radius: 50%;
   background: var(--acc-vio); color: #fff;
-  box-shadow: 0 4px 10px -3px rgba(109,77,255,.50);
+  box-shadow: 0 4px 10px -3px color-mix(in srgb, var(--a) 50%, transparent);
   font-size: 16px; font-weight: 800;
 }
 
@@ -1302,7 +1297,7 @@ const STYLE = `<style>
 }
 .acc2-badge-cell.acc2-badge-new {
   border-color: var(--acc-vio-lt);
-  box-shadow: 0 0 0 2px rgba(167,139,255,.32), 0 8px 18px -7px rgba(109,77,255,.48);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--a-lt) 32%, transparent), 0 8px 18px -7px color-mix(in srgb, var(--a) 48%, transparent);
 }
 .acc2-badge-cell.acc2-badge-new::after {
   content: ""; position: absolute; top: -3px; right: -3px;
@@ -1664,12 +1659,12 @@ function render({
   // tout seul une fois installée (isStandalone) : pas un popup qu'on oublie.
   const installBanner = !isStandalone()
     ? `<style>
-    .acc-install{display:flex;align-items:center;gap:10px;margin:0 16px 12px;padding:10px 12px;border-radius:14px;background:rgba(109,77,255,.07);border:1px solid rgba(109,77,255,.22);box-shadow:0 3px 10px -4px rgba(109,77,255,.20)}
-    .acc-install-ico{flex:0 0 34px;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(109,77,255,.14);color:#6d4dff}
+    .acc-install{display:flex;align-items:center;gap:10px;margin:0 16px 12px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb, var(--a) 7%, transparent);border:1px solid color-mix(in srgb, var(--a) 22%, transparent);box-shadow:0 3px 10px -4px color-mix(in srgb, var(--a) 20%, transparent)}
+    .acc-install-ico{flex:0 0 34px;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--a) 14%, transparent);color:var(--acc-vio)}
     .acc-install-txt{min-width:0;flex:1}
     .acc-install-t{font:700 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
     .acc-install-s{font:500 11px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
-    .acc-install-btn{flex:0 0 auto;min-height:36px;padding:0 14px;border:0;border-radius:10px;background:linear-gradient(180deg,#7d5fff,#6d4dff);color:#fff;font:700 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:0 3px 8px -2px rgba(109,77,255,.45)}
+    .acc-install-btn{flex:0 0 auto;min-height:36px;padding:0 14px;border:0;border-radius:10px;background:linear-gradient(180deg,var(--acc-vio-lt),var(--acc-vio));color:#fff;font:700 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:0 3px 8px -2px color-mix(in srgb, var(--a) 45%, transparent)}
     .acc-install-btn:active{transform:scale(.96)}
     </style>
     <div class="acc-install" id="acc-install">
