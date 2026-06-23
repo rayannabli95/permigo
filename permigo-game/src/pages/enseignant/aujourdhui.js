@@ -143,8 +143,8 @@ const STYLE = `<style>
     animation: ajIn .5s .06s var(--ease) both;
   }
   .aj-validate-hd { display: flex; align-items: center; gap: 8px; }
-  .aj-validate-ttl { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; }
-  .aj-validate-sub { font: 500 12.5px/1.4 'Inter', sans-serif; color: var(--mu); margin: 4px 0 12px; }
+  .aj-validate-ttl { font: 700 18px/1.2 var(--ens-display, 'Fredoka'), sans-serif; color: var(--ink); letter-spacing: -.02em; }
+  .aj-validate-sub { font: 500 13px/1.45 var(--ens-body, 'Inter'), sans-serif; color: var(--mu); margin: 5px 0 14px; }
   .aj-validate-list { display: flex; flex-direction: column; }
   .aj-validate-row {
     display: flex; align-items: center; gap: 12px; width: 100%;
@@ -155,8 +155,8 @@ const STYLE = `<style>
   .aj-validate-row + .aj-validate-row { border-top: 1px solid var(--bo2); }
   .aj-validate-row:active { background: var(--bg2); }
   .aj-validate-av { width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; display: flex; }
-  .aj-validate-nom { flex: 1; min-width: 0; font: 600 14px/1.2 'Inter', sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .aj-validate-prog { font: 700 12px/1 'IBM Plex Mono', monospace; color: var(--mu2); flex-shrink: 0; }
+  .aj-validate-nom { flex: 1; min-width: 0; font: 600 14.5px/1.25 var(--ens-body, 'Inter'), sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .aj-validate-prog { font: 700 13.5px/1 var(--ens-display, 'Fredoka'), sans-serif; color: var(--mu2); font-variant-numeric: tabular-nums; letter-spacing: -.01em; flex-shrink: 0; }
   .aj-validate-chev { color: var(--mu2); flex-shrink: 0; display: flex; }
   .aj-validate-other {
     width: 100%; margin-top: 12px; padding: 12px; min-height: 44px;
@@ -439,7 +439,7 @@ const STYLE = `<style>
   }
   .aj-act-comp-code {
     display: block;
-    font: 600 11px/1 'IBM Plex Mono', monospace;
+    font: 600 11px/1.3 var(--ens-body, 'Inter'), sans-serif;
     color: var(--mu2);
     margin-top: 2px;
   }
@@ -456,8 +456,8 @@ const STYLE = `<style>
     border-radius: var(--r-sm);
   }
   .aj-act-time {
-    font: 500 12px/1 'IBM Plex Mono', monospace;
-    color: var(--ink3);
+    font: 500 12px/1 var(--ens-body, 'Inter'), sans-serif;
+    color: var(--ink3); font-variant-numeric: tabular-nums;
   }
 
   /* Élèves compacts */
@@ -503,8 +503,8 @@ const STYLE = `<style>
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .aj-eleve-prog {
-    font: 700 12px/1 'IBM Plex Mono', monospace;
-    color: var(--adk);
+    font: 700 13px/1 var(--ens-display, 'Fredoka'), sans-serif;
+    color: var(--adk); font-variant-numeric: tabular-nums; letter-spacing: -.01em;
     flex-shrink: 0;
   }
   .aj-eleve-chev { color: var(--mu2); font-size: 14px; flex-shrink: 0; }
@@ -585,7 +585,7 @@ const STYLE = `<style>
     color: var(--ink);
   }
   .aj-recap-row-name { flex: 1; }
-  .aj-recap-row-dur  { font: 700 12px/1 'IBM Plex Mono', monospace; color: var(--adk); flex-shrink: 0; }
+  .aj-recap-row-dur  { font: 700 12px/1 var(--ens-body, 'Inter'), sans-serif; color: var(--adk); font-variant-numeric: tabular-nums; flex-shrink: 0; }
   .aj-recap-row-status {
     font: 600 10px/1 'Inter', sans-serif;
     padding: 3px 7px;
