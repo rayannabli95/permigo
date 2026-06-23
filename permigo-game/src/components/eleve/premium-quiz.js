@@ -56,6 +56,9 @@ const STYLE = `<style>
 .pq-seg span.ok i { width:100%; background:#10b981; }
 .pq-seg span.ko i { width:100%; background:#ef4444; }
 .pq-seg span.now i { width:40%; }
+.pq-seg span.just { animation: pqSegBump .3s cubic-bezier(.23,1,.32,1) both; }
+@keyframes pqSegBump { 0%{transform:scaleY(1)} 40%{transform:scaleY(1.85)} 100%{transform:scaleY(1)} }
+@media (prefers-reduced-motion: reduce){ .pq-seg span.just { animation:none; } }
 .pq-combo { font:800 13px 'Plus Jakarta Sans',sans-serif; color:#f59e0b; min-width:38px; text-align:right; opacity:0; transition:opacity .2s; }
 .pq-combo.on { opacity:1; }
 
@@ -118,11 +121,15 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
   const lastCoach = { v: -1 };
 
   function segHTML() {
+    // Le segment qui vient de se remplir « pompe » une fois (synchro avec l'haptique).
+    // Présent seulement sur le rendu de révélation → ne rejoue jamais ensuite.
+    const justIdx = chosen !== null ? results.length - 1 : -1;
     return qs
       .map((_, i) => {
         let cls = "";
         if (i < results.length) cls = results[i] ? "ok" : "ko";
         else if (i === idx) cls = "now";
+        if (i === justIdx) cls += " just";
         return `<span class="${cls}"><i></i></span>`;
       })
       .join("");
