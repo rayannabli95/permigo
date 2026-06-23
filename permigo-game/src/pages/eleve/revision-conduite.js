@@ -63,11 +63,11 @@ const STYLE = `<style>
   background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; }
 .rvc-top { display:flex; align-items:center; gap:10px; padding:16px 0 8px; }
 .rvc-back { width:38px; height:38px; border-radius:11px; border:0; cursor:pointer;
-  background: var(--surface, #fff); color: var(--ink); font-size:20px; line-height:1;
+  background: var(--su, #fff); color: var(--ink); font-size:20px; line-height:1;
   box-shadow: 0 1px 4px rgba(0,0,0,.08); flex-shrink:0; }
 .rvc-back:active { transform: scale(0.95); }
 .rvc-h1 { font: 800 22px/1.1 'Plus Jakarta Sans', sans-serif; letter-spacing:-.025em; margin:0; }
-.rvc-sub { color: var(--muted, #64748b); font-size:13px; margin:2px 0 0; }
+.rvc-sub { color: var(--mu, #64748b); font-size:13px; margin:2px 0 0; }
 
 /* Carte « point faible du jour » */
 .rvc-pf { margin:14px 0 18px; border-radius:18px; padding:18px;
@@ -83,10 +83,10 @@ const STYLE = `<style>
 /* Mondes + compétences */
 .rvc-monde { margin-bottom:18px; }
 .rvc-monde-h { font:800 15px 'Plus Jakarta Sans',sans-serif; margin:0 0 2px; }
-.rvc-monde-s { color: var(--muted,#64748b); font-size:12px; margin:0 0 10px; }
+.rvc-monde-s { color: var(--mu,#64748b); font-size:12px; margin:0 0 10px; }
 .rvc-list { display:flex; flex-direction:column; gap:8px; }
 .rvc-card { display:flex; align-items:center; gap:12px; text-align:left; width:100%;
-  border:0; cursor:pointer; background: var(--surface,#fff); color:var(--ink);
+  border:0; cursor:pointer; background: var(--su,#fff); color:var(--ink);
   border-radius:14px; padding:13px 14px; box-shadow:0 1px 4px rgba(0,0,0,.06);
   transition: transform .15s cubic-bezier(.23,1,.32,1); }
 .rvc-card:active { transform: scale(0.985); }
@@ -94,17 +94,17 @@ const STYLE = `<style>
 .rvc-chk { width:20px; height:20px; border-radius:50%; flex-shrink:0; font-size:12px;
   display:flex; align-items:center; justify-content:center; }
 .rvc-chk.on { background:#10b981; color:#fff; }
-.rvc-chk.off { border:2px solid var(--border,#e2e8f0); color:transparent; }
+.rvc-chk.off { border:2px solid var(--bo3,#e2e8f0); color:transparent; }
 
 /* Fiche détail */
 .rvc-fiche-tag { display:inline-block; font-size:11px; font-weight:700; color:var(--a,#6366f1);
   background: color-mix(in srgb, var(--a,#6366f1) 12%, transparent); padding:3px 9px; border-radius:999px; }
 .rvc-block { margin:16px 0; }
 .rvc-block-h { font:800 13px 'Plus Jakarta Sans',sans-serif; text-transform:uppercase;
-  letter-spacing:.05em; color:var(--muted,#64748b); margin:0 0 8px; }
+  letter-spacing:.05em; color:var(--mu,#64748b); margin:0 0 8px; }
 .rvc-steps { margin:0; padding:0; list-style:none; counter-reset: s; display:flex; flex-direction:column; gap:8px; }
 .rvc-steps li { counter-increment:s; position:relative; padding:10px 12px 10px 40px;
-  background: var(--surface,#fff); border-radius:12px; font-size:14px; line-height:1.4;
+  background: var(--su,#fff); border-radius:12px; font-size:14px; line-height:1.4;
   box-shadow:0 1px 3px rgba(0,0,0,.05); }
 .rvc-steps li::before { content: counter(s); position:absolute; left:10px; top:10px;
   width:22px; height:22px; border-radius:50%; background:var(--a,#6366f1); color:#fff;
@@ -113,7 +113,7 @@ const STYLE = `<style>
 .rvc-why { background: color-mix(in srgb, #6366f1 8%, transparent); }
 .rvc-err { background: color-mix(in srgb, #f59e0b 12%, transparent); }
 .rvc-bva { background: color-mix(in srgb, #06b6d4 10%, transparent); }
-.rvc-src { font-size:11px; color:var(--muted,#94a3b8); margin-top:14px; }
+.rvc-src { font-size:11px; color:var(--mu,#94a3b8); margin-top:14px; }
 .rvc-go { position:sticky; bottom: calc(16px + env(safe-area-inset-bottom)); width:100%;
   border:0; border-radius:14px; padding:15px; cursor:pointer; margin-top:18px;
   font:800 16px 'Plus Jakarta Sans',sans-serif; color:#fff; background:var(--a,#6366f1);
@@ -121,32 +121,32 @@ const STYLE = `<style>
 .rvc-go:active { transform: scale(0.98); }
 
 /* Flashcards */
-.rvc-prog { font:700 12px 'IBM Plex Mono',monospace; color:var(--muted,#64748b); text-align:center; margin:10px 0 14px; }
-.rvc-q { background:var(--surface,#fff); border-radius:18px; padding:22px 18px; min-height:120px;
+.rvc-prog { font:700 12px 'IBM Plex Mono',monospace; color:var(--mu,#64748b); text-align:center; margin:10px 0 14px; }
+.rvc-q { background:var(--su,#fff); border-radius:18px; padding:22px 18px; min-height:120px;
   display:flex; align-items:center; box-shadow:0 2px 10px rgba(0,0,0,.07);
   font:700 18px/1.35 'Plus Jakarta Sans',sans-serif; }
 .rvc-a { margin-top:14px; border-radius:16px; padding:18px; background: color-mix(in srgb,#10b981 10%, transparent);
   animation: rvcrise .25s cubic-bezier(.23,1,.32,1); }
 @keyframes rvcrise { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform:none; } }
-.rvc-a-r { font:800 16px 'Plus Jakarta Sans',sans-serif; color:#047857; }
+.rvc-a-r { font:800 16px 'Plus Jakarta Sans',sans-serif; color:var(--gr-txt,#047857); }
 .rvc-a-e { font-size:14px; line-height:1.45; margin-top:6px; color:var(--ink); }
 .rvc-done { text-align:center; padding:40px 16px; }
 .rvc-done-e { font-size:54px; animation: rvcrise .35s cubic-bezier(.23,1,.32,1) both; }
 .rvc-done-t { font:800 22px 'Plus Jakarta Sans',sans-serif; margin:10px 0 4px; }
 .rvc-focus { margin:0 0 18px; border:2px solid color-mix(in srgb,#f59e0b 45%, transparent); border-radius:16px; padding:14px; background: color-mix(in srgb,#f59e0b 7%, transparent); }
-.rvc-focus-k { font:800 12px 'Plus Jakarta Sans',sans-serif; text-transform:uppercase; letter-spacing:.05em; color:#b45309; margin-bottom:6px; }
-.rvc-focus-row { display:flex; align-items:center; gap:10px; width:100%; text-align:left; border:0; cursor:pointer; background:var(--surface,#fff); border-radius:12px; padding:12px; margin-top:8px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.rvc-focus-k { font:800 12px 'Plus Jakarta Sans',sans-serif; text-transform:uppercase; letter-spacing:.05em; color:var(--am-txt,#b45309); margin-bottom:6px; }
+.rvc-focus-row { display:flex; align-items:center; gap:10px; width:100%; text-align:left; border:0; cursor:pointer; background:var(--su,#fff); border-radius:12px; padding:12px; margin-top:8px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
 .rvc-focus-row:active { transform: scale(0.985); }
 .rvc-focus-t { font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; flex:1; }
-.rvc-focus-n { font-size:12px; color:var(--muted,#64748b); }
-.rvc-focus-go { font:700 13px 'Plus Jakarta Sans',sans-serif; color:#b45309; white-space:nowrap; }
-.rvc-mlabel { font:800 12px 'Plus Jakarta Sans',sans-serif; text-transform:uppercase; letter-spacing:.05em; color:var(--muted,#94a3b8); margin:6px 0 10px; }
-.rvc-mcard { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:0; cursor:pointer; background:var(--surface,#fff); color:var(--ink); border-radius:14px; padding:15px 14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); transition: transform .15s cubic-bezier(.23,1,.32,1); }
+.rvc-focus-n { font-size:12px; color:var(--mu,#64748b); }
+.rvc-focus-go { font:700 13px 'Plus Jakarta Sans',sans-serif; color:var(--am-txt,#b45309); white-space:nowrap; }
+.rvc-mlabel { font:800 12px 'Plus Jakarta Sans',sans-serif; text-transform:uppercase; letter-spacing:.05em; color:var(--mu,#94a3b8); margin:6px 0 10px; }
+.rvc-mcard { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:0; cursor:pointer; background:var(--su,#fff); color:var(--ink); border-radius:14px; padding:15px 14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); transition: transform .15s cubic-bezier(.23,1,.32,1); }
 .rvc-mcard:active { transform: scale(0.985); }
 .rvc-mnum { width:30px; height:30px; border-radius:9px; flex-shrink:0; background:var(--a,#6366f1); color:#fff; font:800 15px 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; justify-content:center; }
 .rvc-mcard-t { font:700 15px 'Plus Jakarta Sans',sans-serif; flex:1; }
-.rvc-mcard-done { font:700 12px 'IBM Plex Mono',monospace; color:#10b981; }
-.rvc-mcard-go { font-size:22px; color:var(--muted,#cbd5e1); }
+.rvc-mcard-done { font:700 12px 'IBM Plex Mono',monospace; color:var(--gr-txt,#10b981); }
+.rvc-mcard-go { font-size:22px; color:var(--mu,#cbd5e1); }
 .rvc-exam { display:flex; flex-direction:column; gap:2px; width:100%; text-align:left; border:0; cursor:pointer; border-radius:16px; padding:16px; margin:0 0 18px; color:#fff; background: linear-gradient(135deg,#0f172a,#334155); box-shadow:0 8px 20px rgba(15,23,42,.28); }
 .rvc-exam:active { transform: scale(0.985); }
 .rvc-exam-t { font:800 16px 'Plus Jakarta Sans',sans-serif; }
@@ -154,11 +154,11 @@ const STYLE = `<style>
 .rvc-faute { background: linear-gradient(135deg,#7c2d12,#c2410c) !important; box-shadow:0 8px 20px rgba(194,65,12,.30) !important; }
 .rvc-go2 { width:100%; border:2px solid var(--a,#6366f1); background:transparent; color:var(--a,#6366f1); border-radius:14px; padding:13px; cursor:pointer; margin-top:18px; font:800 15px 'Plus Jakarta Sans',sans-serif; }
 .rvc-go2:active { transform: scale(0.98); }
-.rvc-ohint { color:var(--muted,#64748b); font-size:13px; margin:2px 0 14px; }
+.rvc-ohint { color:var(--mu,#64748b); font-size:13px; margin:2px 0 14px; }
 .rvc-oslot { display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:12px; margin-bottom:8px; background: color-mix(in srgb,#10b981 12%, transparent); font-size:14px; line-height:1.35; animation: rvcrise .25s cubic-bezier(.23,1,.32,1); }
 .rvc-onum { width:22px; height:22px; border-radius:50%; background:#10b981; color:#fff; font:700 12px 'IBM Plex Mono',monospace; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .rvc-opool { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
-.rvc-ochip { width:100%; text-align:left; border:1px solid var(--border,#e2e8f0); background:var(--surface,#fff); color:var(--ink); border-radius:12px; padding:12px; cursor:pointer; font:600 14px/1.35 'Inter',sans-serif; transition: transform .12s ease-out; }
+.rvc-ochip { width:100%; text-align:left; border:1px solid var(--bo3,#e2e8f0); background:var(--su,#fff); color:var(--ink); border-radius:12px; padding:12px; cursor:pointer; font:600 14px/1.35 'Inter',sans-serif; transition: transform .12s ease-out; }
 .rvc-ochip:active { transform: scale(0.985); }
 .rvc-shake { animation: rvcshake .35s; border-color:#ef4444 !important; }
 @keyframes rvcshake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }

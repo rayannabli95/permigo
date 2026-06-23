@@ -48,7 +48,7 @@ const STYLE = `<style>
 /* Barre du haut : progression segmentée + combo */
 .pq-top { display:flex; align-items:center; gap:12px; padding:16px 0 6px; }
 .pq-x { width:34px; height:34px; flex-shrink:0; border:0; border-radius:10px; cursor:pointer;
-  background:var(--surface,#fff); color:var(--ink); font-size:18px; line-height:1; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+  background:var(--su,#fff); color:var(--ink); font-size:18px; line-height:1; box-shadow:0 1px 4px rgba(0,0,0,.08); }
 .pq-x:active { transform: scale(0.92); }
 .pq-seg { flex:1; display:flex; gap:4px; }
 .pq-seg span { flex:1; height:6px; border-radius:999px; background: color-mix(in srgb,#6366f1 14%, transparent); overflow:hidden; }
@@ -64,13 +64,13 @@ const STYLE = `<style>
 
 /* Question — gros, aéré, lecture 2 sec */
 .pq-mid { flex:1; display:flex; flex-direction:column; justify-content:center; padding:8px 0; }
-.pq-qn { font:700 12px 'IBM Plex Mono',monospace; color:var(--muted,#94a3b8); margin-bottom:10px; }
+.pq-qn { font:700 12px 'IBM Plex Mono',monospace; color:var(--mu,#94a3b8); margin-bottom:10px; }
 .pq-q { font:800 26px/1.2 'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; margin-bottom:22px; }
 
 /* Options tappables */
 .pq-opts { display:flex; flex-direction:column; gap:10px; }
 .pq-opt { display:flex; align-items:center; gap:12px; width:100%; text-align:left; cursor:pointer;
-  border:2px solid var(--border,#e2e8f0); background:var(--surface,#fff); color:var(--ink);
+  border:2px solid var(--bo3,#e2e8f0); background:var(--su,#fff); color:var(--ink);
   border-radius:15px; padding:16px; font:600 16px/1.3 'Inter',sans-serif;
   transition: transform .12s ease-out, border-color .15s, background .15s; }
 .pq-opt:active { transform: scale(0.985); }
@@ -89,8 +89,8 @@ const STYLE = `<style>
 .pq-fb.win { background: color-mix(in srgb,#10b981 12%, transparent); }
 .pq-fb.lose { background: color-mix(in srgb,#f59e0b 14%, transparent); }
 .pq-fb-h { font:800 14px 'Plus Jakarta Sans',sans-serif; margin-bottom:3px; }
-.pq-fb.win .pq-fb-h { color:#047857; }
-.pq-fb.lose .pq-fb-h { color:#b45309; }
+.pq-fb.win .pq-fb-h { color:var(--gr-txt,#047857); }
+.pq-fb.lose .pq-fb-h { color:var(--am-txt,#b45309); }
 .pq-fb-t { font-size:14px; line-height:1.45; }
 .pq-next { width:100%; border:0; border-radius:15px; padding:16px; cursor:pointer; margin-top:14px;
   font:800 16px 'Plus Jakarta Sans',sans-serif; color:#fff; background:var(--a,#6366f1);
@@ -102,7 +102,7 @@ const STYLE = `<style>
 .pq-res-e { font-size:60px; animation: pqUp .4s cubic-bezier(.23,1,.32,1) both; }
 .pq-res-score { font:800 44px 'IBM Plex Mono',monospace; margin:4px 0 0; transition: transform .12s cubic-bezier(.23,1,.32,1); }
 .pq-res-t { font:800 22px 'Plus Jakarta Sans',sans-serif; margin:6px 0 4px; }
-.pq-res-s { color:var(--muted,#64748b); font-size:14px; max-width:300px; }
+.pq-res-s { color:var(--mu,#64748b); font-size:14px; max-width:300px; }
 @media (prefers-reduced-motion: reduce) { .pq *, .pq *::before { transition:none !important; animation:none !important; } }
 </style>`;
 
