@@ -176,6 +176,26 @@ const STYLE = `<style>
   padding: 8px 12px;
   margin-top: 10px;
 }
+/* Welcome-back streak CTA : « C'est ton Xe jour — maintiens ta série » */
+.acc2-hero-cta {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-top: 14px;
+}
+.acc2-hero-cta-txt {
+  font: 600 13px/1.4 'Plus Jakarta Sans', sans-serif;
+  color: rgba(255,255,255,.92);
+}
+.acc2-hero-cta-txt b { color: #ffb35c; font-weight: 800; }
+.acc2-hero-cta-btn {
+  display: inline-flex; align-items: center; gap: 7px; align-self: flex-start;
+  min-height: 44px; padding: 0 17px; border: 0; border-radius: var(--r-full, 999px);
+  background: #fff; color: #0b0d1a;
+  font: 800 13.5px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 6px 18px rgba(0,0,0,.28); transition: transform .12s ease;
+}
+.acc2-hero-cta-btn:active { transform: scale(.96); }
+@media (prefers-reduced-motion: reduce) { .acc2-hero-cta-btn { transition: none; } }
 /* Streak EN VEDETTE : la flamme 3D (asset) + compteur, en haut à droite */
 .acc2-hero-streak {
   display: flex; flex-direction: column; align-items: center; gap: 0;
@@ -876,15 +896,18 @@ const LS_LAST_VISIT = "pg-last-visit";
 function _greeting(awayDays) {
   if (awayDays >= 3) return "Content de te revoir,";
   let revisitToday = false;
+  let hasPriorVisit = false;
   try {
     const today = new Date().toDateString();
     const last = localStorage.getItem(LS_LAST_VISIT);
     revisitToday = last === today;
+    hasPriorVisit = !!last && last !== today; // déjà venu un autre jour → retour
     localStorage.setItem(LS_LAST_VISIT, today);
   } catch {
     /* ignore */
   }
   if (revisitToday) return "Ça fait plaisir de te revoir aujourd'hui,";
+  if (hasPriorVisit) return "Rebonjour"; // l'élève revient un nouveau jour
   const h = new Date().getHours();
   if (h >= 18 || h < 5) return "Bonsoir";
   return "Bonjour";
@@ -1242,11 +1265,20 @@ function render({
         }
       </div>
       ${
-        _awayDays >= 3
-          ? `<div class="acc2-hero-back">Ça fait ${_awayDays} jours — continue là où tu t'étais arrêté.</div>`
-          : streak.current_streak === 1 && isActive
-            ? `<div class="acc2-hero-back">Reviens demain : ta série démarre.</div>`
-            : ""
+        streak.current_streak >= 1
+          ? `<div class="acc2-hero-cta">
+               <span class="acc2-hero-cta-txt">🔥 C'est ton <b>${streak.current_streak}ᵉ</b> jour ici — garde ta série.</span>
+               <button class="acc2-hero-cta-btn" id="hero-streak-cta" type="button">Maintiens ta série · 2 questions ${icon("arrow-right", { size: 14 })}</button>
+             </div>`
+          : _awayDays >= 3
+            ? `<div class="acc2-hero-cta">
+                 <span class="acc2-hero-cta-txt">Ça fait ${_awayDays} jours — on relance en douceur ?</span>
+                 <button class="acc2-hero-cta-btn" id="hero-streak-cta" type="button">Reprends · 2 questions ${icon("arrow-right", { size: 14 })}</button>
+               </div>`
+            : `<div class="acc2-hero-cta">
+                 <span class="acc2-hero-cta-txt">Lance ta série aujourd'hui 🔥</span>
+                 <button class="acc2-hero-cta-btn" id="hero-streak-cta" type="button">Démarre · 2 questions ${icon("arrow-right", { size: 14 })}</button>
+               </div>`
       }
     </div>
   </div>
@@ -1640,6 +1672,13 @@ function wire(
       track("cta.clicked", { cta_type: "action_btn" });
       navigate(href);
     }
+  });
+
+  // Hero welcome-back : « maintiens ta série » → quiz de révision court
+  root.querySelector("#hero-streak-cta")?.addEventListener("click", () => {
+    haptic("impact");
+    track("cta.clicked", { cta_type: "hero_streak" });
+    navigate("#/quiz/next/post_validation/revision");
   });
 }
 

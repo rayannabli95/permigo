@@ -61,6 +61,20 @@ const STYLE = `<style>
     background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
     font: 700 12px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: #fff;
   }
+  /* Toggle segmenté Pratique / Révision */
+  .ce-hero-toggle {
+    display: inline-flex; gap: 3px; margin: 14px 0 2px; padding: 4px;
+    border-radius: 999px; background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.18);
+  }
+  .ce-hero-tog {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 15px; border-radius: 999px; text-decoration: none;
+    font: 700 12.5px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: rgba(255,255,255,.78); white-space: nowrap;
+    -webkit-tap-highlight-color: transparent; transition: background .15s, color .15s;
+  }
+  .ce-hero-tog.is-active { background: #fff; color: var(--ink); }
   @keyframes ceHeroIn {
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -215,8 +229,11 @@ export async function mount(root, mode) {
       .select("eleve_id, competence_id, validated_by, statut")
       .eq("statut", "acquis"),
     sb.from("examens").select("eleve_id, statut, created_at"),
-    // Streak d'activité (RLS : l'enseignant lit les streaks de son école)
-    sb.from("streaks").select("user_id, current_streak"),
+    // Streak d'activité (RLS : l'enseignant lit les streaks de son école).
+    // last_activity_date est nécessaire pour calculer le streak RÉEL : la valeur
+    // stockée ne se reset côté serveur qu'au prochain login de l'élève → sans ce
+    // garde-fou, un élève inactif depuis 3 j afficherait encore son ancien streak.
+    sb.from("streaks").select("user_id, current_streak, last_activity_date"),
   ]);
 
   if (elevesRes.error) {
@@ -227,10 +244,20 @@ export async function mount(root, mode) {
   const elevesMap = {};
   (elevesRes.data || []).forEach((e) => (elevesMap[e.id] = e));
 
-  // Streak courant par élève (0 si aucune ligne)
+  // Streak RÉEL par élève : vivant seulement si actif aujourd'hui ou hier,
+  // sinon 0 (le reset serveur n'a pas encore eu lieu). 0 si aucune ligne.
+  const _today = new Date();
+  _today.setHours(0, 0, 0, 0);
+  const _yesterday = new Date(_today);
+  _yesterday.setDate(_today.getDate() - 1);
   const streakByEleve = {};
   (streaksRes.data || []).forEach((s) => {
-    streakByEleve[s.user_id] = s.current_streak || 0;
+    const cur = s.current_streak || 0;
+    const la = s.last_activity_date
+      ? new Date(s.last_activity_date + "T00:00:00")
+      : null;
+    const alive = la && la.getTime() >= _yesterday.getTime();
+    streakByEleve[s.user_id] = alive ? cur : 0;
   });
 
   // Acquis distincts par élève + ensemble des élèves que j'ai validés
@@ -367,7 +394,11 @@ function heroArcade(n, isTheorie) {
         <p class="ce-hero-kicker">${isTheorie ? "Ligue Révision" : "Ligue Pratique"}</p>
         <h1 class="ce-hero-title">Classement élèves</h1>
         <p class="ce-hero-sub">${sub}</p>
-        ${n > 0 ? `<span class="ce-hero-chip">${icon("users", { size: 12, strokeWidth: 2 })} ${n} élève${n > 1 ? "s" : ""} dans ta cohorte</span>` : ""}
+        <div class="ce-hero-toggle" role="tablist" aria-label="Type de ligue">
+          <a class="ce-hero-tog ${!isTheorie ? "is-active" : ""}" href="#/classement-eleves/pratique" role="tab" aria-selected="${!isTheorie}">${icon("check-circle", { size: 13, strokeWidth: 2.2 })} Pratique</a>
+          <a class="ce-hero-tog ${isTheorie ? "is-active" : ""}" href="#/classement-eleves/theorie" role="tab" aria-selected="${isTheorie}">${icon("book-open", { size: 13, strokeWidth: 2.2 })} Révision</a>
+        </div>
+        ${n > 0 ? `<span class="ce-hero-chip" style="margin-top:14px">${icon("users", { size: 12, strokeWidth: 2 })} ${n} élève${n > 1 ? "s" : ""} dans ta cohorte</span>` : ""}
       </div>
     </div>`;
 }

@@ -920,29 +920,14 @@ async function renderInto(root, _me) {
         </div>
       </div>
 
-      ${recapWidget}
-
-      <!-- Widget dominant : valider une compétence -->
+      <!-- Widget CENTRAL : valider une compétence (action #1 du moniteur).
+           Les stats détaillées vivent dans l'onglet Analyses → pas de
+           « Tableau de bord » dupliqué ici. -->
       ${validateWidget}
 
-      <!-- KPI cadrés en valeur : mes élèves / engagement 7 j / progression -->
-      <div class="aj-section-title">Tableau de bord</div>
-      <div class="aj-quickstats">
-        <div class="aj-quickstat" title="${nbElevesEcole} élèves dans l'école">
-          <div class="aj-quickstat-val">${nbElevesActifs}</div>
-          <div class="aj-quickstat-lbl">Mes élèves</div>
-        </div>
-        <div class="aj-quickstat"${nbElevesActifs > 0 ? ` title="${actifs7j} élèves sur ${nbElevesActifs}"` : ""}>
-          <div class="aj-quickstat-val">${nbElevesActifs > 0 ? `${engagementPct}<small> %</small>` : "—"}</div>
-          <div class="aj-quickstat-lbl">Actifs 7 derniers jours</div>
-          <div class="aj-quickstat-bar"><div style="width:${engagementPct}%"></div></div>
-        </div>
-        <div class="aj-quickstat">
-          <div class="aj-quickstat-val">${nbElevesActifs > 0 ? `${livretPct}<small> %</small>` : "—"}</div>
-          <div class="aj-quickstat-lbl">Progression moyenne</div>
-          <div class="aj-quickstat-bar"><div style="width:${livretPct}%"></div></div>
-        </div>
-      </div>
+      ${recapWidget}
+
+      <!-- (Tableau de bord retiré : doublon avec l'onglet Analyses) -->
 
       <!-- Action rapide : Inviter seulement — « Mes élèves » est dans la nav,
            « Valider une séance » a déjà le FAB + le hero -->
@@ -977,61 +962,6 @@ async function renderInto(root, _me) {
         </a>`;
       })()}
 
-      <!-- Accès classements (1 carte repliable : ma ligue + ligues élèves) -->
-      <div class="aj-section">
-        <div class="aj-section-title">Classements</div>
-        <details class="aj-ranks" id="aj-ranks">
-          <summary class="aj-ranks-sum">
-            <span class="aj-ranks-ico">${icon("award", { size: 17, strokeWidth: 2 })}</span>
-            <span class="aj-ranks-hd">
-              <div class="aj-ranks-ttl">Classements</div>
-              <div class="aj-ranks-meta">
-                ${myLeague ? `<span style="width:7px;height:7px;border-radius:50%;background:${myLeague.color};display:inline-block;flex-shrink:0" aria-hidden="true"></span>` : ""}
-                <span>${
-                  myLeague
-                    ? `Ma ligue ${esc(myLeague.name)}${myLeagueRow?.rank_pos ? ` · ${myLeagueRow.rank_pos}ᵉ` : ""}`
-                    : "Pas encore classé"
-                }</span>
-              </div>
-            </span>
-            <span class="aj-ranks-chev">${icon("chevron-down", { size: 18, strokeWidth: 2 })}</span>
-          </summary>
-          <div class="aj-ranks-body">
-            <a class="aj-rank-row" href="#/ligue-semaine" id="aj-ligue-moi">
-              <span class="aj-rank-row-ico">${myLeague ? `<span style="width:9px;height:9px;border-radius:50%;background:${myLeague.color};display:inline-block" aria-hidden="true"></span>` : icon("flame", { size: 14, strokeWidth: 2 })}</span>
-              <span class="aj-rank-row-body">
-                <span class="aj-rank-row-main">${
-                  myLeague
-                    ? `Ma ligue · ${esc(myLeague.name)}${myLeagueRow?.rank_pos ? ` · ${myLeagueRow.rank_pos}ᵉ` : ""}`
-                    : "Ma ligue"
-                }</span>
-                <span class="aj-rank-row-sub">${
-                  myWeeklyPts > 0
-                    ? `${myWeeklyPts} validation${myWeeklyPts > 1 ? "s" : ""} cette semaine`
-                    : "1 validation = 1 point"
-                }</span>
-              </span>
-              <span class="aj-rank-row-chev">${icon("chevron-right", { size: 16, strokeWidth: 2 })}</span>
-            </a>
-            <a class="aj-rank-row" href="#/classement-eleves/theorie" id="aj-ligue-theorie">
-              <span class="aj-rank-row-ico">${icon("book-open", { size: 14, strokeWidth: 2 })}</span>
-              <span class="aj-rank-row-body">
-                <span class="aj-rank-row-main">Ligue Révision · mes élèves</span>
-                <span class="aj-rank-row-sub">Qui révise en autonomie ?</span>
-              </span>
-              <span class="aj-rank-row-chev">${icon("chevron-right", { size: 16, strokeWidth: 2 })}</span>
-            </a>
-            <a class="aj-rank-row" href="#/classement-eleves/pratique" id="aj-ligue-pratique">
-              <span class="aj-rank-row-ico">${icon("check-circle", { size: 14, strokeWidth: 2 })}</span>
-              <span class="aj-rank-row-body">
-                <span class="aj-rank-row-main">Ligue Pratique · mes élèves</span>
-                <span class="aj-rank-row-sub">Progression livret de compétences</span>
-              </span>
-              <span class="aj-rank-row-chev">${icon("chevron-right", { size: 16, strokeWidth: 2 })}</span>
-            </a>
-          </div>
-        </details>
-      </div>
 
       <!-- Activité récente -->
       <div class="aj-section">
@@ -1104,15 +1034,7 @@ async function renderInto(root, _me) {
     activityAllBtn.remove();
     track("aujourdhui.activity.voir_tout");
   });
-  root.querySelector("#aj-ligue-moi")?.addEventListener("click", () => {
-    track("ligue.open", { from: "aujourdhui", which: "moniteur" });
-  });
-  root.querySelector("#aj-ligue-theorie")?.addEventListener("click", () => {
-    track("ligue.open", { from: "aujourdhui", which: "eleves_theorie" });
-  });
-  root.querySelector("#aj-ligue-pratique")?.addEventListener("click", () => {
-    track("ligue.open", { from: "aujourdhui", which: "eleves_pratique" });
-  });
+  // (Classements retirés de l'accueil → accessibles depuis « Mes élèves »)
 
   // Recap soir / prompt log → page dédiée plein écran
   const goLogSession = () => {

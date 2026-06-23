@@ -143,6 +143,27 @@ const STYLE = `<style>
     box-shadow: 0 0 8px color-mix(in srgb, var(--ens-go, var(--a)) 50%, transparent);
   }
 
+  /* Carte « profil en un coup d'œil » (analyse heuristique locale) */
+  .lr-profil {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin: 0 16px 12px; padding: 13px 14px;
+    border-radius: var(--ens-r, 14px); border: 1.5px solid var(--bo);
+    background: var(--su); box-shadow: var(--ens-shadow, 0 1px 0 rgba(15,23,42,.04));
+    border-left: 4px solid var(--ens-go, #18a558);
+  }
+  .lr-profil--cold { border-left-color: var(--ens-amber, #f59e0b); }
+  .lr-profil--new  { border-left-color: var(--ens-blue, #1d4ed8); }
+  .lr-profil-ico {
+    flex-shrink: 0; margin-top: 1px; color: var(--ens-go, #18a558);
+    display: inline-flex;
+  }
+  .lr-profil--cold .lr-profil-ico { color: var(--am-txt, #935e06); }
+  .lr-profil--new  .lr-profil-ico { color: var(--ens-blue-lt, #3b82f6); }
+  .lr-profil-txt {
+    margin: 0; font: 600 13.5px/1.45 var(--ens-body, 'Inter'), sans-serif;
+    color: var(--ink);
+  }
+
   /* Corps */
   .lr-body { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
 
@@ -482,6 +503,9 @@ let _me = null;
 let _eleveId = null;
 let _eleveProfil = null; // { prenom, nom }
 let _validationsMap = {}; // competence_id → { statut, note }
+let _valsRaw = []; // validations brutes (avec validated_at) — pour l'analyse profil
+let _quizAttempts = []; // quiz_attempts (avec completed_at) — pour l'analyse profil
+let _streakEff = 0; // streak RÉEL (vivant seulement si actif aujourd'hui/hier)
 let _theory = null; // { score, nComp, nExams } — ligue Révision (autonomie élève)
 let _sheetComp = null; // { c, n } la comp ouverte dans le sheet
 let _sheetStatut = null;
@@ -544,11 +568,12 @@ async function loadData() {
   // Toutes les validations de cet élève (tous enseignants — pour voir l'état complet)
   const { data: vals } = await sb
     .from("validations")
-    .select("competence_id, statut, note_enseignant")
+    .select("competence_id, statut, note_enseignant, validated_at")
     .eq("eleve_id", _eleveId);
 
+  _valsRaw = vals || [];
   _validationsMap = {};
-  (vals || []).forEach((v) => {
+  _valsRaw.forEach((v) => {
     _validationsMap[v.competence_id] = {
       statut: v.statut,
       note: v.note_enseignant || "",
@@ -560,12 +585,105 @@ async function loadData() {
   try {
     const { data: qa, error } = await sb
       .from("quiz_attempts")
-      .select("competence_id, type, score, ref_id, passed")
+      .select("competence_id, type, score, ref_id, passed, completed_at")
       .eq("user_id", _eleveId);
+    _quizAttempts = error ? [] : qa || [];
     _theory = error ? null : computeTheoryScore(qa);
   } catch (e) {
+    _quizAttempts = [];
     _theory = null;
   }
+
+  // Streak RÉEL (vivant seulement si actif aujourd'hui ou hier)
+  try {
+    const { data: st } = await sb
+      .from("streaks")
+      .select("current_streak, last_activity_date")
+      .eq("user_id", _eleveId)
+      .maybeSingle();
+    _streakEff = effectiveStreak(st);
+  } catch (e) {
+    _streakEff = 0;
+  }
+}
+
+// Streak réellement vivant : la valeur stockée ne se reset qu'au prochain login
+// de l'élève → on l'annule si la dernière activité date de > hier.
+function effectiveStreak(st) {
+  if (!st || !st.last_activity_date) return 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const y = new Date(today);
+  y.setDate(today.getDate() - 1);
+  const la = new Date(st.last_activity_date + "T00:00:00");
+  return la.getTime() >= y.getTime() ? st.current_streak || 0 : 0;
+}
+
+// ─── Analyse profil élève (heuristique locale, ZÉRO token / LLM) ──────
+// Déduit un profil en une phrase à partir des cadences (compétences/sem,
+// quiz/sem, streak, inactivité). Genre-safe (pas de pronom ni d'adjectif accordé).
+function computeEleveProfil() {
+  const now = Date.now();
+  const DAY = 86400000;
+  const within = (iso, d) => iso && now - new Date(iso).getTime() <= d * DAY;
+
+  const acquis = _valsRaw.filter((v) => v.statut === "acquis");
+  const acquisCount = acquis.length;
+  const comp4w = acquis.filter((v) => within(v.validated_at, 28)).length;
+  const quiz4w = _quizAttempts.filter((q) => within(q.completed_at, 28)).length;
+  const compPerWeek = Math.round((comp4w / 4) * 10) / 10;
+  const quizPerWeek = Math.round((quiz4w / 4) * 10) / 10;
+
+  const lastTs = Math.max(
+    0,
+    ..._quizAttempts.map((q) =>
+      q.completed_at ? new Date(q.completed_at).getTime() : 0,
+    ),
+    ...acquis.map((v) =>
+      v.validated_at ? new Date(v.validated_at).getTime() : 0,
+    ),
+  );
+  const daysSince = lastTs ? Math.floor((now - lastTs) / DAY) : null;
+  const prenom = esc(_eleveProfil?.prenom || "Cet élève");
+
+  // Tout début de parcours
+  if (acquisCount === 0 && _quizAttempts.length === 0) {
+    return {
+      tone: "new",
+      text: `${prenom} démarre tout juste — encore trop peu d'activité pour cerner son profil.`,
+    };
+  }
+  // En retrait (rien depuis 2 semaines)
+  if (daysSince !== null && daysSince >= 14 && quiz4w === 0) {
+    return {
+      tone: "cold",
+      text: `${prenom} est en retrait : aucune activité depuis ${daysSince} jours. Une relance l'aiderait à reprendre.`,
+    };
+  }
+  // Label d'assiduité (phrase nominale, sans genre)
+  let label;
+  if (quizPerWeek >= 5 || _streakEff >= 5) label = "régularité exemplaire";
+  else if (quizPerWeek >= 2 || _streakEff >= 2) label = "bon rythme";
+  else label = "activité modérée";
+
+  const bits = [];
+  if (compPerWeek > 0)
+    bits.push(`~${compPerWeek} compétence${compPerWeek >= 2 ? "s" : ""}/sem`);
+  if (quizPerWeek > 0) bits.push(`~${quizPerWeek} quiz/sem`);
+  const streakBit = _streakEff >= 2 ? ` Série en cours : ${_streakEff} j.` : "";
+  const facts = bits.length ? ` : ${bits.join(", ")}.` : ".";
+  return { tone: "warm", text: `${prenom} — ${label}${facts}${streakBit}` };
+}
+
+// Carte « profil en un coup d'œil » — texte déjà échappé par computeEleveProfil.
+function _renderProfilCard() {
+  const p = computeEleveProfil();
+  const ico =
+    p.tone === "cold" ? "clock" : p.tone === "new" ? "star" : "activity";
+  return `<div class="lr-profil lr-profil--${p.tone}">
+    <span class="lr-profil-ico">${icon(ico, { size: 16, strokeWidth: 2.2 })}</span>
+    <p class="lr-profil-txt">${p.text}</p>
+  </div>`;
 }
 
 // ─── Ligne « Révision (autonomie) » (KPI, lecture seule, ton factuel) ──
@@ -635,6 +753,8 @@ function render() {
         </div>
         ${_renderTheoryRow()}
       </div>
+
+      ${_renderProfilCard()}
 
       <div class="lr-body">
         ${REMC.map(renderMonde).join("")}
