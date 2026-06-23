@@ -404,7 +404,7 @@ const STYLE = `<style>
 
 /* ── Pièges — cartes premium ── */
 .cea-rev-intro { font-size:13px; color:var(--mu2,#64748b); margin:0 0 10px; }
-.cea-rev-row { display:flex; align-items:center; justify-content:space-between; gap:10px; text-decoration:none; background:var(--surface,#fff); border:1px solid var(--bo2,#e2e8f0); border-radius:12px; padding:13px 14px; margin-bottom:8px; }
+.cea-rev-row { display:flex; align-items:center; justify-content:space-between; gap:10px; text-decoration:none; background:var(--su,#fff); border:1px solid var(--bo2,#e2e8f0); border-radius:12px; padding:13px 14px; margin-bottom:8px; }
 .cea-rev-row:active { transform: scale(0.99); }
 .cea-rev-t { font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; color:var(--ink,#0f172a); }
 .cea-rev-go { font:700 13px 'Plus Jakarta Sans',sans-serif; color:var(--a,#6366f1); white-space:nowrap; }
