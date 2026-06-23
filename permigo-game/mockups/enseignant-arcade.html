@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PermiGo — DA Arcade Routière (enseignant)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ens-display:"Fredoka","Plus Jakarta Sans",system-ui,sans-serif;
+    --ens-body:"Plus Jakarta Sans",system-ui,sans-serif;
+    --ens-go:#18a558; --ens-go-lt:#34d27b; --ens-blue:#1d4ed8; --ens-blue-lt:#3b82f6;
+    --ens-amber:#f59e0b; --ens-stop:#e11d48; --ens-ink-go:#07150c;
+    --su:#fff; --bo:#e2e6f2; --bo4:#cbd5e1; --ink:#0b0d1a; --mu:#5f6788; --bg:#f4f6fb;
+    --am-txt:#935e06;
+    --ens-r:16px; --ens-r-lg:22px; --ens-r-pill:999px;
+    --ens-shadow:0 1px 0 rgba(15,23,42,.04),0 8px 22px -12px rgba(15,23,42,.22);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:var(--ens-body);color:var(--ink);padding:24px;display:flex;justify-content:center}
+  .phone{width:390px}
+  h1,h2,h3{font-family:var(--ens-display);letter-spacing:-.01em;font-weight:700;margin:0}
+
+  /* HERO */
+  .ens-hero{position:relative;overflow:hidden;border-radius:var(--ens-r-lg);padding:24px 22px 30px;color:#fff;
+    background:radial-gradient(130% 150% at 0% 0%,#14391f 0%,#0c2614 44%,#0b0d1a 100%);box-shadow:var(--ens-shadow);isolation:isolate}
+  .ens-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;z-index:1;
+    background:repeating-linear-gradient(90deg,var(--ens-amber) 0 18px,transparent 18px 34px);opacity:.85}
+  .ens-hero>*{position:relative;z-index:2}
+  .ens-panneaux{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+  .ens-panneaux img{position:absolute;width:var(--s,64px);height:var(--s,64px);opacity:var(--o,.16);
+    transform:rotate(var(--rot,0deg));filter:saturate(1.1) brightness(1.08)}
+  .kicker{font:700 11px/1 var(--ens-body);text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.7);margin:0 0 8px}
+  .htitle{font:700 30px/1.04 var(--ens-display);letter-spacing:-.02em;margin:0 0 6px;color:#fff}
+  .hsub{font:500 14px/1.45 var(--ens-body);color:rgba(255,255,255,.82);margin:0;max-width:34ch}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .hchip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 13px;border-radius:999px;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);font:700 12px/1 var(--ens-body);color:#fff}
+
+  /* CARDS / COMPONENTS */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .ens-card{background:var(--su);border:1.5px solid var(--bo);border-radius:var(--ens-r);box-shadow:var(--ens-shadow);padding:16px}
+  .ens-stat__num{font:800 28px/1 var(--ens-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .ens-stat__lbl{font:600 11px/1.2 var(--ens-body);text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-top:3px}
+  .sec-title{font:700 13px/1 var(--ens-display);text-transform:uppercase;letter-spacing:.04em;color:var(--mu);margin:22px 2px 10px}
+  .row{display:flex;align-items:center;gap:12px}
+  .ens-chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:999px;font:700 12px/1 var(--ens-body);border:1.5px solid transparent}
+  .c-go{background:color-mix(in srgb,var(--ens-go) 14%,#fff);color:var(--ens-go);border-color:color-mix(in srgb,var(--ens-go) 28%,transparent)}
+  .c-blue{background:color-mix(in srgb,var(--ens-blue) 12%,#fff);color:var(--ens-blue-lt);border-color:color-mix(in srgb,var(--ens-blue) 26%,transparent)}
+  .c-amber{background:color-mix(in srgb,var(--ens-amber) 16%,#fff);color:var(--am-txt);border-color:color-mix(in srgb,var(--ens-amber) 32%,transparent)}
+  .c-stop{background:color-mix(in srgb,var(--ens-stop) 12%,#fff);color:var(--ens-stop);border-color:color-mix(in srgb,var(--ens-stop) 26%,transparent)}
+  .ens-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;padding:0 18px;border:0;border-radius:var(--ens-r);font:700 15px/1 var(--ens-body);cursor:pointer;margin-top:6px}
+  .b-go{background:linear-gradient(180deg,var(--ens-go-lt),var(--ens-go));color:var(--ens-ink-go);
+    box-shadow:0 4px 0 color-mix(in srgb,var(--ens-go) 60%,#000),var(--ens-shadow)}
+  .illwrap{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:center;padding:6px 0}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <header class="ens-hero">
+    <div class="ens-panneaux">
+      <img src="../public/signs/stop.svg" style="top:8%;left:78%;--s:72px;--o:.18;--rot:-8deg" />
+      <img src="../public/signs/route-prioritaire.svg" style="top:54%;left:84%;--s:56px;--o:.14;--rot:10deg" />
+      <img src="../public/signs/danger-feux-tricolores.svg" style="top:58%;left:5%;--s:64px;--o:.15;--rot:-6deg" />
+      <img src="../public/signs/sens-interdit.svg" style="top:12%;left:10%;--s:46px;--o:.13;--rot:12deg" />
+      <img src="../public/signs/carrefour-giratoire.svg" style="top:30%;left:46%;--s:40px;--o:.1;--rot:0deg" />
+      <img src="../public/signs/priorite-a-droite.svg" style="top:80%;left:38%;--s:44px;--o:.12;--rot:-10deg" />
+    </div>
+    <p class="kicker">Mardi 23 juin</p>
+    <h1 class="htitle">Bonjour, Rayan</h1>
+    <p class="hsub"><b>4 élèves</b> en cours. Valide leurs compétences pour faire avancer leur livret.</p>
+    <div class="chips"><span class="hchip">🔥 12 jours actifs</span><span class="hchip">⭐ 4,9 / 5</span></div>
+  </header>
+
+  <div class="grid">
+    <div class="ens-card"><div class="ens-stat__num">4</div><div class="ens-stat__lbl">Élèves actifs</div></div>
+    <div class="ens-card"><div class="ens-stat__num">87%</div><div class="ens-stat__lbl">Engagement 7j</div></div>
+  </div>
+
+  <div class="sec-title">Statuts</div>
+  <div class="ens-card">
+    <div class="row" style="flex-wrap:wrap;gap:8px">
+      <span class="ens-chip c-go">● Acquise</span>
+      <span class="ens-chip c-blue">● En cours</span>
+      <span class="ens-chip c-amber">● En attente</span>
+      <span class="ens-chip c-stop">● À revoir</span>
+    </div>
+    <button class="ens-btn b-go">Valider une compétence</button>
+  </div>
+
+  <div class="sec-title">Illustrations flat (remplacent les SVG)</div>
+  <div class="ens-card illwrap" id="illslot"></div>
+
+</div>
+<script type="module">
+  const wrap=(i,s)=>`<svg viewBox="0 0 120 120" width="${s}" height="${s}" fill="none" xmlns="http://www.w3.org/2000/svg">${i}</svg>`;
+  const car=`<ellipse cx="60" cy="98" rx="44" ry="8" fill="#0b0d1a" opacity=".08"/><rect x="20" y="58" width="80" height="30" rx="13" fill="#18a558"/><path d="M32 60c3-13 9-20 16-20h24c7 0 13 7 16 20" fill="#34d27b"/><path d="M40 44c1-3 3-5 6-5h28c3 0 5 2 6 5l4 14H36z" fill="#dff7e8"/><rect x="44" y="46" width="14" height="11" rx="3" fill="#3b82f6"/><rect x="62" y="46" width="14" height="11" rx="3" fill="#3b82f6"/><circle cx="40" cy="88" r="11" fill="#0b0d1a"/><circle cx="40" cy="88" r="4.5" fill="#cbd5e1"/><circle cx="80" cy="88" r="11" fill="#0b0d1a"/><circle cx="80" cy="88" r="4.5" fill="#cbd5e1"/><rect x="22" y="68" width="8" height="7" rx="3" fill="#f59e0b"/><rect x="90" y="68" width="8" height="7" rx="3" fill="#e11d48"/>`;
+  const wheel=`<circle cx="60" cy="60" r="42" fill="#0b0d1a"/><circle cx="60" cy="60" r="42" stroke="#34d27b" stroke-width="5"/><circle cx="60" cy="60" r="15" fill="#18a558"/><rect x="56" y="60" width="8" height="32" rx="4" fill="#18a558"/><rect x="28" y="56" width="30" height="8" rx="4" fill="#18a558"/><rect x="62" y="56" width="30" height="8" rx="4" fill="#18a558"/>`;
+  const trophy=`<rect x="48" y="80" width="24" height="10" rx="3" fill="#b45309"/><rect x="40" y="90" width="40" height="9" rx="4" fill="#92400e"/><path d="M38 30h44v14c0 14-10 24-22 24S38 58 38 44z" fill="#f59e0b"/><path d="M38 34H28c0 12 7 18 14 18" stroke="#f59e0b" stroke-width="6" stroke-linecap="round"/><path d="M82 34h10c0 12-7 18-14 18" stroke="#f59e0b" stroke-width="6" stroke-linecap="round"/><path d="M60 40l3 6 6.5.9-4.7 4.6 1.1 6.5L60 61.9 54.1 65l1.1-6.5L50.4 53.9 57 53z" fill="#fff" opacity=".85"/>`;
+  const clipboard=`<rect x="26" y="20" width="68" height="84" rx="12" fill="#fff" stroke="#e2e8f0" stroke-width="3"/><rect x="46" y="14" width="28" height="14" rx="6" fill="#94a3b8"/><rect x="38" y="40" width="44" height="7" rx="3.5" fill="#e2e8f0"/><rect x="38" y="56" width="34" height="7" rx="3.5" fill="#e2e8f0"/><circle cx="84" cy="86" r="20" fill="#18a558"/><path d="M75 86l6 6 12-13" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const podium=`<rect x="46" y="48" width="28" height="58" rx="5" fill="#f59e0b"/><rect x="14" y="66" width="28" height="40" rx="5" fill="#94a3b8"/><rect x="78" y="74" width="28" height="32" rx="5" fill="#b45309"/><path d="M60 18l5.5 11 12 1.7-8.7 8.4 2.1 12L60 56l-10.9 6.1 2.1-12-8.7-8.4 12-1.7z" fill="#34d27b"/>`;
+  document.getElementById('illslot').innerHTML=[car,wheel,trophy,clipboard,podium].map(i=>wrap(i,76)).join('');
+</script>
+</body>
+</html>

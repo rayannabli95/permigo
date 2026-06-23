@@ -15,13 +15,26 @@ const HAS_VIBRATE =
   typeof navigator !== "undefined" && typeof navigator.vibrate === "function";
 
 // Patterns Apple-like (ms) — toujours courts pour rester discrets.
+// ── Jeu de vibrations « arcade routière » : chaque geste métier a sa signature
+//    haptique. Toujours court (< 250ms cumulé) pour rester pro, jamais punitif.
 const PATTERNS = {
+  // — base —
   tap: [8],
   select: [12],
   success: [10, 50, 18],
   warning: [25],
   swipe: [6],
   longpress: [18, 30, 12],
+  // — jeu arcade (additif) —
+  tick: [4], // micro-tick d'un compteur / d'un pas de slider
+  impact: [16], // un « clac » net (bouton d'action métier)
+  confirm: [10, 40, 10], // leçon confirmée — double appui satisfaisant
+  validate: [12, 35, 12, 35, 24], // compétence REMC validée — montée
+  unlock: [20, 60, 14, 40, 30], // palier débloqué — crescendo court
+  levelup: [14, 45, 14, 45, 14, 45, 30], // passage de tier — escalier
+  notify: [10, 30, 10], // notification / nouvel avis reçu
+  error: [30, 40, 30], // refus / action impossible — deux coups secs
+  nav: [5], // changement d'écran (feed) — quasi imperceptible
 };
 
 function reduced() {
@@ -57,9 +70,20 @@ function iosBuzz() {
   }
 }
 
+// Familles de son pour le jeu arcade (le reste = clic d'interface discret).
+const SOUND_SUCCESS = new Set([
+  "success",
+  "confirm",
+  "validate",
+  "unlock",
+  "levelup",
+]);
+const SOUND_ERROR = new Set(["warning", "error"]);
+const SOUND_SILENT = new Set(["swipe", "tick", "nav"]);
+
 /**
  * Feedback haptique court + son d'interface (moments intentionnels).
- * @param {'tap'|'select'|'success'|'warning'|'swipe'|'longpress'} type
+ * @param {'tap'|'select'|'success'|'warning'|'swipe'|'longpress'|'tick'|'impact'|'confirm'|'validate'|'unlock'|'levelup'|'notify'|'error'|'nav'} type
  */
 export function haptic(type = "tap") {
   if (!reduced()) {
@@ -72,9 +96,26 @@ export function haptic(type = "tap") {
     }
     iosBuzz();
   }
-  if (type === "success") playSuccess();
-  else if (type === "warning") playError();
-  else if (type !== "swipe") playClick();
+  if (SOUND_SUCCESS.has(type)) playSuccess();
+  else if (SOUND_ERROR.has(type)) playError();
+  else if (!SOUND_SILENT.has(type)) playClick();
+}
+
+/**
+ * Helper haptique direct pour un pattern custom (ms) — sans son.
+ * Pour les micro-interactions (compteurs, sliders, feed).
+ * @param {number|number[]} pattern
+ */
+export function hapticRaw(pattern) {
+  if (reduced()) return;
+  if (HAS_VIBRATE) {
+    try {
+      navigator.vibrate(pattern);
+    } catch {
+      /* no-op */
+    }
+  }
+  iosBuzz();
 }
 
 // ── Tap haptique GLOBAL : court, SILENCIEUX, anti-spam (1 tap / 55 ms).

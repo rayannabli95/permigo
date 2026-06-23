@@ -13,103 +13,167 @@ import { REMC_TOTAL } from "@/data/remc.js";
 import { icon } from "@/utils/icons.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
+import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
+import { illus } from "@/components/enseignant/illus.js";
+import { haptic } from "@/utils/haptic.js";
 
 const STYLE = `<style>
   .ce-page {
-    padding: 20px 16px calc(90px + env(safe-area-inset-bottom,0px));
+    padding: 0 0 calc(90px + env(safe-area-inset-bottom,0px));
     max-width: 600px; margin: 0 auto;
     background: var(--bg); color: var(--ink);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
   }
+
+  /* ── Hero arcade (parité mes-eleves / aujourdhui) ── */
+  .ce-hero {
+    position: relative; overflow: hidden;
+    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 22px) 20px 26px;
+    background: radial-gradient(130% 150% at 100% 0%, #0e1b4a 0%, #0c1538 44%, #0b0d1a 100%);
+    color: #fff; isolation: isolate;
+    animation: ceHeroIn .45s var(--ease, ease) both;
+    margin: 0 0 0;
+  }
+  .ce-hero::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
+    background: repeating-linear-gradient(90deg, var(--ens-amber, #f59e0b) 0 18px, transparent 18px 34px);
+    opacity: .85;
+  }
+  .ce-hero .ens-panneaux__sign { opacity: var(--o, .13); filter: saturate(1.1) brightness(1.1); }
+  .ce-hero-content { position: relative; z-index: 2; }
+  .ce-hero-kicker {
+    font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: .12em;
+    margin: 0 0 7px;
+  }
+  .ce-hero-title {
+    font: 700 clamp(24px, 7.5vw, 30px)/1.05 var(--ens-display, 'Fredoka'), sans-serif;
+    color: #fff; margin: 0; letter-spacing: -.02em;
+    text-shadow: 0 2px 14px rgba(11,13,26,.5);
+  }
+  .ce-hero-sub {
+    font: 500 12.5px/1.5 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: rgba(255,255,255,.75); margin: 8px 0 0; max-width: 40ch;
+  }
+  .ce-hero-chip {
+    display: inline-flex; align-items: center; gap: 5px; margin-top: 12px;
+    padding: 5px 12px; border-radius: var(--ens-r-pill, 999px);
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+    font: 700 12px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: #fff;
+  }
+  @keyframes ceHeroIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .ce-hero { animation: none; } }
+
+  /* Zone corps sous le hero */
+  .ce-body { padding: 16px 16px 0; }
+
+  /* ── (legacy) header — conservé pour usage drill éventuel ── */
   .ce-hd { margin-bottom: 18px; }
   .ce-h1 {
-    font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif;
+    font: 700 22px/1.2 var(--ens-display, 'Fredoka'), sans-serif;
     color: var(--ink); margin: 0 0 4px; letter-spacing: -.02em;
   }
-  .ce-sub { font: 500 13px/1.4 'Inter', sans-serif; color: var(--mu2); margin: 0; }
+  .ce-sub { font: 500 13px/1.4 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--mu2); margin: 0; }
 
-  /* Leaderboard unifié (parité design côté élève) : médailles top-3 inline,
-     lignes épurées, score à droite. Plus de podium séparé. */
+  /* Leaderboard — cards arcade ens-card */
   .ce-list { display: flex; flex-direction: column; gap: 8px; }
   .ce-row {
     background: var(--su); border: 1px solid var(--bo);
-    border-radius: var(--r-lg); padding: 11px 14px;
+    border-radius: var(--ens-r, var(--r-lg)); padding: 11px 14px;
     display: flex; align-items: center; gap: 12px;
-    box-shadow: var(--s0); cursor: pointer; min-height: 44px;
+    box-shadow: var(--ens-shadow, var(--s0)); cursor: pointer; min-height: 44px;
     transition: border-color .15s cubic-bezier(0.23,1,0.32,1),
+                box-shadow .15s cubic-bezier(0.23,1,0.32,1),
                 transform .2s cubic-bezier(0.23,1,0.32,1);
   }
-  .ce-row.top1 { border-color: color-mix(in srgb, var(--am) 40%, transparent); background: linear-gradient(100deg, color-mix(in srgb, var(--am) 9%, var(--su)), var(--su) 55%); }
-  .ce-row:hover { border-color: var(--bo4); transform: translateY(-1px); }
-  .ce-row:active { transform: scale(.97); }
-  @media (prefers-reduced-motion: reduce) {
-    .ce-row { transition: none; }
+  .ce-row.top1 {
+    border-color: color-mix(in srgb, var(--ens-amber, #f59e0b) 50%, transparent);
+    background: linear-gradient(100deg, color-mix(in srgb, var(--ens-amber, #f59e0b) 9%, var(--su)), var(--su) 55%);
+    box-shadow: 0 3px 0 0 color-mix(in srgb, var(--ens-amber, #f59e0b) 30%, transparent);
   }
-  .ce-row:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
+  .ce-row:hover { border-color: var(--bo4); transform: translateY(-1px); box-shadow: var(--s1); }
+  .ce-row:active { transform: scale(.97); }
+  @media (prefers-reduced-motion: reduce) { .ce-row { transition: none; } }
+  .ce-row:focus-visible { outline: 3px solid var(--ens-go, #18a558); outline-offset: 2px; }
 
   /* Rang : numéro neutre, ou médaille pour le top 3 */
   .ce-rank {
     width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font: 800 13px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu2);
+    font: 800 13px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--mu2);
     background: var(--bg2);
   }
   .ce-rank.medal { color: #fff; background: var(--mg); box-shadow: 0 3px 10px -2px var(--mglow); }
 
   .ce-row-nom {
     flex: 1; min-width: 0;
-    font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+    font: 700 14px/1.2 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--ink);
     letter-spacing: -.01em;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .ce-row-bar { width: 64px; flex-shrink: 0; }
   .ce-row-bar-t { height: 4px; background: var(--bo); border-radius: 2px; overflow: hidden; margin-bottom: 3px; }
-  .ce-row-bar-f { height: 100%; background: linear-gradient(90deg, var(--a), var(--a-lt)); border-radius: 2px; }
-  .ce-row-score { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); text-align: right; }
+  .ce-row-bar-f { height: 100%; background: linear-gradient(90deg, var(--ens-go, #18a558), #34d27b); border-radius: 2px; }
+  /* Score en Fredoka tabulaire (ens-stat__num spirit) */
+  .ce-row-score {
+    font: 700 12px/1 var(--ens-display, 'Fredoka'), sans-serif;
+    color: var(--mu2); text-align: right; font-variant-numeric: tabular-nums;
+  }
 
-  /* Streak 🔥 — chip discret, ton factuel (pas de pression) */
+  /* Streak — chip amber arcade */
   .ce-streak {
     display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;
-    font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--amx);
-    background: var(--amp); border: 1px solid color-mix(in srgb, var(--am) 22%, transparent);
-    padding: 4px 7px; border-radius: var(--r-sm);
+    font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: #fff; background: var(--ens-amber, #f59e0b);
+    padding: 4px 8px; border-radius: var(--ens-r-pill, 999px);
   }
-  .ce-streak.off { color: var(--mu2); background: var(--bg2); border-color: var(--bo); }
+  .ce-streak.off { color: var(--mu2); background: var(--bg2); }
   .ce-streak svg { flex-shrink: 0; }
 
-  /* Hall of fame (permis obtenu) */
+  /* Hall of fame — section go vert */
   .ce-hof-title {
-    font: 700 11px/1 'Inter', sans-serif; text-transform: uppercase; letter-spacing: .1em;
+    font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    text-transform: uppercase; letter-spacing: .1em;
     color: var(--mu2); margin: 28px 0 12px; display: flex; align-items: center; gap: 8px;
   }
   .ce-hof-title::after { content: ''; flex: 1; height: 1px; background: var(--bo); }
   .ce-hof-row {
-    background: color-mix(in srgb, var(--a) 6%, transparent); border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
-    border-radius: var(--r); padding: 12px 14px;
+    background: color-mix(in srgb, var(--ens-go, #18a558) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ens-go, #18a558) 22%, transparent);
+    border-radius: var(--ens-r, var(--r)); padding: 12px 14px;
     display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+    cursor: pointer; min-height: 44px;
+    transition: border-color .12s, transform .12s;
   }
+  .ce-hof-row:hover { border-color: color-mix(in srgb, var(--ens-go, #18a558) 40%, transparent); transform: translateY(-1px); }
+  .ce-hof-row:active { transform: scale(.98); }
   .ce-hof-nom {
     flex: 1; min-width: 0;
-    font: 700 13px/1.2 'Inter', sans-serif; color: var(--adk);
-    text-transform: uppercase; letter-spacing: .01em;
+    font: 700 13px/1.2 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--ens-go, #18a558);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .ce-hof-badge {
     display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
-    font: 700 11px/1 'Inter', sans-serif; color: var(--adk);
-    background: color-mix(in srgb, var(--a) 14%, transparent); padding: 4px 8px; border-radius: var(--r);
+    font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: #fff;
+    background: var(--ens-go, #18a558); padding: 4px 9px; border-radius: var(--ens-r-pill, 999px);
   }
 
+  /* Empty state arcade */
   .ce-empty {
     padding: 40px 20px; text-align: center; color: var(--mu2);
-    font: 500 14px/1.6 'Inter', sans-serif;
-    background: var(--su); border: 1px solid var(--bo); border-radius: var(--r-lg);
+    font: 500 14px/1.6 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    background: var(--su); border: 1px solid var(--bo); border-radius: var(--ens-r, var(--r-lg));
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
   }
   .ce-cohorte-note {
     display: inline-flex; align-items: center; gap: 5px;
-    font: 500 11px/1 'Inter', sans-serif; color: var(--mu2);
+    font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--mu2);
     background: var(--bg2); border: 1px solid var(--bo);
-    padding: 4px 9px; border-radius: var(--r-sm); margin-top: 6px;
+    padding: 5px 10px; border-radius: var(--ens-r-pill, 999px); margin-top: 8px;
   }
 </style>`;
 
@@ -128,7 +192,17 @@ export async function mount(root, mode) {
     mode: isTheorie ? "theorie" : "pratique",
   });
 
-  root.innerHTML = `${STYLE}<div class="ce-page"><div class="ce-empty">Chargement du classement…</div></div>`;
+  root.innerHTML = `${STYLE}<div class="ce-page">
+    <div class="ce-hero">
+      ${panneauxLayer({ variant: "hero" })}
+      <div class="ce-hero-content">
+        <p class="ce-hero-kicker">Classement</p>
+        <h1 class="ce-hero-title">${isTheorie ? "Ligue Révision" : "Ligue Pratique"}</h1>
+        <p class="ce-hero-sub">Chargement en cours…</p>
+      </div>
+    </div>
+    <div class="ce-body"><div class="ce-empty">Chargement du classement…</div></div>
+  </div>`;
 
   // ── Fetch : élèves de l'école, mes validations, examens « reçu », streaks ──
   const [elevesRes, valsRes, examsRes, streaksRes] = await Promise.all([
@@ -235,12 +309,22 @@ export async function mount(root, mode) {
 
   if (ranked.length === 0 && hof.length === 0) {
     root.innerHTML = `${STYLE}<div class="ce-page anim-slide-up">
-      ${header(ranked.length, isTheorie)}
-      <div class="ce-empty">${
-        isTheorie
-          ? "Aucune révision enregistrée ces 30 derniers jours.<br>Partage l'app à tes élèves pour qu'ils révisent en autonomie entre deux leçons — leur score apparaîtra ici."
-          : "Aucun élève dans ta cohorte pour l'instant.<br>Attribue des élèves ou enregistre une séance — leurs compétences validées alimenteront ce classement."
-      }</div>
+      ${heroArcade(0, isTheorie)}
+      <div class="ce-body">
+        <div class="ce-empty">
+          ${illus(isTheorie ? "route" : "podium", { size: 80 })}
+          <strong style="font:700 15px/1.2 var(--ens-display,'Fredoka'),sans-serif;color:var(--ink)">${
+            isTheorie
+              ? "Aucune révision ces 30 jours"
+              : "Aucun élève dans ta cohorte"
+          }</strong>
+          <span style="max-width:28ch;text-align:center">${
+            isTheorie
+              ? "Partage l'app à tes élèves — leur score apparaîtra ici dès leur première révision."
+              : "Attribue des élèves ou enregistre une séance — leurs compétences alimenteront ce classement."
+          }</span>
+        </div>
+      </div>
     </div>`;
     wireBack(root);
     return;
@@ -248,36 +332,44 @@ export async function mount(root, mode) {
 
   root.innerHTML = `${STYLE}
     <div class="ce-page anim-slide-up">
-      ${header(ranked.length, isTheorie)}
+      ${heroArcade(ranked.length, isTheorie)}
 
-      ${ranked.length > 0 ? `<div class="ce-list">${ranked.map((e, i) => renderRow(e, i + 1, isTheorie)).join("")}</div>` : ""}
+      <div class="ce-body">
+        ${ranked.length > 0 ? `<div class="ce-list">${ranked.map((e, i) => renderRow(e, i + 1, isTheorie)).join("")}</div>` : ""}
 
-      ${
-        hof.length > 0
-          ? `<div class="ce-hof-title">${icon("award", { size: 13, strokeWidth: 2.2 })} Hall of fame — permis obtenu</div>
-             ${hof.map(renderHof).join("")}`
-          : ""
-      }
+        ${
+          hof.length > 0
+            ? `<div class="ce-hof-title">${icon("award", { size: 13, strokeWidth: 2.2 })} Hall of fame — permis obtenu</div>
+               ${hof.map(renderHof).join("")}`
+            : ""
+        }
+      </div>
     </div>`;
 
   wireBack(root);
   root.querySelectorAll("[data-eleve-id]").forEach((el) => {
     el.addEventListener("click", () => {
+      haptic("impact");
       navigate(`#/livret/${el.dataset.eleveId}`);
     });
   });
 }
 
-function header(n, isTheorie) {
-  // Explainer one-liner : qui est dans la liste, comment lire le score.
-  const explainer = isTheorie
-    ? `Tes élèves classés par volume de révision (30 derniers jours) · barre = score moyen`
-    : `Tes élèves classés par compétences de conduite validées · barre = progression globale`;
-  return `<header class="ce-hd">
-    <h1 class="ce-h1">${isTheorie ? "Ligue Révision" : "Ligue Pratique"}</h1>
-    <p class="ce-sub">${explainer}</p>
-    <span class="ce-cohorte-note">${n} élève${n > 1 ? "s" : ""} dans ta cohorte</span>
-  </header>`;
+/** Hero arcade clé-en-main pour la page classement. */
+function heroArcade(n, isTheorie) {
+  const sub = isTheorie
+    ? `Classés par volume de révision · 30 derniers jours`
+    : `Classés par compétences de conduite validées`;
+  return `
+    <div class="ce-hero">
+      ${panneauxLayer({ variant: "hero" })}
+      <div class="ce-hero-content">
+        <p class="ce-hero-kicker">${isTheorie ? "Ligue Révision" : "Ligue Pratique"}</p>
+        <h1 class="ce-hero-title">Classement élèves</h1>
+        <p class="ce-hero-sub">${sub}</p>
+        ${n > 0 ? `<span class="ce-hero-chip">${icon("users", { size: 12, strokeWidth: 2 })} ${n} élève${n > 1 ? "s" : ""} dans ta cohorte</span>` : ""}
+      </div>
+    </div>`;
 }
 
 // Médailles top-3 (parité côté élève : badge rond coloré + glow)

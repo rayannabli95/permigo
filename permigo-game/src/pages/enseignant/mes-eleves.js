@@ -9,38 +9,82 @@ import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
-import {
-  renderEmptyState,
-  emptyState,
-} from "@/components/common/empty-state.js";
+// (empty-state.js non utilisé — remplacé par illus() arcade)
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
 import { triggerEleveRecovery } from "@/services/eleve-recovery.js";
 import { icon } from "@/utils/icons.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
+import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
+import { illus } from "@/components/enseignant/illus.js";
+import { haptic } from "@/utils/haptic.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
   .me-page {
-    padding: 20px 16px 100px;
+    padding: 0 0 100px;
     max-width: 600px;
     margin: 0 auto;
     background: var(--bg);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
     color: var(--ink);
   }
 
-  /* Header */
+  /* ── Hero arcade (parité aujourdhui.js) ── */
+  .me-hero {
+    position: relative; overflow: hidden;
+    margin: 0 0 0;
+    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 22px) 20px 26px;
+    background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+    color: #fff;
+    isolation: isolate;
+    animation: meHeroIn .45s var(--ease, ease) both;
+  }
+  .me-hero::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
+    background: repeating-linear-gradient(90deg, #f59e0b 0 18px, transparent 18px 34px); opacity: .85;
+  }
+  .me-hero .ens-panneaux__sign { opacity: var(--o, .15); filter: saturate(1.1) brightness(1.1); }
+  .me-hero-content { position: relative; z-index: 2; }
+  .me-hero-kicker {
+    font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: rgba(255,255,255,.65); text-transform: uppercase; letter-spacing: .12em;
+    margin: 0 0 7px;
+  }
+  .me-hero-title {
+    font: 700 clamp(26px, 8vw, 32px)/1.05 var(--ens-display, 'Fredoka'), sans-serif;
+    color: #fff; margin: 0; letter-spacing: -.02em;
+    text-shadow: 0 2px 14px rgba(11,13,26,.4);
+  }
+  .me-hero-sub {
+    font: 500 13px/1.5 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: rgba(255,255,255,.85); margin: 10px 0 0; max-width: 38ch;
+  }
+  .me-hero-actions {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;
+  }
+  @keyframes meHeroIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .me-hero { animation: none; } }
+
+  /* Zone corps sous le hero */
+  .me-body {
+    padding: 16px 16px 0;
+  }
+
+  /* Header (legacy, conservé pour drill) */
   .me-hd { margin-bottom: 24px; }
   .me-h1 {
-    font: 700 24px/1.2 'Plus Jakarta Sans', sans-serif;
+    font: 700 24px/1.2 var(--ens-display, 'Fredoka'), sans-serif;
     color: var(--ink);
     margin: 0 0 4px;
     letter-spacing: -0.02em;
   }
   .me-sub {
-    font: 500 13px/1.4 'Inter', sans-serif;
+    font: 500 13px/1.4 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
     color: var(--mu2);
     margin: 0;
   }
@@ -65,7 +109,7 @@ const STYLE = `<style>
     background: var(--su);
     border: 1px solid var(--bo);
     border-radius: var(--r);
-    font: 500 16px/1 'Inter', sans-serif;
+    font: 500 16px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
     color: var(--ink);
     outline: none;
     transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
@@ -110,7 +154,7 @@ const STYLE = `<style>
     border: none;
     background: transparent;
     border-radius: var(--r-sm);
-    font: 600 11.5px/1 'Inter', sans-serif;
+    font: 600 11.5px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
     color: var(--mu2);
     cursor: pointer;
     transition: background .15s var(--ease), color .15s var(--ease);
@@ -119,8 +163,9 @@ const STYLE = `<style>
   }
   .me-tab.active {
     background: var(--su);
-    color: var(--adk);
+    color: var(--ens-go, #18a558);
     box-shadow: var(--s1);
+    font-weight: 700;
   }
 
   /* Liste */
@@ -130,16 +175,16 @@ const STYLE = `<style>
     gap: 8px;
   }
 
-  /* Card élève */
+  /* Card élève — arcade */
   .me-row {
     background: var(--su);
     border: 1px solid var(--bo);
-    border-radius: var(--r);
+    border-radius: var(--ens-r, var(--r));
     padding: 14px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: var(--s0);
+    box-shadow: var(--ens-shadow, var(--s0));
     transition: border-color .15s var(--ease), transform .15s var(--ease), box-shadow .15s var(--ease);
     cursor: pointer;
     min-height: 44px;
@@ -177,7 +222,7 @@ const STYLE = `<style>
   /* Infos */
   .me-info { flex: 1; min-width: 0; }
   .me-nom {
-    font: 700 14.5px/1.2 'Plus Jakarta Sans', sans-serif;
+    font: 700 14.5px/1.2 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
     color: var(--ink);
     margin: 0 0 4px;
     letter-spacing: -0.01em;
@@ -192,52 +237,33 @@ const STYLE = `<style>
     flex-wrap: wrap;
   }
   .me-meta-count {
-    font: 500 11px/1 'Inter', sans-serif;
+    font: 500 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
     color: var(--mu2);
   }
 
-  /* Badge statut */
+  /* Badges statut — tokens arcade (ens-chip) */
+  /* Les classes .me-badge sont conservées pour compatibilité logique,
+     le visuel est surchargé ci-dessous via les modificateurs ens-chip. */
   .me-badge {
-    font: 600 11px/1 'Inter', sans-serif;
-    padding: 3px 8px;
-    border-radius: var(--r);
+    display: inline-flex; align-items: center; gap: 4px;
+    font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    padding: 4px 9px; border-radius: var(--ens-r-pill, 999px);
     flex-shrink: 0;
   }
-  .me-badge.actif {
-    color: var(--grd);
-    background: rgba(16,185,129,.1);
+  .me-badge.actif, .me-badge.pret {
+    color: #fff; background: var(--ens-go, #18a558);
   }
   .me-badge.inactif {
-    color: var(--mu2);
-    background: rgba(148,163,184,.1);
-  }
-  .me-badge.pret {
-    color: var(--grd);
-    background: rgba(16,185,129,.12);
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
+    color: var(--mu2); background: var(--bg2);
   }
   .me-badge.approche {
-    color: var(--state-approche);
-    background: color-mix(in srgb, var(--state-approche) 12%, transparent);
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
+    color: #fff; background: var(--ens-blue, #1d4ed8);
   }
   .me-badge.recu {
-    color: var(--adk);
-    background: color-mix(in srgb, var(--a) 14%, transparent);
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
+    color: #07150c; background: var(--ens-go, #18a558);
   }
   .me-badge.planifie {
-    color: #6366f1;
-    background: rgba(99,102,241,.12);
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
+    color: #fff; background: var(--ens-amber, #f59e0b);
   }
 
   /* Progression REMC */
@@ -294,18 +320,18 @@ const STYLE = `<style>
     flex-shrink: 0;
   }
 
-  /* Empty state */
+  /* Empty state — arcade */
   .me-empty {
-    padding: 48px 20px;
+    padding: 40px 20px;
     text-align: center;
     color: var(--mu2);
-    font: 500 14px/1.6 'Inter', sans-serif;
+    font: 500 14px/1.6 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
   }
   .me-empty-ico {
-    font-size: 36px;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
     display: block;
-    opacity: .6;
+    opacity: .75;
   }
 
   /* Skeleton */
@@ -322,56 +348,62 @@ const STYLE = `<style>
     50% { opacity: .5; }
   }
 
-  /* Bouton Inviter */
+  /* Boutons header — ghost arcade (léger, ne concurrence pas le FAB) */
   .me-invite-btn {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 14px; min-height: 44px; border-radius: var(--r);
-    background: color-mix(in srgb, var(--a) 10%, transparent); border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
-    color: var(--a-txt); font: 600 13px/1 'Inter', sans-serif;
+    padding: 8px 14px; min-height: 44px; border-radius: var(--ens-r-pill, 999px);
+    background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.25);
+    color: #fff; font: 700 12px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
     cursor: pointer; flex-shrink: 0;
-    transition: background .12s, border-color .12s;
+    transition: background .12s, border-color .12s, transform .12s;
     -webkit-tap-highlight-color: transparent;
   }
-  .me-invite-btn:hover { background: color-mix(in srgb, var(--a) 18%, transparent); border-color: color-mix(in srgb, var(--a) 40%, transparent); }
-  .me-invite-btn:active { background: color-mix(in srgb, var(--a) 22%, transparent); }
+  .me-invite-btn:hover { background: rgba(255,255,255,.2); }
+  .me-invite-btn:active { background: rgba(255,255,255,.28); transform: scale(.96); }
+  /* Bouton "Inviter" — accent go vert */
+  .me-invite-btn--go {
+    background: var(--ens-go, #18a558); border-color: transparent; color: #fff;
+    box-shadow: 0 3px 0 0 #0f6b38, var(--ens-shadow, none);
+  }
+  .me-invite-btn--go:hover { background: #19b660; }
+  .me-invite-btn--go:active { box-shadow: 0 1px 0 0 #0f6b38; transform: translateY(2px) scale(.97); }
 
-  /* Anti-décrochage */
+  /* Anti-décrochage — carte amber arcade */
   .me-relancer-section {
-    background: rgba(245,158,11,.06);
-    border: 1.5px solid rgba(245,158,11,.25);
-    border-radius: var(--r-xl);
+    background: color-mix(in srgb, var(--ens-amber, #f59e0b) 8%, var(--su));
+    border: 1.5px solid color-mix(in srgb, var(--ens-amber, #f59e0b) 35%, transparent);
+    border-radius: var(--ens-r, var(--r-xl));
     padding: 14px 16px;
     margin-bottom: 16px;
-    animation: skel-pulse 0s; /* reset */
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    box-shadow: var(--s-am);
+    box-shadow: 0 2px 0 0 color-mix(in srgb, var(--ens-amber, #f59e0b) 30%, transparent);
     transition: transform .14s var(--ease-snap);
   }
   .me-relancer-section:active { transform: scale(0.98); transition: transform 180ms cubic-bezier(0.23,1,0.32,1); }
   @media (prefers-reduced-motion: reduce) { .me-relancer-section:active { transform: none; } }
-  .me-relancer-section:focus-visible { outline: 3px solid var(--amx); outline-offset: 2px; }
+  .me-relancer-section:focus-visible { outline: 3px solid var(--ens-amber, #f59e0b); outline-offset: 2px; }
   .me-relancer-title {
-    font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: var(--amx);
+    font: 700 13px/1.2 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: color-mix(in srgb, var(--ens-amber, #f59e0b) 80%, #7c4700);
     margin: 0 0 4px;
     display: flex;
     align-items: center;
     gap: 6px;
   }
   .me-relancer-sub {
-    font: 500 12px/1.4 'Inter', sans-serif;
-    color: #92400e;
+    font: 500 12px/1.4 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--mu2);
     margin: 0;
   }
 
-  /* Badge à relancer inline */
+  /* Badge à relancer inline — amber arcade */
   .me-badge-relancer {
-    font: 600 10px/1 'Inter', sans-serif;
-    padding: 3px 7px;
-    border-radius: var(--r);
-    color: var(--amx);
-    background: rgba(245,158,11,.12);
+    font: 700 10px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    padding: 4px 9px;
+    border-radius: var(--ens-r-pill, 999px);
+    color: #fff;
+    background: var(--ens-amber, #f59e0b);
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
@@ -477,12 +509,17 @@ export async function mount(root) {
   root.innerHTML = `
     ${STYLE}
     <div class="me-page anim-slide-up">
-      <header class="me-hd">
-        <h1 class="me-h1">${_drillComp ? `Élèves bloqués sur ${esc(_drillComp)}` : "Mes élèves"}</h1>
-        <p class="me-sub">Récupération de la liste…</p>
-      </header>
-      <div class="me-skel-list">
-        ${[1, 2, 3, 4].map(() => `<div class="me-skel-row"></div>`).join("")}
+      <div class="me-hero">
+        ${panneauxLayer({ variant: "hero" })}
+        <div class="me-hero-content">
+          <p class="me-hero-kicker">Chargement…</p>
+          <h1 class="me-hero-title">${_drillComp ? `Bloqués sur ${esc(_drillComp)}` : "Mes élèves"}</h1>
+        </div>
+      </div>
+      <div class="me-body">
+        <div class="me-skel-list">
+          ${[1, 2, 3, 4].map(() => `<div class="me-skel-row"></div>`).join("")}
+        </div>
       </div>
     </div>
   `;
@@ -635,6 +672,7 @@ function renderDrill() {
 
   const count = _drillEleves.length;
   page.innerHTML = `
+    <div class="me-body">
     <header class="me-hd" style="margin-bottom:4px;">
       <div>
         <h1 class="me-h1" style="display:flex;align-items:center;gap:8px;font-size:17px;">
@@ -645,16 +683,16 @@ function renderDrill() {
       </div>
     </header>
     <button class="me-drill-back" id="me-drill-back"
-            style="display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:8px 12px;background:var(--su);border:1.5px solid var(--bo);border-radius:10px;font:600 13px/1 'Inter',sans-serif;color:var(--a-txt);cursor:pointer;">
+            style="display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:8px 12px;background:var(--su);border:1.5px solid var(--bo);border-radius:var(--ens-r,10px);font:600 13px/1 var(--ens-body,'Plus Jakarta Sans'),sans-serif;color:var(--a-txt);cursor:pointer;min-height:44px;">
       ${icon("arrow-left", { size: 14, strokeWidth: 2.5 })} Voir tous les élèves
     </button>
     <div class="me-list">
       ${
         count === 0
-          ? `<div style="text-align:center;padding:40px 20px;color:var(--mu2);font:500 14px/1.6 'Inter',sans-serif;">
-             ${icon("check-circle", { size: 32, strokeWidth: 1.5, color: "var(--bo)" })}
-             <br><br>Aucun élève en difficulté sur cette compétence ces 30 derniers jours.
-           </div>`
+          ? `<div class="me-empty">
+               ${illus("route", { size: 72 })}
+               Aucun élève en difficulté sur cette compétence ces 30 derniers jours.
+             </div>`
           : _drillEleves
               .map((e) => {
                 const nm = esc(
@@ -676,6 +714,7 @@ function renderDrill() {
               .join("")
       }
     </div>
+    </div><!-- /.me-body -->
   `;
 
   // Back button
@@ -686,6 +725,7 @@ function renderDrill() {
   // Row click → livret
   _root.querySelectorAll(".me-row[data-eleve-id]").forEach((row) => {
     row.addEventListener("click", () => {
+      haptic("impact");
       track("drill.eleve.open", {
         eleve_id: row.dataset.eleveId,
         comp: _drillComp,
@@ -723,31 +763,45 @@ function render() {
   `
       : "";
 
+  // Kicker dynamique selon l'état
+  const heroKicker =
+    prets > 0
+      ? `${prets} prêt${prets > 1 ? "s" : ""} pour l'examen`
+      : total === 0
+        ? "Commence ici"
+        : `${total} élève${total > 1 ? "s" : ""} · ${actifs} actif${actifs > 1 ? "s" : ""} cette semaine`;
+  const heroSub =
+    prets > 0
+      ? `${prets} élève${prets > 1 ? "s ont" : " a"} toutes les compétences C1-C3 — prêt${prets > 1 ? "s" : ""} à présenter l'examen.`
+      : total === 0
+        ? "Invite un élève — il crée son compte en 30 secondes, son livret s'ouvre aussitôt."
+        : "";
+
   _root.innerHTML = `
     ${STYLE}
     <div class="me-page anim-slide-up">
-      <header class="me-hd">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-          <h1 class="me-h1">Mes élèves</h1>
-          <div style="display:flex;gap:8px;align-items:center">
+
+      <!-- Hero arcade -->
+      <div class="me-hero">
+        ${panneauxLayer({ variant: "hero" })}
+        <div class="me-hero-content">
+          <p class="me-hero-kicker">${esc(heroKicker)}</p>
+          <h1 class="me-hero-title">Mes élèves</h1>
+          ${heroSub ? `<p class="me-hero-sub">${esc(heroSub)}</p>` : ""}
+          <div class="me-hero-actions">
             <button id="me-rank-btn" class="me-invite-btn" type="button"
                     aria-label="Classement des élèves">
               ${icon("award", { size: 14, strokeWidth: 2.2 })} Classement
             </button>
-            <button id="me-invite-btn" class="me-invite-btn" type="button"
+            <button id="me-invite-btn" class="me-invite-btn me-invite-btn--go" type="button"
                     aria-label="Inviter un élève">
               ${icon("user-plus", { size: 14, strokeWidth: 2.2 })} Inviter
             </button>
           </div>
         </div>
-        <p class="me-sub">${
-          prets > 0
-            ? `${total} élève${total > 1 ? "s" : ""} · <b style="color:var(--grd);font-weight:800">${prets} prêt${prets > 1 ? "s" : ""} pour l'examen</b>`
-            : total === 0
-              ? "Invite ton premier élève pour commencer"
-              : `${total} élève${total > 1 ? "s" : ""} · ${actifs} actif${actifs > 1 ? "s" : ""} cette semaine`
-        }</p>
-      </header>
+      </div>
+
+      <div class="me-body">
 
       ${relancerSection}
 
@@ -778,24 +832,24 @@ function render() {
         ${
           filtered.length === 0
             ? _tab === "tous" && !_query
-              ? emptyState({
-                  image: "/skins/empty-states/empty_eleves.png",
-                  title: "Aucun élève pour l'instant",
-                  body: "Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes et tu suis sa progression en temps réel.",
-                  cta: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:4px">
-                    <button id="me-invite-empty-btn" style="display:inline-flex;align-items:center;gap:7px;padding:12px 22px;background:var(--a);color:var(--a-ink);border:0;border-radius:12px;font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
-                      ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
-                    </button>
-                  </div>`,
-                })
+              ? `<div class="me-empty">
+                   <span class="me-empty-ico">${illus("school", { size: 80 })}</span>
+                   <strong style="font:700 16px/1.2 var(--ens-display,'Fredoka'),sans-serif;color:var(--ink)">Aucun élève pour l'instant</strong>
+                   <span style="font:500 13px/1.5 var(--ens-body,'Plus Jakarta Sans'),sans-serif;color:var(--mu2);max-width:30ch;text-align:center">Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes.</span>
+                   <button id="me-invite-empty-btn" class="ens-btn ens-btn--go" type="button" style="margin-top:4px;min-height:48px;padding:0 24px;font-size:14px;">
+                     ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
+                   </button>
+                 </div>`
               : `<div class="me-empty">
-                   <span class="me-empty-ico">${icon("users", { size: 30 })}</span>
-                   ${_query ? 'Aucun résultat pour <strong>"' + esc(_query) + '"</strong>.' : "Aucun élève dans cet onglet."}
+                   <span class="me-empty-ico">${illus("route", { size: 64 })}</span>
+                   ${_query ? `Aucun résultat pour <strong>"${esc(_query)}"</strong>.` : "Aucun élève dans cet onglet."}
                  </div>`
             : filtered.map(renderRow).join("")
         }
       </div>
-    </div>
+
+      </div><!-- /.me-body -->
+    </div><!-- /.me-page -->
 
   `;
 }
@@ -966,14 +1020,13 @@ function wire() {
 
 async function wireRows() {
   const { attachSwipe, attachLongPress } = await import("@/utils/gestures.js");
-  const { haptic } = await import("@/utils/haptic.js");
 
   _root.querySelectorAll(".me-row[data-eleve-id]").forEach((row) => {
     const id = row.dataset.eleveId;
 
     // ── Click standard → livret ──
     const handler = () => {
-      haptic("tap");
+      haptic("impact"); // clac net : ouverture fiche élève
       track("eleve.fiche.open", { eleve_id: id });
       navigate(`#/livret/${id}`);
     };
@@ -1583,20 +1636,18 @@ function renderList() {
   if (filtered.length === 0) {
     listEl.innerHTML =
       _tab === "tous" && !_query
-        ? emptyState({
-            image: "/skins/empty-states/empty_eleves.png",
-            title: "Aucun élève pour l'instant",
-            body: "Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes et tu suis sa progression en temps réel.",
-            cta: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:4px">
-              <button id="me-invite-empty-btn" style="display:inline-flex;align-items:center;gap:7px;padding:12px 22px;background:var(--a);color:var(--a-ink);border:0;border-radius:12px;font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;min-height:44px;transition:transform .12s,background .12s">
-                ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
-              </button>
-            </div>`,
-          })
+        ? `<div class="me-empty">
+             <span class="me-empty-ico">${illus("school", { size: 80 })}</span>
+             <strong style="font:700 16px/1.2 var(--ens-display,'Fredoka'),sans-serif;color:var(--ink)">Aucun élève pour l'instant</strong>
+             <span style="font:500 13px/1.5 var(--ens-body,'Plus Jakarta Sans'),sans-serif;color:var(--mu2);max-width:30ch;text-align:center">Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes.</span>
+             <button id="me-invite-empty-btn" class="ens-btn ens-btn--go" type="button" style="margin-top:4px;min-height:48px;padding:0 24px;font-size:14px;">
+               ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
+             </button>
+           </div>`
         : `<div class="me-empty">
-           <span class="me-empty-ico">${icon("users", { size: 30 })}</span>
-           ${_query ? 'Aucun résultat pour <strong>"' + esc(_query) + '"</strong>.' : "Aucun élève dans cet onglet."}
-         </div>`;
+             <span class="me-empty-ico">${illus("route", { size: 64 })}</span>
+             ${_query ? `Aucun résultat pour <strong>"${esc(_query)}"</strong>.` : "Aucun élève dans cet onglet."}
+           </div>`;
     // Wire the invite button if it was just rendered
     listEl
       .querySelector("#me-invite-empty-btn")
