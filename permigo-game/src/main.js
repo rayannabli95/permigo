@@ -15,9 +15,9 @@ import { initThemeEarly, syncFromPrefs } from "@/utils/theme.js";
 import { initAccentEarly } from "@/utils/accent.js";
 import { initGameState, initEquippedTheme } from "@/utils/game-state.js";
 import { mountCookieBanner } from "@/components/common/cookie-banner.js";
-import { showLaunchSplash } from "@/components/common/launch-splash.js";
 import { initPosthog } from "@/services/posthog.js";
 import { initVercelAnalytics } from "@/services/vercel-analytics.js";
+import { tapHaptic } from "@/utils/haptic.js";
 import "@/utils/pwa.js"; // capte beforeinstallprompt très tôt
 
 // Apply saved/system theme before any rendering (reads localStorage, synchronous)
@@ -207,6 +207,20 @@ window.addEventListener("offline", () =>
 );
 window.addEventListener("online", () =>
   toast("Connexion rétablie ✓", "success", 2500),
+);
+
+// Immersion : retour haptique léger sur chaque tap d'élément interactif.
+// (Android : vibration · iPhone : hack switch · desktop : no-op · silencieux.)
+document.addEventListener(
+  "click",
+  (e) => {
+    const t = e.target?.closest?.(
+      'button, a[href], [role="button"], .tappable, label, .bn-tab, [data-haptic]',
+    );
+    if (!t || t.closest("[data-no-haptic]")) return;
+    tapHaptic();
+  },
+  { capture: true, passive: true },
 );
 
 // PWA service worker (production only)

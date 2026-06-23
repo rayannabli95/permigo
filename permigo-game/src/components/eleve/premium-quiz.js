@@ -9,7 +9,7 @@
 // Autonome (son propre <style>, son propre état). Aucune dépendance DB.
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
-import { haptic } from "@/utils/haptic.js";
+import { haptic, hapticPulses } from "@/utils/haptic.js";
 
 // Récompense VARIABLE : jamais 2× le même d'affilée (sinon le cerveau
 // s'habitue et le pic dopamine disparaît — cf. reward prediction error).
@@ -194,7 +194,7 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
     if (win) {
       correctCount++;
       combo++;
-      haptic("success");
+      hapticPulses(combo); // escalade : 1 pulse, puis 2, puis 3…
     } else {
       combo = 0;
       haptic("warning");
