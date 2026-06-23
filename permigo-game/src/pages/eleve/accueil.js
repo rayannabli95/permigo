@@ -736,7 +736,7 @@ const STYLE = `<style>
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(120% 85% at 0% 0%, rgba(139,92,246,.36) 0%, transparent 55%),
+    radial-gradient(120% 85% at 0% 0%, color-mix(in srgb, var(--a) 36%, transparent) 0%, transparent 55%),
     radial-gradient(130% 95% at 100% 100%, rgba(245,158,11,.20) 0%, transparent 52%),
     linear-gradient(152deg, #221a3d 0%, #171232 46%, #0d0a1f 100%);
   border: 1px solid rgba(255,255,255,.10);

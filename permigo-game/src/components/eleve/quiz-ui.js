@@ -228,7 +228,7 @@ export const QUIZ_STYLE = `<style>
   .qz-top{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-right:62px} /* réserve l'angle à la mascotte */
   .qz-pips{display:flex;flex:1;gap:6px}
   .qz-pip{flex:1;height:7px;border-radius:4px;background:rgba(148,163,184,.18);position:relative;overflow:hidden}
-  .qz-pip::after{content:"";position:absolute;inset:0;border-radius:4px;background:linear-gradient(90deg,#6366f1,#8b5cf6);transform:scaleX(0);transform-origin:left;transition:transform .35s var(--qz-out)}
+  .qz-pip::after{content:"";position:absolute;inset:0;border-radius:4px;background:linear-gradient(90deg,var(--a),var(--a-lt));transform:scaleX(0);transform-origin:left;transition:transform .35s var(--qz-out)}
   .qz-pip.done::after{transform:scaleX(1)}
   .qz-pip.cur{box-shadow:0 0 0 1.5px rgba(129,140,248,.55)}
   .qz-pip.cur::after{transform:scaleX(.35);background:linear-gradient(90deg,#818cf8,#a78bfa)}
@@ -290,11 +290,11 @@ export const QUIZ_STYLE = `<style>
   .qz-score.gold{background:linear-gradient(135deg,#fcd34d,#f59e0b);-webkit-background-clip:text;background-clip:text}
   .qz-score-sep{font-size:.55em;margin:0 2px;color:#64748b;-webkit-text-fill-color:#64748b}
   .qz-result-msg{font:600 17px/1.45 'Inter',sans-serif;color:#cbd5e1;margin:0 0 24px}
-  .qz-cta{padding:15px 36px;min-height:48px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:0;border-radius:14px;color:#fff;font:700 15px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;touch-action:manipulation;transition:transform .14s var(--qz-out),opacity .14s}
+  .qz-cta{padding:15px 36px;min-height:48px;background:linear-gradient(135deg,var(--a),var(--a-lt));border:0;border-radius:14px;color:var(--a-ink);font:700 15px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;touch-action:manipulation;transition:transform .14s var(--qz-out),opacity .14s}
   .qz-cta:active{transform:scale(.97);opacity:.92}
 
   /* Bouton « Suivant » pleine largeur (engine) */
-  .qz-next{width:100%;margin-top:14px;padding:15px;min-height:50px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:0;border-radius:14px;color:#fff;font:700 15px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;touch-action:manipulation;transition:transform .14s var(--qz-out),opacity .14s;animation:qzExplIn .3s var(--qz-out) .1s both}
+  .qz-next{width:100%;margin-top:14px;padding:15px;min-height:50px;background:linear-gradient(135deg,var(--a),var(--a-lt));border:0;border-radius:14px;color:var(--a-ink);font:700 15px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;touch-action:manipulation;transition:transform .14s var(--qz-out),opacity .14s;animation:qzExplIn .3s var(--qz-out) .1s both}
   .qz-next:active{transform:scale(.98)}
 
   /* Reduced motion : on garde les fondus, on coupe les mouvements */
