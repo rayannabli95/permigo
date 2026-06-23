@@ -37,19 +37,19 @@ function verdict(pct) {
   if (pct >= 0.8)
     return {
       e: "💪",
-      t: "Tu te sens prêt !",
-      s: "Beau score. Confirme avec ton moniteur — c'est lui qui valide pour de vrai.",
+      t: "Ça sent bon !",
+      s: "Gros score. Le dernier mot, c'est ton moniteur — montre-lui.",
     };
   if (pct >= 0.5)
     return {
       e: "🔥",
       t: "Presque !",
-      s: "Encore quelques révisions ciblées et c'est dans la poche.",
+      s: "Quelques révisions et c'est plié.",
     };
   return {
     e: "📚",
-    t: "Continue à réviser",
-    s: "Reprends les fiches tranquillement, ça va rentrer.",
+    t: "Faut bosser un peu",
+    s: "Relis les fiches cool, ça va rentrer.",
   };
 }
 
@@ -128,14 +128,14 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}<div class="exc">
       <div class="exc-top">
         <button class="exc-back" aria-label="Retour à la révision">←</button>
-        <h1 class="exc-h1">Examen blanc de conduite</h1>
+        <h1 class="exc-h1">Examen blanc</h1>
       </div>
       <div class="exc-intro">
         <div class="exc-intro-e">🏁</div>
-        <div class="exc-intro-t">${exam.length} questions, tous les mondes</div>
-        <p class="exc-sub">Tu réponds dans ta tête, tu vérifies, et tu t'auto-notes honnêtement. À la fin : où tu en es + quoi réviser.</p>
-        <p class="exc-note">⚠️ C'est une auto-évaluation pour t'entraîner — la vraie note (/31), c'est l'inspecteur le jour J qui la donne.</p>
-        <button class="exc-go" data-start>Commencer</button>
+        <div class="exc-intro-t">${exam.length} questions · toutes les compétences</div>
+        <p class="exc-sub">Réponds dans ta tête, vérifie, note-toi cash. À la fin : où t'en es + quoi bosser.</p>
+        <p class="exc-note">⚠️ C'est un entraînement, pas la vraie note. Le /31, c'est l'inspecteur le jour J.</p>
+        <button class="exc-go" data-start>C'est parti</button>
       </div>
     </div>`;
     root
@@ -156,7 +156,7 @@ export async function mount(root) {
         <button class="exc-back" aria-label="Abandonner">←</button>
         <h1 class="exc-h1" style="font-size:18px">Examen blanc</h1>
       </div>
-      <div class="exc-prog">Question ${idx + 1} / ${exam.length}</div>
+      <div class="exc-prog">${idx + 1} / ${exam.length}</div>
       <div class="exc-barwrap"><div class="exc-bar" style="width:${pct}%"></div></div>
       <span class="exc-tag">${esc(q.titre)}</span>
       <div class="exc-q">${esc(q.q)}</div>
@@ -170,7 +170,7 @@ export async function mount(root) {
               <button class="exc-knew" data-k="1">Je savais ✅</button>
               <button class="exc-nope" data-k="0">Pas sûr</button>
             </div>`
-          : `<button class="exc-go" data-reveal>Voir la réponse</button>`
+          : `<button class="exc-go" data-reveal>La réponse</button>`
       }
     </div>`;
     root.querySelector(".exc-back").addEventListener("click", () => {
@@ -223,12 +223,12 @@ export async function mount(root) {
       ${
         weak.length
           ? `<div class="exc-weak">
-              <div class="exc-weak-h">À revoir en priorité</div>
+              <div class="exc-weak-h">À retravailler en premier</div>
               ${weak.map((t) => `<div class="exc-weak-row">${esc(t)}</div>`).join("")}
             </div>`
-          : `<p class="exc-sub" style="text-align:center">Rien à revoir, propre. 🎯</p>`
+          : `<p class="exc-sub" style="text-align:center">Rien à retravailler, propre. 🎯</p>`
       }
-      <button class="exc-go" data-again>Retour à la révision</button>
+      <button class="exc-go" data-again>Retour aux révisions</button>
     </div>`;
     root
       .querySelector("[data-again]")

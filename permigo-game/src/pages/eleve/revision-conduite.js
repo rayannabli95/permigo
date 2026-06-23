@@ -172,7 +172,7 @@ export async function mount(root, param) {
   if (!FICHES.length) {
     root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-top">
       <button class="rvc-back" aria-label="Retour">←</button>
-      <h1 class="rvc-h1">Révision conduite</h1></div>
+      <h1 class="rvc-h1">Révise ta conduite</h1></div>
       <p class="rvc-sub" style="margin-top:20px">Le contenu arrive très vite. Reviens dans un instant 👀</p></div>`;
     root
       .querySelector(".rvc-back")
@@ -279,11 +279,11 @@ export async function mount(root, param) {
     }).join("");
 
     const focusHtml = focuses.length
-      ? `<div class="rvc-focus"><div class="rvc-focus-k">🎯 Ciblé par ton moniteur</div>${focuses
+      ? `<div class="rvc-focus"><div class="rvc-focus-k">🎯 Ton moniteur t'a ciblé ça</div>${focuses
           .map((x) => {
             const ff = getFiche(x.competence_code);
             const t = ff ? ff.titre : x.competence_code;
-            return `<button class="rvc-focus-row" data-focus="${esc(x.id)}" data-fcode="${esc(x.competence_code)}"><span class="rvc-focus-t">${esc(t)}</span>${x.note ? `<span class="rvc-focus-n">${esc(x.note)}</span>` : ""}<span class="rvc-focus-go">Réviser →</span></button>`;
+            return `<button class="rvc-focus-row" data-focus="${esc(x.id)}" data-fcode="${esc(x.competence_code)}"><span class="rvc-focus-t">${esc(t)}</span>${x.note ? `<span class="rvc-focus-n">${esc(x.note)}</span>` : ""}<span class="rvc-focus-go">J'm'y mets →</span></button>`;
           })
           .join("")}</div>`
       : "";
@@ -291,22 +291,22 @@ export async function mount(root, param) {
     root.innerHTML = `${STYLE}<div class="rvc">
       <div class="rvc-top">
         <button class="rvc-back" aria-label="Retour à l'accueil">←</button>
-        <h1 class="rvc-h1">Révision conduite</h1>
+        <h1 class="rvc-h1">Révise ta conduite</h1>
       </div>
       ${
         pf
           ? `<div class="rvc-pf">
-        <div class="rvc-pf-k">⚡ Ton point faible du jour</div>
+        <div class="rvc-pf-k">⚡ Ton défi du jour</div>
         <div class="rvc-pf-t">${esc(pf.titre)}</div>
-        <div class="rvc-pf-c">3 questions ciblées · 1 minute</div>
-        <button class="rvc-pf-btn" data-pf="${esc(pf.code)}">Réviser maintenant</button>
+        <div class="rvc-pf-c">3 questions · 1 min chrono</div>
+        <button class="rvc-pf-btn" data-pf="${esc(pf.code)}">Go, 1 min</button>
       </div>`
           : ""
       }
       ${focusHtml}
-      <button class="rvc-exam" data-exam><span class="rvc-exam-t">🏁 Examen blanc</span><span class="rvc-exam-s">Teste-toi sur tout</span></button>
+      <button class="rvc-exam" data-exam><span class="rvc-exam-t">🏁 Examen blanc</span><span class="rvc-exam-s">Toutes les compétences d'un coup</span></button>
       <button class="rvc-exam rvc-faute" data-faute><span class="rvc-exam-t">⚠️ Trouve la faute</span><span class="rvc-exam-s">Repère la faute éliminatoire</span></button>
-      <div class="rvc-mlabel">Par compétence</div>
+      <div class="rvc-mlabel">Par thème</div>
       ${mondeCards}
     </div>`;
     wireHome();
@@ -375,29 +375,29 @@ export async function mount(root, param) {
       }
       ${
         f.pourquoi
-          ? `<div class="rvc-block"><h3 class="rvc-block-h">Le pourquoi</h3>
+          ? `<div class="rvc-block"><h3 class="rvc-block-h">Pourquoi ça compte</h3>
         <div class="rvc-why">${esc(f.pourquoi)}</div></div>`
           : ""
       }
       ${
         f.erreur
-          ? `<div class="rvc-block"><h3 class="rvc-block-h">L'erreur classique</h3>
+          ? `<div class="rvc-block"><h3 class="rvc-block-h">Le piège</h3>
         <div class="rvc-err">${esc(f.erreur)}</div></div>`
           : ""
       }
       ${
         f.bva
-          ? `<div class="rvc-block"><h3 class="rvc-block-h">Boîte automatique</h3>
+          ? `<div class="rvc-block"><h3 class="rvc-block-h">En boîte auto</h3>
         <div class="rvc-bva">${esc(f.bva)}</div></div>`
           : ""
       }
       ${
         Array.isArray(f.sources) && f.sources.length
-          ? `<p class="rvc-src">🎬 D'après de vrais moniteurs : ${f.sources.map((s) => esc(s)).join(", ")}</p>`
+          ? `<p class="rvc-src">🎬 Vu chez de vrais moniteurs : ${f.sources.map((s) => esc(s)).join(", ")}</p>`
           : ""
       }
-      ${f.methode && f.methode.length >= 3 ? `<button class="rvc-go2">🧩 Remets les étapes dans l'ordre</button>` : ""}
-      <button class="rvc-go">▶ Lancer le quizz</button>
+      ${f.methode && f.methode.length >= 3 ? `<button class="rvc-go2">🧩 Remets dans l'ordre</button>` : ""}
+      <button class="rvc-go">▶ Lance le quiz</button>
     </div>`;
     root.querySelector(".rvc-back").addEventListener("click", () => {
       view = "home";
@@ -430,7 +430,7 @@ export async function mount(root, param) {
       root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-done">
         <div class="rvc-done-e">🧩</div>
         <div class="rvc-done-t">Dans l'ordre, nickel !</div>
-        <p class="rvc-sub">Tu as remis les ${steps.length} étapes de « ${esc(f.titre)} » dans le bon ordre.</p>
+        <p class="rvc-sub">Les ${steps.length} étapes de « ${esc(f.titre)} » : pliées.</p>
         <button class="rvc-go" data-next>Continuer</button>
       </div></div>`;
       root.querySelector("[data-next]").addEventListener("click", () => {
@@ -456,8 +456,8 @@ export async function mount(root, param) {
         <button class="rvc-back" aria-label="Retour à la fiche">←</button>
         <h1 class="rvc-h1" style="font-size:17px">${esc(f.titre)}</h1>
       </div>
-      <div class="rvc-prog">Étape ${orderPlaced.length + 1} / ${steps.length}</div>
-      <p class="rvc-ohint">Tape les étapes dans le bon ordre.</p>
+      <div class="rvc-prog">${orderPlaced.length + 1} / ${steps.length}</div>
+      <p class="rvc-ohint">Dans le bon ordre. À toi.</p>
       ${placed}
       <div class="rvc-opool">${pool}</div>
     </div>`;

@@ -20,7 +20,7 @@ const PRAISES = [
   "Pile poil",
   "Réflexe parfait",
   "Bien vu",
-  "Exactement",
+  "Exact",
   "Au quart de tour",
   "Comme un pro",
   "Propre",
@@ -154,7 +154,7 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
           <div class="pq-fb-h">${win ? esc(head) + " !" : esc(head)}</div>
           <div class="pq-fb-t">${esc(q.explication || q.options[q.correct])}</div>
         </div>
-        <button class="pq-next" data-next>${idx + 1 >= qs.length ? "Voir mon score" : "Suivant"}</button>`;
+        <button class="pq-next" data-next>${idx + 1 >= qs.length ? "Mon score" : "Suivant"}</button>`;
     }
 
     root.innerHTML = `${STYLE}<div class="pq">
@@ -223,15 +223,15 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
     if (pct >= 0.8) {
       e = "🏆";
       t = "Tu maîtrises !";
-      s = "Beau score. Garde ce niveau et confirme avec ton moniteur.";
+      s = "Gros score. Garde ce niveau, montre-le à ton moniteur.";
     } else if (pct >= 0.5) {
       e = "🔥";
       t = "Bien joué";
-      s = "Tu y es presque — refais-en quelques-unes et c'est verrouillé.";
+      s = "Presque — refais-en deux-trois et c'est verrouillé.";
     } else {
       e = "💪";
       t = "Ça vient";
-      s = "Relis la fiche tranquille, puis retente. Ça va rentrer.";
+      s = "Relis la fiche cool, puis retente. Ça va rentrer.";
     }
     root.innerHTML = `${STYLE}<div class="pq">
       <div class="pq-top"><button class="pq-x" aria-label="Fermer">✕</button><div class="pq-seg">${segHTML()}</div><div class="pq-combo"></div></div>
