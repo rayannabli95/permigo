@@ -76,8 +76,12 @@ function maybeStartMoniteurTour() {
 // ─── CSS ──────────────────────────────────────────────────────────
 const STYLE = `<style>
   /* ── Reset local ── */
+  /* Le FAB « séance » global (#bn-seance-fab) fait doublon avec le gros
+     bouton « Valider une séance » de cette page ET chevauche le footer →
+     on le masque ICI seulement (il reste sur les autres pages moniteur). */
+  #bn-seance-fab { display: none !important; }
   .aj-page {
-    padding: 0 0 calc(80px + env(safe-area-inset-bottom, 0px));
+    padding: 0 0 calc(84px + env(safe-area-inset-bottom, 0px));
     max-width: 600px;
     margin: 0 auto;
     background: #eef1fb;
