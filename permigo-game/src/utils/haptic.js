@@ -119,5 +119,5 @@ export function hapticPulses(n = 1) {
     };
     tick();
   }
-  playSuccess();
+  // (son géré par l'appelant → permet une récompense VARIABLE, pas toujours le même)
 }

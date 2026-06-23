@@ -10,6 +10,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
 import { haptic, hapticPulses, tapHaptic } from "@/utils/haptic.js";
+import { playPop, playCoin, playReveal } from "@/utils/sound.js";
 
 // Récompense VARIABLE : jamais 2× le même d'affilée (sinon le cerveau
 // s'habitue et le pic dopamine disparaît — cf. reward prediction error).
@@ -194,7 +195,13 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
     if (win) {
       correctCount++;
       combo++;
-      hapticPulses(combo); // escalade : 1 pulse, puis 2, puis 3…
+      hapticPulses(combo); // vibration escaladée avec le combo
+      // Récompense VARIABLE (ratio variable → le pic dopamine grave la mémoire) :
+      // léger le plus souvent, « coin » parfois, « reveal » rare = jamais le même.
+      const r = Math.random();
+      if (r < 0.06) playReveal();
+      else if (r < 0.28) playCoin();
+      else playPop();
     } else {
       combo = 0;
       haptic("warning");
