@@ -12,6 +12,8 @@
 
 import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
+import { volantImg } from "@/utils/volant.js";
+import { flyVolants } from "@/components/eleve/volant-reward.js";
 import { markChestOpened } from "@/utils/game-state.js";
 import { burstConfetti } from "@/components/common/confetti.js";
 import { playWhoosh, playUnlock, playGold, playCoin } from "@/utils/sound.js";
@@ -80,7 +82,7 @@ export function renderChest({ worldNum, worldName, opened = false }) {
       <div class="chest-label">
         <div class="chest-tier">${opened ? "✓ OUVERT" : tier.name}</div>
         <div class="chest-name">${esc(worldName)}</div>
-        ${!opened ? `<div class="chest-cta">${icon("gem", { size: 13 })} +${tier.gemmes} volants</div>` : ""}
+        ${!opened ? `<div class="chest-cta">${volantImg(13)} +${tier.gemmes} volants</div>` : ""}
       </div>
     </div>
   `;
@@ -169,7 +171,7 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
       // Phase 4 : Cascade de récompenses (1300ms+)
       const list = [
         {
-          icon: icon("gem", { size: 20 }),
+          icon: volantImg(20),
           label: `+${tier.gemmes} volants`,
           delay: 200,
         },
@@ -223,6 +225,10 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
         onClaim?.();
       } catch (e) {
         console.warn("[chest] onClaim error", e);
+      }
+      // Jetons dorés qui s'envolent vers le HUD une fois la modale fermée
+      if (tier.gemmes > 0) {
+        setTimeout(() => flyVolants(tier.gemmes, { from: closeBtn }), 300);
       }
     }
     modal.classList.add("cm-closing");

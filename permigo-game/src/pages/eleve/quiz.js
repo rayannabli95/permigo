@@ -419,6 +419,15 @@ async function handleComplete(
       } catch {
         /* best-effort — l'écran s'affiche sans le compteur */
       }
+      // Montée de niveau ? (XP dérivée des compétences → 1 niveau / 5 acquis).
+      // On la détecte ici et on la célèbre APRÈS l'écran « compétence acquise ».
+      let leveledTo = 0;
+      if (typeof acquiredCount === "number") {
+        const { levelForCount, checkLevelUp } =
+          await import("@/components/eleve/level-up.js");
+        leveledTo = checkLevelUp(levelForCount(acquiredCount));
+      }
+
       const { showCompetenceUnlock } =
         await import("@/components/eleve/competence-unlock.js");
       showCompetenceUnlock({
@@ -430,10 +439,19 @@ async function handleComplete(
         onCta: () => {
           location.hash = "#/parcours";
         },
-        // L'install nudge se déclenche à la fermeture pour éviter d'empiler
-        // deux overlays (hors question du jour, déjà opt-in push).
-        onClose: () => {
-          if (!canChain) promptInstallAtValueMoment(me, "eleve_quiz_reussi");
+        // À la fermeture : d'abord la fanfare « niveau supérieur » si montée,
+        // PUIS l'install nudge — on n'empile jamais deux overlays d'un coup.
+        onClose: async () => {
+          const installNudge = () => {
+            if (!canChain) promptInstallAtValueMoment(me, "eleve_quiz_reussi");
+          };
+          if (leveledTo) {
+            const { showLevelUp } =
+              await import("@/components/eleve/level-up.js");
+            showLevelUp({ level: leveledTo, onClose: installNudge });
+          } else {
+            installNudge();
+          }
         },
       });
     }

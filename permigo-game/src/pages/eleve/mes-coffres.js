@@ -11,6 +11,8 @@ import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
+import { volantImg } from "@/utils/volant.js";
+import { flyVolants } from "@/components/eleve/volant-reward.js";
 import { toast } from "@/components/common/toast.js";
 import { getMyChests, openChest } from "@/utils/game-state.js";
 import { playCoin } from "@/utils/sound.js";
@@ -319,7 +321,7 @@ function renderCard(chest) {
       ${
         canOpen
           ? `<div class="mc-rewards">
-        <span class="mc-rew-chip">${icon("gem", { size: 13 })} +${gemmes} volants</span>
+        <span class="mc-rew-chip">${volantImg(13)} +${gemmes} volants</span>
       </div>`
           : ""
       }
@@ -470,6 +472,9 @@ export async function mount(root) {
               `${meta.label} ouvert ! +${meta.gemmes ?? 0} volants`,
               "success",
             );
+            // Jetons dorés vers le HUD (coffres non-monde)
+            const gemsWon = result.gemmes ?? meta.gemmes ?? 0;
+            if (gemsWon > 0) flyVolants(gemsWon, { from: card });
           }
         } else if (result.error === "already_opened") {
           markOpened();

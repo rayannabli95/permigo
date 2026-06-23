@@ -3,16 +3,22 @@
 // 3 sections : Trophées · Fonds carte permis · (Badges futur)
 // Permet de visualiser TOUT ce qui est débloquable + l'état (acquis/verrouillé)
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { CATALOG, RARITY_COLOR, RARITY_META, shortProgress } from '@/data/achievements.js';
-import { ASSETS } from '@/utils/assets.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { volantImg, volantLabel } from "@/utils/volant.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import {
+  CATALOG,
+  RARITY_COLOR,
+  RARITY_META,
+  shortProgress,
+} from "@/data/achievements.js";
+import { ASSETS } from "@/utils/assets.js";
 
 const RARITY_LABEL = Object.fromEntries(
-  Object.entries(RARITY_META).map(([k, v]) => [k, v.label])
+  Object.entries(RARITY_META).map(([k, v]) => [k, v.label]),
 );
 
 const STYLE = `<style>
@@ -250,7 +256,7 @@ export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track('page.view', { page: 'galerie', user_role: me.role });
+  track("page.view", { page: "galerie", user_role: me.role });
 
   // Initial skeleton
   root.innerHTML = `${STYLE}<div class="gal">
@@ -268,22 +274,34 @@ export async function mount(root) {
   let unlockedMap = new Map();
   try {
     const [achRes, validRes, streakRes] = await Promise.allSettled([
-      sb.rpc('get_my_achievements'),
-      sb.from('validations').select('id', { count: 'exact', head: true }).eq('eleve_id', me.id).eq('statut', 'acquis'),
-      sb.from('streaks').select('current_streak').eq('user_id', me.id).maybeSingle(),
+      sb.rpc("get_my_achievements"),
+      sb
+        .from("validations")
+        .select("id", { count: "exact", head: true })
+        .eq("eleve_id", me.id)
+        .eq("statut", "acquis"),
+      sb
+        .from("streaks")
+        .select("current_streak")
+        .eq("user_id", me.id)
+        .maybeSingle(),
     ]);
-    unlockedMap = new Map((achRes.value?.data ?? []).map(u => [u.achievement_key, u]));
+    unlockedMap = new Map(
+      (achRes.value?.data ?? []).map((u) => [u.achievement_key, u]),
+    );
     validatedCount = validRes.value?.count ?? 0;
     currentStreak = streakRes.value?.data?.current_streak ?? 0;
   } catch (e) {
-    console.warn('[galerie] fetch failed', e);
-    import('@/components/common/toast.js')
-      .then(({ toast }) => toast('Connexion instable — compteurs indisponibles', 'info'))
+    console.warn("[galerie] fetch failed", e);
+    import("@/components/common/toast.js")
+      .then(({ toast }) =>
+        toast("Connexion instable — compteurs indisponibles", "info"),
+      )
       .catch(() => {});
   }
 
   const progressStats = { compCount: validatedCount, streak: currentStreak };
-  const trophees = CATALOG.map(c => ({
+  const trophees = CATALOG.map((c) => ({
     id: c.key,
     image: c.image,
     ico: c.emoji,
@@ -292,59 +310,88 @@ export async function mount(root) {
     rarity: c.rarity,
     xp: c.xp,
     gemmes: c.gemmes,
-    color: RARITY_COLOR[c.rarity] || 'var(--mu2)',
+    color: RARITY_COLOR[c.rarity] || "var(--mu2)",
     objectif: shortProgress(c.key, progressStats),
     unlocked: unlockedMap.has(c.key),
   }));
-  const unlockedTrophies = trophees.filter(t => t.unlocked).length;
+  const unlockedTrophies = trophees.filter((t) => t.unlocked).length;
 
   // 3 paliers fonds permis (mesh < 10, route 10-19, holo 20+)
   const permisTiers = [
-    { key: 'mesh',         min: 0,  max: 9,  nom: 'Mesh', cond: 'Disponible dès le départ', img: ASSETS.permisBg.mesh },
-    { key: 'route',        min: 10, max: 19, nom: 'Route', cond: '10 compétences acquises', img: ASSETS.permisBg.route },
-    { key: 'holographic',  min: 20, max: 31, nom: 'Holographique', cond: '20 compétences acquises', img: ASSETS.permisBg.holographic },
-  ].map(t => ({ ...t, unlocked: validatedCount >= t.min }));
-  const unlockedPermisBg = permisTiers.filter(t => t.unlocked).length;
+    {
+      key: "mesh",
+      min: 0,
+      max: 9,
+      nom: "Mesh",
+      cond: "Disponible dès le départ",
+      img: ASSETS.permisBg.mesh,
+    },
+    {
+      key: "route",
+      min: 10,
+      max: 19,
+      nom: "Route",
+      cond: "10 compétences acquises",
+      img: ASSETS.permisBg.route,
+    },
+    {
+      key: "holographic",
+      min: 20,
+      max: 31,
+      nom: "Holographique",
+      cond: "20 compétences acquises",
+      img: ASSETS.permisBg.holographic,
+    },
+  ].map((t) => ({ ...t, unlocked: validatedCount >= t.min }));
+  const unlockedPermisBg = permisTiers.filter((t) => t.unlocked).length;
 
-  let activeTab = 'trophees';
+  let activeTab = "trophees";
 
   function renderTrophees() {
-    const unlocked = trophees.filter(t => t.unlocked);
-    const locked   = trophees.filter(t => !t.unlocked);
+    const unlocked = trophees.filter((t) => t.unlocked);
+    const locked = trophees.filter((t) => !t.unlocked);
     return `
       <div class="gal-section-hd">
         <span class="gal-section-title">Débloqués</span>
         <span class="gal-section-count">${unlocked.length}/${trophees.length}</span>
       </div>
       <div class="gal-grid">
-        ${unlocked.length === 0 ? '' : unlocked.map(t => renderTrophyCard(t, true)).join('')}
+        ${unlocked.length === 0 ? "" : unlocked.map((t) => renderTrophyCard(t, true)).join("")}
       </div>
-      ${unlocked.length === 0 ? `
+      ${
+        unlocked.length === 0
+          ? `
         <div class="gal-empty-hint">
-          <div class="gal-empty-hint-emoji">${icon('trophy',{size:30})}</div>
+          <div class="gal-empty-hint-emoji">${icon("trophy", { size: 30 })}</div>
           <div class="gal-empty-hint-txt">Aucun trophée débloqué pour l'instant — valide ta première compétence pour commencer !</div>
         </div>
-      ` : ''}
-      ${locked.length > 0 ? `
+      `
+          : ""
+      }
+      ${
+        locked.length > 0
+          ? `
         <div class="gal-section-hd" style="margin-top:8px"><span class="gal-section-title">À débloquer</span></div>
-        <div class="gal-grid">${locked.map(t => renderTrophyCard(t, false)).join('')}</div>
-      ` : ''}
+        <div class="gal-grid">${locked.map((t) => renderTrophyCard(t, false)).join("")}</div>
+      `
+          : ""
+      }
     `;
   }
 
   function renderTrophyCard(t, unlocked) {
-    const color = t.color || 'var(--mu2)';
+    const color = t.color || "var(--mu2)";
     const visual = t.image
       ? `<img src="${esc(t.image)}" alt="${esc(t.nom)}" loading="lazy" />`
-      : `<span class="gal-emoji">${t.ico ? esc(t.ico) : icon('trophy', { size: 26 })}</span>`;
+      : `<span class="gal-emoji">${t.ico ? esc(t.ico) : icon("trophy", { size: 26 })}</span>`;
     return `
-      <div class="gal-card ${unlocked ? 'acquis' : 'locked'}" style="--gc:${color}"
+      <div class="gal-card ${unlocked ? "acquis" : "locked"}" style="--gc:${color}"
            data-id="${esc(t.id)}" role="button" tabindex="0"
            aria-label="${unlocked ? `Voir le trophée ${esc(t.nom)}` : `Trophée verrouillé : ${esc(t.nom)}`}">
-        ${!unlocked ? `<div class="gal-lock-badge" aria-hidden="true">${icon('lock',{size:14})}</div>` : ''}
+        ${!unlocked ? `<div class="gal-lock-badge" aria-hidden="true">${icon("lock", { size: 14 })}</div>` : ""}
         <div class="gal-card-visual">${visual}</div>
         <div class="gal-card-nom">${esc(t.nom)}</div>
-        <div class="gal-card-meta">${unlocked ? 'Acquis' : esc(t.objectif || 'Verrouillé')}</div>
+        <div class="gal-card-meta">${unlocked ? "Acquis" : esc(t.objectif || "Verrouillé")}</div>
       </div>
     `;
   }
@@ -356,60 +403,70 @@ export async function mount(root) {
         <span class="gal-section-count">${unlockedPermisBg}/${permisTiers.length}</span>
       </div>
       <div class="gal-permis-grid">
-        ${permisTiers.map(t => `
-          <div class="gal-permis-card ${t.unlocked ? 'acquis' : 'locked'}">
+        ${permisTiers
+          .map(
+            (t) => `
+          <div class="gal-permis-card ${t.unlocked ? "acquis" : "locked"}">
             <div class="gal-permis-preview" style="background-image:url('${esc(t.img)}')"></div>
             <div class="gal-permis-info">
               <div class="gal-permis-nom">${esc(t.nom)}</div>
               <div class="gal-permis-cond">${esc(t.cond)}</div>
             </div>
             <div class="gal-permis-status">
-              ${t.unlocked
-                ? `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--grdk);background:rgba(16,185,129,.12);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">Acquis</span>`
-                : `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--mu2);background:var(--bg3);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">${icon('lock',{size:11})} ${esc(`${t.min}`)} comp</span>`}
+              ${
+                t.unlocked
+                  ? `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--grdk);background:rgba(16,185,129,.12);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">Acquis</span>`
+                  : `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--mu2);background:var(--bg3);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">${icon("lock", { size: 11 })} ${esc(`${t.min}`)} comp</span>`
+              }
             </div>
           </div>
-        `).join('')}
+        `,
+          )
+          .join("")}
       </div>
     `;
   }
 
   // Modal d'agrandissement d'un trophée (clic carte)
   function openTrophyModal(t, unlocked) {
-    if (document.querySelector('.gal-modal-bg')) return;
-    const color = t.color || 'var(--mu2)';
-    const rarityColor = RARITY_COLOR[t.rarity] || 'var(--mu2)';
-    const rarityLabel = RARITY_LABEL[t.rarity] || t.rarity || '';
+    if (document.querySelector(".gal-modal-bg")) return;
+    const color = t.color || "var(--mu2)";
+    const rarityColor = RARITY_COLOR[t.rarity] || "var(--mu2)";
+    const rarityLabel = RARITY_LABEL[t.rarity] || t.rarity || "";
     const visual = t.image
       ? `<img src="${esc(t.image)}" alt="${esc(t.nom)}" />`
-      : `<span class="gal-emoji">${t.ico ? esc(t.ico) : icon('trophy', { size: 26 })}</span>`;
+      : `<span class="gal-emoji">${t.ico ? esc(t.ico) : icon("trophy", { size: 26 })}</span>`;
 
-    const overlay = document.createElement('div');
-    overlay.className = 'gal-modal-bg';
+    const overlay = document.createElement("div");
+    overlay.className = "gal-modal-bg";
     overlay.innerHTML = `
-      <div class="gal-modal ${unlocked ? '' : 'locked'}" style="--gc:${color}" role="dialog" aria-modal="true" aria-label="${esc(t.nom)}">
+      <div class="gal-modal ${unlocked ? "" : "locked"}" style="--gc:${color}" role="dialog" aria-modal="true" aria-label="${esc(t.nom)}">
         <button class="gal-modal-close" type="button" aria-label="Fermer">×</button>
         <div class="gal-modal-visual">${visual}</div>
-        ${rarityLabel ? `<div class="gal-modal-rarity" style="color:${rarityColor};background:color-mix(in srgb,${rarityColor} 16%,transparent)">${esc(rarityLabel)}</div>` : ''}
+        ${rarityLabel ? `<div class="gal-modal-rarity" style="color:${rarityColor};background:color-mix(in srgb,${rarityColor} 16%,transparent)">${esc(rarityLabel)}</div>` : ""}
         <div class="gal-modal-nom">${esc(t.nom)}</div>
-        <div class="gal-modal-desc">${esc(t.desc || '')}</div>
+        <div class="gal-modal-desc">${esc(t.desc || "")}</div>
         <div class="gal-modal-foot">
-          ${t.gemmes ? `<span class="gal-modal-xp" style="color:var(--gr);background:rgba(16,185,129,.1)">+${t.gemmes} ${icon('gem',{size:13})}</span>` : ''}
-          <span class="gal-modal-state ${unlocked ? 'on' : 'off'}">${unlocked ? '✓ Débloqué' : esc(t.objectif || '🔒 Verrouillé')}</span>
+          ${t.gemmes ? `<span class="gal-modal-xp" style="color:var(--gr);background:rgba(16,185,129,.1)">+${t.gemmes} ${volantImg(13)} ${volantLabel(t.gemmes)}</span>` : ""}
+          <span class="gal-modal-state ${unlocked ? "on" : "off"}">${unlocked ? "✓ Débloqué" : esc(t.objectif || "🔒 Verrouillé")}</span>
         </div>
       </div>`;
     document.body.appendChild(overlay);
-    track('galerie.trophy_opened', { trophy_id: t.id, unlocked });
+    track("galerie.trophy_opened", { trophy_id: t.id, unlocked });
 
-    const onKey = (e) => { if (e.key === 'Escape') close(); };
-    const close = () => {
-      overlay.style.animation = 'galFade .15s ease reverse forwards';
-      setTimeout(() => overlay.remove(), 140);
-      document.removeEventListener('keydown', onKey);
+    const onKey = (e) => {
+      if (e.key === "Escape") close();
     };
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-    overlay.querySelector('.gal-modal-close')?.addEventListener('click', close);
-    document.addEventListener('keydown', onKey);
+    const close = () => {
+      overlay.style.animation = "galFade .15s ease reverse forwards";
+      setTimeout(() => overlay.remove(), 140);
+      document.removeEventListener("keydown", onKey);
+    };
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();
+    });
+    overlay.querySelector(".gal-modal-close")?.addEventListener("click", close);
+    document.addEventListener("keydown", onKey);
   }
 
   function render() {
@@ -417,36 +474,39 @@ export async function mount(root) {
       <div class="gal anim-slide-up">
         <div class="gal-hd">
           <h1 class="gal-title">Ma collection</h1>
-          <p class="gal-sub">${unlockedTrophies + unlockedPermisBg} récompense${unlockedTrophies + unlockedPermisBg > 1 ? 's' : ''} débloquée${unlockedTrophies + unlockedPermisBg > 1 ? 's' : ''} sur ${trophees.length + permisTiers.length}.</p>
+          <p class="gal-sub">${unlockedTrophies + unlockedPermisBg} récompense${unlockedTrophies + unlockedPermisBg > 1 ? "s" : ""} débloquée${unlockedTrophies + unlockedPermisBg > 1 ? "s" : ""} sur ${trophees.length + permisTiers.length}.</p>
         </div>
         <div class="gal-tabs" role="tablist">
-          <button class="gal-tab ${activeTab === 'trophees' ? 'active' : ''}" data-tab="trophees" role="tab" aria-selected="${activeTab === 'trophees'}">Trophées</button>
-          <button class="gal-tab ${activeTab === 'permis' ? 'active' : ''}" data-tab="permis" role="tab" aria-selected="${activeTab === 'permis'}">Fonds permis</button>
+          <button class="gal-tab ${activeTab === "trophees" ? "active" : ""}" data-tab="trophees" role="tab" aria-selected="${activeTab === "trophees"}">Trophées</button>
+          <button class="gal-tab ${activeTab === "permis" ? "active" : ""}" data-tab="permis" role="tab" aria-selected="${activeTab === "permis"}">Fonds permis</button>
         </div>
         <div id="gal-content">
-          ${activeTab === 'trophees' ? renderTrophees() : renderPermisTiers()}
+          ${activeTab === "trophees" ? renderTrophees() : renderPermisTiers()}
         </div>
       </div>`;
 
-    root.querySelectorAll('.gal-tab').forEach(btn => {
-      btn.addEventListener('click', () => {
+    root.querySelectorAll(".gal-tab").forEach((btn) => {
+      btn.addEventListener("click", () => {
         const tab = btn.dataset.tab;
         if (tab === activeTab) return;
         activeTab = tab;
-        track('galerie.tab_switched', { tab });
+        track("galerie.tab_switched", { tab });
         render();
       });
     });
 
     // Clic / clavier sur une carte trophée → agrandissement
-    root.querySelectorAll('.gal-card').forEach(card => {
+    root.querySelectorAll(".gal-card").forEach((card) => {
       const open = () => {
-        const t = trophees.find(x => x.id === card.dataset.id);
+        const t = trophees.find((x) => x.id === card.dataset.id);
         if (t) openTrophyModal(t, !!t.unlocked);
       };
-      card.addEventListener('click', open);
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      card.addEventListener("click", open);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          open();
+        }
       });
     });
   }

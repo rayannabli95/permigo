@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
+import { volantImg, volantLabel } from "@/utils/volant.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -485,7 +486,7 @@ function showModal(def, unlockData, totalUnlocked) {
         <h2 class="tr2-modal-title">${esc(def.title)}</h2>
         <div class="tr2-modal-desc">${esc(def.body)}</div>
         <div class="tr2-modal-meta">
-          <div class="tr2-modal-chip gems">+${def.gemmes} ${icon("gem", { size: 13 })}</div>
+          <div class="tr2-modal-chip gems">+${def.gemmes} ${volantImg(13)} ${volantLabel(def.gemmes)}</div>
           ${dateStr ? `<div class="tr2-modal-chip date">${icon("calendar", { size: 13 })} ${esc(dateStr)}</div>` : ""}
         </div>
         <div class="tr2-modal-social">${
@@ -515,7 +516,7 @@ function showModal(def, unlockData, totalUnlocked) {
         <h2 class="tr2-modal-title">${esc(def.title)}</h2>
         <div class="tr2-modal-desc">${esc(def.body)}</div>
         <div class="tr2-modal-meta">
-          <div class="tr2-modal-chip gems">+${def.gemmes} ${icon("gem", { size: 13 })} à débloquer</div>
+          <div class="tr2-modal-chip gems">+${def.gemmes} ${volantImg(13)} ${volantLabel(def.gemmes)} à débloquer</div>
           <div class="tr2-modal-chip date">${esc(rm.label)}</div>
         </div>
         <div class="tr2-modal-social">Objectif : ${esc(shortProgress(def.key))}</div>

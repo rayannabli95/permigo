@@ -6,8 +6,13 @@
 import { mountNotifBell } from "@/components/common/notif-bell.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
-import { getEquippedAsset } from "@/utils/game-state.js";
+import {
+  getEquippedAsset,
+  getGemmes,
+  refreshGemmes,
+} from "@/utils/game-state.js";
 import { icon } from "@/utils/icons.js";
+import { volantImg } from "@/utils/volant.js";
 
 const STYLE = `
   #header-bar {
@@ -41,6 +46,23 @@ const STYLE = `
   .pg-logo-btn:active { background: color-mix(in srgb, var(--a) 8%, transparent); }
   .pg-logo-img { width: 36px; height: 36px; display: block; object-fit: contain; }
   #ht-right { display: flex; align-items: center; gap: 6px; }
+  /* Pastille « volants » (monnaie) — élève seulement. Compteur persistant +
+     cible permanente pour l'animation des jetons gagnés. */
+  .ht-volant {
+    display: flex; align-items: center; gap: 5px;
+    height: 32px; padding: 0 11px 0 7px;
+    border-radius: 999px; cursor: pointer;
+    border: 1px solid color-mix(in srgb, #f5b50a 38%, var(--bo));
+    background: linear-gradient(180deg, color-mix(in srgb, #ffd87a 24%, var(--su)), var(--su));
+    color: var(--ink);
+    font: 800 13.5px/1 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .12s;
+    flex-shrink: 0;
+  }
+  .ht-volant:active { transform: scale(.94); }
+  .ht-volant .ht-volant-v { display: inline-block; min-width: 8px; }
   .ht-icon-btn {
     width: 36px; height: 36px;
     border-radius: 8px;
@@ -101,6 +123,14 @@ export async function mountHeader() {
       <img class="pg-logo-img" src="/skins/avatars/permigo-badge-icon.png" alt="PermiGo" width="36" height="36" />
     </button>
     <div id="ht-right">
+      ${
+        me?.role === "eleve"
+          ? `<button class="ht-volant" id="ht-volant-btn" type="button" data-volant-balance aria-label="Tes volants — ouvrir la boutique" title="Tes volants">
+               ${volantImg(18, { drop: true })}
+               <span class="ht-volant-v" data-volant-count>${getGemmes()}</span>
+             </button>`
+          : ""
+      }
       <div id="ht-bell"></div>
       ${me ? `<button class="ht-icon-btn" id="ht-settings" aria-label="Réglages" title="Réglages">${icon("settings", { size: 19 })}</button>` : ""}
       ${me ? `<button class="ht-avatar-btn" id="ht-avatar" aria-label="Mon profil" title="Mon profil">${renderUserAvatar({ ...me, avatar_url: getEquippedAsset("avatar") || me.avatar_url }, 36)}</button>` : ""}
@@ -117,6 +147,34 @@ export async function mountHeader() {
   bar.querySelector("#ht-avatar")?.addEventListener("click", () => {
     location.hash = "#/profil";
   });
+
+  // Pastille volants → boutique (élève).
+  bar.querySelector("#ht-volant-btn")?.addEventListener("click", () => {
+    location.hash = "#/boutique";
+  });
+  // Solde sûr : on resynchronise depuis profiles.gemmes (le cache localStorage
+  // peut être vide si initGameState a raté la fenêtre auth au boot).
+  if (me?.role === "eleve") refreshGemmes(me.id).catch(() => {});
+  // Compteur de volants en live (crédit/débit) + rebond. Listener window
+  // enregistré une seule fois ; bouton requêté à chaque event (header recréé).
+  if (!window.__pgHeaderVolantListener) {
+    window.__pgHeaderVolantListener = true;
+    window.addEventListener("pg-gemmes-changed", (e) => {
+      const bal = e?.detail?.balance;
+      const btn = document.querySelector("#ht-volant-btn");
+      if (!btn || typeof bal !== "number") return;
+      const v = btn.querySelector("[data-volant-count]");
+      // Ne rebondit QUE sur un vrai changement de solde (pas sur la simple
+      // resynchro à chaque navigation), sinon la pastille saute sans raison.
+      const changed = v && v.textContent !== String(bal);
+      if (v) v.textContent = String(bal);
+      if (changed) {
+        import("@/components/eleve/volant-reward.js")
+          .then(({ bumpVolantPill }) => bumpVolantPill(btn))
+          .catch(() => {});
+      }
+    });
+  }
 
   // Réglages : accès direct + état actif à la couleur du thème.
   // Le header est recréé à chaque route → listener window enregistré 1 seule
