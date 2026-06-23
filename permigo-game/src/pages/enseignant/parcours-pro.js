@@ -1,14 +1,13 @@
 // ═══════════════════════════════════════════════════════════════
-// Enseignant — Parcours Pro (route sinueuse à badges)
-// Moteur visuel de la route élève (src/pages/eleve/parcours.js) porté
-// au moniteur : path SVG 4 couches, portion parcourue teintée accent,
-// nodes animés, états done/next/todo/locked, badge « PROCHAIN PALIER »,
-// fiche palier en bottom-sheet au clic.
+// Enseignant — Progression (style indigo premium)
+// Raccord visuel avec Aujourd'hui / Mes élèves / Stats.
+// Fond #eef1fb · cartes blanches radius 16 · hero indigo #4f46e5→#8b5cf6
+// Trophée 3D flottant · section trophées images réelles · carte ligue.
 //
-// Jalons = UNIQUEMENT le nombre de validations cumulées (décision figée).
-// Source de données = MONITEUR_TIERS / getMoniteurState (moniteur-levels.js).
-// Chaque node = un palier de STATUT (pas d'« outils débloqués »).
-// ZÉRO gemme / monnaie virtuelle / mascotte — ton pro sobre.
+// Source de données :
+//   - Palier     : validations WHERE validated_by = me.id (count) → getMoniteurState
+//   - Trophées   : même logique que trophees-moniteur.js (12 jalons)
+//   - Ligue      : get_league_leaderboard({p_role:'enseignant'})
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -18,204 +17,271 @@ import { navigate } from "@/router.js";
 import { getMoniteurState, MONITEUR_TIERS } from "@/data/moniteur-levels.js";
 import { animateCounter } from "@/utils/gestures.js";
 import { icon } from "@/utils/icons.js";
-import { openPalierSheet } from "@/components/common/palier-sheet.js";
-import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
-import { illus } from "@/components/enseignant/illus.js";
 import { haptic } from "@/utils/haptic.js";
+import { getLeague } from "@/utils/league-shared.js";
 
-// ─── Géométrie de la route (viewBox 396 × 1240) ──────────────────
-// x maintenu dans ~[100,290] pour que les étiquettes centrées (≤150px)
-// ne débordent pas du cadre à 375–420px (correction n°3 du brief).
-const VBW = 396;
-// VBH laisse ~140 unités sous le dernier nœud : sa tuile + son étiquette +
-// le badge « PROCHAIN PALIER » doivent tenir DANS le panneau photo (avant :
-// dernier nœud à 50 unités du bord → étiquette coupée, badge chevauchant
-// l'étiquette du nœud précédent).
-const VBH = 1340;
-const PTS = [
-  { x: 198, y: 80 },
-  { x: 290, y: 200 },
-  { x: 250, y: 330 },
-  { x: 120, y: 450 },
-  { x: 100, y: 580 },
-  { x: 180, y: 710 },
-  { x: 290, y: 830 },
-  { x: 280, y: 960 },
-  { x: 150, y: 1060 },
-  { x: 110, y: 1200 },
+// ─── Trophées : 12 jalons (même définition que trophees-moniteur.js) ──
+const TROPHEES = [
+  { id: "premiere_seance", check: (d) => d.totalVals >= 1 },
+  { id: "dix_comps", check: (d) => d.totalVals >= 10 },
+  { id: "premier_eleve", check: (d) => d.studentsActive >= 1 },
+  { id: "streak_7", check: (d) => d.streak >= 7 },
+  { id: "cinquante_comps", check: (d) => d.totalVals >= 50 },
+  { id: "cinq_eleves", check: (d) => d.studentsTotal >= 5 },
+  { id: "cent_comps", check: (d) => d.totalVals >= 100 },
+  { id: "streak_30", check: (d) => d.streak >= 30 },
+  { id: "dix_eleves", check: (d) => d.studentsTotal >= 10 },
+  { id: "deux_cent_comps", check: (d) => d.totalVals >= 200 },
+  {
+    id: "classe_complete",
+    check: (d) => d.studentsTotal >= 3 && d.studentsActive >= d.studentsTotal,
+  },
+  { id: "expert_remc", check: (d) => d.totalVals >= 300 },
 ];
+const BADGE_IMG = {
+  premiere_seance: "badge-3d-01",
+  dix_comps: "badge-3d-02",
+  premier_eleve: "badge-3d-03",
+  streak_7: "badge-3d-04",
+  cinquante_comps: "badge-3d-06",
+  cinq_eleves: "badge-3d-08",
+  cent_comps: "badge-3d-02",
+  streak_30: "badge-3d-04",
+  dix_eleves: "badge-3d-06",
+  deux_cent_comps: "badge-3d-08",
+  classe_complete: "badge-3d-01",
+  expert_remc: "badge-3d-ultimate",
+};
+const badgeSrc = (id) => `/skins/${BADGE_IMG[id] || "badge-3d-01"}.webp`;
+
+// Noms lisibles pour aria-label des trophées
+const TROPHEE_NAMES = {
+  premiere_seance: "Premier pas",
+  dix_comps: "10 validations",
+  premier_eleve: "Premier élève mobilisé",
+  streak_7: "Semaine active",
+  cinquante_comps: "50 validations",
+  cinq_eleves: "Classe en formation",
+  cent_comps: "100 validations",
+  streak_30: "Mois sans faille",
+  dix_eleves: "Portefeuille solide",
+  deux_cent_comps: "200 validations",
+  classe_complete: "Classe au complet",
+  expert_remc: "Référent certifié",
+};
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
 .ppr {
   max-width: 480px; margin: 0 auto;
-  padding: 0 0 calc(100px + env(safe-area-inset-bottom, 0px));
-  background: var(--bg); color: var(--ink);
-  font-family: var(--ens-body, 'Inter'), sans-serif;
+  padding: 0 0 calc(96px + env(safe-area-inset-bottom, 0px));
+  background: #eef1fb; color: #1a1c2e;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
 }
 
-/* ── Segmented « Progression » (Parcours · Trophées) ── */
-.ppr-tabs { display: flex; gap: 4px; padding: 10px 14px 0; background: var(--su); border-bottom: 1px solid var(--bo); }
-.ppr-tab {
-  flex: 1; text-align: center; padding: 11px 4px 12px; min-height: 44px;
-  font: 800 13px/1 var(--ens-display, 'Fredoka'), sans-serif; color: var(--mu2);
-  background: none; border: 0; border-bottom: 2.5px solid transparent; cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+/* ── En-tête « Progression » ── */
+.ppr-hd {
+  padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 14px) 20px 0;
 }
-.ppr-tab.on { color: var(--ink); border-bottom-color: var(--ens-go, var(--a)); }
-.ppr-tab:focus-visible { outline: 3px solid var(--ens-go, var(--a)); outline-offset: -3px; border-radius: var(--r-sm); }
+.ppr-hd-title {
+  font: 800 23px/1.15 'Manrope', 'Inter', sans-serif;
+  color: #1a1c2e; letter-spacing: -.02em;
+}
 
-/* ── Hero arcade : panneaux en fond + dégradé vert profond (= aujourdhui.js) ── */
+/* ── Hero indigo dégradé ── */
 .ppr-hero {
-  position: relative; overflow: hidden; padding: 22px 18px 24px;
-  background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+  position: relative;
+  margin: 14px 16px 0;
+  background: linear-gradient(150deg, #4f46e5, #6d6bff 60%, #8b5cf6);
+  border-radius: 24px;
+  padding: 20px 18px 26px;
+  overflow: visible;
+  box-shadow: 0 16px 40px -14px rgba(79, 70, 229, .58);
   isolation: isolate;
+  min-height: 172px;
+  color: #fff;
+  animation: pprHeroIn .45s cubic-bezier(.22,.68,0,1.2) both;
 }
-/* Marquage au sol pointillé ambre — signature arcade */
-.ppr-hero::after {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; z-index: 1;
-  background: repeating-linear-gradient(90deg, #f59e0b 0 18px, transparent 18px 34px); opacity: .85;
-}
-.ppr-hero .ens-panneaux__sign { opacity: var(--o, .18); filter: saturate(1.1) brightness(1.08); }
-.ppr-hero-in { position: relative; z-index: 2; }
-.ppr-hero-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
-.ppr-hero-title { font: 800 clamp(20px,5.5vw,26px)/1.1 var(--ens-display, 'Fredoka'), sans-serif; color: #fff; letter-spacing: -.02em; }
-.ppr-hero-sub { font: 600 12px/1.3 var(--ens-body, 'Inter'), sans-serif; color: rgba(255,255,255,.62); margin-top: 5px; }
-.ppr-hero-count { text-align: right; flex-shrink: 0; }
-.ppr-hero-count .v { font: 800 30px/1 var(--ens-display, 'Fredoka'), sans-serif; color: #fff; }
-.ppr-hero-count .l { font: 700 10px/1 var(--ens-body, 'Inter'), sans-serif; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .1em; margin-top: 4px; }
-.ppr-next { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); border-radius: var(--ens-r, var(--r-md)); padding: 12px 13px; }
-.ppr-next-lbl { font: 800 9.5px/1 var(--ens-body, 'Inter'), sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #f59e0b; margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
-.ppr-next-tool { font: 800 13.5px/1.3 var(--ens-display, 'Fredoka'), sans-serif; color: #fff; margin-bottom: 9px; }
-.ppr-next-bar { height: 7px; background: rgba(255,255,255,.16); border-radius: var(--r-full); overflow: hidden; }
-.ppr-next-fill { height: 100%; width: 0; border-radius: var(--r-full); background: linear-gradient(90deg, var(--ens-go, var(--a)), color-mix(in srgb, var(--ens-go, var(--a)) 70%, #fff)); box-shadow: 0 0 8px color-mix(in srgb, var(--ens-go, var(--a)) 60%, transparent); transition: width 1s var(--ease-out); }
-.ppr-next-meta { font: 600 10.5px/1 var(--ens-body, 'Inter'), sans-serif; color: rgba(255,255,255,.66); margin-top: 7px; }
-.ppr-next.done { display: flex; align-items: center; gap: 10px; }
-.ppr-next.done .ppr-next-tool { margin: 0; }
 
-/* ── Légende ── */
-.ppr-legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 18px 2px; font: 600 10.5px/1.4 var(--ens-body, 'Inter'), sans-serif; color: var(--mu3); }
-.ppr-legend span { display: inline-flex; align-items: center; gap: 5px; }
-.ppr-legend i { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-
-/* ── Route ── */
-.ppr-route {
-  position: relative; margin: 10px 10px 0; padding: 18px 8px 30px;
-  border-radius: var(--r-xl); overflow: hidden;
-  background:
-    linear-gradient(to bottom, rgba(11,13,26,.58) 0%, rgba(11,13,26,.74) 60%, rgba(11,13,26,.86) 100%),
-    url('/skins/fond-parcours-enseignant.webp') center top / cover no-repeat;
-  box-shadow: var(--s1);
+/* Halo doré autour du trophée */
+.ppr-hero-halo {
+  position: absolute;
+  right: -10px; top: -16px;
+  width: 170px; height: 170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 210, 120, .60), transparent 65%);
+  z-index: 0; filter: blur(4px); pointer-events: none;
 }
-.ppr-route svg.path { display: block; width: 100%; height: auto; overflow: visible; }
-/* Route 3D : arête foncée décalée (épaisseur) + surface claire + marquage */
-.p-shadow { stroke: rgba(0,0,0,.32); stroke-width: 28; fill: none; stroke-linecap: round; filter: blur(4px); transform: translateY(7px); }
-.p-edge { stroke: rgba(11,13,26,.55); stroke-width: 26; fill: none; stroke-linecap: round; transform: translateY(6px); }
-.p-surface { stroke: #cdd4e6; stroke-width: 23; fill: none; stroke-linecap: round; }
-.p-dash { stroke: #fff; stroke-width: 3; stroke-dasharray: 7 13; stroke-linecap: round; fill: none; opacity: .9; }
-/* Portion atteinte : arête + surface accent */
-.p-done { stroke: var(--a); stroke-width: 23; fill: none; stroke-linecap: round; }
-.p-done-dash { stroke: #fff; stroke-width: 3; stroke-dasharray: 7 13; stroke-linecap: round; fill: none; opacity: .95; }
-/* Portion atteinte : remplissage doux au chargement (pathLength=1 →
-   dashoffset), marquage central en fondu après. Statique si reduced-motion. */
+
+/* Trophée flottant */
+.ppr-hero-trophy {
+  position: absolute;
+  right: -4px; bottom: -8px;
+  width: 124px; z-index: 1;
+  filter: drop-shadow(0 12px 20px rgba(40, 20, 90, .40));
+}
 @media (prefers-reduced-motion: no-preference) {
-  .p-done[pathLength] { stroke-dasharray: 1; stroke-dashoffset: 1; animation: pprDraw 1s cubic-bezier(.45,.1,.3,1) .3s both; }
-  .p-done-dash { opacity: 0; animation: pprFadeDash .45s ease 1.2s both; }
-  .ppr-hero-in { animation: pprHeroIn .45s var(--ease-out) both; }
+  .ppr-hero-trophy { animation: pprFloat 4s ease-in-out infinite; }
 }
-@keyframes pprDraw { to { stroke-dashoffset: 0; } }
-@keyframes pprFadeDash { to { opacity: .9; } }
-@keyframes pprHeroIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes pprFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-7px); }
+}
 
-.ppr-nodes { position: absolute; inset: 0; }
-.ppr-node {
-  position: absolute; transform: translate(-50%, -50%);
-  display: flex; flex-direction: column; align-items: center;
-  border: 0; background: none; font-family: inherit; padding: 0; cursor: pointer;
-  opacity: 0; animation: ndPop .5s var(--ease-spring) both;
+.ppr-hero-in { position: relative; z-index: 2; max-width: 62%; }
+
+.ppr-hero-surtitle {
+  font: 700 10.5px/1 'Inter', sans-serif;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: #cdc9ff; margin: 0 0 6px;
+}
+.ppr-hero-palier {
+  font: 700 28px/1.05 'Fredoka', 'Manrope', sans-serif;
+  color: #fff; margin: 0 0 3px; letter-spacing: -.01em;
+}
+.ppr-hero-sub {
+  font: 600 12px/1.3 'Inter', sans-serif;
+  color: #e2e0ff; margin: 0 0 16px;
+}
+
+/* Barre de progression */
+.ppr-prog { max-width: 100%; }
+.ppr-prog-bar {
+  height: 8px; border-radius: 999px;
+  background: rgba(255,255,255,.22); overflow: hidden;
+}
+.ppr-prog-fill {
+  display: block; height: 100%; width: 0;
+  border-radius: 999px; background: #fff;
+  transition: width 1.1s cubic-bezier(.2,.7,.3,1);
+}
+.ppr-prog-hint {
+  font: 700 11px/1 'Inter', sans-serif;
+  color: #e2e0ff; margin-top: 7px;
+}
+.ppr-prog-hint b { color: #ffd27a; }
+
+/* ── Section générique ── */
+.ppr-sec {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin: 22px 20px 10px;
+}
+.ppr-sec-title {
+  font: 800 13px/1 'Manrope', 'Inter', sans-serif;
+  color: #3a3f63; letter-spacing: -.01em;
+}
+.ppr-sec-link {
+  font: 700 11.5px/1 'Inter', sans-serif;
+  color: #4f46e5; background: none; border: 0;
+  cursor: pointer; padding: 4px 0; min-height: 32px;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
+}
+.ppr-sec-link:focus-visible { outline: 2px solid #4f46e5; border-radius: 4px; }
+
+/* ── Rangée trophées ── */
+.ppr-troph-row {
+  display: flex; gap: 9px; overflow-x: auto;
+  padding: 2px 20px 4px;
+  scrollbar-width: none;
+}
+.ppr-troph-row::-webkit-scrollbar { display: none; }
+
+.ppr-tcell {
+  width: 64px; height: 64px; flex: none;
+  background: #fff; border: 1px solid #e6e9f7; border-radius: 18px;
+  display: grid; place-items: center;
+  box-shadow: 0 6px 16px -10px rgba(60, 50, 130, .28);
+  position: relative; overflow: visible;
+  transition: transform .14s cubic-bezier(.23,1,.32,1);
+}
+.ppr-tcell:active { transform: scale(.93); }
+.ppr-tcell img {
+  width: 46px; height: 46px; object-fit: contain; display: block;
+  filter: drop-shadow(0 3px 5px rgba(40, 20, 90, .22));
+}
+.ppr-tcell.lock img {
+  filter: grayscale(1) brightness(.82); opacity: .7;
+}
+.ppr-tcell.lock::after {
+  content: ""; position: absolute; inset: 0; border-radius: 18px;
+  background: rgba(245, 247, 252, .35);
+}
+/* Pastille NEW (dernier débloqué) */
+.ppr-tcell.new-badge { border-color: #a78bff; box-shadow: 0 0 0 2px rgba(140,90,255,.32), 0 8px 18px -7px rgba(109,77,255,.48); }
+.ppr-tcell.new-badge::before {
+  content: ""; position: absolute; top: -3px; right: -3px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #ff4d6d; border: 2.5px solid #eef1fb; z-index: 2;
+}
+
+/* ── Carte ligue ── */
+.ppr-ligue {
+  margin: 0 16px; padding: 16px;
+  background: #fff; border: 1px solid #e6e9f7; border-radius: 18px;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 8px 24px -14px rgba(60, 50, 130, .24);
+  cursor: pointer;
+  transition: transform .14s cubic-bezier(.23,1,.32,1), box-shadow .14s;
   -webkit-tap-highlight-color: transparent;
 }
-@keyframes ndPop {
-  0% { opacity: 0; transform: translate(-50%,-50%) scale(.3); }
-  65% { opacity: 1; transform: translate(-50%,-50%) scale(1.08); }
-  100% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+.ppr-ligue:active { transform: scale(.98); box-shadow: 0 4px 12px -8px rgba(60,50,130,.18); }
+.ppr-ligue-crown {
+  width: 56px; height: 56px; flex: none;
+  object-fit: contain; filter: drop-shadow(0 4px 8px rgba(120,80,20,.28));
 }
-.ppr-node:focus-visible { outline: none; }
-.ppr-node:focus-visible .nd-circle { outline: 3px solid var(--a); outline-offset: 4px; }
-/* Tuile 3D brillante (cohérence avec le parcours élève, ton sobre) */
-.nd-circle {
-  width: 62px; height: 62px; border-radius: var(--r-xl); border: 0;
-  --tile: var(--a); --tile-dk: var(--adk, color-mix(in srgb, var(--a) 60%, #000));
-  display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--tile) 78%, #fff) 0%, var(--tile) 55%, var(--tile-dk) 100%);
-  box-shadow: 0 6px 0 0 var(--tile-dk), 0 12px 18px -6px color-mix(in srgb, var(--tile) 50%, transparent);
-  color: #fff; transition: transform .15s, box-shadow .18s;
+.ppr-ligue-info { flex: 1; min-width: 0; }
+.ppr-ligue-name {
+  font: 800 16px/1.2 'Manrope', 'Inter', sans-serif;
+  color: #1a1c2e; letter-spacing: -.01em;
 }
-.nd-circle::before { content: ''; position: absolute; top: 5px; left: 9px; right: 9px; height: 38%; border-radius: 13px 13px 50% 50%; background: linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,0)); pointer-events: none; }
-.nd-circle svg { position: relative; z-index: 1; width: 28px; height: 28px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.2)); }
-@media (max-width: 380px) { .nd-circle { width: 54px; height: 54px; border-radius: var(--rl); } }
-.ppr-node:active .nd-circle { transform: translateY(4px); box-shadow: 0 2px 0 0 var(--tile-dk), 0 5px 10px -4px color-mix(in srgb, var(--tile) 50%, transparent); }
-.nd-check { position: absolute; bottom: -5px; right: -5px; width: 24px; height: 24px; border-radius: 50%; background: var(--gr); border: 3px solid var(--su); color: #fff; display: flex; align-items: center; justify-content: center; z-index: 2; }
-.nd-check svg { width: 12px; height: 12px; }
-
-/* next — rebond doux + halo (sobre) */
-.ppr-node.next .nd-circle { animation: ndBob 2s ease-in-out infinite; }
-@keyframes ndBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-.ppr-node.next .nd-circle::after { content: ''; position: absolute; inset: -10px; border-radius: 28px; border: 2.5px solid color-mix(in srgb, var(--a) 30%, transparent); animation: ndRing 2.4s ease-out infinite; }
-@keyframes ndRing { 0% { transform: scale(.9); opacity: .5; } 100% { transform: scale(1.3); opacity: 0; } }
-
-/* todo / locked — tuiles claires/grises */
-.ppr-node.todo .nd-circle {
-  --tile: #ffffff; --tile-dk: #c5cbdc;
-  background: linear-gradient(160deg, #fff, #eef1f8); color: var(--mu2);
+.ppr-ligue-sub {
+  font: 600 11.5px/1.4 'Inter', sans-serif;
+  color: #8b8298; margin-top: 3px;
 }
-.ppr-node.todo .nd-circle svg { filter: none; }
-.ppr-node.locked .nd-circle {
-  --tile: #e2e6f2; --tile-dk: #c2c8da;
-  background: linear-gradient(160deg, #eef1f8, #dde2ee); color: var(--mu5);
+.ppr-ligue-rank {
+  font: 800 24px/1 'Fredoka', 'Manrope', sans-serif;
+  color: #7c3aed; flex-shrink: 0;
 }
-
-/* labels */
-.nd-lbl { margin-top: 11px; background: var(--su); border: 1px solid var(--bo); border-radius: var(--ens-r, var(--r-md)); padding: 6px 11px 7px; width: max-content; max-width: 150px; text-align: center; box-shadow: 0 5px 14px rgba(11,13,26,.09); transition: border-color .18s, box-shadow .18s; }
-@media (max-width: 380px) { .nd-lbl { max-width: 132px; } }
-.nd-name { display: block; font: 800 12px/1.25 var(--ens-display, 'Fredoka'), sans-serif; color: var(--ink); letter-spacing: -.01em; }
-.nd-thr { display: block; font: 700 9.5px/1 'IBM Plex Mono', monospace; color: var(--mu3); margin-top: 3px; }
-.ppr-node.todo .nd-name, .ppr-node.locked .nd-name { color: var(--mu3); }
-.ppr-node.done .nd-lbl { border-color: color-mix(in srgb, var(--ens-go, var(--a)) 28%, transparent); }
-.ppr-node.next .nd-lbl { border-color: color-mix(in srgb, var(--ens-go, var(--a)) 40%, transparent); box-shadow: 0 8px 22px color-mix(in srgb, var(--ens-go, var(--a)) 18%, transparent), 0 0 0 2px color-mix(in srgb, var(--ens-go, var(--a)) 20%, transparent); position: relative; }
-.nd-stt { display: inline-block; margin-top: 7px; padding: 6px 13px; background: var(--ens-go, var(--a)); color: #fff; font: 800 11px/1 var(--ens-body, 'Inter'), sans-serif; border-radius: var(--r-full); box-shadow: 0 2px 8px color-mix(in srgb, var(--ens-go, var(--a)) 35%, transparent); }
-
-/* Hover desktop discret — lift léger, jamais de spectacle */
-@media (hover: hover) {
-  .ppr-node:not(.locked):hover .nd-circle { transform: translateY(-2px); box-shadow: 0 8px 0 0 var(--tile-dk), 0 16px 22px -6px color-mix(in srgb, var(--tile) 50%, transparent); }
-  .ppr-node:not(.locked):hover .nd-lbl { border-color: color-mix(in srgb, var(--a) 32%, transparent); box-shadow: 0 8px 18px rgba(11,13,26,.12); }
-}
-.ppr-node.next .nd-lbl::before {
-  content: 'PROCHAIN PALIER'; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
-  background: var(--ens-go, var(--a)); color: #fff; font: 800 8px/1 var(--ens-body, 'Inter'), sans-serif; padding: 4px 10px; border-radius: var(--r-full);
-  letter-spacing: .14em; white-space: nowrap; box-shadow: 0 3px 10px color-mix(in srgb, var(--ens-go, var(--a)) 40%, transparent);
-}
-
-/* ── Final ── */
-.ppr-final { margin: 8px 14px 0; padding: 22px 18px; background: var(--su); border: 1.5px solid var(--bo); border-radius: var(--r-xl); text-align: center; box-shadow: var(--ens-shadow, var(--s1)); position: relative; overflow: hidden; }
-.ppr-final::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 30% 20%, rgba(167,139,250,.10), transparent 55%), radial-gradient(ellipse at 80% 90%, color-mix(in srgb, var(--ens-go, var(--a)) 7%, transparent), transparent 55%); }
-.ppr-final .crown { width: 56px; height: 56px; border-radius: var(--ens-r, var(--r-md)); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: #fff; position: relative; background: linear-gradient(145deg, var(--ens-go, #18a558), color-mix(in srgb, var(--ens-go, #18a558) 60%, #fff)); box-shadow: 0 6px 0 0 color-mix(in srgb, var(--ens-go, #18a558) 55%, #000), 0 12px 24px -6px color-mix(in srgb, var(--ens-go, #18a558) 45%, transparent); }
-.ppr-final h3 { font: 800 18px/1.2 var(--ens-display, 'Fredoka'), sans-serif; margin: 0 0 5px; color: var(--ink); position: relative; }
-.ppr-final p { font: 500 12.5px/1.45 var(--ens-body, 'Inter'), sans-serif; color: var(--mu3); margin: 0; position: relative; }
 
 /* ── Skeleton ── */
-.ppr-skel { background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%); background-size: 200% 100%; animation: pprShim 1.4s ease-in-out infinite; }
+.ppr-skel {
+  border-radius: 18px;
+  background: linear-gradient(90deg, #dde3f5 0%, #eef1fb 50%, #dde3f5 100%);
+  background-size: 200% 100%;
+  animation: pprShim 1.4s ease-in-out infinite;
+}
 @keyframes pprShim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
-/* ── Retry button active state ── */
+/* ── Max palier ── */
+.ppr-max {
+  display: flex; align-items: center; gap: 10px; margin-top: 12px;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+  border-radius: 12px; padding: 10px 14px;
+}
+.ppr-max-txt {
+  font: 700 12.5px/1.3 'Inter', sans-serif; color: #fff;
+}
+
+/* ── Retry ── */
 #ppr-retry {
-  transition: transform .18s cubic-bezier(0.23,1,0.32,1), box-shadow .18s cubic-bezier(0.23,1,0.32,1);
+  display: block; margin: 24px auto 0; padding: 14px 32px; min-height: 48px;
+  background: #4f46e5; color: #fff; border: 0; border-radius: 14px;
+  font: 700 14px/1 'Inter', sans-serif; cursor: pointer;
+  box-shadow: 0 8px 20px -6px rgba(79,70,229,.5);
+  transition: transform .14s, box-shadow .14s;
 }
 #ppr-retry:active { transform: scale(.97); box-shadow: none; }
+#ppr-retry:focus-visible { outline: 3px solid #4f46e5; outline-offset: 3px; }
+
+@keyframes pprHeroIn {
+  from { opacity: 0; transform: translateY(8px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .ppr-node, .ppr-node.next .nd-circle, .ppr-node.next .nd-circle::after, .ppr-node.next .nd-lbl::before,
-  .ppr-next-fill, .ppr-skel, #ppr-retry { animation: none !important; transition: none !important; opacity: 1 !important; }
+  .ppr-prog-fill, .ppr-skel, .ppr-hero-trophy, .ppr-hero { animation: none !important; transition: none !important; }
 }
 </style>`;
 
@@ -227,227 +293,245 @@ export async function mount(root) {
   _root = root;
   const me = getCurUser();
   if (!me || me.role !== "enseignant") {
-    root.innerHTML = `<p style="padding:32px;text-align:center;color:var(--mu)">Accès enseignant requis</p>`;
+    root.innerHTML = `<p style="padding:32px;text-align:center;color:#6b7095">Accès enseignant requis</p>`;
     return;
   }
 
   track("page.view", { page: "parcours_pro" });
 
+  // Skeleton
   root.innerHTML = `${STYLE}
     <div class="ppr">
-      ${_tabsHtml()}
-      <div class="ppr-skel" style="height:200px"></div>
-      <div class="ppr-skel" style="height:480px;margin-top:10px"></div>
+      <div class="ppr-hd"><div class="ppr-hd-title">Progression</div></div>
+      <div class="ppr-skel" style="height:178px;margin:14px 16px 0"></div>
+      <div class="ppr-skel" style="height:86px;margin:22px 16px 0"></div>
+      <div class="ppr-skel" style="height:74px;margin:22px 16px 0"></div>
     </div>`;
-  _wireTabs(root);
 
-  // Source de vérité = compte réel de validations (validated_by).
-  const { count, error } = await sb
-    .from("validations")
-    .select("id", { count: "exact", head: true })
-    .eq("validated_by", me.id);
+  // Chargement parallèle de toutes les données
+  try {
+    const since30d = new Date(Date.now() - 30 * 86400_000).toISOString();
 
-  if (error) {
-    root.innerHTML = `${STYLE}<div class="ppr">${_tabsHtml()}
-      <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
-        <div style="display:flex;justify-content:center;margin-bottom:16px">${illus("cone", { size: 72 })}</div>
-        <p style="font:600 15px/1.4 var(--ens-body,'Inter'),sans-serif">Ton parcours n'a pas pu se charger.</p>
-        <button id="ppr-retry" class="ens-btn ens-btn--go" style="margin-top:16px;min-height:44px;padding:12px 28px;cursor:pointer;">Réessayer</button>
-      </div></div>`;
-    _wireTabs(root);
+    const [valsRes, profileRes, studentsRes, activeRes, ligueRes] =
+      await Promise.all([
+        sb
+          .from("validations")
+          .select("id", { count: "exact", head: true })
+          .eq("validated_by", me.id),
+        sb
+          .from("profiles")
+          .select("streak_pro_days")
+          .eq("id", me.id)
+          .maybeSingle(),
+        sb
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("enseignant_id", me.id)
+          .eq("role", "eleve"),
+        sb
+          .from("validations")
+          .select("eleve_id")
+          .eq("validated_by", me.id)
+          .gte("validated_at", since30d),
+        sb.rpc("get_league_leaderboard", { p_role: "enseignant", p_limit: 50 }),
+      ]);
+
+    if (valsRes.error) throw valsRes.error;
+
+    const d = {
+      totalVals: valsRes.count ?? 0,
+      streak: profileRes.data?.streak_pro_days ?? 0,
+      studentsTotal: studentsRes.count ?? 0,
+      studentsActive: new Set(
+        (activeRes.data || []).map((v) => v.eleve_id).filter(Boolean),
+      ).size,
+    };
+
+    const ligueRows = ligueRes.data || [];
+    const state = getMoniteurState(d.totalVals);
+    _render(root, d, state, ligueRows);
+  } catch (e) {
+    console.error("[parcours-pro]", e);
+    root.innerHTML = `${STYLE}
+      <div class="ppr">
+        <div class="ppr-hd"><div class="ppr-hd-title">Progression</div></div>
+        <div style="padding:48px 24px;text-align:center;color:#6b7095">
+          <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
+          <button id="ppr-retry">Réessayer</button>
+        </div>
+      </div>`;
     root
       .querySelector("#ppr-retry")
       ?.addEventListener("click", () => mount(root));
-    return;
   }
-
-  const totalVals = count ?? 0;
-  _render(root, totalVals, getMoniteurState(totalVals));
 }
 
 // ─── Render ──────────────────────────────────────────────────────
-function _render(root, totalVals, state) {
-  const tiers = MONITEUR_TIERS;
-  const palierNum = state.tier?.tier ?? 0;
-  const title = state.tier?.title ?? "Premiers pas";
+function _render(root, d, state, ligueRows) {
+  const { tier, nextReward, pctToNextReward, isMax } = state;
+  const palierNum = tier?.tier ?? 0;
+  const palierName = tier?.title ?? "Premiers pas";
 
-  // États par node
-  const nextIdx = tiers.findIndex((t) => totalVals < t.threshold);
-  const items = tiers.map((t, i) => {
-    let st;
-    if (totalVals >= t.threshold) st = "done";
-    else if (i === nextIdx) st = "next";
-    else if (nextIdx !== -1 && i <= nextIdx + 2) st = "todo";
-    else st = "locked";
-    return { tier: t, state: st };
-  });
+  // Trophées
+  const troResults = TROPHEES.map((t) => ({ ...t, unlocked: t.check(d) }));
+  const unlockedCount = troResults.filter((t) => t.unlocked).length;
+  const total = troResults.length;
+  // Dernier débloqué = le plus haut index débloqué
+  const lastUnlockedIdx = troResults.reduce(
+    (best, t, i) => (t.unlocked ? i : best),
+    -1,
+  );
 
-  const doneCount = items.filter((it) => it.state === "done").length;
+  // Ligue
+  const mine = ligueRows.find((r) => r.is_me) || null;
+  const myPts = mine?.weekly_pts ?? 0;
+  const myRank = mine?.rank_pos ?? null;
+  const myLeague = getLeague(myPts);
+
+  // Ligue suivante (pour "monte en X à Y")
+  const LEAGUES_ORDER = ["bronze", "argent", "or", "diamant"];
+  const LEAGUES_DEF = {
+    bronze: { name: "Bronze", minPts: 1 },
+    argent: { name: "Argent", minPts: 8 },
+    or: { name: "Or", minPts: 20 },
+    diamant: { name: "Diamant", minPts: 40 },
+  };
+  const myLeagueId = myLeague?.id ?? null;
+  const myLeagueIdx = myLeagueId ? LEAGUES_ORDER.indexOf(myLeagueId) : -1;
+  const prevLeagueId = myLeagueIdx > 0 ? LEAGUES_ORDER[myLeagueIdx - 1] : null;
+  const prevLeague = prevLeagueId ? LEAGUES_DEF[prevLeagueId] : null;
+  const ptsToNext = prevLeague ? prevLeague.minPts - myPts : 0;
+
+  // Nom de la ligue courante
+  const ligueName = myLeague ? `Ligue ${esc(myLeague.name)}` : "Hors-ligue";
+  const ligueSub =
+    myPts === 0
+      ? "Valide une compétence pour entrer en ligue"
+      : ptsToNext > 0 && prevLeague
+        ? `${myPts} validation${myPts > 1 ? "s" : ""} cette semaine · monte en ${esc(prevLeague.name)} à ${prevLeague.minPts}`
+        : `${myPts} validation${myPts > 1 ? "s" : ""} cette semaine · ligue maximale atteinte`;
 
   root.innerHTML = `${STYLE}
-    <div class="ppr">
-      ${_tabsHtml()}
+<div class="ppr">
 
-      <div class="ppr-hero">
-        ${panneauxLayer({ variant: "hero" })}
-        <div class="ppr-hero-in">
-          <div class="ppr-hero-top">
-            <div>
-              <div class="ppr-hero-title">Mon parcours pro</div>
-              <div class="ppr-hero-sub">${esc(title)} · palier ${palierNum}/${tiers.length}</div>
-            </div>
-            <div class="ppr-hero-count">
-              <div class="v" data-counter="${totalVals}">0</div>
-              <div class="l">validations</div>
-            </div>
-          </div>
-          ${_nextHtml(state)}
-        </div>
+  <!-- En-tête -->
+  <div class="ppr-hd">
+    <div class="ppr-hd-title">Progression</div>
+  </div>
+
+  <!-- Hero indigo -->
+  <div class="ppr-hero" aria-label="Palier de moniteur : ${esc(palierName)}, palier ${palierNum} sur ${MONITEUR_TIERS.length}">
+    <div class="ppr-hero-halo"></div>
+    <img
+      class="ppr-hero-trophy"
+      src="/skins/trophy-permis-virtuel.webp"
+      alt=""
+      aria-hidden="true"
+      width="124"
+    >
+    <div class="ppr-hero-in">
+      <p class="ppr-hero-surtitle">Ton palier de moniteur</p>
+      <div class="ppr-hero-palier" id="ppr-palier-name">${esc(palierName)}</div>
+      <div class="ppr-hero-sub">
+        Palier ${palierNum} sur ${MONITEUR_TIERS.length} · <span id="ppr-val-count">0</span> compétences validées
       </div>
+      ${_progHtml(state)}
+    </div>
+  </div>
 
-      <div class="ppr-legend">
-        <span><i style="background:var(--a)"></i>Atteint</span>
-        <span><i style="background:var(--a);box-shadow:0 0 0 3px color-mix(in srgb,var(--a) 25%,transparent)"></i>Prochain</span>
-        <span><i style="background:var(--su);border:1.5px dashed var(--bo4)"></i>À venir</span>
-        <span><i style="background:var(--bg2);border:1px solid var(--bo)"></i>Verrouillé</span>
-      </div>
+  <!-- Trophées -->
+  <div class="ppr-sec">
+    <div class="ppr-sec-title">Tes trophées · ${unlockedCount} / ${total}</div>
+    <button class="ppr-sec-link" id="ppr-tro-link" aria-label="Voir tous les trophées">Voir tout</button>
+  </div>
+  <div class="ppr-troph-row" role="list" aria-label="Aperçu des trophées">
+    ${_trophRow(troResults, lastUnlockedIdx)}
+  </div>
 
-      <div class="ppr-route">
-        <svg class="path" viewBox="0 0 ${VBW} ${VBH}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" id="ppr-svg"></svg>
-        <div class="ppr-nodes" id="ppr-nodes"></div>
-      </div>
+  <!-- Ligue -->
+  <div class="ppr-sec">
+    <div class="ppr-sec-title">Ligue de la semaine</div>
+    <button class="ppr-sec-link" id="ppr-lig-link" aria-label="Voir le classement complet">Classement</button>
+  </div>
+  <div class="ppr-ligue" id="ppr-ligue-card" role="button" tabindex="0" aria-label="${ligueName}${myRank ? " — rang #" + myRank : ""}">
+    <img class="ppr-ligue-crown" src="/skins/couronne.png" alt="" aria-hidden="true" width="56" height="56">
+    <div class="ppr-ligue-info">
+      <div class="ppr-ligue-name">${ligueName}</div>
+      <div class="ppr-ligue-sub">${esc(ligueSub)}</div>
+    </div>
+    ${myRank ? `<div class="ppr-ligue-rank">#${myRank}</div>` : ""}
+  </div>
 
-      <div class="ppr-final">
-        <div class="crown">${illus("trophy", { size: 48 })}</div>
-        <h3>${esc(tiers[tiers.length - 1].title)}</h3>
-        <p>${tiers[tiers.length - 1].threshold} validations — palier ultime. Chaque séance compte.</p>
-      </div>
-    </div>`;
-
-  _wireTabs(root);
-  _renderPath(root, doneCount);
-  _renderNodes(root, items, totalVals);
+</div>`;
 
   // Animations différées
   requestAnimationFrame(() => {
-    const fill = root.querySelector("#ppr-next-fill");
-    if (fill)
-      fill.style.width = `${Math.min(100, state.pctToNextReward ?? 0)}%`;
+    const fill = root.querySelector("#ppr-prog-fill");
+    if (fill) fill.style.width = `${Math.min(100, pctToNextReward ?? 0)}%`;
   });
   setTimeout(() => {
-    const el = root.querySelector("[data-counter]");
-    if (el) animateCounter(el, 0, parseInt(el.dataset.counter, 10) || 0, 800);
-  }, 100);
+    const el = root.querySelector("#ppr-val-count");
+    if (el) animateCounter(el, 0, d.totalVals, 900);
+  }, 150);
+
+  // Listeners navigation
+  root.querySelector("#ppr-tro-link")?.addEventListener("click", () => {
+    haptic("tap");
+    navigate("#/trophees-moniteur");
+  });
+  const ligueCard = root.querySelector("#ppr-ligue-card");
+  ligueCard?.addEventListener("click", () => {
+    haptic("tap");
+    navigate("#/ligue-semaine");
+  });
+  ligueCard?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      haptic("tap");
+      navigate("#/ligue-semaine");
+    }
+  });
+  root.querySelector("#ppr-lig-link")?.addEventListener("click", () => {
+    haptic("tap");
+    navigate("#/ligue-semaine");
+  });
 }
 
-// ─── Hero : bloc prochain outil ──────────────────────────────────
-function _nextHtml(state) {
-  if (!state.nextReward) {
-    return `<div class="ppr-next done">
-      <span style="color:var(--a)">${icon("check-circle", { size: 22, strokeWidth: 2 })}</span>
-      <div class="ppr-next-tool">Palier maximum atteint — référent certifié.</div>
+// ─── Barre de progression dans le hero ──────────────────────────
+function _progHtml(state) {
+  if (state.isMax) {
+    return `<div class="ppr-max">
+      ${icon("check-circle", { size: 18, strokeWidth: 2 })}
+      <div class="ppr-max-txt">Palier maximum atteint — référent certifié.</div>
     </div>`;
   }
-  const t = state.nextReward.data;
-  const missing = state.nextReward.missing ?? 0;
-  return `<div class="ppr-next">
-    <div class="ppr-next-lbl">${icon("trending-up", { size: 12, strokeWidth: 2 })} Prochain palier</div>
-    <div class="ppr-next-tool">${esc(t.title)} · ${t.threshold} validations</div>
-    <div class="ppr-next-bar"><div class="ppr-next-fill" id="ppr-next-fill"></div></div>
-    <div class="ppr-next-meta">Plus que ${missing} validation${missing > 1 ? "s" : ""}</div>
+  const missing = state.nextReward?.missing ?? 0;
+  const nextTitle = state.nextReward?.data?.title ?? "";
+  const nextNum = (state.tier?.tier ?? 0) + 1;
+  return `<div class="ppr-prog">
+    <div class="ppr-prog-bar">
+      <span class="ppr-prog-fill" id="ppr-prog-fill" role="progressbar"
+        aria-valuenow="${Math.round(state.pctToNextReward ?? 0)}"
+        aria-valuemin="0" aria-valuemax="100"
+        aria-label="Progression vers le palier ${nextNum}"></span>
+    </div>
+    <div class="ppr-prog-hint">
+      Plus que <b>${missing} validation${missing > 1 ? "s" : ""}</b> pour le palier ${nextNum}
+    </div>
   </div>`;
 }
 
-// ─── SVG path (Catmull-Rom → Bézier) ─────────────────────────────
-function _smooth(pts) {
-  if (pts.length < 2) return pts.length ? `M ${pts[0].x} ${pts[0].y}` : "";
-  let d = `M ${pts[0].x} ${pts[0].y}`;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] || pts[i];
-    const p1 = pts[i];
-    const p2 = pts[i + 1];
-    const p3 = pts[i + 2] || pts[i + 1];
-    const c1x = p1.x + (p2.x - p0.x) / 6,
-      c1y = p1.y + (p2.y - p0.y) / 6;
-    const c2x = p2.x - (p3.x - p1.x) / 6,
-      c2y = p2.y - (p3.y - p1.y) / 6;
-    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x} ${p2.y}`;
-  }
-  return d;
-}
-
-function _renderPath(root, doneCount) {
-  const full = _smooth(PTS);
-  // Portion parcourue : jusqu'au node « next » inclus (doneCount + 1 points)
-  const donePath = _smooth(PTS.slice(0, Math.min(PTS.length, doneCount + 1)));
-  const svg = root.querySelector("#ppr-svg");
-  if (svg) {
-    svg.innerHTML = `
-      <path class="p-shadow" d="${full}" transform="translate(0,4)"/>
-      <path class="p-edge" d="${full}"/>
-      <path class="p-surface" d="${full}"/>
-      <path class="p-dash" d="${full}"/>
-      <path class="p-done" d="${donePath}" pathLength="1"/>
-      <path class="p-done-dash" d="${donePath}"/>`;
-  }
-}
-
-// ─── Nodes ───────────────────────────────────────────────────────
-function _renderNodes(root, items, totalVals) {
-  const nodesEl = root.querySelector("#ppr-nodes");
-  if (!nodesEl) return;
-
-  nodesEl.innerHTML = items
-    .map((it, i) => {
-      const p = PTS[i];
-      const left = ((p.x / VBW) * 100).toFixed(2);
-      const top = ((p.y / VBH) * 100).toFixed(2);
-      const inner =
-        it.state === "locked"
-          ? icon("lock", { size: 26, strokeWidth: 2 })
-          : icon("award", { size: 28, strokeWidth: 2 });
-      const check =
-        it.state === "done"
-          ? `<div class="nd-check">${icon("check", { size: 12, strokeWidth: 3 })}</div>`
-          : "";
-      const cta =
-        it.state === "next"
-          ? `<span class="nd-stt">Voir le palier →</span>`
-          : "";
-      return `<button class="ppr-node ${it.state}" style="left:${left}%;top:${top}%;animation-delay:${i * 70}ms" data-i="${i}" aria-label="Palier ${i + 1} sur ${items.length} : ${esc(it.tier.title)} — ${it.state === "done" ? "atteint" : it.state === "next" ? "prochain palier" : "à atteindre à " + it.tier.threshold + " validations"}">
-        <div class="nd-circle">${inner}${check}</div>
-        <div class="nd-lbl">
-          <span class="nd-name">${it.tier.threshold} validations</span>
-          <span class="nd-thr">${esc(it.tier.title)}</span>
-          ${cta}
-        </div>
-      </button>`;
+// ─── Rangée trophées ─────────────────────────────────────────────
+function _trophRow(troResults, lastUnlockedIdx) {
+  return troResults
+    .map((t, i) => {
+      const isNew = i === lastUnlockedIdx && t.unlocked;
+      const lockCls = t.unlocked ? "" : " lock";
+      const newCls = isNew ? " new-badge" : "";
+      const label = TROPHEE_NAMES[t.id] || t.id;
+      return `<div class="ppr-tcell${lockCls}${newCls}" role="listitem" aria-label="${esc(label)}${t.unlocked ? " — débloqué" : " — verrouillé"}">
+        <img src="${badgeSrc(t.id)}" alt="" width="46" height="46" loading="lazy">
+      </div>`;
     })
     .join("");
-
-  nodesEl.querySelectorAll(".ppr-node").forEach((el) => {
-    el.addEventListener("click", () => {
-      const i = parseInt(el.dataset.i, 10);
-      const it = items[i];
-      if (!it) return;
-      haptic(it.state === "done" ? "unlock" : "impact");
-      track("parcours_pro.tier_detail", { tier: it.tier.tier });
-      openPalierSheet(it.tier, totalVals);
-    });
-  });
-}
-
-// ─── Onglet Progression (Parcours · Trophées) — ligue moniteur abandonnée ──
-function _tabsHtml() {
-  return `
-  <div class="ppr-tabs" role="tablist" aria-label="Progression">
-    <button class="ppr-tab on" role="tab" aria-selected="true">Parcours</button>
-    <button class="ppr-tab" role="tab" aria-selected="false" data-go="#/trophees-moniteur">Trophées</button>
-  </div>`;
-}
-
-function _wireTabs(root) {
-  root.querySelectorAll(".ppr-tab[data-go]").forEach((el) => {
-    el.addEventListener("click", () => navigate(el.dataset.go));
-  });
 }
