@@ -23,9 +23,13 @@ async function loginAsEnseignant(page) {
   await page.emulateMedia({ reducedMotion: "reduce" });
   // Pose le consentement cookies AVANT le chargement : le banner (fixed bottom)
   // intercepte sinon les clics sur les CTA bas d'écran en mobile.
+  // + marque les tuto guidés comme vus : sinon l'overlay du tour (gt-root)
+  // intercepte les clics sur les chips de validation (flake récurrent).
   await page.addInitScript(() => {
     try {
       localStorage.setItem("permigo_cookie_consent", "essential");
+      localStorage.setItem("pg-tour-moniteur-v1", "1");
+      localStorage.setItem("pg-tour-validation-v1", "1");
     } catch {
       /* ignore */
     }
@@ -143,7 +147,7 @@ test.describe("Enseignant — validation de séance", () => {
   });
 
   test("validation complète → toast de succès", async ({ page }) => {
-    test.setTimeout(60_000); // login + RPC validate_session : long sur réseau lent
+    test.setTimeout(90_000); // login + RPC validate_session : long sur réseau lent (marge anti-flake)
     await loginAsEnseignant(page);
     await goToValidation(page);
     await pickFirstEleve(page);
@@ -159,8 +163,12 @@ test.describe("Enseignant — validation de séance", () => {
     const submit = page.locator("#vs-submit");
     await submit.scrollIntoViewIfNeeded();
     await submit.click();
-    // Succès = navigation vers la liste élèves (déclenchée APRÈS le toast) ;
-    // plus fiable que d'attraper le toast qui peut disparaître vite.
+    // Succès = l'écran de confirmation s'affiche (RPC validate_session OK).
+    // L'app ne redirige PAS auto : elle montre un écran de succès avec un CTA
+    // « Voir mes élèves ». On l'attend, puis on suit le CTA vers la liste.
+    const done = page.locator("#vs-success-done");
+    await expect(done).toBeVisible({ timeout: 30_000 });
+    await done.click();
     await page.waitForURL(/#\/eleves/, { timeout: 20_000 });
   });
 });
