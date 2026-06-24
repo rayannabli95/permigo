@@ -162,10 +162,12 @@ const STYLE = `<style>
   }
 
   /* Couleurs par groupe */
+  .me-grp-head--prevu  { color: #1d4ed8; }
   .me-grp-head--pret   { color: #15803d; }
   .me-grp-head--appr   { color: #b45309; }
   .me-grp-head--rel    { color: #b91c1c; }
   .me-grp-head--cours  { color: #6b7280; }
+  .me-grp-head--repass { color: #c2410c; }
   .me-grp-head--recu   { color: #7c3aed; }
 
   /* Bande blanche contenant les lignes */
@@ -177,10 +179,12 @@ const STYLE = `<style>
     box-shadow: 0 2px 8px -4px rgba(26,31,43,.1);
   }
   /* Liseré gauche coloré selon le groupe */
+  .me-band--prevu { box-shadow: inset 3px 0 0 #2563eb, 0 2px 8px -4px rgba(26,31,43,.08); }
   .me-band--pret  { box-shadow: inset 3px 0 0 #16a34a, 0 2px 8px -4px rgba(26,31,43,.08); }
   .me-band--appr  { box-shadow: inset 3px 0 0 #f59e0b, 0 2px 8px -4px rgba(26,31,43,.08); }
   .me-band--rel   { box-shadow: inset 3px 0 0 #ef4444, 0 2px 8px -4px rgba(26,31,43,.08); }
   .me-band--cours { box-shadow: inset 3px 0 0 #d1d5db, 0 2px 8px -4px rgba(26,31,43,.08); }
+  .me-band--repass{ box-shadow: inset 3px 0 0 #ea580c, 0 2px 8px -4px rgba(26,31,43,.08); }
   .me-band--recu  { box-shadow: inset 3px 0 0 #7c3aed, 0 2px 8px -4px rgba(26,31,43,.08); }
 
   /* Ligne élève dans la bande */
@@ -343,11 +347,20 @@ function baseManquantes(acquisSet) {
 
 /**
  * État de readiness d'un élève vis-à-vis de l'examen.
+ *
+ * TOUT examen enregistré est un état TERMINAL qui sort l'élève de la
+ * formation active : reçu (obtenu), raté (à représenter), planifié (date
+ * connue → on l'affiche, plus besoin de le dire « prêt »). Sans ça un élève
+ * qui a déjà passé/planifié son examen restait classé « Prêts » (bug Imed).
+ *
  * @param {Set<string>} acquisSet  compétences acquises (école)
- * @returns {'recu'|'pret'|'en_approche'|'en_cours'}
+ * @param {?string} examStatut     dernier examen : 'recu'|'rate'|'planifie'|null
+ * @returns {'recu'|'rate'|'planifie'|'pret'|'en_approche'|'en_cours'}
  */
 function computeReadiness(acquisSet, examStatut) {
   if (examStatut === "recu") return "recu";
+  if (examStatut === "rate") return "rate";
+  if (examStatut === "planifie") return "planifie";
   if (baseManquantes(acquisSet).length === 0) return "pret";
   if (acquisSet.size >= APPROCHE_SEUIL) return "en_approche";
   return "en_cours";
@@ -735,7 +748,21 @@ function renderPipeline() {
     </div>`;
   }
 
+  // États d'examen terminaux (prévu / raté / reçu) : on les teste à part pour
+  // qu'un élève n'apparaisse JAMAIS dans deux bandes (les filtres sont exclusifs).
+  const examTermine = (e) =>
+    e.readiness === "recu" ||
+    e.readiness === "rate" ||
+    e.readiness === "planifie";
+
   const groups = [
+    {
+      key: "prevu",
+      mod: "prevu",
+      color: "#2563eb",
+      label: "Examen prévu",
+      filter: (e) => e.readiness === "planifie",
+    },
     {
       key: "pret",
       mod: "pret",
@@ -755,15 +782,21 @@ function renderPipeline() {
       mod: "rel",
       color: "#ef4444",
       label: "À relancer",
-      filter: (e) => e.aRelancer && e.readiness !== "recu",
+      filter: (e) => e.aRelancer && !examTermine(e),
     },
     {
       key: "cours",
       mod: "cours",
       color: "#d1d5db",
       label: "En cours",
-      filter: (e) =>
-        e.readiness === "en_cours" && !e.aRelancer && e.readiness !== "recu",
+      filter: (e) => e.readiness === "en_cours" && !e.aRelancer,
+    },
+    {
+      key: "repass",
+      mod: "repass",
+      color: "#ea580c",
+      label: "À repasser",
+      filter: (e) => e.readiness === "rate",
     },
     {
       key: "recu",
@@ -802,10 +835,17 @@ function renderBandRow(eleve) {
     fmtName([eleve.prenom, eleve.nom].filter(Boolean).join(" ")) || "—",
   );
 
-  // Valeur droite : jours inactif pour les relancers, sinon X/31
+  // Valeur droite : état d'examen prioritaire (prévu/raté), puis inactivité,
+  // sinon l'avancement X/31. Les états d'examen priment pour que l'info la plus
+  // forte (« il a déjà passé / une date est posée ») ne soit jamais masquée.
   let rightLabel = "";
   let rightClass = "me-pr";
-  if (eleve.aRelancer && eleve.readiness !== "recu") {
+  if (eleve.readiness === "planifie") {
+    rightLabel = eleve.examDate ? fmtExamDate(eleve.examDate) : "prévu";
+  } else if (eleve.readiness === "rate") {
+    rightLabel = "à repasser";
+    rightClass = "me-pr me-pr--warn";
+  } else if (eleve.aRelancer && eleve.readiness !== "recu") {
     const j = eleve.joursInactif;
     rightLabel = j != null ? `inactif ${j} j` : "inactif";
     rightClass = "me-pr me-pr--warn";
@@ -815,7 +855,7 @@ function renderBandRow(eleve) {
 
   return `
     <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="listitem button" tabindex="0"
-         aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
+         aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "recu" ? ", examen reussi" : eleve.readiness === "rate" ? ", examen a repasser" : eleve.readiness === "planifie" ? ", examen prevu" : eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
       <span class="me-nom">${fullNom}</span>
       <span class="${rightClass}">${esc(rightLabel)}</span>
