@@ -428,7 +428,11 @@ function wire(root) {
         resetRateLimit("login", email);
         if (remember.checked) saveRememberedEmail(email);
         else clearRememberedEmail();
-        toast(`Bonjour ${esc(profile.nom.split(" ")[0])}`, "success");
+        // Prénom pour le bonjour — garde anti-null : un profil sans `nom`
+        // (ex. compte owner) faisait planter `null.split()` → le login réussissait
+        // mais afterLogin() n'était jamais appelé (« rien ne se passe »).
+        const greetName = (profile.prenom || profile.nom || "").split(" ")[0];
+        toast(`Bonjour ${esc(greetName)}`.trim(), "success");
         afterLogin();
       } else if (mode === "otp-request") {
         const r = await loginWithOtp(email, { captchaToken });
