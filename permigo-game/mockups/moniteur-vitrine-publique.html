@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Karim D. — moniteur indépendant · PermiGo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#1a1a2e;
+    --ink-2:#3d3d56;
+    --muted:#6b6b80;
+    --line:#e8e6f0;
+    --line-soft:#f1eff7;
+    --paper:#ffffff;
+    --bg:#f7f6fb;
+    --indigo:#4f46e5;
+    --indigo-deep:#3730a3;
+    --indigo-soft:#eef0fe;
+    --gold:#b8923f;
+    --gold-soft:#f7f0df;
+    --green:#15803d;
+    --green-soft:#e7f4ec;
+    --shadow-card:0 1px 2px rgba(26,26,46,.04), 0 8px 24px rgba(26,26,46,.06), 0 24px 60px rgba(55,48,163,.05);
+    --shadow-soft:0 1px 2px rgba(26,26,46,.04), 0 6px 18px rgba(26,26,46,.05);
+    --radius:20px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    background-image:
+      radial-gradient(1100px 520px at 78% -8%, rgba(79,70,229,.07), transparent 62%),
+      radial-gradient(900px 520px at -6% 6%, rgba(184,146,63,.05), transparent 55%);
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  .serif{font-family:'Fraunces',Georgia,serif}
+
+  /* ---- Top bar ---- */
+  .topbar{
+    position:sticky;top:0;z-index:30;
+    backdrop-filter:saturate(150%) blur(14px);
+    background:rgba(247,246,251,.82);
+    border-bottom:1px solid rgba(232,230,240,.9);
+  }
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .brandmark{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em}
+  .brandmark .dot{
+    width:30px;height:30px;border-radius:9px;
+    background:linear-gradient(150deg,#6366f1,#4f46e5 55%,#3730a3);
+    box-shadow:0 4px 12px rgba(79,70,229,.32), inset 0 1px 0 rgba(255,255,255,.4);
+    display:grid;place-items:center;
+  }
+  .brandmark .dot svg{width:17px;height:17px}
+  .topbar .meta{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .verif-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:600;color:var(--indigo-deep);
+    background:var(--indigo-soft);
+    border:1px solid #dcdcfb;
+    padding:5px 11px;border-radius:999px;
+  }
+  .verif-pill svg{width:13px;height:13px}
+
+  /* ---- Hero ---- */
+  .hero{padding:54px 0 12px}
+  .hero-card{
+    position:relative;
+    background:
+      linear-gradient(180deg, #ffffff 0%, #fcfbff 100%);
+    border:1px solid var(--line);
+    border-radius:28px;
+    box-shadow:var(--shadow-card);
+    overflow:hidden;
+  }
+  .hero-card::before{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(620px 280px at 88% -22%, rgba(79,70,229,.10), transparent 60%),
+      radial-gradient(440px 240px at -8% 120%, rgba(184,146,63,.07), transparent 60%);
+    pointer-events:none;
+  }
+  .hero-inner{position:relative;display:grid;grid-template-columns:1.45fr 1fr;gap:8px}
+  .hero-left{padding:42px 14px 40px 44px}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--gold);
+  }
+  .eyebrow .bar{width:24px;height:1.5px;background:linear-gradient(90deg,var(--gold),transparent)}
+  h1.name{
+    font-weight:600;font-size:46px;line-height:1.04;letter-spacing:-.028em;
+    margin:16px 0 6px;color:var(--ink);
+  }
+  h1.name em{font-style:italic;color:var(--indigo-deep)}
+  .tagline{font-size:17px;color:var(--ink-2);max-width:42ch;margin-bottom:22px}
+  .tagline b{font-weight:600;color:var(--ink)}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:30px}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:13px;font-weight:500;color:var(--ink-2);
+    background:#fff;border:1px solid var(--line);
+    padding:8px 13px;border-radius:11px;
+    box-shadow:0 1px 2px rgba(26,26,46,.03);
+  }
+  .chip svg{width:15px;height:15px;color:var(--indigo)}
+  .cta-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .btn-primary{
+    position:relative;
+    display:inline-flex;align-items:center;gap:10px;
+    font-size:16px;font-weight:600;letter-spacing:-.01em;color:#fff;
+    background:linear-gradient(170deg,#5b54ec,#4f46e5 52%,#4338ca);
+    border:none;border-radius:14px;padding:15px 26px;cursor:pointer;
+    box-shadow:0 1px 0 rgba(255,255,255,.25) inset, 0 8px 20px rgba(79,70,229,.34), 0 2px 6px rgba(55,48,163,.28);
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.25) inset, 0 12px 26px rgba(79,70,229,.4), 0 3px 8px rgba(55,48,163,.3)}
+  .btn-primary svg{width:18px;height:18px}
+  .cta-note{font-size:13px;color:var(--muted);max-width:20ch}
+  .cta-note b{color:var(--ink-2);font-weight:600}
+
+  /* Hero right — portrait + rating */
+  .hero-right{position:relative;padding:30px 34px 30px 12px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+  .portrait-wrap{position:relative;align-self:center}
+  .portrait{
+    width:188px;height:188px;border-radius:50%;
+    background:
+      radial-gradient(120% 120% at 28% 22%, #eef1ff 0%, #dfe2ff 38%, #c9cdf6 100%);
+    border:1px solid #d7d8f5;
+    box-shadow:0 20px 44px rgba(55,48,163,.22), inset 0 2px 4px rgba(255,255,255,.7);
+    position:relative;overflow:hidden;
+    display:grid;place-items:center;
+  }
+  .portrait .initials{
+    font-family:'Fraunces',serif;font-weight:600;font-size:74px;letter-spacing:-.02em;
+    background:linear-gradient(160deg,#4f46e5,#3730a3);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .ring{
+    position:absolute;inset:-9px;border-radius:50%;
+    background:conic-gradient(from 200deg, #b8923f, #e3c878 25%, #b8923f 50%, #8c6d27 75%, #b8923f);
+    z-index:-1;filter:blur(.3px);opacity:.5;
+  }
+  .badge-verif{
+    position:absolute;right:6px;bottom:8px;
+    width:42px;height:42px;border-radius:50%;
+    background:linear-gradient(150deg,#16a34a,#15803d);
+    border:3px solid #fff;display:grid;place-items:center;
+    box-shadow:0 6px 16px rgba(21,128,61,.35);
+  }
+  .badge-verif svg{width:20px;height:20px;color:#fff}
+  .rating-mini{
+    align-self:center;text-align:center;
+  }
+  .stars{display:inline-flex;gap:3px;margin-bottom:5px}
+  .stars svg{width:18px;height:18px;color:#e0a52a}
+  .rating-mini .val{font-family:'Fraunces',serif;font-weight:600;font-size:18px}
+  .rating-mini .sub{font-size:12.5px;color:var(--muted)}
+
+  /* ---- Stat band ---- */
+  .stat-band{padding:30px 0 6px}
+  .stat-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px}
+  .stat{
+    position:relative;
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:24px 24px 22px;box-shadow:var(--shadow-soft);overflow:hidden;
+  }
+  .stat.hero-stat{
+    background:
+      linear-gradient(165deg,#fbfaff 0%,#f4f2fe 100%);
+    border-color:#e2e0f7;
+    box-shadow:0 1px 2px rgba(26,26,46,.04), 0 10px 30px rgba(55,48,163,.10);
+  }
+  .stat.hero-stat::after{
+    content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;
+    background:radial-gradient(circle,rgba(79,70,229,.12),transparent 68%);
+  }
+  .stat .label{font-size:12.5px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .stat .label svg{width:15px;height:15px;color:var(--indigo)}
+  .stat .num{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-.02em;line-height:1;margin:14px 0 6px}
+  .stat.hero-stat .num{font-size:68px;color:var(--indigo-deep)}
+  .stat .num{font-size:42px;color:var(--ink)}
+  .stat .desc{font-size:13.5px;color:var(--muted);max-width:30ch}
+  .stat.hero-stat .desc{max-width:34ch}
+  .progress-track{height:7px;border-radius:99px;background:#e9e7f5;margin-top:16px;overflow:hidden;position:relative}
+  .progress-fill{height:100%;width:92%;border-radius:99px;background:linear-gradient(90deg,#6366f1,#4f46e5);box-shadow:0 0 0 1px rgba(79,70,229,.15) inset}
+  .stat-source{margin-top:14px;font-size:12px;color:var(--gold);display:flex;align-items:center;gap:6px;font-weight:500}
+  .stat-source svg{width:13px;height:13px}
+
+  /* ---- Section header ---- */
+  .section{padding:40px 0 8px}
+  .sec-head{margin-bottom:22px}
+  .sec-kicker{font-size:12.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  .sec-head h2{font-family:'Fraunces',serif;font-weight:600;font-size:30px;letter-spacing:-.02em;color:var(--ink)}
+  .sec-head p{font-size:15px;color:var(--muted);margin-top:6px;max-width:54ch}
+
+  /* ---- Reviews ---- */
+  .reviews{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:18px;align-items:start}
+  .review{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:24px;box-shadow:var(--shadow-soft);position:relative;
+  }
+  .review.feature{
+    background:linear-gradient(170deg,#ffffff,#fbfbff);
+    border-color:#e4e2f5;
+    box-shadow:0 1px 2px rgba(26,26,46,.04), 0 12px 32px rgba(55,48,163,.08);
+  }
+  .review .quote-mark{
+    font-family:'Fraunces',serif;font-size:54px;line-height:.5;color:var(--indigo-soft);
+    position:absolute;top:22px;right:20px;
+  }
+  .review .rstars{display:inline-flex;gap:2px;margin-bottom:12px}
+  .review .rstars svg{width:15px;height:15px;color:#e0a52a}
+  .review p{font-size:15px;color:var(--ink-2);position:relative;z-index:1}
+  .review.feature p{font-size:16.5px;color:var(--ink);font-weight:450}
+  .review .who{display:flex;align-items:center;gap:12px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line-soft)}
+  .av{
+    width:40px;height:40px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+    font-weight:600;font-size:15px;color:#fff;
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.3), 0 3px 8px rgba(26,26,46,.14);
+  }
+  .av.a{background:linear-gradient(150deg,#6366f1,#4338ca)}
+  .av.b{background:linear-gradient(150deg,#0d9488,#0f766e)}
+  .av.c{background:linear-gradient(150deg,#d97706,#b45309)}
+  .av.d{background:linear-gradient(150deg,#db2777,#9d174d)}
+  .who .nm{font-weight:600;font-size:14.5px}
+  .who .verified{font-size:12px;color:var(--green);display:flex;align-items:center;gap:5px;margin-top:2px}
+  .who .verified svg{width:12px;height:12px}
+  .review-strip{display:grid;gap:18px}
+
+  /* ---- Zones ---- */
+  .zones-card{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);overflow:hidden;
+    display:grid;grid-template-columns:1.1fr 1fr;
+  }
+  .zones-left{padding:30px 32px}
+  .zones-left h3{font-family:'Fraunces',serif;font-weight:600;font-size:22px;letter-spacing:-.01em;margin-bottom:6px}
+  .zones-left .lead{font-size:14.5px;color:var(--muted);margin-bottom:20px}
+  .zone-list{display:flex;flex-wrap:wrap;gap:9px}
+  .zone{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:14px;font-weight:500;color:var(--ink-2);
+    background:#fbfbfe;border:1px solid var(--line);border-radius:11px;padding:9px 14px;
+  }
+  .zone svg{width:14px;height:14px;color:var(--indigo)}
+  .zone.more{color:var(--indigo-deep);background:var(--indigo-soft);border-color:#dcdcfb;font-weight:600}
+  .zones-map{
+    position:relative;
+    background:
+      radial-gradient(420px 320px at 60% 40%, #eef0fe 0%, #f6f5fc 70%);
+    border-left:1px solid var(--line-soft);
+    min-height:230px;overflow:hidden;
+  }
+  .zones-map svg{position:absolute;inset:0;width:100%;height:100%}
+  .map-pin{position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .map-pin .ico{width:13px;height:13px;border-radius:50%;background:var(--indigo);box-shadow:0 0 0 5px rgba(79,70,229,.16), 0 2px 5px rgba(55,48,163,.4)}
+  .map-pin .lbl{font-size:11px;font-weight:600;color:var(--indigo-deep);background:rgba(255,255,255,.85);padding:1px 7px;border-radius:6px;white-space:nowrap}
+  .map-pin.main .ico{width:17px;height:17px;background:linear-gradient(150deg,#6366f1,#3730a3);box-shadow:0 0 0 6px rgba(79,70,229,.2),0 3px 7px rgba(55,48,163,.5)}
+  .pulse{position:absolute;width:17px;height:17px;border-radius:50%;background:rgba(79,70,229,.35);animation:ping 2.6s ease-out infinite}
+
+  /* ---- Proof row ---- */
+  .proof{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:8px}
+  .proof-item{
+    background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px 18px;
+    box-shadow:0 1px 2px rgba(26,26,46,.03);
+    display:flex;gap:13px;align-items:flex-start;
+  }
+  .proof-item .ic{
+    flex:0 0 auto;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+    background:var(--indigo-soft);border:1px solid #e1e1fb;
+  }
+  .proof-item .ic svg{width:19px;height:19px;color:var(--indigo)}
+  .proof-item .t{font-weight:600;font-size:14px;line-height:1.3}
+  .proof-item .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+  /* ---- Final CTA ---- */
+  .final{padding:46px 0 24px}
+  .final-card{
+    position:relative;overflow:hidden;
+    border-radius:26px;
+    background:linear-gradient(160deg,#312a8a 0%,#3730a3 42%,#4338ca 100%);
+    color:#fff;padding:46px 48px;
+    box-shadow:0 20px 50px rgba(55,48,163,.32), inset 0 1px 0 rgba(255,255,255,.12);
+  }
+  .final-card::before{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(520px 280px at 88% -20%, rgba(255,255,255,.14), transparent 60%),
+      radial-gradient(420px 320px at 6% 130%, rgba(184,146,63,.22), transparent 62%);
+    pointer-events:none;
+  }
+  .final-inner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:30px;flex-wrap:wrap}
+  .final-card h2{font-family:'Fraunces',serif;font-weight:600;font-size:32px;letter-spacing:-.02em;line-height:1.12;max-width:18ch}
+  .final-card p{font-size:15px;color:rgba(255,255,255,.82);margin-top:10px;max-width:42ch}
+  .btn-light{
+    display:inline-flex;align-items:center;gap:11px;
+    font-size:16px;font-weight:600;color:var(--indigo-deep);
+    background:linear-gradient(180deg,#ffffff,#f4f3ff);
+    border:none;border-radius:14px;padding:16px 28px;cursor:pointer;
+    box-shadow:0 10px 24px rgba(0,0,0,.22), inset 0 1px 0 #fff;
+    transition:transform .2s ease;white-space:nowrap;
+  }
+  .btn-light:hover{transform:translateY(-1px)}
+  .btn-light svg{width:18px;height:18px}
+  .final-trust{display:flex;gap:22px;margin-top:24px;position:relative;flex-wrap:wrap}
+  .final-trust .ft{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.78)}
+  .final-trust svg{width:15px;height:15px;color:#e3c878}
+
+  /* ---- Footer ---- */
+  .footer{padding:30px 0 50px;text-align:center}
+  .footer .pwr{display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);font-weight:500}
+  .footer .pwr .dot{width:22px;height:22px;border-radius:7px;background:linear-gradient(150deg,#6366f1,#4338ca);display:grid;place-items:center;box-shadow:0 3px 8px rgba(79,70,229,.3)}
+  .footer .pwr .dot svg{width:13px;height:13px}
+  .footer .legal{font-size:12px;color:#9a9aae;margin-top:12px}
+  .footer .legal a{color:var(--muted);text-decoration:none}
+
+  @keyframes ping{0%{transform:scale(1);opacity:.5}70%,100%{transform:scale(2.6);opacity:0}}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .rise{animation:rise .6s cubic-bezier(.22,.61,.36,1) both}
+  .d1{animation-delay:.05s}.d2{animation-delay:.13s}.d3{animation-delay:.21s}.d4{animation-delay:.29s}
+
+  @media (max-width:860px){
+    h1.name{font-size:36px}
+    .hero-inner{grid-template-columns:1fr}
+    .hero-left{padding:34px 26px 8px}
+    .hero-right{padding:8px 26px 34px;flex-direction:row;justify-content:flex-start;align-items:center;gap:24px}
+    .portrait{width:118px;height:118px}.portrait .initials{font-size:46px}.badge-verif{width:32px;height:32px}.badge-verif svg{width:15px;height:15px}
+    .stat-grid{grid-template-columns:1fr}
+    .stat.hero-stat .num{font-size:58px}
+    .reviews{grid-template-columns:1fr}
+    .review-strip{grid-template-columns:1fr 1fr;display:grid}
+    .zones-card{grid-template-columns:1fr}
+    .zones-map{min-height:200px}
+    .proof{grid-template-columns:1fr 1fr}
+    .final-card{padding:34px 26px}
+  }
+  @media (max-width:520px){
+    .review-strip{grid-template-columns:1fr}
+    .proof{grid-template-columns:1fr}
+    .topbar .meta .verif-pill{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="wrap">
+      <div class="brandmark">
+        <span class="dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.6" fill="#fff" stroke="none"/></svg>
+        </span>
+        Karim D.
+      </div>
+      <div class="meta">
+        <span class="verif-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 2l2.4 1.6 2.9-.2 1 2.7 2.4 1.7-.9 2.8.9 2.8-2.4 1.7-1 2.7-2.9-.2L12 22l-2.4-1.6-2.9.2-1-2.7L3.3 16l.9-2.8L3.3 10.4 5.7 8.7l1-2.7 2.9.2z"/></svg>
+          Profil vérifié
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-card rise">
+        <div class="hero-inner">
+          <div class="hero-left">
+            <span class="eyebrow"><span class="bar"></span>Moniteur indépendant · Permis B</span>
+            <h1 class="name serif">Karim Dahmani,<br><em>votre moniteur</em> de confiance</h1>
+            <p class="tagline">Conduite accompagnée et permis B en région de Cergy. Un suivi <b>personnalisé</b>, un livret de compétences clair, et des élèves qui passent l’examen <b>au bon moment</b>.</p>
+
+            <div class="chips">
+              <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>Région de Cergy</span>
+              <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="8" rx="2"/><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11"/><circle cx="7.5" cy="15" r="1.2"/><circle cx="16.5" cy="15" r="1.2"/></svg>Boîte manuelle & auto</span>
+              <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7"/><path d="M3 7l9 6 9-6"/><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2"/></svg>Agréé préfecture</span>
+            </div>
+
+            <div class="cta-row">
+              <a class="btn-primary" href="#">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4z" transform="translate(-4 0)"/><circle cx="9" cy="7" r="4"/><path d="M3 21v-1a6 6 0 0 1 6-6h0a6 6 0 0 1 6 6v1"/><path d="M19 8v6M22 11h-6"/></svg>
+                Rejoindre Karim
+              </a>
+              <span class="cta-note"><b>Gratuit pour l’élève.</b> Réponse sous 24 h.</span>
+            </div>
+          </div>
+
+          <div class="hero-right">
+            <div class="portrait-wrap">
+              <span class="ring"></span>
+              <div class="portrait">
+                <span class="initials">KD</span>
+              </div>
+              <span class="badge-verif" title="Identité vérifiée">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg>
+              </span>
+            </div>
+            <div class="rating-mini">
+              <span class="stars">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              </span>
+              <div class="val serif">4,9 / 5</div>
+              <div class="sub">sur 38 avis vérifiés</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAT BAND -->
+  <section class="stat-band">
+    <div class="wrap">
+      <div class="stat-grid">
+        <div class="stat hero-stat rise d1">
+          <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-8"/><path d="M16 8h4v4"/></svg>Taux de réussite</div>
+          <div class="num serif">92 %</div>
+          <div class="desc">des élèves présentés par Karim obtiennent leur permis B.</div>
+          <div class="progress-track"><div class="progress-fill"></div></div>
+          <div class="stat-source"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Calculé sur les compétences réellement validées</div>
+        </div>
+
+        <div class="stat rise d2">
+          <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 19a6.5 6.5 0 0 1 13 0"/><path d="M16 6.2a3.2 3.2 0 0 1 0 6"/><path d="M22 19a6.3 6.3 0 0 0-4-5.9"/></svg>Élèves accompagnés</div>
+          <div class="num serif">140+</div>
+          <div class="desc">candidats formés depuis 2019.</div>
+        </div>
+
+        <div class="stat rise d3">
+          <div class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Délai moyen</div>
+          <div class="num serif">5 mois</div>
+          <div class="desc">entre la 1ʳᵉ leçon et l’examen.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div class="sec-kicker">Ils ont réussi avec Karim</div>
+        <h2 class="serif">Des avis liés à une vraie réussite</h2>
+        <p>Chaque avis ci-dessous provient d’un élève ayant terminé sa formation et obtenu son permis. Pas de note achetée, pas d’anonyme.</p>
+      </div>
+
+      <div class="reviews">
+        <article class="review feature rise d1">
+          <span class="quote-mark">”</span>
+          <span class="rstars">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+          </span>
+          <p>« J’avais raté deux fois avec une grande auto-école. Karim a repris les bases calmement, sans jamais me presser. J’ai eu mon permis du premier coup avec lui. Il sait exactement quand vous êtes prêt. »</p>
+          <div class="who">
+            <span class="av a">IB</span>
+            <div>
+              <div class="nm">Inès B.</div>
+              <div class="verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg>Permis obtenu en mars 2026</div>
+            </div>
+          </div>
+        </article>
+
+        <div class="review-strip">
+          <article class="review rise d2">
+            <span class="rstars">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+            </span>
+            <p>« Pédagogue et patient. On voit sa progression sur l’appli après chaque leçon, ça motive vraiment. »</p>
+            <div class="who">
+              <span class="av b">LM</span>
+              <div>
+                <div class="nm">Lucas M.</div>
+                <div class="verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg>Permis obtenu en janvier 2026</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="review rise d3">
+            <span class="rstars">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>
+            </span>
+            <p>« Très à l’écoute, ponctuel, voiture impeccable. Je recommande à 100 % autour de Pontoise. »</p>
+            <div class="who">
+              <span class="av c">YK</span>
+              <div>
+                <div class="nm">Yanis K.</div>
+                <div class="verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg>Permis obtenu en février 2026</div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ZONES -->
+  <section class="section">
+    <div class="wrap">
+      <div class="zones-card rise">
+        <div class="zones-left">
+          <h3 class="serif">Zones couvertes</h3>
+          <p class="lead">Karim assure les leçons et accompagne à l’examen dans tout le secteur de Cergy-Pontoise.</p>
+          <div class="zone-list">
+            <span class="zone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>Cergy</span>
+            <span class="zone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>Pontoise</span>
+            <span class="zone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>Osny</span>
+            <span class="zone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>Vauréal</span>
+            <span class="zone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>Jouy-le-Moutier</span>
+            <span class="zone more">+ Éragny, Cormeilles</span>
+          </div>
+        </div>
+        <div class="zones-map">
+          <svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" fill="none">
+            <path d="M40 60 C 90 40, 150 70, 200 55 S 320 80, 370 60" stroke="#d8daf2" stroke-width="1.4" stroke-dasharray="3 6"/>
+            <path d="M30 130 C 110 110, 180 150, 250 130 S 350 120, 380 140" stroke="#d8daf2" stroke-width="1.4" stroke-dasharray="3 6"/>
+            <path d="M60 200 C 130 175, 210 210, 290 185 S 360 195, 392 180" stroke="#d8daf2" stroke-width="1.4" stroke-dasharray="3 6"/>
+            <circle cx="200" cy="118" r="78" stroke="#c7c9ef" stroke-width="1.2" stroke-dasharray="4 7" opacity=".7"/>
+          </svg>
+          <span class="pulse" style="left:188px;top:106px"></span>
+          <div class="map-pin main" style="left:182px;top:100px"><span class="ico"></span><span class="lbl">Cergy</span></div>
+          <div class="map-pin" style="left:96px;top:64px"><span class="ico"></span><span class="lbl">Pontoise</span></div>
+          <div class="map-pin" style="left:290px;top:78px"><span class="ico"></span><span class="lbl">Osny</span></div>
+          <div class="map-pin" style="left:120px;top:178px"><span class="ico"></span><span class="lbl">Vauréal</span></div>
+          <div class="map-pin" style="left:286px;top:170px"><span class="ico"></span><span class="lbl">Éragny</span></div>
+        </div>
+      </div>
+
+      <div class="proof">
+        <div class="proof-item rise d1">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12"/><path d="M4 19h16"/><path d="M8 9h8M8 13h6"/></svg></span>
+          <div><div class="t">Livret de compétences</div><div class="s">Vous suivez chaque acquis en temps réel.</div></div>
+        </div>
+        <div class="proof-item rise d2">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></span>
+          <div><div class="t">Forfaits clairs</div><div class="s">Pas de frais cachés, tout est écrit.</div></div>
+        </div>
+        <div class="proof-item rise d3">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 1.6 2.9-.2 1 2.7 2.4 1.7-.9 2.8.9 2.8-2.4 1.7-1 2.7-2.9-.2L12 22l-2.4-1.6-2.9.2-1-2.7L3.3 16l.9-2.8L3.3 10.4 5.7 8.7l1-2.7 2.9.2z"/><path d="M9 12l2 2 4-4"/></svg></span>
+          <div><div class="t">Moniteur agréé</div><div class="s">Diplômé BEPECASER, assuré.</div></div>
+        </div>
+        <div class="proof-item rise d4">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.5a8.5 8.5 0 1 1-4.8-7.6"/><path d="M21 4l-9 9-3-3"/></svg></span>
+          <div><div class="t">Réponse rapide</div><div class="s">Karim vous recontacte sous 24 h.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <div class="wrap">
+      <div class="final-card rise">
+        <div class="final-inner">
+          <div>
+            <h2 class="serif">Prêt à apprendre avec Karim&nbsp;?</h2>
+            <p>Rejoignez son espace en quelques secondes. Vous y suivez votre progression, vos leçons et votre préparation à l’examen.</p>
+            <div class="final-trust">
+              <span class="ft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg>Sans engagement</span>
+              <span class="ft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg>Gratuit pour l’élève</span>
+              <span class="ft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg>Données protégées</span>
+            </div>
+          </div>
+          <a class="btn-light" href="#">
+            Rejoindre Karim
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="wrap">
+      <span class="pwr">
+        <span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.6" fill="#fff" stroke="none"/></svg></span>
+        Page propulsée par PermiGo
+      </span>
+      <div class="legal">permigo.fr/m/karim-d · <a href="#">Mentions légales</a> · <a href="#">Confidentialité</a></div>
+    </div>
+  </footer>
+
+</body>
+</html>

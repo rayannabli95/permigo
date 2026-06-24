@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>PermiGo — Tu l'as eu !</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --night-1:#1a1030;
+    --night-2:#241445;
+    --night-3:#120a24;
+    --panel:#2a1b52;
+    --gold-1:#ffe08a;
+    --gold-2:#ffd24a;
+    --gold-3:#ff9c1c;
+    --violet:#7c4dff;
+    --violet-2:#a855f7;
+    --ink:#ffffff;
+    --mute:#b9aee0;
+    --line:rgba(168,135,255,.22);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px 16px;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, #2b1a52 0%, transparent 60%),
+      radial-gradient(900px 600px at 90% 110%, #1d1140 0%, transparent 55%),
+      linear-gradient(160deg,#14101f 0%,#0c0918 100%);
+    color:var(--ink);
+  }
+
+  /* ---------- coque téléphone ---------- */
+  .phone{
+    position:relative;
+    width:390px;
+    height:844px;
+    border-radius:46px;
+    padding:11px;
+    background:
+      linear-gradient(160deg,#3a2c5e 0%,#1a1330 48%,#0d0a1c 100%);
+    box-shadow:
+      0 2px 2px rgba(255,255,255,.08) inset,
+      0 -2px 6px rgba(0,0,0,.5) inset,
+      0 40px 80px -20px rgba(0,0,0,.75),
+      0 10px 30px -8px rgba(124,77,255,.35);
+  }
+  .screen{
+    position:relative;
+    width:100%;
+    height:100%;
+    border-radius:36px;
+    overflow:hidden;
+    background:
+      radial-gradient(640px 380px at 50% -8%, #341d63 0%, transparent 58%),
+      radial-gradient(420px 360px at 12% 24%, rgba(124,77,255,.30) 0%, transparent 55%),
+      radial-gradient(520px 420px at 100% 84%, rgba(255,156,28,.10) 0%, transparent 55%),
+      linear-gradient(176deg,#241445 0%,#1a1030 46%,#120a24 100%);
+    display:flex;
+    flex-direction:column;
+  }
+  /* grain subtil */
+  .screen::after{
+    content:"";
+    position:absolute;inset:0;
+    pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+    opacity:.04;
+    mix-blend-mode:overlay;
+    z-index:60;
+  }
+
+  /* ---------- barre d'état ---------- */
+  .status{
+    position:relative;z-index:40;
+    flex:0 0 auto;
+    height:50px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 26px 0 30px;
+    font-size:14.5px;font-weight:700;letter-spacing:.2px;
+    color:#fff;
+  }
+  .status .right{display:flex;align-items:center;gap:7px;}
+  .battery{
+    width:25px;height:13px;border:1.6px solid rgba(255,255,255,.75);
+    border-radius:4px;position:relative;padding:1.6px;
+  }
+  .battery::after{content:"";position:absolute;right:-3.4px;top:3.2px;width:2px;height:5px;background:rgba(255,255,255,.75);border-radius:0 2px 2px 0;}
+  .battery i{display:block;height:100%;width:74%;background:linear-gradient(180deg,#ffe08a,#ffd24a);border-radius:1.5px;}
+  .dot-sig{display:flex;gap:2.5px;align-items:flex-end;height:12px;}
+  .dot-sig span{width:3px;background:#fff;border-radius:1px;}
+  .dot-sig span:nth-child(1){height:4px;opacity:.55}
+  .dot-sig span:nth-child(2){height:7px;opacity:.7}
+  .dot-sig span:nth-child(3){height:10px;opacity:.85}
+  .dot-sig span:nth-child(4){height:12px}
+
+  /* ---------- contenu scroll ---------- */
+  .content{
+    position:relative;z-index:30;
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding:6px 22px 24px;
+    display:flex;flex-direction:column;
+  }
+  .content::-webkit-scrollbar{display:none;}
+
+  /* éclats dorés en fond du héros */
+  .sparks{position:absolute;inset:0;pointer-events:none;z-index:20;overflow:hidden;}
+  .spark{position:absolute;background:radial-gradient(circle,#ffe08a 0%,rgba(255,210,74,0) 70%);border-radius:50%;opacity:.0;animation:twinkle 3.6s ease-in-out infinite;}
+  .spark.s1{top:96px;left:38px;width:9px;height:9px;animation-delay:.2s}
+  .spark.s2{top:74px;right:46px;width:6px;height:6px;animation-delay:1.1s}
+  .spark.s3{top:150px;right:30px;width:11px;height:11px;animation-delay:.6s}
+  .spark.s4{top:210px;left:26px;width:7px;height:7px;animation-delay:1.8s}
+  .spark.s5{top:128px;left:54%;width:5px;height:5px;animation-delay:2.4s}
+  @keyframes twinkle{0%,100%{opacity:0;transform:scale(.4)}45%{opacity:.9;transform:scale(1)}}
+
+  /* ---------- HÉROS célébration ---------- */
+  .hero{
+    position:relative;z-index:30;
+    text-align:center;
+    padding-top:14px;
+    margin-bottom:18px;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:11px;font-weight:800;letter-spacing:2.4px;text-transform:uppercase;
+    color:#ffe7b3;
+    padding:7px 14px;border-radius:999px;
+    background:linear-gradient(180deg,rgba(255,210,74,.16),rgba(255,156,28,.08));
+    border:1px solid rgba(255,210,74,.32);
+    box-shadow:0 0 22px rgba(255,180,60,.22),0 1px 0 rgba(255,255,255,.18) inset;
+  }
+  .eyebrow svg{width:13px;height:13px}
+
+  /* médaillon */
+  .medal{
+    position:relative;
+    width:128px;height:128px;
+    margin:20px auto 10px;
+  }
+  .medal .halo{
+    position:absolute;inset:-34px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,200,70,.42) 0%,rgba(124,77,255,.18) 45%,transparent 70%);
+    filter:blur(4px);
+    animation:pulse 3.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{transform:scale(.92);opacity:.75}50%{transform:scale(1.06);opacity:1}}
+  .medal .ring{
+    position:absolute;inset:0;border-radius:50%;
+    background:conic-gradient(from 210deg,#ff9c1c,#ffe08a 28%,#fff6d8 42%,#ffd24a 60%,#ff9c1c 82%,#b5670a 100%);
+    padding:7px;
+    box-shadow:
+      0 14px 30px -8px rgba(255,140,20,.6),
+      0 0 0 1px rgba(255,255,255,.25) inset;
+    animation:float 5.5s ease-in-out infinite;
+  }
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .medal .core{
+    width:100%;height:100%;border-radius:50%;
+    background:
+      radial-gradient(60% 50% at 50% 22%, rgba(255,255,255,.55) 0%, transparent 60%),
+      linear-gradient(165deg,#3a2566 0%,#241445 60%,#180e30 100%);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 16px rgba(0,0,0,.45) inset,0 -2px 8px rgba(124,77,255,.4) inset;
+    position:relative;
+  }
+  .medal .core svg{width:62px;height:62px;filter:drop-shadow(0 2px 6px rgba(255,180,60,.55));}
+  /* shimmer sur le médaillon */
+  .medal .core::after{
+    content:"";position:absolute;inset:0;border-radius:50%;
+    background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.42) 48%,transparent 58%);
+    background-size:240% 240%;
+    animation:shimmer 4.2s ease-in-out infinite;
+  }
+  @keyframes shimmer{0%{background-position:140% 0}60%,100%{background-position:-60% 0}}
+
+  .hero h1{
+    font-family:'Baloo 2',cursive;
+    font-weight:800;
+    font-size:42px;
+    line-height:.98;
+    letter-spacing:-1.2px;
+    margin-top:6px;
+    background:linear-gradient(180deg,#fff6e0 0%,#ffd24a 52%,#ff9c1c 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 2px 20px rgba(255,170,50,.28);
+  }
+  .hero .sub{
+    margin-top:8px;
+    font-size:14.5px;line-height:1.45;font-weight:500;
+    color:var(--mute);
+    max-width:280px;margin-left:auto;margin-right:auto;
+  }
+  .hero .sub b{color:#fff;font-weight:700;}
+
+  /* ---------- carte avis ---------- */
+  .card{
+    position:relative;z-index:30;
+    margin-top:4px;
+    border-radius:26px;
+    padding:22px 20px 20px;
+    background:linear-gradient(170deg,rgba(58,40,98,.72) 0%,rgba(36,22,68,.78) 100%);
+    border:1px solid var(--line);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.07) inset,
+      0 -18px 40px -28px rgba(124,77,255,.6) inset,
+      0 26px 50px -22px rgba(0,0,0,.7);
+    backdrop-filter:blur(6px);
+  }
+  /* liseré or fin en haut de la carte */
+  .card::before{
+    content:"";position:absolute;left:24px;right:24px;top:0;height:1.5px;
+    background:linear-gradient(90deg,transparent,rgba(255,210,74,.7),transparent);
+  }
+
+  .coach{
+    display:flex;align-items:center;gap:12px;
+    padding-bottom:16px;
+    border-bottom:1px solid rgba(168,135,255,.16);
+    margin-bottom:16px;
+  }
+  .ava{
+    flex:0 0 auto;width:50px;height:50px;border-radius:16px;
+    background:linear-gradient(155deg,#8a5cff,#5a2ee0);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:21px;color:#fff;
+    box-shadow:0 6px 14px -4px rgba(124,77,255,.7),0 0 0 1.5px rgba(255,255,255,.16) inset;
+    position:relative;
+  }
+  .ava .pro{
+    position:absolute;right:-4px;bottom:-4px;width:20px;height:20px;border-radius:50%;
+    background:linear-gradient(160deg,#ffe08a,#ff9c1c);
+    display:flex;align-items:center;justify-content:center;
+    border:2px solid #241445;
+    box-shadow:0 2px 5px rgba(255,150,20,.6);
+  }
+  .ava .pro svg{width:11px;height:11px;}
+  .coach .meta .q{font-size:12.5px;font-weight:600;color:var(--mute);letter-spacing:.1px;}
+  .coach .meta .n{font-family:'Baloo 2',cursive;font-weight:700;font-size:19px;color:#fff;line-height:1.15;letter-spacing:-.2px;}
+  .coach .meta .role{font-size:11.5px;color:#c9bdf0;font-weight:500;}
+
+  /* étoiles */
+  .stars-block{text-align:center;margin-bottom:4px;}
+  .stars-block .lbl{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#cbbdf2;margin-bottom:11px;}
+  .stars{display:flex;justify-content:center;gap:9px;}
+  .star{
+    width:42px;height:42px;cursor:pointer;
+    background:none;border:none;padding:0;
+    transition:transform .18s cubic-bezier(.34,1.56,.64,1);
+  }
+  .star svg{width:100%;height:100%;display:block;}
+  .star .fill{opacity:0;transition:opacity .2s ease;}
+  .star.on .fill{opacity:1;}
+  .star.on{transform:scale(1.04);}
+  .star:active{transform:scale(.9);}
+  .rating-word{
+    margin-top:12px;height:18px;
+    font-family:'Baloo 2',cursive;font-weight:700;font-size:15px;
+    color:#ffd766;
+    text-shadow:0 0 16px rgba(255,180,60,.4);
+    transition:opacity .2s ease;
+  }
+
+  /* champ texte */
+  .field{margin-top:18px;}
+  .field .lbl{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#cbbdf2;margin-bottom:10px;}
+  .ta-wrap{
+    position:relative;border-radius:18px;
+    background:linear-gradient(180deg,rgba(18,10,36,.6),rgba(26,16,48,.5));
+    border:1px solid rgba(168,135,255,.26);
+    box-shadow:0 2px 10px rgba(0,0,0,.35) inset;
+  }
+  textarea{
+    width:100%;min-height:84px;resize:none;border:none;background:transparent;outline:none;
+    font-family:'Inter',sans-serif;font-size:14.5px;line-height:1.5;color:#fff;
+    padding:14px 14px 30px;
+  }
+  textarea::placeholder{color:#8e82b8;}
+  .counter{position:absolute;right:12px;bottom:9px;font-size:11px;font-weight:600;color:#857ab0;}
+
+  /* toggle vitrine */
+  .toggle-row{
+    margin-top:16px;
+    display:flex;align-items:center;gap:13px;
+    padding:14px 14px;border-radius:18px;
+    background:linear-gradient(170deg,rgba(124,77,255,.16),rgba(124,77,255,.05));
+    border:1px solid rgba(168,135,255,.24);
+  }
+  .toggle-row .ic{
+    flex:0 0 auto;width:38px;height:38px;border-radius:12px;
+    background:linear-gradient(160deg,rgba(255,210,74,.2),rgba(255,156,28,.12));
+    border:1px solid rgba(255,210,74,.3);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .toggle-row .ic svg{width:19px;height:19px;}
+  .toggle-row .txt{flex:1 1 auto;}
+  .toggle-row .txt .t{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.1px;}
+  .toggle-row .txt .d{font-size:11.5px;color:var(--mute);margin-top:2px;line-height:1.35;}
+  .switch{
+    flex:0 0 auto;width:50px;height:30px;border-radius:999px;border:none;cursor:pointer;
+    padding:3px;position:relative;
+    background:linear-gradient(180deg,#1c1238,#150d2b);
+    box-shadow:0 2px 6px rgba(0,0,0,.4) inset,0 0 0 1px rgba(168,135,255,.2) inset;
+    transition:background .25s ease;
+  }
+  .switch i{
+    display:block;width:24px;height:24px;border-radius:50%;
+    background:linear-gradient(180deg,#fff,#d8cdf2);
+    box-shadow:0 2px 4px rgba(0,0,0,.4),0 1px 0 rgba(255,255,255,.6) inset;
+    transition:transform .25s cubic-bezier(.34,1.4,.64,1),background .25s ease;
+  }
+  .switch.on{background:linear-gradient(180deg,#ffd24a,#ff9c1c);box-shadow:0 0 14px rgba(255,160,30,.55),0 1px 0 rgba(255,255,255,.4) inset;}
+  .switch.on i{transform:translateX(20px);background:linear-gradient(180deg,#fff,#fff0cf);}
+
+  /* ---------- bas / CTA ---------- */
+  .cta-zone{
+    position:relative;z-index:30;
+    margin-top:18px;
+  }
+  .btn{
+    width:100%;border:none;cursor:pointer;
+    height:58px;border-radius:20px;
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:18px;letter-spacing:.2px;
+    color:#3a1c00;
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    background:linear-gradient(180deg,#ffe48f 0%,#ffd24a 42%,#ff9c1c 100%);
+    box-shadow:
+      0 5px 0 #b5670a,
+      0 14px 26px -8px rgba(255,150,20,.6),
+      0 1px 0 rgba(255,255,255,.7) inset,
+      0 -4px 8px rgba(180,90,0,.35) inset;
+    transition:transform .09s ease,box-shadow .09s ease;
+  }
+  .btn svg{width:20px;height:20px;}
+  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #b5670a,0 6px 14px -8px rgba(255,150,20,.6),0 1px 0 rgba(255,255,255,.7) inset;}
+  .skip{
+    display:block;width:100%;text-align:center;
+    margin-top:13px;padding:6px;
+    background:none;border:none;cursor:pointer;
+    font-size:13.5px;font-weight:600;color:#9d92c8;
+  }
+  .reassure{
+    text-align:center;margin-top:10px;
+    font-size:11.5px;color:#8b80b4;font-weight:500;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .reassure svg{width:13px;height:13px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+
+      <!-- barre d'état -->
+      <div class="status">
+        <span>9:41</span>
+        <span class="right">
+          <span class="dot-sig"><span></span><span></span><span></span><span></span></span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.5px;">5G</span>
+          <span class="battery"><i></i></span>
+        </span>
+      </div>
+
+      <!-- éclats dorés -->
+      <div class="sparks" aria-hidden="true">
+        <span class="spark s1"></span><span class="spark s2"></span>
+        <span class="spark s3"></span><span class="spark s4"></span>
+        <span class="spark s5"></span>
+      </div>
+
+      <div class="content">
+
+        <!-- HÉROS -->
+        <div class="hero">
+          <span class="eyebrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ffe7b3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg>
+            Examen validé
+          </span>
+
+          <div class="medal">
+            <span class="halo"></span>
+            <div class="ring">
+              <div class="core">
+                <!-- coupe / trophée SVG -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="url(#g)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3cf"/><stop offset="1" stop-color="#ffb13a"/></linearGradient></defs>
+                  <path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/>
+                  <path d="M17 5h2.5a2 2 0 0 1 0 4H17"/>
+                  <path d="M7 5H4.5a2 2 0 0 0 0 4H7"/>
+                  <path d="M12 13v3"/>
+                  <path d="M8.5 20h7"/>
+                  <path d="M9.5 16.5h5l-.5 3.5h-4z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <h1>Tu l'as eu&nbsp;!</h1>
+          <p class="sub">Permis B en poche, <b>Inès</b>. Le plus dur est derrière toi — savoure ce moment&nbsp;🎉</p>
+        </div>
+
+        <!-- CARTE AVIS -->
+        <div class="card">
+
+          <div class="coach">
+            <div class="ava">K
+              <span class="pro">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#3a1c00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 6"/></svg>
+              </span>
+            </div>
+            <div class="meta">
+              <div class="q">Un mot pour</div>
+              <div class="n">Karim B.</div>
+              <div class="role">Ton moniteur · 23 leçons ensemble</div>
+            </div>
+          </div>
+
+          <!-- étoiles -->
+          <div class="stars-block">
+            <div class="lbl">Ta note</div>
+            <div class="stars" id="stars">
+              <!-- 5 boutons étoile -->
+              <button class="star" data-v="1" aria-label="1 étoile"></button>
+              <button class="star" data-v="2" aria-label="2 étoiles"></button>
+              <button class="star" data-v="3" aria-label="3 étoiles"></button>
+              <button class="star" data-v="4" aria-label="4 étoiles"></button>
+              <button class="star" data-v="5" aria-label="5 étoiles"></button>
+            </div>
+            <div class="rating-word" id="ratingWord">&nbsp;</div>
+          </div>
+
+          <!-- champ une phrase -->
+          <div class="field">
+            <div class="lbl">Ton message (facultatif)</div>
+            <div class="ta-wrap">
+              <textarea id="msg" maxlength="160" placeholder="Patient, clair, m'a mis en confiance dès la première leçon…"></textarea>
+              <span class="counter" id="counter">0 / 160</span>
+            </div>
+          </div>
+
+          <!-- toggle vitrine -->
+          <div class="toggle-row">
+            <div class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#ffd24a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-4.5h15L21 9"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/></svg>
+            </div>
+            <div class="txt">
+              <div class="t">Le montrer sur sa vitrine</div>
+              <div class="d">Ton avis aide d'autres élèves à choisir Karim.</div>
+            </div>
+            <button class="switch on" id="sw" role="switch" aria-checked="true" aria-label="Rendre public"><i></i></button>
+          </div>
+
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-zone">
+          <button class="btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#3a1c00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            Envoyer mon avis
+          </button>
+          <button class="skip">Plus tard</button>
+          <div class="reassure">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#8b80b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+            Tu pourras le modifier à tout moment
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+  // étoiles SVG injectées + interaction
+  const STAR_SVG = `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <defs>
+        <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffe48f"/><stop offset=".55" stop-color="#ffd24a"/><stop offset="1" stop-color="#ff9c1c"/>
+        </linearGradient>
+        <filter id="sgl" x="-40%" y="-40%" width="180%" height="180%">
+          <feDropShadow dx="0" dy="0" stdDeviation="2.4" flood-color="#ffb13a" flood-opacity="0.85"/>
+        </filter>
+      </defs>
+      <path class="base" d="M12 3.2l2.55 5.17 5.7.83-4.13 4.02.98 5.68L12 16.2l-5.1 2.5.98-5.68L3.75 9.2l5.7-.83L12 3.2z"
+        fill="rgba(255,255,255,0.05)" stroke="rgba(168,135,255,.45)" stroke-width="1.4" stroke-linejoin="round"/>
+      <path class="fill" d="M12 3.2l2.55 5.17 5.7.83-4.13 4.02.98 5.68L12 16.2l-5.1 2.5.98-5.68L3.75 9.2l5.7-.83L12 3.2z"
+        fill="url(#sg)" stroke="#fff0cf" stroke-width="1" stroke-linejoin="round" filter="url(#sgl)"/>
+    </svg>`;
+  const WORDS = ['', 'À revoir', 'Correct', 'Bien', 'Très bien', 'Au top !'];
+  const stars = [...document.querySelectorAll('.star')];
+  const word = document.getElementById('ratingWord');
+  let current = 5;
+  stars.forEach(s => s.innerHTML = STAR_SVG);
+  function paint(n){ stars.forEach(s => s.classList.toggle('on', +s.dataset.v <= n)); word.textContent = n ? WORDS[n] : ' '; }
+  stars.forEach(s => {
+    s.addEventListener('click', () => { current = +s.dataset.v; paint(current); });
+    s.addEventListener('mouseenter', () => paint(+s.dataset.v));
+  });
+  document.getElementById('stars').addEventListener('mouseleave', () => paint(current));
+  paint(current); // pré-rempli 5 (moment positif)
+
+  // compteur texte
+  const ta = document.getElementById('msg'), counter = document.getElementById('counter');
+  ta.addEventListener('input', () => counter.textContent = ta.value.length + ' / 160');
+
+  // toggle
+  const sw = document.getElementById('sw');
+  sw.addEventListener('click', () => {
+    const on = sw.classList.toggle('on');
+    sw.setAttribute('aria-checked', on);
+  });
+</script>
+</body>
+</html>

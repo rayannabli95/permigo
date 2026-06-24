@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Moniteur — Devoirs entre deux leçons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --indigo:#4f46e5;
+    --indigo-d:#4338ca;
+    --indigo-dd:#3730a3;
+    --indigo-50:#eef0ff;
+    --indigo-100:#e3e6ff;
+    --indigo-200:#cdd2ff;
+    --ink:#1d2046;
+    --ink-soft:#4b4f73;
+    --mut:#7c80a3;
+    --line:#e7e9f7;
+    --bg:#f5f6ff;
+    --card:#ffffff;
+    --ok:#16a34a;
+    --ok-soft:#dcfce7;
+    --warn:#d97706;
+    --gold-1:#fde9a8;
+    --gold-2:#f4c64a;
+    --gold-3:#c98a16;
+    --arene-1:#241a4d;
+    --arene-2:#160f33;
+    --arene-acc:#a78bfa;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1100px 700px at 18% -8%, #e9ebff 0%, rgba(233,235,255,0) 55%),
+      radial-gradient(900px 600px at 110% 8%, #eef0ff 0%, rgba(238,240,255,0) 50%),
+      #ecedfb;
+    min-height:100%;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:48px 18px 80px;
+  }
+
+  /* ---------- coque téléphone ---------- */
+  .phone{
+    position:relative;
+    width:390px;
+    height:844px;
+    border-radius:46px;
+    background:var(--bg);
+    box-shadow:
+      0 2px 4px rgba(40,40,90,.12),
+      0 30px 60px -18px rgba(48,44,120,.45),
+      0 60px 120px -40px rgba(60,55,150,.5),
+      inset 0 0 0 9px #0c0e22,
+      inset 0 0 0 11px #2a2c52;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .phone::after{ /* notch */
+    content:"";
+    position:absolute;top:11px;left:50%;transform:translateX(-50%);
+    width:128px;height:30px;border-radius:18px;background:#0c0e22;z-index:60;
+  }
+
+  /* panneaux routiers décoratifs en fond très léger */
+  .signs{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .signs svg{position:absolute}
+
+  /* status bar */
+  .statusbar{
+    position:relative;z-index:50;
+    height:52px;display:flex;align-items:flex-end;justify-content:space-between;
+    padding:0 26px 6px;font-weight:700;font-size:15px;color:var(--ink);
+    letter-spacing:.2px;
+  }
+  .sb-right{display:flex;align-items:center;gap:6px}
+  .batt{width:25px;height:13px;border:1.6px solid var(--ink);border-radius:3.5px;position:relative;opacity:.85}
+  .batt::after{content:"";position:absolute;right:-3px;top:3.5px;width:2px;height:5px;background:var(--ink);border-radius:0 2px 2px 0}
+  .batt i{position:absolute;inset:1.6px;width:72%;background:var(--ink);border-radius:1.5px;display:block}
+  .sig{display:flex;align-items:flex-end;gap:1.6px;height:12px}
+  .sig b{width:3px;background:var(--ink);border-radius:1px;display:block}
+  .sig b:nth-child(1){height:5px}.sig b:nth-child(2){height:7px}.sig b:nth-child(3){height:9.5px}.sig b:nth-child(4){height:12px}
+
+  /* scroll zone */
+  .screen{
+    position:relative;z-index:10;
+    height:calc(844px - 52px);
+    overflow-y:auto;overflow-x:hidden;
+    padding:4px 18px 38px;
+    scrollbar-width:none;
+  }
+  .screen::-webkit-scrollbar{display:none}
+
+  /* ---------- top bar ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin:6px 2px 16px}
+  .back{
+    width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+    background:var(--card);border:1px solid var(--line);
+    box-shadow:0 2px 5px rgba(60,55,140,.07);
+  }
+  .back svg{width:20px;height:20px;stroke:var(--ink);stroke-width:2.4;fill:none}
+  .kicker{font-family:'Fredoka';font-weight:600;font-size:12.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--indigo);text-align:center;line-height:1.1}
+  .kicker small{display:block;font-family:'Inter';font-weight:600;letter-spacing:.2px;text-transform:none;color:var(--mut);font-size:11.5px;margin-top:2px}
+  .help{
+    width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+    background:var(--card);border:1px solid var(--line);
+    box-shadow:0 2px 5px rgba(60,55,140,.07);font-family:'Fredoka';font-weight:600;color:var(--mut)
+  }
+
+  /* ---------- HERO (élément dominant) ---------- */
+  .hero{
+    position:relative;
+    border-radius:28px;
+    padding:22px 20px 20px;
+    color:#fff;
+    background:
+      radial-gradient(120% 100% at 12% 0%, #6d63f0 0%, rgba(109,99,240,0) 52%),
+      linear-gradient(155deg, #5b51ec 0%, #4338ca 46%, #3730a3 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.18) inset,
+      0 18px 34px -14px rgba(67,56,202,.6),
+      0 34px 60px -28px rgba(55,48,163,.55);
+    overflow:hidden;
+    margin-bottom:18px;
+  }
+  .hero::before{ /* grain / mesh subtil */
+    content:"";position:absolute;inset:0;opacity:.4;mix-blend-mode:soft-light;pointer-events:none;
+    background:
+      radial-gradient(90px 90px at 86% 14%, #fff 0%, rgba(255,255,255,0) 70%),
+      radial-gradient(140px 120px at 102% 96%, #b9b2ff 0%, rgba(185,178,255,0) 70%);
+  }
+  .hero-top{display:flex;align-items:center;gap:11px;position:relative;z-index:2}
+  .ava{
+    width:52px;height:52px;border-radius:16px;flex:0 0 auto;
+    background:linear-gradient(145deg,#fbcfe8,#f9a8d4);
+    display:grid;place-items:center;font-family:'Fredoka';font-weight:700;font-size:20px;color:#9d174d;
+    box-shadow:0 0 0 3px rgba(255,255,255,.35), 0 6px 14px -4px rgba(0,0,0,.4);
+  }
+  .hero-who b{font-family:'Fredoka';font-weight:600;font-size:18px;letter-spacing:-.2px;display:block;line-height:1.1}
+  .hero-who span{font-size:12.5px;color:#d9d6ff;font-weight:500}
+  .hero-tag{
+    margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+    background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+    padding:6px 10px;border-radius:999px;color:#eef0ff;backdrop-filter:blur(4px);
+  }
+  .hero-title{font-family:'Fredoka';font-weight:600;font-size:25px;line-height:1.12;letter-spacing:-.5px;margin:16px 0 4px;position:relative;z-index:2}
+  .hero-sub{font-size:13px;color:#dcd9ff;font-weight:500;position:relative;z-index:2;line-height:1.45}
+
+  .hero-meta{display:flex;gap:9px;margin-top:16px;position:relative;z-index:2}
+  .chip{
+    flex:1;border-radius:15px;padding:11px 12px;
+    background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.07));
+    border:1px solid rgba(255,255,255,.2);
+    box-shadow:0 1px 0 rgba(255,255,255,.15) inset;
+  }
+  .chip .k{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:#cfcbff;font-weight:700;display:flex;align-items:center;gap:5px}
+  .chip .k svg{width:13px;height:13px;stroke:#fff;stroke-width:2.2;fill:none;opacity:.9}
+  .chip .v{font-family:'Fredoka';font-weight:600;font-size:16px;margin-top:3px;letter-spacing:-.2px}
+  .chip .v small{font-family:'Inter';font-weight:600;font-size:11.5px;color:#cfcbff}
+
+  /* progress global ring + bar */
+  .hero-prog{margin-top:16px;position:relative;z-index:2}
+  .hero-prog .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+  .hero-prog .row b{font-size:12.5px;font-weight:700;color:#efeeff}
+  .hero-prog .row span{font-family:'Fredoka';font-weight:600;font-size:13px;color:#fff}
+  .track{height:10px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
+  .track i{display:block;height:100%;width:33%;border-radius:999px;
+    background:linear-gradient(90deg,#fde9a8,#f4c64a 60%,#facc15);
+    box-shadow:0 0 10px rgba(250,204,21,.6);position:relative;overflow:hidden}
+  .track i::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 20%,rgba(255,255,255,.55) 50%,transparent 80%);transform:translateX(-120%);animation:shine 3.2s ease-in-out 1.2s infinite}
+  @keyframes shine{0%{transform:translateX(-120%)}55%,100%{transform:translateX(220%)}}
+
+  /* ---------- section label ---------- */
+  .sec{display:flex;align-items:center;gap:8px;margin:6px 2px 12px}
+  .sec h2{font-family:'Fredoka';font-weight:600;font-size:16.5px;letter-spacing:-.2px;color:var(--ink)}
+  .sec .num{
+    width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-family:'Fredoka';font-weight:600;font-size:12.5px;
+    color:#fff;background:linear-gradient(160deg,var(--indigo),var(--indigo-dd));
+    box-shadow:0 4px 9px -3px rgba(67,56,202,.6)
+  }
+  .sec .count{margin-left:auto;font-size:12px;font-weight:700;color:var(--mut)}
+  .sec .count b{color:var(--ok)}
+
+  /* ---------- devoir cards (liste, PAS grille plate) ---------- */
+  .dlist{display:flex;flex-direction:column;gap:11px;margin-bottom:20px}
+  .devoir{
+    position:relative;display:flex;gap:13px;align-items:center;
+    background:var(--card);border:1px solid var(--line);border-radius:20px;
+    padding:14px 14px 14px 15px;
+    box-shadow:0 1px 2px rgba(60,55,140,.05), 0 10px 22px -16px rgba(67,56,202,.4);
+  }
+  .devoir.done{background:linear-gradient(180deg,#f4fbf5,#fbfffb);border-color:#cdedd2}
+  .d-ico{
+    width:46px;height:46px;border-radius:14px;flex:0 0 auto;display:grid;place-items:center;position:relative;
+  }
+  .d-ico.fiche{background:linear-gradient(160deg,#eef0ff,#dfe3ff);box-shadow:inset 0 0 0 1px #d3d8ff}
+  .d-ico.quiz{background:linear-gradient(160deg,#fff3df,#ffe7bd);box-shadow:inset 0 0 0 1px #ffe0b0}
+  .d-ico svg{width:23px;height:23px;fill:none;stroke-width:2.1}
+  .d-ico.fiche svg{stroke:var(--indigo-d)}
+  .d-ico.quiz svg{stroke:#b5760a}
+  .d-body{flex:1;min-width:0}
+  .d-kind{font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--indigo);margin-bottom:2px}
+  .d-kind.q{color:#b5760a}
+  .d-title{font-family:'Fredoka';font-weight:500;font-size:15px;color:var(--ink);line-height:1.18;letter-spacing:-.1px}
+  .d-meta{display:flex;align-items:center;gap:9px;margin-top:6px;font-size:11.5px;color:var(--mut);font-weight:600}
+  .d-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--line)}
+  .d-meta svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;vertical-align:-2px;margin-right:3px}
+
+  /* état Fait / Pas fait */
+  .state{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;width:58px}
+  .stbtn{
+    width:30px;height:30px;border-radius:10px;display:grid;place-items:center;border:2px solid var(--line);background:#fbfbff;
+  }
+  .stbtn svg{width:16px;height:16px;fill:none;stroke-width:2.6}
+  .devoir.done .stbtn{border-color:var(--ok);background:linear-gradient(160deg,#22c55e,#15803d);box-shadow:0 6px 12px -5px rgba(22,163,74,.6)}
+  .devoir.done .stbtn svg{stroke:#fff}
+  .st-lab{font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase}
+  .devoir.done .st-lab{color:var(--ok)}
+  .devoir.todo .st-lab{color:var(--mut)}
+  .devoir.late .stbtn{border-color:#f0b6b6;background:#fff6f6}
+  .devoir.late .st-lab{color:#c0392b}
+
+  .late-flag{
+    position:absolute;top:-7px;right:14px;font-size:9.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+    background:linear-gradient(180deg,#fee2e2,#fecaca);color:#b91c1c;border:1px solid #f6b8b8;
+    padding:3px 8px;border-radius:999px;box-shadow:0 4px 8px -4px rgba(185,28,28,.4)
+  }
+
+  /* ---------- échéance card ---------- */
+  .deadline{
+    position:relative;display:flex;align-items:center;gap:13px;
+    border-radius:20px;padding:15px 16px;margin-bottom:22px;overflow:hidden;
+    background:linear-gradient(160deg,#fff,#f3f5ff);
+    border:1px solid #dfe3ff;
+    box-shadow:0 10px 24px -16px rgba(67,56,202,.45);
+  }
+  .deadline::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,var(--indigo),var(--indigo-dd))}
+  .dl-ico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:0 0 auto;
+    background:linear-gradient(160deg,var(--indigo),var(--indigo-dd));box-shadow:0 8px 16px -7px rgba(67,56,202,.7)}
+  .dl-ico svg{width:23px;height:23px;stroke:#fff;stroke-width:2.1;fill:none}
+  .dl-body b{display:block;font-family:'Fredoka';font-weight:600;font-size:15px;color:var(--ink);letter-spacing:-.2px}
+  .dl-body span{font-size:12px;color:var(--ink-soft);font-weight:500}
+  .dl-pill{margin-left:auto;text-align:center;flex:0 0 auto}
+  .dl-pill b{font-family:'Fredoka';font-weight:700;font-size:22px;color:var(--indigo-d);line-height:1;letter-spacing:-.5px;display:block}
+  .dl-pill span{font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--mut)}
+
+  /* ---------- aperçu côté élève (arène violet sombre) ---------- */
+  .preview-lab{display:flex;align-items:center;gap:9px;margin:4px 2px 12px}
+  .preview-lab .eye{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(160deg,#2a1f57,#160f33);box-shadow:0 5px 12px -4px rgba(43,31,87,.6)}
+  .preview-lab .eye svg{width:15px;height:15px;stroke:#c4b5fd;stroke-width:2;fill:none}
+  .preview-lab b{font-family:'Fredoka';font-weight:600;font-size:14px;color:var(--ink)}
+  .preview-lab small{font-size:11.5px;color:var(--mut);font-weight:600;margin-left:auto}
+
+  .arene{
+    position:relative;border-radius:24px;padding:18px 17px 17px;overflow:hidden;color:#efe9ff;
+    background:
+      radial-gradient(120% 90% at 88% -10%, #4c2f86 0%, rgba(76,47,134,0) 55%),
+      radial-gradient(90% 80% at 0% 110%, #3a1f6e 0%, rgba(58,31,110,0) 55%),
+      linear-gradient(160deg,#241a4d 0%, #1a1240 55%, #120c2e 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.07) inset,
+      0 18px 38px -16px rgba(26,18,64,.85),
+      0 0 0 1px rgba(167,139,250,.18);
+    margin-bottom:26px;
+  }
+  .arene::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:screen;
+    background:radial-gradient(70px 70px at 14% 18%,rgba(167,139,250,.5),transparent 70%),radial-gradient(90px 90px at 96% 8%,rgba(244,114,182,.32),transparent 70%)}
+  .a-head{display:flex;align-items:center;gap:11px;position:relative;z-index:2}
+  .a-crest{
+    width:44px;height:44px;border-radius:13px;flex:0 0 auto;display:grid;place-items:center;
+    background:linear-gradient(160deg,#7c3aed,#5b21b6);box-shadow:0 0 0 1px rgba(167,139,250,.5),0 8px 18px -6px rgba(124,58,237,.8)}
+  .a-crest svg{width:23px;height:23px;stroke:#fde9a8;stroke-width:2;fill:none}
+  .a-head b{font-family:'Fredoka';font-weight:600;font-size:17px;letter-spacing:-.2px;color:#fff;display:block;line-height:1.1}
+  .a-head span{font-size:11.5px;color:#b7a9e8;font-weight:600}
+  .a-badge{margin-left:auto;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#1a1240;
+    background:linear-gradient(160deg,var(--gold-1),var(--gold-2));padding:5px 9px;border-radius:999px;box-shadow:0 5px 12px -4px rgba(244,198,74,.6)}
+
+  .a-task{display:flex;align-items:center;gap:11px;padding:11px 4px;position:relative;z-index:2}
+  .a-task + .a-task{border-top:1px solid rgba(167,139,250,.16)}
+  .a-check{width:26px;height:26px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;border:2px solid rgba(167,139,250,.4);background:rgba(124,58,237,.12)}
+  .a-check svg{width:14px;height:14px;fill:none;stroke-width:2.6}
+  .a-task.done .a-check{border-color:transparent;background:linear-gradient(160deg,#a78bfa,#7c3aed);box-shadow:0 0 14px rgba(167,139,250,.55)}
+  .a-task.done .a-check svg{stroke:#fff}
+  .a-task.open .a-check svg{stroke:#7c6bb0}
+  .a-t-body{flex:1;min-width:0}
+  .a-t-body b{font-family:'Fredoka';font-weight:500;font-size:13.5px;color:#f3eeff;letter-spacing:-.1px;display:block;line-height:1.2}
+  .a-task.done .a-t-body b{color:#b9aee0;text-decoration:line-through;text-decoration-color:rgba(167,139,250,.45)}
+  .a-t-body span{font-size:11px;color:#9c8fcb;font-weight:600}
+  .a-rew{font-family:'Fredoka';font-weight:600;font-size:12px;color:var(--gold-1);display:flex;align-items:center;gap:4px;flex:0 0 auto}
+  .a-rew svg{width:14px;height:14px}
+
+  .a-foot{margin-top:13px;position:relative;z-index:2}
+  .a-foot .row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:11.5px;font-weight:700}
+  .a-foot .row span{color:#c9bef0}
+  .a-foot .row b{color:var(--gold-1);font-family:'Fredoka'}
+  .a-track{height:9px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+  .a-track i{display:block;height:100%;width:66%;border-radius:999px;background:linear-gradient(90deg,#a78bfa,#7c3aed 60%,#c084fc);box-shadow:0 0 12px rgba(167,139,250,.7)}
+
+  /* ---------- CTA fixe ---------- */
+  .cta-wrap{position:absolute;left:0;right:0;bottom:0;z-index:40;
+    padding:16px 18px calc(18px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(245,246,255,0) 0%,rgba(245,246,255,.86) 32%,#f5f6ff 70%)}
+  .cta{
+    width:100%;height:56px;border:none;border-radius:18px;cursor:pointer;
+    font-family:'Fredoka';font-weight:600;font-size:16px;letter-spacing:-.1px;color:#fff;
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    background:linear-gradient(180deg,#5b51ec,#4338ca 70%,#3a31ad);
+    box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 10px 22px -8px rgba(67,56,202,.7),0 18px 36px -16px rgba(55,48,163,.6)}
+  .cta svg{width:20px;height:20px;stroke:#fff;stroke-width:2.3;fill:none}
+  .cta-note{text-align:center;font-size:11px;color:var(--mut);font-weight:600;margin-top:9px}
+
+  @media (prefers-reduced-motion: reduce){
+    .track i::after{animation:none}
+  }
+</style>
+</head>
+<body>
+  <div class="phone" role="img" aria-label="Maquette écran moniteur — devoirs entre deux leçons">
+
+    <!-- panneaux routiers décoratifs très légers -->
+    <div class="signs" aria-hidden="true">
+      <svg width="150" height="150" viewBox="0 0 100 100" style="top:96px;right:-34px;opacity:.05">
+        <circle cx="50" cy="50" r="44" fill="none" stroke="#ef4444" stroke-width="9"/>
+      </svg>
+      <svg width="120" height="120" viewBox="0 0 100 100" style="top:470px;left:-30px;opacity:.045">
+        <path d="M50 8 L92 86 L8 86 Z" fill="none" stroke="#ef4444" stroke-width="8" stroke-linejoin="round"/>
+      </svg>
+      <svg width="96" height="96" viewBox="0 0 100 100" style="top:712px;right:-22px;opacity:.05">
+        <rect x="50" y="6" width="62" height="62" rx="8" transform="rotate(45 50 50)" fill="none" stroke="#4f46e5" stroke-width="7"/>
+      </svg>
+    </div>
+
+    <!-- status bar -->
+    <div class="statusbar">
+      <span>9:41</span>
+      <div class="sb-right">
+        <span class="sig" aria-hidden="true"><b></b><b></b><b></b><b></b></span>
+        <span style="font-size:12px;font-weight:800">5G</span>
+        <span class="batt" aria-hidden="true"><i></i></span>
+      </div>
+    </div>
+
+    <div class="screen">
+
+      <!-- top bar -->
+      <div class="topbar">
+        <div class="back" aria-label="Retour"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div>
+        <div class="kicker">Devoirs entre deux leçons<small>Auto-école Loïc Mercier</small></div>
+        <div class="help">?</div>
+      </div>
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-top">
+          <div class="ava">IB</div>
+          <div class="hero-who">
+            <b>Inès Benali</b>
+            <span>14 h de conduite · niveau 2/4</span>
+          </div>
+          <div class="hero-tag">Plan actif</div>
+        </div>
+
+        <h1 class="hero-title">Le plan d’Inès<br>avant sa prochaine conduite</h1>
+        <p class="hero-sub">Deux fiches et un quiz à boucler pour arriver prête. Tu suis l’avancement en direct, elle reçoit tout dans son appli.</p>
+
+        <div class="hero-meta">
+          <div class="chip">
+            <div class="k"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg>À faire</div>
+            <div class="v">3 <small>devoirs</small></div>
+          </div>
+          <div class="chip">
+            <div class="k"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg>Faits</div>
+            <div class="v">1 <small>/ 3</small></div>
+          </div>
+          <div class="chip">
+            <div class="k"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Échéance</div>
+            <div class="v">Jeu. <small>18 h</small></div>
+          </div>
+        </div>
+
+        <div class="hero-prog">
+          <div class="row"><b>Avancement du plan</b><span>33 %</span></div>
+          <div class="track"><i></i></div>
+        </div>
+      </section>
+
+      <!-- SECTION devoirs -->
+      <div class="sec">
+        <span class="num">3</span>
+        <h2>Le mini-plan</h2>
+        <span class="count"><b>1 fait</b> · 2 en attente</span>
+      </div>
+
+      <div class="dlist">
+
+        <!-- fiche 1 — faite -->
+        <article class="devoir done">
+          <div class="d-ico fiche">
+            <svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
+          </div>
+          <div class="d-body">
+            <div class="d-kind">Fiche · Révision</div>
+            <div class="d-title">Le créneau : repères et trajectoire</div>
+            <div class="d-meta">
+              <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>4 min</span>
+              <span class="dot"></span>
+              <span>Lue lundi · 18 h 12</span>
+            </div>
+          </div>
+          <div class="state">
+            <div class="stbtn"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg></div>
+            <div class="st-lab">Fait</div>
+          </div>
+        </article>
+
+        <!-- fiche 2 — pas fait, en retard -->
+        <article class="devoir todo late">
+          <span class="late-flag">En retard</span>
+          <div class="d-ico fiche">
+            <svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
+          </div>
+          <div class="d-body">
+            <div class="d-kind">Fiche · Révision</div>
+            <div class="d-title">Priorités à une intersection</div>
+            <div class="d-meta">
+              <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>5 min</span>
+              <span class="dot"></span>
+              <span>Pas encore ouverte</span>
+            </div>
+          </div>
+          <div class="state">
+            <div class="stbtn"></div>
+            <div class="st-lab">Pas fait</div>
+          </div>
+        </article>
+
+        <!-- quiz — pas fait -->
+        <article class="devoir todo">
+          <div class="d-ico quiz">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.2 9a2.8 2.8 0 1 1 4 2.5c-1 .6-1.2 1.1-1.2 2"/><path d="M12 17h.01"/></svg>
+          </div>
+          <div class="d-body">
+            <div class="d-kind q">Quiz · 10 questions</div>
+            <div class="d-title">Stop, cédez le passage et feux</div>
+            <div class="d-meta">
+              <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>≈ 6 min</span>
+              <span class="dot"></span>
+              <span>Objectif : 8 / 10</span>
+            </div>
+          </div>
+          <div class="state">
+            <div class="stbtn"></div>
+            <div class="st-lab">Pas fait</div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- échéance -->
+      <div class="deadline">
+        <div class="dl-ico"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg></div>
+        <div class="dl-body">
+          <b>À rendre avant la conduite</b>
+          <span>Jeudi 27 juin · 18 h 00 — RDV Cergy-Préfecture</span>
+        </div>
+        <div class="dl-pill">
+          <b>2j</b><span>restants</span>
+        </div>
+      </div>
+
+      <!-- APERÇU CÔTÉ ÉLÈVE (arène violet sombre) -->
+      <div class="preview-lab">
+        <span class="eye"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/></svg></span>
+        <b>Côté élève</b>
+        <small>ce qu’Inès reçoit</small>
+      </div>
+
+      <section class="arene" aria-label="Aperçu de l’écran de l’élève">
+        <div class="a-head">
+          <div class="a-crest"><svg viewBox="0 0 24 24"><path d="M6 4h12v4a6 6 0 0 1-12 0Z"/><path d="M6 6H3.5v1.5A3.5 3.5 0 0 0 6 11M18 6h2.5v1.5A3.5 3.5 0 0 1 18 11M9 16h6M10 20h4M12 16v4"/></svg></div>
+          <div>
+            <b>Tes devoirs</b>
+            <span>Avant ta conduite de jeudi</span>
+          </div>
+          <div class="a-badge">+90 volants</div>
+        </div>
+
+        <div class="a-task done">
+          <div class="a-check"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg></div>
+          <div class="a-t-body"><b>Le créneau : repères et trajectoire</b><span>Fiche · terminée</span></div>
+          <div class="a-rew"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#f4c64a" stroke="#c98a16" stroke-width="2"/><path d="M12 8v8M9 12h6" stroke="#7a4e06" stroke-width="2.4" fill="none"/></svg>+30</div>
+        </div>
+
+        <div class="a-task open">
+          <div class="a-check"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></div>
+          <div class="a-t-body"><b>Priorités à une intersection</b><span>Fiche · à lire</span></div>
+          <div class="a-rew"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#f4c64a" stroke="#c98a16" stroke-width="2"/><path d="M12 8v8M9 12h6" stroke="#7a4e06" stroke-width="2.4" fill="none"/></svg>+30</div>
+        </div>
+
+        <div class="a-task open">
+          <div class="a-check"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></div>
+          <div class="a-t-body"><b>Stop, cédez le passage et feux</b><span>Quiz · 10 questions</span></div>
+          <div class="a-rew"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#f4c64a" stroke="#c98a16" stroke-width="2"/><path d="M12 8v8M9 12h6" stroke="#7a4e06" stroke-width="2.4" fill="none"/></svg>+30</div>
+        </div>
+
+        <div class="a-foot">
+          <div class="row"><span>1 défi sur 3 relevé</span><b>33 %</b></div>
+          <div class="a-track"><i style="width:33%"></i></div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-wrap">
+      <button class="cta"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Envoyer le plan à Inès</button>
+    </div>
+
+  </div>
+</body>
+</html>

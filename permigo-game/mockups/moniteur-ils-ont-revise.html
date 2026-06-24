@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>PermiGo — Avant ta leçon avec Marie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --indigo: #4f46e5;
+    --indigo-d: #4338ca;
+    --indigo-dd: #3730a3;
+    --indigo-ink: #1e1b4b;
+    --ink: #20223a;
+    --mut: #6b6e8a;
+    --mut-2: #8b8ea8;
+    --line: #e7e8f4;
+    --bg: #eceef9;
+    --card: #ffffff;
+    --indigo-soft: #eef0ff;
+    --indigo-soft-2: #e4e7ff;
+    --gold-1: #f7e6a8;
+    --gold-2: #e8c25a;
+    --gold-3: #b8862a;
+    --green: #16a34a;
+    --green-soft: #e6f6ec;
+    --amber: #d97706;
+    --amber-soft: #fdf1e0;
+    --red: #dc2626;
+    --red-soft: #fdebec;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:
+      radial-gradient(900px 600px at 18% -8%, #dfe3fb 0%, rgba(223,227,251,0) 60%),
+      radial-gradient(900px 700px at 96% 8%, #e7e1fb 0%, rgba(231,225,251,0) 55%),
+      linear-gradient(180deg,#f1f2fb 0%, #e6e8f6 100%);
+    min-height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:34px 16px;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ===== Coque téléphone ===== */
+  .phone{
+    position:relative;
+    width:390px;
+    height:844px;
+    border-radius:46px;
+    background:linear-gradient(170deg,#f8f9ff 0%, #f3f4fc 100%);
+    box-shadow:
+      0 2px 2px rgba(40,42,80,.04),
+      0 18px 40px -12px rgba(60,55,140,.30),
+      0 50px 90px -30px rgba(50,45,120,.45),
+      inset 0 0 0 1.2px rgba(255,255,255,.7),
+      inset 0 0 0 8px #14132b;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .phone::before{ /* notch */
+    content:"";
+    position:absolute;
+    top:9px;left:50%;
+    transform:translateX(-50%);
+    width:128px;height:30px;
+    background:#14132b;
+    border-radius:0 0 18px 18px;
+    z-index:60;
+  }
+
+  .screen{
+    position:absolute;
+    inset:8px;
+    border-radius:38px;
+    overflow:hidden;
+    background:
+      radial-gradient(640px 400px at 80% -10%, #e9eb ff 0%, rgba(233,235,255,0) 55%),
+      linear-gradient(180deg,#f6f7ff 0%, #f0f1fb 46%, #eceef9 100%);
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* faint decorative road signs in the far background */
+  .signs{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .signs svg{position:absolute;}
+  .sg1{top:120px;left:-26px;opacity:.05;}
+  .sg2{top:470px;right:-30px;opacity:.05;}
+  .sg3{bottom:80px;left:30px;opacity:.045;}
+
+  /* ===== status bar ===== */
+  .status{
+    position:relative;z-index:30;
+    height:50px;
+    display:flex;align-items:flex-end;justify-content:space-between;
+    padding:0 26px 7px;
+    font-weight:700;font-size:14.5px;
+    letter-spacing:-.2px;color:#211f3d;
+  }
+  .status .right{display:flex;align-items:center;gap:6px;}
+  .bat{width:23px;height:12px;border:1.6px solid #211f3d;border-radius:3.4px;position:relative;opacity:.92;}
+  .bat::after{content:"";position:absolute;right:-3.4px;top:3px;width:2px;height:6px;background:#211f3d;border-radius:0 2px 2px 0;}
+  .bat i{position:absolute;inset:1.6px;width:72%;background:#211f3d;border-radius:1.4px;}
+  .sig{display:flex;align-items:flex-end;gap:1.6px;height:11px;}
+  .sig span{width:3px;background:#211f3d;border-radius:1px;}
+  .sig span:nth-child(1){height:4px;}
+  .sig span:nth-child(2){height:6.5px;}
+  .sig span:nth-child(3){height:9px;}
+  .sig span:nth-child(4){height:11px;}
+
+  /* ===== app header ===== */
+  .appbar{
+    position:relative;z-index:20;
+    display:flex;align-items:center;gap:12px;
+    padding:6px 22px 12px;
+  }
+  .back{
+    width:40px;height:40px;border-radius:13px;flex:0 0 auto;
+    display:grid;place-items:center;
+    background:#fff;
+    border:1px solid var(--line);
+    box-shadow:0 2px 6px rgba(60,55,140,.07), inset 0 1px 0 #fff;
+    color:var(--indigo-d);
+  }
+  .appbar .ttl{
+    font-family:'Fredoka',sans-serif;font-weight:600;
+    font-size:16px;color:var(--indigo-ink);letter-spacing:-.3px;
+    line-height:1;
+  }
+  .appbar .sub{font-size:11.5px;color:var(--mut-2);font-weight:600;margin-top:3px;letter-spacing:.2px;}
+  .avatar-mini{
+    margin-left:auto;
+    width:40px;height:40px;border-radius:13px;flex:0 0 auto;
+    display:grid;place-items:center;
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;color:#fff;
+    background:linear-gradient(150deg,#fb7185 0%, #e11d6f 100%);
+    box-shadow:0 6px 14px -5px rgba(225,29,111,.6), inset 0 1px 0 rgba(255,255,255,.4);
+  }
+
+  /* ===== scroll area ===== */
+  .body{
+    position:relative;z-index:10;
+    flex:1;overflow-y:auto;
+    padding:4px 18px 26px;
+  }
+  .body::-webkit-scrollbar{display:none;}
+
+  /* ===== HERO brief card ===== */
+  .brief{
+    position:relative;
+    border-radius:30px;
+    padding:22px 20px 20px;
+    background:
+      radial-gradient(420px 240px at 88% -20%, rgba(129,140,248,.45) 0%, rgba(129,140,248,0) 60%),
+      linear-gradient(158deg,#5b53ea 0%, #4a40d6 44%, #3a2fb0 100%);
+    box-shadow:
+      0 2px 3px rgba(40,30,120,.18),
+      0 16px 30px -10px rgba(67,56,202,.55),
+      0 34px 60px -22px rgba(55,48,163,.55),
+      inset 0 1px 0 rgba(255,255,255,.28),
+      inset 0 0 0 1px rgba(255,255,255,.07);
+    color:#fff;
+    overflow:hidden;
+    animation:rise .5s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .brief::before{ /* subtle grain/mesh sheen */
+    content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:
+      radial-gradient(160px 100px at 12% 110%, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 70%),
+      repeating-linear-gradient(115deg, rgba(255,255,255,.025) 0 2px, rgba(255,255,255,0) 2px 5px);
+    mix-blend-mode:screen;opacity:.7;
+  }
+  .brief-flag{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:6px 11px 6px 9px;border-radius:999px;
+    background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.22);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
+    font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;
+    color:#eef0ff;
+  }
+  .brief-flag .pulse{
+    width:8px;height:8px;border-radius:50%;
+    background:#7ef0b0;
+    box-shadow:0 0 0 0 rgba(126,240,176,.7);
+    animation:pulse 2.2s ease-out infinite;
+  }
+  .brief h1{
+    font-family:'Fredoka',sans-serif;font-weight:600;
+    font-size:27px;line-height:1.06;letter-spacing:-.7px;
+    margin:14px 0 0;
+  }
+  .brief h1 b{font-weight:700;}
+  .brief .lead{
+    margin-top:7px;font-size:13px;line-height:1.5;
+    color:#d9dcff;font-weight:500;max-width:90%;
+  }
+
+  .who{
+    margin-top:16px;
+    display:flex;align-items:center;gap:13px;
+    padding:13px;
+    border-radius:20px;
+    background:linear-gradient(150deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.07) 100%);
+    border:1px solid rgba(255,255,255,.18);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
+  }
+  .who .pic{
+    width:50px;height:50px;border-radius:15px;flex:0 0 auto;
+    display:grid;place-items:center;
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:20px;color:#fff;
+    background:linear-gradient(150deg,#fb9bb6 0%, #f0568f 100%);
+    box-shadow:0 6px 14px -5px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.5);
+  }
+  .who .nm{font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;letter-spacing:-.2px;line-height:1.1;}
+  .who .det{font-size:11.5px;color:#cdd0ff;font-weight:600;margin-top:3px;}
+  .who .when{
+    margin-left:auto;text-align:right;flex:0 0 auto;
+  }
+  .who .when .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:#bfc3ff;font-weight:800;}
+  .who .when .val{font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;margin-top:2px;}
+
+  /* prep stat strip inside hero */
+  .prep{
+    margin-top:14px;
+    display:flex;align-items:stretch;gap:10px;
+    padding:13px 6px;
+    border-radius:18px;
+    background:linear-gradient(180deg, rgba(20,16,70,.34) 0%, rgba(20,16,70,.18) 100%);
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+  }
+  .prep .cell{flex:1;text-align:center;position:relative;}
+  .prep .cell + .cell::before{
+    content:"";position:absolute;left:0;top:14%;height:72%;width:1px;
+    background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.22),rgba(255,255,255,0));
+  }
+  .prep .big{font-family:'Fredoka',sans-serif;font-weight:600;font-size:21px;letter-spacing:-.5px;line-height:1;}
+  .prep .big .u{font-size:12px;font-weight:600;color:#cdd0ff;margin-left:1px;}
+  .prep .cap{font-size:10px;font-weight:700;letter-spacing:.3px;color:#c4c8ff;margin-top:5px;}
+
+  /* ===== section title ===== */
+  .sec{
+    margin:24px 4px 12px;
+    display:flex;align-items:center;gap:9px;
+  }
+  .sec h2{
+    font-family:'Fredoka',sans-serif;font-weight:600;
+    font-size:15.5px;color:var(--indigo-ink);letter-spacing:-.3px;
+  }
+  .sec .since{
+    margin-left:auto;font-size:10.5px;font-weight:700;color:var(--mut-2);
+    background:#fff;border:1px solid var(--line);
+    padding:5px 9px;border-radius:999px;
+    box-shadow:0 2px 5px rgba(60,55,140,.05);
+  }
+
+  /* ===== timeline of what she revised ===== */
+  .feed{position:relative;padding-left:6px;}
+  .row{
+    position:relative;
+    display:flex;gap:13px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:14px 15px;
+    margin-bottom:11px;
+    box-shadow:
+      0 2px 4px rgba(60,55,140,.05),
+      0 10px 22px -14px rgba(67,56,202,.30);
+    animation:rise .5s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .row.r2{animation-delay:.06s;}
+  .row.r3{animation-delay:.12s;}
+  .ic{
+    width:44px;height:44px;border-radius:14px;flex:0 0 auto;
+    display:grid;place-items:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 4px 10px -4px rgba(67,56,202,.30);
+  }
+  .ic.indigo{background:linear-gradient(150deg,#eef0ff,#dfe2ff);color:var(--indigo-d);}
+  .ic.green{background:linear-gradient(150deg,#e6f6ec,#d2f0db);color:#15803d;}
+  .ic.red{background:linear-gradient(150deg,#fdeaec,#fbd9dd);color:#c52532;}
+  .row .txt{flex:1;min-width:0;}
+  .row .h{
+    font-family:'Fredoka',sans-serif;font-weight:500;
+    font-size:14.5px;color:var(--ink);letter-spacing:-.2px;line-height:1.15;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  .tag{
+    font-family:'Inter';font-weight:800;font-size:10px;letter-spacing:.3px;
+    padding:3px 7px;border-radius:7px;line-height:1;
+  }
+  .tag.c2{background:var(--indigo-soft-2);color:var(--indigo-d);}
+  .tag.ok{background:var(--green-soft);color:#15803d;}
+  .tag.ko{background:var(--red-soft);color:#c52532;}
+  .row .d{font-size:12px;color:var(--mut);font-weight:500;margin-top:5px;line-height:1.45;}
+
+  /* mini progress bar for the competence row */
+  .barwrap{margin-top:10px;}
+  .bartop{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .bartop .pl{font-size:11px;font-weight:700;color:var(--mut);}
+  .bartop .pr{font-size:11.5px;font-weight:800;color:var(--indigo-d);font-family:'Fredoka';}
+  .track{height:8px;border-radius:999px;background:#eceefb;overflow:hidden;box-shadow:inset 0 1px 2px rgba(60,55,140,.12);}
+  .fill{
+    height:100%;width:62%;border-radius:999px;
+    background:linear-gradient(90deg,#6366f1 0%, #4f46e5 60%, #4338ca 100%);
+    box-shadow:0 0 10px rgba(99,102,241,.6), inset 0 1px 0 rgba(255,255,255,.5);
+    position:relative;overflow:hidden;
+  }
+  .fill::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(100deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 70%);
+    transform:translateX(-120%);
+    animation:shimmer 3.2s ease-in-out infinite;
+  }
+
+  /* quiz sparkline mini */
+  .quizmini{
+    margin-top:11px;display:flex;align-items:center;gap:11px;
+    background:var(--red-soft);
+    border:1px solid #f7cdd2;
+    border-radius:13px;padding:9px 11px;
+  }
+  .quizmini svg{flex:0 0 auto;}
+  .quizmini .qt{font-size:11.5px;font-weight:700;color:#b3232f;line-height:1.35;}
+  .quizmini .qt b{font-weight:800;}
+
+  /* ===== coup d'avance — micro conseil ===== */
+  .advice{
+    position:relative;
+    margin-top:18px;
+    border-radius:24px;
+    padding:18px 17px 17px;
+    background:
+      radial-gradient(280px 160px at 92% -30%, rgba(232,194,90,.20) 0%, rgba(232,194,90,0) 60%),
+      linear-gradient(155deg,#fffaf0 0%, #fdf5e3 100%);
+    border:1px solid #f0e3bf;
+    box-shadow:
+      0 2px 4px rgba(120,90,20,.06),
+      0 14px 28px -16px rgba(184,134,42,.45),
+      inset 0 1px 0 rgba(255,255,255,.7);
+    overflow:hidden;
+  }
+  .advice .crown{
+    position:absolute;top:14px;right:14px;
+    width:42px;height:42px;border-radius:13px;
+    display:grid;place-items:center;
+    background:
+      radial-gradient(circle at 32% 28%, #fff6d6 0%, #f2d471 38%, #d6a533 72%, #a9781f 100%);
+    box-shadow:
+      0 5px 12px -4px rgba(169,120,31,.7),
+      inset 0 1px 0 rgba(255,255,255,.8),
+      inset 0 -3px 6px rgba(140,95,20,.45);
+    color:#6b4a12;
+    animation:floaty 4.5s ease-in-out infinite;
+  }
+  .advice .lab{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:10.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;
+    color:#a9781f;
+  }
+  .advice .lab svg{stroke:#b8862a;}
+  .advice h3{
+    font-family:'Fredoka',sans-serif;font-weight:600;
+    font-size:18px;letter-spacing:-.4px;color:#5b3f0f;
+    margin:9px 0 0;line-height:1.18;max-width:78%;
+  }
+  .advice p{font-size:12.5px;color:#7a5e2c;font-weight:500;line-height:1.5;margin-top:7px;max-width:90%;}
+
+  /* ===== CTA ===== */
+  .cta{
+    margin-top:16px;
+    width:100%;border:0;cursor:pointer;
+    border-radius:18px;padding:16px;
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;letter-spacing:-.2px;color:#fff;
+    background:linear-gradient(160deg,#5b53ea 0%, #4a40d6 55%, #3a2fb0 100%);
+    box-shadow:
+      0 8px 18px -6px rgba(67,56,202,.6),
+      0 18px 34px -16px rgba(55,48,163,.6),
+      inset 0 1px 0 rgba(255,255,255,.3);
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .cta:active{transform:translateY(2px) scale(.992);box-shadow:0 5px 12px -6px rgba(67,56,202,.6);}
+  .cta .arr{display:grid;place-items:center;}
+  .ghost{
+    margin-top:10px;text-align:center;
+    font-size:12.5px;font-weight:700;color:var(--mut);
+    padding:6px;
+  }
+  .ghost b{color:var(--indigo-d);}
+
+  /* ===== animations ===== */
+  @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(126,240,176,.6);}70%{box-shadow:0 0 0 8px rgba(126,240,176,0);}100%{box-shadow:0 0 0 0 rgba(126,240,176,0);}}
+  @keyframes shimmer{0%{transform:translateX(-120%);}55%,100%{transform:translateX(220%);}}
+  @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+
+      <!-- faint decorative road signs -->
+      <div class="signs" aria-hidden="true">
+        <svg class="sg1" width="150" height="150" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#4f46e5"/><circle cx="50" cy="50" r="44" fill="none" stroke="#dc2626" stroke-width="9"/></svg>
+        <svg class="sg2" width="170" height="150" viewBox="0 0 100 90"><path d="M50 6 L96 84 H4 Z" fill="none" stroke="#dc2626" stroke-width="9" stroke-linejoin="round"/></svg>
+        <svg class="sg3" width="130" height="130" viewBox="0 0 100 100"><rect x="50" y="6" width="62" height="62" rx="8" transform="rotate(45 50 6)" fill="#4338ca"/></svg>
+      </div>
+
+      <!-- status bar -->
+      <div class="status">
+        <span>8:42</span>
+        <span class="right">
+          <span class="sig"><span></span><span></span><span></span><span></span></span>
+          <svg width="17" height="13" viewBox="0 0 17 13" fill="none"><path d="M8.5 11.5c.7 0 1.3-.6 1.3-1.3S9.2 9 8.5 9s-1.3.6-1.3 1.3.6 1.2 1.3 1.2Z" fill="#211f3d"/><path d="M2 5.2C3.8 3.5 6 2.5 8.5 2.5S13.2 3.5 15 5.2M4.4 7.6c1.1-1 2.6-1.6 4.1-1.6s3 .6 4.1 1.6" stroke="#211f3d" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span class="bat"><i></i></span>
+        </span>
+      </div>
+
+      <!-- app header -->
+      <div class="appbar">
+        <div class="back" role="button" aria-label="Retour">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="ttl">Brief avant leçon</div>
+          <div class="sub">Aujourd’hui · 14 h 00</div>
+        </div>
+        <div class="avatar-mini">YB</div>
+      </div>
+
+      <!-- scrollable body -->
+      <div class="body">
+
+        <!-- HERO -->
+        <section class="brief">
+          <span class="brief-flag"><span class="pulse"></span>Ton coup d’avance</span>
+          <h1>Avant ta leçon<br>avec <b>Marie</b></h1>
+          <p class="lead">Voici ce qu’elle a révisé toute seule depuis votre dernière séance. Tu arrives déjà au courant.</p>
+
+          <div class="who">
+            <div class="pic">M</div>
+            <div>
+              <div class="nm">Marie Lefèvre</div>
+              <div class="det">Permis B · 14 h de conduite</div>
+            </div>
+            <div class="when">
+              <div class="lbl">Leçon</div>
+              <div class="val">14 h 00</div>
+            </div>
+          </div>
+
+          <div class="prep">
+            <div class="cell">
+              <div class="big">25<span class="u"> min</span></div>
+              <div class="cap">de révision</div>
+            </div>
+            <div class="cell">
+              <div class="big">C2</div>
+              <div class="cap">compétence vue</div>
+            </div>
+            <div class="cell">
+              <div class="big">4<span class="u"> j</span></div>
+              <div class="cap">depuis la dernière fois</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- section title -->
+        <div class="sec">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="#4338ca" stroke-width="2.2" stroke-linecap="round"/></svg>
+          <h2>Ce qu’elle a travaillé</h2>
+          <span class="since">depuis le 21 juin</span>
+        </div>
+
+        <!-- feed -->
+        <div class="feed">
+
+          <!-- competence row -->
+          <div class="row r1">
+            <div class="ic indigo">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9L12 3Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="txt">
+              <div class="h">Compétence travaillée <span class="tag c2">C2 · Circulation</span></div>
+              <div class="d">Elle a relu « Adapter son allure » et « Évaluer les distances ». Bon réflexe avant de remonter en voiture.</div>
+              <div class="barwrap">
+                <div class="bartop"><span class="pl">Maîtrise estimée</span><span class="pr">en bonne voie · 62 %</span></div>
+                <div class="track"><div class="fill"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- review time row -->
+          <div class="row r2">
+            <div class="ic green">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.9"/><path d="M12 9.5V13l2.3 1.6M9.5 3h5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+            </div>
+            <div class="txt">
+              <div class="h">25 min de révision <span class="tag ok">3 sessions</span></div>
+              <div class="d">Régulière : deux soirs et ce matin. Elle est venue préparée, valorise-le en début de séance.</div>
+            </div>
+          </div>
+
+          <!-- failed quiz row -->
+          <div class="row r3">
+            <div class="ic red">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3.5l8.5 14.7H3.5L12 3.5Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 10v3.4M12 16.2h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="txt">
+              <div class="h">1 quiz raté <span class="tag ko">à revoir</span></div>
+              <div class="d">Le point qui coince en ce moment :</div>
+              <div class="quizmini">
+                <svg width="34" height="30" viewBox="0 0 34 30" fill="none"><circle cx="17" cy="15" r="13" stroke="#dc2626" stroke-width="2.2"/><circle cx="17" cy="15" r="5.5" stroke="#dc2626" stroke-width="2.2"/><path d="M17 2v4M17 24v4M30 15h-4M8 15H4" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round"/></svg>
+                <div class="qt"><b>Les giratoires</b> — 3 réponses sur 6. Choix de voie et clignotant de sortie à reprendre.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- coup d'avance / micro conseil -->
+        <section class="advice">
+          <div class="crown" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 8l4 3 4-6 4 6 4-3-1.5 10H5.5L4 8Z" stroke="#6b4a12" stroke-width="1.7" stroke-linejoin="round" fill="rgba(255,255,255,.25)"/></svg>
+          </div>
+          <div class="lab">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 1 4 10.5c-.8.8-1 1.3-1 2.5H9c0-1.2-.2-1.7-1-2.5A6 6 0 0 1 12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            Le conseil PermiGo
+          </div>
+          <h3>Reprends les giratoires en début de séance</h3>
+          <p>C’est frais dans sa tête et ça la rassure tout de suite. Un grand giratoire, puis enchaîne sur la circulation en ville.</p>
+        </section>
+
+        <button class="cta">
+          Préparer ma séance
+          <span class="arr"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+        <div class="ghost">Vu le brief ? <b>Marquer comme lu</b></div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

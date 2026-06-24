@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>PermiGo — Fiche élève (moniteur)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --indigo-900:#1e1b4b;
+    --indigo-800:#312e81;
+    --indigo-700:#4338ca;
+    --indigo-600:#4f46e5;
+    --indigo-500:#6366f1;
+    --indigo-300:#a5b4fc;
+    --indigo-100:#e0e7ff;
+    --indigo-50:#eef2ff;
+    --ink:#1f2147;
+    --ink-soft:#4a4d77;
+    --mut:#7b7ea6;
+    --line:#e7e8fb;
+    --bg:#f5f6ff;
+    --card:#ffffff;
+    --gold-1:#fde68a;
+    --gold-2:#f5c451;
+    --gold-3:#c8941f;
+    --green:#16a34a;
+    --green-bg:#e8f8ee;
+    --amber:#d97706;
+    --amber-bg:#fff3e0;
+    --slate-bg:#eef0f8;
+    --radius:22px;
+    --shadow-soft:
+      0 1px 2px rgba(49,46,129,.06),
+      0 8px 18px -8px rgba(79,70,229,.18),
+      0 28px 50px -28px rgba(49,46,129,.22);
+    --shadow-hero:
+      0 1px 0 rgba(255,255,255,.18) inset,
+      0 2px 6px rgba(20,18,70,.30),
+      0 24px 44px -20px rgba(49,30,140,.55),
+      0 50px 80px -40px rgba(30,20,90,.55);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1100px 700px at 12% -8%, #e8ebff 0%, rgba(232,235,255,0) 55%),
+      radial-gradient(1000px 720px at 108% 8%, #eae6ff 0%, rgba(234,230,255,0) 52%),
+      linear-gradient(180deg,#f3f4ff 0%, #eef0fb 100%);
+    min-height:100%;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 18px 64px;
+  }
+
+  /* ---------- coque téléphone ---------- */
+  .phone{
+    position:relative;
+    width:390px;
+    height:844px;
+    border-radius:46px;
+    background:linear-gradient(180deg,#fbfbff 0%, #f4f5fe 100%);
+    box-shadow:
+      0 0 0 11px #141432,
+      0 0 0 13px #2a2a52,
+      0 40px 70px -22px rgba(30,24,90,.55),
+      0 80px 120px -50px rgba(30,24,90,.45);
+    overflow:hidden;
+    isolation:isolate;
+  }
+  /* panneaux routiers décor en fond, très légers */
+  .road-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .road-bg svg{position:absolute;}
+  .rb1{top:88px;right:-44px;opacity:.05;}
+  .rb2{top:430px;left:-50px;opacity:.045;}
+  .rb3{bottom:120px;right:-30px;opacity:.05;}
+
+  .notch{
+    position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:150px;height:30px;background:#141432;
+    border-radius:0 0 18px 18px;z-index:40;
+  }
+  .statusbar{
+    position:relative;z-index:30;
+    height:52px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 26px 0 30px;font-weight:700;font-size:15px;color:var(--ink);
+    font-family:'Inter';letter-spacing:.2px;
+  }
+  .sb-right{display:flex;align-items:center;gap:7px;}
+  .battery{width:25px;height:13px;border:1.6px solid var(--ink);border-radius:4px;position:relative;padding:1.6px;}
+  .battery::after{content:"";position:absolute;right:-4px;top:3.5px;width:2.4px;height:5px;background:var(--ink);border-radius:0 2px 2px 0;}
+  .battery span{display:block;height:100%;width:74%;background:var(--ink);border-radius:1.6px;}
+
+  .screen{
+    position:relative;z-index:10;
+    height:792px;overflow-y:auto;overflow-x:hidden;
+    padding:0 16px 26px;
+    scrollbar-width:none;
+  }
+  .screen::-webkit-scrollbar{display:none;}
+
+  /* ---------- top bar appli ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:25;
+    display:flex;align-items:center;gap:12px;
+    padding:6px 2px 14px;
+    background:linear-gradient(180deg,#f5f6ff 62%, rgba(245,246,255,0) 100%);
+  }
+  .iconbtn{
+    width:42px;height:42px;border-radius:14px;border:1px solid var(--line);
+    background:#fff;display:grid;place-items:center;flex:none;
+    box-shadow:0 2px 6px rgba(49,46,129,.07);
+  }
+  .iconbtn svg{stroke:var(--indigo-700);}
+  .topbar .crumb{flex:1;}
+  .crumb .k{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--indigo-500);}
+  .crumb .t{font-family:'Fredoka';font-weight:600;font-size:16px;color:var(--ink);margin-top:1px;}
+
+  /* ---------- HERO élève ---------- */
+  .hero{
+    position:relative;margin-top:2px;border-radius:28px;overflow:hidden;
+    padding:22px 20px 20px;
+    background:
+      radial-gradient(380px 200px at 88% -10%, rgba(165,180,252,.55) 0%, rgba(99,102,241,0) 60%),
+      radial-gradient(300px 240px at -8% 120%, rgba(67,56,202,.7) 0%, rgba(67,56,202,0) 60%),
+      linear-gradient(155deg,#5b50e6 0%, #4338ca 48%, #312e81 100%);
+    box-shadow:var(--shadow-hero);
+    color:#fff;
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;opacity:.5;mix-blend-mode:overlay;pointer-events:none;
+    background-image:radial-gradient(rgba(255,255,255,.65) .6px, transparent .7px);
+    background-size:4px 4px;
+  }
+  .hero::after{
+    content:"";position:absolute;top:-60px;right:-30px;width:180px;height:180px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, rgba(255,255,255,.32), rgba(255,255,255,0) 62%);
+    pointer-events:none;
+  }
+  .hero-row{position:relative;display:flex;align-items:center;gap:16px;z-index:2;}
+
+  /* anneau de progression */
+  .ring{position:relative;width:84px;height:84px;flex:none;}
+  .ring svg{transform:rotate(-90deg);display:block;}
+  .ring .avatar{
+    position:absolute;inset:11px;border-radius:50%;
+    background:linear-gradient(150deg,#fff 0%, #eef0ff 100%);
+    display:grid;place-items:center;
+    font-family:'Fredoka';font-weight:700;font-size:23px;color:var(--indigo-700);
+    box-shadow:0 4px 12px rgba(20,16,70,.4), 0 0 0 3px rgba(255,255,255,.25);
+    letter-spacing:-.5px;
+  }
+  .ring .pct{
+    position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);
+    background:#fff;color:var(--indigo-700);font-family:'Fredoka';font-weight:700;
+    font-size:12px;padding:2px 9px;border-radius:999px;white-space:nowrap;
+    box-shadow:0 3px 8px rgba(20,16,70,.35);
+  }
+  .hero-id{flex:1;min-width:0;}
+  .hero-id h1{font-family:'Fredoka';font-weight:600;font-size:24px;letter-spacing:-.6px;line-height:1.04;}
+  .hero-id .sub{margin-top:5px;font-size:12.5px;color:#dfe1ff;font-weight:500;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+  .dot{width:4px;height:4px;border-radius:50%;background:#a5b4fc;display:inline-block;}
+  .pill-live{
+    display:inline-flex;align-items:center;gap:6px;margin-top:11px;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);
+    padding:5px 11px 5px 9px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.02em;
+    backdrop-filter:blur(4px);
+  }
+  .led{width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 0 3px rgba(52,211,153,.28);}
+  .led.on{animation:pulse 2.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(52,211,153,.28);}50%{box-shadow:0 0 0 6px rgba(52,211,153,.08);}}
+
+  .hero-stats{
+    position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px;
+  }
+  .hs{
+    background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
+    border-radius:15px;padding:10px 11px;backdrop-filter:blur(3px);
+  }
+  .hs .n{font-family:'Fredoka';font-weight:700;font-size:19px;line-height:1;letter-spacing:-.4px;}
+  .hs .n small{font-size:12px;font-weight:600;color:#cdd0ff;}
+  .hs .l{font-size:10.5px;color:#cdd0ff;font-weight:600;margin-top:4px;letter-spacing:.01em;}
+
+  /* ---------- section générique ---------- */
+  .section-h{display:flex;align-items:center;gap:9px;margin:24px 4px 12px;}
+  .section-h .tg{
+    width:30px;height:30px;border-radius:10px;display:grid;place-items:center;flex:none;
+    background:linear-gradient(150deg,var(--indigo-50),#fff);border:1px solid var(--line);
+  }
+  .section-h .tg svg{stroke:var(--indigo-700);}
+  .section-h h2{font-family:'Fredoka';font-weight:600;font-size:16.5px;color:var(--ink);letter-spacing:-.2px;}
+  .section-h .more{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--indigo-600);}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow-soft);
+  }
+
+  /* La où ça coince */
+  .weak{padding:16px 16px 8px;}
+  .weak .lead{font-size:12.5px;color:var(--ink-soft);font-weight:500;margin-bottom:13px;line-height:1.45;}
+  .weak .lead b{color:var(--ink);font-weight:700;}
+  .wrow{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);}
+  .wrow:first-of-type{border-top:none;}
+  .wtag{
+    width:34px;height:34px;border-radius:11px;flex:none;display:grid;place-items:center;
+    background:linear-gradient(150deg,#fff4e6,#ffe8cf);border:1px solid #ffe0b8;
+  }
+  .wtag svg{stroke:#c2410c;}
+  .wmeta{flex:1;min-width:0;}
+  .wmeta .t{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .wmeta .d{font-size:11px;color:var(--mut);font-weight:500;margin-top:2px;}
+  .wbar{width:58px;flex:none;}
+  .wbar .track{height:7px;border-radius:99px;background:var(--slate-bg);overflow:hidden;}
+  .wbar .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#fb923c,#f97316);}
+  .wbar .lab{font-size:10px;font-weight:700;color:var(--amber);text-align:right;margin-top:4px;}
+
+  /* Prêt pour l'examen — jauge /31 */
+  .ready{
+    position:relative;overflow:hidden;padding:18px 18px 18px;
+    background:
+      radial-gradient(260px 160px at 100% 0%, rgba(99,102,241,.1), rgba(99,102,241,0) 60%),
+      linear-gradient(160deg,#ffffff 0%, #f7f8ff 100%);
+    border:1px solid var(--line);
+  }
+  .ready-top{display:flex;align-items:flex-start;gap:14px;}
+  .ready-num{display:flex;align-items:baseline;gap:3px;}
+  .ready-num .big{font-family:'Fredoka';font-weight:700;font-size:46px;line-height:.9;letter-spacing:-1.5px;
+    background:linear-gradient(160deg,#4f46e5,#312e81);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .ready-num .den{font-family:'Fredoka';font-weight:600;font-size:18px;color:var(--mut);}
+  .ready-cap{margin-left:auto;text-align:right;}
+  .ready-cap .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--green-bg);color:#15803d;border:1px solid #bdecca;
+    font-size:11px;font-weight:800;padding:5px 10px;border-radius:999px;letter-spacing:.01em;
+  }
+  .ready-cap .badge svg{stroke:#15803d;}
+  .ready-cap .eta{font-size:11px;color:var(--mut);font-weight:600;margin-top:7px;}
+  .seg{display:flex;gap:4px;margin-top:16px;}
+  .seg i{flex:1;height:11px;border-radius:4px;background:var(--slate-bg);position:relative;}
+  .seg i.ok{background:linear-gradient(180deg,#34d399,#16a34a);box-shadow:0 2px 5px rgba(22,163,74,.35) inset, 0 1px 0 rgba(255,255,255,.4) inset;}
+  .seg i.warn{background:linear-gradient(180deg,#fbbf24,#f59e0b);box-shadow:0 1px 0 rgba(255,255,255,.4) inset;}
+  .seg-leg{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap;}
+  .seg-leg span{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--ink-soft);}
+  .lk{width:9px;height:9px;border-radius:3px;display:inline-block;}
+
+  /* Compte-rendu dernière leçon */
+  .report{padding:16px 16px 16px;}
+  .rep-head{display:flex;align-items:center;gap:11px;margin-bottom:13px;}
+  .rep-av{
+    width:40px;height:40px;border-radius:12px;flex:none;display:grid;place-items:center;
+    background:linear-gradient(150deg,#4f46e5,#312e81);color:#fff;font-family:'Fredoka';font-weight:700;font-size:15px;
+    box-shadow:0 6px 14px -4px rgba(67,56,202,.5);
+  }
+  .rep-head .who{flex:1;}
+  .rep-head .who .n{font-size:13px;font-weight:800;color:var(--ink);}
+  .rep-head .who .d{font-size:11px;color:var(--mut);font-weight:600;margin-top:1px;}
+  .rep-head .grade{
+    font-family:'Fredoka';font-weight:700;font-size:15px;color:var(--indigo-700);
+    background:var(--indigo-50);border:1px solid var(--indigo-100);padding:6px 11px;border-radius:12px;
+  }
+  .rep-quote{
+    position:relative;font-size:13px;line-height:1.55;color:var(--ink-soft);font-weight:500;
+    background:linear-gradient(160deg,#f7f8ff,#f1f2fd);border:1px solid var(--line);
+    border-left:3px solid var(--indigo-500);border-radius:14px;padding:13px 14px 13px 15px;
+  }
+  .rep-quote b{color:var(--ink);font-weight:700;}
+  .rep-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;}
+  .chip{font-size:11px;font-weight:700;padding:6px 11px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;}
+  .chip.up{background:var(--green-bg);color:#15803d;border:1px solid #bdecca;}
+  .chip.work{background:var(--amber-bg);color:#b45309;border:1px solid #ffe0b8;}
+  .chip svg{width:13px;height:13px;}
+
+  /* Grille REMC C1-C4 */
+  .remc-wrap{margin-top:4px;}
+  .comp{border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:var(--shadow-soft);overflow:hidden;margin-bottom:12px;}
+  .comp-h{display:flex;align-items:center;gap:11px;padding:13px 14px;cursor:pointer;}
+  .comp-tag{
+    width:38px;height:38px;border-radius:12px;flex:none;display:grid;place-items:center;
+    font-family:'Fredoka';font-weight:700;font-size:15px;color:#fff;letter-spacing:-.5px;
+    box-shadow:0 5px 12px -4px rgba(49,46,129,.45), 0 1px 0 rgba(255,255,255,.3) inset;
+  }
+  .c1{background:linear-gradient(150deg,#6366f1,#4338ca);}
+  .c2{background:linear-gradient(150deg,#0ea5e9,#0369a1);}
+  .c3{background:linear-gradient(150deg,#8b5cf6,#6d28d9);}
+  .c4{background:linear-gradient(150deg,#ec4899,#be185d);}
+  .comp-h .ttl{flex:1;min-width:0;}
+  .comp-h .ttl .t{font-family:'Fredoka';font-weight:600;font-size:13.5px;color:var(--ink);letter-spacing:-.1px;}
+  .comp-h .ttl .s{font-size:11px;color:var(--mut);font-weight:600;margin-top:2px;}
+  .comp-prog{text-align:right;flex:none;}
+  .comp-prog .frac{font-family:'Fredoka';font-weight:700;font-size:14px;color:var(--ink);}
+  .comp-prog .mini{width:46px;height:6px;border-radius:99px;background:var(--slate-bg);overflow:hidden;margin-top:5px;}
+  .comp-prog .mini i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#6366f1,#4338ca);}
+
+  .obj-list{padding:2px 8px 10px;border-top:1px solid var(--line);}
+  .obj{display:flex;align-items:center;gap:11px;padding:9px 6px;}
+  .obj + .obj{border-top:1px dashed #eceefb;}
+  .ob-ic{width:24px;height:24px;border-radius:8px;flex:none;display:grid;place-items:center;}
+  .ob-ic.done{background:var(--green-bg);border:1px solid #c4eecf;}
+  .ob-ic.done svg{stroke:#15803d;}
+  .ob-ic.work{background:var(--amber-bg);border:1px solid #ffe0b8;}
+  .ob-ic.work svg{stroke:#b45309;}
+  .ob-ic.todo{background:#f1f2f8;border:1px solid #e4e6f2;}
+  .ob-ic.todo svg{stroke:#a6a9c6;}
+  .obj .lab{flex:1;font-size:12.5px;font-weight:600;color:var(--ink-soft);line-height:1.3;}
+  .obj.is-done .lab{color:var(--ink);}
+  .obj.is-todo .lab{color:var(--mut);font-weight:500;}
+  .obj .st{font-size:10px;font-weight:800;letter-spacing:.03em;padding:3px 8px;border-radius:999px;flex:none;text-transform:uppercase;}
+  .st.done{color:#15803d;background:var(--green-bg);}
+  .st.work{color:#b45309;background:var(--amber-bg);}
+  .st.todo{color:#9396b8;background:#f1f2f8;}
+
+  /* CTA bas */
+  .footer-cta{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:20px;}
+  .btn-primary{
+    border:none;border-radius:17px;padding:15px;font-family:'Fredoka';font-weight:600;font-size:15px;color:#fff;
+    background:linear-gradient(160deg,#5b50e6,#4338ca);letter-spacing:.1px;
+    box-shadow:0 1px 0 rgba(255,255,255,.25) inset, 0 10px 22px -8px rgba(67,56,202,.6);
+    display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;
+  }
+  .btn-primary svg{stroke:#fff;}
+  .btn-ghost{
+    width:54px;border-radius:17px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;
+    box-shadow:0 3px 8px rgba(49,46,129,.07);
+  }
+  .btn-ghost svg{stroke:var(--indigo-700);}
+
+  .trophy-note{
+    display:flex;align-items:center;gap:11px;margin-top:14px;padding:12px 14px;border-radius:16px;
+    background:linear-gradient(160deg,#fffdf5,#fff7e3);border:1px solid #f4e3b6;
+    box-shadow:0 6px 16px -8px rgba(200,148,31,.35);
+  }
+  .trophy-note .tr{width:34px;height:34px;flex:none;filter:drop-shadow(0 4px 6px rgba(200,148,31,.4));}
+  .trophy-note .txt{font-size:11.5px;color:#7a5a14;font-weight:600;line-height:1.4;}
+  .trophy-note .txt b{color:#5c440e;font-weight:800;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <!-- décor panneaux -->
+    <div class="road-bg" aria-hidden="true">
+      <svg class="rb1" width="200" height="200" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="#dc2626" stroke-width="9"/><circle cx="50" cy="50" r="32" fill="#1f2147"/></svg>
+      <svg class="rb2" width="210" height="190" viewBox="0 0 100 92"><path d="M50 6 L96 86 H4 Z" fill="none" stroke="#dc2626" stroke-width="8" stroke-linejoin="round"/></svg>
+      <svg class="rb3" width="170" height="170" viewBox="0 0 100 100"><rect x="50" y="6" width="62" height="62" rx="10" transform="rotate(45 50 50)" fill="none" stroke="#4338ca" stroke-width="8"/></svg>
+    </div>
+
+    <div class="notch"></div>
+
+    <div class="statusbar">
+      <span>9:41</span>
+      <div class="sb-right">
+        <svg width="18" height="13" viewBox="0 0 18 13" fill="none"><path d="M1 9c4.5-5 11.5-5 16 0M3.5 11.5c2.5-2.8 8.5-2.8 11 0" stroke="#1f2147" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="12" r="0" fill="#1f2147"/></svg>
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="none"><rect x="1" y="6" width="3" height="5" rx="1" fill="#1f2147"/><rect x="5.5" y="4" width="3" height="7" rx="1" fill="#1f2147"/><rect x="10" y="2" width="3" height="9" rx="1" fill="#1f2147"/><rect x="14.5" y="0" width="0" height="11" rx="1" fill="#1f2147"/></svg>
+        <span class="battery"><span></span></span>
+      </div>
+    </div>
+
+    <div class="screen">
+
+      <!-- topbar -->
+      <div class="topbar">
+        <button class="iconbtn" aria-label="Retour">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="crumb">
+          <div class="k">Mes élèves · Livret</div>
+          <div class="t">Fiche élève</div>
+        </div>
+        <button class="iconbtn" aria-label="Options">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg>
+        </button>
+      </div>
+
+      <!-- HERO élève -->
+      <section class="hero">
+        <div class="hero-row">
+          <div class="ring">
+            <svg width="84" height="84" viewBox="0 0 84 84">
+              <circle cx="42" cy="42" r="37" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="7"/>
+              <circle cx="42" cy="42" r="37" fill="none" stroke="url(#rg)" stroke-width="7" stroke-linecap="round"
+                stroke-dasharray="232.5" stroke-dashoffset="63"/>
+              <defs>
+                <linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#fde68a"/><stop offset=".5" stop-color="#a5b4fc"/><stop offset="1" stop-color="#ffffff"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="avatar">ID</div>
+            <div class="pct">73 %</div>
+          </div>
+
+          <div class="hero-id">
+            <h1>Inès D.</h1>
+            <div class="sub">
+              <span>Boîte manuelle</span><span class="dot"></span><span>Permis B</span><span class="dot"></span><span>14 leçons</span>
+            </div>
+            <span class="pill-live"><span class="led on"></span> En bonne voie · examen visé sept.</span>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hs"><div class="n">23<small>/31</small></div><div class="l">Compétences acquises</div></div>
+          <div class="hs"><div class="n">5</div><div class="l">À retravailler</div></div>
+          <div class="hs"><div class="n">3</div><div class="l">Non encore vues</div></div>
+        </div>
+      </section>
+
+      <!-- LA OÙ ÇA COINCE -->
+      <div class="section-h">
+        <span class="tg"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span>
+        <h2>Là où ça coince</h2>
+        <span class="more">Priorités</span>
+      </div>
+      <section class="card weak">
+        <p class="lead">Trois points à travailler en priorité pour <b>débloquer la conduite autonome</b> d’Inès.</p>
+
+        <div class="wrow">
+          <span class="wtag"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg></span>
+          <div class="wmeta"><div class="t">Insertion sur voie rapide</div><div class="d">Allure trop hésitante · 4 leçons</div></div>
+          <div class="wbar"><div class="track"><div class="fill" style="width:38%"></div></div><div class="lab">38 %</div></div>
+        </div>
+
+        <div class="wrow">
+          <span class="wtag"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+          <div class="wmeta"><div class="t">Créneau en bataille</div><div class="d">Repères arrière à fixer · 2 leçons</div></div>
+          <div class="wbar"><div class="track"><div class="fill" style="width:52%"></div></div><div class="lab">52 %</div></div>
+        </div>
+
+        <div class="wrow">
+          <span class="wtag"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 4 18 3-9h4"/></svg></span>
+          <div class="wmeta"><div class="t">Anticipation aux intersections</div><div class="d">Regard à porter plus loin · 3 leçons</div></div>
+          <div class="wbar"><div class="track"><div class="fill" style="width:61%"></div></div><div class="lab">61 %</div></div>
+        </div>
+      </section>
+
+      <!-- PRÊT POUR L'EXAMEN -->
+      <div class="section-h">
+        <span class="tg"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V4h12v5a6 6 0 0 1-12 0Z"/><path d="M6 4H4a2 2 0 0 0 0 4h1M18 4h2a2 2 0 0 1 0 4h-1M9 16v3M15 16v3M8 21h8"/></svg></span>
+        <h2>Prêt pour l’examen ?</h2>
+      </div>
+      <section class="card ready">
+        <div class="ready-top">
+          <div class="ready-num"><span class="big">23</span><span class="den">/ 31</span></div>
+          <div class="ready-cap">
+            <span class="badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg> Sur la bonne pente</span>
+            <div class="eta">Objectif atteignable en ~6 leçons</div>
+          </div>
+        </div>
+
+        <!-- 31 segments -->
+        <div class="seg" aria-label="31 objectifs">
+          <i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i>
+          <i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i>
+          <i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i>
+          <i class="warn"></i><i class="warn"></i><i class="warn"></i><i class="warn"></i><i class="warn"></i>
+          <i></i><i></i><i></i>
+        </div>
+        <div class="seg-leg">
+          <span><i class="lk" style="background:#16a34a"></i> 23 acquises</span>
+          <span><i class="lk" style="background:#f59e0b"></i> 5 à retravailler</span>
+          <span><i class="lk" style="background:#e4e6f2"></i> 3 non vues</span>
+        </div>
+      </section>
+
+      <!-- COMPTE-RENDU -->
+      <div class="section-h">
+        <span class="tg"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="M9 13h6M9 17h4"/></svg></span>
+        <h2>Dernière leçon</h2>
+        <span class="more">mar. 23 juin</span>
+      </div>
+      <section class="card report">
+        <div class="rep-head">
+          <span class="rep-av">YK</span>
+          <div class="who"><div class="n">Leçon de 2 h · Cergy centre</div><div class="d">Toi · 18 h 00 → 20 h 00</div></div>
+          <span class="grade">Bien</span>
+        </div>
+        <div class="rep-quote">
+          Belle progression sur les <b>ronds-points</b> aujourd’hui : Inès place bien la voiture et signale ses sorties. On garde le cap sur l’<b>insertion rapide</b> — encore un peu trop d’hésitation à l’accélération. Prochaine fois : <b>route de Pontoise</b> aux heures creuses.
+        </div>
+        <div class="rep-chips">
+          <span class="chip up"><svg viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg> Ronds-points</span>
+          <span class="chip up"><svg viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"/></svg> Allure en ville</span>
+          <span class="chip work"><svg viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v8M8 12h8"/></svg> Insertion rapide</span>
+        </div>
+      </section>
+
+      <!-- GRILLE REMC -->
+      <div class="section-h">
+        <span class="tg"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+        <h2>Livret REMC · 31 objectifs</h2>
+        <span class="more">C1 → C4</span>
+      </div>
+
+      <div class="remc-wrap">
+
+        <!-- C1 -->
+        <div class="comp">
+          <div class="comp-h">
+            <span class="comp-tag c1">C1</span>
+            <div class="ttl"><div class="t">Maîtriser le véhicule</div><div class="s">Faible trafic · 8 objectifs</div></div>
+            <div class="comp-prog"><div class="frac">8/8</div><div class="mini"><i style="width:100%"></i></div></div>
+          </div>
+          <div class="obj-list">
+            <div class="obj is-done"><span class="ob-ic done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="lab">Installation au poste de conduite</span><span class="st done">Acquis</span></div>
+            <div class="obj is-done"><span class="ob-ic done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="lab">Démarrer et s’arrêter</span><span class="st done">Acquis</span></div>
+            <div class="obj is-done"><span class="ob-ic done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="lab">Doser l’accélération et le freinage</span><span class="st done">Acquis</span></div>
+            <div class="obj is-done"><span class="ob-ic done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="lab">Tenir et tourner le volant</span><span class="st done">Acquis</span></div>
+          </div>
+        </div>
+
+        <!-- C2 -->
+        <div class="comp">
+          <div class="comp-h">
+            <span class="comp-tag c2">C2</span>
+            <div class="ttl"><div class="t">Appréhender la route</div><div class="s">Trafic limité · 7 objectifs</div></div>
+            <div class="comp-prog"><div class="frac">6/7</div><div class="mini"><i style="width:86%"></i></div></div>
+          </div>
+          <div class="obj-list">
+            <div class="obj is-done"><span class="ob-ic done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="lab">Rechercher la signalisation et les indices</span><span class="st done">Acquis</span></div>
+            <div class="obj is-done"><span class="ob-ic done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="lab">Adapter l’allure aux circonstances</span><span class="st done">Acquis</span></div>
+            <div class="obj is-work"><span class="ob-ic work"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg></span><span class="lab">Tourner à droite et à gauche en ville</span><span class="st work">À revoir</span></div>
+            <div class="obj is-done"><span class="ob-ic done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="lab">Détecter, identifier et franchir les intersections</span><span class="st done">Acquis</span></div>
+          </div>
+        </div>
+
+        <!-- C3 -->
+        <div class="comp">
+          <div class="comp-h">
+            <span class="comp-tag c3">C3</span>
+            <div class="ttl"><div class="t">Circuler dans des conditions difficiles</div><div class="s">Trafic dense · 8 objectifs</div></div>
+            <div class="comp-prog"><div class="frac">6/8</div><div class="mini"><i style="width:75%"></i></div></div>
+          </div>
+          <div class="obj-list">
+            <div class="obj is-work"><span class="ob-ic work"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg></span><span class="lab">S’insérer sur une voie rapide</span><span class="st work">À revoir</span></div>
+            <div class="obj is-done"><span class="ob-ic done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="lab">Conduire dans une file de véhicules</span><span class="st done">Acquis</span></div>
+            <div class="obj is-work"><span class="ob-ic work"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg></span><span class="lab">Stationner en bataille et en créneau</span><span class="st work">À revoir</span></div>
+            <div class="obj is-todo"><span class="ob-ic todo"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="lab">Conduire de nuit et par visibilité réduite</span><span class="st todo">Non vu</span></div>
+          </div>
+        </div>
+
+        <!-- C4 -->
+        <div class="comp">
+          <div class="comp-h">
+            <span class="comp-tag c4">C4</span>
+            <div class="ttl"><div class="t">Pratiquer une conduite autonome</div><div class="s">Sûre, économique, citoyenne · 8 objectifs</div></div>
+            <div class="comp-prog"><div class="frac">3/8</div><div class="mini"><i style="width:38%"></i></div></div>
+          </div>
+          <div class="obj-list">
+            <div class="obj is-done"><span class="ob-ic done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span class="lab">Suivre un itinéraire de manière autonome</span><span class="st done">Acquis</span></div>
+            <div class="obj is-work"><span class="ob-ic work"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg></span><span class="lab">Anticiper et gérer les situations imprévues</span><span class="st work">À revoir</span></div>
+            <div class="obj is-todo"><span class="ob-ic todo"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="lab">Conduire en respectant l’environnement</span><span class="st todo">Non vu</span></div>
+            <div class="obj is-todo"><span class="ob-ic todo"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></span><span class="lab">Connaître les démarches après le permis</span><span class="st todo">Non vu</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Note trophée -->
+      <div class="trophy-note">
+        <svg class="tr" width="34" height="34" viewBox="0 0 48 48" fill="none">
+          <defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fde68a"/><stop offset=".5" stop-color="#f5c451"/><stop offset="1" stop-color="#c8941f"/></linearGradient></defs>
+          <path d="M14 8h20v6a10 10 0 0 1-20 0V8Z" fill="url(#gold)" stroke="#b5821a" stroke-width="1.4"/>
+          <path d="M14 9H9a3 3 0 0 0 0 6h2M34 9h5a3 3 0 0 1 0 6h-2" stroke="#c8941f" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path d="M20 23h8l-1 6h-6l-1-6Z" fill="url(#gold)"/>
+          <rect x="17" y="34" width="14" height="4" rx="2" fill="url(#gold)" stroke="#b5821a" stroke-width="1"/>
+          <rect x="20" y="29" width="8" height="6" rx="1.5" fill="#e2a72e"/>
+        </svg>
+        <div class="txt">Plus que <b>5 objectifs</b> à valider avant le <b>cap des 28/31</b> — le seuil que tu fixes d’habitude avant de présenter à l’examen.</div>
+      </div>
+
+      <!-- CTA -->
+      <div class="footer-cta">
+        <button class="btn-primary">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+          Valider une compétence
+        </button>
+        <button class="btn-ghost" aria-label="Programmer une leçon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4"/></svg>
+        </button>
+      </div>
+
+    </div><!-- /screen -->
+  </div><!-- /phone -->
+</body>
+</html>

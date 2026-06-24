@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>PermiGo — Forfait d'heures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --indigo:#4f46e5;
+    --indigo-700:#4338ca;
+    --indigo-900:#312e81;
+    --indigo-50:#eef0ff;
+    --indigo-100:#e3e6ff;
+    --indigo-200:#cdd2ff;
+    --ink:#1d2040;
+    --ink-soft:#4a4e6e;
+    --muted:#8b8fb3;
+    --paper:#f5f6ff;
+    --card:#ffffff;
+    --amber:#d97706;
+    --amber-bg:#fff5e6;
+    --amber-line:#f7d9a3;
+    --good:#10b981;
+    --gold-1:#fde9a8;
+    --gold-2:#e9b949;
+    --gold-3:#b7841f;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+
+  body{
+    font-family:"Inter",system-ui,sans-serif;
+    background:
+      radial-gradient(1100px 700px at 18% -8%, #e9ebff 0%, rgba(233,235,255,0) 60%),
+      radial-gradient(900px 620px at 92% 4%, #eef0ff 0%, rgba(238,240,255,0) 55%),
+      linear-gradient(180deg,#f0f1fb 0%, #e8eaff 100%);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px 16px;
+    color:var(--ink);
+  }
+
+  /* ---------- coque téléphone ---------- */
+  .phone{
+    position:relative;
+    width:390px;
+    height:844px;
+    border-radius:46px;
+    background:linear-gradient(180deg,#fbfbff 0%, #f3f4ff 100%);
+    box-shadow:
+      0 2px 0 rgba(255,255,255,.9) inset,
+      0 50px 90px -30px rgba(49,46,129,.55),
+      0 22px 50px -20px rgba(79,70,229,.35),
+      0 0 0 11px #0d0e1f,
+      0 0 0 12px #2a2c4d,
+      0 0 0 13px rgba(255,255,255,.06);
+    overflow:hidden;
+    isolation:isolate;
+  }
+
+  /* fond panneaux routiers décoratifs */
+  .road-bg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+  .road-bg svg{position:absolute;}
+
+  /* ---------- barre d'état ---------- */
+  .statusbar{
+    position:relative;z-index:5;
+    height:54px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 26px 0 32px;
+    font-family:"Inter";font-weight:700;font-size:15px;
+    color:var(--ink);
+  }
+  .statusbar .right{display:flex;align-items:center;gap:7px;}
+  .sb-batt{width:25px;height:13px;border:1.6px solid var(--ink);border-radius:4px;position:relative;padding:1.6px;}
+  .sb-batt::after{content:"";position:absolute;right:-3.4px;top:50%;transform:translateY(-50%);width:2px;height:5px;background:var(--ink);border-radius:0 1px 1px 0;}
+  .sb-batt i{display:block;height:100%;width:74%;background:var(--ink);border-radius:1.5px;}
+  .sb-net{display:flex;align-items:flex-end;gap:2.5px;height:12px;}
+  .sb-net span{width:3.2px;background:var(--ink);border-radius:1px;}
+  .sb-net span:nth-child(1){height:5px;} .sb-net span:nth-child(2){height:7.5px;}
+  .sb-net span:nth-child(3){height:10px;} .sb-net span:nth-child(4){height:12px;}
+
+  /* ---------- écran scroll ---------- */
+  .screen{
+    position:relative;z-index:2;
+    height:calc(844px - 54px - 76px);
+    overflow-y:auto;
+    padding:6px 20px 26px;
+    scrollbar-width:none;
+  }
+  .screen::-webkit-scrollbar{display:none;}
+
+  /* ---------- header moniteur ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 18px;}
+  .crumb{display:flex;align-items:center;gap:11px;}
+  .crumb .back{
+    width:42px;height:42px;border-radius:14px;
+    background:linear-gradient(180deg,#ffffff,#f1f2ff);
+    border:1px solid #e4e6fb;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 16px -8px rgba(79,70,229,.35), 0 1px 0 #fff inset;
+  }
+  .crumb .titles small{
+    display:block;font-family:"Inter";font-weight:700;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--indigo);opacity:.85;
+  }
+  .crumb .titles h1{
+    font-family:"Fredoka";font-weight:600;font-size:20px;line-height:1.05;color:var(--ink);
+    letter-spacing:-.01em;margin-top:1px;
+  }
+  .trophy{
+    width:44px;height:44px;border-radius:14px;position:relative;
+    background:
+      radial-gradient(120% 120% at 30% 18%, #fff6dc 0%, #f4dd9a 38%, #e3b94e 70%, #b7841f 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.7) inset,
+      0 -3px 6px rgba(160,110,20,.45) inset,
+      0 8px 18px -8px rgba(180,130,30,.7);
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* ---------- carte élève (identité) ---------- */
+  .student{
+    display:flex;align-items:center;gap:13px;
+    background:linear-gradient(180deg,#ffffff,#f7f8ff);
+    border:1px solid #eaecfb;
+    border-radius:20px;padding:12px 14px;margin-bottom:18px;
+    box-shadow:0 10px 26px -16px rgba(49,46,129,.4), 0 1px 0 #fff inset;
+  }
+  .ava{
+    width:52px;height:52px;border-radius:16px;flex:none;position:relative;
+    background:linear-gradient(150deg,#6d63f0,#4338ca);
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Fredoka";font-weight:600;font-size:21px;color:#fff;
+    box-shadow:0 8px 18px -8px rgba(67,56,202,.7), 0 1px 0 rgba(255,255,255,.4) inset;
+  }
+  .ava .dot{
+    position:absolute;right:-3px;bottom:-3px;width:16px;height:16px;border-radius:50%;
+    background:var(--good);border:3px solid #fff;
+  }
+  .student .who{flex:1;min-width:0;}
+  .student .who b{font-family:"Fredoka";font-weight:600;font-size:17px;color:var(--ink);letter-spacing:-.01em;}
+  .student .who span{display:block;font-size:12.5px;color:var(--muted);font-weight:500;margin-top:1px;}
+  .chip-boite{
+    flex:none;font-size:11px;font-weight:700;color:var(--indigo-700);
+    background:var(--indigo-50);border:1px solid var(--indigo-100);
+    padding:5px 10px;border-radius:999px;letter-spacing:.02em;
+  }
+
+  /* ---------- HÉROS : jauge forfait ---------- */
+  .hero{
+    position:relative;
+    border-radius:30px;
+    padding:26px 22px 24px;
+    margin-bottom:18px;
+    background:
+      radial-gradient(140% 120% at 84% -10%, rgba(124,114,245,.55) 0%, rgba(124,114,245,0) 52%),
+      radial-gradient(120% 120% at 8% 110%, rgba(49,46,129,.6) 0%, rgba(49,46,129,0) 55%),
+      linear-gradient(165deg,#4f46e5 0%, #4338ca 48%, #312e81 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.18) inset,
+      0 -22px 50px -28px rgba(0,0,0,.55) inset,
+      0 34px 60px -28px rgba(49,46,129,.85),
+      0 16px 34px -20px rgba(79,70,229,.7);
+    overflow:hidden;
+    color:#fff;
+  }
+  .hero::after{ /* grain/mesh subtil */
+    content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
+    background:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.5), transparent 60%),
+      radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,.35), transparent 60%),
+      radial-gradient(1px 1px at 45% 85%, rgba(255,255,255,.3), transparent 60%),
+      radial-gradient(1px 1px at 88% 20%, rgba(255,255,255,.4), transparent 60%);
+  }
+  .hero .hlabel{
+    display:flex;align-items:center;gap:8px;
+    font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+    color:#c7c9ff;position:relative;z-index:2;
+  }
+  .hero .hlabel .ic{width:15px;height:15px;color:#c7c9ff;}
+
+  .gauge-wrap{
+    position:relative;z-index:2;
+    display:flex;align-items:center;gap:18px;margin-top:14px;
+  }
+  .ring{position:relative;width:138px;height:138px;flex:none;}
+  .ring svg{transform:rotate(-90deg);display:block;}
+  .ring .center{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;
+  }
+  .ring .center .num{
+    font-family:"Fredoka";font-weight:700;font-size:40px;line-height:.9;letter-spacing:-.03em;
+    color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.35);
+  }
+  .ring .center .num small{font-size:18px;font-weight:600;opacity:.78;margin-left:1px;}
+  .ring .center .of{font-size:12px;font-weight:600;color:#c7c9ff;margin-top:3px;letter-spacing:.02em;}
+
+  .gauge-side{flex:1;position:relative;z-index:2;}
+  .gauge-side .big{
+    font-family:"Fredoka";font-weight:600;font-size:15px;color:#eef0ff;line-height:1.25;letter-spacing:-.005em;
+  }
+  .gauge-side .sub{font-size:12.5px;color:#b9bcff;margin-top:6px;line-height:1.45;font-weight:500;}
+  .pill-left{
+    display:inline-flex;align-items:center;gap:7px;margin-top:13px;
+    background:rgba(255,255,255,.13);
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:999px;padding:7px 12px;
+    font-size:12.5px;font-weight:700;color:#fff;
+    box-shadow:0 1px 0 rgba(255,255,255,.18) inset;
+  }
+  .pill-left b{font-family:"Fredoka";font-weight:600;}
+
+  /* mini barre de progression linéaire sous l'anneau */
+  .linbar{position:relative;z-index:2;margin-top:20px;}
+  .linbar .scale{
+    height:12px;border-radius:999px;position:relative;overflow:hidden;
+    background:rgba(255,255,255,.16);
+    box-shadow:0 2px 6px rgba(0,0,0,.25) inset;
+  }
+  .linbar .fill{
+    position:absolute;inset:0;width:70%;border-radius:999px;
+    background:linear-gradient(90deg,#ffe9a8 0%, #ffd36b 45%, #ffbf3d 100%);
+    box-shadow:0 0 14px rgba(255,200,80,.55), 0 1px 0 rgba(255,255,255,.5) inset;
+  }
+  .linbar .fill::after{ /* shimmer or */
+    content:"";position:absolute;inset:0;border-radius:999px;
+    background:linear-gradient(110deg,transparent 25%, rgba(255,255,255,.85) 50%, transparent 75%);
+    transform:translateX(-120%);
+    animation:shimmer 3.4s ease-in-out infinite;
+  }
+  .linbar .ticks{display:flex;justify-content:space-between;margin-top:8px;font-size:10.5px;font-weight:600;color:#b9bcff;letter-spacing:.02em;}
+
+  @keyframes shimmer{0%{transform:translateX(-120%);}55%,100%{transform:translateX(220%);}}
+
+  /* ---------- alerte douce « bientôt fini » ---------- */
+  .alert{
+    display:flex;gap:13px;align-items:flex-start;
+    background:linear-gradient(180deg,#fff8ec,#fff3df);
+    border:1px solid var(--amber-line);
+    border-radius:20px;padding:15px 16px;margin-bottom:18px;
+    box-shadow:0 12px 26px -18px rgba(217,119,6,.5), 0 1px 0 #fff inset;
+    position:relative;overflow:hidden;
+  }
+  .alert .halo{
+    position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;
+    background:radial-gradient(circle,rgba(245,158,11,.22),transparent 70%);
+    animation:pulse 3.6s ease-in-out infinite;pointer-events:none;
+  }
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:.9;}50%{transform:scale(1.18);opacity:.55;}}
+  .alert .aic{
+    width:38px;height:38px;border-radius:12px;flex:none;
+    background:linear-gradient(160deg,#fbbf52,#e08a08);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 16px -8px rgba(217,119,6,.7), 0 1px 0 rgba(255,255,255,.5) inset;
+  }
+  .alert .atxt{position:relative;z-index:2;}
+  .alert .atxt b{font-family:"Fredoka";font-weight:600;font-size:14.5px;color:#92400e;display:block;letter-spacing:-.005em;}
+  .alert .atxt span{font-size:12.5px;color:#9a6313;font-weight:500;line-height:1.45;display:block;margin-top:2px;}
+
+  /* ---------- bloc journal récent ---------- */
+  .sec-h{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 11px;}
+  .sec-h h2{font-family:"Fredoka";font-weight:600;font-size:15.5px;color:var(--ink);letter-spacing:-.005em;}
+  .sec-h .count{font-size:11.5px;font-weight:700;color:var(--muted);}
+
+  .log{
+    background:linear-gradient(180deg,#ffffff,#fafbff);
+    border:1px solid #ecedfb;border-radius:20px;
+    padding:6px 4px;margin-bottom:18px;
+    box-shadow:0 10px 26px -20px rgba(49,46,129,.45), 0 1px 0 #fff inset;
+  }
+  .lrow{display:flex;align-items:center;gap:12px;padding:11px 12px;position:relative;}
+  .lrow + .lrow::before{content:"";position:absolute;top:0;left:54px;right:12px;height:1px;background:#f0f1fb;}
+  .lrow .ld{
+    width:38px;height:38px;border-radius:12px;flex:none;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:var(--indigo-50);border:1px solid var(--indigo-100);
+  }
+  .lrow .ld b{font-family:"Fredoka";font-weight:600;font-size:15px;color:var(--indigo-700);line-height:1;}
+  .lrow .ld span{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--indigo);margin-top:1px;}
+  .lrow .li{flex:1;min-width:0;}
+  .lrow .li b{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .lrow .li span{display:block;font-size:11.5px;color:var(--muted);font-weight:500;margin-top:1px;}
+  .lrow .lq{
+    flex:none;font-family:"Fredoka";font-weight:600;font-size:13px;color:var(--good);
+    background:#e7f8f1;border:1px solid #c7eddd;border-radius:999px;padding:4px 10px;
+  }
+
+  /* ---------- note charte ---------- */
+  .note{
+    display:flex;gap:10px;align-items:center;
+    font-size:11.5px;color:var(--muted);font-weight:500;line-height:1.45;
+    padding:0 4px 8px;
+  }
+  .note .ni{width:16px;height:16px;flex:none;color:var(--indigo);opacity:.7;}
+
+  /* ---------- barre d'action collante (bouton héros + Leçon faite) ---------- */
+  .dock{
+    position:absolute;left:0;right:0;bottom:0;z-index:6;
+    height:96px;padding:14px 20px 20px;
+    background:linear-gradient(180deg,rgba(245,246,255,0) 0%, #f1f2ff 38%, #eceeff 100%);
+    display:flex;align-items:center;gap:12px;
+  }
+  .btn-sec{
+    width:54px;height:54px;flex:none;border-radius:18px;
+    background:linear-gradient(180deg,#ffffff,#eef0ff);
+    border:1px solid #dfe2fb;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 10px 22px -12px rgba(79,70,229,.4), 0 1px 0 #fff inset;
+  }
+  .btn-main{
+    flex:1;height:56px;border:0;border-radius:18px;cursor:pointer;
+    position:relative;overflow:hidden;
+    background:
+      radial-gradient(120% 180% at 20% -40%, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 50%),
+      linear-gradient(180deg,#5b52ec 0%, #4f46e5 42%, #4338ca 100%);
+    color:#fff;font-family:"Fredoka";font-weight:600;font-size:16.5px;letter-spacing:-.005em;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.35) inset,
+      0 -4px 10px rgba(0,0,0,.25) inset,
+      0 16px 30px -12px rgba(67,56,202,.85),
+      0 6px 14px -6px rgba(79,70,229,.6);
+    transition:transform .14s cubic-bezier(.2,.7,.3,1), box-shadow .14s ease;
+  }
+  .btn-main:active{
+    transform:translateY(2px) scale(.99);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.3) inset,
+      0 -3px 8px rgba(0,0,0,.25) inset,
+      0 8px 16px -10px rgba(67,56,202,.85);
+  }
+  .btn-main .plus{
+    width:24px;height:24px;border-radius:50%;
+    background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;
+    box-shadow:0 1px 0 rgba(255,255,255,.35) inset;
+  }
+  /* flash quand on incrémente */
+  .flash{
+    position:absolute;inset:0;background:rgba(255,255,255,.5);opacity:0;border-radius:18px;pointer-events:none;
+  }
+  .btn-main.bump .flash{animation:flash .45s ease;}
+  @keyframes flash{0%{opacity:.55;}100%{opacity:0;}}
+
+  @media (prefers-reduced-motion: reduce){
+    .linbar .fill::after,.alert .halo{animation:none;}
+    .btn-main{transition:none;}
+    .btn-main.bump .flash{animation:none;}
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+
+    <!-- panneaux routiers décoratifs en fond -->
+    <div class="road-bg" aria-hidden="true">
+      <!-- disque liseré rouge -->
+      <svg width="180" height="180" viewBox="0 0 100 100" style="top:120px;right:-58px;opacity:.05;">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="#dc2626" stroke-width="8"/>
+        <circle cx="50" cy="50" r="46" fill="#4f46e5"/>
+      </svg>
+      <!-- triangle -->
+      <svg width="150" height="135" viewBox="0 0 100 90" style="top:500px;left:-44px;opacity:.045;">
+        <path d="M50 6 L94 84 L6 84 Z" fill="none" stroke="#dc2626" stroke-width="8" stroke-linejoin="round"/>
+      </svg>
+      <!-- losange -->
+      <svg width="120" height="120" viewBox="0 0 100 100" style="bottom:120px;right:-30px;opacity:.05;">
+        <rect x="22" y="22" width="56" height="56" rx="6" transform="rotate(45 50 50)" fill="#4f46e5"/>
+      </svg>
+    </div>
+
+    <!-- barre d'état -->
+    <div class="statusbar">
+      <span>9:41</span>
+      <div class="right">
+        <div class="sb-net"><span></span><span></span><span></span><span></span></div>
+        <svg width="17" height="13" viewBox="0 0 17 13" fill="none"><path d="M8.5 11.5C9.3 11.5 10 12.2 10 13M8.5 8C10.6 8 12.5 8.9 13.8 10.3M8.5 4.5C12 4.5 15.2 6 17 8.5M8.5 1C13.4 1 17.8 3.2 20 6.6" stroke="#1d2040" stroke-width="1.6" stroke-linecap="round" transform="scale(.78)"/></svg>
+        <div class="sb-batt"><i></i></div>
+      </div>
+    </div>
+
+    <!-- écran -->
+    <div class="screen">
+
+      <!-- header -->
+      <div class="topbar">
+        <div class="crumb">
+          <div class="back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#4338ca" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="titles">
+            <small>Forfait d'heures</small>
+            <h1>Compteur</h1>
+          </div>
+        </div>
+        <div class="trophy" title="Auto-école à votre marque">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 4h10v3a5 5 0 0 1-10 0V4Z" fill="#7a5410"/><path d="M7 5H4.5a2.5 2.5 0 0 0 2.5 2.5M17 5h2.5A2.5 2.5 0 0 1 17 7.5" stroke="#7a5410" stroke-width="1.6" stroke-linecap="round"/><path d="M10 13h4l-.4 3h-3.2L10 13Z" fill="#7a5410"/><rect x="8.5" y="18.5" width="7" height="2" rx="1" fill="#7a5410"/></svg>
+        </div>
+      </div>
+
+      <!-- carte élève -->
+      <div class="student">
+        <div class="ava">IM<span class="dot"></span></div>
+        <div class="who">
+          <b>Inès Moreau</b>
+          <span>Élève depuis le 4 mars · Code obtenu</span>
+        </div>
+        <span class="chip-boite">Boîte manuelle</span>
+      </div>
+
+      <!-- HÉROS : jauge -->
+      <div class="hero">
+        <div class="hlabel">
+          <svg class="ic" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3.5 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Heures restantes au forfait
+        </div>
+
+        <div class="gauge-wrap">
+          <div class="ring">
+            <svg width="138" height="138" viewBox="0 0 138 138">
+              <defs>
+                <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ffe9a8"/>
+                  <stop offset="55%" stop-color="#ffd36b"/>
+                  <stop offset="100%" stop-color="#ffbf3d"/>
+                </linearGradient>
+              </defs>
+              <circle cx="69" cy="69" r="58" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="13"/>
+              <!-- 14/20 = 70% ; circ ≈ 364.4 ; offset = 30% -->
+              <circle cx="69" cy="69" r="58" fill="none" stroke="url(#gold)" stroke-width="13"
+                stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="109.3"
+                style="filter:drop-shadow(0 0 7px rgba(255,200,80,.6));"/>
+            </svg>
+            <div class="center">
+              <div class="num" id="hnum">14<small>h</small></div>
+              <div class="of">sur 20 h</div>
+            </div>
+          </div>
+
+          <div class="gauge-side">
+            <div class="big">Il reste 14 heures de conduite.</div>
+            <div class="sub">6 h déjà réalisées avec vous. Le forfait couvre l'apprentissage jusqu'à l'examen.</div>
+            <span class="pill-left">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="11" r="2.4" stroke="#fff" stroke-width="1.8"/></svg>
+              <b>3</b> séances cette semaine
+            </span>
+          </div>
+        </div>
+
+        <div class="linbar">
+          <div class="scale"><div class="fill" id="lfill"></div></div>
+          <div class="ticks"><span>Début</span><span>Réalisé 6 h</span><span>Forfait 20 h</span></div>
+        </div>
+      </div>
+
+      <!-- alerte douce -->
+      <div class="alert">
+        <div class="halo"></div>
+        <div class="aic">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 4 3 20h18L12 4Z" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"/><path d="M12 10v4" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="17" r="1.1" fill="#fff"/></svg>
+        </div>
+        <div class="atxt">
+          <b>Bientôt fini — pense à recharger</b>
+          <span>Au rythme actuel, le forfait d'Inès sera épuisé d'ici 2 à 3 semaines. Glisse-lui un mot pour la suite.</span>
+        </div>
+      </div>
+
+      <!-- journal récent -->
+      <div class="sec-h">
+        <h2>Dernières leçons pointées</h2>
+        <span class="count">3 récentes</span>
+      </div>
+      <div class="log">
+        <div class="lrow">
+          <div class="ld"><b>23</b><span>juin</span></div>
+          <div class="li"><b>Leçon de conduite</b><span>Manœuvres · créneau et marche arrière</span></div>
+          <div class="lq">+1 h</div>
+        </div>
+        <div class="lrow">
+          <div class="ld"><b>20</b><span>juin</span></div>
+          <div class="li"><b>Leçon de conduite</b><span>Conduite en ville · giratoires</span></div>
+          <div class="lq">+1 h</div>
+        </div>
+        <div class="lrow">
+          <div class="ld"><b>17</b><span>juin</span></div>
+          <div class="li"><b>Leçon de conduite</b><span>Première sortie · prise en main</span></div>
+          <div class="lq">+2 h</div>
+        </div>
+      </div>
+
+      <div class="note">
+        <svg class="ni" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.1" fill="currentColor"/></svg>
+        Simple compteur d'heures — pas de prise de rendez-vous. Tu pointes une leçon après l'avoir faite.
+      </div>
+
+    </div>
+
+    <!-- dock action -->
+    <div class="dock">
+      <button class="btn-sec" title="Détail du forfait" aria-label="Détail du forfait">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h9" stroke="#4338ca" stroke-width="2.1" stroke-linecap="round"/></svg>
+      </button>
+      <button class="btn-main" id="addBtn">
+        <span class="flash"></span>
+        <span class="plus">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 6v12M6 12h12" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </span>
+        Leçon faite
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    (function(){
+      var done = 6;          // heures réalisées
+      var total = 20;        // forfait
+      var btn = document.getElementById('addBtn');
+      var hnum = document.getElementById('hnum');
+      var fill = document.getElementById('lfill');
+      var ringFg = document.querySelector('.ring circle:nth-child(2)');
+      var circ = 364.4;
+      function render(){
+        var remaining = Math.max(total - done, 0);
+        hnum.innerHTML = remaining + '<small>h</small>';
+        var pct = Math.min(done/total, 1);
+        fill.style.width = (pct*100) + '%';
+        var rpct = remaining/total; // anneau = heures restantes
+        if(ringFg) ringFg.setAttribute('stroke-dashoffset', (circ*(1-rpct)).toFixed(1));
+      }
+      btn.addEventListener('click', function(){
+        if(done < total) done += 1;
+        render();
+        btn.classList.remove('bump'); void btn.offsetWidth; btn.classList.add('bump');
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Moniteur — Là où ça coince</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --indigo:#4f46e5;
+    --indigo-deep:#4338ca;
+    --indigo-night:#312e81;
+    --indigo-ink:#1e1b4b;
+    --indigo-50:#eef0ff;
+    --indigo-100:#e3e6ff;
+    --indigo-200:#cdd2ff;
+    --paper:#f5f6ff;
+    --white:#ffffff;
+    --ink:#1c1b33;
+    --muted:#6b6b87;
+    --muted-2:#8a8aa6;
+    --line:#e7e8f6;
+    --red:#e23b3b;
+    --amber:#e0892a;
+    --green:#16a34a;
+    --shadow-indigo:rgba(79,70,229,.22);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+
+  html,body{
+    height:100%;
+  }
+  body{
+    font-family:"Inter",system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 700px at 12% -8%, #e8eaff 0%, rgba(232,234,255,0) 55%),
+      radial-gradient(1000px 800px at 110% 12%, #eaecff 0%, rgba(234,236,255,0) 50%),
+      linear-gradient(165deg,#eef0fb 0%, #e6e8f7 100%);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:38px 16px;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ----- coque téléphone ----- */
+  .phone{
+    position:relative;
+    width:390px;
+    height:844px;
+    border-radius:46px;
+    background:linear-gradient(160deg,#fbfbff 0%, #f3f4fd 100%);
+    box-shadow:
+      0 2px 4px rgba(30,27,75,.06),
+      0 30px 60px -18px rgba(49,46,129,.42),
+      0 60px 120px -40px rgba(49,46,129,.5),
+      inset 0 0 0 1px rgba(255,255,255,.7),
+      inset 0 0 0 9px #0e0d1f;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  /* fine bordure métal autour */
+  .phone::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:46px;
+    padding:1px;
+    background:linear-gradient(160deg, rgba(255,255,255,.9), rgba(79,70,229,.25) 40%, rgba(49,46,129,.3));
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    pointer-events:none;
+    z-index:60;
+  }
+
+  .screen{
+    position:absolute;
+    inset:9px;
+    border-radius:38px;
+    background:
+      radial-gradient(680px 380px at 50% -6%, #eaecff 0%, rgba(234,236,255,0) 60%),
+      var(--paper);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* panneaux routiers décoratifs en fond ultra-léger */
+  .signs{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .signs svg{position:absolute;}
+  .sign-disc{top:128px;right:-44px;width:188px;height:188px;opacity:.05;transform:rotate(8deg);}
+  .sign-tri{top:430px;left:-50px;width:170px;height:160px;opacity:.045;transform:rotate(-10deg);}
+  .sign-dia{bottom:96px;right:18px;width:120px;height:120px;opacity:.05;transform:rotate(0deg);}
+
+  /* ----- barre d'état ----- */
+  .statusbar{
+    position:relative;z-index:5;
+    height:50px;
+    padding:16px 26px 0;
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:"Inter";font-weight:700;font-size:15px;
+    color:var(--indigo-ink);
+    letter-spacing:.2px;
+  }
+  .sb-right{display:flex;align-items:center;gap:7px;}
+  .sb-right svg{display:block;}
+
+  /* ----- header ----- */
+  .topbar{
+    position:relative;z-index:5;
+    padding:6px 22px 8px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .back{
+    width:42px;height:42px;border-radius:14px;
+    background:linear-gradient(160deg,#fff,#f1f2fd);
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 10px -4px rgba(49,46,129,.2), inset 0 1px 0 #fff;
+  }
+  .back svg{stroke:var(--indigo-deep);}
+  .eyebrow{
+    font-family:"Inter";font-weight:700;font-size:11px;letter-spacing:1.4px;
+    text-transform:uppercase;color:var(--indigo);
+    text-align:center;
+  }
+  .topbar .av{
+    width:42px;height:42px;border-radius:14px;
+    background:
+      linear-gradient(145deg,#6366f1,#4338ca);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:"Fredoka";font-weight:600;font-size:15px;
+    box-shadow:0 6px 14px -5px var(--shadow-indigo), inset 0 1px 0 rgba(255,255,255,.35);
+  }
+
+  /* ----- contenu scrollable ----- */
+  .content{
+    position:relative;z-index:5;
+    flex:1;
+    overflow-y:auto;
+    padding:6px 20px 30px;
+    scrollbar-width:none;
+  }
+  .content::-webkit-scrollbar{display:none;}
+
+  /* élève en cours */
+  .student-row{
+    display:flex;align-items:center;gap:13px;
+    padding:4px 2px 14px;
+  }
+  .student-row .ph{
+    width:48px;height:48px;border-radius:16px;flex-shrink:0;
+    background:linear-gradient(150deg,#fde8c3,#f5c98a);
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Fredoka";font-weight:600;font-size:18px;color:#7a4f10;
+    box-shadow:0 6px 16px -7px rgba(180,130,40,.55), inset 0 1px 0 rgba(255,255,255,.5);
+  }
+  .student-meta .nm{
+    display:flex;align-items:center;gap:8px;
+  }
+  .student-meta .nm b{
+    font-family:"Fredoka";font-weight:600;font-size:18px;color:var(--ink);
+    letter-spacing:-.3px;
+  }
+  .pill{
+    font-size:10.5px;font-weight:700;letter-spacing:.3px;
+    padding:3px 8px;border-radius:999px;
+    background:var(--indigo-50);color:var(--indigo-deep);
+    border:1px solid var(--indigo-100);
+  }
+  .student-meta .sub{font-size:12.5px;color:var(--muted);font-weight:500;margin-top:2px;}
+
+  /* ----- carte hero "Là où ça coince" ----- */
+  .hero{
+    position:relative;
+    border-radius:26px;
+    padding:1.5px;
+    background:linear-gradient(155deg, rgba(255,255,255,.5), rgba(99,102,241,.55) 45%, rgba(49,46,129,.7));
+    box-shadow:
+      0 2px 4px rgba(49,46,129,.12),
+      0 22px 40px -20px rgba(67,56,202,.6),
+      0 40px 70px -34px rgba(49,46,129,.5);
+    margin-bottom:18px;
+  }
+  .hero-inner{
+    position:relative;
+    border-radius:25px;
+    overflow:hidden;
+    background:
+      radial-gradient(420px 220px at 88% -10%, rgba(129,140,248,.55) 0%, rgba(129,140,248,0) 60%),
+      radial-gradient(360px 260px at -6% 120%, rgba(49,46,129,.6) 0%, rgba(49,46,129,0) 55%),
+      linear-gradient(158deg,#5b54e6 0%, #4338ca 52%, #312e81 100%);
+    color:#fff;
+    padding:20px 20px 22px;
+  }
+  /* grain léger */
+  .hero-inner::after{
+    content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:.5;
+    background-image:radial-gradient(rgba(255,255,255,.16) 1px, transparent 1px);
+    background-size:4px 4px;
+  }
+  /* halo doux */
+  .hero-glow{
+    position:absolute;width:200px;height:200px;border-radius:50%;
+    top:-80px;right:-40px;
+    background:radial-gradient(circle, rgba(165,180,252,.5) 0%, rgba(165,180,252,0) 70%);
+    filter:blur(2px);
+    animation:floatGlow 7s ease-in-out infinite;
+  }
+
+  .hero-top{
+    position:relative;z-index:2;
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .hero-top .lab{display:flex;align-items:center;gap:11px;}
+  .hero-icon{
+    width:40px;height:40px;border-radius:13px;flex-shrink:0;
+    background:linear-gradient(150deg, rgba(255,255,255,.28), rgba(255,255,255,.08));
+    border:1px solid rgba(255,255,255,.35);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 6px 14px -6px rgba(0,0,0,.4);
+  }
+  .hero-icon svg{stroke:#fff;}
+  .hero h1{
+    font-family:"Fredoka";font-weight:600;font-size:22px;line-height:1.05;
+    letter-spacing:-.5px;
+  }
+  .hero .h-sub{font-size:12px;color:rgba(255,255,255,.78);font-weight:500;margin-top:1px;}
+
+  .hero-count{
+    flex-shrink:0;text-align:center;
+    background:linear-gradient(160deg, rgba(255,255,255,.16), rgba(255,255,255,.05));
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:16px;
+    padding:8px 13px 7px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  .hero-count b{font-family:"Fredoka";font-weight:600;font-size:24px;display:block;line-height:1;letter-spacing:-1px;}
+  .hero-count span{font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.72);font-weight:700;}
+
+  .hero-note{
+    position:relative;z-index:2;
+    display:flex;align-items:flex-start;gap:9px;
+    font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.85);font-weight:500;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:14px;padding:11px 13px;
+  }
+  .hero-note svg{stroke:#c7d2fe;flex-shrink:0;margin-top:1px;}
+
+  /* ----- liste compétences ----- */
+  .sec-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin:4px 4px 12px;
+  }
+  .sec-head h2{font-family:"Fredoka";font-weight:600;font-size:15px;color:var(--indigo-ink);letter-spacing:-.2px;}
+  .sec-head .ref{font-size:11px;color:var(--muted-2);font-weight:600;letter-spacing:.3px;}
+
+  .skill{
+    position:relative;
+    background:linear-gradient(170deg,#ffffff 0%, #fafbff 100%);
+    border:1px solid var(--line);
+    border-radius:22px;
+    padding:16px 16px 15px;
+    margin-bottom:13px;
+    box-shadow:
+      0 1px 2px rgba(49,46,129,.05),
+      0 14px 26px -18px rgba(49,46,129,.32);
+    overflow:hidden;
+  }
+  /* liseré gauche selon sévérité */
+  .skill::before{
+    content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:999px;
+  }
+  .skill.fragile::before{background:linear-gradient(180deg,#f56767,#d62f2f);box-shadow:0 0 12px rgba(226,59,59,.45);}
+  .skill.moyen::before{background:linear-gradient(180deg,#f0a94b,#d97d18);box-shadow:0 0 12px rgba(224,137,42,.4);}
+
+  .skill-top{
+    display:flex;align-items:flex-start;gap:12px;
+    margin-bottom:13px;
+  }
+  .skill-ic{
+    width:42px;height:42px;border-radius:14px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+  }
+  .skill-ic.i-vit{background:linear-gradient(150deg,#fee2e2,#fecaca);}
+  .skill-ic.i-cro{background:linear-gradient(150deg,#fff0db,#ffe0b8);}
+  .skill-ic.i-gir{background:linear-gradient(150deg,#fff0db,#ffe0b8);}
+  .skill-ic.i-vit svg{stroke:#d62f2f;}
+  .skill-ic.i-cro svg,.skill-ic.i-gir svg{stroke:#c46a10;}
+
+  .skill-id{flex:1;min-width:0;}
+  .skill-id .c{font-size:10.5px;font-weight:800;letter-spacing:.6px;color:var(--muted-2);text-transform:uppercase;}
+  .skill-id h3{font-family:"Fredoka";font-weight:600;font-size:16.5px;color:var(--ink);line-height:1.15;letter-spacing:-.3px;margin-top:1px;}
+
+  .sev-tag{
+    flex-shrink:0;
+    font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+    padding:5px 9px;border-radius:9px;
+    display:flex;align-items:center;gap:5px;
+  }
+  .sev-tag .dot{width:6px;height:6px;border-radius:50%;}
+  .sev-tag.t-fragile{background:#fdeaea;color:#c11f1f;border:1px solid #f7cdcd;}
+  .sev-tag.t-fragile .dot{background:#d62f2f;box-shadow:0 0 6px #e23b3b;}
+  .sev-tag.t-moyen{background:#fdf2e2;color:#b66608;border:1px solid #f6e0bf;}
+  .sev-tag.t-moyen .dot{background:#e0892a;box-shadow:0 0 6px #e0892a;}
+
+  /* barre de sévérité */
+  .sev-bar-wrap{margin-bottom:14px;}
+  .sev-bar-label{
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:7px;
+  }
+  .sev-bar-label .obs{color:var(--muted-2);font-weight:500;}
+  .sev-track{
+    position:relative;height:9px;border-radius:999px;
+    background:#eef0f7;
+    box-shadow:inset 0 1px 2px rgba(49,46,129,.1);
+    overflow:hidden;
+  }
+  .sev-fill{
+    position:absolute;left:0;top:0;bottom:0;border-radius:999px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  .sev-fill.f-fragile{background:linear-gradient(90deg,#f97070,#d62f2f);}
+  .sev-fill.f-moyen{background:linear-gradient(90deg,#f4b35e,#dd861d);}
+  /* graduations */
+  .sev-track .tick{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.7);}
+
+  /* mini observations sparkline / contexte */
+  .skill-foot{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;
+  }
+  .obs-chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0;}
+  .chip{
+    font-size:10.5px;font-weight:600;color:var(--indigo-deep);
+    background:var(--indigo-50);border:1px solid var(--indigo-100);
+    padding:4px 8px;border-radius:8px;
+    white-space:nowrap;
+  }
+
+  .btn-prescribe{
+    flex-shrink:0;
+    display:inline-flex;align-items:center;gap:7px;
+    height:44px;padding:0 16px;border-radius:14px;border:none;
+    font-family:"Fredoka";font-weight:600;font-size:13.5px;color:#fff;
+    letter-spacing:.1px;cursor:pointer;
+    background:linear-gradient(160deg,#5b54e6,#4338ca);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.3) inset,
+      0 8px 18px -7px var(--shadow-indigo),
+      0 2px 4px rgba(49,46,129,.2);
+    transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease;
+  }
+  .btn-prescribe svg{stroke:#fff;}
+  .btn-prescribe:active{transform:translateY(2px) scale(.98);box-shadow:0 4px 10px -6px var(--shadow-indigo);}
+  .btn-prescribe.done{
+    background:linear-gradient(160deg,#dcfce7,#bbf7d0);
+    color:#15803d;
+    box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 6px 14px -8px rgba(22,163,74,.5);
+  }
+  .btn-prescribe.done svg{stroke:#15803d;}
+
+  /* bandeau bas conseil */
+  .footer-tip{
+    margin-top:6px;
+    display:flex;align-items:center;gap:11px;
+    background:linear-gradient(160deg,#fff,#f4f5fe);
+    border:1px solid var(--line);
+    border-radius:18px;padding:13px 14px;
+    box-shadow:0 10px 22px -16px rgba(49,46,129,.3);
+  }
+  .footer-tip .ftic{
+    width:36px;height:36px;border-radius:11px;flex-shrink:0;
+    background:linear-gradient(150deg,#fff5dd,#ffe7ad);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 1px 0 #fff;
+  }
+  .footer-tip .ftic svg{stroke:#b07712;}
+  .footer-tip p{font-size:12px;line-height:1.45;color:var(--muted);font-weight:500;}
+  .footer-tip p b{color:var(--ink);font-weight:700;}
+
+  /* ----- nav bas factice ----- */
+  .tabbar{
+    position:relative;z-index:5;
+    height:74px;flex-shrink:0;
+    background:linear-gradient(180deg, rgba(255,255,255,.6), #ffffff 60%);
+    border-top:1px solid var(--line);
+    display:flex;align-items:flex-start;justify-content:space-around;
+    padding:11px 14px 0;
+    backdrop-filter:blur(8px);
+  }
+  .tab{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--muted-2);letter-spacing:.2px;}
+  .tab svg{stroke:var(--muted-2);}
+  .tab.active{color:var(--indigo-deep);}
+  .tab.active svg{stroke:var(--indigo-deep);}
+  .tab.active .tdot{
+    width:5px;height:5px;border-radius:50%;background:var(--indigo);margin-top:1px;
+    box-shadow:0 0 8px var(--indigo);
+  }
+
+  /* entrée cascade */
+  @keyframes riseIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes floatGlow{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(14px) scale(1.06);}}
+  @keyframes shimmer{0%{background-position:-120% 0;}100%{background-position:220% 0;}}
+
+  .anim{opacity:0;animation:riseIn .5s cubic-bezier(.22,.9,.32,1) forwards;}
+  .d1{animation-delay:.05s;} .d2{animation-delay:.14s;} .d3{animation-delay:.23s;}
+  .d4{animation-delay:.32s;} .d5{animation-delay:.41s;} .d6{animation-delay:.5s;}
+
+  /* shimmer or sur le compteur hero */
+  .hero-count{position:relative;overflow:hidden;}
+  .hero-count::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(105deg, transparent 40%, rgba(255,255,255,.45) 50%, transparent 60%);
+    background-size:220% 100%;
+    animation:shimmer 4.5s ease-in-out infinite;
+    pointer-events:none;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .anim{opacity:1;animation:none;}
+    .hero-glow,.hero-count::after{animation:none;}
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+
+      <!-- panneaux décoratifs -->
+      <div class="signs" aria-hidden="true">
+        <svg class="sign-disc" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#fff" stroke="#d62f2f" stroke-width="8"/></svg>
+        <svg class="sign-tri" viewBox="0 0 100 90"><path d="M50 6 L96 84 H4 Z" fill="#fff" stroke="#d62f2f" stroke-width="7" stroke-linejoin="round"/></svg>
+        <svg class="sign-dia" viewBox="0 0 100 100"><path d="M50 4 L96 50 L50 96 L4 50 Z" fill="#fdd835" stroke="#fff" stroke-width="6" stroke-linejoin="round"/></svg>
+      </div>
+
+      <!-- barre d'état -->
+      <div class="statusbar">
+        <span>9:41</span>
+        <div class="sb-right">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1e1b4b"/><rect x="5" y="4.5" width="3" height="7.5" rx="1" fill="#1e1b4b"/><rect x="10" y="2" width="3" height="10" rx="1" fill="#1e1b4b"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1e1b4b" opacity=".3"/></svg>
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="none"><path d="M8.5 2.5C10.7 2.5 12.7 3.4 14.1 4.8" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/><path d="M5 6C6 5 7.2 4.5 8.5 4.5C9.8 4.5 11 5 12 6" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round"/><circle cx="8.5" cy="9" r="1.4" fill="#1e1b4b"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="#1e1b4b" stroke-width="1.3" opacity=".4"/><rect x="2.6" y="2.6" width="16" height="6.8" rx="1.6" fill="#1e1b4b"/><rect x="23.4" y="4" width="1.6" height="4" rx=".8" fill="#1e1b4b" opacity=".5"/></svg>
+        </div>
+      </div>
+
+      <!-- header -->
+      <div class="topbar anim d1">
+        <div class="back" role="button" aria-label="Retour">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </div>
+        <div class="eyebrow">Fiche élève · suivi</div>
+        <div class="av">M</div>
+      </div>
+
+      <!-- contenu -->
+      <div class="content">
+
+        <!-- élève -->
+        <div class="student-row anim d1">
+          <div class="ph">CL</div>
+          <div class="student-meta">
+            <div class="nm"><b>Chloé Lemoine</b><span class="pill">Boîte manuelle</span></div>
+            <div class="sub">14 leçons · prochaine séance jeu. 10 h</div>
+          </div>
+        </div>
+
+        <!-- HERO : Là où ça coince -->
+        <div class="hero anim d2">
+          <div class="hero-inner">
+            <span class="hero-glow" aria-hidden="true"></span>
+            <div class="hero-top">
+              <div class="lab">
+                <div class="hero-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                </div>
+                <div>
+                  <h1>Là où ça coince</h1>
+                  <div class="h-sub">Repéré sur les 3 dernières séances</div>
+                </div>
+              </div>
+              <div class="hero-count">
+                <b>3</b>
+                <span>points</span>
+              </div>
+            </div>
+            <div class="hero-note">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg>
+              <span>Trois compétences à renforcer avant l’examen. Prescris la fiche : Chloé la révise entre deux leçons.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-head anim d3">
+          <h2>Compétences à renforcer</h2>
+          <span class="ref">Référentiel REMC</span>
+        </div>
+
+        <!-- compétence 1 : FRAGILE -->
+        <div class="skill fragile anim d3">
+          <div class="skill-top">
+            <div class="skill-ic i-vit">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="m13.4 10.6 4-4"/><path d="M3.3 17a9 9 0 1 1 17.4 0"/></svg>
+            </div>
+            <div class="skill-id">
+              <div class="c">REMC · Compétence 3</div>
+              <h3>Allure &amp; adaptation à la vitesse</h3>
+            </div>
+            <span class="sev-tag t-fragile"><span class="dot"></span>Fragile</span>
+          </div>
+
+          <div class="sev-bar-wrap">
+            <div class="sev-bar-label"><span>Niveau de maîtrise</span><span class="obs">2 séances sur 3 en difficulté</span></div>
+            <div class="sev-track">
+              <div class="sev-fill f-fragile" style="width:26%"></div>
+              <span class="tick" style="left:33.3%"></span><span class="tick" style="left:66.6%"></span>
+            </div>
+          </div>
+
+          <div class="skill-foot">
+            <div class="obs-chips">
+              <span class="chip">Trop lente en agglo</span>
+              <span class="chip">Freine tard</span>
+            </div>
+            <button class="btn-prescribe" type="button" data-prescribe>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
+              Prescrire la fiche
+            </button>
+          </div>
+        </div>
+
+        <!-- compétence 2 : MOYEN -->
+        <div class="skill moyen anim d4">
+          <div class="skill-top">
+            <div class="skill-ic i-cro">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><path d="m6.5 6.5 11 11"/><path d="m17.5 6.5-11 11"/></svg>
+            </div>
+            <div class="skill-id">
+              <div class="c">REMC · Compétence 3</div>
+              <h3>Croisements &amp; dépassements</h3>
+            </div>
+            <span class="sev-tag t-moyen"><span class="dot"></span>Moyen</span>
+          </div>
+
+          <div class="sev-bar-wrap">
+            <div class="sev-bar-label"><span>Niveau de maîtrise</span><span class="obs">Hésite en route étroite</span></div>
+            <div class="sev-track">
+              <div class="sev-fill f-moyen" style="width:54%"></div>
+              <span class="tick" style="left:33.3%"></span><span class="tick" style="left:66.6%"></span>
+            </div>
+          </div>
+
+          <div class="skill-foot">
+            <div class="obs-chips">
+              <span class="chip">Position à droite</span>
+              <span class="chip">Anticipation</span>
+            </div>
+            <button class="btn-prescribe" type="button" data-prescribe>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
+              Prescrire la fiche
+            </button>
+          </div>
+        </div>
+
+        <!-- compétence 3 : MOYEN -->
+        <div class="skill moyen anim d5">
+          <div class="skill-top">
+            <div class="skill-ic i-gir">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3"/><path d="M12 19v3"/><path d="M4.2 7l2.6 1.5"/><path d="M17.2 15.5 19.8 17"/><path d="M19.8 7l-2.6 1.5"/><path d="M6.8 15.5 4.2 17"/></svg>
+            </div>
+            <div class="skill-id">
+              <div class="c">REMC · Compétence 3</div>
+              <h3>Giratoires &amp; insertions</h3>
+            </div>
+            <span class="sev-tag t-moyen"><span class="dot"></span>Moyen</span>
+          </div>
+
+          <div class="sev-bar-wrap">
+            <div class="sev-bar-label"><span>Niveau de maîtrise</span><span class="obs">Clignotant de sortie oublié</span></div>
+            <div class="sev-track">
+              <div class="sev-fill f-moyen" style="width:48%"></div>
+              <span class="tick" style="left:33.3%"></span><span class="tick" style="left:66.6%"></span>
+            </div>
+          </div>
+
+          <div class="skill-foot">
+            <div class="obs-chips">
+              <span class="chip">Choix de voie</span>
+              <span class="chip">Sortie</span>
+            </div>
+            <button class="btn-prescribe" type="button" data-prescribe>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/></svg>
+              Prescrire la fiche
+            </button>
+          </div>
+        </div>
+
+        <!-- conseil bas -->
+        <div class="footer-tip anim d6">
+          <div class="ftic">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2h6c0-.8.4-1.5 1-2A7 7 0 0 0 12 2Z"/></svg>
+          </div>
+          <p><b>Une fiche à la fois.</b> Commence par « Allure » : c’est le point le plus fragile et le plus pénalisant à l’examen.</p>
+        </div>
+
+      </div>
+
+      <!-- nav bas -->
+      <div class="tabbar anim d6">
+        <div class="tab">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+          Aujourd’hui
+        </div>
+        <div class="tab">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
+          Planning
+        </div>
+        <div class="tab active">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/></svg>
+          Mes élèves
+          <span class="tdot"></span>
+        </div>
+        <div class="tab">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+          Profil
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // micro-interaction : bouton prescrire -> état "prescrite"
+    document.querySelectorAll('[data-prescribe]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('done')) return;
+        btn.classList.add('done');
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Prescrite';
+      });
+    });
+  </script>
+</body>
+</html>

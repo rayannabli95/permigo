@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Night Run — 20 maquettes à choisir · PermiGo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#0f1020; --panel:#181a30; --ink:#11131f; --line:#e7e9f3;
+    --indigo:#4f46e5; --violet:#7c4dff; --gold:#e7c672;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background:
+      radial-gradient(120% 60% at 50% -10%, #221a4d 0%, transparent 50%),
+      linear-gradient(180deg, #0f1020 0%, #131426 100%);
+    color: #fff; min-height: 100vh; padding: 0 0 80px;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+  header { padding: 48px 0 28px; }
+  .kick { display:inline-flex; align-items:center; gap:8px; font:700 11px/1 'Inter',sans-serif; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; }
+  .kick::before { content:''; width:22px; height:2px; background:var(--gold); border-radius:2px; }
+  h1 { font: 600 clamp(30px,5vw,46px)/1.05 'Fraunces', serif; letter-spacing:-.02em; margin-bottom: 12px; }
+  h1 em { font-style: italic; color: #c9b6ff; }
+  .lead { font: 400 15px/1.6 'Inter',sans-serif; color: #b9b3d6; max-width: 640px; }
+  .legend { display:flex; flex-wrap:wrap; gap:10px 18px; margin-top:22px; }
+  .tag { display:inline-flex; align-items:center; gap:7px; font:600 12px/1 'Inter',sans-serif; color:#cfc9ec; }
+  .dot { width:10px; height:10px; border-radius:50%; }
+  .dot.eleve { background: linear-gradient(135deg,#ffd24a,#7c4dff); }
+  .dot.moniteur { background: var(--indigo); }
+  .dot.public { background: #94a3b8; }
+
+  section { margin-top: 40px; }
+  .sec-h { display:flex; align-items:baseline; gap:12px; margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.08); }
+  .sec-h h2 { font: 700 20px/1.1 'Inter',sans-serif; letter-spacing:-.01em; }
+  .sec-h span { font: 500 13px/1 'Inter',sans-serif; color:#8c86ad; }
+
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 22px; }
+  .card {
+    background: #fbfaff; color: var(--ink); border-radius: 18px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.1);
+    box-shadow: 0 18px 40px -22px rgba(0,0,0,.8);
+    text-decoration: none; display: flex; flex-direction: column;
+    transition: transform .16s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 26px 54px -22px rgba(0,0,0,.85); }
+  .thumb { position: relative; height: 208px; overflow: hidden; background: #0f1020; border-bottom: 1px solid var(--line); }
+  .thumb iframe { position:absolute; top:0; left:0; width: 1180px; height: 840px; border:0; transform: scale(.262); transform-origin: top left; pointer-events: none; }
+  .thumb .ov { position:absolute; inset:0; }
+  .badge-star { position:absolute; top:10px; right:10px; z-index:2; display:inline-flex; align-items:center; gap:5px; background:linear-gradient(180deg,#fff3d0,#e7c672); color:#5e430f; font:800 10px/1 'Inter',sans-serif; letter-spacing:.04em; text-transform:uppercase; padding:5px 9px; border-radius:99px; box-shadow:0 3px 8px rgba(120,80,10,.4); }
+  .role { position:absolute; top:10px; left:10px; z-index:2; width:14px; height:14px; border-radius:50%; box-shadow:0 0 0 3px rgba(255,255,255,.85); }
+  .role.eleve { background: linear-gradient(135deg,#ffd24a,#7c4dff); }
+  .role.moniteur { background: var(--indigo); }
+  .role.public { background: #94a3b8; }
+  .meta { padding: 14px 16px 16px; }
+  .meta h3 { font: 700 15px/1.2 'Inter',sans-serif; color:#171a2c; margin-bottom: 6px; }
+  .meta p { font: 400 12.5px/1.5 'Inter',sans-serif; color:#5b6072; }
+  .meta .file { display:block; margin-top:9px; font: 500 10.5px/1 'Inter',sans-serif; color:#9aa0b4; }
+  footer { margin-top: 56px; text-align:center; font: 400 12px/1.6 'Inter',sans-serif; color:#6b6790; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="kick">Night Run · 25 juin 2026</span>
+    <h1>20 maquettes <em>à choisir</em> au réveil</h1>
+    <p class="lead">Des maquettes à regarder, pas du code branché. Chacune s'ouvre seule. Clique pour ouvrir en plein écran. Une fois ton choix fait, on code les retenues pour de vrai.</p>
+    <div class="legend">
+      <span class="tag"><span class="dot eleve"></span>Élève — arène violet/or</span>
+      <span class="tag"><span class="dot moniteur"></span>Moniteur — indigo néo-arcade</span>
+      <span class="tag"><span class="dot public"></span>Public — sobre &amp; rassurant</span>
+      <span class="tag">⭐ = manque produit prioritaire</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-h"><h2>Profil élève</h2><span>2 directions</span></div>
+    <div class="grid" id="g-profil"></div>
+  </section>
+  <section>
+    <div class="sec-h"><h2>Parcours élève</h2><span>3 directions</span></div>
+    <div class="grid" id="g-parcours"></div>
+  </section>
+  <section>
+    <div class="sec-h"><h2>Pages moniteur — refonte premium</h2><span>3 écrans existants</span></div>
+    <div class="grid" id="g-moniteur-refonte"></div>
+  </section>
+  <section>
+    <div class="sec-h"><h2>Features moniteur — manques produit</h2><span>9 nouveaux écrans</span></div>
+    <div class="grid" id="g-moniteur-features"></div>
+  </section>
+  <section>
+    <div class="sec-h"><h2>Pages publiques</h2><span>cible = adulte payeur</span></div>
+    <div class="grid" id="g-public"></div>
+  </section>
+  <section>
+    <div class="sec-h"><h2>Élève — célébration</h2><span>moment de réussite</span></div>
+    <div class="grid" id="g-eleve-extra"></div>
+  </section>
+
+  <footer>PermiGo · maquettes Night Run · ouvre chaque fichier dans <code>mockups/</code></footer>
+</div>
+
+<script>
+  const M = {
+    'g-profil': [
+      ['profil-eleve-carte-joueur.html','Carte de pilote','eleve',false,'Permis virtuel doré en hero : avatar équipé, niveau, volants, série, badges vedettes.'],
+      ['profil-eleve-saison.html','Stats de saison','eleve',false,'Anneau de progression, jours actifs, points faibles, meilleurs trophées, mini-courbe.'],
+    ],
+    'g-parcours': [
+      ['parcours-eleve-route-immersive.html','Route immersive','eleve',false,'Itinéraire à jalons en relief, étape courante qui pulse et appelle.'],
+      ['parcours-eleve-mondes.html','Mondes / chapitres','eleve',false,'4 mondes REMC en cartes premium, progression par monde.'],
+      ['parcours-eleve-focus.html','Compétence du moment','eleve',false,'Un focal unique + fiche révision conduite + quiz lié.'],
+    ],
+    'g-moniteur-refonte': [
+      ['moniteur-fiche-eleve-redesign.html','Fiche élève (livret REMC 31)','moniteur',false,'Points faibles + examen blanc + compte-rendu + grille C1–C4.'],
+      ['moniteur-mes-eleves-redesign.html','Mes élèves + tri','moniteur',false,'Liste + tri (nom/progrès/%comp.) + pastilles d’état + recherche claire.'],
+      ['moniteur-insights-redesign.html','Insights / KPI','moniteur',false,'KPI premium remplis (cas avec élèves) + micro-graphes.'],
+    ],
+    'g-moniteur-features': [
+      ['moniteur-compte-rendu-lecon.html','Compte-rendu de leçon','moniteur',true,'Écran succès post-séance à envoyer à l’élève / parent (3 acquis, 1 point, 1 fiche).'],
+      ['moniteur-examen-blanc-pret.html','Prêt pour l’examen ?','moniteur',true,'Jauge /31 + badge Reçu/Recalé + faute éliminatoire + courbe des tentatives.'],
+      ['moniteur-points-faibles.html','Là où ça coince','moniteur',true,'1–3 compétences REMC faibles + bouton « Prescrire la fiche ».'],
+      ['moniteur-radar-relance.html','Élèves à relancer','moniteur',true,'Score de refroidissement + message pré-écrit + Envoyer (WhatsApp/SMS).'],
+      ['moniteur-ils-ont-revise.html','Avant ta leçon','moniteur',true,'Ce que l’élève a révisé depuis la dernière fois + micro-conseil.'],
+      ['moniteur-devoirs.html','Devoirs entre 2 leçons','moniteur',false,'Mini-plan fiches + quiz + échéance, suivi Fait/Pas fait (+ vue élève).'],
+      ['moniteur-forfait-heures.html','Forfait d’heures','moniteur',false,'Compteur de solde 14 h / 20 h — pas de réservation (charte).'],
+      ['moniteur-inbox-semaine.html','Ta semaine (inbox)','moniteur',false,'3 piles Relancer / Féliciter / Recharger, 1 action par ligne.'],
+      ['moniteur-livret-attestation.html','Récap A4 + attestation','moniteur',false,'Document à la marque (31 objectifs + dates). Jamais le livret légal.'],
+    ],
+    'g-public': [
+      ['moniteur-vitrine-publique.html','Vitrine publique #/m/[code]','public',true,'À la marque : taux de réussite + avis vérifiés + zones + Rejoindre.'],
+      ['parent-bulletin.html','Bulletin parents','public',false,'Lecture seule : progression REMC + dernier bilan + mot du moniteur (RGPD).'],
+    ],
+    'g-eleve-extra': [
+      ['eleve-demande-avis.html','Demande d’avis post-réussite','eleve',false,'« Tu l’as eu ! » Un mot pour le moniteur : note + 1 phrase + option public.'],
+    ],
+  };
+  for (const [gid, items] of Object.entries(M)) {
+    const grid = document.getElementById(gid);
+    for (const [file, title, role, star, desc] of items) {
+      const a = document.createElement('a');
+      a.className = 'card'; a.href = file; a.target = '_blank'; a.rel = 'noopener';
+      a.innerHTML =
+        '<div class="thumb">' +
+          '<span class="role ' + role + '"></span>' +
+          (star ? '<span class="badge-star">⭐ Prioritaire</span>' : '') +
+          '<iframe src="' + file + '" loading="lazy" tabindex="-1" title="' + title + '"></iframe>' +
+          '<span class="ov"></span>' +
+        '</div>' +
+        '<div class="meta"><h3>' + title + '</h3><p>' + desc + '</p><span class="file">' + file + '</span></div>';
+      grid.appendChild(a);
+    }
+  }
+</script>
+</body>
+</html>

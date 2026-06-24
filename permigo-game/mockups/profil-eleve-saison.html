@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>PermiGo — Profil élève · Saison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --night1:#1a1030;
+    --night2:#241445;
+    --night3:#120a24;
+    --panel:rgba(42,27,82,.70);
+    --panel-2:rgba(50,32,98,.62);
+    --gold1:#ffe28a;
+    --gold2:#ffd24a;
+    --gold3:#ff9c1c;
+    --vio:#7c4dff;
+    --vio2:#a855f7;
+    --ink:#ffffff;
+    --mut:#b9aee0;
+    --mut-2:#8a7cb8;
+    --line:rgba(168,135,255,.18);
+    --ok:#3ddc8c;
+    --warn:#ff7a8a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:"Inter",system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 700px at 12% -8%, #3a2266 0%, transparent 55%),
+      radial-gradient(900px 600px at 110% 8%, #2a1a55 0%, transparent 50%),
+      linear-gradient(160deg,#0d0820 0%,#150c2c 50%,#0a0618 100%);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px 16px;
+    color:var(--ink);
+  }
+
+  /* ---------- Coque téléphone ---------- */
+  .phone{
+    width:390px;
+    height:844px;
+    border-radius:46px;
+    position:relative;
+    background:
+      radial-gradient(140% 90% at 50% -10%, #2c1a52 0%, transparent 60%),
+      linear-gradient(165deg,#1a1030 0%,#241445 46%,#120a24 100%);
+    box-shadow:
+      0 2px 0 rgba(255,255,255,.05) inset,
+      0 0 0 2px rgba(124,77,255,.22),
+      0 0 0 9px #07040f,
+      0 34px 70px -22px rgba(0,0,0,.85),
+      0 0 120px -30px rgba(124,77,255,.55);
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .phone::before{ /* grain + mesh subtil */
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(60% 40% at 80% 6%, rgba(168,135,255,.16), transparent 60%),
+      radial-gradient(50% 35% at 6% 30%, rgba(255,156,28,.10), transparent 60%);
+    pointer-events:none;
+    z-index:0;
+    mix-blend-mode:screen;
+  }
+
+  /* barre d'état */
+  .status{
+    position:relative; z-index:5;
+    height:50px;
+    padding:16px 26px 0;
+    display:flex; align-items:center; justify-content:space-between;
+    font-weight:700; font-size:15px; letter-spacing:-.2px;
+  }
+  .status .right{display:flex; align-items:center; gap:7px;}
+  .sig,.wifi{display:block;}
+  .batt{
+    width:25px; height:13px; border-radius:4px;
+    border:1.6px solid rgba(255,255,255,.65);
+    position:relative; padding:1.6px;
+  }
+  .batt::after{content:""; position:absolute; right:-3.5px; top:3.5px; width:2px; height:5px; border-radius:0 2px 2px 0; background:rgba(255,255,255,.65);}
+  .batt i{display:block; height:100%; width:78%; border-radius:1.5px; background:linear-gradient(90deg,var(--gold2),var(--gold3));}
+
+  /* zone scroll */
+  .screen{
+    position:relative; z-index:3;
+    height:calc(844px - 50px);
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:4px 18px 110px;
+    scrollbar-width:none;
+  }
+  .screen::-webkit-scrollbar{display:none;}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:6px 2px 14px;
+  }
+  .iconbtn{
+    width:42px; height:42px; border-radius:14px;
+    display:grid; place-items:center;
+    background:linear-gradient(180deg,rgba(60,40,110,.85),rgba(36,22,72,.85));
+    border:1px solid rgba(168,135,255,.22);
+    box-shadow:0 4px 0 rgba(14,8,30,.9), 0 1px 0 rgba(255,255,255,.10) inset;
+    color:#d9cfff;
+    cursor:pointer;
+  }
+  .topbar h1{
+    font-family:"Baloo 2",cursive;
+    font-weight:800; font-size:18px; letter-spacing:-.4px;
+    display:flex; flex-direction:column; align-items:center; line-height:1;
+  }
+  .topbar h1 small{
+    font-family:"Inter",sans-serif;
+    font-weight:700; font-size:10.5px; letter-spacing:1.4px;
+    color:var(--gold2); text-transform:uppercase; margin-top:4px;
+  }
+
+  /* ---------- Carte identité ---------- */
+  .me{
+    display:flex; align-items:center; gap:13px;
+    padding:4px 4px 18px;
+  }
+  .avatar{
+    width:60px; height:60px; border-radius:20px;
+    position:relative; flex:0 0 auto;
+    background:linear-gradient(150deg,#8b5cff,#5a2fd6 60%,#3a1a9e);
+    box-shadow:0 6px 16px -4px rgba(124,77,255,.7), 0 0 0 2px rgba(255,210,74,.35), inset 0 2px 4px rgba(255,255,255,.25);
+    display:grid; place-items:center;
+  }
+  .avatar svg{width:38px;height:38px;}
+  .avatar .lvl{
+    position:absolute; bottom:-7px; right:-7px;
+    min-width:26px; height:24px; padding:0 5px;
+    border-radius:9px;
+    display:grid; place-items:center;
+    font-family:"Baloo 2",cursive; font-weight:800; font-size:12px; color:#3a2400;
+    background:linear-gradient(180deg,var(--gold1),var(--gold3));
+    box-shadow:0 3px 0 #b56b00, inset 0 1px 0 rgba(255,255,255,.6);
+    border:1.5px solid #ffedb0;
+  }
+  .me .who{display:flex; flex-direction:column; gap:3px;}
+  .me .who b{font-family:"Baloo 2",cursive; font-weight:700; font-size:19px; letter-spacing:-.4px;}
+  .me .who .tag{
+    display:inline-flex; align-items:center; gap:6px; align-self:flex-start;
+    font-size:11.5px; font-weight:700; color:var(--gold2);
+    padding:4px 9px; border-radius:999px;
+    background:rgba(255,210,74,.10);
+    border:1px solid rgba(255,210,74,.28);
+  }
+  .me .who .tag .dot{width:6px;height:6px;border-radius:50%;background:var(--gold2);box-shadow:0 0 8px var(--gold2);}
+
+  /* ---------- HÉROS : anneau ---------- */
+  .hero{
+    position:relative;
+    border-radius:30px;
+    padding:26px 22px 24px;
+    margin-bottom:18px;
+    background:
+      radial-gradient(120% 90% at 50% -10%, rgba(124,77,255,.45), transparent 60%),
+      linear-gradient(165deg,rgba(58,36,112,.92),rgba(30,18,64,.95));
+    border:1px solid rgba(168,135,255,.28);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.10) inset,
+      0 -30px 60px -40px rgba(255,156,28,.5) inset,
+      0 26px 50px -24px rgba(0,0,0,.8),
+      0 0 80px -34px rgba(124,77,255,.8);
+    overflow:hidden;
+    text-align:center;
+  }
+  .hero::before{ /* halo doré derrière l'anneau */
+    content:""; position:absolute; left:50%; top:96px; transform:translateX(-50%);
+    width:230px; height:230px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,180,60,.28), transparent 62%);
+    filter:blur(6px);
+    z-index:0;
+    animation:pulse 4.5s ease-in-out infinite;
+  }
+  .hero .saison{
+    position:relative; z-index:2;
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:11px; font-weight:800; letter-spacing:1.6px; text-transform:uppercase;
+    color:var(--gold2);
+    padding:6px 13px; border-radius:999px;
+    background:linear-gradient(180deg,rgba(255,210,74,.14),rgba(255,156,28,.06));
+    border:1px solid rgba(255,210,74,.34);
+    box-shadow:0 2px 10px -4px rgba(255,156,28,.5), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+
+  .ring-wrap{position:relative; z-index:2; width:212px; height:212px; margin:18px auto 6px;}
+  .ring-wrap svg{transform:rotate(-90deg); display:block;}
+  .ring-center{
+    position:absolute; inset:0; display:grid; place-content:center; text-align:center;
+  }
+  .ring-center .pct{
+    font-family:"Baloo 2",cursive; font-weight:800;
+    font-size:60px; line-height:.92; letter-spacing:-2.5px;
+    background:linear-gradient(180deg,#fff 0%,#ffe9b6 55%,var(--gold3) 100%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    text-shadow:0 4px 18px rgba(255,156,28,.35);
+  }
+  .ring-center .pct sup{font-size:22px; vertical-align:18px; margin-left:-2px; -webkit-text-fill-color:var(--gold2);}
+  .ring-center .sub{font-size:11.5px; font-weight:700; letter-spacing:.4px; color:var(--mut); margin-top:4px;}
+  .ring-center .sub b{color:#fff;}
+
+  .hero-foot{
+    position:relative; z-index:2;
+    margin-top:14px;
+    display:flex; align-items:stretch; gap:10px;
+  }
+  .hf{
+    flex:1; padding:11px 8px 10px;
+    border-radius:16px;
+    background:rgba(18,10,36,.55);
+    border:1px solid rgba(168,135,255,.16);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+    text-align:center;
+  }
+  .hf b{display:block; font-family:"Baloo 2",cursive; font-weight:800; font-size:21px; letter-spacing:-.5px;}
+  .hf b.gold{background:linear-gradient(180deg,#fff,var(--gold2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  .hf span{display:block; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--mut-2); margin-top:3px;}
+  .hf .row{display:inline-flex; align-items:center; gap:4px;}
+  .flame{width:15px;height:15px;}
+
+  /* ---------- Section ---------- */
+  .sec-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin:22px 4px 12px;
+  }
+  .sec-head h2{
+    font-family:"Fredoka",sans-serif; font-weight:700; font-size:17px; letter-spacing:-.2px;
+    display:flex; align-items:center; gap:9px;
+  }
+  .sec-head h2 .ic{
+    width:28px;height:28px;border-radius:9px;display:grid;place-items:center;
+    background:linear-gradient(180deg,rgba(124,77,255,.4),rgba(124,77,255,.12));
+    border:1px solid rgba(168,135,255,.3);
+    color:#d9cfff;
+  }
+  .sec-head .link{font-size:12px; font-weight:700; color:var(--mut);}
+
+  .card{
+    border-radius:24px;
+    padding:18px;
+    background:linear-gradient(165deg,rgba(46,29,88,.72),rgba(28,17,58,.78));
+    border:1px solid var(--line);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.06) inset,
+      0 18px 38px -24px rgba(0,0,0,.7);
+  }
+
+  /* ---------- Heatmap ---------- */
+  .heat-top{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;}
+  .heat-top .big{font-family:"Baloo 2",cursive; font-weight:800; font-size:15px;}
+  .heat-top .big em{font-style:normal; color:var(--gold2);}
+  .heat-top .muted{font-size:11px; color:var(--mut-2); font-weight:600;}
+  .heat{
+    display:grid;
+    grid-template-columns:repeat(17,1fr);
+    gap:5px;
+  }
+  .heat i{
+    aspect-ratio:1/1; border-radius:5px;
+    background:rgba(124,77,255,.10);
+    box-shadow:inset 0 0 0 1px rgba(168,135,255,.08);
+  }
+  .heat i.l1{background:rgba(124,77,255,.34);}
+  .heat i.l2{background:linear-gradient(160deg,#7c4dff,#5a2fd6);}
+  .heat i.l3{background:linear-gradient(160deg,#a855f7,#6d28d9); box-shadow:0 0 8px -2px rgba(168,85,247,.7);}
+  .heat i.gold{background:linear-gradient(160deg,var(--gold1),var(--gold3)); box-shadow:0 0 9px -1px rgba(255,156,28,.8), inset 0 1px 0 rgba(255,255,255,.4);}
+  .heat-legend{display:flex; align-items:center; justify-content:flex-end; gap:7px; margin-top:13px; font-size:10px; font-weight:600; color:var(--mut-2);}
+  .heat-legend .scale{display:flex; gap:4px;}
+  .heat-legend .scale b{width:11px;height:11px;border-radius:3px;display:block;}
+
+  /* ---------- Points faibles REMC ---------- */
+  .weak{display:flex; flex-direction:column; gap:14px;}
+  .weak-row{display:flex; flex-direction:column; gap:7px;}
+  .weak-row .top{display:flex; align-items:center; justify-content:space-between;}
+  .weak-row .lab{display:flex; align-items:center; gap:9px; font-size:13.5px; font-weight:600;}
+  .weak-row .lab .chip{
+    width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;
+    font-family:"Baloo 2",cursive;font-weight:800;font-size:12px;color:#fff;
+    background:linear-gradient(160deg,#3a2a66,#221542);
+    border:1px solid rgba(255,122,138,.3);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+  }
+  .weak-row .val{font-family:"Baloo 2",cursive;font-weight:800;font-size:14px;color:var(--warn);}
+  .bar{height:9px;border-radius:6px;background:rgba(18,10,36,.7);overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.5);}
+  .bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#ff5e72,#ff9c6b);box-shadow:0 0 10px -2px rgba(255,94,114,.8);}
+  .bar i.mid{background:linear-gradient(90deg,#ff9c1c,#ffd24a);box-shadow:0 0 10px -2px rgba(255,156,28,.7);}
+  .weak-foot{
+    margin-top:16px; padding:12px 13px; border-radius:15px;
+    display:flex; align-items:center; gap:11px;
+    background:linear-gradient(120deg,rgba(124,77,255,.2),rgba(255,156,28,.10));
+    border:1px solid rgba(168,135,255,.25);
+  }
+  .weak-foot .t{font-size:12px; font-weight:600; color:var(--mut); line-height:1.4;}
+  .weak-foot .t b{color:#fff;}
+  .weak-foot svg{flex:0 0 auto;}
+
+  /* ---------- Trophées ---------- */
+  .medals{display:grid; grid-template-columns:repeat(3,1fr); gap:11px;}
+  .medal{
+    position:relative;
+    border-radius:20px;
+    padding:16px 8px 13px;
+    text-align:center;
+    background:linear-gradient(170deg,rgba(50,32,98,.7),rgba(26,15,52,.8));
+    border:1px solid rgba(168,135,255,.2);
+    box-shadow:0 14px 30px -20px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.07);
+    overflow:hidden;
+  }
+  .medal.legend{
+    border:1px solid rgba(255,210,74,.5);
+    background:linear-gradient(170deg,rgba(70,48,30,.55),rgba(40,22,58,.85));
+    box-shadow:0 16px 34px -18px rgba(255,156,28,.55), inset 0 1px 0 rgba(255,255,255,.14);
+  }
+  .medal.legend::after{ /* shimmer */
+    content:""; position:absolute; top:0; left:-60%; width:55%; height:100%;
+    background:linear-gradient(100deg,transparent, rgba(255,255,255,.35), transparent);
+    transform:skewX(-18deg);
+    animation:shimmer 3.6s ease-in-out infinite;
+  }
+  .disc{
+    width:54px;height:54px;border-radius:50%;margin:0 auto 9px;
+    display:grid;place-items:center; position:relative; z-index:1;
+    background:conic-gradient(from 210deg,#caa1ff,#7c4dff,#5a2fd6,#caa1ff);
+    box-shadow:0 6px 16px -6px rgba(124,77,255,.7), inset 0 0 0 3px rgba(255,255,255,.16);
+  }
+  .disc.gold{
+    background:conic-gradient(from 220deg,#fff1c2,var(--gold2),var(--gold3),#fff1c2);
+    box-shadow:0 7px 18px -5px rgba(255,156,28,.85), inset 0 0 0 3px rgba(255,255,255,.35);
+  }
+  .disc.bronze{
+    background:conic-gradient(from 220deg,#f0c79a,#c98a4f,#9a5e2d,#f0c79a);
+    box-shadow:0 6px 16px -6px rgba(180,110,50,.7), inset 0 0 0 3px rgba(255,255,255,.18);
+  }
+  .disc svg{width:28px;height:28px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));}
+  .medal b{display:block; position:relative; z-index:1; font-family:"Baloo 2",cursive; font-weight:700; font-size:12.5px; letter-spacing:-.2px; line-height:1.15;}
+  .medal span{display:block; position:relative; z-index:1; font-size:9.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--mut-2); margin-top:4px;}
+  .medal.legend span{color:var(--gold2);}
+
+  /* ---------- Sparkline activité hebdo ---------- */
+  .spark-card{margin-top:14px;}
+  .spark-top{display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:6px;}
+  .spark-top .l b{font-family:"Baloo 2",cursive; font-weight:800; font-size:26px; letter-spacing:-1px;}
+  .spark-top .l span{font-size:11px; font-weight:600; color:var(--mut-2); display:block; margin-top:-2px;}
+  .spark-top .trend{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:12px; font-weight:800; color:var(--ok);
+    padding:5px 10px; border-radius:999px;
+    background:rgba(61,220,140,.12); border:1px solid rgba(61,220,140,.3);
+  }
+  .spark-svg{width:100%; height:78px; display:block; margin-top:6px;}
+  .days{display:flex; justify-content:space-between; margin-top:8px; padding:0 2px;}
+  .days span{font-size:10px; font-weight:700; color:var(--mut-2);}
+  .days span.on{color:var(--gold2);}
+
+  /* ---------- Bottom nav (déco) ---------- */
+  .nav{
+    position:absolute; z-index:8; left:14px; right:14px; bottom:14px;
+    height:64px; border-radius:24px;
+    display:flex; align-items:center; justify-content:space-around;
+    background:linear-gradient(180deg,rgba(50,32,98,.92),rgba(26,15,52,.96));
+    border:1px solid rgba(168,135,255,.26);
+    box-shadow:0 -2px 0 rgba(255,255,255,.05) inset, 0 18px 40px -16px rgba(0,0,0,.9), 0 0 60px -20px rgba(124,77,255,.6);
+    backdrop-filter:blur(10px);
+  }
+  .nav a{display:grid; place-items:center; gap:3px; color:var(--mut-2); font-size:9.5px; font-weight:700; width:56px;}
+  .nav a svg{width:23px;height:23px;}
+  .nav a.active{color:#fff;}
+  .nav a.active .pill{
+    width:46px;height:34px;border-radius:13px;display:grid;place-items:center;
+    background:linear-gradient(180deg,var(--gold2),var(--gold3));
+    color:#3a2400;
+    box-shadow:0 4px 0 #b56b00, inset 0 1px 0 rgba(255,255,255,.55), 0 0 20px -2px rgba(255,156,28,.7);
+    margin-bottom:1px;
+  }
+  .nav a:not(.active) .pill{width:46px;height:34px;display:grid;place-items:center;}
+
+  @keyframes pulse{0%,100%{opacity:.75; transform:translateX(-50%) scale(1);}50%{opacity:1; transform:translateX(-50%) scale(1.06);}}
+  @keyframes shimmer{0%{left:-60%;}55%,100%{left:130%;}}
+  @keyframes dash{to{stroke-dashoffset:0;}}
+  @keyframes rise{from{opacity:0; transform:translateY(14px);}to{opacity:1; transform:translateY(0);}}
+  .rise{animation:rise .5s cubic-bezier(.2,.7,.2,1) both;}
+  .d1{animation-delay:.05s;}.d2{animation-delay:.12s;}.d3{animation-delay:.2s;}.d4{animation-delay:.28s;}.d5{animation-delay:.36s;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;}
+    .ring-prog{stroke-dashoffset:var(--final) !important;}
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <!-- barre d'état -->
+    <div class="status">
+      <span>9:41</span>
+      <span class="right">
+        <svg class="sig" width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0" y="8" width="3" height="4" rx="1" fill="#fff"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#fff"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="#fff"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#fff" opacity=".4"/></svg>
+        <svg class="wifi" width="17" height="12" viewBox="0 0 17 12" fill="none"><path d="M8.5 11.2 10.6 8.7a3 3 0 0 0-4.2 0l2.1 2.5Z" fill="#fff"/><path d="M3.6 5.7a7.5 7.5 0 0 1 9.8 0" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M1.2 3.1a11 11 0 0 1 14.6 0" stroke="#fff" stroke-width="1.7" stroke-linecap="round" opacity=".55"/></svg>
+        <span class="batt"><i></i></span>
+      </span>
+    </div>
+
+    <div class="screen">
+      <!-- top bar -->
+      <div class="topbar rise">
+        <button class="iconbtn" aria-label="Retour">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 5 8 12l7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <h1>Mon profil <small>Saison · Printemps</small></h1>
+        <button class="iconbtn" aria-label="Réglages">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="2"/><path d="M19.4 13a7.6 7.6 0 0 0 0-2l1.7-1.3-1.8-3.2-2 .8a7.4 7.4 0 0 0-1.8-1l-.3-2.1H9.6l-.3 2.1a7.4 7.4 0 0 0-1.8 1l-2-.8L3.7 9.7 5.4 11a7.6 7.6 0 0 0 0 2l-1.7 1.3 1.8 3.2 2-.8c.55.43 1.16.78 1.8 1l.3 2.1h3.8l.3-2.1c.64-.23 1.25-.58 1.8-1l2 .8 1.8-3.2L19.4 13Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <!-- identité -->
+      <div class="me rise d1">
+        <div class="avatar">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.4" r="4.1" fill="#fff" opacity=".95"/><path d="M4.5 19.5c0-3.7 3.3-6.2 7.5-6.2s7.5 2.5 7.5 6.2" fill="#fff" opacity=".95"/></svg>
+          <span class="lvl">14</span>
+        </div>
+        <div class="who">
+          <b>Inès Berthier</b>
+          <span class="tag"><span class="dot"></span> Auto-école Volant d'Or · Cergy</span>
+        </div>
+      </div>
+
+      <!-- HÉROS anneau -->
+      <section class="hero rise d2">
+        <span class="saison">◆ Progression de la saison</span>
+
+        <div class="ring-wrap">
+          <svg width="212" height="212" viewBox="0 0 212 212">
+            <defs>
+              <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#ffe28a"/>
+                <stop offset=".5" stop-color="#ffd24a"/>
+                <stop offset="1" stop-color="#ff9c1c"/>
+              </linearGradient>
+              <linearGradient id="vio" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#a855f7"/>
+                <stop offset="1" stop-color="#7c4dff"/>
+              </linearGradient>
+              <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="4" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <!-- piste -->
+            <circle cx="106" cy="106" r="88" fill="none" stroke="rgba(18,10,36,.85)" stroke-width="18"/>
+            <circle cx="106" cy="106" r="88" fill="none" stroke="rgba(124,77,255,.16)" stroke-width="18" stroke-dasharray="4 9" stroke-linecap="round"/>
+            <!-- progression 68% -->
+            <circle class="ring-prog" cx="106" cy="106" r="88" fill="none" stroke="url(#gold)" stroke-width="18" stroke-linecap="round"
+              stroke-dasharray="552.9" stroke-dashoffset="552.9" filter="url(#glow)"
+              style="--final:177; animation:dash 1.4s cubic-bezier(.2,.7,.2,1) .3s forwards;"/>
+            <!-- pointe brillante -->
+            <circle cx="106" cy="18" r="4.4" fill="#fff" opacity=".0"/>
+          </svg>
+          <div class="ring-center">
+            <div class="pct">68<sup>%</sup></div>
+            <div class="sub"><b>17</b> compétences sur 25 acquises</div>
+          </div>
+        </div>
+
+        <div class="hero-foot">
+          <div class="hf">
+            <b class="gold">4 280</b>
+            <span>Trophées</span>
+          </div>
+          <div class="hf">
+            <b><span class="row"><svg class="flame" viewBox="0 0 24 24" fill="none"><path d="M12 2.5c1 3.4-1.6 4.7-1.6 7.3 0 1.2.7 2 1.6 2 1 0 1.7-1 1.7-2.3.7.6 2.5 2.5 2.5 5.2A5.7 5.7 0 0 1 12 21.5 5.7 5.7 0 0 1 6.2 15c0-4.5 3.8-6.4 5.8-12.5Z" fill="url(#gold)"/></svg>23</span></b>
+            <span>Jours de série</span>
+          </div>
+          <div class="hf">
+            <b>#3</b>
+            <span>Ligue École</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- HEATMAP jours actifs -->
+      <div class="sec-head rise d3">
+        <h2><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="3" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span> Jours actifs</h2>
+        <span class="link">12 sem.</span>
+      </div>
+      <div class="card rise d3">
+        <div class="heat-top">
+          <div class="big"><em>61</em> séances ce trimestre</div>
+          <div class="muted">meilleure série : 23 j</div>
+        </div>
+        <div class="heat" id="heat"></div>
+        <div class="heat-legend">
+          moins
+          <span class="scale">
+            <b style="background:rgba(124,77,255,.10)"></b>
+            <b style="background:rgba(124,77,255,.34)"></b>
+            <b style="background:linear-gradient(160deg,#7c4dff,#5a2fd6)"></b>
+            <b style="background:linear-gradient(160deg,#a855f7,#6d28d9)"></b>
+            <b style="background:linear-gradient(160deg,#ffd24a,#ff9c1c)"></b>
+          </span>
+          plus
+        </div>
+      </div>
+
+      <!-- POINTS FAIBLES REMC -->
+      <div class="sec-head rise d4">
+        <h2><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3 2.5 20.5h19L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4M12 17.2v.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></span> Points à travailler</h2>
+        <span class="link">REMC</span>
+      </div>
+      <div class="card rise d4">
+        <div class="weak">
+          <div class="weak-row">
+            <div class="top">
+              <span class="lab"><span class="chip">C2</span> Priorités et intersections</span>
+              <span class="val">41 %</span>
+            </div>
+            <div class="bar"><i style="width:41%"></i></div>
+          </div>
+          <div class="weak-row">
+            <div class="top">
+              <span class="lab"><span class="chip">C3</span> Insertion sur autoroute</span>
+              <span class="val">48 %</span>
+            </div>
+            <div class="bar"><i style="width:48%"></i></div>
+          </div>
+          <div class="weak-row">
+            <div class="top">
+              <span class="lab"><span class="chip">C2</span> Distances de sécurité</span>
+              <span class="val" style="color:var(--gold2)">57 %</span>
+            </div>
+            <div class="bar"><i class="mid" style="width:57%"></i></div>
+          </div>
+        </div>
+        <div class="weak-foot">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="url(#vio)" stroke-width="2"/><path d="M12 7.5v5l3 2" stroke="#d9cfff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="t">Cible 3 séries cette semaine sur <b>Priorités</b> pour passer la barre des 60 %.</div>
+        </div>
+      </div>
+
+      <!-- TROPHÉES -->
+      <div class="sec-head rise d4">
+        <h2><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M7 4h10v3.5a5 5 0 0 1-10 0V4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M7 5H4.5v1.5A3 3 0 0 0 7 9.4M17 5h2.5v1.5A3 3 0 0 1 17 9.4M9.5 14.5h5L15.5 20h-7l1-5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span> Meilleurs trophées</h2>
+        <span class="link">Voir tout</span>
+      </div>
+      <div class="medals rise d5">
+        <div class="medal legend">
+          <div class="disc gold">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.5 5 5.5.8-4 3.9 1 5.5L12 16l-5 2.7 1-5.5-4-3.9 5.5-.8L12 3Z" fill="#3a2400"/></svg>
+          </div>
+          <b>Régularité d'or</b>
+          <span>Légendaire</span>
+        </div>
+        <div class="medal">
+          <div class="disc">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.6c1 3.4-1.6 4.7-1.6 7.3 0 1.3.7 2.1 1.6 2.1 1 0 1.7-1 1.7-2.4.7.6 2.6 2.6 2.6 5.4A5.9 5.9 0 0 1 12 21.4 5.9 5.9 0 0 1 6 15c0-4.6 4-6.6 6-12.4Z" fill="#fff"/></svg>
+          </div>
+          <b>20 jours d'affilée</b>
+          <span>Épique</span>
+        </div>
+        <div class="medal">
+          <div class="disc bronze">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#3a1a00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <b>Code sans faute</b>
+          <span>Rare</span>
+        </div>
+      </div>
+
+      <!-- SPARKLINE activité -->
+      <div class="sec-head rise d5">
+        <h2><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 17l5-6 4 3 4-7 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span> Activité de la semaine</h2>
+        <span class="link">7 j</span>
+      </div>
+      <div class="card spark-card rise d5">
+        <div class="spark-top">
+          <div class="l">
+            <b>312</b>
+            <span>questions réussies cette semaine</span>
+          </div>
+          <div class="trend">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4 17l6-6 4 3 6-8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 6h4v4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            +18 %
+          </div>
+        </div>
+        <svg class="spark-svg" viewBox="0 0 300 80" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffd24a" stop-opacity=".42"/>
+              <stop offset="1" stop-color="#ffd24a" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#a855f7"/>
+              <stop offset="1" stop-color="#ffd24a"/>
+            </linearGradient>
+          </defs>
+          <path d="M6,58 L52,46 L98,52 L144,30 L190,38 L236,18 L294,10 L294,80 L6,80 Z" fill="url(#fill)"/>
+          <path d="M6,58 L52,46 L98,52 L144,30 L190,38 L236,18 L294,10" fill="none" stroke="url(#stroke)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"
+            stroke-dasharray="360" stroke-dashoffset="360" style="animation:dash 1.3s cubic-bezier(.2,.7,.2,1) .4s forwards;"/>
+          <circle cx="294" cy="10" r="5" fill="#ffd24a" stroke="#fff" stroke-width="1.6"/>
+          <circle cx="236" cy="18" r="3" fill="#a855f7"/>
+        </svg>
+        <div class="days">
+          <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span class="on">Sam</span><span class="on">Dim</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- bottom nav déco -->
+    <nav class="nav">
+      <a>
+        <span class="pill"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 4l8 7.5V20H4v-8.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>
+        Accueil
+      </a>
+      <a>
+        <span class="pill"><svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+        Parcours
+      </a>
+      <a>
+        <span class="pill"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        Réviser
+      </a>
+      <a class="active">
+        <span class="pill"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6" fill="currentColor"/></svg></span>
+        Profil
+      </a>
+    </nav>
+  </div>
+
+<script>
+  // Génère la mini-heatmap (17 colonnes × ~4 lignes lisibles, ici une grille dense)
+  (function(){
+    var el = document.getElementById('heat');
+    if(!el) return;
+    var cells = 17 * 6; // 102 cases
+    var pattern = [];
+    for(var i=0;i<cells;i++){
+      var r = Math.random();
+      var cls = '';
+      // pondération vers la fin = plus actif (effet "monte en puissance")
+      var bias = i / cells;
+      var v = r * (0.55 + bias*0.7);
+      if(v > 1.02) cls='gold';
+      else if(v > 0.78) cls='l3';
+      else if(v > 0.5) cls='l2';
+      else if(v > 0.28) cls='l1';
+      pattern.push(cls);
+    }
+    // poser quelques jours "or" remarquables
+    [11,29,46,71,88,99].forEach(function(idx){ if(pattern[idx]!==undefined) pattern[idx]='gold'; });
+    el.innerHTML = pattern.map(function(c){ return '<i class="'+c+'"></i>'; }).join('');
+  })();
+</script>
+</body>
+</html>

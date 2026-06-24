@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bulletin — PermiGo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --indigo:#4f46e5;
+    --indigo-deep:#3730a3;
+    --indigo-soft:#eef0fe;
+    --indigo-line:#dcdcfb;
+    --ink:#1a1830;
+    --ink-2:#4b4960;
+    --ink-3:#7c7a92;
+    --paper:#ffffff;
+    --paper-2:#fbfaff;
+    --line:#ecebf4;
+    --line-2:#e3e2ef;
+    --gold:#b08433;
+    --gold-soft:#f6efe1;
+    --green:#3f7d56;
+    --green-soft:#eaf4ee;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html{ -webkit-text-size-adjust:100%; }
+
+  body{
+    font-family:"Inter",system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 50% -200px, #f3f2fd 0%, rgba(243,242,253,0) 60%),
+      linear-gradient(180deg,#f7f6fc 0%, #f3f2f9 100%);
+    min-height:100vh;
+    line-height:1.55;
+    letter-spacing:-0.005em;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  .wrap{
+    max-width:680px;
+    margin:0 auto;
+    padding:34px 22px 60px;
+  }
+
+  /* ---------- En-tête lien partagé ---------- */
+  .share-bar{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    justify-content:center;
+    font-size:13px;
+    color:var(--ink-3);
+    letter-spacing:.01em;
+    margin-bottom:26px;
+  }
+  .share-bar svg{ width:15px;height:15px; color:var(--indigo); flex:none; }
+  .share-bar .dot{ width:3px;height:3px;border-radius:50%;background:#c8c6d8; flex:none; }
+  .share-bar b{ color:var(--ink-2); font-weight:600; }
+
+  /* ---------- Carte bulletin ---------- */
+  .sheet{
+    position:relative;
+    background:
+      linear-gradient(180deg,#ffffff 0%, #fefdff 100%);
+    border:1px solid var(--line-2);
+    border-radius:26px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.9) inset,
+      0 2px 4px rgba(40,38,80,.04),
+      0 18px 44px -22px rgba(55,52,120,.28),
+      0 40px 90px -50px rgba(40,38,80,.35);
+    overflow:hidden;
+    opacity:0;
+    transform:translateY(14px);
+    animation:rise .6s cubic-bezier(.2,.7,.2,1) .05s forwards;
+  }
+
+  /* fine ligne d'accent en haut */
+  .sheet::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:4px;
+    background:linear-gradient(90deg,#6a63ee 0%, var(--indigo) 38%, #3d34b8 100%);
+  }
+
+  /* grain très subtil */
+  .sheet::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(rgba(40,38,80,.025) 1px, transparent 1px);
+    background-size:4px 4px;
+    opacity:.5;
+    mix-blend-mode:multiply;
+  }
+
+  .sheet > *{ position:relative; z-index:1; }
+
+  /* ---------- Bandeau identité moniteur ---------- */
+  .top{
+    padding:30px 30px 26px;
+    border-bottom:1px solid var(--line);
+    background:
+      radial-gradient(420px 200px at 88% -40px, rgba(79,70,229,.07), transparent 70%);
+  }
+  .brand{
+    display:flex; align-items:center; gap:8px;
+    font-size:11.5px; font-weight:700; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--indigo-deep);
+    margin-bottom:18px;
+  }
+  .brand .mk{
+    width:21px;height:21px;border-radius:7px;
+    background:linear-gradient(150deg,#6a63ee,#3d34b8);
+    display:grid;place-items:center;
+    box-shadow:0 3px 8px -3px rgba(61,52,184,.6), 0 1px 0 rgba(255,255,255,.4) inset;
+  }
+  .brand .mk svg{ width:13px;height:13px;color:#fff; }
+
+  .ttl-kicker{
+    font-size:12.5px; letter-spacing:.04em; color:var(--ink-3);
+    font-weight:500; margin-bottom:5px;
+  }
+  .ttl{
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:600;
+    font-size:31px;
+    line-height:1.08;
+    letter-spacing:-0.02em;
+    color:var(--ink);
+  }
+  .ttl em{ font-style:italic; font-weight:500; color:var(--indigo-deep); }
+
+  .for-line{
+    margin-top:14px;
+    display:inline-flex; align-items:center; gap:9px;
+    padding:7px 13px 7px 8px;
+    border:1px solid var(--indigo-line);
+    background:linear-gradient(180deg,#fff,#f9f9ff);
+    border-radius:999px;
+    font-size:13px; color:var(--ink-2);
+    box-shadow:0 1px 2px rgba(60,50,140,.05);
+  }
+  .for-line .av{
+    width:24px;height:24px;border-radius:50%;
+    background:linear-gradient(150deg,#7d76ff,#4338ca);
+    color:#fff; font-weight:700; font-size:11px;
+    display:grid;place-items:center;
+    box-shadow:0 1px 0 rgba(255,255,255,.3) inset;
+  }
+  .for-line b{ color:var(--ink); font-weight:600; }
+
+  /* ---------- Héros : anneau de progression ---------- */
+  .hero{
+    padding:34px 30px 32px;
+    display:flex; align-items:center; gap:30px;
+    background:
+      radial-gradient(360px 260px at 18% 30%, rgba(79,70,229,.06), transparent 72%);
+    border-bottom:1px solid var(--line);
+  }
+  .ring-box{ flex:none; position:relative; width:152px; height:152px; }
+  .ring-box svg{ display:block; transform:rotate(-90deg); }
+  .ring-glow{
+    position:absolute; inset:14px; border-radius:50%;
+    background:radial-gradient(circle, rgba(79,70,229,.16), transparent 68%);
+    filter:blur(6px);
+    animation:pulse 4.5s ease-in-out infinite;
+  }
+  .ring-center{
+    position:absolute; inset:0; display:grid; place-items:center; text-align:center;
+  }
+  .ring-pct{
+    font-family:"Fraunces",serif; font-weight:700; font-size:42px;
+    letter-spacing:-0.03em; color:var(--ink); line-height:1;
+  }
+  .ring-pct span{ font-size:19px; color:var(--ink-3); font-weight:500; }
+  .ring-sub{ font-size:11px; letter-spacing:.05em; color:var(--ink-3); text-transform:uppercase; margin-top:3px; font-weight:600; }
+
+  .hero-txt{ flex:1; min-width:0; }
+  .hero-h{
+    font-family:"Fraunces",serif; font-weight:600; font-size:19px;
+    letter-spacing:-0.01em; line-height:1.25; margin-bottom:8px; color:var(--ink);
+  }
+  .hero-p{ font-size:13.5px; color:var(--ink-2); line-height:1.6; }
+  .hero-p b{ color:var(--ink); font-weight:600; }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:7px; margin-top:15px; }
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:11.5px; font-weight:600; letter-spacing:.01em;
+    padding:5px 11px; border-radius:999px;
+    border:1px solid var(--line-2); color:var(--ink-2);
+    background:#fcfcff;
+  }
+  .chip .d{ width:7px;height:7px;border-radius:50%; flex:none; }
+  .chip.ok{ border-color:#cfe6d8; background:var(--green-soft); color:var(--green); }
+  .chip.ok .d{ background:var(--green); }
+  .chip.go .d{ background:var(--indigo); }
+  .chip.wait .d{ background:#cbc8da; }
+
+  /* ---------- Barres REMC ---------- */
+  .section{ padding:28px 30px; border-bottom:1px solid var(--line); }
+  .sec-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px; }
+  .sec-title{
+    font-family:"Fraunces",serif; font-weight:600; font-size:17px;
+    letter-spacing:-0.01em; color:var(--ink);
+  }
+  .sec-note{ font-size:11.5px; color:var(--ink-3); letter-spacing:.02em; }
+
+  .comp{ display:flex; align-items:center; gap:14px; padding:11px 0; }
+  .comp + .comp{ border-top:1px solid var(--line); }
+  .comp-name{ flex:none; width:138px; }
+  .comp-name .n{ font-size:13px; font-weight:600; color:var(--ink); letter-spacing:-0.005em; }
+  .comp-name .c{ font-size:10.5px; color:var(--ink-3); letter-spacing:.06em; text-transform:uppercase; font-weight:600; }
+  .bar{
+    flex:1; height:9px; border-radius:99px;
+    background:#eeedf6; overflow:hidden;
+    box-shadow:0 1px 1px rgba(40,38,80,.05) inset;
+  }
+  .bar > i{
+    display:block; height:100%; border-radius:99px;
+    background:linear-gradient(90deg,#6a63ee,#4338ca);
+    box-shadow:0 0 0 1px rgba(67,56,202,.15) inset;
+    width:0; animation:grow 1s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .bar.full > i{ background:linear-gradient(90deg,#46a36e,#2f7d51); }
+  .comp-val{ flex:none; width:42px; text-align:right; font-size:12.5px; font-weight:700; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+
+  /* ---------- Dernier bilan ---------- */
+  .bilan{
+    border:1px solid var(--indigo-line);
+    border-radius:18px;
+    padding:18px 20px;
+    background:linear-gradient(180deg,#fafaff,#f5f5ff);
+    box-shadow:0 1px 0 rgba(255,255,255,.8) inset, 0 6px 18px -14px rgba(67,56,202,.45);
+  }
+  .bilan-top{ display:flex; align-items:center; gap:9px; margin-bottom:11px; }
+  .bilan-ic{
+    width:30px;height:30px;border-radius:9px; flex:none;
+    background:linear-gradient(150deg,#eef0fe,#dcdcfb);
+    border:1px solid #d2d2f7;
+    display:grid;place-items:center; color:var(--indigo-deep);
+  }
+  .bilan-ic svg{ width:16px;height:16px; }
+  .bilan-meta .l{ font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3); font-weight:600; }
+  .bilan-meta .d{ font-size:13.5px; font-weight:600; color:var(--ink); }
+  .bilan-body{ font-size:13.5px; color:var(--ink-2); line-height:1.62; }
+  .bilan-body b{ color:var(--ink); font-weight:600; }
+
+  /* ---------- Mot du moniteur ---------- */
+  .word{
+    position:relative;
+    padding:26px 30px 30px;
+    background:
+      radial-gradient(300px 200px at 92% 0%, rgba(176,132,51,.06), transparent 70%);
+  }
+  .word-q{
+    font-family:"Fraunces",serif; font-style:italic; font-weight:500;
+    font-size:18px; line-height:1.55; letter-spacing:-0.01em;
+    color:var(--ink);
+  }
+  .word-q .mark{
+    font-family:"Fraunces",serif; font-size:46px; line-height:0; color:var(--indigo-line);
+    margin-right:2px; position:relative; top:14px;
+  }
+  .sign{ display:flex; align-items:center; gap:12px; margin-top:20px; }
+  .sign-av{
+    width:46px;height:46px;border-radius:50%; flex:none;
+    background:linear-gradient(150deg,#7d76ff,#3730a3);
+    color:#fff; font-weight:700; font-size:16px;
+    display:grid;place-items:center;
+    box-shadow:0 4px 12px -5px rgba(55,48,163,.6), 0 1px 0 rgba(255,255,255,.3) inset;
+  }
+  .sign-info .nm{ font-family:"Fraunces",serif; font-weight:600; font-size:15.5px; color:var(--ink); letter-spacing:-0.01em; }
+  .sign-info .ro{ font-size:12px; color:var(--ink-3); display:flex; align-items:center; gap:6px; margin-top:1px; }
+  .sign-info .ro svg{ width:12px;height:12px; color:var(--gold); }
+
+  /* ---------- Pied RGPD ---------- */
+  .foot{
+    margin-top:18px;
+    border:1px solid var(--line-2);
+    border-radius:16px;
+    background:linear-gradient(180deg,#fbfaff,#f6f5fb);
+    padding:16px 18px;
+    display:flex; gap:12px;
+  }
+  .foot-ic{ flex:none; color:var(--ink-3); }
+  .foot-ic svg{ width:18px;height:18px; }
+  .foot p{ font-size:11.5px; color:var(--ink-3); line-height:1.55; letter-spacing:.005em; }
+  .foot p b{ color:var(--ink-2); font-weight:600; }
+  .foot a{ color:var(--indigo); text-decoration:none; font-weight:600; }
+
+  .copy{
+    text-align:center; margin-top:22px;
+    font-size:11.5px; color:#a09eb2; letter-spacing:.04em;
+  }
+  .copy b{ color:var(--ink-3); font-weight:600; }
+
+  /* ---------- Animations ---------- */
+  @keyframes rise{ to{ opacity:1; transform:translateY(0);} }
+  @keyframes grow{ from{width:0;} }
+  @keyframes ringfill{ to{ stroke-dashoffset:var(--off);} }
+  @keyframes pulse{ 0%,100%{opacity:.55; transform:scale(.97);} 50%{opacity:1; transform:scale(1.03);} }
+
+  .ring-fg{
+    stroke-dasharray:402;
+    stroke-dashoffset:402;
+    --off:83; /* 100% - 79% de 402 ≈ 84 */
+    animation:ringfill 1.4s cubic-bezier(.2,.7,.2,1) .25s forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .sheet{ animation:none; opacity:1; transform:none; }
+    .bar > i{ animation:none; }
+    .ring-fg{ animation:none; stroke-dashoffset:83; }
+    .ring-glow{ animation:none; }
+  }
+
+  @media (max-width:540px){
+    .wrap{ padding:24px 14px 48px; }
+    .hero{ flex-direction:column; text-align:center; gap:22px; }
+    .chips{ justify-content:center; }
+    .comp-name{ width:120px; }
+    .ttl{ font-size:27px; }
+    .top,.section,.word{ padding-left:22px; padding-right:22px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- lien partagé -->
+    <div class="share-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <span>Lien de suivi partagé — <b>aucun compte requis</b></span>
+      <span class="dot"></span>
+      <span>Lecture seule</span>
+    </div>
+
+    <!-- carte bulletin -->
+    <article class="sheet">
+
+      <!-- haut -->
+      <header class="top">
+        <div class="brand">
+          <span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          Auto-école Yanis Conduite
+        </div>
+
+        <div class="ttl-kicker">Bulletin de progression</div>
+        <h1 class="ttl">Le parcours de <em>Lucas</em><br/>vers le permis</h1>
+
+        <div class="for-line">
+          <span class="av">L</span>
+          <span>Suivi de <b>Lucas Moreau</b> · mis à jour le 23 juin 2026</span>
+        </div>
+      </header>
+
+      <!-- héros : anneau -->
+      <section class="hero">
+        <div class="ring-box">
+          <span class="ring-glow"></span>
+          <svg width="152" height="152" viewBox="0 0 152 152">
+            <circle cx="76" cy="76" r="64" fill="none" stroke="#ecebf6" stroke-width="13"/>
+            <defs>
+              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#6a63ee"/>
+                <stop offset="1" stop-color="#3730a3"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-fg" cx="76" cy="76" r="64" fill="none" stroke="url(#g)" stroke-width="13" stroke-linecap="round"/>
+          </svg>
+          <div class="ring-center">
+            <div>
+              <div class="ring-pct">79<span>%</span></div>
+              <div class="ring-sub">Compétences</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-txt">
+          <h2 class="hero-h">Lucas avance bien et de façon régulière.</h2>
+          <p class="hero-p">Sur les <b>4 grandes compétences</b> du permis, deux sont déjà acquises et la troisième est presque terminée. Le rythme est sérieux : <b>14 leçons</b> suivies depuis le début.</p>
+          <div class="chips">
+            <span class="chip ok"><span class="d"></span>2 compétences acquises</span>
+            <span class="chip go"><span class="d"></span>1 en cours</span>
+            <span class="chip wait"><span class="d"></span>1 à venir</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- barres REMC -->
+      <section class="section">
+        <div class="sec-head">
+          <h3 class="sec-title">Le détail par compétence</h3>
+          <span class="sec-note">Référentiel officiel REMC</span>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name"><div class="n">Maîtriser la voiture</div><div class="c">Compétence 1</div></div>
+          <div class="bar full"><i style="width:100%"></i></div>
+          <div class="comp-val">100 %</div>
+        </div>
+        <div class="comp">
+          <div class="comp-name"><div class="n">Circuler dans le trafic</div><div class="c">Compétence 2</div></div>
+          <div class="bar full"><i style="width:100%"></i></div>
+          <div class="comp-val">100 %</div>
+        </div>
+        <div class="comp">
+          <div class="comp-name"><div class="n">Conditions difficiles</div><div class="c">Compétence 3</div></div>
+          <div class="bar"><i style="width:72%"></i></div>
+          <div class="comp-val">72 %</div>
+        </div>
+        <div class="comp">
+          <div class="comp-name"><div class="n">Pratiquer en autonomie</div><div class="c">Compétence 4</div></div>
+          <div class="bar"><i style="width:41%"></i></div>
+          <div class="comp-val">41 %</div>
+        </div>
+      </section>
+
+      <!-- dernier bilan -->
+      <section class="section">
+        <div class="sec-head">
+          <h3 class="sec-title">Le dernier bilan</h3>
+        </div>
+        <div class="bilan">
+          <div class="bilan-top">
+            <span class="bilan-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>
+            <div class="bilan-meta">
+              <div class="l">Leçon n°14 · Conduite</div>
+              <div class="d">Lundi 23 juin 2026 — 14 h 00</div>
+            </div>
+          </div>
+          <p class="bilan-body">Belle séance sur route de campagne. Lucas gère désormais <b>les dépassements et les intersections</b> avec calme. On continue à travailler la <b>conduite sous la pluie</b> avant de passer à l’autonomie complète.</p>
+        </div>
+      </section>
+
+      <!-- mot du moniteur -->
+      <section class="word">
+        <p class="word-q"><span class="mark">«</span>Lucas est un élève appliqué et de plus en plus à l’aise. Il prend de bonnes habitudes au volant. Encore quelques séances et il sera prêt pour l’examen. Vous pouvez être fiers de lui.»</p>
+        <div class="sign">
+          <span class="sign-av">YB</span>
+          <div class="sign-info">
+            <div class="nm">Yanis Benali</div>
+            <div class="ro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></svg> Moniteur diplômé d’État · 11 ans d’expérience</div>
+          </div>
+        </div>
+      </section>
+
+    </article>
+
+    <!-- RGPD -->
+    <div class="foot">
+      <span class="foot-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+      <p><b>Accès en lecture seule, sur invitation du moniteur.</b> Cette page présente uniquement la progression pédagogique de l’élève. S’il s’agit d’un mineur, le suivi est partagé avec l’accord du représentant légal. Aucune donnée n’est conservée sur votre appareil. Pour toute question relative à vos données, écrivez à <a href="#">contact@permigo.fr</a> — conforme au RGPD.</p>
+    </div>
+
+    <div class="copy">Édité par <b>PermiGo</b> · suivi du permis de conduire</div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>PermiGo — Ton parcours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --night-1:#1a1030;
+    --night-2:#241445;
+    --night-3:#120a24;
+    --panel:#2a1b52;
+    --violet:#7c4dff;
+    --violet-2:#a855f7;
+    --gold-1:#ffd24a;
+    --gold-2:#ff9c1c;
+    --ink:#ffffff;
+    --mute:#b9aee0;
+    --mute-soft:#8a7eb8;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px 16px;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, #2c1a52 0%, transparent 60%),
+      radial-gradient(900px 600px at 80% 110%, #1d1136 0%, transparent 55%),
+      linear-gradient(160deg,#0e0820 0%, #15102b 50%, #0c0718 100%);
+    color:var(--ink);
+  }
+
+  /* ============ COQUE TELEPHONE ============ */
+  .phone{
+    position:relative;
+    width:390px;
+    height:844px;
+    border-radius:46px;
+    padding:10px;
+    background:linear-gradient(155deg,#3a2a64 0%, #1c1238 45%, #0c0718 100%);
+    box-shadow:
+      0 2px 2px rgba(255,255,255,.10) inset,
+      0 -2px 6px rgba(0,0,0,.6) inset,
+      0 50px 90px -30px rgba(7,3,18,.9),
+      0 30px 60px -40px rgba(124,77,255,.5);
+  }
+  .screen{
+    position:relative;
+    width:100%;
+    height:100%;
+    border-radius:38px;
+    overflow:hidden;
+    background:
+      radial-gradient(700px 420px at 50% -8%, #2c1a52 0%, transparent 62%),
+      radial-gradient(600px 500px at 100% 100%, #1c1136 0%, transparent 58%),
+      linear-gradient(165deg,#1a1030 0%, #241445 48%, #120a24 100%);
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* subtle grain */
+  .screen::after{
+    content:"";
+    position:absolute; inset:0; pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/></svg>");
+    opacity:.035;
+    mix-blend-mode:overlay;
+  }
+
+  /* status bar */
+  .statusbar{
+    position:relative; z-index:5;
+    height:50px; flex:0 0 50px;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 26px 0 30px;
+    font-size:14.5px; font-weight:700; letter-spacing:.2px;
+    color:#fff;
+  }
+  .statusbar .right{ display:flex; align-items:center; gap:7px; }
+  .sb-ico{ display:block; }
+  .battery{ position:relative; width:25px; height:13px; border:1.6px solid rgba(255,255,255,.85); border-radius:4px; }
+  .battery::after{ content:""; position:absolute; right:-4px; top:3.5px; width:2.5px; height:5px; background:rgba(255,255,255,.85); border-radius:0 2px 2px 0; }
+  .battery .fill{ position:absolute; left:1.6px; top:1.6px; bottom:1.6px; width:64%; border-radius:1.5px; background:linear-gradient(90deg,var(--gold-1),var(--gold-2)); }
+
+  /* ============ SCROLL CONTENT ============ */
+  .content{
+    position:relative; z-index:4;
+    flex:1; overflow-y:auto; overflow-x:hidden;
+    padding:6px 18px 110px;
+    scrollbar-width:none;
+  }
+  .content::-webkit-scrollbar{ display:none; }
+
+  /* ---- header ---- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:4px 4px 14px;
+  }
+  .hi-eyebrow{ font-size:12px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color:var(--violet-2); }
+  .hi-title{
+    font-family:'Baloo 2',cursive; font-weight:800;
+    font-size:26px; line-height:1; letter-spacing:-.8px; margin-top:2px;
+    color:#fff; text-shadow:0 2px 10px rgba(124,77,255,.35);
+  }
+  /* volants pill */
+  .volants{
+    display:flex; align-items:center; gap:7px;
+    padding:7px 12px 7px 9px;
+    border-radius:30px;
+    background:linear-gradient(160deg, rgba(58,40,104,.9), rgba(34,20,69,.9));
+    border:1px solid rgba(124,77,255,.35);
+    box-shadow:0 4px 14px -4px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.07) inset;
+  }
+  .coin{
+    width:26px; height:26px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff3c0, var(--gold-1) 40%, var(--gold-2) 90%);
+    box-shadow:0 0 0 2px rgba(255,156,28,.4), 0 2px 6px rgba(255,156,28,.5), 0 1px 1px rgba(255,255,255,.7) inset;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .coin::before{ content:""; position:absolute; inset:4px; border-radius:50%; border:1.5px solid rgba(255,255,255,.45); }
+  .coin svg{ width:13px; height:13px; }
+  .volants b{ font-family:'Baloo 2',cursive; font-weight:700; font-size:16px; color:#ffe49a; letter-spacing:.3px; }
+
+  /* ---- overall progress strip ---- */
+  .overall{
+    margin:2px 4px 22px;
+    padding:16px 18px;
+    border-radius:22px;
+    background:
+      linear-gradient(150deg, rgba(46,29,90,.85), rgba(28,17,56,.92));
+    border:1px solid rgba(124,77,255,.28);
+    box-shadow:0 18px 36px -22px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.06) inset;
+    position:relative; overflow:hidden;
+  }
+  .overall::before{
+    content:""; position:absolute; right:-30px; top:-40px; width:160px; height:160px;
+    background:radial-gradient(circle, rgba(168,85,247,.35), transparent 70%);
+    pointer-events:none;
+  }
+  .overall-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:11px; }
+  .overall-lab{ font-size:12.5px; font-weight:700; color:var(--mute); letter-spacing:.2px; }
+  .overall-pct{ font-family:'Baloo 2',cursive; font-weight:800; font-size:18px; color:#fff; }
+  .overall-pct span{ color:#ffd66e; }
+  .track{ height:11px; border-radius:10px; background:rgba(10,5,24,.7); box-shadow:0 1px 2px rgba(0,0,0,.5) inset; overflow:hidden; position:relative; }
+  .fill-bar{
+    height:100%; width:46%; border-radius:10px;
+    background:linear-gradient(90deg, var(--violet) 0%, var(--violet-2) 60%, #d6a4ff 100%);
+    box-shadow:0 0 12px rgba(168,85,247,.7), 0 1px 0 rgba(255,255,255,.35) inset;
+    position:relative;
+  }
+  .fill-bar::after{
+    content:""; position:absolute; top:0; bottom:0; width:40px; right:0;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.55));
+    animation:sheen 2.6s ease-in-out infinite;
+  }
+  @keyframes sheen{ 0%{ transform:translateX(-260px); opacity:0;} 30%{opacity:1;} 60%{ transform:translateX(40px); opacity:0;} 100%{opacity:0;} }
+
+  .section-h{
+    display:flex; align-items:center; gap:9px;
+    margin:0 4px 14px;
+  }
+  .section-h h2{ font-family:'Baloo 2',cursive; font-weight:700; font-size:16px; letter-spacing:.2px; color:#efe9ff; }
+  .section-h .line{ flex:1; height:1px; background:linear-gradient(90deg, rgba(124,77,255,.4), transparent); }
+
+  /* ============ WORLD CARDS ============ */
+  .worlds{ display:flex; flex-direction:column; gap:16px; }
+
+  .world{
+    position:relative;
+    border-radius:26px;
+    overflow:hidden;
+    border:1px solid rgba(124,77,255,.22);
+    box-shadow:0 20px 40px -26px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.05) inset;
+    opacity:0; transform:translateY(14px);
+    animation:rise .5s cubic-bezier(.2,.7,.3,1) forwards;
+  }
+  .world:nth-child(1){ animation-delay:.05s; }
+  .world:nth-child(2){ animation-delay:.13s; }
+  .world:nth-child(3){ animation-delay:.21s; }
+  .world:nth-child(4){ animation-delay:.29s; }
+  @keyframes rise{ to{ opacity:1; transform:translateY(0);} }
+
+  /* scene (top illustration) */
+  .scene{ position:relative; height:150px; overflow:hidden; }
+  .scene svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .scene .vignette{
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, transparent 38%, rgba(18,10,36,.35) 70%, rgba(18,10,36,.92) 100%);
+  }
+  .scene-badge{
+    position:absolute; top:13px; left:14px;
+    display:flex; align-items:center; gap:7px;
+    padding:5px 11px 5px 7px; border-radius:20px;
+    background:rgba(13,7,26,.55); backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.14);
+    font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#fff;
+  }
+  .scene-badge .dot{ width:7px; height:7px; border-radius:50%; box-shadow:0 0 8px currentColor; }
+
+  /* body */
+  .wbody{
+    position:relative;
+    padding:14px 16px 16px;
+    background:linear-gradient(160deg, rgba(42,27,82,.9) 0%, rgba(30,18,60,.95) 100%);
+    margin-top:-1px;
+  }
+  .wbody-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .wname{ font-family:'Baloo 2',cursive; font-weight:800; font-size:21px; line-height:1.05; letter-spacing:-.4px; color:#fff; }
+  .wsub{ font-size:12.5px; color:var(--mute); margin-top:3px; font-weight:500; }
+
+  /* progress numbers */
+  .wprog{ text-align:right; flex:0 0 auto; }
+  .wprog b{ font-family:'Baloo 2',cursive; font-weight:800; font-size:22px; color:#fff; }
+  .wprog b span{ color:var(--mute-soft); font-size:15px; }
+  .wprog small{ display:block; font-size:10.5px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--mute-soft); margin-top:1px; }
+
+  .wtrack{ height:9px; border-radius:8px; background:rgba(10,5,24,.7); margin-top:13px; box-shadow:0 1px 2px rgba(0,0,0,.5) inset; overflow:hidden; }
+  .wtrack i{ display:block; height:100%; border-radius:8px; }
+
+  /* ---- CURRENT WORLD (hero) ---- */
+  .world.current{
+    border:1.5px solid transparent;
+    background:
+      linear-gradient(rgba(30,18,60,1),rgba(30,18,60,1)) padding-box,
+      linear-gradient(145deg, var(--gold-1), var(--gold-2) 55%, #b9700f) border-box;
+    box-shadow:
+      0 26px 56px -24px rgba(0,0,0,.9),
+      0 0 0 1px rgba(255,210,74,.12),
+      0 14px 40px -18px rgba(255,156,28,.4);
+  }
+  .world.current .scene{ height:172px; }
+  .world.current .wname{ font-size:25px; }
+  .world.current .wbody{ padding:16px 18px 18px; }
+
+  .current-flag{
+    position:absolute; top:14px; right:14px; z-index:3;
+    display:flex; align-items:center; gap:6px;
+    padding:6px 12px 6px 9px; border-radius:20px;
+    background:linear-gradient(135deg, var(--gold-1), var(--gold-2));
+    color:#3a1d00; font-size:11px; font-weight:800; letter-spacing:.6px; text-transform:uppercase;
+    box-shadow:0 4px 0 #b9700f, 0 8px 18px -6px rgba(255,156,28,.7), 0 1px 0 rgba(255,255,255,.6) inset;
+  }
+  .current-flag svg{ width:13px; height:13px; }
+  .current-flag::before{
+    content:""; position:absolute; inset:0; border-radius:20px; pointer-events:none;
+    background:linear-gradient(110deg, transparent 30%, rgba(255,255,255,.6) 50%, transparent 70%);
+    background-size:220% 100%;
+    animation:shimmer 3s linear infinite;
+  }
+  @keyframes shimmer{ 0%{ background-position:130% 0;} 100%{ background-position:-130% 0;} }
+
+  .wtrack.gold i{
+    background:linear-gradient(90deg, var(--gold-2), var(--gold-1) 70%, #fff0c0);
+    box-shadow:0 0 12px rgba(255,200,90,.8), 0 1px 0 rgba(255,255,255,.5) inset;
+  }
+  .wtrack.violet i{
+    background:linear-gradient(90deg, var(--violet), var(--violet-2) 80%, #e0b6ff);
+    box-shadow:0 0 10px rgba(168,85,247,.6), 0 1px 0 rgba(255,255,255,.3) inset;
+  }
+
+  /* CTA button on current */
+  .play-btn{
+    margin-top:16px; width:100%;
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    height:52px; border:none; border-radius:18px; cursor:pointer;
+    font-family:'Baloo 2',cursive; font-weight:800; font-size:16.5px; letter-spacing:.3px;
+    color:#3a1d00;
+    background:linear-gradient(180deg, #ffe07a 0%, var(--gold-1) 40%, var(--gold-2) 100%);
+    box-shadow:
+      0 6px 0 #b9700f,
+      0 14px 26px -8px rgba(255,156,28,.55),
+      0 1px 0 rgba(255,255,255,.8) inset,
+      0 -3px 6px rgba(160,90,0,.3) inset;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .play-btn:active{ transform:translateY(4px); box-shadow:0 2px 0 #b9700f, 0 6px 14px -6px rgba(255,156,28,.5), 0 1px 0 rgba(255,255,255,.7) inset; }
+  .play-btn svg{ width:19px; height:19px; }
+
+  /* ---- LOCKED world ---- */
+  .world.locked{ opacity:.66; }
+  .world.locked .scene{ height:120px; filter:saturate(.45) brightness(.7); }
+  .world.locked .wname{ color:#cdc3ea; }
+  .world.locked:nth-child(4){ animation-name:rise; }
+
+  .lock-veil{
+    position:absolute; inset:0; z-index:2;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    background:linear-gradient(180deg, rgba(18,10,36,.45), rgba(18,10,36,.78));
+    backdrop-filter:blur(1.5px);
+  }
+  .lock-chip{
+    display:flex; align-items:center; gap:7px;
+    padding:8px 15px; border-radius:30px;
+    background:rgba(20,12,40,.82);
+    border:1px solid rgba(185,174,224,.28);
+    box-shadow:0 6px 16px -6px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.06) inset;
+    color:#d8cff2; font-size:12.5px; font-weight:700;
+  }
+  .lock-chip svg{ width:15px; height:15px; }
+  .lock-hint{ font-size:11px; color:var(--mute); font-weight:500; max-width:230px; text-align:center; }
+
+  /* compact row (locked body) */
+  .wbody.compact{ padding:12px 16px 13px; }
+  .wbody.compact .wname{ font-size:18px; }
+
+  /* small competence dots row */
+  .comps{ display:flex; gap:5px; margin-top:12px; }
+  .comps i{ flex:1; height:6px; border-radius:6px; background:rgba(120,104,170,.3); }
+  .comps i.done{ background:linear-gradient(90deg,var(--violet),var(--violet-2)); box-shadow:0 0 7px rgba(168,85,247,.5); }
+  .comps.gold i.done{ background:linear-gradient(90deg,var(--gold-2),var(--gold-1)); box-shadow:0 0 7px rgba(255,200,90,.6); }
+
+  /* footer note */
+  .foot-note{
+    text-align:center; margin:22px 8px 6px;
+    font-size:11.5px; color:var(--mute-soft); font-weight:500; line-height:1.5;
+  }
+  .foot-note b{ color:var(--mute); }
+
+  /* ============ BOTTOM NAV ============ */
+  .nav{
+    position:absolute; left:10px; right:10px; bottom:10px; z-index:8;
+    height:74px;
+    display:flex; align-items:center; justify-content:space-around;
+    padding:0 10px 8px;
+    border-radius:0 0 38px 38px;
+    background:linear-gradient(180deg, rgba(28,17,56,.4) 0%, rgba(18,10,36,.96) 55%);
+    backdrop-filter:blur(14px);
+    border-top:1px solid rgba(124,77,255,.18);
+  }
+  .nav a{ display:flex; flex-direction:column; align-items:center; gap:3px; text-decoration:none; color:var(--mute-soft); font-size:10px; font-weight:700; letter-spacing:.2px; }
+  .nav a svg{ width:24px; height:24px; }
+  .nav a.active{ color:#fff; }
+  .nav a.active .nav-ico{
+    background:linear-gradient(160deg, var(--violet), var(--violet-2));
+    box-shadow:0 6px 16px -4px rgba(124,77,255,.7), 0 1px 0 rgba(255,255,255,.25) inset;
+  }
+  .nav-ico{
+    width:46px; height:34px; border-radius:13px;
+    display:flex; align-items:center; justify-content:center;
+    transition:all .2s ease;
+  }
+  .nav a.active svg{ stroke:#fff; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+    .world{ opacity:1; transform:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+
+      <!-- status bar -->
+      <div class="statusbar">
+        <span>9:41</span>
+        <div class="right">
+          <svg class="sb-ico" width="17" height="12" viewBox="0 0 17 12" fill="none"><rect x="0" y="7" width="3" height="5" rx="1" fill="#fff"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1" fill="#fff"/><rect x="9" y="2" width="3" height="10" rx="1" fill="#fff"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#fff" opacity=".4"/></svg>
+          <svg class="sb-ico" width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 11.5 0.7 4.2a10.3 10.3 0 0 1 14.6 0L8 11.5Z" stroke="#fff" stroke-width="1.4" fill="none" opacity=".95"/></svg>
+          <div class="battery"><span class="fill"></span></div>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- header -->
+        <div class="topbar">
+          <div>
+            <div class="hi-eyebrow">Salut Inès</div>
+            <div class="hi-title">Ton parcours</div>
+          </div>
+          <div class="volants">
+            <span class="coin">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="#8a4d00" stroke-width="2"/><path d="M12 5v14M5 12h14" stroke="#8a4d00" stroke-width="2"/></svg>
+            </span>
+            <b>1 240</b>
+          </div>
+        </div>
+
+        <!-- overall progress -->
+        <div class="overall">
+          <div class="overall-top">
+            <span class="overall-lab">Progression générale du permis</span>
+            <span class="overall-pct"><span>46</span>%</span>
+          </div>
+          <div class="track"><div class="fill-bar"></div></div>
+        </div>
+
+        <div class="section-h">
+          <h2>Les 4 mondes</h2>
+          <span class="line"></span>
+        </div>
+
+        <div class="worlds">
+
+          <!-- ===== MONDE 1 — terminé ===== -->
+          <div class="world">
+            <div class="scene">
+              <svg viewBox="0 0 360 150" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                  <linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#3f2d78"/><stop offset="1" stop-color="#241445"/>
+                  </linearGradient>
+                  <linearGradient id="bld1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#5b3fa3"/><stop offset="1" stop-color="#2c1c58"/>
+                  </linearGradient>
+                </defs>
+                <rect width="360" height="150" fill="url(#sky1)"/>
+                <circle cx="300" cy="38" r="20" fill="#ffd97a" opacity=".5"/>
+                <!-- buildings -->
+                <rect x="14" y="58" width="46" height="92" fill="url(#bld1)"/>
+                <rect x="66" y="42" width="40" height="108" fill="#4b338c"/>
+                <rect x="112" y="70" width="34" height="80" fill="#5b3fa3"/>
+                <rect x="200" y="50" width="44" height="100" fill="#4b338c"/>
+                <rect x="250" y="66" width="36" height="84" fill="#5b3fa3"/>
+                <rect x="292" y="44" width="48" height="106" fill="url(#bld1)"/>
+                <!-- windows -->
+                <g fill="#ffd97a" opacity=".75">
+                  <rect x="22" y="66" width="6" height="8"/><rect x="34" y="66" width="6" height="8"/><rect x="22" y="82" width="6" height="8"/><rect x="46" y="82" width="6" height="8"/>
+                  <rect x="74" y="52" width="6" height="8"/><rect x="88" y="52" width="6" height="8"/><rect x="74" y="70" width="6" height="8"/><rect x="88" y="70" width="6" height="8"/>
+                  <rect x="208" y="60" width="6" height="8"/><rect x="226" y="60" width="6" height="8"/><rect x="208" y="78" width="6" height="8"/>
+                  <rect x="300" y="54" width="6" height="8"/><rect x="318" y="54" width="6" height="8"/><rect x="300" y="74" width="6" height="8"/><rect x="318" y="74" width="6" height="8"/>
+                </g>
+                <!-- road -->
+                <path d="M0 150 L360 150 L300 104 L60 104 Z" fill="#1a1130"/>
+                <rect x="170" y="108" width="6" height="14" rx="2" fill="#ffd24a" opacity=".85"/>
+                <rect x="176" y="130" width="8" height="18" rx="2" fill="#ffd24a"/>
+                <!-- traffic light -->
+                <rect x="148" y="78" width="9" height="30" rx="3" fill="#15102b"/>
+                <circle cx="152.5" cy="100" r="3" fill="#4dff88"/>
+              </svg>
+              <div class="vignette"></div>
+              <div class="scene-badge"><span class="dot" style="color:#4dff88"></span>Monde 1</div>
+            </div>
+            <div class="wbody compact">
+              <div class="wbody-top">
+                <div>
+                  <div class="wname">En ville</div>
+                  <div class="wsub">Carrefours, priorités, piétons</div>
+                </div>
+                <div class="wprog">
+                  <b>12<span>/12</span></b>
+                  <small>Terminé</small>
+                </div>
+              </div>
+              <div class="comps">
+                <i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== MONDE 2 — EN COURS (hero) ===== -->
+          <div class="world current">
+            <div class="current-flag">
+              <svg viewBox="0 0 24 24" fill="none"><path d="m12 2 2.9 6.2 6.6.7-4.9 4.6 1.3 6.5L12 17.6 6.1 20.6l1.3-6.5L2.5 9.5l6.6-.7L12 2Z" fill="#3a1d00"/></svg>
+              En cours
+            </div>
+            <div class="scene">
+              <svg viewBox="0 0 360 172" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                  <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#ff9c1c"/><stop offset=".45" stop-color="#b65aa0"/><stop offset="1" stop-color="#3a2270"/>
+                  </linearGradient>
+                  <linearGradient id="road2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#2a1c50"/><stop offset="1" stop-color="#140b28"/>
+                  </linearGradient>
+                </defs>
+                <rect width="360" height="172" fill="url(#sky2)"/>
+                <circle cx="278" cy="46" r="26" fill="#ffe9a8" opacity=".9"/>
+                <circle cx="278" cy="46" r="40" fill="#fff" opacity=".12"/>
+                <!-- hills -->
+                <path d="M0 110 Q90 78 180 104 T360 96 L360 172 L0 172 Z" fill="#5a3f96" opacity=".7"/>
+                <path d="M0 126 Q120 100 240 122 T360 118 L360 172 L0 172 Z" fill="#42297e"/>
+                <!-- road perspective -->
+                <path d="M120 172 L240 172 L210 110 L150 110 Z" fill="url(#road2)"/>
+                <path d="M179 110 L181 110 L185 172 L175 172 Z" fill="#ffd24a" opacity=".9"/>
+                <g fill="#ffd24a" opacity=".7">
+                  <rect x="178" y="118" width="4" height="9"/><rect x="177" y="138" width="6" height="11"/><rect x="175" y="160" width="9" height="12"/>
+                </g>
+                <!-- distant car -->
+                <rect x="166" y="120" width="28" height="13" rx="5" fill="#7c4dff"/>
+                <rect x="171" y="116" width="18" height="8" rx="4" fill="#a855f7"/>
+                <circle cx="172" cy="133" r="3" fill="#15102b"/><circle cx="188" cy="133" r="3" fill="#15102b"/>
+                <!-- road sign -->
+                <rect x="58" y="92" width="5" height="40" fill="#2a1c50"/>
+                <circle cx="60.5" cy="84" r="13" fill="#ff5a5a" stroke="#fff" stroke-width="3"/>
+                <rect x="52" y="81" width="17" height="5" rx="2" fill="#fff"/>
+              </svg>
+              <div class="vignette"></div>
+              <div class="scene-badge"><span class="dot" style="color:#ffd24a"></span>Monde 2</div>
+            </div>
+            <div class="wbody">
+              <div class="wbody-top">
+                <div>
+                  <div class="wname">Sur la route</div>
+                  <div class="wsub">Dépassements, vitesse, distances de sécurité</div>
+                </div>
+                <div class="wprog">
+                  <b>8<span>/12</span></b>
+                  <small>Étapes</small>
+                </div>
+              </div>
+              <div class="wtrack gold"><i style="width:67%"></i></div>
+              <button class="play-btn">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M7 5.5v13l11-6.5L7 5.5Z" fill="#3a1d00"/></svg>
+                Continuer l’étape 9
+              </button>
+            </div>
+          </div>
+
+          <!-- ===== MONDE 3 — verrouillé (proche) ===== -->
+          <div class="world locked">
+            <div class="lock-veil">
+              <div class="lock-chip">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2.5" stroke="#d8cff2" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#d8cff2" stroke-width="2"/></svg>
+                Bientôt débloqué
+              </div>
+              <div class="lock-hint">Termine <b style="color:#ffd66e">Sur la route</b> pour ouvrir les manœuvres</div>
+            </div>
+            <div class="scene">
+              <svg viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice">
+                <defs><linearGradient id="sky3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#46308a"/><stop offset="1" stop-color="#241445"/></linearGradient></defs>
+                <rect width="360" height="120" fill="url(#sky3)"/>
+                <!-- parking lot -->
+                <rect x="0" y="60" width="360" height="60" fill="#1f1440"/>
+                <g stroke="#7c4dff" stroke-width="3" opacity=".55">
+                  <path d="M40 120 L70 64"/><path d="M110 120 L130 64"/><path d="M180 120 L190 64"/><path d="M250 120 L250 64"/><path d="M320 120 L310 64"/>
+                </g>
+                <!-- cone -->
+                <path d="M200 50 L208 78 L192 78 Z" fill="#ff9c1c"/><rect x="190" y="78" width="20" height="5" rx="2" fill="#ff7a1c"/>
+                <!-- car parking -->
+                <rect x="80" y="80" width="46" height="22" rx="7" fill="#a855f7"/>
+                <rect x="88" y="74" width="30" height="12" rx="5" fill="#c89bff"/>
+              </svg>
+              <div class="vignette"></div>
+              <div class="scene-badge"><span class="dot" style="color:#b9aee0"></span>Monde 3</div>
+            </div>
+            <div class="wbody compact">
+              <div class="wbody-top">
+                <div>
+                  <div class="wname">Manœuvres</div>
+                  <div class="wsub">Créneau, demi-tour, stationnement</div>
+                </div>
+                <div class="wprog">
+                  <b>0<span>/10</span></b>
+                  <small>Verrouillé</small>
+                </div>
+              </div>
+              <div class="comps"><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+          </div>
+
+          <!-- ===== MONDE 4 — verrouillé (loin) ===== -->
+          <div class="world locked">
+            <div class="lock-veil">
+              <div class="lock-chip">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2.5" stroke="#d8cff2" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#d8cff2" stroke-width="2"/></svg>
+                Le grand final
+              </div>
+              <div class="lock-hint">Le dernier monde avant l’examen — roule en toute autonomie</div>
+            </div>
+            <div class="scene">
+              <svg viewBox="0 0 360 120" preserveAspectRatio="xMidYMid slice">
+                <defs><linearGradient id="sky4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2a78"/><stop offset="1" stop-color="#1a1030"/></linearGradient></defs>
+                <rect width="360" height="120" fill="url(#sky4)"/>
+                <!-- highway -->
+                <path d="M0 120 L360 120 L240 50 L120 50 Z" fill="#1d1338"/>
+                <g fill="#ffd24a" opacity=".7"><rect x="150" y="58" width="5" height="9"/><rect x="146" y="78" width="7" height="12"/><rect x="140" y="102" width="11" height="16"/></g>
+                <g fill="#ffd24a" opacity=".7"><rect x="205" y="58" width="5" height="9"/><rect x="209" y="78" width="7" height="12"/><rect x="215" y="102" width="11" height="16"/></g>
+                <!-- gantry sign -->
+                <rect x="96" y="34" width="168" height="4" fill="#3a2a78"/>
+                <rect x="100" y="40" width="160" height="2" fill="#2a1c50"/>
+                <rect x="98" y="38" width="5" height="20" fill="#2a1c50"/><rect x="257" y="38" width="5" height="20" fill="#2a1c50"/>
+                <!-- car -->
+                <rect x="166" y="92" width="36" height="16" rx="6" fill="#7c4dff"/><rect x="174" y="84" width="22" height="11" rx="5" fill="#a855f7"/>
+              </svg>
+              <div class="vignette"></div>
+              <div class="scene-badge"><span class="dot" style="color:#b9aee0"></span>Monde 4</div>
+            </div>
+            <div class="wbody compact">
+              <div class="wbody-top">
+                <div>
+                  <div class="wname">Autonomie</div>
+                  <div class="wsub">Voie rapide, conduite seule, examen blanc</div>
+                </div>
+                <div class="wprog">
+                  <b>0<span>/8</span></b>
+                  <small>Verrouillé</small>
+                </div>
+              </div>
+              <div class="comps"><i></i><i></i><i></i><i></i></div>
+            </div>
+          </div>
+
+        </div>
+
+        <p class="foot-note">Chaque monde validé te rapproche du <b>permis</b>.<br>Inès, tu es à mi-chemin — garde le cap !</p>
+
+      </div>
+
+      <!-- bottom nav -->
+      <nav class="nav">
+        <a href="#"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2h-3v-6h-4v6H5a2 2 0 0 1-2-2Z"/></svg></span>Accueil</a>
+        <a href="#" class="active"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14M5 4v16M5 12h11M5 20h14"/><circle cx="16" cy="12" r="0"/></svg></span>Parcours</a>
+        <a href="#"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M6 4h12v5a6 6 0 0 1-12 0Z"/><path d="M18 5h2a2 2 0 0 1 0 4h-2M6 5H4a2 2 0 0 0 0 4h2"/></svg></span>Trophées</a>
+        <a href="#"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M7 14h2m4 0h4M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg></span>Boutique</a>
+      </nav>
+
+    </div>
+  </div>
+</body>
+</html>

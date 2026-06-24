@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>PermiGo — Ta semaine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --indigo:#4f46e5;
+    --indigo-deep:#4338ca;
+    --indigo-night:#312e81;
+    --indigo-ink:#1e1b4b;
+    --indigo-soft:#eef0ff;
+    --indigo-softer:#f5f6ff;
+    --indigo-line:#e3e5ff;
+    --paper:#ffffff;
+    --ink:#1f2243;
+    --muted:#6b6f99;
+    --faint:#9498bf;
+    --green:#0f9d6b;
+    --green-soft:#e6f7f0;
+    --amber:#e8930c;
+    --amber-soft:#fdf2dd;
+    --rose:#e23b6d;
+    --rose-soft:#fde7ee;
+    --gold-1:#fff3c4;
+    --gold-2:#f6cd5b;
+    --gold-3:#c98f1e;
+    --shadow-indigo:24px 32px 60px -28px rgba(49,46,129,.55);
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:
+      radial-gradient(900px 600px at 12% -8%, #e9ebff 0%, rgba(233,235,255,0) 60%),
+      radial-gradient(800px 700px at 108% 12%, #eceaff 0%, rgba(236,234,255,0) 55%),
+      linear-gradient(180deg,#f3f4ff 0%, #eef0fb 100%);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px 16px;
+    color:var(--ink);
+  }
+
+  /* ===== Phone shell ===== */
+  .phone{
+    position:relative;
+    width:390px;
+    height:844px;
+    border-radius:54px;
+    background:linear-gradient(160deg,#15163a 0%, #23245a 48%, #15163a 100%);
+    padding:13px;
+    box-shadow:
+      0 2px 0 rgba(255,255,255,.06) inset,
+      0 50px 90px -30px rgba(28,28,70,.65),
+      0 14px 40px -20px rgba(49,46,129,.5);
+  }
+  .phone::after{
+    content:"";
+    position:absolute;inset:13px;
+    border-radius:42px;
+    box-shadow:0 0 0 2px rgba(255,255,255,.04) inset;
+    pointer-events:none;
+    z-index:60;
+  }
+  .screen{
+    position:relative;
+    width:100%;height:100%;
+    border-radius:42px;
+    overflow:hidden;
+    background:
+      radial-gradient(520px 360px at 50% -10%, #f0f1ff 0%, rgba(240,241,255,0) 70%),
+      linear-gradient(180deg,#f7f8ff 0%, #f2f3fc 100%);
+    display:flex;flex-direction:column;
+  }
+
+  /* decorative road signs in very light bg */
+  .signs{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .signs svg{position:absolute;opacity:.05}
+  .s1{top:96px;right:-30px;width:170px}
+  .s2{top:360px;left:-44px;width:160px;opacity:.045}
+  .s3{bottom:120px;right:-26px;width:150px;opacity:.04}
+
+  /* status bar */
+  .statusbar{
+    position:relative;z-index:5;
+    height:48px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 26px 0 30px;
+    font-family:'Inter';font-weight:700;font-size:15px;
+    color:var(--indigo-ink);
+  }
+  .sb-right{display:flex;align-items:center;gap:7px}
+  .sb-right svg{display:block}
+  .batt{width:25px;height:13px;border:1.6px solid var(--indigo-ink);border-radius:4px;position:relative;opacity:.85}
+  .batt::after{content:"";position:absolute;right:-3.4px;top:3px;width:2px;height:7px;background:var(--indigo-ink);border-radius:0 2px 2px 0;opacity:.85}
+  .batt span{position:absolute;inset:1.6px;width:72%;background:var(--indigo-ink);border-radius:1.5px}
+
+  /* scroll body */
+  .body{
+    position:relative;z-index:2;
+    flex:1;
+    overflow-y:auto;
+    padding:6px 18px 30px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .body::-webkit-scrollbar{width:0}
+
+  /* ===== Header ===== */
+  .topline{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 14px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand-badge{
+    width:34px;height:34px;border-radius:11px;
+    background:linear-gradient(145deg,var(--indigo) 0%,var(--indigo-deep) 100%);
+    display:grid;place-items:center;
+    box-shadow:0 8px 16px -6px rgba(67,56,202,.6), 0 1px 0 rgba(255,255,255,.4) inset;
+  }
+  .brand-name{font-family:'Fredoka';font-weight:600;font-size:16px;letter-spacing:-.2px;color:var(--indigo-ink)}
+  .avatar{
+    width:38px;height:38px;border-radius:50%;
+    background:linear-gradient(150deg,#fbe4c6,#f3b27a);
+    display:grid;place-items:center;
+    font-family:'Fredoka';font-weight:600;color:#7a3d12;font-size:15px;
+    box-shadow:0 6px 14px -6px rgba(120,60,18,.5), 0 0 0 3px #fff, 0 0 0 4px var(--indigo-line);
+  }
+
+  /* hero title */
+  .hero{
+    margin:2px 2px 18px;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    font-family:'Inter';font-weight:700;font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;
+    color:var(--indigo-deep);
+    background:linear-gradient(180deg,#fff,#eef0ff);
+    border:1px solid var(--indigo-line);
+    padding:6px 12px;border-radius:999px;
+    box-shadow:0 6px 14px -10px rgba(67,56,202,.5);
+  }
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--indigo);box-shadow:0 0 0 4px rgba(79,70,229,.16)}
+  h1{
+    font-family:'Fredoka';font-weight:600;
+    font-size:34px;line-height:1.02;letter-spacing:-1.1px;
+    margin:12px 0 6px;color:var(--indigo-ink);
+  }
+  h1 .accent{
+    background:linear-gradient(95deg,var(--indigo) 0%,var(--indigo-deep) 60%,#6d28d9 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .sub{font-size:14px;color:var(--muted);font-weight:500;line-height:1.45;max-width:300px}
+
+  /* ritual strip */
+  .ritual{
+    margin:16px 2px 22px;
+    display:flex;align-items:center;gap:14px;
+    padding:14px 16px;
+    border-radius:20px;
+    background:
+      radial-gradient(120px 80px at 0% 0%, rgba(255,255,255,.5), rgba(255,255,255,0)),
+      linear-gradient(135deg,var(--indigo-night) 0%,var(--indigo-deep) 55%,#5b50e6 100%);
+    color:#fff;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.18) inset,
+      0 20px 34px -18px rgba(49,46,129,.75);
+    position:relative;overflow:hidden;
+  }
+  .ritual::before{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(140px 120px at 110% -20%, rgba(124,108,255,.7), rgba(124,108,255,0) 60%);
+    pointer-events:none;
+  }
+  .ritual-ring{
+    flex:none;width:52px;height:52px;position:relative;z-index:1;
+  }
+  .ritual-ring svg{display:block;transform:rotate(-90deg)}
+  .ritual-ring .num{
+    position:absolute;inset:0;display:grid;place-items:center;
+    font-family:'Fredoka';font-weight:600;font-size:16px;color:#fff;
+  }
+  .ritual-ring .num small{font-size:9px;font-weight:600;opacity:.8;letter-spacing:.4px}
+  .ritual-txt{position:relative;z-index:1}
+  .ritual-txt .k{font-family:'Fredoka';font-weight:600;font-size:15.5px;letter-spacing:-.2px}
+  .ritual-txt .p{font-size:12.5px;color:rgba(255,255,255,.78);font-weight:500;margin-top:2px}
+  .ritual-cta{
+    margin-left:auto;position:relative;z-index:1;
+    width:40px;height:40px;border-radius:13px;flex:none;
+    background:linear-gradient(160deg,#fff,#eef0ff);
+    display:grid;place-items:center;
+    box-shadow:0 8px 16px -8px rgba(0,0,0,.5);
+  }
+
+  /* ===== Pile section ===== */
+  .pile{
+    margin-bottom:18px;
+    border-radius:24px;
+    background:linear-gradient(180deg,#ffffff 0%,#fcfcff 100%);
+    border:1px solid var(--indigo-line);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.9) inset,
+      0 18px 36px -26px rgba(49,46,129,.4),
+      0 4px 12px -8px rgba(49,46,129,.18);
+    overflow:hidden;
+  }
+  .pile-head{
+    display:flex;align-items:center;gap:13px;
+    padding:16px 16px 13px;
+    position:relative;
+  }
+  .pile-icon{
+    width:42px;height:42px;flex:none;border-radius:14px;
+    display:grid;place-items:center;
+    position:relative;
+    box-shadow:0 10px 18px -10px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.6) inset;
+  }
+  .pile-icon.relancer{background:linear-gradient(150deg,#ff7aa0 0%,#e23b6d 100%)}
+  .pile-icon.feliciter{background:linear-gradient(150deg,#fbd778 0%,#e8930c 100%)}
+  .pile-icon.recharger{background:linear-gradient(150deg,#4fd4ff 0%,#3f7bf0 100%)}
+  .pile-titles{flex:1;min-width:0}
+  .pile-titles .t{font-family:'Fredoka';font-weight:600;font-size:17px;letter-spacing:-.3px;color:var(--indigo-ink)}
+  .pile-titles .d{font-size:12px;color:var(--muted);font-weight:500;margin-top:1px}
+  .counter{
+    flex:none;min-width:30px;height:28px;padding:0 9px;
+    border-radius:10px;
+    display:grid;place-items:center;
+    font-family:'Fredoka';font-weight:600;font-size:15px;
+    color:#fff;
+  }
+  .counter.relancer{background:linear-gradient(150deg,#f0588a,#d12f5f);box-shadow:0 8px 14px -8px rgba(209,47,95,.7)}
+  .counter.feliciter{background:linear-gradient(150deg,#eaa11c,#cf7f08);box-shadow:0 8px 14px -8px rgba(207,127,8,.7)}
+  .counter.recharger{background:linear-gradient(150deg,#3c8af0,#2f6ad8);box-shadow:0 8px 14px -8px rgba(47,106,216,.7)}
+
+  .rows{padding:2px 10px 12px}
+  .row{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 8px;
+    border-radius:16px;
+    position:relative;
+  }
+  .row + .row{border-top:1px solid #f0f1fb}
+  .row:active{background:var(--indigo-softer)}
+  .pic{
+    width:40px;height:40px;flex:none;border-radius:13px;
+    display:grid;place-items:center;
+    font-family:'Fredoka';font-weight:600;font-size:15px;color:#fff;
+    box-shadow:0 6px 12px -7px rgba(0,0,0,.4), 0 0 0 2px #fff;
+  }
+  .pic.c1{background:linear-gradient(150deg,#7c83ff,#4f46e5)}
+  .pic.c2{background:linear-gradient(150deg,#36c692,#0f9d6b)}
+  .pic.c3{background:linear-gradient(150deg,#ff9d6e,#f0603a)}
+  .pic.c4{background:linear-gradient(150deg,#5ec3ff,#3f7bf0)}
+  .pic.c5{background:linear-gradient(150deg,#d490ff,#9333ea)}
+  .row-info{flex:1;min-width:0}
+  .row-info .name{font-family:'Inter';font-weight:700;font-size:14.5px;color:var(--ink);letter-spacing:-.1px}
+  .row-info .meta{font-size:12px;color:var(--muted);font-weight:500;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row-info .meta b{color:var(--indigo-deep);font-weight:700}
+  .tag{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:10.5px;font-weight:700;letter-spacing:.2px;
+    padding:2px 7px;border-radius:7px;margin-right:6px;
+    vertical-align:middle;
+  }
+  .tag.warn{color:#b5320f;background:#fce6df}
+  .tag.idle{color:#9a5b00;background:#fbedcf}
+
+  .btn{
+    flex:none;
+    border:none;outline:none;cursor:pointer;
+    height:36px;padding:0 14px;
+    border-radius:12px;
+    font-family:'Inter';font-weight:700;font-size:13px;letter-spacing:.1px;
+    display:inline-flex;align-items:center;gap:6px;
+    color:#fff;
+    transition:transform .14s ease, box-shadow .14s ease;
+  }
+  .btn svg{display:block}
+  .btn:active{transform:translateY(1px)}
+  .btn.relancer{background:linear-gradient(160deg,#f0588a,#d12f5f);box-shadow:0 8px 16px -8px rgba(209,47,95,.65),0 1px 0 rgba(255,255,255,.35) inset}
+  .btn.feliciter{background:linear-gradient(160deg,#eaa11c,#cf7f08);box-shadow:0 8px 16px -8px rgba(207,127,8,.6),0 1px 0 rgba(255,255,255,.4) inset}
+  .btn.recharger{background:linear-gradient(160deg,#3c8af0,#2f6ad8);box-shadow:0 8px 16px -8px rgba(47,106,216,.6),0 1px 0 rgba(255,255,255,.35) inset}
+  .btn.ghost{
+    background:#fff;color:var(--indigo-deep);
+    border:1.5px solid var(--indigo-line);
+    box-shadow:0 6px 14px -10px rgba(67,56,202,.5);
+    padding:0 12px;
+  }
+
+  /* feliciter mini sparkline */
+  .spark{flex:none;width:54px;height:26px;margin-right:2px}
+
+  /* progress bar in recharger */
+  .pbar{margin-top:5px;height:7px;border-radius:5px;background:#eceefb;overflow:hidden;width:120px}
+  .pbar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#3c8af0,#2f6ad8)}
+
+  /* ===== Empty state (collapsed pile demo) ===== */
+  .empty{
+    margin:8px 2px 6px;
+    border-radius:26px;
+    padding:30px 22px 28px;
+    text-align:center;
+    background:
+      radial-gradient(220px 160px at 50% 0%, #ffffff 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(180deg,#f9fbff 0%,#eef2ff 100%);
+    border:1px solid var(--indigo-line);
+    box-shadow:0 18px 36px -28px rgba(49,46,129,.4), 0 1px 0 rgba(255,255,255,.9) inset;
+    position:relative;overflow:hidden;
+  }
+  .empty .glow{
+    position:absolute;left:50%;top:-30px;transform:translateX(-50%);
+    width:200px;height:200px;border-radius:50%;
+    background:radial-gradient(circle, rgba(79,70,229,.16), rgba(79,70,229,0) 65%);
+    filter:blur(2px);
+  }
+  .empty-art{width:118px;height:118px;margin:0 auto 4px;position:relative;z-index:1}
+  .empty-art .float{animation:float 5s ease-in-out infinite}
+  .empty h2{font-family:'Fredoka';font-weight:600;font-size:20px;letter-spacing:-.3px;color:var(--indigo-ink);margin:6px 0 5px;position:relative;z-index:1}
+  .empty p{font-size:13px;color:var(--muted);font-weight:500;line-height:1.45;max-width:250px;margin:0 auto;position:relative;z-index:1}
+  .empty .chip{
+    margin-top:14px;display:inline-flex;align-items:center;gap:7px;
+    font-size:12px;font-weight:700;color:var(--green);
+    background:var(--green-soft);border:1px solid #c8eedd;
+    padding:7px 13px;border-radius:999px;position:relative;z-index:1;
+  }
+
+  /* footer note */
+  .footnote{
+    margin:18px 6px 4px;text-align:center;
+    font-size:11.5px;color:var(--faint);font-weight:500;
+  }
+  .footnote b{color:var(--indigo-deep)}
+
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  @keyframes shimmer{0%{background-position:-120% 0}100%{background-position:220% 0}}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .rise{animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+  .rise.d1{animation-delay:.05s}
+  .rise.d2{animation-delay:.12s}
+  .rise.d3{animation-delay:.19s}
+  .rise.d4{animation-delay:.26s}
+
+  .trophy-shine{
+    background-size:200% 100%;
+    background-image:linear-gradient(110deg,transparent 38%, rgba(255,255,255,.65) 50%, transparent 62%);
+    animation:shimmer 3.4s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important}
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+
+      <!-- decorative road signs -->
+      <div class="signs" aria-hidden="true">
+        <svg class="s1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="#e23b6d" stroke-width="9"/><circle cx="50" cy="50" r="30" fill="#4f46e5"/></svg>
+        <svg class="s2" viewBox="0 0 100 100"><path d="M50 8 L92 84 L8 84 Z" fill="none" stroke="#4f46e5" stroke-width="9" stroke-linejoin="round"/></svg>
+        <svg class="s3" viewBox="0 0 100 100"><rect x="50" y="6" width="62" height="62" rx="10" transform="rotate(45 50 50)" fill="none" stroke="#4338ca" stroke-width="9"/></svg>
+      </div>
+
+      <!-- status bar -->
+      <div class="statusbar">
+        <span>9:41</span>
+        <div class="sb-right">
+          <svg width="18" height="13" viewBox="0 0 18 13" fill="none"><path d="M1 9.2 Q9 1 17 9.2" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round" opacity=".85"/><path d="M4 11 Q9 6.4 14 11" stroke="#1e1b4b" stroke-width="1.6" stroke-linecap="round" opacity=".85"/><circle cx="9" cy="12.2" r="1.1" fill="#1e1b4b"/></svg>
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="none"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1e1b4b" opacity=".4"/><rect x="4.5" y="5" width="3" height="7" rx="1" fill="#1e1b4b" opacity=".6"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="#1e1b4b" opacity=".85"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1e1b4b"/></svg>
+          <span class="batt"><span></span></span>
+        </div>
+      </div>
+
+      <div class="body">
+
+        <!-- top brand line -->
+        <div class="topline">
+          <div class="brand">
+            <span class="brand-badge">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l2-5.5A2 2 0 0 1 8.9 6h6.2a2 2 0 0 1 1.9 1.5L19 13" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="3.5" y="13" width="17" height="5.5" rx="2" stroke="#fff" stroke-width="2"/><circle cx="7.5" cy="18.5" r="1.6" fill="#fff"/><circle cx="16.5" cy="18.5" r="1.6" fill="#fff"/></svg>
+            </span>
+            <span class="brand-name">PermiGo</span>
+          </div>
+          <span class="avatar">TM</span>
+        </div>
+
+        <!-- hero -->
+        <div class="hero rise">
+          <span class="eyebrow"><span class="dot"></span>Lundi · 5 minutes suffisent</span>
+          <h1>Ta <span class="accent">semaine</span></h1>
+          <p class="sub">Trois piles d'actions, une ligne à la fois. Tu déroules, tu cliques, tu fermes.</p>
+        </div>
+
+        <!-- ritual strip -->
+        <div class="ritual rise d1">
+          <div class="ritual-ring">
+            <svg width="52" height="52" viewBox="0 0 52 52">
+              <circle cx="26" cy="26" r="22" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="6"/>
+              <circle cx="26" cy="26" r="22" fill="none" stroke="url(#rg)" stroke-width="6" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="58"/>
+              <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset="1" stop-color="#f6cd5b"/></linearGradient></defs>
+            </svg>
+            <span class="num">3<small>/8</small></span>
+          </div>
+          <div class="ritual-txt">
+            <div class="k">Ton rituel du lundi</div>
+            <div class="p">8 élèves à toucher cette semaine</div>
+          </div>
+          <span class="ritual-cta">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#4338ca" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </div>
+
+        <!-- ===== PILE 1 : RELANCER ===== -->
+        <section class="pile rise d2">
+          <div class="pile-head">
+            <span class="pile-icon relancer">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M21 11a8.1 8.1 0 1 1-2.3-5.6" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><path d="M21 4v4.2h-4.2" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <div class="pile-titles">
+              <div class="t">Relancer</div>
+              <div class="d">Silence radio, on les ramène</div>
+            </div>
+            <span class="counter relancer">3</span>
+          </div>
+          <div class="rows">
+
+            <div class="row">
+              <span class="pic c1">YL</span>
+              <div class="row-info">
+                <div class="name">Yanis Lefèvre</div>
+                <div class="meta"><span class="tag warn">12 j sans leçon</span>Dernière séance le 13 juin</div>
+              </div>
+              <button class="btn relancer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v14H4z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M4.5 6l7.5 6 7.5-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Relancer
+              </button>
+            </div>
+
+            <div class="row">
+              <span class="pic c5">CR</span>
+              <div class="row-info">
+                <div class="name">Chloé Renard</div>
+                <div class="meta"><span class="tag warn">forfait expire le 30/06</span>2 h restantes</div>
+              </div>
+              <button class="btn relancer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v14H4z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M4.5 6l7.5 6 7.5-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Relancer
+              </button>
+            </div>
+
+            <div class="row">
+              <span class="pic c3">IM</span>
+              <div class="row-info">
+                <div class="name">Inès Moreau</div>
+                <div class="meta"><span class="tag idle">RDV annulé</span>À reprogrammer depuis vendredi</div>
+              </div>
+              <button class="btn relancer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v14H4z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M4.5 6l7.5 6 7.5-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Relancer
+              </button>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ===== PILE 2 : FELICITER ===== -->
+        <section class="pile rise d3">
+          <div class="pile-head">
+            <span class="pile-icon feliciter">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 4h10v4a5 5 0 0 1-10 0V4Z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M17 5h2.5a2 2 0 0 1 0 4H17M7 5H4.5a2 2 0 0 0 0 4H7" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M12 13v3M9 20h6M10.5 20l.6-4h1.8l.6 4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <div class="pile-titles">
+              <div class="t">Féliciter</div>
+              <div class="d">Une victoire mérite un mot</div>
+            </div>
+            <span class="counter feliciter">2</span>
+          </div>
+          <div class="rows">
+
+            <div class="row">
+              <span class="pic c2">LM</span>
+              <div class="row-info">
+                <div class="name">Lucas Martin</div>
+                <div class="meta">A validé <b>Manœuvres en sécurité</b> hier</div>
+              </div>
+              <svg class="spark" viewBox="0 0 54 26" fill="none" aria-hidden="true">
+                <polyline points="2,20 12,17 21,18 30,11 40,9 52,3" stroke="#0f9d6b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="52" cy="3" r="2.6" fill="#0f9d6b"/>
+              </svg>
+              <button class="btn feliciter">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 4.8C10.4 1.9 5.5 2.4 4 5.8c-1.4 3.2 1.3 6.4 8 10 6.7-3.6 9.4-6.8 8-10-1.5-3.4-6.4-3.9-8-1Z" fill="#fff"/></svg>
+                Féliciter
+              </button>
+            </div>
+
+            <div class="row">
+              <span class="pic c4">MD</span>
+              <div class="row-info">
+                <div class="name">Marie Dubois</div>
+                <div class="meta"><b>5 leçons d'affilée</b> — belle régularité</div>
+              </div>
+              <svg class="spark" viewBox="0 0 54 26" fill="none" aria-hidden="true">
+                <rect x="2" y="14" width="6" height="9" rx="2" fill="#cbe9da"/>
+                <rect x="12" y="11" width="6" height="12" rx="2" fill="#a7ddc4"/>
+                <rect x="22" y="13" width="6" height="10" rx="2" fill="#cbe9da"/>
+                <rect x="32" y="8" width="6" height="15" rx="2" fill="#62c79b"/>
+                <rect x="42" y="4" width="6" height="19" rx="2" fill="#0f9d6b"/>
+              </svg>
+              <button class="btn feliciter">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 4.8C10.4 1.9 5.5 2.4 4 5.8c-1.4 3.2 1.3 6.4 8 10 6.7-3.6 9.4-6.8 8-10-1.5-3.4-6.4-3.9-8-1Z" fill="#fff"/></svg>
+                Féliciter
+              </button>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ===== PILE 3 : RECHARGER ===== -->
+        <section class="pile rise d4">
+          <div class="pile-head">
+            <span class="pile-icon recharger">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M13 3 5 13h5l-1 8 8-10h-5l1-8Z" fill="#fff"/></svg>
+            </span>
+            <div class="pile-titles">
+              <div class="t">Recharger</div>
+              <div class="d">Forfaits bientôt à sec</div>
+            </div>
+            <span class="counter recharger">2</span>
+          </div>
+          <div class="rows">
+
+            <div class="row">
+              <span class="pic c4">NB</span>
+              <div class="row-info">
+                <div class="name">Nadia Benali</div>
+                <div class="meta"><b>1 h sur 20</b> restante</div>
+                <span class="pbar"><i style="width:5%"></i></span>
+              </div>
+              <button class="btn recharger">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+                Proposer
+              </button>
+            </div>
+
+            <div class="row">
+              <span class="pic c1">TG</span>
+              <div class="row-info">
+                <div class="name">Théo Garnier</div>
+                <div class="meta"><b>3 h sur 30</b> restantes</div>
+                <span class="pbar"><i style="width:10%"></i></span>
+              </div>
+              <button class="btn recharger">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+                Proposer
+              </button>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ===== EMPTY STATE (Inbox zero) ===== -->
+        <div class="empty rise d4">
+          <span class="glow"></span>
+          <div class="empty-art">
+            <svg class="float" width="118" height="118" viewBox="0 0 118 118" fill="none">
+              <!-- soft halo -->
+              <circle cx="59" cy="60" r="46" fill="#eef0ff"/>
+              <!-- trophy gold 3D discreet -->
+              <path d="M40 36h38v8a19 19 0 0 1-38 0v-8Z" fill="url(#tg1)"/>
+              <path d="M78 38h6a6 6 0 0 1 0 12h-7M40 38h-6a6 6 0 0 0 0 12h7" stroke="#c98f1e" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <rect x="53" y="60" width="12" height="9" rx="2" fill="#d6a52f"/>
+              <path d="M47 73h24l-2.5 8H49.5L47 73Z" fill="url(#tg2)"/>
+              <rect x="44" y="80" width="30" height="6" rx="3" fill="#c98f1e"/>
+              <path d="M50 42l5 5 9-10" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- sparkle -->
+              <path d="M88 30l1.6 4.4L94 36l-4.4 1.6L88 42l-1.6-4.4L82 36l4.4-1.6L88 30Z" fill="#f6cd5b"/>
+              <circle cx="30" cy="46" r="2.4" fill="#a5a9ff"/>
+              <circle cx="92" cy="62" r="2" fill="#c7b0ff"/>
+              <defs>
+                <linearGradient id="tg1" x1="40" y1="36" x2="78" y2="63" gradientUnits="userSpaceOnUse"><stop stop-color="#fff3c4"/><stop offset=".5" stop-color="#f6cd5b"/><stop offset="1" stop-color="#d6a52f"/></linearGradient>
+                <linearGradient id="tg2" x1="47" y1="73" x2="71" y2="81" gradientUnits="userSpaceOnUse"><stop stop-color="#f6cd5b"/><stop offset="1" stop-color="#c98f1e"/></linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <h2>Inbox zéro — tout est à jour</h2>
+          <p>Personne ne traîne, personne n'attend. Reviens lundi prochain pour ton rituel de 5 minutes.</p>
+          <span class="chip">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4 10-11" stroke="#0f9d6b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Semaine bouclée
+          </span>
+        </div>
+
+        <p class="footnote">Aperçu de l'état vide ci-dessus — il s'affiche seul quand <b>les 3 piles sont vides</b>.</p>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

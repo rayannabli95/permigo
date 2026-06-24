@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Moniteur — Mes élèves</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --indigo: #4f46e5;
+    --indigo-deep: #4338ca;
+    --indigo-dark: #312e81;
+    --indigo-50: #eef0ff;
+    --indigo-100: #e0e3ff;
+    --indigo-200: #c7ccff;
+    --ink: #1a1c2e;
+    --ink-2: #4a4d68;
+    --ink-3: #8085a3;
+    --green: #16a34a;
+    --green-soft: #dcfce7;
+    --green-ink: #15803d;
+    --amber: #d97706;
+    --amber-soft: #fef3c7;
+    --amber-ink: #b45309;
+    --red: #e11d48;
+    --red-soft: #ffe4e6;
+    --red-ink: #be123c;
+    --gold-1: #fde68a;
+    --gold-2: #f6c453;
+    --gold-3: #d99a2b;
+    --paper: #f5f6ff;
+    --card: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background:
+      radial-gradient(1100px 700px at 18% -8%, #e9ebff 0%, rgba(233,235,255,0) 55%),
+      radial-gradient(900px 600px at 95% 8%, #eef0ff 0%, rgba(238,240,255,0) 50%),
+      linear-gradient(180deg, #f0f1fb 0%, #e7e9f8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    color: var(--ink);
+  }
+
+  /* ---------- Phone shell ---------- */
+  .phone {
+    position: relative;
+    width: 390px;
+    height: 844px;
+    background: var(--paper);
+    border-radius: 46px;
+    box-shadow:
+      0 2px 4px rgba(49, 46, 129, 0.10),
+      0 18px 40px rgba(49, 46, 129, 0.22),
+      0 50px 90px rgba(49, 46, 129, 0.28),
+      inset 0 0 0 1.5px rgba(255,255,255,0.6);
+    padding: 12px;
+    overflow: hidden;
+  }
+  .phone::after {
+    /* outer rim highlight */
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 46px;
+    box-shadow: inset 0 0 0 8px #0e1030;
+    pointer-events: none;
+  }
+
+  .screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: var(--paper);
+    border-radius: 36px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* decorative road signs in background, very faint */
+  .signs { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .signs svg { position: absolute; opacity: 0.05; }
+  .sign-a { top: 120px; right: -30px; }
+  .sign-b { top: 430px; left: -34px; }
+  .sign-c { bottom: 90px; right: 18px; }
+
+  /* ---------- Status bar ---------- */
+  .statusbar {
+    position: relative;
+    z-index: 5;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 26px 0 30px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--ink);
+    flex: none;
+  }
+  .statusbar .time { letter-spacing: 0.2px; }
+  .statusbar .right { display: flex; align-items: center; gap: 7px; }
+  .battery {
+    width: 25px; height: 12px; border-radius: 3px;
+    border: 1.5px solid rgba(26,28,46,0.55);
+    position: relative; padding: 1.5px;
+  }
+  .battery::after {
+    content:""; position:absolute; right:-3.5px; top:3px; width:2px; height:5px;
+    background: rgba(26,28,46,0.45); border-radius: 0 1px 1px 0;
+  }
+  .battery i { display:block; height:100%; width:78%; border-radius:1.5px;
+    background: linear-gradient(90deg, var(--indigo), #6366f1); }
+
+  /* ---------- Scroll area ---------- */
+  .scroller {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 96px;
+  }
+  .scroller::-webkit-scrollbar { width: 0; }
+
+  /* ---------- Header ---------- */
+  .head {
+    padding: 6px 22px 4px;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--indigo-deep);
+    background: linear-gradient(180deg, #fff, var(--indigo-50));
+    border: 1px solid var(--indigo-100);
+    padding: 5px 11px; border-radius: 999px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 2px 6px rgba(79,70,229,0.08);
+  }
+  .eyebrow svg { display:block; }
+  .h1 {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 1.05;
+    letter-spacing: -0.8px;
+    margin-top: 12px;
+    color: var(--ink);
+  }
+  .sub {
+    margin-top: 5px;
+    font-size: 13.5px;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .sub b { color: var(--ink-2); font-weight: 700; }
+
+  /* ---------- Search ---------- */
+  .search {
+    margin: 16px 22px 0;
+    position: relative;
+  }
+  .search input {
+    width: 100%;
+    height: 50px;
+    border-radius: 16px;
+    border: 1px solid #e3e5f5;
+    background: #ffffff;
+    padding: 0 16px 0 46px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 4px 14px rgba(49,46,129,0.07);
+    outline: none;
+  }
+  .search input::placeholder { color: #a6aac6; font-weight: 500; }
+  .search .ico {
+    position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-3); display:flex;
+  }
+  .search .kbd {
+    position:absolute; right: 12px; top:50%; transform: translateY(-50%);
+    font-size: 11px; font-weight: 700; color: var(--ink-3);
+    background: var(--indigo-50); border:1px solid var(--indigo-100);
+    border-radius: 7px; padding: 4px 8px; letter-spacing: 0.3px;
+  }
+
+  /* ---------- Segmented sort ---------- */
+  .seg-wrap { margin: 12px 22px 0; }
+  .seg-label {
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase; color: var(--ink-3);
+    margin: 0 2px 7px; display:flex; align-items:center; gap:6px;
+  }
+  .seg {
+    display: flex;
+    gap: 4px;
+    background: #eaecfb;
+    border: 1px solid #dfe2f6;
+    border-radius: 14px;
+    padding: 4px;
+    box-shadow: inset 0 2px 5px rgba(49,46,129,0.08);
+  }
+  .seg button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-2);
+    height: 38px;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    letter-spacing: -0.1px;
+  }
+  .seg button.on {
+    color: #fff;
+    background: linear-gradient(180deg, #5b53ea 0%, var(--indigo-deep) 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.35) inset,
+      0 6px 14px rgba(67,56,202,0.38),
+      0 2px 4px rgba(67,56,202,0.30);
+  }
+
+  /* ---------- Section title ---------- */
+  .sec-title {
+    display:flex; align-items:center; justify-content: space-between;
+    margin: 22px 24px 10px;
+  }
+  .sec-title h2 {
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size:15px;
+    letter-spacing:-0.2px; color: var(--ink-2);
+    display:flex; align-items:center; gap:8px;
+  }
+  .sec-title .count {
+    font-size: 12px; font-weight: 700; color: var(--ink-3);
+    background:#fff; border:1px solid #e6e8f6; border-radius: 999px;
+    padding: 3px 10px;
+  }
+
+  /* ---------- Priority (hero) card ---------- */
+  .hero {
+    position: relative;
+    margin: 0 18px 18px;
+    border-radius: 24px;
+    padding: 1.5px; /* gradient border */
+    background: linear-gradient(135deg, #6e66f0, #4338ca 45%, #312e81);
+    box-shadow:
+      0 2px 4px rgba(67,56,202,0.18),
+      0 14px 30px rgba(67,56,202,0.34),
+      0 30px 50px rgba(49,46,129,0.22);
+    animation: rise 0.5s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .hero-inner {
+    position: relative;
+    border-radius: 22.5px;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 120% at 90% -10%, rgba(255,255,255,0.16), rgba(255,255,255,0) 45%),
+      linear-gradient(165deg, #5852ea 0%, #4338ca 55%, #312e81 100%);
+    padding: 18px 18px 16px;
+    color: #fff;
+  }
+  .hero-inner::before {
+    /* faint sign + grain */
+    content:""; position:absolute; inset:0;
+    background-image:
+      radial-gradient(circle at 88% 18%, rgba(255,255,255,0.10) 0, transparent 30%);
+    opacity:0.8; pointer-events:none;
+  }
+  .hero-tag {
+    display:inline-flex; align-items:center; gap:6px;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.7px; text-transform: uppercase;
+    background: linear-gradient(180deg, var(--gold-1), var(--gold-2));
+    color: #5c3d04;
+    padding: 5px 10px; border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(217,154,43,0.4), 0 1px 0 rgba(255,255,255,0.6) inset;
+  }
+  .hero-tag svg { display:block; }
+  .hero-top { display:flex; align-items:center; justify-content:space-between; }
+  .hero-when { font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,0.78); display:flex; align-items:center; gap:5px;}
+
+  .hero-row { display:flex; align-items:center; gap:13px; margin-top:14px; }
+  .hero-av {
+    width: 58px; height: 58px; border-radius: 18px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size:23px;
+    color:#fff; position:relative;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.28), 0 0 0 2px rgba(255,255,255,0.18) inset;
+  }
+  .hero-av .ring {
+    position:absolute; inset:-5px; border-radius:22px;
+    background: conic-gradient(from -90deg, var(--gold-2), var(--gold-1), var(--gold-3), var(--gold-2));
+    z-index:-1; filter: blur(0.3px);
+  }
+  .hero-name { font-family:'Fredoka', sans-serif; font-weight:600; font-size:20px; letter-spacing:-0.4px; line-height:1.1; }
+  .hero-meta { font-size:12.5px; color: rgba(255,255,255,0.74); margin-top:3px; font-weight:500; }
+
+  .hero-stat { margin-left:auto; text-align:right; }
+  .hero-stat .big { font-family:'Fredoka',sans-serif; font-weight:600; font-size:26px; line-height:1; letter-spacing:-0.5px; }
+  .hero-stat .lbl { font-size:10.5px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color: rgba(255,255,255,0.6); margin-top:3px;}
+
+  .hero-bar-wrap { margin-top:15px; }
+  .hero-bar-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; }
+  .hero-bar-head .l { font-size:11.5px; font-weight:600; color:rgba(255,255,255,0.8); }
+  .hero-bar-head .r { font-size:11.5px; font-weight:700; color:#fff; }
+  .hero-bar {
+    height: 12px; border-radius: 999px;
+    background: rgba(0,0,0,0.28);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+    overflow:hidden; position:relative;
+  }
+  .hero-bar i {
+    display:block; height:100%; width:88%; border-radius:999px;
+    background: linear-gradient(90deg, #fde68a, #f6c453 60%, #34d399);
+    box-shadow: 0 0 12px rgba(246,196,83,0.7);
+    position:relative;
+  }
+  .hero-bar i::after {
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 2.6s ease-in-out infinite;
+  }
+
+  .hero-cta {
+    margin-top:15px; display:flex; gap:9px;
+  }
+  .hero-cta button {
+    flex:1; height:44px; border:none; border-radius:13px;
+    font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:7px;
+  }
+  .btn-gold {
+    background: linear-gradient(180deg, #fde68a, var(--gold-2) 70%, var(--gold-3));
+    color:#4a2f02;
+    box-shadow: 0 5px 14px rgba(217,154,43,0.45), 0 1px 0 rgba(255,255,255,0.65) inset;
+  }
+  .btn-ghost {
+    flex:0 0 44px; background: rgba(255,255,255,0.12);
+    color:#fff; border:1px solid rgba(255,255,255,0.22) !important;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.12) inset;
+  }
+  .hero-cta button svg { display:block; }
+
+  /* ---------- Student list ---------- */
+  .list { padding: 0 18px; display:flex; flex-direction:column; gap:11px; }
+
+  .row {
+    position: relative;
+    display:flex; align-items:center; gap:13px;
+    background: var(--card);
+    border: 1px solid #ecedf8;
+    border-radius: 19px;
+    padding: 13px 15px 13px 13px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 2px 5px rgba(49,46,129,0.05),
+      0 10px 22px rgba(49,46,129,0.07);
+    animation: rise 0.5s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .row:nth-child(1){animation-delay:.04s}
+  .row:nth-child(2){animation-delay:.09s}
+  .row:nth-child(3){animation-delay:.14s}
+  .row:nth-child(4){animation-delay:.19s}
+  .row:nth-child(5){animation-delay:.24s}
+
+  .av {
+    width: 50px; height: 50px; border-radius: 15px; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fredoka',sans-serif; font-weight:600; font-size:19px; color:#fff;
+    box-shadow: 0 4px 10px rgba(49,46,129,0.18), 0 0 0 1.5px rgba(255,255,255,0.4) inset;
+  }
+  .av-a { background: linear-gradient(150deg, #6366f1, #4338ca); }
+  .av-b { background: linear-gradient(150deg, #f472b6, #db2777); }
+  .av-c { background: linear-gradient(150deg, #22d3ee, #0891b2); }
+  .av-d { background: linear-gradient(150deg, #fb923c, #ea580c); }
+  .av-e { background: linear-gradient(150deg, #34d399, #059669); }
+
+  .row-main { flex:1; min-width:0; }
+  .row-top { display:flex; align-items:center; gap:8px; }
+  .name { font-family:'Fredoka',sans-serif; font-weight:600; font-size:16px; letter-spacing:-0.3px; color:var(--ink); }
+
+  /* graded state pill */
+  .pill {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:10.5px; font-weight:800; letter-spacing:0.2px;
+    padding: 3px 9px 3px 7px; border-radius: 999px;
+    white-space:nowrap;
+  }
+  .pill .dot { width:7px; height:7px; border-radius:50%; flex:none; }
+  .pill-green { color: var(--green-ink); background: var(--green-soft); border:1px solid #bbf7d0; }
+  .pill-green .dot { background: var(--green); box-shadow:0 0 0 3px rgba(22,163,74,0.18); }
+  .pill-amber { color: var(--amber-ink); background: var(--amber-soft); border:1px solid #fde68a; }
+  .pill-amber .dot { background: var(--amber); box-shadow:0 0 0 3px rgba(217,119,6,0.16); }
+  .pill-red { color: var(--red-ink); background: var(--red-soft); border:1px solid #fecdd3; }
+  .pill-red .dot { background: var(--red); box-shadow:0 0 0 3px rgba(225,29,72,0.15); }
+  .pill-blue { color: var(--indigo-deep); background: var(--indigo-50); border:1px solid var(--indigo-100); }
+  .pill-blue .dot { background: var(--indigo); box-shadow:0 0 0 3px rgba(79,70,229,0.14); }
+
+  .row-sub { font-size:11.5px; color:var(--ink-3); font-weight:500; margin-top:3px; }
+  .row-sub b { color: var(--ink-2); font-weight:700; }
+
+  .mini-wrap { display:flex; align-items:center; gap:9px; margin-top:9px; }
+  .mini {
+    flex:1; height:8px; border-radius:999px;
+    background:#edeef8; box-shadow: inset 0 1px 2px rgba(49,46,129,0.10);
+    overflow:hidden;
+  }
+  .mini i { display:block; height:100%; border-radius:999px; position:relative; }
+  .fill-green { background: linear-gradient(90deg, #34d399, var(--green)); box-shadow:0 0 8px rgba(22,163,74,0.35);}
+  .fill-amber { background: linear-gradient(90deg, #fbbf24, var(--amber)); box-shadow:0 0 8px rgba(217,119,6,0.30);}
+  .fill-red { background: linear-gradient(90deg, #fb7185, var(--red)); box-shadow:0 0 8px rgba(225,29,72,0.25);}
+  .fill-blue { background: linear-gradient(90deg, #818cf8, var(--indigo)); box-shadow:0 0 8px rgba(79,70,229,0.30);}
+  .pct { font-size:12px; font-weight:800; color:var(--ink-2); flex:none; width:34px; text-align:right; letter-spacing:-0.3px; }
+
+  .chev { flex:none; color:#c2c5dd; align-self:center; }
+
+  /* trend mini sparkline */
+  .trend { display:flex; align-items:flex-end; gap:2px; height:18px; margin-top:1px; }
+  .trend span { width:3px; border-radius:2px; background: var(--indigo-200); }
+
+  /* ---------- bottom nav ---------- */
+  .nav {
+    position: absolute; left:12px; right:12px; bottom:12px;
+    height: 72px;
+    border-radius: 26px;
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.7);
+    box-shadow:
+      0 2px 6px rgba(49,46,129,0.10),
+      0 14px 34px rgba(49,46,129,0.20);
+    display:flex; align-items:center; justify-content:space-around;
+    padding: 0 10px;
+    z-index: 8;
+  }
+  .nav a { display:flex; flex-direction:column; align-items:center; gap:4px; text-decoration:none;
+    font-size:10.5px; font-weight:700; color:#9a9ec0; letter-spacing:-0.1px; }
+  .nav a svg { display:block; }
+  .nav a.act { color: var(--indigo-deep); }
+  .nav a.act .pic {
+    background: linear-gradient(180deg,#5b53ea,var(--indigo-deep));
+    color:#fff; box-shadow: 0 6px 14px rgba(67,56,202,0.4), 0 1px 0 rgba(255,255,255,0.3) inset;
+  }
+  .nav .pic { width:42px; height:34px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#9a9ec0; transition:.2s;}
+
+  /* ---------- animations ---------- */
+  @keyframes shimmer { 0%{transform:translateX(-100%)} 55%,100%{transform:translateX(220%)} }
+  @keyframes rise { from{opacity:0; transform: translateY(10px)} to{opacity:1; transform:none} }
+  @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+  .floaty { animation: floaty 4s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+
+      <!-- faint decorative road signs -->
+      <div class="signs" aria-hidden="true">
+        <!-- disque liseré rouge -->
+        <svg class="sign-a" width="150" height="150" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="46" fill="#fff" stroke="#e11d48" stroke-width="9"/>
+        </svg>
+        <!-- triangle -->
+        <svg class="sign-b" width="160" height="150" viewBox="0 0 100 90">
+          <path d="M50 6 L94 82 L6 82 Z" fill="#fff" stroke="#e11d48" stroke-width="8" stroke-linejoin="round"/>
+        </svg>
+        <!-- losange -->
+        <svg class="sign-c" width="120" height="120" viewBox="0 0 100 100">
+          <rect x="22" y="22" width="56" height="56" rx="6" transform="rotate(45 50 50)" fill="#f6c453" stroke="#fff" stroke-width="6"/>
+        </svg>
+      </div>
+
+      <!-- status bar -->
+      <div class="statusbar">
+        <span class="time">9:41</span>
+        <span class="right">
+          <svg width="18" height="13" viewBox="0 0 18 13" fill="none"><path d="M9 12.5C5.7 9 1 6 1 6c4-4 12-4 16 0 0 0-4.7 3-8 6.5Z" stroke="#1a1c2e" stroke-width="1.5" stroke-linejoin="round"/><circle cx="9" cy="8" r="1.6" fill="#1a1c2e"/></svg>
+          <svg width="18" height="13" viewBox="0 0 18 13"><rect x="1" y="8" width="3" height="4" rx="1" fill="#1a1c2e"/><rect x="5.5" y="5.5" width="3" height="6.5" rx="1" fill="#1a1c2e"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#1a1c2e"/><rect x="14.5" y="0.5" width="3" height="11.5" rx="1" fill="#1a1c2e" opacity="0.35"/></svg>
+          <span class="battery"><i></i></span>
+        </span>
+      </div>
+
+      <div class="scroller">
+
+        <!-- header -->
+        <div class="head">
+          <span class="eyebrow">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="#4338ca" stroke-width="2" stroke-linecap="round"/><circle cx="9.5" cy="7" r="3.5" stroke="#4338ca" stroke-width="2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87" stroke="#4338ca" stroke-width="2" stroke-linecap="round"/></svg>
+            Mon volant d'élèves
+          </span>
+          <h1 class="h1">Mes élèves</h1>
+          <p class="sub"><b>14 élèves</b> suivis · <b>3</b> prêts à passer · 1 à relancer cette semaine</p>
+        </div>
+
+        <!-- search -->
+        <div class="search">
+          <span class="ico">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.2-3.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </span>
+          <input type="text" placeholder="Rechercher un élève…" />
+          <span class="kbd">14</span>
+        </div>
+
+        <!-- sort segmented control -->
+        <div class="seg-wrap">
+          <div class="seg-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M7 4v16M7 4l-3 3m3-3 3 3M17 20V4m0 16 3-3m-3 3-3-3" stroke="#8085a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Trier par
+          </div>
+          <div class="seg" id="seg">
+            <button data-i="0">Nom</button>
+            <button class="on" data-i="1">Progrès récent</button>
+            <button data-i="2">% compétences</button>
+          </div>
+        </div>
+
+        <!-- priority section -->
+        <div class="sec-title">
+          <h2>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="m12 2 2.6 5.3 5.9.9-4.2 4.1 1 5.8L12 21l-5.3 2.1 1-5.8L3.5 8.2l5.9-.9L12 2Z" fill="#f6c453" stroke="#d99a2b" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            À traiter en priorité
+          </h2>
+        </div>
+
+        <!-- HERO priority card -->
+        <div class="hero">
+          <div class="hero-inner">
+            <div class="hero-top">
+              <span class="hero-tag">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" fill="#5c3d04"/></svg>
+                Prêt — à présenter
+              </span>
+              <span class="hero-when">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,.7)" stroke-width="2"/><path d="M12 7v5l3 2" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Leçon hier
+              </span>
+            </div>
+
+            <div class="hero-row">
+              <div class="hero-av floaty">
+                <span class="ring"></span>
+                IL
+              </div>
+              <div>
+                <div class="hero-name">Inès Lemaire</div>
+                <div class="hero-meta">22 conduites · 3 fautes au dernier blanc</div>
+              </div>
+              <div class="hero-stat">
+                <div class="big">96<span style="font-size:15px;opacity:.7">%</span></div>
+                <div class="lbl">Compétences</div>
+              </div>
+            </div>
+
+            <div class="hero-bar-wrap">
+              <div class="hero-bar-head">
+                <span class="l">Maîtrise globale</span>
+                <span class="r">21 / 22 compétences validées</span>
+              </div>
+              <div class="hero-bar"><i></i></div>
+            </div>
+
+            <div class="hero-cta">
+              <button class="btn-gold">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="#4a2f02" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Proposer une date d'examen
+              </button>
+              <button class="btn-ghost">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v12H7l-3 3V4Z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- full list section -->
+        <div class="sec-title">
+          <h2>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="#4a4d68" stroke-width="2" stroke-linecap="round"/></svg>
+            Tous mes élèves
+          </h2>
+          <span class="count">13 autres</span>
+        </div>
+
+        <div class="list">
+
+          <!-- row 1 — green / prêt -->
+          <div class="row">
+            <div class="av av-e">YC</div>
+            <div class="row-main">
+              <div class="row-top">
+                <span class="name">Yanis Cherif</span>
+                <span class="pill pill-green"><span class="dot"></span>Prêt</span>
+              </div>
+              <div class="row-sub"><b>18 conduites</b> · dernier examen blanc réussi</div>
+              <div class="mini-wrap">
+                <div class="mini"><i class="fill-green" style="width:91%"></i></div>
+                <span class="pct">91%</span>
+              </div>
+            </div>
+            <span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+
+          <!-- row 2 — blue / en progrès (positive) -->
+          <div class="row">
+            <div class="av av-a">LM</div>
+            <div class="row-main">
+              <div class="row-top">
+                <span class="name">Lucas Morel</span>
+                <span class="pill pill-blue"><span class="dot"></span>En progrès</span>
+              </div>
+              <div class="row-sub"><b>+2 compétences</b> validées cette semaine</div>
+              <div class="mini-wrap">
+                <div class="mini"><i class="fill-blue" style="width:68%"></i></div>
+                <span class="pct">68%</span>
+              </div>
+            </div>
+            <span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+
+          <!-- row 3 — amber / refroidit -->
+          <div class="row">
+            <div class="av av-b">CD</div>
+            <div class="row-main">
+              <div class="row-top">
+                <span class="name">Chloé Dubois</span>
+                <span class="pill pill-amber"><span class="dot"></span>À relancer</span>
+              </div>
+              <div class="row-sub">Pas de leçon depuis <b>12 jours</b> · risque de décrochage</div>
+              <div class="mini-wrap">
+                <div class="mini"><i class="fill-amber" style="width:54%"></i></div>
+                <span class="pct">54%</span>
+              </div>
+            </div>
+            <span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+
+          <!-- row 4 — red / recalé au blanc -->
+          <div class="row">
+            <div class="av av-d">MB</div>
+            <div class="row-main">
+              <div class="row-top">
+                <span class="name">Marie Bonnet</span>
+                <span class="pill pill-red"><span class="dot"></span>Recalée au blanc</span>
+              </div>
+              <div class="row-sub"><b>2 fautes éliminatoires</b> · priorité créneaux & giratoires</div>
+              <div class="mini-wrap">
+                <div class="mini"><i class="fill-red" style="width:62%"></i></div>
+                <span class="pct">62%</span>
+              </div>
+            </div>
+            <span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+
+          <!-- row 5 — green / prêt -->
+          <div class="row">
+            <div class="av av-c">SR</div>
+            <div class="row-main">
+              <div class="row-top">
+                <span class="name">Sofiane Roux</span>
+                <span class="pill pill-green"><span class="dot"></span>Prêt</span>
+              </div>
+              <div class="row-sub"><b>24 conduites</b> · attend une date d'examen</div>
+              <div class="mini-wrap">
+                <div class="mini"><i class="fill-green" style="width:88%"></i></div>
+                <span class="pct">88%</span>
+              </div>
+            </div>
+            <span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- bottom nav -->
+      <nav class="nav">
+        <a href="#"><span class="pic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M3 11 12 4l9 7v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Aujourd'hui</a>
+        <a href="#"><span class="pic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Planning</a>
+        <a href="#" class="act"><span class="pic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.4" stroke="currentColor" stroke-width="2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 6.2a3.2 3.2 0 0 1 0 6M20.5 19a5 5 0 0 0-3.5-4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Mes élèves</a>
+        <a href="#"><span class="pic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M5 5h14v14l-7-3-7 3V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Avis</a>
+        <a href="#"><span class="pic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Profil</a>
+      </nav>
+
+    </div>
+  </div>
+
+  <script>
+    // micro-interaction: tri segmenté
+    const seg = document.getElementById('seg');
+    seg.addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      seg.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+    });
+  </script>
+</body>
+</html>
