@@ -194,9 +194,11 @@ const STYLE = `<style>
   display: grid; place-items: center;
   box-shadow: 0 6px 16px -10px rgba(60, 50, 130, .28);
   position: relative; overflow: visible;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
   transition: transform .14s cubic-bezier(.23,1,.32,1);
 }
 .ppr-tcell:active { transform: scale(.93); }
+.ppr-tcell:focus-visible { outline: 3px solid #4f46e5; outline-offset: 2px; }
 .ppr-tcell img {
   width: 46px; height: 46px; object-fit: contain; display: block;
   filter: drop-shadow(0 3px 5px rgba(40, 20, 90, .22));
@@ -479,6 +481,21 @@ function _render(root, d, state, ligueRows) {
     haptic("tap");
     navigate("#/trophees-moniteur");
   });
+
+  // Chaque trophée du rail ouvre son détail (deep-link). Avant : clic dans le vide.
+  root.querySelectorAll(".ppr-tcell[data-key]").forEach((cell) => {
+    const open = () => {
+      haptic("tap");
+      navigate(`#/trophees-moniteur/${cell.dataset.key}`);
+    };
+    cell.addEventListener("click", open);
+    cell.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
+    });
+  });
   const ligueCard = root.querySelector("#ppr-ligue-card");
   ligueCard?.addEventListener("click", () => {
     haptic("tap");
@@ -529,7 +546,7 @@ function _trophRow(troResults, lastUnlockedIdx) {
       const lockCls = t.unlocked ? "" : " lock";
       const newCls = isNew ? " new-badge" : "";
       const label = TROPHEE_NAMES[t.id] || t.id;
-      return `<div class="ppr-tcell${lockCls}${newCls}" role="listitem" aria-label="${esc(label)}${t.unlocked ? " — débloqué" : " — verrouillé"}">
+      return `<div class="ppr-tcell${lockCls}${newCls}" role="button" tabindex="0" data-key="${esc(t.id)}" aria-label="${esc(label)}${t.unlocked ? " — débloqué" : " — verrouillé"} — voir le détail">
         <img src="${badgeSrc(t.id)}" alt="" width="46" height="46" loading="lazy">
       </div>`;
     })

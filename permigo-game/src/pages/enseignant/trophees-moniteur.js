@@ -468,15 +468,22 @@ const STYLE = `<style>
 @media (prefers-reduced-motion: reduce) {
   .tr2-sheet-bg, .tr2-sheet, .tr2-sheet-ico { transition: none !important; animation: none !important; }
 }
+/* Détail ouvert → masque la barre de nav du bas : la feuille vit dans #app
+   (sous le contexte d'empilement de la transition de route) et ne peut donc pas
+   passer au-dessus de la nav (body, z-300), qui rognait ses boutons. */
+body.tr2m-sheet-open #bottom-nav { display: none !important; }
 </style>`;
 
 // ─── État module (sheet) ─────────────────────────────────────────
 let _results = [];
 let _onKeydown = null;
+let _onNav = null;
 let _lastFocus = null;
 
 // ─── Mount ────────────────────────────────────────────────────────
-export async function mount(root) {
+// openKey : deep-link #/trophees-moniteur/{id} → ouvre directement le détail
+// (depuis le rail « Tes trophées » de la page Progression).
+export async function mount(root, openKey = null) {
   const me = getCurUser();
   if (!me || me.role !== "enseignant") {
     root.innerHTML = `<p style="padding:32px;text-align:center;color:var(--mu)">Accès enseignant requis</p>`;
@@ -537,7 +544,7 @@ export async function mount(root) {
       ).size,
       prenom: profileRes.data?.prenom ?? "",
     };
-    _render(root, d);
+    _render(root, d, openKey);
   } catch (e) {
     console.error("[trophees-moniteur]", e);
     toast("Erreur de chargement", "error");
@@ -549,7 +556,7 @@ export function unmount() {
 }
 
 // ─── Render ──────────────────────────────────────────────────────
-function _render(root, d) {
+function _render(root, d, openKey = null) {
   _results = TROPHEES.map((t) => {
     const prog = t.progress(d);
     const unlocked = t.check(d);
@@ -639,6 +646,12 @@ function _render(root, d) {
     const fill = root.querySelector("#tr2-fill");
     if (fill) fill.style.width = `${pct}%`;
   });
+
+  // Deep-link : ouvre directement le détail du trophée ciblé (rail Progression).
+  if (openKey) {
+    const idx = _results.findIndex((t) => t.id === openKey);
+    if (idx >= 0) _openSheet(root, idx);
+  }
 }
 
 // ─── Header ──────────────────────────────────────────────────────
@@ -739,6 +752,14 @@ function _openSheet(root, i) {
 
   _lastFocus = document.activeElement;
   bg.classList.add("open");
+  // La feuille vit dans #app (contexte d'empilement créé par la transition de
+  // route) → le z-index ne passe PAS au-dessus de la nav (body, z-300) : ses
+  // boutons du bas étaient masqués par la barre. On masque la nav le temps du
+  // détail. Fermeture aussi à la navigation (sinon nav masquée sur la page
+  // suivante car la feuille est retirée du DOM sans _closeSheet).
+  document.body.classList.add("tr2m-sheet-open");
+  _onNav = () => _closeSheet();
+  window.addEventListener("hashchange", _onNav);
 
   sheet.querySelector("#tr2-close")?.addEventListener("click", _closeSheet);
   sheet.querySelector("#tr2-goto")?.addEventListener("click", () => {
@@ -764,6 +785,11 @@ function _closeSheet() {
     document.removeEventListener("keydown", _onKeydown);
     _onKeydown = null;
   }
+  if (_onNav) {
+    window.removeEventListener("hashchange", _onNav);
+    _onNav = null;
+  }
+  document.body.classList.remove("tr2m-sheet-open");
   const bg = document.querySelector("#tr2-sheet-bg.open");
   if (bg) bg.classList.remove("open");
   if (_lastFocus && typeof _lastFocus.focus === "function") {
