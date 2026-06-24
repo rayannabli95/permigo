@@ -970,6 +970,14 @@ export async function mount(root) {
     ?.addEventListener("click", async () => {
       haptic("select");
       track("onboarding.replay_requested", { user_role: me.role });
+      // ⚠️ Le tour guidé est gaté par CE flag localStorage (cf. accueil.js
+      // maybeStartEleveTour). Sans l'effacer, le tour NE repart pas — le reset
+      // DB de first_value_action_at seul ne suffit pas (c'était le bug).
+      try {
+        localStorage.removeItem("pg-tour-eleve-v1");
+      } catch {
+        /* stockage indispo */
+      }
       try {
         await sb
           .from("profiles")
