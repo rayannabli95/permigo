@@ -15,6 +15,7 @@ import { track } from "@/services/analytics.js";
 import { haptic, tapHaptic } from "@/utils/haptic.js";
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { openShareRecap } from "@/components/eleve/share-recap.js";
 import {
   PHASES,
   FAMILLES,
@@ -142,6 +143,23 @@ export async function mount(root) {
   let pi = 0; // phase index
   let ii = 0; // item index dans la phase
   let picked = null; // index choisi (null = pas répondu)
+  const me = getCurUser();
+  let moniteurName = null; // pour la carte partageable (marque du moniteur)
+
+  // Récupère le prénom du moniteur de l'élève (best-effort, non bloquant).
+  (async () => {
+    try {
+      if (!me?.enseignant_id) return;
+      const { data } = await sb
+        .from("profiles")
+        .select("prenom, nom")
+        .eq("id", me.enseignant_id)
+        .maybeSingle();
+      if (data) moniteurName = (data.prenom || data.nom || "").trim() || null;
+    } catch {
+      /* pas grave, on retombe sur « ton moniteur » */
+    }
+  })();
 
   const leave = () => {
     document.body.classList.remove("exc2-immersive");
@@ -382,9 +400,21 @@ export async function mount(root) {
         }
         <p class="exc2-note">Rappel : c'est un entraînement. Le vrai ${TOTAL}, c'est l'inspecteur.</p>
       </div>
-      <button class="exc2-go" data-done>Retour aux révisions</button>
+      <button class="exc2-go" data-share>📲 Partager mon score</button>
+      <button class="exc2-ghost" data-done>Retour aux révisions</button>
     </div>`;
     root.querySelector("[data-done]").addEventListener("click", leave);
+    root.querySelector("[data-share]").addEventListener("click", () => {
+      openShareRecap({
+        kicker: "Examen blanc de conduite",
+        big: `${r.note}/${TOTAL}`,
+        sub: r.passed
+          ? `Au-dessus du seuil de ${SEUIL} 🎯`
+          : `${r.note} points — ça progresse`,
+        eleveName: me?.prenom || null,
+        moniteurName,
+      });
+    });
     countUp(r.note);
   }
 
