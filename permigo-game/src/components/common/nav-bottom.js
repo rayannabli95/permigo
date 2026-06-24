@@ -60,6 +60,11 @@ const TABS = {
     { id: "eleves", label: "Élèves", ico: "users" },
     { id: "profil", label: "Profil", ico: "user" },
   ],
+  // Owner (plateforme) — V1 : vue d'ensemble agrégée + profil.
+  owner: [
+    { id: "default", label: "Plateforme", ico: "chart" },
+    { id: "profil", label: "Profil", ico: "user" },
+  ],
 };
 
 const STYLE = `

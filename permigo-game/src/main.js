@@ -174,6 +174,7 @@ async function boot() {
         () => import("@/pages/enseignant/log-session.js"),
       ],
       gerant: [() => import("@/pages/gerant/pulse.js")],
+      owner: [() => import("@/pages/gerant/owner.js")],
     };
     const prefetch = () =>
       (HOT[me.role] || []).forEach((load) => load().catch(() => {}));
