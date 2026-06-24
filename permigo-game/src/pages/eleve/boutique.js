@@ -287,7 +287,9 @@ const STYLE = `<style>
 .bo2-price-btn:active { transform: scale(.95); opacity: .9; }
 .bo2-price-btn:disabled { opacity: .5; cursor: default; }
 .bo2-price-btn.cant-afford { background: var(--bg2); color: var(--mu2); }
-.bo2-equip-cta { background: var(--a); color: var(--a-ink); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; }
+/* Fond = accent FONCÉ (--adk) + texte blanc : garantit le contraste AA quel que
+   soit l'accent choisi (les accents clairs type cyan échouaient le 4.5:1 avec --a). */
+.bo2-equip-cta { background: var(--adk); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; }
 .bo2-owned-txt { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--gr-txt); padding: 9px 0; min-height: 40px; }
 
 /* ── Intro / tuto ── */

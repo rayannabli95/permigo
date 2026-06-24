@@ -804,12 +804,6 @@ export async function mount(root) {
     };
   }
 
-  // ── Bandeau 3 stats bento (source unique, une seule fois) ─
-  // Pour l'élève : compétences / streak / restantes
-  // Pour l'enseignant : validations / élèves / streak
-  // Pour le gérant : pas de bento (pas de stats disponibles)
-  const bentoTiles = profileCardData ? profileCardData.stats : null;
-
   // ── Render HTML ──────────────────────────────────────────
   root.innerHTML = `${STYLE}
 <div class="prf anim-slide-up">
@@ -827,23 +821,8 @@ export async function mount(root) {
     }
   </div>
 
-  <!-- 2. Bandeau 3 stats (une seule source de vérité — supprime la redondance) -->
-  ${
-    bentoTiles
-      ? `
-  <div class="prf-bento" role="list" aria-label="Mes statistiques">
-    ${bentoTiles
-      .map(
-        (t) => `
-    <div class="prf-bento-tile" role="listitem">
-      <span class="prf-bento-n" data-count-target="${Number(t.value)}" aria-label="${esc(String(t.value))} ${esc(t.label)}">0</span>
-      <div class="prf-bento-lbl" aria-hidden="true">${esc(t.label)}</div>
-    </div>`,
-      )
-      .join("")}
-  </div>`
-      : ""
-  }
+  <!-- 2. Les 3 stats clés sont déjà DANS le héro (ProfileCard) — source unique.
+       On a retiré le bandeau bento qui les répétait à l'identique. -->
 
   <!-- 3. Navigation rapide (galerie élève / boutique enseignant) -->
   ${
@@ -975,9 +954,6 @@ export async function mount(root) {
     if (socialHost) mountProfileCard(socialHost, profileCardData);
   }
 
-  // ── Count-up bento ────────────────────────────────────────
-  _animateBento(root);
-
   // ── Mount carte permis (élève) ────────────────────────────
   if (permisData) {
     const cardHost = root.querySelector("#prf-permis-card");
@@ -1037,52 +1013,6 @@ export async function mount(root) {
     });
 
   _wireNotifToggle(root);
-}
-
-// ─── Count-up bento (transform/opacity seulement) ────────────
-function _animateBento(root) {
-  const tiles = [...root.querySelectorAll("[data-count-target]")];
-  if (!tiles.length) return;
-  if (matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-    tiles.forEach((el) => {
-      el.textContent = el.dataset.countTarget;
-    });
-    return;
-  }
-  const duration = 900;
-  const start = performance.now();
-  const items = tiles.map((el) => ({
-    el,
-    target: parseFloat(el.dataset.countTarget) || 0,
-  }));
-  function frame(now) {
-    const t = Math.min(1, (now - start) / duration);
-    const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
-    items.forEach((it) => {
-      it.el.textContent = String(Math.round(it.target * eased));
-    });
-    if (t < 1) requestAnimationFrame(frame);
-    else
-      items.forEach((it) => {
-        it.el.textContent = String(it.target);
-      });
-  }
-  // Légère entrée opacity sur les tuiles
-  tiles.forEach((el) => {
-    el.closest(".prf-bento-tile")?.animate?.(
-      [
-        { opacity: 0, transform: "translateY(6px)" },
-        { opacity: 1, transform: "translateY(0)" },
-      ],
-      {
-        duration: 280,
-        delay: 80,
-        easing: "cubic-bezier(.2,.7,.3,1)",
-        fill: "both",
-      },
-    );
-  });
-  requestAnimationFrame(frame);
 }
 
 // ─── Bottom-sheet suppression compte ─────────────────────────

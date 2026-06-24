@@ -106,7 +106,7 @@ export async function mount(root) {
         <div class="ob-track" id="ob-track" style="width:${DOT_COUNT * 100}%">
 
           <!-- ─── Écran 0 : Accueil perso ─── -->
-          <section class="ob-slide ob-slide-welcome" data-i="0" aria-labelledby="ob-title-0">
+          <section class="ob-slide ob-slide-welcome" data-i="0" tabindex="0" aria-labelledby="ob-title-0">
             <div class="ob-halo" aria-hidden="true">
               <div class="ob-emoji">${icon("car", { size: 44 })}</div>
             </div>
@@ -236,7 +236,7 @@ export async function mount(root) {
         <h1 class="ob-title" id="ob-a2hs-title">Ajoute l'appli</h1>
         <p class="ob-body-txt">2 gestes, 10 secondes — tes rappels arrivent ici.</p>
         <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
-        <button class="ob-plat-switch" id="ob-plat-switch" type="button"></button>
+        <button class="ob-plat-switch" id="ob-plat-switch" type="button" aria-label="Changer la plateforme des instructions (iPhone / Android)"></button>
       </div>
 
       <div class="ob-footer">
