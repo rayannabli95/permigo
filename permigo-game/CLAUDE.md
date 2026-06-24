@@ -20,6 +20,7 @@ Avant de répondre à un message, regarde si une **skill** colle à la demande e
 | `supabase-permigo` | **DB / RLS / migration / edge function / auth** |
 | `triple-validation` | flow **pédagogique** (validation compétence, quizz, consolidation) |
 | `systematic-debugging` | « ça marche pas », bug, erreur, « pourquoi… » |
+| `lint-and-validate` | valider (build / tests) après un change de code |
 | `emil-design-eng` · `ui-ux-pro-max` | **polish UI**, animations, micro-interactions, design |
 | `concise-planning` | « fais un plan », « découpe ça » |
 | `grill-me` | stress-tester un plan / une décision **avant** de coder |
@@ -73,7 +74,7 @@ Chaque rôle a son univers. **Côté moniteur : liberté totale** (aucune règle
 1. **Pas de planning / réservation** — PermiGo n'est pas Doctolib. L'élève voit son **crédit d'heures** ; il prend RDV en dehors de l'app.
 2. **Pas de données perso élève** — jamais de téléphone, adresse, NEPH, ni **paiement élève**. (L'email d'auth de l'élève est OK ; l'**abonnement moniteur via Stripe est OK** — c'est le produit.)
 3. **Sécurité** :
-   - **XSS** : toute donnée injectée en `innerHTML` passe par `esc()` / `richEsc()` (`src/utils/escape.js`).
+   - **XSS** : toute donnée user injectée en `innerHTML` passe par **`esc()`** (`src/utils/escape.js`). _(`richEsc()` = variante du quizz qui gère le **gras** — elle vit dans `src/components/eleve/quiz-ui.js`, pas dans escape.js.)_
    - **RLS activée sur TOUTES les tables** (schema public, aucune exception).
    - `SUPABASE_SERVICE_ROLE_KEY` **jamais** côté client. Backend only.
    - Env client = préfixe **`VITE_`**.
