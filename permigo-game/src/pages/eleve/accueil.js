@@ -1357,17 +1357,13 @@ function render({
 <div class="acc2${isFirstRun ? " acc2--first-run" : ""}">
   ${installBanner}
 
-  <!-- ══ HUD — série + gemmes + avatar ══ -->
+  <!-- ══ HUD — série ══ (le solde de volants vit dans le header global) -->
   <div class="acc2-hud">
     <button class="acc2-chip streak${isActive ? "" : " inactive"}" id="streak-badge-btn"
             type="button" aria-label="Série ${streak.current_streak} jours, voir le détail">
       <img src="/skins/permigo-streak-flame-v1.webp" alt="" aria-hidden="true">
       <span class="num">${streak.current_streak}</span>
     </button>
-    <span class="acc2-chip gem" aria-label="${esc(String(profile.gemmes ?? 0))} gemmes">
-      <img src="/skins/skill-shard-indigo.png" alt="" aria-hidden="true">
-      <span class="num">${esc(String(profile.gemmes ?? 0))}</span>
-    </span>
   </div>
 
   <!-- ══ HERO FOCAL v2 — question du jour ══ -->
