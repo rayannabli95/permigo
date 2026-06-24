@@ -14,6 +14,7 @@ import { esc } from "@/utils/escape.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { playReward } from "@/utils/sound.js";
 import { getWeakPoints } from "@/utils/weak-points.js";
+import { openShareRecap } from "@/components/eleve/share-recap.js";
 
 const STYLE_ID = "revision-recap-style";
 
@@ -344,7 +345,8 @@ export function showRevisionRecap(summary = {}, opts = {}) {
         ${weakHtml}
         ${leagueChip}
         <button class="rcp-cta" type="button">Continuer</button>
-        ${onSecondary ? `<button class="rcp-second" type="button">Voir le classement</button>` : ""}
+        ${nPassed > 0 ? `<button class="rcp-second" data-share type="button">📲 Partager ma session</button>` : ""}
+        ${onSecondary ? `<button class="rcp-second" data-secondary type="button">Voir le classement</button>` : ""}
       </div>
     `;
 
@@ -385,13 +387,21 @@ export function showRevisionRecap(summary = {}, opts = {}) {
       }
       close("cta");
     });
-    overlay.querySelector(".rcp-second")?.addEventListener("click", () => {
+    overlay.querySelector("[data-secondary]")?.addEventListener("click", () => {
       try {
         onSecondary?.();
       } catch {
         /* noop */
       }
       close("secondary");
+    });
+    // Partage : la carte-image s'ouvre PAR-DESSUS la recap (z 10080), qui reste.
+    overlay.querySelector("[data-share]")?.addEventListener("click", () => {
+      openShareRecap({
+        kicker: "Quiz réussis aujourd'hui",
+        big: String(nPassed),
+        sub: `+${pointsGained} pt${pointsGained > 1 ? "s" : ""} en ligue Révision${ranksGained > 0 ? ` · +${ranksGained} place${ranksGained > 1 ? "s" : ""}` : ""}`,
+      });
     });
     overlay
       .querySelector(".rcp-close")

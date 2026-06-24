@@ -144,22 +144,6 @@ export async function mount(root) {
   let ii = 0; // item index dans la phase
   let picked = null; // index choisi (null = pas répondu)
   const me = getCurUser();
-  let moniteurName = null; // pour la carte partageable (marque du moniteur)
-
-  // Récupère le prénom du moniteur de l'élève (best-effort, non bloquant).
-  (async () => {
-    try {
-      if (!me?.enseignant_id) return;
-      const { data } = await sb
-        .from("profiles")
-        .select("prenom, nom")
-        .eq("id", me.enseignant_id)
-        .maybeSingle();
-      if (data) moniteurName = (data.prenom || data.nom || "").trim() || null;
-    } catch {
-      /* pas grave, on retombe sur « ton moniteur » */
-    }
-  })();
 
   const leave = () => {
     document.body.classList.remove("exc2-immersive");
@@ -411,8 +395,6 @@ export async function mount(root) {
         sub: r.passed
           ? `Au-dessus du seuil de ${SEUIL} 🎯`
           : `${r.note} points — ça progresse`,
-        eleveName: me?.prenom || null,
-        moniteurName,
       });
     });
     countUp(r.note);
