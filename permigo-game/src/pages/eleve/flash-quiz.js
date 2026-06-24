@@ -270,13 +270,15 @@ function renderClosed(root, message) {
 // Coquille de page uniquement — tout le rendu question/réponse/résultat
 // vient de QUIZ_STYLE (quiz-ui.js).
 const STYLE = `${QUIZ_STYLE}<style>
-.fqz{min-height:100dvh;background:radial-gradient(120% 80% at 50% 0%,#1a1d2e 0%,#0a0d1a 60%);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);font-family:'Inter',sans-serif}
+.fqz{min-height:100dvh;background:radial-gradient(130% 80% at 50% -5%, rgba(110,70,220,.28) 0%, transparent 55%),radial-gradient(120% 60% at 50% 0%, rgba(255,180,60,.08) 0%, transparent 45%),linear-gradient(180deg,#181241 0%,#0a081f 60%,#08071c 100%);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);font-family:'Inter',sans-serif}
 .fqz-top{display:flex;align-items:center;justify-content:space-between;max-width:480px;width:100%;margin:0 auto 22px}
 .fqz-tag{display:inline-flex;align-items:center;gap:6px;font:800 14px/1 'Plus Jakarta Sans',sans-serif;color:#fde68a;background:rgba(253,224,71,.12);padding:8px 14px;border-radius:999px}
 .fqz-clock{font:800 20px/1 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;color:#a7f3d0;background:rgba(16,185,129,.14);padding:8px 14px;border-radius:12px;min-width:64px;text-align:center}
 .fqz-clock.danger{color:#fecaca;background:rgba(239,68,68,.18);animation:fqzPulse 1s ease-in-out infinite}
 @keyframes fqzPulse{0%,100%{opacity:1}50%{opacity:.6}}
-.fqz-card{position:relative;width:100%;max-width:480px;margin:0 auto;background:linear-gradient(180deg,#1a1d2e,#0f1220);border:1px solid rgba(99,102,241,.3);border-radius:24px;padding:26px;color:#fff}
+.fqz-card{position:relative;width:100%;max-width:480px;margin:0 auto;overflow:visible;isolation:isolate;border-radius:26px;padding:26px;color:#fff;background:radial-gradient(150% 70% at 50% -5%, rgba(255,180,60,.10) 0%, transparent 50%),radial-gradient(120% 65% at 50% 26%, rgba(110,70,220,.22) 0%, transparent 60%),linear-gradient(180deg,#181241 0%,#0c0a26 62%,#08071c 100%);border:1px solid rgba(255,200,90,.16);box-shadow:0 24px 60px -20px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 120px 24px rgba(2,1,14,.5)}
+.fqz-card>*{position:relative;z-index:1}
+.fqz-mascot-slot{display:contents}
 .fqz-load{text-align:center;color:#94a3b8;padding:40px 0;font:600 15px/1 'Inter'}
 .fqz-closed{text-align:center;padding:24px 0}
 .fqz-closed-ico{margin-bottom:12px}

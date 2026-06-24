@@ -221,9 +221,18 @@ function renderOverlay() {
   el.innerHTML = `
     ${QUIZ_STYLE}
     <style>
-      .quiz-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,13,26,.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top, 0px) + 20px) 20px calc(env(safe-area-inset-bottom, 0px) + 20px);animation:quizIn .3s cubic-bezier(.23,1,.32,1);overflow-y:auto}
+      .quiz-overlay{position:fixed;inset:0;z-index:9999;background:rgba(6,5,20,.94);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top, 0px) + 20px) 20px calc(env(safe-area-inset-bottom, 0px) + 20px);animation:quizIn .3s cubic-bezier(.23,1,.32,1);overflow-y:auto}
       @keyframes quizIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
-      .quiz-body{position:relative;width:100%;max-width:480px;background:linear-gradient(180deg,#1a1d2e,#0f1220);border:1px solid rgba(99,102,241,.3);border-radius:24px;padding:28px;color:#fff;margin:auto}
+      .quiz-body{position:relative;width:100%;max-width:480px;border-radius:26px;padding:28px;color:#fff;margin:auto;isolation:isolate;overflow:visible;
+        background:radial-gradient(150% 70% at 50% -5%, rgba(255,180,60,.10) 0%, transparent 50%),radial-gradient(120% 65% at 50% 26%, rgba(110,70,220,.22) 0%, transparent 60%),linear-gradient(180deg,#181241 0%,#0c0a26 62%,#08071c 100%);
+        border:1px solid rgba(255,200,90,.16);
+        box-shadow:0 24px 60px -20px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 120px 24px rgba(2,1,14,.55)}
+      .quiz-body::before{content:"";position:absolute;inset:0;border-radius:26px;pointer-events:none;z-index:0;background-image:radial-gradient(1.4px 1.4px at 22% 12%,rgba(255,255,255,.45),transparent),radial-gradient(1.2px 1.2px at 80% 8%,rgba(255,210,120,.5),transparent),radial-gradient(1.1px 1.1px at 64% 18%,rgba(255,255,255,.32),transparent),radial-gradient(1.3px 1.3px at 12% 24%,rgba(180,160,255,.4),transparent)}
+      .quiz-body>*{position:relative;z-index:1}
+      /* le slot ne doit PAS être le repère de la mascotte : sinon elle se cale
+         sur ce span 0px (haut-gauche). display:contents → la mascotte (absolute)
+         s'ancre sur .quiz-body et part dans le coin haut-droit. */
+      .quiz-mascot-slot{display:contents}
       @media (prefers-reduced-motion:reduce){.quiz-overlay{animation:none}}
     </style>
     <div class="quiz-body">
