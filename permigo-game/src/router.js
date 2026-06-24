@@ -105,6 +105,21 @@ const ROUTES = {
     settings: () => import("@/pages/common/settings.js"),
     "nouveau-mdp": () => import("@/pages/auth/nouveau-mdp.js"),
   },
+  // Owner (= plateforme, au-dessus du gérant) : cockpit agrégé toutes écoles.
+  // Le drill « une école » réutilisera le cockpit gérant paramétré (V2).
+  owner: {
+    default: () => import("@/pages/gerant/owner.js"),
+    ecoles: () => import("@/pages/gerant/owner.js"),
+    cockpit: () => import("@/pages/gerant/cockpit.js"),
+    ecole: () => import("@/pages/public/ecole.js"),
+    messages: () => import("@/pages/common/messages.js"),
+    legal: () => import("@/pages/common/legal.js"),
+    dbg: () => import("@/pages/admin/debug.js"),
+    profil: () => import("@/pages/common/profil.js"),
+    notifications: () => import("@/pages/common/notifications.js"),
+    settings: () => import("@/pages/common/settings.js"),
+    "nouveau-mdp": () => import("@/pages/auth/nouveau-mdp.js"),
+  },
 };
 
 // Libellés de titre de page (a11y lecteur d'écran, onglet, historique, SEO).
