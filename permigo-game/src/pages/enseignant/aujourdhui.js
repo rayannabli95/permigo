@@ -8,7 +8,18 @@ import { toast } from "@/components/common/toast.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
-import { REMC_TOTAL } from "@/data/remc.js";
+import { REMC, REMC_TOTAL } from "@/data/remc.js";
+
+// « Prêt » pour l'examen = MÊME règle métier que mes-eleves.js (source de vérité) :
+// les compétences de BASE C1-C2-C3 sont toutes acquises (C4 = conduite autonome
+// ne conditionne pas la présentation). On évite ainsi le seuil ad hoc 0.85 qui
+// faisait diverger le compteur « N prêts » entre l'accueil et la liste.
+const BASE_CATS = ["C1", "C2", "C3"];
+const BASE_COMPS = REMC.filter((c) => BASE_CATS.includes(c.id)).flatMap((c) =>
+  c.subs.map((s) => s.c),
+);
+const isPretExam = (acquisSet) =>
+  !!acquisSet && BASE_COMPS.every((c) => acquisSet.has(c));
 import { labelComp } from "@/utils/remc-label.js";
 import { statutCfg } from "@/utils/statut-label.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
@@ -597,6 +608,21 @@ async function renderInto(root, _me) {
     (acquisSetByEleve[v.eleve_id] ||= new Set()).add(v.competence_id);
   });
 
+  // Élèves ayant OBTENU le permis (dernier examen = 'recu') → ils sortent de la
+  // formation active : ils ne doivent PLUS compter comme « prêts » ni encombrer
+  // le roster (sinon un reçu très avancé reste affiché « Prête » à tort).
+  const { data: examsAll } = await sb
+    .from("examens")
+    .select("eleve_id, statut, created_at")
+    .order("created_at", { ascending: false });
+  const recuByEleve = new Set();
+  const lastExamSeen = new Set();
+  (examsAll || []).forEach((ex) => {
+    if (lastExamSeen.has(ex.eleve_id)) return; // 1ère ligne vue = plus récente
+    lastExamSeen.add(ex.eleve_id);
+    if (ex.statut === "recu") recuByEleve.add(ex.eleve_id);
+  });
+
   const mesIds = new Set(
     Object.values(elevesMap)
       .filter((e) => e.enseignant_id === _me.id)
@@ -608,19 +634,24 @@ async function renderInto(root, _me) {
     id,
     ...(elevesMap[id] || { prenom: "Élève", nom: "", idx: 0 }),
     acquis: acquisSetByEleve[id]?.size || 0,
+    acquisSet: acquisSetByEleve[id] || new Set(),
+    recu: recuByEleve.has(id), // a déjà obtenu son permis
   }));
 
-  const nbElevesActifs = mesEleves.length;
+  // Élèves encore EN FORMATION (les reçus sont sortis) — base des compteurs.
+  const elevesEnFormation = mesEleves.filter((e) => !e.recu);
+  const nbElevesActifs = elevesEnFormation.length;
+  const nbRecus = mesEleves.length - elevesEnFormation.length;
 
-  // « Prêts » = C1-C3 acquis (readiness pret = tous les 31 validés ici approx)
-  // Simplification : pct >= 85% (~26/31)
-  const prets = mesEleves.filter((e) => e.acquis / REMC_TOTAL >= 0.85);
+  // « Prêts » = bien avancé ET pas encore passé l'examen (un reçu n'est pas
+  // « prêt à passer », il a déjà réussi).
+  const prets = elevesEnFormation.filter((e) => isPretExam(e.acquisSet));
   const nbPrets = prets.length;
 
   // Roster 3 élèves prioritaires
   // Tri : 1) inactifs depuis > 7j (à relancer) 2) proches de la fin 3) actifs récemment
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
-  const roster = mesEleves
+  const roster = elevesEnFormation
     .filter((e) => (e.acquis || 0) < REMC_TOTAL)
     .sort((a, b) => {
       const aLast = elevesMap[a.id]?.last_active_at || "";
@@ -663,7 +694,7 @@ async function renderInto(root, _me) {
     let pillText = `${REMC_TOTAL - e.acquis} à valider`;
     let barColor = "#4f46e5";
 
-    if (e.acquis / REMC_TOTAL >= 0.85) {
+    if (isPretExam(e.acquisSet)) {
       pillClass = "aj-pill-ok";
       pillText = "Prête";
       barColor = "#15803d";
@@ -736,7 +767,7 @@ async function renderInto(root, _me) {
 
       <!-- Tes élèves -->
       <div class="aj-sec-header">
-        <span class="aj-sec-title">Tes élèves${nbPrets > 0 ? " · " + nbPrets + " prêt" + (nbPrets > 1 ? "s" : "") : ""}</span>
+        <span class="aj-sec-title">Tes élèves${nbPrets > 0 ? " · " + nbPrets + " prêt" + (nbPrets > 1 ? "s" : "") : ""}${nbRecus > 0 ? " · " + nbRecus + " reçu" + (nbRecus > 1 ? "s" : "") : ""}</span>
         <button class="aj-sec-link" id="aj-voir-tout" type="button">Tout voir</button>
       </div>
 
