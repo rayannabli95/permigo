@@ -1,289 +1,165 @@
-# CLAUDE.md — Contexte projet PermiGo Game
+# CLAUDE.md — PermiGo
 
-> **Lu automatiquement par Claude Code à chaque session.** Source de vérité unique.
+> **Lu à chaque session. Source de vérité unique du projet.**
+> Le `/CLAUDE.md` à la racine n'est qu'un pointeur vers ce fichier.
 
----
-
-## 🌙 MODE NIGHT RUN (3h autonome)
-
-Si l'utilisateur dit **"night run"**, **"vas-y bosse seul"**, **"je dodo"**, **"go autonome"**, ou colle un message contenant `NIGHT_RUN.md` :
-
-→ **Lis immédiatement** `.claude/NIGHT_RUN.md` et applique-le **à la lettre**.
-
-Ce mode est conçu pour 3h de travail sans interruption. Il demande TOUTES les permissions en une fois au début, puis bosse seul en 4 phases (stabilisation / polish / feature / QA + push). Tu DOIS suivre le format de report final demandé.
-
-Ce mode est valable **autant pour Claude Code que pour Claude Cowork**.
+⚠️ **Emplacement** : le projet vivant est **`permigo-game/`**. La racine `permigo-v7/` héberge un vieux projet Drizzle + Hono + SQLite (`dev.db`) **inutilisé** + des docs legacy. **Ne pas modifier le code à la racine** sans validation explicite. Tous les chemins ci-dessous sont relatifs à `permigo-game/`.
 
 ---
 
-## 🧠 RÈGLE #0 — ABSOLUE : SCAN DES SKILLS AVANT CHAQUE RÉPONSE
+## 🧠 RÈGLE #0 — Scanner les skills avant de répondre
 
-**OBLIGATOIRE.** Avant de répondre à TOUT message du user, tu DOIS :
+Avant de répondre à un message, regarde si une **skill** colle à la demande et **invoque-la** — sans attendre que l'utilisateur la nomme. Tu peux en combiner plusieurs (ex : `systematic-debugging` + `supabase-permigo`).
 
-1. **Lire** le contenu de `.claude/skills/` (chaque dossier = 1 skill avec son `SKILL.md`)
-2. **Comparer** le message du user aux `description:` (frontmatter YAML) de chaque skill
-3. **Invoquer** la skill la plus pertinente AVANT de générer ta réponse
-
-**Aucune exception.** Même pour une question simple, tu scannes. Tu n'attends JAMAIS que le user invoque explicitement une skill par son nom — c'est À TOI de détecter et d'utiliser.
-
-### Skills installées actuellement (à scanner à chaque message)
-
-| Skill | Trigger naturel quand le user dit… |
+| Skill | Quand l'utiliser |
 |---|---|
-| `concise-planning` | "fais un plan", "comment je m'attaque à", "découpe ça" |
-| `lint-and-validate` | après chaque code change (automatique) |
-| `git-pushing` | "push", "commit", "save sur GitHub" |
-| `kaizen` | "améliore", "refactor", "comment je peux faire mieux" |
-| `systematic-debugging` | "bug", "ça marche pas", "erreur", "pourquoi…" |
-| `emil-design-eng` | UI, animations, easing, transitions, micro-interactions |
-| `llm-council` | "council this", "should I X or Y", décision à fort enjeu |
-| `page-vanilla` | nouvelle page vanilla JS pour PermiGo |
-| `supabase-permigo` | requête / migration / RLS Supabase du projet |
-| `triple-validation` | tout ce qui touche au flow pédagogique Triple Validation |
+| `permigo-eleve-ux` | écran/UX **élève** (accueil, parcours, quizz, boutique, trophées) |
+| `permigo-moniteur-ux` | écran/UX **moniteur** (aujourd'hui, mes-élèves, fiche, livret, classement) |
+| `permigo-admin-ops` | écran **gérant/owner** (tableau de bord, équipe) — rare, espace dormant |
+| `page-vanilla` | créer une **nouvelle page** vanilla |
+| `supabase-permigo` | **DB / RLS / migration / edge function / auth** |
+| `triple-validation` | flow **pédagogique** (validation compétence, quizz, consolidation) |
+| `systematic-debugging` | « ça marche pas », bug, erreur, « pourquoi… » |
+| `emil-design-eng` · `ui-ux-pro-max` | **polish UI**, animations, micro-interactions, design |
+| `concise-planning` | « fais un plan », « découpe ça » |
+| `grill-me` | stress-tester un plan / une décision **avant** de coder |
+| `llm-council` | décision à fort enjeu (« X ou Y ») |
+| `kaizen` | « améliore », refactor, réduire la dette |
+| `git-pushing` · `permigo-ship` | commit, push, ouvrir une PR |
+| `permigo-rls-audit` | audit sécurité RLS |
+| `permigo-feature` · `permigo-demo` · `permigo-customer-onboard` | démarrer une feature / compte démo / setup client |
 
-**Tu peux invoquer plusieurs skills en combinaison.** Ex : `systematic-debugging` + `supabase-permigo` pour un bug DB.
-
-**Anti-rationalisation** : si tu réponds sans avoir invoqué de skill alors qu'une matchait → c'est un échec. Le user attend que tu sois proactif sur ça.
-
----
-
-## 🎯 Mission (ne JAMAIS perdre de vue)
-
-> **PermiGo transforme l'apprentissage du permis de conduire en habitude quotidienne.**
-
-C'est la **couche d'engagement pédagogique** entre l'élève, son enseignant et son auto-école. **Pas un CRM. Pas une plateforme de réservation. Pas un système de paiement.**
-
-## 🔒 RÈGLES NON-NÉGOCIABLES
-
-### 1. Pas de données sensibles élèves
-**Tu ne dois JAMAIS** créer une table, un champ ou une UI qui stocke :
-- ❌ Numéro de téléphone élève
-- ❌ Adresse postale élève
-- ❌ NEPH (Numéro d'Enregistrement Préfectoral Harmonisé)
-- ❌ Données bancaires / paiements
-- ❌ Email personnel (juste un email d'invitation auto-écolé éphémère)
-
-**Pourquoi** : l'auto-école garde la propriété de ses données clients. PermiGo = outil pédagogique pur. **Aucune exception.**
-
-### 2. Pas de planning
-**Tu ne dois JAMAIS** créer :
-- ❌ Système de planning enseignant avec créneaux
-- ❌ Réservation autonome élève
-- ❌ Gestion d'horaires
-
-L'élève voit son **crédit d'heures** (ex: "8h restantes"). Il prend RDV en dehors de l'app (WhatsApp, téléphone). PermiGo n'est pas Doctolib.
-
-### 3. La pédagogie d'abord, le fun ensuite
-Chaque mécanique gamifiée DOIT avoir une **conséquence pédagogique réelle**. Si tu codes un truc cosmétique sans valeur d'apprentissage → tu dégages.
-
-Test à appliquer : *"Est-ce que cette feature aide à mémoriser/réussir le permis ?"*. Si non → tu poses la question à l'utilisateur avant.
-
-### 4. Mobile-first absolu
-Chaque écran codé doit être conçu et testé pour un iPhone d'abord. Min touch target : 44×44px. Safe areas (`env(safe-area-inset-*)`) gérées partout.
-
-### 5. Mesurable dès le départ
-Toute action utilisateur significative est trackée dans la table `events_analytics` avec event_name + properties. **Tu n'ajoutes pas une feature sans tracker son usage.**
+**Mode NIGHT RUN** : si l'utilisateur dit « night run », « bosse seul », « je dodo », « go autonome » → lis `.claude/NIGHT_RUN.md` et applique-le à la lettre.
 
 ---
 
-## 🏗 Architecture technique
+## 🎯 La mission (le cap — verrouillé)
 
-### Stack
-- **Frontend** : Vite + JS vanilla modules + CSS scoped (pas de framework lourd)
-- **Backend / DB** : Supabase (Postgres + Auth + Storage + Realtime)
-- **Hosting** : Vercel (déploiement auto via GitHub push)
-- **Domain** : permigo-game.vercel.app (custom plus tard)
+PermiGo = **l'outil DU moniteur indépendant, à SA marque**. Il lui donne deux choses :
 
-### Stack interdite
-- ❌ React / Vue / Angular (pas nécessaire, on garde vanilla)
-- ❌ Express / Node serveur (Supabase suffit pour tout)
-- ❌ JSX (tout reste en `.js` avec template literals)
+1. **Preuve & autorité** — « qui est prêt », taux de réussite à son nom (vs Ornikar / En Voiture Simone qui possèdent l'élève).
+2. **Engagement élève** — l'élève révise et revient **entre** les leçons. **L'élève est le carburant viral** : son accroche EST l'argument de vente du moniteur.
 
-### Modules métier (maintenant dans `src/services/`)
-1. **pedagogie** : système Triple Validation → `src/services/quiz-engine.js`
-2. **progression** : streak, XP, actions quotidiennes → `src/services/daily-action.js`
-3. **enseignant** : 1 écran simple "Mes élèves + bouton valider compétence"
-4. **gerant** : dashboard "Pulse école" avec 4 KPI
+**Modèle** : abonnement **self-serve 9,99 €/mois** — le moniteur paie pour lui-même, cycle de vente court. Stripe en place.
 
-### Composants (`src/components/`)
-- `common/` — partagés (toast, header-top, nav-bottom, confetti, badge…)
-- `eleve/` — spécifiques élève (chest, game-hud, reward-reveal, weekly-replay…)
-- `enseignant/` — spécifiques moniteur (log-session-fab, moniteur-ranking…)
+**Trou de marché** : personne n'offre au moniteur **son** propre outil (sa marque) + une couche d'engagement élève. Concurrents : Ornikar/EVS (à leur marque), éditeurs B2B (Codes Rousseau, Ediser), SaaS (Stych).
 
 ---
 
-## 📋 Workflow obligatoire à chaque session
+## 👥 Les rôles
 
-### Quand tu ouvres une session
-1. Lis ce fichier (déjà fait)
-2. **Lis le Vault** `.claude/loop/status.md` puis `.claude/loop/next-up.md` (source de vérité « où on en est / quoi faire » — cf. `.claude/loop/LOOP.md`)
-3. Lis `docs/PRODUCT.md` et `docs/ROADMAP.md` (pour comprendre où on en est)
-4. Vérifie `git status` (commits non poussés)
-5. Annonce à l'utilisateur : "*Je reprends sur [contexte]. Voici ce que je vais faire : [plan]*"
+- **élève** (apprenti) — le **carburant** : on le rend accro (réviser, revenir, progresser).
+- **moniteur** (`enseignant`) — **la cible & le payeur**. Tout converge vers lui.
+- **gérant** (auto-école) — **dormant / hors-cible**. ⚠️ On n'investit pas, on ne le route pas en avant, MAIS **on ne le supprime pas** : le rôle `gerant` est branché à l'auth, la nav ET au RLS (la policy `leads_select` — lecture des leads de la landing — en dépend). Retrait = chantier DB dédié, jamais un cleanup au passage. Détails GTM : `docs/GTM_PREMIERS_CLIENTS.md`.
+- **owner** (= Rayan) — vue **plateforme** (tous les agrégats). Helpers DB : `is_owner()`, `get_owner_overview()`.
 
-### Avant de dire « c'est fini » (fermeture de boucle — pilier 6 « Repo remembers »)
-Tout run qui change l'état DOIT mettre à jour le Vault : `status.md` (photo), `done-log.md` (1 ligne append-only), `next-up.md` / `board.md` (file priorisée). **L'état sur disque bat l'état dans le contexte.** Un run qui n'écrit pas le Vault est un run perdu.
+---
 
-### Avant de coder une feature
-1. Vérifie qu'elle correspond à `docs/ROADMAP.md` (V1 / V2 / V3)
-2. Vérifie qu'elle respecte les 5 règles non-négociables ci-dessus
-3. Cherche dans le code existant si un composant similaire existe (réutiliser > recoder)
-4. Code, teste localement, commit avec message descriptif
+## 🎨 Le style par rôle (la DA)
 
-### Pattern obligatoire pour chaque page
+Chaque rôle a son univers. **Côté moniteur : liberté totale** (aucune règle ne bride — fais le plus beau et le plus pro possible).
+
+- **élève** : **violet** (accent `--a`) + premium ludique. Le **quizz est en « Arène 3D »** (nuit-violet + or, boutons plastique 3D, mascotte — esprit Clash Royale / Supercell). Accueil & boutique = clair premium.
+- **moniteur** : **indigo `#4f46e5`** premium (Néo-arcade : Fredoka, panneaux routiers en fond, trophée 3D, classement local/national). Aucune contrainte de ton ou de mécanique.
+- **gérant / owner** : **command-center** (tableau de bord, agrégats).
+
+**Tokens couleur (theme-aware, dans `base.css`)** : accent = `--a` / `--adk` / `--a-lt` / `--a-ink` / `--a-txt` · neutres = `--su` / `--mu` / `--bo` / `--ink` / `--gr-txt`.
+⚠️ **N'invente JAMAIS** `--surface` / `--border` / `--muted` → bug blanc-sur-blanc en dark mode. Pour du texte sur fond accent, utilise `--a-txt`.
+
+---
+
+## 🔒 Règles non-négociables (les seules qui restent)
+
+1. **Pas de planning / réservation** — PermiGo n'est pas Doctolib. L'élève voit son **crédit d'heures** ; il prend RDV en dehors de l'app.
+2. **Pas de données perso élève** — jamais de téléphone, adresse, NEPH, ni **paiement élève**. (L'email d'auth de l'élève est OK ; l'**abonnement moniteur via Stripe est OK** — c'est le produit.)
+3. **Sécurité** :
+   - **XSS** : toute donnée injectée en `innerHTML` passe par `esc()` / `richEsc()` (`src/utils/escape.js`).
+   - **RLS activée sur TOUTES les tables** (schema public, aucune exception).
+   - `SUPABASE_SERVICE_ROLE_KEY` **jamais** côté client. Backend only.
+   - Env client = préfixe **`VITE_`**.
+   - Supabase = **singleton `sb`** (`src/auth/auth.js`). Pattern : `const { data, error } = await sb.from(...)` — toujours gérer `error` (try/catch autour de l'`await`).
+4. **Mobile d'abord** — conçu/testé iPhone d'abord. Touch ≥ 44px. Safe areas (`env(safe-area-inset-*)`) partout.
+5. **Mesurable** — toute action significative est trackée (`src/services/analytics.js`).
+
+> 🗑️ Les anciens « antipatterns moniteur » (pas de jeu / points / classement / streak / ton fun) sont **supprimés** : le moniteur a déjà trophées, classement local+national, série et premium. **Liberté totale assumée.**
+
+---
+
+## 💳 Monétisation
+
+- **Abonnement moniteur 9,99 €/mois** via **Stripe** (en place, en test — passage live à finaliser). C'est LE modèle.
+- **PermiGo+ élève** (~4,99 €/mois, optionnel, résiliable, zéro commission moniteur) = **gelé** (idée gardée, non prioritaire).
+- Offre « auto-école / per-seat » = **option lointaine**, jamais mise en avant.
+
+---
+
+## 🏗 Stack & emplacements
+
+- Front : `src/` — **Vanilla JS (ES modules)** + **Vite**. Pas de TypeScript, React, react-query, shadcn.
+- Pages : `src/pages/<role>/` — chaque page exporte **`mount(root, param)`**, rendu via `innerHTML`.
+- Routing : **hash router maison** `src/router.js` (`#/route/{param}`, écoute `hashchange`).
+- Auth + DB : **Supabase**. Singleton `sb` (`src/auth/auth.js`), user courant `getCurUser()` (`src/auth/cur-user.js`).
+- Composants : `src/components/{common,eleve,enseignant}/` · utils : `src/utils/` · métier/réseau : `src/services/` (ex : `quiz-engine.js`).
+- Alias import : `@/` → `src/`.
+- DB : migrations `supabase/migrations/*.sql` (**jamais** modifier la prod à la main — passe par une migration). Edge functions `supabase/functions/`. Env `src/config/env.js` (`VITE_`).
+- ⚠️ `src/db/client.js` = façade Drizzle legacy **non utilisée** par le front. Ignorer.
+
+## ⌨️ Commandes (depuis `permigo-game/`)
+
+- `npm run dev` · `npm run build` · `npm run preview`
+- `npm run lint` → ⚠️ **stub** (« No lint configured yet ») : ne te fie pas à sa sortie verte, ce n'est pas un vrai lint.
+- `npm run test` → Playwright e2e (`tests/e2e/*.spec.js`, dont `a11y.spec.js` via axe-core) · `npm run test:ui` en mode UI.
+- Pas de `typecheck` ni `db:types`.
+- **Avant un commit** : `npm run build` (vert obligatoire) + `npm run test` si tu touches un flow critique.
+
+## 📄 Pattern d'une page
+
 ```js
-// src/pages/<role>/<nom>.js
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { toast } from '@/components/common/toast.js';
-import { esc } from '@/utils/escape.js';
-import { trackEvent } from '@/services/analytics.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
 
-export async function mount(root, ...args) {
+export async function mount(root, param) {
   const me = getCurUser();
   if (!me) return;
-
-  trackEvent('page_view', { page: '<nom>', user_role: me.role });
-
-  root.innerHTML = `<div class="skel"></div>`;  // skeleton
-  const data = await loadData();                 // fetch
-  root.innerHTML = renderTemplate(me, data);     // render
-  wire(root);                                    // listeners
+  track("page_view", { page: "<nom>", role: me.role });
+  root.innerHTML = `<style>/* CSS scoped */</style><div class="skel">…</div>`; // skeleton
+  const data = await load();          // try/catch + toast en cas d'erreur
+  root.innerHTML = render(me, data);  // esc() sur TOUTE donnée user
+  wire(root);                         // listeners
 }
 ```
 
-### Règles de code (non-négociables)
-- **`esc()` partout** sur les données user dans `innerHTML` (sinon XSS)
-- **`mount(root)` exporté** (pas de side effects au import)
-- **CSS scoped** via `<style>` inline dans la page
-- **Animations** : utilise les composants de `src/components/common/` (mesh-bg) et `src/components/eleve/` (reward-reveal, etc.)
-- **Erreurs** : `try/catch` autour de chaque opération Supabase. Toast en cas d'erreur.
+- Un module par fichier, fonctions camelCase. **CSS scoped** via `<style>` inline dans la page.
+- i18n : **français pour l'UI**, anglais pour commentaires/variables.
+- Logging : pas de logger central (des `console.*` traînent). Pas de règle « zéro console » en vigueur.
 
----
+## 🔁 Boucle de vérification
 
-## 🗃 Structure DB Supabase (cf. `docs/ARCHITECTURE.md` pour détails)
+- Modif d'une table → **migration SQL** dans `supabase/migrations/`.
+- Donnée user en `innerHTML` → vérifier l'`esc()`.
+- Build casse → on fixe **avant** de continuer (pas de « TODO fix later »).
+- Avant « c'est fini » → `npm run build` (+ `npm run test` sur flows critiques) et **reporter la vraie sortie** (jamais prétendre que c'est vert sans avoir lancé).
 
-**Tables principales** :
-- `profiles` (auth + rôles + crédit d'heures)
-- `competences_remc` (31 sous-compétences officielles)
-- `questions_competence` (3-5 questions par sous-compétence)
-- `validations` (statut + score cognitif + consolidation)
-- `quiz_attempts` (logs de toutes les tentatives)
-- `streaks` (streak par élève)
-- `leçons_realisees` (log simple, pas planning)
-- `events_analytics` (tracking exhaustif)
+## 🌳 Workflow Git / PR
 
-**RLS obligatoire** sur toutes les tables. Pas d'accès "always true". Cf. `ARCHITECTURE.md` section RLS.
+- Une branche par feature (`feat/` `fix/` `chore/`). **Jamais de push direct sur `main`.**
+- Conventional commits. Vérifier la **preview Vercel** avant merge (déploiement auto au push).
 
----
+## 💬 Communication
 
-## 🎨 Design system (cf. `docs/DESIGN_SYSTEM.md`)
+- **Français simple, zéro jargon/anglicisme, réponses courtes.** Pour un choix produit, montre le **concret** (avant/après + pour/contre), pas des termes abstraits.
+- Direct, pas de flatterie. **Challenge** poliment ce qui contredit le cap.
+- Prends l'**initiative** (fais le premier pas, rapport complet) ; ne demande pas « je peux ? » pour un oui évident.
 
-- **Couleurs** : indigo `#6366f1`, violet `#8b5cf6`, cyan `#06b6d4`, fond `#0a0d1a`
-- **Typo** : Plus Jakarta Sans (titres) + Inter (corps) + IBM Plex Mono (chiffres)
-- **Tone copy** : sérieux mais chaleureux, tutoiement élève, vouvoiement gérant
-- **Animations** : mesh gradient, glassmorphism, transitions cubic-bezier
-- **Sons** : ding-success, streak-up, reveal-trophy (dossier `public/sounds/`)
+## 🚗 Domaine métier (REMC)
 
----
+- **REMC** = Référentiel pour l'Éducation à une Mobilité Citoyenne (arrêté 13/05/2013).
+- 4 compétences **C1–C4**. Livret officiel = **30 objectifs** (arrêté 29/07/2013, annexe III).
+- Cœur pédagogique = **Triple Validation** (`src/services/quiz-engine.js`). Toute mécanique gamifiée doit avoir une **vraie conséquence pédagogique**.
 
-## 🚀 Roadmap (cf. `docs/ROADMAP.md` pour détails)
+## ⚠️ Erreurs récurrentes (compléter quand Claude se trompe 2×)
 
-### V1 (en cours) — Le MVP "Triple Validation"
-- Module pedagogie complet
-- Module progression partiel (parcours + streak + XP)
-- Module enseignant simplifié
-- Module gerant : 4 KPI
-- 30 questions sur 8 compétences
-
-### V2 — Polish + gamification complète
-- Trophées + gemmes + avatars
-- Sons + animations premium
-- 120 questions complètes
-- Examens blancs
-
-### V3 — Croissance
-- Leagues + classements
-- Page publique école ✅ (src/pages/public/ecole.js — `#/ecole/{slug}`)
-- Programme parrainage
-
-### ✅ Sprint Premium 2 livré (19–20 mai 2026)
-- Dark mode CSS vars complet (tous les fichiers)
-- Trophées élève refonte (Clash Royale ADN, rareté, mystère)
-- Boutique élève refonte (Supercell ADN, tabs, achat, gemmes)
-- Notifications premium (pull-to-refresh, swipe-to-delete, deep-link)
-- Empty states + skeletons audit + dark mode fix (todos pages)
-- Onboarding magique 3 écrans (src/pages/onboarding/index.js)
-- Page école publique (src/pages/public/ecole.js)
-- Cleanup : anglicismes (Insights → Analyses), skeleton CSS vars
-
-**TU NE DOIS PAS coder une feature V2 si V1 n'est pas finie.** Toujours valider avec l'utilisateur si tu veux dévier.
-
----
-
-## ❌ ANTIPATTERNS MONITEUR À NE JAMAIS FAIRE
-
-Ces règles s'appliquent à tout ce qui touche au côté enseignant/moniteur. Violation = revert immédiat.
-
-1. **Pas de mascottes, confettis enfantins, ton "Bravo champion"** — le moniteur est un professionnel adulte. Le ton est Linear/Notion, pas Duolingo enfant.
-2. **Pas de monnaie virtuelle** (gemmes, coffres, points échangeables) — infantilise et dilue le sens de l'XP métier.
-3. **Pas de leaderboard global brut** — toujours percentile relatif + cohorte homogène. Jamais "tu es 247e sur 3000" sans contexte.
-4. **Pas de streak punitif** — jamais "tu vas perdre ton streak", jamais de notif culpabilisante. Le streak est un indicateur neutre, pas une menace.
-5. **Pas de récompense pour vitesse de validation** — incite à bâcler des validations REMC. L'XP récompense le geste métier, pas la rapidité.
-6. **Pas de surveillance managériale** — le gérant voit des agrégats d'auto-école uniquement. Jamais les stats nominatives d'un moniteur individuel sans son opt-in explicite.
-7. **Pas de notif agressive** — max 1 push/jour côté moniteur, ton factuel ("3 compétences validées aujourd'hui"). Jamais émotionnel ou urgent.
-8. **Pas de pay-to-win** — la monétisation est un abonnement auto-école. Aucune feature ne s'achète à la carte par le moniteur ; tout est inclus dans l'abonnement école.
-
-Référence complète : `docs/MONITEUR_VISION_V3.md` section "8 antipatterns".
-
----
-
-## 🔁 Workflow Git / Vercel
-
-- **Branch principale** : `main`
-- **Commits descriptifs** : `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`
-- **Push** : déclenche un build Vercel automatique
-- **Test** : toujours `npm run dev` localement avant de push
-- **Si build foire** : check les logs Vercel via MCP, fix, re-push
-
----
-
-## 💬 Communication avec l'utilisateur
-
-### Style de réponse
-- **Concis et direct** (l'utilisateur préfère économiser les tokens)
-- **Pas de bullshit motivationnel** ("super idée !" sans valeur ajoutée)
-- **Challenge poliment** quand l'utilisateur propose quelque chose qui contredit la mission
-- **Propose des AskUserQuestion** quand il y a un choix produit à faire
-
-### Quand demander confirmation
-- Avant toute modification du **schéma DB** (migration)
-- Avant toute **suppression de feature** existante
-- Avant un **changement de positionnement** du produit
-- Avant un **changement de prix**
-
-### Quand agir en autonomie
-- Bug fix sur du code existant
-- Petite amélioration UX (animations, micro-interactions)
-- Refactor interne sans changement de comportement
-- Ajout de tracking / analytics
-
----
-
-## 🎯 Le mantra à se répéter
-
-Avant chaque feature, pose-toi 3 questions :
-
-1. **Ça déclenche l'envie ?** (élève : clarté/contrôle, gérant : peur de perdre)
-2. **Ça génère une métrique ?** (KPI mesurable)
-3. **Ça simplifie la vie d'au moins 1 persona ?**
-
-Si NON aux 3 → on dégage. Anti-scope-creep.
-
----
-
-## 📞 En cas de doute
-
-Si tu hésites sur une décision (technique ou produit), **demande à l'utilisateur** plutôt que d'assumer. Une question coûte moins qu'un refactor.
-
-Bon code 🚀
+- N'invente pas de tokens CSS (`--surface` / `--border` / `--muted`) → bug dark mode. Utilise `--su` / `--bo` / `--mu`.
+- Tests e2e : le login attend **`body.has-chrome`** (et **non** `.acc2-hero-hi`, périmé). Les `.prc-node` du parcours animent → cliquer en DOM direct `locator.evaluate(el => el.click())`.
