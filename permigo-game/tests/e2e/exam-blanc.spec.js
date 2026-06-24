@@ -32,7 +32,7 @@ async function loginAsEleve(page) {
   await page.fill("#lg-email", ELEVE.email);
   await page.fill("#lg-pwd", ELEVE.pwd);
   await page.click("#lg-submit");
-  await page.waitForSelector(".acc2-hero-hi", { timeout: 20_000 });
+  await page.waitForSelector("body.has-chrome", { timeout: 20_000 });
 }
 
 test.describe("Examen blanc — parcours", () => {
