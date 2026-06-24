@@ -113,6 +113,16 @@ Chaque rôle a son univers. **Côté moniteur : liberté totale** (aucune règle
 - Pas de `typecheck` ni `db:types`.
 - **Avant un commit** : `npm run build` (vert obligatoire) + `npm run test` si tu touches un flow critique.
 
+## 🧰 Outils locaux & savoir partagé (ce que les sous-agents ne devinent pas)
+
+> Les **accès** (MCP, terminal) sont automatiques à chaque session. Le **savoir** ci-dessous ne l'est pas — il vit ici pour que **tous les agents l'aient**.
+
+- **Transcripts YouTube** : `yt-dlp` (+ `ffmpeg`, installés via brew — local, gratuit, **sans clé ni compte**) récupère les **sous-titres auto** (le texte, pas la vidéo). ⚠️ YouTube **ne marche PAS** en web fetch (page en JS) → **toujours `yt-dlp`**. (C'est ce qui a produit les transcripts qui ont nourri les fiches de conduite.)
+- **MCP branchés** : Supabase · Vercel · GitHub (+ CLI `gh` authentifié → Claude gère le Git/GitHub direct) · Playwright (navigateur) · Figma.
+- **Stack = vanilla, PAS de React** (figé) : pour s'inspirer de 21st.dev / shadcn → **recoder en vanilla**, ne jamais importer du React (un 2e framework = poids + incohérence + réécriture). Persos/PNJ = images externes (PNG transparent) dans `public/skins/`.
+- **Comptes** (identités — **jamais de mot de passe ici**) : owner `rayannabli27@gmail.com` · test moniteur `enseignant@test.fr` · test élève `eleve@test.fr`. Projet Supabase `arrfmdagdqtrtfbhxlty`.
+- **Secrets** (clés, mots de passe) → `.env` (ignoré par Git) + dashboards Supabase/Stripe/Vercel. **Jamais dans ce fichier** (il est sur Git).
+
 ## 📄 Pattern d'une page
 
 ```js
