@@ -106,15 +106,18 @@ ${LEAGUE_CSS}
   font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
 }
 .clt-mepill-ico { font-size: 15px; }
-.clt-tabs { display: flex; gap: 6px; margin-top: 12px; }
+.clt-tabs { display: flex; gap: 7px; margin-top: 14px; }
 .clt-tab {
-  flex: 1; min-height: 44px; padding: 9px 6px;
-  background: var(--su); border: 1px solid var(--bo); border-radius: var(--r);
-  color: var(--mu2); font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
+  flex: 1; min-height: 52px; padding: 12px 6px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: var(--su); border: 1.5px solid var(--bo); border-radius: var(--r);
+  color: var(--ink); font: 800 14.5px/1 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.01em;
   cursor: pointer; transition: background .15s, color .15s, border-color .15s;
   white-space: nowrap;
 }
-.clt-tab.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.clt-tab.on { background: var(--ink); border-color: var(--ink); color: var(--bg);
+  box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--ink) 60%, transparent); }
 .clt-tab-ligue.on { background: linear-gradient(135deg,#d97706,#fbbf24); border-color: transparent; color: #fff; }
 .clt-tab:active { transform: scale(.97); }
 
@@ -210,6 +213,8 @@ ${LEAGUE_CSS}
 .clt-rl-hero { margin: 4px 16px 12px; padding: 16px; border-radius: var(--rl);
   background: var(--su); border: 1px solid var(--bo); box-shadow: var(--s1);
   border-left: 4px solid var(--lc, var(--a)); }
+/* Variante « tout en bas » (après le classement) : plus d'air au-dessus. */
+.clt-rl-hero--bottom { margin: 22px 16px 4px; }
 .clt-rl-top { display: flex; align-items: center; gap: 12px; }
 .clt-rl-medal { width: 44px; height: 44px; border-radius: var(--r-md); flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; color: #fff;
@@ -528,8 +533,8 @@ function _render(scope, data) {
     <h1 class="clt-title">Classement</h1>
     ${pill}
     <div class="clt-tabs">
-      <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">${icon("trophy", { size: 13, strokeWidth: 2 })} Conduite</button>
-      <button class="clt-tab ${scope === "theorie" ? "on" : ""}" data-scope="theorie">${icon("zap", { size: 13, strokeWidth: 2 })} Révision</button>
+      <button class="clt-tab ${scope === "ecole" ? "on" : ""}" data-scope="ecole">${icon("trophy", { size: 16, strokeWidth: 2.2 })} Conduite</button>
+      <button class="clt-tab ${scope === "theorie" ? "on" : ""}" data-scope="theorie">${icon("zap", { size: 16, strokeWidth: 2.2 })} Révision</button>
       <button class="clt-tab ${scope === "national" ? "on" : ""}" data-scope="national">National</button>
     </div>
     <p id="clt-scope-desc" class="clt-scope-desc">${SCOPE_DESC[scope] ?? ""}</p>
@@ -816,7 +821,8 @@ function _renderLeagueBody(rows) {
 }
 
 // ── Hero « Ta ligue » (ligues REMC) ───────────────────────────────
-function _remcLeagueHero(mine) {
+// atBottom : rendu en bas de page (après le classement) → marge haute + libellé.
+function _remcLeagueHero(mine, atBottom = false) {
   const sc = mine?.score ?? 0;
   const info = remcLeague(sc);
   const L = info.league;
@@ -831,7 +837,7 @@ function _remcLeagueHero(mine) {
       : `Encore <strong>${info.toNext}</strong> validation${info.toNext > 1 ? "s" : ""} pour atteindre l'Élite (prêt examen)`;
   const lc = info.elite ? "#f59e0b" : L.color;
   return `
-  <div class="clt-rl-hero" style="--lc:${lc}">
+  <div class="clt-rl-hero${atBottom ? " clt-rl-hero--bottom" : ""}" style="--lc:${lc}">
     <div class="clt-rl-top">
       <div class="clt-rl-medal">${info.elite ? "★" : L.n}</div>
       <div class="clt-rl-info">
@@ -870,7 +876,10 @@ function _renderAllTimeBody(rows, scope, hof) {
     const info = remcLeague(r.score);
     return info.elite ? "#f59e0b" : info.league.color;
   };
-  return `${_remcLeagueHero(mine)}${_rankedBody(top, mine, meOutside, fmtScore, leagueColorOf)}${hofHtml}`;
+  // Le héros « Classement avec ton moniteur / Élite » passe TOUT EN BAS,
+  // après le classement (et le Hall of Fame) : c'est un récap de progression,
+  // pas l'info principale — la liste vient en premier.
+  return `${_rankedBody(top, mine, meOutside, fmtScore, leagueColorOf)}${hofHtml}${_remcLeagueHero(mine, true)}`;
 }
 
 // ─── Wire ────────────────────────────────────────────────────────

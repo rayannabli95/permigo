@@ -24,7 +24,10 @@ import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
 import { getMyChests } from "@/utils/game-state.js";
 import { mountFeedbackFeed } from "@/components/eleve/feedback-feed.js";
-import { mountDailyQuests } from "@/components/eleve/daily-quests.js";
+import {
+  mountDailyQuests,
+  cleanQuestTitle,
+} from "@/components/eleve/daily-quests.js";
 import { toast } from "@/components/common/toast.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
@@ -423,9 +426,9 @@ const STYLE = `<style>
 
 /* ── Tes ligues — 2 cartes premium (École + Révision) ── */
 .acc-lg-head {
-  font: 700 11px/1 'Plus Jakarta Sans', sans-serif; text-transform: uppercase;
-  letter-spacing: .12em; color: var(--mu2); margin: 26px 20px 14px;
-  display: flex; align-items: center; gap: 8px;
+  font: 800 18px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em;
+  color: var(--ink); margin: 28px 18px 14px;
+  display: flex; align-items: center; gap: 10px;
 }
 .acc-lg-head::after {
   content: ''; flex: 1; height: 1px;
@@ -495,13 +498,13 @@ const STYLE = `<style>
 
 /* ── Tag label ── */
 .acc-lg-tag {
-  display: inline-flex; align-items: center; gap: 4px;
-  font: 700 10.5px/1 'Plus Jakarta Sans', sans-serif;
+  display: inline-flex; align-items: center; gap: 5px;
+  font: 800 13px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em;
   color: var(--acc-vio);
   position: relative; z-index: 1;
   background: color-mix(in srgb, var(--a) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--a) 18%, transparent);
-  border-radius: 100px; padding: 3px 7px 3px 5px;
+  border-radius: 100px; padding: 5px 11px 5px 8px;
 }
 
 /* ── Le RANG — héros de la carte ── */
@@ -532,7 +535,7 @@ const STYLE = `<style>
   position: relative; z-index: 1;
 }
 .acc-lg-sub {
-  font: 500 11px/1.3 'Inter', sans-serif; color: var(--mu);
+  font: 600 12.5px/1.3 'Inter', sans-serif; color: var(--mu);
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 /* Pastille chevron violette pleine — affordance forte */
@@ -790,8 +793,8 @@ const STYLE = `<style>
   margin: 6px 16px 0;
 }
 .acc2-premium-link {
-  display: flex; align-items: center; gap: 12px;
-  padding: 13px 14px; background: var(--su);
+  display: flex; align-items: center; gap: 14px;
+  padding: 17px 16px; background: var(--su);
   border: 1px solid var(--bo); text-decoration: none;
   -webkit-tap-highlight-color: transparent;
   transition: background .12s;
@@ -800,20 +803,21 @@ const STYLE = `<style>
 .acc2-premium-link:last-child  { border-radius: 0 0 18px 18px; }
 .acc2-premium-link:active { background: color-mix(in srgb, var(--a) 6%, transparent); }
 .acc2-premium-link-ico {
-  width: 38px; height: 38px; flex: none;
-  background: color-mix(in srgb, var(--a) 10%, transparent); border-radius: 12px;
+  width: 46px; height: 46px; flex: none;
+  background: color-mix(in srgb, var(--a) 10%, transparent); border-radius: 14px;
   display: grid; place-items: center;
 }
 .acc2-premium-link-ico img {
-  width: 26px; height: 26px; object-fit: contain;
+  width: 32px; height: 32px; object-fit: contain;
   filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--a) 25%, transparent));
 }
 .acc2-premium-link-txt { flex: 1; min-width: 0; }
 .acc2-premium-link-t {
-  font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  letter-spacing: -.01em;
 }
 .acc2-premium-link-s {
-  font: 500 11.5px/1 'Inter', sans-serif; color: var(--mu); margin-top: 2px;
+  font: 500 12.5px/1.35 'Inter', sans-serif; color: var(--mu); margin-top: 3px;
 }
 .acc2-premium-link-arr {
   flex: none; display: inline-flex; align-items: center; justify-content: center;
@@ -1502,11 +1506,7 @@ function render({
 
   <!-- ══ BELOW FOLD ══ -->
 
-  <!-- ══ VA PLUS LOIN — carte premium Examen blanc en vedette ══ -->
-  <div class="acc2-sec" aria-label="Va plus loin">
-    <h2>Va plus loin</h2>
-    <a href="#/trophees" style="text-decoration:none">Tout voir</a>
-  </div>
+  <!-- ══ Carte premium Examen blanc en vedette (sans en-tête de section) ══ -->
 
   <!-- Carte Examen blanc en vedette -->
   <a class="acc2-premium" id="acc-exam-conduite" href="#/exam-conduite"
@@ -2028,7 +2028,7 @@ const _QUEST_BTN = {
 function _normalizeQuest(q) {
   const reward = q.reward_gemmes > 0 ? `+${q.reward_gemmes} volants` : "";
   return {
-    label: q.title,
+    label: cleanQuestTitle(q.title),
     sub: reward,
     href: _QUEST_HREF[q.quest_id] ?? "#/parcours",
     btnText: _QUEST_BTN[q.quest_id] ?? "Commencer →",

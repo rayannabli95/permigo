@@ -15,6 +15,15 @@ import { flyVolants } from "@/components/eleve/volant-reward.js";
 
 const STYLE_ID = "daily-quests-style";
 
+// Nettoie un libellé de quête venu de la DB : retire le suffixe technique
+// « (≥70%) » / « (70 %) » en fin de titre — du jargon qui ne parle pas à
+// l'élève (« Réussir 1 quiz (≥70%) » → « Réussir 1 quiz »).
+export function cleanQuestTitle(title) {
+  return String(title ?? "")
+    .replace(/\s*\([^)]*%\)\s*$/u, "")
+    .trim();
+}
+
 // img/mask = illustration PNG (éclair/badge/cahier) ; ico = icône SVG classique
 const CAT_CFG = {
   quiz: { mask: "cahier", color: "var(--a)" },
@@ -284,7 +293,7 @@ function renderCard(q) {
   return `
     <div class="dq-card ${stCls}" data-quest-id="${esc(String(q.quest_id))}"
          role="${ready ? "button" : "article"}" tabindex="${ready ? "0" : "-1"}"
-         aria-label="${esc(q.title)}">
+         aria-label="${esc(cleanQuestTitle(q.title))}">
       ${badge}
       <div class="dq-ico" style="background:${cat.color}18">
         ${
@@ -295,7 +304,7 @@ function renderCard(q) {
               : icon(cat.ico, { size: 16, strokeWidth: 2.2, color: cat.color })
         }
       </div>
-      <div class="dq-name">${esc(q.title)}</div>
+      <div class="dq-name">${esc(cleanQuestTitle(q.title))}</div>
       <div class="dq-track">
         <div class="dq-fill" style="width:${pct}%;background:${fillClr}"></div>
       </div>
