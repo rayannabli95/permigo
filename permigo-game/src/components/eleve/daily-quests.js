@@ -97,7 +97,9 @@ function ensureStyle() {
   }
   .dq-badge--claim { background: var(--a); color: var(--a-ink); }
   .dq-badge--done  {
-    background: var(--gr); color: #fff;
+    /* vert assombri (#15803d) : blanc sur --gr (#22c55e) à 9px = 2.27:1 (échec
+       WCAG AA). #15803d donne ~5:1 avec le blanc → conforme. */
+    background: #15803d; color: #fff;
     display: flex; align-items: center; gap: 3px;
   }
 

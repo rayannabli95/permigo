@@ -12,12 +12,27 @@ const EMAIL = ELEVE.email;
 const PWD = ELEVE.pwd;
 
 async function loginAsEleve(page) {
+  // Marque cookies + tutos/tour guidés comme vus : sinon l'overlay du tour
+  // (.gt-root / .gt-catch) intercepte les clics sur le parcours (flaky → timeout).
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem("permigo_cookie_consent", "essential");
+      localStorage.setItem("pg-tour-eleve-v1", "1");
+      localStorage.setItem("permigo-parcours-tuto-v1", "1");
+      localStorage.setItem("permigo-theory-tuto-v1", "1");
+      localStorage.setItem("pg-nav-intro-done", "1");
+    } catch {
+      /* ignore */
+    }
+  });
   await page.goto("/#/login");
   await page.waitForSelector("#lg-email", { timeout: 12_000 });
   await page.fill("#lg-email", EMAIL);
   await page.fill("#lg-pwd", PWD);
   await page.click("#lg-submit");
-  await page.waitForSelector(".acc2-hero-hi", { timeout: 20_000 });
+  // Shell monté post-login (accueil redesign : l'ancien .acc2-hero-hi n'existe plus).
+  await page.waitForSelector("body.has-chrome", { timeout: 25_000 });
+  await page.waitForSelector(".acc2", { timeout: 20_000 });
 }
 
 // ─── Login ──────────────────────────────────────────────────────────
@@ -31,8 +46,8 @@ test.describe("Login", () => {
 
   test("connexion élève réussie → accueil chargé", async ({ page }) => {
     await loginAsEleve(page);
-    await expect(page.locator(".acc2-hero-hi")).toBeVisible();
-    await expect(page.locator(".acc2-xp-bar")).toBeVisible();
+    await expect(page.locator(".acc2")).toBeVisible();
+    await expect(page.locator(".acc2-hero-v2")).toBeVisible();
   });
 });
 
@@ -41,11 +56,11 @@ test.describe("Accueil élève", () => {
   test.beforeEach(async ({ page }) => loginAsEleve(page));
 
   test("hero section visible", async ({ page }) => {
-    await expect(page.locator(".acc2-hero")).toBeVisible();
+    await expect(page.locator(".acc2-hero-v2")).toBeVisible();
   });
 
-  test("CTA vers parcours présent", async ({ page }) => {
-    await expect(page.locator('[data-href="#/parcours"]').first()).toBeVisible({
+  test("CTA principal (king) présent", async ({ page }) => {
+    await expect(page.locator(".acc2-cta-king").first()).toBeVisible({
       timeout: 10_000,
     });
   });
@@ -65,16 +80,25 @@ test.describe("Parcours REMC", () => {
     await expect(page.locator(".prc-node").first()).toBeVisible();
   });
 
+  // NB : les nœuds ont une animation continue (« not stable » pour l'auto-wait)
+  // et un overlay de tour peut intercepter le pointeur → on clique en DOM direct
+  // (.evaluate(el => el.click())), comme le fait a11y.spec.js.
   test("fiche s'ouvre au clic sur un nœud", async ({ page }) => {
-    await page.locator(".prc-node").first().click();
+    await page
+      .locator(".prc-node:not(.locked)")
+      .first()
+      .evaluate((el) => el.click());
     await page.waitForSelector("#bsheet.open", { timeout: 6_000 });
     await expect(page.locator(".fiche-hero")).toBeVisible();
   });
 
   test("fiche se referme avec le bouton ×", async ({ page }) => {
-    await page.locator(".prc-node").first().click();
+    await page
+      .locator(".prc-node:not(.locked)")
+      .first()
+      .evaluate((el) => el.click());
     await page.waitForSelector("#bsheet.open", { timeout: 6_000 });
-    await page.locator(".fiche-close").click();
+    await page.locator(".fiche-close").evaluate((el) => el.click());
     await expect(page.locator("#bsheet")).not.toHaveClass(/open/, {
       timeout: 4_000,
     });
