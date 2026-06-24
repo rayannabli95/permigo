@@ -313,7 +313,10 @@ export async function mount(root, openKey = null) {
         .eq("user_id", me.id)
         .maybeSingle(),
     ]);
-    if (achRes.value?.error) throw achRes.value.error;
+    // Si la RPC échoue, on NE jette PAS : on rend quand même la grille (tout
+    // verrouillé) — l'élève voit les trophées à viser au lieu d'un écran vide.
+    if (achRes.value?.error)
+      console.warn("[trophees] get_my_achievements:", achRes.value.error);
     const stats = {
       compCount: cntRes.value?.count ?? 0,
       streak: strkRes.value?.data?.current_streak ?? 0,

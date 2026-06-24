@@ -185,8 +185,10 @@ async function load(root) {
   // ou être refusée (compte non promu 'owner') → état vide explicite, pas un
   // écran blanc.
   const overviewErr = overviewRes.value?.error || overviewRes.reason;
-  const overview =
-    overviewRes.value?.data?.[0] || overviewRes.value?.data || null;
+  // Un tableau VIDE est « truthy » → on le ramène à null pour déclencher
+  // l'état indisponible plutôt qu'un cockpit tout-à-zéro trompeur.
+  const _d = overviewRes.value?.data;
+  const overview = Array.isArray(_d) ? (_d[0] ?? null) : (_d ?? null);
 
   if (overviewErr || !overview) {
     renderUnavailable(root, overviewErr);
@@ -247,8 +249,9 @@ function renderSchools(root, schools) {
 function renderUnavailable(root, err) {
   const msg = String(err?.message || err || "");
   const forbidden = /forbidden|owner only|permission/i.test(msg);
-  root.querySelector("#ow-kpis")?.replaceChildren();
-  root.querySelector("#ow-schools")?.replaceChildren();
+  // Retire toute la section « Écoles » (sinon un titre de section orphelin
+  // reste au-dessus d'un corps vide).
+  root.querySelector("#ow-schools")?.closest(".ow-section")?.remove();
   const kpis = root.querySelector("#ow-kpis");
   if (kpis) {
     kpis.outerHTML = `<div class="ow-empty">
