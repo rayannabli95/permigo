@@ -34,6 +34,7 @@ import { theoryLeague } from "@/utils/theory-league.js";
 import { getDailyStreak } from "@/services/daily-quiz.js";
 import { isStandalone } from "@/utils/pwa.js";
 import { openInstallSheet } from "@/components/common/install-nudge.js";
+import { CATALOG } from "@/data/achievements.js";
 
 // Tour guidé élève — 1× à la première arrivée sur l'accueil (l'onboarding
 // plein écran est déjà passé : main.js le monte AVANT cette page).
@@ -689,7 +690,7 @@ const STYLE = `<style>
 }
 .acc2-permis-val {
   font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--acc-vio); font-variant-numeric: tabular-nums;
+  color: var(--a-txt); font-variant-numeric: tabular-nums;
 }
 .acc2-permis-bar {
   height: 9px; border-radius: 999px; background: var(--bo);
@@ -875,20 +876,44 @@ const STYLE = `<style>
 }
 .acc2-sec a {
   font: 700 12.5px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--acc-vio); text-decoration: none;
+  /* --a-txt = accent assombri pour le texte (l'accent pur fait ~2:1 sur clair, échec AA) */
+  color: var(--a-txt); text-decoration: none;
 }
 
 /* ═══════════════ BADGES TEASER ══════════════════════════════════ */
 .acc2-badges {
-  display: flex; gap: 9px; overflow: visible;
-  padding: 4px 18px 4px;
+  display: flex; gap: 9px;
+  padding: 6px 18px 8px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.acc2-badges::-webkit-scrollbar { display: none; }
 .acc2-badge-cell {
   width: 62px; height: 62px; flex: none;
   background: var(--su); border: 1px solid var(--bo);
   border-radius: 18px; display: grid; place-items: center;
   box-shadow: 0 6px 16px -8px rgba(80,50,160,.25);
   position: relative;
+  scroll-snap-align: start;
+  cursor: pointer; text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .14s var(--ease-spring), box-shadow .14s ease;
+}
+.acc2-badge-cell:active { transform: scale(.92); }
+.acc2-badge-cell:focus-visible {
+  outline: 2px solid var(--a); outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .acc2-badge-cell:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px -8px rgba(80,50,160,.4);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .acc2-badge-cell { transition: none; }
+  .acc2-badge-cell:active { transform: none; }
 }
 .acc2-badge-cell img {
   width: 46px; height: 46px; object-fit: contain;
@@ -1027,10 +1052,12 @@ export async function mount(root) {
       ]);
 
     // RPCs optionnels (peuvent ne pas exister encore)
-    const [pendingSessionsRes, todayQuestsRes] = await Promise.allSettled([
-      sb.rpc("get_pending_sessions_eleve"),
-      sb.rpc("get_today_quests"),
-    ]);
+    const [pendingSessionsRes, todayQuestsRes, achievementsRes] =
+      await Promise.allSettled([
+        sb.rpc("get_pending_sessions_eleve"),
+        sb.rpc("get_today_quests"),
+        sb.rpc("get_my_achievements"),
+      ]);
 
     const profile = profileRes.value?.data || {
       prenom: me.prenom || "Toi",
@@ -1111,6 +1138,10 @@ export async function mount(root) {
     // Indépendant du streak serveur (streaks table), purement local.
     const dailyStreakCount = getDailyStreak();
 
+    // Trophées réels pour le rail « Tes badges » (plus de badges en dur qui
+    // mentent). RPC optionnelle → [] si indispo (rail = teaser à viser).
+    const achievements = achievementsRes.value?.data || [];
+
     track("streak.viewed", { days: streak.current_streak, status: streakSt });
 
     root.innerHTML = render({
@@ -1126,6 +1157,7 @@ export async function mount(root) {
       pendingNotif,
       dailyQuiz,
       dailyStreakCount,
+      achievements,
     });
     wire(root, {
       streak,
@@ -1235,6 +1267,57 @@ function streakStatus(streak) {
   return hoursLeft < 6 ? "critical" : "at_risk";
 }
 
+// ─── Rail « Tes badges » ──────────────────────────────────────────
+// Aperçu interactif des VRAIS trophées de l'élève (plus de badges en dur) :
+// jusqu'à 4 débloqués les plus récents + le prochain à viser (verrouillé).
+// Chaque vignette est un lien profond #/trophees/{key} → ouvre le détail.
+function renderBadgesRail(achievements = []) {
+  const unlockedKeys = new Set(achievements.map((a) => a.achievement_key));
+  // Set des trophées déjà vus (partagé avec trophees.js / nav-bottom).
+  let seen = new Set();
+  try {
+    seen = new Set(JSON.parse(localStorage.getItem("pg-troph-seen") || "[]"));
+  } catch {
+    /* localStorage indispo → tous neufs, pas grave */
+  }
+
+  // Débloqués, du plus récent au plus ancien, mappés sur le catalogue.
+  const recent = achievements
+    .slice()
+    .sort(
+      (a, b) =>
+        new Date(b.unlocked_at || 0).getTime() -
+        new Date(a.unlocked_at || 0).getTime(),
+    )
+    .map((a) => CATALOG.find((t) => t.key === a.achievement_key))
+    .filter(Boolean)
+    .slice(0, 4);
+
+  // Prochain(s) à viser = premiers du catalogue non débloqués (complète à 5).
+  const locked = CATALOG.filter((t) => !unlockedKeys.has(t.key));
+  const nextLocked = locked.slice(0, Math.max(1, 5 - recent.length));
+
+  const cells = [];
+  for (const t of recent) {
+    const isNew = !seen.has(t.key);
+    cells.push(`
+      <a class="acc2-badge-cell${isNew ? " acc2-badge-new" : ""}" role="listitem"
+         href="#/trophees/${esc(t.key)}"
+         aria-label="Trophée ${esc(t.title)}${isNew ? ", nouveau" : ""}">
+        <img src="${esc(t.image || "")}" alt="" loading="lazy">
+      </a>`);
+  }
+  for (const t of nextLocked) {
+    cells.push(`
+      <a class="acc2-badge-cell acc2-badge-locked" role="listitem"
+         href="#/trophees/${esc(t.key)}"
+         aria-label="Trophée à débloquer : ${esc(t.title)}">
+        <img src="${esc(t.image || "")}" alt="" loading="lazy">
+      </a>`);
+  }
+  return cells.join("");
+}
+
 // ─── Render ───────────────────────────────────────────────────────
 function render({
   me,
@@ -1249,6 +1332,7 @@ function render({
   pendingNotif,
   dailyQuiz,
   dailyStreakCount = 0,
+  achievements = [],
 }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom = profile.prenom || me.prenom || "Toi";
@@ -1474,22 +1558,8 @@ function render({
     <h2>Tes badges</h2>
     <a href="#/trophees" id="acc-badges-voir-tout">Voir tout</a>
   </div>
-  <div class="acc2-badges" aria-label="Aperçu de tes badges">
-    <span class="acc2-badge-cell acc2-badge-new" aria-label="Badge série 7 jours">
-      <img src="/skins/trophy-streak-7d.webp" alt="" loading="lazy">
-    </span>
-    <span class="acc2-badge-cell" aria-label="Badge conduite">
-      <img src="/skins/badge-3d-03.webp" alt="" loading="lazy">
-    </span>
-    <span class="acc2-badge-cell" aria-label="Badge premier quiz parfait">
-      <img src="/skins/trophy-first-quiz-perfect.webp" alt="" loading="lazy">
-    </span>
-    <span class="acc2-badge-cell" aria-label="Badge boussole">
-      <img src="/skins/badge-3d-06.webp" alt="" loading="lazy">
-    </span>
-    <span class="acc2-badge-cell acc2-badge-locked" aria-label="Badge ultime — verrouillé">
-      <img src="/skins/badge-3d-ultimate.webp" alt="" loading="lazy">
-    </span>
+  <div class="acc2-badges" role="list" aria-label="Aperçu de tes trophées">
+    ${renderBadgesRail(achievements)}
   </div>
 
 </div>

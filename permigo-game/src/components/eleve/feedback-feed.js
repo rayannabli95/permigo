@@ -34,10 +34,18 @@ function ensureStyle() {
 
   .fft-hd {
     display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; margin-bottom: 0;
-    cursor: pointer; -webkit-tap-highlight-color: transparent;
-    padding: 8px 0; user-select: none;
+    gap: 8px; margin-bottom: 0;
   }
+  /* Le toggle est désormais un VRAI bouton (plus de div role=button imbriquant
+     un autre bouton → corrige nested-interactive). Reset des styles natifs. */
+  .fft-hd-toggle {
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: none; border: none; font: inherit; color: inherit; text-align: left;
+    cursor: pointer; padding: 8px 0; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .fft-hd-toggle:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; border-radius: 8px; }
   .fft-hd-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
   .fft-title {
     font: 800 16px/1.15 'Plus Jakarta Sans', sans-serif;
@@ -255,25 +263,24 @@ export async function mountFeedbackFeed(
   wrap.className = "fft-section";
   wrap.id = "ff-section";
   wrap.innerHTML = `
-    <div class="fft-hd" id="ff-toggle" role="button"
-         aria-expanded="false" aria-controls="ff-timeline-wrap"
-         tabindex="0">
-      <div class="fft-hd-left">
-        <div>
-          <div class="fft-title">
-            <span class="fft-title-ico">${icon("message-circle", { size: 16, strokeWidth: 2.2 })}</span>
-            ${esc(title)}
+    <div class="fft-hd">
+      <button class="fft-hd-toggle" id="ff-toggle" type="button"
+              aria-expanded="false" aria-controls="ff-timeline-wrap">
+        <div class="fft-hd-left">
+          <div>
+            <div class="fft-title">
+              <span class="fft-title-ico">${icon("message-circle", { size: 16, strokeWidth: 2.2 })}</span>
+              ${esc(title)}
+            </div>
+            ${singleMoniteur ? `<div class="fft-sub">Avec ${esc(singleMoniteur)}</div>` : ""}
           </div>
-          ${singleMoniteur ? `<div class="fft-sub">Avec ${esc(singleMoniteur)}</div>` : ""}
+          <span class="fft-count">${esc(countLabel)}</span>
         </div>
-        <span class="fft-count">${esc(countLabel)}</span>
-      </div>
-      <div class="fft-hd-right">
-        <button class="fft-all" id="ff-see-all" aria-label="Voir tout le fil">
-          Tout voir ${icon("chevron-right", { size: 13, strokeWidth: 2.5 })}
-        </button>
         <span class="fft-chevron">${icon("chevron-down", { size: 16, strokeWidth: 2.2 })}</span>
-      </div>
+      </button>
+      <button class="fft-all" id="ff-see-all" aria-label="Voir tout le fil">
+        Tout voir ${icon("chevron-right", { size: 13, strokeWidth: 2.5 })}
+      </button>
     </div>
     <div class="fft-timeline-wrap" id="ff-timeline-wrap">
       <div class="fft-timeline">
@@ -300,13 +307,7 @@ export async function mountFeedbackFeed(
       track("feedback_feed.expanded", { count: events.length });
     }
   });
-  // Accessibilité clavier
-  toggleEl?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      toggleEl.click();
-    }
-  });
+  // (clavier géré nativement par le <button> #ff-toggle)
 
   // "Tout voir" ne déclenche pas le toggle
   wrap.querySelector("#ff-see-all")?.addEventListener("click", (e) => {
