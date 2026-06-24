@@ -249,6 +249,43 @@ const STYLE = `<style>
 .bo2-hero:active .bo2-hero-cta { transform: translateY(2px); box-shadow: 0 2px 0 var(--adk), 0 5px 10px rgba(70,163,2,.30); }
 .bo2-hero-owned { font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--adk); }
 
+/* ═══ Objectif épinglé (wishlist, localStorage) ═══ */
+.bo2-obj {
+  position: relative; overflow: hidden; margin: 18px 16px 0; padding: 14px 15px;
+  display: flex; gap: 13px; align-items: center; cursor: pointer;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FCFAF3 100%);
+  border: 1px solid var(--g-line); border-radius: var(--g-rad); box-shadow: var(--g-sh);
+  transition: transform .14s var(--ease-spring);
+}
+.bo2-obj:active { transform: scale(.99); }
+.bo2-obj::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 140% at 88% -20%, rgba(231,198,114,.20), transparent 60%); }
+.bo2-obj-thumb {
+  position: relative; z-index: 1; width: 76px; height: 60px; flex: none; border-radius: 14px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(70% 60% at 50% 38%, rgba(231,198,114,.32), transparent 70%), linear-gradient(180deg, #FBF3DD, #F4E7C2);
+  border: 1px solid var(--g-gold2); box-shadow: inset 0 1px 0 #fff;
+}
+.bo2-obj-thumb img { max-width: 72px; max-height: 50px; object-fit: contain; filter: drop-shadow(0 5px 7px rgba(120,80,10,.30)); }
+.bo2-obj-thumb.is-cover { background: #0c0a12; border-color: var(--g-gold3); }
+.bo2-obj-thumb.is-cover img { max-width: none; max-height: none; width: 100%; height: 100%; object-fit: cover; filter: none; }
+.bo2-obj-body { position: relative; z-index: 1; flex: 1; min-width: 0; }
+.bo2-obj-kick { display: flex; align-items: center; gap: 6px; font: 800 10px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .09em; text-transform: uppercase; color: var(--g-gold4); }
+.bo2-obj-kick .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--g-gold3); box-shadow: 0 0 0 3px rgba(201,154,59,.18); }
+.bo2-obj-name { font: 800 15px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--g-ink); letter-spacing: -.02em; margin: 4px 24px 9px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bo2-obj-bar { height: 9px; border-radius: 99px; background: #EFE9DA; overflow: hidden; box-shadow: inset 0 1px 2px rgba(28,26,23,.10); }
+.bo2-obj-bar > i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--g-gold2), var(--g-gold3) 70%, var(--g-gold4)); box-shadow: 0 0 8px rgba(201,154,59,.5); transition: width .4s ease; }
+.bo2-obj-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 7px; gap: 10px; }
+.bo2-obj-meta .left { font: 600 11px/1.3 'Inter', sans-serif; color: var(--g-soft); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bo2-obj-meta .left b { color: var(--adk); }
+.bo2-obj-meta .nums { flex: none; font: 700 12.5px/1 'IBM Plex Mono', monospace; color: #7a5a16; font-variant-numeric: tabular-nums; }
+.bo2-obj-x { position: absolute; top: 8px; right: 8px; z-index: 2; width: 28px; height: 28px; border: 0; border-radius: 50%; background: #F2EFE7; color: var(--g-mute); font-size: 16px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.bo2-obj-x::before { content: ''; position: absolute; inset: -6px; }
+
+/* Bouton « définir comme objectif » dans le modal */
+.bo2-modal-obj { display: flex; align-items: center; justify-content: center; gap: 7px; width: calc(100% - 48px); margin: 10px 24px 0; min-height: 46px; border: 1px solid var(--g-gold2); border-radius: 14px; background: #FBF7EC; color: var(--g-gold4); font: 800 13px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
+.bo2-modal-obj.on { background: rgba(88,204,2,.10); border-color: rgba(88,204,2,.40); color: var(--adk); }
+.bo2-modal-obj:active { transform: scale(.98); }
+
 /* ── Section heading ── */
 .bo2-sec { padding: 22px 18px 2px; display: flex; align-items: baseline; gap: 9px; }
 .bo2-sec-block { display: flex; flex-direction: column; }
@@ -600,6 +637,9 @@ export async function mount(root) {
     const badge = root.querySelector("[data-volant-balance]");
     if (badge) bumpVolantPill(badge);
 
+    // Objectif atteint → on le retire (le skin est obtenu)
+    if (getObjectif() === item.id) setObjectif(null);
+
     return true;
   }
 
@@ -721,8 +761,16 @@ export async function mount(root) {
     const heroHtml = hero ? renderHeroCard(hero, gemmes) : "";
     const introHtml = renderIntro();
 
+    // Objectif épinglé (wishlist) en tête, s'il existe et n'est pas déjà possédé
+    const objId = getObjectif();
+    const objItem = objId
+      ? allItems.find((i) => i.id === objId && !i.owned)
+      : null;
+    const objHtml = objItem ? renderObjectifCard(objItem, gemmes) : "";
+
     const total = rest.length + (hero ? 1 : 0);
     content.innerHTML = `
+      ${objHtml}
       ${heroHtml}
       ${introHtml}
       <div class="bo2-sec">
@@ -740,7 +788,30 @@ export async function mount(root) {
     wireGrid(content);
     wireIntro(content);
     _scanCovers(content);
+
+    // Carte objectif : clic = ouvre l'item, × = retire l'objectif
+    const objEl = content.querySelector(".bo2-obj");
+    if (objEl) {
+      objEl.querySelector("[data-obj-x]")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        haptic("tap");
+        setObjectif(null);
+        toast("Objectif retiré", "info");
+        renderTab(activeTab);
+      });
+      objEl.addEventListener("click", () => {
+        haptic("select");
+        const it = allItems.find((i) => i.id === objEl.dataset.itemId);
+        if (!it) return;
+        if (it.owned) toggleEquip(it);
+        else buyFlow(it, objEl);
+      });
+    }
   }
+
+  // Wishlist : re-render quand l'objectif change depuis le modal détail
+  _activeRerender = () => renderTab(activeTab);
+  _ensureObjListener();
 
   renderTab(activeTab);
 
@@ -985,6 +1056,66 @@ function _scanCovers(root) {
   root.querySelectorAll("[data-prev] img").forEach(_applyCover);
 }
 
+// ─── Objectif épinglé (wishlist) ──────────────────────────────
+// Stocké en localStorage : c'est une préférence perso (quel skin tu vises),
+// pas une donnée serveur → zéro migration. La barre se remplit avec ton solde
+// de volants, qui se gagne en révisant → le désir cosmétique tire la révision.
+const OBJ_KEY = "pg-boutique-objectif";
+function getObjectif() {
+  try {
+    return localStorage.getItem(OBJ_KEY) || null;
+  } catch {
+    return null;
+  }
+}
+function setObjectif(id) {
+  try {
+    if (id) localStorage.setItem(OBJ_KEY, id);
+    else localStorage.removeItem(OBJ_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+// Re-render de l'onglet courant quand l'objectif change depuis le modal.
+// Un seul listener window (posé une fois) → pas de fuite au remount de la page.
+let _activeRerender = null;
+let _objListenerSet = false;
+function _ensureObjListener() {
+  if (_objListenerSet) return;
+  _objListenerSet = true;
+  window.addEventListener("pg-objectif-changed", () => {
+    try {
+      _activeRerender?.();
+    } catch {
+      /* ignore */
+    }
+  });
+}
+
+function renderObjectifCard(item, gemmes) {
+  const r = rm(item.rarity);
+  const pct = Math.min(100, Math.round((gemmes / item.cost_gemmes) * 100));
+  const lacking = item.cost_gemmes - gemmes;
+  const ready = gemmes >= item.cost_gemmes;
+  const imgHtml = item.asset_url
+    ? `<img src="${esc(item.asset_url)}" alt="" aria-hidden="true">`
+    : `<span style="font-size:30px" aria-hidden="true">${_typeEmoji(item.type)}</span>`;
+  return `
+    <div class="bo2-obj" data-item-id="${esc(item.id)}" role="button" tabindex="0" aria-label="Objectif : ${esc(item.name)}, ${ready ? "tu peux l'acheter" : `encore ${lacking} volant${lacking > 1 ? "s" : ""}`}">
+      <button class="bo2-obj-x" data-obj-x type="button" aria-label="Retirer l'objectif">×</button>
+      <div class="bo2-obj-thumb" data-prev>${imgHtml}</div>
+      <div class="bo2-obj-body">
+        <div class="bo2-obj-kick"><span class="dot"></span>${esc(r.label)} · Ton objectif</div>
+        <div class="bo2-obj-name">${ready ? "Objectif atteint 🎉" : `Encore ${lacking} volant${lacking > 1 ? "s" : ""}`}</div>
+        <div class="bo2-obj-bar"><i style="width:${pct}%"></i></div>
+        <div class="bo2-obj-meta">
+          <span class="left">${ready ? `<b>${esc(item.name)}</b> — touche pour l'avoir` : "Gagné en <b>révisant</b>"}</span>
+          <span class="nums">${gemmes} / ${item.cost_gemmes}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
 // ─── Gem float animation ──────────────────────────────────────
 function showGemsFloat(root, text) {
   const badge = root.querySelector("#bo2-gems-badge");
@@ -1091,6 +1222,7 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
       ${priceBlock}
       ${balanceLine}
       ${cta}
+      ${item.owned ? "" : `<button class="bo2-modal-obj ${getObjectif() === item.id ? "on" : ""}" id="bo2-obj-toggle" type="button">${getObjectif() === item.id ? "✓ C'est ton objectif" : "🎯 Définir comme objectif"}</button>`}
       <button class="bo2-modal-cancel" id="bo2-modal-cancel">Fermer</button>
     </div>`;
 
@@ -1104,6 +1236,27 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
   track("boutique.detail_opened", { item_id: item.id });
   _scanCovers(overlay);
   overlay.querySelector("#bo2-modal-cancel")?.addEventListener("click", close);
+
+  // Wishlist : définir / retirer l'objectif depuis le modal détail
+  overlay.querySelector("#bo2-obj-toggle")?.addEventListener("click", () => {
+    const nowOn = getObjectif() !== item.id;
+    setObjectif(nowOn ? item.id : null);
+    const b = overlay.querySelector("#bo2-obj-toggle");
+    if (b) {
+      b.classList.toggle("on", nowOn);
+      b.textContent = nowOn
+        ? "✓ C'est ton objectif"
+        : "🎯 Définir comme objectif";
+    }
+    haptic("tap");
+    toast(
+      nowOn
+        ? "Objectif défini — gagne des volants en révisant !"
+        : "Objectif retiré",
+      nowOn ? "success" : "info",
+    );
+    window.dispatchEvent(new CustomEvent("pg-objectif-changed"));
+  });
 
   const ctaBtn = overlay.querySelector("#bo2-cta");
   if (ctaBtn && !ctaBtn.disabled) {
