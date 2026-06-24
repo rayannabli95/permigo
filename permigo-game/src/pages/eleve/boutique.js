@@ -174,6 +174,7 @@ const STYLE = `<style>
 
 /* ═══ Hero vedette — vitrine showroom ═══ */
 .bo2-hero {
+  --cg: rgba(255,224,150,.55); /* ambiance cover, teintée par data-rarity */
   margin: 18px 16px 0; border-radius: 26px; overflow: hidden; position: relative;
   padding: 16px 18px 16px; cursor: pointer;
   background:
@@ -184,6 +185,9 @@ const STYLE = `<style>
   transition: transform .14s var(--ease-spring);
 }
 .bo2-hero:active { transform: scale(.985); }
+.bo2-hero[data-rarity="rare"] { --cg: rgba(84,160,255,.5); }
+.bo2-hero[data-rarity="epique"] { --cg: rgba(168,107,255,.55); }
+.bo2-hero[data-rarity="legendaire"] { --cg: rgba(255,212,120,.62); box-shadow: var(--g-sh-lg), 0 0 0 1px var(--g-gold2), 0 18px 50px -16px rgba(201,154,59,.5), inset 0 1px 0 #fff; }
 .bo2-hero::before {
   content: ''; position: absolute; left: 50%; top: -40%; width: 150%; height: 130%;
   transform: translateX(-50%); pointer-events: none;
@@ -224,10 +228,17 @@ const STYLE = `<style>
 }
 .bo2-hero-emoji { font-size: 72px; position: relative; z-index: 2; animation: bo2HeroFloat 5s ease-in-out infinite; }
 @keyframes bo2HeroFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
-/* Hero en mode COVER (skin = scène opaque) : vitrine plein cadre arrondie */
-.bo2-hero-stage.is-cover { padding: 0; border-radius: 18px; overflow: hidden; background: #0c0a12; min-height: 168px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
-.bo2-hero-stage.is-cover::after { display: none; }
-.bo2-hero-stage.is-cover .bo2-hero-obj { max-width: none; max-height: none; width: 100%; height: 168px; object-fit: cover; filter: none; border-radius: 18px; }
+/* Hero en mode COVER (skin = scène opaque) : VITRINE CINÉMA plein cadre.
+   Même mise en scène que les cartes mais plus généreuse (la vedette domine). */
+.bo2-hero-stage.is-cover { padding: 0; border-radius: 18px; overflow: hidden; background: #0c0a12; min-height: 184px; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), inset 0 0 64px rgba(0,0,0,.5); }
+.bo2-hero-stage.is-cover::after {
+  content: ''; display: block; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: 18px;
+  background:
+    radial-gradient(80% 58% at 50% -10%, var(--cg), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.16), transparent 24%),
+    radial-gradient(130% 85% at 50% 124%, rgba(0,0,0,.5), transparent 60%);
+}
+.bo2-hero-stage.is-cover .bo2-hero-obj { max-width: none; max-height: none; width: 100%; height: 184px; object-fit: cover; filter: none; border-radius: 18px; }
 .bo2-hero-sheen {
   position: absolute; top: 0; left: -35%; width: 38%; height: 100%; z-index: 3; pointer-events: none;
   background: linear-gradient(105deg, transparent, rgba(255,255,255,.6), transparent); transform: skewX(-18deg);
@@ -325,6 +336,10 @@ const STYLE = `<style>
 
 /* ═══ Carte produit (galerie claire) ═══ */
 .bo2-card {
+  /* --cg = couleur d'ambiance projetee derriere/au-dessus d'une scene en
+     mode cover, teintee par la rarete (la scene parait eclairee, pas un
+     carre noir brut). Surchargee par data-rarity ci-dessous. */
+  --cg: rgba(255,255,255,.26);
   background: var(--g-card); border: 1px solid var(--g-line); border-radius: var(--g-rad);
   overflow: hidden; cursor: pointer; position: relative; user-select: none;
   box-shadow: var(--g-sh);
@@ -334,9 +349,9 @@ const STYLE = `<style>
 @media (hover: hover) { .bo2-card:hover { transform: translateY(-3px); box-shadow: var(--g-sh-lg); } }
 
 /* Lueur de rareté (sous la carte) — lisible même quand le skin est en cover */
-.bo2-card[data-rarity="rare"] { box-shadow: 0 10px 26px -8px rgba(62,120,200,.30), var(--g-sh); }
-.bo2-card[data-rarity="epique"] { box-shadow: 0 12px 28px -8px rgba(124,77,216,.34), var(--g-sh); }
-.bo2-card[data-rarity="legendaire"] { border-color: var(--g-gold2); box-shadow: 0 12px 30px -8px rgba(201,154,59,.40), var(--g-sh); }
+.bo2-card[data-rarity="rare"] { --cg: rgba(84,160,255,.5); box-shadow: 0 10px 26px -8px rgba(62,120,200,.36), var(--g-sh); }
+.bo2-card[data-rarity="epique"] { --cg: rgba(168,107,255,.55); box-shadow: 0 12px 30px -8px rgba(124,77,216,.42), var(--g-sh); }
+.bo2-card[data-rarity="legendaire"] { --cg: rgba(255,212,120,.6); border-color: var(--g-gold2); box-shadow: 0 14px 34px -8px rgba(201,154,59,.48), var(--g-sh); }
 
 /* ── Zone preview (objet flottant sur teinte claire de rareté) ── */
 .bo2-card-preview {
@@ -357,13 +372,26 @@ const STYLE = `<style>
 .bo2-card:active .bo2-card-preview img { transform: scale(.93); }
 @media (hover: hover) { .bo2-card:hover .bo2-card-preview img { transform: translateY(-4px) scale(1.05); } }
 
-/* ── Mode COVER : skins = scènes opaques (voitures néon) → vitrine plein cadre ── */
-.bo2-card-preview.is-cover { background: #0c0a12; }
+/* ── Mode COVER : skins = scènes opaques (voitures néon) → vitrine plein cadre ──
+   La scène sombre est MISE EN SCÈNE comme dans une vitrine éclairée : halo
+   d'ambiance teinté par la rareté (var --cg) qui déborde par le haut, lumière
+   directionnelle, cadre cinéma (liseré interne) et vignette de pied. Fini le
+   carré noir brut qui faisait « dark-mode IA ». */
+.bo2-card-preview.is-cover { background: #0c0a12; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), inset 0 0 44px rgba(0,0,0,.55); }
 .bo2-card-preview.is-cover img { max-width: none; max-height: none; width: 100%; height: 100%; object-fit: cover; filter: none; }
 .bo2-card-preview.is-cover::after { display: none; }
 .bo2-card-preview.is-cover::before {
   content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
-  background: linear-gradient(180deg, rgba(255,255,255,.10), transparent 30%), radial-gradient(120% 80% at 50% 122%, rgba(0,0,0,.4), transparent 58%);
+  background:
+    radial-gradient(85% 55% at 50% -12%, var(--cg), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,.16), transparent 26%),
+    radial-gradient(130% 85% at 50% 125%, rgba(0,0,0,.5), transparent 60%);
+}
+/* Légendaire en cover : le cadre respire (aura dorée qui scintille) */
+.bo2-card[data-rarity="legendaire"] .bo2-card-preview.is-cover { animation: bo2LegFrame 3.2s ease-in-out infinite; }
+@keyframes bo2LegFrame {
+  0%,100% { box-shadow: inset 0 0 0 1.5px rgba(255,212,120,.45), inset 0 0 44px rgba(0,0,0,.55); }
+  50% { box-shadow: inset 0 0 0 1.5px rgba(255,212,120,.85), inset 0 0 44px rgba(0,0,0,.42); }
 }
 /* sheen légendaire (cover) */
 .bo2-card[data-rarity="legendaire"] .bo2-card-preview .bo2-card-sheen {
@@ -484,8 +512,15 @@ const STYLE = `<style>
 }
 .bo2-halo-ring::after { content:''; position:absolute; left:50%; bottom:16px; transform:translateX(-50%); width:54%; height:18px; border-radius:50%; background: radial-gradient(50% 50% at 50% 50%, rgba(28,26,23,.20), transparent 72%); filter: blur(3px); z-index:1; }
 .bo2-halo-ring img { max-width: 80%; max-height: 150px; object-fit: contain; position: relative; z-index: 2; filter: drop-shadow(0 14px 16px rgba(28,26,23,.26)); }
-.bo2-halo-ring.is-cover { background: #0c0a12; }
+.bo2-halo-ring.is-cover { background: #0c0a12; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.10), inset 0 0 60px rgba(0,0,0,.5); }
 .bo2-halo-ring.is-cover::after { display: none; }
+.bo2-halo-ring.is-cover::before {
+  content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: 22px;
+  background:
+    radial-gradient(80% 55% at 50% -10%, rgba(255,212,120,.45), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.14), transparent 24%),
+    radial-gradient(130% 85% at 50% 124%, rgba(0,0,0,.5), transparent 60%);
+}
 .bo2-halo-ring.is-cover img { max-width: none; max-height: none; width: 100%; height: 100%; object-fit: cover; filter: none; }
 .bo2-halo-ring .bo2-fallback { font-size: 76px; position: relative; z-index: 2; }
 .bo2-halo-ring.legendary { border-color: var(--g-gold2); box-shadow: 0 0 0 1px var(--g-gold2), 0 14px 34px -10px rgba(201,154,59,.45); }
@@ -894,7 +929,7 @@ function renderHeroCard(item, gemmes) {
   }
 
   return `
-    <div class="bo2-hero" data-item-id="${esc(item.id)}" role="button" tabindex="0" aria-label="${esc(item.name)}, ${esc(r.label)}, ${isOwned ? (isEquipped ? "équipé" : "débloqué") : canAfford ? "acheter" : "pas assez de volants"}">
+    <div class="bo2-hero" data-item-id="${esc(item.id)}" data-rarity="${esc(item.rarity)}" role="button" tabindex="0" aria-label="${esc(item.name)}, ${esc(r.label)}, ${isOwned ? (isEquipped ? "équipé" : "débloqué") : canAfford ? "acheter" : "pas assez de volants"}">
       <span class="bo2-hero-tag">${isLeg ? "★ " : ""}${esc(r.label)}</span>
       <span class="bo2-hero-spark s1" aria-hidden="true"></span>
       <span class="bo2-hero-spark s2" aria-hidden="true"></span>
