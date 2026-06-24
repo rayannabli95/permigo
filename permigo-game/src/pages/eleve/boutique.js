@@ -23,18 +23,28 @@ import { volantImg } from "@/utils/volant.js";
 import { bumpVolantPill } from "@/components/eleve/volant-reward.js";
 import { showPurchaseReveal } from "@/components/eleve/purchase-reveal.js";
 
-const TABS = [
-  { key: "skins", label: "Skins", ico: "car" },
-  { key: "autres", label: "Fonds", ico: "image" },
+// Sections de la boutique. Voiture vs Personnage = distinction par asset_url
+// (les voitures ont '/car-' dans l'URL ; tout le reste des avatars = perso).
+const SECTIONS = [
+  {
+    key: "voitures",
+    label: "Voitures",
+    sub: "Affiche ta caisse au classement",
+    match: (i) => i.type === "avatar" && /\/car-/.test(i.asset_url || ""),
+  },
+  {
+    key: "persos",
+    label: "Personnages",
+    sub: "Ton avatar à côté de ton nom",
+    match: (i) => i.type === "avatar" && !/\/car-/.test(i.asset_url || ""),
+  },
+  {
+    key: "fonds",
+    label: "Fonds de permis",
+    sub: "Ta carte de permis virtuelle",
+    match: (i) => i.type === "permis_bg",
+  },
 ];
-
-// Types regroupés sous chaque onglet.
-// Les thèmes ne sont plus vendus ici : le changement de couleur/thème est
-// gratuit (F2P) dans les Réglages. La boutique reste cosmétique « flex ».
-const TAB_TYPES = {
-  skins: ["avatar"],
-  autres: ["permis_bg"],
-};
 
 // Rareté — palette harmonisée :
 //   commun    = bleu neutre  (aucune émotion)
@@ -293,7 +303,24 @@ const STYLE = `<style>
 .bo2-sec-sub { font: 500 12px/1.4 'Inter', sans-serif; color: var(--g-mute); margin-top: 2px; }
 .bo2-sec-count { margin-left: auto; align-self: center; font: 700 11.5px/1 'Inter', sans-serif; color: var(--g-mute); }
 
-/* ═══ Grid ═══ */
+/* Rangées horizontales (scroll-snap) — layout mockup */
+.bo2-row { display: flex; gap: 13px; overflow-x: auto; padding: 12px 16px 4px; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.bo2-row::-webkit-scrollbar { display: none; }
+.bo2-row > .bo2-card { flex: none; width: 158px; scroll-snap-align: start; }
+
+/* Récompense du jour */
+.bo2-daily { margin: 22px 16px 0; position: relative; overflow: hidden; display: flex; align-items: center; gap: 13px; background: linear-gradient(180deg,#FFFFFF,#FAF8F1); border: 1px dashed var(--g-gold3); border-radius: var(--g-rad); box-shadow: var(--g-sh); padding: 14px 15px; }
+.bo2-daily-ico { width: 50px; height: 50px; flex: none; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: radial-gradient(60% 60% at 50% 40%, rgba(231,198,114,.4), transparent 70%), linear-gradient(180deg,#FBF3DD,#F4E7C2); border: 1px solid var(--g-gold2); box-shadow: inset 0 1px 0 #fff; }
+.bo2-daily-ico img { filter: drop-shadow(0 3px 4px rgba(156,115,34,.4)); }
+.bo2-daily-body { flex: 1; min-width: 0; }
+.bo2-daily-kick { font: 800 9.5px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .09em; text-transform: uppercase; color: var(--g-gold4); }
+.bo2-daily-title { font: 800 14px/1.15 'Plus Jakarta Sans', sans-serif; color: var(--g-ink); margin: 3px 0; letter-spacing: -.01em; }
+.bo2-daily-sub { font: 500 11px/1.35 'Inter', sans-serif; color: var(--g-soft); }
+.bo2-daily-sub b { color: var(--g-ink); }
+.bo2-daily-cta { flex: none; min-height: 44px; padding: 0 16px; border: none; border-radius: 12px; cursor: pointer; font: 800 12.5px/1 'Plus Jakarta Sans', sans-serif; color: #fff; background: linear-gradient(180deg,#62d40a,var(--a)); box-shadow: 0 3px 0 var(--adk); }
+.bo2-daily-cta:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--adk); }
+
+/* ═══ Grid (conservé pour compatibilité éventuelle) ═══ */
 .bo2-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 13px; padding: 12px 16px 0; }
 
 /* ═══ Carte produit (galerie claire) ═══ */
@@ -568,10 +595,10 @@ export async function mount(root) {
         <span class="bo2-gems-sr">volants</span>
       </div>
     </div>
-    <div class="bo2-tabs" id="bo2-tabs" role="tablist">
-      ${TABS.map(
-        (t, i) => `
-        <button class="bo2-tab ${i === 0 ? "active" : ""}" data-tab="${esc(t.key)}" role="tab" aria-selected="${i === 0 ? "true" : "false"}">${icon(t.ico, { size: 14 })} ${esc(t.label)}</button>
+    <div class="bo2-tabs" id="bo2-tabs">
+      ${SECTIONS.map(
+        (s, i) => `
+        <button class="bo2-tab ${i === 0 ? "active" : ""}" data-jump="${esc(s.key)}" type="button">${esc(s.label)}</button>
       `,
       ).join("")}
     </div>
@@ -605,8 +632,6 @@ export async function mount(root) {
   const catalogFailed =
     itemsRes.status === "rejected" || !!itemsRes.value?.error;
   const allItems = itemsRes.value?.data ?? [];
-
-  let activeTab = TABS[0].key;
 
   // ── Source unique du solde après achat ────────────────────────
   function applyPurchase(result, item) {
@@ -658,7 +683,7 @@ export async function mount(root) {
             item,
             balanceBadge,
             cost: item.cost_gemmes,
-            onClose: () => renderTab(activeTab),
+            onClose: () => renderAll(),
           });
         }
       },
@@ -681,32 +706,6 @@ export async function mount(root) {
     }
     // Mute seulement la carte concernée (pas de re-render global)
     _muteCard(root, item);
-  }
-
-  function renderTab(tabKey) {
-    const types = TAB_TYPES[tabKey] || [];
-    const items = allItems.filter((i) => types.includes(i.type));
-    const content = root.querySelector("#bo2-content");
-    if (!content) return;
-
-    // Masque l'onglet Fonds s'il est vide (hygiène #8)
-    if (tabKey === "autres" && !items.length && !catalogFailed) {
-      content.innerHTML = `<div class="bo2-empty">
-        <div class="bo2-empty-ico">${icon("image", { size: 30 })}</div>
-        <div class="bo2-empty-t">Bientôt disponible</div>
-        <div class="bo2-empty-d">Ces fonds arrivent dans la prochaine mise à jour !</div>
-      </div>`;
-      return;
-    }
-
-    if (!items.length) {
-      content.innerHTML = catalogFailed
-        ? `<div class="bo2-empty"><div class="bo2-empty-ico">${icon("alert-circle", { size: 30 })}</div><div class="bo2-empty-t">Boutique indisponible</div><div class="bo2-empty-d">Vérifie ta connexion et réessaie.</div></div>`
-        : `<div class="bo2-empty"><div class="bo2-empty-ico">${icon("shopping-bag", { size: 30 })}</div><div class="bo2-empty-t">Bientôt disponible</div><div class="bo2-empty-d">Ces items arrivent dans la prochaine mise à jour !</div></div>`;
-      return;
-    }
-
-    renderGrid(content, items);
   }
 
   // Wire commun aux grilles
@@ -746,50 +745,72 @@ export async function mount(root) {
     });
   }
 
-  // ── Grille unifiée (skins + autres) ──────────────────────────
-  function renderGrid(content, items) {
-    const sorted = [...items].sort(
-      (a, b) =>
-        rm(b.rarity).order - rm(a.rarity).order || // légendaire en premier
-        b.cost_gemmes - a.cost_gemmes,
-    );
+  // ── Scroll vertical unique — toutes les sections ─────────────
+  const byRarityCost = (a, b) =>
+    rm(b.rarity).order - rm(a.rarity).order || b.cost_gemmes - a.cost_gemmes;
 
-    // Hero vedette = le légendaire, ou à défaut le plus cher
-    const hero = sorted.find((i) => i.rarity === "legendaire") || sorted[0];
-    const rest = sorted.filter((i) => i !== hero);
+  function renderAll() {
+    const content = root.querySelector("#bo2-content");
+    if (!content) return;
+    if (catalogFailed) {
+      content.innerHTML = `<div class="bo2-empty"><div class="bo2-empty-ico">${icon("alert-circle", { size: 30 })}</div><div class="bo2-empty-t">Boutique indisponible</div><div class="bo2-empty-d">Vérifie ta connexion et réessaie.</div></div>`;
+      return;
+    }
 
-    const heroHtml = hero ? renderHeroCard(hero, gemmes) : "";
-    const introHtml = renderIntro();
+    const cats = SECTIONS.map((s) => ({
+      ...s,
+      items: allItems.filter(s.match).sort(byRarityCost),
+    })).filter((c) => c.items.length);
 
-    // Objectif épinglé (wishlist) en tête, s'il existe et n'est pas déjà possédé
+    // Vedette du jour = item le plus prestigieux (légendaire / + cher) toutes catégories
+    const inShop = allItems.filter((i) => SECTIONS.some((s) => s.match(i)));
+    const vedette = [...inShop].sort(byRarityCost)[0] || null;
+
+    // Objectif : épinglé (localStorage) sinon suggestion = la vedette non possédée
     const objId = getObjectif();
-    const objItem = objId
+    let objItem = objId
       ? allItems.find((i) => i.id === objId && !i.owned)
       : null;
-    const objHtml = objItem ? renderObjectifCard(objItem, gemmes) : "";
+    const objPinned = !!objItem;
+    if (!objItem && vedette && !vedette.owned) objItem = vedette;
+    const objHtml = objItem
+      ? renderObjectifCard(objItem, gemmes, objPinned)
+      : "";
 
-    const total = rest.length + (hero ? 1 : 0);
+    const vedetteHtml = vedette
+      ? `<div class="bo2-sec"><div class="bo2-sec-block"><div class="bo2-sec-title">Vedette du jour</div><div class="bo2-sec-sub">La pièce à viser</div></div><span class="bo2-sec-count">✦ Sélection</span></div>${renderHeroCard(vedette, gemmes)}`
+      : "";
+
+    const sectionsHtml = cats
+      .map(
+        (c) => `
+      <div class="bo2-sec" id="bo2-sec-${esc(c.key)}">
+        <div class="bo2-sec-block"><div class="bo2-sec-title">${esc(c.label)}</div><div class="bo2-sec-sub">${esc(c.sub)}</div></div>
+        <span class="bo2-sec-count">${c.items.length}</span>
+      </div>
+      <div class="bo2-row">${c.items.map((it, idx) => renderGridCard(it, gemmes, idx)).join("")}</div>`,
+      )
+      .join("");
+
     content.innerHTML = `
       ${objHtml}
-      ${heroHtml}
-      ${introHtml}
-      <div class="bo2-sec">
-        <div class="bo2-sec-block">
-          <div class="bo2-sec-title">${activeTab === "skins" ? "Skins & styles" : "Fonds de permis"}</div>
-          <div class="bo2-sec-sub">Débloque ton style sur PermiGo</div>
-        </div>
-        <span class="bo2-sec-count">${total} pièce${total > 1 ? "s" : ""}</span>
-      </div>
-      <div class="bo2-grid">
-        ${rest.map((item, idx) => renderGridCard(item, gemmes, idx)).join("")}
-      </div>
+      ${renderIntro()}
+      ${vedetteHtml}
+      ${sectionsHtml}
+      ${renderDailyCard()}
       <div class="bo2-note">Les skins sont 100 % cosmétiques — du style, jamais d'avantage.</div>`;
 
     wireGrid(content);
     wireIntro(content);
     _scanCovers(content);
 
-    // Carte objectif : clic = ouvre l'item, × = retire l'objectif
+    // CTA "Réviser" de la récompense du jour
+    content.querySelector("[data-go-revise]")?.addEventListener("click", () => {
+      haptic("tap");
+      location.hash = "#/parcours";
+    });
+
+    // Carte objectif : clic = ouvre l'item, × = retire (si épinglé)
     const objEl = content.querySelector(".bo2-obj");
     if (objEl) {
       objEl.querySelector("[data-obj-x]")?.addEventListener("click", (e) => {
@@ -797,7 +818,7 @@ export async function mount(root) {
         haptic("tap");
         setObjectif(null);
         toast("Objectif retiré", "info");
-        renderTab(activeTab);
+        renderAll();
       });
       objEl.addEventListener("click", () => {
         haptic("select");
@@ -810,22 +831,22 @@ export async function mount(root) {
   }
 
   // Wishlist : re-render quand l'objectif change depuis le modal détail
-  _activeRerender = () => renderTab(activeTab);
+  _activeRerender = () => renderAll();
   _ensureObjListener();
 
-  renderTab(activeTab);
+  renderAll();
 
+  // Chips = navigation : scroll vers la section
   root.querySelector("#bo2-tabs")?.addEventListener("click", (e) => {
-    const btn = e.target.closest(".bo2-tab");
-    if (!btn) return;
+    const chip = e.target.closest("[data-jump]");
+    if (!chip) return;
     haptic("tap");
-    activeTab = btn.dataset.tab;
-    root.querySelectorAll(".bo2-tab").forEach((b) => {
-      b.classList.toggle("active", b === btn);
-      b.setAttribute("aria-selected", b === btn ? "true" : "false");
-    });
-    requestAnimationFrame(() => renderTab(activeTab));
-    track("boutique.tab_changed", { tab: activeTab });
+    root
+      .querySelectorAll(".bo2-tab")
+      .forEach((b) => b.classList.toggle("active", b === chip));
+    root
+      .querySelector(`#bo2-sec-${chip.dataset.jump}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 }
 
@@ -1092,7 +1113,7 @@ function _ensureObjListener() {
   });
 }
 
-function renderObjectifCard(item, gemmes) {
+function renderObjectifCard(item, gemmes, pinned = true) {
   const r = rm(item.rarity);
   const pct = Math.min(100, Math.round((gemmes / item.cost_gemmes) * 100));
   const lacking = item.cost_gemmes - gemmes;
@@ -1100,19 +1121,36 @@ function renderObjectifCard(item, gemmes) {
   const imgHtml = item.asset_url
     ? `<img src="${esc(item.asset_url)}" alt="" aria-hidden="true">`
     : `<span style="font-size:30px" aria-hidden="true">${_typeEmoji(item.type)}</span>`;
+  const kickerLabel = `${esc(r.label)} · ${pinned ? "Ton objectif" : "À viser"}`;
+  const closeBtn = pinned
+    ? `<button class="bo2-obj-x" data-obj-x type="button" aria-label="Retirer l'objectif">×</button>`
+    : "";
   return `
     <div class="bo2-obj" data-item-id="${esc(item.id)}" role="button" tabindex="0" aria-label="Objectif : ${esc(item.name)}, ${ready ? "tu peux l'acheter" : `encore ${lacking} volant${lacking > 1 ? "s" : ""}`}">
-      <button class="bo2-obj-x" data-obj-x type="button" aria-label="Retirer l'objectif">×</button>
+      ${closeBtn}
       <div class="bo2-obj-thumb" data-prev>${imgHtml}</div>
       <div class="bo2-obj-body">
-        <div class="bo2-obj-kick"><span class="dot"></span>${esc(r.label)} · Ton objectif</div>
-        <div class="bo2-obj-name">${ready ? "Objectif atteint 🎉" : `Encore ${lacking} volant${lacking > 1 ? "s" : ""}`}</div>
+        <div class="bo2-obj-kick"><span class="dot"></span>${kickerLabel}</div>
+        <div class="bo2-obj-name">${ready ? "Objectif atteint !" : `Encore ${lacking} volant${lacking > 1 ? "s" : ""}`}</div>
         <div class="bo2-obj-bar"><i style="width:${pct}%"></i></div>
         <div class="bo2-obj-meta">
           <span class="left">${ready ? `<b>${esc(item.name)}</b> — touche pour l'avoir` : "Gagné en <b>révisant</b>"}</span>
           <span class="nums">${gemmes} / ${item.cost_gemmes}</span>
         </div>
       </div>
+    </div>`;
+}
+
+function renderDailyCard() {
+  return `
+    <div class="bo2-daily">
+      <div class="bo2-daily-ico">${volantImg(34)}</div>
+      <div class="bo2-daily-body">
+        <div class="bo2-daily-kick">Récompense en révisant</div>
+        <div class="bo2-daily-title">Gagne des volants chaque jour</div>
+        <div class="bo2-daily-sub">Chaque session de révision terminée crédite ton solde. <b>Pas de raccourci.</b></div>
+      </div>
+      <button class="bo2-daily-cta" type="button" data-go-revise>Réviser</button>
     </div>`;
 }
 
