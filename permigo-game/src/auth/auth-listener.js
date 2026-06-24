@@ -13,6 +13,29 @@ import { setCurUser } from "./cur-user.js";
 export function setupAuthListener(sb) {
   sb.auth.onAuthStateChange(async (event, session) => {
     try {
+      // Lien de récupération de mot de passe cliqué (resetPasswordForEmail —
+      // ex : flux moniteur→élève via l'edge function eleve-recovery). Supabase
+      // émet PASSWORD_RECOVERY avec une session active : on route vers l'écran
+      // « nouveau mot de passe » au lieu de laisser l'utilisateur sur l'accueil
+      // (où il est juste connecté, sans pouvoir définir son mot de passe).
+      if (event === "PASSWORD_RECOVERY") {
+        if (session) {
+          const { data: profile } = await sb
+            .from("profiles")
+            .select("id, role, nom, prenom, email, auto_ecole_id, avatar_url")
+            .eq("auth_id", session.user.id)
+            .maybeSingle();
+          if (profile)
+            setCurUser({
+              ...profile,
+              email: profile.email || session.user.email,
+            });
+        }
+        if (!location.hash.startsWith("#/nouveau-mdp"))
+          location.hash = "#/nouveau-mdp";
+        return;
+      }
+
       if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
         setCurUser(null);
         // Le router détecte CUR_USER=null et redirige
