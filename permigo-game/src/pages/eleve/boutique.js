@@ -88,350 +88,400 @@ function rm(rarity) {
   return RARITY_META[rarity] ?? RARITY_META.commun;
 }
 
-// ─── CSS ──────────────────────────────────────────────────────
+// ─── CSS — GALERIE MATIN (clair luxe / joaillier) ─────────────
 const STYLE = `<style>
 .bo2 {
-  max-width: 480px; margin: 0 auto; padding: 0 0 100px;
-  background: var(--bg); min-height: 100dvh; font-family: 'Inter', sans-serif;
+  /* Palette locale "Galerie Matin" (scopée, indépendante du thème app) */
+  --g-bg:#F7F5EF; --g-top:#FFFDF8; --g-bot:#F1EDE2;
+  --g-card:#FFFFFF; --g-ink:#1C1A17; --g-soft:#5C574E; --g-mute:#938B7E;
+  --g-line:#EBE6DA;
+  --g-gold1:#F7E7B6; --g-gold2:#E7C672; --g-gold3:#C99A3B; --g-gold4:#9C7322;
+  --g-rare:#3E78C8; --g-epic:#7C4DD8; --g-common:#9A938A;
+  --g-sh:0 8px 24px rgba(28,26,23,.10);
+  --g-sh-lg:0 18px 44px rgba(28,26,23,.16);
+  --g-rad:20px;
+
+  max-width: 480px; margin: 0 auto; padding: 0 0 110px; min-height: 100dvh;
+  font-family: 'Inter', system-ui, sans-serif; color: var(--g-ink);
+  background: radial-gradient(120% 80% at 50% -10%, var(--g-top) 0%, var(--g-bg) 46%, var(--g-bot) 100%);
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ── Skeleton ── */
 .bo2-skel {
-  background: linear-gradient(90deg, var(--bg2) 0%, var(--bo) 50%, var(--bg2) 100%);
-  background-size: 200% 100%; animation: bo2Shim 1.4s ease-in-out infinite; border-radius: var(--rl);
+  background: linear-gradient(90deg, #F1EDE2 0%, #FBF8F1 50%, #F1EDE2 100%);
+  background-size: 200% 100%; animation: bo2Shim 1.4s ease-in-out infinite; border-radius: var(--g-rad);
 }
 @keyframes bo2Shim { from{background-position:200% 0} to{background-position:-200% 0} }
 
-/* ── Sticky header ── */
+/* ── Sticky header (barre verre clair) ── */
 .bo2-hd {
   position: sticky; top: calc(52px + env(safe-area-inset-top, 0px)); z-index: 20;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--a) 22%, #14101f) 0%, color-mix(in srgb, var(--a) 42%, #14101f) 60%, var(--adk) 100%);
-  padding: 14px 20px 0; overflow: hidden;
-}
-.bo2-hd::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse 80% 70% at 90% 20%, color-mix(in srgb, var(--a-lt) 30%, transparent) 0%, transparent 55%);
-  pointer-events: none;
+  padding: 12px 16px 8px;
+  background: linear-gradient(180deg, rgba(247,245,239,.92) 0%, rgba(247,245,239,.78) 70%, rgba(247,245,239,0) 100%);
+  -webkit-backdrop-filter: saturate(150%) blur(10px); backdrop-filter: saturate(150%) blur(10px);
 }
 .bo2-hd-row {
-  position: relative; z-index: 1; display: flex; align-items: center;
-  justify-content: space-between; margin-bottom: 14px;
+  position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+  background: rgba(255,253,248,.85); border: 1px solid rgba(255,255,255,.8);
+  box-shadow: 0 6px 20px rgba(28,26,23,.08), inset 0 1px 0 rgba(255,255,255,.9);
+  border-radius: 16px; padding: 9px 9px 9px 15px;
 }
-.bo2-hd-title { font: 800 clamp(19px, 5.6vw, 22px)/1.1 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: -.03em; }
+.bo2-hd-title { font: 800 clamp(18px, 5.4vw, 20px)/1.1 'Plus Jakarta Sans', sans-serif; color: var(--g-ink); letter-spacing: -.025em; }
+.bo2-hd-title small { display: block; font: 500 10.5px/1.2 'Inter', sans-serif; color: var(--g-mute); margin-top: 2px; letter-spacing: 0; }
 
-/* Pastille solde — accessible : role status + aria-live */
+/* Pastille solde — capsule blanche sertie or */
 .bo2-gems {
-  display: flex; align-items: center; gap: 6px;
-  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
-  border-radius: var(--r-full); padding: 7px 14px; position: relative; overflow: hidden;
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(180deg,#FFFFFF,#FBF7EC);
+  border: 1px solid var(--g-gold2);
+  box-shadow: 0 4px 12px rgba(201,154,59,.20), inset 0 1px 0 #fff;
+  border-radius: var(--r-full); padding: 6px 14px 6px 7px; position: relative; overflow: hidden;
 }
-.bo2-gems-ico { font-size: 16px; line-height: 1; }
-.bo2-gems-val { font: 800 15px/1 'IBM Plex Mono', monospace; color: #fff; letter-spacing: -.02em; }
-/* Texte SR-only "volants" à côté de l'icône (fallback accessible) */
+.bo2-gems-ico { font-size: 0; line-height: 0; display: flex; }
+.bo2-gems-ico img { filter: drop-shadow(0 2px 3px rgba(156,115,34,.45)); }
+.bo2-gems-val { font: 700 16px/1 'IBM Plex Mono', monospace; color: #7a5a16; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
 .bo2-gems-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .bo2-gems-float {
   position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-  font: 700 13px/1 'IBM Plex Mono', monospace; color: #f87171; pointer-events: none;
-  opacity: 0; animation: bo2Float .8s ease-out both;
+  font: 700 13px/1 'IBM Plex Mono', monospace; color: #c0392b; pointer-events: none;
+  opacity: 0; animation: bo2Float .8s ease-out both; z-index: 2;
 }
 @keyframes bo2Float { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-20px)} }
 
 /* ── Tabs ── */
-.bo2-tabs { position: relative; z-index: 1; display: flex; gap: 8px; padding-bottom: 14px; }
+.bo2-tabs { position: relative; z-index: 1; display: flex; gap: 8px; }
 .bo2-tab {
-  flex: 1; padding: 9px 8px; border-radius: var(--r); min-height: 44px;
-  background: rgba(255,255,255,.06); border: 1px solid transparent;
-  font: 700 13px/1 'Inter', sans-serif; color: rgba(255,255,255,.6);
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-  transition: color .15s, background .15s, border-color .15s, transform .14s var(--ease-snap); font-family: inherit; white-space: nowrap;
+  flex: 1; padding: 10px 8px; border-radius: 13px; min-height: 44px;
+  background: transparent; border: 1px solid transparent;
+  font: 700 13.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--g-soft);
+  cursor: pointer; transition: color .15s, background .15s, border-color .15s, box-shadow .15s, transform .14s var(--ease-snap);
+  white-space: nowrap;
 }
 .bo2-tab:active { transform: scale(.97); }
-.bo2-tab.active { color: #1e1b4b; background: #fff; border-color: #fff; }
+.bo2-tab.active { color: var(--g-ink); background: var(--g-card); border-color: var(--g-line); box-shadow: var(--g-sh); }
 
-/* ── Hero vedette (premier légendaire ou skin le + cher atteignable) ── */
+/* ═══ Hero vedette — vitrine showroom ═══ */
 .bo2-hero {
-  margin: 16px 16px 0; border-radius: var(--r-xl); overflow: hidden; position: relative;
-  background: linear-gradient(145deg, #1e1340 0%, #2a1f5c 100%);
-  border: 1px solid rgba(251,191,36,.28); cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  margin: 18px 16px 0; border-radius: 26px; overflow: hidden; position: relative;
+  padding: 16px 18px 16px; cursor: pointer;
+  background:
+    radial-gradient(115% 75% at 50% -8%, rgba(247,231,182,.55), transparent 60%),
+    linear-gradient(180deg, #FFFFFF 0%, #FBF6EA 100%);
+  border: 1px solid var(--g-gold2);
+  box-shadow: var(--g-sh-lg), inset 0 1px 0 #fff;
   transition: transform .14s var(--ease-spring);
 }
-.bo2-hero:active { transform: scale(.98); }
-
-/* Bordure conic animée pour le hero légendaire */
-.bo2-hero-legendary-border {
-  position: absolute; inset: 0; border-radius: var(--r-xl); z-index: 0;
-  background: conic-gradient(from 0deg, #fbbf24 0%, #f472b6 25%, #8b5cf6 50%, #fbbf24 75%, #f472b6 100%);
-  animation: bo2ConicSpin 4s linear infinite;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude; padding: 1.5px;
+.bo2-hero:active { transform: scale(.985); }
+.bo2-hero::before {
+  content: ''; position: absolute; left: 50%; top: -40%; width: 150%; height: 130%;
+  transform: translateX(-50%); pointer-events: none;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255,250,235,.9), rgba(255,250,235,0) 70%);
 }
-@keyframes bo2ConicSpin { to { transform: rotate(360deg); } }
-
-.bo2-hero-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 16px; padding: 16px; }
-.bo2-hero-img {
-  width: 88px; height: 88px; flex-shrink: 0; border-radius: var(--r-lg); overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255,255,255,.06);
+/* (compat ancien markup — neutralisé en clair) */
+.bo2-hero-legendary-border { display: none; }
+.bo2-hero-spark {
+  position: absolute; z-index: 3; width: 9px; height: 9px; pointer-events: none;
+  background:
+    linear-gradient(transparent 45%, #E7C672 45% 55%, transparent 55%),
+    linear-gradient(90deg, transparent 45%, #E7C672 45% 55%, transparent 55%);
+  filter: drop-shadow(0 0 3px rgba(231,198,114,.9));
+  animation: bo2Spark 2.6s ease-in-out infinite;
 }
-.bo2-hero-img img { width: 100%; height: 100%; object-fit: cover; }
-.bo2-hero-img-emoji { font-size: 40px; }
+.bo2-hero-spark.s1 { top: 14px; right: 18px; left: auto; }
+.bo2-hero-spark.s2 { top: 70px; left: 22px; width: 6px; height: 6px; animation-delay: 1.2s; }
+@keyframes bo2Spark { 0%,100%{opacity:0;transform:scale(.4) rotate(0)} 50%{opacity:1;transform:scale(1) rotate(45deg)} }
+
+.bo2-hero-tag {
+  position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(180deg, var(--g-gold1), var(--g-gold2)); color: #5e430f;
+  border: 1px solid var(--g-gold3);
+  font: 800 10px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .1em; text-transform: uppercase;
+  padding: 5px 11px; border-radius: var(--r-full);
+  box-shadow: 0 3px 8px rgba(201,154,59,.3), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.bo2-hero-stage { position: relative; z-index: 1; text-align: center; padding: 8px 0 2px; min-height: 132px; display: flex; align-items: center; justify-content: center; }
+.bo2-hero-stage::after {
+  content: ''; position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  width: 58%; height: 20px; border-radius: 50%; z-index: 0;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(120,80,10,.26), transparent 72%); filter: blur(3px);
+}
+.bo2-hero-obj {
+  position: relative; z-index: 2; max-width: 86%; max-height: 124px; object-fit: contain;
+  filter: drop-shadow(0 16px 20px rgba(120,80,10,.28));
+  animation: bo2HeroFloat 5s ease-in-out infinite;
+}
+.bo2-hero-emoji { font-size: 72px; position: relative; z-index: 2; animation: bo2HeroFloat 5s ease-in-out infinite; }
+@keyframes bo2HeroFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+/* Hero en mode COVER (skin = scène opaque) : vitrine plein cadre arrondie */
+.bo2-hero-stage.is-cover { padding: 0; border-radius: 18px; overflow: hidden; background: #0c0a12; min-height: 168px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
+.bo2-hero-stage.is-cover::after { display: none; }
+.bo2-hero-stage.is-cover .bo2-hero-obj { max-width: none; max-height: none; width: 100%; height: 168px; object-fit: cover; filter: none; border-radius: 18px; }
+.bo2-hero-sheen {
+  position: absolute; top: 0; left: -35%; width: 38%; height: 100%; z-index: 3; pointer-events: none;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,.6), transparent); transform: skewX(-18deg);
+  animation: bo2Sweep 4.6s ease-in-out infinite;
+}
+@keyframes bo2Sweep { 0%,72%{left:-40%} 86%,100%{left:120%} }
+
+.bo2-hero-foot { position: relative; z-index: 2; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 8px; }
 .bo2-hero-body { flex: 1; min-width: 0; }
-.bo2-hero-badge {
-  display: inline-block; margin-bottom: 6px;
-  font: 800 9px/1 'IBM Plex Mono', monospace; letter-spacing: .1em; text-transform: uppercase;
-  padding: 4px 9px; border-radius: var(--r-full); background: #fbbf24; color: #1a1208;
-}
-.bo2-hero-name { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: -.02em; margin-bottom: 6px; }
-.bo2-hero-desc { font: 500 12px/1.4 'Inter', sans-serif; color: rgba(255,255,255,.65); margin-bottom: 10px; }
+.bo2-hero-name { font: 800 21px/1.05 'Plus Jakarta Sans', sans-serif; color: var(--g-ink); letter-spacing: -.025em; }
+.bo2-hero-sub { display: flex; align-items: center; gap: 6px; margin-top: 5px; font: 600 11.5px/1.3 'Inter', sans-serif; color: var(--g-soft); }
+.bo2-hero-sub .lab { font: 800 9.5px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--g-gold4); background: rgba(201,154,59,.14); padding: 3px 7px; border-radius: 6px; }
 /* Barre de progression « plus que N volants » */
-.bo2-hero-prog-wrap { display: flex; flex-direction: column; gap: 4px; }
-.bo2-hero-prog-label { font: 600 11px/1 'Inter', sans-serif; color: rgba(255,255,255,.6); }
-.bo2-hero-prog-track {
-  height: 6px; border-radius: 3px; background: rgba(255,255,255,.14); overflow: hidden;
+.bo2-hero-prog-wrap { display: flex; flex-direction: column; gap: 5px; margin-top: 9px; }
+.bo2-hero-prog-label { font: 600 11px/1 'Inter', sans-serif; color: var(--g-soft); }
+.bo2-hero-prog-track { height: 8px; border-radius: 99px; background: #EFE9DA; overflow: hidden; box-shadow: inset 0 1px 2px rgba(28,26,23,.10); }
+.bo2-hero-prog-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--g-gold2), var(--g-gold3) 70%, var(--g-gold4)); box-shadow: 0 0 8px rgba(201,154,59,.5); transition: width .4s ease; }
+.bo2-hero-buy { flex: none; text-align: right; }
+.bo2-hero-price { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.bo2-hero-price b { font: 700 19px/1 'IBM Plex Mono', monospace; color: var(--g-ink); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.bo2-hero-cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px;
+  min-height: 44px; padding: 0 22px; border: none; border-radius: 14px; cursor: pointer;
+  font: 800 14px/1 'Plus Jakarta Sans', sans-serif; color: #fff;
+  background: linear-gradient(180deg, #62d40a, var(--a));
+  box-shadow: 0 4px 0 var(--adk), 0 8px 16px rgba(70,163,2,.30);
+  transition: transform .1s var(--ease-snap), box-shadow .1s var(--ease-snap);
 }
-.bo2-hero-prog-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#fbbf24,#f59e0b); transition: width .4s ease; }
+.bo2-hero:active .bo2-hero-cta { transform: translateY(2px); box-shadow: 0 2px 0 var(--adk), 0 5px 10px rgba(70,163,2,.30); }
+.bo2-hero-owned { font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--adk); }
 
 /* ── Section heading ── */
-.bo2-sec {
-  padding: 18px 20px 4px;
-}
-.bo2-sec-title { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; }
-.bo2-sec-sub { font: 500 12.5px/1.4 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
+.bo2-sec { padding: 22px 18px 2px; display: flex; align-items: baseline; gap: 9px; }
+.bo2-sec-block { display: flex; flex-direction: column; }
+.bo2-sec-title { font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--g-ink); letter-spacing: -.02em; }
+.bo2-sec-sub { font: 500 12px/1.4 'Inter', sans-serif; color: var(--g-mute); margin-top: 2px; }
+.bo2-sec-count { margin-left: auto; align-self: center; font: 700 11.5px/1 'Inter', sans-serif; color: var(--g-mute); }
 
-/* ── Grid ── */
-.bo2-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px 16px 0; }
+/* ═══ Grid ═══ */
+.bo2-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 13px; padding: 12px 16px 0; }
 
-/* ── Carte commune (escalade visuelle par rareté) ── */
+/* ═══ Carte produit (galerie claire) ═══ */
 .bo2-card {
-  background: var(--su); border-radius: var(--r-xl); overflow: hidden; cursor: pointer;
-  -webkit-tap-highlight-color: transparent; transition: transform .14s var(--ease-spring);
-  user-select: none; position: relative;
+  background: var(--g-card); border: 1px solid var(--g-line); border-radius: var(--g-rad);
+  overflow: hidden; cursor: pointer; position: relative; user-select: none;
+  box-shadow: var(--g-sh);
+  transition: transform .14s var(--ease-spring), box-shadow .2s ease;
 }
-.bo2-card:active { transform: scale(.95); }
+.bo2-card:active { transform: scale(.96); }
+@media (hover: hover) { .bo2-card:hover { transform: translateY(-3px); box-shadow: var(--g-sh-lg); } }
 
-/* Rare : bordure teintée visible */
-.bo2-card[data-rarity="rare"] {
-  border: 1.5px solid rgba(139,92,246,.45) !important;
-}
+/* Lueur de rareté (sous la carte) — lisible même quand le skin est en cover */
+.bo2-card[data-rarity="rare"] { box-shadow: 0 10px 26px -8px rgba(62,120,200,.30), var(--g-sh); }
+.bo2-card[data-rarity="epique"] { box-shadow: 0 12px 28px -8px rgba(124,77,216,.34), var(--g-sh); }
+.bo2-card[data-rarity="legendaire"] { border-color: var(--g-gold2); box-shadow: 0 12px 30px -8px rgba(201,154,59,.40), var(--g-sh); }
 
-/* Épique : bordure + glow doux + gradient de fond subtil */
-.bo2-card[data-rarity="epique"] {
-  border: 1.5px solid rgba(192,38,211,.55) !important;
-  box-shadow: 0 0 18px -4px rgba(192,38,211,.3) !important;
-}
-
-/* Légendaire : bordure conic animée (shimmer holographique) + ruban */
-.bo2-card[data-rarity="legendaire"] {
-  border: none !important;
-  position: relative;
-}
-.bo2-card[data-rarity="legendaire"]::before {
-  content: ''; position: absolute; inset: 0; border-radius: var(--r-xl); z-index: 0;
-  background: conic-gradient(from 0deg, #fbbf24 0%, #f472b6 25%, #8b5cf6 50%, #fbbf24 75%, #f472b6 100%);
-  animation: bo2ConicSpin 4s linear infinite;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude; padding: 1.5px;
-  pointer-events: none;
-}
-/* Shimmer holographique sur le légendaire */
-.bo2-card[data-rarity="legendaire"] .bo2-card-preview::after {
-  content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
-  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.18) 48%, rgba(251,191,36,.12) 52%, transparent 70%);
-  animation: bo2Shimmer 3s ease-in-out infinite;
-}
-@keyframes bo2Shimmer { 0%,100%{opacity:0;transform:translateX(-100%)} 50%{opacity:1;transform:translateX(100%)} }
-
-/* Ruban légendaire (coin supérieur droit) */
-.bo2-legendary-ribbon {
-  position: absolute; top: 0; right: 0; z-index: 4;
-  width: 64px; height: 64px; overflow: hidden; pointer-events: none;
-}
-.bo2-legendary-ribbon span {
-  position: absolute; top: 14px; right: -12px;
-  transform: rotate(45deg); transform-origin: 50% 50%;
-  width: 68px; text-align: center;
-  font: 800 7px/1.6 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase;
-  background: #fbbf24; color: #1a1208; padding: 2px 0;
-  box-shadow: 0 1px 4px rgba(0,0,0,.3);
-}
-
+/* ── Zone preview (objet flottant sur teinte claire de rareté) ── */
 .bo2-card-preview {
-  height: 118px; display: flex; align-items: center; justify-content: center; background: var(--bg); overflow: hidden; position: relative;
+  position: relative; height: 120px; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; background: linear-gradient(180deg, #FBFAF6, #F3F0E8);
 }
-.bo2-card-preview img { width: 86px; height: 86px; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(11,13,26,.28)); transition: transform .25s var(--ease-spring); position: relative; z-index: 2; }
-.bo2-card:active .bo2-card-preview img { transform: scale(.92); }
-@media (hover: hover) { .bo2-card:hover .bo2-card-preview img { transform: scale(1.08) translateY(-2px); } }
+.bo2-card[data-rarity="rare"] .bo2-card-preview:not(.is-cover) { background: linear-gradient(180deg, #F2F6FC, #E6EFFA); }
+.bo2-card[data-rarity="epique"] .bo2-card-preview:not(.is-cover) { background: linear-gradient(180deg, #F6F1FD, #ECE2FA); }
+.bo2-card[data-rarity="legendaire"] .bo2-card-preview:not(.is-cover) { background: linear-gradient(180deg, #FCF5E4, #F6EAC8); }
+/* halo de rareté derrière l'objet (float) */
+.bo2-card[data-rarity="rare"] .bo2-card-preview:not(.is-cover)::before { content:''; position:absolute; inset:0; background: radial-gradient(60% 55% at 50% 42%, rgba(62,120,200,.16), transparent 68%); }
+.bo2-card[data-rarity="epique"] .bo2-card-preview:not(.is-cover)::before { content:''; position:absolute; inset:0; background: radial-gradient(62% 58% at 50% 42%, rgba(124,77,216,.22), transparent 66%); animation: bo2EpicPulse 3.4s ease-in-out infinite; }
+.bo2-card[data-rarity="legendaire"] .bo2-card-preview:not(.is-cover)::before { content:''; position:absolute; inset:0; background: radial-gradient(62% 58% at 50% 42%, rgba(201,154,59,.28), transparent 64%); }
+@keyframes bo2EpicPulse { 0%,100%{opacity:.7} 50%{opacity:1} }
+/* objet flottant + ombre au sol */
+.bo2-card-preview img { position: relative; z-index: 2; max-width: 78%; max-height: 86px; object-fit: contain; filter: drop-shadow(0 8px 9px rgba(28,26,23,.22)); transition: transform .25s var(--ease-spring); }
+.bo2-card-preview::after { content:''; position:absolute; left:50%; bottom:12px; transform:translateX(-50%); width:56%; height:13px; border-radius:50%; z-index:1; background: radial-gradient(50% 50% at 50% 50%, rgba(28,26,23,.18), transparent 72%); filter: blur(2px); }
+.bo2-card:active .bo2-card-preview img { transform: scale(.93); }
+@media (hover: hover) { .bo2-card:hover .bo2-card-preview img { transform: translateY(-4px) scale(1.05); } }
+
+/* ── Mode COVER : skins = scènes opaques (voitures néon) → vitrine plein cadre ── */
+.bo2-card-preview.is-cover { background: #0c0a12; }
+.bo2-card-preview.is-cover img { max-width: none; max-height: none; width: 100%; height: 100%; object-fit: cover; filter: none; }
+.bo2-card-preview.is-cover::after { display: none; }
+.bo2-card-preview.is-cover::before {
+  content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,.10), transparent 30%), radial-gradient(120% 80% at 50% 122%, rgba(0,0,0,.4), transparent 58%);
+}
+/* sheen légendaire (cover) */
+.bo2-card[data-rarity="legendaire"] .bo2-card-preview .bo2-card-sheen {
+  position: absolute; top: 0; left: -35%; width: 42%; height: 100%; z-index: 4; pointer-events: none;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,.5), transparent); transform: skewX(-18deg);
+  animation: bo2Sweep 4.6s ease-in-out .8s infinite;
+}
+
 .bo2-card-preview-circle { width: 66px; height: 66px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; position: relative; z-index: 2; }
 
 /* Étiquette de rareté */
 .bo2-card-rarity-tag {
-  position: absolute; top: 8px; left: 8px; z-index: 4;
-  padding: 3px 8px; border-radius: var(--r-full); color: #fff;
-  font: 800 8.5px/1 'Inter', sans-serif; letter-spacing: .08em; text-transform: uppercase;
-  box-shadow: 0 2px 6px rgba(11,13,26,.25);
+  position: absolute; top: 9px; left: 9px; z-index: 5;
+  padding: 3px 8px; border-radius: 7px;
+  font: 800 8.5px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .09em; text-transform: uppercase;
+  background: #fff; border: 1px solid var(--g-line); color: var(--g-common);
+  box-shadow: 0 2px 5px rgba(28,26,23,.10);
 }
+.bo2-card[data-rarity="rare"] .bo2-card-rarity-tag { color: #fff; background: var(--g-rare); border-color: var(--g-rare); }
+.bo2-card[data-rarity="epique"] .bo2-card-rarity-tag { color: #fff; background: var(--g-epic); border-color: var(--g-epic); }
+.bo2-card[data-rarity="legendaire"] .bo2-card-rarity-tag { color: #5e430f; background: linear-gradient(180deg, var(--g-gold1), var(--g-gold2)); border-color: var(--g-gold3); }
 .bo2-card-owned-badge {
-  position: absolute; top: 8px; right: 8px; z-index: 4;
-  background: rgba(16,185,129,.92); border-radius: var(--r-full);
-  padding: 3px 8px; font: 700 9px/1 'IBM Plex Mono', monospace; color: #fff; letter-spacing: .04em; text-transform: uppercase;
+  position: absolute; top: 9px; right: 9px; z-index: 5;
+  background: rgba(88,204,2,.95); border-radius: 99px;
+  padding: 3px 8px; font: 800 8.5px/1 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: .04em; text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(70,163,2,.35);
 }
-.bo2-card-info { padding: 10px 12px 12px; position: relative; z-index: 1; }
-.bo2-card-name { font: 800 13.5px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bo2-card-footer { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.bo2-price-btn {
-  display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; padding: 9px 12px; border: none; border-radius: var(--r);
-  color: #fff; font: 800 12.5px/1 'IBM Plex Mono', monospace; cursor: pointer; min-height: 44px;
-  white-space: nowrap; transition: transform .12s, opacity .12s; -webkit-tap-highlight-color: transparent;
-}
-.bo2-price-btn:active { transform: scale(.95); opacity: .9; }
-.bo2-price-btn:disabled { opacity: .5; cursor: default; }
-.bo2-price-btn.cant-afford { background: var(--bg2); color: var(--mu2); }
-/* Fond = accent FONCÉ (--adk) + texte blanc : garantit le contraste AA quel que
-   soit l'accent choisi (les accents clairs type cyan échouaient le 4.5:1 avec --a). */
-.bo2-equip-cta { background: var(--adk); color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; }
-.bo2-owned-txt { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--gr-txt); padding: 9px 0; min-height: 40px; }
 
-/* ── Intro / tuto ── */
+/* Ruban légendaire */
+.bo2-legendary-ribbon { position: absolute; top: 0; right: 0; z-index: 5; width: 60px; height: 60px; overflow: hidden; pointer-events: none; }
+.bo2-legendary-ribbon span {
+  position: absolute; top: 12px; right: -13px; transform: rotate(45deg); transform-origin: 50% 50%;
+  width: 70px; text-align: center;
+  font: 800 7px/1.6 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase;
+  background: linear-gradient(180deg, var(--g-gold1), var(--g-gold2) 60%, var(--g-gold3)); color: #5e430f; padding: 2px 0;
+  box-shadow: 0 1px 4px rgba(120,80,10,.35), inset 0 1px 0 rgba(255,255,255,.5);
+}
+
+.bo2-card-info { padding: 11px 12px 12px; position: relative; z-index: 1; }
+.bo2-card-name { font: 700 13.5px/1.15 'Plus Jakarta Sans', sans-serif; color: var(--g-ink); margin-bottom: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bo2-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+/* Bouton acheter — vert 3D doux + prix mono */
+.bo2-card-footer .bo2-price-cell { display: inline-flex; align-items: center; gap: 5px; }
+.bo2-card-footer .bo2-price-cell img { filter: drop-shadow(0 1px 1px rgba(156,115,34,.4)); }
+.bo2-card-footer .bo2-price-cell b { font: 700 13.5px/1 'IBM Plex Mono', monospace; color: var(--g-ink); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.bo2-price-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  min-height: 44px; min-width: 64px; padding: 0 14px; border: none; border-radius: 12px; cursor: pointer;
+  color: #fff; font: 800 12px/1 'Plus Jakarta Sans', sans-serif; white-space: nowrap;
+  background: linear-gradient(180deg, #62d40a, var(--a));
+  box-shadow: 0 3px 0 var(--adk), 0 5px 11px rgba(70,163,2,.24);
+  transition: transform .1s var(--ease-snap), box-shadow .1s var(--ease-snap), opacity .12s;
+}
+.bo2-price-btn:active { transform: translateY(3px); box-shadow: 0 0 0 var(--adk), 0 2px 5px rgba(70,163,2,.24); }
+.bo2-price-btn:disabled { cursor: default; }
+.bo2-price-btn.cant-afford { background: #EEE9DD; color: var(--g-soft); box-shadow: inset 0 0 0 1px var(--g-line); font-weight: 700; }
+.bo2-price-btn.cant-afford:active { transform: none; }
+.bo2-equip-cta { background: linear-gradient(180deg,#fff,#F1EEE6); color: var(--g-ink); box-shadow: 0 3px 0 #D8D2C4, inset 0 1px 0 #fff; }
+.bo2-equip-cta:active { box-shadow: 0 0 0 #D8D2C4; }
+.bo2-owned-txt {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  min-height: 44px; padding: 0 12px; font: 800 11.5px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--adk); background: rgba(88,204,2,.12); border-radius: 12px; box-shadow: inset 0 0 0 1.4px rgba(88,204,2,.45);
+}
+
+/* ── Intro / tuto (clair) ── */
 .bo2-intro {
-  position: relative; margin: 14px 16px 4px; padding: 14px 16px;
-  border-radius: var(--rl); overflow: hidden;
+  position: relative; margin: 16px 16px 0; padding: 14px 16px;
+  border-radius: var(--g-rad); overflow: hidden;
   display: flex; gap: 13px; align-items: flex-start;
-  background: linear-gradient(150deg, color-mix(in srgb, var(--a) 14%, var(--su)) 0%, var(--su) 70%);
-  border: 1px solid color-mix(in srgb, var(--a) 26%, transparent);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--a) 10%, #fff) 0%, #fff 70%);
+  border: 1px solid color-mix(in srgb, var(--a) 24%, var(--g-line));
+  box-shadow: var(--g-sh);
   transition: height .26s ease, opacity .26s ease, margin .26s ease, padding .26s ease;
 }
 .bo2-intro.out { opacity: 0; height: 0 !important; margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
 .bo2-intro-x::before { content: ''; position: absolute; inset: -7px; }
 .bo2-intro-x {
   position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border: 0;
-  background: var(--bg2); color: var(--mu); border-radius: 50%; font-size: 17px; line-height: 1; cursor: pointer;
+  background: #F2EFE7; color: var(--g-mute); border-radius: 50%; font-size: 17px; line-height: 1; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
 }
 .bo2-intro-ico {
-  flex-shrink: 0; width: 40px; height: 40px; border-radius: var(--r-md);
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px;
   background: var(--a); color: var(--a-ink);
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 5px 14px -4px color-mix(in srgb, var(--a) 55%, transparent);
 }
 .bo2-intro-body { flex: 1; min-width: 0; padding-right: 24px; }
-.bo2-intro-title { font: 800 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 8px; }
+.bo2-intro-title { font: 800 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--g-ink); margin-bottom: 8px; }
 .bo2-intro-steps { display: flex; flex-direction: column; gap: 6px; }
-.bo2-intro-steps span { display: flex; align-items: center; gap: 7px; font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu); }
-.bo2-intro-steps span svg { color: var(--a-txt); flex-shrink: 0; }
+.bo2-intro-steps span { display: flex; align-items: center; gap: 7px; font: 500 12px/1.3 'Inter', sans-serif; color: var(--g-soft); }
+.bo2-intro-steps span svg { color: var(--adk); flex-shrink: 0; }
 
-/* ── Detail modal (bottom-sheet) ── */
+/* ═══ Detail modal (bottom-sheet clair) ═══ */
 .bo2-modal-bg {
-  position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  position: fixed; inset: 0; background: rgba(28,26,23,.42); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   z-index: 500; display: flex; align-items: flex-end; justify-content: center;
   padding-bottom: env(safe-area-inset-bottom, 0); animation: bo2FadeBg .2s ease both;
 }
 @keyframes bo2FadeBg { from{opacity:0} to{opacity:1} }
 .bo2-modal {
   width: 100%; max-width: 480px; border-radius: 28px 28px 0 0; padding: 0 0 24px;
-  background: linear-gradient(180deg, #1e1b4b 0%, #15122e 100%);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAF7EF 100%);
+  box-shadow: 0 -10px 40px rgba(28,26,23,.22);
   animation: bo2ModalUp .3s cubic-bezier(.32,.72,0,1) both;
 }
 @keyframes bo2ModalUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
-.bo2-modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,.3); border-radius: 2px; margin: 14px auto 8px; }
+.bo2-modal-handle { width: 36px; height: 4px; background: rgba(28,26,23,.18); border-radius: 2px; margin: 14px auto 8px; }
 
-/* Halo preview modal */
-.bo2-halo { height: 248px; display: flex; align-items: center; justify-content: center; position: relative; padding-top: 10px; }
+/* Halo preview modal (objet sur scène claire ou cover) */
+.bo2-halo { height: 232px; display: flex; align-items: center; justify-content: center; position: relative; padding: 8px 24px 0; }
 .bo2-halo-ring {
-  width: 216px; height: 216px; border-radius: 28px; overflow: hidden; display: flex; align-items: center; justify-content: center;
-  position: relative;
+  width: 100%; max-width: 300px; height: 200px; border-radius: 22px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; position: relative;
+  background: linear-gradient(180deg, #FBFAF6, #F1EDE2); border: 1px solid var(--g-line);
 }
-.bo2-halo-ring img { width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 2; }
+.bo2-halo-ring::after { content:''; position:absolute; left:50%; bottom:16px; transform:translateX(-50%); width:54%; height:18px; border-radius:50%; background: radial-gradient(50% 50% at 50% 50%, rgba(28,26,23,.20), transparent 72%); filter: blur(3px); z-index:1; }
+.bo2-halo-ring img { max-width: 80%; max-height: 150px; object-fit: contain; position: relative; z-index: 2; filter: drop-shadow(0 14px 16px rgba(28,26,23,.26)); }
+.bo2-halo-ring.is-cover { background: #0c0a12; }
+.bo2-halo-ring.is-cover::after { display: none; }
+.bo2-halo-ring.is-cover img { max-width: none; max-height: none; width: 100%; height: 100%; object-fit: cover; filter: none; }
 .bo2-halo-ring .bo2-fallback { font-size: 76px; position: relative; z-index: 2; }
+.bo2-halo-ring.legendary { border-color: var(--g-gold2); box-shadow: 0 0 0 1px var(--g-gold2), 0 14px 34px -10px rgba(201,154,59,.45); }
 
-/* Shimmer holographique dans le modal pour le légendaire */
-.bo2-halo-ring.legendary {
-  box-shadow: 0 0 40px rgba(251,191,36,.4), inset 0 0 20px rgba(251,191,36,.08);
-}
-.bo2-halo-ring.legendary::after {
-  content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
-  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.22) 48%, rgba(251,191,36,.14) 52%, transparent 70%);
-  animation: bo2Shimmer 2.5s ease-in-out infinite;
-}
-
-/* Try-before-buy : contexte visuel dans le modal */
-.bo2-try-preview {
-  margin: 0 24px 14px; border-radius: var(--r-lg); overflow: hidden;
-  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-}
-.bo2-try-preview-title {
-  font: 700 10px/1 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase;
-  color: rgba(255,255,255,.5); padding: 8px 12px 6px;
-}
-/* Fausse ligne de classement (avatar) */
-.bo2-try-rank-row {
-  display: flex; align-items: center; gap: 10px; padding: 8px 12px 10px;
-  border-top: 1px solid rgba(255,255,255,.07);
-}
-.bo2-try-rank-num { font: 800 14px/1 'IBM Plex Mono', monospace; color: #fbbf24; min-width: 24px; }
-.bo2-try-rank-avatar {
-  width: 36px; height: 36px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
-  background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center;
-}
+/* Try-before-buy */
+.bo2-try-preview { margin: 0 24px 14px; border-radius: 14px; overflow: hidden; background: #fff; border: 1px solid var(--g-line); box-shadow: var(--g-sh); }
+.bo2-try-preview-title { font: 700 10px/1 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--g-mute); padding: 9px 12px 6px; }
+.bo2-try-rank-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px 10px; border-top: 1px solid var(--g-line); }
+.bo2-try-rank-num { font: 800 14px/1 'IBM Plex Mono', monospace; color: var(--g-gold3); min-width: 24px; }
+.bo2-try-rank-avatar { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: #F2EFE7; display: flex; align-items: center; justify-content: center; }
 .bo2-try-rank-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .bo2-try-rank-avatar-emoji { font-size: 20px; }
-.bo2-try-rank-name { flex: 1; font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: #fff; }
-.bo2-try-rank-score { font: 600 12px/1 'IBM Plex Mono', monospace; color: rgba(255,255,255,.55); }
-/* Mini permis virtuel (permis_bg) */
-.bo2-try-permis {
-  display: flex; align-items: center; justify-content: center; padding: 10px;
-}
-.bo2-try-permis-card {
-  width: 180px; height: 112px; border-radius: 10px; overflow: hidden; position: relative;
-  box-shadow: 0 6px 20px -4px rgba(0,0,0,.5);
-}
+.bo2-try-rank-name { flex: 1; font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--g-ink); }
+.bo2-try-rank-score { font: 600 12px/1 'IBM Plex Mono', monospace; color: var(--g-mute); }
+.bo2-try-permis { display: flex; align-items: center; justify-content: center; padding: 10px; }
+.bo2-try-permis-card { width: 180px; height: 112px; border-radius: 10px; overflow: hidden; position: relative; box-shadow: var(--g-sh); }
 .bo2-try-permis-card img { width: 100%; height: 100%; object-fit: cover; }
-.bo2-try-permis-badge {
-  position: absolute; bottom: 6px; left: 8px; right: 8px;
-  font: 700 9px/1.3 'Inter', sans-serif; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7);
-}
+.bo2-try-permis-badge { position: absolute; bottom: 6px; left: 8px; right: 8px; font: 700 9px/1.3 'Inter', sans-serif; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.7); }
 
-.bo2-modal-body { padding: 4px 24px 0; text-align: center; }
-.bo2-modal-pill {
-  display: inline-block; font: 800 10px/1 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase;
-  padding: 5px 12px; border-radius: var(--r-full); color: #fff; margin-bottom: 10px;
-}
-.bo2-modal-name { font: 800 26px/1.1 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: -.03em; margin-bottom: 8px; }
-.bo2-modal-desc { font: 500 14px/1.5 'Inter', sans-serif; color: rgba(255,255,255,.7); margin-bottom: 14px; max-width: 320px; margin-left: auto; margin-right: auto; }
+.bo2-modal-body { padding: 8px 24px 0; text-align: center; }
+.bo2-modal-pill { display: inline-block; font: 800 10px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .08em; text-transform: uppercase; padding: 5px 12px; border-radius: var(--r-full); color: #fff; margin-bottom: 10px; }
+.bo2-modal-name { font: 800 26px/1.05 'Plus Jakarta Sans', sans-serif; color: var(--g-ink); letter-spacing: -.03em; margin-bottom: 8px; }
+.bo2-modal-desc { font: 500 14px/1.5 'Inter', sans-serif; color: var(--g-soft); margin-bottom: 14px; max-width: 320px; margin-left: auto; margin-right: auto; }
 
-/* Bloc prix consolidé (un seul bloc, pas triple affichage) */
-.bo2-modal-price {
-  margin: 0 24px 16px; padding: 12px 16px; border-radius: var(--r-lg); background: rgba(255,255,255,.08);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.bo2-modal-price-label { font: 600 14px/1 'Inter', sans-serif; color: rgba(255,255,255,.7); }
-.bo2-modal-price-amount { display: flex; align-items: center; gap: 6px; font: 800 20px/1 'IBM Plex Mono', monospace; color: #fff; }
-.bo2-modal-balance { font: 500 12px/1 'Inter', sans-serif; color: rgba(255,255,255,.55); text-align: center; margin: 0 24px 14px; }
+.bo2-modal-price { margin: 0 24px 14px; padding: 12px 16px; border-radius: 14px; background: #FBF7EC; border: 1px solid var(--g-line); display: flex; align-items: center; justify-content: space-between; }
+.bo2-modal-price-label { font: 600 14px/1 'Inter', sans-serif; color: var(--g-soft); }
+.bo2-modal-price-amount { display: flex; align-items: center; gap: 6px; font: 700 20px/1 'IBM Plex Mono', monospace; color: var(--g-ink); }
+.bo2-modal-balance { font: 500 12px/1 'Inter', sans-serif; color: var(--g-mute); text-align: center; margin: 0 24px 14px; }
 
 .bo2-modal-cta {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: calc(100% - 48px); margin: 0 24px; padding: 17px; border: none; border-radius: var(--r-full);
-  font: 800 17px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; min-height: 56px;
-  transition: transform .14s var(--ease-spring), opacity .12s;
+  width: calc(100% - 48px); margin: 0 24px; padding: 0; min-height: 56px; border: none; border-radius: 16px;
+  font: 800 17px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+  transition: transform .12s var(--ease-snap), box-shadow .12s var(--ease-snap), opacity .12s;
 }
-.bo2-modal-cta.buy { background: var(--a); color: var(--a-ink); box-shadow: var(--s-a-lg); }
-.bo2-modal-cta.equip { background: #fff; color: #1e1b4b; }
-.bo2-modal-cta.locked { background: rgba(255,255,255,.12); color: rgba(255,255,255,.5); cursor: default; }
-.bo2-modal-cta:not(.locked):active { transform: scale(.97); opacity: .9; }
-.bo2-modal-cancel {
-  display: block; width: calc(100% - 48px); margin: 10px 24px 0; padding: 12px; background: none; border: none;
-  color: rgba(255,255,255,.6); font: 600 13px/1 'Inter', sans-serif; cursor: pointer;
-}
+.bo2-modal-cta.buy { background: linear-gradient(180deg, #62d40a, var(--a)); color: #fff; box-shadow: 0 5px 0 var(--adk), 0 10px 20px rgba(70,163,2,.28); }
+.bo2-modal-cta.buy:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--adk); }
+.bo2-modal-cta.equip { background: linear-gradient(180deg,#fff,#F1EEE6); color: var(--g-ink); box-shadow: 0 5px 0 #D8D2C4, inset 0 1px 0 #fff; }
+.bo2-modal-cta.equip:active { transform: translateY(4px); box-shadow: 0 1px 0 #D8D2C4; }
+.bo2-modal-cta.locked { background: #EEE9DD; color: var(--g-mute); cursor: default; box-shadow: inset 0 0 0 1px var(--g-line); }
+.bo2-modal-cancel { display: block; width: calc(100% - 48px); margin: 10px 24px 0; padding: 12px; min-height: 44px; background: none; border: none; color: var(--g-mute); font: 600 13px/1 'Inter', sans-serif; cursor: pointer; }
 
-/* ── Empty / error ── */
-.bo2-empty { text-align: center; padding: 56px 24px; color: var(--mu); }
-.bo2-empty-ico { font-size: 48px; margin-bottom: 12px; }
-.bo2-empty-t { font: 700 16px/1.3 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 6px; }
+/* ── Note / Empty / error ── */
+.bo2-note { text-align: center; color: var(--g-mute); font: 600 10.5px/1.4 'Inter', sans-serif; margin: 22px 18px 4px; }
+.bo2-empty { text-align: center; padding: 56px 24px; color: var(--g-soft); }
+.bo2-empty-ico { font-size: 48px; margin-bottom: 12px; color: var(--g-mute); }
+.bo2-empty-t { font: 700 16px/1.3 'Plus Jakarta Sans', sans-serif; color: var(--g-ink); margin-bottom: 6px; }
 .bo2-empty-d { font: 500 13px/1.5 'Inter', sans-serif; }
 
 @keyframes bo2CardIn { from{opacity:0;transform:translateY(14px) scale(.93)} to{opacity:1;transform:none} }
+
+/* Focus clavier visible (a11y) */
+.bo2-tab:focus-visible, .bo2-price-btn:focus-visible, .bo2-equip-cta:focus-visible,
+.bo2-modal-cta:focus-visible, .bo2-modal-cancel:focus-visible, .bo2-hero:focus-visible {
+  outline: 2px solid var(--adk); outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{ animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important }
+  .bo2-hero-obj, .bo2-hero-emoji, .bo2-hero-sheen, .bo2-card-sheen, .bo2-hero-spark { animation: none !important; transform: none !important; }
 }
 </style>`;
 
@@ -469,14 +519,14 @@ export async function mount(root) {
 <div class="bo2 anim-slide-up">
   <div class="bo2-hd">
     <div class="bo2-hd-row">
-      <h1 class="bo2-hd-title" tabindex="-1">Boutique</h1>
+      <h1 class="bo2-hd-title" tabindex="-1">Boutique<small>Affiche ton style au classement</small></h1>
       <div class="bo2-gems"
            id="bo2-gems-badge"
            data-volant-balance
            role="status"
            aria-live="polite"
            aria-label="Ton solde : … volants">
-        <span class="bo2-gems-ico">${volantImg(15)}</span>
+        <span class="bo2-gems-ico">${volantImg(24)}</span>
         <span class="bo2-gems-val" id="bo2-gems-val" data-volant-count>…</span>
         <span class="bo2-gems-sr">volants</span>
       </div>
@@ -671,19 +721,25 @@ export async function mount(root) {
     const heroHtml = hero ? renderHeroCard(hero, gemmes) : "";
     const introHtml = renderIntro();
 
+    const total = rest.length + (hero ? 1 : 0);
     content.innerHTML = `
       ${heroHtml}
       ${introHtml}
       <div class="bo2-sec">
-        <div class="bo2-sec-title">Tous les items</div>
-        <div class="bo2-sec-sub">Débloque ton style sur PermiGo</div>
+        <div class="bo2-sec-block">
+          <div class="bo2-sec-title">${activeTab === "skins" ? "Skins & styles" : "Fonds de permis"}</div>
+          <div class="bo2-sec-sub">Débloque ton style sur PermiGo</div>
+        </div>
+        <span class="bo2-sec-count">${total} pièce${total > 1 ? "s" : ""}</span>
       </div>
       <div class="bo2-grid">
         ${rest.map((item, idx) => renderGridCard(item, gemmes, idx)).join("")}
-      </div>`;
+      </div>
+      <div class="bo2-note">Les skins sont 100 % cosmétiques — du style, jamais d'avantage.</div>`;
 
     wireGrid(content);
     wireIntro(content);
+    _scanCovers(content);
   }
 
   renderTab(activeTab);
@@ -715,7 +771,7 @@ function _updateGemsBadge(root, balance) {
   }
 }
 
-// ─── Hero vedette pleine largeur ─────────────────────────────
+// ─── Hero vedette — vitrine showroom ─────────────────────────
 function renderHeroCard(item, gemmes) {
   const r = rm(item.rarity);
   const canAfford = gemmes >= item.cost_gemmes;
@@ -723,38 +779,44 @@ function renderHeroCard(item, gemmes) {
   const lacking = item.cost_gemmes - gemmes;
   const isOwned = item.owned;
   const isEquipped = item.owned && getEquipped()[item.type] === item.id;
+  const isLeg = item.rarity === "legendaire";
 
-  const imgHtml = item.asset_url
-    ? `<img src="${esc(item.asset_url)}" alt="${esc(item.name)}" loading="lazy">`
-    : `<span class="bo2-hero-img-emoji">${_typeEmoji(item.type)}</span>`;
+  const objHtml = item.asset_url
+    ? `<img class="bo2-hero-obj" src="${esc(item.asset_url)}" alt="${esc(item.name)}" loading="lazy">`
+    : `<span class="bo2-hero-emoji">${_typeEmoji(item.type)}</span>`;
 
-  const legendaryBorderHtml =
-    item.rarity === "legendaire"
-      ? `<div class="bo2-hero-legendary-border" aria-hidden="true"></div>`
-      : "";
-
-  const progHtml = !isOwned
-    ? `<div class="bo2-hero-prog-wrap">
+  // Pied droit : à acheter (prix + CTA) / débloqué / équipé
+  let footRight = "";
+  let progHtml = "";
+  if (!isOwned) {
+    footRight = `<div class="bo2-hero-buy">
+        <div class="bo2-hero-price">${volantImg(20)} <b>${item.cost_gemmes}</b></div>
+        <button class="bo2-hero-cta" tabindex="-1">${canAfford ? "Acheter" : "Voir"}</button>
+      </div>`;
+    progHtml = `<div class="bo2-hero-prog-wrap">
         <div class="bo2-hero-prog-label">${canAfford ? "Tu peux l'acheter !" : `Encore ${lacking} volant${lacking > 1 ? "s" : ""}`}</div>
-        <div class="bo2-hero-prog-track">
-          <div class="bo2-hero-prog-bar" style="width:${pct}%"></div>
-        </div>
-      </div>`
-    : isEquipped
-      ? `<div style="font:700 12px/1 'Inter',sans-serif;color:#34d399">✓ Équipé</div>`
-      : `<div style="font:700 12px/1 'Inter',sans-serif;color:rgba(255,255,255,.6)">Débloqué — touche pour équiper</div>`;
+        <div class="bo2-hero-prog-track"><div class="bo2-hero-prog-bar" style="width:${pct}%"></div></div>
+      </div>`;
+  } else {
+    footRight = `<div class="bo2-hero-buy"><div class="bo2-hero-owned">${isEquipped ? "✓ Équipé" : "Touche pour équiper"}</div></div>`;
+  }
 
   return `
     <div class="bo2-hero" data-item-id="${esc(item.id)}" role="button" tabindex="0" aria-label="${esc(item.name)}, ${esc(r.label)}, ${isOwned ? (isEquipped ? "équipé" : "débloqué") : canAfford ? "acheter" : "pas assez de volants"}">
-      ${legendaryBorderHtml}
-      <div class="bo2-hero-inner">
-        <div class="bo2-hero-img">${imgHtml}</div>
+      <span class="bo2-hero-tag">${isLeg ? "★ " : ""}${esc(r.label)}</span>
+      <span class="bo2-hero-spark s1" aria-hidden="true"></span>
+      <span class="bo2-hero-spark s2" aria-hidden="true"></span>
+      <div class="bo2-hero-stage" data-prev>
+        <span class="bo2-hero-sheen" aria-hidden="true"></span>
+        ${objHtml}
+      </div>
+      <div class="bo2-hero-foot">
         <div class="bo2-hero-body">
-          <div class="bo2-hero-badge">${esc(r.label)}</div>
           <div class="bo2-hero-name">${esc(item.name)}</div>
-          ${item.description ? `<div class="bo2-hero-desc">${esc(item.description)}</div>` : ""}
+          <div class="bo2-hero-sub"><span class="lab">${esc(r.label)}</span>${item.description ? esc(item.description) : "Skin à ta signature"}</div>
           ${progHtml}
         </div>
+        ${footRight}
       </div>
     </div>`;
 }
@@ -808,36 +870,42 @@ function renderGridCard(item, gemmes, idx) {
   const imgUrl = item.asset_url ?? null;
   const isEquipped = item.owned && getEquipped()[item.type] === item.id;
 
+  const lacking = item.cost_gemmes - gemmes;
   const preview = imgUrl
     ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` +
-      `<div class="bo2-card-preview-circle" style="background:${esc(color)}20;color:${esc(color)};display:none">${_typeIconSvg(item.type, color)}</div>`
-    : `<div class="bo2-card-preview-circle" style="background:${esc(color)}20;color:${esc(color)}">${_typeIconSvg(item.type, color)}</div>`;
+      `<div class="bo2-card-preview-circle" style="background:${esc(color)}1f;color:${esc(color)};display:none">${_typeIconSvg(item.type, color)}</div>`
+    : `<div class="bo2-card-preview-circle" style="background:${esc(color)}1f;color:${esc(color)}">${_typeIconSvg(item.type, color)}</div>`;
 
   const legendaryRibbon =
     item.rarity === "legendaire"
       ? `<div class="bo2-legendary-ribbon" aria-hidden="true"><span>Légend.</span></div>`
       : "";
+  const legendarySheen =
+    item.rarity === "legendaire"
+      ? `<span class="bo2-card-sheen" aria-hidden="true"></span>`
+      : "";
+
+  let footer;
+  if (item.owned) {
+    footer = isEquipped
+      ? `<span class="bo2-owned-txt" style="flex:1">${icon("check", { size: 13, strokeWidth: 3 })} Équipé</span>`
+      : `<span class="bo2-price-cell" style="color:var(--g-mute);font:700 11.5px/1 'Plus Jakarta Sans',sans-serif">Possédé</span><button class="bo2-price-btn bo2-equip-cta">Équiper</button>`;
+  } else {
+    footer = `<span class="bo2-price-cell">${volantImg(16)} <b>${item.cost_gemmes}</b></span><button class="bo2-price-btn ${canAfford ? "" : "cant-afford"}" ${!canAfford ? "disabled" : ""}>${canAfford ? "Acheter" : `−${lacking}`}</button>`;
+  }
 
   return `
     <div class="bo2-card" data-item-id="${esc(item.id)}" data-rarity="${esc(item.rarity)}"
-      style="border:1px solid ${r.c}3a; box-shadow:var(--s0); animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
-      <div class="bo2-card-preview" style="background:radial-gradient(120% 90% at 50% 12%, ${r.c}14 0%, transparent 60%), var(--su)">
-        <span class="bo2-card-rarity-tag" style="background:${r.tagBg};color:${r.tagFg}">${esc(r.label)}</span>
-        ${legendaryRibbon}
+      style="animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
+      <div class="bo2-card-preview" data-prev>
+        <span class="bo2-card-rarity-tag">${esc(r.label)}</span>
+        ${legendaryRibbon}${legendarySheen}
         ${preview}
-        ${item.owned ? `<div class="bo2-card-owned-badge">✓ Débloqué</div>` : ""}
+        ${item.owned ? `<div class="bo2-card-owned-badge">Débloqué</div>` : ""}
       </div>
       <div class="bo2-card-info">
         <div class="bo2-card-name">${esc(item.name)}</div>
-        <div class="bo2-card-footer">
-          ${
-            item.owned
-              ? isEquipped
-                ? `<div class="bo2-owned-txt">${icon("check", { size: 13, strokeWidth: 3 })} Équipé</div>`
-                : `<button class="bo2-price-btn bo2-equip-cta">Équiper</button>`
-              : `<button class="bo2-price-btn ${canAfford ? "" : "cant-afford"}" style="${canAfford ? `background:${r.c}` : ""}" ${!canAfford ? "disabled" : ""}>${volantImg(14)} ${item.cost_gemmes}</button>`
-          }
-        </div>
+        <div class="bo2-card-footer">${footer}</div>
       </div>
     </div>`;
 }
@@ -871,6 +939,50 @@ function _typeEmoji(type) {
   if (type === "theme") return "🎨";
   if (type === "permis_bg") return "🖼";
   return "🎁";
+}
+
+// ─── Détection d'opacité du skin ──────────────────────────────
+// Certains skins (voitures) sont des scènes NÉON opaques (fond noir incrusté) ;
+// d'autres (persos) sont transparents. Sur le thème clair, un asset opaque
+// affiché « contain » = un carré noir dégueu qui flotte. On détecte l'opacité
+// au chargement (alpha des 4 coins via canvas) → les opaques passent en mode
+// « cover » plein cadre (la scène devient une vraie vitrine encadrée), les
+// transparents restent flottants sur la teinte claire de rareté.
+const _opaqueCache = new Map();
+function _applyCover(img) {
+  if (!img) return;
+  const zone = img.closest("[data-prev]");
+  if (!zone) return;
+  const url = img.currentSrc || img.src || "";
+  const set = (opaque) => zone.classList.toggle("is-cover", opaque);
+  if (_opaqueCache.has(url)) return set(_opaqueCache.get(url));
+  const probe = () => {
+    if (!img.naturalWidth) return; // image cassée → reste flottant
+    let opaque = true;
+    try {
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = 20;
+      const cx = cv.getContext("2d", { willReadFrequently: true });
+      cx.drawImage(img, 0, 0, 20, 20);
+      const pts = [
+        [1, 1],
+        [18, 1],
+        [1, 18],
+        [18, 18],
+      ];
+      opaque = pts.every(([x, y]) => cx.getImageData(x, y, 1, 1).data[3] > 248);
+    } catch {
+      opaque = false; // canvas indisponible/teinté → on garde le mode flottant
+    }
+    _opaqueCache.set(url, opaque);
+    set(opaque);
+  };
+  if (img.complete && img.naturalWidth) probe();
+  else img.addEventListener("load", probe, { once: true });
+}
+function _scanCovers(root) {
+  if (!root) return;
+  root.querySelectorAll("[data-prev] img").forEach(_applyCover);
 }
 
 // ─── Gem float animation ──────────────────────────────────────
@@ -966,12 +1078,12 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
     <div class="bo2-modal" role="document">
       <div class="bo2-modal-handle" aria-hidden="true"></div>
       <div class="bo2-halo">
-        <div class="${haloRingClass}" style="background:${r.c}12;${!isLegendary ? `box-shadow:0 0 30px ${r.c}33` : ""}">
+        <div class="${haloRingClass}" data-prev>
           ${halo}
         </div>
       </div>
       <div class="bo2-modal-body">
-        <div class="bo2-modal-pill" style="background:${r.c}" id="bo2-modal-title">${esc(r.label)}</div>
+        <div class="bo2-modal-pill" style="background:${esc(r.c)};color:${item.rarity === "legendaire" ? "#5e430f" : "#fff"}" id="bo2-modal-title">${esc(r.label)}</div>
         <div class="bo2-modal-name">${esc(item.name)}</div>
         ${item.description ? `<div class="bo2-modal-desc">${esc(item.description)}</div>` : ""}
       </div>
@@ -990,6 +1102,7 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
     triggerEl,
   });
   track("boutique.detail_opened", { item_id: item.id });
+  _scanCovers(overlay);
   overlay.querySelector("#bo2-modal-cancel")?.addEventListener("click", close);
 
   const ctaBtn = overlay.querySelector("#bo2-cta");
