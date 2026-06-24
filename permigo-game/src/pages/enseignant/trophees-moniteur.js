@@ -16,192 +16,15 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
-import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 import { illus } from "@/components/enseignant/illus.js";
-
-// ─── Médailles (raretés) — couleurs de médaille, pas couleurs de marque ──
-const TIERS = {
-  bronze: {
-    label: "Bronze",
-    gradient: "linear-gradient(145deg,#92400e,#d97706)",
-    color: "#cd7f32",
-    glow: "rgba(205,127,50,.55)",
-  },
-  argent: {
-    label: "Argent",
-    gradient: "linear-gradient(145deg,#475569,#cbd5e1)",
-    color: "#94a3b8",
-    glow: "rgba(148,163,184,.5)",
-  },
-  or: {
-    label: "Or",
-    gradient: "linear-gradient(145deg,#b45309,#fbbf24)",
-    color: "#d97706",
-    glow: "rgba(245,158,11,.6)",
-  },
-  platine: {
-    label: "Platine",
-    gradient: "linear-gradient(145deg,#0369a1,#7dd3fc)",
-    color: "#0ea5e9",
-    glow: "rgba(56,189,248,.55)",
-  },
-  diamant: {
-    label: "Diamant",
-    gradient: "linear-gradient(145deg,#5b21b6,#c4b5fd)",
-    color: "var(--pu)",
-    glow: "rgba(167,139,250,.7)",
-  },
-};
-const TIER_ORDER = ["bronze", "argent", "or", "platine", "diamant"];
-
-// ─── Les 12 trophées (jalons pédagogiques) ───────────────────────
-const TROPHEES = [
-  // ─ Bronze
-  {
-    id: "premiere_seance",
-    tier: "bronze",
-    iconName: "car",
-    name: "Premier pas",
-    goal: "1 séance",
-    desc: "Première séance enregistrée dans PermiGo.",
-    check: (d) => d.totalVals >= 1,
-    progress: (d) => ({ v: Math.min(1, d.totalVals), max: 1 }),
-  },
-  {
-    id: "dix_comps",
-    tier: "bronze",
-    iconName: "check-circle",
-    name: "10 validations",
-    goal: "10 validations",
-    desc: "Un début solide — 10 compétences validées avec tes élèves.",
-    check: (d) => d.totalVals >= 10,
-    progress: (d) => ({ v: Math.min(10, d.totalVals), max: 10 }),
-  },
-  {
-    id: "premier_eleve",
-    tier: "bronze",
-    iconName: "user",
-    name: "Premier élève mobilisé",
-    goal: "1 élève actif",
-    desc: "Ton premier élève actif dans l'app ces 30 derniers jours.",
-    check: (d) => d.studentsActive >= 1,
-    progress: (d) => ({ v: Math.min(1, d.studentsActive), max: 1 }),
-  },
-  // ─ Argent
-  {
-    id: "streak_7",
-    tier: "argent",
-    iconName: "flame",
-    name: "Semaine active",
-    goal: "7 jours d'affilée",
-    desc: "7 jours consécutifs d'activité pédagogique.",
-    check: (d) => d.streak >= 7,
-    progress: (d) => ({ v: Math.min(7, d.streak), max: 7 }),
-  },
-  {
-    id: "cinquante_comps",
-    tier: "argent",
-    iconName: "trending-up",
-    name: "50 validations",
-    goal: "50 validations",
-    desc: "La régularité commence à faire une vraie différence.",
-    check: (d) => d.totalVals >= 50,
-    progress: (d) => ({ v: Math.min(50, d.totalVals), max: 50 }),
-  },
-  {
-    id: "cinq_eleves",
-    tier: "argent",
-    iconName: "users",
-    name: "Classe en formation",
-    goal: "5 élèves suivis",
-    desc: "5 élèves suivis simultanément dans PermiGo.",
-    check: (d) => d.studentsTotal >= 5,
-    progress: (d) => ({ v: Math.min(5, d.studentsTotal), max: 5 }),
-  },
-  // ─ Or
-  {
-    id: "cent_comps",
-    tier: "or",
-    iconName: "award",
-    name: "100 validations",
-    goal: "100 validations",
-    desc: "Référent pédagogique — 100 compétences validées, un suivi qui fait la différence.",
-    check: (d) => d.totalVals >= 100,
-    progress: (d) => ({ v: Math.min(100, d.totalVals), max: 100 }),
-  },
-  {
-    id: "streak_30",
-    tier: "or",
-    iconName: "zap",
-    name: "Mois sans faille",
-    goal: "30 jours d'affilée",
-    desc: "30 jours consécutifs actifs sans interruption.",
-    check: (d) => d.streak >= 30,
-    progress: (d) => ({ v: Math.min(30, d.streak), max: 30 }),
-  },
-  {
-    id: "dix_eleves",
-    tier: "or",
-    iconName: "users",
-    name: "Portefeuille solide",
-    goal: "10 élèves suivis",
-    desc: "10 élèves accompagnés en parallèle.",
-    check: (d) => d.studentsTotal >= 10,
-    progress: (d) => ({ v: Math.min(10, d.studentsTotal), max: 10 }),
-  },
-  // ─ Platine
-  {
-    id: "deux_cent_comps",
-    tier: "platine",
-    iconName: "shield",
-    name: "200 validations",
-    goal: "200 validations",
-    desc: "Expertise avérée — tu formes des conducteurs solides.",
-    check: (d) => d.totalVals >= 200,
-    progress: (d) => ({ v: Math.min(200, d.totalVals), max: 200 }),
-  },
-  {
-    id: "classe_complete",
-    tier: "platine",
-    iconName: "check-circle",
-    name: "Classe au complet",
-    goal: "Toute la classe active",
-    desc: "Tous tes élèves actifs sur les 30 derniers jours.",
-    check: (d) => d.studentsTotal >= 3 && d.studentsActive >= d.studentsTotal,
-    progress: (d) => ({
-      v: d.studentsActive,
-      max: Math.max(3, d.studentsTotal),
-    }),
-  },
-  // ─ Diamant
-  {
-    id: "expert_remc",
-    tier: "diamant",
-    iconName: "crown",
-    name: "Référent certifié",
-    goal: "300 validations",
-    desc: "300 validations — palier ultime. Tu maîtrises l'accompagnement complet de tes élèves.",
-    check: (d) => d.totalVals >= 300,
-    progress: (d) => ({ v: Math.min(300, d.totalVals), max: 300 }),
-  },
-];
-
-// Badge 3D par jalon (assets public/skins/badge-3d-*.png).
-const BADGE_IMG = {
-  premiere_seance: "badge-3d-01",
-  dix_comps: "badge-3d-02",
-  premier_eleve: "badge-3d-03",
-  streak_7: "badge-3d-04",
-  cinquante_comps: "badge-3d-06",
-  cinq_eleves: "badge-3d-08",
-  cent_comps: "badge-3d-02",
-  streak_30: "badge-3d-04",
-  dix_eleves: "badge-3d-06",
-  deux_cent_comps: "badge-3d-08",
-  classe_complete: "badge-3d-01",
-  expert_remc: "badge-3d-ultimate",
-};
-const badgeSrc = (id) => `/skins/${BADGE_IMG[id] || "badge-3d-01"}.webp`;
+// Données + feuille de détail partagées avec le rail de parcours-pro.js.
+import {
+  TIERS,
+  TIER_ORDER,
+  badgeSrc,
+  computeTrophees,
+  openTrophySheet,
+} from "@/components/enseignant/trophy-sheet.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -350,7 +173,6 @@ const STYLE = `<style>
 .tr2-card.locked .tr2-card-ico { background: transparent; border: 0; box-shadow: none; }
 .tr2-card-img { width: 48px; height: 48px; object-fit: contain; display: block; filter: drop-shadow(0 3px 6px rgba(0,0,0,.2)); }
 .tr2-card-img.locked { filter: grayscale(1) opacity(.4); }
-.tr2-sheet-img { width: 92px; height: 92px; object-fit: contain; display: block; filter: drop-shadow(0 5px 12px rgba(0,0,0,.28)); }
 .tr2-card-name {
   font: 700 10.5px/1.2 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
   letter-spacing: -.01em;
@@ -366,7 +188,7 @@ const STYLE = `<style>
 @media (prefers-reduced-motion: reduce) {
   .tr2-card, .tr2-prog-fill { animation: none !important; transition: none !important; }
   .tr2-card.diamant { animation: none !important; }
-  .tr2-cta-btn, .tr2-sheet-share { transition: none !important; }
+  .tr2-cta-btn { transition: none !important; }
 }
 
 /* ── Empty state trophy ── */
@@ -379,106 +201,14 @@ const STYLE = `<style>
   color: var(--mu2); max-width: 28ch;
 }
 
-/* ── Bottom sheet (détail trophée) ── */
-.tr2-sheet-bg {
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(11,13,26,0); backdrop-filter: blur(0);
-  display: flex; align-items: flex-end; justify-content: center;
-  opacity: 0; pointer-events: none; transition: opacity .22s, background .22s;
-}
-.tr2-sheet-bg.open { opacity: 1; pointer-events: auto; background: rgba(11,13,26,.6); backdrop-filter: blur(6px); }
-.tr2-sheet {
-  width: 100%; max-width: 480px; background: var(--su);
-  border-radius: 26px 26px 0 0; overflow: hidden;
-  transform: translateY(100%); transition: transform .3s cubic-bezier(.32,.72,0,1);
-  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
-}
-.tr2-sheet-bg.open .tr2-sheet { transform: translateY(0); }
-.tr2-sheet-glow {
-  height: 162px; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 10px; position: relative;
-}
-.tr2-sheet-handle {
-  width: 36px; height: 4px; background: rgba(255,255,255,.5); border-radius: 2px;
-  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-}
-.tr2-sheet-ico {
-  width: 96px; height: 96px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255,255,255,.2); color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 8px 24px rgba(0,0,0,.25);
-  animation: tr2IcoIn .5s .08s cubic-bezier(.34,1.56,.64,1) both;
-}
-@keyframes tr2IcoIn { from { transform: scale(.4) rotate(-12deg); opacity: 0; } to { transform: none; opacity: 1; } }
-.tr2-sheet-tier {
-  font: 700 11px/1 'IBM Plex Mono', monospace; letter-spacing: .08em; text-transform: uppercase;
-  color: #fff; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.32);
-  border-radius: var(--ens-r-pill, 999px); padding: 4px 11px;
-}
-.tr2-sheet-body { padding: 20px 20px 8px; }
-.tr2-sheet-title {
-  font: 700 22px/1.2 var(--ens-display, 'Fredoka'), sans-serif;
-  color: var(--ink); letter-spacing: -.02em; margin: 0 0 8px;
-}
-.tr2-sheet-desc { font: 500 14px/1.55 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--mu); margin: 0 0 16px; }
-.tr2-sheet-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-.tr2-sheet-chip-val {
-  display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px;
-  border-radius: var(--ens-r-pill, 999px);
-  font: 700 12px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-  background: color-mix(in srgb, #4f46e5 14%, var(--su));
-  color: #4f46e5;
-  border: 1.5px solid color-mix(in srgb, #4f46e5 28%, transparent);
-}
-.tr2-sheet-chip-prog {
-  display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px;
-  border-radius: var(--ens-r-pill, 999px);
-  font: 700 12px/1 'IBM Plex Mono', monospace;
-  background: var(--bg2); color: var(--mu3);
-  border: 1px solid var(--bo);
-}
-.tr2-sheet-social { font: 500 12.5px/1.45 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--mu2); margin-bottom: 18px; }
-.tr2-sheet-actions { display: flex; gap: 8px; padding: 0 20px 8px; }
-.tr2-sheet-share {
-  flex: 1; padding: 14px; min-height: 50px; border: 0;
-  border-radius: var(--ens-r, 16px);
-  background: linear-gradient(180deg, #6d6bff, #4f46e5);
-  color: var(--ens-ink-go, #07150c);
-  font: 700 14px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-  cursor: pointer;
-  box-shadow: 0 4px 0 0 color-mix(in srgb, #4f46e5 60%, #000);
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: transform .1s ease, box-shadow .1s ease;
-}
-.tr2-sheet-share:active { transform: translateY(3px); box-shadow: 0 1px 0 0 color-mix(in srgb, #4f46e5 60%, #000); }
-.tr2-sheet-share:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
-.tr2-sheet-close {
-  padding: 14px 20px; min-height: 50px;
-  border: 1.5px solid var(--bo4); border-radius: var(--ens-r, 16px);
-  background: var(--bg); color: var(--mu3);
-  font: 700 14px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; cursor: pointer;
-  transition: background .15s, border-color .15s;
-}
-.tr2-sheet-close:hover { background: var(--bg2); border-color: var(--bo4); }
-.tr2-sheet-close:focus-visible { outline: 3px solid #4f46e5); outline-offset: 2px; }
-.tr2-sheet-glow.locked { background: var(--bg2); border-bottom: 1px solid var(--bo); }
-.tr2-sheet-glow.locked .tr2-sheet-ico { background: var(--su); color: var(--mu2); border: 1px solid var(--bo); box-shadow: none; }
-.tr2-sheet-glow.locked .tr2-sheet-handle { background: var(--bo4); }
-.tr2-sheet-glow.locked .tr2-sheet-tier { background: var(--su); color: var(--mu3); border-color: var(--bo); }
-@media (prefers-reduced-motion: reduce) {
-  .tr2-sheet-bg, .tr2-sheet, .tr2-sheet-ico { transition: none !important; animation: none !important; }
-}
-/* Détail ouvert → masque la barre de nav du bas : la feuille vit dans #app
-   (sous le contexte d'empilement de la transition de route) et ne peut donc pas
-   passer au-dessus de la nav (body, z-300), qui rognait ses boutons. */
-body.tr2m-sheet-open #bottom-nav { display: none !important; }
+/* La feuille de détail vit désormais dans le module partagé trophy-sheet.js
+   (posée sur <body>, au-dessus de la nav). Plus de markup/CSS de feuille ici. */
 </style>`;
 
-// ─── État module (sheet) ─────────────────────────────────────────
+// ─── État module ─────────────────────────────────────────────────
+// _results = trophées enrichis (computeTrophees) — utilisé par la grille + le
+// deep-link. La feuille de détail est gérée par le module partagé (body-level).
 let _results = [];
-let _onKeydown = null;
-let _onNav = null;
-let _lastFocus = null;
 
 // ─── Mount ────────────────────────────────────────────────────────
 // openKey : deep-link #/trophees-moniteur/{id} → ouvre directement le détail
@@ -552,18 +282,12 @@ export async function mount(root, openKey = null) {
 }
 
 export function unmount() {
-  _closeSheet();
+  // La feuille de détail (module partagé) se ferme d'elle-même au hashchange.
 }
 
 // ─── Render ──────────────────────────────────────────────────────
 function _render(root, d, openKey = null) {
-  _results = TROPHEES.map((t) => {
-    const prog = t.progress(d);
-    const unlocked = t.check(d);
-    const pct = prog.max > 0 ? Math.round((prog.v / prog.max) * 100) : 0;
-    const close = !unlocked && pct >= 25;
-    return { ...t, prog, unlocked, pct, close, mystery: !unlocked && !close };
-  });
+  _results = computeTrophees(d);
 
   const unlockedCount = _results.filter((t) => t.unlocked).length;
   const total = _results.length;
@@ -620,9 +344,6 @@ function _render(root, d, openKey = null) {
   ${cta}
   ${emptyState}
   ${gridHtml}
-</div>
-<div class="tr2-sheet-bg" id="tr2-sheet-bg" role="dialog" aria-modal="true" aria-label="Détail du trophée">
-  <div class="tr2-sheet" id="tr2-sheet"></div>
 </div>`;
 
   _wireBack(root);
@@ -633,13 +354,8 @@ function _render(root, d, openKey = null) {
   root.querySelectorAll(".tr2-card").forEach((el) => {
     el.addEventListener("click", () => {
       haptic("impact");
-      _openSheet(root, parseInt(el.dataset.i, 10));
+      openTrophySheet(_results[parseInt(el.dataset.i, 10)], { triggerEl: el });
     });
-  });
-
-  const bg = root.querySelector("#tr2-sheet-bg");
-  bg?.addEventListener("click", (e) => {
-    if (e.target === bg) _closeSheet();
   });
 
   requestAnimationFrame(() => {
@@ -649,8 +365,8 @@ function _render(root, d, openKey = null) {
 
   // Deep-link : ouvre directement le détail du trophée ciblé (rail Progression).
   if (openKey) {
-    const idx = _results.findIndex((t) => t.id === openKey);
-    if (idx >= 0) _openSheet(root, idx);
+    const t = _results.find((x) => x.id === openKey);
+    if (t) openTrophySheet(t);
   }
 }
 
@@ -695,119 +411,4 @@ function _cardHtml(t) {
     <div class="tr2-card-name">${name}</div>
     ${sub}
   </button>`;
-}
-
-// ─── Bottom sheet ────────────────────────────────────────────────
-function _openSheet(root, i) {
-  const t = _results[i];
-  if (!t) return;
-  const cfg = TIERS[t.tier];
-  const sheet = root.querySelector("#tr2-sheet");
-  const bg = root.querySelector("#tr2-sheet-bg");
-  if (!sheet || !bg) return;
-
-  track("trophees_moniteur.detail", { id: t.id, unlocked: t.unlocked });
-
-  if (t.unlocked) {
-    haptic("unlock");
-    sheet.innerHTML = `
-      <div class="tr2-sheet-glow" style="background:${cfg.gradient}">
-        <div class="tr2-sheet-handle"></div>
-        <div class="tr2-sheet-ico" style="background:transparent;border:0;box-shadow:none"><img src="${badgeSrc(t.id)}" alt="" class="tr2-sheet-img"></div>
-        <div class="tr2-sheet-tier">${cfg.label}</div>
-      </div>
-      <div class="tr2-sheet-body">
-        <h2 class="tr2-sheet-title">${esc(t.name)}</h2>
-        <p class="tr2-sheet-desc">${esc(t.desc)}</p>
-        <div class="tr2-sheet-meta">
-          <span class="tr2-sheet-chip-val">${icon("check", { size: 13, strokeWidth: 3 })} ${esc(t.goal)}</span>
-        </div>
-        <div class="tr2-sheet-social">Une preuve de plus de ton travail au quotidien.</div>
-      </div>
-      <div class="tr2-sheet-actions">
-        <button class="tr2-sheet-share" id="tr2-share">${icon("share", { size: 18, strokeWidth: 2 })} Partager</button>
-        <button class="tr2-sheet-close" id="tr2-close">Fermer</button>
-      </div>`;
-  } else {
-    sheet.innerHTML = `
-      <div class="tr2-sheet-glow locked">
-        <div class="tr2-sheet-handle"></div>
-        <div class="tr2-sheet-ico">${icon("lock", { size: 40, strokeWidth: 2 })}</div>
-        <div class="tr2-sheet-tier">Verrouillé · ${cfg.label}</div>
-      </div>
-      <div class="tr2-sheet-body">
-        <h2 class="tr2-sheet-title">${t.mystery ? "À découvrir" : esc(t.name)}</h2>
-        <p class="tr2-sheet-desc">${t.mystery ? "Continue à valider des compétences pour révéler ce trophée." : esc(t.desc)}</p>
-        <div class="tr2-sheet-meta">
-          <span class="tr2-sheet-chip-val">Objectif : ${esc(t.goal)}</span>
-          ${t.close ? `<span class="tr2-sheet-chip-prog">${t.prog.v}/${t.prog.max} — ${t.pct}%</span>` : ""}
-        </div>
-        <div class="tr2-sheet-social">Chaque validation te rapproche de ce jalon.</div>
-      </div>
-      <div class="tr2-sheet-actions">
-        <button class="tr2-sheet-share" id="tr2-goto">Voir mon parcours ${icon("chevron-right", { size: 16, strokeWidth: 2.5 })}</button>
-        <button class="tr2-sheet-close" id="tr2-close">Fermer</button>
-      </div>`;
-  }
-
-  _lastFocus = document.activeElement;
-  bg.classList.add("open");
-  // La feuille vit dans #app (contexte d'empilement créé par la transition de
-  // route) → le z-index ne passe PAS au-dessus de la nav (body, z-300) : ses
-  // boutons du bas étaient masqués par la barre. On masque la nav le temps du
-  // détail. Fermeture aussi à la navigation (sinon nav masquée sur la page
-  // suivante car la feuille est retirée du DOM sans _closeSheet).
-  document.body.classList.add("tr2m-sheet-open");
-  _onNav = () => _closeSheet();
-  window.addEventListener("hashchange", _onNav);
-
-  sheet.querySelector("#tr2-close")?.addEventListener("click", _closeSheet);
-  sheet.querySelector("#tr2-goto")?.addEventListener("click", () => {
-    _closeSheet();
-    navigate("#/parcours");
-  });
-  sheet
-    .querySelector("#tr2-share")
-    ?.addEventListener("click", () => _shareTrophy(t));
-
-  enableSheetSwipe(sheet, _closeSheet, { overlay: bg });
-
-  _onKeydown = (e) => {
-    if (e.key === "Escape") _closeSheet();
-  };
-  document.addEventListener("keydown", _onKeydown);
-
-  requestAnimationFrame(() => sheet.querySelector("button")?.focus());
-}
-
-function _closeSheet() {
-  if (_onKeydown) {
-    document.removeEventListener("keydown", _onKeydown);
-    _onKeydown = null;
-  }
-  if (_onNav) {
-    window.removeEventListener("hashchange", _onNav);
-    _onNav = null;
-  }
-  document.body.classList.remove("tr2m-sheet-open");
-  const bg = document.querySelector("#tr2-sheet-bg.open");
-  if (bg) bg.classList.remove("open");
-  if (_lastFocus && typeof _lastFocus.focus === "function") {
-    _lastFocus.focus();
-    _lastFocus = null;
-  }
-}
-
-async function _shareTrophy(t) {
-  const text = `J'ai débloqué le jalon « ${t.name} » sur PermiGo`;
-  try {
-    if (navigator.share) {
-      await navigator.share({ title: "Trophée PermiGo", text });
-    } else if (navigator.clipboard) {
-      await navigator.clipboard.writeText(text);
-      toast("Copié dans le presse-papier", "success");
-    }
-  } catch {
-    /* partage annulé par l'utilisateur — silencieux */
-  }
 }

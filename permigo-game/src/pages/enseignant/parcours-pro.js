@@ -19,56 +19,14 @@ import { animateCounter } from "@/utils/gestures.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
 import { getLeague } from "@/utils/league-shared.js";
-
-// ─── Trophées : 12 jalons (même définition que trophees-moniteur.js) ──
-const TROPHEES = [
-  { id: "premiere_seance", check: (d) => d.totalVals >= 1 },
-  { id: "dix_comps", check: (d) => d.totalVals >= 10 },
-  { id: "premier_eleve", check: (d) => d.studentsActive >= 1 },
-  { id: "streak_7", check: (d) => d.streak >= 7 },
-  { id: "cinquante_comps", check: (d) => d.totalVals >= 50 },
-  { id: "cinq_eleves", check: (d) => d.studentsTotal >= 5 },
-  { id: "cent_comps", check: (d) => d.totalVals >= 100 },
-  { id: "streak_30", check: (d) => d.streak >= 30 },
-  { id: "dix_eleves", check: (d) => d.studentsTotal >= 10 },
-  { id: "deux_cent_comps", check: (d) => d.totalVals >= 200 },
-  {
-    id: "classe_complete",
-    check: (d) => d.studentsTotal >= 3 && d.studentsActive >= d.studentsTotal,
-  },
-  { id: "expert_remc", check: (d) => d.totalVals >= 300 },
-];
-const BADGE_IMG = {
-  premiere_seance: "badge-3d-01",
-  dix_comps: "badge-3d-02",
-  premier_eleve: "badge-3d-03",
-  streak_7: "badge-3d-04",
-  cinquante_comps: "badge-3d-06",
-  cinq_eleves: "badge-3d-08",
-  cent_comps: "badge-3d-02",
-  streak_30: "badge-3d-04",
-  dix_eleves: "badge-3d-06",
-  deux_cent_comps: "badge-3d-08",
-  classe_complete: "badge-3d-01",
-  expert_remc: "badge-3d-ultimate",
-};
-const badgeSrc = (id) => `/skins/${BADGE_IMG[id] || "badge-3d-01"}.webp`;
-
-// Noms lisibles pour aria-label des trophées
-const TROPHEE_NAMES = {
-  premiere_seance: "Premier pas",
-  dix_comps: "10 validations",
-  premier_eleve: "Premier élève mobilisé",
-  streak_7: "Semaine active",
-  cinquante_comps: "50 validations",
-  cinq_eleves: "Classe en formation",
-  cent_comps: "100 validations",
-  streak_30: "Mois sans faille",
-  dix_eleves: "Portefeuille solide",
-  deux_cent_comps: "200 validations",
-  classe_complete: "Classe au complet",
-  expert_remc: "Référent certifié",
-};
+// Trophées : données + feuille de détail partagées avec trophees-moniteur.js.
+// Cliquer un trophée du rail ouvre son détail EN PLACE (feuille body-level),
+// sans naviguer vers une autre page.
+import {
+  badgeSrc,
+  computeTrophees,
+  openTrophySheet,
+} from "@/components/enseignant/trophy-sheet.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -374,8 +332,8 @@ function _render(root, d, state, ligueRows) {
   const palierNum = tier?.tier ?? 0;
   const palierName = tier?.title ?? "Premiers pas";
 
-  // Trophées
-  const troResults = TROPHEES.map((t) => ({ ...t, unlocked: t.check(d) }));
+  // Trophées (état enrichi partagé avec la page complète)
+  const troResults = computeTrophees(d);
   const unlockedCount = troResults.filter((t) => t.unlocked).length;
   const total = troResults.length;
   // Dernier débloqué = le plus haut index débloqué
@@ -482,11 +440,13 @@ function _render(root, d, state, ligueRows) {
     navigate("#/trophees-moniteur");
   });
 
-  // Chaque trophée du rail ouvre son détail (deep-link). Avant : clic dans le vide.
+  // Chaque trophée du rail ouvre son détail EN PLACE (feuille body-level, par-
+  // dessus la nav) — pas de navigation vers une autre page. Avant : clic dans le
+  // vide, puis (fix précédent) redirection « page en flou ».
   root.querySelectorAll(".ppr-tcell[data-key]").forEach((cell) => {
     const open = () => {
-      haptic("tap");
-      navigate(`#/trophees-moniteur/${cell.dataset.key}`);
+      const t = troResults.find((x) => x.id === cell.dataset.key);
+      if (t) openTrophySheet(t, { triggerEl: cell });
     };
     cell.addEventListener("click", open);
     cell.addEventListener("keydown", (e) => {
@@ -545,7 +505,7 @@ function _trophRow(troResults, lastUnlockedIdx) {
       const isNew = i === lastUnlockedIdx && t.unlocked;
       const lockCls = t.unlocked ? "" : " lock";
       const newCls = isNew ? " new-badge" : "";
-      const label = TROPHEE_NAMES[t.id] || t.id;
+      const label = t.name || t.id;
       return `<div class="ppr-tcell${lockCls}${newCls}" role="button" tabindex="0" data-key="${esc(t.id)}" aria-label="${esc(label)}${t.unlocked ? " — débloqué" : " — verrouillé"} — voir le détail">
         <img src="${badgeSrc(t.id)}" alt="" width="46" height="46" loading="lazy">
       </div>`;
