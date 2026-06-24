@@ -8,7 +8,18 @@ import { toast } from "@/components/common/toast.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
-import { REMC_TOTAL } from "@/data/remc.js";
+import { REMC, REMC_TOTAL } from "@/data/remc.js";
+
+// « Prêt » pour l'examen = MÊME règle métier que mes-eleves.js (source de vérité) :
+// les compétences de BASE C1-C2-C3 sont toutes acquises (C4 = conduite autonome
+// ne conditionne pas la présentation). On évite ainsi le seuil ad hoc 0.85 qui
+// faisait diverger le compteur « N prêts » entre l'accueil et la liste.
+const BASE_CATS = ["C1", "C2", "C3"];
+const BASE_COMPS = REMC.filter((c) => BASE_CATS.includes(c.id)).flatMap((c) =>
+  c.subs.map((s) => s.c),
+);
+const isPretExam = (acquisSet) =>
+  !!acquisSet && BASE_COMPS.every((c) => acquisSet.has(c));
 import { labelComp } from "@/utils/remc-label.js";
 import { statutCfg } from "@/utils/statut-label.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
@@ -623,6 +634,7 @@ async function renderInto(root, _me) {
     id,
     ...(elevesMap[id] || { prenom: "Élève", nom: "", idx: 0 }),
     acquis: acquisSetByEleve[id]?.size || 0,
+    acquisSet: acquisSetByEleve[id] || new Set(),
     recu: recuByEleve.has(id), // a déjà obtenu son permis
   }));
 
@@ -633,7 +645,7 @@ async function renderInto(root, _me) {
 
   // « Prêts » = bien avancé ET pas encore passé l'examen (un reçu n'est pas
   // « prêt à passer », il a déjà réussi).
-  const prets = elevesEnFormation.filter((e) => e.acquis / REMC_TOTAL >= 0.85);
+  const prets = elevesEnFormation.filter((e) => isPretExam(e.acquisSet));
   const nbPrets = prets.length;
 
   // Roster 3 élèves prioritaires
@@ -682,7 +694,7 @@ async function renderInto(root, _me) {
     let pillText = `${REMC_TOTAL - e.acquis} à valider`;
     let barColor = "#4f46e5";
 
-    if (e.acquis / REMC_TOTAL >= 0.85) {
+    if (isPretExam(e.acquisSet)) {
       pillClass = "aj-pill-ok";
       pillText = "Prête";
       barColor = "#15803d";
