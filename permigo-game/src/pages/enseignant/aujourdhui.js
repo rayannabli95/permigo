@@ -760,8 +760,8 @@ async function renderInto(root, _me) {
         <div class="aj-ft">
           <img src="/skins/badge-3d-06.webp" alt="" loading="lazy" width="32" height="32">
           <div>
-            <div class="aj-ft-val">${nbElevesActifs > 0 ? Math.round(((acquisAll?.length || 0) / Math.max(nbElevesActifs, 1) / REMC_TOTAL) * 100) + "%" : "—"}</div>
-            <div class="aj-ft-lbl">complétude moy.</div>
+            <div class="aj-ft-val">${nbElevesActifs > 0 ? nbPrets : "—"}</div>
+            <div class="aj-ft-lbl">${nbPrets >= 2 ? "élèves prêts" : "élève prêt"}</div>
           </div>
         </div>
         <div class="aj-ft">
