@@ -70,8 +70,9 @@ export function openBottomSheet({
     closed = true;
     haptic("select");
     overlay.remove();
-    // Nettoyage du listener clavier
+    // Nettoyage des listeners
     document.removeEventListener("keydown", _onKey);
+    window.removeEventListener("hashchange", _onNav);
     // Restauration du focus (UX clavier + lecteur d'écran)
     try {
       previousFocus?.focus?.({ preventScroll: true });
@@ -116,6 +117,14 @@ export function openBottomSheet({
     }
   };
   document.addEventListener("keydown", _onKey);
+
+  // ── Fermeture à la navigation (changement de route hash) ──────
+  // L'overlay est posé sur <body> : sans ça, naviguer (ex : ouvrir un détail
+  // de trophée en deep-link puis changer de page) laisse le fond flou COLLÉ
+  // par-dessus la nouvelle page, qui intercepte tous les clics (« je clique,
+  // ça ne fait que du flou »). On le ferme donc à tout hashchange.
+  const _onNav = () => close();
+  window.addEventListener("hashchange", _onNav);
 
   // ── Focus initial ─────────────────────────────────────────────
   // Priorisation : initialFocus param > 1er bouton principal > 1er focusable.
