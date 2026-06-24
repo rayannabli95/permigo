@@ -106,11 +106,12 @@ const ROUTES = {
     "nouveau-mdp": () => import("@/pages/auth/nouveau-mdp.js"),
   },
   // Owner (= plateforme, au-dessus du gérant) : cockpit agrégé toutes écoles.
-  // Le drill « une école » réutilisera le cockpit gérant paramétré (V2).
+  // NB : pas de route `cockpit` ici — cockpit.js bail-out sans rendu pour un
+  // non-gérant (écran figé). Le drill « une école » (cockpit gérant paramétré)
+  // sera câblé en V2 avec un cockpit.js owner-aware.
   owner: {
     default: () => import("@/pages/gerant/owner.js"),
     ecoles: () => import("@/pages/gerant/owner.js"),
-    cockpit: () => import("@/pages/gerant/cockpit.js"),
     ecole: () => import("@/pages/public/ecole.js"),
     messages: () => import("@/pages/common/messages.js"),
     legal: () => import("@/pages/common/legal.js"),

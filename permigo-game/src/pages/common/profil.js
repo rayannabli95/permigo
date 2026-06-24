@@ -3,9 +3,9 @@
 //
 // Architecture "app de l'année" (Strava / Cash App style) :
 //  1. Héro d'identité unique (ProfileCard) — bannière var(--a)/var(--adk)
-//     rôle-adaptative (violet élève, indigo moniteur, auto)
-//  2. Bandeau 3 stats bento avec count-up à l'entrée
-//  3. Sections labellisées : Ma vitrine · Inviter des amis · Réglages
+//     rôle-adaptative (violet élève, indigo moniteur, auto). Porte les 3 stats
+//     clés (compétences/streak/restantes) — source unique, pas de doublon.
+//  2. Sections labellisées : Ma vitrine · Inviter des amis · Réglages
 //  4. Carte permis dans Ma vitrine (sans redondance de chiffres)
 //  5. Parrainage avec volant doré
 //  6. Suppression de l'UUID brut côté UI
@@ -36,6 +36,7 @@ const ROLE_LABELS = {
   eleve: "Élève",
   enseignant: "Enseignant",
   gerant: "Gérant",
+  owner: "Plateforme",
 };
 
 // ─── CSS scoped .prf ─────────────────────────────────────────
@@ -53,36 +54,6 @@ const STYLE = `<style>
 
 /* ── Héro : pas de padding latéral (la ProfileCard sort plein-bord) ── */
 .prf-hero { padding: 0 0 4px; }
-
-/* ── Bandeau 3 stats bento ── */
-.prf-bento {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 12px 16px 4px;
-}
-.prf-bento-tile {
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: var(--r-lg, 16px);
-  padding: 14px 10px 12px;
-  text-align: center;
-  box-shadow: var(--s0);
-}
-.prf-bento-n {
-  font: 700 26px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
-  letter-spacing: -0.03em;
-  display: block;
-  margin-bottom: 5px;
-}
-.prf-bento-n[data-count-target] { /* count-up démarre à 0 */}
-.prf-bento-lbl {
-  font: 500 10px/1.3 'Inter', sans-serif;
-  color: var(--mu2);
-  text-transform: uppercase;
-  letter-spacing: .07em;
-}
 
 /* ── Titre de section (iOS Settings / Linear style) ── */
 .prf-sec-ttl {
@@ -634,7 +605,7 @@ const STYLE = `<style>
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .prf-bento-tile, .prf-sheet, .prf-sheet-overlay { animation: none !important; }
+  .prf-sheet, .prf-sheet-overlay { animation: none !important; }
 }
 </style>`;
 
