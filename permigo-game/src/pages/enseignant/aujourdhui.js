@@ -597,6 +597,21 @@ async function renderInto(root, _me) {
     (acquisSetByEleve[v.eleve_id] ||= new Set()).add(v.competence_id);
   });
 
+  // Élèves ayant OBTENU le permis (dernier examen = 'recu') → ils sortent de la
+  // formation active : ils ne doivent PLUS compter comme « prêts » ni encombrer
+  // le roster (sinon un reçu très avancé reste affiché « Prête » à tort).
+  const { data: examsAll } = await sb
+    .from("examens")
+    .select("eleve_id, statut, created_at")
+    .order("created_at", { ascending: false });
+  const recuByEleve = new Set();
+  const lastExamSeen = new Set();
+  (examsAll || []).forEach((ex) => {
+    if (lastExamSeen.has(ex.eleve_id)) return; // 1ère ligne vue = plus récente
+    lastExamSeen.add(ex.eleve_id);
+    if (ex.statut === "recu") recuByEleve.add(ex.eleve_id);
+  });
+
   const mesIds = new Set(
     Object.values(elevesMap)
       .filter((e) => e.enseignant_id === _me.id)
@@ -608,19 +623,23 @@ async function renderInto(root, _me) {
     id,
     ...(elevesMap[id] || { prenom: "Élève", nom: "", idx: 0 }),
     acquis: acquisSetByEleve[id]?.size || 0,
+    recu: recuByEleve.has(id), // a déjà obtenu son permis
   }));
 
-  const nbElevesActifs = mesEleves.length;
+  // Élèves encore EN FORMATION (les reçus sont sortis) — base des compteurs.
+  const elevesEnFormation = mesEleves.filter((e) => !e.recu);
+  const nbElevesActifs = elevesEnFormation.length;
+  const nbRecus = mesEleves.length - elevesEnFormation.length;
 
-  // « Prêts » = C1-C3 acquis (readiness pret = tous les 31 validés ici approx)
-  // Simplification : pct >= 85% (~26/31)
-  const prets = mesEleves.filter((e) => e.acquis / REMC_TOTAL >= 0.85);
+  // « Prêts » = bien avancé ET pas encore passé l'examen (un reçu n'est pas
+  // « prêt à passer », il a déjà réussi).
+  const prets = elevesEnFormation.filter((e) => e.acquis / REMC_TOTAL >= 0.85);
   const nbPrets = prets.length;
 
   // Roster 3 élèves prioritaires
   // Tri : 1) inactifs depuis > 7j (à relancer) 2) proches de la fin 3) actifs récemment
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
-  const roster = mesEleves
+  const roster = elevesEnFormation
     .filter((e) => (e.acquis || 0) < REMC_TOTAL)
     .sort((a, b) => {
       const aLast = elevesMap[a.id]?.last_active_at || "";
@@ -736,7 +755,7 @@ async function renderInto(root, _me) {
 
       <!-- Tes élèves -->
       <div class="aj-sec-header">
-        <span class="aj-sec-title">Tes élèves${nbPrets > 0 ? " · " + nbPrets + " prêt" + (nbPrets > 1 ? "s" : "") : ""}</span>
+        <span class="aj-sec-title">Tes élèves${nbPrets > 0 ? " · " + nbPrets + " prêt" + (nbPrets > 1 ? "s" : "") : ""}${nbRecus > 0 ? " · " + nbRecus + " reçu" + (nbRecus > 1 ? "s" : "") : ""}</span>
         <button class="aj-sec-link" id="aj-voir-tout" type="button">Tout voir</button>
       </div>
 
