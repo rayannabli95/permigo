@@ -808,19 +808,19 @@ const STYLE = `<style>
   pointer-events: auto;
   backdrop-filter: blur(4px);
 }
-/* Fiche compétence : descend du HAUT de l'écran */
+/* Fiche compétence : monte du BAS de l'écran (comme la feuille trophée) */
 .bsheet {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  bottom: 0; left: 0; right: 0;
   z-index: 99;
   background: var(--su);
-  border-radius: 0 0 24px 24px;
-  border-bottom: 1px solid var(--bo);
-  box-shadow: 0 8px 32px rgba(11,13,26,.16);
-  transform: translateY(-100%);
+  border-radius: 24px 24px 0 0;
+  border-top: 1px solid var(--bo);
+  box-shadow: 0 -8px 32px rgba(11,13,26,.16);
+  transform: translateY(100%);
   transition: transform .34s cubic-bezier(.32,.72,0,1);
   touch-action: pan-y;
-  padding-top: max(8px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
   will-change: transform;
   max-height: 88vh;
   overflow-y: auto;
@@ -828,12 +828,12 @@ const STYLE = `<style>
   overscroll-behavior: contain;
 }
 .bsheet.open { transform: translateY(0); }
-/* Poignée en BAS du panneau (il descend du haut) */
+/* Poignée en HAUT du panneau (il monte du bas) */
 .bsheet-handle {
   width: 40px; height: 4px;
   background: var(--bo);
   border-radius: 2px;
-  margin: 4px auto 10px;
+  margin: 10px auto 6px;
   flex-shrink: 0;
   touch-action: none;
   cursor: grab;
@@ -1952,8 +1952,8 @@ function renderPage(
 <!-- Bottom sheet -->
 <div class="bsheet-bg" id="bsheet-bg" aria-hidden="true"></div>
 <div class="bsheet" id="bsheet" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="bsheet-title">
-  <div id="bsheet-body"></div>
   <div class="bsheet-handle" aria-hidden="true"></div>
+  <div id="bsheet-body"></div>
 </div>`;
 }
 
@@ -2454,8 +2454,9 @@ function wire(root, worldStates, validatedMap, pendingMap, me, view = "map") {
         .forEach((el) => el.classList.remove("selected"));
     });
   }
-  // Swipe-to-dismiss vers le HAUT (le panneau descend du haut)
-  if (sheet) enableSheetSwipe(sheet, closeFn, { overlay: bg, direction: "up" });
+  // Swipe-to-dismiss vers le BAS (le panneau monte du bas, comme la feuille trophée)
+  if (sheet)
+    enableSheetSwipe(sheet, closeFn, { overlay: bg, direction: "down" });
 }
 
 function openFiche(root, compId, ws, validatedMap, pendingMap) {

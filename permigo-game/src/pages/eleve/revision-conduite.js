@@ -69,16 +69,40 @@ const STYLE = `<style>
 .rvc-h1 { font: 800 22px/1.1 'Plus Jakarta Sans', sans-serif; letter-spacing:-.025em; margin:0; }
 .rvc-sub { color: var(--mu, #64748b); font-size:13px; margin:2px 0 0; }
 
-/* Carte « point faible du jour » */
-.rvc-pf { margin:14px 0 18px; border-radius:18px; padding:18px;
-  background: linear-gradient(135deg, var(--a), var(--a-lt)); color:#fff;
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--a, #6366f1) 35%, transparent); }
-.rvc-pf-k { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; opacity:.9; }
-.rvc-pf-t { font: 800 19px/1.15 'Plus Jakarta Sans', sans-serif; margin:6px 0 2px; }
-.rvc-pf-c { font-size:13px; opacity:.92; }
-.rvc-pf-btn { margin-top:14px; width:100%; border:0; border-radius:12px; padding:13px;
-  font:700 15px 'Plus Jakarta Sans',sans-serif; cursor:pointer; background:#fff; color:#4f46e5; }
-.rvc-pf-btn:active { transform: scale(0.98); }
+/* Carte « défi du jour » — premium */
+.rvc-pf { position:relative; overflow:hidden; margin:14px 0 18px; border-radius:22px; padding:20px;
+  background: linear-gradient(140deg, var(--adk, #4f46e5) 0%, var(--a, #6366f1) 55%, var(--a-lt, #818cf8) 100%); color:#fff;
+  box-shadow: 0 16px 36px -10px color-mix(in srgb, var(--a, #6366f1) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.22); }
+.rvc-pf-glow { position:absolute; pointer-events:none; top:-40%; right:-20%; width:220px; height:220px; border-radius:50%;
+  background: radial-gradient(circle, rgba(255,255,255,.30), transparent 65%); }
+.rvc-pf-head { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.rvc-pf-k { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; opacity:.95; }
+.rvc-pf-chrono { flex-shrink:0; font:800 11px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:.02em;
+  background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.32); border-radius:999px; padding:5px 10px; }
+.rvc-pf-t { position:relative; z-index:1; font: 800 22px/1.15 'Plus Jakarta Sans', sans-serif; letter-spacing:-.01em; margin:10px 0 3px; }
+.rvc-pf-c { position:relative; z-index:1; font-size:13.5px; line-height:1.4; opacity:.94; }
+.rvc-pf-btn { position:relative; z-index:1; margin-top:16px; width:100%; border:0; border-radius:14px; padding:15px;
+  font:800 15.5px 'Plus Jakarta Sans',sans-serif; cursor:pointer; background:#fff; color:var(--adk, #4f46e5);
+  box-shadow: 0 6px 16px -4px rgba(15,23,42,.28); transition: transform .12s ease, box-shadow .12s ease; }
+.rvc-pf-btn:active { transform: scale(0.98); box-shadow: 0 2px 8px -4px rgba(15,23,42,.24); }
+
+/* Carte « Trouve la faute » — premium (ambre/orange, distincte) */
+.rvc-faute2 { display:flex; align-items:center; gap:14px; width:100%; text-align:left; cursor:pointer;
+  border:0; border-radius:18px; padding:16px; margin:0 0 18px; color:#fff;
+  background: linear-gradient(135deg, #9a3412 0%, #ea580c 70%, #f59e0b 100%);
+  box-shadow: 0 12px 28px -10px rgba(234,88,12,.5), inset 0 1px 0 rgba(255,255,255,.2);
+  -webkit-tap-highlight-color: transparent; transition: transform .12s ease; }
+.rvc-faute2:active { transform: scale(0.985); }
+.rvc-faute2-ico { flex-shrink:0; width:46px; height:46px; border-radius:14px; display:grid; place-items:center;
+  font-size:24px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.28); }
+.rvc-faute2-txt { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.rvc-faute2-t { font:800 17px/1.15 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; }
+.rvc-faute2-s { font-size:12.5px; line-height:1.35; opacity:.92; }
+.rvc-faute2-arr { flex-shrink:0; display:inline-flex; align-items:center; justify-content:center;
+  width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.2); font-size:18px; font-weight:800; }
+@media (prefers-reduced-motion: reduce) {
+  .rvc-pf-btn, .rvc-faute2 { transition:none; }
+}
 
 /* Mondes + compétences */
 .rvc-monde { margin-bottom:18px; }
@@ -147,11 +171,6 @@ const STYLE = `<style>
 .rvc-mcard-t { font:700 15px 'Plus Jakarta Sans',sans-serif; flex:1; }
 .rvc-mcard-done { font:700 12px 'IBM Plex Mono',monospace; color:var(--gr-txt,#10b981); }
 .rvc-mcard-go { font-size:22px; color:var(--mu,#cbd5e1); }
-.rvc-exam { display:flex; flex-direction:column; gap:2px; width:100%; text-align:left; border:0; cursor:pointer; border-radius:16px; padding:16px; margin:0 0 18px; color:#fff; background: linear-gradient(135deg,#0f172a,#334155); box-shadow:0 8px 20px rgba(15,23,42,.28); }
-.rvc-exam:active { transform: scale(0.985); }
-.rvc-exam-t { font:800 16px 'Plus Jakarta Sans',sans-serif; }
-.rvc-exam-s { font-size:12px; opacity:.85; }
-.rvc-faute { background: linear-gradient(135deg,#7c2d12,#c2410c) !important; box-shadow:0 8px 20px rgba(194,65,12,.30) !important; }
 .rvc-go2 { width:100%; border:2px solid var(--a,#6366f1); background:transparent; color:var(--a,#6366f1); border-radius:14px; padding:13px; cursor:pointer; margin-top:18px; font:800 15px 'Plus Jakarta Sans',sans-serif; }
 .rvc-go2:active { transform: scale(0.98); }
 .rvc-ohint { color:var(--mu,#64748b); font-size:13px; margin:2px 0 14px; }
@@ -296,16 +315,26 @@ export async function mount(root, param) {
       ${
         pf
           ? `<div class="rvc-pf">
-        <div class="rvc-pf-k">⚡ Ton défi du jour</div>
+        <div class="rvc-pf-glow" aria-hidden="true"></div>
+        <div class="rvc-pf-head">
+          <span class="rvc-pf-k">⚡ Ton défi du jour</span>
+          <span class="rvc-pf-chrono">1 min chrono</span>
+        </div>
         <div class="rvc-pf-t">${esc(pf.titre)}</div>
-        <div class="rvc-pf-c">3 questions · 1 min chrono</div>
-        <button class="rvc-pf-btn" data-pf="${esc(pf.code)}">Go, 1 min</button>
+        <div class="rvc-pf-c">3 questions ciblées sur ton point faible du moment.</div>
+        <button class="rvc-pf-btn" data-pf="${esc(pf.code)}">Relever le défi →</button>
       </div>`
           : ""
       }
       ${focusHtml}
-      <button class="rvc-exam" data-exam><span class="rvc-exam-t">🏁 Examen blanc</span><span class="rvc-exam-s">Toutes les compétences d'un coup</span></button>
-      <button class="rvc-exam rvc-faute" data-faute><span class="rvc-exam-t">⚠️ Trouve la faute</span><span class="rvc-exam-s">Repère la faute éliminatoire</span></button>
+      <button class="rvc-faute2" data-faute>
+        <span class="rvc-faute2-ico" aria-hidden="true">⚠️</span>
+        <span class="rvc-faute2-txt">
+          <span class="rvc-faute2-t">Trouve la faute</span>
+          <span class="rvc-faute2-s">Repère la faute éliminatoire avant le jour J</span>
+        </span>
+        <span class="rvc-faute2-arr" aria-hidden="true">›</span>
+      </button>
       <div class="rvc-mlabel">Par thème</div>
       ${mondeCards}
     </div>`;
@@ -321,10 +350,6 @@ export async function mount(root, param) {
       focusId = null;
       track("revision_conduite_pf_start", { code });
       startQuiz();
-    });
-    root.querySelector("[data-exam]")?.addEventListener("click", () => {
-      track("revision_conduite_exam_open");
-      navigate("#/exam-conduite");
     });
     root.querySelector("[data-faute]")?.addEventListener("click", () => {
       track("revision_conduite_faute_open");

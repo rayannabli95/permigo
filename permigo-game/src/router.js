@@ -22,14 +22,42 @@ function _navDir(hash) {
 // `position:fixed`, et l'empilement de calques partait en vrille en navigation
 // rapide. Ici on rejoue juste une entrée directionnelle sur la page vivante →
 // fluide, robuste, et re-déclenchable proprement même si on tape vite.
+let _enterTimer = null;
 function _playEnter(root, dir) {
   window.scrollTo(0, 0); // le nouvel écran démarre en haut (parité iOS)
   // Retire les classes puis force un reflow : sans ça, le navigateur ne
   // redémarre pas l'animation quand on enchaîne deux navigations rapides.
+  if (_enterTimer) {
+    clearTimeout(_enterTimer);
+    _enterTimer = null;
+  }
   root.classList.remove("route-enter", "route-back");
   void root.offsetWidth; // reflow
   root.classList.toggle("route-back", dir === "back");
   root.classList.add("route-enter");
+
+  // ⚠️ CRUCIAL : retirer `route-enter` une fois l'entrée terminée.
+  // `.route-enter` porte `animation: routeIn … both` (transform). Tant que la
+  // classe reste, #app garde une animation `transform` « filled » → il devient
+  // un bloc conteneur pour ses descendants `position:fixed`. Conséquence : toute
+  // feuille/overlay posée DANS #app (sheet streak, modales, quiz…) se positionne
+  // par rapport à #app (toute la hauteur de page) au lieu du viewport → la
+  // feuille part hors écran et on ne voit que le fond flouté (« appuie sur la
+  // flamme = effet flou », « le quiz reste tout en haut »). On nettoie donc dès
+  // la fin de l'animation, avec un filet de sécurité par timeout.
+  const cleanup = () => {
+    if (_enterTimer) {
+      clearTimeout(_enterTimer);
+      _enterTimer = null;
+    }
+    root.removeEventListener("animationend", onEnd);
+    root.classList.remove("route-enter", "route-back");
+  };
+  function onEnd(e) {
+    if (e.target === root) cleanup();
+  }
+  root.addEventListener("animationend", onEnd);
+  _enterTimer = setTimeout(cleanup, 460); // > durée d'anim (.28s) + marge
 }
 
 const ROUTES = {
