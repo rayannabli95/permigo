@@ -16,6 +16,30 @@
 import { haptic } from "@/utils/haptic.js";
 import { track } from "@/services/analytics.js";
 import { toast } from "@/components/common/toast.js";
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+
+// Résout la marque : prénom élève + prénom du moniteur (me.enseignant_id →
+// profiles). Best-effort : si pas de moniteur → « ton moniteur ». Ainsi tout
+// appelant n'a qu'à passer kicker/big/sub, la marque est gérée ici.
+async function resolveBrand(data) {
+  const me = getCurUser();
+  const eleveName = data.eleveName ?? (me?.prenom || null);
+  let moniteurName = data.moniteurName ?? null;
+  if (!moniteurName && me?.enseignant_id) {
+    try {
+      const { data: m } = await sb
+        .from("profiles")
+        .select("prenom, nom")
+        .eq("id", me.enseignant_id)
+        .maybeSingle();
+      if (m) moniteurName = (m.prenom || m.nom || "").trim() || null;
+    } catch {
+      /* repli « ton moniteur » */
+    }
+  }
+  return { ...data, eleveName, moniteurName };
+}
 
 const W = 1080;
 const H = 1350; // portrait « story »
@@ -179,7 +203,7 @@ function ensureStyle() {
   const s = document.createElement("style");
   s.id = "srk-style";
   s.textContent = `
-.srk-bg{position:fixed;inset:0;z-index:700;display:flex;align-items:flex-end;justify-content:center;
+.srk-bg{position:fixed;inset:0;z-index:10080;display:flex;align-items:flex-end;justify-content:center;
   background:rgba(8,7,28,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   padding-bottom:env(safe-area-inset-bottom,0);animation:srkFade .2s ease both;}
 @keyframes srkFade{from{opacity:0}to{opacity:1}}
@@ -232,10 +256,12 @@ async function shareCanvas(canvas, data) {
   track("recap.shared", { kind: "download", kicker: data.kicker });
 }
 
-export async function openShareRecap(data) {
+export async function openShareRecap(rawData) {
   haptic("select");
   ensureStyle();
-  track("recap.open", { kicker: data.kicker });
+  track("recap.open", { kicker: rawData.kicker });
+  // Résout la marque (prénom élève + moniteur) une fois ; tout le reste s'en sert.
+  const data = await resolveBrand(rawData);
 
   const overlay = document.createElement("div");
   overlay.className = "srk-bg";
