@@ -690,7 +690,7 @@ const STYLE = `<style>
 }
 .acc2-permis-val {
   font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--acc-vio); font-variant-numeric: tabular-nums;
+  color: var(--a-txt); font-variant-numeric: tabular-nums;
 }
 .acc2-permis-bar {
   height: 9px; border-radius: 999px; background: var(--bo);
@@ -876,7 +876,8 @@ const STYLE = `<style>
 }
 .acc2-sec a {
   font: 700 12.5px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--acc-vio); text-decoration: none;
+  /* --a-txt = accent assombri pour le texte (l'accent pur fait ~2:1 sur clair, échec AA) */
+  color: var(--a-txt); text-decoration: none;
 }
 
 /* ═══════════════ BADGES TEASER ══════════════════════════════════ */

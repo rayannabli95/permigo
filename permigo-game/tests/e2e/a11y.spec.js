@@ -89,7 +89,7 @@ test("a11y · login page", async ({ page }) => {
 // ─── Page : Accueil élève ────────────────────────────────────────────
 test("a11y · accueil élève", async ({ page }) => {
   await loginAs(page, EMAIL_ELEVE);
-  await page.waitForSelector(".acc2-hero-hi", { timeout: 20_000 });
+  await page.waitForSelector(".acc2", { timeout: 20_000 });
 
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
@@ -113,7 +113,7 @@ test("a11y · accueil élève", async ({ page }) => {
 // ─── Page : Parcours élève ───────────────────────────────────────────
 test("a11y · parcours élève", async ({ page }) => {
   await loginAs(page, EMAIL_ELEVE);
-  await page.waitForSelector(".acc2-hero-hi", { timeout: 20_000 });
+  await page.waitForSelector(".acc2", { timeout: 20_000 });
   await page.evaluate(() => {
     location.hash = "#/parcours";
   });
@@ -141,7 +141,7 @@ test("a11y · parcours élève", async ({ page }) => {
 // ─── Parcours : fiche compétence (dialog) ───────────────────────────
 test("a11y · fiche compétence dialog", async ({ page }) => {
   await loginAs(page, EMAIL_ELEVE);
-  await page.waitForSelector(".acc2-hero-hi", { timeout: 20_000 });
+  await page.waitForSelector(".acc2", { timeout: 20_000 });
   await page.evaluate(() => {
     location.hash = "#/parcours";
   });
@@ -205,7 +205,7 @@ test("a11y · validation enseignant", async ({ page }) => {
 // ─── Page : Profil (commun) ──────────────────────────────────────────
 test("a11y · profil", async ({ page }) => {
   await loginAs(page, EMAIL_ELEVE);
-  await page.waitForSelector(".acc2-hero-hi", { timeout: 20_000 });
+  await page.waitForSelector(".acc2", { timeout: 20_000 });
   await page.evaluate(() => {
     location.hash = "#/profil";
   });
