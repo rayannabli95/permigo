@@ -39,70 +39,94 @@ function pick(arr, last) {
   return arr[i];
 }
 
+// DA « Arène 3D » (cohérente avec le quizz principal — quiz-ui.js) : nuit-violet
+// + or, boutons plastique 3D, Baloo 2. Mascotte non utilisée ici (questions texte).
 const STYLE = `<style>
-.pq { max-width: 480px; margin: 0 auto; min-height: 100dvh;
+.pq { position:relative; max-width: 480px; margin: 0 auto; min-height: 100dvh;
   padding: 0 18px calc(20px + env(safe-area-inset-bottom));
-  display: flex; flex-direction: column; background: var(--bg);
-  color: var(--ink); font-family: 'Inter', sans-serif; }
+  display: flex; flex-direction: column; isolation:isolate;
+  color: #f4f1ff; font-family: 'Fredoka','Inter', sans-serif;
+  background:
+    radial-gradient(150% 60% at 50% -5%, rgba(255,180,60,.10) 0%, transparent 50%),
+    radial-gradient(120% 55% at 50% 22%, rgba(110,70,220,.22) 0%, transparent 60%),
+    linear-gradient(180deg,#181241 0%,#0c0a26 60%,#08071c 100%); }
+.pq::before { content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    radial-gradient(1.4px 1.4px at 22% 12%, rgba(255,255,255,.4), transparent),
+    radial-gradient(1.2px 1.2px at 80% 8%, rgba(255,210,120,.45), transparent),
+    radial-gradient(1.1px 1.1px at 64% 18%, rgba(255,255,255,.3), transparent),
+    radial-gradient(1.3px 1.3px at 12% 26%, rgba(180,160,255,.35), transparent); }
+.pq > * { position:relative; z-index:1; }
 
-/* Barre du haut : progression segmentée + combo */
+/* Immersion : pendant le quiz on masque le chrome (header + nav) ET on annule le
+   padding-top de #app (sinon une bande claire = la place réservée au header). */
+body.pq-immersive #header-bar, body.pq-immersive #bottom-nav { display:none !important; }
+body.pq-immersive #app { padding-top: 0 !important; }
+
+/* Barre du haut : progression dorée + combo */
 .pq-top { display:flex; align-items:center; gap:12px; padding:16px 0 6px; }
-.pq-x { width:34px; height:34px; flex-shrink:0; border:0; border-radius:10px; cursor:pointer;
-  background:var(--su,#fff); color:var(--ink); font-size:18px; line-height:1; box-shadow:0 1px 4px rgba(0,0,0,.08); }
-.pq-x:active { transform: scale(0.92); }
-.pq-seg { flex:1; display:flex; gap:4px; }
-.pq-seg span { flex:1; height:6px; border-radius:999px; background: color-mix(in srgb,#6366f1 14%, transparent); overflow:hidden; }
-.pq-seg span i { display:block; height:100%; width:0; border-radius:999px; background:var(--a,#6366f1); transition: width .35s cubic-bezier(.23,1,.32,1); }
-.pq-seg span.ok i { width:100%; background:#10b981; }
-.pq-seg span.ko i { width:100%; background:#ef4444; }
+.pq-x { width:38px; height:38px; flex-shrink:0; border:0; border-radius:12px; cursor:pointer;
+  background:linear-gradient(180deg,#2c2660,#1a1442); color:#cfc7ff; font-size:18px; line-height:1;
+  box-shadow:0 4px 0 #100c30, inset 0 1px 0 rgba(255,255,255,.14); }
+.pq-x:active { transform: translateY(3px); box-shadow:0 1px 0 #100c30, inset 0 1px 0 rgba(255,255,255,.14); }
+.pq-seg { flex:1; display:flex; gap:5px; }
+.pq-seg span { flex:1; height:9px; border-radius:999px; background:#251f56; box-shadow: inset 0 2px 3px rgba(0,0,0,.5); overflow:hidden; }
+.pq-seg span i { display:block; height:100%; width:0; border-radius:999px; background:linear-gradient(180deg,#ffe588,#ff9d1f); transition: width .35s cubic-bezier(.23,1,.32,1); }
+.pq-seg span.ok i { width:100%; background:linear-gradient(180deg,#ffd95e,#f59b16); box-shadow:0 0 8px rgba(255,170,40,.5); }
+.pq-seg span.ko i { width:100%; background:linear-gradient(180deg,#f59e8a,#d96a52); }
 .pq-seg span.now i { width:40%; }
 .pq-seg span.just { animation: pqSegBump .3s cubic-bezier(.23,1,.32,1) both; }
 @keyframes pqSegBump { 0%{transform:scaleY(1)} 40%{transform:scaleY(1.85)} 100%{transform:scaleY(1)} }
 @media (prefers-reduced-motion: reduce){ .pq-seg span.just { animation:none; } }
-.pq-combo { font:800 13px 'Plus Jakarta Sans',sans-serif; color:#f59e0b; min-width:38px; text-align:right; opacity:0; transition:opacity .2s; }
+.pq-combo { font:800 14px 'Baloo 2','Fredoka',sans-serif; color:#ffd06a; min-width:40px; text-align:right; opacity:0; transition:opacity .2s; text-shadow:0 1px 0 rgba(0,0,0,.4); }
 .pq-combo.on { opacity:1; }
 
-/* Question — gros, aéré, lecture 2 sec */
+/* Question — gros, aéré, Baloo 2 */
 .pq-mid { flex:1; display:flex; flex-direction:column; justify-content:center; padding:8px 0; }
-.pq-qn { font:700 12px 'IBM Plex Mono',monospace; color:var(--mu,#94a3b8); margin-bottom:10px; }
-.pq-q { font:800 26px/1.2 'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; margin-bottom:22px; }
+.pq-qn { font:700 12px 'IBM Plex Mono',monospace; color:#b9b2e8; margin-bottom:10px; letter-spacing:.04em; }
+.pq-q { font:700 25px/1.25 'Baloo 2','Fredoka',sans-serif; letter-spacing:-.01em; margin-bottom:22px; color:#fff;
+  text-shadow:0 2px 0 rgba(0,0,0,.3), 0 0 18px rgba(120,90,230,.35); }
 
-/* Options tappables */
-.pq-opts { display:flex; flex-direction:column; gap:10px; }
-.pq-opt { display:flex; align-items:center; gap:12px; width:100%; text-align:left; cursor:pointer;
-  border:2px solid var(--bo3,#e2e8f0); background:var(--su,#fff); color:var(--ink);
-  border-radius:15px; padding:16px; font:600 16px/1.3 'Inter',sans-serif;
-  transition: transform .12s ease-out, border-color .15s, background .15s; }
-.pq-opt:active { transform: scale(0.985); }
-.pq-opt-k { width:26px; height:26px; flex-shrink:0; border-radius:8px; display:flex; align-items:center; justify-content:center;
-  font:800 13px 'Plus Jakarta Sans',sans-serif; background: color-mix(in srgb,#6366f1 12%, transparent); color:var(--a,#6366f1); }
-.pq-opt.good { border-color:#10b981; background: color-mix(in srgb,#10b981 12%, transparent); }
-.pq-opt.good .pq-opt-k { background:#10b981; color:#fff; }
-.pq-opt.bad { border-color:#ef4444; background: color-mix(in srgb,#ef4444 10%, transparent); }
-.pq-opt.bad .pq-opt-k { background:#ef4444; color:#fff; }
-.pq-opt.dim { opacity:.5; }
+/* Options — boutons plastique 3D */
+.pq-opts { display:flex; flex-direction:column; gap:13px; }
+.pq-opt { display:flex; align-items:center; gap:13px; width:100%; text-align:left; cursor:pointer; min-height:58px;
+  border:1px solid rgba(255,255,255,.06); border-radius:18px; padding:15px 16px;
+  background:linear-gradient(180deg,#3a3470,#231d4f); color:#ece8ff; font:500 16px/1.3 'Fredoka','Inter',sans-serif;
+  box-shadow:0 7px 0 #15113a, 0 12px 16px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.24), inset 0 -2px 6px rgba(0,0,0,.4);
+  transition: transform .08s ease, box-shadow .08s ease, opacity .2s; }
+.pq-opt:active:not([disabled]) { transform: translateY(5px); box-shadow:0 2px 0 #15113a, 0 4px 8px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.24); }
+.pq-opt-k { width:36px; height:36px; flex-shrink:0; border-radius:11px; display:flex; align-items:center; justify-content:center;
+  font:800 16px 'Baloo 2','Fredoka',sans-serif; background:linear-gradient(180deg,#2b2560,#1b1545); color:#cfc7ff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 3px 0 #110d35; }
+.pq-opt.good { background:linear-gradient(180deg,#ffd24a,#ff9c1c); border-color:rgba(255,255,255,.35); color:#3a1d00;
+  box-shadow:0 5px 0 #b85e00, 0 10px 20px rgba(255,140,30,.4), inset 0 1px 0 rgba(255,255,255,.65); }
+.pq-opt.good .pq-opt-k { background:linear-gradient(180deg,#fff,#ffe7a8); color:#c46a00; box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 3px 0 #c46a00; }
+.pq-opt.bad { background:linear-gradient(180deg,#4a2740,#34203a); border-color:rgba(255,160,90,.3); color:#ffd9c2; box-shadow:0 5px 0 #1f1430, inset 0 1px 0 rgba(255,255,255,.12); }
+.pq-opt.bad .pq-opt-k { background:linear-gradient(180deg,#5a3450,#3a2440); color:#ffb890; }
+.pq-opt.dim { opacity:.42; }
 .pq-opt[disabled] { cursor:default; }
 
-/* Bandeau correction (slide-up) — court, qu'on a envie de lire */
-.pq-fb { margin-top:16px; border-radius:16px; padding:16px; animation: pqUp .28s cubic-bezier(.23,1,.32,1); }
+/* Bandeau correction (slide-up) */
+.pq-fb { margin-top:16px; border-radius:16px; padding:16px; border:1px solid; animation: pqUp .28s cubic-bezier(.23,1,.32,1); }
 @keyframes pqUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
-.pq-fb.win { background: color-mix(in srgb,#10b981 12%, transparent); }
-.pq-fb.lose { background: color-mix(in srgb,#f59e0b 14%, transparent); }
-.pq-fb-h { font:800 14px 'Plus Jakarta Sans',sans-serif; margin-bottom:3px; }
-.pq-fb.win .pq-fb-h { color:var(--gr-txt,#047857); }
-.pq-fb.lose .pq-fb-h { color:var(--am-txt,#b45309); }
-.pq-fb-t { font-size:14px; line-height:1.45; }
-.pq-next { width:100%; border:0; border-radius:15px; padding:16px; cursor:pointer; margin-top:14px;
-  font:800 16px 'Plus Jakarta Sans',sans-serif; color:#fff; background:var(--a,#6366f1);
-  box-shadow:0 8px 20px color-mix(in srgb,var(--a,#6366f1) 40%, transparent); }
-.pq-next:active { transform: scale(0.985); }
+.pq-fb.win { background:rgba(255,180,60,.1); border-color:rgba(255,180,60,.3); }
+.pq-fb.lose { background:rgba(129,140,248,.1); border-color:rgba(129,140,248,.32); }
+.pq-fb-h { font:800 14px 'Baloo 2','Fredoka',sans-serif; margin-bottom:3px; }
+.pq-fb.win .pq-fb-h { color:#ffd06a; }
+.pq-fb.lose .pq-fb-h { color:#c7d2fe; }
+.pq-fb-t { font-size:14px; line-height:1.5; color:#e2e0ff; }
+.pq-next { width:100%; border:0; border-radius:16px; padding:16px; cursor:pointer; margin-top:14px; min-height:54px;
+  font:800 16px 'Baloo 2','Fredoka',sans-serif; color:#3a1d00; background:linear-gradient(180deg,#ffd24a,#ff9c1c);
+  box-shadow:0 5px 0 #b85e00, 0 8px 18px rgba(255,140,30,.35), inset 0 1px 0 rgba(255,255,255,.5); transition: transform .1s, box-shadow .1s; }
+.pq-next:active { transform: translateY(4px); box-shadow:0 1px 0 #b85e00, inset 0 1px 0 rgba(255,255,255,.5); }
 
 /* Résultat */
 .pq-res { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
-.pq-res-e { font-size:60px; animation: pqUp .4s cubic-bezier(.23,1,.32,1) both; }
-.pq-res-score { font:800 44px 'IBM Plex Mono',monospace; margin:4px 0 0; transition: transform .12s cubic-bezier(.23,1,.32,1); }
-.pq-res-t { font:800 22px 'Plus Jakarta Sans',sans-serif; margin:6px 0 4px; }
-.pq-res-s { color:var(--mu,#64748b); font-size:14px; max-width:300px; }
+.pq-res-e { font-size:64px; animation: pqUp .4s cubic-bezier(.23,1,.32,1) both; filter: drop-shadow(0 8px 16px rgba(0,0,0,.4)); }
+.pq-res-score { font:700 48px 'Baloo 2','Fredoka',sans-serif; margin:4px 0 0; transition: transform .12s cubic-bezier(.23,1,.32,1);
+  background:linear-gradient(180deg,#ffe27a,#ff9b1e); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.pq-res-t { font:700 22px 'Baloo 2','Fredoka',sans-serif; margin:6px 0 4px; color:#fff; }
+.pq-res-s { color:#cbc6f0; font-size:14px; max-width:300px; line-height:1.5; }
 @media (prefers-reduced-motion: reduce) { .pq *, .pq *::before { transition:none !important; animation:none !important; } }
 </style>`;
 
@@ -112,6 +136,12 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
     onExit?.();
     return;
   }
+  // Immersion : masque le chrome (header + nav) pendant le quiz, restauré à la sortie.
+  document.body.classList.add("pq-immersive");
+  const exit = (...a) => {
+    document.body.classList.remove("pq-immersive");
+    onExit?.(...a);
+  };
   let idx = 0;
   let chosen = null; // index choisi (null = pas encore répondu)
   let correctCount = 0;
@@ -178,7 +208,7 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
       </div>
     </div>`;
 
-    root.querySelector(".pq-x").addEventListener("click", () => onExit?.());
+    root.querySelector(".pq-x").addEventListener("click", () => exit());
 
     if (!answered) {
       root
@@ -252,10 +282,10 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
     </div>`;
     root
       .querySelector(".pq-x")
-      .addEventListener("click", () => onExit?.(correctCount, total));
+      .addEventListener("click", () => exit(correctCount, total));
     root
       .querySelector("[data-done]")
-      .addEventListener("click", () => onExit?.(correctCount, total));
+      .addEventListener("click", () => exit(correctCount, total));
     // Count-up du score : chaque point « monte » avec un tic haptique + un pop.
     const countEl = root.querySelector("[data-count]");
     if (countEl && correctCount > 0) {
