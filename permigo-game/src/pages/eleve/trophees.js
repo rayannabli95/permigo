@@ -258,10 +258,12 @@ const STYLE = `<style>
 </style>`;
 
 // ─── Mount ────────────────────────────────────────────────────
-export async function mount(root) {
+// openKey : deep-link #/trophees/{key} → ouvre directement le détail d'un
+// trophée (depuis le rail « Tes badges » de l'accueil, une notif, un partage).
+export async function mount(root, openKey = null) {
   const me = getCurUser();
   if (!me) return;
-  track("page.view", { page: "trophees" });
+  track("page.view", { page: "trophees", deep_link: openKey || undefined });
 
   root.innerHTML = `${STYLE}
 <div class="tr2 anim-slide-up">
@@ -316,7 +318,7 @@ export async function mount(root) {
       compCount: cntRes.value?.count ?? 0,
       streak: strkRes.value?.data?.current_streak ?? 0,
     };
-    renderAll(root, achRes.value?.data ?? [], stats);
+    renderAll(root, achRes.value?.data ?? [], stats, openKey);
   } catch (e) {
     console.error("[trophees]", e);
     toast("Impossible de charger les trophées", "error");
@@ -348,7 +350,12 @@ function saveSeenSet(keys) {
   }
 }
 
-function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
+function renderAll(
+  root,
+  unlocked,
+  stats = { compCount: 0, streak: 0 },
+  openKey = null,
+) {
   const unlockedMap = new Map(unlocked.map((u) => [u.achievement_key, u]));
   // Nouveautés = débloqués jamais affichés ici
   const seen = getSeenSet();
@@ -456,6 +463,12 @@ function renderAll(root, unlocked, stats = { compCount: 0, streak: 0 }) {
       if (def) showModal(def, unlockData, unlockedCount);
     });
   });
+
+  // Deep-link #/trophees/{key} → ouvre directement le détail du trophée ciblé.
+  if (openKey) {
+    const def = CATALOG.find((t) => t.key === openKey);
+    if (def) showModal(def, unlockedMap.get(openKey) ?? null, unlockedCount);
+  }
 }
 
 // ─── Modal ────────────────────────────────────────────────────
