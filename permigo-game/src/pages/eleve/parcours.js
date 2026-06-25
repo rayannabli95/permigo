@@ -1654,6 +1654,84 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
   box-shadow: 0 4px 0 #160e32, 0 8px 14px -6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.07);
 }
 
+/* ── BOSS du chapitre : destination finale, centré ─────────────── */
+.prc-cv-ms.boss {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 132px;
+  padding: 8px 0 4px;
+}
+/* BOSS = PNJ couronne 3D posée sur un halo (pas de pastille ronde) */
+.prc-cv-node.bossnode {
+  width: 120px; height: 86px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; box-shadow: none; border: 0; cursor: default;
+}
+.prc-cv-boss-glow {
+  position: absolute; inset: -16px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,210,74,.5) 24%, transparent 66%);
+}
+.prc-cv-node.bossnode.wait .prc-cv-boss-glow {
+  background: radial-gradient(circle, rgba(124,77,255,.4) 24%, transparent 66%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .prc-cv-node.bossnode.won .prc-cv-boss-glow { animation: cvHalo 2.4s ease-in-out infinite; }
+}
+.prc-cv-boss-img {
+  position: relative; z-index: 1; width: 112px; height: auto;
+  filter: drop-shadow(0 10px 18px rgba(10,4,26,.55));
+}
+/* BOSS vaincu : couronne en gloire, légère flottaison */
+.prc-cv-node.bossnode.won .prc-cv-boss-img {
+  filter: drop-shadow(0 0 16px rgba(255,184,64,.75)) drop-shadow(0 12px 18px rgba(120,60,0,.5));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .prc-cv-node.bossnode.won .prc-cv-boss-img { animation: cvBossFloat 3.2s ease-in-out infinite; }
+}
+@keyframes cvBossFloat { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-5px) } }
+/* BOSS pas encore vaincu : couronne grisée + cadenas */
+.prc-cv-node.bossnode.wait .prc-cv-boss-img {
+  filter: grayscale(.85) brightness(.55) drop-shadow(0 8px 14px rgba(10,4,26,.6));
+  opacity: .82;
+}
+.prc-cv-boss-lock {
+  position: absolute; z-index: 2; right: 14px; bottom: -2px;
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #2a1f56, #1a1030);
+  box-shadow: 0 4px 10px -3px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.prc-cv-boss-card {
+  text-align: center;
+  max-width: 280px;
+  padding: 12px 18px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(58,32,112,.65), rgba(26,16,48,.8));
+  border: 1px solid rgba(168,85,247,.35);
+  box-shadow: 0 14px 30px -16px rgba(10,4,26,.9), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.prc-cv-boss-card.won {
+  background: linear-gradient(160deg, rgba(120,70,0,.4), rgba(40,24,12,.6));
+  border-color: rgba(255,210,74,.5);
+  box-shadow: 0 14px 34px -14px rgba(255,156,28,.5), inset 0 1px 0 rgba(255,255,255,.1);
+}
+.prc-cv-boss-kick {
+  font: 800 11px/1 'Inter', sans-serif; letter-spacing: .14em; text-transform: uppercase;
+  color: #c9b8ff;
+}
+.prc-cv-boss-card.won .prc-cv-boss-kick { color: #ffd98a; }
+.prc-cv-boss-ttl {
+  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800; font-size: 17px; line-height: 1.1; color: #fff; margin: 5px 0 3px;
+}
+.prc-cv-boss-sub { font: 500 12px/1.35 'Inter', sans-serif; color: #b9aee0; }
+.prc-cv-boss-card.won .prc-cv-boss-sub { color: #f0d9a8; }
+
+/* ── Coffre du chapitre (récompense) ───────────────────────────── */
+.prc-cv-chest { margin: 6px 0 2px; }
+
 /* ── Label du jalon ─────────────────────────────────────────── */
 .prc-cv-ms-label { max-width: 184px; }
 .prc-cv-ms.right .prc-cv-ms-label { text-align: right; }
@@ -1719,6 +1797,79 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 }
 .prc-cv-gate-g1 { font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: #cdbff5; }
 .prc-cv-gate-g2 { font-size: 11.5px; color: var(--cv-mute); font-weight: 600; margin-top: 2px; }
+
+/* Panneaux routiers en fond de l'itinéraire (comme la vue carte). Volontairement
+   TRÈS discrets + assombris : texture de fond qui ne dispute jamais la lisibilité
+   des jalons verts ni des étiquettes (cf. retour Rayan). */
+.prc-cv .prc-signs { z-index: 0; }
+.prc-cv .prc-signs .prc-sign {
+  opacity: calc(var(--op, .1) * .55);
+  filter: saturate(.45) brightness(.6) blur(calc(var(--blur, 1px) + .8px));
+}
+
+/* ── Carte « Chapitre suivant » — destination en bout de route ────── */
+.prc-cv-next {
+  width: calc(100% - 44px);
+  margin: 18px 22px 6px;
+  padding: 16px 18px;
+  display: flex; align-items: center; gap: 14px; text-align: left;
+  border-radius: 22px;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+}
+.prc-cv-next.open {
+  border: 1px solid rgba(168,85,247,.5); cursor: pointer;
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(168,85,247,.5), transparent 55%),
+    linear-gradient(150deg, #3a2070 0%, #281552 60%, #1c1142 100%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.1) inset,
+    0 18px 36px -16px rgba(124,77,255,.7),
+    0 0 40px -20px rgba(168,85,247,.6);
+  transition: transform .18s var(--ease-out), box-shadow .2s;
+}
+.prc-cv-next.open:hover { transform: translateY(-2px); }
+.prc-cv-next.open:active { transform: translateY(0) scale(.99); }
+.prc-cv-next.open:focus-visible { outline: 3px solid var(--cv-gold); outline-offset: 3px; }
+.prc-cv-next.locked {
+  border: 1px dashed rgba(168,85,247,.3); cursor: default;
+  background: linear-gradient(150deg, rgba(33,18,66,.7), rgba(18,10,36,.8));
+}
+.prc-cv-next-badge {
+  width: 50px; height: 50px; flex: 0 0 auto; border-radius: 15px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 22px;
+}
+.prc-cv-next-badge.open {
+  color: #3a1c00;
+  background: linear-gradient(160deg, #fff0bf, #ffd24a 55%, #ff9c1c);
+  box-shadow: 0 5px 0 var(--cv-gold-dk), 0 10px 18px -6px rgba(255,156,28,.6), inset 0 2px 0 rgba(255,255,255,.7);
+}
+.prc-cv-next-badge.locked {
+  background: linear-gradient(160deg, #2c1f4e, #1c1338);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 0 #140d28;
+}
+.prc-cv-next-txt { flex: 1 1 auto; min-width: 0; }
+.prc-cv-next-kick {
+  font: 800 10.5px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase;
+  color: #c9b8ff; margin-bottom: 4px;
+}
+.prc-cv-next.locked .prc-cv-next-kick { color: var(--cv-mute); }
+.prc-cv-next-ttl {
+  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 17px;
+  color: #fff; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.prc-cv-next-sub { font: 500 11.5px/1.3 'Inter', sans-serif; color: var(--cv-mute); margin-top: 3px; }
+.prc-cv-next-go {
+  flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, rgba(255,255,255,.18), rgba(255,255,255,.05));
+  border: 1px solid rgba(255,255,255,.18);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .prc-cv-next.open .prc-cv-next-go svg { animation: cvNextArrow 1.6s ease-in-out infinite; }
+}
+@keyframes cvNextArrow { 0%,100% { transform: translateX(0) } 50% { transform: translateX(3px) } }
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
@@ -1984,7 +2135,7 @@ export async function mount(root) {
       }),
     );
     root
-      .querySelectorAll(".prc-cv-gate[data-chap], .prc-cv-cn[data-chap]")
+      .querySelectorAll(".prc-cv-next[data-chap], .prc-cv-cn[data-chap]")
       .forEach((el) =>
         el.addEventListener("click", () => {
           const idx = parseInt(el.dataset.chap, 10);
@@ -2352,7 +2503,7 @@ function renderPage(
   // Le fond violet nuit déborde sous la topbar app (comportement voulu).
   if (view === "chapitre") {
     return `${STYLE}
-${renderChapterView(worldStates, validatedMap, pendingMap, currentChapIdx)}
+${renderChapterView(worldStates, validatedMap, pendingMap, currentChapIdx, openedWorlds)}
 
 <!-- Bottom sheet -->
 <div class="bsheet-bg" id="bsheet-bg" aria-hidden="true"></div>
@@ -2652,7 +2803,13 @@ function renderPortalArch(color, isComplete) {
 
 // ─── Vue Chapitre (focus 1 chapitre à la fois) ───────────────────
 // ─── Vue Chapitre — Route sinueuse immersive (fidèle au mockup) ──
-function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
+function renderChapterView(
+  worldStates,
+  validatedMap,
+  pendingMap,
+  currentIdx,
+  openedWorlds = new Set(),
+) {
   const ws = worldStates[currentIdx];
   const meta = WORLDS_META[currentIdx];
   const world = ws.world ?? {};
@@ -2789,6 +2946,35 @@ function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
       </div>`;
     });
 
+    // ── Boss du chapitre : destination FINALE de la route (climax) ───
+    // La route file jusqu'à lui ; vaincu quand toutes les compétences du
+    // chapitre sont acquises (= le coffre se débloque).
+    const bossWon = ws.status === "complete";
+    const bossRemain = Math.max(0, ws.total - ws.done);
+    // PNJ couronne 3D (DA arène violet/or) — vaincu = couronne en gloire,
+    // pas encore = couronne grisée/verrouillée « à conquérir ».
+    const BOSS_IMG = "/skins/permigo-autonomie-crown-v1.webp";
+    const bossMs = `
+      <div class="prc-cv-ms boss">
+        <div class="prc-cv-node bossnode ${bossWon ? "won" : "wait"}" aria-hidden="true">
+          <div class="prc-cv-boss-glow"></div>
+          <img class="prc-cv-boss-img" src="${BOSS_IMG}" alt="" loading="lazy" draggable="false" />
+          ${bossWon ? "" : '<span class="prc-cv-boss-lock" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2.3" fill="#1a1030" stroke="#cdbff5" stroke-width="2"/><path d="M8 11V8.5a4 4 0 0 1 8 0V11" stroke="#cdbff5" stroke-width="2"/></svg></span>'}
+        </div>
+        <div class="prc-cv-boss-card ${bossWon ? "won" : "wait"}">
+          <div class="prc-cv-boss-kick">${bossWon ? "★ Boss vaincu" : "Boss du chapitre"}</div>
+          <div class="prc-cv-boss-ttl">${esc(chapTitle)}</div>
+          <div class="prc-cv-boss-sub">${
+            bossWon
+              ? "Chapitre maîtrisé — ta récompense est là"
+              : bossRemain > 0
+                ? `Plus que ${bossRemain} compétence${bossRemain > 1 ? "s" : ""} à valider pour le vaincre`
+                : "Toutes acquises — récompense imminente"
+          }</div>
+        </div>
+      </div>`;
+    milestones.push(bossMs);
+
     // Route SVG sinueuse : hauteur dynamique selon le nombre de jalons
     // On réutilise le path du mockup adapté (même courbe, échelle selon hauteur)
     const nodeH = 96; // min-height d'un milestone
@@ -2804,6 +2990,7 @@ function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
         <div class="prc-cv-step-count">${ws.total} étape${ws.total > 1 ? "s" : ""}</div>
       </div>
       <div class="prc-cv-route">
+        ${renderWorldSigns(currentIdx)}
         <svg class="prc-cv-ribbon" viewBox="0 0 346 ${routeH}" preserveAspectRatio="none" fill="none" aria-hidden="true">
           <path d="${routePath}" stroke="var(--cv-road)" stroke-width="34" stroke-linecap="round"/>
           <path d="${routePath}" stroke="#2a1d52" stroke-width="26" stroke-linecap="round"/>
@@ -2815,41 +3002,38 @@ function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
       </div>`;
   }
 
-  // ── Gate chapitre suivant (si chapitre suivant verrouillé) ───────
+  // ── Carte « Chapitre suivant » : destination en bout de route ────
   let gateHTML = "";
-  if (nextWs && nextWs.status === "locked" && ws.status !== "locked") {
+  if (nextWs && ws.status !== "locked") {
+    const nextNum = currentIdx + 2;
     const nextTitle =
-      nextWs.world?.titre ?? nextWs.world?.nom ?? `Chapitre ${currentIdx + 2}`;
-    gateHTML = `
-      <div class="prc-cv-gate"
-           data-chap="${currentIdx + 1}"
-           role="button" tabindex="0"
-           aria-label="Chapitre suivant : ${esc(nextTitle)}">
-        <div class="prc-cv-gate-lock" aria-hidden="true">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9.5" rx="2.4" stroke="#a48fe0" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="#a48fe0" stroke-width="2"/></svg>
+      nextWs.world?.titre ?? nextWs.world?.nom ?? `Chapitre ${nextNum}`;
+    const nextLocked = nextWs.status === "locked";
+    gateHTML = nextLocked
+      ? `
+      <div class="prc-cv-next locked" aria-label="Chapitre ${nextNum} verrouillé : ${esc(nextTitle)}">
+        <div class="prc-cv-next-badge locked" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9.5" rx="2.4" stroke="#cdbff5" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="#cdbff5" stroke-width="2"/></svg>
         </div>
-        <div class="prc-cv-gate-txt">
-          <div class="prc-cv-gate-g1">Chapitre ${currentIdx + 2} · ${esc(nextTitle)}</div>
-          <div class="prc-cv-gate-g2">Termine « ${esc(world.nom ?? chapTitle)} » pour ouvrir la suite</div>
+        <div class="prc-cv-next-txt">
+          <div class="prc-cv-next-kick">Chapitre ${nextNum} · Verrouillé</div>
+          <div class="prc-cv-next-ttl">${esc(nextTitle)}</div>
+          <div class="prc-cv-next-sub">Bats le boss de « ${esc(world.nom ?? chapTitle)} » pour l'ouvrir</div>
         </div>
-      </div>`;
-  } else if (nextWs && nextWs.status !== "locked") {
-    // Chapitre suivant débloqué : lien discret pour y naviguer
-    const nextTitle =
-      nextWs.world?.titre ?? nextWs.world?.nom ?? `Chapitre ${currentIdx + 2}`;
-    gateHTML = `
-      <div class="prc-cv-gate" style="border-color:rgba(124,77,255,.5);cursor:pointer"
-           data-chap="${currentIdx + 1}"
-           role="button" tabindex="0"
-           aria-label="Accéder au chapitre suivant : ${esc(nextTitle)}">
-        <div class="prc-cv-gate-lock" style="background:linear-gradient(160deg,#3a2c6e,#2a1f56)" aria-hidden="true">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="#a48fe0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>`
+      : `
+      <button class="prc-cv-next open" type="button"
+              data-chap="${currentIdx + 1}"
+              aria-label="Aller au chapitre ${nextNum} : ${esc(nextTitle)}">
+        <div class="prc-cv-next-badge open" aria-hidden="true">${nextNum}</div>
+        <div class="prc-cv-next-txt">
+          <div class="prc-cv-next-kick">Chapitre suivant · débloqué</div>
+          <div class="prc-cv-next-ttl">${esc(nextTitle)}</div>
         </div>
-        <div>
-          <div class="prc-cv-gate-g1">Chapitre ${currentIdx + 2} · ${esc(nextTitle)}</div>
-          <div class="prc-cv-gate-g2">Continuer sur ce chapitre →</div>
+        <div class="prc-cv-next-go" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-      </div>`;
+      </button>`;
   }
 
   // ── Sélecteur de chapitres (stepper) : on VOIT et on atteint les 4 ───
@@ -2886,6 +3070,17 @@ function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
     Carte
   </button>`;
 
+  // ── Coffre du chapitre : la récompense, débloquée quand le boss tombe ──
+  const chestWorldNum = meta?.num ?? currentIdx + 1;
+  const chestHTML =
+    ws.status === "complete"
+      ? `<div class="prc-cv-chest">${renderChest({
+          worldNum: chestWorldNum,
+          worldName: world.nom ?? chapTitle,
+          opened: openedWorlds.has(chestWorldNum),
+        })}</div>`
+      : "";
+
   return `<div class="prc-cv" role="main" aria-label="Ton parcours — vue chapitre">
   <div class="prc-cv-screen">
     <div class="prc-cv-topbar">
@@ -2894,6 +3089,7 @@ function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
     </div>
     ${heroHTML}
     ${routeHTML}
+    ${chestHTML}
     ${gateHTML}
     <div style="height:40px"></div>
   </div>
