@@ -31,6 +31,8 @@ function notifRoute(n) {
       return "#/";
     case "comp_acquise":
       return "#/parcours";
+    case "relance":
+      return d.link || "#/parcours";
     case "compte_rendu":
       return d.compte_rendu_id
         ? `#/compte-rendu/${d.compte_rendu_id}`
@@ -133,6 +135,12 @@ const TYPE_META = {
     bg: "rgba(16,185,129,.12)",
     color: "var(--gr)",
     label: "Compétence validée",
+  },
+  relance: {
+    iconName: "message-circle",
+    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    color: "var(--a)",
+    label: "Encouragement",
   },
   compte_rendu: {
     iconName: "file-text",
