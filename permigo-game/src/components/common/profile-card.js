@@ -1,395 +1,299 @@
 // ═══════════════════════════════════════════════════════════════
-// Profile Card — carte profil sociale adaptable élève/enseignant
-// Inspiré ProfileCard (React) → vanilla JS, design system PermiGo
-// Features :
-//  - Avatar + bannière modifiables (Supabase Storage)
-//  - Barre XP gamifiée (gradient arc-en-ciel élève / indigo-violet enseignant)
-//  - 3 stats animées (rôle-dépendantes)
-//  - Bouton Partager natif (Web Share API + fallback)
-//  - Badge prestige avec accent color du tier
+// Profile Card — héros d'identité role-native (refonte 2026-06-25)
+//
+// Avant : carte « sociale » générique (bannière violet/bleu, barre XP
+// arc-en-ciel, badge prestige Px, rangée WhatsApp/Insta/lien). → « trop IA »,
+// ne ressemblait NI à l'accueil élève NI à l'aujourd'hui moniteur.
+//
+// Maintenant : un héros par rôle, raccord avec la DA déjà validée :
+//  • élève     → fond vert tendre (color-mix --a), barre de progression
+//                RÉELLE vers le permis (X/31), 3 stats, theme-aware.
+//  • moniteur  → dégradé indigo confiant (#4f46e5→#8b5cf6), halo doré,
+//                3 stats en verre dépoli.
+// On garde : avatar + bannière éditables (Supabase Storage), Partager natif.
+// On retire : prestige, XP arc-en-ciel, triple bouton social (filler).
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { sb } from "@/auth/auth.js";
-import { getPrestige } from "@/data/prestige.js";
 import { haptic } from "@/utils/haptic.js";
-import {
-  wrapAnimatedBorder,
-  BORDER_PRESETS,
-} from "@/components/common/animated-border.js";
 import {
   openAvatarPicker,
   AVATAR_PICKER_UPLOAD,
 } from "@/components/common/avatar-picker.js";
 
 const STYLE = `<style>
-.pcc { width: 100%; max-width: 380px; margin: 0 auto; padding: 0; }
+.pcc { width: 100%; padding: 0 16px; }
+
+/* ── Coquille commune ── */
 .pcc-card {
-  /* Carte de partage = toujours palette CLAIRE (fond blanc), même en mode nuit.
-     On fige les tokens localement → plus de texte clair invisible sur blanc. */
-  --ink:#0b0d1a; --ink2:#1a1d2e; --ink3:#2d3050; --ink4:#1e293b; --ink5:#374151;
-  --mu:#5f6788; --mu2:#5e6e82; --mu3:#556070; --mu4:#475569;
-  --su:#fff; --su2:#f8f9fd;
-  --bo:#e2e6f2; --bo2:#edf0f9; --bg2:#eceef8;
-  color: var(--ink);
-  background: #fff;
-  border: 1px solid var(--bo);
+  position: relative;
   border-radius: 28px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(10,13,26,.06), 0 10px 30px -12px rgba(10,13,26,.12);
-  position: relative;
+  isolation: isolate;
 }
 
-/* ── Bannière ── */
+/* ════════════ VARIANTE ÉLÈVE — vert tendre, premium clair ════════════ */
+.pcc-card.is-eleve {
+  background: linear-gradient(155deg,
+    color-mix(in srgb, var(--a) 14%, var(--su)) 0%,
+    color-mix(in srgb, var(--a) 6%, var(--su)) 52%,
+    var(--su) 100%);
+  border: 1px solid color-mix(in srgb, var(--a) 22%, var(--su));
+  box-shadow:
+    0 16px 40px -18px color-mix(in srgb, var(--a) 32%, transparent),
+    0 1px 0 rgba(255,255,255,.6) inset;
+  padding: 18px 18px 16px;
+}
+.pcc-card.is-eleve .pcc-halo {
+  position: absolute; right: -30px; top: -40px;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--a-lt) 50%, transparent),
+    color-mix(in srgb, var(--a) 16%, transparent) 50%, transparent 72%);
+  filter: blur(8px); z-index: 0; pointer-events: none;
+}
+
+/* ════════════ VARIANTE MONITEUR — indigo confiant ════════════ */
+.pcc-card.is-ens {
+  background: linear-gradient(150deg, #4f46e5, #6d6bff 58%, #8b5cf6);
+  box-shadow: 0 18px 44px -16px rgba(79,70,229,.6);
+  padding: 18px 18px 16px;
+  --pcc-fg: #fff;
+  --pcc-fg-mu: #d8d5ff;
+}
+.pcc-card.is-ens .pcc-halo {
+  position: absolute; right: -24px; top: -34px;
+  width: 168px; height: 168px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,210,120,.55), transparent 64%);
+  filter: blur(6px); z-index: 0; pointer-events: none;
+}
+
+/* ── Bannière (optionnelle, en fond du héros) ── */
 .pcc-banner {
-  position: relative;
-  height: 140px;
-  background: linear-gradient(135deg, var(--pu), var(--puk), var(--blk));
-  overflow: hidden;
+  position: absolute; inset: 0; z-index: 0; overflow: hidden;
 }
-.pcc-banner img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-}
+.pcc-banner img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pcc-banner::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(255,255,255,.0) 100%);
-  pointer-events: none;
+  content: ''; position: absolute; inset: 0;
 }
-.pcc-banner-edit::after { content: ''; position: absolute; inset: -5px; }
-.pcc-banner-edit {
-  position: absolute;
-  top: 12px; left: 12px;
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.92);
-  backdrop-filter: blur(8px);
-  border: 0;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--ink);
-  box-shadow: 0 2px 8px rgba(10,13,26,.15);
-  transition: transform .15s ease;
+.pcc-card.is-eleve .pcc-banner::after {
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--su) 78%, transparent),
+    color-mix(in srgb, var(--su) 92%, transparent));
 }
-.pcc-banner-edit:hover { transform: scale(1.06); }
-.pcc-banner-edit:active { transform: scale(.94); }
-
-/* ── Bouton partager (remplace Follow) ── */
-.pcc-share {
-  position: absolute;
-  top: 12px; right: 12px;
-  padding: 15px 18px 15px 14px;
-  border-radius: 99px;
-  background: rgba(255,255,255,.95);
-  backdrop-filter: blur(10px);
-  border: 0;
-  font: 600 13px/1 'Inter', sans-serif;
-  color: var(--ink);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 4px 12px rgba(10,13,26,.12);
-  transition: transform .15s ease, background .15s ease;
-}
-.pcc-share:hover { background: #fff; transform: translateY(-1px); }
-.pcc-share:active { transform: scale(.96); }
-.pcc-share-ico { font-size: 14px; }
-
-/* ── Body ── */
-.pcc-body {
-  padding: 0 20px 20px;
-  margin-top: -42px;
-  position: relative;
+.pcc-card.is-ens .pcc-banner::after {
+  background: linear-gradient(150deg, rgba(79,70,229,.82), rgba(139,92,246,.82));
 }
 
-/* ── Avatar ── */
-.pcc-av-wrap {
-  position: relative;
-  width: 84px; height: 84px;
-  margin-bottom: 14px;
+/* ── Rangée du haut : avatar + identité ── */
+.pcc-top {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; gap: 14px;
 }
+.pcc-av-wrap { position: relative; flex-shrink: 0; width: 72px; height: 72px; }
 .pcc-av {
-  width: 100%; height: 100%;
-  border-radius: 50%;
-  border: 4px solid #fff;
+  width: 100%; height: 100%; border-radius: 50%;
+  border: 3px solid var(--su);
   background: linear-gradient(135deg, var(--a), var(--adk));
-  overflow: hidden;
-  box-shadow: 0 4px 14px rgba(10,13,26,.12);
-  display: flex; align-items: center; justify-content: center;
-  font: 700 28px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--a-ink);
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+  font: 800 26px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-ink);
+  box-shadow: 0 6px 18px rgba(10,13,26,.18);
 }
-.pcc-av img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-}
+.pcc-card.is-ens .pcc-av { border-color: rgba(255,255,255,.92); }
+.pcc-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pcc-av-edit {
-  position: absolute;
-  bottom: 0; right: 0;
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--a);
-  color: var(--a-ink);
-  border: 2.5px solid #fff;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px;
-  box-shadow: 0 2px 6px rgba(10,13,26,.2);
+  position: absolute; bottom: -2px; right: -2px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--a); color: var(--a-ink);
+  border: 2.5px solid var(--su);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(10,13,26,.22);
   transition: transform .15s ease;
 }
-.pcc-av-edit:hover { transform: scale(1.1); }
+.pcc-card.is-ens .pcc-av-edit { border-color: #fff; background: #fff; color: var(--adk); }
 .pcc-av-edit::after { content: ''; position: absolute; inset: -8px; }
-.pcc-av-edit:active { transform: scale(.94); }
+.pcc-av-edit:active { transform: scale(.9); }
 
-/* ── Barre XP ── */
-.pcc-xp {
-  margin-bottom: 16px;
-}
-.pcc-xp-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.pcc-xp-lbl {
-  font: 600 10.5px/1 'Inter', sans-serif;
-  color: var(--mu2);
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  flex-shrink: 0;
-}
-.pcc-xp-bar {
-  flex: 1;
-  height: 6px;
-  background: var(--bo3);
-  border-radius: 99px;
-  overflow: hidden;
-}
-.pcc-xp-fill {
-  height: 100%;
-  border-radius: 99px;
-  transition: width 1s cubic-bezier(.2,.7,.3,1);
-}
-.pcc-xp-fill.gradient-rainbow {
-  background: linear-gradient(90deg, var(--pu), #ec4899, var(--or), var(--am), var(--gr), #06b6d4, var(--a));
-}
-.pcc-xp-fill.gradient-indigo {
-  background: linear-gradient(90deg, var(--a), var(--adk));
-}
-.pcc-xp-val {
-  font: 600 11px/1 'Inter', sans-serif;
-  color: var(--ink);
-  flex-shrink: 0;
-}
-
-/* ── Badge prestige ── */
-.pcc-prestige {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 99px;
-  font: 600 11px/1 'Inter', sans-serif;
-  letter-spacing: .04em;
-  margin-bottom: 12px;
-  border: 1px solid;
-}
-.pcc-prestige-ico { display: flex; align-items: center; line-height: 1; }
-.pcc-prestige-num {
-  font: 700 10px/1 'Inter', sans-serif;
-  background: rgba(0,0,0,.06);
-  padding: 3px 6px;
-  border-radius: 6px;
-}
-
-/* ── Nom + bio ── */
+.pcc-id { flex: 1; min-width: 0; }
 .pcc-name {
-  font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
-  margin: 0 0 6px;
-  letter-spacing: -0.022em;
+  font: 700 21px/1.15 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.01em;
+  color: var(--pcc-fg, var(--ink));
+  margin: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pcc-bio {
-  font: 500 13px/1.5 'Inter', sans-serif;
-  color: var(--mu3);
-  margin: 0 0 20px;
+  font: 600 13px/1.4 'Plus Jakarta Sans', sans-serif;
+  color: var(--pcc-fg-mu, var(--mu));
+  margin: 3px 0 0;
 }
 
-/* ── Stats grid ── */
+/* ── Bouton partager (coin haut-droit) ── */
+.pcc-share {
+  position: absolute; top: 0; right: 0; z-index: 3;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px 12px; border-radius: 999px; border: 0; cursor: pointer;
+  font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
+  transition: transform .15s ease;
+}
+.pcc-card.is-eleve .pcc-share {
+  background: color-mix(in srgb, var(--a) 12%, var(--su));
+  color: var(--a-txt);
+  border: 1px solid color-mix(in srgb, var(--a) 22%, transparent);
+}
+.pcc-card.is-ens .pcc-share {
+  background: rgba(255,255,255,.18);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.32);
+}
+.pcc-share:active { transform: scale(.94); }
+.pcc-share svg { width: 14px; height: 14px; }
+
+/* ── Barre de progression permis (élève) ── */
+.pcc-prog { position: relative; z-index: 2; margin-top: 16px; }
+.pcc-prog-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 7px;
+}
+.pcc-prog-lbl {
+  font: 700 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink2);
+}
+.pcc-prog-val {
+  font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-txt);
+}
+.pcc-prog-track {
+  height: 9px; border-radius: 999px;
+  background: color-mix(in srgb, var(--a) 12%, var(--su2, #f1f3fa));
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(10,13,26,.06) inset;
+}
+.pcc-prog-fill {
+  height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--a-lt), var(--a));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--a) 45%, transparent);
+  transition: width 1s cubic-bezier(.2,.7,.3,1);
+}
+
+/* ── Strip de 3 stats ── */
 .pcc-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  padding: 16px 0;
-  margin: 0 -4px 16px;
-  border-top: 1px solid var(--bo);
-  border-bottom: 1px solid var(--bo);
+  position: relative; z-index: 2;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  margin-top: 16px;
 }
-.pcc-stat {
-  text-align: center;
-  padding: 0 8px;
+.pcc-card.is-eleve .pcc-stats {
+  border-top: 1px solid color-mix(in srgb, var(--a) 16%, var(--bo));
+  padding-top: 14px;
 }
-.pcc-stat + .pcc-stat {
-  border-left: 1px solid var(--bo);
+.pcc-card.is-ens .pcc-stats {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 16px;
+  padding: 12px 0;
 }
+.pcc-stat { text-align: center; padding: 0 6px; }
+.pcc-stat + .pcc-stat { border-left: 1px solid; }
+.pcc-card.is-eleve .pcc-stat + .pcc-stat { border-color: color-mix(in srgb, var(--a) 14%, var(--bo)); }
+.pcc-card.is-ens .pcc-stat + .pcc-stat { border-color: rgba(255,255,255,.2); }
 .pcc-stat-val {
-  font: 700 22px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
+  font: 800 23px/1 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.01em;
+  color: var(--pcc-fg, var(--ink));
   margin-bottom: 4px;
-  letter-spacing: -0.022em;
 }
 .pcc-stat-lbl {
-  font: 500 11px/1 'Inter', sans-serif;
-  color: var(--mu2);
-  text-transform: uppercase;
-  letter-spacing: .04em;
+  font: 600 11px/1.1 'Plus Jakarta Sans', sans-serif;
+  color: var(--pcc-fg-mu, var(--mu2));
 }
 
-/* ── Actions partage social ── */
-.pcc-social {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-.pcc-social-btn {
-  width: 44px; height: 44px;
-  border-radius: 12px;
-  background: var(--su2);
-  border: 1px solid var(--bo);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  color: var(--ink);
-  transition: background .12s ease, border-color .12s ease, transform .12s ease;
-}
-.pcc-social-btn:hover { background: #fff; border-color: var(--a); color: var(--a-txt); }
-.pcc-social-btn:active { transform: scale(.94); }
-.pcc-social-btn svg { width: 18px; height: 18px; }
-
-/* ── Hidden file input ── */
 .pcc-file-input { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .pcc-card, .pcc-xp-fill, .pcc-share, .pcc-av-edit, .pcc-banner-edit {
-    transition: none !important;
-  }
+  .pcc-prog-fill, .pcc-share, .pcc-av-edit { transition: none !important; }
 }
 </style>`;
 
 /**
- * Render la card profile pour un user.
+ * Render le héros d'identité role-native.
  * @param {Object} opts
- * @param {Object} opts.me - user object {id, prenom, nom, role, ...}
- * @param {string} opts.avatarUrl - URL avatar (peut être null)
- * @param {string} opts.bannerUrl - URL bannière (peut être null)
- * @param {number} opts.count - count métier (compétences validées ou validations faites)
- * @param {{label:string, value:number|string}[]} opts.stats - 3 stats à afficher
- * @param {string} opts.bio - sous-titre / bio courte
+ * @param {Object} opts.me        user {id, prenom, nom, role}
+ * @param {string} opts.avatarUrl URL avatar (ou null → initiales)
+ * @param {string} opts.bannerUrl URL bannière de fond (ou null)
+ * @param {{label:string,value:number|string}[]} opts.stats 3 stats
+ * @param {string} opts.bio       sous-titre court (ex: « Apprenti permis B »)
+ * @param {{pct:number,current:number,total:number,label:string}} [opts.progress]
+ *        barre de progression RÉELLE (élève uniquement)
  */
 export function renderProfileCard({
   me,
   avatarUrl,
   bannerUrl,
-  count = 0,
   stats = [],
   bio = "",
+  progress = null,
 }) {
   const role = me.role || "eleve";
-  const { current, next, pctToNext } = getPrestige(role, count);
-  const xpBarClass =
-    role === "enseignant" ? "gradient-indigo" : "gradient-rainbow";
+  const variant = role === "enseignant" ? "is-ens" : "is-eleve";
   const initials = ((me.prenom || "")[0] || "") + ((me.nom || "")[0] || "");
   const displayName = `${me.prenom || ""} ${me.nom || ""}`.trim() || "Élève";
 
   const stats3 = stats.slice(0, 3);
   while (stats3.length < 3) stats3.push({ label: "—", value: 0 });
 
-  // Avatar : url uploadée (photo ou avatar réaliste) > initiales
   const avatarInner = avatarUrl
     ? `<img src="${esc(avatarUrl)}" alt="${esc(displayName)}" />`
     : esc((initials || "?").toUpperCase());
 
-  // Border preset selon le rôle : moniteur=cyan / élève=violet / gerant=gold
-  const borderPreset =
-    role === "enseignant"
-      ? BORDER_PRESETS.cyan
-      : role === "gerant"
-        ? BORDER_PRESETS.gold
-        : BORDER_PRESETS.violet;
-
   return `${STYLE}
 <div class="pcc">
-  ${wrapAnimatedBorder(
-    `<div class="pcc-card">
-    <div class="pcc-banner">
-      ${bannerUrl ? `<img src="${esc(bannerUrl)}" alt="" />` : ""}
-      <button class="pcc-banner-edit" data-action="edit-banner" aria-label="Modifier la bannière" title="Modifier la bannière">✎</button>
-      <button class="pcc-share" data-action="share" aria-label="Partager mon profil">
-        <span class="pcc-share-ico">↗</span> Partager
-      </button>
-    </div>
+  <div class="pcc-card ${variant}">
+    ${bannerUrl ? `<div class="pcc-banner"><img src="${esc(bannerUrl)}" alt="" /></div>` : `<div class="pcc-halo" aria-hidden="true"></div>`}
 
-    <div class="pcc-body">
+    <button class="pcc-share" data-action="share" aria-label="Partager mon profil">
+      ${icon("share", { size: 14, strokeWidth: 2.2 })} Partager
+    </button>
+
+    <div class="pcc-top">
       <div class="pcc-av-wrap">
-        <div class="pcc-av">
-          ${avatarInner}
-        </div>
-        <button class="pcc-av-edit" data-action="edit-avatar" aria-label="Modifier la photo" title="Modifier la photo">✎</button>
+        <div class="pcc-av">${avatarInner}</div>
+        <button class="pcc-av-edit" data-action="edit-avatar" aria-label="Modifier la photo" title="Modifier la photo">${icon("edit", { size: 12, strokeWidth: 2.4 })}</button>
       </div>
-
-      <div class="pcc-prestige" style="color:${esc(current.accent)};background:${esc(current.accent)}1a;border-color:${esc(current.accent)}40">
-        <span class="pcc-prestige-ico">${icon(current.iconName, { size: 13, strokeWidth: 2 })}</span>
-        <span>${esc(current.name)}</span>
-        <span class="pcc-prestige-num">P${current.p}</span>
-      </div>
-
-      <h2 class="pcc-name">${esc(displayName)}</h2>
-      ${bio ? `<p class="pcc-bio">${esc(bio)}</p>` : ""}
-
-      <div class="pcc-xp">
-        <div class="pcc-xp-row">
-          <span class="pcc-xp-lbl">${next ? "Prog." : "Max"}</span>
-          <div class="pcc-xp-bar">
-            <div class="pcc-xp-fill ${xpBarClass}" style="width:${pctToNext}%"></div>
-          </div>
-          <span class="pcc-xp-val">${next ? `→ ${esc(next.name)}` : "✓ Élite"}</span>
-        </div>
-      </div>
-
-      <div class="pcc-stats">
-        ${stats3
-          .map(
-            (s) => `
-          <div class="pcc-stat">
-            <div class="pcc-stat-val" data-target="${s.value}">0</div>
-            <div class="pcc-stat-lbl">${esc(s.label)}</div>
-          </div>
-        `,
-          )
-          .join("")}
-      </div>
-
-      <div class="pcc-social">
-        <button class="pcc-social-btn" data-action="share-whatsapp" aria-label="Partager sur WhatsApp" title="WhatsApp">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9s-.5-.1-.6.1-.7.9-.9 1.1-.3.2-.6.1c-.3-.1-1.2-.5-2.3-1.4-.8-.8-1.4-1.7-1.5-2s0-.3.1-.5c.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.3 0-.5s-.6-1.4-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.2-1 1-1 2.4s1 2.8 1.2 3 2.1 3.1 5.1 4.3c.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 1.9-1.3.2-.7.2-1.2.2-1.3-.1-.2-.3-.2-.6-.4zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.1-1.3c1.5.8 3.1 1.3 4.9 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
-        </button>
-        <button class="pcc-social-btn" data-action="share-instagram" aria-label="Partager sur Instagram" title="Instagram">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-        </button>
-        <button class="pcc-social-btn" data-action="copy-link" aria-label="Copier le lien" title="Copier le lien">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        </button>
+      <div class="pcc-id">
+        <h2 class="pcc-name">${esc(displayName)}</h2>
+        ${bio ? `<p class="pcc-bio">${esc(bio)}</p>` : ""}
       </div>
     </div>
-  </div>`,
-    { ...borderPreset, radius: 28, borderWidth: 2.5, bg: "#fff" },
-  )}
 
-  <input type="file" class="pcc-file-input" accept="image/*" data-target="avatar" />
-  <input type="file" class="pcc-file-input" accept="image/*" data-target="banner" />
+    ${
+      progress
+        ? `
+    <div class="pcc-prog">
+      <div class="pcc-prog-head">
+        <span class="pcc-prog-lbl">Mon permis</span>
+        <span class="pcc-prog-val">${esc(progress.label)}</span>
+      </div>
+      <div class="pcc-prog-track">
+        <div class="pcc-prog-fill" style="width:${Math.max(3, Math.min(100, progress.pct))}%"></div>
+      </div>
+    </div>`
+        : ""
+    }
+
+    <div class="pcc-stats">
+      ${stats3
+        .map(
+          (s) => `
+        <div class="pcc-stat">
+          <div class="pcc-stat-val" data-target="${esc(String(s.value))}">0</div>
+          <div class="pcc-stat-lbl">${esc(s.label)}</div>
+        </div>`,
+        )
+        .join("")}
+    </div>
+
+    <input type="file" class="pcc-file-input" accept="image/*" data-target="avatar" />
+    <input type="file" class="pcc-file-input" accept="image/*" data-target="banner" />
+  </div>
 </div>`;
 }
 
@@ -403,7 +307,7 @@ function animateStats(root) {
     });
     return;
   }
-  const duration = 1200;
+  const duration = 1100;
   const start = performance.now();
   const items = [...root.querySelectorAll("[data-target]")].map((el) => ({
     el,
@@ -433,12 +337,7 @@ function formatNum(n) {
 /**
  * Upload une image dans le bucket user-media et update profiles.{column}_url
  */
-async function uploadAndSet(
-  userId,
-  file,
-  kind /* 'avatar' | 'banner' */,
-  onProgress,
-) {
+async function uploadAndSet(userId, file, kind /* 'avatar' | 'banner' */) {
   if (!file) return null;
   if (file.size > 5 * 1024 * 1024) {
     const { toast } = await import("@/components/common/toast.js");
@@ -495,14 +394,13 @@ export function mountProfileCard(container, opts) {
   const card = container.querySelector(".pcc");
   if (!card) return;
 
-  // Anime les stats
-  setTimeout(() => animateStats(card), 200);
+  setTimeout(() => animateStats(card), 180);
 
-  // Edit avatar — ouvre d'abord le picker (6 défauts + option "Ma photo")
+  // Edit avatar — ouvre d'abord le picker (6 défauts + option « Ma photo »)
   const avInput = card.querySelector('.pcc-file-input[data-target="avatar"]');
   card
     .querySelector('[data-action="edit-avatar"]')
-    .addEventListener("click", async () => {
+    ?.addEventListener("click", async () => {
       haptic("select");
       try {
         const choice = await openAvatarPicker({
@@ -510,10 +408,9 @@ export function mountProfileCard(container, opts) {
         });
         if (!choice) return; // annulé
         if (choice === AVATAR_PICKER_UPLOAD) {
-          avInput.click(); // déclenche le file picker existant
+          avInput.click();
           return;
         }
-        // Avatar par défaut sélectionné — persist direct, pas d'upload
         await safeRun(async () => {
           const { error } = await sb
             .from("profiles")
@@ -530,7 +427,7 @@ export function mountProfileCard(container, opts) {
         console.warn("[profile-card] avatar picker failed", e);
       }
     });
-  avInput.addEventListener("change", (e) => {
+  avInput?.addEventListener("change", (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     safeRun(async () => {
@@ -547,25 +444,33 @@ export function mountProfileCard(container, opts) {
     });
   });
 
-  // Edit banner
+  // Edit banner — déclenché par appui long / via le picker ? On garde le
+  // file input câblé (utilisé par la bannière de fond). Pour le déclencher,
+  // un double-tap sur le héros ouvre le sélecteur de bannière.
   const bnInput = card.querySelector('.pcc-file-input[data-target="banner"]');
-  card
-    .querySelector('[data-action="edit-banner"]')
-    .addEventListener("click", () => {
-      haptic("select");
-      bnInput.click();
-    });
-  bnInput.addEventListener("change", (e) => {
+  card.querySelector(".pcc-card")?.addEventListener("dblclick", () => {
+    haptic("select");
+    bnInput?.click();
+  });
+  bnInput?.addEventListener("change", (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     safeRun(async () => {
       const url = await uploadAndSet(me.id, file, "banner");
       if (url) {
-        const bnEl = card.querySelector(".pcc-banner");
-        const existing = bnEl.querySelector("img");
-        if (existing) existing.src = url;
-        else
-          bnEl.insertAdjacentHTML("afterbegin", `<img src="${url}" alt="" />`);
+        const cardEl = card.querySelector(".pcc-card");
+        let bnEl = cardEl.querySelector(".pcc-banner");
+        if (!bnEl) {
+          cardEl.insertAdjacentHTML(
+            "afterbegin",
+            `<div class="pcc-banner"><img src="${url}" alt="" /></div>`,
+          );
+          cardEl.querySelector(".pcc-halo")?.remove();
+        } else {
+          const img = bnEl.querySelector("img");
+          if (img) img.src = url;
+          else bnEl.innerHTML = `<img src="${url}" alt="" />`;
+        }
         haptic("success");
         const { toast } = await import("@/components/common/toast.js");
         toast("Bannière mise à jour ✓", "success", 2500);
@@ -581,47 +486,23 @@ export function mountProfileCard(container, opts) {
     text: shareText || "Suis ma progression sur PermiGo",
     url: shareUrl || window.location.origin,
   };
-
   card
     .querySelector('[data-action="share"]')
-    .addEventListener("click", async () => {
+    ?.addEventListener("click", async () => {
       haptic("select");
       if (navigator.share) {
         try {
           await navigator.share(shareData);
-        } catch {}
+        } catch {
+          /* annulé */
+        }
       } else {
-        await copyLink(shareData.url, card);
+        await copyLink(shareData.url);
       }
-    });
-
-  card
-    .querySelector('[data-action="share-whatsapp"]')
-    .addEventListener("click", () => {
-      haptic("tap");
-      const url = `https://wa.me/?text=${encodeURIComponent(shareData.text + " " + shareData.url)}`;
-      window.open(url, "_blank", "noopener");
-    });
-
-  card
-    .querySelector('[data-action="share-instagram"]')
-    .addEventListener("click", async () => {
-      haptic("tap");
-      // Instagram n'a pas d'URL share direct → on copie le lien
-      await copyLink(shareData.url, card);
-      const { toast } = await import("@/components/common/toast.js");
-      toast("Lien copié — colle-le dans Instagram", "info", 3000);
-    });
-
-  card
-    .querySelector('[data-action="copy-link"]')
-    .addEventListener("click", async () => {
-      haptic("tap");
-      await copyLink(shareData.url, card);
     });
 }
 
-async function copyLink(url, card) {
+async function copyLink(url) {
   try {
     await navigator.clipboard.writeText(url);
     const { toast } = await import("@/components/common/toast.js");
