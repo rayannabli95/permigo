@@ -999,6 +999,9 @@ const STYLE = `<style>
   .ob-slide-notif.granted .ob-notif-note { color: var(--a); font-weight: 700; }
 
   /* ── Sous-step A2HS (hors carrousel) ── */
+  /* [hidden] doit l'emporter : sans ça, le display:flex ci-dessous écrase
+     l'attribut hidden et la slide « Ajoute l'appli » bave sur tout le tour. */
+  .ob-a2hs-wrap[hidden] { display: none !important; }
   .ob-a2hs-wrap {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center;
