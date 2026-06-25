@@ -282,7 +282,13 @@ const STYLE = `<style>
   padding: 18px;
   font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
-  background: linear-gradient(180deg, var(--acc-vio-lt), var(--acc-vio));
+  /* Dégradé MÊME TEINTE (reflet clair → accent → accent foncé) : on garde le
+     relief plastique 3D sans virer de couleur. L'ancien --a-lt → --a faisait
+     lavande-clair → bleu-violet → lecture « bicolore ». */
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--a) 88%, #fff) 0%,
+    var(--a) 50%,
+    var(--adk) 100%);
   box-shadow: var(--acc-cta-shadow);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -427,12 +433,17 @@ const STYLE = `<style>
 /* ── Tes ligues — 2 cartes premium (École + Révision) ── */
 .acc-lg-head {
   font: 800 18px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em;
-  color: var(--ink); margin: 28px 18px 14px;
+  color: var(--ink); margin: 28px 18px 4px;
   display: flex; align-items: center; gap: 10px;
 }
 .acc-lg-head::after {
   content: ''; flex: 1; height: 1px;
   background: linear-gradient(90deg, color-mix(in srgb, var(--a) 22%, transparent), transparent);
+}
+/* Lève l'ambiguïté « faut-il cliquer ? » : on dit ce que c'est ET que ça s'ouvre. */
+.acc-lg-lead {
+  font: 600 12.5px/1.4 'Inter', sans-serif; color: var(--mu);
+  margin: 0 18px 14px;
 }
 .acc-lg-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
@@ -508,21 +519,22 @@ const STYLE = `<style>
 }
 
 /* ── Le RANG — héros de la carte ── */
+/* « Ta place » : micro-label qui donne du sens au gros numéro (sinon « #1 »
+   tout seul ne dit pas que c'est ton classement). */
+.acc-lg-kick {
+  font: 800 10px/1 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--mu); margin-top: 9px; position: relative; z-index: 1;
+}
 .acc-lg-rank {
   font: 800 40px/1 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -.04em; margin: 8px 0 0; position: relative; z-index: 1;
-  background: linear-gradient(160deg, var(--acc-vio-lt) 0%, var(--ink) 55%, var(--acc-vio) 100%);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: -.04em; margin: 2px 0 0; position: relative; z-index: 1;
+  color: var(--ink);              /* numéro UNI — fini le dégradé « bicolore » */
   font-variant-numeric: tabular-nums;
 }
-/* Podium top-3 : éclat plus intense */
-.acc-lg-card[data-pos="1"] .acc-lg-rank {
-  background: linear-gradient(150deg, var(--acc-vio-lt) 0%, var(--acc-vio) 40%, var(--ink) 70%, var(--acc-vio-lt) 100%);
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 46px;
-}
+.acc-lg-rank.is-empty { color: var(--mu); }
+/* Podium top-3 : seul le #1 passe en or (signal sobre, une seule couleur) */
+.acc-lg-card[data-pos="1"] .acc-lg-rank { color: var(--acc-gold-dk); font-size: 46px; }
 .acc-lg-card[data-pos="2"] .acc-lg-rank,
 .acc-lg-card[data-pos="3"] .acc-lg-rank {
   font-size: 43px;
@@ -701,7 +713,7 @@ const STYLE = `<style>
 }
 .acc2-permis-fill {
   display: block; height: 100%; border-radius: 999px;
-  background: linear-gradient(90deg, var(--acc-vio), var(--acc-vio-lt));
+  background: var(--a);
   box-shadow: 0 0 10px color-mix(in srgb, var(--a) 55%, transparent);
   width: 0; transition: width .6s cubic-bezier(.34,1.56,.64,1);
 }
@@ -1863,12 +1875,14 @@ async function _loadAndInjectLeagues(root) {
 
     slot.innerHTML = `
       <div class="acc-lg-head">Tes ligues</div>
+      <p class="acc-lg-lead">Ton classement parmi les élèves — appuie pour voir le détail.</p>
       <div class="acc-lg-grid">
         <button class="acc-lg-card" id="acc-lg-ecole" data-go="#/classement/ecole"
                 data-ligue="ecole"
                 ${ecolePos != null && ecolePos <= 3 ? `data-pos="${ecolePos}"` : ""}
                 aria-label="Classement conduite — ${esc(ecoleRanked ? `${ecoleRankLabel} sur ${pos.total_eleves}` : "pas encore classé")}">
           <span class="acc-lg-tag">${ill("badge", { size: 16 })} Conduite</span>
+          <span class="acc-lg-kick">Ta place</span>
           ${
             ecoleRanked
               ? `<span class="acc-lg-rank">${esc(ecoleRankLabel)}</span>`
@@ -1884,6 +1898,7 @@ async function _loadAndInjectLeagues(root) {
                 ${revPos != null && revPos <= 3 ? `data-pos="${revPos}"` : ""}
                 aria-label="Classement révision — ${esc(revClassed ? revRankLabel : "pas encore classé")}">
           <span class="acc-lg-tag">${illMask("cahier", { size: 16 })} Révision</span>
+          <span class="acc-lg-kick">Ta place</span>
           ${
             revClassed
               ? `<span class="acc-lg-rank">${esc(revRankLabel)}</span>`
@@ -2072,11 +2087,13 @@ const _QUEST_HREF = {
   quest_quiz_perfect: "#/parcours",
   quest_streak_keep: "#/",
 };
+// NB : pas de « → » ici — le CTA roi (acc2-cta-king) ajoute déjà sa propre
+// flèche (.acc2-cta-arr). En remettre une donnait « Faire un quiz → → ».
 const _QUEST_BTN = {
-  quest_quiz_1: "Faire un quiz →",
-  quest_quiz_3: "Faire 3 quiz →",
-  quest_quiz_perfect: "Viser 100% →",
-  quest_streak_keep: "Voir mon accueil →",
+  quest_quiz_1: "Faire un quiz",
+  quest_quiz_3: "Faire 3 quiz",
+  quest_quiz_perfect: "Viser 100%",
+  quest_streak_keep: "Voir mon accueil",
 };
 
 function _normalizeQuest(q) {
@@ -2085,7 +2102,7 @@ function _normalizeQuest(q) {
     label: cleanQuestTitle(q.title),
     sub: reward,
     href: _QUEST_HREF[q.quest_id] ?? "#/parcours",
-    btnText: _QUEST_BTN[q.quest_id] ?? "Commencer →",
+    btnText: _QUEST_BTN[q.quest_id] ?? "Commencer",
     type: q.quest_id,
   };
 }
