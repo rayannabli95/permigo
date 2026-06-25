@@ -1,7 +1,8 @@
 /**
- * Page Login — design v2 (inputs avec icônes, social OAuth, remember me).
+ * Page Login — DA « Arène 3D » (nuit-violet + plastique 3D), badge vert PermiGo
+ * comme seule marque (« feu vert / GO »). Accessibilité poussée (WCAG AA/AAA).
  *
- * Stack sécurité actif :
+ * Stack sécurité actif (INCHANGÉ) :
  *  - Honeypot (champs invisibles website_url/fax_number)
  *  - Rate limit client (5 login/5min, 3 OTP/5min)
  *  - Cloudflare Turnstile captcha (si VITE_TURNSTILE_SITEKEY défini)
@@ -55,181 +56,300 @@ import { getTurnstileToken, isTurnstileEnabled } from "@/utils/turnstile.js";
 import { renderHoneypot, checkHoneypot } from "@/utils/honeypot.js";
 
 const DEMO_ACCOUNTS = [
-  { role: "Élève", email: "eleve@test.fr", ico: "school" },
-  { role: "Enseignant", email: "enseignant@test.fr", ico: "car" },
-  { role: "Gérant", email: "gerant@test.fr", ico: "crown" },
+  { role: "Élève", email: "eleve@test.fr", ico: "school", gold: false },
+  { role: "Enseignant", email: "enseignant@test.fr", ico: "car", gold: false },
+  { role: "Gérant", email: "gerant@test.fr", ico: "crown", gold: true },
 ];
+
+// État des effets visuels (étincelles) — nettoyés à l'unmount.
+let _fxRaf = 0;
+let _fxResize = null;
 
 export function mount(root) {
   root.innerHTML = template();
   wire(root);
   restoreRememberedEmail(root);
+  startFx(root); // étincelles + tilt (coupés si prefers-reduced-motion)
 }
 
 export function unmount() {
-  /* rien à clean */
+  // Stoppe la boucle d'animation et le listener resize (évite une fuite rAF)
+  if (_fxRaf) (cancelAnimationFrame(_fxRaf), (_fxRaf = 0));
+  if (_fxResize) (removeEventListener("resize", _fxResize), (_fxResize = null));
 }
 
 // ─── Template ───
-// DA « à l'image de PermiGo » : clair, accent indigo/violet (la marque du logo),
-// motif route en perspective (la signature « la route vers le permis »).
+// DA « Arène 3D » : fond nuit-violet, carte plaque plastique 3D, badge vert PermiGo
+// (le « feu vert / GO ») comme seule marque. A11y : focus visibles, contrastes AA,
+// fix autofill, cibles ≥44px, support reduced-motion / forced-colors / prefers-contrast.
 function template() {
   return `
     <style>
-      .lg-root{position:fixed;inset:0;overflow:auto;overscroll-behavior:contain;display:flex;align-items:center;justify-content:center;padding:28px 18px;font-family:var(--fb);
-        --lg-ink:#1b1d33;--lg-mu:#6a6f93;--lg-line:#e7e9f6;--lg-card:#fff;--lg-field:#f5f6fd;
-        --lg-brand:#6c63ff;--lg-brand-dk:#5048d6;--lg-brand-lt:#8a83ff;--lg-brand-txt:#4f46e5;
-        color:var(--lg-ink);
-        background:radial-gradient(120% 80% at 50% -12%,#edecff 0%,transparent 55%),radial-gradient(90% 60% at 100% 105%,#efe9ff 0%,transparent 52%),linear-gradient(180deg,#fcfcff 0%,#f3f4fc 100%)}
+      .lg-root{
+        position:fixed;inset:0;overflow:auto;overscroll-behavior:contain;
+        display:flex;align-items:center;justify-content:center;
+        padding:24px 18px calc(24px + env(safe-area-inset-bottom));
+        font-family:'Baloo 2',var(--fb);-webkit-font-smoothing:antialiased;
+        /* Jetons DA (scopés) */
+        --in:#6c63ff;--in-lt:#8e87ff;--in-dp:#4a3fc9;--in-dk:#372fa3;
+        --gold:#ffce4d;--gold-dp:#e8a317;--go:#58cc02;--go-dp:#3a8a01;
+        --ncard:#2b2160;--ink:#f4f1ff;--ink-soft:#cdc8ec;--ink-mu:#aaa2d8;
+        --field:#221a4f;--field-line:#6257a8;--focus:#ffd84d;--rad:26px;--tap:46px;
+        color:var(--ink);
+        background:
+          radial-gradient(120% 90% at 50% -10%,rgba(255,206,77,.16),transparent 55%),
+          radial-gradient(130% 120% at 50% 110%,rgba(0,0,0,.55),transparent 60%),
+          linear-gradient(160deg,#241a4d 0%,#3a2a7a 100%);
+      }
 
-      /* Route signature (écho du logo) */
-      .lg-road{position:fixed;left:0;right:0;bottom:0;height:48%;z-index:0;pointer-events:none;overflow:hidden;display:flex;justify-content:center;align-items:flex-end;
-        -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 62%);mask-image:linear-gradient(180deg,transparent 0%,#000 62%)}
-      .lg-road svg{width:min(680px,150%);height:100%}
-      @media (prefers-reduced-motion:no-preference){.lg-road-dash{animation:lg-dash 5.5s linear infinite}}
-      @keyframes lg-dash{to{stroke-dashoffset:-56}}
+      /* Étincelles dorées (canvas, décor) */
+      .lg-sparks{position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none}
 
-      .lg-content{position:relative;z-index:2;width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;margin:auto;gap:22px}
+      /* Scène (perspective pour le tilt) */
+      .lg-scene{position:relative;z-index:1;width:100%;max-width:430px;margin:auto;perspective:1100px}
 
-      /* Logo */
-      .lg-logo-host{display:flex;justify-content:center;opacity:0;animation:lg-in .7s cubic-bezier(.2,.7,.3,1) .05s both}
-      .lg-logo-host img{height:clamp(38px,8vw,50px);filter:drop-shadow(0 8px 22px rgba(108,99,255,.28))}
-      @keyframes lg-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+      /* Carte = plaque plastique 3D */
+      .lg-card{
+        position:relative;
+        background:linear-gradient(180deg,#322764 0%,var(--ncard) 60%,#261d56 100%);
+        border-radius:var(--rad);padding:30px 26px 26px;
+        box-shadow:
+          inset 0 3px 0 rgba(255,255,255,.18),
+          inset 0 2px 14px rgba(255,255,255,.06),
+          inset 0 -10px 22px rgba(0,0,0,.45),
+          0 10px 0 #160f38,
+          0 22px 38px rgba(0,0,0,.5),
+          0 0 0 2px rgba(124,111,224,.35);
+        transition:transform .12s ease-out;transform-style:preserve-3d;will-change:transform;
+        display:flex;flex-direction:column;
+      }
+      /* Liseré doré subtil */
+      .lg-card::before{
+        content:"";position:absolute;inset:0;border-radius:var(--rad);padding:1.5px;
+        background:linear-gradient(180deg,rgba(255,206,77,.55),rgba(255,206,77,0) 45%);
+        -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+        -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
 
-      /* Card — clair premium */
-      .lg-card{width:100%;background:var(--lg-card);border:1px solid var(--lg-line);border-radius:24px;padding:26px 24px 24px;
-        box-shadow:0 28px 64px -26px rgba(60,48,150,.32),0 6px 18px -8px rgba(60,48,150,.14);
-        animation:lg-in .55s cubic-bezier(.2,.7,.3,1) .14s both;display:flex;flex-direction:column;gap:16px}
-      .lg-card h2{font-family:var(--fd);font-weight:900;font-size:21px;letter-spacing:-.02em;margin:0;text-align:center;color:var(--lg-ink)}
-      .lg-card .h-sub{font-size:13px;color:var(--lg-mu);text-align:center;margin:-8px 0 4px}
+      /* En-tête : badge vert = seule marque */
+      .lg-head{text-align:center}
+      .lg-emblem{position:relative;display:grid;place-items:center;width:88px;height:88px;margin:0 auto 16px}
+      .lg-emblem img{width:88px;height:88px;object-fit:contain;position:relative;z-index:1;
+        filter:drop-shadow(0 5px 8px rgba(0,0,0,.5)) drop-shadow(0 0 16px rgba(88,204,2,.6))}
+      .lg-emblem::before{content:"";position:absolute;inset:-14px;border-radius:50%;z-index:0;
+        background:radial-gradient(circle,rgba(88,204,2,.45),rgba(88,204,2,0) 68%);
+        animation:lg-pulse 2.8s ease-in-out infinite}
+      @keyframes lg-pulse{0%,100%{transform:scale(.92);opacity:.55}50%{transform:scale(1.12);opacity:.9}}
+      .lg-emblem-fb{display:none;width:80px;height:80px;place-items:center;position:relative;z-index:1;
+        background:linear-gradient(180deg,#7ee838,var(--go) 55%,var(--go-dp) 100%);
+        clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+        box-shadow:inset 0 2px 3px rgba(255,255,255,.5),0 4px 8px rgba(0,0,0,.4)}
+      .lg-emblem-fb b{color:#fff;font-size:42px;font-weight:800;text-shadow:0 2px 2px rgba(0,0,0,.35)}
 
-      /* Field — icône + input */
-      .lg-field{display:flex;flex-direction:column;gap:7px}
-      .lg-field label{font-size:10.5px;font-weight:800;color:var(--lg-mu);letter-spacing:1.1px;text-transform:uppercase}
-      .lg-input-wrap{display:flex;align-items:center;gap:10px;height:50px;padding:0 14px;border-radius:14px;border:1.5px solid var(--lg-line);background:var(--lg-field);transition:border-color .15s,background .15s,box-shadow .15s}
-      .lg-input-wrap:focus-within{border-color:var(--lg-brand);background:#fff;box-shadow:0 0 0 4px rgba(108,99,255,.15)}
-      .lg-input-wrap svg{width:18px;height:18px;color:var(--lg-mu);flex-shrink:0}
-      .lg-input-wrap input{flex:1;align-self:stretch;background:transparent;border:0;outline:0;color:var(--lg-ink);font-size:16px;font-family:inherit;min-width:0}
-      .lg-input-wrap input::placeholder{color:#a9adc6}
-      .lg-pw-eye{background:transparent;border:0;color:var(--lg-mu);cursor:pointer;padding:13px;margin:-9px;font-size:16px;line-height:1;border-radius:6px}
-      .lg-pw-eye:hover{background:rgba(108,99,255,.08);color:var(--lg-brand)}
+      .lg-title{margin:6px 0 4px;font-size:26px;font-weight:800;line-height:1.1;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+      .lg-subtitle{margin:0 0 22px;font-size:14.5px;color:var(--ink-soft);font-weight:600}
 
-      /* Remember + Forgot */
-      .lg-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;margin-top:-2px}
-      .lg-remember{display:flex;align-items:center;gap:8px;color:var(--lg-mu);cursor:pointer;user-select:none;min-height:44px;font-weight:600}
-      .lg-remember input{appearance:none;width:18px;height:18px;border:1.5px solid #c4c7e0;border-radius:5px;cursor:pointer;position:relative;flex-shrink:0;transition:background .15s,border-color .15s}
-      .lg-remember input:checked{background:var(--lg-brand);border-color:var(--lg-brand)}
-      .lg-remember input:checked::after{content:'✓';position:absolute;top:-2px;left:2px;font-size:14px;color:#fff;font-weight:900}
-      .lg-forgot{background:transparent;border:0;color:var(--lg-brand-txt);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;padding:15px 6px;margin:-15px -6px}
-      .lg-forgot:hover{color:var(--lg-brand-dk);text-decoration:underline;text-underline-offset:2px}
+      /* Champs */
+      .lg-field{margin-bottom:14px}
+      .lg-field label{display:block;font-size:13px;font-weight:700;color:var(--ink-soft);margin:0 0 6px 4px}
+      .lg-shell{position:relative;display:flex;align-items:center;background:var(--field);border-radius:15px;
+        box-shadow:inset 0 2px 5px rgba(0,0,0,.5),inset 0 0 0 1.5px var(--field-line);transition:box-shadow .15s ease}
+      .lg-shell:focus-within{box-shadow:inset 0 2px 5px rgba(0,0,0,.4),inset 0 0 0 2px var(--focus),0 0 0 4px rgba(255,216,77,.35)}
+      .lg-ico{flex:0 0 auto;display:grid;place-items:center;width:46px;height:var(--tap);color:#b7afe8}
+      .lg-ico svg{width:20px;height:20px}
+      .lg-shell input{flex:1 1 auto;min-width:0;height:var(--tap);background:transparent;border:0;outline:0;
+        color:var(--ink);font-family:inherit;font-size:16px;font-weight:600;padding:0 6px 0 0}
+      .lg-shell input::placeholder{color:#9b93cf;font-weight:500}
+      .lg-otp-input{letter-spacing:.4em;font-family:var(--fn,monospace);font-size:17px;text-align:center}
 
-      /* CTA primaire */
-      .lg-cta{position:relative;width:100%;height:52px;border-radius:14px;border:0;
-        background:linear-gradient(180deg,var(--lg-brand-lt) 0%,var(--lg-brand) 52%,var(--lg-brand-dk) 100%);
-        color:#fff;font-family:var(--fd);font-weight:800;font-size:15.5px;letter-spacing:.01em;cursor:pointer;transition:transform .12s,box-shadow .12s;
-        box-shadow:0 14px 30px -12px rgba(108,99,255,.7),0 1.5px 0 0 rgba(255,255,255,.35) inset,0 -3px 8px 0 rgba(80,72,214,.4) inset}
-      .lg-cta:hover{transform:translateY(-1px);box-shadow:0 18px 40px -12px rgba(108,99,255,.85),0 1.5px 0 0 rgba(255,255,255,.35) inset}
-      .lg-cta:active{transform:translateY(1px)}
-      .lg-cta:disabled{opacity:.6;cursor:wait;transform:none}
+      /* FIX autofill : garde le champ sombre (plus de rectangle blanc) */
+      .lg-root input:-webkit-autofill,
+      .lg-root input:-webkit-autofill:hover,
+      .lg-root input:-webkit-autofill:focus,
+      .lg-root input:-webkit-autofill:active{
+        -webkit-text-fill-color:var(--ink) !important;
+        -webkit-box-shadow:0 0 0 1000px var(--field) inset !important;
+        box-shadow:0 0 0 1000px var(--field) inset !important;
+        caret-color:var(--ink);transition:background-color 9999s ease-out 0s}
 
-      .lg-err{color:#dc2626;font-size:12.5px;margin:0;min-height:18px;text-align:center;font-weight:600}
+      /* Bouton œil */
+      .lg-eye{flex:0 0 auto;width:var(--tap);height:var(--tap);display:grid;place-items:center;
+        background:transparent;border:0;cursor:pointer;color:#b7afe8;border-radius:12px}
+      .lg-eye:hover{color:var(--ink)}
+      .lg-eye:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
 
-      /* OTP toggle */
-      .lg-otp-toggle{background:transparent;border:0;color:var(--lg-brand-txt);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;letter-spacing:.2px;display:block;padding:14px 8px;margin:-14px auto -8px}
-      .lg-otp-toggle:hover{color:var(--lg-brand-dk);text-decoration:underline;text-underline-offset:2px}
+      /* Ligne se souvenir / oublié */
+      .lg-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 2px 20px}
+      .lg-remember{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;
+        color:var(--ink-soft);font-weight:600;user-select:none;min-height:var(--tap);padding:4px 4px 4px 0}
+      .lg-remember input{position:absolute;opacity:0;width:0;height:0}
+      .lg-box{width:24px;height:24px;border-radius:7px;flex:0 0 auto;background:var(--field);display:grid;place-items:center;
+        box-shadow:inset 0 2px 4px rgba(0,0,0,.5),inset 0 0 0 1.5px var(--field-line);transition:all .15s ease}
+      .lg-box svg{width:14px;height:14px;opacity:0;transform:scale(.5);color:#1a1340;
+        transition:all .15s cubic-bezier(.34,1.56,.64,1)}
+      .lg-remember input:checked + .lg-box{background:linear-gradient(180deg,var(--gold),var(--gold-dp));
+        box-shadow:inset 0 1px 2px rgba(255,255,255,.6),0 2px 5px rgba(0,0,0,.35)}
+      .lg-remember input:checked + .lg-box svg{opacity:1;transform:scale(1)}
+      .lg-remember input:focus-visible + .lg-box{outline:3px solid var(--focus);outline-offset:3px}
 
-      /* Divider + démos */
-      .lg-divider{display:flex;align-items:center;gap:10px;color:#5b6080;font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;margin:2px 0}
-      .lg-divider::before,.lg-divider::after{content:'';flex:1;height:1px;background:var(--lg-line)}
-      .lg-demos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
-      .lg-demo{padding:10px 4px;border-radius:11px;background:var(--lg-field);border:1px solid var(--lg-line);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;color:var(--lg-ink);transition:border-color .15s,background .15s,transform .12s}
-      .lg-demo:hover{border-color:var(--lg-brand);background:#fff;transform:translateY(-1px)}
-      .lg-demo .em{display:flex;color:var(--lg-brand)}
-      .lg-demo .nm{font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--lg-mu)}
+      .lg-link{background:transparent;border:0;cursor:pointer;font-family:inherit;color:#bdb6ff;
+        text-decoration:underline;text-underline-offset:2px;font-weight:700;font-size:13.5px;
+        display:inline-flex;align-items:center;min-height:var(--tap);padding:4px 2px;border-radius:8px}
+      .lg-link:hover{color:#d8d4ff}
+      .lg-link:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+      /* CTA plastique 3D */
+      .lg-cta{width:100%;height:58px;border:0;cursor:pointer;border-radius:17px;font-family:inherit;
+        font-size:18px;font-weight:800;letter-spacing:.2px;color:#fff;
+        background:linear-gradient(180deg,var(--in-lt) 0%,var(--in) 55%,var(--in-dp) 100%);
+        box-shadow:inset 0 2px 0 rgba(255,255,255,.55),inset 0 -4px 8px rgba(0,0,0,.28),
+          0 7px 0 var(--in-dk),0 12px 20px rgba(74,63,201,.5);
+        text-shadow:0 2px 1px rgba(0,0,0,.3);transform:translateY(0);
+        transition:transform .08s cubic-bezier(.34,1.56,.64,1),box-shadow .08s ease}
+      .lg-cta:hover{filter:brightness(1.04)}
+      .lg-cta:active{transform:translateY(5px);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),
+        inset 0 -2px 6px rgba(0,0,0,.3),0 2px 0 var(--in-dk),0 5px 10px rgba(74,63,201,.45)}
+      .lg-cta:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+      .lg-cta:disabled{opacity:.65;cursor:wait;transform:none;filter:none}
+
+      .lg-err{color:#ffb3b3;font-size:13px;margin:10px 0 0;min-height:18px;text-align:center;font-weight:700}
+
+      /* Lien code par email (bascule de mode) */
+      .lg-code-link{display:flex;align-items:center;justify-content:center;gap:5px;text-align:center;
+        margin:10px auto 4px;background:transparent;border:0;cursor:pointer;font-family:inherit;
+        color:#bdb6ff;font-size:13.5px;font-weight:700;text-decoration:underline;text-underline-offset:2px;
+        padding:8px;min-height:var(--tap);border-radius:10px}
+      .lg-code-link:hover{color:#fff}
+      .lg-code-link:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+      /* Séparateur démo */
+      .lg-sep{display:flex;align-items:center;gap:12px;margin:14px 0 16px;color:var(--ink-mu);
+        font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+      .lg-sep::before,.lg-sep::after{content:"";flex:1;height:2px;border-radius:2px;
+        background:linear-gradient(90deg,transparent,rgba(124,111,224,.4),transparent)}
+
+      /* 3 mini-cartes démo */
+      .lg-demos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+      .lg-demo{display:flex;flex-direction:column;align-items:center;gap:7px;padding:13px 6px 11px;
+        min-height:var(--tap);border:0;cursor:pointer;border-radius:16px;color:var(--ink);
+        background:linear-gradient(180deg,#3a2f72 0%,#2c2360 100%);font-family:inherit;font-size:12.5px;font-weight:700;
+        box-shadow:inset 0 2px 0 rgba(255,255,255,.16),0 4px 0 #1b143f,0 7px 12px rgba(0,0,0,.35);
+        transition:transform .08s ease,box-shadow .08s ease}
+      .lg-demo:hover{filter:brightness(1.06)}
+      .lg-demo:active{transform:translateY(3px);box-shadow:inset 0 2px 0 rgba(255,255,255,.14),0 1px 0 #1b143f,0 3px 7px rgba(0,0,0,.3)}
+      .lg-demo:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+      .lg-demo .lg-badge{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#fff;
+        background:linear-gradient(180deg,var(--in-lt),var(--in-dp));
+        box-shadow:inset 0 2px 2px rgba(255,255,255,.4),0 2px 4px rgba(0,0,0,.3)}
+      .lg-demo.is-gold .lg-badge{background:linear-gradient(180deg,var(--gold),var(--gold-dp));color:#3a2600}
 
       /* Footer */
-      .lg-foot{text-align:center;font-size:13px;color:var(--lg-mu);margin-top:2px}
-      .lg-foot a{color:var(--lg-brand-txt);font-weight:800;text-decoration:none;border-bottom:1.5px solid rgba(108,99,255,.3);transition:border-color .15s}
-      .lg-foot a:hover{border-color:var(--lg-brand)}
+      .lg-foot{margin-top:18px;text-align:center;font-size:13.5px;color:var(--ink-soft);font-weight:600}
+      .lg-foot a{color:var(--gold);font-weight:700;text-decoration:underline;text-underline-offset:2px;
+        display:inline-flex;min-height:var(--tap);align-items:center;padding:2px 4px;border-radius:8px}
+      .lg-foot a:hover{color:#ffe39a}
+      .lg-foot a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
-      .lg-version{position:absolute;bottom:14px;right:16px;font-family:var(--fn);font-size:10px;color:#b3b6cf;letter-spacing:1.4px;z-index:3}
+      .lg-version{position:fixed;right:14px;bottom:12px;z-index:2;font-size:11px;font-weight:700;
+        color:var(--ink-mu);letter-spacing:.3px}
+
+      /* Préférence de mouvement */
+      @media (prefers-reduced-motion: reduce){
+        .lg-sparks{display:none}
+        .lg-card{transform:none !important}
+        .lg-root *,.lg-root *::before,.lg-root *::after{animation:none !important;transition:none !important}
+        .lg-emblem::before{transform:scale(1);opacity:.7}
+      }
+      /* Contraste renforcé */
+      @media (prefers-contrast: more){
+        .lg-root{--ink-soft:#e4e1f7;--ink-mu:#cfcaee;--field-line:#8a7ed0}
+        .lg-shell{box-shadow:inset 0 0 0 2px var(--field-line)}
+        .lg-demo,.lg-cta{outline:1px solid rgba(255,255,255,.4)}
+        .lg-link,.lg-code-link,.lg-foot a{text-decoration-thickness:2px}
+      }
+      /* Contrastes forcés (Windows High Contrast) */
+      @media (forced-colors: active){
+        .lg-card{border:1px solid CanvasText}
+        .lg-shell{border:1px solid CanvasText;box-shadow:none}
+        .lg-cta,.lg-demo{border:2px solid ButtonText;box-shadow:none}
+        .lg-box{border:1px solid CanvasText}
+        .lg-remember input:checked + .lg-box{background:Highlight}
+        .lg-root :focus-visible{outline:2px solid Highlight !important}
+        .lg-emblem img{filter:none}
+      }
+      /* Petits écrans */
+      @media (max-width:360px){
+        .lg-card{padding:26px 20px 22px}
+        .lg-title{font-size:23px}
+        .lg-demo{font-size:11.5px}
+      }
     </style>
 
     <div class="lg-root">
-      <div class="lg-road" aria-hidden="true">
-        <svg viewBox="0 0 420 240" preserveAspectRatio="xMidYMax slice">
-          <defs>
-            <linearGradient id="lgRoadG" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="0" stop-color="#6c63ff" stop-opacity=".16"/>
-              <stop offset="1" stop-color="#6c63ff" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <path d="M150 240 L197 60 L223 60 L270 240 Z" fill="url(#lgRoadG)"/>
-          <path class="lg-road-dash" d="M210 240 L210 60" fill="none" stroke="#6c63ff" stroke-opacity=".22" stroke-width="5" stroke-dasharray="13 17" stroke-linecap="round"/>
-        </svg>
-      </div>
+      <canvas class="lg-sparks" id="lg-sparks" aria-hidden="true"></canvas>
 
-      <div class="lg-content">
-        <div class="lg-logo-host">
-          <img src="/permigo-logo.png" alt="PermiGo" loading="eager" draggable="false">
-        </div>
+      <main class="lg-scene">
+        <form class="lg-card" id="login-form" autocomplete="on" novalidate>
+          ${renderHoneypot()}
 
-        <div class="lg-card">
-          <h2>Content de te revoir</h2>
-          <p class="h-sub">Élève, moniteur ou gérant — retrouve ton espace</p>
-
-          <form id="login-form" novalidate>
-            ${renderHoneypot()}
-
-            <div class="lg-field">
-              <label for="lg-email">Email</label>
-              <div class="lg-input-wrap">
-                ${ICON_MAIL}
-                <input id="lg-email" type="email" name="email" required autocomplete="email" placeholder="vous@exemple.fr">
-              </div>
+          <div class="lg-head">
+            <div class="lg-emblem">
+              <img src="/skins/avatars/permigo-badge-icon.png" alt="PermiGo" loading="eager" draggable="false"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
+              <span class="lg-emblem-fb" aria-hidden="true"><b>P</b></span>
             </div>
+            <h1 class="lg-title">Content de te revoir</h1>
+            <p class="lg-subtitle">Élève, moniteur ou gérant — retrouve ton espace</p>
+          </div>
 
-            <div class="lg-field" id="lg-pwd-field">
-              <label for="lg-pwd">Mot de passe</label>
-              <div class="lg-input-wrap">
-                ${ICON_LOCK}
-                <input id="lg-pwd" type="password" name="password" autocomplete="current-password" placeholder="••••••••">
-                <button type="button" class="lg-pw-eye" id="lg-pw-toggle" aria-label="Afficher le mot de passe">${icon("eye", { size: 18 })}</button>
-              </div>
+          <div class="lg-field" id="lg-email-field">
+            <label for="lg-email">Email</label>
+            <div class="lg-shell">
+              <span class="lg-ico" aria-hidden="true">${ICON_MAIL}</span>
+              <input id="lg-email" type="email" name="email" inputmode="email" required autocomplete="email" placeholder="vous@exemple.fr">
             </div>
+          </div>
 
-            <div class="lg-field" id="lg-otp-field" style="display:none">
-              <label for="lg-otp">Code reçu par email</label>
-              <div class="lg-input-wrap">
-                ${ICON_KEY}
-                <input id="lg-otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="123456" style="letter-spacing:.4em;font-family:var(--fn,monospace);font-size:17px;text-align:center">
-              </div>
-              <button type="button" id="lg-otp-resend" style="background:transparent;border:0;color:var(--lg-brand-txt);font-family:inherit;font-size:11.5px;cursor:pointer;margin-top:6px;text-align:center;text-decoration:underline">Renvoyer le code</button>
+          <div class="lg-field" id="lg-pwd-field">
+            <label for="lg-pwd">Mot de passe</label>
+            <div class="lg-shell">
+              <span class="lg-ico" aria-hidden="true">${ICON_LOCK}</span>
+              <input id="lg-pwd" type="password" name="password" autocomplete="current-password" placeholder="••••••••">
+              <button type="button" class="lg-eye" id="lg-pw-toggle" aria-label="Afficher le mot de passe" aria-pressed="false">${icon("eye", { size: 20 })}</button>
             </div>
+          </div>
 
-            <div class="lg-row" id="lg-row-remember">
-              <label class="lg-remember">
-                <input type="checkbox" id="lg-remember">
-                <span>Se souvenir de moi</span>
-              </label>
-              <button type="button" class="lg-forgot" id="lg-forgot">Mot de passe oublié ?</button>
+          <div class="lg-field" id="lg-otp-field" style="display:none">
+            <label for="lg-otp">Code reçu par email</label>
+            <div class="lg-shell">
+              <span class="lg-ico" aria-hidden="true">${ICON_KEY}</span>
+              <input id="lg-otp" class="lg-otp-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="123456">
             </div>
+            <button type="button" id="lg-otp-resend" class="lg-link" style="margin:6px auto 0">Renvoyer le code</button>
+          </div>
 
-            <button type="submit" class="lg-cta" id="lg-submit">Se connecter</button>
-            <p class="lg-err" id="lg-err"></p>
-          </form>
+          <div class="lg-row" id="lg-row-remember">
+            <label class="lg-remember">
+              <input type="checkbox" id="lg-remember">
+              <span class="lg-box" aria-hidden="true">${ICON_CHECK}</span>
+              <span>Se souvenir de moi</span>
+            </label>
+            <button type="button" class="lg-link" id="lg-forgot">Mot de passe oublié ?</button>
+          </div>
 
-          <button type="button" class="lg-otp-toggle" id="lg-mode-toggle">Recevoir un code par email</button>
+          <button type="submit" class="lg-cta" id="lg-submit">Se connecter</button>
+          <p class="lg-err" id="lg-err" role="alert" aria-live="assertive"></p>
+
+          <button type="button" class="lg-code-link" id="lg-mode-toggle">Recevoir un code par email</button>
 
           ${
             import.meta.env.DEV
-              ? `<div class="lg-divider">Démos rapides</div>
+              ? `<div class="lg-sep">Comptes démo</div>
           <div class="lg-demos">
             ${DEMO_ACCOUNTS.map(
               (a) => `
-              <button class="lg-demo" type="button" data-email="${esc(a.email)}">
-                <span class="em">${icon(a.ico, { size: 17 })}</span>
-                <span class="nm">${esc(a.role)}</span>
+              <button class="lg-demo${a.gold ? " is-gold" : ""}" type="button" data-email="${esc(a.email)}" aria-label="Démo ${esc(a.role)}">
+                <span class="lg-badge" aria-hidden="true">${icon(a.ico, { size: 20 })}</span>
+                ${esc(a.role)}
               </button>
             `,
             ).join("")}
@@ -237,23 +357,93 @@ function template() {
               : ""
           }
 
-          <div class="lg-foot">
+          <p class="lg-foot">
             Élève avec un code moniteur ? <a href="/#/rejoindre">Rejoins ton moniteur</a>
-          </div>
-        </div>
-      </div>
+          </p>
+        </form>
+      </main>
 
-      <div class="lg-version">PermiGo · v7</div>
+      <span class="lg-version">PermiGo · v7</span>
     </div>
   `;
 }
 
 // ─── Icônes SVG inline (lucide-style) ───
-const ICON_MAIL = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>`;
-const ICON_LOCK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;
+const ICON_MAIL = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3 7 9 6 9-6"/></svg>`;
+const ICON_LOCK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>`;
 const ICON_KEY = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 8.5-8.5M16 6l3 3M14 8l3 3"/></svg>`;
-const ICON_GOOGLE = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC04" d="M5.84 14.09A6.97 6.97 0 0 1 5.46 12c0-.73.13-1.43.36-2.09V7.07H2.18A11 11 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/></svg>`;
-const ICON_APPLE = `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M17.05 12.04c-.03-2.93 2.4-4.35 2.51-4.42-1.37-2-3.49-2.27-4.25-2.31-1.81-.18-3.53 1.06-4.45 1.06-.92 0-2.34-1.03-3.84-1-1.98.03-3.8 1.15-4.82 2.92-2.05 3.55-.52 8.79 1.48 11.66.98 1.41 2.15 2.99 3.69 2.93 1.48-.06 2.04-.96 3.83-.96 1.79 0 2.29.96 3.86.93 1.59-.03 2.6-1.43 3.58-2.84 1.13-1.63 1.59-3.21 1.61-3.29-.04-.02-3.09-1.19-3.12-4.72zM14.5 4.06c.81-.98 1.36-2.34 1.21-3.69-1.17.05-2.59.78-3.43 1.76-.75.86-1.41 2.24-1.23 3.57 1.31.1 2.64-.66 3.45-1.64z"/></svg>`;
+const ICON_CHECK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
+
+// ─── Effets visuels (étincelles dorées + tilt 3D) — enhancement, sans état métier ───
+function startFx(root) {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) return;
+
+  // Tilt 3D subtil de la carte (pointeur fin uniquement)
+  if (matchMedia("(pointer:fine)").matches) {
+    const card = root.querySelector("#login-form");
+    if (card) {
+      const MAX = 5;
+      card.addEventListener("mousemove", (e) => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `rotateY(${px * MAX}deg) rotateX(${-py * MAX}deg) translateZ(0)`;
+      });
+      card.addEventListener("mouseleave", () => (card.style.transform = ""));
+    }
+  }
+
+  // Étincelles dorées (canvas)
+  const cv = root.querySelector("#lg-sparks");
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  const GOLD = ["#ffce4d", "#ffe39a", "#ffd76b"];
+  let dots = [];
+
+  _fxResize = function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = innerWidth * dpr;
+    cv.height = innerHeight * dpr;
+    cv.style.width = innerWidth + "px";
+    cv.style.height = innerHeight + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const n = Math.round((innerWidth * innerHeight) / 42000);
+    dots = Array.from({ length: Math.max(16, Math.min(n, 40)) }, () => ({
+      x: Math.random() * innerWidth,
+      y: Math.random() * innerHeight,
+      r: Math.random() * 1.6 + 0.5,
+      vy: Math.random() * 0.25 + 0.06,
+      a: Math.random() * Math.PI * 2,
+      sp: Math.random() * 0.03 + 0.012,
+      c: GOLD[(Math.random() * GOLD.length) | 0],
+    }));
+  };
+  _fxResize();
+  addEventListener("resize", _fxResize);
+
+  (function tick() {
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    for (const d of dots) {
+      d.y -= d.vy;
+      d.a += d.sp;
+      if (d.y < -5) {
+        d.y = innerHeight + 5;
+        d.x = Math.random() * innerWidth;
+      }
+      const glow = (Math.sin(d.a) + 1) / 2;
+      ctx.globalAlpha = 0.15 + glow * 0.5;
+      ctx.fillStyle = d.c;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = d.c;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+    _fxRaf = requestAnimationFrame(tick);
+  })();
+}
 
 // ─── Wire ───
 function wire(root) {
@@ -300,13 +490,18 @@ function wire(root) {
     setMode(mode === "password" ? "otp-request" : "password"),
   );
 
-  // Show/hide password
+  // Show/hide password (+ a11y : aria-pressed / aria-label)
   pwToggle.addEventListener("click", () => {
-    pwdIn.type = pwdIn.type === "password" ? "text" : "password";
-    pwToggle.innerHTML =
-      pwdIn.type === "password"
-        ? icon("eye", { size: 18 })
-        : icon("eye-off", { size: 18 });
+    const show = pwdIn.type === "password";
+    pwdIn.type = show ? "text" : "password";
+    pwToggle.innerHTML = show
+      ? icon("eye-off", { size: 20 })
+      : icon("eye", { size: 20 });
+    pwToggle.setAttribute("aria-pressed", String(show));
+    pwToggle.setAttribute(
+      "aria-label",
+      show ? "Masquer le mot de passe" : "Afficher le mot de passe",
+    );
   });
 
   // Forgot password = bascule en mode OTP

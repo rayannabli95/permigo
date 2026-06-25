@@ -1352,279 +1352,337 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 /* Filigrane volant déjà atténué par les photos retirées ; avec panneaux on le calme aussi */
 .prc:has(.prc-signs)::before { opacity:.10; }
 
-/* ══ Vue Chapitre (focus 1 chapitre à la fois) ══════════════════ */
+/* ══ Vue Chapitre — Immersif nuit-violet (route sinueuse) ════════
+   Tokens de route (modifiables pour re-thèmer toute la route) :
+   --cv-road        : couleur du ruban de route (fond sombre)
+   --cv-road-edge   : arête intérieure du ruban (violet plus vif)
+   --cv-road-done   : portion déjà parcourue / nodes validés (= accent thème)
+   --cv-gold        : or de l'étape en cours
+   --cv-gold-dk     : arête du bouton or (ton plus sombre)
+   --cv-night-1     : fond le plus sombre (haut de l'écran)
+   --cv-night-2     : fond intermédiaire
+   --cv-mute        : texte secondaire sur fond sombre
+════════════════════════════════════════════════════════════════ */
+.prc-cv {
+  --cv-road:      #1c1338;
+  --cv-road-edge: rgba(124,77,255,.4);
+  --cv-road-done: var(--a);
+  --cv-gold:      #ffd24a;
+  --cv-gold-dk:   #b85e00;
+  --cv-night-1:   #120a24;
+  --cv-night-2:   #1a1030;
+  --cv-mute:      #b9aee0;
+  --cv-panel:     #2a1b52;
+  --cv-node:      60px;
 
-/* Bandeau pastilles chapitres */
-.prc-cv-pills {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 14px 20px 10px;
   position: relative;
-  z-index: 2;
-}
-.prc-cv-pill {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  flex: 1;
-  min-width: 0;
-}
-.prc-cv-pill:focus-visible { outline: 3px solid var(--a); outline-offset: 3px; border-radius: 12px; }
-.prc-cv-pill-dot {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  font: 900 17px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  min-height: 100dvh;
+  background:
+    radial-gradient(900px 600px at 18% -5%, #2c1a55 0%, transparent 55%),
+    radial-gradient(800px 700px at 110% 12%, #3a1d63 0%, transparent 50%),
+    linear-gradient(160deg, #0e0820 0%, #160c2c 50%, #0b0719 100%);
   color: #fff;
-  background: #2a1a4e;
-  border: 2px solid #3d2a6e;
-  transition: transform .18s var(--ease-out), box-shadow .18s var(--ease-out), background .18s, border-color .18s;
-}
-.prc-cv-pill.active .prc-cv-pill-dot {
-  background: #ffd24a;
-  color: #1a0e30;
-  border-color: #e6b800;
-  box-shadow: 0 4px 16px rgba(255,210,74,.45);
-  transform: translateY(-2px) scale(1.08);
-}
-.prc-cv-pill.complete .prc-cv-pill-dot { background: var(--gr); border-color: var(--grdk); }
-.prc-cv-pill.locked { opacity: .45; cursor: default; pointer-events: none; }
-.prc-cv-pill-lbl {
-  font: 700 9px/1 'Inter', sans-serif;
-  letter-spacing: .05em;
-  color: #8878b4;
-  white-space: nowrap;
-}
-.prc-cv-pill.active .prc-cv-pill-lbl { color: #ffd24a; }
-.prc-cv-pill.complete .prc-cv-pill-lbl { color: var(--gr-txt); }
-
-/* Hero chapitre courant */
-.prc-cv-hero {
-  margin: 4px 14px 0;
-  border-radius: 20px;
   overflow: hidden;
-  position: relative;
-  z-index: 2;
-  min-height: 148px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 0;
 }
-.prc-cv-hero-bg {
-  position: absolute;
+/* grain de texture discret */
+.prc-cv::after {
+  content: "";
+  position: fixed;
   inset: 0;
-  background: linear-gradient(135deg, #1a0e30 0%, #2d1b5e 60%, #3d2a6e 100%);
+  pointer-events: none;
   z-index: 0;
+  opacity: .04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.prc-cv-hero-img {
-  position: absolute;
-  top: 0; right: 0;
-  width: 48%;
-  height: 100%;
-  object-fit: contain;
-  object-position: right center;
-  z-index: 1;
-  opacity: .35;
+/* Halo mesh violet en arrière-plan */
+.prc-cv::before {
+  content: "";
+  position: fixed;
+  inset: 0;
   pointer-events: none;
-}
-.prc-cv-hero-glow {
-  position: absolute;
-  bottom: -20px; left: 50%;
-  width: 180px; height: 80px;
-  transform: translateX(-50%);
-  background: radial-gradient(ellipse, rgba(255,210,74,.22) 0%, transparent 70%);
-  z-index: 1;
-  pointer-events: none;
-}
-.prc-cv-hero-body {
-  position: relative;
-  z-index: 2;
-  padding: 20px 18px 18px;
-}
-.prc-cv-hero-kicker {
-  font: 700 9.5px/1 'Fredoka', 'Inter', sans-serif;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: #ffd24a;
-  margin-bottom: 5px;
-}
-.prc-cv-hero-title {
-  font: 800 19px/1.15 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  margin: 0 0 12px;
-  text-shadow: 0 2px 8px rgba(0,0,0,.4);
-}
-.prc-cv-hero-prog {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.prc-cv-hero-track {
-  flex: 1;
-  height: 7px;
-  background: rgba(255,255,255,.15);
-  border-radius: 999px;
-  overflow: hidden;
-}
-.prc-cv-hero-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #ff9c1c, #ffd24a);
-  transition: width .7s var(--ease-out);
-}
-.prc-cv-hero-frac {
-  font: 800 12px/1 'Inter', sans-serif;
-  color: rgba(255,255,255,.75);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* Itinéraire des jalons */
-.prc-cv-route {
-  margin: 10px 14px 0;
-  position: relative;
-  z-index: 2;
-}
-/* Trait vertical reliant les jalons */
-.prc-cv-route-line {
-  position: absolute;
-  left: 34px; /* centre de la pastille de numéro (14px marge + 26px/2 = 27 → ajusté visuellement) */
-  top: 0; bottom: 0;
-  width: 2px;
-  background: var(--bo2);
   z-index: 0;
+  background:
+    radial-gradient(620px 380px at 80% 8%, rgba(124,77,255,.22), transparent 60%),
+    radial-gradient(520px 480px at 8% 86%, rgba(168,85,247,.14), transparent 60%);
+  mix-blend-mode: screen;
 }
-.prc-cv-jalon {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 11px 12px 11px 14px;
-  border-radius: var(--r-md);
-  position: relative;
-  z-index: 1;
-  -webkit-tap-highlight-color: transparent;
-  transition: background .14s;
-  min-height: 56px;
-}
-.prc-cv-jalon:not(.locked) { cursor: pointer; }
-.prc-cv-jalon:not(.locked):active { background: var(--su); }
-.prc-cv-jalon:focus-visible { outline: 3px solid var(--a); outline-offset: -2px; border-radius: var(--r-md); }
+.prc-cv > * { position: relative; z-index: 1; }
 
-/* Pastille numéro/état */
-.prc-cv-jalon-num {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  font: 800 12px/1 'Inter', sans-serif;
-  color: #fff;
-  background: var(--mu2);
-  position: relative;
-  z-index: 2;
-  transition: background .18s, box-shadow .18s;
+/* scrollable inner */
+.prc-cv-screen {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 120px;
 }
-.prc-cv-jalon.done    .prc-cv-jalon-num { background: var(--gr); }
-.prc-cv-jalon.a_valider .prc-cv-jalon-num { background: var(--am); }
-.prc-cv-jalon.next    .prc-cv-jalon-num { background: #ffd24a; color: #1a0e30; box-shadow: 0 0 0 5px rgba(255,210,74,.25); }
-.prc-cv-jalon.todo    .prc-cv-jalon-num { background: var(--bo2); color: var(--mu2); }
-.prc-cv-jalon.locked  .prc-cv-jalon-num { background: var(--bo); color: var(--bo4); }
+.prc-cv-screen::-webkit-scrollbar { display: none; }
 
-/* Segment coloré (done = vert) au-dessus du jalon */
-.prc-cv-jalon-seg {
-  position: absolute;
-  left: 34px;
-  top: -100%; /* sera overridé inline */
-  width: 2px;
-  z-index: 1;
-  pointer-events: none;
-}
-.prc-cv-jalon-seg.done { background: var(--gr); }
-.prc-cv-jalon-seg.partial { background: linear-gradient(180deg, var(--gr), var(--bo2)); }
-
-/* Pulse sur "next" */
-@media (prefers-reduced-motion: no-preference) {
-  .prc-cv-jalon.next .prc-cv-jalon-num {
-    animation: cvJalonPulse 1.8s ease-in-out infinite;
-  }
-}
-@keyframes cvJalonPulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(255,210,74,.25); }
-  50%       { box-shadow: 0 0 0 9px rgba(255,210,74,.08); }
-}
-
-.prc-cv-jalon-main { flex: 1; min-width: 0; }
-.prc-cv-jalon-nm {
-  font: 600 13.5px/1.3 'Inter', sans-serif;
-  color: var(--ink);
-}
-.prc-cv-jalon.todo .prc-cv-jalon-nm,
-.prc-cv-jalon.locked .prc-cv-jalon-nm { color: var(--mu3); font-weight: 500; }
-.prc-cv-jalon.next .prc-cv-jalon-nm { font-weight: 800; }
-.prc-cv-jalon-code {
-  font: 500 10.5px/1 'Inter', sans-serif;
-  color: var(--mu2);
-  margin-top: 2px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-.prc-cv-jalon-lbl {
-  font: 700 10px/1 'Inter', sans-serif;
-  margin-top: 3px;
-}
-.prc-cv-jalon.done    .prc-cv-jalon-lbl { color: var(--gr-txt); }
-.prc-cv-jalon.a_valider .prc-cv-jalon-lbl { color: #b45309; }
-.prc-cv-jalon.next    .prc-cv-jalon-lbl { color: #b37900; }
-
-/* Bouton Continuer sur "next" */
-.prc-cv-jalon-go {
-  flex-shrink: 0;
+/* Lien discret "Voir la carte" */
+.prc-cv-back {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: #ffd24a;
-  color: #1a0e30;
-  font: 800 11px/1 'Inter', sans-serif;
-  padding: 10px 14px;
-  border-radius: 999px;
-  box-shadow: 0 3px 10px rgba(255,210,74,.45);
-  white-space: nowrap;
+  gap: 6px;
+  margin: 12px 20px 0;
+  font: 600 11.5px/1 'Inter', sans-serif;
+  color: var(--cv-mute);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px 0;
 }
+.prc-cv-back:hover { color: #fff; }
+.prc-cv-back:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 3px; border-radius: 4px; }
 
-/* État statut à droite (done / a_valider / todo) */
-.prc-cv-jalon-st {
-  flex-shrink: 0;
-  font: 700 11px/1 'Inter', sans-serif;
-  color: var(--mu2);
-}
-.prc-cv-jalon.done .prc-cv-jalon-st { color: var(--gr-txt); }
-
-/* Chapitre verrouillé : message */
-.prc-cv-lock-msg {
-  margin: 16px 14px 0;
-  padding: 14px 16px;
-  background: var(--su2);
-  border: 1px dashed var(--bo4);
-  border-radius: var(--r-md);
-  font: 500 13px/1.5 'Inter', sans-serif;
-  color: var(--mu3);
+/* ── HERO : monde courant ─────────────────────────────────────── */
+.prc-cv-hero-wrap { padding: 10px 18px 6px; }
+.prc-cv-world-card {
   position: relative;
-  z-index: 2;
-  text-align: center;
+  border-radius: 28px;
+  padding: 22px 22px 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(380px 200px at 88% -10%, rgba(168,85,247,.55), transparent 60%),
+    linear-gradient(150deg, #3a2070 0%, #2a1655 48%, #1d1040 100%);
+  border: 1px solid rgba(168,85,247,.4);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.1) inset,
+    0 -30px 50px -30px rgba(124,77,255,.7) inset,
+    0 24px 44px -18px rgba(10,4,26,.9),
+    0 0 50px -16px rgba(124,77,255,.55);
 }
-.prc-cv-lock-msg strong { color: var(--ink); font-weight: 700; }
+/* route stylisée en fond de la carte monde */
+.prc-cv-world-card .prc-cv-road-deco {
+  position: absolute; right: -26px; top: -12px; width: 170px; height: 200px; opacity: .5; z-index: 0; pointer-events: none;
+}
+.prc-cv-world-meta { position: relative; z-index: 2; }
+.prc-cv-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 12px; border-radius: 20px;
+  background: rgba(18,10,36,.55);
+  border: 1px solid rgba(255,210,74,.35);
+  font: 800 11.5px/1 'Inter', sans-serif; letter-spacing: .06em; text-transform: uppercase;
+  color: #ffe1a0;
+  box-shadow: 0 2px 10px -4px rgba(255,156,28,.5);
+}
+.prc-cv-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: linear-gradient(#ffd24a, #ff9c1c); box-shadow: 0 0 8px #ffb840; }
+.prc-cv-world-title {
+  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800; font-size: 27px; line-height: 1.02; letter-spacing: -.6px;
+  margin: 13px 0 4px;
+  text-shadow: 0 2px 14px rgba(10,2,30,.6);
+  color: #fff;
+}
+.prc-cv-world-sub { font-size: 13px; color: #d9cffa; font-weight: 500; max-width: 235px; line-height: 1.35; }
+.prc-cv-world-prog { position: relative; z-index: 2; margin-top: 18px; }
+.prc-cv-wp-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.prc-cv-wp-top span { font-size: 12px; color: var(--cv-mute); font-weight: 600; }
+.prc-cv-wp-top b { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 14px; color: #ffe9a8; }
+.prc-cv-wp-bar {
+  height: 13px; border-radius: 10px;
+  background: rgba(11,5,24,.7);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.55), inset 0 -1px 0 rgba(255,255,255,.05);
+  overflow: hidden; position: relative;
+}
+.prc-cv-wp-fill {
+  position: absolute; inset: 0; border-radius: 10px;
+  background: linear-gradient(90deg, var(--cv-gold), #ff9c1c 65%, #ff8a0d);
+  box-shadow: 0 0 16px rgba(255,156,28,.7), inset 0 1px 0 rgba(255,255,255,.55);
+  transition: width .7s var(--ease-out);
+}
+.prc-cv-wp-fill::after {
+  content: ""; position: absolute; inset: 0; border-radius: 10px;
+  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.5) 48%, transparent 76%);
+  background-size: 200% 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .prc-cv-wp-fill::after { animation: cvShimmer 3.2s linear infinite; }
+}
+@keyframes cvShimmer { to { background-position: -200% 0; } }
+
+/* ── Titre section route ─────────────────────────────────────── */
+.prc-cv-route-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 22px 4px;
+}
+.prc-cv-route-head h2 {
+  font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: -.2px;
+  color: #fff;
+}
+.prc-cv-step-count {
+  font-size: 11.5px; font-weight: 700; color: var(--cv-mute);
+  padding: 4px 10px; border-radius: 14px;
+  background: rgba(42,27,82,.7); border: 1px solid rgba(168,85,247,.25);
+}
+
+/* ── ROUTE sinueuse ─────────────────────────────────────────── */
+.prc-cv-route {
+  position: relative;
+  padding: 14px 0 30px;
+  margin: 0 22px;
+}
+.prc-cv-ribbon {
+  position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
+  overflow: visible;
+}
+.prc-cv-nodes { position: relative; z-index: 2; display: flex; flex-direction: column; }
+
+/* ── Milestone (jalon) ─────────────────────────────────────── */
+.prc-cv-ms {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 96px;
+}
+.prc-cv-ms.left  { justify-content: flex-start;  padding-left: 6px; }
+.prc-cv-ms.right { justify-content: flex-end; flex-direction: row-reverse; padding-right: 6px; }
+@media (prefers-reduced-motion: no-preference) {
+  .prc-cv-ms { opacity: 0; animation: cvRise .5s cubic-bezier(.2,.7,.2,1) forwards; }
+  .prc-cv-ms:nth-child(1) { animation-delay: .04s; }
+  .prc-cv-ms:nth-child(2) { animation-delay: .10s; }
+  .prc-cv-ms:nth-child(3) { animation-delay: .16s; }
+  .prc-cv-ms:nth-child(4) { animation-delay: .22s; }
+  .prc-cv-ms:nth-child(5) { animation-delay: .28s; }
+  .prc-cv-ms:nth-child(6) { animation-delay: .34s; }
+  .prc-cv-ms:nth-child(7) { animation-delay: .40s; }
+  .prc-cv-ms:nth-child(8) { animation-delay: .46s; }
+  .prc-cv-ms:nth-child(9) { animation-delay: .52s; }
+}
+@keyframes cvRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .prc-cv-ms { opacity: 1; } }
+
+/* ── Node (pastille) ────────────────────────────────────────── */
+.prc-cv-node {
+  position: relative;
+  width: var(--cv-node); height: var(--cv-node);
+  border-radius: 50%; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.prc-cv-node:focus-visible { outline: 3px solid var(--cv-gold); outline-offset: 4px; }
+.prc-cv-node-ring { position: absolute; inset: -6px; border-radius: 50%; }
+.prc-cv-node-face {
+  position: absolute; inset: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+/* DONE */
+.prc-cv-node.done .prc-cv-node-face {
+  background: linear-gradient(160deg, #3ee07e 0%, #22a35a 60%, #178246 100%);
+  box-shadow:
+    0 5px 0 #0f5e32,
+    0 10px 18px -6px rgba(20,120,60,.7),
+    inset 0 2px 0 rgba(255,255,255,.55),
+    inset 0 -4px 8px rgba(8,50,26,.6);
+}
+.prc-cv-node.done .prc-cv-node-face svg { filter: drop-shadow(0 1px 1px rgba(0,40,20,.5)); }
+/* CURRENT — or, halo pulsé */
+.prc-cv-node.current { width: 74px; height: 74px; }
+.prc-cv-node.current .prc-cv-node-ring {
+  inset: -12px;
+  background: radial-gradient(circle, rgba(255,210,74,.45) 30%, transparent 70%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .prc-cv-node.current .prc-cv-node-ring { animation: cvHalo 2.4s ease-in-out infinite; }
+}
+@keyframes cvHalo { 0%,100%{transform:scale(.92);opacity:.7;} 50%{transform:scale(1.12);opacity:1;} }
+.prc-cv-node.current .prc-cv-node-face {
+  background: linear-gradient(160deg, #fff0bf 0%, #ffd24a 42%, #ff9c1c 88%);
+  box-shadow:
+    0 6px 0 var(--cv-gold-dk),
+    0 14px 26px -6px rgba(255,156,28,.75),
+    inset 0 2px 0 rgba(255,255,255,.85),
+    inset 0 -5px 10px rgba(150,70,0,.5);
+}
+.prc-cv-node-glint {
+  position: absolute; top: 9px; left: 14px; width: 18px; height: 9px;
+  border-radius: 50%; background: rgba(255,255,255,.85);
+  filter: blur(2px); transform: rotate(-22deg);
+}
+/* LOCKED */
+.prc-cv-node.locked { width: 54px; height: 54px; cursor: default; }
+.prc-cv-node.locked .prc-cv-node-face {
+  background: linear-gradient(160deg, #3a2c5e 0%, #2a1f48 70%);
+  box-shadow:
+    0 4px 0 #1a1230,
+    0 8px 14px -6px rgba(0,0,0,.6),
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+.prc-cv-node.locked .prc-cv-node-face svg { opacity: .55; }
+/* TODO (à venir, non verrouillé) */
+.prc-cv-node.todo .prc-cv-node-face {
+  background: linear-gradient(160deg, #2e2060 0%, #1e1444 70%);
+  box-shadow: 0 4px 0 #160e32, 0 8px 14px -6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.07);
+}
+
+/* ── Label du jalon ─────────────────────────────────────────── */
+.prc-cv-ms-label { max-width: 184px; }
+.prc-cv-ms.right .prc-cv-ms-label { text-align: right; }
+.prc-cv-ms-ttl {
+  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700; font-size: 15px; line-height: 1.1; letter-spacing: -.2px;
+  color: #fff;
+}
+.prc-cv-ms-meta {
+  margin-top: 3px; font-size: 11.5px; font-weight: 600; color: var(--cv-mute);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.prc-cv-ms.right .prc-cv-ms-meta { flex-direction: row-reverse; }
+.prc-cv-ms-label.locked .prc-cv-ms-ttl { color: #8b7eb8; }
+.prc-cv-ms-label.locked .prc-cv-ms-meta { color: #6f63a0; }
+.prc-cv-tag-done { color: #76e6a4; }
+
+/* ── Carte CTA "étape en cours" ─────────────────────────────── */
+.prc-cv-current-call {
+  position: relative;
+  margin: 6px 0 4px;
+  padding: 14px 16px; border-radius: 20px;
+  background:
+    radial-gradient(220px 90px at 80% 0%, rgba(255,210,74,.16), transparent 60%),
+    linear-gradient(150deg, rgba(58,33,99,.92), rgba(31,17,64,.92));
+  border: 1px solid rgba(255,210,74,.35);
+  box-shadow: 0 14px 30px -14px rgba(255,156,28,.55), inset 0 1px 0 rgba(255,255,255,.07);
+  max-width: 218px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.prc-cv-current-call:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; border-radius: 20px; }
+.prc-cv-call-kick { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #ffd98a; }
+.prc-cv-call-ct {
+  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700; font-size: 14.5px; margin: 3px 0 11px; line-height: 1.15; color: #fff;
+}
+.prc-cv-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 18px; border-radius: 15px; border: none; cursor: pointer;
+  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800; font-size: 14px; letter-spacing: .2px; color: #3a1c00;
+  background: linear-gradient(160deg, #ffe48f 0%, #ffd24a 40%, #ff9c1c 100%);
+  box-shadow: 0 5px 0 var(--cv-gold-dk), 0 12px 22px -8px rgba(255,156,28,.8), inset 0 1px 0 rgba(255,255,255,.7);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.prc-cv-cta:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--cv-gold-dk), 0 6px 14px -8px rgba(255,156,28,.8), inset 0 1px 0 rgba(255,255,255,.7); }
+.prc-cv-cta svg { filter: drop-shadow(0 1px 0 rgba(255,255,255,.4)); }
+
+/* ── Gate chapitre suivant ──────────────────────────────────── */
+.prc-cv-gate {
+  margin: 12px 22px 6px;
+  padding: 15px 18px; border-radius: 22px;
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(150deg, rgba(33,18,66,.85), rgba(18,10,36,.85));
+  border: 1px dashed rgba(168,85,247,.32);
+}
+.prc-cv-gate-lock {
+  width: 46px; height: 46px; border-radius: 14px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #2c1f4e, #1c1338);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 0 #140d28;
+}
+.prc-cv-gate-g1 { font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: #cdbff5; }
+.prc-cv-gate-g2 { font-size: 11.5px; color: var(--cv-mute); font-weight: 600; margin-top: 2px; }
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
@@ -1869,23 +1927,60 @@ export async function mount(root) {
         renderAndWire();
       }),
     );
-    // Bandeau pastilles chapitres : tap → change currentChapIdx + re-render
-    root.querySelectorAll(".prc-cv-pill[data-chap]").forEach((pill) =>
-      pill.addEventListener("click", () => {
-        const idx = parseInt(pill.dataset.chap, 10);
-        if (isNaN(idx) || idx === currentChapIdx) return;
+    // Vue Chapitre — lien "Voir la carte" / boutons de navigation entre chapitres
+    // Cible : .prc-cv-back[data-view] + .prc-cv-gate[data-chap]
+    root.querySelectorAll(".prc-cv-back[data-view]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const v = btn.dataset.view;
+        if (!v) return;
+        view = v;
+        saveParcoursView(v);
+        track("parcours.view_switch", { view: v });
+        renderAndWire();
+      }),
+    );
+    root.querySelectorAll(".prc-cv-gate[data-chap]").forEach((gate) =>
+      gate.addEventListener("click", () => {
+        const idx = parseInt(gate.dataset.chap, 10);
+        if (isNaN(idx)) return;
         currentChapIdx = idx;
         renderAndWire();
       }),
     );
-    // Jalons vue chapitre → même ouverture de fiche que .prc-row
+    // Vue Chapitre — jalons cliquables (milestones non-next + carte CTA or)
+    // Milestones avec data-comp (états done/a_valider/todo)
+    root.querySelectorAll(".prc-cv-ms[data-comp]").forEach((ms) => {
+      const open = () => {
+        haptic("tap");
+        const compId = ms.dataset.comp;
+        const worldIdx = parseInt(ms.dataset.worldIdx, 10);
+        openFiche(
+          root,
+          compId,
+          worldStates[worldIdx],
+          validatedMap,
+          pendingMap,
+        );
+        track("parcours.node_tap", { compId, worldIdx, view: "chapitre" });
+      };
+      ms.addEventListener("click", open);
+      ms.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          open();
+        }
+      });
+    });
+    // Carte CTA or "Étape en cours" + bouton "Continuer →"
     root
-      .querySelectorAll(".prc-cv-jalon[data-comp]:not([aria-hidden])")
-      .forEach((jalon) => {
+      .querySelectorAll(
+        ".prc-cv-current-call[data-comp], .prc-cv-cta[data-comp]",
+      )
+      .forEach((el) => {
         const open = () => {
           haptic("tap");
-          const compId = jalon.dataset.comp;
-          const worldIdx = parseInt(jalon.dataset.worldIdx, 10);
+          const compId = el.dataset.comp;
+          const worldIdx = parseInt(el.dataset.worldIdx, 10);
           openFiche(
             root,
             compId,
@@ -1893,10 +1988,17 @@ export async function mount(root) {
             validatedMap,
             pendingMap,
           );
-          track("parcours.node_tap", { compId, worldIdx, view: "chapitre" });
+          track("parcours.node_tap", {
+            compId,
+            worldIdx,
+            view: "chapitre_next",
+          });
         };
-        jalon.addEventListener("click", open);
-        jalon.addEventListener("keydown", (e) => {
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          open();
+        });
+        el.addEventListener("keydown", (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             open();
@@ -2198,6 +2300,21 @@ function renderPage(
   view = "map",
   currentChapIdx = 0,
 ) {
+  // ── Vue Chapitre : template full-screen immersif sombre (edge-to-edge) ──
+  // Pas de header clair, pas de toggle visible, pas de barre globale.
+  // Le fond violet nuit déborde sous la topbar app (comportement voulu).
+  if (view === "chapitre") {
+    return `${STYLE}
+${renderChapterView(worldStates, validatedMap, pendingMap, currentChapIdx)}
+
+<!-- Bottom sheet -->
+<div class="bsheet-bg" id="bsheet-bg" aria-hidden="true"></div>
+<div class="bsheet" id="bsheet" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="bsheet-title">
+  <div class="bsheet-handle" aria-hidden="true"></div>
+  <div id="bsheet-body"></div>
+</div>`;
+  }
+
   const totalDone = worldStates.reduce((s, w) => s + w.done, 0);
   const totalComps = worldStates.reduce((s, w) => s + w.total, 0);
   const globalPct = Math.round((totalDone / totalComps) * 100);
@@ -2240,11 +2357,8 @@ function renderPage(
     </div>
   </div>
 
-  <!-- Toggle d'affichage Chapitre / Carte / Liste -->
+  <!-- Toggle Carte / Liste (vue Chapitre = pas de toggle ici) -->
   <div class="prc-viewtoggle" role="tablist" aria-label="Mode d'affichage du parcours">
-    <button class="prc-vt-btn ${view === "chapitre" ? "on" : ""}" data-view="chapitre" type="button" role="tab" aria-selected="${view === "chapitre"}">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Chapitre
-    </button>
     <button class="prc-vt-btn ${view === "map" ? "on" : ""}" data-view="map" type="button" role="tab" aria-selected="${view === "map"}">
       ${icon("map", { size: 16 })} Carte
     </button>
@@ -2258,28 +2372,21 @@ function renderPage(
   <!-- Carte des mondes — pleine page, scroll naturel (plus d'encadré interne) -->
   <div class="prc-map" id="prc-map-scroll" tabindex="-1" role="region" aria-label="Carte d'apprentissage">
     ${
-      view === "chapitre"
-        ? renderChapterView(
-            worldStates,
-            validatedMap,
-            pendingMap,
-            currentChapIdx,
-          )
-        : view === "list"
-          ? `<div class="prc-list">${renderListView(worldStates, validatedMap, pendingMap, openedWorlds)}</div>`
-          : worldStates
-              .map((ws, i) =>
-                renderWorldSection(
-                  ws,
-                  validatedMap,
-                  pendingMap,
-                  i < worldStates.length - 1,
-                  openedWorlds,
-                ),
-              )
-              .join("")
+      view === "list"
+        ? `<div class="prc-list">${renderListView(worldStates, validatedMap, pendingMap, openedWorlds)}</div>`
+        : worldStates
+            .map((ws, i) =>
+              renderWorldSection(
+                ws,
+                validatedMap,
+                pendingMap,
+                i < worldStates.length - 1,
+                openedWorlds,
+              ),
+            )
+            .join("")
     }
-    ${view !== "chapitre" ? renderFinal(totalDone, totalComps) : ""}
+    ${renderFinal(totalDone, totalComps)}
     <div style="height: 24px"></div>
   </div>
 
@@ -2494,92 +2601,65 @@ function renderPortalArch(color, isComplete) {
 }
 
 // ─── Vue Chapitre (focus 1 chapitre à la fois) ───────────────────
+// ─── Vue Chapitre — Route sinueuse immersive (fidèle au mockup) ──
 function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
-  const WORLD_COLORS = [
-    { bg: "#1a3a0e", dot: "#22c55e", lbl: "Campagne" },
-    { bg: "#0e2d3a", dot: "#06b6d4", lbl: "Ville" },
-    { bg: "#1a0e30", dot: "#8b5cf6", lbl: "Montagne" },
-    { bg: "#3a1f00", dot: "#f59e0b", lbl: "Sommet" },
-  ];
-
-  // ── Bandeau pastilles ──────────────────────────────────────────
-  const pillsHTML = worldStates
-    .map((ws, i) => {
-      const wc = WORLD_COLORS[i] ?? WORLD_COLORS[0];
-      const isActive = i === currentIdx;
-      const isLocked = ws.status === "locked";
-      const isComplete = ws.status === "complete";
-      const stateClass = isLocked
-        ? "locked"
-        : isComplete
-          ? "complete"
-          : isActive
-            ? "active"
-            : "";
-      const dotContent = isComplete
-        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`
-        : isLocked
-          ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
-          : `${i + 1}`;
-      const lbl = isLocked
-        ? "Verrouillé"
-        : isComplete
-          ? "Terminé"
-          : isActive
-            ? "En cours"
-            : `C${i + 1}`;
-      return `<button
-        class="prc-cv-pill ${stateClass}"
-        data-chap="${i}"
-        type="button"
-        role="tab"
-        aria-selected="${isActive}"
-        aria-label="Chapitre ${i + 1} — ${esc(ws.world?.nom ?? wc.lbl)} : ${esc(lbl)}"
-        ${isLocked ? "disabled" : ""}
-      >
-        <span class="prc-cv-pill-dot" style="${isActive && !isComplete ? "background:#ffd24a;color:#1a0e30;border-color:#e6b800" : isComplete ? "" : `background:#2a1a4e;border-color:#3d2a6e`}">${dotContent}</span>
-        <span class="prc-cv-pill-lbl">${esc(ws.world?.nom ?? wc.lbl)}</span>
-      </button>`;
-    })
-    .join("");
-
-  // ── Hero du chapitre courant ───────────────────────────────────
   const ws = worldStates[currentIdx];
   const meta = WORLDS_META[currentIdx];
   const world = ws.world ?? {};
   const chapTitle = world.titre ?? world.nom ?? `Chapitre ${currentIdx + 1}`;
   const chapPct = ws.total ? Math.round((ws.done / ws.total) * 100) : 0;
+  const nextWs = worldStates[currentIdx + 1] ?? null;
 
+  // ── Hero monde courant (carte avec route décorative en fond) ─────
   const heroHTML = `
-    <div class="prc-cv-hero">
-      <div class="prc-cv-hero-bg"></div>
-      <img class="prc-cv-hero-img" src="${esc(meta.img ?? "")}" alt="" aria-hidden="true" loading="lazy">
-      <div class="prc-cv-hero-glow"></div>
-      <div class="prc-cv-hero-body">
-        <div class="prc-cv-hero-kicker">Chapitre ${currentIdx + 1} sur ${worldStates.length}</div>
-        <div class="prc-cv-hero-title">${esc(chapTitle)}</div>
-        <div class="prc-cv-hero-prog">
-          <div class="prc-cv-hero-track" role="progressbar"
-               aria-valuenow="${chapPct}" aria-valuemin="0" aria-valuemax="100"
-               aria-label="${ws.done} jalons sur ${ws.total} acquis">
-            <div class="prc-cv-hero-fill" style="width:${chapPct}%"></div>
+    <div class="prc-cv-hero-wrap">
+      <div class="prc-cv-world-card">
+        <!-- Route décorative SVG en fond de la carte -->
+        <svg class="prc-cv-road-deco" viewBox="0 0 170 200" fill="none" aria-hidden="true">
+          <path d="M120 -10 C 60 30, 150 70, 80 110 S 30 170, 110 210"
+                stroke="rgba(255,255,255,.18)" stroke-width="26" stroke-linecap="round"/>
+          <path d="M120 -10 C 60 30, 150 70, 80 110 S 30 170, 110 210"
+                stroke="rgba(255,210,74,.5)" stroke-width="2.5" stroke-dasharray="9 12" stroke-linecap="round"/>
+        </svg>
+        <div class="prc-cv-world-meta">
+          <span class="prc-cv-chip"><span class="dot" aria-hidden="true"></span>Chapitre ${currentIdx + 1} sur ${worldStates.length}</span>
+          <h1 class="prc-cv-world-title">${esc(chapTitle)}</h1>
+          <p class="prc-cv-world-sub">${esc(world.description ?? "")}</p>
+        </div>
+        <div class="prc-cv-world-prog">
+          <div class="prc-cv-wp-top">
+            <span>Progression du chapitre</span>
+            <b>${ws.done} / ${ws.total} jalons</b>
           </div>
-          <span class="prc-cv-hero-frac">${ws.done}/${ws.total} jalons</span>
+          <div class="prc-cv-wp-bar"
+               role="progressbar" aria-valuenow="${chapPct}" aria-valuemin="0" aria-valuemax="100"
+               aria-label="${ws.done} jalons sur ${ws.total} acquis">
+            <div class="prc-cv-wp-fill" style="width:${chapPct}%"></div>
+          </div>
         </div>
       </div>
     </div>`;
 
-  // ── Itinéraire des jalons ──────────────────────────────────────
-  let jalonsHTML = "";
+  // ── Route sinueuse + jalons en quinconce ─────────────────────────
+  let routeHTML = "";
   if (ws.status === "locked") {
+    // Chapitre verrouillé : pas de route, juste un gate
     const req = UNLOCK_REQ[currentIdx] ?? 0;
     const need = Math.max(0, req - (ws.prevDoneCount ?? 0));
-    jalonsHTML = `<div class="prc-cv-lock-msg">
-      ${`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="display:inline-block;vertical-align:middle;margin-right:6px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`}
-      Termine le chapitre précédent — encore <strong>${need} compétence${need > 1 ? "s" : ""}</strong> à acquérir.
-    </div>`;
+    routeHTML = `
+      <div class="prc-cv-gate" style="margin-top:24px">
+        <div class="prc-cv-gate-lock" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9.5" rx="2.4" stroke="#a48fe0" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="#a48fe0" stroke-width="2"/></svg>
+        </div>
+        <div>
+          <div class="prc-cv-gate-g1">${esc(chapTitle)}</div>
+          <div class="prc-cv-gate-g2">Valide encore <strong style="color:#cdbff5">${need} compétence${need > 1 ? "s" : ""}</strong> du chapitre précédent</div>
+        </div>
+      </div>`;
   } else {
-    const rows = ws.subs.map((sub, subIdx) => {
+    // Génère les jalons avec alternance gauche/droite
+    // Un jalon "next" (current) génère en plus une carte CTA or
+    const milestones = ws.subs.map((sub, subIdx) => {
       const st = compStatus(
         sub.c,
         ws.status,
@@ -2587,81 +2667,156 @@ function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
         validatedMap,
         pendingMap,
       );
-      const prevSt =
-        subIdx > 0
-          ? compStatus(
-              ws.subs[subIdx - 1].c,
-              ws.status,
-              ws.nextChallenge,
-              validatedMap,
-              pendingMap,
-            )
-          : null;
-
-      // Icône pastille
-      const numContent =
-        st === "done" || st === "a_valider"
-          ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`
-          : st === "locked"
-            ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
-            : `${subIdx + 1}`;
-
-      const lblText = {
-        done: "Acquis",
-        a_valider: "À valider",
-        next: "Commence ici",
-        todo: "",
-        locked: "",
-      }[st];
-
-      const right =
-        st === "next"
-          ? `<span class="prc-cv-jalon-go">Continuer →</span>`
-          : lblText
-            ? `<span class="prc-cv-jalon-st">${esc(lblText)}</span>`
-            : "";
-
+      const side = subIdx % 2 === 0 ? "left" : "right";
       const interactive = st !== "locked";
-      // Segment au-dessus (couleur selon si le jalon précédent est done)
-      const segColor =
-        prevSt === "done" || prevSt === "a_valider" ? "done" : "partial";
-      const segHTML =
-        subIdx > 0
-          ? `<div class="prc-cv-jalon-seg ${segColor}" style="top:0;height:11px;transform:translateY(-100%)"></div>`
-          : "";
 
-      return `<div
-        class="prc-cv-jalon ${st}"
-        data-comp="${esc(sub.c)}"
-        data-world-idx="${currentIdx}"
-        ${interactive ? `role="button" tabindex="0"` : `aria-hidden="true"`}
-        aria-label="${esc(sub.n)} — ${esc(lblText || (st === "todo" ? "À venir" : st))}"
+      // Icône dans le node
+      const ICO_CHECK = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4 10-11" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      const ICO_LOCK = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.4" stroke="#9d8fce" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="#9d8fce" stroke-width="2"/></svg>`;
+      const ICO_STAR = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l2.6 5.3 5.8.85-4.2 4.1 1 5.75L12 16.9l-5.2 2.1 1-5.75-4.2-4.1 5.8-.85L12 3z" fill="#7a3c00"/></svg>`;
+      const ICO_DOT = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><circle cx="5" cy="5" r="4" fill="rgba(255,255,255,.35)"/></svg>`;
+
+      let nodeClass = "";
+      let nodeContent = ICO_DOT;
+      let glint = "";
+      if (st === "done" || st === "a_valider") {
+        nodeClass = "done";
+        nodeContent = ICO_CHECK;
+      } else if (st === "next") {
+        nodeClass = "current";
+        nodeContent = ICO_STAR;
+        glint = `<span class="prc-cv-node-glint" aria-hidden="true"></span>`;
+      } else if (st === "locked") {
+        nodeClass = "locked";
+        nodeContent = ICO_LOCK;
+      } else {
+        nodeClass = "todo";
+      }
+
+      const metaText =
+        st === "done" || st === "a_valider"
+          ? `<span class="prc-cv-tag-done">● Terminé</span>`
+          : st === "locked"
+            ? "À débloquer"
+            : st === "next"
+              ? "En cours"
+              : "À venir";
+
+      const labelClass =
+        st === "locked" ? "prc-cv-ms-label locked" : "prc-cv-ms-label";
+
+      // Carte CTA or uniquement sur le jalon "next"
+      const ctaCard =
+        st === "next"
+          ? `<div class="prc-cv-current-call"
+              data-comp="${esc(sub.c)}" data-world-idx="${currentIdx}"
+              role="button" tabindex="0"
+              aria-label="Étape en cours : ${esc(sub.n)} — Continuer">
+            <div class="prc-cv-call-kick">★ Étape en cours</div>
+            <div class="prc-cv-call-ct">${esc(sub.n)}</div>
+            <button class="prc-cv-cta" type="button"
+                    data-comp="${esc(sub.c)}" data-world-idx="${currentIdx}">
+              Continuer
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" stroke="#3a1c00" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>`
+          : `<div class="${labelClass}">
+            <div class="prc-cv-ms-ttl">${esc(sub.n)}</div>
+            <div class="prc-cv-ms-meta">${metaText}</div>
+           </div>`;
+
+      // Le milestone entier est cliquable (sauf locked) via data-comp
+      return `<div class="prc-cv-ms ${side}"
+        ${interactive && st !== "next" ? `data-comp="${esc(sub.c)}" data-world-idx="${currentIdx}" role="button" tabindex="0" aria-label="${esc(sub.n)}"` : ""}
       >
-        ${segHTML}
-        <span class="prc-cv-jalon-num">${numContent}</span>
-        <span class="prc-cv-jalon-main">
-          <span class="prc-cv-jalon-nm">${esc(sub.n)}</span>
-          <span class="prc-cv-jalon-code">${esc(sub.c.toUpperCase())}</span>
-          ${lblText ? `<span class="prc-cv-jalon-lbl">${esc(lblText)}</span>` : ""}
-        </span>
-        ${right}
+        <div class="prc-cv-node ${nodeClass}"
+          ${interactive && st !== "next" ? "" : ""}
+          aria-hidden="true">
+          <div class="prc-cv-node-ring"></div>
+          <div class="prc-cv-node-face">${glint}${nodeContent}</div>
+        </div>
+        ${ctaCard}
       </div>`;
     });
 
-    jalonsHTML = `<div class="prc-cv-route">
-      <div class="prc-cv-route-line"></div>
-      ${rows.join("")}
-    </div>`;
+    // Route SVG sinueuse : hauteur dynamique selon le nombre de jalons
+    // On réutilise le path du mockup adapté (même courbe, échelle selon hauteur)
+    const nodeH = 96; // min-height d'un milestone
+    const routeH = Math.max(ws.subs.length * nodeH + 60, 300);
+    // Chemin sinueux : gauche → droite → gauche (inspiré du mockup)
+    // W=346 correspond au container moins les marges de 22px×2 = env. 346
+    const segH = routeH / 4;
+    const routePath = `M70 24 C 240 ${segH * 0.7}, 60 ${segH * 1.5}, 276 ${segH * 2} C 80 ${segH * 2.6}, 250 ${segH * 3.2}, 70 ${segH * 3.8} C 250 ${segH * 4.4}, 60 ${routeH - 30}, 200 ${routeH}`;
+
+    routeHTML = `
+      <div class="prc-cv-route-head">
+        <h2>Ton itinéraire</h2>
+        <div class="prc-cv-step-count">${ws.total} étape${ws.total > 1 ? "s" : ""}</div>
+      </div>
+      <div class="prc-cv-route">
+        <svg class="prc-cv-ribbon" viewBox="0 0 346 ${routeH}" preserveAspectRatio="none" fill="none" aria-hidden="true">
+          <path d="${routePath}" stroke="var(--cv-road)" stroke-width="34" stroke-linecap="round"/>
+          <path d="${routePath}" stroke="#2a1d52" stroke-width="26" stroke-linecap="round"/>
+          <path d="${routePath}" stroke="var(--cv-road-edge)" stroke-width="3" stroke-dasharray="2 16" stroke-linecap="round"/>
+        </svg>
+        <div class="prc-cv-nodes">
+          ${milestones.join("")}
+        </div>
+      </div>`;
   }
 
-  return `
-    <div class="prc-cv-wrap">
-      <div class="prc-cv-pills" role="tablist" aria-label="Chapitres du parcours">
-        ${pillsHTML}
-      </div>
-      ${heroHTML}
-      ${jalonsHTML}
-    </div>`;
+  // ── Gate chapitre suivant (si chapitre suivant verrouillé) ───────
+  let gateHTML = "";
+  if (nextWs && nextWs.status === "locked" && ws.status !== "locked") {
+    const nextTitle =
+      nextWs.world?.titre ?? nextWs.world?.nom ?? `Chapitre ${currentIdx + 2}`;
+    gateHTML = `
+      <div class="prc-cv-gate"
+           data-chap="${currentIdx + 1}"
+           role="button" tabindex="0"
+           aria-label="Chapitre suivant : ${esc(nextTitle)}">
+        <div class="prc-cv-gate-lock" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9.5" rx="2.4" stroke="#a48fe0" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="#a48fe0" stroke-width="2"/></svg>
+        </div>
+        <div class="prc-cv-gate-txt">
+          <div class="prc-cv-gate-g1">Chapitre ${currentIdx + 2} · ${esc(nextTitle)}</div>
+          <div class="prc-cv-gate-g2">Termine « ${esc(world.nom ?? chapTitle)} » pour ouvrir la suite</div>
+        </div>
+      </div>`;
+  } else if (nextWs && nextWs.status !== "locked") {
+    // Chapitre suivant débloqué : lien discret pour y naviguer
+    const nextTitle =
+      nextWs.world?.titre ?? nextWs.world?.nom ?? `Chapitre ${currentIdx + 2}`;
+    gateHTML = `
+      <div class="prc-cv-gate" style="border-color:rgba(124,77,255,.5);cursor:pointer"
+           data-chap="${currentIdx + 1}"
+           role="button" tabindex="0"
+           aria-label="Accéder au chapitre suivant : ${esc(nextTitle)}">
+        <div class="prc-cv-gate-lock" style="background:linear-gradient(160deg,#3a2c6e,#2a1f56)" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="#a48fe0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="prc-cv-gate-g1">Chapitre ${currentIdx + 2} · ${esc(nextTitle)}</div>
+          <div class="prc-cv-gate-g2">Continuer sur ce chapitre →</div>
+        </div>
+      </div>`;
+  }
+
+  // ── Lien discret "Voir la carte" ─────────────────────────────────
+  const backLink = `<button class="prc-cv-back" data-view="map" type="button" aria-label="Voir la carte multi-chapitres">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6l9-3 9 3-9 3-9-3zM3 12l9 3 9-3M3 18l9 3 9-3"/></svg>
+    Voir la carte
+  </button>`;
+
+  return `<div class="prc-cv" role="main" aria-label="Ton parcours — vue chapitre">
+  <div class="prc-cv-screen">
+    ${backLink}
+    ${heroHTML}
+    ${routeHTML}
+    ${gateHTML}
+    <div style="height:40px"></div>
+  </div>
+</div>`;
 }
 
 function renderFinal(done, total) {

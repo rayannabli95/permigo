@@ -115,7 +115,7 @@ test("a11y · parcours élève", async ({ page }) => {
   await loginAs(page, EMAIL_ELEVE);
   await page.waitForSelector(".acc2", { timeout: 20_000 });
   await page.evaluate(() => {
-    // Vue par défaut « Chapitre » (jalons .prc-cv-jalon) — forcée pour déterminisme.
+    // Vue par défaut « Chapitre » (jalons .prc-cv-ms) — forcée pour déterminisme.
     try {
       localStorage.setItem("permigo_parcours_view", "chapitre");
     } catch {
@@ -123,7 +123,7 @@ test("a11y · parcours élève", async ({ page }) => {
     }
     location.hash = "#/parcours";
   });
-  await page.waitForSelector(".prc-cv-jalon", { timeout: 15_000 });
+  await page.waitForSelector(".prc-cv-ms", { timeout: 15_000 });
 
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
@@ -149,7 +149,7 @@ test("a11y · fiche compétence dialog", async ({ page }) => {
   await loginAs(page, EMAIL_ELEVE);
   await page.waitForSelector(".acc2", { timeout: 20_000 });
   await page.evaluate(() => {
-    // Vue par défaut « Chapitre » (jalons .prc-cv-jalon) — forcée pour déterminisme.
+    // Vue par défaut « Chapitre » (jalons .prc-cv-ms) — forcée pour déterminisme.
     try {
       localStorage.setItem("permigo_parcours_view", "chapitre");
     } catch {
@@ -157,11 +157,11 @@ test("a11y · fiche compétence dialog", async ({ page }) => {
     }
     location.hash = "#/parcours";
   });
-  await page.waitForSelector(".prc-cv-jalon", { timeout: 15_000 });
+  await page.waitForSelector(".prc-cv-ms", { timeout: 15_000 });
   // Ouvre la première fiche (clic via evaluate : les nodes ont une animation
   // continue qui les rend « not stable » pour l'auto-wait Playwright)
   await page
-    .locator(".prc-cv-jalon:not(.locked)")
+    .locator(".prc-cv-ms[data-comp]")
     .first()
     .evaluate((el) => el.click());
   await page.waitForSelector("#bsheet.open", { timeout: 6_000 });
