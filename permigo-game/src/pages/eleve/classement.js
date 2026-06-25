@@ -427,6 +427,19 @@ ${LEAGUE_CSS}
   color: var(--ink); display: flex; align-items: baseline; gap: 2px;
 }
 .clt-score2 span { font: 600 10px/1 'Inter', sans-serif; color: var(--mu2); }
+
+/* ── Premium : entrée en cascade des rangs + glow d'avatar sur le top ── */
+@keyframes cltRowIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.clt-row2, .clt-hof-row { animation: cltRowIn .42s cubic-bezier(.2,.7,.3,1) both; animation-delay: calc(var(--i, 0) * 38ms); }
+/* Avatar du top-3 : halo coloré par le rang (drop-shadow suit le rond) */
+.clt-row2.top1 .clt-av { filter: drop-shadow(0 2px 9px rgba(245,158,11,.6)); }
+.clt-row2.top2 .clt-av { filter: drop-shadow(0 2px 8px rgba(148,163,184,.55)); }
+.clt-row2.top3 .clt-av { filter: drop-shadow(0 2px 8px rgba(192,132,52,.55)); }
+/* Podium : anneau lumineux par médaille (sauf « moi » qui garde l'anneau indigo) */
+.clt-pod-1:not(.me) .clt-pod-av { box-shadow: 0 0 0 1px rgba(245,158,11,.5), 0 6px 20px -4px rgba(245,158,11,.62); }
+.clt-pod-2:not(.me) .clt-pod-av { box-shadow: 0 0 0 1px rgba(148,163,184,.5), 0 6px 16px -4px rgba(148,163,184,.5); }
+.clt-pod-3:not(.me) .clt-pod-av { box-shadow: 0 0 0 1px rgba(192,132,52,.5), 0 6px 16px -4px rgba(192,132,52,.52); }
+@media (prefers-reduced-motion: reduce) { .clt-row2, .clt-hof-row { animation: none; } }
 </style>`;
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -562,8 +575,8 @@ function _hofSection(hof) {
   if (!hof || hof.length === 0) return "";
   const rows = hof
     .map(
-      (g) => `
-    <div class="clt-hof-row${g.is_me ? " me" : ""}">
+      (g, i) => `
+    <div class="clt-hof-row${g.is_me ? " me" : ""}" style="--i:${i}">
       <div class="clt-av">${renderUserAvatar({ avatar_url: g.avatar, prenom: g.prenom }, 34)}</div>
       <div class="clt-name">${esc(fmtName(g.prenom))}</div>
       <span class="clt-hof-badge">${icon("award", { size: 12, strokeWidth: 2.4 })} Permis obtenu</span>
@@ -715,9 +728,10 @@ function _podium(top3, fmtScore) {
 }
 
 // ── Rang épuré : un seul accent (ligue en trait latéral), score neutre ──
-function _epureRow(r, scoreHtml, leagueColor) {
+function _epureRow(r, scoreHtml, leagueColor, idx = 0) {
+  const topCls = r.rang <= 3 ? ` top${r.rang}` : "";
   return `
-  <div class="clt-row2 ${r.is_me ? "me" : ""}" style="--lc:${leagueColor}">
+  <div class="clt-row2 ${r.is_me ? "me" : ""}${topCls}" style="--lc:${leagueColor};--i:${idx}">
     <div class="clt-rank2" aria-label="Rang ${r.rang}">${r.rang}</div>
     <div class="clt-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 32)}</div>
     <div class="clt-name">${esc(r.display_name)}</div>
@@ -733,7 +747,7 @@ function _rankedBody(top, mine, meOutside, fmtScore, leagueColorOf) {
   const podiumHtml = hasPodium ? _podium(podiumRows, fmtScore) : "";
   const listRows = hasPodium ? top.slice(3) : top;
   let html = `${podiumHtml}<div class="clt-list">${listRows
-    .map((r) => _epureRow(r, fmtScore(r), leagueColorOf(r)))
+    .map((r, i) => _epureRow(r, fmtScore(r), leagueColorOf(r), i))
     .join("")}</div>`;
   if (meOutside) {
     html += `<div class="clt-sep">· · ·</div><div class="clt-list">${_epureRow(mine, fmtScore(mine), leagueColorOf(mine))}</div>`;
