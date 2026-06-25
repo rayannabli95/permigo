@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0d1f" />
+<title>PermiGo — Compétence acquise (Carte feu vert)</title>
+
+<!-- Polices : Plus Jakarta Sans (titres/note) + Nunito (texte) + IBM Plex Mono (stats carte) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Nunito:wght@600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  /* ============================================================
+     PermiGo — « Compétence acquise »
+     DIRECTION D2 : CARTE HOLOGRAPHIQUE × FEU VERT / ROUTE
+     La carte à collectionner FLOTTE au-dessus de la route de nuit
+     (l'étape franchie sur le chemin du permis). Rails VERTS « GO »,
+     foil holo teinté VERT #58CC02 + or, feu tricolore qui passe au vert.
+     ============================================================ */
+
+  :root{
+    /* Rareté MONTAGNE = violet (accent secondaire : liseré carte, halo) */
+    --rare:        #8b5cf6;
+    --rare-soft:   #a78bfa;
+    --rare-deep:   #6d28d9;
+
+    /* VERT GO — la couleur d'ACTION / de validation */
+    --go:          #58cc02;
+    --go-soft:     #7ee63a;
+    --go-bright:   #6fe016;
+    --go-deep:     #46a302;
+    --go-light:    #b4ff8c;
+    --go-ink:      #0d2400;
+
+    /* Or holo (liseré métal + sceau + balayage) */
+    --gold:        #f5d27a;
+    --gold-deep:   #c79a3e;
+    --gold-soft:   #ffe9b0;
+
+    /* Scène nuit indigo */
+    --sky-top:     #0b0d1f;
+    --sky-mid:     #14122e;
+    --sky-low:     #1a1640;
+    --aurore-1:    #ffcaa0;
+    --aurore-2:    #ff9a6e;
+    --aurore-3:    #7b6cff;
+
+    /* Texte sur sombre (WCAG AA) */
+    --ink:         #f4f3ff;
+    --ink-soft:    #c9c4e4;
+    --ink-mute:    #968fbf;
+
+    --card-r:      20px;
+    --radius:      16px;
+    --ease:        cubic-bezier(.22,.61,.36,1);
+    --ease-spring: cubic-bezier(.34,1.56,.64,1);
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+
+  body{
+    font-family:"Nunito", system-ui, sans-serif;
+    color:var(--ink);
+    background:#06060f;
+    min-height:100svh;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px 16px;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+
+  /* ====================== CADRE TÉLÉPHONE ====================== */
+  .phone{
+    position:relative;
+    width:390px; max-width:100vw;
+    height:844px; max-height:calc(100svh - 32px);
+    border-radius:44px;
+    overflow:hidden;
+    background:var(--sky-top);
+    box-shadow:
+      0 0 0 1px rgba(180,170,255,.10),
+      0 40px 120px -30px rgba(0,0,0,.9),
+      0 0 90px -20px rgba(88,204,2,.16);   /* halo vert ambiant autour du cadre */
+    isolation:isolate;
+  }
+  @media (max-width:430px){
+    body{ padding:0; }
+    .phone{ width:100vw; height:100svh; max-height:100svh; border-radius:0; }
+  }
+
+  .stage{ position:absolute; inset:0; overflow:hidden; }
+
+  /* ====================== DÉCOR : LA ROUTE DE NUIT ====================== */
+  .scene{
+    position:absolute; inset:0; z-index:0;
+    background:
+      radial-gradient(120% 80% at 50% 100%, rgba(88,204,2,.13) 0%, transparent 55%),
+      linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 48%, var(--sky-low) 100%);
+    overflow:hidden;
+  }
+
+  /* Glow d'aurore au point de fuite (horizon ~ 40%) */
+  .aurore{
+    position:absolute; left:50%; top:40%;
+    width:min(560px, 150%); height:min(560px, 150%);
+    transform:translate(-50%,-50%);
+    background:radial-gradient(closest-side,
+      rgba(255,240,220,.66) 0%,
+      var(--aurore-1) 18%,
+      var(--aurore-2) 38%,
+      var(--aurore-3) 60%,
+      transparent 76%);
+    filter:blur(20px); opacity:.62;
+    animation:aurorePulse 9s var(--ease) infinite;
+    will-change:transform, opacity;
+  }
+  @keyframes aurorePulse{
+    0%,100%{ opacity:.56; transform:translate(-50%,-50%) scale(1); }
+    50%    { opacity:.74; transform:translate(-50%,-50%) scale(1.06); }
+  }
+
+  /* Bande de halo vert posée sur l'horizon */
+  .horizon-glow{
+    position:absolute; left:0; right:0; top:40%;
+    height:120px; transform:translateY(-50%);
+    background:linear-gradient(180deg, transparent, rgba(120,230,60,.16) 45%, rgba(88,204,2,.10) 100%);
+    filter:blur(8px); mix-blend-mode:screen;
+  }
+
+  /* Étoiles (box-shadow, scintillent) */
+  .stars{ position:absolute; inset:0 0 64% 0; }
+  .stars::before, .stars::after{
+    content:""; position:absolute; top:0; left:0; width:2px; height:2px; border-radius:50%;
+    background:transparent;
+  }
+  .stars::before{
+    box-shadow:
+      30px 60px 0 0 rgba(255,255,255,.7),  92px 30px 0 0 rgba(255,255,255,.5),
+      140px 88px 0 0 rgba(200,210,255,.6), 196px 44px 0 0 rgba(255,255,255,.45),
+      250px 74px 0 0 rgba(255,255,255,.6), 300px 26px 0 0 rgba(210,210,255,.5),
+      344px 64px 0 0 rgba(255,255,255,.55),60px 120px 0 0 rgba(255,255,255,.4),
+      214px 116px 0 0 rgba(255,255,255,.4),124px 18px 0 0 rgba(255,255,255,.35);
+    animation:twinkle 5.5s ease-in-out infinite;
+  }
+  .stars::after{
+    box-shadow:
+      18px 140px 0 0 rgba(255,255,255,.5), 112px 150px 0 0 rgba(220,220,255,.4),
+      160px 20px 0 0 rgba(255,255,255,.5), 268px 132px 0 0 rgba(255,255,255,.35),
+      320px 122px 0 0 rgba(255,255,255,.45),366px 40px 0 0 rgba(255,255,255,.4),
+      44px 32px 0 0 rgba(255,255,255,.35), 206px 56px 0 0 rgba(255,255,255,.5);
+    animation:twinkle 7s ease-in-out infinite reverse;
+  }
+  @keyframes twinkle{ 0%,100%{ opacity:.5; } 50%{ opacity:1; } }
+
+  /* La ROUTE : trapèze qui file vers le point de fuite */
+  .road{
+    position:absolute; left:50%; bottom:0; top:40%;
+    width:100%; transform:translateX(-50%);
+    perspective:520px; overflow:hidden;
+  }
+  .road__surface{
+    position:absolute; left:50%; bottom:0;
+    width:240%; height:200%;
+    transform:translateX(-50%) rotateX(74deg);
+    transform-origin:bottom center;
+    background:linear-gradient(180deg, rgba(26,22,64,0) 0%, #15122e 30%, #0c0a22 100%);
+  }
+  /* Rails néon VERTS (feu vert GO) — éteints au départ, s'allument à l'entrée */
+  .road__edge{
+    position:absolute; bottom:0; width:3px; height:54%;
+    background:linear-gradient(0deg, rgba(88,204,2,0), rgba(110,224,40,.85) 55%, rgba(180,255,140,.95));
+    filter:blur(.4px);
+    box-shadow:0 0 14px rgba(88,204,2,.75);
+    opacity:0; animation:railOn 1s var(--ease) .2s forwards;
+  }
+  .road__edge.l{ left:50%; transform:translateX(-50%); transform-origin:bottom; rotate:18deg; }
+  .road__edge.r{ left:50%; transform:translateX(-50%); transform-origin:bottom; rotate:-18deg; }
+  @keyframes railOn{ to{ opacity:1; } }
+
+  /* Lignes centrales pointillées défilant vers le spectateur */
+  .road__lines{
+    position:absolute; left:50%; bottom:0;
+    width:14px; height:60%;
+    transform:translateX(-50%);
+    background:repeating-linear-gradient(to top,
+      rgba(245,255,235,.92) 0 5%, transparent 5% 12%);
+    -webkit-mask-image:linear-gradient(to top, #000 0%, rgba(0,0,0,.25) 78%, transparent 100%);
+            mask-image:linear-gradient(to top, #000 0%, rgba(0,0,0,.25) 78%, transparent 100%);
+    clip-path:polygon(38% 100%, 62% 100%, 51% 0, 49% 0);
+    opacity:0;
+    animation:linesOn .8s var(--ease) .3s forwards, dash 1.5s linear .3s infinite;
+  }
+  @keyframes linesOn{ to{ opacity:.9; } }
+  @keyframes dash{ from{ background-position:0 0; } to{ background-position:0 360px; } }
+
+  /* Halos de phares diffus */
+  .lamp{ position:absolute; border-radius:50%; filter:blur(40px); mix-blend-mode:screen; pointer-events:none; }
+  .lamp.a{ width:220px; height:220px; left:-50px; top:48%; background:radial-gradient(closest-side, rgba(120,230,60,.40), transparent); }
+  .lamp.b{ width:240px; height:240px; right:-60px; top:60%; background:radial-gradient(closest-side, rgba(255,200,150,.26), transparent); animation:drift 11s var(--ease) infinite; }
+  .lamp.c{ width:300px; height:300px; left:50%; bottom:-50px; transform:translateX(-50%); background:radial-gradient(closest-side, rgba(88,204,2,.28), transparent); }
+  @keyframes drift{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(20px); } }
+
+  /* Poussière lumineuse verte qui monte */
+  .dust{ position:absolute; inset:0; z-index:1; pointer-events:none; }
+  .dust span{
+    position:absolute; width:3px; height:3px; border-radius:50%;
+    background:rgba(220,255,200,.9);
+    box-shadow:0 0 6px 1px rgba(120,230,60,.85);
+    animation:rise linear infinite;
+  }
+  .dust span:nth-child(1){ left:20%; bottom:-10px; animation-duration:9s;  animation-delay:.4s; }
+  .dust span:nth-child(2){ left:36%; bottom:-10px; animation-duration:11s; animation-delay:1.6s; opacity:.7; }
+  .dust span:nth-child(3){ left:54%; bottom:-10px; animation-duration:8s;  animation-delay:2.3s; }
+  .dust span:nth-child(4){ left:68%; bottom:-10px; animation-duration:12s; animation-delay:.8s; opacity:.6; }
+  .dust span:nth-child(5){ left:80%; bottom:-10px; animation-duration:10s; animation-delay:3.1s; }
+  .dust span:nth-child(6){ left:28%; bottom:-10px; animation-duration:13s; animation-delay:2.8s; opacity:.5; }
+  @keyframes rise{
+    0%{ transform:translateY(0) scale(.6); opacity:0; }
+    14%{ opacity:1; } 85%{ opacity:.85; }
+    100%{ transform:translateY(-560px) scale(1.1); opacity:0; }
+  }
+
+  /* Vignette pour focaliser sur la carte */
+  .vignette{
+    position:absolute; inset:0; z-index:2; pointer-events:none;
+    background:radial-gradient(115% 80% at 50% 42%, transparent 40%, rgba(4,4,14,.62) 100%);
+  }
+
+  /* ====================== CONTENU ====================== */
+  .ui{
+    position:absolute; inset:0; z-index:3;
+    display:flex; flex-direction:column;
+    padding:max(18px, env(safe-area-inset-top)) 22px max(22px, env(safe-area-inset-bottom));
+  }
+
+  /* Logo discret en haut */
+  .topbar{ display:flex; align-items:center; justify-content:center; height:28px; flex:none; }
+  .topbar img{ height:22px; width:auto; filter:drop-shadow(0 4px 14px rgba(88,204,2,.45)); opacity:.95; }
+  .topbar .logo-fallback{
+    display:none; font-family:"Plus Jakarta Sans", sans-serif; font-weight:800; font-size:18px;
+    letter-spacing:-.3px; color:var(--ink); text-shadow:0 4px 16px rgba(88,204,2,.5);
+  }
+  .topbar img.is-broken{ display:none; }
+  .topbar img.is-broken + .logo-fallback{ display:inline-block; }
+
+  /* Kicker vert « Compétence acquise » */
+  .kicker{
+    display:inline-flex; align-items:center; gap:8px; align-self:center;
+    margin-top:14px;
+    padding:7px 14px 7px 8px;
+    background:rgba(88,204,2,.12);
+    border:1px solid rgba(126,230,58,.34);
+    border-radius:999px;
+    font-family:"Plus Jakarta Sans",sans-serif; font-weight:800; font-size:13px;
+    letter-spacing:.3px; color:var(--ink);
+    box-shadow:0 0 22px -6px rgba(88,204,2,.6);
+    opacity:0; transform:translateY(-8px);
+    animation:kickerIn .7s var(--ease) .5s both;
+  }
+  .kicker .tick{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:22px; height:22px; border-radius:50%; flex:none;
+    background:linear-gradient(160deg, var(--go-soft), var(--go-deep));
+    box-shadow:0 0 12px rgba(88,204,2,.8);
+  }
+  .kicker .tick svg{ width:13px; height:13px; color:#fff; }
+  @keyframes kickerIn{ to{ opacity:1; transform:translateY(0); } }
+
+  /* ---------- LA CARTE (focal), flotte au-dessus de la route ---------- */
+  .card-stage{
+    flex:1; display:flex; align-items:center; justify-content:center;
+    width:100%; min-height:0;
+    perspective:1100px;
+    margin:6px 0 2px;
+  }
+
+  .card{
+    position:relative;
+    width:236px; aspect-ratio:5/7;
+    border-radius:var(--card-r);
+    transform-style:preserve-3d;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition:transform .14s var(--ease);
+    will-change:transform;
+    animation:cardFlipIn 1s var(--ease) .85s both, cardFloat 6s ease-in-out 2s infinite;
+  }
+  /* Flip d'entrée : la carte arrive de dos et se retourne face visible */
+  @keyframes cardFlipIn{
+    0%   { opacity:0; transform:translateY(8px) rotateY(-200deg) scale(.82); }
+    60%  { opacity:1; }
+    100% { opacity:1; transform:translateY(0) rotateY(0deg) scale(1); }
+  }
+  @keyframes cardFloat{
+    0%,100%{ transform:translateY(0)    rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)); }
+    50%    { transform:translateY(-10px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)); }
+  }
+  .card.is-tilting{ animation:none; transition:transform .08s linear; }
+
+  /* Ombre portée projetée — bouge avec le tilt (var --sx en JS) */
+  .card__shadow{
+    position:absolute; left:50%; bottom:-30px;
+    width:72%; height:30px;
+    transform:translateX(calc(-50% + var(--sx, 0px)));
+    background:radial-gradient(closest-side, rgba(2,1,8,.7), transparent 72%);
+    filter:blur(9px); z-index:-1;
+  }
+
+  /* La surface de la carte */
+  .card__body{
+    position:absolute; inset:0;
+    border-radius:var(--card-r); overflow:hidden;
+    background:linear-gradient(150deg, #18142a 0%, #20183a 46%, #130f24 100%);
+    box-shadow:
+      0 0 0 2px rgba(0,0,0,.5),
+      0 26px 60px -18px rgba(0,0,0,.85),
+      0 0 50px -10px rgba(139,92,246,.45);
+  }
+
+  /* Cadre métallique : VERT GO dominant + or, accent violet rareté.
+     S'EMBRASE en vert à l'apparition (animation goEnflamme). */
+  .card__frame{
+    position:absolute; inset:0; border-radius:var(--card-r);
+    padding:3px; z-index:6; pointer-events:none;
+    background:linear-gradient(140deg,
+      var(--go-light) 0%, var(--go) 16%,
+      var(--gold-soft) 36%, var(--gold-deep) 50%,
+      var(--rare-soft) 66%, var(--go-soft) 84%, var(--go-deep) 100%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    box-shadow:0 0 0 0 rgba(88,204,2,0);
+    animation:goEnflamme 1.4s var(--ease) .9s both, goFramePulse 3.4s var(--ease) 2.4s infinite;
+  }
+  @keyframes goEnflamme{
+    0%  { box-shadow:0 0 0 0 rgba(88,204,2,0); }
+    40% { box-shadow:0 0 30px 3px rgba(88,204,2,.95); }
+    100%{ box-shadow:0 0 18px -2px rgba(88,204,2,.55); }
+  }
+  @keyframes goFramePulse{
+    0%,100%{ box-shadow:0 0 16px -3px rgba(88,204,2,.45); }
+    50%    { box-shadow:0 0 24px 0 rgba(88,204,2,.7); }
+  }
+  .card__frame::after{
+    content:""; position:absolute; inset:3px; border-radius:calc(var(--card-r) - 3px);
+    box-shadow:0 0 0 1px rgba(255,255,255,.14) inset;
+  }
+
+  /* === Contenu de la carte === */
+  .card__art{
+    position:absolute; inset:0;
+    background:linear-gradient(160deg, #3b2370, #1a1030 70%);
+    background-size:cover; background-position:center 30%;
+  }
+  .card__art.is-broken{
+    background:
+      radial-gradient(120% 90% at 50% 18%, rgba(167,139,250,.5), transparent 60%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,.04) 0 14px, transparent 14px 28px),
+      linear-gradient(160deg, #4b2d8f, #1a1030 75%);
+  }
+  .card__art.is-broken::after{
+    content:"⛰️"; position:absolute; inset:0; display:flex;
+    align-items:center; justify-content:center;
+    font-size:62px; opacity:.5; filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));
+  }
+  .card__scrim{
+    position:absolute; inset:0; z-index:2;
+    background:linear-gradient(180deg,
+      rgba(12,7,28,.30) 0%, transparent 26%,
+      transparent 48%, rgba(10,6,24,.82) 86%, rgba(8,4,20,.94) 100%);
+  }
+
+  /* Coin haut-gauche : NOTE + catégorie (façon carte stat) */
+  .card__rating{
+    position:absolute; top:13px; left:13px; z-index:4;
+    display:flex; flex-direction:column; align-items:center; line-height:1;
+    text-shadow:0 2px 10px rgba(0,0,0,.7);
+  }
+  .card__rating .num{
+    font-family:"Plus Jakarta Sans",sans-serif; font-weight:800; font-size:36px;
+    letter-spacing:-1px;
+    background:linear-gradient(180deg,#fff, var(--go-light));
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .card__rating .cat{
+    font-family:"IBM Plex Mono",monospace; font-weight:700; font-size:13px;
+    color:var(--go-light); letter-spacing:1px; margin-top:2px;
+    text-shadow:0 0 10px rgba(88,204,2,.5);
+  }
+  .card__rating .divider{
+    width:30px; height:2px; margin:4px 0 2px;
+    background:linear-gradient(90deg, transparent, var(--go-soft), transparent);
+    border-radius:2px;
+  }
+
+  /* Coin haut-droit : sceau ✓ validé qui s'embrase en VERT à l'apparition */
+  .card__seal{
+    position:absolute; top:11px; right:11px; z-index:4;
+    width:44px; height:44px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 35% 30%, var(--go-soft), var(--go-deep) 78%);
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,.22) inset,
+      0 4px 14px -2px rgba(0,0,0,.6),
+      0 0 18px -1px rgba(88,204,2,.9);
+    transform:rotate(-8deg);
+    opacity:0; animation:sealStamp .5s var(--ease-spring) 1.65s both, sealGlow 3s ease-in-out 2.3s infinite;
+  }
+  @keyframes sealStamp{
+    0%{ opacity:0; transform:rotate(-8deg) scale(1.9); }
+    100%{ opacity:1; transform:rotate(-8deg) scale(1); }
+  }
+  @keyframes sealGlow{
+    0%,100%{ box-shadow:0 0 0 2px rgba(255,255,255,.22) inset, 0 4px 14px -2px rgba(0,0,0,.6), 0 0 18px -1px rgba(88,204,2,.9); }
+    50%    { box-shadow:0 0 0 2px rgba(255,255,255,.22) inset, 0 4px 14px -2px rgba(0,0,0,.6), 0 0 26px 1px rgba(120,230,60,1); }
+  }
+  .card__seal svg{ width:22px; height:22px; color:#fff; }
+
+  /* n° de collection discret */
+  .card__num{
+    position:absolute; top:62px; right:14px; z-index:4;
+    font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:12px;
+    color:rgba(255,255,255,.82); letter-spacing:.5px;
+    text-shadow:0 1px 6px rgba(0,0,0,.8);
+  }
+
+  /* Bandeau bas : nom + ligne monde */
+  .card__caption{
+    position:absolute; left:0; right:0; bottom:0; z-index:4;
+    padding:13px 15px 15px; text-align:left;
+  }
+  .card__name{
+    font-family:"Plus Jakarta Sans",sans-serif; font-weight:800; font-size:18px;
+    line-height:1.12; color:#fff; letter-spacing:-.3px;
+    text-shadow:0 2px 12px rgba(0,0,0,.85);
+  }
+  .card__world{
+    margin-top:7px;
+    font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:10.5px;
+    letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--go-light);
+    text-shadow:0 1px 8px rgba(0,0,0,.8), 0 0 10px rgba(88,204,2,.4);
+  }
+
+  /* === COUCHES HOLO teintées VERT GO + OR (le « feu vert qui glisse ») === */
+  /* Couche 1 : foil conique vert→or→vert (pas d'arc-en-ciel), color-dodge, balaie au pointeur */
+  .card__foil{
+    position:absolute; inset:0; z-index:5; pointer-events:none;
+    border-radius:var(--card-r);
+    mix-blend-mode:color-dodge; opacity:.55;
+    background:
+      conic-gradient(from var(--foil-a, 120deg) at var(--mx,50%) var(--my,50%),
+        #2e6b00 0deg, #58cc02 46deg, #7ee63a 92deg, #d8ff9c 132deg,
+        #f5d27a 176deg, #c79a3e 214deg, #58cc02 268deg, #b4ff8c 312deg, #2e6b00 360deg);
+    background-size:200% 200%;
+    filter:saturate(1.45) brightness(1.12);
+    transition:opacity .2s var(--ease);
+  }
+  /* Couche 2 : glare diagonal (bande de lumière) en overlay */
+  .card__glare{
+    position:absolute; inset:0; z-index:5; pointer-events:none;
+    border-radius:var(--card-r);
+    mix-blend-mode:overlay; opacity:.7;
+    background:linear-gradient(105deg,
+      transparent 30%,
+      rgba(220,255,200,.55) var(--glare, 48%),
+      transparent 66%);
+  }
+  /* Couche 3 : trame holo fine teintée vert/or */
+  .card__sheen{
+    position:absolute; inset:0; z-index:5; pointer-events:none;
+    border-radius:var(--card-r);
+    mix-blend-mode:color-dodge; opacity:.26;
+    background:repeating-linear-gradient(115deg,
+      rgba(255,255,255,0) 0 6px,
+      rgba(140,230,80,.5) 6px 7px,
+      rgba(245,210,122,.4) 7px 8px,
+      rgba(255,255,255,0) 8px 14px);
+    background-size:200% 200%;
+  }
+
+  /* Balayage auto (mobile / pas de pointeur fin) */
+  .card.is-auto .card__foil{ animation:foilSweep 5.5s linear infinite; }
+  .card.is-auto .card__glare{ animation:glareSweep 5.5s ease-in-out infinite; }
+  .card.is-auto .card__sheen{ animation:foilSweep 7s linear infinite reverse; }
+  @keyframes foilSweep{
+    0%{ background-position:0% 50%; } 50%{ background-position:100% 50%; } 100%{ background-position:0% 50%; }
+  }
+  @keyframes glareSweep{
+    0%{ --glare:18%; } 50%{ --glare:80%; } 100%{ --glare:18%; }
+  }
+
+  /* ---------- FEU TRICOLORE : passe au VERT à l'entrée (signal validation) ---------- */
+  .stoplight{
+    position:absolute; bottom:18px; right:18px; z-index:7;
+    display:flex; flex-direction:column; gap:6px;
+    padding:7px 6px;
+    border-radius:11px;
+    background:linear-gradient(180deg, #1a1730, #0e0c1e);
+    border:1px solid rgba(180,170,255,.16);
+    box-shadow:0 8px 22px -8px rgba(0,0,0,.8), 0 0 0 3px rgba(8,8,20,.6);
+    opacity:0; animation:lightFade .6s var(--ease) 1.2s both;
+  }
+  @keyframes lightFade{ to{ opacity:1; } }
+  .stoplight .bulb{
+    width:14px; height:14px; border-radius:50%;
+    background:#241f33;
+    box-shadow:0 0 0 1px rgba(0,0,0,.5) inset;
+  }
+  .stoplight .bulb.red,
+  .stoplight .bulb.amber{ background:#2a2440; }   /* restent ÉTEINTS */
+  /* le vert s'allume avec glow */
+  .stoplight .bulb.green{
+    background:#1e3a10;
+    animation:greenOn .5s var(--ease) 1.7s forwards, greenBlink 2.6s ease-in-out 2.4s infinite;
+  }
+  @keyframes greenOn{
+    to{
+      background:radial-gradient(circle at 38% 32%, var(--go-soft), var(--go) 60%, var(--go-deep));
+      box-shadow:0 0 12px 2px rgba(88,204,2,.9), 0 0 0 1px rgba(180,255,140,.4) inset;
+    }
+  }
+  @keyframes greenBlink{
+    0%,100%{ box-shadow:0 0 12px 2px rgba(88,204,2,.9), 0 0 0 1px rgba(180,255,140,.4) inset; }
+    50%    { box-shadow:0 0 18px 3px rgba(120,230,60,1), 0 0 0 1px rgba(180,255,140,.5) inset; }
+  }
+
+  /* ---------- SOUS LA CARTE : Permis virtuel ---------- */
+  .progress{
+    width:100%; max-width:300px; align-self:center; margin-top:18px;
+    opacity:0; transform:translateY(10px);
+    animation:fadeUp .7s var(--ease) 1.85s both;
+  }
+  .progress__head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+  .progress__label{
+    display:flex; align-items:center; gap:7px;
+    font-family:"Plus Jakarta Sans",sans-serif; font-weight:700; font-size:13.5px;
+    color:var(--ink-soft); letter-spacing:.2px;
+  }
+  .progress__label svg{ width:15px; height:15px; color:var(--go-soft); }
+  .progress__pct{
+    font-family:"Plus Jakarta Sans",sans-serif; font-weight:800; font-size:16px;
+    color:var(--go-soft); text-shadow:0 0 12px rgba(88,204,2,.45);
+  }
+  .progress__track{
+    position:relative; height:12px; border-radius:999px;
+    background:rgba(8,8,22,.85);
+    box-shadow:0 1px 2px rgba(0,0,0,.5) inset, 0 0 0 1px rgba(180,170,255,.12);
+    overflow:hidden;
+  }
+  .progress__fill{
+    position:absolute; inset:0 auto 0 0; width:0%;
+    border-radius:999px;
+    background:linear-gradient(90deg, var(--go-deep), var(--go) 55%, var(--go-soft));
+    box-shadow:0 0 16px 1px rgba(88,204,2,.85), 0 0 0 1px rgba(180,255,140,.3) inset;
+    animation:fillGrow 1.3s var(--ease) 2.1s forwards;
+  }
+  .progress__fill::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(100deg, transparent 30%, rgba(255,255,255,.45) 50%, transparent 70%);
+    transform:translateX(-100%);
+    animation:barSheen 2.6s var(--ease) 3.2s infinite;
+  }
+  @keyframes fillGrow{ to{ width:58%; } }
+  @keyframes barSheen{ 0%{ transform:translateX(-100%); } 60%,100%{ transform:translateX(180%); } }
+
+  /* ---------- CTA VERT GO + lien ---------- */
+  .actions{
+    width:100%; max-width:300px; align-self:center; margin-top:18px;
+    opacity:0; transform:translateY(12px);
+    animation:fadeUp .7s var(--ease) 2.05s both;
+  }
+  .cta{
+    position:relative; width:100%; min-height:56px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-family:"Plus Jakarta Sans",sans-serif; font-weight:800; font-size:17px;
+    color:var(--go-ink); letter-spacing:.2px;
+    border:0; border-radius:var(--radius); cursor:pointer;
+    background:linear-gradient(135deg, var(--go-bright) 0%, var(--go) 48%, var(--go-deep) 100%);
+    /* ombre basse SOLIDE pressable (plastique) */
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.45) inset,
+      0 5px 0 0 var(--go-deep),
+      0 14px 28px -8px rgba(88,204,2,.6),
+      0 0 30px -8px rgba(88,204,2,.5);
+    overflow:hidden;
+    transition:transform .12s var(--ease), box-shadow .12s var(--ease), filter .2s var(--ease);
+  }
+  .cta::before{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.5) 50%, transparent 70%);
+    transform:translateX(-130%); transition:transform .7s var(--ease);
+  }
+  .cta:hover{ filter:brightness(1.05); }
+  .cta:hover::before{ transform:translateX(130%); }
+  /* enfoncement plastique : la carte descend sur son ombre solide */
+  .cta:active{
+    transform:translateY(4px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.45) inset,
+      0 1px 0 0 var(--go-deep),
+      0 6px 16px -8px rgba(88,204,2,.5);
+  }
+  .cta:focus-visible{ outline:3px solid rgba(255,255,255,.7); outline-offset:3px; }
+  .cta svg{ width:19px; height:19px; }
+
+  .collection-link{
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    width:100%; min-height:44px; margin-top:8px;
+    font-family:"Nunito",sans-serif; font-weight:700; font-size:14.5px;
+    color:var(--ink-soft); text-decoration:none;
+    transition:color .2s var(--ease);
+  }
+  .collection-link svg{ width:16px; height:16px; color:var(--go-soft); }
+  .collection-link:hover{ color:#fff; }
+  .collection-link:focus-visible{ outline:2px solid var(--go-soft); outline-offset:3px; border-radius:8px; }
+
+  @keyframes fadeUp{ to{ opacity:1; transform:translateY(0); } }
+
+  /* ====================== REDUCED MOTION ====================== */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation:none !important;
+      transition-duration:.01ms !important;
+    }
+    .road__edge, .road__lines{ opacity:.9; }
+    .road__lines{ background-position:0 0 !important; }
+    .card{ transform:none; opacity:1; }
+    .card__frame{ box-shadow:0 0 16px -2px rgba(88,204,2,.5); }
+    .card__foil{ opacity:.34; background-position:30% 50%; }
+    .card__glare{ opacity:.4; }
+    .card__seal{ opacity:1; transform:rotate(-8deg); }
+    .stoplight{ opacity:1; }
+    .stoplight .bulb.green{
+      background:radial-gradient(circle at 38% 32%, var(--go-soft), var(--go) 60%, var(--go-deep));
+      box-shadow:0 0 12px 2px rgba(88,204,2,.9), 0 0 0 1px rgba(180,255,140,.4) inset;
+    }
+    .progress__fill{ width:58%; }
+    .kicker, .progress, .actions{ opacity:1; transform:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="stage">
+
+      <!-- ===== DÉCOR : la route de nuit vers le permis ===== -->
+      <div class="scene" aria-hidden="true">
+        <div class="stars"></div>
+        <div class="aurore"></div>
+        <div class="horizon-glow"></div>
+        <div class="road">
+          <div class="road__surface"></div>
+          <div class="road__edge l"></div>
+          <div class="road__edge r"></div>
+          <div class="road__lines"></div>
+        </div>
+        <span class="lamp a"></span>
+        <span class="lamp b"></span>
+        <span class="lamp c"></span>
+      </div>
+      <div class="dust" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="vignette" aria-hidden="true"></div>
+
+      <!-- ===== CONTENU ===== -->
+      <div class="ui">
+
+        <!-- Logo discret -->
+        <div class="topbar">
+          <img src="../public/permigo-logo.png" alt="PermiGo"
+               onerror="this.classList.add('is-broken')" />
+          <span class="logo-fallback" aria-hidden="true">PermiGo</span>
+        </div>
+
+        <!-- Kicker -->
+        <div class="kicker">
+          <span class="tick" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"
+                 stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          Compétence acquise
+        </div>
+
+        <!-- ===== LA CARTE (focal) qui flotte au-dessus de la route ===== -->
+        <div class="card-stage">
+          <div class="card is-auto" id="card">
+            <div class="card__shadow" aria-hidden="true"></div>
+
+            <div class="card__body">
+              <!-- Illustration du monde Montagne -->
+              <div class="card__art" id="cardArt"
+                   style="background-image:url('../public/skins/permigo-remc-conditions-difficiles-v1.webp');"></div>
+              <div class="card__scrim" aria-hidden="true"></div>
+
+              <!-- Note + catégorie -->
+              <div class="card__rating">
+                <span class="num">100</span>
+                <span class="divider" aria-hidden="true"></span>
+                <span class="cat">C3</span>
+              </div>
+
+              <!-- Sceau validé (s'embrase vert) -->
+              <div class="card__seal" aria-label="Validé">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"
+                     stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </div>
+
+              <!-- n° de collection -->
+              <span class="card__num">N°18/31</span>
+
+              <!-- Bandeau bas -->
+              <div class="card__caption">
+                <div class="card__name">S'insérer sur l'autoroute</div>
+                <div class="card__world">Montagne · Conditions difficiles</div>
+              </div>
+
+              <!-- Feu tricolore : passe au vert (signal validation) -->
+              <div class="stoplight" aria-label="Feu au vert">
+                <span class="bulb red" aria-hidden="true"></span>
+                <span class="bulb amber" aria-hidden="true"></span>
+                <span class="bulb green" aria-hidden="true"></span>
+              </div>
+
+              <!-- Couches holographiques vert/or -->
+              <div class="card__foil"  aria-hidden="true"></div>
+              <div class="card__sheen" aria-hidden="true"></div>
+              <div class="card__glare" aria-hidden="true"></div>
+            </div>
+
+            <!-- Cadre métallique vert/or -->
+            <div class="card__frame" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <!-- ===== Permis virtuel ===== -->
+        <div class="progress">
+          <div class="progress__head">
+            <span class="progress__label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/><path d="M7 15h4"/>
+              </svg>
+              Permis virtuel
+            </span>
+            <span class="progress__pct">58 %</span>
+          </div>
+          <div class="progress__track">
+            <div class="progress__fill"></div>
+          </div>
+        </div>
+
+        <!-- ===== CTA + lien ===== -->
+        <div class="actions">
+          <button type="button" class="cta">
+            Continuer
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </svg>
+          </button>
+          <a href="#collection" class="collection-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/>
+            </svg>
+            Voir ma collection
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const card = document.getElementById('card');
+      const art  = document.getElementById('cardArt');
+
+      // Fallback motif si l'illustration de la carte ne charge pas
+      const artUrl = '../public/skins/permigo-remc-conditions-difficiles-v1.webp';
+      const artTest = new Image();
+      artTest.onerror = () => { art.classList.add('is-broken'); art.style.backgroundImage = 'none'; };
+      artTest.src = artUrl;
+
+      // Respect du reduced-motion : carte figée
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+
+      // ===== Tilt 3D + balayage holo (feu vert qui glisse) qui suivent le pointeur =====
+      const MAX = 14;
+      let raf = null;
+
+      function onMove(e){
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top)  / r.height;
+        const cx = px - .5, cy = py - .5;
+
+        if (raf) cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          card.classList.add('is-tilting');
+          card.classList.remove('is-auto');
+          card.style.setProperty('--ry', (cx *  MAX).toFixed(2) + 'deg');
+          card.style.setProperty('--rx', (-cy * MAX).toFixed(2) + 'deg');
+          card.querySelector('.card__shadow').style.setProperty('--sx', (cx * 26).toFixed(1) + 'px');
+          const foil = card.querySelector('.card__foil');
+          foil.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
+          foil.style.setProperty('--my', (py * 100).toFixed(1) + '%');
+          foil.style.setProperty('--foil-a', (120 + cx * 140).toFixed(0) + 'deg');
+          foil.style.opacity = .72;
+          card.querySelector('.card__glare').style.setProperty('--glare', (20 + px * 60).toFixed(0) + '%');
+        });
+      }
+
+      function onLeave(){
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
+        card.querySelector('.card__shadow').style.setProperty('--sx', '0px');
+        card.querySelector('.card__foil').style.opacity = '';
+        card.classList.remove('is-tilting');
+        card.classList.add('is-auto');
+      }
+
+      const stage = card.closest('.card-stage');
+      if (window.matchMedia('(pointer: fine)').matches){
+        stage.addEventListener('pointermove', onMove);
+        stage.addEventListener('pointerleave', onLeave);
+      }
+
+      // Coup de brillance verte au clic/tap sur la carte (mobile)
+      card.addEventListener('click', () => {
+        const foil = card.querySelector('.card__foil');
+        foil.style.transition = 'opacity .15s';
+        foil.style.opacity = '.9';
+        setTimeout(() => { foil.style.opacity = ''; }, 280);
+      });
+    })();
+  </script>
+</body>
+</html>

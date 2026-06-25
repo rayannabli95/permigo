@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PermiGo — 4 directions « Compétence acquise »</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    background:#0e0f17;color:#f3f4f8;
+    padding:28px 20px 60px;
+  }
+  h1{font-size:22px;font-weight:800;margin-bottom:4px}
+  .sub{color:#9aa0b4;font-size:14px;margin-bottom:26px}
+  .grid{
+    display:flex;flex-wrap:wrap;gap:30px;justify-content:center;
+  }
+  .cell{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .tag{
+    font-size:13px;font-weight:800;letter-spacing:.04em;
+    padding:7px 16px;border-radius:99px;
+    background:#1b1d2c;border:1px solid #2a2d40;color:#cdd2e6;
+  }
+  .tag b{color:#fff}
+  .frame{
+    width:430px;height:900px;border:0;border-radius:20px;
+    background:#000;box-shadow:0 24px 60px -20px rgba(0,0,0,.7);
+    overflow:hidden;
+  }
+  iframe{width:100%;height:100%;border:0;display:block}
+  @media(max-width:920px){ .frame{width:380px;height:800px} }
+</style>
+</head>
+<body>
+  <h1>4 directions — écran « Compétence acquise »</h1>
+  <p class="sub">Mêmes données partout · S'insérer sur l'autoroute · C3 Montagne · 100 % · 18/31 · permis virtuel 58 %</p>
+  <div class="grid">
+    <div class="cell">
+      <span class="tag" style="background:#13261a;border-color:#2f6b3a;color:#bff0c9">★ <b>D2</b> · Carte + Feu vert (nouvelle)</span>
+      <div class="frame"><iframe src="competence-win-D2-carte-feuvert.html" title="D2"></iframe></div>
+    </div>
+    <div class="cell">
+      <span class="tag"><b>A</b> · Médaille Or 3D (luxe clair)</span>
+      <div class="frame"><iframe src="competence-win-A-medaille-or.html" title="A"></iframe></div>
+    </div>
+    <div class="cell">
+      <span class="tag"><b>B</b> · Arène / Coffre (Clash Royale)</span>
+      <div class="frame"><iframe src="competence-win-B-arene-coffre.html" title="B"></iframe></div>
+    </div>
+    <div class="cell">
+      <span class="tag"><b>C</b> · Route / Feu vert (marque)</span>
+      <div class="frame"><iframe src="competence-win-C-route-feuvert.html" title="C"></iframe></div>
+    </div>
+    <div class="cell">
+      <span class="tag"><b>D</b> · Carte holographique (collection)</span>
+      <div class="frame"><iframe src="competence-win-D-carte-holo.html" title="D"></iframe></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#15171f" />
+<title>PermiGo — Compétence acquise · Médaille or 3D</title>
+
+<!-- Polices : titres luxe (Fraunces) + UI (Plus Jakarta Sans) + texte (Nunito) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800;9..144,900&family=Plus+Jakarta+Sans:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+  /* ============================================================
+     PermiGo — « Compétence acquise »  ·  Direction A
+     MÉDAILLE OR 3D — luxe clair, salle des trophées / boîte à montre
+     ============================================================ */
+
+  :root{
+    /* --- Or (le métal) --- */
+    --or-hi:    #fceabb;   /* reflet le plus clair */
+    --or:       #f6d365;   /* or chaud */
+    --or-mid:   #e8b84b;
+    --or-deep:  #d4a017;   /* or sombre (gravure) */
+    --or-shade: #a9760c;   /* ombre du métal */
+
+    /* --- Monde « Montagne » : violet --- */
+    --vio:      #8b5cf6;
+    --vio-soft: #a78bfa;
+    --vio-deep: #6d28d9;
+    --indigo:   #4f46e5;
+
+    /* --- Neutres ivoire / encre (luxe clair) --- */
+    --ivoire-1: #fdfbf7;
+    --ivoire-2: #f3ece0;
+    --ivoire-3: #e9dcc7;
+    --carte:    #fffdf9;   /* fond des cartes, blanc cassé chaud */
+    --ink:      #2a2018;   /* encre sombre = texte principal */
+    --ink-soft: #6b5d4d;   /* texte secondaire chaud */
+    --ink-mute: #9a8a73;   /* labels */
+    --hair:     rgba(212,160,23,.28);  /* filet doré subtil */
+
+    --r:        20px;
+    --r-sm:     16px;
+    --ease:     cubic-bezier(.22,.61,.36,1);     /* sortie douce */
+    --spring:   cubic-bezier(.34,1.56,.64,1);    /* léger rebond */
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+
+  /* ====== FOND DE PAGE (le « bureau » sombre où pose le téléphone) ====== */
+  body{
+    font-family:"Nunito", system-ui, sans-serif;
+    background:
+      radial-gradient(120% 90% at 50% -10%, #20232f 0%, #15171f 55%, #0f1118 100%);
+    min-height:100svh;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px 16px;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  /* ====== CADRE TÉLÉPHONE ====== */
+  .phone{
+    position:relative;
+    width:390px; max-width:100%;
+    height:844px; max-height:calc(100svh - 40px);
+    border-radius:44px;
+    padding:10px;
+    background:linear-gradient(160deg, #2c2f3a, #14151c);
+    box-shadow:
+      0 2px 1px rgba(255,255,255,.12) inset,
+      0 50px 90px -30px rgba(0,0,0,.85),
+      0 18px 50px -20px rgba(0,0,0,.6);
+  }
+  /* Encoche */
+  .phone::before{
+    content:""; position:absolute; top:12px; left:50%; transform:translateX(-50%);
+    width:128px; height:26px; background:#0c0d12; border-radius:0 0 16px 16px; z-index:30;
+  }
+
+  /* ====== ÉCRAN = la célébration ====== */
+  .screen{
+    position:relative;
+    width:100%; height:100%;
+    border-radius:35px;
+    overflow:hidden;
+    isolation:isolate;
+    /* Fond perle/ivoire chaud, dégradé radial */
+    background:
+      radial-gradient(130% 100% at 50% 0%, var(--ivoire-1) 0%, var(--ivoire-2) 52%, var(--ivoire-3) 100%);
+    display:flex; flex-direction:column;
+  }
+
+  /* --- Spotlight : cône de lumière qui descend du haut sur la médaille --- */
+  .spotlight{
+    position:absolute; left:50%; top:-6%;
+    width:118%; height:62%;
+    transform:translateX(-50%);
+    background:
+      radial-gradient(60% 100% at 50% 0%, rgba(255,255,255,.92) 0%, rgba(255,250,235,.45) 26%, transparent 62%);
+    /* le cône : large en bas, pincé en haut */
+    clip-path:polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+    mix-blend-mode:screen;
+    opacity:.9;
+    pointer-events:none; z-index:1;
+  }
+  /* Halo chaud diffus sous le spot, qui « pose » la médaille */
+  .glow-floor{
+    position:absolute; left:50%; top:30%;
+    width:340px; height:340px; transform:translate(-50%,-50%);
+    background:radial-gradient(closest-side, rgba(246,211,101,.34), rgba(246,211,101,.10) 55%, transparent 72%);
+    filter:blur(8px); pointer-events:none; z-index:1;
+  }
+
+  /* --- Vignette douce aux bords --- */
+  .vignette{
+    position:absolute; inset:0; pointer-events:none; z-index:6;
+    background:radial-gradient(120% 95% at 50% 32%, transparent 52%, rgba(74,54,20,.16) 100%);
+  }
+  /* --- Grain premium (SVG bruit) --- */
+  .grain{
+    position:absolute; inset:0; pointer-events:none; z-index:7; opacity:.045;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* --- Confettis dorés/violets discrets (peu, premium) --- */
+  .confetti{ position:absolute; inset:0; z-index:2; pointer-events:none; overflow:hidden; }
+  .confetti i{
+    position:absolute; width:9px; height:9px; opacity:0;
+    border-radius:2px;
+    will-change:transform, opacity;
+  }
+  .confetti i:nth-child(1){ left:18%; top:14%; background:var(--or); transform:rotate(18deg); }
+  .confetti i:nth-child(2){ left:78%; top:11%; background:var(--vio); width:7px; height:7px; }
+  .confetti i:nth-child(3){ left:30%; top:8%;  background:var(--or-deep); border-radius:50%; width:6px; height:6px; }
+  .confetti i:nth-child(4){ left:68%; top:20%; background:var(--vio-soft); transform:rotate(-22deg); }
+  .confetti i:nth-child(5){ left:12%; top:26%; background:var(--or-hi); width:6px; height:6px; border-radius:50%; }
+  .confetti i:nth-child(6){ left:86%; top:30%; background:var(--or); width:7px; height:7px; transform:rotate(40deg); }
+  .confetti i:nth-child(7){ left:50%; top:6%;  background:var(--vio); width:6px; height:6px; border-radius:50%; }
+  .confetti i:nth-child(8){ left:62%; top:34%; background:var(--or-deep); width:6px; height:6px; }
+
+  /* ====== CONTENU ====== */
+  .stage{
+    position:relative; z-index:5;
+    flex:1; min-height:0;
+    display:flex; flex-direction:column; align-items:center;
+    padding:46px 26px 22px;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+  }
+
+  /* --- Logo discret en haut --- */
+  .logo{ height:22px; width:auto; opacity:.62; margin-bottom:18px; }
+  .logo.is-broken{ display:none; }
+  .logo.is-broken + .logo-txt{ display:inline-block; }
+  .logo-txt{
+    display:none; font-family:"Fraunces", serif; font-weight:800; font-size:16px;
+    letter-spacing:.3px; color:var(--ink-soft); opacity:.7; margin-bottom:18px;
+  }
+
+  /* --- Kicker « Compétence acquise » + coche --- */
+  .kicker{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:"Plus Jakarta Sans", sans-serif; font-weight:800;
+    font-size:12px; letter-spacing:2.4px; text-transform:uppercase;
+    color:var(--or-deep);
+    padding:7px 14px 7px 9px;
+    background:linear-gradient(180deg, rgba(255,255,255,.7), rgba(246,211,101,.16));
+    border:1px solid var(--hair);
+    border-radius:999px;
+    box-shadow:0 1px 0 rgba(255,255,255,.8) inset, 0 4px 14px -6px rgba(212,160,23,.5);
+  }
+  .kicker .tick{
+    width:20px; height:20px; border-radius:50%; flex:none;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(160deg, var(--or-hi), var(--or-mid));
+    box-shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 2px 6px -1px rgba(169,118,12,.6);
+  }
+  .kicker .tick svg{ width:11px; height:11px; color:#5a3d06; }
+
+  /* ====== LA MÉDAILLE (focal unique) ====== */
+  .medal{
+    position:relative; margin:24px 0 8px;
+    width:174px; height:174px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  /* Halo doré radial derrière */
+  .medal::before{
+    content:""; position:absolute; inset:-34px; z-index:-1; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(246,211,101,.55), rgba(246,211,101,.18) 56%, transparent 76%);
+    filter:blur(4px);
+    animation:halo 4s var(--ease) infinite;
+  }
+  @keyframes halo{ 0%,100%{ opacity:.75; transform:scale(.97); } 50%{ opacity:1; transform:scale(1.05); } }
+
+  .medal img{
+    width:150px; height:150px; object-fit:contain;
+    filter:
+      drop-shadow(0 10px 18px rgba(169,118,12,.45))
+      drop-shadow(0 2px 4px rgba(0,0,0,.18));
+  }
+  .medal img.is-broken{ display:none; }
+  .medal img.is-broken ~ .medal-css{ display:flex; }
+
+  /* --- Fallback médaille 100% CSS --- */
+  .medal-css{
+    display:none; position:relative;
+    width:150px; height:150px; align-items:center; justify-content:center;
+  }
+  /* Ruban (couleur du monde Montagne = violet) */
+  .medal-css .ribbon-l,
+  .medal-css .ribbon-r{
+    position:absolute; top:-6px; width:30px; height:74px; z-index:0;
+    background:linear-gradient(180deg, var(--vio-soft), var(--vio-deep));
+    box-shadow:0 4px 10px -3px rgba(109,40,217,.5) inset;
+  }
+  .medal-css .ribbon-l{ left:42px; transform:rotate(11deg); clip-path:polygon(0 0,100% 0,100% 100%,50% 84%,0 100%); }
+  .medal-css .ribbon-r{ right:42px; transform:rotate(-11deg); clip-path:polygon(0 0,100% 0,100% 100%,50% 84%,0 100%); }
+  /* Anneau or */
+  .medal-css .ring{
+    position:absolute; top:30px; width:108px; height:108px; border-radius:50%;
+    background:
+      conic-gradient(from 220deg, var(--or-hi), var(--or) 22%, var(--or-deep) 50%, var(--or) 78%, var(--or-hi));
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.6) inset,
+      0 10px 22px -8px rgba(169,118,12,.7),
+      0 0 0 6px rgba(255,255,255,.4);
+    display:flex; align-items:center; justify-content:center; z-index:1;
+  }
+  /* Disque intérieur + coche gravée */
+  .medal-css .disc{
+    width:78px; height:78px; border-radius:50%;
+    background:radial-gradient(circle at 38% 30%, var(--or-hi), var(--or) 45%, var(--or-mid) 78%, var(--or-shade));
+    box-shadow:0 2px 6px rgba(105,72,8,.5) inset, 0 -2px 4px rgba(255,255,255,.4) inset;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .medal-css .disc svg{ width:38px; height:38px; color:#5a3d06; filter:drop-shadow(0 1px 0 rgba(255,255,255,.35)); }
+
+  /* Reflet vitré glissant sur la médaille */
+  .medal .shine{
+    position:absolute; inset:0; z-index:2; pointer-events:none; border-radius:50%;
+    background:linear-gradient(120deg, transparent 36%, rgba(255,255,255,.55) 50%, transparent 64%);
+    -webkit-mask:radial-gradient(closest-side, #000 64%, transparent 67%);
+            mask:radial-gradient(closest-side, #000 64%, transparent 67%);
+    transform:translateX(-130%);
+  }
+
+  /* ====== TITRES ====== */
+  .title{
+    font-family:"Fraunces", serif; font-weight:800;
+    font-size:29px; line-height:1.1; letter-spacing:-.3px;
+    color:var(--ink); text-align:center; margin-top:6px;
+    max-width:300px;
+  }
+  .cat{
+    margin-top:9px; display:inline-flex; align-items:center; gap:7px;
+    font-family:"Plus Jakarta Sans", sans-serif; font-weight:700; font-size:13.5px;
+    color:var(--ink-soft);
+  }
+  .cat .dot{ width:7px; height:7px; border-radius:50%; background:var(--vio); box-shadow:0 0 0 3px rgba(139,92,246,.18); }
+
+  /* ====== STATS ====== */
+  .stats{
+    display:grid; grid-template-columns:1fr 1fr; gap:12px;
+    width:100%; max-width:320px; margin-top:22px;
+  }
+  .stat{
+    background:linear-gradient(180deg, var(--carte), #fbf6ec);
+    border:1px solid var(--hair);
+    border-radius:var(--r-sm);
+    padding:14px 12px 12px;
+    text-align:center;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.9) inset,
+      0 8px 20px -12px rgba(120,90,30,.4);
+  }
+  .stat__num{
+    font-family:"Fraunces", serif; font-weight:800;
+    font-size:26px; line-height:1; color:var(--ink);
+    font-variant-numeric:tabular-nums;
+  }
+  .stat__num .unit{ font-size:16px; color:var(--ink-soft); margin-left:1px; }
+  .stat__lab{
+    margin-top:6px; font-family:"Plus Jakarta Sans", sans-serif; font-weight:700;
+    font-size:11px; letter-spacing:.7px; text-transform:uppercase; color:var(--ink-mute);
+  }
+
+  /* ====== BARRE PERMIS VIRTUEL ====== */
+  .perm{ width:100%; max-width:320px; margin-top:18px; }
+  .perm__top{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:8px;
+  }
+  .perm__lab{
+    font-family:"Plus Jakarta Sans", sans-serif; font-weight:800; font-size:13px;
+    color:var(--ink-soft); letter-spacing:.2px;
+  }
+  .perm__val{
+    font-family:"Fraunces", serif; font-weight:800; font-size:16px; color:var(--or-deep);
+    font-variant-numeric:tabular-nums;
+  }
+  .perm__track{
+    height:11px; border-radius:999px;
+    background:linear-gradient(180deg, #efe6d4, #f6efe2);
+    box-shadow:0 1px 2px rgba(120,90,30,.22) inset;
+    overflow:hidden;
+  }
+  .perm__fill{
+    height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(90deg, var(--or) 0%, var(--or-mid) 42%, var(--vio) 100%);
+    box-shadow:0 0 10px -1px rgba(139,92,246,.5);
+    transition:width 1.1s var(--ease);
+  }
+  /* petite brillance sur le fill */
+  .perm__fill::after{
+    content:""; display:block; height:42%; margin:1px 4px 0;
+    background:linear-gradient(90deg, rgba(255,255,255,.6), transparent);
+    border-radius:999px;
+  }
+
+  /* ====== ACTIONS ====== */
+  .actions{ width:100%; max-width:320px; margin-top:auto; padding-top:22px; }
+
+  .cta{
+    position:relative; width:100%; min-height:56px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-family:"Plus Jakarta Sans", sans-serif; font-weight:800; font-size:17px;
+    color:#fff7ec; letter-spacing:.2px;
+    border:0; border-radius:var(--r-sm); cursor:pointer;
+    background:linear-gradient(180deg, #3a2c1e 0%, var(--ink) 60%, #1c140d 100%);
+    /* bouton physique : highlight haut + ombre du bas */
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.18) inset,
+      0 6px 0 #14100a,                       /* « épaisseur » du bouton */
+      0 16px 26px -10px rgba(34,24,12,.7);
+    overflow:hidden;
+    transition:transform .12s var(--ease), box-shadow .2s var(--ease), filter .2s var(--ease);
+  }
+  /* liseré doré en haut du bouton */
+  .cta::before{
+    content:""; position:absolute; left:0; right:0; top:0; height:2px;
+    background:linear-gradient(90deg, transparent, var(--or), transparent);
+    opacity:.7;
+  }
+  /* balayage lumineux */
+  .cta .sweep{
+    position:absolute; inset:0;
+    background:linear-gradient(120deg, transparent 34%, rgba(255,232,170,.28) 50%, transparent 66%);
+    transform:translateX(-130%); transition:transform .7s var(--ease);
+  }
+  .cta:hover{ filter:brightness(1.07); }
+  .cta:hover .sweep{ transform:translateX(130%); }
+  .cta:active{
+    transform:translateY(4px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.18) inset,
+      0 2px 0 #14100a,
+      0 8px 14px -8px rgba(34,24,12,.7);
+  }
+  .cta:focus-visible{ outline:3px solid var(--or); outline-offset:3px; }
+  .cta svg{ width:18px; height:18px; }
+
+  .secondary{
+    display:block; width:100%; text-align:center;
+    margin-top:14px; padding:10px; min-height:44px;
+    font-family:"Plus Jakarta Sans", sans-serif; font-weight:700; font-size:14px;
+    color:var(--ink-mute); text-decoration:none; background:none; border:0; cursor:pointer;
+    transition:color .2s var(--ease);
+  }
+  .secondary:hover{ color:var(--ink-soft); text-decoration:underline; }
+  .secondary:focus-visible{ outline:2px solid var(--vio); outline-offset:3px; border-radius:8px; }
+
+  /* ====== MASCOTTE (coin bas) ====== */
+  .mascot{
+    position:absolute; right:-6px; bottom:84px; z-index:4;
+    width:96px; height:auto; pointer-events:none;
+    filter:drop-shadow(0 8px 14px rgba(120,90,30,.32));
+    transform:scaleX(-1);          /* regarde vers la médaille (centre) */
+  }
+  .mascot.is-broken{ display:none; }
+
+  /* ====== ANIMATIONS D'ENTRÉE ====== */
+  /* état initial (avant .show) */
+  .kicker, .medal, .title, .cat, .stat, .perm, .actions .cta, .actions .secondary, .confetti i, .mascot{
+    opacity:0;
+  }
+  .screen.show .kicker{ animation:fadeDown .6s var(--ease) .05s both; }
+  .screen.show .medal{ animation:pop .8s var(--spring) .15s both; }
+  .screen.show .medal .shine{ animation:shineSweep 1.1s var(--ease) .9s 1; }
+  .screen.show .title{ animation:slideUp .6s var(--ease) .42s both; }
+  .screen.show .cat{ animation:slideUp .6s var(--ease) .50s both; }
+  .screen.show .stat:nth-child(1){ animation:slideUp .55s var(--ease) .60s both; }
+  .screen.show .stat:nth-child(2){ animation:slideUp .55s var(--ease) .70s both; }
+  .screen.show .perm{ animation:slideUp .55s var(--ease) .80s both; }
+  .screen.show .actions .cta{ animation:fadeUp .55s var(--ease) .95s both; }
+  .screen.show .actions .secondary{ animation:fadeUp .55s var(--ease) 1.05s both; }
+  .screen.show .mascot{ animation:mascotIn .7s var(--spring) 1.1s both; }
+  .screen.show .confetti i{ animation:confettiPop .7s var(--spring) both; }
+  .screen.show .confetti i:nth-child(odd){ animation-delay:.5s; }
+  .screen.show .confetti i:nth-child(even){ animation-delay:.65s; }
+
+  @keyframes fadeDown{ from{ opacity:0; transform:translateY(-12px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes slideUp{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+  @keyframes pop{
+    0%{ opacity:0; transform:scale(.5) translateY(10px); }
+    60%{ opacity:1; transform:scale(1.08); }
+    100%{ opacity:1; transform:scale(1); }
+  }
+  @keyframes mascotIn{ from{ opacity:0; transform:scaleX(-1) translateY(28px); } to{ opacity:1; transform:scaleX(-1) translateY(0); } }
+  @keyframes confettiPop{
+    0%{ opacity:0; transform:translateY(0) scale(.4); }
+    35%{ opacity:1; }
+    100%{ opacity:.9; transform:translateY(8px) scale(1) rotate(40deg); }
+  }
+  @keyframes shineSweep{ 0%{ transform:translateX(-130%); } 100%{ transform:translateX(130%); } }
+
+  /* ====== REDUCED MOTION ====== */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation:none !important; transition-duration:.01ms !important; }
+    .kicker, .medal, .title, .cat, .stat, .perm, .actions .cta, .actions .secondary, .mascot{ opacity:1 !important; }
+    .confetti i{ opacity:.9 !important; }
+    .perm__fill{ transition:none !important; }
+  }
+
+  /* ====== petit écran (cadre rétrécit sous 400px) ====== */
+  @media (max-width:410px){
+    .phone{ height:auto; min-height:760px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="screen" id="screen">
+
+      <!-- décor -->
+      <div class="spotlight" aria-hidden="true"></div>
+      <div class="glow-floor" aria-hidden="true"></div>
+      <div class="confetti" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+
+      <!-- contenu -->
+      <main class="stage" role="dialog" aria-label="Compétence acquise">
+
+        <img src="../public/permigo-logo.png" alt="PermiGo" class="logo"
+             onerror="this.classList.add('is-broken')" />
+        <span class="logo-txt" aria-hidden="true">PermiGo</span>
+
+        <!-- Kicker -->
+        <div class="kicker">
+          <span class="tick" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6"
+                 stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          Compétence acquise
+        </div>
+
+        <!-- La médaille -->
+        <div class="medal">
+          <img src="../public/skins/badge-medaille.png" alt="Médaille d'or"
+               onerror="this.classList.add('is-broken')" />
+          <!-- fallback CSS -->
+          <div class="medal-css" aria-hidden="true">
+            <span class="ribbon-l"></span>
+            <span class="ribbon-r"></span>
+            <div class="ring">
+              <div class="disc">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4"
+                     stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </div>
+            </div>
+          </div>
+          <span class="shine" aria-hidden="true"></span>
+        </div>
+
+        <!-- Titres -->
+        <h1 class="title">S'insérer sur l'autoroute</h1>
+        <span class="cat"><span class="dot"></span>C3 · Montagne</span>
+
+        <!-- Stats -->
+        <div class="stats">
+          <div class="stat">
+            <div class="stat__num"><span id="score">0</span><span class="unit">%</span></div>
+            <div class="stat__lab">Score</div>
+          </div>
+          <div class="stat">
+            <div class="stat__num"><span id="acq">0</span><span class="unit">/31</span></div>
+            <div class="stat__lab">Acquises</div>
+          </div>
+        </div>
+
+        <!-- Barre Permis virtuel -->
+        <div class="perm">
+          <div class="perm__top">
+            <span class="perm__lab">Permis virtuel</span>
+            <span class="perm__val">58 %</span>
+          </div>
+          <div class="perm__track">
+            <div class="perm__fill" id="permFill"></div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button type="button" class="cta">
+            <span class="sweep" aria-hidden="true"></span>
+            Continuer
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+                 stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+          <button type="button" class="secondary">Voir mon parcours</button>
+        </div>
+
+      </main>
+
+      <!-- Mascotte qui regarde la médaille -->
+      <img src="../public/skins/mascot-celebrate.png" alt="" class="mascot"
+           onerror="this.classList.add('is-broken')" />
+
+      <!-- overlays au-dessus de tout -->
+      <div class="vignette" aria-hidden="true"></div>
+      <div class="grain" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      var screen  = document.getElementById('screen');
+      var reduce  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // compteurs animés
+      function countTo(el, target, dur){
+        if(reduce){ el.textContent = target; return; }
+        var start = null;
+        function step(ts){
+          if(!start) start = ts;
+          var p = Math.min((ts - start) / dur, 1);
+          // easeOut
+          var e = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(e * target);
+          if(p < 1) requestAnimationFrame(step);
+          else el.textContent = target;
+        }
+        requestAnimationFrame(step);
+      }
+
+      // déclenche après un reflow → joue les animations CSS d'entrée
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          screen.classList.add('show');
+
+          // barre permis : remplir à 58 %
+          var fill = document.getElementById('permFill');
+          if(reduce){ fill.style.width = '58%'; }
+          else { setTimeout(function(){ fill.style.width = '58%'; }, 800); }
+
+          // compteurs (calés sur l'apparition des stats)
+          var scoreEl = document.getElementById('score');
+          var acqEl   = document.getElementById('acq');
+          if(reduce){
+            scoreEl.textContent = 100; acqEl.textContent = 18;
+          } else {
+            setTimeout(function(){ countTo(scoreEl, 100, 1100); }, 650);
+            setTimeout(function(){ countTo(acqEl, 18, 1000); }, 750);
+          }
+        });
+      });
+
+      // feedback léger sur les boutons (mockup : pas de navigation réelle)
+      document.querySelectorAll('.cta, .secondary').forEach(function(b){
+        b.addEventListener('click', function(e){ e.preventDefault(); });
+      });
+    })();
+  </script>
+</body>
+</html>
