@@ -29,6 +29,12 @@ function notifRoute(n) {
     case "session_confirmed":
     case "session_refused":
       return "#/";
+    case "comp_acquise":
+      return "#/parcours";
+    case "compte_rendu":
+      return d.compte_rendu_id
+        ? `#/compte-rendu/${d.compte_rendu_id}`
+        : "#/parcours";
     default:
       return "#/";
   }
@@ -121,6 +127,18 @@ const TYPE_META = {
     bg: "rgba(14,165,233,.12)",
     color: "var(--bl)",
     label: "Rappel",
+  },
+  comp_acquise: {
+    iconName: "check-circle",
+    bg: "rgba(16,185,129,.12)",
+    color: "var(--gr)",
+    label: "Compétence validée",
+  },
+  compte_rendu: {
+    iconName: "file-text",
+    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    color: "var(--a)",
+    label: "Compte-rendu",
   },
   info: {
     iconName: "bell",

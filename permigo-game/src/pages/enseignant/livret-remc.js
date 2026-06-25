@@ -1201,21 +1201,25 @@ async function doSave(overlay) {
     });
     saveError = error || (data?.error ? new Error(data.error) : null);
   } else {
-    // « En cours » / « à retravailler » : upsert direct. Pas de notif, et il
-    // faut pouvoir RÉTROGRADER une compétence acquise (correction), ce que
-    // validate_session interdit volontairement. Pas de RLS bloquante ici.
-    const payload = {
-      eleve_id: _eleveId,
-      competence_id: _sheetComp.c,
-      validated_by: _me.id,
-      statut: _sheetStatut,
-      validated_at: new Date().toISOString(),
-    };
-    if (note) payload.note_enseignant = note;
-    const { error } = await sb
-      .from("validations")
-      .upsert(payload, { onConflict: "eleve_id,competence_id" });
-    saveError = error;
+    // « En cours » / « à retravailler » : via set_competence_status
+    // (SECURITY DEFINER). Il autorise la RÉTROGRADATION d'un acquis (correction,
+    // ce que validate_session interdit) ET, pour « à retravailler », crée
+    // automatiquement un devoir + notifie l'élève (compte-rendu d'1 compétence).
+    let crText = null;
+    if (_sheetStatut === "a_retravailler") {
+      const prenom = _eleveProfil?.prenom || "Ton élève";
+      crText =
+        `Compte-rendu — ${prenom}\n\nÀ retravailler : ${_sheetComp.n}` +
+        (note ? `\n\nNote du moniteur : ${note}` : "");
+    }
+    const { data, error } = await sb.rpc("set_competence_status", {
+      p_eleve_id: _eleveId,
+      p_competence_id: _sheetComp.c,
+      p_statut: _sheetStatut,
+      p_note: note,
+      p_compte_rendu: crText,
+    });
+    saveError = error || (data?.error ? new Error(data.error) : null);
   }
 
   if (saveError) {
