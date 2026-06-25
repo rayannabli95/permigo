@@ -58,8 +58,11 @@ export async function lancerQuiz({
     return null;
   }
 
-  // Mélange + slice
-  const pool = shuffle(questions).slice(0, nbQuestions);
+  // Mélange des questions + des réponses (sinon la bonne réponse reste à
+  // l'index `correct_index` figé → toujours à la même place) + slice
+  const pool = shuffle(questions)
+    .slice(0, nbQuestions)
+    .map(withShuffledOptions);
   let idx = 0;
   let score = 0;
   let streak = 0; // bonnes réponses consécutives (son + chip « Série de N »)
@@ -213,6 +216,19 @@ function shuffle(a) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+// Mélange les réponses d'une question et remappe `correct_index` vers sa
+// nouvelle position. Clone la question : le rendu (q.options) et le score
+// (q.correct_index) restent alignés sur le même objet.
+function withShuffledOptions(q) {
+  if (!Array.isArray(q.options) || q.options.length < 2) return q;
+  const order = shuffle(q.options.map((_, i) => i));
+  return {
+    ...q,
+    options: order.map((i) => q.options[i]),
+    correct_index: order.indexOf(q.correct_index),
+  };
 }
 
 function renderOverlay() {

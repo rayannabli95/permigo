@@ -38,6 +38,28 @@ function fmtClock(ms) {
   return `${m}:${String(s % 60).padStart(2, "0")}`;
 }
 
+// Mélange les réponses pour qu'elles ne tombent pas toujours dans le même
+// ordre (la bonne sinon figée à `correct_index`). On garde `_order` :
+// _order[indexAffiché] = indexOriginalEnBase. Le rendu/la correction utilisent
+// l'index affiché ; l'envoi serveur retraduit vers l'index d'origine (le score
+// est recalculé côté serveur contre le correct_index de la base).
+function withShuffledOptions(q) {
+  if (!Array.isArray(q.options) || q.options.length < 2) {
+    return { ...q, _order: (q.options || []).map((_, i) => i) };
+  }
+  const order = q.options.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return {
+    ...q,
+    options: order.map((i) => q.options[i]),
+    correct_index: order.indexOf(q.correct_index),
+    _order: order,
+  };
+}
+
 export async function mount(root, flashQuizId) {
   if (_timer) {
     clearInterval(_timer);
@@ -78,7 +100,10 @@ export async function mount(root, flashQuizId) {
       .in("id", quiz.question_ids);
 
     const byId = new Map((rows || []).map((q) => [q.id, q]));
-    const pool = quiz.question_ids.map((id) => byId.get(id)).filter(Boolean);
+    const pool = quiz.question_ids
+      .map((id) => byId.get(id))
+      .filter(Boolean)
+      .map(withShuffledOptions);
 
     if (pool.length === 0)
       return renderClosed(root, "Questions indisponibles, réessaie plus tard.");
@@ -153,7 +178,12 @@ function runQuiz(root, { quiz, pool }) {
 
   function handleAnswer(chosen, q) {
     stopSpeaking();
-    answers.push({ question_id: q.id, selected_idx: chosen });
+    // Le serveur rescore contre le correct_index d'origine → on lui renvoie
+    // l'index AVANT mélange (q._order traduit l'index affiché → index base).
+    answers.push({
+      question_id: q.id,
+      selected_idx: q._order[chosen] ?? chosen,
+    });
     const correct = applyReveal(bodyEl, {
       chosen,
       correctIndex: q.correct_index,
