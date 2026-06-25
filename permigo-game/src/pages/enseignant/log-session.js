@@ -18,6 +18,7 @@ import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { getFiche } from "@/data/fiches-conduite.js";
+import { labelComp } from "@/utils/remc-label.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { illus } from "@/components/enseignant/illus.js";
@@ -994,6 +995,55 @@ async function sendTargetedRevisions(codes) {
   }
 }
 
+// ── Compte-rendu de leçon (⭐) : texte partageable, preuve à la marque du
+// moniteur, reçue par l'élève (et lue par ses parents). Cadré « validation »
+// (jamais de date de prochaine leçon — charte : pas de planning).
+function buildCompteRenduText(
+  prenom,
+  acquisNames,
+  totalAcquis,
+  pct,
+  point,
+  monNom,
+) {
+  const lines = [`Compte-rendu de la leçon — ${prenom}`, ""];
+  if (acquisNames.length) {
+    lines.push("Validé aujourd'hui :");
+    acquisNames.forEach((n) => lines.push("• " + n));
+    lines.push("");
+  }
+  lines.push(
+    `Progression : ${totalAcquis}/${REMC_TOTAL} compétences (${pct}%)`,
+  );
+  if (point) lines.push(`À revoir avant la prochaine validation : ${point}`);
+  lines.push("");
+  lines.push(
+    `Bravo, continue comme ça ! — ${fmtName(monNom || "ton moniteur")}`,
+  );
+  return lines.join("\n");
+}
+
+async function sendCompteRendu(text) {
+  track("compte_rendu.send");
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "Compte-rendu PermiGo", text });
+      return;
+    } catch (e) {
+      if (e && e.name === "AbortError") return; // annulé par le moniteur
+    }
+  }
+  // Fallback (desktop / pas de Web Share) : WhatsApp en mode composition.
+  // Aucun numéro d'élève n'est stocké (charte) → le moniteur choisit le contact.
+  try {
+    await navigator.clipboard.writeText(text);
+    toast("Compte-rendu copié — colle-le à ton élève", "info");
+  } catch {
+    /* clipboard indispo */
+  }
+  window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+}
+
 // Écran succès arcade : referme la boucle « je valide → l'élève avance → il le voit ».
 function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes) {
   // Ferme un tour guidé 1re-visite qui aurait pu s'afficher pendant la RPC
@@ -1002,6 +1052,67 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes) {
   const pct = REMC_TOTAL > 0 ? Math.round((totalAcquis / REMC_TOTAL) * 100) : 0;
   const complete = totalAcquis >= REMC_TOTAL;
   const suggestions = buildRevisionSuggestions(validatedCodes);
+
+  // ── Compte-rendu de leçon (⭐) : la preuve à envoyer à l'élève / parent.
+  const me = getCurUser();
+  const acquisNames = (validatedCodes || [])
+    .map((c) => labelComp(c))
+    .filter(Boolean);
+  // Point à bosser = une compétence suggérée NON validée aujourd'hui (sinon on
+  // afficherait « à revoir » sur ce qu'on vient juste de valider — redondant).
+  const crPoint =
+    (suggestions.find((s) => !acquisNames.includes(s.nom)) || {}).nom || null;
+  const crText = buildCompteRenduText(
+    prenom,
+    acquisNames,
+    totalAcquis,
+    pct,
+    crPoint,
+    me?.nom,
+  );
+  const crCard = `
+    <style>
+      .vs-cr { margin: 14px 0 0; text-align: left; background: #fff; border: 1px solid #e6e9ef; border-radius: 16px; padding: 14px 15px; box-shadow: 0 8px 22px -12px rgba(60,50,130,.35); }
+      .vs-cr-head { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; }
+      .vs-cr-ico { width: 38px; height: 38px; flex-shrink: 0; border-radius: 11px; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #4f46e5, #7c4dff); box-shadow: 0 6px 14px -6px rgba(79,70,229,.6); }
+      .vs-cr-title { font: 800 15px/1.15 'Manrope', 'Plus Jakarta Sans', sans-serif; color: #1a1c2e; }
+      .vs-cr-sub { font: 600 11.5px/1.3 'Inter', sans-serif; color: #6b7095; margin-top: 2px; }
+      .vs-cr-body { display: flex; flex-direction: column; gap: 6px; padding: 11px 12px; background: #f7f8fc; border-radius: 12px; margin-bottom: 12px; }
+      .vs-cr-line { display: flex; align-items: center; gap: 8px; font: 600 13px/1.3 'Inter', sans-serif; color: #2d3050; }
+      .vs-cr-line > svg { flex-shrink: 0; }
+      .vs-cr-line.ok > svg { color: #16a34a; }
+      .vs-cr-line.work { color: #b45309; }
+      .vs-cr-line.work > svg { color: #b45309; }
+      .vs-cr-prog { margin-top: 3px; font: 600 12px/1.3 'Inter', sans-serif; color: #6b7095; }
+      .vs-cr-prog b { color: #4f46e5; font-weight: 800; }
+      .vs-cr-send { width: 100%; min-height: 48px; border: 0; border-radius: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: #fff; font: 800 14px/1 'Inter', sans-serif; background: linear-gradient(135deg, #4f46e5, #7c4dff); box-shadow: 0 6px 16px -6px rgba(79,70,229,.65); transition: transform .1s; }
+      .vs-cr-send:active { transform: scale(.98); }
+    </style>
+    <section class="vs-cr">
+      <div class="vs-cr-head">
+        <div class="vs-cr-ico">${icon("file-text", { size: 18, strokeWidth: 2.2 })}</div>
+        <div>
+          <div class="vs-cr-title">Compte-rendu prêt</div>
+          <div class="vs-cr-sub">À envoyer à ${esc(prenom)} — lu aussi par ses parents</div>
+        </div>
+      </div>
+      <div class="vs-cr-body">
+        ${
+          acquisNames.length
+            ? acquisNames
+                .slice(0, 4)
+                .map(
+                  (n) =>
+                    `<div class="vs-cr-line ok">${icon("check", { size: 14, strokeWidth: 3 })}<span>${esc(n)}</span></div>`,
+                )
+                .join("")
+            : `<div class="vs-cr-line"><span>Progression mise à jour</span></div>`
+        }
+        ${crPoint ? `<div class="vs-cr-line work">${icon("target", { size: 13, strokeWidth: 2.4 })}<span>À revoir : ${esc(crPoint)}</span></div>` : ""}
+        <div class="vs-cr-prog">Progression : <b>${totalAcquis}/${REMC_TOTAL}</b> · ${pct}%</div>
+      </div>
+      <button class="vs-cr-send" id="vs-cr-send" type="button">${icon("send", { size: 15, strokeWidth: 2.2 })} Envoyer le compte-rendu à ${esc(prenom)}</button>
+    </section>`;
 
   const revCard = suggestions.length
     ? `<section class="vs-revsugg" id="vs-revsugg">
@@ -1037,6 +1148,7 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes) {
         <div class="vs-success-bar"><div class="vs-success-fill" style="width:0%"></div></div>
         <div class="vs-success-meta"><b>${totalAcquis}/${REMC_TOTAL}</b> compétences validées · ${pct}%</div>
         <div class="vs-success-note">${complete ? `${esc(prenom)} est prêt·e pour l'examen.` : `${esc(prenom)} voit sa progression dans son appli.`}</div>
+        ${crCard}
         ${revCard}
         <button class="vs-success-done" id="vs-success-done" type="button">${icon("users", { size: 16, strokeWidth: 2.2 })} Voir mes élèves</button>
       </div>
@@ -1050,6 +1162,11 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes) {
   _root
     .querySelector("#vs-success-done")
     ?.addEventListener("click", () => navigate("#/eleves"));
+
+  _root.querySelector("#vs-cr-send")?.addEventListener("click", () => {
+    haptic("tap");
+    sendCompteRendu(crText);
+  });
 
   wireRevisionCard();
 }
