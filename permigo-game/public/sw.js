@@ -7,7 +7,7 @@
  *  - Pas de tracking, juste pour permettre l'install PWA sur iOS / Android.
  */
 
-const CACHE_NAME = "permigo-v4";
+const CACHE_NAME = "permigo-v5";
 // Scope auto-detect : ex '/permigo-v7/' sur GitHub Pages, '/' en local
 const SCOPE = self.registration
   ? self.registration.scope
@@ -48,8 +48,10 @@ self.addEventListener("activate", (event) => {
 // { type, title, body, icon?, badge?, data: { route?, competence_id? } }
 
 const NOTIF_DEFAULTS = {
-  icon: "/icons/icon-192.png",
-  badge: "/icons/badge-72.png",
+  // /icons/* n'existe pas (le rewrite Vercel renvoyait le HTML du SPA → notif
+  // sans icône). On pointe les vrais assets de public/ (utilisés par le manifest).
+  icon: "/icon-192.png",
+  badge: "/icon-192.png", // pas de badge monochrome dédié → fallback sur l'icône
   requireInteraction: false,
 };
 
@@ -86,7 +88,12 @@ self.addEventListener("push", (event) => {
     body: payload.body ?? defaults.body,
     icon: payload.icon ?? NOTIF_DEFAULTS.icon,
     badge: payload.badge ?? NOTIF_DEFAULTS.badge,
-    tag: payload.type ?? "permigo",
+    // tag stable par TYPE (daily/comeback se remplacent) mais distinct par
+    // route pour les pushs événementiels (sinon validation/consolidation/série
+    // partageaient "permigo" et s'écrasaient l'un l'autre).
+    tag:
+      payload.type ??
+      (payload.data?.route ? `pg:${payload.data.route}` : `pg:${Date.now()}`),
     data: payload.data ?? {},
     // Vibration douce : 200ms on, 100ms off, 100ms on
     vibrate: [200, 100, 100],
