@@ -71,13 +71,20 @@ test.describe("Parcours REMC", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsEleve(page);
     await page.evaluate(() => {
+      // Vue par défaut = « Chapitre » (jalons .prc-cv-jalon). On la force pour
+      // un test déterministe, indépendant d'une préférence éventuellement stockée.
+      try {
+        localStorage.setItem("permigo_parcours_view", "chapitre");
+      } catch {
+        /* ignore */
+      }
       location.hash = "#/parcours";
     });
-    await page.waitForSelector(".prc-node", { timeout: 15_000 });
+    await page.waitForSelector(".prc-cv-jalon", { timeout: 15_000 });
   });
 
   test("au moins une compétence visible", async ({ page }) => {
-    await expect(page.locator(".prc-node").first()).toBeVisible();
+    await expect(page.locator(".prc-cv-jalon").first()).toBeVisible();
   });
 
   // NB : les nœuds ont une animation continue (« not stable » pour l'auto-wait)
@@ -85,7 +92,7 @@ test.describe("Parcours REMC", () => {
   // (.evaluate(el => el.click())), comme le fait a11y.spec.js.
   test("fiche s'ouvre au clic sur un nœud", async ({ page }) => {
     await page
-      .locator(".prc-node:not(.locked)")
+      .locator(".prc-cv-jalon:not(.locked)")
       .first()
       .evaluate((el) => el.click());
     await page.waitForSelector("#bsheet.open", { timeout: 6_000 });
@@ -94,7 +101,7 @@ test.describe("Parcours REMC", () => {
 
   test("fiche se referme avec le bouton ×", async ({ page }) => {
     await page
-      .locator(".prc-node:not(.locked)")
+      .locator(".prc-cv-jalon:not(.locked)")
       .first()
       .evaluate((el) => el.click());
     await page.waitForSelector("#bsheet.open", { timeout: 6_000 });

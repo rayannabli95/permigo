@@ -2532,6 +2532,8 @@ function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
         class="prc-cv-pill ${stateClass}"
         data-chap="${i}"
         type="button"
+        role="tab"
+        aria-selected="${isActive}"
         aria-label="Chapitre ${i + 1} — ${esc(ws.world?.nom ?? wc.lbl)} : ${esc(lbl)}"
         ${isLocked ? "disabled" : ""}
       >
