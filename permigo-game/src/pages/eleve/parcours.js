@@ -1912,6 +1912,11 @@ export async function mount(root) {
       currentChapIdx,
     );
     wire(root, worldStates, validatedMap, pendingMap, me, view);
+    // Vue Chapitre : trace la route SVG À TRAVERS les vrais jalons (toute
+    // hauteur / tout nombre de jalons), au lieu d'un tracé fixe qui dérive.
+    if (view === "chapitre") {
+      requestAnimationFrame(() => layoutChapterRoad(root));
+    }
     // Bouton « ? » du tuto (re-câblé à chaque rendu)
     root
       .querySelector("#prc-help")
@@ -2817,6 +2822,59 @@ function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
     <div style="height:40px"></div>
   </div>
 </div>`;
+}
+
+// Trace le ruban-route SVG À TRAVERS le centre des jalons réellement rendus.
+// Robuste à n'importe quel nombre de jalons et à la hauteur variable de la
+// carte « Continuer » (le tracé fixe précédent dérivait hors des pastilles).
+let _roadResizeHooked = false;
+function layoutChapterRoad(root) {
+  const scope = root && root.querySelector ? root : document;
+  const route = scope.querySelector(".prc-cv-route");
+  if (!route) return;
+  const svg = route.querySelector(".prc-cv-ribbon");
+  const nodes = [...route.querySelectorAll(".prc-cv-node")];
+  if (!svg || nodes.length === 0) return;
+
+  // Position d'un node relative au conteneur .prc-cv-route (offsetTop/Left
+  // ignorent les transforms → stable pendant l'anim "rise" des jalons).
+  const offIn = (el) => {
+    let x = 0;
+    let y = 0;
+    while (el && el !== route) {
+      x += el.offsetLeft;
+      y += el.offsetTop;
+      el = el.offsetParent;
+    }
+    return { x, y };
+  };
+  const pts = nodes.map((n) => {
+    const o = offIn(n);
+    return { x: o.x + n.offsetWidth / 2, y: o.y + n.offsetHeight / 2 };
+  });
+  const W = route.clientWidth;
+  const H = route.clientHeight;
+  if (!W || !H) return;
+
+  // Courbe lisse (S-curve) reliant chaque centre de jalon.
+  let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1];
+    const b = pts[i];
+    const my = ((a.y + b.y) / 2).toFixed(1);
+    d += ` C ${a.x.toFixed(1)} ${my}, ${b.x.toFixed(1)} ${my}, ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+  }
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.querySelectorAll("path").forEach((p) => p.setAttribute("d", d));
+
+  if (!_roadResizeHooked) {
+    _roadResizeHooked = true;
+    let t;
+    window.addEventListener("resize", () => {
+      clearTimeout(t);
+      t = setTimeout(() => layoutChapterRoad(document), 120);
+    });
+  }
 }
 
 function renderFinal(done, total) {
