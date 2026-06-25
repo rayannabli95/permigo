@@ -1,15 +1,16 @@
 // ═══════════════════════════════════════════════════════════════
-// Onboarding élève — 4 écrans max, 1ère valeur ressentie en <60s
+// Onboarding élève — 3 écrans, 1ère valeur ressentie en <60s
 //
 // Flow :
 //   0. Accueil perso « Salut {prenom} »
-//   1. One-tap win  — panneau STOP visuel, bonne réponse → confetti +10 XP
-//   2. Perso fusionnée — avatar + couleur sur un seul écran
-//   3. Garde ton avance — streak + opt-in notif (CTA) + tease coffre
-//   (3b) Sous-step A2HS — conditionnel (hors dots), si app non installée
+//   1. Perso fusionnée — avatar + couleur sur un seul écran
+//   2. Garde ton avance — opt-in notif (CTA) + tease coffre
+//   (2b) Sous-step A2HS — conditionnel (hors dots), si app non installée
 //
-// Dots = 4 pastilles seulement (les 4 vrais écrans).
-// A11y : focus management entre slides, aria-live sur les changements d'état.
+// Dots = 3 pastilles seulement (les 3 vrais écrans).
+// A11y : focus management entre slides, navigation clavier + flèches dans
+// les radiogroups, aria-live sur les changements d'état.
+// La récompense = le coffre de bienvenue (plus de quiz).
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
@@ -29,29 +30,17 @@ import { unlockChest } from "@/utils/game-state.js";
 import { ACCENTS, getAccent, setAccent } from "@/utils/accent.js";
 import { a2hsStepsHTML, A2HS_STYLE } from "@/components/common/a2hs-steps.js";
 
-// ─── Indices des 4 écrans de contenu (fixes) ────────────────────
+// ─── Indices des 3 écrans de contenu (fixes) ────────────────────
 const S_WELCOME = 0; // Accueil perso
-const S_QUIZ = 1; // One-tap win
-const S_PERSO = 2; // Avatar + couleur
-const S_NOTIF = 3; // Garde ton avance + opt-in
-const DOT_COUNT = 4; // Toujours 4 dots, jamais plus
-
-// ─── Question infaillible (bonne réponse évidente) ──────────────
-const QUIZ_QUESTION = {
-  // Panneau STOP reconnu mondialement — impossible de se tromper
-  sign: "🛑",
-  question: "Face à ce panneau, je dois…",
-  answers: [
-    { id: "stop", label: "M'arrêter complètement", correct: true },
-    { id: "slow", label: "Simplement ralentir", correct: false },
-  ],
-};
+const S_PERSO = 1; // Avatar + couleur
+const S_NOTIF = 2; // Garde ton avance + opt-in
+const DOT_COUNT = 3; // Toujours 3 dots, jamais plus
 
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track("onboarding.start", { role: me.role, version: "v2" });
+  track("onboarding.start", { role: me.role, version: "v3" });
 
   // Opt-in notif : disponible si l'API existe et que la permission n'est pas déjà accordée.
   const showNotif =
@@ -62,9 +51,7 @@ export async function mount(root) {
   // A2HS : sous-step conditionnel (pas de dot dédié)
   const showA2HS = !isStandalone();
 
-  let idx = 0; // slide actif (0-3)
-  let quizAnswered = false;
-  let quizCorrect = false;
+  let idx = 0; // slide actif (0-2)
   let notifDone = false;
   let notifBusy = false;
   let a2hsDone = false;
@@ -119,39 +106,12 @@ export async function mount(root) {
             </p>
           </section>
 
-          <!-- ─── Écran 1 : One-tap win ─── -->
-          <section class="ob-slide ob-slide-quiz" data-i="1" aria-labelledby="ob-title-1">
-            <p class="ob-quiz-eyebrow">Question rapide</p>
-            <div class="ob-sign" aria-label="Panneau de signalisation" aria-hidden="true">${QUIZ_QUESTION.sign}</div>
-            <h1 class="ob-title ob-title-quiz" id="ob-title-1">${esc(QUIZ_QUESTION.question)}</h1>
-            <div class="ob-quiz-answers" id="ob-quiz-answers" role="group" aria-label="Choix de réponse">
-              ${QUIZ_QUESTION.answers
-                .map(
-                  (a) => `
-                <button
-                  class="ob-quiz-btn"
-                  data-id="${esc(a.id)}"
-                  data-correct="${a.correct}"
-                  type="button"
-                  aria-label="${esc(a.label)}"
-                >${esc(a.label)}</button>
-              `,
-                )
-                .join("")}
-            </div>
-            <!-- Feedback après réponse (caché au départ) -->
-            <div class="ob-quiz-result" id="ob-quiz-result" aria-live="assertive" hidden>
-              <div class="ob-quiz-xp" id="ob-quiz-xp">+10 XP</div>
-              <div class="ob-quiz-msg" id="ob-quiz-msg"></div>
-            </div>
-          </section>
-
-          <!-- ─── Écran 2 : Perso fusionnée (avatar + couleur) ─── -->
-          <section class="ob-slide ob-slide-perso" data-i="2" aria-labelledby="ob-title-2">
+          <!-- ─── Écran 1 : Perso fusionnée (avatar + couleur) ─── -->
+          <section class="ob-slide ob-slide-perso" data-i="1" aria-labelledby="ob-title-1">
             <div class="ob-halo" aria-hidden="true">
               <div class="ob-emoji">${icon("user", { size: 34 })}</div>
             </div>
-            <h1 class="ob-title" id="ob-title-2">Personnalise ton profil</h1>
+            <h1 class="ob-title" id="ob-title-1">Personnalise ton profil</h1>
 
             <p class="ob-perso-label">Avatar</p>
             <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="Choix de l'avatar">
@@ -196,12 +156,12 @@ export async function mount(root) {
             </div>
           </section>
 
-          <!-- ─── Écran 3 : Garde ton avance ─── -->
-          <section class="ob-slide ob-slide-notif" data-i="3" aria-labelledby="ob-title-3">
+          <!-- ─── Écran 2 : Garde ton avance ─── -->
+          <section class="ob-slide ob-slide-notif" data-i="2" aria-labelledby="ob-title-2">
             <div class="ob-halo ob-halo-bell" aria-hidden="true">
               <div class="ob-emoji ob-bell">${icon("bell", { size: 40 })}</div>
             </div>
-            <h1 class="ob-title" id="ob-title-3">Garde ton avance</h1>
+            <h1 class="ob-title" id="ob-title-2">Garde ton avance</h1>
             <p class="ob-body-txt">3 questions ce soir, 2 minutes. Chaque jour qui passe renforce la mémorisation — pour de vrai.</p>
 
             <!-- Tease coffre de bienvenue -->
@@ -276,8 +236,10 @@ export async function mount(root) {
 
   // ─── Mise à jour affichage ─────────────────────────────────────
   function update() {
-    // Déplace le carrousel si on n'est pas dans le sous-step A2HS
+    // Déplace le carrousel si on n'est pas dans le sous-step A2HS.
+    // On rétablit la transition (un drag a pu la passer à "none" inline).
     if (!inA2HS) {
+      track$.style.transition = "";
       track$.style.transform = `translateX(-${(idx * 100) / DOT_COUNT}%)`;
     }
 
@@ -301,16 +263,6 @@ export async function mount(root) {
     // Label CTA
     if (inA2HS) {
       ctaBtn.innerHTML = 'C\'est parti <span aria-hidden="true">→</span>';
-      laterBtn.hidden = true;
-    } else if (idx === S_QUIZ) {
-      // Quiz : le CTA n'est actif qu'après avoir répondu
-      if (!quizAnswered) {
-        ctaBtn.innerHTML = "Réponds pour continuer";
-        ctaBtn.disabled = true;
-      } else {
-        ctaBtn.innerHTML = 'Continuer <span aria-hidden="true">→</span>';
-        ctaBtn.disabled = false;
-      }
       laterBtn.hidden = true;
     } else if (idx === S_NOTIF) {
       if (!notifDone && showNotif) {
@@ -341,12 +293,7 @@ export async function mount(root) {
     haptic("tap");
     update();
     // Annonce le changement d'écran pour les lecteurs d'écran
-    const labels = [
-      "Bienvenue",
-      "Question rapide",
-      "Personnalisation",
-      "Rappels",
-    ];
+    const labels = ["Bienvenue", "Personnalisation", "Rappels"];
     announce(`Étape ${idx + 1} sur ${DOT_COUNT} : ${labels[idx]}`);
     // Focus sur le titre du nouvel écran
     requestAnimationFrame(() => focusSlideTitle(idx));
@@ -376,79 +323,6 @@ export async function mount(root) {
     } else if (idx > 0) {
       goTo(idx - 1);
     }
-  }
-
-  // ─── Quiz : one-tap win ────────────────────────────────────────
-  function handleQuizAnswer(btn) {
-    if (quizAnswered) return;
-    quizAnswered = true;
-
-    const correct = btn.dataset.correct === "true";
-    quizCorrect = correct;
-
-    haptic(correct ? "success" : "select");
-
-    // Marque le bouton sélectionné + montre la bonne réponse
-    root.querySelectorAll(".ob-quiz-btn").forEach((b) => {
-      const isCor = b.dataset.correct === "true";
-      b.disabled = true;
-      b.classList.toggle("correct", isCor);
-      b.classList.toggle("selected", b === btn);
-      b.classList.toggle("wrong", !isCor && b === btn);
-      b.setAttribute("aria-pressed", b === btn ? "true" : "false");
-    });
-
-    // Affiche le feedback XP
-    const resultEl = root.querySelector("#ob-quiz-result");
-    const msgEl = root.querySelector("#ob-quiz-msg");
-    const xpEl = root.querySelector("#ob-quiz-xp");
-
-    if (correct) {
-      msgEl.textContent = "Exactement ! Tu mémorises mieux en agissant.";
-      xpEl.textContent = "+10 XP";
-      xpEl.classList.add("win");
-    } else {
-      msgEl.textContent = "Le STOP oblige à s'arrêter complètement. Retenu !";
-      xpEl.textContent = "+10 XP quand même";
-      xpEl.classList.add("consolation");
-    }
-
-    resultEl.hidden = false;
-    resultEl.removeAttribute("hidden");
-
-    // Confetti léger (best-effort — si le module rate, on continue).
-    // Le canvas confetti est posé sur <body> avec z-index:9998, soit EN DESSOUS
-    // de l'overlay onboarding (z-index:9999). On l'élève brièvement à 10000
-    // pour qu'il soit visible, puis on le redescend automatiquement.
-    try {
-      import("@/components/common/confetti.js").then(({ burstConfetti }) => {
-        burstConfetti({ x: 0.5, y: 0.4, count: 55, power: 11 });
-        // Élève le canvas confetti au-dessus de l'overlay le temps de l'animation (~2s)
-        requestAnimationFrame(() => {
-          const cvs = document.querySelector(
-            'canvas[style*="z-index:9998"], canvas[style*="z-index: 9998"]',
-          );
-          if (cvs) {
-            cvs.style.zIndex = "10000";
-            setTimeout(() => {
-              if (cvs) cvs.style.zIndex = "9998";
-            }, 2200);
-          }
-        });
-      });
-    } catch {
-      /* best-effort */
-    }
-
-    // Débloque le CTA
-    update();
-
-    // Annonce le résultat aux lecteurs d'écran
-    announce(
-      correct
-        ? "Bonne réponse ! +10 XP gagné."
-        : "Tu as appris quelque chose de nouveau. +10 XP quand même.",
-    );
   }
 
   // ─── Opt-in notifications ──────────────────────────────────────
@@ -585,91 +459,201 @@ export async function mount(root) {
     finish();
   });
 
-  // ─── Quiz : listeners réponses ─────────────────────────────────
-  root.querySelectorAll(".ob-quiz-btn").forEach((btn) => {
-    btn.addEventListener("click", () => handleQuizAnswer(btn));
-  });
+  // ─── Radiogroups a11y (avatar + couleur) ──────────────────────
+  // Tabindex roving + navigation flèches : un seul élément focusable par
+  // groupe (le sélectionné), les flèches déplacent la sélection et le focus.
+  function wireRadioGroup(selector, onSelect, isSel) {
+    const items = Array.from(root.querySelectorAll(selector));
+    if (!items.length) return;
 
-  // ─── Avatar ────────────────────────────────────────────────────
-  root.querySelectorAll(".ob-av-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      avatar = card.dataset.url;
-      haptic("select");
-      root.querySelectorAll(".ob-av-card").forEach((c) => {
-        const on = c.dataset.url === avatar;
-        c.classList.toggle("sel", on);
-        c.setAttribute("aria-checked", on ? "true" : "false");
+    const syncTabindex = () => {
+      const selIdx = Math.max(
+        0,
+        items.findIndex((el) => isSel(el)),
+      );
+      items.forEach((el, i) =>
+        el.setAttribute("tabindex", i === selIdx ? "0" : "-1"),
+      );
+    };
+
+    const select = (el, { focus = false } = {}) => {
+      onSelect(el);
+      items.forEach((it) => {
+        const on = isSel(it);
+        it.classList.toggle("sel", on);
+        it.setAttribute("aria-checked", on ? "true" : "false");
+      });
+      syncTabindex();
+      if (focus) el.focus({ preventScroll: true });
+    };
+
+    items.forEach((el, i) => {
+      el.addEventListener("click", () => {
+        haptic("select");
+        select(el);
+      });
+      el.addEventListener("keydown", (e) => {
+        let next = -1;
+        if (e.key === "ArrowRight" || e.key === "ArrowDown")
+          next = (i + 1) % items.length;
+        else if (e.key === "ArrowLeft" || e.key === "ArrowUp")
+          next = (i - 1 + items.length) % items.length;
+        else if (e.key === "Home") next = 0;
+        else if (e.key === "End") next = items.length - 1;
+        else if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          e.stopPropagation();
+          haptic("select");
+          select(el, { focus: true });
+          return;
+        } else return;
+        e.preventDefault();
+        e.stopPropagation();
+        haptic("select");
+        select(items[next], { focus: true });
       });
     });
-  });
 
-  // ─── Couleur d'accent — recoloration live ─────────────────────
-  root.querySelectorAll(".ob-color-sw").forEach((sw) => {
-    sw.addEventListener("click", () => {
+    syncTabindex();
+  }
+
+  // Avatar
+  wireRadioGroup(
+    ".ob-av-card",
+    (card) => {
+      avatar = card.dataset.url;
+    },
+    (card) => card.dataset.url === avatar,
+  );
+
+  // Couleur d'accent — recoloration live de toute l'app
+  wireRadioGroup(
+    ".ob-color-sw",
+    (sw) => {
       accentId = sw.dataset.accent;
       setAccent(accentId);
-      haptic("select");
       track("onboarding.accent_chosen", { accent: accentId });
-      root.querySelectorAll(".ob-color-sw").forEach((s) => {
-        const on = s.dataset.accent === accentId;
-        s.classList.toggle("sel", on);
-        s.setAttribute("aria-checked", on ? "true" : "false");
-      });
-    });
-  });
+    },
+    (sw) => sw.dataset.accent === accentId,
+  );
 
-  // ─── Swipe horizontal ─────────────────────────────────────────
+  // ─── Swipe horizontal (drag-follow live + advance net) ────────
+  // Seuil bas et réactif (38px) + détection d'intention horizontale robuste.
+  // Pendant le geste on suit le doigt (track désolidarisé de la transition) ;
+  // au relâchement on tranche : avancer, reculer, ou revenir en place.
+  const SWIPE_THRESHOLD = 38; // px : déplacement mini pour changer de slide
+  const INTENT_LOCK = 8; // px : au-delà, on verrouille l'axe (H ou V)
   let startX = 0,
     startY = 0,
-    swiping = false;
+    dragging = false,
+    axisLock = null; // null | "h" | "v"
+
+  // Décalage de base (en %) du track pour la slide courante
+  const baseOffset = () => (idx * 100) / DOT_COUNT;
+
+  // Largeur d'une slide en px (≈ largeur du viewport)
+  const slideW = () => viewport.clientWidth || window.innerWidth || 1;
+
+  function dragMove(px) {
+    // Translate le track en suivant le doigt, avec résistance aux bords
+    let eff = px;
+    const atStart = idx === 0;
+    const atEnd = idx === DOT_COUNT - 1;
+    if ((atStart && px > 0) || (atEnd && px < 0)) eff = px * 0.35; // caoutchouc
+    const pct = baseOffset() - (eff / slideW()) * (100 / DOT_COUNT);
+    track$.style.transition = "none";
+    track$.style.transform = `translateX(-${pct}%)`;
+  }
+
+  function dragEnd(dx) {
+    // Réactive la transition pour le snap final
+    track$.style.transition = "";
+    if (dx <= -SWIPE_THRESHOLD) {
+      forwardBySwipe();
+    } else if (dx >= SWIPE_THRESHOLD) {
+      prev();
+    } else {
+      update(); // pas assez : on recolle la slide courante
+    }
+  }
+
+  // Avancer par swipe gauche (gère le cas opt-in notif = swipe = on passe)
+  function forwardBySwipe() {
+    if (idx === S_NOTIF && showNotif && !notifDone) {
+      track("onboarding.push_optin", { outcome: "swiped_past" });
+      notifDone = true;
+    }
+    advance();
+  }
 
   viewport.addEventListener(
     "touchstart",
     (e) => {
+      if (inA2HS || e.touches.length > 1) return;
       const t = e.changedTouches[0];
       startX = t.clientX;
       startY = t.clientY;
-      swiping = true;
+      dragging = true;
+      axisLock = null;
     },
     { passive: true },
   );
 
   viewport.addEventListener(
-    "touchend",
+    "touchmove",
     (e) => {
-      if (!swiping) return;
-      swiping = false;
+      if (!dragging || inA2HS) return;
       const t = e.changedTouches[0];
       const dx = t.clientX - startX;
       const dy = t.clientY - startY;
-      if (Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy) * 1.4) return;
 
-      if (dx < 0) {
-        // Swipe gauche = avancer
-        if (idx === S_NOTIF && showNotif && !notifDone) {
-          // Swipe passe l'opt-in sans l'activer
-          track("onboarding.push_optin", { outcome: "swiped_past" });
-          notifDone = true;
-          advance();
-        } else if (idx !== S_QUIZ || quizAnswered) {
-          // Sur le quiz, on ne peut pas swiper sans répondre
-          advance();
-        }
-      } else {
-        prev();
+      // Verrouille l'axe dès qu'on dépasse le seuil d'intention
+      if (
+        !axisLock &&
+        (Math.abs(dx) > INTENT_LOCK || Math.abs(dy) > INTENT_LOCK)
+      ) {
+        axisLock = Math.abs(dx) > Math.abs(dy) ? "h" : "v";
       }
+      if (axisLock === "h") dragMove(dx);
     },
     { passive: true },
   );
 
+  function endSwipe(e) {
+    if (!dragging) return;
+    dragging = false;
+    const wasH = axisLock === "h";
+    axisLock = null;
+    if (inA2HS || !wasH) {
+      if (!inA2HS) update(); // remet la slide d'aplomb si geste vertical
+      return;
+    }
+    const t = e.changedTouches[0];
+    dragEnd(t.clientX - startX);
+  }
+
+  viewport.addEventListener("touchend", endSwipe, { passive: true });
+  viewport.addEventListener("touchcancel", endSwipe, { passive: true });
+
   // ─── Clavier ──────────────────────────────────────────────────
   function onKey(e) {
+    // Laisse les radiogroups (avatar/couleur) gérer leurs propres flèches
+    const inRadio = e.target.closest?.(".ob-av-card, .ob-color-sw");
+    if (inRadio && e.key.startsWith("Arrow")) return;
+
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
       e.preventDefault();
-      if (idx !== S_QUIZ || quizAnswered) advance();
+      advance();
     } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
       e.preventDefault();
       prev();
+    } else if (e.key === "Enter") {
+      // Enter = action du CTA (sauf si le focus est sur un bouton interactif)
+      const onBtn = e.target.closest?.("button");
+      if (!onBtn || onBtn === ctaBtn) {
+        e.preventDefault();
+        next();
+      }
     }
   }
   document.addEventListener("keydown", onKey);
@@ -682,10 +666,9 @@ export async function mount(root) {
 
     track("onboarding.completed", {
       last_step: inA2HS ? "a2hs" : idx,
-      quiz_correct: quizCorrect,
       avatar_chosen: !!avatar,
       accent_id: accentId,
-      version: "v2",
+      version: "v3",
     });
 
     ctaBtn.disabled = true;
@@ -793,7 +776,9 @@ const STYLE = `<style>
   .ob-skip:active { color: #fff; }
 
   /* ── Viewport + track (carrousel) ── */
-  .ob-viewport { flex: 1; overflow: hidden; position: relative; z-index: 1; }
+  /* touch-action: pan-y → on autorise le scroll vertical natif (slides
+     longues) tout en captant nous-mêmes le geste horizontal du carrousel. */
+  .ob-viewport { flex: 1; overflow: hidden; position: relative; z-index: 1; touch-action: pan-y; }
   .ob-track {
     display: flex; height: 100%;
     transition: transform .42s cubic-bezier(.22,1,.36,1);
@@ -858,84 +843,6 @@ const STYLE = `<style>
     margin: 0; max-width: 32ch;
   }
 
-  /* ── Slide quiz ── */
-  .ob-quiz-eyebrow {
-    font: 700 11px/1 'Inter', sans-serif;
-    letter-spacing: .08em; text-transform: uppercase;
-    color: var(--a); margin: 0 0 8px;
-    opacity: 0;
-  }
-  .ob-slide-quiz.on .ob-quiz-eyebrow { animation: obRise .45s cubic-bezier(.22,1,.36,1) .05s both; }
-  @media (prefers-reduced-motion: reduce) {
-    .ob-slide-quiz.on .ob-quiz-eyebrow { animation: none; opacity: 1; }
-  }
-
-  .ob-sign {
-    font-size: 72px; line-height: 1; margin-bottom: 10px;
-    filter: drop-shadow(0 8px 18px rgba(0,0,0,.5));
-    opacity: 0;
-  }
-  .ob-slide-quiz.on .ob-sign { animation: obPop .55s cubic-bezier(.34,1.56,.64,1) .08s both; }
-  @media (prefers-reduced-motion: reduce) { .ob-slide-quiz.on .ob-sign { animation: none; opacity: 1; } }
-
-  .ob-title-quiz { font-size: 20px; margin-bottom: 18px; }
-
-  .ob-quiz-answers {
-    display: flex; flex-direction: column; gap: 10px;
-    width: 100%; max-width: 340px;
-    opacity: 0;
-  }
-  .ob-slide-quiz.on .ob-quiz-answers { animation: obRise .5s cubic-bezier(.22,1,.36,1) .22s both; }
-  @media (prefers-reduced-motion: reduce) { .ob-slide-quiz.on .ob-quiz-answers { animation: none; opacity: 1; } }
-
-  .ob-quiz-btn {
-    width: 100%; padding: 15px 18px;
-    border: 2px solid rgba(255,255,255,.18);
-    border-radius: 14px;
-    background: rgba(255,255,255,.07);
-    color: #fff; font: 600 15px/1.35 'Inter', sans-serif;
-    cursor: pointer; min-height: 52px;
-    text-align: left;
-    transition: border-color .15s, background .15s, transform .1s;
-  }
-  .ob-quiz-btn:active { transform: scale(.98); }
-  .ob-quiz-btn:hover:not(:disabled) { border-color: rgba(255,255,255,.38); background: rgba(255,255,255,.12); }
-  .ob-quiz-btn.correct {
-    border-color: #22c55e;
-    background: rgba(34,197,94,.15);
-    color: #86efac;
-  }
-  .ob-quiz-btn.wrong {
-    border-color: rgba(239,68,68,.6);
-    background: rgba(239,68,68,.1);
-    color: rgba(255,255,255,.55);
-    text-decoration: line-through;
-  }
-  .ob-quiz-btn:disabled { cursor: default; }
-
-  .ob-quiz-result {
-    margin-top: 16px; display: flex; flex-direction: column; align-items: center; gap: 6px;
-    animation: obRise .45s cubic-bezier(.22,1,.36,1) both;
-  }
-  .ob-quiz-xp {
-    font: 800 28px/1 'Plus Jakarta Sans', sans-serif;
-    color: var(--a);
-    letter-spacing: -.02em;
-    filter: drop-shadow(0 0 16px color-mix(in srgb, var(--a) 60%, transparent));
-  }
-  .ob-quiz-xp.win { animation: obBounce .6s cubic-bezier(.34,1.56,.64,1) both; }
-  .ob-quiz-xp.consolation { color: rgba(255,255,255,.75); font-size: 20px; }
-  @keyframes obBounce { 0% { transform: scale(.4); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) {
-    .ob-quiz-xp.win { animation: none; }
-    .ob-quiz-result { animation: none; }
-  }
-  .ob-quiz-msg {
-    font: 500 14px/1.45 'Inter', sans-serif;
-    color: rgba(255,255,255,.7);
-    max-width: 30ch;
-  }
-
   /* ── Slide perso (avatar + couleur fusionnés) ── */
   .ob-slide-perso { justify-content: flex-start; padding-top: 12px; }
   .ob-slide-perso .ob-halo { width: 80px; height: 80px; margin-bottom: 8px; }
@@ -965,6 +872,10 @@ const STYLE = `<style>
     padding: 0; transition: border-color .15s, transform .12s;
   }
   .ob-av-card:active { transform: scale(.95); }
+  .ob-av-card:focus-visible, .ob-color-sw:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+  }
   .ob-av-card.sel { border-color: var(--a); }
   .ob-av-img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .ob-av-check {

@@ -13,17 +13,13 @@ import { ASSETS } from "@/utils/assets.js";
 import { getCompDetail } from "@/data/remc-details.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
-import { playWhoosh } from "@/utils/sound.js";
 import {
   renderChest,
   openChestModal,
   ensureChestStyles,
 } from "@/components/eleve/chest.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
-import {
-  maybeShowParcoursTuto,
-  showParcoursTuto,
-} from "@/components/eleve/parcours-tuto.js";
+import { maybeShowParcoursTuto } from "@/components/eleve/parcours-tuto.js";
 import {
   unlockChest,
   openChest,
@@ -33,766 +29,7 @@ import {
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
-/* ── Layout global avec volant filigrane fixe ── */
-.prc {
-  padding: 0 0 100px;
-  max-width: 480px;
-  margin: 0 auto;
-  font-family: 'Inter', sans-serif;
-  color: var(--ink);
-  position: relative;
-  background-color: var(--bg);
-}
-.prc::before {
-  content: '';
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: min(620px, 95vw);
-  height: min(620px, 95vw);
-  background-image: url('${ASSETS.volantBg}');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  transform: translate(-50%, -50%);
-  opacity: .18;
-  pointer-events: none;
-  z-index: 0;
-  filter: blur(0.6px) saturate(.92);
-}
-/* Gradient teinté par monde — ::before pour passer au-dessus du fond photo */
-.prc-world::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    /* Halo « ciel / horizon » en haut du monde → atmosphère qui évolue avec la
-       couleur du monde (vert campagne → cyan ville → violet montagne → ambre sommet). */
-    radial-gradient(140% 60% at 50% -4%,
-      color-mix(in srgb, var(--wc, var(--gr)) 32%, transparent) 0%,
-      color-mix(in srgb, var(--wc, var(--gr)) 9%, transparent) 38%,
-      transparent 66%),
-    /* Fondu vertical de la teinte monde */
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--wc, var(--gr)) 13%, transparent) 0%,
-      color-mix(in srgb, var(--wc, var(--gr)) 6%, transparent) 50%,
-      color-mix(in srgb, var(--wc, var(--gr)) 2%, transparent) 100%);
-}
-/* Tous les contenus passent au-dessus du volant */
-.prc > * { position: relative; z-index: 1; }
-
-/* ── Header sticky (sous le header global fixe de 52px) ── */
-/* Header en flux normal : la page scrolle entière (plus de sticky qui
-   se faisait chevaucher par la barre de progression). */
-.prc-hd {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px 14px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--bo);
-}
-.prc-title    { font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--ink); display: inline-flex; align-items: center; gap: 8px; }
-.prc-help { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--bo4); background: var(--su); color: var(--mu2); font: 800 12px/1 'Inter', sans-serif; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; transition: border-color .12s, color .12s; position: relative; }
-.prc-help::after { content: ''; position: absolute; inset: -11px; }
-.prc-help:hover { border-color: var(--a); color: var(--a-txt); }
-.prc-help:active { transform: scale(.9); }
-.prc-subtitle { font: 500 12px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
-.prc-hd-right { text-align: right; }
-.prc-total    { font: 800 26px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
-.prc-total-denom { font-size: 15px; color: var(--mu2); }
-.prc-total-lbl{ font: 600 10px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
-
-/* ── Barre de progression globale ── */
-.prc-global-bar {
-  position: relative; z-index: 51; /* #12 — au-dessus du header sticky (z 50) */
-  padding: 12px 20px;
-  background: var(--su);
-  border-bottom: 1px solid var(--bo2);
-}
-.prc-global-track {
-  height: 6px;
-  background: var(--bo);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.prc-global-fill {
-  height: 100%;
-  /* Couleur unique : variations du thème choisi (pas d'arc-en-ciel) */
-  background: linear-gradient(90deg, var(--adk), var(--a));
-  border-radius: 3px;
-  transition: width 1s var(--ease-out);
-}
-.prc-global-meta {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 5px;
-  font: 600 11px/1 'Inter', sans-serif;
-  color: var(--mu2);
-}
-
-/* ── Carte des mondes — pleine page, le scroll de la page fait tout ── */
-.prc-map {
-  position: relative;
-  z-index: 2;
-  margin-top: 6px;
-}
-
-/* ── Sections Monde — fond photo z:0, gradient ::before z:1, contenu z:3+ ── */
-.prc-world {
-  position: relative;
-  padding: 0 0 50px;
-  overflow: hidden;
-  min-height: 240px;
-  background: var(--bg);
-}
-/* Petit visuel décoratif en haut à droite (au lieu de fond pleine page) */
-.prc-world-decor {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
-  z-index: 4;
-  filter: drop-shadow(0 4px 12px rgba(11,13,26,.15));
-  opacity: .8;
-  transition: transform .4s var(--ease-snap);
-  pointer-events: none;
-}
-.prc-world.complete .prc-world-decor { opacity: 1; }
-
-/* ── Fond photographique immersif jour/nuit par monde ── */
-.prc-world { background: var(--bg); }
-.prc-world-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  opacity: .7;
-  filter: saturate(1.05);
-  transition: opacity .6s ease;
-  pointer-events: none;
-}
-.prc-world-bg--active { opacity: 1; }
-.prc-world.locked .prc-world-bg { opacity: .18; filter: grayscale(.5) saturate(.7); }
-[data-theme="dark"] .prc-world-bg         { opacity: .3; }
-[data-theme="dark"] .prc-world-bg--active { opacity: .7; }
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"]) .prc-world-bg         { opacity: .3; }
-  html:not([data-theme="light"]) .prc-world-bg--active { opacity: .7; }
-}
-@media (prefers-reduced-motion: reduce) { .prc-world-bg { transition: none; } }
-/* Filigrane volant atténué quand fond photo présent */
-.prc:has(.prc-world-bg)::before { opacity: .08; }
-
-/* En-tête du monde */
-.prc-world-hd {
-  position: relative;
-  z-index: 5;
-  padding: 16px 16px 8px;
-  text-align: center;
-}
-.prc-world-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: var(--r-full);
-  background: rgba(255,255,255,.95);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,.8);
-  box-shadow: 0 4px 14px rgba(11,13,26,.1);
-  font-family: 'Inter', sans-serif;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-.prc-world-badge .num {
-  display: inline-flex;
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: var(--wc, var(--gr));
-  color: #fff;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  font-weight: 900;
-}
-.prc-world-h2 {
-  font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
-  margin: 0 0 3px;
-  text-shadow: 0 1px 8px rgba(255,255,255,.8);
-}
-.prc-world-tagline {
-  font: 500 12px/1.3 'Inter', sans-serif;
-  color: var(--ink);
-  opacity: .82;
-  margin-bottom: 8px;
-  text-shadow: 0 1px 6px rgba(255,255,255,.95);
-}
-.prc-world-count {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--wc, var(--gr));
-  padding: 4px 12px;
-  border-radius: var(--r-full);
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--wc, var(--gr)) 40%, transparent);
-}
-
-/* ── Route SVG ── */
-.prc-route {
-  position: relative;
-  padding: 0 10px 36px;
-  z-index: 3;
-}
-.prc-route svg { display: block; width: 100%; height: auto; overflow: visible; }
-/* Route 3D : ombre portée + arête épaisse foncée (profondeur) + surface claire + marquage.
-   L'arête est nettement décalée vers le bas et plus foncée → effet « rail » relevé. */
-.prc-path-shadow { stroke: rgba(11,13,26,.18); stroke-width: 28; fill: none; stroke-linecap: round; filter: blur(5px); transform: translateY(11px); }
-/* Arête 3D : trait foncé épais, bien décalé → c'est l'épaisseur visible de la route */
-.prc-path-edge   { stroke: color-mix(in srgb, var(--wc, var(--a)) 55%, #1c2536); stroke-width: 26; fill: none; stroke-linecap: round; transform: translateY(7px); }
-/* Surface : dégradé clair → teinté monde pour le volume */
-.prc-path        { stroke: color-mix(in srgb, var(--wc, var(--a)) 22%, #f3f5fb); stroke-width: 24; fill: none; stroke-linecap: round; }
-/* Liseré clair en haut de la surface (lumière) */
-.prc-path-edge2  { stroke: rgba(255,255,255,.55); stroke-width: 24; fill: none; stroke-linecap: round; transform: translateY(-2px); opacity: .5; }
-/* Marquage central pointillé */
-.prc-path-light  { stroke: #fff; stroke-width: 3; stroke-dasharray: 7 13; stroke-linecap: round; fill: none; opacity: .92; }
-[data-theme="dark"] .prc-path { stroke: color-mix(in srgb, var(--wc, var(--a)) 34%, #2a3346); }
-[data-theme="dark"] .prc-path-edge2 { opacity: .12; }
-[data-theme="dark"] .prc-path-light { opacity: .55; }
-/* Marquage central qui « défile » → la route avance vers les prochains nodes.
-   GPU-cheap (stroke-dashoffset seulement), coupé sous prefers-reduced-motion.
-   dasharray = 7 13 → période 20 ; on translate d'une période pour une boucle sans couture. */
-@media (prefers-reduced-motion: no-preference) {
-  .prc-path-light { animation: prcRoadFlow .9s linear infinite; }
-}
-@keyframes prcRoadFlow { to { stroke-dashoffset: -20; } }
-/* Volant qui roule sur la route (monde en cours) */
-.prc-car { filter: drop-shadow(0 3px 6px rgba(11,13,26,.35)); }
-.prc-car image { opacity: .9; }
-
-/* ── Nodes (style Duolingo path) ── */
-.prc-node {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  z-index: 6;
-  opacity: 0;
-  animation: nd-pop .55s var(--ease-spring) both;
-  animation-delay: var(--nd-delay, 0s);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
-/* Hit-area tactile etendue des nodes de la carte (les pastilles restent petites) */
-.prc-node::after { content: ''; position: absolute; inset: -10px; }
-@keyframes nd-pop {
-  0%   { opacity: 0; transform: translate(-50%,-50%) scale(.25); filter: blur(4px); }
-  65%  { opacity: 1; transform: translate(-50%,-50%) scale(1.08); filter: blur(0); }
-  100% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
-}
-.prc-node.locked { cursor: default; pointer-events: none; opacity: .6; }
-.prc-node.next   { transform: translate(-50%,-50%) scale(1.15); }
-.prc-node.next.nd-pop-done { transform: translate(-50%,-50%) scale(1.15) !important; }
-@keyframes nd-pop-next {
-  0%   { opacity: 0; transform: translate(-50%,-50%) scale(.25) !important; filter: blur(4px); }
-  65%  { opacity: 1; transform: translate(-50%,-50%) scale(1.25) !important; filter: blur(0); }
-  100% { opacity: 1; transform: translate(-50%,-50%) scale(1.15) !important; }
-}
-.prc-node.next { animation-name: nd-pop-next; }
-
-/* ── Tuile 3D brillante portant le badge PermiGo (le P vert) ──
-   Tuile blanche brillante avec arête 3D portée (--tile-dk) colorée selon le
-   statut, le badge PermiGo posé dessus + une pastille de statut. */
-.nd-circle {
-  width: 60px; height: 60px;
-  border-radius: var(--r-xl);
-  --tile-dk: #c2c8da;
-  background: linear-gradient(160deg, #ffffff 0%, #eef1f8 100%);
-  box-shadow: 0 6px 0 0 var(--tile-dk), 0 12px 18px -6px rgba(11,13,26,.28);
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-  transition: box-shadow .18s, transform .15s var(--ease-out);
-  flex-shrink: 0;
-}
-/* Reflet brillant en haut */
-.nd-circle::before {
-  content: '';
-  position: absolute; top: 5px; left: 9px; right: 9px; height: 38%;
-  border-radius: 14px 14px 50% 50%;
-  background: linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0));
-  pointer-events: none; z-index: 2;
-}
-/* Badge PermiGo (le P vert) */
-.nd-badge {
-  display: block; width: 70%; height: 70%; object-fit: contain;
-  position: relative; z-index: 1;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,.22));
-}
-/* Pastille de statut (coin bas-droite) */
-.nd-stamp {
-  position: absolute; bottom: -5px; right: -5px; z-index: 3;
-  width: 22px; height: 22px; border-radius: 50%;
-  border: 2.5px solid var(--su);
-  display: flex; align-items: center; justify-content: center;
-  color: #fff;
-}
-.nd-stamp.done   { background: var(--gr); }
-.nd-stamp.next   { background: var(--a); }
-.nd-stamp.locked { background: var(--mu2); }
-/* Node actif : la pastille de statut chevauchait le badge « TU ES ICI » et est
-   redondante (halo + « TU ES ICI » + CTA signalent déjà l'état). On la masque. */
-.prc-node.next .nd-stamp,
-.prc-node.a_valider .nd-stamp { display: none; }
-@media (max-width: 400px) {
-  .nd-circle { width: 52px; height: 52px; border-radius: var(--rl); }
-}
-.prc-node:not(.locked):active .nd-circle {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 0 var(--tile-dk), 0 5px 10px -4px rgba(11,13,26,.25);
-}
-.prc-node:not(.locked):hover .nd-circle {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 0 0 var(--tile-dk), 0 16px 22px -6px rgba(11,13,26,.3);
-}
-
-/* ─ DONE — arête verte + halo discret ─ */
-.prc-node.done .nd-circle { --tile-dk: var(--grdk, #047857); }
-.prc-node.done .nd-circle::after {
-  content: '';
-  position: absolute; inset: -7px; border-radius: var(--rx);
-  border: 2px solid color-mix(in srgb, var(--gr) 45%, transparent);
-  animation: nd-ring-pulse 2.6s ease-out infinite;
-  pointer-events: none;
-}
-@keyframes nd-ring-pulse {
-  0%   { transform: scale(.85); opacity: .55; }
-  100% { transform: scale(1.3); opacity: 0; }
-}
-
-/* ─ NEXT — arête accent, rebond « tu es ici » + anneau ─ */
-.prc-node.next .nd-circle { --tile-dk: var(--adk, var(--a)); animation: nd-bob 1.8s ease-in-out infinite; }
-@keyframes nd-bob {
-  0%,100% { transform: translateY(0); }
-  50%     { transform: translateY(-5px); }
-}
-.prc-node.next .nd-circle::after {
-  content: '';
-  position: absolute; inset: -8px; border-radius: 26px;
-  border: 2.5px solid color-mix(in srgb, var(--a) 55%, transparent);
-  animation: nd-ring-pulse 1.9s ease-out infinite;
-  pointer-events: none;
-}
-
-/* ─ TODO — badge légèrement atténué ─ */
-.prc-node.todo .nd-badge { filter: grayscale(.25) opacity(.85); }
-
-/* ─ LOCKED — tuile grise, badge désaturé ─ */
-.prc-node.locked .nd-circle { --tile-dk: #c2c8da; background: linear-gradient(160deg, #eef1f8, #dde2ee); }
-.prc-node.locked .nd-badge { filter: grayscale(1) opacity(.45); }
-.prc-node.locked .nd-circle::before { opacity: .4; }
-
-.nd-wheel-pending { display: none; }
-
-/* ── Case sélectionnée : se soulève vers le haut ── */
-.prc-node.selected { z-index: 8; }
-.prc-node.selected .nd-circle {
-  transform: translateY(-12px) scale(1.12);
-  box-shadow: 0 14px 0 0 var(--tile-dk), 0 22px 26px -6px rgba(11,13,26,.3);
-  animation: none;
-}
-.prc-node.selected .nd-lbl { transform: translateY(-8px); }
-@media (prefers-reduced-motion: reduce) {
-  .prc-node.selected .nd-circle { transform: scale(1.08); }
-}
-
-/* Volant qui oscille gauche-droite sur le prochain défi (image PNG) */
-.nd-wheel {
-  display: block;
-  width: 70%;
-  height: 70%;
-  object-fit: contain;
-  animation: ndWheelOsc 1.6s ease-in-out infinite;
-  transform-origin: 50% 50%;
-  pointer-events: none;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,.25));
-}
-@keyframes ndWheelOsc {
-  0%, 100% { transform: rotate(-22deg); }
-  50%      { transform: rotate(22deg); }
-}
-/* Volant acquis — silhouette PNG teintée en blanc, rotation lente */
-.nd-wheel-done {
-  width: 70%;
-  height: 70%;
-  background-color: #ffffff;
-  -webkit-mask: url('/worlds/volant.png') center/contain no-repeat;
-          mask: url('/worlds/volant.png') center/contain no-repeat;
-  animation: ndSlowSpin 16s linear infinite;
-  transform-origin: 50% 50%;
-  pointer-events: none;
-  filter: drop-shadow(0 1px 1px rgba(0,0,0,.15));
-}
-@keyframes ndSlowSpin { to { transform: rotate(360deg); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .nd-wheel,
-  .nd-wheel-done,
-  .prc-node.next .nd-circle {
-    animation: none !important;
-  }
-}
-.prc-node.next .nd-circle::before {
-  content: '';
-  position: absolute;
-  inset: -12px;
-  border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--a) 22%, transparent) 0%, transparent 70%);
-  animation: nd-halo 1.8s ease-in-out infinite;
-}
-@keyframes nd-halo {
-  0%,100% { transform: scale(.8);  opacity: .6; }
-  50%     { transform: scale(1.15); opacity: 1; }
-}
-.prc-node.next .nd-circle::after {
-  content: '';
-  position: absolute;
-  inset: -18px;
-  border-radius: 50%;
-  border: 1.5px solid color-mix(in srgb, var(--a) 25%, transparent);
-  animation: nd-ring-pulse 1.8s ease-out infinite;
-}
-
-/* ─ TODO — blanc, bordure pointillée ─ */
-.prc-node.todo .nd-circle {
-  background: var(--su);
-  border-color: var(--bo);
-  border-style: dashed;
-  box-shadow: 0 2px 8px rgba(0,0,0,.05);
-}
-/* Volant grisé statique sur les compétences pas encore débloquées */
-.nd-wheel-todo {
-  width: 60%;
-  height: 60%;
-  background-color: var(--bo4);
-  -webkit-mask: url('/worlds/volant.png') center/contain no-repeat;
-          mask: url('/worlds/volant.png') center/contain no-repeat;
-  pointer-events: none;
-  opacity: .8;
-}
-/* Petit point gris (legacy — remplacé par .nd-wheel-todo, à supprimer plus tard) */
-.prc-node.todo .nd-circle::before {
-  content: none;
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: var(--bo4);
-  position: absolute;
-}
-
-/* ─ LOCKED — gris pâle, volant grisé (uniformisé avec todo) ─ */
-.prc-node.locked .nd-circle {
-  background: #e5e7eb;
-  border-color: #f3f4f6;
-  box-shadow: none;
-}
-.nd-wheel-locked { opacity: .45; }
-
-/* ── Labels flottants sous le node ── */
-/* Noms LÉGERS : pour tous les nodes SAUF l'actif/à valider, on retire la grosse
-   carte blanche → simple légende discrète (nom seul, gris, sans cadre).
-   Propre ET informatif. Le node actif garde sa carte + CTA + « TU ES ICI ». */
-.prc-node:not(.next):not(.a_valider) .nd-lbl {
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: 0;
-  box-shadow: none;
-  padding: 3px 4px 0;
-  max-width: 122px;
-  min-width: 0;
-}
-.prc-node:not(.next):not(.a_valider) .nd-lbl .nd-name {
-  font: 600 11px/1.25 'Inter', sans-serif;
-  color: var(--mu2);
-  margin-bottom: 0;
-}
-.prc-node:not(.next):not(.a_valider) .nd-lbl .nd-stt { display: none; }
-.prc-node.done:not(.next) .nd-lbl .nd-name { color: var(--gr-txt); }
-.nd-lbl {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: color-mix(in srgb, var(--su) 96%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--bo);
-  border-radius: var(--r);
-  padding: 6px 10px 7px;
-  width: max-content;
-  max-width: 184px;
-  min-width: 104px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(11,13,26,.08);
-  pointer-events: none;
-}
-/* Nom compétence — ROI typographique */
-.nd-lbl .nd-name {
-  display: block;
-  font: 600 13px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
-  white-space: normal;
-  /* Plus de coupe automatique mid-mot (« ma-nœuvres ») : on passe à la ligne
-     aux espaces ; un mot trop long casse sans tiret seulement s'il déborde. */
-  overflow-wrap: break-word;
-  word-break: normal;
-  hyphens: none;
-  margin-bottom: 3px;
-}
-/* Code REMC — caché sur la map (bruit visuel pour le débutant)
-   reste accessible dans la fiche détail bottom sheet */
-.nd-lbl .nd-code {
-  display: none;
-  font: 500 10px/1 'Inter', sans-serif;
-  color: var(--mu2);
-  letter-spacing: .4px;
-  margin-bottom: 5px;
-}
-/* Statut — italique, coloré */
-.nd-lbl .nd-stt {
-  display: block;
-  font: 500 11px/1 'Inter', sans-serif;
-  font-style: italic;
-}
-
-/* ─── Labels par statut ─── */
-.prc-node.done .nd-lbl {
-  border-color: rgba(16,185,129,.25);
-  box-shadow: 0 6px 18px rgba(16,185,129,.12), 0 0 0 1px rgba(16,185,129,.12);
-}
-.prc-node.done .nd-lbl .nd-stt { color: var(--gr-txt); }
-
-.prc-node.next .nd-lbl {
-  border-color: color-mix(in srgb, var(--a) 30%, transparent);
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--a) 15%, transparent), 0 0 0 2px color-mix(in srgb, var(--a) 20%, transparent);
-}
-.prc-node.next .nd-lbl { padding-bottom: 11px; }
-.prc-node.next .nd-lbl .nd-name { color: var(--ink); }
-/* Statut "next" rendu comme un bouton tappable → incite au clic */
-.prc-node.next .nd-lbl .nd-stt {
-  display: inline-block;
-  margin-top: 6px;
-  padding: 6px 13px;
-  background: var(--wc, var(--a));
-  color: #fff;
-  font: 800 11px/1 'Inter', sans-serif;
-  font-style: normal;
-  border-radius: var(--r-full);
-  box-shadow: 0 3px 10px var(--wg, color-mix(in srgb, var(--a) 40%, transparent));
-  /* Le label parent a pointer-events:none (évite de bloquer les nodes voisins).
-     On le ré-active uniquement sur cette pastille CTA : le clic remonte alors
-     au .prc-node et ouvre la fiche. Sans ça, le bouton « Commence ici → »
-     n'était pas cliquable. */
-  pointer-events: auto;
-  cursor: pointer;
-}
-.prc-node.next .nd-lbl .nd-stt::after { content: ' →'; }
-/* Badge "TU ES ICI" */
-.prc-node.next .nd-lbl::before {
-  content: 'TU ES ICI';
-  position: absolute;
-  bottom: calc(100% + 5px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--a);
-  color: var(--a-ink);
-  font: 800 8px/1 'Inter', sans-serif;
-  padding: 3px 9px;
-  border-radius: var(--r-full);
-  letter-spacing: .14em;
-  white-space: nowrap;
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--a) 35%, transparent);
-  animation: tu-bounce 1.6s ease-in-out infinite;
-}
-@keyframes tu-bounce {
-  0%,100% { transform: translateX(-50%) translateY(0); }
-  50%     { transform: translateX(-50%) translateY(-3px); }
-}
-
-.prc-node.todo .nd-lbl .nd-name { color: var(--mu3); }
-.prc-node.todo .nd-lbl .nd-stt  { color: var(--mu2); }
-
-.prc-node.a_valider .nd-circle {
-  border-color: var(--am);
-  background: rgba(245,158,11,.12);
-  box-shadow: 0 0 0 4px rgba(245,158,11,.18), 0 8px 22px rgba(245,158,11,.2);
-  animation: nd-pop-next 2s ease-in-out infinite;
-}
-.prc-node.a_valider .nd-lbl {
-  border-color: rgba(245,158,11,.35);
-  box-shadow: 0 6px 18px rgba(245,158,11,.15), 0 0 0 1px rgba(245,158,11,.2);
-}
-.prc-node.a_valider .nd-lbl::before {
-  content: 'FAIS TON QUIZ';
-  position: absolute;
-  bottom: calc(100% + 5px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--am);
-  color: #fff;
-  font: 800 8px/1 'Inter', sans-serif;
-  padding: 3px 9px;
-  border-radius: var(--r-full);
-  letter-spacing: .14em;
-  white-space: nowrap;
-  box-shadow: 0 3px 10px rgba(245,158,11,.35);
-  animation: tu-bounce 1.6s ease-in-out infinite;
-}
-.prc-node.a_valider .nd-lbl .nd-stt { color: var(--amx); font-weight: 700; }
-.nd-wheel-pending {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: var(--am);
-  box-shadow: 0 2px 8px rgba(245,158,11,.5);
-}
-
-.prc-node.locked .nd-lbl {
-  background: color-mix(in srgb, var(--su) 95%, transparent);
-  border-color: rgba(203,213,225,.4);
-  box-shadow: 0 2px 8px rgba(11,13,26,.06);
-}
-.prc-node.locked .nd-lbl .nd-name { color: var(--mu2); }
-.prc-node.locked .nd-lbl .nd-code { color: var(--bo4); }
-.prc-node.locked .nd-lbl .nd-stt  { color: var(--bo4); }
-
-/* ── Portail entre mondes ── */
-.prc-portal {
-  position: relative;
-  z-index: 5;
-  padding: 8px 16px 28px;
-  text-align: center;
-}
-.prc-portal-arch { position: relative; width: 100px; height: 130px; margin: 0 auto 12px; }
-.prc-portal-arch::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 60%, color-mix(in srgb, var(--wc) 30%, transparent) 0%, transparent 60%);
-  filter: blur(8px);
-  animation: portal-pulse 3s ease-in-out infinite;
-}
-@keyframes portal-pulse { 0%,100% { opacity: .5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.06); } }
-.prc-portal-arch svg { position: relative; width: 100%; height: 100%; filter: drop-shadow(0 4px 12px color-mix(in srgb, var(--wc) 25%, transparent)); }
-.prc-portal-arch .arch-bg { fill: var(--wc); opacity: .1; }
-.prc-portal-arch .arch-stroke { fill: none; stroke: var(--wc); stroke-width: 2.5; stroke-linecap: round; }
-.prc-portal-arch .arch-light { fill: none; stroke: rgba(255,255,255,.6); stroke-width: 1; stroke-dasharray: 3 6; stroke-linecap: round; }
-
-.prc-portal .pbadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 11px;
-  border-radius: var(--r-full);
-  background: rgba(255,255,255,.9);
-  border: 1px solid var(--bo);
-  font-family: 'Inter', sans-serif;
-  font-size: 9.5px;
-  font-weight: 800;
-  color: var(--wc, var(--a));
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 5px;
-  box-shadow: 0 2px 8px rgba(11,13,26,.07);
-}
-.prc-portal h3 { font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin: 0 0 4px; }
-.prc-portal p  { font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu3); max-width: 260px; margin: 0 auto; }
-.prc-world.complete .prc-portal h3 { color: var(--wc); }
-
-/* Monde verrouillé → overlay grisé */
-.prc-world.locked::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: color-mix(in srgb, var(--bg) 60%, transparent);
-  z-index: 8;
-  backdrop-filter: grayscale(.8);
-  pointer-events: none;
-}
-.prc-world.locked { background: var(--bg2); }
-.prc-world.locked .prc-world-decor { filter: grayscale(.9) opacity(.4); }
-
-/* Pont entre mondes */
-.prc-bridge {
-  height: 40px;
-  position: relative;
-  overflow: hidden;
-  z-index: 3;
-}
-.prc-bridge::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: -4px;
-  bottom: -4px;
-  width: 12px;
-  transform: translateX(-50%);
-  background: rgba(11,13,26,.05);
-  border-radius: var(--r-full);
-}
-.prc-bridge::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  transform: translateX(-50%);
-  background-image: linear-gradient(180deg, var(--mu2) 50%, transparent 0);
-  background-size: 2px 10px;
-  opacity: .6;
-}
-
-/* ── Final — fin du voyage ── */
-.prc-final {
-  margin: 20px 12px 0;
-  padding: 24px 18px;
-  background: var(--su);
-  border: 1.5px solid var(--bo);
-  color: var(--ink);
-  border-radius: var(--r-xl);
-  text-align: center;
-  box-shadow: 0 4px 16px rgba(11,13,26,.07);
-  position: relative;
-  overflow: hidden;
-}
-.prc-final::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 30% 20%, color-mix(in srgb, var(--a) 6%, transparent), transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(245,158,11,.05), transparent 50%);
-  pointer-events: none;
-}
-.prc-final h3  { font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; margin: 0 0 6px; position: relative; color: var(--ink); }
-.prc-final p   { font: 500 12.5px/1.4 'Inter', sans-serif; color: var(--mu3); margin: 0 0 16px; position: relative; }
-.prc-final-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; position: relative; }
-.prc-final-stat .v { font: 900 22px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; color: var(--ink); }
-.prc-final-stat .l { font: 600 9px/1 'Inter', sans-serif; color: var(--mu2); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+/* CSS purgé (vue carte/liste supprimée) — seul le CSS vue-chapitre + bsheet + fiche suit */
 
 /* ── Bottom sheet ── */
 .bsheet-bg {
@@ -1169,98 +406,101 @@ const STYLE = `<style>
 .fiche-status.next .fiche-status-title { color: var(--ink4); }
 .fiche-status.next .fiche-status-sub   { color: var(--mu4); }
 
-/* ── Accessibilité : focus clavier visible ──
-   Aucun style :focus n'existait → la navigation clavier était invisible.
-   On cible :focus-visible pour ne PAS afficher l'anneau au clic souris. */
-.prc-node:focus-visible { outline: none; }
-.prc-node:focus-visible .nd-circle {
-  outline: 3px solid var(--a);
-  outline-offset: 3px;
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--a) 28%, transparent);
+/* ════════════════════════════════════════════════════════════════
+   FICHE COMPÉTENCE — refonte « Arène nuit-violet » (cohérente avec
+   l'itinéraire immersif). Override des styles clairs ci-dessus.
+   ════════════════════════════════════════════════════════════════ */
+.bsheet {
+  background:
+    radial-gradient(120% 80% at 50% 0%, #2a1655 0%, transparent 55%),
+    linear-gradient(180deg, #1c1240 0%, #160c30 55%, #110920 100%);
+  border-top: 1px solid rgba(168,85,247,.35);
+  box-shadow: 0 -12px 44px rgba(6,2,18,.65), inset 0 1px 0 rgba(255,255,255,.07);
+  color: #fff;
 }
+.bsheet-handle { background: rgba(255,255,255,.2); }
+.fiche-hero { padding: 18px 18px 8px; }
+.fiche-hero .fiche-close {
+  background: rgba(255,255,255,.08);
+  color: #cdbff5;
+  border: 1px solid rgba(255,255,255,.14);
+}
+.fiche-hero .fiche-close:hover { background: rgba(255,255,255,.15); color: #fff; }
+.fiche-badge-cat { color: #c9b8ff; letter-spacing: .16em; opacity: .92; }
+.fiche-circle {
+  width: 62px; height: 62px; border-radius: 19px;
+  box-shadow:
+    0 12px 28px -8px rgba(124,77,255,.7),
+    inset 0 2px 0 rgba(255,255,255,.45),
+    inset 0 -5px 10px rgba(20,8,50,.4);
+}
+.fiche-circle.done {
+  background: linear-gradient(160deg, #3ee07e 0%, #22a35a 60%, #178246 100%) !important;
+  box-shadow:
+    0 12px 28px -8px rgba(20,120,60,.7),
+    inset 0 2px 0 rgba(255,255,255,.5) !important;
+}
+.fiche-hero h3 {
+  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800; font-size: 21px; letter-spacing: -.3px;
+  color: #fff; text-shadow: 0 2px 14px rgba(8,2,26,.5);
+}
+.fiche-hero .fiche-id { color: #a99fce; }
+.stt-pill.done   { background: rgba(62,224,126,.16); color: #7ef0a8; }
+.stt-pill.next   { background: linear-gradient(160deg,#ffd24a,#ff9c1c); color: #3a1c00; }
+.stt-pill.todo   { background: rgba(255,255,255,.08); color: #b9aee0; }
+.stt-pill.locked { background: rgba(255,255,255,.06); color: #8d80b8; }
+.fiche-summary-txt, .fiche-summary p { color: #d9cffa !important; opacity: 1; }
+/* Blocs status */
+.fiche-status { border: 1px solid rgba(255,255,255,.09); }
+.fiche-status.done   { background: rgba(62,224,126,.1) !important; }
+.fiche-status.next   { background: rgba(124,77,255,.16) !important; }
+.fiche-status.locked { background: rgba(255,255,255,.05) !important; }
+.fiche-status.done   .fiche-status-ico { background: linear-gradient(160deg,#3ee07e,#178246); color:#fff; }
+.fiche-status.next   .fiche-status-ico { background: linear-gradient(160deg,#fff0bf,#ffd24a 50%,#ff9c1c); color:#3a1c00; }
+.fiche-status.locked .fiche-status-ico { background: rgba(255,255,255,.12); color:#cdbff5; }
+.fiche-status-title { color: #fff !important; }
+.fiche-status.done   .fiche-status-title { color: #8ef0b0 !important; }
+.fiche-status.next   .fiche-status-title { color: #fff !important; }
+.fiche-status-sub { color: #b9aee0 !important; }
+.fiche-status.done .fiche-status-sub { color: #9fe0b8 !important; }
+.fiche-status.next .fiche-status-sub { color: #cdbff5 !important; }
+/* Accordéon « points clés » */
+.fiche-acc { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); }
+.fiche-acc > summary { color: #fff; }
+.fiche-acc > summary svg { color: #ffd24a; }
+.fiche-acc-chev { color: #a99fce; }
+.fiche-block-list li { color: #e6def8; border-top-color: rgba(255,255,255,.08); }
+.fiche-block-list .kp-check { background: rgba(255,210,74,.2); color: #ffd24a; }
+.fiche-acc-tip { background: rgba(255,210,74,.1); color: #f0d9a8; }
+.fiche-acc-tip svg { color: #ffd24a; }
+/* CTA « Révise » — bouton plastique 3D doré (esprit Arène quizz) */
+.fiche-quiz-cta {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: 2px 0 0; padding: 15px; min-height: 54px;
+  border: 0; border-radius: 16px; cursor: pointer;
+  text-decoration: none; -webkit-tap-highlight-color: transparent;
+  font: 800 14.5px/1 'Baloo 2','Inter',sans-serif; color: #3a1c00;
+  background: linear-gradient(180deg, #fff0bf 0%, #ffd24a 45%, #ff9c1c 100%);
+  box-shadow:
+    0 6px 0 #b85e00,
+    0 14px 26px -8px rgba(255,156,28,.7),
+    inset 0 2px 0 rgba(255,255,255,.7);
+  transition: transform .12s var(--ease-snap), box-shadow .12s var(--ease-snap);
+}
+.fiche-quiz-cta svg { color: #3a1c00; }
+.fiche-quiz-cta:active { transform: translateY(4px); box-shadow: 0 2px 0 #b85e00, 0 8px 16px -8px rgba(255,156,28,.7), inset 0 2px 0 rgba(255,255,255,.7); }
+.fiche-quiz-cta:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+/* ── Accessibilité : focus clavier visible ── */
 .chest-card:focus-visible,
-.fiche-close:focus-visible,
-.prc-back:focus-visible,
-#prc-back:focus-visible {
+.fiche-close:focus-visible {
   outline: 3px solid var(--a);
   outline-offset: 2px;
   border-radius: var(--r);
 }
-/* Lien d'évitement clavier vers la carte */
-.prc-skip {
-  position: absolute; left: 50%; top: 8px; transform: translateX(-50%) translateY(-200%);
-  z-index: 60; padding: 10px 16px; border-radius: var(--r);
-  background: var(--a); color: var(--a-ink); font: 700 13px/1 'Inter', sans-serif;
-  text-decoration: none; transition: transform .15s ease;
-}
-.prc-skip:focus { transform: translateX(-50%) translateY(0); outline: 2px solid #fff; outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .prc-skip { transition: none; } }
 
-/* ── Carte vivante (gated par .prc-anim, ajoutée en JS si IO dispo
-   et prefers-reduced-motion absent → fallback 100% statique sinon) ── */
-/* Route qui « se dessine » à l'entrée du monde dans le viewport.
-   pathLength="1" sur les 3 couches pleines ; la ligne pointillée
-   (dasharray absolu) fade-in après le tracé. */
-.prc-anim .prc-draw {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: prcRouteDraw 1.1s cubic-bezier(.5,.05,.3,1) both;
-  animation-play-state: paused;
-}
-.prc-anim .prc-world.in .prc-draw { animation-play-state: running; }
-@keyframes prcRouteDraw { to { stroke-dashoffset: 0; } }
-.prc-anim .prc-path-light { opacity: 0; transition: opacity .6s ease .8s; }
-.prc-anim .prc-world.in .prc-path-light { opacity: .9; }
-/* Nodes en cascade APRÈS le tracé : on garde nd-pop + --nd-delay,
-   simplement mis en pause tant que le monde n'est pas visible. */
-.prc-anim .prc-node { animation-play-state: paused; animation-delay: calc(var(--nd-delay, 0s) + .45s); }
-.prc-anim .prc-world.in .prc-node { animation-play-state: running; }
-/* En-tête et portail du monde glissent doucement */
-.prc-anim .prc-world-hd, .prc-anim .prc-portal {
-  opacity: 0;
-  transform: translateY(14px);
-  transition: opacity .55s ease, transform .55s var(--ease-out);
-}
-.prc-anim .prc-world.in .prc-world-hd,
-.prc-anim .prc-world.in .prc-portal { opacity: 1; transform: none; }
-.prc-anim .prc-world.in .prc-portal { transition-delay: .25s; }
-/* Parallax léger sur le fond photo (transform piloté en JS) */
-.prc-anim .prc-world-bg { transform: scale(1.08); will-change: transform; }
-
-/* Halo vivant derrière le node courant (respire, couleur du monde) */
-.prc-node.next::before {
-  content: '';
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 96px; height: 96px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--wc, var(--a)) 32%, transparent) 0%, transparent 70%);
-  animation: ndHaloLive 2.2s ease-in-out infinite;
-  z-index: -1;
-  pointer-events: none;
-}
-@keyframes ndHaloLive {
-  0%, 100% { transform: translate(-50%,-50%) scale(.82); opacity: .65; }
-  50%      { transform: translate(-50%,-50%) scale(1.18); opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .prc-node.next::before { animation: none; }
-}
-
-/* ── Indice contextuel zero-state ── */
-.prc-hint {
-  margin: 0 20px 4px;
-  padding: 12px 14px;
-  background: color-mix(in srgb, var(--a) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--a) 20%, transparent);
-  border-radius: var(--r-md);
-  font: 500 13px/1.5 'Inter', sans-serif;
-  color: var(--mu);
-}
-
-/* ── Bouton recap : scale au press (fallback inline onpointerdown
-   couvre les cas où CSS :active ne déclenche pas sur iOS Safari) ── */
+/* ── Bouton recap : scale au press ── */
 @media (prefers-reduced-motion: no-preference) {
   a[href*="post_validation"] {
     transition: transform .2s var(--ease-snap), box-shadow .2s var(--ease-snap);
@@ -1270,69 +510,6 @@ const STYLE = `<style>
     box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--a) 35%, transparent) !important;
   }
 }
-
-/* ══ Toggle d'affichage Carte / Liste ══════════════════════════ */
-.prc-viewtoggle { display:flex; gap:4px; margin:10px 20px 0; padding:4px; background:var(--bg2); border-radius:var(--r-full); position:relative; z-index:2; }
-.prc-vt-btn { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:9px 8px; border:0; background:transparent; border-radius:var(--r-full); font:800 13px/1 'Inter',sans-serif; color:var(--mu2); cursor:pointer; -webkit-tap-highlight-color:transparent; transition:color .15s, background .15s, box-shadow .15s; }
-.prc-vt-btn svg { width:16px; height:16px; }
-.prc-vt-btn.on { background:var(--su); color:var(--ink); box-shadow:0 2px 8px rgba(11,13,26,.1); }
-.prc-vt-btn:not(.on):active { transform:scale(.97); }
-.prc-vt-btn:focus-visible { outline:3px solid var(--a); outline-offset:2px; }
-
-/* ══ Vue Liste (chapitres dépliables) ══════════════════════════ */
-.prc-list { padding:14px 14px 0; display:flex; flex-direction:column; gap:13px; position:relative; z-index:2; }
-.prc-chap { background:var(--su); border:1px solid var(--bo); border-radius:var(--r-xl); overflow:hidden; box-shadow:0 4px 16px -10px rgba(11,13,26,.14); }
-.prc-chap-hd { display:flex; align-items:center; gap:13px; padding:14px 16px; position:relative; list-style:none; cursor:pointer; -webkit-tap-highlight-color:transparent; }
-.prc-chap-hd::-webkit-details-marker { display:none; }
-.prc-chap-hd::before { content:''; position:absolute; left:0; top:13px; bottom:13px; width:4px; border-radius:0 4px 4px 0; background:var(--wc,var(--a)); }
-.prc-chap-num { width:44px; height:44px; border-radius:13px; flex-shrink:0; display:grid; place-items:center; font:900 17px/1 'Plus Jakarta Sans',sans-serif; color:#fff; background:var(--wc,var(--a)); }
-.prc-chap-num svg { color:#fff; }
-.prc-chap-main { flex:1; min-width:0; }
-.prc-chap-eyebrow { font:700 9.5px/1 'Inter',sans-serif; letter-spacing:.13em; text-transform:uppercase; color:var(--mu2); margin-bottom:4px; }
-.prc-chap-title { font:800 15.5px/1.15 'Plus Jakarta Sans',sans-serif; color:var(--ink); margin:0 0 8px; }
-.prc-chap-bar { display:flex; align-items:center; gap:9px; }
-.prc-chap-bar .track { flex:1; height:6px; background:var(--bg2); border-radius:999px; overflow:hidden; }
-.prc-chap-bar .track i { display:block; height:100%; border-radius:999px; background:var(--wc,var(--a)); transition:width .6s var(--ease-out); }
-.prc-chap-bar .frac { font:800 11px/1 'Inter',sans-serif; color:var(--mu2); white-space:nowrap; }
-.prc-chap-right { flex-shrink:0; display:flex; align-items:center; gap:8px; }
-.prc-chap-chev { color:var(--mu2); display:grid; transition:transform .22s var(--ease-out); }
-details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
-.prc-chap-badge { display:inline-flex; align-items:center; gap:4px; font:800 8.5px/1 'Inter',sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--gr-txt); background:var(--grp2); padding:5px 9px; border-radius:999px; }
-.prc-chap-lock { color:var(--mu2); display:grid; }
-.prc-chap.locked { background:var(--su2); }
-.prc-chap.locked .prc-chap-num { background:var(--bo4); }
-.prc-chap.locked .prc-chap-hd { cursor:default; }
-.prc-chap.locked .prc-chap-hd::before { background:var(--bo4); }
-.prc-chap.locked .prc-chap-title { color:var(--mu3); }
-.prc-chap-locknote { padding:0 16px 14px; font:500 12.5px/1.5 'Inter',sans-serif; color:var(--mu3); }
-.prc-chap-locknote strong { color:var(--ink); font-weight:700; }
-.prc-chap-hd:focus-visible { outline:3px solid var(--a); outline-offset:-3px; border-radius:var(--r-xl); }
-
-.prc-chap-body { padding:2px 10px 10px; }
-.prc-row { display:flex; align-items:center; gap:11px; padding:11px 10px; border-radius:var(--r-md); position:relative; -webkit-tap-highlight-color:transparent; }
-.prc-row + .prc-row { margin-top:1px; }
-.prc-row:not(.locked) { cursor:pointer; }
-.prc-row:not(.locked):active { background:var(--bg3); }
-.prc-row:focus-visible { outline:3px solid var(--a); outline-offset:-2px; }
-.prc-row-ic { width:26px; height:26px; border-radius:50%; flex-shrink:0; display:grid; place-items:center; color:#fff; }
-.prc-row-ic svg { color:#fff; }
-.prc-row.done .prc-row-ic { background:var(--gr); }
-.prc-row.a_valider .prc-row-ic { background:var(--am); }
-.prc-row.next .prc-row-ic { background:var(--a); box-shadow:0 0 0 4px color-mix(in srgb,var(--a) 18%,transparent); }
-.prc-row.todo .prc-row-ic { background:var(--bg2); }
-.prc-row.todo .prc-row-ic::after { content:''; width:7px; height:7px; border-radius:50%; background:var(--bo4); }
-.prc-row.locked .prc-row-ic { background:transparent; }
-.prc-row.locked .prc-row-ic svg { color:var(--bo4); }
-.prc-row-main { flex:1; min-width:0; }
-.prc-row-nm { font:600 13.5px/1.3 'Inter',sans-serif; color:var(--ink); }
-.prc-row.todo .prc-row-nm, .prc-row.locked .prc-row-nm { color:var(--mu3); font-weight:500; }
-.prc-row-sub { display:block; font:500 11px/1.2 'Inter',sans-serif; color:var(--mu2); margin-top:3px; }
-.prc-row-st { flex-shrink:0; font:700 11px/1 'Inter',sans-serif; color:var(--mu2); }
-.prc-row.done .prc-row-st { color:var(--gr-txt); }
-.prc-row.next { background:color-mix(in srgb,var(--a) 8%,transparent); border:1px solid color-mix(in srgb,var(--a) 26%,transparent); }
-.prc-row.next .prc-row-nm { font-weight:800; }
-.prc-row-go { flex-shrink:0; display:inline-flex; align-items:center; gap:5px; background:var(--a); color:var(--a-ink); font:800 11px/1 'Inter',sans-serif; padding:9px 13px; border-radius:999px; box-shadow:0 3px 9px color-mix(in srgb,var(--a) 40%,transparent); }
-.prc-chap .chest-card { margin-top:8px; }
 
 /* ══ Décor immersif : panneaux de signalisation (fond, gouttières) ══ */
 .prc-signs { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
@@ -1347,10 +524,8 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]) .prc-sign { opacity:calc(var(--op,.1) * .45); filter:grayscale(.35) blur(var(--blur,1px)); }
 }
-/* Monde verrouillé : panneaux encore plus discrets */
-.prc-world.locked .prc-signs { opacity:.45; filter:grayscale(.6); }
-/* Filigrane volant déjà atténué par les photos retirées ; avec panneaux on le calme aussi */
-.prc:has(.prc-signs)::before { opacity:.10; }
+/* Monde verrouillé : panneaux encore plus discrets — référencé dans .prc-cv */
+/* .prc-world.locked .prc-signs — supprimé (vue carte retirée) */
 
 /* ══ Vue Chapitre — Immersif nuit-violet (route sinueuse) ════════
    Tokens de route (modifiables pour re-thèmer toute la route) :
@@ -1374,6 +549,8 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
   --cv-mute:      #b9aee0;
   --cv-panel:     #2a1b52;
   --cv-node:      60px;
+  --cv-ink:       #fff;
+  --cv-ink-sub:   #d9cffa;
 
   position: relative;
   min-height: 100dvh;
@@ -1381,7 +558,7 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
     radial-gradient(900px 600px at 18% -5%, #2c1a55 0%, transparent 55%),
     radial-gradient(800px 700px at 110% 12%, #3a1d63 0%, transparent 50%),
     linear-gradient(160deg, #0e0820 0%, #160c2c 50%, #0b0719 100%);
-  color: #fff;
+  color: var(--cv-ink);
   /* PAS d'overflow:hidden : min-height:100dvh + hidden pouvait clipper le bas
      sur iOS (barre d'outils dynamique). Le scroll horizontal est déjà géré
      par .prc-cv-screen (overflow-x:hidden). */
@@ -1410,6 +587,191 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
   mix-blend-mode: screen;
 }
 .prc-cv > * { position: relative; z-index: 1; }
+
+/* ══ VERSION CLAIRE (is-light) — palette premium lavande/blanc ══
+   Scopée au conteneur .prc-cv : override uniquement les tokens
+   sombres. Thème sombre 100% intact quand .is-light est absent.  */
+.prc-cv.is-light {
+  --cv-road:      #e2dcf2;
+  --cv-road-edge: rgba(124,77,255,.38);
+  --cv-night-1:   #f7f5fd;
+  --cv-night-2:   #fbfaff;
+  --cv-mute:      #6b5e8c;
+  --cv-panel:     #ede7f9;
+  --cv-ink:       #241a3f;
+  --cv-ink-sub:   #4b3f72;
+  background:
+    radial-gradient(700px 420px at 18% -6%, rgba(180,160,240,.28) 0%, transparent 55%),
+    radial-gradient(600px 500px at 108% 14%, rgba(200,170,255,.18) 0%, transparent 50%),
+    linear-gradient(160deg, #f7f5fd 0%, #fbfaff 50%, #f3f1fa 100%);
+  color: var(--cv-ink);
+}
+/* Grain atténué en clair */
+.prc-cv.is-light::after { opacity: .025; }
+/* Halo mesh adouci en clair */
+.prc-cv.is-light::before {
+  background:
+    radial-gradient(500px 280px at 80% 8%, rgba(180,130,255,.12), transparent 60%),
+    radial-gradient(420px 380px at 8% 86%, rgba(168,85,247,.08), transparent 60%);
+  mix-blend-mode: multiply;
+}
+/* Panneaux plus visibles en clair (fond blanc naturel sur fond clair) */
+.prc-cv.is-light .prc-cv .prc-signs .prc-sign,
+.prc-cv.is-light .prc-signs .prc-sign {
+  opacity: calc(var(--op, .1) * .75) !important;
+  filter: saturate(.7) brightness(1) blur(calc(var(--blur, 1px) + .4px)) !important;
+}
+
+/* ── Textes codés en dur : override pour le mode clair ── */
+.prc-cv.is-light .prc-cv-world-title { color: var(--cv-ink); text-shadow: none; }
+.prc-cv.is-light .prc-cv-world-sub { color: var(--cv-ink-sub); }
+.prc-cv.is-light .prc-cv-chip {
+  background: rgba(124,77,255,.1);
+  border-color: rgba(124,77,255,.3);
+  color: #5a2fa0;
+}
+.prc-cv.is-light .prc-cv-chip .dot { background: linear-gradient(#a870ff, #7c4dff); }
+.prc-cv.is-light .prc-cv-world-card {
+  background:
+    radial-gradient(300px 160px at 88% -10%, rgba(180,130,255,.22), transparent 60%),
+    linear-gradient(150deg, #ede7f9 0%, #e4dcf6 48%, #ddd5f0 100%);
+  border-color: rgba(124,77,255,.25);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 -20px 40px -20px rgba(124,77,255,.18) inset,
+    0 14px 28px -12px rgba(100,80,180,.18),
+    0 0 40px -20px rgba(124,77,255,.14);
+}
+.prc-cv.is-light .prc-cv-wp-bar {
+  background: rgba(124,77,255,.12);
+  box-shadow: inset 0 2px 4px rgba(100,80,180,.1), inset 0 -1px 0 rgba(255,255,255,.6);
+}
+.prc-cv.is-light .prc-cv-wp-top span { color: var(--cv-mute); }
+.prc-cv.is-light .prc-cv-wp-top b { color: #5a2fa0; }
+.prc-cv.is-light .prc-cv-route-head h2 { color: var(--cv-ink); }
+.prc-cv.is-light .prc-cv-step-count {
+  color: var(--cv-mute);
+  background: rgba(124,77,255,.08);
+  border-color: rgba(124,77,255,.2);
+}
+
+/* Route SVG — la 2e passe intérieure (codée en dur #2a1d52) */
+.prc-cv.is-light .prc-cv-ribbon path:nth-child(2) { stroke: #ddd5f0; }
+
+/* Nodes locked/todo : lavande pâle en clair */
+.prc-cv.is-light .prc-cv-node.locked .prc-cv-node-face {
+  background: linear-gradient(160deg, #ede7f9 0%, #e0d8f2 70%);
+  box-shadow: 0 4px 0 #cec4e8, 0 8px 14px -6px rgba(100,80,180,.18), inset 0 1px 0 rgba(255,255,255,.9);
+}
+.prc-cv.is-light .prc-cv-node.locked .prc-cv-node-face svg { opacity: .5; color: #7c5ab8; }
+.prc-cv.is-light .prc-cv-node.todo .prc-cv-node-face {
+  background: linear-gradient(160deg, #e4dcf6 0%, #d9d0ee 70%);
+  box-shadow: 0 4px 0 #c8bfe4, 0 8px 14px -6px rgba(100,80,180,.15), inset 0 1px 0 rgba(255,255,255,.85);
+}
+
+/* Chapnav en clair */
+.prc-cv.is-light .prc-cv-cn {
+  color: #5a4a8a;
+  background: rgba(124,77,255,.08);
+  border-color: rgba(124,77,255,.22);
+}
+.prc-cv.is-light .prc-cv-cn.done { color: #1a6637; border-color: rgba(46,200,110,.4); background: rgba(46,200,110,.1); }
+.prc-cv.is-light .prc-cv-cn.lock { color: #9e8cbf; opacity: .9; }
+
+/* Milestones labels */
+.prc-cv.is-light .prc-cv-ms-ttl { color: var(--cv-ink); }
+.prc-cv.is-light .prc-cv-ms-label.locked .prc-cv-ms-ttl { color: #9e8cbf; }
+.prc-cv.is-light .prc-cv-ms-label.locked .prc-cv-ms-meta { color: #b5a6d4; }
+.prc-cv.is-light .prc-cv-tag-done { color: #1a7840; }
+
+/* Boss card en clair */
+.prc-cv.is-light .prc-cv-boss-card {
+  background: linear-gradient(160deg, rgba(180,140,255,.18), rgba(220,210,245,.7));
+  border-color: rgba(124,77,255,.28);
+  box-shadow: 0 10px 20px -14px rgba(100,80,180,.25), inset 0 1px 0 rgba(255,255,255,.8);
+}
+.prc-cv.is-light .prc-cv-boss-card.won {
+  background: linear-gradient(160deg, rgba(255,220,120,.25), rgba(255,245,200,.7));
+  border-color: rgba(255,210,74,.45);
+  box-shadow: 0 10px 24px -12px rgba(200,140,0,.25), inset 0 1px 0 rgba(255,255,255,.9);
+}
+.prc-cv.is-light .prc-cv-boss-kick { color: #7c4dff; }
+.prc-cv.is-light .prc-cv-boss-ttl { color: var(--cv-ink); }
+.prc-cv.is-light .prc-cv-boss-sub { color: var(--cv-mute); }
+.prc-cv.is-light .prc-cv-boss-lock {
+  background: linear-gradient(160deg, #ede7f9, #ddd5f0);
+  box-shadow: 0 4px 8px -3px rgba(100,80,180,.2), inset 0 1px 0 rgba(255,255,255,.8);
+}
+
+/* Carte CTA "étape en cours" en clair */
+.prc-cv.is-light .prc-cv-current-call {
+  background:
+    radial-gradient(180px 70px at 80% 0%, rgba(255,210,74,.12), transparent 60%),
+    linear-gradient(150deg, rgba(240,233,255,.96), rgba(228,220,248,.96));
+  border-color: rgba(255,210,74,.45);
+  box-shadow: 0 10px 22px -12px rgba(200,140,0,.22), inset 0 1px 0 rgba(255,255,255,.9);
+}
+.prc-cv.is-light .prc-cv-call-ct { color: var(--cv-ink); }
+
+/* Gate chapitre suivant en clair */
+.prc-cv.is-light .prc-cv-gate {
+  background: linear-gradient(150deg, rgba(230,224,250,.9), rgba(240,237,252,.9));
+  border-color: rgba(124,77,255,.25);
+}
+.prc-cv.is-light .prc-cv-gate-lock {
+  background: linear-gradient(160deg, #ede7f9, #ddd5f0);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 4px 0 #cec4e8;
+}
+.prc-cv.is-light .prc-cv-gate-g1 { color: var(--cv-ink); }
+
+/* Carte chapitre suivant en clair */
+.prc-cv.is-light .prc-cv-next.locked {
+  background: linear-gradient(150deg, rgba(230,224,250,.7), rgba(240,237,252,.8));
+}
+.prc-cv.is-light .prc-cv-next.open {
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(180,130,255,.25), transparent 55%),
+    linear-gradient(150deg, #e8e0f8 0%, #ddd8f2 60%, #d6d0ec 100%);
+  border-color: rgba(124,77,255,.35);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 14px 28px -14px rgba(100,80,180,.25),
+    0 0 32px -18px rgba(124,77,255,.25);
+}
+.prc-cv.is-light .prc-cv-next-badge.locked {
+  background: linear-gradient(160deg, #ede7f9, #ddd5f0);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 4px 0 #cec4e8;
+}
+.prc-cv.is-light .prc-cv-next-kick { color: #7c4dff; }
+.prc-cv.is-light .prc-cv-next.locked .prc-cv-next-kick { color: var(--cv-mute); }
+.prc-cv.is-light .prc-cv-next-ttl { color: var(--cv-ink); }
+.prc-cv.is-light .prc-cv-next-go {
+  background: linear-gradient(160deg, rgba(124,77,255,.18), rgba(124,77,255,.08));
+  border-color: rgba(124,77,255,.28);
+  color: #5a2fa0;
+}
+
+/* ── Bouton toggle thème ── */
+.prc-cv-theme-btn {
+  flex: 0 0 auto;
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid rgba(168,85,247,.3);
+  background: rgba(42,27,82,.5);
+  color: #cdbff5;
+  cursor: pointer;
+  transition: background .18s, border-color .18s, transform .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.prc-cv-theme-btn::after { content: ""; position: absolute; inset: -6px; }
+.prc-cv-theme-btn:active { transform: scale(.9); }
+.prc-cv-theme-btn:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
+/* Version claire du bouton */
+.prc-cv.is-light .prc-cv-theme-btn {
+  background: rgba(124,77,255,.1);
+  border-color: rgba(124,77,255,.28);
+  color: #5a2fa0;
+}
 
 /* scrollable inner */
 .prc-cv-screen {
@@ -1454,24 +816,6 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 .prc-cv-cn.cur.done { color: #16431f; }
 .prc-cv-cn:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
 
-/* Bouton "Carte" — lisible (≥44px tactile), plus un lien gris 11px */
-.prc-cv-back {
-  position: relative;
-  display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto;
-  height: 34px; padding: 0 13px;
-  font: 800 12px/1 'Inter', sans-serif;
-  color: #ece6ff;
-  background: rgba(42,27,82,.7);
-  border: 1.5px solid rgba(168,85,247,.32);
-  border-radius: 11px;
-  -webkit-tap-highlight-color: transparent; cursor: pointer;
-  transition: transform .12s, border-color .15s, color .15s;
-}
-.prc-cv-back::after { content: ""; position: absolute; inset: -6px; }
-.prc-cv-back:hover { color: #fff; border-color: rgba(168,85,247,.5); }
-.prc-cv-back:active { transform: scale(.96); }
-.prc-cv-back:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
-
 /* ── HERO : monde courant ─────────────────────────────────────── */
 .prc-cv-hero-wrap { padding: 10px 18px 6px; }
 .prc-cv-world-card {
@@ -1509,9 +853,9 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
   font-weight: 800; font-size: 27px; line-height: 1.02; letter-spacing: -.6px;
   margin: 13px 0 4px;
   text-shadow: 0 2px 14px rgba(10,2,30,.6);
-  color: #fff;
+  color: var(--cv-ink, #fff);
 }
-.prc-cv-world-sub { font-size: 13px; color: #d9cffa; font-weight: 500; max-width: 235px; line-height: 1.35; }
+.prc-cv-world-sub { font-size: 13px; color: var(--cv-ink-sub, #d9cffa); font-weight: 500; max-width: 235px; line-height: 1.35; }
 .prc-cv-world-prog { position: relative; z-index: 2; margin-top: 18px; }
 .prc-cv-wp-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
 .prc-cv-wp-top span { font-size: 12px; color: var(--cv-mute); font-weight: 600; }
@@ -1545,7 +889,7 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 }
 .prc-cv-route-head h2 {
   font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: -.2px;
-  color: #fff;
+  color: var(--cv-ink, #fff);
 }
 .prc-cv-step-count {
   font-size: 11.5px; font-weight: 700; color: var(--cv-mute);
@@ -1724,7 +1068,7 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 .prc-cv-boss-card.won .prc-cv-boss-kick { color: #ffd98a; }
 .prc-cv-boss-ttl {
   font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
-  font-weight: 800; font-size: 17px; line-height: 1.1; color: #fff; margin: 5px 0 3px;
+  font-weight: 800; font-size: 17px; line-height: 1.1; color: var(--cv-ink, #fff); margin: 5px 0 3px;
 }
 .prc-cv-boss-sub { font: 500 12px/1.35 'Inter', sans-serif; color: #b9aee0; }
 .prc-cv-boss-card.won .prc-cv-boss-sub { color: #f0d9a8; }
@@ -1738,7 +1082,7 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 .prc-cv-ms-ttl {
   font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
   font-weight: 700; font-size: 15px; line-height: 1.1; letter-spacing: -.2px;
-  color: #fff;
+  color: var(--cv-ink, #fff);
 }
 .prc-cv-ms-meta {
   margin-top: 3px; font-size: 11.5px; font-weight: 600; color: var(--cv-mute);
@@ -1767,7 +1111,7 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 .prc-cv-call-kick { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #ffd98a; }
 .prc-cv-call-ct {
   font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700; font-size: 14.5px; margin: 3px 0 11px; line-height: 1.15; color: #fff;
+  font-weight: 700; font-size: 14.5px; margin: 3px 0 11px; line-height: 1.15; color: var(--cv-ink, #fff);
 }
 .prc-cv-cta {
   display: inline-flex; align-items: center; gap: 8px;
@@ -1795,7 +1139,7 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
   background: linear-gradient(160deg, #2c1f4e, #1c1338);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 0 #140d28;
 }
-.prc-cv-gate-g1 { font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: #cdbff5; }
+.prc-cv-gate-g1 { font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: var(--cv-ink, #cdbff5); }
 .prc-cv-gate-g2 { font-size: 11.5px; color: var(--cv-mute); font-weight: 600; margin-top: 2px; }
 
 /* Panneaux routiers en fond de l'itinéraire (comme la vue carte). Volontairement
@@ -1857,7 +1201,7 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 .prc-cv-next.locked .prc-cv-next-kick { color: var(--cv-mute); }
 .prc-cv-next-ttl {
   font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 17px;
-  color: #fff; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--cv-ink, #fff); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .prc-cv-next-sub { font: 500 11.5px/1.3 'Inter', sans-serif; color: var(--cv-mute); margin-top: 3px; }
 .prc-cv-next-go {
@@ -1988,21 +1332,10 @@ const NEW_BADGE_MS = 24 * 60 * 60 * 1000;
 // ─── Vue Carte | Liste (persistée localStorage) ──────────────────
 const PARCOURS_VIEW_KEY = "permigo_parcours_view";
 function loadParcoursView() {
-  try {
-    const stored = localStorage.getItem(PARCOURS_VIEW_KEY);
-    if (stored === "list" || stored === "map" || stored === "chapitre")
-      return stored;
-    return "chapitre"; // défaut : vue Chapitre (focus sur 1 chapitre à la fois)
-  } catch {
-    return "chapitre";
-  }
+  return "chapitre";
 }
-function saveParcoursView(v) {
-  try {
-    localStorage.setItem(PARCOURS_VIEW_KEY, v);
-  } catch {
-    /* localStorage indispo — non bloquant */
-  }
+function saveParcoursView(_v) {
+  /* vue unique : plus rien à persister */
 }
 // Escape ferme la fiche — listener global lié une seule fois (anti-empilement au re-render).
 let escBound = false;
@@ -2098,42 +1431,45 @@ export async function mount(root) {
       view,
       currentChapIdx,
     );
-    wire(root, worldStates, validatedMap, pendingMap, me, view);
-    // Vue Chapitre : trace la route SVG À TRAVERS les vrais jalons (toute
-    // hauteur / tout nombre de jalons), au lieu d'un tracé fixe qui dérive.
-    // Planification robuste (double rAF + fonts.ready + ResizeObserver).
-    if (view === "chapitre") {
-      scheduleRoadLayout(root);
-    } else {
-      stopRoadLayout();
-    }
-    // Bouton « ? » du tuto (re-câblé à chaque rendu)
-    root
-      .querySelector("#prc-help")
-      ?.addEventListener("click", showParcoursTuto);
-    // Toggle Chapitre / Carte / Liste
-    root.querySelectorAll(".prc-vt-btn").forEach((btn) =>
-      btn.addEventListener("click", () => {
-        const v = btn.dataset.view;
-        if (!v || v === view) return;
-        view = v;
-        saveParcoursView(v);
-        track("parcours.view_switch", { view: v });
-        renderAndWire();
-      }),
-    );
-    // Vue Chapitre — lien "Voir la carte" / boutons de navigation entre chapitres
-    // Cible : .prc-cv-back[data-view] + .prc-cv-gate[data-chap]
-    root.querySelectorAll(".prc-cv-back[data-view]").forEach((btn) =>
-      btn.addEventListener("click", () => {
-        const v = btn.dataset.view;
-        if (!v) return;
-        view = v;
-        saveParcoursView(v);
-        track("parcours.view_switch", { view: v });
-        renderAndWire();
-      }),
-    );
+    wire(root, worldStates, validatedMap, pendingMap, me);
+    // Trace la route SVG à travers les vrais jalons (planification robuste :
+    // double rAF + fonts.ready + ResizeObserver).
+    scheduleRoadLayout(root);
+
+    // ── Toggle thème clair / sombre ─────────────────────────────────
+    // Applique le thème mémorisé dès le rendu (défaut = "light").
+    const cvRoot = root.querySelector(".prc-cv");
+    const applyTheme = (theme) => {
+      if (!cvRoot) return;
+      if (theme === "light") {
+        cvRoot.classList.add("is-light");
+      } else {
+        cvRoot.classList.remove("is-light");
+      }
+      const btn = root.querySelector("#prc-theme-toggle");
+      if (!btn) return;
+      const isL = theme === "light";
+      btn.setAttribute("aria-pressed", String(isL));
+      btn.setAttribute(
+        "aria-label",
+        isL ? "Passer en mode sombre" : "Passer en mode clair",
+      );
+      const ICO_SUN_BTN = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+      const ICO_MOON_BTN = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      btn.innerHTML = isL ? ICO_MOON_BTN : ICO_SUN_BTN;
+    };
+    const savedTheme =
+      localStorage.getItem("permigo_parcours_theme") ?? "light";
+    applyTheme(savedTheme);
+    root.querySelector("#prc-theme-toggle")?.addEventListener("click", () => {
+      const current = cvRoot?.classList.contains("is-light") ? "light" : "dark";
+      const next = current === "light" ? "dark" : "light";
+      localStorage.setItem("permigo_parcours_theme", next);
+      track("parcours.theme_toggle", { theme: next });
+      applyTheme(next);
+    });
+
+    // Navigation entre chapitres (stepper + carte chapitre suivant)
     root
       .querySelectorAll(".prc-cv-next[data-chap], .prc-cv-cn[data-chap]")
       .forEach((el) =>
@@ -2489,20 +1825,16 @@ function compStatus(
   return "todo";
 }
 
-// ─── Render principal ─────────────────────────────────────────────
+// ─── Render principal (vue chapitre uniquement) ───────────────────
 function renderPage(
   worldStates,
   validatedMap,
   pendingMap,
   openedWorlds = new Set(),
-  view = "map",
+  view = "chapitre",
   currentChapIdx = 0,
 ) {
-  // ── Vue Chapitre : template full-screen immersif sombre (edge-to-edge) ──
-  // Pas de header clair, pas de toggle visible, pas de barre globale.
-  // Le fond violet nuit déborde sous la topbar app (comportement voulu).
-  if (view === "chapitre") {
-    return `${STYLE}
+  return `${STYLE}
 ${renderChapterView(worldStates, validatedMap, pendingMap, currentChapIdx, openedWorlds)}
 
 <!-- Bottom sheet -->
@@ -2511,297 +1843,8 @@ ${renderChapterView(worldStates, validatedMap, pendingMap, currentChapIdx, opene
   <div class="bsheet-handle" aria-hidden="true"></div>
   <div id="bsheet-body"></div>
 </div>`;
-  }
-
-  const totalDone = worldStates.reduce((s, w) => s + w.done, 0);
-  const totalComps = worldStates.reduce((s, w) => s + w.total, 0);
-  const globalPct = Math.round((totalDone / totalComps) * 100);
-
-  // Zero-state hint: shown only when the student hasn't validated any competence yet.
-  const zeroStateHint =
-    totalDone === 0
-      ? `<div style="margin:0 20px 4px;padding:12px 14px;background:color-mix(in srgb,var(--a) 8%,transparent);border:1px solid color-mix(in srgb,var(--a) 20%,transparent);border-radius:var(--r-md);font:500 13px/1.5 'Inter',sans-serif;color:var(--mu)">
-        Chaque étape = une compétence du permis.<br>Ton moniteur la valide en séance — elle s'allume ici automatiquement.
-       </div>`
-      : "";
-
-  return `${STYLE}
-<div class="prc">
-
-  <a href="#prc-map-scroll" class="prc-skip">Aller à la carte</a>
-
-  <!-- Header -->
-  <div class="prc-hd">
-    <div>
-      <h1 class="prc-title" tabindex="-1">Ta carte du permis <button class="prc-help" id="prc-help" type="button" aria-label="Comment marche la carte ?">?</button></h1>
-      <div class="prc-subtitle">Valide les ${totalComps} compétences pour décrocher ton permis B</div>
-    </div>
-    <div class="prc-hd-right">
-      <div class="prc-total">${totalDone}<span class="prc-total-denom">/${totalComps}</span></div>
-      <div class="prc-total-lbl">compétences acquises</div>
-    </div>
-  </div>
-
-  <!-- Barre globale -->
-  <div class="prc-global-bar">
-    <div class="prc-global-track" role="progressbar"
-         aria-valuenow="${globalPct}" aria-valuemin="0" aria-valuemax="100"
-         aria-label="Progression du parcours : ${globalPct}%, ${totalDone} compétences sur ${totalComps}">
-      <div class="prc-global-fill" style="width:${globalPct}%"></div>
-    </div>
-    <div class="prc-global-meta">
-      <span>${totalDone === 0 ? "Commence ta première compétence" : `${globalPct}% de compétences acquises`}</span>
-      <span>${totalComps - totalDone} ${totalComps - totalDone === 1 ? "restante" : "restantes"}</span>
-    </div>
-  </div>
-
-  <!-- Toggle Itinéraire (vue Chapitre immersive) / Carte / Liste -->
-  <div class="prc-viewtoggle" role="tablist" aria-label="Mode d'affichage du parcours">
-    <button class="prc-vt-btn ${view === "chapitre" ? "on" : ""}" data-view="chapitre" type="button" role="tab" aria-selected="${view === "chapitre"}">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 20c0-6 12-4 12-10"/><circle cx="6" cy="20" r="1.7" fill="currentColor" stroke="none"/><circle cx="18" cy="10" r="1.7" fill="currentColor" stroke="none"/></svg> Itinéraire
-    </button>
-    <button class="prc-vt-btn ${view === "map" ? "on" : ""}" data-view="map" type="button" role="tab" aria-selected="${view === "map"}">
-      ${icon("map", { size: 16 })} Carte
-    </button>
-    <button class="prc-vt-btn ${view === "list" ? "on" : ""}" data-view="list" type="button" role="tab" aria-selected="${view === "list"}">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.2" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.2" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.2" cy="18" r="1.4" fill="currentColor" stroke="none"/></svg> Liste
-    </button>
-  </div>
-
-  ${zeroStateHint}
-
-  <!-- Carte des mondes — pleine page, scroll naturel (plus d'encadré interne) -->
-  <div class="prc-map" id="prc-map-scroll" tabindex="-1" role="region" aria-label="Carte d'apprentissage">
-    ${
-      view === "list"
-        ? `<div class="prc-list">${renderListView(worldStates, validatedMap, pendingMap, openedWorlds)}</div>`
-        : worldStates
-            .map((ws, i) =>
-              renderWorldSection(
-                ws,
-                validatedMap,
-                pendingMap,
-                i < worldStates.length - 1,
-                openedWorlds,
-              ),
-            )
-            .join("")
-    }
-    ${renderFinal(totalDone, totalComps)}
-    <div style="height: 24px"></div>
-  </div>
-
-</div>
-
-<!-- Bottom sheet -->
-<div class="bsheet-bg" id="bsheet-bg" aria-hidden="true"></div>
-<div class="bsheet" id="bsheet" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="bsheet-title">
-  <div class="bsheet-handle" aria-hidden="true"></div>
-  <div id="bsheet-body"></div>
-</div>`;
 }
 
-// ─── Render d'un monde avec route SVG + nodes ─────────────────────
-function renderWorldSection(
-  ws,
-  validatedMap,
-  pendingMap,
-  hasNext,
-  openedWorlds = new Set(),
-) {
-  const { idx, cat, subs, done, total, status, nextChallenge } = ws;
-  const meta = WORLDS_META[idx];
-  const world = WORLDS[idx];
-  const isLocked = status === "locked";
-  const isComplete = status === "complete";
-
-  // ─ Génération route SVG sinueuse ─
-  // W ≈ largeur réelle rendue (≈ conteneur 480) pour éviter la distorsion
-  // horizontale du trait : avant W=280 + preserveAspectRatio="none" étirait
-  // la route ~1,7× en largeur (route trop grosse/déformée).
-  const W = 440;
-  // Zigzag franc → les virages "consomment" la distance à l'horizontale, donc
-  // on peut resserrer la verticale (~108px/node) sans empiler les étiquettes
-  // (nodes consécutifs de côtés opposés). Route plus compacte ET plus "route".
-  const H = Math.max(330, subs.length * 108 + 50);
-
-  const ZIG = 0.27; // amplitude du zigzag (part de W de chaque côté du centre)
-  const points = subs.map((sub, i) => {
-    const yPct = (i + 0.5) / subs.length;
-    // Alternance stricte gauche/droite à chaque étape = vrais virages.
-    const xPct = 0.5 + (i % 2 === 0 ? ZIG : -ZIG);
-    return { c: sub.c, n: sub.n, x: xPct * W, y: yPct * H };
-  });
-
-  let pathD = `M ${points[0].x} 0 L ${points[0].x} ${points[0].y}`;
-  for (let i = 1; i < points.length; i++) {
-    const p = points[i],
-      pp = points[i - 1];
-    const my = (pp.y + p.y) / 2;
-    pathD += ` C ${pp.x} ${my}, ${p.x} ${my}, ${p.x} ${p.y}`;
-  }
-  pathD += ` L ${points[points.length - 1].x} ${H}`;
-
-  const nodesHTML = points
-    .map((p, i) => {
-      const st = compStatus(
-        p.c,
-        status,
-        nextChallenge,
-        validatedMap,
-        pendingMap,
-      );
-      const xp = ((p.x / W) * 100).toFixed(2);
-      const yp = ((p.y / H) * 100).toFixed(2);
-      const delay = (i * 0.07 + 0.12).toFixed(2);
-      const sttLabel = {
-        done: "Acquis",
-        a_valider: "À valider",
-        next: "Commence ici",
-        todo: "Pas encore travaillée",
-        locked: "Verrouillé",
-      }[st];
-
-      // Badge PermiGo (le P vert) dans la tuile, + pastille de statut.
-      const BADGE = "/skins/avatars/permigo-badge-icon.png";
-      const stamp = {
-        done: `<span class="nd-stamp done">${icon("check", { size: 12, strokeWidth: 3 })}</span>`,
-        a_valider: `<span class="nd-stamp done">${icon("check", { size: 12, strokeWidth: 3 })}</span>`,
-        next: `<span class="nd-stamp next">${icon("zap", { size: 11, strokeWidth: 2.6 })}</span>`,
-        todo: "",
-        locked: `<span class="nd-stamp locked">${icon("lock", { size: 10, strokeWidth: 2.6 })}</span>`,
-      }[st];
-
-      const isLocked = st === "locked";
-      return `
-      <div class="prc-node ${st}" data-comp="${esc(p.c)}" data-world-idx="${idx}"
-           style="left:${xp}%;top:${yp}%;--wc:${meta.color};--wg:${meta.glow};--nd-delay:${delay}s"
-           ${!isLocked ? `role="button" tabindex="0"` : 'aria-hidden="true"'}
-           aria-label="${esc(p.n)} — ${esc(sttLabel)}">
-        <div class="nd-circle"><img class="nd-badge" src="${BADGE}" alt="" aria-hidden="true"/>${stamp}</div>
-        <div class="nd-lbl" aria-hidden="true">
-          <span class="nd-name">${esc(p.n)}</span>
-          <span class="nd-code">${esc(p.c.toUpperCase())}</span>
-          <span class="nd-stt">${esc(sttLabel)}</span>
-        </div>
-      </div>`;
-    })
-    .join("");
-
-  // Message monde verrouillé
-  const lockMsg = isLocked
-    ? (() => {
-        const req = UNLOCK_REQ[idx];
-        const prevDone = ws.prevDoneCount ?? 0;
-        const need = req - prevDone;
-        return `<div style="position:relative;z-index:9;text-align:center;padding:12px 16px;font:500 13px/1.4 'Inter',sans-serif;color:var(--mu3)">Valide encore <strong style="color:var(--ink)">${need} compétence${need > 1 ? "s" : ""}</strong> dans le monde précédent pour ouvrir celui-ci.</div>`;
-      })()
-    : "";
-
-  const isActive = status === "in_progress";
-
-  // Volant qui « roule » sur le tracé du monde en cours (immersion Tier 2).
-  // SVG <animateMotion> = coordonnées exactes du path (pas de souci d'échelle) ;
-  // uniquement le monde actif ; coupé sous prefers-reduced-motion.
-  const reducedMotion = window.matchMedia?.(
-    "(prefers-reduced-motion: reduce)",
-  )?.matches;
-  const carHTML =
-    isActive && !reducedMotion
-      ? `<g class="prc-car" aria-hidden="true"><image href="/worlds/volant.png" width="28" height="28" x="-14" y="-14" /><animateMotion dur="${Math.max(6, Math.round(H / 110))}s" repeatCount="indefinite" rotate="0" calcMode="linear" path="${pathD}" /></g>`
-      : "";
-
-  return `
-<section class="prc-world ${isLocked ? "locked" : ""} ${isComplete ? "complete" : ""} ${isActive ? "active" : ""}"
-         data-world-idx="${idx}"
-         style="--wc:${meta.color};--wg:${meta.glow}">
-  <!-- Décor immersif : panneaux de signalisation en gouttières (fond, faible opacité) -->
-  ${renderWorldSigns(idx)}
-  <!-- Petit visuel décoratif top-right (plus de photo plein écran : illisible + hors charte) -->
-  <img src="${meta.img}" alt="" class="prc-world-decor" loading="lazy" draggable="false">
-
-
-  <!-- En-tête monde -->
-  <div class="prc-world-hd">
-    <div class="prc-world-badge" style="color:${meta.color}">
-      <span class="num">${meta.num}</span>
-      ${esc(world.nom)}
-    </div>
-    <div class="prc-world-h2">${esc(world.titre)}</div>
-    <div class="prc-world-tagline">${esc(world.description)}</div>
-    <div class="prc-world-count">
-      ${done} / ${total} acquises
-      ${isComplete ? " " + icon("trophy", { size: 15 }) : ""}
-    </div>
-  </div>
-
-  ${lockMsg}
-
-  <!-- Route + nodes -->
-  <div class="prc-route" style="min-height:${H}px">
-    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:${H}px">
-      <path class="prc-path-shadow prc-draw" d="${pathD}" pathLength="1" />
-      <path class="prc-path-edge prc-draw"   d="${pathD}" pathLength="1" />
-      <path class="prc-path prc-draw"        d="${pathD}" pathLength="1" />
-      <path class="prc-path-edge2"  d="${pathD}" />
-      <path class="prc-path-light"  d="${pathD}" />
-      ${carHTML}
-    </svg>
-    ${nodesHTML}
-  </div>
-
-  <!-- Portail de fin de monde -->
-  <div class="prc-portal">
-    ${renderPortalArch(meta.color, isComplete)}
-    <div class="pbadge">${isComplete ? "✓ Toutes acquises" : `${total - done} à valider`}</div>
-    <h3>${isComplete ? `Monde ${meta.num} bouclé !` : `Continue — tu avances bien`}</h3>
-    <p>${
-      isComplete
-        ? hasNext
-          ? `Monde ${idx + 2} débloqué — continue ta progression.`
-          : `Bravo, tu as maîtrisé toutes les compétences !`
-        : hasNext
-          ? `Valide toutes les compétences de ce monde pour passer au suivant.`
-          : `Plus que ${total - done} compétence${total - done > 1 ? "s" : ""} et tu touches au but.`
-    }</p>
-  </div>
-
-  ${
-    isComplete
-      ? renderChest({
-          worldNum: meta.num,
-          worldName: world.nom,
-          opened: openedWorlds.has(meta.num),
-        })
-      : ""
-  }
-
-  ${hasNext ? '<div class="prc-bridge"></div>' : ""}
-</section>`;
-}
-
-function renderPortalArch(color, isComplete) {
-  return `
-<div class="prc-portal-arch">
-  <svg viewBox="0 0 130 170" xmlns="http://www.w3.org/2000/svg">
-    <path class="arch-bg" d="M 20 170 L 20 80 Q 20 20, 65 20 Q 110 20, 110 80 L 110 170 Z" />
-    <path class="arch-stroke" d="M 20 170 L 20 80 Q 20 20, 65 20 Q 110 20, 110 80 L 110 170" />
-    <path class="arch-light"  d="M 30 170 L 30 80 Q 30 30, 65 30 Q 100 30, 100 80 L 100 170" />
-    ${
-      isComplete
-        ? `
-      <circle cx="65" cy="70" r="5" fill="${color}" opacity=".9"/>
-      <circle cx="65" cy="70" r="12" fill="none" stroke="${color}" stroke-width="1.5" opacity=".5">
-        <animate attributeName="r" values="6;20" dur="2s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values=".8;0" dur="2s" repeatCount="indefinite"/>
-      </circle>`
-        : ""
-    }
-  </svg>
-</div>`;
-}
-
-// ─── Vue Chapitre (focus 1 chapitre à la fois) ───────────────────
 // ─── Vue Chapitre — Route sinueuse immersive (fidèle au mockup) ──
 function renderChapterView(
   worldStates,
@@ -3041,6 +2084,11 @@ function renderChapterView(
   // et atteignables sans quitter la vue immersive.
   const ICO_CHK = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4 10-11" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const ICO_LK = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.3" stroke="currentColor" stroke-width="2.4"/><path d="M8 11V8.5a4 4 0 0 1 8 0V11" stroke="currentColor" stroke-width="2.4"/></svg>`;
+  // Icônes toggle thème (soleil / lune)
+  const ICO_SUN = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const ICO_MOON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const isLightNow =
+    (localStorage.getItem("permigo_parcours_theme") ?? "light") === "light";
   const chapNav = `
     <div class="prc-cv-chapnav" role="tablist" aria-label="Chapitres du parcours">
       ${worldStates
@@ -3062,13 +2110,13 @@ function renderChapterView(
           return `<button class="prc-cv-cn ${cls}" data-chap="${i}" type="button" role="tab" aria-selected="${isCur}" aria-label="Chapitre ${i + 1}${isCur ? " — affiché" : ""}">${inner}</button>`;
         })
         .join("")}
-    </div>`;
-
-  // ── Bouton "Voir la carte" — lisible (≥44px), pas un lien gris ───────
-  const backLink = `<button class="prc-cv-back" data-view="map" type="button" aria-label="Voir la carte multi-chapitres">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6l9-3 9 3-9 3-9-3zM3 12l9 3 9-3M3 18l9 3 9-3"/></svg>
-    Carte
-  </button>`;
+    </div>
+    <button id="prc-theme-toggle" class="prc-cv-theme-btn"
+      type="button"
+      aria-pressed="${isLightNow}"
+      aria-label="${isLightNow ? "Passer en mode sombre" : "Passer en mode clair"}">
+      ${isLightNow ? ICO_MOON : ICO_SUN}
+    </button>`;
 
   // ── Coffre du chapitre : la récompense, débloquée quand le boss tombe ──
   const chestWorldNum = meta?.num ?? currentIdx + 1;
@@ -3085,7 +2133,6 @@ function renderChapterView(
   <div class="prc-cv-screen">
     <div class="prc-cv-topbar">
       ${chapNav}
-      ${backLink}
     </div>
     ${heroHTML}
     ${routeHTML}
@@ -3184,190 +2231,11 @@ function stopRoadLayout() {
   }
 }
 
-function renderFinal(done, total) {
-  const pct = Math.round((done / total) * 100);
-  return `
-<div class="prc-final">
-  <h3>La ligne d'arrivée : l'Examen du permis</h3>
-  <p>Acquiers toutes les compétences et ton moniteur pourra te présenter à l'examen.</p>
-  <div class="prc-final-stats">
-    <div class="prc-final-stat">
-      <div class="v">${done}<small style="font-size:13px;opacity:.6">/${total}</small></div>
-      <div class="l">Acquises</div>
-    </div>
-    <div class="prc-final-stat">
-      <div class="v">${pct}%</div>
-      <div class="l">Progression</div>
-    </div>
-    <div class="prc-final-stat">
-      <div class="v">${total - done}</div>
-      <div class="l">Restantes</div>
-    </div>
-  </div>
-</div>`;
-}
-
-// ─── Vue Liste (chapitres) — alternative compacte à la carte ──────
-function renderListView(worldStates, validatedMap, pendingMap, openedWorlds) {
-  return worldStates
-    .map((ws) => renderWorldChapter(ws, validatedMap, pendingMap, openedWorlds))
-    .join("");
-}
-
-function renderWorldChapter(ws, validatedMap, pendingMap, openedWorlds) {
-  const { idx, cat, subs, done, total, status, nextChallenge } = ws;
-  const meta = WORLDS_META[idx];
-  const world = WORLDS[idx];
-  const isLocked = status === "locked";
-  const isComplete = status === "complete";
-  const pct = total ? Math.round((done / total) * 100) : 0;
-
-  const eyebrow = isLocked
-    ? `Compétence ${meta.num} · verrouillé`
-    : isComplete
-      ? `Compétence ${meta.num} · terminé`
-      : `Compétence ${meta.num} · en cours`;
-
-  const numCell = isComplete
-    ? `<span class="prc-chap-num">${icon("check", { size: 22, strokeWidth: 3 })}</span>`
-    : `<span class="prc-chap-num">${meta.num}</span>`;
-
-  const rightCell = isLocked
-    ? `<span class="prc-chap-lock">${icon("lock", { size: 16 })}</span>`
-    : isComplete
-      ? `<span class="prc-chap-badge">${icon("check", { size: 11, strokeWidth: 3 })} Terminé</span><span class="prc-chap-chev">${icon("chevron-down", { size: 16 })}</span>`
-      : `<span class="prc-chap-chev">${icon("chevron-down", { size: 16 })}</span>`;
-
-  const header = `
-    ${numCell}
-    <div class="prc-chap-main">
-      <div class="prc-chap-eyebrow">${esc(eyebrow)}</div>
-      <h3 class="prc-chap-title">${esc(world.titre)}</h3>
-      <div class="prc-chap-bar">
-        <div class="track"><i style="width:${pct}%"></i></div>
-        <span class="frac">${done}/${total}</span>
-      </div>
-    </div>
-    <div class="prc-chap-right">${rightCell}</div>`;
-
-  // Monde verrouillé : carte statique (header + note), pas de liste dépliable.
-  if (isLocked) {
-    const req = UNLOCK_REQ[idx];
-    const need = Math.max(0, (req ?? 0) - (ws.prevDoneCount ?? 0));
-    return `
-    <div class="prc-chap locked" data-world-idx="${idx}" style="--wc:${meta.color}">
-      <div class="prc-chap-hd">${header}</div>
-      <div class="prc-chap-locknote">Valide encore <strong>${need} compétence${need > 1 ? "s" : ""}</strong> du monde précédent pour ouvrir ce chapitre.</div>
-    </div>`;
-  }
-
-  const rowsHTML = subs
-    .map((sub) => {
-      const st = compStatus(
-        sub.c,
-        status,
-        nextChallenge,
-        validatedMap,
-        pendingMap,
-      );
-      const ic = {
-        done: icon("check", { size: 14, strokeWidth: 3 }),
-        a_valider: icon("check", { size: 14, strokeWidth: 3 }),
-        next: icon("zap", { size: 13, strokeWidth: 2.6 }),
-        todo: "",
-        locked: icon("lock", { size: 12 }),
-      }[st];
-      const label = {
-        done: "Acquis",
-        a_valider: "Acquis",
-        next: "",
-        todo: "À venir",
-        locked: "Verrouillé",
-      }[st];
-      const right =
-        st === "next"
-          ? `<span class="prc-row-go">Réviser →</span>`
-          : `<span class="prc-row-st">${esc(label)}</span>`;
-      const subLine =
-        st === "next"
-          ? `<span class="prc-row-sub">Prochaine compétence à travailler</span>`
-          : "";
-      const interactive = st !== "locked";
-      return `
-      <div class="prc-row ${st}" data-comp="${esc(sub.c)}" data-world-idx="${idx}"
-           ${interactive ? 'role="button" tabindex="0"' : 'aria-hidden="true"'}
-           aria-label="${esc(sub.n)} — ${esc(label || "à réviser")}">
-        <span class="prc-row-ic">${ic}</span>
-        <span class="prc-row-main"><span class="prc-row-nm">${esc(sub.n)}</span>${subLine}</span>
-        ${right}
-      </div>`;
-    })
-    .join("");
-
-  const chestHTML = isComplete
-    ? renderChest({
-        worldNum: meta.num,
-        worldName: world.nom,
-        opened: openedWorlds.has(meta.num),
-      })
-    : "";
-
-  // Chapitre en cours ouvert par défaut ; terminé replié (cliquable).
-  const openAttr = status === "in_progress" ? " open" : "";
-  return `
-    <details class="prc-chap ${isComplete ? "complete" : ""}" data-world-idx="${idx}" style="--wc:${meta.color}"${openAttr}>
-      <summary class="prc-chap-hd">${header}</summary>
-      <div class="prc-chap-body">
-        ${rowsHTML}
-        ${chestHTML}
-      </div>
-    </details>`;
-}
-
 // ─── Wire & bottom sheet ──────────────────────────────────────────
-function wire(root, worldStates, validatedMap, pendingMap, me, view = "map") {
+function wire(root, worldStates, validatedMap, pendingMap, me) {
   // Back via hashchange
   root.querySelector("#prc-back")?.addEventListener("click", () => {
     location.hash = "#/";
-  });
-
-  // ── Carte vivante (vue Carte uniquement) : route dessinée + cascade de nodes ──
-  // Gated : vue Carte ET IntersectionObserver dispo ET pas de reduced-motion.
-  // Sans la classe .prc-anim, tout reste statique (fallback).
-  const reduced = window.matchMedia?.(
-    "(prefers-reduced-motion: reduce)",
-  )?.matches;
-  const mapEl = root.querySelector(".prc-map");
-  if (view === "map" && !reduced && "IntersectionObserver" in window && mapEl) {
-    root.querySelector(".prc")?.classList.add("prc-anim");
-    // Whoosh à l'entrée d'un nouveau monde au scroll (pas au mount initial).
-    let whooshArmed = false;
-    setTimeout(() => {
-      whooshArmed = true;
-    }, 700);
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            e.target.classList.add("in");
-            if (whooshArmed) playWhoosh();
-            io.unobserve(e.target);
-          }
-        }
-      },
-      { threshold: 0.1 },
-    );
-    root.querySelectorAll(".prc-world").forEach((sec) => io.observe(sec));
-  }
-
-  // Auto-scroll vers le monde en cours
-  requestAnimationFrame(() => {
-    const target = worldStates.find((w) => w.status === "in_progress");
-    if (target) {
-      root
-        .querySelector(`[data-world-idx="${target.idx}"]`)
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
   });
 
   // Coffres → modal cinématique
@@ -3400,52 +2268,11 @@ function wire(root, worldStates, validatedMap, pendingMap, me, view = "map") {
   // Élément qui a ouvert la fiche → on lui rend le focus à la fermeture (a11y).
   let lastTrigger = null;
 
-  // Nodes → ouvre la fiche (click + Enter/Space pour keyboard nav)
-  // La case cliquée se « soulève » (classe .selected) tant que la fiche est ouverte.
+  // Vue chapitre : milestones → ouvre la fiche compétence
   const clearSelected = () =>
     root
-      .querySelectorAll(".prc-node.selected")
+      .querySelectorAll(".prc-cv-ms.selected")
       .forEach((el) => el.classList.remove("selected"));
-  root.querySelectorAll(".prc-node:not(.locked)").forEach((n) => {
-    const open = () => {
-      haptic("tap");
-      lastTrigger = n;
-      clearSelected();
-      n.classList.add("selected");
-      const compId = n.dataset.comp;
-      const worldIdx = parseInt(n.dataset.worldIdx, 10);
-      // Le quiz n'est plus une porte : on ouvre toujours la fiche.
-      // Le quiz-récap (optionnel) se lance depuis la fiche d'une compétence acquise.
-      openFiche(root, compId, worldStates[worldIdx], validatedMap, pendingMap);
-      track("parcours.node_tap", { compId, worldIdx });
-    };
-    n.addEventListener("click", open);
-    n.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        open();
-      }
-    });
-  });
-
-  // Vue Liste : chaque ligne de compétence ouvre la même fiche (bottom sheet)
-  root.querySelectorAll(".prc-row:not(.locked)").forEach((rowEl) => {
-    const open = () => {
-      haptic("tap");
-      lastTrigger = rowEl;
-      const compId = rowEl.dataset.comp;
-      const worldIdx = parseInt(rowEl.dataset.worldIdx, 10);
-      openFiche(root, compId, worldStates[worldIdx], validatedMap, pendingMap);
-      track("parcours.node_tap", { compId, worldIdx, view: "list" });
-    };
-    rowEl.addEventListener("click", open);
-    rowEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        open();
-      }
-    });
-  });
 
   // Bottom sheet — close
   const bg =
@@ -3459,14 +2286,14 @@ function wire(root, worldStates, validatedMap, pendingMap, me, view = "map") {
     bg?.classList.remove("open");
     sheet?.setAttribute("aria-hidden", "true");
     clearSelected();
-    // Rend le focus au node déclencheur (sinon le focus part dans le vide).
+    // Rend le focus à l'élément déclencheur (a11y).
     if (wasOpen && lastTrigger) {
       lastTrigger.focus();
       lastTrigger = null;
     }
   };
   bg?.addEventListener("click", closeFn);
-  // Escape ferme la fiche — lié une seule fois (anti-empilement au re-render du toggle).
+  // Escape ferme la fiche — lié une seule fois (anti-empilement au re-render).
   if (!escBound) {
     escBound = true;
     document.addEventListener("keydown", (e) => {
@@ -3476,8 +2303,8 @@ function wire(root, worldStates, validatedMap, pendingMap, me, view = "map") {
       sh.classList.remove("open");
       document.getElementById("bsheet-bg")?.classList.remove("open");
       sh.setAttribute("aria-hidden", "true");
-      document
-        .querySelectorAll(".prc-node.selected, .prc-row.selected")
+      root
+        .querySelectorAll(".prc-cv-ms.selected")
         .forEach((el) => el.classList.remove("selected"));
     });
   }
@@ -3528,9 +2355,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   // Quiz-récap : rappel OPTIONNEL proposé sur une compétence acquise.
   // Ne change pas le statut (already_acquired) — joue l'animation + crédite l'XP d'engagement.
   const recapBtn = `
-    <a href="#/quiz/${esc(compId)}/post_validation" role="button"
-       style="display:flex;align-items:center;justify-content:center;gap:8px;margin:0;padding:15px;background:var(--a);border:none;color:var(--a-ink);border-radius:14px;font:800 14px/1 'Inter',sans-serif;text-align:center;text-decoration:none;box-shadow:0 6px 16px -4px color-mix(in srgb, var(--a) 60%, transparent);min-height:52px;transition:transform .2s var(--ease-snap),box-shadow .2s var(--ease-snap);-webkit-tap-highlight-color:transparent;"
-       onpointerdown="this.style.transform='scale(0.97)'" onpointerup="this.style.transform=''" onpointerleave="this.style.transform=''">
+    <a href="#/quiz/${esc(compId)}/post_validation" role="button" class="fiche-quiz-cta">
       ${icon("zap", { size: 16 })} Révise cette compétence
     </a>`;
 
@@ -3615,12 +2440,12 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   body.innerHTML = `
     <div class="fiche-hero" style="--wc:${meta.color}">
       <button class="fiche-close" type="button" aria-label="Fermer">×</button>
-      <div class="fiche-badge-cat">MONDE ${meta.num} · ${esc(world.nom).toUpperCase()}</div>
+      <div class="fiche-badge-cat">CHAPITRE ${meta.num} · ${esc(world.nom).toUpperCase()}</div>
       <div class="fiche-circle ${st === "done" ? "done" : ""}" style="background:${st === "done" ? "var(--gr)" : meta.color}">
         ${stIcon}
       </div>
       <h3 id="bsheet-title">${esc(sub.n)}</h3>
-      <div class="fiche-id">${compNum} sur ${total} dans ce monde</div>
+      <div class="fiche-id">${compNum} sur ${total} dans ce chapitre</div>
       ${st === "done" ? "" : `<div><span class="stt-pill ${st}" style="--wc:${meta.color}">${esc(stLabel)}</span></div>`}
     </div>
     <div class="fiche-body">
@@ -3652,9 +2477,9 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
     sheet?.classList.remove("open");
     bg?.classList.remove("open");
     sheet?.setAttribute("aria-hidden", "true");
-    // Rend la case à sa position (retire le « lift »)
+    // Retire la sélection visuelle sur le jalon source
     root
-      .querySelectorAll(".prc-node.selected")
+      .querySelectorAll(".prc-cv-ms.selected")
       .forEach((el) => el.classList.remove("selected"));
   });
 

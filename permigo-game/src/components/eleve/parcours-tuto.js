@@ -10,7 +10,7 @@ const SLIDES = [
     mascot: "/skins/mascot-hello.png",
     extra: "/skins/avatars/permigo-badge-icon.png",
     title: "Ta route vers le permis",
-    text: "Un parcours clair, étape par étape.",
+    text: "Un cours clair, étape par étape.",
   },
   {
     mascot: "/skins/mascot-point.png",
