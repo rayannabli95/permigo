@@ -18,7 +18,6 @@ import { track } from "@/services/analytics.js";
 import { mountPermisCard } from "@/components/eleve/permis-card.js";
 import { mountProfileCard } from "@/components/common/profile-card.js";
 import { getEquippedAsset } from "@/utils/game-state.js";
-import { getPermisBg } from "@/utils/assets.js";
 import { REMC_TOTAL } from "@/data/remc.js";
 import { icon } from "@/utils/icons.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
@@ -55,13 +54,12 @@ const STYLE = `<style>
 /* ── Héro : pas de padding latéral (la ProfileCard sort plein-bord) ── */
 .prf-hero { padding: 0 0 4px; }
 
-/* ── Titre de section (iOS Settings / Linear style) ── */
+/* ── Titre de section : vrai titre humain (sentence-case, pas de MAJUSCULE crispée) ── */
 .prf-sec-ttl {
-  font: 600 11px/1 'Inter', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: var(--mu2);
-  padding: 20px 20px 8px;
+  font: 800 17px/1.2 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  padding: 26px 20px 10px;
   margin: 0;
 }
 
@@ -98,11 +96,9 @@ const STYLE = `<style>
 }
 .prf-row-body { flex: 1; min-width: 0; }
 .prf-row-lbl {
-  font: 500 11px/1 'Inter', sans-serif;
+  font: 600 12px/1 'Plus Jakarta Sans', sans-serif;
   color: var(--mu2);
   margin-bottom: 4px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
 }
 .prf-row-val {
   font: 600 14px/1.3 'Inter', sans-serif;
@@ -112,52 +108,33 @@ const STYLE = `<style>
   text-overflow: ellipsis;
 }
 
-/* ── Tuile(s) de navigation rapide ── */
-.prf-nav-tiles { display: flex; gap: 10px; padding: 0 16px; margin-bottom: 4px; }
-.prf-nav-tile {
-  flex: 1;
+/* ── Lien-ligne (galerie / boutique) — discret, intentionnel ── */
+.prf-linkrow {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 12px;
+  gap: 12px;
+  margin: 10px 16px 0;
+  padding: 14px 18px;
+  min-height: 52px;
   background: var(--su);
   border: 1px solid var(--bo);
   border-radius: var(--r-lg, 16px);
   color: var(--ink);
   text-decoration: none;
-  font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
   box-shadow: var(--s0);
-  transition: transform .12s var(--ease-snap), box-shadow .2s;
+  transition: transform .12s var(--ease-snap), background .15s;
 }
-.prf-nav-tile:active { transform: scale(.97); }
-.prf-nav-ico { font-size: 18px; line-height: 1; }
-
-/* ── Streak (enseignant) ── */
-.prf-streak {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--su);
-  border: 1px solid var(--bo);
-  border-radius: var(--r-xl, 20px);
-  padding: 16px 20px;
-  margin: 0 16px 12px;
-  box-shadow: var(--s0);
+.prf-linkrow:active { transform: scale(.99); background: var(--su2); }
+@media(hover:hover){ .prf-linkrow:hover { background: var(--su2); } }
+.prf-linkrow-ico {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--a) 10%, transparent);
+  color: var(--a-txt);
 }
-.prf-streak-ico { font-size: 24px; line-height: 1; }
-.prf-streak-body { flex: 1; }
-.prf-streak-n {
-  font: 700 20px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
-  letter-spacing: -0.022em;
-}
-.prf-streak-lbl {
-  font: 500 12px/1.3 'Inter', sans-serif;
-  color: var(--mu2);
-  margin-top: 4px;
-}
+.prf-linkrow-lbl { flex: 1; font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; }
+.prf-linkrow-chev { font-size: 22px; color: var(--mu2); line-height: 1; }
 
 /* ── Stats enseignant (grille Mon Année) ── */
 .prf-annee {
@@ -169,10 +146,9 @@ const STYLE = `<style>
   box-shadow: var(--s0);
 }
 .prf-annee-ttl {
-  font: 600 11px/1 'Inter', sans-serif;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--mu2);
+  font: 800 15px/1.2 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.01em;
+  color: var(--ink);
   margin: 0 0 16px;
 }
 .prf-annee-grid {
@@ -209,10 +185,9 @@ const STYLE = `<style>
   box-shadow: var(--s0);
 }
 .prf-pseudo-ttl {
-  font: 600 11px/1 'Inter', sans-serif;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--mu2);
+  font: 800 15px/1.2 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.01em;
+  color: var(--ink);
   margin: 0 0 6px;
 }
 .prf-pseudo-help {
@@ -272,10 +247,9 @@ const STYLE = `<style>
   margin-bottom: 14px;
 }
 .prf-ref-ttl {
-  font: 600 11px/1 'Inter', sans-serif;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--mu2);
+  font: 800 15px/1.2 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.01em;
+  color: var(--ink);
   margin: 0;
   flex: 1;
 }
@@ -739,19 +713,38 @@ export async function mount(root) {
       .join("")
       .toUpperCase() || "?";
 
-  // ── Données ProfileCard (élève + enseignant) ─────────────
+  // ── « Membre depuis » (humanise la section Réglages) ─────
+  let memberSince = "";
+  if (profile?.created_at) {
+    const d = new Date(profile.created_at);
+    if (!isNaN(d)) {
+      memberSince = d.toLocaleDateString("fr-FR", {
+        month: "long",
+        year: "numeric",
+      });
+    }
+  }
+
+  // ── Données du héros d'identité (élève + enseignant) ──────
   let profileCardData = null;
   if (me.role === "eleve" && permisData) {
+    const restantes = REMC_TOTAL - permisData.validated;
     profileCardData = {
       me: { ...me, prenom: profile?.prenom || "", nom: profile?.nom || "" },
       avatarUrl: getEquippedAsset("avatar") || profile?.avatar_url || null,
       bannerUrl: profile?.banner_url || null,
-      count: permisData.validated,
-      bio: `Apprenti permis B · ${permisData.validated}/${REMC_TOTAL} compétences`,
+      bio: "Apprenti permis B",
+      // Barre de progression RÉELLE vers le permis (remplace le badge prestige + l'XP arc-en-ciel)
+      progress: {
+        pct: REMC_TOTAL ? (permisData.validated / REMC_TOTAL) * 100 : 0,
+        current: permisData.validated,
+        total: REMC_TOTAL,
+        label: `${permisData.validated} / ${REMC_TOTAL}`,
+      },
       stats: [
         { label: "Compétences", value: permisData.validated },
-        { label: "Streak", value: eleveStreak },
-        { label: "Restantes", value: REMC_TOTAL - permisData.validated },
+        { label: "Série", value: eleveStreak },
+        { label: "Restantes", value: restantes },
       ],
       shareUrl: window.location.origin,
       shareText: `Je suis à ${permisData.validated}/${REMC_TOTAL} compétences validées sur PermiGo`,
@@ -760,15 +753,12 @@ export async function mount(root) {
     profileCardData = {
       me: { ...me, prenom: profile?.prenom || "", nom: profile?.nom || "" },
       avatarUrl: profile?.avatar_url || null,
-      bannerUrl:
-        profile?.banner_url ||
-        getPermisBg(anneeStats.totalValidations, "enseignant"),
-      count: anneeStats.totalValidations,
-      bio: `Enseignant · ${anneeStats.elevesCount} élève${anneeStats.elevesCount > 1 ? "s" : ""} suivi${anneeStats.elevesCount > 1 ? "s" : ""}`,
+      bannerUrl: profile?.banner_url || null,
+      bio: `${anneeStats.elevesCount} élève${anneeStats.elevesCount > 1 ? "s" : ""} suivi${anneeStats.elevesCount > 1 ? "s" : ""} · cette année`,
       stats: [
         { label: "Validations", value: anneeStats.totalValidations },
         { label: "Élèves", value: anneeStats.elevesCount },
-        { label: "Streak", value: anneeStats.streakDays },
+        { label: "Série", value: anneeStats.streakDays },
       ],
       shareUrl: window.location.origin,
       shareText: `${anneeStats.totalValidations} validations sur PermiGo cette année`,
@@ -795,81 +785,57 @@ export async function mount(root) {
   <!-- 2. Les 3 stats clés sont déjà DANS le héro (ProfileCard) — source unique.
        On a retiré le bandeau bento qui les répétait à l'identique. -->
 
-  <!-- 3. Navigation rapide (galerie élève / boutique enseignant) -->
+  <!-- Carte permis (objet de collection) + lien galerie (élève) -->
+  ${permisData ? `<div id="prf-permis-card" style="padding:0 16px;margin-top:6px"></div>` : ""}
   ${
     me.role === "eleve"
       ? `
-  <div class="prf-nav-tiles">
-    <a class="prf-nav-tile" href="#/galerie" aria-label="Ouvrir ta galerie">
-      <span class="prf-nav-ico" aria-hidden="true">${icon("image", { size: 18 })}</span><span>Ta galerie</span>
-    </a>
-  </div>`
-      : ""
-  }
-  ${
-    me.role === "enseignant"
-      ? `
-  <div class="prf-nav-tiles">
-    <a class="prf-nav-tile" href="#/boutique" aria-label="Ouvrir la boutique">
-      <span class="prf-nav-ico" aria-hidden="true">${icon("car", { size: 18 })}</span><span>Boutique</span>
-    </a>
-  </div>`
+  <a class="prf-linkrow" href="#/galerie" aria-label="Voir ma galerie">
+    <span class="prf-linkrow-ico" aria-hidden="true">${icon("image", { size: 17 })}</span>
+    <span class="prf-linkrow-lbl">Voir ma galerie</span>
+    <span class="prf-linkrow-chev" aria-hidden="true">›</span>
+  </a>`
       : ""
   }
 
-  <!-- ═══ SECTION : MA VITRINE ════════════════════════════ -->
-  ${
-    me.role === "eleve" || me.role === "enseignant"
-      ? `
-  <h2 class="prf-sec-ttl">Ma vitrine</h2>`
-      : ""
-  }
-
-  <!-- Pseudo public (dans Ma vitrine) -->
-  ${me.role === "eleve" ? `<div id="prf-pseudo-section">${_renderPseudo(profile?.username)}</div>` : ""}
-
-  <!-- Carte permis (objet de collection, SANS rechiffrer les stats déjà au-dessus) -->
-  ${permisData ? `<div id="prf-permis-card" style="padding:0 16px"></div>` : ""}
-
-  <!-- Ranking moniteur -->
+  <!-- Classement moniteur -->
   ${anneeStats ? `<div id="prf-ranking-host"></div>` : ""}
 
-  <!-- Stats Mon Année (enseignant) -->
+  <!-- Mon année (enseignant) : le dossier de preuve ; la « série » est déjà dans le héro -->
   ${
     anneeStats
       ? `
-  <div class="prf-streak">
-    <span class="prf-streak-ico" style="color:var(--or)" aria-hidden="true">${icon("flame", { size: 28, strokeWidth: 2.2 })}</span>
-    <div class="prf-streak-body">
-      <div class="prf-streak-n">${anneeStats.streakDays} jour${anneeStats.streakDays !== 1 ? "s" : ""}</div>
-      <div class="prf-streak-lbl">d'affilée cette semaine</div>
-    </div>
-  </div>
   <div class="prf-annee">
-    <h2 class="prf-annee-ttl">Ma chasse en ${new Date().getFullYear()}</h2>
+    <h2 class="prf-annee-ttl">Mon année ${new Date().getFullYear()}</h2>
     <div class="prf-annee-grid">
       <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.totalValidations}</span><div class="prf-kpi-lbl">compétences validées</div></div>
       <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.elevesCount}</span><div class="prf-kpi-lbl">élèves suivis</div></div>
       <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.c3Count}</span><div class="prf-kpi-lbl">C3 Maîtrise atteints</div></div>
-      <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.elevesActifsCount ?? 0}</span><div class="prf-kpi-lbl">élèves actifs 30j</div></div>
+      <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.elevesActifsCount ?? 0}</span><div class="prf-kpi-lbl">élèves actifs (30 j)</div></div>
     </div>
-  </div>`
+  </div>
+  <a class="prf-linkrow" href="#/boutique" aria-label="Voir la boutique">
+    <span class="prf-linkrow-ico" aria-hidden="true">${icon("car", { size: 17 })}</span>
+    <span class="prf-linkrow-lbl">Voir la boutique</span>
+    <span class="prf-linkrow-chev" aria-hidden="true">›</span>
+  </a>`
       : ""
   }
 
-  <!-- ═══ SECTION : INVITER DES AMIS (élève) ══════════════ -->
+  <!-- Pseudo public (élève) — la carte porte son propre titre -->
+  ${me.role === "eleve" ? `<div id="prf-pseudo-section">${_renderPseudo(profile?.username)}</div>` : ""}
+
+  <!-- Parrainage (élève) — la carte porte son propre titre -->
   ${
     referralStats !== null
-      ? `
-  <h2 class="prf-sec-ttl">Inviter des amis</h2>
-  <div id="prf-ref-section">${_renderReferral(referralStats)}</div>`
+      ? `<div id="prf-ref-section">${_renderReferral(referralStats)}</div>`
       : ""
   }
 
-  <!-- ═══ SECTION : RÉGLAGES ══════════════════════════════ -->
+  <!-- ═══ RÉGLAGES ══════════════════════════════ -->
   <h2 class="prf-sec-ttl">Réglages</h2>
 
-  <!-- Infos compte (email + rôle) — UUID supprimé -->
+  <!-- Compte : email + membre depuis (UUID et rôle retirés — du bruit) -->
   <div class="prf-section">
     <div class="prf-row">
       <span class="prf-row-ico" aria-hidden="true">${icon("mail", { size: 16 })}</span>
@@ -878,21 +844,14 @@ export async function mount(root) {
         <div class="prf-row-val">${esc(profile?.email || me.email || "—")}</div>
       </div>
     </div>
+    ${
+      memberSince
+        ? `
     <div class="prf-row">
       <span class="prf-row-ico" aria-hidden="true">${icon("user", { size: 16 })}</span>
       <div class="prf-row-body">
-        <div class="prf-row-lbl">Rôle</div>
-        <div class="prf-row-val">${esc(ROLE_LABELS[me.role] || me.role)}</div>
-      </div>
-    </div>
-    ${
-      me.role !== "eleve" && profile?.xp != null
-        ? `
-    <div class="prf-row">
-      <span class="prf-row-ico" aria-hidden="true">${icon("zap", { size: 16 })}</span>
-      <div class="prf-row-body">
-        <div class="prf-row-lbl">XP total</div>
-        <div class="prf-row-val" style="color:var(--a-txt)">${esc(String(profile.xp))} XP</div>
+        <div class="prf-row-lbl">Membre depuis</div>
+        <div class="prf-row-val">${esc(memberSince)}</div>
       </div>
     </div>`
         : ""
