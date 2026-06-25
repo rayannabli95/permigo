@@ -1382,7 +1382,10 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
     radial-gradient(800px 700px at 110% 12%, #3a1d63 0%, transparent 50%),
     linear-gradient(160deg, #0e0820 0%, #160c2c 50%, #0b0719 100%);
   color: #fff;
-  overflow: hidden;
+  /* PAS d'overflow:hidden : min-height:100dvh + hidden pouvait clipper le bas
+     sur iOS (barre d'outils dynamique). Le scroll horizontal est déjà géré
+     par .prc-cv-screen (overflow-x:hidden). */
+  overflow: visible;
 }
 /* grain de texture discret */
 .prc-cv::after {
@@ -1418,23 +1421,56 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 }
 .prc-cv-screen::-webkit-scrollbar { display: none; }
 
-/* Lien discret "Voir la carte" */
-.prc-cv-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin: 12px 20px 0;
-  font: 600 11.5px/1 'Inter', sans-serif;
-  color: var(--cv-mute);
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 4px 0;
+/* ── Barre du haut : stepper des chapitres + bouton Carte ─────────── */
+.prc-cv-topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 16px 2px;
 }
-.prc-cv-back:hover { color: #fff; }
-.prc-cv-back:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 3px; border-radius: 4px; }
+.prc-cv-chapnav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.prc-cv-cn {
+  position: relative;
+  min-width: 34px; height: 34px; padding: 0 5px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 11px;
+  font: 800 14px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  color: #cdbff5;
+  background: rgba(42,27,82,.6);
+  border: 1.5px solid rgba(168,85,247,.28);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform .12s, border-color .15s, background .15s, color .15s;
+}
+/* zone tactile ≥44px sans gonfler le visuel */
+.prc-cv-cn::after { content: ""; position: absolute; inset: -6px; }
+.prc-cv-cn:active { transform: scale(.93); }
+.prc-cv-cn.done { color: #6ef0a4; border-color: rgba(46,200,110,.45); background: rgba(20,80,46,.4); }
+.prc-cv-cn.lock { color: #8e7fc0; opacity: .85; }
+.prc-cv-cn.cur {
+  color: #3a1c00;
+  background: linear-gradient(160deg,#ffe08a,#ffb33f);
+  border-color: #ffd24a;
+  box-shadow: 0 4px 14px -4px rgba(255,156,28,.7), inset 0 1px 0 rgba(255,255,255,.6);
+  transform: translateY(-1px);
+}
+.prc-cv-cn.cur.done { color: #16431f; }
+.prc-cv-cn:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
+
+/* Bouton "Carte" — lisible (≥44px tactile), plus un lien gris 11px */
+.prc-cv-back {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto;
+  height: 34px; padding: 0 13px;
+  font: 800 12px/1 'Inter', sans-serif;
+  color: #ece6ff;
+  background: rgba(42,27,82,.7);
+  border: 1.5px solid rgba(168,85,247,.32);
+  border-radius: 11px;
+  -webkit-tap-highlight-color: transparent; cursor: pointer;
+  transition: transform .12s, border-color .15s, color .15s;
+}
+.prc-cv-back::after { content: ""; position: absolute; inset: -6px; }
+.prc-cv-back:hover { color: #fff; border-color: rgba(168,85,247,.5); }
+.prc-cv-back:active { transform: scale(.96); }
+.prc-cv-back:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
 
 /* ── HERO : monde courant ─────────────────────────────────────── */
 .prc-cv-hero-wrap { padding: 10px 18px 6px; }
@@ -1914,8 +1950,11 @@ export async function mount(root) {
     wire(root, worldStates, validatedMap, pendingMap, me, view);
     // Vue Chapitre : trace la route SVG À TRAVERS les vrais jalons (toute
     // hauteur / tout nombre de jalons), au lieu d'un tracé fixe qui dérive.
+    // Planification robuste (double rAF + fonts.ready + ResizeObserver).
     if (view === "chapitre") {
-      requestAnimationFrame(() => layoutChapterRoad(root));
+      scheduleRoadLayout(root);
+    } else {
+      stopRoadLayout();
     }
     // Bouton « ? » du tuto (re-câblé à chaque rendu)
     root
@@ -1944,14 +1983,17 @@ export async function mount(root) {
         renderAndWire();
       }),
     );
-    root.querySelectorAll(".prc-cv-gate[data-chap]").forEach((gate) =>
-      gate.addEventListener("click", () => {
-        const idx = parseInt(gate.dataset.chap, 10);
-        if (isNaN(idx)) return;
-        currentChapIdx = idx;
-        renderAndWire();
-      }),
-    );
+    root
+      .querySelectorAll(".prc-cv-gate[data-chap], .prc-cv-cn[data-chap]")
+      .forEach((el) =>
+        el.addEventListener("click", () => {
+          const idx = parseInt(el.dataset.chap, 10);
+          if (isNaN(idx)) return;
+          currentChapIdx = idx;
+          track("parcours.chap_switch", { idx, view: "chapitre" });
+          renderAndWire();
+        }),
+      );
     // Vue Chapitre — jalons cliquables (milestones non-next + carte CTA or)
     // Milestones avec data-comp (états done/a_valider/todo)
     root.querySelectorAll(".prc-cv-ms[data-comp]").forEach((ms) => {
@@ -2362,8 +2404,11 @@ ${renderChapterView(worldStates, validatedMap, pendingMap, currentChapIdx)}
     </div>
   </div>
 
-  <!-- Toggle Carte / Liste (vue Chapitre = pas de toggle ici) -->
+  <!-- Toggle Itinéraire (vue Chapitre immersive) / Carte / Liste -->
   <div class="prc-viewtoggle" role="tablist" aria-label="Mode d'affichage du parcours">
+    <button class="prc-vt-btn ${view === "chapitre" ? "on" : ""}" data-view="chapitre" type="button" role="tab" aria-selected="${view === "chapitre"}">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 20c0-6 12-4 12-10"/><circle cx="6" cy="20" r="1.7" fill="currentColor" stroke="none"/><circle cx="18" cy="10" r="1.7" fill="currentColor" stroke="none"/></svg> Itinéraire
+    </button>
     <button class="prc-vt-btn ${view === "map" ? "on" : ""}" data-view="map" type="button" role="tab" aria-selected="${view === "map"}">
       ${icon("map", { size: 16 })} Carte
     </button>
@@ -2807,15 +2852,46 @@ function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
       </div>`;
   }
 
-  // ── Lien discret "Voir la carte" ─────────────────────────────────
+  // ── Sélecteur de chapitres (stepper) : on VOIT et on atteint les 4 ───
+  // Corrige « j'avais que la première partie » : tous les chapitres visibles
+  // et atteignables sans quitter la vue immersive.
+  const ICO_CHK = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4 10-11" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const ICO_LK = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.3" stroke="currentColor" stroke-width="2.4"/><path d="M8 11V8.5a4 4 0 0 1 8 0V11" stroke="currentColor" stroke-width="2.4"/></svg>`;
+  const chapNav = `
+    <div class="prc-cv-chapnav" role="tablist" aria-label="Chapitres du parcours">
+      ${worldStates
+        .map((w, i) => {
+          const isCur = i === currentIdx;
+          const cls =
+            (isCur ? "cur " : "") +
+            (w.status === "complete"
+              ? "done"
+              : w.status === "locked"
+                ? "lock"
+                : "todo");
+          const inner =
+            w.status === "complete"
+              ? ICO_CHK
+              : w.status === "locked"
+                ? ICO_LK
+                : `${i + 1}`;
+          return `<button class="prc-cv-cn ${cls}" data-chap="${i}" type="button" role="tab" aria-selected="${isCur}" aria-label="Chapitre ${i + 1}${isCur ? " — affiché" : ""}">${inner}</button>`;
+        })
+        .join("")}
+    </div>`;
+
+  // ── Bouton "Voir la carte" — lisible (≥44px), pas un lien gris ───────
   const backLink = `<button class="prc-cv-back" data-view="map" type="button" aria-label="Voir la carte multi-chapitres">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6l9-3 9 3-9 3-9-3zM3 12l9 3 9-3M3 18l9 3 9-3"/></svg>
-    Voir la carte
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6l9-3 9 3-9 3-9-3zM3 12l9 3 9-3M3 18l9 3 9-3"/></svg>
+    Carte
   </button>`;
 
   return `<div class="prc-cv" role="main" aria-label="Ton parcours — vue chapitre">
   <div class="prc-cv-screen">
-    ${backLink}
+    <div class="prc-cv-topbar">
+      ${chapNav}
+      ${backLink}
+    </div>
     ${heroHTML}
     ${routeHTML}
     ${gateHTML}
@@ -2827,7 +2903,8 @@ function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
 // Trace le ruban-route SVG À TRAVERS le centre des jalons réellement rendus.
 // Robuste à n'importe quel nombre de jalons et à la hauteur variable de la
 // carte « Continuer » (le tracé fixe précédent dérivait hors des pastilles).
-let _roadResizeHooked = false;
+// PURE mesure : la planification robuste est dans scheduleRoadLayout().
+let _roadObserver = null;
 function layoutChapterRoad(root) {
   const scope = root && root.querySelector ? root : document;
   const route = scope.querySelector(".prc-cv-route");
@@ -2854,7 +2931,7 @@ function layoutChapterRoad(root) {
   });
   const W = route.clientWidth;
   const H = route.clientHeight;
-  if (!W || !H) return;
+  if (!W || !H) return; // layout pas encore prêt → on re-mesurera
 
   // Courbe lisse (S-curve) reliant chaque centre de jalon.
   let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
@@ -2866,14 +2943,48 @@ function layoutChapterRoad(root) {
   }
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.querySelectorAll("path").forEach((p) => p.setAttribute("d", d));
+}
 
-  if (!_roadResizeHooked) {
-    _roadResizeHooked = true;
-    let t;
-    window.addEventListener("resize", () => {
-      clearTimeout(t);
-      t = setTimeout(() => layoutChapterRoad(document), 120);
-    });
+// Planifie le tracé de façon ROBUSTE aux vrais appareils (le dev validait sur
+// desktop polices en cache → OK ; sur mobile 1er chargement, les polices
+// Baloo 2 / Fredoka arrivent APRÈS le 1er paint, changent la hauteur des
+// jalons, et la route tracée trop tôt se retrouve décalée = « mal affiché »).
+function scheduleRoadLayout(root) {
+  const run = () => {
+    try {
+      layoutChapterRoad(root);
+    } catch (_) {
+      /* jamais throw depuis un callback async */
+    }
+  };
+  // 1) double rAF : layout + début d'anim posés
+  requestAnimationFrame(() => requestAnimationFrame(run));
+  // 2) après chargement des polices : re-mesure (metrics définitives)
+  try {
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(run).catch(() => {});
+    }
+  } catch (_) {}
+  // 3) ResizeObserver : tout reflow du conteneur (polices, rotation, resize)
+  //    re-trace pile sur les jalons. Fire aussi une fois à l'observation.
+  const route = (root && root.querySelector ? root : document).querySelector(
+    ".prc-cv-route",
+  );
+  if (_roadObserver) {
+    _roadObserver.disconnect();
+    _roadObserver = null;
+  }
+  if (route && "ResizeObserver" in window) {
+    _roadObserver = new ResizeObserver(run);
+    _roadObserver.observe(route);
+  }
+}
+
+// Stoppe l'observation quand on quitte la vue chapitre (route démontée).
+function stopRoadLayout() {
+  if (_roadObserver) {
+    _roadObserver.disconnect();
+    _roadObserver = null;
   }
 }
 
