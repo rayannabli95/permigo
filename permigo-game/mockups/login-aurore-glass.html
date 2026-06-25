@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#efe9ff" />
+<title>PermiGo — Connexion</title>
+
+<!-- Typo : Plus Jakarta Sans (titres) + Nunito (corps) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Nunito:wght@500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================
+   PermiGo — Login « Aurore claire » (glassmorphism premium)
+   Un seul fichier, ouvrable direct dans un navigateur.
+   ============================================================ */
+
+:root{
+  --indigo:#6c63ff;          /* couleur de marque */
+  --indigo-deep:#5b52e6;     /* nuance foncée (gradient CTA) */
+  --indigo-soft:#8b85ff;     /* nuance claire (lueur) */
+  --go:#58cc02;              /* vert « feu vert / GO » du badge */
+  --ink:#1b1d33;             /* encre foncée — texte principal */
+  --muted:#6a6f93;           /* texte secondaire */
+  --line:rgba(27,29,51,.10); /* filets discrets */
+  --field:rgba(255,255,255,.62); /* fond des champs (verre) */
+  --radius:22px;
+  --ease:cubic-bezier(.22,.61,.36,1); /* easing doux premium */
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+html,body{height:100%}
+
+body{
+  font-family:"Nunito",system-ui,-apple-system,sans-serif;
+  color:var(--ink);
+  /* Mesh gradient clair et aéré : indigo → violet → pêche très pâle */
+  background:
+    radial-gradient(120% 90% at 8% -8%, #edecff 0%, rgba(237,236,255,0) 55%),
+    radial-gradient(120% 100% at 100% 0%, #efe9ff 0%, rgba(239,233,255,0) 55%),
+    radial-gradient(130% 120% at 50% 110%, #fdeef0 0%, rgba(253,238,240,0) 60%),
+    linear-gradient(180deg,#f6f6ff 0%, #f4f1ff 100%);
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:clamp(16px,5vw,40px);
+  position:relative;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- Décor de fond : blobs colorés flous + grain ---------- */
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+
+.blob{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(70px);
+  opacity:.65;
+  will-change:transform;
+  mix-blend-mode:multiply;
+}
+.blob.b1{width:48vmax;height:48vmax;left:-14vmax;top:-16vmax;
+  background:radial-gradient(circle,#c9c5ff 0%, rgba(201,197,255,0) 70%);
+  animation:drift1 26s var(--ease) infinite alternate}
+.blob.b2{width:42vmax;height:42vmax;right:-12vmax;top:-6vmax;
+  /* soupçon de vert-menthe en écho au badge (reste discret) */
+  background:radial-gradient(circle,#d7f0c6 0%, #e6d8ff 45%, rgba(230,212,255,0) 72%);
+  opacity:.5;
+  animation:drift2 32s var(--ease) infinite alternate}
+.blob.b3{width:46vmax;height:46vmax;left:24vmax;bottom:-22vmax;
+  background:radial-gradient(circle,#ffd9e0 0%, rgba(255,217,224,0) 70%);
+  animation:drift3 30s var(--ease) infinite alternate}
+
+@keyframes drift1{to{transform:translate3d(6vmax,5vmax,0) scale(1.12)}}
+@keyframes drift2{to{transform:translate3d(-5vmax,7vmax,0) scale(1.08)}}
+@keyframes drift3{to{transform:translate3d(4vmax,-6vmax,0) scale(1.1)}}
+
+/* Grain/lumière très subtil par-dessus le mesh */
+.aurora::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  opacity:.04;mix-blend-mode:overlay;
+}
+
+/* ---------- Panneaux routiers flottants (confettis premium) ---------- */
+.sign{
+  position:fixed;z-index:1;pointer-events:none;
+  opacity:.10;filter:blur(.6px) saturate(.9);
+  will-change:transform;
+}
+.sign img{display:block;width:100%;height:100%}
+.sign.s1{width:92px;height:92px;left:6%;top:16%;transform:rotate(-12deg);
+  animation:float 18s var(--ease) infinite alternate}
+.sign.s2{width:74px;height:74px;right:8%;top:24%;transform:rotate(10deg);
+  animation:float 22s var(--ease) infinite alternate-reverse}
+.sign.s3{width:84px;height:84px;right:14%;bottom:12%;transform:rotate(-8deg);
+  animation:float 20s var(--ease) infinite alternate}
+
+@keyframes float{
+  from{transform:translateY(0) rotate(var(--r,0deg))}
+  to{transform:translateY(-16px) rotate(var(--r,0deg))}
+}
+/* on conserve la rotation initiale en passant par une var dédiée */
+.sign.s1{--r:-12deg}
+.sign.s2{--r:10deg}
+.sign.s3{--r:-8deg}
+
+/* ---------- Route en perspective (écho de la marque) ---------- */
+.road{
+  position:fixed;left:50%;bottom:0;z-index:1;
+  width:160vw;height:42vh;transform:translateX(-50%);
+  pointer-events:none;opacity:.5;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 55%);
+          mask-image:linear-gradient(180deg,transparent 0%,#000 55%);
+}
+.road .asphalt{
+  position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  width:100%;height:100%;
+  /* trapèze perspective via clip-path */
+  background:linear-gradient(180deg, rgba(120,120,150,0) 0%, rgba(108,99,255,.10) 100%);
+  clip-path:polygon(43% 0%, 57% 0%, 100% 100%, 0% 100%);
+}
+.road .dash{
+  position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  width:2px;height:100%;
+  clip-path:polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%);
+  background:repeating-linear-gradient(180deg,
+    rgba(108,99,255,.55) 0 22px, transparent 22px 52px);
+  background-size:100% 74px;
+  animation:dashmove 2.4s linear infinite;
+}
+@keyframes dashmove{to{background-position:0 74px}}
+
+/* ============================================================
+   Carte de connexion — vrai glassmorphism clair
+   ============================================================ */
+.shell{position:relative;z-index:3;width:100%;max-width:430px}
+
+.card{
+  position:relative;
+  border-radius:var(--radius);
+  padding:clamp(24px,6vw,34px);
+  /* verre dépoli clair */
+  background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.58));
+  -webkit-backdrop-filter:blur(26px) saturate(1.6);
+          backdrop-filter:blur(26px) saturate(1.6);
+  border:1px solid rgba(255,255,255,.7);
+  /* ombre douce multi-couches → la carte flotte */
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 0 0 1px rgba(108,99,255,.06),
+    0 18px 40px -18px rgba(70,60,160,.30),
+    0 50px 90px -40px rgba(70,60,160,.32);
+  overflow:hidden;
+}
+/* liseré lumineux interne (bord 1px qui capte la lumière) */
+.card::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(140deg, rgba(255,255,255,.95), rgba(108,99,255,.18) 40%, transparent 70%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  pointer-events:none;
+}
+
+/* ---------- En-tête ---------- */
+.head{text-align:center;margin-bottom:22px}
+.logo-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:14px}
+
+/* ---- Emblème : badge vert PermiGo (touche « feu vert / GO ») ---- */
+.badge{position:relative;width:62px;height:62px;display:inline-flex;
+  align-items:center;justify-content:center}
+.badge .badge-img{width:100%;height:100%;object-fit:contain;
+  /* ombre douce verte → il « pop » sur le verre clair */
+  filter:drop-shadow(0 8px 16px rgba(88,204,2,.35)) drop-shadow(0 2px 5px rgba(88,204,2,.25))}
+/* halo vert très léger derrière le badge */
+.badge::before{content:"";position:absolute;inset:-10px;border-radius:50%;
+  background:radial-gradient(circle, rgba(88,204,2,.22) 0%, rgba(88,204,2,0) 70%);
+  z-index:-1}
+/* fallback CSS : hexagone vert avec « P » si l'image ne charge pas */
+.badge-fallback{display:none;width:58px;height:58px;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#6fe015,var(--go) 60%,#46a302);
+  /* forme hexagonale */
+  clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+  box-shadow:0 8px 16px rgba(88,204,2,.4), inset 0 2px 0 rgba(255,255,255,.45);
+  font-family:"Plus Jakarta Sans";font-weight:800;font-size:30px;color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.18);line-height:1}
+.badge-img.is-broken{display:none}
+.badge-img.is-broken ~ .badge-fallback{display:inline-flex}
+
+.logo{height:30px;width:auto;filter:drop-shadow(0 6px 14px rgba(108,99,255,.3))}
+/* fallback texte si l'image logo ne charge pas */
+.logo-text{display:none;font-family:"Plus Jakarta Sans";font-weight:800;font-size:24px;
+  letter-spacing:-.5px;color:var(--indigo)}
+.logo-text b{color:var(--ink)}
+.logo.is-broken{display:none}
+.logo.is-broken + .logo-text{display:inline-block}
+
+h1{font-family:"Plus Jakarta Sans";font-weight:800;font-size:clamp(22px,5.6vw,26px);
+  letter-spacing:-.4px;line-height:1.15}
+.sub{margin-top:6px;color:var(--muted);font-size:14.5px;font-weight:600}
+
+/* ---------- Champs ---------- */
+.field{margin-top:14px}
+.field label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin:0 0 7px 2px}
+
+.input{
+  position:relative;display:flex;align-items:center;
+  background:var(--field);
+  border:1px solid var(--line);
+  border-radius:14px;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  transition:border-color .2s var(--ease), box-shadow .2s var(--ease), background .2s var(--ease);
+}
+.input .ico{display:flex;align-items:center;justify-content:center;
+  width:44px;height:48px;color:var(--muted);flex:0 0 auto}
+.input input{
+  flex:1;min-width:0;border:0;outline:0;background:transparent;
+  font-family:inherit;font-size:15.5px;font-weight:600;color:var(--ink);
+  padding:13px 12px 13px 0;height:48px;
+}
+.input input::placeholder{color:#9aa0bd;font-weight:600}
+/* bouton œil */
+.eye{display:flex;align-items:center;justify-content:center;
+  width:48px;height:48px;background:transparent;border:0;cursor:pointer;
+  color:var(--muted);border-radius:0 14px 14px 0;
+  transition:color .15s var(--ease)}
+.eye:hover{color:var(--indigo)}
+.eye:focus-visible{outline:2px solid var(--indigo);outline-offset:-3px;border-radius:11px}
+
+/* état focus du champ : ring indigo doux */
+.input:focus-within{
+  border-color:rgba(108,99,255,.55);
+  background:rgba(255,255,255,.85);
+  box-shadow:0 0 0 4px rgba(108,99,255,.14), 0 8px 22px -14px rgba(108,99,255,.6);
+}
+
+/* ---------- Ligne options ---------- */
+.row{display:flex;align-items:center;justify-content:space-between;
+  margin-top:14px;gap:12px;flex-wrap:wrap}
+.remember{display:inline-flex;align-items:center;gap:9px;cursor:pointer;
+  font-size:13.5px;font-weight:600;color:var(--muted);user-select:none}
+.remember input{position:absolute;opacity:0;width:0;height:0}
+.box{width:20px;height:20px;border-radius:7px;border:1.5px solid var(--line);
+  background:rgba(255,255,255,.7);display:inline-flex;align-items:center;justify-content:center;
+  transition:all .18s var(--ease);flex:0 0 auto}
+.box svg{width:13px;height:13px;color:#fff;opacity:0;transform:scale(.6);transition:all .18s var(--ease)}
+.remember input:checked + .box{background:linear-gradient(180deg,var(--indigo-soft),var(--indigo));
+  border-color:transparent;box-shadow:0 4px 10px -4px rgba(108,99,255,.7)}
+.remember input:checked + .box svg{opacity:1;transform:scale(1)}
+.remember input:focus-visible + .box{outline:2px solid var(--indigo);outline-offset:2px}
+
+.link{font-size:13.5px;font-weight:700;color:var(--indigo);text-decoration:none;
+  transition:opacity .15s var(--ease)}
+.link:hover{opacity:.72;text-decoration:underline;text-underline-offset:3px}
+.link:focus-visible{outline:2px solid var(--indigo);outline-offset:3px;border-radius:5px}
+
+/* ---------- CTA premium plastique ---------- */
+.cta{
+  position:relative;width:100%;margin-top:20px;height:54px;
+  border:0;border-radius:15px;cursor:pointer;
+  font-family:"Plus Jakarta Sans";font-weight:700;font-size:16px;color:#fff;
+  letter-spacing:.2px;
+  background:linear-gradient(180deg,#8079ff 0%, var(--indigo) 50%, var(--indigo-deep) 100%);
+  /* ombre colorée + reflet plastique */
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.4) inset,
+    0 -10px 18px -10px rgba(0,0,0,.25) inset,
+    0 14px 26px -10px rgba(108,99,255,.65),
+    0 6px 12px -6px rgba(108,99,255,.5);
+  transition:transform .16s var(--ease), box-shadow .16s var(--ease), filter .16s var(--ease);
+}
+.cta:hover{transform:translateY(-2px) scale(1.005);filter:saturate(1.05);
+  box-shadow:0 1px 0 rgba(255,255,255,.45) inset, 0 -10px 18px -10px rgba(0,0,0,.25) inset,
+    0 20px 34px -10px rgba(108,99,255,.72), 0 8px 16px -6px rgba(108,99,255,.55)}
+.cta:active{transform:translateY(1px) scale(.992);
+  box-shadow:0 1px 0 rgba(255,255,255,.3) inset, 0 -6px 14px -8px rgba(0,0,0,.3) inset,
+    0 8px 18px -10px rgba(108,99,255,.6)}
+.cta:focus-visible{outline:3px solid rgba(108,99,255,.45);outline-offset:3px}
+/* reflet glissant subtil au survol */
+.cta::after{content:"";position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(110deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+  transform:translateX(-120%);transition:transform .6s var(--ease);pointer-events:none}
+.cta:hover::after{transform:translateX(120%)}
+
+/* ---------- Lien code par email ---------- */
+.alt{display:block;text-align:center;margin-top:14px;font-size:13.5px;font-weight:700;
+  color:var(--muted);text-decoration:none;transition:color .15s var(--ease)}
+.alt:hover{color:var(--indigo)}
+.alt:focus-visible{outline:2px solid var(--indigo);outline-offset:3px;border-radius:6px}
+
+/* ---------- Séparateur ---------- */
+.sep{display:flex;align-items:center;gap:12px;margin:20px 0 14px;
+  color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.sep::before,.sep::after{content:"";flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line),transparent)}
+
+/* ---------- Boutons démo (grille 3) ---------- */
+.demos{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.demo{
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  padding:12px 6px;min-height:74px;justify-content:center;
+  border-radius:13px;cursor:pointer;
+  background:rgba(255,255,255,.55);
+  border:1px solid var(--line);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  font-family:"Plus Jakarta Sans";font-weight:700;font-size:12.5px;color:var(--ink);
+  transition:transform .16s var(--ease), box-shadow .16s var(--ease),
+             border-color .16s var(--ease), background .16s var(--ease);
+}
+.demo .di{display:flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:9px;color:var(--indigo);
+  background:rgba(108,99,255,.10)}
+.demo:hover{transform:translateY(-2px);border-color:rgba(108,99,255,.4);
+  background:rgba(255,255,255,.78);
+  box-shadow:0 12px 22px -14px rgba(108,99,255,.5)}
+.demo:active{transform:translateY(0)}
+.demo:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+
+/* ---------- Footer carte ---------- */
+.foot{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);
+  text-align:center;font-size:13.5px;font-weight:600;color:var(--muted)}
+.foot a{color:var(--indigo);font-weight:700;text-decoration:none}
+.foot a:hover{text-decoration:underline;text-underline-offset:3px}
+.foot a:focus-visible{outline:2px solid var(--indigo);outline-offset:3px;border-radius:5px}
+
+/* version en bas à droite */
+.version{position:fixed;right:14px;bottom:12px;z-index:4;
+  font-size:11.5px;font-weight:700;color:var(--muted);opacity:.7;letter-spacing:.3px}
+
+/* ---------- Reduced motion : on coupe les mouvements ---------- */
+@media (prefers-reduced-motion:reduce){
+  .blob,.sign,.dash,.cta::after{animation:none !important}
+  .cta,.demo,.input,.link{transition:none}
+}
+
+/* petit confort très petits écrans */
+@media (max-width:340px){
+  .demos{grid-template-columns:1fr;gap:8px}
+  .demo{flex-direction:row;min-height:46px;justify-content:flex-start;padding-left:14px;gap:12px}
+}
+</style>
+</head>
+
+<body>
+
+  <!-- Décor : aurore (blobs + grain) -->
+  <div class="aurora" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+
+  <!-- Panneaux routiers flottants, très estompés -->
+  <div class="sign s1" aria-hidden="true"><img src="../public/signs/cedez-le-passage.svg" alt="" /></div>
+  <div class="sign s2" aria-hidden="true"><img src="../public/signs/circulation-interdite.svg" alt="" /></div>
+  <div class="sign s3" aria-hidden="true"><img src="../public/signs/carrefour-giratoire.svg" alt="" /></div>
+
+  <!-- Route en perspective (écho marque) -->
+  <div class="road" aria-hidden="true">
+    <span class="asphalt"></span>
+    <span class="dash"></span>
+  </div>
+
+  <!-- Carte de connexion -->
+  <main class="shell">
+    <section class="card">
+
+      <header class="head">
+        <div class="logo-wrap">
+          <!-- Emblème : badge vert PermiGo + fallback hexagone CSS -->
+          <span class="badge">
+            <img class="badge-img" src="../public/skins/avatars/permigo-badge-icon.png" alt="PermiGo"
+                 onerror="this.classList.add('is-broken')" />
+            <span class="badge-fallback" aria-hidden="true">P</span>
+          </span>
+          <!-- Logo mot + fallback texte si l'image manque -->
+          <img class="logo" src="../public/permigo-logo.png" alt=""
+               onerror="this.classList.add('is-broken')" />
+          <span class="logo-text" aria-hidden="true">Permi<b>Go</b></span>
+        </div>
+        <h1>Content de te revoir</h1>
+        <p class="sub">Élève, moniteur ou gérant — retrouve ton espace</p>
+      </header>
+
+      <form id="loginForm" novalidate>
+
+        <!-- Email -->
+        <div class="field">
+          <label for="email">Email</label>
+          <div class="input">
+            <span class="ico" aria-hidden="true">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="3"/>
+                <path d="m3 6 9 6 9-6"/>
+              </svg>
+            </span>
+            <input id="email" name="email" type="email" inputmode="email"
+                   autocomplete="email" placeholder="vous@exemple.fr" />
+          </div>
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="field">
+          <label for="password">Mot de passe</label>
+          <div class="input">
+            <span class="ico" aria-hidden="true">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="11" width="16" height="10" rx="2.5"/>
+                <path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+              </svg>
+            </span>
+            <input id="password" name="password" type="password"
+                   autocomplete="current-password" placeholder="••••••••" />
+            <button type="button" class="eye" id="eyeBtn"
+                    aria-label="Afficher le mot de passe" aria-pressed="false">
+              <!-- icône œil (état: visible) -->
+              <svg class="eye-on" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <!-- icône œil barré (état: masqué) -->
+              <svg class="eye-off" width="19" height="19" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                   style="display:none">
+                <path d="M9.9 4.2A10.9 10.9 0 0 1 12 4c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1"/>
+                <path d="M6.6 6.6A17.4 17.4 0 0 0 2 11s3.5 7 10 7a10.6 10.6 0 0 0 5.4-1.4"/>
+                <path d="m2 2 20 20"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="row">
+          <label class="remember">
+            <input type="checkbox" id="remember" checked />
+            <span class="box" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"
+                   stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"/></svg>
+            </span>
+            Se souvenir de moi
+          </label>
+          <a class="link" href="#">Mot de passe oublié&nbsp;?</a>
+        </div>
+
+        <!-- CTA -->
+        <button type="submit" class="cta">Se connecter</button>
+
+        <!-- Code par email -->
+        <a class="alt" href="#">Recevoir un code par email</a>
+      </form>
+
+      <!-- Démos -->
+      <div class="sep">Connexion démo</div>
+      <div class="demos">
+        <button type="button" class="demo">
+          <span class="di" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>
+            </svg>
+          </span>
+          Élève
+        </button>
+        <button type="button" class="demo">
+          <span class="di" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 19a8 8 0 0 1 16 0"/><circle cx="11" cy="8" r="4"/><path d="M20 7v5M22 9h-4"/>
+            </svg>
+          </span>
+          Enseignant
+        </button>
+        <button type="button" class="demo">
+          <span class="di" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/>
+            </svg>
+          </span>
+          Gérant
+        </button>
+      </div>
+
+      <!-- Footer -->
+      <p class="foot">
+        Élève avec un code moniteur&nbsp;? <a href="#">Rejoins ton moniteur</a>
+      </p>
+
+    </section>
+  </main>
+
+  <span class="version" aria-hidden="true">PermiGo · v7</span>
+
+<script>
+/* ---- Œil : afficher / masquer le mot de passe ---- */
+(function(){
+  var btn = document.getElementById('eyeBtn');
+  var pwd = document.getElementById('password');
+  var on  = btn.querySelector('.eye-on');
+  var off = btn.querySelector('.eye-off');
+  btn.addEventListener('click', function(){
+    var show = pwd.type === 'password';
+    pwd.type = show ? 'text' : 'password';
+    on.style.display  = show ? 'none' : '';
+    off.style.display = show ? '' : 'none';
+    btn.setAttribute('aria-pressed', String(show));
+    btn.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+  });
+})();
+
+/* ---- Empêche le rechargement (mockup statique) ---- */
+document.getElementById('loginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b0d1f" />
+<title>PermiGo — Connexion</title>
+
+<!-- Polices : titres lourds (Plus Jakarta Sans) + texte (Nunito) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+  /* ============================================================
+     PermiGo — Login « Cinématique nuit »
+     La route vers le permis : profondeur + lumière, keynote nocturne
+     ============================================================ */
+
+  :root{
+    /* Couleurs marque + scène nuit */
+    --indigo:        #6c63ff;        /* accent marque */
+    --indigo-soft:   #8b84ff;
+    --indigo-deep:   #4a42d4;
+    --go:            #58cc02;        /* feu vert PermiGo « GO » */
+    --go-soft:       #7ee63a;
+    --sky-top:       #0b0d1f;        /* haut du ciel nuit */
+    --sky-mid:       #14122e;
+    --sky-low:       #1a1640;        /* bas du ciel, vers l'horizon */
+    --aurore-1:      #ff8a5c;        /* ambre doux au point de fuite */
+    --aurore-2:      #ff5fae;        /* rose */
+    --aurore-3:      #7b6cff;        /* violet */
+
+    /* Texte sur fond sombre (WCAG AA) */
+    --ink:           #f4f3ff;        /* texte principal clair */
+    --ink-soft:      #c4c2e0;        /* texte secondaire */
+    --ink-mute:      #9a98bf;        /* labels / placeholders */
+
+    /* Verre dépoli sombre */
+    --glass:         rgba(17, 15, 38, 0.66);
+    --glass-edge:    rgba(180, 170, 255, 0.22);
+    --glass-input:   rgba(10, 9, 24, 0.78);
+
+    --radius:        22px;
+    --radius-sm:     14px;
+    --ease:          cubic-bezier(.22,.61,.36,1);   /* easing « out » doux */
+    --ease-spring:   cubic-bezier(.34,1.56,.64,1);  /* léger rebond */
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html,body{ height:100%; }
+
+  body{
+    font-family:"Nunito", system-ui, sans-serif;
+    color:var(--ink);
+    background:var(--sky-top);
+    min-height:100svh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:max(20px, env(safe-area-inset-top)) 18px max(28px, env(safe-area-inset-bottom));
+    overflow:hidden;
+    position:relative;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  /* ====================== DÉCOR : LA SCÈNE NUIT ====================== */
+
+  /* Ciel nuit en dégradé profond */
+  .scene{
+    position:fixed; inset:0; z-index:0;
+    background:
+      radial-gradient(120% 80% at 50% 100%, rgba(123,108,255,.16) 0%, transparent 55%),
+      linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 48%, var(--sky-low) 100%);
+    overflow:hidden;
+  }
+
+  /* Glow d'aurore / lever de soleil au point de fuite (horizon ~ 38% de la hauteur) */
+  .aurore{
+    position:absolute;
+    left:50%; top:38%;
+    width:min(620px, 140vw); height:min(620px, 140vw);
+    transform:translate(-50%,-50%);
+    background:
+      radial-gradient(closest-side,
+        rgba(255,235,210,.85) 0%,
+        var(--aurore-1) 14%,
+        var(--aurore-2) 34%,
+        var(--aurore-3) 56%,
+        transparent 72%);
+    filter:blur(18px);
+    opacity:.85;
+    animation:aurorePulse 9s var(--ease) infinite;
+    will-change:transform, opacity;
+  }
+  @keyframes aurorePulse{
+    0%,100%{ opacity:.78; transform:translate(-50%,-50%) scale(1); }
+    50%    { opacity:.95; transform:translate(-50%,-50%) scale(1.06); }
+  }
+
+  /* Bande de halo lumineux posée sur l'horizon */
+  .horizon-glow{
+    position:absolute;
+    left:0; right:0; top:38%;
+    height:130px; transform:translateY(-50%);
+    background:linear-gradient(180deg, transparent, rgba(255,150,120,.20) 45%, rgba(123,108,255,.12) 100%);
+    filter:blur(8px);
+    mix-blend-mode:screen;
+  }
+
+  /* Étoiles / poussière lumineuse (discrète, générée en box-shadow) */
+  .stars{
+    position:absolute; inset:0 0 62% 0; /* seulement dans le ciel */
+    background:transparent;
+  }
+  .stars::before,
+  .stars::after{
+    content:""; position:absolute; top:0; left:0; width:2px; height:2px; border-radius:50%;
+    background:transparent;
+  }
+  .stars::before{
+    box-shadow:
+      8vw 12vh 0 0 rgba(255,255,255,.7),  22vw 6vh 0 0 rgba(255,255,255,.5),
+      34vw 18vh 0 0 rgba(200,210,255,.6), 47vw 9vh 0 0 rgba(255,255,255,.45),
+      61vw 16vh 0 0 rgba(255,255,255,.6), 73vw 5vh 0 0 rgba(210,210,255,.5),
+      85vw 14vh 0 0 rgba(255,255,255,.55),92vw 22vh 0 0 rgba(255,255,255,.4),
+      15vw 26vh 0 0 rgba(255,255,255,.4), 54vw 24vh 0 0 rgba(255,255,255,.35);
+    animation:twinkle 5.5s ease-in-out infinite;
+  }
+  .stars::after{
+    box-shadow:
+      4vw 30vh 0 0 rgba(255,255,255,.5),  28vw 32vh 0 0 rgba(220,220,255,.4),
+      40vw 4vh 0 0 rgba(255,255,255,.5),  66vw 30vh 0 0 rgba(255,255,255,.35),
+      78vw 28vh 0 0 rgba(255,255,255,.45),96vw 8vh 0 0 rgba(255,255,255,.4),
+      11vw 7vh 0 0 rgba(255,255,255,.35), 50vw 13vh 0 0 rgba(255,255,255,.5);
+    animation:twinkle 7s ease-in-out infinite reverse;
+  }
+  @keyframes twinkle{ 0%,100%{ opacity:.55; } 50%{ opacity:1; } }
+
+  /* La ROUTE : trapèze qui part du bas et file vers le point de fuite */
+  .road{
+    position:absolute;
+    left:50%; bottom:0; top:38%;
+    width:100%;
+    transform:translateX(-50%);
+    perspective:520px;            /* profondeur 3D */
+    overflow:hidden;
+  }
+  .road__surface{
+    position:absolute; left:50%; bottom:0;
+    width:240%; height:200%;
+    transform:translateX(-50%) rotateX(74deg);
+    transform-origin:bottom center;
+    background:
+      linear-gradient(180deg, rgba(26,22,64,0) 0%, #15122e 30%, #0c0a22 100%);
+  }
+  /* Bords lumineux de la route (rails néon) */
+  .road__edge{
+    position:absolute; bottom:0; width:3px; height:54vh;
+    background:linear-gradient(0deg, rgba(123,108,255,.0), rgba(139,132,255,.85) 60%, rgba(255,180,150,.9));
+    filter:blur(.4px);
+    box-shadow:0 0 14px rgba(123,108,255,.7);
+  }
+  .road__edge.l{ left:50%; transform:translateX(-50%); transform-origin:bottom; rotate:18deg; }
+  .road__edge.r{ left:50%; transform:translateX(-50%); transform-origin:bottom; rotate:-18deg; }
+
+  /* Lignes centrales en pointillés, défilant vers le spectateur */
+  .road__lines{
+    position:absolute; left:50%; bottom:0;
+    width:14px; height:60vh;
+    transform:translateX(-50%);
+    background:repeating-linear-gradient(
+      to top,
+      rgba(255,255,255,.92) 0 5%,
+      transparent 5% 12%);
+    /* le masque rétrécit la bande vers l'horizon → fausse perspective */
+    -webkit-mask-image:linear-gradient(to top, #000 0%, rgba(0,0,0,.25) 78%, transparent 100%);
+            mask-image:linear-gradient(to top, #000 0%, rgba(0,0,0,.25) 78%, transparent 100%);
+    clip-path:polygon(38% 100%, 62% 100%, 51% 0, 49% 0);
+    animation:dash 1.5s linear infinite;
+    opacity:.9;
+  }
+  @keyframes dash{ to{ background-position:0 60vh; } }
+
+  /* Halos de phares / lampadaires diffus */
+  .lamp{ position:absolute; border-radius:50%; filter:blur(40px); mix-blend-mode:screen; pointer-events:none; }
+  .lamp.a{ width:240px; height:240px; left:-40px; top:18%; background:radial-gradient(closest-side, rgba(123,108,255,.5), transparent); }
+  .lamp.b{ width:280px; height:280px; right:-60px; top:30%; background:radial-gradient(closest-side, rgba(255,120,160,.4), transparent); animation:drift 11s var(--ease) infinite; }
+  .lamp.c{ width:180px; height:180px; left:12%;  bottom:8%; background:radial-gradient(closest-side, rgba(255,180,120,.35), transparent); }
+  @keyframes drift{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(22px); } }
+
+  /* Vignette pour focaliser le regard sur la carte */
+  .vignette{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 36%, transparent 38%, rgba(5,5,16,.58) 100%);
+  }
+
+  /* ====================== CARTE DE CONNEXION ====================== */
+
+  .card{
+    position:relative; z-index:2;
+    width:100%; max-width:430px;
+    background:var(--glass);
+    backdrop-filter:blur(26px) saturate(140%);
+    -webkit-backdrop-filter:blur(26px) saturate(140%);
+    border:1px solid var(--glass-edge);
+    border-radius:var(--radius);
+    padding:30px 26px 24px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.10) inset,        /* liseré lumineux haut */
+      0 30px 80px -20px rgba(0,0,0,.75),          /* ombre portée profonde */
+      0 0 60px -10px rgba(108,99,255,.30);        /* glow indigo ambiant */
+    animation:cardIn .9s var(--ease) both;
+  }
+  @keyframes cardIn{
+    from{ opacity:0; transform:translateY(26px) scale(.97); }
+    to  { opacity:1; transform:translateY(0)    scale(1); }
+  }
+
+  /* En-tête : badge GO + logo + titres */
+  .brand{ text-align:center; margin-bottom:22px; }
+
+  /* === Badge vert « GO » : LE phare au bout de la route === */
+  .brand__badge{
+    position:relative; display:inline-flex; align-items:center; justify-content:center;
+    width:68px; height:68px; margin-bottom:12px;
+  }
+  /* Halo vert diffus qui respire derrière le badge */
+  .brand__badge::before{
+    content:""; position:absolute; inset:-22px; border-radius:50%; z-index:-1;
+    background:radial-gradient(closest-side, rgba(88,204,2,.55), rgba(88,204,2,.18) 55%, transparent 75%);
+    filter:blur(6px);
+    animation:goPulse 3.2s var(--ease) infinite;
+    will-change:transform, opacity;
+  }
+  .brand__badge img{
+    width:100%; height:100%; object-fit:contain;
+    /* double glow vert pour faire « briller » l'hexagone contre la nuit */
+    filter:drop-shadow(0 0 10px rgba(88,204,2,.85)) drop-shadow(0 6px 16px rgba(88,204,2,.45));
+  }
+  @keyframes goPulse{
+    0%,100%{ opacity:.7;  transform:scale(.94); }
+    50%    { opacity:1;   transform:scale(1.08); }
+  }
+  /* Fallback hexagone vert CSS avec « P » si l'image ne charge pas */
+  .brand__badge .badge-fallback{
+    display:none; width:60px; height:66px;
+    background:linear-gradient(160deg, var(--go-soft), var(--go) 60%, #3fa000);
+    /* hexagone pointe-haut */
+    clip-path:polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    align-items:center; justify-content:center;
+    font-family:"Plus Jakarta Sans", sans-serif; font-weight:800; font-size:30px; color:#fff;
+    box-shadow:0 0 18px rgba(88,204,2,.7);
+  }
+  .brand__badge img.is-broken{ display:none; }
+  .brand__badge img.is-broken + .badge-fallback{ display:flex; }
+
+  .brand__logo{ display:block; margin:0 auto; height:46px; width:auto; filter:drop-shadow(0 6px 18px rgba(108,99,255,.65)); }
+  /* Fallback texte si le logo ne charge pas */
+  .brand__fallback{
+    display:none; font-family:"Plus Jakarta Sans", sans-serif; font-weight:800; font-size:30px;
+    letter-spacing:-.5px; background:linear-gradient(90deg, #fff, var(--indigo-soft));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 6px 22px rgba(108,99,255,.5);
+  }
+  .brand__logo.is-broken{ display:none; }
+  .brand__logo.is-broken + .brand__fallback{ display:inline-block; }
+
+  .title{
+    font-family:"Plus Jakarta Sans", sans-serif; font-weight:800;
+    font-size:25px; line-height:1.15; letter-spacing:-.4px;
+    margin-top:18px; color:var(--ink);
+  }
+  .subtitle{ margin-top:7px; font-size:14.5px; color:var(--ink-soft); font-weight:600; }
+
+  /* ---- Champs ---- */
+  form{ margin-top:24px; display:flex; flex-direction:column; gap:14px; }
+
+  .field{ position:relative; }
+  .field__label{
+    display:block; font-size:12.5px; font-weight:700; color:var(--ink-mute);
+    margin:0 0 7px 2px; letter-spacing:.2px; text-transform:uppercase;
+  }
+  .field__wrap{ position:relative; display:flex; align-items:center; }
+  .field__icon{
+    position:absolute; left:14px; display:flex; color:var(--ink-mute);
+    pointer-events:none; transition:color .25s var(--ease);
+  }
+  .field input{
+    width:100%; height:52px;
+    padding:0 14px 0 44px;
+    font-family:"Nunito", sans-serif; font-size:16px; font-weight:600;
+    color:var(--ink);
+    background:var(--glass-input);
+    border:1px solid rgba(180,170,255,.16);
+    border-radius:var(--radius-sm);
+    outline:none;
+    transition:border-color .25s var(--ease), box-shadow .25s var(--ease), background .25s var(--ease);
+  }
+  .field input::placeholder{ color:var(--ink-mute); opacity:.75; font-weight:600; }
+  .field input:hover{ border-color:rgba(180,170,255,.30); }
+  .field input:focus{
+    border-color:var(--indigo);
+    background:rgba(13,12,30,.72);
+    box-shadow:0 0 0 4px rgba(108,99,255,.22), 0 0 24px -6px rgba(108,99,255,.55);
+  }
+  .field:focus-within .field__icon{ color:var(--indigo-soft); }
+
+  /* Champ mot de passe : place pour le bouton œil */
+  .field--pwd input{ padding-right:48px; }
+  .eye{
+    position:absolute; right:6px; top:50%; transform:translateY(-50%);
+    width:40px; height:40px; min-width:44px; min-height:44px;   /* cible tactile */
+    display:flex; align-items:center; justify-content:center;
+    background:none; border:0; cursor:pointer; color:var(--ink-mute);
+    border-radius:10px; transition:color .2s var(--ease), background .2s var(--ease);
+  }
+  .eye:hover{ color:var(--ink); background:rgba(180,170,255,.10); }
+  .eye:focus-visible{ outline:2px solid var(--indigo-soft); outline-offset:2px; }
+
+  /* ---- Ligne : souvenir + oublié ---- */
+  .row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:2px; }
+  .remember{ display:flex; align-items:center; gap:9px; cursor:pointer; user-select:none; min-height:44px; }
+  .remember input{ position:absolute; opacity:0; width:0; height:0; }
+  .remember__box{
+    width:20px; height:20px; border-radius:7px; flex:none;
+    border:1.5px solid rgba(180,170,255,.40);
+    background:var(--glass-input);
+    display:flex; align-items:center; justify-content:center;
+    transition:all .2s var(--ease-spring);
+  }
+  .remember__box svg{ width:13px; height:13px; opacity:0; transform:scale(.5); transition:all .2s var(--ease-spring); color:#fff; }
+  .remember input:checked + .remember__box{
+    background:linear-gradient(135deg, var(--indigo-soft), var(--indigo-deep));
+    border-color:transparent; box-shadow:0 0 14px -2px rgba(108,99,255,.7);
+  }
+  .remember input:checked + .remember__box svg{ opacity:1; transform:scale(1); }
+  .remember input:focus-visible + .remember__box{ outline:2px solid var(--indigo-soft); outline-offset:2px; }
+  .remember__txt{ font-size:14px; color:var(--ink-soft); font-weight:600; }
+
+  .link{ font-size:14px; font-weight:700; color:var(--indigo-soft); text-decoration:none; transition:color .2s var(--ease); }
+  .link:hover{ color:#fff; text-decoration:underline; }
+  .link:focus-visible{ outline:2px solid var(--indigo-soft); outline-offset:3px; border-radius:4px; }
+
+  /* ---- CTA principal ---- */
+  .cta{
+    position:relative; margin-top:6px;
+    width:100%; min-height:54px;
+    font-family:"Plus Jakarta Sans", sans-serif; font-weight:800; font-size:16.5px;
+    color:#fff; letter-spacing:.2px;
+    border:0; border-radius:var(--radius-sm); cursor:pointer;
+    background:linear-gradient(135deg, var(--indigo-soft) 0%, var(--indigo) 45%, var(--indigo-deep) 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.30) inset,
+      0 12px 30px -8px rgba(108,99,255,.65),
+      0 0 0 0 rgba(108,99,255,.0);
+    overflow:hidden;
+    transition:transform .18s var(--ease), box-shadow .25s var(--ease), filter .2s var(--ease);
+  }
+  /* Halo lumineux qui balaye au survol */
+  .cta::before{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+    transform:translateX(-120%); transition:transform .7s var(--ease);
+  }
+  /* Liseré vert « GO » discret à gauche du CTA (clin d'œil feu vert) */
+  .cta::after{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:5px;
+    background:linear-gradient(180deg, var(--go-soft), var(--go));
+    box-shadow:0 0 16px 1px rgba(88,204,2,.85);
+    transition:box-shadow .25s var(--ease);
+  }
+  .cta:hover::after{ box-shadow:0 0 24px 2px rgba(88,204,2,1); }
+  .cta:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.06);
+    box-shadow:0 1px 0 rgba(255,255,255,.30) inset, 0 18px 40px -8px rgba(108,99,255,.8), 0 0 36px -4px rgba(108,99,255,.6);
+  }
+  .cta:hover::before{ transform:translateX(120%); }
+  .cta:active{ transform:translateY(0) scale(.985); }
+  .cta:focus-visible{ outline:3px solid rgba(255,255,255,.55); outline-offset:3px; }
+  .cta svg{ vertical-align:-2px; margin-left:7px; }
+
+  /* Lien « code par email » */
+  .otp-link{
+    display:block; text-align:center; margin-top:14px;
+    font-size:14px; font-weight:700; color:var(--ink-soft); text-decoration:none;
+    transition:color .2s var(--ease);
+  }
+  .otp-link:hover{ color:#fff; }
+  .otp-link svg{ vertical-align:-3px; margin-right:5px; color:var(--indigo-soft); }
+  .otp-link:focus-visible{ outline:2px solid var(--indigo-soft); outline-offset:3px; border-radius:6px; }
+
+  /* ---- Séparateur ---- */
+  .sep{ display:flex; align-items:center; gap:12px; margin:20px 0 16px; color:var(--ink-mute); }
+  .sep::before, .sep::after{ content:""; height:1px; flex:1; background:linear-gradient(90deg, transparent, rgba(180,170,255,.28), transparent); }
+  .sep span{ font-size:12px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; }
+
+  /* ---- 3 boutons démo ---- */
+  .demos{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
+  .demo{
+    display:flex; flex-direction:column; align-items:center; gap:7px;
+    min-height:74px; padding:12px 6px;
+    font-family:"Nunito", sans-serif; font-size:13px; font-weight:700; color:var(--ink-soft);
+    background:rgba(180,170,255,.06);
+    border:1px solid rgba(180,170,255,.16);
+    border-radius:var(--radius-sm); cursor:pointer;
+    transition:transform .2s var(--ease-spring), border-color .2s var(--ease), background .2s var(--ease), color .2s var(--ease);
+  }
+  .demo svg{ width:22px; height:22px; color:var(--indigo-soft); transition:color .2s var(--ease), transform .2s var(--ease-spring); }
+  .demo:hover{
+    transform:translateY(-3px);
+    background:rgba(108,99,255,.16);
+    border-color:rgba(139,132,255,.5);
+    color:#fff;
+  }
+  .demo:hover svg{ color:#fff; transform:scale(1.12); }
+  .demo:active{ transform:translateY(-1px) scale(.97); }
+  .demo:focus-visible{ outline:2px solid var(--indigo-soft); outline-offset:2px; }
+
+  /* ---- Footer ---- */
+  .footer{
+    margin-top:22px; padding-top:18px;
+    border-top:1px solid rgba(180,170,255,.12);
+    text-align:center; font-size:14px; color:var(--ink-soft); font-weight:600;
+  }
+  .footer a{ color:var(--indigo-soft); font-weight:800; text-decoration:none; }
+  .footer a:hover{ color:#fff; text-decoration:underline; }
+  .footer a:focus-visible{ outline:2px solid var(--indigo-soft); outline-offset:3px; border-radius:4px; }
+
+  /* Version, coin bas-droit */
+  .version{
+    position:fixed; right:14px; bottom:10px; z-index:3;
+    font-size:11px; font-weight:700; letter-spacing:.4px; color:rgba(196,194,224,.5);
+  }
+
+  /* ====================== RESPONSIVE ====================== */
+  @media (max-width:400px){
+    .card{ padding:26px 20px 20px; border-radius:20px; }
+    .title{ font-size:22.5px; }
+    .demos{ gap:8px; }
+    .demo{ min-height:70px; font-size:12px; }
+  }
+  /* Desktop : on pousse la carte vers le bas pour laisser respirer
+     l'horizon lumineux + la pointe de la route au-dessus d'elle. */
+  @media (min-width:600px) and (min-height:760px){
+    body{ align-items:flex-end; padding-bottom:7vh; }
+  }
+  @media (min-width:431px){
+    body{ padding-top:40px; }
+  }
+
+  /* ====================== REDUCED MOTION ====================== */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation:none !important;
+      transition-duration:.01ms !important;
+    }
+    .road__lines{ background-position:0 0 !important; }
+    .aurore{ opacity:.85; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== DÉCOR : la route vers le permis ===== -->
+  <div class="scene" aria-hidden="true">
+    <div class="stars"></div>
+    <div class="aurore"></div>
+    <div class="horizon-glow"></div>
+    <div class="road">
+      <div class="road__surface"></div>
+      <div class="road__edge l"></div>
+      <div class="road__edge r"></div>
+      <div class="road__lines"></div>
+    </div>
+    <span class="lamp a"></span>
+    <span class="lamp b"></span>
+    <span class="lamp c"></span>
+  </div>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- ===== CARTE DE CONNEXION ===== -->
+  <main class="card">
+
+    <!-- Badge vert « GO » + logo + titres -->
+    <header class="brand">
+      <!-- Le feu vert au bout de la route : emblème héro lumineux -->
+      <div class="brand__badge">
+        <img src="../public/skins/avatars/permigo-badge-icon.png" alt=""
+             onerror="this.classList.add('is-broken')" />
+        <span class="badge-fallback" aria-hidden="true">P</span>
+      </div>
+      <img src="../public/permigo-logo.png" alt="PermiGo" class="brand__logo"
+           onerror="this.classList.add('is-broken')" />
+      <span class="brand__fallback" aria-hidden="true">PermiGo</span>
+      <h1 class="title">Content de te revoir</h1>
+      <p class="subtitle">Élève, moniteur ou gérant — retrouve ton espace</p>
+    </header>
+
+    <form autocomplete="on" onsubmit="return false">
+
+      <!-- Email -->
+      <div class="field">
+        <label class="field__label" for="email">Adresse e-mail</label>
+        <div class="field__wrap">
+          <span class="field__icon" aria-hidden="true">
+            <!-- enveloppe (lucide) -->
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="3"/>
+              <path d="m3 7 9 6 9-6"/>
+            </svg>
+          </span>
+          <input id="email" name="email" type="email" inputmode="email"
+                 autocomplete="email" placeholder="vous@exemple.fr" />
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="field field--pwd">
+        <label class="field__label" for="password">Mot de passe</label>
+        <div class="field__wrap">
+          <span class="field__icon" aria-hidden="true">
+            <!-- cadenas (lucide) -->
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="11" width="16" height="10" rx="2"/>
+              <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+            </svg>
+          </span>
+          <input id="password" name="password" type="password"
+                 autocomplete="current-password" placeholder="••••••••" />
+          <button type="button" class="eye" id="toggleEye"
+                  aria-label="Afficher le mot de passe" aria-pressed="false">
+            <!-- œil (visible par défaut, devient barré) -->
+            <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Souvenir + oublié -->
+      <div class="row">
+        <label class="remember">
+          <input type="checkbox" id="remember" />
+          <span class="remember__box" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"
+                 stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <span class="remember__txt">Se souvenir de moi</span>
+        </label>
+        <a href="#oublie" class="link">Mot de passe oublié ?</a>
+      </div>
+
+      <!-- CTA -->
+      <button type="submit" class="cta">
+        Se connecter
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+      </button>
+
+      <!-- Code par email -->
+      <a href="#code" class="otp-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="3"/><path d="m3 7 9 6 9-6"/>
+        </svg>
+        Recevoir un code par e-mail
+      </a>
+    </form>
+
+    <!-- Séparateur -->
+    <div class="sep"><span>ou en démo</span></div>
+
+    <!-- 3 démos -->
+    <div class="demos">
+      <button type="button" class="demo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+        Élève
+      </button>
+      <button type="button" class="demo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 4h6v6"/><path d="M10 14 20.5 3.5"/><path d="M20 14v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/>
+        </svg>
+        Enseignant
+      </button>
+      <button type="button" class="demo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 21V7l9-4 9 4v14"/><path d="M9 21v-6h6v6"/><path d="M3 21h18"/>
+        </svg>
+        Gérant
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <p class="footer">
+      Élève avec un code moniteur ?
+      <a href="#rejoindre">Rejoins ton moniteur</a>
+    </p>
+  </main>
+
+  <span class="version" aria-hidden="true">PermiGo · v7</span>
+
+  <script>
+    // Bouton œil : afficher / masquer le mot de passe
+    (function(){
+      const input   = document.getElementById('password');
+      const btn      = document.getElementById('toggleEye');
+      const icon    = document.getElementById('eyeIcon');
+
+      // Icône « œil barré » (mot de passe visible)
+      const EYE_OFF = '<path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 7 10 7a13.2 13.2 0 0 1-2.16 3.19"/>'
+                    + '<path d="M6.6 6.6A13.5 13.5 0 0 0 2 11s3.5 7 10 7a9 9 0 0 0 4.4-1.13"/>'
+                    + '<path d="m2 2 20 20"/><path d="M9.5 9.5a3 3 0 0 0 4.2 4.2"/>';
+      // Icône « œil ouvert » (mot de passe masqué)
+      const EYE_ON  = '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+
+      btn.addEventListener('click', function(){
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        icon.innerHTML = show ? EYE_OFF : EYE_ON;
+        btn.setAttribute('aria-pressed', String(show));
+        btn.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+        input.focus({ preventScroll:true });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>PermiGo — Connexion (Arcade 3D)</title>
+
+<!-- Typo ronde et ludique (Baloo 2) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+  /* ===== Jetons de design (DA Arène 3D : nuit-violet + OR) ===== */
+  :root{
+    --indigo:#6c63ff;          /* marque */
+    --indigo-lite:#8e87ff;     /* face haute du bouton plastique */
+    --indigo-deep:#4a3fc9;     /* tranche / ombre du bouton */
+    --indigo-darker:#372fa3;
+    --gold:#ffce4d;            /* or premium */
+    --gold-deep:#e8a317;       /* tranche dorée */
+    --go:#58cc02;              /* vert « feu vert / GO » PermiGo */
+    --go-deep:#3a8a01;         /* tranche verte */
+    --night-1:#241a4d;         /* fond haut */
+    --night-2:#3a2a7a;         /* fond bas */
+    --card:#2b2160;            /* corps de la carte */
+    --card-top:#7d6fe0;        /* bord épais clair (haut de plaque) */
+    --card-bottom:#160f38;     /* ombre dure (bas de plaque) */
+    --ink:#f4f1ff;             /* texte principal clair (≈14:1 sur la carte) */
+    --ink-soft:#cdc8ec;        /* texte secondaire éclairci (≈6.8:1 → AA corps) */
+    --ink-mute:#aaa2d8;        /* texte tertiaire (séparateur, version) ≈4.6:1 */
+    --field:#221a4f;           /* fond des champs */
+    --field-line:#6257a8;      /* liseré des champs (renforcé ≥3:1) */
+    --focus:#ffd84d;           /* anneau de focus doré, contrasté */
+    --radius:26px;
+    --tap:46px;                /* cible tactile mini */
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:"Baloo 2", system-ui, -apple-system, sans-serif;
+    color:var(--ink);
+    /* Fond nuit-violet riche + vignette + lueur dorée */
+    background:
+      radial-gradient(120% 90% at 50% -10%, rgba(255,206,77,.16), transparent 55%),
+      radial-gradient(130% 120% at 50% 110%, rgba(0,0,0,.55), transparent 60%),
+      linear-gradient(160deg, var(--night-1) 0%, var(--night-2) 100%);
+    background-attachment:fixed;
+    min-height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 18px calc(24px + env(safe-area-inset-bottom));
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ===== Étincelles dorées discrètes en fond (canvas) ===== */
+  #sparks{
+    position:fixed; inset:0; z-index:0;
+    width:100%; height:100%;
+    pointer-events:none;
+  }
+
+  /* ===== Scène (perspective pour le tilt 3D) ===== */
+  .scene{
+    position:relative; z-index:1;
+    width:100%; max-width:430px;
+    perspective:1100px;
+  }
+
+  /* ===== Carte = plaque plastique 3D ===== */
+  .card{
+    position:relative;
+    background:linear-gradient(180deg, #322764 0%, var(--card) 60%, #261d56 100%);
+    border-radius:var(--radius);
+    padding:30px 26px 26px;
+    /* Bord épais clair en haut + ombre dure en bas = effet plaque */
+    box-shadow:
+      inset 0 3px 0 rgba(255,255,255,.18),         /* arête lumineuse haute */
+      inset 0 2px 14px rgba(255,255,255,.06),
+      inset 0 -10px 22px rgba(0,0,0,.45),           /* creux interne bas */
+      0 10px 0 var(--card-bottom),                  /* tranche épaisse */
+      0 22px 38px rgba(0,0,0,.5),                   /* ombre portée */
+      0 0 0 2px rgba(124,111,224,.35);              /* liseré */
+    transition:transform .12s ease-out;
+    transform-style:preserve-3d;
+    will-change:transform;
+  }
+  /* Liseré doré subtil tout autour (touche premium) */
+  .card::before{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:var(--radius);
+    padding:1.5px;
+    background:linear-gradient(180deg, rgba(255,206,77,.55), rgba(255,206,77,0) 45%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    pointer-events:none;
+  }
+
+  /* ===== En-tête : badge vert (seule marque) ===== */
+  .head{ text-align:center; }
+
+  /* Emblème HÉRO : le badge hexagonal VERT « feu vert / GO » = seule marque */
+  .emblem{
+    position:relative;
+    display:grid; place-items:center;
+    width:88px; height:88px;
+    margin:0 auto 16px;   /* centré, seul en haut */
+  }
+  .emblem img{
+    width:88px; height:88px; object-fit:contain;
+    /* relief 3D (l'image l'est déjà) + halo vert PermiGo */
+    filter:
+      drop-shadow(0 5px 8px rgba(0,0,0,.5))
+      drop-shadow(0 0 16px rgba(88,204,2,.6));
+    position:relative; z-index:1;
+  }
+  /* Halo vert pulsé derrière le badge (décor → aria-hidden côté markup) */
+  .emblem::before{
+    content:""; position:absolute; inset:-14px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(88,204,2,.45), rgba(88,204,2,0) 68%);
+    z-index:0;
+    animation:greenPulse 2.8s ease-in-out infinite;
+  }
+  @keyframes greenPulse{
+    0%,100%{ transform:scale(.92); opacity:.55; }
+    50%    { transform:scale(1.12); opacity:.9; }
+  }
+  /* Fallback CSS : hexagone vert avec « P » si l'image ne charge pas */
+  .emblem-fallback{
+    display:none;
+    width:80px; height:80px;
+    background:linear-gradient(180deg, #7ee838, var(--go) 55%, var(--go-deep) 100%);
+    /* forme hexagonale */
+    clip-path:polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+    place-items:center; z-index:1; position:relative;
+    box-shadow:inset 0 2px 3px rgba(255,255,255,.5), 0 4px 8px rgba(0,0,0,.4);
+  }
+  .emblem-fallback b{ color:#fff; font-size:42px; font-weight:800; text-shadow:0 2px 2px rgba(0,0,0,.35); }
+
+  h1.title{
+    margin:6px 0 4px; font-size:26px; font-weight:800; line-height:1.1;
+    text-shadow:0 2px 0 rgba(0,0,0,.35);
+  }
+  /* Sous-titre : muted éclairci pour ≥4.5:1 sur le violet de la carte */
+  .subtitle{ margin:0 0 22px; font-size:14.5px; color:var(--ink-soft); font-weight:600; }
+
+  /* ===== Champs ===== */
+  .field{ margin-bottom:14px; }
+  .field label{
+    display:block; font-size:13px; font-weight:600;
+    color:var(--ink-soft); margin:0 0 6px 4px;
+  }
+  .input-shell{
+    position:relative; display:flex; align-items:center;
+    background:var(--field);
+    border-radius:15px;
+    box-shadow:
+      inset 0 2px 5px rgba(0,0,0,.5),
+      inset 0 0 0 1.5px var(--field-line);
+    transition:box-shadow .15s ease;
+  }
+  /* Focus VISIBLE et net sur le champ (anneau doré ≥3:1) */
+  .input-shell:focus-within{
+    box-shadow:
+      inset 0 2px 5px rgba(0,0,0,.4),
+      inset 0 0 0 2px var(--focus),
+      0 0 0 4px rgba(255,216,77,.35);
+  }
+  .input-shell .ico{
+    flex:0 0 auto; display:grid; place-items:center;
+    width:46px; height:var(--tap); color:#b7afe8; /* icône éclaircie ≥3:1 */
+  }
+  .input-shell input{
+    flex:1 1 auto; min-width:0;
+    height:var(--tap);
+    background:transparent; border:0; outline:0;
+    color:var(--ink);
+    font-family:inherit; font-size:16px; font-weight:500; /* 16px = pas de zoom iOS */
+    padding:0 6px 0 0;
+  }
+  .input-shell input::placeholder{ color:#9b93cf; font-weight:500; } /* ≥4.5:1 sur le champ sombre */
+
+  /* === FIX autofill : garde le champ dans le thème sombre (plus de rectangle blanc) === */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active{
+    -webkit-text-fill-color: var(--ink) !important;            /* texte clair lisible */
+    -webkit-box-shadow: 0 0 0 1000px var(--field) inset !important; /* fond sombre du champ */
+    box-shadow: 0 0 0 1000px var(--field) inset !important;
+    caret-color: var(--ink);
+    border-radius: 0;                                          /* évite tout débord d'angle */
+    transition: background-color 9999s ease-out 0s;            /* tue le flash blanc */
+  }
+
+  /* Bouton œil (afficher/masquer mot de passe) */
+  .eye{
+    flex:0 0 auto;
+    width:var(--tap); height:var(--tap);
+    display:grid; place-items:center;
+    background:transparent; border:0; cursor:pointer;
+    color:#b7afe8; border-radius:12px;
+  }
+  .eye:hover{ color:var(--ink); }
+  .eye:focus-visible{ outline:3px solid var(--focus); outline-offset:-3px; border-radius:12px; }
+
+  /* ===== Ligne se souvenir / oublié ===== */
+  .row-between{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px; margin:6px 2px 20px;
+  }
+  .remember{
+    display:inline-flex; align-items:center; gap:10px;
+    cursor:pointer; font-size:13.5px; color:var(--ink-soft); font-weight:600;
+    user-select:none; min-height:var(--tap); padding:4px 4px 4px 0; /* zone tactile élargie */
+  }
+  .remember input{ position:absolute; opacity:0; width:0; height:0; }
+  .box{
+    width:24px; height:24px; border-radius:7px; flex:0 0 auto;
+    background:var(--field);
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.5), inset 0 0 0 1.5px var(--field-line);
+    display:grid; place-items:center;
+    transition:all .15s ease;
+  }
+  .box svg{ opacity:0; transform:scale(.5); transition:all .15s cubic-bezier(.34,1.56,.64,1); color:#1a1340; }
+  .remember input:checked + .box{
+    background:linear-gradient(180deg, var(--gold), var(--gold-deep));
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.6), 0 2px 5px rgba(0,0,0,.35);
+  }
+  .remember input:checked + .box svg{ opacity:1; transform:scale(1); }
+  /* Focus visible net sur la case (anneau doré) */
+  .remember input:focus-visible + .box{ outline:3px solid var(--focus); outline-offset:3px; }
+  .link{
+    color:#bdb6ff; text-decoration:underline; text-underline-offset:2px; /* lien repérable même sans couleur */
+    font-weight:700; font-size:13.5px;
+    display:inline-flex; align-items:center; min-height:var(--tap); padding:4px 2px; border-radius:8px;
+  }
+  .link:hover{ color:#d8d4ff; }
+  .link:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+
+  /* ===== CTA : gros bouton plastique 3D ===== */
+  .cta{
+    width:100%;
+    height:58px;
+    border:0; cursor:pointer;
+    border-radius:17px;
+    font-family:inherit; font-size:18px; font-weight:800; letter-spacing:.2px;
+    color:#fff;
+    background:linear-gradient(180deg, var(--indigo-lite) 0%, var(--indigo) 55%, var(--indigo-deep) 100%);
+    /* Épaisseur plastique : arête haute claire + tranche foncée dessous */
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,.55),
+      inset 0 -4px 8px rgba(0,0,0,.28),
+      0 7px 0 var(--indigo-darker),                 /* la tranche 3D */
+      0 12px 20px rgba(74,63,201,.5);
+    text-shadow:0 2px 1px rgba(0,0,0,.3);
+    transform:translateY(0);
+    transition:transform .08s cubic-bezier(.34,1.56,.64,1), box-shadow .08s ease;
+  }
+  .cta:hover{ filter:brightness(1.04); }
+  /* S'enfonce au clic : le moment satisfaisant */
+  .cta:active{
+    transform:translateY(5px);
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,.45),
+      inset 0 -2px 6px rgba(0,0,0,.3),
+      0 2px 0 var(--indigo-darker),
+      0 5px 10px rgba(74,63,201,.45);
+  }
+  .cta:focus-visible{ outline:3px solid var(--focus); outline-offset:3px; }
+
+  /* Lien discret code par email */
+  .code-link{
+    display:flex; align-items:center; justify-content:center;
+    text-align:center; margin:10px auto 4px;
+    color:var(--ink-soft); font-size:13.5px; font-weight:600;
+    text-decoration:none; padding:8px; min-height:var(--tap); border-radius:10px;
+  }
+  .code-link span{ color:#bdb6ff; text-decoration:underline; text-underline-offset:2px; }
+  .code-link:hover span{ color:#fff; }
+  .code-link:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+
+  /* ===== Séparateur ===== */
+  .sep{
+    display:flex; align-items:center; gap:12px;
+    margin:6px 0 16px; color:var(--ink-mute); font-size:12px; font-weight:700;
+    text-transform:uppercase; letter-spacing:1px;
+  }
+  .sep::before, .sep::after{
+    content:""; flex:1; height:2px; border-radius:2px;
+    background:linear-gradient(90deg, transparent, rgba(124,111,224,.4), transparent);
+  }
+
+  /* ===== 3 boutons démo = mini-cartes de jeu ===== */
+  .demos{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+  }
+  .demo{
+    display:flex; flex-direction:column; align-items:center; gap:7px;
+    padding:13px 6px 11px;
+    min-height:var(--tap);
+    border:0; cursor:pointer;
+    border-radius:16px;
+    background:linear-gradient(180deg, #3a2f72 0%, #2c2360 100%);
+    color:var(--ink);
+    font-family:inherit; font-size:12.5px; font-weight:700;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,.16),
+      0 4px 0 #1b143f,
+      0 7px 12px rgba(0,0,0,.35);
+    transition:transform .08s ease, box-shadow .08s ease;
+  }
+  .demo:hover{ filter:brightness(1.06); }
+  .demo:active{
+    transform:translateY(3px);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.14), 0 1px 0 #1b143f, 0 3px 7px rgba(0,0,0,.3);
+  }
+  .demo:focus-visible{ outline:3px solid var(--focus); outline-offset:3px; }
+  .demo .badge{
+    width:36px; height:36px; border-radius:11px;
+    display:grid; place-items:center;
+    background:linear-gradient(180deg, var(--indigo-lite), var(--indigo-deep));
+    box-shadow:inset 0 2px 2px rgba(255,255,255,.4), 0 2px 4px rgba(0,0,0,.3);
+    color:#fff;
+  }
+  /* Teinte dorée pour le gérant (rôle "premium") */
+  .demo.is-gold .badge{
+    background:linear-gradient(180deg, var(--gold), var(--gold-deep));
+    color:#3a2600;
+  }
+
+  /* ===== Footer ===== */
+  .foot{
+    margin-top:18px; text-align:center;
+    font-size:13.5px; color:var(--ink-soft); font-weight:600;
+  }
+  .foot a{
+    color:var(--gold); font-weight:700; text-decoration:underline; text-underline-offset:2px;
+    display:inline-flex; min-height:var(--tap); align-items:center; padding:2px 4px; border-radius:8px;
+  }
+  .foot a:hover{ color:#ffe39a; }
+  .foot a:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+
+  .version{
+    position:fixed; right:14px; bottom:12px; z-index:2;
+    font-size:11px; font-weight:700; color:var(--ink-mute);
+    letter-spacing:.3px;
+  }
+
+  /* ===== Respect des préférences de mouvement ===== */
+  @media (prefers-reduced-motion: reduce){
+    #sparks{ display:none; }                 /* coupe les étincelles */
+    .card{ transform:none !important; }      /* coupe le tilt */
+    /* coupe TOUTE anim + transitions longues, pseudo-éléments inclus (pulse vert) */
+    *, *::before, *::after{
+      animation:none !important;
+      transition:none !important;
+    }
+    .emblem::before{ transform:scale(1); opacity:.7; } /* halo vert figé, lisible */
+  }
+
+  /* ===== Contraste renforcé : on durcit les bordures et le texte muted ===== */
+  @media (prefers-contrast: more){
+    :root{ --ink-soft:#e4e1f7; --ink-mute:#cfcaee; --field-line:#8a7ed0; }
+    .input-shell{ box-shadow:inset 0 0 0 2px var(--field-line); }
+    .demo, .cta{ outline:1px solid rgba(255,255,255,.4); }
+    .link, .code-link span, .foot a{ text-decoration-thickness:2px; }
+  }
+
+  /* ===== Mode contrastes forcés (Windows High Contrast) : bordures garanties ===== */
+  @media (forced-colors: active){
+    .card{ border:1px solid CanvasText; }
+    .input-shell{ border:1px solid CanvasText; box-shadow:none; }
+    .cta, .demo{ border:2px solid ButtonText; box-shadow:none; }
+    .box{ border:1px solid CanvasText; }
+    .remember input:checked + .box{ background:Highlight; }
+    /* le focus système reste visible (ne pas l'écraser) */
+    :focus-visible{ outline:2px solid Highlight !important; }
+    .emblem img{ filter:none; }
+  }
+
+  /* Petits écrans : on resserre */
+  @media (max-width:360px){
+    .card{ padding:26px 20px 22px; }
+    h1.title{ font-size:23px; }
+    .demo{ font-size:11.5px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Étincelles dorées en fond -->
+  <canvas id="sparks" aria-hidden="true"></canvas>
+
+  <main class="scene">
+    <form class="card" id="card" autocomplete="on" novalidate>
+
+      <!-- En-tête : badge vert = seule marque, centré -->
+      <div class="head">
+        <!-- Emblème HÉRO : badge hexagonal vert « feu vert / GO » -->
+        <div class="emblem">
+          <img src="../public/skins/avatars/permigo-badge-icon.png" alt="PermiGo"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='grid';" />
+          <span class="emblem-fallback" aria-hidden="true"><b>P</b></span>
+        </div>
+        <h1 class="title">Content de te revoir</h1>
+        <p class="subtitle">Élève, moniteur ou gérant — retrouve ton espace.</p>
+      </div>
+
+      <!-- Email -->
+      <div class="field">
+        <label for="email">Email</label>
+        <div class="input-shell">
+          <span class="ico" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3 7 9 6 9-6"/>
+            </svg>
+          </span>
+          <input id="email" name="email" type="email" inputmode="email"
+                 autocomplete="email" placeholder="vous@exemple.fr" />
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="field">
+        <label for="pwd">Mot de passe</label>
+        <div class="input-shell">
+          <span class="ico" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+            </svg>
+          </span>
+          <input id="pwd" name="password" type="password"
+                 autocomplete="current-password" placeholder="••••••••" />
+          <button type="button" class="eye" id="eye" aria-label="Afficher le mot de passe" aria-pressed="false">
+            <!-- œil ouvert (par défaut) -->
+            <svg id="eyeOpen" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+            <!-- œil barré (caché par défaut) -->
+            <svg id="eyeOff" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+              <path d="M9.9 4.2A10.8 10.8 0 0 1 12 4c6.5 0 10 7 10 7a18 18 0 0 1-3 3.7M6.6 6.6A18 18 0 0 0 2 11s3.5 7 10 7a10.8 10.8 0 0 0 4.1-.8"/><path d="m9.5 9.5a3 3 0 0 0 4.2 4.2"/><path d="M2 2l20 20"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Se souvenir + oublié -->
+      <div class="row-between">
+        <label class="remember">
+          <input type="checkbox" name="remember" />
+          <span class="box" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          Se souvenir de moi
+        </label>
+        <a class="link" href="#">Mot de passe oublié ?</a>
+      </div>
+
+      <!-- CTA plastique 3D -->
+      <button type="submit" class="cta">Se connecter</button>
+
+      <!-- Lien discret : code par email -->
+      <a class="code-link" href="#">Recevoir un <span>code par email</span></a>
+
+      <!-- Séparateur démo -->
+      <div class="sep">Comptes démo</div>
+
+      <!-- 3 mini-cartes de jeu -->
+      <div class="demos">
+        <button type="button" class="demo" aria-label="Démo Élève">
+          <span class="badge" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          </span>
+          Élève
+        </button>
+        <button type="button" class="demo" aria-label="Démo Enseignant">
+          <span class="badge" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/></svg>
+          </span>
+          Enseignant
+        </button>
+        <button type="button" class="demo is-gold" aria-label="Démo Gérant">
+          <span class="badge" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l4 3 5-6 5 6 4-3-2 11H5L3 8Z"/></svg>
+          </span>
+          Gérant
+        </button>
+      </div>
+
+      <!-- Footer -->
+      <p class="foot">Élève avec un code moniteur ? <a href="#">Rejoins ton moniteur</a></p>
+    </form>
+  </main>
+
+  <span class="version">PermiGo · v7</span>
+
+<script>
+  /* ====== Préférence de mouvement ====== */
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ====== Afficher / masquer le mot de passe ====== */
+  const eye = document.getElementById('eye');
+  const pwd = document.getElementById('pwd');
+  const eyeOpen = document.getElementById('eyeOpen');
+  const eyeOff = document.getElementById('eyeOff');
+  eye.addEventListener('click', () => {
+    const show = pwd.type === 'password';
+    pwd.type = show ? 'text' : 'password';
+    eyeOpen.style.display = show ? 'none' : 'block';
+    eyeOff.style.display  = show ? 'block' : 'none';
+    eye.setAttribute('aria-pressed', String(show));
+    eye.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+  });
+
+  /* ====== Empêcher l'envoi réel (mockup) ====== */
+  document.getElementById('card').addEventListener('submit', (e) => e.preventDefault());
+
+  /* ====== Léger tilt 3D de la carte au mouvement souris (désactivé en reduced-motion) ====== */
+  if (!reduceMotion && window.matchMedia('(pointer:fine)').matches) {
+    const card = document.getElementById('card');
+    const MAX = 5; // degrés max, subtil
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;   // -0.5 → 0.5
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform =
+        `rotateY(${px * MAX}deg) rotateX(${-py * MAX}deg) translateZ(0)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  }
+
+  /* ====== Étincelles dorées discrètes (canvas) ====== */
+  if (!reduceMotion) {
+    const cv = document.getElementById('sparks');
+    const ctx = cv.getContext('2d');
+    let w, h, dots = [];
+    const GOLD = ['#ffce4d', '#ffe39a', '#ffd76b'];
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = cv.width = innerWidth * dpr;
+      h = cv.height = innerHeight * dpr;
+      cv.style.width = innerWidth + 'px';
+      cv.style.height = innerHeight + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // ~26 étincelles, densité douce
+      const n = Math.round(innerWidth * innerHeight / 42000);
+      dots = Array.from({ length: Math.max(16, Math.min(n, 40)) }, () => ({
+        x: Math.random() * innerWidth,
+        y: Math.random() * innerHeight,
+        r: Math.random() * 1.6 + 0.5,
+        vy: Math.random() * 0.25 + 0.06,   // dérive lente vers le haut
+        a: Math.random() * Math.PI * 2,    // phase de scintillement
+        sp: Math.random() * 0.03 + 0.012,  // vitesse de scintillement
+        c: GOLD[(Math.random() * GOLD.length) | 0]
+      }));
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      for (const d of dots) {
+        d.y -= d.vy;
+        d.a += d.sp;
+        if (d.y < -5) { d.y = innerHeight + 5; d.x = Math.random() * innerWidth; }
+        const glow = (Math.sin(d.a) + 1) / 2;          // 0 → 1
+        ctx.globalAlpha = 0.15 + glow * 0.5;
+        ctx.fillStyle = d.c;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = d.c;
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+      requestAnimationFrame(tick);
+    }
+
+    resize();
+    addEventListener('resize', resize);
+    requestAnimationFrame(tick);
+  }
+</script>
+</body>
+</html>
