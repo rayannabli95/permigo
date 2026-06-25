@@ -1740,6 +1740,11 @@ async function mountEleveArene(root, me) {
   <div class="arn-set">
     <p class="arn-set-title">Réglages</p>
     <div class="arn-set-list">
+      <a class="arn-row" href="#/notifications">
+        <span class="arn-row-ico">${icon("inbox", { size: 19 })}</span>
+        <span class="arn-row-lab">Mes notifications<small>Validations, encouragements, comptes-rendus</small></span>
+        <span class="arn-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
       ${
         notifSupported
           ? `
