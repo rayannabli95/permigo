@@ -751,26 +751,35 @@ const STYLE = `<style>
   color: #5a2fa0;
 }
 
-/* ── Bouton toggle thème ── */
-.prc-cv-theme-btn {
+/* ── Sélecteur d'affichage clair / sombre (deux segments visibles) ── */
+.prc-cv-themesw {
   flex: 0 0 auto;
-  width: 36px; height: 36px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  border: 1.5px solid rgba(168,85,247,.3);
+  display: inline-flex; gap: 3px; padding: 3px;
+  border-radius: 999px;
   background: rgba(42,27,82,.5);
-  color: #cdbff5;
-  cursor: pointer;
-  transition: background .18s, border-color .18s, transform .12s;
-  -webkit-tap-highlight-color: transparent;
+  border: 1.5px solid rgba(168,85,247,.28);
 }
-.prc-cv-theme-btn::after { content: ""; position: absolute; inset: -6px; }
-.prc-cv-theme-btn:active { transform: scale(.9); }
-.prc-cv-theme-btn:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
-/* Version claire du bouton */
-.prc-cv.is-light .prc-cv-theme-btn {
-  background: rgba(124,77,255,.1);
-  border-color: rgba(124,77,255,.28);
-  color: #5a2fa0;
+.prc-cv-th-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 11px; border: 0; border-radius: 999px;
+  background: transparent; color: #cdbff5;
+  font: 800 12px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background .15s, color .15s, transform .12s;
+}
+.prc-cv-th-btn svg { width: 15px; height: 15px; }
+.prc-cv-th-btn.on { background: linear-gradient(180deg, #8b5cf6, #7c3aed); color: #fff; }
+.prc-cv-th-btn:not(.on):active { transform: scale(.95); }
+.prc-cv-th-btn:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
+/* Version claire du sélecteur */
+.prc-cv.is-light .prc-cv-themesw {
+  background: rgba(124,77,255,.08);
+  border-color: rgba(124,77,255,.25);
+}
+.prc-cv.is-light .prc-cv-th-btn { color: #7c5ab8; }
+.prc-cv.is-light .prc-cv-th-btn.on {
+  background: #fff; color: #5a2fa0;
+  box-shadow: 0 1px 4px rgba(124,77,255,.25);
 }
 
 /* scrollable inner */
@@ -1436,38 +1445,36 @@ export async function mount(root) {
     // double rAF + fonts.ready + ResizeObserver).
     scheduleRoadLayout(root);
 
-    // ── Toggle thème clair / sombre ─────────────────────────────────
-    // Applique le thème mémorisé dès le rendu (défaut = "light").
+    // ── Sélecteur d'affichage clair / sombre (deux modes de vision) ──
+    // Défaut = "dark" : le mode le plus lisible sur l'itinéraire (validé
+    // produit). Le sélecteur 2 segments rend les deux modes explicites.
     const cvRoot = root.querySelector(".prc-cv");
     const applyTheme = (theme) => {
       if (!cvRoot) return;
-      if (theme === "light") {
-        cvRoot.classList.add("is-light");
-      } else {
-        cvRoot.classList.remove("is-light");
-      }
-      const btn = root.querySelector("#prc-theme-toggle");
-      if (!btn) return;
       const isL = theme === "light";
-      btn.setAttribute("aria-pressed", String(isL));
-      btn.setAttribute(
-        "aria-label",
-        isL ? "Passer en mode sombre" : "Passer en mode clair",
-      );
-      const ICO_SUN_BTN = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
-      const ICO_MOON_BTN = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-      btn.innerHTML = isL ? ICO_MOON_BTN : ICO_SUN_BTN;
+      cvRoot.classList.toggle("is-light", isL);
+      root.querySelectorAll(".prc-cv-th-btn[data-prc-theme]").forEach((b) => {
+        const on = b.dataset.prcTheme === theme;
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", String(on));
+      });
     };
-    const savedTheme =
-      localStorage.getItem("permigo_parcours_theme") ?? "light";
+    const savedTheme = localStorage.getItem("permigo_parcours_theme") ?? "dark";
     applyTheme(savedTheme);
-    root.querySelector("#prc-theme-toggle")?.addEventListener("click", () => {
-      const current = cvRoot?.classList.contains("is-light") ? "light" : "dark";
-      const next = current === "light" ? "dark" : "light";
-      localStorage.setItem("permigo_parcours_theme", next);
-      track("parcours.theme_toggle", { theme: next });
-      applyTheme(next);
-    });
+    root.querySelectorAll(".prc-cv-th-btn[data-prc-theme]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const theme = b.dataset.prcTheme;
+        // déjà actif → rien à faire
+        if (
+          !theme ||
+          cvRoot?.classList.contains("is-light") === (theme === "light")
+        )
+          return;
+        localStorage.setItem("permigo_parcours_theme", theme);
+        track("parcours.theme_toggle", { theme });
+        applyTheme(theme);
+      }),
+    );
 
     // Navigation entre chapitres (stepper + carte chapitre suivant)
     root
@@ -2088,7 +2095,7 @@ function renderChapterView(
   const ICO_SUN = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
   const ICO_MOON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const isLightNow =
-    (localStorage.getItem("permigo_parcours_theme") ?? "light") === "light";
+    (localStorage.getItem("permigo_parcours_theme") ?? "dark") === "light";
   const chapNav = `
     <div class="prc-cv-chapnav" role="tablist" aria-label="Chapitres du parcours">
       ${worldStates
@@ -2111,12 +2118,10 @@ function renderChapterView(
         })
         .join("")}
     </div>
-    <button id="prc-theme-toggle" class="prc-cv-theme-btn"
-      type="button"
-      aria-pressed="${isLightNow}"
-      aria-label="${isLightNow ? "Passer en mode sombre" : "Passer en mode clair"}">
-      ${isLightNow ? ICO_MOON : ICO_SUN}
-    </button>`;
+    <div class="prc-cv-themesw" role="group" aria-label="Affichage : clair ou sombre">
+      <button class="prc-cv-th-btn ${isLightNow ? "" : "on"}" data-prc-theme="dark" type="button" aria-pressed="${!isLightNow}">${ICO_MOON}<span>Sombre</span></button>
+      <button class="prc-cv-th-btn ${isLightNow ? "on" : ""}" data-prc-theme="light" type="button" aria-pressed="${isLightNow}">${ICO_SUN}<span>Clair</span></button>
+    </div>`;
 
   // ── Coffre du chapitre : la récompense, débloquée quand le boss tombe ──
   const chestWorldNum = meta?.num ?? currentIdx + 1;
