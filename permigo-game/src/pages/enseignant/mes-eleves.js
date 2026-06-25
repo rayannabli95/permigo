@@ -327,6 +327,49 @@ const STYLE = `<style>
 
   /* FAB « Séance » retiré ici : le FAB global #bn-seance-fab (nav-bottom)
      est déjà monté pour l'enseignant sur toutes ses pages. */
+
+  /* ── Hero « à traiter en priorité » (indigo premium, raccord mockup) ── */
+  .me-prio {
+    position: relative; overflow: hidden; margin: 0 0 16px;
+    border-radius: 18px; padding: 15px 16px; cursor: pointer;
+    background: linear-gradient(135deg, #4f46e5 0%, #6d5ef0 55%, #7c4dff 100%);
+    color: #fff; -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 16px 34px -16px rgba(79,70,229,.7), inset 0 1px 0 rgba(255,255,255,.18);
+    transition: transform .14s var(--ease-spring, ease);
+  }
+  .me-prio:active { transform: scale(.99); }
+  .me-prio::before { content: ''; position: absolute; right: -30px; top: -42px; width: 168px; height: 168px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%); pointer-events: none; }
+  .me-prio-kick { display: inline-flex; align-items: center; gap: 6px; font: 800 9.5px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.82); margin-bottom: 11px; position: relative; z-index: 1; }
+  .me-prio-kick .d { width: 6px; height: 6px; border-radius: 50%; background: #ffd24a; box-shadow: 0 0 8px #ffd24a; }
+  .me-prio-top { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+  .me-prio-av { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(255,255,255,.5); overflow: hidden; }
+  .me-prio-id { flex: 1; min-width: 0; }
+  .me-prio-name { font: 800 17px/1.15 'Manrope', 'Plus Jakarta Sans', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .me-prio-state { display: inline-flex; align-items: center; margin-top: 5px; font: 700 11px/1 'Inter', sans-serif; color: #fff; background: rgba(255,255,255,.18); padding: 4px 10px; border-radius: 999px; }
+  .me-prio-pct { flex-shrink: 0; text-align: right; }
+  .me-prio-pct b { font: 800 22px/1 'Manrope', sans-serif; letter-spacing: -.02em; }
+  .me-prio-pct span { display: block; font: 600 9.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.75); text-transform: uppercase; letter-spacing: .06em; margin-top: 3px; }
+  .me-prio-bar { position: relative; z-index: 1; height: 7px; margin-top: 12px; border-radius: 99px; background: rgba(255,255,255,.2); overflow: hidden; }
+  .me-prio-bar > i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #ffd24a, #fff); box-shadow: 0 0 8px rgba(255,210,74,.5); }
+  .me-prio-cta { display: inline-flex; align-items: center; gap: 6px; margin-top: 13px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 11px; background: #fff; color: #4f46e5; font: 800 13px/1 'Inter', sans-serif; cursor: pointer; position: relative; z-index: 1; box-shadow: 0 4px 0 rgba(255,255,255,.4); transition: transform .1s; }
+  .me-prio-cta:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(255,255,255,.4); }
+
+  /* ── Tri segmenté (Par état / Nom / Progrès / Compétences) ── */
+  .me-seg { display: flex; gap: 4px; padding: 4px; margin: 0 0 14px; background: #eef0f6; border-radius: 13px; }
+  .me-seg-btn { flex: 1; min-height: 40px; padding: 8px 4px; border: 0; border-radius: 10px; background: transparent; color: #6b7095; font: 700 12px/1 'Inter', sans-serif; cursor: pointer; transition: background .15s, color .15s, box-shadow .15s, transform .1s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  .me-seg-btn.on { background: #fff; color: #4f46e5; box-shadow: 0 2px 6px -2px rgba(60,50,130,.25); }
+  .me-seg-btn:active { transform: scale(.96); }
+  .me-seg-btn:focus-visible { outline: 2px solid #4f46e5; outline-offset: 1px; }
+
+  /* ── Pastille d'état sur une ligne (vue triée à plat) ── */
+  .me-pill { flex-shrink: 0; font: 700 10.5px/1 'Inter', sans-serif; padding: 4px 9px; border-radius: 999px; }
+  .me-pill--pret  { color: #15803d; background: #dcfce7; }
+  .me-pill--appr  { color: #b45309; background: #fef3c7; }
+  .me-pill--rel   { color: #b91c1c; background: #fee2e2; }
+  .me-pill--cours { color: #4b5563; background: #eef0f6; }
+  .me-pill--prevu { color: #1d4ed8; background: #dbeafe; }
+  .me-pill--repass{ color: #c2410c; background: #ffedd5; }
+  .me-pill--recu  { color: #7c3aed; background: #ede9fe; }
 </style>`;
 
 const INACTIF_SEUIL_MS = 14 * 86400000; // 14 jours
@@ -395,6 +438,7 @@ let _root = null;
 let _me = null;
 let _eleves = []; // { id, prenom, nom, acquis, total, actif }
 let _query = "";
+let _sort = "etat"; // 'etat' (pipeline) | 'nom' | 'progres' | 'comp'
 let _drillComp = null; // competence_id si mode drill bloque_sur
 
 // ─── Entry point ─────────────────────────────────────────────────
@@ -411,6 +455,7 @@ export async function mount(root) {
   if (!_me) return;
 
   _query = "";
+  _sort = "etat";
   _drillComp = null;
 
   // Lire le param bloque_sur depuis le hash URL (#/eleves?bloque_sur=C2a)
@@ -499,17 +544,28 @@ async function loadData() {
   //    élève suivi par un collègue). RLS partage déjà les validations école.
   const { data: valsRaw, error: e2 } = await sb
     .from("validations")
-    .select("eleve_id, competence_id")
+    .select("eleve_id, competence_id, validated_at")
     .eq("statut", "acquis");
 
   if (e2) console.error("[mes-eleves] validations query error", e2);
 
   // Map : eleve_id → Set des competence_id acquis (total école).
   // Le Set alimente à la fois le count et la liste des compétences manquantes.
+  // recentByEleve = nb de validations sur les 21 derniers jours → alimente le
+  // tri « Progrès récent » (réel : des validations datées, pas l'activité app).
+  const RECENT_MS = 21 * 86400000;
+  const nowRecent = Date.now();
   const acquisSetByEleve = {};
+  const recentByEleve = {};
   (valsRaw || []).forEach((v) => {
     if (!v.competence_id) return;
     (acquisSetByEleve[v.eleve_id] ||= new Set()).add(v.competence_id);
+    if (
+      v.validated_at &&
+      nowRecent - new Date(v.validated_at).getTime() <= RECENT_MS
+    ) {
+      recentByEleve[v.eleve_id] = (recentByEleve[v.eleve_id] || 0) + 1;
+    }
   });
 
   // 3. Dernier examen par élève (le plus récent fait foi).
@@ -550,6 +606,7 @@ async function loadData() {
         ...e,
         acquis,
         acquisSet,
+        recentAcquis: recentByEleve[e.id] || 0,
         total: REMC_TOTAL,
         actif,
         idx: i,
@@ -693,6 +750,8 @@ function render() {
 
       <div class="me-body">
 
+      ${renderPrio()}
+
       <div class="me-search-wrap">
         <span class="me-search-ico">${icon("search", { size: 15, strokeWidth: 2, color: "#a0a6b4" })}</span>
         <input
@@ -706,14 +765,128 @@ function render() {
         <button class="me-search-clear${_query ? " visible" : ""}" id="me-search-clear" type="button" aria-label="Effacer la recherche">x</button>
       </div>
 
+      <div class="me-seg" id="me-seg" role="tablist" aria-label="Trier les élèves">
+        <button class="me-seg-btn ${_sort === "etat" ? "on" : ""}" data-sort="etat" type="button">Par état</button>
+        <button class="me-seg-btn ${_sort === "nom" ? "on" : ""}" data-sort="nom" type="button">Nom</button>
+        <button class="me-seg-btn ${_sort === "progres" ? "on" : ""}" data-sort="progres" type="button">Progrès</button>
+        <button class="me-seg-btn ${_sort === "comp" ? "on" : ""}" data-sort="comp" type="button">Compétences</button>
+      </div>
+
       <div class="me-pipeline" id="me-pipeline">
-        ${renderPipeline()}
+        ${renderContent()}
       </div>
 
       </div><!-- /.me-body -->
     </div><!-- /.me-page -->
 
   `;
+}
+
+// ─── État → pastille (vue triée à plat) ──────────────────────────
+const READINESS_PILL = {
+  pret: { cls: "pret", label: "Prêt" },
+  en_approche: { cls: "appr", label: "En approche" },
+  planifie: { cls: "prevu", label: "Examen prévu" },
+  rate: { cls: "repass", label: "À repasser" },
+  recu: { cls: "recu", label: "Reçu" },
+  en_cours: { cls: "cours", label: "En cours" },
+};
+function pillFor(e) {
+  // « à relancer » prime sur l'état de progression (sauf examen terminal)
+  if (
+    e.aRelancer &&
+    e.readiness !== "recu" &&
+    e.readiness !== "rate" &&
+    e.readiness !== "planifie"
+  ) {
+    return {
+      cls: "rel",
+      label:
+        e.joursInactif != null ? `Inactif ${e.joursInactif} j` : "À relancer",
+    };
+  }
+  return READINESS_PILL[e.readiness] || READINESS_PILL.en_cours;
+}
+
+// ─── Hero « à traiter en priorité » ──────────────────────────────
+// Surface l'élève le plus actionnable : prêt (pour proposer l'examen) →
+// sinon le plus refroidi à relancer → sinon le plus avancé en approche.
+function renderPrio() {
+  const roster = _eleves.filter((e) => e.readiness !== "recu");
+  const pret = roster.filter((e) => e.readiness === "pret" && !e.aRelancer);
+  const relancer = roster
+    .filter((e) => e.aRelancer)
+    .sort((a, b) => (b.joursInactif || 0) - (a.joursInactif || 0));
+  const approche = roster
+    .filter((e) => e.readiness === "en_approche")
+    .sort((a, b) => b.acquis - a.acquis);
+  const cand = pret[0] || relancer[0] || approche[0] || null;
+  if (!cand) return "";
+  const p = pillFor(cand);
+  const pct = Math.round((100 * cand.acquis) / cand.total);
+  const nm = esc(
+    fmtName([cand.prenom, cand.nom].filter(Boolean).join(" ")) || "—",
+  );
+  const cta = cand.aRelancer ? "Ouvrir sa fiche" : "Voir son livret";
+  return `
+    <div class="me-prio" data-prio-id="${esc(cand.id)}" role="button" tabindex="0"
+         aria-label="À traiter en priorité : ${nm}, ${esc(p.label)}, ${pct}% des compétences">
+      <div class="me-prio-kick"><span class="d" aria-hidden="true"></span>À traiter en priorité</div>
+      <div class="me-prio-top">
+        <div class="me-prio-av">${renderUserAvatar({ avatar_url: cand.avatar_url, prenom: cand.prenom, nom: cand.nom }, 46)}</div>
+        <div class="me-prio-id">
+          <div class="me-prio-name">${nm}</div>
+          <span class="me-prio-state">${esc(p.label)}</span>
+        </div>
+        <div class="me-prio-pct"><b>${pct}%</b><span>compétences</span></div>
+      </div>
+      <div class="me-prio-bar"><i style="width:${pct}%"></i></div>
+      <button class="me-prio-cta" id="me-prio-cta" type="button">${cta} →</button>
+    </div>`;
+}
+
+// ─── Contenu : pipeline (par état) ou liste triée à plat ─────────
+function renderContent() {
+  return _sort === "etat" ? renderPipeline() : renderRosterFlat();
+}
+
+// Liste à plat triée (Nom / Progrès récent / % compétences) — réutilise les
+// lignes du pipeline (wireRows reste valable), avec une pastille d'état.
+function renderRosterFlat() {
+  const q = _query.toLowerCase().trim();
+  const match = (e) =>
+    !q ||
+    (e.prenom || "").toLowerCase().includes(q) ||
+    (e.nom || "").toLowerCase().includes(q);
+  let list = _eleves.filter(match);
+
+  if (list.length === 0 && _eleves.length === 0) {
+    return `<div class="me-empty">
+      <span class="me-empty-ico">${illus("school", { size: 80 })}</span>
+      <strong style="font:800 16px/1.2 'Manrope',sans-serif;color:#1a1f2b">Aucun élève pour l'instant</strong>
+      <button id="me-invite-empty-btn" class="ens-btn ens-btn--go" type="button" style="margin-top:4px;min-height:48px;padding:0 24px;font-size:14px;">
+        ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
+      </button>
+    </div>`;
+  }
+  if (list.length === 0 && q) {
+    return `<div class="me-empty"><span class="me-empty-ico">${illus("route", { size: 64 })}</span>Aucun résultat pour <strong>"${esc(_query)}"</strong>.</div>`;
+  }
+
+  if (_sort === "nom") {
+    list = [...list].sort((a, b) =>
+      (a.prenom || "").localeCompare(b.prenom || "", "fr"),
+    );
+  } else if (_sort === "comp") {
+    list = [...list].sort((a, b) => b.acquis - a.acquis);
+  } else {
+    // progrès récent (validations 21 j), avancement global en départage
+    list = [...list].sort(
+      (a, b) =>
+        (b.recentAcquis || 0) - (a.recentAcquis || 0) || b.acquis - a.acquis,
+    );
+  }
+  return `<div class="me-band" role="list">${list.map((e) => renderBandRow(e, true)).join("")}</div>`;
 }
 
 // ─── Pipeline segmenté ───────────────────────────────────────────
@@ -830,7 +1003,7 @@ function renderPipeline() {
 /**
  * Ligne d'un élève dans une bande du pipeline.
  */
-function renderBandRow(eleve) {
+function renderBandRow(eleve, withPill = false) {
   const fullNom = esc(
     fmtName([eleve.prenom, eleve.nom].filter(Boolean).join(" ")) || "—",
   );
@@ -853,11 +1026,21 @@ function renderBandRow(eleve) {
     rightLabel = `${eleve.acquis}/${eleve.total}`;
   }
 
+  // Vue triée à plat : pastille d'état + valeur droite = avancement X/31.
+  let pillHtml = "";
+  if (withPill) {
+    const p = pillFor(eleve);
+    pillHtml = `<span class="me-pill me-pill--${p.cls}">${esc(p.label)}</span>`;
+    rightLabel = `${eleve.acquis}/${eleve.total}`;
+    rightClass = "me-pr";
+  }
+
   return `
     <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="listitem button" tabindex="0"
          aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "recu" ? ", examen reussi" : eleve.readiness === "rate" ? ", examen a repasser" : eleve.readiness === "planifie" ? ", examen prevu" : eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
       <span class="me-nom">${fullNom}</span>
+      ${pillHtml}
       <span class="${rightClass}">${esc(rightLabel)}</span>
       <button class="me-more" data-more type="button"
               aria-label="Actions rapides pour ${fullNom}">${icon("more-vertical", { size: 16, strokeWidth: 2 })}</button>
@@ -875,6 +1058,46 @@ function wire() {
     track("mes_eleves.classement.click");
     navigate("#/classement-eleves");
   });
+
+  // Tri segmenté (Par état / Nom / Progrès / Compétences)
+  _root.querySelectorAll("#me-seg .me-seg-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const s = btn.dataset.sort;
+      if (s === _sort) return;
+      _sort = s;
+      haptic("tap");
+      track("mes_eleves.sort", { sort: s });
+      _root
+        .querySelectorAll("#me-seg .me-seg-btn")
+        .forEach((b) => b.classList.toggle("on", b.dataset.sort === s));
+      renderList();
+    });
+  });
+
+  // Hero « à traiter en priorité » → fiche/livret de l'élève ciblé
+  const prio = _root.querySelector(".me-prio");
+  if (prio) {
+    const goPrio = () => {
+      const id = prio.dataset.prioId;
+      haptic("impact");
+      track("mes_eleves.prio.open", { eleve_id: id });
+      navigate(`#/livret/${id}`);
+    };
+    prio.addEventListener("click", (e) => {
+      if (e.target.closest("#me-prio-cta")) return;
+      goPrio();
+    });
+    prio.querySelector("#me-prio-cta")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      goPrio();
+    });
+    prio.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        goPrio();
+      }
+    });
+  }
 
   // Bouton CTA dans l'état vide (0 élève)
   _root.querySelector("#me-invite-empty-btn")?.addEventListener("click", () => {
@@ -1502,7 +1725,7 @@ function renderList() {
   const pipelineEl = _root?.querySelector("#me-pipeline");
   if (!pipelineEl) return;
 
-  pipelineEl.innerHTML = renderPipeline();
+  pipelineEl.innerHTML = renderContent();
   wireRows();
 
   // Si l'empty state avec bouton invite vient d'être rendu
