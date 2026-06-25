@@ -110,7 +110,7 @@ export function playUnlockCinematic({
     </div>
 
     <div class="wuc-content" role="dialog" aria-modal="true" aria-labelledby="wuc-title">
-      <div class="wuc-tag">MONDE ${worldNum} TERMINÉ</div>
+      <div class="wuc-tag">CHAPITRE ${worldNum} TERMINÉ</div>
       <h1 class="wuc-title" id="wuc-title">${esc(worldName)}</h1>
       <div class="wuc-sub">Tu as conquis ce monde</div>
 
@@ -130,7 +130,7 @@ export function playUnlockCinematic({
           ? `
         <button class="wuc-cta" id="wuc-cta" type="button">
           <span class="wuc-cta-top">
-            <span class="wuc-cta-lbl">ENTRER DANS LE MONDE ${nextWorldNum}</span>
+            <span class="wuc-cta-lbl">ENTRER DANS LE CHAPITRE ${nextWorldNum}</span>
             <span class="wuc-cta-arrow">→</span>
           </span>
           <span class="wuc-cta-name">${esc(nextWorldName || "")}</span>
@@ -138,7 +138,7 @@ export function playUnlockCinematic({
       `
           : `
         <button class="wuc-cta wuc-cta-final" id="wuc-cta" type="button">
-          <span class="wuc-cta-lbl">${icon("trophy", { size: 18 })} TU AS CONQUIS TOUS LES MONDES</span>
+          <span class="wuc-cta-lbl">${icon("trophy", { size: 18 })} TU AS CONQUIS TOUS LES CHAPITRES</span>
           <span class="wuc-cta-name">Tu es prêt pour l'examen</span>
         </button>
       `
