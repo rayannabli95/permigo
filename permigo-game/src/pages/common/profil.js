@@ -614,6 +614,11 @@ export async function mount(root) {
     return mountEleveArene(root, me);
   }
 
+  // ── Moniteur : profil « Blason pro » (indigo premium) — chemin dédié ──
+  if (me.role === "enseignant") {
+    return mountEnseignantArene(root, me);
+  }
+
   // Skeleton pendant les fetches
   root.innerHTML = `${STYLE}<div class="prf"><div class="skel skel-card" style="height:220px;margin:0 0 10px"></div><div class="skel skel-card" style="height:80px;margin:0 16px 10px"></div><div class="skel skel-card" style="height:140px;margin:0 16px"></div></div>`;
 
@@ -1940,4 +1945,462 @@ function _wireEleveArene(root, me) {
       saveBtn.textContent = "Valider mon nom";
     }
   });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PROFIL MONITEUR — « Blason pro » (INDIGO PREMIUM CLAIR)
+// Même énergie « carte premium » que l'élève, mais univers PRO :
+//   • identité = VRAI NOM (pas de pseudo, pas de modale)
+//   • métrique reine = validations cette année (preuve & autorité)
+//   • « prochain défi » remplacé par MA POSITION (classement réel)
+//   • OR = prestige uniquement (rang, trophées) ; l'indigo domine
+//   • fond CLAIR, cartes blanches premium (univers moniteur)
+// ═══════════════════════════════════════════════════════════════
+function _rankLabel(r) {
+  return r === 1 ? "1<sup>er</sup>" : `${r}<sup>e</sup>`;
+}
+function _ensInitials(prenom, nom) {
+  return (
+    ((prenom || "")[0] || "") + ((nom || "")[0] || "") || "?"
+  ).toUpperCase();
+}
+function _ensAchievements(v, e, s, rank) {
+  return [
+    {
+      img: "trophy-first-validation",
+      name: "1<sup>re</sup> validation",
+      need: v >= 1,
+    },
+    { img: "badge-3d-03", name: "50 validations", need: v >= 50 },
+    { img: "badge-3d-05", name: "100 validations", need: v >= 100 },
+    { img: "trophy-10-comps", name: "10 élèves suivis", need: e >= 10 },
+    { img: "trophy-streak-7d", name: "Série 7 jours", need: s >= 7 },
+    { img: "badge-3d-07", name: "Top 5 du mois", need: rank > 0 && rank <= 5 },
+    { img: "badge-3d-08", name: "250 validations", need: v >= 250 },
+    { img: "trophy-streak-30d", name: "Série 30 jours", need: s >= 30 },
+    { img: "badge-3d-09", name: "25 élèves suivis", need: e >= 25 },
+    { img: "badge-3d-ultimate", name: "N°1 du mois", need: rank === 1 },
+  ].sort((a, b) => (a.need === b.need ? 0 : a.need ? -1 : 1));
+}
+
+const STYLE_ENS = `<style>
+.enp{
+  --ind:#4f46e5; --ind-dk:#3a32c4; --ind-lt:#6d6bff; --ind-pale:#eef0ff; --vio:#8b5cf6;
+  --gd:#f7b32b; --gd-hi:#ffd27a; --gd-dp:#e8a317; --gd-deep:#b5610a; --gd-pale:#ffe6a8; --gd-ink:#5a3a08;
+  --grn:#18a558; --grn-dk:#0f7a3e; --grn-rim:#3fd17a;
+  --c:#fff; --c-soft:#fbfbff;
+  --enk:#1c1b3a; --enk2:#3a3a5c; --enmu:#6f6e92; --enfa:#9a99bb;
+  --enl:#eceaf6; --enl2:#e3e1f2;
+  --oni:#fff; --oni-dim:#d9d8ff; --oni-mu:#b6b4f0;
+  max-width:480px; margin:0 auto; min-height:100dvh; position:relative;
+  padding-top:calc(var(--th, 52px) + env(safe-area-inset-top,0px) + 4px);
+  padding-bottom:calc(var(--bh, 64px) + env(safe-area-inset-bottom,0px) + 28px);
+  color:var(--enk); font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  background:
+    radial-gradient(120% 30% at 50% 0%, rgba(79,70,229,.10), transparent 62%),
+    linear-gradient(180deg,#f7f8ff 0%,var(--bg, #f4f5fb) 22%);
+}
+.enp-h1{font-family:'Fredoka',sans-serif;font-weight:600;font-size:21px;margin:0;padding:2px 22px 0;color:var(--enk)}
+
+/* ── Carte héros (blason pro indigo) ── */
+.enp-hero{position:relative;overflow:hidden;color:var(--oni);margin:14px 16px 0;border-radius:30px;padding:20px 20px 22px;
+  background:
+    radial-gradient(120% 80% at 85% -10%, rgba(139,92,246,.55), transparent 58%),
+    radial-gradient(90% 70% at 8% 110%, rgba(58,50,196,.6), transparent 60%),
+    linear-gradient(155deg,#5b52ff 0%,#4f46e5 42%,#5b3fd6 74%,#3a32c4 100%);
+  box-shadow:0 22px 44px rgba(60,46,180,.40),0 8px 16px rgba(60,46,180,.26),inset 0 1.5px 0 rgba(255,255,255,.30),inset 0 0 0 1.5px rgba(255,255,255,.10)}
+.enp-hero::before{content:"";position:absolute;right:-50px;top:-60px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,122,.30),transparent 66%);pointer-events:none}
+.enp-hero::after{content:"";position:absolute;top:-40%;left:-10%;width:60%;height:120%;background:linear-gradient(120deg,rgba(255,255,255,.16),transparent 60%);transform:rotate(6deg);pointer-events:none}
+.enp-rank{position:relative;z-index:1;display:inline-flex;align-items:center;gap:9px;padding:7px 13px 7px 9px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.06));border:1px solid rgba(255,226,168,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.enp-rank img{width:24px;height:24px;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+.enp-rank .rt{font-size:12px;font-weight:800;color:#fff}
+.enp-rank .rt b{color:var(--gd-hi)}
+.enp-id{position:relative;z-index:1;display:flex;align-items:center;gap:15px;margin-top:16px}
+.enp-crest{position:relative;flex:0 0 auto;width:74px;height:74px}
+.enp-crest-disc{position:absolute;inset:0;border-radius:22px;padding:3px;background:linear-gradient(155deg,#8b7bff,#4f46e5 60%,#3a32c4);box-shadow:0 10px 22px rgba(20,14,80,.45)}
+.enp-crest-disc::after{content:"";position:absolute;inset:-2px;border-radius:24px;border:2px solid transparent;background:linear-gradient(150deg,var(--gd-hi),var(--gd-deep)) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.enp-crest-inner{width:100%;height:100%;border-radius:19px;display:grid;place-items:center;position:relative;overflow:hidden;background:linear-gradient(160deg,#6a5cf0,#3f37c7);font-family:'Fredoka',sans-serif;font-weight:600;font-size:28px;color:#fff;letter-spacing:1px;text-shadow:0 2px 5px rgba(0,0,0,.4);box-shadow:inset 0 3px 9px rgba(0,0,0,.28)}
+.enp-crest-inner::before{content:"";position:absolute;top:-30%;left:-20%;width:80%;height:90%;background:linear-gradient(120deg,rgba(255,255,255,.30),transparent 60%);transform:rotate(8deg)}
+.enp-nm{min-width:0}
+.enp-nm .nn{font-family:'Fredoka',sans-serif;font-weight:600;font-size:25px;line-height:1.05;color:#fff;letter-spacing:.2px;text-shadow:0 1px 2px rgba(20,14,70,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.enp-nm .tg{display:inline-flex;align-items:center;gap:6px;margin-top:7px;padding:4px 11px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase}
+.enp-nm .tg .dot{width:7px;height:7px;border-radius:50%;background:var(--grn-rim);box-shadow:0 0 7px var(--grn-rim)}
+.enp-metric{position:relative;z-index:1;margin-top:18px;display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
+.enp-metric .em-emb{width:46px;height:46px;flex:0 0 auto;border-radius:13px;display:grid;place-items:center;background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 1px rgba(255,226,168,.4)}
+.enp-metric .em-emb img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+.enp-metric .em-num{font-family:'Fredoka',sans-serif;font-weight:700;font-size:42px;color:#fff;line-height:1;text-shadow:0 2px 4px rgba(20,14,70,.3)}
+.enp-metric .em-lab{margin-left:auto;text-align:right}
+.enp-metric .em-lab .l1{font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--gd-hi)}
+.enp-metric .em-lab .l2{font-size:11.5px;font-weight:700;color:var(--oni-dim);margin-top:3px}
+.enp-sub{position:relative;z-index:1;margin-top:13px;display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:var(--oni-dim)}
+.enp-sub svg{width:17px;height:17px;color:#fff;flex:0 0 auto}
+.enp-sub b{color:#fff;font-weight:800}
+
+/* ── Stats (cartes claires) ── */
+.enp-stats{display:flex;gap:11px;margin:18px 16px 0}
+.enp-stat{flex:1;border-radius:20px;padding:16px 8px 14px;text-align:center;background:var(--c);box-shadow:0 8px 18px rgba(60,50,160,.08),inset 0 0 0 1px var(--enl)}
+.enp-s-ico{height:30px;margin:0 auto 8px;display:block}
+.enp-s-num{font-family:'Fredoka',sans-serif;font-weight:700;font-size:23px;color:var(--enk);line-height:1}
+.enp-s-num.gd{color:var(--gd-dp)}
+.enp-s-lab{font-size:10.5px;font-weight:700;color:var(--enmu);margin-top:5px}
+
+/* ── Succès ── */
+.enp-ach{margin:26px 0 0}
+.enp-ach-head{display:flex;align-items:baseline;justify-content:space-between;margin:0 22px 12px}
+.enp-ach-title{font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;color:var(--enk)}
+.enp-ach-count{font-size:11.5px;font-weight:800;color:var(--ind)}
+.enp-ach-scroll{display:flex;gap:13px;overflow-x:auto;padding:4px 18px 16px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.enp-ach-scroll::-webkit-scrollbar{height:0}
+.enp-a{flex:0 0 auto;width:96px;scroll-snap-align:start;text-align:center}
+.enp-medal{position:relative;width:96px;height:96px;border-radius:22px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(180deg,#fff,#f5f5ff);box-shadow:0 8px 18px rgba(60,50,160,.10),inset 0 0 0 1px var(--enl2)}
+.enp-medal img{width:74px;height:74px;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(60,50,160,.20));position:relative;z-index:1}
+.enp-medal::before{content:"";position:absolute;width:66px;height:66px;border-radius:50%;background:radial-gradient(circle,rgba(79,70,229,.16),transparent 70%)}
+.enp-a.locked .enp-medal{background:linear-gradient(180deg,#f3f3f8,#eceaf3);box-shadow:0 5px 12px rgba(60,50,160,.06),inset 0 0 0 1px var(--enl)}
+.enp-a.locked .enp-medal::before{display:none}
+.enp-a.locked .enp-medal img{filter:grayscale(1) brightness(1.05) contrast(.85);opacity:.4}
+.enp-alock{position:absolute;z-index:2;width:30px;height:30px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 2px 5px rgba(60,50,160,.18),inset 0 0 0 1px var(--enl2)}
+.enp-alock svg{width:15px;height:15px;color:var(--enfa)}
+.enp-a-name{font-size:10.5px;font-weight:700;color:var(--enk2);margin-top:9px;line-height:1.25}
+.enp-a.locked .enp-a-name{color:var(--enfa)}
+
+/* ── Ma position ── */
+.enp-rankcard{margin:26px 16px 0;border-radius:24px;padding:18px 18px 16px;background:var(--c);box-shadow:0 12px 28px rgba(60,50,160,.10),inset 0 0 0 1px var(--enl);position:relative;overflow:hidden}
+.enp-rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.enp-rh-l{display:flex;align-items:center;gap:9px}
+.enp-rh-badge{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;background:linear-gradient(160deg,#fff0cf,#ffe0a0);box-shadow:inset 0 0 0 1px rgba(247,179,43,.4)}
+.enp-rh-badge img{width:24px;height:24px;object-fit:contain}
+.enp-rh-tt{font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;color:var(--enk)}
+.enp-rh-sub{font-size:11px;font-weight:700;color:var(--enmu);margin-top:1px}
+.enp-rlink{border:0;background:transparent;cursor:pointer;font-size:12.5px;font-weight:800;color:var(--ind);display:inline-flex;align-items:center;gap:4px;padding:6px 2px;font-family:inherit}
+.enp-rlink svg{width:15px;height:15px}
+.enp-rlist{display:flex;flex-direction:column;gap:7px}
+.enp-rrow{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:15px;background:var(--c-soft);box-shadow:inset 0 0 0 1px var(--enl)}
+.enp-rrow .rp{width:30px;height:30px;flex:0 0 auto;border-radius:9px;display:grid;place-items:center;font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;color:var(--enmu);background:#fff;box-shadow:inset 0 0 0 1px var(--enl2)}
+.enp-rrow .rav{width:34px;height:34px;flex:0 0 auto;border-radius:10px;display:grid;place-items:center;font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;color:#fff;letter-spacing:.5px;background:linear-gradient(160deg,#9b95c6,#7d77ad);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.enp-rrow .rnm{flex:1;font-size:14px;font-weight:700;color:var(--enk2);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.enp-rrow .rpt{font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;color:var(--enmu);flex:0 0 auto}
+.enp-rrow .rpt span{font-size:11px;font-weight:700;color:var(--enfa)}
+.enp-rrow.me{background:linear-gradient(160deg,#5b52ff,#4f46e5);box-shadow:0 10px 22px rgba(60,46,180,.34),inset 0 1px 0 rgba(255,255,255,.28)}
+.enp-rrow.me .rp{background:rgba(255,255,255,.18);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.enp-rrow.me .rav{background:linear-gradient(160deg,#fff0cf,#ffd27a);color:var(--gd-ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 0 0 1.5px rgba(255,226,168,.5)}
+.enp-rrow.me .rnm{color:#fff;font-weight:800}
+.enp-rrow.me .rpt{color:#fff}.enp-rrow.me .rpt span{color:var(--oni-mu)}
+.enp-rempty{text-align:center;color:var(--enmu);font:600 13px/1.5 'Plus Jakarta Sans',sans-serif;padding:8px 4px}
+
+/* ── Mon année ── */
+.enp-year{margin:24px 16px 0;border-radius:24px;padding:18px 18px 16px;background:var(--c);box-shadow:0 12px 28px rgba(60,50,160,.10),inset 0 0 0 1px var(--enl)}
+.enp-yh{display:flex;align-items:center;gap:9px;margin-bottom:15px}
+.enp-yh-ico{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;color:#fff;background:linear-gradient(160deg,#6d6bff,#4f46e5);box-shadow:0 5px 12px rgba(60,46,180,.28)}
+.enp-yh-ico svg{width:19px;height:19px}
+.enp-yh h2{font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;color:var(--enk);margin:0}
+.enp-ygrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.enp-kpi{border-radius:16px;padding:14px;background:var(--c-soft);box-shadow:inset 0 0 0 1px var(--enl)}
+.enp-kpi .kn{font-family:'Fredoka',sans-serif;font-weight:700;font-size:27px;color:var(--ind);line-height:1}
+.enp-kpi .kn.gd{color:var(--gd-dp)}.enp-kpi .kn.gr{color:var(--grn)}
+.enp-kpi .kl{font-size:11.5px;font-weight:700;color:var(--enmu);margin-top:6px;line-height:1.25}
+
+/* ── Réglages ── */
+.enp-set{margin:28px 16px 0}
+.enp-set-title{font-size:11px;font-weight:800;color:var(--enfa);letter-spacing:2px;text-transform:uppercase;margin:0 6px 11px}
+.enp-set-list{border-radius:22px;overflow:hidden;background:var(--c);box-shadow:0 10px 24px rgba(60,50,160,.08),inset 0 0 0 1px var(--enl)}
+.enp-row{display:flex;align-items:center;gap:14px;padding:16px 17px;border-bottom:1px solid var(--enl);width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;cursor:pointer;font-family:inherit;color:inherit;text-decoration:none}
+.enp-row:last-child{border-bottom:0}
+.enp-row-ico{width:38px;height:38px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;background:var(--ind-pale);color:var(--ind);box-shadow:inset 0 0 0 1px var(--enl2)}
+.enp-row-ico svg{width:20px;height:20px}
+.enp-row-lab{flex:1;font-size:15px;font-weight:700;color:var(--enk)}
+.enp-row-lab small{display:block;font-size:11.5px;font-weight:600;color:var(--enmu);margin-top:2px}
+.enp-chev{color:var(--enfa)}.enp-chev svg{width:18px;height:18px}
+.enp-tog{width:52px;height:30px;border-radius:999px;border:0;cursor:pointer;position:relative;flex:0 0 auto;background:#e1e0ee;box-shadow:inset 0 1px 3px rgba(60,50,120,.18);transition:background .2s}
+.enp-tog.on{background:linear-gradient(180deg,#6d6bff,#4f46e5);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.enp-tog .knob{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(40,35,90,.3);transition:transform .2s}
+.enp-tog.on .knob{transform:translateX(22px)}
+.enp-logout{margin:18px 16px 0;width:calc(100% - 32px);border:0;cursor:pointer;font-family:'Fredoka',sans-serif;font-weight:600;font-size:15.5px;color:#d92d52;padding:15px;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 6px 16px rgba(217,45,82,.10),inset 0 0 0 1px rgba(217,45,82,.16);transition:transform .08s,box-shadow .08s}
+.enp-logout:active{transform:translateY(2px)}
+.enp-logout svg{width:18px;height:18px}
+.enp-since{text-align:center;margin:18px 0 4px;font-size:11px;font-weight:700;color:var(--enfa);letter-spacing:.6px;text-transform:uppercase}
+</style>`;
+
+async function mountEnseignantArene(root, me) {
+  root.innerHTML = `${STYLE_ENS}<div class="enp"><div class="skel skel-card" style="height:300px;margin:14px 16px 0;border-radius:30px"></div><div class="skel skel-card" style="height:90px;margin:18px 16px 0;border-radius:20px"></div></div>`;
+
+  const yearStart = `${new Date().getFullYear()}-01-01`;
+  const today = new Date().toISOString().slice(0, 10);
+  const month = new Date().toISOString().slice(0, 7) + "-01";
+
+  const [
+    { data: profile },
+    { data: valData },
+    { data: elevesData },
+    rankingRes,
+  ] = await Promise.all([
+    sb
+      .from("profiles")
+      .select("email, prenom, nom, created_at, streak_pro_days")
+      .eq("id", me.id)
+      .single(),
+    sb
+      .from("validations")
+      .select("competence_id, eleve_id, validated_at")
+      .eq("validated_by", me.id)
+      .gte("validated_at", yearStart),
+    sb
+      .from("profiles")
+      .select("id")
+      .eq("role", "eleve")
+      .eq("enseignant_id", me.id)
+      .is("deleted_at", null),
+    sb.rpc("get_moniteur_ranking", { p_month: month }).then(
+      (r) => r,
+      () => ({ data: null }),
+    ),
+  ]);
+
+  // ── Stats Mon Année ───────────────────────────────────────
+  const vals = valData || [];
+  const elevesIds = new Set((elevesData || []).map((e) => e.id));
+  for (const v of vals) elevesIds.add(v.eleve_id);
+  const elevesCount = elevesIds.size;
+  const totalValidations = vals.length;
+  const c3Count = vals.filter((v) => v.competence_id?.startsWith("C3")).length;
+  const hasValidationToday = vals.some((v) =>
+    v.validated_at?.startsWith(today),
+  );
+  const streakDays = Math.max(
+    profile?.streak_pro_days ?? 0,
+    hasValidationToday ? 1 : 0,
+  );
+  const since30d = new Date(Date.now() - 30 * 86400000)
+    .toISOString()
+    .slice(0, 10);
+  const elevesActifsCount = new Set(
+    vals.filter((v) => v.validated_at >= since30d).map((v) => v.eleve_id),
+  ).size;
+
+  // ── Classement réel ───────────────────────────────────────
+  const ranking = Array.isArray(rankingRes?.data) ? rankingRes.data : [];
+  const myIdx = ranking.findIndex((r) => r.moniteur_id === me.id);
+  const mine = myIdx >= 0 ? ranking[myIdx] : null;
+  const myRank = mine?.rank ?? 0;
+  const myScore = mine?.score_total ?? 0;
+  // 3 lignes autour de moi pour le mini-podium
+  let podium = [];
+  if (myIdx >= 0) {
+    const start = Math.max(0, myIdx - 1);
+    podium = ranking.slice(start, start + 3);
+  }
+
+  // ── Identité ──────────────────────────────────────────────
+  const name =
+    `${profile?.prenom || ""} ${profile?.nom || ""}`.trim() ||
+    profile?.email ||
+    me.email ||
+    "Enseignant";
+  const initials = _ensInitials(profile?.prenom, profile?.nom);
+  const year = new Date().getFullYear();
+
+  let memberSince = "";
+  if (profile?.created_at) {
+    const d = new Date(profile.created_at);
+    if (!isNaN(d))
+      memberSince = d.toLocaleDateString("fr-FR", {
+        month: "long",
+        year: "numeric",
+      });
+  }
+
+  const achievements = _ensAchievements(
+    totalValidations,
+    elevesCount,
+    streakDays,
+    myRank,
+  );
+  const unlocked = achievements.filter((a) => a.need).length;
+
+  const notifSupported = "Notification" in window;
+  const notifDenied = notifSupported && Notification.permission === "denied";
+  const notifOn = notifSupported && isPushEnabled();
+
+  // ── Render ────────────────────────────────────────────────
+  root.innerHTML = `${STYLE_ENS}
+<div class="enp anim-slide-up">
+  <h1 class="enp-h1">Mon profil</h1>
+
+  <div class="enp-hero">
+    ${
+      myRank > 0
+        ? `<div class="enp-rank">
+        <img src="/skins/trophy-10-comps.webp" alt="" />
+        <span class="rt">${_rankLabel(myRank)} ce mois-ci · <b>${myScore} pts</b></span>
+      </div>`
+        : ""
+    }
+    <div class="enp-id">
+      <div class="enp-crest"><div class="enp-crest-disc"><div class="enp-crest-inner">${esc(initials)}</div></div></div>
+      <div class="enp-nm">
+        <div class="nn">${esc(name)}</div>
+        <span class="tg"><span class="dot"></span>Enseignant</span>
+      </div>
+    </div>
+    <div class="enp-metric">
+      <span class="em-emb"><img src="/skins/trophy-permis-virtuel.webp" alt="" /></span>
+      <div class="em-num">${totalValidations}</div>
+      <div class="em-lab"><div class="l1">Validations</div><div class="l2">cette année</div></div>
+    </div>
+    <div class="enp-sub">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M16 19v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="3.2" stroke="currentColor" stroke-width="2"/><path d="M22 19v-2a4 4 0 00-3-3.9M16 3.1A4 4 0 0116 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span><b>${elevesCount} élève${elevesCount > 1 ? "s" : ""}</b> suivi${elevesCount > 1 ? "s" : ""} · <b>${elevesActifsCount} actif${elevesActifsCount > 1 ? "s" : ""}</b> sur 30 jours</span>
+    </div>
+  </div>
+
+  <div class="enp-stats">
+    <div class="enp-stat">
+      <svg class="enp-s-ico" viewBox="0 0 24 24" fill="none" style="width:30px"><path d="M16 19v-1.5a3.5 3.5 0 00-3.5-3.5h-5A3.5 3.5 0 004 17.5V19" stroke="#4f46e5" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="7.5" r="3" stroke="#4f46e5" stroke-width="2"/><path d="M19 8l1.6 1.6L23 6.6" stroke="#18a558" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="enp-s-num">${elevesCount}</div>
+      <div class="enp-s-lab">Élèves suivis</div>
+    </div>
+    <div class="enp-stat">
+      <img class="enp-s-ico" src="/skins/permigo-streak-flame-v1.webp" alt="" />
+      <div class="enp-s-num gd">${streakDays} j</div>
+      <div class="enp-s-lab">Série pro</div>
+    </div>
+    <div class="enp-stat">
+      <svg class="enp-s-ico" viewBox="0 0 24 24" fill="none" style="width:30px"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9L12 3z" fill="#fff3d6" stroke="#e8a317" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <div class="enp-s-num gd">${c3Count}</div>
+      <div class="enp-s-lab">C3 Maîtrise</div>
+    </div>
+  </div>
+
+  <div class="enp-ach">
+    <div class="enp-ach-head">
+      <span class="enp-ach-title">Mes succès</span>
+      <span class="enp-ach-count">${unlocked} débloqué${unlocked > 1 ? "s" : ""} · ${achievements.length - unlocked} à venir</span>
+    </div>
+    <div class="enp-ach-scroll">
+      ${achievements
+        .map(
+          (a) => `
+      <div class="enp-a ${a.need ? "" : "locked"}">
+        <div class="enp-medal">
+          <img src="/skins/${a.img}.webp" alt="" loading="lazy" />
+          ${a.need ? "" : `<span class="enp-alock">${_LOCK_SVG}</span>`}
+        </div>
+        <div class="enp-a-name">${a.name}</div>
+      </div>`,
+        )
+        .join("")}
+    </div>
+  </div>
+
+  <div class="enp-rankcard">
+    <div class="enp-rh">
+      <div class="enp-rh-l">
+        <span class="enp-rh-badge"><img src="/skins/couronne.png" alt="" /></span>
+        <div>
+          <div class="enp-rh-tt">Ma position</div>
+          <div class="enp-rh-sub">Classement du mois</div>
+        </div>
+      </div>
+      <a class="enp-rlink" href="#/classement-eleves">Voir le classement
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m0 0l-6-6m6 6l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+    ${
+      podium.length
+        ? `<div class="enp-rlist">
+      ${podium
+        .map(
+          (r) => `
+      <div class="enp-rrow ${r.moniteur_id === me.id ? "me" : ""}">
+        <span class="rp">${_rankLabel(r.rank)}</span>
+        <span class="rav">${esc(_ensInitials(r.moniteur_prenom, r.moniteur_nom))}</span>
+        <span class="rnm">${esc(`${r.moniteur_prenom || ""} ${r.moniteur_nom || ""}`.trim() || "Enseignant")}${r.moniteur_id === me.id ? " — toi" : ""}</span>
+        <span class="rpt">${r.score_total} <span>pts</span></span>
+      </div>`,
+        )
+        .join("")}
+    </div>`
+        : `<div class="enp-rempty">Ton classement apparaîtra dès tes premières validations ce mois-ci.</div>`
+    }
+  </div>
+
+  <div class="enp-year">
+    <div class="enp-yh">
+      <span class="enp-yh-ico"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+      <h2>Mon année ${year}</h2>
+    </div>
+    <div class="enp-ygrid">
+      <div class="enp-kpi"><div class="kn">${totalValidations}</div><div class="kl">Compétences validées</div></div>
+      <div class="enp-kpi"><div class="kn">${elevesCount}</div><div class="kl">Élèves suivis</div></div>
+      <div class="enp-kpi"><div class="kn gd">${c3Count}</div><div class="kl">C3 Maîtrise atteints</div></div>
+      <div class="enp-kpi"><div class="kn gr">${elevesActifsCount}</div><div class="kl">Élèves actifs (30 j)</div></div>
+    </div>
+  </div>
+
+  <div class="enp-set">
+    <p class="enp-set-title">Réglages</p>
+    <div class="enp-set-list">
+      ${
+        notifSupported
+          ? `
+      <button class="enp-row" id="enp-notif" type="button" aria-pressed="${notifOn}">
+        <span class="enp-row-ico">${icon("bell", { size: 19 })}</span>
+        <span class="enp-row-lab">Notifications<small id="enp-notif-sub">${notifDenied ? "Bloquées par le navigateur" : notifOn ? "Validations & relances" : "Désactivées"}</small></span>
+        ${notifDenied ? "" : `<span class="enp-tog ${notifOn ? "on" : ""}" id="enp-notif-tog"><span class="knob"></span></span>`}
+      </button>`
+          : ""
+      }
+      <a class="enp-row" href="#/settings">
+        <span class="enp-row-ico">${icon("settings", { size: 19 })}</span>
+        <span class="enp-row-lab">Réglages du compte<small>Thème, abonnement, sécurité</small></span>
+        <span class="enp-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+    </div>
+  </div>
+
+  <button class="enp-logout" id="enp-logout">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 12H4m0 0l4-4m-4 4l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3h8a2 2 0 012 2v14a2 2 0 01-2 2H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Se déconnecter
+  </button>
+
+  <div class="enp-since">${memberSince ? `Membre depuis ${esc(memberSince)}` : ""}</div>
+</div>`;
+
+  // ── Wire ──────────────────────────────────────────────────
+  root.querySelector("#enp-logout")?.addEventListener("click", async () => {
+    haptic("tap");
+    track("auth.logout", { user_role: me.role });
+    try {
+      await logout();
+    } catch (e) {
+      console.error("[profil] logout", e);
+      const { toast } = await import("@/components/common/toast.js");
+      toast("Déconnexion impossible — réessaie", "error");
+    }
+  });
+
+  const notifRow = root.querySelector("#enp-notif");
+  if (notifRow && !notifDenied) {
+    notifRow.addEventListener("click", async () => {
+      haptic("tap");
+      const tog = root.querySelector("#enp-notif-tog");
+      const sub = root.querySelector("#enp-notif-sub");
+      if (isPushEnabled()) {
+        await optOutPush();
+        tog?.classList.remove("on");
+        notifRow.setAttribute("aria-pressed", "false");
+        if (sub) sub.textContent = "Désactivées";
+      } else {
+        const ok = await optInPush();
+        if (ok) {
+          haptic("success");
+          tog?.classList.add("on");
+          notifRow.setAttribute("aria-pressed", "true");
+          if (sub) sub.textContent = "Validations & relances";
+        } else if (Notification.permission === "denied") {
+          if (sub) sub.textContent = "Bloquées par le navigateur";
+          tog?.remove();
+        }
+      }
+    });
+  }
 }
