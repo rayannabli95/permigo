@@ -78,7 +78,7 @@ function template() {
     <style>
       .lg-root{position:fixed;inset:0;overflow:auto;overscroll-behavior:contain;display:flex;align-items:center;justify-content:center;padding:28px 18px;font-family:var(--fb);
         --lg-ink:#1b1d33;--lg-mu:#6a6f93;--lg-line:#e7e9f6;--lg-card:#fff;--lg-field:#f5f6fd;
-        --lg-brand:#6c63ff;--lg-brand-dk:#5048d6;--lg-brand-lt:#8a83ff;
+        --lg-brand:#6c63ff;--lg-brand-dk:#5048d6;--lg-brand-lt:#8a83ff;--lg-brand-txt:#4f46e5;
         color:var(--lg-ink);
         background:radial-gradient(120% 80% at 50% -12%,#edecff 0%,transparent 55%),radial-gradient(90% 60% at 100% 105%,#efe9ff 0%,transparent 52%),linear-gradient(180deg,#fcfcff 0%,#f3f4fc 100%)}
 
@@ -120,7 +120,7 @@ function template() {
       .lg-remember input{appearance:none;width:18px;height:18px;border:1.5px solid #c4c7e0;border-radius:5px;cursor:pointer;position:relative;flex-shrink:0;transition:background .15s,border-color .15s}
       .lg-remember input:checked{background:var(--lg-brand);border-color:var(--lg-brand)}
       .lg-remember input:checked::after{content:'✓';position:absolute;top:-2px;left:2px;font-size:14px;color:#fff;font-weight:900}
-      .lg-forgot{background:transparent;border:0;color:var(--lg-brand);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;padding:15px 6px;margin:-15px -6px}
+      .lg-forgot{background:transparent;border:0;color:var(--lg-brand-txt);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;padding:15px 6px;margin:-15px -6px}
       .lg-forgot:hover{color:var(--lg-brand-dk);text-decoration:underline;text-underline-offset:2px}
 
       /* CTA primaire */
@@ -135,11 +135,11 @@ function template() {
       .lg-err{color:#dc2626;font-size:12.5px;margin:0;min-height:18px;text-align:center;font-weight:600}
 
       /* OTP toggle */
-      .lg-otp-toggle{background:transparent;border:0;color:var(--lg-brand);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;letter-spacing:.2px;display:block;padding:14px 8px;margin:-14px auto -8px}
+      .lg-otp-toggle{background:transparent;border:0;color:var(--lg-brand-txt);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;letter-spacing:.2px;display:block;padding:14px 8px;margin:-14px auto -8px}
       .lg-otp-toggle:hover{color:var(--lg-brand-dk);text-decoration:underline;text-underline-offset:2px}
 
       /* Divider + démos */
-      .lg-divider{display:flex;align-items:center;gap:10px;color:#a3a7c4;font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;margin:2px 0}
+      .lg-divider{display:flex;align-items:center;gap:10px;color:#5b6080;font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;margin:2px 0}
       .lg-divider::before,.lg-divider::after{content:'';flex:1;height:1px;background:var(--lg-line)}
       .lg-demos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
       .lg-demo{padding:10px 4px;border-radius:11px;background:var(--lg-field);border:1px solid var(--lg-line);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;color:var(--lg-ink);transition:border-color .15s,background .15s,transform .12s}
@@ -149,7 +149,7 @@ function template() {
 
       /* Footer */
       .lg-foot{text-align:center;font-size:13px;color:var(--lg-mu);margin-top:2px}
-      .lg-foot a{color:var(--lg-brand);font-weight:800;text-decoration:none;border-bottom:1.5px solid rgba(108,99,255,.25);transition:border-color .15s}
+      .lg-foot a{color:var(--lg-brand-txt);font-weight:800;text-decoration:none;border-bottom:1.5px solid rgba(108,99,255,.3);transition:border-color .15s}
       .lg-foot a:hover{border-color:var(--lg-brand)}
 
       .lg-version{position:absolute;bottom:14px;right:16px;font-family:var(--fn);font-size:10px;color:#b3b6cf;letter-spacing:1.4px;z-index:3}
@@ -204,7 +204,7 @@ function template() {
                 ${ICON_KEY}
                 <input id="lg-otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="123456" style="letter-spacing:.4em;font-family:var(--fn,monospace);font-size:17px;text-align:center">
               </div>
-              <button type="button" id="lg-otp-resend" style="background:transparent;border:0;color:var(--lg-brand);font-family:inherit;font-size:11.5px;cursor:pointer;margin-top:6px;text-align:center;text-decoration:underline">Renvoyer le code</button>
+              <button type="button" id="lg-otp-resend" style="background:transparent;border:0;color:var(--lg-brand-txt);font-family:inherit;font-size:11.5px;cursor:pointer;margin-top:6px;text-align:center;text-decoration:underline">Renvoyer le code</button>
             </div>
 
             <div class="lg-row" id="lg-row-remember">
