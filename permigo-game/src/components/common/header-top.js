@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════════════════
-// Header Top — logo PermiGo (gauche) + cloche notifications (droite)
+// Header Top — logo PermiGo (gauche) + volants/réglages/avatar (droite)
+// Cloche notifs retirée (2026-06) : les notifs se gèrent depuis le profil.
 // Usage : await mountHeader() depuis main.js après route()
 // ═══════════════════════════════════════════════════════════════
 
-import { mountNotifBell } from "@/components/common/notif-bell.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import {
@@ -131,7 +131,6 @@ export async function mountHeader() {
              </button>`
           : ""
       }
-      <div id="ht-bell"></div>
       ${me ? `<button class="ht-icon-btn" id="ht-settings" aria-label="Réglages" title="Réglages">${icon("settings", { size: 19 })}</button>` : ""}
       ${me ? `<button class="ht-avatar-btn" id="ht-avatar" aria-label="Mon profil" title="Mon profil">${renderUserAvatar({ ...me, avatar_url: getEquippedAsset("avatar") || me.avatar_url }, 36)}</button>` : ""}
     </div>
@@ -211,8 +210,6 @@ export async function mountHeader() {
       }
     });
   }
-
-  await mountNotifBell(bar.querySelector("#ht-bell"));
 }
 
 export function unmountHeader() {
