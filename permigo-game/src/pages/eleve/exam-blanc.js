@@ -62,6 +62,24 @@ function clearExamTimer() {
   }
 }
 
+// Mélange les réponses d'une question (Fisher-Yates) et remappe l'index de la
+// bonne réponse vers sa nouvelle position. Sans ça, `correct` reste fixe dans
+// les données → la bonne réponse tombe toujours à la même place (souvent la 1re).
+// On clone la question : les données sources (QUESTIONS) restent intactes, et le
+// même objet mélangé sert au rendu ET au score (cohérence garantie).
+function withShuffledOptions(q) {
+  const idx = q.options.map((_, i) => i);
+  for (let i = idx.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  return {
+    ...q,
+    options: idx.map((i) => q.options[i]),
+    correct: idx.indexOf(q.correct),
+  };
+}
+
 // Déblocage par progression : l'examen officiel s'ouvre une fois que l'élève a
 // validé sa compétence 1 — concrètement quand il a OUVERT le coffre `world_1`
 // (son premier coffre, qui annonce « Examen blanc débloqué »). Recalculé au mount.
@@ -471,7 +489,7 @@ function runExbQuiz(
 
 function startParcours(root, parcours_id) {
   const parcours = PARCOURS.find((p) => p.id === parcours_id);
-  const questions = questionsForParcours(parcours_id);
+  const questions = questionsForParcours(parcours_id).map(withShuffledOptions);
   track("parcours_quiz.started", { parcours_id, nom: parcours?.nom });
 
   runExbQuiz(root, questions, {
@@ -663,7 +681,9 @@ function pickOfficielQuestions() {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
-  return pool.slice(0, Math.min(OFFICIEL_TOTAL, pool.length));
+  return pool
+    .slice(0, Math.min(OFFICIEL_TOTAL, pool.length))
+    .map(withShuffledOptions);
 }
 
 function startExamenOfficiel(root) {
@@ -862,7 +882,9 @@ function startThemeRevision(root, tag, label) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
-  const questions = pool.slice(0, Math.min(12, pool.length));
+  const questions = pool
+    .slice(0, Math.min(12, pool.length))
+    .map(withShuffledOptions);
   if (!questions.length) {
     toast("Pas encore de questions sur ce thème", "info");
     return;
@@ -890,7 +912,9 @@ function startCentreRevision(root, slug) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
-  const questions = pool.slice(0, Math.min(15, pool.length));
+  const questions = pool
+    .slice(0, Math.min(15, pool.length))
+    .map(withShuffledOptions);
   if (!questions.length) {
     toast("Pas encore de questions pour ce centre", "info");
     return;
