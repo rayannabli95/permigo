@@ -11,7 +11,8 @@
 //   POST { user_id, type, data? }       → push événementiel à UN élève
 //       (types du spec : post_validation_quiz | consolidation_quiz | streak_risk)
 //
-// Auth : header `x-cron-secret` === CRON_SECRET (cron Vercel)
+// Auth : header `x-cron-secret` === CRON_SECRET (cron Vercel) OU
+//        === DISPATCH_PUSH_SECRET (trigger DB send_push_on_notification_insert)
 //        OU Authorization: Bearer SERVICE_ROLE_KEY (appels internes).
 //
 // Setup (cf. permigo-game/docs/PUSH-SETUP.md) :
@@ -23,16 +24,16 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
 
-type NotifType = "post_validation_quiz" | "consolidation_quiz" | "streak_risk";
+type EventPayloadFn = (data: Record<string, unknown>) => {
+  title: string;
+  body: string;
+  data: object;
+};
 
-const EVENT_PAYLOADS: Record<
-  NotifType,
-  (data: Record<string, unknown>) => {
-    title: string;
-    body: string;
-    data: object;
-  }
-> = {
+// Gabarits dédiés (titre/corps soignés + route). Les autres types autorisés par
+// le trigger (emotional_nudge, student_at_risk, session_confirmation) sont
+// poussés via un payload générique construit depuis le title/body de la notif.
+const EVENT_PAYLOADS: Record<string, EventPayloadFn> = {
   post_validation_quiz: (d) => ({
     title: "Compétence validée !",
     body: "Ton moniteur a validé une compétence. Lance le quiz maintenant !",
@@ -110,14 +111,33 @@ const SERVICE_KEY =
   "";
 
 Deno.serve(async (req) => {
-  // ── Auth : cron secret OU service role ──
+  // ── Auth : x-cron-secret (CRON_SECRET cron Vercel, env DISPATCH_PUSH_SECRET,
+  //    OU la valeur app_config.DISPATCH_PUSH_SECRET envoyée par le trigger DB)
+  //    OU Authorization: Bearer SERVICE_ROLE_KEY (appels internes). ──
   const serviceKey = SERVICE_KEY;
   const cronSecret = Deno.env.get("CRON_SECRET") ?? "";
+  const sharedSecret = Deno.env.get("DISPATCH_PUSH_SECRET") ?? "";
   const gotCron = req.headers.get("x-cron-secret") ?? "";
   const gotAuth = req.headers.get("authorization") ?? "";
-  const authorized =
-    (cronSecret && gotCron === cronSecret) ||
+
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
+
+  let authorized =
+    (!!gotCron && (gotCron === cronSecret || gotCron === sharedSecret)) ||
     gotAuth === `Bearer ${serviceKey}`;
+
+  // Fallback robuste : le trigger DB envoie x-cron-secret =
+  // app_config.DISPATCH_PUSH_SECRET. On compare à la MÊME source de vérité,
+  // indépendamment du nom/valeur des variables d'env de la fonction.
+  if (!authorized && gotCron) {
+    const { data: cfg } = await supabase
+      .from("app_config")
+      .select("value")
+      .eq("key", "DISPATCH_PUSH_SECRET")
+      .maybeSingle();
+    if (cfg?.value && gotCron === cfg.value) authorized = true;
+  }
+
   if (!authorized) {
     return new Response(JSON.stringify({ error: "unauthorized" }), {
       status: 401,
@@ -134,16 +154,29 @@ Deno.serve(async (req) => {
     );
   }
 
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
   const body = await req.json().catch(() => ({}));
 
-  // ════ Mode événementiel : { user_id, type, data } ════
+  // ════ Mode événementiel : { user_id, type, title?, body?, data? } ════
   if (body?.user_id && body?.type) {
-    const make = EVENT_PAYLOADS[body.type as NotifType];
-    if (!make) {
-      return new Response(JSON.stringify({ error: "unknown_type" }), {
-        status: 400,
-      });
+    const make = EVENT_PAYLOADS[body.type];
+    const d = (body.data ?? {}) as Record<string, unknown>;
+    // Type connu → gabarit dédié. Sinon → payload générique depuis la notif
+    // (data.link de l'in-app est mappé vers data.route attendu par le SW).
+    const payload = make
+      ? make(d)
+      : {
+          title: String(body.title ?? "PermiGo"),
+          body: String(body.body ?? ""),
+          data: {
+            route:
+              (d.route as string) ?? (d.link as string) ?? "#/notifications",
+          },
+        };
+    // Pas de gabarit ET pas de texte → rien à pousser (évite une notif vide).
+    if (!make && !payload.body) {
+      return new Response(
+        JSON.stringify({ ok: true, sent: 0, skipped: "no_copy" }),
+      );
     }
     const { data: subs } = await supabase
       .from("push_subscriptions")
@@ -154,8 +187,7 @@ Deno.serve(async (req) => {
 
     let sent = 0;
     for (const sub of subs) {
-      if ((await sendTo(supabase, sub, make(body.data ?? {}))) === "sent")
-        sent++;
+      if ((await sendTo(supabase, sub, payload)) === "sent") sent++;
     }
     return new Response(JSON.stringify({ ok: true, sent }));
   }
