@@ -1264,6 +1264,9 @@ export async function mount(root) {
     Promise.resolve()
       .then(() => _loadAndInjectDevoirs(root, me))
       .catch(() => {});
+    Promise.resolve()
+      .then(() => _loadAndInjectCompteRendu(root, me))
+      .catch(() => {});
 
     // Onboarding premier login : géré en amont par main.js (page plein écran
     // pages/onboarding/index.js, gate first_value_action_at). Rien à faire ici.
@@ -1558,6 +1561,9 @@ function render({
       <span class="acc2-premium-go">Découvrir</span>
     </div>
   </a>
+
+  <!-- Compte-rendu non lu du moniteur (injecté async) -->
+  <div id="acc-cr-slot"></div>
 
   <!-- Tes devoirs du moniteur (injecté async par _loadAndInjectDevoirs si en attente) -->
   <div id="acc-devoirs-slot"></div>
@@ -1948,6 +1954,58 @@ async function _loadAndInjectDevoirs(root, me) {
       </a>`;
   } catch (e) {
     console.warn("[accueil] devoirs", e);
+  }
+}
+
+async function _loadAndInjectCompteRendu(root, me) {
+  try {
+    if (!me) return;
+    const { data, error } = await sb
+      .from("comptes_rendus")
+      .select("id, created_at, read_at")
+      .eq("eleve_id", me.id)
+      .is("read_at", null)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error || !data?.length) return;
+    const cr = data[0];
+    const slot = root.querySelector("#acc-cr-slot");
+    if (!slot) return;
+    slot.innerHTML = `
+      <style>
+      .acc2-cr-banner{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 14px 14px 16px;background:color-mix(in srgb,var(--a) 8%,var(--su));border:1px solid color-mix(in srgb,var(--a) 20%,transparent);border-radius:18px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .12s;text-decoration:none}
+      .acc2-cr-banner:active{background:color-mix(in srgb,var(--a) 14%,var(--su))}
+      .acc2-cr-ico{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--a) 14%,transparent);display:flex;align-items:center;justify-content:center;color:var(--a-txt)}
+      .acc2-cr-txt{flex:1;min-width:0}
+      .acc2-cr-t{font:700 13.5px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
+      .acc2-cr-s{font:500 11.5px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
+      .acc2-cr-arr{flex:0 0 24px;width:24px;height:24px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800}
+      </style>
+      <div class="acc2-cr-banner" id="acc-cr-banner" role="button" tabindex="0"
+           aria-label="Ton moniteur t'a envoyé un compte-rendu — appuie pour le lire">
+        <div class="acc2-cr-ico" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="acc2-cr-txt">
+          <div class="acc2-cr-t">Ton moniteur t'a envoyé un compte-rendu</div>
+          <div class="acc2-cr-s">Appuie pour lire son retour sur ta leçon</div>
+        </div>
+        <div class="acc2-cr-arr" aria-hidden="true">›</div>
+      </div>`;
+    const banner = slot.querySelector("#acc-cr-banner");
+    const go = () => {
+      track("accueil.cr_banner.tapped", { cr_id: cr.id });
+      navigate(`#/compte-rendu/${cr.id}`);
+    };
+    banner?.addEventListener("click", go);
+    banner?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        go();
+      }
+    });
+  } catch (e) {
+    console.warn("[accueil] compte-rendu banner", e);
   }
 }
 

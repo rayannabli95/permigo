@@ -859,6 +859,30 @@ async function submit() {
     else if (st === "a_retravailler") aRetravailler.push(id);
   }
 
+  // ── Compte-rendu construit AVANT la RPC : il part AUTOMATIQUEMENT dans
+  // l'appli de l'élève (validate_session le stocke + le notifie côté serveur).
+  // Plus de bouton « Envoyer » manuel — la preuve arrive toute seule.
+  const _el = _eleves.find((e) => e.id === _eleve);
+  const _prenom = _el?.prenom ? fmtName(_el.prenom) : "Ton élève";
+  const _me = getCurUser();
+  // nNew côté client = mêmes acquis que le serveur (statut ≠ 'acquis' avant).
+  const _newAcquis = acquis.filter((c) => !_acquisSet.has(c)).length;
+  const _totalAcquis = _acquisSet.size + _newAcquis;
+  const _pct =
+    REMC_TOTAL > 0 ? Math.round((_totalAcquis / REMC_TOTAL) * 100) : 0;
+  const _acquisNames = acquis.map((c) => labelComp(c)).filter(Boolean);
+  const _suggestions = buildRevisionSuggestions(acquis);
+  const _crPoint =
+    (_suggestions.find((s) => !_acquisNames.includes(s.nom)) || {}).nom || null;
+  const crText = buildCompteRenduText(
+    _prenom,
+    _acquisNames,
+    _totalAcquis,
+    _pct,
+    _crPoint,
+    _me?.nom,
+  );
+
   try {
     const { data, error } = await sb.rpc("validate_session", {
       p_eleve_id: _eleve,
@@ -867,6 +891,7 @@ async function submit() {
       p_acquis: acquis.length ? acquis : null,
       p_en_cours: enCours.length ? enCours : null,
       p_a_retravailler: aRetravailler.length ? aRetravailler : null,
+      p_compte_rendu: crText,
     });
     if (error || data?.error) {
       console.error("[valider-seance] rpc error", error || data?.error);
@@ -892,15 +917,15 @@ async function submit() {
     const nNew = data?.n_acquis_new ?? acquis.length;
     // Acquis = moment de valeur : on PROUVE l'avancée avant de quitter.
     if (nNew > 0) {
-      const el = _eleves.find((e) => e.id === _eleve);
-      const prenom = el?.prenom ? fmtName(el.prenom) : "Ton élève";
       const totalAcquis = _acquisSet.size + nNew;
-      showSessionSuccess(prenom, nNew, totalAcquis, acquis);
+      showSessionSuccess(_prenom, nNew, totalAcquis, acquis, crText);
       // Palier moniteur (parcours-pro) + install nudge (différé après l'écran
       // palier s'il s'affiche, pour ne pas empiler deux overlays).
       _maybeCelebrateMoniteurTier();
     } else {
-      toast("Séance enregistrée", "success");
+      // Séance sans nouvel acquis (ex. seulement « à retravailler ») : le
+      // compte-rendu est tout de même parti dans l'appli de l'élève.
+      toast(`Compte-rendu envoyé à ${_prenom}`, "success");
       navigate("#/eleves");
     }
   } catch (e) {
@@ -1045,7 +1070,7 @@ async function sendCompteRendu(text) {
 }
 
 // Écran succès arcade : referme la boucle « je valide → l'élève avance → il le voit ».
-function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes) {
+function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes, crText) {
   // Ferme un tour guidé 1re-visite qui aurait pu s'afficher pendant la RPC
   document.querySelector(".gt-root")?.remove();
 
@@ -1062,14 +1087,19 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes) {
   // afficherait « à revoir » sur ce qu'on vient juste de valider — redondant).
   const crPoint =
     (suggestions.find((s) => !acquisNames.includes(s.nom)) || {}).nom || null;
-  const crText = buildCompteRenduText(
-    prenom,
-    acquisNames,
-    totalAcquis,
-    pct,
-    crPoint,
-    me?.nom,
-  );
+  // Le texte est déjà construit dans submit() et envoyé à l'élève via la RPC.
+  // On le réutilise ici pour le partage WhatsApp/SMS optionnel (fallback : on
+  // le reconstruit si jamais l'appelant ne l'a pas passé).
+  crText =
+    crText ||
+    buildCompteRenduText(
+      prenom,
+      acquisNames,
+      totalAcquis,
+      pct,
+      crPoint,
+      me?.nom,
+    );
   const crCard = `
     <style>
       .vs-cr { margin: 14px 0 0; text-align: left; background: #fff; border: 1px solid #e6e9ef; border-radius: 16px; padding: 14px 15px; box-shadow: 0 8px 22px -12px rgba(60,50,130,.35); }
@@ -1085,15 +1115,16 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes) {
       .vs-cr-line.work > svg { color: #b45309; }
       .vs-cr-prog { margin-top: 3px; font: 600 12px/1.3 'Inter', sans-serif; color: #6b7095; }
       .vs-cr-prog b { color: #4f46e5; font-weight: 800; }
-      .vs-cr-send { width: 100%; min-height: 48px; border: 0; border-radius: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: #fff; font: 800 14px/1 'Inter', sans-serif; background: linear-gradient(135deg, #4f46e5, #7c4dff); box-shadow: 0 6px 16px -6px rgba(79,70,229,.65); transition: transform .1s; }
-      .vs-cr-send:active { transform: scale(.98); }
+      .vs-cr-sent { width: 100%; min-height: 46px; border-radius: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: #15803d; background: #ecfdf3; border: 1px solid #bbf7d0; font: 800 13.5px/1.2 'Inter', sans-serif; text-align: center; }
+      .vs-cr-share { width: 100%; margin-top: 8px; min-height: 42px; border: 1px solid #e6e9ef; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: #4f46e5; font: 700 12.5px/1 'Inter', sans-serif; background: #fff; transition: background .12s; }
+      .vs-cr-share:active { background: #f7f8fc; }
     </style>
     <section class="vs-cr">
       <div class="vs-cr-head">
         <div class="vs-cr-ico">${icon("file-text", { size: 18, strokeWidth: 2.2 })}</div>
         <div>
-          <div class="vs-cr-title">Compte-rendu prêt</div>
-          <div class="vs-cr-sub">À envoyer à ${esc(prenom)} — lu aussi par ses parents</div>
+          <div class="vs-cr-title">Compte-rendu envoyé</div>
+          <div class="vs-cr-sub">Reçu par ${esc(prenom)} dans son appli — il le voit tout de suite</div>
         </div>
       </div>
       <div class="vs-cr-body">
@@ -1111,7 +1142,8 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes) {
         ${crPoint ? `<div class="vs-cr-line work">${icon("target", { size: 13, strokeWidth: 2.4 })}<span>À revoir : ${esc(crPoint)}</span></div>` : ""}
         <div class="vs-cr-prog">Progression : <b>${totalAcquis}/${REMC_TOTAL}</b> · ${pct}%</div>
       </div>
-      <button class="vs-cr-send" id="vs-cr-send" type="button">${icon("send", { size: 15, strokeWidth: 2.2 })} Envoyer le compte-rendu à ${esc(prenom)}</button>
+      <div class="vs-cr-sent">${icon("check-circle", { size: 15, strokeWidth: 2.4 })} Envoyé automatiquement à ${esc(prenom)}</div>
+      <button class="vs-cr-share" id="vs-cr-share" type="button">${icon("share", { size: 14, strokeWidth: 2.2 })} Partager aussi (WhatsApp, parents…)</button>
     </section>`;
 
   const revCard = suggestions.length
@@ -1163,7 +1195,9 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes) {
     .querySelector("#vs-success-done")
     ?.addEventListener("click", () => navigate("#/eleves"));
 
-  _root.querySelector("#vs-cr-send")?.addEventListener("click", () => {
+  // Partage optionnel (WhatsApp/SMS) : l'envoi in-app est déjà parti tout
+  // seul, ceci sert juste à doubler pour les parents si le moniteur le veut.
+  _root.querySelector("#vs-cr-share")?.addEventListener("click", () => {
     haptic("tap");
     sendCompteRendu(crText);
   });
