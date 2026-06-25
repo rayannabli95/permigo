@@ -1351,6 +1351,280 @@ details[open] > .prc-chap-hd .prc-chap-chev { transform:rotate(180deg); }
 .prc-world.locked .prc-signs { opacity:.45; filter:grayscale(.6); }
 /* Filigrane volant déjà atténué par les photos retirées ; avec panneaux on le calme aussi */
 .prc:has(.prc-signs)::before { opacity:.10; }
+
+/* ══ Vue Chapitre (focus 1 chapitre à la fois) ══════════════════ */
+
+/* Bandeau pastilles chapitres */
+.prc-cv-pills {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px 10px;
+  position: relative;
+  z-index: 2;
+}
+.prc-cv-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  flex: 1;
+  min-width: 0;
+}
+.prc-cv-pill:focus-visible { outline: 3px solid var(--a); outline-offset: 3px; border-radius: 12px; }
+.prc-cv-pill-dot {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font: 900 17px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  background: #2a1a4e;
+  border: 2px solid #3d2a6e;
+  transition: transform .18s var(--ease-out), box-shadow .18s var(--ease-out), background .18s, border-color .18s;
+}
+.prc-cv-pill.active .prc-cv-pill-dot {
+  background: #ffd24a;
+  color: #1a0e30;
+  border-color: #e6b800;
+  box-shadow: 0 4px 16px rgba(255,210,74,.45);
+  transform: translateY(-2px) scale(1.08);
+}
+.prc-cv-pill.complete .prc-cv-pill-dot { background: var(--gr); border-color: var(--grdk); }
+.prc-cv-pill.locked { opacity: .45; cursor: default; pointer-events: none; }
+.prc-cv-pill-lbl {
+  font: 700 9px/1 'Inter', sans-serif;
+  letter-spacing: .05em;
+  color: #8878b4;
+  white-space: nowrap;
+}
+.prc-cv-pill.active .prc-cv-pill-lbl { color: #ffd24a; }
+.prc-cv-pill.complete .prc-cv-pill-lbl { color: var(--gr-txt); }
+
+/* Hero chapitre courant */
+.prc-cv-hero {
+  margin: 4px 14px 0;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+  min-height: 148px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0;
+}
+.prc-cv-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #1a0e30 0%, #2d1b5e 60%, #3d2a6e 100%);
+  z-index: 0;
+}
+.prc-cv-hero-img {
+  position: absolute;
+  top: 0; right: 0;
+  width: 48%;
+  height: 100%;
+  object-fit: contain;
+  object-position: right center;
+  z-index: 1;
+  opacity: .35;
+  pointer-events: none;
+}
+.prc-cv-hero-glow {
+  position: absolute;
+  bottom: -20px; left: 50%;
+  width: 180px; height: 80px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(255,210,74,.22) 0%, transparent 70%);
+  z-index: 1;
+  pointer-events: none;
+}
+.prc-cv-hero-body {
+  position: relative;
+  z-index: 2;
+  padding: 20px 18px 18px;
+}
+.prc-cv-hero-kicker {
+  font: 700 9.5px/1 'Fredoka', 'Inter', sans-serif;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #ffd24a;
+  margin-bottom: 5px;
+}
+.prc-cv-hero-title {
+  font: 800 19px/1.15 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  margin: 0 0 12px;
+  text-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.prc-cv-hero-prog {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.prc-cv-hero-track {
+  flex: 1;
+  height: 7px;
+  background: rgba(255,255,255,.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.prc-cv-hero-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff9c1c, #ffd24a);
+  transition: width .7s var(--ease-out);
+}
+.prc-cv-hero-frac {
+  font: 800 12px/1 'Inter', sans-serif;
+  color: rgba(255,255,255,.75);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Itinéraire des jalons */
+.prc-cv-route {
+  margin: 10px 14px 0;
+  position: relative;
+  z-index: 2;
+}
+/* Trait vertical reliant les jalons */
+.prc-cv-route-line {
+  position: absolute;
+  left: 34px; /* centre de la pastille de numéro (14px marge + 26px/2 = 27 → ajusté visuellement) */
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--bo2);
+  z-index: 0;
+}
+.prc-cv-jalon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px 11px 14px;
+  border-radius: var(--r-md);
+  position: relative;
+  z-index: 1;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .14s;
+  min-height: 56px;
+}
+.prc-cv-jalon:not(.locked) { cursor: pointer; }
+.prc-cv-jalon:not(.locked):active { background: var(--su); }
+.prc-cv-jalon:focus-visible { outline: 3px solid var(--a); outline-offset: -2px; border-radius: var(--r-md); }
+
+/* Pastille numéro/état */
+.prc-cv-jalon-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  font: 800 12px/1 'Inter', sans-serif;
+  color: #fff;
+  background: var(--mu2);
+  position: relative;
+  z-index: 2;
+  transition: background .18s, box-shadow .18s;
+}
+.prc-cv-jalon.done    .prc-cv-jalon-num { background: var(--gr); }
+.prc-cv-jalon.a_valider .prc-cv-jalon-num { background: var(--am); }
+.prc-cv-jalon.next    .prc-cv-jalon-num { background: #ffd24a; color: #1a0e30; box-shadow: 0 0 0 5px rgba(255,210,74,.25); }
+.prc-cv-jalon.todo    .prc-cv-jalon-num { background: var(--bo2); color: var(--mu2); }
+.prc-cv-jalon.locked  .prc-cv-jalon-num { background: var(--bo); color: var(--bo4); }
+
+/* Segment coloré (done = vert) au-dessus du jalon */
+.prc-cv-jalon-seg {
+  position: absolute;
+  left: 34px;
+  top: -100%; /* sera overridé inline */
+  width: 2px;
+  z-index: 1;
+  pointer-events: none;
+}
+.prc-cv-jalon-seg.done { background: var(--gr); }
+.prc-cv-jalon-seg.partial { background: linear-gradient(180deg, var(--gr), var(--bo2)); }
+
+/* Pulse sur "next" */
+@media (prefers-reduced-motion: no-preference) {
+  .prc-cv-jalon.next .prc-cv-jalon-num {
+    animation: cvJalonPulse 1.8s ease-in-out infinite;
+  }
+}
+@keyframes cvJalonPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(255,210,74,.25); }
+  50%       { box-shadow: 0 0 0 9px rgba(255,210,74,.08); }
+}
+
+.prc-cv-jalon-main { flex: 1; min-width: 0; }
+.prc-cv-jalon-nm {
+  font: 600 13.5px/1.3 'Inter', sans-serif;
+  color: var(--ink);
+}
+.prc-cv-jalon.todo .prc-cv-jalon-nm,
+.prc-cv-jalon.locked .prc-cv-jalon-nm { color: var(--mu3); font-weight: 500; }
+.prc-cv-jalon.next .prc-cv-jalon-nm { font-weight: 800; }
+.prc-cv-jalon-code {
+  font: 500 10.5px/1 'Inter', sans-serif;
+  color: var(--mu2);
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.prc-cv-jalon-lbl {
+  font: 700 10px/1 'Inter', sans-serif;
+  margin-top: 3px;
+}
+.prc-cv-jalon.done    .prc-cv-jalon-lbl { color: var(--gr-txt); }
+.prc-cv-jalon.a_valider .prc-cv-jalon-lbl { color: #b45309; }
+.prc-cv-jalon.next    .prc-cv-jalon-lbl { color: #b37900; }
+
+/* Bouton Continuer sur "next" */
+.prc-cv-jalon-go {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffd24a;
+  color: #1a0e30;
+  font: 800 11px/1 'Inter', sans-serif;
+  padding: 10px 14px;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(255,210,74,.45);
+  white-space: nowrap;
+}
+
+/* État statut à droite (done / a_valider / todo) */
+.prc-cv-jalon-st {
+  flex-shrink: 0;
+  font: 700 11px/1 'Inter', sans-serif;
+  color: var(--mu2);
+}
+.prc-cv-jalon.done .prc-cv-jalon-st { color: var(--gr-txt); }
+
+/* Chapitre verrouillé : message */
+.prc-cv-lock-msg {
+  margin: 16px 14px 0;
+  padding: 14px 16px;
+  background: var(--su2);
+  border: 1px dashed var(--bo4);
+  border-radius: var(--r-md);
+  font: 500 13px/1.5 'Inter', sans-serif;
+  color: var(--mu3);
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+.prc-cv-lock-msg strong { color: var(--ink); font-weight: 700; }
 </style>`;
 
 // ─── Identité visuelle par monde (PNG premium ChatGPT 3D) ───────
@@ -1470,9 +1744,12 @@ const NEW_BADGE_MS = 24 * 60 * 60 * 1000;
 const PARCOURS_VIEW_KEY = "permigo_parcours_view";
 function loadParcoursView() {
   try {
-    return localStorage.getItem(PARCOURS_VIEW_KEY) === "list" ? "list" : "map";
+    const stored = localStorage.getItem(PARCOURS_VIEW_KEY);
+    if (stored === "list" || stored === "map" || stored === "chapitre")
+      return stored;
+    return "chapitre"; // défaut : vue Chapitre (focus sur 1 chapitre à la fois)
   } catch {
-    return "map";
+    return "chapitre";
   }
 }
 function saveParcoursView(v) {
@@ -1552,8 +1829,21 @@ export async function mount(root) {
 
   ensureChestStyles();
 
-  // Vue active (Carte | Liste), persistée. Le toggle re-rend la page in-place.
+  // Vue active (Chapitre | Carte | Liste), persistée. Le toggle re-rend la page in-place.
   let view = loadParcoursView();
+
+  // Index du chapitre affiché en vue Chapitre :
+  // 1er "in_progress", sinon dernier "complete", sinon 0.
+  let currentChapIdx = (() => {
+    const ipIdx = worldStates.findIndex((w) => w.status === "in_progress");
+    if (ipIdx !== -1) return ipIdx;
+    let lastComplete = 0;
+    worldStates.forEach((w, i) => {
+      if (w.status === "complete") lastComplete = i;
+    });
+    return lastComplete;
+  })();
+
   const renderAndWire = () => {
     root.innerHTML = renderPage(
       worldStates,
@@ -1561,13 +1851,14 @@ export async function mount(root) {
       pendingMap,
       openedWorlds,
       view,
+      currentChapIdx,
     );
     wire(root, worldStates, validatedMap, pendingMap, me, view);
     // Bouton « ? » du tuto (re-câblé à chaque rendu)
     root
       .querySelector("#prc-help")
       ?.addEventListener("click", showParcoursTuto);
-    // Toggle Carte / Liste
+    // Toggle Chapitre / Carte / Liste
     root.querySelectorAll(".prc-vt-btn").forEach((btn) =>
       btn.addEventListener("click", () => {
         const v = btn.dataset.view;
@@ -1578,6 +1869,40 @@ export async function mount(root) {
         renderAndWire();
       }),
     );
+    // Bandeau pastilles chapitres : tap → change currentChapIdx + re-render
+    root.querySelectorAll(".prc-cv-pill[data-chap]").forEach((pill) =>
+      pill.addEventListener("click", () => {
+        const idx = parseInt(pill.dataset.chap, 10);
+        if (isNaN(idx) || idx === currentChapIdx) return;
+        currentChapIdx = idx;
+        renderAndWire();
+      }),
+    );
+    // Jalons vue chapitre → même ouverture de fiche que .prc-row
+    root
+      .querySelectorAll(".prc-cv-jalon[data-comp]:not([aria-hidden])")
+      .forEach((jalon) => {
+        const open = () => {
+          haptic("tap");
+          const compId = jalon.dataset.comp;
+          const worldIdx = parseInt(jalon.dataset.worldIdx, 10);
+          openFiche(
+            root,
+            compId,
+            worldStates[worldIdx],
+            validatedMap,
+            pendingMap,
+          );
+          track("parcours.node_tap", { compId, worldIdx, view: "chapitre" });
+        };
+        jalon.addEventListener("click", open);
+        jalon.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            open();
+          }
+        });
+      });
   };
   renderAndWire();
 
@@ -1871,6 +2196,7 @@ function renderPage(
   pendingMap,
   openedWorlds = new Set(),
   view = "map",
+  currentChapIdx = 0,
 ) {
   const totalDone = worldStates.reduce((s, w) => s + w.done, 0);
   const totalComps = worldStates.reduce((s, w) => s + w.total, 0);
@@ -1914,8 +2240,11 @@ function renderPage(
     </div>
   </div>
 
-  <!-- Toggle d'affichage Carte / Liste -->
+  <!-- Toggle d'affichage Chapitre / Carte / Liste -->
   <div class="prc-viewtoggle" role="tablist" aria-label="Mode d'affichage du parcours">
+    <button class="prc-vt-btn ${view === "chapitre" ? "on" : ""}" data-view="chapitre" type="button" role="tab" aria-selected="${view === "chapitre"}">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Chapitre
+    </button>
     <button class="prc-vt-btn ${view === "map" ? "on" : ""}" data-view="map" type="button" role="tab" aria-selected="${view === "map"}">
       ${icon("map", { size: 16 })} Carte
     </button>
@@ -1929,21 +2258,28 @@ function renderPage(
   <!-- Carte des mondes — pleine page, scroll naturel (plus d'encadré interne) -->
   <div class="prc-map" id="prc-map-scroll" tabindex="-1" role="region" aria-label="Carte d'apprentissage">
     ${
-      view === "list"
-        ? `<div class="prc-list">${renderListView(worldStates, validatedMap, pendingMap, openedWorlds)}</div>`
-        : worldStates
-            .map((ws, i) =>
-              renderWorldSection(
-                ws,
-                validatedMap,
-                pendingMap,
-                i < worldStates.length - 1,
-                openedWorlds,
-              ),
-            )
-            .join("")
+      view === "chapitre"
+        ? renderChapterView(
+            worldStates,
+            validatedMap,
+            pendingMap,
+            currentChapIdx,
+          )
+        : view === "list"
+          ? `<div class="prc-list">${renderListView(worldStates, validatedMap, pendingMap, openedWorlds)}</div>`
+          : worldStates
+              .map((ws, i) =>
+                renderWorldSection(
+                  ws,
+                  validatedMap,
+                  pendingMap,
+                  i < worldStates.length - 1,
+                  openedWorlds,
+                ),
+              )
+              .join("")
     }
-    ${renderFinal(totalDone, totalComps)}
+    ${view !== "chapitre" ? renderFinal(totalDone, totalComps) : ""}
     <div style="height: 24px"></div>
   </div>
 
@@ -2155,6 +2491,175 @@ function renderPortalArch(color, isComplete) {
     }
   </svg>
 </div>`;
+}
+
+// ─── Vue Chapitre (focus 1 chapitre à la fois) ───────────────────
+function renderChapterView(worldStates, validatedMap, pendingMap, currentIdx) {
+  const WORLD_COLORS = [
+    { bg: "#1a3a0e", dot: "#22c55e", lbl: "Campagne" },
+    { bg: "#0e2d3a", dot: "#06b6d4", lbl: "Ville" },
+    { bg: "#1a0e30", dot: "#8b5cf6", lbl: "Montagne" },
+    { bg: "#3a1f00", dot: "#f59e0b", lbl: "Sommet" },
+  ];
+
+  // ── Bandeau pastilles ──────────────────────────────────────────
+  const pillsHTML = worldStates
+    .map((ws, i) => {
+      const wc = WORLD_COLORS[i] ?? WORLD_COLORS[0];
+      const isActive = i === currentIdx;
+      const isLocked = ws.status === "locked";
+      const isComplete = ws.status === "complete";
+      const stateClass = isLocked
+        ? "locked"
+        : isComplete
+          ? "complete"
+          : isActive
+            ? "active"
+            : "";
+      const dotContent = isComplete
+        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`
+        : isLocked
+          ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+          : `${i + 1}`;
+      const lbl = isLocked
+        ? "Verrouillé"
+        : isComplete
+          ? "Terminé"
+          : isActive
+            ? "En cours"
+            : `C${i + 1}`;
+      return `<button
+        class="prc-cv-pill ${stateClass}"
+        data-chap="${i}"
+        type="button"
+        aria-label="Chapitre ${i + 1} — ${esc(ws.world?.nom ?? wc.lbl)} : ${esc(lbl)}"
+        ${isLocked ? "disabled" : ""}
+      >
+        <span class="prc-cv-pill-dot" style="${isActive && !isComplete ? "background:#ffd24a;color:#1a0e30;border-color:#e6b800" : isComplete ? "" : `background:#2a1a4e;border-color:#3d2a6e`}">${dotContent}</span>
+        <span class="prc-cv-pill-lbl">${esc(ws.world?.nom ?? wc.lbl)}</span>
+      </button>`;
+    })
+    .join("");
+
+  // ── Hero du chapitre courant ───────────────────────────────────
+  const ws = worldStates[currentIdx];
+  const meta = WORLDS_META[currentIdx];
+  const world = ws.world ?? {};
+  const chapTitle = world.titre ?? world.nom ?? `Chapitre ${currentIdx + 1}`;
+  const chapPct = ws.total ? Math.round((ws.done / ws.total) * 100) : 0;
+
+  const heroHTML = `
+    <div class="prc-cv-hero">
+      <div class="prc-cv-hero-bg"></div>
+      <img class="prc-cv-hero-img" src="${esc(meta.img ?? "")}" alt="" aria-hidden="true" loading="lazy">
+      <div class="prc-cv-hero-glow"></div>
+      <div class="prc-cv-hero-body">
+        <div class="prc-cv-hero-kicker">Chapitre ${currentIdx + 1} sur ${worldStates.length}</div>
+        <div class="prc-cv-hero-title">${esc(chapTitle)}</div>
+        <div class="prc-cv-hero-prog">
+          <div class="prc-cv-hero-track" role="progressbar"
+               aria-valuenow="${chapPct}" aria-valuemin="0" aria-valuemax="100"
+               aria-label="${ws.done} jalons sur ${ws.total} acquis">
+            <div class="prc-cv-hero-fill" style="width:${chapPct}%"></div>
+          </div>
+          <span class="prc-cv-hero-frac">${ws.done}/${ws.total} jalons</span>
+        </div>
+      </div>
+    </div>`;
+
+  // ── Itinéraire des jalons ──────────────────────────────────────
+  let jalonsHTML = "";
+  if (ws.status === "locked") {
+    const req = UNLOCK_REQ[currentIdx] ?? 0;
+    const need = Math.max(0, req - (ws.prevDoneCount ?? 0));
+    jalonsHTML = `<div class="prc-cv-lock-msg">
+      ${`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="display:inline-block;vertical-align:middle;margin-right:6px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`}
+      Termine le chapitre précédent — encore <strong>${need} compétence${need > 1 ? "s" : ""}</strong> à acquérir.
+    </div>`;
+  } else {
+    const rows = ws.subs.map((sub, subIdx) => {
+      const st = compStatus(
+        sub.c,
+        ws.status,
+        ws.nextChallenge,
+        validatedMap,
+        pendingMap,
+      );
+      const prevSt =
+        subIdx > 0
+          ? compStatus(
+              ws.subs[subIdx - 1].c,
+              ws.status,
+              ws.nextChallenge,
+              validatedMap,
+              pendingMap,
+            )
+          : null;
+
+      // Icône pastille
+      const numContent =
+        st === "done" || st === "a_valider"
+          ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`
+          : st === "locked"
+            ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+            : `${subIdx + 1}`;
+
+      const lblText = {
+        done: "Acquis",
+        a_valider: "À valider",
+        next: "Commence ici",
+        todo: "",
+        locked: "",
+      }[st];
+
+      const right =
+        st === "next"
+          ? `<span class="prc-cv-jalon-go">Continuer →</span>`
+          : lblText
+            ? `<span class="prc-cv-jalon-st">${esc(lblText)}</span>`
+            : "";
+
+      const interactive = st !== "locked";
+      // Segment au-dessus (couleur selon si le jalon précédent est done)
+      const segColor =
+        prevSt === "done" || prevSt === "a_valider" ? "done" : "partial";
+      const segHTML =
+        subIdx > 0
+          ? `<div class="prc-cv-jalon-seg ${segColor}" style="top:0;height:11px;transform:translateY(-100%)"></div>`
+          : "";
+
+      return `<div
+        class="prc-cv-jalon ${st}"
+        data-comp="${esc(sub.c)}"
+        data-world-idx="${currentIdx}"
+        ${interactive ? `role="button" tabindex="0"` : `aria-hidden="true"`}
+        aria-label="${esc(sub.n)} — ${esc(lblText || (st === "todo" ? "À venir" : st))}"
+      >
+        ${segHTML}
+        <span class="prc-cv-jalon-num">${numContent}</span>
+        <span class="prc-cv-jalon-main">
+          <span class="prc-cv-jalon-nm">${esc(sub.n)}</span>
+          <span class="prc-cv-jalon-code">${esc(sub.c.toUpperCase())}</span>
+          ${lblText ? `<span class="prc-cv-jalon-lbl">${esc(lblText)}</span>` : ""}
+        </span>
+        ${right}
+      </div>`;
+    });
+
+    jalonsHTML = `<div class="prc-cv-route">
+      <div class="prc-cv-route-line"></div>
+      ${rows.join("")}
+    </div>`;
+  }
+
+  return `
+    <div class="prc-cv-wrap">
+      <div class="prc-cv-pills" role="tablist" aria-label="Chapitres du parcours">
+        ${pillsHTML}
+      </div>
+      ${heroHTML}
+      ${jalonsHTML}
+    </div>`;
 }
 
 function renderFinal(done, total) {
