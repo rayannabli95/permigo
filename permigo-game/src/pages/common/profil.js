@@ -2344,6 +2344,11 @@ async function mountEnseignantArene(root, me) {
   <div class="enp-set">
     <p class="enp-set-title">Réglages</p>
     <div class="enp-set-list">
+      <a class="enp-row" href="#/notifications">
+        <span class="enp-row-ico">${icon("inbox", { size: 19 })}</span>
+        <span class="enp-row-lab">Mes notifications<small>Validations, séances, messages</small></span>
+        <span class="enp-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
       ${
         notifSupported
           ? `
