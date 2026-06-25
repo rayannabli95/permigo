@@ -99,6 +99,7 @@ const ROUTES = {
     // point de saisie. On garde la route en alias vers log-session (?eleveId=).
     validation: () => import("@/pages/enseignant/log-session.js"),
     eleves: () => import("@/pages/enseignant/mes-eleves.js"),
+    relances: () => import("@/pages/enseignant/relances.js"),
     "classement-eleves": () =>
       import("@/pages/enseignant/classement-eleves.js"),
     livret: () => import("@/pages/enseignant/livret-remc.js"),

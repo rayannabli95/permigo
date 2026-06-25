@@ -8,6 +8,7 @@ import { toast } from "@/components/common/toast.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
+import { icon } from "@/utils/icons.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
 
 // « Prêt » pour l'examen = MÊME règle métier que mes-eleves.js (source de vérité) :
@@ -765,6 +766,16 @@ async function renderInto(root, _me) {
         >
       </div>
 
+      <!-- Radar de relance -->
+      <button id="aj-radar" type="button" style="display:flex;align-items:center;gap:12px;width:calc(100% - 32px);margin:0 16px 14px;padding:14px 15px;background:#fff;border:1px solid #e6e9f7;border-radius:16px;box-shadow:0 6px 16px -10px rgba(60,50,130,.3);cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;">
+        <span style="width:40px;height:40px;flex-shrink:0;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#4f46e5,#7c4dff);box-shadow:0 6px 14px -6px rgba(79,70,229,.6);">${icon("activity", { size: 20, strokeWidth: 2.2 })}</span>
+        <span style="flex:1;min-width:0;">
+          <span style="display:block;font:800 14.5px/1.15 'Manrope','Plus Jakarta Sans',sans-serif;color:#1a1c2e;">Radar de relance</span>
+          <span style="display:block;font:600 12px/1.3 'Inter',sans-serif;color:#6b7095;margin-top:2px;">Relance en 1 tap tes élèves qui refroidissent</span>
+        </span>
+        <span style="flex-shrink:0;color:#a3a9c4;">${icon("chevron-right", { size: 20, strokeWidth: 2.4 })}</span>
+      </button>
+
       <!-- Tes élèves -->
       <div class="aj-sec-header">
         <span class="aj-sec-title">Tes élèves${nbPrets > 0 ? " · " + nbPrets + " prêt" + (nbPrets > 1 ? "s" : "") : ""}${nbRecus > 0 ? " · " + nbRecus + " reçu" + (nbRecus > 1 ? "s" : "") : ""}</span>
@@ -826,6 +837,12 @@ async function renderInto(root, _me) {
   root.querySelector("#aj-voir-tout")?.addEventListener("click", () => {
     track("aujourdhui.voir_tout.clicked");
     navigate("#/eleves");
+  });
+
+  root.querySelector("#aj-radar")?.addEventListener("click", () => {
+    haptic("tap");
+    track("aujourdhui.radar.clicked");
+    navigate("#/relances");
   });
 
   // Cartes élèves → livret
