@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PermiGo — Ligues · Cartes Glass + Feuille</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* accents */
+  --a:#6d4dff; --adk:#4a2fc4; --a-lt:#a78bff;
+  --rev:#2563eb; --rev-dk:#1d4ed8; --rev-lt:#93c5fd;
+  --gold:#f7b32b; --gold-dk:#e08e0b; --silver:#b9c2d0; --bronze:#cd8b5b;
+  /* neutres */
+  --page:#f4f5fb; --su:#ffffff; --bo:#e2e6f2;
+  --ink:#0b0d1a; --mu:#6b7280;
+  --up:#15803d; --dn:#dc2626;
+  --r:22px;
+  font-feature-settings:'tnum' 1;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:
+    radial-gradient(1100px 700px at 18% -8%, #ece9ff 0%, transparent 55%),
+    radial-gradient(1000px 700px at 110% 8%, #e3edff 0%, transparent 50%),
+    var(--page);
+  color:var(--ink);
+  display:flex; align-items:center; justify-content:center;
+  min-height:100vh; padding:34px 16px;
+}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1}
+
+/* ===== phone frame ===== */
+.phone{
+  position:relative; width:390px; height:844px;
+  background:var(--page); border-radius:46px;
+  box-shadow:0 2px 1px rgba(11,13,26,.04), 0 40px 80px -30px rgba(28,22,84,.45), 0 0 0 11px #11131f, 0 0 0 12px #2a2d40;
+  overflow:hidden;
+}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:138px;height:30px;background:#11131f;border-radius:0 0 20px 20px;z-index:60}
+.scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
+
+/* status bar */
+.status{display:flex;justify-content:space-between;align-items:center;padding:14px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+.status .dots{display:flex;gap:5px;align-items:center}
+.status .dots i{width:16px;height:11px;border-radius:2px;background:var(--ink);opacity:.85;display:inline-block}
+.status .dots i.bat{width:22px;border-radius:3px;position:relative}
+
+/* ===== header ===== */
+.hdr{padding:14px 22px 6px}
+.hdr .eyebrow{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--mu);letter-spacing:.04em;text-transform:uppercase}
+.hdr .eyebrow .liv{display:inline-flex;align-items:center;gap:5px;color:var(--a);background:#efeaff;border:1px solid #e0d7ff;padding:3px 9px;border-radius:99px;font-size:10.5px}
+.hdr .eyebrow .liv b{width:6px;height:6px;border-radius:99px;background:var(--a);box-shadow:0 0 0 0 rgba(109,77,255,.55);animation:pulse 2.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(109,77,255,.5)}70%{box-shadow:0 0 0 7px rgba(109,77,255,0)}100%{box-shadow:0 0 0 0 rgba(109,77,255,0)}}
+.hdr h1{font-family:'Plus Jakarta Sans';font-weight:800;font-size:25px;letter-spacing:-.02em;margin-top:9px;line-height:1.05}
+.hdr .sub{font-size:13px;color:var(--mu);margin-top:5px}
+.hdr .me-row{display:flex;align-items:center;gap:10px;margin-top:13px;background:var(--su);border:1px solid var(--bo);border-radius:16px;padding:9px 11px;box-shadow:0 8px 22px -16px rgba(28,22,84,.4)}
+.hdr .me-row .av{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#7c5cff,#4a2fc4);color:#fff;font-family:'Plus Jakarta Sans';font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.hdr .me-row .who{flex:1;min-width:0}
+.hdr .me-row .who b{font-size:13.5px;font-weight:800;display:block}
+.hdr .me-row .who span{font-size:11.5px;color:var(--mu)}
+.hdr .me-row .cycle{font-size:11px;color:var(--mu);text-align:right;line-height:1.3}
+.hdr .me-row .cycle b{color:var(--ink);font-weight:700;display:block;font-size:11.5px}
+
+/* ===== league cards ===== */
+.cards{padding:14px 18px 26px;display:flex;flex-direction:column;gap:16px}
+.card{
+  position:relative; border-radius:26px; padding:18px 18px 16px;
+  color:#fff; overflow:hidden; cursor:pointer;
+  box-shadow:0 24px 46px -22px rgba(40,20,120,.62), 0 2px 0 rgba(255,255,255,.04) inset;
+  transition:transform .22s cubic-bezier(.2,.7,.2,1), box-shadow .22s;
+  isolation:isolate;
+}
+.card:active{transform:scale(.985)}
+.card.conduite{background:linear-gradient(150deg,#7b5cff 0%,#5a39e0 48%,#4426b8 100%)}
+.card.revision{background:linear-gradient(150deg,#3b82f6 0%,#2563eb 50%,#1b46c9 100%)}
+/* route texture + glow */
+.card .tex{position:absolute;inset:0;z-index:-1;opacity:.9}
+.card .tex::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(520px 240px at 88% -20%, rgba(255,255,255,.30), transparent 60%),
+  radial-gradient(420px 280px at -10% 120%, rgba(0,0,0,.28), transparent 60%);}
+.card .road{position:absolute;right:-34px;bottom:-60px;width:230px;height:230px;z-index:-1;opacity:.5}
+.card .road svg{width:100%;height:100%}
+
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.lg-name{font-family:'Plus Jakarta Sans';font-weight:800;font-size:13px;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.lg-name .ico{width:26px;height:26px;border-radius:9px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.lg-name .ico svg{width:15px;height:15px}
+.lg-name small{display:block;font-weight:600;font-size:10.5px;opacity:.72;letter-spacing:.02em;margin-top:2px;font-family:'Inter'}
+
+/* tier badge metal */
+.tier{display:inline-flex;align-items:center;gap:7px;padding:6px 11px 6px 7px;border-radius:99px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);font-size:11px;font-weight:700;white-space:nowrap}
+.tier .crest{width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 2px rgba(0,0,0,.25)}
+.tier .crest svg{width:11px;height:11px}
+.crest.c-cond{background:linear-gradient(160deg,#c9b9ff,#8a6bff 55%,#5b3ee0)}
+.crest.c-rev{background:linear-gradient(160deg,#bcd6ff,#5b9bff 55%,#1d4ed8)}
+
+/* hero rank */
+.hero{display:flex;align-items:flex-end;gap:14px;margin-top:16px}
+.hero .rk{display:flex;align-items:baseline;gap:2px;line-height:.82}
+.hero .rk .hash{font-family:'Plus Jakarta Sans';font-weight:700;font-size:30px;opacity:.55;transform:translateY(-2px)}
+.hero .rk .n{font-family:'Plus Jakarta Sans';font-weight:800;font-size:74px;letter-spacing:-.04em;text-shadow:0 6px 26px rgba(0,0,0,.22)}
+.hero .meta{padding-bottom:10px}
+.hero .meta .of{font-size:12px;font-weight:600;opacity:.78}
+.hero .meta .delta{display:inline-flex;align-items:center;gap:4px;margin-top:7px;font-size:12px;font-weight:800;padding:4px 9px;border-radius:99px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2)}
+.hero .meta .delta.up{color:#bbf7d0}
+.hero .meta .delta.flat{color:rgba(255,255,255,.78)}
+.hero .meta .delta svg{width:11px;height:11px}
+
+/* score line + progress */
+.scoreline{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.scoreline .lbl{font-size:11.5px;opacity:.8;font-weight:600}
+.scoreline .val{font-family:'Plus Jakarta Sans';font-weight:800;font-size:17px}
+.scoreline .val small{font-weight:700;font-size:12px;opacity:.7}
+.bar{height:7px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:9px;box-shadow:inset 0 1px 1px rgba(0,0,0,.18)}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#fff,rgba(255,255,255,.82));box-shadow:0 0 10px rgba(255,255,255,.55)}
+.goal{font-size:11px;opacity:.82;margin-top:8px;display:flex;align-items:center;gap:6px}
+.goal svg{width:12px;height:12px;opacity:.9}
+
+/* footer of card: podium pills + cta */
+.card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:15px;padding-top:13px;border-top:1px solid rgba(255,255,255,.16)}
+.podium-mini{display:flex;align-items:center}
+.podium-mini .pm{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans';font-weight:800;font-size:11px;color:#1a1430;margin-left:-9px;border:2px solid rgba(255,255,255,.85);box-shadow:0 4px 10px rgba(0,0,0,.25);position:relative}
+.podium-mini .pm:first-child{margin-left:0}
+.podium-mini .pm .cr{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:11px}
+.pm.g{background:linear-gradient(160deg,#ffe7a3,#f7b32b 60%,#e08e0b)}
+.pm.s{background:linear-gradient(160deg,#eef2f8,#b9c2d0 60%,#94a0b3)}
+.pm.b{background:linear-gradient(160deg,#f0d6c2,#cd8b5b 60%,#a96a3d)}
+.podium-mini .cap{margin-left:11px;font-size:10.5px;opacity:.8;line-height:1.25}
+.podium-mini .cap b{display:block;font-weight:700;opacity:1}
+.cta{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);padding:9px 12px;border-radius:13px;box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.cta svg{width:13px;height:13px}
+
+/* footer note */
+.foot-note{text-align:center;font-size:11px;color:var(--mu);padding:0 24px 90px;line-height:1.5}
+.foot-note b{color:var(--ink);font-weight:700}
+
+/* fake bottom nav */
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:78px;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-top:1px solid var(--bo);display:flex;justify-content:space-around;align-items:flex-start;padding-top:11px;z-index:40}
+.tabbar a{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--mu);text-decoration:none}
+.tabbar a svg{width:22px;height:22px}
+.tabbar a.on{color:var(--a)}
+.tabbar a.on .pip{width:5px;height:5px;border-radius:99px;background:var(--a);position:absolute;margin-top:-16px}
+
+/* ===== bottom sheet ===== */
+.scrim{position:absolute;inset:0;background:rgba(8,6,28,.5);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:80}
+.scrim.show{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;background:var(--su);border-radius:28px 28px 0 0;transform:translateY(102%);transition:transform .42s cubic-bezier(.16,.84,.3,1);z-index:90;display:flex;flex-direction:column;box-shadow:0 -20px 50px -16px rgba(20,12,60,.4)}
+.sheet.show{transform:translateY(0)}
+.sheet .grab{width:42px;height:5px;border-radius:99px;background:var(--bo);margin:10px auto 4px}
+.sheet-hd{padding:6px 20px 12px;border-bottom:1px solid var(--bo)}
+.sheet-hd .row1{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sheet-hd .ttl{font-family:'Plus Jakarta Sans';font-weight:800;font-size:18px;display:flex;align-items:center;gap:9px}
+.sheet-hd .ttl .dot{width:9px;height:9px;border-radius:99px}
+.sheet-hd .x{width:32px;height:32px;border-radius:10px;background:var(--page);border:1px solid var(--bo);display:flex;align-items:center;justify-content:center;color:var(--mu);cursor:pointer}
+.sheet-hd .x svg{width:15px;height:15px}
+.sheet-hd .row2{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px}
+.tier-pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;padding:6px 11px 6px 7px;border-radius:99px;color:#fff}
+.tier-pill .crest{width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.tier-pill .crest svg{width:11px;height:11px}
+.timer{font-size:11px;color:var(--mu);display:inline-flex;align-items:center;gap:5px}
+.timer svg{width:12px;height:12px}
+
+/* scope toggle */
+.scope{display:flex;gap:4px;background:var(--page);border:1px solid var(--bo);border-radius:12px;padding:4px;margin:12px 20px 4px}
+.scope button{flex:1;border:0;background:transparent;font-family:'Inter';font-size:12px;font-weight:700;color:var(--mu);padding:8px 0;border-radius:9px;cursor:pointer;transition:.15s}
+.scope button.on{background:var(--su);color:var(--ink);box-shadow:0 2px 8px -3px rgba(0,0,0,.2)}
+.scope button .n{font-weight:600;color:var(--mu);font-size:10.5px;margin-left:4px}
+
+.list{overflow-y:auto;padding:6px 14px 12px;flex:1}
+.list::-webkit-scrollbar{display:none}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:9px;padding:18px 8px 14px}
+.pcol{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1;max-width:96px}
+.pcol .pav{border-radius:16px;color:#fff;font-family:'Plus Jakarta Sans';font-weight:800;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 10px 22px -10px rgba(20,12,60,.5),inset 0 1px 0 rgba(255,255,255,.3)}
+.pcol.first .pav{width:66px;height:66px;font-size:19px}
+.pcol.second .pav,.pcol.third .pav{width:54px;height:54px;font-size:16px}
+.pcol .crown{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-size:18px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
+.pcol .ring{position:absolute;inset:-4px;border-radius:19px;border:2.5px solid;pointer-events:none}
+.r-g{border-color:var(--gold)} .r-s{border-color:var(--silver)} .r-b{border-color:var(--bronze)}
+.pcol .nm{font-size:11.5px;font-weight:700;text-align:center;line-height:1.15;max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}
+.pcol .sc{font-family:'Plus Jakarta Sans';font-weight:800;font-size:13px}
+.pcol .sc small{font-weight:700;font-size:10px;color:var(--mu)}
+.pcol .pedestal{width:100%;border-radius:12px 12px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:7px;font-family:'Plus Jakarta Sans';font-weight:800;color:#fff;font-size:13px;margin-top:2px}
+.pcol.first .pedestal{height:42px}.pcol.second .pedestal{height:30px}.pcol.third .pedestal{height:22px}
+
+.sec-lbl{font-size:10.5px;font-weight:700;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;padding:8px 8px 6px}
+.li{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:14px;transition:background .15s;cursor:pointer}
+.li:active{background:var(--page)}
+.li+.li{margin-top:1px}
+.li .rk{width:22px;text-align:center;font-family:'Plus Jakarta Sans';font-weight:800;font-size:13px;color:var(--mu);flex:0 0 auto}
+.li .av{width:38px;height:38px;border-radius:12px;color:#fff;font-family:'Plus Jakarta Sans';font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.li .nm{flex:1;min-width:0}
+.li .nm b{font-size:13.5px;font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .nm span{font-size:11px;color:var(--mu)}
+.li .sc{font-family:'Plus Jakarta Sans';font-weight:800;font-size:15px;text-align:right;flex:0 0 auto}
+.li .sc small{font-weight:700;font-size:10.5px;color:var(--mu)}
+.li .dl{flex:0 0 auto;width:18px;text-align:center}
+.li .dl svg{width:11px;height:11px}
+.dl.up{color:var(--up)}.dl.dn{color:var(--dn)}.dl.flat{color:var(--mu)}
+
+/* my row (in flow) */
+.li.me{background:linear-gradient(90deg,rgba(109,77,255,.1),rgba(109,77,255,.03));position:relative}
+.li.me.rev{background:linear-gradient(90deg,rgba(37,99,235,.1),rgba(37,99,235,.03))}
+.li.me::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3.5px;border-radius:99px;background:var(--a)}
+.li.me.rev::before{background:var(--rev)}
+.li.me .nm b{color:var(--a)} .li.me.rev .nm b{color:var(--rev)}
+.li .chev{width:24px;height:24px;border-radius:99px;background:var(--a);display:none;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 4px 10px -3px var(--a)}
+.li.me.rev .chev{background:var(--rev);box-shadow:0 4px 10px -3px var(--rev)}
+.li.me .chev{display:flex} .li.me .dl{display:none}
+.li .chev svg{width:13px;height:13px;color:#fff}
+
+/* sticky me at bottom */
+.me-dock{border-top:1px solid var(--bo);background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:10px 16px calc(12px + env(safe-area-inset-bottom))}
+.me-dock .li{cursor:default}
+.me-dock .gap{font-size:11.5px;color:var(--mu);padding:0 10px 7px;font-weight:600}
+.me-dock .gap b{color:var(--a);font-weight:800}
+.me-dock.rev .gap b{color:var(--rev)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"></div>
+
+  <div class="scroll">
+    <!-- status bar -->
+    <div class="status">
+      <span>9:41</span>
+      <span class="dots"><i></i><i style="opacity:.5"></i><i class="bat"></i></span>
+    </div>
+
+    <!-- header -->
+    <div class="hdr">
+      <div class="eyebrow">
+        Tes ligues
+        <span class="liv"><b></b>en direct</span>
+      </div>
+      <h1>Ta place cette semaine</h1>
+      <div class="sub">Deux défis : ta conduite validée, et tes révisions en autonomie.</div>
+
+      <div class="me-row">
+        <div class="av">LS</div>
+        <div class="who">
+          <b>Latifa S. · Toi</b>
+          <span>Auto-école · 12 camarades</span>
+        </div>
+        <div class="cycle">se termine dans<b>2 jours</b></div>
+      </div>
+    </div>
+
+    <!-- league cards -->
+    <div class="cards">
+
+      <!-- ===== CONDUITE ===== -->
+      <div class="card conduite" onclick="openSheet('cond')">
+        <div class="tex"></div>
+        <div class="road">
+          <svg viewBox="0 0 200 200" fill="none"><path d="M20 200 C 40 120, 150 130, 120 60 C 100 20, 160 10, 190 0" stroke="rgba(255,255,255,.5)" stroke-width="9" stroke-linecap="round" stroke-dasharray="2 16"/><path d="M20 200 C 40 120, 150 130, 120 60 C 100 20, 160 10, 190 0" stroke="rgba(255,255,255,.18)" stroke-width="22" stroke-linecap="round"/></svg>
+        </div>
+
+        <div class="card-top">
+          <div class="lg-name">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M5 11l1.5-4.5A2 2 0 018.4 5h7.2a2 2 0 011.9 1.5L19 11M5 11h14M5 11v6m14-6v6M7 17h0m10 0h0" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>Ligue Conduite
+              <small>Validée par ton moniteur · /31</small>
+            </span>
+          </div>
+          <span class="tier"><span class="crest c-cond"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.9 7.2 17l.9-5.4L4.2 7.7l5.4-.8L12 2z" fill="#fff"/></svg></span>Conduite autonome</span>
+        </div>
+
+        <div class="hero">
+          <div class="rk"><span class="hash">#</span><span class="n num">3</span></div>
+          <div class="meta">
+            <div class="of">sur 12 à ton école</div>
+            <span class="delta up"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M12 5l-6 6M12 5l6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>+1 place</span>
+          </div>
+        </div>
+
+        <div class="scoreline">
+          <span class="lbl">Compétences validées</span>
+          <span class="val num">24<small>/31</small></span>
+        </div>
+        <div class="bar"><i style="width:77%"></i></div>
+        <div class="goal"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Plus que 5 pour le permis en poche (31/31)</div>
+
+        <div class="card-foot">
+          <div class="podium-mini">
+            <span class="pm g">KB<span class="cr">👑</span></span>
+            <span class="pm s">IM</span>
+            <span class="pm b">LS</span>
+            <span class="cap"><b>Karim mène · 29</b>Inès 27 · toi 24</span>
+          </div>
+          <span class="cta">Classement<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </div>
+
+      <!-- ===== RÉVISION ===== -->
+      <div class="card revision" onclick="openSheet('rev')">
+        <div class="tex"></div>
+        <div class="road">
+          <svg viewBox="0 0 200 200" fill="none"><path d="M20 200 C 40 120, 150 130, 120 60 C 100 20, 160 10, 190 0" stroke="rgba(255,255,255,.5)" stroke-width="9" stroke-linecap="round" stroke-dasharray="2 16"/><path d="M20 200 C 40 120, 150 130, 120 60 C 100 20, 160 10, 190 0" stroke="rgba(255,255,255,.18)" stroke-width="22" stroke-linecap="round"/></svg>
+        </div>
+
+        <div class="card-top">
+          <div class="lg-name">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5a2 2 0 012-2h7v18H6a2 2 0 01-2-2V5zM20 5a2 2 0 00-2-2h-5v18h5a2 2 0 002-2V5z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+            <span>Ligue Révision
+              <small>Ton effort en autonomie · /50</small>
+            </span>
+          </div>
+          <span class="tier"><span class="crest c-rev"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.9 7.2 17l.9-5.4L4.2 7.7l5.4-.8L12 2z" fill="#fff"/></svg></span>Confirmé</span>
+        </div>
+
+        <div class="hero">
+          <div class="rk"><span class="hash">#</span><span class="n num">1</span></div>
+          <div class="meta">
+            <div class="of">sur 46 à ton école</div>
+            <span class="delta flat"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>tu gardes la 1re place</span>
+          </div>
+        </div>
+
+        <div class="scoreline">
+          <span class="lbl">Quiz + examens blancs réussis</span>
+          <span class="val num">38<small>/50</small></span>
+        </div>
+        <div class="bar"><i style="width:76%"></i></div>
+        <div class="goal"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Plus que 4 pour « Révision maîtrisée »</div>
+
+        <div class="card-foot">
+          <div class="podium-mini">
+            <span class="pm g">LS<span class="cr">👑</span></span>
+            <span class="pm s">YK</span>
+            <span class="pm b">ET</span>
+            <span class="cap"><b>Tu mènes · 38</b>Yanis 35 · Emma 33</span>
+          </div>
+          <span class="cta">Classement<svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot-note">Touche une carte pour voir le <b>classement complet</b>.<br>Conduite = en voiture, validée par un humain. Révision = tes quiz en solo.</div>
+
+    <!-- bottom nav -->
+    <div class="tabbar">
+      <a href="#"><svg viewBox="0 0 24 24" fill="none"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 001 1h12a1 1 0 001-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Accueil</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5m0 14h16M8 19v-6m4 6V9m4 10v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Parcours</a>
+      <a href="#" class="on"><span class="pip"></span><svg viewBox="0 0 24 24" fill="none"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 01-10 0V4zM7 5H4v2a3 3 0 003 3M17 5h3v2a3 3 0 01-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ligues</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Profil</a>
+    </div>
+  </div>
+
+  <!-- ===== SCRIM + SHEET ===== -->
+  <div class="scrim" id="scrim" onclick="closeSheet()"></div>
+
+  <div class="sheet" id="sheet">
+    <div class="grab"></div>
+    <div class="sheet-hd">
+      <div class="row1">
+        <div class="ttl"><span class="dot" id="sh-dot"></span><span id="sh-title">Ligue Conduite</span></div>
+        <div class="x" onclick="closeSheet()"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="row2">
+        <span class="tier-pill" id="sh-tier"></span>
+        <span class="timer"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 9v4l2.5 2.5M9 2h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>se termine dans 2 j</span>
+      </div>
+    </div>
+
+    <div class="scope">
+      <button class="on" data-scope="ecole">Mon école <span class="n" id="sc-ecole">· 12</span></button>
+      <button data-scope="nat">National <span class="n">· 14 320</span></button>
+    </div>
+
+    <div class="list" id="sh-list"></div>
+
+    <div class="me-dock" id="sh-dock"></div>
+  </div>
+</div>
+
+<script>
+/* ---- data ---- */
+const grad = {
+  // varied avatar gradients (neutral-ish, accent kept for "me")
+  KB:'linear-gradient(135deg,#34d399,#0f9d63)', IM:'linear-gradient(135deg,#fb7185,#be123c)',
+  LS:'linear-gradient(135deg,#7c5cff,#4a2fc4)', LP:'linear-gradient(135deg,#fbbf24,#d97706)',
+  SD:'linear-gradient(135deg,#22d3ee,#0e7490)', HL:'linear-gradient(135deg,#a78bfa,#6d28d9)',
+  MA:'linear-gradient(135deg,#f472b6,#9d174d)', CR:'linear-gradient(135deg,#60a5fa,#1e40af)',
+  YK:'linear-gradient(135deg,#f59e0b,#b45309)', ET:'linear-gradient(135deg,#34d399,#047857)',
+  NB:'linear-gradient(135deg,#818cf8,#3730a3)', LF:'linear-gradient(135deg,#fb923c,#c2410c)',
+  AS:'linear-gradient(135deg,#2dd4bf,#0f766e)'
+};
+function av(init){return grad[init]||'linear-gradient(135deg,#94a3b8,#475569)';}
+
+const DATA = {
+  cond:{
+    title:'Ligue Conduite', accent:'#6d4dff',
+    tier:{txt:'Conduite autonome', bg:'linear-gradient(135deg,#7b5cff,#4a2fc4)', crest:'c-cond'},
+    out:'31', me:'LS', meRank:3,
+    gap:'Il te manque <b>3</b> pour repasser 2e.',
+    rows:[
+      {r:1,i:'KB',n:'Karim B.',s:29,d:'flat'},
+      {r:2,i:'IM',n:'Inès M.',s:27,d:'up'},
+      {r:3,i:'LS',n:'Latifa S. · Toi',s:24,d:'up',me:1},
+      {r:4,i:'LP',n:'Lucas P.',s:22,d:'flat'},
+      {r:5,i:'SD',n:'Sofia D.',s:20,d:'up'},
+      {r:6,i:'HL',n:'Hugo L.',s:19,d:'dn'},
+      {r:7,i:'MA',n:'Mehdi A.',s:17,d:'flat'},
+      {r:8,i:'CR',n:'Chloé R.',s:15,d:'up'},
+    ]
+  },
+  rev:{
+    title:'Ligue Révision', accent:'#2563eb',
+    tier:{txt:'Confirmé', bg:'linear-gradient(135deg,#3b82f6,#1d4ed8)', crest:'c-rev'},
+    out:'50', me:'LS', meRank:1,
+    gap:'Tu mènes — <b>4</b> de plus = « Révision maîtrisée ».',
+    rows:[
+      {r:1,i:'LS',n:'Latifa S. · Toi',s:38,d:'flat',me:1},
+      {r:2,i:'YK',n:'Yanis K.',s:35,d:'up'},
+      {r:3,i:'ET',n:'Emma T.',s:33,d:'up'},
+      {r:4,i:'NB',n:'Noah B.',s:30,d:'flat'},
+      {r:5,i:'LF',n:'Léa F.',s:28,d:'up'},
+      {r:6,i:'AS',n:'Adam S.',s:26,d:'dn'},
+    ]
+  }
+};
+
+const ARROW={
+  up:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M12 5l-5 5M12 5l5 5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  dn:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 19V5M12 19l-5-5M12 19l5-5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  flat:'<svg viewBox="0 0 24 24" fill="none"><path d="M6 12h12" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>'
+};
+const MEDAL=['g','s','b'];
+
+function buildSheet(key){
+  const d=DATA[key], isRev=key==='rev';
+  document.getElementById('sh-title').textContent=d.title;
+  document.getElementById('sh-dot').style.background=d.accent;
+  document.getElementById('sc-ecole').textContent = '· '+ (isRev?'46':'12');
+  const tier=document.getElementById('sh-tier');
+  tier.style.background=d.tier.bg;
+  tier.innerHTML='<span class="crest '+d.tier.crest+'"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.9 7.2 17l.9-5.4L4.2 7.7l5.4-.8L12 2z" fill="#fff"/></svg></span>'+d.tier.txt;
+
+  // podium top3
+  const t3=d.rows.slice(0,3);
+  const order=[1,0,2]; // 2nd, 1st, 3rd visual order
+  const cls=['second','first','third'], ring=['r-s','r-g','r-b'], ped=['s','b','g'];
+  const pedColor={g:'linear-gradient(160deg,#ffe7a3,#f7b32b 60%,#e08e0b)',s:'linear-gradient(160deg,#eef2f8,#b9c2d0 60%,#94a0b3)',b:'linear-gradient(160deg,#f0d6c2,#cd8b5b 60%,#a96a3d)'};
+  const pedMap={second:'s',first:'g',third:'b'};
+  let podium='<div class="podium">';
+  order.forEach((idx,vis)=>{
+    const row=t3[idx]; if(!row) return;
+    const pos=cls[vis];
+    const crown = pos==='first'?'<span class="crown">👑</span>':'';
+    const rcls = pos==='first'?'r-g':(pos==='second'?'r-s':'r-b');
+    const meHalo = row.me ? 'box-shadow:0 0 0 3px '+d.accent+'55,0 10px 22px -10px rgba(20,12,60,.5);' : '';
+    const nm = row.n.replace(' · Toi',''), meTag = row.me?' · Toi':'';
+    podium+='<div class="pcol '+pos+'">'
+      +'<div class="pav" style="background:'+av(row.i)+';'+meHalo+'">'+crown+'<span class="ring '+rcls+'"></span>'+row.i+'</div>'
+      +'<div class="nm">'+nm+(meTag?'<span style="color:'+d.accent+'">'+meTag+'</span>':'')+'</div>'
+      +'<div class="sc num">'+row.s+'<small>/'+d.out+'</small></div>'
+      +'<div class="pedestal" style="background:'+pedColor[pedMap[pos]]+'">'+row.r+'</div>'
+      +'</div>';
+  });
+  podium+='</div>';
+
+  // rest list (4+)
+  let rest='<div class="sec-lbl">À partir de la 4e place</div>';
+  d.rows.slice(3).forEach(row=>{
+    rest+=liHTML(row,d,isRev,false);
+  });
+
+  document.getElementById('sh-list').innerHTML=podium+rest;
+
+  // sticky dock = me row
+  const meRow=d.rows.find(r=>r.me);
+  const dock=document.getElementById('sh-dock');
+  dock.className='me-dock'+(isRev?' rev':'');
+  dock.innerHTML='<div class="gap">'+d.gap+'</div>'+liHTML(meRow,d,isRev,true);
+}
+
+function liHTML(row,d,isRev,dock){
+  const meCls = row.me ? (' me'+(isRev?' rev':'')) : '';
+  const nm = row.n.replace(' · Toi',''), meTag = row.me?' <span style="font-weight:600">· Toi</span>':'';
+  const right = row.me
+    ? '<span class="chev"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+    : '<span class="dl '+row.d+'">'+ARROW[row.d]+'</span>';
+  const sub = row.me ? '<span>ta ligne</span>' : '';
+  return '<div class="li'+meCls+'">'
+    +'<span class="rk num">'+row.r+'</span>'
+    +'<span class="av" style="background:'+av(row.i)+'">'+row.i+'</span>'
+    +'<span class="nm"><b>'+nm+meTag+'</b>'+sub+'</span>'
+    +'<span class="sc num">'+row.s+'<small>/'+d.out+'</small></span>'
+    + right
+    +'</div>';
+}
+
+let cur='cond';
+function openSheet(key){
+  cur=key; buildSheet(key);
+  document.getElementById('scrim').classList.add('show');
+  document.getElementById('sheet').classList.add('show');
+}
+function closeSheet(){
+  document.getElementById('scrim').classList.remove('show');
+  document.getElementById('sheet').classList.remove('show');
+}
+/* scope toggle (visual only) */
+document.querySelectorAll('.scope button').forEach(b=>{
+  b.onclick=()=>{document.querySelectorAll('.scope button').forEach(x=>x.classList.remove('on'));b.classList.add('on');};
+});
+</script>
+</body>
+</html>

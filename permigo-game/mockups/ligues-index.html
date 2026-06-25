@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PermiGo — 4 directions de classement (ligues)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --a:#6d4dff; --adk:#4a2fc4; --page:#f4f5fb; --su:#fff; --bo:#e2e6f2; --ink:#0b0d1a; --mu:#6b7280; }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--page);color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  header{max-width:1100px;margin:0 auto;padding:40px 24px 8px}
+  .kick{font:700 12px/1 'Inter';letter-spacing:.16em;text-transform:uppercase;color:var(--a)}
+  h1{font:800 30px/1.15 'Plus Jakarta Sans';letter-spacing:-.02em;margin:10px 0 6px}
+  .sub{color:var(--mu);font-size:15px;max-width:680px;line-height:1.6}
+  .grid{max-width:1100px;margin:0 auto;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px}
+  .card{background:var(--su);border:1px solid var(--bo);border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;
+        box-shadow:0 8px 24px -14px rgba(30,30,60,.25);transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 34px -16px rgba(80,60,200,.35);border-color:color-mix(in srgb,var(--a) 40%,var(--bo))}
+  .thumb{aspect-ratio:9/16;background:#0e0a23 center top/cover no-repeat;border-bottom:1px solid var(--bo)}
+  .num{position:absolute;margin:10px;width:30px;height:30px;border-radius:50%;background:var(--a);color:#fff;font:800 14px/30px 'Plus Jakarta Sans';text-align:center}
+  .body{padding:14px 15px 16px}
+  .ttl{font:800 16px/1.25 'Plus Jakarta Sans';margin:0 0 6px}
+  .pitch{color:var(--mu);font-size:13px;line-height:1.5}
+  .tag{display:inline-block;margin-top:10px;font:700 11px/1 'Inter';color:var(--a);background:color-mix(in srgb,var(--a) 10%,transparent);
+       border:1px solid color-mix(in srgb,var(--a) 22%,transparent);border-radius:99px;padding:5px 10px}
+</style>
+</head>
+<body>
+  <header>
+    <div class="kick">PermiGo · Élève</div>
+    <h1>Classement — 4 directions premium</h1>
+    <p class="sub">Deux ligues à mettre en avant à égalité : <b>Conduite</b> (validations moniteur, /31) et <b>Révision</b> (effort solo, /50). Clique une carte pour ouvrir le mockup plein écran (390px).</p>
+  </header>
+  <div class="grid">
+    <a class="card" href="ligue-1-arene-podium.html"><div style="position:relative"><span class="num">1</span></div>
+      <iframe src="ligue-1-arene-podium.html" style="width:100%;aspect-ratio:9/16;border:0;border-bottom:1px solid var(--bo)" loading="lazy" scrolling="no"></iframe>
+      <div class="body"><div class="ttl">Arène Podium</div><div class="pitch">Plein écran sombre type Supercell : podium 3D, couronne, ligne « Toi » épinglée à halo. Bascule Conduite/Révision.</div><span class="tag">Énergie jeu · page Classement</span></div></a>
+    <a class="card" href="ligue-2-divisions-promotion.html"><div style="position:relative"><span class="num">2</span></div>
+      <iframe src="ligue-2-divisions-promotion.html" style="width:100%;aspect-ratio:9/16;border:0;border-bottom:1px solid var(--bo)" loading="lazy" scrolling="no"></iframe>
+      <div class="body"><div class="ttl">Divisions &amp; Promotion</div><div class="pitch">Clair, type Duolingo Leagues : écusson de palier, zone de promotion verte, ta ligne épinglée, barre vers le palier suivant.</div><span class="tag">Clarté · compétition</span></div></a>
+    <a class="card" href="ligue-3-stat-athletique.html"><div style="position:relative"><span class="num">3</span></div>
+      <iframe src="ligue-3-stat-athletique.html" style="width:100%;aspect-ratio:9/16;border:0;border-bottom:1px solid var(--bo)" loading="lazy" scrolling="no"></iframe>
+      <div class="body"><div class="ttl">Carte Stat Athlétique</div><div class="pitch">Éditorial, type Strava/Apple Fitness : ta place en chiffre héros + delta semaine + sparkline. Les 2 ligues en 2 blocs, sans onglets.</div><span class="tag">Motivation · progression</span></div></a>
+    <a class="card" href="ligue-4-cartes-glass.html"><div style="position:relative"><span class="num">4</span></div>
+      <iframe src="ligue-4-cartes-glass.html" style="width:100%;aspect-ratio:9/16;border:0;border-bottom:1px solid var(--bo)" loading="lazy" scrolling="no"></iframe>
+      <div class="body"><div class="ttl">Cartes Ligues Glass + Feuille</div><div class="pitch">Fintech premium : 2 cartes glass (accueil) → bottom-sheet de classement complet au tap. Raffine le pattern carte d'accueil actuel.</div><span class="tag">Accueil · raffinement direct</span></div></a>
+  </div>
+</body>
+</html>
