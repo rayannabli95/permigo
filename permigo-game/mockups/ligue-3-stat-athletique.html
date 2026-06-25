@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>PermiGo — Classements · Carte Stat Athlétique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Accents */
+    --a:#6d4dff; --adk:#4a2fc4; --a-lt:#a78bff;
+    --gold:#f7b32b; --gold-dk:#e08e0b; --silver:#b9c2d0; --bronze:#cd8b5b;
+    /* Révision — échelle bleue */
+    --b1:#93c5fd; --b2:#60a5fa; --b3:#3b82f6; --b4:#2563eb; --b5:#1d4ed8;
+    /* Neutres */
+    --page:#f4f5fb; --su:#ffffff; --bo:#e2e6f2; --ink:#0b0d1a; --mu:#6b7280;
+    --up:#15803d; --down:#c43d3d;
+    --mono:'Plus Jakarta Sans','Inter',system-ui,sans-serif;
+    --tnum:"tnum" 1,"lnum" 1;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #eef0fb 0%, transparent 60%),
+      #e9ebf4;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; padding:32px 16px;
+  }
+  .tnum{font-variant-numeric:tabular-nums lining-nums; font-feature-settings:var(--tnum)}
+
+  /* ---------- Phone frame ---------- */
+  .phone{
+    width:390px; background:var(--page);
+    border-radius:42px;
+    box-shadow:0 40px 90px -30px rgba(20,18,60,.45), 0 8px 24px -12px rgba(20,18,60,.2);
+    overflow:hidden; position:relative;
+    border:1px solid rgba(255,255,255,.7);
+  }
+  .status{
+    height:48px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 26px 0 30px; font-size:14px; font-weight:700; color:var(--ink);
+    font-family:var(--mono);
+  }
+  .status .dots{display:flex; gap:5px; align-items:center}
+  .status .bars{display:flex; gap:2px; align-items:flex-end; height:11px}
+  .status .bars i{width:3px; background:var(--ink); border-radius:1px}
+  .status .bars i:nth-child(1){height:4px} .status .bars i:nth-child(2){height:6px}
+  .status .bars i:nth-child(3){height:8px} .status .bars i:nth-child(4){height:11px}
+  .batt{width:22px;height:11px;border:1.5px solid var(--ink);border-radius:3px;position:relative;opacity:.9}
+  .batt::after{content:"";position:absolute;right:-3px;top:3px;width:2px;height:5px;background:var(--ink);border-radius:0 1px 1px 0}
+  .batt i{position:absolute;inset:1.5px;width:70%;background:var(--ink);border-radius:1px}
+
+  /* ---------- Header ---------- */
+  .hd{padding:6px 24px 18px}
+  .hd .kick{font:700 12px/1 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--a); opacity:.85}
+  .hd h1{font:800 27px/1.1 var(--mono); letter-spacing:-.02em; margin-top:8px}
+  .hd .sub{margin-top:7px; color:var(--mu); font-size:13.5px; font-weight:500}
+
+  /* Scope toggle */
+  .scope{
+    margin:16px 24px 0; display:flex; gap:4px; padding:4px;
+    background:#e7e9f4; border-radius:13px;
+  }
+  .scope button{
+    flex:1; border:0; background:transparent; cursor:pointer;
+    font:700 13px/1 var(--mono); color:var(--mu); padding:9px 0; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    transition:.18s;
+  }
+  .scope button.on{background:var(--su); color:var(--ink); box-shadow:0 2px 8px -3px rgba(20,18,60,.25)}
+  .scope button .pin{font-size:13px}
+
+  .feed{padding:18px 16px 28px}
+
+  /* ---------- Stat block (card) ---------- */
+  .block{
+    background:var(--su); border-radius:24px; padding:20px 18px 16px;
+    box-shadow:0 18px 40px -26px rgba(20,18,60,.35), 0 2px 6px -3px rgba(20,18,60,.12);
+    position:relative; overflow:hidden;
+  }
+  .block + .block{margin-top:18px}
+  /* top hairline accent */
+  .block::before{content:""; position:absolute; left:0; right:0; top:0; height:3px}
+  .block.conduite::before{background:linear-gradient(90deg,var(--a),var(--a-lt))}
+  .block.revision::before{background:linear-gradient(90deg,var(--b5),var(--b2))}
+
+  .blockHd{display:flex; align-items:flex-start; justify-content:space-between; gap:12px}
+  .blockHd .lbl{display:flex; align-items:center; gap:10px}
+  .ico{
+    width:38px; height:38px; border-radius:11px; display:grid; place-items:center;
+    flex:0 0 auto; box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+  }
+  .conduite .ico{background:linear-gradient(160deg,#f0ecff,#e4dcff); color:var(--adk)}
+  .revision .ico{background:linear-gradient(160deg,#e8f1ff,#d8e6ff); color:var(--b5)}
+  .ico svg{width:21px;height:21px}
+  .blockHd .name{font:800 16px/1.15 var(--mono); letter-spacing:-.01em}
+  .blockHd .dim{font-size:11.5px; color:var(--mu); font-weight:600; margin-top:3px; letter-spacing:.01em}
+
+  /* tier badge — engraved metal pill */
+  .tier{
+    display:inline-flex; align-items:center; gap:6px; flex:0 0 auto;
+    padding:6px 11px 6px 9px; border-radius:999px; font:700 11.5px/1 var(--mono);
+    letter-spacing:.01em; box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 1px 2px rgba(20,18,60,.12);
+    white-space:nowrap;
+  }
+  .tier .gem{width:13px;height:13px;border-radius:4px; box-shadow:inset 0 1px 1px rgba(255,255,255,.6), inset 0 -1px 2px rgba(0,0,0,.18)}
+  .tier.cv{background:linear-gradient(160deg,#efeaff,#e1d8ff); color:var(--adk); border:1px solid #d6cbff}
+  .tier.cv .gem{background:linear-gradient(160deg,var(--a-lt),var(--adk))}
+  .tier.rv{background:linear-gradient(160deg,#e7f0ff,#d6e6ff); color:var(--b5); border:1px solid #cadcff}
+  .tier.rv .gem{background:linear-gradient(160deg,var(--b3),var(--b5))}
+
+  /* hero rank row */
+  .hero{display:flex; align-items:flex-end; gap:18px; margin-top:16px; padding:0 2px}
+  .rankWrap{display:flex; flex-direction:column; line-height:1}
+  .rankBig{
+    font:800 64px/.82 var(--mono); letter-spacing:-.04em; display:flex; align-items:flex-start;
+  }
+  .rankBig .hash{font-size:30px; font-weight:700; color:var(--mu); margin-right:3px; margin-top:6px}
+  .conduite .rankBig{color:var(--ink)}
+  .revision .rankBig{color:var(--ink)}
+  .rankMeta{display:flex; align-items:center; gap:9px; margin-top:11px}
+  .ofN{font-size:12.5px; color:var(--mu); font-weight:600}
+  .delta{display:inline-flex; align-items:center; gap:3px; font:700 12px/1 var(--mono); padding:3px 8px; border-radius:999px}
+  .delta.up{color:var(--up); background:#e7f3ec}
+  .delta.flat{color:var(--mu); background:#eef0f5}
+  .delta svg{width:11px;height:11px}
+
+  /* sparkline */
+  .spark{flex:1; min-width:0; align-self:stretch; display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:4px}
+  .spark .cap{font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--mu); opacity:.8; margin-bottom:6px; text-align:right}
+  .spark svg{width:100%; height:44px; display:block; overflow:visible}
+
+  /* self comparison line */
+  .selfline{
+    margin-top:16px; display:flex; align-items:center; justify-content:space-between;
+    padding:11px 13px; border-radius:14px; background:var(--page);
+    border:1px solid var(--bo);
+  }
+  .selfline .who{display:flex; align-items:center; gap:10px}
+  .av{
+    width:30px;height:30px;border-radius:50%; display:grid; place-items:center;
+    font:800 11px/1 var(--mono); color:#fff; flex:0 0 auto;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .conduite .av.me{background:linear-gradient(150deg,var(--a-lt),var(--adk))}
+  .revision .av.me{background:linear-gradient(150deg,var(--b2),var(--b5))}
+  .selfline .lab{font-size:12.5px; color:var(--mu); font-weight:600}
+  .selfline .lab b{color:var(--ink); font-weight:800}
+  .selfline .score{text-align:right}
+  .selfline .score .big{font:800 18px/1 var(--mono); letter-spacing:-.01em}
+  .selfline .score .wk{font-size:11px; font-weight:700; color:var(--up); margin-top:3px}
+  .selfline .score .wk.flat{color:var(--mu)}
+
+  /* progress-to-next */
+  .prog{margin-top:13px}
+  .prog .top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px}
+  .prog .top .l{font-size:11.5px; color:var(--mu); font-weight:600}
+  .prog .top .l b{color:var(--ink); font-weight:800}
+  .prog .top .goal{display:inline-flex; align-items:center; gap:5px; font:700 11px/1 var(--mono)}
+  .prog .top .goal .dot{width:9px;height:9px;border-radius:50%}
+  .bar{height:8px; border-radius:999px; background:#eceefa; overflow:hidden; position:relative}
+  .bar i{position:absolute; left:0; top:0; bottom:0; border-radius:999px}
+  .conduite .bar i{background:linear-gradient(90deg,var(--a-lt),var(--a))}
+  .revision .bar i{background:linear-gradient(90deg,var(--b2),var(--b4))}
+  .conduite .prog .goal{color:var(--adk)} .conduite .prog .goal .dot{background:var(--a)}
+  .revision .prog .goal{color:var(--b5)} .revision .prog .goal .dot{background:var(--b4)}
+
+  /* mini podium */
+  .podium{margin-top:16px; padding-top:15px; border-top:1px solid var(--bo)}
+  .podium .ttl{font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--mu); opacity:.7; margin-bottom:12px}
+  .pods{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
+  .pod{
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding:11px 6px 10px; border-radius:15px; position:relative;
+    transition:.15s; cursor:pointer;
+  }
+  .pod:active{transform:scale(.97)}
+  .pod.medal{background:var(--page)}
+  .pod.me{background:#f2effe}
+  .revision .pod.me{background:#eef4ff}
+  .pod.me{box-shadow:inset 0 0 0 1.5px var(--a)}
+  .revision .pod.me{box-shadow:inset 0 0 0 1.5px var(--b3)}
+  .pod .crown{position:absolute; top:-9px; left:50%; transform:translateX(-50%); width:18px;height:18px; color:var(--gold-dk)}
+  .pAv{
+    width:48px;height:48px;border-radius:50%; display:grid; place-items:center;
+    font:800 16px/1 var(--mono); color:#fff; position:relative; margin-bottom:8px;
+    box-shadow:0 4px 10px -5px rgba(20,18,60,.4), inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .medalBadge{
+    position:absolute; bottom:-3px; right:-3px; width:20px;height:20px;border-radius:50%;
+    display:grid; place-items:center; font:800 10px/1 var(--mono); color:#fff;
+    border:2px solid var(--su); box-shadow:0 1px 3px rgba(0,0,0,.2);
+  }
+  .m1{background:linear-gradient(160deg,#fbe08a,var(--gold-dk))}
+  .m2{background:linear-gradient(160deg,#e2e8f0,var(--silver))}
+  .m3{background:linear-gradient(160deg,#e7c19a,var(--bronze))}
+  .pod .pn{font:700 12.5px/1.1 var(--mono); letter-spacing:-.01em; margin-bottom:5px}
+  .pod .ps{font:800 14px/1 var(--mono); letter-spacing:-.01em}
+  .pod .ps small{font-size:10px; font-weight:700; color:var(--mu)}
+  /* avatar fills */
+  .a-kar{background:linear-gradient(150deg,#7c6cf0,#3b2aa0)}
+  .a-ine{background:linear-gradient(150deg,#5eb0ff,#2563eb)}
+  .a-yan{background:linear-gradient(150deg,#34d399,#0f766e)}
+  .a-emm{background:linear-gradient(150deg,#fb923c,#c2410c)}
+
+  /* see-all link */
+  .seeall{
+    display:flex; align-items:center; justify-content:center; gap:7px;
+    margin-top:13px; padding:11px; border-radius:13px; cursor:pointer;
+    font:700 12.5px/1 var(--mono); color:var(--ink); background:var(--page);
+    border:1px solid var(--bo); transition:.15s;
+  }
+  .seeall:active{transform:scale(.985)}
+  .conduite .seeall:hover{color:var(--adk)} .revision .seeall:hover{color:var(--b5)}
+  .seeall .ch{width:15px;height:15px; opacity:.6}
+
+  /* cadence footer */
+  .cadence{
+    text-align:center; margin-top:20px; color:var(--mu); font-size:11.5px; font-weight:600;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .cadence svg{width:13px;height:13px; opacity:.7}
+
+  /* bottom nav */
+  .nav{
+    display:flex; justify-content:space-around; align-items:center;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom)); background:var(--su);
+    border-top:1px solid var(--bo);
+  }
+  .nav a{display:flex; flex-direction:column; align-items:center; gap:4px; color:#aeb4c6; text-decoration:none; font:700 10px/1 var(--mono)}
+  .nav a svg{width:23px;height:23px}
+  .nav a.on{color:var(--a)}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- status bar -->
+  <div class="status">
+    <span class="tnum">9:41</span>
+    <span class="dots">
+      <span class="bars"><i></i><i></i><i></i><i></i></span>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 2.5c2.2 0 4.2.8 5.8 2.2l1.2-1.3C13.6 1.6 11.1.6 8.5.6S3.4 1.6 1.5 3.4l1.2 1.3C4.3 3.3 6.3 2.5 8.5 2.5zM8.5 6c1.1 0 2.2.4 3 1.2l1.2-1.3C11.5 4.7 10 4 8.5 4S5.5 4.7 4.3 5.9L5.5 7.2C6.3 6.4 7.4 6 8.5 6zm0 3.4l1.6-1.7c-.4-.4-1-.6-1.6-.6s-1.2.2-1.6.6L8.5 9.4z"/></svg>
+      <span class="batt"><i></i></span>
+    </span>
+  </div>
+
+  <!-- header -->
+  <div class="hd">
+    <div class="kick">Tes classements</div>
+    <h1>Ta saison</h1>
+    <div class="sub">Deux efforts, deux ligues. La voiture et la révision.</div>
+  </div>
+
+  <!-- scope -->
+  <div class="scope">
+    <button class="on"><span class="pin">🏫</span> Mon école</button>
+    <button><span class="pin">🌍</span> National</button>
+  </div>
+
+  <div class="feed">
+
+    <!-- ============ BLOC CONDUITE ============ -->
+    <section class="block conduite">
+      <div class="blockHd">
+        <div class="lbl">
+          <div class="ico">
+            <!-- steering wheel -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/><path d="M12 9.4V3.1M9.7 13.4 4.6 17M14.3 13.4 19.4 17"/></svg>
+          </div>
+          <div>
+            <div class="name">Conduite</div>
+            <div class="dim">Validé par ton moniteur · /31</div>
+          </div>
+        </div>
+        <span class="tier cv"><span class="gem"></span>Conduite autonome</span>
+      </div>
+
+      <!-- hero -->
+      <div class="hero">
+        <div class="rankWrap">
+          <div class="rankBig tnum"><span class="hash">#</span>3</div>
+          <div class="rankMeta">
+            <span class="ofN tnum">sur 12 élèves</span>
+            <span class="delta up">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5V2.5M6 2.5 2.8 5.7M6 2.5 9.2 5.7"/></svg>
+              <span class="tnum">+1</span>
+            </span>
+          </div>
+        </div>
+        <div class="spark">
+          <div class="cap">6 dernières sem.</div>
+          <svg viewBox="0 0 160 44" preserveAspectRatio="none">
+            <defs><linearGradient id="cvFade" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#6d4dff" stop-opacity=".16"/><stop offset="1" stop-color="#6d4dff" stop-opacity="0"/></linearGradient></defs>
+            <path d="M2 38 L34 34 L66 30 L98 24 L130 16 L158 8 L158 44 L2 44 Z" fill="url(#cvFade)"/>
+            <path d="M2 38 L34 34 L66 30 L98 24 L130 16 L158 8" fill="none" stroke="#6d4dff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="158" cy="8" r="3.4" fill="#6d4dff" stroke="#fff" stroke-width="1.6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- self line -->
+      <div class="selfline">
+        <div class="who">
+          <span class="av me">LS</span>
+          <span class="lab"><b>Toi</b> · ton score</span>
+        </div>
+        <div class="score">
+          <div class="big tnum">24<small style="font-weight:700;color:var(--mu)">/31</small></div>
+          <div class="wk">+1 cette semaine</div>
+        </div>
+      </div>
+
+      <!-- progress to next -->
+      <div class="prog">
+        <div class="top">
+          <span class="l">Il te manque <b class="tnum">3</b> compétences pour passer <b>2e</b></span>
+          <span class="goal"><span class="dot"></span>31/31</span>
+        </div>
+        <div class="bar"><i style="width:77.4%"></i></div>
+      </div>
+
+      <!-- mini podium -->
+      <div class="podium">
+        <div class="ttl">Le podium · Mon école</div>
+        <div class="pods">
+          <div class="pod medal">
+            <svg class="crown" viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4.2 3.2L12 4l4.8 7.2L21 8l-1.6 9.6a1 1 0 0 1-1 .9H5.6a1 1 0 0 1-1-.9L3 8z"/></svg>
+            <div class="pAv a-kar">KB<span class="medalBadge m1">1</span></div>
+            <div class="pn">Karim B.</div>
+            <div class="ps tnum">29<small>/31</small></div>
+          </div>
+          <div class="pod medal">
+            <div class="pAv a-ine">IM<span class="medalBadge m2">2</span></div>
+            <div class="pn">Inès M.</div>
+            <div class="ps tnum">27<small>/31</small></div>
+          </div>
+          <div class="pod me">
+            <div class="pAv" style="background:linear-gradient(150deg,var(--a-lt),var(--adk))">LS<span class="medalBadge m3">3</span></div>
+            <div class="pn">Toi</div>
+            <div class="ps tnum">24<small>/31</small></div>
+          </div>
+        </div>
+        <div class="seeall">
+          Voir le classement complet
+          <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BLOC RÉVISION ============ -->
+    <section class="block revision">
+      <div class="blockHd">
+        <div class="lbl">
+          <div class="ico">
+            <!-- book -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.2A2.2 2.2 0 0 1 6.2 3H12v17H6.2A2.2 2.2 0 0 0 4 22.2V5.2z"/><path d="M20 5.2A2.2 2.2 0 0 0 17.8 3H12v17h5.8A2.2 2.2 0 0 1 20 22.2V5.2z"/></svg>
+          </div>
+          <div>
+            <div class="name">Révision</div>
+            <div class="dim">Ton effort en solo · /50</div>
+          </div>
+        </div>
+        <span class="tier rv"><span class="gem"></span>Confirmé</span>
+      </div>
+
+      <!-- hero -->
+      <div class="hero">
+        <div class="rankWrap">
+          <div class="rankBig tnum"><span class="hash">#</span>1</div>
+          <div class="rankMeta">
+            <span class="ofN tnum">sur 46 élèves</span>
+            <span class="delta flat">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 6h7"/></svg>
+              <span>1er maintenu</span>
+            </span>
+          </div>
+        </div>
+        <div class="spark">
+          <div class="cap">6 dernières sem.</div>
+          <svg viewBox="0 0 160 44" preserveAspectRatio="none">
+            <defs><linearGradient id="rvFade" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2563eb" stop-opacity=".16"/><stop offset="1" stop-color="#2563eb" stop-opacity="0"/></linearGradient></defs>
+            <path d="M2 36 L34 28 L66 30 L98 20 L130 14 L158 9 L158 44 L2 44 Z" fill="url(#rvFade)"/>
+            <path d="M2 36 L34 28 L66 30 L98 20 L130 14 L158 9" fill="none" stroke="#2563eb" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="158" cy="9" r="3.4" fill="#2563eb" stroke="#fff" stroke-width="1.6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- self line -->
+      <div class="selfline">
+        <div class="who">
+          <span class="av me">LS</span>
+          <span class="lab"><b>Toi</b> · ton score</span>
+        </div>
+        <div class="score">
+          <div class="big tnum">38<small style="font-weight:700;color:var(--mu)">/50</small></div>
+          <div class="wk flat">Tu gardes la tête</div>
+        </div>
+      </div>
+
+      <!-- progress to next -->
+      <div class="prog">
+        <div class="top">
+          <span class="l">Plus que <b class="tnum">4</b> pts pour « <b>Révision maîtrisée</b> »</span>
+          <span class="goal"><span class="dot"></span>42/50</span>
+        </div>
+        <div class="bar"><i style="width:76%"></i></div>
+      </div>
+
+      <!-- mini podium -->
+      <div class="podium">
+        <div class="ttl">Le podium · Mon école</div>
+        <div class="pods">
+          <div class="pod me">
+            <svg class="crown" viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4.2 3.2L12 4l4.8 7.2L21 8l-1.6 9.6a1 1 0 0 1-1 .9H5.6a1 1 0 0 1-1-.9L3 8z"/></svg>
+            <div class="pAv" style="background:linear-gradient(150deg,var(--b2),var(--b5))">LS<span class="medalBadge m1">1</span></div>
+            <div class="pn">Toi</div>
+            <div class="ps tnum">38<small>/50</small></div>
+          </div>
+          <div class="pod medal">
+            <div class="pAv a-yan">YK<span class="medalBadge m2">2</span></div>
+            <div class="pn">Yanis K.</div>
+            <div class="ps tnum">35<small>/50</small></div>
+          </div>
+          <div class="pod medal">
+            <div class="pAv a-emm">ET<span class="medalBadge m3">3</span></div>
+            <div class="pn">Emma T.</div>
+            <div class="ps tnum">33<small>/50</small></div>
+          </div>
+        </div>
+        <div class="seeall">
+          Voir le classement complet
+          <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- cadence -->
+    <div class="cadence">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      La semaine se termine dans 2 jours
+    </div>
+  </div>
+
+  <!-- bottom nav -->
+  <nav class="nav">
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>Accueil</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19V5M5 19h14M9 19v-7M14 19V9M19 19v-4"/></svg>Parcours</a>
+    <a href="#" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21V10M16 21v-7M4 21h16M4 21V8l4-3 4 3 4-2v15"/></svg>Classements</a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Profil</a>
+  </nav>
+
+</div>
+
+<script>
+  // Scope toggle (Mon école / National) — purement visuel pour le mockup
+  document.querySelectorAll('.scope button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.scope button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+    });
+  });
+</script>
+</body>
+</html>

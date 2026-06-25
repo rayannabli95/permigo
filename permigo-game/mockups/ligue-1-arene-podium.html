@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>PermiGo — Classement « Arène Podium »</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   PermiGo — Classement « Arène Podium »
+   Esprit Supercell / Clash Royale : nuit-violet, glow contenu.
+   Deux ligues (Conduite / Révision) — seul l'accent change.
+   ============================================================ */
+:root{
+  /* Accent CONDUITE (violet) */
+  --a:#6d4dff; --adk:#4a2fc4; --a-lt:#a78bff;
+  /* Accent RÉVISION (bleu monochrome) */
+  --rv:#2563eb; --rv-lt:#60a5fa; --rv-deep:#1d4ed8;
+  /* Métaux top-3 (désaturés) */
+  --gold:#f7b32b; --gold-dk:#e08e0b;
+  --silver:#b9c2d0; --silver-dk:#8d97a8;
+  --bronze:#cd8b5b; --bronze-dk:#a96a3c;
+  /* Nuit */
+  --n0:#0a0820; --n1:#13102f; --n2:#1b1742; --n3:#252050;
+  --ink:#f4f2ff; --ink-soft:#c7c2e8; --ink-mute:#9a93c8;
+  /* Sémantique */
+  --up:#3ddc84; --flat:#9a93c8;
+  /* Accent actif (piloté par data-ligue) */
+  --acc:var(--a); --acc-lt:var(--a-lt); --acc-dk:var(--adk);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:"Inter",system-ui,sans-serif;
+  background:#22243a;
+  display:flex; align-items:flex-start; justify-content:center;
+  min-height:100dvh; padding:34px 16px;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ===== Cadre téléphone 390px ===== */
+.phone{
+  width:390px; max-width:100%;
+  border-radius:46px;
+  background:var(--n0);
+  box-shadow:0 30px 80px rgba(0,0,0,.5), 0 0 0 11px #0c0c18, 0 0 0 13px #2a2a3e;
+  overflow:hidden;
+  position:relative;
+}
+
+/* Fond riche nuit-violet + lueur radiale derrière le podium */
+.scr{
+  position:relative;
+  min-height:780px;
+  color:var(--ink);
+  background:
+    radial-gradient(115% 60% at 50% 20%, color-mix(in srgb,var(--acc) 26%, transparent), transparent 60%),
+    radial-gradient(140% 90% at 50% 120%, rgba(0,0,0,.6), transparent 55%),
+    linear-gradient(168deg, var(--acc-dk) 0%, var(--n1) 42%, var(--n0) 100%);
+  transition:background .5s ease;
+  padding-bottom:18px;
+}
+/* étoiles discrètes */
+.scr::before{
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background-image:
+    radial-gradient(1.4px 1.4px at 18% 12%, rgba(255,255,255,.7), transparent),
+    radial-gradient(1.2px 1.2px at 78% 8%, rgba(255,255,255,.55), transparent),
+    radial-gradient(1.1px 1.1px at 62% 22%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1.3px 1.3px at 32% 28%, rgba(255,255,255,.45), transparent),
+    radial-gradient(1px 1px at 88% 30%, rgba(255,255,255,.4), transparent);
+}
+
+/* ===== Status bar factice ===== */
+.statusbar{
+  position:relative; z-index:2;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 22px 4px; font-size:13px; font-weight:700; color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.statusbar .dots{display:flex; gap:5px; align-items:center}
+.statusbar .bat{width:22px;height:11px;border:1.5px solid var(--ink);border-radius:3px;position:relative;opacity:.9}
+.statusbar .bat::after{content:"";position:absolute;inset:1.5px;width:70%;background:var(--ink);border-radius:1px}
+.statusbar .bat::before{content:"";position:absolute;right:-3px;top:3px;width:2px;height:5px;background:var(--ink);border-radius:0 1px 1px 0}
+
+/* ===== En-tête ===== */
+.hd{position:relative; z-index:2; padding:6px 20px 0; text-align:center}
+.hd h1{
+  font-family:"Plus Jakarta Sans",sans-serif;
+  font-size:21px; font-weight:800; margin:2px 0 0; letter-spacing:-.3px;
+}
+.hd .deadline{
+  font-size:12px; color:var(--ink-mute); margin-top:3px; font-weight:600;
+  display:inline-flex; align-items:center; gap:5px;
+}
+.hourglass{width:11px;height:11px;display:inline-block;opacity:.75}
+
+/* ===== Segmented control ===== */
+.seg{
+  position:relative; z-index:2;
+  margin:14px 20px 4px;
+  display:flex; gap:4px; padding:4px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;
+  backdrop-filter:blur(8px);
+}
+.seg button{
+  flex:1; border:0; cursor:pointer;
+  padding:11px 6px; border-radius:12px;
+  font-family:"Plus Jakarta Sans",sans-serif;
+  font-size:14px; font-weight:700; letter-spacing:-.2px;
+  color:var(--ink-soft); background:transparent;
+  display:flex; flex-direction:column; align-items:center; gap:1px;
+  transition:color .25s;
+}
+.seg button .sub{font-size:10px; font-weight:600; opacity:.75; letter-spacing:0}
+.seg button[aria-selected="true"]{
+  color:#fff;
+  background:linear-gradient(180deg, var(--acc-lt), var(--acc));
+  box-shadow:0 4px 14px color-mix(in srgb,var(--acc) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.seg button[aria-selected="true"] .sub{opacity:.92}
+
+/* ===== Sous-ligne : portée + ta place résumée ===== */
+.scopebar{
+  position:relative; z-index:2;
+  margin:12px 20px 6px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.scope{
+  display:inline-flex; padding:3px; gap:2px;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09);
+  border-radius:11px;
+}
+.scope button{
+  border:0; cursor:pointer; background:transparent;
+  color:var(--ink-mute); font-size:12px; font-weight:700;
+  padding:6px 12px; border-radius:9px; transition:.2s;
+}
+.scope button.on{background:rgba(255,255,255,.14); color:#fff}
+.effectif{font-size:11.5px; color:var(--ink-mute); font-weight:600; font-variant-numeric:tabular-nums}
+
+/* ===== PODIUM ===== */
+.podium-wrap{position:relative; z-index:2; margin:6px 0 0; padding:0 14px}
+.podium-glow{
+  position:absolute; left:50%; top:18px; width:240px; height:240px;
+  transform:translateX(-50%);
+  background:radial-gradient(circle, color-mix(in srgb,var(--acc) 38%, transparent), transparent 62%);
+  filter:blur(8px); pointer-events:none;
+}
+.podium{
+  position:relative;
+  display:grid; grid-template-columns:1fr 1.18fr 1fr;
+  align-items:end; gap:8px;
+  padding-top:18px;
+}
+.pcol{display:flex; flex-direction:column; align-items:center}
+
+/* Couronne */
+.crown{
+  width:30px; height:22px; margin-bottom:-2px;
+  filter:drop-shadow(0 3px 5px rgba(247,179,43,.55));
+  animation:bob 2.8s ease-in-out infinite;
+}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+/* Avatar podium */
+.pav{
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:"Baloo 2",sans-serif; font-weight:800; color:#fff;
+  position:relative;
+}
+.pav.g1{width:74px;height:74px;font-size:25px}
+.pav.g23{width:56px;height:56px;font-size:18px}
+.pav::after{ /* anneau métal */
+  content:""; position:absolute; inset:-4px; border-radius:50%;
+  padding:3px; pointer-events:none;
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+}
+.pav.m-gold{background:linear-gradient(160deg,#9d7bff,#5a3df0); box-shadow:0 0 22px rgba(247,179,43,.5)}
+.pav.m-gold::after{background:linear-gradient(160deg,#ffe08a,var(--gold),var(--gold-dk))}
+.pav.m-silver{background:linear-gradient(160deg,#7f87a0,#525a72); box-shadow:0 0 16px rgba(185,194,208,.4)}
+.pav.m-silver::after{background:linear-gradient(160deg,#eef1f6,var(--silver),var(--silver-dk))}
+.pav.m-bronze{background:linear-gradient(160deg,#c98c5e,#9c5f37); box-shadow:0 0 16px rgba(205,139,91,.4)}
+.pav.m-bronze::after{background:linear-gradient(160deg,#f0cba6,var(--bronze),var(--bronze-dk))}
+
+/* « Toi » sur le podium : double signal (métal + halo accent) */
+.pav.is-me{box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 70%, transparent), 0 0 26px color-mix(in srgb,var(--acc) 60%, transparent)}
+
+/* Médaillon rang sur l'avatar */
+.medal{
+  position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
+  width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Baloo 2",sans-serif; font-weight:800; font-size:11px; color:#3a2a00;
+  border:2px solid var(--n0);
+}
+.medal.gold{background:linear-gradient(160deg,#ffe08a,var(--gold))}
+.medal.silver{background:linear-gradient(160deg,#eef1f6,var(--silver));color:#2c3140}
+.medal.bronze{background:linear-gradient(160deg,#f0cba6,var(--bronze));color:#3a230f}
+
+.pname{
+  margin-top:11px; font-family:"Plus Jakarta Sans",sans-serif;
+  font-weight:700; font-size:13px; max-width:96px; text-align:center;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.pname.me{color:#fff}
+.pname .youtag{
+  display:inline-block; font-size:9px; font-weight:800; letter-spacing:.4px;
+  background:linear-gradient(180deg,var(--acc-lt),var(--acc));
+  color:#fff; padding:1px 6px; border-radius:6px; margin-left:1px; vertical-align:1px;
+}
+.pscore{
+  font-weight:800; font-size:15px; margin-top:2px;
+  font-variant-numeric:tabular-nums; letter-spacing:-.3px;
+}
+.pscore .of{font-size:11px; color:var(--ink-mute); font-weight:700}
+.pscore.me{color:var(--acc-lt)}
+
+/* Piédestal */
+.ped{
+  width:100%; margin-top:11px; border-radius:14px 14px 0 0;
+  display:flex; align-items:flex-start; justify-content:center;
+  padding-top:9px;
+  font-family:"Baloo 2",sans-serif; font-weight:800; font-size:24px;
+  background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.12); border-bottom:0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
+  position:relative;
+}
+.ped.p1{height:84px; color:var(--gold)}
+.ped.p2{height:60px; color:var(--silver)}
+.ped.p3{height:48px; color:var(--bronze)}
+/* piédestal du 1er si c'est « toi » (Révision) → teinte accent */
+.ped.p1.me-ped{
+  background:linear-gradient(180deg, color-mix(in srgb,var(--acc) 32%,transparent), color-mix(in srgb,var(--acc) 8%,transparent));
+  border-color:color-mix(in srgb,var(--acc) 45%, transparent);
+}
+
+/* ===== Liste dense (4e →) ===== */
+.list-head{
+  position:relative; z-index:2;
+  display:flex; align-items:center; justify-content:space-between;
+  margin:16px 20px 8px;
+}
+.list-head .lbl{font-size:12px; font-weight:700; color:var(--ink-mute); letter-spacing:.3px; text-transform:uppercase}
+.list-head .rule{flex:1; height:1px; margin:0 12px; background:linear-gradient(90deg,rgba(255,255,255,.14),transparent)}
+
+.list{position:relative; z-index:2; padding:0 14px; display:flex; flex-direction:column; gap:6px}
+.row{
+  display:grid; grid-template-columns:30px 38px 1fr auto; align-items:center; gap:11px;
+  padding:9px 12px; border-radius:14px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.07);
+  backdrop-filter:blur(6px);
+  transition:background .18s, transform .12s;
+  cursor:pointer; min-height:48px;
+}
+.row:active{transform:scale(.985)}
+.row:hover{background:rgba(255,255,255,.09)}
+.row .rk{
+  font-family:"Plus Jakarta Sans",sans-serif; font-weight:800; font-size:14px;
+  color:var(--ink-mute); text-align:center; font-variant-numeric:tabular-nums;
+}
+.row .av{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Baloo 2",sans-serif; font-weight:800; font-size:14px; color:#fff;
+  background:linear-gradient(160deg,#6a63a8,#3d3768);
+}
+.row .nm{font-weight:700; font-size:14px; letter-spacing:-.2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.row .sc{font-weight:800; font-size:15px; font-variant-numeric:tabular-nums; letter-spacing:-.3px; text-align:right}
+.row .sc .of{font-size:11px; color:var(--ink-mute); font-weight:700}
+
+/* ===== Ligne « Toi » épinglée (sticky pattern) ===== */
+.me-row{
+  position:sticky; bottom:8px; z-index:3;
+  margin:8px 14px 4px;
+  display:grid; grid-template-columns:30px 42px 1fr auto auto; align-items:center; gap:11px;
+  padding:11px 13px; border-radius:16px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb,var(--acc) 30%, rgba(20,16,48,.9)), color-mix(in srgb,var(--acc-dk) 60%, rgba(12,9,32,.92)));
+  border:1px solid color-mix(in srgb,var(--acc-lt) 55%, transparent);
+  border-left:4px solid var(--acc-lt);
+  box-shadow:0 8px 26px color-mix(in srgb,var(--acc) 45%, transparent), 0 0 0 1px rgba(255,255,255,.06) inset;
+  transform:scale(1.02);
+}
+.me-row .rk{
+  font-family:"Plus Jakarta Sans",sans-serif; font-weight:800; font-size:16px; color:#fff;
+  text-align:center; font-variant-numeric:tabular-nums;
+}
+.me-row .av{
+  width:42px;height:42px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Baloo 2",sans-serif; font-weight:800; font-size:15px; color:#fff;
+  background:linear-gradient(160deg,var(--acc-lt),var(--acc));
+  box-shadow:0 0 0 2px rgba(255,255,255,.25);
+}
+.me-row .nm{font-weight:800; font-size:14.5px; color:#fff}
+.me-row .nm .pal{display:block; font-size:11px; font-weight:600; color:rgba(255,255,255,.82); margin-top:1px}
+.me-row .sc{font-weight:800; font-size:18px; color:#fff; font-variant-numeric:tabular-nums; text-align:right; letter-spacing:-.4px}
+.me-row .sc .of{font-size:12px; color:rgba(255,255,255,.75); font-weight:700}
+.me-row .chev{
+  width:26px;height:26px;border-radius:50%;
+  background:rgba(255,255,255,.9); color:var(--acc-dk);
+  display:flex;align-items:center;justify-content:center; font-weight:900; font-size:15px;
+  flex-shrink:0;
+}
+/* delta collé au rang */
+.delta{
+  display:inline-flex; align-items:center; gap:2px; font-size:11px; font-weight:800;
+  margin-top:2px; justify-content:center; font-variant-numeric:tabular-nums;
+}
+.delta.up{color:var(--up)}
+.delta.flat{color:var(--flat)}
+
+/* ===== Encouragement « il te manque X » ===== */
+.nudge{
+  position:relative; z-index:2; margin:4px 20px 0;
+  font-size:12px; color:var(--ink-soft); font-weight:600; text-align:center;
+}
+.nudge b{color:var(--acc-lt); font-weight:800}
+
+/* ===== Rail des paliers ===== */
+.paliers{
+  position:relative; z-index:2; margin:16px 14px 6px;
+  padding:13px 12px 12px;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+}
+.paliers .pt{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:11px;
+}
+.paliers .pt .t{font-size:12px; font-weight:800; color:var(--ink); letter-spacing:.2px}
+.paliers .pt .goal{font-size:11px; font-weight:700; color:var(--acc-lt)}
+.rail{display:flex; align-items:flex-end; gap:6px}
+.badge{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; text-align:center;
+  opacity:.42; transition:opacity .3s, transform .3s;
+}
+.badge.done{opacity:1}
+.badge.target{opacity:1; transform:translateY(-3px)}
+.shield{
+  width:40px;height:44px; position:relative;
+  display:flex; align-items:center; justify-content:center;
+  font-family:"Baloo 2",sans-serif; font-weight:800; font-size:14px; color:#fff;
+  clip-path:polygon(50% 0,100% 16%,100% 64%,50% 100%,0 64%,0 16%);
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.4));
+}
+.shield::before{ /* highlight bombé */
+  content:""; position:absolute; top:3px; left:6px; right:6px; height:38%;
+  border-radius:50%; background:linear-gradient(180deg,rgba(255,255,255,.45),transparent);
+}
+.badge.done.target .shield{box-shadow:0 0 0 2px rgba(255,255,255,.3)}
+.badge.target .shield{animation:pulseShield 2s ease-in-out infinite}
+@keyframes pulseShield{0%,100%{filter:drop-shadow(0 3px 4px rgba(0,0,0,.4))}50%{filter:drop-shadow(0 3px 10px color-mix(in srgb,var(--acc) 75%,transparent))}}
+.badge .bn{font-size:9.5px; font-weight:700; color:var(--ink-soft); line-height:1.1; max-width:62px}
+.badge.done .bn{color:var(--ink)}
+.badge.target .bn{color:var(--acc-lt); font-weight:800}
+
+/* ===== Nav du bas factice ===== */
+.tabbar{
+  position:relative; z-index:2; margin-top:14px;
+  display:flex; justify-content:space-around; align-items:center;
+  padding:12px 8px calc(14px + env(safe-area-inset-bottom));
+  border-top:1px solid rgba(255,255,255,.08);
+  background:rgba(8,6,24,.55); backdrop-filter:blur(10px);
+}
+.tabbar .ti{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:700;color:var(--ink-mute)}
+.tabbar .ti.on{color:#fff}
+.tabbar .ti svg{width:22px;height:22px}
+
+@media (prefers-reduced-motion: reduce){
+  .crown,.badge.target .shield{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="scr" id="scr" data-ligue="conduite">
+
+    <!-- status bar -->
+    <div class="statusbar">
+      <span>9:41</span>
+      <span class="dots">
+        <svg width="17" height="11" viewBox="0 0 17 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="1" fill="#f4f2ff"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#f4f2ff"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#f4f2ff"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#f4f2ff" opacity=".4"/></svg>
+        <span class="bat"></span>
+      </span>
+    </div>
+
+    <!-- header -->
+    <div class="hd">
+      <h1>Classement</h1>
+      <div class="deadline">
+        <svg class="hourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2h12M6 22h12M6 2c0 5 6 6 6 6s6-1 6 6M6 22c0-5 6-6 6-6"/></svg>
+        Se termine dans 2&nbsp;jours
+      </div>
+    </div>
+
+    <!-- segmented control -->
+    <div class="seg" role="tablist">
+      <button id="tab-conduite" role="tab" aria-selected="true" onclick="setLigue('conduite')">
+        Conduite <span class="sub">en voiture · validé moniteur</span>
+      </button>
+      <button id="tab-revision" role="tab" aria-selected="false" onclick="setLigue('revision')">
+        Révision <span class="sub">en autonomie</span>
+      </button>
+    </div>
+
+    <!-- portée + effectif -->
+    <div class="scopebar">
+      <div class="scope">
+        <button class="on">Mon école</button>
+        <button>National</button>
+      </div>
+      <span class="effectif" id="effectif">sur 12 élèves</span>
+    </div>
+
+    <!-- PODIUM -->
+    <div class="podium-wrap">
+      <div class="podium-glow"></div>
+      <div class="podium" id="podium"><!-- injecté --></div>
+    </div>
+
+    <!-- nudge perso -->
+    <div class="nudge" id="nudge"></div>
+
+    <!-- liste 4e → -->
+    <div class="list-head">
+      <span class="lbl">À partir du 4<sup>e</sup></span>
+      <span class="rule"></span>
+    </div>
+    <div class="list" id="list"><!-- injecté --></div>
+
+    <!-- ligne TOI épinglée -->
+    <div id="merow-host"></div>
+
+    <!-- rail des paliers -->
+    <div class="paliers">
+      <div class="pt">
+        <span class="t" id="pal-title">Paliers Conduite</span>
+        <span class="goal" id="pal-goal">Objectif : Conduite autonome</span>
+      </div>
+      <div class="rail" id="rail"><!-- injecté --></div>
+    </div>
+
+    <!-- nav bas -->
+    <div class="tabbar">
+      <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Accueil</div>
+      <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M4 19h16M8 16l3-5 3 3 4-7"/></svg>Parcours</div>
+      <div class="ti on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M6 4h12v5a6 6 0 01-12 0V4zM6 6H3v2a3 3 0 003 2M18 6h3v2a3 3 0 01-3 2"/></svg>Classement</div>
+      <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profil</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ============ Données d'exemple (TELLES QUELLES) ============ */
+const DATA = {
+  conduite:{
+    accent:'conduite',
+    effectif:'sur 12 élèves',
+    palTitle:'Paliers Conduite',
+    palGoal:'Objectif : Conduite autonome',
+    of:31,
+    me:{rank:3, name:'Latifa S.', init:'LS', score:24, pal:'Conduite autonome',
+        delta:{type:'up', txt:'+1 place'}, onPodium:true},
+    nudge:'Il te manque <b>3 compétences</b> pour passer 2<sup>e</sup>.',
+    podium:[
+      {rank:1, name:'Karim B.', init:'KB', score:29, metal:'gold'},
+      {rank:2, name:'Inès M.',  init:'IM', score:27, metal:'silver'},
+      {rank:3, name:'Toi',      init:'LS', score:24, metal:'bronze', me:true},
+    ],
+    rest:[
+      {rank:4, name:'Lucas P.', init:'LP', score:22},
+      {rank:5, name:'Sofia D.', init:'SD', score:20},
+      {rank:6, name:'Hugo L.',  init:'HL', score:19},
+      {rank:7, name:'Mehdi A.', init:'MA', score:17},
+      {rank:8, name:'Chloé R.', init:'CR', score:15},
+    ],
+    paliers:[
+      {n:'C1',                short:'C1'},
+      {n:'C2',                short:'C2'},
+      {n:'C3',                short:'C3'},
+      {n:'Conduite autonome', short:'C4'},
+    ],
+    palDone:3, palTarget:4, /* Toi a atteint C3 (24/31) ; C4 « Conduite autonome » = cible visible (carotte) */
+  },
+  revision:{
+    accent:'revision',
+    effectif:'sur 46 élèves',
+    palTitle:'Paliers Révision',
+    palGoal:'Objectif : Révision maîtrisée',
+    of:50,
+    me:{rank:1, name:'Latifa S.', init:'LS', score:38, pal:'Confirmé',
+        delta:{type:'flat', txt:'#1'}, onPodium:true},
+    nudge:'Encore <b>4 points</b> et tu débloques « Révision maîtrisée ».',
+    podium:[
+      {rank:1, name:'Toi',     init:'LS', score:38, metal:'gold', me:true},
+      {rank:2, name:'Yanis K.',init:'YK', score:35, metal:'silver'},
+      {rank:3, name:'Emma T.', init:'ET', score:33, metal:'bronze'},
+    ],
+    rest:[
+      {rank:4, name:'Noah B.', init:'NB', score:30},
+      {rank:5, name:'Léa F.',  init:'LF', score:28},
+      {rank:6, name:'Adam S.', init:'AS', score:26},
+    ],
+    paliers:[
+      {n:'Novice',   short:'1'},
+      {n:'Apprenti', short:'8'},
+      {n:'Sérieux',  short:'18'},
+      {n:'Confirmé', short:'30'},
+      {n:'Révision maîtrisée', short:'42'},
+    ],
+    palDone:4, palTarget:5, /* Toi = Confirmé (4e), cible = Révision maîtrisée (5e) */
+  }
+};
+
+/* Couleurs bleues monochromes pour les paliers Révision (saturation = progression) */
+const RV_PAL = ['#93c5fd','#60a5fa','#3b82f6','#2563eb','#1d4ed8'];
+
+const metalLabel = {gold:'1', silver:'2', bronze:'3'};
+
+/* ============ Rendu ============ */
+function setLigue(key){
+  const d = DATA[key];
+  const scr = document.getElementById('scr');
+  scr.dataset.ligue = key;
+
+  // accent actif (vars CSS)
+  if(key==='conduite'){
+    scr.style.setProperty('--acc','var(--a)');
+    scr.style.setProperty('--acc-lt','var(--a-lt)');
+    scr.style.setProperty('--acc-dk','var(--adk)');
+  }else{
+    scr.style.setProperty('--acc','var(--rv)');
+    scr.style.setProperty('--acc-lt','var(--rv-lt)');
+    scr.style.setProperty('--acc-dk','var(--rv-deep)');
+  }
+
+  document.getElementById('tab-conduite').setAttribute('aria-selected', key==='conduite');
+  document.getElementById('tab-revision').setAttribute('aria-selected', key==='revision');
+  document.getElementById('effectif').textContent = d.effectif;
+  document.getElementById('nudge').innerHTML = d.nudge;
+  document.getElementById('pal-title').textContent = d.palTitle;
+  document.getElementById('pal-goal').textContent = d.palGoal;
+
+  renderPodium(d);
+  renderList(d);
+  renderMeRow(d);
+  renderRail(d, key);
+}
+
+function renderPodium(d){
+  // ordre visuel : 2 (gauche) · 1 (centre) · 3 (droite)
+  const byRank = {};
+  d.podium.forEach(p=>byRank[p.rank]=p);
+  const order = [byRank[2], byRank[1], byRank[3]];
+  const pedClass = {1:'p1',2:'p2',3:'p3'};
+  const crownSvg = `<svg class="crown" viewBox="0 0 30 22" fill="none">
+      <path d="M2 20h26l-2-13-6 5-5-9-5 9-6-5-2 13z" fill="url(#cg)" stroke="#e08e0b" stroke-width="1"/>
+      <circle cx="4" cy="6" r="2" fill="#ffe08a"/><circle cx="15" cy="2.5" r="2.2" fill="#ffe08a"/><circle cx="26" cy="6" r="2" fill="#ffe08a"/>
+      <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffe08a"/><stop offset="1" stop-color="#f7b32b"/></linearGradient></defs>
+    </svg>`;
+
+  document.getElementById('podium').innerHTML = order.map(p=>{
+    const isFirst = p.rank===1;
+    const avSize = isFirst ? 'g1' : 'g23';
+    const meCls = p.me ? ' is-me' : '';
+    const pedMe = (isFirst && p.me) ? ' me-ped' : '';
+    const nameHtml = p.me
+      ? `<span class="me">Toi <span class="youtag">${escA(DATA[document.getElementById('scr').dataset.ligue].me.name)}</span></span>`
+      : escA(p.name);
+    const scoreMe = p.me ? ' me' : '';
+    return `<div class="pcol">
+      ${isFirst ? crownSvg : ''}
+      <div class="pav ${avSize} m-${p.metal}${meCls}">${escA(p.init)}
+        <span class="medal ${p.metal}">${metalLabel[p.metal]}</span>
+      </div>
+      <div class="pname ${p.me?'me':''}">${nameHtml}</div>
+      <div class="pscore${scoreMe}">${p.score}<span class="of">/${d.of}</span></div>
+      <div class="ped ${pedClass[p.rank]}${pedMe}">${p.rank}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderList(d){
+  document.getElementById('list').innerHTML = d.rest.map(p=>`
+    <div class="row" tabindex="0">
+      <span class="rk">${p.rank}</span>
+      <span class="av">${escA(p.init)}</span>
+      <span class="nm">${escA(p.name)}</span>
+      <span class="sc">${p.score}<span class="of">/${d.of}</span></span>
+    </div>`).join('');
+}
+
+function renderMeRow(d){
+  const m = d.me;
+  const deltaCls = m.delta.type==='up' ? 'up' : 'flat';
+  const arrow = m.delta.type==='up'
+    ? '<svg width="9" height="9" viewBox="0 0 10 10" fill="currentColor"><path d="M5 1l4 6H1z"/></svg>'
+    : '<span style="font-size:13px;line-height:1">=</span>';
+  document.getElementById('merow-host').innerHTML = `
+    <div class="me-row" tabindex="0" aria-label="Ta place">
+      <span class="rk">#${m.rank}
+        <span class="delta ${deltaCls}">${arrow}${escA(m.delta.txt)}</span>
+      </span>
+      <span class="av">${escA(m.init)}</span>
+      <span class="nm">Toi · ${escA(m.name)}
+        <span class="pal">${escA(m.pal)}</span>
+      </span>
+      <span class="sc">${m.score}<span class="of">/${d.of}</span></span>
+      <span class="chev">&rsaquo;</span>
+    </div>`;
+}
+
+function renderRail(d, key){
+  document.getElementById('rail').innerHTML = d.paliers.map((p,i)=>{
+    const idx = i+1;
+    const done = idx <= d.palDone;
+    const target = idx === d.palTarget;
+    let bg;
+    if(key==='revision'){
+      bg = done ? `linear-gradient(160deg, ${shade(RV_PAL[i],28)}, ${RV_PAL[i]})`
+                : 'linear-gradient(160deg,#3a3568,#262249)';
+    }else{
+      bg = done ? 'linear-gradient(160deg,var(--a-lt),var(--a))'
+                : 'linear-gradient(160deg,#3a3568,#262249)';
+    }
+    const cls = 'badge'+(done?' done':'')+(target?' target':'');
+    return `<div class="${cls}">
+      <span class="shield" style="background:${bg}">${escA(p.short)}</span>
+      <span class="bn">${escA(p.n)}</span>
+    </div>`;
+  }).join('');
+}
+
+/* éclaircir une couleur hex pour le highlight bombé */
+function shade(hex, amt){
+  const n = parseInt(hex.slice(1),16);
+  let r=(n>>16)+amt, g=((n>>8)&255)+amt, b=(n&255)+amt;
+  r=Math.min(255,r); g=Math.min(255,g); b=Math.min(255,b);
+  return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
+}
+function escA(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+setLigue('conduite');
+</script>
+</body>
+</html>
