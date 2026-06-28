@@ -113,7 +113,7 @@ export async function mount(root) {
             </div>
             <h1 class="ob-title" id="ob-title-1">Personnalise ton profil</h1>
 
-            <p class="ob-perso-label">Avatar</p>
+            <p class="ob-perso-label">Photo de profil</p>
             <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="Choix de l'avatar">
               ${(ASSETS.avatar || [])
                 .map(
@@ -194,7 +194,7 @@ export async function mount(root) {
       <div class="ob-a2hs-wrap" id="ob-a2hs-wrap" hidden>
         <img class="ob-a2hs-badge" src="/skins/avatars/permigo-badge-icon.png" alt="" />
         <h1 class="ob-title" id="ob-a2hs-title">Ajoute l'appli</h1>
-        <p class="ob-body-txt">2 gestes, 10 secondes — tes rappels arrivent ici.</p>
+        <p class="ob-body-txt">2 gestes, 10 secondes — tes rappels et tes récompenses arrivent ici.</p>
         <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
         <button class="ob-plat-switch" id="ob-plat-switch" type="button" aria-label="Changer la plateforme des instructions (iPhone / Android)"></button>
       </div>
