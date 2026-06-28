@@ -1146,6 +1146,7 @@ function openSheet(compId, compNom) {
   // Note textarea
   const ta = overlay.querySelector(".lr-note");
   const counter = overlay.querySelector(".lr-note-count");
+  if (!ta || !counter) return;
   ta.addEventListener("input", () => {
     _sheetNote = ta.value.slice(0, 280);
     ta.value = _sheetNote;

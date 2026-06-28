@@ -1388,7 +1388,7 @@ function confirmDeleteEleve(eleveId) {
     .querySelectorAll("[data-close]")
     .forEach((b) => b.addEventListener("click", () => wrap.remove()));
 
-  wrap.querySelector("#me-del-ok").addEventListener("click", async () => {
+  wrap.querySelector("#me-del-ok")?.addEventListener("click", async () => {
     const btn = wrap.querySelector("#me-del-ok");
     btn.disabled = true;
     btn.textContent = "Suppression…";
@@ -1543,7 +1543,7 @@ function confirmRecu(eleveId) {
   wrap
     .querySelectorAll("[data-close]")
     .forEach((x) => x.addEventListener("click", close));
-  wrap.querySelector("#me-cf-ok").addEventListener("click", () => {
+  wrap.querySelector("#me-cf-ok")?.addEventListener("click", () => {
     close();
     recordExam(eleveId, "recu", todayIso());
   });
@@ -1577,7 +1577,7 @@ function openPlanifieDialog(eleveId) {
   wrap
     .querySelectorAll("[data-close]")
     .forEach((x) => x.addEventListener("click", close));
-  wrap.querySelector("#me-cf-ok").addEventListener("click", () => {
+  wrap.querySelector("#me-cf-ok")?.addEventListener("click", () => {
     const date = (input && input.value) || today;
     close();
     recordExam(eleveId, "planifie", date);
@@ -1633,7 +1633,7 @@ function showUndoSnackbar(msg, onUndo, duration = 6000) {
     setTimeout(() => bar.remove(), 250);
   };
   const timer = setTimeout(remove, duration);
-  bar.querySelector(".me-undo-btn").addEventListener("click", () => {
+  bar.querySelector(".me-undo-btn")?.addEventListener("click", () => {
     clearTimeout(timer);
     remove();
     onUndo();
@@ -1717,8 +1717,8 @@ function openMissingPanel(eleve) {
   document.body.appendChild(wrap);
 
   const close = () => wrap.remove();
-  wrap.querySelector("[data-close]").addEventListener("click", close);
-  wrap.querySelector("[data-livret]").addEventListener("click", () => {
+  wrap.querySelector("[data-close]")?.addEventListener("click", close);
+  wrap.querySelector("[data-livret]")?.addEventListener("click", () => {
     close();
     navigate(`#/livret/${eleve.id}`);
   });
