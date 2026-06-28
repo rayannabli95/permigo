@@ -1542,6 +1542,18 @@ const STYLE_ARENE = `<style>
 .arn-del{display:block;margin:14px auto 0;background:none;border:0;color:var(--tx-fa);font:500 12.5px/1 'Plus Jakarta Sans',sans-serif;text-decoration:underline;cursor:pointer;padding:8px}
 .arn-since{text-align:center;margin:16px 0 4px;font-size:11px;font-weight:700;color:var(--tx-fa);letter-spacing:.6px;text-transform:uppercase}
 
+/* La carte profil entre avec une translation (slide-up partagé, fill-mode
+   « both »). Or un élément qui ANIME un transform reste un bloc conteneur pour
+   ses enfants position:fixed tant que le remplissage « forward » persiste —
+   même quand la frame finale vaut transform:none (le moteur calcule une matrice
+   identité, pas le mot-clé none). Résultat : la modale (inset:0) couvrait toute
+   la page haute au lieu du viewport → centrée ≈ en bas de l'écran.
+   Fix : fill-mode « backwards » → l'anim garde son état de départ (aucun flash à
+   l'entrée) mais NE persiste PAS après : .arn revient à transform:none et ne
+   capture donc plus le position:fixed. Scopé à .arn (profil élève) uniquement.
+   ⚠️ Ne JAMAIS repasser en « both » / « forwards » : le bug de position revient. */
+.arn.anim-slide-up{animation-fill-mode:backwards}
+
 /* modale pseudo */
 .arn-modal-scrim{position:fixed;inset:0;z-index:var(--z-modal,200);display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(120% 80% at 50% 30%,rgba(30,18,72,.7),rgba(4,3,14,.88));backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s}
 .arn-modal-scrim.open{opacity:1;visibility:visible}
