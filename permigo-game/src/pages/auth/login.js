@@ -666,7 +666,10 @@ function wire(root) {
         }
         resetRateLimit("otp", email);
         resetRateLimit("otp-verify", email);
-        toast(`Bonjour ${esc(r.profile.nom.split(" ")[0])}`, "success");
+        toast(
+          `Bonjour ${esc((r.profile.prenom || r.profile.nom || "").split(" ")[0])}`,
+          "success",
+        );
         afterLogin();
       }
     } finally {

@@ -529,7 +529,7 @@ export async function mount(root) {
       </div>
       <div class="vs-skel"></div><div class="vs-skel"></div><div class="vs-skel"></div>
     </div>`;
-  root.querySelector("#vs-back").addEventListener("click", goBack);
+  root.querySelector("#vs-back")?.addEventListener("click", goBack);
 
   // Élèves attitrés du moniteur
   const { data, error } = await sb

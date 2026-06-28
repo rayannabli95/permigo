@@ -138,7 +138,7 @@ async function openConversation(root, me, thread) {
     </div>
     <div class="msg-conv-footer">
       <input class="msg-input" id="msg-input" type="text" placeholder="Écrire un message…" autocomplete="off" maxlength="500">
-      <button class="msg-send-btn" id="msg-send">↑</button>
+      <button class="msg-send-btn" id="msg-send" aria-label="Envoyer le message">↑</button>
     </div>
   `;
 
@@ -203,6 +203,7 @@ function renderBubble(msg, me) {
 function wireConvInput(root, me, partnerId) {
   const input = root.querySelector("#msg-input");
   const sendBtn = root.querySelector("#msg-send");
+  if (!input || !sendBtn) return;
 
   async function sendMessage() {
     const body = input?.value?.trim();

@@ -271,7 +271,7 @@ function runQuiz(root, { quiz, pool }) {
     bodyEl.innerHTML = resultHTML({ score: score3, total });
     bodyEl
       .querySelector(".qz-cta")
-      .addEventListener("click", () => navigate("/"));
+      ?.addEventListener("click", () => navigate("/"));
   }
 
   renderQuestion();

@@ -2108,6 +2108,7 @@ async function _loadAndInjectFlashQuiz(root, me) {
     const el = root.querySelector("#acc-flashq");
     if (!el) return;
     const clockEl = el.querySelector("#acc-fq-clock");
+    if (!clockEl) return;
     const iv = setInterval(() => {
       if (!document.body.contains(el)) {
         clearInterval(iv);
