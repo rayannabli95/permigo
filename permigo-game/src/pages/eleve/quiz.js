@@ -260,10 +260,11 @@ export async function mount(root, params = {}) {
   `;
 
   const startQuiz = async () => {
-    root.querySelector("#btn-start").disabled = true;
+    const startBtn = root.querySelector("#btn-start");
+    if (startBtn) startBtn.disabled = true;
     const startTs = Date.now();
 
-    await lancerQuiz({
+    const launched = await lancerQuiz({
       competenceId,
       type,
       nbQuestions,
@@ -281,6 +282,17 @@ export async function mount(root, params = {}) {
         });
       },
     });
+
+    // lancerQuiz renvoie null si la compétence n'a aucune question de ce type :
+    // sans ce garde-fou le bouton restait figé en « disabled » sans aucun
+    // retour (cul-de-sac). On réactive + message clair, ou on rentre à
+    // l'accueil si le quiz avait été lancé automatiquement (pas de bouton à
+    // réactiver pour l'élève).
+    if (launched === null) {
+      if (startBtn) startBtn.disabled = false;
+      toast("Pas encore de questions sur cette compétence", "info");
+      if (autoStart) location.hash = "#/";
+    }
   };
 
   root.querySelector("#btn-start").addEventListener("click", startQuiz);

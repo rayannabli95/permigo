@@ -673,16 +673,20 @@ function renderDrill() {
              </div>`
           : _drillEleves
               .map((e) => {
+                // La RPC get_eleves_bloque_sur_competence renvoie eleve_id /
+                // eleve_prenom / eleve_nom / n_fails (PAS id/prenom/nom/jours_bloque).
                 const nm = esc(
-                  fmtName(`${e.prenom || ""} ${e.nom || ""}`.trim()),
+                  fmtName(
+                    `${e.eleve_prenom || ""} ${e.eleve_nom || ""}`.trim(),
+                  ),
                 );
                 return `
-              <div class="me-row" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
-                <div class="me-ava" style="flex-shrink:0">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 44)}</div>
+              <div class="me-row" data-eleve-id="${esc(e.eleve_id)}" role="button" tabindex="0">
+                <div class="me-ava" style="flex-shrink:0">${renderUserAvatar({ prenom: e.eleve_prenom, nom: e.eleve_nom }, 44)}</div>
                 <div class="me-info">
                   <div class="me-name">${nm}</div>
                   <div class="me-meta">
-                    ${e.jours_bloque != null ? `<span style="font:500 11px/1 'Inter',sans-serif;color:var(--rdk);">Bloqué depuis ${e.jours_bloque}j</span>` : ""}
+                    ${e.n_fails ? `<span style="font:500 11px/1 'Inter',sans-serif;color:var(--rdk);">${e.n_fails} échec${e.n_fails > 1 ? "s" : ""} récent${e.n_fails > 1 ? "s" : ""}</span>` : ""}
                   </div>
                 </div>
                 <div class="me-eleve-chev">${icon("chevron-right", { size: 16, strokeWidth: 2.5, color: "var(--bo4)" })}</div>
