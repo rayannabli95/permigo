@@ -203,6 +203,25 @@ function _setPageTitle(root, routeName) {
   document.title = label ? `${label} · PermiGo` : "PermiGo";
 }
 
+// Module de la page actuellement montée. On garde la référence pour appeler son
+// unmount() (cleanup des listeners/timers/overlays posés par la page) AVANT de
+// monter la page suivante. Sans ça, les unmount() exportés par les pages
+// n'étaient jamais appelés → fuites (pull-to-refresh sur window, rAF de login,
+// timers d'examen, overlays collés au <body>…).
+let _currentMod = null;
+
+async function _unmountCurrent() {
+  const prev = _currentMod;
+  _currentMod = null;
+  if (prev && typeof prev.unmount === "function") {
+    try {
+      await prev.unmount();
+    } catch (e) {
+      console.error("[router] unmount", e);
+    }
+  }
+}
+
 export async function route(root, me) {
   const role = me.role || "eleve";
   const map = ROUTES[role] || ROUTES.eleve;
@@ -218,12 +237,15 @@ export async function route(root, me) {
 
   try {
     const mod = await loader();
+    // Démonte la page précédente avant de monter la suivante (cleanup réel).
+    await _unmountCurrent();
     // Direction (push/pop) pour orienter la transition d'entrée.
     const dir = _navDir(location.hash || "#/"); // 'fwd' | 'back' (mute la pile 1×)
     root.classList.remove("route-enter", "route-back");
     // Pour les pages qui attendent (root, eleveId) on passe param en 2e arg
     // Les autres pages ignorent les args supplémentaires
     await mod.mount(root, param);
+    _currentMod = mod; // mémorise pour le prochain unmount
     _playEnter(root, dir); // entrée directionnelle légère sur la page vivante
     const heading = root.querySelector("h1") || root;
     heading.setAttribute("tabindex", "-1");
@@ -255,38 +277,32 @@ export async function route(root, me) {
 // #/creer-compte, #/ecole/…) doit monter la BONNE page, pas retomber sur login.
 async function routePublic(app) {
   const hash = location.hash || "";
+  let m;
+  let arg;
   if (hash.startsWith("#/parental-consent")) {
-    const m = await import("@/pages/public/parental-consent.js");
-    return m.mount?.(app);
+    m = await import("@/pages/public/parental-consent.js");
+  } else if (hash.startsWith("#/creer-compte")) {
+    m = await import("@/pages/public/creer-compte.js");
+  } else if (hash.startsWith("#/signup")) {
+    m = await import("@/pages/public/signup.js");
+  } else if (hash.startsWith("#/rejoindre")) {
+    m = await import("@/pages/public/rejoindre.js");
+  } else if (hash.startsWith("#/ecole/")) {
+    arg = hash.replace("#/ecole/", "").split("?")[0];
+    m = await import("@/pages/public/ecole.js");
+  } else if (hash.startsWith("#/legal")) {
+    m = await import("@/pages/common/legal.js");
+  } else if (hash.startsWith("#/login")) {
+    m = await import("@/pages/auth/login.js");
+  } else {
+    // Défaut visiteur = landing / page de vente
+    m = await import("@/pages/public/landing.js");
   }
-  if (hash.startsWith("#/creer-compte")) {
-    const m = await import("@/pages/public/creer-compte.js");
-    return m.mount?.(app);
-  }
-  if (hash.startsWith("#/signup")) {
-    const m = await import("@/pages/public/signup.js");
-    return m.mount?.(app);
-  }
-  if (hash.startsWith("#/rejoindre")) {
-    const m = await import("@/pages/public/rejoindre.js");
-    return m.mount?.(app);
-  }
-  if (hash.startsWith("#/ecole/")) {
-    const slug = hash.replace("#/ecole/", "").split("?")[0];
-    const m = await import("@/pages/public/ecole.js");
-    return m.mount?.(app, slug);
-  }
-  if (hash.startsWith("#/legal")) {
-    const m = await import("@/pages/common/legal.js");
-    return m.mount?.(app);
-  }
-  if (hash.startsWith("#/login")) {
-    const m = await import("@/pages/auth/login.js");
-    return m.mount?.(app);
-  }
-  // Défaut visiteur = landing / page de vente
-  const m = await import("@/pages/public/landing.js");
-  return m.mount?.(app);
+  // Démonte la page précédente (ex: rAF d'animation du fond de login) avant de
+  // monter la nouvelle page publique.
+  await _unmountCurrent();
+  await m.mount?.(app, arg);
+  _currentMod = m;
 }
 
 window.addEventListener("hashchange", () => {
