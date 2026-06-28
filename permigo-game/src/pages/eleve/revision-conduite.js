@@ -299,6 +299,129 @@ const STYLE = `<style>
 .rvc-act-main.locked .lock { display:block; }
 .rvc-act-main.locked .go { display:none; }
 
+/* ───── Home « Bento » : navigation engageante vers les fiches ───── */
+.rvcb { --lime:#c8ff4d; --lime-ink:#1f2a00; --rb:24px; }
+.rvcb-top { display:flex; align-items:center; gap:11px; padding:16px 0 12px; }
+.rvcb-hi { display:flex; flex-direction:column; gap:1px; flex:1; min-width:0; }
+.rvcb-k { font:600 12px 'Plus Jakarta Sans',sans-serif; letter-spacing:.04em; text-transform:uppercase; color:var(--mu,#9499a8); }
+.rvcb-n { font:800 21px/1.1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; color:var(--ink); }
+.rvcb-ava { width:42px; height:42px; flex:none; border-radius:14px; display:grid; place-items:center;
+  background:linear-gradient(150deg,var(--a,#6366f1),var(--adk,#4f46e5)); color:#fff;
+  font:800 14px 'Plus Jakarta Sans',sans-serif; box-shadow:0 8px 18px -8px color-mix(in srgb,var(--adk,#4f46e5) 60%,transparent); }
+
+.rvcb-grid { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+.span2 { grid-column:1 / -1; }
+.rvcb-tile { position:relative; overflow:hidden; display:flex; flex-direction:column;
+  background:var(--su,#fff); border:1px solid var(--bo3,#e7e9f0); border-radius:var(--rb);
+  padding:16px; text-align:left; cursor:default; color:var(--ink);
+  box-shadow:0 1px 0 rgba(16,18,28,.02), 0 8px 24px -12px rgba(31,32,46,.16);
+  transition:transform .16s cubic-bezier(.2,.7,.3,1); }
+button.rvcb-tile { cursor:pointer; }
+button.rvcb-tile:active { transform:scale(.975); }
+.rvcb-lab { display:flex; align-items:center; gap:6px; font:700 11px 'Plus Jakarta Sans',sans-serif;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--mu,#9499a8); }
+.rvcb-dot { width:6px; height:6px; border-radius:50%; background:var(--a,#6366f1); }
+
+/* défi du jour — tuile dominante */
+.rvcb-defi { color:#fff; border:none; padding:18px; min-height:170px; justify-content:space-between;
+  background:radial-gradient(130% 120% at 100% 0%, color-mix(in srgb,var(--a-lt,#9b7bff) 60%,transparent) 0%, transparent 46%),
+    linear-gradient(160deg, var(--a,#6366f1) 0%, var(--adk,#4f46e5) 68%, color-mix(in srgb,var(--adk,#4f46e5) 62%, #000) 100%);
+  box-shadow:0 18px 40px -16px color-mix(in srgb,var(--adk,#4f46e5) 60%,transparent); }
+.rvcb-defi .rvcb-lab { color:rgba(255,255,255,.74); }
+.rvcb-defi .rvcb-dot { background:var(--lime); box-shadow:0 0 8px var(--lime); }
+.rvcb-ring-deco { position:absolute; right:-46px; top:-46px; width:150px; height:150px; border-radius:50%;
+  border:18px solid rgba(255,255,255,.08); pointer-events:none; }
+.rvcb-defi-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; position:relative; z-index:1; }
+.rvcb-defi-meta { display:inline-flex; align-items:center; gap:6px; font:600 11.5px 'Inter',sans-serif;
+  background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2); padding:6px 11px; border-radius:999px; }
+.rvcb-defi-t { font:800 24px/1.08 'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; margin:14px 0 4px; position:relative; z-index:1; }
+.rvcb-defi-p { margin:0; font:500 13px/1.4 'Inter',sans-serif; color:rgba(255,255,255,.82); position:relative; z-index:1; }
+.rvcb-defi-cta { margin-top:16px; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:var(--lime); color:var(--lime-ink); border-radius:15px; padding:13px 16px;
+  font:800 15px 'Plus Jakarta Sans',sans-serif; position:relative; z-index:1;
+  box-shadow:0 10px 22px -10px rgba(200,255,77,.6); }
+.rvcb-defi-cta .rvcb-arr { width:30px; height:30px; flex:none; border-radius:10px; background:var(--lime-ink); color:var(--lime); display:grid; place-items:center; }
+.rvcb-defi-cta .rvcb-arr svg { width:16px; height:16px; }
+
+/* progression — gros chiffre + anneau */
+.rvcb-prog { min-height:146px; justify-content:space-between; }
+.rvcb-ring { position:absolute; right:14px; top:14px; width:46px; height:46px; }
+.rvcb-pct { position:absolute; inset:0; display:grid; place-items:center; font:800 11px 'Plus Jakarta Sans',sans-serif; color:var(--a,#6366f1); }
+.rvcb-big { font:800 40px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.03em; margin-top:8px; }
+.rvcb-big small { font:700 17px 'Plus Jakarta Sans',sans-serif; color:var(--mu,#9499a8); }
+.rvcb-sub { font:500 12px 'Inter',sans-serif; color:var(--mu,#5b6072); margin-top:2px; }
+.rvcb-bar { height:7px; border-radius:99px; background:var(--bo3,#e7e9f0); overflow:hidden; margin-top:10px; }
+.rvcb-bar > i { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,var(--a,#6366f1),var(--a-lt,#818cf8)); }
+
+/* prochaine fiche */
+.rvcb-next { min-height:146px; justify-content:space-between; }
+.rvcb-chip { align-self:flex-start; font:700 10.5px 'Plus Jakarta Sans',sans-serif; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--a,#6366f1); background:color-mix(in srgb,var(--a,#6366f1) 12%,transparent); padding:4px 9px; border-radius:8px; }
+.rvcb-next-t { font:800 15.5px/1.2 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; margin-top:auto; }
+.rvcb-next-w { font:600 11.5px 'Inter',sans-serif; color:var(--mu,#9499a8); margin-top:3px; }
+.rvcb-next-go { margin-top:11px; display:flex; align-items:center; gap:7px; font:700 13px 'Plus Jakarta Sans',sans-serif; color:var(--ink); }
+.rvcb-next-go .rvcb-pp { width:26px; height:26px; border-radius:9px; background:var(--a,#6366f1); color:#fff; display:grid; place-items:center; }
+.rvcb-next-go .rvcb-pp svg, .rvcb-play svg, .rvcb-faute-ic svg { width:14px; height:14px; }
+
+/* trouve la faute — bandeau large sombre */
+.rvcb-faute { flex-direction:row; align-items:center; gap:14px; min-height:94px; border:none; color:#fff;
+  background:linear-gradient(110deg,#15171f 0%, #20232f 100%); box-shadow:0 14px 30px -16px rgba(0,0,0,.5); }
+.rvcb-faute .rvcb-lab { color:rgba(255,255,255,.55); }
+.rvcb-faute-ic { flex:none; width:52px; height:52px; border-radius:16px; display:grid; place-items:center; color:var(--lime-ink);
+  background:linear-gradient(150deg,#ffb547,#ff7a45); box-shadow:0 10px 20px -8px rgba(255,122,69,.55); }
+.rvcb-faute-ic svg { width:26px; height:26px; }
+.rvcb-faute-tx { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.rvcb-faute-h { font:800 17px 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; }
+.rvcb-faute-p { font:500 12px/1.35 'Inter',sans-serif; color:rgba(255,255,255,.65); }
+.rvcb-play { flex:none; width:38px; height:38px; border-radius:12px; background:var(--lime); color:var(--lime-ink); display:grid; place-items:center; }
+
+/* focus moniteur */
+.rvcb-focus { gap:10px; }
+.rvcb-focus-list { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+.rvcb-focus-row { display:flex; align-items:center; gap:10px; width:100%; text-align:left; cursor:pointer;
+  border:1px solid var(--bo3,#e7e9f0); background:var(--bg); border-radius:13px; padding:11px 12px; color:var(--ink); }
+.rvcb-focus-row:active { transform:scale(.985); }
+.rvcb-focus-t { flex:1; font:700 13.5px/1.2 'Plus Jakarta Sans',sans-serif; }
+.rvcb-focus-go { font:700 12px 'Plus Jakarta Sans',sans-serif; color:var(--a,#6366f1); white-space:nowrap; }
+
+/* mondes */
+.rvcb-mondes-h { display:flex; align-items:baseline; justify-content:space-between; padding:6px 2px 0; }
+.rvcb-mondes-t { font:800 16px 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; }
+.rvcb-mondes-a { font:600 12px 'Inter',sans-serif; color:var(--mu,#9499a8); }
+.rvcb-monde { padding:14px; min-height:116px; justify-content:space-between; }
+.rvcb-monde-top { display:flex; align-items:center; justify-content:space-between; }
+.rvcb-mnum { width:30px; height:30px; border-radius:10px; display:grid; place-items:center; color:#fff; font:800 14px 'Plus Jakarta Sans',sans-serif; }
+.rvcb-monde.m1 .rvcb-mnum { background:linear-gradient(150deg,#6d49ff,#3b1ea8); }
+.rvcb-monde.m2 .rvcb-mnum { background:linear-gradient(150deg,#19b6a8,#0c7d72); }
+.rvcb-monde.m3 .rvcb-mnum { background:linear-gradient(150deg,#5b6bff,#2b2f9e); }
+.rvcb-monde.m4 .rvcb-mnum { background:linear-gradient(150deg,#ff8a4c,#e1561f); }
+.rvcb-frac { font:700 12px 'Plus Jakarta Sans',sans-serif; color:var(--mu,#9499a8); }
+.rvcb-mnm { font:800 13.5px/1.18 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; margin-top:8px; }
+.rvcb-mdz { font:500 11px 'Inter',sans-serif; color:var(--mu,#9499a8); margin-top:2px; }
+.rvcb-mbar { height:5px; border-radius:99px; background:var(--bo3,#e7e9f0); overflow:hidden; margin-top:9px; }
+.rvcb-mbar > i { display:block; height:100%; border-radius:99px; }
+.rvcb-monde.m1 .rvcb-mbar > i { background:#6d49ff; }
+.rvcb-monde.m2 .rvcb-mbar > i { background:#19b6a8; }
+.rvcb-monde.m3 .rvcb-mbar > i { background:#5b6bff; }
+.rvcb-monde.m4 .rvcb-mbar > i { background:#ff8a4c; }
+.rvcb-foot { text-align:center; font:500 11px 'Inter',sans-serif; color:var(--mu,#9499a8); padding:14px 0 2px; }
+
+/* liste de fiches d'un monde (renderMonde) */
+.rvcb-mprog { display:flex; align-items:center; gap:10px; margin:2px 0 14px; }
+.rvcb-mprog .rvcb-bar { flex:1; margin-top:0; }
+.rvcb-mprog-x { font:700 12px 'Plus Jakarta Sans',sans-serif; color:var(--mu,#9499a8); white-space:nowrap; }
+.rvcb-flist { display:flex; flex-direction:column; gap:9px; }
+.rvcb-frow { display:flex; align-items:center; gap:12px; width:100%; text-align:left; cursor:pointer; color:var(--ink);
+  background:var(--su,#fff); border:1px solid var(--bo3,#e7e9f0); border-radius:15px; padding:13px 14px;
+  box-shadow:0 6px 18px -14px rgba(40,30,90,.4); transition:transform .15s cubic-bezier(.23,1,.32,1); }
+.rvcb-frow:active { transform:scale(.985); }
+.rvcb-frow-code { flex:none; font:700 11px 'IBM Plex Mono',monospace; color:var(--a,#6366f1);
+  background:color-mix(in srgb,var(--a,#6366f1) 12%,transparent); padding:5px 8px; border-radius:8px; }
+.rvcb-frow-t { flex:1; font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; }
+.rvcb-frow.is-read .rvcb-frow-t { color:var(--mu,#9499a8); }
+.rvcb-frow-st { flex:none; width:22px; height:22px; display:grid; place-items:center; color:#10b981; }
+.rvcb-frow-st svg { width:18px; height:18px; }
+
 @media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before { transition:none !important; animation:none !important; } }
 </style>`;
 
@@ -382,28 +505,36 @@ export async function mount(root, param) {
       view = "home";
       return render();
     }
-    const revised = loadRevised();
-    const items = fichesByMonde(m.n)
+    const read = loadRead();
+    const fm = fichesByMonde(m.n);
+    const done = fm.filter((f) => read[f.code]).length;
+    const p = fm.length ? Math.round((done / fm.length) * 100) : 0;
+    const items = fm
       .map((f) => {
-        const on = revisedToday(f.code, revised);
-        return `<button class="rvc-card" data-code="${esc(f.code)}">
-            <span class="rvc-card-tit">${esc(f.titre)}</span>
-            <span class="rvc-chk ${on ? "on" : "off"}">${on ? "✓" : ""}</span>
+        const on = !!read[f.code];
+        return `<button class="rvcb-frow ${on ? "is-read" : ""}" data-code="${esc(f.code)}">
+            <span class="rvcb-frow-code">${esc(f.code)}</span>
+            <span class="rvcb-frow-t">${esc(f.titre)}</span>
+            <span class="rvcb-frow-st">${on ? FSVG.check : ""}</span>
           </button>`;
       })
       .join("");
-    root.innerHTML = `${STYLE}<div class="rvc">
-      <div class="rvc-top">
+    root.innerHTML = `${STYLE}<div class="rvc rvcb">
+      <div class="rvcb-top">
         <button class="rvc-back" aria-label="Retour">←</button>
-        <h1 class="rvc-h1">${esc(m.nom)}</h1>
+        <div class="rvcb-hi">
+          <span class="rvcb-k">Monde ${m.n} · ${esc(m.nom)}</span>
+          <span class="rvcb-n">${esc(m.sous)}</span>
+        </div>
       </div>
-      <div class="rvc-list">${items}</div>
+      <div class="rvcb-mprog"><div class="rvcb-bar"><i style="width:${p}%"></i></div><span class="rvcb-mprog-x">${done}/${fm.length} lues</span></div>
+      <div class="rvcb-flist">${items}</div>
     </div>`;
     root.querySelector(".rvc-back").addEventListener("click", () => {
       view = "home";
       render();
     });
-    root.querySelectorAll(".rvc-card").forEach((b) =>
+    root.querySelectorAll(".rvcb-frow").forEach((b) =>
       b.addEventListener("click", () => {
         code = b.getAttribute("data-code");
         focusId = null;
@@ -413,62 +544,129 @@ export async function mount(root, param) {
     );
   }
 
+  // Home « Bento » (style validé sur maquette) : tuiles modulaires premium —
+  // défi du jour dominant, progression chiffrée, prochaine fiche, Trouve la
+  // faute, ciblage moniteur, et les 4 mondes en mosaïque. Donne envie d'entrer
+  // dans les fiches « Coach ». Theme-aware (suit l'accent du compte).
   function renderHome() {
+    const me = getCurUser();
+    const nom = (me?.nom || "").trim();
+    const prenom = nom ? nom.split(/\s+/)[0] : "";
+    const initials = nom
+      ? nom
+          .split(/\s+/)
+          .filter(Boolean)
+          .map((s) => s[0])
+          .slice(0, 2)
+          .join("")
+          .toUpperCase()
+      : "";
+
     const revised = loadRevised();
+    const read = loadRead();
+    const totalF = FICHES.length;
+    const lues = FICHES.filter((f) => read[f.code]).length;
+    const pct = totalF ? Math.round((lues / totalF) * 100) : 0;
     const pf = pointFaible(revised);
-    const mondeCards = MONDES.map((m) => {
-      const total = fichesByMonde(m.n).length;
-      const done = fichesByMonde(m.n).filter((f) =>
-        revisedToday(f.code, revised),
-      ).length;
-      return `<button class="rvc-mcard" data-monde="${m.n}">
-        <span class="rvc-mnum">${m.n}</span>
-        <span class="rvc-mcard-t">${esc(m.nom)}</span>
-        ${done ? `<span class="rvc-mcard-done">${done}/${total}</span>` : ""}
-        <span class="rvc-mcard-go">›</span>
+    const nextF = FICHES.find((f) => !read[f.code]) || pf;
+
+    const C = 2 * Math.PI * 19; // anneau de progression
+    const dash = (C * (1 - pct / 100)).toFixed(1);
+
+    const svgArr = `<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const svgPlay = `<svg viewBox="0 0 24 24" fill="none"><path d="M7 5l11 7-11 7V5z" fill="currentColor"/></svg>`;
+    const svgWarn = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 4l8.5 15h-17L12 4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.4" r="1.2" fill="currentColor"/></svg>`;
+
+    const mondeTiles = MONDES.map((m) => {
+      const fm = fichesByMonde(m.n);
+      const tot = fm.length;
+      const done = fm.filter((f) => read[f.code]).length;
+      const p = tot ? Math.round((done / tot) * 100) : 0;
+      return `<button class="rvcb-tile rvcb-monde m${m.n}" data-monde="${m.n}">
+        <div class="rvcb-monde-top"><span class="rvcb-mnum">${m.n}</span><span class="rvcb-frac">${done}/${tot}</span></div>
+        <div><div class="rvcb-mnm">${esc(m.sous)}</div><div class="rvcb-mdz">${esc(m.nom)}</div></div>
+        <div class="rvcb-mbar"><i style="width:${p}%"></i></div>
       </button>`;
     }).join("");
 
-    const focusHtml = focuses.length
-      ? `<div class="rvc-focus"><div class="rvc-focus-k">🎯 Ton moniteur t'a ciblé ça</div>${focuses
-          .map((x) => {
-            const ff = getFiche(x.competence_code);
-            const t = ff ? ff.titre : x.competence_code;
-            return `<button class="rvc-focus-row" data-focus="${esc(x.id)}" data-fcode="${esc(x.competence_code)}"><span class="rvc-focus-t">${esc(t)}</span>${x.note ? `<span class="rvc-focus-n">${esc(x.note)}</span>` : ""}<span class="rvc-focus-go">J'm'y mets →</span></button>`;
-          })
-          .join("")}</div>`
+    const focusTile = focuses.length
+      ? `<div class="rvcb-tile rvcb-focus span2">
+          <div class="rvcb-lab"><span class="rvcb-dot"></span>Ton moniteur t'a ciblé ça</div>
+          <div class="rvcb-focus-list">${focuses
+            .map((x) => {
+              const ff = getFiche(x.competence_code);
+              const t = ff ? ff.titre : x.competence_code;
+              return `<button class="rvcb-focus-row" data-focus="${esc(x.id)}" data-fcode="${esc(x.competence_code)}"><span class="rvcb-focus-t">${esc(t)}</span><span class="rvcb-focus-go">J'm'y mets →</span></button>`;
+            })
+            .join("")}</div>
+        </div>`
       : "";
 
-    root.innerHTML = `${STYLE}<div class="rvc">
-      <div class="rvc-top">
+    root.innerHTML = `${STYLE}<div class="rvc rvcb">
+      <div class="rvcb-top">
         <button class="rvc-back" aria-label="Retour à l'accueil">←</button>
-        <h1 class="rvc-h1">Révise ta conduite</h1>
-      </div>
-      ${
-        pf
-          ? `<div class="rvc-pf">
-        <div class="rvc-pf-glow" aria-hidden="true"></div>
-        <div class="rvc-pf-head">
-          <span class="rvc-pf-k">⚡ Ton défi du jour</span>
-          <span class="rvc-pf-chrono">1 min chrono</span>
+        <div class="rvcb-hi">
+          <span class="rvcb-k">Révise ta conduite</span>
+          <span class="rvcb-n">${prenom ? `Salut, ${esc(prenom)} 👋` : "Le geste, pas que le code"}</span>
         </div>
-        <div class="rvc-pf-t">${esc(pf.titre)}</div>
-        <div class="rvc-pf-c">3 questions ciblées sur ton point faible du moment.</div>
-        <button class="rvc-pf-btn" data-pf="${esc(pf.code)}">Relever le défi →</button>
-      </div>`
-          : ""
-      }
-      ${focusHtml}
-      <button class="rvc-faute2" data-faute>
-        <span class="rvc-faute2-ico" aria-hidden="true">⚠️</span>
-        <span class="rvc-faute2-txt">
-          <span class="rvc-faute2-t">Trouve la faute</span>
-          <span class="rvc-faute2-s">Repère la faute éliminatoire avant le jour J</span>
-        </span>
-        <span class="rvc-faute2-arr" aria-hidden="true">›</span>
-      </button>
-      <div class="rvc-mlabel">Par thème</div>
-      ${mondeCards}
+        ${initials ? `<span class="rvcb-ava" aria-hidden="true">${esc(initials)}</span>` : ""}
+      </div>
+
+      <div class="rvcb-grid">
+        ${
+          pf
+            ? `<button class="rvcb-tile rvcb-defi span2" data-pf="${esc(pf.code)}">
+          <span class="rvcb-ring-deco" aria-hidden="true"></span>
+          <div class="rvcb-defi-head">
+            <span class="rvcb-lab"><span class="rvcb-dot"></span>Ton défi du jour</span>
+            <span class="rvcb-defi-meta">1 min · 3 questions</span>
+          </div>
+          <div>
+            <div class="rvcb-defi-t">${esc(pf.titre)}</div>
+            <p class="rvcb-defi-p">On a repéré ton point faible. Remets-toi dedans en 1 minute.</p>
+          </div>
+          <span class="rvcb-defi-cta"><span>Relever le défi</span><span class="rvcb-arr">${svgArr}</span></span>
+        </button>`
+            : ""
+        }
+
+        <div class="rvcb-tile rvcb-prog">
+          <div class="rvcb-ring">
+            <svg width="46" height="46" viewBox="0 0 46 46">
+              <circle cx="23" cy="23" r="19" fill="none" stroke="var(--bo3,#eef0f6)" stroke-width="6"/>
+              <circle cx="23" cy="23" r="19" fill="none" stroke="var(--a,#6366f1)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${dash}" transform="rotate(-90 23 23)"/>
+            </svg>
+            <span class="rvcb-pct">${pct}%</span>
+          </div>
+          <span class="rvcb-lab"><span class="rvcb-dot"></span>Progression</span>
+          <div><div class="rvcb-big">${lues}<small>/${totalF}</small></div><div class="rvcb-sub">fiches lues</div></div>
+          <div class="rvcb-bar"><i style="width:${pct}%"></i></div>
+        </div>
+
+        ${
+          nextF
+            ? `<button class="rvcb-tile rvcb-next" data-next data-code="${esc(nextF.code)}">
+          <span class="rvcb-chip">À lire ensuite</span>
+          <div class="rvcb-next-t">${esc(nextF.titre)}</div>
+          <div class="rvcb-next-w">Monde ${nextF.monde} · Fiche ${esc(nextF.code)}</div>
+          <div class="rvcb-next-go"><span class="rvcb-pp">${svgPlay}</span>${read[nextF.code] ? "Revoir" : "Ouvrir"}</div>
+        </button>`
+            : ""
+        }
+
+        <button class="rvcb-tile rvcb-faute span2" data-faute>
+          <span class="rvcb-faute-ic">${svgWarn}</span>
+          <span class="rvcb-faute-tx"><span class="rvcb-lab">Mini-jeu</span><span class="rvcb-faute-h">Trouve la faute</span><span class="rvcb-faute-p">Repère la faute éliminatoire avant le jour J.</span></span>
+          <span class="rvcb-play">${svgPlay}</span>
+        </button>
+
+        ${focusTile}
+
+        <div class="rvcb-mondes-h span2"><span class="rvcb-mondes-t">Tes 4 mondes</span><span class="rvcb-mondes-a">${lues}/${totalF} lues</span></div>
+        ${mondeTiles}
+
+        <div class="rvcb-foot span2">${totalF} fiches · révise le geste, pas que le code</div>
+      </div>
     </div>`;
     wireHome();
   }
@@ -486,6 +684,12 @@ export async function mount(root, param) {
     root.querySelector("[data-faute]")?.addEventListener("click", () => {
       track("revision_conduite_faute_open");
       navigate("#/jeu-faute");
+    });
+    root.querySelector("[data-next]")?.addEventListener("click", (e) => {
+      code = e.currentTarget.getAttribute("data-code");
+      focusId = null;
+      view = "fiche";
+      render();
     });
     root.querySelectorAll("[data-monde]").forEach((b) =>
       b.addEventListener("click", () => {
