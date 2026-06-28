@@ -31,6 +31,18 @@ import {
 import { mountMoniteurRanking } from "@/components/enseignant/moniteur-ranking.js";
 
 // ─── Labels rôle ─────────────────────────────────────────────
+let _areneEscHandler = null;
+
+// Démontage : retire le listener clavier global de la modale pseudo (sinon il
+// s'accumule sur `document` à chaque visite du profil → fuite + handlers
+// fantômes qui ciblent une modale déjà retirée du DOM).
+export function unmount() {
+  if (_areneEscHandler) {
+    document.removeEventListener("keydown", _areneEscHandler);
+    _areneEscHandler = null;
+  }
+}
+
 const ROLE_LABELS = {
   eleve: "Élève",
   enseignant: "Enseignant",
@@ -1890,9 +1902,12 @@ function _wireEleveArene(root, me) {
   modal?.addEventListener("click", (e) => {
     if (e.target === modal) closeModal();
   });
-  document.addEventListener("keydown", function esc(e) {
+  if (_areneEscHandler)
+    document.removeEventListener("keydown", _areneEscHandler);
+  _areneEscHandler = (e) => {
     if (e.key === "Escape") closeModal();
-  });
+  };
+  document.addEventListener("keydown", _areneEscHandler);
 
   input?.addEventListener("input", () => {
     const v = input.value.trim();
