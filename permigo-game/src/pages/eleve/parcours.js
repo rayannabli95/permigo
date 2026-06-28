@@ -1657,7 +1657,8 @@ function flashFreshComp(root, compId) {
 }
 
 function spawnArrow(node, compId) {
-  // Évite doublon
+  // Évite doublon (+ retire une flèche précédente : DOM ET listeners)
+  _arrowCleanup?.();
   document.querySelector(".fresh-arrow")?.remove();
 
   const ind = document.createElement("div");
@@ -1732,13 +1733,18 @@ function spawnArrow(node, compId) {
   window.addEventListener("scroll", position, { passive: true });
   window.addEventListener("resize", position);
 
+  // Nettoyage centralisé (node <body> + listeners) réutilisé au démontage de
+  // la page via unmount() pour éviter une flèche fantôme sur la page suivante.
+  _arrowCleanup = () => {
+    ind.remove();
+    window.removeEventListener("scroll", position);
+    window.removeEventListener("resize", position);
+    _arrowCleanup = null;
+  };
+
   const dismiss = () => {
     ind.classList.add("dismiss");
-    setTimeout(() => {
-      ind.remove();
-      window.removeEventListener("scroll", position);
-      window.removeEventListener("resize", position);
-    }, 280);
+    setTimeout(() => _arrowCleanup?.(), 280);
   };
 
   // Tap node = disparaît
@@ -2153,6 +2159,15 @@ function renderChapterView(
 // carte « Continuer » (le tracé fixe précédent dérivait hors des pastilles).
 // PURE mesure : la planification robuste est dans scheduleRoadLayout().
 let _roadObserver = null;
+let _arrowCleanup = null; // flèche « fraîchement débloqué » (overlay <body> + listeners)
+
+// Démontage de la page (appelé par le router avant de monter la suivante) :
+// coupe le ResizeObserver de la route ET nettoie la flèche « fraîchement
+// débloqué » (sinon elle reste visible sur la page suivante, listeners inclus).
+export function unmount() {
+  stopRoadLayout();
+  _arrowCleanup?.();
+}
 function layoutChapterRoad(root) {
   const scope = root && root.querySelector ? root : document;
   const route = scope.querySelector(".prc-cv-route");
