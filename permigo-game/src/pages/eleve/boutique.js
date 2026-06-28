@@ -103,7 +103,7 @@ const STYLE = `<style>
 .bo2 {
   /* Palette locale "Galerie Matin" (scopée, indépendante du thème app) */
   --g-bg:#F7F5EF; --g-top:#FFFDF8; --g-bot:#F1EDE2;
-  --g-card:#FFFFFF; --g-ink:#1C1A17; --g-soft:#5C574E; --g-mute:#938B7E;
+  --g-card:#FFFFFF; --g-ink:#1C1A17; --g-soft:#5C574E; --g-mute:#736D5D;
   --g-line:#EBE6DA;
   --g-gold1:#F7E7B6; --g-gold2:#E7C672; --g-gold3:#C99A3B; --g-gold4:#9C7322;
   --g-rare:#3E78C8; --g-epic:#7C4DD8; --g-common:#9A938A;
@@ -770,14 +770,23 @@ export async function mount(root) {
       });
     });
     // Hero vedette
-    content.querySelector(".bo2-hero")?.addEventListener("click", (e) => {
-      haptic("select");
-      const heroId = content.querySelector(".bo2-hero")?.dataset.itemId;
-      const item = allItems.find((i) => i.id === heroId);
-      if (!item) return;
-      if (item.owned) toggleEquip(item);
-      else buyFlow(item, e.currentTarget);
-    });
+    const hero = content.querySelector(".bo2-hero");
+    if (hero) {
+      const activateHero = (e) => {
+        haptic("select");
+        const item = allItems.find((i) => i.id === hero.dataset.itemId);
+        if (!item) return;
+        if (item.owned) toggleEquip(item);
+        else buyFlow(item, e.currentTarget || hero);
+      };
+      hero.addEventListener("click", activateHero);
+      hero.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          activateHero(e);
+        }
+      });
+    }
   }
 
   // ── Scroll vertical unique — toutes les sections ─────────────
@@ -855,12 +864,19 @@ export async function mount(root) {
         toast("Objectif retiré", "info");
         renderAll();
       });
-      objEl.addEventListener("click", () => {
+      const activateObj = () => {
         haptic("select");
         const it = allItems.find((i) => i.id === objEl.dataset.itemId);
         if (!it) return;
         if (it.owned) toggleEquip(it);
         else buyFlow(it, objEl);
+      };
+      objEl.addEventListener("click", activateObj);
+      objEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          activateObj();
+        }
       });
     }
   }

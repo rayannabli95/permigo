@@ -3,13 +3,13 @@
 // RPCs : get_my_threads() · get_thread(p_partner_id, limit)
 //        send_message(p_partner_id, p_body)
 // ═══════════════════════════════════════════════════════════════
-import { sb }         from '@/auth/auth.js';
-import { icon } from '@/utils/icons.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { toast }      from '@/components/common/toast.js';
-import { esc }        from '@/utils/escape.js';
-import { track }      from '@/services/analytics.js';
-import { emptyState } from '@/components/common/empty-state.js';
+import { sb } from "@/auth/auth.js";
+import { icon } from "@/utils/icons.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { toast } from "@/components/common/toast.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { emptyState } from "@/components/common/empty-state.js";
 
 const MSG_LIMIT = 50;
 
@@ -17,9 +17,11 @@ const MSG_LIMIT = 50;
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
-  track('page_view', { page: 'messages', user_role: me.role });
+  track("page_view", { page: "messages", user_role: me.role });
 
-  root.innerHTML = renderStyles() + `
+  root.innerHTML =
+    renderStyles() +
+    `
 <div class="msg anim-slide-up" id="msg-root">
   <div class="msg-list-view" id="msg-list-view">
     ${renderListSkeleton()}
@@ -33,29 +35,30 @@ export async function mount(root) {
 // ─── Thread list ─────────────────────────────────────────────
 async function loadThreads(root, me) {
   try {
-    const { data, error } = await sb.rpc('get_my_threads');
-    if (error || data?.error) throw new Error(data?.error || 'Erreur chargement');
+    const { data, error } = await sb.rpc("get_my_threads");
+    if (error || data?.error)
+      throw new Error(data?.error || "Erreur chargement");
 
     const threads = Array.isArray(data) ? data : [];
     renderThreadList(root, me, threads);
   } catch (e) {
-    console.error('[messages] loadThreads', e);
-    root.querySelector('#msg-list-view').innerHTML = `
+    console.error("[messages] loadThreads", e);
+    root.querySelector("#msg-list-view").innerHTML = `
       <div class="msg-empty">
-        <div class="msg-empty-ico">${icon('alert-triangle',{size:28})}</div>
+        <div class="msg-empty-ico">${icon("alert-triangle", { size: 28 })}</div>
         <div class="msg-empty-txt">Impossible de charger les messages</div>
         <button class="msg-retry-btn" id="msg-retry">Réessayer</button>
       </div>
     `;
-    root.querySelector('#msg-retry')?.addEventListener('click', () => {
-      root.querySelector('#msg-list-view').innerHTML = renderListSkeleton();
+    root.querySelector("#msg-retry")?.addEventListener("click", () => {
+      root.querySelector("#msg-list-view").innerHTML = renderListSkeleton();
       loadThreads(root, me);
     });
   }
 }
 
 function renderThreadList(root, me, threads) {
-  const listView = root.querySelector('#msg-list-view');
+  const listView = root.querySelector("#msg-list-view");
 
   if (threads.length === 0) {
     listView.innerHTML = `
@@ -63,9 +66,9 @@ function renderThreadList(root, me, threads) {
         <h1 class="msg-title">Messages</h1>
       </div>
       ${emptyState({
-        image: '/skins/empty-states/empty_messages.png',
-        title: 'Aucun message',
-        body: 'Lance la conversation avec ton moniteur ou ta classe.',
+        image: "/skins/empty-states/empty_messages.png",
+        title: "Aucun message",
+        body: "Lance la conversation avec ton moniteur ou ta classe.",
       })}
     `;
     return;
@@ -77,23 +80,29 @@ function renderThreadList(root, me, threads) {
       <span class="msg-count">${threads.length}</span>
     </div>
     <div class="msg-threads" id="msg-threads">
-      ${threads.map(t => renderThreadRow(t, me)).join('')}
+      ${threads.map((t) => renderThreadRow(t, me)).join("")}
     </div>
   `;
 
-  threads.forEach(thread => {
+  threads.forEach((thread) => {
     const partnerId = thread.partner_id;
-    listView.querySelector(`[data-partner="${partnerId}"]`)
-      ?.addEventListener('click', () => openConversation(root, me, thread));
+    listView
+      .querySelector(`[data-partner="${partnerId}"]`)
+      ?.addEventListener("click", () => openConversation(root, me, thread));
   });
 }
 
 function renderThreadRow(thread, me) {
-  const name     = esc(thread.partner_name || 'Inconnu');
-  const lastMsg  = esc(thread.last_message || '');
-  const unread   = thread.unread_count || 0;
-  const initials = (thread.partner_name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
-  const ts       = thread.last_message_at ? relativeTime(thread.last_message_at) : '';
+  const name = esc(thread.partner_name || "Inconnu");
+  const lastMsg = esc(thread.last_message || "");
+  const unread = thread.unread_count || 0;
+  const initials = (thread.partner_name || "?")
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  const ts = thread.last_message_at ? relativeTime(thread.last_message_at) : "";
 
   return `
 <div class="msg-thread-row" data-partner="${esc(thread.partner_id)}">
@@ -105,7 +114,7 @@ function renderThreadRow(thread, me) {
     </div>
     <div class="msg-thread-bottom">
       <span class="msg-thread-last">${lastMsg}</span>
-      ${unread > 0 ? `<span class="msg-badge">${unread > 9 ? '9+' : unread}</span>` : ''}
+      ${unread > 0 ? `<span class="msg-badge">${unread > 9 ? "9+" : unread}</span>` : ""}
     </div>
   </div>
 </div>`;
@@ -113,12 +122,12 @@ function renderThreadRow(thread, me) {
 
 // ─── Conversation ─────────────────────────────────────────────
 async function openConversation(root, me, thread) {
-  const listView = root.querySelector('#msg-list-view');
-  const convView = root.querySelector('#msg-conv-view');
-  listView.style.display = 'none';
-  convView.style.display = 'flex';
+  const listView = root.querySelector("#msg-list-view");
+  const convView = root.querySelector("#msg-conv-view");
+  listView.style.display = "none";
+  convView.style.display = "flex";
 
-  const partnerName = esc(thread.partner_name || 'Conversation');
+  const partnerName = esc(thread.partner_name || "Conversation");
   convView.innerHTML = `
     <div class="msg-conv-header">
       <button class="msg-back-btn" id="msg-back" aria-label="Retour">←</button>
@@ -133,13 +142,13 @@ async function openConversation(root, me, thread) {
     </div>
   `;
 
-  root.querySelector('#msg-back')?.addEventListener('click', () => {
-    convView.style.display = 'none';
-    listView.style.display = 'flex';
+  root.querySelector("#msg-back")?.addEventListener("click", () => {
+    convView.style.display = "none";
+    listView.style.display = "flex";
     loadThreads(root, me);
   });
 
-  track('messages.thread_opened', { partner_id: thread.partner_id });
+  track("messages.thread_opened", { partner_id: thread.partner_id });
 
   await loadMessages(root, me, thread.partner_id);
   wireConvInput(root, me, thread.partner_id);
@@ -147,23 +156,25 @@ async function openConversation(root, me, thread) {
 
 async function loadMessages(root, me, partnerId) {
   try {
-    const { data, error } = await sb.rpc('get_thread', {
+    const { data, error } = await sb.rpc("get_thread", {
       p_partner_id: partnerId,
       p_limit: MSG_LIMIT,
     });
-    if (error || data?.error) throw new Error(data?.error || 'Erreur chargement');
+    if (error || data?.error)
+      throw new Error(data?.error || "Erreur chargement");
 
     const messages = Array.isArray(data) ? data : [];
     renderMessages(root, me, messages);
   } catch (e) {
-    console.error('[messages] loadMessages', e);
-    const el = root.querySelector('#msg-conv-messages');
-    if (el) el.innerHTML = `<div class="msg-conv-err">Impossible de charger les messages</div>`;
+    console.error("[messages] loadMessages", e);
+    const el = root.querySelector("#msg-conv-messages");
+    if (el)
+      el.innerHTML = `<div class="msg-conv-err">Impossible de charger les messages</div>`;
   }
 }
 
 function renderMessages(root, me, messages) {
-  const el = root.querySelector('#msg-conv-messages');
+  const el = root.querySelector("#msg-conv-messages");
   if (!el) return;
 
   if (messages.length === 0) {
@@ -171,18 +182,18 @@ function renderMessages(root, me, messages) {
     return;
   }
 
-  el.innerHTML = messages.map(msg => renderBubble(msg, me)).join('');
+  el.innerHTML = messages.map((msg) => renderBubble(msg, me)).join("");
   el.scrollTop = el.scrollHeight;
 }
 
 function renderBubble(msg, me) {
   const isMine = msg.sender_id === me.id;
-  const body   = esc(msg.body || '');
-  const ts     = msg.created_at ? relativeTime(msg.created_at) : '';
+  const body = esc(msg.body || "");
+  const ts = msg.created_at ? relativeTime(msg.created_at) : "";
 
   return `
-<div class="msg-bubble-wrap ${isMine ? 'msg-bubble-wrap--mine' : ''}">
-  <div class="msg-bubble ${isMine ? 'msg-bubble--mine' : 'msg-bubble--other'}">
+<div class="msg-bubble-wrap ${isMine ? "msg-bubble-wrap--mine" : ""}">
+  <div class="msg-bubble ${isMine ? "msg-bubble--mine" : "msg-bubble--other"}">
     ${body}
   </div>
   <div class="msg-bubble-ts">${ts}</div>
@@ -190,32 +201,32 @@ function renderBubble(msg, me) {
 }
 
 function wireConvInput(root, me, partnerId) {
-  const input  = root.querySelector('#msg-input');
-  const sendBtn = root.querySelector('#msg-send');
+  const input = root.querySelector("#msg-input");
+  const sendBtn = root.querySelector("#msg-send");
 
   async function sendMessage() {
     const body = input?.value?.trim();
     if (!body) return;
-    input.value = '';
+    input.value = "";
     sendBtn.disabled = true;
 
     const optimisticEl = appendOptimistic(root, me, body);
 
     try {
-      const { data, error } = await sb.rpc('send_message', {
+      const { data, error } = await sb.rpc("send_message", {
         p_partner_id: partnerId,
         p_body: body,
       });
       if (error || data?.error) {
         optimisticEl?.remove();
-        toast(data?.error || 'Envoi impossible', 'error');
+        toast(data?.error || "Envoi impossible", "error");
         input.value = body;
       } else {
-        track('messages.sent', { partner_id: partnerId });
+        track("messages.sent", { partner_id: partnerId });
       }
     } catch (e) {
       optimisticEl?.remove();
-      toast('Erreur de connexion', 'error');
+      toast("Erreur de connexion", "error");
       input.value = body;
     } finally {
       sendBtn.disabled = false;
@@ -223,17 +234,20 @@ function wireConvInput(root, me, partnerId) {
     }
   }
 
-  sendBtn?.addEventListener('click', sendMessage);
-  input?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  sendBtn?.addEventListener("click", sendMessage);
+  input?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
   });
 }
 
 function appendOptimistic(root, me, body) {
-  const el = root.querySelector('#msg-conv-messages');
+  const el = root.querySelector("#msg-conv-messages");
   if (!el) return null;
-  const div = document.createElement('div');
-  div.className = 'msg-bubble-wrap msg-bubble-wrap--mine';
+  const div = document.createElement("div");
+  div.className = "msg-bubble-wrap msg-bubble-wrap--mine";
   div.innerHTML = `
     <div class="msg-bubble msg-bubble--mine msg-bubble--pending">${esc(body)}</div>
     <div class="msg-bubble-ts">Envoi…</div>
@@ -247,7 +261,7 @@ function appendOptimistic(root, me, body) {
 function relativeTime(iso) {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return 'à l\'instant';
+  if (m < 1) return "à l'instant";
   if (m < 60) return `il y a ${m} min`;
   const h = Math.floor(m / 60);
   if (h < 24) return `il y a ${h} h`;
@@ -260,21 +274,29 @@ function renderListSkeleton() {
 <div class="msg-list-header">
   <h1 class="msg-title">Messages</h1>
 </div>
-${[...Array(4)].map(() => `
+${[...Array(4)]
+  .map(
+    () => `
 <div class="msg-thread-row msg-thread-row--skel">
   <div class="skel" style="width:44px;height:44px;border-radius:50%"></div>
   <div style="flex:1;display:flex;flex-direction:column;gap:8px">
     <div class="skel" style="width:60%;height:13px;border-radius:6px"></div>
     <div class="skel" style="width:85%;height:12px;border-radius:6px"></div>
   </div>
-</div>`).join('')}`;
+</div>`,
+  )
+  .join("")}`;
 }
 
 function renderConvSkeleton() {
-  return [...Array(5)].map((_, i) => `
-<div class="msg-bubble-wrap ${i % 2 === 0 ? '' : 'msg-bubble-wrap--mine'}">
-  <div class="skel" style="width:${60 + Math.random() * 30 | 0}%;height:40px;border-radius:12px"></div>
-</div>`).join('');
+  return [...Array(5)]
+    .map(
+      (_, i) => `
+<div class="msg-bubble-wrap ${i % 2 === 0 ? "" : "msg-bubble-wrap--mine"}">
+  <div class="skel" style="width:${(60 + Math.random() * 30) | 0}%;height:40px;border-radius:12px"></div>
+</div>`,
+    )
+    .join("");
 }
 
 // ─── Styles ──────────────────────────────────────────────────
@@ -285,10 +307,17 @@ function renderStyles() {
   display: flex;
   flex-direction: column;
   min-height: 100svh;
-  background: var(--ink);
+  /* messagerie = surface SOMBRE fixe (chat) : on n'utilise PAS var(--ink) qui
+     s'inverse en dark mode (fond clair + texte #fff = illisible). Palette figée
+     + textes clairs fixes ci-dessous → cohérent dans les deux thèmes (a11y). */
+  background: #0b0d1a;
   font-family: 'Inter', sans-serif;
   color: #fff;
 }
+/* l'empty-state partagé suppose un fond CLAIR (texte var(--ink)/var(--mu)) :
+   sur la messagerie sombre, on force des textes clairs lisibles (a11y) */
+.msg .es-title, .msg [style*="var(--ink)"] { color: #e8ecf5 !important; }
+.msg .es-sub, .msg [style*="var(--mu)"] { color: #9aa3bd !important; }
 
 /* List view */
 .msg-list-view {
@@ -350,14 +379,14 @@ function renderStyles() {
 }
 .msg-thread-name {
   font: 600 15px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--bg4);
+  color: #e8ecf5;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .msg-thread-ts {
   font: 400 11px/1 'IBM Plex Mono', monospace;
-  color: var(--mu4);
+  color: #9aa3bd;
   flex-shrink: 0;
 }
 .msg-thread-bottom {
@@ -368,7 +397,7 @@ function renderStyles() {
 }
 .msg-thread-last {
   font: 400 13px/1 'Inter', sans-serif;
-  color: var(--mu);
+  color: #9aa3bd;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -415,7 +444,7 @@ function renderStyles() {
 .msg-back-btn:active { background: rgba(255,255,255,.15); }
 .msg-conv-name {
   font: 700 16px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--bg4);
+  color: #e8ecf5;
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -445,14 +474,14 @@ function renderStyles() {
   background: var(--ink2);
   border: 1.5px solid rgba(255,255,255,.08);
   border-radius: 24px;
-  color: var(--bg4);
+  color: #e8ecf5;
   font: 400 15px/1 'Inter', sans-serif;
   outline: none;
   transition: border-color 140ms;
   min-height: 44px;
 }
 .msg-input:focus { border-color: color-mix(in srgb, var(--a) 50%, transparent); }
-.msg-input::placeholder { color: var(--mu4); }
+.msg-input::placeholder { color: #9aa3bd; }
 .msg-send-btn {
   width: 44px;
   height: 44px;
@@ -499,7 +528,7 @@ function renderStyles() {
 .msg-bubble--pending { opacity: .6; }
 .msg-bubble-ts {
   font: 400 11px/1 'IBM Plex Mono', monospace;
-  color: var(--mu4);
+  color: #9aa3bd;
   padding: 0 4px;
 }
 
@@ -517,15 +546,15 @@ function renderStyles() {
 .msg-empty-ico { font-size: 40px; margin-bottom: 8px; }
 .msg-empty-txt {
   font: 600 16px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: var(--bg4);
+  color: #e8ecf5;
 }
 .msg-empty-sub {
   font: 400 14px/1.5 'Inter', sans-serif;
-  color: var(--mu);
+  color: #9aa3bd;
 }
 .msg-conv-empty, .msg-conv-err {
   font: 400 14px/1.5 'Inter', sans-serif;
-  color: var(--mu);
+  color: #9aa3bd;
 }
 .msg-retry-btn {
   margin-top: 12px;

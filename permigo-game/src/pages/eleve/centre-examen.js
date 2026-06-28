@@ -143,7 +143,7 @@ const STYLE = `<style>
   font: 800 9px/1 'Inter', sans-serif;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--a);
+  color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--a) 25%, transparent);
   margin-top: 5px;
@@ -186,9 +186,12 @@ const STYLE = `<style>
 .cea-chip.active {
   border-color: var(--a);
   background: var(--a);
-  color: #fff;
+  color: var(--a-ink);
   box-shadow: 0 4px 14px color-mix(in srgb, var(--a) 38%, transparent);
 }
+/* sur la puce active, le n° de département (span opacity:.65) doit rester lisible
+   sur fond accent → opacité pleine, sinon le blend tombe sous 4.5:1 (a11y) */
+.cea-chip.active span { opacity: 1 !important; }
 .cea-chip.soon {
   opacity: .5;
   cursor: default;

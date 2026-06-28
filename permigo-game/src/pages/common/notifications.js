@@ -451,7 +451,7 @@ async function loadNotifs(root, me) {
           <div class="nf2-item ${n.read ? "" : "unread"}" data-id="${esc(n.id)}" data-read="${n.read}" data-route="${esc(route)}">
             <div class="nf2-item-ico" style="background:${m.bg};color:${m.color}">${icon(m.iconName, { size: 19 })}</div>
             <div class="nf2-item-body">
-              <div class="nf2-item-eyebrow" style="color:color-mix(in srgb, ${m.color} 65%, var(--ink))">${esc(m.label)} <span class="nf2-when">· ${fmtTime(n.created_at)}</span></div>
+              <div class="nf2-item-eyebrow" style="color:color-mix(in srgb, ${m.color} 50%, var(--ink))">${esc(m.label)} <span class="nf2-when">· ${fmtTime(n.created_at)}</span></div>
               <div class="nf2-item-title">${esc(n.title)}</div>
               ${n.body ? `<div class="nf2-item-desc">${esc(n.body)}</div>` : ""}
             </div>

@@ -3,18 +3,18 @@
 // Route : #/feedback
 // Affiche tout le feed get_eleve_feedback_feed, pagination 30/30
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
-import { navigate } from '@/router.js';
-import { icon } from '@/utils/icons.js';
-import { findSubComp } from '@/data/remc.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { icon } from "@/utils/icons.js";
+import { findSubComp } from "@/data/remc.js";
 
 // "C2f" → "Intersections, ronds-points" (fallback : code brut)
 function compLabel(compId) {
   const sub = findSubComp(compId);
-  return sub ? sub.n : (compId || '—');
+  return sub ? sub.n : compId || "—";
 }
 
 const STYLE = `<style>
@@ -160,71 +160,82 @@ const STYLE = `<style>
 
 // ─── Helpers ─────────────────────────────────────────────────
 const GRADS = [
-  'linear-gradient(135deg,#5b5bd6,#3a3a8e)',
-  'linear-gradient(135deg,var(--blk),#155e75)',
-  'linear-gradient(135deg,var(--puk),#4c1d95)',
-  'linear-gradient(135deg,var(--grd),#064e3b)',
-  'linear-gradient(135deg,#9333ea,#6b21a8)',
-  'linear-gradient(135deg,var(--rdk),#7f1d1d)',
+  "linear-gradient(135deg,#5b5bd6,#3a3a8e)",
+  "linear-gradient(135deg,var(--blk),#155e75)",
+  "linear-gradient(135deg,var(--puk),#4c1d95)",
+  "linear-gradient(135deg,var(--grd),#064e3b)",
+  "linear-gradient(135deg,#9333ea,#6b21a8)",
+  "linear-gradient(135deg,var(--rdk),#7f1d1d)",
 ];
 function gradFor(str) {
   let h = 0;
-  for (let i = 0; i < (str || '').length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  for (let i = 0; i < (str || "").length; i++)
+    h = (h * 31 + str.charCodeAt(i)) >>> 0;
   return GRADS[h % GRADS.length];
 }
 function relTime(ts) {
-  if (!ts) return '';
+  if (!ts) return "";
   const diff = Date.now() - new Date(ts).getTime();
   const min = Math.floor(diff / 60000);
   if (min < 60) return `il y a ${min}min`;
   const h = Math.floor(min / 60);
   if (h < 24) return `il y a ${h}h`;
   const d = Math.floor(h / 24);
-  if (d === 1) return 'hier';
+  if (d === 1) return "hier";
   if (d < 7) return `il y a ${d}j`;
-  return new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date(ts).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 function fmtMin(m) {
-  if (!m) return '';
-  const h = Math.floor(m / 60), r = m % 60;
+  if (!m) return "";
+  const h = Math.floor(m / 60),
+    r = m % 60;
   return h === 0 ? `${r}min` : r === 0 ? `${h}h` : `${h}h${r}`;
 }
 
 function renderCard(evt) {
-  const isSession = evt.kind === 'session';
-  const nameKey   = `${evt.moniteur_prenom || ''}${evt.moniteur_nom || ''}`;
-  const inits     = ((evt.moniteur_prenom || '')[0] || '') + ((evt.moniteur_nom || '')[0] || '');
-  const badgeCls  = isSession ? 'fb-badge-session' : 'fb-badge-validation';
-  const badgeIco  = isSession
-    ? icon('clock',         { size: 14, strokeWidth: 2.2 })
-    : icon('check-circle',  { size: 14, strokeWidth: 2.2 });
+  const isSession = evt.kind === "session";
+  const nameKey = `${evt.moniteur_prenom || ""}${evt.moniteur_nom || ""}`;
+  const inits =
+    ((evt.moniteur_prenom || "")[0] || "") +
+    ((evt.moniteur_nom || "")[0] || "");
+  const badgeCls = isSession ? "fb-badge-session" : "fb-badge-validation";
+  const badgeIco = isSession
+    ? icon("clock", { size: 14, strokeWidth: 2.2 })
+    : icon("check-circle", { size: 14, strokeWidth: 2.2 });
   const desc = isSession
     ? `<strong>${fmtMin(evt.duration_minutes)}</strong> de conduite avec toi`
     : `Compétence validée : <strong>${esc(compLabel(evt.competence_id))}</strong>`;
 
-  const statusLine = isSession && evt.confirmation_status ? `
-    <div class="fb-extra-row" style="color:${evt.confirmation_status === 'confirmed' ? 'var(--grd)' : 'var(--mu2)'}">
-      ${evt.confirmation_status === 'confirmed' ? '✓ Confirmée' : evt.confirmation_status === 'refused' ? '✗ Refusée' : 'En attente'}
-    </div>` : '';
+  const statusLine =
+    isSession && evt.confirmation_status
+      ? `
+    <div class="fb-extra-row" style="color:${evt.confirmation_status === "confirmed" ? "var(--grd)" : "var(--mu2)"}">
+      ${evt.confirmation_status === "confirmed" ? "✓ Confirmée" : evt.confirmation_status === "refused" ? "✗ Refusée" : "En attente"}
+    </div>`
+      : "";
 
   return `
   <div class="fb-card" role="button" tabindex="0" aria-expanded="false">
     <div class="fb-card-top">
-      <div class="fb-av" style="background:${gradFor(nameKey)}">${esc(inits.toUpperCase() || '?')}</div>
+      <div class="fb-av" style="background:${gradFor(nameKey)}">${esc(inits.toUpperCase() || "?")}</div>
       <div class="fb-meta">
-        <div class="fb-author">${esc(evt.moniteur_prenom || '')} ${esc(evt.moniteur_nom || '')}</div>
+        <div class="fb-author">${esc(evt.moniteur_prenom || "")} ${esc(evt.moniteur_nom || "")}</div>
         <div class="fb-time">${relTime(evt.ts)}</div>
       </div>
       <div class="fb-badge ${badgeCls}">${badgeIco}</div>
     </div>
     <div class="fb-body">
       <div class="fb-event">${desc}</div>
-      ${evt.comment ? `<div class="fb-comment">"${esc(evt.comment)}"</div>` : ''}
+      ${evt.comment ? `<div class="fb-comment">"${esc(evt.comment)}"</div>` : ""}
     </div>
     <div class="fb-card-extra">
       <div class="fb-extra">
-        <div class="fb-extra-row">${icon('calendar', { size: 12, color: 'var(--mu2)', strokeWidth: 2 })} ${new Date(evt.ts).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
-        ${isSession ? `<div class="fb-extra-row">${icon('clock', { size: 12, color: 'var(--mu2)', strokeWidth: 2 })} ${fmtMin(evt.duration_minutes)}</div>` : ''}
+        <div class="fb-extra-row">${icon("calendar", { size: 12, color: "var(--mu2)", strokeWidth: 2 })} ${new Date(evt.ts).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</div>
+        ${isSession ? `<div class="fb-extra-row">${icon("clock", { size: 12, color: "var(--mu2)", strokeWidth: 2 })} ${fmtMin(evt.duration_minutes)}</div>` : ""}
         ${statusLine}
       </div>
     </div>
@@ -237,7 +248,7 @@ export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track('page.view', { page: 'feedback', role: me.role });
+  track("page.view", { page: "feedback", role: me.role });
 
   // Skeleton
   root.innerHTML = `
@@ -255,17 +266,19 @@ export async function mount(root) {
     </div>
   `;
 
-  root.querySelector('#fb-back')?.addEventListener('click', () => navigate('#/'));
+  root
+    .querySelector("#fb-back")
+    ?.addEventListener("click", () => navigate("#/"));
 
   let offset = 0;
   let allEvents = [];
 
   async function loadMore() {
-    const btn = root.querySelector('#fb-load-btn');
+    const btn = root.querySelector("#fb-load-btn");
     if (btn) btn.disabled = true;
 
     try {
-      const { data } = await sb.rpc('get_eleve_feedback_feed', {
+      const { data } = await sb.rpc("get_eleve_feedback_feed", {
         p_eleve_id: me.id,
         p_limit: PAGE_SIZE,
         p_offset: offset,
@@ -275,62 +288,82 @@ export async function mount(root) {
       offset += batch.length;
       renderList(batch.length < PAGE_SIZE);
     } catch (e) {
-      console.error('[feedback] load error', e);
-      const lb = root.querySelector('#fb-load-btn');
-      if (lb) { lb.disabled = false; return; }            // pagination : on garde l'existant
-      const list = root.querySelector('.fb-list');         // 1er chargement : on tue le skeleton
+      console.error("[feedback] load error", e);
+      const lb = root.querySelector("#fb-load-btn");
+      if (lb) {
+        lb.disabled = false;
+        return;
+      } // pagination : on garde l'existant
+      const list = root.querySelector(".fb-list"); // 1er chargement : on tue le skeleton
       if (list) {
-        list.innerHTML = `<div class="fb-empty"><div class="fb-empty-ico">${icon('alert-circle',{size:30})}</div>
+        list.innerHTML = `<div class="fb-empty"><div class="fb-empty-ico">${icon("alert-circle", { size: 30 })}</div>
           Impossible de charger tes retours.<br>
           <button class="fb-load-more" id="fb-retry" style="margin-top:12px">Réessayer</button></div>`;
-        root.querySelector('#fb-retry')?.addEventListener('click', () => { offset = 0; allEvents = []; loadMore(); });
+        root.querySelector("#fb-retry")?.addEventListener("click", () => {
+          offset = 0;
+          allEvents = [];
+          loadMore();
+        });
       }
     }
   }
 
   function renderList(noMore) {
-    const page = root.querySelector('.fb-page');
+    const page = root.querySelector(".fb-page");
     if (!page) return;
 
     if (allEvents.length === 0) {
-      page.querySelector('.fb-list')?.remove();
-      page.querySelector('#fb-load-btn')?.remove();
-      if (!page.querySelector('.fb-empty')) {
-        page.insertAdjacentHTML('beforeend', `
+      page.querySelector(".fb-list")?.remove();
+      page.querySelector("#fb-load-btn")?.remove();
+      if (!page.querySelector(".fb-empty")) {
+        page.insertAdjacentHTML(
+          "beforeend",
+          `
           <div class="fb-empty">
-            <div class="fb-empty-ico">${icon('message-circle',{size:30})}</div>
+            <div class="fb-empty-ico">${icon("message-circle", { size: 30 })}</div>
             Aucun retour encore — continue tes leçons !
           </div>
-        `);
+        `,
+        );
       }
       return;
     }
 
-    let list = page.querySelector('.fb-list');
+    let list = page.querySelector(".fb-list");
     if (!list) {
-      list = document.createElement('div');
-      list.className = 'fb-list';
+      list = document.createElement("div");
+      list.className = "fb-list";
       page.appendChild(list);
     }
-    list.innerHTML = allEvents.map(renderCard).join('');
+    list.innerHTML = allEvents.map(renderCard).join("");
 
     // Remove old button
-    page.querySelector('#fb-load-btn')?.remove();
+    page.querySelector("#fb-load-btn")?.remove();
 
     if (!noMore) {
-      page.insertAdjacentHTML('beforeend', `
+      page.insertAdjacentHTML(
+        "beforeend",
+        `
         <button class="fb-load-more" id="fb-load-btn">
-          ${icon('refresh', { size: 15, strokeWidth: 2.2 })} Charger plus
+          ${icon("refresh", { size: 15, strokeWidth: 2.2 })} Charger plus
         </button>
-      `);
-      page.querySelector('#fb-load-btn')?.addEventListener('click', loadMore);
+      `,
+      );
+      page.querySelector("#fb-load-btn")?.addEventListener("click", loadMore);
     }
 
     // Wire expand
-    list.querySelectorAll('.fb-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const expanded = card.classList.toggle('fb-expanded');
-        card.setAttribute('aria-expanded', expanded);
+    list.querySelectorAll(".fb-card").forEach((card) => {
+      const toggle = () => {
+        const expanded = card.classList.toggle("fb-expanded");
+        card.setAttribute("aria-expanded", expanded);
+      };
+      card.addEventListener("click", toggle);
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle();
+        }
       });
     });
   }

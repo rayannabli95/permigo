@@ -124,7 +124,7 @@ const STYLE = `<style>
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.gal-card.acquis .gal-card-meta { color: var(--grdk); }
+.gal-card.acquis .gal-card-meta { color: var(--gr-txt); }
 
 /* Lock icon overlay */
 .gal-lock-badge {

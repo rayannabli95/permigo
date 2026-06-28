@@ -248,7 +248,7 @@ const STYLE = `<style>
 .tr2-card:active { transform: scale(.93); }
 .tr2-new-dot {
   position: absolute; top: 7px; left: 7px; z-index: 3;
-  background: var(--rd); color: #fff;
+  background: var(--rdx); color: #fff;
   font: 800 7.5px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .06em;
   padding: 4px 7px; border-radius: var(--r-full);
   box-shadow: 0 3px 10px rgba(239,68,68,.6);
