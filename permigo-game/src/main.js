@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 import "./styles/main.css";
 import { restoreSession, sb } from "@/auth/auth.js";
+import { setupAuthListener } from "@/auth/auth-listener.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { route } from "@/router.js";
 import { track } from "@/services/analytics.js";
@@ -197,7 +198,10 @@ async function boot() {
   }
 }
 
-boot();
+// Le listener auth est branché APRÈS le boot (évite le deadlock sur getSession
+// au démarrage) : il resynchronise l'app quand la session change pendant qu'elle
+// est ouverte (login/logout dans un autre onglet, changement de compte).
+boot().finally(() => setupAuthListener(sb));
 
 // Bandeau cookies (RGPD) — affiché tant qu'aucun choix n'est mémorisé,
 // indépendamment de l'état d'authentification.

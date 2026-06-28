@@ -149,7 +149,7 @@ function show(me) {
       <div class="ppr-handle" aria-hidden="true"></div>
       <div class="ppr-bell" aria-hidden="true">${icon("bell", { size: 30 })}</div>
       <div class="ppr-title" id="ppr-title">${tu ? "Active tes rappels" : "Activez vos notifications"}</div>
-      <div class="ppr-sub">${tu ? "Un tap maintenant, et on s'occupe du reste. Jamais de spam." : "Un tap maintenant — jamais plus d'une par jour."}</div>
+      <div class="ppr-sub">${tu ? "Un tap maintenant, et on s'occupe du reste." : "Un tap maintenant — jamais plus d'une par jour."}</div>
       <div class="ppr-rows">
         ${rows.map(([ico, txt]) => `<div class="ppr-row"><span class="ppr-row-ico">${icon(ico, { size: 19 })}</span>${txt}</div>`).join("")}
       </div>

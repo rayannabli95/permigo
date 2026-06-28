@@ -7,7 +7,7 @@
 //
 // Sections :
 //   HERO   — « Salut {prenom} ! » + mascotte + pitch coach.
-//   1 « Ta tête »          — grille d'avatars (+ couleur d'accent, live).
+//   1 « Photo de profil »  — grille d'avatars (+ couleur d'accent, live).
 //   2 « Tes rappels du soir » — toggle (ON = demande permission notif)
 //                               + carte récompense (coffre / XP / volants).
 //   3 « Ajoute l'appli »   — A2HS, seulement si pas déjà installée.
@@ -97,11 +97,11 @@ export async function mount(root) {
             <p class="ob-lead">Moi c'est <b>PermiGo</b>. En 30&nbsp;secondes, on prépare ton appli — après, tu réviseras <b>2&nbsp;min par soir</b>.</p>
           </header>
 
-          <!-- ─── SECTION 1 : Ta tête ─── -->
+          <!-- ─── SECTION 1 : Photo de profil ─── -->
           <section class="ob-section" aria-labelledby="ob-sec1-t">
             <div class="ob-sec-head">
               <span class="ob-sec-num">1</span>
-              <h2 class="ob-sec-title" id="ob-sec1-t">Ta tête</h2>
+              <h2 class="ob-sec-title" id="ob-sec1-t">Photo de profil</h2>
             </div>
             <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="Choix de l'avatar">
               ${(ASSETS.avatar || [])
@@ -198,7 +198,7 @@ export async function mount(root) {
             </div>
             <div class="ob-install-head">
               <img class="ob-install-badge" src="/skins/avatars/permigo-badge-icon.png" alt="" />
-              <p class="ob-install-lead"><b>2 gestes, 10 secondes</b> — tes rappels arrivent ici.</p>
+              <p class="ob-install-lead"><b>2 gestes, 10 secondes</b> — tes rappels et tes récompenses arrivent ici.</p>
             </div>
             <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
             <button class="ob-plat-switch" id="ob-plat-switch" type="button" aria-label="Changer la plateforme des instructions (iPhone / Android)"></button>
