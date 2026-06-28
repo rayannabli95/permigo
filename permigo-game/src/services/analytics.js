@@ -2,10 +2,10 @@
 // Analytics — wrapper unifié (Supabase events_analytics + PostHog futur)
 // Voir .telemetry/tracking-plan.yaml pour le contrat
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { analyticsConsentGranted } from '@/components/common/cookie-banner.js';
-import { phCapture } from '@/services/posthog.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { analyticsConsentGranted } from "@/components/common/cookie-banner.js";
+import { phCapture } from "@/services/posthog.js";
 
 const DEBUG = import.meta.env.DEV;
 const queue = [];
@@ -20,7 +20,7 @@ export function track(name, props = {}) {
   // RGPD / ePrivacy : pas de mesure d'audience tant que le consentement
   // analytics n'est pas accordé (privacy by default).
   if (!analyticsConsentGranted()) {
-    if (DEBUG) console.log('[track] skipped (no consent)', name);
+    if (DEBUG) console.log("[track] skipped (no consent)", name);
     return;
   }
 
@@ -28,17 +28,17 @@ export function track(name, props = {}) {
   const evt = {
     user_id: me?.id || null,
     auto_ecole_id: me?.auto_ecole_id || null,
-    role: me?.role || 'guest',
+    role: me?.role || "guest",
     event_name: name,
     properties: props,
     ts: new Date().toISOString(),
   };
 
-  if (DEBUG) console.log('[track]', name, props);
+  if (DEBUG) console.log("[track]", name, props);
 
   queue.push(evt);
   schedule();
-  phCapture(name, props);  // mirror vers PostHog (events métier unifiés)
+  phCapture(name, props); // mirror vers PostHog (events métier unifiés)
 }
 
 function schedule() {
@@ -54,26 +54,38 @@ async function flush() {
   // Si l'utilisateur s'est déconnecté entre track() et flush(),
   // get_my_id() retourne null côté RLS et un user_id non-null casse la policy.
   const me = getCurUser();
-  const batch = queue.splice(0, queue.length).map(evt => ({
+
+  // Pas de mesure pour les invités : events_analytics n'autorise l'INSERT
+  // qu'aux utilisateurs authentifiés (anon = SELECT only, aucune policy INSERT).
+  // Tenter un INSERT sans session échouait en boucle ("permission denied for
+  // table events_analytics") et polluait les logs. On droppe la file (un replay
+  // donnerait le même refus) — l'utilisateur qui se connecte ensuite repart
+  // proprement avec ses events authentifiés.
+  if (!me) {
+    queue.length = 0;
+    return;
+  }
+
+  const batch = queue.splice(0, queue.length).map((evt) => ({
     ...evt,
     user_id: me?.id || null,
     auto_ecole_id: me?.auto_ecole_id || null,
-    role: me?.role || 'guest',
+    role: me?.role || "guest",
   }));
 
-  const { error } = await sb.from('events_analytics').insert(batch);
+  const { error } = await sb.from("events_analytics").insert(batch);
 
   if (error) {
-    if (DEBUG) console.warn('[track] flush failed', error.message);
+    if (DEBUG) console.warn("[track] flush failed", error.message);
     // RLS 42501 → on drop (event obsolète, replay aurait le même résultat)
     // Réseau / 5xx → on retente (cap 50 pour éviter la boucle infinie)
-    const isRls = error.code === '42501';
+    const isRls = error.code === "42501";
     if (!isRls && queue.length < 50) queue.unshift(...batch);
   }
 }
 
 // Flush avant unload
-window.addEventListener('beforeunload', () => {
+window.addEventListener("beforeunload", () => {
   if (queue.length && navigator.sendBeacon) {
     // best-effort; Supabase REST n'est pas idéal pour beacon, mais on tente
     flush();
@@ -87,9 +99,10 @@ export async function identify(traits = {}) {
   const me = getCurUser();
   if (!me) return;
   try {
-    const { error } = await sb.from('profiles').update(traits).eq('id', me.id);
-    if (error && DEBUG) console.warn('[identify] RLS or DB error:', error.message);
+    const { error } = await sb.from("profiles").update(traits).eq("id", me.id);
+    if (error && DEBUG)
+      console.warn("[identify] RLS or DB error:", error.message);
   } catch (e) {
-    if (DEBUG) console.warn('[identify] network error:', e);
+    if (DEBUG) console.warn("[identify] network error:", e);
   }
 }
