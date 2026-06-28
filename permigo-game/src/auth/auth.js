@@ -158,17 +158,27 @@ export async function restoreSession() {
   } = await sb.auth.getSession();
   if (!session) return null;
 
-  const { data: profile } = await sb
-    .from("profiles")
-    .select(
-      "id, auth_id, role, nom, prenom, email, auto_ecole_id, join_code, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes, parental_consent_required, parental_consent_given_at, parental_consent_token",
-    )
-    .eq("auth_id", session.user.id)
-    .maybeSingle();
+  // On a une session valide → on charge le profil. En cas d'ERREUR transitoire
+  // (réseau, hoquet RLS), on retente 1× avant d'abandonner : sinon un simple
+  // hoquet renvoyait null et boot() traitait l'utilisateur connecté comme un
+  // invité → « déconnexion fantôme » (retour landing/login alors que la session
+  // est bien là). Un vrai « pas de profil » (error null, profile null) sort tout
+  // de suite, sans retry inutile.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const { data: profile, error } = await sb
+      .from("profiles")
+      .select(
+        "id, auth_id, role, nom, prenom, email, auto_ecole_id, join_code, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes, parental_consent_required, parental_consent_given_at, parental_consent_token",
+      )
+      .eq("auth_id", session.user.id)
+      .maybeSingle();
 
-  if (profile) {
-    setCurUser({ ...profile, email: profile.email || session.user.email });
-    return profile;
+    if (profile) {
+      setCurUser({ ...profile, email: profile.email || session.user.email });
+      return profile;
+    }
+    if (!error) break; // pas d'erreur mais pas de profil → vrai cas « sans profil »
+    if (attempt === 0) await new Promise((r) => setTimeout(r, 600));
   }
   return null;
 }
