@@ -225,7 +225,7 @@ function _renderArena(state, data) {
       <span class="arn-link-t">Choisis ton pseudo public</span>
       <span class="arn-link-s">Sinon tu apparais en « Apprenti »</span>
     </span>
-    <span style="color:var(--amute)" aria-hidden="true">›</span>
+    <span style="color:var(--mu)" aria-hidden="true">›</span>
   </a>
 </div>`;
 }
@@ -238,7 +238,7 @@ function _renderScopebar(state, rows) {
   const effectif =
     ranked > 0 ? `sur ${ranked} élève${ranked > 1 ? "s" : ""}` : "";
   if (state.ligue === "revision") {
-    return `<div class="arn-scopebar"><span style="font:600 12px/1 'Inter',sans-serif;color:var(--amute)">Mon école</span><span class="arn-effectif">${effectif}</span></div>`;
+    return `<div class="arn-scopebar"><span style="font:600 12px/1 'Inter',sans-serif;color:var(--mu)">Mon école</span><span class="arn-effectif">${effectif}</span></div>`;
   }
   return `<div class="arn-scopebar">
     <div class="arn-scope" role="group" aria-label="Portée du classement">
