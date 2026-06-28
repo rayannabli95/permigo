@@ -215,7 +215,7 @@ function wireConvInput(root, me, partnerId) {
 
     try {
       const { data, error } = await sb.rpc("send_message", {
-        p_partner_id: partnerId,
+        p_recipient_id: partnerId,
         p_body: body,
       });
       if (error || data?.error) {
