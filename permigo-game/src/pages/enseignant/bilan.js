@@ -592,7 +592,7 @@ export async function mount(root, eleveId) {
   </div>
 
   <!-- Mention légale (écran + impression) — ce document n'est PAS officiel -->
-  <div class="bl-disclaimer" style="margin:14px 16px 0;padding:12px 14px;border:1px solid #e6e9ef;border-radius:12px;background:#f7f8fc;font:500 11px/1.5 'Inter',sans-serif;color:#6b7095;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+  <div class="bl-disclaimer" style="margin:14px 16px 0;padding:12px 14px;border:1px solid #e6e9ef;border-radius:12px;background:#f7f8fc;font:500 11px/1.5 'Inter',sans-serif;color:#5a6188;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
     <strong style="color:#1a1c2e;font-weight:700;">Document de suivi</strong> à la marque de ${esc(ecoleNom)}. Ce n'est <strong>pas</strong> le livret d'apprentissage ni l'attestation de fin de formation <strong>officiels</strong>, et il ne remplace aucun document légal.
   </div>
 

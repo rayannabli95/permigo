@@ -42,7 +42,7 @@ const STYLE = `<style>
   .me-hero-content { position: relative; z-index: 2; }
   .me-hero-kicker {
     font: 700 11px/1 'Inter', sans-serif;
-    color: #a3a9c4; text-transform: uppercase; letter-spacing: .12em;
+    color: #646a8c; text-transform: uppercase; letter-spacing: .12em;
     margin: 0 0 6px;
   }
   .me-hero-title {
@@ -51,7 +51,7 @@ const STYLE = `<style>
   }
   .me-hero-sub {
     font: 600 13px/1.5 'Inter', sans-serif;
-    color: #6b7095; margin: 5px 0 0; max-width: 38ch;
+    color: #5a6188; margin: 5px 0 0; max-width: 38ch;
   }
   .me-hero-actions {
     display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;
@@ -158,7 +158,7 @@ const STYLE = `<style>
     margin-left: auto;
     font: 800 11px/1 'Inter', sans-serif;
     letter-spacing: 0;
-    color: #8b92a3;
+    color: #5f6788;
   }
 
   /* Couleurs par groupe */
@@ -236,7 +236,7 @@ const STYLE = `<style>
   /* Valeur droite : progression ou jours inactif */
   .me-pr {
     font: 700 12px/1 'Inter', sans-serif;
-    color: #8b92a3;
+    color: #5f6788;
     font-variant-numeric: tabular-nums;
     flex-shrink: 0;
   }
@@ -356,7 +356,7 @@ const STYLE = `<style>
 
   /* ── Tri segmenté (Par état / Nom / Progrès / Compétences) ── */
   .me-seg { display: flex; gap: 4px; padding: 4px; margin: 0 0 14px; background: #eef0f6; border-radius: 13px; }
-  .me-seg-btn { flex: 1; min-height: 40px; padding: 8px 4px; border: 0; border-radius: 10px; background: transparent; color: #6b7095; font: 700 12px/1 'Inter', sans-serif; cursor: pointer; transition: background .15s, color .15s, box-shadow .15s, transform .1s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  .me-seg-btn { flex: 1; min-height: 40px; padding: 8px 4px; border: 0; border-radius: 10px; background: transparent; color: #5a6188; font: 700 12px/1 'Inter', sans-serif; cursor: pointer; transition: background .15s, color .15s, box-shadow .15s, transform .1s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
   .me-seg-btn.on { background: #fff; color: #4f46e5; box-shadow: 0 2px 6px -2px rgba(60,50,130,.25); }
   .me-seg-btn:active { transform: scale(.96); }
   .me-seg-btn:focus-visible { outline: 2px solid #4f46e5; outline-offset: 1px; }
@@ -765,11 +765,11 @@ function render() {
         <button class="me-search-clear${_query ? " visible" : ""}" id="me-search-clear" type="button" aria-label="Effacer la recherche">x</button>
       </div>
 
-      <div class="me-seg" id="me-seg" role="tablist" aria-label="Trier les élèves">
-        <button class="me-seg-btn ${_sort === "etat" ? "on" : ""}" data-sort="etat" type="button">Par état</button>
-        <button class="me-seg-btn ${_sort === "nom" ? "on" : ""}" data-sort="nom" type="button">Nom</button>
-        <button class="me-seg-btn ${_sort === "progres" ? "on" : ""}" data-sort="progres" type="button">Progrès</button>
-        <button class="me-seg-btn ${_sort === "comp" ? "on" : ""}" data-sort="comp" type="button">Compétences</button>
+      <div class="me-seg" id="me-seg" role="group" aria-label="Trier les élèves">
+        <button class="me-seg-btn ${_sort === "etat" ? "on" : ""}" data-sort="etat" type="button" aria-pressed="${_sort === "etat"}">Par état</button>
+        <button class="me-seg-btn ${_sort === "nom" ? "on" : ""}" data-sort="nom" type="button" aria-pressed="${_sort === "nom"}">Nom</button>
+        <button class="me-seg-btn ${_sort === "progres" ? "on" : ""}" data-sort="progres" type="button" aria-pressed="${_sort === "progres"}">Progrès</button>
+        <button class="me-seg-btn ${_sort === "comp" ? "on" : ""}" data-sort="comp" type="button" aria-pressed="${_sort === "comp"}">Compétences</button>
       </div>
 
       <div class="me-pipeline" id="me-pipeline">
@@ -829,8 +829,7 @@ function renderPrio() {
   );
   const cta = cand.aRelancer ? "Ouvrir sa fiche" : "Voir son livret";
   return `
-    <div class="me-prio" data-prio-id="${esc(cand.id)}" role="button" tabindex="0"
-         aria-label="À traiter en priorité : ${nm}, ${esc(p.label)}, ${pct}% des compétences">
+    <div class="me-prio" data-prio-id="${esc(cand.id)}">
       <div class="me-prio-kick"><span class="d" aria-hidden="true"></span>À traiter en priorité</div>
       <div class="me-prio-top">
         <div class="me-prio-av">${renderUserAvatar({ avatar_url: cand.avatar_url, prenom: cand.prenom, nom: cand.nom }, 46)}</div>
@@ -907,7 +906,7 @@ function renderPipeline() {
     return `<div class="me-empty">
       <span class="me-empty-ico">${illus("school", { size: 80 })}</span>
       <strong style="font:800 16px/1.2 'Manrope',sans-serif;color:#1a1f2b">Aucun élève pour l'instant</strong>
-      <span style="font:500 13px/1.5 'Inter',sans-serif;color:#8b92a3;max-width:30ch;text-align:center">Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes.</span>
+      <span style="font:500 13px/1.5 'Inter',sans-serif;color:#5f6788;max-width:30ch;text-align:center">Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes.</span>
       <button id="me-invite-empty-btn" class="ens-btn ens-btn--go" type="button" style="margin-top:4px;min-height:48px;padding:0 24px;font-size:14px;">
         ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
       </button>
@@ -1036,7 +1035,7 @@ function renderBandRow(eleve, withPill = false) {
   }
 
   return `
-    <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="listitem button" tabindex="0"
+    <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="listitem" tabindex="0"
          aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "recu" ? ", examen reussi" : eleve.readiness === "rate" ? ", examen a repasser" : eleve.readiness === "planifie" ? ", examen prevu" : eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
       <span class="me-nom">${fullNom}</span>
@@ -1067,9 +1066,11 @@ function wire() {
       _sort = s;
       haptic("tap");
       track("mes_eleves.sort", { sort: s });
-      _root
-        .querySelectorAll("#me-seg .me-seg-btn")
-        .forEach((b) => b.classList.toggle("on", b.dataset.sort === s));
+      _root.querySelectorAll("#me-seg .me-seg-btn").forEach((b) => {
+        const on = b.dataset.sort === s;
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", String(on));
+      });
       renderList();
     });
   });

@@ -52,7 +52,7 @@ const STYLE = `<style>
     border: none;
     background: transparent;
     font: 700 11px/1 'Inter', sans-serif;
-    color: #6b7095;
+    color: #5a6188;
     padding: 5px 11px;
     border-radius: 999px;
     cursor: pointer;
@@ -181,7 +181,7 @@ const STYLE = `<style>
   .ins-bt-val.red   { color: #dc2626; }
   .ins-bt-lbl {
     font: 600 10px/1.2 'Inter', sans-serif;
-    color: #a3a9c4;
+    color: #646a8c;
     margin-top: 4px;
   }
 
@@ -229,7 +229,7 @@ const STYLE = `<style>
   }
   .ins-bar-day {
     font: 700 9.5px/1 'Inter', sans-serif;
-    color: #a3a9c4;
+    color: #646a8c;
     text-align: center;
   }
   .ins-bar-day.peak { color: #4f46e5; }
@@ -282,13 +282,13 @@ const STYLE = `<style>
   }
   .ins-prog-delta {
     font: 800 13px/1 'Manrope', sans-serif;
-    color: #16a34a;
+    color: #15803d;
     flex-shrink: 0;
     white-space: nowrap;
   }
   .ins-prog-delta small {
     font: 600 10px/1 'Inter', sans-serif;
-    color: #a3a9c4;
+    color: #646a8c;
   }
 
   /* ── Tabs eleves progressent / en pause ── */
@@ -308,7 +308,7 @@ const STYLE = `<style>
     background: transparent;
     border-radius: 9px;
     font: 600 12px/1 'Inter', sans-serif;
-    color: #6b7095;
+    color: #5a6188;
     cursor: pointer;
     transition: background .15s, color .15s;
     -webkit-tap-highlight-color: transparent;
@@ -343,14 +343,14 @@ const STYLE = `<style>
   }
   .ins-reco-txt {
     font: 400 12px/1.5 'Inter', sans-serif;
-    color: #6b7095;
+    color: #5a6188;
   }
 
   /* ── Empty states ── */
   .ins-empty {
     padding: 28px 16px;
     text-align: center;
-    color: #6b7095;
+    color: #5a6188;
     font: 500 13px/1.5 'Inter', sans-serif;
     background: #fff;
     border: 1px solid #e6e9f7;
@@ -715,7 +715,7 @@ async function loadData(me) {
     const d = topDiff[0];
     const nm = esc(labelComp(d.compId));
     recos.push({
-      icon: icon("search", { size: 18, strokeWidth: 2, color: "#6b7095" }),
+      icon: icon("search", { size: 18, strokeWidth: 2, color: "#5a6188" }),
       ttl: `Point pedagogique : ${nm}`,
       txt: `${d.count} élève${d.count > 1 ? "s" : ""} bloqué${d.count > 1 ? "s" : ""} sur cette compétence. Prévois un temps dédié en leçon.`,
       route: `#/eleves?bloque_sur=${encodeURIComponent(d.compId)}`,
@@ -1006,7 +1006,7 @@ function renderElevesList(tab, data) {
           ${avHtml}
           <div style="flex:1;min-width:0">
             <div class="ins-prog-nom">${nom}</div>
-            <div style="font:500 11px/1 'Inter',sans-serif;color:#a3a9c4;margin-top:3px">${esc(meta)}</div>
+            <div style="font:500 11px/1 'Inter',sans-serif;color:#646a8c;margin-top:3px">${esc(meta)}</div>
           </div>
         </div>`;
       })

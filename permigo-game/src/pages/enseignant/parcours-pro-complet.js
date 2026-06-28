@@ -72,7 +72,7 @@ const STYLE = `<style>
 /* Progress pill arcade */
 .epc-full-pill {
   font: 700 12px/1 'IBM Plex Mono', monospace;
-  color: #fff;
+  color: var(--a-ink);
   background: var(--ens-go, var(--a));
   padding: 6px 12px;
   border-radius: var(--r-full);
@@ -158,8 +158,8 @@ const STYLE = `<style>
   white-space: nowrap;
   flex-shrink: 0;
 }
-.epcf-stop-cost.done { color: #fff; background: var(--ens-go, var(--gr)); }
-.epcf-stop-cost.now  { color: #fff; background: var(--ens-blue, var(--a)); }
+.epcf-stop-cost.done { color: #06310f; background: var(--ens-go, var(--gr)); }
+.epcf-stop-cost.now  { color: var(--a-ink); background: var(--ens-blue, var(--a)); }
 .epcf-stop-cost.todo { color: var(--mu3); background: var(--bg2); }
 .epcf-stop-title {
   font: 700 14px/1.3 var(--ens-display, 'Fredoka'), sans-serif;
@@ -182,7 +182,7 @@ const STYLE = `<style>
 .epcf-stop-reward.unlocked {
   background: color-mix(in srgb, var(--ens-go, #18a558) 9%, transparent);
   border-color: color-mix(in srgb, var(--ens-go, #18a558) 25%, transparent);
-  color: var(--ens-go, var(--grd));
+  color: var(--ens-go, var(--gr-txt));
 }
 .epcf-stop-reward-ico { display: flex; align-items: center; flex-shrink: 0; }
 .epcf-stop-skin-img {

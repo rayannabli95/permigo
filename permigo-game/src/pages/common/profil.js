@@ -2003,10 +2003,10 @@ function _ensAchievements(v, e, s, rank) {
 const STYLE_ENS = `<style>
 .enp{
   --ind:#4f46e5; --ind-dk:#3a32c4; --ind-lt:#6d6bff; --ind-pale:#eef0ff; --vio:#8b5cf6;
-  --gd:#f7b32b; --gd-hi:#ffd27a; --gd-dp:#e8a317; --gd-deep:#b5610a; --gd-pale:#ffe6a8; --gd-ink:#5a3a08;
+  --gd:#f7b32b; --gd-hi:#ffd27a; --gd-dp:#bd7a08; --gd-deep:#b5610a; --gd-pale:#ffe6a8; --gd-ink:#5a3a08;
   --grn:#18a558; --grn-dk:#0f7a3e; --grn-rim:#3fd17a;
   --c:#fff; --c-soft:#fbfbff;
-  --enk:#1c1b3a; --enk2:#3a3a5c; --enmu:#6f6e92; --enfa:#9a99bb;
+  --enk:#1c1b3a; --enk2:#3a3a5c; --enmu:#6f6e92; --enfa:#6e6d91;
   --enl:#eceaf6; --enl2:#e3e1f2;
   --oni:#fff; --oni-dim:#d9d8ff; --oni-mu:#b6b4f0;
   max-width:480px; margin:0 auto; min-height:100dvh; position:relative;
@@ -2292,7 +2292,7 @@ async function mountEnseignantArene(root, me) {
       <span class="enp-ach-title">Mes succès</span>
       <span class="enp-ach-count">${unlocked} débloqué${unlocked > 1 ? "s" : ""} · ${achievements.length - unlocked} à venir</span>
     </div>
-    <div class="enp-ach-scroll">
+    <div class="enp-ach-scroll" tabindex="0" role="group" aria-label="Tes succès (liste défilante)">
       ${achievements
         .map(
           (a) => `

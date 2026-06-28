@@ -1106,14 +1106,14 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes, crText) {
       .vs-cr-head { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; }
       .vs-cr-ico { width: 38px; height: 38px; flex-shrink: 0; border-radius: 11px; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #4f46e5, #7c4dff); box-shadow: 0 6px 14px -6px rgba(79,70,229,.6); }
       .vs-cr-title { font: 800 15px/1.15 'Manrope', 'Plus Jakarta Sans', sans-serif; color: #1a1c2e; }
-      .vs-cr-sub { font: 600 11.5px/1.3 'Inter', sans-serif; color: #6b7095; margin-top: 2px; }
+      .vs-cr-sub { font: 600 11.5px/1.3 'Inter', sans-serif; color: #5a6188; margin-top: 2px; }
       .vs-cr-body { display: flex; flex-direction: column; gap: 6px; padding: 11px 12px; background: #f7f8fc; border-radius: 12px; margin-bottom: 12px; }
       .vs-cr-line { display: flex; align-items: center; gap: 8px; font: 600 13px/1.3 'Inter', sans-serif; color: #2d3050; }
       .vs-cr-line > svg { flex-shrink: 0; }
       .vs-cr-line.ok > svg { color: #16a34a; }
       .vs-cr-line.work { color: #b45309; }
       .vs-cr-line.work > svg { color: #b45309; }
-      .vs-cr-prog { margin-top: 3px; font: 600 12px/1.3 'Inter', sans-serif; color: #6b7095; }
+      .vs-cr-prog { margin-top: 3px; font: 600 12px/1.3 'Inter', sans-serif; color: #5a6188; }
       .vs-cr-prog b { color: #4f46e5; font-weight: 800; }
       .vs-cr-sent { width: 100%; min-height: 46px; border-radius: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: #15803d; background: #ecfdf3; border: 1px solid #bbf7d0; font: 800 13.5px/1.2 'Inter', sans-serif; text-align: center; }
       .vs-cr-share { width: 100%; margin-top: 8px; min-height: 42px; border: 1px solid #e6e9ef; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: #4f46e5; font: 700 12.5px/1 'Inter', sans-serif; background: #fff; transition: background .12s; }

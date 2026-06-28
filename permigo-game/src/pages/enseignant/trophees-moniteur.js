@@ -127,6 +127,9 @@ const STYLE = `<style>
   padding: 22px 16px 10px; display: flex; align-items: center; gap: 8px;
   font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
   letter-spacing: .09em; text-transform: uppercase;
+  /* couleur du palier mélangée vers --ink (theme-aware) : foncée sur fond clair,
+     claire sur fond sombre → ≥4.5:1 dans les deux thèmes (a11y) */
+  color: color-mix(in srgb, var(--tier, var(--ink)) 55%, var(--ink));
 }
 .tr2-group .gcount {
   margin-left: auto; font: 700 11px/1 'IBM Plex Mono', monospace;
@@ -301,7 +304,7 @@ function _render(root, d, openKey = null) {
     if (!list.length) continue;
     const done = list.filter((t) => t.unlocked).length;
     gridHtml += `
-      <div class="tr2-group" style="color:${cfg.color}">${cfg.label}<span class="gcount">${done}/${list.length}</span></div>
+      <div class="tr2-group" style="--tier:${cfg.color}">${cfg.label}<span class="gcount">${done}/${list.length}</span></div>
       <div class="tr2-grid">${list.map((t) => _cardHtml(t)).join("")}</div>`;
   }
 

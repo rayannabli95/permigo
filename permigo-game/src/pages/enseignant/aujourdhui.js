@@ -106,7 +106,7 @@ const STYLE = `<style>
   .aj-hi {
     padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 12px) 20px 0;
     font: 700 14px/1.3 'Inter', sans-serif;
-    color: #6b7095;
+    color: #5a6188;
   }
   .aj-hi-name {
     display: block;
@@ -357,7 +357,7 @@ const STYLE = `<style>
   }
   .aj-ft-lbl {
     font: 600 10px/1.2 'Inter', sans-serif;
-    color: #a3a9c4;
+    color: #646a8c;
     margin-top: 1px;
   }
 
@@ -771,9 +771,9 @@ async function renderInto(root, _me) {
         <span style="width:40px;height:40px;flex-shrink:0;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#4f46e5,#7c4dff);box-shadow:0 6px 14px -6px rgba(79,70,229,.6);">${icon("activity", { size: 20, strokeWidth: 2.2 })}</span>
         <span style="flex:1;min-width:0;">
           <span style="display:block;font:800 14.5px/1.15 'Manrope','Plus Jakarta Sans',sans-serif;color:#1a1c2e;">Radar de relance</span>
-          <span style="display:block;font:600 12px/1.3 'Inter',sans-serif;color:#6b7095;margin-top:2px;">Relance en 1 tap tes élèves qui refroidissent</span>
+          <span style="display:block;font:600 12px/1.3 'Inter',sans-serif;color:#5a6188;margin-top:2px;">Relance en 1 tap tes élèves qui refroidissent</span>
         </span>
-        <span style="flex-shrink:0;color:#a3a9c4;">${icon("chevron-right", { size: 20, strokeWidth: 2.4 })}</span>
+        <span style="flex-shrink:0;color:#646a8c;">${icon("chevron-right", { size: 20, strokeWidth: 2.4 })}</span>
       </button>
 
       <!-- Tes élèves -->
@@ -784,7 +784,7 @@ async function renderInto(root, _me) {
 
       ${
         nbElevesActifs === 0
-          ? `<p style="margin:0 16px 12px;font:500 13px/1.5 'Inter',sans-serif;color:#6b7095;padding:16px;background:#fff;border-radius:16px;border:1px solid #e6e9f7;">
+          ? `<p style="margin:0 16px 12px;font:500 13px/1.5 'Inter',sans-serif;color:#5a6188;padding:16px;background:#fff;border-radius:16px;border:1px solid #e6e9f7;">
             Invite ton premier élève pour commencer.
           </p>`
           : roster.map(renderRosterCard).join("")
