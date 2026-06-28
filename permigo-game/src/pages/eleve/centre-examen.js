@@ -388,7 +388,7 @@ const STYLE = `<style>
   margin-top: 14px;
   border-radius: 14px;
   background: var(--a);
-  color: #fff;
+  color: var(--a-ink);
   font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
   text-decoration: none;
   border: none;
