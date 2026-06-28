@@ -860,7 +860,7 @@ function renderPeriodContent(data) {
     <div class="ins-bento">
       <div class="ins-bt">
         <div class="ins-bt-val green">${data.nbActifs}</div>
-        <div class="ins-bt-lbl">&#201;l&#232;ves actifs</div>
+        <div class="ins-bt-lbl">&#233;l&#232;ves actifs</div>
       </div>
       <div class="ins-bt">
         <div class="ins-bt-val amber">${data.nbEnApproche}</div>

@@ -434,7 +434,7 @@ function renderByMonde(byMonde) {
 <div class="bl-section">
   <div class="bl-section-hd">
     <div class="bl-section-title">
-      ${icon(m.ico, { size: 16, strokeWidth: 1.5 })} ${esc(m.name)}
+      ${m.ico} ${esc(m.name)}
     </div>
     <span class="bl-section-badge">${comps.length} acquise${comps.length > 1 ? "s" : ""}</span>
   </div>

@@ -50,7 +50,7 @@ const STYLE = `<style>
 }
 @media (hover:hover) { .tr2-back:hover { background: var(--bg2); border-color: var(--bo4); } }
 .tr2-back:active { background: var(--bg2); transform: translateY(1px); }
-.tr2-back:focus-visible { outline: 3px solid #4f46e5); outline-offset: 2px; }
+.tr2-back:focus-visible { outline: 3px solid #4f46e5; outline-offset: 2px; }
 .tr2-hd-info { flex: 1; min-width: 0; }
 .tr2-hd-title {
   font: 700 17px/1.2 var(--ens-display, 'Fredoka'), sans-serif;
@@ -120,7 +120,7 @@ const STYLE = `<style>
   transition: transform .1s ease, box-shadow .1s ease;
 }
 .tr2-cta-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 0 color-mix(in srgb, #4f46e5 60%, #000); }
-.tr2-cta-btn:focus-visible { outline: 3px solid #4f46e5); outline-offset: 2px; }
+.tr2-cta-btn:focus-visible { outline: 3px solid #4f46e5; outline-offset: 2px; }
 
 /* ── Section label par médaille ── */
 .tr2-group {
@@ -148,7 +148,7 @@ const STYLE = `<style>
 }
 @keyframes tr2In { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: none; } }
 .tr2-card:active { transform: scale(.93); }
-.tr2-card:focus-visible { outline: 3px solid #4f46e5); outline-offset: 3px; }
+.tr2-card:focus-visible { outline: 3px solid #4f46e5; outline-offset: 3px; }
 .tr2-card.locked { background: var(--su); border: 1.5px solid var(--bo); }
 .tr2-card.unlocked { color: #fff; }
 .tr2-card.bronze  { background: var(--tc-grad); box-shadow: 0 4px 16px -4px var(--tc-glow); }
