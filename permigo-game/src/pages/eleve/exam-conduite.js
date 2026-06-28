@@ -133,6 +133,14 @@ body.exc2-immersive #app { padding-top:0 !important; }
 
 const KEYS = ["A", "B", "C", "D"];
 
+// Le router appelle unmount() en quittant la page (y compris Précédent / lien /
+// notif). Sans ça, la classe immersive — qui masque header + nav — restait
+// posée si l'élève sortait autrement que par le bouton de fin → plus aucune
+// navigation sur le reste de l'app (élève piégé jusqu'au reload).
+export async function unmount() {
+  document.body.classList.remove("exc2-immersive");
+}
+
 export async function mount(root) {
   track("page_view", { page: "exam_conduite" });
   document.body.classList.add("exc2-immersive");

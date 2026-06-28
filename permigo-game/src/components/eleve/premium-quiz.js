@@ -138,8 +138,19 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
   }
   // Immersion : masque le chrome (header + nav) pendant le quiz, restauré à la sortie.
   document.body.classList.add("pq-immersive");
+  // Filet de sécurité : si on quitte le quiz par une navigation (bouton
+  // Précédent, lien, notif) au lieu du ✕/bouton de fin, on retire quand même la
+  // classe immersive — sinon header + nav restent cachés sur tout le reste de
+  // l'app (utilisateur piégé sans navigation). Ce composant est monté par
+  // plusieurs pages (jeu-faute, revision-conduite), d'où le nettoyage interne.
+  const onNavAway = () => {
+    document.body.classList.remove("pq-immersive");
+    window.removeEventListener("hashchange", onNavAway);
+  };
+  window.addEventListener("hashchange", onNavAway);
   const exit = (...a) => {
     document.body.classList.remove("pq-immersive");
+    window.removeEventListener("hashchange", onNavAway);
     onExit?.(...a);
   };
   let idx = 0;
