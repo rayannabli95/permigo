@@ -241,9 +241,9 @@ function _renderScopebar(state, rows) {
     return `<div class="arn-scopebar"><span style="font:600 12px/1 'Inter',sans-serif;color:var(--amute)">Mon école</span><span class="arn-effectif">${effectif}</span></div>`;
   }
   return `<div class="arn-scopebar">
-    <div class="arn-scope" role="tablist">
-      <button data-scope="ecole" class="${state.scope === "ecole" ? "on" : ""}">Mon école</button>
-      <button data-scope="national" class="${state.scope === "national" ? "on" : ""}">National</button>
+    <div class="arn-scope" role="group" aria-label="Portée du classement">
+      <button data-scope="ecole" aria-pressed="${state.scope === "ecole"}" class="${state.scope === "ecole" ? "on" : ""}">Mon école</button>
+      <button data-scope="national" aria-pressed="${state.scope === "national"}" class="${state.scope === "national" ? "on" : ""}">National</button>
     </div>
     <span class="arn-effectif">${effectif}</span>
   </div>`;

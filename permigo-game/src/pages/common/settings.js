@@ -418,9 +418,9 @@ ${
       <div class="st-row-title">Ne pas déranger</div>
       <div style="display:flex;align-items:center;gap:8px;width:100%">
         <label style="font:500 12px/1 'Inter',sans-serif;color:var(--mu3);flex-shrink:0">De</label>
-        <input class="st-inp" id="inp-dnd-start" type="time" value="${prefs.dndStart}" style="flex:1;padding:8px 10px">
+        <input class="st-inp" id="inp-dnd-start" type="time" value="${prefs.dndStart}" aria-label="Ne pas déranger : heure de début" style="flex:1;padding:8px 10px">
         <label style="font:500 12px/1 'Inter',sans-serif;color:var(--mu3);flex-shrink:0">à</label>
-        <input class="st-inp" id="inp-dnd-end" type="time" value="${prefs.dndEnd}" style="flex:1;padding:8px 10px">
+        <input class="st-inp" id="inp-dnd-end" type="time" value="${prefs.dndEnd}" aria-label="Ne pas déranger : heure de fin" style="flex:1;padding:8px 10px">
         <button class="st-save-btn" id="btn-save-dnd" style="margin:0;width:auto;padding:8px 14px;font-size:12px">OK</button>
       </div>
     </div>
@@ -473,9 +473,9 @@ ${
         <div class="st-row-sub">Apparence de l'application</div>
       </div>
       <div class="st-theme-seg" id="theme-seg" role="group" aria-label="Choisir le thème">
-        <button class="st-theme-btn ${prefs.theme === "light" ? "active" : ""}" data-theme="light" aria-pressed="${prefs.theme === "light"}">${icon("sun", { size: 16 })} Clair</button>
-        <button class="st-theme-btn ${prefs.theme === "dark" ? "active" : ""}" data-theme="dark"  aria-pressed="${prefs.theme === "dark"}">${icon("moon", { size: 16 })} Sombre</button>
-        <button class="st-theme-btn ${prefs.theme === "auto" ? "active" : ""}" data-theme="auto"  aria-pressed="${prefs.theme === "auto"}">Système</button>
+        <button class="st-theme-btn ${prefs.theme === "light" ? "active" : ""}" data-set-theme="light" aria-pressed="${prefs.theme === "light"}">${icon("sun", { size: 16 })} Clair</button>
+        <button class="st-theme-btn ${prefs.theme === "dark" ? "active" : ""}" data-set-theme="dark"  aria-pressed="${prefs.theme === "dark"}">${icon("moon", { size: 16 })} Sombre</button>
+        <button class="st-theme-btn ${prefs.theme === "auto" ? "active" : ""}" data-set-theme="auto"  aria-pressed="${prefs.theme === "auto"}">Système</button>
       </div>
     </div>
     <div class="st-row" style="flex-direction:column;align-items:flex-start;gap:12px">
@@ -580,7 +580,7 @@ ${
     <div class="st-section-label">Zone critique</div>
     <div class="st-row">
       <div class="st-row-left">
-        <div class="st-row-title" style="color:var(--rd)">Supprimer mon compte</div>
+        <div class="st-row-title" style="color:var(--rd-txt)">Supprimer mon compte</div>
         <div class="st-row-sub">Irréversible — toutes tes données seront effacées</div>
       </div>
       <div class="st-row-action">
@@ -776,7 +776,7 @@ function wire(root, me, prefs) {
   root.querySelector("#theme-seg")?.addEventListener("click", async (e) => {
     const btn = e.target.closest(".st-theme-btn");
     if (!btn) return;
-    const mode = btn.dataset.theme;
+    const mode = btn.dataset.setTheme;
     root.querySelectorAll(".st-theme-btn").forEach((b) => {
       b.classList.toggle("active", b === btn);
       b.setAttribute("aria-pressed", String(b === btn));

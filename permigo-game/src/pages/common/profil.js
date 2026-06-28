@@ -1722,7 +1722,7 @@ async function mountEleveArene(root, me) {
       <span class="arn-ach-title">Tes succès</span>
       <span class="arn-ach-count">${unlocked} débloqué${unlocked > 1 ? "s" : ""} · ${achievements.length - unlocked} à venir</span>
     </div>
-    <div class="arn-ach-scroll">
+    <div class="arn-ach-scroll" tabindex="0" role="group" aria-label="Tes succès (liste défilante)">
       ${achievements
         .map(
           (a) => `

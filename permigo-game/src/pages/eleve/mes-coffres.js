@@ -174,7 +174,13 @@ const STYLE = `<style>
   }
 }
 .mc-card.mc-can-open:active { transform: scale(.98); }
-.mc-card.mc-opened { opacity: .52; filter: saturate(.45); cursor: default; }
+/* coffre ouvert = « consommé » : on garde l'effet fané sur le visuel
+   (désaturation + vignette estompée) MAIS le texte reste à pleine opacité,
+   sinon le label/sous-titre tombait sous 4.5:1 (a11y). */
+.mc-card.mc-opened { filter: saturate(.5); cursor: default; }
+.mc-card.mc-opened .mc-thumb { opacity: .5; }
+.mc-card.mc-opened .mc-label { color: var(--mu); }
+.mc-card.mc-opened .mc-sub { color: var(--mu2); }
 
 .mc-thumb {
   width: 72px; height: 72px; border-radius: 16px;

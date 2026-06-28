@@ -110,10 +110,12 @@ const STYLE = `<style>
   display: block;
   margin-top: 6px;
 }
-.exam-tile.urgent { border-color: #fca5a5; background: linear-gradient(145deg,#fff5f5,var(--rdp2)); }
+/* fonds theme-aware : un fond clair codé en dur cassait la lisibilité du
+   num/label (var(--ink)/var(--mu2)) en mode sombre (a11y) */
+.exam-tile.urgent { border-color: color-mix(in srgb, var(--rd) 40%, transparent); background: var(--rdp); }
 .exam-tile.urgent .exam-tile-num { color: var(--rd-txt); }
-.exam-tile.done { border-color: #bbf7d0; background: linear-gradient(145deg,#f0fdf4,var(--grp2)); }
-.exam-tile.done .exam-tile-num { color: var(--grk); }
+.exam-tile.done { border-color: color-mix(in srgb, var(--gr) 40%, transparent); background: var(--grp); }
+.exam-tile.done .exam-tile-num { color: var(--gr-txt); }
 
 .exam-date-row {
   display: flex;
@@ -191,13 +193,15 @@ const STYLE = `<style>
   border: 1.5px solid var(--bo);
   transition: border-color .18s ease, background .18s ease;
 }
+/* fonds theme-aware (translucides) : en dark le texte var(--ink) devient clair,
+   un fond clair codé en dur le rendait illisible (a11y) */
 .exam-check-row.pass {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
+  background: var(--grp);
+  border-color: color-mix(in srgb, var(--gr) 32%, transparent);
 }
 .exam-check-row.fail {
-  background: #fff7ed;
-  border-color: #fed7aa;
+  background: var(--amp);
+  border-color: color-mix(in srgb, var(--am) 32%, transparent);
 }
 .exam-check-ico {
   width: 32px; height: 32px;
@@ -211,7 +215,7 @@ const STYLE = `<style>
 .exam-check-row.neutral .exam-check-ico { background: var(--bg4); }
 .exam-check-body { flex: 1; min-width: 0; }
 .exam-check-label { font: 600 14px/1.3 'Plus Jakarta Sans',sans-serif; color: var(--ink); }
-.exam-check-sub { font: 500 12px/1.3 'Inter',sans-serif; color: var(--mu3); margin-top: 2px; }
+.exam-check-sub { font: 500 12px/1.3 'Inter',sans-serif; color: var(--mu); margin-top: 2px; }
 .exam-check-badge {
   font: 700 12px/1 'IBM Plex Mono',monospace;
   padding: 4px 8px;
@@ -283,7 +287,7 @@ const STYLE = `<style>
   display: flex; align-items: center; gap: 12px;
   padding: 6px 0;
 }
-.exam-predict-ready .exam-predict-title { color: var(--grk2); }
+.exam-predict-ready .exam-predict-title { color: var(--gr-txt); }
 
 /* ── Readiness pill ── */
 .exam-readiness {
