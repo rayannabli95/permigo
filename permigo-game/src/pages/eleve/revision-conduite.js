@@ -23,6 +23,24 @@ import {
 } from "@/data/fiches-conduite.js";
 
 const LS_KEY = "rvc_revised_v1"; // { [code]: isoDate }
+const LS_READ_KEY = "rvc_read_v1"; // { [code]: 1 } — fiche déjà déroulée (relecture = tout affiché)
+
+function loadRead() {
+  try {
+    return JSON.parse(localStorage.getItem(LS_READ_KEY) || "{}") || {};
+  } catch {
+    return {};
+  }
+}
+function markRead(code) {
+  const r = loadRead();
+  r[code] = 1;
+  try {
+    localStorage.setItem(LS_READ_KEY, JSON.stringify(r));
+  } catch {
+    /* quota / private mode : non bloquant */
+  }
+}
 
 function loadRevised() {
   try {
@@ -82,7 +100,7 @@ const STYLE = `<style>
 .rvc-pf-t { position:relative; z-index:1; font: 800 22px/1.15 'Plus Jakarta Sans', sans-serif; letter-spacing:-.01em; margin:10px 0 3px; }
 .rvc-pf-c { position:relative; z-index:1; font-size:13.5px; line-height:1.4; opacity:.94; }
 .rvc-pf-btn { position:relative; z-index:1; margin-top:16px; width:100%; border:0; border-radius:14px; padding:15px;
-  font:800 15.5px 'Plus Jakarta Sans',sans-serif; cursor:pointer; background:#fff; color:var(--adk, #4f46e5);
+  font:800 15.5px 'Plus Jakarta Sans',sans-serif; cursor:pointer; background:var(--su); color:var(--a-txt);
   box-shadow: 0 6px 16px -4px rgba(15,23,42,.28); transition: transform .12s ease, box-shadow .12s ease; }
 .rvc-pf-btn:active { transform: scale(0.98); box-shadow: 0 2px 8px -4px rgba(15,23,42,.24); }
 
@@ -181,8 +199,122 @@ const STYLE = `<style>
 .rvc-ochip:active { transform: scale(0.985); }
 .rvc-shake { animation: rvcshake .35s; border-color:#ef4444 !important; }
 @keyframes rvcshake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+
+/* ───── Fiche « Coach » : lecture engageante, révélation progressive ───── */
+.rvc-fbadge { font:600 11px 'IBM Plex Mono',monospace; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--a,#6366f1); background:color-mix(in srgb,var(--a,#6366f1) 12%,transparent);
+  border:1px solid color-mix(in srgb,var(--a,#6366f1) 22%,transparent); padding:6px 11px; border-radius:999px; margin-left:auto; }
+.rvc-ftitle { font:800 24px/1.2 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; margin:12px 0 0; color:var(--ink); }
+
+.rvc-coach { position:relative; overflow:hidden; margin:16px 0 0; border-radius:22px; padding:17px 17px 18px; color:#fff;
+  background:linear-gradient(135deg,var(--a,#6366f1) 0%,var(--adk,#4f46e5) 60%,#6d28d9 100%);
+  box-shadow:0 14px 30px -14px color-mix(in srgb,var(--adk,#4f46e5) 65%,transparent); }
+.rvc-coach::after { content:""; position:absolute; right:-40px; top:-50px; width:150px; height:150px; border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.22),transparent 70%); pointer-events:none; }
+.rvc-coach-row { position:relative; z-index:1; display:flex; gap:12px; align-items:flex-start; }
+.rvc-coach-av { width:44px; height:44px; border-radius:14px; flex:none; display:grid; place-items:center;
+  background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.34); }
+.rvc-coach-av svg { width:23px; height:23px; }
+.rvc-coach-tag { font:600 10px 'IBM Plex Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:#dcddff; margin-bottom:3px; }
+.rvc-coach-msg { font:600 15px/1.42 'Plus Jakarta Sans',sans-serif; }
+.rvc-coach-msg b { font-weight:800; }
+.rvc-prog { position:relative; z-index:1; margin-top:15px; display:flex; align-items:center; gap:11px; }
+.rvc-prog-bar { flex:1; height:8px; border-radius:99px; background:rgba(255,255,255,.22); overflow:hidden; }
+.rvc-prog-fill { height:100%; width:0; border-radius:99px; background:linear-gradient(90deg,#fff,#c7d2fe); transition:width .5s cubic-bezier(.4,0,.2,1); }
+.rvc-prog-txt { font:600 12px 'IBM Plex Mono',monospace; color:#eceaff; min-width:30px; text-align:right; }
+
+.rvc-sect { display:flex; align-items:center; gap:9px; margin:22px 0 2px; }
+.rvc-sect i { width:7px; height:7px; border-radius:50%; background:var(--a,#6366f1); }
+.rvc-sect span { font:600 11px 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--mu,#94a3b8); }
+
+.rvc-msteps { display:flex; flex-direction:column; gap:11px; margin-top:10px; }
+.rvc-step { display:flex; gap:13px; align-items:flex-start; background:var(--su,#fff); border:1px solid var(--bo3,#e2e8f0);
+  border-radius:18px; padding:14px 15px; box-shadow:0 6px 18px -14px rgba(40,30,90,.4); }
+.rvc-step.is-hidden { display:none; }
+.rvc-step.is-reveal { animation:rvcreveal .45s cubic-bezier(.16,.84,.44,1) both; }
+@keyframes rvcreveal { from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:none;} }
+.rvc-step.is-current { border-color:color-mix(in srgb,var(--a,#6366f1) 40%,transparent);
+  box-shadow:0 12px 26px -16px color-mix(in srgb,var(--adk,#4f46e5) 55%,transparent); }
+.rvc-step-n { width:33px; height:33px; flex:none; border-radius:11px; display:grid; place-items:center;
+  background:color-mix(in srgb,var(--a,#6366f1) 12%,transparent); color:var(--adk,#4f46e5);
+  border:1px solid color-mix(in srgb,var(--a,#6366f1) 22%,transparent); font:700 16px 'Baloo 2',cursive; }
+.rvc-step-n svg { display:none; width:17px; height:17px; }
+.rvc-step.is-done .rvc-step-n { background:linear-gradient(135deg,var(--a,#6366f1),var(--adk,#4f46e5)); color:#fff; border-color:transparent; }
+.rvc-step.is-done .rvc-step-n b { display:none; }
+.rvc-step.is-done .rvc-step-n svg { display:block; }
+.rvc-step-t { font:400 14.5px/1.5 'Inter',sans-serif; color:var(--ink); padding-top:4px; }
+
+.rvc-next { margin-top:16px; }
+.rvc-next-btn { width:100%; border:0; border-radius:16px; padding:16px; cursor:pointer;
+  font:700 15.5px 'Plus Jakarta Sans',sans-serif; color:#fff; display:flex; align-items:center; justify-content:center; gap:9px;
+  background:linear-gradient(135deg,var(--a,#6366f1),var(--adk,#4f46e5));
+  box-shadow:0 12px 24px -12px color-mix(in srgb,var(--adk,#4f46e5) 70%,transparent); transition:transform .12s ease; }
+.rvc-next-btn:active { transform:scale(.975); }
+.rvc-next-btn svg { width:18px; height:18px; }
+.rvc-hint2 { text-align:center; font:500 12px 'IBM Plex Mono',monospace; color:var(--mu,#94a3b8); margin-top:9px; }
+
+.rvc-finale { display:none; }
+.rvc-finale.on { display:block; animation:rvcreveal .5s ease both; }
+.rvc-bravo { display:flex; gap:12px; align-items:center; margin-top:16px; border-radius:18px; padding:15px 16px;
+  background:color-mix(in srgb,#10b981 12%,transparent); border:1px solid color-mix(in srgb,#10b981 28%,transparent); }
+.rvc-bravo-ic { width:40px; height:40px; flex:none; border-radius:12px; display:grid; place-items:center;
+  background:linear-gradient(135deg,#22c55e,#16a34a); box-shadow:0 8px 18px -10px rgba(22,163,74,.7); }
+.rvc-bravo-ic svg { width:21px; height:21px; color:#fff; }
+.rvc-bravo h3 { font:800 15px 'Plus Jakarta Sans',sans-serif; color:var(--gr-txt,#047857); }
+.rvc-bravo p { font-size:12.5px; line-height:1.4; color:var(--gr-txt,#047857); opacity:.85; margin-top:2px; }
+
+.rvc-icard { margin-top:13px; border-radius:18px; padding:15px 16px; border:1px solid var(--bo3,#e2e8f0);
+  background:var(--su,#fff); box-shadow:0 6px 18px -16px rgba(40,30,90,.5); }
+.rvc-icard-h { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.rvc-icard-ic { width:33px; height:33px; flex:none; border-radius:11px; display:grid; place-items:center; }
+.rvc-icard-ic svg { width:18px; height:18px; }
+.rvc-icard-h b { font:700 14.5px 'Plus Jakarta Sans',sans-serif; }
+.rvc-icard p { font:400 14px/1.55 'Inter',sans-serif; color:var(--ink); }
+.rvc-icard.why .rvc-icard-ic { background:color-mix(in srgb,var(--a,#6366f1) 14%,transparent); color:var(--adk,#4f46e5); }
+.rvc-icard.why .rvc-icard-h b { color:var(--ink); }
+.rvc-icard.trap { background:color-mix(in srgb,#f59e0b 12%,transparent); border-color:color-mix(in srgb,#f59e0b 30%,transparent); }
+.rvc-icard.trap .rvc-icard-ic { background:color-mix(in srgb,#f59e0b 22%,transparent); color:#d97706; }
+.rvc-icard.trap .rvc-icard-h b { color:var(--am-txt,#b45309); }
+.rvc-icard.bva { background:color-mix(in srgb,#06b6d4 10%,transparent); border-color:color-mix(in srgb,#06b6d4 26%,transparent); }
+.rvc-icard.bva .rvc-icard-ic { background:color-mix(in srgb,#06b6d4 20%,transparent); color:#0891b2; }
+.rvc-icard.bva .rvc-icard-h b { color:#0e7490; }
+.rvc-fsrc { display:flex; align-items:center; gap:8px; margin-top:14px; font-size:12px; font-style:italic; color:var(--mu,#94a3b8); }
+.rvc-fsrc svg { width:15px; height:15px; color:var(--a-lt,#818cf8); flex:none; }
+
+.rvc-actbar { position:sticky; bottom:calc(13px + env(safe-area-inset-bottom)); display:flex; gap:11px; margin-top:22px; padding:8px 0;
+  background:linear-gradient(to top,var(--bg) 70%,transparent); }
+.rvc-act-ghost { flex:none; border:1px solid var(--bo3,#e2e8f0); background:var(--su,#fff); color:var(--ink); border-radius:15px;
+  padding:14px 15px; cursor:pointer; font:700 13.5px 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; gap:8px;
+  box-shadow:0 6px 16px -12px rgba(40,30,90,.4); transition:transform .12s ease; }
+.rvc-act-ghost svg { width:17px; height:17px; color:var(--a,#6366f1); }
+.rvc-act-ghost:active { transform:scale(.97); }
+.rvc-act-main { flex:1; border:0; border-radius:15px; cursor:pointer; color:#fff;
+  font:800 15px 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:9px;
+  background:linear-gradient(135deg,var(--a,#6366f1),var(--adk,#4f46e5));
+  box-shadow:0 14px 26px -12px color-mix(in srgb,var(--adk,#4f46e5) 75%,transparent); transition:transform .12s ease,opacity .3s ease; }
+.rvc-act-main:active { transform:scale(.97); }
+.rvc-act-main svg { width:18px; height:18px; }
+.rvc-act-main.locked { opacity:.45; pointer-events:none; }
+.rvc-act-main .lock { display:none; }
+.rvc-act-main.locked .lock { display:block; }
+.rvc-act-main.locked .go { display:none; }
+
 @media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before { transition:none !important; animation:none !important; } }
 </style>`;
+
+// Pictos SVG (sobres, mono-trait) réutilisés par la fiche « Coach ».
+const FSVG = {
+  star: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16l-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>`,
+  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`,
+  arrow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`,
+  info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>`,
+  warn: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>`,
+  auto: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/></svg>`,
+  video: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m23 7-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`,
+  shuffle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>`,
+  lock: `<svg class="lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`,
+  play: `<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>`,
+};
 
 export async function mount(root, param) {
   track("page_view", { page: "revision-conduite" });
@@ -379,66 +511,193 @@ export async function mount(root, param) {
     );
   }
 
+  // Fiche « Coach » : un coach déroule la méthode pas à pas (engagement par
+  // l'interaction). Le quiz se débloque une fois la méthode lue. En relecture
+  // (déjà déroulée) ou en mouvement réduit, tout s'affiche d'emblée — pas de
+  // re-tap forcé.
   function renderFiche() {
     const f = getFiche(code);
     if (!f) {
       view = "home";
       return render();
     }
-    const steps = (f.methode || []).map((s) => `<li>${esc(s)}</li>`).join("");
+    track("revision_conduite_fiche_open", { code });
+    const steps = Array.isArray(f.methode) ? f.methode : [];
+    const total = steps.length;
+    const reduced =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const revealAll = reduced || !!loadRead()[code] || total === 0;
+
+    // Phrase d'intro du coach : « Je te montre comment <titre minuscule>. »
+    const titreFlow = f.titre
+      ? f.titre.charAt(0).toLowerCase() + f.titre.slice(1)
+      : "";
+
+    const stepsHtml = steps
+      .map(
+        (s, i) => `
+        <div class="rvc-step ${i === 0 ? "is-current" : "is-hidden"}" data-step="${i + 1}">
+          <div class="rvc-step-n"><b>${i + 1}</b>${FSVG.check}</div>
+          <div class="rvc-step-t">${esc(s)}</div>
+        </div>`,
+      )
+      .join("");
+
+    const whyCard = f.pourquoi
+      ? `<div class="rvc-icard why"><div class="rvc-icard-h"><span class="rvc-icard-ic">${FSVG.info}</span><b>Pourquoi ça compte</b></div><p>${esc(f.pourquoi)}</p></div>`
+      : "";
+    const trapCard = f.erreur
+      ? `<div class="rvc-icard trap"><div class="rvc-icard-h"><span class="rvc-icard-ic">${FSVG.warn}</span><b>Le piège</b></div><p>${esc(f.erreur)}</p></div>`
+      : "";
+    const bvaCard = f.bva
+      ? `<div class="rvc-icard bva"><div class="rvc-icard-h"><span class="rvc-icard-ic">${FSVG.auto}</span><b>En boîte auto</b></div><p>${esc(f.bva)}</p></div>`
+      : "";
+    const srcHtml =
+      Array.isArray(f.sources) && f.sources.length
+        ? `<div class="rvc-fsrc">${FSVG.video}<span>Vu chez de vrais moniteurs : ${f.sources.map((s) => esc(s)).join(", ")}</span></div>`
+        : "";
+
     root.innerHTML = `${STYLE}<div class="rvc">
       <div class="rvc-top">
         <button class="rvc-back" aria-label="Retour">←</button>
-        <div><span class="rvc-fiche-tag">${esc(f.code)} · ${esc(f.competence)}</span>
-        <h1 class="rvc-h1" style="margin-top:6px">${esc(f.titre)}</h1></div>
+        <span class="rvc-fbadge">${esc(f.code)} · ${esc(f.competence)}</span>
       </div>
+      <h1 class="rvc-ftitle">${esc(f.titre)}</h1>
+
       ${
-        steps
-          ? `<div class="rvc-block"><h3 class="rvc-block-h">La méthode</h3>
-        <ol class="rvc-steps">${steps}</ol></div>`
+        total
+          ? `<div class="rvc-coach">
+        <div class="rvc-coach-row">
+          <div class="rvc-coach-av">${FSVG.star}</div>
+          <div>
+            <div class="rvc-coach-tag">Ton coach</div>
+            <div class="rvc-coach-msg">Je te montre comment <b>${esc(titreFlow)}</b>. On y va pas à pas — prêt&nbsp;?</div>
+          </div>
+        </div>
+        <div class="rvc-prog">
+          <div class="rvc-prog-bar"><div class="rvc-prog-fill"></div></div>
+          <div class="rvc-prog-txt">0/${total}</div>
+        </div>
+      </div>
+
+      <div class="rvc-sect"><i></i><span>La méthode</span></div>
+      <div class="rvc-msteps">${stepsHtml}</div>
+      <div class="rvc-next">
+        <button class="rvc-next-btn"><span class="rvc-next-lbl">Étape suivante</span>${FSVG.arrow}</button>
+        <div class="rvc-hint2">Tape la carte ou le bouton pour avancer</div>
+      </div>`
           : ""
       }
-      ${
-        f.pourquoi
-          ? `<div class="rvc-block"><h3 class="rvc-block-h">Pourquoi ça compte</h3>
-        <div class="rvc-why">${esc(f.pourquoi)}</div></div>`
-          : ""
-      }
-      ${
-        f.erreur
-          ? `<div class="rvc-block"><h3 class="rvc-block-h">Le piège</h3>
-        <div class="rvc-err">${esc(f.erreur)}</div></div>`
-          : ""
-      }
-      ${
-        f.bva
-          ? `<div class="rvc-block"><h3 class="rvc-block-h">En boîte auto</h3>
-        <div class="rvc-bva">${esc(f.bva)}</div></div>`
-          : ""
-      }
-      ${
-        Array.isArray(f.sources) && f.sources.length
-          ? `<p class="rvc-src">🎬 Vu chez de vrais moniteurs : ${f.sources.map((s) => esc(s)).join(", ")}</p>`
-          : ""
-      }
-      ${f.methode && f.methode.length >= 3 ? `<button class="rvc-go2">🧩 Remets dans l'ordre</button>` : ""}
-      <button class="rvc-go">▶ Lance le quiz</button>
+
+      <div class="rvc-finale">
+        ${total ? `<div class="rvc-bravo"><div class="rvc-bravo-ic">${FSVG.check}</div><div><h3>Bien joué&nbsp;!</h3><p>Tu as la méthode complète. Voici ce qu'il faut retenir.</p></div></div>` : ""}
+        ${whyCard}${trapCard}${bvaCard}${srcHtml}
+      </div>
+
+      <div class="rvc-actbar">
+        ${total >= 3 ? `<button class="rvc-act-ghost" data-order>${FSVG.shuffle}Remets dans l'ordre</button>` : ""}
+        <button class="rvc-act-main locked" data-quiz>${FSVG.lock}${FSVG.play}<span>Lance le quiz</span></button>
+      </div>
     </div>`;
+
+    wireFiche(f, total, revealAll, reduced);
+  }
+
+  function wireFiche(f, total, revealAll, reduced) {
     root.querySelector(".rvc-back").addEventListener("click", () => {
       view = "home";
       render();
     });
-    root.querySelector(".rvc-go").addEventListener("click", () => {
-      focusId = null;
-      startQuiz();
-    });
-    root.querySelector(".rvc-go2")?.addEventListener("click", () => {
+
+    const mainBtn = root.querySelector("[data-quiz]");
+    const fillEl = root.querySelector(".rvc-prog-fill");
+    const ptxtEl = root.querySelector(".rvc-prog-txt");
+    const finaleEl = root.querySelector(".rvc-finale");
+    const nextZone = root.querySelector(".rvc-next");
+    const stepEls = Array.prototype.slice.call(
+      root.querySelectorAll(".rvc-step"),
+    );
+    let current = 1;
+
+    function setProgress(n) {
+      if (fillEl) fillEl.style.width = total ? (n / total) * 100 + "%" : "100%";
+      if (ptxtEl) ptxtEl.textContent = n + "/" + total;
+    }
+    function unlockEnd() {
+      if (nextZone) nextZone.style.display = "none";
+      if (finaleEl) finaleEl.classList.add("on");
+      if (mainBtn) mainBtn.classList.remove("locked");
+    }
+    function finish() {
+      unlockEnd();
+      markRead(code);
+      track("revision_conduite_fiche_read", { code });
+      if (finaleEl)
+        setTimeout(
+          () =>
+            finaleEl.scrollIntoView({
+              behavior: reduced ? "auto" : "smooth",
+              block: "start",
+            }),
+          120,
+        );
+    }
+    function advance() {
+      const cur = stepEls[current - 1];
+      if (cur) {
+        cur.classList.remove("is-current");
+        cur.classList.add("is-done");
+      }
+      if (current >= total) {
+        setProgress(total);
+        haptic("success");
+        finish();
+        return;
+      }
+      current++;
+      const nx = stepEls[current - 1];
+      if (nx) {
+        nx.classList.remove("is-hidden");
+        if (!reduced) nx.classList.add("is-reveal");
+        nx.classList.add("is-current");
+      }
+      setProgress(current - 1);
+      haptic("select");
+      if (current === total) {
+        const lbl = root.querySelector(".rvc-next-lbl");
+        if (lbl) lbl.textContent = "Terminer";
+      }
+    }
+
+    if (revealAll) {
+      stepEls.forEach((s) => {
+        s.classList.remove("is-hidden", "is-current");
+        s.classList.add("is-done");
+      });
+      setProgress(total);
+      unlockEnd();
+    } else {
+      setProgress(0);
+      root.querySelector(".rvc-next-btn")?.addEventListener("click", advance);
+      stepEls.forEach((s) =>
+        s.addEventListener("click", () => {
+          if (s.classList.contains("is-current")) advance();
+        }),
+      );
+    }
+
+    root.querySelector("[data-order]")?.addEventListener("click", () => {
       orderPlaced = [];
       orderPool = (f.methode || [])
         .map((t, i) => ({ i, t }))
         .sort(() => Math.random() - 0.5);
       view = "order";
       render();
+    });
+    mainBtn?.addEventListener("click", () => {
+      focusId = null;
+      startQuiz();
     });
   }
 
