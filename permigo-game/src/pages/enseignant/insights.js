@@ -436,7 +436,24 @@ export async function mount(root) {
     </div>
   `;
 
-  const data = await loadData(me);
+  let data;
+  try {
+    data = await loadData(me);
+  } catch (e) {
+    // Sans ça, si une requête échoue (réseau, RLS…), la page restait bloquée
+    // sur le squelette indéfiniment. On affiche un état d'erreur + Réessayer.
+    console.error("[insights] loadData", e);
+    toast("Impossible de charger les insights", "error");
+    root.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:64px 24px;text-align:center;color:var(--mu)">
+        <p style="margin:0;font:600 15px/1.4 'Inter',sans-serif">Impossible de charger les insights.</p>
+        <button id="ins-retry" type="button" style="border:0;border-radius:999px;padding:10px 20px;background:var(--a);color:#fff;font:700 14px/1 'Inter',sans-serif;cursor:pointer">Réessayer</button>
+      </div>`;
+    root
+      .querySelector("#ins-retry")
+      ?.addEventListener("click", () => mount(root));
+    return;
+  }
   renderAll(root, me, data);
   wireAll(root, me, data);
 }
