@@ -198,7 +198,7 @@ const STYLE = `<style>
 }
 .ppr-ligue-sub {
   font: 600 11.5px/1.4 'Inter', sans-serif;
-  color: #8b8298; margin-top: 3px;
+  color: #665f7e; margin-top: 3px;
 }
 .ppr-ligue-rank {
   font: 800 24px/1 'Fredoka', 'Manrope', sans-serif;
@@ -253,7 +253,7 @@ export async function mount(root) {
   _root = root;
   const me = getCurUser();
   if (!me || me.role !== "enseignant") {
-    root.innerHTML = `<p style="padding:32px;text-align:center;color:#6b7095">Accès enseignant requis</p>`;
+    root.innerHTML = `<p style="padding:32px;text-align:center;color:#5a6188">Accès enseignant requis</p>`;
     return;
   }
 
@@ -315,7 +315,7 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}
       <div class="ppr">
         <div class="ppr-hd"><div class="ppr-hd-title">Progression</div></div>
-        <div style="padding:48px 24px;text-align:center;color:#6b7095">
+        <div style="padding:48px 24px;text-align:center;color:#5a6188">
           <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
           <button id="ppr-retry">Réessayer</button>
         </div>
@@ -404,7 +404,7 @@ function _render(root, d, state, ligueRows) {
     <div class="ppr-sec-title">Tes trophées · ${unlockedCount} / ${total}</div>
     <button class="ppr-sec-link" id="ppr-tro-link" aria-label="Voir tous les trophées">Voir tout</button>
   </div>
-  <div class="ppr-troph-row" role="list" aria-label="Aperçu des trophées">
+  <div class="ppr-troph-row" role="group" aria-label="Aperçu des trophées">
     ${_trophRow(troResults, lastUnlockedIdx)}
   </div>
 
