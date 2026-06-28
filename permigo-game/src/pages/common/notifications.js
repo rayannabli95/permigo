@@ -448,7 +448,7 @@ async function loadNotifs(root, me) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             Suppr.
           </div>
-          <div class="nf2-item ${n.read ? "" : "unread"}" data-id="${esc(n.id)}" data-read="${n.read}" data-route="${esc(route)}">
+          <div class="nf2-item ${n.read ? "" : "unread"}" data-id="${esc(n.id)}" data-read="${n.read}" data-route="${esc(route)}" role="button" tabindex="0">
             <div class="nf2-item-ico" style="background:${m.bg};color:${m.color}">${icon(m.iconName, { size: 19 })}</div>
             <div class="nf2-item-body">
               <div class="nf2-item-eyebrow" style="color:color-mix(in srgb, ${m.color} 50%, var(--ink))">${esc(m.label)} <span class="nf2-when">· ${fmtTime(n.created_at)}</span></div>
@@ -483,9 +483,9 @@ function wireItems(root, me, initialUnread) {
     if (markAll) markAll.disabled = unreadCount === 0;
   };
 
-  // Mark single as read + navigate
+  // Mark single as read + navigate (souris ET clavier : nf2-item est role=button)
   root.querySelectorAll(".nf2-item").forEach((el) => {
-    el.addEventListener("click", async () => {
+    const open = async () => {
       haptic("select");
       const id = el.dataset.id;
       const route = el.dataset.route;
@@ -501,6 +501,13 @@ function wireItems(root, me, initialUnread) {
       }
       if (route && route !== "#/") {
         navigate(route);
+      }
+    };
+    el.addEventListener("click", open);
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
       }
     });
   });
