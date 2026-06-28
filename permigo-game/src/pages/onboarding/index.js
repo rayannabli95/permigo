@@ -1,19 +1,26 @@
 // ═══════════════════════════════════════════════════════════════
-// Onboarding élève — 3 écrans, 1ère valeur ressentie en <60s
+// Onboarding élève — UNE PAGE, ZÉRO SWIPE.
 //
-// Flow :
-//   0. Accueil perso « Salut {prenom} »
-//   1. Perso fusionnée — avatar + couleur sur un seul écran
-//   2. Garde ton avance — opt-in notif (CTA) + tease coffre
-//   (2b) Sous-step A2HS — conditionnel (hors dots), si app non installée
+// Une seule page verticale qui défile (plus de carrousel à swipe, qui
+// buggait). La barre de progression se remplit au SCROLL ; le bouton
+// « C'est parti → » reste collé en bas.
 //
-// Dots = 3 pastilles seulement (les 3 vrais écrans).
-// A11y : focus management entre slides, navigation clavier + flèches dans
-// les radiogroups, aria-live sur les changements d'état.
-// La récompense = le coffre de bienvenue (plus de quiz).
+// Sections :
+//   HERO   — « Salut {prenom} ! » + mascotte + pitch coach.
+//   1 « Photo de profil »  — grille d'avatars (+ couleur d'accent, live).
+//   2 « Tes rappels du soir » — toggle (ON = demande permission notif)
+//                               + carte récompense (coffre / XP / volants).
+//   3 « Ajoute l'appli »   — A2HS, seulement si pas déjà installée.
+//
+// 2 finitions selon le thème global (html[data-theme]) :
+//   • défaut / dark  → Arène nuit-violet (Baloo 2, plastique 3D, or).
+//   • light          → Clair premium (Plus Jakarta, ombres douces).
+//
+// Au FINISH : patch profil (first_value_action_at, avatar, accent),
+// unlockChest("welcome", {xp:50,gemmes:25}), flag localStorage, → #/.
+// A11y : nav clavier sur les contrôles + flèches dans la grille avatars.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
-import { icon } from "@/utils/icons.js";
 import { getCurUser, setCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -30,34 +37,22 @@ import { unlockChest } from "@/utils/game-state.js";
 import { ACCENTS, getAccent, setAccent } from "@/utils/accent.js";
 import { a2hsStepsHTML, A2HS_STYLE } from "@/components/common/a2hs-steps.js";
 
-// ─── Indices des 3 écrans de contenu (fixes) ────────────────────
-const S_WELCOME = 0; // Accueil perso
-const S_PERSO = 1; // Avatar + couleur
-const S_NOTIF = 2; // Garde ton avance + opt-in
-const DOT_COUNT = 3; // Toujours 3 dots, jamais plus
-
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track("onboarding.start", { role: me.role, version: "v3" });
+  track("onboarding.start", { role: me.role, version: "v4-onepage" });
 
-  // Opt-in notif : disponible si l'API existe et que la permission n'est pas déjà accordée.
+  // Opt-in notif : possible si l'API existe et que ce n'est pas déjà accordé.
   const showNotif =
     "Notification" in window &&
     "serviceWorker" in navigator &&
     Notification.permission !== "granted";
 
-  // A2HS : sous-step conditionnel (pas de dot dédié)
+  // A2HS : section conditionnelle (uniquement si pas déjà installée).
   const showA2HS = !isStandalone();
 
-  let idx = 0; // slide actif (0-2)
-  let notifDone = false;
-  let notifBusy = false;
-  let a2hsDone = false;
-  let finishing = false;
-  let inA2HS = false; // sous-step A2HS (pas un vrai slide)
-
+  // ─── État ──────────────────────────────────────────────────────
   let avatar =
     me.avatar_url && ASSETS.avatar?.includes(me.avatar_url)
       ? me.avatar_url
@@ -65,323 +60,254 @@ export async function mount(root) {
   let accentId = getAccent();
   let a2hsPlat = guessPlatform() === "android" ? "android" : "ios";
 
+  // Toggle rappels : ON par défaut. notifWanted reflète l'intention de l'utilisateur.
+  let notifWanted = showNotif; // si déjà accordé / indispo → rien à demander
+  let notifAsked = false; // permission déjà demandée durant cette session
+  let finishing = false;
+
   const prenom = esc(me.prenom || me.nom || "toi");
 
-  // ─── Rendu HTML initial ────────────────────────────────────────
+  // ─── Rendu HTML ────────────────────────────────────────────────
   root.innerHTML = `
     ${STYLE}
     <style>${A2HS_STYLE}</style>
     <div class="ob" role="dialog" aria-modal="true" aria-label="Tour de bienvenue">
-      <div class="ob-orb ob-orb-a" aria-hidden="true"></div>
-      <div class="ob-orb ob-orb-b" aria-hidden="true"></div>
 
-      <div class="ob-head">
-        <div class="ob-dots" id="ob-dots" role="group" aria-label="Progression">
-          ${Array.from(
-            { length: DOT_COUNT },
-            (_, i) =>
-              `<span class="ob-dot${i === 0 ? " active" : ""}" data-i="${i}" aria-hidden="true"></span>`,
-          ).join("")}
+      <!-- Barre de progression (remplie au scroll) + Passer -->
+      <div class="ob-top">
+        <div class="ob-prog" role="progressbar" aria-label="Progression" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <i id="ob-prog-fill" style="width:8%"></i>
         </div>
         <button class="ob-skip" id="ob-skip" type="button" aria-label="Passer l'introduction">Passer</button>
       </div>
 
-      <!-- Region annonces a11y (changements d'état, slide active) -->
+      <!-- Annonces a11y -->
       <div id="ob-live" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
-      <div class="ob-viewport" id="ob-viewport" aria-label="Contenu de l'étape">
-        <div class="ob-track" id="ob-track" style="width:${DOT_COUNT * 100}%">
+      <div class="ob-scroll" id="ob-scroll">
+        <div class="ob-content">
 
-          <!-- ─── Écran 0 : Accueil perso ─── -->
-          <section class="ob-slide ob-slide-welcome" data-i="0" tabindex="0" aria-labelledby="ob-title-0">
-            <div class="ob-halo" aria-hidden="true">
-              <div class="ob-emoji">${icon("car", { size: 44 })}</div>
+          <!-- ─── HERO ─── -->
+          <header class="ob-hero">
+            <span class="ob-eyebrow">Permi<b>Go</b></span>
+            <div class="ob-mascot-wrap">
+              <img class="ob-mascot" src="/skins/mascot-hello.png" alt="" />
             </div>
-            <div class="ob-badge">Permi<span>Go</span></div>
-            <h1 class="ob-title" id="ob-title-0">
-              Salut, <span class="accent">${prenom}</span>&nbsp;!
-            </h1>
-            <p class="ob-body-txt">
-              Ton permis, étape par étape — avec ton moniteur.
-            </p>
-          </section>
+            <h1 class="ob-h1" id="ob-h1">Salut, ${prenom}&nbsp;!</h1>
+            <p class="ob-lead">Moi c'est <b>PermiGo</b>. En 30&nbsp;secondes, on prépare ton appli — après, tu réviseras <b>2&nbsp;min par soir</b>.</p>
+          </header>
 
-          <!-- ─── Écran 1 : Perso fusionnée (avatar + couleur) ─── -->
-          <section class="ob-slide ob-slide-perso" data-i="1" aria-labelledby="ob-title-1">
-            <div class="ob-halo" aria-hidden="true">
-              <div class="ob-emoji">${icon("user", { size: 34 })}</div>
+          <!-- ─── SECTION 1 : Photo de profil ─── -->
+          <section class="ob-section" aria-labelledby="ob-sec1-t">
+            <div class="ob-sec-head">
+              <span class="ob-sec-num">1</span>
+              <h2 class="ob-sec-title" id="ob-sec1-t">Photo de profil</h2>
             </div>
-            <h1 class="ob-title" id="ob-title-1">Personnalise ton profil</h1>
-
-            <p class="ob-perso-label">Photo de profil</p>
             <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="Choix de l'avatar">
               ${(ASSETS.avatar || [])
                 .map(
                   (url, i) => `
                 <button
-                  class="ob-av-card${url === avatar ? " sel" : ""}"
+                  class="ob-av${url === avatar ? " sel" : ""}"
                   data-url="${esc(url)}"
                   role="radio"
-                  aria-checked="${url === avatar}"
+                  aria-checked="${url === avatar ? "true" : "false"}"
                   aria-label="Avatar ${i + 1}"
                   type="button"
                 >
                   <img class="ob-av-img" src="${esc(url)}" alt="" loading="lazy" />
-                  <span class="ob-av-check" aria-hidden="true">✓</span>
-                </button>
-              `,
+                  <span class="ob-av-check" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                  </span>
+                </button>`,
                 )
                 .join("")}
             </div>
+            <p class="ob-helper">Choisis ton avatar</p>
 
-            <p class="ob-perso-label">Couleur</p>
-            <p class="ob-body-txt ob-color-hint">Tout l'app change en temps réel&nbsp;→</p>
+            <p class="ob-color-label">Ta couleur</p>
             <div class="ob-color-grid" id="ob-color-grid" role="radiogroup" aria-label="Choix de la couleur">
               ${ACCENTS.map(
                 (c) => `
                 <button
-                  class="ob-color-sw${c.id === accentId ? " sel" : ""}"
+                  class="ob-color${c.id === accentId ? " sel" : ""}"
                   data-accent="${esc(c.id)}"
                   role="radio"
-                  aria-checked="${c.id === accentId}"
+                  aria-checked="${c.id === accentId ? "true" : "false"}"
                   aria-label="${esc(c.name)}"
                   type="button"
-                  style="--sw:${c.a};--sw-dk:${c.adk}"
+                  style="--sw:${esc(c.a)};--sw-dk:${esc(c.adk)}"
                 >
                   <span class="ob-color-dot" aria-hidden="true"></span>
-                  <span class="ob-color-name">${esc(c.name)}</span>
-                </button>
-              `,
+                </button>`,
               ).join("")}
             </div>
           </section>
 
-          <!-- ─── Écran 2 : Garde ton avance ─── -->
-          <section class="ob-slide ob-slide-notif" data-i="2" aria-labelledby="ob-title-2">
-            <div class="ob-halo ob-halo-bell" aria-hidden="true">
-              <div class="ob-emoji ob-bell">${icon("bell", { size: 40 })}</div>
+          <!-- ─── SECTION 2 : Tes rappels du soir ─── -->
+          <section class="ob-section" aria-labelledby="ob-sec2-t">
+            <div class="ob-sec-head">
+              <span class="ob-sec-num">2</span>
+              <h2 class="ob-sec-title" id="ob-sec2-t">Tes rappels du soir</h2>
             </div>
-            <h1 class="ob-title" id="ob-title-2">Garde ton avance</h1>
-            <p class="ob-body-txt">3 questions ce soir, 2 minutes. Chaque jour qui passe renforce la mémorisation — pour de vrai.</p>
 
-            <!-- Tease coffre de bienvenue -->
-            <div class="ob-chest-tease" aria-label="Coffre de bienvenue débloqué">
-              <span class="ob-chest-ico" aria-hidden="true">🎁</span>
-              <div class="ob-chest-txt">
-                <div class="ob-chest-title">Un coffre t'attend à l'arrivée</div>
-                <div class="ob-chest-sub">50 XP + 25 volants à récupérer</div>
+            <div class="ob-card">
+              <div class="ob-toggle-row">
+                <div class="ob-toggle-txt">
+                  <div class="ob-toggle-tt">Rappel chaque soir</div>
+                  <div class="ob-toggle-ts">20&nbsp;h · doux, jamais spam</div>
+                </div>
+                <button
+                  class="ob-switch${notifWanted ? "" : " off"}"
+                  id="ob-switch"
+                  type="button"
+                  role="switch"
+                  aria-checked="${notifWanted ? "true" : "false"}"
+                  aria-label="Activer les rappels du soir"
+                >
+                  <span class="ob-knob" aria-hidden="true"></span>
+                </button>
+              </div>
+              <p class="ob-micro" id="ob-notif-note"><b>3 questions chaque soir, 2 minutes</b> — c'est ce qui fait progresser pour de vrai.</p>
+            </div>
+
+            <!-- Carte récompense -->
+            <div class="ob-reward" aria-label="Coffre de bienvenue : 50 XP et 25 volants">
+              <div class="ob-reward-chest">
+                <img src="/skins/chest-closed.png" alt="" />
+              </div>
+              <div class="ob-reward-body">
+                <div class="ob-reward-tag">Récompense</div>
+                <div class="ob-reward-title">Un coffre t'attend dès ce soir</div>
+                <div class="ob-pills">
+                  <span class="ob-pill ob-pill-xp"><span class="ob-xp-ic" aria-hidden="true">XP</span>50&nbsp;XP</span>
+                  <span class="ob-pill ob-pill-vol"><img src="/skins/volant-coin.webp" alt="" />25&nbsp;volants</span>
+                </div>
               </div>
             </div>
-
-            <!-- Prévisualisation notif (cosmétique) -->
-            <div class="ob-notif-preview" aria-hidden="true">
-              <img class="ob-notif-ico" src="/skins/avatars/permigo-badge-icon.png" alt="" />
-              <div class="ob-notif-txt">
-                <div class="ob-notif-app">PermiGo <span>maintenant</span></div>
-                <div class="ob-notif-title">Tes 3 questions t'attendent</div>
-                <div class="ob-notif-body">2 minutes — garde ton avance.</div>
-              </div>
-            </div>
-
-            <!-- Feedback état notif (a11y) -->
-            <p class="ob-notif-note" id="ob-notif-note">1 rappel/jour max. Désactivable à tout moment.</p>
           </section>
+
+          ${
+            showA2HS
+              ? `
+          <!-- ─── SECTION 3 : Ajoute l'appli ─── -->
+          <section class="ob-section" aria-labelledby="ob-sec3-t">
+            <div class="ob-sec-head">
+              <span class="ob-sec-num">3</span>
+              <h2 class="ob-sec-title" id="ob-sec3-t">Ajoute l'appli</h2>
+            </div>
+            <div class="ob-install-head">
+              <img class="ob-install-badge" src="/skins/avatars/permigo-badge-icon.png" alt="" />
+              <p class="ob-install-lead"><b>2 gestes, 10 secondes</b> — tes rappels et tes récompenses arrivent ici.</p>
+            </div>
+            <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
+            <button class="ob-plat-switch" id="ob-plat-switch" type="button" aria-label="Changer la plateforme des instructions (iPhone / Android)"></button>
+          </section>`
+              : ""
+          }
 
         </div>
       </div>
 
-      <!-- Sous-step A2HS (hors track carrousel, injecté conditionnellement) -->
-      <div class="ob-a2hs-wrap" id="ob-a2hs-wrap" hidden>
-        <img class="ob-a2hs-badge" src="/skins/avatars/permigo-badge-icon.png" alt="" />
-        <h1 class="ob-title" id="ob-a2hs-title">Ajoute l'appli</h1>
-        <p class="ob-body-txt">2 gestes, 10 secondes — tes rappels et tes récompenses arrivent ici.</p>
-        <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
-        <button class="ob-plat-switch" id="ob-plat-switch" type="button" aria-label="Changer la plateforme des instructions (iPhone / Android)"></button>
-      </div>
-
-      <div class="ob-footer">
+      <!-- Bouton sticky unique -->
+      <div class="ob-dock">
         <button class="ob-cta" id="ob-cta" type="button">
-          Commencer <span aria-hidden="true">→</span>
+          C'est parti <span class="ob-arrow" aria-hidden="true">→</span>
         </button>
-        <button class="ob-later" id="ob-later" type="button" hidden>Plus tard</button>
       </div>
     </div>
   `;
 
   // ─── Références DOM ────────────────────────────────────────────
-  const track$ = root.querySelector("#ob-track");
+  const scrollEl = root.querySelector("#ob-scroll");
+  const progFill = root.querySelector("#ob-prog-fill");
+  const progBar = root.querySelector(".ob-prog");
   const ctaBtn = root.querySelector("#ob-cta");
-  const laterBtn = root.querySelector("#ob-later");
-  const dotsEl = root.querySelector("#ob-dots");
-  const viewport = root.querySelector("#ob-viewport");
+  const switchBtn = root.querySelector("#ob-switch");
   const liveEl = root.querySelector("#ob-live");
-  const a2hsWrap = root.querySelector("#ob-a2hs-wrap");
-
-  // ─── Focus management helpers ──────────────────────────────────
-  function focusSlideTitle(slideIdx) {
-    // Déplace le focus sur le titre du nouvel écran (a11y)
-    const titleId =
-      slideIdx === -1 /* A2HS */ ? "ob-a2hs-title" : `ob-title-${slideIdx}`;
-    const titleEl = root.querySelector(`#${titleId}`);
-    if (titleEl) {
-      titleEl.setAttribute("tabindex", "-1");
-      titleEl.focus({ preventScroll: true });
-    }
-  }
 
   function announce(msg) {
-    // Annonce douce (aria-live polite) — ne coupe pas ce qui est déjà lu
     if (liveEl) liveEl.textContent = msg;
   }
 
-  // ─── Mise à jour affichage ─────────────────────────────────────
-  function update() {
-    // Déplace le carrousel si on n'est pas dans le sous-step A2HS.
-    // On rétablit la transition (un drag a pu la passer à "none" inline).
-    if (!inA2HS) {
-      track$.style.transition = "";
-      track$.style.transform = `translateX(-${(idx * 100) / DOT_COUNT}%)`;
-    }
+  // ─── Barre de progression au scroll ───────────────────────────
+  function updateProgress() {
+    const max = scrollEl.scrollHeight - scrollEl.clientHeight;
+    const ratio = max > 0 ? scrollEl.scrollTop / max : 1;
+    const pct = Math.round(8 + ratio * 92); // 8 % au départ → 100 % en bas
+    progFill.style.width = pct + "%";
+    progBar.setAttribute("aria-valuenow", String(pct));
+  }
+  scrollEl.addEventListener("scroll", updateProgress, { passive: true });
 
-    // Dots
-    dotsEl.querySelectorAll(".ob-dot").forEach((d, i) => {
-      d.classList.toggle("active", i === idx && !inA2HS);
-      d.classList.toggle("done", i < idx || (inA2HS && i <= idx));
-    });
-
-    // aria-hidden sur les slides (non-actifs masqués aux screen readers)
-    root.querySelectorAll(".ob-slide").forEach((s, i) => {
-      const on = !inA2HS && i === idx;
-      s.classList.toggle("on", on);
-      s.setAttribute("aria-hidden", on ? "false" : "true");
-    });
-
-    // Viewport principal vs sous-step A2HS
-    viewport.hidden = inA2HS;
-    a2hsWrap.hidden = !inA2HS;
-
-    // Label CTA
-    if (inA2HS) {
-      ctaBtn.innerHTML = 'C\'est parti <span aria-hidden="true">→</span>';
-      laterBtn.hidden = true;
-    } else if (idx === S_NOTIF) {
-      if (!notifDone && showNotif) {
-        ctaBtn.innerHTML = "Activer les rappels";
-        ctaBtn.disabled = false;
-      } else {
-        ctaBtn.innerHTML = 'C\'est parti <span aria-hidden="true">→</span>';
-        ctaBtn.disabled = false;
-      }
-      laterBtn.hidden = !(showNotif && !notifDone);
-    } else if (idx === S_PERSO) {
-      ctaBtn.innerHTML = 'Continuer <span aria-hidden="true">→</span>';
-      ctaBtn.disabled = false;
-      laterBtn.hidden = true;
-    } else {
-      // S_WELCOME
-      ctaBtn.innerHTML = 'Commencer <span aria-hidden="true">→</span>';
-      ctaBtn.disabled = false;
-      laterBtn.hidden = true;
-    }
-
-    track("onboarding.step_viewed", { step: inA2HS ? "a2hs" : idx });
+  // ─── Tracking « section vue » au scroll (une fois par section) ──
+  const seen = new Set();
+  const sections = Array.from(root.querySelectorAll(".ob-section"));
+  if ("IntersectionObserver" in window && sections.length) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((ent) => {
+          if (!ent.isIntersecting) return;
+          const i = sections.indexOf(ent.target);
+          const key = "section_" + (i + 1);
+          if (i < 0 || seen.has(key)) return;
+          seen.add(key);
+          track("onboarding.step_viewed", { step: i + 1 });
+        });
+      },
+      { root: scrollEl, threshold: 0.5 },
+    );
+    sections.forEach((s) => io.observe(s));
   }
 
-  function goTo(i) {
-    idx = Math.max(0, Math.min(DOT_COUNT - 1, i));
-    inA2HS = false;
-    haptic("tap");
-    update();
-    // Annonce le changement d'écran pour les lecteurs d'écran
-    const labels = ["Bienvenue", "Personnalisation", "Rappels"];
-    announce(`Étape ${idx + 1} sur ${DOT_COUNT} : ${labels[idx]}`);
-    // Focus sur le titre du nouvel écran
-    requestAnimationFrame(() => focusSlideTitle(idx));
+  // ─── Toggle rappels (ON = demande permission notif) ────────────
+  function setSwitch(on) {
+    notifWanted = on;
+    switchBtn.classList.toggle("off", !on);
+    switchBtn.setAttribute("aria-checked", on ? "true" : "false");
   }
 
-  function advance() {
-    if (idx < DOT_COUNT - 1) {
-      goTo(idx + 1);
-    } else {
-      // Dernier slide (S_NOTIF) — sous-step A2HS si non installé, sinon finish
-      if (showA2HS && !a2hsDone && !inA2HS) {
-        enterA2HS();
-      } else {
-        finish();
-      }
-    }
-  }
-
-  function prev() {
-    if (inA2HS) {
-      // Retour depuis A2HS → retour au dernier vrai slide
-      inA2HS = false;
-      haptic("tap");
-      update();
-      announce("Retour à l'étape précédente");
-      requestAnimationFrame(() => focusSlideTitle(idx));
-    } else if (idx > 0) {
-      goTo(idx - 1);
-    }
-  }
-
-  // ─── Opt-in notifications ──────────────────────────────────────
-  // Reste synchrone dans le geste tactile (iOS exige user gesture)
-  async function handleNotifOptIn() {
-    if (notifBusy) return;
-    notifBusy = true;
-    ctaBtn.disabled = true;
+  // Demande de permission notif — reste synchrone dans le geste tactile (iOS).
+  async function requestNotif() {
+    if (!showNotif || notifAsked) return;
+    notifAsked = true;
     const note = root.querySelector("#ob-notif-note");
-
     try {
       const granted = await optInPush();
       track("onboarding.push_optin", {
         outcome: granted ? "granted" : Notification.permission,
       });
-      notifDone = true;
-
       if (granted) {
         haptic("success");
-        root.querySelector(".ob-slide-notif")?.classList.add("granted");
-        if (note) note.textContent = "Rappels activés — à ce soir !";
+        setSwitch(true);
+        if (note) note.innerHTML = "<b>Rappels activés</b> — à ce soir&nbsp;!";
         announce("Rappels activés ! Tu recevras 3 questions ce soir.");
-        setTimeout(() => {
-          ctaBtn.disabled = false;
-          advance();
-        }, 900);
-        return;
+      } else {
+        // Refusé / bloqué : le toggle reflète l'état réel (off).
+        setSwitch(false);
+        if (note && Notification.permission === "denied") {
+          note.textContent =
+            "Bloquées — active-les dans les réglages si tu changes d'avis.";
+          announce(
+            "Rappels non activés. Tu peux les activer plus tard dans les réglages.",
+          );
+        }
       }
-
-      if (note && Notification.permission === "denied") {
-        note.textContent =
-          "Bloquées — active-les dans les réglages si tu changes d'avis.";
-        announce(
-          "Rappels non activés. Tu peux les activer plus tard dans les réglages.",
-        );
-      }
-      ctaBtn.disabled = false;
-      update();
     } catch (e) {
       console.error("[onboarding] push opt-in failed", e);
-      notifDone = true;
-      ctaBtn.disabled = false;
-      update();
-    } finally {
-      notifBusy = false;
     }
   }
 
-  // ─── Sous-step A2HS ───────────────────────────────────────────
-  function enterA2HS() {
-    inA2HS = true;
+  switchBtn.addEventListener("click", () => {
     haptic("tap");
-    track("onboarding.step_viewed", { step: "a2hs" });
-    renderA2HSSteps();
-    update();
-    announce("Étape bonus : ajouter l'application à ton écran d'accueil");
-    requestAnimationFrame(() => focusSlideTitle(-1));
-  }
+    const next = !notifWanted;
+    setSwitch(next);
+    track("onboarding.reminder_toggle", { on: next });
+    // Passage à ON → on tente la permission tout de suite (geste utilisateur).
+    if (next && showNotif && !notifAsked) requestNotif();
+  });
 
+  // ─── Section A2HS ──────────────────────────────────────────────
   function renderA2HSSteps() {
     const stepsEl = root.querySelector("#ob-a2hs-steps");
     if (!stepsEl) return;
@@ -408,7 +334,6 @@ export async function mount(root) {
           const outcome = await promptInstall();
           track("a2hs.install_prompt", { outcome, source: "onboarding" });
           if (outcome === "accepted") {
-            a2hsDone = true;
             finish();
             return;
           }
@@ -421,47 +346,39 @@ export async function mount(root) {
     }
   }
 
-  // ─── CTA principal ─────────────────────────────────────────────
-  function next() {
-    if (inA2HS) {
-      a2hsDone = true;
-      finish();
-      return;
-    }
-    if (idx === S_NOTIF && showNotif && !notifDone) {
-      handleNotifOptIn();
-      return;
-    }
-    advance();
+  if (showA2HS) {
+    renderA2HSSteps();
+    root.querySelector("#ob-plat-switch")?.addEventListener("click", () => {
+      a2hsPlat = a2hsPlat === "ios" ? "android" : "ios";
+      track("a2hs.platform_selected", {
+        platform: a2hsPlat,
+        source: "onboarding",
+      });
+      renderA2HSSteps();
+    });
   }
 
-  ctaBtn.addEventListener("click", next);
-
-  laterBtn.addEventListener("click", () => {
-    track("onboarding.push_optin", { outcome: "later" });
-    notifDone = true;
-    advance();
-  });
-
-  // Switch plateforme A2HS (délégué car injecté dynamiquement)
-  root.querySelector("#ob-plat-switch")?.addEventListener("click", () => {
-    a2hsPlat = a2hsPlat === "ios" ? "android" : "ios";
-    track("a2hs.platform_selected", {
-      platform: a2hsPlat,
-      source: "onboarding",
-    });
-    renderA2HSSteps();
-  });
-
-  // Skip → termine direct
+  // ─── Skip → finish direct ──────────────────────────────────────
   root.querySelector("#ob-skip").addEventListener("click", () => {
-    track("onboarding.skipped", { at_step: idx + 1 });
+    track("onboarding.skipped", {});
+    finish();
+  });
+
+  // ─── CTA principal ─────────────────────────────────────────────
+  ctaBtn.addEventListener("click", () => {
+    // Si l'utilisateur veut les rappels mais ne les a pas encore demandés
+    // (il n'a pas touché le toggle ON par défaut), on demande maintenant —
+    // reste dans le geste tactile — puis on termine.
+    if (notifWanted && showNotif && !notifAsked) {
+      requestNotif().finally(() => finish());
+      return;
+    }
     finish();
   });
 
   // ─── Radiogroups a11y (avatar + couleur) ──────────────────────
   // Tabindex roving + navigation flèches : un seul élément focusable par
-  // groupe (le sélectionné), les flèches déplacent la sélection et le focus.
+  // groupe (le sélectionné), les flèches déplacent sélection + focus.
   function wireRadioGroup(selector, onSelect, isSel) {
     const items = Array.from(root.querySelectorAll(selector));
     if (!items.length) return;
@@ -502,13 +419,11 @@ export async function mount(root) {
         else if (e.key === "End") next = items.length - 1;
         else if (e.key === " " || e.key === "Enter") {
           e.preventDefault();
-          e.stopPropagation();
           haptic("select");
           select(el, { focus: true });
           return;
         } else return;
         e.preventDefault();
-        e.stopPropagation();
         haptic("select");
         select(items[next], { focus: true });
       });
@@ -519,7 +434,7 @@ export async function mount(root) {
 
   // Avatar
   wireRadioGroup(
-    ".ob-av-card",
+    ".ob-av",
     (card) => {
       avatar = card.dataset.url;
     },
@@ -528,7 +443,7 @@ export async function mount(root) {
 
   // Couleur d'accent — recoloration live de toute l'app
   wireRadioGroup(
-    ".ob-color-sw",
+    ".ob-color",
     (sw) => {
       accentId = sw.dataset.accent;
       setAccent(accentId);
@@ -537,144 +452,22 @@ export async function mount(root) {
     (sw) => sw.dataset.accent === accentId,
   );
 
-  // ─── Swipe horizontal (drag-follow live + advance net) ────────
-  // Seuil bas et réactif (38px) + détection d'intention horizontale robuste.
-  // Pendant le geste on suit le doigt (track désolidarisé de la transition) ;
-  // au relâchement on tranche : avancer, reculer, ou revenir en place.
-  const SWIPE_THRESHOLD = 38; // px : déplacement mini pour changer de slide
-  const INTENT_LOCK = 8; // px : au-delà, on verrouille l'axe (H ou V)
-  let startX = 0,
-    startY = 0,
-    dragging = false,
-    axisLock = null; // null | "h" | "v"
-
-  // Décalage de base (en %) du track pour la slide courante
-  const baseOffset = () => (idx * 100) / DOT_COUNT;
-
-  // Largeur d'une slide en px (≈ largeur du viewport)
-  const slideW = () => viewport.clientWidth || window.innerWidth || 1;
-
-  function dragMove(px) {
-    // Translate le track en suivant le doigt, avec résistance aux bords
-    let eff = px;
-    const atStart = idx === 0;
-    const atEnd = idx === DOT_COUNT - 1;
-    if ((atStart && px > 0) || (atEnd && px < 0)) eff = px * 0.35; // caoutchouc
-    const pct = baseOffset() - (eff / slideW()) * (100 / DOT_COUNT);
-    track$.style.transition = "none";
-    track$.style.transform = `translateX(-${pct}%)`;
-  }
-
-  function dragEnd(dx) {
-    // Réactive la transition pour le snap final
-    track$.style.transition = "";
-    if (dx <= -SWIPE_THRESHOLD) {
-      forwardBySwipe();
-    } else if (dx >= SWIPE_THRESHOLD) {
-      prev();
-    } else {
-      update(); // pas assez : on recolle la slide courante
-    }
-  }
-
-  // Avancer par swipe gauche (gère le cas opt-in notif = swipe = on passe)
-  function forwardBySwipe() {
-    if (idx === S_NOTIF && showNotif && !notifDone) {
-      track("onboarding.push_optin", { outcome: "swiped_past" });
-      notifDone = true;
-    }
-    advance();
-  }
-
-  viewport.addEventListener(
-    "touchstart",
-    (e) => {
-      if (inA2HS || e.touches.length > 1) return;
-      const t = e.changedTouches[0];
-      startX = t.clientX;
-      startY = t.clientY;
-      dragging = true;
-      axisLock = null;
-    },
-    { passive: true },
-  );
-
-  viewport.addEventListener(
-    "touchmove",
-    (e) => {
-      if (!dragging || inA2HS) return;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - startX;
-      const dy = t.clientY - startY;
-
-      // Verrouille l'axe dès qu'on dépasse le seuil d'intention
-      if (
-        !axisLock &&
-        (Math.abs(dx) > INTENT_LOCK || Math.abs(dy) > INTENT_LOCK)
-      ) {
-        axisLock = Math.abs(dx) > Math.abs(dy) ? "h" : "v";
-      }
-      if (axisLock === "h") dragMove(dx);
-    },
-    { passive: true },
-  );
-
-  function endSwipe(e) {
-    if (!dragging) return;
-    dragging = false;
-    const wasH = axisLock === "h";
-    axisLock = null;
-    if (inA2HS || !wasH) {
-      if (!inA2HS) update(); // remet la slide d'aplomb si geste vertical
-      return;
-    }
-    const t = e.changedTouches[0];
-    dragEnd(t.clientX - startX);
-  }
-
-  viewport.addEventListener("touchend", endSwipe, { passive: true });
-  viewport.addEventListener("touchcancel", endSwipe, { passive: true });
-
-  // ─── Clavier ──────────────────────────────────────────────────
-  function onKey(e) {
-    // Laisse les radiogroups (avatar/couleur) gérer leurs propres flèches
-    const inRadio = e.target.closest?.(".ob-av-card, .ob-color-sw");
-    if (inRadio && e.key.startsWith("Arrow")) return;
-
-    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-      e.preventDefault();
-      advance();
-    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-      e.preventDefault();
-      prev();
-    } else if (e.key === "Enter") {
-      // Enter = action du CTA (sauf si le focus est sur un bouton interactif)
-      const onBtn = e.target.closest?.("button");
-      if (!onBtn || onBtn === ctaBtn) {
-        e.preventDefault();
-        next();
-      }
-    }
-  }
-  document.addEventListener("keydown", onKey);
-
   // ─── Finish ───────────────────────────────────────────────────
   async function finish() {
     if (finishing) return;
     finishing = true;
-    document.removeEventListener("keydown", onKey);
 
     track("onboarding.completed", {
-      last_step: inA2HS ? "a2hs" : idx,
       avatar_chosen: !!avatar,
       accent_id: accentId,
-      version: "v3",
+      reminders_on: notifWanted,
+      version: "v4-onepage",
     });
 
     ctaBtn.disabled = true;
     ctaBtn.innerHTML = "C'est parti…";
 
-    // Sauvegarde profil (avatar + marquage onboarding terminé)
+    // Sauvegarde profil (avatar + marquage onboarding terminé).
     try {
       const now = new Date().toISOString();
       const patch = { first_value_action_at: now };
@@ -685,391 +478,546 @@ export async function mount(root) {
       console.error("[onboarding] finish update failed", e);
     }
 
-    // Fallback localStorage (évite re-affichage si DB échoue)
+    // Fallback localStorage (évite re-affichage si DB échoue).
     try {
       localStorage.setItem("permigo_eleve_onboarding_done", "1");
     } catch {}
 
-    // Coffre de bienvenue (crédité idempotent côté serveur).
-    // On l'unlock ici mais l'élève le verra S'OUVRIR sur l'accueil
-    // (le chest component s'affiche dès l'arrivée, pas en teaser passif).
+    // Coffre de bienvenue (crédité idempotent côté serveur). L'élève le
+    // verra S'OUVRIR sur l'accueil (le composant coffre s'affiche à l'arrivée).
     unlockChest("welcome", {
       xp: 50,
       gemmes: 25,
       title: "Bienvenue dans PermiGo !",
     }).catch(() => {});
 
-    // Atterrissage sur l'accueil → le composant coffre s'affiche immédiatement
     location.hash = "#/";
     location.reload();
   }
 
   // ─── Init ─────────────────────────────────────────────────────
-  update();
-  // Focus initial sur le titre du premier écran
-  requestAnimationFrame(() => focusSlideTitle(0));
+  updateProgress();
+  requestAnimationFrame(() => {
+    const h1 = root.querySelector("#ob-h1");
+    if (h1) {
+      h1.setAttribute("tabindex", "-1");
+      h1.focus({ preventScroll: true });
+    }
+  });
 }
 
 // ─── Styles ───────────────────────────────────────────────────────
+// Deux finitions selon le thème global porté par html[data-theme] :
+//   • défaut / "dark" → Arène nuit-violet.
+//   • "light"         → Clair premium (sélecteurs html[data-theme="light"]).
 const STYLE = `<style>
-  /* Utilitaire a11y : texte réservé aux lecteurs d'écran */
+  /* Utilitaire a11y */
   .sr-only {
     position: absolute; width: 1px; height: 1px;
     padding: 0; margin: -1px; overflow: hidden;
     clip: rect(0,0,0,0); white-space: nowrap; border: 0;
   }
 
-  /* ── Conteneur principal ── */
+  /* ═══════════════ ARÈNE (défaut) — tokens locaux ═══════════════ */
+  .ob {
+    --ob-vio: #7c4dff; --ob-vio-d: #5a2fd6; --ob-vio-l: #a583ff;
+    --ob-or: #ffce4d; --ob-or-d: #f0a500;
+    --ob-night-1: #241a4d; --ob-night-2: #3a2a7a;
+    --ob-ink: #ffffff; --ob-ink-2: #cdc2f5; --ob-ink-3: #9b8fd0;
+    --ob-plate: #2c2059; --ob-plate-2: #34286b;
+    --ob-line: rgba(165,131,255,.22);
+  }
+
+  /* ── Conteneur plein écran ── */
   .ob {
     position: fixed; inset: 0; z-index: 9999;
-    background:
-      radial-gradient(ellipse 90% 60% at 50% 0%, color-mix(in srgb, var(--a) 14%, transparent) 0%, transparent 55%),
-      linear-gradient(180deg, var(--ink) 0%, var(--ink4, #0f1424) 100%);
     display: flex; flex-direction: column;
-    font-family: 'Inter', sans-serif;
-    color: #fff;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    color: var(--ob-ink);
     -webkit-font-smoothing: antialiased;
-    overflow: hidden;
+    background:
+      radial-gradient(120% 70% at 50% -8%, rgba(255,206,77,.16) 0%, rgba(255,206,77,0) 46%),
+      radial-gradient(140% 90% at 50% 0%, #2a1f55 0%, rgba(42,31,85,0) 55%),
+      linear-gradient(180deg, #241a4d 0%, #2c2160 42%, #3a2a7a 100%);
     animation: obFade .3s ease both;
   }
   @keyframes obFade { from { opacity: 0; } to { opacity: 1; } }
 
-  /* ── Orbes lumineux (profondeur) ── */
-  .ob-orb {
-    position: absolute; border-radius: 50%; pointer-events: none;
-    filter: blur(60px); opacity: .35; will-change: transform;
+  /* ── Barre progression + Passer (sticky en haut) ── */
+  .ob-top {
+    flex-shrink: 0; position: relative; z-index: 30;
+    display: flex; align-items: center; gap: 12px;
+    padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px 10px;
   }
-  .ob-orb-a {
-    width: 260px; height: 260px; top: -60px; right: -80px;
-    background: color-mix(in srgb, var(--a) 55%, transparent);
-    animation: obFloatA 11s ease-in-out infinite alternate;
+  .ob-prog {
+    flex: 1; height: 6px; border-radius: 99px;
+    background: rgba(0,0,0,.28); overflow: hidden;
+    box-shadow: 0 1px 0 rgba(255,255,255,.05) inset;
   }
-  .ob-orb-b {
-    width: 220px; height: 220px; bottom: 6%; left: -90px;
-    background: color-mix(in srgb, var(--adk, var(--a)) 45%, transparent);
-    animation: obFloatB 14s ease-in-out infinite alternate;
+  .ob-prog > i {
+    display: block; height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--ob-vio-l), var(--ob-or));
+    box-shadow: 0 0 10px rgba(255,206,77,.55);
+    transition: width .18s ease-out;
   }
-  @keyframes obFloatA { from { transform: translate(0,0) scale(1); } to { transform: translate(-30px,40px) scale(1.15); } }
-  @keyframes obFloatB { from { transform: translate(0,0) scale(1.1); } to { transform: translate(35px,-30px) scale(.95); } }
-  @media (prefers-reduced-motion: reduce) { .ob-orb { animation: none; } }
-
-  /* ── Header dots + skip ── */
-  .ob-head {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 8px;
-    flex-shrink: 0; position: relative; z-index: 1;
-  }
-  .ob-dots { display: flex; align-items: center; gap: 7px; }
-  .ob-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: rgba(255,255,255,.22);
-    transition: background .3s, width .3s;
-    border: 0; padding: 0; cursor: default;
-  }
-  .ob-dot.active { width: 22px; border-radius: 4px; background: var(--a); box-shadow: 0 0 10px color-mix(in srgb, var(--a) 60%, transparent); }
-  .ob-dot.done { background: color-mix(in srgb, var(--a) 45%, transparent); }
   .ob-skip {
-    background: none; border: 0; color: rgba(255,255,255,.55);
-    font: 600 13px/1 'Inter', sans-serif; cursor: pointer;
-    padding: 10px 6px; min-height: 44px;
+    flex-shrink: 0; background: none; border: 0;
+    color: var(--ob-ink-3); cursor: pointer;
+    font: 600 13px/1 'Plus Jakarta Sans', sans-serif;
+    padding: 10px 4px; min-height: 44px;
   }
   .ob-skip:active { color: #fff; }
 
-  /* ── Viewport + track (carrousel) ── */
-  /* touch-action: pan-y → on autorise le scroll vertical natif (slides
-     longues) tout en captant nous-mêmes le geste horizontal du carrousel. */
-  .ob-viewport { flex: 1; overflow: hidden; position: relative; z-index: 1; touch-action: pan-y; }
-  .ob-track {
-    display: flex; height: 100%;
-    transition: transform .42s cubic-bezier(.22,1,.36,1);
+  /* ── Zone scrollable ── */
+  .ob-scroll {
+    flex: 1; min-height: 0;
+    overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    position: relative; z-index: 1;
   }
-  @media (prefers-reduced-motion: reduce) { .ob-track { transition: none; } }
-  .ob-slide {
-    flex: 1 0 0; min-width: 0;
-    display: flex; flex-direction: column;
+  .ob-scroll::-webkit-scrollbar { width: 0; }
+  .ob-content {
+    padding: 6px 22px calc(120px + env(safe-area-inset-bottom, 0px));
+    max-width: 460px; margin: 0 auto;
+  }
+
+  /* ── HERO ── */
+  .ob-hero { text-align: center; padding-top: 6px; }
+  .ob-eyebrow {
+    font: 700 14px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: 2.4px; text-transform: uppercase;
+    color: var(--ob-ink-2); display: inline-block; margin-bottom: 14px;
+  }
+  .ob-eyebrow b { color: var(--ob-or); text-shadow: 0 0 14px rgba(255,206,77,.5); }
+  .ob-mascot-wrap {
+    position: relative; width: 148px; height: 148px;
+    margin: 2px auto 16px; display: flex;
     align-items: center; justify-content: center;
-    text-align: center;
-    padding: 16px 28px;
-    overflow-y: auto;
+  }
+  .ob-mascot-wrap::before {
+    content: ""; position: absolute; inset: -6px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,206,77,.40) 0%, rgba(124,77,255,.30) 42%, rgba(124,77,255,0) 70%);
+    filter: blur(4px);
+  }
+  .ob-mascot {
+    position: relative; width: 138px; height: 138px; object-fit: contain;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.45));
+    animation: obPop .55s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes obPop { 0% { transform: scale(.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .ob-mascot { animation: none; } }
+  .ob-h1 {
+    font: 800 30px/1.1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -.3px; margin: 0 0 12px;
+    text-shadow: 0 2px 10px rgba(0,0,0,.3); outline: none;
+  }
+  .ob-lead {
+    font: 500 15.5px/1.5 'Plus Jakarta Sans', sans-serif;
+    color: var(--ob-ink-2); max-width: 290px; margin: 0 auto;
+  }
+  .ob-lead b { color: #fff; font-weight: 700; }
+
+  /* ── Section générique ── */
+  .ob-section { margin-top: 34px; }
+  .ob-sec-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .ob-sec-num {
+    flex: 0 0 auto; width: 34px; height: 34px; border-radius: 11px;
+    display: grid; place-items: center;
+    font: 800 16px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    color: #1a1233; background: linear-gradient(180deg, #ffe39a, var(--ob-or-d));
+    box-shadow: 0 4px 0 #b87d00, 0 0 0 1px rgba(255,255,255,.5) inset;
+  }
+  .ob-sec-title {
+    margin: 0; font: 700 19px/1.1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: .1px;
   }
 
-  /* ── Halo pulsant ── */
-  .ob-halo {
-    position: relative; display: flex; align-items: center; justify-content: center;
-    width: 100px; height: 100px; margin-bottom: 12px; flex-shrink: 0;
+  /* ── Avatars ── */
+  .ob-av-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+  .ob-av {
+    position: relative; aspect-ratio: 1; border-radius: 20px; cursor: pointer;
+    background: linear-gradient(180deg, var(--ob-plate-2), var(--ob-plate));
+    border: 1px solid var(--ob-line);
+    box-shadow: 0 5px 0 rgba(0,0,0,.30), 0 1px 0 rgba(255,255,255,.07) inset;
+    display: grid; place-items: center; padding: 0;
+    transition: transform .12s, border-color .15s;
   }
-  .ob-halo::before {
-    content: ""; position: absolute; inset: 0; border-radius: 50%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--a) 26%, transparent) 0%, transparent 70%);
+  .ob-av:active { transform: scale(.95); }
+  .ob-av:focus-visible, .ob-color:focus-visible, .ob-switch:focus-visible {
+    outline: 3px solid #fff; outline-offset: 2px;
   }
-  .ob-slide.on .ob-halo::before { animation: obHalo 2.6s ease-in-out infinite; }
-  @keyframes obHalo { 0%, 100% { transform: scale(1); opacity: .8; } 50% { transform: scale(1.18); opacity: 1; } }
-  .ob-emoji {
-    font-size: 64px; line-height: 1; position: relative;
-    filter: drop-shadow(0 10px 22px rgba(0,0,0,.45));
+  .ob-av-img { width: 74%; height: 74%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,.4)); }
+  .ob-av.sel {
+    background: linear-gradient(180deg, #5a3fb0, #3a2a7a);
+    border: 2px solid var(--ob-or);
+    box-shadow: 0 6px 0 rgba(0,0,0,.32), 0 0 0 4px rgba(255,206,77,.18), 0 0 18px rgba(255,206,77,.3);
+    transform: translateY(-2px);
   }
-  .ob-slide.on .ob-emoji { animation: obPop .55s cubic-bezier(.34,1.56,.64,1) both; }
-  @keyframes obPop { 0% { transform: scale(.5) translateY(10px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
-
-  /* ── Cascade d'entrée titre/body ── */
-  .ob-slide .ob-title, .ob-slide .ob-body-txt { opacity: 0; }
-  .ob-slide.on .ob-title { animation: obRise .5s cubic-bezier(.22,1,.36,1) .1s both; }
-  .ob-slide.on .ob-body-txt { animation: obRise .5s cubic-bezier(.22,1,.36,1) .2s both; }
-  .ob-slide.on .ob-badge { animation: obRise .5s cubic-bezier(.22,1,.36,1) .05s both; }
-  @keyframes obRise { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) {
-    .ob-slide.on .ob-emoji, .ob-slide.on .ob-halo::before,
-    .ob-slide.on .ob-title, .ob-slide.on .ob-body-txt, .ob-slide.on .ob-badge { animation: none; }
-    .ob-slide .ob-title, .ob-slide .ob-body-txt { opacity: 1; }
-  }
-
-  .ob-badge {
-    font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
-    letter-spacing: -.01em; color: #fff;
-    margin-bottom: 12px; opacity: .9;
-  }
-  .ob-badge span { color: var(--a); }
-
-  .ob-title {
-    font: 800 26px/1.2 'Plus Jakarta Sans', sans-serif;
-    color: #fff; letter-spacing: -.025em;
-    margin: 0 0 12px; max-width: 18ch;
-    outline: none; /* focus géré par JS, pas par le navigateur */
-  }
-  .ob-title .accent { color: var(--a); }
-  .ob-body-txt {
-    font: 500 15px/1.55 'Inter', sans-serif;
-    color: rgba(255,255,255,.72);
-    margin: 0; max-width: 32ch;
-  }
-
-  /* ── Slide perso (avatar + couleur fusionnés) ── */
-  .ob-slide-perso { justify-content: flex-start; padding-top: 12px; }
-  .ob-slide-perso .ob-halo { width: 80px; height: 80px; margin-bottom: 8px; }
-  .ob-slide-perso .ob-emoji { font-size: 48px; }
-  .ob-perso-label {
-    font: 700 11px/1 'Inter', sans-serif;
-    letter-spacing: .06em; text-transform: uppercase;
-    color: rgba(255,255,255,.5);
-    margin: 14px 0 8px; align-self: flex-start;
-    opacity: 0;
-  }
-  .ob-slide-perso.on .ob-perso-label { animation: obRise .45s cubic-bezier(.22,1,.36,1) .18s both; }
-  @media (prefers-reduced-motion: reduce) { .ob-slide-perso.on .ob-perso-label { animation: none; opacity: 1; } }
-
-  .ob-color-hint { font-size: 13px; margin-bottom: 8px; }
-
-  /* ── Avatar grid (3 colonnes) ── */
-  .ob-av-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-    width: 100%; max-width: 340px;
-  }
-  .ob-av-card {
-    position: relative; aspect-ratio: 1;
-    border-radius: 12px; overflow: hidden; cursor: pointer;
-    border: 2.5px solid transparent;
-    background: rgba(255,255,255,.06);
-    padding: 0; transition: border-color .15s, transform .12s;
-  }
-  .ob-av-card:active { transform: scale(.95); }
-  .ob-av-card:focus-visible, .ob-color-sw:focus-visible {
-    outline: 3px solid #fff;
-    outline-offset: 2px;
-  }
-  .ob-av-card.sel { border-color: var(--a); }
-  .ob-av-img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .ob-av-check {
-    position: absolute; top: 4px; right: 4px;
-    width: 20px; height: 20px; border-radius: 50%;
-    background: var(--a); color: var(--a-ink);
-    font-size: 12px; font-weight: 800;
-    display: flex; align-items: center; justify-content: center;
+    position: absolute; top: -7px; right: -7px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(180deg, #ffe39a, var(--ob-or-d));
+    box-shadow: 0 3px 0 #b87d00, 0 0 0 2px #2c2059;
+    display: grid; place-items: center; color: #1a1233;
     opacity: 0; transform: scale(.5); transition: opacity .15s, transform .15s;
   }
-  .ob-av-card.sel .ob-av-check { opacity: 1; transform: scale(1); }
+  .ob-av-check svg { width: 13px; height: 13px; }
+  .ob-av.sel .ob-av-check { opacity: 1; transform: scale(1); }
+  .ob-helper {
+    font: 500 13px/1.4 'Plus Jakarta Sans', sans-serif;
+    color: var(--ob-ink-3); text-align: center; margin: 14px 0 0;
+  }
 
-  /* ── Palette couleurs (2 rangées de 3) ── */
-  .ob-color-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-    width: 100%; max-width: 340px;
+  /* ── Couleur d'accent (rangée compacte) ── */
+  .ob-color-label {
+    font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ob-ink-3); margin: 22px 0 10px;
   }
-  .ob-color-sw {
-    display: flex; flex-direction: column; align-items: center; gap: 7px;
-    padding: 12px 4px; border-radius: 12px; cursor: pointer;
-    border: 2.5px solid transparent;
-    background: rgba(255,255,255,.06);
-    transition: border-color .15s, transform .12s, background .15s;
+  .ob-color-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+  .ob-color {
+    width: 46px; height: 46px; border-radius: 50%; cursor: pointer; padding: 0;
+    background: transparent; border: 2.5px solid transparent;
+    display: grid; place-items: center;
+    transition: transform .12s, border-color .15s;
   }
-  .ob-color-sw:active { transform: scale(.94); }
-  .ob-color-sw.sel { border-color: #fff; background: rgba(255,255,255,.12); }
+  .ob-color:active { transform: scale(.92); }
+  .ob-color.sel { border-color: #fff; }
   .ob-color-dot {
-    position: relative;
-    width: 36px; height: 36px; border-radius: 50%;
+    width: 34px; height: 34px; border-radius: 50%;
     background: linear-gradient(135deg, var(--sw), var(--sw-dk));
     box-shadow: 0 4px 12px -2px color-mix(in srgb, var(--sw) 65%, transparent),
                 inset 0 2px 4px rgba(255,255,255,.35);
+    position: relative;
   }
-  .ob-color-sw.sel .ob-color-dot::after {
+  .ob-color.sel .ob-color-dot::after {
     content: '✓'; position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    color: #fff; font: 800 17px/1 'Inter', sans-serif;
+    color: #fff; font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
     text-shadow: 0 1px 3px rgba(0,0,0,.45);
   }
-  .ob-color-name {
-    font: 600 10.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.78);
-  }
-  .ob-slide-perso.on .ob-color-sw {
-    animation: obSwIn .45s cubic-bezier(.22,1,.36,1) both;
-  }
-  .ob-slide-perso.on .ob-color-sw:nth-child(1) { animation-delay: .22s; }
-  .ob-slide-perso.on .ob-color-sw:nth-child(2) { animation-delay: .28s; }
-  .ob-slide-perso.on .ob-color-sw:nth-child(3) { animation-delay: .34s; }
-  .ob-slide-perso.on .ob-color-sw:nth-child(4) { animation-delay: .40s; }
-  .ob-slide-perso.on .ob-color-sw:nth-child(5) { animation-delay: .46s; }
-  .ob-slide-perso.on .ob-color-sw:nth-child(6) { animation-delay: .52s; }
-  @keyframes obSwIn {
-    from { opacity: 0; transform: translateY(14px) scale(.9); }
-    to   { opacity: 1; transform: none; }
-  }
-  @media (prefers-reduced-motion: reduce) { .ob-slide-perso.on .ob-color-sw { animation: none; } }
 
-  /* ── Slide notif ── */
-  .ob-halo-bell::before {
-    background: radial-gradient(circle, color-mix(in srgb, var(--a) 32%, transparent) 0%, transparent 70%);
+  /* ── Carte toggle (plaque) ── */
+  .ob-card {
+    background: linear-gradient(180deg, var(--ob-plate-2), var(--ob-plate));
+    border: 1px solid var(--ob-line); border-radius: 22px; padding: 18px;
+    box-shadow: 0 6px 0 rgba(0,0,0,.26), 0 1px 0 rgba(255,255,255,.06) inset;
   }
-  .ob-slide.on .ob-bell {
-    animation: obPop .55s cubic-bezier(.34,1.56,.64,1) both, obRing 2.4s ease-in-out 1s infinite;
-    transform-origin: 50% 8%;
-  }
-  @keyframes obRing {
-    0%, 60%, 100% { rotate: 0deg; }
-    64% { rotate: 12deg; } 68% { rotate: -10deg; }
-    72% { rotate: 7deg; } 76% { rotate: -5deg; } 80% { rotate: 2deg; }
-  }
-  @media (prefers-reduced-motion: reduce) { .ob-slide.on .ob-bell { animation: none; } }
+  .ob-toggle-row { display: flex; align-items: center; gap: 14px; }
+  .ob-toggle-txt { flex: 1; min-width: 0; }
+  .ob-toggle-tt { font: 700 16px/1.2 'Baloo 2', 'Plus Jakarta Sans', sans-serif; margin-bottom: 3px; }
+  .ob-toggle-ts { font: 500 12.5px/1.3 'Plus Jakarta Sans', sans-serif; color: var(--ob-ink-3); }
 
-  /* Tease coffre */
-  .ob-chest-tease {
-    display: flex; align-items: center; gap: 12px;
-    width: 100%; max-width: 340px; margin-top: 16px;
-    padding: 12px 14px; border-radius: 14px;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.12);
-    text-align: left;
-    opacity: 0;
+  .ob-switch {
+    flex: 0 0 auto; width: 62px; height: 36px; border-radius: 99px;
+    padding: 3px; cursor: pointer; position: relative; border: 0;
+    background: linear-gradient(180deg, #5a3fb0, var(--ob-vio-d));
+    box-shadow: 0 3px 8px rgba(124,77,255,.45), 0 1px 0 rgba(255,255,255,.18) inset, 0 -2px 4px rgba(0,0,0,.25) inset;
+    transition: background .2s;
   }
-  .ob-slide-notif.on .ob-chest-tease {
-    animation: obRise .5s cubic-bezier(.22,1,.36,1) .28s both;
+  .ob-knob {
+    position: absolute; top: 3px; left: 29px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(180deg, #fff, #e7e0ff);
+    box-shadow: 0 3px 6px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.9) inset;
+    display: grid; place-items: center; transition: left .2s;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .ob-slide-notif.on .ob-chest-tease { animation: none; opacity: 1; }
+  .ob-knob::after {
+    content: ""; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--ob-or); box-shadow: 0 0 8px var(--ob-or);
   }
-  .ob-chest-ico { font-size: 32px; flex-shrink: 0; }
-  .ob-chest-title { font: 700 14px/1.3 'Inter', sans-serif; color: #fff; }
-  .ob-chest-sub { font: 500 12.5px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.6); margin-top: 2px; }
+  .ob-switch.off { background: linear-gradient(180deg, #3a3060, #241a4d); }
+  .ob-switch.off .ob-knob { left: 3px; }
+  .ob-switch.off .ob-knob::after { background: #6b6090; box-shadow: none; }
 
-  /* Preview notif (cosmétique) */
-  .ob-notif-preview {
-    display: flex; gap: 11px; align-items: center; text-align: left;
-    width: 100%; max-width: 340px; margin-top: 12px;
-    padding: 12px 13px; border-radius: 14px;
-    background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.14);
-    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    opacity: 0;
+  .ob-micro {
+    font: 500 14px/1.5 'Plus Jakarta Sans', sans-serif;
+    color: var(--ob-ink-2); margin: 14px 0 0;
   }
-  .ob-slide-notif.on .ob-notif-preview { animation: obDropIn .6s cubic-bezier(.22,1.4,.36,1) .4s both; }
-  @keyframes obDropIn { from { transform: translateY(-18px) scale(.93); opacity: 0; } to { transform: none; opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { .ob-slide-notif.on .ob-notif-preview { animation: none; opacity: 1; } }
-  .ob-notif-ico { width: 36px; height: 36px; border-radius: 9px; object-fit: contain; flex-shrink: 0; }
-  .ob-notif-txt { min-width: 0; }
-  .ob-notif-app { font: 700 10.5px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: .02em; }
-  .ob-notif-app span { font-weight: 500; text-transform: none; float: right; }
-  .ob-notif-title { font: 700 13.5px/1.35 'Inter', sans-serif; color: #fff; margin-top: 1px; }
-  .ob-notif-body { font: 400 12.5px/1.4 'Inter', sans-serif; color: rgba(255,255,255,.72); }
-  .ob-notif-note {
-    font: 500 12.5px/1.5 'Inter', sans-serif; color: rgba(255,255,255,.5);
-    margin: 10px 0 0; max-width: 30ch;
-    text-align: center;
-  }
-  .ob-slide-notif.granted .ob-notif-preview {
-    border-color: color-mix(in srgb, var(--a) 65%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--a) 30%, transparent);
-  }
-  .ob-slide-notif.granted .ob-notif-note { color: var(--a); font-weight: 700; }
+  .ob-micro b { color: #fff; font-weight: 700; }
 
-  /* ── Sous-step A2HS (hors carrousel) ── */
-  /* [hidden] doit l'emporter : sans ça, le display:flex ci-dessous écrase
-     l'attribut hidden et la slide « Ajoute l'appli » bave sur tout le tour. */
-  .ob-a2hs-wrap[hidden] { display: none !important; }
-  .ob-a2hs-wrap {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 16px 28px; text-align: center;
-    overflow-y: auto; position: relative; z-index: 1;
-    animation: obFade .3s ease both;
+  /* ── Carte récompense ── */
+  .ob-reward {
+    margin-top: 14px; border-radius: 22px; padding: 16px 16px 16px 14px;
+    display: flex; align-items: center; gap: 14px;
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(120% 120% at 0% 0%, rgba(255,206,77,.18) 0%, rgba(255,206,77,0) 50%),
+      linear-gradient(180deg, #3a2c72, #2a1f55);
+    border: 1px solid rgba(255,206,77,.40);
+    box-shadow: 0 6px 0 rgba(0,0,0,.28), 0 0 22px rgba(255,206,77,.12), 0 1px 0 rgba(255,255,255,.07) inset;
   }
-  .ob-a2hs-badge {
-    width: 76px; height: 76px; object-fit: contain; margin-bottom: 16px;
-    filter: drop-shadow(0 10px 22px rgba(16,185,129,.4));
-    animation: obPop .55s cubic-bezier(.34,1.56,.64,1) both;
+  .ob-reward-chest { flex: 0 0 auto; width: 64px; height: 64px; position: relative; }
+  .ob-reward-chest::before {
+    content: ""; position: absolute; inset: -8px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,206,77,.5), rgba(255,206,77,0) 65%);
   }
-  .ob-a2hs-steps { width: 100%; max-width: 340px; text-align: left; margin-top: 16px; }
-  /* Override tokens du composant partagé a2hs-steps sur fond sombre de l'onboarding */
-  .ob-a2hs-wrap .a2s-step {
-    background: rgba(255,255,255,.08);
-    border-color: rgba(255,255,255,.15);
+  .ob-reward-chest img {
+    position: relative; width: 100%; height: 100%; object-fit: contain;
+    filter: drop-shadow(0 5px 8px rgba(0,0,0,.5));
   }
-  .ob-a2hs-wrap .a2s-txt { color: #fff; }
-  .ob-a2hs-wrap .a2s-glyph.share { background: rgba(10,132,255,.22); color: #4da6ff; }
-  .ob-a2hs-wrap .a2s-glyph.plus,
-  .ob-a2hs-wrap .a2s-glyph.dots { background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); border-color: rgba(255,255,255,.2); }
-  .ob-a2hs-wrap .a2s-point { color: rgba(255,255,255,.6); }
+  .ob-reward-body { flex: 1; min-width: 0; }
+  .ob-reward-tag {
+    font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ob-or); margin-bottom: 4px;
+  }
+  .ob-reward-title {
+    font: 700 15px/1.2 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    color: #fff; margin-bottom: 8px;
+  }
+  .ob-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ob-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
+    padding: 5px 11px 5px 8px; border-radius: 99px;
+    background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.10);
+  }
+  .ob-pill-xp { color: var(--ob-vio-l); }
+  .ob-xp-ic {
+    font: 900 10px/1 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(180deg, var(--ob-vio-l), var(--ob-vio));
+    color: #1a1233; border-radius: 6px; padding: 2px 5px;
+  }
+  .ob-pill-vol { color: var(--ob-or); }
+  .ob-pill-vol img { width: 18px; height: 18px; object-fit: contain; }
+
+  /* ── Section 3 : install ── */
+  .ob-install-head { display: flex; align-items: center; gap: 13px; margin-bottom: 6px; }
+  .ob-install-badge {
+    flex: 0 0 auto; width: 56px; height: 56px; border-radius: 16px; object-fit: contain;
+    background: linear-gradient(180deg, var(--ob-plate-2), var(--ob-plate));
+    border: 1px solid var(--ob-line);
+    box-shadow: 0 5px 0 rgba(0,0,0,.28), 0 0 16px rgba(124,77,255,.25), 0 1px 0 rgba(255,255,255,.08) inset;
+    padding: 9px;
+  }
+  .ob-install-lead { font: 500 14px/1.45 'Plus Jakarta Sans', sans-serif; color: var(--ob-ink-2); margin: 0; }
+  .ob-install-lead b { color: #fff; font-weight: 700; }
+  .ob-a2hs-steps { margin-top: 14px; }
+
+  /* Override des tokens du composant a2hs-steps sur le fond Arène sombre */
+  .ob-a2hs-steps .a2s-step {
+    background: linear-gradient(180deg, var(--ob-plate-2), var(--ob-plate));
+    border-color: var(--ob-line);
+    box-shadow: 0 4px 0 rgba(0,0,0,.24), 0 1px 0 rgba(255,255,255,.06) inset;
+  }
+  .ob-a2hs-steps .a2s-txt { color: #fff; }
+  .ob-a2hs-steps .a2s-glyph.share { background: rgba(10,132,255,.22); color: #4da6ff; }
+  .ob-a2hs-steps .a2s-glyph.plus,
+  .ob-a2hs-steps .a2s-glyph.dots { background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); border-color: rgba(255,255,255,.2); }
+  .ob-a2hs-steps .a2s-num { background: var(--ob-or); color: #1a1233; }
+  .ob-a2hs-steps .a2s-point { color: var(--ob-ink-2); }
   .ob-a2hs-install {
-    width: 100%; margin-bottom: 12px; border: 0; border-radius: 12px;
-    background: linear-gradient(135deg, var(--a), var(--adk, var(--a))); color: var(--a-ink);
-    font: 800 15px/1 'Inter', sans-serif; padding: 14px; cursor: pointer;
-    box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--a) 55%, transparent);
+    width: 100%; margin-bottom: 12px; border: 0; border-radius: 14px;
+    background: linear-gradient(180deg, #9a6dff, var(--ob-vio-d)); color: #fff;
+    font: 800 15px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif; padding: 14px; cursor: pointer;
+    box-shadow: 0 5px 0 #4321a8, 0 10px 18px rgba(124,77,255,.4), 0 1px 0 rgba(255,255,255,.4) inset;
   }
-  .ob-a2hs-install:active { transform: translateY(1px); }
+  .ob-a2hs-install:active { transform: translateY(2px); box-shadow: 0 3px 0 #4321a8, 0 6px 12px rgba(124,77,255,.35); }
   .ob-a2hs-install:disabled { opacity: .6; cursor: wait; }
   .ob-plat-switch {
-    margin-top: 12px; background: none; border: 0;
-    color: rgba(255,255,255,.45); font: 500 13px/1 'Inter', sans-serif;
+    margin: 14px auto 0; display: block; background: none; border: 0;
+    color: var(--ob-ink-3); font: 500 13px/1 'Plus Jakarta Sans', sans-serif;
     cursor: pointer; padding: 10px; min-height: 44px;
   }
-  .ob-plat-switch:active { color: rgba(255,255,255,.8); }
+  .ob-plat-switch:active { color: #fff; }
 
-  /* ── Footer CTA ── */
-  .ob-footer {
-    flex-shrink: 0; position: relative; z-index: 1;
-    padding: 12px 24px calc(env(safe-area-inset-bottom, 0px) + 20px);
-    display: flex; flex-direction: column; gap: 4px;
+  /* ── Bouton sticky ── */
+  .ob-dock {
+    flex-shrink: 0; position: relative; z-index: 35;
+    padding: 14px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(58,42,122,0) 0%, #3a2a7a 38%);
   }
   .ob-cta {
-    position: relative; overflow: hidden;
-    width: 100%; padding: 17px;
-    background: linear-gradient(135deg, var(--a), var(--adk, var(--a)));
-    border: 0; border-radius: 18px; color: var(--a-ink);
-    font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
-    cursor: pointer; min-height: 56px;
-    box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--a) 55%, transparent);
-    transition: transform .12s, opacity .15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; min-height: 56px; padding: 17px; cursor: pointer; border: 0;
+    border-radius: 18px; color: #fff; position: relative; overflow: hidden;
+    font: 800 18px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif; letter-spacing: .3px;
+    background: linear-gradient(180deg, #9a6dff 0%, var(--ob-vio) 48%, var(--ob-vio-d) 100%);
+    box-shadow: 0 7px 0 #4321a8, 0 12px 22px rgba(124,77,255,.5),
+                0 1px 0 rgba(255,255,255,.55) inset, 0 -3px 6px rgba(0,0,0,.22) inset;
+    transition: transform .1s, box-shadow .1s, opacity .15s;
   }
   .ob-cta::after {
-    content: ""; position: absolute; top: 0; bottom: 0; width: 46%;
-    left: -60%; transform: skewX(-18deg);
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.26), transparent);
-    animation: obShine 3.4s ease-in-out infinite;
+    content: ""; position: absolute; top: 3px; left: 8%; right: 8%; height: 34%;
+    border-radius: 99px; pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0));
   }
-  @keyframes obShine { 0%, 55% { left: -60%; } 85%, 100% { left: 130%; } }
-  @media (prefers-reduced-motion: reduce) { .ob-cta::after { animation: none; display: none; } }
-  .ob-cta:active:not(:disabled) { transform: scale(.98); }
-  .ob-cta:disabled { opacity: .55; cursor: default; }
-  .ob-later {
-    background: none; border: 0; color: rgba(255,255,255,.5);
-    font: 600 14px/1 'Inter', sans-serif; cursor: pointer;
-    padding: 12px; min-height: 44px;
+  .ob-cta:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 3px 0 #4321a8, 0 6px 14px rgba(124,77,255,.45), 0 1px 0 rgba(255,255,255,.5) inset;
   }
-  .ob-later:active { color: #fff; }
+  .ob-cta:disabled { opacity: .6; cursor: default; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     CLAIR PREMIUM — uniquement quand le thème global est clair.
+     ═══════════════════════════════════════════════════════════════ */
+  html[data-theme="light"] .ob {
+    --ob-violet: #7c4dff; --ob-violet-d: #5a2fd6; --ob-violet-l: #a583ff;
+    --ob-or-l: #f5b400;
+    --c-ink: #1d1b2e; --c-ink-2: #4a4761; --c-ink-3: #8b88a3;
+    --c-bg: #ffffff; --c-line: #ece8f7; --c-lav: #f0ebff; --c-lav-2: #e7deff;
+    --c-shadow-card: 0 1px 2px rgba(29,27,46,.04), 0 8px 24px rgba(90,47,214,.06);
+    --c-shadow-soft: 0 2px 8px rgba(29,27,46,.05);
+    color: var(--c-ink);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background: linear-gradient(180deg, #f7f5fd 0%, #ffffff 38%);
+  }
+
+  /* Top bar */
+  html[data-theme="light"] .ob-top {
+    background: linear-gradient(180deg, rgba(247,245,253,.97) 60%, rgba(247,245,253,0));
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  html[data-theme="light"] .ob-prog { background: var(--c-lav-2); height: 5px; }
+  html[data-theme="light"] .ob-prog > i {
+    background: linear-gradient(90deg, var(--ob-violet), var(--ob-violet-l));
+    box-shadow: 0 0 8px rgba(124,77,255,.5);
+  }
+  html[data-theme="light"] .ob-skip { color: var(--c-ink-3); }
+  html[data-theme="light"] .ob-skip:active { color: var(--c-ink); }
+
+  /* Hero */
+  html[data-theme="light"] .ob-eyebrow { color: var(--c-ink-3); text-shadow: none; }
+  html[data-theme="light"] .ob-eyebrow b { color: var(--ob-violet); text-shadow: none; }
+  html[data-theme="light"] .ob-mascot-wrap::before {
+    background: radial-gradient(circle, rgba(165,131,255,.30) 0%, rgba(240,235,255,0) 68%);
+    filter: none; inset: -2px;
+  }
+  html[data-theme="light"] .ob-mascot { filter: drop-shadow(0 14px 24px rgba(124,77,255,.22)); }
+  html[data-theme="light"] .ob-h1 { color: var(--c-ink); text-shadow: none; letter-spacing: -.02em; }
+  html[data-theme="light"] .ob-lead { color: var(--c-ink-2); }
+  html[data-theme="light"] .ob-lead b { color: var(--c-ink); font-weight: 600; }
+
+  /* Section heads */
+  html[data-theme="light"] .ob-sec-num {
+    width: 30px; height: 30px; border-radius: 10px; color: #fff;
+    background: linear-gradient(135deg, var(--ob-violet), var(--ob-violet-d));
+    box-shadow: 0 4px 10px rgba(124,77,255,.32); font-size: 15px;
+  }
+  html[data-theme="light"] .ob-sec-title { color: var(--c-ink); font-size: 18.5px; letter-spacing: -.01em; }
+
+  /* Avatars */
+  html[data-theme="light"] .ob-av {
+    background: var(--c-bg); border: 2px solid var(--c-line);
+    box-shadow: var(--c-shadow-soft);
+  }
+  html[data-theme="light"] .ob-av.sel {
+    background: var(--c-lav); border: 2px solid var(--ob-violet);
+    box-shadow: 0 0 0 4px rgba(124,77,255,.16), 0 6px 16px rgba(124,77,255,.2);
+    transform: none;
+  }
+  html[data-theme="light"] .ob-av-img { filter: none; }
+  html[data-theme="light"] .ob-av-check {
+    top: 7px; right: 7px; width: 21px; height: 21px;
+    background: var(--ob-violet); color: #fff;
+    box-shadow: 0 2px 6px rgba(124,77,255,.45);
+  }
+  html[data-theme="light"] .ob-helper { color: var(--c-ink-3); }
+  html[data-theme="light"] .ob-color-label { color: var(--c-ink-3); }
+  html[data-theme="light"] .ob-color.sel { border-color: var(--ob-violet); }
+  html[data-theme="light"] .ob-av:focus-visible,
+  html[data-theme="light"] .ob-color:focus-visible,
+  html[data-theme="light"] .ob-switch:focus-visible {
+    outline: 3px solid var(--ob-violet);
+  }
+
+  /* Carte toggle */
+  html[data-theme="light"] .ob-card {
+    background: var(--c-bg); border: 1px solid var(--c-line);
+    border-radius: 26px; box-shadow: var(--c-shadow-card);
+  }
+  html[data-theme="light"] .ob-toggle-tt { color: var(--c-ink); }
+  html[data-theme="light"] .ob-toggle-ts { color: var(--c-ink-3); }
+  html[data-theme="light"] .ob-switch {
+    width: 58px; height: 34px;
+    background: linear-gradient(135deg, var(--ob-violet), var(--ob-violet-d));
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.18), 0 2px 8px rgba(124,77,255,.3);
+  }
+  html[data-theme="light"] .ob-knob {
+    left: 27px; width: 28px; height: 28px;
+    background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,.25);
+  }
+  html[data-theme="light"] .ob-knob::after { display: none; }
+  html[data-theme="light"] .ob-switch.off { background: #cfc7e6; }
+  html[data-theme="light"] .ob-switch.off .ob-knob { left: 3px; }
+  html[data-theme="light"] .ob-micro {
+    color: var(--c-ink-2); padding-top: 14px; margin-top: 14px;
+    border-top: 1px solid var(--c-line);
+  }
+  html[data-theme="light"] .ob-micro b { color: var(--ob-violet-d); font-weight: 600; }
+
+  /* Carte récompense */
+  html[data-theme="light"] .ob-reward {
+    border-radius: 26px;
+    background:
+      radial-gradient(120% 100% at 100% 0%, rgba(255,206,77,.16), transparent 60%),
+      linear-gradient(135deg, #fbf8ff, #f1ecff);
+    border: 1px solid var(--c-lav-2); box-shadow: var(--c-shadow-card);
+  }
+  html[data-theme="light"] .ob-reward-chest { width: 62px; height: 62px; }
+  html[data-theme="light"] .ob-reward-chest::before { display: none; }
+  html[data-theme="light"] .ob-reward-chest img { filter: drop-shadow(0 6px 12px rgba(245,180,0,.32)); }
+  html[data-theme="light"] .ob-reward-tag { color: var(--ob-or-l); }
+  html[data-theme="light"] .ob-reward-title { color: var(--c-ink); }
+  html[data-theme="light"] .ob-pill {
+    background: #fff; border: 1px solid var(--c-line); color: var(--c-ink);
+    box-shadow: var(--c-shadow-soft);
+  }
+  html[data-theme="light"] .ob-pill-xp { color: var(--ob-violet-d); }
+  html[data-theme="light"] .ob-xp-ic {
+    background: linear-gradient(135deg, var(--ob-violet), var(--ob-violet-l));
+    color: #fff; border-radius: 5px;
+  }
+  html[data-theme="light"] .ob-pill-vol { color: var(--c-ink); }
+
+  /* Section install */
+  html[data-theme="light"] .ob-install-head {
+    background: var(--c-bg); border: 1px solid var(--c-line);
+    border-radius: 20px; padding: 14px; box-shadow: var(--c-shadow-soft);
+    margin-bottom: 14px;
+  }
+  html[data-theme="light"] .ob-install-badge {
+    width: 50px; height: 50px; border-radius: 13px; border: 0; padding: 0;
+    background: none; box-shadow: 0 4px 12px rgba(124,77,255,.22);
+  }
+  html[data-theme="light"] .ob-install-lead { color: var(--c-ink-2); }
+  html[data-theme="light"] .ob-install-lead b { color: var(--c-ink); font-weight: 600; }
+  html[data-theme="light"] .ob-a2hs-steps .a2s-step {
+    background: var(--c-bg); border: 1px solid var(--c-line);
+    border-radius: 20px; box-shadow: var(--c-shadow-soft);
+  }
+  html[data-theme="light"] .ob-a2hs-steps .a2s-txt { color: var(--c-ink); }
+  html[data-theme="light"] .ob-a2hs-steps .a2s-glyph.share { background: #eaf2ff; color: #0a84ff; }
+  html[data-theme="light"] .ob-a2hs-steps .a2s-glyph.plus,
+  html[data-theme="light"] .ob-a2hs-steps .a2s-glyph.dots {
+    background: var(--c-lav); color: var(--ob-violet-d); border: 1px solid var(--c-line);
+  }
+  html[data-theme="light"] .ob-a2hs-steps .a2s-num { background: var(--ob-violet); color: #fff; }
+  html[data-theme="light"] .ob-a2hs-steps .a2s-point { color: var(--ob-violet); }
+  html[data-theme="light"] .ob-a2hs-install {
+    background: linear-gradient(135deg, var(--ob-violet), var(--ob-violet-d)); color: #fff;
+    box-shadow: 0 6px 18px rgba(124,77,255,.34), 0 2px 4px rgba(124,77,255,.2);
+  }
+  html[data-theme="light"] .ob-a2hs-install:active {
+    transform: translateY(1px);
+    box-shadow: 0 3px 10px rgba(124,77,255,.3);
+  }
+  html[data-theme="light"] .ob-plat-switch { color: var(--c-ink-3); }
+  html[data-theme="light"] .ob-plat-switch:active { color: var(--c-ink); }
+
+  /* Dock + bouton */
+  html[data-theme="light"] .ob-dock {
+    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.95) 32%, #fff 60%);
+  }
+  html[data-theme="light"] .ob-cta {
+    background: linear-gradient(135deg, var(--ob-violet), var(--ob-violet-d));
+    box-shadow: 0 6px 18px rgba(124,77,255,.34), 0 2px 4px rgba(124,77,255,.2);
+    border-radius: 18px;
+  }
+  html[data-theme="light"] .ob-cta::after { display: none; }
+  html[data-theme="light"] .ob-cta:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 3px 12px rgba(124,77,255,.3);
+  }
 </style>`;

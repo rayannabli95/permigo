@@ -43,11 +43,16 @@ async function poll() {
 
   try {
     // IMPORTANT: user_id dans notifications = profiles.id (pas auth.users.id)
+    // On NE récupère QUE les types que ce listener consomme (auto-lancement de
+    // quiz). Sinon on marquait `read` toute notif non-lue (comp_acquise,
+    // relance, session_confirmation…) avant que l'élève la voie → la cloche
+    // n'alertait jamais pour ces types.
     const { data, error } = await sb
       .from("notifications")
       .select("id, type, data")
       .eq("user_id", me.id)
       .eq("read", false)
+      .in("type", ["post_validation_quiz", "consolidation_quiz"])
       .order("created_at", { ascending: true })
       .limit(5);
 

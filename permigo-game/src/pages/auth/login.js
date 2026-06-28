@@ -358,6 +358,9 @@ function template() {
           }
 
           <p class="lg-foot">
+            Pas encore de compte ? <a href="/#/creer-compte">Crée ton compte moniteur</a>
+          </p>
+          <p class="lg-foot">
             Élève avec un code moniteur ? <a href="/#/rejoindre">Rejoins ton moniteur</a>
           </p>
         </form>
