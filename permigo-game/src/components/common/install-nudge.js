@@ -33,14 +33,14 @@ const VM_SNOOZE_MS = 24 * 60 * 60 * 1000; // 1 prompt valeur / 24 h max
 const STYLE = `<style id="inn-style">
 ${A2HS_STYLE}
 .inn-bg {
-  position: fixed; inset: 0; z-index: 240;
+  position: fixed; inset: 0; z-index: 319;
   background: rgba(11,13,26,.45);
   backdrop-filter: blur(3px);
   opacity: 0; transition: opacity .28s ease;
 }
 .inn-bg.on { opacity: 1; }
 .inn {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 241;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 320;
   max-width: 480px; margin: 0 auto;
   background: var(--su); color: var(--ink);
   border-radius: 22px 22px 0 0;
