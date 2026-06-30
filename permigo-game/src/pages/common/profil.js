@@ -1256,7 +1256,7 @@ function _wireReferral(root, me) {
     applyBtn.disabled = true;
     applyBtn.textContent = "…";
     try {
-      const { data, error } = await sb.rpc("apply_referral", { code });
+      const { data, error } = await sb.rpc("apply_referral", { p_code: code });
       const { toast } = await import("@/components/common/toast.js");
       if (error || data?.error) {
         toast(data?.error || "Code invalide ou déjà utilisé", "error");
