@@ -658,7 +658,7 @@ export async function mount(root) {
   } catch (e) {
     console.error("[pulse]", e);
     toast("Erreur de chargement", "error");
-    root.innerHTML = `${STYLE}<div class="pulse"><p style="padding:32px;color:var(--rd)">Erreur de chargement du dashboard.</p></div>`;
+    root.innerHTML = `${STYLE}<div class="pulse"><p style="padding:32px;color:var(--rd)">Erreur de chargement du tableau de bord.</p></div>`;
   }
 }
 
