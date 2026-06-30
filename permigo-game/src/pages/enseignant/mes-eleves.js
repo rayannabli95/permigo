@@ -504,11 +504,24 @@ export async function mount(root) {
 async function loadData() {
   // 1. Tous les élèves de mon auto-école (RLS multi-moniteurs : on voit tout le monde)
   //    Côté frontend on marquera ensuite les "attitrés" (enseignant_id = me.id)
-  const { data: elevesRaw, error: e1 } = await sb
-    .from("profiles")
-    .select("id, prenom, nom, enseignant_id, last_active_at, avatar_url")
-    .eq("role", "eleve")
-    .order("prenom");
+  // Les 3 requêtes (élèves / validations / examens) sont indépendantes →
+  // en parallèle (Promise.all) : le chargement = la plus lente, pas la somme.
+  const [elevesRes, valsRes, examsRes] = await Promise.all([
+    sb
+      .from("profiles")
+      .select("id, prenom, nom, enseignant_id, last_active_at, avatar_url")
+      .eq("role", "eleve")
+      .order("prenom"),
+    sb
+      .from("validations")
+      .select("eleve_id, competence_id, validated_at")
+      .eq("statut", "acquis"),
+    sb
+      .from("examens")
+      .select("eleve_id, statut, date_examen, created_at")
+      .order("created_at", { ascending: false }),
+  ]);
+  const { data: elevesRaw, error: e1 } = elevesRes;
 
   if (e1) {
     console.error("[mes-eleves] query error", e1);
@@ -542,10 +555,7 @@ async function loadData() {
   //    La barre "X/31" doit refléter l'avancement permis de l'élève, pas la
   //    seule contribution du moniteur courant (sinon 0/31 trompeur pour un
   //    élève suivi par un collègue). RLS partage déjà les validations école.
-  const { data: valsRaw, error: e2 } = await sb
-    .from("validations")
-    .select("eleve_id, competence_id, validated_at")
-    .eq("statut", "acquis");
+  const { data: valsRaw, error: e2 } = valsRes;
 
   if (e2) console.error("[mes-eleves] validations query error", e2);
 
@@ -569,10 +579,7 @@ async function loadData() {
   });
 
   // 3. Dernier examen par élève (le plus récent fait foi).
-  const { data: examsRaw, error: e3 } = await sb
-    .from("examens")
-    .select("eleve_id, statut, date_examen, created_at")
-    .order("created_at", { ascending: false });
+  const { data: examsRaw, error: e3 } = examsRes;
 
   if (e3) console.error("[mes-eleves] examens query error", e3);
 
