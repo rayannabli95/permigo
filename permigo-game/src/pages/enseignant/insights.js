@@ -709,7 +709,7 @@ async function loadData(me) {
     recos.push({
       icon: icon("target", { size: 18, strokeWidth: 2, color: "#4f46e5" }),
       ttl: "Lance ta semaine",
-      txt: "Valide une compétence avec un élève actif pour alimenter ton streak.",
+      txt: "Valide une compétence avec un élève actif pour alimenter ta série.",
       route: "#/log-session",
     });
   }

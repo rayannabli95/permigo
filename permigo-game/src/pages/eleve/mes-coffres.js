@@ -4,7 +4,7 @@
 // Liste tous les coffres DB (get_my_chests) :
 //   - À ouvrir (unlocked, opened_at IS NULL)
 //   - Déjà ouverts
-//   - Prochains jalons (streak / mondes)
+//   - Prochains jalons (série / mondes)
 // ═══════════════════════════════════════════════════════════════
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
@@ -53,7 +53,7 @@ const CHEST_META = {
     gemmes: 300,
   },
   streak_7: {
-    label: "Streak 7 jours",
+    label: "Série 7 jours",
     image: "/skins/chests/chest_streak_7.png",
     ico: "flame",
     tier: "argent",
@@ -61,7 +61,7 @@ const CHEST_META = {
     gemmes: 30,
   },
   streak_14: {
-    label: "Streak 14 jours",
+    label: "Série 14 jours",
     image: "/skins/chests/chest_streak_14.png",
     ico: "zap",
     tier: "or",
@@ -69,7 +69,7 @@ const CHEST_META = {
     gemmes: 80,
   },
   streak_30: {
-    label: "Streak 30 jours",
+    label: "Série 30 jours",
     image: "/skins/chests/chest_streak_30.png",
     ico: "crown",
     tier: "legendaire",
@@ -398,7 +398,7 @@ export async function mount(root) {
     html = loadFailed
       ? `<div class="mc-empty"><div class="mc-empty-ico">${icon("alert-circle", { size: 30 })}</div>Impossible de charger tes coffres.<br>
          <button class="mc-open-btn" id="mc-retry" style="margin-top:12px">Réessayer</button></div>`
-      : `<div class="mc-empty"><div class="mc-empty-ico">${icon("package", { size: 32, strokeWidth: 1.5 })}</div>Aucun coffre encore — complète des mondes<br>et construis ton streak !</div>`;
+      : `<div class="mc-empty"><div class="mc-empty-ico">${icon("package", { size: 32, strokeWidth: 1.5 })}</div>Aucun coffre encore — complète des mondes<br>et construis ta série !</div>`;
   }
 
   // Replace skeleton with real content

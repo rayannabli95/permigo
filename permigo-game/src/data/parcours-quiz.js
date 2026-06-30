@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// Données statiques — 5 parcours × 15 questions
+// Données statiques — 12 parcours (~196 questions au total)
 // Pas de Supabase. Modifiable sans migration.
 // Ton : tutoiement simple, une idée par question (anti « trauma
 // code de la route ») — réécriture 2026-06-12, sens et réponses

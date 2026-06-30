@@ -305,7 +305,7 @@ function template() {
             <label for="lg-email">Email</label>
             <div class="lg-shell">
               <span class="lg-ico" aria-hidden="true">${ICON_MAIL}</span>
-              <input id="lg-email" type="email" name="email" inputmode="email" required autocomplete="email" placeholder="vous@exemple.fr">
+              <input id="lg-email" type="email" name="email" inputmode="email" required autocomplete="email" placeholder="toi@exemple.fr">
             </div>
           </div>
 
