@@ -24,13 +24,13 @@ const SHOW_DELAY_MS = 1200;
 
 const STYLE = `<style id="ppr-style">
 .ppr-bg {
-  position: fixed; inset: 0; z-index: 240;
+  position: fixed; inset: 0; z-index: 319;
   background: rgba(11,13,26,.45); backdrop-filter: blur(3px);
   opacity: 0; transition: opacity .28s ease;
 }
 .ppr-bg.on { opacity: 1; }
 .ppr {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 241;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 320;
   max-width: 480px; margin: 0 auto;
   background: var(--su); color: var(--ink);
   border-radius: 22px 22px 0 0; border-top: 1px solid var(--bo);

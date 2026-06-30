@@ -188,7 +188,7 @@ const STYLE = `<style>
 
 /* ── Modal agrandissement trophée ── */
 .gal-modal-bg {
-  position: fixed; inset: 0; z-index: 200;
+  position: fixed; inset: 0; z-index: 320;
   display: flex; align-items: center; justify-content: center;
   padding: calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px);
   background: rgba(11,13,26,.62);
