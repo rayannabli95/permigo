@@ -8,10 +8,10 @@
 //   import { emotionalBanner } from '@/components/eleve/emotional-banner.js';
 //   await emotionalBanner.checkAndRender(root);
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { track } from '@/services/analytics.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
 
 // ─── Styles ──────────────────────────────────────────────────────
 const STYLES = `
@@ -59,12 +59,14 @@ const STYLES = `
 /* ── Content ── */
 .eb-title {
   font: 700 15px/1.3 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
+  /* Fonds pastel clairs codés en dur → texte fixe sombre (sinon var(--ink)
+     passe en quasi-blanc en thème sombre = titre illisible sur pastel clair). */
+  color: #1a1d2e;
   margin-bottom: 3px;
 }
 .eb-body {
   font: 500 13px/1.4 'Inter', sans-serif;
-  color: var(--ink5);
+  color: #4b5563;
   margin-bottom: 10px;
 }
 .eb-cta {
@@ -125,22 +127,26 @@ let _stylesInjected = false;
 function ensureBannerStyles() {
   if (_stylesInjected) return;
   _stylesInjected = true;
-  const el = document.createElement('style');
+  const el = document.createElement("style");
   el.textContent = STYLES;
   document.head.appendChild(el);
 }
 
 async function markRead(notifId) {
-  try { await sb.rpc('mark_notif_read', { p_notif_id: notifId }); } catch (e) { /* silent */ }
+  try {
+    await sb.rpc("mark_notif_read", { p_notif_id: notifId });
+  } catch (e) {
+    /* silent */
+  }
 }
 
 function renderBanner(notif, content) {
-  const tone = content.tone || 'gentle';
+  const tone = content.tone || "gentle";
   return `
 <div class="eb-banner eb-${esc(tone)}" role="alert" aria-live="polite" data-notif-id="${esc(notif.id)}">
   <div class="eb-title">${esc(content.title)}</div>
   <div class="eb-body">${esc(content.body)}</div>
-  ${content.cta ? `<a class="eb-cta" href="${esc(content.route || '#')}" data-cta="1">${esc(content.cta)}</a>` : ''}
+  ${content.cta ? `<a class="eb-cta" href="${esc(content.route || "#")}" data-cta="1">${esc(content.cta)}</a>` : ""}
   <button class="eb-close" aria-label="Fermer" data-close="1">✕</button>
   <div class="eb-progress" aria-hidden="true"></div>
 </div>`;
@@ -159,12 +165,12 @@ export const emotionalBanner = {
 
     try {
       const { data, error } = await sb
-        .from('notifications')
-        .select('id, data')
-        .eq('user_id', me.id)
-        .like('type', 'emotional_%')
-        .is('read_at', null)
-        .order('created_at', { ascending: false })
+        .from("notifications")
+        .select("id, data")
+        .eq("user_id", me.id)
+        .like("type", "emotional_%")
+        .is("read_at", null)
+        .order("created_at", { ascending: false })
         .limit(1);
 
       if (error || !data?.length) return;
@@ -176,53 +182,63 @@ export const emotionalBanner = {
 
       ensureBannerStyles();
 
-      const div = document.createElement('div');
+      const div = document.createElement("div");
       div.innerHTML = renderBanner(notif, content);
       const el = div.firstElementChild;
 
       // afterSelector → insert right after the matched element
       if (afterSelector) {
         const anchor = root.querySelector(afterSelector);
-        if (anchor?.parentNode) { anchor.parentNode.insertBefore(el, anchor.nextSibling); }
-        else root.appendChild(el);
+        if (anchor?.parentNode) {
+          anchor.parentNode.insertBefore(el, anchor.nextSibling);
+        } else root.appendChild(el);
       } else {
         // containerSelector → insertBefore firstChild; fallback to common containers then root
-        const container = (containerSelector && root.querySelector(containerSelector))
-          || root.querySelector('.acc2')
-          || root.querySelector('.acc')
-          || root;
+        const container =
+          (containerSelector && root.querySelector(containerSelector)) ||
+          root.querySelector(".acc2") ||
+          root.querySelector(".acc") ||
+          root;
         container.insertBefore(el, container.firstChild);
       }
 
-      track('emotional_banner.shown', { template_id: content.template_id, tone: content.tone });
+      track("emotional_banner.shown", {
+        template_id: content.template_id,
+        tone: content.tone,
+      });
 
       // Fermer + mark read
       const close = async () => {
-        el.style.transition = 'opacity 200ms, transform 200ms';
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(-8px)';
+        el.style.transition = "opacity 200ms, transform 200ms";
+        el.style.opacity = "0";
+        el.style.transform = "translateY(-8px)";
         setTimeout(() => el.remove(), 220);
         await markRead(notif.id);
       };
 
       // CTA click
-      el.querySelector('[data-cta="1"]')?.addEventListener('click', () => {
-        track('emotional_banner.cta_clicked', { template_id: content.template_id });
+      el.querySelector('[data-cta="1"]')?.addEventListener("click", () => {
+        track("emotional_banner.cta_clicked", {
+          template_id: content.template_id,
+        });
         close();
       });
 
       // Close button
-      el.querySelector('[data-close="1"]')?.addEventListener('click', () => {
-        track('emotional_banner.dismissed', { template_id: content.template_id });
+      el.querySelector('[data-close="1"]')?.addEventListener("click", () => {
+        track("emotional_banner.dismissed", {
+          template_id: content.template_id,
+        });
         close();
       });
 
       // Auto-dismiss après 12s
       const autoDismiss = setTimeout(() => close(), 12_000);
-      el.addEventListener('click', () => clearTimeout(autoDismiss), { once: true });
-
+      el.addEventListener("click", () => clearTimeout(autoDismiss), {
+        once: true,
+      });
     } catch (e) {
-      console.warn('[emotional-banner] checkAndRender failed', e?.message);
+      console.warn("[emotional-banner] checkAndRender failed", e?.message);
     }
   },
 };
