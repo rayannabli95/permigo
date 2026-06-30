@@ -784,7 +784,7 @@ function wire(root, me, prefs) {
     applyTheme(mode);
     track("settings.theme_changed", { theme: mode });
     try {
-      await sb.rpc("set_my_preferences", { theme: mode });
+      await sb.rpc("set_my_preferences", { p_data: { theme: mode } });
     } catch (e) {
       console.error("[settings] theme save", e);
     }
@@ -851,7 +851,7 @@ function wire(root, me, prefs) {
       const val = e.target.checked;
       try {
         const { error } = await sb.rpc("set_my_preferences", {
-          marketing_optin: val,
+          p_data: { marketing_optin: val },
         });
         if (error) {
           toast("Erreur de sauvegarde", "error");
