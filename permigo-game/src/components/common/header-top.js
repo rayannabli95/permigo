@@ -20,7 +20,9 @@ const STYLE = `
     top: 0; left: 0; right: 0;
     height: calc(52px + env(safe-area-inset-top, 0px));
     padding-top: env(safe-area-inset-top, 0px);
-    background: rgba(255,255,255,.92);
+    /* theme-aware : --su suit le thème, y compris en mode "auto" sur OS sombre
+       (où [data-theme="dark"] est absent). Clair=#fff, sombre=#181b30 → rendu identique. */
+    background: color-mix(in srgb, var(--su) 92%, transparent);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--bo);
