@@ -29,10 +29,44 @@ function coolGrade(jours) {
   return { cls: "warn", label: "Refroidit", c: "#d97706" };
 }
 
-// Message pré-écrit — cadré VALIDATION (révision / prochaine validation),
+// Messages pré-écrits — cadrés VALIDATION (révision / prochaine validation),
 // jamais de créneau ni de date de leçon (charte : pas de planning).
-function defaultMessage(prenom, jours) {
-  return `Salut ${prenom} ! Ça fait ${jours} jours qu'on s'est pas vus sur PermiGo. Reprends une petite session de révision pour garder ton avance — chaque quiz te rapproche de ta prochaine validation. 🚗`;
+// Variés par palier de refroidissement + variante STABLE par élève (sinon
+// tous les élèves reçoivent le même texte mot pour mot = effet robot, à
+// l'encontre du « le message part de toi, pas d'un robot »).
+const MESSAGES = {
+  // 14-20 j : reprise douce
+  warn: [
+    (p, j) =>
+      `Salut ${p} ! Ça fait ${j} jours qu'on s'est pas vus sur PermiGo. Une petite session de révision et tu gardes ton avance — chaque quiz te rapproche de ta prochaine validation. 🚗`,
+    (p, j) =>
+      `Hello ${p} ! ${j} jours sans réviser, ça se rattrape vite : 5 minutes de quiz et t'es relancé. Ta prochaine validation n'attend que toi. 💪`,
+  ],
+  // 21-29 j : plus direct
+  cold: [
+    (p, j) =>
+      `${p}, ça fait ${j} jours — tes acquis commencent à refroidir. Reprends une session de révision cette semaine, on revalide ça ensemble. 🚗`,
+    (p, j) =>
+      `Salut ${p} ! ${j} jours déjà… Ce que tu as validé mérite d'être entretenu. Un quiz rapide et la machine repart. 🔧`,
+  ],
+  // ≥ 30 j : réengagement empathique
+  icy: [
+    (p, j) =>
+      `Salut ${p}, ça fait un moment (${j} jours) ! Pas de souci, on reprend là où tu t'es arrêté — commence par un petit quiz, le reste suivra. 🚗`,
+    (p, j) =>
+      `${p}, ton permis n'a pas bougé, il t'attend. ${j} jours de pause, ça arrive — 5 minutes de révision et tu reprends le fil. Je suis là si tu bloques. 👊`,
+  ],
+};
+
+function defaultMessage(prenom, jours, eleveId = "") {
+  const grade = jours >= 30 ? "icy" : jours >= 21 ? "cold" : "warn";
+  const pool = MESSAGES[grade];
+  // Variante stable par élève (déterministe : pas de texte qui change à
+  // chaque rendu) — simple somme des codes du visible de l'id.
+  let h = 0;
+  for (let i = 0; i < eleveId.length; i++)
+    h = (h + eleveId.charCodeAt(i)) % 997;
+  return pool[h % pool.length](prenom, jours);
 }
 
 const STYLE = `<style>
@@ -181,9 +215,9 @@ function render() {
 function renderCard(e) {
   const g = coolGrade(e.jours);
   const nm = esc(fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "—");
-  // Gauge : 7 j = ~35%, 30 j = 100%
-  const pct = Math.min(100, Math.round(35 + ((e.jours - 7) / 23) * 65));
-  const msg = defaultMessage(fmtName(e.prenom) || "toi", e.jours);
+  // Gauge : 14 j (seuil) = ~35%, 30 j = 100%
+  const pct = Math.min(100, Math.round(35 + ((e.jours - 14) / 16) * 65));
+  const msg = defaultMessage(fmtName(e.prenom) || "toi", e.jours, e.id);
   return `
     <div class="rl-card" data-eleve-id="${esc(e.id)}">
       <div class="rl-card-top">
