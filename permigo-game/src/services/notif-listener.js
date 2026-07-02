@@ -23,12 +23,32 @@ export function startNotifListener() {
     console.log(`[notif-listener] starting, user=${me?.id ?? "none"}`);
   poll();
   _intervalId = setInterval(poll, POLL_INTERVAL);
+  _wireVisibility();
 }
 
 export function stopNotifListener() {
   import.meta.env.DEV && console.log("[notif-listener] stopping");
   clearInterval(_intervalId);
   _intervalId = null;
+}
+
+// Pause le polling quand l'app passe en arrière-plan (batterie/réseau),
+// reprend immédiatement au retour au premier plan.
+let _visWired = false;
+function _wireVisibility() {
+  if (_visWired) return;
+  _visWired = true;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (_intervalId) {
+        clearInterval(_intervalId);
+        _intervalId = null;
+      }
+    } else if (!_intervalId && getCurUser()) {
+      poll();
+      _intervalId = setInterval(poll, POLL_INTERVAL);
+    }
+  });
 }
 
 // ─── Polling ─────────────────────────────────────────────────────

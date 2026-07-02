@@ -80,7 +80,12 @@ async function flush() {
     // RLS 42501 → on drop (event obsolète, replay aurait le même résultat)
     // Réseau / 5xx → on retente (cap 50 pour éviter la boucle infinie)
     const isRls = error.code === "42501";
-    if (!isRls && queue.length < 50) queue.unshift(...batch);
+    // Re-empile ET replanifie un flush — sinon les events re-empilés
+    // dormaient jusqu'au prochain track() (jamais garanti).
+    if (!isRls && queue.length < 50) {
+      queue.unshift(...batch);
+      schedule();
+    }
   }
 }
 
