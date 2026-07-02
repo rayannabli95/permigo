@@ -68,7 +68,10 @@ function renderThreadList(root, me, threads) {
       ${emptyState({
         image: "/skins/empty-states/empty_messages.png",
         title: "Aucun message",
-        body: "Lance la conversation avec ton moniteur ou ta classe.",
+        body:
+          me?.role === "eleve"
+            ? "Lance la conversation avec ton moniteur."
+            : "Tes conversations avec tes élèves apparaîtront ici.",
       })}
     `;
     return;

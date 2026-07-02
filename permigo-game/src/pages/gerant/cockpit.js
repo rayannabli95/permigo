@@ -476,17 +476,17 @@ async function loadFallback(root, me) {
   try {
     const { data: profile } = await sb
       .from("profiles")
-      .select("ecole_id")
+      .select("auto_ecole_id")
       .eq("id", me.id)
       .maybeSingle();
-    const ecoleId = profile?.ecole_id;
+    const ecoleId = profile?.auto_ecole_id;
 
     const [elevesRes, valsRes] = await Promise.allSettled([
       ecoleId
         ? sb
             .from("profiles")
             .select("id", { count: "exact", head: true })
-            .eq("ecole_id", ecoleId)
+            .eq("auto_ecole_id", ecoleId)
             .eq("role", "eleve")
         : Promise.resolve({ count: 0 }),
       ecoleId

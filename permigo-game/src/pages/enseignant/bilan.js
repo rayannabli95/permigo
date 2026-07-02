@@ -497,7 +497,12 @@ export async function mount(root, eleveId) {
   if (!me) return;
 
   if (!eleveId) {
-    root.innerHTML = `<div class="bl"><div class="bl-no-data">Identifiant élève manquant.</div></div>`;
+    // STYLE injecté aussi ici, sinon l'état s'affiche en texte brut non stylé
+    root.innerHTML = `${STYLE}<div class="bl"><div class="bl-body"><div class="bl-no-data">
+      ${illus("clipboard", { size: 64 })}
+      <p>Ouvre le bilan depuis la fiche d'un élève.</p>
+      <a href="#/eleves" style="color:var(--a);font-weight:700;text-decoration:none">Voir mes élèves →</a>
+    </div></div></div>`;
     return;
   }
 
