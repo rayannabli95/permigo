@@ -195,6 +195,11 @@ const STYLE = `
   /* Masqué sur la page validation : on y EST déjà (le FAB recouvrait le
      bouton « Enregistrer la séance »). Idem quand un footer CTA est présent. */
   body:has(.vs) #bn-seance-fab { display: none; }
+  /* Quand le FAB est visible, le contenu doit pouvoir défiler AU-DESSUS de
+     lui (sinon il recouvre la dernière carte des listes — mes-élèves, radar). */
+  body.has-chrome:has(#bn-seance-fab) #app {
+    padding-bottom: calc(148px + env(safe-area-inset-bottom, 0px));
+  }
   #bn-seance-fab {
     position: fixed;
     right: 20px;
