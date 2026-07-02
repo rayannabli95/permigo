@@ -452,11 +452,28 @@ export function addGemmes(n) {
   const next = getGemmes() + n;
   localStorage.setItem(LS_GEMMES, String(next));
   _scheduleSave();
-  // Sync aussi profiles.gemmes (source canonique pour le HUD) — fire-and-forget
+  // Crédit serveur par le RPC sanctionné : l'UPDATE direct de profiles.gemmes
+  // était BLOQUÉ silencieusement par le trigger protect_profile_fields (le
+  // solde local montait puis se faisait écraser par le solde serveur inchangé
+  // au prochain refreshGemmes). add_gemmes passe le trigger et renvoie le
+  // solde canonique — on aligne le local dessus dès la réponse.
   if (_userId) {
-    Promise.resolve(
-      sb.from("profiles").update({ gemmes: next }).eq("id", _userId),
-    ).catch(() => {});
+    Promise.resolve(sb.rpc("add_gemmes", { p_amount: n }))
+      .then(({ data, error }) => {
+        if (error || data?.error) {
+          console.warn("[game-state] add_gemmes refusé", error || data?.error);
+          return;
+        }
+        if (typeof data?.new_balance === "number") {
+          localStorage.setItem(LS_GEMMES, String(data.new_balance));
+          window.dispatchEvent(
+            new CustomEvent("pg-gemmes-changed", {
+              detail: { balance: data.new_balance },
+            }),
+          );
+        }
+      })
+      .catch((e) => console.warn("[game-state] add_gemmes échec réseau", e));
   }
   return next;
 }
@@ -467,11 +484,10 @@ export function spendGemmes(n) {
   const next = cur - n;
   localStorage.setItem(LS_GEMMES, String(next));
   _scheduleSave();
-  if (_userId) {
-    Promise.resolve(
-      sb.from("profiles").update({ gemmes: next }).eq("id", _userId),
-    ).catch(() => {});
-  }
+  // Pas d'écriture directe de profiles.gemmes : elle était bloquée par le
+  // trigger protect_profile_fields (échec silencieux). Le seul débit sanctionné
+  // côté serveur est purchase_item (utilisé par la boutique) — ce débit local
+  // ne sert que l'aperçu optimiste.
   return true;
 }
 

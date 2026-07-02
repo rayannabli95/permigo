@@ -17,7 +17,7 @@ import { findSubComp, findCategory } from "@/data/remc.js";
 import { WORLDS } from "@/data/worlds.js";
 import { track } from "@/services/analytics.js";
 import { esc } from "@/utils/escape.js";
-import { addGemmes } from "@/utils/game-state.js";
+import { refreshGemmes } from "@/utils/game-state.js";
 import { playReward } from "@/utils/sound.js";
 
 const STYLE_ID = "cwn-style";
@@ -427,18 +427,36 @@ export function showCompetenceUnlock(opts = {}) {
     /* best-effort */
   }
 
-  // Crédit RÉEL des volants — une fois, au moment de l'écran.
-  // addGemmes met à jour le solde (localStorage + profiles.gemmes) mais
-  // n'émet pas l'event ; on le dispatche pour rafraîchir la pastille du header.
-  if (volantReward > 0) {
-    try {
-      const next = addGemmes(volantReward);
-      window.dispatchEvent(
-        new CustomEvent("pg-gemmes-changed", { detail: { balance: next } }),
-      );
-    } catch {
-      /* best-effort */
-    }
+  // Crédit RÉEL des volants — SERVEUR, idempotent : une seule récompense par
+  // (élève, compétence), même en multi-appareils ou ré-affichage. L'ancien
+  // crédit local (addGemmes → UPDATE profiles.gemmes) était bloqué en silence
+  // par le trigger protect_profile_fields : le solde montait puis disparaissait.
+  // Si le RPC échoue (migration pas encore appliquée / réseau), on garde la
+  // célébration sans mentir sur le solde.
+  if (volantReward > 0 && competenceCode) {
+    (async () => {
+      try {
+        const { sb } = await import("@/auth/auth.js");
+        const { data, error } = await sb.rpc("claim_competence_reward", {
+          p_competence_id: competenceCode,
+        });
+        if (error || data?.error) {
+          console.warn(
+            "[competence-unlock] claim refusé",
+            error || data?.error,
+          );
+          return;
+        }
+        // Aligne le cache local sur la vérité serveur, puis rafraîchit la
+        // pastille du header (même pattern que open_chest).
+        const bal = await refreshGemmes();
+        window.dispatchEvent(
+          new CustomEvent("pg-gemmes-changed", { detail: { balance: bal } }),
+        );
+      } catch (e) {
+        console.warn("[competence-unlock] claim échec", e);
+      }
+    })();
   }
 
   const reduce =
