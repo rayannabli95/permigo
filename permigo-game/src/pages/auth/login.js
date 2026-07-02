@@ -426,6 +426,12 @@ function startFx(root) {
   addEventListener("resize", _fxResize);
 
   (function tick() {
+    // Auto-stop : si le canvas n'est plus dans le DOM (page quittée), on
+    // arrête la boucle — sinon elle tournait pour toujours après connexion.
+    if (!document.body.contains(cv)) {
+      _fxRaf = 0;
+      return;
+    }
     ctx.clearRect(0, 0, innerWidth, innerHeight);
     for (const d of dots) {
       d.y -= d.vy;
@@ -686,6 +692,8 @@ function wire(root) {
     setTimeout(() => form.classList.remove("anim-shake"), 400);
   }
   async function afterLogin() {
+    // Nettoyage explicite des FX login (rAF + resize) avant de monter la home
+    unmount();
     setTimeout(async () => {
       const [{ route }, { mountBottomNav }, { mountHeader }] =
         await Promise.all([

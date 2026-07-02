@@ -7,19 +7,19 @@
 //  - Ne re-demande pas si déjà demandé ou refusé (permigo_push_asked)
 //  - Désactivable depuis profil (permigo_push_optout)
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { track } from '@/services/analytics.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { track } from "@/services/analytics.js";
 
-const PUSH_ASKED_KEY = 'permigo_push_asked';
-const PUSH_OPTED_OUT = 'permigo_push_optout';
-const HAS_VALIDATED  = 'permigo_has_validated';
+const PUSH_ASKED_KEY = "permigo_push_asked";
+const PUSH_OPTED_OUT = "permigo_push_optout";
+const HAS_VALIDATED = "permigo_has_validated";
 
 // ─── Flag : set par notif-listener après 1ère post_validation_quiz ──────────
 
 /** Appelé par notif-listener.js quand un post_validation_quiz est traité. */
 export function markHasValidated() {
-  localStorage.setItem(HAS_VALIDATED, '1');
+  localStorage.setItem(HAS_VALIDATED, "1");
 }
 
 // ─── Public API ──────────────────────────────────────────────────
@@ -29,18 +29,18 @@ export function markHasValidated() {
  * Montre le banner soft seulement si l'élève a ≥1 validation (sinon no-op).
  */
 export function maybeSoftRequestPush({ skipValidatedGate = false } = {}) {
-  if (!('Notification' in window)) return;
+  if (!("Notification" in window)) return;
   // Gate « a déjà ≥1 validation » — sautée après la question du jour
   // (l'élève vient de vivre la valeur : moment d'opt-in idéal).
   if (!skipValidatedGate && !localStorage.getItem(HAS_VALIDATED)) return;
   if (localStorage.getItem(PUSH_ASKED_KEY)) return;
   if (localStorage.getItem(PUSH_OPTED_OUT)) return;
-  if (Notification.permission === 'granted') {
+  if (Notification.permission === "granted") {
     // Déjà accordé → juste s'assurer que la sub existe
     _ensureSubscription();
     return;
   }
-  if (Notification.permission === 'denied') return;
+  if (Notification.permission === "denied") return;
 
   // Délai 5s — pas intrusif
   setTimeout(() => {
@@ -54,13 +54,13 @@ export function maybeSoftRequestPush({ skipValidatedGate = false } = {}) {
  * Appelé depuis profil.js (toggle) ou le banner soft.
  */
 export async function requestPushPermission() {
-  if (!('Notification' in window)) return false;
+  if (!("Notification" in window)) return false;
 
-  localStorage.setItem(PUSH_ASKED_KEY, '1');
+  localStorage.setItem(PUSH_ASKED_KEY, "1");
   const result = await Notification.requestPermission();
-  track('push.permission_result', { result });
+  track("push.permission_result", { result });
 
-  if (result === 'granted') {
+  if (result === "granted") {
     await _ensureSubscription();
     return true;
   }
@@ -69,27 +69,31 @@ export async function requestPushPermission() {
 
 /** Opt-out depuis profil. Désabonne la subscription si possible. */
 export async function optOutPush() {
-  localStorage.setItem(PUSH_OPTED_OUT, '1');
-  track('push.opted_out', {});
+  localStorage.setItem(PUSH_OPTED_OUT, "1");
+  track("push.opted_out", {});
   try {
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
     if (sub) await sub.unsubscribe();
-  } catch { /* silent */ }
+  } catch {
+    /* silent */
+  }
 }
 
 /** Réactive depuis profil (retire l'opt-out et re-demande). */
 export async function optInPush() {
   localStorage.removeItem(PUSH_OPTED_OUT);
-  track('push.opted_in', {});
+  track("push.opted_in", {});
   return requestPushPermission();
 }
 
 /** Vérifie si push est actif du point de vue utilisateur. */
 export function isPushEnabled() {
-  return 'Notification' in window
-    && Notification.permission === 'granted'
-    && !localStorage.getItem(PUSH_OPTED_OUT);
+  return (
+    "Notification" in window &&
+    Notification.permission === "granted" &&
+    !localStorage.getItem(PUSH_OPTED_OUT)
+  );
 }
 
 /**
@@ -99,33 +103,39 @@ export function isPushEnabled() {
 export async function maybeSendStreakRiskNotif() {
   if (!isPushEnabled()) return;
   const me = getCurUser();
-  if (!me || me.role !== 'eleve') return;
+  if (!me || me.role !== "eleve") return;
 
-  const now  = new Date();
+  const now = new Date();
   const hour = now.getHours();
   if (hour < 20 || hour >= 21) return;
 
   const lastSentKey = `permigo_push_last_${now.toDateString()}`;
   if (localStorage.getItem(lastSentKey)) return;
 
-  const today = now.toISOString().split('T')[0];
+  // Minuit LOCAL converti en ISO/UTC — toISOString().split('T')[0] donnait le
+  // jour UTC, faussant « actif aujourd'hui » pour tout fuseau ≠ UTC.
+  const localMidnight = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).toISOString();
   const { data: todayEvents } = await sb
-    .from('events_analytics')
-    .select('id')
-    .eq('user_id', me.id)
-    .gte('created_at', today)
+    .from("events_analytics")
+    .select("id")
+    .eq("user_id", me.id)
+    .gte("created_at", localMidnight)
     .limit(1);
 
   if (todayEvents?.length) return;
 
-  localStorage.setItem(lastSentKey, '1');
-  track('push.streak_risk_sent', {});
+  localStorage.setItem(lastSentKey, "1");
+  track("push.streak_risk_sent", {});
 
-  new Notification('PermiGo', {
-    body:  `Ton parcours t'attend — 2 min suffisent !`,
-    icon:  '/icons/icon-192.png',
-    badge: '/icons/badge-72.png',
-    tag:   'streak-risk',
+  new Notification("PermiGo", {
+    body: `Ton parcours t'attend — 2 min suffisent !`,
+    icon: "/icons/icon-192.png",
+    badge: "/icons/badge-72.png",
+    tag: "streak-risk",
   });
 }
 
@@ -137,10 +147,12 @@ export async function maybeSendStreakRiskNotif() {
  * TODO(Cowork): cf. .telemetry/push-spec.md pour le schéma attendu.
  */
 async function _ensureSubscription() {
-  if (!('serviceWorker' in navigator)) return;
+  if (!("serviceWorker" in navigator)) return;
   const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
   if (!vapidKey) {
-    console.warn('[web-push] VITE_VAPID_PUBLIC_KEY manquante — subscription désactivée');
+    console.warn(
+      "[web-push] VITE_VAPID_PUBLIC_KEY manquante — subscription désactivée",
+    );
     return;
   }
 
@@ -153,53 +165,59 @@ async function _ensureSubscription() {
         userVisibleOnly: true,
         applicationServerKey: _urlBase64ToUint8Array(vapidKey),
       });
-      track('push.subscribed', {});
+      track("push.subscribed", {});
     }
 
     await _saveSub(sub);
 
     // Écoute BroadcastChannel pour les re-subscriptions depuis le SW
-    const bc = new BroadcastChannel('permigo-push');
+    const bc = new BroadcastChannel("permigo-push");
     bc.onmessage = async (e) => {
-      if (e.data?.type === 'subscription_renewed') {
+      if (e.data?.type === "subscription_renewed") {
         const newSub = await reg.pushManager.getSubscription();
         if (newSub) await _saveSub(newSub);
       }
     };
   } catch (e) {
-    console.warn('[web-push] subscription failed:', e);
+    console.warn("[web-push] subscription failed:", e);
   }
 }
 
 async function _saveSub(sub) {
   const me = getCurUser();
   if (!me) return;
-  const p256dh = btoa(String.fromCharCode(...new Uint8Array(sub.getKey('p256dh'))));
-  const auth   = btoa(String.fromCharCode(...new Uint8Array(sub.getKey('auth'))));
+  const p256dh = btoa(
+    String.fromCharCode(...new Uint8Array(sub.getKey("p256dh"))),
+  );
+  const auth = btoa(String.fromCharCode(...new Uint8Array(sub.getKey("auth"))));
   // TODO(Cowork): table push_subscriptions doit exister — cf. .telemetry/push-spec.md
-  const { error } = await sb.from('push_subscriptions').upsert({
-    user_id:    me.id,
-    endpoint:   sub.endpoint,
-    p256dh,
-    auth,
-    updated_at: new Date().toISOString(),
-  }, { onConflict: 'user_id' });
-  if (error) console.warn('[web-push] push_subscriptions upsert failed:', error.message);
-  else track('push.subscription_saved', {});
+  const { error } = await sb.from("push_subscriptions").upsert(
+    {
+      user_id: me.id,
+      endpoint: sub.endpoint,
+      p256dh,
+      auth,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" },
+  );
+  if (error)
+    console.warn("[web-push] push_subscriptions upsert failed:", error.message);
+  else track("push.subscription_saved", {});
 }
 
 function _urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const raw     = atob(base64);
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64);
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
 }
 
 function _createSoftBanner() {
-  const el = document.createElement('div');
-  el.id = 'push-soft-banner';
-  el.setAttribute('role', 'dialog');
-  el.setAttribute('aria-label', 'Activer les notifications PermiGo');
+  const el = document.createElement("div");
+  el.id = "push-soft-banner";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-label", "Activer les notifications PermiGo");
   el.innerHTML = `
     <style>
       #push-soft-banner {
@@ -242,14 +260,14 @@ function _createSoftBanner() {
     </div>
   `;
 
-  el.querySelector('#pb-allow').addEventListener('click', async () => {
+  el.querySelector("#pb-allow").addEventListener("click", async () => {
     el.remove();
     await requestPushPermission();
   });
-  el.querySelector('#pb-skip').addEventListener('click', () => {
+  el.querySelector("#pb-skip").addEventListener("click", () => {
     el.remove();
-    localStorage.setItem(PUSH_ASKED_KEY, '1');
-    track('push.banner_skipped', {});
+    localStorage.setItem(PUSH_ASKED_KEY, "1");
+    track("push.banner_skipped", {});
   });
 
   return el;

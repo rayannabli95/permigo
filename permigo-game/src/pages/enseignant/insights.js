@@ -485,11 +485,14 @@ async function loadData(me) {
       .gte("validated_at", thisMonth.start)
       .lte("validated_at", thisMonth.end),
 
-    // Validations mois precedent (pour delta mois)
+    // Validations mois precedent (pour delta mois) — acquis uniquement,
+    // comme la periode courante (filtree en JS), sinon le delta compare
+    // des grandeurs differentes.
     sb
       .from("validations")
       .select("id", { count: "exact", head: true })
       .eq("validated_by", me.id)
+      .eq("statut", "acquis")
       .gte("validated_at", prevMonth.start)
       .lte("validated_at", prevMonth.end),
 
@@ -524,11 +527,13 @@ async function loadData(me) {
       .eq("validated_by", me.id)
       .gte("validated_at", ago7),
 
-    // Validations semaine precedente (7-14 jours)
+    // Validations semaine precedente (7-14 jours) — acquis uniquement,
+    // comme la periode courante.
     sb
       .from("validations")
       .select("id", { count: "exact", head: true })
       .eq("validated_by", me.id)
+      .eq("statut", "acquis")
       .gte("validated_at", daysAgoISO(14))
       .lt("validated_at", ago7),
   ]);
