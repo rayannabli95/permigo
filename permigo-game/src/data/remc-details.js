@@ -10,289 +10,317 @@
 export const REMC_DETAILS = {
   // ─── MONDE 1 — Maîtrise du véhicule ──────────────────────────
   C1a: {
-    summary: 'Identifier les commandes principales et vérifier que ta voiture est prête à rouler.',
+    summary:
+      "Identifier les commandes principales et vérifier que ta voiture est prête à rouler.",
     keyPoints: [
-      'Reconnaître commandes au tableau de bord',
-      'Vérifier feux, pneus, niveaux',
-      'Connaître les voyants d\'alerte',
+      "Reconnaître commandes au tableau de bord",
+      "Vérifier feux, pneus, niveaux",
+      "Connaître les voyants d'alerte",
     ],
-    tip: 'Avant chaque démarrage : tour rapide de la voiture, puis ceinture, miroirs, contact.',
+    tip: "Avant chaque démarrage : tour rapide de la voiture, puis ceinture, miroirs, contact.",
   },
   C1b: {
-    summary: 'Régler ton poste de conduite pour être stable, à l\'aise et bien voir la route.',
+    summary:
+      "Régler ton poste de conduite pour être stable, à l'aise et bien voir la route.",
     keyPoints: [
-      'Siège : pieds atteignent pédales sans tendre',
-      'Volant : poignets posés en haut, bras pliés',
-      'Miroirs réglés avant de démarrer',
+      "Siège : pieds atteignent pédales sans tendre",
+      "Volant : poignets posés en haut, bras pliés",
+      "Miroirs réglés avant de démarrer",
     ],
-    tip: 'Mauvais réglage = fatigue rapide + angles morts. 30 sec investis = leçon plus confortable.',
+    tip: "Mauvais réglage = fatigue rapide + angles morts. 30 sec investis = leçon plus confortable.",
   },
   C1c: {
-    summary: 'Tenir le volant correctement et garder ta voiture dans la bonne trajectoire.',
+    summary:
+      "Tenir le volant correctement et garder ta voiture dans la bonne trajectoire.",
     keyPoints: [
-      'Position 9h15 (ou 10h10), pouces sur la jante',
-      'Regard loin pour anticiper la trajectoire',
-      'Croiser les mains uniquement en manœuvre lente',
+      "Position 9h15 (ou 10h10), pouces sur la jante",
+      "Regard loin pour anticiper la trajectoire",
+      "Croiser les mains uniquement en manœuvre lente",
     ],
-    tip: 'Ton regard guide ta trajectoire. Fixe loin devant, pas le capot.',
+    tip: "Ton regard guide ta trajectoire. Fixe loin devant, pas le capot.",
   },
   C1d: {
-    summary: 'Démarrer en douceur et s\'arrêter sans à-coups avec un freinage progressif.',
+    summary:
+      "Démarrer en douceur et s'arrêter sans à-coups avec un freinage progressif.",
     keyPoints: [
-      'Embrayage relâché lentement au point de patinage',
-      'Frein gauche-pied progressif jusqu\'à l\'arrêt',
-      'Arrêt complet : frein à main + point mort',
+      "Embrayage relâché lentement au point de patinage",
+      "Frein gauche-pied progressif jusqu'à l'arrêt",
+      "Arrêt complet : frein à main + point mort",
     ],
-    tip: 'Anticipe les arrêts à 50m : relâcher l\'accélérateur d\'abord, freiner ensuite.',
+    tip: "Anticipe les arrêts à 50m : relâcher l'accélérateur d'abord, freiner ensuite.",
   },
   C1e: {
-    summary: 'Doser accélération et freinage pour une conduite fluide et économique.',
+    summary:
+      "Doser accélération et freinage pour une conduite fluide et économique.",
     keyPoints: [
-      'Accélération progressive sans saccade',
-      'Anticipation pour éviter les freinages brusques',
-      'Pied droit léger, jamais lourd',
+      "Accélération progressive sans saccade",
+      "Anticipation pour éviter les freinages brusques",
+      "Pied droit léger, jamais lourd",
     ],
-    tip: 'Conduite douce = passagers contents + carburant économisé + meilleure note.',
+    tip: "Conduite douce = passagers contents + carburant économisé + meilleure note.",
   },
   C1f: {
-    summary: 'Changer de vitesse au bon moment, sans regarder le levier ni caler.',
+    summary:
+      "Changer de vitesse au bon moment, sans regarder le levier ni caler.",
     keyPoints: [
-      'Monter les rapports vers 2000-2500 tr/min',
-      'Rétrograder avant les virages et freinages',
-      'Embrayage rapide mais doux',
+      "Monter les rapports vers 2000-2500 tr/min",
+      "Rétrograder avant les virages et freinages",
+      "Embrayage rapide mais doux",
     ],
     tip: 'Écoute le moteur : s\'il "force", monte un rapport. S\'il "tousse", rétrograde.',
   },
   C1g: {
-    summary: 'Faire les vérifications de sécurité extérieures (tour de voiture, pneus, feux).',
+    summary:
+      "Faire les vérifications de sécurité extérieures (tour de voiture, pneus, feux).",
     keyPoints: [
-      'Pneus : pression et usure',
-      'Feux : phares, clignotants, stop',
-      'Vitres, miroirs, plaques propres',
+      "Pneus : pression et usure",
+      "Feux : phares, clignotants, stop",
+      "Vitres, miroirs, plaques propres",
     ],
     tip: 'Question type examen : "Que vérifiez-vous avant de prendre la route ?"',
   },
   C1h: {
-    summary: 'Réaliser les manœuvres-test du permis : créneau, demi-tour, épi, stationnement.',
+    summary:
+      "Réaliser les manœuvres-test du permis : créneau, demi-tour, épi, stationnement.",
     keyPoints: [
-      'Créneau : repères visuels au rétroviseur droit',
-      'Demi-tour : 3 temps si rue étroite',
-      'Stationnement en bataille : roues droites en sortie',
+      "Créneau : repères visuels au rétroviseur droit",
+      "Demi-tour : 3 temps si rue étroite",
+      "Stationnement en bataille : roues droites en sortie",
     ],
-    tip: 'Vitesse lente + braquage rapide. C\'est l\'inverse qui foire la manœuvre.',
+    tip: "Vitesse lente + braquage rapide. C'est l'inverse qui foire la manœuvre.",
   },
   C1i: {
-    summary: 'Réaliser toutes les manœuvres seul, sans aide ni guidage du moniteur.',
+    summary:
+      "Réaliser toutes les manœuvres seul, sans aide ni guidage du moniteur.",
     keyPoints: [
-      'Choisir la bonne manœuvre selon la situation',
-      'Gérer toi-même les repères et le timing',
-      'Corriger sans paniquer si raté',
+      "Choisir la bonne manœuvre selon la situation",
+      "Gérer toi-même les repères et le timing",
+      "Corriger sans paniquer si raté",
     ],
-    tip: 'Cette validation = tu es prêt pour le monde 2. Pas de stress, juste de la pratique.',
+    tip: "Cette validation = tu es prêt pour le monde 2. Pas de stress, juste de la pratique.",
   },
 
   // ─── MONDE 2 — Circulation normale ───────────────────────────
   C2a: {
-    summary: 'Capter et interpréter les infos visuelles importantes (panneaux, autres usagers, sol).',
+    summary:
+      "Capter et interpréter les infos visuelles importantes (panneaux, autres usagers, sol).",
     keyPoints: [
-      'Regard loin (15-20 sec devant)',
-      'Balayage : rétro, devant, côtés, devant',
-      'Identifier les panneaux à distance',
+      "Regard loin (15-20 sec devant)",
+      "Balayage : rétro, devant, côtés, devant",
+      "Identifier les panneaux à distance",
     ],
-    tip: 'Tes yeux travaillent en continu : 1 contrôle rétro toutes les 5-7 secondes.',
+    tip: "Tes yeux travaillent en continu : 1 contrôle rétro toutes les 5-7 secondes.",
   },
   C2b: {
-    summary: 'Adapter ta vitesse et ta trajectoire à l\'environnement (météo, trafic, route).',
+    summary:
+      "Adapter ta vitesse et ta trajectoire à l'environnement (météo, trafic, route).",
     keyPoints: [
-      'Réduire en zone scolaire, marché, virage',
-      'Augmenter distances par pluie / nuit',
-      'Anticiper les comportements imprévus',
+      "Réduire en zone scolaire, marché, virage",
+      "Augmenter distances par pluie / nuit",
+      "Anticiper les comportements imprévus",
     ],
-    tip: 'La règle des 2 sec : compte 2 secondes entre toi et la voiture devant (4 sec sous la pluie).',
+    tip: "La règle des 2 sec : compte 2 secondes entre toi et la voiture devant (4 sec sous la pluie).",
   },
   C2c: {
-    summary: 'Te placer correctement sur la chaussée selon le sens et le type de route.',
+    summary:
+      "Te placer correctement sur la chaussée selon le sens et le type de route.",
     keyPoints: [
-      'Au milieu de ta voie, ni à droite ni au centre',
-      'Trajectoire stable dans les courbes',
-      'Bonne distance latérale avec véhicules garés',
+      "Au milieu de ta voie, ni à droite ni au centre",
+      "Trajectoire stable dans les courbes",
+      "Bonne distance latérale avec véhicules garés",
     ],
-    tip: 'Vise un point loin devant pour garder une ligne droite parfaite.',
+    tip: "Vise un point loin devant pour garder une ligne droite parfaite.",
   },
   C2d: {
-    summary: 'Aborder un virage à la bonne vitesse et tracer la bonne trajectoire.',
+    summary:
+      "Aborder un virage à la bonne vitesse et tracer la bonne trajectoire.",
     keyPoints: [
-      'Ralentir AVANT le virage, pas pendant',
-      'Trajectoire extérieur → intérieur → extérieur',
-      'Accélérer à la sortie, pas avant',
+      "Ralentir AVANT le virage, pas pendant",
+      "Trajectoire extérieur → intérieur → extérieur",
+      "Accélérer à la sortie, pas avant",
     ],
-    tip: 'Si tu freines dans le virage, c\'est que tu es entré trop vite. Anticipe.',
+    tip: "Si tu freines dans le virage, c'est que tu es entré trop vite. Anticipe.",
   },
   C2e: {
-    summary: 'Croiser un véhicule en sécurité et dépasser quand c\'est légal et sûr.',
+    summary:
+      "Croiser un véhicule en sécurité et dépasser quand c'est légal et sûr.",
     keyPoints: [
-      'Croisements étroits : ralentir, serrer à droite',
-      'Dépassement : visibilité + indicateur + écart',
-      'Jamais en ligne continue ni avant un virage',
+      "Croisements étroits : ralentir, serrer à droite",
+      "Dépassement : visibilité + indicateur + écart",
+      "Jamais en ligne continue ni avant un virage",
     ],
-    tip: 'Si tu hésites à dépasser, ne dépasse pas. Le doute est ton meilleur ami.',
+    tip: "Si tu hésites à dépasser, ne dépasse pas. Le doute est ton meilleur ami.",
   },
   C2f: {
-    summary: 'Aborder une intersection ou un rond-point en respectant les priorités.',
+    summary:
+      "Aborder une intersection ou un rond-point en respectant les priorités.",
     keyPoints: [
-      'Identifier qui a la priorité avant d\'entrer',
-      'Rond-point : céder à gauche, clignotant à droite en sortie',
-      'Ne jamais s\'arrêter au milieu d\'un carrefour',
+      "Identifier qui a la priorité avant d'entrer",
+      "Rond-point : céder à gauche, clignotant à droite en sortie",
+      "Ne jamais s'arrêter au milieu d'un carrefour",
     ],
-    tip: 'Priorité à droite par défaut sauf indication contraire (panneau, feu, marquage).',
+    tip: "Priorité à droite par défaut sauf indication contraire (panneau, feu, marquage).",
   },
   C2g: {
-    summary: 'Communiquer clairement avec les autres usagers : clignotants, regards, signes.',
+    summary:
+      "Communiquer clairement avec les autres usagers : clignotants, regards, signes.",
     keyPoints: [
-      'Clignotant 3 sec avant chaque changement',
-      'Contact visuel aux carrefours et passages piétons',
-      'Klaxon uniquement pour prévenir d\'un danger',
+      "Clignotant 3 sec avant chaque changement",
+      "Contact visuel aux carrefours et passages piétons",
+      "Klaxon uniquement pour prévenir d'un danger",
     ],
-    tip: 'Un bon conducteur prévient ses intentions. La route est un dialogue.',
+    tip: "Un bon conducteur prévient ses intentions. La route est un dialogue.",
   },
   C2h: {
-    summary: 'Conduire seul en ville en gérant trajectoire, vitesse et décisions sans aide.',
+    summary:
+      "Conduire seul en ville en gérant trajectoire, vitesse et décisions sans aide.",
     keyPoints: [
-      'Itinéraire mémorisé avant de partir',
-      'Adapter en temps réel à l\'imprévu',
-      'Garder calme et confiance même en stress',
+      "Itinéraire mémorisé avant de partir",
+      "Adapter en temps réel à l'imprévu",
+      "Garder calme et confiance même en stress",
     ],
-    tip: 'Tu maîtrises le monde 2 quand tu fais 30 min sans intervention du moniteur.',
+    tip: "Tu maîtrises le monde 2 quand tu fais 30 min sans intervention du moniteur.",
   },
 
   // ─── MONDE 3 — Conditions difficiles ──────────────────────────
   C3a: {
-    summary: 'Conduire de nuit en gérant la visibilité réduite et la fatigue.',
+    summary: "Conduire de nuit en gérant la visibilité réduite et la fatigue.",
     keyPoints: [
-      'Phares adaptés (croisement / route)',
-      'Distances augmentées',
-      'Pause toutes les 2h en conduite longue',
+      "Phares adaptés (croisement / route)",
+      "Distances augmentées",
+      "Pause toutes les 2h en conduite longue",
     ],
-    tip: 'Croisement d\'un véhicule : regarde la bande blanche à droite, pas les phares.',
+    tip: "Croisement d'un véhicule : regarde la bande blanche à droite, pas les phares.",
   },
   C3b: {
-    summary: 'Adapter ta conduite par pluie, neige, brouillard ou verglas.',
+    summary: "Adapter ta conduite par pluie, neige, brouillard ou verglas.",
     keyPoints: [
-      'Distance de sécurité × 2 (pluie) ou × 3 (neige)',
-      'Freinage doux et progressif',
-      'Feux de brouillard si visibilité < 50m',
+      "Distance de sécurité × 2 (pluie) ou × 3 (neige)",
+      "Freinage doux et progressif",
+      "Feux de brouillard si visibilité < 50m",
     ],
-    tip: 'Sur sol mouillé, le freinage prend 2× plus de distance. Anticipe.',
+    tip: "Sur sol mouillé, le freinage prend 2× plus de distance. Anticipe.",
   },
   C3c: {
-    summary: 'Garder le contrôle sur chaussée glissante : pluie, verglas, feuilles, gravillons.',
+    summary:
+      "Garder le contrôle sur chaussée glissante : pluie, verglas, feuilles, gravillons.",
     keyPoints: [
-      'Gestes doux : accélération, freinage, volant progressifs',
-      'Allonger nettement les distances de sécurité',
-      'Éviter de freiner en plein virage',
+      "Gestes doux : accélération, freinage, volant progressifs",
+      "Allonger nettement les distances de sécurité",
+      "Éviter de freiner en plein virage",
     ],
-    tip: 'Sur sol glissant, tout en souplesse. Un geste brusque = perte d\'adhérence.',
+    tip: "Sur sol glissant, tout en souplesse. Un geste brusque = perte d'adhérence.",
   },
   C3d: {
-    summary: 'Comprendre l\'adhérence et réussir un freinage d\'urgence en gardant le contrôle.',
+    summary:
+      "Comprendre l'adhérence et réussir un freinage d'urgence en gardant le contrôle.",
     keyPoints: [
-      'Freinage d\'urgence : pied à fond, l\'ABS gère',
-      'Regarder où tu veux aller, pas l\'obstacle',
-      'Adhérence réduite = distances augmentées',
+      "Freinage d'urgence : pied à fond, l'ABS gère",
+      "Regarder où tu veux aller, pas l'obstacle",
+      "Adhérence réduite = distances augmentées",
     ],
-    tip: 'En urgence : freine FORT et regarde ton échappatoire, la voiture suit ton regard.',
+    tip: "En urgence : freine FORT et regarde ton échappatoire, la voiture suit ton regard.",
   },
   C3e: {
-    summary: 'Rouler sur voie rapide et autoroute en sécurité : insertion, voies, sortie.',
+    summary:
+      "Rouler sur voie rapide et autoroute en sécurité : insertion, voies, sortie.",
     keyPoints: [
-      'Insertion : utiliser toute la bande d\'accélération',
-      'Voie de droite par défaut, dépassement à gauche',
-      'Sortie : clignotant 200 m avant',
+      "Insertion : utiliser toute la bande d'accélération",
+      "Voie de droite par défaut, dépassement à gauche",
+      "Sortie : clignotant 200 m avant",
     ],
-    tip: 'Sur autoroute, le danger n\'est pas la vitesse mais l\'inattention. Reste vigilant.',
+    tip: "Sur autoroute, le danger n'est pas la vitesse mais l'inattention. Reste vigilant.",
   },
   C3f: {
-    summary: 'Aborder tunnels, ponts et zones spécifiques avec les bons réflexes.',
+    summary:
+      "Aborder tunnels, ponts et zones spécifiques avec les bons réflexes.",
     keyPoints: [
-      'Tunnel : allumer les feux, garder ses distances',
-      'Pont ou viaduc : vigilance au vent latéral',
-      'Repérer les sorties de secours dès l\'entrée du tunnel',
+      "Tunnel : allumer les feux, garder ses distances",
+      "Pont ou viaduc : vigilance au vent latéral",
+      "Repérer les sorties de secours dès l'entrée du tunnel",
     ],
-    tip: 'En tunnel, garde tes distances et repère la sortie de secours la plus proche dès l\'entrée.',
+    tip: "En tunnel, garde tes distances et repère la sortie de secours la plus proche dès l'entrée.",
   },
   C3g: {
-    summary: 'Conduire en ville dense en partageant la route avec piétons, vélos et bus.',
+    summary:
+      "Conduire en ville dense en partageant la route avec piétons, vélos et bus.",
     keyPoints: [
-      'Allure réduite, anticiper les piétons',
-      'Surveiller les angles morts (vélos, trottinettes)',
-      'Respecter couloirs de bus et zones de rencontre',
+      "Allure réduite, anticiper les piétons",
+      "Surveiller les angles morts (vélos, trottinettes)",
+      "Respecter couloirs de bus et zones de rencontre",
     ],
-    tip: 'En ville dense, lève le pied et regarde loin : tout peut surgir entre deux voitures.',
+    tip: "En ville dense, lève le pied et regarde loin : tout peut surgir entre deux voitures.",
   },
 
   // ─── MONDE 4 — Conduite autonome & sûre ───────────────────────
   C4a: {
-    summary: 'Préparer son itinéraire avant de partir : trajet, alternatives, conditions.',
+    summary:
+      "Préparer son itinéraire avant de partir : trajet, alternatives, conditions.",
     keyPoints: [
-      'Choisir l\'itinéraire et une alternative',
-      'Vérifier météo, trafic et travaux',
-      'Prévoir des pauses sur les longs trajets',
+      "Choisir l'itinéraire et une alternative",
+      "Vérifier météo, trafic et travaux",
+      "Prévoir des pauses sur les longs trajets",
     ],
-    tip: 'Avant un trajet inconnu, repère les sorties et les zones difficiles à l\'avance.',
+    tip: "Avant un trajet inconnu, repère les sorties et les zones difficiles à l'avance.",
   },
   C4b: {
-    summary: 'Suivre un itinéraire (GPS ou panneaux) sans se laisser distraire de la route.',
+    summary:
+      "Suivre un itinéraire (GPS ou panneaux) sans se laisser distraire de la route.",
     keyPoints: [
-      'Régler le GPS avant de démarrer',
-      'Lire les panneaux de direction à distance',
-      'La route reste prioritaire sur l\'écran',
+      "Régler le GPS avant de démarrer",
+      "Lire les panneaux de direction à distance",
+      "La route reste prioritaire sur l'écran",
     ],
-    tip: 'Sortie ratée ? Continue. On ne freine jamais et on ne recule jamais sur l\'autoroute.',
+    tip: "Sortie ratée ? Continue. On ne freine jamais et on ne recule jamais sur l'autoroute.",
   },
   C4c: {
-    summary: 'Adopter une conduite souple et éco-responsable : moins de carburant, moins de CO₂.',
+    summary:
+      "Adopter une conduite souple et éco-responsable : moins de carburant, moins de CO₂.",
     keyPoints: [
-      'Anticiper pour éviter les freinages inutiles',
-      'Passer les rapports tôt, rouler en sous-régime',
-      'Couper le moteur à l\'arrêt prolongé',
+      "Anticiper pour éviter les freinages inutiles",
+      "Passer les rapports tôt, rouler en sous-régime",
+      "Couper le moteur à l'arrêt prolongé",
     ],
-    tip: 'Une conduite souple = jusqu\'à 20% de carburant économisé et une voiture qui dure.',
+    tip: "Une conduite souple = jusqu'à 20% de carburant économisé et une voiture qui dure.",
   },
   C4d: {
-    summary: 'Anticiper les situations à risque et garder son calme au volant.',
+    summary: "Anticiper les situations à risque et garder son calme au volant.",
     keyPoints: [
-      'Regarder loin pour anticiper les dangers',
-      'Garder ses distances de sécurité',
-      'Respirer, ne pas se laisser gagner par le stress',
+      "Regarder loin pour anticiper les dangers",
+      "Garder ses distances de sécurité",
+      "Respirer, ne pas se laisser gagner par le stress",
     ],
-    tip: 'Un conducteur qui anticipe freine rarement en urgence. Regarde loin, pas juste le capot.',
+    tip: "Un conducteur qui anticipe freine rarement en urgence. Regarde loin, pas juste le capot.",
   },
   C4e: {
-    summary: 'Partager la route en sécurité avec tous les usagers, surtout les plus vulnérables.',
+    summary:
+      "Partager la route en sécurité avec tous les usagers, surtout les plus vulnérables.",
     keyPoints: [
-      'Cyclistes : 1 m en ville, 1,5 m hors agglo',
-      'Piétons et zones 30 : priorité absolue',
-      'Trottinettes : trajectoires imprévisibles',
+      "Cyclistes : 1 m en ville, 1,5 m hors agglo",
+      "Piétons et zones 30 : priorité absolue",
+      "Trottinettes : trajectoires imprévisibles",
     ],
-    tip: 'Plus l\'usager est vulnérable, plus tu anticipes ses erreurs. Courtoisie avant vitesse.',
+    tip: "Plus l'usager est vulnérable, plus tu anticipes ses erreurs. Courtoisie avant vitesse.",
   },
   C4f: {
-    summary: 'Aborder l\'examen pratique sereinement et savoir comment il se déroule.',
+    summary:
+      "Aborder l'examen pratique sereinement et savoir comment il se déroule.",
     keyPoints: [
-      'Vérifications intérieures et extérieures demandées',
-      'Suivre les consignes de l\'inspecteur calmement',
-      'Une petite erreur ne fait pas tout rater',
+      "Vérifications intérieures et extérieures demandées",
+      "Suivre les consignes de l'inspecteur calmement",
+      "Une petite erreur ne fait pas tout rater",
     ],
-    tip: 'L\'inspecteur évalue ta sécurité, pas la perfection. Respire et conduis comme à l\'entraînement.',
+    tip: "L'inspecteur évalue ta sécurité, pas la perfection. Respire et conduis comme à l'entraînement.",
   },
   C4g: {
-    summary: 'Conduire en jeune permis : période probatoire et bons réflexes pour durer.',
+    summary:
+      "Conduire en jeune permis : période probatoire et bons réflexes pour durer.",
     keyPoints: [
-      'Disque A à l\'arrière pendant 3 ans',
-      'Vitesses réduites pour les jeunes conducteurs',
-      '6 points au départ, capital qui se reconstitue',
+      "Disque A à l'arrière pendant 3 ans",
+      "Vitesses réduites pour les jeunes conducteurs",
+      "6 points au départ, capital qui se reconstitue",
     ],
-    tip: 'Jeune permis = vigilance maximale les 3 premières années. Un seul excès peut coûter cher.',
+    tip: "Jeune permis = vigilance maximale les 3 premières années. Un seul excès peut coûter cher.",
   },
 };
 
@@ -302,12 +330,23 @@ export const REMC_DETAILS = {
  * @returns {{summary: string, keyPoints: string[], tip: string}}
  */
 export function getCompDetail(compId) {
-  const key = compId?.toUpperCase().replace(/(\d)([a-z])/i, '$1$2'); // normalise C1h → C1H
-  const exact = REMC_DETAILS[key] || REMC_DETAILS[compId];
+  // Normalise vers la casse réelle des clés (C majuscule, chiffre, lettre
+  // minuscule) : 'c1H' / 'C1H' → 'C1h'. L'ancienne version produisait 'C1H'
+  // (clé inexistante) et ne matchait jamais.
+  const key = compId?.replace(
+    /^([cC])(\d)([a-zA-Z])$/,
+    (_, _c, d, l) => "C" + d + l.toLowerCase(),
+  );
+  const exact = (key && REMC_DETAILS[key]) || REMC_DETAILS[compId];
   if (exact) return exact;
   return {
-    summary: 'Compétence officielle du référentiel REMC. Pratique-la avec ton moniteur.',
-    keyPoints: ['Demande à ton moniteur de te guider', 'Pratique répétée', 'Sois attentif aux feedbacks'],
-    tip: 'Chaque compétence se valide par la pratique. Pas de raccourci.',
+    summary:
+      "Compétence officielle du référentiel REMC. Pratique-la avec ton moniteur.",
+    keyPoints: [
+      "Demande à ton moniteur de te guider",
+      "Pratique répétée",
+      "Sois attentif aux feedbacks",
+    ],
+    tip: "Chaque compétence se valide par la pratique. Pas de raccourci.",
   };
 }

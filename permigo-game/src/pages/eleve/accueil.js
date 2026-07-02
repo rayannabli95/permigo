@@ -2175,7 +2175,11 @@ function buildActivityData(attempts, streak) {
   today.setHours(0, 0, 0, 0);
   const counts = {};
   for (const a of attempts) {
-    const key = (a.completed_at || a.created_at || "").slice(0, 10);
+    // Jour LOCAL (comme la grille days7 via _dKey) — .slice(0,10) prenait le
+    // jour UTC et décalait les tentatives du soir dans la mauvaise case.
+    const raw = a.completed_at || a.created_at;
+    if (!raw) continue;
+    const key = _dKey(new Date(raw));
     counts[key] = (counts[key] || 0) + 1;
   }
   if (!attempts.length && streak?.current_streak > 0) {

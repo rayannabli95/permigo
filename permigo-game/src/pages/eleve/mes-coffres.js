@@ -474,12 +474,12 @@ export async function mount(root) {
           migrateCard();
           if (!silent) {
             navigator.vibrate?.([30, 50, 30]);
-            toast(
-              `${meta.label} ouvert ! +${meta.gemmes ?? 0} volants`,
-              "success",
-            );
+            // Montant réellement crédité par le serveur : openChest renvoie
+            // { ok, data } et le RPC open_chest expose data.gemmes_added
+            // (result.gemmes n'a jamais existé), fallback sur la méta locale.
+            const gemsWon = result.data?.gemmes_added ?? meta.gemmes ?? 0;
+            toast(`${meta.label} ouvert ! +${gemsWon} volants`, "success");
             // Jetons dorés vers le HUD (coffres non-monde)
-            const gemsWon = result.gemmes ?? meta.gemmes ?? 0;
             if (gemsWon > 0) flyVolants(gemsWon, { from: card });
           }
         } else if (result.error === "already_opened") {
