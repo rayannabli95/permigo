@@ -17,12 +17,15 @@ import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
 import { illus } from "@/components/enseignant/illus.js";
 
-const COOL_SEUIL_J = 7; // refroidit à partir de 7 jours d'inactivité
+// Règle produit : relance élève à 14 jours (aligné sur mes-eleves
+// INACTIF_SEUIL_MS et insights « à relancer > 14j » — le radar était le
+// seul écran à 7j).
+const COOL_SEUIL_J = 14;
 
 // Graduation du refroidissement (couleur + libellé)
 function coolGrade(jours) {
   if (jours >= 30) return { cls: "icy", label: "Très froid", c: "#b91c1c" };
-  if (jours >= 14) return { cls: "cold", label: "Froid", c: "#dc2626" };
+  if (jours >= 21) return { cls: "cold", label: "Froid", c: "#dc2626" };
   return { cls: "warn", label: "Refroidit", c: "#d97706" };
 }
 
