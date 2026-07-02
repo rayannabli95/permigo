@@ -104,7 +104,8 @@ const STYLE = `<style>
 
   /* ── Salutation ── */
   .aj-hi {
-    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 12px) 20px 0;
+    /* #app (has-chrome) compense déjà le header fixe — pas de var(--th) ici */
+    padding: 12px 20px 0;
     font: 700 14px/1.3 'Inter', sans-serif;
     color: #5a6188;
   }
@@ -385,7 +386,7 @@ const STYLE = `<style>
 
   /* ── Skeleton ── */
   .aj-skel {
-    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 20px) 16px 24px;
+    padding: 20px 16px 24px;
     display: flex;
     flex-direction: column;
     gap: 16px;

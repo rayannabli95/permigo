@@ -34,7 +34,8 @@ const STYLE = `<style>
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 14px) 18px 0;
+    /* #app (has-chrome) compense déjà le header fixe — pas de var(--th) ici */
+    padding: 14px 18px 0;
   }
   .ins-title {
     font: 800 23px/1.15 'Manrope', 'Inter', sans-serif;
@@ -359,7 +360,7 @@ const STYLE = `<style>
 
   /* ── Skeleton ── */
   .ins-skel {
-    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 20px) 16px 24px;
+    padding: 20px 16px 24px;
     display: flex;
     flex-direction: column;
     gap: 14px;

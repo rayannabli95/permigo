@@ -37,6 +37,9 @@ const STYLE = `<style>
   position: relative;
   overflow: hidden;
   background: radial-gradient(130% 150% at 0% 0%, #14391f 0%, #0c2614 44%, #0b0d1a 100%);
+  /* Pleine hauteur sous le header verre : remonte de la hauteur déjà comptée
+     par #app, puis re-padde — le dégradé glisse sous le header (pattern livret). */
+  margin-top: calc(-1 * (var(--th, 52px) + env(safe-area-inset-top, 0px)));
   padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 20px) 20px 30px;
   isolation: isolate;
   animation: blHeroIn .4s var(--ease, ease) both;

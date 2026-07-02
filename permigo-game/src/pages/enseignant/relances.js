@@ -34,7 +34,7 @@ function defaultMessage(prenom, jours) {
 
 const STYLE = `<style>
   .rl-page { max-width: 600px; margin: 0 auto; padding: 0 0 110px; background: #f6f7f9; min-height: 100dvh; font-family: 'Inter', sans-serif; color: #1a1f2b; }
-  .rl-hero { position: relative; overflow: hidden; padding: calc(env(safe-area-inset-top,0px) + var(--th,52px) + 18px) 18px 20px; color: #fff;
+  .rl-hero { position: relative; overflow: hidden; margin-top: calc(-1 * (var(--th,52px) + env(safe-area-inset-top,0px))); padding: calc(env(safe-area-inset-top,0px) + var(--th,52px) + 18px) 18px 20px; color: #fff;
     background: linear-gradient(135deg, #4338ca 0%, #4f46e5 55%, #6d5ef0 100%); }
   .rl-hero::before { content: ''; position: absolute; right: -40px; top: -50px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%); pointer-events: none; }
   .rl-hero-kick { font: 800 10px/1 'Inter', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.8); margin-bottom: 8px; position: relative; }
