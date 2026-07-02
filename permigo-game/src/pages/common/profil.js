@@ -54,7 +54,8 @@ const ROLE_LABELS = {
 const STYLE = `<style>
 /* ── Conteneur principal ── */
 .prf {
-  padding-top: calc(var(--th) + env(safe-area-inset-top, 0px) + 8px);
+  /* #app (has-chrome) compense déjà le header fixe — pas de var(--th) ici */
+  padding-top: 8px;
   padding-bottom: calc(var(--bh, 64px) + env(safe-area-inset-bottom, 0px) + 24px);
   max-width: 480px;
   margin: 0 auto;
@@ -796,7 +797,7 @@ export async function mount(root) {
     ${
       profileCardData
         ? `<div id="prf-social-card"></div>`
-        : `<div style="padding:calc(var(--th) + 8px) 16px 0;display:flex;flex-direction:column;align-items:center;gap:12px;padding-bottom:20px">
+        : `<div style="padding:8px 16px 0;display:flex;flex-direction:column;align-items:center;gap:12px;padding-bottom:20px">
           <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--adk));display:flex;align-items:center;justify-content:center;font:700 32px/1 'Plus Jakarta Sans',sans-serif;color:var(--a-ink);box-shadow:0 8px 24px color-mix(in srgb,var(--a) 25%,transparent)">${esc(initials)}</div>
           <div style="font:700 22px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink);letter-spacing:-0.022em">${esc(displayName)}</div>
           <span style="font:600 11px/1 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--a-txt);background:color-mix(in srgb,var(--a) 10%,transparent);border-radius:99px;padding:6px 12px">${esc(ROLE_LABELS[me.role] || me.role)}</span>
@@ -1405,7 +1406,9 @@ const STYLE_ARENE = `<style>
   --tx:#f3efff; --tx-dim:#c3bce6; --tx-mu:#8b83b8; --tx-fa:#6c6498;
   --ctop:#241c52; --cbot:#171134; --cedge:#0c0922;
   --gl:rgba(247,179,43,.40); --gl2:rgba(247,179,43,.18);
-  position:relative; max-width:480px; margin:0 auto; min-height:100dvh;
+  position:relative; max-width:480px; min-height:100dvh;
+  /* Fond nuit pleine hauteur sous le header verre (pattern livret) */
+  margin:calc(-1 * (var(--th, 52px) + env(safe-area-inset-top,0px))) auto 0;
   padding-top:calc(var(--th, 52px) + env(safe-area-inset-top,0px) + 6px);
   padding-bottom:calc(var(--bh, 64px) + env(safe-area-inset-bottom,0px) + 28px);
   color:var(--tx); font-family:'Plus Jakarta Sans',system-ui,sans-serif;
@@ -2024,7 +2027,9 @@ const STYLE_ENS = `<style>
   --enk:#1c1b3a; --enk2:#3a3a5c; --enmu:#6f6e92; --enfa:#6e6d91;
   --enl:#eceaf6; --enl2:#e3e1f2;
   --oni:#fff; --oni-dim:#d9d8ff; --oni-mu:#b6b4f0;
-  max-width:480px; margin:0 auto; min-height:100dvh; position:relative;
+  max-width:480px; min-height:100dvh; position:relative;
+  /* Fond pleine hauteur sous le header verre (pattern livret) */
+  margin:calc(-1 * (var(--th, 52px) + env(safe-area-inset-top,0px))) auto 0;
   padding-top:calc(var(--th, 52px) + env(safe-area-inset-top,0px) + 4px);
   padding-bottom:calc(var(--bh, 64px) + env(safe-area-inset-bottom,0px) + 28px);
   color:var(--enk); font-family:'Plus Jakarta Sans',system-ui,sans-serif;
