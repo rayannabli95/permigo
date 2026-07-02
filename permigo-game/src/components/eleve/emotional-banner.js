@@ -182,6 +182,10 @@ export const emotionalBanner = {
 
       ensureBannerStyles();
 
+      // Idempotence : jamais deux bannières à l'écran (double mount / re-route
+      // de l'accueil) — on retire toute bannière déjà posée avant d'insérer.
+      document.querySelectorAll(".eb-banner").forEach((n) => n.remove());
+
       const div = document.createElement("div");
       div.innerHTML = renderBanner(notif, content);
       const el = div.firstElementChild;
