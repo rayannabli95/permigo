@@ -34,7 +34,8 @@ const STYLE = `<style>
   .me-hero {
     position: relative;
     margin: 0;
-    padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 16px) 18px 2px;
+    /* #app (has-chrome) compense déjà le header fixe — pas de var(--th) ici */
+    padding: 16px 18px 2px;
     background: transparent;
     color: #1a1c2e;
     animation: meHeroIn .45s var(--ease, ease) both;

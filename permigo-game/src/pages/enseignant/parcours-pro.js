@@ -40,7 +40,8 @@ const STYLE = `<style>
 
 /* ── En-tête « Progression » ── */
 .ppr-hd {
-  padding: calc(env(safe-area-inset-top, 0px) + var(--th, 52px) + 14px) 20px 0;
+  /* #app (has-chrome) compense déjà le header fixe — pas de var(--th) ici */
+  padding: 14px 20px 0;
 }
 .ppr-hd-title {
   font: 800 23px/1.15 'Manrope', 'Inter', sans-serif;

@@ -41,8 +41,11 @@ export const ARENE_CSS = `<style>
   --bronze:#cd8b5b; --bronze-dk:#a96a3c;
   --aink:#f4f2ff; --asoft:#c7c2e8; --amute:#9a93c8; --aup:#3ddc84;
   position:relative; isolation:isolate;
-  min-height:100vh; margin:0 auto; max-width:520px;
-  padding:0 0 calc(86px + env(safe-area-inset-bottom,0px));
+  min-height:100vh; max-width:520px;
+  /* Remonte de la hauteur déjà comptée par #app : le fond nuit glisse sous le
+     header verre (pattern livret), le contenu reste sous le header. */
+  margin:calc(-1 * (var(--th,52px) + env(safe-area-inset-top,0px))) auto 0;
+  padding:calc(var(--th,52px) + env(safe-area-inset-top,0px)) 0 calc(86px + env(safe-area-inset-bottom,0px));
   color:var(--aink); font-family:'Inter',system-ui,sans-serif;
   background:
     radial-gradient(115% 55% at 50% 4%, color-mix(in srgb,var(--acc) 26%, transparent), transparent 60%),
@@ -62,7 +65,7 @@ export const ARENE_CSS = `<style>
 .arn > *{ position:relative; z-index:2; }
 
 /* ── En-tête ── */
-.arn-hd{ padding:calc(env(safe-area-inset-top,0px) + var(--th,0px) + 14px) 20px 0; text-align:center; }
+.arn-hd{ padding:14px 20px 0; text-align:center; }
 .arn-hd h1{ font:800 22px/1.1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; margin:0; }
 .arn-hd .arn-sub{ font:600 12.5px/1.4 'Inter',sans-serif; color:var(--amute); margin:5px 0 0; }
 
