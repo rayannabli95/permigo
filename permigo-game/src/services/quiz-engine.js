@@ -55,6 +55,17 @@ export async function lancerQuiz({
 
   if (error || !questions?.length) {
     console.error("[quiz]", error);
+    // Feedback utilisateur + télémétrie : sinon le quiz « ne se lance pas »
+    // en silence et on ne détecte jamais les compétences sans questions.
+    track("quiz.no_questions", { competence_id: competenceId, type });
+    try {
+      const { toast } = await import("@/components/common/toast.js");
+      toast(
+        "Ce quiz n'est pas encore prêt — réessaie plus tard.",
+        "info",
+        4000,
+      );
+    } catch {}
     return null;
   }
 

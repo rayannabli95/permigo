@@ -92,6 +92,25 @@ export async function mount(root, initialTab) {
     ),
   ]);
 
+  // Panne totale (réseau/RPC) ≠ « pas encore classé » : on affiche un vrai
+  // état d'erreur avec Réessayer au lieu d'un faux classement vide.
+  const allFailed = [ecoleRes, nationalRes, theorieRes, hofRes].every(
+    (r) => r.error || r.data == null,
+  );
+  if (allFailed) {
+    root.innerHTML = `${ARENE_CSS}<div class="arn" style="${CONDUITE_ACCENT}">
+      <div class="arn-hd"><h1>Classement</h1><p class="arn-sub">Impossible de charger le classement</p></div>
+      <div style="padding:28px 20px;text-align:center">
+        <p style="font:600 13.5px/1.5 'Inter',sans-serif;color:var(--amute);margin:0 0 16px">Vérifie ta connexion et réessaie.</p>
+        <button id="arn-retry" style="font:800 14px 'Inter',sans-serif;padding:13px 28px;border-radius:14px;border:0;background:var(--aup);color:#04220f;cursor:pointer">Réessayer</button>
+      </div>
+    </div>`;
+    root
+      .querySelector("#arn-retry")
+      ?.addEventListener("click", () => mount(root, initialTab));
+    return;
+  }
+
   const data = {
     ecole: ecoleRes.data || [],
     national: nationalRes.data || [],
