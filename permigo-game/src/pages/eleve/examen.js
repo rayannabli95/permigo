@@ -13,7 +13,8 @@ import { hideBottomNav } from "@/utils/nav.js";
 const STYLE = `<style>
 /* ── Layout ── */
 .exam {
-  padding: 20px 16px 100px;
+  /* #app (has-chrome) compense déjà le header fixe — pas de gros vide en tête */
+  padding: 8px 16px 100px;
   max-width: 480px;
   margin: 0 auto;
   background: var(--bg);
@@ -33,7 +34,7 @@ const STYLE = `<style>
 
 /* ── Skeleton ── */
 .exam-skel {
-  padding: 20px 16px 100px;
+  padding: 8px 16px 100px;
   max-width: 480px;
   margin: 0 auto;
 }
@@ -52,7 +53,6 @@ const STYLE = `<style>
   align-items: center;
   gap: 10px;
   margin-bottom: 16px;
-  padding-top: 4px;
 }
 .exam-hd-ico {
   width: 40px; height: 40px;
@@ -288,6 +288,10 @@ const STYLE = `<style>
   padding: 6px 0;
 }
 .exam-predict-ready .exam-predict-title { color: var(--gr-txt); }
+.exam-predict-almost {
+  display: flex; align-items: center; gap: 12px;
+  padding: 6px 0;
+}
 
 /* ── Readiness pill ── */
 .exam-readiness {
@@ -423,7 +427,11 @@ async function loadData(meId) {
   const predictRaw = predictRes.value?.data;
   const predict = predictRaw?.error ? null : predictRaw || null;
 
-  return { compsCount, baseAcquis, streak, avgScore, predict };
+  // Fetch critique : si les validations n'ont pas pu être lues, on ne doit
+  // pas afficher « 0 compétence » ni une readiness fausse (dégradation silencieuse)
+  const loadFailed = validRes.status !== "fulfilled" || !!validRes.value?.error;
+
+  return { compsCount, baseAcquis, streak, avgScore, predict, loadFailed };
 }
 
 // ─── Render helpers ───────────────────────────────────────────────
@@ -489,16 +497,30 @@ function renderCountdown(examDate) {
 
 const PREDICT_TARGET = 28;
 
-function renderPredict({ compsCount, predict }) {
+function renderPredict(data) {
+  const { compsCount, predict } = data;
   const pct = Math.min(100, Math.round((compsCount / PREDICT_TARGET) * 100));
 
   if (compsCount >= PREDICT_TARGET) {
-    return `
+    // Jamais un « prêt » vert au-dessus d'un critère rouge dans la checklist :
+    // si un critère de préparation n'est pas atteint, on nuance le verdict.
+    const fails = buildCriteria(data).filter((c) => !c.pass && !c.neutral);
+    if (!fails.length) {
+      return `
 <div class="exam-predict-ready">
   <span aria-hidden="true" style="color:var(--gr)">${icon("check-circle", { size: 26 })}</span>
   <div>
     <div class="exam-predict-title">Tu es prêt pour l'examen !</div>
     <div class="exam-predict-sub">${compsCount}/31 compétences validées — objectif atteint</div>
+  </div>
+</div>`;
+    }
+    return `
+<div class="exam-predict-almost">
+  <span aria-hidden="true" style="color:#d97706">${icon("alert-triangle", { size: 26 })}</span>
+  <div>
+    <div class="exam-predict-title">Presque prêt — encore ${fails.length} critère${fails.length > 1 ? "s" : ""}</div>
+    <div class="exam-predict-sub">${compsCount}/31 validées. Reste : ${esc(fails.map((f) => f.label).join(" · "))}</div>
   </div>
 </div>`;
   }
@@ -533,11 +555,9 @@ function renderPredict({ compsCount, predict }) {
 
 const BASE_TOTAL = 24; // C1+C2+C3 (mêmes bases que la readiness moniteur)
 
-function renderChecklist({ compsCount, baseAcquis = 0, streak, avgScore }) {
+function buildCriteria({ compsCount, streak, avgScore }) {
   const revised = isRevised();
-  const baseRestantes = Math.max(0, BASE_TOTAL - baseAcquis);
-
-  const criteria = [
+  return [
     {
       label: "Parcours > 50%",
       sub: `${compsCount} compétences validées sur 31`,
@@ -574,6 +594,13 @@ function renderChecklist({ compsCount, baseAcquis = 0, streak, avgScore }) {
       ico: icon("book", { size: 20 }),
     },
   ];
+}
+
+function renderChecklist(data) {
+  const { compsCount, baseAcquis = 0 } = data;
+  const baseRestantes = Math.max(0, BASE_TOTAL - baseAcquis);
+
+  const criteria = buildCriteria(data);
 
   // Verdict ALIGNÉ sur le moniteur : « prêt » = 100% des bases C1-C3
   // validées par le moniteur (source de vérité). Les critères ci-dessous
@@ -670,6 +697,31 @@ export async function mount(root) {
 
   const data = await loadData(me.id);
   const examDate = parseSavedDate();
+
+  // Panne réseau sur les données critiques : état clair + retry,
+  // plutôt que « 0 compétence » et une readiness fausse (anxiogène avant l'examen)
+  if (data.loadFailed) {
+    root.innerHTML = `${STYLE}
+<div class="exam">
+  <div class="exam-hd">
+    <div class="exam-hd-ico" aria-hidden="true">${icon("graduation-cap", { size: 34 })}</div>
+    <div>
+      <h1 class="exam-hd-title">Ton examen blanc</h1>
+      <div class="exam-hd-sub">Prépare-toi sereinement pour le grand jour.</div>
+    </div>
+  </div>
+  <div class="exam-card" style="text-align:center;padding:28px 20px">
+    <div style="margin-bottom:10px;color:var(--mu3)">${icon("alert-circle", { size: 30 })}</div>
+    <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Impossible de charger ta préparation</div>
+    <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">Vérifie ta connexion, puis réessaie.</div>
+    <button class="exam-choose-btn" id="exam-retry">Réessayer</button>
+  </div>
+</div>`;
+    root
+      .querySelector("#exam-retry")
+      ?.addEventListener("click", () => mount(root));
+    return;
+  }
 
   root.innerHTML = `${STYLE}
 <div class="exam">
