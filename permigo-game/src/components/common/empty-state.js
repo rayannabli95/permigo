@@ -87,11 +87,13 @@ const SHARED_STYLES = `
 }
 `;
 
-let _stylesInjected = false;
+// Vérifie le DOM (pas un drapeau en mémoire) : le nettoyage du routeur peut
+// retirer la balise <style> au changement de route — un drapeau module resterait
+// à « déjà injecté » et tous les états vides suivants sortiraient sans style.
 function ensureStyles() {
-  if (_stylesInjected) return;
-  _stylesInjected = true;
+  if (document.getElementById("es-shared-styles")) return;
   const style = document.createElement("style");
+  style.id = "es-shared-styles";
   style.textContent = SHARED_STYLES;
   document.head.appendChild(style);
 }
@@ -106,6 +108,8 @@ function ensureStyles() {
  * @returns {string} HTML
  */
 export function emptyState({ image, title, body, cta }) {
+  // Les styles partagés (.es-cta…) servent aussi au CTA de cette variante légère
+  ensureStyles();
   // Mascotte par défaut quand l'appelant ne fournit pas d'illustration
   const img = image || "/skins/mascot-wait.png";
   return `

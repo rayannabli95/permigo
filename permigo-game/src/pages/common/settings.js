@@ -38,9 +38,18 @@ const STYLE = `<style>
   background: var(--su);
   border-bottom: 1px solid var(--bo);
   position: sticky;
-  top: calc(52px + env(safe-area-inset-top, 0px));
+  top: calc(var(--th, 52px) + env(safe-area-inset-top, 0px));
   z-index: 10;
 }
+/* Squelette de chargement (l'écran ne reste plus figé le temps du réseau) */
+.st-skel-block {
+  margin: 20px 16px 0;
+  border-radius: 16px;
+  background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
+  background-size: 200% 100%;
+  animation: stShimmer 1.4s infinite;
+}
+@keyframes stShimmer { to { background-position: -200% 0; } }
 .st-back {
   width: 36px; height: 36px;
   border-radius: 8px;
@@ -314,8 +323,18 @@ export async function mount(root) {
 
   track("page_view", { page: "settings", role: me.role });
 
+  // Squelette immédiat : l'écran ne reste plus figé sur la page précédente
+  // le temps du réseau
+  root.innerHTML = `${STYLE}
+<div class="st">
+  ${renderHeader()}
+  <div class="st-skel-block" style="height:120px"></div>
+  <div class="st-skel-block" style="height:180px"></div>
+  <div class="st-skel-block" style="height:140px"></div>
+</div>`;
+
   // Load current profile prefs + RGPD preferences in parallel
-  const [{ data: profile }, { data: myPrefs }] = await Promise.all([
+  const [profileRes, prefsRes] = await Promise.allSettled([
     sb
       .from("profiles")
       .select(
@@ -325,6 +344,38 @@ export async function mount(root) {
       .maybeSingle(),
     sb.rpc("get_my_preferences"),
   ]);
+
+  const profileFailed =
+    profileRes.status !== "fulfilled" || !!profileRes.value.error;
+  const profile =
+    profileRes.status === "fulfilled" ? profileRes.value.data : null;
+  const prefsFailed = prefsRes.status !== "fulfilled" || !!prefsRes.value.error;
+  const myPrefs = prefsRes.status === "fulfilled" ? prefsRes.value.data : null;
+
+  // Lecture du profil en échec : état d'erreur + retry, plutôt que des
+  // toggles pré-remplis de défauts trompeurs (risque d'écraser les vraies prefs)
+  if (profileFailed) {
+    root.innerHTML = `${STYLE}
+<div class="st">
+  ${renderHeader()}
+  <div class="st-section" style="margin-top:20px;padding:28px 20px;text-align:center">
+    <div style="margin-bottom:10px;color:var(--mu3)">${icon("alert-circle", { size: 30 })}</div>
+    <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Impossible de charger tes préférences</div>
+    <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">Vérifie ta connexion, puis réessaie.</div>
+    <button class="st-save-btn" id="st-retry" style="margin:0 auto;width:auto;padding:10px 20px">Réessayer</button>
+  </div>
+</div>`;
+    root
+      .querySelector("#st-back")
+      ?.addEventListener("click", () => navigate("/profil"));
+    root
+      .querySelector("#st-retry")
+      ?.addEventListener("click", () => mount(root));
+    return;
+  }
+  if (prefsFailed) {
+    toast("Certaines préférences n'ont pas pu être chargées", "error", 2500);
+  }
 
   const prefs = {
     notifPush: profile?.notif_push ?? true,
@@ -346,9 +397,8 @@ export async function mount(root) {
   wire(root, me, prefs);
 }
 
-function render(root, me, prefs) {
-  root.innerHTML = `${STYLE}
-<div class="st anim-slide-up">
+function renderHeader() {
+  return `
   <div class="st-header">
     <button class="st-back" id="st-back" aria-label="Retour">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -356,7 +406,13 @@ function render(root, me, prefs) {
       </svg>
     </button>
     <div class="st-page-title">Préférences</div>
-  </div>
+  </div>`;
+}
+
+function render(root, me, prefs) {
+  root.innerHTML = `${STYLE}
+<div class="st anim-slide-up">
+  ${renderHeader()}
 ${
   isStandalone() || guessPlatform() === "other"
     ? ""
@@ -416,12 +472,12 @@ ${
     </div>
     <div class="st-row" style="flex-direction:column;align-items:flex-start;gap:8px">
       <div class="st-row-title">Ne pas déranger</div>
+      <div class="st-row-sub" style="margin-top:-4px">Enregistré automatiquement</div>
       <div style="display:flex;align-items:center;gap:8px;width:100%">
-        <label style="font:500 12px/1 'Inter',sans-serif;color:var(--mu3);flex-shrink:0">De</label>
-        <input class="st-inp" id="inp-dnd-start" type="time" value="${prefs.dndStart}" aria-label="Ne pas déranger : heure de début" style="flex:1;padding:8px 10px">
-        <label style="font:500 12px/1 'Inter',sans-serif;color:var(--mu3);flex-shrink:0">à</label>
-        <input class="st-inp" id="inp-dnd-end" type="time" value="${prefs.dndEnd}" aria-label="Ne pas déranger : heure de fin" style="flex:1;padding:8px 10px">
-        <button class="st-save-btn" id="btn-save-dnd" style="margin:0;width:auto;padding:8px 14px;font-size:12px">OK</button>
+        <label for="inp-dnd-start" style="font:500 12px/1 'Inter',sans-serif;color:var(--mu3);flex-shrink:0">De</label>
+        <input class="st-inp" id="inp-dnd-start" type="time" step="60" value="${prefs.dndStart}" aria-label="Ne pas déranger : heure de début" style="flex:1;padding:8px 10px">
+        <label for="inp-dnd-end" style="font:500 12px/1 'Inter',sans-serif;color:var(--mu3);flex-shrink:0">à</label>
+        <input class="st-inp" id="inp-dnd-end" type="time" step="60" value="${prefs.dndEnd}" aria-label="Ne pas déranger : heure de fin" style="flex:1;padding:8px 10px">
       </div>
     </div>
   </div>
@@ -722,8 +778,8 @@ function wire(root, me, prefs) {
   root.querySelector("#tgl-email")?.addEventListener("change", savePrefs);
   root.querySelector("#tgl-ranking")?.addEventListener("change", savePrefs);
 
-  // Save DND times
-  root.querySelector("#btn-save-dnd")?.addEventListener("click", async () => {
+  // DND : sauvegarde automatique au changement (plus de bouton OK criard)
+  const saveDnd = async () => {
     const start = root.querySelector("#inp-dnd-start")?.value;
     const end = root.querySelector("#inp-dnd-end")?.value;
     if (!start || !end) return;
@@ -731,11 +787,15 @@ function wire(root, me, prefs) {
       .from("profiles")
       .update({ dnd_start: start, dnd_end: end })
       .eq("id", me.id);
-    if (!error) {
+    if (error) {
+      toast("Erreur de sauvegarde", "error", 2000);
+    } else {
       toast("Plage Ne pas déranger enregistrée", "success", 2000);
       track("settings.dnd_saved", {});
     }
-  });
+  };
+  root.querySelector("#inp-dnd-start")?.addEventListener("change", saveDnd);
+  root.querySelector("#inp-dnd-end")?.addEventListener("change", saveDnd);
 
   // Save prénom
   root

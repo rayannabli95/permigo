@@ -61,6 +61,8 @@ function renderThreadList(root, me, threads) {
   const listView = root.querySelector("#msg-list-view");
 
   if (threads.length === 0) {
+    // L'invite « lance la conversation » doit offrir l'action, sinon cul-de-sac
+    const isEleve = me?.role === "eleve";
     listView.innerHTML = `
       <div class="msg-list-header">
         <h1 class="msg-title">Messages</h1>
@@ -68,12 +70,44 @@ function renderThreadList(root, me, threads) {
       ${emptyState({
         image: "/skins/empty-states/empty_messages.png",
         title: "Aucun message",
-        body:
-          me?.role === "eleve"
-            ? "Lance la conversation avec ton moniteur."
-            : "Tes conversations avec tes élèves apparaîtront ici.",
+        body: isEleve
+          ? "Lance la conversation avec ton moniteur."
+          : "Tes conversations avec tes élèves apparaîtront ici.",
+        cta: isEleve
+          ? `<button class="es-cta" id="msg-empty-cta">Écrire à mon moniteur</button>`
+          : "",
       })}
     `;
+    if (isEleve) {
+      listView
+        .querySelector("#msg-empty-cta")
+        ?.addEventListener("click", async () => {
+          try {
+            // Le moniteur rattaché = l'enseignant de son auto-école
+            const { data, error } = await sb
+              .from("profiles")
+              .select("id, prenom, nom")
+              .eq("auto_ecole_id", me.auto_ecole_id)
+              .eq("role", "enseignant")
+              .limit(1);
+            const moniteur = data?.[0];
+            if (error || !moniteur) {
+              toast("Pas de moniteur rattaché pour l'instant", "error", 2500);
+              return;
+            }
+            track("messages.empty_cta", {});
+            openConversation(root, me, {
+              partner_id: moniteur.id,
+              partner_name:
+                [moniteur.prenom, moniteur.nom].filter(Boolean).join(" ") ||
+                "Ton moniteur",
+            });
+          } catch (e) {
+            console.error("[messages] empty cta", e);
+            toast("Impossible d'ouvrir la conversation", "error", 2500);
+          }
+        });
+    }
     return;
   }
 
