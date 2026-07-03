@@ -477,12 +477,16 @@ export async function mount(root, openKey = null) {
 // ─── Render all ───────────────────────────────────────────────
 // Trophées déjà « vus » : tout débloqué absent de ce set porte une pastille
 // NOUVEAU à l'affichage, puis le set est mis à jour (vu = affiché ici).
+// Retourne null si le ledger n'existe pas encore (première visite) : dans ce
+// cas on seed en silence, sans pastille — un badge sur 100% des cartes ne
+// signalerait plus rien.
 const LS_TROPH_SEEN = "pg-troph-seen";
 function getSeenSet() {
   try {
-    return new Set(JSON.parse(localStorage.getItem(LS_TROPH_SEEN) || "[]"));
+    const raw = localStorage.getItem(LS_TROPH_SEEN);
+    return raw === null ? null : new Set(JSON.parse(raw));
   } catch {
-    return new Set();
+    return null; // ledger illisible → re-seed silencieux, jamais de spam
   }
 }
 function saveSeenSet(keys) {
@@ -511,12 +515,15 @@ function renderAll(
   openKey = null,
 ) {
   const unlockedMap = new Map(unlocked.map((u) => [u.achievement_key, u]));
-  // Nouveautés = débloqués jamais affichés ici
+  // Nouveautés = débloqués DEPUIS la dernière visite. Première visite
+  // (ledger absent) → aucun badge : on marque l'existant comme déjà vu.
   const seen = getSeenSet();
-  const freshKeys = new Set(
-    unlocked.map((u) => u.achievement_key).filter((k) => !seen.has(k)),
-  );
-  saveSeenSet(new Set([...seen, ...freshKeys]));
+  const unlockedKeys = unlocked.map((u) => u.achievement_key);
+  const freshKeys =
+    seen === null
+      ? new Set()
+      : new Set(unlockedKeys.filter((k) => !seen.has(k)));
+  saveSeenSet(new Set([...(seen ?? []), ...unlockedKeys]));
   window.dispatchEvent(new CustomEvent("pg-trophees-seen"));
   const unlockedDefs = CATALOG.filter((t) => unlockedMap.has(t.key));
   const unlockedCount = unlockedDefs.length;

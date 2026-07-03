@@ -124,7 +124,6 @@ const STYLE = `<style>
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.gal-card.acquis .gal-card-meta { color: var(--gr-txt); }
 
 /* Lock icon overlay */
 .gal-lock-badge {
@@ -391,7 +390,7 @@ export async function mount(root) {
         ${!unlocked ? `<div class="gal-lock-badge" aria-hidden="true">${icon("lock", { size: 14 })}</div>` : ""}
         <div class="gal-card-visual">${visual}</div>
         <div class="gal-card-nom">${esc(t.nom)}</div>
-        <div class="gal-card-meta">${unlocked ? "Acquis" : esc(t.objectif || "Verrouillé")}</div>
+        ${unlocked ? "" : `<div class="gal-card-meta">${esc(t.objectif || "Verrouillé")}</div>`}
       </div>
     `;
   }

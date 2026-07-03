@@ -181,6 +181,15 @@ const STYLE = `<style>
 .mc-card.mc-opened .mc-thumb { opacity: .5; }
 .mc-card.mc-opened .mc-label { color: var(--mu); }
 .mc-card.mc-opened .mc-sub { color: var(--mu2); }
+/* Rareté lisible même une fois ouvert — le légendaire domine la liste */
+.mc-card.mc-opened[data-tier="argent"] { border-color: color-mix(in srgb, var(--mu2) 40%, var(--bo)); }
+.mc-card.mc-opened[data-tier="or"] { border-color: color-mix(in srgb, #facc15 55%, var(--bo)); }
+.mc-card.mc-opened[data-tier="legendaire"] {
+  border-color: color-mix(in srgb, var(--pul) 60%, var(--bo));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--pul) 8%, var(--su)) 0%, var(--su) 70%);
+  filter: saturate(.85);
+}
+.mc-card.mc-opened[data-tier="legendaire"] .mc-thumb { opacity: .75; }
 
 .mc-thumb {
   width: 72px; height: 72px; border-radius: 16px;
@@ -229,14 +238,6 @@ const STYLE = `<style>
   background: color-mix(in srgb, var(--a) 8%, transparent);
   color: var(--a-txt);
 }
-
-.mc-badge {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; flex-shrink: 0;
-}
-.mc-badge-open    { background: color-mix(in srgb, var(--a) 12%, transparent); color: var(--a-txt); }
-.mc-badge-opened  { background: rgba(16,185,129,.1);  color: var(--grd); }
 
 /* ── CTA open button on card ── */
 .mc-open-btn {
@@ -335,7 +336,7 @@ function renderCard(chest) {
     ${
       canOpen
         ? `<button class="mc-open-btn" aria-label="Ouvrir le coffre">Ouvrir</button>`
-        : `<div class="mc-badge mc-badge-opened" aria-hidden="true">${icon("check", { size: 14, strokeWidth: 2.5 })}</div>`
+        : ""
     }
   </div>`;
 }
@@ -377,7 +378,10 @@ export async function mount(root) {
   }
 
   const toOpen = chests.filter((c) => !c.opened_at);
-  const opened = chests.filter((c) => c.opened_at);
+  // Dernier coffre ouvert en tête de section (le plus récent d'abord)
+  const opened = chests
+    .filter((c) => c.opened_at)
+    .sort((a, b) => new Date(b.opened_at) - new Date(a.opened_at));
 
   const page = root.querySelector(".mc-page");
   if (!page) return;
@@ -390,7 +394,8 @@ export async function mount(root) {
   }
 
   if (opened.length > 0) {
-    html += `<div class="mc-section">Déjà ouverts</div>`;
+    // Le compteur vit dans l'en-tête (remplace les coches identiques par carte)
+    html += `<div class="mc-section">Déjà ouverts (${opened.length})</div>`;
     html += `<div class="mc-list">${opened.map(renderCard).join("")}</div>`;
   }
 
@@ -419,12 +424,7 @@ export async function mount(root) {
         card.classList.remove("mc-can-open");
         card.classList.add("mc-opened");
         card.tabIndex = -1;
-        card.querySelector(".mc-open-btn")?.replaceWith(
-          Object.assign(document.createElement("div"), {
-            className: "mc-badge mc-badge-opened",
-            innerHTML: icon("check", { size: 14, strokeWidth: 2.5 }),
-          }),
-        );
+        card.querySelector(".mc-open-btn")?.remove();
         const sub = card.querySelector(".mc-sub");
         if (sub) sub.textContent = "Ouvert aujourd'hui";
         card.querySelector(".mc-rewards")?.remove();
@@ -464,6 +464,10 @@ export async function mount(root) {
           page.appendChild(openedList);
         }
         openedList.prepend(card);
+        // Le compteur de l'en-tête suit le nombre de coffres ouverts
+        const openedHdr = openedList.previousElementSibling;
+        if (openedHdr?.classList?.contains("mc-section"))
+          openedHdr.textContent = `Déjà ouverts (${openedList.children.length})`;
       };
 
       // Persiste l'ouverture en DB + met à jour l'UI
