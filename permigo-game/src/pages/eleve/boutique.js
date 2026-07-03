@@ -10,6 +10,7 @@ import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { toast } from "@/components/common/toast.js";
 import { haptic } from "@/utils/haptic.js";
+import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
 import {
   equipItem,
   unequipItem,
@@ -616,6 +617,7 @@ export async function mount(root) {
 
   root.innerHTML = `${STYLE}
 <div class="bo2 anim-slide-up">
+  ${recompensesTabs("boutique")}
   <div class="bo2-hd">
     <div class="bo2-hd-row">
       <h1 class="bo2-hd-title" tabindex="-1">Boutique<small>Affiche ton style au classement</small></h1>

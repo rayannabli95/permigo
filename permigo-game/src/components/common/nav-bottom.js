@@ -16,7 +16,8 @@ const ICO = {
   bag: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
   activity: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
   chart: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
-  gift: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 21 12 13 4 21"/><polyline points="4 3 12 11 20 3"/><line x1="12" y1="11" x2="12" y2="21"/><line x1="4" y1="3" x2="20" y2="3"/><line x1="4" y1="3" x2="4" y2="13"/><line x1="20" y1="3" x2="20" y2="13"/></svg>`,
+  gift: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>`,
+  zap: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
 };
 
 // Variantes PLEINES (état actif) — remplies à la couleur du thème (--a).
@@ -31,14 +32,40 @@ const ICO_FILL = {
   chart: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="16" y="9" width="4" height="11" rx="1"/><rect x="10" y="3" width="4" height="17" rx="1"/><rect x="4" y="13" width="4" height="7" rx="1"/></svg>`,
   // Tracé non remplissable : version épaissie (le passage à la couleur thème suffit)
   activity: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+  zap: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  gift: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 7h-2.7A3.4 3.4 0 0 0 12 3.6 3.4 3.4 0 0 0 6.7 7H4a1 1 0 0 0-1 1v3.5h8V9h2v2.5h8V8a1 1 0 0 0-1-1zM9.6 7a1.4 1.4 0 0 1 0-2.8c.9 0 1.5 1.3 1.8 2.8H9.6zm4.8 0h-1.8c.3-1.5.9-2.8 1.8-2.8a1.4 1.4 0 0 1 0 2.8zM3 13.5V21a1 1 0 0 0 1 1h7v-8.5H3zm10 8.5h7a1 1 0 0 0 1-1v-7.5h-8V22z"/></svg>`,
 };
 
 const TABS = {
+  // Nav « 5 portes » (2026-07) : une porte par besoin, les features rangées
+  // derrière (match) — l'élève ne se perd plus dans 22 destinations.
   eleve: [
     { id: "default", label: "Accueil", ico: "home" },
-    { id: "parcours", label: "Parcours", ico: "map" },
-    { id: "boutique", label: "Boutique", ico: "bag" },
-    { id: "trophees", label: "Trophées", ico: "trophy" },
+    {
+      id: "reviser",
+      label: "Réviser",
+      ico: "zap",
+      match: [
+        "quiz",
+        "exam-blanc",
+        "revision-conduite",
+        "exam-conduite",
+        "jeu-faute",
+        "flash-quiz",
+      ],
+    },
+    {
+      id: "parcours",
+      label: "Mon permis",
+      ico: "map",
+      match: ["examen", "centre-examen", "compte-rendu", "sessions"],
+    },
+    {
+      id: "boutique",
+      label: "Récompenses",
+      ico: "gift",
+      match: ["galerie", "trophees", "mes-coffres", "classement"],
+    },
     { id: "profil", label: "Profil", ico: "user" },
   ],
   enseignant: [
@@ -295,7 +322,7 @@ export function mountBottomNav(role) {
   // encore été vu sur la page trophées (set localStorage pg-troph-seen).
   if (role === "eleve") _checkTropheesDot(nav);
   window.addEventListener("pg-trophees-seen", () => {
-    nav.querySelector('.bn-tab[data-id="trophees"] .bn-dot')?.remove();
+    nav.querySelector('.bn-tab[data-id="boutique"] .bn-dot')?.remove();
   });
 
   // Intro : petit rebond en cascade des onglets, UNE fois par session —
@@ -362,7 +389,8 @@ async function _checkTropheesDot(nav) {
     const { data } = await sb.rpc("get_my_achievements");
     const hasNew = (data || []).some((a) => !seen.has(a.achievement_key));
     if (!hasNew) return;
-    const tab = nav.querySelector('.bn-tab[data-id="trophees"]');
+    // Les trophées vivent derrière la porte « Récompenses » (id boutique)
+    const tab = nav.querySelector('.bn-tab[data-id="boutique"]');
     if (tab && !tab.querySelector(".bn-dot")) {
       const dot = document.createElement("span");
       dot.className = "bn-dot";

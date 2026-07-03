@@ -13,6 +13,7 @@ import { haptic } from "@/utils/haptic.js";
 import { toast } from "@/components/common/toast.js";
 import { openBottomSheet } from "@/components/common/bottom-sheet.js";
 import { CATALOG, RARITY_META, shortProgress } from "@/data/achievements.js";
+import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
 
 // Ordre de prestige (pour élire le trophée vedette)
 const RARITY_RANK = { commun: 0, rare: 1, epique: 2, legendaire: 3 };
@@ -406,6 +407,7 @@ export async function mount(root, openKey = null) {
 
   root.innerHTML = `${STYLE}
 <div class="tr2 anim-slide-up">
+  ${recompensesTabs("trophees")}
   <div class="tr2-hero">
     <div class="tr2-hero-inner">
       <div class="tr2-hero-top">

@@ -27,6 +27,7 @@ import {
   areneMeRow,
   arenePaliers,
 } from "@/components/common/arene-rank.js";
+import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
 
 const LIMIT = 50;
 
@@ -229,6 +230,8 @@ function _renderArena(state, data) {
 
   return `<div class="arn" style="${accent}">
   <div class="arn-hd"><h1>Classement</h1><p class="arn-sub">${sub}</p></div>
+
+  ${recompensesTabs("classement", { dark: true })}
 
   <div class="arn-seg" role="tablist">
     <button data-ligue="conduite" role="tab" aria-selected="${state.ligue === "conduite"}">Conduite <span class="sub">en voiture</span></button>

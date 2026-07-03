@@ -16,6 +16,7 @@ import {
   shortProgress,
 } from "@/data/achievements.js";
 import { ASSETS } from "@/utils/assets.js";
+import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
 
 const RARITY_LABEL = Object.fromEntries(
   Object.entries(RARITY_META).map(([k, v]) => [k, v.label]),
@@ -259,6 +260,7 @@ export async function mount(root) {
 
   // Initial skeleton
   root.innerHTML = `${STYLE}<div class="gal">
+    ${recompensesTabs("galerie")}
     <div class="gal-hd">
       <h1 class="gal-title">Ma collection</h1>
       <p class="gal-sub">Tout ce que tu peux débloquer.</p>
@@ -471,6 +473,7 @@ export async function mount(root) {
   function render() {
     root.innerHTML = `${STYLE}
       <div class="gal anim-slide-up">
+        ${recompensesTabs("galerie")}
         <div class="gal-hd">
           <h1 class="gal-title">Ma collection</h1>
           <p class="gal-sub">${unlockedTrophies + unlockedPermisBg} récompense${unlockedTrophies + unlockedPermisBg > 1 ? "s" : ""} débloquée${unlockedTrophies + unlockedPermisBg > 1 ? "s" : ""} sur ${trophees.length + permisTiers.length}.</p>
