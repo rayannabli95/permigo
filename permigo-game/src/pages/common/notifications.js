@@ -9,6 +9,7 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
+import { hideHeader } from "@/utils/nav.js";
 import { emptyState } from "@/components/common/empty-state.js";
 
 // ─── Deep-link resolver ───────────────────────────────────────
@@ -203,10 +204,13 @@ const STYLE = `<style>
 }
 
 /* ── Header ── */
+/* Le chrome global est masqué sur cette page (hideHeader) : l'en-tête in-page
+   devient LA barre de titre — collée en haut, safe-area incluse. */
 .nf2-hd {
-  position: sticky; top: calc(52px + env(safe-area-inset-top, 0px)); z-index: 20;
+  position: sticky; top: 0; z-index: 20;
   background: var(--su); border-bottom: 1px solid var(--bo);
-  padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px;
+  display: flex; align-items: center; gap: 10px;
 }
 .nf2-back {
   width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--bo);
@@ -352,6 +356,10 @@ export async function mount(root, me) {
   if (!me) return;
 
   track("page.view", { page: "notifications", role: me.role });
+
+  // Un seul niveau de titre : l'en-tête in-page (retour + Notifications +
+  // « Tout lu ») remplace le chrome global le temps de la page.
+  hideHeader();
 
   root.innerHTML = `${STYLE}
 <div class="nf2 anim-slide-up" id="nf2-root">

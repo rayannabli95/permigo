@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
+import { getCurUser } from "@/auth/cur-user.js";
 
 const CONTENT = {
   privacy: {
@@ -177,7 +178,13 @@ export async function mount(root, param = "privacy") {
   <div class="legal-footer">PermiGo v7 · ${new Date().getFullYear()}</div>
 </div>`;
 
-  root
-    .querySelector("#legal-back")
-    ?.addEventListener("click", () => navigate("/settings"));
+  root.querySelector("#legal-back")?.addEventListener("click", () => {
+    // Page atteignable depuis la landing (visiteur non connecté) ET depuis
+    // les réglages : revenir d'où l'on vient, jamais forcer /settings.
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    navigate(getCurUser() ? "/settings" : "/");
+  });
 }

@@ -108,6 +108,11 @@ body.has-chrome #app {
   padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
 }
 
+/* Sous-page avec en-tête in-page complet : header global masqué (cf hideHeader).
+   #header-bar est en display:flex → [hidden] seul ne suffirait pas. */
+#header-bar[hidden] { display: none; }
+body.has-chrome.no-top-chrome #app { padding-top: 0; }
+
 /* ─── Desktop framing : iPhone-style centered, max-width 480 ─── */
 @media (min-width: 768px) {
   body {
