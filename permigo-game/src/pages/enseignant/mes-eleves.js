@@ -731,11 +731,13 @@ function render() {
   const total = roster.length;
   const prets = roster.filter((e) => e.readiness === "pret").length;
 
-  // Kicker dynamique selon l'état
+  // Sous-titre = uniquement l'info nouvelle (le titre affiche déjà le total)
   const heroSub =
     total === 0
       ? null
-      : `${total} élève${total > 1 ? "s" : ""} · ${prets > 0 ? `${prets} prêt${prets > 1 ? "s" : ""} pour l'examen` : "en cours de formation"}`;
+      : prets > 0
+        ? `${prets} prêt${prets > 1 ? "s" : ""} pour l'examen`
+        : "En cours de formation";
 
   _root.innerHTML = `
     ${STYLE}

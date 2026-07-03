@@ -124,9 +124,11 @@ const STYLE = `<style>
     border-radius: 999px;
     margin-bottom: 8px;
     align-self: flex-end;
+    white-space: nowrap;
   }
   .ins-hero-delta.up   { background: rgba(255,255,255,.18); color: #c7f9d8; }
-  .ins-hero-delta.down { background: rgba(255,255,255,.14); color: #fecaca; }
+  /* Ambre neutre plutôt que rouge : informer, pas alarmer */
+  .ins-hero-delta.down { background: rgba(255,255,255,.14); color: #fde68a; }
   .ins-hero-delta.flat { background: rgba(255,255,255,.12); color: rgba(255,255,255,.8); }
 
   /* Sparkline 7 barres dans le hero */
@@ -145,7 +147,10 @@ const STYLE = `<style>
     transition: height .3s ease;
   }
   .ins-hero-spark-bar.peak {
-    background: #fff;
+    /* Pas de blanc pur plein (lisait comme un placeholder) : blanc adouci + halo */
+    background: rgba(255, 255, 255, .88);
+    box-shadow: 0 0 8px rgba(255, 255, 255, .35);
+    border-radius: 4px 4px 2px 2px;
   }
 
   /* ── Bento 3 tuiles ── */
@@ -827,23 +832,23 @@ function renderPeriodContent(data) {
   let deltaHtml = "";
   if (isSemaine) {
     if (delta === null) {
-      deltaHtml = `<span class="ins-hero-delta flat">Premiere semaine</span>`;
+      deltaHtml = `<span class="ins-hero-delta flat">Première semaine</span>`;
     } else if (delta > 0) {
-      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${delta} vs S-1</span>`;
+      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${delta} vs semaine passée</span>`;
     } else if (delta < 0) {
-      deltaHtml = `<span class="ins-hero-delta down">&#9660; ${delta} vs S-1</span>`;
+      deltaHtml = `<span class="ins-hero-delta down">${delta} vs semaine passée</span>`;
     } else {
-      deltaHtml = `<span class="ins-hero-delta flat">Stable vs S-1</span>`;
+      deltaHtml = `<span class="ins-hero-delta flat">Comme la semaine passée</span>`;
     }
   } else {
     if (deltaMois === null) {
       deltaHtml = `<span class="ins-hero-delta flat">Premier mois</span>`;
     } else if (deltaMois > 0) {
-      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${deltaMois}% vs M-1</span>`;
+      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${deltaMois}% vs mois dernier</span>`;
     } else if (deltaMois < 0) {
-      deltaHtml = `<span class="ins-hero-delta down">&#9660; ${Math.abs(deltaMois)}% vs M-1</span>`;
+      deltaHtml = `<span class="ins-hero-delta down">-${Math.abs(deltaMois)}% vs mois dernier</span>`;
     } else {
-      deltaHtml = `<span class="ins-hero-delta flat">Stable vs M-1</span>`;
+      deltaHtml = `<span class="ins-hero-delta flat">Comme le mois dernier</span>`;
     }
   }
 
@@ -851,7 +856,8 @@ function renderPeriodContent(data) {
   const sparkMax = Math.max(1, ...spark);
   const sparkBars = spark
     .map((v, i) => {
-      const pct = Math.max(8, Math.round((v / sparkMax) * 100));
+      // Jours actifs lisibles (min 20 %), jours vides en trait fantôme (10 %)
+      const pct = v > 0 ? Math.max(20, Math.round((v / sparkMax) * 100)) : 10;
       const isPeak = v === sparkMax && v > 0;
       return `<div class="ins-hero-spark-bar${isPeak ? " peak" : ""}"
                    style="height:${pct}%;flex:1"></div>`;

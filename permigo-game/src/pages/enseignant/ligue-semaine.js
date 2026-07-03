@@ -77,7 +77,6 @@ ${LEAGUE_CSS}
 .ls-w-hero-inner { position: relative; z-index: 2; }
 .ls-w-hero-top {
   display: flex; align-items: flex-start; gap: 14px;
-  margin-bottom: 16px;
 }
 .ls-w-hero-illus { flex-shrink: 0; opacity: .9; }
 .ls-w-hero-text { flex: 1; min-width: 0; }
@@ -98,18 +97,6 @@ ${LEAGUE_CSS}
 }
 .ls-w-countdown-lbl { font: 600 10px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: .06em; }
 .ls-w-countdown-val { font: 700 13px/1 'IBM Plex Mono', monospace; color: #fff; }
-
-/* Légende seuils — chips colorées sur fond blanc */
-.ls-w-pts-legend {
-  display: flex; flex-wrap: wrap; gap: 6px;
-  padding-top: 14px; border-top: 1px solid rgba(255,255,255,.12);
-}
-.ls-w-pts-pill {
-  font: 600 10px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-  padding: 4px 9px; border-radius: var(--ens-r-pill, 999px);
-  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
-  color: rgba(255,255,255,.82);
-}
 
 /* Ligues header dans la liste */
 .ls-w-league-hd {
@@ -175,17 +162,6 @@ ${LEAGUE_CSS}
   .ls-w-motivation-cta, .ls-w-back { transition: none; }
 }
 
-/* Stat intégrée au hero */
-.ls-w-stat { display: flex; flex-direction: column; gap: 2px; }
-.ls-w-stat__num {
-  font: 800 28px/1 var(--ens-display, 'Fredoka'), sans-serif;
-  color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -.02em;
-}
-.ls-w-stat__lbl {
-  font: 600 11px/1.2 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-  text-transform: uppercase; letter-spacing: .06em;
-  color: rgba(255,255,255,.62);
-}
 </style>`;
 
 // ─── Mount ────────────────────────────────────────────────────
@@ -242,6 +218,7 @@ function _render(root, rows) {
   const mine = rows.find((r) => r.is_me) || null;
   const myPts = mine?.weekly_pts ?? 0;
   const myLeague = getLeague(myPts);
+  const myRank = mine?.rank_pos ?? null;
   const countdown = fmtCountdown(msToNextMonday());
 
   // Seuils min pour remonter de ligue
@@ -251,7 +228,10 @@ function _render(root, rows) {
   const prevLeague = myLeagueIdx > 0 ? LEAGUES[myLeagueIdx - 1] : null;
   const ptsToNext = prevLeague ? prevLeague.minPts - myPts : 0;
 
-  // Hero arcade : podium + badge de ligue + compteur remise à zéro
+  // Hero allégé : rang + badge de ligue (avec les points) + remise à zéro.
+  // Le titre « Ligue de la semaine » est déjà dans le header juste au-dessus,
+  // les points sont déjà dans le badge, et « 1 pt = 1 validation » vit dans
+  // le sous-titre du header → on ne les répète plus ici.
   const hero = `
   <div class="ls-w-hero-wrap">
     <div class="ls-w-hero-inner">
@@ -259,25 +239,15 @@ function _render(root, rows) {
         <div class="ls-w-hero-illus">${illus("podium", { size: 68 })}</div>
         <div class="ls-w-hero-text">
           <p class="ls-w-hero-kicker">Classement hebdo</p>
-          <h1 class="ls-w-hero-title">Ligue de la semaine</h1>
+          <h1 class="ls-w-hero-title">${myRank ? `Tu es #${myRank} cette semaine` : "Marque ton premier point"}</h1>
           <div class="ls-w-hero-badge">
             ${renderLeagueBadge(myLeague, myPts, "md")}
+            <div class="ls-w-countdown">
+              <span class="ls-w-countdown-lbl">Remise à zéro dans</span>
+              <span class="ls-w-countdown-val">${esc(countdown)}</span>
+            </div>
           </div>
         </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-        <div class="ls-w-stat">
-          <span class="ls-w-stat__num">${myPts}</span>
-          <span class="ls-w-stat__lbl">pt${myPts !== 1 ? "s" : ""} cette semaine</span>
-        </div>
-        <div class="ls-w-countdown">
-          <span class="ls-w-countdown-lbl">Remise à zéro dans</span>
-          <span class="ls-w-countdown-val">${esc(countdown)}</span>
-        </div>
-      </div>
-      <div class="ls-w-pts-legend">
-        <span class="ls-w-pts-pill">1 pt = 1 validation</span>
-        ${LEAGUES.map((l) => `<span class="ls-w-pts-pill">${l.name} ≥${l.minPts}</span>`).join("")}
       </div>
     </div>
   </div>`;
