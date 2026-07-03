@@ -245,7 +245,7 @@ function renderSelection() {
     <button class="exb-pcard" data-pid="${p.id}" aria-label="Démarrer le parcours ${esc(p.nom)}">
       <div class="exb-pcard-top">
         <span class="exb-pcard-num">Parcours ${p.id}</span>
-        <span class="exb-pcard-stars" aria-label="Difficulté ${p.difficulte}/5">${esc(stars(p.difficulte))}</span>
+        <span class="exb-pcard-stars" aria-label="Difficulté ${p.difficulte}/5"><small class="exb-pcard-stars-lbl">Difficulté</small>${esc(stars(p.difficulte))}</span>
       </div>
       <div class="exb-pcard-nom">${esc(p.nom)}</div>
       <div class="exb-pcard-ctx">${esc(p.contexte)}</div>
@@ -1076,9 +1076,19 @@ const EXB_CSS = `
   text-transform: uppercase;
 }
 .exb-pcard-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   color: var(--am-txt);
   letter-spacing: 2px;
+}
+/* étoiles nues = ambigu (note ? difficulté ?) → étiquette visible */
+.exb-pcard-stars-lbl {
+  font: 600 10px/1 'Inter', sans-serif;
+  color: var(--mu2);
+  letter-spacing: .06em;
+  text-transform: uppercase;
 }
 .exb-pcard-nom {
   font: 700 17px/1.2 'Plus Jakarta Sans', sans-serif;

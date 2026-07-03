@@ -345,6 +345,12 @@ button.rvcb-tile:active { transform:scale(.975); }
 
 /* progression — gros chiffre + anneau */
 .rvcb-prog { min-height:146px; justify-content:space-between; }
+/* amorçage 1re fiche (0 lue) */
+.rvcb-prog0 { text-align:left; cursor:pointer; border:0; font:inherit; color:inherit; }
+.rvcb-prog0-t { font:800 17px/1.25 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; margin-top:8px; }
+.rvcb-prog0-t sup { font-size:11px; }
+.rvcb-prog0-cta { display:inline-flex; align-items:center; gap:6px; font:700 12.5px 'Plus Jakarta Sans',sans-serif; color:var(--a,#6366f1); }
+.rvcb-prog0-cta svg { width:14px; height:14px; }
 .rvcb-ring { position:absolute; right:14px; top:14px; width:46px; height:46px; }
 .rvcb-pct { position:absolute; inset:0; display:grid; place-items:center; font:800 11px 'Plus Jakarta Sans',sans-serif; color:var(--a,#6366f1); }
 .rvcb-big { font:800 40px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.03em; margin-top:8px; }
@@ -630,6 +636,18 @@ export async function mount(root, param) {
             : ""
         }
 
+        ${
+          lues === 0 && nextF
+            ? /* 0 fiche lue : pas de « 0/31 · 0% » démoralisant — amorçage engageant */ `
+        <button class="rvcb-tile rvcb-prog rvcb-prog0" data-first data-code="${esc(nextF.code)}">
+          <span class="rvcb-lab"><span class="rvcb-dot"></span>Progression</span>
+          <div>
+            <div class="rvcb-prog0-t">Commence ta 1<sup>re</sup> fiche</div>
+            <div class="rvcb-sub">${totalF} fiches t'attendent</div>
+          </div>
+          <span class="rvcb-prog0-cta">C'est parti ${svgArr}</span>
+        </button>`
+            : `
         <div class="rvcb-tile rvcb-prog">
           <div class="rvcb-ring">
             <svg width="46" height="46" viewBox="0 0 46 46">
@@ -641,7 +659,8 @@ export async function mount(root, param) {
           <span class="rvcb-lab"><span class="rvcb-dot"></span>Progression</span>
           <div><div class="rvcb-big">${lues}<small>/${totalF}</small></div><div class="rvcb-sub">fiches lues</div></div>
           <div class="rvcb-bar"><i style="width:${pct}%"></i></div>
-        </div>
+        </div>`
+        }
 
         ${
           nextF
@@ -688,6 +707,13 @@ export async function mount(root, param) {
     root.querySelector("[data-next]")?.addEventListener("click", (e) => {
       code = e.currentTarget.getAttribute("data-code");
       focusId = null;
+      view = "fiche";
+      render();
+    });
+    root.querySelector("[data-first]")?.addEventListener("click", (e) => {
+      code = e.currentTarget.getAttribute("data-code");
+      focusId = null;
+      track("revision_conduite_first_fiche", { code });
       view = "fiche";
       render();
     });
