@@ -31,6 +31,7 @@ import { getLeague } from "@/utils/league-shared.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { haptic } from "@/utils/haptic.js";
 import { onPopupsSettled } from "@/utils/intro-overlays.js";
+import { illus } from "@/components/enseignant/illus.js";
 
 // Tour guidé enseignant — affiché 1× à la première connexion
 const TOUR_KEY = "pg-tour-moniteur-v1";
@@ -567,8 +568,29 @@ async function renderInto(root, _me) {
     ).catch(() => ({ data: null })),
   ]);
 
-  if (valsAll.error) {
+  // Erreur bloquante (réseau, RLS…) → vrai état d'erreur récupérable.
+  // Avant : un toast de 3s puis un dashboard « normal mais vide » trompeur.
+  const loadError = valsAll.error || elevesAll.error || todayValsRes.error;
+  if (loadError) {
+    console.error("[aujourdhui] chargement", loadError);
     toast("Impossible de charger les données", "error");
+    root.innerHTML = `
+      ${STYLE}
+      <div class="aj-page">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:72px 24px;text-align:center;">
+          ${illus("cone", { size: 64 })}
+          <p style="margin:0;font:600 15px/1.45 'Inter',sans-serif;color:#1a1c2e;">
+            Impossible de charger ton tableau de bord.<br>
+            <span style="font:500 13px/1.4 'Inter',sans-serif;color:#5a6188;">Vérifie ta connexion, puis réessaie.</span>
+          </p>
+          <button id="aj-retry" type="button" style="border:none;border-radius:999px;padding:13px 24px;min-height:44px;background:#4f46e5;color:#fff;font:700 14px/1 'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">Réessayer</button>
+        </div>
+      </div>
+    `;
+    root.querySelector("#aj-retry")?.addEventListener("click", () => {
+      renderInto(root, _me);
+    });
+    return;
   }
 
   const recentVals = valsAll.data || [];
@@ -676,6 +698,17 @@ async function renderInto(root, _me) {
   // Flamme PNG pour le record
   const flammeHtml = `<img src="/skins/permigo-streak-flame-v1.webp" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;display:inline-block;margin-right:2px;filter:drop-shadow(0 1px 3px rgba(255,150,0,.5))">`;
 
+  // À 0 validation : pas de célébration à vide. Trophée en sourdine +
+  // message d'amorçage vers le CTA, au lieu d'un « 0 » triomphal avec
+  // « record à battre » et « pareil qu'hier ».
+  const heroEmpty = todayCount === 0;
+  const heroSubHtml = heroEmpty
+    ? `<b>Valide ta première compétence du jour</b> avec « Valider une séance »`
+    : `${deltaHtml} &nbsp;·&nbsp; record ${flammeHtml} à battre`;
+  const trophyMutedStyle = heroEmpty
+    ? ' style="opacity:.4;filter:grayscale(.75) drop-shadow(0 14px 20px rgba(40,20,90,.3));animation:none"'
+    : "";
+
   // Pastille badge top dept — on montre si rang connu + top quartile
   const topBadgeHtml =
     myRank !== null && myRank <= 5
@@ -706,7 +739,8 @@ async function renderInto(root, _me) {
         ? Math.round((Date.now() - new Date(lastActive)) / 86400000)
         : null;
       pillClass = "aj-pill-warn";
-      pillText = joursOff ? `${joursOff} j` : "Inactif";
+      // Libellé explicite : « 43 j » nu se lisait comme un jeton mystère
+      pillText = joursOff ? `Inactif ${joursOff} j` : "Inactif";
       barColor = "#d97706";
     }
 
@@ -750,11 +784,11 @@ async function renderInto(root, _me) {
 
       <!-- Hero validations du jour -->
       <div class="aj-hero">
-        <div class="aj-hero-halo"></div>
+        <div class="aj-hero-halo"${heroEmpty ? ' style="opacity:.3"' : ""}></div>
         <div class="aj-hero-content">
           <div class="aj-hero-label">Tes validations du jour</div>
-          <div class="aj-hero-big">${todayCount}<span class="aj-hero-big-unit">compétences</span></div>
-          <div class="aj-hero-sub">${deltaHtml} &nbsp;·&nbsp; record ${flammeHtml} à battre</div>
+          <div class="aj-hero-big">${todayCount}<span class="aj-hero-big-unit">compétence${todayCount > 1 ? "s" : ""}</span></div>
+          <div class="aj-hero-sub">${heroSubHtml}</div>
           ${topBadgeHtml}
         </div>
         <img
@@ -763,7 +797,7 @@ async function renderInto(root, _me) {
           alt=""
           loading="eager"
           width="130"
-          height="130"
+          height="130"${trophyMutedStyle}
         >
       </div>
 
