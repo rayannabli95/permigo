@@ -64,6 +64,7 @@ const ROUTES = {
   eleve: {
     default: () => import("@/pages/eleve/accueil.js"),
     ecole: () => import("@/pages/public/ecole.js"),
+    reviser: () => import("@/pages/eleve/reviser.js"),
     parcours: () => import("@/pages/eleve/parcours.js"),
     sessions: () => import("@/pages/eleve/session-confirmation.js"),
     quiz: () => import("@/pages/eleve/quiz.js"),
