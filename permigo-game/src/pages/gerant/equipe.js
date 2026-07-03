@@ -9,7 +9,6 @@ import { icon } from "@/utils/icons.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
-import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 
 // ─── CSS scoped (cohérent avec pulse.js — cockpit gérant) ────────
@@ -23,9 +22,9 @@ const STYLE = `<style>
   color: var(--ink);
 }
 
-/* Header */
+/* Header — collé au chrome d'app (qui gère déjà la safe-area), sans espace mort */
 .eq-hd {
-  padding: 24px 20px 16px;
+  padding: 14px 20px 16px;
   background: var(--su);
   border-bottom: 1px solid var(--bo);
 }
@@ -197,6 +196,50 @@ const STYLE = `<style>
 }
 .eq-empty-ico { font-size: 36px; margin-bottom: 10px; }
 
+/* Erreur de chargement */
+.eq-error {
+  margin: 48px 20px 0;
+  padding: 32px 20px;
+  text-align: center;
+  background: var(--su);
+  border: 1px solid var(--bo);
+  border-radius: var(--r-xl);
+}
+.eq-error-ico {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--rd);
+  background: rgba(239,68,68,.1);
+}
+.eq-error-title {
+  font: 700 15px/1.3 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.eq-error-sub {
+  font: 500 13px/1.5 'Inter', sans-serif;
+  color: var(--mu2);
+  margin-bottom: 18px;
+}
+.eq-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: var(--r);
+  background: var(--a);
+  color: var(--a-ink);
+  font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: transform .12s ease, background .15s ease;
+}
+.eq-retry-btn:hover { background: var(--adk); }
+.eq-retry-btn:active { transform: scale(.97); }
+
 /* Skeleton */
 .eq-skel {
   background: linear-gradient(90deg, var(--bg2) 0%, var(--bo) 50%, var(--bg2) 100%);
@@ -277,8 +320,23 @@ export async function mount(root) {
     render(root, teachers, teacherStats);
   } catch (e) {
     console.error("[equipe]", e);
-    toast("Erreur de chargement", "error");
-    root.innerHTML = `${STYLE}<div class="eq-page"><p style="padding:32px;color:var(--rd)">Erreur de chargement.</p></div>`;
+    root.innerHTML = `${STYLE}
+<div class="eq-page">
+  <div class="eq-hd">
+    <div class="eq-hd-top">
+      <div class="eq-title">Équipe</div>
+    </div>
+  </div>
+  <div class="eq-error">
+    <div class="eq-error-ico">${icon("alert-triangle", { size: 20 })}</div>
+    <div class="eq-error-title">Impossible de charger l'équipe</div>
+    <div class="eq-error-sub">Vérifie ta connexion, puis réessaie.</div>
+    <button id="eq-retry" class="eq-retry-btn">${icon("refresh-cw", { size: 14 })} Réessayer</button>
+  </div>
+</div>`;
+    root
+      .querySelector("#eq-retry")
+      ?.addEventListener("click", () => mount(root));
   }
 }
 

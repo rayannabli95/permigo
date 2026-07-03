@@ -23,9 +23,9 @@ const STYLE = `<style>
   color: var(--ink);
 }
 
-/* Header */
+/* Header — collé au chrome d'app (qui gère déjà la safe-area), sans espace mort */
 .pulse-hd {
-  padding: 24px 20px 16px;
+  padding: 14px 20px 16px;
   border-bottom: 1px solid var(--bo);
   background: var(--su);
 }

@@ -446,6 +446,24 @@ const STYLE = `<style>
 
 // ─── Entry point ─────────────────────────────────────────────────
 let _cockpitData = null;
+let _schoolName = null;
+
+// Résout le nom réel de l'auto-école (le profil ne porte pas school_name,
+// seulement auto_ecole_id). Mis en cache module — une seule requête par session.
+async function resolveSchoolName(me) {
+  if (_schoolName || !me.auto_ecole_id) return;
+  try {
+    const { data, error } = await sb
+      .from("auto_ecoles")
+      .select("nom")
+      .eq("id", me.auto_ecole_id)
+      .maybeSingle();
+    if (error) throw error;
+    _schoolName = data?.nom?.trim() || null;
+  } catch (e) {
+    console.warn("[cockpit] nom école indisponible", e);
+  }
+}
 
 export async function mount(root) {
   const me = getCurUser();
@@ -454,6 +472,7 @@ export async function mount(root) {
   track("page.view", { page: "gerant_cockpit" });
 
   root.innerHTML = renderSkeleton();
+  await resolveSchoolName(me);
   await loadAndRender(root, me);
 }
 
@@ -580,7 +599,7 @@ function render(data, me) {
   <!-- HEADER -->
   <div class="ck-hd">
     <div class="ck-hd-logo">PermiGo</div>
-    <div class="ck-hd-school">${esc(me.school_name ?? me.prenom ?? "Mon école")}</div>
+    <div class="ck-hd-school">${esc(_schoolName ?? "Mon école")}</div>
     <div class="ck-hd-date">${esc(dateStr)}</div>
     <button class="ck-refresh-btn" id="ck-refresh" aria-label="Actualiser">
       ${icon("refresh-cw", { size: 14 })}
