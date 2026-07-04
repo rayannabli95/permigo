@@ -308,6 +308,23 @@ export async function mount(root, params = {}) {
 }
 
 // ─── Fin de quiz ─────────────────────────────────────────────────
+// 1er quiz réussi : flag local (une fois par appareil, comme les ex-tutos).
+const FIRST_QUIZ_REWARD_KEY = "pg-first-quiz-reward-v1";
+function firstQuizRewardPending() {
+  try {
+    return !localStorage.getItem(FIRST_QUIZ_REWARD_KEY);
+  } catch {
+    return false;
+  }
+}
+function markFirstQuizRewardDone() {
+  try {
+    localStorage.setItem(FIRST_QUIZ_REWARD_KEY, "1");
+  } catch {
+    /* mode privé strict → on ne re-célèbre pas de façon fiable, tant pis */
+  }
+}
+
 async function handleComplete(
   root,
   me,
@@ -390,6 +407,16 @@ async function handleComplete(
   const result = data?.[0] ?? data ?? {};
   const { passed, validated, reason } = result;
 
+  // 1er quiz réussi (hors question du jour, qui a déjà son moment d'opt-in
+  // push) → on débloque un TOUR DE ROUE offert via un overlay dédié. C'est
+  // aussi là que l'install se pitche désormais (plus de nudge à froid au boot).
+  const quizWin = scorePct >= 70;
+  const firstQuizReward = quizWin && !isDaily && firstQuizRewardPending();
+  if (firstQuizReward) markFirstQuizRewardDone();
+  // L'écran plein écran « Compétence acquise » (validated hors révision) gère
+  // sa propre fermeture → la récompense y est déclenchée dans son onClose.
+  const showsUnlockScreen = !!validated && !isRevision;
+
   track("quiz.result_saved", {
     competence_id: competenceId,
     type,
@@ -454,6 +481,14 @@ async function handleComplete(
         // À la fermeture : d'abord la fanfare « niveau supérieur » si montée,
         // PUIS l'install nudge — on n'empile jamais deux overlays d'un coup.
         onClose: async () => {
+          // 1er quiz réussi → la récompense roue prend le pas sur l'install
+          // (elle pitchera l'install après le tour, sur la page roue).
+          if (firstQuizReward) {
+            const { showFirstQuizReward } =
+              await import("@/components/eleve/first-quiz-reward.js");
+            showFirstQuizReward({ me, scorePct });
+            return;
+          }
           const installNudge = () => {
             if (!canChain) promptInstallAtValueMoment(me, "eleve_quiz_reussi");
           };
@@ -481,7 +516,8 @@ async function handleComplete(
     passed &&
     !validated &&
     !canChain &&
-    reason !== "no_competence_unlocked"
+    reason !== "no_competence_unlocked" &&
+    !firstQuizReward
   ) {
     promptInstallAtValueMoment(me, "eleve_quiz_reussi");
   }
@@ -510,6 +546,14 @@ async function handleComplete(
     competenceId,
     dailyStreakAfter,
   });
+
+  // 1er quiz réussi (hors écran « Compétence acquise » qui a son propre
+  // enchaînement) → récompense roue offerte, par-dessus l'écran de résultat.
+  if (firstQuizReward && !showsUnlockScreen) {
+    const { showFirstQuizReward } =
+      await import("@/components/eleve/first-quiz-reward.js");
+    showFirstQuizReward({ me, scorePct });
+  }
 }
 
 function renderResult(

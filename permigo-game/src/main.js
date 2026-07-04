@@ -11,7 +11,7 @@ import { startNotifListener } from "@/services/notif-listener.js";
 import { toast } from "@/components/common/toast.js";
 import { mountHeader } from "@/components/common/header-top.js";
 import { mountBottomNav } from "@/components/common/nav-bottom.js";
-import { armPopupPhase } from "@/utils/intro-overlays.js";
+import { armPopupPhase, notifyPopupSettled } from "@/utils/intro-overlays.js";
 import { initThemeEarly, syncFromPrefs } from "@/utils/theme.js";
 import { initAccentEarly, applyAccent } from "@/utils/accent.js";
 import { initGameState, initEquippedTheme } from "@/utils/game-state.js";
@@ -145,22 +145,22 @@ async function boot() {
 
     startNotifListener();
 
-    // Boucle d'engagement notifs — 2 états exclusifs :
+    // Boucle d'engagement notifs :
     //  - app installée (standalone) → primer « active tes rappels » (sur iOS,
     //    l'API Notification n'existe QUE là, et le storage est neuf → c'est
     //    l'UNIQUE moment où on peut obtenir la permission)
-    //  - navigateur mobile → nudge « installe l'app » (étape 1 de la boucle)
+    //  - navigateur mobile → PLUS de nudge d'install à froid (l'élève le ferme
+    //    par réflexe). L'install est proposée à un moment de valeur : 1er quiz
+    //    réussi (roue offerte), séance validée… cf. promptInstallAtValueMoment.
     import("@/utils/pwa.js")
-      .then(({ isStandalone }) =>
-        isStandalone()
-          ? import("@/components/common/push-prime.js").then((m) =>
-              m.maybeShowPushPrime(me),
-            )
-          : import("@/components/common/install-nudge.js").then((m) =>
-              m.maybeShowInstallNudge(me),
-            ),
-      )
-      .catch(() => {});
+      .then(({ isStandalone }) => {
+        if (isStandalone())
+          import("@/components/common/push-prime.js").then((m) =>
+            m.maybeShowPushPrime(me),
+          );
+        else notifyPopupSettled(); // aucun popup à froid → libère le tuto guidé
+      })
+      .catch(() => notifyPopupSettled());
 
     // Prefetch idle des routes chaudes (navigation instantanée au tap).
     // requestIdleCallback → jamais en concurrence avec le rendu initial.

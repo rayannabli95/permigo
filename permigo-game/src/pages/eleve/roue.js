@@ -27,6 +27,25 @@ const SPIN_MS = 5200; // = durée de la transition CSS du disque
 
 const LS_FREE = "pg-roue-free-last"; // repli aperçu : YYYY-MM-DD du dernier tour
 
+// Drapeau posé par first-quiz-reward.js : l'élève arrive ici depuis le tour
+// offert de son 1er quiz réussi → on pitche l'install PILE après le gain
+// (meilleur moment de valeur). Appelé une fois, après le résultat du tour.
+function maybeInstallAfterSpin() {
+  let flagged = false;
+  try {
+    flagged = sessionStorage.getItem("pg-install-after-roue") === "1";
+    if (flagged) sessionStorage.removeItem("pg-install-after-roue");
+  } catch {
+    return;
+  }
+  if (!flagged) return;
+  import("@/components/common/install-nudge.js")
+    .then((m) =>
+      m.promptInstallAtValueMoment(getCurUser(), "eleve_first_quiz_roue"),
+    )
+    .catch(() => {});
+}
+
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -499,6 +518,7 @@ export async function mount(root) {
         }
         showResult(SEGMENTS[seg], true);
         finishDone();
+        maybeInstallAfterSpin();
       }, 5300);
       return;
     }
@@ -533,6 +553,7 @@ export async function mount(root) {
       setTimeout(() => {
         showGrosLot(res.gros_lot);
         finishDone();
+        maybeInstallAfterSpin();
       }, 5300);
       return;
     }
@@ -551,6 +572,7 @@ export async function mount(root) {
       }
       haptic("tap");
       finishDone();
+      maybeInstallAfterSpin();
     }, 5300);
   });
 }
