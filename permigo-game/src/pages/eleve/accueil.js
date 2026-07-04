@@ -811,8 +811,9 @@ const STYLE = `<style>
   -webkit-tap-highlight-color: transparent;
   transition: background .12s;
 }
-.acc2-premium-link:first-child { border-radius: 18px 18px 0 0; border-bottom: none; }
+.acc2-premium-link:first-child { border-radius: 18px 18px 0 0; }
 .acc2-premium-link:last-child  { border-radius: 0 0 18px 18px; }
+.acc2-premium-link:not(:last-child) { border-bottom: none; } /* évite le double liseré entre cartes */
 .acc2-premium-link:active { background: color-mix(in srgb, var(--a) 6%, transparent); }
 .acc2-premium-link-ico {
   width: 46px; height: 46px; flex: none;
@@ -1592,6 +1593,17 @@ function render({
       </div>
       <span class="acc2-premium-link-arr" aria-hidden="true">›</span>
     </a>
+    <a class="acc2-premium-link" id="acc-en-situation" href="#/en-situation"
+       aria-label="En situation — mini-jeu de mises en situation">
+      <div class="acc2-premium-link-ico">
+        <img src="/skins/permigo-remc-circulation-normale-v3.webp" alt="" aria-hidden="true" loading="lazy">
+      </div>
+      <div class="acc2-premium-link-txt">
+        <div class="acc2-premium-link-t">En situation</div>
+        <div class="acc2-premium-link-s">Une scène, une décision — à toi de jouer</div>
+      </div>
+      <span class="acc2-premium-link-arr" aria-hidden="true">›</span>
+    </a>
   </div>
 
   <!-- Slot coffre (injecté async par _loadAndInjectChests) -->
@@ -1735,6 +1747,12 @@ function wire(
   root.querySelector("#acc-revision")?.addEventListener("click", () => {
     haptic("tap");
     track("cta.clicked", { cta_type: "revision_conduite_card" });
+  });
+
+  // En situation — tuile <a href>
+  root.querySelector("#acc-en-situation")?.addEventListener("click", () => {
+    haptic("tap");
+    track("cta.clicked", { cta_type: "en_situation_card" });
   });
 
   // Badges teaser — lien « Voir tout »
