@@ -183,6 +183,37 @@ const STYLE = `<style>
 .roue-note svg { width: 16px; height: 16px; flex: none; color: #c9b8ff; margin-top: 1px; }
 .roue-note p { font: 700 11.5px/1.45 'Nunito', sans-serif; color: var(--mu); }
 .roue-note b { color: #c9b8ff; }
+
+/* Célébration GROS LOT (au lieu du résultat volants) */
+.roue-gros { background: linear-gradient(180deg, #2a1a08, #3a2408); border-color: rgba(255,210,74,.55);
+  box-shadow: 0 0 34px -6px rgba(255,180,40,.5), inset 0 1px 0 rgba(255,255,255,.12); }
+.roue-gros-badge { display: inline-block; font: 800 12px/1 'Baloo 2', cursive; letter-spacing: .1em;
+  color: #3a2408; background: linear-gradient(180deg, #ffe9a8, #ffd24a); padding: 6px 14px; border-radius: 999px;
+  box-shadow: 0 4px 0 #c87d12; }
+.roue-gros-lot { margin: 12px 0 4px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.roue-gros-lot .roue-gros-ic { font-size: 30px; }
+.roue-gros-lot b { font: 800 20px/1.1 'Baloo 2', cursive; color: var(--gold-s); }
+.roue-gros-code { margin-top: 8px; font: 700 13px/1.3 'Nunito', sans-serif; color: #fff; }
+.roue-gros-code b { font: 800 20px/1 'Baloo 2', cursive; letter-spacing: .12em; color: var(--gold);
+  display: inline-block; margin-top: 3px; padding: 5px 12px; border-radius: 12px;
+  background: rgba(255,210,74,.14); border: 1px dashed rgba(255,210,74,.55); }
+
+/* Mes lots gagnés (le code reste retrouvable après coup) */
+.roue-wins { margin: 16px auto 0; max-width: 400px; border-radius: 18px; padding: 14px 16px;
+  background: linear-gradient(180deg, var(--pnl), var(--pnl2)); border: 1px solid rgba(255,210,74,.4); }
+.roue-wins h3 { font: 700 14px/1.1 'Baloo 2', cursive; display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+.roue-wins-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; border-bottom: 1px solid rgba(167,139,250,.14); }
+.roue-wins-row:last-child { border-bottom: 0; }
+.roue-wins-ic { width: 34px; height: 34px; flex: none; border-radius: 11px; display: grid; place-items: center; font-size: 18px; background: rgba(255,210,74,.12); border: 1px solid rgba(255,210,74,.3); }
+.roue-wins-tx { flex: 1; min-width: 0; }
+.roue-wins-tx b { display: block; font: 700 13px/1.2 'Baloo 2', cursive; color: #fff; }
+.roue-wins-tx span { font: 700 11px/1.3 'Nunito', sans-serif; color: var(--mu2); }
+.roue-wins-code { flex: none; font: 800 13px/1 'Baloo 2', cursive; letter-spacing: .08em; color: var(--gold);
+  padding: 6px 10px; border-radius: 10px; background: rgba(255,210,74,.12); border: 1px dashed rgba(255,210,74,.45); }
+.roue-wins-code.remis { color: var(--mu2); border-style: solid; border-color: rgba(167,139,250,.3); }
+
+.roue-real-big { flex: none; font: 700 9px/1 'Fredoka', sans-serif; letter-spacing: .06em; text-transform: uppercase;
+  color: #3a2408; background: linear-gradient(180deg, #ffe9a8, #ffd24a); padding: 3px 7px; border-radius: 999px; }
 @media (prefers-reduced-motion: reduce) { .roue-disc { transition: transform 1.2s ease-out; } .roue-result { animation: none; } }
 </style>`;
 
@@ -192,6 +223,7 @@ function segLabel(v) {
 
 // Panneau « gros lots réels » : les lots ACTIVÉS par le moniteur (via
 // get_moniteur_rewards) — sinon les 2 lots par défaut. Signé à sa marque.
+// Les lots marqués « gros lot » (big) sont réellement gagnables à la roue.
 function renderRealLots(lots, moniteurPrenom) {
   const name = (moniteurPrenom || "ton moniteur").trim();
   const initiale = (name.charAt(0) || "R").toUpperCase();
@@ -202,6 +234,7 @@ function renderRealLots(lots, moniteurPrenom) {
           { icon: "🅰️", label: "Disque A jeune conducteur" },
           { icon: "🚗", label: "1 heure de conduite offerte" },
         ];
+  const anyBig = list.some((l) => l && l.big);
   const rows = list
     .slice(0, 6)
     .map(
@@ -211,6 +244,7 @@ function renderRealLots(lots, moniteurPrenom) {
       <div class="roue-real-flex">
         <div class="roue-real-name">${esc(l.label || "Cadeau")}</div>
       </div>
+      ${l && l.big ? `<span class="roue-real-big">À gagner</span>` : ""}
     </div>`,
     )
     .join("");
@@ -218,16 +252,41 @@ function renderRealLots(lots, moniteurPrenom) {
   <section class="roue-real">
     <div class="roue-real-h">
       <h2>${medallion("cadeau", "pink", { size: 20 })} Gros lots réels</h2>
-      <span class="tag">Bientôt</span>
+      <span class="tag">${anyBig ? "En jeu" : "Bientôt"}</span>
     </div>
     ${rows}
     <div class="roue-real-sign">
       <div class="roue-real-av">${esc(initiale)}</div>
       <div>
         <b>Offert par ${esc(name)} · ton moniteur</b>
-        <span>C'est lui qui choisit et régale — à sa marque.</span>
+        <span>${anyBig ? "Tente ta chance chaque jour — c'est lui qui régale, à sa marque." : "C'est lui qui choisit et régale — à sa marque."}</span>
       </div>
     </div>
+  </section>`;
+}
+
+// « Mes lots gagnés » : garde le code de retrait à portée après coup.
+function renderMyWins(wins) {
+  if (!Array.isArray(wins) || !wins.length) return "";
+  const rows = wins
+    .slice(0, 5)
+    .map((w) => {
+      const remis = w.status === "remis";
+      return `
+    <div class="roue-wins-row">
+      <div class="roue-wins-ic">${esc(w.lot_icon || "🎁")}</div>
+      <div class="roue-wins-tx">
+        <b>${esc(w.lot_label || "Cadeau")}</b>
+        <span>${remis ? "Récupéré ✓" : "Montre le code à ton moniteur"}</span>
+      </div>
+      <span class="roue-wins-code${remis ? " remis" : ""}">${esc(w.claim_code || "")}</span>
+    </div>`;
+    })
+    .join("");
+  return `
+  <section class="roue-wins">
+    <h3>🏆 Tes lots gagnés</h3>
+    ${rows}
   </section>`;
 }
 
@@ -248,13 +307,19 @@ export async function mount(root) {
   let mode = "apercu";
   let realLots = null;
   let moniteurName = null;
-  const [spinRes, rewardsRes] = await Promise.allSettled([
+  let myWins = [];
+  const [spinRes, rewardsRes, winsRes] = await Promise.allSettled([
     sb
       .from("roue_daily_spins")
       .select("volants")
       .eq("spin_date", todayKey())
       .maybeSingle(),
     sb.rpc("get_moniteur_rewards"),
+    sb
+      .from("gros_lot_wins")
+      .select("lot_label, lot_icon, claim_code, status, won_at")
+      .order("won_at", { ascending: false })
+      .limit(5),
   ]);
   if (spinRes.status === "fulfilled" && !spinRes.value.error) {
     mode = spinRes.value.data ? "done" : "ready";
@@ -263,6 +328,9 @@ export async function mount(root) {
     const d = rewardsRes.value.data;
     if (Array.isArray(d?.lots)) realLots = d.lots;
     moniteurName = d?.moniteur || null;
+  }
+  if (winsRes.status === "fulfilled" && !winsRes.value.error) {
+    myWins = Array.isArray(winsRes.value.data) ? winsRes.value.data : [];
   }
   if (mode === "apercu" && localStorage.getItem(LS_FREE) === todayKey()) {
     mode = "done";
@@ -312,9 +380,11 @@ export async function mount(root) {
 
   ${renderRealLots(realLots, moniteurName || prenom, initiale)}
 
+  ${renderMyWins(myWins)}
+
   <div class="roue-note">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-    <p>Les <b>gros lots réels</b> arriveront quand ton moniteur les activera. Les volants se gagnent en jouant — <b>jamais</b> avec de l'argent.</p>
+    <p>Un <b>gros lot</b> peut tomber (rare !) si ton moniteur en a mis en jeu — tu le récupères en vrai avec ton code. Les volants se gagnent en jouant — <b>jamais</b> avec de l'argent.</p>
   </div>
 </div>`;
 
@@ -389,6 +459,20 @@ export async function mount(root) {
     </div>`;
   }
 
+  function showGrosLot(gl) {
+    playReward();
+    haptic("success");
+    const slot = root.querySelector("#roue-result-slot");
+    if (!slot) return;
+    slot.innerHTML = `
+    <div class="roue-result roue-gros">
+      <div class="roue-gros-badge">🎁 GROS LOT !</div>
+      <div class="roue-gros-lot"><span class="roue-gros-ic" aria-hidden="true">${esc(gl.icon || "🎁")}</span><b>${esc(gl.label || "Cadeau")}</b></div>
+      <div class="roue-gros-code">Ton code de retrait<br><b>${esc(gl.claim_code || "")}</b></div>
+      <div class="roue-result-s">Montre ce code à <b>${esc(gl.moniteur || "ton moniteur")}</b> pour récupérer ton lot — c'est lui qui régale.</div>
+    </div>`;
+  }
+
   function finishDone() {
     btn.textContent = "Reviens demain";
     btn.disabled = true;
@@ -441,6 +525,17 @@ export async function mount(root) {
     if (res?.already) {
       spinTo(0);
       setTimeout(finishDone, 900);
+      return;
+    }
+
+    // Gros lot ! (le serveur a tiré un vrai lot du moniteur)
+    if (res?.gros_lot) {
+      track("roue.gros_lot_win");
+      spinTo(Math.floor(Math.random() * SEGMENTS.length));
+      setTimeout(() => {
+        showGrosLot(res.gros_lot);
+        finishDone();
+      }, 5300);
       return;
     }
 

@@ -19,6 +19,7 @@ import { mountPermisCard } from "@/components/eleve/permis-card.js";
 import { mountProfileCard } from "@/components/common/profile-card.js";
 import { getEquippedAsset } from "@/utils/game-state.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
+import { CATALOG, STREAK_SEUIL } from "@/data/achievements.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
@@ -1391,19 +1392,28 @@ function _competenceState(validated) {
   };
 }
 
-// Succès (vrais badges) déduits des validations + série. Débloqués d'abord.
-function _areneAchievements(validated, streak) {
-  return [
-    { img: "ach_comp_5", name: "5 compétences", need: validated >= 5 },
-    { img: "ach_comp_10", name: "10 compétences", need: validated >= 10 },
-    { img: "ach_comp_15", name: "15 compétences", need: validated >= 15 },
-    { img: "ach_comp_20", name: "20 compétences", need: validated >= 20 },
-    { img: "ach_comp_25", name: "25 compétences", need: validated >= 25 },
-    { img: "ach_comp_28", name: "28 compétences", need: validated >= 28 },
-    { img: "ach_comp_31", name: "Permis virtuel", need: validated >= 31 },
-    { img: "ach_streak_3", name: "Série de 3 j", need: streak >= 3 },
-    { img: "ach_streak_14", name: "Série de 14 j", need: streak >= 14 },
-  ].sort((a, b) => (a.need === b.need ? 0 : a.need ? -1 : 1));
+// Succès (vrais badges) — source de vérité UNIQUE : le CATALOG de la salle des
+// trophées (mêmes visuels badge-3d, mêmes titres). Déblocage = table serveur
+// (get_my_achievements) pour coller EXACTEMENT aux trophées. Repli local sur
+// validations/série si la RPC échoue (réseau). Débloqués d'abord.
+function _areneAchievements(unlockedKeys, achOk, validated, streak) {
+  return CATALOG.map((def) => ({
+    image: def.image,
+    name: def.title,
+    need: achOk
+      ? unlockedKeys.has(def.key)
+      : _fallbackUnlocked(def.key, validated, streak),
+  })).sort((a, b) => (a.need === b.need ? 0 : a.need ? -1 : 1));
+}
+
+// Repli quand get_my_achievements est indisponible : on déduit ce qu'on peut
+// des compteurs locaux (compétences + série). Les succès quiz restent
+// verrouillés faute de compteur ici — c'est le mode dégradé, pas la norme.
+function _fallbackUnlocked(key, validated, streak) {
+  if (key.startsWith("comp_")) return validated >= parseInt(key.slice(5), 10);
+  if (key.startsWith("streak_"))
+    return streak >= (STREAK_SEUIL[key] ?? parseInt(key.slice(7), 10));
+  return false;
 }
 
 const STYLE_ARENE = `<style>
@@ -1606,7 +1616,9 @@ async function mountEleveArene(root, me) {
   root.innerHTML = `${STYLE_ARENE}<div class="arn"><div class="skel skel-card" style="height:300px;margin:14px 16px 0;border-radius:28px"></div><div class="skel skel-card" style="height:90px;margin:18px 16px 0;border-radius:18px"></div></div>`;
 
   // ── Fetch réel ─────────────────────────────────────────────
-  const [{ data: profile }, { data: valData }, { data: streakRow }] =
+  // get_my_achievements = MÊME source que la salle des trophées → « Tes
+  // succès » affiche exactement les mêmes badges (débloqués inclus).
+  const [{ data: profile }, { data: valData }, { data: streakRow }, achRes] =
     await Promise.all([
       sb
         .from("profiles")
@@ -1623,6 +1635,7 @@ async function mountEleveArene(root, me) {
         .select("current_streak")
         .eq("user_id", me.id)
         .maybeSingle(),
+      sb.rpc("get_my_achievements"),
     ]);
 
   const validated = (valData || []).length;
@@ -1660,7 +1673,16 @@ async function mountEleveArene(root, me) {
       });
   }
 
-  const achievements = _areneAchievements(validated, streak);
+  const achOk = !achRes?.error && Array.isArray(achRes?.data);
+  const unlockedKeys = new Set(
+    (achRes?.data || []).map((u) => u.achievement_key),
+  );
+  const achievements = _areneAchievements(
+    unlockedKeys,
+    achOk,
+    validated,
+    streak,
+  );
   const unlocked = achievements.filter((a) => a.need).length;
 
   // ── Notifications : état réel ──────────────────────────────
@@ -1750,7 +1772,7 @@ async function mountEleveArene(root, me) {
           (a) => `
       <div class="arn-ach ${a.need ? "" : "locked"}">
         <div class="arn-medal">
-          <img src="/skins/achievements/${a.img}.png" alt="" loading="lazy" />
+          <img src="${a.image}" alt="" loading="lazy" />
           ${a.need ? "" : `<span class="arn-lock">${_LOCK_SVG}</span>`}
         </div>
         <div class="arn-ach-name">${esc(a.name)}</div>
