@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réglages — redesign biblio · PermiGo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ui-kit-tokens.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:#0d0d14;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:14px;
+    padding:22px 12px 40px;font-family:var(--fd)}
+  .bar{display:flex;gap:8px}
+  .bar button{border:1px solid #33344a;background:#1b1c28;color:#cfd2e6;cursor:pointer;font:700 12px var(--fd);
+    padding:8px 14px;border-radius:999px}
+  .bar button.on{background:#fff;color:#111}
+  /* cadre téléphone */
+  .phone{width:390px;max-width:100%;background:var(--bg);border-radius:34px;overflow:hidden;
+    box-shadow:0 30px 70px -20px rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.06)}
+  .scroll{height:auto}
+
+  /* header vitré */
+  .sr-head{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:14px 16px;
+    background:color-mix(in srgb,var(--su) 90%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--bo)}
+  .sr-back{width:38px;height:38px;border-radius:var(--r-md);border:1px solid var(--bo);background:var(--su);
+    display:grid;place-items:center;color:var(--ink);cursor:pointer}
+  .sr-back svg{width:19px;height:19px}
+  .sr-title{font:800 18px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em;color:var(--ink)}
+
+  .sr-body{padding:16px 14px 30px;display:flex;flex-direction:column;gap:18px}
+  .sr-glabel{font:700 11px/1 var(--fd);letter-spacing:.08em;text-transform:uppercase;color:var(--mu);padding:0 8px 8px}
+  .sr-card{background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);overflow:hidden;box-shadow:var(--s1)}
+
+  .sr-row{display:flex;align-items:center;gap:13px;padding:13px 14px;border-top:1px solid var(--bo2);min-height:58px}
+  .sr-row:first-child{border-top:0}
+  .sr-row.tap{cursor:pointer;transition:background var(--t)}
+  .sr-row.tap:active{background:var(--bg2)}
+  .sr-row.col{flex-direction:column;align-items:stretch;gap:11px}
+  /* tuile d'icône colorée (élévation « Réglages iOS ») */
+  .sr-ic{width:32px;height:32px;border-radius:9px;flex:none;display:grid;place-items:center;
+    color:var(--c,var(--a));background:color-mix(in srgb,var(--c,var(--a)) 15%,transparent)}
+  .sr-ic svg{width:18px;height:18px}
+  .sr-tx{flex:1;min-width:0}
+  .sr-tx b{display:block;font:700 14px/1.25 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
+  .sr-tx span{display:block;font:500 12px/1.3 var(--fd);color:var(--mu);margin-top:2px}
+  .sr-rhead{display:flex;align-items:center;gap:13px}
+  .sr-chev{color:var(--mu);width:18px;height:18px;flex:none}
+  .sr-link{background:none;border:0;cursor:pointer;font:700 13px/1 var(--fd);color:var(--a-txt);padding:6px}
+  .sr-link.danger{color:var(--rd-txt)}
+
+  /* switch (biblio) */
+  .sr-sw{position:relative;width:46px;height:28px;flex:none;cursor:pointer}
+  .sr-sw input{position:absolute;opacity:0;width:0;height:0}
+  .sr-sw i{position:absolute;inset:0;border-radius:999px;background:var(--bo4);transition:background var(--t)}
+  .sr-sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:var(--s1);transition:left var(--t)}
+  .sr-sw input:checked + i{background:var(--a)}
+  .sr-sw input:checked + i::after{left:21px}
+
+  /* input */
+  .sr-inp{width:100%;height:44px;border-radius:var(--r-md);border:1.5px solid var(--bo4);background:var(--bg);
+    color:var(--ink);font:600 14px var(--fd);padding:0 13px;transition:border var(--t),box-shadow var(--t)}
+  .sr-inp:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 4px var(--ap)}
+  .sr-inp.time{height:40px;text-align:center}
+  .sr-save{height:44px;border:0;border-radius:var(--r-md);background:var(--a);color:var(--a-ink);
+    font:800 13.5px var(--fd);cursor:pointer;padding:0 18px;align-self:flex-start}
+  .sr-dnd{display:flex;align-items:center;gap:9px}
+  .sr-dnd label{font:600 12px var(--fd);color:var(--mu)}
+
+  /* segment thème (biblio) */
+  .sr-seg{display:flex;gap:3px;background:var(--bg2);border:1px solid var(--bo);border-radius:var(--r-md);padding:3px}
+  .sr-seg button{flex:1;border:0;background:none;cursor:pointer;font:700 12.5px var(--fd);color:var(--mu);
+    padding:9px 4px;border-radius:var(--r-sm);transition:all var(--t);display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:40px}
+  .sr-seg button svg{width:15px;height:15px}
+  .sr-seg button.on{background:var(--su);color:var(--a-txt);box-shadow:var(--s1)}
+
+  /* swatches accent */
+  .sr-sw-row{display:flex;gap:12px;flex-wrap:wrap}
+  .sr-swatch{width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;background:var(--c);
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.3);position:relative;transition:transform var(--t)}
+  .sr-swatch:active{transform:scale(.9)}
+  .sr-swatch.on{box-shadow:0 0 0 3px var(--su),0 0 0 5px var(--c)}
+  .sr-swatch.on::after{content:"";position:absolute;inset:0;display:grid;place-items:center;
+    background:center/15px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")}
+
+  .sr-danger{border-color:color-mix(in srgb,var(--rd) 26%,var(--bo))}
+</style>
+</head>
+<body data-role="eleve">
+  <div class="bar">
+    <button data-th="light" class="on">☀︎ Clair</button>
+    <button data-th="dark">☾ Sombre</button>
+  </div>
+
+  <div class="phone">
+    <div class="scroll">
+      <div class="sr-head">
+        <button class="sr-back" aria-label="Retour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div class="sr-title">Préférences</div>
+      </div>
+
+      <div class="sr-body">
+        <!-- APPLICATION -->
+        <div>
+          <div class="sr-glabel">Application</div>
+          <div class="sr-card"><div class="sr-row tap">
+            <span class="sr-ic" style="--c:#0ea5e9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></span>
+            <span class="sr-tx"><b>Ajouter à l'écran d'accueil</b><span>Ouvre PermiGo d'un geste, comme une vraie app</span></span>
+            <svg class="sr-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </div></div>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div>
+          <div class="sr-glabel">Notifications</div>
+          <div class="sr-card">
+            <div class="sr-row">
+              <span class="sr-ic" style="--c:var(--a)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+              <span class="sr-tx"><b>Notifications push</b><span>Rappels et mises à jour</span></span>
+              <label class="sr-sw"><input type="checkbox" checked><i></i></label>
+            </div>
+            <div class="sr-row">
+              <span class="sr-ic" style="--c:#0ea5e9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3 7 9 6 9-6"/></svg></span>
+              <span class="sr-tx"><b>Notifications email</b><span>Résumé hebdomadaire</span></span>
+              <label class="sr-sw"><input type="checkbox"><i></i></label>
+            </div>
+            <div class="sr-row col">
+              <div class="sr-rhead">
+                <span class="sr-ic" style="--c:#8b5cf6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
+                <span class="sr-tx"><b>Ne pas déranger</b><span>Enregistré automatiquement</span></span>
+              </div>
+              <div class="sr-dnd" style="padding-left:45px"><label>De</label><input class="sr-inp time" type="time" value="22:00" style="flex:1"><label>à</label><input class="sr-inp time" type="time" value="07:00" style="flex:1"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONFIDENTIALITÉ -->
+        <div>
+          <div class="sr-glabel">Confidentialité</div>
+          <div class="sr-card"><div class="sr-row">
+            <span class="sr-ic" style="--c:#f59e0b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21V9m4 12V5m4 16v-8"/><path d="M4 21h16"/></svg></span>
+            <span class="sr-tx"><b>Classement national</b><span>Apparaître dans les classements</span></span>
+            <label class="sr-sw"><input type="checkbox" checked><i></i></label>
+          </div></div>
+        </div>
+
+        <!-- MON COMPTE -->
+        <div>
+          <div class="sr-glabel">Mon compte</div>
+          <div class="sr-card">
+            <div class="sr-row col">
+              <div class="sr-rhead">
+                <span class="sr-ic" style="--c:var(--a)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
+                <span class="sr-tx"><b>Prénom affiché</b><span>Visible par ton moniteur</span></span>
+              </div>
+              <div style="display:flex;gap:9px;padding-left:45px"><input class="sr-inp" value="Camille" style="flex:1"><button class="sr-save">Enregistrer</button></div>
+            </div>
+            <div class="sr-row tap">
+              <span class="sr-ic" style="--c:#64748b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+              <span class="sr-tx"><b>Mot de passe</b><span>Modifier</span></span>
+              <button class="sr-link">Modifier →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- APPARENCE -->
+        <div>
+          <div class="sr-glabel">Apparence</div>
+          <div class="sr-card">
+            <div class="sr-row col">
+              <div class="sr-rhead">
+                <span class="sr-ic" style="--c:#8b5cf6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" fill="none"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/></svg></span>
+                <span class="sr-tx"><b>Thème</b><span>Apparence de l'application</span></span>
+              </div>
+              <div class="sr-seg" style="margin-left:45px" role="group">
+                <button class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19" stroke-linecap="round"/></svg> Clair</button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> Sombre</button>
+                <button>Système</button>
+              </div>
+            </div>
+            <div class="sr-row col">
+              <div class="sr-rhead">
+                <span class="sr-ic" style="--c:#ff6b9d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 1 0 0 20 3 3 0 0 0 3-3 2 2 0 0 1 2-2h1a3 3 0 0 0 3-3c0-6-4-12-12-12Z"/></svg></span>
+                <span class="sr-tx"><b>Couleur d'accent</b><span>Le vert ne te plaît pas ? Choisis ta couleur.</span></span>
+              </div>
+              <div class="sr-sw-row" style="margin-left:45px">
+                <button class="sr-swatch on" style="--c:#6d4dff"></button>
+                <button class="sr-swatch" style="--c:#58cc02"></button>
+                <button class="sr-swatch" style="--c:#0ea5e9"></button>
+                <button class="sr-swatch" style="--c:#ff6b9d"></button>
+                <button class="sr-swatch" style="--c:#f59e0b"></button>
+                <button class="sr-swatch" style="--c:#ef4444"></button>
+              </div>
+            </div>
+            <div class="sr-row">
+              <span class="sr-ic" style="--c:#22c55e"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg></span>
+              <span class="sr-tx"><b>Sons d'interface</b><span>Retours sonores sur les actions</span></span>
+              <label class="sr-sw"><input type="checkbox" checked><i></i></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- MES DONNÉES -->
+        <div>
+          <div class="sr-glabel">Mes données</div>
+          <div class="sr-card">
+            <div class="sr-row tap">
+              <span class="sr-ic" style="--c:#22c55e"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 21h14"/></svg></span>
+              <span class="sr-tx"><b>Exporter mes données</b><span>Un fichier JSON de toutes tes données</span></span>
+              <button class="sr-link">Exporter →</button>
+            </div>
+            <div class="sr-row">
+              <span class="sr-ic" style="--c:#f59e0b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+              <span class="sr-tx"><b>Emails marketing</b><span>Conseils, nouveautés et offres</span></span>
+              <label class="sr-sw"><input type="checkbox"><i></i></label>
+            </div>
+            <div class="sr-row tap">
+              <span class="sr-ic" style="--c:#64748b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8 7 9 4-1 7-4.5 7-9V6l-7-3Z"/></svg></span>
+              <span class="sr-tx"><b>Confidentialité & CGU</b><span>Politique, conditions, crédits</span></span>
+              <svg class="sr-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZONE CRITIQUE -->
+        <div>
+          <div class="sr-glabel" style="color:var(--rd-txt)">Zone critique</div>
+          <div class="sr-card sr-danger"><div class="sr-row tap">
+            <span class="sr-ic" style="--c:#ef4444"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m2 0-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 7"/></svg></span>
+            <span class="sr-tx"><b style="color:var(--rd-txt)">Supprimer mon compte</b><span>Irréversible — toutes tes données seront effacées</span></span>
+            <button class="sr-link danger">Supprimer</button>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('[data-th]').forEach(b=>b.addEventListener('click',()=>{
+      document.documentElement.dataset.theme=b.dataset.th;
+      document.querySelectorAll('[data-th]').forEach(x=>x.classList.toggle('on',x===b));
+    }));
+  </script>
+</body>
+</html>
