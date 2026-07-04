@@ -15,6 +15,7 @@ import { haptic } from "@/utils/haptic.js";
 import { fmtName } from "@/utils/fmt-name.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { THEORY_LEAGUES, theoryLeague } from "@/utils/theory-league.js";
+import { msToNextMonday, fmtCountdown } from "@/utils/league-shared.js";
 import {
   showTheoryTuto,
   maybeShowTheoryTuto,
@@ -72,26 +73,40 @@ export async function mount(root, initialTab) {
       .join("")}</div>
   </div>`;
 
-  const [ecoleRes, nationalRes, theorieRes, hofRes] = await Promise.all([
-    sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: LIMIT }).then(
-      (r) => r,
-      () => ({ data: null }),
-    ),
-    sb
-      .rpc("get_eleve_leaderboard", { p_scope: "national", p_limit: LIMIT })
-      .then(
+  const [ecoleRes, nationalRes, theorieRes, theorieWeeklyRes, hofRes] =
+    await Promise.all([
+      sb
+        .rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: LIMIT })
+        .then(
+          (r) => r,
+          () => ({ data: null }),
+        ),
+      sb
+        .rpc("get_eleve_leaderboard", { p_scope: "national", p_limit: LIMIT })
+        .then(
+          (r) => r,
+          () => ({ data: null }),
+        ),
+      sb
+        .rpc("get_theory_leaderboard", { p_scope: "ecole", p_limit: LIMIT })
+        .then(
+          (r) => r,
+          () => ({ data: null }),
+        ),
+      sb
+        .rpc("get_theory_leaderboard_weekly", {
+          p_scope: "ecole",
+          p_limit: LIMIT,
+        })
+        .then(
+          (r) => r,
+          () => ({ data: null }),
+        ),
+      sb.rpc("get_hall_of_fame", { p_scope: "ecole", p_limit: 100 }).then(
         (r) => r,
         () => ({ data: null }),
       ),
-    sb.rpc("get_theory_leaderboard", { p_scope: "ecole", p_limit: LIMIT }).then(
-      (r) => r,
-      () => ({ data: null }),
-    ),
-    sb.rpc("get_hall_of_fame", { p_scope: "ecole", p_limit: 100 }).then(
-      (r) => r,
-      () => ({ data: null }),
-    ),
-  ]);
+    ]);
 
   // Panne totale (réseau/RPC) ≠ « pas encore classé » : on affiche un vrai
   // état d'erreur avec Réessayer au lieu d'un faux classement vide.
@@ -115,7 +130,8 @@ export async function mount(root, initialTab) {
   const data = {
     ecole: ecoleRes.data || [],
     national: nationalRes.data || [],
-    theorie: theorieRes.data || [],
+    theorie: theorieRes.data || [], // à vie → paliers de progression
+    theorieWeekly: theorieWeeklyRes.data || [], // saison → classement affiché
     hof: hofRes.data || [],
   };
 
@@ -140,7 +156,8 @@ export async function mount(root, initialTab) {
 const OF = { conduite: 31, revision: 50 };
 
 function _rowsFor(state, data) {
-  if (state.ligue === "revision") return data.theorie;
+  // Révision = classement de la SAISON (points de la semaine).
+  if (state.ligue === "revision") return data.theorieWeekly;
   return state.scope === "national" ? data.national : data.ecole;
 }
 function _myRow(rows) {
@@ -225,7 +242,7 @@ function _renderArena(state, data) {
   const rows = _rowsFor(state, data);
   const sub =
     state.ligue === "revision"
-      ? "Ton effort en autonomie — quiz & examens blancs"
+      ? "Ton effort de la semaine — quiz & examens blancs"
       : "Validé en leçon avec ton moniteur";
 
   return `<div class="arn" style="${accent}">
@@ -239,7 +256,7 @@ function _renderArena(state, data) {
   </div>
 
   ${_renderScopebar(state, rows)}
-  <div id="arn-body">${_renderBody(state, rows, data.hof)}</div>
+  <div id="arn-body">${_renderBody(state, rows, data)}</div>
 
   <a class="arn-link" href="#/profil">
     <span aria-hidden="true">${icon("user", { size: 16, strokeWidth: 2 })}</span>
@@ -260,7 +277,9 @@ function _renderScopebar(state, rows) {
   const effectif =
     ranked > 0 ? `sur ${ranked} élève${ranked > 1 ? "s" : ""}` : "";
   if (state.ligue === "revision") {
-    return `<div class="arn-scopebar"><span style="font:600 12px/1 'Inter',sans-serif;color:var(--mu)">Mon école</span><span class="arn-effectif">${effectif}</span></div>`;
+    // Saison hebdo : compte à rebours jusqu'au reset (lundi 00:00).
+    const cd = esc(fmtCountdown(msToNextMonday()));
+    return `<div class="arn-scopebar"><span style="display:inline-flex;align-items:center;gap:5px;font:800 12px/1 'Inter',sans-serif;color:#ffd9cf">${icon("clock", { size: 13, strokeWidth: 2.2 })} Saison · <b style="color:#fff;font-variant-numeric:tabular-nums">${cd}</b></span><span class="arn-effectif">${effectif}</span></div>`;
   }
   return `<div class="arn-scopebar">
     <div class="arn-scope" role="group" aria-label="Portée du classement">
@@ -271,8 +290,9 @@ function _renderScopebar(state, rows) {
   </div>`;
 }
 
-function _renderBody(state, rows, hof) {
+function _renderBody(state, rows, data) {
   const ligue = state.ligue;
+  const hof = data.hof;
   const mine = _myRow(rows);
   const active = rows.filter((r) => (r.score ?? 0) > 0);
 
@@ -281,7 +301,7 @@ function _renderBody(state, rows, hof) {
     const cta = ligue === "revision" ? _quizCta() : "";
     const txt =
       ligue === "revision"
-        ? "Le classement s'anime dès que deux élèves ont des points révision."
+        ? "Le classement de la semaine s'anime dès que deux élèves ont marqué des points révision."
         : "Le classement apparaît dès que deux élèves ont validé une compétence avec leur moniteur.";
     return `<div class="arn-empty">
       <div class="arn-empty-ico">${icon(ligue === "revision" ? "zap" : "target", { size: 34 })}</div>
@@ -298,7 +318,13 @@ function _renderBody(state, rows, hof) {
     ? arenePodium(top.slice(0, 3), { fmtScore: fmt })
     : "";
   const listRows = hasPodium ? top.slice(3) : top;
-  const pal = _paliersData(ligue, mine?.score ?? 0);
+  // Paliers Révision = progression cumulée À VIE → on lit le score lifetime
+  // (data.theorie), pas le score hebdo du classement affiché (saison).
+  const lifeScore =
+    ligue === "revision"
+      ? (data.theorie.find((r) => r.is_me === true)?.score ?? 0)
+      : (mine?.score ?? 0);
+  const pal = _paliersData(ligue, lifeScore);
 
   const list = listRows.length
     ? `<div class="arn-list-head"><span class="lbl">${hasPodium ? "À partir du 4ᵉ" : "Classement"}</span><span class="rule"></span></div>
