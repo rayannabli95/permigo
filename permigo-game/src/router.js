@@ -81,6 +81,7 @@ const ROUTES = {
     "exam-conduite": () => import("@/pages/eleve/exam-conduite.js"),
     "jeu-faute": () => import("@/pages/eleve/jeu-faute.js"),
     "en-situation": () => import("@/pages/eleve/en-situation.js"),
+    roue: () => import("@/pages/eleve/roue.js"),
     "mes-coffres": () => import("@/pages/eleve/mes-coffres.js"),
     "compte-rendu": () => import("@/pages/eleve/compte-rendu.js"),
     messages: () => import("@/pages/common/messages.js"),

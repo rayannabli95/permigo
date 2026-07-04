@@ -1,0 +1,312 @@
+// ═══════════════════════════════════════════════════════════════
+// Élève — La Roue (aperçu jouable)
+// v1 : tour gratuit du jour (localStorage), révélation cosmétique visuelle.
+// Le panneau « gros lots réels » est un TEASER (offerts/personnalisés par le
+// moniteur) — pas encore crédité : l'économie de la roue (coût du tour, débit
+// volants, grant serveur) attend la validation produit + une migration DB.
+// DA « Arène » nuit-violet + or (comme le quiz).
+// ═══════════════════════════════════════════════════════════════
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { haptic } from "@/utils/haptic.js";
+
+const LS_FREE = "pg-roue-free-last"; // YYYY-MM-DD du dernier tour gratuit
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function freeUsedToday() {
+  try {
+    return localStorage.getItem(LS_FREE) === todayKey();
+  } catch {
+    return false;
+  }
+}
+function markFreeUsed() {
+  try {
+    localStorage.setItem(LS_FREE, todayKey());
+  } catch {
+    /* noop */
+  }
+}
+
+// 8 segments (cosmétique). L'ordre suit le conic-gradient du disque.
+const SEGMENTS = [
+  { ic: "👑", label: "Skin légendaire", rarete: "legend" },
+  { ic: "🎨", label: "Fond néon", rarete: "rare" },
+  { ic: "🏎️", label: "Skin épique", rarete: "epique" },
+  { ic: "🪙", label: "20 volants", rarete: "commun" },
+  { ic: "🎁", label: "Gros lot réel", rarete: "reel" },
+  { ic: "🌌", label: "Fond animé", rarete: "epique" },
+  { ic: "🪙", label: "10 volants", rarete: "commun" },
+  { ic: "🏷️", label: "Titre rare", rarete: "rare" },
+];
+// Tirage cosmétique pondéré (le gros lot réel n'est JAMAIS tiré en aperçu).
+const WEIGHTED = [3, 1, 2, 3, 2, 3, 1]; // indices 0,1,2,3,5,6,7 (pas le 4=réel)
+const POOL = [0, 1, 2, 3, 5, 6, 7];
+
+function pickSegment() {
+  const total = WEIGHTED.reduce((a, b) => a + b, 0);
+  let r = Math.floor(Math.random() * total);
+  for (let i = 0; i < POOL.length; i++) {
+    if (r < WEIGHTED[i]) return POOL[i];
+    r -= WEIGHTED[i];
+  }
+  return 3;
+}
+
+const STYLE = `<style>
+.roue {
+  --pnl: #241644; --pnl2: #2b1b54; --line: rgba(167,139,250,.20);
+  --mu: #c3b8e8; --mu2: #9488bf; --gold: #ffd24a; --gold-s: #ffe9a8;
+  position: relative;
+  margin-top: calc(-1 * (var(--th, 52px) + env(safe-area-inset-top, 0px)));
+  padding: calc(var(--th, 52px) + env(safe-area-inset-top, 0px) + 8px) 16px 96px;
+  min-height: 100dvh; max-width: 480px; margin-inline: auto;
+  color: #fff; font-family: 'Nunito', system-ui, sans-serif; overflow: hidden;
+  background:
+    radial-gradient(120% 55% at 20% -6%, rgba(168,85,247,.42) 0%, transparent 54%),
+    radial-gradient(110% 45% at 96% 4%, rgba(255,156,28,.16) 0%, transparent 50%),
+    linear-gradient(180deg, #1d1138 0%, #150d2b 46%, #100a22 100%);
+}
+.roue-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.roue-back {
+  width: 40px; height: 40px; flex: none; border-radius: 13px;
+  border: 1px solid var(--line); background: rgba(255,255,255,.06);
+  color: #fff; display: grid; place-items: center; cursor: pointer;
+}
+.roue-back svg { width: 20px; height: 20px; }
+.roue-title { font: 800 20px/1 'Baloo 2', cursive; text-shadow: 0 0 18px rgba(168,85,247,.4); }
+
+.roue-hero { text-align: center; padding: 8px 8px 2px; }
+.roue-kicker {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 999px; margin-bottom: 8px;
+  background: rgba(111,224,22,.16); border: 1px solid rgba(111,224,22,.4);
+  font: 600 10px/1 'Fredoka', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #b9f26e;
+}
+.roue-h1 {
+  font: 800 25px/1.05 'Baloo 2', cursive;
+  background: linear-gradient(180deg, #fff 0%, #fff7e0 55%, #ffd86b 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.roue-sub { margin-top: 5px; font: 700 12.5px/1.4 'Nunito', sans-serif; color: var(--mu); }
+
+/* la roue */
+.roue-zone { position: relative; margin: 14px auto 4px; width: 290px; height: 290px; }
+.roue-zone::before {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 330px; height: 330px;
+  transform: translate(-50%,-50%);
+  background: radial-gradient(closest-side, rgba(255,210,74,.28) 0%, rgba(168,85,247,.16) 45%, transparent 72%);
+  filter: blur(8px); pointer-events: none;
+}
+.roue-rim {
+  position: absolute; inset: 0; border-radius: 50%; padding: 10px;
+  background: conic-gradient(from 0deg, #ffe9a8, #f0a818 18%, #ffd24a 35%, #c87d12 52%, #ffe9a8 70%, #f0a818 86%, #ffe9a8 100%);
+  box-shadow: 0 18px 40px -10px rgba(0,0,0,.7), 0 0 34px -4px rgba(255,180,40,.5),
+    inset 0 2px 4px rgba(255,255,255,.55), inset 0 -3px 6px rgba(122,74,5,.6);
+}
+.roue-disc {
+  position: absolute; inset: 10px; border-radius: 50%; overflow: hidden;
+  transform: rotate(0deg); transition: transform 5.2s cubic-bezier(.16,.84,.28,1);
+  box-shadow: inset 0 0 0 3px rgba(10,7,24,.85), inset 0 4px 18px rgba(0,0,0,.6);
+  background: conic-gradient(
+    #ffd24a 0deg 45deg, #54a0ff 45deg 90deg, #b06bff 90deg 135deg, #9a93c8 135deg 180deg,
+    #6fe016 180deg 225deg, #b06bff 225deg 270deg, #9a93c8 270deg 315deg, #54a0ff 315deg 360deg);
+}
+.roue-disc::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, transparent 0deg 44.4deg, rgba(10,7,24,.8) 44.4deg 45deg);
+}
+.roue-seg { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform: translate(-50%,-50%) rotate(var(--a)); }
+.roue-seg > span { position: absolute; left: 50%; top: -100px; transform: translateX(-50%); font-size: 23px; width: 34px; text-align: center; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
+.roue-hub {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 4;
+  width: 66px; height: 66px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #fff7da 0%, var(--gold-s) 22%, var(--gold) 55%, #ff9c1c 100%);
+  border: 3px solid #fff7df; display: grid; place-items: center; color: #6a4506;
+  box-shadow: 0 6px 0 #c87d12, 0 12px 22px -6px rgba(0,0,0,.6);
+}
+.roue-hub svg { width: 30px; height: 30px; }
+.roue-ptr {
+  position: absolute; left: 50%; top: -12px; transform: translateX(-50%); z-index: 6;
+  width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent;
+  border-top: 24px solid var(--gold);
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,.6)) drop-shadow(0 0 8px rgba(255,180,40,.7));
+}
+
+/* CTA */
+.roue-cta {
+  display: block; width: 100%; max-width: 330px; margin: 16px auto 0; min-height: 60px;
+  border: 0; border-radius: 18px; cursor: pointer;
+  font: 800 17px/1 'Baloo 2', cursive; color: #fff; text-shadow: 0 2px 0 rgba(40,90,5,.55);
+  background: linear-gradient(180deg, #6fe016, #58cc02);
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), 0 6px 0 #3f8f02, 0 12px 24px -6px rgba(70,163,2,.7);
+  transition: transform .1s, filter .15s;
+}
+.roue-cta:active { transform: translateY(3px); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), 0 3px 0 #3f8f02; }
+.roue-cta:disabled { filter: grayscale(.5) brightness(.8); cursor: default; }
+.roue-free { text-align: center; margin-top: 10px; font: 600 12px/1.4 'Fredoka', sans-serif; color: var(--mu); }
+
+/* résultat */
+.roue-result {
+  margin: 14px auto 0; max-width: 360px; text-align: center;
+  padding: 14px 16px; border-radius: 18px;
+  background: linear-gradient(180deg, var(--pnl), var(--pnl2)); border: 1px solid var(--line);
+  animation: rouepop .35s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes rouepop { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
+.roue-result-ic { font-size: 34px; }
+.roue-result-t { font: 800 16px/1.2 'Baloo 2', cursive; margin-top: 4px; }
+.roue-result-s { font: 700 12px/1.4 'Nunito', sans-serif; color: var(--mu2); margin-top: 2px; }
+
+/* gros lots réels (teaser) */
+.roue-real {
+  margin: 20px auto 0; max-width: 400px; border-radius: 20px; padding: 16px;
+  background: linear-gradient(180deg, rgba(111,224,22,.10), rgba(88,204,2,.03)),
+    linear-gradient(180deg, var(--pnl), var(--pnl2));
+  border: 1px solid rgba(111,224,22,.38);
+  box-shadow: 0 16px 30px -18px rgba(0,0,0,.8), 0 0 26px -10px rgba(111,224,22,.35);
+}
+.roue-real-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.roue-real-h h2 { font: 700 15px/1.1 'Baloo 2', cursive; display: flex; align-items: center; gap: 7px; }
+.roue-real-h .tag { flex: none; font: 600 9.5px/1 'Fredoka', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #b9f26e; padding: 4px 9px; border-radius: 999px; background: rgba(111,224,22,.14); border: 1px solid rgba(111,224,22,.35); }
+.roue-real-row { display: flex; align-items: center; gap: 11px; padding: 10px 2px; border-bottom: 1px solid rgba(111,224,22,.12); }
+.roue-real-row:last-of-type { border-bottom: 0; }
+.roue-real-ic { width: 38px; height: 38px; flex: none; border-radius: 12px; display: grid; place-items: center; font-size: 20px; background: linear-gradient(150deg, rgba(111,224,22,.25), rgba(63,143,2,.3)); border: 1px solid rgba(111,224,22,.4); }
+.roue-real-name { font: 700 13.5px/1.15 'Baloo 2', cursive; color: #e9ffd2; }
+.roue-real-sub { font: 700 11px/1.3 'Nunito', sans-serif; color: var(--mu2); margin-top: 1px; }
+.roue-real-flex { flex: 1; min-width: 0; }
+.roue-real-sign { margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(10,7,24,.35); border: 1px dashed rgba(111,224,22,.35); }
+.roue-real-av { width: 32px; height: 32px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 800 15px/1 'Baloo 2', cursive; color: #0d2402; background: linear-gradient(160deg, #b9f26e, #58cc02); border: 2px solid rgba(255,255,255,.5); }
+.roue-real-sign b { display: block; font: 700 12.5px/1.2 'Baloo 2', cursive; color: #e9ffd2; }
+.roue-real-sign span { font: 700 10.5px/1.3 'Nunito', sans-serif; color: var(--mu2); }
+
+.roue-note { margin: 14px auto 0; max-width: 400px; display: flex; align-items: flex-start; gap: 9px; padding: 12px 14px; border-radius: 16px; background: rgba(124,77,255,.10); border: 1px solid rgba(167,139,250,.22); }
+.roue-note svg { width: 16px; height: 16px; flex: none; color: #c9b8ff; margin-top: 1px; }
+.roue-note p { font: 700 11.5px/1.45 'Nunito', sans-serif; color: var(--mu); }
+.roue-note b { color: #c9b8ff; }
+@media (prefers-reduced-motion: reduce) { .roue-disc { transition: transform 1.2s ease-out; } .roue-result { animation: none; } }
+</style>`;
+
+export async function mount(root) {
+  const me = getCurUser();
+  if (!me) return;
+  track("page_view", { page: "eleve_roue" });
+
+  const prenom =
+    (me.prenom || me.nom || "ton moniteur").trim().split(/\s+/)[0] || "R";
+  const initiale = prenom.charAt(0).toUpperCase() || "R";
+  const used = freeUsedToday();
+
+  root.innerHTML = `${STYLE}
+<div class="roue">
+  <div class="roue-top">
+    <button class="roue-back" id="roue-back" aria-label="Retour">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="roue-title">La Roue</div>
+  </div>
+
+  <div class="roue-hero">
+    <div class="roue-kicker">Aperçu · bientôt jouable pour de vrai</div>
+    <div class="roue-h1">Tente ta chance</div>
+    <div class="roue-sub">Skins, titres, fonds… et parfois un vrai cadeau signé de ton moniteur.</div>
+  </div>
+
+  <div class="roue-zone">
+    <div class="roue-ptr" aria-hidden="true"></div>
+    <div class="roue-rim">
+      <div class="roue-disc" id="roue-disc">
+        ${SEGMENTS.map((s, i) => `<div class="roue-seg" style="--a:${22.5 + i * 45}deg"><span>${s.ic}</span></div>`).join("")}
+      </div>
+    </div>
+    <div class="roue-hub" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/><path d="M12 3v6.4M4.2 17.5l5.4-3.1M19.8 17.5l-5.4-3.1"/></svg>
+    </div>
+  </div>
+
+  <button class="roue-cta" id="roue-spin" ${used ? "disabled" : ""}>${used ? "Reviens demain" : "Tour gratuit du jour"}</button>
+  <div class="roue-free" id="roue-free">${used ? "Ton tour gratuit est déjà passé aujourd'hui." : "1 tour offert chaque jour."}</div>
+
+  <div id="roue-result-slot"></div>
+
+  <section class="roue-real">
+    <div class="roue-real-h">
+      <h2>🎁 Gros lots réels</h2>
+      <span class="tag">Ultra-rares</span>
+    </div>
+    <div class="roue-real-row">
+      <div class="roue-real-ic">🅰️</div>
+      <div class="roue-real-flex">
+        <div class="roue-real-name">Disque A jeune conducteur</div>
+        <div class="roue-real-sub">Le vrai, à coller sur ta voiture</div>
+      </div>
+    </div>
+    <div class="roue-real-row">
+      <div class="roue-real-ic">🚗</div>
+      <div class="roue-real-flex">
+        <div class="roue-real-name">1 heure de conduite offerte</div>
+        <div class="roue-real-sub">Une vraie leçon en plus, cadeau</div>
+      </div>
+    </div>
+    <div class="roue-real-sign">
+      <div class="roue-real-av">${esc(initiale)}</div>
+      <div>
+        <b>Offert par ${esc(prenom)} · ton moniteur</b>
+        <span>C'est lui qui choisit et régale — à sa marque.</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="roue-note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+    <p>Les <b>gros lots réels</b> arriveront quand ton moniteur les activera. Les volants se gagnent en révisant — <b>jamais</b> avec de l'argent.</p>
+  </div>
+</div>`;
+
+  root
+    .querySelector("#roue-back")
+    ?.addEventListener("click", () => navigate("/boutique"));
+
+  const disc = root.querySelector("#roue-disc");
+  const btn = root.querySelector("#roue-spin");
+  const free = root.querySelector("#roue-free");
+  let turns = 0;
+  let busy = false;
+
+  btn?.addEventListener("click", () => {
+    if (busy || freeUsedToday()) return;
+    busy = true;
+    haptic("select");
+    track("roue.spin", { kind: "free" });
+    const seg = pickSegment();
+    turns += 5;
+    // amène le centre du segment sous le pointeur (haut)
+    const target = 360 * turns + (360 - (seg * 45 + 22.5));
+    disc.style.transform = `rotate(${target}deg)`;
+    btn.disabled = true;
+    btn.textContent = "La roue tourne…";
+    setTimeout(() => {
+      markFreeUsed();
+      const s = SEGMENTS[seg];
+      const slot = root.querySelector("#roue-result-slot");
+      if (slot) {
+        slot.innerHTML = `
+        <div class="roue-result">
+          <div class="roue-result-ic" aria-hidden="true">${s.ic}</div>
+          <div class="roue-result-t">${esc(s.label)} !</div>
+          <div class="roue-result-s">Aperçu — tes récompenses seront créditées quand la roue ouvrira pour de vrai.</div>
+        </div>`;
+      }
+      btn.textContent = "Reviens demain";
+      if (free)
+        free.textContent = "Ton tour gratuit est déjà passé aujourd'hui.";
+      haptic("tap");
+      busy = false;
+    }, 5300);
+  });
+}

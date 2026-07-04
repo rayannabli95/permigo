@@ -616,8 +616,42 @@ export async function mount(root) {
     syncAvatarUrlToProfile("avatar", equippedAv);
 
   root.innerHTML = `${STYLE}
+<style>
+  .bo2-roue {
+    display: flex; align-items: center; gap: 13px; width: 100%; text-align: left;
+    margin: 0 0 16px; padding: 13px 15px; border-radius: 20px; cursor: pointer;
+    color: #fff; font: inherit; text-decoration: none;
+    background:
+      radial-gradient(120% 90% at 88% 14%, rgba(255,180,40,.28) 0%, transparent 55%),
+      linear-gradient(150deg, #33205f 0%, #241644 72%);
+    border: 1px solid rgba(255,210,74,.4);
+    box-shadow: 0 16px 30px -16px rgba(20,10,40,.6);
+  }
+  .bo2-roue-w {
+    width: 58px; height: 58px; flex: none; border-radius: 50%; position: relative;
+    background: conic-gradient(#ffd24a 0 45deg,#54a0ff 45deg 90deg,#b06bff 90deg 135deg,#9a93c8 135deg 180deg,#6fe016 180deg 225deg,#b06bff 225deg 270deg,#9a93c8 270deg 315deg,#54a0ff 315deg 360deg);
+    border: 3px solid #ffe9a8; box-shadow: 0 4px 0 #c87d12, 0 0 16px -3px rgba(255,180,40,.7);
+    animation: bo2RoueSpin 13s linear infinite;
+  }
+  @keyframes bo2RoueSpin { to { transform: rotate(360deg); } }
+  .bo2-roue-w::after { content: ""; position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; transform: translate(-50%,-50%); border-radius: 50%; background: radial-gradient(circle at 36% 30%, #fff7da, #ffd24a 60%, #ff9c1c); border: 2px solid #ffe9a8; }
+  .bo2-roue-tx { flex: 1; min-width: 0; }
+  .bo2-roue-t { font: 800 16.5px/1.1 'Baloo 2', cursive, sans-serif; background: linear-gradient(180deg,#fff,#ffd86b); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .bo2-roue-s { margin-top: 3px; font: 700 11.5px/1.35 'Nunito', sans-serif; color: #c3b8e8; }
+  .bo2-roue-s b { color: #b9f26e; }
+  .bo2-roue-go { flex: none; font: 800 12.5px/1 'Baloo 2', cursive, sans-serif; color: #0d2402; padding: 9px 13px; border-radius: 12px; background: linear-gradient(180deg,#b9f26e,#58cc02); box-shadow: 0 3px 0 #3f8f02; }
+  @media (prefers-reduced-motion: reduce) { .bo2-roue-w { animation: none; } }
+</style>
 <div class="bo2 anim-slide-up">
   ${recompensesTabs("boutique")}
+  <a class="bo2-roue" href="#/roue" aria-label="Ouvrir la Roue">
+    <span class="bo2-roue-w" aria-hidden="true"></span>
+    <span class="bo2-roue-tx">
+      <span class="bo2-roue-t">La Roue</span>
+      <span class="bo2-roue-s">Skins, titres… et des <b>gros lots réels</b> de ton moniteur.</span>
+    </span>
+    <span class="bo2-roue-go">Tour gratuit !</span>
+  </a>
   <div class="bo2-hd">
     <div class="bo2-hd-row">
       <h1 class="bo2-hd-title" tabindex="-1">Boutique<small>Affiche ton style au classement</small></h1>
