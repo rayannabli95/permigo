@@ -215,6 +215,14 @@ export async function mount(root) {
           C'est parti <span class="ob-arrow" aria-hidden="true">→</span>
         </button>
       </div>
+
+      <!-- Cue de scroll : pousse à découvrir couleur/rappels sous la grille -->
+      <div class="ob-cue" id="ob-cue" aria-hidden="true">
+        <span class="ob-cue-txt">Descends choisir ta couleur</span>
+        <span class="ob-cue-arr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </span>
+      </div>
     </div>
   `;
 
@@ -238,7 +246,25 @@ export async function mount(root) {
     progFill.style.width = pct + "%";
     progBar.setAttribute("aria-valuenow", String(pct));
   }
-  scrollEl.addEventListener("scroll", updateProgress, { passive: true });
+
+  // Cue « descends choisir ta couleur » : visible tant que l'élève n'a pas
+  // scrollé (et seulement s'il y a de quoi dérouler).
+  const cueEl = root.querySelector("#ob-cue");
+  function updateCue() {
+    if (!cueEl) return;
+    const scrollable = scrollEl.scrollHeight - scrollEl.clientHeight > 24;
+    cueEl.classList.toggle("hide", !scrollable || scrollEl.scrollTop > 40);
+  }
+
+  scrollEl.addEventListener(
+    "scroll",
+    () => {
+      updateProgress();
+      updateCue();
+    },
+    { passive: true },
+  );
+  requestAnimationFrame(updateCue); // état initial (masqué si rien à dérouler)
 
   // ─── Tracking « section vue » au scroll (une fois par section) ──
   const seen = new Set();
@@ -866,6 +892,31 @@ const STYLE = `<style>
     box-shadow: 0 3px 0 #4321a8, 0 6px 14px rgba(124,77,255,.45), 0 1px 0 rgba(255,255,255,.5) inset;
   }
   .ob-cta:disabled { opacity: .6; cursor: default; }
+
+  /* Cue de scroll — invite à descendre vers couleur/rappels (1er passage,
+     disparaît dès que l'élève scrolle ou si l'écran n'a rien à dérouler). */
+  .ob-cue {
+    position: absolute; left: 0; right: 0;
+    bottom: calc(94px + env(safe-area-inset-bottom, 0px));
+    z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 7px;
+    pointer-events: none; transition: opacity .3s ease, transform .3s ease;
+  }
+  .ob-cue.hide { opacity: 0; transform: translateY(8px); }
+  .ob-cue-txt {
+    font: 800 13px/1 'Plus Jakarta Sans', sans-serif; color: #1a1233;
+    background: linear-gradient(180deg, #ffe39a, var(--ob-or-d));
+    padding: 8px 15px; border-radius: 99px;
+    box-shadow: 0 8px 20px -5px rgba(255,206,77,.55);
+  }
+  .ob-cue-arr {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(255,206,77,.16); color: var(--ob-or);
+    display: grid; place-items: center;
+    animation: obCueBob 1.4s ease-in-out infinite;
+  }
+  .ob-cue-arr svg { width: 18px; height: 18px; }
+  @keyframes obCueBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
+  @media (prefers-reduced-motion: reduce) { .ob-cue-arr { animation: none; } }
 
   /* ═══════════════════════════════════════════════════════════════
      CLAIR PREMIUM — uniquement quand le thème global est clair.

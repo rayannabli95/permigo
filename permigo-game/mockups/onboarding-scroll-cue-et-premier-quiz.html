@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maquette — cue scroll onboarding + 1er quiz (roue + install)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
+  :root{
+    --ob-vio:#7c4dff; --ob-vio-d:#5a2fd6; --ob-vio-l:#a583ff;
+    --ob-or:#ffce4d; --ob-or-d:#f0a500;
+    --ob-night-1:#241a4d; --ob-night-2:#3a2a7a;
+    --ob-ink:#fff; --ob-ink-2:#cdc2f5; --ob-ink-3:#9b8fd0;
+    --ob-plate:#2c2059; --ob-plate-2:#34286b;
+    --ob-line:rgba(165,131,255,.22);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;}
+  body{background:#12102a;font-family:'Plus Jakarta Sans',sans-serif;display:flex;gap:40px;justify-content:center;align-items:flex-start;padding:44px 24px;flex-wrap:wrap;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .cap{color:#cdc2f5;font-size:13px;font-weight:700;letter-spacing:.02em;text-align:center;max-width:360px;line-height:1.4;}
+  .cap b{color:var(--ob-or);}
+  /* Téléphone */
+  .ph{width:360px;height:740px;border-radius:44px;background:linear-gradient(180deg,var(--ob-night-1),#1b1540);
+      border:1px solid var(--ob-line);overflow:hidden;position:relative;box-shadow:0 30px 70px -20px rgba(0,0,0,.7);}
+  /* ─── Onboarding ─── */
+  .top{position:absolute;top:0;left:0;right:0;height:56px;display:flex;align-items:center;gap:12px;padding:0 18px;z-index:5;}
+  .prog{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;}
+  .prog::after{content:"";display:block;width:34%;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ob-vio-l),var(--ob-or));}
+  .skip{color:var(--ob-ink-3);font-size:13px;font-weight:600;}
+  .scroll{position:absolute;inset:56px 0 0;overflow:hidden;padding:6px 22px 0;}
+  .eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--ob-ink-2);text-transform:uppercase;}
+  .eyebrow b{color:var(--ob-or);}
+  .mascot{width:78px;height:78px;object-fit:contain;display:block;margin:6px auto 2px;}
+  .h1{font-family:'Baloo 2';font-weight:800;font-size:24px;color:#fff;text-align:center;}
+  .lead{font-size:13px;color:var(--ob-ink-2);text-align:center;max-width:280px;margin:4px auto 0;line-height:1.45;}
+  .sec-head{display:flex;align-items:center;gap:10px;margin:22px 0 14px;}
+  .sec-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(180deg,#ffe39a,var(--ob-or-d));
+           color:#1a1233;font-weight:800;font-size:14px;display:grid;place-items:center;}
+  .sec-title{font-family:'Baloo 2';font-weight:700;font-size:18px;color:#fff;}
+  .av-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
+  .av{aspect-ratio:1;border-radius:20px;background:linear-gradient(180deg,var(--ob-plate-2),var(--ob-plate));
+      border:1px solid var(--ob-line);display:grid;place-items:center;position:relative;}
+  .av img{width:74%;height:74%;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4));}
+  .av.sel{border:2px solid var(--ob-or);box-shadow:0 0 0 4px rgba(255,206,77,.18),0 8px 20px -6px rgba(255,206,77,.4);}
+  .av.sel::after{content:"✓";position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;
+      background:linear-gradient(180deg,#ffe39a,var(--ob-or-d));color:#1a1233;font-size:12px;font-weight:800;display:grid;place-items:center;}
+  .helper{font-size:13px;font-weight:600;color:var(--ob-ink-3);text-align:center;margin-top:14px;}
+  .colr-label{font-size:14px;font-weight:700;color:var(--ob-ink-3);margin:22px 0 10px;}
+  .colr-grid{display:flex;flex-wrap:wrap;gap:12px;}
+  .dot{width:46px;height:46px;border-radius:50%;border:2px solid transparent;}
+  /* ─── LE CUE (nouveauté) ─── */
+  .cue-fade{position:absolute;left:0;right:0;bottom:0;height:130px;pointer-events:none;z-index:6;
+      background:linear-gradient(180deg,transparent, #1d1640 70%);}
+  .cue{position:absolute;left:0;right:0;bottom:20px;z-index:7;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;}
+  .cue-txt{font-size:13px;font-weight:800;color:#1a1233;background:linear-gradient(180deg,#ffe39a,var(--ob-or-d));
+      padding:7px 15px;border-radius:99px;box-shadow:0 8px 20px -5px rgba(255,206,77,.55);}
+  .cue-arr{width:30px;height:30px;border-radius:50%;background:rgba(255,206,77,.16);display:grid;place-items:center;
+      animation:bob 1.4s ease-in-out infinite;}
+  .cue-arr svg{width:18px;height:18px;stroke:var(--ob-or);}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+
+  /* ─── Frame B : 1er quiz réussi ─── */
+  .qbg{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 0%, #3a2a7a 0%, #201748 55%, #17123a 100%);
+       display:flex;flex-direction:column;align-items:center;padding:38px 24px;}
+  .qstar{position:absolute;font-size:16px;opacity:.6;}
+  .ring{width:118px;height:118px;border-radius:50%;display:grid;place-items:center;margin-top:14px;position:relative;
+        background:conic-gradient(var(--ob-or) 0 86%, rgba(255,255,255,.12) 86% 100%);}
+  .ring::before{content:"";position:absolute;inset:9px;border-radius:50%;background:#201748;}
+  .ring b{position:relative;font-family:'Baloo 2';font-weight:800;font-size:30px;color:#fff;}
+  .ring b small{font-size:15px;color:var(--ob-ink-2);font-weight:700;}
+  .qtitle{font-family:'Baloo 2';font-weight:800;font-size:23px;color:#fff;margin-top:16px;text-align:center;}
+  .qsub{font-size:13.5px;color:var(--ob-ink-2);text-align:center;margin-top:4px;}
+  /* carte roue offerte */
+  .reward{margin-top:22px;width:100%;border-radius:24px;padding:18px;position:relative;overflow:hidden;
+      background:linear-gradient(160deg,#4a2fa8,#2f2170);border:1px solid rgba(255,206,77,.4);
+      box-shadow:0 16px 40px -14px rgba(255,206,77,.35);display:flex;align-items:center;gap:14px;}
+  .reward .glow{position:absolute;top:-40px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,206,77,.35),transparent 70%);}
+  .wheel{width:64px;height:64px;flex-shrink:0;border-radius:50%;position:relative;
+      background:conic-gradient(#ff6b8b 0 45deg,#ffce4d 45deg 90deg,#6be2a0 90deg 135deg,#7c4dff 135deg 180deg,#ff6b8b 180deg 225deg,#ffce4d 225deg 270deg,#6be2a0 270deg 315deg,#7c4dff 315deg 360deg);
+      border:3px solid #fff;box-shadow:0 6px 16px -4px rgba(0,0,0,.5);}
+  .wheel::after{content:"";position:absolute;top:50%;left:50%;width:16px;height:16px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);}
+  .reward-body{position:relative;flex:1;}
+  .reward-tag{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ob-or);}
+  .reward-tt{font-family:'Baloo 2';font-weight:700;font-size:16.5px;color:#fff;margin-top:2px;line-height:1.2;}
+  .reward-ts{font-size:12px;color:var(--ob-ink-2);margin-top:3px;}
+  .cta{margin-top:16px;width:100%;height:56px;border:0;border-radius:18px;font-family:'Baloo 2';font-weight:800;font-size:16px;color:#1a1233;
+       background:linear-gradient(180deg,#ffe39a,var(--ob-or-d));box-shadow:0 10px 24px -8px rgba(255,206,77,.6),inset 0 2px 0 rgba(255,255,255,.5);
+       display:flex;align-items:center;justify-content:center;gap:8px;}
+  .later{margin-top:12px;color:var(--ob-ink-3);font-size:13px;font-weight:600;text-align:center;}
+  /* mini sheet install (après la roue) */
+  .isheet{margin-top:18px;width:100%;border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px;
+      background:rgba(255,255,255,.06);border:1px solid var(--ob-line);}
+  .isheet img{width:38px;height:38px;border-radius:11px;}
+  .isheet .t{flex:1;}
+  .isheet .t b{color:#fff;font-size:13.5px;font-weight:800;}
+  .isheet .t span{display:block;color:var(--ob-ink-3);font-size:11.5px;margin-top:2px;}
+  .isheet .go{font-size:12px;font-weight:800;color:#1a1233;background:var(--ob-or);padding:8px 12px;border-radius:10px;}
+</style>
+</head>
+<body>
+
+  <!-- FRAME A : onboarding avec cue de scroll -->
+  <div class="col">
+    <div class="ph">
+      <div class="top"><div class="prog"></div><div class="skip">Passer</div></div>
+      <div class="scroll">
+        <div class="eyebrow">Permi<b>Go</b></div>
+        <img class="mascot" src="/skins/mascot-hello.png" alt="" onerror="this.style.display='none'"/>
+        <div class="h1">Salut, Léa&nbsp;!</div>
+        <div class="lead">En 30&nbsp;secondes on prépare ton appli.</div>
+        <div class="sec-head"><span class="sec-num">1</span><span class="sec-title">Ton personnage</span></div>
+        <div class="av-grid">
+          <div class="av sel"><img src="/skins/avatars/av1.png" onerror="this.parentNode.innerHTML='🧑'"/></div>
+          <div class="av"><img src="/skins/avatars/av2.png" onerror="this.parentNode.innerHTML='👦'"/></div>
+          <div class="av"><img src="/skins/avatars/av3.png" onerror="this.parentNode.innerHTML='👧'"/></div>
+          <div class="av"><img src="/skins/avatars/av4.png" onerror="this.parentNode.innerHTML='🧔'"/></div>
+          <div class="av"><img src="/skins/avatars/av5.png" onerror="this.parentNode.innerHTML='👩'"/></div>
+          <div class="av"><img src="/skins/avatars/av6.png" onerror="this.parentNode.innerHTML='🧑‍🦱'"/></div>
+        </div>
+        <div class="helper">Choisis ton avatar</div>
+        <div class="colr-label">Ta couleur</div>
+        <div class="colr-grid">
+          <span class="dot" style="background:#7c4dff"></span>
+          <span class="dot" style="background:#22c55e"></span>
+        </div>
+      </div>
+      <!-- LE CUE -->
+      <div class="cue-fade"></div>
+      <div class="cue">
+        <div class="cue-txt">Descends choisir ta couleur ✨</div>
+        <div class="cue-arr"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div>
+      </div>
+    </div>
+    <div class="cap">A · <b>Choix perso</b> — un cue or (bulle + chevron qui rebondit + fondu) qui pousse à scroller vers la couleur. Disparaît au 1<sup>er</sup> scroll.</div>
+  </div>
+
+  <!-- FRAME B : 1er quiz réussi → roue offerte + install -->
+  <div class="col">
+    <div class="ph">
+      <div class="qbg">
+        <span class="qstar" style="top:60px;left:40px">✦</span>
+        <span class="qstar" style="top:90px;right:50px">✧</span>
+        <span class="qstar" style="top:150px;left:70px">★</span>
+        <div class="ring"><b>86<small>%</small></b></div>
+        <div class="qtitle">Premier quiz réussi ! 🎉</div>
+        <div class="qsub">Bien joué Léa — tu es lancée.</div>
+        <div class="reward">
+          <div class="glow"></div>
+          <div class="wheel"></div>
+          <div class="reward-body">
+            <div class="reward-tag">Cadeau débloqué</div>
+            <div class="reward-tt">Un tour de roue offert</div>
+            <div class="reward-ts">De vrais volants à gagner 🪙</div>
+          </div>
+        </div>
+        <button class="cta">🎡 Tourner la roue</button>
+        <div class="isheet">
+          <img src="/skins/avatars/permigo-badge-icon.png" onerror="this.style.display='none'"/>
+          <div class="t"><b>Ajoute PermiGo</b><span>Pour tes rappels + retrouver tes volants</span></div>
+          <div class="go">Ajouter</div>
+        </div>
+        <div class="later">Plus tard</div>
+      </div>
+    </div>
+    <div class="cap">B · <b>1<sup>er</sup> quiz réussi</b> — la roue devient la récompense (au lieu d'un pop-up d'install à froid). L'install se pitche ici, adossée au cadeau.</div>
+  </div>
+
+</body>
+</html>
