@@ -104,6 +104,7 @@ const ROUTES = {
     validation: () => import("@/pages/enseignant/log-session.js"),
     eleves: () => import("@/pages/enseignant/mes-eleves.js"),
     relances: () => import("@/pages/enseignant/relances.js"),
+    recompenses: () => import("@/pages/enseignant/recompenses.js"),
     "classement-eleves": () =>
       import("@/pages/enseignant/classement-eleves.js"),
     livret: () => import("@/pages/enseignant/livret-remc.js"),

@@ -432,6 +432,18 @@ ${
 ${
   me.role === "enseignant"
     ? `
+  <!-- RÉCOMPENSES ÉLÈVES — le moniteur choisit ses lots (roue) -->
+  <div class="st-section" style="margin-top:20px">
+    <div class="st-section-label">Tes élèves</div>
+    <div class="st-row" id="st-recompenses-row" role="button" tabindex="0" aria-label="Régler ta roue de récompenses">
+      <div class="st-row-left">
+        <div class="st-row-title">Ta roue de récompenses</div>
+        <div class="st-row-sub">Choisis les lots offerts à tes élèves, à ta marque</div>
+      </div>
+      <div class="st-row-action">${icon("chevron-right", { size: 18, strokeWidth: 2.2, color: "var(--mu2)" })}</div>
+    </div>
+  </div>
+
   <!-- ABONNEMENT (bêta moniteur indé) — statut chargé en async dans wire() -->
   <div class="st-section" style="margin-top:20px">
     <div class="st-section-label">Abonnement</div>
@@ -653,6 +665,11 @@ function wire(root, me, prefs) {
     playBack();
     navigate("/");
   });
+
+  // Entrée moniteur → réglage de la roue de récompenses
+  root
+    .querySelector("#st-recompenses-row")
+    ?.addEventListener("click", () => navigate("/recompenses"));
 
   // Entrée permanente « Ajouter à l'écran d'accueil »
   const installRow = root.querySelector("#st-install-row");
