@@ -1,0 +1,146 @@
+/* ═══════════════════════════════════════════════════════════════
+   PermiGo — TOKENS AUTONOMES pour galerie de composants (zéro build)
+   Valeurs RÉELLES extraites de src/styles/base.css + accent.js +
+   enseignant-arcade.css.
+   Bascule sombre = attribut [data-theme="dark"] sur <html> (:root).
+   Accent par rôle = body[data-role="enseignant"] (posé par main.js).
+   NB app réelle : l'accent élève DÉFAUT est forcé en violet (#6d4dff)
+   par main.js au boot (applyAccent("violet")). Le vert #58CC02 reste
+   le défaut « de marque » global de base.css → ici on livre le violet
+   élève tel qu'il s'affiche vraiment, avec le vert dispo en commentaire.
+═══════════════════════════════════════════════════════════════ */
+:root {
+  /* ─ Accent élève (violet — rendu réel au boot ; vert = défaut base.css) ─ */
+  --a:#6d4dff; --adk:#4a2fc4;
+  --a-lt:#a78bff;                                   /* stop clair du dégradé plastique */
+  --a-ink:#ffffff;                                  /* texte/icône posé SUR l'accent */
+  --a-txt:color-mix(in srgb, var(--a) 58%, #000);   /* accent utilisé COMME texte sur fond clair */
+  --ap:color-mix(in srgb, var(--a) 9%, transparent);
+  --ag:color-mix(in srgb, var(--a) 14%, transparent);
+  /* Vert de marque historique (base.css) si besoin : --a:#58CC02; --adk:#46A302; --a-lt:#6fe016; --a-ink:#1a2800; */
+
+  /* ─ États ─ */
+  --gr:#22c55e; --grd:#16a34a; --grp:rgba(34,197,94,.09);
+  --rd:#ef4444; --rdk:#dc2626; --rdx:#b91c1c; --rdp:rgba(239,68,68,.09);
+  --am:#f59e0b; --amk:#d97706; --amx:#b45309; --aml:#fde68a; --aml2:#fbbf24; --amp:rgba(245,158,11,.09);
+  --gr-txt:#147638; --am-txt:#935e06; --rd-txt:#9b2c2c;  /* couleurs d'état COMME texte sur fond clair (assombries ~5.5:1) */
+  --bl:#0ea5e9; --blk:#0891b2; --blp:rgba(14,165,233,.09);
+  --pu:#8b5cf6; --puk:#7c3aed; --pul:#a855f7; --pup:rgba(139,92,246,.09);
+  --state-pret:var(--grd); --state-relancer:var(--amx); --state-approche:var(--pu);
+
+  /* ─ Surfaces (clair) ─ */
+  --bg:#f4f5fb; --bg2:#eceef8; --bg3:#f0f2f8; --bg4:#f1f5f9; --bg5:#e4e8f4;
+  --su:#ffffff; --su2:#f8f9fd;
+  --bo:#e2e6f2; --bo2:#edf0f9; --bo3:#e2e8f0; --bo4:#cbd5e1;
+
+  /* ─ Texte (clair) ─ */
+  --ink:#0b0d1a; --ink2:#1a1d2e; --ink3:#2d3050; --ink4:#1e293b; --ink5:#374151;
+  --mu:#5f6788; --mu2:#5e6e82; --mu3:#556070; --mu4:#475569; --mu5:#c4ccd8;  /* muets assombris pour AA */
+  --gr2:#22c55e; --grk:#16a34a; --grk2:#15803d; --grdk:#047857; --grp2:#dcfce7;
+  --rdp2:#fee2e2;
+  --al:#818cf8; --al2:#c7d2fe; --al3:#a5b4fc; --adx:#4338ca;
+  --bl2:#3b82f6; --blk2:#1d4ed8; --or:#f97316;
+
+  /* ─ Layout ─ */
+  --sw:248px; --th:52px; --bh:64px;
+
+  /* ─ Espacement (échelle canonique) ─ */
+  --sp-1:8px; --sp-2:12px; --sp-3:16px; --sp-4:24px; --sp-5:32px; --sp-page:20px;
+
+  /* ─ Radius (échelle complète) ─ */
+  --r-sm:8px; --r:12px; --r-md:14px; --r-lg:16px; --rl:18px; --r-xl:20px; --rx:24px; --r-full:999px;
+
+  /* ─ Ombres (clair) ─ */
+  --s0:0 1px 3px rgba(11,13,26,.05);
+  --s1:0 2px 10px rgba(11,13,26,.07), 0 1px 3px rgba(11,13,26,.04);
+  --s2:0 6px 22px rgba(11,13,26,.09), 0 2px 8px rgba(11,13,26,.05);
+  --s3:0 14px 40px rgba(11,13,26,.13), 0 4px 12px rgba(11,13,26,.07);
+  --s4:0 28px 60px rgba(11,13,26,.17), 0 8px 22px rgba(11,13,26,.08);
+  --s-a:0 8px 24px -6px color-mix(in srgb, var(--a) 45%, transparent);
+  --s-a-lg:0 12px 32px -8px color-mix(in srgb, var(--a) 60%, transparent);
+  --s-am:0 6px 18px -4px rgba(245,158,11,.35);
+  --s-gr:0 6px 18px -4px rgba(34,197,94,.30);
+  --s-pu:0 6px 18px -4px rgba(139,92,246,.30);
+  /* Bouton 3D « Duo » — relief qui s'écrase au press */
+  --s-btn-rest:0 4px 0 0 var(--adk);
+  --s-btn-active:0 1px 0 0 var(--adk);
+
+  /* ─ Motion (courbes canoniques) ─ */
+  --t:.16s cubic-bezier(.4,0,.2,1);
+  --t-slow:.35s cubic-bezier(.4,0,.2,1);
+  --ease:cubic-bezier(.4,0,.2,1);
+  --ease-out:cubic-bezier(.2,.7,.3,1);
+  --ease-snap:cubic-bezier(.23,1,.32,1);
+  --ease-ios:cubic-bezier(.32,.72,0,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  --ease-bounce:cubic-bezier(.5,1.8,.5,1);
+
+  /* ─ Fonts ─ */
+  --fd:'Nunito','Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --fb:'Nunito','Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --fn:'JetBrains Mono','IBM Plex Mono','SF Mono',Menlo,monospace;
+
+  /* ─ Échelle typo (6 paliers) ─ */
+  --fs-xs:10px; --fs-sm:12px; --fs-base:14px; --fs-md:16px; --fs-lg:20px; --fs-xl:28px;
+
+  /* ─ Z-index (couches nommées) ─ */
+  --z-base:1; --z-sticky:10; --z-drawer:100; --z-modal:200; --z-toast:9999; --z-splash:10100;
+
+  /* ─ Or « Arène » + nuit-violet (monde quiz/révision élève) — utilitaires galerie ─ */
+  --arene-gold:#ffd24a; --arene-gold-hi:#ffe9a8; --arene-gold-deep:#c87d12;
+  --arene-night-1:#1e1240; --arene-night-2:#0f0824;
+  --arene-panel:#271850; --arene-panel2:#2f1e5e; --arene-line:rgba(178,150,255,.22);
+
+  color-scheme: light;
+}
+
+/* ═══════════ DARK — [data-theme="dark"] sur <html> ═══════════ */
+:root[data-theme="dark"] {
+  --bg:#0b0d1a; --bg2:#13162a; --bg3:#151831; --bg4:#13162a; --bg5:#1d2140;
+  --su:#181b30; --su2:#1f2238;
+  --bo:#2a2e48; --bo2:#23263c; --bo3:#2a2e48; --bo4:#3d4263;
+
+  --ink:#f3f4f8; --ink2:#e2e5ee; --ink3:#c9cde0; --ink4:#aab2c8; --ink5:#98a2b8;
+  --mu:#9da3c0; --mu2:#8b92b5; --mu3:#8f96b5; --mu4:#aab0ca; --mu5:#4d5478;
+
+  --a-txt:var(--a-lt, var(--a));          /* accent clair passe sur fond sombre */
+  --gr-txt:var(--gr); --am-txt:var(--am); --rd-txt:#f87171;
+
+  --ap:color-mix(in srgb, var(--a) 15%, transparent);
+  --ag:color-mix(in srgb, var(--a) 22%, transparent);
+  --grp:rgba(34,197,94,.15);
+  --rdp:rgba(239,68,68,.15);
+  --amp:rgba(245,158,11,.15);
+  --blp:rgba(14,165,233,.15);
+  --pup:rgba(139,92,246,.15);
+
+  --s0:0 1px 3px rgba(0,0,0,.4);
+  --s1:0 2px 10px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.25);
+  --s2:0 6px 22px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
+  --s3:0 14px 40px rgba(0,0,0,.55), 0 4px 12px rgba(0,0,0,.35);
+  --s4:0 28px 60px rgba(0,0,0,.6),  0 8px 22px rgba(0,0,0,.4);
+
+  color-scheme: dark;
+}
+
+/* ═══════════ ACCENT PAR RÔLE — body[data-role="enseignant"] ═══════════
+   Dans l'app, main.js pose document.body.dataset.role ; enseignant-arcade.css
+   redéfinit --a en INDIGO premium. --ens-go (vert = statut « acquis ») reste
+   séparé. Fonctionne aussi bien en clair qu'en sombre (hérite des surfaces). */
+body[data-role="enseignant"] {
+  --a:#4f46e5; --adk:#3a32c4; --a-lt:#6d6bff; --a-ink:#ffffff;
+
+  /* Polices arcade enseignant */
+  --ens-display:"Fredoka","Plus Jakarta Sans",system-ui,sans-serif;
+  --ens-body:"Plus Jakarta Sans","Inter",system-ui,sans-serif;
+
+  /* Palette signalisation (panneaux routiers) */
+  --ens-go:#18a558; --ens-go-lt:#34d27b;
+  --ens-blue:#1d4ed8; --ens-blue-lt:#3b82f6;
+  --ens-amber:#f59e0b; --ens-stop:#e11d48; --ens-ink-go:#07150c;
+
+  /* Rayons & ombres tactiles arcade */
+  --ens-r:16px; --ens-r-lg:22px; --ens-r-pill:999px;
+  --ens-shadow:0 1px 0 rgba(15,23,42,.04), 0 8px 22px -12px rgba(15,23,42,.22);
+  --ens-shadow-press:0 2px 0 rgba(15,23,42,.06);
+}
