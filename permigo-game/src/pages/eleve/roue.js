@@ -15,6 +15,15 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { toast } from "@/components/common/toast.js";
+import {
+  isSoundEnabled,
+  playClick,
+  playTick,
+  playCoin,
+  playReward,
+} from "@/utils/sound.js";
+
+const SPIN_MS = 5200; // = durée de la transition CSS du disque
 
 const LS_FREE = "pg-roue-free-last"; // repli aperçu : YYYY-MM-DD du dernier tour
 
@@ -315,15 +324,56 @@ export async function mount(root) {
   const btn = root.querySelector("#roue-spin");
   const free = root.querySelector("#roue-free");
   let turns = 0;
+  let prevRot = 0;
   let busy = false;
+  const _tickTimers = [];
+  // Si on quitte la page en plein spin, on coupe les tics programmés.
+  window.addEventListener(
+    "hashchange",
+    () => {
+      _tickTimers.forEach(clearTimeout);
+      _tickTimers.length = 0;
+    },
+    { once: true },
+  );
+
+  // Ratchet de roulette : un « tic » chaque fois qu'une frontière de segment
+  // (45°) passe sous le pointeur, avec un ralenti calqué sur l'easing du disque
+  // (fort ease-out) → tic-tic-tic rapide au départ … tic … tic à la fin.
+  function scheduleSpinSound(deltaDeg) {
+    if (!isSoundEnabled()) return;
+    const crossings = Math.max(1, Math.floor(deltaDeg / 45));
+    const N = 240;
+    let last = 0;
+    let lastMs = -100;
+    for (let i = 1; i <= N; i++) {
+      const t = i / N;
+      const prog = 1 - Math.pow(1 - t, 4); // ease-out quart ≈ courbe du disque
+      const b = Math.floor(prog * crossings);
+      if (b > last) {
+        last = b;
+        const ms = t * SPIN_MS;
+        if (ms - lastMs >= 55) {
+          // évite un débit d'audio ingérable
+          lastMs = ms;
+          _tickTimers.push(setTimeout(playTick, ms));
+        }
+      }
+    }
+  }
 
   function spinTo(segIdx) {
     turns += 5;
     const target = 360 * turns + (360 - (segIdx * 45 + 22.5));
     disc.style.transform = `rotate(${target}deg)`;
+    scheduleSpinSound(target - prevRot);
+    prevRot = target;
   }
 
   function showResult(volants, apercu) {
+    // Ding de fin : plus « précieux » pour un gros gain.
+    if (volants >= 50) playReward();
+    else playCoin();
     const slot = root.querySelector("#roue-result-slot");
     if (!slot) return;
     slot.innerHTML = `
@@ -348,6 +398,7 @@ export async function mount(root) {
     if (busy || btn.disabled) return;
     busy = true;
     haptic("select");
+    playClick(); // son au clic du bouton
     btn.disabled = true;
     btn.textContent = "La roue tourne…";
 
