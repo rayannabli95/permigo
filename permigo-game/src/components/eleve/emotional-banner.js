@@ -171,10 +171,19 @@ export const emotionalBanner = {
         .like("type", "emotional_%")
         .is("read_at", null)
         .order("created_at", { ascending: false })
-        .limit(1);
+        .limit(5);
 
       if (error || !data?.length) return;
-      const notif = data[0];
+
+      // Un message d'ABSENCE (« come back / une semaine sans toi ») n'a aucun
+      // sens en bannière in-app : si l'élève la voit, c'est qu'il est DANS
+      // l'app — donc présent. On ne l'affiche jamais ici (il reste pertinent
+      // en push, quand lui est vraiment parti). On prend le nudge non-absence
+      // le plus récent, s'il existe.
+      const notif = data.find(
+        (n) => !String(n.data?.template_id || "").startsWith("come_back"),
+      );
+      if (!notif) return;
 
       // data est déjà pré-hydraté côté backend : { template_id, tone, title, body, cta, route }
       const content = notif.data;
