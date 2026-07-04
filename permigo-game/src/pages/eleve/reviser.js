@@ -24,18 +24,53 @@ import { ASSETS } from "@/utils/assets.js";
 
 const LS_READ_KEY = "rvc_read_v1"; // même clé que revision-conduite (fiches lues)
 
-// Vrais visuels de conduite (servis depuis public/) : c'est ce qui remplace
-// les pictos-trait « effet IA ». Silhouettes toutes distinctes d'une tuile à
-// l'autre : trophée or · volant rond · sens-interdit (cercle) · piétons
-// (triangle) · mascotte.
+// Images réelles conservées : la flamme de série (chip) et le badge 3D de
+// l'Arène (hero) fonctionnent déjà comme centres de gravité.
 const IMG = {
   flame: ASSETS.streakFlame, // /skins/permigo-streak-flame-v1.webp
   badge: ASSETS.badgeUltimate, // médaillon de l'Arène
-  trophy: ASSETS.trophy.permisVirtuel, // examen blanc
-  volant: "/worlds/volant.png", // fiches de conduite (le geste)
-  signInterdit: "/signs/sens-interdit.svg", // trouve la faute
-  signPietons: "/signs/danger-passage-pietons.svg", // en situation
-  mascotThink: "/skins/mascot-think.png", // question du jour
+};
+
+// ── Set d'icônes COHÉRENT « médaillon » (1 seul style pour les 5 tuiles) :
+// disque dégradé + biseau + reflet haut + glyphe blanc. Fini le mélange
+// trophée-webp / volant-png / panneaux-plats / mascotte (styles disparates).
+// Dessiné en SVG inline (net à toute densité, thémable, zéro fichier binaire).
+function med(id, stops, glyph) {
+  return `<svg class="rvh-med" viewBox="0 0 64 64" aria-hidden="true"><defs>
+    <radialGradient id="rm${id}" cx="38%" cy="30%" r="75%"><stop offset="0" stop-color="${stops[0]}"/><stop offset=".5" stop-color="${stops[1]}"/><stop offset="1" stop-color="${stops[2]}"/></radialGradient>
+    <linearGradient id="rg${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+    <circle cx="32" cy="31" r="27" fill="url(#rm${id})"/>
+    <circle cx="32" cy="31" r="27" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"/>
+    <circle cx="32" cy="31" r="23.5" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="2"/>
+    <path d="M12 24a20 12 0 0 1 40 0 24 16 0 0 0-40 0z" fill="url(#rg${id})"/>
+    ${glyph}</svg>`;
+}
+const MED = {
+  exam: med(
+    "ex",
+    ["#fff2c0", "#ffd24a", "#f08a12"],
+    `<g fill="#fff"><path d="M32 17 15 24l17 7 13-5.35V33h3v-9.4L32 17z"/><path d="M22 30.5V36c0 2.2 4.5 4 10 4s10-1.8 10-4v-5.5l-10 4.1-10-4.1z"/></g>`,
+  ),
+  fiches: med(
+    "fi",
+    ["#d9c2ff", "#a855f7", "#6d34d6"],
+    `<g fill="none" stroke="#fff"><circle cx="32" cy="31" r="13.5" stroke-width="3.4"/><path d="M32 20v7M22.7 37.2l6-3.4M41.3 37.2l-6-3.4" stroke-width="3.2" stroke-linecap="round"/></g><circle cx="32" cy="31" r="3.6" fill="#fff"/>`,
+  ),
+  faute: med(
+    "fa",
+    ["#ffb3b3", "#ff6b6b", "#d12b2b"],
+    `<g fill="#fff"><rect x="29.6" y="19" width="4.8" height="14" rx="2.4"/><circle cx="32" cy="40" r="2.9"/></g>`,
+  ),
+  situ: med(
+    "si",
+    ["#bce0ff", "#54a0ff", "#2b6fd6"],
+    `<path d="M28 18h8v10h10v8H36v10h-8V36H18v-8h10V18z" fill="#fff"/><circle cx="32" cy="32" r="2.6" fill="#2b6fd6"/>`,
+  ),
+  daily: med(
+    "da",
+    ["#c9f7a0", "#6fe016", "#3f9e00"],
+    `<g fill="#fff"><path d="M32 16a11 11 0 0 0-6.5 19.9c1 .8 1.6 1.9 1.7 3.1h9.6c.1-1.2.7-2.3 1.7-3.1A11 11 0 0 0 32 16z"/><rect x="27.5" y="41" width="9" height="3" rx="1.5"/><rect x="29" y="45.5" width="6" height="3" rx="1.5"/></g>`,
+  ),
 };
 
 // Quelques traits vectoriels soignés (ampoule dégradée, flèche play, chevron,
@@ -215,16 +250,9 @@ const STYLE = `<style>
 .rvh-mode.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 13px; min-height: 0; }
 .rvh-mode.wide .rvh-mode-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 
-/* visuel de conduite planté dans la tuile + ombre au sol */
-.rvh-sign { position: relative; width: 56px; height: 56px; flex: none; display: grid; place-items: end center; }
-.rvh-sign img { width: 52px; height: 52px; object-fit: contain; filter: drop-shadow(0 5px 6px rgba(0,0,0,.5)); z-index: 2; }
-.rvh-sign::after {
-  content: ""; position: absolute; left: 50%; bottom: -3px; transform: translateX(-50%);
-  width: 44px; height: 9px; border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(0,0,0,.55) 0%, transparent 70%); z-index: 1;
-}
-/* variante image « pleine » (trophée / volant / mascotte) */
-.rvh-sign.tall img { width: 56px; height: 56px; filter: drop-shadow(0 6px 7px rgba(0,0,0,.55)) drop-shadow(0 0 10px rgba(255,182,44,.35)); }
+/* médaillon d'icône (set cohérent) */
+.rvh-sign { width: 54px; height: 54px; flex: none; display: grid; place-items: center; }
+.rvh-med { width: 54px; height: 54px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }
 
 .rvh-mode-t { font: 700 15px/1.12 'Baloo 2', cursive; }
 .rvh-mode-s { font: 700 11px/1.35 'Nunito', sans-serif; color: var(--rvh-mu2); }
@@ -334,14 +362,14 @@ function render({ streak, dailyDone, fichesLues, fichesTotal, weak }) {
   <div class="rvh-h"><h2>Tes entraînements</h2><span>tout est là 👇</span></div>
   <div class="rvh-modes">
     <button class="rvh-mode" data-go="/exam-blanc">
-      <span class="rvh-sign tall" aria-hidden="true"><img src="${IMG.trophy}" alt="" width="56" height="56"></span>
+      <span class="rvh-sign" aria-hidden="true">${MED.exam}</span>
       <div class="rvh-mode-t">Examen blanc</div>
       <div class="rvh-mode-s">40 questions · chrono · comme le vrai</div>
       <span class="rvh-mode-meta">Se tester ${SVG.chevron}</span>
     </button>
 
     <button class="rvh-mode" data-go="/revision-conduite">
-      <span class="rvh-sign tall" aria-hidden="true"><img src="${IMG.volant}" alt="" width="54" height="54"></span>
+      <span class="rvh-sign" aria-hidden="true">${MED.fiches}</span>
       <div class="rvh-mode-t">Fiches de conduite</div>
       <div class="rvh-mode-s">Le geste, pas que le code</div>
       <span class="rvh-mode-meta">${fichesLues}/${fichesTotal} lues ${SVG.chevron}</span>
@@ -349,21 +377,21 @@ function render({ streak, dailyDone, fichesLues, fichesTotal, weak }) {
 
     <button class="rvh-mode" data-go="/jeu-faute">
       <span class="rvh-mode-badge">Mini-jeu</span>
-      <span class="rvh-sign" aria-hidden="true"><img src="${IMG.signInterdit}" alt="" width="52" height="52"></span>
+      <span class="rvh-sign" aria-hidden="true">${MED.faute}</span>
       <div class="rvh-mode-t">Trouve la faute</div>
       <div class="rvh-mode-s">Repère la faute éliminatoire</div>
       <span class="rvh-mode-meta">2 min ${SVG.chevron}</span>
     </button>
 
     <button class="rvh-mode" data-go="/en-situation">
-      <span class="rvh-sign" aria-hidden="true"><img src="${IMG.signPietons}" alt="" width="52" height="52"></span>
+      <span class="rvh-sign" aria-hidden="true">${MED.situ}</span>
       <div class="rvh-mode-t">En situation</div>
       <div class="rvh-mode-s">Une scène, une décision</div>
       <span class="rvh-mode-meta">6 situations ${SVG.chevron}</span>
     </button>
 
     <button class="rvh-mode wide" id="rvh-daily-tile">
-      <span class="rvh-sign tall" aria-hidden="true"><img src="${IMG.mascotThink}" alt="" width="56" height="56"></span>
+      <span class="rvh-sign" aria-hidden="true">${MED.daily}</span>
       <div class="rvh-mode-body">
         <div class="rvh-mode-t">Question du jour</div>
         <div class="rvh-mode-s">${dailyDone ? "Fait pour aujourd'hui !" : "Ta dose du jour en 30 sec"}</div>
