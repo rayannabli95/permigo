@@ -64,7 +64,7 @@ const TABS = {
       id: "boutique",
       label: "Récompenses",
       ico: "gift",
-      match: ["galerie", "trophees", "mes-coffres", "classement"],
+      match: ["galerie", "trophees", "mes-coffres", "classement", "roue"],
     },
     { id: "profil", label: "Profil", ico: "user" },
   ],
