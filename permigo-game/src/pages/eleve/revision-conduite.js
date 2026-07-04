@@ -97,11 +97,11 @@ function groupSteps(methode) {
 }
 
 // On ne bascule en accordéons que pour une VRAIE structure en sections :
-// assez longue, ≥ 3 groupes, chacun d'au moins 2 étapes (sinon = tiret au milieu
-// d'une phrase → on reste en liste à plat, plus honnête).
+// assez longue (≥ 8 étapes), ≥ 3 groupes, chacun d'au moins 2 étapes (sinon =
+// tiret au milieu d'une phrase, ou fiche courte → liste à plat, plus honnête).
 function useGrouped(methode, groups) {
   return (
-    methode.length >= 9 &&
+    methode.length >= 8 &&
     groups.length >= 3 &&
     groups.every((g) => g.steps.length >= 2)
   );
@@ -815,6 +815,9 @@ export async function mount(root, param) {
     const total = steps.length;
     const groups = groupSteps(steps);
     const grouped = useGrouped(steps, groups);
+    // Étapes « propres » (préfixe de section retiré) : pour le jeu « remets dans
+    // l'ordre », sinon les libellés de section donneraient l'ordre.
+    const flatSteps = groups.flatMap((g) => g.steps);
 
     // Phrase d'accroche du coach : « Voici comment <titre minuscule>. »
     const titreFlow = f.titre
@@ -893,10 +896,10 @@ export async function mount(root, param) {
       </div>
     </div>`;
 
-    wireFiche(f);
+    wireFiche(f, flatSteps);
   }
 
-  function wireFiche(f) {
+  function wireFiche(f, flatSteps) {
     root.querySelector(".rvc-back").addEventListener("click", () => {
       view = "home";
       render();
@@ -909,7 +912,7 @@ export async function mount(root, param) {
     );
     root.querySelector("[data-order]")?.addEventListener("click", () => {
       orderPlaced = [];
-      orderPool = (f.methode || [])
+      orderPool = (flatSteps && flatSteps.length ? flatSteps : f.methode || [])
         .map((t, i) => ({ i, t }))
         .sort(() => Math.random() - 0.5);
       view = "order";

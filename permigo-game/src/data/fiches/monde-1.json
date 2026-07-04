@@ -112,14 +112,14 @@
     "monde": 1,
     "competence": "Maniement",
     "methode": [
-      "Avant de démarrer : frein à main serré, levier au point mort, embrayage enfoncé à fond, contact.",
-      "Passe la 1ère.",
-      "Trouve la zone de patinage : relâche l'embrayage et passe vite la « zone morte » (entre la pédale enfoncée et le début du patinage), puis ralentis le geste dès que le moteur réagit.",
-      "Au patinage, donne un filet d'accélérateur et fais glisser le pied gauche progressivement (la voiture « veut » avancer, le bruit moteur change un peu).",
-      "Desserre le frein à main, la voiture avance.",
-      "Pour t'arrêter : lâche l'accélérateur tôt, freine progressivement, et débraye juste avant l'arrêt complet pour ne pas caler.",
-      "À l'arrêt : frein maintenu, puis point mort + frein à main si tu restes immobilisé.",
-      "Tenue du pied : appuie avec la pointe du pied, talon ancré au sol, et fais glisser le talon au sol pour remonter l'embrayage. Si tu décolles le talon ou si la semelle glisse, tu perds en précision et tu ne retrouves plus le patinage au même endroit."
+      "Avant de rouler — Avant de démarrer : frein à main serré, levier au point mort, embrayage enfoncé à fond, contact.",
+      "Avant de rouler — Passe la 1ère.",
+      "Le patinage — Trouve la zone de patinage : relâche l'embrayage et passe vite la « zone morte » (entre la pédale enfoncée et le début du patinage), puis ralentis le geste dès que le moteur réagit.",
+      "Le patinage — Au patinage, donne un filet d'accélérateur et fais glisser le pied gauche progressivement (la voiture « veut » avancer, le bruit moteur change un peu).",
+      "Le patinage — Desserre le frein à main, la voiture avance.",
+      "Arrêt et tenue du pied — Pour t'arrêter : lâche l'accélérateur tôt, freine progressivement, et débraye juste avant l'arrêt complet pour ne pas caler.",
+      "Arrêt et tenue du pied — À l'arrêt : frein maintenu, puis point mort + frein à main si tu restes immobilisé.",
+      "Arrêt et tenue du pied — Tenue du pied : appuie avec la pointe du pied, talon ancré au sol, et fais glisser le talon au sol pour remonter l'embrayage. Si tu décolles le talon ou si la semelle glisse, tu perds en précision et tu ne retrouves plus le patinage au même endroit."
     ],
     "pourquoi": "Le point de patinage (ou plutôt la zone de patinage), c'est le moment où l'embrayage commence à transmettre la force du moteur aux roues. Le relâcher trop vite à ce moment = la voiture sursaute ou cale. Le relâcher en douceur = départ propre.",
     "erreur": "Relâcher l'embrayage d'un coup au point de patinage → ça cale ou ça part en à-coups. Et débrayer trop tard au freinage → ça cale juste avant l'arrêt.",
