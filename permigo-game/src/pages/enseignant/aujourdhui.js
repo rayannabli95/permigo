@@ -31,7 +31,7 @@ import { getLeague } from "@/utils/league-shared.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { haptic } from "@/utils/haptic.js";
 import { onPopupsSettled } from "@/utils/intro-overlays.js";
-import { illus } from "@/components/enseignant/illus.js";
+import { medallion } from "@/utils/medallions.js";
 
 // Tour guidé enseignant — affiché 1× à la première connexion
 const TOUR_KEY = "pg-tour-moniteur-v1";
@@ -578,7 +578,7 @@ async function renderInto(root, _me) {
       ${STYLE}
       <div class="aj-page">
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:72px 24px;text-align:center;">
-          ${illus("cone", { size: 64 })}
+          ${medallion("cone", "orange", { size: 52 })}
           <p style="margin:0;font:600 15px/1.45 'Inter',sans-serif;color:#1a1c2e;">
             Impossible de charger ton tableau de bord.<br>
             <span style="font:500 13px/1.4 'Inter',sans-serif;color:#5a6188;">Vérifie ta connexion, puis réessaie.</span>
@@ -803,7 +803,7 @@ async function renderInto(root, _me) {
 
       <!-- Radar de relance -->
       <button id="aj-radar" type="button" style="display:flex;align-items:center;gap:12px;width:calc(100% - 32px);margin:0 16px 14px;padding:14px 15px;background:#fff;border:1px solid #e6e9f7;border-radius:16px;box-shadow:0 6px 16px -10px rgba(60,50,130,.3);cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;">
-        <span style="width:40px;height:40px;flex-shrink:0;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#4f46e5,#7c4dff);box-shadow:0 6px 14px -6px rgba(79,70,229,.6);">${icon("activity", { size: 20, strokeWidth: 2.2 })}</span>
+        <span style="flex-shrink:0;display:flex;">${medallion("cible", "indigo", { size: 36 })}</span>
         <span style="flex:1;min-width:0;">
           <span style="display:block;font:800 14.5px/1.15 'Manrope','Plus Jakarta Sans',sans-serif;color:#1a1c2e;">Radar de relance</span>
           <span style="display:block;font:600 12px/1.3 'Inter',sans-serif;color:#5a6188;margin-top:2px;">Relance en 1 tap tes élèves qui refroidissent</span>

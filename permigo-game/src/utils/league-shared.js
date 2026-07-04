@@ -3,7 +3,16 @@
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
-import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
+
+// Écusson médaillon par ligue (grammaire visuelle premium, par id de ligue).
+// Basse → bouclier bronze · argent → médaille · or → trophée · haute → diamant.
+const LEAGUE_MED = {
+  bronze: ["bouclier", "bronze"],
+  argent: ["medaille", "argent"],
+  or: ["trophee", "gold"],
+  diamant: ["diamant", "cyan"],
+};
 
 // 4 ligues ordonnées du plus haut au plus bas
 export const LEAGUES = [
@@ -60,18 +69,19 @@ export function getLeague(pts) {
  * size: 'sm' | 'md' | 'lg'
  */
 export function renderLeagueBadge(league, pts, size = "md") {
+  const icoSize = size === "lg" ? 48 : size === "sm" ? 30 : 40;
   if (!league) {
     return `<div class="lg-badge lg-badge-${size} lg-badge-none">
-      <div class="lg-badge-ico">${icon("flag", { size: size === "lg" ? 36 : size === "sm" ? 18 : 26, strokeWidth: 1.5 })}</div>
+      <div class="lg-badge-ico">${medallion("drapeau", "slate", { size: icoSize })}</div>
       <div>
         <div class="lg-badge-name">Hors-ligue</div>
         <div class="lg-badge-pts">0 pt cette semaine</div>
       </div>
     </div>`;
   }
-  const icoSize = size === "lg" ? 36 : size === "sm" ? 18 : 26;
+  const [glyph, ramp] = LEAGUE_MED[league.id] || ["trophee", "gold"];
   return `<div class="lg-badge lg-badge-${size}" style="--lc:${league.color};--lb:${league.bg};--lbr:${league.border}">
-    <div class="lg-badge-ico" style="background:${league.gradient};border-radius:10px;padding:6px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0">${icon(league.iconName, { size: icoSize, strokeWidth: 1.5 })}</div>
+    <div class="lg-badge-ico">${medallion(glyph, ramp, { size: icoSize })}</div>
     <div>
       <div class="lg-badge-name">Ligue ${esc(league.name)}</div>
       <div class="lg-badge-pts">${pts} pt${pts > 1 ? "s" : ""} cette semaine</div>

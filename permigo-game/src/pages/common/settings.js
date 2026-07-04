@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
@@ -104,13 +105,12 @@ const STYLE = `<style>
 .st-row.col { flex-direction: column; align-items: stretch; gap: 11px; }
 .st-rhead { display: flex; align-items: center; gap: 13px; }
 .st-expand { padding-left: 45px; }
+/* Médaillon 3D : porte sa propre couleur → juste un centrage, pas de fond teinté */
 .st-ic {
-  width: 32px; height: 32px; border-radius: 9px; flex: none;
+  width: 32px; height: 32px; flex: none;
   display: grid; place-items: center;
-  color: var(--c, var(--a));
-  background: color-mix(in srgb, var(--c, var(--a)) 15%, transparent);
 }
-.st-ic svg { width: 18px; height: 18px; }
+.st-ic svg { width: 32px; height: 32px; display: block; }
 .st-row-left { flex: 1; min-width: 0; }
 .st-row-title { font: 700 14px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
 .st-row-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu); margin-top: 2px; }
@@ -395,7 +395,7 @@ ${
     <div class="st-glabel">Application</div>
     <div class="st-section">
       <div class="st-row tap" id="st-install-row" role="button" tabindex="0" aria-label="Ajouter PermiGo à l'écran d'accueil">
-        <span class="st-ic" style="--c:#0ea5e9" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("fusee", "cyan", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Ajouter à l'écran d'accueil</div>
           <div class="st-row-sub">Ouvre PermiGo d'un geste, comme une vraie app</div>
@@ -413,7 +413,7 @@ ${
     <div class="st-glabel">Tes élèves</div>
     <div class="st-section">
       <div class="st-row tap" id="st-recompenses-row" role="button" tabindex="0" aria-label="Régler ta roue de récompenses">
-        <span class="st-ic" style="--c:#f59e0b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4.5" rx="1"/><path d="M5 12.5V20h14v-7.5M12 8v12"/><path d="M12 8S9 3.5 6.5 5.5 8 8 12 8Zm0 0s3-4.5 5.5-2.5S16 8 12 8Z"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("cadeau", "orange", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Ta roue de récompenses</div>
           <div class="st-row-sub">Choisis les lots offerts à tes élèves, à ta marque</div>
@@ -429,7 +429,7 @@ ${
     <div class="st-section">
       <div class="st-row col">
         <div class="st-rhead">
-          <span class="st-ic" style="--c:var(--a)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 14.9 8.5 21.5 9.4 16.7 14 17.9 20.6 12 17.5 6.1 20.6 7.3 14 2.5 9.4 9.1 8.5 12 2.5Z"/></svg></span>
+          <span class="st-ic" aria-hidden="true">${medallion("etoile", "gold", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
             <div class="st-row-title">PermiGo Pro</div>
             <div class="st-row-sub" id="st-sub-status">Chargement…</div>
@@ -447,7 +447,7 @@ ${
     <div class="st-glabel">Notifications</div>
     <div class="st-section">
       <div class="st-row">
-        <span class="st-ic" style="--c:var(--a)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("cloche", "violet", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Notifications push</div>
           <div class="st-row-sub">Rappels et mises à jour dans le navigateur</div>
@@ -460,7 +460,7 @@ ${
         </div>
       </div>
       <div class="st-row">
-        <span class="st-ic" style="--c:#0ea5e9" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3 7 9 6 9-6"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("message", "blue", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Notifications email</div>
           <div class="st-row-sub">Résumé hebdomadaire par email</div>
@@ -474,7 +474,7 @@ ${
       </div>
       <div class="st-row col">
         <div class="st-rhead">
-          <span class="st-ic" style="--c:#8b5cf6" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
+          <span class="st-ic" aria-hidden="true">${medallion("lune", "violet", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
             <div class="st-row-title">Ne pas déranger</div>
             <div class="st-row-sub">Enregistré automatiquement</div>
@@ -495,7 +495,7 @@ ${
     <div class="st-glabel">Confidentialité</div>
     <div class="st-section">
       <div class="st-row">
-        <span class="st-ic" style="--c:#f59e0b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21V9m4 12V5m4 16v-8"/><path d="M4 21h16"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("trophee", "orange", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Classement national</div>
           <div class="st-row-sub">Apparaître dans les classements de ton école</div>
@@ -516,7 +516,7 @@ ${
     <div class="st-section">
       <div class="st-row col">
         <div class="st-rhead">
-          <span class="st-ic" style="--c:var(--a)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
+          <span class="st-ic" aria-hidden="true">${medallion("profil", "violet", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
             <div class="st-row-title">Prénom affiché</div>
             <div class="st-row-sub">Visible par ton moniteur</div>
@@ -528,7 +528,7 @@ ${
         </div>
       </div>
       <div class="st-row">
-        <span class="st-ic" style="--c:#64748b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("cle", "slate", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Mot de passe</div>
           <div class="st-row-sub">Modifier via email de réinitialisation</div>
@@ -546,7 +546,7 @@ ${
     <div class="st-section">
       <div class="st-row col">
         <div class="st-rhead">
-          <span class="st-ic" style="--c:#8b5cf6" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/></svg></span>
+          <span class="st-ic" aria-hidden="true">${medallion("lune", "indigo", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
             <div class="st-row-title">Thème</div>
             <div class="st-row-sub">Apparence de l'application</div>
@@ -560,7 +560,7 @@ ${
       </div>
       <div class="st-row col">
         <div class="st-rhead">
-          <span class="st-ic" style="--c:#ff6b9d" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.3"/><circle cx="17.5" cy="10.5" r="1.3"/><circle cx="8.5" cy="7.5" r="1.3"/><circle cx="6.5" cy="12.5" r="1.3"/><path d="M12 2a10 10 0 1 0 0 20 3 3 0 0 0 3-3 2 2 0 0 1 2-2h1a3 3 0 0 0 3-3c0-6-4-12-12-12Z"/></svg></span>
+          <span class="st-ic" aria-hidden="true">${medallion("crayon", "pink", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
             <div class="st-row-title">Couleur d'accent</div>
             <div class="st-row-sub">Le vert ne te plaît pas ? Choisis ta couleur.</div>
@@ -571,7 +571,7 @@ ${
         </div>
       </div>
       <div class="st-row">
-        <span class="st-ic" style="--c:#22c55e" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("casque", "green", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Sons d'interface</div>
           <div class="st-row-sub">Retours sonores sur les actions et récompenses</div>
@@ -593,7 +593,7 @@ ${
     <div class="st-glabel">Aide</div>
     <div class="st-section">
       <div class="st-row">
-        <span class="st-ic" style="--c:#0ea5e9" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.7"/><circle cx="12" cy="17" r=".6" fill="currentColor" stroke="none"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("ampoule", "cyan", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Revoir le guide de démarrage</div>
           <div class="st-row-sub">Relance la visite guidée pas à pas</div>
@@ -612,7 +612,7 @@ ${
     <div class="st-glabel">Mes données</div>
     <div class="st-section">
       <div class="st-row">
-        <span class="st-ic" style="--c:#22c55e" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 21h14"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("fiches", "green", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Exporter mes données</div>
           <div class="st-row-sub">Télécharge un fichier JSON de toutes tes données</div>
@@ -622,7 +622,7 @@ ${
         </div>
       </div>
       <div class="st-row">
-        <span class="st-ic" style="--c:#f59e0b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("megaphone", "orange", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Emails marketing</div>
           <div class="st-row-sub">Conseils, nouveautés et offres PermiGo</div>
@@ -635,7 +635,7 @@ ${
         </div>
       </div>
       <div class="st-row tap">
-        <span class="st-ic" style="--c:#64748b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8 7 9 4-1 7-4.5 7-9V6l-7-3Z"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("bouclier", "slate", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Politique de confidentialité</div>
         </div>
@@ -644,7 +644,7 @@ ${
         </div>
       </div>
       <div class="st-row tap">
-        <span class="st-ic" style="--c:#64748b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M8 13h8M8 17h6"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("livret", "slate", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Conditions générales d'utilisation</div>
         </div>
@@ -653,7 +653,7 @@ ${
         </div>
       </div>
       <div class="st-row tap">
-        <span class="st-ic" style="--c:#ff6b9d" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 2.5 5 6 5c2 0 3.2 1.2 4 2.3C10.8 6.2 12 5 14 5c3.5 0 5.5 3.5 3.5 7.5C19 16.65 12 21 12 21Z"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("coeur", "pink", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">Crédits & licences</div>
         </div>
@@ -669,7 +669,7 @@ ${
     <div class="st-glabel" style="color:var(--rd-txt)">Zone critique</div>
     <div class="st-section st-danger">
       <div class="st-row">
-        <span class="st-ic" style="--c:#ef4444" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m2 0-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 7"/></svg></span>
+        <span class="st-ic" aria-hidden="true">${medallion("faute", "red", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title" style="color:var(--rd-txt)">Supprimer mon compte</div>
           <div class="st-row-sub">Irréversible — toutes tes données seront effacées</div>

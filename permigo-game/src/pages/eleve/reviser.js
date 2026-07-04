@@ -21,6 +21,7 @@ import { isDailyDone } from "@/services/daily-quiz.js";
 import { getWeakPoints } from "@/utils/weak-points.js";
 import { FICHES } from "@/data/fiches-conduite.js";
 import { ASSETS } from "@/utils/assets.js";
+import { medallion } from "@/utils/medallions.js";
 
 const LS_READ_KEY = "rvc_read_v1"; // même clé que revision-conduite (fiches lues)
 
@@ -32,45 +33,16 @@ const IMG = {
 };
 
 // ── Set d'icônes COHÉRENT « médaillon » (1 seul style pour les 5 tuiles) :
-// disque dégradé + biseau + reflet haut + glyphe blanc. Fini le mélange
-// trophée-webp / volant-png / panneaux-plats / mascotte (styles disparates).
-// Dessiné en SVG inline (net à toute densité, thémable, zéro fichier binaire).
-function med(id, stops, glyph) {
-  return `<svg class="rvh-med" viewBox="0 0 64 64" aria-hidden="true"><defs>
-    <radialGradient id="rm${id}" cx="38%" cy="30%" r="75%"><stop offset="0" stop-color="${stops[0]}"/><stop offset=".5" stop-color="${stops[1]}"/><stop offset="1" stop-color="${stops[2]}"/></radialGradient>
-    <linearGradient id="rg${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
-    <circle cx="32" cy="31" r="27" fill="url(#rm${id})"/>
-    <circle cx="32" cy="31" r="27" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"/>
-    <circle cx="32" cy="31" r="23.5" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="2"/>
-    <path d="M12 24a20 12 0 0 1 40 0 24 16 0 0 0-40 0z" fill="url(#rg${id})"/>
-    ${glyph}</svg>`;
-}
+// disque dégradé + biseau + reflet haut + glyphe blanc. Migré sur la banque
+// centrale @/utils/medallions.js pour dédupliquer (fini le set local qui
+// dérivait). cls:"rvh-med" conserve le dimensionnement existant (54px).
+// Le glyphe « volant » PLEIN remplace enfin le volant en trait (point faible).
 const MED = {
-  exam: med(
-    "ex",
-    ["#fff2c0", "#ffd24a", "#f08a12"],
-    `<g fill="#fff"><path d="M32 17 15 24l17 7 13-5.35V33h3v-9.4L32 17z"/><path d="M22 30.5V36c0 2.2 4.5 4 10 4s10-1.8 10-4v-5.5l-10 4.1-10-4.1z"/></g>`,
-  ),
-  fiches: med(
-    "fi",
-    ["#d9c2ff", "#a855f7", "#6d34d6"],
-    `<g fill="none" stroke="#fff"><circle cx="32" cy="31" r="13.5" stroke-width="3.4"/><path d="M32 20v7M22.7 37.2l6-3.4M41.3 37.2l-6-3.4" stroke-width="3.2" stroke-linecap="round"/></g><circle cx="32" cy="31" r="3.6" fill="#fff"/>`,
-  ),
-  faute: med(
-    "fa",
-    ["#ffb3b3", "#ff6b6b", "#d12b2b"],
-    `<g fill="#fff"><rect x="29.6" y="19" width="4.8" height="14" rx="2.4"/><circle cx="32" cy="40" r="2.9"/></g>`,
-  ),
-  situ: med(
-    "si",
-    ["#bce0ff", "#54a0ff", "#2b6fd6"],
-    `<path d="M20 45 28 18h8l8 27z" fill="#fff"/><g fill="#2b6fd6"><rect x="30.2" y="38.5" width="3.6" height="3.6" rx="1.1"/><rect x="30.7" y="30.5" width="2.6" height="3.1" rx="1"/><rect x="31.1" y="23.8" width="1.8" height="2.5" rx=".9"/></g>`,
-  ),
-  daily: med(
-    "da",
-    ["#c9f7a0", "#6fe016", "#3f9e00"],
-    `<g fill="#fff"><path d="M32 16a11 11 0 0 0-6.5 19.9c1 .8 1.6 1.9 1.7 3.1h9.6c.1-1.2.7-2.3 1.7-3.1A11 11 0 0 0 32 16z"/><rect x="27.5" y="41" width="9" height="3" rx="1.5"/><rect x="29" y="45.5" width="6" height="3" rx="1.5"/></g>`,
-  ),
+  exam: medallion("examen", "gold", { cls: "rvh-med" }),
+  fiches: medallion("volant", "violet", { cls: "rvh-med" }),
+  faute: medallion("faute", "red", { cls: "rvh-med" }),
+  situ: medallion("route", "blue", { cls: "rvh-med" }),
+  daily: medallion("ampoule", "green", { cls: "rvh-med" }),
 };
 
 // Quelques traits vectoriels soignés (ampoule dégradée, flèche play, chevron,

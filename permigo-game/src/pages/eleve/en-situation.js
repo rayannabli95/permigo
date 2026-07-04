@@ -6,6 +6,7 @@
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
+import { medallion } from "@/utils/medallions.js";
 import {
   pickSession,
   THEME_LABELS,
@@ -27,6 +28,22 @@ import {
 } from "@/utils/sound.js";
 import { haptic } from "@/utils/haptic.js";
 import { burstConfetti } from "@/components/common/confetti.js";
+
+// Emoji d'action des réponses (data/situations-conduite.js) → mini-médaillon 3D.
+// On ne touche pas la donnée : on traduit l'emoji au rendu. Emoji inconnu →
+// on garde l'emoji brut (jamais de trou).
+const REP_MED = {
+  "✋": ["bouclier", "teal"], // je cède / je laisse passer
+  "🛑": ["panneau", "red"], // je m'arrête
+  "⚡": ["eclair", "orange"], // j'accélère
+  "🐢": ["horloge", "blue"], // je ralentis
+  "👀": ["cible", "violet"], // je regarde / j'observe
+  "📢": ["megaphone", "orange"], // je klaxonne
+};
+function repIco(emoji, size = 24) {
+  const m = REP_MED[(emoji || "").trim()];
+  return m ? medallion(m[0], m[1], { size }) : emoji;
+}
 
 const ROUND_SIZE = 6;
 const INTRO_SIZE = 3; // manche courte de l'accroche post-onboarding
@@ -91,7 +108,7 @@ export async function mount(root, param) {
         }</p>
         <div class="sit-hero" aria-hidden="true">${renderSituationScene(demo.scene)}</div>
         <div class="sit-chips">
-          <span class="sit-chip">🚗 ${count} situations</span>
+          <span class="sit-chip">${medallion("voiture", "blue", { size: 18 })} ${count} situations</span>
           <span class="sit-chip">${volantImg(14)} +${VOLANTS_PAR_BONNE} par bonne réponse</span>
         </div>
         <button class="sit-cta" id="sit-start" type="button">${isIntro ? "C'est parti !" : "Jouer"}</button>
@@ -139,7 +156,7 @@ export async function mount(root, param) {
           .map(
             (r) => `
           <button class="sit-card" type="button" data-rep="${esc(r.id)}">
-            ${r.ico ? `<span class="sit-card-ico" aria-hidden="true">${r.ico}</span>` : ""}
+            ${r.ico ? `<span class="sit-card-ico" aria-hidden="true">${repIco(r.ico, 26)}</span>` : ""}
             <span>${esc(r.label)}</span>
           </button>`,
           )
@@ -525,7 +542,7 @@ body.sit-immersive #app { padding-top: 0 !important; padding-bottom: 0 !importan
     inset 0 1px 0 rgba(255,255,255,.24), inset 0 -2px 6px rgba(0,0,0,.4);
   transform: translateY(0); transition: transform .08s ease, box-shadow .08s ease, opacity .25s ease;
 }
-.sit-card-ico { font-size: 19px; flex: 0 0 auto; }
+.sit-card-ico { font-size: 19px; flex: 0 0 auto; display: inline-flex; align-items: center; }
 .sit-card:active:not(:disabled) {
   transform: translateY(4px);
   box-shadow: 0 2px 0 var(--sit-btn-edge), 0 4px 8px rgba(0,0,0,.4),

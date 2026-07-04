@@ -14,9 +14,9 @@ import {
 } from "@/data/moniteur-levels.js";
 import { haptic } from "@/utils/haptic.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { openPalierSheet } from "@/components/common/palier-sheet.js";
 import { panneauxLayer } from "@/components/enseignant/panneaux-bg.js";
-import { illus } from "@/components/enseignant/illus.js";
 
 // ─── CSS ────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -109,32 +109,24 @@ const STYLE = `<style>
   background: var(--bo3);
 }
 .epcf-stop.done:not(:last-child)::before { background: var(--gr); }
+/* Le glyphe est désormais un médaillon 3D auto-porté : le pastillon ne fait
+   plus que le loger (plus de fond/bordure plat qui doublonnait avec la pièce). */
 .epcf-stop-dot {
   width: 36px; height: 36px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: var(--su);
-  border: 2.5px solid var(--bo3);
   display: flex; align-items: center; justify-content: center;
   position: relative;
   z-index: 1;
-  color: var(--mu2);
   margin-top: 2px;
 }
-.epcf-stop.done .epcf-stop-dot {
-  background: var(--gr);
-  border-color: var(--gr);
-  color: #fff;
-}
+.epcf-stop-dot .pg-med { display: block; }
+/* Palier courant : anneau lumineux conservé comme repère « c'est ici » */
 .epcf-stop.now .epcf-stop-dot {
-  background: var(--su);
-  border-color: var(--a);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--a) 20%, transparent);
-  width: 44px; height: 44px;
-  margin-left: -4px;
-  margin-top: -2px;
+  border-radius: 50%;
 }
-.epcf-stop.locked .epcf-stop-dot { opacity: .5; }
+.epcf-stop.locked .epcf-stop-dot { opacity: .55; }
 .epcf-stop-body { flex: 1; min-width: 0; padding: 2px 0; }
 .epcf-stop-head {
   display: flex;
@@ -342,9 +334,11 @@ function renderStop(stop, totalValidations) {
   const iconName = "award";
 
   const dotContent =
-    cls === "done"
-      ? icon("check", { size: 16, strokeWidth: 3 })
-      : icon(iconName, { size: 15, strokeWidth: 2 });
+    isCercleOr && cls === "done"
+      ? medallion("couronne", "gold", { size: 34, glow: true })
+      : cls === "done"
+        ? medallion("check", "green", { size: 30 })
+        : medallion("etoile", "argent", { size: 30 });
 
   // Cost badge
   const diff = stop.threshold - totalValidations;
@@ -356,7 +350,7 @@ function renderStop(stop, totalValidations) {
   // Ligne statut — palier de progression (plus d'« outil débloqué »)
   const rewardIco =
     cls === "done"
-      ? illus("trophy", { size: 20 })
+      ? medallion("trophee", "gold", { size: 22 })
       : icon(iconName, { size: 14, strokeWidth: 2.4 });
   const rewardLine = `
     <div class="epcf-stop-reward ${cls === "done" ? "unlocked" : ""}">

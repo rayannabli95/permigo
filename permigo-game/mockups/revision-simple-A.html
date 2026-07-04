@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Révision conduite — version simple A</title>
+<style>
+  :root{
+    --bg:#eef1f7; --card:#fff; --ink:#141c30; --mu:#727d98; --mu2:#9aa3ba;
+    --line:#e6eaf2; --a:#f97316; --a-dk:#e05f00; --a-soft:#fff1e6;
+    --go1:#84e83c; --go2:#58cc02; --go3:#43a300; --go-dk:#2f7a00;
+    --c1:#6366f1; --c2:#17c9b2; --c3:#f59e0b; --c4:#ec6a2e;
+    --r:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:#c9cfdd;font-family:'Nunito',system-ui,-apple-system,sans-serif;
+       display:flex;justify-content:center;padding:26px 0;}
+  .phone{width:390px;background:var(--bg);border-radius:38px;overflow:hidden;
+         box-shadow:0 30px 80px -20px rgba(20,28,50,.5);position:relative;}
+  .scr{height:auto;padding:0 0 26px;}
+
+  /* header global (app) */
+  .top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;}
+  .top-logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(160deg,#7ee838,#3f9e00);
+            display:grid;place-items:center;color:#fff;font-weight:900;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);}
+  .top-r{display:flex;align-items:center;gap:9px;}
+  .top-pill{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);
+            border-radius:999px;padding:5px 11px 5px 6px;font-weight:800;font-size:14px;color:var(--ink);}
+  .top-pill .co{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 38% 30%,#ffe9a8,#ffd24a 50%,#f08a12);box-shadow:inset 0 0 0 1.5px #fff6;}
+  .ic-btn{width:36px;height:36px;border-radius:11px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--mu);}
+  .av{width:36px;height:36px;border-radius:50%;background:#20242e;background-size:cover;
+      box-shadow:inset 0 0 0 2px #fff, 0 0 0 1px var(--line);}
+
+  /* titre de page — pas de "Salut X", juste la fonction */
+  .head{padding:10px 18px 4px;display:flex;align-items:flex-start;gap:12px;}
+  .back{width:40px;height:40px;border-radius:12px;background:#fff;border:1px solid var(--line);
+        display:grid;place-items:center;flex:none;color:var(--ink);font-size:20px;}
+  .head h1{margin:0;font:900 25px/1.05 'Plus Jakarta Sans','Nunito',sans-serif;letter-spacing:-.02em;color:var(--ink);}
+  .head p{margin:5px 0 0;font:600 13.5px/1.35 'Nunito';color:var(--mu);}
+  .head p b{color:var(--a-dk);}
+
+  /* LA carte : une seule action claire */
+  .now{margin:18px 16px 0;background:linear-gradient(160deg,#fff,#fbfcff);
+       border:1px solid var(--line);border-radius:22px;padding:17px 17px 16px;
+       box-shadow:0 12px 26px -16px rgba(30,40,80,.4);position:relative;overflow:hidden;}
+  .now::before{content:"";position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;
+               background:radial-gradient(circle,var(--a-soft),transparent 70%);}
+  .now-k{display:inline-flex;align-items:center;gap:7px;font:800 11px/1 'Nunito';letter-spacing:.09em;
+         text-transform:uppercase;color:var(--a-dk);background:var(--a-soft);padding:6px 10px;border-radius:999px;}
+  .now-k .dot{width:7px;height:7px;border-radius:50%;background:var(--a);box-shadow:0 0 0 3px #f9731633;}
+  .now h2{margin:11px 0 3px;font:800 20px/1.15 'Plus Jakarta Sans','Nunito';color:var(--ink);letter-spacing:-.01em;}
+  .now .meta{font:600 13px/1 'Nunito';color:var(--mu);display:flex;align-items:center;gap:7px;}
+  .now .meta .chip{background:#eef1f7;border-radius:6px;padding:3px 7px;font-weight:800;color:#57617c;font-size:11.5px;}
+  .cta{margin-top:14px;width:100%;height:56px;border:none;border-radius:16px;cursor:pointer;
+       background:linear-gradient(180deg,var(--go1),var(--go2));color:#123400;
+       box-shadow:0 5px 0 var(--go-dk), 0 10px 20px -6px #58cc0288;
+       font:900 16px/1 'Plus Jakarta Sans','Nunito';display:flex;align-items:center;justify-content:center;gap:9px;}
+  .cta .arw{width:26px;height:26px;border-radius:8px;background:#123400;display:grid;place-items:center;color:#a6ff5e;}
+
+  /* progression : UNE ligne calme, pas 4 blocs */
+  .prog{margin:20px 18px 6px;display:flex;align-items:center;justify-content:space-between;}
+  .prog .lbl{font:800 13px/1 'Nunito';color:var(--ink);}
+  .prog .val{font:800 13px/1 'Nunito';color:var(--mu);}
+  .bar{margin:0 18px;height:9px;border-radius:99px;background:#e2e7f1;overflow:hidden;}
+  .bar>i{display:block;height:100%;width:3.2%;border-radius:99px;background:linear-gradient(90deg,var(--a),#ffb257);}
+
+  /* liste des fiches : scannable, repliable, sans blocs criards */
+  .sec{margin:22px 18px 8px;font:800 12px/1 'Nunito';letter-spacing:.06em;text-transform:uppercase;color:var(--mu2);}
+  .list{margin:0 16px;display:flex;flex-direction:column;gap:10px;}
+  .grp{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;}
+  .grp-h{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;}
+  .num{width:34px;height:34px;border-radius:10px;flex:none;display:grid;place-items:center;
+       color:#fff;font:900 15px/1 'Plus Jakarta Sans';box-shadow:inset 0 -2px 0 rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.35);}
+  .grp-t{flex:1;min-width:0;}
+  .grp-t b{display:block;font:800 14.5px/1.15 'Plus Jakarta Sans','Nunito';color:var(--ink);}
+  .grp-t span{font:600 12px/1 'Nunito';color:var(--mu);}
+  .grp-c{font:800 12.5px/1 'Nunito';color:var(--mu2);flex:none;}
+  .chev{width:20px;height:20px;flex:none;color:var(--mu2);transition:transform .2s;}
+  .grp.open .chev{transform:rotate(90deg);}
+  .grp-body{border-top:1px solid var(--line);display:none;}
+  .grp.open .grp-body{display:block;}
+  .fiche{display:flex;align-items:center;gap:11px;padding:12px 14px 12px 16px;border-top:1px solid #f0f3f9;}
+  .fiche:first-child{border-top:none;}
+  .fiche .st{width:22px;height:22px;border-radius:50%;flex:none;border:2px solid #d5dbe8;}
+  .fiche.done .st{border:none;background:radial-gradient(circle at 38% 30%,#84e83c,#58cc02);
+                  box-shadow:0 1px 3px #58cc0255;position:relative;}
+  .fiche.done .st::after{content:"";position:absolute;left:6px;top:5px;width:5px;height:9px;border:2.4px solid #fff;border-top:0;border-left:0;transform:rotate(42deg);}
+  .fiche .fn{flex:1;font:700 13.5px/1.2 'Nunito';color:var(--ink);}
+  .fiche .fn small{display:block;font:600 11.5px/1 'Nunito';color:var(--mu2);margin-top:2px;}
+  .fiche .go{font:800 12px/1 'Nunito';color:var(--a-dk);}
+
+  /* secondaire, tout en bas, discret : l'entraînement optionnel */
+  .extra{margin:22px 16px 0;background:#f6f8fc;border:1px dashed #d9dfec;border-radius:14px;padding:13px 14px;}
+  .extra p{margin:0 0 9px;font:700 12.5px/1 'Nunito';color:var(--mu);}
+  .extra .row{display:flex;gap:9px;}
+  .mini{flex:1;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);
+        border-radius:11px;padding:9px 10px;font:800 12.5px/1.1 'Nunito';color:var(--ink);}
+  .mini .mi{width:26px;height:26px;border-radius:8px;flex:none;display:grid;place-items:center;color:#fff;}
+
+  .foot{text-align:center;margin:20px 18px 0;font:600 12px/1.4 'Nunito';color:var(--mu2);}
+</style>
+</head>
+<body>
+<div class="phone"><div class="scr">
+
+  <div class="top">
+    <div class="top-logo">P</div>
+    <div class="top-r">
+      <div class="top-pill"><span class="co"></span>654</div>
+      <div class="ic-btn">⚙</div>
+      <div class="av" style="background-image:url('/skins/avatars/pilote-f1.png')"></div>
+    </div>
+  </div>
+
+  <div class="head">
+    <div class="back">←</div>
+    <div>
+      <h1>Révise ta conduite</h1>
+      <p>Le geste, pas le code. <b>Ton moniteur valide en vrai</b> — ici tu t'entraînes entre les leçons.</p>
+    </div>
+  </div>
+
+  <div class="now">
+    <span class="now-k"><span class="dot"></span>Reprends ta lecture</span>
+    <h2>Prendre en main le poste de conduite</h2>
+    <div class="meta"><span class="chip">Monde 1</span> Fiche 1 · 4 min de lecture</div>
+    <button class="cta"><span class="arw">▸</span> Lire la fiche</button>
+  </div>
+
+  <div class="prog"><span class="lbl">Ta progression</span><span class="val">1 fiche sur 31</span></div>
+  <div class="bar"><i></i></div>
+
+  <div class="sec">Toutes les fiches</div>
+  <div class="list">
+
+    <div class="grp open">
+      <div class="grp-h">
+        <div class="num" style="background:linear-gradient(160deg,#818cf8,#6366f1)">1</div>
+        <div class="grp-t"><b>Prendre en main la voiture</b><span>Maniement du véhicule</span></div>
+        <div class="grp-c">1/9</div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="grp-body">
+        <div class="fiche done"><span class="st"></span><span class="fn">Prendre en main le poste de conduite<small>Lu</small></span><span class="go">Relire</span></div>
+        <div class="fiche"><span class="st"></span><span class="fn">Démarrer et s'arrêter en douceur</span><span class="go">Lire ›</span></div>
+        <div class="fiche"><span class="st"></span><span class="fn">Doser l'accélérateur et le frein</span><span class="go">Lire ›</span></div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="grp-h">
+        <div class="num" style="background:linear-gradient(160deg,#2fe0c6,#17c9b2)">2</div>
+        <div class="grp-t"><b>Rouler en conditions normales</b><span>Circulation</span></div>
+        <div class="grp-c">0/8</div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="grp-h">
+        <div class="num" style="background:linear-gradient(160deg,#fbbf3f,#f59e0b)">3</div>
+        <div class="grp-t"><b>Nuit, météo, partage de la route</b><span>Conditions difficiles</span></div>
+        <div class="grp-c">0/7</div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="grp-h">
+        <div class="num" style="background:linear-gradient(160deg,#f68a4f,#ec6a2e)">4</div>
+        <div class="grp-t"><b>Seul, sûr, économique</b><span>Conduite autonome</span></div>
+        <div class="grp-c">0/7</div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="extra">
+    <p>Envie de t'entraîner autrement ? (optionnel)</p>
+    <div class="row">
+      <div class="mini"><span class="mi" style="background:linear-gradient(160deg,#ffb257,#f97316)">⚡</span>Défi du jour · 1 min</div>
+      <div class="mini"><span class="mi" style="background:linear-gradient(160deg,#ff8a8a,#ef4444)">!</span>Trouve la faute</div>
+    </div>
+  </div>
+
+  <div class="foot">31 fiches · révise le geste, pas que le code</div>
+
+</div></div>
+</body>
+</html>

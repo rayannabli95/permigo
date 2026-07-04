@@ -7,6 +7,7 @@ import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { getMyChests } from "@/utils/game-state.js";
@@ -221,7 +222,7 @@ function renderFeedbackBlock({
 }) {
   const banner =
     !isCorrect && faute
-      ? `<div class="exb-faute-banner">⚠️ À l'examen, ce serait éliminatoire — autant le savoir ici</div>`
+      ? `<div class="exb-faute-banner">${medallion("panneau", "red", { size: 22 })}<span>À l'examen, ce serait éliminatoire — autant le savoir ici</span></div>`
       : "";
   const verdict = isCorrect
     ? "✓ Bonne réponse"
@@ -239,13 +240,20 @@ function renderFeedbackBlock({
 }
 
 function renderSelection() {
-  const stars = (n) => "★".repeat(n) + "☆".repeat(5 - n);
+  // Étoiles de difficulté : mini-SVG (pleines dorées / contour gris) — pas un
+  // médaillon par étoile (trop lourd). 1 seul path d'étoile réutilisé.
+  const stars = (n) =>
+    `<span class="exb-pcard-stars-svg" aria-hidden="true">${Array.from(
+      { length: 5 },
+      (_, i) =>
+        `<svg viewBox="0 0 24 24" width="13" height="13" class="exb-star ${i < n ? "is-on" : ""}"><path d="M12 2.6l2.7 5.9 6.4.7-4.8 4.4 1.3 6.4L12 17l-5.6 3 1.3-6.4L2.9 9.2l6.4-.7z"/></svg>`,
+    ).join("")}</span>`;
   const cards = PARCOURS.map(
     (p) => `
     <button class="exb-pcard" data-pid="${p.id}" aria-label="Démarrer le parcours ${esc(p.nom)}">
       <div class="exb-pcard-top">
         <span class="exb-pcard-num">Parcours ${p.id}</span>
-        <span class="exb-pcard-stars" aria-label="Difficulté ${p.difficulte}/5"><small class="exb-pcard-stars-lbl">Difficulté</small>${esc(stars(p.difficulte))}</span>
+        <span class="exb-pcard-stars" aria-label="Difficulté ${p.difficulte}/5"><small class="exb-pcard-stars-lbl">Difficulté</small>${stars(p.difficulte)}</span>
       </div>
       <div class="exb-pcard-nom">${esc(p.nom)}</div>
       <div class="exb-pcard-ctx">${esc(p.contexte)}</div>
@@ -255,7 +263,10 @@ function renderSelection() {
   ).join("");
 
   const locked = EXAMEN_OFFICIEL_LOCKED || !_examenUnlocked;
-  const lockBadge = EXAMEN_OFFICIEL_LOCKED ? "🔒 PermiGo+" : "🔒 Compétence 1";
+  const lockMed = medallion("cadenas", "slate", { size: 16 });
+  const lockBadge = EXAMEN_OFFICIEL_LOCKED
+    ? `${lockMed} PermiGo+`
+    : `${lockMed} Compétence 1`;
   const lockSub = EXAMEN_OFFICIEL_LOCKED
     ? "Débloque le vrai examen blanc avec PermiGo+"
     : "Valide ta compétence 1 pour débloquer le vrai examen blanc";
@@ -276,7 +287,7 @@ function renderSelection() {
   const weak = getWeakPoints({ minSeen: 3, limit: 3 });
   const weakSection = weak.length
     ? `<div class="exb-weak">
-    <p class="exb-weak-title">🎯 Tes points faibles</p>
+    <p class="exb-weak-title">${medallion("cible", "red", { size: 24 })} Tes points faibles</p>
     <div class="exb-weak-list">
       ${weak
         .map(
@@ -609,7 +620,13 @@ function showResults(root, questions, answers, parcours_id) {
     <div class="exb-results">
       ${renderTrophy(TROPHY_END, "exb-trophy--end")}
       <div class="exb-res-top ${passed ? "exb-res-top--pass" : "exb-res-top--fail"}">
-        <div class="exb-res-ico">${passed ? "✓" : fauteRatee ? "✗" : "↻"}</div>
+        <div class="exb-res-ico">${
+          passed
+            ? medallion("trophee", "gold", { size: 60 })
+            : fauteRatee
+              ? medallion("faute", "red", { size: 60 })
+              : medallion("cible", "orange", { size: 60 })
+        }</div>
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
         <div class="exb-res-pct">${pct} %</div>
         <div class="exb-res-verdict">${
@@ -792,7 +809,11 @@ function showOfficielResults(root, questions, answers, startedAt) {
   root.querySelector("#exb-screen").innerHTML = `
     <div class="exb-results">
       <div class="exb-res-top ${passed ? "exb-res-top--pass" : "exb-res-top--fail"}">
-        <div class="exb-res-ico">${passed ? "✓" : "✗"}</div>
+        <div class="exb-res-ico">${
+          passed
+            ? medallion("trophee", "gold", { size: 60 })
+            : medallion("faute", "red", { size: 60 })
+        }</div>
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
         <div class="exb-res-pct">${fautes} faute${fautes > 1 ? "s" : ""} · ${pct} %</div>
         <div class="exb-res-verdict">${passed ? "Admis — tu es prêt !" : "Recalé — plus de 5 fautes"}</div>
@@ -971,7 +992,11 @@ function showRevisionResults(
   root.querySelector("#exb-screen").innerHTML = `
     <div class="exb-results">
       <div class="exb-res-top ${perfect ? "exb-res-top--pass" : "exb-res-top--fail"}">
-        <div class="exb-res-ico">${perfect ? "✓" : "↻"}</div>
+        <div class="exb-res-ico">${
+          perfect
+            ? medallion("trophee", "gold", { size: 60 })
+            : medallion("cible", "orange", { size: 60 })
+        }</div>
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
         <div class="exb-res-pct">${esc(label)} · ${pct} %</div>
         <div class="exb-res-verdict">Révision terminée</div>
@@ -1079,9 +1104,13 @@ const EXB_CSS = `
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  color: var(--am-txt);
-  letter-spacing: 2px;
+}
+.exb-pcard-stars-svg { display: inline-flex; align-items: center; gap: 2px; }
+.exb-star { display: block; }
+.exb-star path { fill: var(--bo); }
+.exb-star.is-on path {
+  fill: #ffd24a;
+  filter: drop-shadow(0 1px 1.5px rgba(240,138,18,.45));
 }
 /* étoiles nues = ambigu (note ? difficulté ?) → étiquette visible */
 .exb-pcard-stars-lbl {
@@ -1269,7 +1298,11 @@ const EXB_CSS = `
   padding: 10px 14px;
   font: 700 13px/1.4 'Inter', sans-serif;
   color: var(--rd-txt);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+.exb-faute-banner .pg-med { flex-shrink: 0; }
 .exb-feedback-verdict {
   font: 700 14px/1.3 'Plus Jakarta Sans', sans-serif;
   padding: 10px 14px;
@@ -1319,7 +1352,21 @@ const EXB_CSS = `
 }
 .exb-res-top--pass { background: linear-gradient(180deg, rgba(34,197,94,.12) 0%, transparent 100%); }
 .exb-res-top--fail { background: linear-gradient(180deg, rgba(239,68,68,.08) 0%, transparent 100%); }
-.exb-res-ico { font-size: 48px; margin-bottom: 4px; }
+.exb-res-ico {
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.exb-res-ico .pg-med {
+  filter: drop-shadow(0 8px 18px rgba(10,13,26,.22));
+  animation: exbResIcoPop .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes exbResIcoPop {
+  from { opacity: 0; transform: scale(.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .exb-res-ico .pg-med { animation: none !important; } }
 .exb-res-score {
   font: 800 56px/1 'Plus Jakarta Sans', sans-serif;
   color: var(--ink);
@@ -1525,7 +1572,11 @@ const EXB_CSS = `
   color: var(--ink);
   margin: 0 0 10px;
   letter-spacing: -.01em;
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
+.exb-weak-title .pg-med { flex-shrink: 0; }
 .exb-weak-list { display: flex; flex-direction: column; gap: 8px; }
 .exb-weak-btn {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -1608,8 +1659,10 @@ const EXB_CSS = `
   position: absolute; top: 12px; right: 12px;
   font: 800 11px/1 'Plus Jakarta Sans', sans-serif;
   background: rgba(0,0,0,.18); color: #fff;
-  padding: 6px 10px; border-radius: 99px;
+  padding: 5px 10px 5px 6px; border-radius: 99px;
+  display: inline-flex; align-items: center; gap: 5px;
 }
+.exo-hero-lock .pg-med { flex-shrink: 0; }
 
 /* ── Barre chrono du mode officiel ── */
 .exo-run-bar { display: flex; align-items: center; gap: 10px; }

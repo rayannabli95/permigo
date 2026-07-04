@@ -15,6 +15,7 @@ import { haptic } from "@/utils/haptic.js";
 import { mountPremiumQuiz } from "@/components/eleve/premium-quiz.js";
 import { quizByCode } from "@/data/quiz-conduite.js";
 import { track } from "@/services/analytics.js";
+import { medallion, medStatus } from "@/utils/medallions.js";
 import {
   FICHES,
   MONDES,
@@ -243,9 +244,9 @@ const STYLE = `<style>
 .rvc-coach::after { content:""; position:absolute; right:-40px; top:-50px; width:150px; height:150px; border-radius:50%;
   background:radial-gradient(circle,rgba(255,255,255,.22),transparent 70%); pointer-events:none; }
 .rvc-coach-row { position:relative; z-index:1; display:flex; gap:12px; align-items:flex-start; }
-.rvc-coach-av { width:44px; height:44px; border-radius:14px; flex:none; display:grid; place-items:center;
-  background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.34); }
-.rvc-coach-av svg { width:23px; height:23px; }
+.rvc-coach-av { width:52px; height:52px; flex:none; display:grid; place-items:center; }
+.rvc-coach-av img { width:52px; height:52px; object-fit:contain;
+  filter: drop-shadow(0 4px 8px rgba(20,10,50,.35)); }
 .rvc-coach-tag { font:600 10px 'IBM Plex Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:#dcddff; margin-bottom:3px; }
 .rvc-coach-msg { font:600 15px/1.42 'Plus Jakarta Sans',sans-serif; }
 .rvc-coach-msg b { font-weight:800; }
@@ -420,15 +421,15 @@ button.rvcb-tile:active { transform:scale(.975); }
 .rvcb-next-w { font:600 11.5px 'Inter',sans-serif; color:var(--mu,#9499a8); margin-top:3px; }
 .rvcb-next-go { margin-top:11px; display:flex; align-items:center; gap:7px; font:700 13px 'Plus Jakarta Sans',sans-serif; color:var(--ink); }
 .rvcb-next-go .rvcb-pp { width:26px; height:26px; border-radius:9px; background:var(--a,#6366f1); color:#fff; display:grid; place-items:center; }
-.rvcb-next-go .rvcb-pp svg, .rvcb-play svg, .rvcb-faute-ic svg { width:14px; height:14px; }
+.rvcb-next-go .rvcb-pp svg, .rvcb-play svg { width:14px; height:14px; }
 
 /* trouve la faute — bandeau large sombre */
 .rvcb-faute { flex-direction:row; align-items:center; gap:14px; min-height:94px; border:none; color:#fff;
   background:linear-gradient(110deg,#15171f 0%, #20232f 100%); box-shadow:0 14px 30px -16px rgba(0,0,0,.5); }
 .rvcb-faute .rvcb-lab { color:rgba(255,255,255,.55); }
-.rvcb-faute-ic { flex:none; width:52px; height:52px; border-radius:16px; display:grid; place-items:center; color:var(--lime-ink);
-  background:linear-gradient(150deg,#ffb547,#ff7a45); box-shadow:0 10px 20px -8px rgba(255,122,69,.55); }
-.rvcb-faute-ic svg { width:26px; height:26px; }
+.rvcb-faute-ic { flex:none; width:52px; height:52px; display:grid; place-items:center;
+  filter: drop-shadow(0 8px 16px rgba(209,43,43,.4)); }
+.rvcb-faute-ic .pg-med { width:52px; height:52px; }
 .rvcb-faute-tx { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
 .rvcb-faute-h { font:800 17px 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; }
 .rvcb-faute-p { font:500 12px/1.35 'Inter',sans-serif; color:rgba(255,255,255,.65); }
@@ -449,11 +450,9 @@ button.rvcb-tile:active { transform:scale(.975); }
 .rvcb-mondes-a { font:600 12px 'Inter',sans-serif; color:var(--mu,#9499a8); }
 .rvcb-monde { padding:14px; min-height:116px; justify-content:space-between; }
 .rvcb-monde-top { display:flex; align-items:center; justify-content:space-between; }
-.rvcb-mnum { width:30px; height:30px; border-radius:10px; display:grid; place-items:center; color:#fff; font:800 14px 'Plus Jakarta Sans',sans-serif; }
-.rvcb-monde.m1 .rvcb-mnum { background:linear-gradient(150deg,#6d49ff,#3b1ea8); }
-.rvcb-monde.m2 .rvcb-mnum { background:linear-gradient(150deg,#19b6a8,#0c7d72); }
-.rvcb-monde.m3 .rvcb-mnum { background:linear-gradient(150deg,#5b6bff,#2b2f9e); }
-.rvcb-monde.m4 .rvcb-mnum { background:linear-gradient(150deg,#ff8a4c,#e1561f); }
+.rvcb-mmed { width:34px; height:34px; flex:none; display:grid; place-items:center;
+  filter: drop-shadow(0 4px 9px rgba(31,32,46,.22)); }
+.rvcb-mmed .pg-med { width:34px; height:34px; }
 .rvcb-frac { font:700 12px 'Plus Jakarta Sans',sans-serif; color:var(--mu,#9499a8); }
 .rvcb-mnm { font:800 13.5px/1.18 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; margin-top:8px; }
 .rvcb-mdz { font:500 11px 'Inter',sans-serif; color:var(--mu,#9499a8); margin-top:2px; }
@@ -478,15 +477,89 @@ button.rvcb-tile:active { transform:scale(.975); }
   background:color-mix(in srgb,var(--a,#6366f1) 12%,transparent); padding:5px 8px; border-radius:8px; }
 .rvcb-frow-t { flex:1; font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; }
 .rvcb-frow.is-read .rvcb-frow-t { color:var(--mu,#9499a8); }
-.rvcb-frow-st { flex:none; width:22px; height:22px; display:grid; place-items:center; color:#10b981; }
-.rvcb-frow-st svg { width:18px; height:18px; }
+.rvcb-frow-st { flex:none; width:22px; height:22px; display:grid; place-items:center; }
+.rvcb-frow-st .pg-med { width:22px; height:22px; }
+
+/* ═══ Refonte « simple » de la home (mockup validé) : une seule action,
+      progression calme, liste des fiches repliée, entraînement optionnel en bas.
+      Theme-aware : suit l'accent du compte (--a). ═══ */
+.rvs-head { display:flex; align-items:flex-start; gap:12px; padding:16px 0 4px; }
+.rvs-head .rvc-back { margin-top:2px; }
+.rvs-h1 { font:800 24px/1.05 'Plus Jakarta Sans',sans-serif; letter-spacing:-.025em; margin:0; color:var(--ink); }
+.rvs-p { margin:5px 0 0; font:600 13px/1.35 'Inter',sans-serif; color:var(--mu,#64748b); }
+.rvs-p b { color:var(--a-txt,var(--a,#4f46e5)); }
+
+.rvs-now { position:relative; overflow:hidden; display:block; width:100%; text-align:left; cursor:pointer;
+  margin:16px 0 0; border:1px solid var(--bo3,#e6eaf2); border-radius:22px; padding:17px;
+  background:var(--su,#fff); color:var(--ink); box-shadow:0 12px 26px -16px rgba(30,40,80,.4);
+  -webkit-tap-highlight-color:transparent; transition:transform .12s ease; }
+.rvs-now:active { transform:scale(.99); }
+.rvs-now::before { content:""; position:absolute; right:-40px; top:-40px; width:150px; height:150px; border-radius:50%;
+  background:radial-gradient(circle, color-mix(in srgb,var(--a,#f97316) 18%,transparent), transparent 70%); }
+.rvs-now-k { position:relative; display:inline-flex; align-items:center; gap:7px; font:800 11px/1 'Inter',sans-serif;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--a-txt,var(--a));
+  background:color-mix(in srgb,var(--a,#f97316) 12%,transparent); padding:6px 10px; border-radius:999px; }
+.rvs-dot { width:7px; height:7px; border-radius:50%; background:var(--a,#f97316);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--a,#f97316) 25%,transparent); }
+.rvs-now-t { position:relative; display:block; margin:11px 0 4px; font:800 20px/1.15 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; }
+.rvs-now-meta { position:relative; display:flex; align-items:center; gap:7px; font:600 13px/1 'Inter',sans-serif; color:var(--mu,#64748b); }
+.rvs-chipm { background:var(--bg,#eef1f7); border-radius:6px; padding:3px 7px; font:800 11.5px/1 'Inter',sans-serif; color:var(--mu,#57617c); }
+.rvs-cta { position:relative; margin-top:14px; width:100%; height:54px; border-radius:16px;
+  background:linear-gradient(180deg,#84e83c,#58cc02); color:#123400;
+  box-shadow:0 5px 0 #2f7a00, 0 10px 20px -6px rgba(88,204,2,.5);
+  font:800 16px/1 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:9px; }
+.rvs-cta-ic { width:26px; height:26px; border-radius:8px; background:#123400; display:grid; place-items:center; }
+.rvs-cta-ic svg { width:14px; height:14px; color:#a6ff5e; }
+.rvs-done { cursor:default; } .rvs-done:active { transform:none; }
+
+.rvs-focus { margin:12px 0 0; background:color-mix(in srgb,var(--a,#f97316) 8%,var(--su,#fff));
+  border:1px solid color-mix(in srgb,var(--a,#f97316) 22%,transparent); border-radius:16px; padding:12px 14px; }
+.rvs-focus-k { display:flex; align-items:center; gap:7px; font:800 11.5px/1 'Inter',sans-serif; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--a-txt,var(--a)); margin-bottom:8px; }
+.rvs-focus-row { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; text-align:left;
+  border:0; cursor:pointer; background:var(--su,#fff); border-radius:11px; padding:11px 12px; margin-top:7px; color:var(--ink);
+  font:700 13.5px/1.2 'Inter',sans-serif; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+.rvs-focus-go { display:inline-flex; align-items:center; gap:4px; flex:none; font:800 12px/1 'Inter',sans-serif; color:var(--a-txt,var(--a)); }
+.rvs-focus-go svg { width:16px; height:16px; }
+
+.rvs-prog { margin:20px 2px 0; }
+.rvs-prog-h { display:flex; align-items:center; justify-content:space-between; font:800 13px/1 'Inter',sans-serif; color:var(--ink); }
+.rvs-prog-x { color:var(--mu,#64748b); }
+.rvs-bar { margin-top:9px; height:9px; border-radius:99px; background:var(--bo3,#e2e7f1); overflow:hidden; }
+.rvs-bar > i { display:block; height:100%; border-radius:99px;
+  background:linear-gradient(90deg,var(--a,#f97316),color-mix(in srgb,var(--a,#f97316) 55%,#fff)); transition:width .5s ease; }
+
+.rvs-sec { margin:22px 2px 8px; font:800 12px/1 'Inter',sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--mu2,#9aa3ba); }
+.rvs-list { display:flex; flex-direction:column; gap:10px; }
+.rvs-grp { display:flex; align-items:center; gap:12px; width:100%; text-align:left; cursor:pointer;
+  background:var(--su,#fff); border:1px solid var(--bo3,#e6eaf2); border-radius:16px; padding:13px 14px; color:var(--ink);
+  -webkit-tap-highlight-color:transparent; transition:transform .12s ease; }
+.rvs-grp:active { transform:scale(.99); }
+.rvs-num { width:34px; height:34px; border-radius:10px; flex:none; display:grid; place-items:center; color:#fff;
+  font:800 15px/1 'Plus Jakarta Sans',sans-serif; box-shadow:inset 0 -2px 0 rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.35); }
+.rvs-grp-t { flex:1; min-width:0; }
+.rvs-grp-t b { display:block; font:800 14.5px/1.15 'Plus Jakarta Sans',sans-serif; }
+.rvs-grp-t span { font:600 12px/1 'Inter',sans-serif; color:var(--mu,#64748b); }
+.rvs-grp-c { font:800 12.5px/1 'Inter',sans-serif; color:var(--mu2,#9aa3ba); flex:none; }
+.rvs-chev { width:20px; height:20px; flex:none; color:var(--mu2,#9aa3ba); }
+
+.rvs-extra { margin:22px 0 0; background:color-mix(in srgb,var(--ink,#141c30) 3%,var(--su,#fff));
+  border:1px dashed var(--bo3,#d9dfec); border-radius:14px; padding:13px 14px; }
+.rvs-extra > p { margin:0 0 9px; font:700 12.5px/1 'Inter',sans-serif; color:var(--mu,#64748b); }
+.rvs-extra-row { display:flex; gap:9px; }
+.rvs-mini { flex:1; display:flex; align-items:center; gap:9px; cursor:pointer; background:var(--su,#fff);
+  border:1px solid var(--bo3,#e6eaf2); border-radius:11px; padding:9px 10px; color:var(--ink);
+  font:800 12.5px/1.1 'Inter',sans-serif; text-align:left; -webkit-tap-highlight-color:transparent; }
+.rvs-mini-ic { width:26px; height:26px; border-radius:8px; flex:none; display:grid; place-items:center; color:#fff; font-weight:900; }
+.rvs-mini-ic svg { width:15px; height:15px; }
+
+.rvs-foot { text-align:center; margin:20px 0 0; font:600 12px/1.4 'Inter',sans-serif; color:var(--mu2,#9aa3ba); }
 
 @media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before { transition:none !important; animation:none !important; } }
 </style>`;
 
 // Pictos SVG (sobres, mono-trait) réutilisés par la fiche « Coach ».
 const FSVG = {
-  star: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16l-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>`,
   check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`,
   arrow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`,
   info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>`,
@@ -494,7 +567,6 @@ const FSVG = {
   auto: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/></svg>`,
   video: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m23 7-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`,
   shuffle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>`,
-  lock: `<svg class="lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`,
   play: `<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>`,
 };
 
@@ -574,7 +646,7 @@ export async function mount(root, param) {
         return `<button class="rvcb-frow ${on ? "is-read" : ""}" data-code="${esc(f.code)}">
             <span class="rvcb-frow-code">${esc(f.code)}</span>
             <span class="rvcb-frow-t">${esc(f.titre)}</span>
-            <span class="rvcb-frow-st">${on ? FSVG.check : ""}</span>
+            <span class="rvcb-frow-st">${on ? medStatus("acquis", { size: 22 }) : ""}</span>
           </button>`;
       })
       .join("");
@@ -608,137 +680,94 @@ export async function mount(root, param) {
   // faute, ciblage moniteur, et les 4 mondes en mosaïque. Donne envie d'entrer
   // dans les fiches « Coach ». Theme-aware (suit l'accent du compte).
   function renderHome() {
-    const me = getCurUser();
-    const nom = (me?.nom || "").trim();
-    const prenom = nom ? nom.split(/\s+/)[0] : "";
-    const initials = nom
-      ? nom
-          .split(/\s+/)
-          .filter(Boolean)
-          .map((s) => s[0])
-          .slice(0, 2)
-          .join("")
-          .toUpperCase()
-      : "";
-
-    const revised = loadRevised();
     const read = loadRead();
+    const revised = loadRevised();
     const totalF = FICHES.length;
     const lues = FICHES.filter((f) => read[f.code]).length;
     const pct = totalF ? Math.round((lues / totalF) * 100) : 0;
     const pf = pointFaible(revised);
     const nextF = FICHES.find((f) => !read[f.code]) || pf;
+    const firstEver = lues === 0;
 
-    const C = 2 * Math.PI * 19; // anneau de progression
-    const dash = (C * (1 - pct / 100)).toFixed(1);
+    const chev = `<svg class="rvs-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>`;
+    const play = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5l12 7-12 7V5z"/></svg>`;
+    const eclair = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>`;
 
-    const svgArr = `<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    const svgPlay = `<svg viewBox="0 0 24 24" fill="none"><path d="M7 5l11 7-11 7V5z" fill="currentColor"/></svg>`;
-    const svgWarn = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 4l8.5 15h-17L12 4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.4" r="1.2" fill="currentColor"/></svg>`;
+    // ── UNE seule action : reprendre (ou commencer) la lecture ──
+    const primary = nextF
+      ? `<button class="rvs-now" ${firstEver ? "data-first" : "data-next"} data-code="${esc(nextF.code)}">
+          <span class="rvs-now-k"><span class="rvs-dot"></span>${firstEver ? "Commence ta révision" : "Reprends ta lecture"}</span>
+          <span class="rvs-now-t">${esc(nextF.titre)}</span>
+          <span class="rvs-now-meta"><span class="rvs-chipm">Monde ${nextF.monde}</span>Fiche ${esc(nextF.code)}</span>
+          <span class="rvs-cta"><span class="rvs-cta-ic">${play}</span>${read[nextF.code] ? "Relire la fiche" : "Lire la fiche"}</span>
+        </button>`
+      : `<div class="rvs-now rvs-done">
+          <span class="rvs-now-k"><span class="rvs-dot"></span>Bravo</span>
+          <span class="rvs-now-t">Tu as lu les ${totalF} fiches 🎉</span>
+          <span class="rvs-now-meta">Reviens réviser avant chaque leçon.</span>
+        </div>`;
 
-    const mondeTiles = MONDES.map((m) => {
-      const fm = fichesByMonde(m.n);
-      const tot = fm.length;
-      const done = fm.filter((f) => read[f.code]).length;
-      const p = tot ? Math.round((done / tot) * 100) : 0;
-      return `<button class="rvcb-tile rvcb-monde m${m.n}" data-monde="${m.n}">
-        <div class="rvcb-monde-top"><span class="rvcb-mnum">${m.n}</span><span class="rvcb-frac">${done}/${tot}</span></div>
-        <div><div class="rvcb-mnm">${esc(m.sous)}</div><div class="rvcb-mdz">${esc(m.nom)}</div></div>
-        <div class="rvcb-mbar"><i style="width:${p}%"></i></div>
-      </button>`;
-    }).join("");
-
-    const focusTile = focuses.length
-      ? `<div class="rvcb-tile rvcb-focus span2">
-          <div class="rvcb-lab"><span class="rvcb-dot"></span>Ton moniteur t'a ciblé ça</div>
-          <div class="rvcb-focus-list">${focuses
+    // ── Ciblage moniteur (rare, prioritaire) — juste sous l'action ──
+    const focusBlock = focuses.length
+      ? `<div class="rvs-focus">
+          <div class="rvs-focus-k"><span class="rvs-dot"></span>Ton moniteur t'a ciblé ça</div>
+          ${focuses
             .map((x) => {
               const ff = getFiche(x.competence_code);
               const t = ff ? ff.titre : x.competence_code;
-              return `<button class="rvcb-focus-row" data-focus="${esc(x.id)}" data-fcode="${esc(x.competence_code)}"><span class="rvcb-focus-t">${esc(t)}</span><span class="rvcb-focus-go">J'm'y mets →</span></button>`;
+              return `<button class="rvs-focus-row" data-focus="${esc(x.id)}" data-fcode="${esc(x.competence_code)}"><span>${esc(t)}</span><span class="rvs-focus-go">J'm'y mets ${chev}</span></button>`;
             })
-            .join("")}</div>
+            .join("")}
         </div>`
       : "";
 
-    root.innerHTML = `${STYLE}<div class="rvc rvcb">
-      <div class="rvcb-top">
+    // ── Les 4 mondes : liste calme, une ligne = un monde, ouvre ses fiches ──
+    const MCOLOR = {
+      1: "linear-gradient(160deg,#818cf8,#6366f1)",
+      2: "linear-gradient(160deg,#2fe0c6,#17c9b2)",
+      3: "linear-gradient(160deg,#fbbf3f,#f59e0b)",
+      4: "linear-gradient(160deg,#f68a4f,#ec6a2e)",
+    };
+    const mondeRows = MONDES.map((m) => {
+      const fm = fichesByMonde(m.n);
+      const done = fm.filter((f) => read[f.code]).length;
+      return `<button class="rvs-grp" data-monde="${m.n}">
+        <span class="rvs-num" style="background:${MCOLOR[m.n] || MCOLOR[1]}">${m.n}</span>
+        <span class="rvs-grp-t"><b>${esc(m.sous)}</b><span>${esc(m.nom)}</span></span>
+        <span class="rvs-grp-c">${done}/${fm.length}</span>
+        ${chev}
+      </button>`;
+    }).join("");
+
+    root.innerHTML = `${STYLE}<div class="rvc">
+      <div class="rvs-head">
         <button class="rvc-back" aria-label="Retour à l'accueil">←</button>
-        <div class="rvcb-hi">
-          <span class="rvcb-k">Révise ta conduite</span>
-          <span class="rvcb-n">${prenom ? `Salut, ${esc(prenom)} 👋` : "Le geste, pas que le code"}</span>
+        <div class="rvs-head-tx">
+          <h1 class="rvs-h1">Révise ta conduite</h1>
+          <p class="rvs-p">Le geste, pas le code. <b>Ton moniteur valide en vrai</b> — ici tu t'entraînes entre les leçons.</p>
         </div>
-        ${initials ? `<span class="rvcb-ava" aria-hidden="true">${esc(initials)}</span>` : ""}
       </div>
 
-      <div class="rvcb-grid">
-        ${
-          pf
-            ? `<button class="rvcb-tile rvcb-defi span2" data-pf="${esc(pf.code)}">
-          <span class="rvcb-ring-deco" aria-hidden="true"></span>
-          <div class="rvcb-defi-head">
-            <span class="rvcb-lab"><span class="rvcb-dot"></span>Ton défi du jour</span>
-            <span class="rvcb-defi-meta">1 min · 3 questions</span>
-          </div>
-          <div>
-            <div class="rvcb-defi-t">${esc(pf.titre)}</div>
-            <p class="rvcb-defi-p">On a repéré ton point faible. Remets-toi dedans en 1 minute.</p>
-          </div>
-          <span class="rvcb-defi-cta"><span>Relever le défi</span><span class="rvcb-arr">${svgArr}</span></span>
-        </button>`
-            : ""
-        }
+      ${primary}
+      ${focusBlock}
 
-        ${
-          lues === 0 && nextF
-            ? /* 0 fiche lue : pas de « 0/31 · 0% » démoralisant — amorçage engageant */ `
-        <button class="rvcb-tile rvcb-prog rvcb-prog0" data-first data-code="${esc(nextF.code)}">
-          <span class="rvcb-lab"><span class="rvcb-dot"></span>Progression</span>
-          <div>
-            <div class="rvcb-prog0-t">Commence ta 1<sup>re</sup> fiche</div>
-            <div class="rvcb-sub">${totalF} fiches t'attendent</div>
-          </div>
-          <span class="rvcb-prog0-cta">C'est parti ${svgArr}</span>
-        </button>`
-            : `
-        <div class="rvcb-tile rvcb-prog">
-          <div class="rvcb-ring">
-            <svg width="46" height="46" viewBox="0 0 46 46">
-              <circle cx="23" cy="23" r="19" fill="none" stroke="var(--bo3,#eef0f6)" stroke-width="6"/>
-              <circle cx="23" cy="23" r="19" fill="none" stroke="var(--a,#6366f1)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${dash}" transform="rotate(-90 23 23)"/>
-            </svg>
-            <span class="rvcb-pct">${pct}%</span>
-          </div>
-          <span class="rvcb-lab"><span class="rvcb-dot"></span>Progression</span>
-          <div><div class="rvcb-big">${lues}<small>/${totalF}</small></div><div class="rvcb-sub">fiches lues</div></div>
-          <div class="rvcb-bar"><i style="width:${pct}%"></i></div>
-        </div>`
-        }
-
-        ${
-          nextF
-            ? `<button class="rvcb-tile rvcb-next" data-next data-code="${esc(nextF.code)}">
-          <span class="rvcb-chip">À lire ensuite</span>
-          <div class="rvcb-next-t">${esc(nextF.titre)}</div>
-          <div class="rvcb-next-w">Monde ${nextF.monde} · Fiche ${esc(nextF.code)}</div>
-          <div class="rvcb-next-go"><span class="rvcb-pp">${svgPlay}</span>${read[nextF.code] ? "Revoir" : "Ouvrir"}</div>
-        </button>`
-            : ""
-        }
-
-        <button class="rvcb-tile rvcb-faute span2" data-faute>
-          <span class="rvcb-faute-ic">${svgWarn}</span>
-          <span class="rvcb-faute-tx"><span class="rvcb-lab">Mini-jeu</span><span class="rvcb-faute-h">Trouve la faute</span><span class="rvcb-faute-p">Repère la faute éliminatoire avant le jour J.</span></span>
-          <span class="rvcb-play">${svgPlay}</span>
-        </button>
-
-        ${focusTile}
-
-        <div class="rvcb-mondes-h span2"><span class="rvcb-mondes-t">Tes 4 mondes</span><span class="rvcb-mondes-a">${lues}/${totalF} lues</span></div>
-        ${mondeTiles}
-
-        <div class="rvcb-foot span2">${totalF} fiches · révise le geste, pas que le code</div>
+      <div class="rvs-prog">
+        <div class="rvs-prog-h"><span>Ta progression</span><span class="rvs-prog-x">${lues} fiche${lues > 1 ? "s" : ""} sur ${totalF}</span></div>
+        <div class="rvs-bar"><i style="width:${Math.max(pct, lues ? 3 : 0)}%"></i></div>
       </div>
+
+      <div class="rvs-sec">Toutes les fiches</div>
+      <div class="rvs-list">${mondeRows}</div>
+
+      <div class="rvs-extra">
+        <p>Envie de t'entraîner autrement ? (optionnel)</p>
+        <div class="rvs-extra-row">
+          ${pf ? `<button class="rvs-mini" data-pf="${esc(pf.code)}"><span class="rvs-mini-ic" style="background:linear-gradient(160deg,#ffb257,#f97316)">${eclair}</span>Défi du jour · 1 min</button>` : ""}
+          <button class="rvs-mini" data-faute><span class="rvs-mini-ic" style="background:linear-gradient(160deg,#ff8a8a,#ef4444)">!</span>Trouve la faute</button>
+        </div>
+      </div>
+
+      <div class="rvs-foot">${totalF} fiches · révise le geste, pas que le code</div>
     </div>`;
     wireHome();
   }
@@ -875,7 +904,7 @@ export async function mount(root, param) {
         total
           ? `<div class="rvc-coach">
         <div class="rvc-coach-row">
-          <div class="rvc-coach-av">${FSVG.star}</div>
+          <div class="rvc-coach-av"><img src="/skins/mascot-point.png" alt="" aria-hidden="true" onerror="this.style.display='none'"></div>
           <div>
             <div class="rvc-coach-tag">Ton coach</div>
             <div class="rvc-coach-msg">Voici comment <b>${esc(titreFlow)}</b>. Lis la méthode, puis teste-toi.</div>
@@ -935,7 +964,7 @@ export async function mount(root, param) {
       markRevised(code);
       haptic("success");
       root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-done">
-        <div class="rvc-done-e">🧩</div>
+        <div class="rvc-done-e">${medallion("check", "green", { size: 64 })}</div>
         <div class="rvc-done-t">Dans l'ordre, nickel !</div>
         <p class="rvc-sub">Les ${steps.length} étapes de « ${esc(f.titre)} » : pliées.</p>
         <button class="rvc-go" data-next>Continuer</button>

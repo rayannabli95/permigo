@@ -5,6 +5,8 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
+import { ASSETS } from "@/utils/assets.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { toast } from "@/components/common/toast.js";
 import { esc } from "@/utils/escape.js";
@@ -15,6 +17,20 @@ import { unlockChest } from "@/utils/game-state.js";
 import { promptInstallAtValueMoment } from "@/components/common/install-nudge.js";
 import { hideBottomNav } from "@/utils/nav.js";
 import { playSuccess } from "@/utils/sound.js";
+
+// Mappe l'icône de catégorie REMC (cat.ico) vers un médaillon 3D premium.
+// [glyphe, rampe] — les 4 mondes ont chacun leur identité visuelle.
+const CAT_MED = {
+  "world-c1": ["volant", "gold"], // Maîtrise du véhicule
+  "world-c2": ["route", "blue"], // Circulation normale
+  "world-c3": ["eclair", "violet"], // Conditions difficiles
+  "world-c4": ["couronne", "gold"], // Conduite autonome
+};
+
+function catMedallion(ico, size = 28) {
+  const [glyph, ramp] = CAT_MED[ico] || ["cible", "teal"];
+  return medallion(glyph, ramp, { size });
+}
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -115,18 +131,36 @@ const STYLE = `<style>
   @keyframes pop { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { .qp-result-card { animation: none; } }
   .qp-score-ring {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 4px solid;
+    position: relative;
+    width: 132px;
+    height: 132px;
+    margin: 0 auto 24px;
+    display: grid;
+    place-items: center;
+  }
+  .qp-score-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+  .qp-ring-track { fill: none; stroke: var(--bo); stroke-width: 9; opacity: .55; }
+  .qp-ring-prog {
+    fill: none;
+    stroke-width: 9;
+    stroke-linecap: round;
+    stroke-dasharray: 339.29;
+    stroke-dashoffset: var(--ring-off, 339.29);
+    filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--ring-glow, var(--gr)) 45%, transparent));
+    animation: qpRingFill .9s .15s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  @keyframes qpRingFill { from { stroke-dashoffset: 339.29; } }
+  @media (prefers-reduced-motion: reduce) { .qp-ring-prog { animation: none; stroke-dashoffset: var(--ring-off, 339.29); } }
+  .qp-score-inner {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 24px;
   }
-  .ring-ok { border-color: var(--gr); background: rgba(16,185,129,.08); }
-  .ring-warn { border-color: var(--am); background: rgba(245,158,11,.08); }
+  .ring-ok .qp-ring-prog { stroke: url(#qpRingGold); --ring-glow: var(--gr); }
+  .ring-warn .qp-ring-prog { stroke: url(#qpRingAmber); --ring-glow: var(--am); }
   .qp-score-num {
     font: 600 30px/1 'Fredoka', 'Plus Jakarta Sans', sans-serif;
     color: var(--ink);
@@ -247,7 +281,7 @@ export async function mount(root, params = {}) {
       <div class="qp-card" id="qp-welcome">
         <img class="qp-mascot" src="/skins/mascot-hello.png" alt="" aria-hidden="true" />
         <div class="qp-badge">${esc(typeLabel)}</div>
-        <div class="qp-cat-row">${cat?.ico ? icon(cat.ico, { size: 18, strokeWidth: 1.5 }) : ""} <span>${esc(cat?.name || "")}</span></div>
+        <div class="qp-cat-row">${cat?.ico ? catMedallion(cat.ico, 28) : ""} <span>${esc(cat?.name || "")}</span></div>
         <h1 class="qp-comp" tabindex="-1">${esc(sub?.n || competenceId)}</h1>
         <div class="qp-meta">
           <span class="qp-meta-item">${icon("file-text", { size: 14 })} ${nbQuestions} questions</span>
@@ -561,7 +595,7 @@ function renderResult(
   // JAMAIS de mention de perte ou de pression.
   const dailyStreakHtml =
     isDaily && dailyStreakAfter >= 2
-      ? `<div class="qp-daily-streak" role="status">${dailyStreakAfter} jours d'affilée</div>`
+      ? `<div class="qp-daily-streak" role="status"><img class="qp-daily-streak-ico" src="${ASSETS.streakFlame}" alt="" aria-hidden="true" width="16" height="16" />${dailyStreakAfter} jours d'affilée</div>`
       : "";
 
   // Slot pour le gain Ligue Revision (injecte de facon asynchrone apres render).
@@ -603,15 +637,29 @@ function renderResult(
       padding: 6px 14px 7px;
       animation: qpStreakIn .4s .3s cubic-bezier(.34,1.56,.64,1) both;
     }
-    .qp-daily-streak::before { content: '🔥'; font-size: 13px; }
+    .qp-daily-streak-ico { display: block; width: 16px; height: 16px; object-fit: contain; }
     @keyframes qpStreakIn { from { opacity:0; transform:translateY(6px) scale(.9); } to { opacity:1; transform:none; } }
     @media (prefers-reduced-motion: reduce) { .qp-daily-streak { animation: none; } }
     </style>
     <div class="qp anim-slide-up">
       <div class="qp-card qp-result-card" role="status" aria-live="polite">
-        <div class="qp-score-ring ${success ? "ring-ok" : "ring-warn"}">
-          <span class="qp-score-num">${score}/${total}</span>
-          <span class="qp-score-pct">${scorePct}%</span>
+        <div class="qp-score-ring ${success ? "ring-ok" : "ring-warn"}" style="--ring-off:${(339.29 * (100 - Math.max(0, Math.min(100, scorePct)))) / 100}">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <defs>
+              <linearGradient id="qpRingGold" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#ffd24a"/><stop offset=".55" stop-color="#6fe016"/><stop offset="1" stop-color="#3f9e00"/>
+              </linearGradient>
+              <linearGradient id="qpRingAmber" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#ffdfb8"/><stop offset="1" stop-color="#ff9c1c"/>
+              </linearGradient>
+            </defs>
+            <circle class="qp-ring-track" cx="60" cy="60" r="54"/>
+            <circle class="qp-ring-prog" cx="60" cy="60" r="54"/>
+          </svg>
+          <div class="qp-score-inner">
+            <span class="qp-score-num">${score}/${total}</span>
+            <span class="qp-score-pct">${scorePct}%</span>
+          </div>
         </div>
         <p class="qp-result-msg">${esc(msg)}</p>
         ${dailyStreakHtml}

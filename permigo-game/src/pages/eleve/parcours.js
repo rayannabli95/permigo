@@ -12,6 +12,7 @@ import { WORLDS } from "@/data/worlds.js";
 import { ASSETS } from "@/utils/assets.js";
 import { getCompDetail } from "@/data/remc-details.js";
 import { icon } from "@/utils/icons.js";
+import { medallion, medStatus } from "@/utils/medallions.js";
 import { haptic } from "@/utils/haptic.js";
 import {
   renderChest,
@@ -128,6 +129,18 @@ const STYLE = `<style>
   margin: 0 0 3px;
 }
 .fiche-circle svg { width: 26px; height: 26px; }
+/* Disque héros portant un médaillon 3D : la pièce fournit le relief,
+   on retire le fond plat + l'ombre + l'anim rotative du carré coloré. */
+.fiche-circle.has-med {
+  background: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+  width: 62px; height: 62px;
+}
+.fiche-circle.has-med svg.pg-med {
+  width: 100%; height: 100%;
+  filter: drop-shadow(0 6px 12px rgba(10,4,26,.32));
+}
 .fiche-hero .fiche-id {
   font: 600 10.5px/1 'Inter', sans-serif;
   color: var(--mu2);
@@ -434,7 +447,7 @@ const STYLE = `<style>
     inset 0 2px 0 rgba(255,255,255,.45),
     inset 0 -5px 10px rgba(20,8,50,.4);
 }
-.fiche-circle.done {
+.fiche-circle.done:not(.has-med) {
   background: linear-gradient(160deg, #3ee07e 0%, #22a35a 60%, #178246 100%) !important;
   box-shadow:
     0 12px 28px -8px rgba(20,120,60,.7),
@@ -976,6 +989,38 @@ const STYLE = `<style>
 .prc-cv-node-face {
   position: absolute; inset: 0; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
+}
+/* Face qui porte un médaillon 3D : la pièce EST le relief → on efface le
+   fond plat et l'ombre de la pastille pour ne pas faire un rond dans un rond.
+   Le médaillon déborde légèrement pour combler l'anneau. */
+.prc-cv-node-face.has-med {
+  background: none !important;
+  box-shadow: none !important;
+}
+.prc-cv-node .prc-cv-node-face.has-med svg.pg-med {
+  width: 112%; height: 112%;
+  filter: drop-shadow(0 5px 9px rgba(10,4,26,.4));
+}
+/* Le médaillon "verrouillé" (slate) porte déjà sa propre teinte muette :
+   on annule le voile d'opacité/couleur hérité des anciens svg plats. */
+.prc-cv-node.locked .prc-cv-node-face.has-med svg.pg-med { opacity: .9; }
+
+/* Badges (tuiles/ronds) qui accueillent un médaillon 3D : la pièce est le
+   relief → on efface le fond plat + l'ombre du carré, y compris en thème clair.
+   Cible : gate-lock, next-badge verrouillé, cadenas du boss. */
+.prc-cv-gate-lock.has-med,
+.prc-cv-next-badge.has-med,
+.prc-cv-boss-lock.has-med,
+.prc-cv.is-light .prc-cv-gate-lock.has-med,
+.prc-cv.is-light .prc-cv-next-badge.has-med {
+  background: none !important;
+  box-shadow: none !important;
+}
+.prc-cv-gate-lock.has-med svg.pg-med,
+.prc-cv-next-badge.has-med svg.pg-med,
+.prc-cv-boss-lock.has-med svg.pg-med {
+  width: 100%; height: 100%;
+  filter: drop-shadow(0 4px 8px rgba(10,4,26,.4));
 }
 /* DONE */
 .prc-cv-node.done .prc-cv-node-face {
@@ -1930,8 +1975,8 @@ function renderChapterView(
     const need = Math.max(0, req - (ws.prevDoneCount ?? 0));
     routeHTML = `
       <div class="prc-cv-gate" style="margin-top:24px">
-        <div class="prc-cv-gate-lock" aria-hidden="true">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9.5" rx="2.4" stroke="#a48fe0" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="#a48fe0" stroke-width="2"/></svg>
+        <div class="prc-cv-gate-lock has-med" aria-hidden="true">
+          ${medallion("cadenas", "slate", { size: 46, shape: "tile" })}
         </div>
         <div>
           <div class="prc-cv-gate-g1">${esc(chapTitle)}</div>
@@ -1952,25 +1997,28 @@ function renderChapterView(
       const side = subIdx % 2 === 0 ? "left" : "right";
       const interactive = st !== "locked";
 
-      // Icône dans le node
-      const ICO_CHECK = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4 10-11" stroke="white" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-      const ICO_LOCK = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.4" stroke="#9d8fce" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="#9d8fce" stroke-width="2"/></svg>`;
-      const ICO_STAR = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l2.6 5.3 5.8.85-4.2 4.1 1 5.75L12 16.9l-5.2 2.1 1-5.75-4.2-4.1 5.8-.85L12 3z" fill="#7a3c00"/></svg>`;
+      // Contenu du node : médaillon 3D qui REMPLIT la pastille (le
+      // médaillon EST la pièce 3D → la face perd son fond plat, cf .has-med).
+      // Le "à venir" garde un simple point discret (pas de médaillon).
       const ICO_DOT = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><circle cx="5" cy="5" r="4" fill="rgba(255,255,255,.35)"/></svg>`;
 
       let nodeClass = "";
       let nodeContent = ICO_DOT;
+      let faceMed = ""; // classe ajoutée à la face quand elle porte un médaillon
       let glint = "";
       if (st === "done" || st === "a_valider") {
         nodeClass = "done";
-        nodeContent = ICO_CHECK;
+        nodeContent = medallion("check", "green", { size: 56 });
+        faceMed = " has-med";
       } else if (st === "next") {
         nodeClass = "current";
-        nodeContent = ICO_STAR;
+        nodeContent = medallion("etoile", "gold", { size: 74 });
+        faceMed = " has-med";
         glint = `<span class="prc-cv-node-glint" aria-hidden="true"></span>`;
       } else if (st === "locked") {
         nodeClass = "locked";
-        nodeContent = ICO_LOCK;
+        nodeContent = medallion("cadenas", "slate", { size: 54 });
+        faceMed = " has-med";
       } else {
         nodeClass = "todo";
       }
@@ -2015,7 +2063,7 @@ function renderChapterView(
           ${interactive && st !== "next" ? "" : ""}
           aria-hidden="true">
           <div class="prc-cv-node-ring"></div>
-          <div class="prc-cv-node-face">${glint}${nodeContent}</div>
+          <div class="prc-cv-node-face${faceMed}">${glint}${nodeContent}</div>
         </div>
         ${ctaCard}
       </div>`;
@@ -2034,7 +2082,7 @@ function renderChapterView(
         <div class="prc-cv-node bossnode ${bossWon ? "won" : "wait"}" aria-hidden="true">
           <div class="prc-cv-boss-glow"></div>
           <img class="prc-cv-boss-img" src="${BOSS_IMG}" alt="" loading="lazy" draggable="false" />
-          ${bossWon ? "" : '<span class="prc-cv-boss-lock" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2.3" fill="#1a1030" stroke="#cdbff5" stroke-width="2"/><path d="M8 11V8.5a4 4 0 0 1 8 0V11" stroke="#cdbff5" stroke-width="2"/></svg></span>'}
+          ${bossWon ? "" : `<span class="prc-cv-boss-lock has-med" aria-hidden="true">${medallion("cadenas", "slate", { size: 30 })}</span>`}
         </div>
         <div class="prc-cv-boss-card ${bossWon ? "won" : "wait"}">
           <div class="prc-cv-boss-kick">${bossWon ? "★ Boss vaincu" : "Boss du chapitre"}</div>
@@ -2087,8 +2135,8 @@ function renderChapterView(
     gateHTML = nextLocked
       ? `
       <div class="prc-cv-next locked" aria-label="Chapitre ${nextNum} verrouillé : ${esc(nextTitle)}">
-        <div class="prc-cv-next-badge locked" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9.5" rx="2.4" stroke="#cdbff5" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="#cdbff5" stroke-width="2"/></svg>
+        <div class="prc-cv-next-badge locked has-med" aria-hidden="true">
+          ${medallion("cadenas", "slate", { size: 50, shape: "tile" })}
         </div>
         <div class="prc-cv-next-txt">
           <div class="prc-cv-next-kick">Chapitre ${nextNum} · Verrouillé</div>
@@ -2387,15 +2435,16 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
   const total = cat.subs.length;
   const detail = getCompDetail(compId);
 
-  // Icône SVG selon statut (au lieu d'emoji)
+  // Médaillon de statut (grammaire commune à toute l'app, cf medStatus).
+  // Remplit le disque héros → celui-ci perd son fond plat (.has-med).
   const stIcon =
     {
-      done: icon("check", { size: 36 }),
-      a_valider: icon("clipboard-check", { size: 32 }),
-      next: icon("zap", { size: 32 }),
-      todo: icon("clock", { size: 30 }),
-      locked: icon("lock", { size: 28 }),
-    }[st] ?? icon("clock", { size: 30 });
+      done: medStatus("acquis", { size: 58 }),
+      a_valider: medStatus("acquis", { size: 58 }),
+      next: medStatus("encours", { size: 58 }),
+      todo: medStatus("encours", { size: 58 }),
+      locked: medStatus("verrouille", { size: 58 }),
+    }[st] ?? medStatus("encours", { size: 58 });
 
   // Progression visuelle dans le monde (n / total)
   const pctInWorld = Math.round((compNum / total) * 100);
@@ -2489,7 +2538,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
     <div class="fiche-hero" style="--wc:${meta.color}">
       <button class="fiche-close" type="button" aria-label="Fermer">×</button>
       <div class="fiche-badge-cat">CHAPITRE ${meta.num} · ${esc(world.nom).toUpperCase()}</div>
-      <div class="fiche-circle ${st === "done" ? "done" : ""}" style="background:${st === "done" ? "var(--gr)" : meta.color}">
+      <div class="fiche-circle has-med ${st === "done" ? "done" : ""}">
         ${stIcon}
       </div>
       <h3 id="bsheet-title">${esc(sub.n)}</h3>
@@ -2507,14 +2556,14 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
       <!-- POINTS CLÉS — repliés par défaut (mobile : moins de texte) -->
       <details class="fiche-acc" style="--wc:${meta.color}">
         <summary>
-          ${icon("target", { size: 13 })}
+          ${medallion("cible", "teal", { size: 22 })}
           ${st === "done" ? "Ce que tu maîtrises" : "Ce que tu vas maîtriser"}
           <span class="fiche-acc-chev">${icon("chevron-down", { size: 15 })}</span>
         </summary>
         <ul class="fiche-block-list">
           ${detail.keyPoints.map((kp) => `<li><span class="kp-check">${icon("check", { size: 11, strokeWidth: 3 })}</span>${esc(kp)}</li>`).join("")}
         </ul>
-        <div class="fiche-acc-tip">${icon("sparkle", { size: 13 })} ${esc(detail.tip)}</div>
+        <div class="fiche-acc-tip">${medallion("ampoule", "gold", { size: 22 })} ${esc(detail.tip)}</div>
       </details>
 
     </div>`;

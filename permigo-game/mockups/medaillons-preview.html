@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Médaillons 3D — planche de contrôle</title>
+<style>
+  body { margin:0; font-family: 'Nunito', system-ui, sans-serif; background:#f1f3f9; color:#1a2033; }
+  h2 { margin: 26px 18px 10px; font-size: 15px; letter-spacing:.04em; text-transform: uppercase; opacity:.6; }
+  .grid { display:flex; flex-wrap:wrap; gap:14px; padding: 0 18px; }
+  .cell { width:86px; display:flex; flex-direction:column; align-items:center; gap:5px; padding:10px 2px;
+          background:#fff; border-radius:14px; box-shadow:0 1px 4px rgba(20,30,60,.08); }
+  .cell span { font-size:10px; opacity:.65; }
+  .dark { background:#160d30; color:#fff; padding-bottom:24px; }
+  .dark .cell { background:#271850; box-shadow:none; }
+</style>
+</head>
+<body>
+<div id="light">
+  <h2>Tous les glyphes (pièce, rampe auto) — fond clair</h2>
+  <div class="grid" id="all"></div>
+  <h2>Rampes (glyphe trophée)</h2>
+  <div class="grid" id="ramps"></div>
+  <h2>Forme tuile (app-tile)</h2>
+  <div class="grid" id="tiles"></div>
+  <h2>Statuts standard + lots (emoji → médaillon)</h2>
+  <div class="grid" id="std"></div>
+</div>
+<div class="dark" id="darkzone">
+  <h2>Fond sombre (Arène) + glow</h2>
+  <div class="grid" id="dark-all"></div>
+</div>
+<script type="module">
+  import { medallion, MED_RAMPS, MED_GLYPH_NAMES, medStatus, medLot } from "../src/utils/medallions.js";
+  const rampNames = Object.keys(MED_RAMPS);
+  const autoRamp = (i) => rampNames[i % rampNames.length];
+  const cell = (html, label) => `<div class="cell">${html}<span>${label}</span></div>`;
+
+  document.getElementById("all").innerHTML =
+    MED_GLYPH_NAMES.map((g, i) => cell(medallion(g, autoRamp(i), { size: 54 }), g)).join("");
+  document.getElementById("ramps").innerHTML =
+    rampNames.map((r) => cell(medallion("trophee", r, { size: 54 }), r)).join("");
+  document.getElementById("tiles").innerHTML =
+    ["examen","cloche","calendrier","eleves","stats","reglages","livret","cible","message","carte","euro","cadenas"]
+      .map((g, i) => cell(medallion(g, autoRamp(i + 3), { size: 54, shape: "tile" }), g)).join("");
+  document.getElementById("std").innerHTML =
+    ["acquis","encours","retravailler","verrouille"].map((s) => cell(medStatus(s, { size: 40 }), s)).join("") +
+    ["🎁","🚗","🧰","☕","🎟️","🛒","⛽","🍔","🎧","🧢","🅰️","🏆"].map((e) => cell(medLot(e, { size: 54 }), e)).join("");
+  document.getElementById("dark-all").innerHTML =
+    MED_GLYPH_NAMES.slice(0, 24).map((g, i) => cell(medallion(g, autoRamp(i), { size: 54, glow: true }), g)).join("");
+</script>
+</body>
+</html>

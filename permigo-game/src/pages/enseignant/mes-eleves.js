@@ -18,6 +18,7 @@ import { openInviteEleveModal } from "@/services/invite-eleve.js";
 // coach-hint retiré : pipeline segmenté n'a pas de bandeau relancer séparé
 import { illus } from "@/components/enseignant/illus.js";
 import { haptic } from "@/utils/haptic.js";
+import { medallion } from "@/utils/medallions.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -341,6 +342,7 @@ const STYLE = `<style>
   .me-prio:active { transform: scale(.99); }
   .me-prio::before { content: ''; position: absolute; right: -30px; top: -42px; width: 168px; height: 168px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%); pointer-events: none; }
   .me-prio-kick { display: inline-flex; align-items: center; gap: 6px; font: 800 9.5px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.82); margin-bottom: 11px; position: relative; z-index: 1; }
+  .me-prio-kick .pg-med { margin: -8px 0; }
   .me-prio-kick .d { width: 6px; height: 6px; border-radius: 50%; background: #ffd24a; box-shadow: 0 0 8px #ffd24a; }
   .me-prio-top { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
   .me-prio-av { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(255,255,255,.5); overflow: hidden; }
@@ -363,7 +365,8 @@ const STYLE = `<style>
   .me-seg-btn:focus-visible { outline: 2px solid #4f46e5; outline-offset: 1px; }
 
   /* ── Pastille d'état sur une ligne (vue triée à plat) ── */
-  .me-pill { flex-shrink: 0; font: 700 10.5px/1 'Inter', sans-serif; padding: 4px 9px; border-radius: 999px; }
+  .me-pill { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; font: 700 10.5px/1 'Inter', sans-serif; padding: 4px 9px; border-radius: 999px; }
+  .me-pill .pg-med { margin: -2px 0 -2px -2px; flex-shrink: 0; }
   .me-pill--pret  { color: #15803d; background: #dcfce7; }
   .me-pill--appr  { color: #b45309; background: #fef3c7; }
   .me-pill--rel   { color: #b91c1c; background: #fee2e2; }
@@ -822,6 +825,18 @@ function pillFor(e) {
   return READINESS_PILL[e.readiness] || READINESS_PILL.en_cours;
 }
 
+// Mini-médaillon 20px pour les 3 états clés (prêt / en approche / refroidi).
+// On ne médaillonne que ceux-là : les autres restent des chips texte sobres.
+const PILL_MED = {
+  pret: ["check", "green"],
+  appr: ["horloge", "blue"],
+  rel: ["lune", "slate"],
+};
+function pillMed(cls) {
+  const m = PILL_MED[cls];
+  return m ? medallion(m[0], m[1], { size: 20 }) : "";
+}
+
 // ─── Hero « à traiter en priorité » ──────────────────────────────
 // Surface l'élève le plus actionnable : prêt (pour proposer l'examen) →
 // sinon le plus refroidi à relancer → sinon le plus avancé en approche.
@@ -844,7 +859,7 @@ function renderPrio() {
   const cta = cand.aRelancer ? "Ouvrir sa fiche" : "Voir son livret";
   return `
     <div class="me-prio" data-prio-id="${esc(cand.id)}">
-      <div class="me-prio-kick"><span class="d" aria-hidden="true"></span>À traiter en priorité</div>
+      <div class="me-prio-kick">${medallion("cible", "red", { size: 26, glow: true })}<span class="d" aria-hidden="true"></span>À traiter en priorité</div>
       <div class="me-prio-top">
         <div class="me-prio-av">${renderUserAvatar({ avatar_url: cand.avatar_url, prenom: cand.prenom, nom: cand.nom }, 46)}</div>
         <div class="me-prio-id">
@@ -1043,7 +1058,7 @@ function renderBandRow(eleve, withPill = false) {
   let pillHtml = "";
   if (withPill) {
     const p = pillFor(eleve);
-    pillHtml = `<span class="me-pill me-pill--${p.cls}">${esc(p.label)}</span>`;
+    pillHtml = `<span class="me-pill me-pill--${p.cls}">${pillMed(p.cls)}${esc(p.label)}</span>`;
     rightLabel = `${eleve.acquis}/${eleve.total}`;
     rightClass = "me-pr";
   }

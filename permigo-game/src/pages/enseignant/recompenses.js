@@ -12,6 +12,8 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { toast } from "@/components/common/toast.js";
 import { haptic } from "@/utils/haptic.js";
+import { medallion, medLot } from "@/utils/medallions.js";
+import { icon } from "@/utils/icons.js";
 
 // Icônes proposées pour un lot perso (emoji = rendu identique élève/moniteur,
 // zéro asset à héberger → règle le « comment le représenter côté élève »).
@@ -79,7 +81,8 @@ const STYLE = `<style>
 
 .mrw-lot { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--line); }
 .mrw-lot:last-of-type { border-bottom: 0; }
-.mrw-lot-ic { width: 42px; height: 42px; flex: none; border-radius: 13px; display: grid; place-items: center; font-size: 21px; background: var(--ind-softer); border: 1px solid var(--line); }
+.mrw-lot-ic { width: 44px; height: 44px; flex: none; display: grid; place-items: center; }
+.mrw-lot-ic svg { display: block; }
 .mrw-lot-tx { flex: 1; min-width: 0; }
 .mrw-lot-name { font: 800 14.5px/1.2 'Nunito', sans-serif; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .mrw-lot-badge { font: 600 9.5px/1 'Fredoka', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--ind); background: var(--ind-soft); border: 1px solid rgba(99,102,241,.3); padding: 2px 7px; border-radius: 999px; }
@@ -117,7 +120,8 @@ const STYLE = `<style>
 .mrw-editor input[type=text] { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font: 700 14px/1.2 'Nunito', sans-serif; color: var(--ink); outline: none; }
 .mrw-editor input[type=text]:focus { border-color: var(--ind-2); }
 .mrw-icons { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin: 10px 0 12px; }
-.mrw-ico-btn { aspect-ratio: 1; border-radius: 11px; border: 1.5px solid var(--line); background: #fff; font-size: 20px; cursor: pointer; display: grid; place-items: center; }
+.mrw-ico-btn { aspect-ratio: 1; border-radius: 11px; border: 1.5px solid var(--line); background: #fff; cursor: pointer; display: grid; place-items: center; }
+.mrw-ico-btn svg { display: block; }
 .mrw-ico-btn.on { border-color: var(--ind); background: var(--ind-soft); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
 .mrw-editor-actions { display: flex; gap: 8px; }
 .mrw-btn-add { flex: 1; min-height: 44px; border: 0; border-radius: 12px; background: linear-gradient(180deg, var(--ind-2), var(--ind)); color: #fff; font: 600 14px/1 'Fredoka', sans-serif; cursor: pointer; }
@@ -144,7 +148,9 @@ const STYLE = `<style>
 .mrw-prev-av { width: 34px; height: 34px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 700 15px/1 'Fredoka', sans-serif; color: #0d2402; background: linear-gradient(160deg, #b9f26e, #58cc02); border: 2px solid rgba(255,255,255,.55); }
 .mrw-prev-tx { flex: 1; min-width: 0; }
 .mrw-prev-tx b { display: block; font: 800 13px/1.2 'Nunito', sans-serif; color: #fff; }
-.mrw-prev-tx span { font: 700 11px/1.3 'Nunito', sans-serif; color: #c3b8e8; }
+.mrw-prev-tx span { font: 700 11px/1.3 'Nunito', sans-serif; color: #c3b8e8; display: inline-flex; align-items: center; gap: 5px; }
+.mrw-prev-ic { display: inline-flex; flex: none; }
+.mrw-prev-ic svg { display: block; }
 .mrw-prev-tag { flex: none; font: 600 9.5px/1 'Fredoka', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #b9f26e; background: rgba(111,224,22,.15); border: 1px solid rgba(111,224,22,.4); padding: 3px 8px; border-radius: 999px; }
 .mrw-prev-empty { padding: 14px; border-radius: 16px; background: var(--ind-softer); border: 1px dashed var(--line); font: 700 12.5px/1.5 'Nunito', sans-serif; color: var(--mu); text-align: center; }
 
@@ -164,7 +170,7 @@ function renderLotsSection() {
   return LOTS.map(
     (lot, i) => `
     <div class="mrw-lot" data-lot="${i}">
-      <div class="mrw-lot-ic" aria-hidden="true">${esc(lot.icon || "🎁")}</div>
+      <div class="mrw-lot-ic" aria-hidden="true">${medLot(lot.icon, { size: 40 })}</div>
       <div class="mrw-lot-tx">
         <div class="mrw-lot-name">${esc(lot.label)}${lot.kind === "custom" ? '<span class="mrw-lot-badge">Lot perso</span>' : ""}${lot.enabled && lot.big ? '<span class="mrw-lot-badge big">🎯 En jeu</span>' : ""}</div>
         ${
@@ -176,7 +182,7 @@ function renderLotsSection() {
       ${
         lot.kind === "custom"
           ? `<button class="mrw-lot-del" data-del="${i}" aria-label="Retirer ce lot">
-               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+               ${icon("trash", { size: 16 })}
              </button>`
           : ""
       }
@@ -196,7 +202,7 @@ function renderPreview(prenom, initiale) {
       <div class="mrw-prev-av">${esc(initiale)}</div>
       <div class="mrw-prev-tx">
         <b>Offert par ${esc(prenom)} · ton moniteur</b>
-        <span>${esc(lot.icon || "🎁")} ${esc(lot.label)}</span>
+        <span><span class="mrw-prev-ic">${medLot(lot.icon, { size: 18, glow: true })}</span>${esc(lot.label)}</span>
       </div>
       <span class="mrw-prev-tag">Réel</span>
     </div>`;
