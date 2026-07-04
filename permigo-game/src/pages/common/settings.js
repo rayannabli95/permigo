@@ -30,29 +30,23 @@ const STYLE = `<style>
   padding-bottom: 80px;
   font-family: 'Inter', sans-serif;
 }
+/* header vitré collé sous le header global */
 .st-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 16px;
-  background: var(--su);
+  gap: 12px;
+  padding: 13px 16px;
+  background: color-mix(in srgb, var(--su) 90%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--bo);
   position: sticky;
   top: calc(var(--th, 52px) + env(safe-area-inset-top, 0px));
   z-index: 10;
 }
-/* Squelette de chargement (l'écran ne reste plus figé le temps du réseau) */
-.st-skel-block {
-  margin: 20px 16px 0;
-  border-radius: 16px;
-  background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
-  background-size: 200% 100%;
-  animation: stShimmer 1.4s infinite;
-}
-@keyframes stShimmer { to { background-position: -200% 0; } }
 .st-back {
-  width: 36px; height: 36px;
-  border-radius: 8px;
+  width: 38px; height: 38px;
+  border-radius: var(--r-md);
   border: 1px solid var(--bo);
   background: var(--su);
   cursor: pointer;
@@ -64,124 +58,146 @@ const STYLE = `<style>
   padding: 0;
   position: relative;
 }
-/* Hit-area 44×44 sans grossir le visuel (cible tactile) */
-.st-back::before { content: ''; position: absolute; inset: -4px; }
-.st-back:hover { background: var(--bg); }
+.st-back::before { content: ''; position: absolute; inset: -4px; } /* hit-area 44 */
+.st-back:hover { background: var(--bg2); }
 .st-page-title {
-  font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif;
   color: var(--ink);
   letter-spacing: -.02em;
 }
 
+/* Squelette de chargement */
+.st-skel-block {
+  margin: 20px 16px 0;
+  border-radius: 16px;
+  background: linear-gradient(90deg, var(--bg3) 0%, var(--bg5) 50%, var(--bg3) 100%);
+  background-size: 200% 100%;
+  animation: stShimmer 1.4s infinite;
+}
+@keyframes stShimmer { to { background-position: -200% 0; } }
+
+/* Corps : groupes = libellé AU-DESSUS + carte */
+.st-body { padding: 16px 14px 30px; display: flex; flex-direction: column; gap: 18px; }
+.st-glabel {
+  font: 700 11px/1 'Inter', sans-serif;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--mu); padding: 0 8px 8px;
+}
 .st-section {
-  margin: 16px 16px 0;
   background: var(--su);
   border: 1px solid var(--bo);
-  border-radius: 16px;
+  border-radius: var(--rl);
   overflow: hidden;
-}
-.st-section-label {
-  padding: 12px 16px 6px;
-  font: 600 11px/1 'Inter', sans-serif;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--mu2);
-  background: var(--bg);
-  border-bottom: 1px solid var(--bo2);
-}
-.st-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--bo2);
-  gap: 12px;
-  min-height: 52px;
-}
-.st-row:last-child { border-bottom: 0; }
-.st-row-left { flex: 1; min-width: 0; }
-.st-row-title {
-  font: 600 14px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
-}
-.st-row-sub {
-  font: 500 12px/1.3 'Inter', sans-serif;
-  color: var(--mu);
-  margin-top: 2px;
-}
-.st-row-action {
-  flex-shrink: 0;
+  box-shadow: var(--s1);
 }
 
-/* Toggle switch */
-.st-tgl { position: relative; display: inline-block; width: 44px; height: 26px; cursor: pointer; }
+/* Ligne : tuile d'icône colorée + texte + action (style Réglages iOS) */
+.st-row {
+  display: flex; align-items: center; gap: 13px;
+  padding: 13px 14px;
+  border-top: 1px solid var(--bo2);
+  min-height: 58px;
+}
+.st-row:first-child { border-top: 0; }
+.st-row.tap { cursor: pointer; transition: background .12s; }
+.st-row.tap:active { background: var(--bg2); }
+.st-row.col { flex-direction: column; align-items: stretch; gap: 11px; }
+.st-rhead { display: flex; align-items: center; gap: 13px; }
+.st-expand { padding-left: 45px; }
+.st-ic {
+  width: 32px; height: 32px; border-radius: 9px; flex: none;
+  display: grid; place-items: center;
+  color: var(--c, var(--a));
+  background: color-mix(in srgb, var(--c, var(--a)) 15%, transparent);
+}
+.st-ic svg { width: 18px; height: 18px; }
+.st-row-left { flex: 1; min-width: 0; }
+.st-row-title { font: 700 14px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
+.st-row-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu); margin-top: 2px; }
+.st-row-action { flex-shrink: 0; display: flex; align-items: center; }
+.st-chev { color: var(--mu); width: 18px; height: 18px; flex: none; }
+
+/* Toggle switch (biblio : off = token, on = accent) */
+.st-tgl { position: relative; display: inline-block; width: 46px; height: 28px; cursor: pointer; flex: none; }
 .st-tgl input { display: none; }
-.st-tgl-t { position: absolute; inset: 0; background: #d1d8ee; border-radius: 999px; transition: background .2s; }
-.st-tgl-t::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.st-tgl-t { position: absolute; inset: 0; background: var(--bo4); border-radius: 999px; transition: background .2s; }
+.st-tgl-t::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: var(--s1); }
 .st-tgl input:checked + .st-tgl-t { background: var(--a); }
 .st-tgl input:checked + .st-tgl-t::after { transform: translateX(18px); }
 
 /* Text button */
 .st-btn-txt {
-  font: 600 13px/1 'Inter', sans-serif;
+  font: 700 13px/1 'Inter', sans-serif;
   color: var(--a-txt);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 16px 8px;
-  margin: -10px -8px;
+  background: none; border: none; cursor: pointer;
+  padding: 10px 6px; margin: -6px -6px;
   font-family: inherit;
 }
 .st-btn-txt.danger { color: var(--rd-txt); }
 
-/* Input inline */
+/* Input */
 .st-inp {
   width: 100%;
-  padding: 14px 12px;
-  min-height: 44px;
-  font: 500 14px/1 'Inter', sans-serif;
+  height: 44px;
+  padding: 0 13px;
+  font: 600 14px/1 'Inter', sans-serif;
   color: var(--ink);
   background: var(--bg);
-  border: 1.5px solid var(--bo);
-  border-radius: 10px;
-  transition: border-color .15s;
+  border: 1.5px solid var(--bo4);
+  border-radius: var(--r-md);
+  transition: border-color .15s, box-shadow .15s;
   font-family: inherit;
 }
-.st-inp:focus { outline: none; border-color: var(--a); }
-.st-inp-row { padding: 10px 16px 14px; }
+.st-inp:focus { outline: none; border-color: var(--a); box-shadow: 0 0 0 4px var(--ap); }
+.st-inp.time { height: 40px; text-align: center; }
+.st-inp-line { display: flex; gap: 9px; align-items: center; }
 .st-save-btn {
-  display: block;
-  width: calc(100% - 32px);
-  margin: 10px 16px 0;
-  padding: 13px;
-  min-height: 44px;
-  background: var(--a);
-  color: var(--a-ink);
-  border: none;
-  border-radius: 12px;
-  font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
-  cursor: pointer;
-  transition: background .15s;
-  font-family: inherit;
+  height: 44px; padding: 0 18px;
+  background: var(--a); color: var(--a-ink);
+  border: none; border-radius: var(--r-md);
+  font: 800 13.5px/1 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer; transition: background .15s;
+  font-family: inherit; flex: none;
 }
 .st-save-btn:hover { background: var(--adk); }
 .st-save-btn:disabled { opacity: .5; cursor: default; }
 
-/* Danger zone */
-.st-danger { border-color: rgba(239,68,68,.2); }
-.st-danger .st-section-label { color: var(--rd-txt); background: rgba(239,68,68,.04); border-color: rgba(239,68,68,.12); }
+/* Ne pas déranger */
+.st-dnd { display: flex; align-items: center; gap: 9px; }
+.st-dnd label { font: 600 12px/1 'Inter', sans-serif; color: var(--mu); flex-shrink: 0; }
 
-/* Appearance chip */
-.st-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1.5px solid var(--a);
-  background: color-mix(in srgb, var(--a) 8%, transparent);
-  font: 700 12px/1 'IBM Plex Mono', monospace;
-  color: var(--a-txt);
+/* Danger zone */
+.st-danger { border-color: color-mix(in srgb, var(--rd) 26%, var(--bo)); }
+
+/* Theme segmented control */
+.st-theme-seg { display: flex; gap: 3px; background: var(--bg2); border: 1px solid var(--bo); border-radius: var(--r-md); padding: 3px; width: 100%; }
+.st-theme-btn {
+  flex: 1; padding: 9px 4px; border: none; border-radius: var(--r-sm);
+  background: transparent; font: 700 12.5px/1 'Inter', sans-serif; color: var(--mu);
+  cursor: pointer; transition: background .15s cubic-bezier(.23,1,.32,1), color .15s, box-shadow .15s;
+  white-space: nowrap; min-height: 40px; font-family: inherit;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+}
+.st-theme-btn svg { width: 15px; height: 15px; }
+.st-theme-btn.active { background: var(--su); color: var(--a-txt); box-shadow: var(--s1); }
+
+/* Accent color swatches */
+.st-accent-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.st-accent-sw {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 0; cursor: pointer; padding: 0;
+  background: var(--sw);
+  box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--sw) 55%, transparent), inset 0 1.5px 0 rgba(255,255,255,.3);
+  position: relative;
+  transition: transform .12s cubic-bezier(.34,1.56,.64,1);
+  -webkit-tap-highlight-color: transparent;
+}
+.st-accent-sw:active { transform: scale(.9); }
+.st-accent-sw[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--su), 0 0 0 5px var(--sw); }
+.st-accent-sw[aria-pressed="true"]::after {
+  content: ''; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: center/16px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
 }
 
 /* Delete modal overlay */
@@ -202,7 +218,7 @@ const STYLE = `<style>
 }
 .st-modal-handle {
   width: 36px; height: 4px;
-  background: var(--bo);
+  background: var(--bo4);
   border-radius: 2px;
   margin: 0 auto 20px;
 }
@@ -226,7 +242,7 @@ const STYLE = `<style>
   width: 100%;
   padding: 12px 14px;
   background: var(--bg);
-  border: 1.5px solid var(--bo);
+  border: 1.5px solid var(--bo4);
   border-radius: 10px;
   font: 500 14px/1 'IBM Plex Mono', monospace;
   color: var(--ink);
@@ -260,53 +276,6 @@ const STYLE = `<style>
   margin-top: 12px;
 }
 .st-dpo-note a { color: var(--a-txt); }
-
-/* Theme segmented control */
-.st-theme-seg {
-  display: flex;
-  gap: 3px;
-  background: var(--bg2);
-  border-radius: 10px;
-  padding: 3px;
-  width: 100%;
-}
-.st-theme-btn {
-  flex: 1;
-  padding: 7px 4px;
-  border: none;
-  border-radius: 7px;
-  background: transparent;
-  font: 600 12px/1 'Inter', sans-serif;
-  color: var(--mu);
-  cursor: pointer;
-  transition: background .15s cubic-bezier(.23,1,.32,1), color .15s, box-shadow .15s;
-  white-space: nowrap;
-  min-height: 44px;
-  font-family: inherit;
-}
-.st-theme-btn.active {
-  background: var(--su);
-  color: var(--a-txt);
-  box-shadow: 0 1px 3px rgba(0,0,0,.1);
-}
-/* Accent color swatches */
-.st-accent-row { display: flex; gap: 12px; flex-wrap: wrap; }
-.st-accent-sw {
-  width: 44px; height: 44px; border-radius: 50%;
-  border: 0; cursor: pointer; padding: 0;
-  background: var(--sw);
-  box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--sw) 55%, transparent), inset 0 1.5px 0 rgba(255,255,255,.3);
-  position: relative;
-  transition: transform .12s cubic-bezier(.34,1.56,.64,1);
-  -webkit-tap-highlight-color: transparent;
-}
-.st-accent-sw:active { transform: scale(.9); }
-.st-accent-sw[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--su), 0 0 0 5px var(--sw); }
-.st-accent-sw[aria-pressed="true"]::after {
-  content: ''; position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: center/16px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
-}
 </style>`;
 
 // Tours relançables depuis les Réglages : flag localStorage à effacer + page
@@ -401,7 +370,7 @@ function renderHeader() {
   return `
   <div class="st-header">
     <button class="st-back" id="st-back" aria-label="Retour">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="15 18 9 12 15 6"/>
       </svg>
     </button>
@@ -409,162 +378,210 @@ function renderHeader() {
   </div>`;
 }
 
+// Chevron « aller à » réutilisé
+const _CHEV = `<svg class="st-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+
 function render(root, me, prefs) {
   root.innerHTML = `${STYLE}
 <div class="st anim-slide-up">
   ${renderHeader()}
+  <div class="st-body">
 ${
   isStandalone() || guessPlatform() === "other"
     ? ""
     : `
   <!-- APPLICATION : install écran d'accueil (masqué si déjà installée / desktop) -->
-  <div class="st-section" style="margin-top:20px">
-    <div class="st-section-label">Application</div>
-    <div class="st-row" id="st-install-row" role="button" tabindex="0" aria-label="Ajouter PermiGo à l'écran d'accueil">
-      <div class="st-row-left">
-        <div class="st-row-title">Ajouter à l'écran d'accueil</div>
-        <div class="st-row-sub">Ouvre PermiGo d'un geste, comme une vraie app</div>
+  <div>
+    <div class="st-glabel">Application</div>
+    <div class="st-section">
+      <div class="st-row tap" id="st-install-row" role="button" tabindex="0" aria-label="Ajouter PermiGo à l'écran d'accueil">
+        <span class="st-ic" style="--c:#0ea5e9" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Ajouter à l'écran d'accueil</div>
+          <div class="st-row-sub">Ouvre PermiGo d'un geste, comme une vraie app</div>
+        </div>
+        <div class="st-row-action">${_CHEV}</div>
       </div>
-      <div class="st-row-action">${icon("chevron-right", { size: 18, strokeWidth: 2.2, color: "var(--mu2)" })}</div>
     </div>
   </div>`
 }
 ${
   me.role === "enseignant"
     ? `
-  <!-- RÉCOMPENSES ÉLÈVES — le moniteur choisit ses lots (roue) -->
-  <div class="st-section" style="margin-top:20px">
-    <div class="st-section-label">Tes élèves</div>
-    <div class="st-row" id="st-recompenses-row" role="button" tabindex="0" aria-label="Régler ta roue de récompenses">
-      <div class="st-row-left">
-        <div class="st-row-title">Ta roue de récompenses</div>
-        <div class="st-row-sub">Choisis les lots offerts à tes élèves, à ta marque</div>
+  <!-- RÉCOMPENSES ÉLÈVES -->
+  <div>
+    <div class="st-glabel">Tes élèves</div>
+    <div class="st-section">
+      <div class="st-row tap" id="st-recompenses-row" role="button" tabindex="0" aria-label="Régler ta roue de récompenses">
+        <span class="st-ic" style="--c:#f59e0b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4.5" rx="1"/><path d="M5 12.5V20h14v-7.5M12 8v12"/><path d="M12 8S9 3.5 6.5 5.5 8 8 12 8Zm0 0s3-4.5 5.5-2.5S16 8 12 8Z"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Ta roue de récompenses</div>
+          <div class="st-row-sub">Choisis les lots offerts à tes élèves, à ta marque</div>
+        </div>
+        <div class="st-row-action">${_CHEV}</div>
       </div>
-      <div class="st-row-action">${icon("chevron-right", { size: 18, strokeWidth: 2.2, color: "var(--mu2)" })}</div>
     </div>
   </div>
 
-  <!-- ABONNEMENT (bêta moniteur indé) — statut chargé en async dans wire() -->
-  <div class="st-section" style="margin-top:20px">
-    <div class="st-section-label">Abonnement</div>
-    <div class="st-row" style="flex-direction:column;align-items:stretch;gap:12px">
-      <div id="st-sub-status" class="st-row-sub">Chargement…</div>
-      <button class="st-save-btn" id="st-subscribe" style="margin:0;display:none">S'abonner — 9,99 €/mois</button>
+  <!-- ABONNEMENT (bêta moniteur indé) -->
+  <div>
+    <div class="st-glabel">Abonnement</div>
+    <div class="st-section">
+      <div class="st-row col">
+        <div class="st-rhead">
+          <span class="st-ic" style="--c:var(--a)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5 14.9 8.5 21.5 9.4 16.7 14 17.9 20.6 12 17.5 6.1 20.6 7.3 14 2.5 9.4 9.1 8.5 12 2.5Z"/></svg></span>
+          <div class="st-row-left">
+            <div class="st-row-title">PermiGo Pro</div>
+            <div class="st-row-sub" id="st-sub-status">Chargement…</div>
+          </div>
+        </div>
+        <button class="st-save-btn" id="st-subscribe" style="display:none;align-self:stretch;text-align:center">S'abonner — 9,99 €/mois</button>
+      </div>
     </div>
   </div>`
     : ""
 }
 
   <!-- NOTIFICATIONS -->
-  <div class="st-section" style="margin-top:20px">
-    <div class="st-section-label">Notifications</div>
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title">Notifications push</div>
-        <div class="st-row-sub">Rappels et mises à jour dans le navigateur</div>
+  <div>
+    <div class="st-glabel">Notifications</div>
+    <div class="st-section">
+      <div class="st-row">
+        <span class="st-ic" style="--c:var(--a)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Notifications push</div>
+          <div class="st-row-sub">Rappels et mises à jour dans le navigateur</div>
+        </div>
+        <div class="st-row-action">
+          <label class="st-tgl" aria-label="Activer notifications push">
+            <input type="checkbox" id="tgl-push" ${prefs.notifPush ? "checked" : ""}>
+            <span class="st-tgl-t"></span>
+          </label>
+        </div>
       </div>
-      <div class="st-row-action">
-        <label class="st-tgl" aria-label="Activer notifications push">
-          <input type="checkbox" id="tgl-push" ${prefs.notifPush ? "checked" : ""}>
-          <span class="st-tgl-t"></span>
-        </label>
+      <div class="st-row">
+        <span class="st-ic" style="--c:#0ea5e9" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3 7 9 6 9-6"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Notifications email</div>
+          <div class="st-row-sub">Résumé hebdomadaire par email</div>
+        </div>
+        <div class="st-row-action">
+          <label class="st-tgl" aria-label="Activer notifications email">
+            <input type="checkbox" id="tgl-email" ${prefs.notifEmail ? "checked" : ""}>
+            <span class="st-tgl-t"></span>
+          </label>
+        </div>
       </div>
-    </div>
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title">Notifications email</div>
-        <div class="st-row-sub">Résumé hebdomadaire par email</div>
-      </div>
-      <div class="st-row-action">
-        <label class="st-tgl" aria-label="Activer notifications email">
-          <input type="checkbox" id="tgl-email" ${prefs.notifEmail ? "checked" : ""}>
-          <span class="st-tgl-t"></span>
-        </label>
-      </div>
-    </div>
-    <div class="st-row" style="flex-direction:column;align-items:flex-start;gap:8px">
-      <div class="st-row-title">Ne pas déranger</div>
-      <div class="st-row-sub" style="margin-top:-4px">Enregistré automatiquement</div>
-      <div style="display:flex;align-items:center;gap:8px;width:100%">
-        <label for="inp-dnd-start" style="font:500 12px/1 'Inter',sans-serif;color:var(--mu3);flex-shrink:0">De</label>
-        <input class="st-inp" id="inp-dnd-start" type="time" step="60" value="${prefs.dndStart}" aria-label="Ne pas déranger : heure de début" style="flex:1;padding:8px 10px">
-        <label for="inp-dnd-end" style="font:500 12px/1 'Inter',sans-serif;color:var(--mu3);flex-shrink:0">à</label>
-        <input class="st-inp" id="inp-dnd-end" type="time" step="60" value="${prefs.dndEnd}" aria-label="Ne pas déranger : heure de fin" style="flex:1;padding:8px 10px">
+      <div class="st-row col">
+        <div class="st-rhead">
+          <span class="st-ic" style="--c:#8b5cf6" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
+          <div class="st-row-left">
+            <div class="st-row-title">Ne pas déranger</div>
+            <div class="st-row-sub">Enregistré automatiquement</div>
+          </div>
+        </div>
+        <div class="st-dnd st-expand">
+          <label for="inp-dnd-start">De</label>
+          <input class="st-inp time" id="inp-dnd-start" type="time" step="60" value="${prefs.dndStart}" aria-label="Ne pas déranger : heure de début" style="flex:1">
+          <label for="inp-dnd-end">à</label>
+          <input class="st-inp time" id="inp-dnd-end" type="time" step="60" value="${prefs.dndEnd}" aria-label="Ne pas déranger : heure de fin" style="flex:1">
+        </div>
       </div>
     </div>
   </div>
 
   <!-- CONFIDENTIALITÉ -->
-  <div class="st-section">
-    <div class="st-section-label">Confidentialité</div>
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title">Classement national</div>
-        <div class="st-row-sub">Apparaître dans les classements de ton école</div>
-      </div>
-      <div class="st-row-action">
-        <label class="st-tgl" aria-label="Apparaître dans le classement">
-          <input type="checkbox" id="tgl-ranking" ${prefs.showInRanking ? "checked" : ""}>
-          <span class="st-tgl-t"></span>
-        </label>
+  <div>
+    <div class="st-glabel">Confidentialité</div>
+    <div class="st-section">
+      <div class="st-row">
+        <span class="st-ic" style="--c:#f59e0b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21V9m4 12V5m4 16v-8"/><path d="M4 21h16"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Classement national</div>
+          <div class="st-row-sub">Apparaître dans les classements de ton école</div>
+        </div>
+        <div class="st-row-action">
+          <label class="st-tgl" aria-label="Apparaître dans le classement">
+            <input type="checkbox" id="tgl-ranking" ${prefs.showInRanking ? "checked" : ""}>
+            <span class="st-tgl-t"></span>
+          </label>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- COMPTE -->
-  <div class="st-section">
-    <div class="st-section-label">Mon compte</div>
-    <div class="st-row" style="flex-direction:column;align-items:flex-start;gap:8px">
-      <div class="st-row-title">Prénom affiché</div>
-      <div class="st-inp-row" style="padding:0;width:100%">
-        <input class="st-inp" id="inp-prenom" type="text" value="${esc(prefs.prenom)}" maxlength="30" placeholder="Ton prénom" autocomplete="given-name">
+  <!-- MON COMPTE -->
+  <div>
+    <div class="st-glabel">Mon compte</div>
+    <div class="st-section">
+      <div class="st-row col">
+        <div class="st-rhead">
+          <span class="st-ic" style="--c:var(--a)" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
+          <div class="st-row-left">
+            <div class="st-row-title">Prénom affiché</div>
+            <div class="st-row-sub">Visible par ton moniteur</div>
+          </div>
+        </div>
+        <div class="st-inp-line st-expand">
+          <input class="st-inp" id="inp-prenom" type="text" value="${esc(prefs.prenom)}" maxlength="30" placeholder="Ton prénom" autocomplete="given-name" style="flex:1">
+          <button class="st-save-btn" id="btn-save-prenom">Enregistrer</button>
+        </div>
       </div>
-      <button class="st-save-btn" id="btn-save-prenom" style="margin:4px 0 0">Enregistrer</button>
-    </div>
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title">Mot de passe</div>
-        <div class="st-row-sub">Modifier via email de réinitialisation</div>
-      </div>
-      <div class="st-row-action">
-        <button class="st-btn-txt" id="btn-reset-pwd">Modifier →</button>
+      <div class="st-row">
+        <span class="st-ic" style="--c:#64748b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Mot de passe</div>
+          <div class="st-row-sub">Modifier via email de réinitialisation</div>
+        </div>
+        <div class="st-row-action">
+          <button class="st-btn-txt" id="btn-reset-pwd">Modifier →</button>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- APPARENCE -->
-  <div class="st-section">
-    <div class="st-section-label">Apparence</div>
-    <div class="st-row" style="flex-direction:column;align-items:flex-start;gap:10px">
-      <div>
-        <div class="st-row-title">Thème</div>
-        <div class="st-row-sub">Apparence de l'application</div>
+  <div>
+    <div class="st-glabel">Apparence</div>
+    <div class="st-section">
+      <div class="st-row col">
+        <div class="st-rhead">
+          <span class="st-ic" style="--c:#8b5cf6" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/></svg></span>
+          <div class="st-row-left">
+            <div class="st-row-title">Thème</div>
+            <div class="st-row-sub">Apparence de l'application</div>
+          </div>
+        </div>
+        <div class="st-theme-seg st-expand" id="theme-seg" role="group" aria-label="Choisir le thème">
+          <button class="st-theme-btn ${prefs.theme === "light" ? "active" : ""}" data-set-theme="light" aria-pressed="${prefs.theme === "light"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg> Clair</button>
+          <button class="st-theme-btn ${prefs.theme === "dark" ? "active" : ""}" data-set-theme="dark" aria-pressed="${prefs.theme === "dark"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> Sombre</button>
+          <button class="st-theme-btn ${prefs.theme === "auto" ? "active" : ""}" data-set-theme="auto" aria-pressed="${prefs.theme === "auto"}">Système</button>
+        </div>
       </div>
-      <div class="st-theme-seg" id="theme-seg" role="group" aria-label="Choisir le thème">
-        <button class="st-theme-btn ${prefs.theme === "light" ? "active" : ""}" data-set-theme="light" aria-pressed="${prefs.theme === "light"}">${icon("sun", { size: 16 })} Clair</button>
-        <button class="st-theme-btn ${prefs.theme === "dark" ? "active" : ""}" data-set-theme="dark"  aria-pressed="${prefs.theme === "dark"}">${icon("moon", { size: 16 })} Sombre</button>
-        <button class="st-theme-btn ${prefs.theme === "auto" ? "active" : ""}" data-set-theme="auto"  aria-pressed="${prefs.theme === "auto"}">Système</button>
+      <div class="st-row col">
+        <div class="st-rhead">
+          <span class="st-ic" style="--c:#ff6b9d" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.3"/><circle cx="17.5" cy="10.5" r="1.3"/><circle cx="8.5" cy="7.5" r="1.3"/><circle cx="6.5" cy="12.5" r="1.3"/><path d="M12 2a10 10 0 1 0 0 20 3 3 0 0 0 3-3 2 2 0 0 1 2-2h1a3 3 0 0 0 3-3c0-6-4-12-12-12Z"/></svg></span>
+          <div class="st-row-left">
+            <div class="st-row-title">Couleur d'accent</div>
+            <div class="st-row-sub">Le vert ne te plaît pas ? Choisis ta couleur.</div>
+          </div>
+        </div>
+        <div class="st-accent-row st-expand" id="accent-row" role="group" aria-label="Choisir la couleur d'accent">
+          ${ACCENTS.map((p) => `<button class="st-accent-sw" type="button" data-accent="${p.id}" aria-pressed="${getAccent() === p.id}" aria-label="${esc(p.name)}" title="${esc(p.name)}" style="--sw:${p.a}"></button>`).join("")}
+        </div>
       </div>
-    </div>
-    <div class="st-row" style="flex-direction:column;align-items:flex-start;gap:12px">
-      <div>
-        <div class="st-row-title">Couleur d'accent</div>
-        <div class="st-row-sub">Le vert ne te plaît pas ? Choisis ta couleur.</div>
-      </div>
-      <div class="st-accent-row" id="accent-row" role="group" aria-label="Choisir la couleur d'accent">
-        ${ACCENTS.map((p) => `<button class="st-accent-sw" type="button" data-accent="${p.id}" aria-pressed="${getAccent() === p.id}" aria-label="${esc(p.name)}" title="${esc(p.name)}" style="--sw:${p.a}"></button>`).join("")}
-      </div>
-    </div>
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title">Sons d'interface</div>
-        <div class="st-row-sub">Retours sonores sur les actions et récompenses</div>
-      </div>
-      <div class="st-row-action">
-        <label class="st-tgl" aria-label="Activer les sons d'interface">
-          <input type="checkbox" id="tgl-sound" ${isSoundEnabled() ? "checked" : ""}>
-          <span class="st-tgl-t"></span>
-        </label>
+      <div class="st-row">
+        <span class="st-ic" style="--c:#22c55e" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Sons d'interface</div>
+          <div class="st-row-sub">Retours sonores sur les actions et récompenses</div>
+        </div>
+        <div class="st-row-action">
+          <label class="st-tgl" aria-label="Activer les sons d'interface">
+            <input type="checkbox" id="tgl-sound" ${isSoundEnabled() ? "checked" : ""}>
+            <span class="st-tgl-t"></span>
+          </label>
+        </div>
       </div>
     </div>
   </div>
@@ -572,91 +589,99 @@ ${
   ${
     TOUR_CFG[me.role]
       ? `<!-- AIDE -->
-  <div class="st-section">
-    <div class="st-section-label">Aide</div>
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title">Revoir le guide de démarrage</div>
-        <div class="st-row-sub">Relance la visite guidée pas à pas</div>
-      </div>
-      <div class="st-row-action">
-        <button class="st-btn-txt" id="btn-replay-tour">Relancer →</button>
+  <div>
+    <div class="st-glabel">Aide</div>
+    <div class="st-section">
+      <div class="st-row">
+        <span class="st-ic" style="--c:#0ea5e9" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.7"/><circle cx="12" cy="17" r=".6" fill="currentColor" stroke="none"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Revoir le guide de démarrage</div>
+          <div class="st-row-sub">Relance la visite guidée pas à pas</div>
+        </div>
+        <div class="st-row-action">
+          <button class="st-btn-txt" id="btn-replay-tour">Relancer →</button>
+        </div>
       </div>
     </div>
   </div>`
       : ""
   }
 
-  <!-- 🔐 MES DONNÉES (RGPD) -->
-  <div class="st-section">
-    <div class="st-section-label">${icon("lock", { size: 14 })} Mes données</div>
-
-    <!-- Export -->
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title">Exporter mes données</div>
-        <div class="st-row-sub">Télécharge un fichier JSON de toutes tes données</div>
+  <!-- MES DONNÉES (RGPD) -->
+  <div>
+    <div class="st-glabel">Mes données</div>
+    <div class="st-section">
+      <div class="st-row">
+        <span class="st-ic" style="--c:#22c55e" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 21h14"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Exporter mes données</div>
+          <div class="st-row-sub">Télécharge un fichier JSON de toutes tes données</div>
+        </div>
+        <div class="st-row-action">
+          <button class="st-btn-txt" id="btn-export-data">Exporter →</button>
+        </div>
       </div>
-      <div class="st-row-action">
-        <button class="st-btn-txt" id="btn-export-data">Exporter →</button>
+      <div class="st-row">
+        <span class="st-ic" style="--c:#f59e0b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 13v-2Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Emails marketing</div>
+          <div class="st-row-sub">Conseils, nouveautés et offres PermiGo</div>
+        </div>
+        <div class="st-row-action">
+          <label class="st-tgl" aria-label="Recevoir les emails marketing">
+            <input type="checkbox" id="tgl-marketing" ${prefs.marketingOptin ? "checked" : ""}>
+            <span class="st-tgl-t"></span>
+          </label>
+        </div>
       </div>
-    </div>
-
-    <!-- Marketing toggle -->
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title">Emails marketing</div>
-        <div class="st-row-sub">Conseils, nouveautés et offres PermiGo</div>
+      <div class="st-row tap">
+        <span class="st-ic" style="--c:#64748b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8 7 9 4-1 7-4.5 7-9V6l-7-3Z"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Politique de confidentialité</div>
+        </div>
+        <div class="st-row-action">
+          <button class="st-btn-txt" id="btn-privacy">Lire →</button>
+        </div>
       </div>
-      <div class="st-row-action">
-        <label class="st-tgl" aria-label="Recevoir les emails marketing">
-          <input type="checkbox" id="tgl-marketing" ${prefs.marketingOptin ? "checked" : ""}>
-          <span class="st-tgl-t"></span>
-        </label>
+      <div class="st-row tap">
+        <span class="st-ic" style="--c:#64748b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M8 13h8M8 17h6"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Conditions générales d'utilisation</div>
+        </div>
+        <div class="st-row-action">
+          <button class="st-btn-txt" id="btn-cgu">Lire →</button>
+        </div>
       </div>
-    </div>
-
-    <!-- Legal links -->
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title">Politique de confidentialité</div>
-      </div>
-      <div class="st-row-action">
-        <button class="st-btn-txt" id="btn-privacy">Lire →</button>
-      </div>
-    </div>
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title">Conditions générales d'utilisation</div>
-      </div>
-      <div class="st-row-action">
-        <button class="st-btn-txt" id="btn-cgu">Lire →</button>
-      </div>
-    </div>
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title">Crédits & licences</div>
-      </div>
-      <div class="st-row-action">
-        <button class="st-btn-txt" id="btn-credits">Lire →</button>
+      <div class="st-row tap">
+        <span class="st-ic" style="--c:#ff6b9d" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 2.5 5 6 5c2 0 3.2 1.2 4 2.3C10.8 6.2 12 5 14 5c3.5 0 5.5 3.5 3.5 7.5C19 16.65 12 21 12 21Z"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title">Crédits & licences</div>
+        </div>
+        <div class="st-row-action">
+          <button class="st-btn-txt" id="btn-credits">Lire →</button>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- ZONE DANGER -->
-  <div class="st-section st-danger">
-    <div class="st-section-label">Zone critique</div>
-    <div class="st-row">
-      <div class="st-row-left">
-        <div class="st-row-title" style="color:var(--rd-txt)">Supprimer mon compte</div>
-        <div class="st-row-sub">Irréversible — toutes tes données seront effacées</div>
-      </div>
-      <div class="st-row-action">
-        <button class="st-btn-txt danger" id="btn-delete-account">Supprimer</button>
+  <div>
+    <div class="st-glabel" style="color:var(--rd-txt)">Zone critique</div>
+    <div class="st-section st-danger">
+      <div class="st-row">
+        <span class="st-ic" style="--c:#ef4444" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m2 0-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 7"/></svg></span>
+        <div class="st-row-left">
+          <div class="st-row-title" style="color:var(--rd-txt)">Supprimer mon compte</div>
+          <div class="st-row-sub">Irréversible — toutes tes données seront effacées</div>
+        </div>
+        <div class="st-row-action">
+          <button class="st-btn-txt danger" id="btn-delete-account">Supprimer</button>
+        </div>
       </div>
     </div>
   </div>
 
+  </div>
 </div>`;
 }
 
