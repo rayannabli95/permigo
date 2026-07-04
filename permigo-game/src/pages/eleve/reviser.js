@@ -135,6 +135,7 @@ const STYLE = `<style>
 .rvh-mode.fiches .rvh-mode-ic { background: rgba(111,224,22,.13); border: 1px solid rgba(111,224,22,.32); }
 .rvh-mode.faute .rvh-mode-ic { background: rgba(255,107,107,.13); border: 1px solid rgba(255,107,107,.32); }
 .rvh-mode.daily .rvh-mode-ic { background: rgba(84,160,255,.13); border: 1px solid rgba(84,160,255,.32); }
+.rvh-mode.situation .rvh-mode-ic { background: rgba(167,139,255,.13); border: 1px solid rgba(167,139,255,.32); }
 .rvh-mode-t { font: 700 14.5px/1.15 'Baloo 2', cursive; }
 .rvh-mode-s { font: 700 11px/1.35 'Nunito', sans-serif; color: var(--rvh-mu2); }
 .rvh-mode-meta {
@@ -234,6 +235,12 @@ function render({ streak, dailyDone, fichesLues, fichesTotal, weak }) {
       <div class="rvh-mode-t">Trouve la faute</div>
       <div class="rvh-mode-s">Repère la faute éliminatoire</div>
       <span class="rvh-mode-meta">2 min ${chevr}</span>
+    </button>
+    <button class="rvh-mode situation" data-go="/en-situation">
+      <div class="rvh-mode-ic" aria-hidden="true">🚦</div>
+      <div class="rvh-mode-t">En situation</div>
+      <div class="rvh-mode-s">Une scène, une décision</div>
+      <span class="rvh-mode-meta">6 situations ${chevr}</span>
     </button>
     <button class="rvh-mode daily" id="rvh-daily-tile">
       <div class="rvh-mode-ic" aria-hidden="true">❓</div>
