@@ -31,9 +31,9 @@ const ICON_CHOICES = [
 ];
 
 const GENEROSITE = [
-  { key: "eco", label: "Éco", hint: "≈ 1 gros lot / 4 mois" },
-  { key: "equilibre", label: "Équilibré", hint: "≈ 1 gros lot / 2 mois" },
-  { key: "genereux", label: "Généreux", hint: "≈ 1 gros lot / mois" },
+  { key: "eco", label: "Éco", hint: "Rare" },
+  { key: "equilibre", label: "Équilibré", hint: "~1 / trimestre" },
+  { key: "genereux", label: "Généreux", hint: "Plus de chances" },
 ];
 
 // état module (le temps de la page)
@@ -83,6 +83,21 @@ const STYLE = `<style>
 .mrw-lot-tx { flex: 1; min-width: 0; }
 .mrw-lot-name { font: 800 14.5px/1.2 'Nunito', sans-serif; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .mrw-lot-badge { font: 600 9.5px/1 'Fredoka', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--ind); background: var(--ind-soft); border: 1px solid rgba(99,102,241,.3); padding: 2px 7px; border-radius: 999px; }
+.mrw-lot-badge.big { color: #8a5a00; background: #fff3d6; border-color: #f0c164; }
+.mrw-lot-big { margin-top: 6px; font: 700 11px/1 'Fredoka', sans-serif; color: var(--mu); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; cursor: pointer; }
+.mrw-lot-big.on { color: #8a5a00; background: #fff3d6; border-color: #f0c164; }
+
+.mrw-wins-row { display: flex; align-items: center; gap: 11px; padding: 11px 2px; border-bottom: 1px solid var(--line); }
+.mrw-wins-row:last-of-type { border-bottom: 0; }
+.mrw-wins-ic { width: 38px; height: 38px; flex: none; border-radius: 12px; display: grid; place-items: center; font-size: 19px; background: var(--ind-softer); border: 1px solid var(--line); }
+.mrw-wins-tx { flex: 1; min-width: 0; }
+.mrw-wins-tx b { display: block; font: 800 13.5px/1.2 'Nunito', sans-serif; }
+.mrw-wins-tx span { font: 700 11px/1.3 'Nunito', sans-serif; color: var(--mu2); }
+.mrw-wins-code { flex: none; font: 800 13px/1 'Fredoka', sans-serif; letter-spacing: .06em; color: var(--ind-deep); background: var(--ind-soft); border: 1px dashed rgba(99,102,241,.4); border-radius: 9px; padding: 6px 9px; }
+.mrw-wins-btn { flex: none; min-height: 38px; padding: 0 14px; border: 0; border-radius: 10px; background: linear-gradient(180deg, var(--ind-2), var(--ind)); color: #fff; font: 600 12.5px/1 'Fredoka', sans-serif; cursor: pointer; }
+.mrw-wins-btn:disabled { opacity: .55; }
+.mrw-wins-done { flex: none; font: 700 12px/1 'Fredoka', sans-serif; color: var(--green); display: inline-flex; align-items: center; gap: 5px; }
+.mrw-wins-empty { font: 700 12.5px/1.5 'Nunito', sans-serif; color: var(--mu); text-align: center; padding: 4px 0; }
 .mrw-lot-del { flex: none; width: 30px; height: 30px; border: 0; border-radius: 9px; background: transparent; color: var(--mu2); cursor: pointer; display: grid; place-items: center; }
 .mrw-lot-del svg { width: 16px; height: 16px; }
 
@@ -151,7 +166,12 @@ function renderLotsSection() {
     <div class="mrw-lot" data-lot="${i}">
       <div class="mrw-lot-ic" aria-hidden="true">${esc(lot.icon || "🎁")}</div>
       <div class="mrw-lot-tx">
-        <div class="mrw-lot-name">${esc(lot.label)}${lot.kind === "custom" ? '<span class="mrw-lot-badge">Lot perso</span>' : ""}</div>
+        <div class="mrw-lot-name">${esc(lot.label)}${lot.kind === "custom" ? '<span class="mrw-lot-badge">Lot perso</span>' : ""}${lot.enabled && lot.big ? '<span class="mrw-lot-badge big">🎯 En jeu</span>' : ""}</div>
+        ${
+          lot.enabled
+            ? `<button class="mrw-lot-big ${lot.big ? "on" : ""}" data-big="${i}">${lot.big ? "🎯 Mis en jeu — gagnable à la roue" : "Mettre en jeu dans la roue"}</button>`
+            : ""
+        }
       </div>
       ${
         lot.kind === "custom"
@@ -182,6 +202,32 @@ function renderPreview(prenom, initiale) {
     </div>`;
 }
 
+// Carte « à remettre » : les gros lots gagnés par ses élèves, en attente.
+function renderWinsCard(wins) {
+  const pending = (wins || []).filter((w) => w.status === "a_remettre");
+  if (!pending.length) return "";
+  const rows = pending
+    .map(
+      (w) => `
+    <div class="mrw-wins-row" data-row="${esc(w.claim_code)}">
+      <div class="mrw-wins-ic" aria-hidden="true">${esc(w.lot_icon || "🎁")}</div>
+      <div class="mrw-wins-tx">
+        <b>${esc(w.lot_label || "Cadeau")}</b>
+        <span>Gagné par ${esc(w.eleve || "un élève")}</span>
+      </div>
+      <span class="mrw-wins-code">${esc(w.claim_code)}</span>
+      <button class="mrw-wins-btn" data-remis="${esc(w.claim_code)}">Remis</button>
+    </div>`,
+    )
+    .join("");
+  return `
+  <section class="mrw-card">
+    <div class="mrw-card-h"><span class="ic">🎁</span>À remettre</div>
+    <div class="mrw-card-sub">Un élève a gagné un gros lot chez toi. Vérifie son code, offre le lot, marque-le remis.</div>
+    ${rows}
+  </section>`;
+}
+
 function render(root, me) {
   const prenom = (me.prenom || me.nom || "toi").trim().split(/\s+/)[0] || "toi";
   const initiale = prenom.charAt(0).toUpperCase() || "R";
@@ -202,12 +248,14 @@ function render(root, me) {
     <p>Les gros lots, c'est <b>toi</b> qui les offres. Ton nom apparaît sur chacun d'eux.</p>
   </div>
 
+  <div id="mrw-wins-slot"></div>
+
   <section class="mrw-card">
     <div class="mrw-card-h">
       <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7S10.5 3 7.5 3 4.5 5.2 4.5 5.2 6.5 7 8 7h4z"/><path d="M12 7s1.5-4 4.5-4 3 2.2 3 2.2S17.5 7 16 7h-4z"/></svg></span>
       Tes lots
     </div>
-    <div class="mrw-card-sub">Active ceux que tu veux offrir. Ajoute les tiens.</div>
+    <div class="mrw-card-sub">Active un lot pour l'afficher aux élèves. « Mets-le en jeu » pour qu'il soit <b>gagnable</b> à la roue.</div>
     <div id="mrw-lots">${renderLotsSection()}</div>
     <button class="mrw-add" id="mrw-add">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -231,7 +279,7 @@ function render(root, me) {
     <div class="mrw-cap-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
     <div class="mrw-cap-tx">
       <h3>Plafond de sécurité</h3>
-      <p>Jamais plus d'<b>1 gros lot par mois</b>, quoi qu'il arrive. Une fois le plafond atteint, la roue n'offre plus que du cosmétique. Aucune mauvaise surprise.</p>
+      <p>Jamais plus d'<b>1 gros lot par trimestre et par élève</b>, quoi qu'il arrive. Une fois le plafond atteint, la roue n'offre plus que des volants. Aucune mauvaise surprise.</p>
     </div>
   </section>
 
@@ -262,14 +310,16 @@ function wireLots(root, me, prenom, initiale) {
     cb.addEventListener("change", () => {
       const i = +cb.dataset.toggle;
       if (LOTS[i]) LOTS[i].enabled = cb.checked;
-      root.querySelector("#mrw-preview").innerHTML = renderPreview(
-        prenom,
-        initiale,
-      );
-      const activeCount = LOTS.filter((l) => l.enabled).length;
-      const save = root.querySelector("#mrw-save");
-      if (save)
-        save.textContent = `Enregistrer (${activeCount} lot${activeCount > 1 ? "s" : ""})`;
+      // re-rend : fait apparaître/disparaître le bouton « Mettre en jeu ».
+      refresh(root, me, prenom, initiale);
+    }),
+  );
+  root.querySelectorAll("[data-big]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const i = +b.dataset.big;
+      if (LOTS[i]) LOTS[i].big = !LOTS[i].big;
+      haptic("select");
+      refresh(root, me, prenom, initiale);
     }),
   );
   root.querySelectorAll("[data-del]").forEach((b) =>
@@ -424,4 +474,41 @@ export async function mount(root) {
   }
 
   render(root, me);
+
+  // Gros lots gagnés à remettre (best-effort : RPC absent = section masquée).
+  try {
+    const { data, error } = await sb.rpc("get_my_lot_wins");
+    if (!error && Array.isArray(data)) {
+      const slot = root.querySelector("#mrw-wins-slot");
+      if (slot) {
+        slot.innerHTML = renderWinsCard(data);
+        wireWins(root);
+      }
+    }
+  } catch {
+    /* RPC pas encore posé en prod : on masque simplement la section */
+  }
+}
+
+function wireWins(root) {
+  root.querySelectorAll("[data-remis]").forEach((b) =>
+    b.addEventListener("click", async () => {
+      const code = b.dataset.remis;
+      b.disabled = true;
+      b.textContent = "…";
+      try {
+        const { data, error } = await sb.rpc("mark_lot_win_remis", {
+          p_claim_code: code,
+        });
+        if (error || !data?.ok) throw new Error("fail");
+        haptic("success");
+        b.outerHTML = `<span class="mrw-wins-done">✓ Remis</span>`;
+        toast("Lot marqué remis", "success", 1800);
+      } catch {
+        b.disabled = false;
+        b.textContent = "Remis";
+        toast("Réessaie dans un instant", "error", 2200);
+      }
+    }),
+  );
 }
