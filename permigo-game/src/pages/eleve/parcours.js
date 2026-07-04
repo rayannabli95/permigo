@@ -20,7 +20,6 @@ import {
   ensureChestStyles,
 } from "@/components/eleve/chest.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
-import { maybeShowParcoursTuto } from "@/components/eleve/parcours-tuto.js";
 import {
   unlockChest,
   openChest,
@@ -1612,9 +1611,6 @@ export async function mount(root) {
       });
   };
   renderAndWire();
-
-  // Tuto : 1er passage auto
-  maybeShowParcoursTuto();
 
   // Persister en DB les coffres des mondes complétés (idempotent)
   const CHEST_REWARDS = [

@@ -17,10 +17,6 @@ import { renderUserAvatar } from "@/components/common/avatar.js";
 import { THEORY_LEAGUES, theoryLeague } from "@/utils/theory-league.js";
 import { msToNextMonday, fmtCountdown } from "@/utils/league-shared.js";
 import {
-  showTheoryTuto,
-  maybeShowTheoryTuto,
-} from "@/components/eleve/theory-tuto.js";
-import {
   ARENE_CSS,
   areneAccent,
   arenePodium,
@@ -150,7 +146,6 @@ export async function mount(root, initialTab) {
     _wire(root, state, data, rerender);
   };
   rerender();
-  if (state.ligue === "revision") maybeShowTheoryTuto();
 }
 
 // ─── Helpers données ─────────────────────────────────────────────
@@ -390,7 +385,6 @@ function _wire(root, state, data, rerender) {
       playPop();
       track("classement.ligue_changed", { ligue: next });
       rerender();
-      if (next === "revision") maybeShowTheoryTuto();
     });
   });
 
@@ -414,9 +408,6 @@ function _wire(root, state, data, rerender) {
       playClick();
       track("revision_quiz.shortcut", { from: "classement" });
       location.hash = `#/quiz/next/post_validation/revision/${Date.now()}`;
-    } else if (e.target.closest("#arn-help")) {
-      playClick();
-      showTheoryTuto();
     }
   });
 }
