@@ -129,8 +129,7 @@ function _loopTrack(name, vol) {
   }
 }
 
-// Tuto parcours + quizz : même mélodie douce de fond (sons/tuto.mp3).
-export const playTutoMusic = (vol = 0.16) => _loopTrack("tuto", vol);
+// Quizz : mélodie douce de fond (sons/tuto.mp3).
 export const playQuizMusic = (vol = 0.12) => _loopTrack("tuto", vol);
 
 // Joué une seule fois par session, après le 1er geste user (autoplay safe)
