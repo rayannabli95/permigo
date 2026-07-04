@@ -16,7 +16,7 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
-import { illus } from "@/components/enseignant/illus.js";
+import { medallion } from "@/utils/medallions.js";
 // Données + feuille de détail partagées avec le rail de parcours-pro.js.
 import {
   TIERS,
@@ -74,7 +74,7 @@ const STYLE = `<style>
 }
 .tr2-hero-inner { position: relative; z-index: 2; }
 .tr2-hero-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
-.tr2-hero-illus { flex-shrink: 0; opacity: .92; }
+.tr2-hero-illus { flex-shrink: 0; }
 .tr2-hero-text { flex: 1; min-width: 0; }
 .tr2-hero-kicker {
   font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
@@ -231,7 +231,7 @@ export async function mount(root, openKey = null) {
   <div class="tr2-hero-wrap">
     <div class="tr2-hero-inner">
       <div class="tr2-hero-top">
-        <div class="tr2-hero-illus">${illus("trophy", { size: 64 })}</div>
+        <div class="tr2-hero-illus">${medallion("trophee", "gold", { size: 64, glow: true })}</div>
         <div class="tr2-hero-text">
           <p class="tr2-hero-kicker">Jalons pédagogiques</p>
           <h1 class="tr2-hero-title">Mes trophées</h1>
@@ -320,7 +320,7 @@ function _render(root, d, openKey = null) {
   const emptyState =
     d.totalVals === 0
       ? `<div class="tr2-empty">
-          ${illus("route", { size: 72 })}
+          ${medallion("route", "indigo", { size: 56 })}
           <p class="tr2-empty-sub">Valide ta première compétence pour commencer à débloquer tes jalons.</p>
         </div>`
       : "";
@@ -331,7 +331,7 @@ function _render(root, d, openKey = null) {
   <div class="tr2-hero-wrap">
     <div class="tr2-hero-inner">
       <div class="tr2-hero-top">
-        <div class="tr2-hero-illus">${illus("trophy", { size: 64 })}</div>
+        <div class="tr2-hero-illus">${medallion("trophee", "gold", { size: 64, glow: true })}</div>
         <div class="tr2-hero-text">
           <p class="tr2-hero-kicker">Jalons pédagogiques</p>
           <h1 class="tr2-hero-title">Mes trophées</h1>
@@ -398,7 +398,7 @@ function _cardHtml(t) {
   const cfg = TIERS[t.tier];
   const cls = t.unlocked ? `unlocked ${t.tier}` : "locked";
   const icoHtml = t.mystery
-    ? icon("lock", { size: 22, strokeWidth: 2 })
+    ? medallion("cadenas", "slate", { size: 20 })
     : `<img src="${badgeSrc(t.id)}" alt="" class="tr2-card-img${t.unlocked ? "" : " locked"}" loading="lazy">`;
   const name = t.mystery ? "???" : esc(t.name);
   const sub = t.unlocked

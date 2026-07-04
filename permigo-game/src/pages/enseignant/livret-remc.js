@@ -17,6 +17,24 @@ import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 import { mountCiblerRevision } from "@/components/enseignant/cibler-revision.js";
 import { illus } from "@/components/enseignant/illus.js";
 import { haptic } from "@/utils/haptic.js";
+import { medallion, medStatus } from "@/utils/medallions.js";
+
+// Médaillon d'identité par catégorie REMC (en-tête de groupe C1→C4).
+const MONDE_MED = {
+  C1: ["volant", "indigo"],
+  C2: ["route", "blue"],
+  C3: ["lune", "orange"],
+  C4: ["drapeau", "green"],
+};
+
+// Statut technique REMC → clé de pastille standard medStatus (grammaire
+// partagée élève ↔ moniteur). « a_valider » et null restent sans médaillon
+// (pas d'équivalent dans la grammaire à 4 états).
+const STATUT_MED = {
+  acquis: "acquis",
+  en_cours: "encours",
+  a_retravailler: "retravailler",
+};
 
 // ─── Couleurs par monde ───────────────────────────────────────────
 const MONDE_COLORS = {
@@ -179,14 +197,16 @@ const STYLE = `<style>
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 10px;
     padding: 14px 20px;
     border-bottom: 1px solid var(--bo2);
   }
+  .lr-monde-med { flex-shrink: 0; display: inline-flex; }
   .lr-monde-nm {
     font: 700 15px/1.25 var(--ens-display, 'Fredoka'), sans-serif;
     color: var(--ink);
     text-align: center;
-    padding: 0 44px;
+    padding: 0 44px 0 0;
     letter-spacing: -0.01em;
   }
   .lr-monde-prog {
@@ -226,6 +246,8 @@ const STYLE = `<style>
     border-radius: 50%;
     flex-shrink: 0;
   }
+  /* pastille statut standard (medStatus) — même gabarit que le dot dans la ligne */
+  .lr-comp-med { flex-shrink: 0; display: inline-flex; }
   .lr-comp-nom {
     font: 600 15.5px/1.35 var(--ens-body, 'Inter'), sans-serif;
     color: var(--ink);
@@ -727,7 +749,7 @@ function render() {
 
       <header class="lr-hero">
         <div class="lr-hero-in">
-          <button class="lr-back" aria-label="Retour liste élèves">←</button>
+          <button class="lr-back" aria-label="Retour liste élèves">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
           <div class="lr-hd-info">
             <h1 class="lr-title" tabindex="-1">Livret — ${prenomNom || "Élève"}</h1>
             <p class="lr-subtitle">${acquis}/${REMC_TOTAL} compétences validées</p>
@@ -1005,6 +1027,7 @@ function renderMonde(cat) {
   return `
     <div class="lr-monde" role="group" aria-label="${esc(cat.name)} — ${acquis}/${cat.subs.length} acquises">
       <div class="lr-monde-hd" style="background:${col.bg}; border-color:${col.border};">
+        <span class="lr-monde-med">${medallion(...(MONDE_MED[cat.id] || MONDE_MED.C1), { size: 30 })}</span>
         <span class="lr-monde-nm">${esc(cat.name)}</span>
         <span class="lr-monde-prog">${acquis}/${cat.subs.length}</span>
       </div>
@@ -1031,10 +1054,11 @@ function renderComp(sub) {
   const cfg = STATUT_CFG[statut] || STATUT_CFG.null;
   const chipMod = CHIP_CLASS[statut] || "";
 
+  const medKey = STATUT_MED[statut];
   return `
     <div class="lr-comp" data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
          role="button" tabindex="0" aria-label="${esc(sub.n)} — ${cfg.label}. Appuyer pour évaluer cette compétence">
-      <span class="lr-comp-dot" style="background:${cfg.dot}"></span>
+      ${medKey ? `<span class="lr-comp-med">${medStatus(medKey, { size: 24 })}</span>` : `<span class="lr-comp-dot" style="background:${cfg.dot}"></span>`}
       <span class="lr-comp-nom">${esc(sub.n)}</span>
       <span class="lr-comp-badge ens-chip ${chipMod}">${cfg.label}</span>
       <span class="lr-comp-chev" aria-hidden="true">›</span>
@@ -1083,7 +1107,7 @@ function openSheet(compId, compNom) {
     <div class="lr-sheet">
       <div class="lr-sheet-hd">
         <h2 class="lr-sheet-title">${esc(compNom)}</h2>
-        <button class="lr-sheet-close" aria-label="Fermer">✕</button>
+        <button class="lr-sheet-close" aria-label="Fermer">${icon("x", { size: 16, strokeWidth: 2.4 })}</button>
       </div>
       <div class="lr-sheet-body">
         <div>

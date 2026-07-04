@@ -20,7 +20,7 @@ import {
   msToNextMonday,
   fmtCountdown,
 } from "@/utils/league-shared.js";
-import { illus } from "@/components/enseignant/illus.js";
+import { medallion } from "@/utils/medallions.js";
 
 // ─── CSS ─────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -78,7 +78,7 @@ ${LEAGUE_CSS}
 .ls-w-hero-top {
   display: flex; align-items: flex-start; gap: 14px;
 }
-.ls-w-hero-illus { flex-shrink: 0; opacity: .9; }
+.ls-w-hero-illus { flex-shrink: 0; }
 .ls-w-hero-text { flex: 1; min-width: 0; }
 .ls-w-hero-kicker {
   font: 700 11px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
@@ -236,7 +236,7 @@ function _render(root, rows) {
   <div class="ls-w-hero-wrap">
     <div class="ls-w-hero-inner">
       <div class="ls-w-hero-top">
-        <div class="ls-w-hero-illus">${illus("podium", { size: 68 })}</div>
+        <div class="ls-w-hero-illus">${medallion("trophee", "gold", { size: 56, glow: true })}</div>
         <div class="ls-w-hero-text">
           <p class="ls-w-hero-kicker">Classement hebdo</p>
           <h1 class="ls-w-hero-title">${myRank ? `Tu es #${myRank} cette semaine` : "Marque ton premier point"}</h1>
@@ -256,7 +256,7 @@ function _render(root, rows) {
   let listHtml = "";
   if (rows.length === 0) {
     listHtml = `<div class="ls-w-empty">
-      ${illus("cone", { size: 64 })}
+      ${medallion("cone", "orange", { size: 48 })}
       <div class="ls-w-empty-txt">Aucune compétence validée cette semaine. Enregistre une séance avec un élève pour marquer ton premier point et entrer en ligue.</div>
     </div>`;
   } else {
@@ -324,7 +324,7 @@ function _renderEmpty(root) {
   </div>
 </div>
 <div class="ls-w-empty">
-  ${illus("cone", { size: 64 })}
+  ${medallion("cone", "orange", { size: 48 })}
   <div class="ls-w-empty-txt">La ligue n'a pas pu se charger. Réessaie dans quelques instants.</div>
 </div>
 </div>`;

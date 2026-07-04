@@ -10,7 +10,7 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { REMC } from "@/data/remc.js";
 import { labelComp } from "@/utils/remc-label.js";
-import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { haptic } from "@/utils/haptic.js";
 
@@ -718,7 +718,7 @@ async function loadData(me) {
   const recos = [];
   if (streakPro !== null && streakPro < 3) {
     recos.push({
-      icon: icon("target", { size: 18, strokeWidth: 2, color: "#4f46e5" }),
+      icon: medallion("cible", "indigo", { size: 36 }),
       ttl: "Lance ta semaine",
       txt: "Valide une compétence avec un élève actif pour alimenter ta série.",
       route: "#/log-session",
@@ -729,11 +729,7 @@ async function loadData(me) {
     const nm = esc(`${e.prenom || ""} ${e.nom || ""}`.trim());
     const since = e.daysAgo ? `depuis ${e.daysAgo}j` : "depuis un moment";
     recos.push({
-      icon: icon("alert-triangle", {
-        size: 18,
-        strokeWidth: 2,
-        color: "#d97706",
-      }),
+      icon: medallion("panneau", "orange", { size: 36 }),
       ttl: `Relance ${nm}`,
       txt: `${nm} n'a plus validé ${since}. Un point en leçon peut débloquer la progression.`,
       route: `#/livret/${e.id}`,
@@ -743,7 +739,7 @@ async function loadData(me) {
     const d = topDiff[0];
     const nm = esc(labelComp(d.compId));
     recos.push({
-      icon: icon("search", { size: 18, strokeWidth: 2, color: "#5a6188" }),
+      icon: medallion("ampoule", "violet", { size: 36 }),
       ttl: `Point pedagogique : ${nm}`,
       txt: `${d.count} élève${d.count > 1 ? "s" : ""} bloqué${d.count > 1 ? "s" : ""} sur cette compétence. Prévois un temps dédié en leçon.`,
       route: `#/eleves?bloque_sur=${encodeURIComponent(d.compId)}`,
@@ -751,11 +747,7 @@ async function loadData(me) {
   }
   if (recos.length === 0) {
     recos.push({
-      icon: icon("check-circle", {
-        size: 18,
-        strokeWidth: 2,
-        color: "#16a34a",
-      }),
+      icon: medallion("trophee", "gold", { size: 36 }),
       ttl: "Tout roule",
       txt: "Tes élèves progressent bien ce moment. Rien d'urgent.",
       route: null,

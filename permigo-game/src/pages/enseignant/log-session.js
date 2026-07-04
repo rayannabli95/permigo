@@ -21,7 +21,7 @@ import { getFiche } from "@/data/fiches-conduite.js";
 import { labelComp } from "@/utils/remc-label.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
 import { startTour } from "@/components/common/guided-tour.js";
-import { illus } from "@/components/enseignant/illus.js";
+import { medallion } from "@/utils/medallions.js";
 
 // Tour guidé validation — 1× à la première séance, quand l'UI complète existe
 const TOUR_KEY = "pg-tour-validation-v1";
@@ -345,13 +345,14 @@ const STYLE = `<style>
     max-width: 480px; margin: 0 auto; padding: 44px 24px;
     text-align: center; display: flex; flex-direction: column; align-items: center;
   }
-  /* Cercle check arcade vert */
+  /* Médaillon trophée doré — moment de valeur (séance validée) + halo */
   .vs-success-check {
-    width: 72px; height: 72px; border-radius: 50%;
-    background: linear-gradient(180deg, var(--ens-go-lt, #34d27b), var(--ens-go, #18a558));
-    display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
-    box-shadow: 0 4px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000), 0 8px 24px color-mix(in srgb, var(--ens-go, #18a558) 28%, transparent);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
     animation: vs-pop .42s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .vs-success-check .pg-med {
+    filter: drop-shadow(0 6px 16px rgba(240,138,18,.4)) drop-shadow(0 2px 4px rgba(154,90,5,.35));
   }
   @keyframes vs-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .vs-success-comp {
@@ -489,8 +490,10 @@ const STYLE = `<style>
   }
   .vs-revsugg.is-sent { text-align: center; }
   .vs-revsugg-sent-msg {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
     font: 600 13.5px/1.4 var(--ens-body, 'Inter'), sans-serif; color: var(--ens-go, #18a558);
   }
+  .vs-revsugg-sent-msg .pg-med { filter: drop-shadow(0 3px 8px rgba(63,158,0,.3)); }
   @media (prefers-reduced-motion: reduce) { .vs-revsugg-send { transition: none; } }
 </style>`;
 
@@ -524,7 +527,7 @@ export async function mount(root) {
             <h1 class="vs-h1">Valider une séance</h1>
             <p class="vs-sub">Chargement…</p>
           </div>
-          <div class="vs-hd-illus">${illus("clipboard", { size: 48 })}</div>
+          <div class="vs-hd-illus">${medallion("crayon", "indigo", { size: 48, glow: true })}</div>
         </div>
       </div>
       <div class="vs-skel"></div><div class="vs-skel"></div><div class="vs-skel"></div>
@@ -609,7 +612,7 @@ function render() {
             <h1 class="vs-h1">Valider une séance</h1>
             ${_showSub ? `<p class="vs-sub">Choisis l'élève, déroule une catégorie, appuie sur les compétences travaillées.</p>` : ""}
           </div>
-          <div class="vs-hd-illus">${illus("clipboard", { size: 48 })}</div>
+          <div class="vs-hd-illus">${medallion("crayon", "indigo", { size: 48, glow: true })}</div>
         </div>
       </div>
       ${renderEleveDropdown()}
@@ -1173,7 +1176,7 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes, crText) {
   _root.innerHTML = `${STYLE}
     <div class="vs anim-slide-up">
       <div class="vs-success">
-        <div class="vs-success-check">${icon("check", { size: 36, strokeWidth: 3, color: "var(--ens-ink-go, #07150c)" })}</div>
+        <div class="vs-success-check">${medallion("trophee", "gold", { size: 64, glow: true })}</div>
         <span class="vs-success-badge">${icon("check-circle", { size: 14, strokeWidth: 2.2 })} Séance enregistrée</span>
         <div class="vs-success-title">${complete ? `${esc(prenom)} a tout validé` : `${esc(prenom)} a progressé`}</div>
         <div class="vs-success-count">${nNew} compétence${nNew > 1 ? "s" : ""} validée${nNew > 1 ? "s" : ""} aujourd'hui</div>
@@ -1241,7 +1244,7 @@ function wireRevisionCard() {
     if (ok) {
       haptic("confirm");
       card.classList.add("is-sent");
-      card.innerHTML = `<div class="vs-revsugg-sent-msg">${icon("check-circle", { size: 16, strokeWidth: 2.4 })} Révision${codes.length > 1 ? "s" : ""} envoyée${codes.length > 1 ? "s" : ""} ✓</div>`;
+      card.innerHTML = `<div class="vs-revsugg-sent-msg">${medallion("check", "green", { size: 40 })}<span>Révision${codes.length > 1 ? "s" : ""} envoyée${codes.length > 1 ? "s" : ""}</span></div>`;
     } else {
       haptic("error");
       toast("Envoi impossible. Réessaie.", "error");

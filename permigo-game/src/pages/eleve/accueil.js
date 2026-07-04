@@ -18,8 +18,8 @@ import {
   maybeSendStreakRiskNotif,
 } from "@/services/web-push.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { volantImg } from "@/utils/volant.js";
-import { ill, illMask } from "@/utils/illustrations.js";
 import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
 import { getMyChests } from "@/utils/game-state.js";
@@ -509,13 +509,17 @@ const STYLE = `<style>
 
 /* ── Tag label ── */
 .acc-lg-tag {
-  display: inline-flex; align-items: center; gap: 5px;
+  display: inline-flex; align-items: center; gap: 7px;
   font: 800 13px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em;
   color: var(--acc-vio);
   position: relative; z-index: 1;
   background: color-mix(in srgb, var(--a) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--a) 18%, transparent);
-  border-radius: 100px; padding: 5px 11px 5px 8px;
+  border-radius: 100px; padding: 4px 12px 4px 4px;
+}
+.acc-lg-tag .pg-med {
+  flex: none;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.16));
 }
 
 /* ── Le RANG — héros de la carte ── */
@@ -969,7 +973,8 @@ const STYLE = `<style>
 @media (prefers-reduced-motion: reduce) { .acc2-devoirs { animation: none; } }
 .acc2-devoirs:active { transform: scale(.99); }
 .acc2-devoirs::before { content: ''; position: absolute; right: -30px; top: -42px; width: 158px; height: 158px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%); pointer-events: none; }
-.acc2-devoirs-ico { width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(255,255,255,.18); position: relative; z-index: 1; }
+.acc2-devoirs-ico { width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
+.acc2-devoirs-ico .pg-med { filter: drop-shadow(0 3px 6px rgba(10,8,40,.35)); }
 .acc2-devoirs-txt { flex: 1; min-width: 0; position: relative; z-index: 1; }
 .acc2-devoirs-t { font: 800 15px/1.15 'Baloo 2', 'Plus Jakarta Sans', sans-serif; }
 .acc2-devoirs-s { font: 600 11.5px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.85); margin-top: 2px; }
@@ -1386,7 +1391,8 @@ function render({
   const installBanner = !isStandalone()
     ? `<style>
     .acc-install{display:flex;align-items:center;gap:10px;margin:0 16px 12px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb, var(--a) 7%, transparent);border:1px solid color-mix(in srgb, var(--a) 22%, transparent);box-shadow:0 3px 10px -4px color-mix(in srgb, var(--a) 20%, transparent)}
-    .acc-install-ico{flex:0 0 34px;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--a) 14%, transparent);color:var(--acc-vio)}
+    .acc-install-ico{flex:0 0 38px;width:38px;height:38px;display:flex;align-items:center;justify-content:center}
+    .acc-install-ico .pg-med{filter:drop-shadow(0 3px 6px rgba(0,0,0,.14))}
     .acc-install-txt{min-width:0;flex:1}
     .acc-install-t{font:700 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
     .acc-install-s{font:500 11px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
@@ -1394,7 +1400,7 @@ function render({
     .acc-install-btn:active{transform:scale(.96)}
     </style>
     <div class="acc-install" id="acc-install">
-      <div class="acc-install-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></div>
+      <div class="acc-install-ico" aria-hidden="true">${medallion("fusee", "cyan", { size: 38 })}</div>
       <div class="acc-install-txt">
         <div class="acc-install-t">Installe PermiGo sur ton téléphone</div>
         <div class="acc-install-s">Accès direct + tes rappels — 10 secondes.</div>
@@ -1905,7 +1911,7 @@ async function _loadAndInjectLeagues(root) {
                 data-ligue="ecole"
                 ${ecolePos != null && ecolePos <= 3 ? `data-pos="${ecolePos}"` : ""}
                 aria-label="Classement conduite — ${esc(ecoleRanked ? `${ecoleRankLabel} sur ${pos.total_eleves}` : "pas encore classé")}">
-          <span class="acc-lg-tag">${ill("badge", { size: 16 })} Conduite</span>
+          <span class="acc-lg-tag">${medallion("trophee", "gold", { size: 34 })} Conduite</span>
           <span class="acc-lg-kick">Ta place</span>
           ${
             ecoleRanked
@@ -1921,7 +1927,7 @@ async function _loadAndInjectLeagues(root) {
                 data-ligue="revision"
                 ${revPos != null && revPos <= 3 ? `data-pos="${revPos}"` : ""}
                 aria-label="Classement révision — ${esc(revClassed ? revRankLabel : "pas encore classé")}">
-          <span class="acc-lg-tag">${illMask("cahier", { size: 16 })} Révision</span>
+          <span class="acc-lg-tag">${medallion("livret", "violet", { size: 34 })} Révision</span>
           <span class="acc-lg-kick">Ta place</span>
           ${
             revClassed
@@ -1963,7 +1969,7 @@ async function _loadAndInjectDevoirs(root, me) {
     if (!slot) return;
     slot.innerHTML = `
       <a class="acc2-devoirs" href="#/revision-conduite" aria-label="Tes devoirs du moniteur : ${count} à faire">
-        <span class="acc2-devoirs-ico">${icon("clipboard", { size: 22, strokeWidth: 2.2 })}</span>
+        <span class="acc2-devoirs-ico">${medallion("livret", "indigo", { size: 38 })}</span>
         <span class="acc2-devoirs-txt">
           <span class="acc2-devoirs-t">Tes devoirs · ${count} à faire</span>
           <span class="acc2-devoirs-s">De ton moniteur — à boucler avant ta prochaine validation</span>
@@ -1993,7 +1999,8 @@ async function _loadAndInjectCompteRendu(root, me) {
       <style>
       .acc2-cr-banner{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 14px 14px 16px;background:color-mix(in srgb,var(--a) 8%,var(--su));border:1px solid color-mix(in srgb,var(--a) 20%,transparent);border-radius:18px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .12s;text-decoration:none}
       .acc2-cr-banner:active{background:color-mix(in srgb,var(--a) 14%,var(--su))}
-      .acc2-cr-ico{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--a) 14%,transparent);display:flex;align-items:center;justify-content:center;color:var(--a-txt)}
+      .acc2-cr-ico{flex:0 0 40px;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
+      .acc2-cr-ico .pg-med{filter:drop-shadow(0 3px 6px rgba(0,0,0,.16))}
       .acc2-cr-txt{flex:1;min-width:0}
       .acc2-cr-t{font:700 13.5px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
       .acc2-cr-s{font:500 11.5px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
@@ -2001,9 +2008,7 @@ async function _loadAndInjectCompteRendu(root, me) {
       </style>
       <div class="acc2-cr-banner" id="acc-cr-banner" role="button" tabindex="0"
            aria-label="Ton moniteur t'a envoyé un compte-rendu — appuie pour le lire">
-        <div class="acc2-cr-ico" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        </div>
+        <div class="acc2-cr-ico" aria-hidden="true">${medallion("fiches", "violet", { size: 38 })}</div>
         <div class="acc2-cr-txt">
           <div class="acc2-cr-t">Ton moniteur t'a envoyé un compte-rendu</div>
           <div class="acc2-cr-s">Appuie pour lire son retour sur ta leçon</div>
@@ -2100,7 +2105,8 @@ async function _loadAndInjectFlashQuiz(root, me) {
           background:linear-gradient(135deg,#f59e0b,#f97316);box-shadow:0 6px 20px rgba(249,115,22,.32);animation:fqBannerIn .4s var(--ease-snap)}
         @keyframes fqBannerIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
         .acc2-flashq:active{transform:scale(.99)}
-        .acc2-fq-ico{font-size:24px;line-height:1;animation:fqWiggle 1.4s ease-in-out infinite}
+        .acc2-fq-ico{display:inline-flex;flex:none;line-height:0;animation:fqWiggle 1.4s ease-in-out infinite}
+        .acc2-fq-ico .pg-med{filter:drop-shadow(0 2px 5px rgba(0,0,0,.28))}
         @keyframes fqWiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
         .acc2-fq-text{flex:1;min-width:0}
         .acc2-fq-title{font:800 15px/1.2 'Plus Jakarta Sans',sans-serif;color:#fff}
@@ -2114,7 +2120,7 @@ async function _loadAndInjectFlashQuiz(root, me) {
       "afterend",
       `
       <div class="acc2-flashq" id="acc-flashq" role="button" tabindex="0" aria-label="Quiz éclair de ton moniteur, réponds maintenant">
-        <span class="acc2-fq-ico" aria-hidden="true">${ill("eclair", { size: 24 })}</span>
+        <span class="acc2-fq-ico" aria-hidden="true">${medallion("eclair", "gold", { size: 34 })}</span>
         <div class="acc2-fq-text">
           <div class="acc2-fq-title">Quiz éclair de ton moniteur</div>
           <div class="acc2-fq-sub">3 questions · réponds maintenant</div>

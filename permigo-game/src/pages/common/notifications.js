@@ -8,6 +8,7 @@ import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { haptic } from "@/utils/haptic.js";
 import { hideHeader } from "@/utils/nav.js";
 import { emptyState } from "@/components/common/empty-state.js";
@@ -48,110 +49,92 @@ function notifRoute(n) {
 // 1 mot de quoi il s'agit (valorisant > générique).
 const TYPE_META = {
   xp: {
-    iconName: "zap",
-    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    med: ["eclair", "violet"],
     color: "var(--a)",
     label: "Récompense",
   },
   trophy: {
-    iconName: "trophy",
-    bg: "rgba(245,158,11,.12)",
+    med: ["trophee", "gold"],
     color: "var(--am)",
     label: "Trophée",
   },
   achievement_unlocked: {
-    iconName: "trophy",
-    bg: "rgba(245,158,11,.12)",
+    med: ["trophee", "gold"],
     color: "var(--am)",
     label: "Trophée débloqué",
   },
   validation: {
-    iconName: "check-circle",
-    bg: "rgba(16,185,129,.12)",
+    med: ["check", "green"],
     color: "var(--gr)",
     label: "Compétence validée",
   },
   session_confirmation: {
-    iconName: "check-circle",
-    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    med: ["calendrier", "indigo"],
     color: "var(--a)",
     label: "Séance à confirmer",
   },
   session_logged: {
-    iconName: "check-circle",
-    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    med: ["calendrier", "indigo"],
     color: "var(--a)",
     label: "Séance",
   },
   session_confirmed: {
-    iconName: "check",
-    bg: "rgba(16,185,129,.12)",
+    med: ["calendrier", "indigo"],
     color: "var(--gr)",
     label: "Séance confirmée",
   },
   session_refused: {
-    iconName: "x-circle",
-    bg: "rgba(239,68,68,.12)",
+    med: ["faute", "red"],
     color: "var(--rd)",
     label: "Séance",
   },
   streak_at_risk: {
-    iconName: "flame",
-    bg: "rgba(239,68,68,.12)",
+    med: ["flamme", "orange"],
     color: "var(--rd)",
     label: "Ta série",
   },
   streak: {
-    iconName: "flame",
-    bg: "rgba(239,68,68,.12)",
+    med: ["flamme", "orange"],
     color: "var(--rd)",
     label: "Ta série",
   },
   consolidation_quiz: {
-    iconName: "target",
-    bg: "rgba(139,92,246,.12)",
+    med: ["cible", "violet"],
     color: "var(--pu)",
     label: "Quiz",
   },
   post_validation_quiz: {
-    iconName: "target",
-    bg: "rgba(139,92,246,.12)",
+    med: ["cible", "violet"],
     color: "var(--pu)",
     label: "Quiz",
   },
   new_message: {
-    iconName: "message-circle",
-    bg: "rgba(14,165,233,.12)",
+    med: ["message", "blue"],
     color: "var(--bl)",
     label: "Message",
   },
   reminder: {
-    iconName: "bell",
-    bg: "rgba(14,165,233,.12)",
+    med: ["cloche", "slate"],
     color: "var(--bl)",
     label: "Rappel",
   },
   comp_acquise: {
-    iconName: "check-circle",
-    bg: "rgba(16,185,129,.12)",
+    med: ["check", "green"],
     color: "var(--gr)",
     label: "Compétence validée",
   },
   relance: {
-    iconName: "message-circle",
-    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    med: ["message", "blue"],
     color: "var(--a)",
     label: "Encouragement",
   },
   compte_rendu: {
-    iconName: "file-text",
-    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    med: ["fiches", "indigo"],
     color: "var(--a)",
     label: "Compte-rendu",
   },
   info: {
-    iconName: "bell",
-    bg: "rgba(100,116,139,.12)",
+    med: ["cloche", "slate"],
     color: "var(--mu3)",
     label: "Info",
   },
@@ -457,7 +440,7 @@ async function loadNotifs(root, me) {
             Suppr.
           </div>
           <div class="nf2-item ${n.read ? "" : "unread"}" data-id="${esc(n.id)}" data-read="${n.read}" data-route="${esc(route)}" role="button" tabindex="0">
-            <div class="nf2-item-ico" style="background:${m.bg};color:${m.color}">${icon(m.iconName, { size: 19 })}</div>
+            <div class="nf2-item-ico">${medallion(m.med[0], m.med[1], { size: 32 })}</div>
             <div class="nf2-item-body">
               <div class="nf2-item-eyebrow" style="color:color-mix(in srgb, ${m.color} 50%, var(--ink))">${esc(m.label)} <span class="nf2-when">· ${fmtTime(n.created_at)}</span></div>
               <div class="nf2-item-title">${esc(n.title)}</div>
