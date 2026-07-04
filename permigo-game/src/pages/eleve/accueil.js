@@ -33,7 +33,10 @@ import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { onPopupsSettled } from "@/utils/intro-overlays.js";
-import { theoryLeague } from "@/utils/theory-league.js";
+import {
+  mountLeagueHero,
+  LEAGUE_HERO_CSS,
+} from "@/components/eleve/league-hero.js";
 import { getDailyStreak } from "@/services/daily-quiz.js";
 import { isStandalone } from "@/utils/pwa.js";
 import { openInstallSheet } from "@/components/common/install-nudge.js";
@@ -418,7 +421,7 @@ const STYLE = `<style>
 /* Réserve la hauteur des ligues injectées en async : évite le layout-shift
    à chaque retour sur l'accueil. :empty → la réserve disparaît une fois
    le contenu monté (qui est toujours plus haut que cette valeur). */
-#acc-lb-slot:empty { display: block; min-height: 156px; }
+#acc-lb-slot:empty { display: block; min-height: 430px; }
 
 .acc2-section-title {
   font: 600 12px/1 'Inter', sans-serif;
@@ -1720,101 +1723,42 @@ function wire(
   });
 }
 
-// ─── Tes ligues async (École + Révision, à égalité) ──────────────
-// Deux dimensions distinctes, mises en avant pareil :
-//  - Ligue École   = classement REMC (validations moniteur)        → get_my_leaderboard_position
-//  - Ligue Révision = effort solo (quiz réussis + examens blancs)  → get_theory_leaderboard
+// ─── Héros « Ta Ligue » (async) — Conduite + Révision ────────────
+// Deux dimensions à égalité, mises en avant dans une carte Arène :
+//  - Conduite = classement REMC cumulé à vie   → get_eleve_leaderboard
+//  - Révision = saison hebdo (points semaine)  → get_theory_leaderboard_weekly
 async function _loadAndInjectLeagues(root) {
   const slot = root.querySelector("#acc-lb-slot");
   if (!slot) return;
   try {
-    const [posRes, revRes] = await Promise.allSettled([
-      sb.rpc("get_my_leaderboard_position"),
-      sb.rpc("get_theory_leaderboard", { p_scope: "ecole", p_limit: 50 }),
+    // Deux dimensions à égalité, mises en avant dans un héros (toggle) :
+    //  - Conduite = classement REMC cumulé à VIE (validations moniteur)
+    //  - Révision = SAISON HEBDO (points de la semaine, reset lundi)
+    // cf. components/eleve/league-hero.js
+    const [condRes, revRes] = await Promise.allSettled([
+      sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: 50 }),
+      sb.rpc("get_theory_leaderboard_weekly", {
+        p_scope: "ecole",
+        p_limit: 50,
+      }),
     ]);
-
-    // ── Ligue École (REMC / validations) ──
-    const pos =
-      posRes.status === "fulfilled" && !posRes.value?.error
-        ? posRes.value.data
-        : null;
-    const ecoleRanked =
-      pos && pos.my_rank != null && pos.total_eleves != null
-        ? pos.total_eleves > 1
-        : false;
-    const ecoleRankLabel = ecoleRanked ? `#${pos.my_rank}` : null;
-    const ecoleSub = ecoleRanked
-      ? `sur ${pos.total_eleves} à l'école`
-      : "Valide pour te classer";
-
-    // ── Ligue Révision (quiz solo) ──
-    const revRows =
+    const conduite =
+      condRes.status === "fulfilled" && Array.isArray(condRes.value?.data)
+        ? condRes.value.data
+        : [];
+    const revision =
       revRes.status === "fulfilled" && Array.isArray(revRes.value?.data)
         ? revRes.value.data
         : [];
-    const mineRev = revRows.find((r) => r.is_me === true) || null;
-    const revScore = mineRev?.score ?? 0;
-    const revInfo = theoryLeague(revScore);
-    const revClassed =
-      !!revInfo.league && revScore > 0 && mineRev?.rang != null;
-    const revRankLabel = revClassed ? `#${mineRev.rang}` : null;
-    // « sur N » comme la carte Conduite : le rang seul (#1) n'a de sens
-    // qu'avec l'effectif. La ligue (absolue) reste visible sur la page détail.
-    const revTotal = revRows.filter((r) => r.rang != null).length;
-    const revSub =
-      revClassed && revTotal > 0 ? `sur ${revTotal} à l'école` : "Fais un quiz";
 
-    // Render: empty state uses a premium invitation; ranked state shows
-    // the number hero with podium accent for top-3 positions.
-    // data-ligue differentiates visual identity; data-pos drives podium styling.
-    const ecolePos = ecoleRanked ? pos.my_rank : null;
-    const revPos = revClassed ? mineRev.rang : null;
-
-    slot.innerHTML = `
-      <div class="acc-lg-head">Tes ligues</div>
-      <p class="acc-lg-lead">Ton classement parmi les élèves — appuie pour voir le détail.</p>
-      <div class="acc-lg-grid">
-        <button class="acc-lg-card" id="acc-lg-ecole" data-go="#/classement/ecole"
-                data-ligue="ecole"
-                ${ecolePos != null && ecolePos <= 3 ? `data-pos="${ecolePos}"` : ""}
-                aria-label="Classement conduite — ${esc(ecoleRanked ? `${ecoleRankLabel} sur ${pos.total_eleves}` : "pas encore classé")}">
-          <span class="acc-lg-tag">${medallion("trophee", "gold", { size: 34 })} Conduite</span>
-          <span class="acc-lg-kick">Ta place</span>
-          ${
-            ecoleRanked
-              ? `<span class="acc-lg-rank">${esc(ecoleRankLabel)}</span>`
-              : `<span class="acc-lg-rank is-empty">—</span>`
-          }
-          <span class="acc-lg-foot">
-            ${ecoleSub ? `<span class="acc-lg-sub">${esc(ecoleSub)}</span>` : `<span class="acc-lg-sub">&nbsp;</span>`}
-            <span class="acc-lg-go">${icon("chevron-right", { size: 15, strokeWidth: 2.5 })}</span>
-          </span>
-        </button>
-        <button class="acc-lg-card" id="acc-lg-rev" data-go="#/classement/revision"
-                data-ligue="revision"
-                ${revPos != null && revPos <= 3 ? `data-pos="${revPos}"` : ""}
-                aria-label="Classement révision — ${esc(revClassed ? revRankLabel : "pas encore classé")}">
-          <span class="acc-lg-tag">${medallion("livret", "violet", { size: 34 })} Révision</span>
-          <span class="acc-lg-kick">Ta place</span>
-          ${
-            revClassed
-              ? `<span class="acc-lg-rank">${esc(revRankLabel)}</span>`
-              : `<span class="acc-lg-rank is-empty">—</span>`
-          }
-          <span class="acc-lg-foot">
-            ${revSub ? `<span class="acc-lg-sub">${esc(revSub)}</span>` : `<span class="acc-lg-sub">&nbsp;</span>`}
-            <span class="acc-lg-go">${icon("chevron-right", { size: 15, strokeWidth: 2.5 })}</span>
-          </span>
-        </button>
-      </div>`;
-
-    slot.querySelectorAll(".acc-lg-card").forEach((card) => {
-      card.addEventListener("click", () => {
-        const dest = card.dataset.go;
-        track("leaderboard.tapped", { target: dest });
-        navigate(dest);
-      });
-    });
+    // CSS du héros injecté une seule fois (carte toujours sombre — skin Arène)
+    if (!document.getElementById("lgh-css")) {
+      const st = document.createElement("style");
+      st.id = "lgh-css";
+      st.textContent = LEAGUE_HERO_CSS;
+      document.head.appendChild(st);
+    }
+    mountLeagueHero(slot, { conduite, revision });
   } catch (e) {
     console.error("[accueil] leagues", e);
   }
