@@ -50,6 +50,7 @@ export const playUnlock = () => play("unlock");
 export const playCoin = () => play("coin");
 export const playReveal = () => play("reveal");
 export const playPop = () => play("pop");
+export const playTick = () => play("pop", 0.28); // tic de roulette (répété au ralenti)
 export const playBack = () => play("back");
 export const playWhoosh = () => play("whoosh");
 export const playGold = () => play("gold");
