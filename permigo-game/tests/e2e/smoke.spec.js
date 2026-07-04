@@ -152,17 +152,19 @@ test.describe("Push notifications — gating", () => {
     await expect(page.locator("#push-soft-banner")).toHaveCount(0);
   });
 
+  // Le profil élève est le profil « Arène » (.arn) : le toggle rappels y est
+  // le bouton #arn-notif (l'ancien #prf-notif-row ne sert plus que gérant/owner).
   test("toggle notifications visible dans profil", async ({ page }) => {
     await loginAsEleve(page);
     await page.evaluate(() => {
       location.hash = "#/profil";
     });
-    // Attendre la page profil
-    await page.waitForSelector(".prf", { timeout: 10_000 });
-    // Si Notification API dispo → toggle row doit être présent
+    // Attendre la page profil élève (Arène)
+    await page.waitForSelector(".arn", { timeout: 10_000 });
+    // Si Notification API dispo → le bouton rappels doit être présent
     const hasNotifAPI = await page.evaluate(() => "Notification" in window);
     if (hasNotifAPI) {
-      await expect(page.locator("#prf-notif-row")).toBeVisible();
+      await expect(page.locator("#arn-notif")).toBeVisible();
     }
   });
 
@@ -178,7 +180,7 @@ test.describe("Push notifications — gating", () => {
     await page.evaluate(() => {
       location.hash = "#/profil";
     });
-    await page.waitForSelector("#prf-notif-row", { timeout: 10_000 });
+    await page.waitForSelector("#arn-notif", { timeout: 10_000 });
 
     // Skip si la permission push n'est pas réellement 'granted' dans ce contexte headless
     const pushAvailable = await page.evaluate(
@@ -192,10 +194,19 @@ test.describe("Push notifications — gating", () => {
       return;
     }
 
-    await page.locator("#prf-notif-row").click();
-    const optedOut = await page.evaluate(() =>
-      localStorage.getItem("permigo_push_optout"),
+    // Toggle ON → OFF : optOutPush() pose permigo_push_optout=1.
+    // Clic en DOM direct (la page a une animation d'entrée).
+    await page.locator("#arn-notif").evaluate((el) => el.click());
+    await expect
+      .poll(
+        () => page.evaluate(() => localStorage.getItem("permigo_push_optout")),
+        { timeout: 5_000 },
+      )
+      .toBe("1");
+    // L'état accessible suit
+    await expect(page.locator("#arn-notif")).toHaveAttribute(
+      "aria-pressed",
+      "false",
     );
-    expect(optedOut).toBe("1");
   });
 });

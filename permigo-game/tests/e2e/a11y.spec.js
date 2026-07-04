@@ -214,14 +214,16 @@ test("a11y · validation enseignant", async ({ page }) => {
   ).toHaveLength(0);
 });
 
-// ─── Page : Profil (commun) ──────────────────────────────────────────
+// ─── Page : Profil (élève = « Carte de joueur » Arène, racine .arn) ──
 test("a11y · profil", async ({ page }) => {
   await loginAs(page, EMAIL_ELEVE);
   await page.waitForSelector(".acc2", { timeout: 20_000 });
   await page.evaluate(() => {
     location.hash = "#/profil";
   });
-  await page.waitForSelector(".prf", { timeout: 10_000 });
+  // Le profil élève est le profil role-native « Arène » (.arn) —
+  // l'ancienne racine .prf ne sert plus que pour gérant/owner.
+  await page.waitForSelector(".arn", { timeout: 10_000 });
 
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])

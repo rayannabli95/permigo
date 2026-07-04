@@ -1,142 +1,170 @@
 /**
- * E2E — Onboarding modal (1er login élève)
+ * E2E — Onboarding élève « une page » (src/pages/onboarding/index.js)
+ *
+ * L'ancien modal 3 slides (components/onboarding-modal.js, showOnboarding)
+ * a été REMPLACÉ par une page verticale unique, zéro swipe :
+ *   hero « Salut {prenom} » + sections avatar/couleur, rappels, A2HS,
+ *   barre de progression remplie au scroll, CTA collé en bas, bouton Passer.
  *
  * Stratégie :
- *  - L'onboarding s'affiche quand `profiles.first_value_action_at IS NULL`
- *  - On ne peut pas créer un nouveau compte en test sans migration
- *  - On mock la condition via `page.evaluate()` en patchant
- *    `showOnboarding()` au runtime ou en manipulant la condition dans le DOM
- *
- * Alternative directe : injecter l'onboarding manuellement après login
- * et tester son comportement indépendamment de la condition DB.
+ *  - Le gating réel (profiles.first_value_action_at IS NULL + flag
+ *    localStorage absent) est inatteignable avec le compte test → on monte
+ *    la page directement via import du module après login.
+ *  - finish() écrit en DB (PATCH profiles + RPC unlock_chest) : ces appels
+ *    sont neutralisés par interception réseau pour ne pas muter le compte test.
  */
-import { test, expect } from '@playwright/test';
-import { ELEVE } from './_creds.js';
+import { test, expect } from "@playwright/test";
+import { ELEVE } from "./_creds.js";
 
 const EMAIL = ELEVE.email;
-const PWD   = ELEVE.pwd;
+const PWD = ELEVE.pwd;
 
 async function loginAsEleve(page) {
-  await page.goto('/#/login');
-  await page.waitForSelector('#lg-email', { timeout: 12_000 });
-  await page.fill('#lg-email', EMAIL);
-  await page.fill('#lg-pwd', PWD);
-  await page.click('#lg-submit');
-  await page.waitForSelector('body.has-chrome', { timeout: 20_000 });
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem("permigo_cookie_consent", "essential");
+      localStorage.setItem("pg-tour-eleve-v1", "1");
+    } catch {
+      /* ignore */
+    }
+  });
+  await page.goto("/#/login");
+  await page.waitForSelector("#lg-email", { timeout: 12_000 });
+  await page.fill("#lg-email", EMAIL);
+  await page.fill("#lg-pwd", PWD);
+  await page.click("#lg-submit");
+  // 25 s : sous forte charge (suite complète en parallèle), le boot
+  // post-login peut dépasser les 20 s.
+  await page.waitForSelector("body.has-chrome", { timeout: 25_000 });
 }
 
-test.describe('Onboarding modal', () => {
-  test('modal s\'injecte via showOnboarding() et affiche la slide 1', async ({ page }) => {
-    await loginAsEleve(page);
-
-    // Injecte l'onboarding manuellement (bypass condition first_value_action_at)
-    await page.evaluate(async () => {
-      const { showOnboarding } = await import('/src/components/onboarding-modal.js');
-      showOnboarding(null, () => {}); // userId=null → pas de DB write
-    });
-
-    // Le modal doit apparaître
-    await page.waitForSelector('.ob-overlay', { timeout: 5_000 });
-    await expect(page.locator('.ob-overlay')).toBeVisible();
-    await expect(page.locator('.ob-sheet')).toBeVisible();
+// Neutralise les écritures de finish() : PATCH profiles + RPC unlock_chest.
+// Le compte test ne doit pas être muté (first_value_action_at, avatar…).
+async function blockFinishWrites(page) {
+  await page.route("**/rest/v1/profiles**", (route) => {
+    if (route.request().method() === "PATCH") {
+      return route.fulfill({ status: 204, body: "" });
+    }
+    return route.continue();
   });
+  await page.route("**/rest/v1/rpc/unlock_chest", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: "{}",
+    }),
+  );
+}
 
-  test('slide 1 → "Suivant" → slide 2 (accent change)', async ({ page }) => {
+// Monte la page onboarding directement (bypass du gating main.js).
+// Dans un conteneur DÉDIÉ (pas #app) : les rendus async de l'accueil
+// (quêtes, coffre…) peuvent réécrire #app après l'injection et effacer
+// la page montée (flake prouvé en mobile).
+async function mountOnboarding(page) {
+  await page.evaluate(async () => {
+    const { mount } = await import("/src/pages/onboarding/index.js");
+    let root = document.querySelector("#e2e-ob-root");
+    if (!root) {
+      root = document.createElement("div");
+      root.id = "e2e-ob-root";
+      document.body.appendChild(root);
+    }
+    await mount(root);
+  });
+  await page.waitForSelector(".ob", { timeout: 10_000 });
+}
+
+test.describe("Onboarding élève — page unique", () => {
+  test("la page se monte : hero, sections numérotées, CTA et Passer", async ({
+    page,
+  }) => {
     await loginAsEleve(page);
+    await mountOnboarding(page);
 
-    await page.evaluate(async () => {
-      const { showOnboarding } = await import('/src/components/onboarding-modal.js');
-      showOnboarding(null, () => {});
-    });
-    await page.waitForSelector('.ob-slide', { timeout: 5_000 });
-
-    // Accent couleur slide 1 : indigo (#6366f1)
-    const accentBefore = await page.locator('.ob-accent-bar').evaluate(
-      el => getComputedStyle(el).background
+    await expect(page.locator(".ob")).toBeVisible();
+    // Hero personnalisé
+    await expect(page.locator("#ob-h1")).toBeVisible();
+    await expect(page.locator("#ob-h1")).toContainText(/Salut/);
+    // Au moins 2 sections (avatar + rappels ; A2HS conditionnelle)
+    expect(await page.locator(".ob-section").count()).toBeGreaterThanOrEqual(2);
+    // CTA principal + bouton Passer
+    await expect(page.locator("#ob-cta")).toBeVisible();
+    await expect(page.locator("#ob-skip")).toBeVisible();
+    // Barre de progression accessible
+    await expect(page.locator(".ob-prog")).toHaveAttribute(
+      "role",
+      "progressbar",
     );
-
-    await page.locator('#ob-next').click();
-
-    // Slide 2 chargée (contenu change, dot 2 actif)
-    await expect(page.locator('.ob-dots .ob-dot.active').nth(0)).not.toHaveClass('active');
-    const activeIdx = await page.evaluate(() => {
-      const dots = [...document.querySelectorAll('.ob-dot')];
-      return dots.findIndex(d => d.classList.contains('active'));
-    });
-    expect(activeIdx).toBe(1);
   });
 
-  test('3 slides → "C\'est parti" → modal se ferme', async ({ page }) => {
+  test("choisir un avatar met à jour la sélection (radiogroup)", async ({
+    page,
+  }) => {
     await loginAsEleve(page);
+    await mountOnboarding(page);
 
-    let onDoneCalled = false;
-    await page.exposeFunction('__onboardingDone', () => { onDoneCalled = true; });
+    const avatars = page.locator("#ob-av-grid .ob-av");
+    const count = await avatars.count();
+    expect(count).toBeGreaterThan(1);
 
-    await page.evaluate(async () => {
-      const { showOnboarding } = await import('/src/components/onboarding-modal.js');
-      showOnboarding(null, () => window.__onboardingDone());
-    });
-    await page.waitForSelector('.ob-overlay', { timeout: 5_000 });
+    // Sélectionner le 2e avatar (clic DOM direct : animations d'entrée)
+    await avatars.nth(1).evaluate((el) => el.click());
 
-    // Navigue les 3 slides
-    await page.locator('#ob-next').click(); // slide 1 → 2
-    await page.waitForTimeout(300);
-    await page.locator('#ob-next').click(); // slide 2 → 3
-    await page.waitForTimeout(300);
-
-    // Slide 3 : bouton devient "C'est parti !"
-    await expect(page.locator('#ob-next')).toContainText("C'est parti");
-
-    await page.locator('#ob-next').click();
-
-    // Modal doit disparaître
-    await expect(page.locator('.ob-overlay')).toHaveCount(0, { timeout: 2_000 });
+    await expect(avatars.nth(1)).toHaveAttribute("aria-checked", "true");
+    await expect(avatars.nth(1)).toHaveClass(/sel/);
+    // Un seul avatar sélectionné à la fois
+    expect(
+      await page.locator('#ob-av-grid .ob-av[aria-checked="true"]').count(),
+    ).toBe(1);
   });
 
-  test('"Passer" skip immédiatement le modal', async ({ page }) => {
+  test("la barre de progression se remplit au scroll", async ({ page }) => {
     await loginAsEleve(page);
+    await mountOnboarding(page);
 
-    await page.evaluate(async () => {
-      const { showOnboarding } = await import('/src/components/onboarding-modal.js');
-      showOnboarding(null, () => {});
+    const before = await page.locator(".ob-prog").getAttribute("aria-valuenow");
+
+    // Scroller le conteneur interne jusqu'en bas
+    await page.evaluate(() => {
+      const el = document.querySelector("#ob-scroll");
+      el.scrollTop = el.scrollHeight;
+      el.dispatchEvent(new Event("scroll"));
     });
-    await page.waitForSelector('.ob-overlay', { timeout: 5_000 });
-
-    await page.locator('#ob-skip').click();
-    await expect(page.locator('.ob-overlay')).toHaveCount(0, { timeout: 2_000 });
-  });
-
-  test('dots — navigation cohérente avec le slide actif', async ({ page }) => {
-    await loginAsEleve(page);
-
-    await page.evaluate(async () => {
-      const { showOnboarding } = await import('/src/components/onboarding-modal.js');
-      showOnboarding(null, () => {});
-    });
-    await page.waitForSelector('.ob-dots', { timeout: 5_000 });
-
-    // Slide 0 actif
-    let activeIdx = await page.evaluate(() =>
-      [...document.querySelectorAll('.ob-dot')].findIndex(d => d.classList.contains('active'))
-    );
-    expect(activeIdx).toBe(0);
-
-    await page.locator('#ob-next').click();
     await page.waitForTimeout(300);
 
-    // Slide 1 actif
-    activeIdx = await page.evaluate(() =>
-      [...document.querySelectorAll('.ob-dot')].findIndex(d => d.classList.contains('active'))
-    );
-    expect(activeIdx).toBe(1);
+    const after = await page.locator(".ob-prog").getAttribute("aria-valuenow");
+    expect(parseInt(after, 10)).toBeGreaterThan(parseInt(before || "0", 10));
+    // En bas de page → 100 %
+    expect(parseInt(after, 10)).toBe(100);
   });
 
-  test('l\'onboarding n\'apparaît PAS si first_value_action_at est défini', async ({ page }) => {
-    // Dans l'app réelle, accueil.js ne montre l'onboarding que si !profile.first_value_action_at
-    // On teste que notre compte test (profil existant avec date) n'affiche PAS le modal auto
+  test("« Passer » termine l'onboarding : flag posé + retour à l'accueil", async ({
+    page,
+  }) => {
+    await loginAsEleve(page);
+    await blockFinishWrites(page);
+    await mountOnboarding(page);
+
+    await page.locator("#ob-skip").evaluate((el) => el.click());
+
+    // finish() pose le flag puis recharge sur #/ — attendre le re-boot
+    await page.waitForSelector("body.has-chrome", { timeout: 25_000 });
+    await expect(page.locator(".ob")).toHaveCount(0);
+
+    const flag = await page.evaluate(() =>
+      localStorage.getItem("permigo_eleve_onboarding_done"),
+    );
+    expect(flag).toBe("1");
+  });
+
+  test("l'onboarding n'apparaît PAS au boot pour un compte déjà passé par le flow", async ({
+    page,
+  }) => {
+    // main.js ne monte l'onboarding que si first_value_action_at est NULL
+    // ET que le flag localStorage est absent. Le compte test a déjà fait
+    // son onboarding → la page .ob ne doit jamais apparaître au boot.
     await loginAsEleve(page);
     await page.waitForTimeout(1_000); // laisser le temps au boot
-    // Le compte élève de test a déjà fait l'onboarding → .ob-overlay ne doit pas être là
-    await expect(page.locator('.ob-overlay')).toHaveCount(0);
+    await expect(page.locator(".ob")).toHaveCount(0);
   });
 });
