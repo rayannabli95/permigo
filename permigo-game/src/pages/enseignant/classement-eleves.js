@@ -11,7 +11,7 @@ import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { REMC_TOTAL } from "@/data/remc.js";
-import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { fmtName } from "@/utils/fmt-name.js";
 import { haptic } from "@/utils/haptic.js";
 import {
@@ -157,7 +157,11 @@ export async function mount(root, mode) {
     root.innerHTML = `${ARENE_CSS}<div class="arn" style="${ACCENT}">
       ${_header(isTheorie, 0)}
       <div class="arn-empty">
-        <div class="arn-empty-ico">${icon(isTheorie ? "zap" : "trophy", { size: 36 })}</div>
+        <div class="arn-empty-ico">${
+          isTheorie
+            ? medallion("eclair", "indigo", { size: 48 })
+            : medallion("trophee", "gold", { size: 48 })
+        }</div>
         <div class="arn-empty-txt">${
           isTheorie
             ? "Aucune révision ces 30 jours. Partage l'app à tes élèves — leur score apparaîtra ici dès leur première révision."
@@ -235,7 +239,13 @@ function _header(isTheorie, n) {
 }
 
 function _streakChip(s) {
-  return `<span class="arn-chip flame${s > 0 ? "" : " off"}" title="${s > 0 ? `Actif ${s} jour${s > 1 ? "s" : ""} de suite` : "Inactif récemment"}">${icon("flame", { size: 12, strokeWidth: 2 })} ${s}j</span>`;
+  // Mini-médaillon flamme : orange quand la série est vivante, gris (grammaire
+  // « inactif ») quand elle est éteinte — on garde la lecture on/off d'origine.
+  const med =
+    s > 0
+      ? medallion("flamme", "orange", { size: 16 })
+      : medallion("flamme", "slate", { size: 16 });
+  return `<span class="arn-chip flame${s > 0 ? "" : " off"}" title="${s > 0 ? `Actif ${s} jour${s > 1 ? "s" : ""} de suite` : "Inactif récemment"}">${med} ${s}j</span>`;
 }
 
 function _hofSection(hof) {
@@ -247,11 +257,11 @@ function _hofSection(hof) {
       );
       return `<div class="arn-hof-row clickable" role="button" tabindex="0" data-eleve-id="${esc(String(e.id))}">
         <span class="arn-nm">${nom}</span>
-        <span class="arn-hof-badge">${icon("award", { size: 12, strokeWidth: 2.4 })} Permis obtenu</span>
+        <span class="arn-hof-badge">${medallion("medaille", "gold", { size: 16 })} Permis obtenu</span>
       </div>`;
     })
     .join("");
-  return `<div class="arn-hof-title">${icon("award", { size: 13, strokeWidth: 2.2 })} Hall of fame — permis obtenu</div>${rows}`;
+  return `<div class="arn-hof-title">${medallion("medaille", "gold", { size: 16 })} Hall of fame — permis obtenu</div>${rows}`;
 }
 
 // ─── Wire ────────────────────────────────────────────────────────

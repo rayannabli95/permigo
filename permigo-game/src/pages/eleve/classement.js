@@ -29,6 +29,7 @@ import {
   arenePaliers,
 } from "@/components/common/arene-rank.js";
 import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
+import { medallion } from "@/utils/medallions.js";
 
 const LIMIT = 50;
 
@@ -304,7 +305,11 @@ function _renderBody(state, rows, data) {
         ? "Le classement de la semaine s'anime dès que deux élèves ont marqué des points révision."
         : "Le classement apparaît dès que deux élèves ont validé une compétence avec leur moniteur.";
     return `<div class="arn-empty">
-      <div class="arn-empty-ico">${icon(ligue === "revision" ? "zap" : "target", { size: 34 })}</div>
+      <div class="arn-empty-ico" style="opacity:1">${
+        ligue === "revision"
+          ? medallion("eclair", "violet", { size: 48, glow: true })
+          : medallion("cible", "red", { size: 48, glow: true })
+      }</div>
       <div class="arn-empty-txt">${txt}</div>
     </div>${cta}`;
   }

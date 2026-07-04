@@ -11,6 +11,7 @@ import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { volantImg } from "@/utils/volant.js";
 import { flyVolants } from "@/components/eleve/volant-reward.js";
 import { toast } from "@/components/common/toast.js";
@@ -100,6 +101,31 @@ const TIER_GRADIENT = {
   or: "linear-gradient(135deg,#facc15,#a16207)",
   legendaire: "linear-gradient(135deg,var(--pul),#581c87)",
 };
+
+// Médaillon 3D de secours par type de coffre (affiché si le PNG du coffre
+// ne charge pas). Glyphe = thème du coffre ; rampe = rareté (tier).
+const CHEST_MED_GLYPH = {
+  world_1: "bouclier",
+  world_2: "reglages",
+  world_3: "voiture",
+  world_4: "trophee",
+  streak_7: "flamme",
+  streak_14: "eclair",
+  streak_30: "couronne",
+  perfect_quiz: "etoile",
+  welcome: "cadeau",
+};
+const TIER_RAMP = {
+  bronze: "bronze",
+  argent: "argent",
+  or: "gold",
+  legendaire: "violet",
+};
+function _chestMed(chestType, tier, size = 48) {
+  const glyph = CHEST_MED_GLYPH[chestType] || "coffre";
+  const ramp = TIER_RAMP[tier] || "bronze";
+  return medallion(glyph, ramp, { size });
+}
 
 const STYLE = `<style>
 .mc-page {
@@ -319,7 +345,7 @@ function renderCard(chest) {
       <img src="${meta.image}" alt="${esc(meta.label)}" loading="lazy"
            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
            style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))">
-      <span style="display:none;color:#fff" aria-hidden="true">${icon(meta.ico ?? "gift", { size: 32 })}</span>
+      <span style="display:none" aria-hidden="true">${_chestMed(chest.chest_type, meta.tier, 56)}</span>
       <div class="mc-icon-glow" style="background:${grad}"></div>
     </div>
     <div class="mc-info">
@@ -351,7 +377,7 @@ export async function mount(root) {
     ${STYLE}
     <div class="mc-page anim-slide-up">
       <div class="mc-hd">
-        <button class="mc-back" aria-label="Retour" id="mc-back">←</button>
+        <button class="mc-back" aria-label="Retour" id="mc-back">${icon("arrow-left", { size: 18 })}</button>
         <h1 class="mc-h1">Mes coffres</h1>
       </div>
       <div class="mc-list">
@@ -401,9 +427,9 @@ export async function mount(root) {
 
   if (chests.length === 0) {
     html = loadFailed
-      ? `<div class="mc-empty"><div class="mc-empty-ico">${icon("alert-circle", { size: 30 })}</div>Impossible de charger tes coffres.<br>
+      ? `<div class="mc-empty"><div class="mc-empty-ico">${medallion("panneau", "orange", { size: 52 })}</div>Impossible de charger tes coffres.<br>
          <button class="mc-open-btn" id="mc-retry" style="margin-top:12px">Réessayer</button></div>`
-      : `<div class="mc-empty"><div class="mc-empty-ico">${icon("package", { size: 32, strokeWidth: 1.5 })}</div>Aucun coffre encore — complète des mondes<br>et construis ta série !</div>`;
+      : `<div class="mc-empty"><div class="mc-empty-ico">${medallion("coffre", "slate", { size: 52 })}</div>Aucun coffre encore — complète des mondes<br>et construis ta série !</div>`;
   }
 
   // Replace skeleton with real content

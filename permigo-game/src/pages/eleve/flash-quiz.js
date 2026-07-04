@@ -6,7 +6,7 @@
 // quizz post-validation/consolidation).
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
-import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -129,7 +129,7 @@ function runQuiz(root, { quiz, pool }) {
   root.innerHTML = `${STYLE}
     <div class="fqz">
       <div class="fqz-top">
-        <div class="fqz-tag">${icon("zap", { size: 14 })} Quiz éclair</div>
+        <div class="fqz-tag">${medallion("eclair", "gold", { size: 20 })} Quiz éclair</div>
         <div class="fqz-clock" id="fqz-clock">5:00</div>
       </div>
       <div class="fqz-card">
@@ -286,7 +286,7 @@ function renderClosed(root, message) {
     <div class="fqz">
       <div class="fqz-card">
         <div class="fqz-closed">
-          <div class="fqz-closed-ico">${icon("clock", { size: 44, strokeWidth: 1.5, color: "#94a3b8" })}</div>
+          <div class="fqz-closed-ico">${medallion("horloge", "violet", { size: 56, glow: true })}</div>
           <p>${esc(message)}</p>
           <button class="qz-cta" id="fqz-back" type="button">Retour à l'accueil</button>
         </div>

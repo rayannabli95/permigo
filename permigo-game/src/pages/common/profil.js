@@ -21,6 +21,7 @@ import { getEquippedAsset } from "@/utils/game-state.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { CATALOG, STREAK_SEUIL } from "@/data/achievements.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
 import { haptic } from "@/utils/haptic.js";
 import {
@@ -259,6 +260,11 @@ const STYLE = `<style>
   align-items: center;
   gap: 8px;
   margin-bottom: 14px;
+}
+.prf-ref-ico {
+  display: inline-flex;
+  flex-shrink: 0;
+  line-height: 0;
 }
 .prf-ref-ttl {
   font: 800 15px/1.2 'Fredoka', 'Plus Jakarta Sans', sans-serif;
@@ -1121,6 +1127,7 @@ function _renderReferral(stats) {
   return `
 <div class="prf-ref">
   <div class="prf-ref-header">
+    <span class="prf-ref-ico" aria-hidden="true">${medallion("cadeau", "pink", { size: 32 })}</span>
     <h2 class="prf-ref-ttl">Parrainage</h2>
     <div class="prf-ref-volant-badge" aria-label="+50 volants par filleul">
       ${volantImg(14, { drop: true })} +50 ${volantLabel(50)} par filleul
@@ -1523,8 +1530,8 @@ const STYLE_ARENE = `<style>
 .arn-ach.locked .arn-medal{box-shadow:0 7px 0 var(--cedge),inset 0 1px 0 rgba(255,255,255,.04),inset 0 0 0 1px rgba(255,255,255,.05)}
 .arn-ach.locked .arn-medal::before{display:none}
 .arn-ach.locked .arn-medal img{filter:grayscale(1) brightness(.45);opacity:.5}
-.arn-lock{position:absolute;width:30px;height:30px;border-radius:50%;background:rgba(10,8,26,.72);display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
-.arn-lock svg{width:15px;height:15px;color:var(--tx-mu)}
+.arn-lock{position:absolute;width:26px;height:26px;border-radius:50%;background:rgba(10,8,26,.72);display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.arn-lock svg{width:18px;height:18px}
 .arn-ach-name{font-size:10.5px;font-weight:700;color:var(--tx-dim);margin-top:8px;line-height:1.25}
 .arn-ach.locked .arn-ach-name{color:var(--tx-fa)}
 
@@ -1550,8 +1557,8 @@ const STYLE_ARENE = `<style>
 .arn-set-list{border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#1c1548,#15103a);box-shadow:0 8px 0 var(--cedge),inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px var(--gl2)}
 .arn-row{display:flex;align-items:center;gap:14px;padding:16px 17px;border-bottom:1px solid rgba(255,255,255,.05);width:100%;background:none;border-left:0;border-right:0;border-top:0;color:inherit;text-align:left;cursor:pointer;font-family:inherit}
 .arn-row:last-child{border-bottom:0}
-.arn-row-ico{width:38px;height:38px;flex:0 0 auto;border-radius:11px;display:grid;place-items:center;background:rgba(124,92,255,.14);color:var(--gd-lt);box-shadow:inset 0 0 0 1px var(--gl2)}
-.arn-row-ico svg{width:20px;height:20px}
+.arn-row-ico{width:30px;height:30px;flex:0 0 auto;display:grid;place-items:center}
+.arn-row-ico svg{width:30px;height:30px}
 .arn-row-lab{flex:1;font-size:15px;font-weight:700;color:var(--tx)}
 .arn-row-lab small{display:block;font-size:11.5px;font-weight:600;color:var(--tx-mu);margin-top:2px}
 .arn-chev{color:var(--tx-mu)}.arn-chev svg{width:18px;height:18px}
@@ -1603,7 +1610,7 @@ const STYLE_ARENE = `<style>
 @media (prefers-reduced-motion: reduce){.arn-bar-fill::after{animation:none}}
 </style>`;
 
-const _LOCK_SVG = `<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" stroke-width="2"/></svg>`;
+const _LOCK_SVG = medallion("cadenas", "slate", { size: 18 });
 
 async function mountEleveArene(root, me) {
   root.innerHTML = `${STYLE_ARENE}<div class="arn"><div class="skel skel-card" style="height:300px;margin:14px 16px 0;border-radius:28px"></div><div class="skel skel-card" style="height:90px;margin:18px 16px 0;border-radius:18px"></div></div>`;
@@ -1747,7 +1754,7 @@ async function mountEleveArene(root, me) {
       <div class="arn-s-lab">Volants</div>
     </div>
     <div class="arn-stat">
-      <svg class="arn-s-ico" viewBox="0 0 24 24" fill="none" style="width:30px"><path d="M12 3l2.5 5 5.5.8-4 3.9 1 5.5L12 21l-5 -2.8 1-5.5-4-3.9 5.5-.8L12 3z" stroke="#cdbcff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      ${medallion("etoile", "gold", { size: 30, cls: "arn-s-ico" })}
       <div class="arn-s-num">${restantes}</div>
       <div class="arn-s-lab">Restantes</div>
     </div>
@@ -1795,7 +1802,7 @@ async function mountEleveArene(root, me) {
     <p class="arn-set-title">Réglages</p>
     <div class="arn-set-list">
       <a class="arn-row" href="#/notifications">
-        <span class="arn-row-ico">${icon("inbox", { size: 19 })}</span>
+        <span class="arn-row-ico">${medallion("message", "blue", { size: 30, shape: "tile" })}</span>
         <span class="arn-row-lab">Mes notifications<small>Validations, encouragements, comptes-rendus</small></span>
         <span class="arn-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
@@ -1803,14 +1810,14 @@ async function mountEleveArene(root, me) {
         notifSupported
           ? `
       <button class="arn-row" id="arn-notif" type="button" aria-pressed="${notifOn}">
-        <span class="arn-row-ico">${icon("bell", { size: 19 })}</span>
+        <span class="arn-row-ico">${medallion("cloche", "orange", { size: 30, shape: "tile" })}</span>
         <span class="arn-row-lab">Rappels de révision<small id="arn-notif-sub">${notifDenied ? "Bloqués par le navigateur" : notifOn ? "Reste dans le rythme" : "Désactivés"}</small></span>
         ${notifDenied ? "" : `<span class="arn-tog ${notifOn ? "on" : ""}" id="arn-notif-tog"><span class="knob"></span></span>`}
       </button>`
           : ""
       }
       <a class="arn-row" href="#/settings">
-        <span class="arn-row-ico">${icon("settings", { size: 19 })}</span>
+        <span class="arn-row-ico">${medallion("reglages", "slate", { size: 30, shape: "tile" })}</span>
         <span class="arn-row-lab">Réglages<small>Thème, langue, confidentialité</small></span>
         <span class="arn-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
@@ -2117,8 +2124,8 @@ const STYLE_ENS = `<style>
 .enp-a.locked .enp-medal{background:linear-gradient(180deg,#f3f3f8,#eceaf3);box-shadow:0 5px 12px rgba(60,50,160,.06),inset 0 0 0 1px var(--enl)}
 .enp-a.locked .enp-medal::before{display:none}
 .enp-a.locked .enp-medal img{filter:grayscale(1) brightness(1.05) contrast(.85);opacity:.4}
-.enp-alock{position:absolute;z-index:2;width:30px;height:30px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 2px 5px rgba(60,50,160,.18),inset 0 0 0 1px var(--enl2)}
-.enp-alock svg{width:15px;height:15px;color:var(--enfa)}
+.enp-alock{position:absolute;z-index:2;width:26px;height:26px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 2px 5px rgba(60,50,160,.18),inset 0 0 0 1px var(--enl2)}
+.enp-alock svg{width:18px;height:18px}
 .enp-a-name{font-size:10.5px;font-weight:700;color:var(--enk2);margin-top:9px;line-height:1.25}
 .enp-a.locked .enp-a-name{color:var(--enfa)}
 
@@ -2164,8 +2171,8 @@ const STYLE_ENS = `<style>
 .enp-set-list{border-radius:22px;overflow:hidden;background:var(--c);box-shadow:0 10px 24px rgba(60,50,160,.08),inset 0 0 0 1px var(--enl)}
 .enp-row{display:flex;align-items:center;gap:14px;padding:16px 17px;border-bottom:1px solid var(--enl);width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;cursor:pointer;font-family:inherit;color:inherit;text-decoration:none}
 .enp-row:last-child{border-bottom:0}
-.enp-row-ico{width:38px;height:38px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;background:var(--ind-pale);color:var(--ind);box-shadow:inset 0 0 0 1px var(--enl2)}
-.enp-row-ico svg{width:20px;height:20px}
+.enp-row-ico{width:30px;height:30px;flex:0 0 auto;display:grid;place-items:center}
+.enp-row-ico svg{width:30px;height:30px}
 .enp-row-lab{flex:1;font-size:15px;font-weight:700;color:var(--enk)}
 .enp-row-lab small{display:block;font-size:11.5px;font-weight:600;color:var(--enmu);margin-top:2px}
 .enp-chev{color:var(--enfa)}.enp-chev svg{width:18px;height:18px}
@@ -2323,7 +2330,7 @@ async function mountEnseignantArene(root, me) {
       <div class="enp-s-lab">Série pro</div>
     </div>
     <div class="enp-stat">
-      <svg class="enp-s-ico" viewBox="0 0 24 24" fill="none" style="width:30px"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9L12 3z" fill="#fff3d6" stroke="#e8a317" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      ${medallion("etoile", "gold", { size: 30, cls: "enp-s-ico" })}
       <div class="enp-s-num gd">${c3Count}</div>
       <div class="enp-s-lab">C3 Maîtrise</div>
     </div>
@@ -2399,7 +2406,7 @@ async function mountEnseignantArene(root, me) {
     <p class="enp-set-title">Réglages</p>
     <div class="enp-set-list">
       <a class="enp-row" href="#/notifications">
-        <span class="enp-row-ico">${icon("inbox", { size: 19 })}</span>
+        <span class="enp-row-ico">${medallion("message", "blue", { size: 30, shape: "tile" })}</span>
         <span class="enp-row-lab">Mes notifications<small>Validations, séances, messages</small></span>
         <span class="enp-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
@@ -2407,14 +2414,14 @@ async function mountEnseignantArene(root, me) {
         notifSupported
           ? `
       <button class="enp-row" id="enp-notif" type="button" aria-pressed="${notifOn}">
-        <span class="enp-row-ico">${icon("bell", { size: 19 })}</span>
+        <span class="enp-row-ico">${medallion("cloche", "orange", { size: 30, shape: "tile" })}</span>
         <span class="enp-row-lab">Notifications<small id="enp-notif-sub">${notifDenied ? "Bloquées par le navigateur" : notifOn ? "Validations & relances" : "Désactivées"}</small></span>
         ${notifDenied ? "" : `<span class="enp-tog ${notifOn ? "on" : ""}" id="enp-notif-tog"><span class="knob"></span></span>`}
       </button>`
           : ""
       }
       <a class="enp-row" href="#/settings">
-        <span class="enp-row-ico">${icon("settings", { size: 19 })}</span>
+        <span class="enp-row-ico">${medallion("reglages", "slate", { size: 30, shape: "tile" })}</span>
         <span class="enp-row-lab">Réglages du compte<small>Thème, abonnement, sécurité</small></span>
         <span class="enp-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>

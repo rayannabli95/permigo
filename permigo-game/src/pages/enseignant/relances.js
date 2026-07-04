@@ -15,7 +15,7 @@ import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
-import { illus } from "@/components/enseignant/illus.js";
+import { medallion } from "@/utils/medallions.js";
 
 // Règle produit : relance élève à 14 jours (aligné sur mes-eleves
 // INACTIF_SEUIL_MS et insights « à relancer > 14j » — le radar était le
@@ -74,8 +74,9 @@ const STYLE = `<style>
   .rl-hero { position: relative; overflow: hidden; margin-top: calc(-1 * (var(--th,52px) + env(safe-area-inset-top,0px))); padding: calc(env(safe-area-inset-top,0px) + var(--th,52px) + 18px) 18px 20px; color: #fff;
     background: linear-gradient(135deg, #4338ca 0%, #4f46e5 55%, #6d5ef0 100%); }
   .rl-hero::before { content: ''; position: absolute; right: -40px; top: -50px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%); pointer-events: none; }
+  .rl-hero-med { position: absolute; right: 18px; top: calc(env(safe-area-inset-top,0px) + var(--th,52px) + 16px); z-index: 1; }
   .rl-hero-kick { font: 800 10px/1 'Inter', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.8); margin-bottom: 8px; position: relative; }
-  .rl-hero-title { font: 800 clamp(22px, 6.5vw, 27px)/1.12 'Fredoka', 'Manrope', sans-serif; letter-spacing: -.01em; position: relative; }
+  .rl-hero-title { font: 800 clamp(22px, 6.5vw, 27px)/1.12 'Fredoka', 'Manrope', sans-serif; letter-spacing: -.01em; position: relative; padding-right: 56px; }
   .rl-hero-sub { font: 600 13px/1.5 'Inter', sans-serif; color: rgba(255,255,255,.85); margin-top: 6px; max-width: 42ch; position: relative; }
 
   .rl-body { padding: 16px 16px 0; display: flex; flex-direction: column; gap: 13px; }
@@ -136,6 +137,7 @@ export async function mount(root) {
   root.innerHTML = `${STYLE}
     <div class="rl-page anim-slide-up">
       <div class="rl-hero">
+        <span class="rl-hero-med">${medallion("cloche", "orange", { size: 44, glow: true })}</span>
         <div class="rl-hero-kick">Radar de relance</div>
         <div class="rl-hero-title">Ce matin…</div>
         <div class="rl-hero-sub">Chargement de tes élèves qui refroidissent.</div>
@@ -197,7 +199,7 @@ function render() {
   const cards =
     n === 0
       ? `<div class="rl-empty">
-          ${illus("trophy", { size: 96 })}
+          ${medallion("trophee", "gold", { size: 56 })}
           <div class="rl-empty-t">Inbox zéro 🎉</div>
           <div class="rl-empty-d">Aucun élève ne refroidit en ce moment. Reviens demain matin pour ton rituel.</div>
         </div>`
@@ -205,6 +207,7 @@ function render() {
 
   page.innerHTML = `
     <div class="rl-hero">
+      <span class="rl-hero-med">${medallion("cloche", "orange", { size: 44, glow: true })}</span>
       <div class="rl-hero-kick">Radar de relance</div>
       <div class="rl-hero-title">${esc(heroTitle)}</div>
       <div class="rl-hero-sub">${esc(heroSub)}</div>

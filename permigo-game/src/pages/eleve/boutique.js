@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -833,7 +834,7 @@ export async function mount(root) {
     const content = root.querySelector("#bo2-content");
     if (!content) return;
     if (catalogFailed) {
-      content.innerHTML = `<div class="bo2-empty"><div class="bo2-empty-ico">${icon("alert-circle", { size: 30 })}</div><div class="bo2-empty-t">Boutique indisponible</div><div class="bo2-empty-d">Vérifie ta connexion et réessaie.</div></div>`;
+      content.innerHTML = `<div class="bo2-empty"><div class="bo2-empty-ico">${medallion("panneau", "orange", { size: 48 })}</div><div class="bo2-empty-t">Boutique indisponible</div><div class="bo2-empty-d">Vérifie ta connexion et réessaie.</div></div>`;
       return;
     }
 
@@ -962,7 +963,7 @@ function renderHeroCard(item, gemmes) {
 
   const objHtml = item.asset_url
     ? `<img class="bo2-hero-obj" src="${esc(item.asset_url)}" alt="${esc(item.name)}" loading="lazy">`
-    : `<span class="bo2-hero-emoji">${_typeEmoji(item.type)}</span>`;
+    : `<span class="bo2-hero-emoji">${_typeMed(item.type, 72)}</span>`;
 
   // Pied droit : à acheter (prix + CTA) / débloqué / équipé
   let footRight = "";
@@ -1014,7 +1015,7 @@ function renderIntro() {
   return `
     <div class="bo2-intro" id="bo2-intro">
       <button class="bo2-intro-x" id="bo2-intro-x" type="button" aria-label="J'ai compris">×</button>
-      <div class="bo2-intro-ico">${icon("car", { size: 22 })}</div>
+      <div class="bo2-intro-ico" style="background:transparent;box-shadow:none">${medallion("voiture", "blue", { size: 40 })}</div>
       <div class="bo2-intro-body">
         <div class="bo2-intro-title">Ta voiture, ta signature</div>
         <div class="bo2-intro-steps">
@@ -1045,15 +1046,14 @@ function wireIntro(content) {
 function renderGridCard(item, gemmes, idx) {
   const r = rm(item.rarity);
   const canAfford = gemmes >= item.cost_gemmes;
-  const color = item.display_color || r.c;
   const imgUrl = item.asset_url ?? null;
   const isEquipped = item.owned && getEquipped()[item.type] === item.id;
 
   const lacking = item.cost_gemmes - gemmes;
   const preview = imgUrl
     ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` +
-      `<div class="bo2-card-preview-circle" style="background:${esc(color)}1f;color:${esc(color)};display:none">${_typeIconSvg(item.type, color)}</div>`
-    : `<div class="bo2-card-preview-circle" style="background:${esc(color)}1f;color:${esc(color)}">${_typeIconSvg(item.type, color)}</div>`;
+      `<div class="bo2-card-preview-circle" style="display:none">${_typeMed(item.type, 60)}</div>`
+    : `<div class="bo2-card-preview-circle">${_typeMed(item.type, 60)}</div>`;
 
   const legendaryRibbon =
     item.rarity === "legendaire"
@@ -1089,35 +1089,19 @@ function renderGridCard(item, gemmes, idx) {
     </div>`;
 }
 
-// ─── Icônes vectorielles par type (remplace les fallback emoji #8) ──
-function _typeIconSvg(type, color) {
-  // Renvoie un SVG inline teinté à la couleur de rareté
-  const c = esc(color || "#8b5cf6");
-  if (type === "avatar") {
-    return `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M19 17H5c0-2.5 1.5-4 3-5l1-3h6l1 3c1.5 1 3 2.5 3 5z"/><circle cx="8.5" cy="17.5" r="1.5"/><circle cx="15.5" cy="17.5" r="1.5"/>
-    </svg>`;
-  }
-  if (type === "theme") {
-    return `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/>
-    </svg>`;
-  }
-  if (type === "permis_bg") {
-    return `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <rect x="2" y="5" width="20" height="14" rx="3"/><path d="M7 9h.01M7 15h10M7 12h5"/>
-    </svg>`;
-  }
-  return `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/>
-  </svg>`;
-}
-
-function _typeEmoji(type) {
-  if (type === "avatar") return "🚗";
-  if (type === "theme") return "🎨";
-  if (type === "permis_bg") return "🖼";
-  return "🎁";
+// ─── Médaillon 3D de secours par type (quand l'item n'a pas d'asset_url) ──
+// Un seul langage visuel pour les 3 fonds : la pièce premium remplace à la
+// fois les anciens SVG stroke (#8) ET les emoji nus. Glyphe/rampe par type :
+//   avatar (voiture) → voiture/bleu · theme (palette) → crayon/rose
+//   permis_bg (carte) → carte/teal · autre → cadeau/rose
+const _TYPE_MED = {
+  avatar: ["voiture", "blue"],
+  theme: ["crayon", "pink"],
+  permis_bg: ["carte", "teal"],
+};
+function _typeMed(type, size) {
+  const [glyph, ramp] = _TYPE_MED[type] || ["cadeau", "pink"];
+  return medallion(glyph, ramp, { size });
 }
 
 // ─── Détection d'opacité du skin ──────────────────────────────
@@ -1207,7 +1191,7 @@ function renderObjectifCard(item, gemmes, pinned = true) {
   const ready = gemmes >= item.cost_gemmes;
   const imgHtml = item.asset_url
     ? `<img src="${esc(item.asset_url)}" alt="" aria-hidden="true">`
-    : `<span style="font-size:30px" aria-hidden="true">${_typeEmoji(item.type)}</span>`;
+    : `<span aria-hidden="true">${_typeMed(item.type, 44)}</span>`;
   const kickerLabel = `${esc(r.label)} · ${pinned ? "Ton objectif" : "À viser"}`;
   const closeBtn = pinned
     ? `<button class="bo2-obj-x" data-obj-x type="button" aria-label="Retirer l'objectif">×</button>`
@@ -1301,8 +1285,8 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
 
   const imgUrl = item.asset_url ?? null;
   const halo = imgUrl
-    ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="bo2-fallback" style="display:none">${_typeEmoji(item.type)}</span>`
-    : `<span class="bo2-fallback">${_typeEmoji(item.type)}</span>`;
+    ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="bo2-fallback" style="display:none">${_typeMed(item.type, 96)}</span>`
+    : `<span class="bo2-fallback">${_typeMed(item.type, 96)}</span>`;
 
   // Try-before-buy : contexte visuel selon le type (#5)
   const tryPreview = _renderTryPreview(item, me);

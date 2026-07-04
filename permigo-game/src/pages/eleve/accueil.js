@@ -18,8 +18,8 @@ import {
   maybeSendStreakRiskNotif,
 } from "@/services/web-push.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { volantImg } from "@/utils/volant.js";
-import { ill, illMask } from "@/utils/illustrations.js";
 import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
 import { getMyChests } from "@/utils/game-state.js";
@@ -40,7 +40,6 @@ import {
 import { getDailyStreak } from "@/services/daily-quiz.js";
 import { isStandalone } from "@/utils/pwa.js";
 import { openInstallSheet } from "@/components/common/install-nudge.js";
-import { CATALOG } from "@/data/achievements.js";
 
 // Tour guidé élève — 1× à la première arrivée sur l'accueil (l'onboarding
 // plein écran est déjà passé : main.js le monte AVANT cette page).
@@ -512,13 +511,17 @@ const STYLE = `<style>
 
 /* ── Tag label ── */
 .acc-lg-tag {
-  display: inline-flex; align-items: center; gap: 5px;
+  display: inline-flex; align-items: center; gap: 7px;
   font: 800 13px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em;
   color: var(--acc-vio);
   position: relative; z-index: 1;
   background: color-mix(in srgb, var(--a) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--a) 18%, transparent);
-  border-radius: 100px; padding: 5px 11px 5px 8px;
+  border-radius: 100px; padding: 4px 12px 4px 4px;
+}
+.acc-lg-tag .pg-med {
+  flex: none;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.16));
 }
 
 /* ── Le RANG — héros de la carte ── */
@@ -900,64 +903,6 @@ const STYLE = `<style>
   color: var(--a-txt); text-decoration: none;
 }
 
-/* ═══════════════ BADGES TEASER ══════════════════════════════════ */
-.acc2-badges {
-  display: flex; gap: 9px;
-  padding: 6px 18px 8px;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.acc2-badges::-webkit-scrollbar { display: none; }
-.acc2-badge-cell {
-  width: 62px; height: 62px; flex: none;
-  background: var(--su); border: 1px solid var(--bo);
-  border-radius: 18px; display: grid; place-items: center;
-  box-shadow: 0 6px 16px -8px rgba(80,50,160,.25);
-  position: relative;
-  scroll-snap-align: start;
-  cursor: pointer; text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .14s var(--ease-spring), box-shadow .14s ease;
-}
-.acc2-badge-cell:active { transform: scale(.92); }
-.acc2-badge-cell:focus-visible {
-  outline: 2px solid var(--a); outline-offset: 2px;
-}
-@media (hover: hover) and (pointer: fine) {
-  .acc2-badge-cell:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 22px -8px rgba(80,50,160,.4);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .acc2-badge-cell { transition: none; }
-  .acc2-badge-cell:active { transform: none; }
-}
-.acc2-badge-cell img {
-  width: 46px; height: 46px; object-fit: contain;
-  filter: drop-shadow(0 3px 5px rgba(40,20,90,.22));
-}
-.acc2-badge-cell.acc2-badge-new {
-  border-color: var(--acc-vio-lt);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--a-lt) 32%, transparent), 0 8px 18px -7px color-mix(in srgb, var(--a) 48%, transparent);
-}
-.acc2-badge-cell.acc2-badge-new::after {
-  content: ""; position: absolute; top: -3px; right: -3px;
-  width: 12px; height: 12px; border-radius: 50%;
-  background: #ff4d6d; border: 2.5px solid var(--su);
-  box-shadow: 0 2px 5px rgba(255,77,109,.45);
-}
-.acc2-badge-cell.acc2-badge-locked img {
-  filter: grayscale(1) brightness(.75) drop-shadow(0 3px 5px rgba(40,20,90,.14));
-  opacity: .82;
-}
-.acc2-badge-cell.acc2-badge-locked::after {
-  content: ""; position: absolute; inset: 0; border-radius: 18px;
-  background: rgba(0,0,0,.08);
-}
-
 /* ── Tes devoirs (carte du moniteur — indigo, injectée si en attente) ── */
 .acc2-devoirs {
   display: flex; align-items: center; gap: 12px;
@@ -972,7 +917,8 @@ const STYLE = `<style>
 @media (prefers-reduced-motion: reduce) { .acc2-devoirs { animation: none; } }
 .acc2-devoirs:active { transform: scale(.99); }
 .acc2-devoirs::before { content: ''; position: absolute; right: -30px; top: -42px; width: 158px; height: 158px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%); pointer-events: none; }
-.acc2-devoirs-ico { width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(255,255,255,.18); position: relative; z-index: 1; }
+.acc2-devoirs-ico { width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
+.acc2-devoirs-ico .pg-med { filter: drop-shadow(0 3px 6px rgba(10,8,40,.35)); }
 .acc2-devoirs-txt { flex: 1; min-width: 0; position: relative; z-index: 1; }
 .acc2-devoirs-t { font: 800 15px/1.15 'Baloo 2', 'Plus Jakarta Sans', sans-serif; }
 .acc2-devoirs-s { font: 600 11.5px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.85); margin-top: 2px; }
@@ -1092,12 +1038,10 @@ export async function mount(root) {
       ]);
 
     // RPCs optionnels (peuvent ne pas exister encore)
-    const [pendingSessionsRes, todayQuestsRes, achievementsRes] =
-      await Promise.allSettled([
-        sb.rpc("get_pending_sessions_eleve"),
-        sb.rpc("get_today_quests"),
-        sb.rpc("get_my_achievements"),
-      ]);
+    const [pendingSessionsRes, todayQuestsRes] = await Promise.allSettled([
+      sb.rpc("get_pending_sessions_eleve"),
+      sb.rpc("get_today_quests"),
+    ]);
 
     const profile = profileRes.value?.data || {
       prenom: me.prenom || "Toi",
@@ -1178,10 +1122,6 @@ export async function mount(root) {
     // Indépendant du streak serveur (streaks table), purement local.
     const dailyStreakCount = getDailyStreak();
 
-    // Trophées réels pour le rail « Tes badges » (plus de badges en dur qui
-    // mentent). RPC optionnelle → [] si indispo (rail = teaser à viser).
-    const achievements = achievementsRes.value?.data || [];
-
     track("streak.viewed", { days: streak.current_streak, status: streakSt });
 
     root.innerHTML = render({
@@ -1197,7 +1137,6 @@ export async function mount(root) {
       pendingNotif,
       dailyQuiz,
       dailyStreakCount,
-      achievements,
     });
     wire(root, {
       streak,
@@ -1313,57 +1252,6 @@ function streakStatus(streak) {
   return hoursLeft < 6 ? "critical" : "at_risk";
 }
 
-// ─── Rail « Tes badges » ──────────────────────────────────────────
-// Aperçu interactif des VRAIS trophées de l'élève (plus de badges en dur) :
-// jusqu'à 4 débloqués les plus récents + le prochain à viser (verrouillé).
-// Chaque vignette est un lien profond #/trophees/{key} → ouvre le détail.
-function renderBadgesRail(achievements = []) {
-  const unlockedKeys = new Set(achievements.map((a) => a.achievement_key));
-  // Set des trophées déjà vus (partagé avec trophees.js / nav-bottom).
-  let seen = new Set();
-  try {
-    seen = new Set(JSON.parse(localStorage.getItem("pg-troph-seen") || "[]"));
-  } catch {
-    /* localStorage indispo → tous neufs, pas grave */
-  }
-
-  // Débloqués, du plus récent au plus ancien, mappés sur le catalogue.
-  const recent = achievements
-    .slice()
-    .sort(
-      (a, b) =>
-        new Date(b.unlocked_at || 0).getTime() -
-        new Date(a.unlocked_at || 0).getTime(),
-    )
-    .map((a) => CATALOG.find((t) => t.key === a.achievement_key))
-    .filter(Boolean)
-    .slice(0, 4);
-
-  // Prochain(s) à viser = premiers du catalogue non débloqués (complète à 5).
-  const locked = CATALOG.filter((t) => !unlockedKeys.has(t.key));
-  const nextLocked = locked.slice(0, Math.max(1, 5 - recent.length));
-
-  const cells = [];
-  for (const t of recent) {
-    const isNew = !seen.has(t.key);
-    cells.push(`
-      <a class="acc2-badge-cell${isNew ? " acc2-badge-new" : ""}" role="listitem"
-         href="#/trophees/${esc(t.key)}"
-         aria-label="Trophée ${esc(t.title)}${isNew ? ", nouveau" : ""}">
-        <img src="${esc(t.image || "")}" alt="" loading="lazy">
-      </a>`);
-  }
-  for (const t of nextLocked) {
-    cells.push(`
-      <a class="acc2-badge-cell acc2-badge-locked" role="listitem"
-         href="#/trophees/${esc(t.key)}"
-         aria-label="Trophée à débloquer : ${esc(t.title)}">
-        <img src="${esc(t.image || "")}" alt="" loading="lazy">
-      </a>`);
-  }
-  return cells.join("");
-}
-
 // ─── Render ───────────────────────────────────────────────────────
 function render({
   me,
@@ -1378,7 +1266,6 @@ function render({
   pendingNotif,
   dailyQuiz,
   dailyStreakCount = 0,
-  achievements = [],
 }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom = profile.prenom || me.prenom || "Toi";
@@ -1389,7 +1276,8 @@ function render({
   const installBanner = !isStandalone()
     ? `<style>
     .acc-install{display:flex;align-items:center;gap:10px;margin:0 16px 12px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb, var(--a) 7%, transparent);border:1px solid color-mix(in srgb, var(--a) 22%, transparent);box-shadow:0 3px 10px -4px color-mix(in srgb, var(--a) 20%, transparent)}
-    .acc-install-ico{flex:0 0 34px;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb, var(--a) 14%, transparent);color:var(--acc-vio)}
+    .acc-install-ico{flex:0 0 38px;width:38px;height:38px;display:flex;align-items:center;justify-content:center}
+    .acc-install-ico .pg-med{filter:drop-shadow(0 3px 6px rgba(0,0,0,.14))}
     .acc-install-txt{min-width:0;flex:1}
     .acc-install-t{font:700 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
     .acc-install-s{font:500 11px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
@@ -1397,7 +1285,7 @@ function render({
     .acc-install-btn:active{transform:scale(.96)}
     </style>
     <div class="acc-install" id="acc-install">
-      <div class="acc-install-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></div>
+      <div class="acc-install-ico" aria-hidden="true">${medallion("fusee", "cyan", { size: 38 })}</div>
       <div class="acc-install-txt">
         <div class="acc-install-t">Installe PermiGo sur ton téléphone</div>
         <div class="acc-install-s">Accès direct + tes rappels — 10 secondes.</div>
@@ -1612,15 +1500,6 @@ function render({
   <!-- Slot coffre (injecté async par _loadAndInjectChests) -->
   <div id="acc-chest-slot"></div>
 
-  <!-- ══ TES BADGES — teaser vers la page trophées ══ -->
-  <div class="acc2-sec">
-    <h2>Tes badges</h2>
-    <a href="#/trophees" id="acc-badges-voir-tout">Voir tout</a>
-  </div>
-  <div class="acc2-badges" role="list" aria-label="Aperçu de tes trophées">
-    ${renderBadgesRail(achievements)}
-  </div>
-
 </div>
 
 <!-- STREAK BOTTOM SHEET -->
@@ -1758,12 +1637,6 @@ function wire(
     track("cta.clicked", { cta_type: "en_situation_card" });
   });
 
-  // Badges teaser — lien « Voir tout »
-  root.querySelector("#acc-badges-voir-tout")?.addEventListener("click", () => {
-    haptic("tap");
-    track("cta.clicked", { cta_type: "badges_voir_tout" });
-  });
-
   // Streak badge → bottom sheet
   const bsBg = root.querySelector("#bs-bg");
   const bsSheet = root.querySelector("#bs-streak");
@@ -1850,10 +1723,10 @@ function wire(
   });
 }
 
-// ─── Tes ligues async (École + Révision, à égalité) ──────────────
-// Deux dimensions distinctes, mises en avant pareil :
-//  - Ligue École   = classement REMC (validations moniteur)        → get_my_leaderboard_position
-//  - Ligue Révision = effort solo (quiz réussis + examens blancs)  → get_theory_leaderboard
+// ─── Héros « Ta Ligue » (async) — Conduite + Révision ────────────
+// Deux dimensions à égalité, mises en avant dans une carte Arène :
+//  - Conduite = classement REMC cumulé à vie   → get_eleve_leaderboard
+//  - Révision = saison hebdo (points semaine)  → get_theory_leaderboard_weekly
 async function _loadAndInjectLeagues(root) {
   const slot = root.querySelector("#acc-lb-slot");
   if (!slot) return;
@@ -1907,7 +1780,7 @@ async function _loadAndInjectDevoirs(root, me) {
     if (!slot) return;
     slot.innerHTML = `
       <a class="acc2-devoirs" href="#/revision-conduite" aria-label="Tes devoirs du moniteur : ${count} à faire">
-        <span class="acc2-devoirs-ico">${icon("clipboard", { size: 22, strokeWidth: 2.2 })}</span>
+        <span class="acc2-devoirs-ico">${medallion("livret", "indigo", { size: 38 })}</span>
         <span class="acc2-devoirs-txt">
           <span class="acc2-devoirs-t">Tes devoirs · ${count} à faire</span>
           <span class="acc2-devoirs-s">De ton moniteur — à boucler avant ta prochaine validation</span>
@@ -1937,7 +1810,8 @@ async function _loadAndInjectCompteRendu(root, me) {
       <style>
       .acc2-cr-banner{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 14px 14px 16px;background:color-mix(in srgb,var(--a) 8%,var(--su));border:1px solid color-mix(in srgb,var(--a) 20%,transparent);border-radius:18px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .12s;text-decoration:none}
       .acc2-cr-banner:active{background:color-mix(in srgb,var(--a) 14%,var(--su))}
-      .acc2-cr-ico{flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--a) 14%,transparent);display:flex;align-items:center;justify-content:center;color:var(--a-txt)}
+      .acc2-cr-ico{flex:0 0 40px;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
+      .acc2-cr-ico .pg-med{filter:drop-shadow(0 3px 6px rgba(0,0,0,.16))}
       .acc2-cr-txt{flex:1;min-width:0}
       .acc2-cr-t{font:700 13.5px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
       .acc2-cr-s{font:500 11.5px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
@@ -1945,9 +1819,7 @@ async function _loadAndInjectCompteRendu(root, me) {
       </style>
       <div class="acc2-cr-banner" id="acc-cr-banner" role="button" tabindex="0"
            aria-label="Ton moniteur t'a envoyé un compte-rendu — appuie pour le lire">
-        <div class="acc2-cr-ico" aria-hidden="true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        </div>
+        <div class="acc2-cr-ico" aria-hidden="true">${medallion("fiches", "violet", { size: 38 })}</div>
         <div class="acc2-cr-txt">
           <div class="acc2-cr-t">Ton moniteur t'a envoyé un compte-rendu</div>
           <div class="acc2-cr-s">Appuie pour lire son retour sur ta leçon</div>
@@ -2044,7 +1916,8 @@ async function _loadAndInjectFlashQuiz(root, me) {
           background:linear-gradient(135deg,#f59e0b,#f97316);box-shadow:0 6px 20px rgba(249,115,22,.32);animation:fqBannerIn .4s var(--ease-snap)}
         @keyframes fqBannerIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
         .acc2-flashq:active{transform:scale(.99)}
-        .acc2-fq-ico{font-size:24px;line-height:1;animation:fqWiggle 1.4s ease-in-out infinite}
+        .acc2-fq-ico{display:inline-flex;flex:none;line-height:0;animation:fqWiggle 1.4s ease-in-out infinite}
+        .acc2-fq-ico .pg-med{filter:drop-shadow(0 2px 5px rgba(0,0,0,.28))}
         @keyframes fqWiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
         .acc2-fq-text{flex:1;min-width:0}
         .acc2-fq-title{font:800 15px/1.2 'Plus Jakarta Sans',sans-serif;color:#fff}
@@ -2058,7 +1931,7 @@ async function _loadAndInjectFlashQuiz(root, me) {
       "afterend",
       `
       <div class="acc2-flashq" id="acc-flashq" role="button" tabindex="0" aria-label="Quiz éclair de ton moniteur, réponds maintenant">
-        <span class="acc2-fq-ico" aria-hidden="true">${ill("eclair", { size: 24 })}</span>
+        <span class="acc2-fq-ico" aria-hidden="true">${medallion("eclair", "gold", { size: 34 })}</span>
         <div class="acc2-fq-text">
           <div class="acc2-fq-title">Quiz éclair de ton moniteur</div>
           <div class="acc2-fq-sub">3 questions · réponds maintenant</div>
