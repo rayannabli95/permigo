@@ -1,61 +1,39 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — La Roue (aperçu jouable)
-// v1 : tour gratuit du jour (localStorage), révélation cosmétique visuelle.
-// Le panneau « gros lots réels » est un TEASER (offerts/personnalisés par le
-// moniteur) — pas encore crédité : l'économie de la roue (coût du tour, débit
-// volants, grant serveur) attend la validation produit + une migration DB.
-// DA « Arène » nuit-violet + or (comme le quiz).
+// Élève — La Roue de la chance (tour gratuit du jour)
+// Le tirage ET le crédit des volants se font CÔTÉ SERVEUR via le RPC
+// spin_roue_daily() (1 tour/jour garanti, impossible à tricher).
+// Repli « aperçu » propre tant que la migration n'est pas posée en prod
+// (le RPC renvoie alors une erreur « fonction inconnue »).
+// Les gros lots réels (disque A, heure offerte) + le gacha cosmétique
+// restent en teaser : ils attendent la config moniteur.
+// DA « Arène » nuit-violet + or.
 // ═══════════════════════════════════════════════════════════════
+import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
+import { toast } from "@/components/common/toast.js";
 
-const LS_FREE = "pg-roue-free-last"; // YYYY-MM-DD du dernier tour gratuit
+const LS_FREE = "pg-roue-free-last"; // repli aperçu : YYYY-MM-DD du dernier tour
 
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
-function freeUsedToday() {
-  try {
-    return localStorage.getItem(LS_FREE) === todayKey();
-  } catch {
-    return false;
-  }
-}
-function markFreeUsed() {
-  try {
-    localStorage.setItem(LS_FREE, todayKey());
-  } catch {
-    /* noop */
-  }
-}
 
-// 8 segments (cosmétique). L'ordre suit le conic-gradient du disque.
-const SEGMENTS = [
-  { ic: "👑", label: "Skin légendaire", rarete: "legend" },
-  { ic: "🎨", label: "Fond néon", rarete: "rare" },
-  { ic: "🏎️", label: "Skin épique", rarete: "epique" },
-  { ic: "🪙", label: "20 volants", rarete: "commun" },
-  { ic: "🎁", label: "Gros lot réel", rarete: "reel" },
-  { ic: "🌌", label: "Fond animé", rarete: "epique" },
-  { ic: "🪙", label: "10 volants", rarete: "commun" },
-  { ic: "🏷️", label: "Titre rare", rarete: "rare" },
-];
-// Tirage cosmétique pondéré (le gros lot réel n'est JAMAIS tiré en aperçu).
-const WEIGHTED = [3, 1, 2, 3, 2, 3, 1]; // indices 0,1,2,3,5,6,7 (pas le 4=réel)
-const POOL = [0, 1, 2, 3, 5, 6, 7];
+// 8 segments = paliers de volants (alignés sur la distribution serveur).
+// L'ordre suit le disque (0 = premier segment sous le pointeur haut).
+const SEGMENTS = [20, 50, 10, 30, 100, 10, 20, 30];
 
-function pickSegment() {
-  const total = WEIGHTED.reduce((a, b) => a + b, 0);
-  let r = Math.floor(Math.random() * total);
-  for (let i = 0; i < POOL.length; i++) {
-    if (r < WEIGHTED[i]) return POOL[i];
-    r -= WEIGHTED[i];
-  }
-  return 3;
+// Renvoie l'index d'un segment portant ce montant (aléatoire si plusieurs).
+function segmentFor(amount) {
+  const idx = SEGMENTS.map((v, i) => (v === amount ? i : -1)).filter(
+    (i) => i >= 0,
+  );
+  if (!idx.length) return 0;
+  return idx[Math.floor(Math.random() * idx.length)];
 }
 
 const STYLE = `<style>
@@ -85,8 +63,8 @@ const STYLE = `<style>
 .roue-kicker {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 4px 12px; border-radius: 999px; margin-bottom: 8px;
-  background: rgba(111,224,22,.16); border: 1px solid rgba(111,224,22,.4);
-  font: 600 10px/1 'Fredoka', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #b9f26e;
+  background: rgba(255,210,74,.16); border: 1px solid rgba(255,210,74,.4);
+  font: 600 10px/1 'Fredoka', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-s);
 }
 .roue-h1 {
   font: 800 25px/1.05 'Baloo 2', cursive;
@@ -95,7 +73,6 @@ const STYLE = `<style>
 }
 .roue-sub { margin-top: 5px; font: 700 12.5px/1.4 'Nunito', sans-serif; color: var(--mu); }
 
-/* la roue */
 .roue-zone { position: relative; margin: 14px auto 4px; width: 290px; height: 290px; }
 .roue-zone::before {
   content: ""; position: absolute; left: 50%; top: 50%; width: 330px; height: 330px;
@@ -114,15 +91,24 @@ const STYLE = `<style>
   transform: rotate(0deg); transition: transform 5.2s cubic-bezier(.16,.84,.28,1);
   box-shadow: inset 0 0 0 3px rgba(10,7,24,.85), inset 0 4px 18px rgba(0,0,0,.6);
   background: conic-gradient(
-    #ffd24a 0deg 45deg, #54a0ff 45deg 90deg, #b06bff 90deg 135deg, #9a93c8 135deg 180deg,
-    #6fe016 180deg 225deg, #b06bff 225deg 270deg, #9a93c8 270deg 315deg, #54a0ff 315deg 360deg);
+    #9a6bff 0deg 45deg, #54a0ff 45deg 90deg, #6fe016 90deg 135deg, #ffb347 135deg 180deg,
+    #ffd24a 180deg 225deg, #6fe016 225deg 270deg, #9a6bff 270deg 315deg, #ffb347 315deg 360deg);
 }
 .roue-disc::after {
   content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
   background: repeating-conic-gradient(from 0deg, transparent 0deg 44.4deg, rgba(10,7,24,.8) 44.4deg 45deg);
 }
 .roue-seg { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform: translate(-50%,-50%) rotate(var(--a)); }
-.roue-seg > span { position: absolute; left: 50%; top: -100px; transform: translateX(-50%); font-size: 23px; width: 34px; text-align: center; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
+.roue-seg > span {
+  position: absolute; left: 50%; top: -98px; transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 2px; white-space: nowrap;
+  font: 800 15px/1 'Baloo 2', cursive; color: #1a1030; text-shadow: 0 1px 0 rgba(255,255,255,.35);
+}
+.roue-seg .rcoin {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #fff7da, #ffd24a 60%, #ff9c1c);
+  border: 1px solid #fff5cf; box-shadow: 0 1px 0 #c87d12;
+}
 .roue-hub {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 4;
   width: 66px; height: 66px; border-radius: 50%;
@@ -138,7 +124,6 @@ const STYLE = `<style>
   filter: drop-shadow(0 3px 5px rgba(0,0,0,.6)) drop-shadow(0 0 8px rgba(255,180,40,.7));
 }
 
-/* CTA */
 .roue-cta {
   display: block; width: 100%; max-width: 330px; margin: 16px auto 0; min-height: 60px;
   border: 0; border-radius: 18px; cursor: pointer;
@@ -151,7 +136,6 @@ const STYLE = `<style>
 .roue-cta:disabled { filter: grayscale(.5) brightness(.8); cursor: default; }
 .roue-free { text-align: center; margin-top: 10px; font: 600 12px/1.4 'Fredoka', sans-serif; color: var(--mu); }
 
-/* résultat */
 .roue-result {
   margin: 14px auto 0; max-width: 360px; text-align: center;
   padding: 14px 16px; border-radius: 18px;
@@ -159,11 +143,10 @@ const STYLE = `<style>
   animation: rouepop .35s cubic-bezier(.34,1.56,.64,1) both;
 }
 @keyframes rouepop { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
-.roue-result-ic { font-size: 34px; }
-.roue-result-t { font: 800 16px/1.2 'Baloo 2', cursive; margin-top: 4px; }
-.roue-result-s { font: 700 12px/1.4 'Nunito', sans-serif; color: var(--mu2); margin-top: 2px; }
+.roue-result-v { font: 800 26px/1 'Baloo 2', cursive; color: var(--gold-s); display: inline-flex; align-items: center; gap: 7px; }
+.roue-result-v .rcoin2 { width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 36% 30%, #fff7da, #ffd24a 60%, #ff9c1c); border: 1.5px solid #fff5cf; box-shadow: 0 2px 0 #c87d12; }
+.roue-result-s { font: 700 12px/1.4 'Nunito', sans-serif; color: var(--mu2); margin-top: 5px; }
 
-/* gros lots réels (teaser) */
 .roue-real {
   margin: 20px auto 0; max-width: 400px; border-radius: 20px; padding: 16px;
   background: linear-gradient(180deg, rgba(111,224,22,.10), rgba(88,204,2,.03)),
@@ -192,6 +175,10 @@ const STYLE = `<style>
 @media (prefers-reduced-motion: reduce) { .roue-disc { transition: transform 1.2s ease-out; } .roue-result { animation: none; } }
 </style>`;
 
+function segLabel(v) {
+  return `<span><span class="rcoin" aria-hidden="true"></span>${v}</span>`;
+}
+
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
@@ -200,7 +187,40 @@ export async function mount(root) {
   const prenom =
     (me.prenom || me.nom || "ton moniteur").trim().split(/\s+/)[0] || "R";
   const initiale = prenom.charAt(0).toUpperCase() || "R";
-  const used = freeUsedToday();
+
+  // État initial : le RPC est-il posé (migration en prod) ? A-t-on déjà tourné ?
+  // - 'ready'   : peut tourner pour de vrai (RPC live, pas encore tourné aujourd'hui)
+  // - 'done'    : déjà tourné aujourd'hui (RPC live)
+  // - 'apercu'  : migration pas encore posée → repli visuel (gate localStorage)
+  let mode = "apercu";
+  try {
+    const { data, error } = await sb
+      .from("roue_daily_spins")
+      .select("volants")
+      .eq("spin_date", todayKey())
+      .maybeSingle();
+    if (error) {
+      // 42P01 (table inconnue) / 404 → migration pas posée → aperçu
+      mode = "apercu";
+    } else {
+      mode = data ? "done" : "ready";
+    }
+  } catch {
+    mode = "apercu";
+  }
+  if (mode === "apercu" && localStorage.getItem(LS_FREE) === todayKey()) {
+    mode = "done";
+  }
+
+  const disabled = mode === "done";
+  const ctaLabel = disabled ? "Reviens demain" : "Tour gratuit du jour";
+  const freeLabel = disabled
+    ? "Ton tour gratuit est déjà passé aujourd'hui."
+    : "1 tour offert chaque jour — de vrais volants.";
+  const kicker =
+    mode === "apercu"
+      ? "Aperçu · bientôt jouable pour de vrai"
+      : "Tour gratuit du jour";
 
   root.innerHTML = `${STYLE}
 <div class="roue">
@@ -212,16 +232,16 @@ export async function mount(root) {
   </div>
 
   <div class="roue-hero">
-    <div class="roue-kicker">Aperçu · bientôt jouable pour de vrai</div>
-    <div class="roue-h1">Tente ta chance</div>
-    <div class="roue-sub">Skins, titres, fonds… et parfois un vrai cadeau signé de ton moniteur.</div>
+    <div class="roue-kicker">${esc(kicker)}</div>
+    <div class="roue-h1">Roue de la chance</div>
+    <div class="roue-sub">Gagne des volants chaque jour — et bientôt des skins et de vrais cadeaux de ton moniteur.</div>
   </div>
 
   <div class="roue-zone">
     <div class="roue-ptr" aria-hidden="true"></div>
     <div class="roue-rim">
       <div class="roue-disc" id="roue-disc">
-        ${SEGMENTS.map((s, i) => `<div class="roue-seg" style="--a:${22.5 + i * 45}deg"><span>${s.ic}</span></div>`).join("")}
+        ${SEGMENTS.map((v, i) => `<div class="roue-seg" style="--a:${22.5 + i * 45}deg">${segLabel(v)}</div>`).join("")}
       </div>
     </div>
     <div class="roue-hub" aria-hidden="true">
@@ -229,15 +249,15 @@ export async function mount(root) {
     </div>
   </div>
 
-  <button class="roue-cta" id="roue-spin" ${used ? "disabled" : ""}>${used ? "Reviens demain" : "Tour gratuit du jour"}</button>
-  <div class="roue-free" id="roue-free">${used ? "Ton tour gratuit est déjà passé aujourd'hui." : "1 tour offert chaque jour."}</div>
+  <button class="roue-cta" id="roue-spin" ${disabled ? "disabled" : ""}>${ctaLabel}</button>
+  <div class="roue-free" id="roue-free">${freeLabel}</div>
 
   <div id="roue-result-slot"></div>
 
   <section class="roue-real">
     <div class="roue-real-h">
       <h2>🎁 Gros lots réels</h2>
-      <span class="tag">Ultra-rares</span>
+      <span class="tag">Bientôt</span>
     </div>
     <div class="roue-real-row">
       <div class="roue-real-ic">🅰️</div>
@@ -264,7 +284,7 @@ export async function mount(root) {
 
   <div class="roue-note">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-    <p>Les <b>gros lots réels</b> arriveront quand ton moniteur les activera. Les volants se gagnent en révisant — <b>jamais</b> avec de l'argent.</p>
+    <p>Les <b>gros lots réels</b> arriveront quand ton moniteur les activera. Les volants se gagnent en jouant — <b>jamais</b> avec de l'argent.</p>
   </div>
 </div>`;
 
@@ -278,35 +298,94 @@ export async function mount(root) {
   let turns = 0;
   let busy = false;
 
-  btn?.addEventListener("click", () => {
-    if (busy || freeUsedToday()) return;
+  function spinTo(segIdx) {
+    turns += 5;
+    const target = 360 * turns + (360 - (segIdx * 45 + 22.5));
+    disc.style.transform = `rotate(${target}deg)`;
+  }
+
+  function showResult(volants, apercu) {
+    const slot = root.querySelector("#roue-result-slot");
+    if (!slot) return;
+    slot.innerHTML = `
+    <div class="roue-result">
+      <div class="roue-result-v"><span class="rcoin2" aria-hidden="true"></span>+${volants}</div>
+      <div class="roue-result-s">${
+        apercu
+          ? "Aperçu — tes volants seront crédités quand la roue ouvrira."
+          : "volants ajoutés à ton solde !"
+      }</div>
+    </div>`;
+  }
+
+  function finishDone() {
+    btn.textContent = "Reviens demain";
+    btn.disabled = true;
+    if (free) free.textContent = "Ton tour gratuit est déjà passé aujourd'hui.";
+    busy = false;
+  }
+
+  btn?.addEventListener("click", async () => {
+    if (busy || btn.disabled) return;
     busy = true;
     haptic("select");
-    track("roue.spin", { kind: "free" });
-    const seg = pickSegment();
-    turns += 5;
-    // amène le centre du segment sous le pointeur (haut)
-    const target = 360 * turns + (360 - (seg * 45 + 22.5));
-    disc.style.transform = `rotate(${target}deg)`;
     btn.disabled = true;
     btn.textContent = "La roue tourne…";
-    setTimeout(() => {
-      markFreeUsed();
-      const s = SEGMENTS[seg];
-      const slot = root.querySelector("#roue-result-slot");
-      if (slot) {
-        slot.innerHTML = `
-        <div class="roue-result">
-          <div class="roue-result-ic" aria-hidden="true">${s.ic}</div>
-          <div class="roue-result-t">${esc(s.label)} !</div>
-          <div class="roue-result-s">Aperçu — tes récompenses seront créditées quand la roue ouvrira pour de vrai.</div>
-        </div>`;
-      }
-      btn.textContent = "Reviens demain";
-      if (free)
-        free.textContent = "Ton tour gratuit est déjà passé aujourd'hui.";
-      haptic("tap");
+
+    if (mode === "apercu") {
+      // Repli visuel : la migration n'est pas posée → aucun crédit réel.
+      track("roue.spin", { kind: "apercu" });
+      const seg = Math.floor(Math.random() * SEGMENTS.length);
+      spinTo(seg);
+      setTimeout(() => {
+        try {
+          localStorage.setItem(LS_FREE, todayKey());
+        } catch {
+          /* noop */
+        }
+        showResult(SEGMENTS[seg], true);
+        finishDone();
+      }, 5300);
+      return;
+    }
+
+    // Mode réel : le serveur tire ET crédite.
+    track("roue.spin", { kind: "free" });
+    let res = null;
+    try {
+      const { data, error } = await sb.rpc("spin_roue_daily");
+      if (error) throw error;
+      res = data;
+    } catch (e) {
+      // RPC absent (migration retirée entre-temps) ou réseau → repli doux
+      console.warn("[roue] spin_roue_daily failed", e?.message);
+      toast("Réessaie dans un instant", "error", 2200);
+      btn.disabled = false;
+      btn.textContent = "Tour gratuit du jour";
       busy = false;
+      return;
+    }
+
+    if (res?.already) {
+      spinTo(0);
+      setTimeout(finishDone, 900);
+      return;
+    }
+
+    const volants = res?.volants ?? 10;
+    spinTo(segmentFor(volants));
+    setTimeout(() => {
+      showResult(volants, false);
+      // Met à jour le solde du header (event écouté dans header-top.js)
+      if (typeof res?.new_balance === "number") {
+        window.dispatchEvent(
+          new CustomEvent("pg-gemmes-changed", {
+            detail: { balance: res.new_balance },
+          }),
+        );
+      }
+      haptic("tap");
+      finishDone();
     }, 5300);
   });
 }
