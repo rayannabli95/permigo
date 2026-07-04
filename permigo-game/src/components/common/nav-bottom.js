@@ -113,7 +113,8 @@ const STYLE = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 6px 4px 8px;
+    gap: 3px;
+    padding: 6px 2px 8px;
     cursor: pointer;
     color: var(--mu2);
     background: none;
@@ -174,29 +175,22 @@ const STYLE = `
   @media (prefers-reduced-motion: reduce) {
     .bn-limelight { transition: none; }
   }
-  /* Label : visible sous l'onglet actif uniquement. Positionné en absolu
-     pour que le picto reste centré — aucun reflow au changement d'onglet. */
+  /* Label : TOUJOURS visible sous chaque picto (repère clair des sections —
+     les noms « Mon permis »/« Récompenses » ne se devinent pas à l'icône). */
   .bn-label {
-    position: absolute;
-    left: 0; right: 0;
-    bottom: 5px;
+    max-width: 100%;
     text-align: center;
-    font: 700 10px/1 'Inter', sans-serif;
-    letter-spacing: .01em;
+    font: 700 9.5px/1 'Inter', sans-serif;
+    letter-spacing: -.1px;
     white-space: nowrap;
-    opacity: 0;
-    transform: translateY(3px);
-    pointer-events: none;
-    transition: opacity .18s ease, transform .2s var(--ease-spring);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: inherit;
+    transition: color .15s var(--ease);
   }
   .bn-tab.active .bn-label {
-    opacity: 1;
-    transform: translateY(0);
-    /* Label 10px : l'accent pur ne tient pas le 4.5:1 — on l'ancre vers l'encre */
+    /* Label 9.5px : l'accent pur ne tient pas le 4.5:1 — on l'ancre vers l'encre */
     color: color-mix(in srgb, var(--adk) 55%, var(--ink));
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .bn-label { transition: opacity .12s ease; transform: none; }
   }
   .bn-tab:active { transform: scale(.93); transition: transform .12s; }
   @keyframes bnTabIntro {
