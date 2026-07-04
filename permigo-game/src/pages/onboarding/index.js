@@ -358,10 +358,10 @@ export async function mount(root) {
     });
   }
 
-  // ─── Skip → finish direct ──────────────────────────────────────
+  // ─── Skip → finish direct (sans l'accroche : il veut aller vite) ──
   root.querySelector("#ob-skip").addEventListener("click", () => {
     track("onboarding.skipped", {});
-    finish();
+    finish({ intro: false });
   });
 
   // ─── CTA principal ─────────────────────────────────────────────
@@ -453,14 +453,16 @@ export async function mount(root) {
   );
 
   // ─── Finish ───────────────────────────────────────────────────
-  async function finish() {
+  async function finish(opts = {}) {
     if (finishing) return;
     finishing = true;
+    const withIntro = opts.intro !== false; // false depuis « Passer »
 
     track("onboarding.completed", {
       avatar_chosen: !!avatar,
       accent_id: accentId,
       reminders_on: notifWanted,
+      with_intro: withIntro,
       version: "v4-onepage",
     });
 
@@ -490,6 +492,22 @@ export async function mount(root) {
       gemmes: 25,
       title: "Bienvenue dans PermiGo !",
     }).catch(() => {});
+
+    // Accroche « mise en situation » : 3 scènes jouées juste après le tuto →
+    // premier contact « wow » avec le produit. Le jeu est plein écran (le chrome
+    // n'est pas encore monté) ; sa sortie recharge l'app sur l'accueil, où le
+    // coffre de bienvenue s'ouvre. Zappée si l'élève a choisi « Passer ».
+    if (withIntro) {
+      try {
+        const { mount: mountSituations } =
+          await import("@/pages/eleve/en-situation.js");
+        await mountSituations(root, "intro");
+        return;
+      } catch (e) {
+        console.error("[onboarding] accroche en-situation KO", e);
+        /* repli : atterrissage direct sur l'accueil ci-dessous */
+      }
+    }
 
     location.hash = "#/";
     location.reload();
