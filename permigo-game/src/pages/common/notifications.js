@@ -24,8 +24,10 @@ function notifRoute(n) {
     case "achievement_unlocked":
       return "#/trophees";
     case "streak_at_risk":
+    case "streak_risk":
     case "post_validation_quiz":
     case "consolidation_quiz":
+    case "flash_quiz":
       return "#/parcours";
     case "session_confirmed":
     case "session_refused":
@@ -34,12 +36,19 @@ function notifRoute(n) {
       return "#/parcours";
     case "relance":
       return d.link || "#/parcours";
+    case "emotional_nudge":
+      // La source pose data.route ('#/parcours', '#/'…) ; on l'honore.
+      return d.route || "#/parcours";
+    case "student_at_risk":
+      // Alerte moniteur « untel décroche » → sa liste d'élèves à relancer.
+      return "#/eleves";
     case "compte_rendu":
       return d.compte_rendu_id
         ? `#/compte-rendu/${d.compte_rendu_id}`
         : "#/parcours";
     default:
-      return "#/";
+      // Fallback robuste : honorer un lien explicite posé par la source.
+      return d.route || d.link || "#/";
   }
 }
 
@@ -142,6 +151,30 @@ const TYPE_META = {
     bg: "color-mix(in srgb, var(--a) 12%, transparent)",
     color: "var(--a)",
     label: "Encouragement",
+  },
+  emotional_nudge: {
+    iconName: "sparkle",
+    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    color: "var(--a)",
+    label: "Ta progression",
+  },
+  student_at_risk: {
+    iconName: "alert-triangle",
+    bg: "rgba(245,158,11,.12)",
+    color: "var(--am)",
+    label: "Élève à relancer",
+  },
+  flash_quiz: {
+    iconName: "zap",
+    bg: "rgba(139,92,246,.12)",
+    color: "var(--pu)",
+    label: "Quiz flash",
+  },
+  streak_risk: {
+    iconName: "flame",
+    bg: "rgba(239,68,68,.12)",
+    color: "var(--rd)",
+    label: "Ta série",
   },
   compte_rendu: {
     iconName: "file-text",
