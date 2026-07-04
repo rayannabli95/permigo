@@ -13,6 +13,19 @@ const EMAIL = ELEVE.email;
 const PWD = ELEVE.pwd;
 
 async function loginAsEleve(page) {
+  // Marque cookies + tutos guidés comme vus : sinon l'overlay du tour
+  // (.gt-root / .gt-catch) intercepte les clics sur les quêtes (flaky).
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem("permigo_cookie_consent", "essential");
+      localStorage.setItem("pg-tour-eleve-v1", "1");
+      localStorage.setItem("permigo-parcours-tuto-v1", "1");
+      localStorage.setItem("permigo-theory-tuto-v1", "1");
+      localStorage.setItem("pg-nav-intro-done", "1");
+    } catch {
+      /* ignore */
+    }
+  });
   // Le form de login est sur #/login (/ affiche la landing)
   await page.goto("/#/login");
   await page.waitForSelector("#lg-email", { timeout: 12_000 });
@@ -155,7 +168,9 @@ test.describe("Daily quests — fix alignement champs RPC", () => {
       route.continue();
     });
 
-    await readyCard.click();
+    // Clic en DOM direct : la card a une animation (« not stable » pour
+    // l'auto-wait) et un overlay résiduel peut intercepter le pointeur.
+    await readyCard.evaluate((el) => el.click());
 
     // Laisser le temps au RPC + animation
     await page.waitForTimeout(1_500);

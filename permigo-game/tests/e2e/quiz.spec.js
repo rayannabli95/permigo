@@ -21,6 +21,19 @@ const SUPABASE_URL =
 const SUPABASE_ANON = process.env.VITE_SUPABASE_ANON_KEY || "";
 
 async function loginAsEleve(page) {
+  // Marque cookies + tutos guidés comme vus : sinon l'overlay du tour
+  // (.gt-root) intercepte les clics sur les options du quiz (flaky).
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem("permigo_cookie_consent", "essential");
+      localStorage.setItem("pg-tour-eleve-v1", "1");
+      localStorage.setItem("permigo-parcours-tuto-v1", "1");
+      localStorage.setItem("permigo-theory-tuto-v1", "1");
+      localStorage.setItem("pg-nav-intro-done", "1");
+    } catch {
+      /* ignore */
+    }
+  });
   await page.goto("/#/login");
   await page.waitForSelector("#lg-email", { timeout: 12_000 });
   await page.fill("#lg-email", EMAIL);

@@ -1,9 +1,17 @@
 /**
- * E2E — Enseignant : page Insights
+ * E2E — Enseignant : page Stats (ex-Insights)
+ *
+ * La page a été refondue (design premium indigo raccord dashboard) :
+ *   - hero validations (.ins-hero-big) + bento 3 tuiles (.ins-bt-val)
+ *   - graphe activité 7 jours (.ins-bars, remplace l'ancienne heatmap 168 cellules)
+ *   - onglets « Avancent » / « En pause » (.ins-tab[data-tab=pause],
+ *     remplace l'ancien onglet « stagnent »)
+ *   - lignes élèves .ins-prog-row[data-eleve-id] → navigation #/livret/:id
+ *
+ * NB : l'ancien « mode rapide » de la page validation (#btn-mode-rapide,
+ * .mr-overlay) a été SUPPRIMÉ du produit — ses tests ont été retirés.
  *
  * Compte test : enseignant@test.fr / Autopilot2025!
- * Note : la route #/insights doit être câblée dans router.js par Cowork.
- * En attendant, on teste en injectant le mount() directement.
  */
 import { test, expect } from "@playwright/test";
 import { ENSEIGNANT } from "./_creds.js";
@@ -12,8 +20,10 @@ const EMAIL = ENSEIGNANT.email;
 const PWD = ENSEIGNANT.pwd;
 
 async function loginAsEnseignant(page) {
-  // Marque cookies + tuto guidés comme vus : sinon l'overlay du tour (gt-root)
+  // Réduire les animations (les tuiles bento ont des animations d'entrée) et
+  // marquer cookies + tuto guidés comme vus : sinon l'overlay du tour (gt-root)
   // peut intercepter les clics (flake récurrent côté enseignant).
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => {
     try {
       localStorage.setItem("permigo_cookie_consent", "essential");
@@ -28,31 +38,27 @@ async function loginAsEnseignant(page) {
   await page.fill("#lg-email", EMAIL);
   await page.fill("#lg-pwd", PWD);
   await page.click("#lg-submit");
-  await page.waitForSelector(".aj-page, .me-list, .vp", { timeout: 20_000 });
+  await page.waitForSelector(".aj-page, .me-page, .vs", { timeout: 20_000 });
+  // afterLogin() pose body.has-chrome en dernier : attendre ce signal avant
+  // toute navigation hash (sinon le boot écrase le hash posé trop tôt).
+  await page.waitForSelector("body.has-chrome", { timeout: 20_000 });
 }
 
 async function goToInsights(page) {
-  // Route via hash — nécessite que router.js soit câblé par Cowork
-  await page.evaluate(() => {
-    location.hash = "#/insights";
-  });
-  // Attendre soit la page insights, soit injection manuelle
-  const found = await page
-    .waitForSelector(".ins-page, .ins-widgets", { timeout: 10_000 })
-    .catch(() => null);
-  if (!found) {
-    // Route pas encore câblée → injection manuelle du module
-    await page.evaluate(async () => {
-      const { mount } = await import("/src/pages/enseignant/insights.js");
-      const root = document.querySelector("#app") || document.body;
-      await mount(root);
+  // Le boot post-login peut écraser un hash posé trop tôt → on re-pose le
+  // hash et on re-vérifie jusqu'à ce que la page stats soit montée.
+  await expect(async () => {
+    await page.evaluate(() => {
+      location.hash = "#/insights";
     });
-    await page.waitForSelector(".ins-page", { timeout: 10_000 });
-  }
+    await page.waitForSelector(".ins-page", { timeout: 4_000 });
+  }).toPass({ timeout: 25_000 });
+  // Laisser le squelette laisser place au contenu (hero rendu)
+  await page.waitForSelector(".ins-hero", { timeout: 15_000 });
 }
 
-test.describe("Insights enseignant", () => {
-  test("page insights se charge sans erreur", async ({ page }) => {
+test.describe("Stats enseignant", () => {
+  test("page stats se charge sans erreur", async ({ page }) => {
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
 
@@ -67,125 +73,74 @@ test.describe("Insights enseignant", () => {
     expect(criticalErrors).toHaveLength(0);
   });
 
-  test("les 4 KPI affichent des valeurs numériques (pas NaN ni vide)", async ({
+  test("hero + bento : 4 valeurs numériques (pas NaN ni vide)", async ({
     page,
   }) => {
     await loginAsEnseignant(page);
     await goToInsights(page);
 
-    await page.waitForSelector(".ins-widgets", { timeout: 10_000 });
+    // Hero : compteur de validations de la période
+    const heroVal = (await page.locator(".ins-hero-big").textContent()).trim();
+    expect(heroVal).toMatch(/^\d+$/);
 
-    const vals = await page.locator(".ins-widget-val").allTextContents();
-    expect(vals.length).toBe(4);
-
+    // Bento : 3 tuiles (actifs / en approche / à relancer)
+    const vals = await page.locator(".ins-bt-val").allTextContents();
+    expect(vals.length).toBe(3);
     vals.forEach((v) => {
       const txt = v.trim();
-      // Doit être un nombre ou "—" (fallback gracieux), jamais NaN ni vide
       expect(txt).not.toBe("NaN");
-      expect(txt.length).toBeGreaterThan(0);
+      expect(txt).toMatch(/^\d+$/);
     });
   });
 
-  test("heatmap s'affiche avec des cellules colorées", async ({ page }) => {
-    await loginAsEnseignant(page);
-    await goToInsights(page);
-
-    await page.waitForSelector(".ins-heatmap-grid", { timeout: 10_000 });
-    const cells = page.locator(".ins-hmap-cell");
-    const count = await cells.count();
-    // 7 jours × 24 heures = 168 cellules
-    expect(count).toBe(168);
-  });
-
-  test("clic sur un élève en stagnation → navigation vers livret", async ({
+  test("activité 7 jours : graphe à 7 colonnes (ou état vide légitime)", async ({
     page,
   }) => {
     await loginAsEnseignant(page);
     await goToInsights(page);
 
-    await page.waitForSelector(".ins-page", { timeout: 10_000 });
+    // La heatmap 7×24 a été remplacée par un graphe en barres sur 7 jours.
+    // Si aucune validation sur la période → état vide .ins-empty (légitime).
+    const hasBars = await page
+      .locator(".ins-bars")
+      .isVisible({ timeout: 5_000 })
+      .catch(() => false);
 
-    // Basculer sur l'onglet "stagnent"
-    const tabStagnent = page.locator('.ins-tab[data-tab="stagnent"]');
-    if (await tabStagnent.isVisible({ timeout: 3_000 }).catch(() => false)) {
-      await tabStagnent.click();
-      await page.waitForTimeout(400);
+    if (!hasBars) {
+      await expect(page.locator(".ins-empty").first()).toBeVisible();
+      return;
     }
+    await expect(page.locator(".ins-bar-col")).toHaveCount(7);
+  });
 
-    const eleveRow = page.locator(".ins-eleve-row[data-eleve-id]").first();
+  test("clic sur un élève en pause → navigation vers son livret", async ({
+    page,
+  }) => {
+    await loginAsEnseignant(page);
+    await goToInsights(page);
+
+    // Basculer sur l'onglet « En pause » (ex-« stagnent »)
+    const tabPause = page.locator('.ins-tab[data-tab="pause"]');
+    await expect(tabPause).toBeVisible({ timeout: 5_000 });
+    await tabPause.click();
+    await page.waitForTimeout(400);
+
+    const eleveRow = page
+      .locator("#ins-eleves-list .ins-prog-row[data-eleve-id]")
+      .first();
     if (!(await eleveRow.isVisible({ timeout: 3_000 }).catch(() => false))) {
-      test.skip(
-        true,
-        "Aucun élève en stagnation disponible en données de test",
-      );
+      test.skip(true, "Aucun élève en pause dans les données de test");
       return;
     }
 
     const eleveId = await eleveRow.getAttribute("data-eleve-id");
-    await eleveRow.click();
+    // Clic en DOM direct : les lignes ont une animation d'entrée en cascade
+    await eleveRow.evaluate((el) => el.click());
 
     // Doit naviguer vers le livret REMC de l'élève
     await page.waitForFunction((id) => location.hash.includes(id), eleveId, {
       timeout: 5_000,
     });
     expect(page.url()).toContain("livret");
-  });
-
-  test("mode rapide — sélection 2 élèves + comp → bouton confirmer activé", async ({
-    page,
-  }) => {
-    await loginAsEnseignant(page);
-    await page.evaluate(() => {
-      location.hash = "#/validation";
-    });
-    await page.waitForSelector(".vp", { timeout: 10_000 });
-
-    // Ouvrir le mode rapide
-    await page.locator("#btn-mode-rapide").click();
-    await page.waitForSelector(".mr-overlay", { timeout: 5_000 });
-    await expect(page.locator(".mr-sheet")).toBeVisible();
-
-    // Sélectionner les 2 premiers élèves
-    const checks = page.locator(".mr-eleve-check");
-    const count = await checks.count();
-    if (count < 1) {
-      test.skip(true, "Aucun élève assigné au compte test");
-      return;
-    }
-
-    await checks.nth(0).click();
-    if (count >= 2) await checks.nth(1).click();
-
-    // Attendre que les comps apparaissent
-    await page.waitForSelector(".mr-comp-row", { timeout: 5_000 });
-
-    // Sélectionner la première comp éligible
-    await page.locator(".mr-comp-row").first().click();
-
-    // Le bouton confirm doit être actif
-    const confirmBtn = page.locator("#mr-btn-confirm");
-    await expect(confirmBtn).not.toBeDisabled({ timeout: 2_000 });
-
-    // Vérifier que le badge affiche un nombre > 0
-    const badge = page.locator("#mr-count");
-    const badgeText = await badge.textContent();
-    expect(parseInt(badgeText || "0", 10)).toBeGreaterThan(0);
-  });
-
-  test("mode rapide — fermeture avec Escape ou backdrop", async ({ page }) => {
-    await loginAsEnseignant(page);
-    await page.evaluate(() => {
-      location.hash = "#/validation";
-    });
-    await page.waitForSelector(".vp", { timeout: 10_000 });
-
-    await page.locator("#btn-mode-rapide").click();
-    await page.waitForSelector(".mr-overlay", { timeout: 5_000 });
-
-    // Clic sur l'overlay (backdrop)
-    await page.locator(".mr-overlay").click({ position: { x: 1, y: 1 } });
-    await expect(page.locator(".mr-overlay")).toHaveCount(0, {
-      timeout: 2_000,
-    });
   });
 });

@@ -2,9 +2,12 @@
  * E2E — Accueil élève : nettoyage Gestalt (lot 1 & 2)
  *
  * Couvre les décisions produit du redesign accueil :
- *   C3 — une seule cloche de notifications (header), aucune dans le hero
- *   C5 — label de nav visible uniquement sous l'onglet actif (picto partout)
- *   C8 — la Boule de cristal est le point d'entrée examen unique
+ *   C3 — pas de cloche en doublon (la cloche header a été retirée :
+ *        l'entrée notifications vit dans le profil)
+ *   C5 — label de nav visible uniquement sous l'onglet actif
+ *        (picto ligne/plein par onglet, un seul visible)
+ *   C8 — au plus une entrée examen blanc sur l'accueil
+ *        (la Boule de cristal a été retirée)
  *
  * Compte test : eleve@test.fr / Autopilot2025!
  */
@@ -20,27 +23,31 @@ async function loginAsEleve(page) {
   await page.fill("#lg-email", EMAIL);
   await page.fill("#lg-pwd", PWD);
   await page.click("#lg-submit");
-  await page.waitForSelector("body.has-chrome", { timeout: 20_000 });
+  // 25 s : sous forte charge (suite complète en parallèle), le boot
+  // post-login peut dépasser les 20 s.
+  await page.waitForSelector("body.has-chrome", { timeout: 25_000 });
 }
 
 test.describe("Accueil élève — Gestalt cleanup", () => {
   test.beforeEach(async ({ page }) => loginAsEleve(page));
 
-  // ─── C3 — une seule cloche ────────────────────────────────────────
-  test("C3 — une seule cloche, dans le header, aucune dans le hero", async ({
+  // ─── C3 — pas de cloche dupliquée ─────────────────────────────────
+  // La cloche header a été RETIRÉE : l'entrée notifications vit désormais
+  // dans le profil (#/notifications). L'invariant produit conservé :
+  // aucune cloche en doublon sur l'accueil, et surtout aucune dans le hero.
+  test("C3 — aucune cloche sur l'accueil (entrée notifications = profil), hero propre", async ({
     page,
   }) => {
-    // La cloche vit dans #header-bar
+    // Le chrome (header) est bien monté
     await expect(page.locator("#header-bar")).toBeVisible();
-    await expect(page.locator("#header-bar .nb-btn")).toHaveCount(1);
 
-    // Une seule cloche sur toute la page
-    await expect(page.locator(".nb-btn")).toHaveCount(1);
+    // Plus aucune cloche .nb-btn nulle part (composant retiré)
+    await expect(page.locator(".nb-btn")).toHaveCount(0);
 
-    // Aucune cloche dans le hero
-    await expect(page.locator(".acc2-hero .nb-btn")).toHaveCount(0);
+    // Aucune entrée notifications dans le hero
+    await expect(page.locator(".acc2-hero-v2 .nb-btn")).toHaveCount(0);
     await expect(
-      page.locator('.acc2-hero [aria-label="Notifications"]'),
+      page.locator('.acc2-hero-v2 [aria-label="Notifications"]'),
     ).toHaveCount(0);
   });
 
@@ -69,8 +76,11 @@ test.describe("Accueil élève — Gestalt cleanup", () => {
       const isActive = await tab.evaluate((el) =>
         el.classList.contains("active"),
       );
-      // Picto (svg) présent dans chaque onglet, actif ou non
-      await expect(tab.locator("svg")).toHaveCount(1);
+      // Chaque onglet embarque 2 pictos (tracé .bn-ico-line + plein .bn-ico-fill,
+      // l'actif bascule sur la version pleine) — mais UN SEUL est visible à la fois.
+      await expect(tab.locator(".bn-ico-line svg")).toHaveCount(1);
+      await expect(tab.locator(".bn-ico-fill svg")).toHaveCount(1);
+      await expect(tab.locator("svg:visible")).toHaveCount(1);
 
       if (!isActive) {
         const op = await tab
@@ -81,49 +91,30 @@ test.describe("Accueil élève — Gestalt cleanup", () => {
     }
   });
 
-  // ─── C8 — Boule de cristal = point d'entrée examen unique ─────────
-  test("C8 — la Boule de cristal navigue vers l'examen blanc, sans doublon dans l'action du jour", async ({
+  // ─── C8 — pas de doublon d'entrée « examen blanc » sur l'accueil ──
+  // La Boule de cristal a été RETIRÉE de l'accueil (l'examen blanc s'atteint
+  // depuis le parcours / la nav). L'invariant produit conservé : jamais deux
+  // CTA examen blanc en concurrence sur l'accueil.
+  test("C8 — au plus une entrée examen blanc sur l'accueil, boule de cristal retirée", async ({
     page,
   }) => {
-    // La crystal (peuplée) ou son empty-state est inséré en async après le hero
-    await page.waitForSelector(".acc2-crystal, .acc2-cb-empty", {
-      timeout: 12_000,
-    });
+    // Attendre le CTA roi (le contenu principal de l'accueil est rendu)
+    await page.waitForSelector(".acc2-cta-king", { timeout: 12_000 });
 
-    // NB : l'accueil peut injecter plusieurs cartes crystal (cf. rapport — la
-    // garde anti-double-mount d'accueil.js laisse passer un doublon en course
-    // async). On valide la décision produit sur la première carte peuplée.
-    const crystal = page.locator(".acc2-crystal").first();
-    const populated = (await page.locator(".acc2-crystal").count()) > 0;
+    // Plus aucune boule de cristal (ni son état vide)
+    await expect(page.locator(".acc2-crystal")).toHaveCount(0);
+    await expect(page.locator(".acc2-cb-empty")).toHaveCount(0);
 
-    // L'« action du jour » ne doit jamais contenir de CTA vers l'examen blanc
-    // (plus de doublon avec la boule de cristal)
+    // Au plus UNE entrée vers l'examen blanc sur toute la page
+    const entries = page.locator(
+      '#app [href="#/exam-blanc"], #app [data-href="#/exam-blanc"]',
+    );
+    expect(await entries.count()).toBeLessThanOrEqual(1);
+
+    // L'« action du jour » (si présente) ne contient jamais de CTA exam-blanc
     const action = page.locator(".acc2-action");
     if ((await action.count()) > 0) {
       await expect(action.locator('[data-href="#/exam-blanc"]')).toHaveCount(0);
     }
-
-    if (!populated) {
-      // eleve@test.fr n'a aucune compétence validée → crystal en état vide.
-      // On ne peut pas tester le clic→exam-blanc sans état peuplé.
-      test.skip(
-        true,
-        "Crystal en état vide (validated_count=0 sur le compte de test) — pas de carte .acc2-crystal cliquable",
-      );
-      return;
-    }
-
-    // role=button + focusable
-    await expect(crystal).toHaveAttribute("role", "button");
-    await expect(crystal).toHaveAttribute("tabindex", "0");
-    await crystal.focus();
-    await expect(crystal).toBeFocused();
-
-    // Un clic navigue vers #/exam-blanc
-    await crystal.click();
-    await page.waitForFunction(() => location.hash === "#/exam-blanc", {
-      timeout: 6_000,
-    });
-    expect(new URL(page.url()).hash).toBe("#/exam-blanc");
   });
 });

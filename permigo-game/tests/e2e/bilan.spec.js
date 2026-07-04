@@ -108,7 +108,9 @@ test.describe("Bilan trimestriel enseignant", () => {
     expect(critical).toHaveLength(0);
   });
 
-  test("bilan : 4 KPI affichent des valeurs (pas NaN ni vide)", async ({
+  // 3 KPI depuis le retrait des heures de conduite du produit :
+  // compétences acquises, score moyen Révision, jours actifs.
+  test("bilan : 3 KPI affichent des valeurs (pas NaN ni vide)", async ({
     page,
   }) => {
     await loginAsEnseignant(page);
@@ -136,7 +138,7 @@ test.describe("Bilan trimestriel enseignant", () => {
     await page.waitForSelector(".bl-kpi-grid", { timeout: 10_000 });
     const kpis = page.locator(".bl-kpi-val");
     const count = await kpis.count();
-    expect(count).toBeGreaterThanOrEqual(4);
+    expect(count).toBe(3);
 
     const vals = await kpis.allTextContents();
     vals.forEach((v) => {
