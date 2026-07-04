@@ -42,6 +42,10 @@ function notifRoute(n) {
     case "student_at_risk":
       // Alerte moniteur « untel décroche » → sa liste d'élèves à relancer.
       return "#/eleves";
+    case "emotional_recap":
+      return d.route || "#/parcours";
+    case "moniteur_recap":
+      return "#/profil";
     case "compte_rendu":
       return d.compte_rendu_id
         ? `#/compte-rendu/${d.compte_rendu_id}`
@@ -175,6 +179,18 @@ const TYPE_META = {
     bg: "rgba(239,68,68,.12)",
     color: "var(--rd)",
     label: "Ta série",
+  },
+  emotional_recap: {
+    iconName: "calendar",
+    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    color: "var(--a)",
+    label: "Ta semaine",
+  },
+  moniteur_recap: {
+    iconName: "trophy",
+    bg: "rgba(245,158,11,.12)",
+    color: "var(--am)",
+    label: "Bilan du mois",
   },
   compte_rendu: {
     iconName: "file-text",
