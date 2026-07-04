@@ -64,7 +64,7 @@ const MED = {
   situ: med(
     "si",
     ["#bce0ff", "#54a0ff", "#2b6fd6"],
-    `<path d="M28 18h8v10h10v8H36v10h-8V36H18v-8h10V18z" fill="#fff"/><circle cx="32" cy="32" r="2.6" fill="#2b6fd6"/>`,
+    `<path d="M20 45 28 18h8l8 27z" fill="#fff"/><g fill="#2b6fd6"><rect x="30.2" y="38.5" width="3.6" height="3.6" rx="1.1"/><rect x="30.7" y="30.5" width="2.6" height="3.1" rx="1"/><rect x="31.1" y="23.8" width="1.8" height="2.5" rx=".9"/></g>`,
   ),
   daily: med(
     "da",
