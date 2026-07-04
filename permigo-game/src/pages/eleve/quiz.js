@@ -399,6 +399,27 @@ async function handleComplete(
     duration_seconds: duration,
   });
 
+  // Referme la boucle de consolidation : une fois le quiz de consolidation
+  // fait, on marque LUE la notif correspondante. Sinon elle reste non lue à vie
+  // et le hero d'accueil + la Daily Action repoussent le MÊME quiz déjà réussi
+  // (cause du backlog de 424 consolidations « dues » jamais clôturées).
+  if (type === "consolidation" && competenceId) {
+    try {
+      const me = getCurUser();
+      if (me?.id) {
+        await sb
+          .from("notifications")
+          .update({ read: true })
+          .eq("user_id", me.id)
+          .eq("type", "consolidation_quiz")
+          .eq("data->>competence_id", String(competenceId))
+          .eq("read", false);
+      }
+    } catch {
+      /* best-effort : ne bloque jamais l'affichage du résultat */
+    }
+  }
+
   if (reason === "no_competence_unlocked") {
     // En mode découverte (question du jour / révision sur une compétence pas
     // encore travaillée), c'est le cas NORMAL — pas de message « bloqué ».
