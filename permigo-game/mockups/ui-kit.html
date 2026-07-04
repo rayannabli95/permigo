@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PermiGo — Bibliothèque UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ui-kit-tokens.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--ink);font-family:var(--fd);-webkit-font-smoothing:antialiased;padding-bottom:80px}
+  /* ── barre du haut : titre + toggles ── */
+  .uk-bar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    padding:12px 20px;background:color-mix(in srgb,var(--su) 88%,transparent);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--bo)}
+  .uk-brand{font:800 17px/1 var(--fb);letter-spacing:-.2px;margin-right:auto;display:flex;align-items:center;gap:8px}
+  .uk-brand small{font:700 11px/1 var(--fd);color:var(--mu);letter-spacing:0}
+  .uk-seg{display:inline-flex;background:var(--bg2);border:1px solid var(--bo);border-radius:var(--r-full);padding:3px}
+  .uk-seg button{border:0;background:none;cursor:pointer;font:700 12px/1 var(--fd);color:var(--mu);
+    padding:7px 13px;border-radius:var(--r-full);transition:all var(--t)}
+  .uk-seg button[aria-pressed="true"]{background:var(--su);color:var(--ink);box-shadow:var(--s1)}
+  /* ── layout galerie ── */
+  .uk-main{max-width:1080px;margin:0 auto;padding:26px 20px}
+  .uk-lead{margin-bottom:22px}
+  .uk-lead h1{font:800 26px/1.1 var(--fb);letter-spacing:-.4px}
+  .uk-lead p{margin-top:6px;color:var(--mu);font-weight:600;font-size:13px;max-width:60ch}
+  .uk-sec{background:var(--su);border:1px solid var(--bo);border-radius:var(--rx);padding:22px 22px 24px;
+    margin-bottom:22px;box-shadow:var(--s1)}
+  .uk-sec > h2{font:800 19px/1 var(--fb);letter-spacing:-.3px;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .uk-sec > h2::before{content:"";width:6px;height:18px;border-radius:3px;background:var(--a)}
+  .uk-sec > .uk-desc{color:var(--mu);font-weight:600;font-size:12.5px;margin:2px 0 18px}
+  .uk-sub{font:700 12px/1 var(--fd);letter-spacing:.06em;text-transform:uppercase;color:var(--mu);
+    margin:20px 0 12px;padding-top:14px;border-top:1px dashed var(--bo)}
+  .uk-sub:first-of-type{border-top:0;padding-top:0}
+  .uk-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end}
+  .uk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+  .uk-cell{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+  .uk-label{font:700 10.5px/1.2 var(--fd);color:var(--mu)}
+  /* spinner générique */
+  @keyframes uk-spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body data-role="eleve">
+  <header class="uk-bar">
+    <div class="uk-brand">PermiGo <small>· Bibliothèque UI</small></div>
+    <div class="uk-seg" role="group" aria-label="Rôle">
+      <button data-role-set="eleve" aria-pressed="true">Élève</button>
+      <button data-role-set="enseignant" aria-pressed="false">Moniteur</button>
+    </div>
+    <div class="uk-seg" role="group" aria-label="Thème">
+      <button data-theme-set="light" aria-pressed="true">☀︎ Clair</button>
+      <button data-theme-set="dark" aria-pressed="false">☾ Sombre</button>
+    </div>
+  </header>
+
+  <main class="uk-main">
+    <div class="uk-lead">
+      <h1>Bibliothèque UI PermiGo</h1>
+      <p>La référence unique des composants. Bascule <b>rôle</b> (élève violet / moniteur indigo) et <b>thème</b> (clair / sombre) en haut — tout suit les tokens. Chaque composant est montré avec ses variantes et ses états.</p>
+    </div>
+
+    <!-- ═══ FONDATIONS ═══ -->
+    <section class="uk-sec" id="sec-fond">
+      <style>
+        .uk-fond-sw{display:flex;flex-direction:column;gap:6px}
+        .uk-fond-chip{height:56px;border-radius:var(--r);border:1px solid var(--bo);box-shadow:var(--s0)}
+        .uk-fond-chip.ink{border-color:transparent}
+        .uk-fond-name{font:700 10.5px/1.2 var(--fn,monospace);color:var(--ink)}
+        .uk-fond-hint{font:600 9.5px/1.2 var(--fd);color:var(--mu)}
+        .uk-fond-rad{width:100%;height:60px;background:var(--a);opacity:.14;border:2px solid var(--a);display:grid;place-items:center;color:var(--a-txt);font:800 12px var(--fd)}
+        .uk-fond-sh{height:64px;border-radius:var(--r-md);background:var(--su);border:1px solid var(--bo)}
+        .uk-fond-type{display:flex;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid var(--bo2)}
+        .uk-fond-type b{color:var(--ink)}
+        .uk-fond-sp{background:var(--a);height:14px;border-radius:4px;opacity:.85}
+      </style>
+      <h2>Fondations</h2>
+      <div class="uk-desc">Tokens couleur (theme-aware), rayons, ombres, typographie, espacement. Tout le reste s'appuie là-dessus.</div>
+
+      <div class="uk-sub">Accent (change avec le rôle)</div>
+      <div class="uk-grid">
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--a)"></div><span class="uk-fond-name">--a</span><span class="uk-fond-hint">accent principal</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--adk)"></div><span class="uk-fond-name">--adk</span><span class="uk-fond-hint">accent foncé</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--a-lt)"></div><span class="uk-fond-name">--a-lt</span><span class="uk-fond-hint">accent clair</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--ap)"></div><span class="uk-fond-name">--ap</span><span class="uk-fond-hint">accent 9% (fond doux)</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--su);display:grid;place-items:center;color:var(--a-txt);font:800 13px var(--fd)">Texte</div><span class="uk-fond-name">--a-txt</span><span class="uk-fond-hint">accent comme texte</span></div>
+      </div>
+
+      <div class="uk-sub">Neutres & surfaces</div>
+      <div class="uk-grid">
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--bg)"></div><span class="uk-fond-name">--bg</span><span class="uk-fond-hint">fond de page</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--su)"></div><span class="uk-fond-name">--su</span><span class="uk-fond-hint">surface (carte)</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--su2)"></div><span class="uk-fond-name">--su2</span><span class="uk-fond-hint">surface 2</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--bo)"></div><span class="uk-fond-name">--bo</span><span class="uk-fond-hint">bordure</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip ink" style="background:var(--ink)"></div><span class="uk-fond-name">--ink</span><span class="uk-fond-hint">texte principal</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip ink" style="background:var(--mu)"></div><span class="uk-fond-name">--mu</span><span class="uk-fond-hint">texte muet</span></div>
+      </div>
+
+      <div class="uk-sub">États</div>
+      <div class="uk-grid">
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--gr)"></div><span class="uk-fond-name">--gr</span><span class="uk-fond-hint">succès</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--am)"></div><span class="uk-fond-name">--am</span><span class="uk-fond-hint">attention</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--rd)"></div><span class="uk-fond-name">--rd</span><span class="uk-fond-hint">erreur</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--bl)"></div><span class="uk-fond-name">--bl</span><span class="uk-fond-hint">info</span></div>
+        <div class="uk-fond-sw"><div class="uk-fond-chip" style="background:var(--arene-gold)"></div><span class="uk-fond-name">--arene-gold</span><span class="uk-fond-hint">or Arène</span></div>
+      </div>
+
+      <div class="uk-sub">Rayons</div>
+      <div class="uk-row">
+        <div class="uk-cell" style="flex:1;min-width:90px"><div class="uk-fond-rad" style="border-radius:var(--r-sm)">8</div><span class="uk-label">--r-sm</span></div>
+        <div class="uk-cell" style="flex:1;min-width:90px"><div class="uk-fond-rad" style="border-radius:var(--r)">12</div><span class="uk-label">--r</span></div>
+        <div class="uk-cell" style="flex:1;min-width:90px"><div class="uk-fond-rad" style="border-radius:var(--rl)">18</div><span class="uk-label">--rl</span></div>
+        <div class="uk-cell" style="flex:1;min-width:90px"><div class="uk-fond-rad" style="border-radius:var(--rx)">24</div><span class="uk-label">--rx</span></div>
+        <div class="uk-cell" style="flex:1;min-width:90px"><div class="uk-fond-rad" style="border-radius:var(--r-full)">∞</div><span class="uk-label">--r-full</span></div>
+      </div>
+
+      <div class="uk-sub">Ombres</div>
+      <div class="uk-row">
+        <div class="uk-cell" style="flex:1;min-width:120px"><div class="uk-fond-sh" style="box-shadow:var(--s1)"></div><span class="uk-label">--s1</span></div>
+        <div class="uk-cell" style="flex:1;min-width:120px"><div class="uk-fond-sh" style="box-shadow:var(--s2)"></div><span class="uk-label">--s2</span></div>
+        <div class="uk-cell" style="flex:1;min-width:120px"><div class="uk-fond-sh" style="box-shadow:var(--s3)"></div><span class="uk-label">--s3</span></div>
+        <div class="uk-cell" style="flex:1;min-width:120px"><div class="uk-fond-sh" style="box-shadow:var(--s4)"></div><span class="uk-label">--s4</span></div>
+      </div>
+
+      <div class="uk-sub">Typographie</div>
+      <div>
+        <div class="uk-fond-type"><b style="font:800 28px/1 var(--fb)">Aa</b><span class="uk-fond-hint">--fs-xl · 28 · titre héros</span></div>
+        <div class="uk-fond-type"><b style="font:800 20px/1 var(--fb)">Aa</b><span class="uk-fond-hint">--fs-lg · 20 · titre section</span></div>
+        <div class="uk-fond-type"><b style="font:700 16px/1 var(--fd)">Aa</b><span class="uk-fond-hint">--fs-md · 16 · sous-titre</span></div>
+        <div class="uk-fond-type"><b style="font:600 14px/1 var(--fd)">Aa</b><span class="uk-fond-hint">--fs-base · 14 · corps</span></div>
+        <div class="uk-fond-type"><b style="font:700 12px/1 var(--fd)">Aa</b><span class="uk-fond-hint">--fs-sm · 12 · légende</span></div>
+      </div>
+
+      <div class="uk-sub">Espacement</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px"><div class="uk-fond-sp" style="width:8px"></div><span class="uk-label">--sp-1 · 8</span></div>
+        <div style="display:flex;align-items:center;gap:10px"><div class="uk-fond-sp" style="width:12px"></div><span class="uk-label">--sp-2 · 12</span></div>
+        <div style="display:flex;align-items:center;gap:10px"><div class="uk-fond-sp" style="width:16px"></div><span class="uk-label">--sp-3 · 16</span></div>
+        <div style="display:flex;align-items:center;gap:10px"><div class="uk-fond-sp" style="width:24px"></div><span class="uk-label">--sp-4 · 24</span></div>
+        <div style="display:flex;align-items:center;gap:10px"><div class="uk-fond-sp" style="width:32px"></div><span class="uk-label">--sp-5 · 32</span></div>
+      </div>
+    </section>
+
+    <!-- ═══ BOUTONS ═══ -->
+    <section class="uk-sec" id="sec-btn">
+      <style>
+        .uk-btn{font:800 14px/1 var(--fd);border:0;cursor:pointer;border-radius:var(--r-md);
+          padding:0 18px;height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+          transition:transform var(--t),box-shadow var(--t),background var(--t)}
+        .uk-btn:active{transform:translateY(1px)}
+        .uk-btn.pri{background:var(--a);color:var(--a-ink);box-shadow:var(--s-a)}
+        .uk-btn.pri:hover{background:var(--adk)}
+        .uk-btn.sec{background:var(--su);color:var(--ink);border:1.5px solid var(--bo4)}
+        .uk-btn.sec:hover{border-color:var(--a);color:var(--a-txt)}
+        .uk-btn.ghost{background:transparent;color:var(--a-txt)}
+        .uk-btn.ghost:hover{background:var(--ap)}
+        .uk-btn.dang{background:var(--rd);color:#fff;box-shadow:0 6px 18px -4px var(--rdp)}
+        .uk-btn.dang:hover{background:var(--rdk)}
+        .uk-btn[disabled]{opacity:.5;pointer-events:none}
+        .uk-btn.sm{height:36px;font-size:12.5px;padding:0 13px;border-radius:var(--r-sm)}
+        .uk-btn.lg{height:52px;font-size:16px;padding:0 24px;border-radius:var(--rl)}
+        .uk-btn.full{width:100%}
+        .uk-btn-ic{width:44px;height:44px;padding:0;border-radius:var(--r-full)}
+        .uk-btn-ic svg{width:20px;height:20px}
+        /* 3D « Duo » — relief plastique qui s'écrase */
+        .uk-btn3d{position:relative;top:0;border:0;cursor:pointer;color:#fff;font:800 16px/1 var(--fb);
+          height:52px;padding:0 22px;border-radius:var(--rl);display:inline-flex;align-items:center;justify-content:center;gap:9px;
+          background:linear-gradient(180deg,var(--u1),var(--u2));
+          box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 5px 0 var(--u3),0 10px 18px -6px rgba(0,0,0,.35);
+          text-shadow:0 1.5px 0 rgba(0,0,0,.25);transition:top var(--t),box-shadow var(--t)}
+        .uk-btn3d:active{top:4px;box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 1px 0 var(--u3),0 3px 8px -4px rgba(0,0,0,.35)}
+        .uk-btn3d.green{--u1:#7ee83a;--u2:#58cc02;--u3:#3f8f02}
+        .uk-btn3d.gold{--u1:#ffe17a;--u2:#ffc107;--u3:#c88a00;color:#5a3d02;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+        .uk-btn3d.accent{--u1:var(--a-lt);--u2:var(--a);--u3:var(--adk)}
+        .uk-spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:uk-spin .7s linear infinite}
+      </style>
+      <h2>Boutons</h2>
+      <div class="uk-desc">Priorité claire : un seul bouton « roi » par écran. Le relief 3D est réservé à l'action reine (Arène / quiz).</div>
+
+      <div class="uk-sub">Hiérarchie</div>
+      <div class="uk-row">
+        <div class="uk-cell"><button class="uk-btn pri">Valider</button><span class="uk-label">Primaire</span></div>
+        <div class="uk-cell"><button class="uk-btn sec">Annuler</button><span class="uk-label">Secondaire</span></div>
+        <div class="uk-cell"><button class="uk-btn ghost">Voir tout</button><span class="uk-label">Ghost</span></div>
+        <div class="uk-cell"><button class="uk-btn dang">Supprimer</button><span class="uk-label">Danger</span></div>
+        <div class="uk-cell"><button class="uk-btn-ic uk-btn pri" aria-label="Ajouter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button><span class="uk-label">Icône</span></div>
+      </div>
+
+      <div class="uk-sub">Tailles & états</div>
+      <div class="uk-row">
+        <div class="uk-cell"><button class="uk-btn pri sm">Petit</button><span class="uk-label">sm</span></div>
+        <div class="uk-cell"><button class="uk-btn pri">Moyen</button><span class="uk-label">md</span></div>
+        <div class="uk-cell"><button class="uk-btn pri lg">Grand</button><span class="uk-label">lg</span></div>
+        <div class="uk-cell"><button class="uk-btn pri"><span class="uk-spinner"></span> Chargement</button><span class="uk-label">loading</span></div>
+        <div class="uk-cell"><button class="uk-btn pri" disabled>Indispo</button><span class="uk-label">disabled</span></div>
+      </div>
+      <div style="margin-top:14px;max-width:320px">
+        <button class="uk-btn pri full">Continuer — pleine largeur</button>
+      </div>
+
+      <div class="uk-sub">Relief 3D « plastique » (action reine — monde Arène)</div>
+      <div class="uk-row">
+        <div class="uk-cell"><button class="uk-btn3d green"><svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.5-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5Z"/></svg> Jouer</button><span class="uk-label">Vert « go »</span></div>
+        <div class="uk-cell"><button class="uk-btn3d gold">Récupérer</button><span class="uk-label">Or Arène</span></div>
+        <div class="uk-cell"><button class="uk-btn3d accent">Continuer</button><span class="uk-label">Accent du rôle</span></div>
+      </div>
+    </section>
+
+    <!-- ═══ FORMULAIRES ═══ -->
+    <section class="uk-sec" id="sec-form">
+      <style>
+        .uk-field{display:flex;flex-direction:column;gap:6px;max-width:300px}
+        .uk-flabel{font:700 12.5px/1 var(--fd);color:var(--ink)}
+        .uk-input{height:46px;border-radius:var(--r-md);border:1.5px solid var(--bo4);background:var(--su);
+          color:var(--ink);font:600 14px/1 var(--fd);padding:0 14px;transition:border var(--t),box-shadow var(--t);width:100%}
+        .uk-input::placeholder{color:var(--mu5)}
+        .uk-input:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 4px var(--ap)}
+        .uk-input.err{border-color:var(--rd)}
+        .uk-input.err:focus{box-shadow:0 0 0 4px var(--rdp)}
+        .uk-input[disabled]{background:var(--bg2);color:var(--mu);cursor:not-allowed}
+        textarea.uk-input{height:auto;padding:12px 14px;resize:vertical;min-height:80px;font-family:var(--fd)}
+        .uk-hint{font:600 11px/1.3 var(--fd);color:var(--mu)}
+        .uk-hint.err{color:var(--rd-txt)}
+        .uk-pass{position:relative}
+        .uk-pass .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:none;
+          cursor:pointer;color:var(--mu);border-radius:var(--r-sm)}
+        .uk-pass .eye:hover{color:var(--ink);background:var(--bg2)}
+        .uk-pass .eye svg{width:20px;height:20px}
+        .uk-select{position:relative}
+        .uk-select svg{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--mu);pointer-events:none}
+        select.uk-input{appearance:none;padding-right:38px;cursor:pointer}
+        .uk-check{display:flex;align-items:center;gap:10px;cursor:pointer;font:600 14px/1 var(--fd);color:var(--ink);min-height:44px}
+        .uk-check input{position:absolute;opacity:0;width:0;height:0}
+        .uk-box{width:22px;height:22px;border-radius:6px;border:2px solid var(--bo4);display:grid;place-items:center;transition:all var(--t);flex:none}
+        .uk-box svg{width:14px;height:14px;color:#fff;opacity:0;transform:scale(.5);transition:all var(--t)}
+        .uk-check input:checked + .uk-box{background:var(--a);border-color:var(--a)}
+        .uk-check input:checked + .uk-box svg{opacity:1;transform:scale(1)}
+        .uk-box.round{border-radius:50%}
+        .uk-box.round .dot{width:10px;height:10px;border-radius:50%;background:#fff;opacity:0;transform:scale(.4);transition:all var(--t)}
+        .uk-check input:checked + .uk-box.round{background:var(--a);border-color:var(--a)}
+        .uk-check input:checked + .uk-box.round .dot{opacity:1;transform:scale(1)}
+        .uk-switch{width:48px;height:28px;border-radius:var(--r-full);background:var(--bo4);position:relative;transition:background var(--t);flex:none}
+        .uk-switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:var(--s1);transition:left var(--t)}
+        .uk-check input:checked + .uk-switch{background:var(--a)}
+        .uk-check input:checked + .uk-switch::after{left:23px}
+        .uk-segment{display:inline-flex;background:var(--bg2);border:1px solid var(--bo);border-radius:var(--r-md);padding:3px}
+        .uk-segment button{border:0;background:none;cursor:pointer;font:700 13px/1 var(--fd);color:var(--mu);padding:9px 16px;border-radius:var(--r-sm);transition:all var(--t)}
+        .uk-segment button[aria-pressed="true"]{background:var(--su);color:var(--a-txt);box-shadow:var(--s1)}
+        .uk-search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--mu)}
+        .uk-search input{padding-left:40px}
+      </style>
+      <h2>Formulaires</h2>
+      <div class="uk-desc">Champs lisibles, focus visible (anneau accent), erreurs explicites. Cibles ≥ 44px.</div>
+
+      <div class="uk-grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr));align-items:start">
+        <div class="uk-field">
+          <label class="uk-flabel" for="uk-f1">Ton prénom</label>
+          <input class="uk-input" id="uk-f1" placeholder="Ex : Camille">
+          <span class="uk-hint">Visible par ton moniteur.</span>
+        </div>
+        <div class="uk-field">
+          <label class="uk-flabel" for="uk-f2">Mot de passe</label>
+          <div class="uk-pass">
+            <input class="uk-input" id="uk-f2" type="password" value="autopilot">
+            <button class="eye" aria-label="Afficher"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+        </div>
+        <div class="uk-field">
+          <label class="uk-flabel" for="uk-f3">Email</label>
+          <input class="uk-input err" id="uk-f3" value="camille@" aria-invalid="true">
+          <span class="uk-hint err">Adresse email incomplète.</span>
+        </div>
+        <div class="uk-field">
+          <label class="uk-flabel" for="uk-f4">Ton moniteur</label>
+          <div class="uk-select">
+            <select class="uk-input" id="uk-f4"><option>Auto-école du Centre</option><option>Permis Malin</option></select>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="uk-field">
+          <label class="uk-flabel" for="uk-f5">Note</label>
+          <textarea class="uk-input" id="uk-f5" placeholder="Un mot pour ton moniteur…"></textarea>
+        </div>
+        <div class="uk-field">
+          <label class="uk-flabel" for="uk-f6">Désactivé</label>
+          <input class="uk-input" id="uk-f6" value="Non modifiable" disabled>
+        </div>
+      </div>
+
+      <div class="uk-sub">Choix</div>
+      <div class="uk-row" style="align-items:center;gap:24px">
+        <label class="uk-check"><input type="checkbox" checked><span class="uk-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span> Recevoir les rappels</label>
+        <label class="uk-check"><input type="checkbox"><span class="uk-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span> Option</label>
+        <label class="uk-check"><input type="radio" name="uk-r" checked><span class="uk-box round"><span class="dot"></span></span> Choix A</label>
+        <label class="uk-check"><input type="radio" name="uk-r"><span class="uk-box round"><span class="dot"></span></span> Choix B</label>
+        <label class="uk-check"><input type="checkbox" checked><span class="uk-switch"></span> Notifications</label>
+      </div>
+
+      <div class="uk-sub">Segments & recherche</div>
+      <div class="uk-row" style="align-items:center">
+        <div class="uk-segment" role="group"><button aria-pressed="true">Clair</button><button aria-pressed="false">Sombre</button></div>
+        <div class="uk-segment" role="group"><button aria-pressed="false">Jour</button><button aria-pressed="true">Semaine</button><button aria-pressed="false">Mois</button></div>
+        <div class="uk-field" style="max-width:260px"><div class="uk-search uk-pass"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input class="uk-input" placeholder="Rechercher…"></div></div>
+      </div>
+    </section>
+
+    <!-- ═══ CARTES ═══ -->
+    <section class="uk-sec" id="sec-card">
+      <style>
+        .uk-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;align-items:start}
+        .uk-card{background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);padding:16px;box-shadow:var(--s1)}
+        .uk-card h4{font:800 15px/1.2 var(--fb);margin-bottom:5px}
+        .uk-card p{font:600 12.5px/1.45 var(--fd);color:var(--mu)}
+        .uk-cardc{cursor:pointer;display:flex;align-items:center;gap:13px;transition:transform var(--t),box-shadow var(--t)}
+        .uk-cardc:hover{box-shadow:var(--s2)}
+        .uk-cardc:active{transform:scale(.99)}
+        .uk-cardc .ic{width:44px;height:44px;border-radius:var(--r-md);background:var(--ap);color:var(--a-txt);display:grid;place-items:center;flex:none}
+        .uk-cardc .ic svg{width:22px;height:22px}
+        .uk-cardc .go{margin-left:auto;width:28px;height:28px;border-radius:50%;background:var(--a);color:var(--a-ink);display:grid;place-items:center;flex:none}
+        .uk-cardc .go svg{width:15px;height:15px}
+        .uk-cardm .media{height:96px;border-radius:var(--r-md);margin:-16px -16px 12px;background:linear-gradient(135deg,var(--a),var(--adk));display:grid;place-items:center;color:var(--a-ink)}
+        .uk-cardm .media svg{width:38px;height:38px;opacity:.9}
+        /* tuile Arène plastique */
+        .uk-arena{background:linear-gradient(158deg,#38246a,var(--arene-panel));border:1.5px solid var(--arene-line);
+          border-radius:var(--r-xl);padding:15px;color:#fff;box-shadow:0 8px 0 #120a2e,0 18px 30px -16px rgba(0,0,0,.8);
+          display:flex;flex-direction:column;gap:9px;cursor:pointer;transition:transform var(--t)}
+        .uk-arena:active{transform:translateY(2px)}
+        .uk-arena .med{width:48px;height:48px}
+        .uk-arena h4{font:800 15px/1.1 var(--fb);color:#fff}
+        .uk-arena p{font:700 11px/1.3 var(--fd);color:#cabfef}
+        .uk-arena .cta{margin-top:2px;height:40px;border-radius:var(--r);display:grid;place-items:center;font:800 14px var(--fb);
+          background:linear-gradient(180deg,#7ee83a,#58cc02);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #3f8f02;text-shadow:0 1.5px 0 rgba(40,90,5,.5)}
+        /* KPI */
+        .uk-kpi .big{font:800 30px/1 var(--fb);letter-spacing:-.5px}
+        .uk-kpi .lbl{font:700 11.5px/1 var(--fd);color:var(--mu);margin-top:4px}
+        .uk-kpi .delta{display:inline-flex;align-items:center;gap:3px;margin-top:9px;font:800 11px/1 var(--fd);
+          color:var(--gr-txt);background:var(--grp);padding:4px 8px;border-radius:var(--r-full)}
+      </style>
+      <h2>Cartes</h2>
+      <div class="uk-desc">Une carte cliquable annonce son affordance (chevron plein + enfoncement au tap). La tuile Arène est le seul objet « plastique ».</div>
+      <div class="uk-cards">
+        <div class="uk-card"><h4>Carte de base</h4><p>Un conteneur neutre : titre, texte, surface + bordure + ombre douce.</p></div>
+        <div class="uk-card uk-cardc"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></span><div><h4 style="margin:0">Mon parcours</h4><p style="margin-top:2px">Reprends là où tu t'es arrêté</p></div><span class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></span></div>
+        <div class="uk-card uk-cardm"><div class="media"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 1 8l11 5 9-4.1V15h2V8L12 3z"/><path d="M5 13.2V17c0 1.66 3.13 3 7 3s7-1.34 7-3v-3.8l-7 3.18-7-3.18z"/></svg></div><h4>Carte média</h4><p>Un visuel en tête, puis le contenu.</p></div>
+        <div class="uk-arena" id="uk-arena-card"><div style="display:flex;align-items:center;gap:11px"><span class="med" data-med="exam"></span><div><h4>Continue ton Arène</h4><p>Quiz sur tes compétences</p></div></div><div class="cta">▶ Jouer</div></div>
+        <div class="uk-card uk-kpi"><div class="big">86 %</div><div class="lbl">Taux de réussite</div><div class="delta"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg> +4 pts</div></div>
+      </div>
+    </section>
+
+    <!-- ═══ CHIPS · BADGES · PASTILLES ═══ -->
+    <section class="uk-sec" id="sec-chip">
+      <style>
+        .uk-chip{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:var(--r-full);
+          font:700 12.5px/1 var(--fd);cursor:pointer;border:1.5px solid var(--bo4);background:var(--su);color:var(--ink);transition:all var(--t)}
+        .uk-chip.on{background:var(--a);border-color:var(--a);color:var(--a-ink)}
+        .uk-chip:hover{border-color:var(--a)}
+        .uk-tag{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:var(--r-sm);font:800 10.5px/1 var(--fd);letter-spacing:.03em}
+        .uk-tag.new{background:var(--grp);color:var(--gr-txt)}
+        .uk-tag.mini{background:var(--rdp);color:var(--rd-txt);text-transform:uppercase;letter-spacing:.08em;font-size:9.5px}
+        .uk-tag.pro{background:var(--ap);color:var(--a-txt)}
+        .uk-badge-wrap{position:relative;width:44px;height:44px;border-radius:var(--r-md);background:var(--bg2);display:grid;place-items:center;color:var(--ink)}
+        .uk-badge-wrap svg{width:22px;height:22px}
+        .uk-count{position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;padding:0 5px;border-radius:var(--r-full);
+          background:var(--rd);color:#fff;font:800 11px/20px var(--fd);text-align:center;box-shadow:0 0 0 2px var(--su)}
+        .uk-pill{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px 0 6px;border-radius:var(--r-full);
+          background:linear-gradient(180deg,color-mix(in srgb,#ffd87a 24%,var(--su)),var(--su));
+          border:1px solid color-mix(in srgb,#f5b50a 38%,var(--bo));font:800 13.5px/1 var(--fd);color:var(--ink);font-variant-numeric:tabular-nums}
+        .uk-coin{width:22px;height:22px}
+        .uk-pill.flame{background:linear-gradient(180deg,var(--amp),var(--su));border-color:color-mix(in srgb,var(--am) 34%,var(--bo))}
+        .uk-pill.flame img{width:22px;height:22px;object-fit:contain}
+      </style>
+      <h2>Chips · badges · pastilles</h2>
+      <div class="uk-desc">Petits marqueurs : filtres, compteurs, statuts, monnaie. La pastille « volants » et la série sont les compteurs de tête.</div>
+
+      <div class="uk-sub">Chips filtre</div>
+      <div class="uk-row" style="align-items:center">
+        <button class="uk-chip on">Tout</button>
+        <button class="uk-chip">Priorités</button>
+        <button class="uk-chip">Panneaux</button>
+        <button class="uk-chip">Vitesse</button>
+      </div>
+
+      <div class="uk-sub">Statuts & compteurs</div>
+      <div class="uk-row" style="align-items:center;gap:20px">
+        <div class="uk-cell"><span class="uk-tag new">Nouveau</span></div>
+        <div class="uk-cell"><span class="uk-tag mini">Mini-jeu</span></div>
+        <div class="uk-cell"><span class="uk-tag pro">Premium</span></div>
+        <div class="uk-cell"><div class="uk-badge-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="uk-count">3</span></div><span class="uk-label">Badge compteur</span></div>
+      </div>
+
+      <div class="uk-sub">Monnaie & série</div>
+      <div class="uk-row" style="align-items:center">
+        <div class="uk-cell"><span class="uk-pill"><svg class="uk-coin" viewBox="0 0 24 24"><defs><radialGradient id="ukcoin" cx="38%" cy="30%" r="72%"><stop offset="0" stop-color="#fff7da"/><stop offset=".5" stop-color="#ffd24a"/><stop offset="1" stop-color="#ff9c1c"/></radialGradient></defs><circle cx="12" cy="12" r="10" fill="url(#ukcoin)" stroke="#fff5cf" stroke-width="1.5"/><circle cx="12" cy="12" r="6.4" fill="none" stroke="#c87d12" stroke-width="1.4" stroke-dasharray="1.5 1.6"/></svg> 1&nbsp;240</span><span class="uk-label">Pastille volants</span></div>
+        <div class="uk-cell"><span class="uk-pill flame"><img src="../public/skins/permigo-streak-flame-v1.webp" alt="" width="22" height="22"> 6 jours</span><span class="uk-label">Série</span></div>
+      </div>
+    </section>
+
+    <!-- ═══ ICÔNES — SET MÉDAILLON ═══ -->
+    <section class="uk-sec" id="sec-icon">
+      <style>
+        .uk-med-row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+        .uk-med-cell{display:flex;flex-direction:column;align-items:center;gap:7px;width:92px}
+        .uk-med{width:66px;height:66px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.28))}
+        .uk-med-cell .uk-label{text-align:center}
+        .uk-real{display:flex;gap:14px;align-items:center}
+        .uk-real .r{width:60px;height:60px;border-radius:var(--r-md);background:var(--bg2);display:grid;place-items:center}
+        .uk-real .r img{width:48px;height:48px;object-fit:contain}
+      </style>
+      <h2>Icônes — set médaillon</h2>
+      <div class="uk-desc">Un seul langage : disque dégradé + biseau + reflet + glyphe blanc. C'est ce qui remplace les pictos-trait « effet IA ».</div>
+      <div class="uk-med-row" id="uk-med-set"></div>
+      <div class="uk-sub">Vrais assets (cohérents avec le set)</div>
+      <div class="uk-real">
+        <div class="r"><img src="../public/skins/badge-3d-ultimate.webp" alt=""></div>
+        <div class="r"><img src="../public/signs/sens-interdit.svg" alt=""></div>
+        <div class="r"><img src="../public/worlds/volant.png" alt=""></div>
+        <span class="uk-label">badge 3D · panneau · volant (public/)</span>
+      </div>
+      <script>
+        (function(){
+          function med(id,stops,glyph){return `<svg class="uk-med" viewBox="0 0 64 64"><defs><radialGradient id="m${id}" cx="38%" cy="30%" r="75%"><stop offset="0" stop-color="${stops[0]}"/><stop offset=".5" stop-color="${stops[1]}"/><stop offset="1" stop-color="${stops[2]}"/></radialGradient><linearGradient id="g${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><circle cx="32" cy="31" r="27" fill="url(#m${id})"/><circle cx="32" cy="31" r="27" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"/><circle cx="32" cy="31" r="23.5" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="2"/><path d="M12 24a20 12 0 0 1 40 0 24 16 0 0 0-40 0z" fill="url(#g${id})"/>${glyph}</svg>`}
+          var SET=[
+            ['ex',['#fff2c0','#ffd24a','#f08a12'],'Examen','<g fill="#fff"><path d="M32 17 15 24l17 7 13-5.35V33h3v-9.4L32 17z"/><path d="M22 30.5V36c0 2.2 4.5 4 10 4s10-1.8 10-4v-5.5l-10 4.1-10-4.1z"/></g>'],
+            ['fi',['#d9c2ff','#a855f7','#6d34d6'],'Fiches','<g fill="none" stroke="#fff"><circle cx="32" cy="31" r="13.5" stroke-width="3.4"/><path d="M32 20v7M22.7 37.2l6-3.4M41.3 37.2l-6-3.4" stroke-width="3.2" stroke-linecap="round"/></g><circle cx="32" cy="31" r="3.6" fill="#fff"/>'],
+            ['fa',['#ffb3b3','#ff6b6b','#d12b2b'],'Alerte','<g fill="#fff"><rect x="29.6" y="19" width="4.8" height="14" rx="2.4"/><circle cx="32" cy="40" r="2.9"/></g>'],
+            ['si',['#bce0ff','#54a0ff','#2b6fd6'],'Situation','<path d="M20 45 28 18h8l8 27z" fill="#fff"/><g fill="#2b6fd6"><rect x="30.2" y="38.5" width="3.6" height="3.6" rx="1.1"/><rect x="30.7" y="30.5" width="2.6" height="3.1" rx="1"/><rect x="31.1" y="23.8" width="1.8" height="2.5" rx=".9"/></g>'],
+            ['da',['#c9f7a0','#6fe016','#3f9e00'],'Question','<g fill="#fff"><path d="M32 16a11 11 0 0 0-6.5 19.9c1 .8 1.6 1.9 1.7 3.1h9.6c.1-1.2.7-2.3 1.7-3.1A11 11 0 0 0 32 16z"/><rect x="27.5" y="41" width="9" height="3" rx="1.5"/><rect x="29" y="45.5" width="6" height="3" rx="1.5"/></g>'],
+            ['tr',['#ffe6a8','#ffc64a','#e8991c'],'Trophée','<g fill="#fff"><path d="M24 18h16v4a8 8 0 0 1-16 0v-4z"/><path d="M20 19h4v2a4 4 0 0 1-4-2zm24 0h-4v2a4 4 0 0 0 4-2z" stroke="#fff" stroke-width="1.6"/><rect x="30" y="30" width="4" height="6"/><rect x="26" y="36" width="12" height="3.4" rx="1.4"/></g>'],
+            ['ci',['#ffc7d9','#ff6b9d','#d1276a'],'Cible','<g fill="none" stroke="#fff" stroke-width="3"><circle cx="32" cy="31" r="12"/><circle cx="32" cy="31" r="6"/></g><circle cx="32" cy="31" r="2.4" fill="#fff"/>'],
+            ['ec',['#c9f0ff','#3fd0ff','#0a8fd6'],'Éclair','<path d="M35 16 22 34h8l-2 14 14-20h-9l2-12z" fill="#fff"/>'],
+          ];
+          var set=document.getElementById('uk-med-set');
+          if(set) set.innerHTML=SET.map(function(x){return '<div class="uk-med-cell">'+med(x[0],x[1],x[3])+'<span class="uk-label">'+x[2]+'</span></div>'}).join('');
+          // médaillon de la tuile Arène
+          document.querySelectorAll('[data-med="exam"]').forEach(function(el){el.outerHTML=med('ax',['#fff2c0','#ffd24a','#f08a12'],'<g fill="#fff"><path d="M32 17 15 24l17 7 13-5.35V33h3v-9.4L32 17z"/><path d="M22 30.5V36c0 2.2 4.5 4 10 4s10-1.8 10-4v-5.5l-10 4.1-10-4.1z"/></g>').replace('class="uk-med"','class="med" style="width:48px;height:48px"')});
+        })();
+      </script>
+    </section>
+
+    <!-- ═══ NAVIGATION ═══ -->
+    <section class="uk-sec" id="sec-nav">
+      <style>
+        .uk-frame{max-width:390px;border:1px solid var(--bo);border-radius:var(--rl);overflow:hidden;background:var(--bg)}
+        /* header top */
+        .uk-header{display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 12px 0 16px;
+          background:color-mix(in srgb,var(--su) 92%,transparent);border-bottom:1px solid var(--bo);backdrop-filter:blur(10px)}
+        .uk-logo{width:34px;height:34px;border-radius:9px;background:var(--a);display:grid;place-items:center;color:var(--a-ink);font:800 15px var(--fb)}
+        .uk-htools{display:flex;align-items:center;gap:8px}
+        .uk-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--adk));color:#fff;display:grid;place-items:center;font:800 13px var(--fd)}
+        /* bottom nav */
+        .uk-bnav{display:flex;justify-content:space-around;padding:8px 4px;background:var(--su);border-top:1px solid var(--bo)}
+        .uk-bnav button{background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;
+          font:600 9.5px/1 var(--fd);color:var(--mu)}
+        .uk-bnav button svg{width:23px;height:23px}
+        .uk-bnav button.on{color:var(--a)}
+        .uk-bnav button.on::after{content:"";width:16px;height:3px;border-radius:2px;background:var(--a);margin-top:1px}
+        /* tabs */
+        .uk-tabs{display:flex;gap:22px;border-bottom:1px solid var(--bo)}
+        .uk-tabs button{background:none;border:0;cursor:pointer;padding:12px 0;font:800 14px var(--fd);color:var(--mu);position:relative}
+        .uk-tabs button.on{color:var(--ink)}
+        .uk-tabs button.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:2px;background:var(--a)}
+        /* fab + back */
+        .uk-fab{width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;background:var(--a);color:var(--a-ink);
+          box-shadow:var(--s-a-lg);display:grid;place-items:center;transition:transform var(--t)}
+        .uk-fab:active{transform:scale(.94)}
+        .uk-fab svg{width:26px;height:26px}
+        .uk-back{width:40px;height:40px;border-radius:var(--r-md);border:1px solid var(--bo);background:var(--su);cursor:pointer;display:grid;place-items:center;color:var(--ink)}
+        .uk-back svg{width:20px;height:20px}
+      </style>
+      <h2>Navigation</h2>
+      <div class="uk-desc">Header vitré, barre 5 portes (onglet actif surligné), onglets, retour, FAB.</div>
+      <div class="uk-sub">Header top</div>
+      <div class="uk-frame"><div class="uk-header"><div style="display:flex;align-items:center;gap:10px"><span class="uk-logo">P</span></div><div class="uk-htools"><span class="uk-pill" style="height:30px"><svg class="uk-coin" viewBox="0 0 24 24"><defs><radialGradient id="ukcoin2" cx="38%" cy="30%" r="72%"><stop offset="0" stop-color="#fff7da"/><stop offset=".5" stop-color="#ffd24a"/><stop offset="1" stop-color="#ff9c1c"/></radialGradient></defs><circle cx="12" cy="12" r="10" fill="url(#ukcoin2)" stroke="#fff5cf" stroke-width="1.5"/></svg> 619</span><span class="uk-ava">C</span></div></div></div>
+      <div class="uk-sub">Barre 5 portes</div>
+      <div class="uk-frame"><nav class="uk-bnav">
+        <button class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Accueil</button>
+        <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5 20.5 9.5 9 21H3v-6L14.5 3.5Z"/></svg>Réviser</button>
+        <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="11" r="2.2"/><path d="M13 9h5M13 13h5"/></svg>Permis</button>
+        <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4.5" rx="1"/><path d="M5 12.5V20h14v-7.5M12 8v12"/></svg>Récompenses</button>
+        <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>Profil</button>
+      </nav></div>
+      <div class="uk-sub">Onglets · retour · FAB</div>
+      <div class="uk-row" style="align-items:center;gap:24px">
+        <div class="uk-tabs"><button class="on">À faire</button><button>Fait</button><button>Tout</button></div>
+        <button class="uk-back" aria-label="Retour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button class="uk-fab" aria-label="Ajouter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+    </section>
+
+    <!-- ═══ OVERLAYS ═══ -->
+    <section class="uk-sec" id="sec-overlay">
+      <style>
+        .uk-ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;align-items:start}
+        .uk-sheet{background:var(--su);border:1px solid var(--bo);border-radius:var(--rx) var(--rx) 0 0;box-shadow:var(--s3);overflow:hidden}
+        .uk-sheet .grip{width:38px;height:4px;border-radius:2px;background:var(--bo4);margin:10px auto 4px}
+        .uk-sheet .body{padding:6px 18px 18px}
+        .uk-sheet h4{font:800 16px var(--fb);margin-bottom:6px}
+        .uk-sheet p{font:600 12.5px/1.4 var(--fd);color:var(--mu);margin-bottom:14px}
+        .uk-modal{background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);box-shadow:var(--s4);padding:20px;text-align:center}
+        .uk-modal h4{font:800 17px var(--fb);margin-bottom:6px}
+        .uk-modal p{font:600 12.5px/1.45 var(--fd);color:var(--mu);margin-bottom:16px}
+        .uk-modal .acts{display:flex;gap:10px}
+        .uk-toast{display:flex;align-items:center;gap:10px;background:var(--su);border:1px solid var(--bo);border-radius:var(--r-md);
+          padding:12px 14px;box-shadow:var(--s2);font:700 13px var(--fd);color:var(--ink)}
+        .uk-toast .dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;color:#fff}
+        .uk-toast .dot svg{width:15px;height:15px}
+        .uk-toast.ok .dot{background:var(--gr)} .uk-toast.err .dot{background:var(--rd)} .uk-toast.info .dot{background:var(--bl)}
+        .uk-tip{position:relative;display:inline-block;background:var(--ink);color:var(--bg);font:700 12px var(--fd);padding:8px 12px;border-radius:var(--r-sm)}
+        .uk-tip::after{content:"";position:absolute;left:22px;bottom:-6px;border:6px solid transparent;border-top-color:var(--ink)}
+        .uk-tour{background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);box-shadow:var(--s3);padding:16px;max-width:280px}
+        .uk-tour .step{font:700 11px var(--fd);color:var(--a-txt);margin-bottom:6px}
+        .uk-tour h4{font:800 15px var(--fb);margin-bottom:4px}
+        .uk-tour p{font:600 12px/1.4 var(--fd);color:var(--mu);margin-bottom:12px}
+        .uk-tour .acts{display:flex;justify-content:space-between;align-items:center}
+      </style>
+      <h2>Overlays</h2>
+      <div class="uk-desc">Feuilles, modales, toasts, info-bulles, tuto — montrés « ouverts ».</div>
+      <div class="uk-ovgrid">
+        <div class="uk-sheet"><div class="grip"></div><div class="body"><h4>Ajoute l'appli</h4><p>Retrouve PermiGo en un tap depuis ton écran d'accueil.</p><button class="uk-btn pri full">J'installe</button></div></div>
+        <div class="uk-modal"><h4>Supprimer la fiche ?</h4><p>Cette action est définitive.</p><div class="acts"><button class="uk-btn sec" style="flex:1">Annuler</button><button class="uk-btn dang" style="flex:1">Supprimer</button></div></div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="uk-toast ok"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span> Compétence validée !</div>
+          <div class="uk-toast err"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span> Une erreur est survenue.</div>
+          <div class="uk-toast info"><span class="dot"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="1.4"/><rect x="11" y="11" width="2" height="7" rx="1"/></svg></span> Synchronisation en cours…</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:20px;align-items:flex-start">
+          <span class="uk-tip">Tape ici pour valider</span>
+          <div class="uk-tour"><div class="step">Étape 1 / 5</div><h4>Bienvenue 👋</h4><p>Visite express, tu passes quand tu veux.</p><div class="acts"><button class="uk-btn ghost sm">Passer</button><button class="uk-btn pri sm">Suivant</button></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ ÉTATS & FEEDBACK ═══ -->
+    <section class="uk-sec" id="sec-state">
+      <style>
+        @keyframes uk-shim{100%{background-position:-200% 0}}
+        .uk-skel{background:linear-gradient(90deg,var(--bg2) 25%,var(--bo2) 50%,var(--bg2) 75%);background-size:200% 100%;
+          animation:uk-shim 1.4s linear infinite;border-radius:8px}
+        .uk-empty{text-align:center;padding:26px 16px;max-width:280px;margin:0 auto}
+        .uk-empty .med{width:72px;height:72px;margin:0 auto 12px}
+        .uk-empty h4{font:800 16px var(--fb);margin-bottom:4px}
+        .uk-empty p{font:600 12.5px/1.45 var(--fd);color:var(--mu);margin-bottom:14px}
+        .uk-prog{height:12px;border-radius:var(--r-full);background:var(--bg2);overflow:hidden}
+        .uk-prog i{display:block;height:100%;border-radius:var(--r-full);background:linear-gradient(90deg,var(--a),var(--adk))}
+        .uk-tri{width:66px;height:66px}
+        .uk-feu{width:40px;height:96px;border-radius:14px;background:#1c1c22;display:flex;flex-direction:column;align-items:center;justify-content:space-around;padding:7px 0}
+        .uk-feu span{width:22px;height:22px;border-radius:50%;background:#3a3a44}
+        .uk-feu span.g{background:#58cc02;box-shadow:0 0 14px #58cc02}
+      </style>
+      <h2>États & feedback</h2>
+      <div class="uk-desc">Chargement, vide, progression, succès — l'app ne laisse jamais un écran mort.</div>
+
+      <div class="uk-sub">Squelettes</div>
+      <div class="uk-row" style="align-items:flex-start;gap:22px">
+        <div style="display:flex;align-items:center;gap:12px;width:230px"><div class="uk-skel" style="width:48px;height:48px;border-radius:50%"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px"><div class="uk-skel" style="height:12px;width:70%"></div><div class="uk-skel" style="height:10px;width:45%"></div></div></div>
+        <div style="width:200px;display:flex;flex-direction:column;gap:9px"><div class="uk-skel" style="height:80px"></div><div class="uk-skel" style="height:12px;width:90%"></div><div class="uk-skel" style="height:12px;width:60%"></div></div>
+      </div>
+
+      <div class="uk-sub">Progression</div>
+      <div class="uk-row" style="align-items:center;gap:26px">
+        <div style="width:260px"><div class="uk-prog"><i style="width:64%"></i></div><div class="uk-label" style="margin-top:6px">64 % · 16/25 compétences</div></div>
+        <div class="uk-cell"><svg class="uk-tri" viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" fill="none" stroke="var(--bg2)" stroke-width="5"/><circle cx="22" cy="22" r="18" fill="none" stroke="var(--a)" stroke-width="5" stroke-linecap="round" stroke-dasharray="113" stroke-dashoffset="34" transform="rotate(-90 22 22)"/></svg><span class="uk-label">Anneau · 70 %</span></div>
+        <div class="uk-cell"><div class="uk-spinner" style="border-color:var(--bo4);border-top-color:var(--a);width:26px;height:26px;border-width:3px"></div><span class="uk-label">Spinner</span></div>
+        <div class="uk-cell"><div class="uk-feu"><span></span><span></span><span class="g"></span></div><span class="uk-label">Chargement « feu vert »</span></div>
+      </div>
+
+      <div class="uk-sub">État vide</div>
+      <div class="uk-empty"><span class="med" data-med2="ci"></span><h4>Rien à réviser… pour l'instant</h4><p>Valide une compétence avec ton moniteur pour débloquer ta première fiche.</p><button class="uk-btn pri">Voir mon parcours</button></div>
+      <script>(function(){var el=document.querySelector('[data-med2="ci"]');if(el){el.outerHTML='<svg class="med" style="width:72px;height:72px" viewBox="0 0 64 64"><defs><radialGradient id="mci" cx="38%" cy="30%" r="75%"><stop offset="0" stop-color="#ffc7d9"/><stop offset=".5" stop-color="#ff6b9d"/><stop offset="1" stop-color="#d1276a"/></radialGradient></defs><circle cx="32" cy="31" r="27" fill="url(#mci)"/><circle cx="32" cy="31" r="27" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"/><g fill="none" stroke="#fff" stroke-width="3"><circle cx="32" cy="31" r="12"/><circle cx="32" cy="31" r="6"/></g><circle cx="32" cy="31" r="2.4" fill="#fff"/></svg>'}})();</script>
+    </section>
+
+    <!-- ═══ LISTES ═══ -->
+    <section class="uk-sec" id="sec-list">
+      <style>
+        .uk-list{max-width:420px;background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);overflow:hidden}
+        .uk-lh{font:800 11px/1 var(--fd);letter-spacing:.06em;text-transform:uppercase;color:var(--mu);padding:14px 16px 8px}
+        .uk-lrow{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;transition:background var(--t);border-top:1px solid var(--bo2)}
+        .uk-lrow:first-child{border-top:0}
+        .uk-lrow:hover{background:var(--bg2)}
+        .uk-lrow:active{background:var(--bg3)}
+        .uk-lrow .lm{width:40px;height:40px;border-radius:var(--r-md);background:var(--ap);color:var(--a-txt);display:grid;place-items:center;flex:none}
+        .uk-lrow .lm svg{width:20px;height:20px}
+        .uk-lrow .lt{flex:1;min-width:0}
+        .uk-lrow .lt b{font:800 13.5px/1.2 var(--fd);color:var(--ink);display:block}
+        .uk-lrow .lt span{font:600 11.5px/1.2 var(--fd);color:var(--mu)}
+        .uk-lrow .lv{font:800 13px var(--fd);color:var(--ink)}
+        .uk-lrow .chev{color:var(--mu);width:18px;height:18px}
+        .uk-acc{max-width:420px;background:var(--su);border:1px solid var(--bo);border-radius:var(--rl);overflow:hidden;margin-top:16px}
+        .uk-acc summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;font:800 14px var(--fd);color:var(--ink)}
+        .uk-acc summary::-webkit-details-marker{display:none}
+        .uk-acc summary svg{width:18px;height:18px;color:var(--mu);transition:transform var(--t)}
+        .uk-acc[open] summary svg{transform:rotate(180deg)}
+        .uk-acc .cnt{padding:0 16px 16px;font:600 12.5px/1.5 var(--fd);color:var(--mu)}
+        .uk-weak b{color:var(--rd-txt)}
+      </style>
+      <h2>Listes</h2>
+      <div class="uk-desc">Lignes cliquables lisibles, en-têtes, accordéons.</div>
+      <div class="uk-list">
+        <div class="uk-lh">Aujourd'hui</div>
+        <div class="uk-lrow"><span class="lm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div class="lt"><b>Leçon de conduite</b><span>14 h · Auto-école du Centre</span></div><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>
+        <div class="uk-lrow"><span class="lm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></span><div class="lt"><b>Question du jour</b><span>Faite ✓</span></div><span class="lv" style="color:var(--gr-txt)">+15</span></div>
+        <div class="uk-lrow uk-weak"><div class="lt"><b>Priorités à droite</b><span><b>4 erreurs</b> · 44 % ratées</span></div><span class="lv" style="color:var(--a-txt);font-size:12px">Réviser →</span></div>
+      </div>
+      <details class="uk-acc" open><summary>Comment ça marche ?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></summary><div class="cnt">Chaque session validée compte pour ta série. Reviens chaque jour pour la garder allumée.</div></details>
+      <details class="uk-acc"><summary>Et si je rate un jour ?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></summary><div class="cnt">Ta série repart de zéro, mais tes compétences validées restent acquises.</div></details>
+    </section>
+
+    <!-- ═══ AVATARS & BANNIÈRES ═══ -->
+    <section class="uk-sec" id="sec-misc">
+      <style>
+        .uk-av{border-radius:50%;background:linear-gradient(135deg,var(--a),var(--adk));color:#fff;display:grid;place-items:center;font-weight:800;font-family:var(--fd);flex:none}
+        .uk-av.sm{width:32px;height:32px;font-size:12px} .uk-av.md{width:44px;height:44px;font-size:15px} .uk-av.lg{width:60px;height:60px;font-size:20px}
+        .uk-av.ring{box-shadow:0 0 0 3px var(--su),0 0 0 5px var(--gr)}
+        .uk-avstack{display:flex} .uk-avstack .uk-av{margin-left:-10px;box-shadow:0 0 0 3px var(--su)} .uk-avstack .uk-av:first-child{margin-left:0}
+        .uk-avstack .more{background:var(--bg2);color:var(--mu)}
+        .uk-ban{display:flex;align-items:flex-start;gap:11px;padding:13px 15px;border-radius:var(--r-md);font:600 12.5px/1.4 var(--fd);border:1px solid transparent;max-width:440px}
+        .uk-ban .bi{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;color:#fff} .uk-ban .bi svg{width:14px;height:14px}
+        .uk-ban b{font-weight:800}
+        .uk-ban.info{background:var(--blp);border-color:color-mix(in srgb,var(--bl) 30%,transparent);color:var(--ink)} .uk-ban.info .bi{background:var(--bl)}
+        .uk-ban.ok{background:var(--grp);border-color:color-mix(in srgb,var(--gr) 30%,transparent);color:var(--ink)} .uk-ban.ok .bi{background:var(--gr)}
+        .uk-ban.warn{background:var(--amp);border-color:color-mix(in srgb,var(--am) 34%,transparent);color:var(--ink)} .uk-ban.warn .bi{background:var(--am)}
+        .uk-nudge{display:flex;align-items:center;gap:12px;max-width:440px;padding:12px 14px;border-radius:var(--rl);
+          background:var(--su);border:1px solid var(--bo);box-shadow:var(--s2)}
+        .uk-nudge .np{width:40px;height:40px;border-radius:10px;background:var(--a);color:var(--a-ink);display:grid;place-items:center;flex:none;font:800 18px var(--fb)}
+        .uk-nudge .nt{flex:1} .uk-nudge .nt b{font:800 13px var(--fd);display:block} .uk-nudge .nt span{font:600 11.5px var(--fd);color:var(--mu)}
+        .uk-cookie{display:flex;align-items:center;gap:14px;flex-wrap:wrap;max-width:520px;padding:14px 16px;border-radius:var(--rl);background:var(--ink);color:var(--bg)}
+        .uk-cookie p{font:600 12px/1.4 var(--fd);flex:1;min-width:180px}
+        .uk-cookie .ca{display:flex;gap:8px}
+        .uk-cookie button{border:0;cursor:pointer;font:800 12px var(--fd);padding:9px 14px;border-radius:var(--r-sm)}
+        .uk-cookie .ok{background:var(--a);color:var(--a-ink)} .uk-cookie .no{background:transparent;color:var(--bg);border:1px solid color-mix(in srgb,var(--bg) 40%,transparent)}
+      </style>
+      <h2>Avatars & bannières</h2>
+      <div class="uk-desc">Identité et messages système, toujours theme-aware.</div>
+      <div class="uk-sub">Avatars</div>
+      <div class="uk-row" style="align-items:center;gap:16px">
+        <span class="uk-av sm">C</span><span class="uk-av md">R</span><span class="uk-av lg">A</span>
+        <span class="uk-av md ring">M</span>
+        <div class="uk-avstack"><span class="uk-av sm">C</span><span class="uk-av sm">R</span><span class="uk-av sm">A</span><span class="uk-av sm more">+5</span></div>
+      </div>
+      <div class="uk-sub">Bannières</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="uk-ban info"><span class="bi"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7.5" r="1.4"/><rect x="11" y="10.5" width="2" height="7" rx="1"/></svg></span><div>Ta prochaine leçon est <b>jeudi à 14 h</b>.</div></div>
+        <div class="uk-ban ok"><span class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span><div>Compétence <b>« Priorités »</b> validée par ton moniteur.</div></div>
+        <div class="uk-ban warn"><span class="bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 8v5M12 16.5v.01"/></svg></span><div>Ta série s'éteint dans <b>3 heures</b> — révise vite !</div></div>
+        <div class="uk-nudge"><span class="np">P</span><div class="nt"><b>Ajoute PermiGo à ton écran</b><span>Un tap, et c'est comme une appli.</span></div><button class="uk-btn pri sm">Installer</button></div>
+        <div class="uk-cookie"><p>On utilise des cookies pour améliorer l'appli.</p><div class="ca"><button class="no">Refuser</button><button class="ok">Accepter</button></div></div>
+      </div>
+    </section>
+
+    <!-- ⟨FIN-SECTIONS⟩ -->
+  </main>
+
+  <script>
+    // Toggles thème + rôle
+    document.querySelectorAll('[data-theme-set]').forEach(b=>b.addEventListener('click',()=>{
+      document.documentElement.dataset.theme=b.dataset.themeSet;
+      document.querySelectorAll('[data-theme-set]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+    }));
+    document.querySelectorAll('[data-role-set]').forEach(b=>b.addEventListener('click',()=>{
+      document.body.dataset.role=b.dataset.roleSet;
+      document.querySelectorAll('[data-role-set]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+    }));
+    // œil mot de passe
+    document.querySelectorAll('.uk-pass .eye').forEach(e=>e.addEventListener('click',()=>{
+      const i=e.parentElement.querySelector('input');i.type=i.type==='password'?'text':'password';
+    }));
+  </script>
+</body>
+</html>
