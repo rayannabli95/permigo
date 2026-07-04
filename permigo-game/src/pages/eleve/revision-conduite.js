@@ -15,6 +15,7 @@ import { haptic } from "@/utils/haptic.js";
 import { mountPremiumQuiz } from "@/components/eleve/premium-quiz.js";
 import { quizByCode } from "@/data/quiz-conduite.js";
 import { track } from "@/services/analytics.js";
+import { medallion, medStatus } from "@/utils/medallions.js";
 import {
   FICHES,
   MONDES,
@@ -243,9 +244,9 @@ const STYLE = `<style>
 .rvc-coach::after { content:""; position:absolute; right:-40px; top:-50px; width:150px; height:150px; border-radius:50%;
   background:radial-gradient(circle,rgba(255,255,255,.22),transparent 70%); pointer-events:none; }
 .rvc-coach-row { position:relative; z-index:1; display:flex; gap:12px; align-items:flex-start; }
-.rvc-coach-av { width:44px; height:44px; border-radius:14px; flex:none; display:grid; place-items:center;
-  background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.34); }
-.rvc-coach-av svg { width:23px; height:23px; }
+.rvc-coach-av { width:52px; height:52px; flex:none; display:grid; place-items:center; }
+.rvc-coach-av img { width:52px; height:52px; object-fit:contain;
+  filter: drop-shadow(0 4px 8px rgba(20,10,50,.35)); }
 .rvc-coach-tag { font:600 10px 'IBM Plex Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:#dcddff; margin-bottom:3px; }
 .rvc-coach-msg { font:600 15px/1.42 'Plus Jakarta Sans',sans-serif; }
 .rvc-coach-msg b { font-weight:800; }
@@ -420,15 +421,15 @@ button.rvcb-tile:active { transform:scale(.975); }
 .rvcb-next-w { font:600 11.5px 'Inter',sans-serif; color:var(--mu,#9499a8); margin-top:3px; }
 .rvcb-next-go { margin-top:11px; display:flex; align-items:center; gap:7px; font:700 13px 'Plus Jakarta Sans',sans-serif; color:var(--ink); }
 .rvcb-next-go .rvcb-pp { width:26px; height:26px; border-radius:9px; background:var(--a,#6366f1); color:#fff; display:grid; place-items:center; }
-.rvcb-next-go .rvcb-pp svg, .rvcb-play svg, .rvcb-faute-ic svg { width:14px; height:14px; }
+.rvcb-next-go .rvcb-pp svg, .rvcb-play svg { width:14px; height:14px; }
 
 /* trouve la faute — bandeau large sombre */
 .rvcb-faute { flex-direction:row; align-items:center; gap:14px; min-height:94px; border:none; color:#fff;
   background:linear-gradient(110deg,#15171f 0%, #20232f 100%); box-shadow:0 14px 30px -16px rgba(0,0,0,.5); }
 .rvcb-faute .rvcb-lab { color:rgba(255,255,255,.55); }
-.rvcb-faute-ic { flex:none; width:52px; height:52px; border-radius:16px; display:grid; place-items:center; color:var(--lime-ink);
-  background:linear-gradient(150deg,#ffb547,#ff7a45); box-shadow:0 10px 20px -8px rgba(255,122,69,.55); }
-.rvcb-faute-ic svg { width:26px; height:26px; }
+.rvcb-faute-ic { flex:none; width:52px; height:52px; display:grid; place-items:center;
+  filter: drop-shadow(0 8px 16px rgba(209,43,43,.4)); }
+.rvcb-faute-ic .pg-med { width:52px; height:52px; }
 .rvcb-faute-tx { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
 .rvcb-faute-h { font:800 17px 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; }
 .rvcb-faute-p { font:500 12px/1.35 'Inter',sans-serif; color:rgba(255,255,255,.65); }
@@ -449,11 +450,9 @@ button.rvcb-tile:active { transform:scale(.975); }
 .rvcb-mondes-a { font:600 12px 'Inter',sans-serif; color:var(--mu,#9499a8); }
 .rvcb-monde { padding:14px; min-height:116px; justify-content:space-between; }
 .rvcb-monde-top { display:flex; align-items:center; justify-content:space-between; }
-.rvcb-mnum { width:30px; height:30px; border-radius:10px; display:grid; place-items:center; color:#fff; font:800 14px 'Plus Jakarta Sans',sans-serif; }
-.rvcb-monde.m1 .rvcb-mnum { background:linear-gradient(150deg,#6d49ff,#3b1ea8); }
-.rvcb-monde.m2 .rvcb-mnum { background:linear-gradient(150deg,#19b6a8,#0c7d72); }
-.rvcb-monde.m3 .rvcb-mnum { background:linear-gradient(150deg,#5b6bff,#2b2f9e); }
-.rvcb-monde.m4 .rvcb-mnum { background:linear-gradient(150deg,#ff8a4c,#e1561f); }
+.rvcb-mmed { width:34px; height:34px; flex:none; display:grid; place-items:center;
+  filter: drop-shadow(0 4px 9px rgba(31,32,46,.22)); }
+.rvcb-mmed .pg-med { width:34px; height:34px; }
 .rvcb-frac { font:700 12px 'Plus Jakarta Sans',sans-serif; color:var(--mu,#9499a8); }
 .rvcb-mnm { font:800 13.5px/1.18 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; margin-top:8px; }
 .rvcb-mdz { font:500 11px 'Inter',sans-serif; color:var(--mu,#9499a8); margin-top:2px; }
@@ -478,15 +477,14 @@ button.rvcb-tile:active { transform:scale(.975); }
   background:color-mix(in srgb,var(--a,#6366f1) 12%,transparent); padding:5px 8px; border-radius:8px; }
 .rvcb-frow-t { flex:1; font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; }
 .rvcb-frow.is-read .rvcb-frow-t { color:var(--mu,#9499a8); }
-.rvcb-frow-st { flex:none; width:22px; height:22px; display:grid; place-items:center; color:#10b981; }
-.rvcb-frow-st svg { width:18px; height:18px; }
+.rvcb-frow-st { flex:none; width:22px; height:22px; display:grid; place-items:center; }
+.rvcb-frow-st .pg-med { width:22px; height:22px; }
 
 @media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before { transition:none !important; animation:none !important; } }
 </style>`;
 
 // Pictos SVG (sobres, mono-trait) réutilisés par la fiche « Coach ».
 const FSVG = {
-  star: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 16l-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>`,
   check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`,
   arrow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`,
   info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>`,
@@ -494,7 +492,6 @@ const FSVG = {
   auto: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/></svg>`,
   video: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m23 7-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`,
   shuffle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>`,
-  lock: `<svg class="lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`,
   play: `<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>`,
 };
 
@@ -574,7 +571,7 @@ export async function mount(root, param) {
         return `<button class="rvcb-frow ${on ? "is-read" : ""}" data-code="${esc(f.code)}">
             <span class="rvcb-frow-code">${esc(f.code)}</span>
             <span class="rvcb-frow-t">${esc(f.titre)}</span>
-            <span class="rvcb-frow-st">${on ? FSVG.check : ""}</span>
+            <span class="rvcb-frow-st">${on ? medStatus("acquis", { size: 22 }) : ""}</span>
           </button>`;
       })
       .join("");
@@ -632,17 +629,25 @@ export async function mount(root, param) {
     const C = 2 * Math.PI * 19; // anneau de progression
     const dash = (C * (1 - pct / 100)).toFixed(1);
 
-    const svgArr = `<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    // Accents de nav réutilisés (dédoublonnés depuis FSVG).
+    const svgArr = FSVG.arrow;
     const svgPlay = `<svg viewBox="0 0 24 24" fill="none"><path d="M7 5l11 7-11 7V5z" fill="currentColor"/></svg>`;
-    const svgWarn = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 4l8.5 15h-17L12 4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.4" r="1.2" fill="currentColor"/></svg>`;
 
+    // Médaillon d'identité par monde (au lieu d'un simple numéro plat).
+    const MONDE_MED = {
+      1: ["volant", "violet"],
+      2: ["route", "teal"],
+      3: ["lune", "indigo"],
+      4: ["couronne", "orange"],
+    };
     const mondeTiles = MONDES.map((m) => {
       const fm = fichesByMonde(m.n);
       const tot = fm.length;
       const done = fm.filter((f) => read[f.code]).length;
       const p = tot ? Math.round((done / tot) * 100) : 0;
+      const [mg, mr] = MONDE_MED[m.n] || ["volant", "violet"];
       return `<button class="rvcb-tile rvcb-monde m${m.n}" data-monde="${m.n}">
-        <div class="rvcb-monde-top"><span class="rvcb-mnum">${m.n}</span><span class="rvcb-frac">${done}/${tot}</span></div>
+        <div class="rvcb-monde-top"><span class="rvcb-mmed">${medallion(mg, mr, { size: 34 })}</span><span class="rvcb-frac">${done}/${tot}</span></div>
         <div><div class="rvcb-mnm">${esc(m.sous)}</div><div class="rvcb-mdz">${esc(m.nom)}</div></div>
         <div class="rvcb-mbar"><i style="width:${p}%"></i></div>
       </button>`;
@@ -704,8 +709,14 @@ export async function mount(root, param) {
         <div class="rvcb-tile rvcb-prog">
           <div class="rvcb-ring">
             <svg width="46" height="46" viewBox="0 0 46 46">
+              <defs>
+                <linearGradient id="rvcbRing" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#ffd24a"/>
+                  <stop offset="1" stop-color="#3f9e00"/>
+                </linearGradient>
+              </defs>
               <circle cx="23" cy="23" r="19" fill="none" stroke="var(--bo3,#eef0f6)" stroke-width="6"/>
-              <circle cx="23" cy="23" r="19" fill="none" stroke="var(--a,#6366f1)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${dash}" transform="rotate(-90 23 23)"/>
+              <circle cx="23" cy="23" r="19" fill="none" stroke="url(#rvcbRing)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${dash}" transform="rotate(-90 23 23)"/>
             </svg>
             <span class="rvcb-pct">${pct}%</span>
           </div>
@@ -727,7 +738,7 @@ export async function mount(root, param) {
         }
 
         <button class="rvcb-tile rvcb-faute span2" data-faute>
-          <span class="rvcb-faute-ic">${svgWarn}</span>
+          <span class="rvcb-faute-ic">${medallion("faute", "red", { size: 52 })}</span>
           <span class="rvcb-faute-tx"><span class="rvcb-lab">Mini-jeu</span><span class="rvcb-faute-h">Trouve la faute</span><span class="rvcb-faute-p">Repère la faute éliminatoire avant le jour J.</span></span>
           <span class="rvcb-play">${svgPlay}</span>
         </button>
@@ -872,7 +883,7 @@ export async function mount(root, param) {
         total
           ? `<div class="rvc-coach">
         <div class="rvc-coach-row">
-          <div class="rvc-coach-av">${FSVG.star}</div>
+          <div class="rvc-coach-av"><img src="/skins/mascot-point.png" alt="" aria-hidden="true" onerror="this.style.display='none'"></div>
           <div>
             <div class="rvc-coach-tag">Ton coach</div>
             <div class="rvc-coach-msg">Voici comment <b>${esc(titreFlow)}</b>. Lis la méthode, puis teste-toi.</div>
@@ -932,7 +943,7 @@ export async function mount(root, param) {
       markRevised(code);
       haptic("success");
       root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-done">
-        <div class="rvc-done-e">🧩</div>
+        <div class="rvc-done-e">${medallion("check", "green", { size: 64 })}</div>
         <div class="rvc-done-t">Dans l'ordre, nickel !</div>
         <p class="rvc-sub">Les ${steps.length} étapes de « ${esc(f.titre)} » : pliées.</p>
         <button class="rvc-go" data-next>Continuer</button>

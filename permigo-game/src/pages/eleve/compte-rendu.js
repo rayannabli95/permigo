@@ -10,6 +10,8 @@ import { toast } from "@/components/common/toast.js";
 import { navigate } from "@/router.js";
 import { labelComp } from "@/utils/remc-label.js";
 import { REMC_TOTAL } from "@/data/remc.js";
+import { icon } from "@/utils/icons.js";
+import { medStatus } from "@/utils/medallions.js";
 
 // ─── CSS scoped ────────────────────────────────────────────────
 const STYLE = `<style>
@@ -126,18 +128,7 @@ const STYLE = `<style>
 }
 .cr-comp-ico {
   width: 32px; height: 32px; flex-shrink: 0;
-  border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-}
-.cr-comp-ico.acquis {
-  background: rgba(16,185,129,.12); color: var(--gr);
-}
-.cr-comp-ico.retravailler {
-  background: rgba(245,158,11,.12); color: var(--am);
-}
-.cr-comp-ico.en_cours {
-  background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a-txt);
 }
 .cr-comp-code {
   font: 700 10.5px/1 'IBM Plex Mono', monospace;
@@ -213,7 +204,7 @@ function renderSkeleton() {
 <div class="cr anim-slide-up">
   <div class="cr-hd">
     <button class="cr-back" id="cr-back-skel" aria-label="Retour">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      ${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}
     </button>
     <div class="cr-hd-title">Compte-rendu</div>
   </div>
@@ -253,11 +244,12 @@ function renderPage(cr) {
 
   function compItem(code, type) {
     const nom = labelComp(code);
-    const icons = { acquis: "✓", retravailler: "⚠", en_cours: "↻" };
-    const ico = icons[type] || "·";
+    // Même grammaire de statut que le livret moniteur (médaillons 3D).
+    const status =
+      { acquis: "acquis", a_retravailler: "retravailler" }[type] || "encours";
     return `
       <div class="cr-comp-item">
-        <div class="cr-comp-ico ${type === "a_retravailler" ? "retravailler" : type}" aria-hidden="true">${esc(ico)}</div>
+        <div class="cr-comp-ico" aria-hidden="true">${medStatus(status, { size: 26 })}</div>
         <div>
           <div>${esc(nom)}</div>
           <div class="cr-comp-code">${esc(code)}</div>
@@ -297,7 +289,7 @@ function renderPage(cr) {
 <div class="cr anim-slide-up">
   <div class="cr-hd">
     <button class="cr-back" id="cr-back" aria-label="Retour">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      ${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}
     </button>
     <div class="cr-hd-title">Compte-rendu</div>
   </div>
@@ -324,7 +316,7 @@ function renderPage(cr) {
   ${noteHtml}
 
   <button class="cr-cta-primary" id="cr-cta-parcours" type="button">
-    Voir mon itinéraire →
+    Voir mon itinéraire ${icon("arrow-right", { size: 18, strokeWidth: 2.5 })}
   </button>
   <button class="cr-cta-secondary" id="cr-cta-retour" type="button">
     Retour à l'accueil

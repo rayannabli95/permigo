@@ -22,6 +22,7 @@ import {
   playCoin,
   playReward,
 } from "@/utils/sound.js";
+import { medallion, medLot } from "@/utils/medallions.js";
 
 const SPIN_MS = 5200; // = durée de la transition CSS du disque
 
@@ -168,7 +169,8 @@ const STYLE = `<style>
 .roue-real-h .tag { flex: none; font: 600 9.5px/1 'Fredoka', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #b9f26e; padding: 4px 9px; border-radius: 999px; background: rgba(111,224,22,.14); border: 1px solid rgba(111,224,22,.35); }
 .roue-real-row { display: flex; align-items: center; gap: 11px; padding: 10px 2px; border-bottom: 1px solid rgba(111,224,22,.12); }
 .roue-real-row:last-of-type { border-bottom: 0; }
-.roue-real-ic { width: 38px; height: 38px; flex: none; border-radius: 12px; display: grid; place-items: center; font-size: 20px; background: linear-gradient(150deg, rgba(111,224,22,.25), rgba(63,143,2,.3)); border: 1px solid rgba(111,224,22,.4); }
+.roue-real-ic { width: 38px; height: 38px; flex: none; display: grid; place-items: center; }
+.roue-real-ic svg { filter: drop-shadow(0 3px 5px rgba(0,0,0,.4)); }
 .roue-real-name { font: 700 13.5px/1.15 'Baloo 2', cursive; color: #e9ffd2; }
 .roue-real-sub { font: 700 11px/1.3 'Nunito', sans-serif; color: var(--mu2); margin-top: 1px; }
 .roue-real-flex { flex: 1; min-width: 0; }
@@ -205,7 +207,7 @@ function renderRealLots(lots, moniteurPrenom) {
     .map(
       (l) => `
     <div class="roue-real-row">
-      <div class="roue-real-ic">${esc(l.icon || "🎁")}</div>
+      <div class="roue-real-ic">${medLot(l.icon, { size: 34 })}</div>
       <div class="roue-real-flex">
         <div class="roue-real-name">${esc(l.label || "Cadeau")}</div>
       </div>
@@ -215,7 +217,7 @@ function renderRealLots(lots, moniteurPrenom) {
   return `
   <section class="roue-real">
     <div class="roue-real-h">
-      <h2>🎁 Gros lots réels</h2>
+      <h2>${medallion("cadeau", "pink", { size: 20 })} Gros lots réels</h2>
       <span class="tag">Bientôt</span>
     </div>
     ${rows}
@@ -299,7 +301,7 @@ export async function mount(root) {
       </div>
     </div>
     <div class="roue-hub" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/><path d="M12 3v6.4M4.2 17.5l5.4-3.1M19.8 17.5l-5.4-3.1"/></svg>
+      <svg viewBox="0 0 64 64" fill="#fff"><path d="M32 13a18 18 0 0 0-18 18h10.5a7.5 7.5 0 0 1 15 0H50A18 18 0 0 0 32 13z M14.4 35a18 18 0 0 0 13.1 13.6c.3-4.6-1.3-9.3-4.5-11.7-2.4-1.9-5.5-2.5-8.6-1.9z M49.6 35c-3.1-.6-6.2 0-8.6 1.9-3.2 2.4-4.8 7.1-4.5 11.7A18 18 0 0 0 49.6 35z"/><circle cx="32" cy="31" r="3.8"/></svg>
     </div>
   </div>
 

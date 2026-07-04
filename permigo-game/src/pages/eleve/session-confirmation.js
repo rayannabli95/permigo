@@ -3,14 +3,15 @@
 // Route : #/sessions/{session_id}
 // L'élève confirme ou refuse la séance enregistrée par son moniteur
 // ═══════════════════════════════════════════════════════════════
-import { sb } from '@/auth/auth.js';
-import { getCurUser } from '@/auth/cur-user.js';
-import { esc } from '@/utils/escape.js';
-import { toast } from '@/components/common/toast.js';
-import { track } from '@/services/analytics.js';
-import { navigate } from '@/router.js';
-import { icon } from '@/utils/icons.js';
-import { haptic } from '@/utils/haptic.js';
+import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
+import { esc } from "@/utils/escape.js";
+import { toast } from "@/components/common/toast.js";
+import { track } from "@/services/analytics.js";
+import { navigate } from "@/router.js";
+import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
+import { haptic } from "@/utils/haptic.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -142,10 +143,7 @@ const STYLE = `<style>
 .sc-recap-row:last-of-type { border-bottom: none; }
 .sc-recap-ico {
   width: 34px; height: 34px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--a) 8%, transparent);
   display: flex; align-items: center; justify-content: center;
-  color: var(--a-txt);
   flex-shrink: 0;
 }
 .sc-recap-lbl {
@@ -317,19 +315,22 @@ const STYLE = `<style>
 // ─── Entry point ─────────────────────────────────────────────────
 export async function mount(root, sessionId) {
   const me = getCurUser();
-  if (!me || me.role !== 'eleve') return;
+  if (!me || me.role !== "eleve") return;
 
   if (!sessionId) {
-    navigate('#/');
+    navigate("#/");
     return;
   }
 
-  track('page.view', { page: 'eleve_session_confirmation', session_id: sessionId });
+  track("page.view", {
+    page: "eleve_session_confirmation",
+    session_id: sessionId,
+  });
 
   root.innerHTML = `${STYLE}
     <div class="sc">
       <div class="sc-hd">
-        <button class="sc-back" id="sc-back-btn" aria-label="Retour">${icon('arrow-left', { size: 18, strokeWidth: 2.5 })}</button>
+        <button class="sc-back" id="sc-back-btn" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
         <div class="sc-hd-title">Confirmer la séance</div>
       </div>
       <div class="sc-skel" style="height:200px;border-radius:0"></div>
@@ -337,50 +338,58 @@ export async function mount(root, sessionId) {
       <div class="sc-skel" style="height:100px;margin:16px"></div>
     </div>`;
 
-  root.querySelector('#sc-back-btn')?.addEventListener('click', () => navigate('#/'));
+  root
+    .querySelector("#sc-back-btn")
+    ?.addEventListener("click", () => navigate("#/"));
 
   // ─── Fetch session ───────────────────────────────────────────
   const { data: session, error } = await sb
-    .from('sessions_moniteur')
-    .select('*, moniteur:profiles!moniteur_id(id, prenom, nom, avatar_url)')
-    .eq('id', sessionId)
+    .from("sessions_moniteur")
+    .select("*, moniteur:profiles!moniteur_id(id, prenom, nom, avatar_url)")
+    .eq("id", sessionId)
     .maybeSingle();
 
   if (error || !session) {
-    toast('Séance introuvable', 'error');
-    navigate('#/');
+    toast("Séance introuvable", "error");
+    navigate("#/");
     return;
   }
 
   // Fetch compétences validées pendant cette séance
   const sessionDate = session.session_date ?? session.created_at;
   const { data: validations } = await sb
-    .from('validations')
-    .select('competence_id, competences_remc!competence_id(nom), statut')
-    .eq('eleve_id', me.id)
-    .eq('validated_by', session.moniteur_id)
-    .gte('validated_at', sessionDate);
+    .from("validations")
+    .select("competence_id, competences_remc!competence_id(nom), statut")
+    .eq("eleve_id", me.id)
+    .eq("validated_by", session.moniteur_id)
+    .gte("validated_at", sessionDate);
 
   const comps = validations ?? [];
 
   // ─── Render ─────────────────────────────────────────────────
-  const mon       = session.moniteur ?? {};
-  const monPrenom = mon.prenom ?? 'Moniteur';
-  const monNom    = mon.nom ?? '';
-  const initials  = ((monPrenom[0] ?? '') + (monNom[0] ?? '')).toUpperCase() || 'M';
+  const mon = session.moniteur ?? {};
+  const monPrenom = mon.prenom ?? "Moniteur";
+  const monNom = mon.nom ?? "";
+  const initials =
+    ((monPrenom[0] ?? "") + (monNom[0] ?? "")).toUpperCase() || "M";
 
   const dateStr = session.session_date
-    ? new Date(session.session_date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-    : 'Date inconnue';
-  const durStr  = session.duration_minutes
-    ? `${Math.floor(session.duration_minutes / 60) > 0 ? `${Math.floor(session.duration_minutes / 60)}h` : ''}${session.duration_minutes % 60 > 0 ? `${session.duration_minutes % 60}min` : ''}`.trim()
+    ? new Date(session.session_date).toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "Date inconnue";
+  const durStr = session.duration_minutes
+    ? `${Math.floor(session.duration_minutes / 60) > 0 ? `${Math.floor(session.duration_minutes / 60)}h` : ""}${session.duration_minutes % 60 > 0 ? `${session.duration_minutes % 60}min` : ""}`.trim()
     : null;
 
   root.innerHTML = `${STYLE}
     <div class="sc anim-slide-up">
 
       <div class="sc-hd">
-        <button class="sc-back" id="sc-back-btn" aria-label="Retour">${icon('arrow-left', { size: 18, strokeWidth: 2.5 })}</button>
+        <button class="sc-back" id="sc-back-btn" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
         <h1 class="sc-hd-title" tabindex="-1">Confirmer la séance</h1>
       </div>
 
@@ -389,9 +398,11 @@ export async function mount(root, sessionId) {
         <div class="sc-hero-content">
           <div class="sc-hero-top">
             <div class="sc-hero-av">
-              ${mon.avatar_url
-                ? `<img src="${esc(mon.avatar_url)}" alt="${esc(monPrenom)}" loading="lazy">`
-                : esc(initials)}
+              ${
+                mon.avatar_url
+                  ? `<img src="${esc(mon.avatar_url)}" alt="${esc(monPrenom)}" loading="lazy">`
+                  : esc(initials)
+              }
             </div>
             <div class="sc-hero-info">
               <div class="sc-hero-label">Séance avec</div>
@@ -405,52 +416,68 @@ export async function mount(root, sessionId) {
       <div class="sc-recap">
         <div class="sc-recap-title">Détails de la séance</div>
         <div class="sc-recap-row">
-          <div class="sc-recap-ico">${icon('calendar', { size: 16 })}</div>
+          <div class="sc-recap-ico">${medallion("calendrier", "indigo", { size: 28 })}</div>
           <div>
             <div class="sc-recap-lbl">Date</div>
             <div class="sc-recap-val">${esc(dateStr)}</div>
           </div>
         </div>
-        ${durStr ? `
+        ${
+          durStr
+            ? `
         <div class="sc-recap-row">
-          <div class="sc-recap-ico">${icon('clock', { size: 16 })}</div>
+          <div class="sc-recap-ico">${medallion("horloge", "teal", { size: 28 })}</div>
           <div>
             <div class="sc-recap-lbl">Durée</div>
             <div class="sc-recap-val">${esc(durStr)}</div>
           </div>
-        </div>` : ''}
+        </div>`
+            : ""
+        }
       </div>
 
       <!-- Compétences validées -->
-      ${comps.length > 0 ? `
+      ${
+        comps.length > 0
+          ? `
       <div class="sc-comps">
         <div class="sc-comps-title">Compétences validées · ${comps.length}</div>
-        ${comps.map(v => `
+        ${comps
+          .map(
+            (v) => `
           <div class="sc-comp-row">
             <div class="sc-comp-dot"></div>
             <div class="sc-comp-name">${esc(v.competences_remc?.nom ?? v.competence_id)}</div>
-            <div class="sc-comp-status">${icon('check', { size: 10, strokeWidth: 3 })} Acquis</div>
+            <div class="sc-comp-status">${icon("check", { size: 10, strokeWidth: 3 })} Acquis</div>
           </div>
-        `).join('')}
-      </div>` : ''}
+        `,
+          )
+          .join("")}
+      </div>`
+          : ""
+      }
 
       <!-- Commentaire moniteur -->
-      ${session.notes ? `
+      ${
+        session.notes
+          ? `
       <div class="sc-comment">
         <div class="sc-comment-label">Retour de ${esc(monPrenom)}</div>
         <div class="sc-comment-text">"${esc(session.notes)}"</div>
-      </div>` : ''}
+      </div>`
+          : ""
+      }
 
     </div>
 
     <!-- CTAs sticky -->
     <div class="sc-actions">
       <button class="sc-btn-confirm" id="sc-confirm-btn" data-session-id="${esc(sessionId)}">
-        ${icon('check', { size: 16, strokeWidth: 2.8 })}
+        ${icon("check", { size: 16, strokeWidth: 2.8 })}
         Confirmer la séance
       </button>
       <button class="sc-btn-refuse" id="sc-refuse-btn">
-        ${icon('x', { size: 14, strokeWidth: 2.5 })}
+        ${icon("x", { size: 14, strokeWidth: 2.5 })}
         Refuser
       </button>
     </div>`;
@@ -460,40 +487,43 @@ export async function mount(root, sessionId) {
 
 // ─── Wire ────────────────────────────────────────────────────────
 function wire(root, { sessionId, monPrenom }) {
-  root.querySelector('#sc-back-btn')?.addEventListener('click', () => {
-    haptic('select');
-    navigate('#/');
+  root.querySelector("#sc-back-btn")?.addEventListener("click", () => {
+    haptic("select");
+    navigate("#/");
   });
 
   // Confirmer
-  root.querySelector('#sc-confirm-btn')?.addEventListener('click', async (e) => {
-    const btn = e.currentTarget;
-    if (btn.disabled) return;
-    haptic('success');
-    btn.disabled = true;
-    btn.innerHTML = `<div style="width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> En cours…`;
-    try {
-      const { data, error } = await sb.rpc('confirm_session', {
-        p_session_id: sessionId,
-        p_status: 'confirmed',
-      });
-      if (error || data?.error) throw (error || new Error(data.error));
-      track('session.confirmed', { session_id: sessionId });
-      navigator.vibrate?.(50);
-      toast('Séance confirmée ✓', 'success');
-      setTimeout(() => navigate('#/'), 800);
-    } catch (err) {
-      console.error('[session-confirmation] confirm', err);
-      const msg = translateSessionError(err?.message) || 'réessaie dans un instant';
-      toast(`Impossible de confirmer — ${msg}`, 'error');
-      btn.disabled = false;
-      btn.innerHTML = `${icon('check', { size: 16, strokeWidth: 2.8 })} Confirmer la séance`;
-    }
-  });
+  root
+    .querySelector("#sc-confirm-btn")
+    ?.addEventListener("click", async (e) => {
+      const btn = e.currentTarget;
+      if (btn.disabled) return;
+      haptic("success");
+      btn.disabled = true;
+      btn.innerHTML = `<div style="width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> En cours…`;
+      try {
+        const { data, error } = await sb.rpc("confirm_session", {
+          p_session_id: sessionId,
+          p_status: "confirmed",
+        });
+        if (error || data?.error) throw error || new Error(data.error);
+        track("session.confirmed", { session_id: sessionId });
+        navigator.vibrate?.(50);
+        toast("Séance confirmée ✓", "success");
+        setTimeout(() => navigate("#/"), 800);
+      } catch (err) {
+        console.error("[session-confirmation] confirm", err);
+        const msg =
+          translateSessionError(err?.message) || "réessaie dans un instant";
+        toast(`Impossible de confirmer — ${msg}`, "error");
+        btn.disabled = false;
+        btn.innerHTML = `${icon("check", { size: 16, strokeWidth: 2.8 })} Confirmer la séance`;
+      }
+    });
 
   // Refuser → modal
-  root.querySelector('#sc-refuse-btn')?.addEventListener('click', () => {
-    haptic('warning');
+  root.querySelector("#sc-refuse-btn")?.addEventListener("click", () => {
+    haptic("warning");
     showRefuseModal(root, sessionId, monPrenom);
   });
 }
@@ -501,52 +531,59 @@ function wire(root, { sessionId, monPrenom }) {
 // Traduit les codes d'erreur backend RPC confirm_session en messages FR lisibles
 function translateSessionError(code) {
   const map = {
-    already_decided: 'cette séance a déjà été traitée',
-    not_found:       'séance introuvable',
-    forbidden:       'tu n\'as pas accès à cette séance',
-    invalid_status:  'statut de séance invalide',
+    already_decided: "cette séance a déjà été traitée",
+    not_found: "séance introuvable",
+    forbidden: "tu n'as pas accès à cette séance",
+    invalid_status: "statut de séance invalide",
   };
   return map[code] || null;
 }
 
 // ─── Modal confirmation refus ────────────────────────────────────
 function showRefuseModal(root, sessionId, monPrenom) {
-  const modal = document.createElement('div');
-  modal.className = 'sc-modal-bg';
+  const modal = document.createElement("div");
+  modal.className = "sc-modal-bg";
   modal.innerHTML = `
     <div class="sc-modal">
       <div class="sc-modal-title">Refuser la séance ?</div>
       <div class="sc-modal-sub">${esc(monPrenom)} sera notifié du refus.</div>
       <button class="sc-modal-confirm-refuse" id="sc-modal-refuse-confirm">
-        ${icon('x-circle', { size: 16 })} Oui, refuser
+        ${icon("x-circle", { size: 16 })} Oui, refuser
       </button>
       <button class="sc-modal-cancel" id="sc-modal-cancel">Annuler</button>
     </div>`;
 
   document.body.appendChild(modal);
-  modal.querySelector('#sc-modal-cancel')?.addEventListener('click', () => modal.remove());
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
-
-  modal.querySelector('#sc-modal-refuse-confirm')?.addEventListener('click', async () => {
-    const btn = modal.querySelector('#sc-modal-refuse-confirm');
-    btn.disabled = true;
-    btn.textContent = 'En cours…';
-    try {
-      const { data, error } = await sb.rpc('confirm_session', {
-        p_session_id: sessionId,
-        p_status: 'refused',
-      });
-      if (error || data?.error) throw (error || new Error(data.error));
-      track('session.refused', { session_id: sessionId });
-      modal.remove();
-      toast('Séance refusée', 'info');
-      setTimeout(() => navigate('#/'), 800);
-    } catch (err) {
-      console.error('[session-confirmation] refuse', err);
-      const msg = translateSessionError(err?.message) || 'réessaie dans un instant';
-      toast(`Impossible de refuser — ${msg}`, 'error');
-      btn.disabled = false;
-      btn.innerHTML = `${icon('x-circle', { size: 16 })} Oui, refuser`;
-    }
+  modal
+    .querySelector("#sc-modal-cancel")
+    ?.addEventListener("click", () => modal.remove());
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.remove();
   });
+
+  modal
+    .querySelector("#sc-modal-refuse-confirm")
+    ?.addEventListener("click", async () => {
+      const btn = modal.querySelector("#sc-modal-refuse-confirm");
+      btn.disabled = true;
+      btn.textContent = "En cours…";
+      try {
+        const { data, error } = await sb.rpc("confirm_session", {
+          p_session_id: sessionId,
+          p_status: "refused",
+        });
+        if (error || data?.error) throw error || new Error(data.error);
+        track("session.refused", { session_id: sessionId });
+        modal.remove();
+        toast("Séance refusée", "info");
+        setTimeout(() => navigate("#/"), 800);
+      } catch (err) {
+        console.error("[session-confirmation] refuse", err);
+        const msg =
+          translateSessionError(err?.message) || "réessaie dans un instant";
+        toast(`Impossible de refuser — ${msg}`, "error");
+        btn.disabled = false;
+        btn.innerHTML = `${icon("x-circle", { size: 16 })} Oui, refuser`;
+      }
+    });
 }

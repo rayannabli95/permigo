@@ -7,6 +7,7 @@ import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { hideBottomNav } from "@/utils/nav.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
@@ -55,12 +56,12 @@ const STYLE = `<style>
   margin-bottom: 16px;
 }
 .exam-hd-ico {
-  width: 40px; height: 40px;
-  background: var(--a);
-  border-radius: 12px;
+  width: 48px; height: 48px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
   flex-shrink: 0;
+}
+.exam-hd-ico .pg-med {
+  filter: drop-shadow(0 5px 12px color-mix(in srgb, var(--adk, #f08a12) 30%, transparent));
 }
 .exam-hd-title { font: 700 22px/1.2 'Plus Jakarta Sans',sans-serif; color: var(--ink); }
 .exam-hd-sub { font: 500 13px/1.4 'Inter',sans-serif; color: var(--mu3); margin-top: 2px; }
@@ -205,14 +206,12 @@ const STYLE = `<style>
 }
 .exam-check-ico {
   width: 32px; height: 32px;
-  border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
   flex-shrink: 0;
 }
-.exam-check-row.pass .exam-check-ico { background: var(--grp2); }
-.exam-check-row.fail .exam-check-ico { background: #ffedd5; }
-.exam-check-row.neutral .exam-check-ico { background: var(--bg4); }
+.exam-check-ico .pg-med {
+  filter: drop-shadow(0 3px 6px rgba(10,13,26,.18));
+}
 .exam-check-body { flex: 1; min-width: 0; }
 .exam-check-label { font: 600 14px/1.3 'Plus Jakarta Sans',sans-serif; color: var(--ink); }
 .exam-check-sub { font: 500 12px/1.3 'Inter',sans-serif; color: var(--mu); margin-top: 2px; }
@@ -255,7 +254,8 @@ const STYLE = `<style>
 .exam-tip:nth-child(2) { animation-delay:.26s; }
 .exam-tip:nth-child(3) { animation-delay:.30s; }
 .exam-tip:nth-child(4) { animation-delay:.34s; }
-.exam-tip-ico { font-size: 24px; margin-bottom: 8px; display: block; }
+.exam-tip-ico { margin-bottom: 8px; display: flex; }
+.exam-tip-ico .pg-med { filter: drop-shadow(0 4px 8px rgba(10,13,26,.16)); }
 .exam-tip-txt { font: 500 13px/1.4 'Inter',sans-serif; color: var(--ink5); }
 
 /* ── Predict card ── */
@@ -321,19 +321,19 @@ const QUIZ_TARGET = 70;
 
 const TIPS = [
   {
-    ico: icon("moon", { size: 20, strokeWidth: 1.5 }),
+    ico: medallion("lune", "indigo", { size: 34 }),
     txt: "Dors 8h la veille — le cerveau consolide la mémoire pendant le sommeil.",
   },
   {
-    ico: icon("zap", { size: 20, strokeWidth: 1.5 }),
+    ico: medallion("eclair", "orange", { size: 34 }),
     txt: "Mange léger le matin. Évite le sucre rapide avant l'examen.",
   },
   {
-    ico: icon("clock", { size: 20, strokeWidth: 1.5 }),
+    ico: medallion("horloge", "blue", { size: 34 }),
     txt: "Arrive 15 min en avance pour te détendre et vérifier le matériel.",
   },
   {
-    ico: icon("activity", { size: 20, strokeWidth: 1.5 }),
+    ico: medallion("stats", "teal", { size: 34 }),
     txt: "Respire par le ventre avant de démarrer. 4 sec inspiré, 4 sec expiré.",
   },
 ];
@@ -508,7 +508,7 @@ function renderPredict(data) {
     if (!fails.length) {
       return `
 <div class="exam-predict-ready">
-  <span aria-hidden="true" style="color:var(--gr)">${icon("check-circle", { size: 26 })}</span>
+  <span aria-hidden="true">${medallion("check", "green", { size: 24 })}</span>
   <div>
     <div class="exam-predict-title">Tu es prêt pour l'examen !</div>
     <div class="exam-predict-sub">${compsCount}/31 compétences validées — objectif atteint</div>
@@ -517,7 +517,7 @@ function renderPredict(data) {
     }
     return `
 <div class="exam-predict-almost">
-  <span aria-hidden="true" style="color:#d97706">${icon("alert-triangle", { size: 26 })}</span>
+  <span aria-hidden="true">${medallion("panneau", "orange", { size: 24 })}</span>
   <div>
     <div class="exam-predict-title">Presque prêt — encore ${fails.length} critère${fails.length > 1 ? "s" : ""}</div>
     <div class="exam-predict-sub">${compsCount}/31 validées. Reste : ${esc(fails.map((f) => f.label).join(" · "))}</div>
@@ -563,7 +563,7 @@ function buildCriteria({ compsCount, streak, avgScore }) {
       sub: `${compsCount} compétences validées sur 31`,
       pass: compsCount >= COMPS_TARGET,
       badge: `${Math.round((compsCount / 31) * 100)}%`,
-      ico: icon("map", { size: 20 }),
+      ico: medallion("carte", "blue", { size: 30 }),
     },
     {
       label: "Streak actif",
@@ -573,7 +573,7 @@ function buildCriteria({ compsCount, streak, avgScore }) {
           : "Reprends l'application aujourd'hui",
       pass: streak > 0,
       badge: streak > 0 ? `${streak}j` : "0j",
-      ico: icon("flame", { size: 20 }),
+      ico: medallion("flamme", "orange", { size: 30 }),
     },
     {
       label: "Score quiz > 70%",
@@ -582,7 +582,7 @@ function buildCriteria({ compsCount, streak, avgScore }) {
       pass: avgScore !== null && avgScore >= QUIZ_TARGET,
       neutral: avgScore === null,
       badge: avgScore !== null ? `${avgScore}%` : "—",
-      ico: icon("lightbulb", { size: 20 }),
+      ico: medallion("ampoule", "gold", { size: 30 }),
     },
     {
       label: "Révision complète",
@@ -591,7 +591,7 @@ function buildCriteria({ compsCount, streak, avgScore }) {
         : "Consulte les fiches résumé",
       pass: revised,
       badge: revised ? "✓" : "—",
-      ico: icon("book", { size: 20 }),
+      ico: medallion("livret", "violet", { size: 30 }),
     },
   ];
 }
@@ -704,7 +704,7 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}
 <div class="exam">
   <div class="exam-hd">
-    <div class="exam-hd-ico" aria-hidden="true">${icon("graduation-cap", { size: 34 })}</div>
+    <div class="exam-hd-ico" aria-hidden="true">${medallion("examen", "gold", { size: 48 })}</div>
     <div>
       <h1 class="exam-hd-title">Ton examen blanc</h1>
       <div class="exam-hd-sub">Prépare-toi sereinement pour le grand jour.</div>
@@ -728,7 +728,7 @@ export async function mount(root) {
 
   <!-- 1. HEADER -->
   <div class="exam-hd exam-card" style="background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:16px">
-    <div class="exam-hd-ico" aria-hidden="true">${icon("graduation-cap", { size: 34 })}</div>
+    <div class="exam-hd-ico" aria-hidden="true">${medallion("examen", "gold", { size: 48 })}</div>
     <div>
       <h1 class="exam-hd-title">Ton examen blanc</h1>
       <div class="exam-hd-sub">Prépare-toi sereinement pour le grand jour.</div>
@@ -766,8 +766,8 @@ export async function mount(root) {
   <!-- 6. CENTRE D'EXAMEN -->
   <a href="#/centre-examen" class="exam-card exam-centre" id="exam-centre-link"
      style="display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;cursor:pointer">
-    <div style="width:44px;height:44px;border-radius:12px;background:var(--a);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-      ${icon("map", { size: 22 })}
+    <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      ${medallion("carte", "blue", { size: 36 })}
     </div>
     <div style="flex:1;min-width:0">
       <div style="font-size:15px;font-weight:800">Connais ton centre d'examen</div>

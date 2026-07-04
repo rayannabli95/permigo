@@ -16,6 +16,8 @@ import { haptic, tapHaptic } from "@/utils/haptic.js";
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { openShareRecap } from "@/components/eleve/share-recap.js";
+import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import {
   PHASES,
   FAMILLES,
@@ -24,6 +26,23 @@ import {
   SEUIL,
   scoreExam,
 } from "@/data/exam-conduite-phases.js";
+
+// Emoji de phase (data/exam-conduite-phases.js) → médaillon 3D premium.
+// On ne touche jamais la donnée : on traduit l'emoji au rendu (fallback route).
+const PHASE_MED = {
+  "🪪": ["profil", "blue"], // accueil & identité
+  "🪑": ["reglages", "slate"], // installation & réglages
+  "🗣️": ["message", "violet"], // les consignes
+  "🚗": ["voiture", "blue"], // conduite en circulation
+  "🧭": ["carte", "teal"], // conduite autonome
+  "↩️": ["roue", "orange"], // la manœuvre
+  "❓": ["quiz", "violet"], // les questions
+  "🏁": ["drapeau", "gold"], // retour & immobilisation
+};
+function phaseMed(emoji, size = 56) {
+  const [glyph, ramp] = PHASE_MED[(emoji || "").trim()] || ["route", "blue"];
+  return medallion(glyph, ramp, { size, glow: true });
+}
 
 const STYLE = `<style>
 .exc2 { position:relative; max-width:480px; margin:0 auto; min-height:100dvh; isolation:isolate;
@@ -44,6 +63,7 @@ body.exc2-immersive #app { padding-top:0 !important; }
 
 .exc2-top { display:flex; align-items:center; gap:12px; padding:16px 0 6px; }
 .exc2-x { width:38px; height:38px; flex-shrink:0; border:0; border-radius:12px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
   background:linear-gradient(180deg,#2c2660,#1a1442); color:#cfc7ff; font-size:18px;
   box-shadow:0 4px 0 #100c30, inset 0 1px 0 rgba(255,255,255,.14); }
 .exc2-x:active { transform:translateY(3px); box-shadow:0 1px 0 #100c30; }
@@ -105,6 +125,7 @@ body.exc2-immersive #app { padding-top:0 !important; }
   font:800 16px 'Baloo 2','Fredoka',sans-serif; color:#3a1d00; background:linear-gradient(180deg,#ffd24a,#ff9c1c);
   box-shadow:0 5px 0 #b85e00, 0 8px 18px rgba(255,140,30,.35), inset 0 1px 0 rgba(255,255,255,.5); transition:transform .1s, box-shadow .1s; }
 .exc2-go:active { transform:translateY(4px); box-shadow:0 1px 0 #b85e00, inset 0 1px 0 rgba(255,255,255,.5); }
+.exc2-go-ico { display:inline-flex; vertical-align:-5px; margin-right:8px; }
 .exc2-ghost { width:100%; border:1px solid rgba(255,255,255,.16); border-radius:16px; padding:14px; min-height:50px; cursor:pointer; margin-top:10px;
   font:700 15px 'Fredoka',sans-serif; color:#cbc6f0; background:rgba(255,255,255,.04); }
 
@@ -172,7 +193,7 @@ export async function mount(root) {
 
   function topBar(label, onX = "abandon") {
     return `<div class="exc2-top">
-      <button class="exc2-x" data-x aria-label="Quitter">✕</button>
+      <button class="exc2-x" data-x aria-label="Quitter">${icon("x", { size: 18, strokeWidth: 2.4 })}</button>
       <div class="exc2-pips">${pips()}</div>
     </div>`;
   }
@@ -195,7 +216,7 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}<div class="exc2">
       ${topBar()}
       <div class="exc2-mid exc2-center">
-        <div class="exc2-e">🏁</div>
+        <div class="exc2-e">${medallion("drapeau", "gold", { size: 64, glow: true })}</div>
         <div class="exc2-h">Examen blanc de conduite</div>
         <p class="exc2-sub">8 phases, comme le vrai examen. Tu choisis la bonne action à chaque fois.</p>
         <div class="exc2-chips">
@@ -223,7 +244,7 @@ export async function mount(root) {
       ${topBar()}
       <div class="exc2-mid exc2-center">
         <div class="exc2-pk">PHASE ${p.n} / ${phases.length}</div>
-        <div class="exc2-e">${p.emoji}</div>
+        <div class="exc2-e">${phaseMed(p.emoji, 56)}</div>
         <div class="exc2-h">${esc(p.titre)}</div>
         <p class="exc2-sub">${esc(p.sous)}</p>
       </div>
@@ -392,7 +413,7 @@ export async function mount(root) {
         }
         <p class="exc2-note">Rappel : c'est un entraînement. Le vrai ${TOTAL}, c'est l'inspecteur.</p>
       </div>
-      <button class="exc2-go" data-share>📲 Partager mon score</button>
+      <button class="exc2-go" data-share><span class="exc2-go-ico">${medallion("megaphone", "blue", { size: 22 })}</span>Partager mon score</button>
       <button class="exc2-ghost" data-done>Retour aux révisions</button>
     </div>`;
     root.querySelector("[data-done]").addEventListener("click", leave);
@@ -412,7 +433,7 @@ export async function mount(root) {
   function renderElim() {
     root.innerHTML = `${STYLE}<div class="exc2">
       <div class="exc2-mid exc2-center">
-        <div class="exc2-e">⛔</div>
+        <div class="exc2-e">${medallion("panneau", "red", { size: 64, glow: true })}</div>
         <div class="exc2-h">Faute éliminatoire</div>
         <p class="exc2-sub">Dans la réalité, une seule suffit à recaler — quel que soit ton nombre de points. C'est pour ça qu'on s'arrête ici.</p>
         <p class="exc2-note">Pas de panique : c'est un entraînement, justement pour la repérer AVANT le jour J. Relis la correction juste au-dessus et retente.</p>

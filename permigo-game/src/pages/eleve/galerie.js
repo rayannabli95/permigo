@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
@@ -129,14 +130,11 @@ const STYLE = `<style>
 /* Lock icon overlay */
 .gal-lock-badge {
   position: absolute;
-  top: 8px; right: 8px;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: rgba(15,23,42,.85);
-  color: #fff;
+  top: 7px; right: 7px;
+  width: 18px; height: 18px;
   display: grid; place-items: center;
-  font-size: 11px;
-  line-height: 1;
+  line-height: 0;
+  filter: drop-shadow(0 1px 3px rgba(11,13,26,.35));
 }
 
 /* Fonds permis — card un peu plus large */
@@ -241,7 +239,8 @@ const STYLE = `<style>
   font: 700 12px/1 'Inter', sans-serif;
 }
 .gal-modal-xp { color: var(--a-txt); background: color-mix(in srgb, var(--a) 10%, transparent); padding: 6px 12px; border-radius: 99px; }
-.gal-modal-state { padding: 6px 12px; border-radius: 99px; }
+.gal-modal-state { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 99px; }
+.gal-modal-state .pg-med { flex: none; }
 .gal-modal-state.on  { color: var(--grdk); background: rgba(16,185,129,.12); }
 .gal-modal-state.off { color: var(--mu2); background: var(--bg2, var(--bg3)); }
 
@@ -363,7 +362,7 @@ export async function mount(root) {
         unlocked.length === 0
           ? `
         <div class="gal-empty-hint">
-          <div class="gal-empty-hint-emoji">${icon("trophy", { size: 30 })}</div>
+          <div class="gal-empty-hint-emoji">${medallion("trophee", "gold", { size: 44 })}</div>
           <div class="gal-empty-hint-txt">Aucun trophée débloqué pour l'instant — valide ta première compétence pour commencer !</div>
         </div>
       `
@@ -384,12 +383,12 @@ export async function mount(root) {
     const color = t.color || "var(--mu2)";
     const visual = t.image
       ? `<img src="${esc(t.image)}" alt="${esc(t.nom)}" loading="lazy" />`
-      : `<span class="gal-emoji">${t.ico ? esc(t.ico) : icon("trophy", { size: 26 })}</span>`;
+      : `<span class="gal-emoji">${medallion("trophee", "gold", { size: 48 })}</span>`;
     return `
       <div class="gal-card ${unlocked ? "acquis" : "locked"}" style="--gc:${color}"
            data-id="${esc(t.id)}" role="button" tabindex="0"
            aria-label="${unlocked ? `Voir le trophée ${esc(t.nom)}` : `Trophée verrouillé : ${esc(t.nom)}`}">
-        ${!unlocked ? `<div class="gal-lock-badge" aria-hidden="true">${icon("lock", { size: 14 })}</div>` : ""}
+        ${!unlocked ? `<div class="gal-lock-badge" aria-hidden="true">${medallion("cadenas", "slate", { size: 18 })}</div>` : ""}
         <div class="gal-card-visual">${visual}</div>
         <div class="gal-card-nom">${esc(t.nom)}</div>
         ${unlocked ? "" : `<div class="gal-card-meta">${esc(t.objectif || "Verrouillé")}</div>`}
@@ -436,7 +435,7 @@ export async function mount(root) {
     const rarityLabel = RARITY_LABEL[t.rarity] || t.rarity || "";
     const visual = t.image
       ? `<img src="${esc(t.image)}" alt="${esc(t.nom)}" />`
-      : `<span class="gal-emoji">${t.ico ? esc(t.ico) : icon("trophy", { size: 26 })}</span>`;
+      : `<span class="gal-emoji">${medallion("trophee", "gold", { size: 96 })}</span>`;
 
     const overlay = document.createElement("div");
     overlay.className = "gal-modal-bg";
@@ -449,7 +448,7 @@ export async function mount(root) {
         <div class="gal-modal-desc">${esc(t.desc || "")}</div>
         <div class="gal-modal-foot">
           ${t.gemmes ? `<span class="gal-modal-xp" style="color:var(--gr);background:rgba(16,185,129,.1)">+${t.gemmes} ${volantImg(13)} ${volantLabel(t.gemmes)}</span>` : ""}
-          <span class="gal-modal-state ${unlocked ? "on" : "off"}">${unlocked ? "✓ Débloqué" : esc(t.objectif || "🔒 Verrouillé")}</span>
+          <span class="gal-modal-state ${unlocked ? "on" : "off"}">${unlocked ? `${medallion("check", "green", { size: 16 })} Débloqué` : t.objectif ? esc(t.objectif) : `${medallion("cadenas", "slate", { size: 16 })} Verrouillé`}</span>
         </div>
       </div>`;
     document.body.appendChild(overlay);

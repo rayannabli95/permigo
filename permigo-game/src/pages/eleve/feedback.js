@@ -9,6 +9,7 @@ import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
+import { medallion } from "@/utils/medallions.js";
 import { findSubComp } from "@/data/remc.js";
 
 // "C2f" → "Intersections, ronds-points" (fallback : code brut)
@@ -82,12 +83,10 @@ const STYLE = `<style>
 .fb-author { font: 600 13px/1.2 'Inter', sans-serif; color: var(--ink); }
 .fb-time   { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); margin-top: 2px; }
 .fb-badge  {
-  width: 28px; height: 28px; border-radius: 50%;
+  width: 28px; height: 28px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.fb-badge-session    { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a-txt); }
-.fb-badge-validation { background: rgba(16,185,129,.1); color: var(--grd); }
 
 .fb-body { margin-top: 8px; }
 .fb-event {
@@ -204,8 +203,8 @@ function renderCard(evt) {
     ((evt.moniteur_nom || "")[0] || "");
   const badgeCls = isSession ? "fb-badge-session" : "fb-badge-validation";
   const badgeIco = isSession
-    ? icon("clock", { size: 14, strokeWidth: 2.2 })
-    : icon("check-circle", { size: 14, strokeWidth: 2.2 });
+    ? medallion("horloge", "blue", { size: 24 })
+    : medallion("check", "green", { size: 24 });
   const desc = isSession
     ? `<strong>${fmtMin(evt.duration_minutes)}</strong> de conduite avec toi`
     : `Compétence validée : <strong>${esc(compLabel(evt.competence_id))}</strong>`;
@@ -214,7 +213,13 @@ function renderCard(evt) {
     isSession && evt.confirmation_status
       ? `
     <div class="fb-extra-row" style="color:${evt.confirmation_status === "confirmed" ? "var(--grd)" : "var(--mu2)"}">
-      ${evt.confirmation_status === "confirmed" ? "✓ Confirmée" : evt.confirmation_status === "refused" ? "✗ Refusée" : "En attente"}
+      ${
+        evt.confirmation_status === "confirmed"
+          ? `${medallion("check", "green", { size: 14 })} Confirmée`
+          : evt.confirmation_status === "refused"
+            ? `${medallion("faute", "red", { size: 14 })} Refusée`
+            : "En attente"
+      }
     </div>`
       : "";
 
@@ -255,7 +260,7 @@ export async function mount(root) {
     ${STYLE}
     <div class="fb-page anim-slide-up">
       <div class="fb-hd">
-        <button class="fb-back" aria-label="Retour" id="fb-back">←</button>
+        <button class="fb-back" aria-label="Retour" id="fb-back">${icon("arrow-left", { size: 18, strokeWidth: 2.2 })}</button>
         <h1 class="fb-h1">Retours de tes moniteurs</h1>
       </div>
       <div class="fb-list">
