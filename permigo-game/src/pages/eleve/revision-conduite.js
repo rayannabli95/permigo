@@ -76,6 +76,37 @@ function pointFaible(revised) {
   return sorted[0];
 }
 
+// Découpe la méthode en sections à partir des préfixes « Label — … » déjà
+// présents dans certaines fiches (ex. « Créneau — … », « Règles communes — … »).
+// Le libellé doit rester court (≤ 26 car.) pour ne pas confondre avec un tiret
+// employé au milieu d'une phrase. Sans préfixe : un seul groupe (label null).
+function groupSteps(methode) {
+  const groups = [];
+  let cur = null;
+  for (const raw of methode) {
+    const m = raw.match(/^(.{2,26}?) [—–] (.+)$/s);
+    const label = m ? m[1].trim() : null;
+    const text = m ? m[2].trim() : raw.trim();
+    if (!cur || cur.label !== label) {
+      cur = { label, steps: [] };
+      groups.push(cur);
+    }
+    cur.steps.push(text);
+  }
+  return groups;
+}
+
+// On ne bascule en accordéons que pour une VRAIE structure en sections :
+// assez longue, ≥ 3 groupes, chacun d'au moins 2 étapes (sinon = tiret au milieu
+// d'une phrase → on reste en liste à plat, plus honnête).
+function useGrouped(methode, groups) {
+  return (
+    methode.length >= 9 &&
+    groups.length >= 3 &&
+    groups.every((g) => g.steps.length >= 2)
+  );
+}
+
 const STYLE = `<style>
 .rvc { max-width: 480px; margin: 0 auto; padding: 0 16px calc(110px + env(safe-area-inset-bottom));
   background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; }
@@ -298,6 +329,28 @@ const STYLE = `<style>
 .rvc-act-main .lock { display:none; }
 .rvc-act-main.locked .lock { display:block; }
 .rvc-act-main.locked .go { display:none; }
+
+/* Méthode : compteur dans le libellé de section + sections repliables (fiches longues) */
+.rvc-sect-n { font:600 11px 'IBM Plex Mono',monospace; letter-spacing:.06em; color:var(--mu,#94a3b8); margin-left:auto; text-transform:none; }
+.rvc-grps { display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+.rvc-grp { background:var(--su,#fff); border:1px solid var(--bo3,#e2e8f0); border-radius:18px; overflow:hidden;
+  box-shadow:0 6px 18px -14px rgba(40,30,90,.4); }
+.rvc-grp-h { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:0; background:none; cursor:pointer;
+  padding:14px 15px; font:800 15px 'Plus Jakarta Sans',sans-serif; color:var(--ink); }
+.rvc-grp-n { width:28px; height:28px; flex:none; border-radius:9px; display:grid; place-items:center;
+  background:color-mix(in srgb,var(--a,#6366f1) 12%,transparent); color:var(--adk,#4f46e5);
+  border:1px solid color-mix(in srgb,var(--a,#6366f1) 22%,transparent); font:700 14px 'Baloo 2',cursive; }
+.rvc-grp-c { flex:1; }
+.rvc-grp-k { font:700 11px 'IBM Plex Mono',monospace; color:var(--mu,#94a3b8); }
+.rvc-grp-chev { width:20px; height:20px; flex:none; color:var(--mu,#cbd5e1); display:grid; place-items:center;
+  transition:transform .25s cubic-bezier(.4,0,.2,1); }
+.rvc-grp-chev svg { width:16px; height:16px; }
+.rvc-grp.open .rvc-grp-chev { transform:rotate(90deg); color:var(--a,#6366f1); }
+.rvc-grp-body { display:none; padding:0 12px 13px; }
+.rvc-grp.open .rvc-grp-body { display:block; animation:rvcreveal .35s ease both; }
+.rvc-grp-body .rvc-msteps { margin-top:2px; gap:8px; }
+.rvc-grp-body .rvc-step { border-color:transparent; background:var(--bg); box-shadow:none; border-radius:14px; padding:11px 12px; }
+.rvc-grp-body .rvc-step-n { width:27px; height:27px; font-size:14px; }
 
 /* ───── Home « Bento » : navigation engageante vers les fiches ───── */
 .rvcb { --lime:#c8ff4d; --lime-ink:#1f2a00; --rb:24px; }
@@ -745,6 +798,9 @@ export async function mount(root, param) {
   // l'interaction). Le quiz se débloque une fois la méthode lue. En relecture
   // (déjà déroulée) ou en mouvement réduit, tout s'affiche d'emblée — pas de
   // re-tap forcé.
+  // Fiche « rangée » : on lit d'un coup d'œil (méthode + à retenir), une seule
+  // action. La méthode se plie en sections quand la fiche est longue et
+  // structurée (préfixes « Label — » présents dans les données, ex. C1h).
   function renderFiche() {
     const f = getFiche(code);
     if (!f) {
@@ -752,33 +808,49 @@ export async function mount(root, param) {
       return render();
     }
     track("revision_conduite_fiche_open", { code });
+    markRead(code); // ouvrir la fiche = « lue » (alimente la progression du hub)
+    track("revision_conduite_fiche_read", { code });
+
     const steps = Array.isArray(f.methode) ? f.methode : [];
     const total = steps.length;
-    const reduced =
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const revealAll = reduced || !!loadRead()[code] || total === 0;
+    const groups = groupSteps(steps);
+    const grouped = useGrouped(steps, groups);
 
-    // Phrase d'intro du coach : « Je te montre comment <titre minuscule>. »
+    // Phrase d'accroche du coach : « Voici comment <titre minuscule>. »
     const titreFlow = f.titre
       ? f.titre.charAt(0).toLowerCase() + f.titre.slice(1)
       : "";
 
-    const stepsHtml = steps
-      .map(
-        (s, i) => `
-        <div class="rvc-step ${i === 0 ? "is-current" : "is-hidden"}" data-step="${i + 1}">
-          <div class="rvc-step-n"><b>${i + 1}</b>${FSVG.check}</div>
-          <div class="rvc-step-t">${esc(s)}</div>
+    const stepCard = (s, i) =>
+      `<div class="rvc-step"><div class="rvc-step-n"><b>${i + 1}</b>${FSVG.check}</div><div class="rvc-step-t">${esc(s)}</div></div>`;
+
+    let methodeHtml = "";
+    if (total && grouped) {
+      const blocks = groups
+        .map(
+          (g, gi) => `<div class="rvc-grp${gi === 0 ? " open" : ""}">
+          <button class="rvc-grp-h" type="button">
+            <span class="rvc-grp-n">${gi + 1}</span>
+            <span class="rvc-grp-c">${esc(g.label || "L'essentiel")}</span>
+            <span class="rvc-grp-k">${g.steps.length}</span>
+            <span class="rvc-grp-chev" aria-hidden="true">${FSVG.arrow}</span>
+          </button>
+          <div class="rvc-grp-body"><div class="rvc-msteps">${g.steps.map(stepCard).join("")}</div></div>
         </div>`,
-      )
-      .join("");
+        )
+        .join("");
+      methodeHtml = `<div class="rvc-sect"><i></i><span>La méthode</span><span class="rvc-sect-n">${groups.length} temps · ${total} gestes</span></div>
+        <div class="rvc-grps">${blocks}</div>`;
+    } else if (total) {
+      methodeHtml = `<div class="rvc-sect"><i></i><span>La méthode</span><span class="rvc-sect-n">${total} étape${total > 1 ? "s" : ""}</span></div>
+        <div class="rvc-msteps">${steps.map(stepCard).join("")}</div>`;
+    }
 
     const whyCard = f.pourquoi
       ? `<div class="rvc-icard why"><div class="rvc-icard-h"><span class="rvc-icard-ic">${FSVG.info}</span><b>Pourquoi ça compte</b></div><p>${esc(f.pourquoi)}</p></div>`
       : "";
     const trapCard = f.erreur
-      ? `<div class="rvc-icard trap"><div class="rvc-icard-h"><span class="rvc-icard-ic">${FSVG.warn}</span><b>Le piège</b></div><p>${esc(f.erreur)}</p></div>`
+      ? `<div class="rvc-icard trap"><div class="rvc-icard-h"><span class="rvc-icard-ic">${FSVG.warn}</span><b>L'erreur à ne pas faire</b></div><p>${esc(f.erreur)}</p></div>`
       : "";
     const bvaCard = f.bva
       ? `<div class="rvc-icard bva"><div class="rvc-icard-h"><span class="rvc-icard-ic">${FSVG.auto}</span><b>En boîte auto</b></div><p>${esc(f.bva)}</p></div>`
@@ -787,6 +859,7 @@ export async function mount(root, param) {
       Array.isArray(f.sources) && f.sources.length
         ? `<div class="rvc-fsrc">${FSVG.video}<span>Vu chez de vrais moniteurs : ${f.sources.map((s) => esc(s)).join(", ")}</span></div>`
         : "";
+    const retenir = trapCard + whyCard + bvaCard;
 
     root.innerHTML = `${STYLE}<div class="rvc">
       <div class="rvc-top">
@@ -802,121 +875,38 @@ export async function mount(root, param) {
           <div class="rvc-coach-av">${FSVG.star}</div>
           <div>
             <div class="rvc-coach-tag">Ton coach</div>
-            <div class="rvc-coach-msg">Je te montre comment <b>${esc(titreFlow)}</b>. On y va pas à pas — prêt&nbsp;?</div>
+            <div class="rvc-coach-msg">Voici comment <b>${esc(titreFlow)}</b>. Lis la méthode, puis teste-toi.</div>
           </div>
         </div>
-        <div class="rvc-prog">
-          <div class="rvc-prog-bar"><div class="rvc-prog-fill"></div></div>
-          <div class="rvc-prog-txt">0/${total}</div>
-        </div>
-      </div>
-
-      <div class="rvc-sect"><i></i><span>La méthode</span></div>
-      <div class="rvc-msteps">${stepsHtml}</div>
-      <div class="rvc-next">
-        <button class="rvc-next-btn"><span class="rvc-next-lbl">Étape suivante</span>${FSVG.arrow}</button>
-        <div class="rvc-hint2">Tape la carte ou le bouton pour avancer</div>
       </div>`
           : ""
       }
 
-      <div class="rvc-finale">
-        ${total ? `<div class="rvc-bravo"><div class="rvc-bravo-ic">${FSVG.check}</div><div><h3>Bien joué&nbsp;!</h3><p>Tu as la méthode complète. Voici ce qu'il faut retenir.</p></div></div>` : ""}
-        ${whyCard}${trapCard}${bvaCard}${srcHtml}
-      </div>
+      ${methodeHtml}
+
+      ${retenir ? `<div class="rvc-sect"><i></i><span>À retenir</span></div>${retenir}` : ""}
+      ${srcHtml}
 
       <div class="rvc-actbar">
         ${total >= 3 ? `<button class="rvc-act-ghost" data-order>${FSVG.shuffle}Remets dans l'ordre</button>` : ""}
-        <button class="rvc-act-main locked" data-quiz>${FSVG.lock}${FSVG.play}<span>Lance le quiz</span></button>
+        <button class="rvc-act-main" data-quiz>${FSVG.play}<span>Teste-toi</span></button>
       </div>
     </div>`;
 
-    wireFiche(f, total, revealAll, reduced);
+    wireFiche(f);
   }
 
-  function wireFiche(f, total, revealAll, reduced) {
+  function wireFiche(f) {
     root.querySelector(".rvc-back").addEventListener("click", () => {
       view = "home";
       render();
     });
-
-    const mainBtn = root.querySelector("[data-quiz]");
-    const fillEl = root.querySelector(".rvc-prog-fill");
-    const ptxtEl = root.querySelector(".rvc-prog-txt");
-    const finaleEl = root.querySelector(".rvc-finale");
-    const nextZone = root.querySelector(".rvc-next");
-    const stepEls = Array.prototype.slice.call(
-      root.querySelectorAll(".rvc-step"),
+    root.querySelectorAll(".rvc-grp-h").forEach((b) =>
+      b.addEventListener("click", () => {
+        b.parentElement.classList.toggle("open");
+        haptic("select");
+      }),
     );
-    let current = 1;
-
-    function setProgress(n) {
-      if (fillEl) fillEl.style.width = total ? (n / total) * 100 + "%" : "100%";
-      if (ptxtEl) ptxtEl.textContent = n + "/" + total;
-    }
-    function unlockEnd() {
-      if (nextZone) nextZone.style.display = "none";
-      if (finaleEl) finaleEl.classList.add("on");
-      if (mainBtn) mainBtn.classList.remove("locked");
-    }
-    function finish() {
-      unlockEnd();
-      markRead(code);
-      track("revision_conduite_fiche_read", { code });
-      if (finaleEl)
-        setTimeout(
-          () =>
-            finaleEl.scrollIntoView({
-              behavior: reduced ? "auto" : "smooth",
-              block: "start",
-            }),
-          120,
-        );
-    }
-    function advance() {
-      const cur = stepEls[current - 1];
-      if (cur) {
-        cur.classList.remove("is-current");
-        cur.classList.add("is-done");
-      }
-      if (current >= total) {
-        setProgress(total);
-        haptic("success");
-        finish();
-        return;
-      }
-      current++;
-      const nx = stepEls[current - 1];
-      if (nx) {
-        nx.classList.remove("is-hidden");
-        if (!reduced) nx.classList.add("is-reveal");
-        nx.classList.add("is-current");
-      }
-      setProgress(current - 1);
-      haptic("select");
-      if (current === total) {
-        const lbl = root.querySelector(".rvc-next-lbl");
-        if (lbl) lbl.textContent = "Terminer";
-      }
-    }
-
-    if (revealAll) {
-      stepEls.forEach((s) => {
-        s.classList.remove("is-hidden", "is-current");
-        s.classList.add("is-done");
-      });
-      setProgress(total);
-      unlockEnd();
-    } else {
-      setProgress(0);
-      root.querySelector(".rvc-next-btn")?.addEventListener("click", advance);
-      stepEls.forEach((s) =>
-        s.addEventListener("click", () => {
-          if (s.classList.contains("is-current")) advance();
-        }),
-      );
-    }
-
     root.querySelector("[data-order]")?.addEventListener("click", () => {
       orderPlaced = [];
       orderPool = (f.methode || [])
@@ -925,7 +915,7 @@ export async function mount(root, param) {
       view = "order";
       render();
     });
-    mainBtn?.addEventListener("click", () => {
+    root.querySelector("[data-quiz]")?.addEventListener("click", () => {
       focusId = null;
       startQuiz();
     });
