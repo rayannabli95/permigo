@@ -179,6 +179,47 @@ function segLabel(v) {
   return `<span><span class="rcoin" aria-hidden="true"></span>${v}</span>`;
 }
 
+// Panneau « gros lots réels » : les lots ACTIVÉS par le moniteur (via
+// get_moniteur_rewards) — sinon les 2 lots par défaut. Signé à sa marque.
+function renderRealLots(lots, moniteurPrenom) {
+  const name = (moniteurPrenom || "ton moniteur").trim();
+  const initiale = (name.charAt(0) || "R").toUpperCase();
+  const list =
+    Array.isArray(lots) && lots.length
+      ? lots
+      : [
+          { icon: "🅰️", label: "Disque A jeune conducteur" },
+          { icon: "🚗", label: "1 heure de conduite offerte" },
+        ];
+  const rows = list
+    .slice(0, 6)
+    .map(
+      (l) => `
+    <div class="roue-real-row">
+      <div class="roue-real-ic">${esc(l.icon || "🎁")}</div>
+      <div class="roue-real-flex">
+        <div class="roue-real-name">${esc(l.label || "Cadeau")}</div>
+      </div>
+    </div>`,
+    )
+    .join("");
+  return `
+  <section class="roue-real">
+    <div class="roue-real-h">
+      <h2>🎁 Gros lots réels</h2>
+      <span class="tag">Bientôt</span>
+    </div>
+    ${rows}
+    <div class="roue-real-sign">
+      <div class="roue-real-av">${esc(initiale)}</div>
+      <div>
+        <b>Offert par ${esc(name)} · ton moniteur</b>
+        <span>C'est lui qui choisit et régale — à sa marque.</span>
+      </div>
+    </div>
+  </section>`;
+}
+
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
@@ -192,21 +233,25 @@ export async function mount(root) {
   // - 'ready'   : peut tourner pour de vrai (RPC live, pas encore tourné aujourd'hui)
   // - 'done'    : déjà tourné aujourd'hui (RPC live)
   // - 'apercu'  : migration pas encore posée → repli visuel (gate localStorage)
+  // En parallèle : l'état du tour du jour + les lots configurés par le moniteur.
   let mode = "apercu";
-  try {
-    const { data, error } = await sb
+  let realLots = null;
+  let moniteurName = null;
+  const [spinRes, rewardsRes] = await Promise.allSettled([
+    sb
       .from("roue_daily_spins")
       .select("volants")
       .eq("spin_date", todayKey())
-      .maybeSingle();
-    if (error) {
-      // 42P01 (table inconnue) / 404 → migration pas posée → aperçu
-      mode = "apercu";
-    } else {
-      mode = data ? "done" : "ready";
-    }
-  } catch {
-    mode = "apercu";
+      .maybeSingle(),
+    sb.rpc("get_moniteur_rewards"),
+  ]);
+  if (spinRes.status === "fulfilled" && !spinRes.value.error) {
+    mode = spinRes.value.data ? "done" : "ready";
+  }
+  if (rewardsRes.status === "fulfilled" && !rewardsRes.value.error) {
+    const d = rewardsRes.value.data;
+    if (Array.isArray(d?.lots)) realLots = d.lots;
+    moniteurName = d?.moniteur || null;
   }
   if (mode === "apercu" && localStorage.getItem(LS_FREE) === todayKey()) {
     mode = "done";
@@ -254,33 +299,7 @@ export async function mount(root) {
 
   <div id="roue-result-slot"></div>
 
-  <section class="roue-real">
-    <div class="roue-real-h">
-      <h2>🎁 Gros lots réels</h2>
-      <span class="tag">Bientôt</span>
-    </div>
-    <div class="roue-real-row">
-      <div class="roue-real-ic">🅰️</div>
-      <div class="roue-real-flex">
-        <div class="roue-real-name">Disque A jeune conducteur</div>
-        <div class="roue-real-sub">Le vrai, à coller sur ta voiture</div>
-      </div>
-    </div>
-    <div class="roue-real-row">
-      <div class="roue-real-ic">🚗</div>
-      <div class="roue-real-flex">
-        <div class="roue-real-name">1 heure de conduite offerte</div>
-        <div class="roue-real-sub">Une vraie leçon en plus, cadeau</div>
-      </div>
-    </div>
-    <div class="roue-real-sign">
-      <div class="roue-real-av">${esc(initiale)}</div>
-      <div>
-        <b>Offert par ${esc(prenom)} · ton moniteur</b>
-        <span>C'est lui qui choisit et régale — à sa marque.</span>
-      </div>
-    </div>
-  </section>
+  ${renderRealLots(realLots, moniteurName || prenom, initiale)}
 
   <div class="roue-note">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
