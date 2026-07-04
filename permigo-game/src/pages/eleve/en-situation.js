@@ -29,6 +29,7 @@ import { haptic } from "@/utils/haptic.js";
 import { burstConfetti } from "@/components/common/confetti.js";
 
 const ROUND_SIZE = 6;
+const INTRO_SIZE = 3; // manche courte de l'accroche post-onboarding
 const VOLANTS_PAR_BONNE = 2;
 const PLAFOND_JOUR = 24; // volants max gagnés par jour sur ce jeu
 const LS_JOUR = "pg-sit-volants"; // { day: 'YYYY-MM-DD', total: n }
@@ -44,10 +45,14 @@ function clearTimers() {
   _timers = [];
 }
 
-export async function mount(root) {
+export async function mount(root, param) {
   const me = getCurUser();
   if (!me) return;
-  track("page.view", { page: "en-situation" });
+  // Mode « intro » : accroche jouée juste après l'onboarding (manche courte,
+  // sortie vers l'accueil au lieu de « Rejouer »). Déclenché par le param de
+  // route "en-situation/intro" ou par un mount direct depuis l'onboarding.
+  const isIntro = param === "intro";
+  track("page.view", { page: "en-situation", intro: isIntro });
 
   // Plein écran arène : header + nav masqués (filet : restauré au hashchange)
   document.body.classList.add("sit-immersive");
@@ -71,20 +76,25 @@ export async function mount(root) {
     clearTimers();
     const demo =
       SITUATIONS.find((s) => s.id === "prio-droite-cible") || SITUATIONS[0];
+    const count = isIntro ? INTRO_SIZE : ROUND_SIZE;
     stage.innerHTML = `
       <div class="sit-top">
-        <button class="sit-x" id="sit-quit" type="button" aria-label="Quitter le jeu">✕</button>
+        <button class="sit-x" id="sit-quit" type="button" aria-label="${isIntro ? "Passer" : "Quitter le jeu"}">✕</button>
       </div>
       <div class="sit-intro">
-        <div class="sit-kicker">Mini-jeu</div>
-        <h1 class="sit-h1">En situation</h1>
-        <p class="sit-sub">Une scène, une décision. À toi de jouer le code de la route.</p>
+        <div class="sit-kicker">${isIntro ? "Avant de démarrer" : "Mini-jeu"}</div>
+        <h1 class="sit-h1">${isIntro ? "Une mise en situation ?" : "En situation"}</h1>
+        <p class="sit-sub">${
+          isIntro
+            ? "Voyons ton flair pour la route. Une scène, une décision — on y va ?"
+            : "Une scène, une décision. À toi de jouer le code de la route."
+        }</p>
         <div class="sit-hero" aria-hidden="true">${renderSituationScene(demo.scene)}</div>
         <div class="sit-chips">
-          <span class="sit-chip">🚗 ${ROUND_SIZE} situations</span>
+          <span class="sit-chip">🚗 ${count} situations</span>
           <span class="sit-chip">${volantImg(14)} +${VOLANTS_PAR_BONNE} par bonne réponse</span>
         </div>
-        <button class="sit-cta" id="sit-start" type="button">Jouer</button>
+        <button class="sit-cta" id="sit-start" type="button">${isIntro ? "C'est parti !" : "Jouer"}</button>
       </div>`;
     stage.querySelector("#sit-quit").addEventListener("click", quit);
     stage.querySelector("#sit-start").addEventListener("click", () => {
@@ -95,7 +105,7 @@ export async function mount(root) {
 
   // ── Manche ───────────────────────────────────────────────────
   function startRound() {
-    session = pickSession(ROUND_SIZE);
+    session = pickSession(isIntro ? INTRO_SIZE : ROUND_SIZE);
     idx = 0;
     bonnes = 0;
     manquees = [];
@@ -264,6 +274,56 @@ export async function mount(root) {
       playSuccess();
     }
 
+    // Accroche post-onboarding : récap léger qui invite à entrer dans l'app
+    // (l'élève y trouvera son coffre de bienvenue). Pas de « Rejouer ».
+    if (isIntro) {
+      const introTitre =
+        pct === 100
+          ? "Sans faute, bravo !"
+          : pct >= 50
+            ? "Tu as déjà l'œil 👀"
+            : "Bienvenue à bord !";
+      stage.innerHTML = `
+        <div class="sit-top">
+          <button class="sit-x" id="sit-quit" type="button" aria-label="Passer">✕</button>
+        </div>
+        <div class="sit-recap">
+          <div class="sit-kicker">C'est tout vu</div>
+          <div class="sit-score" id="sit-score">${bonnes}<span>/${total}</span></div>
+          <h2 class="sit-h1 sit-h1-sm" tabindex="-1">${introTitre}</h2>
+          <p class="sit-sub">Ton parcours et ton coffre de bienvenue t'attendent.</p>
+          <div class="sit-gain" id="sit-gain">
+            ${
+              credites > 0
+                ? `${volantImg(20, { drop: true })} <b>+${credites}</b>&nbsp;${volantLabel(credites)}`
+                : `${volantImg(20)} Prêt à jouer pour de vrai`
+            }
+          </div>
+          <button class="sit-cta" id="sit-enter" type="button">Entrer dans PermiGo <span aria-hidden="true">→</span></button>
+        </div>`;
+      stage.querySelector(".sit-h1-sm")?.focus({ preventScroll: true });
+      stage.querySelector("#sit-quit").addEventListener("click", exitIntro);
+      stage.querySelector("#sit-enter").addEventListener("click", () => {
+        haptic("tap");
+        exitIntro();
+      });
+      if (credites > 0) {
+        later(async () => {
+          try {
+            const { flyVolants } =
+              await import("@/components/eleve/volant-reward.js");
+            flyVolants(credites, {
+              from: stage.querySelector("#sit-score"),
+              target: stage.querySelector("#sit-gain"),
+            });
+          } catch {
+            /* purement décoratif */
+          }
+        }, 350);
+      }
+      return;
+    }
+
     const titre =
       pct === 100
         ? "Sans faute !"
@@ -347,9 +407,18 @@ export async function mount(root) {
     }
   }
 
+  function exitIntro() {
+    // Fin de l'accroche post-onboarding → accueil (le coffre de bienvenue s'y
+    // ouvre). reload : le chrome n'a pas été monté pendant l'onboarding, c'est
+    // le boot qui le montera.
+    location.hash = "#/";
+    location.reload();
+  }
+
   function quit() {
     haptic("tap");
-    location.hash = "#/";
+    if (isIntro) exitIntro();
+    else location.hash = "#/";
   }
 }
 
