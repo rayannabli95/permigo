@@ -1,15 +1,18 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — Hub « Réviser » : LA porte unique d'entraînement
-// (nav 5 portes — regroupe Arène, examen blanc, fiches conduite,
-//  trouve la faute, en situation, question du jour, points faibles)
+// Élève — Hub « Réviser » : LA porte d'entraînement de la CONDUITE.
 //
-// DA « Arène Néo » : nuit-violet + or (le monde du quiz), exécuté en
-// matière premium — plaques « plastique 3D », médaillon doré + badge
-// 3D réel, CTA vert relief, et de VRAIS visuels de conduite (volant,
-// panneaux routiers, mascotte) à la place des pictos-trait génériques.
+// Parti pris (validé Rayan) : Réviser = la conduite, PAS le code de la
+// route. Le différenciateur PermiGo passe donc devant. Le hero est
+// ADAPTATIF :
+//   • par défaut → « reprends ta prochaine fiche » (violet Arène) ;
+//   • si le moniteur a ciblé des compétences (table revision_focus) →
+//     sa demande prend le hero (doré) et passe avant tout. Les devoirs
+//     du moniteur ne s'affichent QUE là (retirés de l'accueil et de la
+//     page fiches — plus de doublon).
 //
-// Données 100% locales au premier rendu (instantané), enrichies
-// ensuite par la question du jour (1 fetch léger).
+// DA « Arène Néo » : nuit-violet + or, matière premium, vrais médaillons
+// 3D (banque @/utils/medallions.js). Rendu local instantané ; les devoirs
+// moniteur arrivent en 1 fetch léger et remplacent le hero si présents.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -17,54 +20,30 @@ import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { getStreak } from "@/utils/game-state.js";
-import { isDailyDone } from "@/services/daily-quiz.js";
-import { getWeakPoints } from "@/utils/weak-points.js";
-import { FICHES } from "@/data/fiches-conduite.js";
-import { ASSETS } from "@/utils/assets.js";
+import { FICHES, getFiche } from "@/data/fiches-conduite.js";
 import { medallion } from "@/utils/medallions.js";
 
 const LS_READ_KEY = "rvc_read_v1"; // même clé que revision-conduite (fiches lues)
 
-// Images réelles conservées : la flamme de série (chip) et le badge 3D de
-// l'Arène (hero) fonctionnent déjà comme centres de gravité.
-const IMG = {
-  flame: ASSETS.streakFlame, // /skins/permigo-streak-flame-v1.webp
-  badge: ASSETS.badgeUltimate, // médaillon de l'Arène
-};
-
-// ── Set d'icônes COHÉRENT « médaillon » (1 seul style pour les 5 tuiles) :
-// disque dégradé + biseau + reflet haut + glyphe blanc. Migré sur la banque
-// centrale @/utils/medallions.js pour dédupliquer (fini le set local qui
-// dérivait). cls:"rvh-med" conserve le dimensionnement existant (54px).
-// Le glyphe « volant » PLEIN remplace enfin le volant en trait (point faible).
+// Médaillons 3D des tuiles (1 seul style cohérent, banque centrale).
 const MED = {
-  exam: medallion("examen", "gold", { cls: "rvh-med" }),
-  examConduite: medallion("voiture", "gold", { cls: "rvh-med" }),
-  fiches: medallion("volant", "violet", { cls: "rvh-med" }),
+  fiches: medallion("fiches", "violet", { cls: "rvh-med" }),
   faute: medallion("faute", "red", { cls: "rvh-med" }),
-  situ: medallion("route", "blue", { cls: "rvh-med" }),
-  daily: medallion("ampoule", "green", { cls: "rvh-med" }),
+  situ: medallion("cone", "teal", { cls: "rvh-med" }),
+  examConduite: medallion("voiture", "gold", { cls: "rvh-med" }),
 };
 
-// Quelques traits vectoriels soignés (ampoule dégradée, flèche play, chevron,
-// cible) — des accents, pas des pictos nus dans un carré.
-const SVG = {
-  bulb: `<svg class="rvh-bulb" viewBox="0 0 24 24" fill="none" aria-hidden="true"><defs><linearGradient id="rvhGlb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".55" stop-color="#ffd24a"/><stop offset="1" stop-color="#ff9c1c"/></linearGradient></defs><path d="M12 2.5a6.6 6.6 0 0 0-4 11.85c.7.55 1.1 1.35 1.15 2.2h5.7c.05-.85.45-1.65 1.15-2.2A6.6 6.6 0 0 0 12 2.5Z" fill="url(#rvhGlb)" stroke="#c87d12" stroke-width="1"/><path d="M9.4 19.2h5.2M9.9 21.4h4.2" stroke="#ffe9a8" stroke-width="1.9" stroke-linecap="round"/></svg>`,
-  play: `<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.5-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5Z"/></svg>`,
-  chevron: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>`,
-  target: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="#ff6b6b" stroke-width="2"/><circle cx="12" cy="12" r="5" stroke="#ffb347" stroke-width="2"/><circle cx="12" cy="12" r="1.6" fill="#ffd24a"/></svg>`,
-};
+const ARROW = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const CHEVRON = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>`;
 
 const STYLE = `<style>
-/* ── Monde de l'entraînement : Arène nuit-violet + or, en full-bleed sous
-      le header vitre (pattern livret). ── */
+/* ── Monde de l'entraînement : Arène nuit-violet + or, full-bleed sous le header. ── */
 .rvh {
   --rvh-panel:#271850; --rvh-panel2:#2f1e5e; --rvh-panel-deep:#120a2e;
   --rvh-line:rgba(178,150,255,.22);
   --rvh-mu:#cabfef; --rvh-mu2:#9b8dcf;
   --rvh-gold-1:#ffe9a8; --rvh-gold-2:#ffd24a; --rvh-gold-3:#ff9c1c; --rvh-gold-deep:#c87d12;
   --rvh-violet:#a855f7; --rvh-violet-deep:#7c4dff; --rvh-violet-soft:#cbb9ff;
-  --rvh-go-1:var(--a-lt); --rvh-go-2:var(--a); --rvh-go-3:var(--adk); --rvh-go-deep:var(--adk);
   position: relative;
   margin-top: calc(-1 * (var(--th, 52px) + env(safe-area-inset-top, 0px)));
   padding: calc(var(--th, 52px) + env(safe-area-inset-top, 0px) + 12px) 15px 96px;
@@ -80,13 +59,11 @@ const STYLE = `<style>
     radial-gradient(140% 90% at 50% 118%, rgba(0,0,0,.55) 0%, transparent 60%),
     linear-gradient(178deg, #1e1240 0%, #160d30 48%, #0f0824 100%);
 }
-/* grain subtil (matière, pas plat) */
 .rvh::after {
   content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
   opacity: .05; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
 }
-/* étoiles dorées discrètes */
 .rvh-stars { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
 .rvh-stars::before, .rvh-stars::after {
   content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 2px; border-radius: 50%;
@@ -110,120 +87,89 @@ const STYLE = `<style>
 .rvh-title {
   position: relative; z-index: 3;
   font: 800 26px/1.1 'Baloo 2', cursive; letter-spacing: .2px;
-  margin: 2px 2px 13px;
+  margin: 2px 2px 12px;
   text-shadow: 0 2px 0 rgba(0,0,0,.3), 0 0 22px rgba(168,85,247,.45);
 }
 
-/* ── rituels du jour ── */
-.rvh-daily { position: relative; z-index: 3; display: flex; gap: 10px; margin-bottom: 14px; }
-.rvh-chip {
-  flex: 1; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px;
-  background: linear-gradient(180deg, var(--rvh-panel2), var(--rvh-panel));
-  border: 1px solid var(--rvh-line);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 18px -12px rgba(0,0,0,.7);
+/* ── série (statut, discret) ── */
+.rvh-streak {
+  position: relative; z-index: 3; display: inline-flex; align-items: center; gap: 7px;
+  margin-bottom: 14px; padding: 5px 13px 5px 7px; border-radius: 999px;
+  background: rgba(255,210,74,.10); border: 1px solid rgba(255,210,74,.24);
 }
-.rvh-chip-media {
-  width: 38px; height: 38px; flex: none; border-radius: 12px; display: grid; place-items: center; overflow: hidden;
-  background: radial-gradient(circle at 40% 30%, rgba(255,156,28,.28), rgba(255,156,28,.06));
-  border: 1px solid rgba(255,156,28,.32);
-}
-.rvh-chip-media img { width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,.4)); }
-.rvh-chip-media.q { background: radial-gradient(circle at 40% 30%, rgba(84,160,255,.24), rgba(84,160,255,.05)); border-color: rgba(84,160,255,.34); }
-.rvh-bulb { width: 26px; height: 26px; }
-.rvh-chip-t { font: 700 13px/1.12 'Baloo 2', cursive; }
-.rvh-chip-s { margin-top: 1px; font: 700 10.5px/1.3 'Nunito', sans-serif; color: var(--rvh-mu2); }
+.rvh-streak .pg-med { width: 22px; height: 22px; }
+.rvh-streak b { font: 800 12.5px/1 'Nunito', sans-serif; color: var(--rvh-gold-1); }
+.rvh-streak i { font: 700 11.5px/1 'Nunito', sans-serif; font-style: normal; color: var(--rvh-mu2); }
 
-/* ── HERO Arène : plaque plastique 3D ── */
-.rvh-arena {
+/* ── HERO adaptatif (façon header premium : dégradé plein + panneaux + gloss) ── */
+.rvh-hero {
   position: relative; z-index: 3; display: block; width: 100%; text-align: left; cursor: pointer;
   color: inherit; font: inherit; overflow: hidden;
-  border: 1.5px solid rgba(255,210,74,.4); border-radius: 26px; padding: 17px 17px 15px; margin-bottom: 16px;
-  background:
-    radial-gradient(135% 92% at 88% 6%, rgba(255,182,44,.24) 0%, transparent 54%),
-    radial-gradient(90% 80% at 12% 100%, rgba(124,77,255,.32) 0%, transparent 60%),
-    linear-gradient(158deg, #38246a 0%, var(--rvh-panel2) 52%, var(--rvh-panel) 100%);
-  box-shadow:
-    inset 0 2px 0 rgba(255,255,255,.14),
-    inset 0 -14px 30px rgba(0,0,0,.42),
-    0 10px 0 var(--rvh-panel-deep),
-    0 22px 40px -14px rgba(0,0,0,.85),
-    0 0 34px -12px rgba(255,182,44,.55);
+  border: 0; border-radius: 24px; padding: 18px; margin-bottom: 16px;
   transition: transform .16s cubic-bezier(.23,1,.32,1);
 }
-.rvh-arena:active { transform: translateY(2px) scale(.995); }
-/* liseré doré haut (matière plaque) */
-.rvh-arena::before {
-  content: ""; position: absolute; inset: 0; border-radius: 26px; padding: 1.5px;
-  background: linear-gradient(180deg, rgba(255,210,74,.6), rgba(255,210,74,0) 40%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+.rvh-hero:active { transform: translateY(2px) scale(.995); }
+.rvh-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,.20), transparent 42%); pointer-events: none; }
+.rvh-hero.cont {
+  color: #fff;
+  background: linear-gradient(150deg, #6a4bd6, #7d6bff 58%, #9a6bff);
+  box-shadow: 0 20px 44px -18px rgba(124,77,255,.75), inset 0 1px 0 rgba(255,255,255,.2);
 }
-.rvh-arena-k {
-  display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; margin-bottom: 10px;
-  background: rgba(255,210,74,.16); border: 1px solid rgba(255,210,74,.42);
-  font: 600 10px/1 'Fredoka', sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--rvh-gold-1);
+.rvh-hero.moni {
+  color: #2a1600;
+  background: linear-gradient(150deg, #ffca57, #ffb03a 55%, #ff9422);
+  box-shadow: 0 20px 44px -18px rgba(255,150,20,.7), inset 0 1px 0 rgba(255,255,255,.4);
 }
-.rvh-arena-row { display: flex; align-items: center; gap: 12px; }
-.rvh-arena-txt { flex: 1; min-width: 0; }
-.rvh-arena-t {
-  font: 800 23px/1.04 'Baloo 2', cursive;
-  background: linear-gradient(180deg,#fff 0%,#fff7e0 52%,#ffd86b 100%);
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 1px rgba(0,0,0,.25));
-}
-.rvh-arena-s { margin-top: 6px; font: 700 12.5px/1.4 'Nunito', sans-serif; color: var(--rvh-mu); }
+/* panneaux routiers en filigrane */
+.rvh-sg { position: absolute; pointer-events: none; opacity: .14; }
+.rvh-sg.a { width: 72px; height: 72px; right: -16px; top: -22px; border-radius: 50%; border: 9px solid #fff; }
+.rvh-sg.b { width: 0; height: 0; right: 66px; bottom: -14px; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 52px solid #fff; transform: rotate(15deg); opacity: .1; }
+.rvh-sg.c { width: 46px; height: 46px; left: 42%; top: -24px; background: #fff; transform: rotate(45deg); opacity: .08; border-radius: 7px; }
 
-/* médaillon doré + badge 3D réel + ombre 6px flat */
-.rvh-medallion { position: relative; width: 88px; height: 88px; flex: none; }
-.rvh-medallion .rvh-ring {
-  position: absolute; inset: 0; border-radius: 50%;
-  background: radial-gradient(circle at 38% 30%, #fff7da 0%, var(--rvh-gold-2) 48%, var(--rvh-gold-3) 100%);
-  border: 3px solid #fff5cf;
-  box-shadow: 0 6px 0 var(--rvh-gold-deep), 0 14px 26px -8px rgba(0,0,0,.65), inset 0 2px 4px rgba(255,255,255,.6);
+.rvh-hero-top { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; }
+.rvh-hpill { flex: 1; display: inline-flex; align-items: center; gap: 7px; font: 800 11px/1.2 'Nunito', sans-serif; letter-spacing: .05em; text-transform: uppercase; }
+.rvh-hero.cont .rvh-hpill { color: #efe9ff; }
+.rvh-hero.moni .rvh-hpill { color: #4a2a00; }
+.rvh-hdot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.rvh-hero.cont .rvh-hdot { background: var(--rvh-gold-2); box-shadow: 0 0 8px var(--rvh-gold-2); }
+.rvh-hero.moni .rvh-hdot { background: #7a3d00; }
+.rvh-hbadge {
+  width: 46px; height: 46px; border-radius: 14px; flex: none; display: grid; place-items: center;
+  background: rgba(255,255,255,.20); border: 1px solid rgba(255,255,255,.34); box-shadow: inset 0 1px 0 rgba(255,255,255,.45);
 }
-.rvh-medallion .rvh-ring::after { content: ""; position: absolute; inset: 16%; border-radius: 50%; border: 2px dashed rgba(122,74,5,.28); }
-.rvh-medallion img {
-  position: absolute; left: 50%; top: 44%; transform: translate(-50%,-50%);
-  width: 78px; height: 78px; object-fit: contain;
-  filter: drop-shadow(0 6px 8px rgba(0,0,0,.5)) drop-shadow(0 0 12px rgba(255,182,44,.55)); z-index: 2;
-}
+.rvh-hbadge .pg-med { width: 34px; height: 34px; }
 
-/* CTA vert plastique 3D */
-.rvh-arena-cta {
-  position: relative; z-index: 2; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 9px;
-  min-height: 54px; border-radius: 17px;
-  background: linear-gradient(180deg, var(--rvh-go-1) 0%, var(--rvh-go-2) 52%, var(--rvh-go-3) 100%);
-  box-shadow: inset 0 2px 0 rgba(255,255,255,.55), inset 0 -4px 8px rgba(0,0,0,.22), 0 6px 0 var(--rvh-go-deep), 0 12px 22px -6px color-mix(in srgb, var(--a) 70%, transparent);
-  font: 800 19px/1 'Baloo 2', cursive; color: #fff; text-shadow: 0 2px 0 color-mix(in srgb, var(--adk) 60%, #000); letter-spacing: .3px;
+.rvh-htitles { position: relative; z-index: 2; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin: 13px 0 5px; }
+.rvh-htitle { font: 600 25px/1.05 'Baloo 2', cursive; letter-spacing: .2px; }
+.rvh-hmore { font: 800 12px/1 'Nunito', sans-serif; padding: 6px 11px; border-radius: 999px; white-space: nowrap;
+  background: rgba(42,22,0,.15); color: #5c3800; border: 1px solid rgba(42,22,0,.22); }
+.rvh-hsub { position: relative; z-index: 2; font: 700 13px/1.4 'Nunito', sans-serif; max-width: 90%; }
+.rvh-hero.cont .rvh-hsub { color: #e4dcff; }
+.rvh-hero.moni .rvh-hsub { color: #5c3800; }
+.rvh-hcta {
+  position: relative; z-index: 2; margin-top: 16px; display: flex; align-items: center; justify-content: space-between;
+  border-radius: 14px; padding: 13px 16px; font: 600 16px/1 'Baloo 2', cursive; letter-spacing: .3px;
 }
-.rvh-arena-cta svg { width: 22px; height: 22px; }
+.rvh-hero.cont .rvh-hcta { background: rgba(0,0,0,.24); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.16); }
+.rvh-hero.moni .rvh-hcta { background: #2a1600; color: var(--rvh-gold-1); box-shadow: 0 4px 0 rgba(0,0,0,.25); }
+.rvh-hcta svg { width: 20px; height: 20px; }
 
 /* ── grille des entraînements ── */
-.rvh-h { position: relative; z-index: 3; display: flex; align-items: baseline; justify-content: space-between; margin: 4px 3px 11px; }
-.rvh-h h2 { font: 700 16px/1 'Baloo 2', cursive; text-shadow: 0 1px 0 rgba(0,0,0,.3); }
-.rvh-h span { font: 700 11px/1 'Nunito', sans-serif; color: var(--rvh-mu2); }
+.rvh-h { position: relative; z-index: 3; margin: 4px 3px 11px; font: 800 12px/1 'Nunito', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--rvh-mu2); }
 
 .rvh-modes { position: relative; z-index: 3; display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
 .rvh-mode {
   position: relative; display: flex; flex-direction: column; gap: 7px; text-align: left; cursor: pointer;
   color: inherit; font: inherit; min-height: 132px;
-  border: 1px solid var(--rvh-line); border-radius: 20px; padding: 13px 13px 14px;
+  border: 1px solid var(--rvh-line); border-left: 2px solid rgba(255,210,74,.5); border-radius: 20px; padding: 13px 13px 14px;
   background: linear-gradient(180deg, var(--rvh-panel2) 0%, var(--rvh-panel) 100%);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 8px 0 var(--rvh-panel-deep), 0 16px 26px -14px rgba(0,0,0,.75);
   transition: transform .16s cubic-bezier(.23,1,.32,1);
 }
 .rvh-mode:active { transform: translateY(2px) scale(.99); }
-/* liseré violet lumineux */
-.rvh-mode::before {
-  content: ""; position: absolute; inset: 0; border-radius: 20px; padding: 1px;
-  background: linear-gradient(180deg, rgba(178,150,255,.5), rgba(178,150,255,0) 55%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
-}
 .rvh-mode.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 13px; min-height: 0; }
 .rvh-mode.wide .rvh-mode-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 
-/* médaillon d'icône (set cohérent) */
 .rvh-sign { width: 54px; height: 54px; flex: none; display: grid; place-items: center; }
 .rvh-med { width: 54px; height: 54px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }
 
@@ -231,7 +177,6 @@ const STYLE = `<style>
 .rvh-mode-s { font: 700 11px/1.35 'Nunito', sans-serif; color: var(--rvh-mu2); }
 .rvh-mode-meta { margin-top: auto; display: inline-flex; align-items: center; gap: 5px; font: 800 11px/1 'Nunito', sans-serif; color: var(--rvh-gold-1); }
 .rvh-mode.wide .rvh-mode-meta { margin-top: 2px; }
-.rvh-mode-meta.done { color: #b9f26e; }
 .rvh-mode-meta svg { width: 13px; height: 13px; color: var(--rvh-violet-soft); }
 .rvh-mode-badge {
   position: absolute; top: 11px; right: 11px;
@@ -241,55 +186,66 @@ const STYLE = `<style>
   box-shadow: 0 3px 8px -3px rgba(255,107,107,.5);
 }
 
-/* ── points faibles ── */
-.rvh-weak {
-  position: relative; z-index: 3; margin-top: 15px; border-radius: 20px; padding: 14px 15px;
-  background: linear-gradient(180deg, var(--rvh-panel2), var(--rvh-panel)); border: 1px solid var(--rvh-line);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 24px -16px rgba(0,0,0,.75);
-}
-.rvh-weak-h { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; font: 700 15px/1 'Baloo 2', cursive; }
-.rvh-weak-ic { display: inline-grid; place-items: center; width: 26px; height: 26px; flex: none; }
-.rvh-weak-ic svg { width: 26px; height: 26px; }
-.rvh-weak-row {
-  display: flex; align-items: center; gap: 10px; width: 100%;
-  padding: 11px 2px; border-top: 1px solid rgba(178,150,255,.12);
-  background: none; border-left: 0; border-right: 0; border-bottom: 0;
-  color: inherit; font: inherit; text-align: left; cursor: pointer;
-}
-.rvh-weak-row:first-of-type { border-top: 0; }
-.rvh-weak-name { flex: 1; font: 800 13.5px/1.2 'Nunito', sans-serif; }
-.rvh-weak-stat { font: 700 10.5px/1 'Nunito', sans-serif; color: var(--rvh-mu2); white-space: nowrap; }
-.rvh-weak-go { font: 800 12.5px/1 'Baloo 2', cursive; color: var(--rvh-go-1); white-space: nowrap; }
-
 @media (prefers-reduced-motion: reduce) {
-  .rvh-arena, .rvh-mode { transition: none; }
+  .rvh-hero, .rvh-mode { transition: none; }
   .rvh-stars::before, .rvh-stars::after { animation: none; }
 }
 </style>`;
 
+// ─── Hero (adaptatif) ────────────────────────────────────────────
+function heroHtml({ nextFiche, allRead, focuses, moniteurPrenom }) {
+  // Priorité absolue : la demande du moniteur.
+  if (focuses && focuses.length) {
+    const f0 = focuses[0];
+    const fiche = getFiche(f0.competence_code);
+    const titre = fiche ? fiche.titre : f0.competence_code;
+    const more = focuses.length - 1;
+    const who = moniteurPrenom
+      ? `Demande de ${esc(moniteurPrenom)}, ton moniteur`
+      : "Demande de ton moniteur";
+    const sub =
+      more > 0
+        ? `Commence par « ${esc(titre)} » — le reste suit juste après.`
+        : "Il veut que tu maîtrises ça avant ta prochaine leçon.";
+    return `<button class="rvh-hero moni" id="rvh-hero" data-fcode="${esc(f0.competence_code)}">
+      <span class="rvh-sg a"></span><span class="rvh-sg b"></span><span class="rvh-sg c"></span>
+      <div class="rvh-hero-top">
+        <span class="rvh-hpill"><span class="rvh-hdot"></span>${who}</span>
+        <span class="rvh-hbadge">${medallion("cible", "gold", { size: 34 })}</span>
+      </div>
+      <div class="rvh-htitles"><span class="rvh-htitle">${esc(titre)}</span>${more > 0 ? `<span class="rvh-hmore">+ ${more} autre${more > 1 ? "s" : ""}</span>` : ""}</div>
+      <div class="rvh-hsub">${sub}</div>
+      <div class="rvh-hcta">M'entraîner ${ARROW}</div>
+    </button>`;
+  }
+
+  // Par défaut : reprendre (ou commencer) la lecture des fiches.
+  const f = nextFiche;
+  return `<button class="rvh-hero cont" id="rvh-hero" data-fcode="${esc(f.code)}">
+    <span class="rvh-sg a"></span><span class="rvh-sg b"></span><span class="rvh-sg c"></span>
+    <div class="rvh-hero-top">
+      <span class="rvh-hpill"><span class="rvh-hdot"></span>${allRead ? "Bien joué" : "On reprend"}</span>
+      <span class="rvh-hbadge">${medallion("fiches", "night", { size: 34 })}</span>
+    </div>
+    <div class="rvh-htitles"><span class="rvh-htitle">${esc(f.titre)}</span></div>
+    <div class="rvh-hsub">${allRead ? "Tu as lu toutes tes fiches — relis le geste avant ta leçon." : "Ta prochaine fiche — 2 min pour réviser le geste avant ta leçon."}</div>
+    <div class="rvh-hcta">${allRead ? "Relire la fiche" : "Lire la fiche"} ${ARROW}</div>
+  </button>`;
+}
+
 // ─── Render ──────────────────────────────────────────────────────
-function render({ streak, dailyDone, fichesLues, fichesTotal, weak }) {
-  const streakTitle =
+function render(data) {
+  const { streak, fichesLues, fichesTotal } = data;
+  const streakTxt =
     streak.count > 0
-      ? `Série : ${streak.count} jour${streak.count > 1 ? "s" : ""}`
-      : "Lance ta série";
+      ? `${streak.count} jour${streak.count > 1 ? "s" : ""}`
+      : "Nouvelle série";
   const streakSub =
     streak.count > 0
       ? streak.isToday
-        ? "Validée pour aujourd'hui ✓"
-        : "Révise pour la garder !"
-      : "1 session = 1 jour de série";
-
-  const weakRows = weak
-    .map(
-      (w) => `
-    <button class="rvh-weak-row" data-weak>
-      <span class="rvh-weak-name">${esc(w.label)}</span>
-      <span class="rvh-weak-stat">${w.wrong} erreur${w.wrong > 1 ? "s" : ""} · ${Math.round(w.rate * 100)} % ratées</span>
-      <span class="rvh-weak-go">Réviser →</span>
-    </button>`,
-    )
-    .join("");
+        ? "· validée ✓"
+        : "· garde ta série"
+      : "· fais-toi 2 min";
 
   return `${STYLE}
 <div class="rvh">
@@ -297,55 +253,19 @@ function render({ streak, dailyDone, fichesLues, fichesTotal, weak }) {
 
   <h1 class="rvh-title">Réviser</h1>
 
-  <!-- rituels du jour -->
-  <div class="rvh-daily">
-    <div class="rvh-chip">
-      <span class="rvh-chip-media" aria-hidden="true"><img src="${IMG.flame}" alt="" width="34" height="34"></span>
-      <div>
-        <div class="rvh-chip-t">${streakTitle}</div>
-        <div class="rvh-chip-s">${streakSub}</div>
-      </div>
-    </div>
-    <div class="rvh-chip">
-      <span class="rvh-chip-media q" aria-hidden="true">${SVG.bulb}</span>
-      <div>
-        <div class="rvh-chip-t">Question du jour</div>
-        <div class="rvh-chip-s">${dailyDone ? "Faite ✓ Reviens demain" : "30 sec · à faire"}</div>
-      </div>
-    </div>
-  </div>
+  <div class="rvh-streak">${medallion("flamme", "orange", { size: 22 })}<b>${streakTxt}</b><i>${streakSub}</i></div>
 
-  <!-- HERO Arène : la porte principale -->
-  <button class="rvh-arena" id="rvh-arena">
-    <span class="rvh-arena-k">Ton arène</span>
-    <div class="rvh-arena-row">
-      <div class="rvh-arena-txt">
-        <div class="rvh-arena-t">Continue ton Arène</div>
-        <div class="rvh-arena-s">Quiz sur tes compétences · gagne des volants</div>
-      </div>
-      <div class="rvh-medallion" aria-hidden="true">
-        <span class="rvh-ring"></span>
-        <img src="${IMG.badge}" alt="" width="78" height="78">
-      </div>
-    </div>
-    <div class="rvh-arena-cta">${SVG.play} Jouer</div>
-  </button>
+  ${heroHtml(data)}
 
-  <!-- tes entraînements -->
-  <div class="rvh-h"><h2>Tes entraînements</h2><span>tout est là 👇</span></div>
+  <div class="rvh-h">Tout pour t'entraîner</div>
   <div class="rvh-modes">
-    <button class="rvh-mode" data-go="/exam-blanc">
-      <span class="rvh-sign" aria-hidden="true">${MED.exam}</span>
-      <div class="rvh-mode-t">Examen blanc</div>
-      <div class="rvh-mode-s">40 questions · chrono · comme le vrai</div>
-      <span class="rvh-mode-meta">Se tester ${SVG.chevron}</span>
-    </button>
-
-    <button class="rvh-mode" data-go="/revision-conduite">
+    <button class="rvh-mode wide" data-go="/revision-conduite">
       <span class="rvh-sign" aria-hidden="true">${MED.fiches}</span>
-      <div class="rvh-mode-t">Fiches de conduite</div>
-      <div class="rvh-mode-s">Le geste, pas que le code</div>
-      <span class="rvh-mode-meta">${fichesLues}/${fichesTotal} lues ${SVG.chevron}</span>
+      <div class="rvh-mode-body">
+        <div class="rvh-mode-t">Fiches de conduite</div>
+        <div class="rvh-mode-s">Le geste, pas le code · avant chaque leçon</div>
+        <span class="rvh-mode-meta">${fichesLues}/${fichesTotal} lues ${CHEVRON}</span>
+      </div>
     </button>
 
     <button class="rvh-mode" data-go="/jeu-faute">
@@ -353,105 +273,49 @@ function render({ streak, dailyDone, fichesLues, fichesTotal, weak }) {
       <span class="rvh-sign" aria-hidden="true">${MED.faute}</span>
       <div class="rvh-mode-t">Trouve la faute</div>
       <div class="rvh-mode-s">Repère la faute éliminatoire</div>
-      <span class="rvh-mode-meta">2 min ${SVG.chevron}</span>
+      <span class="rvh-mode-meta">2 min ${CHEVRON}</span>
     </button>
 
     <button class="rvh-mode" data-go="/en-situation">
+      <span class="rvh-mode-badge">Mini-jeu</span>
       <span class="rvh-sign" aria-hidden="true">${MED.situ}</span>
       <div class="rvh-mode-t">En situation</div>
       <div class="rvh-mode-s">Une scène, une décision</div>
-      <span class="rvh-mode-meta">6 situations ${SVG.chevron}</span>
+      <span class="rvh-mode-meta">6 situations ${CHEVRON}</span>
     </button>
 
     <button class="rvh-mode wide" data-go="/exam-conduite">
       <span class="rvh-sign" aria-hidden="true">${MED.examConduite}</span>
       <div class="rvh-mode-body">
-        <div class="rvh-mode-t">Examen blanc de conduite</div>
-        <div class="rvh-mode-s">Teste-toi en conditions réelles, comme le jour J</div>
-        <span class="rvh-mode-meta">Se tester ${SVG.chevron}</span>
-      </div>
-    </button>
-
-    <button class="rvh-mode wide" id="rvh-daily-tile">
-      <span class="rvh-sign" aria-hidden="true">${MED.daily}</span>
-      <div class="rvh-mode-body">
-        <div class="rvh-mode-t">Question du jour</div>
-        <div class="rvh-mode-s">${dailyDone ? "Fait pour aujourd'hui !" : "Ta dose du jour en 30 sec"}</div>
-        <span class="rvh-mode-meta ${dailyDone ? "done" : ""}" id="rvh-daily-meta">${dailyDone ? "Faite ✓" : "À faire"} ${dailyDone ? "" : SVG.chevron}</span>
+        <div class="rvh-mode-t">Examen de conduite</div>
+        <div class="rvh-mode-s">En conditions réelles, comme le jour J</div>
+        <span class="rvh-mode-meta">Se tester ${CHEVRON}</span>
       </div>
     </button>
   </div>
-
-  ${
-    weak.length
-      ? `
-  <div class="rvh-weak">
-    <div class="rvh-weak-h"><span class="rvh-weak-ic" aria-hidden="true">${SVG.target}</span> Tes points faibles</div>
-    ${weakRows}
-  </div>`
-      : ""
-  }
 </div>`;
 }
 
 // ─── Wire ────────────────────────────────────────────────────────
-function wire(root, { dailyDone }) {
-  // Arène : session révision libre (même entrée que « Continue à réviser »)
-  root.querySelector("#rvh-arena")?.addEventListener("click", () => {
-    track("reviser.arena_open", {});
-    location.hash = "#/quiz/next/post_validation/revision";
+function wireHero(root) {
+  const hero = root.querySelector("#rvh-hero");
+  if (!hero) return;
+  hero.addEventListener("click", () => {
+    const code = hero.getAttribute("data-fcode");
+    const moni = hero.classList.contains("moni");
+    track(moni ? "reviser.focus_open" : "reviser.next_fiche", { code });
+    navigate(`/revision-conduite/${code}`);
   });
+}
 
+function wire(root) {
+  wireHero(root);
   root.querySelectorAll("[data-go]").forEach((btn) =>
     btn.addEventListener("click", () => {
       track("reviser.mode_open", { mode: btn.dataset.go });
       navigate(btn.dataset.go);
     }),
   );
-
-  // Points faibles : la révision par thème vit sur l'écran examen blanc
-  root.querySelectorAll("[data-weak]").forEach((btn) =>
-    btn.addEventListener("click", () => {
-      track("reviser.weak_open", {});
-      navigate("/exam-blanc");
-    }),
-  );
-
-  // Question du jour : enrichissement async (1 fetch léger) — la tuile
-  // devient un lancement direct dès que la question est choisie.
-  if (!dailyDone) {
-    const tile = root.querySelector("#rvh-daily-tile");
-    tile?.addEventListener("click", async () => {
-      try {
-        const me = getCurUser();
-        const [{ data: rows }, { pickDailyQuiz }] = await Promise.all([
-          sb
-            .from("validations")
-            .select("competence_id")
-            .eq("eleve_id", me.id)
-            .eq("statut", "acquis"),
-          import("@/services/daily-quiz.js"),
-        ]);
-        const validated = (rows || [])
-          .map((r) => r.competence_id)
-          .filter(Boolean);
-        const pick = await pickDailyQuiz(me.id, validated);
-        track("reviser.daily_open", {});
-        if (pick?.competenceId) {
-          location.hash = `#/quiz/${pick.competenceId}/post_validation/daily`;
-        } else {
-          // pas de question dispo → l'Arène libre reste la meilleure porte
-          location.hash = "#/quiz/next/post_validation/revision";
-        }
-      } catch {
-        location.hash = "#/quiz/next/post_validation/revision";
-      }
-    });
-  } else {
-    root.querySelector("#rvh-daily-tile")?.addEventListener("click", () => {
-      location.hash = "#/quiz/next/post_validation/revision";
-    });
-  }
 }
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -461,7 +325,7 @@ export async function mount(root) {
 
   track("page_view", { page: "eleve_reviser" });
 
-  // Données locales → rendu instantané, pas de skeleton nécessaire
+  // Données locales → rendu instantané, pas de skeleton nécessaire.
   let read = {};
   try {
     read = JSON.parse(localStorage.getItem(LS_READ_KEY) || "{}") || {};
@@ -469,15 +333,58 @@ export async function mount(root) {
     /* noop */
   }
   const fichesLues = FICHES.filter((f) => read[f.code]).length;
+  const nextFiche = FICHES.find((f) => !read[f.code]) || FICHES[0];
 
   const data = {
     streak: getStreak(),
-    dailyDone: isDailyDone(),
     fichesLues,
     fichesTotal: FICHES.length,
-    weak: getWeakPoints({ minSeen: 3, limit: 3 }),
+    nextFiche,
+    allRead: FICHES.length > 0 && fichesLues === FICHES.length,
+    focuses: [],
+    moniteurPrenom: "",
   };
 
   root.innerHTML = render(data);
-  wire(root, data);
+  wire(root);
+
+  // Devoirs du moniteur (revision_focus) : 1 fetch léger. Si présents, ils
+  // PRENNENT le hero (priorité absolue). C'est le SEUL endroit où ils
+  // s'affichent (retirés de l'accueil + de la page fiches).
+  try {
+    const { data: focuses } = await sb
+      .from("revision_focus")
+      .select("id, competence_code, note, created_at")
+      .is("done_at", null)
+      .order("created_at", { ascending: false });
+    if (focuses && focuses.length) {
+      data.focuses = focuses;
+      // Prénom du moniteur (best-effort, non bloquant : fallback « ton moniteur »).
+      try {
+        const { data: prof } = await sb
+          .from("profiles")
+          .select("enseignant_id")
+          .eq("id", me.id)
+          .maybeSingle();
+        if (prof?.enseignant_id) {
+          const { data: ens } = await sb
+            .from("profiles")
+            .select("prenom")
+            .eq("id", prof.enseignant_id)
+            .maybeSingle();
+          data.moniteurPrenom = ens?.prenom || "";
+        }
+      } catch {
+        /* prénom optionnel */
+      }
+      // On ne remplace que le hero (évite de re-render toute la page).
+      const cur = root.querySelector("#rvh-hero");
+      if (cur) {
+        cur.outerHTML = heroHtml(data);
+        wireHero(root);
+      }
+    }
+  } catch {
+    /* table non migrée / hors-ligne → hero par défaut, silencieux */
+  }
 }

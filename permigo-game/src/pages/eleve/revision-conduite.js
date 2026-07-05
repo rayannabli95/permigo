@@ -255,16 +255,6 @@ const STYLE = `<style>
 .rvs-cta-ic svg { width:14px; height:14px; color:#fff; }
 .rvs-done { cursor:default; } .rvs-done:active { transform:none; }
 
-.rvs-focus { margin:12px 0 0; background:color-mix(in srgb,var(--a,#f97316) 8%,var(--su,#fff));
-  border:1px solid color-mix(in srgb,var(--a,#f97316) 22%,transparent); border-radius:16px; padding:12px 14px; }
-.rvs-focus-k { display:flex; align-items:center; gap:7px; font:800 11.5px/1 'Inter',sans-serif; letter-spacing:.05em;
-  text-transform:uppercase; color:var(--a-txt,var(--a)); margin-bottom:8px; }
-.rvs-focus-row { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; text-align:left;
-  border:0; cursor:pointer; background:var(--su,#fff); border-radius:11px; padding:11px 12px; margin-top:7px; color:var(--ink);
-  font:700 13.5px/1.2 'Inter',sans-serif; box-shadow:0 1px 3px rgba(0,0,0,.05); }
-.rvs-focus-go { display:inline-flex; align-items:center; gap:4px; flex:none; font:800 12px/1 'Inter',sans-serif; color:var(--a-txt,var(--a)); }
-.rvs-focus-go svg { width:16px; height:16px; }
-
 .rvs-prog { margin:20px 2px 0; }
 .rvs-prog-h { display:flex; align-items:center; justify-content:space-between; font:800 13px/1 'Inter',sans-serif; color:var(--ink); }
 .rvs-prog-x { color:var(--mu,#64748b); }
@@ -448,20 +438,6 @@ export async function mount(root, param) {
           <span class="rvs-now-meta">Reviens réviser avant chaque leçon.</span>
         </div>`;
 
-    // ── Ciblage moniteur (rare, prioritaire) — juste sous l'action ──
-    const focusBlock = focuses.length
-      ? `<div class="rvs-focus">
-          <div class="rvs-focus-k"><span class="rvs-dot"></span>Ton moniteur t'a ciblé ça</div>
-          ${focuses
-            .map((x) => {
-              const ff = getFiche(x.competence_code);
-              const t = ff ? ff.titre : x.competence_code;
-              return `<button class="rvs-focus-row" data-focus="${esc(x.id)}" data-fcode="${esc(x.competence_code)}"><span>${esc(t)}</span><span class="rvs-focus-go">J'm'y mets ${chev}</span></button>`;
-            })
-            .join("")}
-        </div>`
-      : "";
-
     // ── Les 4 mondes : liste calme, une ligne = un monde, ouvre ses fiches ──
     const MCOLOR = {
       1: "linear-gradient(160deg,#818cf8,#6366f1)",
@@ -490,7 +466,6 @@ export async function mount(root, param) {
       </div>
 
       ${primary}
-      ${focusBlock}
 
       <div class="rvs-prog">
         <div class="rvs-prog-h"><span>Ta progression</span><span class="rvs-prog-x">${lues} fiche${lues > 1 ? "s" : ""} sur ${totalF}</span></div>
@@ -545,14 +520,6 @@ export async function mount(root, param) {
         mondeN = Number(b.getAttribute("data-monde"));
         view = "monde";
         render();
-      }),
-    );
-    root.querySelectorAll("[data-focus]").forEach((b) =>
-      b.addEventListener("click", () => {
-        focusId = b.getAttribute("data-focus");
-        code = b.getAttribute("data-fcode");
-        track("revision_conduite_focus_start", { code });
-        startQuiz();
       }),
     );
   }
@@ -727,6 +694,13 @@ export async function mount(root, param) {
   }
 
   function startQuiz() {
+    // Si cette compétence est un ciblage moniteur non fait (arrivée par le hero
+    // « Réviser » en deep-link, ou par navigation normale), on la marquera faite
+    // à la fin du quiz — même sans être passé par une liste de devoirs.
+    if (!focusId) {
+      const fx = focuses.find((x) => x.competence_code === code);
+      if (fx) focusId = fx.id;
+    }
     view = "quiz";
     render();
   }
