@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PermiGo — Valider une séance · DA A2 « Carnet · blanc + indigo »</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Accent indigo (DA moniteur) — structure + touches, pas de gros aplat dégradé */
+    --a:#4f46e5; --adk:#3a32c4; --alt:#6d6bff;
+    /* Statuts (encre, pas pastel) */
+    --acq:#0f8a48; --acq-lt:#e9f6ee;
+    --enc:#2563eb; --enc-lt:#e9effc;
+    --rev:#c2740a; --rev-lt:#fbeede;
+    /* Papier COOL premium — fini le beige : blanc + tons froids raccord DA indigo */
+    --paper:#ffffff; --paper-2:#f3f5fb; --paper-3:#eaedf7;
+    --rule:#e9ebf3;      /* filet fin */
+    --rule-2:#d3d8e8;    /* filet marqué */
+    --ink:#1c1f3d;       /* encre titre = indigo-nuit (bandes catégorie) */
+    --ink-2:#3b3f60;     /* encre corps */
+    --mu:#767c9c; --mu-2:#9aa0bd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:'Manrope',system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, #191c33 0%, transparent 60%),
+      #0e1020;
+    color:#e7e8f4;
+    min-height:100%;
+    display:flex; flex-direction:column; align-items:center;
+    padding:34px 16px 60px;
+  }
+
+  /* ── Ruban titre DA ── */
+  .da-band{ width:390px; max-width:100%; margin-bottom:22px; text-align:center; }
+  .da-kicker{
+    display:inline-flex; align-items:center; gap:8px;
+    font:600 11px/1 'Inter',sans-serif; letter-spacing:.16em; text-transform:uppercase;
+    color:#a7a9c8;
+    padding:7px 13px; border-radius:999px;
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
+  }
+  .da-kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--alt);box-shadow:0 0 0 4px rgba(109,107,255,.18)}
+  .da-title{ margin-top:12px; font:700 23px/1.15 'Fredoka',sans-serif; color:#fff; letter-spacing:.2px}
+  .da-sub{ margin-top:6px; font:500 12.5px/1.4 'Inter',sans-serif; color:#8b8ea8; }
+  .da-sub b{color:#c7c9e0;font-weight:600}
+
+  /* ── Cadre téléphone ── */
+  .phone{
+    width:390px; max-width:100%;
+    background:#0b0c17;
+    border-radius:46px;
+    padding:11px;
+    box-shadow:0 40px 80px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.06), inset 0 0 0 1.5px #24263c;
+    position:relative;
+  }
+  .phone::before{ /* encoche */
+    content:""; position:absolute; top:20px; left:50%; transform:translateX(-50%);
+    width:112px; height:26px; background:#0b0c17; border-radius:0 0 16px 16px; z-index:40;
+  }
+  .screen{
+    background:var(--paper);
+    border-radius:37px;
+    overflow:hidden; height:788px;
+    position:relative;
+    display:flex; flex-direction:column;
+    /* fibres papier réalistes (bruit fin) + très légère teinte inégale */
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='linear' slope='0.04'/></feComponentTransfer></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>"),
+      radial-gradient(120% 90% at 82% 8%, rgba(0,0,0,.028), transparent 42%);
+    background-size:140px 140px, 100% 100%;
+  }
+
+  /* ── Barre statut iOS factice ── */
+  .status-ios{
+    height:46px; flex:0 0 auto; display:flex; align-items:flex-end; justify-content:space-between;
+    padding:0 26px 6px; font:600 13px 'Inter',sans-serif; color:var(--ink);
+  }
+  .status-ios .r{display:flex;gap:6px;align-items:center}
+  .status-ios svg{display:block}
+
+  /* ── EN-TÊTE DOCUMENT ── */
+  .doc-head{
+    flex:0 0 auto;
+    padding:4px 20px 13px;
+    border-bottom:2.5px solid var(--ink);
+    position:relative;
+  }
+  /* double filet façon en-tête officiel */
+  .doc-head::after{
+    content:""; position:absolute; left:20px; right:20px; bottom:-6px; height:1px; background:var(--rule-2);
+  }
+  .doc-topline{ display:flex; align-items:center; justify-content:space-between; }
+  .brand{ display:flex; align-items:center; gap:9px; }
+  .stamp{
+    width:37px;height:37px;border-radius:8px;
+    background:#fff;
+    border:1.5px solid var(--adk);
+    display:grid;place-items:center;
+    position:relative;
+  }
+  .stamp::after{ /* liseré interne « tampon » */
+    content:""; position:absolute; inset:3px; border:1px solid rgba(58,50,196,.35); border-radius:5px;
+  }
+  .brand-txt .bn{font:700 15px 'Fredoka',sans-serif;color:var(--ink);letter-spacing:.3px;line-height:1}
+  .brand-txt .bs{font:600 9px 'Inter',sans-serif;letter-spacing:.15em;text-transform:uppercase;color:var(--mu);margin-top:3px}
+  .ref-seal{
+    text-align:right;
+    font:600 9px 'Inter',sans-serif; letter-spacing:.12em; text-transform:uppercase; color:var(--mu);
+  }
+  .ref-seal .no{
+    display:inline-block;margin-top:4px;
+    font:800 12px 'Manrope',sans-serif;letter-spacing:.04em;color:var(--adk);
+    border:1.5px solid var(--rule-2);border-radius:5px;padding:3px 9px;background:#fff;
+  }
+
+  .doc-form{ margin-top:12px; display:grid; grid-template-columns:1fr auto; gap:9px 14px; }
+  .field .lb{ font:600 8px 'Inter',sans-serif; letter-spacing:.14em; text-transform:uppercase; color:var(--mu); }
+  .field .vl{ font:700 15px 'Manrope',sans-serif; color:var(--ink); margin-top:1px; line-height:1.1; }
+  .field .vl small{font:600 11px 'Inter',sans-serif;color:var(--mu-2)}
+  .field .vl .ava{
+    display:inline-grid; place-items:center; width:22px; height:22px; border-radius:50%;
+    background:linear-gradient(135deg,var(--alt),var(--a)); color:#fff;
+    font:800 9px 'Manrope',sans-serif; margin-right:7px; vertical-align:-5px;
+    box-shadow:0 1px 3px rgba(79,70,229,.4);
+  }
+  .field.r{text-align:right}
+  .field .vl.date{font-variant-numeric:tabular-nums}
+
+  /* légende des colonnes (barème) — sobre, filet, pas de carte */
+  .legend{
+    margin-top:13px;
+    display:flex; align-items:center; gap:14px;
+    padding-top:9px; border-top:1px solid var(--rule);
+  }
+  .legend .lg-lb{font:700 8px 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--mu)}
+  .lg-chip{display:flex;align-items:center;gap:6px;font:700 10.5px 'Manrope',sans-serif;color:var(--ink-2)}
+  .lg-mark{width:15px;height:15px;border:1.5px solid var(--rule-2);border-radius:3px;background:#fff;display:grid;place-items:center;flex:0 0 auto}
+  .lg-mark svg{display:block}
+  .lg-chip.acq .lg-mark{border-color:var(--acq);background:var(--acq-lt)} .lg-chip.acq .lg-mark svg{color:var(--acq)}
+  .lg-chip.enc .lg-mark{border-color:var(--enc);background:var(--enc-lt)} .lg-chip.enc .lg-mark svg{color:var(--enc)}
+  .lg-chip.rev .lg-mark{border-color:var(--rev);background:var(--rev-lt)} .lg-chip.rev .lg-mark svg{color:var(--rev)}
+
+  /* ── CORPS SCROLLABLE : la grille ── */
+  .doc-body{ flex:1 1 auto; overflow-y:auto; padding:2px 0 6px; }
+  .doc-body::-webkit-scrollbar{width:0}
+
+  /* Bandeau de catégorie */
+  .cat{ position:relative; }
+  .cat-head{
+    position:sticky; top:0; z-index:5;
+    display:flex; align-items:center; gap:10px;
+    padding:8px 20px;
+    background:var(--ink);
+    color:#fff;
+    border-top:1px solid #000;
+  }
+  .cat-head .cno{
+    font:800 12px 'Manrope',sans-serif; letter-spacing:.5px;
+    color:var(--alt); flex:0 0 auto; font-variant-numeric:tabular-nums;
+  }
+  .cat-head .cname{ font:600 13px 'Manrope',sans-serif; letter-spacing:.2px; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cat-head .cbar{ flex:0 0 42px; height:5px; border-radius:3px; background:rgba(255,255,255,.15); overflow:hidden; }
+  .cat-head .cbar i{ display:block; height:100%; border-radius:3px; background:var(--alt); }
+  .cat-head .ccount{
+    font:700 9.5px 'Inter',sans-serif; letter-spacing:.03em;
+    color:#c9caea; flex:0 0 auto; font-variant-numeric:tabular-nums;
+  }
+  .cat-head .ccount b{color:#fff;font-weight:800}
+
+  /* en-tête des 3 colonnes — carrés, alignés au cordeau sur les cases */
+  .col-head{
+    display:grid; grid-template-columns:1fr 44px 44px 44px;
+    align-items:end;
+    padding:5px 18px 4px 20px;
+    background:var(--paper-2);
+    border-bottom:1.5px solid var(--rule-2);
+  }
+  .col-head .ch{
+    position:relative; text-align:center; padding-top:9px;
+    font:800 7.5px 'Inter',sans-serif; letter-spacing:.01em; text-transform:uppercase;
+    line-height:1; white-space:nowrap;
+  }
+  .col-head .ch::before{ /* onglet de couleur = mappe la colonne */
+    content:""; position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:15px; height:3px; border-radius:2px; background:currentColor;
+  }
+  .col-head .ch.acq{color:var(--acq)} .col-head .ch.enc{color:var(--enc)} .col-head .ch.rev{color:var(--rev)}
+
+  /* ── Ligne = sous-compétence ── */
+  .row{
+    display:grid; grid-template-columns:1fr 44px 44px 44px;
+    align-items:center;
+    padding:0 18px 0 20px;
+    min-height:46px;
+    border-bottom:1px solid var(--rule);
+    position:relative;
+  }
+  .row:nth-child(odd of .row){background:rgba(0,0,0,.012)}
+  .row.done::before{ /* liseré statut à gauche de la ligne évaluée */
+    content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
+  }
+  .row.s-acq::before{background:var(--acq)} .row.s-enc::before{background:var(--enc)} .row.s-rev::before{background:var(--rev)}
+
+  .cell-label{ display:flex; align-items:baseline; gap:9px; padding:8px 8px 8px 0; min-width:0; }
+  .code{
+    flex:0 0 auto; width:28px;
+    font:700 11px 'Manrope',sans-serif; letter-spacing:.01em;
+    color:var(--adk); font-variant-numeric:tabular-nums;
+  }
+  .lbl{ font:500 12.5px/1.25 'Manrope',sans-serif; color:var(--ink); min-width:0; }
+  .row:not(.done) .lbl{color:var(--ink-2)}
+
+  /* case à cocher : CARRÉ « bulletin » — coche à la main, une par ligne.
+     Les cases NON pertinentes restent des cadres vides discrets (papier),
+     la case cochée est marquée à l'encre du statut → on scanne la LIGNE, pas 3 ronds. */
+  .box{
+    justify-self:center;
+    width:26px;height:26px;border-radius:6px;
+    border:1.25px solid var(--rule);
+    background:#fff;
+    display:grid;place-items:center;
+    cursor:pointer;
+    transition:transform .1s ease, border-color .1s, background .1s;
+    position:relative;
+  }
+  .box:active{transform:scale(.88)}
+  .box .mk{ display:none; }
+  .box .mk svg{display:block}
+  /* colonne faiblement teintée = l'œil suit Acquis / En cours / À revoir */
+  .box.acq{background:#f5faf7} .box.enc{background:#f4f7fe} .box.rev{background:#fdf9f1}
+  /* état coché : fond teinté + marque manuscrite à l'encre du statut */
+  .box.on.acq{border-color:var(--acq);background:var(--acq-lt)} .box.on.acq .mk{display:block;color:var(--acq)}
+  .box.on.enc{border-color:var(--enc);background:var(--enc-lt)} .box.on.enc .mk{display:block;color:var(--enc)}
+  .box.on.rev{border-color:var(--rev);background:var(--rev-lt)} .box.on.rev .mk{display:block;color:var(--rev)}
+
+  /* ── PIED : signature + valider ── */
+  .doc-foot{
+    flex:0 0 auto;
+    border-top:2.5px solid var(--ink);
+    background:var(--paper);
+    padding:10px 20px calc(11px + env(safe-area-inset-bottom));
+    position:relative;
+  }
+  .doc-foot::before{ content:""; position:absolute; left:20px; right:20px; top:4px; height:1px; background:var(--rule-2); }
+
+  /* synthèse chiffrée = colonne de totaux façon bas de tableau */
+  .foot-summary{
+    display:flex;align-items:center;gap:0;margin:5px 0 11px;
+    border:1px solid var(--rule-2); border-radius:7px; overflow:hidden; background:#fff;
+  }
+  .foot-summary .m{
+    flex:1; display:flex;flex-direction:column;align-items:center;gap:1px;
+    padding:6px 4px; border-right:1px solid var(--rule);
+  }
+  .foot-summary .m:last-of-type{border-right:none}
+  .foot-summary .m .n{font:800 16px 'Manrope',sans-serif;font-variant-numeric:tabular-nums;line-height:1}
+  .foot-summary .m .k{font:700 7.5px 'Inter',sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--mu)}
+  .foot-summary .m.acq .n{color:var(--acq)} .foot-summary .m.enc .n{color:var(--enc)} .foot-summary .m.rev .n{color:var(--rev)}
+  .foot-summary .m.tot{background:var(--paper-2)}
+  .foot-summary .m.tot .n{color:var(--ink)}
+
+  .sig-row{ display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:11px; }
+  .sig{ flex:1; }
+  .sig .sig-lb{ font:600 8px 'Inter',sans-serif; letter-spacing:.13em; text-transform:uppercase; color:var(--mu); }
+  .sig .sig-line{
+    margin-top:16px; border-bottom:1.5px solid var(--ink-2);
+    position:relative; height:20px;
+  }
+  .sig .sig-name{
+    position:absolute; left:2px; bottom:1px;
+    font:700 16px 'Fredoka',sans-serif; color:var(--adk);
+    transform:rotate(-4deg); transform-origin:left bottom;
+  }
+  .cachet{
+    flex:0 0 auto; width:56px;height:56px;border-radius:50%;
+    border:1.5px dashed var(--adk); color:var(--adk);
+    display:grid;place-items:center; text-align:center;
+    transform:rotate(-9deg);
+    font:700 6.5px 'Inter',sans-serif; letter-spacing:.06em; line-height:1.3;
+    opacity:.55;
+  }
+  .cachet b{display:block;font:700 8px 'Fredoka',sans-serif;letter-spacing:.3px}
+
+  /* CTA : sobre, INK (pas de gros dégradé violet flashy) — autorité > flash */
+  .btn-valider{
+    width:100%; height:52px; border:none; cursor:pointer;
+    border-radius:11px;
+    background:var(--adk);
+    color:#fff;
+    font:700 15px 'Manrope',sans-serif; letter-spacing:.2px;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    box-shadow:0 3px 0 0 #241f8f, 0 12px 22px -12px rgba(58,50,196,.5);
+    transition:transform .1s ease, box-shadow .1s;
+  }
+  .btn-valider .v-ico{flex:0 0 auto}
+  .btn-valider:active{transform:translateY(3px);box-shadow:0 0 0 0 #241f8f, 0 6px 12px -10px rgba(58,50,196,.5)}
+  .btn-valider .cnt{
+    background:rgba(255,255,255,.14);border-radius:6px;padding:3px 9px;
+    font:700 11px 'Manrope',sans-serif; letter-spacing:.02em;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* toast démo */
+  .toast{
+    position:absolute; left:50%; bottom:96px; transform:translateX(-50%) translateY(14px);
+    background:var(--ink); color:#fff;
+    font:600 12px 'Manrope',sans-serif;
+    padding:11px 16px; border-radius:10px;
+    box-shadow:0 12px 30px -8px rgba(0,0,0,.5);
+    opacity:0; pointer-events:none; transition:.25s; z-index:30;
+    display:flex;align-items:center;gap:8px;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast .ck{width:18px;height:18px;border-radius:50%;background:var(--acq);display:grid;place-items:center}
+</style>
+</head>
+<body>
+
+  <!-- Ruban DA -->
+  <div class="da-band">
+    <span class="da-kicker"><span class="dot"></span>DA A2 · Écran moniteur</span>
+    <div class="da-title">Le Carnet Officiel</div>
+    <div class="da-sub">Pas un dashboard — un <b>document d'évaluation REMC</b> que le moniteur remplit. Blanc premium, indigo, zéro heure.</div>
+  </div>
+
+  <!-- Téléphone -->
+  <div class="phone">
+    <div class="screen">
+
+      <!-- Statut iOS -->
+      <div class="status-ios">
+        <span>9:41</span>
+        <span class="r">
+          <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="6" width="3" height="5" rx="1"/><rect x="4.5" y="4" width="3" height="7" rx="1"/><rect x="9" y="2" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><path d="M8 2.5c1.9 0 3.6.7 4.9 1.9l1.2-1.3A9 9 0 0 0 8 .8 9 9 0 0 0 1.9 3.1l1.2 1.3A7.2 7.2 0 0 1 8 2.5Zm0 3.2c1 0 2 .4 2.7 1.1l1.2-1.3A6 6 0 0 0 8 3.9a6 6 0 0 0-3.9 1.6l1.2 1.3A4 4 0 0 1 8 5.7Zm0 3.1L9.8 7A2.6 2.6 0 0 0 8 6.3 2.6 2.6 0 0 0 6.2 7L8 8.8Z"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="1.6" fill="currentColor"/><rect x="23" y="4" width="1.5" height="4" rx=".75" fill="currentColor" opacity=".5"/></svg>
+        </span>
+      </div>
+
+      <!-- EN-TÊTE DOCUMENT -->
+      <header class="doc-head">
+        <div class="doc-topline">
+          <div class="brand">
+            <div class="stamp">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 13l1.5-4.5A2 2 0 0 1 7.4 7h9.2a2 2 0 0 1 1.9 1.5L20 13m-16 0h16m-16 0v4.5m16-4.5v4.5M6.5 17.5v1.2M17.5 17.5v1.2" stroke="#3a32c4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="14.6" r="1.1" fill="#3a32c4"/><circle cx="17" cy="14.6" r="1.1" fill="#3a32c4"/></svg>
+            </div>
+            <div class="brand-txt">
+              <div class="bn">PermiGo</div>
+              <div class="bs">Livret d'apprentissage</div>
+            </div>
+          </div>
+          <div class="ref-seal">
+            Fiche de séance<br>
+            <span class="no">N° 14</span>
+          </div>
+        </div>
+
+        <div class="doc-form">
+          <div class="field">
+            <div class="lb">Élève</div>
+            <div class="vl"><span class="ava">LM</span>Léa Mercier <small>· Cat. B</small></div>
+          </div>
+          <div class="field r">
+            <div class="lb">Date de séance</div>
+            <div class="vl date">05.07.2026</div>
+          </div>
+          <div class="field">
+            <div class="lb">Moniteur</div>
+            <div class="vl">Karim Belkacem</div>
+          </div>
+        </div>
+
+      </header>
+
+      <!-- CORPS : grille d'évaluation -->
+      <main class="doc-body" id="body">
+
+        <!-- ═ C1 ═ -->
+        <section class="cat">
+          <div class="cat-head">
+            <span class="cno">C1</span>
+            <span class="cname">Maîtrise du véhicule</span>
+            <span class="cbar"><i style="width:89%"></i></span>
+            <span class="ccount"><b class="cnt-eval">8</b> / 9 évaluées</span>
+          </div>
+          <div class="col-head">
+            <div></div>
+            <div class="ch acq">Acquis</div>
+            <div class="ch enc">En cours</div>
+            <div class="ch rev">À revoir</div>
+          </div>
+
+          <div class="row done s-acq" data-code="C1a">
+            <div class="cell-label"><span class="code">C1a</span><span class="lbl">Organes, commandes, vérifications</span></div>
+            <div class="box acq on"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row done s-acq" data-code="C1b">
+            <div class="cell-label"><span class="code">C1b</span><span class="lbl">S'installer au poste de conduite</span></div>
+            <div class="box acq on"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row done s-acq" data-code="C1c">
+            <div class="cell-label"><span class="code">C1c</span><span class="lbl">Tenir le volant, trajectoire</span></div>
+            <div class="box acq on"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row done s-acq" data-code="C1d">
+            <div class="cell-label"><span class="code">C1d</span><span class="lbl">Démarrer et s'arrêter</span></div>
+            <div class="box acq on"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row done s-enc" data-code="C1e">
+            <div class="cell-label"><span class="code">C1e</span><span class="lbl">Doser accélération et freinage</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc on"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row done s-enc" data-code="C1f">
+            <div class="cell-label"><span class="code">C1f</span><span class="lbl">Utiliser la boîte de vitesses</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc on"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row done s-acq" data-code="C1g">
+            <div class="cell-label"><span class="code">C1g</span><span class="lbl">Contrôles de sécurité extérieure</span></div>
+            <div class="box acq on"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row done s-rev" data-code="C1h">
+            <div class="cell-label"><span class="code">C1h</span><span class="lbl">Manœuvres : créneau, demi-tour</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev on"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row" data-code="C1i">
+            <div class="cell-label"><span class="code">C1i</span><span class="lbl">Autonomie sur manœuvres de base</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+        </section>
+
+        <!-- ═ C2 ═ -->
+        <section class="cat">
+          <div class="cat-head">
+            <span class="cno">C2</span>
+            <span class="cname">Circulation normale</span>
+            <span class="cbar"><i style="width:38%"></i></span>
+            <span class="ccount"><b class="cnt-eval">3</b> / 8 évaluées</span>
+          </div>
+          <div class="col-head">
+            <div></div>
+            <div class="ch acq">Acquis</div>
+            <div class="ch enc">En cours</div>
+            <div class="ch rev">À revoir</div>
+          </div>
+
+          <div class="row done s-enc" data-code="C2a">
+            <div class="cell-label"><span class="code">C2a</span><span class="lbl">Prise d'informations visuelles</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc on"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row done s-enc" data-code="C2b">
+            <div class="cell-label"><span class="code">C2b</span><span class="lbl">Adapter sa conduite</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc on"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row" data-code="C2c">
+            <div class="cell-label"><span class="code">C2c</span><span class="lbl">Trajectoire et placement</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row" data-code="C2d">
+            <div class="cell-label"><span class="code">C2d</span><span class="lbl">Vitesse et trajectoire en virage</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row" data-code="C2e">
+            <div class="cell-label"><span class="code">C2e</span><span class="lbl">Croisements et dépassements</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row done s-rev" data-code="C2f">
+            <div class="cell-label"><span class="code">C2f</span><span class="lbl">Intersections, ronds-points</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev on"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row" data-code="C2g">
+            <div class="cell-label"><span class="code">C2g</span><span class="lbl">Communication avec les usagers</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row" data-code="C2h">
+            <div class="cell-label"><span class="code">C2h</span><span class="lbl">Conduite en autonomie</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+        </section>
+
+        <!-- ═ C3 ═ -->
+        <section class="cat">
+          <div class="cat-head">
+            <span class="cno">C3</span>
+            <span class="cname">Conditions difficiles</span>
+            <span class="cbar"><i style="width:0%"></i></span>
+            <span class="ccount"><b class="cnt-eval">0</b> / 7 évaluées</span>
+          </div>
+          <div class="col-head">
+            <div></div>
+            <div class="ch acq">Acquis</div>
+            <div class="ch enc">En cours</div>
+            <div class="ch rev">À revoir</div>
+          </div>
+          <div class="row" data-code="C3a">
+            <div class="cell-label"><span class="code">C3a</span><span class="lbl">Conduite de nuit</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row" data-code="C3b">
+            <div class="cell-label"><span class="code">C3b</span><span class="lbl">Conduite par mauvaise visibilité</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+          <div class="row" data-code="C3e">
+            <div class="cell-label"><span class="code">C3e</span><span class="lbl">Voies rapides et autoroutes</span></div>
+            <div class="box acq"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+            <div class="box enc"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg></span></div>
+            <div class="box rev"><span class="mk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- PIED DOCUMENT -->
+      <footer class="doc-foot">
+        <div class="foot-summary">
+          <div class="m acq"><span class="n" id="c-acq">5</span><span class="k">Acquis</span></div>
+          <div class="m enc"><span class="n" id="c-enc">4</span><span class="k">En cours</span></div>
+          <div class="m rev"><span class="n" id="c-rev">2</span><span class="k">À revoir</span></div>
+          <div class="m tot"><span class="n"><span id="c-tot">11</span>/31</span><span class="k">Évaluées</span></div>
+        </div>
+
+        <div class="sig-row">
+          <div class="sig">
+            <div class="sig-lb">Cachet & signature du moniteur</div>
+            <div class="sig-line"><span class="sig-name">K. Belkacem</span></div>
+          </div>
+          <div class="cachet"><span><b>PermiGo</b>séance<br>validée</span></div>
+        </div>
+
+        <button class="btn-valider" id="btnValider">
+          <svg class="v-ico" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Valider la séance
+          <span class="cnt"><span id="c-btn">11</span> évaluées</span>
+        </button>
+      </footer>
+
+      <!-- toast démo -->
+      <div class="toast" id="toast"><span class="ck"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Livret de Léa mis à jour</div>
+
+    </div>
+  </div>
+
+<script>
+  // Démo légère (non requise pour le rendu) : cocher une case = une seule par ligne
+  const body = document.getElementById('body');
+  function recount(){
+    let acq=0,enc=0,rev=0;
+    document.querySelectorAll('.row').forEach(r=>{
+      const on = r.querySelector('.box.on');
+      r.classList.toggle('done', !!on);
+      r.classList.remove('s-acq','s-enc','s-rev');
+      if(on){
+        if(on.classList.contains('acq')){acq++;r.classList.add('s-acq');}
+        else if(on.classList.contains('enc')){enc++;r.classList.add('s-enc');}
+        else {rev++;r.classList.add('s-rev');}
+      }
+    });
+    const tot=acq+enc+rev;
+    document.getElementById('c-acq').textContent=acq;
+    document.getElementById('c-enc').textContent=enc;
+    document.getElementById('c-rev').textContent=rev;
+    document.getElementById('c-tot').textContent=tot;
+    document.getElementById('c-btn').textContent=tot;
+    document.querySelectorAll('.cat').forEach(cat=>{
+      const evald = cat.querySelectorAll('.row .box.on').length;
+      const el = cat.querySelector('.cnt-eval');
+      if(el) el.textContent = evald;
+    });
+  }
+  body.addEventListener('click', e=>{
+    const box = e.target.closest('.box');
+    if(!box) return;
+    const row = box.closest('.row');
+    const wasOn = box.classList.contains('on');
+    row.querySelectorAll('.box').forEach(b=>b.classList.remove('on'));
+    if(!wasOn) box.classList.add('on'); // re-clic = décoche
+    recount();
+  });
+  document.getElementById('btnValider').addEventListener('click', ()=>{
+    const t=document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),1900);
+  });
+  recount();
+</script>
+</body>
+</html>

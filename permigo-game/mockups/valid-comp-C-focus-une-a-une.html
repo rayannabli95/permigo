@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Valider une compétence — DA C « Une à la fois »</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --a:#4f46e5; --adk:#3a32c4; --alt:#6d6bff;
+  --ok:#18a558; --okl:#34d27b; --okbg:#ecfaf1;
+  --go:#3b82f6; --gol:#6366f1; --gobg:#eef2ff;
+  --warn:#f59e0b; --warnbg:#fff7e8;
+  --ink:#1a1c2e; --ink2:#4a4e6b; --mut:#8b90a8;
+  --line:#e9ebf5;
+  --paper:#f6f7fb;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:'Manrope',sans-serif;
+  background:radial-gradient(1200px 600px at 50% -10%,#191c34,#0e1020 55%);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:44px 18px 80px;color:#fff;
+}
+
+/* ---- ruban titre au-dessus ---- */
+.cap{text-align:center;max-width:420px;margin-bottom:26px}
+.cap .rib{
+  display:inline-flex;align-items:center;gap:9px;
+  background:#141631;color:#c7c9ff;font:700 11px 'Inter';letter-spacing:.16em;text-transform:uppercase;
+  padding:9px 15px 9px 12px;border-radius:8px;border:1px solid #2b2e57;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05)
+}
+.cap .rib .k{width:15px;height:15px;display:block;color:var(--alt)}
+.cap h1{font:600 24px 'Fredoka';margin:15px 0 5px;letter-spacing:.2px}
+.cap p{color:#9aa1bd;font:500 13.5px 'Inter';line-height:1.5}
+
+/* ---- cadre téléphone ---- */
+.phone{
+  width:390px;max-width:100%;border-radius:52px;background:#05060c;
+  padding:11px;position:relative;
+  box-shadow:0 50px 100px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.06),inset 0 0 0 2px #17192b;
+}
+.notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:132px;height:30px;background:#05060c;border-radius:0 0 18px 18px;z-index:80}
+.screen{
+  width:100%;height:812px;border-radius:42px;overflow:hidden;position:relative;
+  background:var(--paper);color:var(--ink);display:flex;flex-direction:column;
+}
+.sb{height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font:600 14px 'Inter';color:var(--ink)}
+.sb .rgt{display:flex;gap:6px;align-items:center}
+.sb .rgt svg{display:block}
+
+/* ---- header appli (sobre, indigo léger) ---- */
+.top{
+  flex:none;padding:6px 20px 14px;background:var(--paper);
+  position:relative;z-index:5;
+}
+.top .row{display:flex;align-items:center;gap:12px}
+.back{
+  width:40px;height:40px;flex:none;border-radius:13px;border:1px solid var(--line);
+  background:#fff;display:grid;place-items:center;box-shadow:0 3px 8px -5px rgba(40,40,90,.3)
+}
+.back svg{width:18px;height:18px}
+.top .who{flex:1;min-width:0}
+.top .who .lab{font:700 11px 'Inter';letter-spacing:.11em;text-transform:uppercase;color:var(--a)}
+.top .who .nm{font:700 17px 'Manrope';color:var(--ink);letter-spacing:-.01em;line-height:1.15}
+.top .who .sub{font:500 12px 'Inter';color:var(--mut)}
+.top .badge{
+  flex:none;display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);
+  border-radius:999px;padding:6px 11px;font:800 12px 'Manrope';color:var(--a);
+  box-shadow:0 3px 8px -5px rgba(40,40,90,.3)
+}
+.top .badge b{font:800 13px 'Manrope'}
+.top .badge .of{font:600 11px 'Inter';color:var(--mut)}
+
+/* ---- rail de progression C1..C4 ---- */
+.rail{margin-top:16px;display:flex;gap:9px}
+.leg{flex:1}
+.leg .cap2{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.leg .cap2 b{font:700 12px 'Fredoka';color:var(--ink)}
+.leg .cap2 .n{font:600 10.5px 'Inter';color:var(--mut)}
+.dots{display:flex;gap:3px}
+.dots i{flex:1;height:7px;border-radius:2px;background:#e4e7f2}
+/* palette calmée dans le rail : le vert domine, les autres = tons discrets (pas d'arc-en-ciel) */
+.dots i.ok{background:var(--ok)}
+.dots i.go{background:#a9b7ee}
+.dots i.wn{background:#f2ca86}
+.dots i.cur{background:var(--a);box-shadow:0 0 0 1.5px #fff,0 0 0 3px rgba(79,70,229,.3)}
+.leg.act .cap2 b{color:var(--a)}
+.leg.act .cap2 .n{color:var(--a);font-weight:700}
+
+/* ---- corps scrollable ---- */
+.body{flex:1;overflow-y:auto;padding:14px 20px 0;position:relative}
+.body::-webkit-scrollbar{width:0}
+
+/* fil d'avancement */
+.progress{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 14px}
+.progress .txt{font:600 12.5px 'Inter';color:var(--ink2)}
+.progress .txt b{font:800 13px 'Manrope';color:var(--a)}
+.progress .track{flex:1;height:5px;border-radius:99px;background:#e4e7f2;margin:0 12px;overflow:hidden;position:relative}
+.progress .track i{position:absolute;inset:0 auto 0 0;width:35%;border-radius:99px;background:var(--a)}
+.progress .pct{font:800 12px 'Manrope';color:var(--mut)}
+
+/* ---- CARTE HÉROS : la compétence en cours ---- */
+.hero{
+  position:relative;background:#fff;border-radius:22px;padding:22px 22px 20px;
+  border:1px solid var(--line);overflow:hidden;
+  box-shadow:0 1px 2px rgba(20,22,50,.04),0 12px 26px -20px rgba(20,22,50,.32);
+}
+/* décor panneau routier discret en filigrane */
+.hero .sign{position:absolute;right:-8px;top:-24px;width:104px;height:150px;opacity:.05;pointer-events:none}
+.hero .kick{display:flex;align-items:center;gap:9px}
+.hero .code{
+  font:800 13px 'Manrope';color:#fff;background:var(--a);
+  padding:4px 10px;border-radius:8px;letter-spacing:.03em;
+  box-shadow:0 2px 5px -2px rgba(58,50,196,.5)
+}
+.hero .fam{font:600 11.5px 'Inter';letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
+.hero h2{
+  font:600 30px/1.08 'Fredoka';color:var(--ink);margin:14px 0 0;letter-spacing:-.01em;
+  max-width:16ch
+}
+.hero .ctx{
+  display:flex;gap:9px;align-items:flex-start;margin-top:13px;
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:11px 12px;
+}
+.hero .ctx svg{width:17px;height:17px;flex:none;margin-top:1px}
+.hero .ctx p{font:500 12.8px/1.45 'Inter';color:var(--ink2)}
+.hero .ctx p b{color:var(--ink);font-weight:700}
+
+/* état déjà posé (rappel discret sous le contexte) */
+.prev{
+  display:flex;align-items:center;gap:7px;margin-top:12px;
+  font:600 11.5px 'Inter';color:var(--mut)
+}
+.prev .tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:7px;font:800 11px 'Manrope'}
+.prev .tag.go{background:var(--gobg);color:var(--gol)}
+.prev .tag i{width:6px;height:6px;border-radius:50%;background:currentColor;display:block}
+
+/* ---- 3 GROS boutons de décision ---- */
+.decide{margin-top:14px;display:flex;flex-direction:column;gap:9px}
+.opt{
+  position:relative;display:flex;align-items:center;gap:13px;width:100%;
+  background:#fff;border:1px solid var(--line);border-radius:16px;
+  padding:14px 15px 14px 18px;min-height:64px;cursor:pointer;text-align:left;overflow:hidden;
+  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+/* barre d'accent statut à gauche — se lit d'un coup d'œil, sans lire le texte */
+.opt::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:0}
+.opt.ok::before{background:var(--ok)}
+.opt.go::before{background:var(--go)}
+.opt.wn::before{background:var(--warn)}
+.opt:active{transform:translateY(1px) scale(.995)}
+.opt .ic{
+  width:44px;height:44px;flex:none;border-radius:13px;display:grid;place-items:center;
+}
+.opt .ic svg{width:22px;height:22px}
+.opt .tx{flex:1;min-width:0}
+.opt .tx .t{font:800 16px 'Manrope';color:var(--ink);line-height:1.1}
+.opt .tx .d{font:500 12px 'Inter';color:var(--mut);margin-top:2px}
+.opt .rd{
+  width:24px;height:24px;flex:none;border-radius:50%;border:2px solid var(--line);
+  display:grid;place-items:center;transition:.12s
+}
+.opt .rd svg{width:13px;height:13px;opacity:0;transform:scale(.5);transition:.15s}
+
+/* variantes couleur */
+.opt.ok  .ic{background:var(--okbg)}
+.opt.go  .ic{background:var(--gobg)}
+.opt.wn  .ic{background:var(--warnbg)}
+
+/* état sélectionné (Acquis choisi ici pour la démo) — franc, la barre s'épaissit */
+.opt.sel{border-width:2px}
+.opt.sel::before{width:6px}
+.opt.sel.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.sel.ok .ic{background:var(--ok)}
+.opt.sel.ok .ic svg{color:#fff}
+.opt.sel.ok .rd{border-color:var(--ok);background:var(--ok)}
+.opt.sel.ok .rd svg{opacity:1;transform:scale(1);color:#fff}
+.opt.sel.ok .tx .t{color:#0f7a41}
+
+.opt.sel.go{border-color:var(--go);background:var(--gobg)}
+.opt.sel.go .ic{background:var(--go)} .opt.sel.go .ic svg{color:#fff}
+.opt.sel.go .rd{border-color:var(--go);background:var(--go)} .opt.sel.go .rd svg{opacity:1;transform:scale(1);color:#fff}
+.opt.sel.go .tx .t{color:#2f4bb8}
+
+.opt.sel.wn{border-color:var(--warn);background:var(--warnbg)}
+.opt.sel.wn .ic{background:var(--warn)} .opt.sel.wn .ic svg{color:#fff}
+.opt.sel.wn .rd{border-color:var(--warn);background:var(--warn)} .opt.sel.wn .rd svg{opacity:1;transform:scale(1);color:#fff}
+.opt.sel.wn .tx .t{color:#b45309}
+
+.opt.ok .ic svg{color:var(--ok)}
+.opt.go .ic svg{color:var(--go)}
+.opt.wn .ic svg{color:var(--warn)}
+
+/* ---- navigation préc/suiv + voir la liste ---- */
+.nav{display:flex;align-items:center;gap:10px;margin-top:16px}
+.nav .arrow{
+  width:52px;height:48px;flex:none;border-radius:14px;background:#fff;border:1px solid var(--line);
+  display:grid;place-items:center;box-shadow:0 4px 10px -7px rgba(40,40,90,.35)
+}
+.nav .arrow svg{width:20px;height:20px;color:var(--ink2)}
+.nav .arrow.off{opacity:.4}
+.nav .mid{
+  flex:1;height:48px;border-radius:14px;background:#fff;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font:700 13px 'Manrope';color:var(--ink2)
+}
+.nav .mid svg{width:15px;height:15px;color:var(--mut)}
+
+/* accès replié liste complète */
+.seeall{
+  margin:12px 0 4px;width:100%;background:transparent;border:1px dashed #cfd3e6;border-radius:14px;
+  padding:12px;display:flex;align-items:center;justify-content:center;gap:8px;
+  font:600 12.5px 'Inter';color:var(--ink2)
+}
+.seeall svg{width:15px;height:15px;color:var(--mut)}
+
+/* ---- barre de validation en bas (sticky) ---- */
+.finish{
+  flex:none;padding:12px 20px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(246,247,251,0),var(--paper) 34%);
+  border-top:1px solid var(--line);
+}
+.finish .meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;padding:0 2px}
+.finish .meta .l{font:600 12px 'Inter';color:var(--ink2)}
+.finish .meta .l b{color:var(--ink);font-weight:800}
+.finish .meta .chips{display:flex;gap:6px}
+.finish .meta .chip{display:inline-flex;align-items:center;gap:4px;font:800 11px 'Manrope';padding:3px 8px;border-radius:99px}
+.finish .meta .chip.ok{background:var(--okbg);color:var(--ok)}
+.finish .meta .chip.go{background:var(--gobg);color:var(--gol)}
+.finish .meta .chip.wn{background:var(--warnbg);color:#b45309}
+.finish .meta .chip i{width:7px;height:7px;border-radius:50%;background:currentColor;display:block}
+.done{
+  width:100%;border:none;border-radius:15px;padding:16px;cursor:pointer;
+  font:700 16px 'Manrope';color:#fff;letter-spacing:.01em;
+  background:var(--a);
+  box-shadow:0 5px 0 var(--adk),0 14px 26px -14px rgba(58,50,196,.55);
+  display:flex;align-items:center;justify-content:center;gap:9px
+}
+.done:active{transform:translateY(4px);box-shadow:0 1px 0 var(--adk)}
+.done svg{width:19px;height:19px}
+</style>
+</head>
+<body>
+
+<div class="cap">
+  <span class="rib">
+    <svg class="k" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.4-3 8.3-7 9.5C8 19.3 5 15.4 5 11V6l7-3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 11.5l2 2 4-4.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    DA C · Une compétence à la fois
+  </span>
+  <h1>Valider une séance — mono-tâche guidé</h1>
+  <p>On refuse le mur de 31 puces. Une seule décision par écran, en grand : « où en est l'élève sur CETTE sous-compétence ? »</p>
+</div>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen">
+
+    <!-- statut iOS -->
+    <div class="sb">
+      <span>9:41</span>
+      <span class="rgt">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0" y="6" width="3" height="6" rx="1" fill="#1a1c2e"/><rect x="4.5" y="4" width="3" height="8" rx="1" fill="#1a1c2e"/><rect x="9" y="2" width="3" height="10" rx="1" fill="#1a1c2e"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1a1c2e"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 3C5.5 3 3.3 4 1.7 5.6l1.4 1.4C4.4 5.7 6.1 5 8 5s3.6.7 4.9 2l1.4-1.4C12.7 4 10.5 3 8 3z" fill="#1a1c2e"/><path d="M8 7c-1 0-2 .4-2.7 1.1L8 11l2.7-2.9C10 7.4 9 7 8 7z" fill="#1a1c2e"/></svg>
+        <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="#1a1c2e" stroke-opacity=".5" stroke-width="1"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.6" fill="#1a1c2e"/><rect x="23" y="4" width="2" height="4" rx="1" fill="#1a1c2e" fill-opacity=".5"/></svg>
+      </span>
+    </div>
+
+    <!-- header -->
+    <div class="top">
+      <div class="row">
+        <div class="back" role="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#4a4e6b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="who">
+          <div class="lab">Séance du jour · Évaluation</div>
+          <div class="nm">Léa Martin</div>
+          <div class="sub">Leçon n°14 · 1 h 30 · aujourd'hui</div>
+        </div>
+        <div class="badge"><b>11</b><span class="of">/31</span></div>
+      </div>
+
+      <!-- rail C1..C4 -->
+      <div class="rail">
+        <div class="leg">
+          <div class="cap2"><b>C1</b><span class="n">9/9</span></div>
+          <div class="dots"><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="go"></i><i class="ok"></i><i class="go"></i><i class="ok"></i><i class="wn"></i><i class="ok"></i></div>
+        </div>
+        <div class="leg act">
+          <div class="cap2"><b>C2</b><span class="n">2/8</span></div>
+          <div class="dots"><i class="ok"></i><i class="go"></i><i class="cur"></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="leg">
+          <div class="cap2"><b>C3</b><span class="n">0/7</span></div>
+          <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="leg">
+          <div class="cap2"><b>C4</b><span class="n">0/7</span></div>
+          <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- corps -->
+    <div class="body">
+
+      <div class="progress">
+        <span class="txt"><b>Compétence 12</b> sur 31</span>
+        <span class="track"><i></i></span>
+        <span class="pct">35%</span>
+      </div>
+
+      <!-- CARTE HÉROS -->
+      <div class="hero">
+        <!-- motif filigrane raccord au sujet : voie + trajectoire (C2c) -->
+        <svg class="sign" viewBox="0 0 100 120" fill="none" preserveAspectRatio="xMidYMid meet">
+          <!-- bords de voie -->
+          <path d="M22 118V6" stroke="#4f46e5" stroke-width="3"/>
+          <path d="M78 118V6" stroke="#4f46e5" stroke-width="3"/>
+          <!-- ligne centrale discontinue -->
+          <path d="M50 116V8" stroke="#4f46e5" stroke-width="3" stroke-dasharray="9 11" stroke-linecap="round"/>
+          <!-- trajectoire idéale du véhicule -->
+          <path d="M36 116C36 92 64 84 64 60S36 30 36 8" stroke="#4f46e5" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+
+        <div class="kick">
+          <span class="code">C2c</span>
+          <span class="fam">C2 · Circulation normale</span>
+        </div>
+
+        <h2>Trajectoire et placement</h2>
+
+        <div class="ctx">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" stroke="#8b90a8" stroke-width="1.6"/><path d="M12 11v5.4" stroke="#8b90a8" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.15" fill="#8b90a8"/></svg>
+          <p>Se placer correctement sur la voie, <b>tenir sa trajectoire</b> en ligne droite comme en courbe, sans mordre ni serrer.</p>
+        </div>
+
+        <div class="prev">
+          Séance précédente :
+          <span class="tag go"><i></i>En cours</span>
+        </div>
+      </div>
+
+      <!-- 3 GROS boutons -->
+      <div class="decide">
+        <button class="opt ok sel" aria-pressed="true">
+          <span class="ic">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="tx">
+            <span class="t">Acquis</span>
+            <span class="d">Maîtrisé seul, plus besoin d'accompagnement</span>
+          </span>
+          <span class="rd"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+
+        <button class="opt go" aria-pressed="false">
+          <span class="ic">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 109 9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M12 3v4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          </span>
+          <span class="tx">
+            <span class="t">En cours</span>
+            <span class="d">Y arrive avec de l'aide, à consolider</span>
+          </span>
+          <span class="rd"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+
+        <button class="opt wn" aria-pressed="false">
+          <span class="ic">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 4l8.5 15H3.5L12 4z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 10v4" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/><circle cx="12" cy="16.6" r="1.15" fill="currentColor"/></svg>
+          </span>
+          <span class="tx">
+            <span class="t">À retravailler</span>
+            <span class="d">Pas encore acquis, à revoir la prochaine fois</span>
+          </span>
+          <span class="rd"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </div>
+
+      <!-- préc / suiv -->
+      <div class="nav">
+        <div class="arrow off" aria-label="Précédent">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="mid">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          C2d suivant : Vitesse en virage
+        </div>
+        <div class="arrow" aria-label="Suivant">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <!-- voir toute la liste (secondaire) -->
+      <button class="seeall">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M8 7h12M8 12h12M8 17h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="4" cy="7" r="1.4" fill="currentColor"/><circle cx="4" cy="12" r="1.4" fill="currentColor"/><circle cx="4" cy="17" r="1.4" fill="currentColor"/></svg>
+        Voir toute la liste des 31 compétences
+      </button>
+
+    </div>
+
+    <!-- barre de validation -->
+    <div class="finish">
+      <div class="meta">
+        <span class="l"><b>11</b> compétences posées aujourd'hui</span>
+        <span class="chips">
+          <span class="chip ok"><i></i>7</span>
+          <span class="chip go"><i></i>3</span>
+          <span class="chip wn"><i></i>1</span>
+        </span>
+      </div>
+      <button class="done">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Terminer &amp; valider la séance
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// JS de démo (non requis pour le rendu) : sélection d'un état = surbrillance.
+document.querySelectorAll('.decide .opt').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var group = btn.parentElement;
+    group.querySelectorAll('.opt').forEach(function(o){
+      o.classList.remove('sel'); o.setAttribute('aria-pressed','false');
+    });
+    btn.classList.add('sel'); btn.setAttribute('aria-pressed','true');
+  });
+});
+</script>
+</body>
+</html>

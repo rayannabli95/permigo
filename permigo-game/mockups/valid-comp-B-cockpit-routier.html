@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>PermiGo — Valider une séance · DA B « Le Cockpit Routier »</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    /* ── DA moniteur : indigo Néo-arcade ── */
+    --a:#4f46e5; --adk:#3a32c4; --alt:#6d6bff; --aink:#fff;
+    /* statuts signalisation */
+    --go:#18a558; --go-lt:#34d27b; --go-glow:#3ff08a;
+    --blue:#3b82f6; --blue-lt:#6d8bff; --blue2:#6366f1;
+    --amber:#f59e0b; --amber-lt:#fbbf24;
+    /* cockpit sombre nuit */
+    --bg0:#0e1020;
+    --coc0:#141634; --coc1:#0c0e22; --coc2:#1a1d45;
+    --glass:rgba(255,255,255,.05);
+    --hair:rgba(255,255,255,.09);
+    --ink:#eef0ff; --ink-mu:#9aa0c9; --ink-dim:#6b7099;
+    --fred:"Fredoka", system-ui, sans-serif;
+    --body:"Manrope","Inter",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;}
+  body{
+    background:
+      radial-gradient(120% 90% at 15% -10%, #1a1c3a 0%, transparent 55%),
+      radial-gradient(90% 70% at 100% 110%, #17193a 0%, transparent 60%),
+      var(--bg0);
+    font-family:var(--body); color:var(--ink);
+    min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+    padding:34px 16px 64px;
+  }
+
+  /* ── Ruban titre DA ── */
+  .da-ribbon{ text-align:center; margin-bottom:22px; max-width:430px; }
+  .da-ribbon .tag{
+    display:inline-flex; align-items:center; gap:8px;
+    font:700 11px/1 var(--body); letter-spacing:.18em; text-transform:uppercase;
+    color:#c7c3ff; background:rgba(109,107,255,.14);
+    border:1px solid rgba(109,107,255,.3); border-radius:999px;
+    padding:7px 14px;
+  }
+  .da-ribbon .tag b{ color:#fff; letter-spacing:.06em; }
+  .da-ribbon h1{
+    font:600 22px/1.15 var(--fred); margin:12px 0 4px; color:#fff;
+    letter-spacing:-.01em;
+  }
+  .da-ribbon p{ margin:0; font:500 12.5px/1.5 var(--body); color:var(--ink-dim); }
+
+  /* ── Cadre téléphone ── */
+  .phone{
+    width:390px; max-width:100%;
+    border-radius:46px; padding:12px;
+    background:linear-gradient(160deg,#22243f,#0a0b17);
+    box-shadow:
+      0 0 0 2px #2c2e4d,
+      0 30px 70px -20px rgba(0,0,0,.85),
+      0 0 60px -20px rgba(79,70,229,.4);
+    position:relative;
+  }
+  .phone::before{ /* encoche */
+    content:""; position:absolute; top:20px; left:50%; transform:translateX(-50%);
+    width:120px; height:26px; background:#07080f; border-radius:0 0 16px 16px; z-index:40;
+  }
+  .screen{
+    position:relative; overflow:hidden;
+    border-radius:36px; height:800px;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #1b1e46 0%, transparent 60%),
+      linear-gradient(180deg, var(--coc0) 0%, var(--coc1) 68%, #090b1a 100%);
+    display:flex; flex-direction:column;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04), inset 0 40px 80px -60px rgba(109,107,255,.6);
+  }
+
+  /* couche décorative : panneaux routiers en filigrane + lueurs */
+  .cockpit-bg{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .cockpit-bg .glow{ position:absolute; border-radius:50%; filter:blur(46px); opacity:.5; }
+  .cockpit-bg .g1{ width:220px; height:220px; top:-70px; left:-50px; background:radial-gradient(#4f46e5,transparent 70%); }
+  .cockpit-bg .g2{ width:180px; height:180px; bottom:120px; right:-60px; background:radial-gradient(#6366f1,transparent 70%); opacity:.35;}
+  .cockpit-bg svg{ position:absolute; opacity:.05; }
+  .cockpit-bg .s1{ top:132px; right:-16px; width:118px; transform:rotate(12deg); }
+  .cockpit-bg .s2{ top:452px; left:-26px; width:128px; transform:rotate(-14deg); }
+  .cockpit-bg .s3{ bottom:206px; right:16px; width:78px; transform:rotate(8deg); }
+
+  /* ═══════ HEADER / cadran cockpit ═══════ */
+  .cluster{ position:relative; z-index:2; padding:34px 18px 14px; }
+  .cluster .top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .cluster .back{
+    width:38px; height:38px; border-radius:12px; border:1px solid var(--hair);
+    background:var(--glass); color:#cdd0f5; display:grid; place-items:center; cursor:pointer;
+  }
+  .cluster .who{ text-align:center; line-height:1.1; }
+  .cluster .who .k{ font:700 9.5px/1 var(--body); letter-spacing:.16em; text-transform:uppercase; color:var(--ink-dim); }
+  .cluster .who .n{ font:600 15px/1.2 var(--fred); color:#fff; margin-top:4px; }
+  .cluster .lesson{
+    font:700 10px/1 var(--body); letter-spacing:.04em; color:#cdd0f5;
+    background:rgba(109,107,255,.16); border:1px solid rgba(109,107,255,.32);
+    border-radius:999px; padding:8px 11px; white-space:nowrap;
+  }
+
+  /* le cadran / compteur global */
+  .gauge-wrap{ display:flex; align-items:center; gap:18px; padding:2px 2px; }
+  .gauge{ position:relative; width:110px; height:110px; flex:0 0 auto; }
+  .gauge svg{ transform:rotate(-90deg); }
+  .gauge .num{
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .gauge .num b{ font:600 30px/1 var(--fred); color:#fff; font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+  .gauge .num span{ font:700 8.5px/1.2 var(--body); letter-spacing:.13em; text-transform:uppercase; color:var(--ink-dim); margin-top:4px; text-align:center; }
+
+  /* légende = 3 jauges verticales façon vu-mètres */
+  .legend{ flex:1; display:flex; flex-direction:column; gap:11px; }
+  .legend .row{ display:flex; align-items:center; gap:10px; }
+  .legend .tick{ width:4px; height:26px; border-radius:2px; flex:0 0 auto; }
+  .legend .tx{ flex:1; min-width:0; }
+  .legend .tx .l{ font:700 10.5px/1 var(--body); letter-spacing:.02em; text-transform:uppercase; }
+  .legend .tx .track{ height:5px; margin-top:5px; border-radius:3px; background:rgba(255,255,255,.08); overflow:hidden; }
+  .legend .tx .track i{ display:block; height:100%; border-radius:3px; }
+  .legend .cnt{ font:600 17px/1 var(--fred); color:#fff; font-variant-numeric:tabular-nums; flex:0 0 auto; width:20px; text-align:right; }
+  .r-go .tick{ background:var(--go-lt); box-shadow:0 0 9px rgba(52,210,123,.6);} .r-go .l{ color:var(--go-lt);} .r-go .track i{ background:linear-gradient(90deg,var(--go),var(--go-lt)); }
+  .r-bl .tick{ background:var(--blue-lt); box-shadow:0 0 9px rgba(109,139,255,.6);} .r-bl .l{ color:var(--blue-lt);} .r-bl .track i{ background:linear-gradient(90deg,var(--blue2),var(--blue-lt)); }
+  .r-am .tick{ background:var(--amber-lt); box-shadow:0 0 9px rgba(251,191,36,.6);} .r-am .l{ color:var(--amber-lt);} .r-am .track i{ background:linear-gradient(90deg,var(--amber),var(--amber-lt)); }
+
+  /* liseré marquage au sol sous le header */
+  .roadline{ height:6px; margin:14px 18px 0; border-radius:3px;
+    background:repeating-linear-gradient(90deg, rgba(251,191,36,.9) 0 18px, transparent 18px 34px); opacity:.9;
+    box-shadow:0 0 12px rgba(251,191,36,.25); }
+
+  /* ═══════ ZONE SCROLL : panneaux catégorie ═══════ */
+  .scroll{ position:relative; z-index:2; flex:1; overflow-y:auto; padding:16px 16px 8px; }
+  .scroll::-webkit-scrollbar{ width:0; }
+
+  .panel{
+    position:relative; margin-bottom:16px; border-radius:20px;
+    background:linear-gradient(180deg, rgba(30,33,72,.85), rgba(17,19,44,.9));
+    border:1px solid var(--hair);
+    box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 18px 34px -24px rgba(0,0,0,.9);
+    overflow:hidden;
+  }
+  /* barre de teinte à gauche = code couleur catégorie, comme un onglet de classeur */
+  .panel::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px; }
+  .p1::before{ background:linear-gradient(180deg,#6d6bff,#3a32c4); }
+  .p2::before{ background:linear-gradient(180deg,#4f7bff,#2952d6); }
+  .p3::before{ background:linear-gradient(180deg,#f0a92a,#d97706); }
+  .p4::before{ background:linear-gradient(180deg,#39c67c,#128046); }
+
+  /* en-tête de panneau = plaque « panneau routier » (forme évocatrice par catégorie) */
+  .panel-head{ display:flex; align-items:center; gap:13px; padding:14px 15px 13px; border-bottom:1px solid rgba(255,255,255,.06); }
+  .sign{ flex:0 0 auto; width:48px; height:48px; position:relative; display:grid; place-items:center; }
+  .sign .plate{
+    position:relative; width:46px; height:46px; display:grid; place-items:center;
+    font:600 17px/1 var(--fred); color:#fff; letter-spacing:-.02em;
+  }
+  .sign .plate .glyph{ position:relative; z-index:2; }
+  .sign .plate::before{ /* la forme du panneau */
+    content:""; position:absolute; inset:0; z-index:1;
+    box-shadow:inset 0 2px 3px rgba(255,255,255,.28), inset 0 -3px 7px rgba(0,0,0,.4), 0 6px 13px -4px rgba(0,0,0,.65);
+    border:2px solid rgba(255,255,255,.9);
+  }
+  /* C1 = carré 45° (danger losange) · C2 = rond (obligation) · C3 = octogone (stop) · C4 = flèche/pentagone (direction) */
+  .p1 .plate::before{ background:linear-gradient(160deg,#6259ff,#3a32c4); border-radius:12px; transform:rotate(45deg); }
+  .p1 .plate .glyph{ transform:none; }
+  .p2 .plate::before{ background:linear-gradient(160deg,#5081ff,#2952d6); border-radius:50%; }
+  .p3 .plate::before{ background:linear-gradient(160deg,#f0a92a,#c96a06); clip-path:polygon(30% 2%,70% 2%,98% 30%,98% 70%,70% 98%,30% 98%,2% 70%,2% 30%); border:0; box-shadow:0 6px 13px -4px rgba(0,0,0,.65); }
+  .p3 .plate::after{ content:""; position:absolute; inset:3px; z-index:1; clip-path:polygon(30% 2%,70% 2%,98% 30%,98% 70%,70% 98%,30% 98%,2% 70%,2% 30%); border:2px solid rgba(255,255,255,.9); }
+  .p4 .plate::before{ background:linear-gradient(160deg,#39c67c,#0f7a42); clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%); border:0; box-shadow:0 6px 13px -4px rgba(0,0,0,.65); }
+  .p4 .plate::after{ content:""; position:absolute; inset:3px; z-index:1; clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%); border:2px solid rgba(255,255,255,.9); }
+
+  .panel-head .meta{ flex:1; min-width:0; }
+  .panel-head .meta .cat-k{ font:700 9.5px/1 var(--body); letter-spacing:.14em; text-transform:uppercase; color:var(--ink-dim); }
+  .panel-head .meta .cat-t{ font:600 15.5px/1.15 var(--fred); color:#fff; margin-top:3px; letter-spacing:-.01em; }
+  /* mini compteur de complétion catégorie */
+  .minig{ flex:0 0 auto; text-align:right; }
+  .minig .f{ font:600 14px/1 var(--fred); color:#fff; font-variant-numeric:tabular-nums; }
+  .minig .f b{ color:var(--go-lt); }
+  .minig .bar{ width:56px; height:5px; border-radius:3px; background:rgba(255,255,255,.1); overflow:hidden; margin-top:6px; margin-left:auto; }
+  .minig .bar i{ display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,var(--go),var(--go-lt)); box-shadow:0 0 8px rgba(52,210,123,.5); }
+
+  /* ── ligne sous-compétence ── */
+  .subs{ padding:4px 13px 12px; }
+  .sub{ padding:13px 2px 13px; border-bottom:1px dashed rgba(255,255,255,.07); }
+  .sub:last-child{ border-bottom:0; }
+  .sub .lbl{ display:flex; align-items:baseline; gap:9px; margin-bottom:10px; }
+  .sub .lbl .code{ font:600 11px/1 var(--fred); color:var(--alt); font-variant-numeric:tabular-nums; letter-spacing:.02em; flex:0 0 auto;
+    background:rgba(109,107,255,.14); border:1px solid rgba(109,107,255,.24); padding:3px 6px; border-radius:6px; }
+  .sub .lbl .txt{ font:600 13px/1.28 var(--body); color:#e7e9ff; flex:1; }
+  /* pastille « à évaluer » quand pas encore fait */
+  .sub .lbl .wait{ flex:0 0 auto; font:700 8.5px/1 var(--body); letter-spacing:.1em; text-transform:uppercase;
+    color:#cdd0f5; background:rgba(109,107,255,.2); border:1px dashed rgba(157,155,255,.55);
+    padding:4px 7px; border-radius:999px; align-self:center; }
+
+  /* ═══════ LE CONTRÔLE 3 CRANS TACTILE 3D ═══════ */
+  .seg{
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;
+    background:#090a1a; padding:5px; border-radius:14px;
+    border:1px solid rgba(0,0,0,.6);
+    box-shadow: inset 0 3px 7px rgba(0,0,0,.72), inset 0 -1px 0 rgba(255,255,255,.04);
+  }
+  .seg button{
+    position:relative; min-height:46px; border:0; cursor:pointer;
+    border-radius:10px; font-family:var(--body); font-weight:700; font-size:11.5px;
+    color:var(--ink-dim);
+    background:linear-gradient(180deg,#23264c,#171938);
+    box-shadow: 0 3px 0 #0b0c1c, inset 0 1px 0 rgba(255,255,255,.06);
+    transition:transform .08s ease, box-shadow .08s ease, color .12s ease, background .12s ease;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    letter-spacing:.01em; padding:0 4px;
+  }
+  /* pastille de cran (le voyant) : neutre hors état, allumé en état */
+  .seg button .led{ width:9px; height:9px; border-radius:50%; flex:0 0 auto;
+    background:rgba(255,255,255,.14); box-shadow:inset 0 1px 1px rgba(0,0,0,.5); transition:all .12s ease; }
+  .seg button:active{ transform:translateY(3px); box-shadow:0 0 0 #0b0c1c, inset 0 1px 0 rgba(255,255,255,.05); }
+
+  /* état actif — le cran s'allume dans sa couleur */
+  .seg button.on{ color:#fff; }
+  .seg button.on .led{ background:currentColor; }
+
+  .seg button.on.v-am{
+    background:linear-gradient(180deg,var(--amber-lt),#d97706);
+    color:#3a2400;
+    box-shadow: 0 3px 0 #7a4a06, inset 0 1px 0 rgba(255,255,255,.4), 0 0 18px -3px rgba(245,158,11,.7);
+  }
+  .seg button.on.v-am .led{ background:#fffdf5; box-shadow:0 0 8px rgba(255,255,255,.9); }
+  .seg button.on.v-am:active{ transform:translateY(3px); box-shadow:0 0 0 #7a4a06, inset 0 1px 0 rgba(255,255,255,.35); }
+
+  .seg button.on.v-bl{
+    background:linear-gradient(180deg,var(--blue-lt),#3557d6);
+    color:#fff;
+    box-shadow: 0 3px 0 #1e3aa0, inset 0 1px 0 rgba(255,255,255,.35), 0 0 18px -3px rgba(99,102,241,.75);
+  }
+  .seg button.on.v-bl .led{ background:#eaf0ff; box-shadow:0 0 8px rgba(234,240,255,.9); }
+  .seg button.on.v-bl:active{ transform:translateY(3px); box-shadow:0 0 0 #1e3aa0, inset 0 1px 0 rgba(255,255,255,.3); }
+
+  .seg button.on.v-go{
+    background:linear-gradient(180deg,var(--go-glow),var(--go));
+    color:#06210f;
+    box-shadow: 0 3px 0 #0a5c30, inset 0 1px 0 rgba(255,255,255,.5), 0 0 22px -2px rgba(63,240,138,.8);
+  }
+  .seg button.on.v-go .led{ background:#f0fff6; box-shadow:0 0 9px rgba(240,255,246,.95); }
+  .seg button.on.v-go:active{ transform:translateY(3px); box-shadow:0 0 0 #0a5c30, inset 0 1px 0 rgba(255,255,255,.4); }
+
+  .seg button .cap{ font-size:11.5px; line-height:1; font-weight:700; white-space:nowrap; }
+
+  /* sous-compétence pas encore évaluée : le boîtier « attend » (liseré indigo pulsant discret) */
+  .sub.todo .seg{ box-shadow: inset 0 3px 7px rgba(0,0,0,.72), inset 0 -1px 0 rgba(255,255,255,.04), 0 0 0 1.5px rgba(109,107,255,.4); }
+
+  /* ═══════ BARRE DE VALIDATION ═══════ */
+  .dock{
+    position:relative; z-index:3; padding:14px 16px calc(16px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg, rgba(9,11,26,0) 0%, #090b1a 46%);
+    border-top:1px solid rgba(255,255,255,.06);
+  }
+  .dock .recap{ display:flex; align-items:center; gap:9px; margin-bottom:12px; }
+  .dock .recap .rest{
+    display:inline-flex; align-items:center; gap:7px; flex:1;
+    font:600 12px/1 var(--body); color:var(--ink-mu);
+  }
+  .dock .recap .rest b{ color:#fff; font-weight:700; }
+  .dock .recap .rest svg{ flex:0 0 auto; }
+  .dock .recap .jump{
+    font:700 11px/1 var(--body); color:#cdd0f5; letter-spacing:.02em;
+    background:rgba(109,107,255,.16); border:1px solid rgba(109,107,255,.34);
+    border-radius:999px; padding:8px 12px; cursor:pointer; white-space:nowrap;
+  }
+
+  .go-btn{
+    width:100%; min-height:60px; border:0; cursor:pointer; border-radius:18px;
+    font-family:var(--fred); font-weight:600; font-size:17px; letter-spacing:-.01em;
+    color:#06210f;
+    background:linear-gradient(180deg,var(--go-glow),var(--go));
+    box-shadow: 0 5px 0 #0a5c30, 0 12px 24px -8px rgba(24,165,88,.6), inset 0 1px 0 rgba(255,255,255,.55);
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    transition:transform .09s ease, box-shadow .09s ease;
+  }
+  .go-btn:active{ transform:translateY(5px); box-shadow:0 0 0 #0a5c30, 0 6px 14px -8px rgba(24,165,88,.5), inset 0 1px 0 rgba(255,255,255,.45); }
+  .go-btn .light{ width:24px; height:24px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #eafff2, #0a5c30 78%);
+    box-shadow:0 0 13px rgba(63,240,138,.95), inset 0 0 5px rgba(255,255,255,.6); flex:0 0 auto; }
+  .go-btn small{ display:block; font:600 10.5px/1 var(--body); opacity:.72; margin-top:3px; }
+  .go-txt{ display:flex; flex-direction:column; align-items:flex-start; }
+</style>
+</head>
+<body>
+
+  <div class="da-ribbon">
+    <span class="tag"><b>DA B</b> · Le Cockpit Routier</span>
+    <h1>Valider une séance</h1>
+    <p>Tableau de bord indigo nuit · contrôles tactiles 3 crans · commande « feu vert »</p>
+  </div>
+
+  <div class="phone">
+    <div class="screen">
+
+      <!-- fond décoratif : lueurs + panneaux en filigrane -->
+      <div class="cockpit-bg" aria-hidden="true">
+        <span class="glow g1"></span><span class="glow g2"></span>
+        <!-- panneau danger (triangle) -->
+        <svg class="s1" viewBox="0 0 100 100"><polygon points="50,8 92,86 8,86" fill="none" stroke="#fff" stroke-width="7" stroke-linejoin="round"/><rect x="46" y="34" width="8" height="26" rx="3" fill="#fff"/><circle cx="50" cy="72" r="5" fill="#fff"/></svg>
+        <!-- panneau obligation (rond) -->
+        <svg class="s2" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#fff" stroke-width="8"/><path d="M50 30 L50 70 M50 30 L36 46 M50 30 L64 46" stroke="#fff" stroke-width="8" stroke-linecap="round" fill="none"/></svg>
+        <!-- panneau stop (octogone) -->
+        <svg class="s3" viewBox="0 0 100 100"><polygon points="30,6 70,6 94,30 94,70 70,94 30,94 6,70 6,30" fill="none" stroke="#fff" stroke-width="7"/></svg>
+      </div>
+
+      <!-- ═══════ CLUSTER / cadran ═══════ -->
+      <div class="cluster">
+        <div class="top">
+          <button class="back" aria-label="Retour">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="who">
+            <div class="k">Séance du 05 juil.</div>
+            <div class="n">Léa Marchand</div>
+          </div>
+          <span class="lesson">Leçon nº 14</span>
+        </div>
+
+        <div class="gauge-wrap">
+          <div class="gauge">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="10"/>
+              <!-- 12/31 ≈ 38.7% · circonf 2πr = 289 · dash = .387*289 ≈ 112 -->
+              <circle cx="55" cy="55" r="46" fill="none" stroke="url(#gg)" stroke-width="10" stroke-linecap="round"
+                      stroke-dasharray="112 289"/>
+              <defs>
+                <linearGradient id="gg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#6d6bff"/><stop offset="1" stop-color="#34d27b"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="num"><b>12</b><span>sur 31<br>évaluées</span></div>
+          </div>
+          <div class="legend">
+            <div class="row r-go">
+              <span class="tick"></span>
+              <span class="tx"><span class="l">Acquis</span><span class="track"><i style="width:100%"></i></span></span>
+              <span class="cnt">5</span>
+            </div>
+            <div class="row r-bl">
+              <span class="tick"></span>
+              <span class="tx"><span class="l">En cours</span><span class="track"><i style="width:80%"></i></span></span>
+              <span class="cnt">4</span>
+            </div>
+            <div class="row r-am">
+              <span class="tick"></span>
+              <span class="tx"><span class="l">À retravailler</span><span class="track"><i style="width:60%"></i></span></span>
+              <span class="cnt">3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="roadline" aria-hidden="true"></div>
+
+      <!-- ═══════ SCROLL : panneaux catégorie ═══════ -->
+      <div class="scroll">
+
+        <!-- ─── C1 ─── -->
+        <section class="panel p1">
+          <div class="panel-head">
+            <div class="sign"><div class="plate"><span class="glyph">C1</span></div></div>
+            <div class="meta">
+              <div class="cat-k">Compétence 1</div>
+              <div class="cat-t">Maîtrise du véhicule</div>
+            </div>
+            <div class="minig">
+              <div class="f"><b>7</b> / 9</div>
+              <div class="bar"><i style="width:78%"></i></div>
+            </div>
+          </div>
+          <div class="subs">
+
+            <div class="sub">
+              <div class="lbl"><span class="code">C1a</span><span class="txt">Organes, commandes, vérifications</span></div>
+              <div class="seg" role="radiogroup" aria-label="C1a Organes, commandes, vérifications">
+                <button class="v-am" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go on" aria-checked="true" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+
+            <div class="sub">
+              <div class="lbl"><span class="code">C1d</span><span class="txt">Démarrer et s'arrêter</span></div>
+              <div class="seg" role="radiogroup" aria-label="C1d Démarrer et s'arrêter">
+                <button class="v-am" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl on" aria-checked="true" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+
+            <div class="sub">
+              <div class="lbl"><span class="code">C1h</span><span class="txt">Manœuvres : créneau, demi-tour</span></div>
+              <div class="seg" role="radiogroup" aria-label="C1h Manœuvres : créneau, demi-tour">
+                <button class="v-am on" aria-checked="true" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+
+            <div class="sub todo">
+              <div class="lbl"><span class="code">C1i</span><span class="txt">Autonomie sur manœuvres de base</span><span class="wait">à évaluer</span></div>
+              <div class="seg" role="radiogroup" aria-label="C1i Autonomie sur manœuvres de base">
+                <button class="v-am" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ─── C2 ─── -->
+        <section class="panel p2">
+          <div class="panel-head">
+            <div class="sign"><div class="plate"><span class="glyph">C2</span></div></div>
+            <div class="meta">
+              <div class="cat-k">Compétence 2</div>
+              <div class="cat-t">Circulation normale</div>
+            </div>
+            <div class="minig">
+              <div class="f"><b>3</b> / 8</div>
+              <div class="bar"><i style="width:38%"></i></div>
+            </div>
+          </div>
+          <div class="subs">
+
+            <div class="sub">
+              <div class="lbl"><span class="code">C2a</span><span class="txt">Infos visuelles</span></div>
+              <div class="seg" role="radiogroup" aria-label="C2a Infos visuelles">
+                <button class="v-am" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl on" aria-checked="true" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+
+            <div class="sub">
+              <div class="lbl"><span class="code">C2e</span><span class="txt">Croisements et dépassements</span></div>
+              <div class="seg" role="radiogroup" aria-label="C2e Croisements et dépassements">
+                <button class="v-am on" aria-checked="true" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+
+            <div class="sub">
+              <div class="lbl"><span class="code">C2f</span><span class="txt">Intersections, ronds-points</span></div>
+              <div class="seg" role="radiogroup" aria-label="C2f Intersections, ronds-points">
+                <button class="v-am" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go on" aria-checked="true" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+
+            <div class="sub todo">
+              <div class="lbl"><span class="code">C2h</span><span class="txt">Conduite en autonomie</span><span class="wait">à évaluer</span></div>
+              <div class="seg" role="radiogroup" aria-label="C2h Conduite en autonomie">
+                <button class="v-am" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ─── C3 ─── -->
+        <section class="panel p3">
+          <div class="panel-head">
+            <div class="sign"><div class="plate"><span class="glyph">C3</span></div></div>
+            <div class="meta">
+              <div class="cat-k">Compétence 3</div>
+              <div class="cat-t">Conditions difficiles</div>
+            </div>
+            <div class="minig">
+              <div class="f"><b>1</b> / 7</div>
+              <div class="bar"><i style="width:14%"></i></div>
+            </div>
+          </div>
+          <div class="subs">
+            <div class="sub">
+              <div class="lbl"><span class="code">C3a</span><span class="txt">Conduite de nuit</span></div>
+              <div class="seg" role="radiogroup" aria-label="C3a Conduite de nuit">
+                <button class="v-am" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl on" aria-checked="true" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+            <div class="sub todo">
+              <div class="lbl"><span class="code">C3e</span><span class="txt">Voies rapides et autoroutes</span><span class="wait">à évaluer</span></div>
+              <div class="seg" role="radiogroup" aria-label="C3e Voies rapides et autoroutes">
+                <button class="v-am" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── C4 (aperçu) ─── -->
+        <section class="panel p4">
+          <div class="panel-head">
+            <div class="sign"><div class="plate"><span class="glyph">C4</span></div></div>
+            <div class="meta">
+              <div class="cat-k">Compétence 4</div>
+              <div class="cat-t">Conduite autonome</div>
+            </div>
+            <div class="minig">
+              <div class="f"><b>1</b> / 7</div>
+              <div class="bar"><i style="width:14%"></i></div>
+            </div>
+          </div>
+          <div class="subs">
+            <div class="sub">
+              <div class="lbl"><span class="code">C4d</span><span class="txt">Anticipation et stress</span></div>
+              <div class="seg" role="radiogroup" aria-label="C4d Anticipation et stress">
+                <button class="v-am" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl on" aria-checked="true" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+            <div class="sub todo">
+              <div class="lbl"><span class="code">C4f</span><span class="txt">Présentation à l'examen</span><span class="wait">à évaluer</span></div>
+              <div class="seg" role="radiogroup" aria-label="C4f Présentation à l'examen">
+                <button class="v-am" aria-label="À retravailler"><span class="led"></span><span class="cap">À revoir</span></button>
+                <button class="v-bl" aria-label="En cours"><span class="led"></span><span class="cap">En cours</span></button>
+                <button class="v-go" aria-label="Acquis"><span class="led"></span><span class="cap">Acquis</span></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ═══════ DOCK VALIDATION ═══════ -->
+      <div class="dock">
+        <div class="recap">
+          <span class="rest">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--alt)" stroke-width="2"/><path d="M12 8v4l3 2" stroke="var(--alt)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><b>19</b> restantes à évaluer</span>
+          </span>
+          <button class="jump" type="button">Aller à la suivante</button>
+        </div>
+        <button class="go-btn" id="validate">
+          <span class="light"></span>
+          <span class="go-txt">
+            Valider la séance
+            <small>Le livret de Léa sera mis à jour</small>
+          </span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // JS de démo (non requis au rendu) : les 3 crans fonctionnent comme un radio.
+    document.querySelectorAll('.seg').forEach(seg=>{
+      seg.addEventListener('click', e=>{
+        const b = e.target.closest('button'); if(!b) return;
+        seg.querySelectorAll('button').forEach(x=>{ x.classList.remove('on'); x.removeAttribute('aria-checked'); });
+        b.classList.add('on'); b.setAttribute('aria-checked','true');
+        const sub = seg.closest('.sub');
+        if(sub){ sub.classList.remove('todo'); const w = sub.querySelector('.wait'); if(w) w.remove(); }
+      });
+    });
+    document.getElementById('validate')?.addEventListener('click', ()=>{
+      const btn = document.getElementById('validate');
+      btn.animate([{transform:'translateY(5px)'},{transform:'translateY(0)'}], {duration:180, easing:'ease-out'});
+    });
+  </script>
+</body>
+</html>
