@@ -27,14 +27,14 @@ import { medallion } from "@/utils/medallions.js";
 const TOUR_KEY = "pg-tour-validation-v1";
 const VALIDATION_TOUR_STEPS = [
   {
-    sel: ".vs-monde-hd",
-    title: "4 catégories de compétences",
-    text: "Le programme officiel est découpé en 4 catégories. Déroule celle que tu veux évaluer.",
+    sel: ".vsc-cat-head",
+    title: "Le programme officiel",
+    text: "Les 31 compétences sont regroupées en 4 catégories, comme dans le livret.",
   },
   {
-    sel: ".vs-chip:not(.locked)",
-    title: "Évalue chaque compétence",
-    text: "Un appui change l'état : acquis → en cours → à retravailler. Rappuie pour corriger ou remettre à zéro.",
+    sel: ".vsc-row:not(.locked) .vsc-box",
+    title: "Coche où en est l'élève",
+    text: "Sur chaque ligne, coche Acquis, En cours ou À revoir. Rappuie sur une case pour la corriger.",
   },
   {
     sel: "#vs-submit",
@@ -61,20 +61,6 @@ function maybeStartValidationTour() {
 
 const MAX_NOTE = 300;
 
-// Cycle de statut au tap : rien → acquis → en cours → à retravailler → rien
-const CYCLE = ["acquis", "en_cours", "a_retravailler"];
-function nextStatut(cur) {
-  if (!cur) return "acquis";
-  const i = CYCLE.indexOf(cur);
-  return i === CYCLE.length - 1 ? null : CYCLE[i + 1];
-}
-function statutMeta(s) {
-  if (s === "acquis") return { label: "Acquis", ico: "check" };
-  if (s === "en_cours") return { label: "En cours", ico: "refresh-cw" };
-  if (s === "a_retravailler")
-    return { label: "À retravailler", ico: "alert-triangle" };
-  return null;
-}
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -90,7 +76,6 @@ let _note = "";
 let _query = "";
 let _submitting = false;
 let _eleveDDOpen = false; // dropdown élève ouvert
-let _openMondes = new Set(); // cat.id des accordéons ouverts
 let _showSub = false; // coach-hint mode d'emploi (1re visite seulement)
 
 // ─── CSS ─────────────────────────────────────────────────────────
@@ -216,83 +201,77 @@ const STYLE = `<style>
   @keyframes vsDdIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
   @media (prefers-reduced-motion: reduce) { .vs-dd-opt { animation: none; opacity: 1; } .vs-dd-chev, .vs-dd-panel { transition: none; } }
 
-  /* ── Légende statuts ── */
-  .vs-comps { margin-bottom: 4px; }
-  .vs-legend {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px;
-    font: 600 12px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--mu2); margin: 0 2px 16px;
+  /* ══ CARNET D'ÉVALUATION (DA A2 — document + indigo, theme-aware) ══ */
+  .vsc {
+    border: 1.5px solid var(--bo); border-radius: var(--ens-r, 16px);
+    background: var(--su); overflow: hidden; margin-bottom: 14px;
+    box-shadow: var(--ens-shadow, var(--s0));
   }
-  .vs-leg { display: inline-flex; align-items: center; gap: 5px; }
-  .vs-leg::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
-  .vs-leg.acquis { color: var(--ens-go, var(--grd)); }
-  .vs-leg.en_cours { color: var(--ens-blue, #6366f1); }
-  .vs-leg.a_retravailler { color: var(--ens-amber, var(--amx)); }
+  /* — En-tête document — */
+  .vsc-head { padding: 12px 14px 11px; border-bottom: 2px solid var(--ink); position: relative; }
+  .vsc-head::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -5px; height: 1px; background: var(--bo3); }
+  .vsc-head-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .vsc-doc-title { font: 800 9px/1 var(--ens-body, 'Inter'), sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--mu2); }
+  .vsc-doc-date { font: 800 13px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .vsc-head-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 9px; }
+  .vsc-meta { display: flex; align-items: center; gap: 7px; min-width: 0; }
+  .vsc-meta i { font: 700 8px/1 var(--ens-body, 'Inter'), sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--mu2); font-style: normal; }
+  .vsc-meta b { font: 700 13px/1.1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vsc-av { flex-shrink: 0; display: inline-flex; }
 
-  /* ── Sections accordéon par compétence REMC ── */
-  .vs-monde {
-    margin-bottom: 8px; border: 1.5px solid var(--bo);
-    border-radius: var(--ens-r, 16px); background: var(--su); overflow: hidden;
-  }
-  .vs-monde.open { border-color: var(--bo4); }
-  .vs-monde-hd {
-    display: flex; align-items: center; gap: 9px; width: 100%;
-    box-sizing: border-box; margin: 0; padding: 13px 14px; min-height: 52px;
-    background: none; border: 0; cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform .14s;
-  }
-  .vs-monde-hd:active { transform: scale(.98); }
-  .vs-monde-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .vs-monde-nom {
-    font: 700 13.5px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--ink); flex: 1; min-width: 0; text-align: left;
-  }
-  .vs-monde-cnt { font: 700 11px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
-  .vs-monde-chev { color: var(--mu2); display: inline-flex; transition: transform .25s; }
-  .vs-monde.open .vs-monde-chev { transform: rotate(180deg); }
-  .vs-monde-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s; }
-  .vs-monde.open .vs-monde-body { grid-template-rows: 1fr; }
-  .vs-monde-body > .vs-chips { overflow: hidden; min-height: 0; }
-  .vs-chips { display: flex; flex-direction: column; gap: 4px; padding: 0 12px 12px; }
-  @media (prefers-reduced-motion: reduce) { .vs-monde-chev, .vs-monde-body { transition: none; } }
+  /* — Bande de catégorie (indigo) — */
+  .vsc-cat-head { display: flex; align-items: center; gap: 9px; padding: 8px 14px; background: var(--a); color: #fff; }
+  .vsc-cno { font: 800 12px/1 'IBM Plex Mono', monospace; color: #d3d0ff; flex: 0 0 auto; }
+  .vsc-cname { font: 700 13px/1 var(--ens-display, 'Fredoka'), sans-serif; letter-spacing: .2px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vsc-cbar { flex: 0 0 40px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.24); overflow: hidden; }
+  .vsc-cbar i { display: block; height: 100%; border-radius: 3px; background: #fff; transition: width .3s ease; }
+  .vsc-ccount { font: 700 10px/1 'IBM Plex Mono', monospace; color: rgba(255,255,255,.82); flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+  .vsc-ccount b { color: #fff; }
 
-  /* ── Chip compétence ── */
-  .vs-chip {
-    display: flex; align-items: center; gap: 9px; width: 100%;
-    box-sizing: border-box; padding: 8px 11px; min-height: 44px;
-    border: 1.5px solid var(--bo); background: var(--su);
-    border-radius: var(--ens-r, 16px);
-    cursor: pointer; font: 500 13px/1.25 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--ink); text-align: left;
-    -webkit-tap-highlight-color: transparent;
-    transition: border-color .12s, background .12s;
-  }
-  .vs-chip:active { transform: scale(.98); transition: transform .12s cubic-bezier(.23,1,.32,1); }
-  @media (prefers-reduced-motion: reduce) { .vs-chip:active { transform: none; } }
-  .vs-chip-ico { width: 15px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--bo4); }
-  .vs-chip-code {
-    font: 700 10px/1 'IBM Plex Mono', monospace;
-    color: var(--mu); background: var(--bg2); padding: 3px 5px; border-radius: 5px; flex-shrink: 0;
-  }
-  .vs-chip-nom { flex: 1; min-width: 0; }
+  /* — En-tête des 3 colonnes — */
+  .vsc-colhead { display: grid; grid-template-columns: 1fr 46px 46px 46px; align-items: end; padding: 6px 12px 5px 14px; background: var(--su2); border-bottom: 1.5px solid var(--bo3); }
+  .vsc-ch { position: relative; text-align: center; padding-top: 9px; font: 800 7.5px/1 var(--ens-body, 'Inter'), sans-serif; letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; }
+  .vsc-ch::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 15px; height: 3px; border-radius: 2px; background: currentColor; }
+  .vsc-ch.acq { color: var(--ens-go, #18a558); } .vsc-ch.enc { color: #2563eb; } .vsc-ch.rev { color: var(--ens-amber, #d97706); }
 
-  /* déjà acquis → effacé (focus sur ce qu'il reste) */
-  .vs-chip.locked {
-    cursor: default; border-color: transparent; background: transparent;
-    min-height: 30px; padding: 4px 11px; opacity: .55;
-  }
-  .vs-chip.locked .vs-chip-ico { color: var(--ens-go, var(--grd)); }
-  .vs-chip.locked .vs-chip-code { background: transparent; color: var(--ens-go, var(--grd)); padding-left: 0; }
-  .vs-chip.locked .vs-chip-nom { color: var(--mu2); }
+  /* — Ligne = sous-compétence — */
+  .vsc-row { display: grid; grid-template-columns: 1fr 46px 46px 46px; align-items: center; padding: 0 12px 0 14px; min-height: 46px; border-bottom: 1px solid var(--bo3); position: relative; }
+  .vsc-row:last-of-type { border-bottom: 0; }
+  .vsc-row.done::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  .vsc-row.s-acq::before { background: var(--ens-go, #18a558); } .vsc-row.s-enc::before { background: #2563eb; } .vsc-row.s-rev::before { background: var(--ens-amber, #f59e0b); }
+  .vsc-label { display: flex; align-items: baseline; gap: 8px; padding: 8px 8px 8px 0; min-width: 0; }
+  .vsc-code { flex: 0 0 auto; width: 26px; font: 700 10.5px/1 'IBM Plex Mono', monospace; color: var(--a); }
+  .vsc-lbl { font: 500 12.5px/1.25 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--ink); min-width: 0; }
+  .vsc-row.locked { opacity: .62; }
+  .vsc-row.locked .vsc-lbl { color: var(--mu2); }
 
-  /* sélection en séance */
-  .vs-chip.acquis { border-color: var(--ens-go, var(--grd)); background: color-mix(in srgb, var(--ens-go, #18a558) 8%, var(--su)); }
-  .vs-chip.acquis .vs-chip-ico { color: var(--ens-go, var(--grd)); }
-  .vs-chip.en_cours { border-color: var(--ens-blue, #6366f1); background: color-mix(in srgb, var(--ens-blue, #1d4ed8) 8%, var(--su)); }
-  .vs-chip.en_cours .vs-chip-ico { color: var(--ens-blue-lt, #3b82f6); }
-  .vs-chip.a_retravailler { border-color: var(--ens-amber, var(--amx)); background: color-mix(in srgb, var(--ens-amber, #f59e0b) 8%, var(--su)); }
-  .vs-chip.a_retravailler .vs-chip-ico { color: var(--ens-amber, var(--amx)); }
+  /* — Case à cocher (hit-area = toute la cellule ≥44px) — */
+  .vsc-box { -webkit-tap-highlight-color: transparent; appearance: none; border: 0; background: none; padding: 0; margin: 0; width: 100%; min-height: 46px; display: grid; place-items: center; cursor: pointer; }
+  .vsc-box:disabled { cursor: default; }
+  .vsc-box .bx { width: 28px; height: 28px; border-radius: 7px; border: 1.5px solid var(--bo3); background: var(--su); display: grid; place-items: center; transition: transform .1s ease, border-color .12s, background .12s; }
+  .vsc-box:not(:disabled):active .bx { transform: scale(.88); }
+  .vsc-box.c-acq .bx { background: color-mix(in srgb, var(--ens-go, #18a558) 5%, var(--su)); }
+  .vsc-box.c-enc .bx { background: color-mix(in srgb, #2563eb 5%, var(--su)); }
+  .vsc-box.c-rev .bx { background: color-mix(in srgb, var(--ens-amber, #f59e0b) 6%, var(--su)); }
+  .vsc-box .mk { display: none; }
+  .vsc-box.on.c-acq .bx { border-color: var(--ens-go, #18a558); background: color-mix(in srgb, var(--ens-go, #18a558) 16%, var(--su)); }
+  .vsc-box.on.c-acq .mk { display: block; color: var(--ens-go, #18a558); }
+  .vsc-box.on.c-enc .bx { border-color: #2563eb; background: color-mix(in srgb, #2563eb 16%, var(--su)); }
+  .vsc-box.on.c-enc .mk { display: block; color: #2563eb; }
+  .vsc-box.on.c-rev .bx { border-color: var(--ens-amber, #d97706); background: color-mix(in srgb, var(--ens-amber, #f59e0b) 18%, var(--su)); }
+  .vsc-box.on.c-rev .mk { display: block; color: var(--ens-amber, #b45309); }
+  .vsc-box:focus-visible .bx { outline: 2px solid var(--a); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .vsc-box .bx { transition: none; } }
+
+  /* — Pied de tableau : synthèse de la séance (live) — */
+  .vsc-foot { display: flex; align-items: stretch; border-top: 2px solid var(--ink); background: var(--su2); }
+  .vsc-foot .m { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 8px 4px; border-right: 1px solid var(--bo3); }
+  .vsc-foot .m:last-child { border-right: 0; }
+  .vsc-foot .m .n { font: 800 16px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; font-variant-numeric: tabular-nums; }
+  .vsc-foot .m .k { font: 700 7.5px/1 var(--ens-body, 'Inter'), sans-serif; letter-spacing: .07em; text-transform: uppercase; color: var(--mu2); margin-top: 2px; }
+  .vsc-foot .m.acq .n { color: var(--ens-go, #18a558); } .vsc-foot .m.enc .n { color: #2563eb; } .vsc-foot .m.rev .n { color: var(--ens-amber, #b45309); }
+  .vsc-foot .m.tot { background: color-mix(in srgb, var(--a) 8%, var(--su)); }
+  .vsc-foot .m.tot .n { color: var(--ink); }
 
   /* ── Note moniteur ── */
   .vs-note {
@@ -510,7 +489,6 @@ export async function mount(root) {
   _query = "";
   _submitting = false;
   _eleveDDOpen = false;
-  _openMondes = new Set();
   // Figé au mount : render() re-tourne à chaque interaction, le hint ne doit
   // pas disparaître au premier tap.
   _showSub = shouldShowHint("validation-sub");
@@ -581,12 +559,6 @@ async function selectEleve(id, doRender = true) {
   } catch (e) {
     console.error("[valider-seance] fetch validations", e);
   }
-  // Ouvre par défaut le 1er monde ayant encore des compétences à valider
-  _openMondes = new Set();
-  const firstOpen = REMC.find((cat) =>
-    cat.subs.some((s) => !_acquisSet.has(s.c)),
-  );
-  if (firstOpen) _openMondes.add(firstOpen.id);
   _eleveDDOpen = false;
   if (doRender) {
     render();
@@ -610,7 +582,7 @@ function render() {
           <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
           <div class="vs-hd-text">
             <h1 class="vs-h1">Valider une séance</h1>
-            ${_showSub ? `<p class="vs-sub">Choisis l'élève, déroule une catégorie, appuie sur les compétences travaillées.</p>` : ""}
+            ${_showSub ? `<p class="vs-sub">Choisis l'élève, puis coche Acquis / En cours / À revoir pour chaque compétence travaillée.</p>` : ""}
           </div>
           <div class="vs-hd-illus">${medallion("crayon", "indigo", { size: 48, glow: true })}</div>
         </div>
@@ -669,54 +641,100 @@ function renderEleveDropdown() {
     </div>`;
 }
 
-const MONDE_COLOR = {
-  C1: "var(--ens-go, var(--a))",
-  C2: "var(--ens-blue-lt, #3b82f6)",
-  C3: "var(--ens-amber, #eab308)",
-  C4: "#8b5cf6",
+// Marques manuscrites par statut (coche / tiret / croix)
+const VSC_MK = {
+  acquis: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  en_cours: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>`,
+  a_retravailler: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`,
 };
+// Les 3 colonnes de la grille (ordre = Acquis, En cours, À revoir)
+const VSC_COLS = [
+  { st: "acquis", cls: "c-acq", lbl: "Acquis" },
+  { st: "en_cours", cls: "c-enc", lbl: "En cours" },
+  { st: "a_retravailler", cls: "c-rev", lbl: "À revoir" },
+];
+
+// Progression d'une catégorie dans le livret (acquises + posées cette séance)
+function catProgress(cat) {
+  const acquis = cat.subs.filter((s) => _acquisSet.has(s.c)).length;
+  const picked = cat.subs.filter((s) => _picked.has(s.c) && !_acquisSet.has(s.c)).length;
+  const evald = acquis + picked;
+  return { evald, total: cat.subs.length, pct: Math.round((evald / cat.subs.length) * 100) };
+}
+
+// Synthèse de CETTE séance (uniquement ce que le moniteur pose maintenant)
+function sessionCounts() {
+  let acquis = 0, en_cours = 0, a_retravailler = 0;
+  for (const st of _picked.values()) {
+    if (st === "acquis") acquis++;
+    else if (st === "en_cours") en_cours++;
+    else if (st === "a_retravailler") a_retravailler++;
+  }
+  return { acquis, en_cours, a_retravailler, total: acquis + en_cours + a_retravailler };
+}
+
+function renderBox(compId, col, current, locked) {
+  const on = current === col.st;
+  return `<button class="vsc-box ${col.cls}${on ? " on" : ""}" type="button"${locked ? " disabled aria-disabled=\"true\"" : ""}
+    data-comp="${esc(compId)}" data-st="${col.st}" aria-label="${esc(compId)} — ${esc(col.lbl)}" aria-pressed="${on}">
+    <span class="bx"><span class="mk">${VSC_MK[col.st]}</span></span></button>`;
+}
 
 function renderComps() {
-  const sections = REMC.map((cat) => {
-    const color = MONDE_COLOR[cat.id] || "var(--mu)";
-    const acquisInCat = cat.subs.filter((s) => _acquisSet.has(s.c)).length;
-    const pickedInCat = cat.subs.filter((s) => _picked.has(s.c)).length;
-    // À valider d'abord, déjà acquises (effacées) en bas
-    const ordered = [
-      ...cat.subs.filter((s) => !_acquisSet.has(s.c)),
-      ...cat.subs.filter((s) => _acquisSet.has(s.c)),
-    ];
-    const chips = ordered
+  const el = eleveById(_eleve);
+  const dateFr = new Date()
+    .toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })
+    .replace(/\//g, ".");
+  const moniteurNom =
+    fmtName(`${_me.prenom || ""} ${_me.nom || ""}`.trim()) || "Moniteur";
+  const eleveNom = el ? fmtName(`${el.prenom || ""} ${el.nom || ""}`.trim()) : "";
+
+  const cats = REMC.map((cat) => {
+    const p = catProgress(cat);
+    const rows = cat.subs
       .map((s) => {
         const locked = _acquisSet.has(s.c);
-        const st = _picked.get(s.c) || null;
-        const cls = locked ? "locked" : st ? st : "";
-        const meta = locked ? { ico: "check" } : statutMeta(st);
-        const ico = meta ? icon(meta.ico, { size: 12, strokeWidth: 2.8 }) : "";
-        return `<button class="vs-chip ${cls}" type="button" ${locked ? 'disabled aria-disabled="true"' : `data-comp="${esc(s.c)}"`}
-                  title="${esc(s.n)}${locked ? " — compétence déjà validée" : ""}">
-          <span class="vs-chip-ico">${ico}</span><span class="vs-chip-code">${esc(s.c)}</span><span class="vs-chip-nom">${esc(s.n)}</span>
-        </button>`;
+        const current = locked ? "acquis" : _picked.get(s.c) || null;
+        const done = !!current;
+        const sCls =
+          current === "acquis" ? " s-acq"
+          : current === "en_cours" ? " s-enc"
+          : current === "a_retravailler" ? " s-rev" : "";
+        const boxes = VSC_COLS.map((col) => renderBox(s.c, col, current, locked)).join("");
+        return `<div class="vsc-row${done ? " done" : ""}${sCls}${locked ? " locked" : ""}" data-comp="${esc(s.c)}">
+          <div class="vsc-label"><span class="vsc-code">${esc(s.c)}</span><span class="vsc-lbl">${esc(s.n)}</span></div>
+          ${boxes}
+        </div>`;
       })
       .join("");
-    const isOpen = _openMondes.has(cat.id);
     return `
-      <section class="vs-monde${isOpen ? " open" : ""}">
-        <button class="vs-monde-hd" type="button" data-monde="${esc(cat.id)}" aria-expanded="${isOpen}">
-          <span class="vs-monde-dot" style="background:${color}"></span>
-          <span class="vs-monde-nom">${esc(cat.name)}</span>
-          <span class="vs-monde-cnt">${acquisInCat + pickedInCat}/${cat.subs.length}</span>
-          <span class="vs-monde-chev">${icon("chevron-down", { size: 16, strokeWidth: 2.4 })}</span>
-        </button>
-        <div class="vs-monde-body"><div class="vs-chips">${chips}</div></div>
-      </section>`;
+      <div class="vsc-cat-head" data-cat="${esc(cat.id)}">
+        <span class="vsc-cno">${esc(cat.id)}</span>
+        <span class="vsc-cname">${esc(cat.name)}</span>
+        <span class="vsc-cbar"><i style="width:${p.pct}%"></i></span>
+        <span class="vsc-ccount"><b>${p.evald}</b>/${p.total}</span>
+      </div>
+      <div class="vsc-colhead"><div></div><div class="vsc-ch acq">Acquis</div><div class="vsc-ch enc">En cours</div><div class="vsc-ch rev">À revoir</div></div>
+      ${rows}`;
   }).join("");
 
+  const c = sessionCounts();
   return `
-    <div class="vs-comps">
-      <p class="vs-legend" aria-label="Un appui change le statut de la compétence : acquis, en cours, à retravailler. Rappuie pour corriger.">
-        <span class="vs-leg acquis">Acquis</span><span class="vs-leg en_cours">En cours</span><span class="vs-leg a_retravailler">À retravailler</span></p>
-      ${sections}
+    <div class="vsc">
+      <div class="vsc-head">
+        <div class="vsc-head-row"><span class="vsc-doc-title">Fiche de séance</span><span class="vsc-doc-date">${esc(dateFr)}</span></div>
+        <div class="vsc-head-meta">
+          ${el ? `<span class="vsc-meta"><span class="vsc-av">${renderUserAvatar({ avatar_url: el.avatar_url, prenom: el.prenom, nom: el.nom }, 24)}</span><b>${esc(eleveNom)}</b></span>` : ""}
+          <span class="vsc-meta"><i>Moniteur</i> <b>${esc(moniteurNom)}</b></span>
+        </div>
+      </div>
+      ${cats}
+      <div class="vsc-foot" id="vsc-foot">
+        <div class="m acq"><span class="n" data-k="acq">${c.acquis}</span><span class="k">Acquis</span></div>
+        <div class="m enc"><span class="n" data-k="enc">${c.en_cours}</span><span class="k">En cours</span></div>
+        <div class="m rev"><span class="n" data-k="rev">${c.a_retravailler}</span><span class="k">À revoir</span></div>
+        <div class="m tot"><span class="n" data-k="tot">${c.total}</span><span class="k">Évaluées</span></div>
+      </div>
     </div>`;
 }
 
@@ -749,15 +767,30 @@ function renderFooter() {
 
 // ─── Wire ────────────────────────────────────────────────────────
 function updateCounts() {
-  _root.querySelectorAll(".vs-monde-hd[data-monde]").forEach((hd) => {
-    const cat = REMC.find((c) => c.id === hd.dataset.monde);
-    if (!cat) return;
-    const n = cat.subs.filter(
-      (s) => _acquisSet.has(s.c) || _picked.has(s.c),
-    ).length;
-    const cnt = hd.querySelector(".vs-monde-cnt");
-    if (cnt) cnt.textContent = `${n}/${cat.subs.length}`;
+  // Bandes de catégorie (barre + compteur)
+  REMC.forEach((cat) => {
+    const head = _root.querySelector(`.vsc-cat-head[data-cat="${cat.id}"]`);
+    if (!head) return;
+    const p = catProgress(cat);
+    const b = head.querySelector(".vsc-ccount b");
+    if (b) b.textContent = p.evald;
+    const bar = head.querySelector(".vsc-cbar i");
+    if (bar) bar.style.width = `${p.pct}%`;
   });
+  // Pied de tableau : synthèse de la séance
+  const foot = _root.querySelector("#vsc-foot");
+  if (foot) {
+    const c = sessionCounts();
+    const set = (k, v) => {
+      const n = foot.querySelector(`[data-k="${k}"]`);
+      if (n) n.textContent = v;
+    };
+    set("acq", c.acquis);
+    set("enc", c.en_cours);
+    set("rev", c.a_retravailler);
+    set("tot", c.total);
+  }
+  // Bouton de validation
   const lbl = _root.querySelector("#vs-submit-lbl");
   if (lbl) {
     const { acquis } = pickedCounts();
@@ -799,36 +832,32 @@ function wire() {
     });
   });
 
-  // ── Accordéons mondes ──
-  _root.querySelectorAll(".vs-monde-hd[data-monde]").forEach((hd) => {
-    hd.addEventListener("click", () => {
-      const id = hd.dataset.monde;
-      if (_openMondes.has(id)) _openMondes.delete(id);
-      else _openMondes.add(id);
-      haptic("tap");
-      render();
+  // ── Cases carnet : une case cochée par ligne (radio de statut) ──
+  _root.querySelector(".vsc")?.addEventListener("click", (e) => {
+    const box = e.target.closest(".vsc-box[data-comp]");
+    if (!box || box.disabled) return;
+    const id = box.dataset.comp;
+    const st = box.dataset.st;
+    const cur = _picked.get(id) || null;
+    const next = cur === st ? null : st; // re-clic sur la case active = décoche
+    if (next === null) _picked.delete(id);
+    else _picked.set(id, next);
+    // haptic métier : validate pour acquis, select pour autre, tap pour reset
+    haptic(next === "acquis" ? "validate" : next ? "select" : "tap");
+    // Maj en place de la ligne (pas de full re-render)
+    const row = box.closest(".vsc-row");
+    row.querySelectorAll(".vsc-box").forEach((b) => {
+      const on = _picked.get(id) === b.dataset.st;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
     });
-  });
-
-  // ── Chips compétences (maj en place, pas de full re-render) ──
-  _root.querySelectorAll(".vs-chips").forEach((list) => {
-    list.addEventListener("click", (e) => {
-      const chip = e.target.closest(".vs-chip[data-comp]");
-      if (!chip) return;
-      const id = chip.dataset.comp;
-      const next = nextStatut(_picked.get(id) || null);
-      if (next === null) _picked.delete(id);
-      else _picked.set(id, next);
-      // haptic métier : validate pour acquis, select pour autre, tap pour reset
-      haptic(next === "acquis" ? "validate" : next ? "select" : "tap");
-      chip.className = "vs-chip" + (next ? " " + next : "");
-      const ico = chip.querySelector(".vs-chip-ico");
-      if (ico)
-        ico.innerHTML = next
-          ? icon(statutMeta(next).ico, { size: 12, strokeWidth: 2.8 })
-          : "";
-      updateCounts();
-    });
+    row.classList.remove("done", "s-acq", "s-enc", "s-rev");
+    if (next)
+      row.classList.add(
+        "done",
+        next === "acquis" ? "s-acq" : next === "en_cours" ? "s-enc" : "s-rev",
+      );
+    updateCounts();
   });
 
   // ── Note ──
