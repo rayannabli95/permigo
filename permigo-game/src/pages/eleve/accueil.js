@@ -138,7 +138,10 @@ const STYLE = `<style>
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: calc(env(safe-area-inset-top, 0px) + 10px) 18px 0;
+  /* Le safe-area + la hauteur du header sont deja pris par body.has-chrome #app
+     (components.css). Ne PAS re-compter env(safe-area-inset-top) ici, sinon gros
+     vide entre le logo du header et la serie. Juste une petite respiration. */
+  padding: 10px 18px 0;
 }
 .acc2-chip {
   display: flex;
