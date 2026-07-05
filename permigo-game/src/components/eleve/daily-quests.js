@@ -95,7 +95,9 @@ function ensureStyle() {
     font: 600 9px/1 'Plus Jakarta Sans', sans-serif;
     padding: 3px 7px; border-radius: 99px; letter-spacing: .03em;
   }
-  .dq-badge--claim { background: var(--a); color: var(--a-ink); }
+  /* --adk (violet profond) : blanc sur --a (#6c63ff) à 9px = 4.31:1 (échec AA) ;
+     --adk (#4a3fc9) donne ~8:1 → conforme (même logique que --done ci-dessous). */
+  .dq-badge--claim { background: var(--adk); color: #fff; }
   .dq-badge--done  {
     /* vert assombri (#15803d) : blanc sur --gr (#22c55e) à 9px = 2.27:1 (échec
        WCAG AA). #15803d donne ~5:1 avec le blanc → conforme. */

@@ -193,7 +193,7 @@ const STYLE = `<style>
   min-height: 54px; border-radius: 17px;
   background: linear-gradient(180deg, var(--rvh-go-1) 0%, var(--rvh-go-2) 52%, var(--rvh-go-3) 100%);
   box-shadow: inset 0 2px 0 rgba(255,255,255,.55), inset 0 -4px 8px rgba(0,0,0,.22), 0 6px 0 var(--rvh-go-deep), 0 12px 22px -6px color-mix(in srgb, var(--a) 70%, transparent);
-  font: 800 19px/1 'Baloo 2', cursive; color: #fff; text-shadow: 0 2px 0 rgba(35,80,4,.6); letter-spacing: .3px;
+  font: 800 19px/1 'Baloo 2', cursive; color: #fff; text-shadow: 0 2px 0 color-mix(in srgb, var(--adk) 60%, #000); letter-spacing: .3px;
 }
 .rvh-arena-cta svg { width: 22px; height: 22px; }
 
