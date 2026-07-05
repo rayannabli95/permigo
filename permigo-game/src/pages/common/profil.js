@@ -17,6 +17,7 @@ import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { mountPermisCard } from "@/components/eleve/permis-card.js";
 import { mountProfileCard } from "@/components/common/profile-card.js";
+import { changeAvatar } from "@/components/common/avatar-edit.js";
 import { getEquippedAsset } from "@/utils/game-state.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { CATALOG, STREAK_SEUIL } from "@/data/achievements.js";
@@ -1476,6 +1477,10 @@ const STYLE_ARENE = `<style>
 .arn-crest-disc::after{content:"";position:absolute;inset:-2px;border-radius:26px;border:2px solid transparent;background:linear-gradient(150deg,var(--gd-pale),var(--gd-deep)) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
 .arn-crest-inner{width:100%;height:100%;border-radius:21px;background:linear-gradient(160deg,#3a2f7e,#221a4e);display:grid;place-items:center;position:relative;overflow:hidden;font-family:'Fredoka',sans-serif;font-weight:600;font-size:32px;color:#fff;letter-spacing:1px;text-shadow:0 2px 5px rgba(0,0,0,.5);box-shadow:inset 0 3px 9px rgba(0,0,0,.4)}
 .arn-crest-inner::before{content:"";position:absolute;top:-30%;left:-20%;width:80%;height:90%;background:linear-gradient(120deg,rgba(255,255,255,.22),transparent 60%);transform:rotate(8deg)}
+.arn-crest-inner img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.arn-crest-edit{position:absolute;right:-5px;bottom:-5px;width:29px;height:29px;border:2.5px solid #1d1545;border-radius:50%;cursor:pointer;display:grid;place-items:center;color:var(--gd-ink);background:linear-gradient(180deg,var(--gd-pale) 0%,var(--gd) 55%,var(--gd-2) 100%);box-shadow:0 2px 0 var(--gd-deep),inset 0 1px 0 rgba(255,255,255,.6);transition:transform .08s,box-shadow .08s}
+.arn-crest-edit:active{transform:translateY(2px);box-shadow:0 0 0 var(--gd-deep),inset 0 1px 0 rgba(255,255,255,.6)}
+.arn-crest-edit svg{width:14px;height:14px}
 .arn-meta{flex:1;min-width:0}
 .arn-permis{display:inline-flex;align-items:center;gap:7px;background:rgba(124,92,255,.16);border:1px solid rgba(167,139,255,.28);color:#cdbcff;font-size:11px;font-weight:800;letter-spacing:.6px;padding:5px 11px;border-radius:999px;text-transform:uppercase}
 .arn-permis .dot{width:7px;height:7px;border-radius:50%;background:var(--gr);box-shadow:0 0 7px var(--gr)}
@@ -1642,6 +1647,9 @@ async function mountEleveArene(root, me) {
   const streak = streakRow?.current_streak ?? 0;
   const volants = typeof profile?.gemmes === "number" ? profile.gemmes : 0;
   const restantes = Math.max(0, REMC_TOTAL - validated);
+  // Photo de profil : même source que le header (avatar équipé de la boutique,
+  // sinon la photo persistée). Repli sur les initiales si aucune image.
+  const avatarUrl = getEquippedAsset("avatar") || profile?.avatar_url || null;
 
   const st = _competenceState(validated);
   const emblem = REMC_EMBLEM[st.comp.id] || REMC_EMBLEM.C1;
@@ -1710,7 +1718,10 @@ async function mountEleveArene(root, me) {
     </div>
 
     <div class="arn-body">
-      <div class="arn-crest"><div class="arn-crest-disc"><div class="arn-crest-inner">${esc(initials)}</div></div></div>
+      <div class="arn-crest">
+        <div class="arn-crest-disc"><div class="arn-crest-inner">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : esc(initials)}</div></div>
+        <button class="arn-crest-edit" id="arn-edit-avatar" aria-label="Changer ma photo" title="Changer ma photo">${icon("image", { size: 14, strokeWidth: 2.2 })}</button>
+      </div>
       <div class="arn-meta">
         <span class="arn-permis"><span class="dot"></span>Permis B</span>
         <div class="arn-comp">
@@ -1854,15 +1865,35 @@ async function mountEleveArene(root, me) {
   </div>
 </div>`;
 
-  _wireEleveArene(root, me);
+  _wireEleveArene(root, me, avatarUrl);
 }
 
-function _wireEleveArene(root, me) {
+function _wireEleveArene(root, me, avatarUrl) {
   // ── Réviser → parcours ──
   root.querySelector("#arn-reviser")?.addEventListener("click", () => {
     haptic("select");
     location.hash = "#/parcours";
   });
+
+  // ── Changer ma photo (avatars au choix + ma photo) ──
+  root
+    .querySelector("#arn-edit-avatar")
+    ?.addEventListener("click", async () => {
+      haptic("select");
+      const url = await changeAvatar({
+        me,
+        currentUrl: avatarUrl || getEquippedAsset("avatar") || me.avatar_url,
+      });
+      if (!url) return;
+      me.avatar_url = url;
+      const inner = root.querySelector(".arn-crest-inner");
+      if (inner)
+        inner.innerHTML = `<img src="${esc(url)}" alt="" referrerpolicy="no-referrer" />`;
+      haptic("success");
+      track("profile.avatar_updated", { user_role: me.role });
+      const { toast } = await import("@/components/common/toast.js");
+      toast("Photo mise à jour ✓", "success", 2500);
+    });
 
   // ── Déconnexion ──
   root.querySelector("#arn-logout")?.addEventListener("click", async () => {
@@ -2087,6 +2118,10 @@ const STYLE_ENS = `<style>
 .enp-crest-disc::after{content:"";position:absolute;inset:-2px;border-radius:24px;border:2px solid transparent;background:linear-gradient(150deg,var(--gd-hi),var(--gd-deep)) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
 .enp-crest-inner{width:100%;height:100%;border-radius:19px;display:grid;place-items:center;position:relative;overflow:hidden;background:linear-gradient(160deg,#6a5cf0,#3f37c7);font-family:'Fredoka',sans-serif;font-weight:600;font-size:28px;color:#fff;letter-spacing:1px;text-shadow:0 2px 5px rgba(0,0,0,.4);box-shadow:inset 0 3px 9px rgba(0,0,0,.28)}
 .enp-crest-inner::before{content:"";position:absolute;top:-30%;left:-20%;width:80%;height:90%;background:linear-gradient(120deg,rgba(255,255,255,.30),transparent 60%);transform:rotate(8deg)}
+.enp-crest-inner img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.enp-crest-edit{position:absolute;right:-5px;bottom:-5px;width:29px;height:29px;border:2.5px solid #4f46e5;border-radius:50%;cursor:pointer;display:grid;place-items:center;color:var(--ind);background:#fff;box-shadow:0 3px 8px rgba(20,14,80,.30);transition:transform .08s}
+.enp-crest-edit:active{transform:translateY(2px)}
+.enp-crest-edit svg{width:14px;height:14px}
 .enp-nm{min-width:0}
 .enp-nm .nn{font-family:'Fredoka',sans-serif;font-weight:600;font-size:25px;line-height:1.05;color:#fff;letter-spacing:.2px;text-shadow:0 1px 2px rgba(20,14,70,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .enp-nm .tg{display:inline-flex;align-items:center;gap:6px;margin-top:7px;padding:4px 11px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase}
@@ -2201,7 +2236,7 @@ async function mountEnseignantArene(root, me) {
   ] = await Promise.all([
     sb
       .from("profiles")
-      .select("email, prenom, nom, created_at, streak_pro_days")
+      .select("email, prenom, nom, created_at, streak_pro_days, avatar_url")
       .eq("id", me.id)
       .single(),
     sb
@@ -2262,6 +2297,8 @@ async function mountEnseignantArene(root, me) {
     me.email ||
     "Enseignant";
   const initials = _ensInitials(profile?.prenom, profile?.nom);
+  // Photo de profil : même source que le header. Repli initiales si absente.
+  const avatarUrl = getEquippedAsset("avatar") || profile?.avatar_url || null;
   const year = new Date().getFullYear();
 
   let memberSince = "";
@@ -2301,7 +2338,10 @@ async function mountEnseignantArene(root, me) {
         : ""
     }
     <div class="enp-id">
-      <div class="enp-crest"><div class="enp-crest-disc"><div class="enp-crest-inner">${esc(initials)}</div></div></div>
+      <div class="enp-crest">
+        <div class="enp-crest-disc"><div class="enp-crest-inner">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : esc(initials)}</div></div>
+        <button class="enp-crest-edit" id="enp-edit-avatar" aria-label="Changer ma photo" title="Changer ma photo">${icon("image", { size: 14, strokeWidth: 2.2 })}</button>
+      </div>
       <div class="enp-nm">
         <div class="nn">${esc(name)}</div>
         <span class="tg"><span class="dot"></span>Enseignant</span>
@@ -2448,6 +2488,26 @@ async function mountEnseignantArene(root, me) {
       toast("Déconnexion impossible — réessaie", "error");
     }
   });
+
+  // ── Changer ma photo (avatars au choix + ma photo) ──
+  root
+    .querySelector("#enp-edit-avatar")
+    ?.addEventListener("click", async () => {
+      haptic("select");
+      const url = await changeAvatar({
+        me,
+        currentUrl: avatarUrl || getEquippedAsset("avatar") || me.avatar_url,
+      });
+      if (!url) return;
+      me.avatar_url = url;
+      const inner = root.querySelector(".enp-crest-inner");
+      if (inner)
+        inner.innerHTML = `<img src="${esc(url)}" alt="" referrerpolicy="no-referrer" />`;
+      haptic("success");
+      track("profile.avatar_updated", { user_role: me.role });
+      const { toast } = await import("@/components/common/toast.js");
+      toast("Photo mise à jour ✓", "success", 2500);
+    });
 
   const notifRow = root.querySelector("#enp-notif");
   if (notifRow && !notifDenied) {
