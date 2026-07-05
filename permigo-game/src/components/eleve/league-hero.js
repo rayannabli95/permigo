@@ -325,13 +325,13 @@ export const LEAGUE_HERO_CSS = `
   background:linear-gradient(90deg,var(--acc-dk),var(--acc-lt));
   box-shadow:0 0 10px color-mix(in srgb,var(--acc) 70%,transparent)}
 
-/* CTA vert 3D */
+/* CTA violet 3D */
 .lgh-cta{width:100%;margin-top:14px;min-height:52px;border:0;border-radius:16px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:8px;
-  font:800 17px/1 'Baloo 2',cursive;color:#fff;letter-spacing:.3px;text-shadow:0 2px 0 rgba(35,80,4,.6);
-  background:linear-gradient(180deg,#7ee83a 0%,#58cc02 52%,#46a302 100%);
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.55),inset 0 -4px 8px rgba(0,0,0,.22),0 6px 0 #3f8f02,0 12px 22px -6px rgba(70,163,2,.7);
+  font:800 17px/1 'Baloo 2',cursive;color:#fff;letter-spacing:.3px;text-shadow:0 2px 0 color-mix(in srgb, var(--adk) 60%, transparent);
+  background:linear-gradient(180deg,var(--a-lt) 0%,var(--a) 52%,var(--adk) 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.55),inset 0 -4px 8px rgba(0,0,0,.22),0 6px 0 var(--adk),0 12px 22px -6px color-mix(in srgb, var(--a) 70%, transparent);
   transition:transform .1s,box-shadow .1s}
 .lgh-cta span{font-size:19px}
-.lgh-cta:active{transform:translateY(4px);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 2px 0 #3f8f02,0 6px 12px -6px rgba(70,163,2,.7)}
+.lgh-cta:active{transform:translateY(4px);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 2px 0 var(--adk),0 6px 12px -6px color-mix(in srgb, var(--a) 70%, transparent)}
 `;

@@ -265,11 +265,11 @@ const STYLE = `<style>
   display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px;
   min-height: 44px; padding: 0 22px; border: none; border-radius: 14px; cursor: pointer;
   font: 800 14px/1 'Plus Jakarta Sans', sans-serif; color: #fff;
-  background: linear-gradient(180deg, #62d40a, var(--a));
-  box-shadow: 0 4px 0 var(--adk), 0 8px 16px rgba(70,163,2,.30);
+  background: linear-gradient(180deg, var(--a-lt), var(--a));
+  box-shadow: 0 4px 0 var(--adk), 0 8px 16px color-mix(in srgb, var(--a) 30%, transparent);
   transition: transform .1s var(--ease-snap), box-shadow .1s var(--ease-snap);
 }
-.bo2-hero:active .bo2-hero-cta { transform: translateY(2px); box-shadow: 0 2px 0 var(--adk), 0 5px 10px rgba(70,163,2,.30); }
+.bo2-hero:active .bo2-hero-cta { transform: translateY(2px); box-shadow: 0 2px 0 var(--adk), 0 5px 10px color-mix(in srgb, var(--a) 30%, transparent); }
 .bo2-hero-owned { font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--adk); }
 
 /* ═══ Objectif épinglé (wishlist, localStorage) ═══ */
@@ -306,7 +306,7 @@ const STYLE = `<style>
 
 /* Bouton « définir comme objectif » dans le modal */
 .bo2-modal-obj { display: flex; align-items: center; justify-content: center; gap: 7px; width: calc(100% - 48px); margin: 10px 24px 0; min-height: 46px; border: 1px solid var(--g-gold2); border-radius: 14px; background: #FBF7EC; color: var(--g-gold4); font: 800 13px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
-.bo2-modal-obj.on { background: rgba(88,204,2,.10); border-color: rgba(88,204,2,.40); color: var(--adk); }
+.bo2-modal-obj.on { background: color-mix(in srgb, var(--a) 10%, transparent); border-color: color-mix(in srgb, var(--a) 40%, transparent); color: var(--adk); }
 .bo2-modal-obj:active { transform: scale(.98); }
 
 /* ── Section heading ── */
@@ -330,7 +330,7 @@ const STYLE = `<style>
 .bo2-daily-title { font: 800 14px/1.15 'Plus Jakarta Sans', sans-serif; color: var(--g-ink); margin: 3px 0; letter-spacing: -.01em; }
 .bo2-daily-sub { font: 500 11px/1.35 'Inter', sans-serif; color: var(--g-soft); }
 .bo2-daily-sub b { color: var(--g-ink); }
-.bo2-daily-cta { flex: none; min-height: 44px; padding: 0 16px; border: none; border-radius: 12px; cursor: pointer; font: 800 12.5px/1 'Plus Jakarta Sans', sans-serif; color: #fff; background: linear-gradient(180deg,#62d40a,var(--a)); box-shadow: 0 3px 0 var(--adk); }
+.bo2-daily-cta { flex: none; min-height: 44px; padding: 0 16px; border: none; border-radius: 12px; cursor: pointer; font: 800 12.5px/1 'Plus Jakarta Sans', sans-serif; color: #fff; background: linear-gradient(180deg,var(--a-lt),var(--a)); box-shadow: 0 3px 0 var(--adk); }
 .bo2-daily-cta:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--adk); }
 
 /* ═══ Grid (conservé pour compatibilité éventuelle) ═══ */
@@ -417,9 +417,9 @@ const STYLE = `<style>
 .bo2-card[data-rarity="legendaire"] .bo2-card-rarity-tag { color: #5e430f; background: linear-gradient(180deg, var(--g-gold1), var(--g-gold2)); border-color: var(--g-gold3); }
 .bo2-card-owned-badge {
   position: absolute; top: 9px; right: 9px; z-index: 5;
-  background: rgba(88,204,2,.95); border-radius: 99px;
+  background: var(--adk); border-radius: 99px;
   padding: 3px 8px; font: 800 8.5px/1 'Plus Jakarta Sans', sans-serif; color: #fff; letter-spacing: .04em; text-transform: uppercase;
-  box-shadow: 0 2px 6px rgba(70,163,2,.35);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--a) 35%, transparent);
 }
 
 /* Ruban légendaire */
@@ -444,11 +444,11 @@ const STYLE = `<style>
   display: inline-flex; align-items: center; justify-content: center; gap: 5px;
   min-height: 44px; min-width: 64px; padding: 0 14px; border: none; border-radius: 12px; cursor: pointer;
   color: #fff; font: 800 12px/1 'Plus Jakarta Sans', sans-serif; white-space: nowrap;
-  background: linear-gradient(180deg, #62d40a, var(--a));
-  box-shadow: 0 3px 0 var(--adk), 0 5px 11px rgba(70,163,2,.24);
+  background: linear-gradient(180deg, var(--a-lt), var(--a));
+  box-shadow: 0 3px 0 var(--adk), 0 5px 11px color-mix(in srgb, var(--a) 24%, transparent);
   transition: transform .1s var(--ease-snap), box-shadow .1s var(--ease-snap), opacity .12s;
 }
-.bo2-price-btn:active { transform: translateY(3px); box-shadow: 0 0 0 var(--adk), 0 2px 5px rgba(70,163,2,.24); }
+.bo2-price-btn:active { transform: translateY(3px); box-shadow: 0 0 0 var(--adk), 0 2px 5px color-mix(in srgb, var(--a) 24%, transparent); }
 .bo2-price-btn:disabled { cursor: default; }
 .bo2-price-btn.cant-afford { background: #EEE9DD; color: var(--g-soft); box-shadow: inset 0 0 0 1px var(--g-line); font-weight: 700; }
 .bo2-price-btn.cant-afford:active { transform: none; }
@@ -457,7 +457,7 @@ const STYLE = `<style>
 .bo2-owned-txt {
   display: inline-flex; align-items: center; justify-content: center; gap: 5px;
   min-height: 44px; padding: 0 12px; font: 800 11.5px/1 'Plus Jakarta Sans', sans-serif;
-  color: var(--adk); background: rgba(88,204,2,.12); border-radius: 12px; box-shadow: inset 0 0 0 1.4px rgba(88,204,2,.45);
+  color: var(--adk); background: color-mix(in srgb, var(--a) 12%, transparent); border-radius: 12px; box-shadow: inset 0 0 0 1.4px color-mix(in srgb, var(--a) 45%, transparent);
 }
 
 /* ── Intro / tuto (clair) ── */
@@ -558,7 +558,7 @@ const STYLE = `<style>
   font: 800 17px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
   transition: transform .12s var(--ease-snap), box-shadow .12s var(--ease-snap), opacity .12s;
 }
-.bo2-modal-cta.buy { background: linear-gradient(180deg, #62d40a, var(--a)); color: #fff; box-shadow: 0 5px 0 var(--adk), 0 10px 20px rgba(70,163,2,.28); }
+.bo2-modal-cta.buy { background: linear-gradient(180deg, var(--a-lt), var(--a)); color: #fff; box-shadow: 0 5px 0 var(--adk), 0 10px 20px color-mix(in srgb, var(--a) 28%, transparent); }
 .bo2-modal-cta.buy:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--adk); }
 .bo2-modal-cta.equip { background: linear-gradient(180deg,#fff,#F1EEE6); color: var(--g-ink); box-shadow: 0 5px 0 #D8D2C4, inset 0 1px 0 #fff; }
 .bo2-modal-cta.equip:active { transform: translateY(4px); box-shadow: 0 1px 0 #D8D2C4; }
@@ -639,8 +639,8 @@ export async function mount(root) {
   .bo2-roue-tx { flex: 1; min-width: 0; }
   .bo2-roue-t { font: 800 16.5px/1.1 'Baloo 2', cursive, sans-serif; background: linear-gradient(180deg,#fff,#ffd86b); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   .bo2-roue-s { margin-top: 3px; font: 700 11.5px/1.35 'Nunito', sans-serif; color: #c3b8e8; }
-  .bo2-roue-s b { color: #b9f26e; }
-  .bo2-roue-go { flex: none; font: 800 12.5px/1 'Baloo 2', cursive, sans-serif; color: #0d2402; padding: 9px 13px; border-radius: 12px; background: linear-gradient(180deg,#b9f26e,#58cc02); box-shadow: 0 3px 0 #3f8f02; }
+  .bo2-roue-s b { color: var(--a-lt); }
+  .bo2-roue-go { flex: none; font: 800 12.5px/1 'Baloo 2', cursive, sans-serif; color: #fff; padding: 9px 13px; border-radius: 12px; background: linear-gradient(180deg,var(--a-lt),var(--a)); box-shadow: 0 3px 0 var(--adk); }
   @media (prefers-reduced-motion: reduce) { .bo2-roue-w { animation: none; } }
 </style>
 <div class="bo2 anim-slide-up">

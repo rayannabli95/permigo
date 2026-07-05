@@ -277,7 +277,9 @@ function renderCard(q) {
         ? "competence"
         : "default";
   const cat = CAT_CFG[_catKey];
-  const fillClr = done ? "var(--gr)" : ready ? "var(--a)" : "var(--a)";
+  // Barre : violet accent partout (le vert « fait » jurait avec la DA violette ;
+  // le « fait » est déjà signalé par le badge ✓). Fait = violet profond.
+  const fillClr = done ? "var(--adk)" : "var(--a)";
   const stCls = done
     ? "dq-card--claimed"
     : ready

@@ -63,7 +63,7 @@ const STYLE = `<style>
   --rvh-mu:#cabfef; --rvh-mu2:#9b8dcf;
   --rvh-gold-1:#ffe9a8; --rvh-gold-2:#ffd24a; --rvh-gold-3:#ff9c1c; --rvh-gold-deep:#c87d12;
   --rvh-violet:#a855f7; --rvh-violet-deep:#7c4dff; --rvh-violet-soft:#cbb9ff;
-  --rvh-go-1:#7ee83a; --rvh-go-2:#58cc02; --rvh-go-3:#46a302; --rvh-go-deep:#357c00;
+  --rvh-go-1:var(--a-lt); --rvh-go-2:var(--a); --rvh-go-3:var(--adk); --rvh-go-deep:var(--adk);
   position: relative;
   margin-top: calc(-1 * (var(--th, 52px) + env(safe-area-inset-top, 0px)));
   padding: calc(var(--th, 52px) + env(safe-area-inset-top, 0px) + 12px) 15px 96px;
@@ -192,7 +192,7 @@ const STYLE = `<style>
   position: relative; z-index: 2; margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 9px;
   min-height: 54px; border-radius: 17px;
   background: linear-gradient(180deg, var(--rvh-go-1) 0%, var(--rvh-go-2) 52%, var(--rvh-go-3) 100%);
-  box-shadow: inset 0 2px 0 rgba(255,255,255,.55), inset 0 -4px 8px rgba(0,0,0,.22), 0 6px 0 var(--rvh-go-deep), 0 12px 22px -6px rgba(70,163,2,.7);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.55), inset 0 -4px 8px rgba(0,0,0,.22), 0 6px 0 var(--rvh-go-deep), 0 12px 22px -6px color-mix(in srgb, var(--a) 70%, transparent);
   font: 800 19px/1 'Baloo 2', cursive; color: #fff; text-shadow: 0 2px 0 rgba(35,80,4,.6); letter-spacing: .3px;
 }
 .rvh-arena-cta svg { width: 22px; height: 22px; }

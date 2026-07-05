@@ -157,11 +157,11 @@ const STYLE = `<style>
   display: block; width: 100%; max-width: 330px; margin: 16px auto 0; min-height: 60px;
   border: 0; border-radius: 18px; cursor: pointer;
   font: 800 17px/1 'Baloo 2', cursive; color: #fff; text-shadow: 0 2px 0 rgba(40,90,5,.55);
-  background: linear-gradient(180deg, #6fe016, #58cc02);
-  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), 0 6px 0 #3f8f02, 0 12px 24px -6px rgba(70,163,2,.7);
+  background: linear-gradient(180deg, var(--a-lt), var(--a));
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), 0 6px 0 var(--adk), 0 12px 24px -6px color-mix(in srgb, var(--a) 70%, transparent);
   transition: transform .1s, filter .15s;
 }
-.roue-cta:active { transform: translateY(3px); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), 0 3px 0 #3f8f02; }
+.roue-cta:active { transform: translateY(3px); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), 0 3px 0 var(--adk); }
 .roue-cta:disabled { filter: grayscale(.5) brightness(.8); cursor: default; }
 .roue-free { text-align: center; margin-top: 10px; font: 600 12px/1.4 'Fredoka', sans-serif; color: var(--mu); }
 
@@ -178,23 +178,23 @@ const STYLE = `<style>
 
 .roue-real {
   margin: 20px auto 0; max-width: 400px; border-radius: 20px; padding: 16px;
-  background: linear-gradient(180deg, rgba(111,224,22,.10), rgba(88,204,2,.03)),
+  background: linear-gradient(180deg, color-mix(in srgb, var(--a) 10%, transparent), color-mix(in srgb, var(--a) 3%, transparent)),
     linear-gradient(180deg, var(--pnl), var(--pnl2));
-  border: 1px solid rgba(111,224,22,.38);
-  box-shadow: 0 16px 30px -18px rgba(0,0,0,.8), 0 0 26px -10px rgba(111,224,22,.35);
+  border: 1px solid color-mix(in srgb, var(--a) 38%, transparent);
+  box-shadow: 0 16px 30px -18px rgba(0,0,0,.8), 0 0 26px -10px color-mix(in srgb, var(--a) 35%, transparent);
 }
 .roue-real-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
 .roue-real-h h2 { font: 700 15px/1.1 'Baloo 2', cursive; display: flex; align-items: center; gap: 7px; }
-.roue-real-h .tag { flex: none; font: 600 9.5px/1 'Fredoka', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #b9f26e; padding: 4px 9px; border-radius: 999px; background: rgba(111,224,22,.14); border: 1px solid rgba(111,224,22,.35); }
-.roue-real-row { display: flex; align-items: center; gap: 11px; padding: 10px 2px; border-bottom: 1px solid rgba(111,224,22,.12); }
+.roue-real-h .tag { flex: none; font: 600 9.5px/1 'Fredoka', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--a-lt); padding: 4px 9px; border-radius: 999px; background: color-mix(in srgb, var(--a) 14%, transparent); border: 1px solid color-mix(in srgb, var(--a) 35%, transparent); }
+.roue-real-row { display: flex; align-items: center; gap: 11px; padding: 10px 2px; border-bottom: 1px solid color-mix(in srgb, var(--a) 12%, transparent); }
 .roue-real-row:last-of-type { border-bottom: 0; }
 .roue-real-ic { width: 38px; height: 38px; flex: none; display: grid; place-items: center; }
 .roue-real-ic svg { filter: drop-shadow(0 3px 5px rgba(0,0,0,.4)); }
 .roue-real-name { font: 700 13.5px/1.15 'Baloo 2', cursive; color: #e9ffd2; }
 .roue-real-sub { font: 700 11px/1.3 'Nunito', sans-serif; color: var(--mu2); margin-top: 1px; }
 .roue-real-flex { flex: 1; min-width: 0; }
-.roue-real-sign { margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(10,7,24,.35); border: 1px dashed rgba(111,224,22,.35); }
-.roue-real-av { width: 32px; height: 32px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 800 15px/1 'Baloo 2', cursive; color: #0d2402; background: linear-gradient(160deg, #b9f26e, #58cc02); border: 2px solid rgba(255,255,255,.5); }
+.roue-real-sign { margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(10,7,24,.35); border: 1px dashed color-mix(in srgb, var(--a) 35%, transparent); }
+.roue-real-av { width: 32px; height: 32px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 800 15px/1 'Baloo 2', cursive; color: #fff; background: linear-gradient(160deg, var(--a-lt), var(--a)); border: 2px solid rgba(255,255,255,.5); }
 .roue-real-sign b { display: block; font: 700 12.5px/1.2 'Baloo 2', cursive; color: #e9ffd2; }
 .roue-real-sign span { font: 700 10.5px/1.3 'Nunito', sans-serif; color: var(--mu2); }
 
