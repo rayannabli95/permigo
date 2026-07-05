@@ -27,14 +27,14 @@ import { medallion } from "@/utils/medallions.js";
 const TOUR_KEY = "pg-tour-validation-v1";
 const VALIDATION_TOUR_STEPS = [
   {
-    sel: ".vsc-cat-head",
+    sel: ".vl-cat-hd",
     title: "Le programme officiel",
-    text: "Les 31 compétences sont regroupées en 4 catégories, comme dans le livret.",
+    text: "Les 31 compétences sont regroupées en 4 catégories. Déroule celle que tu veux évaluer.",
   },
   {
-    sel: ".vsc-row:not(.locked) .vsc-box",
-    title: "Coche où en est l'élève",
-    text: "Sur chaque ligne, coche Acquis, En cours ou À revoir. Rappuie sur une case pour la corriger.",
+    sel: ".vl-row:not(.locked)",
+    title: "Tape une compétence",
+    text: "Un appui la fait défiler : Acquis → En cours → À revoir → vide. Retape pour corriger.",
   },
   {
     sel: "#vs-submit",
@@ -61,6 +61,14 @@ function maybeStartValidationTour() {
 
 const MAX_NOTE = 300;
 
+// Cycle de statut au tap : rien → acquis → en cours → à retravailler → rien
+const CYCLE = ["acquis", "en_cours", "a_retravailler"];
+function nextStatut(cur) {
+  if (!cur) return "acquis";
+  const i = CYCLE.indexOf(cur);
+  return i === CYCLE.length - 1 ? null : CYCLE[i + 1];
+}
+
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -76,16 +84,18 @@ let _note = "";
 let _query = "";
 let _submitting = false;
 let _eleveDDOpen = false; // dropdown élève ouvert
+let _openMondes = new Set(); // catégories dépliées
 let _showSub = false; // coach-hint mode d'emploi (1re visite seulement)
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
+  @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap');
   /* ── Wrapper global ── */
   .vs {
     padding: 0 16px calc(152px + env(safe-area-inset-bottom,0px));
     max-width: 600px; margin: 0 auto;
     background: var(--bg); color: var(--ink);
-    font-family: var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    font-family: 'Hanken Grotesk', var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
   }
 
   /* ── Header arcade : mini hero presse-papier ── */
@@ -201,78 +211,59 @@ const STYLE = `<style>
   @keyframes vsDdIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
   @media (prefers-reduced-motion: reduce) { .vs-dd-opt { animation: none; opacity: 1; } .vs-dd-chev, .vs-dd-panel { transition: none; } }
 
-  /* ══ CARNET D'ÉVALUATION (DA A2 — document + indigo, theme-aware) ══ */
-  .vsc {
-    border: 1.5px solid var(--bo); border-radius: var(--ens-r, 16px);
-    background: var(--su); overflow: hidden; margin-bottom: 14px;
-    box-shadow: var(--ens-shadow, var(--s0));
+  /* ══ LISTE TAP-CYCLE PREMIUM (Piste 1 — theme-aware) ══ */
+  /* nom élève sélectionné (trigger) en MAJUSCULES */
+  .vs-dd-cur .vs-dd-name { text-transform: uppercase; letter-spacing: .03em; }
+
+  .vl { margin-bottom: 4px; }
+  .vl-cat {
+    background: var(--su); border: 1.5px solid var(--bo); border-radius: 18px;
+    margin-bottom: 12px; overflow: hidden;
+    box-shadow: 0 12px 28px -18px rgba(30, 30, 70, .5);
   }
-  /* — En-tête document — */
-  .vsc-head { padding: 15px 16px 13px; border-bottom: 2px solid var(--ink); position: relative; }
-  .vsc-head::after { content: ""; position: absolute; left: 16px; right: 16px; bottom: -5px; height: 1px; background: var(--bo3); }
-  .vsc-head-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-  .vsc-doc-title { font: 800 10px/1 var(--ens-body, 'Inter'), sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--mu2); }
-  .vsc-doc-date { font: 800 15px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--ink); font-variant-numeric: tabular-nums; }
-  .vsc-head-meta { display: flex; flex-wrap: wrap; gap: 7px 18px; margin-top: 11px; }
-  .vsc-meta { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .vsc-meta i { font: 700 9px/1 var(--ens-body, 'Inter'), sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--mu2); font-style: normal; }
-  .vsc-meta b { font: 700 15px/1.1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .vsc-av { flex-shrink: 0; display: inline-flex; }
+  .vl-cat-hd {
+    display: flex; align-items: center; gap: 11px; width: 100%; box-sizing: border-box;
+    padding: 13px 14px; min-height: 56px; background: none; border: 0; cursor: pointer;
+    text-align: left; -webkit-tap-highlight-color: transparent; transition: background .12s;
+  }
+  .vl-cat-hd:active { background: var(--su2); }
+  .vl-cn {
+    width: 32px; height: 32px; border-radius: 10px; flex: none; display: grid; place-items: center;
+    background: linear-gradient(160deg, var(--a-lt, #6d6bff), var(--a));
+    color: #fff; font: 700 13px var(--ens-display, 'Fredoka'), sans-serif;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 3px 8px -2px color-mix(in srgb, var(--a) 55%, transparent);
+  }
+  .vl-nm { font: 600 15px var(--ens-display, 'Fredoka'), sans-serif; color: var(--ink); flex: 1; min-width: 0; letter-spacing: .2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vl-pr { display: flex; align-items: center; gap: 8px; flex: none; }
+  .vl-bar { width: 50px; height: 7px; border-radius: 99px; background: var(--bo2); overflow: hidden; }
+  .vl-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--a-lt, #6d6bff), var(--a)); }
+  .vl-ct { font: 700 12px var(--ens-body, sans-serif); color: var(--mu2); font-variant-numeric: tabular-nums; }
+  .vl-chev { color: var(--mu2); display: inline-flex; transition: transform .2s; }
+  .vl-cat.closed .vl-body { display: none; }
+  .vl-cat.closed .vl-chev { transform: rotate(-90deg); }
+  @media (prefers-reduced-motion: reduce) { .vl-chev { transition: none; } }
 
-  /* — Bande de catégorie (indigo) — */
-  .vsc-cat-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--a); color: #fff; }
-  .vsc-cno { font: 800 14px/1 'IBM Plex Mono', monospace; color: #d3d0ff; flex: 0 0 auto; }
-  .vsc-cname { font: 700 15.5px/1 var(--ens-display, 'Fredoka'), sans-serif; letter-spacing: .2px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .vsc-cbar { flex: 0 0 46px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.24); overflow: hidden; }
-  .vsc-cbar i { display: block; height: 100%; border-radius: 3px; background: #fff; transition: width .3s ease; }
-  .vsc-ccount { font: 700 11.5px/1 'IBM Plex Mono', monospace; color: rgba(255,255,255,.85); flex: 0 0 auto; font-variant-numeric: tabular-nums; }
-  .vsc-ccount b { color: #fff; }
+  .vl-row {
+    display: flex; align-items: center; gap: 11px; width: 100%; box-sizing: border-box;
+    padding: 13px 13px; min-height: 58px; border: 0; border-top: 1px solid var(--bo2);
+    background: transparent; text-align: left; font-family: inherit; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .vl-body .vl-row:first-child { border-top: 1.5px solid var(--bo); }
+  .vl-row:active { background: var(--su2); }
+  .vl-row:disabled { cursor: default; }
+  .vl-code { font: 800 12px var(--ens-body, sans-serif); color: var(--a); flex: none; width: 32px; letter-spacing: .01em; }
+  .vl-lbl { font: 600 13.5px/1.25 var(--ens-body, sans-serif); color: var(--ink2); flex: 1; min-width: 0; }
+  .vl-row.on .vl-lbl { color: var(--ink); font-weight: 700; }
+  .vl-row.locked .vl-lbl { color: var(--mu2); }
 
-  /* — En-tête des 3 colonnes — */
-  .vsc-colhead { display: grid; grid-template-columns: 1fr 50px 50px 50px; align-items: end; padding: 8px 12px 6px 16px; background: var(--su2); border-bottom: 1.5px solid var(--bo3); }
-  .vsc-ch { position: relative; text-align: center; padding-top: 11px; font: 800 9px/1 var(--ens-body, 'Inter'), sans-serif; letter-spacing: .01em; text-transform: uppercase; white-space: nowrap; }
-  .vsc-ch::before { content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 18px; height: 3px; border-radius: 2px; background: currentColor; }
-  .vsc-ch.acq { color: var(--ens-go, #18a558); } .vsc-ch.enc { color: #2563eb; } .vsc-ch.rev { color: var(--ens-amber, #d97706); }
-
-  /* — Ligne = sous-compétence — */
-  .vsc-row { display: grid; grid-template-columns: 1fr 50px 50px 50px; align-items: center; padding: 0 12px 0 16px; min-height: 56px; border-bottom: 1px solid var(--bo3); position: relative; }
-  .vsc-row:last-of-type { border-bottom: 0; }
-  .vsc-row.done::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
-  .vsc-row.s-acq::before { background: var(--ens-go, #18a558); } .vsc-row.s-enc::before { background: #2563eb; } .vsc-row.s-rev::before { background: var(--ens-amber, #f59e0b); }
-  .vsc-label { display: flex; align-items: baseline; gap: 10px; padding: 11px 10px 11px 0; min-width: 0; }
-  .vsc-code { flex: 0 0 auto; width: 30px; font: 700 12px/1 'IBM Plex Mono', monospace; color: var(--a); }
-  .vsc-lbl { font: 500 14px/1.3 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--ink); min-width: 0; }
-  .vsc-row.locked { opacity: .6; }
-  .vsc-row.locked .vsc-lbl { color: var(--mu2); }
-
-  /* — Case à cocher (hit-area = toute la cellule ≥44px) — */
-  .vsc-box { -webkit-tap-highlight-color: transparent; appearance: none; border: 0; background: none; padding: 0; margin: 0; width: 100%; min-height: 56px; display: grid; place-items: center; cursor: pointer; }
-  .vsc-box:disabled { cursor: default; }
-  .vsc-box .bx { width: 32px; height: 32px; border-radius: 9px; border: 1.5px solid var(--bo3); background: var(--su); display: grid; place-items: center; transition: transform .1s ease, border-color .12s, background .12s; }
-  .vsc-box:not(:disabled):active .bx { transform: scale(.88); }
-  .vsc-box.c-acq .bx { background: color-mix(in srgb, var(--ens-go, #18a558) 5%, var(--su)); }
-  .vsc-box.c-enc .bx { background: color-mix(in srgb, #2563eb 5%, var(--su)); }
-  .vsc-box.c-rev .bx { background: color-mix(in srgb, var(--ens-amber, #f59e0b) 6%, var(--su)); }
-  .vsc-box .mk { display: none; }
-  .vsc-box .mk svg { width: 17px; height: 17px; }
-  .vsc-box.on.c-acq .bx { border-color: var(--ens-go, #18a558); background: color-mix(in srgb, var(--ens-go, #18a558) 16%, var(--su)); }
-  .vsc-box.on.c-acq .mk { display: block; color: var(--ens-go, #18a558); }
-  .vsc-box.on.c-enc .bx { border-color: #2563eb; background: color-mix(in srgb, #2563eb 16%, var(--su)); }
-  .vsc-box.on.c-enc .mk { display: block; color: #2563eb; }
-  .vsc-box.on.c-rev .bx { border-color: var(--ens-amber, #d97706); background: color-mix(in srgb, var(--ens-amber, #f59e0b) 18%, var(--su)); }
-  .vsc-box.on.c-rev .mk { display: block; color: var(--ens-amber, #b45309); }
-  .vsc-box:focus-visible .bx { outline: 2px solid var(--a); outline-offset: 2px; }
-  @media (prefers-reduced-motion: reduce) { .vsc-box .bx { transition: none; } }
-
-  /* — Pied de tableau : synthèse de la séance (live) — */
-  .vsc-foot { display: flex; align-items: stretch; border-top: 2px solid var(--ink); background: var(--su2); }
-  .vsc-foot .m { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 11px 4px; border-right: 1px solid var(--bo3); }
-  .vsc-foot .m:last-child { border-right: 0; }
-  .vsc-foot .m .n { font: 800 20px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; font-variant-numeric: tabular-nums; }
-  .vsc-foot .m .k { font: 700 8.5px/1 var(--ens-body, 'Inter'), sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--mu2); margin-top: 3px; }
-  .vsc-foot .m.acq .n { color: var(--ens-go, #18a558); } .vsc-foot .m.enc .n { color: #2563eb; } .vsc-foot .m.rev .n { color: var(--ens-amber, #b45309); }
-  .vsc-foot .m.tot { background: color-mix(in srgb, var(--a) 8%, var(--su)); }
-  .vsc-foot .m.tot .n { color: var(--ink); }
+  /* pastilles « plastique » 3D — le seul repère couleur */
+  .vl-pill { display: inline-flex; align-items: center; gap: 5px; flex: none; padding: 7px 12px; border-radius: 999px; font: 700 12px var(--ens-display, 'Fredoka'), sans-serif; white-space: nowrap; letter-spacing: .2px; color: #fff; }
+  .vl-pill svg { display: block; }
+  .vl-pill.non { background: var(--su); color: var(--mu2); border: 1.5px dashed var(--bo); font-family: var(--ens-body, sans-serif); font-weight: 700; font-size: 11.5px; }
+  .vl-pill.acquis { background: linear-gradient(180deg, var(--ens-go-lt, #34d27b), var(--ens-go, #18a558)); box-shadow: 0 3px 8px -2px color-mix(in srgb, var(--ens-go, #18a558) 50%, transparent), inset 0 1px 0 rgba(255,255,255,.4); }
+  .vl-pill.en_cours { background: linear-gradient(180deg, #4b83ff, #2563eb); box-shadow: 0 3px 8px -2px rgba(37,99,235,.5), inset 0 1px 0 rgba(255,255,255,.4); }
+  .vl-pill.a_retravailler { background: linear-gradient(180deg, #f7a733, var(--ens-amber, #e0850b)); box-shadow: 0 3px 8px -2px rgba(224,133,11,.5), inset 0 1px 0 rgba(255,255,255,.4); }
 
   /* ── Note moniteur ── */
   .vs-note {
@@ -561,6 +552,9 @@ async function selectEleve(id, doRender = true) {
     console.error("[valider-seance] fetch validations", e);
   }
   _eleveDDOpen = false;
+  _openMondes = new Set();
+  const firstOpen = REMC.find((cat) => cat.subs.some((s) => !_acquisSet.has(s.c)));
+  if (firstOpen) _openMondes.add(firstOpen.id);
   if (doRender) {
     render();
     // L'UI complète (mondes, chips, footer) vient d'apparaître : bon moment
@@ -583,7 +577,7 @@ function render() {
           <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
           <div class="vs-hd-text">
             <h1 class="vs-h1">Valider une séance</h1>
-            ${_showSub ? `<p class="vs-sub">Choisis l'élève, puis coche Acquis / En cours / À revoir pour chaque compétence travaillée.</p>` : ""}
+            ${_showSub ? `<p class="vs-sub">Choisis l'élève, puis tape une compétence : Acquis → En cours → À revoir.</p>` : ""}
           </div>
           <div class="vs-hd-illus">${medallion("crayon", "indigo", { size: 48, glow: true })}</div>
         </div>
@@ -642,18 +636,18 @@ function renderEleveDropdown() {
     </div>`;
 }
 
-// Marques manuscrites par statut (coche / tiret / croix)
-const VSC_MK = {
-  acquis: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  en_cours: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>`,
-  a_retravailler: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`,
+// Pastille de statut (icône + label) — le seul repère couleur
+const PILL_ICO = {
+  acquis: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  en_cours: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/></svg>`,
+  a_retravailler: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg>`,
 };
-// Les 3 colonnes de la grille (ordre = Acquis, En cours, À revoir)
-const VSC_COLS = [
-  { st: "acquis", cls: "c-acq", lbl: "Acquis" },
-  { st: "en_cours", cls: "c-enc", lbl: "En cours" },
-  { st: "a_retravailler", cls: "c-rev", lbl: "À revoir" },
-];
+function statutPill(state) {
+  if (state === "acquis") return `<span class="vl-pill acquis">${PILL_ICO.acquis}Acquis</span>`;
+  if (state === "en_cours") return `<span class="vl-pill en_cours">${PILL_ICO.en_cours}En cours</span>`;
+  if (state === "a_retravailler") return `<span class="vl-pill a_retravailler">${PILL_ICO.a_retravailler}À revoir</span>`;
+  return `<span class="vl-pill non">À évaluer</span>`;
+}
 
 // Progression d'une catégorie dans le livret (acquises + posées cette séance)
 function catProgress(cat) {
@@ -663,80 +657,32 @@ function catProgress(cat) {
   return { evald, total: cat.subs.length, pct: Math.round((evald / cat.subs.length) * 100) };
 }
 
-// Synthèse de CETTE séance (uniquement ce que le moniteur pose maintenant)
-function sessionCounts() {
-  let acquis = 0, en_cours = 0, a_retravailler = 0;
-  for (const st of _picked.values()) {
-    if (st === "acquis") acquis++;
-    else if (st === "en_cours") en_cours++;
-    else if (st === "a_retravailler") a_retravailler++;
-  }
-  return { acquis, en_cours, a_retravailler, total: acquis + en_cours + a_retravailler };
-}
-
-function renderBox(compId, col, current, locked) {
-  const on = current === col.st;
-  return `<button class="vsc-box ${col.cls}${on ? " on" : ""}" type="button"${locked ? " disabled aria-disabled=\"true\"" : ""}
-    data-comp="${esc(compId)}" data-st="${col.st}" aria-label="${esc(compId)} — ${esc(col.lbl)}" aria-pressed="${on}">
-    <span class="bx"><span class="mk">${VSC_MK[col.st]}</span></span></button>`;
-}
-
 function renderComps() {
-  const el = eleveById(_eleve);
-  const dateFr = new Date()
-    .toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })
-    .replace(/\//g, ".");
-  const moniteurNom =
-    fmtName(`${_me.prenom || ""} ${_me.nom || ""}`.trim()) || "Moniteur";
-  const eleveNom = el ? fmtName(`${el.prenom || ""} ${el.nom || ""}`.trim()) : "";
-
   const cats = REMC.map((cat) => {
     const p = catProgress(cat);
+    const open = _openMondes.has(cat.id);
     const rows = cat.subs
-      .map((s) => {
-        const locked = _acquisSet.has(s.c);
-        const current = locked ? "acquis" : _picked.get(s.c) || null;
-        const done = !!current;
-        const sCls =
-          current === "acquis" ? " s-acq"
-          : current === "en_cours" ? " s-enc"
-          : current === "a_retravailler" ? " s-rev" : "";
-        const boxes = VSC_COLS.map((col) => renderBox(s.c, col, current, locked)).join("");
-        return `<div class="vsc-row${done ? " done" : ""}${sCls}${locked ? " locked" : ""}" data-comp="${esc(s.c)}">
-          <div class="vsc-label"><span class="vsc-code">${esc(s.c)}</span><span class="vsc-lbl">${esc(s.n)}</span></div>
-          ${boxes}
-        </div>`;
+      .map((sub) => {
+        const locked = _acquisSet.has(sub.c);
+        const current = locked ? "acquis" : _picked.get(sub.c) || null;
+        return `<button class="vl-row${current ? " on" : ""}${locked ? " locked" : ""}" type="button"${locked ? ' disabled aria-disabled="true"' : ""} data-comp="${esc(sub.c)}">
+          <span class="vl-code">${esc(sub.c)}</span>
+          <span class="vl-lbl">${esc(sub.n)}</span>
+          ${statutPill(current)}
+        </button>`;
       })
       .join("");
-    return `
-      <div class="vsc-cat-head" data-cat="${esc(cat.id)}">
-        <span class="vsc-cno">${esc(cat.id)}</span>
-        <span class="vsc-cname">${esc(cat.name)}</span>
-        <span class="vsc-cbar"><i style="width:${p.pct}%"></i></span>
-        <span class="vsc-ccount"><b>${p.evald}</b>/${p.total}</span>
-      </div>
-      <div class="vsc-colhead"><div></div><div class="vsc-ch acq">Acquis</div><div class="vsc-ch enc">En cours</div><div class="vsc-ch rev">À revoir</div></div>
-      ${rows}`;
+    return `<section class="vl-cat${open ? "" : " closed"}">
+      <button class="vl-cat-hd" type="button" data-cat="${esc(cat.id)}" aria-expanded="${open}">
+        <span class="vl-cn">${esc(cat.id)}</span>
+        <span class="vl-nm">${esc(cat.name)}</span>
+        <span class="vl-pr"><span class="vl-bar"><i style="width:${p.pct}%"></i></span><span class="vl-ct">${p.evald}/${p.total}</span></span>
+        <span class="vl-chev">${icon("chevron-down", { size: 18, strokeWidth: 2.4 })}</span>
+      </button>
+      <div class="vl-body">${rows}</div>
+    </section>`;
   }).join("");
-
-  const c = sessionCounts();
-  return `
-    <div class="vsc">
-      <div class="vsc-head">
-        <div class="vsc-head-row"><span class="vsc-doc-title">Fiche de séance</span><span class="vsc-doc-date">${esc(dateFr)}</span></div>
-        <div class="vsc-head-meta">
-          ${el ? `<span class="vsc-meta"><span class="vsc-av">${renderUserAvatar({ avatar_url: el.avatar_url, prenom: el.prenom, nom: el.nom }, 24)}</span><b>${esc(eleveNom)}</b></span>` : ""}
-          <span class="vsc-meta"><i>Moniteur</i> <b>${esc(moniteurNom)}</b></span>
-        </div>
-      </div>
-      ${cats}
-      <div class="vsc-foot" id="vsc-foot">
-        <div class="m acq"><span class="n" data-k="acq">${c.acquis}</span><span class="k">Acquis</span></div>
-        <div class="m enc"><span class="n" data-k="enc">${c.en_cours}</span><span class="k">En cours</span></div>
-        <div class="m rev"><span class="n" data-k="rev">${c.a_retravailler}</span><span class="k">À revoir</span></div>
-        <div class="m tot"><span class="n" data-k="tot">${c.total}</span><span class="k">Évaluées</span></div>
-      </div>
-    </div>`;
+  return `<div class="vl">${cats}</div>`;
 }
 
 function renderNote() {
@@ -770,27 +716,14 @@ function renderFooter() {
 function updateCounts() {
   // Bandes de catégorie (barre + compteur)
   REMC.forEach((cat) => {
-    const head = _root.querySelector(`.vsc-cat-head[data-cat="${cat.id}"]`);
-    if (!head) return;
+    const hd = _root.querySelector(`.vl-cat-hd[data-cat="${cat.id}"]`);
+    if (!hd) return;
     const p = catProgress(cat);
-    const b = head.querySelector(".vsc-ccount b");
-    if (b) b.textContent = p.evald;
-    const bar = head.querySelector(".vsc-cbar i");
+    const ct = hd.querySelector(".vl-ct");
+    if (ct) ct.textContent = `${p.evald}/${p.total}`;
+    const bar = hd.querySelector(".vl-bar i");
     if (bar) bar.style.width = `${p.pct}%`;
   });
-  // Pied de tableau : synthèse de la séance
-  const foot = _root.querySelector("#vsc-foot");
-  if (foot) {
-    const c = sessionCounts();
-    const set = (k, v) => {
-      const n = foot.querySelector(`[data-k="${k}"]`);
-      if (n) n.textContent = v;
-    };
-    set("acq", c.acquis);
-    set("enc", c.en_cours);
-    set("rev", c.a_retravailler);
-    set("tot", c.total);
-  }
   // Bouton de validation
   const lbl = _root.querySelector("#vs-submit-lbl");
   if (lbl) {
@@ -833,31 +766,33 @@ function wire() {
     });
   });
 
-  // ── Cases carnet : une case cochée par ligne (radio de statut) ──
-  _root.querySelector(".vsc")?.addEventListener("click", (e) => {
-    const box = e.target.closest(".vsc-box[data-comp]");
-    if (!box || box.disabled) return;
-    const id = box.dataset.comp;
-    const st = box.dataset.st;
-    const cur = _picked.get(id) || null;
-    const next = cur === st ? null : st; // re-clic sur la case active = décoche
+  // ── Liste : tap = replier la catégorie, ou faire défiler le statut ──
+  _root.querySelector(".vl")?.addEventListener("click", (e) => {
+    // repli / dépli d'une catégorie
+    const hd = e.target.closest(".vl-cat-hd[data-cat]");
+    if (hd) {
+      const cid = hd.dataset.cat;
+      const open = !_openMondes.has(cid);
+      if (open) _openMondes.add(cid);
+      else _openMondes.delete(cid);
+      haptic("tap");
+      hd.closest(".vl-cat").classList.toggle("closed", !open);
+      hd.setAttribute("aria-expanded", open ? "true" : "false");
+      return;
+    }
+    // compétence : le statut défile (rien → acquis → en cours → à retravailler → rien)
+    const row = e.target.closest(".vl-row[data-comp]");
+    if (!row || row.disabled) return;
+    const id = row.dataset.comp;
+    const next = nextStatut(_picked.get(id) || null);
     if (next === null) _picked.delete(id);
     else _picked.set(id, next);
     // haptic métier : validate pour acquis, select pour autre, tap pour reset
     haptic(next === "acquis" ? "validate" : next ? "select" : "tap");
-    // Maj en place de la ligne (pas de full re-render)
-    const row = box.closest(".vsc-row");
-    row.querySelectorAll(".vsc-box").forEach((b) => {
-      const on = _picked.get(id) === b.dataset.st;
-      b.classList.toggle("on", on);
-      b.setAttribute("aria-pressed", on ? "true" : "false");
-    });
-    row.classList.remove("done", "s-acq", "s-enc", "s-rev");
-    if (next)
-      row.classList.add(
-        "done",
-        next === "acquis" ? "s-acq" : next === "en_cours" ? "s-enc" : "s-rev",
-      );
+    // Maj en place : classe + pastille (pas de full re-render)
+    row.classList.toggle("on", !!next);
+    const pill = row.querySelector(".vl-pill");
+    if (pill) pill.outerHTML = statutPill(next);
     updateCounts();
   });
 
