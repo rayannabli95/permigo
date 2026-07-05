@@ -789,26 +789,8 @@ const STYLE = `<style>
   color: var(--a-txt); text-decoration: none;
 }
 
-/* ── Tes devoirs (carte du moniteur — indigo, injectée si en attente) ── */
-.acc2-devoirs {
-  display: flex; align-items: center; gap: 12px;
-  margin: 16px 16px 0; padding: 14px 15px; border-radius: 18px;
-  text-decoration: none; color: #fff; position: relative; overflow: hidden;
-  background: linear-gradient(135deg, #4f46e5 0%, #6d5ef0 55%, #7c4dff 100%);
-  box-shadow: 0 14px 30px -16px rgba(79,70,229,.7), inset 0 1px 0 rgba(255,255,255,.18);
-  -webkit-tap-highlight-color: transparent;
-  animation: acc2DevoirsIn .4s var(--ease-out, ease) both;
-}
-@keyframes acc2DevoirsIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .acc2-devoirs { animation: none; } }
-.acc2-devoirs:active { transform: scale(.99); }
-.acc2-devoirs::before { content: ''; position: absolute; right: -30px; top: -42px; width: 158px; height: 158px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%); pointer-events: none; }
-.acc2-devoirs-ico { width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
-.acc2-devoirs-ico .pg-med { filter: drop-shadow(0 3px 6px rgba(10,8,40,.35)); }
-.acc2-devoirs-txt { flex: 1; min-width: 0; position: relative; z-index: 1; }
-.acc2-devoirs-t { font: 800 15px/1.15 'Baloo 2', 'Plus Jakarta Sans', sans-serif; }
-.acc2-devoirs-s { font: 600 11.5px/1.3 'Inter', sans-serif; color: rgba(255,255,255,.85); margin-top: 2px; }
-.acc2-devoirs-badge { flex-shrink: 0; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; background: #ffd24a; color: #1a1208; font: 800 13px/24px 'Inter', sans-serif; text-align: center; position: relative; z-index: 1; box-shadow: 0 0 10px rgba(255,210,74,.5); }
+/* (Carte « Tes devoirs » retirée : les devoirs du moniteur ne s'affichent
+   plus QUE dans le hero du hub Réviser — plus de doublon.) */
 </style>`;
 
 // ─── Constantes ──────────────────────────────────────────────────
@@ -1091,9 +1073,6 @@ export async function mount(root) {
     // Coffres disponibles — teaser non-bloquant injecté sous l'action du jour
     _loadAndInjectChests(root);
     Promise.resolve()
-      .then(() => _loadAndInjectDevoirs(root, me))
-      .catch(() => {});
-    Promise.resolve()
       .then(() => _loadAndInjectCompteRendu(root, me))
       .catch(() => {});
 
@@ -1327,9 +1306,6 @@ function render({
 
   <!-- Compte-rendu non lu du moniteur (injecté async) -->
   <div id="acc-cr-slot"></div>
-
-  <!-- Tes devoirs du moniteur (injecté async par _loadAndInjectDevoirs si en attente) -->
-  <div id="acc-devoirs-slot"></div>
 
   <!-- Slot coffre (injecté async par _loadAndInjectChests) -->
   <div id="acc-chest-slot"></div>
@@ -1571,34 +1547,6 @@ async function _loadAndInjectLeagues(root) {
     mountLeagueHero(slot, { conduite, revision });
   } catch (e) {
     console.error("[accueil] leagues", e);
-  }
-}
-
-// Injecte une carte « Tes devoirs » si l'élève a des révisions assignées par
-// son moniteur non encore faites (revision_focus.done_at IS NULL). Lecture
-// seule via RLS (« eleve lit ses ciblages »). Cadré validation, pas de date.
-async function _loadAndInjectDevoirs(root, me) {
-  try {
-    if (!me) return;
-    const { count, error } = await sb
-      .from("revision_focus")
-      .select("id", { count: "exact", head: true })
-      .eq("eleve_id", me.id)
-      .is("done_at", null);
-    if (error || !count) return;
-    const slot = root.querySelector("#acc-devoirs-slot");
-    if (!slot) return;
-    slot.innerHTML = `
-      <a class="acc2-devoirs" href="#/revision-conduite" aria-label="Tes devoirs du moniteur : ${count} à faire">
-        <span class="acc2-devoirs-ico">${medallion("livret", "indigo", { size: 38 })}</span>
-        <span class="acc2-devoirs-txt">
-          <span class="acc2-devoirs-t">Tes devoirs · ${count} à faire</span>
-          <span class="acc2-devoirs-s">De ton moniteur — à boucler avant ta prochaine validation</span>
-        </span>
-        <span class="acc2-devoirs-badge">${count}</span>
-      </a>`;
-  } catch (e) {
-    console.warn("[accueil] devoirs", e);
   }
 }
 
