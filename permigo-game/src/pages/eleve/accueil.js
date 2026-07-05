@@ -674,8 +674,7 @@ const STYLE = `<style>
 
 /* ── First-run progressive disclosure ── */
 .acc2--first-run .acc2-section-title,
-.acc2--first-run .worlds-grid,
-.acc2--first-run .acc2-premium {
+.acc2--first-run .worlds-grid {
   opacity: 0.45;
   pointer-events: none;
   user-select: none;
@@ -731,122 +730,6 @@ const STYLE = `<style>
 }
 @media (prefers-reduced-motion: reduce) {
   .acc2-permis-fill { transition: none; }
-}
-
-/* ═══════════════ PREMIUM (carte maquette) ══════════════════════ */
-.acc2-premium {
-  display: block; margin: 22px 16px 0;
-  background: linear-gradient(180deg,#fffdf8,#fdf4e6);
-  border: 1px solid #f6e6c4; border-radius: 24px;
-  overflow: hidden; text-decoration: none;
-  box-shadow: 0 14px 30px -14px rgba(224,142,11,.36);
-  position: relative; transition: transform .12s;
-  -webkit-tap-highlight-color: transparent;
-}
-.acc2-premium:active { transform: scale(.985); }
-.acc2-premium-media {
-  position: relative; height: 130px; overflow: hidden;
-}
-.acc2-premium-media > img.acc2-pm-bg {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-}
-.acc2-premium-media::after {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent 28%, rgba(18,6,0,.58));
-}
-.acc2-premium-shine {
-  position: absolute; inset: 0; overflow: hidden; z-index: 2; pointer-events: none;
-}
-.acc2-premium-shine::after {
-  content: ""; position: absolute; top: 0; left: -130%; width: 55%; height: 100%;
-  background: linear-gradient(120deg, transparent, rgba(255,255,255,.5), transparent);
-  transform: skewX(-20deg);
-  animation: acc2PremiumShine 5s ease-in-out infinite;
-}
-@keyframes acc2PremiumShine {
-  0%       { left: -130%; }
-  55%, 100% { left: 140%; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .acc2-premium-shine::after { animation: none; }
-}
-.acc2-premium-crown {
-  position: absolute; top: 10px; right: 12px; width: 44px; z-index: 3;
-  filter: drop-shadow(0 3px 6px rgba(120,70,0,.45));
-  animation: acc2CrownFloat 4s ease-in-out infinite;
-}
-@keyframes acc2CrownFloat {
-  0%,100% { transform: translateY(0); }
-  50%     { transform: translateY(-8px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .acc2-premium-crown { animation: none; }
-}
-.acc2-premium-tag {
-  position: absolute; top: 14px; left: 13px; z-index: 3;
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(28,21,51,.55); backdrop-filter: blur(6px);
-  color: #ffe9b8; font: 800 10.5px/1 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: .08em; text-transform: uppercase;
-  padding: 5px 10px; border-radius: 999px;
-}
-.acc2-premium-ttl {
-  position: absolute; left: 14px; bottom: 11px; z-index: 3;
-  color: #fff; font: 700 25px/1 'Fredoka', 'Plus Jakarta Sans', sans-serif;
-  text-shadow: 0 2px 10px rgba(0,0,0,.55);
-}
-.acc2-premium-body {
-  padding: 13px 15px 15px;
-  display: flex; align-items: center; gap: 10px;
-}
-.acc2-premium-body p {
-  flex: 1; font: 700 12.5px/1.45 'Plus Jakarta Sans', sans-serif; color: #8a6a3a; margin: 0;
-}
-.acc2-premium-go {
-  flex: none; background: linear-gradient(180deg,#f8b62b,#ef9f12);
-  color: #3a2606; font: 800 13px/1 'Plus Jakarta Sans', sans-serif;
-  padding: 11px 15px; border-radius: 14px;
-  box-shadow: 0 5px 0 var(--acc-gold-dk, #e08e0b);
-  text-decoration: none;
-}
-.acc2-premium-links {
-  display: flex; flex-direction: column; gap: 0;
-  margin: 6px 16px 0;
-}
-.acc2-premium-link {
-  display: flex; align-items: center; gap: 14px;
-  padding: 17px 16px; background: var(--su);
-  border: 1px solid var(--bo); text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: background .12s;
-}
-.acc2-premium-link:first-child { border-radius: 18px 18px 0 0; }
-.acc2-premium-link:last-child  { border-radius: 0 0 18px 18px; }
-.acc2-premium-link:not(:last-child) { border-bottom: none; } /* évite le double liseré entre cartes */
-.acc2-premium-link:active { background: color-mix(in srgb, var(--a) 6%, transparent); }
-.acc2-premium-link-ico {
-  width: 46px; height: 46px; flex: none;
-  background: color-mix(in srgb, var(--a) 10%, transparent); border-radius: 14px;
-  display: grid; place-items: center;
-}
-.acc2-premium-link-ico img {
-  width: 32px; height: 32px; object-fit: contain;
-  filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--a) 25%, transparent));
-}
-.acc2-premium-link-txt { flex: 1; min-width: 0; }
-.acc2-premium-link-t {
-  font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink);
-  letter-spacing: -.01em;
-}
-.acc2-premium-link-s {
-  font: 500 12.5px/1.35 'Inter', sans-serif; color: var(--mu); margin-top: 3px;
-}
-.acc2-premium-link-arr {
-  flex: none; display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; border-radius: 50%;
-  background: var(--acc-vio); color: #fff;
-  box-shadow: 0 4px 10px -3px color-mix(in srgb, var(--a) 50%, transparent);
-  font-size: 16px; font-weight: 800;
 }
 
 /* ═══════════════ COFFRE (style maquette) ════════════════════════ */
@@ -1188,7 +1071,7 @@ export async function mount(root) {
           mountFeedbackFeed(accDiv, {
             eleveId: me.id,
             limit: 5,
-            anchorEl: accDiv.querySelector(".acc2-premium"),
+            anchorEl: accDiv.querySelector("#acc-cr-slot"),
           }),
         )
         .catch(() => {});
@@ -1438,67 +1321,15 @@ function render({
   <div id="acc-lb-slot"></div>
 
   <!-- ══ BELOW FOLD ══ -->
-
-  <!-- ══ Carte premium Examen blanc en vedette (sans en-tête de section) ══ -->
-
-  <!-- Carte Examen blanc en vedette -->
-  <a class="acc2-premium" id="acc-exam-conduite" href="#/exam-conduite"
-     aria-label="Examen blanc PermiGo+">
-    <div class="acc2-premium-media">
-      <img class="acc2-pm-bg" src="/skins/landing/monde2jour.webp" alt="" loading="lazy">
-      <span class="acc2-premium-tag">PermiGo+</span>
-      <img class="acc2-premium-crown" src="/skins/couronne.png" alt="" aria-hidden="true" loading="lazy">
-      <span class="acc2-premium-ttl">Examen blanc</span>
-      <div class="acc2-premium-shine" aria-hidden="true"></div>
-    </div>
-    <div class="acc2-premium-body">
-      <p>Teste-toi en conditions réelles, comme le jour&nbsp;J.</p>
-      <span class="acc2-premium-go">Découvrir</span>
-    </div>
-  </a>
+  <!-- Note : l'entraînement (examen blanc, révision conduite, en situation,
+       centre d'examen) vit dans les onglets « Réviser » et « Mon permis ».
+       L'accueil ne garde ici que ce qui vient du moniteur + les coffres. -->
 
   <!-- Compte-rendu non lu du moniteur (injecté async) -->
   <div id="acc-cr-slot"></div>
 
   <!-- Tes devoirs du moniteur (injecté async par _loadAndInjectDevoirs si en attente) -->
   <div id="acc-devoirs-slot"></div>
-
-  <!-- Deux entrées slim violettes -->
-  <div class="acc2-premium-links">
-    <a class="acc2-premium-link" id="acc-revision" href="#/revision-conduite"
-       aria-label="Révision conduite">
-      <div class="acc2-premium-link-ico">
-        <img src="/skins/badge-3d-02.webp" alt="" aria-hidden="true" loading="lazy">
-      </div>
-      <div class="acc2-premium-link-txt">
-        <div class="acc2-premium-link-t">Révision conduite</div>
-        <div class="acc2-premium-link-s">Le geste, pas le code — entre tes leçons</div>
-      </div>
-      <span class="acc2-premium-link-arr" aria-hidden="true">›</span>
-    </a>
-    <a class="acc2-premium-link" id="acc-centre" href="#/centre-examen"
-       aria-label="Ton centre d'examen">
-      <div class="acc2-premium-link-ico">
-        <img src="/skins/badge-3d-06.webp" alt="" aria-hidden="true" loading="lazy">
-      </div>
-      <div class="acc2-premium-link-txt">
-        <div class="acc2-premium-link-t">Ton centre d'examen</div>
-        <div class="acc2-premium-link-s">Pièges &amp; conseils sur ton centre</div>
-      </div>
-      <span class="acc2-premium-link-arr" aria-hidden="true">›</span>
-    </a>
-    <a class="acc2-premium-link" id="acc-en-situation" href="#/en-situation"
-       aria-label="En situation — mini-jeu de mises en situation">
-      <div class="acc2-premium-link-ico">
-        <img src="/skins/permigo-remc-circulation-normale-v3.webp" alt="" aria-hidden="true" loading="lazy">
-      </div>
-      <div class="acc2-premium-link-txt">
-        <div class="acc2-premium-link-t">En situation</div>
-        <div class="acc2-premium-link-s">Une scène, une décision — à toi de jouer</div>
-      </div>
-      <span class="acc2-premium-link-arr" aria-hidden="true">›</span>
-    </a>
-  </div>
 
   <!-- Slot coffre (injecté async par _loadAndInjectChests) -->
   <div id="acc-chest-slot"></div>
@@ -1615,30 +1446,6 @@ function wire(
       }
     });
   }
-
-  // Examen blanc — tuile <a href>, tracking au clic
-  root.querySelector("#acc-exam-conduite")?.addEventListener("click", () => {
-    haptic("tap");
-    track("cta.clicked", { cta_type: "exam_conduite_card" });
-  });
-
-  // Centre d'examen — tuile <a href>
-  root.querySelector("#acc-centre")?.addEventListener("click", () => {
-    haptic("tap");
-    track("cta.clicked", { cta_type: "centre_examen_card" });
-  });
-
-  // Révision conduite — tuile <a href>
-  root.querySelector("#acc-revision")?.addEventListener("click", () => {
-    haptic("tap");
-    track("cta.clicked", { cta_type: "revision_conduite_card" });
-  });
-
-  // En situation — tuile <a href>
-  root.querySelector("#acc-en-situation")?.addEventListener("click", () => {
-    haptic("tap");
-    track("cta.clicked", { cta_type: "en_situation_card" });
-  });
 
   // Streak badge → bottom sheet
   const bsBg = root.querySelector("#bs-bg");

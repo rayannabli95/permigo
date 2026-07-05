@@ -39,6 +39,7 @@ const IMG = {
 // Le glyphe « volant » PLEIN remplace enfin le volant en trait (point faible).
 const MED = {
   exam: medallion("examen", "gold", { cls: "rvh-med" }),
+  examConduite: medallion("voiture", "gold", { cls: "rvh-med" }),
   fiches: medallion("volant", "violet", { cls: "rvh-med" }),
   faute: medallion("faute", "red", { cls: "rvh-med" }),
   situ: medallion("route", "blue", { cls: "rvh-med" }),
@@ -360,6 +361,15 @@ function render({ streak, dailyDone, fichesLues, fichesTotal, weak }) {
       <div class="rvh-mode-t">En situation</div>
       <div class="rvh-mode-s">Une scène, une décision</div>
       <span class="rvh-mode-meta">6 situations ${SVG.chevron}</span>
+    </button>
+
+    <button class="rvh-mode wide" data-go="/exam-conduite">
+      <span class="rvh-sign" aria-hidden="true">${MED.examConduite}</span>
+      <div class="rvh-mode-body">
+        <div class="rvh-mode-t">Examen blanc de conduite</div>
+        <div class="rvh-mode-s">Teste-toi en conditions réelles, comme le jour J</div>
+        <span class="rvh-mode-meta">Se tester ${SVG.chevron}</span>
+      </div>
     </button>
 
     <button class="rvh-mode wide" id="rvh-daily-tile">
