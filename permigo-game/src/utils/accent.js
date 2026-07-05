@@ -10,8 +10,17 @@ const KEY = "permigo-accent";
 // Teintes claires (vert/orange/cyan) → ink foncé ; teintes soutenues → blanc.
 export const ACCENTS = [
   {
+    // Violet « Arène 3D » — DA élève par défaut, raccord avec le login/quiz.
+    id: "violet",
+    name: "Violet PermiGo",
+    a: "#6c63ff",
+    adk: "#4a3fc9",
+    lt: "#8e87ff",
+    ink: "#ffffff",
+  },
+  {
     id: "vert",
-    name: "Vert PermiGo",
+    name: "Vert Duo",
     a: "#58CC02",
     adk: "#46A302",
     lt: "#6fe016",
@@ -23,14 +32,6 @@ export const ACCENTS = [
     a: "#2f80ed",
     adk: "#1b5fc0",
     lt: "#5aa0ff",
-    ink: "#ffffff",
-  },
-  {
-    id: "violet",
-    name: "Violet",
-    a: "#6d4dff",
-    adk: "#4a2fc4",
-    lt: "#a78bff",
     ink: "#ffffff",
   },
   {
@@ -59,7 +60,7 @@ export const ACCENTS = [
   },
 ];
 
-const DEFAULT = "vert";
+const DEFAULT = "violet";
 
 export function byId(id) {
   return ACCENTS.find((x) => x.id === id) || ACCENTS[0];
@@ -91,7 +92,24 @@ export function setAccent(id) {
   applyAccent(id);
 }
 
+// Migration one-time (2026-07-05) : le vert n'est plus la marque élève.
+// L'ancien défaut « vert » était gravé en localStorage par l'onboarding SANS
+// vrai choix de l'utilisateur → on le repasse en violet. Les autres couleurs
+// (bleu/orange/rose…) sont des choix explicites (le défaut était vert) → gardées.
+const MIGRATED_KEY = "permigo-accent-migrated-violet";
+function migrateLegacyGreen() {
+  try {
+    if (localStorage.getItem(MIGRATED_KEY)) return;
+    if (localStorage.getItem(KEY) === "vert")
+      localStorage.setItem(KEY, "violet");
+    localStorage.setItem(MIGRATED_KEY, "1");
+  } catch {
+    /* localStorage indispo → le défaut violet s'appliquera de toute façon */
+  }
+}
+
 // Appliqué au tout début du boot (avant le rendu), comme initThemeEarly.
 export function initAccentEarly() {
+  migrateLegacyGreen();
   applyAccent(getAccent());
 }

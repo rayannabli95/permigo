@@ -112,12 +112,14 @@ function ensureStyle() {
   .dq-right { flex: none; display: flex; align-items: center; }
   .dq-claim {
     display: inline-flex; align-items: center; gap: 5px;
-    background: var(--a); color: var(--a-ink);
+    /* --adk (violet profond) et non --a : blanc sur --a (#6c63ff) à 12.5px
+       = 4.31:1 (échec AA) ; --adk (#4a3fc9) = ~8:1. */
+    background: var(--adk); color: #fff;
     font: 800 12.5px/1 'Plus Jakarta Sans', sans-serif;
     padding: 10px 14px; border-radius: 12px;
-    box-shadow: 0 5px 0 var(--adk, #4b45c9); white-space: nowrap;
+    box-shadow: 0 5px 0 color-mix(in srgb, var(--adk) 55%, #000); white-space: nowrap;
   }
-  .dq-card--ready:active .dq-claim { transform: translateY(2px); box-shadow: 0 3px 0 var(--adk, #4b45c9); }
+  .dq-card--ready:active .dq-claim { transform: translateY(2px); box-shadow: 0 3px 0 color-mix(in srgb, var(--adk) 55%, #000); }
   .dq-reward {
     display: inline-flex; align-items: center; gap: 4px;
     font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-txt); white-space: nowrap;
@@ -281,7 +283,9 @@ function renderCard(q) {
         ? "competence"
         : "default";
   const cat = CAT_CFG[_catKey];
-  const fillClr = done ? "var(--gr)" : "var(--a)";
+  // Barre : violet (le vert « fait » jurait avec la DA violette ; le « fait »
+  // est déjà signalé par le libellé ✓). Fait = violet profond.
+  const fillClr = done ? "var(--adk)" : "var(--a)";
   const stCls = done
     ? "dq-card--claimed"
     : ready

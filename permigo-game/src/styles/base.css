@@ -8,11 +8,13 @@
    ne découvre la requête qu'après avoir téléchargé et parsé ce fichier). */
 
 :root {
-  /* ─ Accent principal (Duo green par défaut — surchargé par le preset choisi
-     dans le profil, cf. src/utils/accent.js). 4 tokens = toute l'UI suit. ─ */
-  --a:#58CC02; --adk:#46A302;
-  --a-lt:#6fe016;   /* stop clair du dégradé plastique */
-  --a-ink:#1a2800;  /* texte/icône posé SUR l'accent (contraste) */
+  /* ─ Accent principal : violet « Arène 3D » = la DA élève (raccord avec le
+     login/quiz). Surchargé par le preset choisi dans le profil
+     (src/utils/accent.js) et par l'indigo moniteur (enseignant-arcade.css, qui
+     redéfinit les 4 tokens). 4 tokens = toute l'UI suit. ─ */
+  --a:#6c63ff; --adk:#4a3fc9;
+  --a-lt:#8e87ff;   /* stop clair du dégradé plastique */
+  --a-ink:#ffffff;  /* texte/icône posé SUR l'accent (blanc sur violet) */
   --a-txt:color-mix(in srgb, var(--a) 58%, #000); /* accent utilisé COMME texte sur fond clair (l'accent pur fait 2.1:1 sur blanc) */
   --ap:color-mix(in srgb, var(--a) 9%, transparent); --ag:color-mix(in srgb, var(--a) 14%, transparent);
 

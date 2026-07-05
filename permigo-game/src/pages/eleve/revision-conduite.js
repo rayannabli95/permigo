@@ -505,11 +505,11 @@ button.rvcb-tile:active { transform:scale(.975); }
 .rvs-now-meta { position:relative; display:flex; align-items:center; gap:7px; font:600 13px/1 'Inter',sans-serif; color:var(--mu,#64748b); }
 .rvs-chipm { background:var(--bg,#eef1f7); border-radius:6px; padding:3px 7px; font:800 11.5px/1 'Inter',sans-serif; color:var(--mu,#57617c); }
 .rvs-cta { position:relative; margin-top:14px; width:100%; height:54px; border-radius:16px;
-  background:linear-gradient(180deg,#84e83c,#58cc02); color:#123400;
-  box-shadow:0 5px 0 #2f7a00, 0 10px 20px -6px rgba(88,204,2,.5);
+  background:linear-gradient(180deg,var(--a-lt),var(--a)); color:#fff;
+  box-shadow:0 5px 0 var(--adk), 0 10px 20px -6px color-mix(in srgb, var(--a) 50%, transparent);
   font:800 16px/1 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:9px; }
-.rvs-cta-ic { width:26px; height:26px; border-radius:8px; background:#123400; display:grid; place-items:center; }
-.rvs-cta-ic svg { width:14px; height:14px; color:#a6ff5e; }
+.rvs-cta-ic { width:26px; height:26px; border-radius:8px; background:var(--adk); display:grid; place-items:center; }
+.rvs-cta-ic svg { width:14px; height:14px; color:#fff; }
 .rvs-done { cursor:default; } .rvs-done:active { transform:none; }
 
 .rvs-focus { margin:12px 0 0; background:color-mix(in srgb,var(--a,#f97316) 8%,var(--su,#fff));
