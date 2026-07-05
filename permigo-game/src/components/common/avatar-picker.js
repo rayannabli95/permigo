@@ -131,7 +131,8 @@ const STYLE = `<style>
 /**
  * Affiche le picker d'avatars en bottom sheet.
  * @param {{ currentUrl?: string }} opts
- * @returns {Promise<string|null>} URL choisie ou null si annulé
+ * @returns {Promise<string|{file:File}|null>} URL d'un avatar par défaut,
+ *   `{ file }` si l'utilisateur a choisi sa propre photo, ou null si annulé.
  */
 export function openAvatarPicker(opts = {}) {
   return new Promise((resolve) => {
@@ -175,6 +176,7 @@ export function openAvatarPicker(opts = {}) {
             <button class="avpk-btn" data-action="cancel" style="flex:1">Annuler</button>
           </div>
         </div>
+        <input type="file" class="avpk-file" accept="image/*" style="display:none" />
       </div>
     `;
     document.body.appendChild(container);
@@ -220,12 +222,20 @@ export function openAvatarPicker(opts = {}) {
         haptic("tap");
         close(null);
       });
+    // « Ma photo » : déclenche le sélecteur de fichier DANS le geste utilisateur
+    // (obligatoire iOS — un click différé après la fermeture animée serait ignoré).
+    const fileInput = container.querySelector(".avpk-file");
     container
       .querySelector('[data-action="upload"]')
       .addEventListener("click", () => {
         haptic("select");
-        close(AVATAR_PICKER_UPLOAD); // sentinelle interceptée par profile-card
+        fileInput.click();
       });
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (file) close({ file }); // upload perso → résout avec le fichier choisi
+      // annulation système : on ne ferme pas, la feuille reste ouverte.
+    });
     confirmBtn.addEventListener("click", () => {
       haptic("success");
       close(selected);
