@@ -38,91 +38,95 @@ function ensureStyle() {
   const s = document.createElement("style");
   s.id = STYLE_ID;
   s.textContent = `
-  .dq-section { margin-bottom: 12px; }
+  .dq-section { margin: 0 0 14px; }
   .dq-hd {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 8px; padding: 0 2px;
+    margin-bottom: 10px; padding: 0 4px;
   }
   .dq-title {
-    font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+    font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
     color: var(--ink); letter-spacing: -.01em;
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 7px;
   }
   .dq-count {
-    font: 700 11px/1 'Inter', sans-serif;
-    color: var(--a-txt); background: color-mix(in srgb, var(--a) 10%, transparent);
-    border-radius: 99px; padding: 2px 8px;
+    font: 800 11px/1 'Inter', sans-serif;
+    color: var(--a-txt); background: color-mix(in srgb, var(--a) 12%, transparent);
+    border-radius: 99px; padding: 4px 9px;
   }
-  .dq-scroll {
-    display: flex; gap: 10px;
-    overflow-x: auto; padding-bottom: 4px;
-    scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  }
-  .dq-scroll::-webkit-scrollbar { display: none; }
+
+  /* ── Rangées pleine largeur (fini le carrousel horizontal serré) ── */
+  .dq-list { display: flex; flex-direction: column; gap: 8px; }
 
   .dq-card {
-    flex-shrink: 0; width: 156px;
+    display: flex; align-items: center; gap: 13px; width: 100%;
     background: var(--su); border: 1.5px solid var(--bo);
-    border-radius: 16px; padding: 14px 14px 12px;
-    cursor: pointer; position: relative; overflow: hidden;
-    transition: transform .15s cubic-bezier(.23,1,.32,1), border-color .15s;
-    animation: dqCardIn .32s cubic-bezier(.34,1.56,.64,1) both;
+    border-radius: 16px; padding: 11px 13px;
+    position: relative; overflow: hidden; text-align: left;
+    transition: transform .15s cubic-bezier(.23,1,.32,1), border-color .15s, background .2s;
+    animation: dqCardIn .34s cubic-bezier(.34,1.56,.64,1) both;
     -webkit-tap-highlight-color: transparent;
   }
   .dq-card:nth-child(2) { animation-delay: .05s; }
   .dq-card:nth-child(3) { animation-delay: .10s; }
+  .dq-card:nth-child(4) { animation-delay: .15s; }
+  .dq-card:nth-child(5) { animation-delay: .20s; }
   @keyframes dqCardIn {
-    from { opacity:0; transform:translateY(10px) scale(.96); }
-    to   { opacity:1; transform:translateY(0)    scale(1); }
+    from { opacity:0; transform:translateY(9px) scale(.98); }
+    to   { opacity:1; transform:translateY(0)   scale(1); }
   }
   @media (hover:hover) and (pointer:fine) {
-    .dq-card--ready:hover { border-color: color-mix(in srgb, var(--a) 40%, transparent); }
+    .dq-card--ready:hover { border-color: color-mix(in srgb, var(--a) 55%, transparent); }
   }
-  .dq-card:active { transform: scale(.97); }
   .dq-card--ready {
-    border-color: color-mix(in srgb, var(--a) 30%, transparent);
-    background: linear-gradient(145deg, color-mix(in srgb, var(--a) 6%, transparent), color-mix(in srgb, var(--a) 3%, transparent));
+    cursor: pointer;
+    border-color: color-mix(in srgb, var(--a) 36%, transparent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--a) 9%, var(--su)), var(--su) 60%);
+    box-shadow: 0 6px 18px -12px color-mix(in srgb, var(--a) 50%, transparent);
   }
+  .dq-card--ready:active { transform: scale(.985); }
   .dq-card--claimed {
-    border-color: rgba(16,185,129,.22);
-    background: linear-gradient(145deg, rgba(16,185,129,.05), rgba(5,150,105,.03));
+    border-color: rgba(16,185,129,.24);
+    background: linear-gradient(135deg, rgba(16,185,129,.07), var(--su) 60%);
     pointer-events: none; cursor: default;
   }
   .dq-card--pending { cursor: default; }
 
-  .dq-badge {
-    position: absolute; top: 10px; right: 10px;
-    font: 600 9px/1 'Plus Jakarta Sans', sans-serif;
-    padding: 3px 7px; border-radius: 99px; letter-spacing: .03em;
-  }
-  .dq-badge--claim { background: var(--a); color: var(--a-ink); }
-  .dq-badge--done  {
-    /* vert assombri (#15803d) : blanc sur --gr (#22c55e) à 9px = 2.27:1 (échec
-       WCAG AA). #15803d donne ~5:1 avec le blanc → conforme. */
-    background: #15803d; color: #fff;
-    display: flex; align-items: center; gap: 3px;
-  }
-
   .dq-ico {
-    width: 32px; height: 32px; border-radius: 10px;
+    width: 42px; height: 42px; border-radius: 13px; flex: none;
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: 8px;
   }
+  .dq-body { flex: 1; min-width: 0; }
   .dq-name {
-    font: 600 12px/1.3 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink); margin-bottom: 4px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    font: 700 13.5px/1.2 'Plus Jakarta Sans', sans-serif;
+    color: var(--ink); margin-bottom: 7px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .dq-track {
-    height: 4px; background: var(--bo);
-    border-radius: 2px; overflow: hidden; margin: 8px 0 6px;
+    height: 6px; background: var(--bo);
+    border-radius: 99px; overflow: hidden;
   }
-  .dq-fill { height: 100%; border-radius: 2px; transition: width .4s ease; }
-  .dq-foot { display: flex; align-items: center; justify-content: space-between; }
-  .dq-prog { font: 500 10px/1 'IBM Plex Mono', monospace; color: var(--mu2); }
-  .dq-reward { font: 600 10px/1 'Inter', sans-serif; color: var(--a-txt); }
-  .dq-card--ready .dq-reward { color: var(--a-txt); }
+  .dq-fill { height: 100%; border-radius: 99px; transition: width .55s cubic-bezier(.23,1,.32,1); }
+  .dq-prog { font: 700 10.5px/1 'IBM Plex Mono', monospace; color: var(--mu2); margin-top: 5px; display: inline-block; }
+
+  /* ── Rail droit : bouton Réclamer / récompense / fait ── */
+  .dq-right { flex: none; display: flex; align-items: center; }
+  .dq-claim {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--a); color: var(--a-ink);
+    font: 800 12.5px/1 'Plus Jakarta Sans', sans-serif;
+    padding: 10px 14px; border-radius: 12px;
+    box-shadow: 0 5px 0 var(--adk, #4b45c9); white-space: nowrap;
+  }
+  .dq-card--ready:active .dq-claim { transform: translateY(2px); box-shadow: 0 3px 0 var(--adk, #4b45c9); }
+  .dq-reward {
+    display: inline-flex; align-items: center; gap: 4px;
+    font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-txt); white-space: nowrap;
+  }
+  .dq-reward img { width: 17px; height: 17px; }
+  .dq-done {
+    display: inline-flex; align-items: center; gap: 4px;
+    font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: #15803d; white-space: nowrap;
+  }
 
   /* XP popup */
   .dq-xp-pop {
@@ -257,7 +261,7 @@ function renderSection(quests) {
       </div>
       ${readyCount > 0 ? `<span class="dq-count">${readyCount} à réclamer</span>` : ""}
     </div>
-    <div class="dq-scroll">
+    <div class="dq-list">
       ${quests.map(renderCard).join("")}
     </div>
   `;
@@ -277,43 +281,43 @@ function renderCard(q) {
         ? "competence"
         : "default";
   const cat = CAT_CFG[_catKey];
-  const fillClr = done ? "var(--gr)" : ready ? "var(--a)" : "var(--a)";
+  const fillClr = done ? "var(--gr)" : "var(--a)";
   const stCls = done
     ? "dq-card--claimed"
     : ready
       ? "dq-card--ready"
       : "dq-card--pending";
 
-  const badge = done
-    ? `<span class="dq-badge dq-badge--done">${ill("coche", { size: 14 })} Fait</span>`
+  // Rail droit : réclamer (état prêt) · récompense à gagner (en cours) · fait
+  const right = done
+    ? `<span class="dq-done">${ill("coche", { size: 14 })} Fait</span>`
     : ready
-      ? `<span class="dq-badge dq-badge--claim">Réclamer</span>`
-      : "";
-
-  const reward = q.reward_gemmes > 0 ? `+${q.reward_gemmes} volants` : "";
+      ? `<span class="dq-claim">Réclamer</span>`
+      : q.reward_gemmes > 0
+        ? `<span class="dq-reward"><img src="/skins/volant-coin.webp" alt="" aria-hidden="true">+${q.reward_gemmes}</span>`
+        : "";
 
   return `
     <div class="dq-card ${stCls}" data-quest-id="${esc(String(q.quest_id))}"
          role="${ready ? "button" : "article"}" tabindex="${ready ? "0" : "-1"}"
-         aria-label="${esc(cleanQuestTitle(q.title))}">
-      ${badge}
+         aria-label="${esc(cleanQuestTitle(q.title))}${ready ? " — réclamer la récompense" : ""}">
       <div class="dq-ico" style="background:${cat.color}18">
         ${
           cat.img
             ? ill(cat.img, { size: 24 })
             : cat.mask
               ? illMask(cat.mask, { size: 22, color: cat.color })
-              : icon(cat.ico, { size: 16, strokeWidth: 2.2, color: cat.color })
+              : icon(cat.ico, { size: 18, strokeWidth: 2.2, color: cat.color })
         }
       </div>
-      <div class="dq-name">${esc(cleanQuestTitle(q.title))}</div>
-      <div class="dq-track">
-        <div class="dq-fill" style="width:${pct}%;background:${fillClr}"></div>
+      <div class="dq-body">
+        <div class="dq-name">${esc(cleanQuestTitle(q.title))}</div>
+        <div class="dq-track">
+          <div class="dq-fill" style="width:${pct}%;background:${fillClr}"></div>
+        </div>
+        ${!ready && !done ? `<span class="dq-prog">${q.progress}/${q.target}</span>` : ""}
       </div>
-      <div class="dq-foot">
-        <span class="dq-prog">${q.progress}/${q.target}</span>
-        <span class="dq-reward">${reward}</span>
-      </div>
+      <div class="dq-right">${right}</div>
     </div>
   `;
 }
