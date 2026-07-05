@@ -232,49 +232,32 @@ const STYLE = `<style>
 .rvc-shake { animation: rvcshake .35s; border-color:#ef4444 !important; }
 @keyframes rvcshake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
 
-/* ───── Fiche « Coach » : lecture engageante, révélation progressive ───── */
-.rvc-fbadge { font:600 11px 'IBM Plex Mono',monospace; letter-spacing:.04em; text-transform:uppercase;
-  color:var(--a,#6366f1); background:color-mix(in srgb,var(--a,#6366f1) 12%,transparent);
-  border:1px solid color-mix(in srgb,var(--a,#6366f1) 22%,transparent); padding:6px 11px; border-radius:999px; margin-left:auto; }
-.rvc-ftitle { font:800 24px/1.2 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; margin:12px 0 0; color:var(--ink); }
+/* ───── Fiche « Carnet » : éditorial, gros numéros, filets, zéro carte ───── */
+.rvc-detail .rvc-back { border-radius:6px; border:1.5px solid var(--ink); background:transparent;
+  box-shadow:none; }
+.rvc-fbadge { font:600 11px 'IBM Plex Mono',monospace; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--a,#6366f1); margin-left:2px; }
+.rvc-ftitle { font:800 27px/1.08 'Plus Jakarta Sans',sans-serif; letter-spacing:-.03em; margin:14px 0 6px; color:var(--ink); }
+.rvc-fmeta { font:500 13px 'IBM Plex Mono',monospace; color:var(--mu,#94a3b8); letter-spacing:.01em; margin:0; }
 
-.rvc-coach { position:relative; overflow:hidden; margin:16px 0 0; border-radius:22px; padding:17px 17px 18px; color:#fff;
-  background:linear-gradient(135deg,var(--a,#6366f1) 0%,var(--adk,#4f46e5) 60%,#6d28d9 100%);
-  box-shadow:0 14px 30px -14px color-mix(in srgb,var(--adk,#4f46e5) 65%,transparent); }
-.rvc-coach::after { content:""; position:absolute; right:-40px; top:-50px; width:150px; height:150px; border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.22),transparent 70%); pointer-events:none; }
-.rvc-coach-row { position:relative; z-index:1; display:flex; gap:12px; align-items:flex-start; }
-.rvc-coach-av { width:52px; height:52px; flex:none; display:grid; place-items:center; }
-.rvc-coach-av img { width:52px; height:52px; object-fit:contain;
-  filter: drop-shadow(0 4px 8px rgba(20,10,50,.35)); }
-.rvc-coach-tag { font:600 10px 'IBM Plex Mono',monospace; letter-spacing:.14em; text-transform:uppercase; color:#dcddff; margin-bottom:3px; }
-.rvc-coach-msg { font:600 15px/1.42 'Plus Jakarta Sans',sans-serif; }
-.rvc-coach-msg b { font-weight:800; }
-.rvc-prog { position:relative; z-index:1; margin-top:15px; display:flex; align-items:center; gap:11px; }
-.rvc-prog-bar { flex:1; height:8px; border-radius:99px; background:rgba(255,255,255,.22); overflow:hidden; }
-.rvc-prog-fill { height:100%; width:0; border-radius:99px; background:linear-gradient(90deg,#fff,#c7d2fe); transition:width .5s cubic-bezier(.4,0,.2,1); }
-.rvc-prog-txt { font:600 12px 'IBM Plex Mono',monospace; color:#eceaff; min-width:30px; text-align:right; }
+/* Libellé de section : mot + filet plein + numérotage à droite */
+.rvc-lbl { display:flex; align-items:center; gap:12px; margin:30px 0 6px; }
+.rvc-lbl b { font:700 12px 'IBM Plex Mono',monospace; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); }
+.rvc-lbl-line { flex:1; height:1.5px; background:var(--ink); opacity:.85; }
+.rvc-lbl-n { font:600 11px 'IBM Plex Mono',monospace; color:var(--mu,#94a3b8); letter-spacing:.04em; }
 
-.rvc-sect { display:flex; align-items:center; gap:9px; margin:22px 0 2px; }
-.rvc-sect i { width:7px; height:7px; border-radius:50%; background:var(--a,#6366f1); }
-.rvc-sect span { font:600 11px 'IBM Plex Mono',monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--mu,#94a3b8); }
+/* Méthode éditoriale : colonne à gros numéros, filets entre les gestes */
+.rvc-method { margin-top:2px; }
+.rvc-msub { font:700 11px 'IBM Plex Mono',monospace; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--a,#6366f1); margin:16px 0 2px; }
+.rvc-step { display:grid; grid-template-columns:42px 1fr; gap:14px; align-items:start; padding:16px 0; }
+.rvc-step + .rvc-step, .rvc-msub + .rvc-step { border-top:1px solid var(--bo3,#e2e8f0); }
+.rvc-msub + .rvc-step { border-top:0; }
+.rvc-step-n { font:800 26px/1 'Plus Jakarta Sans',sans-serif; color:var(--a,#6366f1); letter-spacing:-.04em; padding-top:1px; }
+.rvc-step-t { font:400 15px/1.55 'Inter',sans-serif; color:var(--ink); }
+.rvc-step-t b { font-weight:700; }
 
-.rvc-msteps { display:flex; flex-direction:column; gap:11px; margin-top:10px; }
-.rvc-step { display:flex; gap:13px; align-items:flex-start; background:var(--su,#fff); border:1px solid var(--bo3,#e2e8f0);
-  border-radius:18px; padding:14px 15px; box-shadow:0 6px 18px -14px rgba(40,30,90,.4); }
-.rvc-step.is-hidden { display:none; }
-.rvc-step.is-reveal { animation:rvcreveal .45s cubic-bezier(.16,.84,.44,1) both; }
 @keyframes rvcreveal { from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:none;} }
-.rvc-step.is-current { border-color:color-mix(in srgb,var(--a,#6366f1) 40%,transparent);
-  box-shadow:0 12px 26px -16px color-mix(in srgb,var(--adk,#4f46e5) 55%,transparent); }
-.rvc-step-n { width:33px; height:33px; flex:none; border-radius:11px; display:grid; place-items:center;
-  background:color-mix(in srgb,var(--a,#6366f1) 12%,transparent); color:var(--adk,#4f46e5);
-  border:1px solid color-mix(in srgb,var(--a,#6366f1) 22%,transparent); font:700 16px 'Baloo 2',cursive; }
-.rvc-step-n svg { display:none; width:17px; height:17px; }
-.rvc-step.is-done .rvc-step-n { background:linear-gradient(135deg,var(--a,#6366f1),var(--adk,#4f46e5)); color:#fff; border-color:transparent; }
-.rvc-step.is-done .rvc-step-n b { display:none; }
-.rvc-step.is-done .rvc-step-n svg { display:block; }
-.rvc-step-t { font:400 14.5px/1.5 'Inter',sans-serif; color:var(--ink); padding-top:4px; }
 
 .rvc-next { margin-top:16px; }
 .rvc-next-btn { width:100%; border:0; border-radius:16px; padding:16px; cursor:pointer;
@@ -295,35 +278,27 @@ const STYLE = `<style>
 .rvc-bravo h3 { font:800 15px 'Plus Jakarta Sans',sans-serif; color:var(--gr-txt,#047857); }
 .rvc-bravo p { font-size:12.5px; line-height:1.4; color:var(--gr-txt,#047857); opacity:.85; margin-top:2px; }
 
-.rvc-icard { margin-top:13px; border-radius:18px; padding:15px 16px; border:1px solid var(--bo3,#e2e8f0);
-  background:var(--su,#fff); box-shadow:0 6px 18px -16px rgba(40,30,90,.5); }
-.rvc-icard-h { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-.rvc-icard-ic { width:33px; height:33px; flex:none; border-radius:11px; display:grid; place-items:center; }
-.rvc-icard-ic svg { width:18px; height:18px; }
-.rvc-icard-h b { font:700 14.5px 'Plus Jakarta Sans',sans-serif; }
-.rvc-icard p { font:400 14px/1.55 'Inter',sans-serif; color:var(--ink); }
-.rvc-icard.why .rvc-icard-ic { background:color-mix(in srgb,var(--a,#6366f1) 14%,transparent); color:var(--adk,#4f46e5); }
-.rvc-icard.why .rvc-icard-h b { color:var(--ink); }
-.rvc-icard.trap { background:color-mix(in srgb,#f59e0b 12%,transparent); border-color:color-mix(in srgb,#f59e0b 30%,transparent); }
-.rvc-icard.trap .rvc-icard-ic { background:color-mix(in srgb,#f59e0b 22%,transparent); color:#d97706; }
-.rvc-icard.trap .rvc-icard-h b { color:var(--am-txt,#b45309); }
-.rvc-icard.bva { background:color-mix(in srgb,#06b6d4 10%,transparent); border-color:color-mix(in srgb,#06b6d4 26%,transparent); }
-.rvc-icard.bva .rvc-icard-ic { background:color-mix(in srgb,#06b6d4 20%,transparent); color:#0891b2; }
-.rvc-icard.bva .rvc-icard-h b { color:#0e7490; }
-.rvc-fsrc { display:flex; align-items:center; gap:8px; margin-top:14px; font-size:12px; font-style:italic; color:var(--mu,#94a3b8); }
-.rvc-fsrc svg { width:15px; height:15px; color:var(--a-lt,#818cf8); flex:none; }
+/* « À retenir » : notes éditoriales, pas de boîtes ; seule l'erreur a un filet */
+.rvc-note { padding:15px 0; border-bottom:1px solid var(--bo3,#e2e8f0); }
+.rvc-note:last-of-type { border-bottom:0; }
+.rvc-note.warn { border-bottom:0; border-left:3px solid #d97706; padding:2px 0 2px 14px; margin:14px 0 2px; }
+.rvc-note-k { font:700 11px 'IBM Plex Mono',monospace; letter-spacing:.13em; text-transform:uppercase; margin:0 0 5px; }
+.rvc-note.warn .rvc-note-k { color:var(--am-txt,#b45309); }
+.rvc-note.why .rvc-note-k { color:var(--a,#6366f1); }
+.rvc-note.bva .rvc-note-k { color:var(--ink); }
+.rvc-note-p { font:400 14px/1.55 'Inter',sans-serif; color:var(--ink); margin:0; }
+.rvc-fsrc { font:500 11px 'IBM Plex Mono',monospace; color:var(--mu,#94a3b8); letter-spacing:.02em; margin:22px 0 0; }
 
-.rvc-actbar { position:sticky; bottom:calc(13px + env(safe-area-inset-bottom)); display:flex; gap:11px; margin-top:22px; padding:8px 0;
-  background:linear-gradient(to top,var(--bg) 70%,transparent); }
-.rvc-act-ghost { flex:none; border:1px solid var(--bo3,#e2e8f0); background:var(--su,#fff); color:var(--ink); border-radius:15px;
-  padding:14px 15px; cursor:pointer; font:700 13.5px 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; gap:8px;
-  box-shadow:0 6px 16px -12px rgba(40,30,90,.4); transition:transform .12s ease; }
-.rvc-act-ghost svg { width:17px; height:17px; color:var(--a,#6366f1); }
+.rvc-actbar { position:sticky; bottom:0; display:flex; gap:10px; margin-top:26px;
+  padding:12px 0 calc(6px + env(safe-area-inset-bottom)); background:var(--bg); border-top:1px solid var(--bo3,#e2e8f0); }
+.rvc-act-ghost { flex:none; border:1.5px solid var(--ink); background:transparent; color:var(--ink); border-radius:6px;
+  padding:0 16px; height:50px; cursor:pointer; font:700 13px 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; gap:8px;
+  transition:transform .12s ease; }
+.rvc-act-ghost svg { width:16px; height:16px; color:var(--a,#6366f1); }
 .rvc-act-ghost:active { transform:scale(.97); }
-.rvc-act-main { flex:1; border:0; border-radius:15px; cursor:pointer; color:#fff;
+.rvc-act-main { flex:1; border:0; border-radius:6px; height:50px; cursor:pointer; color:#fff;
   font:800 15px 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:9px;
-  background:linear-gradient(135deg,var(--a,#6366f1),var(--adk,#4f46e5));
-  box-shadow:0 14px 26px -12px color-mix(in srgb,var(--adk,#4f46e5) 75%,transparent); transition:transform .12s ease,opacity .3s ease; }
+  background:var(--a,#6366f1); transition:transform .12s ease,opacity .3s ease; }
 .rvc-act-main:active { transform:scale(.97); }
 .rvc-act-main svg { width:18px; height:18px; }
 .rvc-act-main.locked { opacity:.45; pointer-events:none; }
@@ -331,27 +306,7 @@ const STYLE = `<style>
 .rvc-act-main.locked .lock { display:block; }
 .rvc-act-main.locked .go { display:none; }
 
-/* Méthode : compteur dans le libellé de section + sections repliables (fiches longues) */
-.rvc-sect-n { font:600 11px 'IBM Plex Mono',monospace; letter-spacing:.06em; color:var(--mu,#94a3b8); margin-left:auto; text-transform:none; }
-.rvc-grps { display:flex; flex-direction:column; gap:10px; margin-top:10px; }
-.rvc-grp { background:var(--su,#fff); border:1px solid var(--bo3,#e2e8f0); border-radius:18px; overflow:hidden;
-  box-shadow:0 6px 18px -14px rgba(40,30,90,.4); }
-.rvc-grp-h { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:0; background:none; cursor:pointer;
-  padding:14px 15px; font:800 15px 'Plus Jakarta Sans',sans-serif; color:var(--ink); }
-.rvc-grp-n { width:28px; height:28px; flex:none; border-radius:9px; display:grid; place-items:center;
-  background:color-mix(in srgb,var(--a,#6366f1) 12%,transparent); color:var(--adk,#4f46e5);
-  border:1px solid color-mix(in srgb,var(--a,#6366f1) 22%,transparent); font:700 14px 'Baloo 2',cursive; }
-.rvc-grp-c { flex:1; }
-.rvc-grp-k { font:700 11px 'IBM Plex Mono',monospace; color:var(--mu,#94a3b8); }
-.rvc-grp-chev { width:20px; height:20px; flex:none; color:var(--mu,#cbd5e1); display:grid; place-items:center;
-  transition:transform .25s cubic-bezier(.4,0,.2,1); }
-.rvc-grp-chev svg { width:16px; height:16px; }
-.rvc-grp.open .rvc-grp-chev { transform:rotate(90deg); color:var(--a,#6366f1); }
-.rvc-grp-body { display:none; padding:0 12px 13px; }
-.rvc-grp.open .rvc-grp-body { display:block; animation:rvcreveal .35s ease both; }
-.rvc-grp-body .rvc-msteps { margin-top:2px; gap:8px; }
-.rvc-grp-body .rvc-step { border-color:transparent; background:var(--bg); box-shadow:none; border-radius:14px; padding:11px 12px; }
-.rvc-grp-body .rvc-step-n { width:27px; height:27px; font-size:14px; }
+/* (bloc accordéons « rvc-grp » retiré — méthode désormais en colonne éditoriale) */
 
 /* ───── Home « Bento » : navigation engageante vers les fiches ───── */
 .rvcb { --lime:#c8ff4d; --lime-ink:#1f2a00; --rb:24px; }
@@ -848,75 +803,54 @@ export async function mount(root, param) {
     // l'ordre », sinon les libellés de section donneraient l'ordre.
     const flatSteps = groups.flatMap((g) => g.steps);
 
-    // Phrase d'accroche du coach : « Voici comment <titre minuscule>. »
-    const titreFlow = f.titre
-      ? f.titre.charAt(0).toLowerCase() + f.titre.slice(1)
-      : "";
-
-    const stepCard = (s, i) =>
-      `<div class="rvc-step"><div class="rvc-step-n"><b>${i + 1}</b>${FSVG.check}</div><div class="rvc-step-t">${esc(s)}</div></div>`;
+    // Étape éditoriale « Carnet » : gros numéro + texte, zéro carte ni ombre.
+    const stepRow = (s, n) =>
+      `<div class="rvc-step"><span class="rvc-step-n">${String(n).padStart(2, "0")}</span><div class="rvc-step-t">${esc(s)}</div></div>`;
 
     let methodeHtml = "";
-    if (total && grouped) {
-      const blocks = groups
-        .map(
-          (g, gi) => `<div class="rvc-grp${gi === 0 ? " open" : ""}">
-          <button class="rvc-grp-h" type="button">
-            <span class="rvc-grp-n">${gi + 1}</span>
-            <span class="rvc-grp-c">${esc(g.label || "L'essentiel")}</span>
-            <span class="rvc-grp-k">${g.steps.length}</span>
-            <span class="rvc-grp-chev" aria-hidden="true">${FSVG.arrow}</span>
-          </button>
-          <div class="rvc-grp-body"><div class="rvc-msteps">${g.steps.map(stepCard).join("")}</div></div>
-        </div>`,
-        )
+    if (total) {
+      let n = 0;
+      // Fiches structurées (préfixes « Label — ») : on garde les libellés de
+      // section en sous-titres, numérotation continue. Sinon, liste à plat.
+      const sections = grouped ? groups : [{ label: null, steps }];
+      const rows = sections
+        .map((g) => {
+          const head = g.label
+            ? `<div class="rvc-msub">${esc(g.label)}</div>`
+            : "";
+          return head + g.steps.map((s) => stepRow(s, ++n)).join("");
+        })
         .join("");
-      methodeHtml = `<div class="rvc-sect"><i></i><span>La méthode</span><span class="rvc-sect-n">${groups.length} temps · ${total} gestes</span></div>
-        <div class="rvc-grps">${blocks}</div>`;
-    } else if (total) {
-      methodeHtml = `<div class="rvc-sect"><i></i><span>La méthode</span><span class="rvc-sect-n">${total} étape${total > 1 ? "s" : ""}</span></div>
-        <div class="rvc-msteps">${steps.map(stepCard).join("")}</div>`;
+      const range = total > 1 ? `01–${String(total).padStart(2, "0")}` : "01";
+      methodeHtml = `<div class="rvc-lbl"><b>La méthode</b><span class="rvc-lbl-line"></span><span class="rvc-lbl-n">${range}</span></div>
+        <div class="rvc-method">${rows}</div>`;
     }
 
-    const whyCard = f.pourquoi
-      ? `<div class="rvc-icard why"><div class="rvc-icard-h"><span class="rvc-icard-ic">${FSVG.info}</span><b>Pourquoi ça compte</b></div><p>${esc(f.pourquoi)}</p></div>`
-      : "";
-    const trapCard = f.erreur
-      ? `<div class="rvc-icard trap"><div class="rvc-icard-h"><span class="rvc-icard-ic">${FSVG.warn}</span><b>L'erreur à ne pas faire</b></div><p>${esc(f.erreur)}</p></div>`
-      : "";
-    const bvaCard = f.bva
-      ? `<div class="rvc-icard bva"><div class="rvc-icard-h"><span class="rvc-icard-ic">${FSVG.auto}</span><b>En boîte auto</b></div><p>${esc(f.bva)}</p></div>`
-      : "";
+    // « À retenir » éditorial : un libellé + un texte, pas de boîtes colorées.
+    const note = (cls, kicker, txt) =>
+      txt
+        ? `<div class="rvc-note ${cls}"><p class="rvc-note-k">${kicker}</p><p class="rvc-note-p">${esc(txt)}</p></div>`
+        : "";
+    const retenir =
+      note("warn", "L'erreur à éviter", f.erreur) +
+      note("why", "Pourquoi ça compte", f.pourquoi) +
+      note("bva", "En boîte auto", f.bva);
     const srcHtml =
       Array.isArray(f.sources) && f.sources.length
-        ? `<div class="rvc-fsrc">${FSVG.video}<span>Vu chez de vrais moniteurs : ${f.sources.map((s) => esc(s)).join(", ")}</span></div>`
+        ? `<p class="rvc-fsrc">↳ Vu chez de vrais moniteurs : ${f.sources.map((s) => esc(s)).join(", ")}</p>`
         : "";
-    const retenir = trapCard + whyCard + bvaCard;
 
-    root.innerHTML = `${STYLE}<div class="rvc">
+    root.innerHTML = `${STYLE}<div class="rvc rvc-detail">
       <div class="rvc-top">
         <button class="rvc-back" aria-label="Retour">←</button>
         <span class="rvc-fbadge">${esc(f.code)} · ${esc(f.competence)}</span>
       </div>
       <h1 class="rvc-ftitle">${esc(f.titre)}</h1>
-
-      ${
-        total
-          ? `<div class="rvc-coach">
-        <div class="rvc-coach-row">
-          <div class="rvc-coach-av"><img src="/skins/mascot-point.png" alt="" aria-hidden="true" onerror="this.style.display='none'"></div>
-          <div>
-            <div class="rvc-coach-tag">Ton coach</div>
-            <div class="rvc-coach-msg">Voici comment <b>${esc(titreFlow)}</b>. Lis la méthode, puis teste-toi.</div>
-          </div>
-        </div>
-      </div>`
-          : ""
-      }
+      ${total ? `<p class="rvc-fmeta">${total} geste${total > 1 ? "s" : ""} — la méthode pas à pas</p>` : ""}
 
       ${methodeHtml}
 
-      ${retenir ? `<div class="rvc-sect"><i></i><span>À retenir</span></div>${retenir}` : ""}
+      ${retenir ? `<div class="rvc-lbl"><b>À retenir</b><span class="rvc-lbl-line"></span></div>${retenir}` : ""}
       ${srcHtml}
 
       <div class="rvc-actbar">
@@ -933,12 +867,6 @@ export async function mount(root, param) {
       view = "home";
       render();
     });
-    root.querySelectorAll(".rvc-grp-h").forEach((b) =>
-      b.addEventListener("click", () => {
-        b.parentElement.classList.toggle("open");
-        haptic("select");
-      }),
-    );
     root.querySelector("[data-order]")?.addEventListener("click", () => {
       orderPlaced = [];
       orderPool = (flatSteps && flatSteps.length ? flatSteps : f.methode || [])
