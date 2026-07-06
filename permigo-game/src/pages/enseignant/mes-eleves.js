@@ -19,6 +19,11 @@ import { openInviteEleveModal } from "@/services/invite-eleve.js";
 import { illus } from "@/components/enseignant/illus.js";
 import { haptic } from "@/utils/haptic.js";
 import { medallion } from "@/utils/medallions.js";
+import {
+  provenanceBadge,
+  fetchProvenanceMap,
+  openProvenanceEditor,
+} from "@/utils/provenance.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -226,7 +231,7 @@ const STYLE = `<style>
 
   /* Nom */
   .me-nom {
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
     font: 700 14px/1.2 'Inter', sans-serif;
     color: #1a1f2b;
@@ -234,6 +239,9 @@ const STYLE = `<style>
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  /* Espace élastique : le nom (+ pastille provenance) hugge à gauche,
+     la pastille d'état / valeur droite / ⋮ restent à droite. */
+  .me-prov-sp { flex: 1 1 auto; min-width: 6px; }
 
   /* Valeur droite : progression ou jours inactif */
   .me-pr {
@@ -510,7 +518,7 @@ async function loadData() {
   //    Côté frontend on marquera ensuite les "attitrés" (enseignant_id = me.id)
   // Les 3 requêtes (élèves / validations / examens) sont indépendantes →
   // en parallèle (Promise.all) : le chargement = la plus lente, pas la somme.
-  const [elevesRes, valsRes, examsRes] = await Promise.all([
+  const [elevesRes, valsRes, examsRes, provMap] = await Promise.all([
     sb
       .from("profiles")
       .select("id, prenom, nom, enseignant_id, last_active_at, avatar_url")
@@ -524,6 +532,8 @@ async function loadData() {
       .from("examens")
       .select("eleve_id, statut, date_examen, created_at")
       .order("created_at", { ascending: false }),
+    // Provenance CRM (RLS = mes élèves) → Map(eleve_id → {label,color}).
+    fetchProvenanceMap(),
   ]);
   const { data: elevesRaw, error: e1 } = elevesRes;
 
@@ -548,10 +558,12 @@ async function loadData() {
     );
   }
 
-  // Tag "attitré" sur chaque élève — affichage UI peut prioriser
+  // Tag "attitré" sur chaque élève — affichage UI peut prioriser.
+  // + provenance CRM (pastille nom/couleur) attachée ici → survit au spread.
   const rawList = (elevesRaw || []).map((e) => ({
     ...e,
     isMine: e.enseignant_id === _me.id,
+    provenance: provMap.get(e.id) || null,
   }));
 
   // 2. Progression REMC réelle de chaque élève = TOTAL des compétences acquises
@@ -1068,6 +1080,8 @@ function renderBandRow(eleve, withPill = false) {
          aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "recu" ? ", examen reussi" : eleve.readiness === "rate" ? ", examen a repasser" : eleve.readiness === "planifie" ? ", examen prevu" : eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
       <span class="me-nom">${fullNom}</span>
+      ${provenanceBadge(eleve.provenance)}
+      <span class="me-prov-sp"></span>
       ${pillHtml}
       <span class="${rightClass}">${esc(rightLabel)}</span>
       <button class="me-more" data-more type="button"
@@ -1218,6 +1232,24 @@ async function wireRows() {
 }
 
 /**
+ * Met à jour la pastille provenance d'un élève en place (sans re-render global).
+ * @param {string} eleveId
+ * @param {{label:string,color:string}|null} prov
+ */
+function updateRowProvenance(eleveId, prov) {
+  const e = _eleves.find((x) => x.id === eleveId);
+  if (e) e.provenance = prov;
+  _root
+    .querySelectorAll(`.me-row[data-eleve-id="${eleveId}"]`)
+    .forEach((row) => {
+      row.querySelector(".pv-badge")?.remove();
+      const nom = row.querySelector(".me-nom");
+      if (nom && prov)
+        nom.insertAdjacentHTML("afterend", provenanceBadge(prov));
+    });
+}
+
+/**
  * Mini menu contextuel apparaît sous la ligne au long-press
  */
 function openQuickMenu(eleveId, anchorRow) {
@@ -1296,6 +1328,9 @@ function openQuickMenu(eleveId, anchorRow) {
       <button class="me-qm-item" data-action="livret">
         <span class="me-qm-ico">${icon("arrow-right", { size: 14, strokeWidth: 2.5 })}</span> Ouvrir le livret de compétences
       </button>
+      <button class="me-qm-item" data-action="provenance">
+        <span class="me-qm-ico">${icon("map-pin", { size: 14, strokeWidth: 2.5 })}</span> ${eleve?.provenance ? "Modifier la provenance" : "Définir la provenance"}
+      </button>
       <div class="me-qm-sep"></div>
       <div class="me-qm-label">Examen</div>
       <button class="me-qm-item" data-action="exam-planifie">
@@ -1337,6 +1372,13 @@ function openQuickMenu(eleveId, anchorRow) {
       close();
       if (action === "valider") navigate(`#/log-session?eleveId=${eleveId}`);
       else if (action === "livret") navigate(`#/livret/${eleveId}`);
+      else if (action === "provenance" && eleve)
+        openProvenanceEditor({
+          eleveId,
+          prenom: eleve.prenom ? fmtName(eleve.prenom) : "",
+          current: eleve.provenance || null,
+          onSaved: (prov) => updateRowProvenance(eleveId, prov),
+        });
       else if (action === "manque" && eleve) openMissingPanel(eleve);
       else if (action === "exam-planifie") openPlanifieDialog(eleveId);
       else if (action === "exam-recu") confirmRecu(eleveId);

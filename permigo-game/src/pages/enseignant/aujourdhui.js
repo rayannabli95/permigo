@@ -10,6 +10,7 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
+import { provenanceBadge, fetchProvenanceMap } from "@/utils/provenance.js";
 
 // « Prêt » pour l'examen = MÊME règle métier que mes-eleves.js (source de vérité) :
 // les compétences de BASE C1-C2-C3 sont toutes acquises (C4 = conduite autonome
@@ -266,12 +267,14 @@ const STYLE = `<style>
 
   .aj-eleve-av { flex-shrink: 0; }
   .aj-eleve-body { flex: 1; min-width: 0; }
+  .aj-eleve-nom-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
   .aj-eleve-nom {
     font: 700 13.5px/1.25 'Inter', sans-serif;
     color: #1a1c2e;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
   }
   .aj-eleve-bar-wrap {
     height: 6px;
@@ -517,6 +520,7 @@ async function renderInto(root, _me) {
     profileRes,
     totalValsRes,
     leagueRes,
+    provMap,
   ] = await Promise.all([
     // Dernières validations (activité récente) — non utilisées dans ce design
     // mais gardées pour éviter de casser les listeners existants
@@ -566,6 +570,9 @@ async function renderInto(root, _me) {
     Promise.resolve(
       sb.rpc("get_league_leaderboard", { p_role: "enseignant", p_limit: 50 }),
     ).catch(() => ({ data: null })),
+
+    // Provenance CRM (RLS = mes élèves) → Map(eleve_id → {label,color})
+    fetchProvenanceMap(),
   ]);
 
   // Erreur bloquante (réseau, RLS…) → vrai état d'erreur récupérable.
@@ -596,7 +603,7 @@ async function renderInto(root, _me) {
   const recentVals = valsAll.data || [];
   const elevesMap = {};
   (elevesAll.data || []).forEach((e, i) => {
-    elevesMap[e.id] = { ...e, idx: i };
+    elevesMap[e.id] = { ...e, idx: i, provenance: provMap.get(e.id) || null };
   });
 
   const prenom = profileRes?.data?.prenom || "";
@@ -757,7 +764,10 @@ async function renderInto(root, _me) {
     return `<div class="aj-eleve-card" data-eleve-id="${esc(e.id)}" role="button" tabindex="0" aria-label="Livret de ${nom}">
       <div class="aj-eleve-av">${avHtml}</div>
       <div class="aj-eleve-body">
-        <div class="aj-eleve-nom">${nom}</div>
+        <div class="aj-eleve-nom-row">
+          <span class="aj-eleve-nom">${nom}</span>
+          ${provenanceBadge(e.provenance)}
+        </div>
         <div class="aj-eleve-bar-wrap">
           <span class="aj-eleve-bar-fill" style="width:${pct}%;background:${barColor}"></span>
         </div>

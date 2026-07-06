@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance élève — maquette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Hanken+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --a:#4f46e5; --adk:#4338ca; --a-lt:#818cf8; --a-ink:#fff;
+  --su:#fff; --su2:#f8f9fd;
+  --bo:#e2e6f2; --bo2:#edf0f9; --bo4:#cbd5e1;
+  --ink:#0b0d1a; --ink2:#1a1d2e; --ink3:#2d3050;
+  --mu:#5f6788; --mu2:#5e6e82;
+  --bg:#f4f5fb;
+  --s1:0 2px 10px rgba(11,13,26,.07), 0 1px 3px rgba(11,13,26,.04);
+  --s2:0 6px 22px rgba(11,13,26,.09), 0 2px 8px rgba(11,13,26,.05);
+  --s3:0 14px 40px rgba(11,13,26,.13), 0 4px 12px rgba(11,13,26,.07);
+}
+:root[data-theme="dark"]{
+  --su:#181b30; --su2:#1f2238;
+  --bo:#2a2e48; --bo2:#23263c; --bo4:#3d4263;
+  --ink:#f3f4f8; --ink2:#e2e5ee; --ink3:#c9cde0;
+  --mu:#9da3c0; --mu2:#8b92b5;
+  --bg:#0b0d1a;
+  --s1:0 2px 10px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.25);
+  --s2:0 6px 22px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
+  --s3:0 14px 40px rgba(0,0,0,.55), 0 4px 12px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Hanken Grotesk',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:430px;margin:0 auto;padding:14px 15px 60px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+.topbar h1{font:700 20px/1 'Fredoka',sans-serif;margin:0;color:var(--ink)}
+.tgl{display:inline-flex;background:var(--su2);border:1px solid var(--bo);border-radius:999px;padding:3px}
+.tgl button{border:0;background:transparent;font:700 12px 'Hanken Grotesk';color:var(--mu);padding:6px 12px;border-radius:999px;cursor:pointer}
+.tgl button.on{background:var(--a);color:#fff}
+
+.sec-h{font:800 11px/1 'Hanken Grotesk';letter-spacing:.09em;text-transform:uppercase;color:var(--mu);margin:26px 3px 10px}
+.hint{font:600 12px/1.4 'Hanken Grotesk';color:var(--mu);margin:-4px 3px 12px}
+
+/* ── carte liste ── */
+.card{background:var(--su);border:1px solid var(--bo);border-radius:18px;box-shadow:var(--s1);overflow:hidden}
+.row{display:flex;align-items:center;gap:11px;padding:12px 13px;border-top:1px solid var(--bo2)}
+.row:first-child{border-top:0}
+.av{width:38px;height:38px;border-radius:12px;flex:none;display:grid;place-items:center;font:800 14px 'Fredoka';color:#fff}
+.nm{flex:0 1 auto;min-width:0;font:700 14.5px 'Hanken Grotesk';color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spacer{flex:1 1 auto}
+.rmeta{font:700 12px 'Hanken Grotesk';color:var(--mu2);flex:none;white-space:nowrap}
+.kebab{border:0;background:transparent;color:var(--mu);cursor:pointer;font-size:18px;line-height:1;padding:4px 2px;flex:none}
+
+/* ═══ STYLE A — pastille pleine 3D ═══ */
+.pv{
+  --c-lt:color-mix(in srgb, var(--c) 82%, #fff);
+  --c-dk:color-mix(in srgb, var(--c) 86%, #000);
+  display:inline-flex;align-items:center;gap:5px;flex:none;
+  padding:4px 10px;border-radius:999px;
+  font:800 10.5px/1 'Hanken Grotesk';letter-spacing:.2px;color:#fff;white-space:nowrap;
+  background:linear-gradient(180deg,var(--c-lt),var(--c-dk));
+  box-shadow:
+    0 2px 7px -1px color-mix(in srgb,var(--c) 48%,transparent),
+    inset 0 1px 0 rgba(255,255,255,.5),
+    inset 0 -4px 7px color-mix(in srgb,var(--c) 60%,#000);
+}
+
+/* ═══ STYLE B — perle 3D + texte teinté ═══ */
+.pvb{display:inline-flex;align-items:center;gap:6px;flex:none}
+.bead{
+  width:13px;height:13px;border-radius:50%;flex:none;
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255,255,255,.95), rgba(255,255,255,0) 42%),
+    linear-gradient(180deg, color-mix(in srgb,var(--c) 45%,#fff), color-mix(in srgb,var(--c) 92%,#000));
+  box-shadow:
+    inset 0 -1.5px 2px rgba(0,0,0,.4),
+    0 1px 3px color-mix(in srgb,var(--c) 55%,transparent),
+    0 0 0 1px rgba(255,255,255,.22);
+}
+.pvb .lbl{font:800 10.5px/1 'Hanken Grotesk';letter-spacing:.2px;color:color-mix(in srgb, var(--c) 62%, var(--ink))}
+
+/* ── écran valider (dropdown) ── */
+.dd{background:var(--su);border:1px solid var(--bo);border-radius:16px;box-shadow:var(--s1);overflow:hidden}
+.dd-trig{display:flex;align-items:center;gap:11px;padding:13px 14px;background:linear-gradient(180deg,color-mix(in srgb,var(--a) 8%,var(--su)),var(--su))}
+.dd-trig .nm{font-size:15.5px}
+.dd-sub{font:700 11.5px 'Hanken Grotesk';color:var(--mu2)}
+.dd-opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border-top:1px solid var(--bo2)}
+
+/* ── éditeur (bottom sheet) ── */
+.sheet{background:var(--su);border:1px solid var(--bo);border-radius:24px;box-shadow:var(--s3);padding:16px 16px 18px;position:relative}
+.sheet::before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:38px;height:4px;border-radius:2px;background:var(--bo4)}
+.sh-title{font:700 18px 'Fredoka';margin:12px 2px 3px;color:var(--ink)}
+.sh-desc{font:600 12.5px/1.4 'Hanken Grotesk';color:var(--mu);margin:0 2px 14px}
+.preview{display:flex;align-items:center;gap:11px;background:var(--su2);border:1px solid var(--bo);border-radius:16px;padding:13px 14px;margin-bottom:16px}
+.preview .av{width:40px;height:40px}
+.pv-lg{padding:5px 12px;font-size:12px}
+
+.field-l{font:800 10.5px/1 'Hanken Grotesk';letter-spacing:.08em;text-transform:uppercase;color:var(--mu);margin:0 2px 9px}
+.presets{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+.chip{border:1px solid var(--bo);background:var(--su);color:var(--ink2);font:700 12px 'Hanken Grotesk';padding:8px 12px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip .cdot{width:9px;height:9px;border-radius:50%;background:var(--cc)}
+.chip:active{transform:scale(.96)}
+.inp{width:100%;border:1.5px solid var(--bo);background:var(--su2);color:var(--ink);font:700 15px 'Hanken Grotesk';padding:12px 14px;border-radius:13px;margin-bottom:16px;outline:none}
+.inp:focus{border-color:var(--a)}
+.sw-row{display:flex;flex-wrap:wrap;gap:11px;align-items:center;margin-bottom:20px}
+.sw{width:34px;height:34px;border-radius:50%;border:0;cursor:pointer;padding:0;background:var(--sc);position:relative;
+  box-shadow:0 2px 8px -2px color-mix(in srgb,var(--sc) 55%,transparent), inset 0 1.5px 0 rgba(255,255,255,.35)}
+.sw:active{transform:scale(.9)}
+.sw.on{box-shadow:0 0 0 3px var(--su),0 0 0 5px var(--sc)}
+.sw.on::after{content:"";position:absolute;inset:0;background:center/15px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")}
+.sw-free{width:34px;height:34px;border-radius:50%;border:1.5px dashed var(--bo4);display:grid;place-items:center;cursor:pointer;position:relative;overflow:hidden;background:conic-gradient(from 0deg,#ff5f5f,#ffb03a,#6fe016,#22d3ee,#7c4dff,#ec4899,#ff5f5f)}
+.sw-free input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.sw-free span{width:16px;height:16px;border-radius:50%;background:var(--su);display:grid;place-items:center;font:800 14px 'Fredoka';color:var(--ink);line-height:1}
+.actions{display:flex;gap:10px}
+.btn{flex:1;border:0;border-radius:14px;font:700 15px 'Fredoka';padding:14px;cursor:pointer}
+.btn-primary{background:linear-gradient(180deg,var(--a-lt),var(--a));color:#fff;box-shadow:0 6px 16px -6px var(--a),inset 0 1px 0 rgba(255,255,255,.3)}
+.btn-ghost{flex:0 0 auto;background:var(--su2);color:var(--mu);border:1px solid var(--bo);padding:14px 18px}
+.note{font:600 11.5px/1.5 'Hanken Grotesk';color:var(--mu);background:var(--su2);border:1px solid var(--bo);border-radius:12px;padding:10px 12px;margin-top:18px}
+.note b{color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <h1>Provenance élève</h1>
+    <div class="tgl">
+      <button id="t-light" class="on" onclick="setTheme('light')">Clair</button>
+      <button id="t-dark" onclick="setTheme('dark')">Sombre</button>
+    </div>
+  </div>
+
+  <!-- STYLE A -->
+  <div class="sec-h">Option A — pastille pleine 3D</div>
+  <p class="hint">Très visible. La provenance saute aux yeux dans la liste.</p>
+  <div class="card">
+    <div class="row">
+      <span class="av" style="background:linear-gradient(135deg,#7c8cff,#5a6bff)">SM</span>
+      <span class="nm">Simon Mercier</span>
+      <span class="pv" style="--c:#ff6e14">Le Bon Coin</span>
+      <span class="spacer"></span>
+      <span class="rmeta">12/30</span>
+      <button class="kebab">⋮</button>
+    </div>
+    <div class="row">
+      <span class="av" style="background:linear-gradient(135deg,#ff9a62,#ff6e3d)">LC</span>
+      <span class="nm">Léa Caron</span>
+      <span class="pv" style="--c:#e1306c">Instagram</span>
+      <span class="spacer"></span>
+      <span class="rmeta">7/30</span>
+      <button class="kebab">⋮</button>
+    </div>
+    <div class="row">
+      <span class="av" style="background:linear-gradient(135deg,#57c98a,#22a55e)">YB</span>
+      <span class="nm">Yanis Benali</span>
+      <span class="pv" style="--c:#16a34a">Bouche à oreille</span>
+      <span class="spacer"></span>
+      <span class="rmeta">21/30</span>
+      <button class="kebab">⋮</button>
+    </div>
+    <div class="row">
+      <span class="av" style="background:linear-gradient(135deg,#b79bff,#8a6bff)">CM</span>
+      <span class="nm">Chloé Martin</span>
+      <span class="spacer"></span>
+      <span class="rmeta">3/30</span>
+      <button class="kebab">⋮</button>
+    </div>
+  </div>
+
+  <!-- STYLE B -->
+  <div class="sec-h">Option B — perle 3D + texte</div>
+  <p class="hint">Plus discret. S'intègre sans alourdir la ligne.</p>
+  <div class="card">
+    <div class="row">
+      <span class="av" style="background:linear-gradient(135deg,#7c8cff,#5a6bff)">SM</span>
+      <span class="nm">Simon Mercier</span>
+      <span class="pvb" style="--c:#ff6e14"><span class="bead"></span><span class="lbl">Le Bon Coin</span></span>
+      <span class="spacer"></span>
+      <span class="rmeta">12/30</span>
+      <button class="kebab">⋮</button>
+    </div>
+    <div class="row">
+      <span class="av" style="background:linear-gradient(135deg,#ff9a62,#ff6e3d)">LC</span>
+      <span class="nm">Léa Caron</span>
+      <span class="pvb" style="--c:#e1306c"><span class="bead"></span><span class="lbl">Instagram</span></span>
+      <span class="spacer"></span>
+      <span class="rmeta">7/30</span>
+      <button class="kebab">⋮</button>
+    </div>
+    <div class="row">
+      <span class="av" style="background:linear-gradient(135deg,#57c98a,#22a55e)">YB</span>
+      <span class="nm">Yanis Benali</span>
+      <span class="pvb" style="--c:#16a34a"><span class="bead"></span><span class="lbl">Bouche à oreille</span></span>
+      <span class="spacer"></span>
+      <span class="rmeta">21/30</span>
+      <button class="kebab">⋮</button>
+    </div>
+  </div>
+
+  <!-- VALIDER -->
+  <div class="sec-h">Sur « Valider une séance »</div>
+  <p class="hint">La provenance suit l'élève partout, à côté des validations.</p>
+  <div class="dd">
+    <div class="dd-trig">
+      <span class="av" style="background:linear-gradient(135deg,#7c8cff,#5a6bff)">SM</span>
+      <div style="flex:1;min-width:0">
+        <div class="nm">Simon Mercier</div>
+        <div class="dd-sub">12/30 acquises</div>
+      </div>
+      <span class="pv" style="--c:#ff6e14">Le Bon Coin</span>
+    </div>
+    <div class="dd-opt">
+      <span class="av" style="width:32px;height:32px;background:linear-gradient(135deg,#ff9a62,#ff6e3d)">LC</span>
+      <span class="nm">Léa Caron</span>
+      <span class="spacer"></span>
+      <span class="pvb" style="--c:#e1306c"><span class="bead"></span><span class="lbl">Instagram</span></span>
+    </div>
+    <div class="dd-opt">
+      <span class="av" style="width:32px;height:32px;background:linear-gradient(135deg,#57c98a,#22a55e)">YB</span>
+      <span class="nm">Yanis Benali</span>
+      <span class="spacer"></span>
+      <span class="pvb" style="--c:#16a34a"><span class="bead"></span><span class="lbl">Bouche à oreille</span></span>
+    </div>
+  </div>
+
+  <!-- EDITEUR -->
+  <div class="sec-h">L'éditeur (via les ⋮)</div>
+  <p class="hint">Le moniteur choisit le nom + la couleur. Aperçu en direct.</p>
+  <div class="sheet">
+    <div class="sh-title">D'où vient Simon ?</div>
+    <p class="sh-desc">Note comment il t'a trouvé. Visible que par toi.</p>
+
+    <div class="preview">
+      <span class="av" style="background:linear-gradient(135deg,#7c8cff,#5a6bff)">SM</span>
+      <div style="flex:1">
+        <div class="nm" style="margin-bottom:6px">Simon Mercier</div>
+        <span class="pv pv-lg" id="pvPrev" style="--c:#ff6e14">Le Bon Coin</span>
+      </div>
+    </div>
+
+    <div class="field-l">Choix rapides</div>
+    <div class="presets" id="presets">
+      <button class="chip" style="--cc:#ff6e14" data-l="Le Bon Coin" data-c="#ff6e14"><span class="cdot"></span>Le Bon Coin</button>
+      <button class="chip" style="--cc:#e1306c" data-l="Instagram" data-c="#e1306c"><span class="cdot"></span>Instagram</button>
+      <button class="chip" style="--cc:#4285f4" data-l="Google" data-c="#4285f4"><span class="cdot"></span>Google</button>
+      <button class="chip" style="--cc:#16a34a" data-l="Bouche à oreille" data-c="#16a34a"><span class="cdot"></span>Bouche à oreille</button>
+      <button class="chip" style="--cc:#00c2a8" data-l="Ornikar" data-c="#00c2a8"><span class="cdot"></span>Ornikar</button>
+      <button class="chip" style="--cc:#2f6bff" data-l="En Voiture Simone" data-c="#2f6bff"><span class="cdot"></span>En Voiture Simone</button>
+      <button class="chip" style="--cc:#f59e0b" data-l="Affiche / flyer" data-c="#f59e0b"><span class="cdot"></span>Affiche / flyer</button>
+    </div>
+
+    <div class="field-l">Nom de la pastille</div>
+    <input class="inp" id="lblInput" value="Le Bon Coin" maxlength="40" placeholder="Ex : Le Bon Coin, un ami, TikTok…">
+
+    <div class="field-l">Couleur</div>
+    <div class="sw-row" id="swRow">
+      <button class="sw on" style="--sc:#ff6e14" data-c="#ff6e14"></button>
+      <button class="sw" style="--sc:#e1306c" data-c="#e1306c"></button>
+      <button class="sw" style="--sc:#4285f4" data-c="#4285f4"></button>
+      <button class="sw" style="--sc:#16a34a" data-c="#16a34a"></button>
+      <button class="sw" style="--sc:#00c2a8" data-c="#00c2a8"></button>
+      <button class="sw" style="--sc:#7c4dff" data-c="#7c4dff"></button>
+      <button class="sw" style="--sc:#f59e0b" data-c="#f59e0b"></button>
+      <button class="sw" style="--sc:#5e6e82" data-c="#5e6e82"></button>
+      <label class="sw-free" title="Couleur libre"><span>+</span><input type="color" id="freeColor" value="#ff6e14"></label>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary">Enregistrer</button>
+      <button class="btn btn-ghost">Retirer</button>
+    </div>
+
+    <div class="note"><b>Confidentiel.</b> C'est ton info à toi (comme un CRM) — l'élève ne la voit jamais.</div>
+  </div>
+</div>
+
+<script>
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('t-light').classList.toggle('on',t==='light');
+  document.getElementById('t-dark').classList.toggle('on',t==='dark');
+}
+const prev=document.getElementById('pvPrev');
+const lbl=document.getElementById('lblInput');
+function setColor(c){
+  prev.style.setProperty('--c',c);
+  document.getElementById('freeColor').value=c;
+  document.querySelectorAll('#swRow .sw').forEach(s=>s.classList.toggle('on',s.dataset.c&&s.dataset.c.toLowerCase()===c.toLowerCase()));
+}
+function setLabel(v){ prev.textContent=v||'Provenance'; }
+lbl.addEventListener('input',()=>setLabel(lbl.value));
+document.querySelectorAll('#swRow .sw').forEach(s=>s.addEventListener('click',()=>setColor(s.dataset.c)));
+document.getElementById('freeColor').addEventListener('input',e=>setColor(e.target.value));
+document.querySelectorAll('#presets .chip').forEach(c=>c.addEventListener('click',()=>{
+  lbl.value=c.dataset.l; setLabel(c.dataset.l); setColor(c.dataset.c);
+}));
+</script>
+</body>
+</html>
