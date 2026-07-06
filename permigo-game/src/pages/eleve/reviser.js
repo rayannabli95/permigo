@@ -31,6 +31,7 @@ const MED = {
   faute: medallion("faute", "red", { cls: "rvh-med" }),
   situ: medallion("cone", "teal", { cls: "rvh-med" }),
   examConduite: medallion("voiture", "gold", { cls: "rvh-med" }),
+  centre: medallion("carte", "cyan", { cls: "rvh-med" }),
 };
 
 const ARROW = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -290,6 +291,15 @@ function render(data) {
         <div class="rvh-mode-t">Examen de conduite</div>
         <div class="rvh-mode-s">En conditions réelles, comme le jour J</div>
         <span class="rvh-mode-meta">Se tester ${CHEVRON}</span>
+      </div>
+    </button>
+
+    <button class="rvh-mode wide" data-go="/centre-examen">
+      <span class="rvh-sign" aria-hidden="true">${MED.centre}</span>
+      <div class="rvh-mode-body">
+        <div class="rvh-mode-t">Ton centre d'examen</div>
+        <div class="rvh-mode-s">Révise les pièges près de chez toi</div>
+        <span class="rvh-mode-meta">Repérer le terrain ${CHEVRON}</span>
       </div>
     </button>
   </div>

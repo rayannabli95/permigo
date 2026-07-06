@@ -343,3 +343,21 @@ textarea:focus-visible,
   overflow: hidden; clip: rect(0,0,0,0);
   white-space: nowrap; border: 0;
 }
+
+/* ─── Pastille « provenance » (CRM moniteur) — badge plastique 3D, couleur libre.
+   Couleur via --c (hex) ; texte via --pv-ink (auto-contraste, cf provenance.js).
+   Auto-éclairée (dégradé + reflet) donc identique en clair et sombre. ─── */
+.pv-badge {
+  --pv-c-lt: color-mix(in srgb, var(--c, #5e6e82) 82%, #fff);
+  --pv-c-dk: color-mix(in srgb, var(--c, #5e6e82) 86%, #000);
+  display: inline-flex; align-items: center; flex: none;
+  padding: 4px 10px; border-radius: 999px;
+  font-weight: 800; font-size: 10.5px; line-height: 1; letter-spacing: .2px;
+  color: var(--pv-ink, #fff); white-space: nowrap;
+  background: linear-gradient(180deg, var(--pv-c-lt), var(--pv-c-dk));
+  box-shadow:
+    0 2px 7px -1px color-mix(in srgb, var(--c, #5e6e82) 48%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.5),
+    inset 0 -4px 7px color-mix(in srgb, var(--c, #5e6e82) 60%, #000);
+}
+.pv-badge--lg { padding: 5px 12px; font-size: 12px; }

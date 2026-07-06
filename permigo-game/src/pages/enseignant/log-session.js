@@ -22,6 +22,7 @@ import { labelComp } from "@/utils/remc-label.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { medallion } from "@/utils/medallions.js";
+import { provenanceBadge, fetchProvenanceMap } from "@/utils/provenance.js";
 
 // Tour guidé validation — 1× à la première séance, quand l'UI complète existe
 const TOUR_KEY = "pg-tour-validation-v1";
@@ -504,19 +505,25 @@ export async function mount(root) {
     </div>`;
   root.querySelector("#vs-back")?.addEventListener("click", goBack);
 
-  // Élèves attitrés du moniteur
-  const { data, error } = await sb
-    .from("profiles")
-    .select("id, prenom, nom, avatar_url")
-    .eq("role", "eleve")
-    .eq("enseignant_id", _me.id)
-    .order("prenom", { ascending: true });
+  // Élèves attitrés du moniteur (+ provenance CRM en parallèle).
+  const [{ data, error }, provMap] = await Promise.all([
+    sb
+      .from("profiles")
+      .select("id, prenom, nom, avatar_url")
+      .eq("role", "eleve")
+      .eq("enseignant_id", _me.id)
+      .order("prenom", { ascending: true }),
+    fetchProvenanceMap(),
+  ]);
 
   if (error) {
     toast("Impossible de charger tes élèves", "error");
     _eleves = [];
   } else {
-    _eleves = data || [];
+    _eleves = (data || []).map((e) => ({
+      ...e,
+      provenance: provMap.get(e.id) || null,
+    }));
   }
 
   // Pré-sélection via #/log-session?eleveId=...
@@ -553,7 +560,9 @@ async function selectEleve(id, doRender = true) {
   }
   _eleveDDOpen = false;
   _openMondes = new Set();
-  const firstOpen = REMC.find((cat) => cat.subs.some((s) => !_acquisSet.has(s.c)));
+  const firstOpen = REMC.find((cat) =>
+    cat.subs.some((s) => !_acquisSet.has(s.c)),
+  );
   if (firstOpen) _openMondes.add(firstOpen.id);
   if (doRender) {
     render();
@@ -570,8 +579,12 @@ function eleveById(id) {
 
 function render() {
   const el = eleveById(_eleve);
+  // ⚠️ PAS de .anim-slide-up ici : render() re-tourne à CHAQUE interaction
+  // (choix d'élève, ouverture du menu, recherche). Rejouer l'animation
+  // d'entrée sur toute la page à chaque tap donnait un « à-coup / zoom
+  // chelou ». L'entrée n'anime qu'une fois, sur le skeleton du mount().
   _root.innerHTML = `${STYLE}
-    <div class="vs anim-slide-up">
+    <div class="vs">
       <div class="vs-hd">
         <div class="vs-hd-inner">
           <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
@@ -602,7 +615,7 @@ function renderEleveDropdown() {
 
   const trigger = el
     ? `<span class="vs-dd-av">${renderUserAvatar({ avatar_url: el.avatar_url, prenom: el.prenom, nom: el.nom }, 34)}</span>
-       <span class="vs-dd-txt"><span class="vs-dd-name">${esc(fmtName(`${el.prenom || ""} ${el.nom || ""}`))}</span><span class="vs-dd-sub">${_acquisSet.size}/${REMC_TOTAL} acquises</span></span>`
+       <span class="vs-dd-txt"><span class="vs-dd-name">${esc(fmtName(`${el.prenom || ""} ${el.nom || ""}`))}</span><span class="vs-dd-sub">${_acquisSet.size}/${REMC_TOTAL} acquises</span></span>${provenanceBadge(el.provenance)}`
     : `<span class="vs-dd-txt"><span class="vs-dd-name vs-dd-ph">Choisir un élève…</span></span>`;
 
   const search =
@@ -620,6 +633,7 @@ function renderEleveDropdown() {
             return `<button class="vs-dd-opt${sel ? " sel" : ""}" type="button" role="option" aria-selected="${sel}" data-eleve="${esc(e.id)}" style="animation-delay:${Math.min(i, 8) * 28}ms">
               <span class="vs-dd-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 32)}</span>
               <span class="vs-dd-name">${esc(fmtName(`${e.prenom || ""} ${e.nom || ""}`))}</span>
+              ${provenanceBadge(e.provenance)}
               ${sel ? `<span class="vs-dd-check">${icon("check", { size: 15, strokeWidth: 2.8 })}</span>` : ""}
             </button>`;
           })
@@ -643,18 +657,27 @@ const PILL_ICO = {
   a_retravailler: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg>`,
 };
 function statutPill(state) {
-  if (state === "acquis") return `<span class="vl-pill acquis">${PILL_ICO.acquis}Acquis</span>`;
-  if (state === "en_cours") return `<span class="vl-pill en_cours">${PILL_ICO.en_cours}En cours</span>`;
-  if (state === "a_retravailler") return `<span class="vl-pill a_retravailler">${PILL_ICO.a_retravailler}À revoir</span>`;
+  if (state === "acquis")
+    return `<span class="vl-pill acquis">${PILL_ICO.acquis}Acquis</span>`;
+  if (state === "en_cours")
+    return `<span class="vl-pill en_cours">${PILL_ICO.en_cours}En cours</span>`;
+  if (state === "a_retravailler")
+    return `<span class="vl-pill a_retravailler">${PILL_ICO.a_retravailler}À revoir</span>`;
   return `<span class="vl-pill non">À évaluer</span>`;
 }
 
 // Progression d'une catégorie dans le livret (acquises + posées cette séance)
 function catProgress(cat) {
   const acquis = cat.subs.filter((s) => _acquisSet.has(s.c)).length;
-  const picked = cat.subs.filter((s) => _picked.has(s.c) && !_acquisSet.has(s.c)).length;
+  const picked = cat.subs.filter(
+    (s) => _picked.has(s.c) && !_acquisSet.has(s.c),
+  ).length;
   const evald = acquis + picked;
-  return { evald, total: cat.subs.length, pct: Math.round((evald / cat.subs.length) * 100) };
+  return {
+    evald,
+    total: cat.subs.length,
+    pct: Math.round((evald / cat.subs.length) * 100),
+  };
 }
 
 function renderComps() {
