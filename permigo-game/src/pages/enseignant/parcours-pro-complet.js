@@ -255,7 +255,10 @@ export async function mount(root) {
     .eq("validated_by", me.id);
 
   if (error) {
-    toast("Impossible de charger le parcours", "error");
+    toast(
+      "« Paliers » indisponible. Vérifie ta connexion, puis réessaie.",
+      "error",
+    );
     return;
   }
 
@@ -356,7 +359,7 @@ function renderStop(stop, totalValidations) {
     <div class="epcf-stop-reward ${cls === "done" ? "unlocked" : ""}">
       <span class="epcf-stop-reward-ico">${rewardIco}</span>
       <span class="epcf-stop-reward-txt">
-        ${cls === "done" ? "Statut atteint : " : "Prochain statut : "}
+        ${cls === "done" ? "Statut atteint : " : "Prochain statut : "}
         <strong>${esc(stop.tier.title)}</strong>
       </span>
     </div>

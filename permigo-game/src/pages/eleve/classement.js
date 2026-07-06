@@ -112,9 +112,9 @@ export async function mount(root, initialTab) {
   );
   if (allFailed) {
     root.innerHTML = `${ARENE_CSS}<div class="arn" style="${CONDUITE_ACCENT}">
-      <div class="arn-hd"><h1>Classement</h1><p class="arn-sub">Impossible de charger le classement</p></div>
+      <div class="arn-hd"><h1>Classement</h1><p class="arn-sub">« Classement » indisponible</p></div>
       <div style="padding:28px 20px;text-align:center">
-        <p style="font:600 13.5px/1.5 'Inter',sans-serif;color:var(--amute);margin:0 0 16px">Vérifie ta connexion et réessaie.</p>
+        <p style="font:600 13.5px/1.5 'Inter',sans-serif;color:var(--amute);margin:0 0 16px">Vérifie ta connexion, puis réessaie.</p>
         <button id="arn-retry" style="font:800 14px 'Inter',sans-serif;padding:13px 28px;border-radius:14px;border:0;background:var(--aup);color:#04220f;cursor:pointer">Réessayer</button>
       </div>
     </div>`;
@@ -179,7 +179,7 @@ function _paliersData(ligue, score) {
       doneCount: done,
       targetIdx: info.top ? 0 : done + 1,
       title: "Paliers Révision",
-      goal: info.top ? "Maîtrisée" : `Objectif : ${esc(info.next?.name ?? "")}`,
+      goal: info.top ? "Maîtrisée" : `Objectif : ${esc(info.next?.name ?? "")}`,
       palierName: info.league?.name ?? "Pas encore classé",
       colorOf: (i, isDone) =>
         isDone
@@ -212,7 +212,7 @@ function _paliersData(ligue, score) {
 // Nudge perso (écart de rang réel — pas de delta hebdo inventé).
 function _nudge(ligue, rows, mine) {
   if (!mine) return "";
-  if (mine.rang === 1) return "Tu es en tête du classement — reste devant.";
+  if (mine.rang === 1) return "Tu es en tête. Reste devant.";
   const above = rows.find((r) => r.rang === mine.rang - 1);
   if (!above) return "";
   const gap = Math.max(0, (above.score ?? 0) - (mine.score ?? 0));
@@ -258,7 +258,7 @@ function _renderArena(state, data) {
     <span aria-hidden="true">${icon("user", { size: 16, strokeWidth: 2 })}</span>
     <span class="arn-link-body">
       <span class="arn-link-t">Choisis ton pseudo public</span>
-      <span class="arn-link-s">Sinon tu apparais en « Apprenti »</span>
+      <span class="arn-link-s">Sinon tu apparais en « Apprenti ».</span>
     </span>
     <span style="color:var(--mu)" aria-hidden="true">›</span>
   </a>
@@ -297,7 +297,7 @@ function _renderBody(state, rows, data) {
     const cta = ligue === "revision" ? _quizCta() : "";
     const txt =
       ligue === "revision"
-        ? "Le classement de la semaine s'anime dès que deux élèves ont marqué des points révision."
+        ? "Le classement de la semaine démarre dès que deux élèves ont marqué des points en révision."
         : "Le classement apparaît dès que deux élèves ont validé une compétence avec leur moniteur.";
     return `<div class="arn-empty">
       <div class="arn-empty-ico" style="opacity:1">${

@@ -310,9 +310,9 @@ function relTime(ts) {
   if (!ts) return "";
   const diff = Date.now() - new Date(ts).getTime();
   const d = Math.floor(diff / 86400000);
-  if (d === 0) return "aujourd'hui";
+  if (d === 0) return "aujourd’hui";
   if (d === 1) return "hier";
-  if (d < 7) return `il y a ${d}j`;
+  if (d < 7) return `il y a ${d} j`;
   return new Date(ts).toLocaleDateString("fr-FR", {
     day: "numeric",
     month: "short",
@@ -340,7 +340,7 @@ function renderCard(chest) {
        data-tier="${esc(meta.tier)}"
        role="${canOpen ? "button" : "article"}"
        tabindex="${canOpen ? "0" : "-1"}"
-       aria-label="${canOpen ? `Ouvrir : ${esc(meta.label)}` : `Déjà ouvert : ${esc(meta.label)}`}">
+       aria-label="${canOpen ? `Ouvrir ${esc(meta.label)}` : `Déjà ouvert : ${esc(meta.label)}`}">
     <div class="mc-thumb" style="background:${grad}">
       <img src="${meta.image}" alt="${esc(meta.label)}" loading="lazy"
            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
@@ -350,7 +350,7 @@ function renderCard(chest) {
     </div>
     <div class="mc-info">
       <div class="mc-label">${esc(meta.label)}</div>
-      <div class="mc-sub">${canOpen ? "Débloqué " + relTime(chest.unlocked_at) : "Ouvert " + relTime(chest.opened_at)}</div>
+      <div class="mc-sub">${canOpen ? "Gagné " + relTime(chest.unlocked_at) : "Ouvert " + relTime(chest.opened_at)}</div>
       ${
         canOpen
           ? `<div class="mc-rewards">
@@ -427,9 +427,9 @@ export async function mount(root) {
 
   if (chests.length === 0) {
     html = loadFailed
-      ? `<div class="mc-empty"><div class="mc-empty-ico">${medallion("panneau", "orange", { size: 52 })}</div>Impossible de charger tes coffres.<br>
+      ? `<div class="mc-empty"><div class="mc-empty-ico">${medallion("panneau", "orange", { size: 52 })}</div>« Coffres » indisponible.<br>Vérifie ta connexion, puis réessaie.<br>
          <button class="mc-open-btn" id="mc-retry" style="margin-top:12px">Réessayer</button></div>`
-      : `<div class="mc-empty"><div class="mc-empty-ico">${medallion("coffre", "slate", { size: 52 })}</div>Aucun coffre encore — complète des mondes<br>et construis ta série !</div>`;
+      : `<div class="mc-empty"><div class="mc-empty-ico">${medallion("coffre", "slate", { size: 52 })}</div>Aucun coffre pour l’instant.<br>Termine un monde ou tiens ta série.</div>`;
   }
 
   // Replace skeleton with real content
@@ -452,7 +452,7 @@ export async function mount(root) {
         card.tabIndex = -1;
         card.querySelector(".mc-open-btn")?.remove();
         const sub = card.querySelector(".mc-sub");
-        if (sub) sub.textContent = "Ouvert aujourd'hui";
+        if (sub) sub.textContent = "Ouvert aujourd’hui";
         card.querySelector(".mc-rewards")?.remove();
       };
 
@@ -508,7 +508,7 @@ export async function mount(root) {
             // { ok, data } et le RPC open_chest expose data.gemmes_added
             // (result.gemmes n'a jamais existé), fallback sur la méta locale.
             const gemsWon = result.data?.gemmes_added ?? meta.gemmes ?? 0;
-            toast(`${meta.label} ouvert ! +${gemsWon} volants`, "success");
+            toast(`${meta.label} ouvert ! +${gemsWon} volants`, "success");
             // Jetons dorés vers le HUD (coffres non-monde)
             if (gemsWon > 0) flyVolants(gemsWon, { from: card });
           }
@@ -517,7 +517,10 @@ export async function mount(root) {
           migrateCard();
         } else {
           console.error("[mes-coffres] openChest error:", result.error);
-          toast(result.error || "Erreur ouverture coffre — réessaie", "error");
+          toast(
+            result.error || "Le coffre n’a pas pu s’ouvrir. Réessaie.",
+            "error",
+          );
         }
       };
 

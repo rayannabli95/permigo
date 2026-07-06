@@ -222,7 +222,7 @@ const STYLE = `<style>
   border-radius: 12px; padding: 10px 14px;
 }
 .ppr-max-txt {
-  font: 700 12.5px/1.3 'Inter', sans-serif; color: #fff;
+  font: 700 12.5px/1.5 'Inter', sans-serif; color: #fff;
 }
 
 /* ── Retry ── */
@@ -254,7 +254,7 @@ export async function mount(root) {
   _root = root;
   const me = getCurUser();
   if (!me || me.role !== "enseignant") {
-    root.innerHTML = `<p style="padding:32px;text-align:center;color:#5a6188">Accès enseignant requis</p>`;
+    root.innerHTML = `<p style="padding:32px;text-align:center;color:#5a6188">Accès réservé aux moniteurs</p>`;
     return;
   }
 
@@ -317,7 +317,8 @@ export async function mount(root) {
       <div class="ppr">
         <div class="ppr-hd"><div class="ppr-hd-title">Progression</div></div>
         <div style="padding:48px 24px;text-align:center;color:#5a6188">
-          <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
+          <p style="font:700 16px/1.4 'Inter',sans-serif;color:#1a1c2e">« Progression » indisponible</p>
+          <p style="font:600 14px/1.5 'Inter',sans-serif;margin-top:6px">Vérifie ta connexion, puis réessaie.</p>
           <button id="ppr-retry">Réessayer</button>
         </div>
       </div>`;
@@ -369,8 +370,8 @@ function _render(root, d, state, ligueRows) {
     myPts === 0
       ? "Valide une compétence pour entrer en ligue"
       : ptsToNext > 0 && prevLeague
-        ? `${myPts} validation${myPts > 1 ? "s" : ""} cette semaine · monte en ${esc(prevLeague.name)} à ${prevLeague.minPts}`
-        : `${myPts} validation${myPts > 1 ? "s" : ""} cette semaine · ligue maximale atteinte`;
+        ? `${myPts} validation${myPts > 1 ? "s" : ""} cette semaine · ${esc(prevLeague.name)} à ${prevLeague.minPts}`
+        : `${myPts} validation${myPts > 1 ? "s" : ""} cette semaine · ligue max atteinte`;
 
   root.innerHTML = `${STYLE}
 <div class="ppr">
@@ -381,7 +382,7 @@ function _render(root, d, state, ligueRows) {
   </div>
 
   <!-- Hero indigo -->
-  <div class="ppr-hero" aria-label="Palier de moniteur : ${esc(palierName)}, palier ${palierNum} sur ${MONITEUR_TIERS.length}">
+  <div class="ppr-hero" aria-label="Ton palier de moniteur : ${esc(palierName)}, palier ${palierNum} sur ${MONITEUR_TIERS.length}">
     <div class="ppr-hero-halo"></div>
     <img
       class="ppr-hero-trophy"
@@ -480,7 +481,7 @@ function _progHtml(state) {
   if (state.isMax) {
     return `<div class="ppr-max">
       ${icon("check-circle", { size: 18, strokeWidth: 2 })}
-      <div class="ppr-max-txt">Palier maximum atteint — référent certifié.</div>
+      <div class="ppr-max-txt">Palier maximum atteint. Tu es référent certifié.</div>
     </div>`;
   }
   const missing = state.nextReward?.missing ?? 0;

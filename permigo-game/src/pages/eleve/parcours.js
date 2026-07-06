@@ -539,7 +539,7 @@ const STYLE = `<style>
 .prc-cv-exam-ic { font-size:24px; flex:none; }
 .prc-cv-exam-tx { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
 .prc-cv-exam-tx b { font:700 14.5px/1.2 'Plus Jakarta Sans',sans-serif; }
-.prc-cv-exam-tx small { font:500 12px/1.35 'Inter',sans-serif; color:var(--mu,#6b7089); }
+.prc-cv-exam-tx small { font:500 12px/1.5 'Inter',sans-serif; color:var(--mu,#6b7089); }
 .prc-cv-exam-go { font:800 18px/1 'Plus Jakarta Sans',sans-serif; color:var(--a,#6366f1); flex:none; }
 
 /* ══ Décor immersif : panneaux de signalisation (fond, gouttières) ══ */
@@ -1431,7 +1431,7 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div></div></div>
       <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
         <div style="font-size:40px;margin-bottom:12px">${icon("alert-circle", { size: 30 })}</div>
-        <p style="font:600 15px/1.4 'Inter',sans-serif">Ton parcours n'a pas pu se charger.</p>
+        <p style="font:600 15px/1.5 'Inter',sans-serif">« Mon parcours » indisponible.<br>Vérifie ta connexion, puis réessaie.</p>
         <button id="prc-retry" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:var(--a-ink);border-radius:12px;cursor:pointer">Réessayer</button>
       </div></div>`;
     root
@@ -2137,7 +2137,7 @@ function renderChapterView(
         <div class="prc-cv-next-txt">
           <div class="prc-cv-next-kick">Chapitre ${nextNum} · Verrouillé</div>
           <div class="prc-cv-next-ttl">${esc(nextTitle)}</div>
-          <div class="prc-cv-next-sub">Bats le boss de « ${esc(world.nom ?? chapTitle)} » pour l'ouvrir</div>
+          <div class="prc-cv-next-sub">Bats le boss de « ${esc(world.nom ?? chapTitle)} » pour l’ouvrir</div>
         </div>
       </div>`
       : `
@@ -2146,7 +2146,7 @@ function renderChapterView(
               aria-label="Aller au chapitre ${nextNum} : ${esc(nextTitle)}">
         <div class="prc-cv-next-badge open" aria-hidden="true">${nextNum}</div>
         <div class="prc-cv-next-txt">
-          <div class="prc-cv-next-kick">Chapitre suivant · débloqué</div>
+          <div class="prc-cv-next-kick">Chapitre suivant · Débloqué</div>
           <div class="prc-cv-next-ttl">${esc(nextTitle)}</div>
         </div>
         <div class="prc-cv-next-go" aria-hidden="true">
@@ -2213,11 +2213,11 @@ function renderChapterView(
     ${chestHTML}
     ${gateHTML}
     <!-- Porte « Mon permis » : le jour J se prépare ici (seul lien vers #/examen) -->
-    <a href="#/examen" class="prc-cv-exam" aria-label="Préparer ton jour J">
+    <a href="#/examen" class="prc-cv-exam" aria-label="Préparer ton examen">
       <span class="prc-cv-exam-ic" aria-hidden="true">🎓</span>
       <span class="prc-cv-exam-tx">
-        <b>Prépare ton jour J</b>
-        <small>Compte à rebours, « suis-je prêt ? », centre d'examen</small>
+        <b>Prépare ton examen</b>
+        <small>Ton compte à rebours et où tu en es</small>
       </span>
       <span class="prc-cv-exam-go" aria-hidden="true">→</span>
     </a>

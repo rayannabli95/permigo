@@ -119,7 +119,7 @@ const STYLE = `<style>
   border-radius: var(--r-full);
 }
 .tr2-progress-hint {
-  font: 600 12px/1.35 'Inter', sans-serif;
+  font: 600 12px/1.5 'Inter', sans-serif;
   color: var(--ar-mu);
 }
 
@@ -416,7 +416,7 @@ export async function mount(root, openKey = null) {
       </div>
       <div class="tr2-progress-wrap">
         <div class="tr2-progress-bar"><div class="tr2-progress-fill" id="tr2-fill" style="width:0%"></div></div>
-        <div class="tr2-progress-hint" id="tr2-hint">Chargement…</div>
+        <div class="tr2-progress-hint" id="tr2-hint">Chargement en cours…</div>
       </div>
     </div>
   </div>
@@ -424,7 +424,7 @@ export async function mount(root, openKey = null) {
     <span class="tr2-galerie-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
     <span class="tr2-galerie-tx">
       <span class="tr2-galerie-t">Ta galerie</span>
-      <span class="tr2-galerie-s">Tes skins et badges débloqués</span>
+      <span class="tr2-galerie-s">Tes tenues et badges débloqués</span>
     </span>
     <span class="tr2-galerie-arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
   </a>
@@ -466,12 +466,12 @@ export async function mount(root, openKey = null) {
     renderAll(root, achRes.value?.data ?? [], stats, openKey);
   } catch (e) {
     console.error("[trophees]", e);
-    toast("Impossible de charger les trophées", "error");
+    toast("« Trophées » indisponible", "error");
     root.querySelector("#tr2-body").innerHTML = `
       <div style="text-align:center;padding:56px 24px;color:var(--ar-mu)">
         <div style="margin-bottom:12px;color:var(--ar-gold2)">${icon("trophy", { size: 44 })}</div>
-        <div style="font:800 16px/1.3 'Baloo 2',cursive;color:#fff;margin-bottom:6px">Continue à apprendre</div>
-        <div style="font:500 13px/1.5 'Inter',sans-serif">Tes premiers trophées arrivent</div>
+        <div style="font:800 16px/1.3 'Baloo 2',cursive;color:#fff;margin-bottom:6px">« Trophées » indisponible</div>
+        <div style="font:500 13px/1.5 'Inter',sans-serif">Vérifie ta connexion, puis réessaie.</div>
       </div>`;
   }
 }
@@ -550,8 +550,8 @@ function renderAll(
   }
   root.querySelector("#tr2-hint").textContent =
     unlockedCount === 0
-      ? "Valide des compétences pour décrocher ton premier trophée !"
-      : `${pct}% du parcours — ${CATALOG.length - unlockedCount} restant${CATALOG.length - unlockedCount > 1 ? "s" : ""}`;
+      ? "Valide des compétences pour décrocher ton premier trophée."
+      : `${pct}% du parcours · ${CATALOG.length - unlockedCount} restant${CATALOG.length - unlockedCount > 1 ? "s" : ""}`;
 
   // Add entry keyframe
   if (!document.head.querySelector("#tr2-kf")) {
@@ -668,9 +668,9 @@ function renderFeatured(def, unlockData, stats = { compCount: 0, streak: 0 }) {
   if (isU && unlockData.unlocked_at) {
     sub = `Débloqué le ${new Date(unlockData.unlocked_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`;
   } else if (isU) {
-    sub = "Débloqué — bravo !";
+    sub = "Débloqué. Bien joué !";
   } else {
-    sub = `Objectif : ${shortProgress(def.key, stats)}`;
+    sub = `Objectif : ${shortProgress(def.key, stats)}`;
   }
   const sparks =
     isU && (rar === "legendaire" || rar === "epique")
@@ -734,8 +734,8 @@ function showModal(def, unlockData, totalUnlocked) {
         </div>
         <div class="tr2-modal-social">${
           totalUnlocked > 1
-            ? `Tu fais partie des élèves les plus avancés de ton école`
-            : "Continue pour débloquer plus de trophées !"
+            ? `Tu fais partie des élèves les plus avancés de ton école.`
+            : "Continue pour débloquer d’autres trophées."
         }</div>
       </div>
       <div class="tr2-modal-actions">
@@ -758,10 +758,10 @@ function showModal(def, unlockData, totalUnlocked) {
           <div class="tr2-modal-chip gems">+${def.gemmes} ${volantImg(13)} ${volantLabel(def.gemmes)} à débloquer</div>
           <div class="tr2-modal-chip date">${esc(RARITY_LABEL[rar] || "")}</div>
         </div>
-        <div class="tr2-modal-social">Objectif : ${esc(shortProgress(def.key))}</div>
+        <div class="tr2-modal-social">Objectif : ${esc(shortProgress(def.key))}</div>
       </div>
       <div class="tr2-modal-actions">
-        <button class="tr2-modal-share goto" id="tr2-goto-btn">Aller au parcours →</button>
+        <button class="tr2-modal-share goto" id="tr2-goto-btn">Voir mon parcours →</button>
         <button class="tr2-modal-close" id="tr2-close-btn">Fermer</button>
       </div>
     </div>
@@ -781,7 +781,7 @@ function showModal(def, unlockData, totalUnlocked) {
     overlay
       .querySelector("#tr2-share-btn")
       ?.addEventListener("click", async () => {
-        const text = `J'ai débloqué "${def.title}" sur PermiGo !`;
+        const text = `J’ai débloqué « ${def.title} » sur PermiGo !`;
         if (navigator.share) {
           try {
             await navigator.share({

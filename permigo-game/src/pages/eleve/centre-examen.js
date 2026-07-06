@@ -406,7 +406,7 @@ const STYLE = `<style>
 }
 
 /* ── Pièges — cartes premium ── */
-.cea-rev-intro { font-size:13px; color:var(--mu2,#64748b); margin:0 0 10px; }
+.cea-rev-intro { font-size:13px; line-height:1.5; color:var(--mu2,#64748b); margin:0 0 10px; }
 .cea-rev-row { display:flex; align-items:center; justify-content:space-between; gap:10px; text-decoration:none; background:var(--su,#fff); border:1px solid var(--bo2,#e2e8f0); border-radius:12px; padding:13px 14px; margin-bottom:8px; }
 .cea-rev-row:active { transform: scale(0.99); }
 .cea-rev-t { font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; color:var(--ink,#0f172a); }
@@ -770,7 +770,7 @@ function renderChips(activeSlug) {
          </button>`,
     )
     .join("");
-  const soon = `<span class="cea-chip soon">${icon("plus", { size: 13 })} Autres bientôt</span>`;
+  const soon = `<span class="cea-chip soon">${icon("plus", { size: 13 })} Autres centres bientôt</span>`;
   return `<div class="cea-chips-wrap"><div class="cea-chips">${chips}${soon}</div></div>`;
 }
 
@@ -800,7 +800,7 @@ function renderFiche(c) {
 
   <!-- ACCÈS -->
   <div class="cea-section reveal">
-    <h2 class="cea-section-tit">${icon("map-pin", { size: 17 })} Accès &amp; adresse</h2>
+    <h2 class="cea-section-tit">${icon("map-pin", { size: 17 })} Accès et adresse</h2>
     <div class="cea-addr-row">${icon("map-pin", { size: 17 })} ${esc(c.adresse)}</div>
     ${c.acces
       .map(
@@ -809,7 +809,7 @@ function renderFiche(c) {
       )
       .join("")}
     <a class="cea-maps-btn" href="${esc(mapsUrl(c))}" target="_blank" rel="noopener" data-act="maps">
-      ${icon("compass", { size: 18 })} Voir sur la carte
+      ${icon("compass", { size: 18 })} Ouvrir dans le plan
     </a>
   </div>
 
@@ -836,8 +836,8 @@ function renderFiche(c) {
   ${
     centreFiches(c).length
       ? `<div class="cea-section reveal">
-    <h2 class="cea-section-tit">${icon("car", { size: 17 })} Révise le geste pour ${esc(c.nom)}</h2>
-    <p class="cea-rev-intro">Les compétences de conduite qui font la différence sur ce secteur :</p>
+    <h2 class="cea-section-tit">${icon("car", { size: 17 })} Révise ta conduite pour ${esc(c.nom)}</h2>
+    <p class="cea-rev-intro">Les gestes qui font la différence sur ce secteur.</p>
     ${centreFiches(c)
       .map(
         (f) =>
@@ -853,10 +853,10 @@ function renderFiche(c) {
     c.quizTags?.length
       ? `<div class="cea-revise-wrap reveal">
     <button class="cea-revise-btn" id="cea-revise" type="button"
-      aria-label="Réviser les questions sur les pièges de ${esc(c.nom)}">
+      aria-label="Réviser les pièges de ${esc(c.nom)}">
       🎯 Révise les pièges de ${esc(c.nom)}
     </button>
-    <p class="cea-revise-sub">Quiz d'entraînement ciblé · ~15 questions</p>
+    <p class="cea-revise-sub">Quiz ciblé · 15 questions</p>
   </div>`
       : ""
   }
@@ -893,7 +893,7 @@ function renderFiche(c) {
       .join("")}
   </div>
 
-  <p class="cea-note">Infos données à titre indicatif pour t'aider à préparer. Vérifie toujours l'adresse exacte sur ta convocation officielle.</p>`;
+  <p class="cea-note">Ces infos peuvent changer. Vérifie l’adresse exacte sur ta convocation officielle.</p>`;
 }
 
 // ─── Écran verrou premium ────────────────────────────────────
@@ -906,11 +906,11 @@ function renderLocked(c) {
         <span class="cea-lock-badge">${icon("sparkle", { size: 10 })}</span>
       </div>
       <div class="cea-lock-tit">Fiche centre — ${esc(c.nom)}</div>
-      <p class="cea-lock-sub">Difficulté, pièges du parcours, conseils personnalisés et FAQ de ton centre d'examen. Débloque les fiches avec PermiGo+.</p>
+      <p class="cea-lock-sub">Difficulté, pièges du parcours, conseils et FAQ de ton centre d’examen. Débloque les fiches avec PermiGo+.</p>
       <div class="cea-lock-perks">
         <span class="cea-lock-perk">${icon("alert-triangle", { size: 13 })} Pièges du parcours</span>
-        <span class="cea-lock-perk">${icon("target", { size: 13 })} Conseils experts</span>
-        <span class="cea-lock-perk">${icon("message-circle", { size: 13 })} FAQ centre</span>
+        <span class="cea-lock-perk">${icon("target", { size: 13 })} Conseils ciblés</span>
+        <span class="cea-lock-perk">${icon("message-circle", { size: 13 })} FAQ du centre</span>
       </div>
       <button class="cea-lock-cta" id="cea-unlock" type="button">
         ${icon("sparkle", { size: 18 })} Débloquer PermiGo+
@@ -930,7 +930,7 @@ function template(activeSlug) {
   <div class="cea-hd">
     <div class="cea-hd-ico">${icon("map", { size: 22 })}</div>
     <div>
-      <div class="cea-hd-tit">Ton centre d'examen</div>
+      <div class="cea-hd-tit">Ton centre d’examen</div>
       <div class="cea-hd-sub">Connais le terrain avant le jour J</div>
       <div class="cea-badge-premium">${icon("map-pin", { size: 10 })} Fiche centre</div>
     </div>
@@ -950,7 +950,7 @@ function skeleton() {
 <div class="cea">
   <div class="cea-hd">
     <div class="cea-hd-ico">${icon("map", { size: 22 })}</div>
-    <div><div class="cea-hd-tit">Ton centre d'examen</div></div>
+    <div><div class="cea-hd-tit">Ton centre d’examen</div></div>
   </div>
   <div class="cea-chips-wrap"><div class="cea-chips" style="gap:8px">
     ${[120, 100, 90].map((w) => `<div class="cea-skel-block" style="width:${w}px;height:44px;border-radius:999px;flex-shrink:0;margin:0"></div>`).join("")}
@@ -1024,7 +1024,8 @@ function wireAccordion(root, activeSlug) {
 export async function mount(root, param) {
   const me = getCurUser();
   if (!me) {
-    root.innerHTML = "<p style='padding:24px;color:var(--mu)'>Non connecté</p>";
+    root.innerHTML =
+      "<p style='padding:24px;color:var(--mu)'>Connecte-toi pour voir ton centre.</p>";
     return;
   }
 

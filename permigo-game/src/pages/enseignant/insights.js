@@ -449,10 +449,11 @@ export async function mount(root) {
     // Sans ça, si une requête échoue (réseau, RLS…), la page restait bloquée
     // sur le squelette indéfiniment. On affiche un état d'erreur + Réessayer.
     console.error("[insights] loadData", e);
-    toast("Impossible de charger les insights", "error");
+    toast("« Stats » indisponible", "error");
     root.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:64px 24px;text-align:center;color:var(--mu)">
-        <p style="margin:0;font:600 15px/1.4 'Inter',sans-serif">Impossible de charger les insights.</p>
+        <p style="margin:0;font:700 16px/1.5 'Inter',sans-serif;color:var(--ink)">« Stats » indisponible</p>
+        <p style="margin:0;font:500 14px/1.5 'Inter',sans-serif">Vérifie ta connexion, puis réessaie.</p>
         <button id="ins-retry" type="button" style="border:0;border-radius:999px;padding:10px 20px;background:var(--a);color:#fff;font:700 14px/1 'Inter',sans-serif;cursor:pointer">Réessayer</button>
       </div>`;
     root
@@ -720,18 +721,18 @@ async function loadData(me) {
     recos.push({
       icon: medallion("cible", "indigo", { size: 36 }),
       ttl: "Lance ta semaine",
-      txt: "Valide une compétence avec un élève actif pour alimenter ta série.",
+      txt: "Valide une compétence avec un élève actif pour garder ta série.",
       route: "#/log-session",
     });
   }
   if (topStagnent.length > 0) {
     const e = topStagnent[0];
     const nm = esc(`${e.prenom || ""} ${e.nom || ""}`.trim());
-    const since = e.daysAgo ? `depuis ${e.daysAgo}j` : "depuis un moment";
+    const since = e.daysAgo ? `depuis ${e.daysAgo} j` : "depuis un moment";
     recos.push({
       icon: medallion("panneau", "orange", { size: 36 }),
       ttl: `Relance ${nm}`,
-      txt: `${nm} n'a plus validé ${since}. Un point en leçon peut débloquer la progression.`,
+      txt: `${nm} n’a plus rien validé ${since}. Un point en leçon peut débloquer sa progression.`,
       route: `#/livret/${e.id}`,
     });
   }
@@ -740,7 +741,7 @@ async function loadData(me) {
     const nm = esc(labelComp(d.compId));
     recos.push({
       icon: medallion("ampoule", "violet", { size: 36 }),
-      ttl: `Point pedagogique : ${nm}`,
+      ttl: `Point à travailler : ${nm}`,
       txt: `${d.count} élève${d.count > 1 ? "s" : ""} bloqué${d.count > 1 ? "s" : ""} sur cette compétence. Prévois un temps dédié en leçon.`,
       route: `#/eleves?bloque_sur=${encodeURIComponent(d.compId)}`,
     });
@@ -749,7 +750,7 @@ async function loadData(me) {
     recos.push({
       icon: medallion("trophee", "gold", { size: 36 }),
       ttl: "Tout roule",
-      txt: "Tes élèves progressent bien ce moment. Rien d'urgent.",
+      txt: "Tes élèves progressent bien. Rien d’urgent en ce moment.",
       route: null,
     });
   }
@@ -826,9 +827,9 @@ function renderPeriodContent(data) {
     if (delta === null) {
       deltaHtml = `<span class="ins-hero-delta flat">Première semaine</span>`;
     } else if (delta > 0) {
-      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${delta} vs semaine passée</span>`;
+      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${delta} sur la semaine passée</span>`;
     } else if (delta < 0) {
-      deltaHtml = `<span class="ins-hero-delta down">${delta} vs semaine passée</span>`;
+      deltaHtml = `<span class="ins-hero-delta down">${delta} sur la semaine passée</span>`;
     } else {
       deltaHtml = `<span class="ins-hero-delta flat">Comme la semaine passée</span>`;
     }
@@ -836,9 +837,9 @@ function renderPeriodContent(data) {
     if (deltaMois === null) {
       deltaHtml = `<span class="ins-hero-delta flat">Premier mois</span>`;
     } else if (deltaMois > 0) {
-      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${deltaMois}% vs mois dernier</span>`;
+      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${deltaMois}&#8239;% sur le mois dernier</span>`;
     } else if (deltaMois < 0) {
-      deltaHtml = `<span class="ins-hero-delta down">-${Math.abs(deltaMois)}% vs mois dernier</span>`;
+      deltaHtml = `<span class="ins-hero-delta down">-${Math.abs(deltaMois)}&#8239;% sur le mois dernier</span>`;
     } else {
       deltaHtml = `<span class="ins-hero-delta flat">Comme le mois dernier</span>`;
     }
@@ -938,7 +939,7 @@ function renderActivityChart({ heatmapDay, spark7 }) {
 
   if (maxTotal === 0) {
     return `<div class="ins-card ins-empty">
-      Aucune validation sur les 7 derniers jours.
+      Aucune validation ces 7 derniers jours.
     </div>`;
   }
 
@@ -965,7 +966,7 @@ function renderActivityChart({ heatmapDay, spark7 }) {
 function renderTopProgresse(list, isSemaine) {
   if (list.length === 0) {
     return `<div class="ins-empty">
-      Aucun élève avec des validations ${isSemaine ? "cette semaine" : "ce mois"}.
+      Aucune validation ${isSemaine ? "cette semaine" : "ce mois"} pour l’instant.
     </div>`;
   }
   return `<div class="ins-prog-list">
@@ -1000,8 +1001,8 @@ function renderElevesList(tab, data) {
   if (list.length === 0) {
     const txt =
       tab === "progressent"
-        ? "Aucun élève avec des validations cette semaine."
-        : "Personne en pause — tout le monde avance !";
+        ? "Aucune validation cette semaine pour l’instant."
+        : "Personne en pause. Tout le monde avance !";
     return `<div class="ins-empty">${txt}</div>`;
   }
   return `<div class="ins-prog-list">
@@ -1020,7 +1021,7 @@ function renderElevesList(tab, data) {
         const meta =
           tab === "progressent"
             ? `+${e.valsWeek || 0} validations cette semaine`
-            : `Aucune validation depuis ${e.daysAgo ? `${e.daysAgo} jours` : "longtemps"}`;
+            : `Rien validé depuis ${e.daysAgo ? `${e.daysAgo} jours` : "longtemps"}`;
         return `<div class="ins-prog-row" data-eleve-id="${esc(e.id)}"
                      role="button" tabindex="0" aria-label="Livret de ${nom}"
                      style="animation:insBtIn .3s ease ${i * 50}ms both">

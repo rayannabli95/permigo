@@ -24,9 +24,9 @@ const COOL_SEUIL_J = 14;
 
 // Graduation du refroidissement (couleur + libellé)
 function coolGrade(jours) {
-  if (jours >= 30) return { cls: "icy", label: "Très froid", c: "#b91c1c" };
-  if (jours >= 21) return { cls: "cold", label: "Froid", c: "#dc2626" };
-  return { cls: "warn", label: "Refroidit", c: "#d97706" };
+  if (jours >= 30) return { cls: "icy", label: "Décroché", c: "#b91c1c" };
+  if (jours >= 21) return { cls: "cold", label: "En pause", c: "#dc2626" };
+  return { cls: "warn", label: "Ralentit", c: "#d97706" };
 }
 
 // Messages pré-écrits — cadrés VALIDATION (révision / prochaine validation),
@@ -38,23 +38,23 @@ const MESSAGES = {
   // 14-20 j : reprise douce
   warn: [
     (p, j) =>
-      `Salut ${p} ! Ça fait ${j} jours qu'on s'est pas vus sur PermiGo. Une petite session de révision et tu gardes ton avance — chaque quiz te rapproche de ta prochaine validation. 🚗`,
+      `Salut ${p} ! ${j} jours sans se voir sur PermiGo. Une session de révision et tu gardes ton avance : chaque quiz te rapproche de ta prochaine validation. 🚗`,
     (p, j) =>
-      `Hello ${p} ! ${j} jours sans réviser, ça se rattrape vite : 5 minutes de quiz et t'es relancé. Ta prochaine validation n'attend que toi. 💪`,
+      `Hello ${p} ! ${j} jours sans réviser, ça se rattrape vite : 5 min de quiz et tu repars. Ta prochaine validation t’attend. 💪`,
   ],
   // 21-29 j : plus direct
   cold: [
     (p, j) =>
-      `${p}, ça fait ${j} jours — tes acquis commencent à refroidir. Reprends une session de révision cette semaine, on revalide ça ensemble. 🚗`,
+      `${p}, ça fait ${j} jours. Tes acquis se perdent vite. Reprends une session de révision cette semaine, on revalide ça ensemble. 🚗`,
     (p, j) =>
-      `Salut ${p} ! ${j} jours déjà… Ce que tu as validé mérite d'être entretenu. Un quiz rapide et la machine repart. 🔧`,
+      `Salut ${p} ! ${j} jours déjà. Ce que tu as validé mérite d’être entretenu. Un quiz rapide et tu repars. 🔧`,
   ],
   // ≥ 30 j : réengagement empathique
   icy: [
     (p, j) =>
-      `Salut ${p}, ça fait un moment (${j} jours) ! Pas de souci, on reprend là où tu t'es arrêté — commence par un petit quiz, le reste suivra. 🚗`,
+      `Salut ${p}, ça fait ${j} jours ! On reprend là où tu t’es arrêté. Commence par un quiz, le reste suit. 🚗`,
     (p, j) =>
-      `${p}, ton permis n'a pas bougé, il t'attend. ${j} jours de pause, ça arrive — 5 minutes de révision et tu reprends le fil. Je suis là si tu bloques. 👊`,
+      `${p}, ton permis t’attend. ${j} jours de pause, ça arrive. 5 min de révision et tu reprends le fil. Je suis là si tu bloques. 👊`,
   ],
 };
 
@@ -139,8 +139,8 @@ export async function mount(root) {
       <div class="rl-hero">
         <span class="rl-hero-med">${medallion("cloche", "orange", { size: 44, glow: true })}</span>
         <div class="rl-hero-kick">Radar de relance</div>
-        <div class="rl-hero-title">Ce matin…</div>
-        <div class="rl-hero-sub">Chargement de tes élèves qui refroidissent.</div>
+        <div class="rl-hero-title">Ce matin</div>
+        <div class="rl-hero-sub">On cherche tes élèves qui ne révisent plus.</div>
       </div>
       <div class="rl-body">
         ${[1, 2, 3].map(() => `<div class="rl-skel"></div>`).join("")}
@@ -161,7 +161,7 @@ async function loadData() {
 
   if (error) {
     console.error("[relances] query error", error);
-    toast("Impossible de charger le radar", "error");
+    toast("Vérifie ta connexion, puis réessaie.", "error");
     _cooling = [];
     return;
   }
@@ -193,15 +193,15 @@ function render() {
       : `${n} élève${n > 1 ? "s" : ""} à relancer`;
   const heroSub =
     n === 0
-      ? "Tous tes élèves sont actifs — beau travail."
-      : "Relance-les en 1 tap. Le message part de toi, pas d'un robot.";
+      ? "Tous tes élèves sont actifs. Beau travail."
+      : "Relance-les en un tap. Le message part de toi, pas d’un robot.";
 
   const cards =
     n === 0
       ? `<div class="rl-empty">
           ${medallion("trophee", "gold", { size: 56 })}
-          <div class="rl-empty-t">Inbox zéro 🎉</div>
-          <div class="rl-empty-d">Aucun élève ne refroidit en ce moment. Reviens demain matin pour ton rituel.</div>
+          <div class="rl-empty-t">Rien à faire 🎉</div>
+          <div class="rl-empty-d">Aucun élève ne décroche en ce moment. Reviens demain matin.</div>
         </div>`
       : _cooling.map(renderCard).join("");
 
@@ -227,12 +227,12 @@ function renderCard(e) {
         <div class="rl-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 46)}</div>
         <div class="rl-id">
           <div class="rl-nom">${nm}</div>
-          <div class="rl-meta">Dernière activité il y a <b>${e.jours} jours</b></div>
+          <div class="rl-meta">Vu il y a <b>${e.jours} jours</b></div>
         </div>
         <span class="rl-badge ${g.cls}"><span class="dot" aria-hidden="true"></span>${esc(g.label)}</span>
       </div>
       <div class="rl-gauge"><i style="width:${pct}%;background:${g.c}"></i></div>
-      <div class="rl-msg-lbl">${icon("edit-3", { size: 12, strokeWidth: 2.4 })} Message (modifiable)</div>
+      <div class="rl-msg-lbl">${icon("edit-3", { size: 12, strokeWidth: 2.4 })} Message à modifier</div>
       <textarea class="rl-msg" data-msg aria-label="Message de relance pour ${nm}">${esc(msg)}</textarea>
       <div class="rl-actions">
         <button class="rl-btn wa" data-send="wa" type="button">${icon("message-circle", { size: 15, strokeWidth: 2.3 })} WhatsApp</button>
@@ -252,7 +252,7 @@ function wire() {
         const mode = btn.dataset.send;
         const text = (ta?.value || "").trim();
         if (!text) {
-          toast("Écris un petit mot d'abord", "info");
+          toast("Écris ton message d’abord.", "info");
           return;
         }
         haptic("tap");
@@ -263,12 +263,12 @@ function wire() {
             "https://wa.me/?text=" + encodeURIComponent(text),
             "_blank",
           );
-          markSent(card, "WhatsApp ouvert — choisis le contact");
+          markSent(card, "WhatsApp ouvert. Choisis le contact.");
         } else if (mode === "sms") {
           track("relance.send", { eleve_id: id, via: "sms" });
           // sms: en mode composition (aucun numéro stocké — charte)
           window.location.href = "sms:?&body=" + encodeURIComponent(text);
-          markSent(card, "SMS ouvert — choisis le contact");
+          markSent(card, "SMS ouvert. Choisis le contact.");
         } else if (mode === "notif") {
           btn.disabled = true;
           try {
@@ -279,10 +279,10 @@ function wire() {
             if (error) throw error;
             track("relance.send", { eleve_id: id, via: "notif" });
             haptic("success");
-            markSent(card, "Notification envoyée à l'élève ✓");
+            markSent(card, "Notification envoyée ✓");
           } catch (err) {
             console.error("[relances] send_eleve_relance", err);
-            toast("Envoi impossible pour le moment", "error");
+            toast("Envoi impossible. Réessaie.", "error");
             btn.disabled = false;
           }
         }

@@ -27,7 +27,7 @@ const ACCENT = areneAccent("indigo");
 export async function mount(root, mode) {
   const me = getCurUser();
   if (!me || (me.role !== "enseignant" && me.role !== "moniteur")) {
-    root.innerHTML = "<p>Accès enseignant requis</p>";
+    root.innerHTML = "<p>Réservé aux moniteurs.</p>";
     return;
   }
 
@@ -40,7 +40,7 @@ export async function mount(root, mode) {
 
   root.innerHTML = `${ARENE_CSS}<div class="arn" style="${ACCENT}">
     ${_header(isTheorie, 0)}
-    <div class="arn-empty"><div class="arn-empty-txt">Chargement du classement…</div></div>
+    <div class="arn-empty"><div class="arn-empty-txt">Chargement…</div></div>
   </div>`;
 
   // ── Fetch : élèves de l'école, mes validations, examens « reçu », streaks ──
@@ -60,7 +60,10 @@ export async function mount(root, mode) {
   ]);
 
   if (elevesRes.error) {
-    toast("Impossible de charger le classement", "error");
+    toast(
+      "Classement indisponible. Vérifie ta connexion, puis réessaie.",
+      "error",
+    );
     return;
   }
 
@@ -164,8 +167,8 @@ export async function mount(root, mode) {
         }</div>
         <div class="arn-empty-txt">${
           isTheorie
-            ? "Aucune révision ces 30 jours. Partage l'app à tes élèves — leur score apparaîtra ici dès leur première révision."
-            : "Aucun élève à classer. Attribue des élèves ou enregistre une séance — leurs compétences alimenteront ce classement."
+            ? "Aucune révision ces 30 derniers jours. Partage l’app à tes élèves : leur score apparaîtra ici dès la première révision."
+            : "Aucun élève à classer. Attribue des élèves ou enregistre une séance : leurs compétences apparaîtront ici."
         }</div>
       </div>
     </div>`;
@@ -223,7 +226,7 @@ export async function mount(root, mode) {
 // ─── En-tête : titre + sous-titre + segmenté Pratique / Révision ──
 function _header(isTheorie, n) {
   const sub = isTheorie
-    ? "Classés par volume de révision · 30 derniers jours"
+    ? "Classés par nombre de révisions · 30 derniers jours"
     : "Classés par compétences de conduite validées";
   const effectif =
     n > 0
@@ -261,7 +264,7 @@ function _hofSection(hof) {
       </div>`;
     })
     .join("");
-  return `<div class="arn-hof-title">${medallion("medaille", "gold", { size: 16 })} Hall of fame — permis obtenu</div>${rows}`;
+  return `<div class="arn-hof-title">${medallion("medaille", "gold", { size: 16 })} Ils ont eu leur permis</div>${rows}`;
 }
 
 // ─── Wire ────────────────────────────────────────────────────────

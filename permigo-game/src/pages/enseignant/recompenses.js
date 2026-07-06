@@ -175,7 +175,7 @@ function renderLotsSection() {
         <div class="mrw-lot-name">${esc(lot.label)}${lot.kind === "custom" ? '<span class="mrw-lot-badge">Lot perso</span>' : ""}${lot.enabled && lot.big ? '<span class="mrw-lot-badge big">🎯 En jeu</span>' : ""}</div>
         ${
           lot.enabled
-            ? `<button class="mrw-lot-big ${lot.big ? "on" : ""}" data-big="${i}">${lot.big ? "🎯 Mis en jeu — gagnable à la roue" : "Mettre en jeu dans la roue"}</button>`
+            ? `<button class="mrw-lot-big ${lot.big ? "on" : ""}" data-big="${i}">${lot.big ? "🎯 En jeu · gagnable à la roue" : "Mettre en jeu dans la roue"}</button>`
             : ""
         }
       </div>
@@ -194,7 +194,7 @@ function renderLotsSection() {
 function renderPreview(prenom, initiale) {
   const active = LOTS.filter((l) => l.enabled);
   if (!active.length) {
-    return `<div class="mrw-prev-empty">Active au moins un lot pour qu'il apparaisse dans la roue de tes élèves.</div>`;
+    return `<div class="mrw-prev-empty">Active au moins un lot pour qu’il apparaisse dans la roue de tes élèves.</div>`;
   }
   const lot = active[0];
   return `
@@ -229,7 +229,7 @@ function renderWinsCard(wins) {
   return `
   <section class="mrw-card">
     <div class="mrw-card-h"><span class="ic">🎁</span>À remettre</div>
-    <div class="mrw-card-sub">Un élève a gagné un gros lot chez toi. Vérifie son code, offre le lot, marque-le remis.</div>
+    <div class="mrw-card-sub">Un élève a gagné un gros lot chez toi. Vérifie son code, remets le lot, puis marque-le remis.</div>
     ${rows}
   </section>`;
 }
@@ -251,7 +251,7 @@ function render(root, me) {
   <div class="mrw-hd">
     <div class="mrw-kicker">Ta marque</div>
     <h1>Ta roue de récompenses</h1>
-    <p>Les gros lots, c'est <b>toi</b> qui les offres. Ton nom apparaît sur chacun d'eux.</p>
+    <p>Les gros lots, c’est <b>toi</b> qui les offres. Ton nom apparaît sur chacun.</p>
   </div>
 
   <div id="mrw-wins-slot"></div>
@@ -261,7 +261,7 @@ function render(root, me) {
       <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7S10.5 3 7.5 3 4.5 5.2 4.5 5.2 6.5 7 8 7h4z"/><path d="M12 7s1.5-4 4.5-4 3 2.2 3 2.2S17.5 7 16 7h-4z"/></svg></span>
       Tes lots
     </div>
-    <div class="mrw-card-sub">Active un lot pour l'afficher aux élèves. « Mets-le en jeu » pour qu'il soit <b>gagnable</b> à la roue.</div>
+    <div class="mrw-card-sub">Active un lot pour l’afficher aux élèves. Mets-le en jeu pour qu’il soit <b>gagnable</b> à la roue.</div>
     <div id="mrw-lots">${renderLotsSection()}</div>
     <button class="mrw-add" id="mrw-add">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -275,7 +275,7 @@ function render(root, me) {
       <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></span>
       Générosité
     </div>
-    <div class="mrw-card-sub">À quelle fréquence un gros lot peut tomber.</div>
+    <div class="mrw-card-sub">La fréquence à laquelle un gros lot peut tomber.</div>
     <div class="mrw-seg" id="mrw-seg">
       ${GENEROSITE.map((g) => `<button class="mrw-seg-opt ${g.key === GEN ? "on" : ""}" data-gen="${g.key}"><b>${g.label}</b><span>${g.hint}</span></button>`).join("")}
     </div>
@@ -285,7 +285,7 @@ function render(root, me) {
     <div class="mrw-cap-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
     <div class="mrw-cap-tx">
       <h3>Plafond de sécurité</h3>
-      <p>Jamais plus d'<b>1 gros lot par trimestre et par élève</b>, quoi qu'il arrive. Une fois le plafond atteint, la roue n'offre plus que des volants. Aucune mauvaise surprise.</p>
+      <p>Jamais plus d’<b>1 gros lot par trimestre et par élève</b>. Une fois ce plafond atteint, la roue n’offre plus que des volants. Aucune mauvaise surprise.</p>
     </div>
   </section>
 
@@ -344,7 +344,7 @@ function openEditor(root, me, prenom, initiale) {
   slot.innerHTML = `
     <div class="mrw-editor">
       <label for="mrw-lot-name">Nom du lot</label>
-      <input type="text" id="mrw-lot-name" maxlength="40" placeholder="Ex : Café offert, bon carburant…" autocomplete="off">
+      <input type="text" id="mrw-lot-name" maxlength="40" placeholder="Ex : café offert, bon carburant…" autocomplete="off">
       <label style="margin-top:12px">Icône</label>
       <div class="mrw-icons" id="mrw-icons">
         ${ICON_CHOICES.map((ic, k) => `<button type="button" class="mrw-ico-btn ${k === 0 ? "on" : ""}" data-ico="${esc(ic)}">${esc(ic)}</button>`).join("")}
@@ -426,7 +426,7 @@ function wire(root, me, prenom, initiale) {
       save.disabled = false;
     } catch (e) {
       console.error("[recompenses] save", e);
-      toast("Impossible d'enregistrer, réessaie", "error", 2500);
+      toast("Enregistrement impossible. Réessaie.", "error", 2500);
       save.textContent = "Enregistrer";
       save.disabled = false;
     }

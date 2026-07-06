@@ -100,18 +100,18 @@ export async function mount(root, param) {
       </div>
       <div class="sit-intro">
         <div class="sit-kicker">${isIntro ? "Avant de démarrer" : "Mini-jeu"}</div>
-        <h1 class="sit-h1">${isIntro ? "Une mise en situation ?" : "En situation"}</h1>
+        <h1 class="sit-h1">${isIntro ? "Mise en situation" : "En situation"}</h1>
         <p class="sit-sub">${
           isIntro
-            ? "Voyons ton flair pour la route. Une scène, une décision — on y va ?"
-            : "Une scène, une décision. À toi de jouer le code de la route."
+            ? "Une scène, une décision. Montre ton flair pour la route."
+            : "Une scène, une décision. Applique le code de la route."
         }</p>
         <div class="sit-hero" aria-hidden="true">${renderSituationScene(demo.scene)}</div>
         <div class="sit-chips">
           <span class="sit-chip">${medallion("voiture", "blue", { size: 18 })} ${count} situations</span>
           <span class="sit-chip">${volantImg(14)} +${VOLANTS_PAR_BONNE} par bonne réponse</span>
         </div>
-        <button class="sit-cta" id="sit-start" type="button">${isIntro ? "C'est parti !" : "Jouer"}</button>
+        <button class="sit-cta" id="sit-start" type="button">${isIntro ? "C’est parti !" : "Jouer"}</button>
       </div>`;
     stage.querySelector("#sit-quit").addEventListener("click", quit);
     stage.querySelector("#sit-start").addEventListener("click", () => {
@@ -144,7 +144,7 @@ export async function mount(root, param) {
         <div class="sit-prog" role="progressbar" aria-valuemin="1" aria-valuemax="${session.length}"
              aria-valuenow="${idx + 1}" aria-label="Situation ${idx + 1} sur ${session.length}"><i style="width:${pct}%"></i></div>
         <span class="sit-count">${idx + 1}/${session.length}</span>
-        <span class="sit-coin" aria-label="Volants gagnés : ${bonnes * VOLANTS_PAR_BONNE}">${volantImg(14)} +${bonnes * VOLANTS_PAR_BONNE}</span>
+        <span class="sit-coin" aria-label="Volants gagnés : ${bonnes * VOLANTS_PAR_BONNE}">${volantImg(14)} +${bonnes * VOLANTS_PAR_BONNE}</span>
       </div>
       <div class="sit-scene">${renderSituationScene(s.scene, { alt: s.alt, tappable })}</div>
       <div class="sit-qwrap">
@@ -210,7 +210,7 @@ export async function mount(root, param) {
         chip.innerHTML = `${volantImg(14)} +${bonnes * VOLANTS_PAR_BONNE}`;
         chip.setAttribute(
           "aria-label",
-          `Volants gagnés : ${bonnes * VOLANTS_PAR_BONNE}`,
+          `Volants gagnés : ${bonnes * VOLANTS_PAR_BONNE}`,
         );
       }
       // la scène se joue : chacun part dans l'ordre de la règle
@@ -246,7 +246,7 @@ export async function mount(root, param) {
     fb.innerHTML = `
       <div aria-live="polite">
         <div class="sit-expl ${ok ? "good" : "bad"}">
-          <div class="sit-expl-t">${ok ? "Bien vu !" : "La règle à retenir"}</div>
+          <div class="sit-expl-t">${ok ? "Bien vu !" : "La règle à retenir"}</div>
           <p class="sit-expl-p">${esc(s.explication)}</p>
         </div>
       </div>
@@ -296,24 +296,24 @@ export async function mount(root, param) {
     if (isIntro) {
       const introTitre =
         pct === 100
-          ? "Sans faute, bravo !"
+          ? "Sans faute, bravo !"
           : pct >= 50
-            ? "Tu as déjà l'œil 👀"
-            : "Bienvenue à bord !";
+            ? "Tu as déjà l’œil"
+            : "Bienvenue à bord !";
       stage.innerHTML = `
         <div class="sit-top">
           <button class="sit-x" id="sit-quit" type="button" aria-label="Passer">✕</button>
         </div>
         <div class="sit-recap">
-          <div class="sit-kicker">C'est tout vu</div>
+          <div class="sit-kicker">Terminé</div>
           <div class="sit-score" id="sit-score">${bonnes}<span>/${total}</span></div>
           <h2 class="sit-h1 sit-h1-sm" tabindex="-1">${introTitre}</h2>
-          <p class="sit-sub">Ton parcours et ton coffre de bienvenue t'attendent.</p>
+          <p class="sit-sub">Ton parcours et ton coffre de bienvenue t’attendent.</p>
           <div class="sit-gain" id="sit-gain">
             ${
               credites > 0
                 ? `${volantImg(20, { drop: true })} <b>+${credites}</b>&nbsp;${volantLabel(credites)}`
-                : `${volantImg(20)} Prêt à jouer pour de vrai`
+                : `${volantImg(20)} Prêt pour la suite`
             }
           </div>
           <button class="sit-cta" id="sit-enter" type="button">Entrer dans PermiGo <span aria-hidden="true">→</span></button>
@@ -343,16 +343,16 @@ export async function mount(root, param) {
 
     const titre =
       pct === 100
-        ? "Sans faute !"
+        ? "Sans faute !"
         : pct >= 60
           ? "Bien joué !"
-          : "Ça rentre, continue !";
+          : "Ça rentre, continue !";
     const sousTitre =
       pct === 100
         ? "Tu lis la route comme un chef."
         : pct >= 60
-          ? "Encore quelques réflexes et c'est du solide."
-          : "Chaque erreur vue ici, c'est une erreur en moins en vraie leçon.";
+          ? "Encore quelques réflexes et c’est du solide."
+          : "Chaque erreur vue ici, c’est une erreur en moins en vraie leçon.";
 
     stage.innerHTML = `
       <div class="sit-top">
@@ -368,13 +368,13 @@ export async function mount(root, param) {
             credites > 0
               ? `${volantImg(20, { drop: true })} <b>+${credites}</b>&nbsp;${volantLabel(credites)}`
               : gagnes > 0 && plafonne
-                ? `${volantImg(20)} récompense du jour déjà au max — reviens demain !`
-                : `${volantImg(20)} 0 volant… la prochaine est la bonne !`
+                ? `${volantImg(20)} Récompense du jour au max — reviens demain`
+                : `${volantImg(20)} 0 volant — la prochaine est la bonne`
           }
         </div>
         ${
           plafonne && credites > 0
-            ? `<p class="sit-cap">Plafond du jour atteint : les volants reviennent demain.</p>`
+            ? `<p class="sit-cap">Plafond du jour atteint. Les volants reviennent demain.</p>`
             : ""
         }
         ${
@@ -392,11 +392,11 @@ export async function mount(root, param) {
                    .join("")}
                </div>`
             : `<div class="sit-revoir"><div class="sit-revoir-item sit-revoir-clean">
-                 Rien à revoir : toutes les règles sont passées. 👏
+                 Rien à revoir. Toutes les règles sont passées.
                </div></div>`
         }
         <button class="sit-cta" id="sit-again" type="button">Rejouer</button>
-        <button class="sit-ghost" id="sit-home" type="button">Retour à l'accueil</button>
+        <button class="sit-ghost" id="sit-home" type="button">Retour à l’accueil</button>
       </div>`;
 
     stage.querySelector(".sit-h1-sm")?.focus({ preventScroll: true });

@@ -117,7 +117,7 @@ const STYLE = `<style>
   box-shadow: 0 1px 4px rgba(0,0,0,.08); flex-shrink:0; }
 .rvc-back:active { transform: scale(0.95); }
 .rvc-h1 { font: 800 22px/1.1 'Plus Jakarta Sans', sans-serif; letter-spacing:-.025em; margin:0; }
-.rvc-sub { color: var(--mu, #64748b); font-size:13px; margin:2px 0 0; }
+.rvc-sub { color: var(--mu, #64748b); font-size:13px; line-height:1.5; margin:2px 0 0; }
 
 .rvc-go { position:sticky; bottom: calc(16px + env(safe-area-inset-bottom)); width:100%;
   border:0; border-radius:14px; padding:15px; cursor:pointer; margin-top:18px;
@@ -229,7 +229,7 @@ const STYLE = `<style>
 .rvs-head { display:flex; align-items:flex-start; gap:12px; padding:16px 0 4px; }
 .rvs-head .rvc-back { margin-top:2px; }
 .rvs-h1 { font:800 24px/1.05 'Plus Jakarta Sans',sans-serif; letter-spacing:-.025em; margin:0; color:var(--ink); }
-.rvs-p { margin:5px 0 0; font:600 13px/1.35 'Inter',sans-serif; color:var(--mu,#64748b); }
+.rvs-p { margin:5px 0 0; font:600 13px/1.5 'Inter',sans-serif; color:var(--mu,#64748b); }
 .rvs-p b { color:var(--a-txt,var(--a,#4f46e5)); }
 
 .rvs-now { position:relative; overflow:hidden; display:block; width:100%; text-align:left; cursor:pointer;
@@ -311,7 +311,7 @@ export async function mount(root, param) {
     root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-top">
       <button class="rvc-back" aria-label="Retour">←</button>
       <h1 class="rvc-h1">Révise ta conduite</h1></div>
-      <p class="rvc-sub" style="margin-top:20px">Le contenu arrive très vite. Reviens dans un instant 👀</p></div>`;
+      <p class="rvc-sub" style="margin-top:20px">Les fiches arrivent très vite. Reviens dans un instant.</p></div>`;
     root
       .querySelector(".rvc-back")
       ?.addEventListener("click", () => navigate("#/"));
@@ -433,9 +433,9 @@ export async function mount(root, param) {
           <span class="rvs-cta"><span class="rvs-cta-ic">${play}</span>${read[nextF.code] ? "Relire la fiche" : "Lire la fiche"}</span>
         </button>`
       : `<div class="rvs-now rvs-done">
-          <span class="rvs-now-k"><span class="rvs-dot"></span>Bravo</span>
-          <span class="rvs-now-t">Tu as lu les ${totalF} fiches 🎉</span>
-          <span class="rvs-now-meta">Reviens réviser avant chaque leçon.</span>
+          <span class="rvs-now-k"><span class="rvs-dot"></span>Bien joué</span>
+          <span class="rvs-now-t">Tu as lu les ${totalF} fiches</span>
+          <span class="rvs-now-meta">Reviens avant chaque leçon.</span>
         </div>`;
 
     // ── Les 4 mondes : liste calme, une ligne = un monde, ouvre ses fiches ──
@@ -458,10 +458,10 @@ export async function mount(root, param) {
 
     root.innerHTML = `${STYLE}<div class="rvc">
       <div class="rvs-head">
-        <button class="rvc-back" aria-label="Retour à l'accueil">←</button>
+        <button class="rvc-back" aria-label="Retour à l’accueil">←</button>
         <div class="rvs-head-tx">
           <h1 class="rvs-h1">Révise ta conduite</h1>
-          <p class="rvs-p">Le geste, pas le code. <b>Ton moniteur valide en vrai</b> — ici tu t'entraînes entre les leçons.</p>
+          <p class="rvs-p">Le geste, pas le code. <b>Ton moniteur valide en vrai.</b> Ici, tu t’entraînes entre les leçons.</p>
         </div>
       </div>
 
@@ -476,14 +476,14 @@ export async function mount(root, param) {
       <div class="rvs-list">${mondeRows}</div>
 
       <div class="rvs-extra">
-        <p>Envie de t'entraîner autrement ? (optionnel)</p>
+        <p>Pour t’entraîner autrement · optionnel</p>
         <div class="rvs-extra-row">
           ${pf ? `<button class="rvs-mini" data-pf="${esc(pf.code)}"><span class="rvs-mini-ic" style="background:linear-gradient(160deg,#ffb257,#f97316)">${eclair}</span>Défi du jour · 1 min</button>` : ""}
           <button class="rvs-mini" data-faute><span class="rvs-mini-ic" style="background:linear-gradient(160deg,#ff8a8a,#ef4444)">!</span>Trouve la faute</button>
         </div>
       </div>
 
-      <div class="rvs-foot">${totalF} fiches · révise le geste, pas que le code</div>
+      <div class="rvs-foot">${totalF} fiches · le geste, pas que le code</div>
     </div>`;
     wireHome();
   }
@@ -578,12 +578,12 @@ export async function mount(root, param) {
         ? `<div class="rvc-note ${cls}"><p class="rvc-note-k">${kicker}</p><p class="rvc-note-p">${esc(txt)}</p></div>`
         : "";
     const retenir =
-      note("warn", "L'erreur à éviter", f.erreur) +
+      note("warn", "L’erreur à éviter", f.erreur) +
       note("why", "Pourquoi ça compte", f.pourquoi) +
       note("bva", "En boîte auto", f.bva);
     const srcHtml =
       Array.isArray(f.sources) && f.sources.length
-        ? `<p class="rvc-fsrc">↳ Vu chez de vrais moniteurs : ${f.sources.map((s) => esc(s)).join(", ")}</p>`
+        ? `<p class="rvc-fsrc">↳ Vu chez de vrais moniteurs : ${f.sources.map((s) => esc(s)).join(", ")}</p>`
         : "";
 
     root.innerHTML = `${STYLE}<div class="rvc rvc-detail">
@@ -592,7 +592,7 @@ export async function mount(root, param) {
         <span class="rvc-fbadge">${esc(f.code)} · ${esc(f.competence)}</span>
       </div>
       <h1 class="rvc-ftitle">${esc(f.titre)}</h1>
-      ${total ? `<p class="rvc-fmeta">${total} geste${total > 1 ? "s" : ""} — la méthode pas à pas</p>` : ""}
+      ${total ? `<p class="rvc-fmeta">${total} geste${total > 1 ? "s" : ""} · la méthode pas à pas</p>` : ""}
 
       ${methodeHtml}
 
@@ -600,7 +600,7 @@ export async function mount(root, param) {
       ${srcHtml}
 
       <div class="rvc-actbar">
-        ${total >= 3 ? `<button class="rvc-act-ghost" data-order>${FSVG.shuffle}Remets dans l'ordre</button>` : ""}
+        ${total >= 3 ? `<button class="rvc-act-ghost" data-order>${FSVG.shuffle}Remets dans l’ordre</button>` : ""}
         <button class="rvc-act-main" data-quiz>${FSVG.play}<span>Teste-toi</span></button>
       </div>
     </div>`;
@@ -639,7 +639,7 @@ export async function mount(root, param) {
       haptic("success");
       root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-done">
         <div class="rvc-done-e">${medallion("check", "green", { size: 64 })}</div>
-        <div class="rvc-done-t">Dans l'ordre, nickel !</div>
+        <div class="rvc-done-t">Dans l’ordre, nickel !</div>
         <p class="rvc-sub">Les ${steps.length} étapes de « ${esc(f.titre)} » : pliées.</p>
         <button class="rvc-go" data-next>Continuer</button>
       </div></div>`;

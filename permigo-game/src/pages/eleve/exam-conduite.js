@@ -200,7 +200,7 @@ export async function mount(root) {
 
   function wireX(confirmAbandon = true) {
     root.querySelector("[data-x]")?.addEventListener("click", () => {
-      if (!confirmAbandon || confirm("Quitter l'examen blanc ?")) leave();
+      if (!confirmAbandon || confirm("Quitter l’examen blanc ?")) leave();
     });
   }
 
@@ -218,13 +218,13 @@ export async function mount(root) {
       <div class="exc2-mid exc2-center">
         <div class="exc2-e">${medallion("drapeau", "gold", { size: 64, glow: true })}</div>
         <div class="exc2-h">Examen blanc de conduite</div>
-        <p class="exc2-sub">8 phases, comme le vrai examen. Tu choisis la bonne action à chaque fois.</p>
+        <p class="exc2-sub">8 phases, comme le vrai examen. À chaque situation, choisis la bonne action.</p>
         <div class="exc2-chips">
           <span class="exc2-chip">Noté / ${TOTAL}</span>
           <span class="exc2-chip">Reçu dès ${SEUIL}</span>
           <span class="exc2-chip">1 faute grave = échec</span>
         </div>
-        <p class="exc2-note">⚠️ C'est un entraînement, pas la vraie note. Le ${TOTAL}, c'est l'inspecteur qui le met le jour J. Ici, tu vois juste où tu en es.</p>
+        <p class="exc2-note">C’est un entraînement, pas ta vraie note. Le jour J, c’est l’inspecteur qui note sur ${TOTAL}. Ici, tu vois juste où tu en es.</p>
       </div>
       <button class="exc2-go" data-start>Commencer</button>
     </div>`;
@@ -243,7 +243,7 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}<div class="exc2">
       ${topBar()}
       <div class="exc2-mid exc2-center">
-        <div class="exc2-pk">PHASE ${p.n} / ${phases.length}</div>
+        <div class="exc2-pk">PHASE ${p.n} · ${phases.length}</div>
         <div class="exc2-e">${phaseMed(p.emoji, 56)}</div>
         <div class="exc2-h">${esc(p.titre)}</div>
         <p class="exc2-sub">${esc(p.sous)}</p>
@@ -304,7 +304,7 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}<div class="exc2">
       ${topBar()}
       <div class="exc2-mid">
-        <div class="exc2-qn">${esc(phases[pi].titre)} · phase ${p.n}/${phases.length}</div>
+        <div class="exc2-qn">${esc(phases[pi].titre)} · phase ${p.n} sur ${phases.length}</div>
         <div class="exc2-q">${esc(it.q)}</div>
         <div class="exc2-opts">${opts}</div>
         ${fb}
@@ -399,7 +399,7 @@ export async function mount(root) {
       <div class="exc2-mid">
         <div class="exc2-center">
           <div class="exc2-score"><span data-count>0</span><span class="exc2-score-sep">/</span>${TOTAL}</div>
-          <div class="exc2-verdict ${r.passed ? "ok" : "ko"}">${r.passed ? `Au-dessus de ${SEUIL} 🎯` : `Sous le seuil de ${SEUIL}`}</div>
+          <div class="exc2-verdict ${r.passed ? "ok" : "ko"}">${r.passed ? `Au-dessus de ${SEUIL}` : `Sous le seuil de ${SEUIL}`}</div>
           <p class="exc2-note">Bonus : ${esc(bonusTxt)}</p>
         </div>
         <div class="exc2-fams">
@@ -408,10 +408,10 @@ export async function mount(root) {
         </div>
         ${
           r.weak
-            ? `<div class="exc2-weakmsg">Ton point faible : <b>${esc(FAMILLES[r.weak].label)}</b>. C'est là que tu gagnes le plus de points — montre-le à ton moniteur pour la prochaine leçon.</div>`
-            : `<div class="exc2-weakmsg">Rien à retravailler, c'est propre 🎯 Montre ce score à ton moniteur.</div>`
+            ? `<div class="exc2-weakmsg">Ton point faible : <b>${esc(FAMILLES[r.weak].label)}</b>. C’est là que tu gagnes le plus de points. Montre-le à ton moniteur pour la prochaine leçon.</div>`
+            : `<div class="exc2-weakmsg">Rien à retravailler, c’est propre. Montre ce score à ton moniteur.</div>`
         }
-        <p class="exc2-note">Rappel : c'est un entraînement. Le vrai ${TOTAL}, c'est l'inspecteur.</p>
+        <p class="exc2-note">C’est un entraînement. Ta vraie note sur ${TOTAL}, c’est l’inspecteur qui la donne.</p>
       </div>
       <button class="exc2-go" data-share><span class="exc2-go-ico">${medallion("megaphone", "blue", { size: 22 })}</span>Partager mon score</button>
       <button class="exc2-ghost" data-done>Retour aux révisions</button>
@@ -422,8 +422,8 @@ export async function mount(root) {
         kicker: "Examen blanc de conduite",
         big: `${r.note}/${TOTAL}`,
         sub: r.passed
-          ? `Au-dessus du seuil de ${SEUIL} 🎯`
-          : `${r.note} points — ça progresse`,
+          ? `Au-dessus du seuil de ${SEUIL}`
+          : `${r.note} points, ça progresse`,
       });
     });
     countUp(r.note);
@@ -435,8 +435,8 @@ export async function mount(root) {
       <div class="exc2-mid exc2-center">
         <div class="exc2-e">${medallion("panneau", "red", { size: 64, glow: true })}</div>
         <div class="exc2-h">Faute éliminatoire</div>
-        <p class="exc2-sub">Dans la réalité, une seule suffit à recaler — quel que soit ton nombre de points. C'est pour ça qu'on s'arrête ici.</p>
-        <p class="exc2-note">Pas de panique : c'est un entraînement, justement pour la repérer AVANT le jour J. Relis la correction juste au-dessus et retente.</p>
+        <p class="exc2-sub">Dans la réalité, une seule suffit à recaler, quel que soit ton nombre de points. C’est pour ça qu’on s’arrête ici.</p>
+        <p class="exc2-note">C’est un entraînement, justement pour la repérer avant le jour J. Relis la correction juste au-dessus, puis retente.</p>
       </div>
       <button class="exc2-go" data-retry>Recommencer</button>
       <button class="exc2-ghost" data-done>Retour aux révisions</button>

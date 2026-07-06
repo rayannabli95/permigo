@@ -407,7 +407,7 @@ function renderKPI(kpi) {
   <div class="bl-kpi">
     <div class="bl-kpi-val" style="color:${esc(scoreColor)}">${noQuiz ? "—" : kpi.score_moyen != null ? kpi.score_moyen + "%" : "—"}</div>
     <div class="bl-kpi-label">Score moyen en Révision</div>
-    <span class="bl-kpi-delta ${!noQuiz && kpi.score_moyen >= 70 ? "up" : "flat"}">${noQuiz ? "Aucun quiz tenté" : `${kpi.quiz_reussis ?? 0}/${kpi.quiz_total} réussis`}</span>
+    <span class="bl-kpi-delta ${!noQuiz && kpi.score_moyen >= 70 ? "up" : "flat"}">${noQuiz ? "Aucun quiz fait" : `${kpi.quiz_reussis ?? 0}/${kpi.quiz_total} réussis`}</span>
   </div>
   <div class="bl-kpi bl-kpi-streak">
     <div class="bl-kpi-val" style="color:var(--or)">${icon("flame", { size: 22, strokeWidth: 2.2, color: "var(--or)" })} ${kpi.jours_actifs ?? "—"}</div>
@@ -431,7 +431,7 @@ function renderByMonde(byMonde) {
 </div>`,
               )
               .join("")
-          : `<div class="bl-comp-none">Aucune compétence validée dans cette catégorie</div>`;
+          : `<div class="bl-comp-none">Aucune compétence validée ici</div>`;
 
       return `
 <div class="bl-section">
@@ -455,7 +455,7 @@ function renderEvolution(evolution) {
   </div>
   <div style="text-align:center;padding:16px 0">
     ${illus("route", { size: 56 })}
-    <div class="bl-comp-none" style="padding:8px 0 0">Pas encore de données — les validations apparaîtront ici mois par mois.</div>
+    <div class="bl-comp-none" style="padding:8px 0 0;line-height:1.5">Pas encore de données. Les validations s’afficheront ici mois par mois.</div>
   </div>
 </div>`;
   }
@@ -500,7 +500,7 @@ export async function mount(root, eleveId) {
     // STYLE injecté aussi ici, sinon l'état s'affiche en texte brut non stylé
     root.innerHTML = `${STYLE}<div class="bl"><div class="bl-body"><div class="bl-no-data">
       ${illus("clipboard", { size: 64 })}
-      <p>Ouvre le bilan depuis la fiche d'un élève.</p>
+      <p>Ouvre le bilan depuis la fiche d’un élève.</p>
       <a href="#/eleves" style="color:var(--a);font-weight:700;text-decoration:none">Voir mes élèves →</a>
     </div></div></div>`;
     return;
@@ -545,10 +545,10 @@ export async function mount(root, eleveId) {
     (ecoleRes.status === "fulfilled" && ecoleRes.value?.data?.nom) || "PermiGo";
 
   if (error || !data) {
-    toast("Impossible de charger le bilan", "error");
-    root.innerHTML = `${STYLE}<div class="bl"><div class="bl-body"><div class="bl-no-data">
+    toast("« Bilan » indisponible", "error");
+    root.innerHTML = `${STYLE}<div class="bl"><div class="bl-body"><div class="bl-no-data" style="line-height:1.5">
       ${illus("clipboard", { size: 64 })}
-      <span>Bilan indisponible. Vérifie que cet élève est bien rattaché à ton compte.</span>
+      <span>« Bilan » indisponible. Vérifie que cet élève est bien rattaché à ton compte, puis réessaie.</span>
     </div></div></div>`;
     return;
   }
@@ -567,7 +567,7 @@ export async function mount(root, eleveId) {
       <p class="bl-school-logo">${esc(ecoleNom)}</p>
       <p class="bl-hero-kicker">Bilan de progression</p>
       <h1 class="bl-hero-title" tabindex="-1">${esc(prenom)} ${esc(nom)}</h1>
-      <p class="bl-hero-sub">Suivi de progression · Permis B</p>
+      <p class="bl-hero-sub">Permis B · à montrer aux parents</p>
       <div class="bl-hero-actions">
         <button class="bl-btn-back" id="bl-btn-back" aria-label="Retour au livret">
           ${icon("arrow-left", { size: 15 })} Retour
@@ -601,7 +601,7 @@ export async function mount(root, eleveId) {
 
   <!-- Mention légale (écran + impression) — ce document n'est PAS officiel -->
   <div class="bl-disclaimer" style="margin:14px 16px 0;padding:12px 14px;border:1px solid #e6e9ef;border-radius:12px;background:#f7f8fc;font:500 11px/1.5 'Inter',sans-serif;color:#5a6188;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-    <strong style="color:#1a1c2e;font-weight:700;">Document de suivi</strong> à la marque de ${esc(ecoleNom)}. Ce n'est <strong>pas</strong> le livret d'apprentissage ni l'attestation de fin de formation <strong>officiels</strong>, et il ne remplace aucun document légal.
+    <strong style="color:#1a1c2e;font-weight:700;">Document de suivi</strong> à la marque de ${esc(ecoleNom)}. Ce n’est <strong>pas</strong> le livret d’apprentissage ni l’attestation de fin de formation <strong>officiels</strong>, et il ne remplace aucun document légal.
   </div>
 
 </div>`;

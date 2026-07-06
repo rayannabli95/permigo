@@ -38,27 +38,27 @@ const TOUR_KEY = "pg-tour-moniteur-v1";
 const MONITEUR_TOUR_STEPS = [
   {
     title: "Bienvenue sur PermiGo",
-    text: "Ton livret passe en numérique. Tes élèves voient leur progression en temps réel — toi tu sais où en est chacun en un coup d'œil.",
+    text: "Ton livret passe en numérique. Tes élèves voient leur progression en temps réel. Toi, tu sais où en est chacun d’un coup d’œil.",
   },
   {
     sel: "#aj-act-invite",
     title: "Commence ici",
-    text: "Invite un élève : il reçoit un lien, crée son compte en 1 minute, et t'est rattaché automatiquement. C'est le point de départ.",
+    text: "Invite un élève. Il reçoit un lien, crée son compte en 1 minute et t’est rattaché tout seul. C’est le point de départ.",
   },
   {
     sel: "#aj-cta-seance",
-    title: "Valide après chaque leçon",
-    text: "Coche les compétences réussies. Le livret de ton élève se met à jour aussitôt — fini le papier.",
+    title: "Valide après la leçon",
+    text: "Coche les compétences réussies. Le livret de ton élève se met à jour aussitôt. Fini le papier.",
   },
   {
     sel: '.bn-tab[data-id="eleves"]',
     title: "Suis tes élèves",
-    text: "Retrouve chaque élève, son livret et sa progression. Les élèves à relancer remontent automatiquement.",
+    text: "Retrouve chaque élève, son livret et sa progression. Ceux à relancer remontent tout seuls.",
   },
   {
     sel: '.bn-tab[data-id="insights"]',
-    title: "Mesure l'engagement",
-    text: "Qui révise cette semaine, qui stagne. Les chiffres sont là pour t'aider à prioriser.",
+    title: "Mesure l’engagement",
+    text: "Qui révise cette semaine, qui stagne. Les chiffres t’aident à décider par où commencer.",
   },
 ];
 
@@ -573,15 +573,15 @@ async function renderInto(root, _me) {
   const loadError = valsAll.error || elevesAll.error || todayValsRes.error;
   if (loadError) {
     console.error("[aujourdhui] chargement", loadError);
-    toast("Impossible de charger les données", "error");
+    toast("« Aujourd’hui » indisponible", "error");
     root.innerHTML = `
       ${STYLE}
       <div class="aj-page">
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:72px 24px;text-align:center;">
           ${medallion("cone", "orange", { size: 52 })}
-          <p style="margin:0;font:600 15px/1.45 'Inter',sans-serif;color:#1a1c2e;">
-            Impossible de charger ton tableau de bord.<br>
-            <span style="font:500 13px/1.4 'Inter',sans-serif;color:#5a6188;">Vérifie ta connexion, puis réessaie.</span>
+          <p style="margin:0;font:600 15px/1.5 'Inter',sans-serif;color:#1a1c2e;">
+            « Aujourd’hui » indisponible.<br>
+            <span style="font:500 13px/1.5 'Inter',sans-serif;color:#5a6188;">Vérifie ta connexion, puis réessaie.</span>
           </p>
           <button id="aj-retry" type="button" style="border:none;border-radius:999px;padding:13px 24px;min-height:44px;background:#4f46e5;color:#fff;font:700 14px/1 'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">Réessayer</button>
         </div>
@@ -693,7 +693,7 @@ async function renderInto(root, _me) {
   const deltaHtml =
     deltaVsHier !== 0
       ? `<b>${deltaVsHier > 0 ? "+" + deltaVsHier : deltaVsHier}</b> vs hier`
-      : "pareil qu'hier";
+      : "pareil qu’hier";
 
   // Flamme PNG pour le record
   const flammeHtml = `<img src="/skins/permigo-streak-flame-v1.webp" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;display:inline-block;margin-right:2px;filter:drop-shadow(0 1px 3px rgba(255,150,0,.5))">`;
@@ -703,7 +703,7 @@ async function renderInto(root, _me) {
   // « record à battre » et « pareil qu'hier ».
   const heroEmpty = todayCount === 0;
   const heroSubHtml = heroEmpty
-    ? `<b>Valide ta première compétence du jour</b> avec « Valider une séance »`
+    ? `<b>Valide ta première compétence du jour</b> avec « Valider une séance »`
     : `${deltaHtml} &nbsp;·&nbsp; record ${flammeHtml} à battre`;
   const trophyMutedStyle = heroEmpty
     ? ' style="opacity:.4;filter:grayscale(.75) drop-shadow(0 14px 20px rgba(40,20,90,.3));animation:none"'
@@ -713,7 +713,7 @@ async function renderInto(root, _me) {
   const topBadgeHtml =
     myRank !== null && myRank <= 5
       ? `<span class="aj-hero-badge"><img src="/skins/trophy-streak-7d.webp" alt="">Top ${myRank} du département</span>`
-      : `<span class="aj-hero-badge">Ta ligue : ${myLeague ? esc(myLeague.name) : "à venir"}</span>`;
+      : `<span class="aj-hero-badge">Ta ligue&nbsp;: ${myLeague ? esc(myLeague.name) : "à venir"}</span>`;
 
   // ─── Roster élèves ────────────────────────────────────────────
   function renderRosterCard(e) {
@@ -740,7 +740,7 @@ async function renderInto(root, _me) {
         : null;
       pillClass = "aj-pill-warn";
       // Libellé explicite : « 43 j » nu se lisait comme un jeton mystère
-      pillText = joursOff ? `Inactif ${joursOff} j` : "Inactif";
+      pillText = joursOff ? `Inactif ${joursOff} j` : "Inactif";
       barColor = "#d97706";
     }
 
@@ -806,7 +806,7 @@ async function renderInto(root, _me) {
         <span style="flex-shrink:0;display:flex;">${medallion("cible", "indigo", { size: 36 })}</span>
         <span style="flex:1;min-width:0;">
           <span style="display:block;font:800 14.5px/1.15 'Manrope','Plus Jakarta Sans',sans-serif;color:#1a1c2e;">Radar de relance</span>
-          <span style="display:block;font:600 12px/1.3 'Inter',sans-serif;color:#5a6188;margin-top:2px;">Relance en 1 tap tes élèves qui refroidissent</span>
+          <span style="display:block;font:600 12px/1.5 'Inter',sans-serif;color:#5a6188;margin-top:2px;">Relance en 1 tap tes élèves qui ne révisent plus</span>
         </span>
         <span style="flex-shrink:0;color:#646a8c;">${icon("chevron-right", { size: 20, strokeWidth: 2.4 })}</span>
       </button>

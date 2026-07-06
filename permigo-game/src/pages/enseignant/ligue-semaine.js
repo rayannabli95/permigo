@@ -208,7 +208,7 @@ export async function mount(root) {
     _render(root, data || []);
   } catch (e) {
     console.error("[ligue-semaine]", e);
-    toast("Données indisponibles", "error");
+    toast("« Ligue » indisponible", "error");
     _renderEmpty(root);
   }
 }
@@ -257,7 +257,7 @@ function _render(root, rows) {
   if (rows.length === 0) {
     listHtml = `<div class="ls-w-empty">
       ${medallion("cone", "orange", { size: 48 })}
-      <div class="ls-w-empty-txt">Aucune compétence validée cette semaine. Enregistre une séance avec un élève pour marquer ton premier point et entrer en ligue.</div>
+      <div class="ls-w-empty-txt">Aucune compétence validée cette semaine. Enregistre une séance pour marquer ton premier point.</div>
     </div>`;
   } else {
     const sorted = [...rows].sort((a, b) => b.weekly_pts - a.weekly_pts);
@@ -283,7 +283,7 @@ function _render(root, rows) {
     prevLeague && ptsToNext > 0
       ? `<div class="ls-w-motivation">
         <div class="ls-w-motivation-title">Plus que ${ptsToNext} validation${ptsToNext > 1 ? "s" : ""} pour passer en Ligue ${esc(prevLeague.name)}</div>
-        <div class="ls-w-motivation-sub">Valide des compétences avec un élève — chaque compétence compte comme un point cette semaine.</div>
+        <div class="ls-w-motivation-sub">Chaque compétence validée avec un élève compte pour un point cette semaine.</div>
         <button class="ls-w-motivation-cta" id="ls-seance-cta">
           ${icon("plus", { size: 16, strokeWidth: 2.5 })} Enregistrer une séance
         </button>
@@ -325,7 +325,7 @@ function _renderEmpty(root) {
 </div>
 <div class="ls-w-empty">
   ${medallion("cone", "orange", { size: 48 })}
-  <div class="ls-w-empty-txt">La ligue n'a pas pu se charger. Réessaie dans quelques instants.</div>
+  <div class="ls-w-empty-txt">Vérifie ta connexion, puis réessaie.</div>
 </div>
 </div>`;
   root.querySelector("#ls-back")?.addEventListener("click", () => {
