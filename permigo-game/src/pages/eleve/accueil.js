@@ -1032,6 +1032,20 @@ export async function mount(root) {
       /* localStorage indispo : pas grave, on n'affiche juste pas l'indice */
     }
 
+    // Animation « série au lancement » (1×/jour, façon TikTok) : la flamme
+    // surgit en grand puis vole se poser dans le badge en haut à gauche.
+    // Réservée aux habitués : à la 1re arrivée, le tour guidé présente déjà
+    // la flamme (TOUR_KEY absent) → on n'empile pas les deux.
+    try {
+      if (localStorage.getItem(TOUR_KEY)) {
+        import("@/components/eleve/streak-launch.js")
+          .then((m) => m.maybeShowStreakLaunch({ streak, streakSt }))
+          .catch(() => {});
+      }
+    } catch {
+      /* localStorage indispo → on saute l'anim, sans casser l'accueil */
+    }
+
     // Composants non-bloquants injectés sous le fold
     if (accDiv) {
       // Quêtes du jour — carrousel réclamable, juste sous le CTA king
