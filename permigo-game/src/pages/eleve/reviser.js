@@ -202,12 +202,12 @@ function heroHtml({ nextFiche, allRead, focuses, moniteurPrenom }) {
     const titre = fiche ? fiche.titre : f0.competence_code;
     const more = focuses.length - 1;
     const who = moniteurPrenom
-      ? `Demande de ${esc(moniteurPrenom)}, ton moniteur`
-      : "Demande de ton moniteur";
+      ? `${esc(moniteurPrenom)}, ton moniteur, te le demande`
+      : "Ton moniteur te le demande";
     const sub =
       more > 0
-        ? `Commence par « ${esc(titre)} » — le reste suit juste après.`
-        : "Il veut que tu maîtrises ça avant ta prochaine leçon.";
+        ? `Commence par « ${esc(titre)} ». Le reste suit ensuite.`
+        : "À maîtriser avant ta prochaine leçon.";
     return `<button class="rvh-hero moni" id="rvh-hero" data-fcode="${esc(f0.competence_code)}">
       <span class="rvh-sg a"></span><span class="rvh-sg b"></span><span class="rvh-sg c"></span>
       <div class="rvh-hero-top">
@@ -216,7 +216,7 @@ function heroHtml({ nextFiche, allRead, focuses, moniteurPrenom }) {
       </div>
       <div class="rvh-htitles"><span class="rvh-htitle">${esc(titre)}</span>${more > 0 ? `<span class="rvh-hmore">+ ${more} autre${more > 1 ? "s" : ""}</span>` : ""}</div>
       <div class="rvh-hsub">${sub}</div>
-      <div class="rvh-hcta">M'entraîner ${ARROW}</div>
+      <div class="rvh-hcta">M’entraîner ${ARROW}</div>
     </button>`;
   }
 
@@ -225,11 +225,11 @@ function heroHtml({ nextFiche, allRead, focuses, moniteurPrenom }) {
   return `<button class="rvh-hero cont" id="rvh-hero" data-fcode="${esc(f.code)}">
     <span class="rvh-sg a"></span><span class="rvh-sg b"></span><span class="rvh-sg c"></span>
     <div class="rvh-hero-top">
-      <span class="rvh-hpill"><span class="rvh-hdot"></span>${allRead ? "Bien joué" : "On reprend"}</span>
+      <span class="rvh-hpill"><span class="rvh-hdot"></span>${allRead ? "Bien joué" : "Ta prochaine fiche"}</span>
       <span class="rvh-hbadge">${medallion("fiches", "night", { size: 34 })}</span>
     </div>
     <div class="rvh-htitles"><span class="rvh-htitle">${esc(f.titre)}</span></div>
-    <div class="rvh-hsub">${allRead ? "Tu as lu toutes tes fiches — relis le geste avant ta leçon." : "Ta prochaine fiche — 2 min pour réviser le geste avant ta leçon."}</div>
+    <div class="rvh-hsub">${allRead ? "Toutes tes fiches sont lues. Relis le geste avant ta leçon." : "2 min · révise le geste avant ta leçon."}</div>
     <div class="rvh-hcta">${allRead ? "Relire la fiche" : "Lire la fiche"} ${ARROW}</div>
   </button>`;
 }
@@ -246,7 +246,7 @@ function render(data) {
       ? streak.isToday
         ? "· validée ✓"
         : "· garde ta série"
-      : "· fais-toi 2 min";
+      : "· 2 min suffisent";
 
   return `${STYLE}
 <div class="rvh">
@@ -258,13 +258,13 @@ function render(data) {
 
   ${heroHtml(data)}
 
-  <div class="rvh-h">Tout pour t'entraîner</div>
+  <div class="rvh-h">Tout pour t’entraîner</div>
   <div class="rvh-modes">
     <button class="rvh-mode wide" data-go="/revision-conduite">
       <span class="rvh-sign" aria-hidden="true">${MED.fiches}</span>
       <div class="rvh-mode-body">
         <div class="rvh-mode-t">Fiches de conduite</div>
-        <div class="rvh-mode-s">Le geste, pas le code · avant chaque leçon</div>
+        <div class="rvh-mode-s">Le geste, pas le code · avant ta leçon</div>
         <span class="rvh-mode-meta">${fichesLues}/${fichesTotal} lues ${CHEVRON}</span>
       </div>
     </button>

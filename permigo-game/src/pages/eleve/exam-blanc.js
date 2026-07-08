@@ -222,12 +222,12 @@ function renderFeedbackBlock({
 }) {
   const banner =
     !isCorrect && faute
-      ? `<div class="exb-faute-banner">${medallion("panneau", "red", { size: 22 })}<span>À l'examen, ce serait éliminatoire — autant le savoir ici</span></div>`
+      ? `<div class="exb-faute-banner">${medallion("panneau", "red", { size: 22 })}<span>À l’examen, cette faute est éliminatoire. Mieux vaut la corriger ici.</span></div>`
       : "";
   const verdict = isCorrect
     ? "✓ Bonne réponse"
-    : (timedOut ? "⏱ Temps écoulé — " : "") +
-      "La bonne réponse était " +
+    : (timedOut ? "⏱ Temps écoulé · " : "") +
+      "La bonne réponse était la " +
       esc(String.fromCharCode(65 + correct));
   return `
     ${banner}
@@ -257,7 +257,7 @@ function renderSelection() {
       </div>
       <div class="exb-pcard-nom">${esc(p.nom)}</div>
       <div class="exb-pcard-ctx">${esc(p.contexte)}</div>
-      <div class="exb-pcard-meta">15 questions · seuil 12/15</div>
+      <div class="exb-pcard-meta">15 questions · réussir dès 12/15</div>
     </button>
   `,
   ).join("");
@@ -268,8 +268,8 @@ function renderSelection() {
     ? `${lockMed} PermiGo+`
     : `${lockMed} Compétence 1`;
   const lockSub = EXAMEN_OFFICIEL_LOCKED
-    ? "Débloque le vrai examen blanc avec PermiGo+"
-    : "Valide ta compétence 1 pour débloquer le vrai examen blanc";
+    ? "Débloque le vrai examen blanc avec PermiGo+."
+    : "Valide ta compétence 1 pour ouvrir le vrai examen blanc.";
   const officiel = locked
     ? `<button class="exo-hero is-locked" id="exb-officiel" aria-label="Examen officiel verrouillé">
         <span class="exo-hero-lock">${lockBadge}</span>
@@ -277,10 +277,10 @@ function renderSelection() {
         <span class="exo-hero-title">40 questions · chrono · comme le vrai</span>
         <span class="exo-hero-sub">${lockSub}</span>
       </button>`
-    : `<button class="exo-hero" id="exb-officiel" aria-label="Démarrer l'examen officiel">
+    : `<button class="exo-hero" id="exb-officiel" aria-label="Démarrer l’examen officiel">
         <span class="exo-hero-kicker">Examen officiel</span>
         <span class="exo-hero-title">40 questions · chrono · comme le vrai</span>
-        <span class="exo-hero-sub">Admis si 5 fautes maximum. Tu es prêt ?</span>
+        <span class="exo-hero-sub">Admis avec 5 fautes maximum.</span>
         <span class="exo-hero-cta">Commencer →</span>
       </button>`;
 
@@ -291,7 +291,8 @@ function renderSelection() {
     <div class="exb-weak-list">
       ${weak
         .map(
-          (w) => `
+          (w) =>
+            `
         <button class="exb-weak-btn" data-tag="${esc(w.tag)}" data-label="${esc(w.label)}" aria-label="Réviser ${esc(w.label)}">
           <span class="exb-weak-info">
             <span class="exb-weak-nom">${esc(w.label)}</span>
@@ -310,12 +311,12 @@ function renderSelection() {
   <div class="exb-sel-header">
     <button class="exb-quit-btn" id="exb-back" aria-label="Retour">←</button>
     ${renderTrophy(TROPHY_START, "exb-trophy--start")}
-    <h1 class="exb-sel-title">Ton parcours d'examen</h1>
-    <p class="exb-sel-sub">L'examen comme le vrai, ou entraîne-toi par thème</p>
+    <h1 class="exb-sel-title">Ton parcours d’examen</h1>
+    <p class="exb-sel-sub">L’examen comme le vrai, ou entraîne-toi par thème.</p>
   </div>
   ${officiel}
   ${weakSection}
-  <p class="exb-sel-sub2">Ou entraîne-toi par thème · ${PARCOURS.length} parcours de 15 questions</p>
+  <p class="exb-sel-sub2">Entraîne-toi par thème · ${PARCOURS.length} parcours de 15 questions</p>
   <div class="exb-pcards" id="exb-pcards">
     ${cards}
   </div>
@@ -332,12 +333,12 @@ function wireSelection(root) {
     haptic("select");
     if (EXAMEN_OFFICIEL_LOCKED) {
       // Le jour J : ouvrir ici la feuille d'achat PermiGo+ (Stripe élève).
-      toast("Bientôt : débloque l'examen officiel avec PermiGo+", "info", 3500);
+      toast("Bientôt : l’examen officiel avec PermiGo+", "info", 3500);
       return;
     }
     if (!_examenUnlocked) {
       toast(
-        "Valide ta compétence 1 pour débloquer l'examen blanc 🔒",
+        "Valide ta compétence 1 pour ouvrir l’examen blanc 🔒",
         "info",
         3500,
       );
@@ -631,17 +632,17 @@ function showResults(root, questions, answers, parcours_id) {
         <div class="exb-res-pct">${pct} %</div>
         <div class="exb-res-verdict">${
           fauteRatee
-            ? "Recalé — faute éliminatoire"
+            ? "Recalé · faute éliminatoire"
             : passed
-              ? "Admis — tu es dans les clous !"
-              : "Non admis — encore un peu d'entraînement"
+              ? "Admis · tu es dans les clous"
+              : "Non admis · encore un peu d’entraînement"
         }</div>
         <div class="exb-res-cepc">${
           fauteRatee
-            ? "Une faute éliminatoire = échec direct à l'examen, peu importe le reste du score."
+            ? "Une faute éliminatoire, c’est l’échec direct à l’examen, quel que soit le reste du score."
             : passed
-              ? "Tu décrocherais ton permis. Continue comme ça !"
-              : "Il te faut au moins 12 / 15 sans faute éliminatoire. Reviens t'entraîner !"
+              ? "Avec ce score, tu décrocherais ton permis. Continue comme ça."
+              : "Il te faut au moins 12/15, sans faute éliminatoire. Reviens t’entraîner."
         }</div>
       </div>
 
@@ -722,7 +723,7 @@ function startExamenOfficiel(root) {
         <span class="exb-quiz-parcours-name">Examen officiel</span>
       </div>`,
     onQuit: (num) => {
-      if (confirm("Quitter l'examen ? Ta progression sera perdue.")) {
+      if (confirm("Quitter l’examen ? Ta progression sera perdue.")) {
         clearExamTimer();
         haptic("tap");
         track("examen_officiel.quit", { question: num });
@@ -785,7 +786,7 @@ function showOfficielResults(root, questions, answers, startedAt) {
 
   const wrongHtml =
     wrongItems.length === 0
-      ? `<p class="exb-perfect">Sans-faute. Impressionnant !</p>`
+      ? `<p class="exb-perfect">Sans faute. Impressionnant.</p>`
       : `
       <h2 class="exb-recap-title">À revoir (${wrongItems.length})</h2>
       <div class="exb-recap-list">
@@ -797,7 +798,7 @@ function showOfficielResults(root, questions, answers, startedAt) {
             ${
               chosen != null && chosen >= 0
                 ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>`
-                : `<p class="exb-recap-wrong">Pas de réponse (temps écoulé)</p>`
+                : `<p class="exb-recap-wrong">Pas de réponse · temps écoulé</p>`
             }
             <p class="exb-recap-correct">Bonne réponse : <strong>${esc(q.options[q.correct])}</strong></p>
             <p class="exb-recap-explication">${esc(q.explication)}</p>
@@ -816,11 +817,11 @@ function showOfficielResults(root, questions, answers, startedAt) {
         }</div>
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
         <div class="exb-res-pct">${fautes} faute${fautes > 1 ? "s" : ""} · ${pct} %</div>
-        <div class="exb-res-verdict">${passed ? "Admis — tu es prêt !" : "Recalé — plus de 5 fautes"}</div>
+        <div class="exb-res-verdict">${passed ? "Admis · bien joué" : "Recalé · plus de 5 fautes"}</div>
         <div class="exb-res-cepc">${
           passed
-            ? "Au vrai examen, il faut 35/40. Tu y es — continue comme ça !"
-            : "Il faut au moins 35/40 (5 fautes max). Reviens t'entraîner !"
+            ? "Au vrai examen, il faut 35/40. Tu y es. Continue comme ça."
+            : "Il te faut au moins 35/40, soit 5 fautes maximum. Reviens t’entraîner."
         }</div>
       </div>
       <div class="exb-res-body">
@@ -972,7 +973,7 @@ function showRevisionResults(
     .filter((x) => x.chosen !== x.q.correct);
 
   const wrongHtml = perfect
-    ? `<p class="exb-perfect">Sans-faute sur ce thème — tu le maîtrises !</p>`
+    ? `<p class="exb-perfect">Sans faute sur ce thème. Tu le maîtrises.</p>`
     : `
       <h2 class="exb-recap-title">À revoir (${wrongItems.length})</h2>
       <div class="exb-recap-list">
@@ -1000,7 +1001,7 @@ function showRevisionResults(
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
         <div class="exb-res-pct">${esc(label)} · ${pct} %</div>
         <div class="exb-res-verdict">Révision terminée</div>
-        <div class="exb-res-cepc">Refais cette série jusqu'à la maîtriser, puis tente l'examen officiel.</div>
+        <div class="exb-res-cepc">Refais cette série jusqu’à la maîtriser, puis tente l’examen officiel.</div>
       </div>
       <div class="exb-res-body">
         <div class="exb-res-bar">
@@ -1296,7 +1297,7 @@ const EXB_CSS = `
   border: 1px solid rgba(239,68,68,.3);
   border-radius: 10px;
   padding: 10px 14px;
-  font: 700 13px/1.4 'Inter', sans-serif;
+  font: 700 13px/1.5 'Inter', sans-serif;
   color: var(--rd-txt);
   display: flex;
   align-items: center;

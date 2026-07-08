@@ -546,7 +546,7 @@ export async function mount(root, eleveId) {
       <div class="lr-page">
         <div class="lr-err">
           <div class="lr-err-ico">${illus("clipboard", { size: 64 })}</div>
-          Aucun élève sélectionné — retourne à la liste.
+          Aucun élève sélectionné. Retourne à la liste.
         </div>
       </div>
     `;
@@ -671,14 +671,14 @@ function computeEleveProfil() {
   if (acquisCount === 0 && _quizAttempts.length === 0) {
     return {
       tone: "new",
-      text: `${prenom} démarre tout juste — encore trop peu d'activité pour cerner son profil.`,
+      text: `${prenom} démarre tout juste. Encore trop peu d’activité pour cerner son profil.`,
     };
   }
   // En retrait (rien depuis 2 semaines)
   if (daysSince !== null && daysSince >= 14 && quiz4w === 0) {
     return {
       tone: "cold",
-      text: `${prenom} est en retrait : aucune activité depuis ${daysSince} jours. Une relance l'aiderait à reprendre.`,
+      text: `${prenom} est en retrait : aucune activité depuis ${daysSince} jours. Une relance l’aiderait à reprendre.`,
     };
   }
   // Label d'assiduité (phrase nominale, sans genre)
@@ -819,7 +819,7 @@ async function _loadFeedSection() {
   function _relTime(ts) {
     if (!ts) return "";
     const d = Math.floor((Date.now() - new Date(ts).getTime()) / 86400000);
-    if (d === 0) return "aujourd'hui";
+    if (d === 0) return "aujourd’hui";
     if (d === 1) return "hier";
     if (d < 7) return `il y a ${d}j`;
     return new Date(ts).toLocaleDateString("fr-FR", {
@@ -1249,7 +1249,7 @@ async function doSave(overlay) {
 
   if (saveError) {
     console.error("[livret-remc] save failed", saveError);
-    toast("Erreur lors de la sauvegarde", "error");
+    toast("Enregistrement impossible. Réessaie.", "error");
     btn.disabled = false;
     btn.textContent = "Enregistrer";
     return;
@@ -1301,7 +1301,7 @@ function showSuccessState(overlay) {
       <div class="lr-success-title">${complete ? `${prenom} a tout validé` : `${prenom} a progressé`}</div>
       <div class="lr-success-bar"><div class="lr-success-fill" style="width:0%"></div></div>
       <div class="lr-success-meta"><b>${acquisCount}/${REMC_TOTAL}</b> compétences validées · ${pct}%</div>
-      <div class="lr-success-note">${complete ? `${prenom} est prêt·e pour l'examen.` : `${prenom} voit sa progression dans son appli.`}</div>
+      <div class="lr-success-note">${complete ? `Les 31 compétences sont validées.` : `${prenom} voit sa progression dans son appli.`}</div>
       <button class="lr-btn-save" id="lr-success-continue" type="button">Continuer</button>
     </div>
   `;

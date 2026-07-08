@@ -219,7 +219,7 @@ let _results = [];
 export async function mount(root, openKey = null) {
   const me = getCurUser();
   if (!me || me.role !== "enseignant") {
-    root.innerHTML = `<p style="padding:32px;text-align:center;color:var(--mu)">Accès enseignant requis</p>`;
+    root.innerHTML = `<p style="padding:32px;text-align:center;color:var(--mu)">Accès réservé aux moniteurs.</p>`;
     return;
   }
 
@@ -280,7 +280,7 @@ export async function mount(root, openKey = null) {
     _render(root, d, openKey);
   } catch (e) {
     console.error("[trophees-moniteur]", e);
-    toast("Erreur de chargement", "error");
+    toast("Vérifie ta connexion, puis réessaie.", "error");
   }
 }
 
@@ -311,8 +311,8 @@ function _render(root, d, openKey = null) {
   const cta =
     d.totalVals === 0
       ? `<div class="tr2-cta">
-          <div class="tr2-cta-txt">Enregistre ta première séance pour débloquer tes premiers trophées.</div>
-          <button class="tr2-cta-btn" id="tr2-start">Première séance</button>
+          <div class="tr2-cta-txt">Valide une séance pour débloquer ton premier trophée.</div>
+          <button class="tr2-cta-btn" id="tr2-start">Valider une séance</button>
         </div>`
       : "";
 
@@ -321,7 +321,7 @@ function _render(root, d, openKey = null) {
     d.totalVals === 0
       ? `<div class="tr2-empty">
           ${medallion("route", "indigo", { size: 56 })}
-          <p class="tr2-empty-sub">Valide ta première compétence pour commencer à débloquer tes jalons.</p>
+          <p class="tr2-empty-sub">Valide ta première compétence pour débloquer tes jalons.</p>
         </div>`
       : "";
 
@@ -340,7 +340,7 @@ function _render(root, d, openKey = null) {
       </div>
       <div class="tr2-prog">
         <div class="tr2-prog-bar"><div class="tr2-prog-fill" id="tr2-fill"></div></div>
-        <div class="tr2-prog-hint">${pct}&nbsp;% des jalons atteints${remaining > 0 ? ` — ${remaining} restant${remaining > 1 ? "s" : ""} à débloquer` : " — collection complète"}</div>
+        <div class="tr2-prog-hint">${pct}&nbsp;% des jalons atteints${remaining > 0 ? ` · ${remaining} restant${remaining > 1 ? "s" : ""}` : " · collection complète"}</div>
       </div>
     </div>
   </div>

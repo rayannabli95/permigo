@@ -266,7 +266,7 @@ function renderPage(cr) {
 
   const retrHtml = retravailler.length
     ? `<div class="cr-section">
-        <div class="cr-section-title">A retravailler</div>
+        <div class="cr-section-title">À retravailler</div>
         <div class="cr-comp-list">${retravailler.map((c) => compItem(c, "a_retravailler")).join("")}</div>
       </div>`
     : "";
@@ -280,7 +280,7 @@ function renderPage(cr) {
 
   const noteHtml = cr.note
     ? `<div class="cr-note">
-        <div class="cr-note-label">Note de ton moniteur</div>
+        <div class="cr-note-label">Le mot de ton moniteur</div>
         <div class="cr-note-body">${esc(cr.note)}</div>
       </div>`
     : "";
@@ -295,14 +295,14 @@ function renderPage(cr) {
   </div>
 
   <div class="cr-hero">
-    <div class="cr-hero-kicker">De la part de ton moniteur</div>
-    <h1 class="cr-hero-title">Compte-rendu de ta leçon</h1>
+    <div class="cr-hero-kicker">De ton moniteur</div>
+    <h1 class="cr-hero-title">Ta dernière leçon</h1>
     <p class="cr-hero-sub">${esc(dateStr)}</p>
   </div>
 
   <div class="cr-prog">
     <div class="cr-prog-row">
-      <span class="cr-prog-label">Progression globale</span>
+      <span class="cr-prog-label">Ta progression</span>
       <span class="cr-prog-count">${esc(String(total))} / ${esc(String(REMC_TOTAL))}</span>
     </div>
     <div class="cr-prog-track">
@@ -319,7 +319,7 @@ function renderPage(cr) {
     Voir mon itinéraire ${icon("arrow-right", { size: 18, strokeWidth: 2.5 })}
   </button>
   <button class="cr-cta-secondary" id="cr-cta-retour" type="button">
-    Retour à l'accueil
+    Retour à l’accueil
   </button>
 </div>`;
 }
@@ -364,7 +364,10 @@ export async function mount(root, id) {
     .maybeSingle();
 
   if (error || !data) {
-    toast("Impossible de charger ce compte-rendu", "error");
+    toast(
+      "Compte-rendu indisponible. Vérifie ta connexion, puis réessaie.",
+      "error",
+    );
     navigate("#/parcours");
     return;
   }

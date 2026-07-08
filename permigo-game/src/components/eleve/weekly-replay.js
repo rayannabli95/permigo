@@ -139,7 +139,7 @@ export function playReplay(stats) {
       content: `
         <div class="wrep-tag">CETTE SEMAINE</div>
         <h1 class="wrep-title" style="font-size:38px">Continue.<br>Le permis t'attend.</h1>
-        <p class="wrep-sub">Prêt(e) pour une nouvelle semaine ?</p>
+        <p class="wrep-sub">On repart pour une nouvelle semaine.</p>
         <button class="wrep-final-cta" id="wrep-share" type="button">PARTAGER MA SEMAINE</button>
       `,
     },

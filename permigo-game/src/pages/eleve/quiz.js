@@ -649,8 +649,8 @@ function renderResult(
           : "Bien joué ! Quiz réussi."
         : reason === "no_competence_unlocked"
           ? canChain
-            ? "Belle découverte ! Tu viens d'explorer une compétence à venir — ton moniteur la travaillera avec toi."
-            : "Compétence pas encore débloquée par ton moniteur."
+            ? "Compétence à venir — ton moniteur la travaillera avec toi."
+            : "Compétence à venir. Ton moniteur la travaillera avec toi en leçon."
           : canChain
             ? "Pas grave — chaque question te fait progresser. On continue ?"
             : "Tu y es presque — un dernier tour avec ton moniteur et c'est dans la poche.";

@@ -331,7 +331,7 @@ export async function mount(root, sessionId) {
     <div class="sc">
       <div class="sc-hd">
         <button class="sc-back" id="sc-back-btn" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
-        <div class="sc-hd-title">Confirmer la séance</div>
+        <div class="sc-hd-title">Confirmer ta séance</div>
       </div>
       <div class="sc-skel" style="height:200px;border-radius:0"></div>
       <div class="sc-skel" style="height:120px;margin:16px"></div>
@@ -350,7 +350,7 @@ export async function mount(root, sessionId) {
     .maybeSingle();
 
   if (error || !session) {
-    toast("Séance introuvable", "error");
+    toast("Séance introuvable.", "error");
     navigate("#/");
     return;
   }
@@ -380,7 +380,7 @@ export async function mount(root, sessionId) {
         month: "long",
         year: "numeric",
       })
-    : "Date inconnue";
+    : "Date non précisée";
   const durStr = session.duration_minutes
     ? `${Math.floor(session.duration_minutes / 60) > 0 ? `${Math.floor(session.duration_minutes / 60)}h` : ""}${session.duration_minutes % 60 > 0 ? `${session.duration_minutes % 60}min` : ""}`.trim()
     : null;
@@ -390,7 +390,7 @@ export async function mount(root, sessionId) {
 
       <div class="sc-hd">
         <button class="sc-back" id="sc-back-btn" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
-        <h1 class="sc-hd-title" tabindex="-1">Confirmer la séance</h1>
+        <h1 class="sc-hd-title" tabindex="-1">Confirmer ta séance</h1>
       </div>
 
       <!-- HERO moniteur -->
@@ -474,7 +474,7 @@ export async function mount(root, sessionId) {
     <div class="sc-actions">
       <button class="sc-btn-confirm" id="sc-confirm-btn" data-session-id="${esc(sessionId)}">
         ${icon("check", { size: 16, strokeWidth: 2.8 })}
-        Confirmer la séance
+        Confirmer ta séance
       </button>
       <button class="sc-btn-refuse" id="sc-refuse-btn">
         ${icon("x", { size: 14, strokeWidth: 2.5 })}
@@ -509,15 +509,15 @@ function wire(root, { sessionId, monPrenom }) {
         if (error || data?.error) throw error || new Error(data.error);
         track("session.confirmed", { session_id: sessionId });
         navigator.vibrate?.(50);
-        toast("Séance confirmée ✓", "success");
+        toast("Séance confirmée.", "success");
         setTimeout(() => navigate("#/"), 800);
       } catch (err) {
         console.error("[session-confirmation] confirm", err);
         const msg =
           translateSessionError(err?.message) || "réessaie dans un instant";
-        toast(`Impossible de confirmer — ${msg}`, "error");
+        toast(`Confirmation impossible — ${msg}`, "error");
         btn.disabled = false;
-        btn.innerHTML = `${icon("check", { size: 16, strokeWidth: 2.8 })} Confirmer la séance`;
+        btn.innerHTML = `${icon("check", { size: 16, strokeWidth: 2.8 })} Confirmer ta séance`;
       }
     });
 
@@ -533,7 +533,7 @@ function translateSessionError(code) {
   const map = {
     already_decided: "cette séance a déjà été traitée",
     not_found: "séance introuvable",
-    forbidden: "tu n'as pas accès à cette séance",
+    forbidden: "tu n’as pas accès à cette séance",
     invalid_status: "statut de séance invalide",
   };
   return map[code] || null;
@@ -545,8 +545,8 @@ function showRefuseModal(root, sessionId, monPrenom) {
   modal.className = "sc-modal-bg";
   modal.innerHTML = `
     <div class="sc-modal">
-      <div class="sc-modal-title">Refuser la séance ?</div>
-      <div class="sc-modal-sub">${esc(monPrenom)} sera notifié du refus.</div>
+      <div class="sc-modal-title">Refuser cette séance ?</div>
+      <div class="sc-modal-sub">${esc(monPrenom)} recevra une notification du refus.</div>
       <button class="sc-modal-confirm-refuse" id="sc-modal-refuse-confirm">
         ${icon("x-circle", { size: 16 })} Oui, refuser
       </button>

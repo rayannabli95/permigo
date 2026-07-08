@@ -106,7 +106,7 @@ export async function mount(root, flashQuizId) {
       .map(withShuffledOptions);
 
     if (pool.length === 0)
-      return renderClosed(root, "Questions indisponibles, réessaie plus tard.");
+      return renderClosed(root, "Questions indisponibles. Réessaie plus tard.");
 
     track("flash_quiz.started", {
       flash_quiz_id: quiz.id,
@@ -115,7 +115,10 @@ export async function mount(root, flashQuizId) {
     runQuiz(root, { quiz, pool });
   } catch (e) {
     console.error("[flash-quiz] mount failed", e);
-    renderClosed(root, "Oups, impossible de charger le quiz.");
+    renderClosed(
+      root,
+      "Quiz indisponible. Vérifie ta connexion, puis réessaie.",
+    );
   }
 }
 

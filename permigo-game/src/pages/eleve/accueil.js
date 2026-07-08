@@ -57,7 +57,7 @@ const ELEVE_TOUR_STEPS = [
   {
     sel: "#action-cta-btn",
     title: "Par où commencer",
-    text: "Un quiz par jour. C'est ici que ça démarre.",
+    text: "Un quiz par jour. Tout démarre ici.",
   },
   {
     sel: '.bn-tab[data-id="parcours"]',
@@ -726,7 +726,7 @@ const STYLE = `<style>
   width: 0; transition: width .6s cubic-bezier(.34,1.56,.64,1);
 }
 .acc2-permis-sub {
-  font: 700 11.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu);
+  font: 700 11.5px/1.5 'Plus Jakarta Sans', sans-serif; color: var(--mu);
 }
 @media (prefers-reduced-motion: reduce) {
   .acc2-permis-fill { transition: none; }
@@ -833,7 +833,7 @@ function _greeting(awayDays) {
   } catch {
     /* ignore */
   }
-  if (revisitToday) return "Ça fait plaisir de te revoir aujourd'hui,";
+  if (revisitToday) return "Ça fait plaisir de te revoir aujourd’hui,";
   if (hasPriorVisit) return "Rebonjour"; // l'élève revient un nouveau jour
   const h = new Date().getHours();
   if (h >= 18 || h < 5) return "Bonsoir";
@@ -1104,9 +1104,9 @@ export async function mount(root) {
   } catch (e) {
     console.error("[accueil] mount failed", e);
     root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:var(--mu3);font-family:'Inter',sans-serif">
-      <div style="font:800 18px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">Oups, ton accueil a du mal à charger</div>
-      <p style="font-size:14px;margin:0 0 20px">Vérifie ta connexion et réessaie.</p>
-      <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Recharger</button>
+      <div style="font:800 18px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">« Accueil » indisponible</div>
+      <p style="font-size:14px;line-height:1.5;margin:0 0 20px">Vérifie ta connexion, puis réessaie.</p>
+      <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Réessayer</button>
     </div>`;
     root
       .querySelector("#acc-reload")
@@ -1167,7 +1167,7 @@ function render({
       <div class="acc-install-ico" aria-hidden="true">${medallion("fusee", "cyan", { size: 38 })}</div>
       <div class="acc-install-txt">
         <div class="acc-install-t">Installe PermiGo sur ton téléphone</div>
-        <div class="acc-install-s">Accès direct + tes rappels — 10 secondes.</div>
+        <div class="acc-install-s">Accès direct et tes rappels · 10 secondes.</div>
       </div>
       <button class="acc-install-btn" id="acc-install-btn" type="button">Installer</button>
     </div>`
@@ -1188,9 +1188,9 @@ function render({
   // le hero focal. Le CTA king prend l'id action-cta-btn pour que wire()
   // le câble sans modification (même data-href, même listener).
   let _heroKicker = "Ta question du jour";
-  let _heroTitle = "Prêt à réviser ?";
-  let _heroMeta = "3 questions · ~2 min · sur ta dernière leçon";
-  let _heroCta = "C'est parti";
+  let _heroTitle = "Révise ta dernière leçon";
+  let _heroMeta = "3 questions · 2 min";
+  let _heroCta = "C’est parti";
   let _heroHref = "#/quiz/next/post_validation/revision";
   let _heroDone = false;
 
@@ -1203,7 +1203,7 @@ function render({
   if (_pendingQuestForHero) {
     const _qn = _normalizeQuest(_pendingQuestForHero);
     _heroKicker = "Quête du jour";
-    _heroTitle = _qn.label ?? "Quête du jour";
+    _heroTitle = _qn.label ?? "Ta quête du jour";
     _heroMeta = _qn.sub ?? "";
     _heroCta = _qn.btnText ?? "Commencer";
     _heroHref = _qn.href ?? "#/parcours";
@@ -1211,7 +1211,7 @@ function render({
     const _isCons = pendingNotif.type === "consolidation_quiz";
     _heroKicker = _isCons ? "Quiz de consolidation" : "Quiz-récap";
     _heroTitle = _isCons
-      ? "Consolide ce que tu viens d'acquérir"
+      ? "Ancre ta nouvelle compétence"
       : "Récap sur ta compétence";
     _heroMeta = _isCons ? "2 questions · 30 sec" : "3 questions · optionnel";
     _heroCta = _isCons ? "Commencer" : "Faire le récap";
@@ -1219,33 +1219,33 @@ function render({
   } else if (dailyQuiz && !dailyQuiz.done && dailyQuiz.competenceId) {
     _heroKicker = "Ta question du jour";
     if (_awayDays >= 3) {
-      _heroTitle = "Reprends en douceur";
-      _heroMeta = "1 question pour te remettre dedans · ~2 min";
+      _heroTitle = "Une question pour reprendre";
+      _heroMeta = "1 question · 2 min · sur ta dernière leçon";
     } else if (dailyQuiz.mode === "decouverte") {
       _heroTitle = "Découvre une compétence";
       _heroMeta = "3 questions · 2 min · sur ta prochaine leçon";
     } else {
-      _heroTitle = "Prêt à réviser ?";
-      _heroMeta = "3 questions · 2 min · sur ta dernière leçon";
+      _heroTitle = "Révise ta dernière leçon";
+      _heroMeta = "3 questions · 2 min";
     }
-    _heroCta = "C'est parti";
+    _heroCta = "C’est parti";
     _heroHref = `#/quiz/${dailyQuiz.competenceId}/post_validation/daily`;
   } else if (dailyQuiz?.done) {
     _heroDone = true;
     _heroKicker = "Question du jour";
-    _heroTitle = "Fait pour aujourd'hui !";
+    _heroTitle = "Terminé pour aujourd’hui";
     _heroMeta = "Reviens demain pour ta prochaine question.";
     _heroCta = "Continue à réviser";
     _heroHref = "#/quiz/next/post_validation/revision";
   } else if (totalValidated === 0) {
-    _heroKicker = "Par où commencer ?";
+    _heroKicker = "Par où commencer";
     _heroTitle = "Lance ta première révision";
     _heroMeta = "2 min suffisent pour démarrer.";
-    _heroCta = "C'est parti — 2 min";
+    _heroCta = "C’est parti · 2 min";
     _heroHref = "#/quiz/next/post_validation/revision";
   } else {
     _heroTitle = "Continue ton parcours";
-    _heroMeta = "Une révision de plus, chaque jour compte.";
+    _heroMeta = "Une révision de plus. Chaque jour compte.";
     _heroCta = "Continue à réviser";
     _heroHref = "#/quiz/next/post_validation/revision";
   }
@@ -1257,7 +1257,7 @@ function render({
   <!-- ══ HUD — série ══ (le solde de volants vit dans le header global) -->
   <div class="acc2-hud">
     <button class="acc2-chip streak${isActive ? "" : " inactive"}" id="streak-badge-btn"
-            type="button" aria-label="Série ${streak.current_streak} jours, voir le détail">
+            type="button" aria-label="Série de ${streak.current_streak} jours · voir le détail">
       <img src="/skins/permigo-streak-flame-v1.webp" alt="" aria-hidden="true">
       <span class="num">${streak.current_streak}</span>
     </button>
@@ -1300,10 +1300,10 @@ function render({
       </div>
       <span class="acc2-permis-sub">${
         totalValidated === 0
-          ? "Chaque compétence validée par ton moniteur la complète."
+          ? "Chaque compétence validée par ton moniteur le complète."
           : totalValidated >= 31
-            ? "Toutes les compétences acquises — bravo !"
-            : `Plus que ${31 - totalValidated} compétence${31 - totalValidated > 1 ? "s" : ""} avant le grand jour`
+            ? "Toutes les compétences acquises. Bravo !"
+            : `Plus que ${31 - totalValidated} compétence${31 - totalValidated > 1 ? "s" : ""} avant l’examen`
       }</span>
     </div>
   </div>
@@ -1328,10 +1328,10 @@ function render({
 
 <!-- STREAK BOTTOM SHEET -->
 <div class="bs-bg" id="bs-bg"></div>
-<div class="bs-streak" id="bs-streak" role="dialog" aria-label="Détail série">
+<div class="bs-streak" id="bs-streak" role="dialog" aria-label="Détail de ta série">
   <div class="bs-handle"></div>
   <div class="bs-hd">
-    <div class="bs-hd-title">Série d'apprentissage</div>
+    <div class="bs-hd-title">Ta série de révision</div>
     <div class="bs-hd-sub">Record : ${streak.longest_streak} jour${streak.longest_streak > 1 ? "s" : ""} · En cours : ${streak.current_streak}</div>
   </div>
   <div class="bs-hmap-wrap">
@@ -1347,7 +1347,7 @@ function render({
       ? `
   <div class="bs-freeze-wrap">
     <button class="bs-freeze-btn" id="bs-freeze-btn">Geler ma série · 50 ${volantImg(16)}</button>
-    <div class="bs-freeze-desc">Protège ta série pour les prochaines 24h</div>
+    <div class="bs-freeze-desc">Protège ta série pendant 24 h.</div>
   </div>`
       : ""
   }
@@ -1461,10 +1461,7 @@ function wire(
     try {
       const { data, error } = await sb.rpc("use_streak_freeze");
       if (error || data?.error) {
-        toast(
-          "Pas assez de volants pour geler ta série. Il t'en faut 50 volants",
-          "error",
-        );
+        toast("Il te faut 50 volants pour geler ta série.", "error");
         setTimeout(() => {
           btn.disabled = false;
           btn.innerHTML = `Geler ma série · 50 ${volantImg(16)}`;
@@ -1472,11 +1469,11 @@ function wire(
         return;
       }
       track("streak.freeze_used", {});
-      toast("Série gelée pour 24h", "success");
+      toast("Série gelée pour 24 h.", "success");
       btn.textContent = "✓ Série gelée"; // évite de laisser "⏳ Gel en cours…" figé
       closeBS();
     } catch {
-      toast("Erreur lors du gel", "error");
+      toast("Le gel a échoué. Réessaie.", "error");
       btn.disabled = false;
       btn.innerHTML = `Geler ma série · 50 ${volantImg(16)}`;
     }
@@ -1590,11 +1587,11 @@ async function _loadAndInjectCompteRendu(root, me) {
       .acc2-cr-arr{flex:0 0 24px;width:24px;height:24px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800}
       </style>
       <div class="acc2-cr-banner" id="acc-cr-banner" role="button" tabindex="0"
-           aria-label="Ton moniteur t'a envoyé un compte-rendu — appuie pour le lire">
+           aria-label="Ton moniteur t’a envoyé un compte-rendu · appuie pour le lire">
         <div class="acc2-cr-ico" aria-hidden="true">${medallion("fiches", "violet", { size: 38 })}</div>
         <div class="acc2-cr-txt">
-          <div class="acc2-cr-t">Ton moniteur t'a envoyé un compte-rendu</div>
-          <div class="acc2-cr-s">Appuie pour lire son retour sur ta leçon</div>
+          <div class="acc2-cr-t">Ton moniteur t’a envoyé un compte-rendu</div>
+          <div class="acc2-cr-s">Lis son retour sur ta leçon.</div>
         </div>
         <div class="acc2-cr-arr" aria-hidden="true">›</div>
       </div>`;
@@ -1633,7 +1630,7 @@ async function _loadAndInjectChests(root) {
         <img src="/skins/chests/chest_welcome.png" alt="" aria-hidden="true" loading="lazy">
         <div class="acc2-chest-v2-body">
           <strong class="acc2-chest-v2-title">${esc(label)}</strong>
-          <span class="acc2-chest-v2-sub">Réclame ta récompense du jour</span>
+          <span class="acc2-chest-v2-sub">Réclame ta récompense du jour.</span>
         </div>
         <span class="acc2-chest-v2-arr" aria-hidden="true">›</span>
       </div>`;

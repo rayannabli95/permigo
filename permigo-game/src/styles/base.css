@@ -115,6 +115,13 @@
   --fb:'Nunito','Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   --fn:'JetBrains Mono','IBM Plex Mono','SF Mono',Menlo,monospace;
 
+  /* ─ Interligne (respiration). Défaut confortable pour le TEXTE COURANT (éléments
+     sans line-height explicite). Les titres et tout ce qui pose un `font:` shorthand
+     gardent le leur → cette couche est purement additive, elle ne régresse rien. ─ */
+  --lh:1.5;        /* corps / sous-titres / notes multi-lignes */
+  --lh-snug:1.35;  /* texte semi-compact */
+  --lh-tight:1.15; /* titres */
+
   /* ─ Échelle typographique — 6 paliers canoniques (audit 2026-06 : ~17 tailles
      dont des fractionnels 12,5/13,5px). Nouvelles règles : viser ces paliers. ─ */
   --fs-xs:10px;
@@ -221,17 +228,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "cv02","cv03","cv04","cv11";
   letter-spacing: -0.005em;
+  line-height: var(--lh);
   overflow-x: hidden;
   max-width: 100vw;
 }
 
 h1, h2, h3, h4 { color: var(--ink); }
 
-/* Headings — kerning serré + letter-spacing optique */
+/* Headings — kerning serré + letter-spacing optique + interligne titre (évite qu'un
+   titre nu multi-lignes hérite du 1.5 du corps). Les titres à `font:` shorthand
+   gardent leur propre valeur. */
 h1, h2, h3, h4, .pg-logo-txt {
   font-family: var(--fd);
   font-feature-settings: "ss01","cv01","cv11";
   letter-spacing: -0.022em;
+  line-height: var(--lh-tight);
   text-wrap: balance;
 }
 

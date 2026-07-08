@@ -30,17 +30,17 @@ const VALIDATION_TOUR_STEPS = [
   {
     sel: ".vl-cat-hd",
     title: "Le programme officiel",
-    text: "Les 31 compétences sont regroupées en 4 catégories. Déroule celle que tu veux évaluer.",
+    text: "31 compétences réparties en 4 catégories. Déroule celle à évaluer.",
   },
   {
     sel: ".vl-row:not(.locked)",
     title: "Tape une compétence",
-    text: "Un appui la fait défiler : Acquis → En cours → À revoir → vide. Retape pour corriger.",
+    text: "Chaque appui change le statut : Acquis → En cours → À revoir → vide. Retape pour corriger.",
   },
   {
     sel: "#vs-submit",
     title: "Enregistre la séance",
-    text: "Le livret de l'élève se met à jour immédiatement. Il voit sa progression dès sa prochaine connexion.",
+    text: "Le livret de l’élève se met à jour aussitôt. Il voit sa progression dès sa prochaine connexion.",
   },
 ];
 
@@ -517,7 +517,7 @@ export async function mount(root) {
   ]);
 
   if (error) {
-    toast("Impossible de charger tes élèves", "error");
+    toast("Vérifie ta connexion, puis réessaie.", "error");
     _eleves = [];
   } else {
     _eleves = (data || []).map((e) => ({
@@ -590,7 +590,7 @@ function render() {
           <button class="vs-back" id="vs-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
           <div class="vs-hd-text">
             <h1 class="vs-h1">Valider une séance</h1>
-            ${_showSub ? `<p class="vs-sub">Choisis l'élève, puis tape une compétence : Acquis → En cours → À revoir.</p>` : ""}
+            ${_showSub ? `<p class="vs-sub">Choisis l’élève, puis tape une compétence : Acquis → En cours → À revoir.</p>` : ""}
           </div>
           <div class="vs-hd-illus">${medallion("crayon", "indigo", { size: 48, glow: true })}</div>
         </div>
@@ -626,7 +626,7 @@ function renderEleveDropdown() {
 
   const opts =
     list.length === 0
-      ? `<div class="vs-empty">${_eleves.length === 0 ? "Aucun élève attitré pour l'instant." : "Aucun résultat pour cette recherche."}</div>`
+      ? `<div class="vs-empty">${_eleves.length === 0 ? "Aucun élève attitré pour l’instant." : "Aucun résultat pour cette recherche."}</div>`
       : list
           .map((e, i) => {
             const sel = e.id === _eleve;
@@ -712,7 +712,7 @@ function renderNote() {
   return `
     <div class="vs-card">
       <div class="vs-card-ttl">${icon("edit-3", { size: 13, strokeWidth: 2.4 })} Observations (optionnel)</div>
-      <textarea class="vs-note" id="vs-note" maxlength="${MAX_NOTE}" placeholder="Ce que tu as observé, les points à retravailler…" aria-label="Observations de séance">${esc(_note)}</textarea>
+      <textarea class="vs-note" id="vs-note" maxlength="${MAX_NOTE}" placeholder="Ce que tu as vu, les points à retravailler…" aria-label="Observations de séance">${esc(_note)}</textarea>
       <div class="vs-note-count" id="vs-note-count">${_note.length}/${MAX_NOTE}</div>
     </div>`;
 }
@@ -886,7 +886,7 @@ async function submit() {
     });
     if (error || data?.error) {
       console.error("[valider-seance] rpc error", error || data?.error);
-      toast("Erreur lors de l'enregistrement", "error");
+      toast("Enregistrement impossible. Réessaie.", "error");
       _submitting = false;
       if (btn) {
         btn.disabled = false;
@@ -921,7 +921,7 @@ async function submit() {
     }
   } catch (e) {
     console.error("[valider-seance] submit crash", e);
-    toast("Erreur réseau", "error");
+    toast("Vérifie ta connexion, puis réessaie.", "error");
     _submitting = false;
     if (btn) {
       btn.disabled = false;
@@ -955,7 +955,7 @@ async function _maybeCelebrateMoniteurTier() {
 // Liste plate ORDONNÉE des compétences REMC → permet « précédentes / suivante ».
 const ALL_SUBS = REMC.flatMap((c) => c.subs); // [{ c, n }]
 const REVSUGG_TAG = {
-  now: "Validé aujourd'hui",
+  now: "Validé aujourd’hui",
   back: "À renforcer",
   next: "À préparer",
 };
@@ -1024,17 +1024,17 @@ function buildCompteRenduText(
 ) {
   const lines = [`Compte-rendu de la leçon — ${prenom}`, ""];
   if (acquisNames.length) {
-    lines.push("Validé aujourd'hui :");
+    lines.push("Validé aujourd’hui :");
     acquisNames.forEach((n) => lines.push("• " + n));
     lines.push("");
   }
   lines.push(
-    `Progression : ${totalAcquis}/${REMC_TOTAL} compétences (${pct}%)`,
+    `Progression : ${totalAcquis}/${REMC_TOTAL} compétences (${pct} %)`,
   );
-  if (point) lines.push(`À revoir avant la prochaine validation : ${point}`);
+  if (point) lines.push(`À revoir avant la prochaine leçon : ${point}`);
   lines.push("");
   lines.push(
-    `Bravo, continue comme ça ! — ${fmtName(monNom || "ton moniteur")}`,
+    `Bravo, continue comme ça ! — ${fmtName(monNom || "ton moniteur")}`,
   );
   return lines.join("\n");
 }
@@ -1097,7 +1097,7 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes, crText) {
       .vs-cr-head { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; }
       .vs-cr-ico { width: 38px; height: 38px; flex-shrink: 0; border-radius: 11px; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #4f46e5, #7c4dff); box-shadow: 0 6px 14px -6px rgba(79,70,229,.6); }
       .vs-cr-title { font: 800 15px/1.15 'Manrope', 'Plus Jakarta Sans', sans-serif; color: #1a1c2e; }
-      .vs-cr-sub { font: 600 11.5px/1.3 'Inter', sans-serif; color: #5a6188; margin-top: 2px; }
+      .vs-cr-sub { font: 600 11.5px/1.45 'Inter', sans-serif; color: #5a6188; margin-top: 2px; }
       .vs-cr-body { display: flex; flex-direction: column; gap: 6px; padding: 11px 12px; background: #f7f8fc; border-radius: 12px; margin-bottom: 12px; }
       .vs-cr-line { display: flex; align-items: center; gap: 8px; font: 600 13px/1.3 'Inter', sans-serif; color: #2d3050; }
       .vs-cr-line > svg { flex-shrink: 0; }
@@ -1115,7 +1115,7 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes, crText) {
         <div class="vs-cr-ico">${icon("file-text", { size: 18, strokeWidth: 2.2 })}</div>
         <div>
           <div class="vs-cr-title">Compte-rendu envoyé</div>
-          <div class="vs-cr-sub">Reçu par ${esc(prenom)} dans son appli — il le voit tout de suite</div>
+          <div class="vs-cr-sub">${esc(prenom)} le voit tout de suite dans son appli.</div>
         </div>
       </div>
       <div class="vs-cr-body">
@@ -1130,17 +1130,17 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes, crText) {
                 .join("")
             : `<div class="vs-cr-line"><span>Progression mise à jour</span></div>`
         }
-        ${crPoint ? `<div class="vs-cr-line work">${icon("target", { size: 13, strokeWidth: 2.4 })}<span>À revoir : ${esc(crPoint)}</span></div>` : ""}
-        <div class="vs-cr-prog">Progression : <b>${totalAcquis}/${REMC_TOTAL}</b> · ${pct}%</div>
+        ${crPoint ? `<div class="vs-cr-line work">${icon("target", { size: 13, strokeWidth: 2.4 })}<span>À revoir : ${esc(crPoint)}</span></div>` : ""}
+        <div class="vs-cr-prog">Progression : <b>${totalAcquis}/${REMC_TOTAL}</b> · ${pct} %</div>
       </div>
       <div class="vs-cr-sent">${icon("check-circle", { size: 15, strokeWidth: 2.4 })} Envoyé automatiquement à ${esc(prenom)}</div>
-      <button class="vs-cr-share" id="vs-cr-share" type="button">${icon("share", { size: 14, strokeWidth: 2.2 })} Partager aussi (WhatsApp, parents…)</button>
+      <button class="vs-cr-share" id="vs-cr-share" type="button">${icon("share", { size: 14, strokeWidth: 2.2 })} Partager aussi (WhatsApp, parents)</button>
     </section>`;
 
   const revCard = suggestions.length
     ? `<section class="vs-revsugg" id="vs-revsugg">
         <div class="vs-revsugg-h">Envoie une révision à ${esc(prenom)}</div>
-        <div class="vs-revsugg-sub">3 questions ciblées, à réviser entre deux leçons.</div>
+        <div class="vs-revsugg-sub">3 questions ciblées · à réviser entre deux leçons</div>
         <div class="vs-revsugg-list">
           ${suggestions
             .map(
@@ -1167,10 +1167,10 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes, crText) {
         <div class="vs-success-check">${medallion("trophee", "gold", { size: 64, glow: true })}</div>
         <span class="vs-success-badge">${icon("check-circle", { size: 14, strokeWidth: 2.2 })} Séance enregistrée</span>
         <div class="vs-success-title">${complete ? `${esc(prenom)} a tout validé` : `${esc(prenom)} a progressé`}</div>
-        <div class="vs-success-count">${nNew} compétence${nNew > 1 ? "s" : ""} validée${nNew > 1 ? "s" : ""} aujourd'hui</div>
+        <div class="vs-success-count">${nNew} compétence${nNew > 1 ? "s" : ""} validée${nNew > 1 ? "s" : ""} aujourd’hui</div>
         <div class="vs-success-bar"><div class="vs-success-fill" style="width:0%"></div></div>
-        <div class="vs-success-meta"><b>${totalAcquis}/${REMC_TOTAL}</b> compétences validées · ${pct}%</div>
-        <div class="vs-success-note">${complete ? `${esc(prenom)} est prêt·e pour l'examen.` : `${esc(prenom)} voit sa progression dans son appli.`}</div>
+        <div class="vs-success-meta"><b>${totalAcquis}/${REMC_TOTAL}</b> compétences validées · ${pct} %</div>
+        <div class="vs-success-note">${complete ? `${esc(prenom)} est prêt·e pour l’examen.` : `${esc(prenom)} voit sa progression dans son appli.`}</div>
         ${crCard}
         ${revCard}
         <button class="vs-success-done" id="vs-success-done" type="button">${icon("users", { size: 16, strokeWidth: 2.2 })} Voir mes élèves</button>

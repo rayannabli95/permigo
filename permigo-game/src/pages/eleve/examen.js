@@ -214,7 +214,7 @@ const STYLE = `<style>
 }
 .exam-check-body { flex: 1; min-width: 0; }
 .exam-check-label { font: 600 14px/1.3 'Plus Jakarta Sans',sans-serif; color: var(--ink); }
-.exam-check-sub { font: 500 12px/1.3 'Inter',sans-serif; color: var(--mu); margin-top: 2px; }
+.exam-check-sub { font: 500 12px/1.5 'Inter',sans-serif; color: var(--mu); margin-top: 2px; }
 .exam-check-badge {
   font: 700 12px/1 'IBM Plex Mono',monospace;
   padding: 4px 8px;
@@ -302,7 +302,7 @@ const STYLE = `<style>
   border-radius: 14px;
   margin-top: -2px;
   margin-bottom: 16px;
-  font: 600 13px/1.3 'Plus Jakarta Sans',sans-serif;
+  font: 600 13px/1.5 'Plus Jakarta Sans',sans-serif;
 }
 .exam-readiness.high { background: var(--grp2); color: var(--grk2); }
 .exam-readiness.mid  { background: #fef9c3; color: #a16207; }
@@ -322,19 +322,19 @@ const QUIZ_TARGET = 70;
 const TIPS = [
   {
     ico: medallion("lune", "indigo", { size: 34 }),
-    txt: "Dors 8h la veille — le cerveau consolide la mémoire pendant le sommeil.",
+    txt: "Dors 8 h la veille. Le cerveau consolide la mémoire pendant le sommeil.",
   },
   {
     ico: medallion("eclair", "orange", { size: 34 }),
-    txt: "Mange léger le matin. Évite le sucre rapide avant l'examen.",
+    txt: "Mange léger le matin. Évite le sucre rapide avant l’examen.",
   },
   {
     ico: medallion("horloge", "blue", { size: 34 }),
-    txt: "Arrive 15 min en avance pour te détendre et vérifier le matériel.",
+    txt: "Arrive 15 min en avance. Le temps de te détendre et de vérifier le matériel.",
   },
   {
     ico: medallion("stats", "teal", { size: 34 }),
-    txt: "Respire par le ventre avant de démarrer. 4 sec inspiré, 4 sec expiré.",
+    txt: "Respire par le ventre avant de démarrer. 4 s inspiré, 4 s expiré.",
   },
 ];
 
@@ -440,7 +440,7 @@ function renderCountdown(examDate) {
     return `
 <div class="exam-no-date">
   <span class="exam-no-date-emoji">${icon("calendar", { size: 26 })}</span>
-  <div class="exam-no-date-txt">Renseigne ta date d'examen pour voir le compte à rebours.</div>
+  <div class="exam-no-date-txt">Ajoute ta date d’examen pour lancer le compte à rebours.</div>
   <button class="exam-choose-btn" id="exam-btn-choose">
     ${icon("calendar", { size: 16 })} Choisir ma date
   </button>
@@ -459,8 +459,8 @@ function renderCountdown(examDate) {
     return `
 <div style="text-align:center;padding:8px 0">
   <div style="margin-bottom:8px;color:var(--gr)">${icon("check-circle", { size: 34 })}</div>
-  <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:4px">Ton examen est passé !</div>
-  <div style="font:500 13px/1.4 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">Bonne chance pour les résultats.</div>
+  <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:4px">Ton examen est passé</div>
+  <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">Bonne chance pour les résultats.</div>
   <button class="exam-choose-btn" id="exam-btn-choose" style="background:var(--gr)">
     ${icon("calendar", { size: 16 })} Changer la date
   </button>
@@ -510,8 +510,8 @@ function renderPredict(data) {
 <div class="exam-predict-ready">
   <span aria-hidden="true">${medallion("check", "green", { size: 24 })}</span>
   <div>
-    <div class="exam-predict-title">Tu es prêt pour l'examen !</div>
-    <div class="exam-predict-sub">${compsCount}/31 compétences validées — objectif atteint</div>
+    <div class="exam-predict-title">Prêt pour l’examen</div>
+    <div class="exam-predict-sub">${compsCount}/31 compétences validées · objectif atteint</div>
   </div>
 </div>`;
     }
@@ -519,7 +519,7 @@ function renderPredict(data) {
 <div class="exam-predict-almost">
   <span aria-hidden="true">${medallion("panneau", "orange", { size: 24 })}</span>
   <div>
-    <div class="exam-predict-title">Presque prêt — encore ${fails.length} critère${fails.length > 1 ? "s" : ""}</div>
+    <div class="exam-predict-title">Presque prêt · encore ${fails.length} critère${fails.length > 1 ? "s" : ""}</div>
     <div class="exam-predict-sub">${compsCount}/31 validées. Reste : ${esc(fails.map((f) => f.label).join(" · "))}</div>
   </div>
 </div>`;
@@ -539,7 +539,7 @@ function renderPredict(data) {
 <div class="exam-predict">
   <div class="exam-predict-ico">${icon("calendar", { size: 18, color: "var(--a)" })}</div>
   <div class="exam-predict-body">
-    <div class="exam-predict-title">${dateStr ? `Prêt vers le ${esc(dateStr)}` : "Estimation en cours…"}</div>
+    <div class="exam-predict-title">${dateStr ? `Prêt vers le ${esc(dateStr)}` : "Estimation en cours"}</div>
     <div class="exam-predict-sub">${esc(advice)}</div>
   </div>
 </div>
@@ -548,8 +548,8 @@ function renderPredict(data) {
 </div>
 <div class="exam-predict-labels">
   <span>${compsCount} validées</span>
-  <span>${pct}% · objectif ${PREDICT_TARGET}</span>
-  <span>${PREDICT_TARGET} cible</span>
+  <span>${pct}% de l’objectif</span>
+  <span>cible ${PREDICT_TARGET}</span>
 </div>`;
 }
 
@@ -559,24 +559,24 @@ function buildCriteria({ compsCount, streak, avgScore }) {
   const revised = isRevised();
   return [
     {
-      label: "Parcours > 50%",
+      label: "Parcours au-dessus de 50 %",
       sub: `${compsCount} compétences validées sur 31`,
       pass: compsCount >= COMPS_TARGET,
       badge: `${Math.round((compsCount / 31) * 100)}%`,
       ico: medallion("carte", "blue", { size: 30 }),
     },
     {
-      label: "Streak actif",
+      label: "Série active",
       sub:
         streak > 0
-          ? `${streak} jours d'affilée`
-          : "Reprends l'application aujourd'hui",
+          ? `${streak} jours d’affilée`
+          : "Reviens réviser aujourd’hui",
       pass: streak > 0,
       badge: streak > 0 ? `${streak}j` : "0j",
       ico: medallion("flamme", "orange", { size: 30 }),
     },
     {
-      label: "Score quiz > 70%",
+      label: "Score quiz au-dessus de 70 %",
       sub:
         avgScore !== null ? `Moyenne : ${avgScore}%` : "Aucun quiz enregistré",
       pass: avgScore !== null && avgScore >= QUIZ_TARGET,
@@ -585,10 +585,10 @@ function buildCriteria({ compsCount, streak, avgScore }) {
       ico: medallion("ampoule", "gold", { size: 30 }),
     },
     {
-      label: "Révision complète",
+      label: "Révision faite",
       sub: revised
         ? "Fiches de révision consultées"
-        : "Consulte les fiches résumé",
+        : "Consulte tes fiches de révision",
       pass: revised,
       badge: revised ? "✓" : "—",
       ico: medallion("livret", "violet", { size: 30 }),
@@ -608,13 +608,13 @@ function renderChecklist(data) {
   let readinessClass, readinessTxt;
   if (baseAcquis >= BASE_TOTAL) {
     readinessClass = "high";
-    readinessTxt = `${icon("check-circle", { size: 14 })} Prêt pour l'examen — ton moniteur a validé tes ${BASE_TOTAL} compétences de base`;
+    readinessTxt = `${icon("check-circle", { size: 14 })} Prêt pour l’examen. Ton moniteur a validé tes ${BASE_TOTAL} compétences de base.`;
   } else if (baseAcquis >= 18) {
     readinessClass = "mid";
-    readinessTxt = `${icon("alert-triangle", { size: 14 })} Bientôt prêt — ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à faire valider par ton moniteur`;
+    readinessTxt = `${icon("alert-triangle", { size: 14 })} Bientôt prêt. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à faire valider par ton moniteur.`;
   } else {
     readinessClass = "low";
-    readinessTxt = `${icon("alert-circle", { size: 14 })} En préparation — tes compétences se valident en leçon avec ton moniteur`;
+    readinessTxt = `${icon("alert-circle", { size: 14 })} En préparation. Tes compétences se valident en leçon avec ton moniteur.`;
   }
 
   const rows = criteria
@@ -706,13 +706,13 @@ export async function mount(root) {
   <div class="exam-hd">
     <div class="exam-hd-ico" aria-hidden="true">${medallion("examen", "gold", { size: 48 })}</div>
     <div>
-      <h1 class="exam-hd-title">Ton examen blanc</h1>
-      <div class="exam-hd-sub">Prépare-toi sereinement pour le grand jour.</div>
+      <h1 class="exam-hd-title">Ton examen</h1>
+      <div class="exam-hd-sub">Ton compte à rebours et où tu en es.</div>
     </div>
   </div>
   <div class="exam-card" style="text-align:center;padding:28px 20px">
     <div style="margin-bottom:10px;color:var(--mu3)">${icon("alert-circle", { size: 30 })}</div>
-    <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Impossible de charger ta préparation</div>
+    <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">« Ton examen » indisponible</div>
     <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">Vérifie ta connexion, puis réessaie.</div>
     <button class="exam-choose-btn" id="exam-retry">Réessayer</button>
   </div>
@@ -730,8 +730,8 @@ export async function mount(root) {
   <div class="exam-hd exam-card" style="background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:16px">
     <div class="exam-hd-ico" aria-hidden="true">${medallion("examen", "gold", { size: 48 })}</div>
     <div>
-      <h1 class="exam-hd-title">Ton examen blanc</h1>
-      <div class="exam-hd-sub">Prépare-toi sereinement pour le grand jour.</div>
+      <h1 class="exam-hd-title">Ton examen</h1>
+      <div class="exam-hd-sub">Ton compte à rebours et où tu en es.</div>
     </div>
   </div>
 
@@ -745,13 +745,13 @@ export async function mount(root) {
 
   <!-- 3. PREDICT -->
   <div class="exam-card">
-    <div class="exam-card-title">Prévision de préparation</div>
+    <div class="exam-card-title">Où tu en es</div>
     ${renderPredict(data)}
   </div>
 
   <!-- 4. CHECKLIST -->
   <div class="exam-card">
-    <div class="exam-card-title">Suis-je prêt ?</div>
+    <div class="exam-card-title">Ta préparation</div>
     ${renderChecklist(data)}
   </div>
 
@@ -770,7 +770,7 @@ export async function mount(root) {
       ${medallion("carte", "blue", { size: 36 })}
     </div>
     <div style="flex:1;min-width:0">
-      <div style="font-size:15px;font-weight:800">Connais ton centre d'examen</div>
+      <div style="font-size:15px;font-weight:800">Ton centre d’examen</div>
       <div style="font-size:13px;color:var(--mu2);margin-top:2px">Difficulté, pièges du parcours, conseils sur place.</div>
     </div>
     ${icon("chevron-right", { size: 20, color: "var(--mu3)" })}

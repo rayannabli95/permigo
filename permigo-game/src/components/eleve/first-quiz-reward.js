@@ -79,7 +79,7 @@ export function showFirstQuizReward({ me = null, scorePct = null } = {}) {
   ov.className = "fqr";
   ov.setAttribute("role", "dialog");
   ov.setAttribute("aria-modal", "true");
-  ov.setAttribute("aria-label", "Premier quiz réussi — tour de roue offert");
+  ov.setAttribute("aria-label", "Premier quiz réussi — un tour de roue offert");
   ov.innerHTML = `
     <style>${CSS}</style>
     <div class="fqr-stars" aria-hidden="true">
@@ -90,7 +90,7 @@ export function showFirstQuizReward({ me = null, scorePct = null } = {}) {
     </div>
     <img class="fqr-badge" src="/skins/mascot-celebrate.png" alt="" />
     <h2 class="fqr-title">Premier quiz réussi&nbsp;! 🎉</h2>
-    <p class="fqr-sub">Tu es lancé — et tu débloques un cadeau.</p>
+    <p class="fqr-sub">Tu débloques un tour de roue offert.</p>
     <div class="fqr-reward">
       <div class="fqr-glow" aria-hidden="true"></div>
       <div class="fqr-wheel" aria-hidden="true"></div>

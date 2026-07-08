@@ -539,7 +539,7 @@ async function loadData() {
 
   if (e1) {
     console.error("[mes-eleves] query error", e1);
-    toast("Impossible de charger les élèves", "error");
+    toast("Vérifie ta connexion, puis réessaie.", "error");
     _eleves = [];
     return;
   }
@@ -663,7 +663,7 @@ async function loadDrillData(compId) {
   } catch (e) {
     console.error("[mes-eleves] drill load error", e);
     _drillEleves = [];
-    toast("Impossible de charger le drill", "error");
+    toast("Vérifie ta connexion, puis réessaie.", "error");
   }
 }
 
@@ -680,19 +680,19 @@ function renderDrill() {
           ${icon("search", { size: 16, strokeWidth: 2.2, color: "var(--a)" })}
           Bloqués — compétence ${esc(_drillComp)}
         </h1>
-        <p class="me-sub">${count} élève${count !== 1 ? "s" : ""} en difficulté sur cette compétence · 30 derniers jours</p>
+        <p class="me-sub">${count} élève${count !== 1 ? "s" : ""} en difficulté · 30 derniers jours</p>
       </div>
     </header>
     <button class="me-drill-back" id="me-drill-back"
             style="display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:8px 12px;background:var(--su);border:1.5px solid var(--bo);border-radius:var(--ens-r,10px);font:600 13px/1 var(--ens-body,'Plus Jakarta Sans'),sans-serif;color:var(--a-txt);cursor:pointer;min-height:44px;">
-      ${icon("arrow-left", { size: 14, strokeWidth: 2.5 })} Voir tous les élèves
+      ${icon("arrow-left", { size: 14, strokeWidth: 2.5 })} Tous mes élèves
     </button>
     <div class="me-list">
       ${
         count === 0
           ? `<div class="me-empty">
                ${illus("route", { size: 72 })}
-               Aucun élève en difficulté sur cette compétence ces 30 derniers jours.
+               Aucun élève bloqué sur cette compétence ces 30 derniers jours.
              </div>`
           : _drillEleves
               .map((e) => {
@@ -751,7 +751,7 @@ function render() {
     total === 0
       ? null
       : prets > 0
-        ? `${prets} prêt${prets > 1 ? "s" : ""} pour l'examen`
+        ? `${prets} prêt${prets > 1 ? "s" : ""} pour l’examen`
         : "En cours de formation";
 
   _root.innerHTML = `
@@ -762,7 +762,7 @@ function render() {
       <div class="me-hero">
         <div class="me-hero-content">
           <p class="me-hero-kicker">Mes élèves</p>
-          <h1 class="me-hero-title">${total === 0 ? "Aucun élève encore" : `${total} élève${total > 1 ? "s" : ""}`}</h1>
+          <h1 class="me-hero-title">${total === 0 ? "Aucun élève" : `${total} élève${total > 1 ? "s" : ""}`}</h1>
           ${heroSub ? `<p class="me-hero-sub">${esc(heroSub)}</p>` : ""}
           <div class="me-hero-actions">
             <button id="me-rank-btn" class="me-invite-btn" type="button"
@@ -786,7 +786,7 @@ function render() {
         <input
           class="me-search"
           type="search"
-          placeholder="Chercher par nom ou prénom…"
+          placeholder="Chercher un élève…"
           value="${esc(_query)}"
           autocomplete="off"
           aria-label="Chercher un élève par nom ou prénom"
@@ -903,14 +903,14 @@ function renderRosterFlat() {
   if (list.length === 0 && _eleves.length === 0) {
     return `<div class="me-empty">
       <span class="me-empty-ico">${illus("school", { size: 80 })}</span>
-      <strong style="font:800 16px/1.2 'Manrope',sans-serif;color:#1a1f2b">Aucun élève pour l'instant</strong>
+      <strong style="font:800 16px/1.2 'Manrope',sans-serif;color:#1a1f2b">Aucun élève pour l’instant</strong>
       <button id="me-invite-empty-btn" class="ens-btn ens-btn--go" type="button" style="margin-top:4px;min-height:48px;padding:0 24px;font-size:14px;">
         ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
       </button>
     </div>`;
   }
   if (list.length === 0 && q) {
-    return `<div class="me-empty"><span class="me-empty-ico">${illus("route", { size: 64 })}</span>Aucun résultat pour <strong>"${esc(_query)}"</strong>.</div>`;
+    return `<div class="me-empty"><span class="me-empty-ico">${illus("route", { size: 64 })}</span>Aucun résultat pour <strong>« ${esc(_query)} »</strong>.</div>`;
   }
 
   if (_sort === "nom") {
@@ -946,8 +946,8 @@ function renderPipeline() {
   if (allVisible.length === 0 && _eleves.length === 0) {
     return `<div class="me-empty">
       <span class="me-empty-ico">${illus("school", { size: 80 })}</span>
-      <strong style="font:800 16px/1.2 'Manrope',sans-serif;color:#1a1f2b">Aucun élève pour l'instant</strong>
-      <span style="font:500 13px/1.5 'Inter',sans-serif;color:#5f6788;max-width:30ch;text-align:center">Envoie un lien par SMS ou WhatsApp — ton élève crée son compte en 30 secondes.</span>
+      <strong style="font:800 16px/1.2 'Manrope',sans-serif;color:#1a1f2b">Aucun élève pour l’instant</strong>
+      <span style="font:500 13px/1.5 'Inter',sans-serif;color:#5f6788;max-width:30ch;text-align:center">Envoie un lien par SMS ou WhatsApp. Ton élève crée son compte en 30 secondes.</span>
       <button id="me-invite-empty-btn" class="ens-btn ens-btn--go" type="button" style="margin-top:4px;min-height:48px;padding:0 24px;font-size:14px;">
         ${icon("user-plus", { size: 15, strokeWidth: 2.2 })} Inviter mon premier élève
       </button>
@@ -957,7 +957,7 @@ function renderPipeline() {
   if (allVisible.length === 0 && q) {
     return `<div class="me-empty">
       <span class="me-empty-ico">${illus("route", { size: 64 })}</span>
-      Aucun résultat pour <strong>"${esc(_query)}"</strong>.
+      Aucun résultat pour <strong>« ${esc(_query)} »</strong>.
     </div>`;
   }
 
@@ -1345,7 +1345,7 @@ function openQuickMenu(eleveId, anchorRow) {
       <div class="me-qm-sep"></div>
       <div class="me-qm-label">Compte</div>
       <button class="me-qm-item" data-action="reset-access">
-        <span class="me-qm-ico">${icon("refresh-cw", { size: 14, strokeWidth: 2.5 })}</span> Réinitialiser l'accès
+        <span class="me-qm-ico">${icon("refresh-cw", { size: 14, strokeWidth: 2.5 })}</span> Réinitialiser l’accès
       </button>
       <button class="me-qm-item danger" data-action="delete-eleve">
         <span class="me-qm-ico">${icon("trash", { size: 14, strokeWidth: 2.5 })}</span> Supprimer cet élève
@@ -1401,12 +1401,12 @@ function confirmResetAccess(eleveId) {
   wrap.className = "me-confirm";
   wrap.innerHTML = `${DIALOG_STYLE}
     <div class="me-cf-bg" data-close="1"></div>
-    <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Réinitialiser l'accès">
-      <div class="me-cf-title">Réinitialiser l'accès de ${prenom} ?</div>
-      <div class="me-cf-body">Un email de connexion sera envoyé directement à ${prenom}. Tu ne vois jamais le lien — c'est lui qui reprend la main sur son compte.</div>
+    <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Réinitialiser l’accès">
+      <div class="me-cf-title">Réinitialiser l’accès de ${prenom} ?</div>
+      <div class="me-cf-body">Un email de connexion sera envoyé à ${prenom}. Tu ne vois jamais le lien. C’est lui qui reprend la main sur son compte.</div>
       <div class="me-cf-actions">
         <button class="me-cf-btn" data-close="1" type="button">Annuler</button>
-        <button class="me-cf-btn confirm" id="me-reset-ok" type="button">Envoyer l'email</button>
+        <button class="me-cf-btn confirm" id="me-reset-ok" type="button">Envoyer l’email</button>
       </div>
     </div>`;
   document.body.appendChild(wrap);
@@ -1424,7 +1424,7 @@ function confirmResetAccess(eleveId) {
     toast(
       ok
         ? `Email de connexion envoyé à ${prenom}.`
-        : "Envoi impossible pour le moment.",
+        : "Envoi impossible. Réessaie.",
       ok ? "success" : "error",
     );
   });
@@ -1443,9 +1443,9 @@ function confirmDeleteEleve(eleveId) {
   wrap.className = "me-confirm";
   wrap.innerHTML = `${DIALOG_STYLE}
     <div class="me-cf-bg" data-close="1"></div>
-    <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Supprimer l'élève">
+    <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Supprimer l’élève">
       <div class="me-cf-title">Supprimer ${prenom} ?</div>
-      <div class="me-cf-body">Cette action est <strong>définitive</strong>. ${prenom} perd son compte et toute sa progression (révisions, validations, examens). Impossible à annuler.</div>
+      <div class="me-cf-body">Cette action est <strong>définitive</strong>. ${prenom} perd son compte et toute sa progression : révisions, validations, examens. Impossible à annuler.</div>
       <div class="me-cf-actions">
         <button class="me-cf-btn" data-close="1" type="button">Annuler</button>
         <button class="me-cf-btn danger" id="me-del-ok" type="button">Supprimer définitivement</button>
@@ -1472,7 +1472,7 @@ function confirmDeleteEleve(eleveId) {
     } catch (e) {
       console.error("[mes-eleves] delete_eleve error", e);
       wrap.remove();
-      toast("Suppression impossible pour le moment.", "error");
+      toast("Suppression impossible. Réessaie.", "error");
     }
   });
 }
@@ -1496,7 +1496,7 @@ async function recordExam(eleveId, statut, dateExamen) {
     .single();
   if (error) {
     console.error("[mes-eleves] examen insert error", error);
-    toast("Impossible d'enregistrer l'examen", "error");
+    toast("Enregistrement impossible. Réessaie.", "error");
     return;
   }
   const newId = data ? data.id : null;
@@ -1516,8 +1516,8 @@ async function recordExam(eleveId, statut, dateExamen) {
   // Snackbar avec undo (supprime la ligne créée, restaure l'état précédent)
   const msg = {
     planifie: "Examen planifié",
-    recu: "Permis obtenu — archivé dans « Reçus »",
-    rate: "Résultat d'examen enregistré",
+    recu: "Permis obtenu · archivé dans « Reçus »",
+    rate: "Résultat d’examen enregistré",
   };
   showUndoSnackbar(msg[statut] || "Enregistré", async () => {
     if (newId) {
@@ -1527,7 +1527,7 @@ async function recordExam(eleveId, statut, dateExamen) {
         .eq("id", newId);
       if (delErr) {
         console.error("[mes-eleves] examen undo error", delErr);
-        toast("Annulation impossible", "error");
+        toast("Annulation impossible. Réessaie.", "error");
         return;
       }
     }
@@ -1599,7 +1599,7 @@ function confirmRecu(eleveId) {
     <div class="me-cf-bg" data-close="1"></div>
     <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Confirmer la réussite">
       <div class="me-cf-title">${prenom} a obtenu le permis ?</div>
-      <div class="me-cf-body">Il quittera ta liste active et sera archivé dans l'onglet « Reçus ». Tu pourras annuler juste après.</div>
+      <div class="me-cf-body">Il quitte ta liste active et rejoint l’onglet « Reçus ». Tu pourras annuler juste après.</div>
       <div class="me-cf-actions">
         <button class="me-cf-btn" data-close="1" type="button">Annuler</button>
         <button class="me-cf-btn confirm" id="me-cf-ok" type="button">Permis obtenu</button>
@@ -1620,7 +1620,7 @@ function confirmRecu(eleveId) {
 /** Saisie de la date d'un examen planifié. */
 function openPlanifieDialog(eleveId) {
   const el = _eleves.find((e) => e.id === eleveId);
-  const prenom = esc(el && el.prenom ? fmtName(el.prenom) : "l'élève");
+  const prenom = esc(el && el.prenom ? fmtName(el.prenom) : "l’élève");
   const today = todayIso();
   document.querySelector(".me-confirm")?.remove();
 
@@ -1629,10 +1629,10 @@ function openPlanifieDialog(eleveId) {
   wrap.innerHTML = `
     ${DIALOG_STYLE}
     <div class="me-cf-bg" data-close="1"></div>
-    <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Date de l'examen">
+    <div class="me-cf-card" role="dialog" aria-modal="true" aria-label="Date de l’examen">
       <div class="me-cf-title">Examen de ${prenom}</div>
-      <div class="me-cf-body">Quelle est la date prévue de l'examen ?</div>
-      <input class="me-cf-date" id="me-cf-date" type="date" value="${today}" min="${today}" aria-label="Date de l'examen" />
+      <div class="me-cf-body">Choisis la date prévue de l’examen.</div>
+      <input class="me-cf-date" id="me-cf-date" type="date" value="${today}" min="${today}" aria-label="Date de l’examen" />
       <div class="me-cf-actions">
         <button class="me-cf-btn" data-close="1" type="button">Annuler</button>
         <button class="me-cf-btn confirm" id="me-cf-ok" type="button">Planifier</button>
@@ -1746,7 +1746,7 @@ function openMissingPanel(eleve) {
       @keyframes meMissUp { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
       @media (prefers-reduced-motion: reduce) { .me-miss-bg, .me-miss-card { animation: none; } }
       .me-miss-title { font: 700 18px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin: 0 0 4px; }
-      .me-miss-sub { font: 500 13px/1.4 'Inter', sans-serif; color: var(--mu2); margin: 0 0 16px; }
+      .me-miss-sub { font: 500 13px/1.5 'Inter', sans-serif; color: var(--mu2); margin: 0 0 16px; }
       .me-miss-list { overflow-y: auto; flex: 1; margin: 0 -4px; padding: 0 4px; }
       .me-miss-cat { font: 700 11px/1 'Inter', sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--a-txt); margin: 14px 0 8px; }
       .me-miss-cat:first-child { margin-top: 0; }
@@ -1759,7 +1759,7 @@ function openMissingPanel(eleve) {
     <div class="me-miss-bg" data-close="1"></div>
     <div class="me-miss-card" role="dialog" aria-modal="true" aria-label="Compétences manquantes de ${nom}">
       <div class="me-miss-title">Il manque à ${nom}</div>
-      <div class="me-miss-sub">${eleve.acquis}/${eleve.total} compétences acquises · ${baseRestantes > 0 ? `encore ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} essentielles avant l'examen` : "toutes les compétences essentielles acquises — prêt pour l'examen"}</div>
+      <div class="me-miss-sub">${eleve.acquis}/${eleve.total} compétences acquises · ${baseRestantes > 0 ? `${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} essentielle${baseRestantes > 1 ? "s" : ""} avant l’examen` : "toutes les compétences essentielles acquises · prêt pour l’examen"}</div>
       <div class="me-miss-list">
         ${
           missing.length === 0

@@ -199,7 +199,7 @@ export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
           p_quest_id: questId,
         });
         if (error || data?.error) {
-          toast("Quête introuvable", "error");
+          toast("Quête introuvable.", "error");
           delete card.dataset.claiming;
           return;
         }

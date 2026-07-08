@@ -207,7 +207,7 @@ function renderCard(evt) {
     : medallion("check", "green", { size: 24 });
   const desc = isSession
     ? `<strong>${fmtMin(evt.duration_minutes)}</strong> de conduite avec toi`
-    : `Compétence validée : <strong>${esc(compLabel(evt.competence_id))}</strong>`;
+    : `Compétence validée : <strong>${esc(compLabel(evt.competence_id))}</strong>`;
 
   const statusLine =
     isSession && evt.confirmation_status
@@ -261,7 +261,7 @@ export async function mount(root) {
     <div class="fb-page anim-slide-up">
       <div class="fb-hd">
         <button class="fb-back" aria-label="Retour" id="fb-back">${icon("arrow-left", { size: 18, strokeWidth: 2.2 })}</button>
-        <h1 class="fb-h1">Retours de tes moniteurs</h1>
+        <h1 class="fb-h1">Retours moniteurs</h1>
       </div>
       <div class="fb-list">
         <div class="fb-skel-card"></div>
@@ -302,7 +302,8 @@ export async function mount(root) {
       const list = root.querySelector(".fb-list"); // 1er chargement : on tue le skeleton
       if (list) {
         list.innerHTML = `<div class="fb-empty"><div class="fb-empty-ico">${icon("alert-circle", { size: 30 })}</div>
-          Impossible de charger tes retours.<br>
+          <strong>« Retours » indisponible</strong><br>
+          Vérifie ta connexion, puis réessaie.<br>
           <button class="fb-load-more" id="fb-retry" style="margin-top:12px">Réessayer</button></div>`;
         root.querySelector("#fb-retry")?.addEventListener("click", () => {
           offset = 0;
@@ -326,7 +327,7 @@ export async function mount(root) {
           `
           <div class="fb-empty">
             <div class="fb-empty-ico">${icon("message-circle", { size: 30 })}</div>
-            Aucun retour encore — continue tes leçons !
+            Aucun retour pour l’instant. Tes moniteurs en laisseront après tes leçons.
           </div>
         `,
         );
@@ -350,7 +351,7 @@ export async function mount(root) {
         "beforeend",
         `
         <button class="fb-load-more" id="fb-load-btn">
-          ${icon("refresh", { size: 15, strokeWidth: 2.2 })} Charger plus
+          ${icon("refresh", { size: 15, strokeWidth: 2.2 })} Voir plus
         </button>
       `,
       );

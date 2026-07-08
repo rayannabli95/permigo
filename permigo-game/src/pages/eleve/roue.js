@@ -100,7 +100,7 @@ const STYLE = `<style>
   background: linear-gradient(180deg, #fff 0%, #fff7e0 55%, #ffd86b 100%);
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
-.roue-sub { margin-top: 5px; font: 700 12.5px/1.4 'Nunito', sans-serif; color: var(--mu); }
+.roue-sub { margin-top: 5px; font: 700 12.5px/1.5 'Nunito', sans-serif; color: var(--mu); }
 
 .roue-zone { position: relative; margin: 14px auto 4px; width: 290px; height: 290px; }
 .roue-zone::before {
@@ -174,7 +174,7 @@ const STYLE = `<style>
 @keyframes rouepop { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
 .roue-result-v { font: 800 26px/1 'Baloo 2', cursive; color: var(--gold-s); display: inline-flex; align-items: center; gap: 7px; }
 .roue-result-v .rcoin2 { width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 36% 30%, #fff7da, #ffd24a 60%, #ff9c1c); border: 1.5px solid #fff5cf; box-shadow: 0 2px 0 #c87d12; }
-.roue-result-s { font: 700 12px/1.4 'Nunito', sans-serif; color: var(--mu2); margin-top: 5px; }
+.roue-result-s { font: 700 12px/1.5 'Nunito', sans-serif; color: var(--mu2); margin-top: 5px; }
 
 .roue-real {
   margin: 20px auto 0; max-width: 400px; border-radius: 20px; padding: 16px;
@@ -200,7 +200,7 @@ const STYLE = `<style>
 
 .roue-note { margin: 14px auto 0; max-width: 400px; display: flex; align-items: flex-start; gap: 9px; padding: 12px 14px; border-radius: 16px; background: rgba(124,77,255,.10); border: 1px solid rgba(167,139,250,.22); }
 .roue-note svg { width: 16px; height: 16px; flex: none; color: #c9b8ff; margin-top: 1px; }
-.roue-note p { font: 700 11.5px/1.45 'Nunito', sans-serif; color: var(--mu); }
+.roue-note p { font: 700 11.5px/1.5 'Nunito', sans-serif; color: var(--mu); }
 .roue-note b { color: #c9b8ff; }
 
 /* Célébration GROS LOT (au lieu du résultat volants) */
@@ -270,7 +270,7 @@ function renderRealLots(lots, moniteurPrenom) {
   return `
   <section class="roue-real">
     <div class="roue-real-h">
-      <h2>${medallion("cadeau", "pink", { size: 20 })} Gros lots réels</h2>
+      <h2>${medallion("cadeau", "pink", { size: 20 })} Vrais cadeaux</h2>
       <span class="tag">${anyBig ? "En jeu" : "Bientôt"}</span>
     </div>
     ${rows}
@@ -278,7 +278,7 @@ function renderRealLots(lots, moniteurPrenom) {
       <div class="roue-real-av">${esc(initiale)}</div>
       <div>
         <b>Offert par ${esc(name)} · ton moniteur</b>
-        <span>${anyBig ? "Tente ta chance chaque jour — c'est lui qui régale, à sa marque." : "C'est lui qui choisit et régale — à sa marque."}</span>
+        <span>${anyBig ? "Tente ta chance chaque jour. C’est lui qui offre." : "C’est lui qui choisit les cadeaux."}</span>
       </div>
     </div>
   </section>`;
@@ -296,7 +296,7 @@ function renderMyWins(wins) {
       <div class="roue-wins-ic">${esc(w.lot_icon || "🎁")}</div>
       <div class="roue-wins-tx">
         <b>${esc(w.lot_label || "Cadeau")}</b>
-        <span>${remis ? "Récupéré ✓" : "Montre le code à ton moniteur"}</span>
+        <span>${remis ? "Récupéré ✓" : "Montre ce code à ton moniteur"}</span>
       </div>
       <span class="roue-wins-code${remis ? " remis" : ""}">${esc(w.claim_code || "")}</span>
     </div>`;
@@ -358,12 +358,10 @@ export async function mount(root) {
   const disabled = mode === "done";
   const ctaLabel = disabled ? "Reviens demain" : "Tour gratuit du jour";
   const freeLabel = disabled
-    ? "Ton tour gratuit est déjà passé aujourd'hui."
-    : "1 tour offert chaque jour — de vrais volants.";
+    ? "Ton tour du jour est déjà passé."
+    : "1 tour offert par jour · de vrais volants.";
   const kicker =
-    mode === "apercu"
-      ? "Aperçu · bientôt jouable pour de vrai"
-      : "Tour gratuit du jour";
+    mode === "apercu" ? "Aperçu · bientôt jouable" : "Tour gratuit du jour";
 
   root.innerHTML = `${STYLE}
 <div class="roue">
@@ -377,7 +375,7 @@ export async function mount(root) {
   <div class="roue-hero">
     <div class="roue-kicker">${esc(kicker)}</div>
     <div class="roue-h1">Roue de la chance</div>
-    <div class="roue-sub">Gagne des volants chaque jour — et bientôt des skins et de vrais cadeaux de ton moniteur.</div>
+    <div class="roue-sub">Gagne des volants chaque jour. Bientôt des skins et de vrais cadeaux de ton moniteur.</div>
   </div>
 
   <div class="roue-zone">
@@ -403,7 +401,7 @@ export async function mount(root) {
 
   <div class="roue-note">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-    <p>Un <b>gros lot</b> peut tomber (rare !) si ton moniteur en a mis en jeu — tu le récupères en vrai avec ton code. Les volants se gagnent en jouant — <b>jamais</b> avec de l'argent.</p>
+    <p>Un <b>gros lot</b> peut tomber (rare !) si ton moniteur en a mis en jeu. Tu le récupères en vrai avec ton code. Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.</p>
   </div>
 </div>`;
 
@@ -472,7 +470,7 @@ export async function mount(root) {
       <div class="roue-result-v"><span class="rcoin2" aria-hidden="true"></span>+${volants}</div>
       <div class="roue-result-s">${
         apercu
-          ? "Aperçu — tes volants seront crédités quand la roue ouvrira."
+          ? "Aperçu. Tes volants seront crédités à l’ouverture de la roue."
           : "volants ajoutés à ton solde !"
       }</div>
     </div>`;
@@ -488,14 +486,14 @@ export async function mount(root) {
       <div class="roue-gros-badge">🎁 GROS LOT !</div>
       <div class="roue-gros-lot"><span class="roue-gros-ic" aria-hidden="true">${esc(gl.icon || "🎁")}</span><b>${esc(gl.label || "Cadeau")}</b></div>
       <div class="roue-gros-code">Ton code de retrait<br><b>${esc(gl.claim_code || "")}</b></div>
-      <div class="roue-result-s">Montre ce code à <b>${esc(gl.moniteur || "ton moniteur")}</b> pour récupérer ton lot — c'est lui qui régale.</div>
+      <div class="roue-result-s">Montre ce code à <b>${esc(gl.moniteur || "ton moniteur")}</b> pour récupérer ton lot. C’est lui qui offre.</div>
     </div>`;
   }
 
   function finishDone() {
     btn.textContent = "Reviens demain";
     btn.disabled = true;
-    if (free) free.textContent = "Ton tour gratuit est déjà passé aujourd'hui.";
+    if (free) free.textContent = "Ton tour du jour est déjà passé.";
     busy = false;
   }
 
@@ -535,7 +533,7 @@ export async function mount(root) {
     } catch (e) {
       // RPC absent (migration retirée entre-temps) ou réseau → repli doux
       console.warn("[roue] spin_roue_daily failed", e?.message);
-      toast("Réessaie dans un instant", "error", 2200);
+      toast("Réessaie dans un instant.", "error", 2200);
       btn.disabled = false;
       btn.textContent = "Tour gratuit du jour";
       busy = false;

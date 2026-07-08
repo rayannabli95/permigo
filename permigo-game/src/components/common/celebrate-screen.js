@@ -21,13 +21,13 @@
 //  - CTA pulse subtil après 600ms
 //  - Sortie : fade + scale 0.95 200ms
 // ═══════════════════════════════════════════════════════════════
-import { esc } from '@/utils/escape.js';
-import { ASSETS } from '@/utils/assets.js';
-import { haptic } from '@/utils/haptic.js';
-import { playReward } from '@/utils/sound.js';
-import { track } from '@/services/analytics.js';
+import { esc } from "@/utils/escape.js";
+import { ASSETS } from "@/utils/assets.js";
+import { haptic } from "@/utils/haptic.js";
+import { playReward } from "@/utils/sound.js";
+import { track } from "@/services/analytics.js";
 
-const STYLE_ID = 'celebrate-screen-style';
+const STYLE_ID = "celebrate-screen-style";
 const STYLE = `
 .cs-overlay {
   position: fixed; inset: 0;
@@ -193,45 +193,58 @@ const STYLE = `
  */
 export const CELEBRATE_PRESETS = {
   firstValidation: {
-    illustration: '/skins/trophy-first-validation.webp',
-    fallbackEmoji: '🎉',
-    title: 'Première compétence !',
-    subtitle: 'Ton aventure a officiellement commencé. La route est longue mais belle.',
-    ctaLabel: 'Continue le parcours',
-    trackKey: 'celebrate.first_validation',
+    illustration: "/skins/trophy-first-validation.webp",
+    fallbackEmoji: "🎉",
+    title: "Première compétence !",
+    subtitle:
+      "Ton aventure a officiellement commencé. La route est longue mais belle.",
+    ctaLabel: "Continue le parcours",
+    trackKey: "celebrate.first_validation",
   },
   tenComps: {
-    illustration: '/skins/trophy-10-comps.webp',
-    fallbackEmoji: '🏔️',
-    title: 'Tiers du chemin',
-    subtitle: '10 compétences validées sur 31. Tu prends de l\'avance, garde le rythme.',
-    ctaLabel: 'En avant',
-    trackKey: 'celebrate.ten_comps',
+    illustration: "/skins/trophy-10-comps.webp",
+    fallbackEmoji: "🏔️",
+    title: "Tiers du chemin",
+    subtitle:
+      "10 compétences validées sur 31. Tu prends de l’avance, garde le rythme.",
+    ctaLabel: "En avant",
+    trackKey: "celebrate.ten_comps",
   },
   readyExam: {
-    illustration: '/skins/badge-3d-ultimate.webp',
-    fallbackEmoji: '🎯',
-    title: 'Prêt pour l\'examen',
-    subtitle: '28 compétences acquises. Tu peux passer ton examen quand tu veux.',
-    ctaLabel: 'Voir ma carte',
-    trackKey: 'celebrate.ready_exam',
+    illustration: "/skins/badge-3d-ultimate.webp",
+    fallbackEmoji: "🎯",
+    title: "Prêt pour l’examen",
+    subtitle:
+      "28 compétences acquises. Tu peux passer ton examen quand tu veux.",
+    ctaLabel: "Voir ma carte",
+    trackKey: "celebrate.ready_exam",
   },
   permisEarned: {
-    illustration: '/skins/trophy-permis-virtuel.webp',
-    fallbackEmoji: '👑',
-    title: 'Permis virtuel obtenu',
-    subtitle: 'Les 31 compétences validées. Bravo, tu maîtrises la route.',
-    ctaLabel: 'Partager ma victoire',
-    trackKey: 'celebrate.permis_earned',
+    illustration: "/skins/trophy-permis-virtuel.webp",
+    fallbackEmoji: "👑",
+    title: "Permis virtuel obtenu",
+    subtitle: "Les 31 compétences validées. Bravo, tu maîtrises la route.",
+    ctaLabel: "Partager ma victoire",
+    trackKey: "celebrate.permis_earned",
   },
 };
 
-const CONFETTI_COLORS = ['var(--aml)', 'var(--am)', 'var(--rd)', 'var(--gr)', 'var(--a)', 'var(--pul)', '#ec4899', '#fff'];
-const CONFETTI_SHAPES = ['cs-square', 'cs-circle', 'cs-ribbon'];
+const CONFETTI_COLORS = [
+  "var(--aml)",
+  "var(--am)",
+  "var(--rd)",
+  "var(--gr)",
+  "var(--a)",
+  "var(--pul)",
+  "#ec4899",
+  "#fff",
+];
+const CONFETTI_SHAPES = ["cs-square", "cs-circle", "cs-ribbon"];
 
 function ensureStyle() {
-  if (typeof document === 'undefined' || document.getElementById(STYLE_ID)) return;
-  const tag = document.createElement('style');
+  if (typeof document === "undefined" || document.getElementById(STYLE_ID))
+    return;
+  const tag = document.createElement("style");
   tag.id = STYLE_ID;
   tag.textContent = STYLE;
   document.head.appendChild(tag);
@@ -240,7 +253,7 @@ function ensureStyle() {
 function renderConfetti(overlay, count = 24) {
   const W = window.innerWidth || 380;
   for (let i = 0; i < count; i++) {
-    const c = document.createElement('span');
+    const c = document.createElement("span");
     const xFrom = Math.random() * W;
     const drift = (Math.random() - 0.5) * 240; // dérive horizontale
     const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
@@ -249,13 +262,13 @@ function renderConfetti(overlay, count = 24) {
     const delay = (i * 50 + Math.random() * 120) / 1000;
     const rot = 360 + Math.random() * 720;
     c.className = `cs-confetti ${shape}`;
-    c.style.left = '0';
-    c.style.setProperty('--cs-c', color);
-    c.style.setProperty('--cs-x-from', `${xFrom}px`);
-    c.style.setProperty('--cs-x-to', `${xFrom + drift}px`);
-    c.style.setProperty('--cs-d', `${dur}s`);
-    c.style.setProperty('--cs-delay', `${delay}s`);
-    c.style.setProperty('--cs-rot', `${rot}deg`);
+    c.style.left = "0";
+    c.style.setProperty("--cs-c", color);
+    c.style.setProperty("--cs-x-from", `${xFrom}px`);
+    c.style.setProperty("--cs-x-to", `${xFrom + drift}px`);
+    c.style.setProperty("--cs-d", `${dur}s`);
+    c.style.setProperty("--cs-delay", `${delay}s`);
+    c.style.setProperty("--cs-rot", `${rot}deg`);
     overlay.appendChild(c);
   }
 }
@@ -279,25 +292,29 @@ export function showCelebrate(opts = {}) {
 
   const {
     illustration,
-    fallbackEmoji = '🎉',
-    title = 'Bravo !',
-    subtitle = '',
-    ctaLabel = 'Continuer',
+    fallbackEmoji = "🎉",
+    title = "Bravo !",
+    subtitle = "",
+    ctaLabel = "Continuer",
     onCta,
     onClose,
     trackKey,
   } = opts;
 
   if (trackKey) {
-    try { track(trackKey); } catch { /* analytics best-effort */ }
+    try {
+      track(trackKey);
+    } catch {
+      /* analytics best-effort */
+    }
   }
 
-  return new Promise(resolve => {
-    const overlay = document.createElement('div');
-    overlay.className = 'cs-overlay';
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'cs-title-el');
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.className = "cs-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-labelledby", "cs-title-el");
 
     const illoHtml = illustration
       ? `<img class="cs-illo" src="${esc(illustration)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'" />
@@ -309,7 +326,7 @@ export function showCelebrate(opts = {}) {
       <div class="cs-card">
         ${illoHtml}
         <h1 class="cs-title" id="cs-title-el">${esc(title)}</h1>
-        ${subtitle ? `<p class="cs-subtitle">${esc(subtitle)}</p>` : ''}
+        ${subtitle ? `<p class="cs-subtitle">${esc(subtitle)}</p>` : ""}
         <button class="cs-cta" type="button">${esc(ctaLabel)}</button>
       </div>
     `;
@@ -319,38 +336,48 @@ export function showCelebrate(opts = {}) {
     document.body.appendChild(overlay);
 
     // Vibration + son de récompense à l'ouverture (playReward seul — pas de double son)
-    try { if (navigator.vibrate) navigator.vibrate([10, 50, 18]); } catch {}
+    try {
+      if (navigator.vibrate) navigator.vibrate([10, 50, 18]);
+    } catch {}
     playReward();
 
     // Force reflow puis classe show pour déclencher les transitions
     void overlay.offsetWidth;
-    overlay.classList.add('cs-show');
+    overlay.classList.add("cs-show");
 
     const close = (sourceCta = false) => {
-      overlay.classList.remove('cs-show');
-      overlay.classList.add('cs-closing');
-      try { onClose?.(); } catch {}
+      overlay.classList.remove("cs-show");
+      overlay.classList.add("cs-closing");
+      try {
+        onClose?.();
+      } catch {}
       setTimeout(() => {
         overlay.remove();
-        resolve(sourceCta ? 'cta' : 'close');
+        resolve(sourceCta ? "cta" : "close");
       }, 240);
     };
 
-    overlay.querySelector('.cs-cta').addEventListener('click', () => {
-      try { haptic('tap'); } catch {}
-      try { onCta?.(); } catch {}
+    overlay.querySelector(".cs-cta").addEventListener("click", () => {
+      try {
+        haptic("tap");
+      } catch {}
+      try {
+        onCta?.();
+      } catch {}
       close(true);
     });
-    overlay.querySelector('.cs-close').addEventListener('click', () => close(false));
+    overlay
+      .querySelector(".cs-close")
+      .addEventListener("click", () => close(false));
 
     // ESC pour fermer
     const escHandler = (e) => {
-      if (e.key === 'Escape') {
-        document.removeEventListener('keydown', escHandler);
+      if (e.key === "Escape") {
+        document.removeEventListener("keydown", escHandler);
         close(false);
       }
     };
-    document.addEventListener('keydown', escHandler);
+    document.addEventListener("keydown", escHandler);
   });
 }
 
@@ -362,16 +389,26 @@ export function showCelebrate(opts = {}) {
  * @returns {boolean} true si une célébration a été déclenchée
  */
 export function maybeCelebrateMilestone(validatedCount) {
-  if (typeof localStorage === 'undefined' || typeof window === 'undefined') return false;
-  const KEY = 'permigo:celebrate_seen';
-  const seen = JSON.parse(localStorage.getItem(KEY) || '{}');
+  if (typeof localStorage === "undefined" || typeof window === "undefined")
+    return false;
+  const KEY = "permigo:celebrate_seen";
+  const seen = JSON.parse(localStorage.getItem(KEY) || "{}");
 
   let preset = null;
   let milestoneKey = null;
-  if (validatedCount >= 31 && !seen.permisEarned)   { preset = CELEBRATE_PRESETS.permisEarned;    milestoneKey = 'permisEarned'; }
-  else if (validatedCount >= 28 && !seen.readyExam) { preset = CELEBRATE_PRESETS.readyExam;       milestoneKey = 'readyExam'; }
-  else if (validatedCount >= 10 && !seen.tenComps)  { preset = CELEBRATE_PRESETS.tenComps;        milestoneKey = 'tenComps'; }
-  else if (validatedCount >= 1  && !seen.firstValidation) { preset = CELEBRATE_PRESETS.firstValidation; milestoneKey = 'firstValidation'; }
+  if (validatedCount >= 31 && !seen.permisEarned) {
+    preset = CELEBRATE_PRESETS.permisEarned;
+    milestoneKey = "permisEarned";
+  } else if (validatedCount >= 28 && !seen.readyExam) {
+    preset = CELEBRATE_PRESETS.readyExam;
+    milestoneKey = "readyExam";
+  } else if (validatedCount >= 10 && !seen.tenComps) {
+    preset = CELEBRATE_PRESETS.tenComps;
+    milestoneKey = "tenComps";
+  } else if (validatedCount >= 1 && !seen.firstValidation) {
+    preset = CELEBRATE_PRESETS.firstValidation;
+    milestoneKey = "firstValidation";
+  }
 
   if (!preset || !milestoneKey) return false;
 
