@@ -127,10 +127,20 @@ body.pq-immersive #app { padding-top: 0 !important; }
   background:linear-gradient(180deg,#ffe27a,#ff9b1e); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .pq-res-t { font:700 22px 'Baloo 2','Fredoka',sans-serif; margin:6px 0 4px; color:#fff; }
 .pq-res-s { color:#cbc6f0; font-size:14px; max-width:300px; line-height:1.5; }
+/* Ligne quête du jour : la règle du « réussi » (≥70 %) dite simplement. */
+.pq-res-quest { margin-top:14px; padding:8px 14px; border-radius:999px; font:600 13px 'Baloo 2','Fredoka',sans-serif; }
+.pq-res-quest.is-pass { color:#1c1533; background:linear-gradient(180deg,#ffe27a,#ffce4d); box-shadow:0 3px 0 #d99a00; }
+.pq-res-quest.is-miss { color:#cbc6f0; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); }
 @media (prefers-reduced-motion: reduce) { .pq *, .pq *::before { transition:none !important; animation:none !important; } }
 </style>`;
 
-export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
+// questHint : affiche sur l'écran de score si le quiz « compte » pour la
+// quête du jour (seuil serveur = 70 %). Opt-in — seul le quiz de fiche
+// conduite alimente la quête, pas les mini-jeux.
+export function mountPremiumQuiz(
+  root,
+  { questions, title = "Quiz", onExit, questHint = false },
+) {
   const qs = (questions || []).filter((q) => q && Array.isArray(q.options));
   if (!qs.length) {
     onExit?.();
@@ -267,11 +277,20 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
   function renderResults() {
     const total = qs.length;
     const pct = correctCount / total;
+    // Même règle que le serveur (quête « Réussir 1 quiz », ligue Révision) :
+    // réussi à partir de 70 %. Dit en questions, pas en pourcents.
+    const needed = Math.ceil(total * 0.7);
+    const passed = correctCount >= needed;
     let e, t, s;
     if (pct >= 0.8) {
       e = "🏆";
       t = "Tu maîtrises !";
       s = "Gros score. Garde ce niveau, montre-le à ton moniteur.";
+    } else if (questHint && passed) {
+      // 70–79 % : réussi — ne surtout pas dire « Presque » (contradictoire).
+      e = "🔥";
+      t = "Bien joué";
+      s = "Quiz réussi — refais-en pour verrouiller le geste.";
     } else if (pct >= 0.5) {
       e = "🔥";
       t = "Bien joué";
@@ -281,6 +300,11 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
       t = "Ça vient";
       s = "Relis la fiche cool, puis retente. Ça va rentrer.";
     }
+    const questLine = !questHint
+      ? ""
+      : passed
+        ? `<div class="pq-res-quest is-pass">✓ Ça compte pour ta quête du jour</div>`
+        : `<div class="pq-res-quest is-miss">Quête du jour : réussis ${needed}/${total} — retente quand tu veux</div>`;
     root.innerHTML = `${STYLE}<div class="pq">
       <div class="pq-top"><button class="pq-x" aria-label="Fermer">✕</button><div class="pq-seg">${segHTML()}</div><div class="pq-combo"></div></div>
       <div class="pq-res">
@@ -288,6 +312,7 @@ export function mountPremiumQuiz(root, { questions, title = "Quiz", onExit }) {
         <div class="pq-res-score"><span data-count>0</span>/${total}</div>
         <div class="pq-res-t">${esc(t)}</div>
         <div class="pq-res-s">${esc(s)}</div>
+        ${questLine}
       </div>
       <button class="pq-next" data-done>Continuer</button>
     </div>`;

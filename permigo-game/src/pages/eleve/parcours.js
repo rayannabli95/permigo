@@ -2452,6 +2452,14 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
       ${icon("zap", { size: 16 })} Révise cette compétence
     </a>`;
 
+  // Compétence pas encore acquise : la fiche doit donner un geste à faire
+  // (avant, elle se refermait sur rien — cul-de-sac du 1er jour). Direction
+  // la fiche de révision conduite (méthode + « Teste-toi »).
+  const reviseBtn = `
+    <a href="#/revision-conduite/${esc(compId)}" role="button" class="fiche-quiz-cta">
+      ${icon("zap", { size: 16 })} Révise cette compétence
+    </a>`;
+
   // Bloc status contextuel selon état
   const statusBlock = (() => {
     if (st === "done" && val) {
@@ -2505,7 +2513,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
             <div class="fiche-status-title">Prochaine à travailler</div>
             <div class="fiche-status-sub">Entraîne-toi en séance — ton moniteur la validera quand tu es prêt(e).</div>
           </div>
-        </div>`;
+        </div>${reviseBtn}`;
     }
     if (st === "locked") {
       return `
@@ -2524,7 +2532,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
           <div class="fiche-status-title">À venir</div>
           <div class="fiche-status-sub">Tu travailleras cette compétence avec ton moniteur au fil des séances.</div>
         </div>
-      </div>`;
+      </div>${reviseBtn}`;
   })();
 
   const body =

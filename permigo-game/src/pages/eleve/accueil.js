@@ -1744,10 +1744,14 @@ async function _loadAndInjectFlashQuiz(root, me) {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────
+// Les quêtes quiz mènent à UN QUIZ en un tap (deep-link « next:quiz » =
+// quiz de la première fiche non lue, résolu par revision-conduite). Avant,
+// « Faire un quiz » ouvrait le parcours → fiche sans action : cul-de-sac,
+// le mot « quiz » disparaissait du chemin.
 const _QUEST_HREF = {
-  quest_quiz_1: "#/parcours",
-  quest_quiz_3: "#/parcours",
-  quest_quiz_perfect: "#/parcours",
+  quest_quiz_1: "#/revision-conduite/next:quiz",
+  quest_quiz_3: "#/revision-conduite/next:quiz",
+  quest_quiz_perfect: "#/revision-conduite/next:quiz",
   quest_streak_keep: "#/",
 };
 // NB : pas de « → » ici — le CTA roi (acc2-cta-king) ajoute déjà sa propre

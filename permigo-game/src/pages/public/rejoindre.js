@@ -399,9 +399,16 @@ export async function mount(root) {
             strokeWidth: 2,
           });
           const ecole = info.ecole_nom || "ton auto-école";
-          const prenom = info.moniteur_prenom
-            ? ` avec ${esc(info.moniteur_prenom)}`
-            : "";
+          // Si le nom de l'école contient déjà le prénom du moniteur
+          // (« Auto École de Rayan »), on ne rajoute pas « avec Rayan » :
+          // la répétition faisait phrase de robot.
+          const dejaDansEcole =
+            info.moniteur_prenom &&
+            ecole.toLowerCase().includes(info.moniteur_prenom.toLowerCase());
+          const prenom =
+            info.moniteur_prenom && !dejaDansEcole
+              ? ` avec ${esc(info.moniteur_prenom)}`
+              : "";
           joinTxt.innerHTML = `Tu rejoins <strong>${esc(ecole)}</strong>${prenom}.`;
         }
       } catch {

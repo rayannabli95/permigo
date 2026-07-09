@@ -14,6 +14,7 @@
  *   await initGameState(me.id);   // une fois au boot, après auth
  */
 import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
 
 const XP_PER_COMP = 100;
 const XP_PER_LEVEL = 500;
@@ -425,24 +426,44 @@ export function getGemmes() {
  * sans être attendu et peut rater la fenêtre auth. Renvoie le solde.
  */
 export async function refreshGemmes(userId) {
-  const uid = userId || _userId;
-  if (!uid) return getGemmes();
+  // _userId peut être null (initGameState pas encore passé, ex: 1re session
+  // juste après inscription) → on retombe sur le profil courant en mémoire.
+  const uid = userId || _userId || getCurUser()?.id;
   try {
-    const { data, error } = await sb
-      .from("profiles")
-      .select("gemmes")
-      .eq("id", uid)
-      .maybeSingle();
-    if (!error && data && typeof data.gemmes === "number") {
-      localStorage.setItem(LS_GEMMES, String(data.gemmes));
+    let row = null;
+    if (uid) {
+      const { data, error } = await sb
+        .from("profiles")
+        .select("gemmes")
+        .eq("id", uid)
+        .maybeSingle();
+      if (!error) row = data;
+    }
+    if (!row || typeof row.gemmes !== "number") {
+      // Filet : requête par auth_id (même filtre que restoreSession, qui
+      // fonctionne toujours) au cas où l'id passé n'est pas l'id profil.
+      const {
+        data: { user },
+      } = await sb.auth.getUser();
+      if (user?.id) {
+        const { data, error } = await sb
+          .from("profiles")
+          .select("gemmes")
+          .eq("auth_id", user.id)
+          .maybeSingle();
+        if (!error) row = data;
+      }
+    }
+    if (row && typeof row.gemmes === "number") {
+      localStorage.setItem(LS_GEMMES, String(row.gemmes));
       try {
         window.dispatchEvent(
           new CustomEvent("pg-gemmes-changed", {
-            detail: { balance: data.gemmes },
+            detail: { balance: row.gemmes },
           }),
         );
       } catch {}
-      return data.gemmes;
+      return row.gemmes;
     }
   } catch {}
   return getGemmes();
