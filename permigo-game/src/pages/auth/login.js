@@ -15,7 +15,6 @@ import { sb, login, loginWithOtp, verifyOtp } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
 import { toast } from "@/components/common/toast.js";
 import { esc } from "@/utils/escape.js";
-import { getCurUser } from "@/auth/cur-user.js";
 
 // Traductions FR des messages d'erreur Supabase Auth (en anglais côté API)
 const AUTH_ERRORS_FR = {
@@ -692,23 +691,17 @@ function wire(root) {
     setTimeout(() => form.classList.remove("anim-shake"), 400);
   }
   async function afterLogin() {
-    // Nettoyage explicite des FX login (rAF + resize) avant de monter la home
+    // Nettoyage explicite des FX login (rAF + resize) avant de quitter la page.
     unmount();
-    setTimeout(async () => {
-      const [{ route }, { mountBottomNav }, { mountHeader }] =
-        await Promise.all([
-          import("@/router.js"),
-          import("@/components/common/nav-bottom.js"),
-          import("@/components/common/header-top.js"),
-        ]);
-      const me = getCurUser();
-      // Force la home : set le hash ET appelle route() direct (sinon hashchange ne fire pas si hash déjà = #/)
+    // Rechargement complet plutôt qu'un montage manuel : le montage partiel
+    // (route + header + nav) SAUTAIT la moitié de boot() → `data-role` jamais
+    // posé (DA arcade moniteur absente), startNotifListener() jamais lancé
+    // (quiz post-validation + célébrations morts), initGameState/accent/onboarding
+    // sautés, et double-montage de la home (hashchange + route() direct). boot()
+    // rejoue toute la séquence proprement sur la home.
+    setTimeout(() => {
       if (location.hash !== "#/") location.hash = "#/";
-      const app = document.getElementById("app");
-      await route(app, me);
-      await mountHeader();
-      mountBottomNav(me?.role);
-      document.body.classList.add("has-chrome");
+      location.reload();
     }, 600);
   }
 }

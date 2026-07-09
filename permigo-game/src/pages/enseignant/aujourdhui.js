@@ -5,7 +5,7 @@
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { toast } from "@/components/common/toast.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
@@ -425,6 +425,25 @@ const STYLE = `<style>
 </style>`;
 
 // ─── Helpers ──────────────────────────────────────────────────────
+// PostgREST plafonne en silence à 1000 lignes → à l'échelle école (validations,
+// examens) on pagine par .range() jusqu'à épuisement, sinon roster et compteurs
+// sous-estimés dès ~1000 lignes. Renvoie { data, error } (même forme qu'une query).
+async function fetchAllRows(buildQuery) {
+  const PAGE = 1000;
+  let from = 0;
+  const data = [];
+  for (;;) {
+    const { data: page, error } = await buildQuery().range(
+      from,
+      from + PAGE - 1,
+    );
+    if (error) return { data, error };
+    data.push(...(page || []));
+    if (!page || page.length < PAGE) return { data, error: null };
+    from += PAGE;
+  }
+}
+
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -623,16 +642,17 @@ async function renderInto(root, _me) {
   const myRank = myLeagueRow?.rank_pos ?? null;
 
   // Élèves que j'ai validé + qui me sont attitrés
-  const { data: elevesValides } = await sb
-    .from("validations")
-    .select("eleve_id")
-    .eq("validated_by", _me.id);
+  const { data: elevesValides } = await fetchAllRows(() =>
+    sb.from("validations").select("eleve_id").eq("validated_by", _me.id),
+  );
   const validatedByMe = new Set((elevesValides || []).map((v) => v.eleve_id));
 
-  const { data: acquisAll } = await sb
-    .from("validations")
-    .select("eleve_id, competence_id")
-    .eq("statut", "acquis");
+  const { data: acquisAll } = await fetchAllRows(() =>
+    sb
+      .from("validations")
+      .select("eleve_id, competence_id")
+      .eq("statut", "acquis"),
+  );
   const acquisSetByEleve = {};
   (acquisAll || []).forEach((v) => {
     if (!v.competence_id) return;
@@ -642,10 +662,12 @@ async function renderInto(root, _me) {
   // Élèves ayant OBTENU le permis (dernier examen = 'recu') → ils sortent de la
   // formation active : ils ne doivent PLUS compter comme « prêts » ni encombrer
   // le roster (sinon un reçu très avancé reste affiché « Prête » à tort).
-  const { data: examsAll } = await sb
-    .from("examens")
-    .select("eleve_id, statut, created_at")
-    .order("created_at", { ascending: false });
+  const { data: examsAll } = await fetchAllRows(() =>
+    sb
+      .from("examens")
+      .select("eleve_id, statut, created_at")
+      .order("created_at", { ascending: false }),
+  );
   const recuByEleve = new Set();
   const lastExamSeen = new Set();
   (examsAll || []).forEach((ex) => {
@@ -724,7 +746,10 @@ async function renderInto(root, _me) {
 
   // ─── Roster élèves ────────────────────────────────────────────
   function renderRosterCard(e) {
-    const nom = esc(
+    // escAttr (pas esc) : `nom` sert AUSSI dans aria-label ci-dessous ; esc
+    // n'encode pas les guillemets → injection d'attribut via un nom d'élève
+    // contenant `"`. escAttr reste correct en contenu texte.
+    const nom = escAttr(
       fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "—",
     );
     const pct = REMC_TOTAL > 0 ? Math.round((e.acquis / REMC_TOTAL) * 100) : 0;
@@ -754,7 +779,7 @@ async function renderInto(root, _me) {
     // Avatar : vrai URL si dispo, sinon initiales
     let avHtml;
     if (e.avatar_url) {
-      avHtml = `<img src="${esc(e.avatar_url)}" alt="" width="36" height="36" style="border-radius:50%;object-fit:cover;flex-shrink:0;" loading="lazy">`;
+      avHtml = `<img src="${escAttr(e.avatar_url)}" alt="" width="36" height="36" style="border-radius:50%;object-fit:cover;flex-shrink:0;" loading="lazy">`;
     } else {
       const color = avatarColor(e.id);
       const inits = esc(initiales(e.prenom, e.nom));

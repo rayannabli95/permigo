@@ -401,8 +401,11 @@ function _wire(root, state, data, rerender) {
     });
   });
 
-  // CTA quiz + aide tuto (délégation : le body est re-rendu)
-  root.addEventListener("click", (e) => {
+  // CTA quiz + aide tuto (délégation sur .arn, PAS sur root=#app persistant :
+  // _wire() est rappelé à chaque rerender → un listener sur root s'accumulerait
+  // à chaque bascule d'onglet/scope et de visite en visite. .arn est recréé par
+  // innerHTML à chaque rerender, donc son listener meurt avec l'ancien nœud.
+  root.querySelector(".arn")?.addEventListener("click", (e) => {
     if (e.target.closest("#arn-quiz-go")) {
       haptic("tap");
       playClick();

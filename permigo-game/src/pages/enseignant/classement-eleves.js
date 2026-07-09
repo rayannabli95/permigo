@@ -24,6 +24,25 @@ import {
 const ACCENT = areneAccent("indigo");
 
 // mode = "pratique" (compétences REMC validées, défaut) | "theorie" (quiz)
+// PostgREST tronque en silence à 1000 lignes : à l'échelle école, les
+// validations « acquis » dépassent ce seuil dès ~33 livrets remplis → l'acquis
+// par élève serait sous-compté et le classement faux. On pagine par .range().
+async function fetchAllRows(buildQuery) {
+  const PAGE = 1000;
+  let from = 0;
+  const data = [];
+  for (;;) {
+    const { data: page, error } = await buildQuery().range(
+      from,
+      from + PAGE - 1,
+    );
+    if (error) return { data, error };
+    data.push(...(page || []));
+    if (!page || page.length < PAGE) return { data, error: null };
+    from += PAGE;
+  }
+}
+
 export async function mount(root, mode) {
   const me = getCurUser();
   if (!me || (me.role !== "enseignant" && me.role !== "moniteur")) {
@@ -49,11 +68,15 @@ export async function mount(root, mode) {
       .from("profiles")
       .select("id, prenom, nom, enseignant_id, avatar_url")
       .eq("role", "eleve"),
-    sb
-      .from("validations")
-      .select("eleve_id, competence_id, validated_by, statut")
-      .eq("statut", "acquis"),
-    sb.from("examens").select("eleve_id, statut, created_at"),
+    fetchAllRows(() =>
+      sb
+        .from("validations")
+        .select("eleve_id, competence_id, validated_by, statut")
+        .eq("statut", "acquis"),
+    ),
+    fetchAllRows(() =>
+      sb.from("examens").select("eleve_id, statut, created_at"),
+    ),
     // Streak RÉEL : last_activity_date nécessaire car la valeur stockée ne se
     // reset côté serveur qu'au prochain login de l'élève (cf. mémoire projet).
     sb.from("streaks").select("user_id, current_streak, last_activity_date"),

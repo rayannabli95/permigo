@@ -395,7 +395,7 @@ export async function mount(root) {
 
   <div id="roue-result-slot"></div>
 
-  ${renderRealLots(realLots, moniteurName || prenom, initiale)}
+  ${renderRealLots(realLots, moniteurName)}
 
   ${renderMyWins(myWins)}
 

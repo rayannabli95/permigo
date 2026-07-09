@@ -5,7 +5,7 @@
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { toast } from "@/components/common/toast.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
@@ -512,6 +512,25 @@ export async function mount(root) {
   }
 }
 
+// PostgREST tronque en silence à 1000 lignes. À l'échelle école (validations,
+// examens), on pagine par .range() jusqu'à épuisement — sinon compteurs et
+// readiness faux dès ~33 livrets remplis. Renvoie la même forme {data, error}.
+async function fetchAllRows(buildQuery) {
+  const PAGE = 1000;
+  let from = 0;
+  const data = [];
+  for (;;) {
+    const { data: page, error } = await buildQuery().range(
+      from,
+      from + PAGE - 1,
+    );
+    if (error) return { data, error };
+    data.push(...(page || []));
+    if (!page || page.length < PAGE) return { data, error: null };
+    from += PAGE;
+  }
+}
+
 // ─── Data ────────────────────────────────────────────────────────
 async function loadData() {
   // 1. Tous les élèves de mon auto-école (RLS multi-moniteurs : on voit tout le monde)
@@ -524,14 +543,18 @@ async function loadData() {
       .select("id, prenom, nom, enseignant_id, last_active_at, avatar_url")
       .eq("role", "eleve")
       .order("prenom"),
-    sb
-      .from("validations")
-      .select("eleve_id, competence_id, validated_at")
-      .eq("statut", "acquis"),
-    sb
-      .from("examens")
-      .select("eleve_id, statut, date_examen, created_at")
-      .order("created_at", { ascending: false }),
+    fetchAllRows(() =>
+      sb
+        .from("validations")
+        .select("eleve_id, competence_id, validated_at")
+        .eq("statut", "acquis"),
+    ),
+    fetchAllRows(() =>
+      sb
+        .from("examens")
+        .select("eleve_id, statut, date_examen, created_at")
+        .order("created_at", { ascending: false }),
+    ),
     // Provenance CRM (RLS = mes élèves) → Map(eleve_id → {label,color}).
     fetchProvenanceMap(),
   ]);
@@ -703,16 +726,15 @@ function renderDrill() {
                     `${e.eleve_prenom || ""} ${e.eleve_nom || ""}`.trim(),
                   ),
                 );
+                // Mêmes classes que renderBandRow (.me-av/.me-nom/.me-pr) —
+                // sinon nom et méta non stylés (les classes .me-ava/.me-info/
+                // .me-name/.me-meta/.me-eleve-chev n'existent pas dans le CSS).
                 return `
               <div class="me-row" data-eleve-id="${esc(e.eleve_id)}" role="button" tabindex="0">
-                <div class="me-ava" style="flex-shrink:0">${renderUserAvatar({ prenom: e.eleve_prenom, nom: e.eleve_nom }, 44)}</div>
-                <div class="me-info">
-                  <div class="me-name">${nm}</div>
-                  <div class="me-meta">
-                    ${e.n_fails ? `<span style="font:500 11px/1 'Inter',sans-serif;color:var(--rdk);">${e.n_fails} échec${e.n_fails > 1 ? "s" : ""} récent${e.n_fails > 1 ? "s" : ""}</span>` : ""}
-                  </div>
-                </div>
-                <div class="me-eleve-chev">${icon("chevron-right", { size: 16, strokeWidth: 2.5, color: "var(--bo4)" })}</div>
+                <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ prenom: e.eleve_prenom, nom: e.eleve_nom }, 36)}</div>
+                <span class="me-nom">${nm}</span>
+                <span class="me-prov-sp"></span>
+                ${e.n_fails ? `<span class="me-pr me-pr--warn">${e.n_fails} échec${e.n_fails > 1 ? "s" : ""} récent${e.n_fails > 1 ? "s" : ""}</span>` : ""}
               </div>
             `;
               })
@@ -1044,7 +1066,9 @@ function renderPipeline() {
  * Ligne d'un élève dans une bande du pipeline.
  */
 function renderBandRow(eleve, withPill = false) {
-  const fullNom = esc(
+  // escAttr : `fullNom` est aussi injecté dans aria-label (esc n'encode pas les
+  // guillemets → injection d'attribut via nom d'élève). Correct aussi en texte.
+  const fullNom = escAttr(
     fmtName([eleve.prenom, eleve.nom].filter(Boolean).join(" ")) || "—",
   );
 
@@ -1713,7 +1737,9 @@ function openMissingPanel(eleve) {
   document.querySelector(".me-miss")?.remove();
 
   const missing = missingComps(eleve.acquisSet);
-  const nom = esc(
+  // escAttr : `nom` sert dans l'aria-label du dialog (esc n'encode pas les
+  // guillemets → injection d'attribut). Correct aussi en contenu texte.
+  const nom = escAttr(
     fmtName([eleve.prenom, eleve.nom].filter(Boolean).join(" ")) || "—",
   );
   const baseRestantes = baseManquantes(eleve.acquisSet).length;

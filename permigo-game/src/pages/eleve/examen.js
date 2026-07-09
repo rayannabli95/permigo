@@ -395,7 +395,7 @@ async function loadData(meId) {
 
     sb
       .from("streaks")
-      .select("current_streak")
+      .select("current_streak, last_activity_date")
       .eq("user_id", meId)
       .maybeSingle(),
 
@@ -418,7 +418,18 @@ async function loadData(meId) {
   const compsCount = acquisSet.size;
   const baseAcquis = [...acquisSet].filter((c) => /^C[123]/.test(c)).length;
 
-  const streak = streakRes.value?.data?.current_streak ?? 0;
+  // Série RÉELLE : la valeur stockée ne se reset côté serveur qu'au prochain
+  // login. Si la dernière activité est plus vieille qu'hier, la série est morte
+  // → 0 (sinon la checklist « Suis-je prêt ? » coche « série active » à tort pour
+  // un élève inactif qui ouvre #/examen sans passer par l'accueil).
+  const _streakRow = streakRes.value?.data;
+  const _yesterdayStr = new Date(Date.now() - 86400000)
+    .toISOString()
+    .slice(0, 10);
+  const streak =
+    _streakRow && _streakRow.last_activity_date >= _yesterdayStr
+      ? (_streakRow.current_streak ?? 0)
+      : 0;
   const scores = quizRes.value?.data ?? [];
   const avgScore = scores.length
     ? Math.round(scores.reduce((s, r) => s + (r.score ?? 0), 0) / scores.length)
