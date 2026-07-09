@@ -1381,7 +1381,7 @@ function renderSessionConfirm(session) {
           <div class="acc2-ms-session-sub">${esc(sub)}</div>
         </div>
       </div>
-      <button class="acc2-ms-session-btn" id="confirm-session-btn" data-session-id="${esc(session.id)}">
+      <button class="acc2-ms-session-btn" id="confirm-session-btn" data-session-id="${esc(session.session_id)}">
         ${icon("check", { size: 16, strokeWidth: 2.8 })}
         Confirmer la séance
       </button>

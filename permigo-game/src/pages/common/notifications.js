@@ -142,38 +142,32 @@ const TYPE_META = {
     label: "Encouragement",
   },
   emotional_nudge: {
-    iconName: "sparkle",
-    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    med: ["etoile", "violet"],
     color: "var(--a)",
     label: "Ta progression",
   },
   student_at_risk: {
-    iconName: "alert-triangle",
-    bg: "rgba(245,158,11,.12)",
+    med: ["cloche", "orange"],
     color: "var(--am)",
     label: "Élève à relancer",
   },
   flash_quiz: {
-    iconName: "zap",
-    bg: "rgba(139,92,246,.12)",
+    med: ["eclair", "violet"],
     color: "var(--pu)",
     label: "Quiz flash",
   },
   streak_risk: {
-    iconName: "flame",
-    bg: "rgba(239,68,68,.12)",
+    med: ["flamme", "red"],
     color: "var(--rd)",
     label: "Ta série",
   },
   emotional_recap: {
-    iconName: "calendar",
-    bg: "color-mix(in srgb, var(--a) 12%, transparent)",
+    med: ["calendrier", "violet"],
     color: "var(--a)",
     label: "Ta semaine",
   },
   moniteur_recap: {
-    iconName: "trophy",
-    bg: "rgba(245,158,11,.12)",
+    med: ["trophee", "gold"],
     color: "var(--am)",
     label: "Bilan du mois",
   },
@@ -189,7 +183,9 @@ const TYPE_META = {
   },
 };
 function typeMeta(t) {
-  return TYPE_META[t] || TYPE_META.info;
+  // Repli champ par champ sur `info` : un type émis par une edge function
+  // absente du repo ne doit JAMAIS faire planter la page (med[0] sur undefined).
+  return { ...TYPE_META.info, ...(TYPE_META[t] || {}) };
 }
 
 // ─── Grouping ─────────────────────────────────────────────────

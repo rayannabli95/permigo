@@ -260,8 +260,12 @@ export async function route(root, me) {
     console.error("[router]", e);
     // Stale chunk après deploy : le hash JS a changé, l'index.html cached
     // référence un module qui n'existe plus → on force le reload
+    // ⚠️ Chaque navigateur a SON message : Chrome « Failed to fetch dynamically
+    // imported module », Safari « Importing a module script failed. », Firefox
+    // « error loading dynamically imported module ». Sans les 3, pas d'auto-reload
+    // sur iOS (PWA restée ouverte pendant un deploy) → écran mort.
     const isStaleChunk =
-      /Failed to fetch dynamically imported module|Loading chunk|ChunkLoadError/i.test(
+      /Failed to fetch dynamically imported module|Loading chunk|ChunkLoadError|Importing a module script failed|error loading dynamically imported module/i.test(
         e?.message || "",
       );
     if (isStaleChunk && !sessionStorage.getItem("reloaded_once")) {

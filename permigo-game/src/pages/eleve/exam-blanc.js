@@ -760,7 +760,11 @@ function showOfficielResults(root, questions, answers, startedAt) {
       .insert({
         user_id: me.id,
         competence_id: null,
-        type: "exam_officiel",
+        // "exam_blanc" et non "exam_officiel" : la contrainte quiz_attempts_type_check
+        // n'admet que post_validation|consolidation|exam_blanc|review → l'insert
+        // 400ait et l'examen officiel n'était JAMAIS persisté. Le ref_id "officiel"
+        // reste le discriminant (même convention que exam-conduite).
+        type: "exam_blanc",
         ref_id: "officiel",
         score: pct,
         passed,

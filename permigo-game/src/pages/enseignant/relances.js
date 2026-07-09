@@ -7,7 +7,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
@@ -217,7 +217,11 @@ function render() {
 
 function renderCard(e) {
   const g = coolGrade(e.jours);
-  const nm = esc(fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "—");
+  // escAttr : `nm` sert dans aria-label du textarea → esc n'encode pas les
+  // guillemets (injection d'attribut via nom d'élève). Correct aussi en texte.
+  const nm = escAttr(
+    fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "—",
+  );
   // Gauge : 14 j (seuil) = ~35%, 30 j = 100%
   const pct = Math.min(100, Math.round(35 + ((e.jours - 14) / 16) * 65));
   const msg = defaultMessage(fmtName(e.prenom) || "toi", e.jours, e.id);

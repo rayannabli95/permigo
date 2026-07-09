@@ -548,7 +548,7 @@ function showRefuseModal(root, sessionId, monPrenom) {
       <div class="sc-modal-title">Refuser cette séance ?</div>
       <div class="sc-modal-sub">${esc(monPrenom)} recevra une notification du refus.</div>
       <button class="sc-modal-confirm-refuse" id="sc-modal-refuse-confirm">
-        ${icon("x-circle", { size: 16 })} Oui, refuser
+        ${icon("x", { size: 16 })} Oui, refuser
       </button>
       <button class="sc-modal-cancel" id="sc-modal-cancel">Annuler</button>
     </div>`;
@@ -583,7 +583,7 @@ function showRefuseModal(root, sessionId, monPrenom) {
           translateSessionError(err?.message) || "réessaie dans un instant";
         toast(`Impossible de refuser — ${msg}`, "error");
         btn.disabled = false;
-        btn.innerHTML = `${icon("x-circle", { size: 16 })} Oui, refuser`;
+        btn.innerHTML = `${icon("x", { size: 16 })} Oui, refuser`;
       }
     });
 }
