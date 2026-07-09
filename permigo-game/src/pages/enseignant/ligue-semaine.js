@@ -98,6 +98,27 @@ ${LEAGUE_CSS}
 .ls-w-countdown-lbl { font: 600 10px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: .06em; }
 .ls-w-countdown-val { font: 700 13px/1 'IBM Plex Mono', monospace; color: #fff; }
 
+/* ── Sélecteur de portée (National / Mon école) ── */
+.ls-w-scope {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  margin: 14px 16px 0; padding: 4px;
+  background: var(--bg2); border: 1.5px solid var(--bo);
+  border-radius: var(--ens-r-pill, 999px);
+}
+.ls-w-scope button {
+  border: none; border-radius: 999px; padding: 10px 12px; min-height: 40px;
+  background: transparent; color: var(--mu2);
+  font: 700 13px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background .15s, color .15s;
+}
+.ls-w-scope button.on {
+  background: #4f46e5; color: #fff;
+  box-shadow: 0 2px 8px -2px rgba(79,70,229,.5);
+}
+.ls-w-scope button:focus-visible { outline: 3px solid #4f46e5; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .ls-w-scope button { transition: none; } }
+
 /* Ligues header dans la liste */
 .ls-w-league-hd {
   display: flex; align-items: center; gap: 6px;
@@ -171,6 +192,13 @@ export async function mount(root) {
 
   track("page_view", { page: "ligue_semaine_enseignant" });
 
+  // Portée par défaut : national — le moniteur indépendant est seul
+  // dans son école, le classement ne prend vie qu'avec tous les inscrits.
+  _renderSkeleton(root);
+  await _load(root, "national");
+}
+
+function _renderSkeleton(root) {
   root.innerHTML = `${STYLE}
 <div class="ls-w anim-slide-up">
   <div class="ls-w-hd">
@@ -193,19 +221,18 @@ export async function mount(root) {
     haptic("tap");
     navigate("#/parcours");
   });
+}
 
+async function _load(root, scope) {
   try {
-    // TODO multi-moniteurs : aujourd'hui le classement ne fait remonter que
-    // l'enseignant courant (cohorte = 1 moniteur seedé par école). Quand
-    // plusieurs moniteurs partageront une école, get_league_leaderboard devra
-    // renvoyer toute la cohorte intra-école pour un vrai classement.
     const { data, error } = await sb.rpc("get_league_leaderboard", {
       p_role: "enseignant",
       p_limit: 50,
+      p_scope: scope,
     });
 
     if (error) throw error;
-    _render(root, data || []);
+    _render(root, data || [], scope);
   } catch (e) {
     console.error("[ligue-semaine]", e);
     toast("« Ligue » indisponible", "error");
@@ -214,7 +241,7 @@ export async function mount(root) {
 }
 
 // ─── Render ──────────────────────────────────────────────────
-function _render(root, rows) {
+function _render(root, rows, scope) {
   const mine = rows.find((r) => r.is_me) || null;
   const myPts = mine?.weekly_pts ?? 0;
   const myLeague = getLeague(myPts);
@@ -238,7 +265,7 @@ function _render(root, rows) {
       <div class="ls-w-hero-top">
         <div class="ls-w-hero-illus">${medallion("trophee", "gold", { size: 56, glow: true })}</div>
         <div class="ls-w-hero-text">
-          <p class="ls-w-hero-kicker">Classement hebdo</p>
+          <p class="ls-w-hero-kicker">Classement hebdo · ${scope === "national" ? "France entière" : "Mon école"}</p>
           <h1 class="ls-w-hero-title">${myRank ? `Tu es #${myRank} cette semaine` : "Marque ton premier point"}</h1>
           <div class="ls-w-hero-badge">
             ${renderLeagueBadge(myLeague, myPts, "md")}
@@ -252,12 +279,19 @@ function _render(root, rows) {
     </div>
   </div>`;
 
+  // Sélecteur de portée — même mécanique que le classement élève
+  const scopeBar = `
+  <div class="ls-w-scope" role="group" aria-label="Portée du classement">
+    <button data-scope="national" aria-pressed="${scope === "national"}" class="${scope === "national" ? "on" : ""}">National</button>
+    <button data-scope="ecole" aria-pressed="${scope === "ecole"}" class="${scope === "ecole" ? "on" : ""}">Mon école</button>
+  </div>`;
+
   // Liste avec séparateurs par ligue
   let listHtml = "";
   if (rows.length === 0) {
     listHtml = `<div class="ls-w-empty">
       ${medallion("cone", "orange", { size: 48 })}
-      <div class="ls-w-empty-txt">Aucune compétence validée cette semaine. Enregistre une séance pour marquer ton premier point.</div>
+      <div class="ls-w-empty-txt">${scope === "national" ? "Aucun moniteur n'a encore marqué de point cette semaine. Enregistre une séance pour prendre la tête." : "Aucune compétence validée cette semaine. Enregistre une séance pour marquer ton premier point."}</div>
     </div>`;
   } else {
     const sorted = [...rows].sort((a, b) => b.weekly_pts - a.weekly_pts);
@@ -300,6 +334,7 @@ function _render(root, rows) {
   </div>
 </div>
 ${hero}
+${scopeBar}
 <div class="ls-w-list">${listHtml}</div>
 ${motiv}
 </div>`;
@@ -311,6 +346,16 @@ ${motiv}
   root.querySelector("#ls-seance-cta")?.addEventListener("click", () => {
     haptic("impact");
     navigate("#/log-session");
+  });
+  root.querySelectorAll(".ls-w-scope button").forEach((b) => {
+    b.addEventListener("click", () => {
+      const next = b.dataset.scope;
+      if (next === scope) return;
+      haptic("tap");
+      track("ligue_moniteur.scope", { scope: next });
+      _renderSkeleton(root);
+      _load(root, next);
+    });
   });
 }
 
