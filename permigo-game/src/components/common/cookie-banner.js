@@ -55,10 +55,11 @@ function setConsent(value) {
 const STYLE = `<style>
   .ck-banner {
     position: fixed;
-    left: 50%; bottom: 0;
-    transform: translateX(-50%) translateY(110%);
+    left: 50%; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    /* +100px pour dégager entièrement l'écran même quand le bandeau est levé
+       au-dessus de la barre de nav (cf. body.has-chrome ci-dessous). */
+    transform: translateX(-50%) translateY(calc(100% + 100px));
     width: min(520px, calc(100vw - 24px));
-    margin-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     background: var(--su, #fff);
     border: 1px solid var(--bo);
     border-radius: 20px;
@@ -68,6 +69,13 @@ const STYLE = `<style>
     transition: transform .42s cubic-bezier(.22,1,.32,1);
     font-family: 'Inter', sans-serif;
   }
+  /* Dans l'app (chrome monté), le bandeau se pose AU-DESSUS de la barre de nav
+     (~60px) au lieu de la recouvrir → les onglets restent tappables. Et pendant
+     qu'il est ouvert, on réserve l'espace bas sur #app pour que les CTA de bas
+     de page (ex. « Ton centre d'examen » sur Réviser) ne soient plus masqués. */
+  body.has-chrome .ck-banner { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  body.ck-open.has-chrome #app { padding-bottom: calc(210px + env(safe-area-inset-bottom, 0px)); }
+  body.ck-open #bn-seance-fab { display: none; }
   .ck-banner.on { transform: translateX(-50%) translateY(0); }
   @media (prefers-reduced-motion: reduce) { .ck-banner { transition: none; } }
   .ck-ttl {
@@ -111,6 +119,8 @@ export function mountCookieBanner() {
       </div>
     </div>`;
   document.body.appendChild(root);
+  // Réserve l'espace bas (cf. body.ck-open dans STYLE) tant que le bandeau est là.
+  document.body.classList.add("ck-open");
 
   const banner = root.querySelector(".ck-banner");
   requestAnimationFrame(() => banner.classList.add("on"));
@@ -118,6 +128,7 @@ export function mountCookieBanner() {
   const close = (value) => {
     setConsent(value);
     banner.classList.remove("on");
+    document.body.classList.remove("ck-open");
     const done = () => root.remove();
     banner.addEventListener("transitionend", done, { once: true });
     setTimeout(done, 500); // fallback si transitionend ne se déclenche pas
