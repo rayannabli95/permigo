@@ -2,6 +2,7 @@
 // Router minimal — route selon role + hash
 // ═══════════════════════════════════════════════════════════════
 import { phPageview } from "@/services/posthog.js";
+import { accessGateFor } from "@/auth/route-guards.js";
 
 // Direction de navigation → transition d'écran directionnelle (sensation « feed »).
 const _navStack = [];
@@ -228,6 +229,17 @@ async function _unmountCurrent() {
 }
 
 export async function route(root, me) {
+  // Anti-contournement : rejoue les murs d'accès (consentement parental,
+  // onboarding) à CHAQUE navigation, pas seulement au boot. Sans ça un mineur
+  // bloqué pouvait taper #/quiz dans l'URL pour atteindre l'app.
+  const gate = accessGateFor(me);
+  if (gate) {
+    await _unmountCurrent();
+    await gate(root, me);
+    _currentMod = null; // la page-mur se gère seule (pas d'unmount router)
+    return;
+  }
+
   const role = me.role || "eleve";
   const map = ROUTES[role] || ROUTES.eleve;
   // segments[0] = route name, segments[1] = optional param (ex: eleve UUID pour livret)
