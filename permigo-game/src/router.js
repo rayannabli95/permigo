@@ -202,10 +202,18 @@ const ROUTE_TITLES = {
   dbg: "Debug",
 };
 
+// Routes dont le <h1> est un CONTENU dynamique, pas un nom de page :
+// l'accueil met la quête du jour en h1 (onglet « Réussir 1 quiz · PermiGo »)
+// et le h1 de la boutique concatène son sous-titre (« BoutiqueTon style… »).
+// Pour elles, le libellé du map gagne.
+const ROUTE_TITLES_FORCE = new Set(["default", "boutique"]);
+
 function _setPageTitle(root, routeName) {
   const h1 = root.querySelector("h1");
   const fromH1 = (h1?.textContent || "").trim().split("\n")[0].slice(0, 60);
-  const label = fromH1 || ROUTE_TITLES[routeName] || "";
+  const label = ROUTE_TITLES_FORCE.has(routeName)
+    ? ROUTE_TITLES[routeName] || fromH1
+    : fromH1 || ROUTE_TITLES[routeName] || "";
   document.title = label ? `${label} · PermiGo` : "PermiGo";
 }
 

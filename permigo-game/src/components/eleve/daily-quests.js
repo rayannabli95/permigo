@@ -12,6 +12,7 @@ import { ill, illMask } from "@/utils/illustrations.js";
 import { toast } from "@/components/common/toast.js";
 import { playStar } from "@/utils/sound.js";
 import { flyVolants } from "@/components/eleve/volant-reward.js";
+import { refreshGemmes } from "@/utils/game-state.js";
 
 const STYLE_ID = "daily-quests-style";
 
@@ -227,6 +228,22 @@ export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
         pop.style.cssText = `left:${rect.left + rect.width / 2}px;top:${rect.top}px`;
         document.body.appendChild(pop);
         setTimeout(() => pop.remove(), 800);
+
+        // Le serveur vient de créditer les volants : on resynchronise le
+        // solde canonique (header + cache) — sinon la pastille reste figée
+        // sur l'ancien montant jusqu'au prochain boot.
+        refreshGemmes().catch(() => {});
+
+        // Badge « N à réclamer » de l'entête : recalculé, sinon il ment
+        // (il restait à sa valeur de rendu même après réclamation).
+        const countEl = section.querySelector(".dq-count");
+        if (countEl) {
+          const left = [...section.querySelectorAll(".dq-card--ready")].filter(
+            (c) => c !== card,
+          ).length;
+          if (left > 0) countEl.textContent = `${left} à réclamer`;
+          else countEl.remove();
+        }
 
         // Fade out card
         card.style.transition = "opacity .28s ease, transform .28s ease";

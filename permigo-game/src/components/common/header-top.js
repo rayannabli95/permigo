@@ -155,7 +155,17 @@ export async function mountHeader() {
   });
   // Solde sûr : on resynchronise depuis profiles.gemmes (le cache localStorage
   // peut être vide si initGameState a raté la fenêtre auth au boot).
-  if (me?.role === "eleve") refreshGemmes(me.id).catch(() => {});
+  // Le solde résolu est écrit DIRECTEMENT dans la pastille : l'event
+  // pg-gemmes-changed peut partir avant que ce header soit dans le DOM
+  // (1re session après inscription → pastille figée à 0 sinon).
+  if (me?.role === "eleve") {
+    refreshGemmes(me.id)
+      .then((bal) => {
+        const v = bar.querySelector("[data-volant-count]");
+        if (v && typeof bal === "number") v.textContent = String(bal);
+      })
+      .catch(() => {});
+  }
   // Compteur de volants en live (crédit/débit) + rebond. Listener window
   // enregistré une seule fois ; bouton requêté à chaque event (header recréé).
   if (!window.__pgHeaderVolantListener) {

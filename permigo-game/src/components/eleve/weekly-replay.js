@@ -215,7 +215,9 @@ export function playReplay(stats) {
             await navigator.share({
               title: "Ma semaine sur PermiGo",
               text: `${stats.compsValidated} compétence${stats.compsValidated !== 1 ? "s" : ""} cette semaine — je progresse vers mon permis !`,
-              url: "https://permigo-game.vercel.app",
+              // location.origin : l'ancien domaine en dur
+              // (permigo-game.vercel.app) renvoie un 404.
+              url: window.location.origin,
             });
           } catch {
             /* user cancelled */

@@ -320,8 +320,19 @@ export async function mount(root, param) {
 
   // Deep-link : #/revision-conduite/{code} (ex. depuis « Ton centre ») ouvre
   // directement la fiche de la compétence.
-  const deep = param && getFiche(param) ? param : null;
-  let view = deep ? "fiche" : "home";
+  // Variantes : {code}:quiz lance le quiz de la fiche sans détour, et le
+  // pseudo-code « next » se résout en première fiche non lue — c'est la cible
+  // du CTA « Faire un quiz » de la quête du jour (accueil), pour que le mot
+  // « quiz » mène à un quiz en un tap, sans embarquer les données de fiches
+  // dans le chunk accueil.
+  const [pCode, pAction] = String(param || "").split(":");
+  let resolved = pCode;
+  if (pCode === "next") {
+    const read = loadRead();
+    resolved = (FICHES.find((f) => !read[f.code]) || FICHES[0]).code;
+  }
+  const deep = resolved && getFiche(resolved) ? resolved : null;
+  let view = deep ? (pAction === "quiz" ? "quiz" : "fiche") : "home";
   let code = deep;
   let focusId = null;
   let orderPlaced = [];
@@ -581,10 +592,21 @@ export async function mount(root, param) {
       note("warn", "L’erreur à éviter", f.erreur) +
       note("why", "Pourquoi ça compte", f.pourquoi) +
       note("bva", "En boîte auto", f.bva);
-    const srcHtml =
-      Array.isArray(f.sources) && f.sources.length
-        ? `<p class="rvc-fsrc">↳ Vu chez de vrais moniteurs : ${f.sources.map((s) => esc(s)).join(", ")}</p>`
-        : "";
+    // sources = ["chaine-slug/videoId", …] : on n'affiche QUE le nom de la
+    // chaîne, humanisé — l'id vidéo brut à l'écran faisait note de dev.
+    const srcChaines = Array.isArray(f.sources)
+      ? [
+          ...new Set(
+            f.sources
+              .map((s) => String(s).split("/")[0].replace(/-/g, " ").trim())
+              .filter(Boolean)
+              .map((c) => c.charAt(0).toUpperCase() + c.slice(1)),
+          ),
+        ]
+      : [];
+    const srcHtml = srcChaines.length
+      ? `<p class="rvc-fsrc">↳ Vu chez de vrais moniteurs : ${srcChaines.map((s) => esc(s)).join(", ")}</p>`
+      : "";
 
     root.innerHTML = `${STYLE}<div class="rvc rvc-detail">
       <div class="rvc-top">
@@ -715,6 +737,7 @@ export async function mount(root, param) {
     track("revision_conduite_quiz_start", { code });
     mountPremiumQuiz(root, {
       questions,
+      questHint: true, // ce quiz alimente la quête du jour (réussi = ≥70 %)
       title: f ? f.titre : "Quiz",
       onExit: (good, total) => {
         markRevised(code);
@@ -726,22 +749,31 @@ export async function mount(root, param) {
         // « acquis », or l'élève ne valide JAMAIS sa conduite (c'est le moniteur).
         const me = getCurUser();
         if (me?.id && total > 0) {
-          sb.from("quiz_attempts")
-            .insert({
-              user_id: me.id,
-              competence_id: code,
-              type: "review",
-              score: Math.round((good / total) * 100),
-              questions_ids: [],
-              answers_indices: [],
-            })
-            .then(({ error }) => {
-              if (error)
+          // Cette ligne alimente la quête du jour (trigger advance_quest_quiz)
+          // ET la ligue Révision : si l'insert rate en silence, l'élève « joue
+          // pour rien ». On retente donc une fois avant d'abandonner.
+          const attemptRow = {
+            user_id: me.id,
+            competence_id: code,
+            type: "review",
+            score: Math.round((good / total) * 100),
+            questions_ids: [],
+            answers_indices: [],
+          };
+          (async () => {
+            for (let tryN = 0; tryN < 2; tryN++) {
+              try {
+                const { error } = await sb
+                  .from("quiz_attempts")
+                  .insert(attemptRow);
+                if (!error) return;
                 console.error("[revision-conduite] persist review", error);
-            })
-            .catch((e) =>
-              console.error("[revision-conduite] persist review", e),
-            );
+              } catch (e) {
+                console.error("[revision-conduite] persist review", e);
+              }
+              await new Promise((r) => setTimeout(r, 1500));
+            }
+          })();
         }
         if (focusId) {
           const fid = focusId;
