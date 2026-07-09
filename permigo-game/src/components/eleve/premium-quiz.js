@@ -61,7 +61,11 @@ const STYLE = `<style>
 /* Immersion : pendant le quiz on masque le chrome (header + nav) ET on annule le
    padding-top de #app (sinon une bande claire = la place réservée au header). */
 body.pq-immersive #header-bar, body.pq-immersive #bottom-nav { display:none !important; }
-body.pq-immersive #app { padding-top: 0 !important; }
+/* padding-bottom aussi : la place réservée à la nav laissait une BANDE BLANCHE
+   sous l'arène sombre. Et le fond du body prend la couleur de l'arène pour
+   couvrir les gouttières (écrans > 480px, rebonds de scroll iOS). */
+body.pq-immersive #app { padding-top: 0 !important; padding-bottom: 0 !important; }
+body.pq-immersive { background: #0c0a26 !important; }
 
 /* Barre du haut : progression dorée + combo */
 .pq-top { display:flex; align-items:center; gap:12px; padding:16px 0 6px; }

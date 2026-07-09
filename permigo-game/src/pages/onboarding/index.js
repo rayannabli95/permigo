@@ -901,6 +901,12 @@ const STYLE = `<style>
     z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 7px;
     pointer-events: none; transition: opacity .3s ease, transform .3s ease;
   }
+  /* Voile derrière la bulle : sans lui, la pastille se posait EN PLEIN sur la
+     grille d'avatars (elle recouvrait un visage) et faisait étiquette cassée. */
+  .ob-cue::before {
+    content: ""; position: absolute; inset: -20px 0 -14px; z-index: -1;
+    background: linear-gradient(180deg, transparent, rgba(19,12,48,.82) 55%);
+  }
   .ob-cue.hide { opacity: 0; transform: translateY(8px); }
   .ob-cue-txt {
     font: 800 13px/1 'Plus Jakarta Sans', sans-serif; color: #1a1233;
