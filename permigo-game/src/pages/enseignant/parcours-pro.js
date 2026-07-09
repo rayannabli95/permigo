@@ -7,7 +7,7 @@
 // Source de données :
 //   - Palier     : validations WHERE validated_by = me.id (count) → getMoniteurState
 //   - Trophées   : même logique que trophees-moniteur.js (12 jalons)
-//   - Ligue      : get_league_leaderboard({p_role:'enseignant'})
+//   - Ligue      : get_league_leaderboard({p_role:'enseignant', p_scope:'national'})
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -294,7 +294,11 @@ export async function mount(root) {
           .select("eleve_id")
           .eq("validated_by", me.id)
           .gte("validated_at", since30d),
-        sb.rpc("get_league_leaderboard", { p_role: "enseignant", p_limit: 50 }),
+        sb.rpc("get_league_leaderboard", {
+          p_role: "enseignant",
+          p_limit: 50,
+          p_scope: "national",
+        }),
       ]);
 
     if (valsRes.error) throw valsRes.error;
