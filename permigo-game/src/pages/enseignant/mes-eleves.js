@@ -108,7 +108,7 @@ const STYLE = `<style>
     background: #fff;
     border: 1px solid #e6e9ef;
     border-radius: 13px;
-    font: 600 15px/1 'Inter', sans-serif;
+    font: 600 16px/1 'Inter', sans-serif; /* 16px min : sinon iOS zoome au focus */
     color: #1a1f2b;
     outline: none;
     transition: border-color .15s ease, box-shadow .15s ease;
