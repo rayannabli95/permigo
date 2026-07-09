@@ -1,15 +1,13 @@
 /**
  * E2E — Enseignant : page Stats (ex-Insights)
  *
- * La page a été refondue (design premium indigo raccord dashboard) :
- *   - hero validations (.ins-hero-big) + bento 3 tuiles (.ins-bt-val)
- *   - graphe activité 7 jours (.ins-bars, remplace l'ancienne heatmap 168 cellules)
- *   - onglets « Avancent » / « En pause » (.ins-tab[data-tab=pause],
- *     remplace l'ancien onglet « stagnent »)
- *   - lignes élèves .ins-prog-row[data-eleve-id] → navigation #/livret/:id
- *
- * NB : l'ancien « mode rapide » de la page validation (#btn-mode-rapide,
- * .mr-overlay) a été SUPPRIMÉ du produit — ses tests ont été retirés.
+ * La page a été refondue en 6 blocs-questions (plus de héro validations,
+ * plus de bento, plus d'onglets Avancent/En pause) :
+ *   1. À faire maintenant (.st-act)         4. Révisions élèves (.st-chart, 7 .st-col)
+ *   2. Prêts pour l'examen (.st-gauge)      5. Ta réussite à l'examen (.st-proof ou amorçage)
+ *   3. Silencieux 14 j (.st-sil-n)          6. Portefeuille (.st-pf-n ×4)
+ * Lignes élèves .st-row[data-eleve-id] → navigation #/livret/:id.
+ * Pied de page hygiène de saisie (.st-foot).
  *
  * Compte test : enseignant@test.fr / Autopilot2025!
  */
@@ -20,9 +18,8 @@ const EMAIL = ENSEIGNANT.email;
 const PWD = ENSEIGNANT.pwd;
 
 async function loginAsEnseignant(page) {
-  // Réduire les animations (les tuiles bento ont des animations d'entrée) et
-  // marquer cookies + tuto guidés comme vus : sinon l'overlay du tour (gt-root)
-  // peut intercepter les clics (flake récurrent côté enseignant).
+  // Réduire les animations et marquer cookies + tuto guidés comme vus :
+  // sinon l'overlay du tour (gt-root) peut intercepter les clics.
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => {
     try {
@@ -51,10 +48,10 @@ async function goToInsights(page) {
     await page.evaluate(() => {
       location.hash = "#/insights";
     });
-    await page.waitForSelector(".ins-page", { timeout: 4_000 });
+    await page.waitForSelector(".st-page", { timeout: 4_000 });
   }).toPass({ timeout: 25_000 });
-  // Laisser le squelette laisser place au contenu (hero rendu)
-  await page.waitForSelector(".ins-hero", { timeout: 15_000 });
+  // Laisser le squelette laisser place au contenu (1er bloc rendu)
+  await page.waitForSelector(".st-act, .st-card", { timeout: 15_000 });
 }
 
 test.describe("Stats enseignant", () => {
@@ -65,79 +62,88 @@ test.describe("Stats enseignant", () => {
     await loginAsEnseignant(page);
     await goToInsights(page);
 
-    await expect(page.locator(".ins-page")).toBeVisible({ timeout: 10_000 });
-    // Aucune erreur JS critique
+    await expect(page.locator(".st-page")).toBeVisible({ timeout: 10_000 });
     const criticalErrors = errors.filter(
       (e) => !e.includes("favicon") && !e.includes("sw.js"),
     );
     expect(criticalErrors).toHaveLength(0);
   });
 
-  test("hero + bento : 4 valeurs numériques (pas NaN ni vide)", async ({
-    page,
-  }) => {
+  test("les 6 blocs-questions sont présents dans l'ordre", async ({ page }) => {
     await loginAsEnseignant(page);
     await goToInsights(page);
 
-    // Hero : compteur de validations de la période
-    const heroVal = (await page.locator(".ins-hero-big").textContent()).trim();
-    expect(heroVal).toMatch(/^\d+$/);
+    const labels = await page.locator(".st-sec-lbl").allTextContents();
+    expect(labels.length).toBe(6);
+    expect(labels[0]).toMatch(/faire maintenant/i);
+    expect(labels[1]).toMatch(/proches de l'examen/i);
+    expect(labels[2]).toMatch(/silencieux/i);
+    expect(labels[3]).toMatch(/révisions/i);
+    expect(labels[4]).toMatch(/réussite/i);
+    expect(labels[5]).toMatch(/portefeuille/i);
 
-    // Bento : 3 tuiles (actifs / en approche / à relancer)
-    const vals = await page.locator(".ins-bt-val").allTextContents();
-    expect(vals.length).toBe(3);
-    vals.forEach((v) => {
-      const txt = v.trim();
-      expect(txt).not.toBe("NaN");
-      expect(txt).toMatch(/^\d+$/);
-    });
+    // Pied de page hygiène de saisie toujours présent
+    await expect(page.locator(".st-foot")).toBeVisible();
   });
 
-  test("activité 7 jours : graphe à 7 colonnes (ou état vide légitime)", async ({
+  test("révisions : 7 colonnes, chacune avec son chiffre (ou état vide légitime)", async ({
     page,
   }) => {
     await loginAsEnseignant(page);
     await goToInsights(page);
 
-    // La heatmap 7×24 a été remplacée par un graphe en barres sur 7 jours.
-    // Si aucune validation sur la période → état vide .ins-empty (légitime).
-    const hasBars = await page
-      .locator(".ins-bars")
+    const hasChart = await page
+      .locator(".st-chart")
       .isVisible({ timeout: 5_000 })
       .catch(() => false);
 
-    if (!hasBars) {
-      await expect(page.locator(".ins-empty").first()).toBeVisible();
+    if (!hasChart) {
+      // 0 réviseur cette semaine → état vide légitime
+      await expect(page.locator(".st-empty").first()).toBeVisible();
       return;
     }
-    await expect(page.locator(".ins-bar-col")).toHaveCount(7);
+    await expect(page.locator(".st-col")).toHaveCount(7);
+    // Règle de la refonte : jamais une barre sans son chiffre
+    const nums = await page.locator(".st-col-n").allTextContents();
+    expect(nums.length).toBe(7);
+    nums.forEach((n) => expect(n.trim()).toMatch(/^\d+$/));
+    // Le dernier jour est marqué « auj. »
+    await expect(page.locator(".st-col-day.auj")).toHaveText("auj.");
   });
 
-  test("clic sur un élève en pause → navigation vers son livret", async ({
+  test("portefeuille : 4 tranches dont la somme = total affiché", async ({
     page,
   }) => {
     await loginAsEnseignant(page);
     await goToInsights(page);
 
-    // Basculer sur l'onglet « En pause » (ex-« stagnent »)
-    const tabPause = page.locator('.ins-tab[data-tab="pause"]');
-    await expect(tabPause).toBeVisible({ timeout: 5_000 });
-    await tabPause.click();
-    await page.waitForTimeout(400);
+    const counts = await page.locator(".st-pf-n").allTextContents();
+    expect(counts.length).toBe(4);
+    const somme = counts
+      .map((c) => parseInt(c.trim(), 10))
+      .reduce((a, b) => a + (Number.isNaN(b) ? 0 : b), 0);
 
-    const eleveRow = page
-      .locator("#ins-eleves-list .ins-prog-row[data-eleve-id]")
-      .first();
+    const totalTxt = await page.locator(".st-pf-intro b").textContent();
+    const total = parseInt(totalTxt.trim(), 10);
+    expect(somme).toBe(total);
+  });
+
+  test("clic sur une ligne élève → navigation vers son livret", async ({
+    page,
+  }) => {
+    await loginAsEnseignant(page);
+    await goToInsights(page);
+
+    const eleveRow = page.locator(".st-row[data-eleve-id]").first();
     if (!(await eleveRow.isVisible({ timeout: 3_000 }).catch(() => false))) {
-      test.skip(true, "Aucun élève en pause dans les données de test");
+      test.skip(true, "Aucune ligne élève dans les données de test");
       return;
     }
 
     const eleveId = await eleveRow.getAttribute("data-eleve-id");
-    // Clic en DOM direct : les lignes ont une animation d'entrée en cascade
+    // Clic en DOM direct (pattern projet : évite les flakes d'animation)
     await eleveRow.evaluate((el) => el.click());
 
-    // Doit naviguer vers le livret REMC de l'élève
     await page.waitForFunction((id) => location.hash.includes(id), eleveId, {
       timeout: 5_000,
     });
