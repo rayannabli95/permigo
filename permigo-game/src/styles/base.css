@@ -274,8 +274,11 @@ button, a, [role="button"], label, select, summary {
 /* Anti-zoom iOS : Safari zoome automatiquement au focus d'un champ < 16px
    et ne revient pas en arrière → l'utilisateur doit dézoomer à la main.
    Filet global sur écrans tactiles : aucun champ texte ne descend sous 16px.
+   `any-pointer` (et non `pointer`) : dès qu'un écran tactile existe, même si le
+   pointeur PRINCIPAL est fin (iPad + trackpad/clavier, laptop tactile) — sinon
+   la règle saute sur ces appareils et Safari re-zoome au focus.
    (!important assumé : doit gagner contre les styles scoped des pages.) */
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
   select,
   textarea {
