@@ -1,443 +1,444 @@
 // ═══════════════════════════════════════════════════════════════
-// Enseignant — Stats (design premium indigo raccord dashboard)
-// Hero validations + bento KPI + activite 7j + qui progresse
+// Enseignant — Stats refondues : 6 blocs, chacun répond à une
+// question métier du moniteur indépendant.
+// 1. À faire maintenant   4. Révisions de tes élèves (7 j)
+// 2. Prêts pour l'examen  5. Ta réussite à l'examen (12 mois)
+// 3. Silencieux (14 j)    6. Où en est ton portefeuille
+// Règles : chaque bloc porte SA période dans son titre, jamais une
+// barre sans son chiffre, jamais un ratio sans son dénominateur.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { toast } from "@/components/common/toast.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
-import { REMC } from "@/data/remc.js";
+import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { labelComp } from "@/utils/remc-label.js";
 import { medallion } from "@/utils/medallions.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { haptic } from "@/utils/haptic.js";
+import { fmtName } from "@/utils/fmt-name.js";
 
 // ─── Constantes ───────────────────────────────────────────────
 const JOURS_COURT = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+const ALL_COMPS = REMC.flatMap((c) => c.subs.map((s) => s.c));
+const SILENCE_JOURS = 14; // seuil décrochage
+const EXAM_FENETRE_J = 30; // examen "proche" = dans les 30 j
+const PRET_SEUIL = 28; // en-dessous, un examen proche mérite une alerte
+
+// ─── Module state (réinitialisé à chaque mount) ───────────────
+let _showAllSilencieux = false;
 
 // ─── CSS ──────────────────────────────────────────────────────
 const STYLE = `<style>
-  /* ── Layout global ── */
-  .ins-page {
-    padding: 0 0 calc(96px + env(safe-area-inset-bottom, 0px));
+  .st-page {
+    padding: 0 16px calc(110px + env(safe-area-inset-bottom, 0px));
     max-width: 600px;
     margin: 0 auto;
-    background: #eef1fb;
-    font-family: 'Inter', sans-serif;
-    color: #1a1c2e;
+    font-family: var(--ens-body, 'Inter', sans-serif);
+    color: var(--ink);
   }
-
-  /* ── En-tête « Stats » + segment Semaine / Mois ── */
-  .ins-topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    /* #app (has-chrome) compense déjà le header fixe — pas de var(--th) ici */
-    padding: 14px 18px 0;
-  }
-  .ins-title {
-    font: 800 23px/1.15 'Manrope', 'Inter', sans-serif;
-    color: #1a1c2e;
-    letter-spacing: -.02em;
-  }
-  .ins-seg {
-    display: flex;
-    background: #fff;
-    border: 1px solid #e6e9f7;
-    border-radius: 999px;
-    padding: 3px;
-  }
-  .ins-seg-btn {
-    border: none;
-    background: transparent;
-    font: 700 11px/1 'Inter', sans-serif;
-    color: #5a6188;
-    padding: 5px 11px;
-    border-radius: 999px;
-    cursor: pointer;
-    min-height: 30px;
-    -webkit-tap-highlight-color: transparent;
-    transition: background .15s, color .15s;
-  }
-  .ins-seg-btn.active {
-    background: #4f46e5;
-    color: #fff;
-  }
-
-  /* ── Corps scrollable ── */
-  .ins-body {
-    padding: 14px 16px 0;
-  }
-
-  /* ── Hero indigo ── */
-  .ins-hero {
-    position: relative;
-    background: linear-gradient(150deg, #4f46e5, #6d6bff 65%);
-    border-radius: 24px;
-    padding: 18px 18px 16px;
-    color: #fff;
-    overflow: hidden;
-    box-shadow: 0 14px 32px -14px rgba(79, 70, 229, .55);
-    animation: insHeroIn .4s cubic-bezier(.22,.68,0,1.2) both;
-  }
-  .ins-hero::after {
-    content: "";
-    position: absolute;
-    right: -32px;
-    top: -32px;
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,.18), transparent 70%);
-    pointer-events: none;
-  }
-  @keyframes insHeroIn {
-    from { opacity: 0; transform: translateY(8px) scale(.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .ins-hero { animation: none !important; }
-  }
-
-  .ins-hero-label {
-    font: 700 10.5px/1 'Inter', sans-serif;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: #cdc9ff;
-    margin-bottom: 6px;
-  }
-  .ins-hero-row {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-  }
-  .ins-hero-big {
-    font: 700 56px/1 'Fredoka', 'Fredoka One', sans-serif;
+  .st-h1 {
+    font: 700 24px/1.15 var(--ens-display, 'Fredoka', sans-serif);
     letter-spacing: -.01em;
-    line-height: 1;
+    margin: 14px 2px 0;
   }
-  .ins-hero-delta {
-    font: 800 12px/1 'Inter', sans-serif;
-    padding: 5px 11px;
-    border-radius: 999px;
-    margin-bottom: 8px;
-    align-self: flex-end;
+
+  /* ── Titre de section (porte sa période) ── */
+  .st-sec {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    margin: 22px 2px 10px;
+  }
+  .st-sec-lbl {
+    font: 600 13px/1 var(--ens-display, 'Fredoka', sans-serif);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .st-sec-per {
+    font: 600 11px/1 var(--ens-body, 'Inter', sans-serif);
+    color: var(--mu);
     white-space: nowrap;
   }
-  .ins-hero-delta.up   { background: rgba(255,255,255,.18); color: #c7f9d8; }
-  /* Ambre neutre plutôt que rouge : informer, pas alarmer */
-  .ins-hero-delta.down { background: rgba(255,255,255,.14); color: #fde68a; }
-  .ins-hero-delta.flat { background: rgba(255,255,255,.12); color: rgba(255,255,255,.8); }
 
-  /* Sparkline 7 barres dans le hero */
-  .ins-hero-spark {
-    display: flex;
-    align-items: flex-end;
-    gap: 4px;
-    height: 32px;
-    margin-top: 12px;
-  }
-  .ins-hero-spark-bar {
-    flex: 1;
-    border-radius: 3px 3px 2px 2px;
-    background: rgba(255, 255, 255, .45);
-    min-height: 4px;
-    transition: height .3s ease;
-  }
-  .ins-hero-spark-bar.peak {
-    /* Pas de blanc pur plein (lisait comme un placeholder) : blanc adouci + halo */
-    background: rgba(255, 255, 255, .88);
-    box-shadow: 0 0 8px rgba(255, 255, 255, .35);
-    border-radius: 4px 4px 2px 2px;
-  }
-
-  /* ── Bento 3 tuiles ── */
-  .ins-bento {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 9px;
-    margin-top: 11px;
-  }
-  .ins-bt {
-    background: #fff;
-    border: 1px solid #e6e9f7;
-    border-radius: 16px;
-    padding: 13px 11px 11px;
-    box-shadow: 0 6px 16px -12px rgba(60, 50, 130, .3);
-    animation: insBtIn .4s cubic-bezier(.22,.68,0,1.2) both;
-  }
-  .ins-bt:nth-child(1) { animation-delay: .06s; }
-  .ins-bt:nth-child(2) { animation-delay: .11s; }
-  .ins-bt:nth-child(3) { animation-delay: .16s; }
-  @keyframes insBtIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .ins-bt { animation: none !important; }
-  }
-  .ins-bt-val {
-    font: 800 24px/1 'Manrope', 'Inter', sans-serif;
-    letter-spacing: -.02em;
-  }
-  .ins-bt-val.green { color: #16a34a; }
-  .ins-bt-val.amber { color: #d97706; }
-  .ins-bt-val.red   { color: #dc2626; }
-  .ins-bt-lbl {
-    font: 600 10px/1.2 'Inter', sans-serif;
-    color: #646a8c;
-    margin-top: 4px;
-  }
-
-  /* ── Section titre ── */
-  .ins-sec-lbl {
-    font: 800 12px/1 'Manrope', 'Inter', sans-serif;
-    color: #3a3f63;
-    margin: 18px 0 9px 2px;
-  }
-
-  /* ── Carte blanche générique ── */
-  .ins-card {
-    background: #fff;
-    border: 1px solid #e6e9f7;
-    border-radius: 18px;
+  /* ── Carte générique ── */
+  .st-card {
+    background: var(--su);
+    border: 1px solid var(--bo);
+    border-radius: var(--ens-r, 16px);
     padding: 14px;
-    box-shadow: 0 8px 22px -14px rgba(60, 50, 130, .25);
+    box-shadow: 0 8px 22px -16px color-mix(in srgb, var(--adk) 40%, transparent);
   }
 
-  /* ── Graphe barres activite 7 jours ── */
-  .ins-bars {
+  /* ── Bloc 1 : cartes-action ── */
+  .st-act-list { display: flex; flex-direction: column; gap: 8px; }
+  .st-act {
     display: flex;
-    align-items: stretch;
-    justify-content: space-between;
-    gap: 6px;
-    height: 88px;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--su);
+    border: 1px solid var(--bo);
+    border-radius: var(--ens-r, 16px);
+    padding: 13px 14px;
+    min-height: 52px;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .12s ease;
   }
-  .ins-bar-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 5px;
-    height: 100%;
+  .st-act[role="button"] { cursor: pointer; }
+  .st-act[role="button"]:active { transform: scale(.98); }
+  .st-act[role="button"]:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
+  .st-act-med { flex-shrink: 0; margin-top: 2px; }
+  .st-act-body { flex: 1; min-width: 0; }
+  .st-act-kick {
+    font: 700 9.5px/1 var(--ens-body, 'Inter', sans-serif);
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
   }
-  .ins-bar-inner {
-    width: 100%;
-    border-radius: 6px 6px 3px 3px;
-    background: #e3e1fb;
-    min-height: 4px;
+  /* Accent utilisé COMME texte → tokens -txt (contraste clair ET sombre) */
+  .st-act-kick.amber  { color: var(--am-txt, #935e06); }
+  .st-act-kick.red    { color: var(--rd-txt, #9b2c2c); }
+  .st-act-kick.indigo { color: var(--a-txt, var(--a)); }
+  .st-act-ttl {
+    font: 700 13.5px/1.3 var(--ens-body, 'Inter', sans-serif);
+    color: var(--ink);
   }
-  .ins-bar-inner.peak {
-    background: linear-gradient(180deg, #6d6bff, #4f46e5);
+  .st-act-txt {
+    font: 400 12px/1.5 var(--ens-body, 'Inter', sans-serif);
+    color: var(--mu);
+    margin-top: 2px;
   }
-  .ins-bar-day {
-    font: 700 9.5px/1 'Inter', sans-serif;
-    color: #646a8c;
-    text-align: center;
+  .st-chev {
+    flex-shrink: 0;
+    align-self: center;
+    color: var(--mu);
+    opacity: .7;
   }
-  .ins-bar-day.peak { color: #4f46e5; }
 
-  /* ── Lignes « Qui progresse » ── */
-  .ins-prog-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .ins-prog-row {
+  /* ── Lignes élève (blocs 2, 3, 4) ── */
+  .st-rows { display: flex; flex-direction: column; }
+  .st-row {
     display: flex;
     align-items: center;
     gap: 11px;
-    background: #fff;
-    border: 1px solid #e6e9f7;
-    border-radius: 14px;
-    padding: 10px 12px;
-    cursor: pointer;
+    padding: 11px 2px;
     min-height: 52px;
+    cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: transform .12s ease, box-shadow .12s ease;
   }
-  .ins-prog-row:active {
-    transform: scale(.975);
-    box-shadow: 0 2px 8px -4px rgba(60, 50, 130, .2);
-  }
-  .ins-prog-row:focus-visible {
-    outline: 3px solid #4f46e5;
-    outline-offset: 2px;
-  }
-  .ins-prog-av {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    color: #fff;
-    font: 800 12px/1 'Manrope', sans-serif;
-    flex-shrink: 0;
-  }
-  .ins-prog-nom {
-    flex: 1;
-    min-width: 0;
-    font: 700 13px/1.2 'Inter', sans-serif;
-    color: #1a1c2e;
+  .st-row + .st-row { border-top: 1px solid var(--bo); }
+  .st-row:active { opacity: .7; }
+  .st-row:focus-visible { outline: 3px solid var(--a); outline-offset: -2px; border-radius: 10px; }
+  .st-row-body { flex: 1; min-width: 0; }
+  .st-row-nom {
+    font: 700 13.5px/1.2 var(--ens-body, 'Inter', sans-serif);
+    color: var(--ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .ins-prog-delta {
-    font: 800 13px/1 'Manrope', sans-serif;
-    color: #15803d;
+  .st-row-meta {
+    font: 500 11.5px/1.3 var(--ens-body, 'Inter', sans-serif);
+    color: var(--mu);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .st-row-val {
     flex-shrink: 0;
+    font: 700 12.5px/1 var(--ens-body, 'Inter', sans-serif);
+    color: var(--ink);
     white-space: nowrap;
   }
-  .ins-prog-delta small {
-    font: 600 10px/1 'Inter', sans-serif;
-    color: #646a8c;
-  }
+  .st-row-val small { font-weight: 600; color: var(--mu); font-size: 10.5px; }
 
-  /* ── Tabs eleves progressent / en pause ── */
-  .ins-tabs {
+  /* ── Bloc 2 : jauge X/31 ── */
+  .st-gauge {
     display: flex;
-    gap: 4px;
-    background: #f0f2fb;
-    padding: 4px;
-    border-radius: 12px;
-    margin-bottom: 10px;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
   }
-  .ins-tab {
+  .st-gauge-track {
     flex: 1;
-    padding: 8px 6px;
-    min-height: 40px;
-    border: none;
+    height: 7px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--a) 13%, transparent);
+    overflow: hidden;
+  }
+  .st-gauge-fill {
+    display: block;
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--a-lt, #6d6bff), var(--a));
+  }
+  .st-gauge-n {
+    flex-shrink: 0;
+    font: 800 12.5px/1 var(--ens-body, 'Inter', sans-serif);
+    color: var(--ink);
+  }
+  .st-gauge-n small { font-weight: 600; color: var(--mu); }
+
+  /* ── Bloc 3 : compteur silencieux ── */
+  .st-sil-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 4px;
+  }
+  .st-sil-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ens-stop, #dc2626);
+    flex-shrink: 0;
+  }
+  .st-sil-n {
+    font: 800 15px/1.2 var(--ens-body, 'Inter', sans-serif);
+    color: var(--ink);
+  }
+  .st-more {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 11px;
+    min-height: 44px;
+    border: 1.5px solid var(--bo);
+    border-radius: 12px;
     background: transparent;
-    border-radius: 9px;
-    font: 600 12px/1 'Inter', sans-serif;
-    color: #5a6188;
+    font: 700 13px/1 var(--ens-body, 'Inter', sans-serif);
+    color: var(--a-txt, var(--a));
     cursor: pointer;
-    transition: background .15s, color .15s;
     -webkit-tap-highlight-color: transparent;
   }
-  .ins-tab.active {
-    background: #fff;
-    color: #4f46e5;
-    font-weight: 700;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .1);
-  }
+  .st-more:active { opacity: .7; }
 
-  /* ── Recos ── */
-  .ins-reco-list { display: flex; flex-direction: column; gap: 8px; }
-  .ins-reco-card {
-    background: #fff;
-    border: 1px solid #e6e9f7;
-    border-radius: 16px;
-    padding: 14px 16px;
+  /* ── Bloc 4 : graphe révisions ── */
+  .st-rev-big {
+    font: 700 34px/1 var(--ens-display, 'Fredoka', sans-serif);
+    color: var(--ink);
+  }
+  .st-rev-big small {
+    font: 600 15px/1 var(--ens-body, 'Inter', sans-serif);
+    color: var(--mu);
+  }
+  .st-rev-sub {
+    font: 600 12.5px/1.4 var(--ens-body, 'Inter', sans-serif);
+    color: var(--ink);
+    margin-top: 2px;
+  }
+  .st-rev-hint {
+    font: 400 11px/1.4 var(--ens-body, 'Inter', sans-serif);
+    color: var(--mu);
+    margin-top: 2px;
+  }
+  .st-chart {
     display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    transition: transform .12s ease;
+    align-items: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+    padding-bottom: 2px;
   }
-  .ins-reco-card[role="button"] { cursor: pointer; }
-  .ins-reco-card[role="button"]:active { transform: scale(.98); }
-  .ins-reco-icon { flex-shrink: 0; margin-top: 1px; }
-  .ins-reco-body { flex: 1; min-width: 0; }
-  .ins-reco-ttl {
-    font: 700 13px/1.3 'Inter', sans-serif;
-    color: #1a1c2e;
-    margin-bottom: 3px;
+  .st-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
   }
-  .ins-reco-txt {
-    font: 400 12px/1.5 'Inter', sans-serif;
-    color: #5a6188;
+  .st-col-n {
+    font: 700 11px/1 var(--ens-body, 'Inter', sans-serif);
+    color: var(--ink);
+  }
+  .st-col-n.zero { color: var(--mu); opacity: .8; }
+  .st-col-barzone {
+    width: 100%;
+    height: 74px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .st-col-bar {
+    width: 22px;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, var(--a-lt, #6d6bff), var(--a));
+  }
+  .st-col-base {
+    width: 22px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--bo);
+  }
+  .st-col-day {
+    font: 600 10px/1 var(--ens-body, 'Inter', sans-serif);
+    color: var(--mu);
+    padding-top: 5px;
+    border-top: 1px solid var(--bo);
+    width: 100%;
+    text-align: center;
+  }
+  .st-col-day.auj { color: var(--a-txt, var(--a)); font-weight: 800; }
+  .st-felic-lbl {
+    font: 700 10.5px/1 var(--ens-body, 'Inter', sans-serif);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--mu);
+    margin: 16px 0 2px;
   }
 
-  /* ── Empty states ── */
-  .ins-empty {
-    padding: 28px 16px;
+  /* ── Bloc 5 : carte réussite (seul bloc accent) ── */
+  .st-proof {
+    position: relative;
+    background: linear-gradient(150deg, var(--a), var(--a-lt, #6d6bff) 130%);
+    border-radius: 20px;
+    padding: 18px 18px 16px;
+    color: var(--a-ink, #fff);
+    overflow: hidden;
+    box-shadow: 0 14px 32px -14px color-mix(in srgb, var(--a) 55%, transparent);
+  }
+  .st-proof::after {
+    content: "";
+    position: absolute;
+    right: -36px; top: -36px;
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%);
+    pointer-events: none;
+  }
+  .st-proof-lbl {
+    font: 700 10.5px/1 var(--ens-body, 'Inter', sans-serif);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    opacity: .78;
+    margin-bottom: 8px;
+  }
+  .st-proof-big {
+    font: 700 52px/1 var(--ens-display, 'Fredoka', sans-serif);
+  }
+  .st-proof-big small { font-size: 26px; }
+  .st-proof-sub {
+    font: 600 12.5px/1.4 var(--ens-body, 'Inter', sans-serif);
+    opacity: .92;
+    margin-top: 6px;
+  }
+  .st-proof-chips { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .st-proof-chip {
+    font: 700 11.5px/1 var(--ens-body, 'Inter', sans-serif);
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.22);
+    padding: 8px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  /* ── Bloc 6 : portefeuille ── */
+  .st-pf-intro {
+    font: 500 12px/1.4 var(--ens-body, 'Inter', sans-serif);
+    color: var(--mu);
+    margin-bottom: 12px;
+  }
+  .st-pf-intro b { color: var(--ink); }
+  .st-pf-line { margin-top: 11px; }
+  .st-pf-line:first-of-type { margin-top: 0; }
+  .st-pf-lbl {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 5px;
+  }
+  .st-pf-name {
+    font: 700 12px/1 var(--ens-body, 'Inter', sans-serif);
+    color: var(--ink);
+  }
+  .st-pf-range {
+    font: 500 10.5px/1 var(--ens-body, 'Inter', sans-serif);
+    color: var(--mu);
+  }
+  .st-pf-barline { display: flex; align-items: center; gap: 8px; }
+  .st-pf-track { flex: 1; height: 14px; border-radius: 7px; display: flex; align-items: center; }
+  .st-pf-bar {
+    height: 14px;
+    border-radius: 7px;
+    background: color-mix(in srgb, var(--a) 22%, var(--su));
+    min-width: 3px;
+  }
+  .st-pf-bar.full { background: linear-gradient(90deg, var(--a-lt, #6d6bff), var(--a)); }
+  .st-pf-n {
+    flex-shrink: 0;
+    font: 800 12px/1 var(--ens-body, 'Inter', sans-serif);
+    color: var(--ink);
+  }
+  .st-pf-n small { font-weight: 600; color: var(--mu); font-size: 10px; }
+
+  /* ── États vides / pied de page ── */
+  .st-empty {
+    padding: 22px 16px;
     text-align: center;
-    color: #5a6188;
-    font: 500 13px/1.5 'Inter', sans-serif;
-    background: #fff;
-    border: 1px solid #e6e9f7;
-    border-radius: 16px;
+    color: var(--mu);
+    font: 500 12.5px/1.5 var(--ens-body, 'Inter', sans-serif);
+  }
+  .st-foot {
+    margin-top: 26px;
+    text-align: center;
+    font: 500 11.5px/1.5 var(--ens-body, 'Inter', sans-serif);
+    color: var(--mu);
   }
 
   /* ── Skeleton ── */
-  .ins-skel {
-    padding: 20px 16px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .ins-skel-block {
-    border-radius: 20px;
-    background: linear-gradient(90deg, #dde0f5 0%, #eceef8 50%, #dde0f5 100%);
+  .st-skel { padding: 20px 0 24px; display: flex; flex-direction: column; gap: 14px; }
+  .st-skel-block {
+    border-radius: 18px;
+    background: linear-gradient(90deg, var(--bg2) 0%, var(--bg3) 50%, var(--bg2) 100%);
     background-size: 200% 100%;
-    animation: ins-shimmer 1.4s ease-in-out infinite;
+    animation: st-shimmer 1.4s ease-in-out infinite;
   }
-  @keyframes ins-shimmer {
+  @keyframes st-shimmer {
     from { background-position: 200% 0; }
     to   { background-position: -200% 0; }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .st-skel-block { animation: none !important; }
+  }
 </style>`;
 
-// ─── Couleurs avatar deterministes ────────────────────────────
-const AV_COLORS = [
-  "#4f46e5",
-  "#0891b2",
-  "#15803d",
-  "#b45309",
-  "#7c3aed",
-  "#c026d3",
-];
-function avatarColor(id) {
-  if (!id) return AV_COLORS[0];
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return AV_COLORS[h % AV_COLORS.length];
-}
-function initiales(prenom, nom) {
-  const p = (prenom || "").trim()[0] || "";
-  const n = (nom || "").trim()[0] || "";
-  return (p + n).toUpperCase() || "?";
-}
-
 // ─── Helpers dates ────────────────────────────────────────────
-function monthBounds(offset = 0) {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth() + offset;
-  const start = new Date(y, m, 1);
-  const end = new Date(y, m + 1, 0, 23, 59, 59, 999);
-  return { start: start.toISOString(), end: end.toISOString() };
-}
-
 function daysAgoISO(n) {
   return new Date(Date.now() - n * 86400000).toISOString();
 }
-
-// ─── Module state ─────────────────────────────────────────────
-let _period = "semaine"; // 'semaine' | 'mois'
-let _tab = "progressent"; // 'progressent' | 'pause'
+// date_examen est un DATE ("YYYY-MM-DD") : parse en local, pas en UTC
+function parseDateOnly(s) {
+  if (!s) return null;
+  const [y, m, d] = String(s).slice(0, 10).split("-").map(Number);
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
+function localMidnight(offsetDays = 0) {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + offsetDays);
+  return d;
+}
 
 // ─── Entry ────────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
+  _showAllSilencieux = false;
 
   track("page.view", { page: "insights", role: me.role });
 
-  // Skeleton
   root.innerHTML = `
     ${STYLE}
-    <div class="ins-page">
-      <div class="ins-skel">
-        <div class="ins-skel-block" style="height:36px"></div>
-        <div class="ins-skel-block" style="height:148px"></div>
-        <div class="ins-skel-block" style="height:80px"></div>
-        <div class="ins-skel-block" style="height:120px"></div>
-        <div class="ins-skel-block" style="height:180px"></div>
+    <div class="st-page">
+      <div class="st-skel">
+        <div class="st-skel-block" style="height:34px;width:40%"></div>
+        <div class="st-skel-block" style="height:150px"></div>
+        <div class="st-skel-block" style="height:170px"></div>
+        <div class="st-skel-block" style="height:120px"></div>
+        <div class="st-skel-block" style="height:200px"></div>
       </div>
     </div>
   `;
@@ -446,690 +447,698 @@ export async function mount(root) {
   try {
     data = await loadData(me);
   } catch (e) {
-    // Sans ça, si une requête échoue (réseau, RLS…), la page restait bloquée
-    // sur le squelette indéfiniment. On affiche un état d'erreur + Réessayer.
     console.error("[insights] loadData", e);
-    toast("« Stats » indisponible", "error");
+    toast("Impossible de charger les stats", "error");
     root.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:64px 24px;text-align:center;color:var(--mu)">
-        <p style="margin:0;font:700 16px/1.5 'Inter',sans-serif;color:var(--ink)">« Stats » indisponible</p>
-        <p style="margin:0;font:500 14px/1.5 'Inter',sans-serif">Vérifie ta connexion, puis réessaie.</p>
-        <button id="ins-retry" type="button" style="border:0;border-radius:999px;padding:10px 20px;background:var(--a);color:#fff;font:700 14px/1 'Inter',sans-serif;cursor:pointer">Réessayer</button>
+        <p style="margin:0;font:600 15px/1.4 var(--ens-body,'Inter',sans-serif)">Impossible de charger les stats.</p>
+        <button id="st-retry" type="button" style="border:0;border-radius:999px;padding:12px 22px;min-height:44px;background:var(--a);color:#fff;font:700 14px/1 var(--ens-body,'Inter',sans-serif);cursor:pointer">Réessayer</button>
       </div>`;
     root
-      .querySelector("#ins-retry")
+      .querySelector("#st-retry")
       ?.addEventListener("click", () => mount(root));
     return;
   }
-  renderAll(root, me, data);
-  wireAll(root, me, data);
+
+  renderAll(root, data);
+  if (data.vide) return; // le chemin vide câble déjà son bouton
+  wireAll(root, data);
 }
 
 // ─── Data loading ─────────────────────────────────────────────
+// PostgREST tronque à 1000 lignes EN SILENCE : on pagine (validations
+// dépasse 1000 dès ~33 élèves à livret rempli, quiz_attempts bien avant).
+async function fetchAllRows(buildQuery) {
+  const PAGE = 1000;
+  let from = 0;
+  const rows = [];
+  for (;;) {
+    const { data, error } = await buildQuery().range(from, from + PAGE - 1);
+    if (error) return { rows, error };
+    rows.push(...(data || []));
+    if (!data || data.length < PAGE) return { rows, error: null };
+    from += PAGE;
+  }
+}
+
 async function loadData(me) {
-  const thisMonth = monthBounds(0);
-  const prevMonth = monthBounds(-1);
-  const ago60 = daysAgoISO(60);
-  const ago14 = daysAgoISO(14);
-  const ago7 = daysAgoISO(7);
+  const { data: elevesRaw, error: e1 } = await sb
+    .from("profiles")
+    .select("id, prenom, nom, last_active_at, avatar_url")
+    .eq("enseignant_id", me.id)
+    .eq("role", "eleve");
+  if (e1) throw e1;
 
-  const [
-    valsCeMois,
-    valsMoisPrev,
-    vals60j,
-    mesEleves,
-    myProfile,
-    valsARetravailler,
-    valsSemaine,
-    valsSemainePrev,
-  ] = await Promise.all([
-    // Validations ce mois
+  const eleves = elevesRaw || [];
+  const eleveIds = eleves.map((e) => e.id);
+
+  if (eleveIds.length === 0) {
+    return { vide: true };
+  }
+
+  const [valsRes, examsRes, quizRes] = await Promise.all([
+    // Une ligne par (élève, compétence) — statut courant (table en upsert)
+    fetchAllRows(() =>
+      sb
+        .from("validations")
+        .select("eleve_id, competence_id, statut, validated_at")
+        .in("eleve_id", eleveIds)
+        .order("id"),
+    ),
+    // Historique conservé : 1ère ligne vue (tri desc) = examen le plus récent
     sb
-      .from("validations")
-      .select("eleve_id, competence_id, statut, validated_at")
-      .eq("validated_by", me.id)
-      .gte("validated_at", thisMonth.start)
-      .lte("validated_at", thisMonth.end),
-
-    // Validations mois precedent (pour delta mois) — acquis uniquement,
-    // comme la periode courante (filtree en JS), sinon le delta compare
-    // des grandeurs differentes.
-    sb
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("validated_by", me.id)
-      .eq("statut", "acquis")
-      .gte("validated_at", prevMonth.start)
-      .lte("validated_at", prevMonth.end),
-
-    // Validations 60 derniers jours (graphe activite + sparkline)
-    sb
-      .from("validations")
-      .select("validated_at")
-      .eq("validated_by", me.id)
-      .gte("validated_at", ago60),
-
-    // Mes eleves attitres
-    sb
-      .from("profiles")
-      .select("id, prenom, nom, last_active_at, avatar_url")
-      .eq("enseignant_id", me.id)
-      .eq("role", "eleve"),
-
-    // Mon profil
-    sb.from("profiles").select("streak_pro_days, xp").eq("id", me.id).single(),
-
-    // Validations a retravailler
-    sb
-      .from("validations")
-      .select("competence_id, eleve_id")
-      .eq("validated_by", me.id)
-      .eq("statut", "a_retravailler"),
-
-    // Validations cette semaine (7 derniers jours)
-    sb
-      .from("validations")
-      .select("eleve_id, competence_id, statut, validated_at")
-      .eq("validated_by", me.id)
-      .gte("validated_at", ago7),
-
-    // Validations semaine precedente (7-14 jours) — acquis uniquement,
-    // comme la periode courante.
-    sb
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("validated_by", me.id)
-      .eq("statut", "acquis")
-      .gte("validated_at", daysAgoISO(14))
-      .lt("validated_at", ago7),
+      .from("examens")
+      .select("eleve_id, statut, date_examen, created_at")
+      .order("created_at", { ascending: false }),
+    fetchAllRows(() =>
+      sb
+        .from("quiz_attempts")
+        .select("user_id, completed_at")
+        .in("user_id", eleveIds)
+        .gte("completed_at", daysAgoISO(30))
+        .order("id"),
+    ),
   ]);
+  if (valsRes.error) throw valsRes.error;
+  if (examsRes.error) throw examsRes.error;
+  // Quiz en échec ≠ page morte : on dégrade le bloc 4 explicitement
+  const quizKo = !!quizRes.error;
+  if (quizKo) console.error("[insights] quiz_attempts", quizRes.error);
 
-  const elevesData = mesEleves.data || [];
-  const eleveIds = elevesData.map((e) => e.id);
-  const valsThisMonth = valsCeMois.data || [];
-  const vals60Data = vals60j.data || [];
-  const valsSemaineData = valsSemaine.data || [];
+  const idSet = new Set(eleveIds);
+  const vals = valsRes.rows;
+  const exams = (examsRes.data || []).filter((x) => idSet.has(x.eleve_id));
+  const quiz = quizRes.rows;
 
-  // Quiz attempts reels pour mes eleves
-  let quizData = [];
-  if (eleveIds.length > 0) {
-    const { data: qa, error: qaErr } = await sb
-      .from("quiz_attempts")
-      .select("user_id, score, completed_at")
-      .in("user_id", eleveIds)
-      .gte("completed_at", daysAgoISO(30));
-    if (qaErr) console.error("[insights] quiz_attempts query error", qaErr);
-    quizData = qa || [];
-  }
-
-  // Validations ce mois par eleve (pour top progressent)
-  const compsCeMoisByEleve = {};
-  valsThisMonth.forEach((v) => {
-    if (!compsCeMoisByEleve[v.eleve_id]) compsCeMoisByEleve[v.eleve_id] = 0;
-    if (v.statut === "acquis") compsCeMoisByEleve[v.eleve_id]++;
+  // ── Dernier examen par élève (1ère ligne vue, tri desc) = la vérité ──
+  // La table est en historique pur (replanifier = nouvelle ligne) : seules
+  // les dernières lignes comptent, pour « reçu » COMME pour « planifié ».
+  const lastExamByEleve = new Map();
+  exams.forEach((x) => {
+    if (!lastExamByEleve.has(x.eleve_id)) lastExamByEleve.set(x.eleve_id, x);
   });
-
-  // Validations cette semaine par eleve
-  const compsSemaineByEleve = {};
-  valsSemaineData.forEach((v) => {
-    if (!compsSemaineByEleve[v.eleve_id]) compsSemaineByEleve[v.eleve_id] = 0;
-    if (v.statut === "acquis") compsSemaineByEleve[v.eleve_id]++;
-  });
-
-  // Derniere validation par eleve
-  let lastValMap = {};
-  if (eleveIds.length > 0) {
-    const { data: lastVals } = await sb
-      .from("validations")
-      .select("eleve_id, validated_at")
-      .eq("validated_by", me.id)
-      .in("eleve_id", eleveIds)
-      .order("validated_at", { ascending: false });
-
-    (lastVals || []).forEach((v) => {
-      if (!lastValMap[v.eleve_id]) lastValMap[v.eleve_id] = v.validated_at;
-    });
-  }
-
-  // ── KPI semaine ──────────────────────────────────────────────
-  const valsSemaineCount = valsSemaineData.filter(
-    (v) => v.statut === "acquis",
-  ).length;
-  const valsSemainePrevCount = valsSemainePrev.count ?? 0;
-  const deltaSemaine =
-    valsSemainePrevCount > 0 ? valsSemaineCount - valsSemainePrevCount : null;
-
-  // ── KPI mois ─────────────────────────────────────────────────
-  const valsCeMoisCount = valsThisMonth.filter(
-    (v) => v.statut === "acquis",
-  ).length;
-  const valsPrevCount = valsMoisPrev.count ?? 0;
-  const deltaMois =
-    valsPrevCount > 0
-      ? Math.round(((valsCeMoisCount - valsPrevCount) / valsPrevCount) * 100)
-      : null;
-
-  const nbElevesAccompagnes = eleveIds.length;
-
-  const quizTotal = quizData.length;
-  const quizSuccess = quizData.filter((q) => (q.score ?? 0) >= 60).length;
-  const tauxQuiz =
-    quizTotal > 0 ? Math.round((quizSuccess / quizTotal) * 100) : null;
-
-  const streakPro = myProfile.data?.streak_pro_days ?? null;
-
-  // ── Activite par jour (60j) pour graphe semaine summe par jour ──
-  // Aggregation des 7 derniers jours (Lun=0 ... Dim=6)
-  const heatmapDay = new Array(7).fill(0);
-  // Granularite fine : on veut les 7 derniers jours calendaires absolus
-  const spark7 = new Array(7).fill(0);
-  const now7 = Date.now();
-  vals60Data.forEach((v) => {
-    const d = new Date(v.validated_at);
-    // Jours depuis maintenant (0 = aujourd'hui, 1 = hier, …)
-    const diffDays = Math.floor((now7 - d.getTime()) / 86400000);
-    if (diffDays >= 0 && diffDays < 7) {
-      spark7[6 - diffDays]++;
-    }
-    // Heatmap par jour de la semaine (pour le graphe)
-    const jour = (d.getDay() + 6) % 7; // Lun=0 ... Dim=6
-    heatmapDay[jour]++;
-  });
-
-  // Sparkline 30 jours (pour periode mois)
-  const SPARK_DAYS = 30;
-  const spark30 = new Array(SPARK_DAYS).fill(0);
-  const sparkStart = Date.now() - (SPARK_DAYS - 1) * 864e5;
-  vals60Data.forEach((v) => {
-    const idx = Math.floor(
-      (new Date(v.validated_at).getTime() - sparkStart) / 864e5,
-    );
-    if (idx >= 0 && idx < SPARK_DAYS) spark30[idx]++;
-  });
-
-  const elevesAvecPrenom = elevesData.map((e, i) => ({ ...e, idx: i }));
-
-  // ── Bento KPI : actifs, en approche, a relancer ───────────────
-  // Actif = au moins 1 validation ce mois
-  const activeThisMonth = new Set(
-    valsThisMonth.filter((v) => v.statut === "acquis").map((v) => v.eleve_id),
+  const recuSet = new Set(
+    [...lastExamByEleve.values()]
+      .filter((x) => x.statut === "recu")
+      .map((x) => x.eleve_id),
   );
-  const nbActifs = eleveIds.filter((id) => activeThisMonth.has(id)).length;
+  const actifs = eleves.filter((e) => !recuSet.has(e.id));
+  const nbActifs = actifs.length;
+  const actifSet = new Set(actifs.map((e) => e.id));
 
-  // A relancer = inactif depuis > 14j (aucune validation depuis 14j)
-  const nbRelancer = eleveIds.filter((id) => {
-    const last = lastValMap[id];
-    return !last || last < ago14;
-  }).length;
+  // ── Acquis par élève (statut courant par couple) ──
+  const acquisByEleve = new Map(); // id → Set(competence_id)
+  const lastValByEleve = new Map(); // id → timestamp (tout statut)
+  vals.forEach((v) => {
+    if (v.statut === "acquis") {
+      if (!acquisByEleve.has(v.eleve_id))
+        acquisByEleve.set(v.eleve_id, new Set());
+      acquisByEleve.get(v.eleve_id).add(v.competence_id);
+    }
+    const t = new Date(v.validated_at).getTime();
+    if (!lastValByEleve.has(v.eleve_id) || t > lastValByEleve.get(v.eleve_id)) {
+      lastValByEleve.set(v.eleve_id, t);
+    }
+  });
+  const nbAcquis = (id) => acquisByEleve.get(id)?.size || 0;
 
-  // En approche = actif mais pas de compétence acquise ce mois (entre les deux)
-  const nbEnApproche = Math.max(0, nbElevesAccompagnes - nbActifs - nbRelancer);
+  // ── Quiz : dernière activité + fenêtre 7 jours calendaires ──
+  const lastQuizByEleve = new Map();
+  quiz.forEach((q) => {
+    const t = new Date(q.completed_at).getTime();
+    if (!lastQuizByEleve.has(q.user_id) || t > lastQuizByEleve.get(q.user_id)) {
+      lastQuizByEleve.set(q.user_id, t);
+    }
+  });
 
-  // ── Top progressent (semaine) ─────────────────────────────────
-  const topProgressent = elevesAvecPrenom
-    .filter((e) => (compsSemaineByEleve[e.id] || 0) >= 1)
-    .sort(
-      (a, b) =>
-        (compsSemaineByEleve[b.id] || 0) - (compsSemaineByEleve[a.id] || 0),
-    )
+  const dayStarts = []; // 7 jours calendaires, du plus ancien à aujourd'hui
+  for (let i = 6; i >= 0; i--) dayStarts.push(localMidnight(-i));
+  const revDays = dayStarts.map((start, i) => {
+    const end = i < 6 ? dayStarts[i + 1] : new Date(Date.now() + 86400000);
+    return {
+      label: JOURS_COURT[(start.getDay() + 6) % 7],
+      isToday: i === 6,
+      users: new Set(),
+      start: start.getTime(),
+      end: end.getTime(),
+    };
+  });
+  const attempts7ByEleve = new Map();
+  const distinct7 = new Set();
+  quiz.forEach((q) => {
+    // Les élèves « sortis » (reçus) ne comptent pas : le dénominateur
+    // affiché est nbActifs, le numérateur doit vivre dans le même monde.
+    if (!actifSet.has(q.user_id)) return;
+    const t = new Date(q.completed_at).getTime();
+    if (t < revDays[0].start) return;
+    for (const d of revDays) {
+      if (t >= d.start && t < d.end) {
+        d.users.add(q.user_id);
+        break;
+      }
+    }
+    distinct7.add(q.user_id);
+    attempts7ByEleve.set(q.user_id, (attempts7ByEleve.get(q.user_id) || 0) + 1);
+  });
+  const eleveById = new Map(eleves.map((e) => [e.id, e]));
+  const topReviseurs = [...attempts7ByEleve.entries()]
+    .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
-    .map((e) => ({ ...e, valsWeek: compsSemaineByEleve[e.id] || 0 }));
+    .map(([id, n]) => ({ ...(eleveById.get(id) || {}), nQuiz: n }))
+    .filter((e) => e.id);
 
-  // Top progressent (mois)
-  const topProgressentMois = elevesAvecPrenom
-    .filter((e) => (compsCeMoisByEleve[e.id] || 0) >= 2)
-    .sort(
-      (a, b) =>
-        (compsCeMoisByEleve[b.id] || 0) - (compsCeMoisByEleve[a.id] || 0),
-    )
-    .slice(0, 3)
-    .map((e) => ({ ...e, valsMonth: compsCeMoisByEleve[e.id] || 0 }));
-
-  // Top stagnent
-  const topStagnent = elevesAvecPrenom
-    .filter((e) => {
-      const lastVal = lastValMap[e.id];
-      const hasActivity = lastVal != null || e.last_active_at != null;
-      const inactive14j = !lastVal || lastVal < ago14;
-      return (
-        hasActivity && inactive14j && (compsCeMoisByEleve[e.id] || 0) === 0
-      );
+  // ── Silencieux : aucun des 3 signaux depuis 14 j ──
+  const ago14 = Date.now() - SILENCE_JOURS * 86400000;
+  const silencieux = actifs
+    .map((e) => {
+      const signaux = [
+        e.last_active_at ? new Date(e.last_active_at).getTime() : null,
+        lastValByEleve.get(e.id) ?? null,
+        lastQuizByEleve.get(e.id) ?? null,
+      ].filter((t) => t != null);
+      const lastSeen = signaux.length ? Math.max(...signaux) : null;
+      return { ...e, lastSeen };
     })
+    .filter((e) => e.lastSeen == null || e.lastSeen < ago14)
+    .map((e) => ({
+      ...e,
+      daysAgo: e.lastSeen
+        ? Math.floor((Date.now() - e.lastSeen) / 86400000)
+        : null,
+    }))
+    // Les plus anciennement vus d'abord (jamais vus tout en haut)
+    .sort((a, b) => (a.lastSeen ?? 0) - (b.lastSeen ?? 0));
+
+  // ── Prêts pour l'examen : top 3 des plus proches du livret complet ──
+  const prets = actifs
+    .map((e) => ({ ...e, acquis: nbAcquis(e.id) }))
+    .filter((e) => e.acquis >= 1)
+    .sort((a, b) => b.acquis - a.acquis)
     .slice(0, 3)
     .map((e) => {
-      const lastVal = lastValMap[e.id];
-      const daysAgo = lastVal
-        ? Math.floor((Date.now() - new Date(lastVal).getTime()) / 86400000)
-        : null;
-      return { ...e, daysAgo };
+      const set = acquisByEleve.get(e.id) || new Set();
+      const manque = ALL_COMPS.filter((c) => !set.has(c))
+        .slice(0, 3)
+        .map((c) => labelComp(c));
+      return { ...e, manque };
     });
 
-  // ── Difficulte comps ──────────────────────────────────────────
-  const diffByComp = {};
-  (valsARetravailler.data || []).forEach((v) => {
-    if (!diffByComp[v.competence_id]) diffByComp[v.competence_id] = new Set();
-    diffByComp[v.competence_id].add(v.eleve_id);
+  // ── Examens : proche (bloc 1), taux 12 mois + à venir (bloc 5) ──
+  // Uniquement le DERNIER examen de chaque élève : une vieille ligne
+  // « planifie » remplacée par une replanification (ou suivie d'un
+  // résultat) ne doit plus exister aux yeux de la page.
+  const today0 = localMidnight(0).getTime();
+  const planifies = [...lastExamByEleve.values()]
+    .filter((x) => x.statut === "planifie" && parseDateOnly(x.date_examen))
+    .map((x) => ({ ...x, ts: parseDateOnly(x.date_examen).getTime() }))
+    .filter((x) => x.ts >= today0 && actifSet.has(x.eleve_id))
+    .sort((a, b) => a.ts - b.ts);
+  const nbExamsAVenir = planifies.length; // 1 ligne max par élève
+
+  // Borne sur un minuit local (pas today0 + 30×24h : l'heure d'été/hiver
+  // décale la fenêtre d'une heure et exclut le 30e jour).
+  const finFenetre = localMidnight(EXAM_FENETRE_J + 1).getTime();
+  const examProche = planifies.find(
+    (x) =>
+      x.ts < finFenetre &&
+      nbAcquis(x.eleve_id) < PRET_SEUIL &&
+      eleveById.has(x.eleve_id),
+  );
+  let carteExam = null;
+  if (examProche) {
+    const e = eleveById.get(examProche.eleve_id);
+    const dJours = Math.round((examProche.ts - today0) / 86400000);
+    const quand =
+      dJours === 0
+        ? "aujourd'hui"
+        : dJours === 1
+          ? "demain"
+          : `dans ${dJours} jours`;
+    carteExam = { eleve: e, quand, acquis: nbAcquis(e.id) };
+  }
+
+  // Un « reçu » se compte par ÉLÈVE (une double saisie ne gonfle pas le
+  // taux) ; les « raté » se comptent par ligne (plusieurs échecs possibles).
+  const ago12mois = Date.now() - 365 * 86400000;
+  const recusEleves12m = new Set();
+  let nbRates12m = 0;
+  const anneeCourante = new Date().getFullYear();
+  const permisAnneeSet = new Set();
+  exams.forEach((x) => {
+    if (x.statut !== "recu" && x.statut !== "rate") return;
+    const ref = parseDateOnly(x.date_examen) ?? new Date(x.created_at);
+    if (x.statut === "recu" && ref.getFullYear() === anneeCourante) {
+      permisAnneeSet.add(x.eleve_id);
+    }
+    if (ref.getTime() < ago12mois) return;
+    if (x.statut === "recu") recusEleves12m.add(x.eleve_id);
+    else nbRates12m++;
   });
-  const topDiff = Object.entries(diffByComp)
-    .map(([compId, elevesSet]) => ({ compId, count: elevesSet.size }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
+  const nbRecus12m = recusEleves12m.size;
+  const nbResultats12m = nbRecus12m + nbRates12m;
+  const permisAnnee = permisAnneeSet.size;
 
-  // ── Recommandations ───────────────────────────────────────────
-  const recos = [];
-  if (streakPro !== null && streakPro < 3) {
-    recos.push({
-      icon: medallion("cible", "indigo", { size: 36 }),
-      ttl: "Lance ta semaine",
-      txt: "Valide une compétence avec un élève actif pour garder ta série.",
-      route: "#/log-session",
-    });
-  }
-  if (topStagnent.length > 0) {
-    const e = topStagnent[0];
-    const nm = esc(`${e.prenom || ""} ${e.nom || ""}`.trim());
-    const since = e.daysAgo ? `depuis ${e.daysAgo} j` : "depuis un moment";
-    recos.push({
-      icon: medallion("panneau", "orange", { size: 36 }),
-      ttl: `Relance ${nm}`,
-      txt: `${nm} n’a plus rien validé ${since}. Un point en leçon peut débloquer sa progression.`,
-      route: `#/livret/${e.id}`,
-    });
-  }
-  if (topDiff.length > 0) {
-    const d = topDiff[0];
-    const nm = esc(labelComp(d.compId));
-    recos.push({
-      icon: medallion("ampoule", "violet", { size: 36 }),
-      ttl: `Point à travailler : ${nm}`,
-      txt: `${d.count} élève${d.count > 1 ? "s" : ""} bloqué${d.count > 1 ? "s" : ""} sur cette compétence. Prévois un temps dédié en leçon.`,
-      route: `#/eleves?bloque_sur=${encodeURIComponent(d.compId)}`,
-    });
-  }
-  if (recos.length === 0) {
-    recos.push({
-      icon: medallion("trophee", "gold", { size: 36 }),
-      ttl: "Tout roule",
-      txt: "Tes élèves progressent bien. Rien d’urgent en ce moment.",
-      route: null,
-    });
-  }
+  // ── Point pédago : compétences « à retravailler » (60 j) ──
+  const ago60 = Date.now() - 60 * 86400000;
+  const diffByComp = new Map();
+  vals.forEach((v) => {
+    if (v.statut !== "a_retravailler") return;
+    if (!actifSet.has(v.eleve_id)) return;
+    if (new Date(v.validated_at).getTime() < ago60) return;
+    if (!diffByComp.has(v.competence_id))
+      diffByComp.set(v.competence_id, new Set());
+    diffByComp.get(v.competence_id).add(v.eleve_id);
+  });
+  const topDiff =
+    [...diffByComp.entries()]
+      .map(([compId, set]) => ({ compId, count: set.size }))
+      .sort((a, b) => b.count - a.count)[0] || null;
+
+  // ── Portefeuille : 4 tranches d'avancement ──
+  const tranches = [
+    { nom: "Démarrage", range: "0–25 %", count: 0 },
+    { nom: "En construction", range: "25–50 %", count: 0 },
+    { nom: "Bien avancés", range: "50–75 %", count: 0 },
+    { nom: "Bientôt sortis", range: "75 % +", count: 0, full: true },
+  ];
+  actifs.forEach((e) => {
+    const pct = (nbAcquis(e.id) / REMC_TOTAL) * 100;
+    const idx = pct >= 75 ? 3 : pct >= 50 ? 2 : pct >= 25 ? 1 : 0;
+    tranches[idx].count++;
+  });
+
+  // ── Pied de page : hygiène de saisie ──
+  const ago7 = Date.now() - 7 * 86400000;
+  const saisies7j = vals.filter(
+    (v) => new Date(v.validated_at).getTime() >= ago7,
+  ).length;
 
   return {
-    // Semaine
-    valsSemaineCount,
-    deltaSemaine,
-    spark7,
-    topProgressent,
-    // Mois
-    valsCeMoisCount,
-    deltaMois,
-    spark30,
-    topProgressentMois,
-    // Partage
-    nbElevesAccompagnes,
+    vide: false,
     nbActifs,
-    nbEnApproche,
-    nbRelancer,
-    tauxQuiz,
-    streakPro,
-    heatmapDay,
-    topStagnent,
+    carteExam,
+    silencieux,
     topDiff,
-    recos,
-    eleveIds,
-    elevesAvecPrenom,
-    // Pour recalcul bento
-    compsCeMoisByEleve,
-    compsSemaineByEleve,
-    lastValMap,
-    ago14,
+    prets,
+    revDays: revDays.map((d) => ({
+      label: d.label,
+      isToday: d.isToday,
+      n: d.users.size,
+    })),
+    nbReviseurs7j: distinct7.size,
+    topReviseurs,
+    quizKo,
+    nbRecus12m,
+    nbResultats12m,
+    permisAnnee,
+    nbExamsAVenir,
+    tranches,
+    saisies7j,
   };
 }
 
-// ─── Render principal ─────────────────────────────────────────
-function renderAll(root, me, data) {
+// ─── Render ───────────────────────────────────────────────────
+function nomCourt(e) {
+  return esc(fmtName(`${e.prenom || ""} ${e.nom || ""}`.trim()) || "Élève");
+}
+// Pour les ATTRIBUTS (aria-label…) : esc() n'encode pas les guillemets
+function nomAttr(e) {
+  return escAttr(fmtName(`${e.prenom || ""} ${e.nom || ""}`.trim()) || "Élève");
+}
+function secTitle(lbl, per) {
+  return `<div class="st-sec">
+    <span class="st-sec-lbl">${lbl}</span>
+    <span class="st-sec-per">· ${per}</span>
+  </div>`;
+}
+const CHEV = `<span class="st-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>`;
+
+function renderAll(root, data) {
+  if (data.vide) {
+    root.innerHTML = `
+      ${STYLE}
+      <div class="st-page anim-slide-up">
+        <h1 class="st-h1">Stats</h1>
+        <div class="st-card" style="margin-top:16px">
+          <div class="st-empty">
+            Ajoute tes élèves pour voir tes stats : qui est proche de l'examen,
+            qui décroche, qui révise entre les leçons.
+          </div>
+          <button class="st-more" data-route="#/eleves" type="button">Voir mes élèves</button>
+        </div>
+      </div>`;
+    wireRoutes(root);
+    return;
+  }
+
   root.innerHTML = `
     ${STYLE}
-    <div class="ins-page anim-slide-up">
+    <div class="st-page anim-slide-up">
+      <h1 class="st-h1">Stats</h1>
 
-      <!-- En-tete + segment -->
-      <div class="ins-topbar">
-        <h1 class="ins-title">Stats</h1>
-        <div class="ins-seg" role="group" aria-label="Periode">
-          <button class="ins-seg-btn${_period === "semaine" ? " active" : ""}"
-                  data-period="semaine" type="button">Semaine</button>
-          <button class="ins-seg-btn${_period === "mois" ? " active" : ""}"
-                  data-period="mois" type="button">Mois</button>
-        </div>
-      </div>
+      ${secTitle("À faire maintenant", "aujourd'hui")}
+      ${renderActions(data)}
 
-      <div class="ins-body">
-        ${renderPeriodContent(data)}
-      </div>
+      ${secTitle("Les plus proches de l'examen", "à ce jour")}
+      ${renderPrets(data)}
+
+      ${secTitle(`Silencieux depuis ${SILENCE_JOURS} jours`, "app, quiz, leçons")}
+      ${renderSilencieux(data)}
+
+      ${secTitle("Révisions de tes élèves", "7 derniers jours")}
+      ${renderRevisions(data)}
+
+      ${secTitle("Ta réussite à l'examen", "12 derniers mois")}
+      ${renderReussite(data)}
+
+      ${secTitle("Où en est ton portefeuille", "à ce jour")}
+      ${renderPortefeuille(data)}
+
+      <p class="st-foot">${
+        data.saisies7j > 0
+          ? `Tu as mis à jour ${data.saisies7j} compétence${data.saisies7j > 1 ? "s" : ""} chez tes élèves ces 7 derniers jours.`
+          : "Aucune validation saisie depuis 7 jours — pense à saisir tes séances pour garder une photo fidèle."
+      }</p>
     </div>
   `;
 }
 
-// ─── Contenu dependant de la periode ─────────────────────────
-function renderPeriodContent(data) {
-  const isSemaine = _period === "semaine";
+// ── Bloc 1 : cartes-action ──
+function renderActions({ carteExam, silencieux, topDiff }) {
+  const cards = [];
 
-  const count = isSemaine ? data.valsSemaineCount : data.valsCeMoisCount;
-  const delta = isSemaine ? data.deltaSemaine : null; // pour mois on affiche % mais simplifions en nombre
-  const deltaMois = data.deltaMois;
-  const spark = isSemaine ? data.spark7 : data.spark30.slice(-14); // 14 derniers jours du mois
-  const topList = isSemaine ? data.topProgressent : data.topProgressentMois;
-
-  // Hero delta HTML
-  let deltaHtml = "";
-  if (isSemaine) {
-    if (delta === null) {
-      deltaHtml = `<span class="ins-hero-delta flat">Première semaine</span>`;
-    } else if (delta > 0) {
-      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${delta} sur la semaine passée</span>`;
-    } else if (delta < 0) {
-      deltaHtml = `<span class="ins-hero-delta down">${delta} sur la semaine passée</span>`;
-    } else {
-      deltaHtml = `<span class="ins-hero-delta flat">Comme la semaine passée</span>`;
-    }
-  } else {
-    if (deltaMois === null) {
-      deltaHtml = `<span class="ins-hero-delta flat">Premier mois</span>`;
-    } else if (deltaMois > 0) {
-      deltaHtml = `<span class="ins-hero-delta up">&#9650; +${deltaMois}&#8239;% sur le mois dernier</span>`;
-    } else if (deltaMois < 0) {
-      deltaHtml = `<span class="ins-hero-delta down">-${Math.abs(deltaMois)}&#8239;% sur le mois dernier</span>`;
-    } else {
-      deltaHtml = `<span class="ins-hero-delta flat">Comme le mois dernier</span>`;
-    }
+  if (carteExam) {
+    const nm = nomCourt(carteExam.eleve);
+    cards.push(`
+      <div class="st-act" role="button" tabindex="0" data-route="#/livret/${esc(carteExam.eleve.id)}"
+           aria-label="Livret de ${nomAttr(carteExam.eleve)}">
+        <span class="st-act-med">${medallion("examen", "indigo", { size: 38 })}</span>
+        <div class="st-act-body">
+          <div class="st-act-kick amber">Examen proche</div>
+          <div class="st-act-ttl">${nm} passe ${esc(carteExam.quand)}</div>
+          <div class="st-act-txt">${carteExam.acquis}/${REMC_TOTAL} acquis — prépare son passage.</div>
+        </div>
+        ${CHEV}
+      </div>`);
   }
 
-  // Sparkline barres CSS
-  const sparkMax = Math.max(1, ...spark);
-  const sparkBars = spark
-    .map((v, i) => {
-      // Jours actifs lisibles (min 20 %), jours vides en trait fantôme (10 %)
-      const pct = v > 0 ? Math.max(20, Math.round((v / sparkMax) * 100)) : 10;
-      const isPeak = v === sparkMax && v > 0;
-      return `<div class="ins-hero-spark-bar${isPeak ? " peak" : ""}"
-                   style="height:${pct}%;flex:1"></div>`;
+  if (silencieux.length > 0) {
+    const e = silencieux[0];
+    const nm = nomCourt(e);
+    const depuis =
+      e.daysAgo != null
+        ? `Silencieux depuis ${e.daysAgo} jours`
+        : "Jamais vu sur l'app";
+    const autres =
+      silencieux.length > 1
+        ? ` · et ${silencieux.length - 1} autre${silencieux.length > 2 ? "s" : ""}`
+        : "";
+    cards.push(`
+      <div class="st-act" role="button" tabindex="0" data-route="#/livret/${esc(e.id)}"
+           aria-label="Livret de ${nomAttr(e)}">
+        <span class="st-act-med">${medallion("panneau", "red", { size: 38 })}</span>
+        <div class="st-act-body">
+          <div class="st-act-kick red">Relance</div>
+          <div class="st-act-ttl">Relance ${nm}</div>
+          <div class="st-act-txt">${esc(depuis)}${esc(autres)}.</div>
+        </div>
+        ${CHEV}
+      </div>`);
+  }
+
+  if (topDiff) {
+    const lbl = esc(labelComp(topDiff.compId));
+    cards.push(`
+      <div class="st-act" role="button" tabindex="0"
+           data-route="#/eleves?bloque_sur=${encodeURIComponent(topDiff.compId)}"
+           aria-label="Élèves bloqués sur ${escAttr(labelComp(topDiff.compId))}">
+        <span class="st-act-med">${medallion("ampoule", "indigo", { size: 38 })}</span>
+        <div class="st-act-body">
+          <div class="st-act-kick indigo">Point pédago</div>
+          <div class="st-act-ttl">${lbl}</div>
+          <div class="st-act-txt">${topDiff.count} élève${topDiff.count > 1 ? "s" : ""} noté${topDiff.count > 1 ? "s" : ""} « à revoir » dessus ces 60 derniers jours — prévois un temps dédié en leçon.</div>
+        </div>
+        ${CHEV}
+      </div>`);
+  }
+
+  if (cards.length === 0) {
+    cards.push(`
+      <div class="st-act">
+        <span class="st-act-med">${medallion("trophee", "gold", { size: 38 })}</span>
+        <div class="st-act-body">
+          <div class="st-act-kick indigo">Rien d'urgent</div>
+          <div class="st-act-ttl">Tout roule</div>
+          <div class="st-act-txt">Pas d'examen imminent, personne en silence, aucun blocage répété.</div>
+        </div>
+      </div>`);
+  }
+
+  return `<div class="st-act-list">${cards.slice(0, 3).join("")}</div>`;
+}
+
+// ── Bloc 2 : prêts pour l'examen ──
+function renderPrets({ prets }) {
+  if (prets.length === 0) {
+    return `<div class="st-card"><div class="st-empty">
+      Aucune compétence validée pour l'instant — les jauges de tes élèves apparaîtront ici.
+    </div></div>`;
+  }
+  const rows = prets
+    .map((e) => {
+      const nm = nomCourt(e);
+      const pct = Math.round((e.acquis / REMC_TOTAL) * 100);
+      const nbManque = REMC_TOTAL - e.acquis;
+      const manque = e.manque.length
+        ? `manque : ${esc(e.manque.join(", "))}${nbManque > 3 ? ` + ${nbManque - 3} autres` : ""}`
+        : "livret complet";
+      return `
+      <div class="st-row" role="button" tabindex="0" data-eleve-id="${esc(e.id)}"
+           aria-label="Livret de ${nomAttr(e)} — ${e.acquis} compétence${e.acquis > 1 ? "s" : ""} acquise${e.acquis > 1 ? "s" : ""} sur ${REMC_TOTAL}">
+        <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
+        <div class="st-row-body">
+          <div class="st-row-nom">${nm}</div>
+          <div class="st-gauge">
+            <span class="st-gauge-track"><span class="st-gauge-fill" style="width:${pct}%"></span></span>
+            <span class="st-gauge-n">${e.acquis}<small>/${REMC_TOTAL}</small></span>
+          </div>
+          <div class="st-row-meta">${manque}</div>
+        </div>
+        ${CHEV}
+      </div>`;
     })
     .join("");
-
-  // Label hero
-  const heroLabel = isSemaine
-    ? "Validations cette semaine"
-    : "Validations ce mois";
-
-  // Top qui progresse
-  const topListHtml = renderTopProgresse(topList, isSemaine);
-
-  return `
-    <!-- Hero indigo -->
-    <div class="ins-hero">
-      <div class="ins-hero-label">${heroLabel}</div>
-      <div class="ins-hero-row">
-        <div class="ins-hero-big">${count}</div>
-        ${deltaHtml}
-      </div>
-      <div class="ins-hero-spark" aria-hidden="true">
-        ${sparkBars}
-      </div>
-    </div>
-
-    <!-- Bento 3 tuiles -->
-    <div class="ins-bento">
-      <div class="ins-bt">
-        <div class="ins-bt-val green">${data.nbActifs}</div>
-        <div class="ins-bt-lbl">&#233;l&#232;ves actifs</div>
-      </div>
-      <div class="ins-bt">
-        <div class="ins-bt-val amber">${data.nbEnApproche}</div>
-        <div class="ins-bt-lbl">En approche</div>
-      </div>
-      <div class="ins-bt">
-        <div class="ins-bt-val red">${data.nbRelancer}</div>
-        <div class="ins-bt-lbl">&#192; relancer</div>
-      </div>
-    </div>
-
-    <!-- Activite 7 derniers jours -->
-    <div class="ins-sec-lbl">Activit&#233; &middot; 7 derniers jours</div>
-    ${renderActivityChart(data)}
-
-    <!-- Qui progresse le plus -->
-    <div class="ins-sec-lbl">Qui progresse le plus</div>
-    ${topListHtml}
-
-    <!-- Tabs avancent / en pause -->
-    <div class="ins-sec-lbl">Tes &#233;l&#232;ves ce mois</div>
-    <div class="ins-tabs" role="tablist" id="ins-tabs">
-      <button class="ins-tab${_tab === "progressent" ? " active" : ""}"
-              data-tab="progressent" role="tab" type="button">
-        Avancent (${data.topProgressent.length})
-      </button>
-      <button class="ins-tab${_tab === "pause" ? " active" : ""}"
-              data-tab="pause" role="tab" type="button">
-        En pause (${data.topStagnent.length})
-      </button>
-    </div>
-    <div id="ins-eleves-list">
-      ${renderElevesList(_tab, data)}
-    </div>
-
-    <!-- Recommandations -->
-    <div class="ins-sec-lbl">&#192; faire cette semaine</div>
-    ${renderRecoSection(data)}
-  `;
+  return `<div class="st-card"><div class="st-rows">${rows}</div></div>`;
 }
 
-// ─── Graphe activite 7 jours ──────────────────────────────────
-function renderActivityChart({ heatmapDay, spark7 }) {
-  // On utilise spark7 pour les 7 derniers jours absolus avec labels generiques
-  const today = new Date();
-  const labels = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today.getTime() - i * 86400000);
-    labels.push(JOURS_COURT[(d.getDay() + 6) % 7]);
+// ── Bloc 3 : silencieux ──
+function renderSilencieux({ silencieux }) {
+  const n = silencieux.length;
+  if (n === 0) {
+    return `<div class="st-card" id="st-sil-card"><div class="st-empty">
+      Personne en silence — tous tes élèves ont donné signe de vie ces ${SILENCE_JOURS} derniers jours.
+    </div></div>`;
   }
-
-  const totals = spark7;
-  const maxTotal = Math.max(...totals);
-
-  if (maxTotal === 0) {
-    return `<div class="ins-card ins-empty">
-      Aucune validation ces 7 derniers jours.
-    </div>`;
-  }
-
-  const peakIdx = totals.indexOf(maxTotal);
-  const bars = totals
-    .map((n, j) => {
-      const isPeak = j === peakIdx;
-      const pct = n > 0 ? Math.max(8, Math.round((n / maxTotal) * 100)) : 6;
+  const visibles = _showAllSilencieux ? silencieux : silencieux.slice(0, 3);
+  const rows = visibles
+    .map((e) => {
+      const nm = nomCourt(e);
+      const depuis =
+        e.daysAgo != null ? `depuis ${e.daysAgo} j` : "jamais vu sur l'app";
       return `
-      <div class="ins-bar-col">
-        <div class="ins-bar-inner${isPeak ? " peak" : ""}"
-             style="height:${pct}%;width:100%"></div>
-        <span class="ins-bar-day${isPeak ? " peak" : ""}">${esc(labels[j])}</span>
+      <div class="st-row" role="button" tabindex="0" data-eleve-id="${esc(e.id)}"
+           aria-label="Livret de ${nomAttr(e)} — silencieux ${escAttr(depuis)}">
+        <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
+        <div class="st-row-body"><div class="st-row-nom">${nm}</div></div>
+        <span class="st-row-val">${esc(depuis)}</span>
+        ${CHEV}
+      </div>`;
+    })
+    .join("");
+  const moreBtn =
+    n > 3 && !_showAllSilencieux
+      ? `<button class="st-more" id="st-more-sil" type="button">Voir les ${n}</button>`
+      : "";
+  return `<div class="st-card" id="st-sil-card">
+    <div class="st-sil-head">
+      <span class="st-sil-dot" aria-hidden="true"></span>
+      <span class="st-sil-n">${n} élève${n > 1 ? "s" : ""} silencieux</span>
+    </div>
+    <div class="st-rows">${rows}</div>
+    ${moreBtn}
+  </div>`;
+}
+
+// ── Bloc 4 : révisions élèves ──
+function renderRevisions({
+  revDays,
+  nbReviseurs7j,
+  nbActifs,
+  topReviseurs,
+  quizKo,
+}) {
+  if (quizKo) {
+    return `<div class="st-card"><div class="st-empty">
+      Données de révision indisponibles pour le moment — réessaie un peu plus tard.
+    </div></div>`;
+  }
+  if (nbReviseurs7j === 0) {
+    return `<div class="st-card"><div class="st-empty">
+      Aucun élève n'a révisé ces 7 derniers jours. Un mot en leçon (« t'as vu ta fiche ? ») relance souvent la machine.
+    </div></div>`;
+  }
+  const maxN = Math.max(...revDays.map((d) => d.n), 1);
+  const cols = revDays
+    .map((d) => {
+      const h = d.n > 0 ? Math.max(14, Math.round((d.n / maxN) * 100)) : 0;
+      return `
+      <div class="st-col">
+        <span class="st-col-n${d.n === 0 ? " zero" : ""}">${d.n}</span>
+        <div class="st-col-barzone">
+          ${d.n > 0 ? `<div class="st-col-bar" style="height:${h}%"></div>` : `<div class="st-col-base"></div>`}
+        </div>
+        <span class="st-col-day${d.isToday ? " auj" : ""}">${d.isToday ? "auj." : esc(d.label)}</span>
       </div>`;
     })
     .join("");
 
-  return `<div class="ins-card">
-    <div class="ins-bars">${bars}</div>
-  </div>`;
-}
-
-// ─── Top qui progresse ────────────────────────────────────────
-function renderTopProgresse(list, isSemaine) {
-  if (list.length === 0) {
-    return `<div class="ins-empty">
-      Aucune validation ${isSemaine ? "cette semaine" : "ce mois"} pour l’instant.
-    </div>`;
-  }
-  return `<div class="ins-prog-list">
-    ${list
-      .map((e, i) => {
-        const nom = esc(`${e.prenom || ""} ${e.nom || ""}`.trim() || "Élève");
-        const valsCount = isSemaine ? e.valsWeek || 0 : e.valsMonth || 0;
-        const color = avatarColor(e.id);
-        const inits = esc(initiales(e.prenom, e.nom));
-        let avHtml;
-        if (e.avatar_url) {
-          avHtml = `<img src="${esc(e.avatar_url)}" alt="" width="32" height="32"
-                        style="border-radius:50%;object-fit:cover;" loading="lazy">`;
-        } else {
-          avHtml = `<span class="ins-prog-av" style="background:${color}">${inits}</span>`;
-        }
-        return `<div class="ins-prog-row" data-eleve-id="${esc(e.id)}"
-                     role="button" tabindex="0" aria-label="Livret de ${nom}"
-                     style="animation:insBtIn .3s ease ${i * 50}ms both">
-          ${avHtml}
-          <span class="ins-prog-nom">${nom}</span>
-          <span class="ins-prog-delta">+${valsCount}<small> validations</small></span>
-        </div>`;
-      })
-      .join("")}
-  </div>`;
-}
-
-// ─── Liste eleves avancent / en pause ─────────────────────────
-function renderElevesList(tab, data) {
-  const list = tab === "progressent" ? data.topProgressent : data.topStagnent;
-  if (list.length === 0) {
-    const txt =
-      tab === "progressent"
-        ? "Aucune validation cette semaine pour l’instant."
-        : "Personne en pause. Tout le monde avance !";
-    return `<div class="ins-empty">${txt}</div>`;
-  }
-  return `<div class="ins-prog-list">
-    ${list
-      .map((e, i) => {
-        const nom = esc(`${e.prenom || ""} ${e.nom || ""}`.trim() || "Élève");
-        const color = avatarColor(e.id);
-        const inits = esc(initiales(e.prenom, e.nom));
-        let avHtml;
-        if (e.avatar_url) {
-          avHtml = `<img src="${esc(e.avatar_url)}" alt="" width="32" height="32"
-                        style="border-radius:50%;object-fit:cover;" loading="lazy">`;
-        } else {
-          avHtml = `<span class="ins-prog-av" style="background:${color}">${inits}</span>`;
-        }
-        const meta =
-          tab === "progressent"
-            ? `+${e.valsWeek || 0} validations cette semaine`
-            : `Rien validé depuis ${e.daysAgo ? `${e.daysAgo} jours` : "longtemps"}`;
-        return `<div class="ins-prog-row" data-eleve-id="${esc(e.id)}"
-                     role="button" tabindex="0" aria-label="Livret de ${nom}"
-                     style="animation:insBtIn .3s ease ${i * 50}ms both">
-          ${avHtml}
-          <div style="flex:1;min-width:0">
-            <div class="ins-prog-nom">${nom}</div>
-            <div style="font:500 11px/1 'Inter',sans-serif;color:#646a8c;margin-top:3px">${esc(meta)}</div>
-          </div>
-        </div>`;
-      })
-      .join("")}
-  </div>`;
-}
-
-// ─── Recommandations ──────────────────────────────────────────
-function renderRecoSection({ recos }) {
-  const cards = recos
-    .map(
-      (r) => `
-    <div class="ins-reco-card${r.route ? " ins-reco-card--link" : ""}"
-         ${r.route ? `data-route="${esc(r.route)}" role="button" tabindex="0"` : ""}>
-      <span class="ins-reco-icon">${r.icon}</span>
-      <div class="ins-reco-body">
-        <div class="ins-reco-ttl">${esc(r.ttl)}</div>
-        <div class="ins-reco-txt">${r.txt}</div>
-      </div>
-    </div>
-  `,
-    )
+  const felic = topReviseurs
+    .map((e) => {
+      const nm = nomCourt(e);
+      return `
+      <div class="st-row" role="button" tabindex="0" data-eleve-id="${esc(e.id)}"
+           aria-label="Livret de ${nomAttr(e)} — ${e.nQuiz} quiz ces 7 derniers jours">
+        <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
+        <div class="st-row-body"><div class="st-row-nom">${nm}</div></div>
+        <span class="st-row-val">${e.nQuiz} <small>quiz</small></span>
+        ${CHEV}
+      </div>`;
+    })
     .join("");
 
-  return `<div class="ins-reco-list">${cards}</div>`;
+  return `<div class="st-card">
+    <div class="st-rev-big">${nbReviseurs7j} <small>sur ${nbActifs}</small></div>
+    <div class="st-rev-sub">élève${nbReviseurs7j > 1 ? "s ont" : " a"} révisé ces 7 derniers jours</div>
+    <div class="st-rev-hint">Chaque barre compte les élèves différents qui ont révisé ce jour-là.</div>
+    <div class="st-chart" role="img"
+         aria-label="Élèves ayant révisé par jour sur 7 jours : ${revDays.map((d) => `${d.isToday ? "aujourd'hui" : d.label} ${d.n}`).join(", ")}">
+      ${cols}
+    </div>
+    ${felic ? `<div class="st-felic-lbl">À féliciter</div><div class="st-rows">${felic}</div>` : ""}
+  </div>`;
+}
+
+// ── Bloc 5 : réussite examen ──
+function renderReussite({
+  nbRecus12m,
+  nbResultats12m,
+  permisAnnee,
+  nbExamsAVenir,
+}) {
+  if (nbResultats12m < 3) {
+    return `
+      <div class="st-act" role="button" tabindex="0" data-route="#/eleves"
+           aria-label="Voir mes élèves">
+        <span class="st-act-med">${medallion("medaille", "gold", { size: 38 })}</span>
+        <div class="st-act-body">
+          <div class="st-act-ttl">Construis ton taux de réussite</div>
+          <div class="st-act-txt">Saisis les résultats d'examen de tes élèves (reçu ou raté) depuis leur fiche : ton taux s'affichera ici, à ton nom.${
+            nbResultats12m > 0
+              ? ` Déjà ${nbResultats12m} résultat${nbResultats12m > 1 ? "s" : ""} saisi${nbResultats12m > 1 ? "s" : ""}.`
+              : ""
+          }</div>
+        </div>
+        ${CHEV}
+      </div>`;
+  }
+  const taux = Math.round((nbRecus12m / nbResultats12m) * 100);
+  const annee = new Date().getFullYear();
+  const chips = [];
+  if (permisAnnee > 0) chips.push(`${permisAnnee} permis en ${annee}`);
+  if (nbExamsAVenir > 0)
+    chips.push(
+      `${nbExamsAVenir} examen${nbExamsAVenir > 1 ? "s" : ""} à venir`,
+    );
+  return `<div class="st-proof">
+    <div class="st-proof-lbl">Taux de réussite</div>
+    <div class="st-proof-big">${taux}<small> %</small></div>
+    <div class="st-proof-sub">${nbRecus12m} reçu${nbRecus12m > 1 ? "s" : ""} sur ${nbResultats12m} · 12 derniers mois</div>
+    ${chips.length ? `<div class="st-proof-chips">${chips.map((c) => `<span class="st-proof-chip">${esc(c)}</span>`).join("")}</div>` : ""}
+  </div>`;
+}
+
+// ── Bloc 6 : portefeuille ──
+function renderPortefeuille({ tranches, nbActifs }) {
+  const maxCount = Math.max(...tranches.map((t) => t.count), 1);
+  const lines = tranches
+    .map((t) => {
+      const w =
+        t.count > 0 ? Math.max(6, Math.round((t.count / maxCount) * 100)) : 0;
+      return `
+      <div class="st-pf-line">
+        <div class="st-pf-lbl">
+          <span class="st-pf-name">${esc(t.nom)}</span>
+          <span class="st-pf-range">${esc(t.range)} du livret</span>
+        </div>
+        <div class="st-pf-barline">
+          <span class="st-pf-track">${t.count > 0 ? `<span class="st-pf-bar${t.full ? " full" : ""}" style="width:${w}%"></span>` : ""}</span>
+          <span class="st-pf-n">${t.count} <small>élève${t.count > 1 ? "s" : ""}</small></span>
+        </div>
+      </div>`;
+    })
+    .join("");
+  return `<div class="st-card">
+    <div class="st-pf-intro">Répartition de tes <b>${nbActifs} élève${nbActifs > 1 ? "s" : ""}</b> selon l'avancement du livret (${REMC_TOTAL} compétences).</div>
+    ${lines}
+  </div>`;
 }
 
 // ─── Wire ─────────────────────────────────────────────────────
-function wireAll(root, me, data) {
-  // Segment periode
-  root.querySelectorAll(".ins-seg-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      haptic("select");
-      _period = btn.dataset.period;
-      root
-        .querySelectorAll(".ins-seg-btn")
-        .forEach((b) => b.classList.toggle("active", b === btn));
-      // Re-render le contenu du body
-      const bodyEl = root.querySelector(".ins-body");
-      if (bodyEl) {
-        bodyEl.innerHTML = renderPeriodContent(data);
-        wireBodyEvents(root, me, data);
-      }
-      track("insights.period.click", { period: _period });
-    });
-  });
-
-  wireBodyEvents(root, me, data);
+function wireAll(root, data) {
+  wireRoutes(root);
+  wireEleveRows(root);
+  wireSilMore(root, data);
 }
 
-function wireBodyEvents(root, me, data) {
-  // Tabs avancent / en pause
-  root.querySelectorAll(".ins-tab[data-tab]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      haptic("select");
-      _tab = btn.dataset.tab;
-      root
-        .querySelectorAll(".ins-tab")
-        .forEach((b) => b.classList.toggle("active", b === btn));
-      const listEl = root.querySelector("#ins-eleves-list");
-      if (listEl) {
-        listEl.innerHTML = renderElevesList(_tab, data);
-        wireEleveRows(listEl);
-      }
-      track("insights.tab.click", { tab: _tab });
-    });
+function wireSilMore(root, data) {
+  root.querySelector("#st-more-sil")?.addEventListener("click", () => {
+    haptic("select");
+    _showAllSilencieux = true;
+    track("insights.silencieux.expand", { count: data.silencieux.length });
+    const card = root.querySelector("#st-sil-card");
+    if (!card) return;
+    card.outerHTML = renderSilencieux(data);
+    const fresh = root.querySelector("#st-sil-card");
+    if (fresh) wireEleveRows(fresh);
   });
+}
 
-  // Lignes eleves (top progresse + liste tabs)
-  wireEleveRows(root);
+function activate(el, handler) {
+  el.addEventListener("click", handler);
+  el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handler();
+    }
+  });
+}
 
-  // Reco cards
-  root.querySelectorAll(".ins-reco-card--link[data-route]").forEach((card) => {
-    const handler = () => {
+function wireRoutes(root) {
+  root.querySelectorAll("[data-route]").forEach((el) => {
+    activate(el, () => {
       haptic("impact");
-      track("insights.reco.click", { route: card.dataset.route });
-      navigate(card.dataset.route);
-    };
-    card.addEventListener("click", handler);
-    card.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        handler();
-      }
+      track("insights.action.click", { route: el.dataset.route });
+      navigate(el.dataset.route);
     });
   });
 }
 
 function wireEleveRows(container) {
-  container.querySelectorAll(".ins-prog-row[data-eleve-id]").forEach((row) => {
-    const handler = () => {
+  container.querySelectorAll(".st-row[data-eleve-id]").forEach((row) => {
+    activate(row, () => {
       haptic("impact");
       track("insights.eleve.open", { eleve_id: row.dataset.eleveId });
       navigate(`#/livret/${row.dataset.eleveId}`);
-    };
-    row.addEventListener("click", handler);
-    row.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        handler();
-      }
     });
   });
 }
