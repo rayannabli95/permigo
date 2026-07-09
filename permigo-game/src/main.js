@@ -6,6 +6,7 @@ import { restoreSession, sb } from "@/auth/auth.js";
 import { setupAuthListener } from "@/auth/auth-listener.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { route } from "@/router.js";
+import { accessGateFor } from "@/auth/route-guards.js";
 import { track } from "@/services/analytics.js";
 import { startNotifListener } from "@/services/notif-listener.js";
 import { toast } from "@/components/common/toast.js";
@@ -106,27 +107,13 @@ async function boot() {
       return;
     }
 
-    // RGPD : élève mineur (<15 ans) en attente du consentement parental → bloqué
-    if (
-      me.role === "eleve" &&
-      me.parental_consent_required &&
-      !me.parental_consent_given_at
-    ) {
-      const { mountConsentBlocked } =
-        await import("@/pages/eleve/consent-blocked.js");
-      mountConsentBlocked(app, me);
-      return; // pas de chrome, aucun accès tant que pas consenti
-    }
-
-    // Onboarding magique — élèves jamais passés par le flow d'accueil
-    if (
-      me.role === "eleve" &&
-      !me.first_value_action_at &&
-      !localStorage.getItem("permigo_eleve_onboarding_done")
-    ) {
-      const { mount } = await import("@/pages/onboarding/index.js");
-      await mount(app);
-      return; // pas de chrome pendant l'onboarding
+    // Murs d'accès (consentement parental mineur, onboarding élève neuf).
+    // Source unique partagée avec le router (accessGateFor) → les deux chemins
+    // — boot ET navigation par hash — appliquent EXACTEMENT les mêmes règles.
+    const gate = accessGateFor(me);
+    if (gate) {
+      await gate(app, me);
+      return; // pas de chrome tant que le mur n'est pas levé
     }
 
     // Coordination overlays 1er lancement : on arme la phase popup AVANT le
