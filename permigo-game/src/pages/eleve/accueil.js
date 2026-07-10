@@ -37,7 +37,12 @@ import {
   mountLeagueHero,
   LEAGUE_HERO_CSS,
 } from "@/components/eleve/league-hero.js";
-import { getDailyStreak } from "@/services/daily-quiz.js";
+import {
+  getDailyStreak,
+  todayKey,
+  yesterdayKey,
+  dayKey,
+} from "@/services/daily-quiz.js";
 import { isStandalone } from "@/utils/pwa.js";
 import { openInstallSheet } from "@/components/common/install-nudge.js";
 
@@ -1019,12 +1024,12 @@ export async function mount(root) {
     // APRÈS le quiz ; le read `streaks` ci-dessus étant fait AVANT cet avance,
     // on reflète le bump côté client si un quiz a bien été fait aujourd'hui
     // (affichage + célébration immédiats, sans round-trip en plus).
-    const _todayStr = new Date().toISOString().slice(0, 10);
-    const _yesterday = new Date(Date.now() - 86400000)
-      .toISOString()
-      .slice(0, 10);
+    // Heure LOCALE (l'élève vit en local ; le serveur date la série en
+    // Europe/Paris → mêmes jours en France). Cohérent avec heatmap + daily-quiz.
+    const _todayStr = todayKey();
+    const _yesterday = yesterdayKey();
     const _didActivityToday = (attemptsRes.value?.data || []).some(
-      (a) => a.completed_at && a.completed_at.slice(0, 10) === _todayStr,
+      (a) => a.completed_at && dayKey(a.completed_at) === _todayStr,
     );
     let streak = rawStreak;
     if (_didActivityToday && rawStreak.last_activity_date !== _todayStr) {
@@ -1227,10 +1232,10 @@ function computeWorlds(validatedIds) {
 
 function streakStatus(streak) {
   if (!streak.current_streak) return "broken";
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKey();
   // Série d'activité : « sauvée » seulement si une activité a été faite AUJOURD'HUI.
   if (streak.last_activity_date === today) return "saved";
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const yesterday = yesterdayKey();
   // Dernière activité ≥ 2 jours → la série est effectivement perdue.
   if (streak.last_activity_date !== yesterday) return "broken";
   // Dernière activité HIER, rien encore aujourd'hui → en danger (saute à minuit).

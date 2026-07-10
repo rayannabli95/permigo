@@ -3,6 +3,7 @@
 // RPC : get_my_achievements()
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
+import { yesterdayKey } from "@/services/daily-quiz.js";
 import { icon } from "@/utils/icons.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -460,7 +461,7 @@ export async function mount(root, openKey = null) {
     if (achRes.value?.error)
       console.warn("[trophees] get_my_achievements:", achRes.value.error);
     const _skRow = strkRes.value?.data;
-    const _yStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const _yStr = yesterdayKey();
     // Série d'activité : périmée si dernière activité < hier (cf. accueil).
     const stats = {
       compCount: cntRes.value?.count ?? 0,

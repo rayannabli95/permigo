@@ -4,6 +4,7 @@
 // Permet de visualiser TOUT ce qui est débloquable + l'état (acquis/verrouillé)
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
+import { yesterdayKey } from "@/services/daily-quiz.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
@@ -291,7 +292,7 @@ export async function mount(root) {
     );
     validatedCount = validRes.value?.count ?? 0;
     const _skRow = streakRes.value?.data;
-    const _yStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const _yStr = yesterdayKey();
     // Série d'activité : périmée si dernière activité < hier (sinon on afficherait
     // un vieux chiffre alors que la série est cassée). Cf. accueil streakStatus.
     currentStreak =

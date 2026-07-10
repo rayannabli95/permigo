@@ -12,6 +12,7 @@
 //  7. Bottom-sheet RGPD maison (remplace l'alert() auto-école incorrect)
 // ═══════════════════════════════════════════════════════════════
 import { sb, logout } from "@/auth/auth.js";
+import { yesterdayKey } from "@/services/daily-quiz.js";
 import { getCurUser, setCurUser } from "@/auth/cur-user.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -671,7 +672,7 @@ export async function mount(root) {
           .maybeSingle(),
         sb.rpc("get_my_referral_stats"),
       ]);
-    const _yStrE = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const _yStrE = yesterdayKey();
     // Série d'activité : périmée si dernière activité < hier (cf. accueil).
     eleveStreak =
       streakRow && streakRow.last_activity_date >= _yStrE
@@ -1649,7 +1650,7 @@ async function mountEleveArene(root, me) {
     ]);
 
   const validated = (valData || []).length;
-  const _yStrS = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const _yStrS = yesterdayKey();
   // Série d'activité : périmée si dernière activité < hier (cf. accueil).
   const streak =
     streakRow && streakRow.last_activity_date >= _yStrS

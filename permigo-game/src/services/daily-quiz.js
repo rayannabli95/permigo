@@ -39,8 +39,14 @@ export function todayKey() {
 }
 
 /** Clé du jour précédent en heure locale. */
-function yesterdayKey() {
+export function yesterdayKey() {
   const d = new Date(Date.now() - 86_400_000);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** Clé (YYYY-MM-DD) en heure locale pour un timestamp donné (ex : completed_at). */
+export function dayKey(dateLike) {
+  const d = new Date(dateLike);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
