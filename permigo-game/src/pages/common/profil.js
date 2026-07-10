@@ -666,12 +666,17 @@ export async function mount(root) {
           .eq("statut", "acquis"),
         sb
           .from("streaks")
-          .select("current_streak")
+          .select("current_streak, last_activity_date")
           .eq("user_id", me.id)
           .maybeSingle(),
         sb.rpc("get_my_referral_stats"),
       ]);
-    eleveStreak = streakRow?.current_streak ?? 0;
+    const _yStrE = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    // Série d'activité : périmée si dernière activité < hier (cf. accueil).
+    eleveStreak =
+      streakRow && streakRow.last_activity_date >= _yStrE
+        ? (streakRow.current_streak ?? 0)
+        : 0;
     permisData = {
       prenom: profile?.prenom || "",
       nom: profile?.nom || "",
@@ -1637,14 +1642,19 @@ async function mountEleveArene(root, me) {
         .eq("statut", "acquis"),
       sb
         .from("streaks")
-        .select("current_streak")
+        .select("current_streak, last_activity_date")
         .eq("user_id", me.id)
         .maybeSingle(),
       sb.rpc("get_my_achievements"),
     ]);
 
   const validated = (valData || []).length;
-  const streak = streakRow?.current_streak ?? 0;
+  const _yStrS = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  // Série d'activité : périmée si dernière activité < hier (cf. accueil).
+  const streak =
+    streakRow && streakRow.last_activity_date >= _yStrS
+      ? (streakRow.current_streak ?? 0)
+      : 0;
   const volants = typeof profile?.gemmes === "number" ? profile.gemmes : 0;
   const restantes = Math.max(0, REMC_TOTAL - validated);
   // Photo de profil : même source que le header (avatar équipé de la boutique,

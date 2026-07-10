@@ -451,7 +451,7 @@ export async function mount(root, openKey = null) {
         .eq("statut", "acquis"),
       sb
         .from("streaks")
-        .select("current_streak")
+        .select("current_streak, last_activity_date")
         .eq("user_id", me.id)
         .maybeSingle(),
     ]);
@@ -459,9 +459,15 @@ export async function mount(root, openKey = null) {
     // verrouillé) — l'élève voit les trophées à viser au lieu d'un écran vide.
     if (achRes.value?.error)
       console.warn("[trophees] get_my_achievements:", achRes.value.error);
+    const _skRow = strkRes.value?.data;
+    const _yStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    // Série d'activité : périmée si dernière activité < hier (cf. accueil).
     const stats = {
       compCount: cntRes.value?.count ?? 0,
-      streak: strkRes.value?.data?.current_streak ?? 0,
+      streak:
+        _skRow && _skRow.last_activity_date >= _yStr
+          ? (_skRow.current_streak ?? 0)
+          : 0,
     };
     renderAll(root, achRes.value?.data ?? [], stats, openKey);
   } catch (e) {

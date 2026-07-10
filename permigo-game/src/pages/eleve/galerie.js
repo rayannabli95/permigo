@@ -282,7 +282,7 @@ export async function mount(root) {
         .eq("statut", "acquis"),
       sb
         .from("streaks")
-        .select("current_streak")
+        .select("current_streak, last_activity_date")
         .eq("user_id", me.id)
         .maybeSingle(),
     ]);
@@ -290,7 +290,14 @@ export async function mount(root) {
       (achRes.value?.data ?? []).map((u) => [u.achievement_key, u]),
     );
     validatedCount = validRes.value?.count ?? 0;
-    currentStreak = streakRes.value?.data?.current_streak ?? 0;
+    const _skRow = streakRes.value?.data;
+    const _yStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    // Série d'activité : périmée si dernière activité < hier (sinon on afficherait
+    // un vieux chiffre alors que la série est cassée). Cf. accueil streakStatus.
+    currentStreak =
+      _skRow && _skRow.last_activity_date >= _yStr
+        ? (_skRow.current_streak ?? 0)
+        : 0;
   } catch (e) {
     console.warn("[galerie] fetch failed", e);
     import("@/components/common/toast.js")
