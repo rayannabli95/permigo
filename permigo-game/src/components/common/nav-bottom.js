@@ -77,7 +77,15 @@ const TABS = {
   ],
   enseignant: [
     { id: "default", label: "Aujourd'hui", ico: "activity" },
-    { id: "eleves", label: "Mes élèves", ico: "users" },
+    // « Mes élèves » = hub à onglets (Liste · Relances · Classement, #340).
+    // match : anciennes routes top-level (redirigent vers le hub) + la fiche
+    // bilan (accessible depuis une ligne élève) doivent aussi allumer l'onglet.
+    {
+      id: "eleves",
+      label: "Mes élèves",
+      ico: "users",
+      match: ["relances", "classement-eleves", "bilan"],
+    },
     // « Progression » regroupe Parcours + Trophées + Ligue (décision figée).
     // L'onglet « Récompenses » (gemmes) a été retiré : monnaie = validations.
     {

@@ -105,10 +105,14 @@ const ROUTES = {
     // point de saisie. On garde la route en alias vers log-session (?eleveId=).
     validation: () => import("@/pages/enseignant/log-session.js"),
     eleves: () => import("@/pages/enseignant/mes-eleves.js"),
-    relances: () => import("@/pages/enseignant/relances.js"),
+    // Chantier nav simplifiée : « Mes élèves » est désormais un hub à onglets
+    // (Liste · Relances · Classement). Les anciennes routes top-level restent
+    // valides (liens/notifs existants) mais atterrissent sur le hub avec le
+    // bon onglet actif — mes-eleves.js lit location.hash pour le déterminer
+    // (même alias que `validation` → log-session.js ci-dessus).
+    relances: () => import("@/pages/enseignant/mes-eleves.js"),
     recompenses: () => import("@/pages/enseignant/recompenses.js"),
-    "classement-eleves": () =>
-      import("@/pages/enseignant/classement-eleves.js"),
+    "classement-eleves": () => import("@/pages/enseignant/mes-eleves.js"),
     livret: () => import("@/pages/enseignant/livret-remc.js"),
     insights: () => import("@/pages/enseignant/insights.js"),
     bilan: () => import("@/pages/enseignant/bilan.js"),

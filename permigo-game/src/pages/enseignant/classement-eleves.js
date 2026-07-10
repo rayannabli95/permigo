@@ -43,25 +43,17 @@ async function fetchAllRows(buildQuery) {
   }
 }
 
-export async function mount(root, mode) {
-  const me = getCurUser();
-  if (!me || (me.role !== "enseignant" && me.role !== "moniteur")) {
-    root.innerHTML = "<p>Réservé aux moniteurs.</p>";
-    return;
-  }
-
-  const isTheorie = mode === "theorie";
-  track("page.view", {
-    page: "classement_eleves",
-    role: me.role,
-    mode: isTheorie ? "theorie" : "pratique",
-  });
-
-  root.innerHTML = `${ARENE_CSS}<div class="arn" style="${ACCENT}">
-    ${_header(isTheorie, 0)}
-    <div class="arn-empty"><div class="arn-empty-txt">Chargement…</div></div>
-  </div>`;
-
+/**
+ * Fetch + transforme les données de classement d'un moniteur.
+ * Exportée : réutilisée telle quelle par le hub « Mes élèves » (onglet
+ * Classement), qui la re-skinne en léger (maquette Pupitre) au lieu du
+ * skin Arène nuit — même logique/mêmes requêtes, présentation différente.
+ * @param {{id:string}} me
+ * @param {{isTheorie?:boolean}} opts
+ * @returns {Promise<{error:boolean, ranked:Array, hof:Array, isTheorie:boolean}>}
+ *   `ranked`/`hof` : lignes `{id,prenom,nom,avatar_url,acquis,quizCount,avgScore,streak,recu}`
+ */
+export async function fetchRanking(me, { isTheorie = false } = {}) {
   // ── Fetch : élèves de l'école, mes validations, examens « reçu », streaks ──
   const [elevesRes, valsRes, examsRes, streaksRes] = await Promise.all([
     sb
@@ -83,11 +75,7 @@ export async function mount(root, mode) {
   ]);
 
   if (elevesRes.error) {
-    toast(
-      "Classement indisponible. Vérifie ta connexion, puis réessaie.",
-      "error",
-    );
-    return;
+    return { error: true, ranked: [], hof: [], isTheorie };
   }
 
   const elevesMap = {};
@@ -178,6 +166,38 @@ export async function mount(root, mode) {
           (a.prenom || "").localeCompare(b.prenom || "")
         : b.acquis - a.acquis || (a.prenom || "").localeCompare(b.prenom || ""),
     );
+
+  return { error: false, ranked, hof, isTheorie };
+}
+
+export async function mount(root, mode) {
+  const me = getCurUser();
+  if (!me || (me.role !== "enseignant" && me.role !== "moniteur")) {
+    root.innerHTML = "<p>Réservé aux moniteurs.</p>";
+    return;
+  }
+
+  const isTheorie = mode === "theorie";
+  track("page.view", {
+    page: "classement_eleves",
+    role: me.role,
+    mode: isTheorie ? "theorie" : "pratique",
+  });
+
+  root.innerHTML = `${ARENE_CSS}<div class="arn" style="${ACCENT}">
+    ${_header(isTheorie, 0)}
+    <div class="arn-empty"><div class="arn-empty-txt">Chargement…</div></div>
+  </div>`;
+
+  const { error, ranked, hof } = await fetchRanking(me, { isTheorie });
+
+  if (error) {
+    toast(
+      "Classement indisponible. Vérifie ta connexion, puis réessaie.",
+      "error",
+    );
+    return;
+  }
 
   if (ranked.length === 0 && hof.length === 0) {
     root.innerHTML = `${ARENE_CSS}<div class="arn" style="${ACCENT}">
