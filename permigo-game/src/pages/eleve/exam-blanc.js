@@ -169,6 +169,16 @@ export async function mount(root, param) {
 
   root.innerHTML = renderStyles() + renderSelection();
   wireSelection(root);
+
+  // Deep-link depuis le hub Réviser : #/exam-blanc/mes-fautes
+  // → amène directement sur le bloc « Tes points faibles » (s'il existe).
+  // Best-effort : si l'élève n'a pas encore assez de données (bloc absent),
+  // on reste simplement sur l'écran de sélection, sans erreur.
+  if (param === "mes-fautes") {
+    root
+      .querySelector(".exb-weak")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 // ─── Écran 1 : sélection du parcours ─────────────────────────
