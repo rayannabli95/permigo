@@ -1,50 +1,131 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — Hub « Réviser » : LA porte d'entraînement de la CONDUITE.
+// Élève — Hub « Réviser » : la salle d'entraînement (maquette validée
+// Rayan, 2026-07 : mockups/nav-hub-reviser-A.html).
 //
-// Parti pris (validé Rayan) : Réviser = la conduite, PAS le code de la
-// route. Le différenciateur PermiGo passe donc devant. Le hero est
-// ADAPTATIF :
-//   • par défaut → « reprends ta prochaine fiche » (violet Arène) ;
-//   • si le moniteur a ciblé des compétences (table revision_focus) →
-//     sa demande prend le hero (doré) et passe avant tout. Les devoirs
-//     du moniteur ne s'affichent QUE là (retirés de l'accueil et de la
-//     page fiches — plus de doublon).
+// Hiérarchie (fidèle à la maquette) :
+//   1. Série (statut discret)
+//   2. Hero « L'Arène » — monde REMC en cours + étoiles + CTA Jouer +
+//      ligne ligue (Révision)
+//   3. « Aussi dans ta salle » — 4 modes : Examen blanc · Mes fautes ·
+//      Quiz éclair · Fiches de conduite
+//   4. Bulle du coach — conseil en règles simples (pas d'IA)
 //
-// DA « Arène Néo » : nuit-violet + or, matière premium, vrais médaillons
-// 3D (banque @/utils/medallions.js). Rendu local instantané ; les devoirs
-// moniteur arrivent en 1 fetch léger et remplacent le hero si présents.
+// ⚠️ Écart texte volontaire vs maquette : le kicker de l'Arène ne dit
+// PAS « ton entraînement au code » — la règle produit (theory-league.js)
+// interdit tout libellé « code »/« ETG » (PermiGo ne couvre pas l'ETG).
+// Remplacé par « ta révision », cohérent avec « Ligue Révision » ailleurs.
+//
+// DA « Arène Néo » : nuit-violet + or, toujours sombre (indépendant du
+// thème clair/sombre de l'app) — même exception assumée que quiz-ui.js /
+// exam-blanc.js / flash-quiz.js (écran d'entraînement dédié).
+//
+// Données 100% réelles (repli gracieux si indisponible, jamais inventées) :
+//   - Monde/étoiles   : table `validations` (eleve_id=moi) + data/remc.js + data/worlds.js
+//   - Ligue Révision  : RPC get_theory_leaderboard (déjà utilisé par classement.js)
+//   - Série           : utils/game-state.js getStreak() (local)
+//   - Examen blanc    : quiz_attempts (type=exam_blanc, hors ref_id="officiel")
+//   - Mes fautes      : utils/weak-points.js (local, alimenté par exam-blanc.js)
+//   - Quiz éclair     : table flash_quizzes (sent_to=moi, non répondu, non expiré)
+//   - Fiches lues     : localStorage rvc_read_v1 + data/fiches-conduite.js
+//
+// Le devoir ciblé du moniteur (`revision_focus`) n'est plus affiché ici
+// (retiré du hero pour coller à la maquette) : il reste visible dans
+// `#/revision-conduite` (qui lit déjà cette table) — pas de régression.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
+import { haptic } from "@/utils/haptic.js";
 import { getStreak } from "@/utils/game-state.js";
-import { FICHES, getFiche } from "@/data/fiches-conduite.js";
+import { getWeakPoints } from "@/utils/weak-points.js";
+import { theoryLeague } from "@/utils/theory-league.js";
+import { FICHES } from "@/data/fiches-conduite.js";
+import { REMC } from "@/data/remc.js";
+import { WORLDS } from "@/data/worlds.js";
 import { medallion } from "@/utils/medallions.js";
+import { toast } from "@/components/common/toast.js";
 
-const LS_READ_KEY = "rvc_read_v1"; // même clé que revision-conduite (fiches lues)
+const LS_READ_KEY = "rvc_read_v1"; // même clé que revision-conduite.js
 
-// Médaillons 3D des tuiles (1 seul style cohérent, banque centrale).
-const MED = {
-  fiches: medallion("fiches", "violet", { cls: "rvh-med" }),
-  faute: medallion("faute", "red", { cls: "rvh-med" }),
-  situ: medallion("cone", "teal", { cls: "rvh-med" }),
-  examConduite: medallion("voiture", "gold", { cls: "rvh-med" }),
-  centre: medallion("carte", "cyan", { cls: "rvh-med" }),
+// Seuil de réussite de l'examen blanc (/15) — même valeur que la constante
+// `PASS_THRESHOLD` de exam-blanc.js. Dupliquée volontairement (pas d'import
+// statique page→page : exam-blanc.js est un gros chunk dédié — quiz engine,
+// sons, banque de questions — que le router code-split à part ; l'importer
+// ici l'aurait fait fusionner dans le chunk du hub).
+const EXAM_BLANC_PASS = 12;
+
+// Médaillon du monde REMC en cours — même convention que quiz.js (CAT_MED).
+const WORLD_MED = {
+  1: ["volant", "gold"],
+  2: ["route", "blue"],
+  3: ["eclair", "violet"],
+  4: ["couronne", "gold"],
 };
 
-const ARROW = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const CHEVRON = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>`;
+// Seuils de déblocage des mondes — mêmes valeurs que parcours.js
+// (computeWorldStates / UNLOCK_REQ). Dupliqué ici volontairement : lecture
+// seule d'une petite constante, pas de dépendance vers une page.
+const UNLOCK_REQ = [null, 5, 6, 6];
 
+const CHEVRON = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>`;
+const PLAY = `<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.5-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5Z"/></svg>`;
+
+function ordinal(n) {
+  return n === 1 ? "ʳᵉ" : "ᵉ";
+}
+
+// ─── Logique métier : monde REMC en cours ─────────────────────────
+function computeCurrentWorld(validatedMap) {
+  const states = REMC.map((cat, idx) => {
+    const done = cat.subs.filter((s) => validatedMap[s.c]).length;
+    const total = cat.subs.length;
+    const complete = done === total;
+    let status;
+    if (idx === 0) {
+      status = complete ? "complete" : "in_progress";
+    } else {
+      const prevDone = REMC[idx - 1].subs.filter(
+        (s) => validatedMap[s.c],
+      ).length;
+      status =
+        prevDone < UNLOCK_REQ[idx]
+          ? "locked"
+          : complete
+            ? "complete"
+            : "in_progress";
+    }
+    return { idx, world: WORLDS[idx], done, total, complete, status };
+  });
+
+  const current = states.find((s) => s.status === "in_progress");
+  if (current) return { ...current, allDone: false };
+
+  const allDone = states.every((s) => s.complete);
+  if (allDone) {
+    const doneAll = states.reduce((n, s) => n + s.done, 0);
+    const totalAll = states.reduce((n, s) => n + s.total, 0);
+    return {
+      ...states[states.length - 1],
+      allDone: true,
+      done: doneAll,
+      total: totalAll,
+    };
+  }
+  return { ...states[0], allDone: false };
+}
+
+// ─── STYLE ─────────────────────────────────────────────────────────
 const STYLE = `<style>
-/* ── Monde de l'entraînement : Arène nuit-violet + or, full-bleed sous le header. ── */
 .rvh {
   --rvh-panel:#271850; --rvh-panel2:#2f1e5e; --rvh-panel-deep:#120a2e;
   --rvh-line:rgba(178,150,255,.22);
   --rvh-mu:#cabfef; --rvh-mu2:#9b8dcf;
   --rvh-gold-1:#ffe9a8; --rvh-gold-2:#ffd24a; --rvh-gold-3:#ff9c1c; --rvh-gold-deep:#c87d12;
   --rvh-violet:#a855f7; --rvh-violet-deep:#7c4dff; --rvh-violet-soft:#cbb9ff;
+  --rvh-go-1:#7ee83a; --rvh-go-2:#58cc02; --rvh-go-3:#46a302; --rvh-go-deep:#357c00;
+  --rvh-red:#ff6b6b; --rvh-blue:#54a0ff;
   position: relative;
   margin-top: calc(-1 * (var(--th, 52px) + env(safe-area-inset-top, 0px)));
   padding: calc(var(--th, 52px) + env(safe-area-inset-top, 0px) + 12px) 15px 96px;
@@ -102,151 +183,271 @@ const STYLE = `<style>
 .rvh-streak b { font: 800 12.5px/1 'Nunito', sans-serif; color: var(--rvh-gold-1); }
 .rvh-streak i { font: 700 11.5px/1 'Nunito', sans-serif; font-style: normal; color: var(--rvh-mu2); }
 
-/* ── HERO adaptatif (façon header premium : dégradé plein + panneaux + gloss) ── */
-.rvh-hero {
+/* ══ HERO — L'ARÈNE ══ */
+.rvh-arena {
   position: relative; z-index: 3; display: block; width: 100%; text-align: left; cursor: pointer;
   color: inherit; font: inherit; overflow: hidden;
-  border: 0; border-radius: 24px; padding: 18px; margin-bottom: 16px;
+  border: 1.5px solid rgba(255,210,74,.4); border-radius: 26px; padding: 18px 17px 16px; margin-bottom: 18px;
+  background:
+    radial-gradient(135% 92% at 88% 6%, rgba(255,182,44,.24) 0%, transparent 54%),
+    radial-gradient(90% 80% at 12% 100%, rgba(124,77,255,.32) 0%, transparent 60%),
+    linear-gradient(158deg, #38246a 0%, var(--rvh-panel2) 52%, var(--rvh-panel) 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.14),
+    inset 0 -14px 30px rgba(0,0,0,.42),
+    0 10px 0 var(--rvh-panel-deep),
+    0 22px 40px -14px rgba(0,0,0,.85),
+    0 0 34px -12px rgba(255,182,44,.55);
   transition: transform .16s cubic-bezier(.23,1,.32,1);
 }
-.rvh-hero:active { transform: translateY(2px) scale(.995); }
-.rvh-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,.20), transparent 42%); pointer-events: none; }
-.rvh-hero.cont {
-  color: #fff;
-  background: linear-gradient(150deg, #6a4bd6, #7d6bff 58%, #9a6bff);
-  box-shadow: 0 20px 44px -18px rgba(124,77,255,.75), inset 0 1px 0 rgba(255,255,255,.2);
+.rvh-arena:active { transform: translateY(2px) scale(.995); }
+.rvh-arena::before {
+  content: ""; position: absolute; inset: 0; border-radius: 26px; padding: 1.5px;
+  background: linear-gradient(180deg, rgba(255,210,74,.6), rgba(255,210,74,0) 40%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
 }
-.rvh-hero.moni {
-  color: #2a1600;
-  background: linear-gradient(150deg, #ffca57, #ffb03a 55%, #ff9422);
-  box-shadow: 0 20px 44px -18px rgba(255,150,20,.7), inset 0 1px 0 rgba(255,255,255,.4);
+.rvh-arena-k {
+  position: relative; z-index: 2;
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; margin-bottom: 10px;
+  background: rgba(255,210,74,.16); border: 1px solid rgba(255,210,74,.42);
+  font: 600 10px/1 'Fredoka', sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--rvh-gold-1);
 }
-/* panneaux routiers en filigrane */
-.rvh-sg { position: absolute; pointer-events: none; opacity: .14; }
-.rvh-sg.a { width: 72px; height: 72px; right: -16px; top: -22px; border-radius: 50%; border: 9px solid #fff; }
-.rvh-sg.b { width: 0; height: 0; right: 66px; bottom: -14px; border-left: 30px solid transparent; border-right: 30px solid transparent; border-bottom: 52px solid #fff; transform: rotate(15deg); opacity: .1; }
-.rvh-sg.c { width: 46px; height: 46px; left: 42%; top: -24px; background: #fff; transform: rotate(45deg); opacity: .08; border-radius: 7px; }
-
-.rvh-hero-top { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; }
-.rvh-hpill { flex: 1; display: inline-flex; align-items: center; gap: 7px; font: 800 11px/1.2 'Nunito', sans-serif; letter-spacing: .05em; text-transform: uppercase; }
-.rvh-hero.cont .rvh-hpill { color: #efe9ff; }
-.rvh-hero.moni .rvh-hpill { color: #4a2a00; }
-.rvh-hdot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
-.rvh-hero.cont .rvh-hdot { background: var(--rvh-gold-2); box-shadow: 0 0 8px var(--rvh-gold-2); }
-.rvh-hero.moni .rvh-hdot { background: #7a3d00; }
-.rvh-hbadge {
-  width: 46px; height: 46px; border-radius: 14px; flex: none; display: grid; place-items: center;
-  background: rgba(255,255,255,.20); border: 1px solid rgba(255,255,255,.34); box-shadow: inset 0 1px 0 rgba(255,255,255,.45);
+.rvh-arena-row { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; }
+.rvh-arena-txt { flex: 1; min-width: 0; }
+.rvh-arena-t {
+  font: 800 24px/1.04 'Baloo 2', cursive;
+  background: linear-gradient(180deg,#fff 0%,#fff7e0 52%,#ffd86b 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 1px rgba(0,0,0,.25));
 }
-.rvh-hbadge .pg-med { width: 34px; height: 34px; }
+.rvh-arena-s { margin-top: 6px; font: 700 12.5px/1.35 'Nunito', sans-serif; color: var(--rvh-mu); }
 
-.rvh-htitles { position: relative; z-index: 2; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin: 13px 0 5px; }
-.rvh-htitle { font: 600 25px/1.05 'Baloo 2', cursive; letter-spacing: .2px; }
-.rvh-hmore { font: 800 12px/1 'Nunito', sans-serif; padding: 6px 11px; border-radius: 999px; white-space: nowrap;
-  background: rgba(42,22,0,.15); color: #5c3800; border: 1px solid rgba(42,22,0,.22); }
-.rvh-hsub { position: relative; z-index: 2; font: 700 13px/1.4 'Nunito', sans-serif; max-width: 90%; }
-.rvh-hero.cont .rvh-hsub { color: #e4dcff; }
-.rvh-hero.moni .rvh-hsub { color: #5c3800; }
-.rvh-hcta {
-  position: relative; z-index: 2; margin-top: 16px; display: flex; align-items: center; justify-content: space-between;
-  border-radius: 14px; padding: 13px 16px; font: 600 16px/1 'Baloo 2', cursive; letter-spacing: .3px;
+.rvh-arena-medal { position: relative; width: 82px; height: 82px; flex: none; }
+.rvh-arena-medal .ring {
+  position: absolute; inset: 0; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 38% 30%, #fff7da 0%, var(--rvh-gold-2) 48%, var(--rvh-gold-3) 100%);
+  border: 3px solid #fff5cf;
+  box-shadow: 0 6px 0 var(--rvh-gold-deep), 0 14px 26px -8px rgba(0,0,0,.65), inset 0 2px 4px rgba(255,255,255,.6);
 }
-.rvh-hero.cont .rvh-hcta { background: rgba(0,0,0,.24); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.16); }
-.rvh-hero.moni .rvh-hcta { background: #2a1600; color: var(--rvh-gold-1); box-shadow: 0 4px 0 rgba(0,0,0,.25); }
-.rvh-hcta svg { width: 20px; height: 20px; }
+.rvh-arena-medal .pg-med { width: 54px; height: 54px; filter: drop-shadow(0 4px 6px rgba(0,0,0,.4)); }
 
-/* ── grille des entraînements ── */
-.rvh-h { position: relative; z-index: 3; margin: 4px 3px 11px; font: 800 12px/1 'Nunito', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--rvh-mu2); }
+.rvh-arena-prog {
+  position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; margin-top: 12px;
+  font: 800 11.5px/1 'Nunito', sans-serif; color: var(--rvh-mu2);
+}
+.rvh-arena-prog .pg-med { width: 16px; height: 16px; }
+.rvh-arena-track { flex: 1; height: 8px; border-radius: 5px; background: rgba(10,7,24,.65); overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.6); }
+.rvh-arena-track i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--rvh-gold-3), var(--rvh-gold-2)); box-shadow: 0 0 10px rgba(255,182,44,.7); }
+.rvh-arena-prog b { color: var(--rvh-gold-1); white-space: nowrap; }
 
-.rvh-modes { position: relative; z-index: 3; display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
-.rvh-mode {
-  position: relative; display: flex; flex-direction: column; gap: 7px; text-align: left; cursor: pointer;
-  color: inherit; font: inherit; min-height: 132px;
-  border: 1px solid var(--rvh-line); border-left: 2px solid rgba(255,210,74,.5); border-radius: 20px; padding: 13px 13px 14px;
+.rvh-arena-cta {
+  position: relative; z-index: 2; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 9px;
+  min-height: 52px; border-radius: 17px;
+  background: linear-gradient(180deg, var(--rvh-go-1) 0%, var(--rvh-go-2) 52%, var(--rvh-go-3) 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.55),
+    inset 0 -4px 8px rgba(0,0,0,.22),
+    0 6px 0 var(--rvh-go-deep),
+    0 12px 22px -6px rgba(70,163,2,.7);
+  font: 800 18px/1 'Baloo 2', cursive; color: #fff; text-shadow: 0 2px 0 rgba(35,80,4,.6); letter-spacing: .3px;
+}
+.rvh-arena-cta svg { width: 20px; height: 20px; }
+
+.rvh-arena-lg {
+  position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; margin-top: 13px;
+  font: 800 11.5px/1 'Nunito', sans-serif; color: var(--rvh-mu2);
+}
+.rvh-arena-lg b { color: var(--rvh-violet-soft); }
+.rvh-lgtrack { flex: 1; height: 7px; margin: 0 11px; border-radius: 4px; background: rgba(10,7,24,.65); overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.6); }
+.rvh-lgtrack i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--rvh-violet-deep), var(--rvh-violet)); box-shadow: 0 0 10px rgba(168,85,247,.7); }
+
+/* ══ AUSSI DANS TA SALLE ══ */
+.rvh-h { position: relative; z-index: 3; margin: 2px 3px 10px; font: 800 12px/1 'Nunito', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--rvh-mu2); }
+
+.rvh-rows { position: relative; z-index: 3; display: flex; flex-direction: column; gap: 10px; }
+.rvh-row {
+  position: relative; display: flex; align-items: center; gap: 13px; text-align: left; cursor: pointer;
+  color: inherit; font: inherit; border: 1px solid var(--rvh-line); border-radius: 18px; padding: 12px 14px 12px 12px;
   background: linear-gradient(180deg, var(--rvh-panel2) 0%, var(--rvh-panel) 100%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 8px 0 var(--rvh-panel-deep), 0 16px 26px -14px rgba(0,0,0,.75);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 6px 0 var(--rvh-panel-deep), 0 14px 24px -14px rgba(0,0,0,.75);
   transition: transform .16s cubic-bezier(.23,1,.32,1);
+  min-height: 44px;
 }
-.rvh-mode:active { transform: translateY(2px) scale(.99); }
-.rvh-mode.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 13px; min-height: 0; }
-.rvh-mode.wide .rvh-mode-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-
-.rvh-sign { width: 54px; height: 54px; flex: none; display: grid; place-items: center; }
-.rvh-med { width: 54px; height: 54px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }
-
-.rvh-mode-t { font: 700 15px/1.12 'Baloo 2', cursive; }
-.rvh-mode-s { font: 700 11px/1.35 'Nunito', sans-serif; color: var(--rvh-mu2); }
-.rvh-mode-meta { margin-top: auto; display: inline-flex; align-items: center; gap: 5px; font: 800 11px/1 'Nunito', sans-serif; color: var(--rvh-gold-1); }
-.rvh-mode.wide .rvh-mode-meta { margin-top: 2px; }
-.rvh-mode-meta svg { width: 13px; height: 13px; color: var(--rvh-violet-soft); }
-.rvh-mode-badge {
-  position: absolute; top: 11px; right: 11px;
+.rvh-row:active { transform: translateY(2px) scale(.995); }
+.rvh-row::before {
+  content: ""; position: absolute; inset: 0; border-radius: 18px; padding: 1px;
+  background: linear-gradient(180deg, rgba(178,150,255,.5), rgba(178,150,255,0) 55%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.rvh-row-med { flex: none; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }
+.rvh-row-body { flex: 1; min-width: 0; }
+.rvh-row-t { font: 700 15.5px/1.1 'Baloo 2', cursive; }
+.rvh-row-s { margin-top: 2px; font: 700 11px/1.35 'Nunito', sans-serif; color: var(--rvh-mu2); }
+.rvh-row-end { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; }
+.rvh-row-meta { font: 800 11px/1 'Nunito', sans-serif; color: var(--rvh-gold-1); white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+.rvh-row-meta svg { width: 13px; height: 13px; color: var(--rvh-violet-soft); }
+.rvh-row-count {
+  min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; display: grid; place-items: center;
+  font: 800 13px/1 'Baloo 2', cursive; color: #fff;
+  background: linear-gradient(180deg,#ff8f8f,var(--rvh-red) 55%,#d94848);
+  border: 1px solid rgba(255,255,255,.35);
+  box-shadow: 0 3px 0 #a52727, 0 6px 12px -4px rgba(255,107,107,.6);
+}
+.rvh-row-new {
   font: 600 9px/1 'Fredoka', sans-serif; letter-spacing: .09em; text-transform: uppercase;
-  padding: 3px 8px; border-radius: 999px;
-  color: #ffdede; background: rgba(255,107,107,.16); border: 1px solid rgba(255,107,107,.4);
-  box-shadow: 0 3px 8px -3px rgba(255,107,107,.5);
+  padding: 3px 8px; border-radius: 999px; color: #d5e8ff;
+  background: rgba(84,160,255,.16); border: 1px solid rgba(84,160,255,.45);
+  box-shadow: 0 3px 8px -3px rgba(84,160,255,.5);
 }
+
+/* ── Coach en bas : une phrase ── */
+.rvh-coach { position: relative; z-index: 3; display: flex; align-items: flex-end; gap: 10px; margin-top: 18px; padding: 0 2px; }
+.rvh-coach img { width: 54px; height: 54px; object-fit: contain; flex: none; filter: drop-shadow(0 6px 8px rgba(0,0,0,.5)); }
+.rvh-coach-bulle {
+  position: relative; flex: 1; padding: 10px 13px; border-radius: 15px 15px 15px 4px;
+  background: rgba(39,24,80,.85); border: 1px solid var(--rvh-line);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  font: 700 12px/1.4 'Nunito', sans-serif; color: var(--rvh-mu);
+}
+.rvh-coach-bulle b { color: #fff; }
+
+/* ── Skeleton ── */
+.rvh-skel { position: relative; z-index: 3; border-radius: 18px; background: rgba(255,255,255,.06); }
+.rvh-skel-arena { height: 236px; border-radius: 26px; margin-bottom: 18px; }
+.rvh-skel-row { height: 76px; margin-bottom: 10px; }
+@keyframes rvhPulse { 0%,100% { opacity: .55; } 50% { opacity: .9; } }
+.rvh-skel { animation: rvhPulse 1.3s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  .rvh-hero, .rvh-mode { transition: none; }
+  .rvh-arena, .rvh-row { transition: none; }
   .rvh-stars::before, .rvh-stars::after { animation: none; }
+  .rvh-skel { animation: none; }
 }
 </style>`;
 
-// ─── Hero (adaptatif) ────────────────────────────────────────────
-function heroHtml({ nextFiche, allRead, focuses, moniteurPrenom }) {
-  // Priorité absolue : la demande du moniteur.
-  if (focuses && focuses.length) {
-    const f0 = focuses[0];
-    const fiche = getFiche(f0.competence_code);
-    const titre = fiche ? fiche.titre : f0.competence_code;
-    const more = focuses.length - 1;
-    const who = moniteurPrenom
-      ? `${esc(moniteurPrenom)}, ton moniteur, te le demande`
-      : "Ton moniteur te le demande";
-    const sub =
-      more > 0
-        ? `Commence par « ${esc(titre)} ». Le reste suit ensuite.`
-        : "À maîtriser avant ta prochaine leçon.";
-    return `<button class="rvh-hero moni" id="rvh-hero" data-fcode="${esc(f0.competence_code)}">
-      <span class="rvh-sg a"></span><span class="rvh-sg b"></span><span class="rvh-sg c"></span>
-      <div class="rvh-hero-top">
-        <span class="rvh-hpill"><span class="rvh-hdot"></span>${who}</span>
-        <span class="rvh-hbadge">${medallion("cible", "gold", { size: 34 })}</span>
-      </div>
-      <div class="rvh-htitles"><span class="rvh-htitle">${esc(titre)}</span>${more > 0 ? `<span class="rvh-hmore">+ ${more} autre${more > 1 ? "s" : ""}</span>` : ""}</div>
-      <div class="rvh-hsub">${sub}</div>
-      <div class="rvh-hcta">M’entraîner ${ARROW}</div>
-    </button>`;
+// ─── Skeleton ────────────────────────────────────────────────────
+function skeletonHtml() {
+  return `${STYLE}
+<div class="rvh">
+  <div class="rvh-stars" aria-hidden="true"></div>
+  <h1 class="rvh-title">Réviser</h1>
+  <div class="rvh-skel rvh-skel-arena"></div>
+  <div class="rvh-h">Aussi dans ta salle</div>
+  <div class="rvh-skel rvh-skel-row"></div>
+  <div class="rvh-skel rvh-skel-row"></div>
+  <div class="rvh-skel rvh-skel-row"></div>
+  <div class="rvh-skel rvh-skel-row"></div>
+</div>`;
+}
+
+// ─── Hero « L'Arène » ──────────────────────────────────────────────
+function arenaHtml({ world, ligue }) {
+  const n = (world?.idx ?? 0) + 1;
+  const [glyph, ramp] = WORLD_MED[n] || ["cible", "teal"];
+  const worldName = world?.world?.nom || "";
+
+  let sub;
+  if (world?.allDone) sub = "Bravo ! Reviens t'entraîner quand tu veux.";
+  else if (!world || world.done === 0) sub = "Découvre ce monde à ton rythme.";
+  else sub = "Reprends là où tu t'es arrêté.";
+
+  const title = world?.allDone
+    ? `Tous les mondes<br>terminés`
+    : `Monde ${n}<br>${esc(worldName)}`;
+
+  const progHtml =
+    world && world.total > 0
+      ? `<div class="rvh-arena-prog">
+          ${medallion("etoile", "gold", { size: 16 })}
+          <span class="rvh-arena-track" aria-hidden="true"><i style="width:${Math.round((world.done / world.total) * 100)}%"></i></span>
+          <b>${world.done}/${world.total} étoiles</b>
+        </div>`
+      : "";
+
+  let lgHtml = "";
+  if (ligue && ligue.classed) {
+    const pct2 = ligue.tier.top
+      ? 100
+      : ligue.tier.league
+        ? Math.min(
+            100,
+            Math.max(
+              6,
+              Math.round(
+                ((ligue.score - ligue.tier.league.startAt) /
+                  (ligue.tier.next.startAt - ligue.tier.league.startAt)) *
+                  100,
+              ),
+            ),
+          )
+        : 8;
+    lgHtml = `<div class="rvh-arena-lg">
+      <span>Ligue <b>${esc(ligue.tier.league?.name || "Novice")}</b></span>
+      <span class="rvh-lgtrack" aria-hidden="true"><i style="width:${pct2}%"></i></span>
+      <span>${ligue.rank}<sup>${ordinal(ligue.rank)}</sup> sur ${ligue.total}</span>
+    </div>`;
   }
 
-  // Par défaut : reprendre (ou commencer) la lecture des fiches.
-  const f = nextFiche;
-  return `<button class="rvh-hero cont" id="rvh-hero" data-fcode="${esc(f.code)}">
-    <span class="rvh-sg a"></span><span class="rvh-sg b"></span><span class="rvh-sg c"></span>
-    <div class="rvh-hero-top">
-      <span class="rvh-hpill"><span class="rvh-hdot"></span>${allRead ? "Bien joué" : "Ta prochaine fiche"}</span>
-      <span class="rvh-hbadge">${medallion("fiches", "night", { size: 34 })}</span>
+  const cta = world?.allDone ? "Revoir mon parcours" : "Jouer";
+  const ariaLabel = world?.allDone
+    ? "Revoir ton parcours"
+    : `Continuer le monde ${n} — ${worldName}`;
+
+  return `<button class="rvh-arena" id="rvh-arena" aria-label="${escAttr(ariaLabel)}">
+    <span class="rvh-arena-k">L'Arène · ta révision</span>
+    <div class="rvh-arena-row">
+      <div class="rvh-arena-txt">
+        <div class="rvh-arena-t">${title}</div>
+        <div class="rvh-arena-s">${esc(sub)}</div>
+      </div>
+      <div class="rvh-arena-medal" aria-hidden="true">
+        <span class="ring">${medallion(glyph, ramp, { size: 54 })}</span>
+      </div>
     </div>
-    <div class="rvh-htitles"><span class="rvh-htitle">${esc(f.titre)}</span></div>
-    <div class="rvh-hsub">${allRead ? "Toutes tes fiches sont lues. Relis le geste avant ta leçon." : "2 min · révise le geste avant ta leçon."}</div>
-    <div class="rvh-hcta">${allRead ? "Relire la fiche" : "Lire la fiche"} ${ARROW}</div>
+    ${progHtml}
+    <div class="rvh-arena-cta">${PLAY}${esc(cta)}</div>
+    ${lgHtml}
   </button>`;
 }
 
 // ─── Render ──────────────────────────────────────────────────────
 function render(data) {
-  const { streak, fichesLues, fichesTotal } = data;
+  const {
+    streak,
+    world,
+    ligue,
+    fichesLues,
+    fichesTotal,
+    examBest,
+    weakPoints,
+    weakCount,
+    flash,
+  } = data;
+
   const streakTxt =
     streak.count > 0
-      ? `${streak.count} jour${streak.count > 1 ? "s" : ""}`
-      : "Nouvelle série";
+      ? `Série : ${streak.count} jour${streak.count > 1 ? "s" : ""}`
+      : "Série : nouvelle";
   const streakSub =
     streak.count > 0
       ? streak.isToday
-        ? "· validée ✓"
+        ? "· validée aujourd'hui"
         : "· garde ta série"
       : "· 2 min suffisent";
+
+  const weakLabels = weakPoints.map((w) => w.label);
+  const weakSub = weakLabels.length
+    ? `${weakLabels.slice(0, 2).join(", ")} · rejoue-les`
+    : "Repère tes points faibles au fil des quiz.";
+
+  const flashSub = flash
+    ? "3 questions choisies par ton moniteur"
+    : "Ton moniteur peut t'en envoyer un quand il veut.";
+  const flashMeta = flash
+    ? `<span class="rvh-row-new">1 en attente</span><span class="rvh-row-meta">${flash.minsLeft} min ${CHEVRON}</span>`
+    : `<span class="rvh-row-meta">Découvrir ${CHEVRON}</span>`;
 
   return `${STYLE}
 <div class="rvh">
@@ -254,78 +455,106 @@ function render(data) {
 
   <h1 class="rvh-title">Réviser</h1>
 
-  <div class="rvh-streak">${medallion("flamme", "orange", { size: 22 })}<b>${streakTxt}</b><i>${streakSub}</i></div>
+  <div class="rvh-streak">${medallion("flamme", "orange", { size: 22 })}<b>${esc(streakTxt)}</b><i>${esc(streakSub)}</i></div>
 
-  ${heroHtml(data)}
+  ${arenaHtml({ world, ligue })}
 
-  <div class="rvh-h">Tout pour t’entraîner</div>
-  <div class="rvh-modes">
-    <button class="rvh-mode wide" data-go="/revision-conduite">
-      <span class="rvh-sign" aria-hidden="true">${MED.fiches}</span>
-      <div class="rvh-mode-body">
-        <div class="rvh-mode-t">Fiches de conduite</div>
-        <div class="rvh-mode-s">Le geste, pas le code · avant ta leçon</div>
-        <span class="rvh-mode-meta">${fichesLues}/${fichesTotal} lues ${CHEVRON}</span>
+  <div class="rvh-h">Aussi dans ta salle</div>
+  <div class="rvh-rows">
+
+    <button class="rvh-row" id="rvh-row-exam" aria-label="Examen blanc — 15 questions, comme le vrai">
+      <span class="rvh-row-med">${medallion("examen", "gold", { size: 46 })}</span>
+      <div class="rvh-row-body">
+        <div class="rvh-row-t">Examen blanc</div>
+        <div class="rvh-row-s">15 questions · réussi dès ${EXAM_BLANC_PASS}/15, comme le vrai</div>
+      </div>
+      <div class="rvh-row-end">
+        <span class="rvh-row-meta">${examBest != null ? `Meilleur : ${examBest}/15` : "Découvrir"} ${CHEVRON}</span>
       </div>
     </button>
 
-    <button class="rvh-mode" data-go="/jeu-faute">
-      <span class="rvh-mode-badge">Mini-jeu</span>
-      <span class="rvh-sign" aria-hidden="true">${MED.faute}</span>
-      <div class="rvh-mode-t">Trouve la faute</div>
-      <div class="rvh-mode-s">Repère la faute éliminatoire</div>
-      <span class="rvh-mode-meta">2 min ${CHEVRON}</span>
-    </button>
-
-    <button class="rvh-mode" data-go="/en-situation">
-      <span class="rvh-mode-badge">Mini-jeu</span>
-      <span class="rvh-sign" aria-hidden="true">${MED.situ}</span>
-      <div class="rvh-mode-t">En situation</div>
-      <div class="rvh-mode-s">Une scène, une décision</div>
-      <span class="rvh-mode-meta">6 situations ${CHEVRON}</span>
-    </button>
-
-    <button class="rvh-mode wide" data-go="/exam-conduite">
-      <span class="rvh-sign" aria-hidden="true">${MED.examConduite}</span>
-      <div class="rvh-mode-body">
-        <div class="rvh-mode-t">Examen de conduite</div>
-        <div class="rvh-mode-s">En conditions réelles, comme le jour J</div>
-        <span class="rvh-mode-meta">Se tester ${CHEVRON}</span>
+    <button class="rvh-row" id="rvh-row-fautes" aria-label="Mes fautes à revoir">
+      <span class="rvh-row-med">${medallion("faute", "red", { size: 46 })}</span>
+      <div class="rvh-row-body">
+        <div class="rvh-row-t">Mes fautes</div>
+        <div class="rvh-row-s">${esc(weakSub)}</div>
+      </div>
+      <div class="rvh-row-end">
+        ${weakCount > 0 ? `<span class="rvh-row-count">${weakCount}</span><span class="rvh-row-meta">à revoir ${CHEVRON}</span>` : `<span class="rvh-row-meta">Repérer ${CHEVRON}</span>`}
       </div>
     </button>
 
-    <button class="rvh-mode wide" data-go="/centre-examen">
-      <span class="rvh-sign" aria-hidden="true">${MED.centre}</span>
-      <div class="rvh-mode-body">
-        <div class="rvh-mode-t">Ton centre d'examen</div>
-        <div class="rvh-mode-s">Révise les pièges près de chez toi</div>
-        <span class="rvh-mode-meta">Repérer le terrain ${CHEVRON}</span>
+    <button class="rvh-row" id="rvh-row-flash" aria-label="Quiz éclair">
+      <span class="rvh-row-med">${medallion("eclair", "blue", { size: 46 })}</span>
+      <div class="rvh-row-body">
+        <div class="rvh-row-t">Quiz éclair</div>
+        <div class="rvh-row-s">${esc(flashSub)}</div>
+      </div>
+      <div class="rvh-row-end">${flashMeta}</div>
+    </button>
+
+    <button class="rvh-row" id="rvh-row-fiches" aria-label="Fiches de conduite">
+      <span class="rvh-row-med">${medallion("fiches", "violet", { size: 46 })}</span>
+      <div class="rvh-row-body">
+        <div class="rvh-row-t">Fiches de conduite</div>
+        <div class="rvh-row-s">Le geste, pas le code · avant ta leçon</div>
+      </div>
+      <div class="rvh-row-end">
+        <span class="rvh-row-meta">${fichesLues}/${fichesTotal} lues ${CHEVRON}</span>
       </div>
     </button>
+  </div>
+
+  <div class="rvh-coach">
+    <img src="/skins/mascot-coach.png" alt="" aria-hidden="true">
+    <div class="rvh-coach-bulle">${coachHtml(weakPoints)}</div>
   </div>
 </div>`;
 }
 
-// ─── Wire ────────────────────────────────────────────────────────
-function wireHero(root) {
-  const hero = root.querySelector("#rvh-hero");
-  if (!hero) return;
-  hero.addEventListener("click", () => {
-    const code = hero.getAttribute("data-fcode");
-    const moni = hero.classList.contains("moni");
-    track(moni ? "reviser.focus_open" : "reviser.next_fiche", { code });
-    navigate(`/revision-conduite/${code}`);
-  });
+function coachHtml(weakPoints) {
+  const top = weakPoints[0];
+  if (top) {
+    return `Tu rates souvent les <b>${esc(top.label)}</b>. Rejoue tes fautes avant l'examen blanc.`;
+  }
+  return `Bienvenue dans ta salle d'entraînement — enchaîne quiz et fiches pour progresser.`;
 }
 
-function wire(root) {
-  wireHero(root);
-  root.querySelectorAll("[data-go]").forEach((btn) =>
-    btn.addEventListener("click", () => {
-      track("reviser.mode_open", { mode: btn.dataset.go });
-      navigate(btn.dataset.go);
-    }),
-  );
+// ─── Wire ────────────────────────────────────────────────────────
+function wire(root, data) {
+  root.querySelector("#rvh-arena")?.addEventListener("click", () => {
+    haptic("tap");
+    track("reviser.arena_play", { world: (data.world?.idx ?? 0) + 1 });
+    navigate("/parcours");
+  });
+
+  root.querySelector("#rvh-row-exam")?.addEventListener("click", () => {
+    haptic("tap");
+    track("reviser.mode_open", { mode: "exam-blanc" });
+    navigate("/exam-blanc");
+  });
+
+  root.querySelector("#rvh-row-fautes")?.addEventListener("click", () => {
+    haptic("tap");
+    track("reviser.mode_open", { mode: "mes-fautes" });
+    navigate("/exam-blanc/mes-fautes");
+  });
+
+  root.querySelector("#rvh-row-fiches")?.addEventListener("click", () => {
+    haptic("tap");
+    track("reviser.mode_open", { mode: "revision-conduite" });
+    navigate("/revision-conduite");
+  });
+
+  root.querySelector("#rvh-row-flash")?.addEventListener("click", () => {
+    haptic("tap");
+    if (data.flash) {
+      track("reviser.mode_open", { mode: "flash-quiz" });
+      navigate(`/flash-quiz/${data.flash.id}`);
+    } else {
+      toast("Pas de quiz éclair pour l'instant.", "info", 3000);
+    }
+  });
 }
 
 // ─── Mount ───────────────────────────────────────────────────────
@@ -335,7 +564,9 @@ export async function mount(root) {
 
   track("page_view", { page: "eleve_reviser" });
 
-  // Données locales → rendu instantané, pas de skeleton nécessaire.
+  root.innerHTML = skeletonHtml();
+
+  // Fiches lues (local, instantané)
   let read = {};
   try {
     read = JSON.parse(localStorage.getItem(LS_READ_KEY) || "{}") || {};
@@ -343,58 +574,106 @@ export async function mount(root) {
     /* noop */
   }
   const fichesLues = FICHES.filter((f) => read[f.code]).length;
-  const nextFiche = FICHES.find((f) => !read[f.code]) || FICHES[0];
+
+  // Mes fautes (local, alimenté par exam-blanc.js)
+  const weakPoints = getWeakPoints({ minSeen: 3, limit: 3 });
+  const weakCount = getWeakPoints({ minSeen: 3, limit: 50 }).reduce(
+    (n, w) => n + w.wrong,
+    0,
+  );
+
+  const [valRes, examRes, flashRes, ligueRes] = await Promise.allSettled([
+    sb
+      .from("validations")
+      .select("competence_id, statut")
+      .eq("eleve_id", me.id),
+    sb
+      .from("quiz_attempts")
+      .select("score, ref_id")
+      .eq("user_id", me.id)
+      .eq("type", "exam_blanc"),
+    sb
+      .from("flash_quizzes")
+      .select("id, expires_at, sent_at")
+      .eq("sent_to", me.id)
+      .is("responded_at", null)
+      .gt("expires_at", new Date().toISOString())
+      .order("sent_at", { ascending: false })
+      .limit(1),
+    sb.rpc("get_theory_leaderboard", { p_scope: "ecole", p_limit: 50 }),
+  ]);
+
+  // Monde REMC en cours + étoiles
+  let world = null;
+  if (valRes.status === "fulfilled" && !valRes.value.error) {
+    const validatedMap = {};
+    for (const v of valRes.value.data || []) {
+      if (v.statut === "acquis") validatedMap[v.competence_id] = true;
+    }
+    world = computeCurrentWorld(validatedMap);
+  }
+
+  // Meilleur score examen blanc (parcours 15 questions, hors mode « officiel »)
+  let examBest = null;
+  if (examRes.status === "fulfilled" && !examRes.value.error) {
+    const attempts = (examRes.value.data || []).filter(
+      (a) => a.ref_id !== "officiel" && typeof a.score === "number",
+    );
+    if (attempts.length) {
+      const bestPct = Math.max(...attempts.map((a) => a.score));
+      examBest = Math.round((bestPct / 100) * 15);
+    }
+  }
+
+  // Quiz éclair en attente
+  let flash = null;
+  if (
+    flashRes.status === "fulfilled" &&
+    !flashRes.value.error &&
+    flashRes.value.data?.length
+  ) {
+    const row = flashRes.value.data[0];
+    const minsLeft = Math.max(
+      1,
+      Math.round((new Date(row.expires_at).getTime() - Date.now()) / 60000),
+    );
+    flash = { id: row.id, minsLeft };
+  }
+
+  // Ligue Révision (école, à vie) — repli gracieux : ligne masquée si non classé.
+  let ligue = null;
+  if (
+    ligueRes.status === "fulfilled" &&
+    !ligueRes.value.error &&
+    Array.isArray(ligueRes.value.data)
+  ) {
+    const rows = ligueRes.value.data;
+    const mine = rows.find((r) => r.is_me === true) || null;
+    const total = rows.filter((r) => (r.score ?? 0) > 0).length;
+    const classed = !!mine && (mine.score ?? 0) > 0;
+    if (classed) {
+      ligue = {
+        classed: true,
+        rank: mine.rang,
+        total,
+        score: mine.score,
+        tier: theoryLeague(mine.score),
+      };
+    }
+  }
 
   const data = {
     streak: getStreak(),
+    world,
+    ligue,
     fichesLues,
     fichesTotal: FICHES.length,
-    nextFiche,
-    allRead: FICHES.length > 0 && fichesLues === FICHES.length,
-    focuses: [],
-    moniteurPrenom: "",
+    examBest,
+    weakPoints,
+    weakCount,
+    flash,
   };
 
   root.innerHTML = render(data);
-  wire(root);
-
-  // Devoirs du moniteur (revision_focus) : 1 fetch léger. Si présents, ils
-  // PRENNENT le hero (priorité absolue). C'est le SEUL endroit où ils
-  // s'affichent (retirés de l'accueil + de la page fiches).
-  try {
-    const { data: focuses } = await sb
-      .from("revision_focus")
-      .select("id, competence_code, note, created_at")
-      .is("done_at", null)
-      .order("created_at", { ascending: false });
-    if (focuses && focuses.length) {
-      data.focuses = focuses;
-      // Prénom du moniteur (best-effort, non bloquant : fallback « ton moniteur »).
-      try {
-        const { data: prof } = await sb
-          .from("profiles")
-          .select("enseignant_id")
-          .eq("id", me.id)
-          .maybeSingle();
-        if (prof?.enseignant_id) {
-          const { data: ens } = await sb
-            .from("profiles")
-            .select("prenom")
-            .eq("id", prof.enseignant_id)
-            .maybeSingle();
-          data.moniteurPrenom = ens?.prenom || "";
-        }
-      } catch {
-        /* prénom optionnel */
-      }
-      // On ne remplace que le hero (évite de re-render toute la page).
-      const cur = root.querySelector("#rvh-hero");
-      if (cur) {
-        cur.outerHTML = heroHtml(data);
-        wireHero(root);
-      }
-    }
-  } catch {
-    /* table non migrée / hors-ligne → hero par défaut, silencieux */
-  }
+  wire(root, data);
 }
