@@ -20,7 +20,32 @@ import { medallion } from "@/utils/medallions.js";
 // Règle produit : relance élève à 14 jours (aligné sur mes-eleves
 // INACTIF_SEUIL_MS et insights « à relancer > 14j » — le radar était le
 // seul écran à 7j).
-const COOL_SEUIL_J = 14;
+export const COOL_SEUIL_J = 14;
+
+/**
+ * Calcule la liste des élèves « refroidis » à partir d'un jeu de profils
+ * déjà chargé (id, prenom, nom, avatar_url, last_active_at).
+ * Réutilisée telle quelle par le hub « Mes élèves » (onglet Relances) —
+ * pas de refetch : mes-eleves.js a déjà les mêmes colonnes en mémoire.
+ * @param {Array<{id:string,prenom?:string,nom?:string,avatar_url?:string,last_active_at?:string}>} profiles
+ * @param {number} seuilJours
+ */
+export function computeCooling(profiles, seuilJours = COOL_SEUIL_J) {
+  const now = Date.now();
+  return (profiles || [])
+    .map((e) => {
+      // Refroidit = a déjà utilisé l'app (last_active_at) mais inactif depuis N j.
+      // (un élève jamais venu n'est pas « refroidi » : c'est un autre sujet.)
+      if (!e.last_active_at) return null;
+      const jours = Math.floor(
+        (now - new Date(e.last_active_at).getTime()) / 86400000,
+      );
+      if (jours < seuilJours) return null;
+      return { ...e, jours };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.jours - a.jours);
+}
 
 // Graduation du refroidissement (couleur + libellé)
 function coolGrade(jours) {
@@ -69,7 +94,10 @@ function defaultMessage(prenom, jours, eleveId = "") {
   return pool[h % pool.length](prenom, jours);
 }
 
-const STYLE = `<style>
+// Exportée : le hub « Mes élèves » (onglet Relances) réutilise les mêmes
+// classes .rl-card/.rl-badge/.rl-gauge/.rl-msg/.rl-actions/.rl-btn/.rl-sent
+// — les règles .rl-page/.rl-hero/.rl-skel restent inertes hors de cette page.
+export const STYLE = `<style>
   .rl-page { max-width: 600px; margin: 0 auto; padding: 0 0 110px; background: #f6f7f9; min-height: 100dvh; font-family: 'Inter', sans-serif; color: #1a1f2b; }
   .rl-hero { position: relative; overflow: hidden; margin-top: calc(-1 * (var(--th,52px) + env(safe-area-inset-top,0px))); padding: calc(env(safe-area-inset-top,0px) + var(--th,52px) + 18px) 18px 20px; color: #fff;
     background: linear-gradient(135deg, #4338ca 0%, #4f46e5 55%, #6d5ef0 100%); }
@@ -166,20 +194,7 @@ async function loadData() {
     return;
   }
 
-  const now = Date.now();
-  _cooling = (data || [])
-    .map((e) => {
-      // Refroidit = a déjà utilisé l'app (last_active_at) mais inactif depuis N j.
-      // (un élève jamais venu n'est pas « refroidi » : c'est un autre sujet.)
-      if (!e.last_active_at) return null;
-      const jours = Math.floor(
-        (now - new Date(e.last_active_at).getTime()) / 86400000,
-      );
-      if (jours < COOL_SEUIL_J) return null;
-      return { ...e, jours };
-    })
-    .filter(Boolean)
-    .sort((a, b) => b.jours - a.jours);
+  _cooling = computeCooling(data);
 }
 
 function render() {
@@ -203,7 +218,7 @@ function render() {
           <div class="rl-empty-t">Rien à faire 🎉</div>
           <div class="rl-empty-d">Aucun élève ne décroche en ce moment. Reviens demain matin.</div>
         </div>`
-      : _cooling.map(renderCard).join("");
+      : _cooling.map(renderRelanceCard).join("");
 
   page.innerHTML = `
     <div class="rl-hero">
@@ -215,7 +230,11 @@ function render() {
     <div class="rl-body">${cards}</div>`;
 }
 
-function renderCard(e) {
+/**
+ * Rendu d'une carte de relance — exportée : réutilisée telle quelle par le
+ * hub « Mes élèves » (onglet Relances). `e` = ligne de computeCooling().
+ */
+export function renderRelanceCard(e) {
   const g = coolGrade(e.jours);
   // escAttr : `nm` sert dans aria-label du textarea → esc n'encode pas les
   // guillemets (injection d'attribut via nom d'élève). Correct aussi en texte.
@@ -247,7 +266,17 @@ function renderCard(e) {
 }
 
 function wire() {
-  _root.querySelectorAll(".rl-card[data-eleve-id]").forEach((card) => {
+  wireRelanceCards(_root);
+}
+
+/**
+ * Câble les cartes de relance (WhatsApp/SMS/Notif) dans un conteneur donné.
+ * Exportée : le hub « Mes élèves » l'appelle sur son panneau Relances —
+ * même logique d'envoi, zéro duplication.
+ * @param {HTMLElement} container
+ */
+export function wireRelanceCards(container) {
+  container.querySelectorAll(".rl-card[data-eleve-id]").forEach((card) => {
     const id = card.dataset.eleveId;
     const ta = card.querySelector("[data-msg]");
 

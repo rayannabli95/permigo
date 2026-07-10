@@ -24,6 +24,16 @@ import {
   fetchProvenanceMap,
   openProvenanceEditor,
 } from "@/utils/provenance.js";
+// Hub à onglets (chantier nav simplifiée) : Relances et Classement montent
+// la logique des pages existantes dans un panneau interne — zéro duplication
+// des requêtes/règles métier (seuil de refroidissement, calcul du classement).
+import {
+  STYLE as RL_STYLE,
+  computeCooling,
+  renderRelanceCard,
+  wireRelanceCards,
+} from "./relances.js";
+import { fetchRanking } from "./classement-eleves.js";
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -175,7 +185,8 @@ const STYLE = `<style>
   .me-grp-head--rel    { color: #b91c1c; }
   .me-grp-head--cours  { color: #6b7280; }
   .me-grp-head--repass { color: #c2410c; }
-  .me-grp-head--recu   { color: #7c3aed; }
+  /* Reçus = OR (DA moniteur unifiée : un permis obtenu est SON trophée) */
+  .me-grp-head--recu   { color: #a16207; }
 
   /* Bande blanche contenant les lignes */
   .me-band {
@@ -192,7 +203,7 @@ const STYLE = `<style>
   .me-band--rel   { box-shadow: inset 3px 0 0 #ef4444, 0 2px 8px -4px rgba(26,31,43,.08); }
   .me-band--cours { box-shadow: inset 3px 0 0 #d1d5db, 0 2px 8px -4px rgba(26,31,43,.08); }
   .me-band--repass{ box-shadow: inset 3px 0 0 #ea580c, 0 2px 8px -4px rgba(26,31,43,.08); }
-  .me-band--recu  { box-shadow: inset 3px 0 0 #7c3aed, 0 2px 8px -4px rgba(26,31,43,.08); }
+  .me-band--recu  { box-shadow: inset 3px 0 0 #eab308, 0 2px 8px -4px rgba(26,31,43,.08); }
 
   /* Ligne élève dans la bande */
   .me-row {
@@ -338,32 +349,118 @@ const STYLE = `<style>
   /* FAB « Séance » retiré ici : le FAB global #bn-seance-fab (nav-bottom)
      est déjà monté pour l'enseignant sur toutes ses pages. */
 
-  /* ── Hero « à traiter en priorité » (indigo premium, raccord mockup) ── */
-  .me-prio {
-    position: relative; overflow: hidden; margin: 0 0 16px;
-    border-radius: 18px; padding: 15px 16px; cursor: pointer;
-    background: linear-gradient(135deg, #4f46e5 0%, #6d5ef0 55%, #7c4dff 100%);
-    color: #fff; -webkit-tap-highlight-color: transparent;
-    box-shadow: 0 16px 34px -16px rgba(79,70,229,.7), inset 0 1px 0 rgba(255,255,255,.18);
-    transition: transform .14s var(--ease-spring, ease);
+  /* ── En-tête « Pupitre » : recherche + 3 compteurs vivants (remplace le
+     hero « à traiter en priorité » — chaque compteur est une porte) ── */
+  .me-counters { display: flex; gap: 9px; margin: 0 0 16px; }
+  .me-cnt {
+    flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    padding: 11px 12px 10px; border: 0; cursor: pointer; text-align: left;
+    background: #fff; border-radius: 16px; font-family: 'Inter', sans-serif;
+    box-shadow: 0 6px 14px -8px rgba(60,50,160,.16), inset 0 0 0 1px #eceaf6;
+    -webkit-tap-highlight-color: transparent; transition: transform .1s;
   }
-  .me-prio:active { transform: scale(.99); }
-  .me-prio::before { content: ''; position: absolute; right: -30px; top: -42px; width: 168px; height: 168px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%); pointer-events: none; }
-  .me-prio-kick { display: inline-flex; align-items: center; gap: 6px; font: 800 9.5px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.82); margin-bottom: 11px; position: relative; z-index: 1; }
-  .me-prio-kick .pg-med { margin: -8px 0; }
-  .me-prio-kick .d { width: 6px; height: 6px; border-radius: 50%; background: #ffd24a; box-shadow: 0 0 8px #ffd24a; }
-  .me-prio-top { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
-  .me-prio-av { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(255,255,255,.5); overflow: hidden; }
-  .me-prio-id { flex: 1; min-width: 0; }
-  .me-prio-name { font: 800 17px/1.15 'Manrope', 'Plus Jakarta Sans', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .me-prio-state { display: inline-flex; align-items: center; margin-top: 5px; font: 700 11px/1 'Inter', sans-serif; color: #fff; background: rgba(255,255,255,.18); padding: 4px 10px; border-radius: 999px; }
-  .me-prio-pct { flex-shrink: 0; text-align: right; }
-  .me-prio-pct b { font: 800 22px/1 'Manrope', sans-serif; letter-spacing: -.02em; }
-  .me-prio-pct span { display: block; font: 600 9.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.75); text-transform: uppercase; letter-spacing: .06em; margin-top: 3px; }
-  .me-prio-bar { position: relative; z-index: 1; height: 7px; margin-top: 12px; border-radius: 99px; background: rgba(255,255,255,.2); overflow: hidden; }
-  .me-prio-bar > i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #ffd24a, #fff); box-shadow: 0 0 8px rgba(255,210,74,.5); }
-  .me-prio-cta { display: inline-flex; align-items: center; gap: 6px; margin-top: 13px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 11px; background: #fff; color: #4f46e5; font: 800 13px/1 'Inter', sans-serif; cursor: pointer; position: relative; z-index: 1; box-shadow: 0 4px 0 rgba(255,255,255,.4); transition: transform .1s; }
-  .me-prio-cta:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(255,255,255,.4); }
+  .me-cnt:active { transform: scale(.97); }
+  .me-cnt .pg-med { margin: -2px 0 -1px; }
+  .me-cnt-val { font: 800 19px/1 'Manrope', sans-serif; color: #1a1f2b; letter-spacing: -.01em; }
+  .me-cnt-lbl { font: 800 9.5px/1.25 'Inter', sans-serif; color: #9a99bb; text-transform: uppercase; letter-spacing: .06em; }
+  .me-cnt--rel { box-shadow: 0 6px 14px -8px rgba(185,28,28,.2), inset 0 0 0 1.5px #f6d5d5; }
+  .me-cnt--rel .me-cnt-val { color: #b91c1c; }
+  .me-cnt--pret { box-shadow: 0 6px 14px -8px rgba(21,128,61,.2), inset 0 0 0 1.5px #cdebd6; }
+  .me-cnt--pret .me-cnt-val { color: #15803d; }
+
+  /* ── Onglets internes : Liste · Relances · Classement (1 porte, 3 salles) ── */
+  .me-tabs {
+    display: flex; gap: 5px; margin: 0 0 16px; padding: 5px;
+    background: #e9eaf5; border-radius: 15px; position: sticky; top: 0; z-index: 40;
+  }
+  .me-tab {
+    flex: 1; position: relative; border: 0; border-radius: 11px; padding: 10px 2px;
+    min-height: 40px; cursor: pointer; text-align: center;
+    font: 700 12.5px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .1px;
+    color: #6f6e92; background: transparent; transition: background .16s, color .16s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .me-tab.on { background: #fff; color: #4f46e5; box-shadow: 0 2px 8px -3px rgba(60,50,160,.35); }
+  .me-tab-bub {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 16px; height: 16px; margin-left: 5px; padding: 0 4px; border-radius: 999px;
+    font: 800 9.5px/1 'Inter', sans-serif; color: #fff;
+    background: linear-gradient(180deg, #f87171, #dc2626);
+    vertical-align: 2px;
+  }
+  .me-panel { display: none; }
+  .me-panel.on { display: block; animation: mePanelIn .22s ease; }
+  @keyframes mePanelIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .me-panel.on { animation: none; } }
+
+  /* Bouton cloche sur une ligne « à relancer » (grouped view) → onglet Relances */
+  .me-bell {
+    width: 34px; height: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    border-radius: 11px; margin-right: -4px; border: 0; cursor: pointer;
+    color: #b45309; background: #fef3c7; box-shadow: inset 0 0 0 1px rgba(217,119,6,.25);
+    -webkit-tap-highlight-color: transparent; transition: transform .1s;
+  }
+  .me-bell:active { transform: scale(.9); }
+
+  /* ── Panneau Relances (embarque relances.js : cartes .rl-card) ── */
+  .me-rl-intro {
+    display: flex; align-items: center; gap: 11px; margin: 0 0 14px; padding: 12px 14px; border-radius: 16px;
+    background: linear-gradient(155deg,#fff8ec,#fff3da); box-shadow: inset 0 0 0 1.5px rgba(217,119,6,.22);
+  }
+  .me-rl-intro .pg-med { flex-shrink: 0; }
+  .me-rl-intro-t { font: 700 14px/1.2 'Manrope', sans-serif; color: #1a1c2e; }
+  .me-rl-intro-s { font: 600 11px/1.4 'Inter', sans-serif; color: #5a6188; margin-top: 2px; }
+  .me-rl-panel .rl-card + .rl-card { margin-top: 12px; }
+  .me-rl-empty { text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .me-rl-empty-t { font: 800 16px/1.2 'Manrope', sans-serif; color: #1a1c2e; }
+  .me-rl-empty-d { font: 500 13px/1.6 'Inter', sans-serif; color: #5a6188; max-width: 30ch; }
+
+  /* ── Panneau Classement (léger, raccord Pupitre — pas le skin Arène nuit) ── */
+  .me-cl-seg { display: flex; gap: 4px; margin: 0 0 14px; padding: 4px; background: #eef0f6; border-radius: 13px; }
+  .me-cl-seg button {
+    flex: 1; min-height: 40px; padding: 8px 4px; border: 0; border-radius: 10px; background: transparent;
+    color: #5a6188; font: 700 12px/1 'Inter', sans-serif; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .me-cl-seg button.on { background: #fff; color: #4f46e5; box-shadow: 0 2px 6px -2px rgba(60,50,130,.25); }
+  .me-cl-pod {
+    display: flex; align-items: flex-end; justify-content: center; gap: 10px; margin: 0 0 18px;
+    padding: 16px 12px 14px; border-radius: 20px;
+    background: radial-gradient(110% 90% at 50% -14%, rgba(255,210,122,.28), transparent 58%), linear-gradient(165deg,#fffdf4,#fff 68%);
+    box-shadow: 0 8px 18px -8px rgba(60,50,160,.14), inset 0 0 0 1.5px rgba(231,178,60,.35);
+  }
+  .me-cl-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .me-cl-col:active { transform: scale(.97); }
+  .me-cl-crest {
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,.2);
+  }
+  .me-cl-col.first .me-cl-crest { box-shadow: inset 0 2px 5px rgba(0,0,0,.2), 0 0 0 2.5px rgba(255,210,122,.8), 0 6px 16px -6px rgba(232,163,23,.6); }
+  .me-cl-nom { font: 700 11.5px/1.15 'Inter', sans-serif; color: #1a1f2b; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .me-cl-score { font: 800 13px/1 'Manrope', sans-serif; color: #b5610a; }
+  .me-cl-score small { font: 700 9.5px/1 'Inter', sans-serif; color: #9a99bb; }
+  .me-cl-rank { font: 800 11px/1 'Manrope', sans-serif; color: #fff; width: 22px; height: 22px; border-radius: 999px; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .me-cl-rank.r1 { background: linear-gradient(180deg,#ffd27a,#e8a317); color: #5a3a08; }
+  .me-cl-rank.r2 { background: linear-gradient(180deg,#e8edf5,#aab6c9); color: #3e4f63; }
+  .me-cl-rank.r3 { background: linear-gradient(180deg,#ffd9ac,#c97b3d); color: #4d2708; }
+  .me-cl-head { display: flex; align-items: center; gap: 9px; margin: 4px 0 8px; font: 800 10px/1 'Inter', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #9a99bb; }
+  .me-cl-head .rule { flex: 1; height: 1px; background: #e3e1f2; }
+  .me-cl-band { background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 18px -8px rgba(60,50,160,.14), inset 0 0 0 1px #eceaf6; }
+  .me-cl-row { display: flex; align-items: center; gap: 11px; padding: 11px 14px; min-height: 52px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .me-cl-row + .me-cl-row { border-top: 1px solid #f2f1fa; }
+  .me-cl-row:active { background: #fafbff; }
+  .me-cl-pos { font: 800 13px/1 'Manrope', sans-serif; color: #9a99bb; width: 20px; text-align: center; flex-shrink: 0; }
+  .me-cl-rnom { flex: 1; min-width: 0; font: 700 13.5px/1.2 'Inter', sans-serif; color: #1a1f2b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .me-cl-flame { display: inline-flex; align-items: center; gap: 4px; font: 800 10.5px/1 'Inter', sans-serif; color: #b45309; flex-shrink: 0; }
+  .me-cl-flame.off { color: #9a99bb; }
+  .me-cl-rscore { font: 800 13.5px/1 'Manrope', sans-serif; color: #5f6788; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .me-cl-rscore small { font: 700 9.5px/1 'Inter', sans-serif; color: #9a99bb; }
+  .me-cl-hof {
+    display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 12px 14px; border-radius: 16px;
+    background: linear-gradient(160deg,#fffdf4,#fff6e2); box-shadow: inset 0 0 0 1.5px rgba(231,178,60,.4);
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .me-cl-hof-t { flex: 1; min-width: 0; font: 700 13px/1.2 'Inter', sans-serif; color: #1a1f2b; }
+  .me-cl-hof-s { display: inline-flex; align-items: center; gap: 5px; font: 800 10.5px/1 'Inter', sans-serif; color: #b5610a; flex-shrink: 0; }
 
   /* ── Tri segmenté (Par état / Nom / Progrès / Compétences) ── */
   .me-seg { display: flex; gap: 4px; padding: 4px; margin: 0 0 14px; background: #eef0f6; border-radius: 13px; }
@@ -381,7 +478,7 @@ const STYLE = `<style>
   .me-pill--cours { color: #4b5563; background: #eef0f6; }
   .me-pill--prevu { color: #1d4ed8; background: #dbeafe; }
   .me-pill--repass{ color: #c2410c; background: #ffedd5; }
-  .me-pill--recu  { color: #7c3aed; background: #ede9fe; }
+  .me-pill--recu  { color: #a16207; background: #fef9c3; }
 </style>`;
 
 const INACTIF_SEUIL_MS = 14 * 86400000; // 14 jours
@@ -453,12 +550,47 @@ let _query = "";
 let _sort = "etat"; // 'etat' (pipeline) | 'nom' | 'progres' | 'comp'
 let _drillComp = null; // competence_id si mode drill bloque_sur
 
+// ─── Hub à onglets (Liste · Relances · Classement) ────────────────
+let _tab = "liste"; // 'liste' | 'relances' | 'classement'
+let _clMode = "pratique"; // 'pratique' | 'theorie' (sous-mode Classement)
+let _rankingCache = {}; // { pratique: {...}|null, theorie: {...}|null }
+
 // ─── Entry point ─────────────────────────────────────────────────
 export async function unmount() {
   document.querySelector(".me-qm")?.remove();
   document.querySelector(".me-miss")?.remove();
   document.querySelector(".me-confirm")?.remove();
   document.querySelector(".me-undo")?.remove();
+}
+
+/**
+ * Détermine l'onglet actif + sous-mode Classement à partir du hash RÉEL —
+ * pas seulement du `param` passé par le router (segments[1]). Les anciennes
+ * routes top-level `#/relances` et `#/classement-eleves[/theorie]` restent
+ * valides (notifs, liens existants — aujourdhui.js, profil.js…) et pointent
+ * maintenant vers ce même module (router.js, alias) : elles n'ont pas de
+ * segments[1] "relatif à /eleves", d'où la lecture directe du hash ici.
+ */
+function _parseHubRoute() {
+  const raw = (window.location.hash || "").replace(/^#\/?/, "").split("?")[0];
+  const segs = raw.split("/").filter(Boolean);
+  const r0 = segs[0] || "eleves";
+  if (r0 === "relances") return { tab: "relances", clMode: "pratique" };
+  if (r0 === "classement-eleves") {
+    return {
+      tab: "classement",
+      clMode: segs[1] === "theorie" ? "theorie" : "pratique",
+    };
+  }
+  // r0 === "eleves" (route canonique du hub) — sous-chemin optionnel
+  if (segs[1] === "relances") return { tab: "relances", clMode: "pratique" };
+  if (segs[1] === "classement") {
+    return {
+      tab: "classement",
+      clMode: segs[2] === "theorie" ? "theorie" : "pratique",
+    };
+  }
+  return { tab: "liste", clMode: "pratique" };
 }
 
 export async function mount(root) {
@@ -469,6 +601,7 @@ export async function mount(root) {
   _query = "";
   _sort = "etat";
   _drillComp = null;
+  _rankingCache = {};
 
   // Lire le param bloque_sur depuis le hash URL (#/eleves?bloque_sur=C2a)
   const hash = window.location.hash;
@@ -478,9 +611,16 @@ export async function mount(root) {
     _drillComp = params.get("bloque_sur") || null;
   }
 
+  const parsed = _drillComp
+    ? { tab: "liste", clMode: "pratique" }
+    : _parseHubRoute();
+  _tab = parsed.tab;
+  _clMode = parsed.clMode;
+
   track("page.view", {
     page: "mes_eleves",
     role: _me.role,
+    tab: _drillComp ? undefined : _tab,
     drill: _drillComp || undefined,
   });
 
@@ -505,11 +645,15 @@ export async function mount(root) {
   if (_drillComp) {
     await loadDrillData(_drillComp);
     renderDrill();
-  } else {
-    await loadData();
-    render();
-    wire();
+    return;
   }
+
+  await loadData();
+  // Onglet Classement en entrée (deep-link/legacy) → charge AVANT le 1er
+  // rendu pour éviter un flash « chargement » supplémentaire.
+  if (_tab === "classement") await ensureRanking(_clMode);
+  render();
+  wire();
 }
 
 // PostgREST tronque en silence à 1000 lignes. À l'échelle école (validations,
@@ -762,35 +906,21 @@ function renderDrill() {
   });
 }
 
-// ─── Render ──────────────────────────────────────────────────────
+// ─── Render (hub) ────────────────────────────────────────────────
 function render() {
   const roster = _eleves.filter((e) => e.readiness !== "recu");
   const total = roster.length;
-  const prets = roster.filter((e) => e.readiness === "pret").length;
-
-  // Sous-titre = uniquement l'info nouvelle (le titre affiche déjà le total)
-  const heroSub =
-    total === 0
-      ? null
-      : prets > 0
-        ? `${prets} prêt${prets > 1 ? "s" : ""} pour l’examen`
-        : "En cours de formation";
 
   _root.innerHTML = `
-    ${STYLE}
+    ${STYLE}${RL_STYLE}
     <div class="me-page anim-slide-up">
 
-      <!-- Hero arcade -->
+      <!-- Hero « Pupitre » -->
       <div class="me-hero">
         <div class="me-hero-content">
           <p class="me-hero-kicker">Mes élèves</p>
           <h1 class="me-hero-title">${total === 0 ? "Aucun élève" : `${total} élève${total > 1 ? "s" : ""}`}</h1>
-          ${heroSub ? `<p class="me-hero-sub">${esc(heroSub)}</p>` : ""}
           <div class="me-hero-actions">
-            <button id="me-rank-btn" class="me-invite-btn" type="button"
-                    aria-label="Classement des élèves">
-              ${icon("award", { size: 14, strokeWidth: 2.2 })} Classement
-            </button>
             <button id="me-invite-btn" class="me-invite-btn me-invite-btn--go" type="button"
                     aria-label="Inviter un élève">
               ${icon("user-plus", { size: 14, strokeWidth: 2.2 })} Inviter
@@ -800,8 +930,6 @@ function render() {
       </div>
 
       <div class="me-body">
-
-      ${renderPrio()}
 
       <div class="me-search-wrap">
         <span class="me-search-ico">${icon("search", { size: 15, strokeWidth: 2, color: "#a0a6b4" })}</span>
@@ -816,21 +944,82 @@ function render() {
         <button class="me-search-clear${_query ? " visible" : ""}" id="me-search-clear" type="button" aria-label="Effacer la recherche">x</button>
       </div>
 
-      <div class="me-seg" id="me-seg" role="group" aria-label="Trier les élèves">
-        <button class="me-seg-btn ${_sort === "etat" ? "on" : ""}" data-sort="etat" type="button" aria-pressed="${_sort === "etat"}">Par état</button>
-        <button class="me-seg-btn ${_sort === "nom" ? "on" : ""}" data-sort="nom" type="button" aria-pressed="${_sort === "nom"}">Nom</button>
-        <button class="me-seg-btn ${_sort === "progres" ? "on" : ""}" data-sort="progres" type="button" aria-pressed="${_sort === "progres"}">Progrès</button>
-        <button class="me-seg-btn ${_sort === "comp" ? "on" : ""}" data-sort="comp" type="button" aria-pressed="${_sort === "comp"}">Compétences</button>
+      ${renderCounters(roster)}
+
+      <div class="me-tabs" role="tablist" aria-label="Sections Mes élèves">
+        ${renderTabButtons()}
       </div>
 
-      <div class="me-pipeline" id="me-pipeline">
-        ${renderContent()}
+      <div class="me-panel${_tab === "liste" ? " on" : ""}" data-panel="liste" id="me-panel-liste">
+        <div class="me-seg" id="me-seg" role="group" aria-label="Trier les élèves">
+          <button class="me-seg-btn ${_sort === "etat" ? "on" : ""}" data-sort="etat" type="button" aria-pressed="${_sort === "etat"}">Par état</button>
+          <button class="me-seg-btn ${_sort === "nom" ? "on" : ""}" data-sort="nom" type="button" aria-pressed="${_sort === "nom"}">Nom</button>
+          <button class="me-seg-btn ${_sort === "progres" ? "on" : ""}" data-sort="progres" type="button" aria-pressed="${_sort === "progres"}">Progrès</button>
+          <button class="me-seg-btn ${_sort === "comp" ? "on" : ""}" data-sort="comp" type="button" aria-pressed="${_sort === "comp"}">Compétences</button>
+        </div>
+        <div class="me-pipeline" id="me-pipeline">
+          ${renderContent()}
+        </div>
+      </div>
+
+      <div class="me-panel${_tab === "relances" ? " on" : ""}" data-panel="relances" id="me-panel-relances">
+        ${_tab === "relances" ? relancesPanelHtml() : ""}
+      </div>
+
+      <div class="me-panel${_tab === "classement" ? " on" : ""}" data-panel="classement" id="me-panel-classement">
+        ${_tab === "classement" ? classementBodyHtml(_rankingCache[_clMode]) : ""}
       </div>
 
       </div><!-- /.me-body -->
     </div><!-- /.me-page -->
 
   `;
+}
+
+// ─── Compteurs vivants (remplacent le hero « à traiter en priorité ») ────
+// Chaque compteur est une porte : « à relancer » → onglet Relances,
+// « prêts exam » → Liste triée par état, scrollée sur la bande Prêts.
+function renderCounters(roster) {
+  const total = roster.length;
+  const relancer = getCooling().length;
+  const prets = roster.filter(
+    (e) => e.readiness === "pret" && !e.aRelancer,
+  ).length;
+  return `
+    <div class="me-counters">
+      <button class="me-cnt" type="button" data-goto="liste">
+        ${medallion("eleves", "indigo", { size: 24 })}
+        <span class="me-cnt-val">${total}</span>
+        <span class="me-cnt-lbl">élève${total > 1 ? "s" : ""} en formation</span>
+      </button>
+      <button class="me-cnt me-cnt--rel" type="button" data-goto="relances">
+        ${medallion("cloche", "orange", { size: 24 })}
+        <span class="me-cnt-val">${relancer}</span>
+        <span class="me-cnt-lbl">à relancer</span>
+      </button>
+      <button class="me-cnt me-cnt--pret" type="button" data-goto="pret">
+        ${medallion("check", "green", { size: 24 })}
+        <span class="me-cnt-val">${prets}</span>
+        <span class="me-cnt-lbl">prêt${prets > 1 ? "s" : ""} exam</span>
+      </button>
+    </div>`;
+}
+
+function renderTabButtons() {
+  const relCount = getCooling().length;
+  const tabs = [
+    { id: "liste", label: "Liste" },
+    { id: "relances", label: "Relances" },
+    { id: "classement", label: "Classement" },
+  ];
+  return tabs
+    .map(
+      (t) => `
+    <button class="me-tab${_tab === t.id ? " on" : ""}" data-tab="${t.id}" role="tab" aria-selected="${_tab === t.id}">
+      ${esc(t.label)}${t.id === "relances" && relCount > 0 ? `<span class="me-tab-bub">${relCount}</span>` : ""}
+    </button>`,
+    )
+    .join("");
 }
 
 // ─── État → pastille (vue triée à plat) ──────────────────────────
@@ -869,42 +1058,6 @@ const PILL_MED = {
 function pillMed(cls) {
   const m = PILL_MED[cls];
   return m ? medallion(m[0], m[1], { size: 20 }) : "";
-}
-
-// ─── Hero « à traiter en priorité » ──────────────────────────────
-// Surface l'élève le plus actionnable : prêt (pour proposer l'examen) →
-// sinon le plus refroidi à relancer → sinon le plus avancé en approche.
-function renderPrio() {
-  const roster = _eleves.filter((e) => e.readiness !== "recu");
-  const pret = roster.filter((e) => e.readiness === "pret" && !e.aRelancer);
-  const relancer = roster
-    .filter((e) => e.aRelancer)
-    .sort((a, b) => (b.joursInactif || 0) - (a.joursInactif || 0));
-  const approche = roster
-    .filter((e) => e.readiness === "en_approche")
-    .sort((a, b) => b.acquis - a.acquis);
-  const cand = pret[0] || relancer[0] || approche[0] || null;
-  if (!cand) return "";
-  const p = pillFor(cand);
-  const pct = Math.round((100 * cand.acquis) / cand.total);
-  const nm = esc(
-    fmtName([cand.prenom, cand.nom].filter(Boolean).join(" ")) || "—",
-  );
-  const cta = cand.aRelancer ? "Ouvrir sa fiche" : "Voir son livret";
-  return `
-    <div class="me-prio" data-prio-id="${esc(cand.id)}">
-      <div class="me-prio-kick">${medallion("cible", "red", { size: 26, glow: true })}<span class="d" aria-hidden="true"></span>À traiter en priorité</div>
-      <div class="me-prio-top">
-        <div class="me-prio-av">${renderUserAvatar({ avatar_url: cand.avatar_url, prenom: cand.prenom, nom: cand.nom }, 46)}</div>
-        <div class="me-prio-id">
-          <div class="me-prio-name">${nm}</div>
-          <span class="me-prio-state">${esc(p.label)}</span>
-        </div>
-        <div class="me-prio-pct"><b>${pct}%</b><span>compétences</span></div>
-      </div>
-      <div class="me-prio-bar"><i style="width:${pct}%"></i></div>
-      <button class="me-prio-cta" id="me-prio-cta" type="button">${cta} →</button>
-    </div>`;
 }
 
 // ─── Contenu : pipeline (par état) ou liste triée à plat ─────────
@@ -948,7 +1101,7 @@ function renderRosterFlat() {
         (b.recentAcquis || 0) - (a.recentAcquis || 0) || b.acquis - a.acquis,
     );
   }
-  return `<div class="me-band" role="list">${list.map((e) => renderBandRow(e, true)).join("")}</div>`;
+  return `<div class="me-band" role="list">${list.map((e) => renderBandRow(e, { withPill: true })).join("")}</div>`;
 }
 
 // ─── Pipeline segmenté ───────────────────────────────────────────
@@ -1018,6 +1171,8 @@ function renderPipeline() {
       color: "#ef4444",
       label: "À relancer",
       filter: (e) => e.aRelancer && !examTermine(e),
+      // La cloche (au lieu du ⋮) saute directement vers l'onglet Relances.
+      bell: true,
     },
     {
       key: "cours",
@@ -1036,14 +1191,14 @@ function renderPipeline() {
     {
       key: "recu",
       mod: "recu",
-      color: "#7c3aed",
+      color: "#eab308",
       label: "Reçus",
       filter: (e) => e.readiness === "recu",
     },
   ];
 
   return groups
-    .map(({ key, mod, color, label, filter }) => {
+    .map(({ key, mod, color, label, filter, bell }) => {
       const list = allVisible.filter(filter);
       if (list.length === 0) return "";
       return `
@@ -1054,7 +1209,7 @@ function renderPipeline() {
             <span class="me-grp-count">${list.length}</span>
           </div>
           <div class="me-band me-band--${mod}" role="list">
-            ${list.map((e) => renderBandRow(e)).join("")}
+            ${list.map((e) => renderBandRow(e, { bell })).join("")}
           </div>
         </div>
       `;
@@ -1064,8 +1219,13 @@ function renderPipeline() {
 
 /**
  * Ligne d'un élève dans une bande du pipeline.
+ * @param {object} eleve
+ * @param {{withPill?:boolean, bell?:boolean}} opts
+ *   `bell` : remplace le ⋮ par une cloche qui saute vers l'onglet Relances
+ *   (bande « À relancer » du pipeline uniquement — maquette Pupitre).
  */
-function renderBandRow(eleve, withPill = false) {
+function renderBandRow(eleve, opts = {}) {
+  const { withPill = false, bell = false } = opts;
   // escAttr : `fullNom` est aussi injecté dans aria-label (esc n'encode pas les
   // guillemets → injection d'attribut via nom d'élève). Correct aussi en texte.
   const fullNom = escAttr(
@@ -1108,8 +1268,13 @@ function renderBandRow(eleve, withPill = false) {
       <span class="me-prov-sp"></span>
       ${pillHtml}
       <span class="${rightClass}">${esc(rightLabel)}</span>
-      <button class="me-more" data-more type="button"
-              aria-label="Actions rapides pour ${fullNom}">${icon("more-vertical", { size: 16, strokeWidth: 2 })}</button>
+      ${
+        bell && !withPill
+          ? `<button class="me-bell" data-bell type="button"
+              aria-label="Relancer ${fullNom}">${icon("bell", { size: 16, strokeWidth: 2.2 })}</button>`
+          : `<button class="me-more" data-more type="button"
+              aria-label="Actions rapides pour ${fullNom}">${icon("more-vertical", { size: 16, strokeWidth: 2 })}</button>`
+      }
     </div>
   `;
 }
@@ -1120,9 +1285,37 @@ function wire() {
     .querySelector("#me-invite-btn")
     ?.addEventListener("click", () => openInviteEleveModal(_me));
 
-  _root.querySelector("#me-rank-btn")?.addEventListener("click", () => {
-    track("mes_eleves.classement.click");
-    navigate("#/classement-eleves");
+  // Onglets internes (Liste · Relances · Classement)
+  _root.querySelectorAll(".me-tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+      if (tab === _tab) return;
+      switchTab(tab);
+    });
+  });
+
+  // Compteurs vivants — chacun est une porte vers un onglet
+  _root.querySelectorAll(".me-cnt").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const goto = btn.dataset.goto;
+      track("mes_eleves.counter.click", { goto });
+      if (goto === "relances") {
+        switchTab("relances");
+      } else if (goto === "pret") {
+        if (_sort !== "etat") {
+          _sort = "etat";
+          _root.querySelectorAll("#me-seg .me-seg-btn").forEach((b) => {
+            const on = b.dataset.sort === "etat";
+            b.classList.toggle("on", on);
+            b.setAttribute("aria-pressed", String(on));
+          });
+          renderList();
+        }
+        switchTab("liste", { scrollToGrp: "pret" });
+      } else {
+        switchTab("liste");
+      }
+    });
   });
 
   // Tri segmenté (Par état / Nom / Progrès / Compétences)
@@ -1142,31 +1335,6 @@ function wire() {
     });
   });
 
-  // Hero « à traiter en priorité » → fiche/livret de l'élève ciblé
-  const prio = _root.querySelector(".me-prio");
-  if (prio) {
-    const goPrio = () => {
-      const id = prio.dataset.prioId;
-      haptic("impact");
-      track("mes_eleves.prio.open", { eleve_id: id });
-      navigate(`#/livret/${id}`);
-    };
-    prio.addEventListener("click", (e) => {
-      if (e.target.closest("#me-prio-cta")) return;
-      goPrio();
-    });
-    prio.querySelector("#me-prio-cta")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      goPrio();
-    });
-    prio.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        goPrio();
-      }
-    });
-  }
-
   // Bouton CTA dans l'état vide (0 élève)
   _root.querySelector("#me-invite-empty-btn")?.addEventListener("click", () => {
     track("invite.empty.header.clicked");
@@ -1176,7 +1344,7 @@ function wire() {
   // FAB « Séance » : le FAB global #bn-seance-fab (nav-bottom, enseignant)
   // couvre déjà cette page → on a retiré le doublon local #me-fab.
 
-  // Recherche — filtre transversal tous les groupes du pipeline
+  // Recherche — filtre transversal tous les groupes du pipeline (onglet Liste)
   const searchEl = _root.querySelector(".me-search");
   const clearBtn = _root.querySelector("#me-search-clear");
   searchEl?.addEventListener("input", (e) => {
@@ -1194,6 +1362,230 @@ function wire() {
 
   // Cards
   wireRows();
+
+  // Panneau initialement actif (Relances/Classement rendus inline dans
+  // render() quand ils sont l'onglet d'entrée) — on les câble ici une fois.
+  if (_tab === "relances") {
+    wireRelanceCards(_root.querySelector("#me-panel-relances"));
+  } else if (_tab === "classement") {
+    const panel = _root.querySelector("#me-panel-classement");
+    if (panel) wireClassementPanel(panel);
+  }
+}
+
+// ─── Bascule d'onglet (Liste · Relances · Classement) ────────────
+// Ne recharge que l'onglet actif (les 2 autres au premier accès) et
+// synchronise le hash (#/eleves[/relances|/classement[/theorie]]) SANS
+// remonter la page (history.replaceState — pas de hashchange déclenché).
+function switchTab(tab, opts = {}) {
+  const changed = tab !== _tab;
+  if (changed) {
+    _tab = tab;
+    haptic("select");
+    track("mes_eleves.tab", { tab });
+  }
+  _syncHash();
+
+  _root.querySelectorAll(".me-tab").forEach((b) => {
+    const on = b.dataset.tab === tab;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-selected", String(on));
+  });
+  _root.querySelectorAll(".me-panel").forEach((p) => {
+    p.classList.toggle("on", p.dataset.panel === tab);
+  });
+
+  if (tab === "relances") renderRelancesPanel();
+  else if (tab === "classement") renderClassementPanel();
+
+  if (opts.scrollToGrp) {
+    requestAnimationFrame(() => {
+      _root
+        .querySelector(`[data-grp="${opts.scrollToGrp}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+}
+
+function _syncHash() {
+  let h = "#/eleves";
+  if (_tab === "relances") h += "/relances";
+  else if (_tab === "classement")
+    h += "/classement" + (_clMode === "theorie" ? "/theorie" : "");
+  if (window.location.hash !== h) history.replaceState(null, "", h);
+}
+
+// ─── Onglet Relances : réutilise relances.js (computeCooling / carte / envoi) ──
+// Aucune requête supplémentaire : mes-eleves.js a déjà last_active_at en
+// mémoire (loadData()) — le calcul est synchrone, zéro coût réseau.
+function getCooling() {
+  return computeCooling(_eleves);
+}
+
+function relancesPanelHtml() {
+  const cooling = getCooling();
+  const n = cooling.length;
+  if (n === 0) {
+    return `<div class="me-rl-empty">
+      ${medallion("trophee", "gold", { size: 56 })}
+      <div class="me-rl-empty-t">Rien à faire 🎉</div>
+      <div class="me-rl-empty-d">Aucun élève ne décroche en ce moment.</div>
+    </div>`;
+  }
+  return `
+    <div class="me-rl-intro">
+      ${medallion("cloche", "orange", { size: 40, glow: true })}
+      <div>
+        <div class="me-rl-intro-t">${n} élève${n > 1 ? "s" : ""} à relancer</div>
+        <div class="me-rl-intro-s">Le message part de toi, pas d’un robot. Modifie-le, puis envoie.</div>
+      </div>
+    </div>
+    <div class="me-rl-panel">${cooling.map(renderRelanceCard).join("")}</div>`;
+}
+
+function renderRelancesPanel() {
+  const panel = _root.querySelector("#me-panel-relances");
+  if (!panel) return;
+  panel.innerHTML = relancesPanelHtml();
+  wireRelanceCards(panel);
+}
+
+// ─── Onglet Classement : réutilise fetchRanking() de classement-eleves.js,
+// re-skinné en léger (raccord « Pupitre ») plutôt que le skin Arène nuit —
+// cohérence visuelle avec Liste/Relances (maquette validée). Chargé à la
+// demande (1er accès à l'onglet) puis mis en cache par mode. ────────────
+async function ensureRanking(mode) {
+  if (_rankingCache[mode]) return _rankingCache[mode];
+  const data = await fetchRanking(_me, { isTheorie: mode === "theorie" });
+  _rankingCache[mode] = data;
+  return data;
+}
+
+async function renderClassementPanel() {
+  const panel = _root.querySelector("#me-panel-classement");
+  if (!panel) return;
+  if (!_rankingCache[_clMode]) {
+    panel.innerHTML = `<div class="me-skel-list">${[1, 2, 3].map(() => `<div class="me-skel-row"></div>`).join("")}</div>`;
+    await ensureRanking(_clMode);
+    // L'utilisateur a pu changer d'onglet pendant l'attente réseau.
+    if (_tab !== "classement") return;
+  }
+  panel.innerHTML = classementBodyHtml(_rankingCache[_clMode]);
+  wireClassementPanel(panel);
+}
+
+function classementBodyHtml(data) {
+  if (!data || data.error) {
+    return `<div class="me-empty">Classement indisponible. Vérifie ta connexion, puis réessaie.</div>`;
+  }
+  const { ranked, hof, isTheorie } = data;
+  const fmtScore = (e) =>
+    isTheorie
+      ? `${e.quizCount}<small>quiz</small>`
+      : `${e.acquis}<small>/${REMC_TOTAL}</small>`;
+  const seg = `
+    <div class="me-cl-seg" role="tablist" aria-label="Ligue">
+      <button class="${!isTheorie ? "on" : ""}" data-mode="pratique" role="tab" aria-selected="${!isTheorie}">Pratique · en voiture</button>
+      <button class="${isTheorie ? "on" : ""}" data-mode="theorie" role="tab" aria-selected="${isTheorie}">Révision · quiz 30 j</button>
+    </div>`;
+
+  if (ranked.length === 0 && hof.length === 0) {
+    return `${seg}<div class="me-empty">
+      ${isTheorie ? medallion("eclair", "indigo", { size: 48 }) : medallion("trophee", "gold", { size: 48 })}
+      <br>${isTheorie ? "Aucune révision ces 30 derniers jours." : "Aucun élève à classer pour l’instant."}
+    </div>`;
+  }
+
+  const top3 = ranked.slice(0, 3);
+  const rest = ranked.slice(3);
+  const hasPodium = top3.length >= 3;
+
+  const podium = hasPodium ? renderClPodium(top3, fmtScore) : "";
+  const listRows = hasPodium ? rest : ranked;
+  const list = listRows.length
+    ? `<div class="me-cl-head">${hasPodium ? "À partir du 4ᵉ" : "Classement"}<span class="rule"></span></div>
+       <div class="me-cl-band">${listRows.map((e, i) => renderClRow(e, i + (hasPodium ? 4 : 1), fmtScore)).join("")}</div>`
+    : "";
+  const hofHtml = hof
+    .map((e) => {
+      const nom = esc(
+        fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "Élève",
+      );
+      return `<div class="me-cl-hof" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
+        ${medallion("medaille", "gold", { size: 34 })}
+        <span class="me-cl-hof-t">${nom}</span>
+        <span class="me-cl-hof-s">${medallion("couronne", "gold", { size: 16 })} Permis obtenu</span>
+      </div>`;
+    })
+    .join("");
+
+  return `${seg}${podium}${list}${hofHtml}`;
+}
+
+function renderClPodium(top3, fmtScore) {
+  const withRank = top3.map((e, i) => ({ e, rang: i + 1 }));
+  const order = [withRank[1], withRank[0], withRank[2]]; // gauche·centre·droite
+  return `<div class="me-cl-pod">${order
+    .map((item) => {
+      if (!item) return `<div class="me-cl-col" aria-hidden="true"></div>`;
+      const { e, rang } = item;
+      const isFirst = rang === 1;
+      const nom = esc(
+        fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "Élève",
+      );
+      const size = isFirst ? 46 : 42;
+      return `
+      <div class="me-cl-col${isFirst ? " first" : ""}" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
+        ${isFirst ? medallion("couronne", "gold", { size: 24 }) : ""}
+        <span class="me-cl-crest" style="width:${size}px;height:${size}px">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, size)}</span>
+        <span class="me-cl-nom">${nom}</span>
+        <span class="me-cl-score">${fmtScore(e)}</span>
+        <span class="me-cl-rank r${rang}">${rang}</span>
+      </div>`;
+    })
+    .join("")}</div>`;
+}
+
+function renderClRow(e, pos, fmtScore) {
+  const nom = esc(
+    fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "Élève",
+  );
+  const s = e.streak || 0;
+  return `
+    <div class="me-cl-row" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
+      <span class="me-cl-pos">${pos}</span>
+      <span class="me-cl-crest" style="width:34px;height:34px">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 34)}</span>
+      <span class="me-cl-rnom">${nom}</span>
+      <span class="me-cl-flame${s > 0 ? "" : " off"}">${medallion("flamme", s > 0 ? "orange" : "slate", { size: 15 })}${s}j</span>
+      <span class="me-cl-rscore">${fmtScore(e)}</span>
+    </div>`;
+}
+
+function wireClassementPanel(panel) {
+  panel.querySelectorAll(".me-cl-seg button").forEach((b) => {
+    b.addEventListener("click", () => {
+      const mode = b.dataset.mode;
+      if (mode === _clMode) return;
+      haptic("select");
+      _clMode = mode;
+      track("mes_eleves.classement.mode", { mode });
+      _syncHash();
+      renderClassementPanel();
+    });
+  });
+  panel.querySelectorAll("[data-eleve-id]").forEach((el) => {
+    const open = () => {
+      haptic("impact");
+      navigate(`#/livret/${el.dataset.eleveId}`);
+    };
+    el.addEventListener("click", open);
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
+    });
+  });
 }
 
 async function wireRows() {
@@ -1242,6 +1634,15 @@ async function wireRows() {
       haptic("tap");
       track("eleve.more_menu", { eleve_id: id });
       openQuickMenu(id, row);
+    });
+
+    // ── Cloche (bande « À relancer ») → saute vers l'onglet Relances ──
+    const bellBtn = row.querySelector("[data-bell]");
+    bellBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      haptic("tap");
+      track("eleve.bell_relance", { eleve_id: id });
+      switchTab("relances");
     });
 
     // ── Long press → menu rapide (raccourci, en plus du bouton) ──
@@ -1490,8 +1891,7 @@ function confirmDeleteEleve(eleveId) {
       if (error) throw error;
       _eleves = _eleves.filter((e) => e.id !== eleveId);
       wrap.remove();
-      render();
-      wire();
+      await _refreshAndRender();
       toast(`${prenom} a été supprimé.`, "success");
     } catch (e) {
       console.error("[mes-eleves] delete_eleve error", e);
@@ -1533,9 +1933,8 @@ async function recordExam(eleveId, statut, dateExamen) {
   }
   track("examen.record", { eleve_id: eleveId, statut });
 
-  // Re-render complet : badges + compteurs d'onglets
-  render();
-  wire();
+  // Re-render complet : badges + compteurs d'onglets + classement (si actif)
+  await _refreshAndRender();
 
   // Snackbar avec undo (supprime la ligne créée, restaure l'état précédent)
   const msg = {
@@ -1561,9 +1960,19 @@ async function recordExam(eleveId, statut, dateExamen) {
       el.readiness = computeReadiness(el.acquisSet, prevStatut);
     }
     track("examen.undo", { eleve_id: eleveId, statut });
-    render();
-    wire();
+    await _refreshAndRender();
   });
+}
+
+// Re-render complet de la page (badges, compteurs, onglet actif) après une
+// mutation locale de `_eleves` (examen enregistré/annulé, élève supprimé).
+// Invalide le cache Classement (le tri/hof peuvent avoir changé) et le
+// recharge tout de suite s'il est l'onglet actif — sinon rechargé au tap.
+async function _refreshAndRender() {
+  _rankingCache = {};
+  if (_tab === "classement") await ensureRanking(_clMode);
+  render();
+  wire();
 }
 
 // ─── Styles partagés des dialogs (confirm + date) ────────────────
