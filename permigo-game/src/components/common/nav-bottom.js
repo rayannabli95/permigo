@@ -86,13 +86,22 @@ const TABS = {
       ico: "users",
       match: ["relances", "classement-eleves", "bilan"],
     },
-    // « Progression » regroupe Parcours + Trophées + Ligue (décision figée).
-    // L'onglet « Récompenses » (gemmes) a été retiré : monnaie = validations.
+    // « Mon blason » (chantier nav simplifiée) fusionne Parcours + Trophées +
+    // Ligue en une seule page statut/fierté. `parcours` = ancienne route hub
+    // (parcours-pro.js, retiré) qui atterrit maintenant sur mon-blason.js —
+    // gardée en match pour que l'onglet s'allume aussi sur les vieux liens.
+    // `parcours-complet`/`trophees-moniteur`/`ligue-semaine` restent de VRAIES
+    // sous-pages satellites du même onglet (pas fusionnées).
     {
-      id: "parcours",
-      label: "Progression",
+      id: "mon-blason",
+      label: "Mon blason",
       ico: "trophy",
-      match: ["parcours-complet", "trophees-moniteur", "ligue-semaine"],
+      match: [
+        "parcours",
+        "parcours-complet",
+        "trophees-moniteur",
+        "ligue-semaine",
+      ],
     },
     { id: "insights", label: "Stats", ico: "chart" },
   ],

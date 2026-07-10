@@ -17,7 +17,7 @@ import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
 import { medallion } from "@/utils/medallions.js";
-// Données + feuille de détail partagées avec le rail de parcours-pro.js.
+// Données + feuille de détail partagées avec le rail de mon-blason.js.
 import {
   TIERS,
   TIER_ORDER,
@@ -388,7 +388,7 @@ function _headerHtml(sub) {
 function _wireBack(root) {
   root.querySelector("#tr2-back")?.addEventListener("click", () => {
     haptic("tap");
-    navigate("#/parcours");
+    navigate("#/mon-blason");
   });
 }
 

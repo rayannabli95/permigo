@@ -185,6 +185,24 @@ ${LEAGUE_CSS}
 
 </style>`;
 
+/**
+ * Fetch RPC get_league_leaderboard pour un scope donné ('national'|'ecole').
+ * Exportée : réutilisée telle quelle par le hub « Mon blason » (aperçu ligue,
+ * chantier nav simplifiée) — même requête, même p_limit, zéro duplication de
+ * la mécanique RPC (pattern déjà suivi par relances.js → mes-eleves.js).
+ * @param {'national'|'ecole'} scope
+ * @returns {Promise<Array>} lignes du classement (peut être vide)
+ */
+export async function fetchLeagueLeaderboard(scope) {
+  const { data, error } = await sb.rpc("get_league_leaderboard", {
+    p_role: "enseignant",
+    p_limit: 50,
+    p_scope: scope,
+  });
+  if (error) throw error;
+  return data || [];
+}
+
 // ─── Mount ────────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
@@ -219,20 +237,14 @@ function _renderSkeleton(root) {
 
   root.querySelector("#ls-back")?.addEventListener("click", () => {
     haptic("tap");
-    navigate("#/parcours");
+    navigate("#/mon-blason");
   });
 }
 
 async function _load(root, scope) {
   try {
-    const { data, error } = await sb.rpc("get_league_leaderboard", {
-      p_role: "enseignant",
-      p_limit: 50,
-      p_scope: scope,
-    });
-
-    if (error) throw error;
-    _render(root, data || [], scope);
+    const rows = await fetchLeagueLeaderboard(scope);
+    _render(root, rows, scope);
   } catch (e) {
     console.error("[ligue-semaine]", e);
     toast("« Ligue » indisponible", "error");
@@ -341,7 +353,7 @@ ${motiv}
 
   root.querySelector("#ls-back")?.addEventListener("click", () => {
     haptic("tap");
-    navigate("#/parcours");
+    navigate("#/mon-blason");
   });
   root.querySelector("#ls-seance-cta")?.addEventListener("click", () => {
     haptic("impact");
@@ -375,6 +387,6 @@ function _renderEmpty(root) {
 </div>`;
   root.querySelector("#ls-back")?.addEventListener("click", () => {
     haptic("tap");
-    navigate("#/parcours");
+    navigate("#/mon-blason");
   });
 }
