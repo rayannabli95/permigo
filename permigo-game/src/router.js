@@ -183,6 +183,7 @@ const ROUTE_TITLES = {
   classement: "Classement",
   galerie: "Galerie",
   recompenses: "Récompenses",
+  roue: "La Roue",
   examen: "Examen",
   "exam-blanc": "Examen blanc du code",
   "revision-conduite": "Révision conduite",
