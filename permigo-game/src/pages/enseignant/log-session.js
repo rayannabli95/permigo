@@ -943,7 +943,7 @@ async function _maybeCelebrateMoniteurTier() {
     if (typeof count === "number") {
       const { maybeCelebrateTier } =
         await import("@/services/moniteur-tier-celebration.js");
-      await maybeCelebrateTier(count, { onCta: () => navigate("#/parcours") });
+      await maybeCelebrateTier(count, { onCta: () => navigate("#/mon-blason") });
     }
   } catch (e) {
     console.warn("[valider-seance] tier celebrate failed", e);

@@ -98,7 +98,18 @@ const ROUTES = {
     default: () => import("@/pages/enseignant/aujourdhui.js"),
     ecole: () => import("@/pages/public/ecole.js"),
     aujourdhui: () => import("@/pages/enseignant/aujourdhui.js"),
-    parcours: () => import("@/pages/enseignant/parcours-pro.js"),
+    // Chantier nav simplifiée : « Mon blason » fusionne l'ancien hub Progression
+    // (parcours-pro.js, retiré) + un aperçu Trophées + un aperçu Ligue de la
+    // semaine. L'ancienne route top-level `#/parcours` reste valide (liens/
+    // notifs/tuiles existants) et atterrit sur ce même hub — même mécanique que
+    // `relances`/`classement-eleves` → mes-eleves.js ci-dessous.
+    // #/trophees-moniteur et #/ligue-semaine restent en revanche de VRAIES
+    // sous-pages (grille complète des 12 jalons / classement jusqu'à 50 rangs) :
+    // nav-bottom.js les traite déjà comme des satellites du même onglet, pas
+    // des routes fusionnées — elles sont les cibles de "Tout voir"/"Classement
+    // complet" depuis le blason.
+    "mon-blason": () => import("@/pages/enseignant/mon-blason.js"),
+    parcours: () => import("@/pages/enseignant/mon-blason.js"),
     "parcours-complet": () =>
       import("@/pages/enseignant/parcours-pro-complet.js"),
     // Refonte : "Valider" n'est plus un moteur séparé — la Séance est l'unique
@@ -170,6 +181,7 @@ const ROUTE_TITLES = {
   ecole: "École",
   aujourdhui: "Aujourd'hui",
   parcours: "Parcours",
+  "mon-blason": "Mon blason",
   "parcours-complet": "Parcours",
   validation: "Valider",
   eleves: "Mes élèves",

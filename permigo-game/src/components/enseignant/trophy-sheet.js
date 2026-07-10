@@ -2,7 +2,7 @@
 // Enseignant — Trophées : données partagées + feuille de détail « en place »
 //
 // Source UNIQUE des 12 jalons moniteur, partagée par :
-//   - src/pages/enseignant/parcours-pro.js   (rail « Tes trophées »)
+//   - src/pages/enseignant/mon-blason.js        (rail « Trophées », hub)
 //   - src/pages/enseignant/trophees-moniteur.js (page complète)
 // Avant, les 12 trophées étaient dupliqués dans les deux fichiers → risque de
 // dérive. Ici on centralise (définitions + médailles + badges + calcul d'état).
@@ -409,6 +409,6 @@ export function openTrophySheet(t, opts = {}) {
     ?.addEventListener("click", () => _shareTrophy(t));
   overlay.querySelector("#trsh-goto")?.addEventListener("click", () => {
     close();
-    navigate("#/parcours");
+    navigate("#/mon-blason");
   });
 }

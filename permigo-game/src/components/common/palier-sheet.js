@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // Palier Sheet — bottom-sheet de détail d'un palier moniteur
-// Réutilisé par parcours-pro.js et parcours-pro-complet.js.
+// Réutilisé par mon-blason.js et parcours-pro-complet.js.
 // Sobre, mobile-first. Ouvre au clic sur un palier ; ferme via overlay,
 // bouton, ou touche Échap. Respecte prefers-reduced-motion.
 // ═══════════════════════════════════════════════════════════════

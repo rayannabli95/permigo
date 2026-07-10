@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // Enseignant — Tous les paliers (timeline complète)
-// Accessible depuis parcours-pro.js via "Voir tous les paliers →"
+// Accessible depuis mon-blason.js via "Tous les paliers →"
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -245,7 +245,7 @@ export async function mount(root) {
 
   root.querySelector("#epcf-back")?.addEventListener("click", () => {
     haptic("select");
-    navigate("#/parcours");
+    navigate("#/mon-blason");
   });
 
   // ─── Fetch ──────────────────────────────────────────────────
@@ -294,7 +294,7 @@ export async function mount(root) {
   // ─── Wire ───────────────────────────────────────────────────
   root.querySelector("#epcf-back")?.addEventListener("click", () => {
     haptic("select");
-    navigate("#/parcours");
+    navigate("#/mon-blason");
   });
 
   // Clic / clavier sur un stop → sheet de détail du palier
