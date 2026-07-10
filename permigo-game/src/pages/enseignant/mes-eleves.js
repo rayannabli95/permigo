@@ -1636,13 +1636,20 @@ async function wireRows() {
       openQuickMenu(id, row);
     });
 
-    // ── Cloche (bande « À relancer ») → saute vers l'onglet Relances ──
+    // ── Cloche (bande « À relancer ») → saute vers l'onglet Relances,
+    // directement sur LA carte de cet élève (sinon, avec 40 cartes, on
+    // atterrit en haut de la pile et la cloche perd son intérêt) ──
     const bellBtn = row.querySelector("[data-bell]");
     bellBtn?.addEventListener("click", (e) => {
       e.stopPropagation();
       haptic("tap");
       track("eleve.bell_relance", { eleve_id: id });
       switchTab("relances");
+      requestAnimationFrame(() => {
+        _root
+          ?.querySelector(`.rl-card[data-eleve-id="${CSS.escape(id)}"]`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
     });
 
     // ── Long press → menu rapide (raccourci, en plus du bouton) ──
