@@ -65,9 +65,9 @@ const ELEVE_TOUR_STEPS = [
     text: "31 compétences à valider avec ton moniteur.",
   },
   {
-    sel: '.bn-tab[data-id="boutique"]',
-    title: "La boutique",
-    text: "Dépense tes volants : skins de voiture, fonds de permis.",
+    sel: '.bn-tab[data-id="recompenses"]',
+    title: "Tes récompenses",
+    text: "La roue, la boutique, tes trophées et ta ligue — tout est là.",
   },
 ];
 
