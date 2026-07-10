@@ -61,10 +61,17 @@ const TABS = {
       match: ["examen", "centre-examen", "compte-rendu", "sessions"],
     },
     {
-      id: "boutique",
+      id: "recompenses",
       label: "Récompenses",
       ico: "gift",
-      match: ["galerie", "trophees", "mes-coffres", "classement", "roue"],
+      match: [
+        "boutique",
+        "galerie",
+        "trophees",
+        "mes-coffres",
+        "classement",
+        "roue",
+      ],
     },
     { id: "profil", label: "Profil", ico: "user" },
   ],
@@ -316,7 +323,7 @@ export function mountBottomNav(role) {
   // encore été vu sur la page trophées (set localStorage pg-troph-seen).
   if (role === "eleve") _checkTropheesDot(nav);
   window.addEventListener("pg-trophees-seen", () => {
-    nav.querySelector('.bn-tab[data-id="boutique"] .bn-dot')?.remove();
+    nav.querySelector('.bn-tab[data-id="recompenses"] .bn-dot')?.remove();
   });
 
   // Intro : petit rebond en cascade des onglets, UNE fois par session —
@@ -383,8 +390,8 @@ async function _checkTropheesDot(nav) {
     const { data } = await sb.rpc("get_my_achievements");
     const hasNew = (data || []).some((a) => !seen.has(a.achievement_key));
     if (!hasNew) return;
-    // Les trophées vivent derrière la porte « Récompenses » (id boutique)
-    const tab = nav.querySelector('.bn-tab[data-id="boutique"]');
+    // Les trophées vivent derrière la porte « Récompenses »
+    const tab = nav.querySelector('.bn-tab[data-id="recompenses"]');
     if (tab && !tab.querySelector(".bn-dot")) {
       const dot = document.createElement("span");
       dot.className = "bn-dot";
