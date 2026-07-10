@@ -72,7 +72,7 @@ BEGIN
   IF v_last IS DISTINCT FROM v_today THEN
     SELECT EXISTS (
       SELECT 1 FROM quiz_attempts
-       WHERE user_id = v_user_id AND created_at::date = v_today
+       WHERE user_id = v_user_id AND completed_at::date = v_today
     ) INTO v_did_quiz;
 
     IF v_did_quiz THEN
