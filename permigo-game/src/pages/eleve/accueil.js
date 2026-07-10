@@ -183,6 +183,100 @@ const STYLE = `<style>
   .acc2-chip.streak img { animation: none; }
 }
 
+/* ════════════ Bandeau « série en danger » (SOS) ════════════ */
+.acc2-sos {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin: 12px 16px 0;
+}
+.acc2-sos-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border-radius: 18px;
+  padding: 12px 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border: 1px solid color-mix(in srgb, var(--am) 42%, transparent);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--am) 16%, var(--su)),
+    color-mix(in srgb, var(--am) 9%, var(--su)));
+  transition: transform .12s ease;
+}
+.acc2-sos-main:active { transform: scale(.985); }
+.acc2-sos.crit .acc2-sos-main {
+  border-color: color-mix(in srgb, var(--or) 55%, transparent);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--or) 20%, var(--su)),
+    color-mix(in srgb, var(--or) 11%, var(--su)));
+}
+.acc2-sos-flame {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: radial-gradient(circle at 50% 40%,
+    color-mix(in srgb, var(--am) 32%, transparent), transparent 70%);
+}
+.acc2-sos-flame img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 5px rgba(255,120,0,.5));
+  animation: hudFlameFlick 1.3s ease-in-out infinite;
+  transform-origin: 50% 85%;
+}
+.acc2-sos-txt {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.acc2-sos-title {
+  font: 800 14.5px/1.2 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+.acc2-sos-sub {
+  font: 500 12.5px/1.3 'Inter', sans-serif;
+  color: var(--mu);
+}
+.acc2-sos-arr {
+  flex-shrink: 0;
+  align-self: center;
+  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  color: color-mix(in srgb, var(--am) 75%, var(--ink));
+}
+.acc2-sos-freeze {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 16px;
+  cursor: pointer;
+  font: 800 12.5px/1 'Plus Jakarta Sans', sans-serif;
+  color: #4a2c00;
+  background: linear-gradient(180deg, #ffdf8f, #f5b636);
+  box-shadow: 0 4px 12px -4px rgba(240,165,0,.5), inset 0 1px 0 rgba(255,255,255,.5);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .12s ease;
+}
+.acc2-sos-freeze img { width: 15px; height: 15px; }
+.acc2-sos-freeze:active { transform: scale(.96); }
+.acc2-sos-freeze:disabled { opacity: .6; }
+@media (prefers-reduced-motion: reduce) {
+  .acc2-sos-flame img { animation: none; }
+}
+
 /* ════════════════ HERO FOCAL v2 ════════════════════════════════ */
 .acc2-hero-v2 {
   position: relative;
@@ -919,16 +1013,21 @@ export async function mount(root) {
       last_activity_date: null,
       longest_streak: 0,
     };
-    // get_today_quests (called above) bumps the streak server-side on first visit
-    // of the day. Reflect that immediately in the UI without an extra round-trip.
+    // Série d'ACTIVITÉ (cf. migration 20260709120000_streak_activity_based) :
+    // ouvrir l'app ne suffit plus, il faut avoir fait un quiz aujourd'hui.
+    // get_today_quests avance la série côté serveur au retour sur l'accueil
+    // APRÈS le quiz ; le read `streaks` ci-dessus étant fait AVANT cet avance,
+    // on reflète le bump côté client si un quiz a bien été fait aujourd'hui
+    // (affichage + célébration immédiats, sans round-trip en plus).
     const _todayStr = new Date().toISOString().slice(0, 10);
-    const _questsOk =
-      todayQuestsRes.status === "fulfilled" && !todayQuestsRes.value?.error;
+    const _yesterday = new Date(Date.now() - 86400000)
+      .toISOString()
+      .slice(0, 10);
+    const _didActivityToday = (attemptsRes.value?.data || []).some(
+      (a) => a.completed_at && a.completed_at.slice(0, 10) === _todayStr,
+    );
     let streak = rawStreak;
-    if (_questsOk && rawStreak.last_activity_date !== _todayStr) {
-      const _yesterday = new Date(Date.now() - 86400000)
-        .toISOString()
-        .slice(0, 10);
+    if (_didActivityToday && rawStreak.last_activity_date !== _todayStr) {
       const _bumped =
         rawStreak.last_activity_date === _yesterday
           ? (rawStreak.current_streak || 0) + 1
@@ -1036,8 +1135,11 @@ export async function mount(root) {
     // surgit en grand puis vole se poser dans le badge en haut à gauche.
     // Réservée aux habitués : à la 1re arrivée, le tour guidé présente déjà
     // la flamme (TOUR_KEY absent) → on n'empile pas les deux.
+    // Série d'activité : on célèbre SEULEMENT une fois la série sécurisée
+    // aujourd'hui ("saved"). Les jours « en danger », c'est le bandeau SOS qui
+    // s'affiche — pas de fête tant que le quiz du jour n'est pas fait.
     try {
-      if (localStorage.getItem(TOUR_KEY)) {
+      if (streakSt === "saved" && localStorage.getItem(TOUR_KEY)) {
         import("@/components/eleve/streak-launch.js")
           .then((m) => m.maybeShowStreakLaunch({ streak, streakSt }))
           .catch(() => {});
@@ -1126,9 +1228,52 @@ function computeWorlds(validatedIds) {
 function streakStatus(streak) {
   if (!streak.current_streak) return "broken";
   const today = new Date().toISOString().slice(0, 10);
+  // Série d'activité : « sauvée » seulement si une activité a été faite AUJOURD'HUI.
   if (streak.last_activity_date === today) return "saved";
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  // Dernière activité ≥ 2 jours → la série est effectivement perdue.
+  if (streak.last_activity_date !== yesterday) return "broken";
+  // Dernière activité HIER, rien encore aujourd'hui → en danger (saute à minuit).
   const hoursLeft = 24 - new Date().getHours() - new Date().getMinutes() / 60;
   return hoursLeft < 6 ? "critical" : "at_risk";
+}
+
+// Bandeau « série en danger » : n'apparaît QUE les jours où l'élève n'a pas
+// encore fait son activité (série d'activité). Il pousse d'abord vers le quiz
+// (la bonne façon de garder la série), et propose le gel en filet si l'élève a
+// les volants. Rien si la série est déjà sauvée/cassée/inexistante.
+function renderStreakSos({ streak, streakSt, gemmes, href }) {
+  if (streakSt !== "at_risk" && streakSt !== "critical") return "";
+  const n = streak.current_streak || 0;
+  if (n < 1) return "";
+  const crit = streakSt === "critical";
+  const jours = `${n} jour${n > 1 ? "s" : ""}`;
+  const title = crit
+    ? `Ta série de ${jours} saute bientôt&nbsp;!`
+    : `Ta série de ${jours} va sauter ce soir`;
+  const sub = crit
+    ? "Vite — un quiz suffit pour la sauver."
+    : "Fais ton quiz du jour pour la garder.";
+  const freeze =
+    gemmes >= 50
+      ? `<button class="acc2-sos-freeze" id="sos-freeze-btn" type="button"
+           aria-label="Geler ma série pour 50 volants">Geler · 50 ${volantImg(15)}</button>`
+      : "";
+  return `
+  <div class="acc2-sos${crit ? " crit" : ""}" id="acc-sos">
+    <button class="acc2-sos-main" id="sos-go" type="button" data-href="${esc(href || "")}"
+            aria-label="${esc(`${title.replace(/&nbsp;/g, " ")} — ${sub}`)}">
+      <span class="acc2-sos-flame" aria-hidden="true">
+        <img src="/skins/permigo-streak-flame-v1.webp" alt="">
+      </span>
+      <span class="acc2-sos-txt">
+        <span class="acc2-sos-title">${title}</span>
+        <span class="acc2-sos-sub">${sub}</span>
+      </span>
+      <span class="acc2-sos-arr" aria-hidden="true">→</span>
+    </button>
+    ${freeze}
+  </div>`;
 }
 
 // ─── Render ───────────────────────────────────────────────────────
@@ -1262,6 +1407,8 @@ function render({
       <span class="num">${streak.current_streak}</span>
     </button>
   </div>
+
+  ${renderStreakSos({ streak, streakSt, gemmes, href: _heroHref })}
 
   <!-- ══ HERO FOCAL v2 — question du jour ══ -->
   <section class="acc2-hero-v2" aria-label="${esc(_heroKicker)}">
@@ -1452,10 +1599,12 @@ function wire(
   root.querySelector("#streak-badge-btn")?.addEventListener("click", openBS);
   bsBg?.addEventListener("click", closeBS);
 
-  // Streak freeze
-  root.querySelector("#bs-freeze-btn")?.addEventListener("click", async () => {
-    const btn = root.querySelector("#bs-freeze-btn");
+  // Gel de série — logique partagée entre le tiroir (#bs-freeze-btn) et le
+  // bandeau « série en danger » (#sos-freeze-btn). Restaure le libellé initial
+  // du bouton en cas d'échec (capturé à la volée, chaque bouton a le sien).
+  const runStreakFreeze = async (btn, onDone) => {
     if (!btn || btn.disabled) return;
+    const prev = btn.innerHTML;
     btn.disabled = true;
     btn.textContent = "⏳ Gel en cours…";
     try {
@@ -1464,20 +1613,47 @@ function wire(
         toast("Il te faut 50 volants pour geler ta série.", "error");
         setTimeout(() => {
           btn.disabled = false;
-          btn.innerHTML = `Geler ma série · 50 ${volantImg(16)}`;
+          btn.innerHTML = prev;
         }, 1800);
         return;
       }
       track("streak.freeze_used", {});
       toast("Série gelée pour 24 h.", "success");
       btn.textContent = "✓ Série gelée"; // évite de laisser "⏳ Gel en cours…" figé
-      closeBS();
+      onDone?.();
     } catch {
       toast("Le gel a échoué. Réessaie.", "error");
       btn.disabled = false;
-      btn.innerHTML = `Geler ma série · 50 ${volantImg(16)}`;
+      btn.innerHTML = prev;
     }
+  };
+
+  const bsFreezeBtn = root.querySelector("#bs-freeze-btn");
+  bsFreezeBtn?.addEventListener("click", () =>
+    runStreakFreeze(bsFreezeBtn, closeBS),
+  );
+
+  // Bandeau « série en danger » : réviser (garde la série) ou la geler (filet).
+  const sosGo = root.querySelector("#sos-go");
+  sosGo?.addEventListener("click", () => {
+    haptic("tap");
+    track("streak.sos_revise", { days: streak?.current_streak });
+    const href = sosGo.dataset.href;
+    if (href) navigate(href);
   });
+  const sosFreezeBtn = root.querySelector("#sos-freeze-btn");
+  sosFreezeBtn?.addEventListener("click", () =>
+    runStreakFreeze(sosFreezeBtn, () => {
+      track("streak.sos_freeze", { days: streak?.current_streak });
+      const sos = root.querySelector("#acc-sos");
+      if (sos) {
+        sos.style.transition = "opacity .3s ease, transform .3s ease";
+        sos.style.opacity = "0";
+        sos.style.transform = "translateY(-6px)";
+        setTimeout(() => sos.remove(), 320);
+      }
+    }),
+  );
 
   // Heatmap tap
   const infoEl = root.querySelector("#hmap-info");
