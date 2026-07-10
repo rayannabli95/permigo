@@ -364,8 +364,8 @@ function renderHero(ctx) {
     : `Reviens demain pour rejouer`;
   const sub =
     anyBig && moniteurPrenom
-      ? `Skins, titres… et parfois un <b>vrai cadeau</b> signé ${esc(moniteurPrenom)}.`
-      : `Des volants, des skins et des titres à gagner chaque jour.`;
+      ? `Avatars, fonds, titres… et parfois un <b>vrai cadeau</b> signé ${esc(moniteurPrenom)}.`
+      : `Des volants, des avatars et des titres à gagner chaque jour.`;
   const ctaLabel = spinAvailable ? "Lancer la roue" : "Voir la Roue";
 
   const claims = [];
