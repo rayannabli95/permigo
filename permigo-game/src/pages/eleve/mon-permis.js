@@ -270,6 +270,7 @@ const STYLE = `<style>
   background: var(--su); border: 1px solid var(--bo); box-shadow: 0 1px 2px rgba(10,13,26,.04);
   font: inherit; color: inherit; text-align: left; text-decoration: none; min-height: 44px;
 }
+.mp-centre svg { width: 16px; height: 16px; flex: none; color: var(--mu2); }
 .mp-centre-b { flex: 1; min-width: 0; }
 .mp-centre-t { font: 700 14px/1 'Baloo 2', cursive; }
 .mp-centre-s { font-size: 10.5px; font-weight: 700; color: var(--mu2); margin-top: 2px; line-height: 1.35; }
@@ -688,11 +689,25 @@ export async function mount(root) {
       .from("validations")
       .select("competence_id, statut")
       .eq("eleve_id", me.id),
-    sb
-      .from("profiles")
-      .select("enseignant_id, moniteur:profiles!enseignant_id(prenom)")
-      .eq("id", me.id)
-      .maybeSingle(),
+    // ⚠️ Pas d'embed self-join ici : PostgREST résout
+    // `moniteur:profiles!enseignant_id(prenom)` dans le sens INVERSE
+    // (to-many : « les profils dont je suis l'enseignant ») → tableau vide
+    // pour un élève, et la chip ne s'affichait jamais. Deux requêtes plates,
+    // couvertes par la policy profiles_select (élève lit les profils
+    // enseignant/gerant de son école).
+    (async () => {
+      const { data: moi, error } = await sb
+        .from("profiles")
+        .select("enseignant_id")
+        .eq("id", me.id)
+        .maybeSingle();
+      if (error || !moi?.enseignant_id) return { data: null };
+      return sb
+        .from("profiles")
+        .select("prenom")
+        .eq("id", moi.enseignant_id)
+        .maybeSingle();
+    })(),
     sb
       .from("sessions_moniteur")
       .select("duration_minutes")
@@ -738,9 +753,7 @@ export async function mount(root) {
   const currentTitre = worldStates[currentIdx]?.world?.titre || "";
 
   const moniteurPrenom =
-    profRes.status === "fulfilled"
-      ? profRes.value.data?.moniteur?.prenom || null
-      : null;
+    profRes.status === "fulfilled" ? profRes.value.data?.prenom || null : null;
 
   const sessRows =
     sessRes.status === "fulfilled" ? sessRes.value.data || [] : [];
