@@ -65,7 +65,9 @@ const ELEVE_TOUR_STEPS = [
     text: "Un quiz par jour. Tout démarre ici.",
   },
   {
-    sel: '.bn-tab[data-id="parcours"]',
+    // Chantier nav simplifiée : l'onglet élève "parcours" est devenu
+    // "mon-permis" (le jeu a déménagé sous Réviser) — le sélecteur suit.
+    sel: '.bn-tab[data-id="mon-permis"]',
     title: "Ta carte du permis",
     text: "31 compétences à valider avec ton moniteur.",
   },
@@ -1739,6 +1741,29 @@ async function _loadAndInjectLeagues(root) {
     mountLeagueHero(slot, { conduite, revision });
   } catch (e) {
     console.error("[accueil] leagues", e);
+  }
+}
+
+// Exportée (chantier nav simplifiée, hub « Mon permis ») : mon-permis.js
+// réutilise CETTE lecture (même table, même tri) pour son étape ② « Mes
+// leçons », sans filtre read_at (contrairement à la bannière ci-dessous qui
+// ne montre QUE le non-lu) — le hub affiche le dernier compte-rendu, lu ou
+// pas, avec juste un badge « Nouveau » si non lu.
+export async function fetchLastCompteRendu(me) {
+  if (!me) return null;
+  try {
+    const { data, error } = await sb
+      .from("comptes_rendus")
+      .select(
+        "id, session_date, created_at, acquis, en_cours, a_retravailler, note, read_at",
+      )
+      .eq("eleve_id", me.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (error || !data?.length) return null;
+    return data[0];
+  } catch {
+    return null;
   }
 }
 

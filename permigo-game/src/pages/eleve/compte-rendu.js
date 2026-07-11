@@ -326,9 +326,13 @@ function renderPage(cr) {
 
 // ─── Wire ──────────────────────────────────────────────────────
 function wire(root) {
+  // Chantier nav simplifiée : « Voir mon itinéraire » renvoie désormais vers
+  // le hub « Mon permis » (progression validée par le moniteur) et non plus
+  // vers #/parcours (le jeu) — le jeu et le sérieux sont séparés, et un
+  // compte-rendu de leçon est un événement « sérieux ».
   root
     .querySelector("#cr-cta-parcours")
-    ?.addEventListener("click", () => navigate("#/parcours"));
+    ?.addEventListener("click", () => navigate("#/mon-permis"));
   root
     .querySelector("#cr-cta-retour")
     ?.addEventListener("click", () => navigate("#/"));
@@ -352,7 +356,7 @@ export async function mount(root, id) {
 
   if (!id) {
     toast("Compte-rendu introuvable", "error");
-    navigate("#/parcours");
+    navigate("#/mon-permis");
     return;
   }
 
@@ -368,7 +372,7 @@ export async function mount(root, id) {
       "Compte-rendu indisponible. Vérifie ta connexion, puis réessaie.",
       "error",
     );
-    navigate("#/parcours");
+    navigate("#/mon-permis");
     return;
   }
 

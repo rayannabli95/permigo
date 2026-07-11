@@ -74,6 +74,13 @@ const ROUTES = {
     classement: () => import("@/pages/eleve/classement.js"),
     galerie: () => import("@/pages/eleve/galerie.js"),
     recompenses: () => import("@/pages/eleve/recompenses.js"),
+    // Chantier nav simplifiée (dernier chantier) : « Mon permis » est le
+    // nouveau hub crédible (compétences validées par le moniteur + leçons +
+    // examen) — le jeu (mondes/boss/coffres) RESTE à `parcours` ci-dessus,
+    // séparé volontairement. `mes-lecons` = sous-page (historique des
+    // comptes-rendus), ouverte depuis l'étape ② du hub.
+    "mon-permis": () => import("@/pages/eleve/mon-permis.js"),
+    "mes-lecons": () => import("@/pages/eleve/mes-lecons.js"),
     examen: () => import("@/pages/eleve/examen.js"),
     "centre-examen": () => import("@/pages/eleve/centre-examen.js"),
     feedback: () => import("@/pages/eleve/feedback.js"),
@@ -200,6 +207,8 @@ const ROUTE_TITLES = {
   galerie: "Galerie",
   recompenses: "Récompenses",
   roue: "La Roue",
+  "mon-permis": "Mon permis",
+  "mes-lecons": "Mes leçons",
   examen: "Examen",
   "exam-blanc": "Examen blanc du code",
   "revision-conduite": "Révision conduite",
