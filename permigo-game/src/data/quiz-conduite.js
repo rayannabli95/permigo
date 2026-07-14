@@ -27,5 +27,6 @@ export function jeuFauteSession(n = 8) {
       options: x.options,
       correct: x.faute_index,
       explication: x.explication,
+      tags: x.tags, // thèmes « Mes fautes » (enregistrés par premium-quiz)
     }));
 }

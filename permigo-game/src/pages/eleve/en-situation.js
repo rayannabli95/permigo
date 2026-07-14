@@ -10,8 +10,10 @@ import { medallion } from "@/utils/medallions.js";
 import {
   pickSession,
   THEME_LABELS,
+  THEME_WEAK_TAGS,
   SITUATIONS,
 } from "@/data/situations-conduite.js";
+import { recordAnswer } from "@/utils/weak-points.js";
 import {
   renderSituationScene,
   buildFocusFX,
@@ -185,6 +187,8 @@ export async function mount(root, param) {
     answered = true;
     const s = session[idx];
     const ok = repId === s.bonne;
+    // Nourrit « Mes fautes » (hub Réviser) avec les thèmes de la situation
+    recordAnswer(THEME_WEAK_TAGS[s.theme], ok);
     track("situation.answered", {
       situation_id: s.id,
       theme: s.theme,

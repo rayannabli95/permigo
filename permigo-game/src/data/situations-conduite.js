@@ -41,6 +41,18 @@ export const THEME_LABELS = {
   croisement: "Croisements",
 };
 
+// Thème du jeu → thèmes « Mes fautes » (TAG_LABELS de utils/weak-points.js).
+// Nourrit la révision ciblée du hub Réviser après chaque réponse.
+export const THEME_WEAK_TAGS = {
+  giratoire: ["rond_point", "priorite"],
+  "priorite-droite": ["priorite"],
+  stop: ["signalisation", "priorite"],
+  cede: ["signalisation", "priorite"],
+  feu: ["signalisation"],
+  pieton: ["pieton"],
+  croisement: ["priorite"],
+};
+
 export const SITUATIONS = [
   // ── Giratoire ────────────────────────────────────────────────
   {
