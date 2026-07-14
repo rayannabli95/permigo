@@ -8,6 +8,10 @@
 //     déduits de la compétence REMC via REMC_THEME_TAGS
 //   - exam-conduite.js : tags portés par les items de
 //     data/exam-conduite-phases.js
+//   - en-situation.js : thèmes des scènes via THEME_WEAK_TAGS
+//     (data/situations-conduite.js)
+//   - premium-quiz.js (jeu-faute + quiz de fiche conduite) : tags de
+//     data/jeu-faute.json, ou code REMC de la question (fiches)
 // Stockage local (par appareil) : suffisant pour une révision ciblée v1.
 // Évolution future : persistance DB pour le cross-device.
 // ═══════════════════════════════════════════════════════════════

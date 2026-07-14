@@ -11,6 +11,7 @@
 import { esc } from "@/utils/escape.js";
 import { haptic, hapticPulses, tapHaptic } from "@/utils/haptic.js";
 import { playPop, playCoin, playReveal } from "@/utils/sound.js";
+import { recordAnswer, recordCompetenceAnswer } from "@/utils/weak-points.js";
 
 // Récompense VARIABLE : jamais 2× le même d'affilée (sinon le cerveau
 // s'habitue et le pic dopamine disparaît — cf. reward prediction error).
@@ -254,6 +255,10 @@ export function mountPremiumQuiz(
     const q = qs[idx];
     const win = i === q.correct;
     results[idx] = win;
+    // Nourrit « Mes fautes » (hub Réviser) : tags portés par la question
+    // (jeu-faute) ou thèmes déduits du code REMC (quiz de fiche conduite).
+    recordAnswer(q.tags, win);
+    if (q.code) recordCompetenceAnswer(q.code, win);
     if (win) {
       correctCount++;
       combo++;
