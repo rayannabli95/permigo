@@ -101,7 +101,12 @@ export function recordAnswer(tags, isCorrect) {
     if (!TAG_LABELS[t]) continue; // ignore les tags non « thème »
     const e = d[t] || { seen: 0, wrong: 0 };
     e.seen += 1;
+    // `wrong` = cumul historique des ratés (sert au taux « tu rates X % »).
+    // `cleared` = fautes effacées : chaque bonne réponse sur le thème en
+    // efface une (plafonné au cumul). Le « à revoir » affiché = wrong-cleared,
+    // et il redescend vraiment quand l'élève rejoue et réussit.
     if (!isCorrect) e.wrong += 1;
+    else e.cleared = Math.min(e.wrong, (e.cleared || 0) + 1);
     d[t] = e;
   }
   save(d);
@@ -118,21 +123,28 @@ export function recordCompetenceAnswer(competenceId, isCorrect) {
 }
 
 /**
- * Thèmes faibles, triés par taux d'erreur décroissant.
+ * Thèmes faibles, triés par taux d'erreur décroissant. Un thème dont toutes
+ * les fautes ont été effacées (left = 0) ne remonte plus.
  * @param {{minSeen?: number, limit?: number}} opts
- * @returns {Array<{tag, label, seen, wrong, rate}>}
+ * @returns {Array<{tag, label, seen, wrong, left, rate}>}
+ *   wrong = cumul historique des ratés · left = fautes restant à revoir
+ *   (wrong - effacées) · rate = wrong/seen (taux de ratés réel)
  */
 export function getWeakPoints({ minSeen = 3, limit = 3 } = {}) {
   const d = load();
   return Object.entries(d)
-    .filter(([t, e]) => TAG_LABELS[t] && e.seen >= minSeen && e.wrong > 0)
+    .filter(
+      ([t, e]) =>
+        TAG_LABELS[t] && e.seen >= minSeen && e.wrong - (e.cleared || 0) > 0,
+    )
     .map(([t, e]) => ({
       tag: t,
       label: TAG_LABELS[t],
       seen: e.seen,
       wrong: e.wrong,
+      left: e.wrong - (e.cleared || 0),
       rate: e.wrong / e.seen,
     }))
-    .sort((a, b) => b.rate - a.rate || b.wrong - a.wrong)
+    .sort((a, b) => b.rate - a.rate || b.left - a.left)
     .slice(0, limit);
 }
