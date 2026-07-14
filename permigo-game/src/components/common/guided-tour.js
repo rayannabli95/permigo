@@ -16,57 +16,111 @@ const STYLE = `<style>
     background: transparent;
     transition: background .2s ease;
   }
-  .gt-catch.gt-dim { background: rgba(8,10,20,.6); }
+  .gt-catch.gt-dim {
+    background: rgba(10,8,26,.74);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
   .gt-spot {
     position: fixed; z-index: 10001;
     border-radius: 14px;
-    box-shadow: 0 0 0 9999px rgba(8,10,20,.6), 0 0 0 2px var(--a, #6366f1) inset;
+    box-shadow: 0 0 0 9999px rgba(10,8,26,.74),
+                0 0 0 3px var(--a, #6366f1) inset,
+                0 0 24px color-mix(in srgb, var(--a, #6366f1) 65%, transparent);
     pointer-events: none;
     transition: ${REDUCED ? "none" : "left .28s cubic-bezier(.4,0,.2,1), top .28s cubic-bezier(.4,0,.2,1), width .28s cubic-bezier(.4,0,.2,1), height .28s cubic-bezier(.4,0,.2,1)"};
   }
+  /* Bulle « Arène » : surface teintée accent + liseré + halo → se détache
+     du voile même en dark (fini la carte noire sur fond noir). */
   .gt-bubble {
     position: fixed; z-index: 10002;
     left: 50%; transform: translateX(-50%);
-    width: min(340px, calc(100vw - 32px));
-    background: var(--su, #fff);
-    border: 1.5px solid var(--bo, #e6e8ef);
-    border-radius: 18px;
-    padding: 18px;
-    box-shadow: 0 12px 40px rgba(8,10,20,.28);
+    width: min(360px, calc(100vw - 28px));
+    background:
+      radial-gradient(130% 90% at 50% -10%,
+        color-mix(in srgb, var(--a, #6366f1) 26%, var(--su, #fff)) 0%,
+        var(--su, #fff) 62%);
+    border: 2px solid color-mix(in srgb, var(--a, #6366f1) 55%, var(--su, #fff));
+    border-radius: 24px;
+    padding: 20px 20px 18px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.14) inset,
+      0 22px 60px rgba(8,10,20,.5),
+      0 0 44px color-mix(in srgb, var(--a, #6366f1) 32%, transparent);
     color: var(--ink, #0a0d1a);
-    ${REDUCED ? "" : "animation: gtIn .26s cubic-bezier(.34,1.4,.64,1);"}
+    ${REDUCED ? "" : "animation: gtIn .32s cubic-bezier(.34,1.45,.64,1);"}
   }
-  .gt-bubble.gt-center { top: 50%; transform: translate(-50%, -50%); }
-  @keyframes gtIn { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; } }
+  .gt-bubble.gt-center {
+    top: 50%; transform: translate(-50%, -50%); text-align: center;
+    ${REDUCED ? "" : "animation-name: gtInC;"}
+  }
+  @keyframes gtIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(14px) scale(.94); }
+    to { opacity: 1; }
+  }
+  @keyframes gtInC {
+    from { opacity: 0; transform: translate(-50%, -46%) scale(.9); }
+    to { opacity: 1; }
+  }
   .gt-step {
-    font: 700 11px/1 'IBM Plex Mono', monospace;
-    color: var(--mu2, #9aa0b4); letter-spacing: .06em; margin-bottom: 8px;
+    display: inline-block;
+    font: 800 11px/1 'Baloo 2', 'Fredoka', sans-serif;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--a-txt, var(--a, #6366f1));
+    background: color-mix(in srgb, var(--a, #6366f1) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--a, #6366f1) 30%, transparent);
+    border-radius: 999px; padding: 6px 11px; margin-bottom: 12px;
   }
   .gt-title {
-    font: 800 17px/1.25 'Plus Jakarta Sans', sans-serif;
-    color: var(--ink, #0a0d1a); margin: 0 0 6px; letter-spacing: -.02em;
+    font: 800 26px/1.12 'Baloo 2', 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+    color: var(--ink, #0a0d1a); margin: 0 0 8px; letter-spacing: -.01em;
+    text-wrap: balance;
   }
+  .gt-bubble.gt-center .gt-title { font-size: 30px; }
   .gt-text {
-    font: 500 13.5px/1.5 'Inter', sans-serif;
-    color: var(--ink5, #3a3f52); margin: 0 0 16px;
+    font: 600 15.5px/1.5 'Plus Jakarta Sans', 'Inter', sans-serif;
+    color: var(--ink2, #3a3f52); margin: 0 0 18px;
   }
-  .gt-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .gt-actions { display: flex; align-items: center; gap: 12px; }
   .gt-skip {
+    flex-shrink: 0;
     background: none; border: none; cursor: pointer;
-    font: 600 13px/1 'Inter', sans-serif; color: var(--mu2, #9aa0b4);
-    padding: 10px 4px; min-height: 44px;
+    font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu, #9aa0b4);
+    padding: 10px 6px; min-height: 44px;
     -webkit-tap-highlight-color: transparent;
   }
   .gt-skip:hover { color: var(--ink5, #3a3f52); }
+  /* Bouton « plastique 3D » (même famille que les CTA de l'Arène) */
   .gt-next {
-    background: var(--a, #6366f1); color: var(--a-ink); border: none; cursor: pointer;
-    font: 700 13.5px/1 'Plus Jakarta Sans', sans-serif;
-    padding: 0 20px; min-height: 44px; border-radius: 12px;
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--a, #6366f1) 35%, transparent);
+    flex: 1;
+    border: none; cursor: pointer; position: relative; overflow: hidden;
+    font: 800 17px/1 'Baloo 2', 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: .3px;
+    color: var(--a-ink, #fff);
+    padding: 0 20px; min-height: 52px; border-radius: 16px;
+    background: linear-gradient(180deg,
+      var(--a-lt, color-mix(in srgb, var(--a, #6366f1) 70%, #fff)) 0%,
+      var(--a, #6366f1) 48%,
+      var(--adk, var(--a, #6366f1)) 100%);
+    box-shadow:
+      0 5px 0 color-mix(in srgb, var(--adk, var(--a, #6366f1)) 72%, #000),
+      0 10px 22px color-mix(in srgb, var(--a, #6366f1) 45%, transparent),
+      0 1px 0 rgba(255,255,255,.5) inset;
     -webkit-tap-highlight-color: transparent;
-    transition: transform .14s cubic-bezier(.23,1,.32,1);
+    transition: transform .1s, box-shadow .1s;
   }
-  .gt-next:active { transform: scale(.96); }
+  .gt-next::after {
+    content: ""; position: absolute; top: 3px; left: 10%; right: 10%; height: 36%;
+    border-radius: 99px; pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0));
+  }
+  .gt-next:active {
+    transform: translateY(3px);
+    box-shadow:
+      0 2px 0 color-mix(in srgb, var(--adk, var(--a, #6366f1)) 72%, #000),
+      0 5px 12px color-mix(in srgb, var(--a, #6366f1) 40%, transparent),
+      0 1px 0 rgba(255,255,255,.4) inset;
+  }
 </style>`;
 
 export function startTour(steps, opts = {}) {
@@ -162,7 +216,7 @@ export function startTour(steps, opts = {}) {
 
   function render() {
     const s = steps[i];
-    elStep.textContent = `${i + 1} / ${steps.length}`;
+    elStep.textContent = `Étape ${i + 1}/${steps.length}`;
     elTitle.textContent = s.title || "";
     elText.textContent = s.text || "";
     btnNext.textContent = i === steps.length - 1 ? "Terminer" : "Suivant";
