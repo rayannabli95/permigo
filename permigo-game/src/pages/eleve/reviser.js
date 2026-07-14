@@ -24,7 +24,8 @@
 //   - Ligue Révision  : RPC get_theory_leaderboard (déjà utilisé par classement.js)
 //   - Série           : utils/game-state.js getStreak() (local)
 //   - Examen blanc    : quiz_attempts (type=exam_blanc, ref_id="exam-conduite" — le blanc de CONDUITE)
-//   - Mes fautes      : utils/weak-points.js (local, alimenté par exam-blanc.js)
+//   - Mes fautes      : utils/weak-points.js (local — alimenté par exam-blanc.js,
+//                       l'Arène (quiz-engine.js) et exam-conduite.js)
 //   - Quiz éclair     : table flash_quizzes (sent_to=moi, non répondu, non expiré)
 //   - Fiches lues     : localStorage rvc_read_v1 + data/fiches-conduite.js
 //
@@ -53,9 +54,8 @@ const LS_READ_KEY = "rvc_read_v1"; // même clé que revision-conduite.js
 // de CONDUITE (#/exam-conduite, 8 phases ECE — le différenciateur PermiGo),
 // PAS l'ancien exam-blanc du code (page à l'ancienne mise en page, sans
 // porte ailleurs). « En situation » retrouve aussi sa porte ici.
-// Les fautes (« Mes fautes ») restent nourries par weak-points.js
-// (alimenté par exam-blanc.js uniquement — follow-up produit : brancher
-// recordAnswer sur l'Arène et l'exam conduite).
+// Les fautes (« Mes fautes ») sont nourries par weak-points.js, alimenté
+// par exam-blanc.js, l'Arène (quiz-engine.js) et l'exam conduite.
 
 // Médaillon du monde REMC en cours — même convention que quiz.js (CAT_MED).
 const WORLD_MED = {
@@ -593,7 +593,7 @@ export async function mount(root) {
   }
   const fichesLues = FICHES.filter((f) => read[f.code]).length;
 
-  // Mes fautes (local, alimenté par exam-blanc.js)
+  // Mes fautes (local — exam-blanc + Arène + exam conduite)
   const weakPoints = getWeakPoints({ minSeen: 3, limit: 3 });
   const weakCount = getWeakPoints({ minSeen: 3, limit: 50 }).reduce(
     (n, w) => n + w.wrong,
