@@ -18,6 +18,7 @@ import { getCurUser } from "@/auth/cur-user.js";
 import { openShareRecap } from "@/components/eleve/share-recap.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
+import { recordAnswer } from "@/utils/weak-points.js";
 import {
   PHASES,
   FAMILLES,
@@ -344,6 +345,8 @@ export async function mount(root) {
       correct,
       isElim,
     });
+    // Nourrit « Mes fautes » (hub Réviser) avec les thèmes de l'item
+    recordAnswer(it.tags, correct);
     haptic(isElim ? "warning" : correct ? "success" : "tap");
     render();
   }

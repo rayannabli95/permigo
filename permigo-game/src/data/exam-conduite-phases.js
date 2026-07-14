@@ -32,6 +32,8 @@ export const SEUIL = 20; // reçu si ≥ 20 ET 0 faute éliminatoire (officiel)
 //       qui est une FAUTE ÉLIMINATOIRE (optionnel, liste officielle uniquement)
 // fam = famille notée ; why = correction courte (tutoiement)
 // bonus = 'courtoisie' | 'eco' (l'item rapporte le point bonus si correct)
+// tags = thèmes « Mes fautes » (TAG_LABELS de utils/weak-points.js) — nourrit
+//        la révision ciblée du hub Réviser ; omis si aucun thème honnête
 export const PHASES = [
   {
     n: 1,
@@ -43,6 +45,7 @@ export const PHASES = [
       {
         id: "p1-impression",
         fam: "info",
+        tags: ["verification_interieure"],
         q: "Pare-brise plein de gouttes, tu t'installes. L'inspecteur t'observe déjà. Tu fais quoi ?",
         opts: [
           "Tu mets les essuie-glaces avant de démarrer",
@@ -64,6 +67,7 @@ export const PHASES = [
       {
         id: "p2-ordre",
         fam: "commandes",
+        tags: ["verification_interieure"],
         q: "Tu règles ton poste. Le plus logique, c'est dans quel ordre ?",
         opts: [
           "Siège → volant → rétroviseurs",
@@ -76,6 +80,7 @@ export const PHASES = [
       {
         id: "p2-securite",
         fam: "commandes",
+        tags: ["verification_interieure"],
         q: "Tu es installé. Avant de partir, le réflexe sécurité c'est…",
         opts: [
           "Vérifier que tout le monde est attaché + portières fermées, aucun voyant rouge",
@@ -118,6 +123,7 @@ export const PHASES = [
       {
         id: "p4-prio-droite",
         fam: "partage",
+        tags: ["priorite"],
         q: "Intersection sans panneau, une voiture arrive à ta droite. Tu fais quoi ?",
         opts: [
           "Tu cèdes — priorité à droite",
@@ -131,6 +137,7 @@ export const PHASES = [
       {
         id: "p4-ligne",
         fam: "partage",
+        tags: ["signalisation", "cycliste"],
         q: "Un cycliste lent devant toi, ligne blanche continue au sol. Tu veux le doubler.",
         opts: [
           "Tu patientes derrière jusqu'à la ligne discontinue",
@@ -144,6 +151,7 @@ export const PHASES = [
       {
         id: "p4-giratoire",
         fam: "info",
+        tags: ["rond_point", "manoeuvre"],
         q: "Sur un giratoire, tu réalises que tu es mal placé pour ta sortie. Le mieux ?",
         opts: [
           "Tu refais un tour proprement",
@@ -156,6 +164,7 @@ export const PHASES = [
       {
         id: "p4-angle-mort",
         fam: "info",
+        tags: ["manoeuvre"],
         q: "Tu vas te déporter pour une voiture en stationnement. Un usager peut être à gauche.",
         opts: [
           "Rétro + coup d'œil angle mort, puis tu te déportes",
@@ -169,6 +178,7 @@ export const PHASES = [
       {
         id: "p4-distance",
         fam: "info",
+        tags: ["vitesse"],
         q: "Tu suis une voiture sur une route à 80. La bonne distance de sécurité ?",
         opts: [
           "Environ 2 secondes derrière elle",
@@ -181,6 +191,7 @@ export const PHASES = [
       {
         id: "p4-allure",
         fam: "commandes",
+        tags: ["vitesse"],
         q: "Ligne droite dégagée, limite à 50, tu roules à 30 « pour être sûr ». L'inspecteur…",
         opts: [
           "Le manque de dynamisme est pénalisé : mets de l'allure quand c'est permis",
@@ -193,6 +204,7 @@ export const PHASES = [
       {
         id: "p4-feu",
         fam: "partage",
+        tags: ["signalisation"],
         q: "Feu qui passe au rouge devant toi, tu peux encore freiner sans danger.",
         opts: [
           "Tu t'arrêtes avant la ligne",
@@ -207,6 +219,7 @@ export const PHASES = [
         id: "p4-courtoisie",
         fam: "partage",
         bonus: "courtoisie",
+        tags: ["courtoisie"],
         q: "Une voiture veut s'insérer depuis un parking, le trafic est dense mais tu peux la laisser sans gêner.",
         opts: [
           "Tu la laisses passer d'un geste",
@@ -229,6 +242,7 @@ export const PHASES = [
       {
         id: "p5-tromper",
         fam: "autonomie",
+        tags: ["manoeuvre"],
         q: "En autonomie, tu réalises que tu pars dans la mauvaise direction. Tu fais quoi ?",
         opts: [
           "Tu continues proprement, tu te recales dès que possible",
@@ -251,6 +265,7 @@ export const PHASES = [
       {
         id: "p6-clignotant",
         fam: "partage",
+        tags: ["manoeuvre"],
         q: "Tu vas t'arrêter pour faire ton créneau. Le clignotant, c'est…",
         opts: [
           "AVANT de t'arrêter",
@@ -263,6 +278,7 @@ export const PHASES = [
       {
         id: "p6-espace",
         fam: "commandes",
+        tags: ["manoeuvre"],
         q: "Pour ton créneau, l'inspecteur t'a laissé une GRANDE place. Erreur classique à éviter ?",
         opts: [
           "Braquer trop tôt et risquer de frotter la voiture",
@@ -284,6 +300,7 @@ export const PHASES = [
       {
         id: "p7-detresse",
         fam: "commandes",
+        tags: ["verification_interieure"],
         q: "Vérif intérieure : « Allume les feux de détresse et cite 3 cas où on les utilise. »",
         opts: [
           "Panne/accident, ralentissement brutal sur autoroute, véhicule lent gênant",
@@ -296,6 +313,7 @@ export const PHASES = [
       {
         id: "p7-secours",
         fam: "autonomie",
+        tags: ["premiers_secours"],
         q: "Premiers secours : à quelle distance places-tu le triangle de pré-signalisation ?",
         opts: [
           "Environ 30 mètres avant le danger (et visible)",
@@ -317,6 +335,7 @@ export const PHASES = [
       {
         id: "p8-immo",
         fam: "commandes",
+        tags: ["manoeuvre"],
         q: "Tu rentres au centre. Pour immobiliser proprement :",
         opts: [
           "Point mort, frein à main, essuie-glaces coupés, moteur éteint",
@@ -330,6 +349,7 @@ export const PHASES = [
         id: "p8-eco",
         fam: "commandes",
         bonus: "eco",
+        tags: ["eco_conduite"],
         q: "Tout au long du parcours, pour la conduite économique tu as…",
         opts: [
           "Passé les rapports assez tôt, conduite souple et fluide",

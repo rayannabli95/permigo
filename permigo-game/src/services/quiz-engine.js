@@ -21,6 +21,7 @@ import {
   renderTheoryGain,
 } from "@/components/eleve/theory-gain.js";
 import { wireQuestionSpeech, stopSpeaking } from "@/utils/speech.js";
+import { recordCompetenceAnswer } from "@/utils/weak-points.js";
 import {
   playCorrect,
   playWrong,
@@ -117,6 +118,9 @@ export async function lancerQuiz({
       chosen,
       correctIndex: q.correct_index,
     });
+
+    // Nourrit « Mes fautes » (hub Réviser) via les thèmes de la compétence
+    recordCompetenceAnswer(competenceId, correct);
 
     if (correct) {
       score++;
