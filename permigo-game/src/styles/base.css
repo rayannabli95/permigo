@@ -254,9 +254,13 @@ code, kbd, samp, pre,
   font-variant-numeric: tabular-nums slashed-zero;
 }
 
-/* iOS safe-area (notch + home bar) */
+/* iOS safe-area (notch + home bar) — pages SANS chrome uniquement.
+   Quand le chrome est monté, header/nav/#app comptent DÉJÀ env(safe-area-*)
+   chacun : ce padding body s'ajoutait par-dessus → bande vide de la hauteur
+   de l'encoche sous le header (et au-dessus des héros immersifs type Réviser
+   qui remontent en margin négatif) sur iPhone en PWA installée. */
 @supports (padding: env(safe-area-inset-top)) {
-  body {
+  body:not(.has-chrome) {
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
