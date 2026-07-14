@@ -45,6 +45,11 @@ const TABS = {
       id: "reviser",
       label: "Réviser",
       ico: "zap",
+      // Chantier nav simplifiée (dernier chantier) : le jeu et le sérieux
+      // sont séparés. `parcours` (mondes/boss/coffres, accessible depuis
+      // Réviser → « Jouer ») allume désormais CET onglet — avant, il
+      // allumait « Mon permis ». La progression sérieuse (compétences
+      // validées, leçons, examen) vit dans le hub `mon-permis` ci-dessous.
       match: [
         "quiz",
         "exam-blanc",
@@ -52,13 +57,23 @@ const TABS = {
         "exam-conduite",
         "jeu-faute",
         "flash-quiz",
+        "parcours",
       ],
     },
     {
-      id: "parcours",
+      // `id` cible directement #/mon-permis (le hub). L'ancien id "parcours"
+      // pointait vers le jeu ; désormais le jeu est sous Réviser (ci-dessus)
+      // et cet onglet est la route crédible vers le vrai permis.
+      id: "mon-permis",
       label: "Mon permis",
       ico: "map",
-      match: ["examen", "centre-examen", "compte-rendu", "sessions"],
+      match: [
+        "examen",
+        "centre-examen",
+        "compte-rendu",
+        "sessions",
+        "mes-lecons",
+      ],
     },
     {
       id: "recompenses",

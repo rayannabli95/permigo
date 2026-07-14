@@ -314,6 +314,10 @@ const STYLE = `<style>
 </style>`;
 
 // ─── Constants ───────────────────────────────────────────────────
+// ⚠️ LS_KEY_DATE/LS_KEY_REVISED, les seuils et la readiness sont réutilisés
+// tels quels par le hub « Mon permis » (mon-permis.js, chantier nav
+// simplifiée) via les exports ci-dessous — AUCUNE re-déclaration de seuil,
+// la readiness reste gelée (même règle moniteur, même vérité) dans les 2 écrans.
 const LS_KEY_DATE = "permigo:exam_date";
 const LS_KEY_REVISED = "permigo:has_revised";
 const COMPS_TARGET = 16; // > 50% of 31
@@ -338,8 +342,9 @@ const TIPS = [
   },
 ];
 
-// ─── Helpers ─────────────────────────────────────────────────────
-function parseSavedDate() {
+// ─── Helpers (exportés : réutilisés tels quels par mon-permis.js — même
+// mécanisme localStorage, ne PAS dupliquer la lecture/écriture de la date) ──
+export function parseSavedDate() {
   try {
     const v = localStorage.getItem(LS_KEY_DATE);
     if (!v) return null;
@@ -350,13 +355,13 @@ function parseSavedDate() {
   }
 }
 
-function saveExamDate(iso) {
+export function saveExamDate(iso) {
   try {
     localStorage.setItem(LS_KEY_DATE, iso);
   } catch {}
 }
 
-function countdown(examDate) {
+export function countdown(examDate) {
   const now = Date.now();
   const diff = examDate.getTime() - now;
   if (diff < 0) return { days: 0, hours: 0, minutes: 0, passed: true };
@@ -367,7 +372,7 @@ function countdown(examDate) {
   return { days, hours, minutes, passed: false };
 }
 
-function fmtDate(d) {
+export function fmtDate(d) {
   return d.toLocaleDateString("fr-FR", {
     weekday: "long",
     day: "numeric",
@@ -384,8 +389,9 @@ function isRevised() {
   }
 }
 
-// ─── Data ────────────────────────────────────────────────────────
-async function loadData(meId) {
+// ─── Data (exportée : mon-permis.js appelle CETTE MÊME fonction pour son
+// étape ③ « L'examen » — un seul calcul de readiness dans toute l'app) ────
+export async function loadData(meId) {
   const [validRes, streakRes, quizRes, predictRes] = await Promise.allSettled([
     sb
       .from("validations")
@@ -564,9 +570,35 @@ function renderPredict(data) {
 </div>`;
 }
 
-const BASE_TOTAL = 24; // C1+C2+C3 (mêmes bases que la readiness moniteur)
+// Exportée : mon-permis.js en a besoin pour situer son hero « X/31 » sur les
+// mêmes bases que la readiness (aucune re-déclaration).
+export const BASE_TOTAL = 24; // C1+C2+C3 (mêmes bases que la readiness moniteur)
 
-function buildCriteria({ compsCount, streak, avgScore }) {
+// Verdict 3 niveaux — EXTRAIT de renderChecklist (même calcul, zéro
+// changement de comportement) pour être réutilisable sans dupliquer les
+// seuils. mon-permis.js appelle cette fonction telle quelle pour son
+// étape ③ : la readiness reste gelée, jamais recalculée « à la main ».
+export function buildVerdict({ baseAcquis = 0 }) {
+  const baseRestantes = Math.max(0, BASE_TOTAL - baseAcquis);
+  if (baseAcquis >= BASE_TOTAL) {
+    return {
+      level: "high",
+      text: `Prêt pour l’examen. Ton moniteur a validé tes ${BASE_TOTAL} compétences de base.`,
+    };
+  }
+  if (baseAcquis >= 18) {
+    return {
+      level: "mid",
+      text: `Bientôt prêt. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à faire valider par ton moniteur.`,
+    };
+  }
+  return {
+    level: "low",
+    text: "En préparation. Tes compétences se valident en leçon avec ton moniteur.",
+  };
+}
+
+export function buildCriteria({ compsCount, streak, avgScore }) {
   const revised = isRevised();
   return [
     {
@@ -607,26 +639,21 @@ function buildCriteria({ compsCount, streak, avgScore }) {
   ];
 }
 
-function renderChecklist(data) {
-  const { compsCount, baseAcquis = 0 } = data;
-  const baseRestantes = Math.max(0, BASE_TOTAL - baseAcquis);
+const READINESS_ICON = {
+  high: "check-circle",
+  mid: "alert-triangle",
+  low: "alert-circle",
+};
 
+function renderChecklist(data) {
   const criteria = buildCriteria(data);
 
   // Verdict ALIGNÉ sur le moniteur : « prêt » = 100% des bases C1-C3
   // validées par le moniteur (source de vérité). Les critères ci-dessous
   // (quiz, streak, révision) restent des conseils de préparation perso.
-  let readinessClass, readinessTxt;
-  if (baseAcquis >= BASE_TOTAL) {
-    readinessClass = "high";
-    readinessTxt = `${icon("check-circle", { size: 14 })} Prêt pour l’examen. Ton moniteur a validé tes ${BASE_TOTAL} compétences de base.`;
-  } else if (baseAcquis >= 18) {
-    readinessClass = "mid";
-    readinessTxt = `${icon("alert-triangle", { size: 14 })} Bientôt prêt. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à faire valider par ton moniteur.`;
-  } else {
-    readinessClass = "low";
-    readinessTxt = `${icon("alert-circle", { size: 14 })} En préparation. Tes compétences se valident en leçon avec ton moniteur.`;
-  }
+  const verdict = buildVerdict(data);
+  const readinessClass = verdict.level;
+  const readinessTxt = `${icon(READINESS_ICON[verdict.level], { size: 14 })} ${verdict.text}`;
 
   const rows = criteria
     .map((c) => {

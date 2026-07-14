@@ -1814,7 +1814,11 @@ function spawnArrow(node, compId) {
 }
 
 // ─── Logique métier ───────────────────────────────────────────────
-function computeWorldStates(validatedMap) {
+// Exportée (chantier nav simplifiée, hub « Mon permis ») : mon-permis.js
+// réutilise EXACTEMENT ces états/seuils pour ses 4 chapitres C1-C4 — aucune
+// re-déclaration des seuils de déblocage (UNLOCK_REQ reste privé ici, la
+// fonction encapsule déjà la règle).
+export function computeWorldStates(validatedMap) {
   const states = REMC.map((cat, idx) => {
     const world = WORLDS[idx];
     const subs = cat.subs;
@@ -2212,8 +2216,12 @@ function renderChapterView(
     ${routeHTML}
     ${chestHTML}
     ${gateHTML}
-    <!-- Porte « Mon permis » : le jour J se prépare ici (seul lien vers #/examen) -->
-    <a href="#/examen" class="prc-cv-exam" aria-label="Préparer ton examen">
+    <!-- Porte vers le hub « Mon permis » (chantier nav simplifiée) : le jeu
+         (ici, #/parcours) et le sérieux sont séparés — cette carte renvoie
+         vers l'étape ③ « L'examen » du hub (?scroll=exam), pas directement
+         vers l'ancienne page #/examen autonome (qui reste joignable en
+         direct/deep-link, cf. router.js). -->
+    <a href="#/mon-permis?scroll=exam" class="prc-cv-exam" aria-label="Voir Mon permis — ton examen">
       <span class="prc-cv-exam-ic" aria-hidden="true">🎓</span>
       <span class="prc-cv-exam-tx">
         <b>Prépare ton examen</b>
