@@ -11,7 +11,11 @@ import { medallion } from "@/utils/medallions.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { getMyChests } from "@/utils/game-state.js";
-import { recordAnswer, getWeakPoints } from "@/utils/weak-points.js";
+import {
+  recordAnswer,
+  getWeakPoints,
+  TAG_LABELS,
+} from "@/utils/weak-points.js";
 import {
   PARCOURS,
   QUESTIONS,
@@ -167,6 +171,17 @@ export async function mount(root, param) {
     }
   }
 
+  // Deep-link depuis le carrousel du hub Réviser : #/exam-blanc/t-<tag>
+  // → lance directement la révision ciblée du thème (ex. t-rond_point).
+  if (param && param.startsWith("t-")) {
+    const tag = param.slice(2);
+    if (TAG_LABELS[tag]) {
+      root.innerHTML = renderStyles() + renderSelection();
+      startThemeRevision(root, tag, TAG_LABELS[tag]);
+      return;
+    }
+  }
+
   root.innerHTML = renderStyles() + renderSelection();
   wireSelection(root);
 
@@ -306,7 +321,7 @@ function renderSelection() {
         <button class="exb-weak-btn" data-tag="${esc(w.tag)}" data-label="${esc(w.label)}" aria-label="Réviser ${esc(w.label)}">
           <span class="exb-weak-info">
             <span class="exb-weak-nom">${esc(w.label)}</span>
-            <span class="exb-weak-stat">${w.wrong} erreur${w.wrong > 1 ? "s" : ""} · ${Math.round(w.rate * 100)} % ratées</span>
+            <span class="exb-weak-stat">${w.left} à revoir · ${Math.round(w.rate * 100)} % ratées</span>
           </span>
           <span class="exb-weak-cta">Réviser →</span>
         </button>`,
