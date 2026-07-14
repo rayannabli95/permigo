@@ -6,8 +6,8 @@
 //   1. Série (statut discret)
 //   2. Hero « L'Arène » — monde REMC en cours + étoiles + CTA Jouer +
 //      ligne ligue (Révision)
-//   3. « Aussi dans ta salle » — 4 modes : Examen blanc · Mes fautes ·
-//      Quiz éclair · Fiches de conduite
+//   3. « Aussi dans ta salle » — 5 modes : Examen blanc (de CONDUITE) ·
+//      En situation · Mes fautes · Quiz éclair · Fiches de conduite
 //   4. Bulle du coach — conseil en règles simples (pas d'IA)
 //
 // ⚠️ Écart texte volontaire vs maquette : le kicker de l'Arène ne dit
@@ -23,7 +23,7 @@
 //   - Monde/étoiles   : table `validations` (eleve_id=moi) + data/remc.js + data/worlds.js
 //   - Ligue Révision  : RPC get_theory_leaderboard (déjà utilisé par classement.js)
 //   - Série           : utils/game-state.js getStreak() (local)
-//   - Examen blanc    : quiz_attempts (type=exam_blanc, hors ref_id="officiel")
+//   - Examen blanc    : quiz_attempts (type=exam_blanc, ref_id="exam-conduite" — le blanc de CONDUITE)
 //   - Mes fautes      : utils/weak-points.js (local, alimenté par exam-blanc.js)
 //   - Quiz éclair     : table flash_quizzes (sent_to=moi, non répondu, non expiré)
 //   - Fiches lues     : localStorage rvc_read_v1 + data/fiches-conduite.js
@@ -49,12 +49,13 @@ import { toast } from "@/components/common/toast.js";
 
 const LS_READ_KEY = "rvc_read_v1"; // même clé que revision-conduite.js
 
-// Seuil de réussite de l'examen blanc (/15) — même valeur que la constante
-// `PASS_THRESHOLD` de exam-blanc.js. Dupliquée volontairement (pas d'import
-// statique page→page : exam-blanc.js est un gros chunk dédié — quiz engine,
-// sons, banque de questions — que le router code-split à part ; l'importer
-// ici l'aurait fait fusionner dans le chunk du hub).
-const EXAM_BLANC_PASS = 12;
+// ⚠️ Retour Rayan 2026-07-14 : « Examen blanc » dans ce hub = l'examen blanc
+// de CONDUITE (#/exam-conduite, 8 phases ECE — le différenciateur PermiGo),
+// PAS l'ancien exam-blanc du code (page à l'ancienne mise en page, sans
+// porte ailleurs). « En situation » retrouve aussi sa porte ici.
+// Les fautes (« Mes fautes ») restent nourries par weak-points.js
+// (alimenté par exam-blanc.js uniquement — follow-up produit : brancher
+// recordAnswer sur l'Arène et l'exam conduite).
 
 // Médaillon du monde REMC en cours — même convention que quiz.js (CAT_MED).
 const WORLD_MED = {
@@ -462,14 +463,25 @@ function render(data) {
   <div class="rvh-h">Aussi dans ta salle</div>
   <div class="rvh-rows">
 
-    <button class="rvh-row" id="rvh-row-exam" aria-label="Examen blanc — 15 questions, comme le vrai">
+    <button class="rvh-row" id="rvh-row-exam" aria-label="Examen blanc de conduite — l'épreuve phase par phase, comme le jour J">
       <span class="rvh-row-med">${medallion("examen", "gold", { size: 46 })}</span>
       <div class="rvh-row-body">
         <div class="rvh-row-t">Examen blanc</div>
-        <div class="rvh-row-s">15 questions · réussi dès ${EXAM_BLANC_PASS}/15, comme le vrai</div>
+        <div class="rvh-row-s">L'épreuve de conduite phase par phase · comme le jour J</div>
       </div>
       <div class="rvh-row-end">
-        <span class="rvh-row-meta">${examBest != null ? `Meilleur : ${examBest}/15` : "Découvrir"} ${CHEVRON}</span>
+        <span class="rvh-row-meta">${examBest != null ? `Meilleur : ${examBest} %` : "Découvrir"} ${CHEVRON}</span>
+      </div>
+    </button>
+
+    <button class="rvh-row" id="rvh-row-situation" aria-label="En situation — des scènes réelles, une décision à chaque fois">
+      <span class="rvh-row-med">${medallion("voiture", "blue", { size: 46 })}</span>
+      <div class="rvh-row-body">
+        <div class="rvh-row-t">En situation</div>
+        <div class="rvh-row-s">6 scènes réelles · une décision à chaque fois</div>
+      </div>
+      <div class="rvh-row-end">
+        <span class="rvh-row-meta">Jouer ${CHEVRON}</span>
       </div>
     </button>
 
@@ -530,8 +542,14 @@ function wire(root, data) {
 
   root.querySelector("#rvh-row-exam")?.addEventListener("click", () => {
     haptic("tap");
-    track("reviser.mode_open", { mode: "exam-blanc" });
-    navigate("/exam-blanc");
+    track("reviser.mode_open", { mode: "exam-conduite" });
+    navigate("/exam-conduite");
+  });
+
+  root.querySelector("#rvh-row-situation")?.addEventListener("click", () => {
+    haptic("tap");
+    track("reviser.mode_open", { mode: "en-situation" });
+    navigate("/en-situation");
   });
 
   root.querySelector("#rvh-row-fautes")?.addEventListener("click", () => {
@@ -613,15 +631,15 @@ export async function mount(root) {
     world = computeCurrentWorld(validatedMap);
   }
 
-  // Meilleur score examen blanc (parcours 15 questions, hors mode « officiel »)
+  // Meilleur score de l'examen blanc de CONDUITE (exam-conduite.js écrit
+  // quiz_attempts type 'exam_blanc' / ref_id 'exam-conduite', score en %).
   let examBest = null;
   if (examRes.status === "fulfilled" && !examRes.value.error) {
     const attempts = (examRes.value.data || []).filter(
-      (a) => a.ref_id !== "officiel" && typeof a.score === "number",
+      (a) => a.ref_id === "exam-conduite" && typeof a.score === "number",
     );
     if (attempts.length) {
-      const bestPct = Math.max(...attempts.map((a) => a.score));
-      examBest = Math.round((bestPct / 100) * 15);
+      examBest = Math.max(...attempts.map((a) => a.score));
     }
   }
 
