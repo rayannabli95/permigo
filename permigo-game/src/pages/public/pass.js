@@ -2,54 +2,65 @@
 // Page publique — Pré-vente « Pass Permis » (payeur = ÉLÈVE)
 // URL : #/pass  (partageable en DM : permigo.vercel.app/#/pass?lang=en)
 //
-// DA « Ticket d'Or » (choix Rayan 15/07) + polish 2e passe :
-//  - billet 3D (relief, grain, reflet balayé au scroll), badge P gloss seul
-//  - BILINGUE FR/EN (bouton dans la barre + ?lang= + langue du navigateur) —
-//    cible aussi les candidats qui galèrent avec le français
-//  - zéro jargon (« REMC » banni), textes courts, message CONDUITE martelé
-//  - assets maison à la place des emojis, révélation des sections au scroll
-//  - jauge de places RÉELLE (RPC publique pass_founder_count, pas de faux chiffre)
+// DA « Ticket d'Or » — v3 (retours Rayan après SON vrai paiement, 15/07 soir) :
+//  - logo = le P vert gloss (/icon-192.png), plus de wordmark illisible
+//  - « Offre de lancement* », tarif exceptionnel, prix barré partout,
+//    chips d'économie jaunes façon Ornikar (−17 % / −33 %)
+//  - PLUS de compteur de places ni de billet numéroté (retiré à sa demande)
+//  - garantie repensée : « satisfait ou remboursé — 3 jours d'essai »,
+//    puis annulation à tout moment (fini le « remboursé sans question »
+//    exploitable) ; questionnaire de départ → #/avis-depart
+//  - titre section : « Préparer le permis, c'est bien plus que conduire. »
+//  - centres d'examen montrés avec une vraie capture (fiche Cergy)
+//  - chiffres sourcés : 74,7 % vs 56,8 % (bilan examens 2022, Sécurité routière)
+//  - succès post-paiement : « Bienvenue dans l'aventure », installation de
+//    l'app expliquée (rappels/notifs), aide pas à pas, retour à l'accueil
+//  - bloc non-francophones VISIBLE UNIQUEMENT en anglais (l'app est en
+//    français simple — on le dit honnêtement, jamais de fausse promesse)
 //
-// 100 % pensé mobile (colonne ≤ 480 px, desktop = même colonne centrée).
+// BILINGUE FR/EN (bouton + ?lang= + langue du navigateur). 100 % mobile.
 // Retour Checkout : #/pass?checkout=success&plan=xxx | #/pass?checkout=cancel
 // ═══════════════════════════════════════════════════════════════
-import { sb } from "@/auth/auth.js";
 import { track } from "@/services/analytics.js";
 import { startPassCheckout } from "@/services/billing.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { illMask } from "@/utils/illustrations.js";
 
-const TOTAL_PLACES = 20;
+const LOGO = "/p-badge.png";
 
 // ── Textes FR / EN ─────────────────────────────────────────────
 const STR = {
   fr: {
     login: "Se connecter",
     langBtn: "EN",
-    kicker: "Promo fondatrice — 20 places",
+    kicker: "Offre de lancement*",
     h1: `Réserve ta place.<br><em>Permis en 90 jours.</em>`,
     lead: `La seule app qui bosse ta <strong>conduite</strong> entre les leçons — pas une énième app de code.`,
     tTitle: `OBJECTIF PERMIS<br>EN 90 JOURS`,
-    tSub: "Conduite · mini-jeux · examens blancs",
+    tSub: "Conduite · mini-jeux · simulations d'examen",
     tBoardLbl: "Embarquement",
     tBoard: "JUIL. 2026",
-    tPriceLbl: "Tarif fondateur",
+    tDureeLbl: "Accès",
+    tDuree: "3 MOIS",
+    tOffre: "Tarif exceptionnel",
+    tStrike: "29,97 €",
     tPrice: "24,99 €",
-    tPlace: "Place",
-    counterZero: `${TOTAL_PLACES} places fondatrices — prix bloqué à vie`,
-    counterSome: (n) =>
-      `${n} place${n > 1 ? "s" : ""} prise${n > 1 ? "s" : ""} sur ${TOTAL_PLACES}`,
-    cta: "Réserver ma place — 24,99 €",
-    ctaNote: `Stripe sécurisé · <b>100 % remboursable</b> en un message`,
+    cta: `Réserver ma place · <s>29,97 €</s> 24,99 €`,
+    ctaNote: `Paiement sécurisé Stripe · <b>Satisfait ou remboursé — 3 jours</b><br><small>*Prix de lancement : il remontera après cette promo.</small>`,
     bulle: "3 compétences validées !",
     bulleSub: "cette semaine",
-    secCode: `Le code, tout le monde le fait.<br>Nous, on bosse ta <em>conduite</em>.`,
-    secCodeSub: "Ce qui fait rater le permis, c'est la conduite :",
+    secCode: `Préparer le permis, c'est <em>bien plus</em> que conduire.`,
+    secCodeSub: "PermiGo t'entraîne sur tout ce qui compte le jour J :",
     situTitle: "Mini-jeux « En situation »",
     situTxt:
       "Une scène, une décision : qui passe en premier ? Priorités, distances, insertions — comme au volant.",
     situAlt:
       "Mini-jeu En situation : un croisement, à toi de décider qui passe",
+    centreTitle: "Ton centre d'examen décortiqué",
+    centreTxt:
+      "Difficulté, accès, réputation des examinateurs et pièges du parcours — centre par centre (Cergy, Argenteuil, Bobigny…).",
+    centreAlt:
+      "Fiche du centre d'examen de Cergy : difficulté 3/5, accès, pièges du parcours",
     feats: [
       {
         mask: "cahier",
@@ -58,13 +69,8 @@ const STR = {
       },
       {
         img: "/skins/badge-medaille.png",
-        t: "Examen blanc de conduite",
-        d: "Un faux examen de conduite, noté sur les mêmes critères que l'inspecteur. Le jour J, zéro surprise.",
-      },
-      {
-        img: "/signs/carrefour-giratoire.svg",
-        t: "Ton centre d'examen décortiqué",
-        d: "Les infos pratiques et les pièges connus du parcours, centre par centre.",
+        t: "Simulation d'examen de conduite",
+        d: "Notée sur les mêmes critères que l'inspecteur. Le jour J, zéro surprise.",
       },
       {
         img: "/skins/volant-coin.webp",
@@ -80,11 +86,12 @@ const STR = {
     mathsNote: "Une leçon mal préparée, c'est 55 € de perdus.",
     mathsSrc: "Sources : UFC-Que Choisir (budget permis) · Sécurité routière",
     secPass: "Trois billets, un objectif",
-    secPassSub: "Tout est inclus dans chacun.",
+    secPassSub:
+      "Le même contenu partout. Plus tu vois loin, moins tu paies : 3 mois au mensuel = 29,97 €.",
     passes: {
       mensuel: {
         name: "Billet Mensuel",
-        desc: "Sans engagement — stop en un clic.",
+        desc: "Ton exam est le mois prochain ? Parfait. Annulable en un clic.",
         price: "9,99 €",
         per: "/mois",
         btn: "Commencer",
@@ -92,92 +99,105 @@ const STR = {
       pass3: {
         tag: "Le plus choisi",
         name: "Billet Or · 3 mois",
-        desc: "« Objectif permis en 90 jours ».",
-        permo: "≈ 8,33 €/mois, payé une fois.",
+        desc: "2 à 4 mois : le vrai temps de préparation d'un permis. Payé une fois, prix bloqué.",
         strike: "29,97 €",
         price: "24,99 €",
+        eco: "−17 %",
         btn: "Réserver",
       },
       pass6: {
         name: "Billet Platine · 6 mois",
-        desc: "Conduite accompagnée, zéro pression.",
+        desc: "Conduite accompagnée ou longue prépa, zéro pression.",
         strike: "59,94 €",
         price: "39,99 €",
+        eco: "−33 %",
         btn: "Réserver",
       },
     },
     err: "Le paiement n'a pas pu démarrer. Réessaie.",
     btnWait: "Ouverture du paiement…",
     stampTag: "Garanti",
-    stampT: "Remboursable en un message",
-    stampD: "Tu changes d'avis ? Remboursé. Sans question, sans délai.",
+    stampT: "Satisfait ou remboursé — 3 jours d'essai",
+    stampD:
+      "Teste tout pendant 3 jours. Pas convaincu ? Remboursé. Ensuite, le mensuel s'annule à tout moment, en un clic.",
     secProof: "S'entraîner régulièrement, ça paie",
-    proofA: "Avec entraînement régulier",
+    proofA: "Conduite accompagnée (entraînement régulier)",
+    proofAVal: "74,7 %",
+    proofAW: 74.7,
     proofB: "Filière classique",
-    proofSrc: "Taux de réussite au permis B — Sécurité routière.",
+    proofBVal: "56,8 %",
+    proofBW: 56.8,
+    proofSrc:
+      "Bilan des examens du permis de conduire 2022 — Sécurité routière.",
     secFaq: "Questions fréquentes",
     faq: [
       [
         "C'est une app de code ?",
-        "Non. Le code est inclus (quiz, examens blancs), mais la vraie différence : on t'entraîne à la <strong>conduite</strong> — mini-jeux, fiches de leçon, examens blancs de conduite, centres d'examen.",
+        "Non. Le code est inclus (quiz, examens blancs), mais la vraie différence : on t'entraîne à la <strong>conduite</strong> — mini-jeux, fiches de leçon, simulations d'examen, centres d'examen.",
       ],
       [
-        "Et si je change d'avis ?",
-        "Un message, remboursement intégral. Sans question.",
+        "Qu'attend l'inspecteur le jour de l'examen ?",
+        "Une conduite <strong>autonome, responsable et sûre</strong> : connaître le code, maîtriser le véhicule, respecter les règles, anticiper les risques et adapter ta conduite à ce qui t'entoure. Ton attitude compte aussi : rester calme, confiant, décider au bon moment. PermiGo t'entraîne exactement là-dessus — simulation d'examen incluse.",
       ],
       [
         "Ça marche avec mon auto-école ?",
         "Oui. Tu gardes tes leçons — PermiGo bosse entre. Si ton moniteur l'utilise, ta progression se synchronise avec lui.",
       ],
       [
-        "Comment je paye ?",
-        "Carte, Apple Pay ou Google Pay, via Stripe. On ne voit jamais ta carte.",
+        "Je galère avec le français, ça ira ?",
+        "Oui. Phrases courtes, mots simples, mini-jeux visuels — et cette page existe en anglais (bouton EN en haut). Par message, on t'aide pas à pas.",
       ],
       [
-        "Le mensuel m'engage ?",
-        "Non, stop en un clic. Billets Or et Platine : paiement unique, zéro renouvellement.",
+        "Je peux annuler ou être remboursé ?",
+        `Pendant les 3 premiers jours : <strong>satisfait ou remboursé</strong>. Ensuite, le mensuel s'annule à tout moment en un clic (les billets Or et Platine sont des paiements uniques). Tu pars ? <a href="#/avis-depart">Dis-nous pourquoi ici</a> — ça nous aide à améliorer l'app.`,
       ],
     ],
-    foot: `Paiement sécurisé par Stripe · Remboursable sur demande<br><a href="#/legal">Mentions légales</a>`,
+    foot: `Paiement sécurisé par Stripe · Satisfait ou remboursé — 3 jours<br><a href="#/legal">Mentions légales</a>`,
     stickyName: "Billet Or · 3 mois",
-    stickyPrice: "24,99 € · remboursable",
+    stickyPrice: "24,99 € · essai 3 jours",
     stickyBtn: "Réserver ma place",
     cancelNote:
       "Paiement annulé — rien n'a été débité. Ton billet t'attend juste en dessous. 👇",
-    successT: "Billet validé — bienvenue dans la promo fondatrice ! 🎉",
-    successD:
-      "Ton reçu Stripe arrive par email. Sous 24 h, tu reçois ton accès sur ce même email — et on t'installe l'app avec toi si tu veux. Une question ? Un message suffit.",
-    planLabels: {
-      mensuel: "Billet Mensuel — 9,99 €/mois",
-      pass3: "Billet Or · 3 mois — 24,99 €",
-      pass6: "Billet Platine · 6 mois — 39,99 €",
-    },
+    successT: "Bienvenue dans l'aventure ! 🚀",
+    successIntro: (label) =>
+      `${label} réservé. Ton reçu et ta facture arrivent par email.`,
+    successSteps: [
+      "<b>Ton accès arrive par email sous 24 h</b> — surveille ta boîte (et les spams).",
+      "<b>Installe l'app sur ton téléphone</b> pour recevoir les rappels de révision : iPhone → Safari → Partager → « Sur l'écran d'accueil ». Android → Chrome → menu ⋮ → « Installer l'application ».",
+      "<b>Besoin d'aide ?</b> Écris-nous : on t'aide pas à pas.",
+    ],
+    successGuarantee: "Et bien sûr : satisfait ou remboursé pendant 3 jours.",
+    successCta: "Découvrir PermiGo",
   },
   en: {
     login: "Log in",
     langBtn: "FR",
-    kicker: "Founding offer — 20 seats",
+    kicker: "Launch offer*",
     h1: `Book your seat.<br><em>Licence in 90 days.</em>`,
     lead: `The only app that trains your <strong>driving</strong> between lessons — not just another code-test app.`,
     tTitle: `LICENCE GOAL:<br>90 DAYS`,
-    tSub: "Driving · mini-games · mock tests",
+    tSub: "Driving · mini-games · exam simulations",
     tBoardLbl: "Boarding",
     tBoard: "JUL 2026",
-    tPriceLbl: "Founder price",
+    tDureeLbl: "Access",
+    tDuree: "3 MONTHS",
+    tOffre: "Special price",
+    tStrike: "€29.97",
     tPrice: "€24.99",
-    tPlace: "Seat",
-    counterZero: `${TOTAL_PLACES} founding seats — price locked for life`,
-    counterSome: (n) => `${n} of ${TOTAL_PLACES} seats taken`,
-    cta: "Book my seat — €24.99",
-    ctaNote: `Secure Stripe checkout · <b>100% refundable</b> with one message`,
+    cta: `Book my seat · <s>€29.97</s> €24.99`,
+    ctaNote: `Secure Stripe checkout · <b>3-day money-back guarantee</b><br><small>*Launch price — it will go up after this promo.</small>`,
     bulle: "3 skills validated!",
     bulleSub: "this week",
-    secCode: `Everyone drills the code test.<br>We train your <em>driving</em>.`,
-    secCodeSub: "Driving is what fails candidates:",
+    secCode: `Getting your licence takes <em>more</em> than driving.`,
+    secCodeSub: "PermiGo trains you on everything that counts on test day:",
     situTitle: "“On the road” mini-games",
     situTxt:
       "One scene, one decision: who goes first? Right of way, distances, merging — like behind the wheel.",
     situAlt: "On-the-road mini-game: a crossroads, you decide who goes first",
+    centreTitle: "Your test centre, decoded",
+    centreTxt:
+      "Difficulty, access, examiner reputation and the known traps of the route — centre by centre.",
+    centreAlt: "Cergy test-centre sheet: difficulty 3/5, access, route traps",
     feats: [
       {
         mask: "cahier",
@@ -186,13 +206,8 @@ const STR = {
       },
       {
         img: "/skins/badge-medaille.png",
-        t: "Mock driving test",
-        d: "A practice driving exam, scored on the examiner's own criteria. No surprises on test day.",
-      },
-      {
-        img: "/signs/carrefour-giratoire.svg",
-        t: "Your test centre, decoded",
-        d: "Practical info and the known traps of the route, centre by centre.",
+        t: "Driving exam simulation",
+        d: "Scored on the examiner's own criteria. No surprises on test day.",
       },
       {
         img: "/skins/volant-coin.webp",
@@ -200,6 +215,10 @@ const STR = {
         d: "Streaks, leagues, rewards. The code test is included too.",
       },
     ],
+    nonFranco: {
+      title: "New to French? We've got you.",
+      txt: "The exam is in French — so the app trains you in short, simple French: the exact words you'll need on test day. Mini-games are visual first. And we answer your messages in English, step by step.",
+    },
     mathsRows: [
       ["1 hour of driving lessons", "€55"],
       ["Average licence budget (France)", "€1,800"],
@@ -208,11 +227,12 @@ const STR = {
     mathsNote: "One unprepared lesson = €55 wasted.",
     mathsSrc: "Sources: UFC-Que Choisir (licence budget) · Sécurité routière",
     secPass: "Three tickets, one goal",
-    secPassSub: "Everything is included in each.",
+    secPassSub:
+      "Same content everywhere. The longer you commit, the less you pay: 3 months on monthly = €29.97.",
     passes: {
       mensuel: {
         name: "Monthly Ticket",
-        desc: "No strings — cancel in one click.",
+        desc: "Exam next month? Perfect. Cancel in one click.",
         price: "€9.99",
         per: "/mo",
         btn: "Start",
@@ -220,66 +240,87 @@ const STR = {
       pass3: {
         tag: "Most popular",
         name: "Gold Ticket · 3 months",
-        desc: "“Licence in 90 days”.",
-        permo: "≈ €8.33/mo, paid once.",
+        desc: "2–4 months is what a licence really takes. Paid once, price locked.",
         strike: "€29.97",
         price: "€24.99",
+        eco: "−17%",
         btn: "Book",
       },
       pass6: {
         name: "Platinum · 6 months",
-        desc: "Accompanied driving, zero pressure.",
+        desc: "Accompanied driving or a longer prep, zero pressure.",
         strike: "€59.94",
         price: "€39.99",
+        eco: "−33%",
         btn: "Book",
       },
     },
     err: "Payment couldn't start. Please try again.",
     btnWait: "Opening checkout…",
     stampTag: "Guaranteed",
-    stampT: "Refund with one message",
-    stampD: "Change your mind? Refunded. No questions, no delay.",
+    stampT: "3-day money-back guarantee",
+    stampD:
+      "Try everything for 3 days. Not convinced? Refunded. After that, the monthly plan cancels anytime, in one click.",
     secProof: "Regular practice pays off",
-    proofA: "With regular practice",
+    proofA: "Accompanied driving (regular practice)",
+    proofAVal: "74.7%",
+    proofAW: 74.7,
     proofB: "Standard route",
-    proofSrc: "French driving-test pass rates — Sécurité routière.",
+    proofBVal: "56.8%",
+    proofBW: 56.8,
+    proofSrc: "French driving-test results 2022 — Sécurité routière.",
     secFaq: "Frequently asked",
     faq: [
       [
         "Is this a code-test app?",
-        "No. The code test is included (quizzes, mock tests), but the real difference: we train your <strong>driving</strong> — mini-games, lesson sheets, mock driving tests, test-centre guides.",
+        "No. The code test is included (quizzes, mock tests), but the real difference: we train your <strong>driving</strong> — mini-games, lesson sheets, exam simulations, test-centre guides.",
       ],
       [
-        "What if I change my mind?",
-        "One message, full refund. No questions asked.",
+        "Is the app in English?",
+        "This page and our support are. The app itself is in <strong>simple French</strong> — on purpose: your exam will be in French, and training in the exact words you'll hear on test day is what gets you through. Mini-games are visual first, so basic French is enough.",
+      ],
+      [
+        "What does the examiner expect on test day?",
+        "<strong>Autonomous, responsible, safe driving</strong>: knowing the code, controlling the car, following the rules, anticipating risks and adapting to your environment. Attitude counts too: stay calm, confident, decide at the right moment. That's exactly what PermiGo trains — exam simulation included.",
       ],
       [
         "Does it work with my driving school?",
         "Yes. Keep your lessons — PermiGo works in between. If your instructor uses PermiGo, your progress syncs with them.",
       ],
       [
-        "How do I pay?",
-        "Card, Apple Pay or Google Pay, through Stripe. We never see your card.",
-      ],
-      [
-        "Does the monthly plan lock me in?",
-        "No — cancel in one click. Gold and Platinum tickets: one-time payment, no renewal.",
+        "Can I cancel or get a refund?",
+        `First 3 days: <strong>money-back guarantee</strong>. After that, the monthly plan cancels anytime in one click (Gold and Platinum are one-time payments). Leaving? <a href="#/avis-depart">Tell us why here</a> — it helps us improve.`,
       ],
     ],
-    foot: `Secure payment by Stripe · Refundable on request<br><a href="#/legal">Legal notice</a>`,
+    foot: `Secure payment by Stripe · 3-day money-back guarantee<br><a href="#/legal">Legal notice</a>`,
     stickyName: "Gold Ticket · 3 months",
-    stickyPrice: "€24.99 · refundable",
+    stickyPrice: "€24.99 · 3-day trial",
     stickyBtn: "Book my seat",
     cancelNote:
       "Payment cancelled — nothing was charged. Your ticket is waiting below. 👇",
-    successT: "Ticket confirmed — welcome to the founding crew! 🎉",
-    successD:
-      "Your Stripe receipt is on its way by email. Within 24 h you'll get your access on that same email — and we'll set the app up with you if you like. Any question? One message.",
-    planLabels: {
-      mensuel: "Monthly Ticket — €9.99/mo",
-      pass3: "Gold Ticket · 3 months — €24.99",
-      pass6: "Platinum Ticket · 6 months — €39.99",
-    },
+    successT: "Welcome aboard! 🚀",
+    successIntro: (label) =>
+      `${label} booked. Your receipt and invoice are on their way by email.`,
+    successSteps: [
+      "<b>Your access arrives by email within 24 h</b> — keep an eye on your inbox (and spam).",
+      "<b>Install the app on your phone</b> to get revision reminders: iPhone → Safari → Share → “Add to Home Screen”. Android → Chrome → ⋮ menu → “Install app”.",
+      "<b>Need help?</b> Message us — we'll walk you through it, step by step.",
+    ],
+    successGuarantee: "And of course: 3-day money-back guarantee.",
+    successCta: "Discover PermiGo",
+  },
+};
+
+const PLAN_LABELS = {
+  fr: {
+    mensuel: "Billet Mensuel",
+    pass3: "Billet Or · 3 mois",
+    pass6: "Billet Platine · 6 mois",
+  },
+  en: {
+    mensuel: "Monthly Ticket",
+    pass3: "Gold Ticket · 3 months",
+    pass6: "Platinum Ticket · 6 months",
   },
 };
 
@@ -294,7 +335,7 @@ const STYLE = `<style>
     font-family: 'Baloo 2', var(--fb), sans-serif;
     -webkit-font-smoothing: antialiased;
     --in:#6c63ff;--in-lt:#8e87ff;--in-dp:#4a3fc9;--in-dk:#372fa3;
-    --gold:#ffce4d;--gold-dp:#e8a317;--go:#58cc02;
+    --gold:#ffce4d;--gold-dp:#e8a317;--go:#58cc02;--eco:#ffe94d;
     --pv-ink:#f4f1ff;--ink-soft:#cdc8ec;--ink-mu:#aaa2d8;--ink-dim:#8b7fc4;
     --tik-ink:#3a2a05;--tik-mu:#6b520f;--tik-lbl:#8a6a17;
     color: var(--pv-ink);
@@ -306,33 +347,20 @@ const STYLE = `<style>
     overflow-x: clip;
   }
   .pv * { box-sizing: border-box; }
-  /* Colonne mobile, même sur grand écran (produit 100 % téléphone). */
   .pv-wrap { max-width: 480px; margin: 0 auto; padding: 0 18px; }
 
-  /* ── Révélation au scroll ── */
   .pv-rev { opacity: 0; transform: translateY(24px); transition: opacity .55s ease, transform .55s cubic-bezier(.22,1,.36,1); }
   .pv-rev.in { opacity: 1; transform: none; }
   @media (prefers-reduced-motion: reduce) { .pv-rev { opacity: 1; transform: none; transition: none; } }
 
-  /* ── Barre haute ── */
+  /* ── Barre haute : le P vert gloss, seul ── */
   .pv-nav {
     display: flex; align-items: center; justify-content: space-between;
     padding: calc(14px + env(safe-area-inset-top)) 18px 4px;
     max-width: 480px; margin: 0 auto;
   }
-  /* Badge P seul, effet gloss (plus de texte « PermiGo ») */
-  .pv-badge-p {
-    position: relative; width: 44px; height: 44px; border-radius: 14px;
-    display: grid; place-items: center; text-decoration: none;
-    background: linear-gradient(180deg, #372b76, #241c5e);
-    box-shadow: inset 0 2px 0 rgba(255,255,255,.28), inset 0 -3px 6px rgba(0,0,0,.4), 0 6px 14px rgba(0,0,0,.4);
-  }
-  .pv-badge-p::after {
-    content: ""; position: absolute; inset: 2px 2px 55% 2px; border-radius: 12px 12px 20px 20px;
-    background: linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,0));
-    pointer-events: none;
-  }
-  .pv-badge-p img { width: 30px; height: 30px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
+  .pv-logo { display: grid; place-items: center; text-decoration: none; }
+  .pv-logo img { width: 46px; height: 46px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.5)); }
   .pv-nav-right { display: flex; align-items: center; gap: 8px; }
   .pv-lang {
     font: 800 13px/1 'Baloo 2', sans-serif; letter-spacing: .05em; color: var(--pv-ink);
@@ -350,7 +378,7 @@ const STYLE = `<style>
   .pv-lead { font: 600 15.5px/1.55 'Baloo 2', sans-serif; color: var(--ink-soft); max-width: 330px; margin: 0 auto; }
   .pv-lead strong { color: var(--gold); }
 
-  /* ── LE billet d'or (relief + grain + reflet) ── */
+  /* ── LE billet d'or ── */
   .pv-ticket-scene { position: relative; margin: 28px auto 0; max-width: 400px; filter: drop-shadow(0 30px 40px rgba(0,0,0,.55)); }
   .pv-ticket-scene.pv-rev { transform: translateY(28px) scale(.96) rotate(-1deg); }
   .pv-ticket-scene.pv-rev.in { transform: none; }
@@ -369,7 +397,7 @@ const STYLE = `<style>
       0 3px 0 #a87c14, 0 10px 18px rgba(0,0,0,.35);
   }
   .pv-ticket::before {
-    content: ""; position: absolute; top: 0; bottom: 0; left: calc(100% - 96px); width: 0;
+    content: ""; position: absolute; top: 0; bottom: 0; left: calc(100% - 104px); width: 0;
     border-left: 2.5px dashed rgba(58,42,5,.4);
   }
   .pv-t-grain { position: absolute; inset: 0; pointer-events: none; background: url("${GRAIN}"); opacity: .12; mix-blend-mode: overlay; }
@@ -383,45 +411,41 @@ const STYLE = `<style>
   @media (prefers-reduced-motion: reduce) { .pv-ticket-scene.in .pv-t-shine { animation: none; transform: translateX(-130%); } }
   .pv-t-inner { display: flex; position: relative; }
   .pv-t-main { flex: 1; padding: 18px 14px 16px 18px; }
-  .pv-t-stub { width: 96px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 12px 6px; text-align: center; }
+  .pv-t-stub { width: 104px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 6px; text-align: center; }
   .pv-t-brand { display: flex; align-items: center; gap: 7px; font: 800 14px/1 'Baloo 2', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.4); }
-  .pv-t-brand img { width: 20px; height: 20px; filter: drop-shadow(0 1px 1px rgba(90,60,5,.5)); }
+  .pv-t-brand img { width: 22px; height: 22px; filter: drop-shadow(0 1px 1px rgba(90,60,5,.4)); }
   .pv-t-title { font: 800 23px/1.05 'Baloo 2', sans-serif; margin: 9px 0 3px; letter-spacing: -.01em; text-shadow: 0 1px 0 rgba(255,255,255,.45), 0 -1px 0 rgba(90,60,5,.3); }
   .pv-t-sub { font: 600 11.5px/1.4 Inter, sans-serif; color: var(--tik-mu); }
   .pv-t-meta { display: flex; gap: 14px; margin-top: 12px; }
   .pv-t-meta div b { display: block; font: 700 10px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--tik-lbl); margin-bottom: 2px; }
   .pv-t-meta div span { font: 600 13px/1 'IBM Plex Mono', monospace; }
-  .pv-t-stub .n { font: 600 11px/1 Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--tik-lbl); }
-  .pv-t-place { font: 800 26px/1 'Baloo 2', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
-  .pv-t-place small { font-size: 14px; }
+  .pv-t-stub .n { font: 700 9.5px/1.25 Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--tik-lbl); }
+  .pv-t-strike { font: 700 13px/1 Inter, sans-serif; color: var(--tik-lbl); text-decoration: line-through; }
+  .pv-t-price { font: 800 22px/1 'Baloo 2', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
+  .pv-t-check { font: 800 30px/1 'Baloo 2', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
   .pv-t-barcode {
-    width: 64px; height: 34px; border-radius: 3px; opacity: .85;
+    width: 64px; height: 30px; border-radius: 3px; opacity: .85; margin-top: 4px;
     background: repeating-linear-gradient(90deg, #3a2a05 0 2px, transparent 2px 5px, #3a2a05 5px 6px, transparent 6px 10px);
     box-shadow: 0 1px 0 rgba(255,255,255,.35);
   }
 
-  /* compteur de places (chiffre réel) */
-  .pv-counter { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 22px; min-height: 20px; }
-  .pv-pips { display: flex; gap: 4px; }
-  .pv-pip { width: 11px; height: 16px; border-radius: 3px; background: rgba(255,255,255,.12); box-shadow: inset 0 1px 2px rgba(0,0,0,.35); }
-  .pv-pip.on { background: linear-gradient(180deg, #ffe08a, var(--gold-dp)); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), 0 0 8px rgba(255,206,77,.5); }
-  .pv-counter b { font: 700 13px/1.2 'Baloo 2', sans-serif; color: var(--gold); }
-
   /* CTA principal */
   .pv-cta-hero {
-    display: block; width: 100%; max-width: 340px; margin: 22px auto 0;
+    display: block; width: 100%; max-width: 340px; margin: 26px auto 0;
     border: 0; cursor: pointer; border-radius: 18px; padding: 17px;
     font: 800 17px/1 'Baloo 2', sans-serif; color: #4a3300; text-shadow: 0 1px 0 rgba(255,255,255,.35);
     background: linear-gradient(180deg, #ffe08a, var(--gold) 55%, var(--gold-dp));
     box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 6px 0 #a86e00, 0 12px 26px rgba(0,0,0,.4);
     transition: transform .1s ease, box-shadow .1s ease;
   }
+  .pv-cta-hero s { opacity: .55; font-weight: 700; font-size: 14px; margin-right: 2px; }
   .pv-cta-hero:active { transform: translateY(4px); box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 2px 0 #a86e00, 0 4px 8px rgba(0,0,0,.3); }
   .pv-cta-hero[disabled] { opacity: .65; cursor: wait; }
-  .pv-cta-note { text-align: center; font: 600 12.5px/1.5 Inter, sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
+  .pv-cta-note { text-align: center; font: 600 12.5px/1.6 Inter, sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
   .pv-cta-note b { color: var(--ink-soft); }
+  .pv-cta-note small { font-size: 11px; color: #655a97; }
 
-  /* ── Scène téléphone + mascotte (Arène) ── */
+  /* ── Scène téléphone + mascotte ── */
   .pv-stage { position: relative; height: 470px; max-width: 400px; margin: 44px auto 0; }
   .pv-phone {
     position: absolute; left: 50%; transform: translateX(-26%) rotate(4deg); top: 0; width: 196px;
@@ -447,7 +471,7 @@ const STYLE = `<style>
   .pv-sec-title em { font-style: normal; color: var(--gold); }
   .pv-sec-sub { text-align: center; font: 600 13.5px/1.55 'Baloo 2', sans-serif; color: var(--ink-mu); margin: 8px auto 22px; max-width: 340px; }
 
-  /* ── « Pas une app de code » ── */
+  /* ── Cartes atouts ── */
   .pv-conduite { display: flex; flex-direction: column; gap: 12px; }
   .pv-situ {
     display: flex; gap: 14px; align-items: center;
@@ -470,7 +494,17 @@ const STYLE = `<style>
   .pv-feat b { display: block; font: 700 15px/1.3 'Baloo 2', sans-serif; }
   .pv-feat span { font: 600 13px/1.45 'Baloo 2', sans-serif; color: var(--ink-mu); }
 
-  /* ── L'addition (ancrage) ── */
+  /* Bloc non-francophones (version EN uniquement) */
+  .pv-franco {
+    margin-top: 12px; padding: 16px; border-radius: 18px; text-align: left;
+    background: rgba(108,99,255,.14); border: 1.5px solid rgba(142,135,255,.4);
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .pv-franco-flag { font-size: 24px; line-height: 1; margin-top: 2px; }
+  .pv-franco b { display: block; font: 800 15.5px/1.3 'Baloo 2', sans-serif; margin-bottom: 4px; }
+  .pv-franco span { font: 600 13px/1.5 'Baloo 2', sans-serif; color: var(--ink-soft); }
+
+  /* ── L'addition ── */
   .pv-maths { margin-top: 22px; border-radius: 20px; padding: 8px 18px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); }
   .pv-maths-row { display: flex; justify-content: space-between; align-items: baseline; padding: 13px 0; font: 500 14px Inter, sans-serif; color: var(--ink-soft); }
   .pv-maths-row + .pv-maths-row { border-top: 1px dashed rgba(255,255,255,.1); }
@@ -484,7 +518,7 @@ const STYLE = `<style>
   .pv-pass { position: relative; display: flex; border-radius: 18px; margin-bottom: 14px; box-shadow: 0 14px 28px rgba(0,0,0,.4); }
   .pv-pass-main { flex: 1; padding: 16px 14px 15px 18px; border-radius: 18px 0 0 18px; }
   .pv-pass-cut {
-    width: 116px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    width: 118px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
     padding: 12px 8px; border-left: 2px dashed rgba(255,255,255,.25); border-radius: 0 18px 18px 0;
   }
   .pv-pass-std { background: linear-gradient(180deg, #352a6e, #2b2160); box-shadow: inset 0 2px 0 rgba(255,255,255,.12), 0 14px 28px rgba(0,0,0,.4); }
@@ -494,6 +528,12 @@ const STYLE = `<style>
   .pv-pass-price { font: 800 24px/1 'Baloo 2', sans-serif; }
   .pv-pass-price small { font-size: 12px; color: var(--ink-mu); }
   .pv-pass-strike { font: 600 12px Inter, sans-serif; color: var(--ink-dim); text-decoration: line-through; }
+  /* Chip d'économie jaune fluo (façon Ornikar) */
+  .pv-eco {
+    font: 800 11.5px/1 Inter, sans-serif; color: #231603; background: var(--eco);
+    padding: 4px 8px; border-radius: 6px; letter-spacing: .02em;
+    box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
   .pv-pass-btn {
     border: 0; cursor: pointer; border-radius: 12px; padding: 11px 14px; width: 100%;
     font: 800 13.5px 'Baloo 2', sans-serif; color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.25);
@@ -520,7 +560,6 @@ const STYLE = `<style>
     background: linear-gradient(180deg, var(--in-dp), var(--in-dk));
     box-shadow: inset 0 2px 0 rgba(255,255,255,.3), 0 4px 0 #241c6e;
   }
-  .pv-pass-permo { font: 700 12px/1.3 'Baloo 2', sans-serif; color: var(--tik-mu); margin-top: 4px; }
   .pv-pass-tag {
     position: absolute; top: -11px; left: 16px; z-index: 1;
     font: 800 10.5px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #fff;
@@ -529,7 +568,7 @@ const STYLE = `<style>
   .pv-err { font: 700 13px/1.4 'Baloo 2', sans-serif; color: #ffb4a8; text-align: center; margin: 4px 0 0; display: none; }
   .pv-err.on { display: block; }
 
-  /* ── Garantie (zone tamponnée) ── */
+  /* ── Garantie ── */
   .pv-stamp-zone { position: relative; margin-top: 26px; padding: 20px 18px; border-radius: 20px; border: 2px dashed rgba(88,204,2,.5); text-align: center; }
   .pv-stamp-zone b { display: block; font: 800 16.5px/1.3 'Baloo 2', sans-serif; margin-bottom: 4px; }
   .pv-stamp-zone span { font: 600 13px/1.55 'Baloo 2', sans-serif; color: var(--ink-soft); }
@@ -542,11 +581,11 @@ const STYLE = `<style>
 
   /* ── Preuve ── */
   .pv-proof { margin-top: 20px; }
-  .pv-bar-lbl { display: flex; justify-content: space-between; font: 600 13px Inter, sans-serif; margin-bottom: 6px; color: var(--ink-soft); }
+  .pv-bar-lbl { display: flex; justify-content: space-between; gap: 12px; font: 600 13px Inter, sans-serif; margin-bottom: 6px; color: var(--ink-soft); }
   .pv-bar { height: 12px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; margin-bottom: 14px; }
   .pv-bar span { display: block; height: 100%; border-radius: 99px; }
-  .pv-bar-go span { width: 75%; background: linear-gradient(90deg, var(--go), #8aec3c); }
-  .pv-bar-mu span { width: 58%; background: #5c519f; }
+  .pv-bar-go span { background: linear-gradient(90deg, var(--go), #8aec3c); }
+  .pv-bar-mu span { background: #5c519f; }
   .pv-src { text-align: center; font: 500 11px Inter, sans-serif; color: #655a97; margin: 0; }
 
   /* ── FAQ ── */
@@ -559,6 +598,7 @@ const STYLE = `<style>
   .pv-faq summary::after { content: "+"; font: 800 19px/1 'Baloo 2', sans-serif; color: var(--gold); flex: none; }
   .pv-faq details[open] summary::after { content: "–"; }
   .pv-faq p { font: 600 13.5px/1.55 'Baloo 2', sans-serif; color: var(--ink-soft); margin: 0 0 14px; }
+  .pv-faq a { color: var(--gold); }
 
   .pv-foot { text-align: center; padding: 36px 0 10px; font: 600 12px/1.7 'Baloo 2', sans-serif; color: var(--ink-dim); }
   .pv-foot a { color: var(--ink-soft); }
@@ -569,7 +609,6 @@ const STYLE = `<style>
     padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
     background: rgba(18,11,44,.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border-top: 1.5px solid rgba(255,206,77,.25);
-    display: flex; align-items: center; gap: 12px;
   }
   .pv-sticky-inner { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 480px; margin: 0 auto; }
   .pv-sticky-txt { font: 700 12.5px/1.25 'Baloo 2', sans-serif; color: var(--ink-soft); white-space: nowrap; }
@@ -584,8 +623,30 @@ const STYLE = `<style>
 
   /* ── Retour checkout ── */
   .pv-result { max-width: 400px; margin: 26px auto 0; filter: drop-shadow(0 30px 40px rgba(0,0,0,.55)); }
-  .pv-result-note { text-align: center; font: 600 14px/1.6 'Baloo 2', sans-serif; color: var(--ink-soft); max-width: 340px; margin: 24px auto 0; }
-  .pv-result-note strong { color: var(--gold); }
+  .pv-result-title { text-align: center; color: var(--pv-ink); font: 800 26px/1.2 'Baloo 2', sans-serif; margin: 26px 0 6px; text-shadow: 0 3px 0 rgba(12,7,32,.8); }
+  .pv-result-intro { text-align: center; font: 600 14px/1.55 'Baloo 2', sans-serif; color: var(--ink-soft); max-width: 340px; margin: 0 auto 20px; }
+  .pv-steps { display: flex; flex-direction: column; gap: 10px; counter-reset: pvstep; max-width: 440px; margin: 0 auto; }
+  .pv-step {
+    display: flex; gap: 12px; align-items: flex-start; text-align: left;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); border-radius: 16px; padding: 13px 14px;
+    font: 600 13.5px/1.5 'Baloo 2', sans-serif; color: var(--ink-mu);
+  }
+  .pv-step b { color: var(--pv-ink); }
+  .pv-step::before {
+    counter-increment: pvstep; content: counter(pvstep);
+    flex: none; width: 28px; height: 28px; display: grid; place-items: center;
+    font: 800 14px/1 'Baloo 2', sans-serif; color: #4a3300;
+    background: linear-gradient(180deg, #ffe08a, var(--gold) 60%, var(--gold-dp));
+    border-radius: 50%; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.55), 0 2.5px 0 #a86e00;
+  }
+  .pv-result-guarantee { text-align: center; font: 600 12.5px/1.5 Inter, sans-serif; color: var(--ink-dim); margin: 16px 0 0; }
+  .pv-result-cta {
+    display: block; width: 100%; max-width: 320px; margin: 20px auto 0;
+    border: 0; cursor: pointer; border-radius: 16px; padding: 15px;
+    font: 800 16px/1 'Baloo 2', sans-serif; color: #fff; text-shadow: 0 1.5px 0 rgba(0,0,0,.3);
+    background: linear-gradient(180deg, var(--in-lt), var(--in) 55%, var(--in-dp));
+    box-shadow: inset 0 2.5px 0 rgba(255,255,255,.35), 0 5px 0 var(--in-dk), 0 9px 16px rgba(0,0,0,.35);
+  }
   .pv-cancel-note {
     max-width: 444px; margin: 14px auto 0; padding: 12px 16px;
     background: rgba(255,206,77,.1); border: 1.5px solid rgba(255,206,77,.35); border-radius: 14px;
@@ -599,8 +660,7 @@ function hashQuery() {
   return new URLSearchParams(q);
 }
 
-/** Langue : choix mémorisé > ?lang= > langue du navigateur (candidats
- *  étrangers → anglais automatique). */
+/** Langue : choix mémorisé > ?lang= > langue du navigateur. */
 function getLang() {
   const stored = localStorage.getItem("pv_lang");
   if (stored === "fr" || stored === "en") return stored;
@@ -611,24 +671,24 @@ function getLang() {
     : "en";
 }
 
-/** Le billet d'or (hero + succès). stamped = billet validé. */
+/** Le billet d'or. stamped = billet validé (écran de succès). */
 function renderTicket(L, { stamped = false } = {}) {
   return `
     <div class="pv-ticket-scene pv-rev">
       <div class="pv-ticket">
         <div class="pv-t-inner">
           <div class="pv-t-main">
-            <div class="pv-t-brand"><img src="/permigo-logo.png" alt="" width="20" height="20">PERMIGO</div>
+            <div class="pv-t-brand"><img src="${LOGO}" alt="" width="22" height="22">PERMIGO</div>
             <div class="pv-t-title">${L.tTitle}</div>
             <div class="pv-t-sub">${L.tSub}</div>
             <div class="pv-t-meta">
               <div><b>${L.tBoardLbl}</b><span>${L.tBoard}</span></div>
-              <div><b>${L.tPriceLbl}</b><span>${L.tPrice}</span></div>
+              <div><b>${L.tDureeLbl}</b><span>${L.tDuree}</span></div>
             </div>
           </div>
           <div class="pv-t-stub">
-            <span class="n">${L.tPlace}</span>
-            <span class="pv-t-place">${stamped ? "✔" : `N° <span id="pv-place-no">—</span><small>/${TOTAL_PLACES}</small>`}</span>
+            <span class="n">${L.tOffre}</span>
+            ${stamped ? `<span class="pv-t-check">✔</span>` : `<span class="pv-t-strike">${L.tStrike}</span><span class="pv-t-price">${L.tPrice}</span>`}
             <div class="pv-t-barcode"></div>
           </div>
         </div>
@@ -652,22 +712,31 @@ export async function mount(root) {
     checkout_return: checkout || "none",
   });
 
-  // ── Retour succès : billet tamponné, pas de re-vente ──
+  // ── Retour succès : bienvenue dans l'aventure ──
   if (checkout === "success") {
     track("pass.checkout_success", { plan: planParam || "?" });
-    const label = L.planLabels[planParam] || "Pass Permis";
+    const label = PLAN_LABELS[lang][planParam] || "Pass Permis";
     root.innerHTML = `${STYLE}
       <div class="pv">
         <header class="pv-nav">
-          <a class="pv-badge-p" href="#/pass" aria-label="PermiGo"><img src="/permigo-logo.png" alt=""></a>
+          <a class="pv-logo" href="#/pass" aria-label="PermiGo"><img src="${LOGO}" alt="PermiGo"></a>
         </header>
         <div class="pv-wrap">
           <div class="pv-result">${renderTicket(L, { stamped: true })}</div>
-          <div class="pv-result-note"><strong>${L.successT}</strong><br>${label}. ${L.successD}</div>
+          <h1 class="pv-result-title">${L.successT}</h1>
+          <p class="pv-result-intro">${L.successIntro(label)}</p>
+          <div class="pv-steps">
+            ${L.successSteps.map((s) => `<div class="pv-step"><div>${s}</div></div>`).join("")}
+          </div>
+          <p class="pv-result-guarantee">${L.successGuarantee}</p>
+          <button class="pv-result-cta" id="pv-home" type="button">${L.successCta}</button>
         </div>
         <footer class="pv-foot">${L.foot}</footer>
       </div>`;
     root.querySelectorAll(".pv-rev").forEach((el) => el.classList.add("in"));
+    root.querySelector("#pv-home")?.addEventListener("click", () => {
+      location.hash = "#/";
+    });
     return;
   }
 
@@ -676,7 +745,7 @@ export async function mount(root) {
   <div class="pv">
 
     <header class="pv-nav">
-      <a class="pv-badge-p" href="#/" aria-label="PermiGo"><img src="/permigo-logo.png" alt=""></a>
+      <a class="pv-logo" href="#/" aria-label="PermiGo"><img src="${LOGO}" alt="PermiGo"></a>
       <div class="pv-nav-right">
         <button class="pv-lang" id="pv-lang" type="button" aria-label="Switch language">${L.langBtn}</button>
         ${me ? "" : `<button class="pv-login" id="pv-login" type="button">${L.login}</button>`}
@@ -687,7 +756,6 @@ export async function mount(root) {
 
     <div class="pv-wrap">
 
-      <!-- ── Hero ── -->
       <section class="pv-hero">
         <div class="pv-kicker">${L.kicker}</div>
         <h1 class="pv-h1">${L.h1}</h1>
@@ -696,15 +764,9 @@ export async function mount(root) {
 
       ${renderTicket(L)}
 
-      <div class="pv-counter" id="pv-counter" hidden>
-        <div class="pv-pips" id="pv-pips"></div>
-        <b id="pv-count-txt"></b>
-      </div>
-
       <button class="pv-cta-hero" data-plan="pass3" type="button">${L.cta}</button>
       <p class="pv-cta-note">${L.ctaNote}</p>
 
-      <!-- ── Scène Arène : l'app que tu reçois ── -->
       <div class="pv-stage pv-rev" aria-hidden="true">
         <div class="pv-phone"><img src="/showcase/eleve-parcours.png" alt="" width="390" height="844" loading="lazy" decoding="async"></div>
         <img class="pv-coin" src="/skins/volant-coin.webp" alt="" loading="lazy" decoding="async">
@@ -712,7 +774,6 @@ export async function mount(root) {
         <div class="pv-bulle">${L.bulle}<small>${L.bulleSub}</small></div>
       </div>
 
-      <!-- ── Pas une app de code ── -->
       <h2 class="pv-sec-title pv-rev">${L.secCode}</h2>
       <p class="pv-sec-sub">${L.secCodeSub}</p>
 
@@ -723,6 +784,13 @@ export async function mount(root) {
             <b>${L.situTitle}</b>
             <span>${L.situTxt}</span>
           </div>
+        </div>
+        <div class="pv-situ">
+          <div class="pv-situ-txt">
+            <b>${L.centreTitle}</b>
+            <span>${L.centreTxt}</span>
+          </div>
+          <div class="pv-situ-shot"><img src="/showcase/eleve-centre-examen.png" alt="${L.centreAlt}" loading="lazy" decoding="async"></div>
         </div>
         ${L.feats
           .map(
@@ -737,9 +805,17 @@ export async function mount(root) {
         </div>`,
           )
           .join("")}
+        ${
+          L.nonFranco
+            ? `
+        <div class="pv-franco">
+          <span class="pv-franco-flag" aria-hidden="true">🇫🇷</span>
+          <div><b>${L.nonFranco.title}</b><span>${L.nonFranco.txt}</span></div>
+        </div>`
+            : ""
+        }
       </div>
 
-      <!-- ── L'addition ── -->
       <div class="pv-maths pv-rev">
         ${L.mathsRows
           .map(
@@ -751,7 +827,6 @@ export async function mount(root) {
       <p class="pv-maths-note">${L.mathsNote}</p>
       <p class="pv-maths-src">${L.mathsSrc}</p>
 
-      <!-- ── Les 3 billets ── -->
       <h2 class="pv-sec-title pv-rev" id="pv-pricing">${L.secPass}</h2>
       <p class="pv-sec-sub">${L.secPassSub}</p>
 
@@ -771,9 +846,9 @@ export async function mount(root) {
         <div class="pv-pass-main">
           <div class="pv-pass-name">${P.pass3.name}</div>
           <div class="pv-pass-desc">${P.pass3.desc}</div>
-          <div class="pv-pass-permo">${P.pass3.permo}</div>
         </div>
         <div class="pv-pass-cut">
+          <span class="pv-eco">${P.pass3.eco}</span>
           <div class="pv-pass-strike">${P.pass3.strike}</div>
           <div class="pv-pass-price">${P.pass3.price}</div>
           <button class="pv-pass-btn" data-plan="pass3" type="button">${P.pass3.btn}</button>
@@ -786,6 +861,7 @@ export async function mount(root) {
           <div class="pv-pass-desc">${P.pass6.desc}</div>
         </div>
         <div class="pv-pass-cut">
+          <span class="pv-eco">${P.pass6.eco}</span>
           <div class="pv-pass-strike">${P.pass6.strike}</div>
           <div class="pv-pass-price">${P.pass6.price}</div>
           <button class="pv-pass-btn" data-plan="pass6" type="button">${P.pass6.btn}</button>
@@ -800,17 +876,15 @@ export async function mount(root) {
         <span>${L.stampD}</span>
       </div>
 
-      <!-- ── Preuve ── -->
       <h2 class="pv-sec-title pv-rev">${L.secProof}</h2>
       <div class="pv-proof pv-rev">
-        <div class="pv-bar-lbl"><span>${L.proofA}</span><span>75 %</span></div>
-        <div class="pv-bar pv-bar-go"><span></span></div>
-        <div class="pv-bar-lbl"><span>${L.proofB}</span><span>58 %</span></div>
-        <div class="pv-bar pv-bar-mu"><span></span></div>
+        <div class="pv-bar-lbl"><span>${L.proofA}</span><span>${L.proofAVal}</span></div>
+        <div class="pv-bar pv-bar-go"><span style="width:${L.proofAW}%"></span></div>
+        <div class="pv-bar-lbl"><span>${L.proofB}</span><span>${L.proofBVal}</span></div>
+        <div class="pv-bar pv-bar-mu"><span style="width:${L.proofBW}%"></span></div>
         <p class="pv-src">${L.proofSrc}</p>
       </div>
 
-      <!-- ── FAQ ── -->
       <section class="pv-faq pv-rev">
         <h2 class="pv-sec-title">${L.secFaq}</h2>
         <div style="margin-top:16px">
@@ -829,7 +903,6 @@ export async function mount(root) {
       <footer class="pv-foot">${L.foot}</footer>
     </div>
 
-    <!-- ── CTA collant ── -->
     <div class="pv-sticky">
       <div class="pv-sticky-inner">
         <div class="pv-sticky-txt">${L.stickyName}<b>${L.stickyPrice}</b></div>
@@ -841,7 +914,6 @@ export async function mount(root) {
 
   wire(root, me, lang, L);
   wireReveal(root);
-  loadFounderCount(root, L);
 }
 
 /** Révélation au scroll : .pv-rev → .in à l'entrée dans le viewport. */
@@ -868,38 +940,6 @@ function wireReveal(root) {
   els.forEach((el) => io.observe(el));
 }
 
-/** Jauge de places : chiffre RÉEL (RPC publique pass_founder_count). En cas
- *  d'échec, la jauge reste cachée et le billet garde « N° — » (pas de faux chiffre). */
-async function loadFounderCount(root, L) {
-  try {
-    const { data, error } = await sb.rpc("pass_founder_count");
-    if (error) throw error;
-    const taken = Math.max(0, Math.min(TOTAL_PLACES, Number(data) || 0));
-    // Numéro du billet = prochaine place libre.
-    const no = root.querySelector("#pv-place-no");
-    if (no)
-      no.textContent = String(Math.min(taken + 1, TOTAL_PLACES)).padStart(
-        2,
-        "0",
-      );
-    // Jauge 10 crans pour 20 places (1 cran = 2 places).
-    const pips = root.querySelector("#pv-pips");
-    const txt = root.querySelector("#pv-count-txt");
-    const counter = root.querySelector("#pv-counter");
-    if (pips && txt && counter) {
-      const lit = Math.round((taken / TOTAL_PLACES) * 10);
-      pips.innerHTML = Array.from(
-        { length: 10 },
-        (_, i) => `<i class="pv-pip${i < lit ? " on" : ""}"></i>`,
-      ).join("");
-      txt.textContent = taken > 0 ? L.counterSome(taken) : L.counterZero;
-      counter.hidden = false;
-    }
-  } catch (e) {
-    console.warn("[pass] founder count", e);
-  }
-}
-
 function wire(root, me, lang, L) {
   const err = root.querySelector("#pv-err");
 
@@ -924,7 +964,7 @@ function wire(root, me, lang, L) {
       track("pass.checkout_click", { plan, lang, logged: !!me });
       err?.classList.remove("on");
       btns.forEach((b) => (b.disabled = true));
-      const prev = btn.textContent;
+      const prev = btn.innerHTML;
       btn.textContent = L.btnWait;
       try {
         await startPassCheckout(plan);
@@ -933,7 +973,7 @@ function wire(root, me, lang, L) {
         console.error("[pass] checkout", e);
         track("pass.checkout_error", { plan });
         btns.forEach((b) => (b.disabled = false));
-        btn.textContent = prev;
+        btn.innerHTML = prev;
         err?.classList.add("on");
         err?.scrollIntoView({ block: "center", behavior: "smooth" });
       }
