@@ -684,6 +684,7 @@ export async function mount(root) {
     examDataRes,
     parcoursModRes,
     examModRes,
+    selfValRes,
   ] = await Promise.allSettled([
     sb
       .from("validations")
@@ -721,6 +722,10 @@ export async function mount(root) {
     examDataP,
     parcoursModP,
     examModP,
+    // Validation autonome (élève SANS moniteur, pré-vente Pass Permis) :
+    // table séparée de `validations`, fusionnée en LECTURE SEULE ci-dessous
+    // pour que la progression du hub reste juste pour un compte solo.
+    sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
   ]);
 
   const examMod = examModRes.status === "fulfilled" ? examModRes.value : null;
@@ -733,6 +738,11 @@ export async function mount(root) {
   if (valOk) {
     for (const v of valRes.value.data || []) {
       if (v.statut === "acquis") validatedMap[v.competence_id] = true;
+    }
+  }
+  if (selfValRes.status === "fulfilled" && !selfValRes.value.error) {
+    for (const s of selfValRes.value.data || []) {
+      if (!validatedMap[s.competence_id]) validatedMap[s.competence_id] = true;
     }
   }
   const step1Failed = !valOk || !parcoursMod;
