@@ -2612,7 +2612,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
           <div class="fiche-status-ico">${icon("zap", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Prochaine à travailler</div>
-            <div class="fiche-status-sub">Entraîne-toi en séance — ton moniteur la validera quand tu es prêt(e).</div>
+            <div class="fiche-status-sub">${hasMoniteur ? "Entraîne-toi en séance — ton moniteur la validera quand tu es prêt(e)." : "Révise-la, puis valide-la toi-même avec le quiz."}</div>
           </div>
         </div>${reviseBtn}${selfValidateBtn}`;
     }
