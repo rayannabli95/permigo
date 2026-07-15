@@ -19,7 +19,7 @@ import { initGameState, initEquippedTheme } from "@/utils/game-state.js";
 import { mountCookieBanner } from "@/components/common/cookie-banner.js";
 import { initPosthog } from "@/services/posthog.js";
 import { initVercelAnalytics } from "@/services/vercel-analytics.js";
-import { tapHaptic } from "@/utils/haptic.js";
+import { tapHaptic, scrollHaptic } from "@/utils/haptic.js";
 import "@/utils/pwa.js"; // capte beforeinstallprompt très tôt
 
 // Apply saved/system theme before any rendering (reads localStorage, synchronous)
@@ -222,6 +222,18 @@ document.addEventListener(
     );
     if (!t || t.closest("[data-no-haptic]")) return;
     tapHaptic();
+  },
+  { capture: true, passive: true },
+);
+
+// Immersion : micro-vibration « cran par cran » au défilement (effet molette),
+// sur la page comme sur les listes internes (capture). Silencieux, throttlé.
+document.addEventListener(
+  "scroll",
+  (e) => {
+    const el = e.target === document ? document.scrollingElement : e.target;
+    if (!el || el.closest?.("[data-no-haptic]")) return;
+    scrollHaptic(el);
   },
   { capture: true, passive: true },
 );
