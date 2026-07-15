@@ -7,7 +7,7 @@
 // v1 100% front + localStorage (aucune table DB). Le pilotage par le moniteur
 // (« Avant/Après ta leçon ») viendra dans une 2e couche (nécessite la DB).
 // ═══════════════════════════════════════════════════════════════
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { navigate } from "@/router.js";
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -25,6 +25,7 @@ import {
 
 const LS_KEY = "rvc_revised_v1"; // { [code]: isoDate }
 const LS_READ_KEY = "rvc_read_v1"; // { [code]: 1 } — fiche déjà déroulée (relecture = tout affiché)
+const LS_PARTS_KEY = "rvc_parts_v1"; // { [code]: n } — étapes lues d'une fiche « mission »
 
 function loadRead() {
   try {
@@ -59,6 +60,23 @@ function markRevised(code) {
     /* quota / private mode : non bloquant */
   }
 }
+function loadParts() {
+  try {
+    return JSON.parse(localStorage.getItem(LS_PARTS_KEY) || "{}") || {};
+  } catch {
+    return {};
+  }
+}
+function savePartsDone(code, n) {
+  const p = loadParts();
+  p[code] = n;
+  try {
+    localStorage.setItem(LS_PARTS_KEY, JSON.stringify(p));
+  } catch {
+    /* quota / private mode : non bloquant */
+  }
+}
+
 function revisedToday(code, revised) {
   const iso = revised[code];
   if (!iso) return false;
@@ -106,6 +124,21 @@ function useGrouped(methode, groups) {
     groups.length >= 3 &&
     groups.every((g) => g.steps.length >= 2)
   );
+}
+
+// sources = ["chaine-slug/videoId", …] : on n'affiche QUE le nom de la
+// chaîne, humanisé — l'id vidéo brut à l'écran faisait note de dev.
+function sourceChannels(f) {
+  return Array.isArray(f.sources)
+    ? [
+        ...new Set(
+          f.sources
+            .map((s) => String(s).split("/")[0].replace(/-/g, " ").trim())
+            .filter(Boolean)
+            .map((c) => c.charAt(0).toUpperCase() + c.slice(1)),
+        ),
+      ]
+    : [];
 }
 
 const STYLE = `<style>
@@ -288,7 +321,89 @@ const STYLE = `<style>
 
 .rvs-foot { text-align:center; margin:20px 0 0; font:600 12px/1.4 'Inter',sans-serif; color:var(--mu2,#9aa3ba); }
 
-@media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before { transition:none !important; animation:none !important; } }
+/* ═══ Fiche « Mission » (maquette validée fiche-triee-F-mission.html, choix
+      Rayan 2026-07-15) : les fiches longues structurées (sections « Label — »)
+      passent en DA Arène nuit-violet + or — 1 partie = 1 étape de mission,
+      l'étape en cours est ouverte, les suivantes verrouillées. Toujours
+      sombre, comme le hub Réviser (indépendant du thème). ═══ */
+.rvm { position:relative;
+  margin-top: calc(-1 * (var(--th, 52px) + env(safe-area-inset-top, 0px)));
+  padding: calc(var(--th, 52px) + env(safe-area-inset-top, 0px) + 14px) 16px calc(110px + env(safe-area-inset-bottom, 0px));
+  min-height: 100dvh; max-width: 480px; margin-left:auto; margin-right:auto;
+  color:#f2f0fa; font-family:'Inter',sans-serif;
+  background:
+    radial-gradient(120% 50% at 50% -5%, rgba(255,190,70,.10) 0%, transparent 55%),
+    radial-gradient(120% 55% at 50% 22%, rgba(110,70,220,.22) 0%, transparent 62%),
+    linear-gradient(180deg,#181241 0%,#0f0d24 58%,#0b0a1c 100%); }
+.rvm-top { display:flex; align-items:center; gap:10px; padding:2px 0 6px; }
+.rvm-back { width:38px; height:38px; border-radius:11px; border:0; cursor:pointer; flex-shrink:0;
+  background:rgba(255,255,255,.1); color:#fff; font-size:19px; line-height:1; }
+.rvm-back:active { transform:scale(.95); }
+.rvm-badge { font:700 11px 'Plus Jakarta Sans',sans-serif; letter-spacing:.14em; text-transform:uppercase; color:#cabfef; }
+.rvm-title { font:800 26px/1.15 'Baloo 2',cursive; letter-spacing:.01em; margin:10px 0 2px;
+  background:linear-gradient(180deg,#ffe9b0,#f5b73d); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.rvm-sub { font:600 12.5px/1.5 'Inter',sans-serif; color:#9b8dcf; margin:0; }
+.rvm-bar { display:flex; gap:6px; margin:14px 0 4px; }
+.rvm-bar i { flex:1; height:9px; border-radius:99px; background:rgba(255,255,255,.12);
+  box-shadow:inset 0 2px 3px rgba(0,0,0,.35); position:relative; overflow:hidden; }
+.rvm-bar i.done::after { content:""; position:absolute; inset:0; border-radius:99px;
+  background:linear-gradient(180deg,#ffe9b0,#f0a93f); box-shadow:inset 0 -2px 0 rgba(0,0,0,.25); }
+.rvm-bar-t { font:700 11px 'Plus Jakarta Sans',sans-serif; color:#9b8dcf; margin:0 0 12px; }
+.rvm-bar-t b { color:#ffd76e; }
+.rvm-etape { border-radius:18px; margin-top:14px; padding:14px 14px 13px;
+  background:linear-gradient(180deg,#241c52,#171034); border:1px solid rgba(178,150,255,.28);
+  box-shadow:0 8px 0 #0c0820, 0 14px 26px rgba(0,0,0,.45), inset 0 1.5px 0 rgba(255,255,255,.14); }
+.rvm-etape.locked { opacity:.55; }
+.rvm-eh { display:flex; align-items:center; gap:11px; width:100%; background:none; border:0; padding:0;
+  text-align:left; color:inherit; font-family:inherit; cursor:pointer; }
+.rvm-eh:disabled { cursor:default; }
+.rvm-medal { flex:none; width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
+  font:800 17px 'Baloo 2',cursive; color:#4a2500;
+  background:radial-gradient(circle at 35% 30%, #ffe9b0, #f0a93f 60%, #b46a10);
+  box-shadow:0 4px 8px rgba(0,0,0,.4), inset 0 -3px 4px rgba(0,0,0,.25), inset 0 2px 2px rgba(255,255,255,.55); }
+.rvm-etape.done .rvm-medal { background:radial-gradient(circle at 35% 30%, #b5f5cf, #2fae7d 60%, #0d5c3d); color:#04160d; }
+.rvm-etape.locked .rvm-medal { background:radial-gradient(circle at 35% 30%, #6a6488, #3a3555 60%, #232040); color:#12101f; }
+.rvm-eh .rvm-et b { font:800 16.5px/1.2 'Plus Jakarta Sans',sans-serif; display:block; }
+.rvm-eh .rvm-et span { font:600 11.5px 'Inter',sans-serif; color:#9b8dcf; }
+.rvm-st { margin-left:auto; flex:none; font:800 10.5px 'Plus Jakarta Sans',sans-serif; letter-spacing:.06em;
+  border-radius:99px; padding:5px 10px; background:rgba(0,0,0,.35); color:#8ef0b0; white-space:nowrap; }
+.rvm-etape.cur .rvm-st { color:#ffd76e; }
+.rvm-etape.locked .rvm-st { color:#9b8dcf; }
+.rvm-gestes { margin-top:12px; border-top:1px solid rgba(178,150,255,.18); }
+.rvm-gestes[hidden] { display:none; }
+.rvm-geste { display:flex; gap:11px; padding:11px 2px; align-items:flex-start; }
+.rvm-geste + .rvm-geste { border-top:1px solid rgba(178,150,255,.12); }
+.rvm-geste .n { flex:none; width:23px; height:23px; border-radius:7px; background:rgba(255,255,255,.1);
+  color:#ffd76e; font:800 11.5px/23px 'Plus Jakarta Sans',sans-serif; text-align:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18); }
+.rvm-geste p { font:400 13.5px/1.5 'Inter',sans-serif; color:#e8e4f6; margin:0; }
+.rvm-cta { margin-top:11px; width:100%; height:46px; border:0; border-radius:12px; cursor:pointer;
+  background:linear-gradient(180deg,#ffd76e,#f0a93f); color:#4a2500; font:800 14.5px 'Plus Jakarta Sans',sans-serif;
+  box-shadow:0 5px 0 #b46a10, 0 9px 16px rgba(0,0,0,.4); }
+.rvm-cta:active { transform:translateY(2px); box-shadow:0 3px 0 #b46a10, 0 6px 12px rgba(0,0,0,.4); }
+.rvm-hint { text-align:center; font:600 11.5px 'Inter',sans-serif; color:#9b8dcf; margin:16px 0 0; }
+.rvm-note { margin-top:16px; border-left:3px solid #f0a93f; padding:2px 0 2px 13px; }
+.rvm-note.why { border-color:#8b5cf6; }
+.rvm-note.bva { border-color:rgba(178,150,255,.4); }
+.rvm-note b { display:block; font:700 11px 'IBM Plex Mono',monospace; letter-spacing:.13em;
+  text-transform:uppercase; color:#ffd76e; margin-bottom:4px; }
+.rvm-note.why b { color:#cabfef; }
+.rvm-note.bva b { color:#9b8dcf; }
+.rvm-note p { font:400 13.5px/1.55 'Inter',sans-serif; color:#e8e4f6; margin:0; }
+.rvm-src { font:500 11px 'IBM Plex Mono',monospace; color:#9b8dcf; margin:18px 0 0; }
+.rvm-acts { display:flex; gap:10px; margin-top:22px; }
+.rvm-ghost { flex:none; border:1.5px solid rgba(255,255,255,.5); background:transparent; color:#fff;
+  border-radius:12px; padding:0 16px; height:50px; cursor:pointer;
+  font:700 13px 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; gap:8px; }
+.rvm-ghost svg { width:16px; height:16px; color:#ffd76e; }
+.rvm-ghost:active { transform:scale(.97); }
+.rvm-main { flex:1; border:0; border-radius:12px; height:50px; cursor:pointer; color:#4a2500;
+  font:800 15px 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:9px;
+  background:linear-gradient(180deg,#ffd76e,#f0a93f); box-shadow:0 5px 0 #b46a10, 0 9px 16px rgba(0,0,0,.4); }
+.rvm-main:active { transform:translateY(2px); }
+.rvm-main svg { width:18px; height:18px; }
+
+@media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before, .rvm *, .rvm *::before { transition:none !important; animation:none !important; } }
 </style>`;
 
 // Pictos SVG (sobres, mono-trait) réutilisés par la fiche « Coach ».
@@ -549,8 +664,6 @@ export async function mount(root, param) {
       return render();
     }
     track("revision_conduite_fiche_open", { code });
-    markRead(code); // ouvrir la fiche = « lue » (alimente la progression du hub)
-    track("revision_conduite_fiche_read", { code });
 
     const steps = Array.isArray(f.methode) ? f.methode : [];
     const total = steps.length;
@@ -560,24 +673,22 @@ export async function mount(root, param) {
     // l'ordre », sinon les libellés de section donneraient l'ordre.
     const flatSteps = groups.flatMap((g) => g.steps);
 
+    // Fiches longues structurées → affichage « mission » en étapes (DA Arène).
+    // Là-bas, « lue » = mission TERMINÉE (markRead à la dernière étape), pas
+    // juste ouverte — sinon la 2ᵉ visite sauterait le déroulé.
+    if (grouped) return renderFicheMission(f, groups, flatSteps);
+
+    markRead(code); // ouvrir la fiche = « lue » (alimente la progression du hub)
+    track("revision_conduite_fiche_read", { code });
+
     // Étape éditoriale « Carnet » : gros numéro + texte, zéro carte ni ombre.
     const stepRow = (s, n) =>
       `<div class="rvc-step"><span class="rvc-step-n">${String(n).padStart(2, "0")}</span><div class="rvc-step-t">${esc(s)}</div></div>`;
 
     let methodeHtml = "";
     if (total) {
-      let n = 0;
-      // Fiches structurées (préfixes « Label — ») : on garde les libellés de
-      // section en sous-titres, numérotation continue. Sinon, liste à plat.
-      const sections = grouped ? groups : [{ label: null, steps }];
-      const rows = sections
-        .map((g) => {
-          const head = g.label
-            ? `<div class="rvc-msub">${esc(g.label)}</div>`
-            : "";
-          return head + g.steps.map((s) => stepRow(s, ++n)).join("");
-        })
-        .join("");
+      // Liste à plat — les fiches structurées sont parties en « mission » plus haut.
+      const rows = steps.map((s, i) => stepRow(s, i + 1)).join("");
       const range = total > 1 ? `01–${String(total).padStart(2, "0")}` : "01";
       methodeHtml = `<div class="rvc-lbl"><b>La méthode</b><span class="rvc-lbl-line"></span><span class="rvc-lbl-n">${range}</span></div>
         <div class="rvc-method">${rows}</div>`;
@@ -592,18 +703,7 @@ export async function mount(root, param) {
       note("warn", "L’erreur à éviter", f.erreur) +
       note("why", "Pourquoi ça compte", f.pourquoi) +
       note("bva", "En boîte auto", f.bva);
-    // sources = ["chaine-slug/videoId", …] : on n'affiche QUE le nom de la
-    // chaîne, humanisé — l'id vidéo brut à l'écran faisait note de dev.
-    const srcChaines = Array.isArray(f.sources)
-      ? [
-          ...new Set(
-            f.sources
-              .map((s) => String(s).split("/")[0].replace(/-/g, " ").trim())
-              .filter(Boolean)
-              .map((c) => c.charAt(0).toUpperCase() + c.slice(1)),
-          ),
-        ]
-      : [];
+    const srcChaines = sourceChannels(f);
     const srcHtml = srcChaines.length
       ? `<p class="rvc-fsrc">↳ Vu chez de vrais moniteurs : ${srcChaines.map((s) => esc(s)).join(", ")}</p>`
       : "";
@@ -631,7 +731,7 @@ export async function mount(root, param) {
   }
 
   function wireFiche(f, flatSteps) {
-    root.querySelector(".rvc-back").addEventListener("click", () => {
+    root.querySelector(".rvc-back, .rvm-back").addEventListener("click", () => {
       view = "home";
       render();
     });
@@ -646,6 +746,152 @@ export async function mount(root, param) {
     root.querySelector("[data-quiz]")?.addEventListener("click", () => {
       focusId = null;
       startQuiz();
+    });
+  }
+
+  // ── Fiche « Mission » : la méthode en étapes (une partie = une étape).
+  // L'étape en cours est ouverte, les faites se replient (tap pour rouvrir),
+  // les suivantes sont verrouillées. Le quiz se débloque à la fin. En
+  // relecture (fiche déjà lue, ou mission terminée), tout est ouvert.
+  function renderFicheMission(f, groups, flatSteps) {
+    const parts = groups.map((g) => ({
+      label: g.label || "Pour commencer",
+      steps: g.steps,
+    }));
+    const totalParts = parts.length;
+
+    // Reprise : étapes déjà lues (persisté). Fiche lue sous l'ANCIEN
+    // affichage (rvc_read_v1 sans état d'étapes) = relecture → tout ouvert.
+    const wasRead = !!loadRead()[f.code];
+    const saved = loadParts()[f.code];
+    const nDone =
+      typeof saved === "number"
+        ? Math.min(saved, totalParts)
+        : wasRead
+          ? totalParts
+          : 0;
+    const finie = nDone >= totalParts;
+
+    const gesteRows = (p) =>
+      p.steps
+        .map(
+          (s, i) =>
+            `<div class="rvm-geste"><span class="n">${i + 1}</span><p>${esc(s)}</p></div>`,
+        )
+        .join("");
+
+    const etapes = parts
+      .map((p, i) => {
+        const state = i < nDone ? "done" : i === nDone ? "cur" : "locked";
+        const nG = p.steps.length;
+        const meta = `${nG} geste${nG > 1 ? "s" : ""}`;
+        const medal = state === "done" ? "✓" : String(i + 1);
+        const st =
+          state === "done" ? "FAIT" : state === "cur" ? "EN COURS" : "À VENIR";
+        // done : gestes repliés (tap sur l'en-tête pour rouvrir) — sauf en
+        // relecture, où tout est affiché d'emblée (pattern des fiches).
+        const open = state === "cur" || finie;
+        const next = parts[i + 1];
+        const cta =
+          state === "cur" && !finie
+            ? `<button class="rvm-cta" data-part-done>${next ? `Étape lue → ${esc(next.label)}` : "Étape lue → au quiz !"}</button>`
+            : "";
+        const gestes =
+          state === "locked"
+            ? ""
+            : `<div class="rvm-gestes" ${open ? "" : "hidden"}>${gesteRows(p)}${cta}</div>`;
+        return `<section class="rvm-etape ${state}">
+          <button class="rvm-eh" data-part="${i}" ${state === "locked" ? "disabled" : ""} aria-expanded="${open}"
+            aria-label="${escAttr(`Étape ${i + 1} : ${p.label} (${st.toLowerCase()})`)}">
+            <span class="rvm-medal" aria-hidden="true">${medal}</span>
+            <span class="rvm-et"><b>${esc(p.label)}</b><span>${meta}</span></span>
+            <span class="rvm-st">${st}</span>
+          </button>
+          ${gestes}
+        </section>`;
+      })
+      .join("");
+
+    const barSegs = parts
+      .map((_, i) => `<i class="${i < nDone ? "done" : ""}"></i>`)
+      .join("");
+    const barTxt = finie
+      ? `<b>${totalParts}/${totalParts} étapes</b> — mission accomplie ✓`
+      : `<b>${nDone}/${totalParts} étapes</b> — la suite : ${esc(parts[nDone].label)}`;
+
+    // Fin de mission : « à retenir », sources et actions (quiz débloqué).
+    const note = (cls, kicker, txt) =>
+      txt
+        ? `<div class="rvm-note ${cls}"><b>${kicker}</b><p>${esc(txt)}</p></div>`
+        : "";
+    const srcChaines = sourceChannels(f);
+    const outro = finie
+      ? `${note("warn", "L’erreur à éviter", f.erreur)}
+         ${note("why", "Pourquoi ça compte", f.pourquoi)}
+         ${note("bva", "En boîte auto", f.bva)}
+         ${srcChaines.length ? `<p class="rvm-src">↳ Vu chez de vrais moniteurs : ${srcChaines.map((s) => esc(s)).join(", ")}</p>` : ""}
+         <div class="rvm-acts">
+           ${flatSteps.length >= 3 ? `<button class="rvm-ghost" data-order>${FSVG.shuffle}Remets dans l’ordre</button>` : ""}
+           <button class="rvm-main" data-quiz>${FSVG.play}<span>Teste-toi</span></button>
+         </div>`
+      : `<p class="rvm-hint">Le quiz se débloque à la fin de la mission.</p>`;
+
+    root.innerHTML = `${STYLE}<div class="rvm">
+      <div class="rvm-top">
+        <button class="rvm-back" aria-label="Retour">←</button>
+        <span class="rvm-badge">${esc(f.code)} · ${esc(f.competence)}</span>
+      </div>
+      <h1 class="rvm-title">${esc(f.titre)}</h1>
+      <p class="rvm-sub">Ta mission : ${totalParts} étapes, ${flatSteps.length} gestes. Le quiz t'attend au bout.</p>
+      <div class="rvm-bar" aria-hidden="true">${barSegs}</div>
+      <p class="rvm-bar-t">${barTxt}</p>
+      ${etapes}
+      ${outro}
+    </div>`;
+
+    wireFiche(f, flatSteps);
+    wireFicheMission(f, totalParts, nDone);
+  }
+
+  function wireFicheMission(f, totalParts, nDone) {
+    // Replier / rouvrir une étape déjà lue (l'étape en cours reste ouverte).
+    root.querySelectorAll(".rvm-etape.done [data-part]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const box = btn.parentElement.querySelector(".rvm-gestes");
+        if (!box) return;
+        const willOpen = box.hasAttribute("hidden");
+        box.toggleAttribute("hidden", !willOpen);
+        btn.setAttribute("aria-expanded", String(willOpen));
+      }),
+    );
+
+    // « Étape lue » → étape suivante (ou fin de mission → quiz débloqué).
+    root.querySelector("[data-part-done]")?.addEventListener("click", () => {
+      haptic("success");
+      const next = nDone + 1;
+      savePartsDone(f.code, next);
+      track("revision_conduite_part_done", {
+        code: f.code,
+        part: next,
+        total: totalParts,
+      });
+      if (next >= totalParts) {
+        // Mission terminée = fiche « lue » (progression du hub + relecture).
+        markRead(f.code);
+        track("revision_conduite_fiche_read", { code: f.code });
+      }
+      view = "fiche";
+      render();
+      requestAnimationFrame(() => {
+        const cible = root.querySelector(".rvm-etape.cur, .rvm-acts");
+        cible?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "auto"
+            : "smooth",
+          block: "center",
+        });
+      });
     });
   }
 
