@@ -5,18 +5,15 @@
 // C'est le flow commercial #1 : un moniteur indépendant crée son compte
 // + son auto-école sans invitation, puis entre dans l'app.
 //
-// Flow :
+// Flow (vérifié bout en bout en prod le 2026-07-15) :
 //   1. Formulaire : email, mot de passe (≥8), prénom, nom, nom de l'activité
 //   2. sb.auth.signUp() → le trigger handle_new_user_signup crée un profil "nu"
-//      (auth_id, role='enseignant', prenom) SANS auto_ecole_id ni email
-//   3. RPC create_independent_moniteur(p_ecole_nom, p_nom) crée l'auto-école
-//      et rattache le profil (role, auto_ecole_id, nom, email) — SECURITY DEFINER
+//      (auth_id, role='eleve', prenom) SANS auto_ecole_id ni email — le rôle
+//      client n'est jamais lu (fix escalade de rôle, audit RLS 2026-07)
+//   3. RPC create_independent_moniteur(p_ecole_nom, p_nom) — SECURITY DEFINER —
+//      crée l'auto-école et promeut le profil (role='enseignant', auto_ecole_id,
+//      nom, email)
 //   4. Add-to-home (comme le flow invitation moniteur) puis entrée dans l'app
-//
-// ⚠️ La RPC create_independent_moniteur n'est PAS encore appliquée en prod
-//    (migration 20260620160000_create_independent_moniteur.sql à relire +
-//    appliquer manuellement). Tant que ce n'est pas fait, le flow échoue à
-//    l'étape 3 (la RPC renvoie une erreur "function does not exist").
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
@@ -360,11 +357,13 @@ export async function mount(root) {
     try {
       if (!accountCreated) {
         // 1. Sign up — le trigger handle_new_user_signup crée un profil "nu"
-        //    (auth_id, role='enseignant', prenom) sans auto_ecole_id ni email.
+        //    (auth_id, role='eleve', prenom) sans auto_ecole_id ni email.
+        //    Le rôle est promu 'enseignant' par la RPC de l'étape 2 (jamais
+        //    depuis le client — le trigger ignore le metadata role).
         const { error: authErr } = await sb.auth.signUp({
           email,
           password: pwdEl.value,
-          options: { data: { prenom, role: "enseignant" } },
+          options: { data: { prenom } },
         });
         if (authErr) throw authErr;
         accountCreated = true;
