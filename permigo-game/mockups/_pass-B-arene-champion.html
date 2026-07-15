@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pass B — Arène Champion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Baloo 2', sans-serif;
+    color:#f4f1ff;
+    background:
+      radial-gradient(120% 55% at 50% -6%, rgba(255,206,77,.22), transparent 55%),
+      linear-gradient(165deg, #241a4d 0%, #3a2a7a 60%, #241a4d 100%);
+    background-color:#241a4d;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .page { max-width:390px; margin:0 auto; position:relative; padding:0 18px 40px; }
+
+  /* confettis fixes */
+  .cf { position:absolute; border-radius:3px; opacity:.8; pointer-events:none; }
+  .cf1 { width:10px; height:10px; background:#ffce4d; transform:rotate(20deg); top:120px; left:16px; }
+  .cf2 { width:7px; height:7px;  background:#58cc02; transform:rotate(-15deg); top:90px; right:30px; }
+  .cf3 { width:8px; height:8px;  background:#8e87ff; transform:rotate(40deg); top:330px; right:12px; }
+  .cf4 { width:6px; height:6px;  background:#ff8a5c; transform:rotate(-30deg); top:420px; left:10px; }
+
+  .nav { display:flex; justify-content:space-between; align-items:center; padding:18px 2px 4px; }
+  .brand { font-weight:800; font-size:20px; display:flex; align-items:center; gap:8px; }
+  .brand img { width:28px; height:28px; filter:drop-shadow(0 3px 6px rgba(0,0,0,.4)); }
+  .brand .g { color:#58cc02; }
+  .login { font:700 14px 'Baloo 2',sans-serif; color:#cdc8ec; text-decoration:none; }
+
+  /* ── hero « affiche de jeu » ── */
+  .hero { text-align:center; padding-top:18px; position:relative; }
+  .badge {
+    display:inline-flex; align-items:center; gap:8px;
+    font:800 12px/1 'Baloo 2',sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#4a3300;
+    background:linear-gradient(180deg, #ffe08a, #ffce4d 60%, #e8a317);
+    padding:10px 18px; border-radius:999px;
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.6), 0 4px 0 #a86e00, 0 8px 18px rgba(0,0,0,.35);
+  }
+  h1 {
+    font-size:46px; line-height:1.0; font-weight:800; margin:20px 0 4px;
+    text-shadow:0 4px 0 rgba(22,15,56,.9), 0 10px 24px rgba(0,0,0,.4);
+  }
+  h1 .gold { color:#ffce4d; }
+  h1 .out {
+    color:transparent; -webkit-text-stroke:2px #ffce4d;
+  }
+  .lead { font:600 16px/1.5 'Baloo 2',sans-serif; color:#cdc8ec; max-width:320px; margin:12px auto 0; }
+  .lead strong { color:#ffce4d; }
+
+  /* scène mascotte + téléphone */
+  .stage { position:relative; height:480px; margin-top:18px; }
+  .phone {
+    position:absolute; left:50%; transform:translateX(-26%) rotate(4deg); top:0; width:196px;
+    border-radius:30px; overflow:hidden; border:6px solid #160f38;
+    box-shadow:0 24px 50px rgba(0,0,0,.55), 0 0 0 2px rgba(142,135,255,.5);
+  }
+  .phone img { display:block; width:100%; }
+  .mascot {
+    position:absolute; left:-8px; bottom:0; width:185px; z-index:3;
+    filter:drop-shadow(0 18px 30px rgba(0,0,0,.5));
+  }
+  .coin {
+    position:absolute; z-index:3; right:6px; top:-4px; width:74px;
+    filter:drop-shadow(0 10px 18px rgba(0,0,0,.45));
+    transform:rotate(12deg);
+  }
+  .bulle {
+    position:absolute; z-index:3; right:-2px; bottom:110px;
+    background:#fff; color:#231603; border-radius:16px 16px 4px 16px; padding:10px 14px;
+    font:700 13px/1.3 'Baloo 2',sans-serif;
+    box-shadow:0 8px 20px rgba(0,0,0,.4);
+  }
+  .bulle small { display:block; color:#8a7a52; font-weight:600; font-size:11px; }
+
+  /* médaillons ancrage */
+  .anchors { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:26px; }
+  .an {
+    text-align:center; border-radius:18px; padding:14px 8px 12px;
+    background:linear-gradient(180deg, #322764, #281f58);
+    box-shadow:inset 0 3px 0 rgba(255,255,255,.14), 0 6px 0 #171040, 0 10px 18px rgba(0,0,0,.3);
+  }
+  .an b { display:block; font-size:22px; font-weight:800; }
+  .an span { font:600 11.5px/1.3 'Baloo 2',sans-serif; color:#aaa2d8; }
+  .an-hot { background:linear-gradient(180deg, #4a3a92, #372b76); box-shadow:inset 0 3px 0 rgba(255,255,255,.2), 0 6px 0 #171040, 0 10px 18px rgba(0,0,0,.3), 0 0 0 2px #ffce4d; }
+  .an-hot b { color:#ffce4d; }
+  .anchors-note { text-align:center; font:600 13px/1.55 'Baloo 2',sans-serif; color:#aaa2d8; margin-top:14px; }
+
+  /* ── boutique de passes ── */
+  .sec-title { text-align:center; font-size:30px; font-weight:800; margin-top:48px; text-shadow:0 3px 0 rgba(22,15,56,.8); }
+  .sec-sub { text-align:center; font:600 14px/1.5 'Baloo 2',sans-serif; color:#aaa2d8; margin:6px 0 22px; }
+
+  .offer {
+    position:relative; border-radius:24px; padding:20px 18px; margin-bottom:16px;
+    background:linear-gradient(180deg, #322764 0%, #2b2160 60%, #261d56 100%);
+    box-shadow:inset 0 3px 0 rgba(255,255,255,.16), inset 0 -10px 20px rgba(0,0,0,.4), 0 9px 0 #160f38, 0 18px 30px rgba(0,0,0,.42);
+  }
+  .offer-star {
+    background:linear-gradient(180deg, #574414 0%, #3d3012 55%, #33280e 100%);
+    box-shadow:inset 0 3px 0 rgba(255,236,170,.35), inset 0 -10px 22px rgba(0,0,0,.45), 0 10px 0 #241a04, 0 20px 34px rgba(0,0,0,.5), 0 0 0 3px #ffce4d;
+    padding-top:30px;
+  }
+  .ribbon {
+    position:absolute; top:-15px; left:50%; transform:translateX(-50%);
+    font:800 12.5px/1 'Baloo 2',sans-serif; letter-spacing:.06em; text-transform:uppercase; color:#4a3300;
+    background:linear-gradient(180deg, #ffe08a, #ffce4d 60%, #e8a317);
+    padding:9px 20px; border-radius:999px; white-space:nowrap;
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.6), 0 4px 0 #a86e00, 0 8px 16px rgba(0,0,0,.4);
+  }
+  .ribbon::before, .ribbon::after { content:"★"; margin:0 6px; }
+  .offer-head { display:flex; align-items:center; gap:12px; }
+  .offer-art { width:52px; height:52px; flex:none; filter:drop-shadow(0 6px 10px rgba(0,0,0,.4)); }
+  .offer-name { font-weight:800; font-size:17px; line-height:1.1; }
+  .offer-name small { display:block; font-weight:600; font-size:12.5px; color:#aaa2d8; }
+  .offer-star .offer-name small { color:#d9c48a; }
+  .price-row { display:flex; align-items:baseline; gap:10px; margin:12px 0 2px; }
+  .price { font-size:36px; font-weight:800; letter-spacing:-.01em; }
+  .price small { font-size:15px; color:#aaa2d8; }
+  .strike { font:700 15px 'Baloo 2',sans-serif; color:#8b7fc4; text-decoration:line-through; }
+  .offer-star .strike { color:#a89154; }
+  .permo { font:700 13px 'Baloo 2',sans-serif; color:#ffce4d; margin-bottom:12px; }
+  .btn3d {
+    width:100%; border:0; cursor:pointer; border-radius:17px; padding:16px;
+    font:800 17px 'Baloo 2',sans-serif; color:#fff; text-shadow:0 1.5px 0 rgba(0,0,0,.3);
+    background:linear-gradient(180deg, #8e87ff, #6c63ff 55%, #4a3fc9);
+    box-shadow:inset 0 3px 0 rgba(255,255,255,.35), 0 6px 0 #372fa3, 0 10px 18px rgba(0,0,0,.35);
+  }
+  .btn3d-gold {
+    color:#4a3300; text-shadow:0 1px 0 rgba(255,255,255,.4);
+    background:linear-gradient(180deg, #ffe08a, #ffce4d 55%, #e8a317);
+    box-shadow:inset 0 3px 0 rgba(255,255,255,.55), 0 6px 0 #a86e00, 0 10px 18px rgba(0,0,0,.35);
+  }
+
+  /* jauge places */
+  .jauge-wrap { margin:20px 2px 0; }
+  .jauge-lbl { display:flex; justify-content:space-between; font:700 13px 'Baloo 2',sans-serif; color:#ffce4d; margin-bottom:7px; }
+  .jauge { height:16px; border-radius:99px; background:rgba(0,0,0,.4); box-shadow:inset 0 2px 5px rgba(0,0,0,.5); overflow:hidden; }
+  .jauge span { display:block; height:100%; width:15%; border-radius:99px; background:linear-gradient(180deg, #ffe08a, #ffce4d 60%, #e8a317); box-shadow:inset 0 2px 0 rgba(255,255,255,.5); }
+
+  /* garantie bouclier */
+  .guarantee {
+    display:flex; gap:13px; align-items:center; margin-top:22px; padding:16px;
+    border-radius:20px; background:rgba(88,204,2,.12); border:2px solid rgba(88,204,2,.4);
+  }
+  .g-shield { width:46px; height:46px; flex:none; filter:drop-shadow(0 5px 8px rgba(0,0,0,.4)); }
+  .guarantee b { display:block; font-size:15.5px; }
+  .guarantee span { font:600 13px/1.5 'Baloo 2',sans-serif; color:#cdc8ec; }
+
+  /* duel proof */
+  .duel { margin-top:48px; border-radius:24px; padding:20px 18px; background:rgba(0,0,0,.25); box-shadow:inset 0 2px 8px rgba(0,0,0,.35); }
+  .duel h3 { text-align:center; font-size:19px; font-weight:800; margin-bottom:16px; }
+  .xp-lbl { display:flex; justify-content:space-between; font:700 13px 'Baloo 2',sans-serif; margin-bottom:6px; }
+  .xp { height:20px; border-radius:99px; background:rgba(0,0,0,.45); overflow:hidden; margin-bottom:16px; box-shadow:inset 0 2px 5px rgba(0,0,0,.5); }
+  .xp span { display:block; height:100%; border-radius:99px; box-shadow:inset 0 2px 0 rgba(255,255,255,.4); }
+  .xp-1 span { width:75%; background:linear-gradient(180deg, #8aec3c, #58cc02 60%, #3a8a01); }
+  .xp-2 span { width:58%; background:#5c519f; }
+  .duel small { display:block; text-align:center; font:600 11px 'Baloo 2',sans-serif; color:#8b7fc4; }
+
+  .foot { text-align:center; font:600 12px/1.7 'Baloo 2',sans-serif; color:#8b7fc4; padding-top:44px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <i class="cf cf1"></i><i class="cf cf2"></i><i class="cf cf3"></i><i class="cf cf4"></i>
+
+  <nav class="nav">
+    <span class="brand"><img src="../public/permigo-logo.png" alt="">Permi<span class="g">Go</span></span>
+    <a class="login" href="#">Se connecter</a>
+  </nav>
+
+  <header class="hero">
+    <span class="badge">Promo fondatrice · 20 places</span>
+    <h1><span class="out">TON PERMIS</span><br><span class="gold">EN 90 JOURS</span></h1>
+    <p class="lead">Révise <strong>10 min par jour</strong> entre tes leçons. Série, ligue, examens blancs — et une progression qui grimpe pour de vrai.</p>
+  </header>
+
+  <div class="stage">
+    <div class="phone"><img src="../public/showcase/eleve-parcours.png" alt=""></div>
+    <img class="coin" src="../public/skins/volant-coin.webp" alt="">
+    <img class="mascot" src="../public/skins/mascot-celebrate.png" alt="">
+    <div class="bulle">3 compétences validées !<small>cette semaine</small></div>
+  </div>
+
+  <div class="anchors">
+    <div class="an"><b>55 €</b><span>1 h de conduite</span></div>
+    <div class="an"><b>1 804 €</b><span>budget permis moyen</span></div>
+    <div class="an an-hot"><b>9,99 €</b><span>PermiGo / mois</span></div>
+  </div>
+  <p class="anchors-note">Chaque leçon mal préparée = 55 € de perdus.<br>PermiGo te fait monter en voiture déjà prêt.</p>
+
+  <h2 class="sec-title">Choisis ton pass</h2>
+  <p class="sec-sub">Tout est inclus. Zéro option cachée.</p>
+
+  <article class="offer">
+    <div class="offer-head">
+      <img class="offer-art" src="../public/skins/badge-3d-01.webp" alt="">
+      <div class="offer-name">Mensuel<small>sans engagement, stop en un clic</small></div>
+    </div>
+    <div class="price-row"><span class="price">9,99 €<small>/mois</small></span></div>
+    <button class="btn3d">Commencer</button>
+  </article>
+
+  <article class="offer offer-star">
+    <div class="ribbon">Meilleure offre</div>
+    <div class="offer-head">
+      <img class="offer-art" src="../public/skins/volant-coin.webp" alt="">
+      <div class="offer-name">Pass Permis · 3 mois<small>« Objectif Permis en 90 jours »</small></div>
+    </div>
+    <div class="price-row"><span class="price">24,99 €</span><span class="strike">29,97 €</span></div>
+    <div class="permo">≈ 8,33 €/mois — payé une fois, c'est réglé.</div>
+    <button class="btn3d btn3d-gold">Prendre le Pass 3 mois</button>
+  </article>
+
+  <article class="offer">
+    <div class="offer-head">
+      <img class="offer-art" src="../public/skins/badge-3d-ultimate.webp" alt="">
+      <div class="offer-name">Pass 6 mois + bonus<small>conduite accompagnée, zéro pression</small></div>
+    </div>
+    <div class="price-row"><span class="price">39,99 €</span><span class="strike">59,94 €</span></div>
+    <div class="permo">≈ 6,67 €/mois — la meilleure valeur.</div>
+    <button class="btn3d">Prendre le Pass 6 mois</button>
+  </article>
+
+  <div class="jauge-wrap">
+    <div class="jauge-lbl"><span>Places fondatrices prises</span><span>3 / 20</span></div>
+    <div class="jauge"><span></span></div>
+  </div>
+
+  <div class="guarantee">
+    <img class="g-shield" src="../public/skins/trophy-first-validation.webp" alt="">
+    <div><b>100 % remboursable, sans question</b>
+    <span>Tu changes d'avis ? Un message et on te rembourse. Tu ne risques rien.</span></div>
+  </div>
+
+  <div class="duel">
+    <h3>L'entraînement régulier, ça gagne</h3>
+    <div class="xp-lbl"><span>Avec entraînement (accompagné)</span><span>75 %</span></div>
+    <div class="xp xp-1"><span></span></div>
+    <div class="xp-lbl"><span>Filière classique</span><span>58 %</span></div>
+    <div class="xp xp-2"><span></span></div>
+    <small>Taux de réussite au permis B — Sécurité routière</small>
+  </div>
+
+  <footer class="foot">Paiement sécurisé par Stripe · Remboursable sur simple demande<br>Mentions légales</footer>
+</div>
+</body>
+</html>

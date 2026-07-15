@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pass C — Ticket d'Or</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Baloo 2', sans-serif;
+    color:#f4f1ff;
+    background:
+      radial-gradient(100% 46% at 50% -4%, rgba(255,206,77,.16), transparent 58%),
+      linear-gradient(180deg, #1b1240 0%, #241a4d 50%, #170f38 100%);
+    background-color:#1b1240;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .page { max-width:390px; margin:0 auto; padding:0 18px 44px; position:relative; }
+
+  .nav { display:flex; justify-content:space-between; align-items:center; padding:18px 2px 4px; }
+  .brand { font-weight:800; font-size:20px; display:flex; align-items:center; gap:8px; }
+  .brand img { width:28px; height:28px; }
+  .brand .g { color:#58cc02; }
+  .login { font:700 14px 'Baloo 2',sans-serif; color:#cdc8ec; text-decoration:none; }
+
+  /* ── hero ── */
+  .hero { text-align:center; padding-top:22px; }
+  .kicker { font:700 12px/1 Inter,sans-serif; letter-spacing:.2em; text-transform:uppercase; color:#aaa2d8; }
+  h1 { font-size:42px; line-height:1.05; font-weight:800; margin:12px 0 10px; text-shadow:0 3px 0 rgba(12,7,32,.8); }
+  h1 em { font-style:normal; color:#ffce4d; }
+  .lead { font:600 15px/1.55 'Baloo 2',sans-serif; color:#cdc8ec; max-width:320px; margin:0 auto; }
+
+  /* ── LE billet d'or ── */
+  .ticket-scene { position:relative; margin:30px -4px 0; filter:drop-shadow(0 30px 40px rgba(0,0,0,.55)); }
+  .ticket {
+    position:relative; transform:rotate(-2.5deg);
+    background:
+      radial-gradient(120% 90% at 20% 0%, rgba(255,255,255,.35), transparent 40%),
+      linear-gradient(115deg, #f6d267 0%, #ffe9a8 22%, #eab63a 48%, #ffdf8a 70%, #d99c1e 100%);
+    border-radius:20px; color:#3a2a05; overflow:hidden;
+  }
+  .ticket::before { /* perforations gauche/droite */
+    content:""; position:absolute; top:0; bottom:0; left:calc(100% - 96px); width:0;
+    border-left:2.5px dashed rgba(58,42,5,.4);
+  }
+  .t-inner { display:flex; }
+  .t-main { flex:1; padding:18px 14px 16px 18px; }
+  .t-stub {
+    width:96px; flex:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    padding:12px 6px; text-align:center;
+  }
+  .t-brand { display:flex; align-items:center; gap:7px; font-weight:800; font-size:14px; letter-spacing:.02em; }
+  .t-brand img { width:20px; height:20px; }
+  .t-title { font-size:23px; font-weight:800; line-height:1.02; margin:9px 0 2px; letter-spacing:-.01em; }
+  .t-sub { font:600 11.5px/1.4 Inter,sans-serif; color:#6b520f; }
+  .t-meta { display:flex; gap:14px; margin-top:12px; }
+  .t-meta div b { display:block; font:700 10px/1 Inter,sans-serif; letter-spacing:.14em; text-transform:uppercase; color:#8a6a17; }
+  .t-meta div span { font:600 13px 'IBM Plex Mono',monospace; }
+  .t-stub .n { font:600 11px/1 Inter,sans-serif; letter-spacing:.1em; text-transform:uppercase; color:#8a6a17; }
+  .t-stub .place { font:800 26px/1 'Baloo 2',sans-serif; }
+  .t-barcode {
+    width:64px; height:34px;
+    background:repeating-linear-gradient(90deg, #3a2a05 0 2px, transparent 2px 5px, #3a2a05 5px 6px, transparent 6px 10px);
+    border-radius:3px; opacity:.85;
+  }
+  .t-shine { position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.5) 44%, transparent 56%);
+    mix-blend-mode:soft-light;
+  }
+  .ticket-caption { text-align:center; font:600 12.5px Inter,sans-serif; color:#8b7fc4; margin-top:22px; }
+
+  /* compteur places */
+  .counter { display:flex; align-items:center; justify-content:center; gap:10px; margin-top:26px; }
+  .counter .pips { display:flex; gap:4px; }
+  .pip { width:11px; height:16px; border-radius:3px; background:rgba(255,255,255,.12); }
+  .pip.on { background:linear-gradient(180deg, #ffe08a, #e8a317); box-shadow:0 0 8px rgba(255,206,77,.5); }
+  .counter b { font:700 13px 'Baloo 2',sans-serif; color:#ffce4d; }
+
+  /* ── ancrage : le calcul en une phrase ── */
+  .maths {
+    margin-top:44px; border-radius:20px; padding:20px 18px;
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09);
+  }
+  .maths-row { display:flex; justify-content:space-between; align-items:baseline; padding:9px 0; font:500 14px Inter,sans-serif; color:#cdc8ec; }
+  .maths-row + .maths-row { border-top:1px dashed rgba(255,255,255,.1); }
+  .maths-row b { font:700 16px 'Baloo 2',sans-serif; color:#fff; }
+  .maths-row.hot b { color:#ffce4d; font-size:18px; }
+  .maths-row.hot { color:#ffce4d; }
+
+  /* ── les 3 billets ── */
+  .sec-title { text-align:center; font-size:28px; font-weight:800; margin-top:50px; text-shadow:0 3px 0 rgba(12,7,32,.8); }
+  .sec-sub { text-align:center; font:600 13.5px/1.5 'Baloo 2',sans-serif; color:#aaa2d8; margin:6px 0 24px; }
+
+  .pass { position:relative; display:flex; border-radius:18px; margin-bottom:14px;
+    box-shadow:0 14px 28px rgba(0,0,0,.4);
+  }
+  .pass-main { flex:1; padding:16px 14px 15px 18px; }
+  .pass-cut { width:112px; flex:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:12px 8px;
+    border-left:2px dashed rgba(255,255,255,.25);
+  }
+  .pass-std { background:linear-gradient(180deg, #352a6e, #2b2160); }
+  .pass-std .pass-cut { border-left-color:rgba(255,255,255,.18); background:rgba(0,0,0,.18); }
+  .pass-name { font-weight:800; font-size:17px; }
+  .pass-desc { font:600 12.5px/1.45 'Baloo 2',sans-serif; color:#aaa2d8; margin-top:3px; }
+  .pass-price { font-size:24px; font-weight:800; line-height:1; }
+  .pass-price small { font-size:12px; color:#aaa2d8; }
+  .pass-strike { font:600 12px Inter,sans-serif; color:#8b7fc4; text-decoration:line-through; }
+  .pass-btn {
+    border:0; cursor:pointer; border-radius:12px; padding:10px 14px; width:100%;
+    font:800 13.5px 'Baloo 2',sans-serif; color:#fff;
+    background:linear-gradient(180deg, #8e87ff, #6c63ff 55%, #4a3fc9);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.35), 0 4px 0 #372fa3;
+  }
+
+  /* billet OR (le héros) */
+  .pass-gold {
+    transform:scale(1.04); margin:22px 0;
+    background:
+      radial-gradient(120% 90% at 15% 0%, rgba(255,255,255,.4), transparent 40%),
+      linear-gradient(115deg, #f6d267 0%, #ffe9a8 25%, #eab63a 55%, #d99c1e 100%);
+    color:#3a2a05;
+    box-shadow:0 20px 40px rgba(0,0,0,.5), 0 0 60px rgba(255,206,77,.25);
+  }
+  .pass-gold .pass-desc { color:#6b520f; }
+  .pass-gold .pass-cut { border-left-color:rgba(58,42,5,.4); background:rgba(255,255,255,.14); }
+  .pass-gold .pass-strike { color:#8a6a17; }
+  .pass-gold .pass-btn {
+    color:#fff; text-shadow:0 1.5px 0 rgba(0,0,0,.35);
+    background:linear-gradient(180deg, #4a3fc9, #372fa3);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.3), 0 4px 0 #241c6e;
+  }
+  .pass-tag {
+    position:absolute; top:-11px; left:16px;
+    font:800 10.5px/1 Inter,sans-serif; letter-spacing:.14em; text-transform:uppercase; color:#fff;
+    background:#e2513f; padding:7px 12px; border-radius:99px;
+    box-shadow:0 4px 10px rgba(0,0,0,.35);
+  }
+  .pass-gold .permo { font:700 12px 'Baloo 2',sans-serif; color:#6b520f; margin-top:2px; }
+
+  /* garantie tampon */
+  .stamp-zone { position:relative; margin-top:30px; padding:20px 18px; border-radius:20px; border:2px dashed rgba(88,204,2,.5); text-align:center; }
+  .stamp-zone b { display:block; font-size:16.5px; margin-bottom:4px; }
+  .stamp-zone span { font:600 13px/1.55 'Baloo 2',sans-serif; color:#cdc8ec; }
+  .stamp {
+    position:absolute; top:-16px; right:10px; transform:rotate(9deg);
+    font:800 11px/1 Inter,sans-serif; letter-spacing:.1em; text-transform:uppercase;
+    color:#7ee838; border:2.5px solid #58cc02; border-radius:8px; padding:7px 10px;
+    background:rgba(20,40,4,.6);
+  }
+
+  /* preuve sobre */
+  .proof { margin-top:44px; }
+  .proof h3 { text-align:center; font-size:18px; font-weight:800; margin-bottom:14px; }
+  .bar-lbl { display:flex; justify-content:space-between; font:600 13px Inter,sans-serif; margin-bottom:6px; color:#cdc8ec; }
+  .bar { height:12px; border-radius:99px; background:rgba(255,255,255,.08); overflow:hidden; margin-bottom:14px; }
+  .bar span { display:block; height:100%; border-radius:99px; }
+  .b1 span { width:75%; background:linear-gradient(90deg, #58cc02, #8aec3c); }
+  .b2 span { width:58%; background:#5c519f; }
+  .src { text-align:center; font:500 11px Inter,sans-serif; color:#655a97; }
+
+  .foot { text-align:center; font:600 12px/1.7 'Baloo 2',sans-serif; color:#8b7fc4; padding-top:40px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <nav class="nav">
+    <span class="brand"><img src="../public/permigo-logo.png" alt="">Permi<span class="g">Go</span></span>
+    <a class="login" href="#">Se connecter</a>
+  </nav>
+
+  <header class="hero">
+    <div class="kicker">Promo fondatrice — juillet 2026</div>
+    <h1>Réserve ta place.<br><em>Passe en 90 jours.</em></h1>
+    <p class="lead">20 billets fondateurs. Un prix bloqué à vie, un accès complet, et l'équipe qui t'installe l'app en main propre.</p>
+  </header>
+
+  <div class="ticket-scene">
+    <div class="ticket">
+      <div class="t-inner">
+        <div class="t-main">
+          <div class="t-brand"><img src="../public/permigo-logo.png" alt="">PERMIGO</div>
+          <div class="t-title">OBJECTIF PERMIS<br>EN 90 JOURS</div>
+          <div class="t-sub">Accès complet · quiz · examens blancs · suivi REMC</div>
+          <div class="t-meta">
+            <div><b>Embarquement</b><span>JUIL. 2026</span></div>
+            <div><b>Tarif fondateur</b><span>24,99 €</span></div>
+          </div>
+        </div>
+        <div class="t-stub">
+          <span class="n">Place</span>
+          <span class="place">N° 04<span style="font-size:14px">/20</span></span>
+          <div class="t-barcode"></div>
+        </div>
+      </div>
+      <div class="t-shine"></div>
+    </div>
+  </div>
+  <p class="ticket-caption">Ton billet = ton accès. Remboursable jusqu'au dernier moment.</p>
+
+  <div class="counter">
+    <div class="pips">
+      <i class="pip on"></i><i class="pip on"></i><i class="pip on"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i><i class="pip"></i>
+    </div>
+    <b>3 places prises sur 20</b>
+  </div>
+
+  <div class="maths">
+    <div class="maths-row"><span>1 heure de conduite</span><b>55 €</b></div>
+    <div class="maths-row"><span>Budget permis moyen</span><b>1 804 €</b></div>
+    <div class="maths-row hot"><span>PermiGo, par mois</span><b>9,99 €</b></div>
+  </div>
+
+  <h2 class="sec-title">Trois billets, un objectif</h2>
+  <p class="sec-sub">Tout est inclus dans chacun. Choisis ton horizon.</p>
+
+  <article class="pass pass-std">
+    <div class="pass-main">
+      <div class="pass-name">Billet Mensuel</div>
+      <div class="pass-desc">Sans engagement — stop en un clic.</div>
+    </div>
+    <div class="pass-cut">
+      <div class="pass-price">9,99 €<small>/mois</small></div>
+      <button class="pass-btn">Commencer</button>
+    </div>
+  </article>
+
+  <article class="pass pass-gold">
+    <span class="pass-tag">Le plus choisi</span>
+    <div class="pass-main">
+      <div class="pass-name">Billet Or · 3 mois</div>
+      <div class="pass-desc">« Objectif Permis en 90 jours » — le temps de préparer et de passer ton exam.</div>
+      <div class="permo">≈ 8,33 €/mois, payé une fois.</div>
+    </div>
+    <div class="pass-cut">
+      <div class="pass-strike">29,97 €</div>
+      <div class="pass-price">24,99 €</div>
+      <button class="pass-btn">Réserver</button>
+    </div>
+  </article>
+
+  <article class="pass pass-std">
+    <div class="pass-main">
+      <div class="pass-name">Billet Platine · 6 mois</div>
+      <div class="pass-desc">Conduite accompagnée, zéro pression. + bonus fondateur.</div>
+    </div>
+    <div class="pass-cut">
+      <div class="pass-strike">59,94 €</div>
+      <div class="pass-price">39,99 €</div>
+      <button class="pass-btn">Réserver</button>
+    </div>
+  </article>
+
+  <div class="stamp-zone">
+    <span class="stamp">Garanti</span>
+    <b>Remboursable sur simple message</b>
+    <span>Pré-vente : tu changes d'avis, on te rembourse. Sans question, sans délai. Le risque est pour nous, pas pour toi.</span>
+  </div>
+
+  <div class="proof">
+    <h3>S'entraîner régulièrement, ça paie</h3>
+    <div class="bar-lbl"><span>Avec entraînement régulier</span><span>75 %</span></div>
+    <div class="bar b1"><span></span></div>
+    <div class="bar-lbl"><span>Filière classique</span><span>58 %</span></div>
+    <div class="bar b2"><span></span></div>
+    <p class="src">Taux de réussite au permis B — Sécurité routière.</p>
+  </div>
+
+  <footer class="foot">Paiement sécurisé par Stripe · Remboursable sur simple demande<br>Mentions légales</footer>
+</div>
+</body>
+</html>

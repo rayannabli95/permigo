@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pass A — Nuit Première</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Plus Jakarta Sans', sans-serif;
+    background:#0a0618;
+    color:#f5f2ff;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .page { max-width:390px; margin:0 auto; position:relative; }
+
+  /* ── fond cinématique ── */
+  .bg {
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(90% 40% at 50% 0%, rgba(108,99,255,.28), transparent 60%),
+      radial-gradient(70% 30% at 50% 24%, rgba(255,206,77,.10), transparent 60%),
+      linear-gradient(180deg, #120b2e 0%, #0a0618 46%, #0a0618 100%);
+  }
+  .bg::after {
+    content:""; position:absolute; inset:0;
+    background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:26px 26px;
+    mask-image:linear-gradient(180deg, rgba(0,0,0,.6), transparent 45%);
+  }
+  .wrap { position:relative; z-index:1; padding:0 22px; }
+
+  /* ── nav ── */
+  .nav { display:flex; justify-content:space-between; align-items:center; padding:20px 22px 6px; position:relative; z-index:2; }
+  .brand { font-weight:800; font-size:19px; letter-spacing:-.02em; display:flex; align-items:center; gap:8px; }
+  .brand img { width:26px; height:26px; }
+  .brand .g { color:#58cc02; }
+  .login { font:600 13px Inter,sans-serif; color:#b9b0e6; text-decoration:none; }
+
+  /* ── hero ── */
+  .hero { text-align:center; padding:34px 0 0; }
+  .kicker {
+    display:inline-block; font:700 11px/1 Inter,sans-serif; letter-spacing:.22em; text-transform:uppercase;
+    color:#ffce4d; padding:9px 16px; border:1px solid rgba(255,206,77,.35); border-radius:999px;
+    background:rgba(255,206,77,.06);
+  }
+  h1 {
+    font-size:46px; line-height:1.02; letter-spacing:-.035em; font-weight:800; margin:22px 0 16px;
+  }
+  h1 .gold {
+    background:linear-gradient(115deg, #ffe9a8 15%, #ffce4d 45%, #e8a317 80%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .lead { font:500 16px/1.6 Inter,sans-serif; color:#b9b0e6; max-width:320px; margin:0 auto; }
+  .lead strong { color:#fff; font-weight:600; }
+
+  .cta-hero {
+    display:block; margin:26px auto 0; width:100%; max-width:330px;
+    padding:18px; border:0; border-radius:18px; cursor:pointer;
+    font:800 17px 'Plus Jakarta Sans',sans-serif; color:#231603;
+    background:linear-gradient(180deg, #ffe08a, #ffce4d 55%, #efb42a);
+    box-shadow:0 0 0 1px rgba(255,224,138,.4), 0 12px 40px rgba(255,206,77,.35), 0 2px 0 rgba(255,255,255,.5) inset;
+  }
+  .cta-sub { text-align:center; font:500 12.5px Inter,sans-serif; color:#8f85c4; margin-top:12px; }
+  .cta-sub b { color:#b9b0e6; }
+
+  /* ── téléphone flottant ── */
+  .stage { position:relative; margin:44px auto 0; width:250px; }
+  .stage::before {
+    content:""; position:absolute; inset:-40px -60px auto; height:340px; z-index:0;
+    background:radial-gradient(60% 60% at 50% 40%, rgba(108,99,255,.4), transparent 70%);
+    filter:blur(10px);
+  }
+  .phone {
+    position:relative; z-index:1; border-radius:38px; overflow:hidden;
+    border:1.5px solid rgba(255,255,255,.16);
+    box-shadow:0 40px 80px rgba(0,0,0,.7), 0 0 0 8px rgba(15,10,36,.9);
+    transform:rotate(-2deg);
+  }
+  .phone img { display:block; width:100%; }
+  .float {
+    position:absolute; z-index:2; display:flex; gap:9px; align-items:center;
+    background:rgba(20,13,46,.85); backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,.14); border-radius:14px; padding:10px 13px;
+    font:600 12px Inter,sans-serif; box-shadow:0 12px 30px rgba(0,0,0,.5);
+  }
+  .float small { display:block; font-weight:500; color:#8f85c4; font-size:10.5px; }
+  .f1 { top:36px; right:-38px; }
+  .f2 { bottom:52px; left:-42px; }
+  .dot { width:26px; height:26px; border-radius:8px; display:grid; place-items:center; font-size:13px; }
+  .d1 { background:rgba(88,204,2,.18); }
+  .d2 { background:rgba(255,206,77,.15); }
+
+  /* ── bande ancrage façon « addition » ── */
+  .receipt { margin:58px 0 0; border-top:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1); }
+  .receipt .row {
+    display:flex; justify-content:space-between; align-items:baseline; padding:16px 2px;
+    font:500 14.5px Inter,sans-serif; color:#b9b0e6;
+  }
+  .receipt .row + .row { border-top:1px dashed rgba(255,255,255,.09); }
+  .receipt .val { font:700 17px 'Plus Jakarta Sans',sans-serif; color:#fff; letter-spacing:-.01em; }
+  .receipt .hot { color:#ffce4d; }
+  .receipt .hot-lbl { color:#ffce4d; }
+  .receipt-note { font:500 12.5px/1.6 Inter,sans-serif; color:#8f85c4; text-align:center; margin:14px 0 0; }
+
+  /* ── pricing ── */
+  .sec { margin-top:64px; }
+  .sec-title { font-size:28px; font-weight:800; letter-spacing:-.03em; text-align:center; }
+  .sec-sub { font:500 14px/1.55 Inter,sans-serif; color:#8f85c4; text-align:center; margin:10px auto 26px; max-width:300px; }
+
+  .card {
+    border:1px solid rgba(255,255,255,.1); border-radius:22px; padding:22px;
+    background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+    margin-bottom:14px; position:relative;
+  }
+  .card-star {
+    border:1.5px solid rgba(255,206,77,.6);
+    background:
+      radial-gradient(120% 100% at 50% 0%, rgba(255,206,77,.1), transparent 55%),
+      linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+    box-shadow:0 0 50px rgba(255,206,77,.12);
+    padding:28px 22px 22px;
+  }
+  .pop {
+    position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+    font:700 10.5px/1 Inter,sans-serif; letter-spacing:.16em; text-transform:uppercase; color:#231603;
+    background:linear-gradient(180deg, #ffe08a, #ffce4d); padding:7px 14px; border-radius:999px; white-space:nowrap;
+  }
+  .plan { font:600 13px Inter,sans-serif; letter-spacing:.06em; text-transform:uppercase; color:#8f85c4; }
+  .price-row { display:flex; align-items:baseline; gap:10px; margin:8px 0 4px; }
+  .price { font-size:38px; font-weight:800; letter-spacing:-.04em; }
+  .price small { font-size:16px; font-weight:600; color:#8f85c4; letter-spacing:0; }
+  .strike { font:600 15px Inter,sans-serif; color:#655a97; text-decoration:line-through; }
+  .permo { font:600 13px Inter,sans-serif; color:#ffce4d; margin-bottom:6px; }
+  .desc { font:500 13.5px/1.55 Inter,sans-serif; color:#b9b0e6; margin-bottom:16px; }
+  .btn {
+    width:100%; padding:15px; border-radius:14px; cursor:pointer; border:1px solid rgba(255,255,255,.16);
+    font:700 15px 'Plus Jakarta Sans',sans-serif; color:#fff; background:rgba(255,255,255,.05);
+  }
+  .btn-gold {
+    border:0; color:#231603;
+    background:linear-gradient(180deg, #ffe08a, #ffce4d 55%, #efb42a);
+    box-shadow:0 10px 30px rgba(255,206,77,.28);
+  }
+
+  /* garantie */
+  .guarantee {
+    display:flex; gap:14px; margin-top:22px; padding:18px;
+    border:1px solid rgba(88,204,2,.35); border-radius:18px; background:rgba(88,204,2,.06);
+  }
+  .g-ico { flex:none; width:38px; height:38px; border-radius:12px; display:grid; place-items:center; background:rgba(88,204,2,.14); }
+  .guarantee b { display:block; font-size:15px; margin-bottom:3px; }
+  .guarantee span { font:500 13px/1.55 Inter,sans-serif; color:#b9b0e6; }
+  .places { text-align:center; font:600 12.5px Inter,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#ffce4d; margin:20px 0 0; }
+
+  /* preuve */
+  .proof { margin-top:64px; padding:24px 22px; border-radius:22px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); }
+  .bar-lbl { display:flex; justify-content:space-between; font:600 13px Inter,sans-serif; margin-bottom:8px; }
+  .bar-lbl i { font-style:normal; }
+  .bar { height:10px; border-radius:99px; background:rgba(255,255,255,.07); overflow:hidden; margin-bottom:18px; }
+  .bar span { display:block; height:100%; border-radius:99px; }
+  .b1 span { width:75%; background:linear-gradient(90deg, #58cc02, #8aec3c); }
+  .b2 span { width:58%; background:#4d4380; }
+  .src { font:500 11px Inter,sans-serif; color:#655a97; }
+
+  .foot { text-align:center; font:500 12px/1.7 Inter,sans-serif; color:#655a97; padding:56px 0 40px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bg"></div>
+  <nav class="nav">
+    <span class="brand"><img src="../public/permigo-logo.png" alt="">Permi<span class="g">Go</span></span>
+    <a class="login" href="#">Se connecter</a>
+  </nav>
+
+  <div class="wrap">
+    <header class="hero">
+      <span class="kicker">Pré-vente · 20 places fondatrices</span>
+      <h1>Ton permis,<br><span class="gold">plus vite.</span><br><span class="gold">Moins cher.</span></h1>
+      <p class="lead"><strong>Objectif Permis en 90 jours.</strong> 10 minutes par jour entre tes leçons, ta progression grimpe compétence par compétence.</p>
+      <button class="cta-hero">Réserver ma place — 24,99 €</button>
+      <p class="cta-sub">Paiement sécurisé Stripe · <b>100 % remboursable</b> sur simple message</p>
+    </header>
+
+    <div class="stage">
+      <div class="phone"><img src="../public/showcase/eleve-parcours.png" alt=""></div>
+      <div class="float f1"><span class="dot d1">✓</span><div>Créneau maîtrisé<small>validé par ton moniteur</small></div></div>
+      <div class="float f2"><span class="dot d2">🔥</span><div>Série · 12 jours<small>10 min chaque soir</small></div></div>
+    </div>
+
+    <div class="receipt">
+      <div class="row"><span>1 heure de conduite</span><span class="val">55 €</span></div>
+      <div class="row"><span>Budget permis moyen en France</span><span class="val">1 804 €</span></div>
+      <div class="row"><span class="hot-lbl">PermiGo, par mois</span><span class="val hot">9,99 €</span></div>
+    </div>
+    <p class="receipt-note">Chaque leçon ratée par manque de préparation, c'est 55 € de perdus.<br>PermiGo te fait monter dans la voiture déjà prêt.</p>
+
+    <section class="sec">
+      <h2 class="sec-title">Choisis ton pass</h2>
+      <p class="sec-sub">Tout est inclus, partout. La seule question, c'est ton horizon.</p>
+
+      <article class="card">
+        <div class="plan">Mensuel</div>
+        <div class="price-row"><span class="price">9,99 €<small>/mois</small></span></div>
+        <p class="desc">Sans engagement. Tu arrêtes en un clic.</p>
+        <button class="btn">Commencer</button>
+      </article>
+
+      <article class="card card-star">
+        <div class="pop">Le plus populaire</div>
+        <div class="plan">Pass Permis · 3 mois</div>
+        <div class="price-row"><span class="price">24,99 €</span><span class="strike">29,97 €</span></div>
+        <div class="permo">≈ 8,33 €/mois — payé une fois, réglé.</div>
+        <p class="desc">L'offre « Objectif Permis en 90 jours » : le temps de préparer et de passer ton examen.</p>
+        <button class="btn btn-gold">Prendre le Pass 3 mois</button>
+      </article>
+
+      <article class="card">
+        <div class="plan">Pass 6 mois + bonus</div>
+        <div class="price-row"><span class="price">39,99 €</span><span class="strike">59,94 €</span></div>
+        <div class="permo">≈ 6,67 €/mois — la meilleure valeur.</div>
+        <p class="desc">Conduite accompagnée, ou permis sans pression.</p>
+        <button class="btn">Prendre le Pass 6 mois</button>
+      </article>
+
+      <div class="guarantee">
+        <div class="g-ico">🛡</div>
+        <div><b>Pré-vente 100 % remboursable</b>
+        <span>Tu changes d'avis ? Un message, on te rembourse. Sans question, sans délai.</span></div>
+      </div>
+      <p class="places">Prix fondateur · première promo · 20 places</p>
+    </section>
+
+    <section class="proof">
+      <div class="bar-lbl"><span>Entraînement régulier (accompagné)</span><i>75 %</i></div>
+      <div class="bar b1"><span></span></div>
+      <div class="bar-lbl"><span>Filière classique</span><i>58 %</i></div>
+      <div class="bar b2"><span></span></div>
+      <p class="src">Taux de réussite au permis B — Sécurité routière.</p>
+    </section>
+
+    <footer class="foot">Paiement sécurisé par Stripe · Remboursable sur simple demande<br>Mentions légales</footer>
+  </div>
+</div>
+</body>
+</html>
