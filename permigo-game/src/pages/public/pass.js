@@ -162,12 +162,13 @@ const STR = {
     successIntro: (label) =>
       `${label} réservé. Ton reçu et ta facture arrivent par email.`,
     successSteps: [
-      "<b>Ton accès arrive par email sous 24 h</b> — surveille ta boîte (et les spams).",
+      "<b>Crée ton compte maintenant</b> — 2 minutes, avec le même email que ton paiement → accès immédiat.",
       "<b>Installe l'app sur ton téléphone</b> pour recevoir les rappels de révision : iPhone → Safari → Partager → « Sur l'écran d'accueil ». Android → Chrome → menu ⋮ → « Installer l'application ».",
       "<b>Besoin d'aide ?</b> Écris-nous : on t'aide pas à pas.",
     ],
     successGuarantee: "Et bien sûr : satisfait ou remboursé pendant 3 jours.",
-    successCta: "Découvrir PermiGo",
+    successCta: "Ouvrir PermiGo",
+    successCtaSolo: "Créer mon compte — accès immédiat",
   },
   en: {
     login: "Log in",
@@ -302,12 +303,13 @@ const STR = {
     successIntro: (label) =>
       `${label} booked. Your receipt and invoice are on their way by email.`,
     successSteps: [
-      "<b>Your access arrives by email within 24 h</b> — keep an eye on your inbox (and spam).",
+      "<b>Create your account now</b> — 2 minutes, with the same email as your payment → instant access.",
       "<b>Install the app on your phone</b> to get revision reminders: iPhone → Safari → Share → “Add to Home Screen”. Android → Chrome → ⋮ menu → “Install app”.",
       "<b>Need help?</b> Message us — we'll walk you through it, step by step.",
     ],
     successGuarantee: "And of course: 3-day money-back guarantee.",
-    successCta: "Discover PermiGo",
+    successCta: "Open PermiGo",
+    successCtaSolo: "Create my account — instant access",
   },
 };
 
@@ -729,13 +731,14 @@ export async function mount(root) {
             ${L.successSteps.map((s) => `<div class="pv-step"><div>${s}</div></div>`).join("")}
           </div>
           <p class="pv-result-guarantee">${L.successGuarantee}</p>
-          <button class="pv-result-cta" id="pv-home" type="button">${L.successCta}</button>
+          <button class="pv-result-cta" id="pv-home" type="button">${me ? L.successCta : L.successCtaSolo}</button>
         </div>
         <footer class="pv-foot">${L.foot}</footer>
       </div>`;
     root.querySelectorAll(".pv-rev").forEach((el) => el.classList.add("in"));
     root.querySelector("#pv-home")?.addEventListener("click", () => {
-      location.hash = "#/";
+      // Invité → inscription élève solo (sans code moniteur) : accès immédiat.
+      location.hash = me ? "#/" : "#/rejoindre?solo=1";
     });
     return;
   }

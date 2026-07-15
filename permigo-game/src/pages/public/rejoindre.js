@@ -195,23 +195,26 @@ const STYLE = `<style>
 </style>`;
 
 export async function mount(root) {
-  track("signup.viewed", { from: "join_code" });
-
   // Pré-remplissage éventuel du code : #/rejoindre?code=PERMIS75
+  // Mode SOLO (#/rejoindre?solo=1) : élève sans moniteur (acheteurs du Pass
+  // Permis) — le code devient inutile, on le cache et on saute le rattachement.
   const hash = location.hash;
   const qIdx = hash.indexOf("?");
   const params = new URLSearchParams(qIdx >= 0 ? hash.slice(qIdx + 1) : "");
   const prefillCode = (params.get("code") || "").trim();
+  const solo = params.get("solo") === "1";
+
+  track("signup.viewed", { from: solo ? "pass_solo" : "join_code" });
 
   root.innerHTML = `${STYLE}
     <div class="sg">
       <div class="sg-card">
         <img class="sg-logo" src="/skins/avatars/permigo-badge-icon.png" alt="PermiGo" width="88" height="88" />
-        <h1 class="sg-title">Rejoins ton moniteur</h1>
-        <p class="sg-sub">Entre le code que ton moniteur t'a donné, puis crée ton compte.</p>
+        <h1 class="sg-title">${solo ? "Crée ton compte élève" : "Rejoins ton moniteur"}</h1>
+        <p class="sg-sub">${solo ? "2 minutes, et tu entres dans l'app. Si tu as pris un Pass, utilise le même email que ton paiement." : "Entre le code que ton moniteur t'a donné, puis crée ton compte."}</p>
         <div style="text-align:center"><span class="sg-role-badge">Élève</span></div>
 
-        <div class="sg-row">
+        <div class="sg-row" ${solo ? 'style="display:none"' : ""}>
           <label class="sg-label" for="sg-code">Code moniteur</label>
           <input class="sg-input sg-code-input" id="sg-code" type="text" autocomplete="off"
             autocorrect="off" autocapitalize="characters" spellcheck="false"
@@ -320,7 +323,7 @@ export async function mount(root) {
   let accountCreated = false; // permet de retenter sans recréer le compte
 
   const validate = () => {
-    const codeOk = codeValid && !codeChecking;
+    const codeOk = solo || (codeValid && !codeChecking);
     const emailOk = emailValid(emailEl.value);
     const prenomOk = prenomEl.value.trim().length >= 2;
     const nomOk = nomEl.value.trim().length >= 1;
@@ -457,10 +460,10 @@ export async function mount(root) {
         });
         if (authErr) throw authErr;
 
-        // 2. Rattache au moniteur via son code
-        const { error: joinErr } = await sb.rpc("join_moniteur_by_code", {
-          p_code: code,
-        });
+        // 2. Rattache au moniteur via son code (sauf inscription solo)
+        const { error: joinErr } = solo
+          ? { error: null }
+          : await sb.rpc("join_moniteur_by_code", { p_code: code });
         if (joinErr) {
           if (/invalid_code/i.test(joinErr.message || "")) {
             toast("Code moniteur invalide — revérifie-le.", "error", 4000);
@@ -520,7 +523,7 @@ export async function mount(root) {
 
       track("signup.completed", {
         role: "eleve",
-        from: "join_code",
+        from: solo ? "pass_solo" : "join_code",
         minor: !!consentToken,
       });
 
@@ -544,7 +547,7 @@ export async function mount(root) {
     }
   });
 
-  setTimeout(() => (prefillCode ? emailEl : codeEl).focus(), 100);
+  setTimeout(() => (solo || prefillCode ? emailEl : codeEl).focus(), 100);
 }
 
 // Moins de 15 ans (âge du consentement numérique en France)
