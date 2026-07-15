@@ -135,6 +135,42 @@ export function tapHaptic() {
   iosBuzz();
 }
 
+// ── Tick de DÉFILEMENT : un micro-cran tous les SCROLL_STEP px défilés
+//    (effet molette cliquetante), SILENCIEUX, anti-spam. À appeler depuis un
+//    listener scroll avec l'élément qui défile (page ou liste interne).
+const SCROLL_STEP = 72; // px défilés entre deux crans
+const SCROLL_MIN_MS = 90; // anti-mitraillette sur les flicks rapides
+const _scrollState = new WeakMap();
+let _lastScrollTick = 0;
+export function scrollHaptic(el) {
+  if (!el) return;
+  const x = el.scrollLeft || 0;
+  const y = el.scrollTop || 0;
+  const st = _scrollState.get(el);
+  if (!st) {
+    // Première mesure : on mémorise la position, pas de vibration.
+    _scrollState.set(el, { x, y, acc: 0 });
+    return;
+  }
+  st.acc += Math.abs(y - st.y) + Math.abs(x - st.x);
+  st.x = x;
+  st.y = y;
+  if (st.acc < SCROLL_STEP) return;
+  st.acc = 0;
+  const now = Date.now();
+  if (now - _lastScrollTick < SCROLL_MIN_MS) return;
+  _lastScrollTick = now;
+  if (reduced()) return;
+  if (HAS_VIBRATE) {
+    try {
+      navigator.vibrate(4);
+    } catch {
+      /* no-op */
+    }
+  }
+  iosBuzz();
+}
+
 // ── Vibration ESCALADÉE : n pulses (combo). Avec son de réussite.
 //    combo 1 → 1 pulse, combo 2 → 2 pulses, … (plafonné à 5).
 export function hapticPulses(n = 1) {

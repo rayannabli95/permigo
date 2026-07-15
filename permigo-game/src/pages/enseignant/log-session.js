@@ -602,16 +602,38 @@ function render() {
   wire();
 }
 
-function renderEleveDropdown() {
-  const el = eleveById(_eleve);
-  const open = _eleveDDOpen || !el;
-  const list = _query
+// Options du menu élève filtrées par _query (partagé entre le rendu complet
+// et le rafraîchissement à la frappe — voir refreshDdList()).
+function ddFiltered() {
+  return _query
     ? _eleves.filter((e) =>
         `${e.prenom || ""} ${e.nom || ""}`
           .toLowerCase()
           .includes(_query.toLowerCase()),
       )
     : _eleves;
+}
+
+function ddOptsHtml(list) {
+  return list.length === 0
+    ? `<div class="vs-empty">${_eleves.length === 0 ? "Aucun élève attitré pour l’instant." : "Aucun résultat pour cette recherche."}</div>`
+    : list
+        .map((e, i) => {
+          const sel = e.id === _eleve;
+          return `<button class="vs-dd-opt${sel ? " sel" : ""}" type="button" role="option" aria-selected="${sel}" data-eleve="${esc(e.id)}" style="animation-delay:${Math.min(i, 8) * 28}ms">
+              <span class="vs-dd-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 32)}</span>
+              <span class="vs-dd-name">${esc(fmtName(`${e.prenom || ""} ${e.nom || ""}`))}</span>
+              ${provenanceBadge(e.provenance)}
+              ${sel ? `<span class="vs-dd-check">${icon("check", { size: 15, strokeWidth: 2.8 })}</span>` : ""}
+            </button>`;
+        })
+        .join("");
+}
+
+function renderEleveDropdown() {
+  const el = eleveById(_eleve);
+  const open = _eleveDDOpen || !el;
+  const list = ddFiltered();
 
   const trigger = el
     ? `<span class="vs-dd-av">${renderUserAvatar({ avatar_url: el.avatar_url, prenom: el.prenom, nom: el.nom }, 34)}</span>
@@ -624,20 +646,7 @@ function renderEleveDropdown() {
          <input class="vs-search" id="vs-dd-search" type="search" placeholder="Chercher…" value="${esc(_query)}" autocomplete="off" aria-label="Chercher un élève"></div>`
       : "";
 
-  const opts =
-    list.length === 0
-      ? `<div class="vs-empty">${_eleves.length === 0 ? "Aucun élève attitré pour l’instant." : "Aucun résultat pour cette recherche."}</div>`
-      : list
-          .map((e, i) => {
-            const sel = e.id === _eleve;
-            return `<button class="vs-dd-opt${sel ? " sel" : ""}" type="button" role="option" aria-selected="${sel}" data-eleve="${esc(e.id)}" style="animation-delay:${Math.min(i, 8) * 28}ms">
-              <span class="vs-dd-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 32)}</span>
-              <span class="vs-dd-name">${esc(fmtName(`${e.prenom || ""} ${e.nom || ""}`))}</span>
-              ${provenanceBadge(e.provenance)}
-              ${sel ? `<span class="vs-dd-check">${icon("check", { size: 15, strokeWidth: 2.8 })}</span>` : ""}
-            </button>`;
-          })
-          .join("");
+  const opts = ddOptsHtml(list);
 
   return `
     ${open ? `<div class="vs-dd-backdrop" id="vs-dd-backdrop"></div>` : ""}
@@ -648,6 +657,33 @@ function renderEleveDropdown() {
       </button>
       <div class="vs-dd-panel">${search}<div class="vs-dd-list"${list.length ? ' role="listbox" aria-label="Choisir un élève"' : ""}>${opts}</div></div>
     </div>`;
+}
+
+// Rafraîchit uniquement la liste des résultats pendant la frappe : le champ
+// de recherche reste monté et garde le focus (voir le ⚠️ dans wire()).
+function refreshDdList() {
+  const listEl = _root.querySelector(".vs-dd-list");
+  if (!listEl) return;
+  const list = ddFiltered();
+  if (list.length) {
+    listEl.setAttribute("role", "listbox");
+    listEl.setAttribute("aria-label", "Choisir un élève");
+  } else {
+    listEl.removeAttribute("role");
+    listEl.removeAttribute("aria-label");
+  }
+  listEl.innerHTML = ddOptsHtml(list);
+  wireDdOpts();
+}
+
+function wireDdOpts() {
+  _root.querySelectorAll(".vs-dd-opt[data-eleve]").forEach((opt) => {
+    opt.addEventListener("click", () => {
+      _query = "";
+      haptic("select");
+      selectEleve(opt.dataset.eleve); // remet _eleveDDOpen=false + render
+    });
+  });
 }
 
 // Pastille de statut (icône + label) — le seul repère couleur
@@ -772,22 +808,14 @@ function wire() {
       render();
     }
   });
+  // ⚠️ À la frappe, ne re-rendre QUE la liste des résultats (jamais render()
+  // complet) : détruire puis re-focuser le champ fait refermer/rouvrir le
+  // clavier iOS à chaque lettre → gros « zoom » du viewport à chaque frappe.
   _root.querySelector("#vs-dd-search")?.addEventListener("input", (e) => {
     _query = e.target.value;
-    render();
-    const s = _root.querySelector("#vs-dd-search");
-    if (s) {
-      s.focus();
-      s.setSelectionRange(s.value.length, s.value.length);
-    }
+    refreshDdList();
   });
-  _root.querySelectorAll(".vs-dd-opt[data-eleve]").forEach((opt) => {
-    opt.addEventListener("click", () => {
-      _query = "";
-      haptic("select");
-      selectEleve(opt.dataset.eleve); // remet _eleveDDOpen=false + render
-    });
-  });
+  wireDdOpts();
 
   // ── Liste : tap = replier la catégorie, ou faire défiler le statut ──
   _root.querySelector(".vl")?.addEventListener("click", (e) => {
@@ -943,7 +971,9 @@ async function _maybeCelebrateMoniteurTier() {
     if (typeof count === "number") {
       const { maybeCelebrateTier } =
         await import("@/services/moniteur-tier-celebration.js");
-      await maybeCelebrateTier(count, { onCta: () => navigate("#/mon-blason") });
+      await maybeCelebrateTier(count, {
+        onCta: () => navigate("#/mon-blason"),
+      });
     }
   } catch (e) {
     console.warn("[valider-seance] tier celebrate failed", e);
