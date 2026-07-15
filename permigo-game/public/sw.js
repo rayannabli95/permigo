@@ -7,7 +7,7 @@
  *  - Pas de tracking, juste pour permettre l'install PWA sur iOS / Android.
  */
 
-const CACHE_NAME = "permigo-v6"; // bump = purge du vieux cache (captures showcase #447 sous les mêmes URLs)
+const CACHE_NAME = "permigo-v7"; // bump = purge du vieux cache (fix affichage Android : color-scheme + manifest)
 // Scope auto-detect : ex '/permigo-v7/' sur GitHub Pages, '/' en local
 const SCOPE = self.registration
   ? self.registration.scope
