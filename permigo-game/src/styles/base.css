@@ -140,8 +140,12 @@
   --z-toast:9999;
   --z-splash:10100;
 
-  /* Scheme info pour les form controls natifs */
-  color-scheme: light;
+  /* Scheme info pour les form controls natifs. « only » = opt-out explicite
+     de l'assombrissement forcé Android (Chrome « Assombrir les sites »,
+     Samsung Internet) quand la page se rend en clair — sans lui, le
+     navigateur repeint l'UI claire → couleurs décalées. Les blocs dark
+     ci-dessous repassent en `color-scheme: dark` et gardent la main. */
+  color-scheme: only light;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -201,6 +205,31 @@
     --s3:0 14px 40px rgba(0,0,0,.55), 0 4px 12px rgba(0,0,0,.35);
     --s4:0 28px 60px rgba(0,0,0,.6),  0 8px 22px rgba(0,0,0,.4);
     color-scheme: dark;
+  }
+}
+
+/* ─ Repli navigateurs sans color-mix() (WebView/Chrome Android < 111, mars
+   2023) : sans ça, les tokens dérivés de l'accent deviennent invalides à
+   l'usage → texte qui hérite du noir, fonds teintés transparents (« plein
+   d'erreurs d'affichage »). On fige des équivalents du violet par défaut :
+   un accent preset perd sa teinte dérivée sur ces vieux navigateurs, mais
+   rien ne casse. Les navigateurs modernes sautent tout ce bloc. ─ */
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+  :root {
+    --a-txt:#3f3994;                                  /* ≈ color-mix(#6c63ff 58%, #000) */
+    --ap:rgba(108,99,255,.09); --ag:rgba(108,99,255,.14);
+    --s-a:0 8px 24px -6px rgba(108,99,255,.45);
+    --s-a-lg:0 12px 32px -8px rgba(108,99,255,.60);
+  }
+  [data-theme="dark"] {
+    --a-txt:var(--a-lt, var(--a));
+    --ap:rgba(108,99,255,.15); --ag:rgba(108,99,255,.22);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]):not([data-theme="light"]) {
+      --a-txt:var(--a-lt, var(--a));
+      --ap:rgba(108,99,255,.15); --ag:rgba(108,99,255,.22);
+    }
   }
 }
 
