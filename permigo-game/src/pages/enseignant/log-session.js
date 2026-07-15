@@ -314,7 +314,7 @@ const STYLE = `<style>
 
   /* ── Écran succès après séance ── */
   .vs-success {
-    max-width: 480px; margin: 0 auto; padding: 44px 24px;
+    max-width: 480px; margin: 0 auto; padding: 30px 24px 40px;
     text-align: center; display: flex; flex-direction: column; align-items: center;
   }
   /* Médaillon trophée doré — moment de valeur (séance validée) + halo */
@@ -348,7 +348,7 @@ const STYLE = `<style>
   }
   .vs-success-count {
     font: 700 14px/1.3 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--ens-go, var(--grd)); margin-bottom: 22px;
+    color: var(--ens-go, var(--grd)); margin-bottom: 16px;
   }
   .vs-success-bar {
     width: 100%; max-width: 320px; height: 8px; background: var(--bo);
@@ -367,8 +367,39 @@ const STYLE = `<style>
   .vs-success-meta b { font-weight: 800; color: var(--ens-go, var(--adk)); }
   .vs-success-note {
     font: 500 13px/1.45 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-    color: var(--mu2); margin-bottom: 28px;
+    color: var(--mu2); margin: 8px 0 0;
   }
+  /* ── Ligne « compte-rendu envoyé » : un STATUT (déjà fait), pas une action ── */
+  .vs-cr2 {
+    width: 100%; max-width: 360px; margin: 20px 0 12px;
+    display: flex; align-items: center; gap: 10px; text-align: left;
+    background: color-mix(in srgb, var(--ens-go, #18a558) 7%, var(--su));
+    border: 1.5px solid color-mix(in srgb, var(--ens-go, #18a558) 24%, transparent);
+    border-radius: var(--ens-r, 14px); padding: 11px 12px;
+  }
+  .vs-cr2-ico {
+    width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ens-go, #18a558);
+    background: color-mix(in srgb, var(--ens-go, #18a558) 14%, var(--su));
+  }
+  .vs-cr2-txt { flex: 1; min-width: 0; }
+  .vs-cr2-t {
+    display: block; font: 700 13px/1.25 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
+    color: var(--ink);
+  }
+  .vs-cr2-s {
+    display: block; margin-top: 2px;
+    font: 500 11.5px/1.35 var(--ens-body, 'Inter'), sans-serif; color: var(--mu);
+  }
+  .vs-cr2-share {
+    flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
+    min-height: 38px; padding: 0 11px; border-radius: 10px;
+    border: 1.5px solid var(--bo); background: var(--su); color: var(--ink);
+    font: 700 12px/1 var(--ens-body, 'Inter'), sans-serif; cursor: pointer;
+    -webkit-tap-highlight-color: transparent; transition: background .12s;
+  }
+  .vs-cr2-share:active { background: var(--bg, #f4f6fb); }
   /* CTA retour arcade */
   .vs-success-done {
     width: 100%; max-width: 320px; min-height: 52px;
@@ -383,6 +414,12 @@ const STYLE = `<style>
   }
   .vs-success-done:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000); }
   .vs-success-done:focus-visible { outline: 3px solid var(--ens-go, var(--a)); outline-offset: 2px; }
+  /* Sortie discrète quand la carte révision est LE geste principal de l'écran */
+  .vs-success-done.is-quiet {
+    background: none; box-shadow: none; color: var(--mu);
+    border: 1.5px solid var(--bo); min-height: 46px; font-weight: 700;
+  }
+  .vs-success-done.is-quiet:active { transform: none; background: var(--su); }
   @media (prefers-reduced-motion: reduce) {
     .vs-success-check { animation: none; }
     .vs-success-fill { transition: none; }
@@ -391,7 +428,7 @@ const STYLE = `<style>
 
   /* ── Carte « Envoie une révision ciblée » (sur l'écran de succès) ── */
   .vs-revsugg {
-    width: 100%; max-width: 360px; margin: 4px 0 18px;
+    width: 100%; max-width: 360px; margin: 0 0 16px;
     text-align: left;
     background: var(--su); border: 1.5px solid var(--bo);
     border-radius: var(--ens-r, 16px); padding: 16px 16px 14px;
@@ -455,11 +492,6 @@ const STYLE = `<style>
   }
   .vs-revsugg-send:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--ens-go, #18a558) 60%, #000); }
   .vs-revsugg-send:disabled { opacity: .5; cursor: default; box-shadow: none; transform: none; }
-  .vs-revsugg-skip {
-    display: block; width: 100%; margin-top: 9px; padding: 6px;
-    background: none; border: 0; cursor: pointer;
-    font: 600 12.5px/1 var(--ens-body, 'Inter'), sans-serif; color: var(--mu);
-  }
   .vs-revsugg.is-sent { text-align: center; }
   .vs-revsugg-sent-msg {
     display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -1121,56 +1153,22 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes, crText) {
       crPoint,
       me?.nom,
     );
+  // Le compte-rendu est déjà parti tout seul → une LIGNE de statut suffit
+  // (le détail vient d'être coché par le moniteur il y a dix secondes).
   const crCard = `
-    <style>
-      .vs-cr { margin: 14px 0 0; text-align: left; background: #fff; border: 1px solid #e6e9ef; border-radius: 16px; padding: 14px 15px; box-shadow: 0 8px 22px -12px rgba(60,50,130,.35); }
-      .vs-cr-head { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; }
-      .vs-cr-ico { width: 38px; height: 38px; flex-shrink: 0; border-radius: 11px; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #4f46e5, #7c4dff); box-shadow: 0 6px 14px -6px rgba(79,70,229,.6); }
-      .vs-cr-title { font: 800 15px/1.15 'Manrope', 'Plus Jakarta Sans', sans-serif; color: #1a1c2e; }
-      .vs-cr-sub { font: 600 11.5px/1.45 'Inter', sans-serif; color: #5a6188; margin-top: 2px; }
-      .vs-cr-body { display: flex; flex-direction: column; gap: 6px; padding: 11px 12px; background: #f7f8fc; border-radius: 12px; margin-bottom: 12px; }
-      .vs-cr-line { display: flex; align-items: center; gap: 8px; font: 600 13px/1.3 'Inter', sans-serif; color: #2d3050; }
-      .vs-cr-line > svg { flex-shrink: 0; }
-      .vs-cr-line.ok > svg { color: #16a34a; }
-      .vs-cr-line.work { color: #b45309; }
-      .vs-cr-line.work > svg { color: #b45309; }
-      .vs-cr-prog { margin-top: 3px; font: 600 12px/1.3 'Inter', sans-serif; color: #5a6188; }
-      .vs-cr-prog b { color: #4f46e5; font-weight: 800; }
-      .vs-cr-sent { width: 100%; min-height: 46px; border-radius: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: #15803d; background: #ecfdf3; border: 1px solid #bbf7d0; font: 800 13.5px/1.2 'Inter', sans-serif; text-align: center; }
-      .vs-cr-share { width: 100%; margin-top: 8px; min-height: 42px; border: 1px solid #e6e9ef; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: #4f46e5; font: 700 12.5px/1 'Inter', sans-serif; background: #fff; transition: background .12s; }
-      .vs-cr-share:active { background: #f7f8fc; }
-    </style>
-    <section class="vs-cr">
-      <div class="vs-cr-head">
-        <div class="vs-cr-ico">${icon("file-text", { size: 18, strokeWidth: 2.2 })}</div>
-        <div>
-          <div class="vs-cr-title">Compte-rendu envoyé</div>
-          <div class="vs-cr-sub">${esc(prenom)} le voit tout de suite dans son appli.</div>
-        </div>
+    <section class="vs-cr2">
+      <div class="vs-cr2-ico">${icon("check-circle", { size: 17, strokeWidth: 2.4 })}</div>
+      <div class="vs-cr2-txt">
+        <span class="vs-cr2-t">Compte-rendu envoyé à ${esc(prenom)}</span>
+        <span class="vs-cr2-s">Reçu à l’instant dans son appli.</span>
       </div>
-      <div class="vs-cr-body">
-        ${
-          acquisNames.length
-            ? acquisNames
-                .slice(0, 4)
-                .map(
-                  (n) =>
-                    `<div class="vs-cr-line ok">${icon("check", { size: 14, strokeWidth: 3 })}<span>${esc(n)}</span></div>`,
-                )
-                .join("")
-            : `<div class="vs-cr-line"><span>Progression mise à jour</span></div>`
-        }
-        ${crPoint ? `<div class="vs-cr-line work">${icon("target", { size: 13, strokeWidth: 2.4 })}<span>À revoir : ${esc(crPoint)}</span></div>` : ""}
-        <div class="vs-cr-prog">Progression : <b>${totalAcquis}/${REMC_TOTAL}</b> · ${pct} %</div>
-      </div>
-      <div class="vs-cr-sent">${icon("check-circle", { size: 15, strokeWidth: 2.4 })} Envoyé automatiquement à ${esc(prenom)}</div>
-      <button class="vs-cr-share" id="vs-cr-share" type="button">${icon("share", { size: 14, strokeWidth: 2.2 })} Partager aussi (WhatsApp, parents)</button>
+      <button class="vs-cr2-share" id="vs-cr-share" type="button" title="Partager (WhatsApp, parents)">${icon("share", { size: 13, strokeWidth: 2.2 })} Partager</button>
     </section>`;
 
   const revCard = suggestions.length
     ? `<section class="vs-revsugg" id="vs-revsugg">
         <div class="vs-revsugg-h">Envoie une révision à ${esc(prenom)}</div>
-        <div class="vs-revsugg-sub">3 questions ciblées · à réviser entre deux leçons</div>
+        <div class="vs-revsugg-sub">Coche les points à réviser entre deux leçons</div>
         <div class="vs-revsugg-list">
           ${suggestions
             .map(
@@ -1187,7 +1185,6 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes, crText) {
             .join("")}
         </div>
         <button type="button" class="vs-revsugg-send" id="vs-revsugg-send">${icon("send", { size: 15, strokeWidth: 2.2 })} <span id="vs-revsugg-send-lbl">Envoyer la révision</span></button>
-        <button type="button" class="vs-revsugg-skip" id="vs-revsugg-skip">Plus tard</button>
       </section>`
     : "";
 
@@ -1200,10 +1197,10 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes, crText) {
         <div class="vs-success-count">${nNew} compétence${nNew > 1 ? "s" : ""} validée${nNew > 1 ? "s" : ""} aujourd’hui</div>
         <div class="vs-success-bar"><div class="vs-success-fill" style="width:0%"></div></div>
         <div class="vs-success-meta"><b>${totalAcquis}/${REMC_TOTAL}</b> compétences validées · ${pct} %</div>
-        <div class="vs-success-note">${complete ? `${esc(prenom)} est prêt·e pour l’examen.` : `${esc(prenom)} voit sa progression dans son appli.`}</div>
+        ${complete ? `<div class="vs-success-note">${esc(prenom)} est prêt·e pour l’examen.</div>` : ""}
         ${crCard}
         ${revCard}
-        <button class="vs-success-done" id="vs-success-done" type="button">${icon("users", { size: 16, strokeWidth: 2.2 })} Voir mes élèves</button>
+        <button class="vs-success-done${suggestions.length ? " is-quiet" : ""}" id="vs-success-done" type="button">${icon("users", { size: 16, strokeWidth: 2.2 })} Voir mes élèves</button>
       </div>
     </div>`;
 
@@ -1269,10 +1266,6 @@ function wireRevisionCard() {
       sendBtn.disabled = false;
       refresh();
     }
-  });
-
-  card.querySelector("#vs-revsugg-skip")?.addEventListener("click", () => {
-    card.remove();
   });
 
   refresh();
