@@ -4,6 +4,9 @@
 // Positionnement : "ton app à ton nom" + engagement élève + preuve/autorité.
 // CTA principal : "Créer mon compte" → #/creer-compte (self-serve 9,99€/mois).
 // CTA secondaire : formulaire "qu'on te montre" → table public.leads (insert anon).
+// Aparté élève : petite section « Pass Permis » (mini billet d'or, écho de la
+// DA « Ticket d'Or » de #/pass) + lien footer → #/pass. Discret : le funnel
+// moniteur reste le fil rouge de la page.
 // Monté par main.js quand !me et hash racine.
 // Cas particulier : un élève/moniteur déjà installé (PWA) dont la session a
 // expiré retombe ici → redirection directe vers #/login (il n'est pas un
@@ -309,6 +312,35 @@ export function mount(root) {
       </div>
     </section>
 
+    <!-- ── Aparté élève : Pass Permis (renvoi vers #/pass) ── -->
+    <section class="lp-eleve lp-rev" id="lp-eleve">
+      <div class="lp-eleve-inner">
+        <div class="lp-eleve-txt">
+          <div class="lp-eyebrow lp-eyebrow-gold">Pour les élèves</div>
+          <h2 class="lp-h2 lp-eleve-h2">Tu passes ton permis&nbsp;?</h2>
+          <p class="lp-eleve-sub">PermiGo bosse ta <strong>conduite</strong> entre les leçons — pas une énième app de code.</p>
+        </div>
+        <div class="lp-tik" aria-hidden="true">
+          <div class="lp-tik-main">
+            <div class="lp-tik-brand"><img src="${BADGE}" alt="" width="18" height="18" loading="lazy" decoding="async" />PERMIGO</div>
+            <div class="lp-tik-title">OBJECTIF PERMIS<br />EN 90 JOURS</div>
+            <div class="lp-tik-sub">Conduite · mini-jeux · examens blancs</div>
+          </div>
+          <div class="lp-tik-stub">
+            <span class="lp-tik-lbl">Billet Or<br />3 mois</span>
+            <span class="lp-tik-price">24,99&nbsp;€</span>
+            <span class="lp-tik-bar"></span>
+          </div>
+        </div>
+        <div class="lp-eleve-cta">
+          <button class="lp-btn lp-btn-gold lp-btn-lg" id="lp-pass-cta" type="button">
+            Découvrir le Pass Permis
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- ── Pricing ── -->
     <section class="lp-sec lp-sec-paper lp-pricing lp-rev" id="lp-pricing">
       <div class="lp-sec-inner">
@@ -387,6 +419,7 @@ export function mount(root) {
       <div class="lp-foot-brand"><img src="${BADGE}" alt="" width="22" height="22" loading="lazy" /> Permi<span class="g">Go</span></div>
       <div class="lp-foot-tag">L'outil du moniteur indépendant.</div>
       <div class="lp-foot-links">
+        <a href="#/pass" id="lp-pass-foot" class="lp-foot-pass">Élève&nbsp;? Découvre le Pass Permis →</a>
         <a href="#/legal" id="lp-legal">Mentions légales</a>
         <button class="lp-foot-login" id="lp-login2" type="button">Se connecter</button>
       </div>
@@ -503,6 +536,21 @@ export function mount(root) {
     e.preventDefault();
     location.hash = "#/legal";
     location.reload();
+  });
+
+  // ── Pass Permis (aparté élève → pré-vente #/pass) ──
+  // reload comme les autres navs sortantes : la landing est montée hors router.
+  const goPass = (from) => {
+    track("landing.cta_pass", { from });
+    location.hash = "#/pass";
+    location.reload();
+  };
+  root
+    .querySelector("#lp-pass-cta")
+    ?.addEventListener("click", () => goPass("section"));
+  root.querySelector("#lp-pass-foot")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    goPass("footer");
   });
 
   // ── Formulaire → leads ──
@@ -835,6 +883,56 @@ const STYLE = `<style>
   .lp-step h3 { font: 700 17px/1.25 'Plus Jakarta Sans'; margin: 0 0 6px; color: var(--lpInk); }
   .lp-step p { font: 400 14.5px/1.6 'Inter'; color: var(--lpMut); margin: 0; }
 
+  /* ── Aparté élève : Pass Permis (écho de la DA « Ticket d'Or » de #/pass) ── */
+  .lp-eleve { color: #fff; padding: 54px 22px 58px;
+    background: radial-gradient(90% 130% at 82% -10%, rgba(255,206,77,.16), transparent 55%),
+      linear-gradient(180deg, #1b1240 0%, #241a4d 100%); }
+  .lp-eleve-inner { max-width: 860px; margin: 0 auto; display: grid;
+    grid-template-columns: 1.05fr .95fr; grid-template-areas: 'txt tik' 'cta tik';
+    gap: 20px 48px; align-items: center; }
+  .lp-eleve-txt { grid-area: txt; }
+  .lp-eyebrow-gold { color: #ffce4d; justify-content: flex-start; }
+  .lp-eyebrow-gold::before, .lp-eyebrow-gold::after { border-top-color: rgba(255,206,77,.45); }
+  .lp-eleve-h2 { text-align: left; color: #fff; margin-bottom: 10px; }
+  .lp-eleve-sub { font: 400 16px/1.65 'Inter'; color: rgba(255,255,255,.66); margin: 0; max-width: 44ch; }
+  .lp-eleve-sub strong { color: #ffce4d; font-weight: 700; }
+  .lp-eleve-cta { grid-area: cta; }
+  .lp-btn-gold { color: #4a3300; text-shadow: 0 1px 0 rgba(255,255,255,.35);
+    background: linear-gradient(to bottom, #ffe08a, #ffce4d 55%, #e8a317);
+    box-shadow: 0 12px 26px -10px rgba(232,163,23,.55),
+      inset 0 1.5px 0 rgba(255,255,255,.55), inset 0 -2px 8px rgba(150,100,10,.35); }
+  .lp-btn-gold:hover { filter: brightness(1.05); transform: translateY(-1px); }
+  .lp-btn-gold:hover:active { transform: translateY(1px); }
+
+  /* Mini billet d'or — mêmes codes que #/pass : dégradé or, coins 20px,
+     perforation en pointillés, talon. Pur CSS, aucune image. */
+  .lp-tik { grid-area: tik; position: relative; display: flex; width: 100%; max-width: 350px;
+    margin: 0 auto; transform: rotate(-2.5deg); border-radius: 20px; overflow: hidden;
+    color: #3a2a05;
+    background:
+      radial-gradient(130% 100% at 18% -6%, rgba(255,255,255,.5), transparent 42%),
+      radial-gradient(90% 70% at 85% 110%, rgba(120,78,8,.35), transparent 55%),
+      linear-gradient(115deg, #f6d267 0%, #ffe9a8 22%, #eab63a 48%, #ffdf8a 70%, #d99c1e 100%);
+    box-shadow: inset 0 2.5px 0 rgba(255,255,255,.75), inset 0 -4px 8px rgba(122,85,16,.55),
+      0 3px 0 #a87c14, 0 18px 34px rgba(2,5,16,.5); }
+  .lp-tik::before { content: ''; position: absolute; top: 0; bottom: 0; right: 92px; width: 0;
+    border-left: 2.5px dashed rgba(58,42,5,.4); }
+  .lp-tik-main { flex: 1; min-width: 0; padding: 16px 12px 15px 18px; }
+  .lp-tik-stub { width: 92px; flex: none; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 6px; padding: 12px 6px; text-align: center; }
+  .lp-tik-brand { display: flex; align-items: center; gap: 6px;
+    font: 800 12.5px/1 'Baloo 2', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.4); }
+  .lp-tik-brand img { width: 18px; height: 18px; object-fit: contain;
+    filter: drop-shadow(0 1px 1px rgba(90,60,5,.5)); }
+  .lp-tik-title { font: 800 20px/1.08 'Baloo 2', sans-serif; margin: 8px 0 4px; letter-spacing: -.01em;
+    text-shadow: 0 1px 0 rgba(255,255,255,.45), 0 -1px 0 rgba(90,60,5,.3); }
+  .lp-tik-sub { font: 600 10.5px/1.4 'Inter', sans-serif; color: #6b520f; }
+  .lp-tik-lbl { font: 700 9px/1.35 'Inter', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #8a6a17; }
+  .lp-tik-price { font: 800 21px/1 'Baloo 2', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
+  .lp-tik-bar { width: 54px; height: 26px; border-radius: 3px; opacity: .85;
+    background: repeating-linear-gradient(90deg, #3a2a05 0 2px, transparent 2px 5px, #3a2a05 5px 6px, transparent 6px 10px);
+    box-shadow: 0 1px 0 rgba(255,255,255,.35); }
+
   /* ── Pricing ── */
   .lp-plan { position: relative; max-width: 380px; margin: 22px auto 0; background: #fff;
     border: 1.5px solid rgba(79,70,229,.35); border-radius: 24px; padding: 30px 26px 26px;
@@ -901,7 +999,10 @@ const STYLE = `<style>
   .lp-foot-brand { display: flex; align-items: center; gap: 8px; font: 800 17px/1 'Plus Jakarta Sans'; }
   .lp-foot-brand img { width: 22px; height: 22px; }
   .lp-foot-tag { font: 500 13px/1.4 'Inter'; color: rgba(255,255,255,.62); }
-  .lp-foot-links { display: flex; align-items: center; gap: 18px; margin-top: 6px; }
+  .lp-foot-links { display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 18px; margin-top: 6px; }
+  .lp-foot-pass { white-space: nowrap; }
+  .lp-foot-links a.lp-foot-pass:hover { color: #ffce4d; }
   .lp-foot-links a, .lp-foot-login { font: 600 13.5px/1 'Inter'; color: rgba(255,255,255,.6);
     background: none; border: 0; cursor: pointer; padding: 16px 6px; margin: -12px -6px; }
   .lp-foot-links a:hover, .lp-foot-login:hover { color: #fff; }
@@ -1001,6 +1102,12 @@ const STYLE = `<style>
     .lp-steps { gap: 30px; }
     .lp-bento { grid-template-columns: 1fr; }
     .lp-cell-7, .lp-cell-5 { grid-column: auto; }
+    .lp-eleve-inner { grid-template-columns: 1fr; grid-template-areas: 'txt' 'tik' 'cta';
+      gap: 26px; text-align: center; }
+    .lp-eleve-h2 { text-align: center; }
+    .lp-eleve-sub { margin-inline: auto; }
+    .lp-eyebrow-gold { justify-content: center; }
+    .lp-eleve-cta { display: flex; justify-content: center; }
   }
   @media (max-width: 460px) {
     .lp-row2 { grid-template-columns: 1fr; }
