@@ -88,6 +88,11 @@ async function boot() {
         const { mount } = await import("@/pages/public/pass.js");
         return mount(app);
       }
+      // Questionnaire de départ (résiliation / remboursement)
+      if (location.hash.startsWith("#/avis-depart")) {
+        const { mount } = await import("@/pages/public/avis-depart.js");
+        return mount(app);
+      }
       if (location.hash.startsWith("#/legal")) {
         const { mount } = await import("@/pages/common/legal.js");
         return mount(app);

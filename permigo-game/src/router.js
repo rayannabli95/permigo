@@ -68,6 +68,7 @@ const ROUTES = {
     // Pré-vente Pass Permis élève — page publique, accessible aussi connecté
     // (l'achat est alors rattaché au compte via le JWT).
     pass: () => import("@/pages/public/pass.js"),
+    "avis-depart": () => import("@/pages/public/avis-depart.js"),
     reviser: () => import("@/pages/eleve/reviser.js"),
     parcours: () => import("@/pages/eleve/parcours.js"),
     sessions: () => import("@/pages/eleve/session-confirmation.js"),
@@ -110,6 +111,7 @@ const ROUTES = {
     // Pré-vente Pass Permis élève — page publique, accessible aussi connecté
     // (l'achat est alors rattaché au compte via le JWT).
     pass: () => import("@/pages/public/pass.js"),
+    "avis-depart": () => import("@/pages/public/avis-depart.js"),
     aujourdhui: () => import("@/pages/enseignant/aujourdhui.js"),
     // Chantier nav simplifiée : « Mon blason » fusionne l'ancien hub Progression
     // (parcours-pro.js, retiré) + un aperçu Trophées + un aperçu Ligue de la
@@ -158,6 +160,7 @@ const ROUTES = {
     // Pré-vente Pass Permis élève — page publique, accessible aussi connecté
     // (l'achat est alors rattaché au compte via le JWT).
     pass: () => import("@/pages/public/pass.js"),
+    "avis-depart": () => import("@/pages/public/avis-depart.js"),
     pulse: () => import("@/pages/gerant/pulse.js"),
     equipe: () => import("@/pages/gerant/equipe.js"),
     eleves: () => import("@/pages/gerant/eleves.js"),
@@ -183,6 +186,7 @@ const ROUTES = {
     // Pré-vente Pass Permis élève — page publique, accessible aussi connecté
     // (l'achat est alors rattaché au compte via le JWT).
     pass: () => import("@/pages/public/pass.js"),
+    "avis-depart": () => import("@/pages/public/avis-depart.js"),
     messages: () => import("@/pages/common/messages.js"),
     legal: () => import("@/pages/common/legal.js"),
     dbg: () => import("@/pages/admin/debug.js"),
@@ -199,6 +203,7 @@ const ROUTE_TITLES = {
   default: "Accueil",
   ecole: "École",
   pass: "Pass Permis",
+  "avis-depart": "Ton avis",
   aujourdhui: "Aujourd'hui",
   parcours: "Parcours",
   "mon-blason": "Mon blason",
@@ -360,6 +365,8 @@ async function routePublic(app) {
   } else if (hash.startsWith("#/ecole/")) {
     arg = hash.replace("#/ecole/", "").split("?")[0];
     m = await import("@/pages/public/ecole.js");
+  } else if (hash.startsWith("#/avis-depart")) {
+    m = await import("@/pages/public/avis-depart.js");
   } else if (hash.startsWith("#/pass")) {
     m = await import("@/pages/public/pass.js");
   } else if (hash.startsWith("#/legal")) {

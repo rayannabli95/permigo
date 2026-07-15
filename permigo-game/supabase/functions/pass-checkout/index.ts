@@ -155,6 +155,9 @@ Deno.serve(async (req) => {
       // Toujours créer un customer : permet le rattachement au compte plus
       // tard (même email) + le remboursement en un clic côté dashboard.
       params.customer_creation = "always";
+      // Facture générée et envoyée après paiement (retour Rayan sur son achat
+      // réel : « 0 mail de confirmation ni facture »).
+      params.invoice_creation = { enabled: true };
     }
 
     const session = await stripe.checkout.sessions.create(params);
