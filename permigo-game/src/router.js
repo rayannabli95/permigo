@@ -65,6 +65,9 @@ const ROUTES = {
   eleve: {
     default: () => import("@/pages/eleve/accueil.js"),
     ecole: () => import("@/pages/public/ecole.js"),
+    // Pré-vente Pass Permis élève — page publique, accessible aussi connecté
+    // (l'achat est alors rattaché au compte via le JWT).
+    pass: () => import("@/pages/public/pass.js"),
     reviser: () => import("@/pages/eleve/reviser.js"),
     parcours: () => import("@/pages/eleve/parcours.js"),
     sessions: () => import("@/pages/eleve/session-confirmation.js"),
@@ -104,6 +107,9 @@ const ROUTES = {
   enseignant: {
     default: () => import("@/pages/enseignant/aujourdhui.js"),
     ecole: () => import("@/pages/public/ecole.js"),
+    // Pré-vente Pass Permis élève — page publique, accessible aussi connecté
+    // (l'achat est alors rattaché au compte via le JWT).
+    pass: () => import("@/pages/public/pass.js"),
     aujourdhui: () => import("@/pages/enseignant/aujourdhui.js"),
     // Chantier nav simplifiée : « Mon blason » fusionne l'ancien hub Progression
     // (parcours-pro.js, retiré) + un aperçu Trophées + un aperçu Ligue de la
@@ -149,6 +155,9 @@ const ROUTES = {
   gerant: {
     default: () => import("@/pages/gerant/cockpit.js"),
     ecole: () => import("@/pages/public/ecole.js"),
+    // Pré-vente Pass Permis élève — page publique, accessible aussi connecté
+    // (l'achat est alors rattaché au compte via le JWT).
+    pass: () => import("@/pages/public/pass.js"),
     pulse: () => import("@/pages/gerant/pulse.js"),
     equipe: () => import("@/pages/gerant/equipe.js"),
     eleves: () => import("@/pages/gerant/eleves.js"),
@@ -171,6 +180,9 @@ const ROUTES = {
     default: () => import("@/pages/gerant/owner.js"),
     ecoles: () => import("@/pages/gerant/owner.js"),
     ecole: () => import("@/pages/public/ecole.js"),
+    // Pré-vente Pass Permis élève — page publique, accessible aussi connecté
+    // (l'achat est alors rattaché au compte via le JWT).
+    pass: () => import("@/pages/public/pass.js"),
     messages: () => import("@/pages/common/messages.js"),
     legal: () => import("@/pages/common/legal.js"),
     dbg: () => import("@/pages/admin/debug.js"),
@@ -186,6 +198,7 @@ const ROUTES = {
 const ROUTE_TITLES = {
   default: "Accueil",
   ecole: "École",
+  pass: "Pass Permis",
   aujourdhui: "Aujourd'hui",
   parcours: "Parcours",
   "mon-blason": "Mon blason",
@@ -347,6 +360,8 @@ async function routePublic(app) {
   } else if (hash.startsWith("#/ecole/")) {
     arg = hash.replace("#/ecole/", "").split("?")[0];
     m = await import("@/pages/public/ecole.js");
+  } else if (hash.startsWith("#/pass")) {
+    m = await import("@/pages/public/pass.js");
   } else if (hash.startsWith("#/legal")) {
     m = await import("@/pages/common/legal.js");
   } else if (hash.startsWith("#/login")) {
