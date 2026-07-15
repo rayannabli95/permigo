@@ -504,6 +504,34 @@ const STYLE = `<style>
 .fiche-quiz-cta:active { transform: translateY(4px); box-shadow: 0 2px 0 #b85e00, 0 8px 16px -8px rgba(255,156,28,.7), inset 0 2px 0 rgba(255,255,255,.7); }
 .fiche-quiz-cta:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 
+/* CTA « Valider en autonomie » — élève SANS moniteur uniquement. Secondaire
+   (contour), sous le CTA doré, pour ne jamais laisser croire que c'est le
+   chemin normal (le moniteur reste la référence). */
+.fiche-self-cta {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: 8px 0 0; padding: 13px 14px; min-height: 46px;
+  border: 1.5px dashed rgba(168,85,247,.5); border-radius: 14px; cursor: pointer;
+  text-decoration: none; -webkit-tap-highlight-color: transparent;
+  font: 700 12.5px/1.3 'Inter',sans-serif; color: #cdbff5;
+  background: rgba(124,77,255,.1);
+  transition: transform .12s var(--ease-snap), background .12s var(--ease-snap);
+}
+.fiche-self-cta svg { color: #cdbff5; flex-shrink: 0; }
+.fiche-self-cta:active { transform: scale(.98); background: rgba(124,77,255,.16); }
+.fiche-self-cta:focus-visible { outline: 2px solid #cdbff5; outline-offset: 2px; }
+.prc-cv.is-light .fiche-self-cta { color: #5a2fa0; background: rgba(124,77,255,.08); border-color: rgba(124,77,255,.35); }
+.prc-cv.is-light .fiche-self-cta svg { color: #5a2fa0; }
+
+/* Badge « Auto-validée » — distinct d'une validation moniteur (jamais vert
+   uni ni « par {prénom} ») */
+.fiche-auto-pill {
+  display: inline-flex; align-items: center; margin-left: 6px;
+  padding: 2px 8px; border-radius: 99px;
+  font: 800 9.5px/1.6 'Inter',sans-serif; letter-spacing: .04em; text-transform: uppercase;
+  background: rgba(124,77,255,.18); color: #cdbff5; vertical-align: middle;
+}
+.prc-cv.is-light .fiche-auto-pill { background: rgba(124,77,255,.12); color: #5a2fa0; }
+
 /* ── Accessibilité : focus clavier visible ── */
 .chest-card:focus-visible,
 .fiche-close:focus-visible {
@@ -1457,6 +1485,43 @@ export async function mount(root) {
     }
   }
 
+  // ── Validation autonome (élève SANS moniteur, pré-vente Pass Permis) ──
+  // Compétences validées par un quiz ≥80% via self_validate_competence,
+  // dans une table SÉPARÉE de `validations` (source de vérité moniteur) —
+  // aucune ligne n'est jamais attribuée à un enseignant. On les fusionne ici
+  // EN LECTURE SEULE dans la carte de progression (débloque mondes/étapes
+  // exactement comme une validation moniteur), sans jamais écraser une
+  // validation moniteur déjà présente. `hasMoniteur` gate l'affichage du
+  // bouton « Valide-la ici » dans la fiche (cf. openFiche).
+  let hasMoniteur = true; // défaut sûr : cache la fonctionnalité si la requête échoue
+  try {
+    const [moiRes, selfValRes] = await Promise.allSettled([
+      sb.from("profiles").select("enseignant_id").eq("id", me.id).maybeSingle(),
+      sb
+        .from("self_validations")
+        .select("competence_id, score, validated_at")
+        .eq("eleve_id", me.id),
+    ]);
+    if (moiRes.status === "fulfilled" && !moiRes.value.error) {
+      hasMoniteur = !!moiRes.value.data?.enseignant_id;
+    }
+    if (selfValRes.status === "fulfilled" && !selfValRes.value.error) {
+      for (const s of selfValRes.value.data || []) {
+        if (!validatedMap[s.competence_id]) {
+          validatedMap[s.competence_id] = {
+            validated_at: s.validated_at,
+            teacherName: null,
+            score_cognitif: s.score ?? null,
+            score_consolidation: null,
+            source: "auto",
+          };
+        }
+      }
+    }
+  } catch (_) {
+    /* best-effort — la fonctionnalité solo se cache simplement en cas d'erreur */
+  }
+
   const worldStates = computeWorldStates(validatedMap);
 
   // Coffres : l'état « ouvert » est la source de vérité DB
@@ -1564,6 +1629,7 @@ export async function mount(root) {
           worldStates[worldIdx],
           validatedMap,
           pendingMap,
+          hasMoniteur,
         );
         track("parcours.node_tap", { compId, worldIdx, view: "chapitre" });
       };
@@ -1591,6 +1657,7 @@ export async function mount(root) {
             worldStates[worldIdx],
             validatedMap,
             pendingMap,
+            hasMoniteur,
           );
           track("parcours.node_tap", {
             compId,
@@ -2413,7 +2480,7 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
     enableSheetSwipe(sheet, closeFn, { overlay: bg, direction: "down" });
 }
 
-function openFiche(root, compId, ws, validatedMap, pendingMap) {
+function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
   const { idx, cat, status, nextChallenge } = ws;
   const meta = WORLDS_META[idx];
   const world = WORLDS[idx];
@@ -2468,8 +2535,34 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
       ${icon("zap", { size: 16 })} Révise cette compétence
     </a>`;
 
+  // Validation autonome : uniquement pour un élève SANS moniteur rattaché
+  // (pré-vente Pass Permis). Sans ce chemin, son parcours resterait bloqué
+  // à vie — `validations` n'est écrite que par un enseignant/gérant.
+  const selfValidateBtn = !hasMoniteur
+    ? `
+    <a href="#/valider-seul/${esc(compId)}" role="button" class="fiche-self-cta">
+      ${icon("shield", { size: 15 })} Ton moniteur te l'a validée en leçon ? Valide-la ici.
+    </a>`
+    : "";
+
   // Bloc status contextuel selon état
   const statusBlock = (() => {
+    if (st === "done" && val?.source === "auto") {
+      // Validée en autonomie (élève solo, sans moniteur) : badge distinct,
+      // jamais confondu avec une validation moniteur.
+      const scoreTxt =
+        val.score_cognitif != null
+          ? ` (quiz : ${Math.round(val.score_cognitif)}%)`
+          : "";
+      return `
+        <div class="fiche-status done fiche-status-auto">
+          <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
+          <div class="fiche-status-body">
+            <div class="fiche-status-title">Compétence acquise <span class="fiche-auto-pill">Auto-validée</span></div>
+            <div class="fiche-status-sub">${esc(`Tu as validé cette compétence toi-même${scoreTxt}, après avoir réussi le quiz de validation.`)}</div>
+          </div>
+        </div>${recapBtn}`;
+    }
     if (st === "done" && val) {
       const dateStr = val.validated_at
         ? new Date(val.validated_at).toLocaleDateString("fr-FR", {
@@ -2521,7 +2614,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
             <div class="fiche-status-title">Prochaine à travailler</div>
             <div class="fiche-status-sub">Entraîne-toi en séance — ton moniteur la validera quand tu es prêt(e).</div>
           </div>
-        </div>${reviseBtn}`;
+        </div>${reviseBtn}${selfValidateBtn}`;
     }
     if (st === "locked") {
       return `
@@ -2540,7 +2633,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap) {
           <div class="fiche-status-title">À venir</div>
           <div class="fiche-status-sub">Tu travailleras cette compétence avec ton moniteur au fil des séances.</div>
         </div>
-      </div>${reviseBtn}`;
+      </div>${reviseBtn}${selfValidateBtn}`;
   })();
 
   const body =

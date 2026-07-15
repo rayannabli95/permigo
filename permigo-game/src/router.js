@@ -84,6 +84,10 @@ const ROUTES = {
     // comptes-rendus), ouverte depuis l'étape ② du hub.
     "mon-permis": () => import("@/pages/eleve/mon-permis.js"),
     "mes-lecons": () => import("@/pages/eleve/mes-lecons.js"),
+    // Validation autonome (élève SANS moniteur, pré-vente Pass Permis) :
+    // CTA depuis la fiche compétence de `parcours.js` (openFiche), route
+    // #/valider-seul/{compId}.
+    "valider-seul": () => import("@/pages/eleve/valider-seul.js"),
     examen: () => import("@/pages/eleve/examen.js"),
     "centre-examen": () => import("@/pages/eleve/centre-examen.js"),
     feedback: () => import("@/pages/eleve/feedback.js"),
@@ -222,6 +226,7 @@ const ROUTE_TITLES = {
   roue: "La Roue",
   "mon-permis": "Mon permis",
   "mes-lecons": "Mes leçons",
+  "valider-seul": "Valider en autonomie",
   examen: "Examen",
   "exam-blanc": "Examen blanc du code",
   "revision-conduite": "Révision conduite",
