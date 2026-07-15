@@ -379,8 +379,9 @@ async function routePublic(app) {
   } else if (hash.startsWith("#/login")) {
     m = await import("@/pages/auth/login.js");
   } else {
-    // Défaut visiteur = landing / page de vente
-    m = await import("@/pages/public/landing.js");
+    // Défaut visiteur = page de vente Pass Permis (l'ancienne landing
+    // moniteur est supprimée — décision Rayan 16/07/2026).
+    m = await import("@/pages/public/pass.js");
   }
   // Démonte la page précédente (ex: rAF d'animation du fond de login) avant de
   // monter la nouvelle page publique.

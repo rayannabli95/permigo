@@ -102,8 +102,9 @@ async function boot() {
         const { mount } = await import("@/pages/auth/login.js");
         return mount(app);
       }
-      // Défaut visiteur = landing / page de vente
-      const { mount } = await import("@/pages/public/landing.js");
+      // Défaut visiteur = page de vente Pass Permis (ancienne landing
+      // moniteur supprimée — décision Rayan 16/07/2026).
+      const { mount } = await import("@/pages/public/pass.js");
       return mount(app);
     }
 
