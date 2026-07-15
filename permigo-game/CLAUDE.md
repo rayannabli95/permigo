@@ -72,7 +72,7 @@ Chaque rôle a son univers. **Côté moniteur : liberté totale** (aucune règle
 ## 🔒 Règles non-négociables (les seules qui restent)
 
 1. **Pas de planning / réservation** — PermiGo n'est pas Doctolib. L'élève voit son **crédit d'heures** ; il prend RDV en dehors de l'app.
-2. **Pas de données perso élève** — jamais de téléphone, adresse, NEPH, ni **paiement élève**. (L'email d'auth de l'élève est OK ; l'**abonnement moniteur via Stripe est OK** — c'est le produit.)
+2. **Pas de données perso élève** — jamais de téléphone, adresse, NEPH, ni **paiement élève**. (L'email d'auth de l'élève est OK ; l'**abonnement moniteur via Stripe est OK** — c'est le produit. **Exception** : la pré-vente « Pass Permis » élève via `#/pass` / `pass-checkout` — test de demande décidé le 15/07/2026, cf. Monétisation.)
 3. **Sécurité** :
    - **XSS** : toute donnée user injectée en `innerHTML` passe par **`esc()`** (`src/utils/escape.js`). _(`richEsc()` = variante du quizz qui gère le **gras** — elle vit dans `src/components/eleve/quiz-ui.js`, pas dans escape.js.)_
    - **RLS activée sur TOUTES les tables** (schema public, aucune exception).
@@ -89,7 +89,8 @@ Chaque rôle a son univers. **Côté moniteur : liberté totale** (aucune règle
 ## 💳 Monétisation
 
 - **Abonnement moniteur 9,99 €/mois** via **Stripe** (en place, en test — passage live à finaliser). C'est LE modèle.
-- **PermiGo+ élève** (~4,99 €/mois, optionnel, résiliable, zéro commission moniteur) = **gelé** (idée gardée, non prioritaire).
+- **Pré-vente « Pass Permis » ÉLÈVE (test de demande, lancé le 15/07/2026)** : page publique `#/pass` — 3 paliers (mensuel 9,99 €/mois · Pass 3 mois 24,99 € ⭐ cible · Pass 6 mois 39,99 €), pré-commande 100 % remboursable. Circuit : edge function `pass-checkout` (prix inline, marche invité ou connecté) → webhook → table `pass_purchases`. **Objectif : 5 payeurs réels.** ⚠️ Ce test lève l'interdit « pas de paiement élève » de la règle #2 — uniquement via ce circuit.
+- **PermiGo+ élève** (~4,99 €/mois, optionnel, résiliable, zéro commission moniteur) = **gelé** (remplacé par le test Pass Permis ci-dessus).
 - Offre « auto-école / per-seat » = **option lointaine**, jamais mise en avant.
 
 ---

@@ -24,6 +24,23 @@ export async function startCheckout() {
 }
 
 /**
+ * Pré-vente Pass Permis ÉLÈVE : lance le Checkout du palier choisi.
+ * Marche connecté (JWT user → achat rattaché au compte) comme invité
+ * (supabase-js envoie l'anon key → Stripe collecte l'email).
+ * @param {'mensuel'|'pass3'|'pass6'} plan
+ * @returns {Promise<void>} redirige la page si succès ; throw sinon.
+ */
+export async function startPassCheckout(plan) {
+  const { data, error } = await sb.functions.invoke("pass-checkout", {
+    body: { plan },
+  });
+  if (error) throw error;
+  const url = data?.url;
+  if (!url) throw new Error("checkout_url_missing");
+  window.location.href = url;
+}
+
+/**
  * Lit l'abonnement de l'utilisateur courant (RLS : il ne voit que le sien).
  * @returns {Promise<{status:string,current_period_end:string|null,cancel_at_period_end:boolean}|null>}
  */

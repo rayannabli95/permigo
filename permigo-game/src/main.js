@@ -83,6 +83,11 @@ async function boot() {
         const { mount } = await import("@/pages/public/ecole.js");
         return mount(app, slug);
       }
+      // Pré-vente Pass Permis élève (lien partageable : /#/pass)
+      if (location.hash.startsWith("#/pass")) {
+        const { mount } = await import("@/pages/public/pass.js");
+        return mount(app);
+      }
       if (location.hash.startsWith("#/legal")) {
         const { mount } = await import("@/pages/common/legal.js");
         return mount(app);

@@ -87,6 +87,44 @@ Deno.serve(async (req) => {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+        // Pré-vente Pass Permis élève : toute session portant
+        // metadata.permigo_plan (posée par pass-checkout) est enregistrée dans
+        // pass_purchases — one-shot (pass3/pass6) comme abo (mensuel), invité
+        // (user_id null, email Stripe) comme connecté. Le flow moniteur
+        // (stripe-checkout) ne pose pas cette metadata → inchangé.
+        if (session.metadata?.permigo_plan) {
+          const row = {
+            email:
+              session.customer_details?.email ?? session.customer_email ?? null,
+            user_id: session.client_reference_id ?? null,
+            plan: session.metadata.permigo_plan,
+            amount_cents: session.amount_total ?? 0,
+            currency: session.currency ?? "eur",
+            stripe_session_id: session.id,
+            stripe_payment_intent:
+              typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : (session.payment_intent?.id ?? null),
+            stripe_customer_id:
+              typeof session.customer === "string"
+                ? session.customer
+                : (session.customer?.id ?? null),
+            stripe_subscription_id:
+              typeof session.subscription === "string"
+                ? session.subscription
+                : (session.subscription?.id ?? null),
+            status: "paid",
+            preorder: session.metadata.preorder === "true",
+          };
+          const { error } = await admin
+            .from("pass_purchases")
+            .upsert(row, { onConflict: "stripe_session_id" });
+          if (error) {
+            console.error("[stripe-webhook] pass_purchases upsert", error);
+            // throw → 500 → Stripe re-tente (même auto-healing que subscriptions).
+            throw new Error(`pass upsert failed: ${error.message}`);
+          }
+        }
         if (session.subscription) {
           const sub = await stripe.subscriptions.retrieve(
             session.subscription as string,
@@ -105,6 +143,27 @@ Deno.serve(async (req) => {
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         await upsertFromSubscription(admin, event.data.object);
+        break;
+      }
+      // Pré-vente remboursable : un remboursement (dashboard Stripe) marque la
+      // ligne pass_purchases correspondante. Ne matche rien pour les paiements
+      // hors Pass → no-op.
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        const pi =
+          typeof charge.payment_intent === "string"
+            ? charge.payment_intent
+            : charge.payment_intent?.id;
+        if (pi) {
+          const { error } = await admin
+            .from("pass_purchases")
+            .update({ status: "refunded" })
+            .eq("stripe_payment_intent", pi);
+          if (error) {
+            console.error("[stripe-webhook] refund update", error);
+            throw new Error(`refund update failed: ${error.message}`);
+          }
+        }
         break;
       }
       default:
