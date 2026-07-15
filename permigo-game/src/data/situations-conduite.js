@@ -20,6 +20,10 @@
 //     vehicules : [{ id, at:branche, d:distance, lane?, couleur, type?, clign?, tourne?, label? }]
 //                 ou { id, angle:degrés } si le véhicule est sur l'anneau
 //                 (lane? = décalage latéral de voie, ex. entrée à 2 files)
+//                 (label? accepte aussi un emoji, ex. « 🚒 Pompiers » pour un
+//                 véhicule prioritaire — même mécanique que le badge « Toi »)
+//     ligne     : 'continue' sur une scène 'route' → ligne d'axe continue
+//                 (au lieu des pointillés), pour les scénarios dépassement
 //   question    : question courte au tutoiement
 //   mode        : 'cartes' (2-4 cartes-réponses) | 'cible' (taper le véhicule)
 //   reponses    : [{ id, label, ico?, veh? }] — veh = id du véhicule (mode cible)
@@ -39,6 +43,9 @@ export const THEME_LABELS = {
   feu: "Feux",
   pieton: "Piétons",
   croisement: "Croisements",
+  distance: "Distances de sécurité",
+  depassement: "Dépassement",
+  prioritaire: "Véhicules prioritaires",
 };
 
 // Thème du jeu → thèmes « Mes fautes » (TAG_LABELS de utils/weak-points.js).
@@ -51,6 +58,9 @@ export const THEME_WEAK_TAGS = {
   feu: ["signalisation"],
   pieton: ["pieton"],
   croisement: ["priorite"],
+  distance: ["vitesse"],
+  depassement: ["signalisation"],
+  prioritaire: ["priorite"],
 };
 
 export const SITUATIONS = [
@@ -390,6 +400,325 @@ export const SITUATIONS = [
     bonne: "ralentis",
     explication:
       "Sans visibilité, une voiture peut surgir de ta droite — et elle serait prioritaire. Tu ralentis et tu contrôles avant de passer.",
+  },
+
+  // ── Priorité à droite (suite) ────────────────────────────────
+  {
+    id: "prio-droite-moto",
+    theme: "priorite-droite",
+    difficulte: 2,
+    alt: "Croisement sans panneau ni feu. Un motard arrive par ta droite.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "v1", at: "E", d: 1.85, couleur: "moto", type: "moto" },
+      ],
+    },
+    question: "Un motard arrive par ta droite. Qui passe en premier ?",
+    mode: "cible",
+    reponses: [
+      { id: "v1", veh: "v1", label: "Le motard" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "v1",
+    explication:
+      "La priorité à droite s'applique de la même façon à tous les véhicules. Le motard vient de ta droite : il passe en premier, comme le ferait une voiture.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 950 }],
+  },
+
+  // ── Cédez le passage (suite) ─────────────────────────────────
+  {
+    id: "cede-route-degagee",
+    theme: "cede",
+    difficulte: 1,
+    alt: "Un panneau cédez-le-passage à ton intersection. La route est dégagée, aucune voiture en vue.",
+    scene: {
+      kind: "croisement",
+      signal: { type: "cede", branch: "S" },
+      vehicules: [
+        { id: "moi", at: "S", d: 1.8, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question: "La route est dégagée au cédez-le-passage. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "ralentis",
+        label: "Je ralentis, j'observe, puis je passe",
+        ico: "🐢",
+      },
+      {
+        id: "arret",
+        label: "Je m'arrête complètement, comme au stop",
+        ico: "🛑",
+      },
+      { id: "vitesse", label: "Je garde ma vitesse, c'est dégagé" },
+    ],
+    bonne: "ralentis",
+    explication:
+      "Cédez le passage n'oblige pas à un arrêt complet, contrairement au stop : tu ralentis, tu regardes, et tu t'engages si la voie est libre.",
+    okAnim: [{ veh: "moi", delai: 600 }],
+  },
+
+  // ── Stop (suite) ─────────────────────────────────────────────
+  {
+    id: "stop-voiture-croise",
+    theme: "stop",
+    difficulte: 2,
+    alt: "Panneau stop à ton intersection. Une voiture arrive sur la route prioritaire, par ta droite.",
+    scene: {
+      kind: "croisement",
+      signal: { type: "stop", branch: "S" },
+      vehicules: [
+        { id: "moi", at: "S", d: 1.7, couleur: "joueur", label: "Toi" },
+        { id: "v1", at: "E", d: 1.9, couleur: "bleu" },
+      ],
+    },
+    question:
+      "Tu es au stop. Une voiture arrive sur la route prioritaire. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "arret_laisse",
+        label: "Arrêt complet, puis je la laisse passer",
+        ico: "🛑",
+      },
+      { id: "arret_passe", label: "Arrêt complet, puis je passe avant elle" },
+      { id: "ralentis", label: "Je ralentis fort sans m'arrêter", ico: "🐢" },
+    ],
+    bonne: "arret_laisse",
+    explication:
+      "Au stop, tu marques toujours un arrêt complet — et la route que tu croises reste prioritaire : tu laisses passer les véhicules qui y roulent avant de t'engager.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 900 }],
+  },
+
+  // ── Giratoire (suite) ────────────────────────────────────────
+  {
+    id: "giratoire-sortie-incertaine",
+    theme: "giratoire",
+    difficulte: 2,
+    alt: "Une voiture roule sur l'anneau du giratoire, clignotant droit allumé, mais elle n'est pas encore sortie.",
+    scene: {
+      kind: "giratoire",
+      signal: { type: "giratoire", branch: "S" },
+      vehicules: [
+        { id: "moi", at: "S", d: 2.6, couleur: "joueur", label: "Toi" },
+        { id: "v1", angle: 195, couleur: "rouge", clign: "droit" },
+      ],
+    },
+    question:
+      "Elle a mis son clignotant droit mais elle est toujours sur l'anneau. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "cede",
+        label: "Je continue de céder, elle n'est pas encore sortie",
+        ico: "✋",
+      },
+      { id: "engage", label: "Je m'engage, elle va sortir devant moi" },
+      { id: "accel", label: "J'accélère pour passer avant elle", ico: "⚡" },
+    ],
+    bonne: "cede",
+    explication:
+      "Un clignotant ne garantit rien : tant qu'elle roule sur l'anneau, elle est prioritaire. Tu attends qu'elle soit vraiment sortie pour t'engager.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 900 }],
+  },
+  {
+    id: "giratoire-file-cede",
+    theme: "giratoire",
+    difficulte: 3,
+    alt: "Entrée de giratoire à deux files. Tu es dans la file de droite pour sortir tout de suite. Une voiture roule déjà sur l'anneau, à ta gauche.",
+    scene: {
+      kind: "giratoire",
+      signal: { type: "giratoire", branch: "S" },
+      lanes2: "S",
+      vehicules: [
+        {
+          id: "moi",
+          at: "S",
+          d: 3.15,
+          lane: 0.87,
+          couleur: "joueur",
+          label: "Toi",
+        },
+        { id: "v1", angle: 195, couleur: "jaune" },
+      ],
+    },
+    question:
+      "Tu es en file de droite pour sortir tout de suite. Une voiture roule sur l'anneau. Qui passe ?",
+    mode: "cible",
+    reponses: [
+      { id: "v1", veh: "v1", label: "La voiture jaune" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "v1",
+    explication:
+      "Peu importe ta file d'entrée : tout véhicule déjà engagé sur l'anneau reste prioritaire. Tu cèdes avant de t'engager, même pour sortir tout de suite.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 900 }],
+  },
+
+  // ── Feux (suite) ─────────────────────────────────────────────
+  {
+    id: "feu-vert-pieton-attarde",
+    theme: "feu",
+    difficulte: 2,
+    alt: "Le feu passe au vert mais un piéton n'a pas fini de traverser le passage devant toi.",
+    scene: {
+      kind: "route",
+      passage: "N",
+      pieton: { engage: true },
+      signal: { type: "feu", etat: "vert", branch: "S" },
+      vehicules: [
+        { id: "moi", at: "S", d: 2.4, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question:
+      "Le feu passe au vert, mais un piéton termine de traverser. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "attends", label: "Je m'arrête, il n'a pas terminé", ico: "🛑" },
+      { id: "demarre", label: "Je démarre, j'ai le feu vert" },
+      {
+        id: "klaxonne",
+        label: "Je klaxonne pour le faire accélérer",
+        ico: "📢",
+      },
+    ],
+    bonne: "attends",
+    explication:
+      "Le feu vert ne t'autorise pas à rouler si un piéton est encore engagé sur le passage. Tu attends qu'il ait fini de traverser.",
+    focus: { pieton: true },
+    okAnim: [],
+  },
+
+  // ── Croisements (suite) ──────────────────────────────────────
+  {
+    id: "croisement-tourne-gauche-toi",
+    theme: "croisement",
+    difficulte: 3,
+    alt: "Croisement sans signalisation. Tu veux tourner à gauche ; une voiture arrive en face et continue tout droit.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        {
+          id: "moi",
+          at: "S",
+          d: 1.9,
+          couleur: "joueur",
+          label: "Toi",
+          clign: "gauche",
+        },
+        { id: "v1", at: "N", d: 1.75, couleur: "bleu" },
+      ],
+    },
+    question:
+      "Tu veux tourner à gauche, une voiture arrive en face tout droit. Qui passe en premier ?",
+    mode: "cible",
+    reponses: [
+      { id: "v1", veh: "v1", label: "La voiture bleue" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "v1",
+    explication:
+      "Quand tu tournes à gauche, tu coupes la trajectoire de la voiture qui vient en face : c'est toi qui cèdes. Elle passe d'abord.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 950 }],
+  },
+
+  // ── Distances de sécurité ────────────────────────────────────
+  {
+    id: "distance-securite-2s",
+    theme: "distance",
+    difficulte: 2,
+    alt: "Ligne droite. Tu roules juste derrière une voiture grise, très proche d'elle.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "lead", at: "S", d: 1.35, couleur: "gris" },
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question:
+      "Tu roules collé à la voiture qui te précède. Que dois-tu faire ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "ecart",
+        label: "Je laisse au moins 2 secondes d'écart",
+        ico: "🐢",
+      },
+      { id: "colle", label: "Je reste collé pour garder ma place" },
+      { id: "double", label: "Je double dès que je peux", ico: "⚡" },
+    ],
+    bonne: "ecart",
+    explication:
+      "La règle des 2 secondes : compte le temps entre son passage et le tien à un repère fixe. En dessous, tu es trop près pour freiner à temps.",
+    okAnim: [{ veh: "lead" }, { veh: "moi", delai: 200 }],
+  },
+
+  // ── Dépassement ──────────────────────────────────────────────
+  {
+    id: "depassement-ligne-continue",
+    theme: "depassement",
+    difficulte: 2,
+    alt: "Ligne continue au sol. Une voiture grise roule lentement devant toi, une autre arrive en face.",
+    scene: {
+      kind: "route",
+      ligne: "continue",
+      vehicules: [
+        { id: "lead", at: "S", d: 1.35, couleur: "gris" },
+        { id: "moi", at: "S", d: 2.0, couleur: "joueur", label: "Toi" },
+        { id: "face", at: "N", d: 2.6, couleur: "rouge" },
+      ],
+    },
+    question:
+      "Ligne continue, une voiture roule lentement devant toi. Peux-tu la dépasser ?",
+    mode: "cartes",
+    reponses: [
+      { id: "non", label: "Non, la ligne continue interdit de doubler" },
+      { id: "oui_rapide", label: "Oui, si je double vite", ico: "⚡" },
+      { id: "oui_personne", label: "Oui, personne n'arrive de près" },
+    ],
+    bonne: "non",
+    explication:
+      "Une ligne continue interdit tout dépassement, même si la voie semble libre. Tu patientes jusqu'à une ligne discontinue.",
+    okAnim: [{ veh: "lead" }, { veh: "moi", delai: 200 }],
+  },
+
+  // ── Véhicules prioritaires ───────────────────────────────────
+  {
+    id: "vehicule-prioritaire-pompiers",
+    theme: "prioritaire",
+    difficulte: 2,
+    alt: "Croisement sans signalisation. Un camion de pompiers arrive par ta gauche, gyrophares et sirène allumés.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "v1", at: "W", d: 1.9, couleur: "rouge", label: "🚒 Pompiers" },
+      ],
+    },
+    question:
+      "Un véhicule de secours arrive, gyrophares et sirène allumés. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "cede", label: "Je m'arrête et je le laisse passer", ico: "✋" },
+      {
+        id: "passe",
+        label: "Je passe, il vient de ma gauche, je suis prioritaire",
+      },
+      { id: "accel", label: "J'accélère pour passer avant lui", ico: "⚡" },
+    ],
+    bonne: "cede",
+    explication:
+      "Un véhicule prioritaire en intervention (pompiers, SAMU, police) passe avant tout le monde, même si la règle normale te donnerait la priorité. Tu le laisses passer.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 1000 }],
   },
 ];
 

@@ -193,6 +193,11 @@ function branchRoad(branch, d0, halfW = HW) {
   );
 }
 
+/** Ligne d'axe continue (interdiction de dépasser), sur toute la route. */
+function centerLine() {
+  return flatRect(0, 0, 0, 1, R + 0.4, 0.035, ROAD.line, 'opacity=".9"');
+}
+
 /** Pointillés d'axe le long d'une branche, de d0 à d1. */
 function dashes(branch, d0, d1, off = 0) {
   const [ux, uy] = BRANCH_IN[branch];
@@ -523,8 +528,12 @@ export function renderSituationScene(scene, opts = {}) {
         'opacity=".5"',
       );
     }
-    roads += dashes("S", cw != null ? 1.0 : -R, R + 0.2);
-    if (cw != null) roads += dashes("N", 0.2, R + 0.2);
+    if (scene.ligne === "continue") {
+      roads += centerLine();
+    } else {
+      roads += dashes("S", cw != null ? 1.0 : -R, R + 0.2);
+      if (cw != null) roads += dashes("N", 0.2, R + 0.2);
+    }
     if (cw != null) roads += crosswalk(cw);
   } else if (kind === "croisement") {
     roads += roadAlongY() + roadAlongX();
