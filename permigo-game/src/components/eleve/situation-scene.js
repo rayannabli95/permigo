@@ -21,6 +21,10 @@ const LANE = 0.39; // décalage du centre de voie
 const RING_OUT = 1.85; // giratoire : rayon extérieur de l'anneau
 const RING_ISLE = 0.92; // giratoire : rayon de l'îlot central
 const RING_LANE = 1.4; // giratoire : rayon de circulation
+// bretelle d'insertion (kind 'insertion') : arc fixe du bord sud-est du
+// plateau jusqu'à la voie d'accélération (jonction en (0.7, −1.0), cap nord).
+// Un véhicule s'y place via { bretelle: t }, t ∈ [0,1] (1 = jonction).
+const RAMP = { cx: 2.6, cy: -1.0, r: 1.9 };
 
 // cap d'approche (vers le centre) par branche
 const BRANCH_IN = { S: [0, 1], N: [0, -1], E: [-1, 0], W: [1, 0] };
@@ -124,6 +128,16 @@ function circlePath(cx, cy, r, samples = 40) {
 
 /** Pose d'un véhicule : position monde + cap unitaire. */
 function vehiclePose(v) {
+  if (typeof v.bretelle === "number") {
+    // t ∈ [0,1] le long de la bretelle : angle 270° (entrée est) → 180° (jonction)
+    const a = ((270 - v.bretelle * 90) * Math.PI) / 180;
+    return {
+      x: RAMP.cx + RAMP.r * Math.cos(a),
+      y: RAMP.cy + RAMP.r * Math.sin(a),
+      ux: Math.sin(a),
+      uy: -Math.cos(a),
+    };
+  }
   if (typeof v.angle === "number") {
     const a = (v.angle * Math.PI) / 180;
     return {
@@ -196,6 +210,36 @@ function branchRoad(branch, d0, halfW = HW) {
     halfW,
     ROAD.fill,
   );
+}
+
+/** Bande d'asphalte de la bretelle : arc échantillonné entre deux rayons. */
+function rampBand() {
+  const N = 24;
+  const at = (i) => ((300 - (122 * i) / N) * Math.PI) / 180; // 300° → 178°
+  const arc = (rr, rev) => {
+    const out = [];
+    for (let i = 0; i <= N; i++) {
+      const a = at(rev ? N - i : i);
+      out.push(P(RAMP.cx + rr * Math.cos(a), RAMP.cy + rr * Math.sin(a)));
+    }
+    return out;
+  };
+  return poly(
+    arc(RAMP.r + 0.36, false).concat(arc(RAMP.r - 0.36, true)),
+    ROAD.fill,
+  );
+}
+
+/** Rive blanche le long de la bretelle (arc fin). */
+function rampEdge(rr) {
+  const N = 24;
+  let d = "";
+  for (let i = 0; i <= N; i++) {
+    const a = ((300 - (114 * i) / N) * Math.PI) / 180; // 300° → 186°
+    const p = P(RAMP.cx + rr * Math.cos(a), RAMP.cy + rr * Math.sin(a));
+    d += (i ? "L" : "M") + pt(p);
+  }
+  return `<path d="${d}" fill="none" stroke="${ROAD.line}" stroke-width="1.6" opacity=".5"/>`;
 }
 
 /** Ligne d'axe continue (interdiction de dépasser), sur toute la route. */
@@ -623,6 +667,42 @@ export function renderSituationScene(scene, opts = {}) {
     roads += dashes("S", -R - 0.2, R + 0.2, -0.3); // séparation des 2 voies
     roads += flatRect(0.45, 0, 0, 1, R + 0.4, 0.035, ROAD.line, 'opacity=".9"'); // ligne de rive BAU
     roads += flatRect(0.95, 0, 0, 1, R + 0.4, 0.03, ROAD.line, 'opacity=".6"');
+  } else if (kind === "insertion") {
+    // autoroute + bretelle d'insertion : la bande de droite (x .45–.95)
+    // devient VOIE D'ACCÉLÉRATION le long de la zone d'insertion
+    // (y −1.1 → 1.4), rejointe par la bretelle courbe venue du sud-est.
+    roads += rampBand();
+    roads += roadAlongY(1.05);
+    roads += flatRect(-0.95, 0, 0, 1, R + 0.4, 0.03, ROAD.line, 'opacity=".6"');
+    roads += dashes("S", -R - 0.2, R + 0.2, -0.3); // séparation des 2 voies
+    // rive droite : continue avant la jonction…
+    roads += flatRect(
+      0.45,
+      -2.68,
+      0,
+      1,
+      1.43,
+      0.035,
+      ROAD.line,
+      'opacity=".9"',
+    );
+    // …DISCONTINUE le long de la zone d'insertion (on peut la franchir)…
+    roads += dashes("S", -1.4, 1.1, 0.45);
+    // …biseau de rabattement puis continue à nouveau
+    roads += flatRect(
+      0.7,
+      1.775,
+      -0.555,
+      0.832,
+      0.45,
+      0.035,
+      ROAD.line,
+      'opacity=".9"',
+    );
+    roads += flatRect(0.45, 2.9, 0, 1, 0.9, 0.035, ROAD.line, 'opacity=".9"');
+    // rive extérieure de la voie d'accélération + rives de la bretelle
+    roads += flatRect(0.95, 0.15, 0, 1, 1.3, 0.03, ROAD.line, 'opacity=".6"');
+    roads += rampEdge(RAMP.r + 0.3) + rampEdge(RAMP.r - 0.3);
   } else if (kind === "giratoire") {
     const wide = scene.lanes2;
     for (const b of ["N", "S", "E", "W"]) {
@@ -662,18 +742,25 @@ export function renderSituationScene(scene, opts = {}) {
   const objects = [];
 
   const treeSpots =
-    kind === "route" || kind === "autoroute"
+    kind === "insertion"
       ? [
-          [1.75, -2.2],
+          // sud-est laissé libre : la bretelle y passe
           [-1.8, -1.0],
-          [1.75, 1.6],
+          [1.9, 2.3],
           [-1.8, 2.6],
         ]
-      : [
-          [2.6, 2.35],
-          [-2.5, 2.55],
-          [-2.55, -2.35],
-        ];
+      : kind === "route" || kind === "autoroute"
+        ? [
+            [1.75, -2.2],
+            [-1.8, -1.0],
+            [1.75, 1.6],
+            [-1.8, 2.6],
+          ]
+        : [
+            [2.6, 2.35],
+            [-2.5, 2.55],
+            [-2.55, -2.35],
+          ];
   for (const [tx, ty] of treeSpots) {
     objects.push({ sy: P(tx, ty).y, svg: tree(tx, ty) });
   }
@@ -684,7 +771,7 @@ export function renderSituationScene(scene, opts = {}) {
     objects.push({ sy: P(0, 0).y, svg: tree(0, 0.05, true) });
   }
 
-  if (kind === "autoroute") {
+  if (kind === "autoroute" || kind === "insertion") {
     // glissière de sécurité du terre-plein central (rail continu + poteaux)
     const gx = -1.18;
     let rail = isoBox(gx, 0, 0, 1, R + 0.2, 0.022, 0.14, 0.22, {
