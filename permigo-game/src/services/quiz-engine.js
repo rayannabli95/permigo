@@ -52,7 +52,10 @@ export async function lancerQuiz({
     )
     .eq("competence_id", competenceId)
     .eq("type", type)
-    .limit(nbQuestions);
+    // Tire plus large que nécessaire : le shuffle+slice ci-dessous pioche
+    // ensuite nbQuestions dans le pool — deux tentatives ne tombent donc
+    // pas sur les mêmes questions dès que la banque dépasse nbQuestions.
+    .limit(Math.max(nbQuestions * 3, 15));
 
   if (error || !questions?.length) {
     console.error("[quiz]", error);
