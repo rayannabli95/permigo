@@ -154,7 +154,10 @@
 ═══════════════════════════════════════════════════════════ */
 [data-theme="dark"] {
   /* ─ Surfaces (dark mode) ─ */
-  --bg:#0b0d1a;    --bg2:#13162a;   --bg3:#151831;  --bg4:#13162a;  --bg5:#1d2140;
+  /* Fond de base adouci : moins « noir pur », un cran vers le bleu nuit —
+     reste sous --bg2/--su (ordre de profondeur préservé). Le vrai éclaircissement
+     global (surfaces + bordures) est un chantier dédié à valider avec Rayan. */
+  --bg:#0f1124;    --bg2:#13162a;   --bg3:#151831;  --bg4:#13162a;  --bg5:#1d2140;
   --su:#181b30;    --su2:#1f2238;
   --bo:#2a2e48;    --bo2:#23263c;   --bo3:#2a2e48;  --bo4:#3d4263;
 
@@ -188,7 +191,10 @@
 /* ─ Auto dark mode : suit la préférence système si l'user n'a rien défini ─ */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]):not([data-theme="light"]) {
-    --bg:#0b0d1a;    --bg2:#13162a;   --bg3:#151831;  --bg4:#13162a;  --bg5:#1d2140;
+    /* Fond de base adouci : moins « noir pur », un cran vers le bleu nuit —
+     reste sous --bg2/--su (ordre de profondeur préservé). Le vrai éclaircissement
+     global (surfaces + bordures) est un chantier dédié à valider avec Rayan. */
+  --bg:#0f1124;    --bg2:#13162a;   --bg3:#151831;  --bg4:#13162a;  --bg5:#1d2140;
     --su:#181b30;    --su2:#1f2238;
     --bo:#2a2e48;    --bo2:#23263c;   --bo3:#2a2e48;  --bo4:#3d4263;
     --ink:#f3f4f8;   --ink2:#e2e5ee;   --ink3:#c9cde0;  --ink4:#aab2c8;  --ink5:#98a2b8;

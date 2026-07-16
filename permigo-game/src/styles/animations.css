@@ -383,3 +383,28 @@
     transition-duration: .01ms !important;
   }
 }
+
+/* ─── Effet « loupe » au défilement ───────────────────────────────
+   L'élément grossit légèrement quand il passe au centre du viewport, et
+   rapetisse aux bords. 100 % CSS scroll-driven : AUCUN listener JS → aucun
+   jank (à l'inverse du tick haptique au scroll, retiré le 16/07). Sur les
+   navigateurs sans `animation-timeline` (vieux iOS), l'élément garde sa
+   taille — dégradation propre. Désactivé si l'utilisateur réduit les
+   animations. À poser sur des CARTES (jamais un conteneur à enfant
+   position:fixed — le scale casserait le containing block). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes pgLoupe {
+      0%   { transform: scale(.94); }
+      50%  { transform: scale(1); }
+      100% { transform: scale(.94); }
+    }
+    .pg-loupe {
+      animation: pgLoupe linear both;
+      animation-timeline: view();
+      /* léger repos avant/après pour que l'effet vive surtout au centre */
+      animation-range: entry 12% exit 88%;
+      transform-origin: center;
+    }
+  }
+}
