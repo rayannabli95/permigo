@@ -343,14 +343,39 @@ export function panneauSVG(type) {
 }
 
 // ── Brique 6 : mini-scène routière iso (réutilise le moteur) ────
-function sceneHTML(scene, { fx = "", gap = false } = {}) {
+// projection monde→écran locale (mêmes constantes que situation-scene.js)
+const PP = (x, y) => `${((x + y) * 46).toFixed(1)},${((x - y) * 24).toFixed(1)}`;
+
+// trajectoires de manœuvre (pointillés dorés + pointe de flèche)
+const TRAJ = {
+  // demi-tour : départ voie de droite vers le nord, retour voie de gauche
+  demiTour: () => ({
+    d: `M ${PP(0.39, -1.7)} L ${PP(0.39, -0.4)} Q ${PP(0.39, 0.75)} ${PP(0, 0.75)} Q ${PP(-0.39, 0.75)} ${PP(-0.39, -0.4)} L ${PP(-0.39, -1.5)}`,
+    tip: `M ${PP(-0.55, -1.15)} L ${PP(-0.39, -1.6)} L ${PP(-0.23, -1.15)}`,
+  }),
+  // marche arrière : la voiture recule (flèche vers le sud, derrière elle)
+  recul: () => ({
+    d: `M ${PP(0.39, -2.0)} L ${PP(0.39, -3.1)}`,
+    tip: `M ${PP(0.24, -2.75)} L ${PP(0.39, -3.2)} L ${PP(0.54, -2.75)}`,
+  }),
+};
+
+function sceneHTML(scene, { fx = "", gap = false, traj = "" } = {}) {
   let svg = renderSituationScene(scene, { alt: "" });
+  let fxSvg = "";
   if (gap) {
     // chevrons dorés de « distance de sécurité » devant le joueur
-    const fxSvg = buildFocusFX(scene, { veh: "moi" }).replace(
+    fxSvg += buildFocusFX(scene, { veh: "moi" }).replace(
       /<ellipse class="sit-halo[^/]*\/>/,
       "",
     );
+  }
+  if (traj && TRAJ[traj]) {
+    const { d, tip } = TRAJ[traj]();
+    fxSvg += `<path class="qzv-trace" d="${d}" fill="none" stroke="#ffcb3d" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="9 10"/>
+      <path d="${tip}" fill="none" stroke="#ffcb3d" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+  if (fxSvg) {
     svg = svg.replace(
       '<g class="sit-fx"></g>',
       `<g class="sit-fx">${fxSvg}</g>`,
@@ -564,6 +589,34 @@ const SCENES = {
       { id: "v1", type: "camion", at: "N", d: 1.5 },
     ],
   },
+  // ── manœuvres & stationnement (lot 3) ──
+  // créneau : deux voitures garées le long de la rive, une place entre
+  // les deux, moi à hauteur de la place (le PROBLÈME, jamais la méthode)
+  creneau: {
+    kind: "route",
+    vehicules: [
+      { id: "p1", at: "S", d: 0.4, lane: 0.63, couleur: "gris" },
+      { id: "p2", at: "S", d: 2.5, lane: 0.63, couleur: "jaune" },
+      { ...MOI, d: 1.45, lane: 0.16 },
+    ],
+  },
+  stationnementRue: {
+    kind: "route",
+    vehicules: [
+      { id: "p1", at: "S", d: 0.3, lane: 0.63, couleur: "gris" },
+      { id: "p2", at: "S", d: 1.55, lane: 0.63, couleur: "rouge" },
+      { id: "p3", at: "S", d: 2.8, lane: 0.63, couleur: "jaune" },
+      { ...MOI, d: 2.2, lane: 0.16 },
+    ],
+  },
+  demiTour: {
+    kind: "route",
+    vehicules: [{ ...MOI, d: 1.7 }],
+  },
+  marcheArriere: {
+    kind: "route",
+    vehicules: [{ ...MOI, d: 2.0 }],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -643,6 +696,25 @@ const RULES = [
     vis: () => sc("camionDevant"),
   },
 
+  // ── Manœuvres & stationnement ───────────────────────────────────
+  // pente/bateau/disque/PMR : rien de fidèle à dessiner en v1
+  {
+    re: /pente|en haut d'une côte|bateau|zone bleue|pmr|réservée|sortie de garage/,
+    vis: null,
+  },
+  // « pas de créneau » en insertion = un trou dans le trafic, pas un
+  // stationnement → on laisse la règle autoroute s'en charger plus bas
+  {
+    re: /créneau|bataille/,
+    and: /^(?!.*(bretelle|insertion|autoroute))/,
+    vis: () => sc("creneau"),
+  },
+  { re: /demi-tour/, vis: () => sc("demiTour", { traj: "demiTour" }) },
+  {
+    re: /marche arrière/,
+    vis: () => sc("marcheArriere", { traj: "recul" }),
+  },
+
   // ── Scènes : giratoire / intersections / priorités ─────────────
   {
     re: /giratoire.*(pas|sans).*(panneau|cédez)|sans panneau visible/,
@@ -683,6 +755,10 @@ const RULES = [
   {
     re: /piéton|passage protégé|poussette|canne blanche|personne âgée/,
     vis: () => sc("pietonPassage"),
+  },
+  {
+    re: /stationn|te gares|se garer|me garer|veux te garer|garé en|es garé/,
+    vis: () => sc("stationnementRue"),
   },
 
   // ── Scènes : dépassement / lignes / distance ────────────────────
