@@ -1003,12 +1003,12 @@ function _openDeleteSheet(root, me) {
       <div class="prf-sheet-ico" aria-hidden="true">🗑️</div>
       <h2 class="prf-sheet-title" id="prf-delete-title">Supprimer mon compte</h2>
       <p class="prf-sheet-body">
-        Tu as le droit de demander la suppression de tes données personnelles (RGPD, art. 17).<br><br>
-        Pour exercer ce droit, contacte-nous à
-        <a href="mailto:support@permigo.fr">support@permigo.fr</a>.<br><br>
-        Nous traiterons ta demande dans un délai de <strong>30 jours</strong>.
+        La suppression est <strong>immédiate et irréversible</strong> : profil effacé,
+        progression anonymisée (RGPD, art. 17).<br><br>
+        Question ou demande par écrit&nbsp;? <a href="mailto:dpo@permigo.fr">dpo@permigo.fr</a>
+        (traitée sous 30 jours).
       </p>
-      <button class="prf-sheet-cta" id="prf-delete-contact">Envoyer un e-mail de suppression</button>
+      <button class="prf-sheet-cta" id="prf-delete-contact">Supprimer mon compte</button>
       <button class="prf-sheet-cancel" id="prf-delete-cancel">Annuler</button>
     </div>`;
 
@@ -1027,23 +1027,16 @@ function _openDeleteSheet(root, me) {
     if (e.target === overlay) close();
   });
 
-  // Ouvre le client mail avec un brouillon pré-rempli
+  // Vrai flux in-app (exigence Google Play) : la modale de confirmation des
+  // Réglages (saisie « SUPPRIMER MON COMPTE » → RPC delete_my_account),
+  // au lieu de l'ancien brouillon d'email sans effet.
   overlay
     .querySelector("#prf-delete-contact")
     ?.addEventListener("click", () => {
       haptic("select");
-      const subject = encodeURIComponent(
-        "Demande de suppression de compte PermiGo",
-      );
-      const body = encodeURIComponent(
-        `Bonjour,\n\nJe souhaite exercer mon droit à l'effacement (RGPD, art. 17) et demander la suppression de mon compte PermiGo.\n\nEmail du compte : ${me.email || ""}\n\nMerci.`,
-      );
-      window.open(
-        `mailto:support@permigo.fr?subject=${subject}&body=${body}`,
-        "_self",
-      );
-      track("profile.delete_contact_clicked", { user_role: me.role });
+      track("profile.delete_flow_opened", { user_role: me.role });
       close();
+      location.hash = "#/settings/supprimer";
     });
 }
 

@@ -11,6 +11,29 @@
   "scope": "/",
   "lang": "fr",
   "categories": ["education", "lifestyle"],
+  "screenshots": [
+    {
+      "src": "/showcase/eleve-accueil.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Accueil élève — quêtes du jour et permis virtuel"
+    },
+    {
+      "src": "/showcase/eleve-parcours.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Parcours — les 31 compétences du permis"
+    },
+    {
+      "src": "/showcase/eleve-examens.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Examen — suis ta préparation au jour J"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Mon parcours",
