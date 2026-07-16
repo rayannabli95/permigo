@@ -325,20 +325,31 @@ export function openInviteEleveModal(me) {
 
       const link =
         window.location.origin + "/#/signup?token=" + (inv?.token ?? invToken);
-      results.push({ email, link });
 
+      // Envoi d'email best-effort. La fonction répond honnêtement quand elle
+      // ne peut PAS envoyer (clé RESEND_API_KEY absente) : on le remonte au
+      // moniteur au lieu de le laisser croire que l'élève a reçu un email.
+      let mailSent = false;
       try {
-        await sb.functions.invoke("send-invitation-email", {
-          body: {
-            invitation_id: inv?.id,
-            token: inv?.token ?? invToken,
-            email,
-            role: "eleve",
+        const { data: mailRes } = await sb.functions.invoke(
+          "send-invitation-email",
+          {
+            body: {
+              invitation_id: inv?.id,
+              token: inv?.token ?? invToken,
+              email,
+              role: "eleve",
+            },
           },
-        });
+        );
+        mailSent =
+          !!mailRes?.ok &&
+          mailRes?.mode !== "dev" &&
+          !/non envoyé/i.test(mailRes?.message || "");
       } catch {
-        /* silencieux */
+        /* silencieux — le lien à partager reste le chemin fiable */
       }
+      results.push({ email, link, mailSent });
     }
 
     const ok = results.filter((r) => r.link).length;
@@ -354,7 +365,9 @@ export function openInviteEleveModal(me) {
       </p>
       ${
         ok > 0
-          ? `<p class="me-inv-result-hint">Envoie le lien à chaque élève. Dès qu'il l'ouvre et crée son compte, il apparaît dans ta liste.</p>`
+          ? results.some((r) => r.link && !r.mailSent)
+            ? `<p class="me-inv-result-hint">⚠️ L'email automatique n'est pas encore actif — <strong>envoie toi-même son lien à chaque élève</strong> (Partager ou WhatsApp). Dès qu'il l'ouvre et crée son compte, il apparaît dans ta liste.</p>`
+            : `<p class="me-inv-result-hint">Un email avec son lien a été envoyé à chaque élève. Tu peux aussi le partager directement.</p>`
           : ""
       }
       ${results

@@ -69,6 +69,9 @@ function _playEnter(root, dir) {
 const SIGNUP_ROUTES = {
   rejoindre: () => import("@/pages/public/rejoindre.js"),
   "creer-compte": () => import("@/pages/public/creer-compte.js"),
+  // Lien d'invitation par email (#/signup?token=…) : même piège — un élève
+  // dont le téléphone a déjà une session ne doit pas atterrir sur l'accueil.
+  signup: () => import("@/pages/public/signup.js"),
 };
 
 const ROUTES = {

@@ -422,8 +422,12 @@ function renderForm(root, invitation, token) {
         <div class="sg-row">
           <label class="sg-label" for="sg-password">Mot de passe</label>
           <div class="sg-pwd-wrap">
-            <input class="sg-input" id="sg-password" type="password" autocomplete="new-password" minlength="8" placeholder="8 caractères minimum" />
-            <button class="sg-pwd-toggle" id="sg-pwd-toggle" type="button" aria-label="Afficher le mot de passe" aria-pressed="false">${icon("eye", { size: 18, strokeWidth: 2 })}</button>
+            <!-- Visible par défaut (type=text) : sur iPhone, un champ
+                 type=password + new-password remplace le clavier par la
+                 suggestion « mot de passe fort » → impossible de taper le sien.
+                 L'œil permet de le masquer. -->
+            <input class="sg-input" id="sg-password" type="text" autocomplete="new-password" minlength="8" placeholder="8 caractères minimum" />
+            <button class="sg-pwd-toggle" id="sg-pwd-toggle" type="button" aria-label="Masquer le mot de passe" aria-pressed="true">${icon("eye-off", { size: 18, strokeWidth: 2 })}</button>
           </div>
           <div class="sg-help" id="sg-pwd-help">Minimum 8 caractères.</div>
         </div>
