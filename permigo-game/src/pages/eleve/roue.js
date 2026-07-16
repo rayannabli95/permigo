@@ -10,6 +10,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { isSoloEleve } from "@/utils/league-bots.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
@@ -311,6 +312,9 @@ function renderMyWins(wins) {
 
 export async function mount(root) {
   const me = getCurUser();
+  // Élève solo : pas de moniteur → pas de « vrais cadeaux » (c'est lui qui
+  // les offre) ; textes neutralisés, panneau + note masqués.
+  const solo = isSoloEleve(me);
   if (!me) return;
   track("page_view", { page: "eleve_roue" });
 
@@ -375,7 +379,7 @@ export async function mount(root) {
   <div class="roue-hero">
     <div class="roue-kicker">${esc(kicker)}</div>
     <div class="roue-h1">Roue de la chance</div>
-    <div class="roue-sub">Gagne des volants chaque jour. Bientôt des skins et de vrais cadeaux de ton moniteur.</div>
+    <div class="roue-sub">${solo ? "Gagne des volants chaque jour. Bientôt des skins à débloquer." : "Gagne des volants chaque jour. Bientôt des skins et de vrais cadeaux de ton moniteur."}</div>
   </div>
 
   <div class="roue-zone">
@@ -395,13 +399,13 @@ export async function mount(root) {
 
   <div id="roue-result-slot"></div>
 
-  ${renderRealLots(realLots, moniteurName)}
+  ${solo ? "" : renderRealLots(realLots, moniteurName)}
 
   ${renderMyWins(myWins)}
 
   <div class="roue-note">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-    <p>Un <b>gros lot</b> peut tomber (rare !) si ton moniteur en a mis en jeu. Tu le récupères en vrai avec ton code. Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.</p>
+    <p>${solo ? "Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent." : `Un <b>gros lot</b> peut tomber (rare !) si ton moniteur en a mis en jeu. Tu le récupères en vrai avec ton code. Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.`}</p>
   </div>
 </div>`;
 

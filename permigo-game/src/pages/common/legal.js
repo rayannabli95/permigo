@@ -50,15 +50,21 @@ const CONTENT = {
     sections: [
       {
         heading: "Objet",
-        body: "PermiGo est une plateforme d'accompagnement pédagogique pour l'apprentissage du permis de conduire (catégorie B). L'accès est réservé aux élèves, moniteurs et gérants d'auto-écoles abonnées.",
+        body: "PermiGo est une plateforme d'accompagnement pédagogique pour l'apprentissage du permis de conduire (catégorie B). L'accès est ouvert aux élèves — rattachés à un moniteur ou en autonomie —, aux moniteurs et aux gérants d'auto-écoles.",
       },
       {
         heading: "Accès au service",
-        body: "L'accès est conditionné à un abonnement souscrit par l'auto-école. Chaque utilisateur dispose d'un compte nominatif non cessible.",
+        body: "L'accès s'effectue via l'abonnement d'un moniteur, sur invitation (code moniteur), ou par inscription directe d'un élève en autonomie. Chaque utilisateur dispose d'un compte nominatif non cessible.",
       },
       {
         heading: "Utilisation",
         body: "L'application est strictement réservée à l'apprentissage du permis de conduire. Toute utilisation frauduleuse, partage de compte ou tentative de manipulation des données pédagogiques est interdite.",
+      },
+      // Transparence classements — les ligues peuvent être complétées par des
+      // profils générés (league-bots.js) tant qu'il y a peu de vrais élèves.
+      {
+        heading: "Classements et profils d'animation",
+        body: "Les classements et ligues ont une visée de motivation. Tant qu'ils comptent peu de participants, ils peuvent être complétés par des profils d'animation générés par l'application (pseudonymes fictifs, sans lien avec des personnes réelles). Ces profils n'influencent ni la progression pédagogique, ni les résultats, ni aucun élément payant, et disparaissent à mesure que de vrais élèves rejoignent le classement.",
       },
       {
         heading: "Propriété intellectuelle",

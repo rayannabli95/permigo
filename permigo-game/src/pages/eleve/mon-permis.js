@@ -40,6 +40,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { isSoloEleve } from "@/utils/league-bots.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
@@ -343,7 +344,7 @@ function renderChip(moniteurPrenom) {
 }
 
 // ─── Hero — permis virtuel ─────────────────────────────────────
-function renderHero({ totalAcquis, currentTitre, allDone }) {
+function renderHero({ totalAcquis, currentTitre, allDone, solo }) {
   const pct = REMC_TOTAL > 0 ? Math.round((totalAcquis / REMC_TOTAL) * 100) : 0;
   const chapLabel = allDone ? "Tous les chapitres validés" : currentTitre || "";
   return `<section class="mp-hero">
@@ -352,7 +353,7 @@ function renderHero({ totalAcquis, currentTitre, allDone }) {
       <div class="mp-hero-txt">
         <div class="mp-hero-t">${totalAcquis} <small>sur ${REMC_TOTAL}</small></div>
         <div class="mp-hero-lbl">compétences validées</div>
-        <div class="mp-hero-s">Par ton moniteur, en leçon — c'est ta vraie progression.</div>
+        <div class="mp-hero-s">${solo ? "En autonomie, à ton rythme — c'est ta vraie progression." : "Par ton moniteur, en leçon — c'est ta vraie progression."}</div>
       </div>
       <span class="mp-hero-med" aria-hidden="true">${medallion("trophee", "gold", { size: 68 })}</span>
     </div>
@@ -532,10 +533,10 @@ function renderExamCountdown(examDate, examMod) {
   </div>`;
 }
 
-function renderStep3({ examMod, examData, examDate }) {
+function renderStep3({ examMod, examData, examDate, solo = false, num = 3 }) {
   if (!examMod || examData?.loadFailed) {
     return `<section class="mp-step" id="mp-step-exam">
-      <span class="mp-step-num" aria-hidden="true">3</span>
+      <span class="mp-step-num" aria-hidden="true">${num}</span>
       <div class="mp-step-h"><h2 class="mp-step-t">L'examen</h2></div>
       <div class="mp-err">
         <p>« L'examen » indisponible. Vérifie ta connexion, puis réessaie.</p>
@@ -544,7 +545,7 @@ function renderStep3({ examMod, examData, examDate }) {
     </section>`;
   }
 
-  const verdict = examMod.buildVerdict(examData);
+  const verdict = examMod.buildVerdict({ ...examData, solo });
   const verdictHtml = `<div class="mp-verdict ${verdict.level}" role="status">
     ${icon(READINESS_ICON[verdict.level], { size: 18 })}
     <span>${esc(verdict.text)}</span>
@@ -563,7 +564,7 @@ function renderStep3({ examMod, examData, examDate }) {
     .join("");
 
   return `<section class="mp-step" id="mp-step-exam">
-    <span class="mp-step-num" aria-hidden="true">3</span>
+    <span class="mp-step-num" aria-hidden="true">${num}</span>
     <div class="mp-step-h">
       <h2 class="mp-step-t">L'examen</h2>
       <span class="mp-step-s">le jour J se prépare ici</span>
@@ -785,15 +786,19 @@ export async function mount(root) {
       : { loadFailed: true };
   const examDate = examMod ? examMod.parseSavedDate() : null;
 
+  // Élève solo : pas de moniteur → pas d'étape « Mes leçons » (impasse
+  // permanente : aucun compte-rendu ne viendra jamais), étape examen
+  // renumérotée, libellés sans « ton moniteur ».
+  const solo = isSoloEleve(me);
   root.innerHTML = `${STYLE}
   <div class="mp anim-slide-up">
     <h1 class="mp-title" tabindex="-1">Mon permis</h1>
     ${renderChip(moniteurPrenom)}
-    ${step1Failed ? "" : renderHero({ totalAcquis, currentTitre, allDone })}
+    ${step1Failed ? "" : renderHero({ totalAcquis, currentTitre, allDone, solo })}
     <div class="mp-tl">
       ${renderStep1({ worldStates, step1Failed, totalMin, nbLecons, moniteurPrenom })}
-      ${renderStep2({ lastCR, crCount })}
-      ${renderStep3({ examMod, examData, examDate })}
+      ${solo ? "" : renderStep2({ lastCR, crCount })}
+      ${renderStep3({ examMod, examData, examDate, solo, num: solo ? 2 : 3 })}
     </div>
   </div>`;
 

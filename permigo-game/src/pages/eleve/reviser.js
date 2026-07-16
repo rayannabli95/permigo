@@ -33,6 +33,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { isSoloEleve } from "@/utils/league-bots.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
@@ -386,13 +387,19 @@ function render(data) {
       <p>3 min ? Une scène, une décision.</p>
       <span class="rvh-jaq-m">${SITUATIONS.length} scènes · Jouer</span>
     </button>
-    <button class="rvh-jaq" id="rvh-row-flash" style="background:linear-gradient(200deg,#8b5cf6,#471bb0);" aria-label="Quiz éclair — le défi de ton moniteur">
+    ${
+      // Élève solo : jamais de quiz éclair (envoyé par le moniteur) → tuile
+      // masquée, sinon impasse permanente « Aucun en attente ».
+      isSoloEleve(getCurUser())
+        ? ""
+        : `<button class="rvh-jaq" id="rvh-row-flash" style="background:linear-gradient(200deg,#8b5cf6,#471bb0);" aria-label="Quiz éclair — le défi de ton moniteur">
       ${flash ? `<span class="rvh-jaq-dot">1</span>` : ""}
       <img src="/art/reviser/eclair.png" alt="" aria-hidden="true">
       <b>Quiz éclair</b>
       <p>Le défi de ton moniteur.</p>
       <span class="rvh-jaq-m">${flash ? `1 en attente · ${flash.minsLeft} min` : "Aucun en attente"}</span>
-    </button>
+    </button>`
+    }
   </div>
 
   <div class="rvh-rowt">Comme le jour J <span>se tester</span></div>
@@ -412,7 +419,7 @@ function render(data) {
     </button>
   </div>
 
-  <div class="rvh-rowt">Avant ta prochaine leçon <span>fiches de conduite</span></div>
+  <div class="rvh-rowt">${isSoloEleve(getCurUser()) ? "Avant de reprendre le volant" : "Avant ta prochaine leçon"} <span>fiches de conduite</span></div>
   <div class="rvh-scroller">
     ${
       ficheDuMoment

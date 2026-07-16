@@ -15,6 +15,7 @@ import { track } from "@/services/analytics.js";
 import { haptic, tapHaptic } from "@/utils/haptic.js";
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { isSoloEleve } from "@/utils/league-bots.js";
 import { openShareRecap } from "@/components/eleve/share-recap.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
@@ -411,8 +412,8 @@ export async function mount(root) {
         </div>
         ${
           r.weak
-            ? `<div class="exc2-weakmsg">Ton point faible : <b>${esc(FAMILLES[r.weak].label)}</b>. C’est là que tu gagnes le plus de points. Montre-le à ton moniteur pour la prochaine leçon.</div>`
-            : `<div class="exc2-weakmsg">Rien à retravailler, c’est propre. Montre ce score à ton moniteur.</div>`
+            ? `<div class="exc2-weakmsg">Ton point faible : <b>${esc(FAMILLES[r.weak].label)}</b>. C’est là que tu gagnes le plus de points.${isSoloEleve(getCurUser()) ? " Retravaille-le à ta prochaine session." : " Montre-le à ton moniteur pour la prochaine leçon."}</div>`
+            : `<div class="exc2-weakmsg">Rien à retravailler, c’est propre.${isSoloEleve(getCurUser()) ? " Continue comme ça." : " Montre ce score à ton moniteur."}</div>`
         }
         <p class="exc2-note">C’est un entraînement. Ta vraie note sur ${TOTAL}, c’est l’inspecteur qui la donne.</p>
       </div>
