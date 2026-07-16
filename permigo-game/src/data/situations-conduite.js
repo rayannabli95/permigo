@@ -10,7 +10,10 @@
 //   difficulte  : 1..3
 //   alt         : description de la scène pour lecteur d'écran
 //   scene       : description déclarative (voir situation-scene.js)
-//     kind      : 'croisement' | 'giratoire' | 'route'
+//     kind      : 'croisement' | 'giratoire' | 'route' | 'autoroute' | 'insertion'
+//                 ('insertion' = autoroute + bretelle d'insertion : un véhicule
+//                 se place sur la bretelle via { bretelle: t }, t ∈ [0,1],
+//                 1 = jonction avec la voie d'accélération)
 //     signal    : { type:'stop'|'cede'|'prio'|'giratoire'|'feu', etat?:'orange', branch }
 //     passage   : branche du passage piéton ('N'|'S'|'E'|'W') ou null
 //     pieton    : { engage:boolean } ou null — dessiné sur le passage
@@ -1757,6 +1760,185 @@ export const SITUATIONS = [
       "Le stop est pour ELLE : tu es sur la route prioritaire, tu passes. Garde quand même un œil — un stop grillé ne se voit qu'au dernier moment.",
     focus: { veh: "moi" },
     okAnim: [{ veh: "moi" }, { veh: "v1", delai: 1100 }],
+  },
+
+  // ── Autoroute : bretelle d'insertion (lot 5) ─────────────────
+  {
+    id: "bretelle-priorite",
+    theme: "autoroute",
+    difficulte: 2,
+    alt: "Tu arrives sur l'autoroute par la bretelle d'insertion. Une voiture roule déjà sur la voie de droite de l'autoroute.",
+    scene: {
+      kind: "insertion",
+      vehicules: [
+        {
+          id: "moi",
+          bretelle: 0.55,
+          couleur: "joueur",
+          label: "Toi",
+        },
+        { id: "v1", at: "S", d: 2.2, lane: 0.05, couleur: "bleu" },
+      ],
+    },
+    question: "Tu arrives par la bretelle. Qui est prioritaire ?",
+    mode: "cible",
+    reponses: [
+      { id: "v1", veh: "v1", label: "La voiture sur l'autoroute" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "v1",
+    explication:
+      "Ceux qui roulent déjà sur l'autoroute sont prioritaires. Toi, tu règles TA vitesse sur la voie d'accélération pour t'insérer sans les gêner.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 900, clign: "gauche" }],
+  },
+  {
+    id: "bretelle-vitesse",
+    theme: "autoroute",
+    difficulte: 1,
+    alt: "Tu es sur la voie d'accélération de l'autoroute. Une voiture roule au loin sur la voie de gauche.",
+    scene: {
+      kind: "insertion",
+      vehicules: [
+        { id: "v1", at: "S", d: 2.8, lane: -0.62, couleur: "gris" },
+        {
+          id: "moi",
+          at: "S",
+          d: 0.2,
+          lane: 0.7,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question: "Tu es sur la voie d'accélération. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "accelere",
+        label: "J'accélère pour prendre la vitesse du trafic",
+        ico: "⚡",
+      },
+      { id: "ralentis", label: "Je ralentis pour bien regarder", ico: "🐢" },
+      { id: "arret", label: "Je m'arrête et j'attends un trou", ico: "🛑" },
+    ],
+    bonne: "accelere",
+    explication:
+      "La voie d'accélération sert à atteindre la vitesse du flux AVANT de t'insérer. T'y traîner ou t'y arrêter oblige à repartir de zéro face à des voitures à 130.",
+    okAnim: [{ veh: "moi", clign: "gauche" }],
+  },
+  {
+    id: "bretelle-clignotant",
+    theme: "autoroute",
+    difficulte: 1,
+    alt: "Tu es sur la bretelle d'insertion, proche de la jonction avec l'autoroute.",
+    scene: {
+      kind: "insertion",
+      vehicules: [
+        {
+          id: "moi",
+          bretelle: 0.75,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question: "Pour t'insérer sur l'autoroute, quel clignotant ?",
+    mode: "cartes",
+    reponses: [
+      { id: "gauche", label: "Clignotant à gauche" },
+      { id: "droit", label: "Clignotant à droite" },
+      { id: "aucun", label: "Aucun : la voie m'y emmène toute seule" },
+    ],
+    bonne: "gauche",
+    explication:
+      "Clignotant à GAUCHE pendant toute l'insertion : tu préviens ceux qui arrivent que tu vas rejoindre leur voie.",
+    okAnim: [{ veh: "moi", clign: "gauche" }],
+  },
+  {
+    id: "bretelle-faciliter",
+    theme: "autoroute",
+    difficulte: 2,
+    alt: "Tu roules sur la voie de droite de l'autoroute. Une voiture s'insère depuis la bretelle, et ta voie de gauche est libre.",
+    scene: {
+      kind: "insertion",
+      vehicules: [
+        { id: "v1", bretelle: 0.5, couleur: "rouge", clign: "gauche" },
+        {
+          id: "moi",
+          at: "S",
+          d: 2.3,
+          lane: 0.05,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question: "Elle s'insère et ta voie de gauche est libre. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "deporte",
+        label: "Je me déporte à gauche pour lui faire de la place",
+        ico: "✋",
+      },
+      { id: "maintiens", label: "Je maintiens : je suis prioritaire" },
+      { id: "accelere", label: "J'accélère pour passer avant elle", ico: "⚡" },
+    ],
+    bonne: "deporte",
+    explication:
+      "Tu es prioritaire, mais faciliter l'insertion est le bon réflexe : voie de gauche libre → tu te déportes. Sinon, tu ajustes ta vitesse.",
+    focus: { veh: "v1" },
+    okAnim: [
+      { veh: "moi", clign: "gauche" },
+      { veh: "v1", delai: 700 },
+    ],
+  },
+  {
+    id: "bretelle-fin-voie",
+    theme: "autoroute",
+    difficulte: 3,
+    alt: "La voie d'accélération se termine devant toi. Des voitures se suivent sur la voie de droite de l'autoroute et personne ne te laisse entrer.",
+    scene: {
+      kind: "insertion",
+      vehicules: [
+        { id: "v1", at: "S", d: -0.3, lane: 0.05, couleur: "gris" },
+        { id: "v2", at: "S", d: 1.3, lane: 0.05, couleur: "bleu" },
+        {
+          id: "moi",
+          at: "S",
+          d: -0.9,
+          lane: 0.7,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question:
+      "La voie d'accélération se termine et personne ne te laisse entrer. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "ralentis",
+        label: "Je ralentis, quitte à m'arrêter en bout de voie",
+        ico: "🐢",
+      },
+      { id: "force", label: "Je force le passage : ils doivent me laisser" },
+      {
+        id: "bau",
+        label: "Je continue sur la bande d'arrêt d'urgence",
+        ico: "⚡",
+      },
+    ],
+    bonne: "ralentis",
+    explication:
+      "Ni forcer, ni rouler sur la BAU : en dernier recours tu ralentis, voire tu t'arrêtes en bout de voie, clignotant à gauche, et tu repars dès qu'un créneau s'ouvre.",
+    focus: { veh: "v1" },
+    okAnim: [
+      { veh: "v1" },
+      { veh: "v2", delai: 250 },
+      { veh: "moi", delai: 1100, clign: "gauche" },
+    ],
   },
 ];
 
