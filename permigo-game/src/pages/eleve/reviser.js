@@ -38,6 +38,7 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { getStreak } from "@/utils/game-state.js";
+import { SITUATIONS } from "@/data/situations-conduite.js";
 import { getWeakPoints } from "@/utils/weak-points.js";
 import { theoryLeague } from "@/utils/theory-league.js";
 import { FICHES } from "@/data/fiches-conduite.js";
@@ -383,7 +384,7 @@ function render(data) {
       <img src="/art/reviser/voiture.png" alt="" aria-hidden="true">
       <b>En situation</b>
       <p>3 min ? Une scène, une décision.</p>
-      <span class="rvh-jaq-m">Jouer</span>
+      <span class="rvh-jaq-m">${SITUATIONS.length} scènes · Jouer</span>
     </button>
     <button class="rvh-jaq" id="rvh-row-flash" style="background:linear-gradient(200deg,#8b5cf6,#471bb0);" aria-label="Quiz éclair — le défi de ton moniteur">
       ${flash ? `<span class="rvh-jaq-dot">1</span>` : ""}
