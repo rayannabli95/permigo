@@ -557,6 +557,18 @@ export async function mount(root) {
         minor: !!consentToken,
       });
 
+      // Mesure « solo sans achat » : cet email a-t-il acheté le Pass ?
+      // (get_my_pass_status, migration solo_hardening). Aucun blocage —
+      // juste la donnée pour décider plus tard d'un éventuel verrou.
+      if (solo) {
+        try {
+          const { data: pass } = await sb.rpc("get_my_pass_status");
+          track("signup.solo_pass_check", { has_pass: !!pass?.has_pass });
+        } catch (_) {
+          /* best-effort */
+        }
+      }
+
       // 3bis. Élève mineur : compte en attente du consentement parental
       if (consentToken) {
         renderConsentPending(root, consentToken);

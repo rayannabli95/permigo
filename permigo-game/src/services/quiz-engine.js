@@ -37,7 +37,10 @@ import {
  * @param {string} opts.competenceId  - ex: C1a, C2f, etc.
  * @param {'post_validation'|'consolidation'} opts.type
  * @param {number} opts.nbQuestions
- * @param {(score, total) => void} opts.onComplete
+ * @param {(score, total, answers) => void} opts.onComplete — answers =
+ *   [{ id, answer }] avec `answer` = index de l'option dans l'ORDRE ORIGINAL
+ *   de la DB (pas l'ordre affiché, qui est mélangé). Permet une correction
+ *   côté serveur (cf. valider-seul.js / self_validate_competence).
  */
 export async function lancerQuiz({
   competenceId,
@@ -81,6 +84,7 @@ export async function lancerQuiz({
   let idx = 0;
   let score = 0;
   let streak = 0; // bonnes réponses consécutives (son + chip « Série de N »)
+  const answers = []; // { id, answer(index original DB) } — remis à onComplete
 
   track("quiz.started", {
     competence_id: competenceId,
@@ -124,6 +128,10 @@ export async function lancerQuiz({
 
     // Nourrit « Mes fautes » (hub Réviser) via les thèmes de la compétence
     recordCompetenceAnswer(competenceId, correct);
+
+    // Trace la réponse dans l'ordre ORIGINAL des options (les options
+    // affichées sont mélangées ; _order[affiché] = index DB).
+    answers.push({ id: q.id, answer: q._order ? q._order[chosen] : chosen });
 
     if (correct) {
       score++;
@@ -200,7 +208,7 @@ export async function lancerQuiz({
     });
     overlay.querySelector(".qz-cta").addEventListener("click", () => {
       overlay.remove();
-      onComplete?.(score, total);
+      onComplete?.(score, total, answers);
     });
 
     // Gain ligue théorique — calculé AVANT la persistance (faite par le
@@ -246,6 +254,7 @@ function withShuffledOptions(q) {
     ...q,
     options: order.map((i) => q.options[i]),
     correct_index: order.indexOf(q.correct_index),
+    _order: order, // _order[index affiché] = index original DB
   };
 }
 
