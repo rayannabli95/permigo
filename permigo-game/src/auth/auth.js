@@ -67,7 +67,7 @@ export async function login(email, password, opts = {}) {
   const { data: profile, error: pErr } = await sb
     .from("profiles")
     .select(
-      "id, auth_id, role, nom, prenom, email, auto_ecole_id, join_code, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes, parental_consent_required, parental_consent_given_at, parental_consent_token",
+      "id, auth_id, role, nom, prenom, username, date_naissance, email, auto_ecole_id, join_code, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes, parental_consent_required, parental_consent_given_at, parental_consent_token",
     )
     .eq("auth_id", data.user.id)
     .maybeSingle();
@@ -120,7 +120,7 @@ export async function verifyOtp(email, token) {
   const { data: profile } = await sb
     .from("profiles")
     .select(
-      "id, auth_id, role, nom, prenom, email, auto_ecole_id, join_code, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes, parental_consent_required, parental_consent_given_at, parental_consent_token",
+      "id, auth_id, role, nom, prenom, username, date_naissance, email, auto_ecole_id, join_code, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes, parental_consent_required, parental_consent_given_at, parental_consent_token",
     )
     .eq("auth_id", data.user.id)
     .maybeSingle();
@@ -168,7 +168,7 @@ export async function restoreSession() {
     const { data: profile, error } = await sb
       .from("profiles")
       .select(
-        "id, auth_id, role, nom, prenom, email, auto_ecole_id, join_code, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes, parental_consent_required, parental_consent_given_at, parental_consent_token",
+        "id, auth_id, role, nom, prenom, username, date_naissance, email, auto_ecole_id, join_code, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes, parental_consent_required, parental_consent_given_at, parental_consent_token",
       )
       .eq("auth_id", session.user.id)
       .maybeSingle();
