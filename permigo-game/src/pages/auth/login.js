@@ -578,17 +578,17 @@ function wire(root) {
   (async () => {
     if (!sb || !gsiBox || !window.isSecureContext || !crypto?.subtle) return;
     try {
-      // Nonce anti-rejeu : le HASH va à Google, le BRUT à Supabase (qui
-      // vérifie que sha256(brut) == nonce du jeton).
+      // Nonce anti-rejeu : le HASH va à Google, le BRUT à Supabase, qui
+      // recalcule sha256(brut) en HEXADÉCIMAL pour le comparer au jeton
+      // (doc Supabase « Login with Google ») — base64 ⇒ « nonce mismatch ».
       const rawNonce = crypto.randomUUID() + crypto.randomUUID();
       const digest = await crypto.subtle.digest(
         "SHA-256",
         new TextEncoder().encode(rawNonce),
       );
-      const hashedNonce = btoa(String.fromCharCode(...new Uint8Array(digest)))
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/, "");
+      const hashedNonce = Array.from(new Uint8Array(digest))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
 
       await new Promise((resolve, reject) => {
         if (window.google?.accounts?.id) return resolve();
