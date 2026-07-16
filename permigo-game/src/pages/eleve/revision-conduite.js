@@ -173,7 +173,20 @@ const STYLE = `<style>
 .rvc-shake { animation: rvcshake .35s; border-color:#ef4444 !important; }
 @keyframes rvcshake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
 
-/* ───── Fiche « Carnet » : éditorial, gros numéros, filets, zéro carte ───── */
+/* ───── Fiche « Carnet » : éditorial, gros numéros, filets, zéro carte ─────
+   Lecture confortable : la fiche se lit TOUJOURS sur un papier clair pastel
+   (crème chaud), même quand l'appareil est en mode sombre — on lit une méthode,
+   pas un tableau de bord. On redéfinit les tokens NEUTRES en local (exactement
+   comme les encarts coaching-tip) : tous les enfants héritent, aucun token
+   global n'est touché. L'accent violet (--a) reste la marque élève. */
+.rvc-detail {
+  --bg:#faf6ec; --su:#ffffff; --su2:#fbf8f1;
+  --bo:#ece4d2; --bo3:#ece4d2;
+  --ink:#2a2416; --mu:#7b7159; --mu2:#9a9078;
+  --a-txt:#4a3fc9; --am-txt:#b45309;
+  color-scheme: light;
+  color: var(--ink);
+}
 .rvc-detail .rvc-back { border-radius:6px; border:1.5px solid var(--ink); background:transparent;
   box-shadow:none; }
 .rvc-fbadge { font:600 11px 'IBM Plex Mono',monospace; letter-spacing:.14em; text-transform:uppercase;
@@ -200,15 +213,27 @@ const STYLE = `<style>
 
 @keyframes rvcreveal { from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:none;} }
 
-/* « À retenir » : notes éditoriales, pas de boîtes ; seule l'erreur a un filet */
-.rvc-note { padding:15px 0; border-bottom:1px solid var(--bo3,#e2e8f0); }
-.rvc-note:last-of-type { border-bottom:0; }
-.rvc-note.warn { border-bottom:0; border-left:3px solid #d97706; padding:2px 0 2px 14px; margin:14px 0 2px; }
-.rvc-note-k { font:700 11px 'IBM Plex Mono',monospace; letter-spacing:.13em; text-transform:uppercase; margin:0 0 5px; }
-.rvc-note.warn .rvc-note-k { color:var(--am-txt,#b45309); }
-.rvc-note.why .rvc-note-k { color:var(--a,#6366f1); }
-.rvc-note.bva .rvc-note-k { color:var(--ink); }
-.rvc-note-p { font:400 14px/1.55 'Inter',sans-serif; color:var(--ink); margin:0; }
+/* « À retenir » : encadrés VOYANTS — l'élève doit les repérer d'un coup d'œil.
+   Chaque type a sa couleur, une pastille icône et un fond teinté (fini les
+   notes discrètes « qu'on voit mal »). La boîte auto passe en bleu net. */
+.rvc-note { display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:start;
+  padding:13px 14px; border-radius:14px; margin:10px 0 0; border:1px solid; }
+.rvc-note-ic { width:30px; height:30px; border-radius:9px; display:grid; place-items:center; flex:none; }
+.rvc-note-ic svg { width:17px; height:17px; }
+.rvc-note-k { font:800 11px 'Plus Jakarta Sans',sans-serif; letter-spacing:.05em; text-transform:uppercase; margin:1px 0 4px; }
+.rvc-note-p { font:500 14px/1.55 'Inter',sans-serif; color:var(--ink); margin:0; }
+/* Erreur à éviter — orange/rouge, le plus voyant */
+.rvc-note.warn { background:#fff1e6; border-color:#f9c99a; }
+.rvc-note.warn .rvc-note-ic { background:#f97316; color:#fff; }
+.rvc-note.warn .rvc-note-k { color:#c2410c; }
+/* Pourquoi ça compte — violet (l'accent élève) */
+.rvc-note.why { background:#f1efff; border-color:#cfc8fb; }
+.rvc-note.why .rvc-note-ic { background:var(--a,#6c63ff); color:#fff; }
+.rvc-note.why .rvc-note-k { color:#4a3fc9; }
+/* En boîte auto — bleu net (bien visible, demande explicite) */
+.rvc-note.bva { background:#e8f4ff; border-color:#b7dbfb; }
+.rvc-note.bva .rvc-note-ic { background:#2b83e0; color:#fff; }
+.rvc-note.bva .rvc-note-k { color:#1a63b8; }
 .rvc-fsrc { font:500 11px 'IBM Plex Mono',monospace; color:var(--mu,#94a3b8); letter-spacing:.02em; margin:22px 0 0; }
 
 .rvc-actbar { position:sticky; bottom:0; display:flex; gap:10px; margin-top:26px;
@@ -309,6 +334,21 @@ const STYLE = `<style>
 .rvs-grp-c { font:800 12.5px/1 'Inter',sans-serif; color:var(--mu2,#9aa3ba); flex:none; }
 .rvs-chev { width:20px; height:20px; flex:none; color:var(--mu2,#9aa3ba); }
 
+/* Les 4 mondes différenciés : chaque ligne a le rail de couleur de SON monde,
+   et le monde EN COURS ressort (teinte + ombre + pastille « Reprendre ») pour
+   que le regard s'y pose direct — fini les 4 lignes identiques. */
+.rvs-grp { border-left:5px solid var(--mc,#6366f1); }
+.rvs-grp.is-current { padding:15px 14px;
+  border:1.5px solid color-mix(in srgb, var(--mc,#6366f1) 45%, var(--bo3,#e6eaf2));
+  border-left:5px solid var(--mc,#6366f1);
+  background:color-mix(in srgb, var(--mc,#6366f1) 9%, var(--su,#fff));
+  box-shadow:0 14px 30px -16px var(--mc,#6366f1); }
+.rvs-grp.is-current .rvs-grp-t b { color:var(--ink); }
+.rvs-grp-badge { flex:none; font:800 11px/1 'Inter',sans-serif; color:#fff;
+  background:var(--mc,#6366f1); border-radius:999px; padding:6px 11px; white-space:nowrap; }
+.rvs-grp.is-done { opacity:.9; }
+.rvs-grp.is-done .rvs-grp-c { color:#16a34a; }
+
 .rvs-extra { margin:22px 0 0; background:color-mix(in srgb,var(--ink,#141c30) 3%,var(--su,#fff));
   border:1px dashed var(--bo3,#d9dfec); border-radius:14px; padding:13px 14px; }
 .rvs-extra > p { margin:0 0 9px; font:700 12.5px/1 'Inter',sans-serif; color:var(--mu,#64748b); }
@@ -382,13 +422,17 @@ const STYLE = `<style>
   box-shadow:0 5px 0 #b46a10, 0 9px 16px rgba(0,0,0,.4); }
 .rvm-cta:active { transform:translateY(2px); box-shadow:0 3px 0 #b46a10, 0 6px 12px rgba(0,0,0,.4); }
 .rvm-hint { text-align:center; font:600 11.5px 'Inter',sans-serif; color:#9b8dcf; margin:16px 0 0; }
-.rvm-note { margin-top:16px; border-left:3px solid #f0a93f; padding:2px 0 2px 13px; }
-.rvm-note.why { border-color:#8b5cf6; }
-.rvm-note.bva { border-color:rgba(178,150,255,.4); }
-.rvm-note b { display:block; font:700 11px 'IBM Plex Mono',monospace; letter-spacing:.13em;
+/* Encadrés « à retenir » : fond teinté + filet épais pour qu'ils ressortent
+   sur le fond nuit (avant : simple filet, « on les voit mal »). */
+.rvm-note { margin-top:14px; padding:12px 14px; border-radius:14px;
+  border:1px solid rgba(255,255,255,.10); border-left:4px solid #f0a93f;
+  background:rgba(240,169,63,.13); }
+.rvm-note.why { border-left-color:#a78bfa; background:rgba(139,92,246,.16); }
+.rvm-note.bva { border-left-color:#5fa8ff; background:rgba(95,168,255,.15); }
+.rvm-note b { display:block; font:800 11px 'Plus Jakarta Sans',sans-serif; letter-spacing:.06em;
   text-transform:uppercase; color:#ffd76e; margin-bottom:4px; }
 .rvm-note.why b { color:#cabfef; }
-.rvm-note.bva b { color:#9b8dcf; }
+.rvm-note.bva b { color:#9fccff; }
 .rvm-note p { font:400 13.5px/1.55 'Inter',sans-serif; color:#e8e4f6; margin:0; }
 .rvm-src { font:500 11px 'IBM Plex Mono',monospace; color:#9b8dcf; margin:18px 0 0; }
 .rvm-acts { display:flex; gap:10px; margin-top:22px; }
@@ -571,13 +615,19 @@ export async function mount(root, param) {
       3: "linear-gradient(160deg,#fbbf3f,#f59e0b)",
       4: "linear-gradient(160deg,#f68a4f,#ec6a2e)",
     };
+    // Couleur pleine (rail + pastille) pour différencier chaque monde d'un coup d'œil.
+    const MSOLID = { 1: "#6366f1", 2: "#17c9b2", 3: "#f59e0b", 4: "#ec6a2e" };
+    const curMonde = nextF ? Number(nextF.monde) : null;
     const mondeRows = MONDES.map((m) => {
       const fm = fichesByMonde(m.n);
       const done = fm.filter((f) => read[f.code]).length;
-      return `<button class="rvs-grp" data-monde="${m.n}">
-        <span class="rvs-num" style="background:${MCOLOR[m.n] || MCOLOR[1]}">${m.n}</span>
+      const isCurrent = curMonde === m.n;
+      const complete = fm.length > 0 && done === fm.length;
+      const cls = `rvs-grp pg-loupe${isCurrent ? " is-current" : ""}${complete ? " is-done" : ""}`;
+      return `<button class="${cls}" data-monde="${m.n}" style="--mc:${MSOLID[m.n] || MSOLID[1]}">
+        <span class="rvs-num" style="background:${MCOLOR[m.n] || MCOLOR[1]}">${complete ? "✓" : m.n}</span>
         <span class="rvs-grp-t"><b>${esc(m.sous)}</b><span>${esc(m.nom)}</span></span>
-        <span class="rvs-grp-c">${done}/${fm.length}</span>
+        ${isCurrent ? `<span class="rvs-grp-badge">Reprendre</span>` : `<span class="rvs-grp-c">${done}/${fm.length}</span>`}
         ${chev}
       </button>`;
     }).join("");
@@ -694,15 +744,16 @@ export async function mount(root, param) {
         <div class="rvc-method">${rows}</div>`;
     }
 
-    // « À retenir » éditorial : un libellé + un texte, pas de boîtes colorées.
-    const note = (cls, kicker, txt) =>
+    // « À retenir » : encadrés voyants avec pastille icône (repérables d'un
+    // coup d'œil — la boîte auto en bleu, la plus demandée).
+    const note = (cls, kicker, txt, icon) =>
       txt
-        ? `<div class="rvc-note ${cls}"><p class="rvc-note-k">${kicker}</p><p class="rvc-note-p">${esc(txt)}</p></div>`
+        ? `<div class="rvc-note pg-loupe ${cls}"><span class="rvc-note-ic">${icon}</span><div><p class="rvc-note-k">${kicker}</p><p class="rvc-note-p">${esc(txt)}</p></div></div>`
         : "";
     const retenir =
-      note("warn", "L’erreur à éviter", f.erreur) +
-      note("why", "Pourquoi ça compte", f.pourquoi) +
-      note("bva", "En boîte auto", f.bva);
+      note("warn", "L’erreur à éviter", f.erreur, FSVG.warn) +
+      note("why", "Pourquoi ça compte", f.pourquoi, FSVG.info) +
+      note("bva", "En boîte auto", f.bva, FSVG.auto);
     const srcChaines = sourceChannels(f);
     const srcHtml = srcChaines.length
       ? `<p class="rvc-fsrc">↳ Vu chez de vrais moniteurs : ${srcChaines.map((s) => esc(s)).join(", ")}</p>`

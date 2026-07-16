@@ -113,10 +113,18 @@ body.has-chrome #app {
 #header-bar[hidden] { display: none; }
 body.has-chrome.no-top-chrome #app { padding-top: 0; }
 
-/* ─── Desktop framing : iPhone-style centered, max-width 480 ─── */
+/* ─── Desktop / iPad framing : l'app posée au centre, comme une vraie appli,
+   sur un fond de marque doux (fini le « petit téléphone perdu dans le vide »).
+   Le contenu des pages est capé à 480px partout → la colonne matche, et le
+   décor autour est assumé et premium. Theme-aware (glow violet sur clair,
+   plus profond sur sombre). ─── */
 @media (min-width: 768px) {
   body {
-    background: var(--bg3);
+    background:
+      radial-gradient(120% 85% at 50% -12%, color-mix(in srgb, var(--a) 12%, transparent), transparent 58%),
+      radial-gradient(90% 60% at 100% 100%, color-mix(in srgb, var(--a) 7%, transparent), transparent 60%),
+      var(--bg3);
+    background-attachment: fixed;
   }
   body.has-chrome #app {
     max-width: 480px;
@@ -125,7 +133,8 @@ body.has-chrome.no-top-chrome #app { padding-top: 0; }
     min-height: 100dvh;
     box-shadow:
       0 0 0 1px var(--bo),
-      0 24px 64px -16px rgba(11,13,26,.08);
+      0 40px 90px -30px rgba(11,13,26,.28),
+      0 12px 32px -18px rgba(11,13,26,.16);
   }
   #header-bar,
   #bottom-nav {
@@ -134,6 +143,15 @@ body.has-chrome.no-top-chrome #app { padding-top: 0; }
     right: auto !important;
     transform: translateX(-50%);
     width: 480px;
+  }
+}
+
+/* Grand écran : un peu plus d'air autour de la colonne + coins arrondis en bas
+   pour que l'app lise comme une fenêtre posée (le header fixe garde le haut). */
+@media (min-width: 1180px) {
+  body.has-chrome #app {
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
   }
 }
 

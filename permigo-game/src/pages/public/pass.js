@@ -364,12 +364,21 @@ const STYLE = `<style>
   .pv-logo { display: grid; place-items: center; text-decoration: none; }
   .pv-logo img { width: 46px; height: 46px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.5)); }
   .pv-nav-right { display: flex; align-items: center; gap: 8px; }
-  .pv-lang {
-    font: 800 13px/1 'Baloo 2', sans-serif; letter-spacing: .05em; color: var(--pv-ink);
-    background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.22);
-    border-radius: 999px; padding: 9px 14px; cursor: pointer;
+  /* Sélecteur de langue : segment FR|EN, la langue ACTIVE est surlignée
+     (fini le bouton unique qui affichait la cible → lu comme inversé). */
+  .pv-lang-seg {
+    display: inline-flex; align-items: center; gap: 2px;
+    background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.20);
+    border-radius: 999px; padding: 3px;
   }
-  .pv-lang:active { background: rgba(255,255,255,.2); }
+  .pv-lang-opt {
+    font: 800 12.5px/1 'Baloo 2', sans-serif; letter-spacing: .04em;
+    color: rgba(255,255,255,.62); background: none; border: 0;
+    border-radius: 999px; padding: 7px 13px; cursor: pointer;
+    transition: background .16s ease, color .16s ease;
+  }
+  .pv-lang-opt.on { color: #1a1030; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.28); }
+  .pv-lang-opt:not(.on):active { background: rgba(255,255,255,.14); }
   .pv-login { font: 700 14px/1 'Baloo 2', sans-serif; color: var(--ink-soft); background: none; border: 0; padding: 10px 8px; cursor: pointer; border-radius: 12px; }
 
   /* ── Hero ── */
@@ -750,7 +759,10 @@ export async function mount(root) {
     <header class="pv-nav">
       <a class="pv-logo" href="#/" aria-label="PermiGo"><img src="${LOGO}" alt="PermiGo"></a>
       <div class="pv-nav-right">
-        <button class="pv-lang" id="pv-lang" type="button" aria-label="Switch language">${L.langBtn}</button>
+        <div class="pv-lang-seg" role="group" aria-label="Langue / Language">
+          <button class="pv-lang-opt${lang === "fr" ? " on" : ""}" data-lang="fr" type="button" aria-pressed="${lang === "fr"}">FR</button>
+          <button class="pv-lang-opt${lang === "en" ? " on" : ""}" data-lang="en" type="button" aria-pressed="${lang === "en"}">EN</button>
+        </div>
         ${me ? "" : `<button class="pv-login" id="pv-login" type="button">${L.login}</button>`}
       </div>
     </header>
@@ -950,12 +962,16 @@ function wire(root, me, lang, L) {
     location.hash = "#/login";
   });
 
-  // Bascule FR/EN : mémorise le choix puis re-rend la page entière.
-  root.querySelector("#pv-lang")?.addEventListener("click", () => {
-    const next = lang === "fr" ? "en" : "fr";
-    localStorage.setItem("pv_lang", next);
-    track("pass.lang_switch", { lang: next });
-    mount(root);
+  // Bascule FR/EN : on clique la langue VOULUE (FR ou EN), pas une bascule
+  // aveugle. On mémorise puis on re-rend la page entière.
+  root.querySelectorAll(".pv-lang-opt").forEach((opt) => {
+    opt.addEventListener("click", () => {
+      const next = opt.dataset.lang;
+      if (next === lang) return;
+      localStorage.setItem("pv_lang", next);
+      track("pass.lang_switch", { lang: next });
+      mount(root);
+    });
   });
 
   // Un clic = une session Checkout. On fige TOUS les boutons le temps de la
