@@ -15,6 +15,7 @@ import {
   SITUATIONS,
 } from "@/data/situations-conduite.js";
 import { recordAnswer } from "@/utils/weak-points.js";
+import { getScenesVues, marquerSceneVue } from "@/utils/situations-vues.js";
 import {
   renderSituationScene,
   buildFocusFX,
@@ -130,7 +131,10 @@ export async function mount(root, param) {
 
   // ── Manche ───────────────────────────────────────────────────
   function startRound() {
-    session = pickSession(isIntro ? INTRO_SIZE : ROUND_SIZE);
+    session = pickSession(
+      isIntro ? INTRO_SIZE : ROUND_SIZE,
+      getScenesVues(me.id),
+    );
     if (isJour) {
       const daily = situationDuJour();
       session = [daily, ...session.filter((s) => s.id !== daily.id)].slice(
@@ -200,8 +204,9 @@ export async function mount(root, param) {
     answered = true;
     const s = session[idx];
     const ok = repId === s.bonne;
-    // Nourrit « Mes fautes » (hub Réviser) avec les thèmes de la situation
+    // Nourrit « Mes fautes » (hub Réviser) + la collection de scènes vues
     recordAnswer(THEME_WEAK_TAGS[s.theme], ok);
+    marquerSceneVue(me.id, s.id);
     track("situation.answered", {
       situation_id: s.id,
       theme: s.theme,
@@ -291,11 +296,15 @@ export async function mount(root, param) {
     const { credites, plafonne } = crediterAvecPlafond(gagnes, me.id);
     if (credites > 0) addGemmes(credites);
 
+    const vues = getScenesVues(me.id);
+    const collPct = Math.round((vues.size / SITUATIONS.length) * 100);
+
     track("situation.completed", {
       score: bonnes,
       total,
       pct,
       volants_gagnes: credites,
+      collection_vues: vues.size,
     });
 
     if (pct === 100) {
@@ -394,6 +403,10 @@ export async function mount(root, param) {
             ? `<p class="sit-cap">Plafond du jour atteint. Les volants reviennent demain.</p>`
             : ""
         }
+        <div class="sit-coll">
+          <div class="sit-coll-t">Collection · ${vues.size}/${SITUATIONS.length} scènes vues</div>
+          <div class="sit-coll-bar"><i style="width:${collPct}%"></i></div>
+        </div>
         ${
           manquees.length
             ? `<div class="sit-revoir">
@@ -634,6 +647,10 @@ body.sit-immersive #app { padding-top: 0 !important; padding-bottom: 0 !importan
   background: rgba(255,203,61,.12); border: 1px solid rgba(255,203,61,.3);
 }
 .sit-cap { margin: 2px 0 0; font: 400 12.5px/1.4 'Inter',sans-serif; color: #b9b3e6; }
+.sit-coll { width: 100%; margin-top: 12px; text-align: left; }
+.sit-coll-t { font: 800 12px/1 'Baloo 2','Fredoka',sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--sit-gold); }
+.sit-coll-bar { margin-top: 6px; height: 8px; border-radius: 999px; background: rgba(255,255,255,.14); overflow: hidden; }
+.sit-coll-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--sit-gold), #ff9b1e); }
 .sit-revoir { width: 100%; margin: 14px 0 6px; text-align: left; display: flex; flex-direction: column; gap: 8px; }
 .sit-revoir-t { font: 800 12px/1 'Baloo 2','Fredoka',sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #b9b3e6; }
 .sit-revoir-item {

@@ -29,6 +29,7 @@ import {
   THEME_LABELS,
 } from "@/data/situations-conduite.js";
 import { renderSituationScene } from "@/components/eleve/situation-scene.js";
+import { getScenesVues } from "@/utils/situations-vues.js";
 import { getMyChests } from "@/utils/game-state.js";
 import { mountFeedbackFeed } from "@/components/eleve/feedback-feed.js";
 import {
@@ -1308,6 +1309,7 @@ function render({
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom = profile.prenom || me.prenom || "Toi";
   const _sit = situationDuJour();
+  const _sitVues = getScenesVues(me.id).size;
 
   // Bandeau d'installation — visible TANT QUE l'app n'est pas installée
   // (sur iPhone, installer = la seule façon d'avoir les notifs). Il disparaît
@@ -1458,6 +1460,9 @@ function render({
     .acc2-sitday-scene{margin:2px auto 0;max-width:280px;pointer-events:none}
     .acc2-sitday-scene svg{width:100%;height:auto;max-height:122px;display:block}
     .acc2-sitday-m{display:block;margin-top:6px;font:500 12px/1.3 'Inter',sans-serif;color:#b9b3e6}
+    .acc2-sitday-m b{color:#ffcb3d;font-weight:800}
+    .acc2-sitday-bar{display:block;margin-top:6px;height:6px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
+    .acc2-sitday-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ffcb3d,#ff9b1e)}
   </style>
   <button class="acc2-sitday" id="acc-sit-day" type="button"
           aria-label="Scène du jour : ${esc(_sit.question)} — jouer à En situation">
@@ -1467,7 +1472,16 @@ function render({
       <span class="acc2-sitday-btn" aria-hidden="true">Je décide →</span>
     </span>
     <span class="acc2-sitday-scene" aria-hidden="true">${renderSituationScene(_sit.scene)}</span>
-    <span class="acc2-sitday-m">Une scène différente chaque jour · ${SITUATIONS.length} situations</span>
+    <span class="acc2-sitday-m">${
+      _sitVues > 0
+        ? `Ta collection : <b>${_sitVues} / ${SITUATIONS.length}</b> scènes vues`
+        : `Une scène différente chaque jour · ${SITUATIONS.length} situations`
+    }</span>
+    ${
+      _sitVues > 0
+        ? `<span class="acc2-sitday-bar" aria-hidden="true"><i style="width:${Math.round((_sitVues / SITUATIONS.length) * 100)}%"></i></span>`
+        : ""
+    }
   </button>
 
   <!-- ══ PERMIS VIRTUEL — carte compacte maquette ══ -->
