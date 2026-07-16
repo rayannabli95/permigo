@@ -245,13 +245,15 @@ export async function mount(root, param) {
               : `[data-veh="${st.veh}"]`,
           );
           if (!el) return;
-          if (st.clign) el.classList.add(`clign-${st.clign}`);
-          const { dx, dy } = actorScreenDelta(
-            s.scene,
-            st.veh,
-            st.veh === "pieton" ? 2.4 : 3.6,
-          );
-          el.style.transform = `translate(${dx}px, ${dy}px)`;
+          if (st.clign === "warning")
+            el.classList.add("clign-droit", "clign-gauche");
+          else if (st.clign) el.classList.add(`clign-${st.clign}`);
+          // avance: 0 → l'acteur clignote sans bouger (ex. feux de détresse)
+          const tiles = st.avance ?? (st.veh === "pieton" ? 2.4 : 3.6);
+          if (tiles > 0) {
+            const { dx, dy } = actorScreenDelta(s.scene, st.veh, tiles);
+            el.style.transform = `translate(${dx}px, ${dy}px)`;
+          }
         }, st.delai || 60);
       }
     } else {
