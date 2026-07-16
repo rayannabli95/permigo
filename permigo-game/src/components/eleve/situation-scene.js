@@ -35,6 +35,11 @@ const CAR_COLORS = {
 };
 // vitres : verre foncé commun (les tons clairs faisaient « gâteau à étages »)
 const GLASS = { mid: "#55648e", lo: "#3f4c70" };
+// gabarits spéciaux (bus urbain, poids lourd) — couleur fixe par type
+const VEH_COLORS = {
+  bus: { hi: "#a7cbec", mid: "#5b8fc9", lo: "#3a6395" },
+  camion: { hi: "#e8e4da", mid: "#b9b2a4", lo: "#8a8171" },
+};
 
 const GROUND = { top: "#79c453", edge: "#4a8a31", edge2: "#3c7027" };
 const ROAD = { fill: "#4b4e66", line: "#f3f4f8", edge: "#3b3e52" };
@@ -354,9 +359,14 @@ function vehicleMarkup(v, opts) {
   const pose = vehiclePose(v);
   const { x, y, ux, uy } = pose;
   const isMoto = v.type === "moto";
-  const col = CAR_COLORS[v.couleur] || CAR_COLORS.gris;
-  const L = isMoto ? 0.3 : 0.5; // demi-longueur
-  const W = isMoto ? 0.075 : 0.27; // demi-largeur
+  const isVelo = v.type === "velo";
+  const isBus = v.type === "bus";
+  const isCamion = v.type === "camion";
+  const isDeuxRoues = isMoto || isVelo;
+  const col = VEH_COLORS[v.type] || CAR_COLORS[v.couleur] || CAR_COLORS.gris;
+  // demi-longueur / demi-largeur selon le gabarit
+  const L = isVelo ? 0.24 : isMoto ? 0.3 : isBus ? 0.95 : isCamion ? 0.85 : 0.5;
+  const W = isVelo ? 0.05 : isMoto ? 0.075 : isBus || isCamion ? 0.3 : 0.27;
   const sx = uy,
     sy = -ux;
 
@@ -369,7 +379,7 @@ function vehicleMarkup(v, opts) {
 
   // roues : 4 coins rentrés
   let wheels = "";
-  if (!isMoto) {
+  if (!isDeuxRoues) {
     for (const du of [0.62, -0.62]) {
       for (const ds of [1.02, -1.02]) {
         const wp = P(
@@ -381,15 +391,71 @@ function vehicleMarkup(v, opts) {
       }
     }
   } else {
+    const wr = isVelo ? 3.5 : 4.4;
     for (const du of [0.95, -0.95]) {
       const wp = P(x + ux * L * du, y + uy * L * du, 0.05);
-      wheels += `<ellipse cx="${f1(wp.x)}" cy="${f1(wp.y)}" rx="4.4" ry="4" fill="#20233a"/>`;
+      wheels += `<ellipse cx="${f1(wp.x)}" cy="${f1(wp.y)}" rx="${wr}" ry="${wr - 0.4}" fill="#20233a"/>`;
     }
   }
 
-  const body = isoBox(x, y, ux, uy, L, W, 0.1, isMoto ? 0.26 : 0.52, col);
+  let body;
+  if (isVelo) {
+    // cadre fin + cycliste assis droit (gilet orange, casque blanc)
+    body = isoBox(x, y, ux, uy, L * 0.72, 0.022, 0.12, 0.2, {
+      hi: "#37474f",
+      mid: "#2c3a44",
+      lo: "#22303a",
+    });
+  } else if (isBus) {
+    // caisse basse + bandeau vitré + toit (empilés : l'iso masque les joints)
+    body =
+      isoBox(x, y, ux, uy, L, W, 0.1, 0.48, col) +
+      isoBox(x, y, ux, uy, L * 0.94, W, 0.48, 0.7, {
+        hi: col.hi,
+        mid: GLASS.mid,
+        lo: GLASS.lo,
+      }) +
+      isoBox(x, y, ux, uy, L, W, 0.7, 0.8, col);
+  } else if (isCamion) {
+    // remorque haute + cabine courte à l'avant. Ordre de peintre selon le
+    // cap : si le camion s'éloigne (vers le haut de l'écran), la cabine est
+    // derrière la remorque et doit être dessinée en premier.
+    const remorque = isoBox(
+      x - ux * 0.22,
+      y - uy * 0.22,
+      ux,
+      uy,
+      L - 0.26,
+      W,
+      0.1,
+      0.82,
+      col,
+    );
+    const cabine = isoBox(
+      x + ux * (L - 0.2),
+      y + uy * (L - 0.2),
+      ux,
+      uy,
+      0.2,
+      W * 0.94,
+      0.1,
+      0.56,
+      CAR_COLORS.rouge,
+    );
+    body = ux < uy ? cabine + remorque : remorque + cabine;
+  } else {
+    body = isoBox(x, y, ux, uy, L, W, 0.1, isMoto ? 0.26 : 0.52, col);
+  }
   let cabin = "";
-  if (!isMoto) {
+  if (isVelo) {
+    const b = P(x, y, 0.3);
+    const h = P(x, y, 0.56);
+    cabin = `<ellipse cx="${f1(b.x)}" cy="${f1(b.y)}" rx="4.6" ry="6.5" fill="#ff7043"/>
+      <circle cx="${f1(h.x)}" cy="${f1(h.y)}" r="4.4" fill="#f3f4f8"/>
+      <circle cx="${f1(h.x - 1.3)}" cy="${f1(h.y - 1.1)}" r="1.4" fill="rgba(0,0,0,.15)"/>`;
+  } else if (isBus || isCamion) {
+    cabin = ""; // caisses déjà dessinées
+  } else if (!isMoto) {
     cabin = isoBox(
       x - ux * 0.06,
       y - uy * 0.06,
@@ -447,7 +513,11 @@ function vehicleMarkup(v, opts) {
 
   const cls = [
     "sit-veh",
-    ["droit", "gauche"].includes(v.clign) ? `clign-${v.clign}` : "",
+    v.clign === "warning"
+      ? "clign-droit clign-gauche"
+      : ["droit", "gauche"].includes(v.clign)
+        ? `clign-${v.clign}`
+        : "",
   ]
     .filter(Boolean)
     .join(" ");
