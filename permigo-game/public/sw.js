@@ -7,7 +7,7 @@
  *  - Pas de tracking, juste pour permettre l'install PWA sur iOS / Android.
  */
 
-const CACHE_NAME = "permigo-v7"; // bump = purge du vieux cache (fix affichage Android : color-scheme + manifest)
+const CACHE_NAME = "permigo-v8"; // bump = purge du vieux cache (ajout offline.html au précache)
 // Scope auto-detect : ex '/permigo-v7/' sur GitHub Pages, '/' en local
 const SCOPE = self.registration
   ? self.registration.scope
@@ -16,6 +16,7 @@ const SCOPE_PATH = new URL(SCOPE).pathname;
 const ASSETS = [
   SCOPE_PATH,
   SCOPE_PATH + "index.html",
+  SCOPE_PATH + "offline.html",
   SCOPE_PATH + "permigo-logo.png",
   SCOPE_PATH + "manifest.webmanifest",
 ];
@@ -156,13 +157,20 @@ self.addEventListener("fetch", (event) => {
   )
     return;
 
-  // Network first pour HTML (toujours la dernière version)
+  // Network first pour HTML (toujours la dernière version).
+  // Hors ligne : coquille SPA en cache, sinon vraie page « hors ligne »
+  // (qualité PWA / Play Store — jamais le dino Chrome).
   if (
     event.request.mode === "navigate" ||
     event.request.destination === "document"
   ) {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(SCOPE_PATH + "index.html")),
+      fetch(event.request).catch(
+        async () =>
+          (await caches.match(SCOPE_PATH + "index.html")) ||
+          (await caches.match(SCOPE_PATH + "offline.html")) ||
+          Response.error(),
+      ),
     );
     return;
   }

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <title>PermiGo — hors ligne</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      margin: 0; min-height: 100svh; display: flex; align-items: center; justify-content: center;
+      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+      background: #f4f5fb; color: #1c1b2e; text-align: center; padding: 24px;
+    }
+    @media (prefers-color-scheme: dark) { body { background: #14122a; color: #f0eefc; } }
+    .box { max-width: 320px; }
+    .logo { font-weight: 800; font-size: 22px; letter-spacing: .14em; margin-bottom: 18px; }
+    .logo b { color: #6366f1; }
+    h1 { font-size: 20px; margin: 0 0 10px; }
+    p { font-size: 14px; line-height: 1.55; opacity: .75; margin: 0 0 22px; }
+    button {
+      font: 800 15px 'Plus Jakarta Sans', system-ui, sans-serif; color: #fff; cursor: pointer;
+      border: 0; border-radius: 14px; padding: 14px 28px;
+      background: linear-gradient(180deg, #818cf8, #6366f1);
+      box-shadow: 0 4px 0 #4338ca;
+    }
+    button:active { transform: translateY(3px); box-shadow: 0 1px 0 #4338ca; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="logo">PERMI<b>GO</b></div>
+    <h1>Tu es hors ligne</h1>
+    <p>Pas de connexion pour le moment. Tes progrès t'attendent — réessaie dès que le réseau revient.</p>
+    <button onclick="location.reload()">Réessayer</button>
+  </div>
+</body>
+</html>

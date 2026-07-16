@@ -286,7 +286,7 @@ const TOUR_CFG = {
   enseignant: { key: "pg-tour-moniteur-v1", route: "/" },
 };
 
-export async function mount(root) {
+export async function mount(root, param) {
   const me = getCurUser();
   if (!me) return;
 
@@ -364,6 +364,11 @@ export async function mount(root) {
 
   render(root, me, prefs);
   wire(root, me, prefs);
+
+  // Deep-link #/settings/supprimer (feuille « Supprimer mon compte » du
+  // profil élève + URL publique /suppression-compte.html) : ouvre
+  // directement la modale de suppression — un seul vrai flux dans l'app.
+  if (param === "supprimer") _showDeleteModal(root, me);
 }
 
 function renderHeader() {
