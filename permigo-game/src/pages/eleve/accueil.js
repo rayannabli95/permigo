@@ -23,6 +23,12 @@ import { medallion } from "@/utils/medallions.js";
 import { volantImg } from "@/utils/volant.js";
 import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
+import {
+  situationDuJour,
+  SITUATIONS,
+  THEME_LABELS,
+} from "@/data/situations-conduite.js";
+import { renderSituationScene } from "@/components/eleve/situation-scene.js";
 import { getMyChests } from "@/utils/game-state.js";
 import { mountFeedbackFeed } from "@/components/eleve/feedback-feed.js";
 import {
@@ -1301,6 +1307,7 @@ function render({
 }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom = profile.prenom || me.prenom || "Toi";
+  const _sit = situationDuJour();
 
   // Bandeau d'installation — visible TANT QUE l'app n'est pas installée
   // (sur iPhone, installer = la seule façon d'avoir les notifs). Il disparaît
@@ -1438,6 +1445,30 @@ function render({
 
   <!-- Ancre pour les quêtes du jour (mountDailyQuests) -->
   <div id="acc-action-anchor"></div>
+
+  <!-- ══ SCÈNE DU JOUR — En situation (panneau nuit, comme le jeu) ══ -->
+  <style>
+    .acc2-sitday{display:block;width:100%;text-align:left;margin:0 0 14px;padding:14px 16px 12px;border:0;border-radius:20px;cursor:pointer;position:relative;overflow:hidden;color:#ece8ff;background:radial-gradient(120% 80% at 50% 0%,rgba(110,70,220,.35) 0%,transparent 60%),linear-gradient(180deg,#181241 0%,#0c0a26 100%);box-shadow:0 10px 24px -8px rgba(24,18,65,.45)}
+    .acc2-sitday:active{transform:scale(.985)}
+    .acc2-sitday-k{display:flex;align-items:center;gap:7px;font:800 11px/1 'Baloo 2','Fredoka',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ffcb3d}
+    .acc2-sitday-k .th{background:#ffcb3d;color:#3a1d00;border-radius:999px;padding:3px 9px;letter-spacing:.02em}
+    .acc2-sitday-row{display:flex;align-items:center;gap:12px;margin-top:7px}
+    .acc2-sitday-q{flex:1;min-width:0;font:800 17px/1.25 'Baloo 2','Fredoka',sans-serif;color:#fff;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .acc2-sitday-btn{flex:0 0 auto;background:linear-gradient(180deg,#ffd24a,#ff9c1c);color:#3a1d00;font:800 14px/1 'Baloo 2','Fredoka',sans-serif;border-radius:13px;padding:12px 18px;box-shadow:0 4px 0 #b85e00;white-space:nowrap}
+    .acc2-sitday-scene{margin:2px -8px 0;pointer-events:none}
+    .acc2-sitday-scene svg{width:100%;height:auto;max-height:148px;display:block}
+    .acc2-sitday-m{display:block;margin-top:6px;font:500 12px/1.3 'Inter',sans-serif;color:#b9b3e6}
+  </style>
+  <button class="acc2-sitday" id="acc-sit-day" type="button"
+          aria-label="Scène du jour : ${esc(_sit.question)} — jouer à En situation">
+    <span class="acc2-sitday-k">Scène du jour <span class="th">${esc(THEME_LABELS[_sit.theme] || "Code de la route")}</span></span>
+    <span class="acc2-sitday-row">
+      <span class="acc2-sitday-q">${esc(_sit.question)}</span>
+      <span class="acc2-sitday-btn" aria-hidden="true">Je décide →</span>
+    </span>
+    <span class="acc2-sitday-scene" aria-hidden="true">${renderSituationScene(_sit.scene)}</span>
+    <span class="acc2-sitday-m">Une scène différente chaque jour · ${SITUATIONS.length} situations</span>
+  </button>
 
   <!-- ══ PERMIS VIRTUEL — carte compacte maquette ══ -->
   <div class="acc2-permis-compact" id="acc-permis" role="button" tabindex="0"
@@ -1591,6 +1622,13 @@ function wire(
       }
     });
   }
+
+  // Scène du jour → manche En situation qui démarre par cette scène
+  root.querySelector("#acc-sit-day")?.addEventListener("click", () => {
+    haptic("tap");
+    track("cta.clicked", { cta_type: "scene_du_jour" });
+    navigate("#/en-situation/jour");
+  });
 
   // Streak badge → bottom sheet
   const bsBg = root.querySelector("#bs-bg");
