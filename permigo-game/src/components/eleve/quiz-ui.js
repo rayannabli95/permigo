@@ -4,12 +4,13 @@
 // pour : carte question, pips de progression, options A/B/C/D,
 // hero de célébration, révélation douce, écran de résultat.
 // ═══════════════════════════════════════════════════════════════
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { ill } from "@/utils/illustrations.js";
 import { muteButtonHTML } from "@/utils/speech.js";
 import {
   quizVisualHTML,
+  quizVisualRevealHTML,
   QUIZ_VISUAL_STYLE,
 } from "@/components/eleve/quiz-visuals.js";
 
@@ -114,6 +115,22 @@ export function pipsHTML(idx, total) {
     </div>`;
 }
 
+// Visuel pédagogique + slot porteur de l'énoncé : à la révélation, le
+// slot est remplacé par le GESTE JUSTE (quizVisualRevealHTML) s'il existe.
+function visualSlotHTML(question) {
+  const vis = quizVisualHTML(question);
+  if (!vis) return "";
+  return `<div class="qz-visual-slot" data-qzvq="${escAttr(question)}">${vis}</div>`;
+}
+
+/** Remplace le visuel de question par le geste juste (si défini). */
+export function swapVisualToReveal(container) {
+  const slot = container.querySelector?.(".qz-visual-slot");
+  if (!slot?.dataset.qzvq) return;
+  const rev = quizVisualRevealHTML(slot.dataset.qzvq);
+  if (rev) slot.innerHTML = rev;
+}
+
 // Corps de question complet : pips + énoncé + options A/B/C/D
 export function questionHTML({ q, idx, total }) {
   return `
@@ -122,7 +139,7 @@ export function questionHTML({ q, idx, total }) {
       ${muteButtonHTML()}
       <h3 class="qz-q">${richEsc(q.question)}</h3>
     </div>
-    ${quizVisualHTML(q.question)}
+    ${visualSlotHTML(q.question)}
     <div class="qz-opts">
       ${(q.options || [])
         .map(
@@ -140,6 +157,7 @@ export function questionHTML({ q, idx, total }) {
 // calme (sans secousse) sinon. Retourne `correct`.
 export function applyReveal(container, { chosen, correctIndex }) {
   const correct = chosen === correctIndex;
+  swapVisualToReveal(container);
   container.querySelectorAll(".qz-opt").forEach((b) => {
     b.disabled = true;
     const i = parseInt(b.dataset.i, 10);
