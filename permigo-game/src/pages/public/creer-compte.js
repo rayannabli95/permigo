@@ -16,6 +16,7 @@
 //   4. Add-to-home (comme le flow invitation moniteur) puis entrée dans l'app
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
 import { icon } from "@/utils/icons.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -240,6 +241,17 @@ const STYLE = `<style>
 export async function mount(root) {
   track("signup.viewed", { from: "self_serve" });
 
+  // Session déjà active (compte test resté connecté, tél partagé…) : on
+  // prévient au lieu de laisser croire que le circuit est cassé.
+  const connected = getCurUser();
+  const connectedBanner = connected
+    ? `<div id="sg-connected" style="display:flex;align-items:center;gap:10px;margin:0 0 18px;padding:12px 14px;border-radius:14px;background:rgba(255,206,77,.12);box-shadow:inset 0 0 0 1.5px rgba(255,206,77,.4)">
+        <span style="flex-shrink:0;color:var(--gold);display:flex">${icon("alert-circle", { size: 20, strokeWidth: 2 })}</span>
+        <span style="font:700 13px/1.4 'Baloo 2',var(--fb),sans-serif;color:var(--sg-ink)">Tu es déjà connecté en tant que <strong style="color:var(--gold)">${esc(connected.prenom || connected.username || connected.email || "quelqu'un")}</strong>.
+          <a href="#" id="sg-switch" style="color:var(--gold);font-weight:800">Se déconnecter pour créer un compte</a></span>
+      </div>`
+    : "";
+
   root.innerHTML = `${STYLE}
     <div class="sg">
       <div class="sg-card">
@@ -251,6 +263,7 @@ export async function mount(root) {
         <h1 class="sg-title">Crée ton compte moniteur</h1>
         <p class="sg-sub">Ton app de révision à ta marque, prête en 30 secondes.</p>
         <div style="text-align:center"><span class="sg-role-badge">Moniteur indépendant</span></div>
+        ${connectedBanner}
 
         <div class="sg-row">
           <label class="sg-label" for="sg-prenom">Prénom</label>
@@ -276,8 +289,12 @@ export async function mount(root) {
         <div class="sg-row">
           <label class="sg-label" for="sg-password">Mot de passe</label>
           <div class="sg-pwd-wrap">
-            <input class="sg-input" id="sg-password" type="password" autocomplete="new-password" minlength="8" placeholder="8 caractères minimum" />
-            <button class="sg-pwd-toggle" id="sg-pwd-toggle" type="button" aria-label="Afficher le mot de passe" aria-pressed="false">${icon("eye", { size: 18, strokeWidth: 2 })}</button>
+            <!-- Visible par défaut (type=text) : sur iPhone, un champ
+                 type=password + new-password remplace le clavier par la
+                 suggestion « mot de passe fort » → impossible de taper le sien.
+                 L'œil permet de le masquer. -->
+            <input class="sg-input" id="sg-password" type="text" autocomplete="new-password" minlength="8" placeholder="8 caractères minimum" />
+            <button class="sg-pwd-toggle" id="sg-pwd-toggle" type="button" aria-label="Masquer le mot de passe" aria-pressed="true">${icon("eye-off", { size: 18, strokeWidth: 2 })}</button>
           </div>
           <div class="sg-help" id="sg-pwd-help">Minimum 8 caractères.</div>
         </div>
@@ -285,7 +302,7 @@ export async function mount(root) {
         <button class="sg-btn" id="sg-submit" disabled>Créer mon compte</button>
         <div class="sg-trust">
           <span>${icon("check", { size: 13, strokeWidth: 2.5 })} Sans engagement</span>
-          <span>${icon("check", { size: 13, strokeWidth: 2.5 })} Élèves illimités</span>
+          <span>${icon("check", { size: 13, strokeWidth: 2.5 })} Jusqu'à 100 élèves — gratuit pour eux</span>
         </div>
         <div class="sg-sep"></div>
         <div class="sg-login-row">Déjà un compte&nbsp;? <a href="/#/login">Se connecter</a></div>
@@ -300,6 +317,18 @@ export async function mount(root) {
   const pwdEl = root.querySelector("#sg-password");
   const pwdHelp = root.querySelector("#sg-pwd-help");
   const submitBtn = root.querySelector("#sg-submit");
+
+  // Déconnexion express depuis le bandeau « déjà connecté » : on reste sur
+  // la page (reload avec le même hash) pour reprendre l'inscription à zéro.
+  root.querySelector("#sg-switch")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    try {
+      await sb.auth.signOut();
+    } catch {
+      /* session déjà morte : on recharge quand même */
+    }
+    window.location.reload();
+  });
 
   // Afficher / masquer le mot de passe
   const pwdToggle = root.querySelector("#sg-pwd-toggle");
@@ -379,14 +408,9 @@ export async function mount(root) {
 
       track("signup.completed", { role: "enseignant", from: "self_serve" });
 
-      // 3. Succès → add-to-home (comme le flow invitation moniteur) puis entrée app.
-      const goToApp = () => {
-        window.location.href = "/#";
-        window.location.reload();
-      };
-      const { renderAddToHome } =
-        await import("@/components/common/add-to-home.js");
-      renderAddToHome(root, { onDone: goToApp });
+      // 3. Succès → étape abonnement (9,99 €/mois via Stripe), puis
+      //    add-to-home et entrée dans l'app.
+      renderPaymentStep(root, prenom);
     } catch (e) {
       console.error("[creer-compte] failed", e);
       let msg;
@@ -408,4 +432,71 @@ export async function mount(root) {
   });
 
   setTimeout(() => prenomEl.focus(), 100);
+}
+
+// ─── Étape abonnement post-inscription ──────────────────────────
+// Le compte est créé : on présente l'abonnement (9,99 €/mois, Stripe Checkout
+// hébergé — même circuit que le bouton de Réglages). « Plus tard » reste
+// possible : on ne bloque pas l'entrée dans l'app (l'essai vaut mieux qu'un
+// abandon), le bouton de Réglages prend le relais.
+function renderPaymentStep(root, prenom) {
+  track("signup.payment_viewed", { role: "enseignant" });
+  root.innerHTML = `${STYLE}
+    <div class="sg">
+      <div class="sg-card" style="text-align:center">
+        <div style="margin-bottom:10px;color:var(--gold);display:flex;justify-content:center">${icon("award", { size: 42 })}</div>
+        <h1 class="sg-title">Ton compte est prêt${prenom ? `, ${esc(prenom)}` : ""} !</h1>
+        <p class="sg-sub">Dernière étape : active ton abonnement pour lancer ton espace moniteur.</p>
+        <div style="text-align:left;margin:0 0 18px;padding:16px;border-radius:16px;background:rgba(255,206,77,.1);box-shadow:inset 0 0 0 1.5px rgba(255,206,77,.35)">
+          <div style="font:800 22px/1.2 'Baloo 2',var(--fb),sans-serif;color:var(--gold);margin-bottom:8px">9,99 €/mois</div>
+          <div style="display:flex;flex-direction:column;gap:7px;font:600 13.5px/1.4 'Baloo 2',var(--fb),sans-serif;color:var(--ink-soft)">
+            <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Jusqu'à 100 élèves — gratuit pour eux</span>
+            <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Sans engagement, résiliable en 2 clics</span>
+            <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Ta marque, ton code élève, ton suivi</span>
+          </div>
+        </div>
+        <button class="sg-btn" id="sg-pay" type="button" style="margin-top:0">Activer mon abonnement</button>
+        <div class="sg-login-row" style="margin-top:14px">
+          <a href="#" id="sg-pay-later">Plus tard — découvrir l'app d'abord</a>
+        </div>
+      </div>
+    </div>`;
+
+  const goToApp = async () => {
+    const { renderAddToHome } =
+      await import("@/components/common/add-to-home.js");
+    renderAddToHome(root, {
+      onDone: () => {
+        window.location.href = "/#";
+        window.location.reload();
+      },
+    });
+  };
+
+  const payBtn = root.querySelector("#sg-pay");
+  payBtn?.addEventListener("click", async () => {
+    payBtn.disabled = true;
+    payBtn.textContent = "Redirection vers le paiement…";
+    track("billing.checkout_start", { role: "enseignant", from: "signup" });
+    try {
+      const { startCheckout } = await import("@/services/billing.js");
+      await startCheckout(); // redirige vers la page Stripe si OK
+    } catch (err) {
+      console.error("[creer-compte] checkout", err);
+      const { toast } = await import("@/components/common/toast.js");
+      toast(
+        "Paiement indisponible pour le moment — tu pourras t'abonner depuis Réglages.",
+        "error",
+        4500,
+      );
+      payBtn.disabled = false;
+      payBtn.textContent = "Activer mon abonnement";
+    }
+  });
+
+  root.querySelector("#sg-pay-later")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    track("signup.payment_skipped", { role: "enseignant" });
+    goToApp();
+  });
 }

@@ -61,6 +61,16 @@ function _playEnter(root, dir) {
   _enterTimer = setTimeout(cleanup, 460); // > durée d'anim (.28s) + marge
 }
 
+// Circuits d'inscription — accessibles MÊME connecté. Sans ça, un utilisateur
+// avec une session active (ex : compte test resté connecté sur un téléphone)
+// qui ouvre #/rejoindre ou #/creer-compte retombait SILENCIEUSEMENT sur
+// l'accueil de son rôle : le circuit d'inscription paraissait « mort ».
+// Les pages elles-mêmes affichent un bandeau « déjà connecté » dans ce cas.
+const SIGNUP_ROUTES = {
+  rejoindre: () => import("@/pages/public/rejoindre.js"),
+  "creer-compte": () => import("@/pages/public/creer-compte.js"),
+};
+
 const ROUTES = {
   eleve: {
     default: () => import("@/pages/eleve/accueil.js"),
@@ -69,6 +79,7 @@ const ROUTES = {
     // (l'achat est alors rattaché au compte via le JWT).
     pass: () => import("@/pages/public/pass.js"),
     "avis-depart": () => import("@/pages/public/avis-depart.js"),
+    ...SIGNUP_ROUTES,
     reviser: () => import("@/pages/eleve/reviser.js"),
     parcours: () => import("@/pages/eleve/parcours.js"),
     sessions: () => import("@/pages/eleve/session-confirmation.js"),
@@ -116,6 +127,7 @@ const ROUTES = {
     // (l'achat est alors rattaché au compte via le JWT).
     pass: () => import("@/pages/public/pass.js"),
     "avis-depart": () => import("@/pages/public/avis-depart.js"),
+    ...SIGNUP_ROUTES,
     aujourdhui: () => import("@/pages/enseignant/aujourdhui.js"),
     // Chantier nav simplifiée : « Mon blason » fusionne l'ancien hub Progression
     // (parcours-pro.js, retiré) + un aperçu Trophées + un aperçu Ligue de la
@@ -165,6 +177,7 @@ const ROUTES = {
     // (l'achat est alors rattaché au compte via le JWT).
     pass: () => import("@/pages/public/pass.js"),
     "avis-depart": () => import("@/pages/public/avis-depart.js"),
+    ...SIGNUP_ROUTES,
     pulse: () => import("@/pages/gerant/pulse.js"),
     equipe: () => import("@/pages/gerant/equipe.js"),
     eleves: () => import("@/pages/gerant/eleves.js"),
@@ -191,6 +204,7 @@ const ROUTES = {
     // (l'achat est alors rattaché au compte via le JWT).
     pass: () => import("@/pages/public/pass.js"),
     "avis-depart": () => import("@/pages/public/avis-depart.js"),
+    ...SIGNUP_ROUTES,
     messages: () => import("@/pages/common/messages.js"),
     legal: () => import("@/pages/common/legal.js"),
     dbg: () => import("@/pages/admin/debug.js"),
@@ -208,6 +222,8 @@ const ROUTE_TITLES = {
   ecole: "École",
   pass: "Pass Permis",
   "avis-depart": "Ton avis",
+  rejoindre: "Rejoins ton moniteur",
+  "creer-compte": "Crée ton compte moniteur",
   aujourdhui: "Aujourd'hui",
   parcours: "Parcours",
   "mon-blason": "Mon blason",

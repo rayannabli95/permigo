@@ -68,7 +68,16 @@ export function setupAuthListener(sb) {
         knownUid = null;
         setCurUser(null);
         // Si on était connecté, on évite de laisser une page de rôle figée.
-        if (wasLogged) hardReset(true);
+        // Sur une page PUBLIQUE (inscription, pass…), on recharge SUR PLACE :
+        // renvoyer à la racine cassait le « Se déconnecter pour créer un
+        // compte » des circuits d'inscription (le hash était perdu).
+        if (wasLogged) {
+          const publicPage =
+            /^#\/(rejoindre|creer-compte|signup|pass|ecole|avis-depart|login)/.test(
+              location.hash || "",
+            );
+          hardReset(!publicPage);
+        }
         return;
       }
 
