@@ -483,6 +483,87 @@ const SCENES = {
       { id: "v1", at: "N", d: 1.6, couleur: "gris" },
     ],
   },
+  // ── acteurs vulnérables & gros gabarits (lot 2) ──
+  cyclisteDevant: {
+    kind: "route",
+    vehicules: [
+      { ...MOI, d: 2.7 },
+      { id: "v1", type: "velo", at: "S", d: 1.0, lane: 0.56 },
+    ],
+  },
+  cyclisteCroise: {
+    kind: "route",
+    vehicules: [
+      { ...MOI, d: 2.5 },
+      { id: "v1", type: "velo", at: "N", d: 1.4, lane: 0.56 },
+    ],
+  },
+  cyclisteFace: {
+    kind: "croisement",
+    vehicules: [
+      { ...MOI, d: 2.2, clign: "gauche" },
+      { id: "v1", type: "velo", at: "N", d: 1.9 },
+    ],
+  },
+  cyclisteGiratoire: {
+    kind: "giratoire",
+    signal: { type: "giratoire", branch: "S" },
+    vehicules: [
+      { ...MOI, d: 2.6 },
+      { id: "v1", type: "velo", angle: 200 },
+    ],
+  },
+  motoDevant: {
+    kind: "route",
+    vehicules: [
+      { ...MOI, d: 2.7, clign: "gauche" },
+      { id: "v1", type: "moto", at: "S", d: 1.1, lane: 0.5 },
+    ],
+  },
+  busArrete: {
+    kind: "route",
+    passage: true,
+    pieton: { engage: true },
+    vehicules: [
+      { ...MOI, d: 2.8 },
+      { id: "v1", type: "bus", at: "S", d: 1.35, lane: 0.52 },
+    ],
+  },
+  busRepart: {
+    kind: "route",
+    vehicules: [
+      { ...MOI, d: 2.9 },
+      { id: "v1", type: "bus", at: "S", d: 1.3, lane: 0.52, clign: "gauche" },
+    ],
+  },
+  busWarnings: {
+    kind: "route",
+    vehicules: [
+      { ...MOI, d: 2.9 },
+      { id: "v1", type: "bus", at: "S", d: 1.3, lane: 0.52, clign: "warning" },
+    ],
+  },
+  rabattementCamion: {
+    kind: "route",
+    vehicules: [
+      { ...MOI, d: 1.1, lane: -0.39, clign: "droit" },
+      { id: "v1", type: "camion", at: "S", d: 2.9 },
+    ],
+  },
+  camionDevant: {
+    kind: "route",
+    vehicules: [
+      { ...MOI, d: 2.9 },
+      { id: "v1", type: "camion", at: "S", d: 1.1 },
+    ],
+  },
+  camionCroise: {
+    kind: "route",
+    vehicules: [
+      { ...MOI, d: 2.5 },
+      { id: "v1", type: "camion", at: "N", d: 1.5 },
+    ],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -499,12 +580,10 @@ const panneau = (t) => wrap("panneau", panneauSVG(t));
 
 const RULES = [
   // ── Bloqueurs : pas d'acteur/décor fidèle → repli texte ────────
+  { re: /cyclable|trottinette|interfile|trottoir/, vis: null },
+  { re: /sens unique|contresens/, vis: null },
   {
-    re: /cycliste|vélo|cyclable|scooter|moto|deux[- ]roues|trottinette|interfile/,
-    vis: null,
-  },
-  {
-    re: /tramway|tram\b|\bbus\b|poids lourd|camion|tracteur|convoi|ambulance|chevaux|animal|cerf/,
+    re: /tramway|tram\b|tracteur|convoi|ambulance|chevaux|animal|cerf/,
     vis: null,
   },
   {
@@ -517,7 +596,7 @@ const RULES = [
     vis: null,
   },
   { re: /tunnel|péage|pont/, vis: null },
-  { re: /école|scolaire/, vis: null },
+  { re: /zone scolaire|d'une école|école,/, vis: null },
   // « feux stop » = feux de freinage (pas le panneau) ; « dépasser la
   // limite » = vitesse (pas un dépassement) ; warnings d'un AUTRE véhicule
   // et ligne jaune de trottoir : rien de fidèle à montrer en v1.
@@ -528,6 +607,41 @@ const RULES = [
 
   // ── Panneaux à sens précis (avant les scènes génériques) ────────
   { re: /fin d'interdiction|gris barré/, vis: () => panneau("fin") },
+
+  // ── Acteurs : cyclistes, bus, poids lourds, scooters ────────────
+  // (avant giratoire/piéton/dépassement génériques : l'acteur prime)
+  {
+    re: /cycliste.*(giratoire|anneau)|(giratoire|anneau).*cycliste/,
+    vis: () => sc("cyclisteGiratoire"),
+  },
+  {
+    re: /cycliste arrive en face|tournes à gauche.*cycliste/,
+    vis: () => sc("cyclisteFace"),
+  },
+  { re: /croises un cycliste/, vis: () => sc("cyclisteCroise") },
+  {
+    re: /cycliste|vélo|usagers vulnérables/,
+    vis: () => sc("cyclisteDevant"),
+  },
+  { re: /scooter|deux[- ]roues/, vis: () => sc("motoDevant") },
+  {
+    re: /bus (redémarre|met son clignotant|quitte)|bus.*clignotant/,
+    vis: () => sc("busRepart"),
+  },
+  { re: /bus scolaire|warnings allumés/, vis: () => sc("busWarnings") },
+  { re: /\bbus\b/, vis: () => sc("busArrete") },
+  {
+    re: /croises un poids lourd|croisement poids lourd/,
+    vis: () => sc("camionCroise"),
+  },
+  {
+    re: /viens de doubler un (camion|poids lourd)/,
+    vis: () => sc("rabattementCamion"),
+  },
+  {
+    re: /camion|poids lourd|camionnette/,
+    vis: () => sc("camionDevant"),
+  },
 
   // ── Scènes : giratoire / intersections / priorités ─────────────
   {
@@ -766,6 +880,7 @@ const RULES = [
     vis: () => pedales({}),
   },
   { re: /\bcales?\b|caler/, vis: () => pedales({}) },
+  { re: /voiture-école/, vis: () => sc("distance") },
   {
     re: /rétrograd.*5|5.*rétrograd/,
     vis: () => levier({ from: "5", to: "3" }),
