@@ -1195,18 +1195,23 @@ function shuffle(arr) {
 /**
  * Tire une manche de n situations en variant les thèmes :
  * d'abord un scénario par thème (ordre aléatoire), puis on complète.
+ * `vues` (ids déjà joués) : les scènes jamais vues passent devant,
+ * pour que la collection avance à chaque manche.
  */
-export function pickSession(n = 6) {
+export function pickSession(n = 6, vues = new Set()) {
   const pool = shuffle(SITUATIONS);
-  const seen = new Set();
+  const ordered = pool
+    .filter((s) => !vues.has(s.id))
+    .concat(pool.filter((s) => vues.has(s.id)));
+  const themes = new Set();
   const first = [];
   const rest = [];
-  for (const s of pool) {
-    if (seen.has(s.theme)) rest.push(s);
+  for (const s of ordered) {
+    if (themes.has(s.theme)) rest.push(s);
     else {
-      seen.add(s.theme);
+      themes.add(s.theme);
       first.push(s);
     }
   }
-  return first.concat(rest).slice(0, Math.min(n, pool.length));
+  return first.concat(rest).slice(0, Math.min(n, ordered.length));
 }
