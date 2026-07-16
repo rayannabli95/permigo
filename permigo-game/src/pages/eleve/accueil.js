@@ -65,9 +65,9 @@ const ELEVE_TOUR_STEPS = [
     text: "Un quiz par jour. Tout démarre ici.",
   },
   {
-    // Chantier nav simplifiée : l'onglet élève "parcours" est devenu
-    // "mon-permis" (le jeu a déménagé sous Réviser) — le sélecteur suit.
-    sel: '.bn-tab[data-id="mon-permis"]',
+    // 2026-07-16 : l'onglet « Mon permis » ré-ouvre directement le
+    // parcours (data-id="parcours") — le sélecteur suit.
+    sel: '.bn-tab[data-id="parcours"]',
     title: "Ta carte du permis",
     text: "31 compétences à valider avec ton moniteur.",
   },
