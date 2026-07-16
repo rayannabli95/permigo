@@ -45,10 +45,31 @@ function reduced() {
   }
 }
 
+// ── Saisie en cours ? (un champ texte a le focus) ──
+// CRITIQUE : pendant la saisie, on coupe le hack switch iOS ET les crans de
+// défilement. Sinon : l'ouverture du clavier fait défiler la page → tick
+// haptique → sur iPhone le .click() du label vole le focus du champ → le
+// clavier se ferme → la page re-défile → boucle « l'écran vibre et on ne
+// peut rien taper » (bug qui a bloqué de vraies inscriptions, 2026-07-16).
+function typingActive() {
+  const ae = typeof document !== "undefined" ? document.activeElement : null;
+  if (!ae) return false;
+  if (ae.isContentEditable) return true;
+  const tag = ae.tagName;
+  if (tag === "TEXTAREA" || tag === "SELECT") return true;
+  if (tag !== "INPUT") return false;
+  return !/^(checkbox|radio|range|button|submit|reset|file|color)$/i.test(
+    ae.type || "",
+  );
+}
+
 // ── Hack haptique iOS : toggler un switch caché = vrai buzz sur iPhone.
 let _switchLabel = null;
 function iosBuzz() {
   if (typeof document === "undefined" || !document.body) return;
+  // Jamais pendant la saisie : le .click() du label volerait le focus du
+  // champ actif (clavier fermé, frappe impossible).
+  if (typingActive()) return;
   try {
     if (!_switchLabel) {
       const label = document.createElement("label");
@@ -144,6 +165,10 @@ const _scrollState = new WeakMap();
 let _lastScrollTick = 0;
 export function scrollHaptic(el) {
   if (!el) return;
+  // Clavier ouvert / saisie en cours : le défilement est très souvent le
+  // scroll AUTOMATIQUE d'ouverture du clavier → vibration en rafale sur
+  // Android + vol de focus sur iPhone. On coupe tout pendant la saisie.
+  if (typingActive()) return;
   const x = el.scrollLeft || 0;
   const y = el.scrollTop || 0;
   const st = _scrollState.get(el);
