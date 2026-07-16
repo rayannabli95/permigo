@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     const origin =
       req.headers.get("origin") ??
       Deno.env.get("APP_URL") ??
-      "https://permigo.vercel.app";
+      "https://www.permigo.fr";
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
