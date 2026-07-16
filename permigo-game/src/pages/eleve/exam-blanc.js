@@ -28,6 +28,10 @@ import {
   renderTheoryGain,
 } from "@/components/eleve/theory-gain.js";
 import { haptic } from "@/utils/haptic.js";
+import {
+  quizVisualHTML,
+  QUIZ_VISUAL_CSS,
+} from "@/components/eleve/quiz-visuals.js";
 import { hideBottomNav } from "@/utils/nav.js";
 import {
   muteButtonHTML,
@@ -227,7 +231,7 @@ function renderQuestionBody(
           ${muteButtonHTML()}
           <p class="exb-qtext">${esc(q.enonce)}</p>
         </div>
-        ${q.image ? `<img class="exb-qimg" src="${esc(q.image)}" alt="Panneau routier à identifier" />` : ""}
+        ${q.image ? `<img class="exb-qimg" src="${esc(q.image)}" alt="Panneau routier à identifier" />` : quizVisualHTML(q.enonce)}
         ${renderChoices(q)}
         <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
       </div>`;
@@ -1739,7 +1743,7 @@ function renderStyles() {
   ) {
     const el = document.createElement("style");
     el.id = EXB_STYLE_ID;
-    el.textContent = EXB_CSS;
+    el.textContent = EXB_CSS + QUIZ_VISUAL_CSS;
     document.head.appendChild(el);
   }
   return "";

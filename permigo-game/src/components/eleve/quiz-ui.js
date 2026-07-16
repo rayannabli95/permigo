@@ -8,6 +8,10 @@ import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { ill } from "@/utils/illustrations.js";
 import { muteButtonHTML } from "@/utils/speech.js";
+import {
+  quizVisualHTML,
+  QUIZ_VISUAL_STYLE,
+} from "@/components/eleve/quiz-visuals.js";
 
 // ─── Texte ───────────────────────────────────────────────────────
 
@@ -118,6 +122,7 @@ export function questionHTML({ q, idx, total }) {
       ${muteButtonHTML()}
       <h3 class="qz-q">${richEsc(q.question)}</h3>
     </div>
+    ${quizVisualHTML(q.question)}
     <div class="qz-opts">
       ${(q.options || [])
         .map(
@@ -310,4 +315,4 @@ export const QUIZ_STYLE = `<style>
     .qz-opt,.qz-praise,.qz-streak,.qz-expl,.qz-next{animation-duration:.01ms;animation-delay:0ms}
     .qz-opt.hero{animation:none}
   }
-</style>`;
+</style>` + QUIZ_VISUAL_STYLE;
