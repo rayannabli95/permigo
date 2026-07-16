@@ -46,6 +46,9 @@ export const THEME_LABELS = {
   distance: "Distances de sécurité",
   depassement: "Dépassement",
   prioritaire: "Véhicules prioritaires",
+  autoroute: "Autoroute",
+  cycliste: "Cyclistes",
+  partage: "Partage de la route",
 };
 
 // Thème du jeu → thèmes « Mes fautes » (TAG_LABELS de utils/weak-points.js).
@@ -61,6 +64,9 @@ export const THEME_WEAK_TAGS = {
   distance: ["vitesse"],
   depassement: ["signalisation"],
   prioritaire: ["priorite"],
+  autoroute: ["vitesse", "signalisation"],
+  cycliste: ["cycliste"],
+  partage: ["courtoisie", "priorite"],
 };
 
 export const SITUATIONS = [
@@ -719,6 +725,450 @@ export const SITUATIONS = [
       "Un véhicule prioritaire en intervention (pompiers, SAMU, police) passe avant tout le monde, même si la règle normale te donnerait la priorité. Tu le laisses passer.",
     focus: { veh: "v1" },
     okAnim: [{ veh: "v1" }, { veh: "moi", delai: 1000 }],
+  },
+
+  // ── Feux (lot 3) ─────────────────────────────────────────────
+  {
+    id: "feu-rouge-desert",
+    theme: "feu",
+    difficulte: 1,
+    alt: "Le feu de ton intersection est rouge. Aucune voiture ni piéton en vue.",
+    scene: {
+      kind: "croisement",
+      signal: { type: "feu", etat: "rouge", branch: "S" },
+      vehicules: [
+        { id: "moi", at: "S", d: 2.2, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question: "Feu rouge, personne en vue. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "arret", label: "Je m'arrête et j'attends le vert", ico: "🛑" },
+      { id: "passe", label: "Je passe, il n'y a personne" },
+      { id: "pas", label: "Je passe au pas, prudemment", ico: "🐢" },
+    ],
+    bonne: "arret",
+    explication:
+      "Le feu rouge impose l'arrêt complet, même si tout est désert. Tu attends le vert derrière la ligne, sans exception.",
+    okAnim: [], // on reste à l'arrêt devant le feu
+  },
+  {
+    id: "feu-orange-engage",
+    theme: "feu",
+    difficulte: 3,
+    alt: "Le feu passe à l'orange alors que tu es presque à sa hauteur, trop près pour freiner en douceur.",
+    scene: {
+      kind: "croisement",
+      signal: { type: "feu", etat: "orange", branch: "S" },
+      vehicules: [
+        { id: "moi", at: "S", d: 1.45, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question:
+      "Le feu passe à l'orange au dernier moment, tu es presque dessus. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "passe", label: "Je passe : freiner ici serait dangereux" },
+      { id: "pile", label: "Je freine à fond pour m'arrêter", ico: "🛑" },
+      { id: "milieu", label: "Je m'arrête au milieu du carrefour" },
+    ],
+    bonne: "passe",
+    explication:
+      "L'orange impose l'arrêt SAUF si tu ne peux plus freiner sans danger. Trop engagé, tu passes — sans accélérer. C'est la nuance avec un orange vu de loin.",
+    okAnim: [{ veh: "moi" }],
+  },
+
+  // ── Priorité à droite (lot 3) ────────────────────────────────
+  {
+    id: "feu-eteint-prio-droite",
+    theme: "priorite-droite",
+    difficulte: 3,
+    alt: "Le feu de l'intersection est éteint, en panne. Une voiture bleue arrive par ta droite.",
+    scene: {
+      kind: "croisement",
+      signal: { type: "feu", etat: "panne", branch: "S" },
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "v1", at: "E", d: 1.75, couleur: "bleu" },
+      ],
+    },
+    question: "Le feu est en panne, éteint. Qui passe en premier ?",
+    mode: "cible",
+    reponses: [
+      { id: "v1", veh: "v1", label: "La voiture bleue" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "v1",
+    explication:
+      "Un feu éteint ou en panne ne compte plus : le croisement redevient une intersection sans signalisation. Priorité à droite — la voiture bleue passe d'abord.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 950 }],
+  },
+  {
+    id: "prio-panneau-croix",
+    theme: "priorite-droite",
+    difficulte: 2,
+    alt: "Un panneau triangulaire avec une croix noire annonce ton intersection. Une voiture jaune arrive par ta droite.",
+    scene: {
+      kind: "croisement",
+      signal: { type: "prio", branch: "S" },
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "v1", at: "E", d: 1.85, couleur: "jaune" },
+      ],
+    },
+    question:
+      "Ce panneau annonce l'intersection. Une voiture arrive à droite. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "laisse", label: "Je la laisse passer", ico: "✋" },
+      { id: "passe", label: "Je passe : le panneau me rend prioritaire" },
+      { id: "arret", label: "Je m'arrête, c'est comme un stop", ico: "🛑" },
+    ],
+    bonne: "laisse",
+    explication:
+      "La croix de Saint-André annonce une intersection SANS priorité particulière : c'est la priorité à droite qui s'applique. Elle vient de ta droite, elle passe.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 950 }],
+  },
+  {
+    id: "camion-prio-droite",
+    theme: "priorite-droite",
+    difficulte: 1,
+    alt: "Croisement sans panneau ni feu. Un camion arrive par ta droite.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "v1", at: "E", d: 2.0, type: "camion" },
+      ],
+    },
+    question: "Un camion arrive par ta droite. Qui passe en premier ?",
+    mode: "cible",
+    reponses: [
+      { id: "v1", veh: "v1", label: "Le camion" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "v1",
+    explication:
+      "Gros ou petit, la règle ne change pas : il vient de ta droite, il passe en premier. Avec un camion, garde encore plus de marge — il démarre lentement.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 1100 }],
+  },
+
+  // ── Giratoire (lot 3) ────────────────────────────────────────
+  {
+    id: "giratoire-anneau-vide",
+    theme: "giratoire",
+    difficulte: 1,
+    alt: "Tu arrives à un giratoire. L'anneau est complètement vide.",
+    scene: {
+      kind: "giratoire",
+      signal: { type: "giratoire", branch: "S" },
+      vehicules: [
+        { id: "moi", at: "S", d: 2.6, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question: "L'anneau est vide. Dois-tu t'arrêter avant d'entrer ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "ralentis",
+        label: "Non : je ralentis, je contrôle et je m'engage",
+        ico: "🐢",
+      },
+      {
+        id: "arret",
+        label: "Oui : arrêt obligatoire, comme au stop",
+        ico: "🛑",
+      },
+      { id: "accel", label: "J'accélère pour entrer vite", ico: "⚡" },
+    ],
+    bonne: "ralentis",
+    explication:
+      "L'entrée d'un giratoire est un « cédez le passage », pas un stop : anneau libre, tu t'engages sans arrêt complet. Tu t'arrêtes seulement si quelqu'un arrive.",
+    okAnim: [{ veh: "moi", delai: 400 }],
+  },
+
+  // ── Autoroute ────────────────────────────────────────────────
+  {
+    id: "autoroute-voie-droite",
+    theme: "autoroute",
+    difficulte: 1,
+    alt: "Autoroute à deux voies. Tu roules sur la voie de gauche alors que la voie de droite est libre.",
+    scene: {
+      kind: "autoroute",
+      vehicules: [
+        {
+          id: "moi",
+          at: "S",
+          d: 2.2,
+          lane: -0.62,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question:
+      "Tu roules à gauche et la voie de droite est libre. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "rabats", label: "Je me rabats sur la voie de droite" },
+      { id: "reste", label: "Je reste à gauche, c'est plus fluide" },
+      { id: "accel", label: "J'accélère pour rester devant", ico: "⚡" },
+    ],
+    bonne: "rabats",
+    explication:
+      "Sur autoroute, tu circules sur la voie la plus à droite. La voie de gauche sert uniquement à dépasser — rester dessus sans raison est une infraction.",
+    okAnim: [{ veh: "moi", clign: "droit" }],
+  },
+  {
+    id: "autoroute-bau-bouchon",
+    theme: "autoroute",
+    difficulte: 2,
+    alt: "Bouchon sur l'autoroute : les deux voies sont à l'arrêt. La bande d'arrêt d'urgence, à droite, est libre.",
+    scene: {
+      kind: "autoroute",
+      vehicules: [
+        { id: "v1", at: "S", d: 1.2, lane: 0.05, couleur: "gris" },
+        { id: "v2", at: "S", d: 0.5, lane: -0.62, couleur: "rouge" },
+        {
+          id: "moi",
+          at: "S",
+          d: 2.3,
+          lane: 0.05,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question:
+      "Ça bouchonne et la bande d'arrêt d'urgence est libre. Tu la prends ?",
+    mode: "cartes",
+    reponses: [
+      { id: "non", label: "Non : elle est réservée aux urgences" },
+      { id: "sortie", label: "Oui, juste pour rejoindre la sortie" },
+      { id: "pas", label: "Oui, si je roule au pas", ico: "🐢" },
+    ],
+    bonne: "non",
+    explication:
+      "La bande d'arrêt d'urgence sert aux véhicules en panne et aux secours. Y rouler est interdit et dangereux, bouchon ou pas — tu patientes dans ta file.",
+    okAnim: [
+      { veh: "v1" },
+      { veh: "v2", delai: 200 },
+      { veh: "moi", delai: 500 },
+    ],
+  },
+  {
+    id: "autoroute-rabattement-camion",
+    theme: "autoroute",
+    difficulte: 2,
+    alt: "Autoroute. Tu es sur la voie de gauche, tu viens de dépasser un camion qui roule sur la voie de droite, derrière toi.",
+    scene: {
+      kind: "autoroute",
+      vehicules: [
+        { id: "camion", at: "S", d: 1.4, lane: 0.05, type: "camion" },
+        {
+          id: "moi",
+          at: "S",
+          d: 2.6,
+          lane: -0.62,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question:
+      "Tu dépasses ce camion par la gauche. Quand te rabats-tu à droite ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "retro",
+        label: "Quand je le vois en entier dans mon rétro intérieur",
+        ico: "👀",
+      },
+      { id: "ras", label: "Tout de suite, au ras de sa calandre", ico: "⚡" },
+      { id: "reste", label: "Je reste à gauche jusqu'à ma sortie" },
+    ],
+    bonne: "retro",
+    explication:
+      "Tu te rabats sans couper la route du dépassé : quand tout le camion apparaît dans ton rétro intérieur, tu as la marge pour revenir à droite en sécurité.",
+    okAnim: [{ veh: "moi", clign: "droit" }],
+  },
+
+  // ── Cyclistes ────────────────────────────────────────────────
+  {
+    id: "cycliste-depassement",
+    theme: "cycliste",
+    difficulte: 2,
+    alt: "Route en ville. Un cycliste roule devant toi, sur le bord droit de ta voie.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "velo", at: "S", d: 0.9, lane: 0.62, type: "velo" },
+        { id: "moi", at: "S", d: 2.1, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question: "Tu veux dépasser ce cycliste. Quel écart dois-tu laisser ?",
+    mode: "cartes",
+    reponses: [
+      { id: "metre", label: "Au moins 1 m en ville, 1,50 m hors agglo" },
+      { id: "frole", label: "50 cm suffisent si je ralentis", ico: "🐢" },
+      { id: "klaxonne", label: "Je klaxonne pour qu'il se serre", ico: "📢" },
+    ],
+    bonne: "metre",
+    explication:
+      "Pour doubler un cycliste, l'écart est obligatoire : 1 m en agglomération, 1,50 m hors agglomération. Pas la place ? Tu restes derrière lui.",
+    focus: { veh: "velo" },
+    okAnim: [{ veh: "velo" }, { veh: "moi", delai: 300 }],
+  },
+
+  // ── Distances (lot 3) ────────────────────────────────────────
+  {
+    id: "distance-camion-ecran",
+    theme: "distance",
+    difficulte: 2,
+    alt: "Route. Tu roules derrière un camion qui bouche complètement ta vue vers l'avant.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "lead", at: "S", d: 1.25, type: "camion" },
+        { id: "moi", at: "S", d: 2.15, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question: "Ce camion te cache tout ce qui se passe devant. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "ecart", label: "J'augmente encore ma distance", ico: "🐢" },
+      { id: "colle", label: "Je me colle pour me préparer à doubler" },
+      { id: "klaxonne", label: "Je klaxonne pour qu'il accélère", ico: "📢" },
+    ],
+    bonne: "ecart",
+    explication:
+      "Plus le véhicule devant est gros, moins tu vois loin : tu allonges ta distance pour retrouver de la visibilité et du temps de réaction.",
+    okAnim: [{ veh: "lead" }, { veh: "moi", delai: 250 }],
+  },
+
+  // ── Piétons (lot 3) ──────────────────────────────────────────
+  {
+    id: "pieton-hors-passage",
+    theme: "pieton",
+    difficulte: 2,
+    alt: "Rue sans passage piéton à cet endroit. Un piéton traverse quand même la chaussée devant toi.",
+    scene: {
+      kind: "route",
+      pieton: { engage: true },
+      vehicules: [
+        { id: "moi", at: "S", d: 2.2, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question: "Il traverse en dehors de tout passage piéton. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "ralentis", label: "Je ralentis et je le laisse finir", ico: "🐢" },
+      {
+        id: "klaxonne",
+        label: "Je klaxonne : il n'a rien à faire là",
+        ico: "📢",
+      },
+      {
+        id: "maintiens",
+        label: "Je maintiens ma vitesse, je suis prioritaire",
+      },
+    ],
+    bonne: "ralentis",
+    explication:
+      "Même en tort, un piéton reste fragile : tu ne forces jamais le passage. Tu ralentis, prêt à t'arrêter — un choc resterait dramatique, peu importe la règle.",
+    focus: { pieton: true },
+    okAnim: [{ veh: "pieton" }, { veh: "moi", delai: 1400 }],
+  },
+
+  // ── Véhicules prioritaires (lot 3) ───────────────────────────
+  {
+    id: "prioritaire-samu-derriere",
+    theme: "prioritaire",
+    difficulte: 2,
+    alt: "Route en ville. Une ambulance arrive derrière toi, gyrophares et sirène allumés, en train de remonter par ta gauche.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "moi", at: "S", d: 1.7, couleur: "joueur", label: "Toi" },
+        {
+          id: "samu",
+          at: "S",
+          d: 3.0,
+          lane: -0.39,
+          couleur: "gris",
+          label: "🚑 SAMU",
+        },
+      ],
+    },
+    question:
+      "Une ambulance arrive derrière toi, sirène hurlante. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "serre", label: "Je serre à droite et je ralentis", ico: "✋" },
+      { id: "accel", label: "J'accélère pour ne pas la gêner", ico: "⚡" },
+      { id: "pile", label: "Je pile sur place", ico: "🛑" },
+    ],
+    bonne: "serre",
+    explication:
+      "Tu facilites toujours le passage d'un véhicule d'urgence : tu serres à droite et tu ralentis — sans piler ni t'arrêter n'importe où.",
+    focus: { veh: "samu" },
+    okAnim: [{ veh: "samu" }],
+  },
+
+  // ── Partage de la route ──────────────────────────────────────
+  {
+    id: "partage-bus-arret",
+    theme: "partage",
+    difficulte: 2,
+    alt: "Rue en ville. Un bus à l'arrêt sur le bord droit met son clignotant gauche pour repartir.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        {
+          id: "bus",
+          at: "S",
+          d: 1.0,
+          lane: 0.72,
+          type: "bus",
+          clign: "gauche",
+        },
+        {
+          id: "moi",
+          at: "S",
+          d: 2.7,
+          lane: 0.1,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question:
+      "En ville, ce bus met son clignotant pour quitter son arrêt. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "laisse",
+        label: "Je ralentis et je le laisse repartir",
+        ico: "✋",
+      },
+      { id: "accel", label: "J'accélère pour passer avant lui", ico: "⚡" },
+      {
+        id: "klaxonne",
+        label: "Je klaxonne pour garder le passage",
+        ico: "📢",
+      },
+    ],
+    bonne: "laisse",
+    explication:
+      "En agglomération, tu dois faciliter le départ d'un bus qui quitte son arrêt : tu ralentis et tu le laisses s'insérer devant toi.",
+    focus: { veh: "bus" },
+    okAnim: [
+      { veh: "bus", clign: "gauche" },
+      { veh: "moi", delai: 1100 },
+    ],
   },
 ];
 
