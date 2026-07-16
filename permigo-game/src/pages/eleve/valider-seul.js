@@ -17,6 +17,9 @@
 //   3. Score ≥ 80% → RPC self_validate_competence (table self_validations,
 //      SÉPARÉE de `validations` — jamais une ligne attribuée à un
 //      enseignant, zéro impact sur les stats moniteur).
+//   4. +25 volants via claim_competence_reward — même récompense qu'une
+//      validation moniteur (migration solo_rewards_parity ; claim
+//      idempotent, 1 seule fois par compétence).
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -31,6 +34,7 @@ import { lancerQuiz } from "@/services/quiz-engine.js";
 import { findSubComp, findCategory } from "@/data/remc.js";
 import { getFiche } from "@/data/fiches-conduite.js";
 import { burstConfetti } from "@/components/common/confetti.js";
+import { refreshGemmes } from "@/utils/game-state.js";
 
 const NB_QUESTIONS = 5; // plus que le quiz-récap (3) : la note ≥80% doit avoir du sens
 const SEUIL = 80;
@@ -99,6 +103,10 @@ const STYLE = `<style>
   background:linear-gradient(180deg,#ffe9b0,#f5b73d); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .vsr-p { font:500 14px/1.55 'Inter',sans-serif; color:#cabfef; margin:0 0 4px; max-width:320px; }
 .vsr-score { font:800 13px/1 'Plus Jakarta Sans',sans-serif; color:#8ef0b0; margin:10px 0 0; }
+.vsr-volants { display:inline-flex; align-items:center; gap:8px; margin:16px 0 0; padding:9px 16px; border-radius:99px;
+  font:800 14px/1 'Plus Jakarta Sans',sans-serif; color:#ffd76e;
+  background:rgba(255,210,74,.12); border:1px solid rgba(255,210,74,.3); }
+.vsr-volants img { width:22px; height:22px; }
 .vsr-cta { width:100%; max-width:340px; margin-top:26px; padding:16px; border:0; border-radius:14px; cursor:pointer;
   font:800 15px/1 'Plus Jakarta Sans',sans-serif; color:#4a2500;
   background:linear-gradient(180deg,#ffd76e,#f0a93f); box-shadow:0 6px 0 #b46a10, 0 12px 22px rgba(0,0,0,.4); }
@@ -216,13 +224,14 @@ function introScreen(sub, cat, already) {
   </div>`;
 }
 
-function successScreen(sub, scorePct) {
+function successScreen(sub, scorePct, volants = 0) {
   return `${STYLE}<div class="vsr anim-slide-up">
     <div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>
     <span class="vsr-kick">${icon("shield", { size: 13 })} Auto-validée</span>
     <h1 class="vsr-ttl">Compétence validée !</h1>
     <p class="vsr-p">« ${esc(sub.n)} » est maintenant acquise dans ton parcours.</p>
     <p class="vsr-score">Quiz réussi à ${scorePct}%</p>
+    ${volants > 0 ? `<span class="vsr-volants"><img src="/skins/volant-coin.webp" alt=""> +${volants} volants</span>` : ""}
     <button class="vsr-cta" id="vs-cta-parcours" type="button">Voir mon parcours</button>
   </div>`;
 }
@@ -378,7 +387,27 @@ async function handleComplete(root, me, compId, sub, cat, score, total) {
       competence_id: compId,
       score_pct: scorePct,
     });
-    root.innerHTML = successScreen(sub, scorePct);
+
+    // +25 volants — même récompense qu'une validation moniteur (parité solo).
+    // Claim SERVEUR idempotent : 1 seule fois par compétence, repasser le
+    // quiz ne re-crédite pas. Best-effort : un refus (migration pas encore
+    // appliquée, réseau) ne bloque jamais la validation elle-même.
+    let volants = 0;
+    try {
+      const { data: claim } = await sb.rpc("claim_competence_reward", {
+        p_competence_id: compId,
+      });
+      if (claim?.ok && !claim.already_claimed && (claim.granted ?? 0) > 0) {
+        volants = claim.granted;
+        // Aligne le cache local sur la vérité serveur + rafraîchit la
+        // pastille du header (refreshGemmes émet déjà pg-gemmes-changed).
+        await refreshGemmes();
+      }
+    } catch (e) {
+      console.warn("[valider-seul] claim_competence_reward", e);
+    }
+
+    root.innerHTML = successScreen(sub, scorePct, volants);
     wireResult(root, me, compId, sub, cat);
   } catch (e) {
     console.warn("[valider-seul] self_validate_competence", e);
