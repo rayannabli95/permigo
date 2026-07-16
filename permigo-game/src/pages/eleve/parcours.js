@@ -2611,7 +2611,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
           <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Compétence acquise</div>
-            <div class="fiche-status-sub">${esc(parts.join(" · ") || "Ton moniteur a validé cette compétence.")}</div>
+            <div class="fiche-status-sub">${esc(parts.join(" · ") || (hasMoniteur ? "Ton moniteur a validé cette compétence." : "Compétence validée."))}</div>
           </div>
         </div>${recapBtn}`;
     }
@@ -2621,7 +2621,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
           <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Compétence acquise</div>
-            <div class="fiche-status-sub">Ton moniteur a validé cette compétence en séance.</div>
+            <div class="fiche-status-sub">${hasMoniteur ? "Ton moniteur a validé cette compétence en séance." : "Compétence validée. Bien joué !"}</div>
           </div>
         </div>${recapBtn}`;
     }
@@ -2633,7 +2633,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
           <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Compétence acquise</div>
-            <div class="fiche-status-sub">Validée par ton moniteur en séance de conduite.</div>
+            <div class="fiche-status-sub">${hasMoniteur ? "Validée par ton moniteur en séance de conduite." : "Validée — compétence acquise."}</div>
           </div>
         </div>${recapBtn}`;
     }

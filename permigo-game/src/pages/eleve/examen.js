@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { isSoloEleve } from "@/utils/league-bots.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
@@ -392,27 +393,33 @@ function isRevised() {
 // ─── Data (exportée : mon-permis.js appelle CETTE MÊME fonction pour son
 // étape ③ « L'examen » — un seul calcul de readiness dans toute l'app) ────
 export async function loadData(meId) {
-  const [validRes, streakRes, quizRes, predictRes] = await Promise.allSettled([
-    sb
-      .from("validations")
-      .select("competence_id", { count: "exact" })
-      .eq("eleve_id", meId)
-      .eq("statut", "acquis"),
+  const [validRes, streakRes, quizRes, predictRes, selfValRes] =
+    await Promise.allSettled([
+      sb
+        .from("validations")
+        .select("competence_id", { count: "exact" })
+        .eq("eleve_id", meId)
+        .eq("statut", "acquis"),
 
-    sb
-      .from("streaks")
-      .select("current_streak, last_activity_date")
-      .eq("user_id", meId)
-      .maybeSingle(),
+      sb
+        .from("streaks")
+        .select("current_streak, last_activity_date")
+        .eq("user_id", meId)
+        .maybeSingle(),
 
-    sb
-      .from("quiz_attempts")
-      .select("score")
-      .eq("user_id", meId)
-      .not("score", "is", null),
+      sb
+        .from("quiz_attempts")
+        .select("score")
+        .eq("user_id", meId)
+        .not("score", "is", null),
 
-    sb.rpc("predict_exam_ready_date"),
-  ]);
+      sb.rpc("predict_exam_ready_date"),
+
+      // Validation autonome (élève solo, valider-seul.js) : fusionnée pour
+      // que la readiness ne reste pas bloquée à 0/31 pour un compte sans
+      // moniteur. Même pattern que mon-permis.js / accueil.js.
+      sb.from("self_validations").select("competence_id").eq("eleve_id", meId),
+    ]);
 
   // Compétences acquises (distinctes). On dérive les BASES C1-C3 (24)
   // pour aligner la readiness élève sur la règle moniteur (« prêt » =
@@ -421,6 +428,8 @@ export async function loadData(meId) {
   const acquisSet = new Set(
     validRows.map((v) => v.competence_id).filter(Boolean),
   );
+  for (const s of selfValRes.value?.data ?? [])
+    if (s.competence_id) acquisSet.add(s.competence_id);
   const compsCount = acquisSet.size;
   const baseAcquis = [...acquisSet].filter((c) => /^C[123]/.test(c)).length;
 
@@ -578,23 +587,29 @@ export const BASE_TOTAL = 24; // C1+C2+C3 (mêmes bases que la readiness moniteu
 // changement de comportement) pour être réutilisable sans dupliquer les
 // seuils. mon-permis.js appelle cette fonction telle quelle pour son
 // étape ③ : la readiness reste gelée, jamais recalculée « à la main ».
-export function buildVerdict({ baseAcquis = 0 }) {
+export function buildVerdict({ baseAcquis = 0, solo = false }) {
   const baseRestantes = Math.max(0, BASE_TOTAL - baseAcquis);
   if (baseAcquis >= BASE_TOTAL) {
     return {
       level: "high",
-      text: `Prêt pour l’examen. Ton moniteur a validé tes ${BASE_TOTAL} compétences de base.`,
+      text: solo
+        ? `Prêt pour l’examen. Tes ${BASE_TOTAL} compétences de base sont validées.`
+        : `Prêt pour l’examen. Ton moniteur a validé tes ${BASE_TOTAL} compétences de base.`,
     };
   }
   if (baseAcquis >= 18) {
     return {
       level: "mid",
-      text: `Bientôt prêt. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à faire valider par ton moniteur.`,
+      text: solo
+        ? `Bientôt prêt. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à valider.`
+        : `Bientôt prêt. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à faire valider par ton moniteur.`,
     };
   }
   return {
     level: "low",
-    text: "En préparation. Tes compétences se valident en leçon avec ton moniteur.",
+    text: solo
+      ? "En préparation. Valide tes compétences au fil de tes révisions."
+      : "En préparation. Tes compétences se valident en leçon avec ton moniteur.",
   };
 }
 
@@ -651,7 +666,8 @@ function renderChecklist(data) {
   // Verdict ALIGNÉ sur le moniteur : « prêt » = 100% des bases C1-C3
   // validées par le moniteur (source de vérité). Les critères ci-dessous
   // (quiz, streak, révision) restent des conseils de préparation perso.
-  const verdict = buildVerdict(data);
+  // Élève solo : mêmes seuils, libellés sans « ton moniteur ».
+  const verdict = buildVerdict({ ...data, solo: isSoloEleve(getCurUser()) });
   const readinessClass = verdict.level;
   const readinessTxt = `${icon(READINESS_ICON[verdict.level], { size: 14 })} ${verdict.text}`;
 

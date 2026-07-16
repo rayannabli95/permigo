@@ -11,6 +11,7 @@ import { esc, escAttr } from "@/utils/escape.js";
 import { navigate } from "@/router.js";
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { isSoloEleve } from "@/utils/league-bots.js";
 import { haptic } from "@/utils/haptic.js";
 import { mountPremiumQuiz } from "@/components/eleve/premium-quiz.js";
 import { quizByCode } from "@/data/quiz-conduite.js";
@@ -587,7 +588,7 @@ export async function mount(root, param) {
         <button class="rvc-back" aria-label="Retour à l’accueil">←</button>
         <div class="rvs-head-tx">
           <h1 class="rvs-h1">Révise ta conduite</h1>
-          <p class="rvs-p">Le geste, pas le code. <b>Ton moniteur valide en vrai.</b> Ici, tu t’entraînes entre les leçons.</p>
+          <p class="rvs-p">${isSoloEleve(getCurUser()) ? "Le geste, pas le code. Ici, tu t’entraînes à ton rythme." : `Le geste, pas le code. <b>Ton moniteur valide en vrai.</b> Ici, tu t’entraînes entre les leçons.`}</p>
         </div>
       </div>
 

@@ -76,7 +76,9 @@ const ELEVE_TOUR_STEPS = [
     // parcours (data-id="parcours") — le sélecteur suit.
     sel: '.bn-tab[data-id="parcours"]',
     title: "Ta carte du permis",
-    text: "31 compétences à valider avec ton moniteur.",
+    // Copie neutre : vaut pour l'élève rattaché ET l'élève solo (validation
+    // autonome) — le tableau est défini au niveau module, pas de flag ici.
+    text: "31 compétences à valider pour décrocher ton permis.",
   },
   {
     sel: '.bn-tab[data-id="recompenses"]',
@@ -975,7 +977,7 @@ export async function mount(root) {
 
   try {
     // Core fetches en parallèle
-    const [profileRes, streakRes, validRes, notifRes, attemptsRes] =
+    const [profileRes, streakRes, validRes, notifRes, attemptsRes, selfValRes] =
       await Promise.allSettled([
         sb
           .from("profiles")
@@ -1011,6 +1013,14 @@ export async function mount(root) {
             new Date(Date.now() - 35 * 86400000).toISOString(),
           )
           .order("completed_at", { ascending: true }),
+        // Validation autonome (élève solo, cf. valider-seul.js) : table
+        // séparée de `validations`, fusionnée en lecture pour que le permis
+        // virtuel compte aussi les compétences auto-validées (sinon un solo
+        // reste affiché « 0/31 » à vie). Même pattern que mon-permis.js.
+        sb
+          .from("self_validations")
+          .select("competence_id")
+          .eq("eleve_id", me.id),
       ]);
 
     // RPCs optionnels (peuvent ne pas exister encore)
@@ -1058,6 +1068,8 @@ export async function mount(root) {
         .filter((v) => v.statut === "acquis")
         .map((v) => v.competence_id),
     );
+    for (const s of selfValRes.value?.data || [])
+      validated.add(s.competence_id);
     const pendingNotif = notifRes.value?.data?.[0] || null;
     const activityDays = buildActivityData(
       attemptsRes.value?.data || [],
@@ -1486,7 +1498,9 @@ function render({
       </div>
       <span class="acc2-permis-sub">${
         totalValidated === 0
-          ? "Chaque compétence validée par ton moniteur le complète."
+          ? isSoloEleve(me)
+            ? "Chaque compétence que tu valides le complète."
+            : "Chaque compétence validée par ton moniteur le complète."
           : totalValidated >= 31
             ? "Toutes les compétences acquises. Bravo !"
             : `Plus que ${31 - totalValidated} compétence${31 - totalValidated > 1 ? "s" : ""} avant l’examen`

@@ -13,6 +13,7 @@
 // Usage (main.js, après le chrome) : maybeShowPushPrime(me)
 // ═══════════════════════════════════════════════════════════════
 import { isStandalone } from "@/utils/pwa.js";
+import { isSoloEleve } from "@/utils/league-bots.js";
 import { requestPushPermission } from "@/services/web-push.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
@@ -131,11 +132,17 @@ function show(me) {
   const tu = me?.role === "eleve";
   track("push_prime.shown", { role: me?.role });
 
+  // Élève solo : la validation vient de lui, pas d'un moniteur.
   const rows = tu
     ? [
         ["sun", "Ta question du jour"],
         ["flame", "Ta série, avant qu'elle saute"],
-        ["check-circle", "Quand ton moniteur te valide"],
+        [
+          "check-circle",
+          isSoloEleve(me)
+            ? "Quand tu valides une compétence"
+            : "Quand ton moniteur te valide",
+        ],
       ]
     : [
         ["bell", "Les validations à confirmer"],

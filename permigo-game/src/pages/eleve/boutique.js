@@ -7,6 +7,7 @@ import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { isSoloEleve } from "@/utils/league-bots.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { toast } from "@/components/common/toast.js";
@@ -649,7 +650,7 @@ export async function mount(root) {
     <span class="bo2-roue-w" aria-hidden="true"></span>
     <span class="bo2-roue-tx">
       <span class="bo2-roue-t">La Roue</span>
-      <span class="bo2-roue-s">Skins, titres et des <b>gros lots réels</b> de ton moniteur.</span>
+      <span class="bo2-roue-s">${isSoloEleve(getCurUser()) ? "Skins, titres et des <b>récompenses</b> à débloquer." : `Skins, titres et des <b>gros lots réels</b> de ton moniteur.`}</span>
     </span>
     <span class="bo2-roue-go">Tour gratuit !</span>
   </a>
