@@ -429,7 +429,7 @@ function renderStep1({
     <button class="mp-renvoi" id="mp-btn-reviser" type="button">
       ${medallion("eclair", "gold", { size: 28 })}
       <p>Envie de t'entraîner ? Direction Réviser.
-        <i>Ici, c'est ta progression validée — le jeu reste dans Réviser.</i></p>
+        <i>Ici, c'est ta progression validée — l'entraînement se passe dans Réviser.</i></p>
       ${CHEVRON}
     </button>
   </section>`;

@@ -690,6 +690,11 @@ const STYLE = `<style>
   color: #5a2fa0;
 }
 .prc-cv.is-light .prc-cv-chip .dot { background: linear-gradient(#a870ff, #7c4dff); }
+.prc-cv.is-light .prc-cv-suivi {
+  background: rgba(124,77,255,.1);
+  border-color: rgba(124,77,255,.3);
+  color: #5a2fa0;
+}
 .prc-cv.is-light .prc-cv-world-card {
   background:
     radial-gradient(300px 160px at 88% -10%, rgba(180,130,255,.22), transparent 60%),
@@ -916,6 +921,23 @@ const STYLE = `<style>
   box-shadow: 0 2px 10px -4px rgba(255,156,28,.5);
 }
 .prc-cv-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: linear-gradient(#ffd24a, #ff9c1c); box-shadow: 0 0 8px #ffb840; }
+/* ── Bouton « Suivi » → hub mon-permis (mode condensé gardé en option) ── */
+.prc-cv-meta-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.prc-cv-suivi {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px; flex: none;
+  padding: 7px 12px; border-radius: 20px;
+  background: rgba(42,27,82,.6);
+  border: 1.5px solid rgba(168,85,247,.35);
+  font: 800 12px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  color: #cdbff5; text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .12s, background .15s;
+}
+.prc-cv-suivi::after { content: ""; position: absolute; inset: -8px; } /* zone tactile ≥44px */
+.prc-cv-suivi svg { width: 14px; height: 14px; }
+.prc-cv-suivi:active { transform: scale(.95); }
+.prc-cv-suivi:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
 .prc-cv-world-title {
   font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
   font-weight: 800; font-size: 27px; line-height: 1.02; letter-spacing: -.6px;
@@ -2016,7 +2038,16 @@ function renderChapterView(
                 stroke="rgba(255,210,74,.5)" stroke-width="2.5" stroke-dasharray="9 12" stroke-linecap="round"/>
         </svg>
         <div class="prc-cv-world-meta">
-          <span class="prc-cv-chip"><span class="dot" aria-hidden="true"></span>Chapitre ${currentIdx + 1} sur ${worldStates.length}</span>
+          <div class="prc-cv-meta-top">
+            <span class="prc-cv-chip"><span class="dot" aria-hidden="true"></span>Chapitre ${currentIdx + 1} sur ${worldStates.length}</span>
+            <!-- Mode condensé (hub mon-permis) gardé en OPTION : l'onglet
+                 « Mon permis » ouvre désormais le parcours en direct
+                 (décision Rayan 2026-07-16), ce bouton donne le résumé. -->
+            <a class="prc-cv-suivi" href="#/mon-permis" aria-label="Mon suivi — compétences validées, leçons, examen">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="3.5" cy="6" r="1.6" fill="currentColor"/><circle cx="3.5" cy="12" r="1.6" fill="currentColor"/><circle cx="3.5" cy="18" r="1.6" fill="currentColor"/></svg>
+              <span>Suivi</span>
+            </a>
+          </div>
           <h1 class="prc-cv-world-title">${esc(chapTitle)}</h1>
           <p class="prc-cv-world-sub">${esc(world.description ?? "")}</p>
         </div>
