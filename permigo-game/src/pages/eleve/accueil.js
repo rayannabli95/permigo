@@ -6,6 +6,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { blendLeagueRows, isSoloEleve } from "@/utils/league-bots.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { REMC } from "@/data/remc.js";
@@ -1715,21 +1716,27 @@ async function _loadAndInjectLeagues(root) {
     //  - Conduite = classement REMC cumulé à VIE (validations moniteur)
     //  - Révision = SAISON HEBDO (points de la semaine, reset lundi)
     // cf. components/eleve/league-hero.js
+    // Élève SOLO (sans moniteur) : portée nationale + profils fictifs
+    // (utils/league-bots.js), sinon sa ligue « école » serait vide.
+    const me = getCurUser();
+    const solo = isSoloEleve(me);
+    const scope = solo ? "national" : "ecole";
     const [condRes, revRes] = await Promise.allSettled([
-      sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: 50 }),
+      sb.rpc("get_eleve_leaderboard", { p_scope: scope, p_limit: 50 }),
       sb.rpc("get_theory_leaderboard_weekly", {
-        p_scope: "ecole",
+        p_scope: scope,
         p_limit: 50,
       }),
     ]);
-    const conduite =
-      condRes.status === "fulfilled" && Array.isArray(condRes.value?.data)
-        ? condRes.value.data
-        : [];
-    const revision =
-      revRes.status === "fulfilled" && Array.isArray(revRes.value?.data)
-        ? revRes.value.data
-        : [];
+    const blend = (res, ligue) => {
+      const rows =
+        res.status === "fulfilled" && Array.isArray(res.value?.data)
+          ? res.value.data
+          : [];
+      return solo ? blendLeagueRows(rows, { ligue, userKey: me.id }) : rows;
+    };
+    const conduite = blend(condRes, "conduite");
+    const revision = blend(revRes, "revision");
 
     // CSS du héros injecté une seule fois (carte toujours sombre — skin Arène)
     if (!document.getElementById("lgh-css")) {
@@ -1738,7 +1745,7 @@ async function _loadAndInjectLeagues(root) {
       st.textContent = LEAGUE_HERO_CSS;
       document.head.appendChild(st);
     }
-    mountLeagueHero(slot, { conduite, revision });
+    mountLeagueHero(slot, { conduite, revision, solo });
   } catch (e) {
     console.error("[accueil] leagues", e);
   }
