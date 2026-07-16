@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { track } from "@/services/analytics.js";
@@ -32,6 +32,7 @@ import {
   quizVisualHTML,
   QUIZ_VISUAL_CSS,
 } from "@/components/eleve/quiz-visuals.js";
+import { swapVisualToReveal } from "@/components/eleve/quiz-ui.js";
 import { hideBottomNav } from "@/utils/nav.js";
 import {
   muteButtonHTML,
@@ -231,10 +232,17 @@ function renderQuestionBody(
           ${muteButtonHTML()}
           <p class="exb-qtext">${esc(q.enonce)}</p>
         </div>
-        ${q.image ? `<img class="exb-qimg" src="${esc(q.image)}" alt="Panneau routier à identifier" />` : quizVisualHTML(q.enonce)}
+        ${q.image ? `<img class="exb-qimg" src="${esc(q.image)}" alt="Panneau routier à identifier" />` : visualSlot(q.enonce)}
         ${renderChoices(q)}
         <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
       </div>`;
+}
+
+// Visuel + slot porteur de l'énoncé (remplacé par le geste juste au reveal)
+function visualSlot(enonce) {
+  const vis = quizVisualHTML(enonce);
+  if (!vis) return "";
+  return `<div class="qz-visual-slot" data-qzvq="${escAttr(enonce)}">${vis}</div>`;
 }
 
 // Bloc de feedback partagé par les 3 modes (parcours / officiel / révision).
@@ -459,6 +467,7 @@ function runExbQuiz(
     function reveal(chosen) {
       if (answered) return;
       answered = true;
+      swapVisualToReveal(root);
       stopSpeaking();
       clearExamTimer();
       const timedOut = chosen === null;

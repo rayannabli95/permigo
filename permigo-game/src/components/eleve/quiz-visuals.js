@@ -95,6 +95,14 @@ export function cockpitSVG(opts = {}) {
         <rect x="177.4" y="98" width="5.2" height="11" rx="2.4" fill="${C.line}" opacity=".85"/>
         <rect x="176.6" y="118" width="6.8" height="13" rx="3" fill="${C.line}" opacity=".9"/>
       </g>
+      ${
+        opts.wipers
+          ? [96, 208].map(
+              (px, i) =>
+                `<g transform="translate(${px},124)"><g class="qzv-wipe" style="animation-delay:${i * 0.12}s"><rect x="-2" y="-52" width="4" height="52" rx="2" fill="#12152b"/></g></g>`,
+            ).join("")
+          : ""
+      }
       ${opts.pluie ? `<g class="qzv-ws-rain">${[26, 68, 112, 152, 198, 244, 288, 322].map((x, i) => `<line x1="${x}" y1="${14 + (i % 3) * 8}" x2="${x - 7}" y2="${34 + (i % 3) * 8}" stroke="rgba(170,200,255,.55)" stroke-width="2" stroke-linecap="round"/>`).join("")}</g>` : ""}
     </g>
     <rect x="10" y="10" width="340" height="116" rx="16" fill="none" stroke="${C.dashHi}" stroke-width="2"/>`;
@@ -139,14 +147,20 @@ export function cockpitSVG(opts = {}) {
     ${voyants}`;
 
   // volant (le bas sort du cadre, comme en vrai)
+  const DOT_ANSWER = [
+    [126, 208],
+    [234, 208],
+  ];
   const dots = opts.wheelDots
-    ? [
+    ? (opts.wheelDots === "915"
+        ? DOT_ANSWER
+        : [
         [180, 154],
         [234, 208],
         [126, 208],
         [141, 172],
         [219, 172],
-      ]
+      ])
         .map(
           ([x, y], i) =>
             `<circle class="qzv-dot" style="animation-delay:${i * 0.22}s" cx="${x}" cy="${y}" r="5.5" fill="${C.gold}" stroke="#3a1d00" stroke-width="1.4"/>`,
@@ -770,6 +784,12 @@ const RULES = [
     and: /giratoire|rond[- ]point/,
     vis: () => sc("giratoireClign"),
   },
+  {
+    re: /clignotant/,
+    and: /giratoire|rond[- ]point/,
+    vis: () => sc("giratoire"),
+    rev: () => sc("giratoireClign"),
+  },
   { re: /giratoire|rond[- ]point/, vis: () => sc("giratoire") },
   { re: /\bstop\b/, vis: () => sc("stop") },
   {
@@ -843,6 +863,10 @@ const RULES = [
   {
     re: /voie (utilisée )?par défaut|doubles par où/,
     vis: () => panneau("autoroute"),
+    rev: (t) =>
+      /doubles par où/.test(t)
+        ? sc("autorouteVoieGauche")
+        : sc("autorouteRoule"),
   },
   {
     re: /sortie d'autoroute approche|quitter (la voie rapide|l'autoroute)|bretelle de décélération|sortir autoroute|tu sors de l'autoroute/,
@@ -946,19 +970,26 @@ const RULES = [
 
 
   // ── Cockpit ─────────────────────────────────────────────────────
-  { re: /commodo|comodo/, vis: () => cockpit({ hl: ["comodoG", "comodoD"] }) },
+  {
+    re: /commodo|comodo/,
+    vis: () => cockpit({ hl: ["comodoG", "comodoD"] }),
+    rev: () => cockpit({ hl: ["comodoG"], clign: "gauche" }),
+  },
   {
     re: /essuie|essuyer le pare-brise/,
     vis: () => cockpit({ hl: ["comodoG", "comodoD"], pluie: true }),
+    rev: () => cockpit({ hl: ["comodoD"], wipers: true, pluie: true }),
   },
   {
     re: /commande des feux|montrez.*feux de croisement/,
     vis: () => cockpit({ hl: ["comodoG", "comodoD"] }),
+    rev: () => cockpit({ hl: ["comodoG"] }),
   },
   { re: /rétroviseur intérieur/, vis: () => cockpit({ hl: ["retro"] }) },
   {
     re: /mains sur le volant|places-tu tes mains/,
     vis: () => cockpit({ wheelDots: true }),
+    rev: () => cockpit({ wheelDots: "915" }),
   },
   { re: /warnings|feux de détresse/, vis: () => cockpit({ clign: "warning" }) },
   {
@@ -1064,6 +1095,28 @@ export function quizVisualHTML(text) {
   return "";
 }
 
+/**
+ * Visuel de RÉVÉLATION : le geste juste, montré après la réponse
+ * (jamais pendant la question — il donnerait la solution). "" si la
+ * règle qui matche n'a pas de variante de révélation.
+ */
+export function quizVisualRevealHTML(text) {
+  if (!text) return "";
+  const t = String(text).replace(/\*\*/g, "").toLowerCase();
+  for (const rule of RULES) {
+    if (rule.and && !rule.and.test(t)) continue;
+    if (rule.re.test(t)) {
+      if (!rule.vis || !rule.rev) return "";
+      try {
+        return rule.rev(t);
+      } catch {
+        return "";
+      }
+    }
+  }
+  return "";
+}
+
 // Export pour l'outillage (script de couverture) — pas utilisé en prod.
 export const _RULES = RULES;
 
@@ -1101,6 +1154,8 @@ export const QUIZ_VISUAL_CSS = `
   .qzv-roll{animation:qzvRoll 1.1s linear infinite}
   @keyframes qzvRoll{from{transform:translateY(-14px)}to{transform:translateY(8px)}}
   .qzv-ws-rain{animation:qzvGlow .9s ease-in-out infinite}
+  .qzv-wipe{transform-origin:0 0;animation:qzvWipe 1.5s ease-in-out infinite}
+  @keyframes qzvWipe{0%,100%{transform:rotate(14deg)}50%{transform:rotate(-58deg)}}
   .qzv-lamp{transform-box:fill-box;transform-origin:center}
 
   /* scène iso : mêmes animations que « En situation » */
