@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // Page publique — Pré-vente « Pass Permis » (payeur = ÉLÈVE)
-// URL : #/pass  (partageable en DM : permigo.vercel.app/#/pass?lang=en)
+// URL : #/pass  (partageable en DM : www.permigo.fr/#/pass?lang=en)
 //
 // DA « Ticket d'Or » — v3 (retours Rayan après SON vrai paiement, 15/07 soir) :
 //  - logo = le P vert gloss (/icon-192.png), plus de wordmark illisible

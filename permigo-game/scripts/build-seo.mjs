@@ -28,7 +28,7 @@ import { GUIDES, MONITEUR_PILLAR } from "../src/data/seo-pages.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const DIST = resolve(ROOT, "dist");
-const SITE = "https://permigo.vercel.app";
+const SITE = "https://www.permigo.fr";
 
 // ─── Échappement HTML ─────────────────────────────────────────
 function esc(s = "") {

@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
     const origin =
       req.headers.get("origin") ??
       Deno.env.get("APP_URL") ??
-      "https://permigo.vercel.app";
+      "https://www.permigo.fr";
     // Client anon "propre" (sans le JWT de l'appelant) pour l'appel public.
     const anonClient = createClient(SUPABASE_URL, ANON_KEY);
     const { error: resetErr } = await anonClient.auth.resetPasswordForEmail(

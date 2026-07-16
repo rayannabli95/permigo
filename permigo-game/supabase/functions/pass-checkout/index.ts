@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
     const origin =
       req.headers.get("origin") ??
       Deno.env.get("APP_URL") ??
-      "https://permigo.vercel.app";
+      "https://www.permigo.fr";
 
     // metadata.permigo_plan = signal pour le webhook → ligne pass_purchases.
     const metadata: Record<string, string> = {
