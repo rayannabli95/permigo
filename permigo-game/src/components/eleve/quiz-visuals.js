@@ -617,6 +617,49 @@ const SCENES = {
     kind: "route",
     vehicules: [{ ...MOI, d: 2.0 }],
   },
+  // ── autoroute (lot 4) : voies gauche −0.62 / droite 0.05 / BAU 0.7 ──
+  autorouteRoule: {
+    kind: "autoroute",
+    vehicules: [
+      { ...MOI, d: 2.6, lane: 0.05 },
+      { id: "v1", at: "S", d: 1.2, lane: -0.62, couleur: "gris" },
+    ],
+  },
+  autorouteInsertion: {
+    kind: "autoroute",
+    vehicules: [
+      { ...MOI, d: 2.0, lane: 0.7, clign: "gauche" },
+      { id: "v1", at: "S", d: 3.0, lane: 0.05, couleur: "gris" },
+    ],
+  },
+  autorouteInsertionAutre: {
+    kind: "autoroute",
+    vehicules: [
+      { ...MOI, d: 2.6, lane: 0.05 },
+      { id: "v1", at: "S", d: 1.4, lane: 0.7, couleur: "gris", clign: "gauche" },
+    ],
+  },
+  autorouteBAU: {
+    kind: "autoroute",
+    vehicules: [
+      { ...MOI, d: 2.8, lane: 0.05 },
+      { id: "v1", at: "S", d: 1.2, lane: 0.7, couleur: "gris", clign: "warning" },
+    ],
+  },
+  autorouteVoieGauche: {
+    kind: "autoroute",
+    vehicules: [
+      { ...MOI, d: 2.4, lane: -0.62 },
+      { id: "v1", at: "S", d: 1.2, lane: 0.05, couleur: "gris" },
+    ],
+  },
+  autorouteSortie: {
+    kind: "autoroute",
+    vehicules: [
+      { ...MOI, d: 2.2, lane: 0.05, clign: "droit" },
+      { id: "v1", at: "S", d: 1.0, lane: -0.62, couleur: "gris" },
+    ],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -794,6 +837,38 @@ const RULES = [
     vis: () => sc("distance", { gap: true }),
   },
 
+  // ── Autoroute / voie express (chaussée dédiée + météo) ──────────
+  // « voie par défaut » / « tu doubles par où » : la position du joueur
+  // donnerait la réponse → panneau vedette neutre
+  {
+    re: /voie (utilisée )?par défaut|doubles par où/,
+    vis: () => panneau("autoroute"),
+  },
+  {
+    re: /sortie d'autoroute approche|quitter (la voie rapide|l'autoroute)|bretelle de décélération|sortir autoroute|tu sors de l'autoroute/,
+    vis: () => sc("autorouteSortie"),
+  },
+  {
+    re: /quelqu'un veut s'insérer|voiture sur la bretelle/,
+    vis: () => sc("autorouteInsertionAutre"),
+  },
+  {
+    re: /insertion|bretelle|t'insères|s'insérer|voie d'accélération/,
+    vis: () => sc("autorouteInsertion"),
+  },
+  {
+    re: /\bbau\b|bande d'arrêt|crevaison.*autoroute|malaise.*autoroute|panne.*autoroute|triangle.*autoroute/,
+    vis: () => sc("autorouteBAU"),
+  },
+  { re: /voie de gauche/, vis: () => sc("autorouteVoieGauche") },
+  {
+    re: /autoroute|voie express/,
+    vis: (t) =>
+      sc("autorouteRoule", {
+        fx: /pleu|pluie/.test(t) ? "pluie" : /nuit/.test(t) ? "nuit" : "",
+      }),
+  },
+
   // ── Météo / nuit (ambiance sur scène route) ─────────────────────
   // « feux de brouillard » = question de commande (l'ambiance brouillard
   // sur « il pleut, feu de brouillard arrière ? » contredirait l'énoncé)
@@ -868,13 +943,7 @@ const RULES = [
     re: /entrée d'agglo|panneau d'entrée|limite agglo|agglomération en france|vitesse max en ville|en ville, sans panneau/,
     vis: () => panneau("agglo"),
   },
-  {
-    re: /autoroute|voie express|bretelle|bande d'arrêt|\bbau\b/,
-    vis: (t) =>
-      /pleuv|pluie/.test(t)
-        ? sc("route", { fx: "pluie" })
-        : panneau("autoroute"),
-  },
+
 
   // ── Cockpit ─────────────────────────────────────────────────────
   { re: /commodo|comodo/, vis: () => cockpit({ hl: ["comodoG", "comodoD"] }) },

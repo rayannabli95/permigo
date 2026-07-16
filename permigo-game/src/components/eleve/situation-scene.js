@@ -614,6 +614,15 @@ export function renderSituationScene(scene, opts = {}) {
       roads += stopLine(scene.signal.branch || "S", true);
     if (scene.signal?.type === "feu")
       roads += crossFeuLine(scene.signal.branch || "S");
+  } else if (kind === "autoroute") {
+    // chaussée UNIDIRECTIONNELLE (vers le nord) : glissière du terre-plein
+    // à gauche, 2 voies (centres ≈ −0.62 / 0.05), BAU à droite de la ligne
+    // continue (x = 0.45). Rives et pointillés réutilisent les helpers.
+    roads += roadAlongY(1.05);
+    roads += flatRect(-0.95, 0, 0, 1, R + 0.4, 0.03, ROAD.line, 'opacity=".6"');
+    roads += dashes("S", -R - 0.2, R + 0.2, -0.3); // séparation des 2 voies
+    roads += flatRect(0.45, 0, 0, 1, R + 0.4, 0.035, ROAD.line, 'opacity=".9"'); // ligne de rive BAU
+    roads += flatRect(0.95, 0, 0, 1, R + 0.4, 0.03, ROAD.line, 'opacity=".6"');
   } else if (kind === "giratoire") {
     const wide = scene.lanes2;
     for (const b of ["N", "S", "E", "W"]) {
@@ -653,7 +662,7 @@ export function renderSituationScene(scene, opts = {}) {
   const objects = [];
 
   const treeSpots =
-    kind === "route"
+    kind === "route" || kind === "autoroute"
       ? [
           [1.75, -2.2],
           [-1.8, -1.0],
@@ -675,6 +684,24 @@ export function renderSituationScene(scene, opts = {}) {
     objects.push({ sy: P(0, 0).y, svg: tree(0, 0.05, true) });
   }
 
+  if (kind === "autoroute") {
+    // glissière de sécurité du terre-plein central (rail continu + poteaux)
+    const gx = -1.18;
+    let rail = isoBox(gx, 0, 0, 1, R + 0.2, 0.022, 0.14, 0.22, {
+      hi: "#cfd8dc",
+      mid: "#9aa7b0",
+      lo: "#66737c",
+    });
+    for (let gy = -3; gy <= 3; gy += 1.0) {
+      rail =
+        isoBox(gx, gy, 0, 1, 0.035, 0.035, 0, 0.14, {
+          hi: "#8b93a8",
+          mid: "#6b7280",
+          lo: "#4b5563",
+        }) + rail;
+    }
+    objects.push({ sy: -10000, svg: rail }); // toujours derrière (côté nord-ouest)
+  }
   if (scene.signal?.type === "feu") {
     objects.push(
       feuAt(scene.signal.branch || "S", scene.signal.etat || "orange"),
