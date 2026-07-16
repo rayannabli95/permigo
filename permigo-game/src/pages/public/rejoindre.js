@@ -18,6 +18,7 @@
 // ⚠️ Dépend de la migration 20260621120000_join_code.sql (RPC à appliquer).
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
+import { getCurUser } from "@/auth/cur-user.js";
 import { icon } from "@/utils/icons.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -206,6 +207,18 @@ export async function mount(root) {
 
   track("signup.viewed", { from: solo ? "pass_solo" : "join_code" });
 
+  // Session déjà active (compte test resté connecté, tél partagé…) : on
+  // prévient au lieu de laisser croire que le circuit est cassé — créer un
+  // compte par-dessus une session existante sème la confusion.
+  const connected = getCurUser();
+  const connectedBanner = connected
+    ? `<div class="sg-join show" id="sg-connected" style="margin-bottom:18px">
+        <span class="sg-join-ico">${icon("alert-circle", { size: 20, strokeWidth: 2 })}</span>
+        <span class="sg-join-txt">Tu es déjà connecté en tant que <strong>${esc(connected.prenom || connected.username || connected.email || "quelqu'un")}</strong>.
+          <a href="#" id="sg-switch" style="color:var(--gold);font-weight:800">Se déconnecter pour créer un compte</a></span>
+      </div>`
+    : "";
+
   root.innerHTML = `${STYLE}
     <div class="sg">
       <div class="sg-card">
@@ -213,6 +226,7 @@ export async function mount(root) {
         <h1 class="sg-title">${solo ? "Crée ton compte élève" : "Rejoins ton moniteur"}</h1>
         <p class="sg-sub">${solo ? "2 minutes, et tu entres dans l'app. Si tu as pris un Pass, utilise le même email que ton paiement." : "Entre le code que ton moniteur t'a donné, puis crée ton compte."}</p>
         <div style="text-align:center"><span class="sg-role-badge">Élève</span></div>
+        ${connectedBanner}
 
         <div class="sg-row" ${solo ? 'style="display:none"' : ""}>
           <label class="sg-label" for="sg-code">Code moniteur</label>
@@ -256,8 +270,12 @@ export async function mount(root) {
         <div class="sg-row">
           <label class="sg-label" for="sg-password">Mot de passe</label>
           <div class="sg-pwd-wrap">
-            <input class="sg-input" id="sg-password" type="password" autocomplete="new-password" minlength="8" placeholder="8 caractères minimum" />
-            <button class="sg-pwd-toggle" id="sg-pwd-toggle" type="button" aria-label="Afficher le mot de passe" aria-pressed="false">${icon("eye", { size: 18, strokeWidth: 2 })}</button>
+            <!-- Visible par défaut (type=text) : sur iPhone, un champ
+                 type=password + new-password remplace le clavier par la
+                 suggestion « mot de passe fort » → impossible de taper le sien.
+                 L'œil permet de le masquer. -->
+            <input class="sg-input" id="sg-password" type="text" autocomplete="new-password" minlength="8" placeholder="8 caractères minimum" />
+            <button class="sg-pwd-toggle" id="sg-pwd-toggle" type="button" aria-label="Masquer le mot de passe" aria-pressed="true">${icon("eye-off", { size: 18, strokeWidth: 2 })}</button>
           </div>
           <div class="sg-help" id="sg-pwd-help">Minimum 8 caractères.</div>
         </div>
@@ -283,6 +301,18 @@ export async function mount(root) {
   const pwdEl = root.querySelector("#sg-password");
   const pwdHelp = root.querySelector("#sg-pwd-help");
   const submitBtn = root.querySelector("#sg-submit");
+
+  // Déconnexion express depuis le bandeau « déjà connecté » : on reste sur
+  // la page (reload avec le même hash) pour reprendre l'inscription à zéro.
+  root.querySelector("#sg-switch")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    try {
+      await sb.auth.signOut();
+    } catch {
+      /* session déjà morte : on recharge quand même */
+    }
+    window.location.reload();
+  });
 
   const pwdToggle = root.querySelector("#sg-pwd-toggle");
   pwdToggle?.addEventListener("click", () => {

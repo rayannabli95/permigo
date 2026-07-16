@@ -160,9 +160,13 @@ export function startTour(steps, opts = {}) {
     if (done) return;
     done = true;
     window.removeEventListener("resize", place);
+    window.removeEventListener("hashchange", end);
     ov.remove();
     opts.onDone?.();
   }
+  // Changement de route (hash) : la page sous le tour n'existe plus — un
+  // tour qui reste affiché recouvre la nouvelle page et bloque tous les taps.
+  window.addEventListener("hashchange", end);
 
   function place() {
     const s = steps[i];
