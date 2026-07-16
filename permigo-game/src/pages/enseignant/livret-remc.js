@@ -265,6 +265,13 @@ const STYLE = `<style>
     flex-shrink: 0;
   }
   .lr-comp-chev { color: var(--bo4); font-size: 14px; flex-shrink: 0; }
+  /* Auto-validée (élève arrivé en solo, quiz ≥80 % avant rattachement) —
+     badge INFO uniquement : ne compte dans aucune stat moniteur. */
+  .lr-comp-auto {
+    background: rgba(139, 92, 246, 0.12);
+    color: #7c3aed;
+    border: 1px solid rgba(139, 92, 246, 0.35);
+  }
 
   /* Bouton bilan trimestriel */
   .lr-bilan-btn {
@@ -525,6 +532,7 @@ let _me = null;
 let _eleveId = null;
 let _eleveProfil = null; // { prenom, nom }
 let _validationsMap = {}; // competence_id → { statut, note }
+let _selfValsMap = {}; // competence_id → auto-validation solo (info seule)
 let _valsRaw = []; // validations brutes (avec validated_at) — pour l'analyse profil
 let _quizAttempts = []; // quiz_attempts (avec completed_at) — pour l'analyse profil
 let _streakEff = 0; // streak RÉEL (vivant seulement si actif aujourd'hui/hier)
@@ -601,6 +609,24 @@ async function loadData() {
       note: v.note_enseignant || "",
     };
   });
+
+  // Auto-validations (élève arrivé en SOLO avant rattachement) — lecture
+  // seule, badge info dans la liste. N'entre dans AUCUNE stat moniteur ;
+  // la validation moniteur reste la source de vérité et prime à l'écran.
+  _selfValsMap = {};
+  try {
+    const { data: sv, error: svErr } = await sb
+      .from("self_validations")
+      .select("competence_id, score, validated_at")
+      .eq("eleve_id", _eleveId);
+    if (!svErr) {
+      (sv || []).forEach((s) => {
+        _selfValsMap[s.competence_id] = s;
+      });
+    }
+  } catch (_) {
+    /* best-effort — le badge disparaît simplement en cas d'erreur */
+  }
 
   // Ligue Révision (autonomie élève) — lecture seule, RLS : enseignant
   // voit les tentatives des élèves de son école.
@@ -1058,13 +1084,21 @@ function renderComp(sub) {
   const cfg = STATUT_CFG[statut] || STATUT_CFG.null;
   const chipMod = CHIP_CLASS[statut] || "";
 
+  // Auto-validée en solo et pas encore évaluée par le moniteur : badge info
+  // à la place du statut vide — le moniteur sait que l'élève a déjà bossé
+  // ce geste seul (quiz ≥80 %), et peut confirmer en séance.
+  const selfVal = !statut ? _selfValsMap[sub.c] : null;
+  const badge = selfVal
+    ? `<span class="lr-comp-badge ens-chip lr-comp-auto" title="Validée en autonomie (quiz ${Math.round(selfVal.score)}%) avant rattachement — à confirmer en séance">Auto-validée</span>`
+    : `<span class="lr-comp-badge ens-chip ${chipMod}">${cfg.label}</span>`;
+
   const medKey = STATUT_MED[statut];
   return `
     <div class="lr-comp" data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
-         role="button" tabindex="0" aria-label="${esc(sub.n)} — ${cfg.label}. Appuyer pour évaluer cette compétence">
+         role="button" tabindex="0" aria-label="${esc(sub.n)} — ${selfVal ? "Auto-validée par l'élève, à confirmer" : cfg.label}. Appuyer pour évaluer cette compétence">
       ${medKey ? `<span class="lr-comp-med">${medStatus(medKey, { size: 24 })}</span>` : `<span class="lr-comp-dot" style="background:${cfg.dot}"></span>`}
       <span class="lr-comp-nom">${esc(sub.n)}</span>
-      <span class="lr-comp-badge ens-chip ${chipMod}">${cfg.label}</span>
+      ${badge}
       <span class="lr-comp-chev" aria-hidden="true">›</span>
     </div>
   `;

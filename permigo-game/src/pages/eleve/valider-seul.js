@@ -322,8 +322,8 @@ function wireIntro(root, me, compId, sub, cat) {
       competenceId: compId,
       type: "post_validation",
       nbQuestions: NB_QUESTIONS,
-      onComplete: (score, total) =>
-        handleComplete(root, me, compId, sub, cat, score, total),
+      onComplete: (score, total, answers) =>
+        handleComplete(root, me, compId, sub, cat, score, total, answers),
     });
 
     if (launched === null) {
@@ -336,7 +336,16 @@ function wireIntro(root, me, compId, sub, cat) {
   });
 }
 
-async function handleComplete(root, me, compId, sub, cat, score, total) {
+async function handleComplete(
+  root,
+  me,
+  compId,
+  sub,
+  cat,
+  score,
+  total,
+  answers,
+) {
   const scorePct = Math.round((score / total) * 100);
   track("valider_seul.quiz_done", {
     competence_id: compId,
@@ -367,9 +376,11 @@ async function handleComplete(root, me, compId, sub, cat, score, total) {
   }
 
   try {
+    // Le SERVEUR corrige : on envoie les réponses, pas un score déclaratif
+    // (migration solo_hardening — l'ancienne signature p_score est supprimée).
     const { data, error } = await sb.rpc("self_validate_competence", {
       p_competence_id: compId,
-      p_score: scorePct,
+      p_answers: answers || [],
     });
     if (error || data?.error) {
       console.warn(
@@ -378,6 +389,13 @@ async function handleComplete(root, me, compId, sub, cat, score, total) {
       );
       toast("Erreur lors de la validation — réessaie.", "error");
       root.innerHTML = failScreen(sub, scorePct);
+      wireResult(root, me, compId, sub, cat);
+      return;
+    }
+    // Le serveur peut recaler ce que le client croyait réussi (anti-triche).
+    if (data?.passed === false) {
+      haptic("warning");
+      root.innerHTML = failScreen(sub, data.score ?? scorePct);
       wireResult(root, me, compId, sub, cat);
       return;
     }
