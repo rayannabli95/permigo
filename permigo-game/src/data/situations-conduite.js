@@ -1172,6 +1172,16 @@ export const SITUATIONS = [
   },
 ];
 
+/**
+ * Scène du jour — la même pour tout le monde, elle change chaque jour
+ * (minuit local). Alimente la carte de l'accueil et la manche `jour`.
+ */
+export function situationDuJour(now = new Date()) {
+  const local = now.getTime() - now.getTimezoneOffset() * 60000;
+  const day = Math.floor(local / 86400000);
+  return SITUATIONS[day % SITUATIONS.length];
+}
+
 /** Mélange (copie) — Fisher-Yates. */
 function shuffle(arr) {
   const a = arr.slice();

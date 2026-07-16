@@ -9,6 +9,7 @@ import { track } from "@/services/analytics.js";
 import { medallion } from "@/utils/medallions.js";
 import {
   pickSession,
+  situationDuJour,
   THEME_LABELS,
   THEME_WEAK_TAGS,
   SITUATIONS,
@@ -71,7 +72,11 @@ export async function mount(root, param) {
   // sortie vers l'accueil au lieu de « Rejouer »). Déclenché par le param de
   // route "en-situation/intro" ou par un mount direct depuis l'onboarding.
   const isIntro = param === "intro";
-  track("page.view", { page: "en-situation", intro: isIntro });
+  // Mode « jour » : arrivée depuis la carte « Scène du jour » de l'accueil.
+  // On saute l'intro (la carte a déjà promis « Je décide ») et la manche
+  // démarre par la scène du jour.
+  const isJour = param === "jour";
+  track("page.view", { page: "en-situation", intro: isIntro, jour: isJour });
 
   // Plein écran arène : header + nav masqués (filet : restauré au hashchange)
   document.body.classList.add("sit-immersive");
@@ -88,7 +93,8 @@ export async function mount(root, param) {
   let manquees = []; // situations ratées (pour le récap)
   let answered = false;
 
-  renderIntro();
+  if (isJour) startRound();
+  else renderIntro();
 
   // ── Écran d'intro ────────────────────────────────────────────
   function renderIntro() {
@@ -125,6 +131,13 @@ export async function mount(root, param) {
   // ── Manche ───────────────────────────────────────────────────
   function startRound() {
     session = pickSession(isIntro ? INTRO_SIZE : ROUND_SIZE);
+    if (isJour) {
+      const daily = situationDuJour();
+      session = [daily, ...session.filter((s) => s.id !== daily.id)].slice(
+        0,
+        ROUND_SIZE,
+      );
+    }
     idx = 0;
     bonnes = 0;
     manquees = [];
