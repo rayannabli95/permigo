@@ -231,6 +231,10 @@ function template() {
       .lg-oauth:disabled{opacity:.6;cursor:default}
       .lg-oauth:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
       .lg-oauth svg{flex-shrink:0}
+      /* Conteneur du bouton Google officiel (GIS) — centré, coins arrondis */
+      .lg-gsi{display:flex;justify-content:center;min-height:0}
+      .lg-gsi:not(:empty){margin:2px 0 0}
+      .lg-gsi>div{border-radius:15px;overflow:hidden}
 
       /* Séparateur démo */
       .lg-sep{display:flex;align-items:center;gap:12px;margin:14px 0 16px;color:var(--ink-mu);
@@ -351,6 +355,11 @@ function template() {
           <p class="lg-err" id="lg-err" role="alert" aria-live="assertive"></p>
 
           <div class="lg-sep">ou</div>
+          <!-- Bouton Google OFFICIEL (GIS) : la fenêtre affiche « PermiGo »
+               (marque de l'écran de consentement) au lieu de l'URL technique
+               Supabase qu'impose le flux par redirection. Rendu en JS ;
+               le bouton maison ci-dessous sert de REPLI (script bloqué…). -->
+          <div class="lg-gsi" id="lg-gsi"></div>
           <button type="button" class="lg-oauth" data-oauth="google" aria-label="Continuer avec Google">
             <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
             Continuer avec Google
@@ -556,6 +565,83 @@ function wire(root) {
     if (r.ok) toast("Nouveau code envoyé", "success");
     else errEl.textContent = esc(r.error || "Erreur envoi");
   });
+
+  // ── Bouton Google OFFICIEL (Google Identity Services) ──
+  // Flux « jeton d'identité » : la fenêtre Google affiche la MARQUE du client
+  // OAuth (« Continuer vers PermiGo ») au lieu de l'URL Supabase du flux par
+  // redirection. Le jeton est échangé via sb.auth.signInWithIdToken.
+  // L'ID client est PUBLIC par nature (il est aussi dans la fenêtre Google).
+  const GOOGLE_CLIENT_ID =
+    "178846205146-oi10lhl4rbifbc3r4nj6v485qk24gnfq.apps.googleusercontent.com";
+  const gsiBox = root.querySelector("#lg-gsi");
+  const gsiFallbackBtn = root.querySelector('[data-oauth="google"]');
+  (async () => {
+    if (!sb || !gsiBox || !window.isSecureContext || !crypto?.subtle) return;
+    try {
+      // Nonce anti-rejeu : le HASH va à Google, le BRUT à Supabase (qui
+      // vérifie que sha256(brut) == nonce du jeton).
+      const rawNonce = crypto.randomUUID() + crypto.randomUUID();
+      const digest = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(rawNonce),
+      );
+      const hashedNonce = btoa(String.fromCharCode(...new Uint8Array(digest)))
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+
+      await new Promise((resolve, reject) => {
+        if (window.google?.accounts?.id) return resolve();
+        const s = document.createElement("script");
+        s.src = "https://accounts.google.com/gsi/client";
+        s.async = true;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+        setTimeout(() => reject(new Error("gsi_timeout")), 6000);
+      });
+      if (!window.google?.accounts?.id) throw new Error("gsi_unavailable");
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        nonce: hashedNonce,
+        callback: async (resp) => {
+          try {
+            const { error } = await sb.auth.signInWithIdToken({
+              provider: "google",
+              token: resp.credential,
+              nonce: rawNonce,
+            });
+            if (error) throw error;
+            window.location.href = "/#";
+            window.location.reload();
+          } catch (e) {
+            console.error("[login] google id-token", e);
+            toast(
+              translateAuthError(e?.message) || "Connexion Google impossible",
+              "error",
+              4000,
+            );
+          }
+        },
+      });
+      window.google.accounts.id.renderButton(gsiBox, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "pill",
+        logo_alignment: "left",
+        locale: "fr",
+        width: Math.min(gsiBox.clientWidth || 320, 380),
+      });
+      // Rendu OK (origine autorisée, script chargé) → le repli disparaît.
+      if (gsiBox.childElementCount > 0 && gsiFallbackBtn)
+        gsiFallbackBtn.style.display = "none";
+    } catch {
+      /* script bloqué / origine non autorisée (dev local) → repli redirection */
+    }
+  })();
 
   // OAuth buttons
   root.querySelectorAll("[data-oauth]").forEach((b) => {
