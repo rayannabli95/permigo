@@ -57,12 +57,14 @@ function heroRowHtml(r, isMe) {
   </div>`;
 }
 
-function goalHtml(active, m) {
+function goalHtml(active, m, solo) {
   const isRev = active === "revision";
   if (!m.classed) {
     const txt = isRev
       ? "Réussis un quiz cette semaine pour entrer dans la saison."
-      : "Valide une compétence avec ton moniteur pour te classer.";
+      : solo
+        ? "Valide ta première compétence pour te classer."
+        : "Valide une compétence avec ton moniteur pour te classer.";
     return `<div class="lgh-goal lgh-goal-invite">
       <span class="lgh-goal-t">${esc(txt)}</span>
     </div>`;
@@ -100,7 +102,7 @@ function goalHtml(active, m) {
   return "";
 }
 
-function renderHero(active, models) {
+function renderHero(active, models, solo) {
   const m = models[active];
   const isRev = active === "revision";
   const rows = podiumRows(m);
@@ -135,7 +137,7 @@ function renderHero(active, models) {
     <span class="lgh-glow lgh-glow-b" aria-hidden="true"></span>
 
     <div class="lgh-top">
-      <span class="lgh-kick">${icon("trophy", { size: 13, strokeWidth: 2.4 })} Ton école</span>
+      <span class="lgh-kick">${icon("trophy", { size: 13, strokeWidth: 2.4 })} ${solo ? "Élèves PermiGo" : "Ton école"}</span>
       ${chip}
     </div>
 
@@ -153,7 +155,7 @@ function renderHero(active, models) {
       ${podium}
     </div>
 
-    ${goalHtml(active, m)}
+    ${goalHtml(active, m, solo)}
 
     <button class="lgh-cta" type="button" data-cta>
       Voir le classement <span aria-hidden="true">→</span>
@@ -164,9 +166,13 @@ function renderHero(active, models) {
 /**
  * Monte le héros dans un slot et gère le toggle + navigation.
  * @param {HTMLElement} slot
- * @param {{conduite: Array, revision: Array, defaultTab?: 'conduite'|'revision'}} data
+ * @param {{conduite: Array, revision: Array, defaultTab?: 'conduite'|'revision', solo?: boolean}} data
+ *   solo : élève sans moniteur → libellé « Élèves PermiGo » (pas d'école).
  */
-export function mountLeagueHero(slot, { conduite, revision, defaultTab } = {}) {
+export function mountLeagueHero(
+  slot,
+  { conduite, revision, defaultTab, solo } = {},
+) {
   const models = {
     conduite: buildModel(conduite),
     revision: buildModel(revision),
@@ -181,7 +187,7 @@ export function mountLeagueHero(slot, { conduite, revision, defaultTab } = {}) {
   };
 
   const render = () => {
-    slot.innerHTML = renderHero(active, models);
+    slot.innerHTML = renderHero(active, models, solo);
     const card = slot.querySelector(".lgh");
     slot.querySelectorAll(".lgh-seg button").forEach((b) => {
       b.addEventListener("click", (e) => {

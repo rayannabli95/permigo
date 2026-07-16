@@ -4,6 +4,9 @@
 //  - Ligue Révision = effort solo (quiz + examens blancs, /50), cf. theory-league.js
 // Deep-link : #/classement/ecole | /national | /revision
 // Aucun nom réel exposé hors Hall of Fame : pseudo ou « Apprenti ».
+// Élève SOLO (sans moniteur) : portée nationale + classement complété par
+// des profils fictifs façon Duolingo (cf. utils/league-bots.js) le temps
+// que la vraie base se remplisse.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
@@ -16,6 +19,7 @@ import { fmtName } from "@/utils/fmt-name.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { THEORY_LEAGUES, theoryLeague } from "@/utils/theory-league.js";
 import { msToNextMonday, fmtCountdown } from "@/utils/league-shared.js";
+import { blendLeagueRows, isSoloEleve } from "@/utils/league-bots.js";
 import {
   ARENE_CSS,
   areneAccent,
@@ -60,6 +64,11 @@ export async function mount(root, initialTab) {
   if (!me) return;
   track("page_view", { page: "classement", user_role: me.role });
 
+  // Élève solo : pas d'école → portée nationale (sinon ligue vide, il n'y
+  // apparaîtrait même pas lui-même), complétée par des profils fictifs.
+  const solo = isSoloEleve(me);
+  const scope = solo ? "national" : "ecole";
+
   root.innerHTML = `${ARENE_CSS}<div class="arn" style="${CONDUITE_ACCENT}">
     <div class="arn-hd"><h1>Classement</h1><p class="arn-sub">Chargement…</p></div>
     <div class="arn-list">${Array.from({ length: 5 })
@@ -72,34 +81,30 @@ export async function mount(root, initialTab) {
 
   const [ecoleRes, nationalRes, theorieRes, theorieWeeklyRes, hofRes] =
     await Promise.all([
-      sb
-        .rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: LIMIT })
-        .then(
-          (r) => r,
-          () => ({ data: null }),
-        ),
+      sb.rpc("get_eleve_leaderboard", { p_scope: scope, p_limit: LIMIT }).then(
+        (r) => r,
+        () => ({ data: null }),
+      ),
       sb
         .rpc("get_eleve_leaderboard", { p_scope: "national", p_limit: LIMIT })
         .then(
           (r) => r,
           () => ({ data: null }),
         ),
-      sb
-        .rpc("get_theory_leaderboard", { p_scope: "ecole", p_limit: LIMIT })
-        .then(
-          (r) => r,
-          () => ({ data: null }),
-        ),
+      sb.rpc("get_theory_leaderboard", { p_scope: scope, p_limit: LIMIT }).then(
+        (r) => r,
+        () => ({ data: null }),
+      ),
       sb
         .rpc("get_theory_leaderboard_weekly", {
-          p_scope: "ecole",
+          p_scope: scope,
           p_limit: LIMIT,
         })
         .then(
           (r) => r,
           () => ({ data: null }),
         ),
-      sb.rpc("get_hall_of_fame", { p_scope: "ecole", p_limit: 100 }).then(
+      sb.rpc("get_hall_of_fame", { p_scope: scope, p_limit: 100 }).then(
         (r) => r,
         () => ({ data: null }),
       ),
@@ -124,13 +129,22 @@ export async function mount(root, initialTab) {
     return;
   }
 
+  // Solo : on complète Conduite + Révision avec des profils fictifs (les
+  // vraies lignes et les vrais scores sont conservés, rangs recalculés).
+  const blend = (rows, ligue) =>
+    solo ? blendLeagueRows(rows || [], { ligue, userKey: me.id }) : rows || [];
   const data = {
-    ecole: ecoleRes.data || [],
-    national: nationalRes.data || [],
+    ecole: blend(ecoleRes.data, "conduite"),
+    national: blend(nationalRes.data, "conduite"),
     theorie: theorieRes.data || [], // à vie → paliers de progression
-    theorieWeekly: theorieWeeklyRes.data || [], // saison → classement affiché
+    theorieWeekly: blend(theorieWeeklyRes.data, "revision"), // saison → classement affiché
     hof: hofRes.data || [],
   };
+  if (solo)
+    track("league.bots_filled", {
+      conduite: data.ecole.filter((r) => r.bot).length,
+      revision: data.theorieWeekly.filter((r) => r.bot).length,
+    });
 
   // État : ligue (conduite|revision) + portée (ecole|national, Conduite only).
   const DEEP = {
@@ -139,7 +153,10 @@ export async function mount(root, initialTab) {
     revision: { ligue: "revision", scope: "ecole" },
     theorie: { ligue: "revision", scope: "ecole" },
   };
-  const state = DEEP[initialTab] || { ligue: "conduite", scope: "ecole" };
+  const state = {
+    ...(DEEP[initialTab] || { ligue: "conduite", scope: "ecole" }),
+    solo,
+  };
 
   const rerender = () => {
     root.innerHTML = `${ARENE_CSS}${_renderArena(state, data)}`;
@@ -239,7 +256,9 @@ function _renderArena(state, data) {
   const sub =
     state.ligue === "revision"
       ? "Ton effort de la semaine — quiz & examens blancs"
-      : "Validé en leçon avec ton moniteur";
+      : state.solo
+        ? "Compétences de conduite validées"
+        : "Validé en leçon avec ton moniteur";
 
   return `<div class="arn" style="${accent}">
   <div class="arn-hd"><h1>Classement</h1><p class="arn-sub">${sub}</p></div>
@@ -276,6 +295,10 @@ function _renderScopebar(state, rows) {
     // Saison hebdo : compte à rebours jusqu'au reset (lundi 00:00).
     const cd = esc(fmtCountdown(msToNextMonday()));
     return `<div class="arn-scopebar"><span style="display:inline-flex;align-items:center;gap:5px;font:800 12px/1 'Inter',sans-serif;color:#ffd9cf">${icon("clock", { size: 13, strokeWidth: 2.2 })} Saison · <b style="color:#fff;font-variant-numeric:tabular-nums">${cd}</b></span><span class="arn-effectif">${effectif}</span></div>`;
+  }
+  if (state.solo) {
+    // Solo : pas d'école → une seule portée (élèves PermiGo), pas de toggle.
+    return `<div class="arn-scopebar"><span style="display:inline-flex;align-items:center;gap:5px;font:800 12px/1 'Inter',sans-serif;color:#cabfef">${icon("users", { size: 13, strokeWidth: 2.2 })} Élèves PermiGo</span><span class="arn-effectif">${effectif}</span></div>`;
   }
   return `<div class="arn-scopebar">
     <div class="arn-scope" role="group" aria-label="Portée du classement">
