@@ -51,6 +51,14 @@ export function openInviteEleveModal(me) {
         animation: meInvSlide .36s cubic-bezier(.32,.72,0,1);
         font-family:'Inter',sans-serif; color:var(--ink);
         box-shadow:0 -8px 32px rgba(10,13,26,.14);
+        /* Clavier mobile : la feuille doit tenir dans le viewport VISIBLE et
+           défiler — sinon le clavier recouvre le champ email (saisie à
+           l'aveugle, « ça ne marche pas »). */
+        box-sizing:border-box;
+        max-height:calc(100dvh - 24px);
+        overflow-y:auto;
+        -webkit-overflow-scrolling:touch;
+        overscroll-behavior:contain;
       }
       .me-inv-grab {
         width:36px; height:4px; background:var(--bo);
@@ -257,12 +265,33 @@ export function openInviteEleveModal(me) {
   const goBtn = ov.querySelector("#me-inv-go");
 
   const close = () => {
+    cleanupViewport();
     sheet.style.transition = "transform .25s cubic-bezier(.4,0,1,1)";
     sheet.style.transform = "translateY(100%)";
     ov.style.transition = "opacity .25s";
     ov.style.opacity = "0";
     setTimeout(() => ov.remove(), 260);
   };
+
+  // Clavier mobile (iOS surtout) : le clavier ne redimensionne PAS une feuille
+  // en position:fixed — il recouvrait le champ email. On borne la hauteur de
+  // la feuille au viewport VISIBLE (visualViewport) et on remonte le champ
+  // au focus pour qu'on voie ce qu'on tape.
+  const vv = window.visualViewport;
+  const fitSheet = () => {
+    sheet.style.maxHeight = Math.max(240, (vv?.height ?? 0) - 10) + "px";
+  };
+  if (vv) {
+    vv.addEventListener("resize", fitSheet);
+    fitSheet();
+  }
+  const cleanupViewport = () => vv?.removeEventListener("resize", fitSheet);
+  ta.addEventListener("focus", () => {
+    setTimeout(
+      () => ta.scrollIntoView({ block: "center", behavior: "smooth" }),
+      250,
+    );
+  });
 
   ov.addEventListener("click", (e) => {
     if (e.target === ov) close();

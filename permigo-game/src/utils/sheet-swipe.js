@@ -34,6 +34,16 @@ export function enableSheetSwipe(
 
   const onDown = (e) => {
     if (e.button != null && e.button !== 0) return;
+    // Geste démarré sur un élément interactif (champ, bouton, lien…) :
+    // on ne s'en mêle pas. Sinon un tap un peu glissé (doigt sur téléphone)
+    // capturait le pointeur et ANNULAIT le focus → le clavier ne s'ouvrait
+    // pas, la saisie paraissait morte (bug « je n'arrive pas à taper »).
+    if (
+      e.target?.closest?.(
+        "input, textarea, select, button, a, [contenteditable]",
+      )
+    )
+      return;
     // Si le contenu est scrollé, on laisse le scroll natif.
     if ((sheet.scrollTop || 0) > 0) return;
     active = true;
