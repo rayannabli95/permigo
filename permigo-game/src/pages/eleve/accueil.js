@@ -1448,15 +1448,15 @@ function render({
 
   <!-- ══ SCÈNE DU JOUR — En situation (panneau nuit, comme le jeu) ══ -->
   <style>
-    .acc2-sitday{display:block;width:100%;text-align:left;margin:0 0 14px;padding:14px 16px 12px;border:0;border-radius:20px;cursor:pointer;position:relative;overflow:hidden;color:#ece8ff;background:radial-gradient(120% 80% at 50% 0%,rgba(110,70,220,.35) 0%,transparent 60%),linear-gradient(180deg,#181241 0%,#0c0a26 100%);box-shadow:0 10px 24px -8px rgba(24,18,65,.45)}
+    .acc2-sitday{display:block;width:calc(100% - 32px);text-align:left;margin:0 16px 14px;padding:13px 15px 11px;border:0;border-radius:20px;cursor:pointer;position:relative;overflow:hidden;color:#ece8ff;background:radial-gradient(120% 80% at 50% 0%,rgba(110,70,220,.35) 0%,transparent 60%),linear-gradient(180deg,#181241 0%,#0c0a26 100%);box-shadow:0 10px 24px -8px rgba(24,18,65,.45)}
     .acc2-sitday:active{transform:scale(.985)}
     .acc2-sitday-k{display:flex;align-items:center;gap:7px;font:800 11px/1 'Baloo 2','Fredoka',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ffcb3d}
     .acc2-sitday-k .th{background:#ffcb3d;color:#3a1d00;border-radius:999px;padding:3px 9px;letter-spacing:.02em}
     .acc2-sitday-row{display:flex;align-items:center;gap:12px;margin-top:7px}
     .acc2-sitday-q{flex:1;min-width:0;font:800 17px/1.25 'Baloo 2','Fredoka',sans-serif;color:#fff;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
     .acc2-sitday-btn{flex:0 0 auto;background:linear-gradient(180deg,#ffd24a,#ff9c1c);color:#3a1d00;font:800 14px/1 'Baloo 2','Fredoka',sans-serif;border-radius:13px;padding:12px 18px;box-shadow:0 4px 0 #b85e00;white-space:nowrap}
-    .acc2-sitday-scene{margin:2px -8px 0;pointer-events:none}
-    .acc2-sitday-scene svg{width:100%;height:auto;max-height:148px;display:block}
+    .acc2-sitday-scene{margin:2px auto 0;max-width:280px;pointer-events:none}
+    .acc2-sitday-scene svg{width:100%;height:auto;max-height:122px;display:block}
     .acc2-sitday-m{display:block;margin-top:6px;font:500 12px/1.3 'Inter',sans-serif;color:#b9b3e6}
   </style>
   <button class="acc2-sitday" id="acc-sit-day" type="button"
