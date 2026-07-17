@@ -34,7 +34,10 @@ const STR = {
     login: "Se connecter",
     langBtn: "EN",
     kicker: "Offre de lancement*",
-    h1: `Réserve ta place.<br><em>Permis en 90 jours.</em>`,
+    // Phrase-mission (décision Rayan 17/07) : LE but de l'app en une phrase,
+    // en gros. « Réserve ta place » vit déjà dans le CTA, « 90 jours » sur le
+    // billet — rien ne se perd.
+    h1: `Prépare ta leçon <br><em>avant de monter en voiture.</em>`,
     lead: `La seule app qui bosse ta <strong>conduite</strong> entre les leçons — pas une énième app de code.`,
     tTitle: `OBJECTIF PERMIS<br>EN 90 JOURS`,
     tSub: "Conduite · mini-jeux · simulations d'examen",
@@ -174,7 +177,7 @@ const STR = {
     login: "Log in",
     langBtn: "FR",
     kicker: "Launch offer*",
-    h1: `Book your seat.<br><em>Licence in 90 days.</em>`,
+    h1: `Prepare every lesson <br><em>before you get in the car.</em>`,
     lead: `The only app that trains your <strong>driving</strong> between lessons — not just another code-test app.`,
     tTitle: `LICENCE GOAL:<br>90 DAYS`,
     tSub: "Driving · mini-games · exam simulations",
