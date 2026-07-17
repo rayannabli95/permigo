@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réviser — Hub A · Chemin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{
+    background:#3d3488;
+    -webkit-font-smoothing:antialiased;
+  }
+  body{
+    width:390px;margin:0 auto;min-height:844px;
+    position:relative;
+    font-family:'Inter',sans-serif;
+    color:#ded7ff;
+    background:
+      radial-gradient(115% 45% at 50% -4%, rgba(255,220,140,.16) 0%, rgba(255,220,140,0) 55%),
+      radial-gradient(120% 55% at 84% 8%, rgba(150,110,240,.28) 0%, rgba(150,110,240,0) 60%),
+      linear-gradient(#5a4fc0 0%, #4a3fa4 60%, #423a96 100%);
+    padding:0 0 26px;
+    overflow-x:hidden;
+  }
+
+  .gold{
+    background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 40%,#f0a93f 72%,#d98a1f 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+  }
+
+  /* ============ HERO ============ */
+  .hero{padding:18px 20px 6px}
+  .hero h1{
+    font-family:'Baloo 2',cursive;font-weight:800;
+    font-size:30px;line-height:1;letter-spacing:-.01em;
+    filter:drop-shadow(0 2px 0 rgba(90,52,6,.30));
+  }
+  .gprog{
+    display:flex;align-items:center;gap:11px;margin-top:12px;
+  }
+  .gprog .bar{
+    flex:1;height:13px;border-radius:999px;
+    background:rgba(24,18,64,.55);
+    border:1px solid rgba(0,0,0,.28);
+    box-shadow:inset 0 2px 3px rgba(0,0,0,.4);
+    position:relative;overflow:hidden;
+  }
+  .gprog .bar .fill{
+    position:absolute;inset:2px auto 2px 2px;width:9%;border-radius:999px;
+    background:linear-gradient(180deg,#ffe9b0,#f0a93f 55%,#d98a1f);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+  }
+  .gprog .cnt{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;white-space:nowrap;
+  }
+  .gprog .cnt small{
+    font-family:'Inter';font-weight:700;font-size:12px;color:#b6a9ee;
+    -webkit-text-fill-color:#b6a9ee;
+  }
+
+  /* ============ CHEMIN ============ */
+  .path{
+    position:relative;width:390px;height:596px;margin-top:4px;
+  }
+  .path .road{position:absolute;inset:0;z-index:1;pointer-events:none}
+
+  .station{position:absolute;z-index:2}
+
+  /* --- medal base --- */
+  .medal{
+    position:relative;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .medal img{display:block;width:70%;height:70%;object-fit:contain}
+  .medal .rank{
+    position:absolute;top:-4px;left:-4px;
+    width:26px;height:26px;border-radius:50%;
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:14px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 4px rgba(20,12,60,.4), inset 0 1px 0 rgba(255,255,255,.5);
+  }
+
+  /* upcoming (violet clair, atténué) */
+  .medal.soft{
+    width:78px;height:78px;
+    background:radial-gradient(circle at 38% 30%,#e7e0ff,#b7a6ea 58%,#8f7dd0);
+    box-shadow:
+      inset 0 -5px 7px rgba(70,50,130,.5),
+      inset 0 3px 4px rgba(255,255,255,.65),
+      0 5px 0 rgba(30,20,80,.35), 0 9px 14px rgba(20,12,60,.35);
+  }
+  .medal.soft img{opacity:.85;filter:saturate(.7) drop-shadow(0 1px 1px rgba(60,40,120,.35))}
+  .medal.soft .rank{
+    background:radial-gradient(circle at 40% 35%,#fff,#cabfef 70%,#a996e0);
+    color:#4a3a86;
+  }
+
+  /* current (or, en avant) */
+  .medal.gold{
+    width:112px;height:112px;
+    background:radial-gradient(circle at 38% 28%,#ffefc4,#f4bd58 52%,#e39a2c 76%,#b46a10);
+    box-shadow:
+      inset 0 -7px 10px rgba(120,60,0,.5),
+      inset 0 4px 5px rgba(255,255,255,.75),
+      0 7px 0 #a5610d, 0 13px 20px rgba(120,66,10,.5);
+  }
+  .medal.gold img{width:66%;height:66%;filter:drop-shadow(0 2px 2px rgba(120,66,10,.4))}
+  .medal.gold .rank{
+    top:-2px;left:-2px;width:30px;height:30px;font-size:16px;
+    background:radial-gradient(circle at 40% 30%,#fff6df,#ffd98a 65%,#e7a63a);
+    color:#7a4708;
+  }
+
+  /* progress ring around current medal */
+  .ring{position:absolute;top:-9px;left:-9px;z-index:1;pointer-events:none}
+
+  /* TU ES ICI pill */
+  .youare{
+    position:absolute;left:50%;top:-30px;transform:translateX(-50%);
+    display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+    padding:4px 11px;border-radius:999px;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:10px;letter-spacing:.09em;color:#4a2c04;
+    background:linear-gradient(180deg,#fff2cf,#ffd984 60%,#f0b953);
+    box-shadow:0 3px 6px rgba(20,12,60,.4), inset 0 1px 0 rgba(255,255,255,.7);
+  }
+  .youare::after{
+    content:"";position:absolute;left:50%;bottom:-4px;transform:translateX(-50%) rotate(45deg);
+    width:8px;height:8px;background:#f0b953;border-radius:1px;
+  }
+
+  /* --- labels --- */
+  .lab{position:absolute;z-index:2;width:150px}
+  .lab .w{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:13.5px;line-height:1.15;color:#efeaff;
+  }
+  .lab .n{
+    font-family:'Inter';font-weight:700;font-size:11px;color:#b6a9ee;margin-top:2px;
+  }
+  .lab.dim .w{color:#c7bdf0}
+  .lab.dim .n{color:#9d8fd6}
+  .lab.r{text-align:right}
+
+  /* current station block (le HOOK) */
+  .now{position:absolute;z-index:2;width:184px}
+  .now .kick{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:10px;letter-spacing:.08em;color:#ffd98a;text-transform:uppercase;
+  }
+  .now .title{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:15px;line-height:1.2;color:#fff;margin:3px 0 11px;
+  }
+  .go{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;height:50px;border:none;border-radius:16px;cursor:pointer;
+    background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 38%,#f0a93f 72%,#e2951f 100%);
+    box-shadow:0 5px 0 #a5610d, 0 10px 16px rgba(150,88,12,.4), inset 0 2px 0 rgba(255,255,255,.7);
+  }
+  .go:active{transform:translateY(3px);box-shadow:0 2px 0 #a5610d, inset 0 2px 0 rgba(255,255,255,.7)}
+  .go span{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:18px;color:#5a3406;
+    text-shadow:0 1px 0 rgba(255,255,255,.35);
+  }
+
+  /* ============ SECONDAIRE ============ */
+  .mini{
+    display:flex;gap:10px;padding:2px 20px 0;
+  }
+  .chip{
+    flex:1;display:flex;align-items:center;gap:9px;
+    padding:9px 11px;border-radius:14px;cursor:pointer;
+    background:rgba(28,20,72,.42);
+    border:1px solid rgba(180,150,255,.22);
+    border-top-color:rgba(203,191,239,.34);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .chip .ci{
+    width:30px;height:30px;flex:0 0 30px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 38% 30%,#e7e0ff,#b7a6ea 60%,#9583d2);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 2px 4px rgba(20,12,60,.3);
+  }
+  .chip .ci img{width:66%;height:66%;object-fit:contain}
+  .chip .ct b{
+    display:block;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:12px;color:#efeaff;line-height:1.15;
+  }
+  .chip .ct span{font-size:10px;color:#a99fce;font-weight:600}
+</style>
+</head>
+<body>
+
+  <!-- ===== HERO ===== -->
+  <div class="hero">
+    <h1 class="gold">Révise ta conduite</h1>
+    <div class="gprog">
+      <div class="bar"><div class="fill"></div></div>
+      <div class="cnt gold">3<small> / 31 fiches</small></div>
+    </div>
+  </div>
+
+  <!-- ===== CHEMIN ===== -->
+  <div class="path">
+
+    <!-- road -->
+    <svg class="road" width="390" height="596" viewBox="0 0 390 596" fill="none">
+      <path d="M108 96 C 150 150 250 182 250 252 C 250 322 104 322 104 394 C 104 466 250 456 250 526"
+            stroke="#372e7e" stroke-width="22" stroke-linecap="round"/>
+      <path d="M108 96 C 150 150 250 182 250 252 C 250 322 104 322 104 394 C 104 466 250 456 250 526"
+            stroke="#8a7ad6" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 15" opacity=".7"/>
+    </svg>
+
+    <!-- ===== STATION 1 — MANIEMENT (en cours, HOOK) ===== -->
+    <div class="station" style="left:108px;top:96px;transform:translate(-50%,-50%)">
+      <div class="youare">TU ES ICI</div>
+      <!-- progress ring 3/9 -->
+      <svg class="ring" width="130" height="130" viewBox="0 0 130 130">
+        <circle cx="65" cy="65" r="60" fill="none" stroke="rgba(24,16,60,.5)" stroke-width="6"/>
+        <circle cx="65" cy="65" r="60" fill="none" stroke="#ffd98a" stroke-width="6"
+                stroke-linecap="round" stroke-dasharray="126 251" transform="rotate(-90 65 65)"/>
+      </svg>
+      <div class="medal gold">
+        <div class="rank">1</div>
+        <img src="assets/voiture.png" alt="">
+      </div>
+    </div>
+
+    <!-- current block (label + CTA) -->
+    <div class="now" style="left:176px;top:44px">
+      <div class="kick">Monde 1 · Maniement · 3/9</div>
+      <div class="title">S'installer au poste de conduite</div>
+      <button class="go">
+        <span>Continuer</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="#5a3406" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <!-- ===== STATION 2 — CIRCULATION ===== -->
+    <div class="station" style="left:250px;top:252px;transform:translate(-50%,-50%)">
+      <div class="medal soft">
+        <div class="rank">2</div>
+        <img src="assets/feu.png" alt="">
+      </div>
+    </div>
+    <div class="lab dim r" style="left:44px;top:236px">
+      <div class="w">Circulation</div>
+      <div class="n">0 / 8 fiches</div>
+    </div>
+
+    <!-- ===== STATION 3 — CONDITIONS DIFFICILES ===== -->
+    <div class="station" style="left:104px;top:394px;transform:translate(-50%,-50%)">
+      <div class="medal soft">
+        <div class="rank">3</div>
+        <img src="assets/eclair.png" alt="">
+      </div>
+    </div>
+    <div class="lab dim" style="left:156px;top:372px">
+      <div class="w">Conditions difficiles</div>
+      <div class="n">0 / 7 fiches</div>
+    </div>
+
+    <!-- ===== STATION 4 — CONDUITE AUTONOME ===== -->
+    <div class="station" style="left:250px;top:526px;transform:translate(-50%,-50%)">
+      <div class="medal soft">
+        <div class="rank">4</div>
+        <img src="assets/toque.png" alt="">
+      </div>
+    </div>
+    <div class="lab dim r" style="left:44px;top:510px">
+      <div class="w">Conduite autonome</div>
+      <div class="n">0 / 7 fiches</div>
+    </div>
+
+  </div>
+
+  <!-- ===== SECONDAIRE ===== -->
+  <div class="mini">
+    <div class="chip">
+      <div class="ci"><img src="assets/cible.png" alt=""></div>
+      <div class="ct"><b>Défi du jour</b><span>1 min</span></div>
+    </div>
+    <div class="chip">
+      <div class="ci"><img src="assets/cible.png" alt=""></div>
+      <div class="ct"><b>Trouve la faute</b><span>Repère l'erreur</span></div>
+    </div>
+  </div>
+
+</body>
+</html>
