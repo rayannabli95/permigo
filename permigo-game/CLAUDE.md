@@ -34,23 +34,30 @@ Avant de répondre à un message, regarde si une **skill** colle à la demande e
 
 ---
 
-## 🎯 La mission (le cap — verrouillé)
+## 🎯 La mission (le cap — PIVOT du 17/07/2026)
 
-PermiGo = **l'outil DU moniteur indépendant, à SA marque**. Il lui donne deux choses :
+PermiGo = **le compagnon qui prépare l'élève avant chaque heure de conduite et l'accompagne entre deux leçons.** L'élève est le moteur ; le moniteur est **observateur et bénéficiaire** — il ne remplit RIEN d'obligatoire (la double saisie tue l'adoption, Rayan parle d'expérience de moniteur).
 
-1. **Preuve & autorité** — « qui est prêt », taux de réussite à son nom (vs Ornikar / En Voiture Simone qui possèdent l'élève).
-2. **Engagement élève** — l'élève révise et revient **entre** les leçons. **L'élève est le carburant viral** : son accroche EST l'argument de vente du moniteur.
+**La boucle produit — filtre de TOUTE feature** :
 
-**Modèle** : abonnement **self-serve 9,99 €/mois** — le moniteur paie pour lui-même, cycle de vente court. Stripe en place.
+> **Préparer → Conduire → Débriefer → Consolider ou passer à la suite.**
 
-**Trou de marché** : personne n'offre au moniteur **son** propre outil (sa marque) + une couche d'engagement élève. Concurrents : Ornikar/EVS (à leur marque), éditeurs B2B (Codes Rousseau, Ediser), SaaS (Stych).
+Si un écran, un bouton ou une mécanique ne renforce pas cette boucle, on ne le développe pas. Chaque heure de conduite est un événement : avant, je me prépare ; après, je fais le bilan ; entre les deux, je progresse.
+
+**Règles de ton** : jamais « échec » → « consolidation » (2-3 leçons sur un giratoire = NORMAL) ; jamais « compétence maîtrisée » → « certifiée par toi / prêt·e à pratiquer » ; éviter le mot « quiz » nu (l'élève fuit les « apps de code ») ; le cycle de l'élève n'attend JAMAIS le moniteur.
+
+**Modèle** : Pass Permis **élève** (pré-vente live, cf. Monétisation) + abonnement moniteur 9,99 €/mois (dashboard passif : élèves mieux préparés, alertes, image moderne — proposition de valeur à re-tester depuis le pivot).
+
+**Trou de marché** : les concurrents font réviser « le permis » (code) ; PermiGo prépare **la prochaine leçon de conduite**. Concurrents : Ornikar/EVS (à leur marque, code d'abord), éditeurs B2B (Codes Rousseau, Ediser), SaaS (Stych).
+
+> 📜 L'ancien cap (« l'outil DU moniteur, à sa marque ») a été abandonné le 17/07/2026 — décision Rayan, détails dans la mémoire `vision_pivot_coach_eleve_2026_07_17.md`.
 
 ---
 
 ## 👥 Les rôles
 
-- **élève** (apprenti) — le **carburant** : on le rend accro (réviser, revenir, progresser).
-- **moniteur** (`enseignant`) — **la cible & le payeur**. Tout converge vers lui.
+- **élève** (apprenti) — **le moteur & le payeur principal** (Pass Permis). Il prépare ses leçons, se débriefe, **certifie lui-même** ses compétences (« Tu te sens prêt·e à passer à la suite ? ») — rattaché ou solo, même parcours.
+- **moniteur** (`enseignant`) — **observateur & bénéficiaire** (abonnement 9,99 €). Dashboard en lecture : qui prépare, qui avance, qui bloque. Sa validation de séance existe encore mais n'est JAMAIS bloquante (retrait progressif en cours — lot 4 du pivot).
 - **gérant** (auto-école) — **dormant / hors-cible**. ⚠️ On n'investit pas, on ne le route pas en avant, MAIS **on ne le supprime pas** : le rôle `gerant` est branché à l'auth, la nav ET au RLS (la policy `leads_select` — lecture des leads de la landing — en dépend). Retrait = chantier DB dédié, jamais un cleanup au passage. Détails GTM : `docs/GTM_PREMIERS_CLIENTS.md`.
 - **owner** (= Rayan) — vue **plateforme** (tous les agrégats). Helpers DB : `is_owner()`, `get_owner_overview()`.
 
@@ -169,7 +176,7 @@ export async function mount(root, param) {
 
 - **REMC** = Référentiel pour l'Éducation à une Mobilité Citoyenne (arrêté 13/05/2013).
 - 4 compétences **C1–C4**. Livret officiel = **30 objectifs** (arrêté 29/07/2013, annexe III).
-- Cœur pédagogique = **Triple Validation** (`src/services/quiz-engine.js`). Toute mécanique gamifiée doit avoir une **vraie conséquence pédagogique**.
+- Cœur pédagogique = **Triple Validation** (`src/services/quiz-engine.js`), **amendée par le pivot 17/07** : la phase 1 n'est plus la saisie moniteur mais la **pratique vécue en leçon + certification par l'élève** (quiz ≥ 80 % corrigé serveur, puis « Tu te sens prêt·e ? ») ; les quiz post-validation et consolidation 48 h sont inchangés. Détails : `.claude/skills/triple-validation/SKILL.md`. Toute mécanique gamifiée doit avoir une **vraie conséquence pédagogique**.
 
 ## ⚠️ Erreurs récurrentes (compléter quand Claude se trompe 2×)
 

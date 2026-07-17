@@ -4,4 +4,4 @@
 
 ⚠️ **Emplacement** : le projet vivant est **`permigo-game/`**. La racine `permigo-v7/` héberge un ancien projet Drizzle + Hono + SQLite (`dev.db`) **inutilisé** + des docs legacy. **Ne pas modifier le code à la racine** sans validation explicite.
 
-**En deux lignes** : PermiGo = l'outil **du moniteur indépendant** (à sa marque — preuve & autorité), et l'**élève** est le carburant viral (engagement entre les leçons). Abonnement **9,99 €/mois** (Stripe). Stack : **Vanilla JS (ES modules) + Vite + Supabase + Vercel**.
+**En deux lignes** : PermiGo = **le compagnon qui prépare l'élève avant chaque heure de conduite** (boucle : Préparer → Conduire → Débriefer → Consolider ou suite — pivot 17/07/2026). Le moniteur observe (dashboard passif, abo 9,99 €/mois) ; l'élève certifie lui-même son parcours. Stack : **Vanilla JS (ES modules) + Vite + Supabase + Vercel**.
