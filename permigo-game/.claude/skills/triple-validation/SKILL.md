@@ -5,15 +5,34 @@ description: Systeme pedagogique core de PermiGo. A UTILISER IMPERATIVEMENT des 
 
 # Triple Validation — coeur pedagogique PermiGo
 
+> ⚠️ **AMENDEE le 17/07/2026 par le PIVOT produit** (validation explicite de Rayan —
+> « le moniteur ne remplit rien, l'eleve est le moteur »). La phase 1 a change ;
+> les phases 2-3 sont inchangees.
+
 ## Le concept (non-negociable)
 
 Chaque competence REMC est validee 3 fois pour creer une memorisation durable :
 
-1. **Validation pratique** (par l'enseignant) — geste maitrise en lecon
+1. **Pratique vecue + CERTIFICATION par l'eleve** — le geste est travaille en
+   vraie lecon (l'eleve a toujours un enseignant dans la voiture, rattache ou
+   solo). Ensuite : quiz de certification 5 questions, **corrige SERVEUR**
+   (`self_validate_competence`, p_answers, seuil 80 %) → question unifiee
+   « Tu te sens pret·e a passer a la suite ? » → l'eleve certifie.
+   La validation moniteur (`validations`) existe encore : c'est une
+   **confirmation optionnelle, jamais bloquante**, jamais ecrasee.
 2. **Quiz post-validation** (30 secondes apres) — 3 questions, valide la comprehension
 3. **Quiz consolidation** (48h apres) — 2 questions, valide la memorisation long-terme
 
-**Ne JAMAIS modifier ce pattern sans validation explicite de Rayan.**
+**Ne JAMAIS re-modifier ce pattern sans validation explicite de Rayan.**
+
+## Vocabulaire (pivot)
+
+- ❌ « valide / maitrise » par l'eleve → ✅ « **certifiee par toi** »
+- ❌ « echec » → ✅ « **consolidation** » (2-3 lecons sur un theme = normal)
+- Le cycle de l'eleve n'attend JAMAIS le moniteur.
+- Table `self_validations` (une ligne par eleve × competence, ecrite UNIQUEMENT
+  par la RPC SECURITY DEFINER) — fusionnee en lecture partout (parcours,
+  accueil, readiness) ; badge distinct dans le livret moniteur.
 
 ## Tables impliquees
 
