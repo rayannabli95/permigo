@@ -65,7 +65,9 @@ function renderHero(models, solo) {
     <span class="lgh-glow lgh-glow-a" aria-hidden="true"></span>
     <span class="lgh-glow lgh-glow-b" aria-hidden="true"></span>
 
-    <span class="lgh-season">${icon("clock", { size: 12, strokeWidth: 2.6 })} Fin de saison · <b>${esc(fmtCountdown(msToNextMonday()))}</b></span>
+    <div class="lgh-head">
+      <span class="lgh-season">${icon("clock", { size: 12, strokeWidth: 2.6 })} Fin de saison · <b>${esc(fmtCountdown(msToNextMonday()))}</b></span>
+    </div>
 
     <div class="lgh-core">
       <span class="lgh-rank-big${m.classed ? "" : " is-empty"}">${rankBig}</span>
@@ -73,7 +75,7 @@ function renderHero(models, solo) {
         <span class="lgh-lbl">Ta place</span>
         <span class="lgh-of">${esc(ofTxt)}</span>
       </div>
-      <span class="lgh-go" aria-hidden="true">→</span>
+      <span class="lgh-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
     </div>
 
     ${nudgeLine(m)}
@@ -143,8 +145,9 @@ export const LEAGUE_HERO_CSS = `
 .lgh-glow-b{width:230px;height:180px;bottom:-70px;left:-60px;background:radial-gradient(circle,color-mix(in srgb, var(--a) 24%, transparent),transparent 68%)}
 .lgh>*{position:relative;z-index:1}
 
-/* chip saison — en haut à droite */
-.lgh-season{position:absolute;top:14px;right:15px;z-index:2;display:inline-flex;align-items:center;gap:5px;
+/* chip saison — sur sa PROPRE ligne, alignée à droite (plus d'absolute → plus de collision avec la flèche) */
+.lgh-head{display:flex;justify-content:flex-end;margin-bottom:6px}
+.lgh-season{display:inline-flex;align-items:center;gap:5px;
   padding:5px 10px;border-radius:999px;font:800 11px/1 'Plus Jakarta Sans',sans-serif;color:#e4defc;
   background:rgba(10,7,24,.55);border:1px solid color-mix(in srgb, var(--a) 40%, transparent)}
 .lgh-season svg{color:var(--a-lt)}
@@ -162,9 +165,10 @@ export const LEAGUE_HERO_CSS = `
 .lgh-lbl{font:800 10.5px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:#c9c2ea}
 .lgh-of{font:800 15px/1.2 'Baloo 2','Plus Jakarta Sans',sans-serif;color:#f7f5ff;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lgh-go{flex:0 0 auto;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:19px;color:#fff;background:linear-gradient(180deg,var(--a-lt),var(--adk));
-  box-shadow:0 4px 0 var(--adk),inset 0 1px 0 rgba(255,255,255,.4)}
+.lgh-go{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:#fff;background:linear-gradient(180deg,var(--a-lt),var(--adk));
+  box-shadow:0 4px 12px -2px color-mix(in srgb,var(--a) 55%,transparent),inset 0 1px 0 rgba(255,255,255,.45)}
+.lgh-go svg{width:18px;height:18px}
 
 /* objectif : une seule ligne (jamais culpabilisante) */
 .lgh-nudge{margin-top:13px;padding-top:12px;border-top:1px solid color-mix(in srgb, var(--a) 22%, transparent);
