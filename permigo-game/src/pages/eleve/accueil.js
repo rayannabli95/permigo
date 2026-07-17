@@ -513,6 +513,87 @@ const STYLE = `<style>
 .acc2-consol-s { display: block; margin-top: 2px; font: 700 11.5px/1.3 'Plus Jakarta Sans', sans-serif; color: var(--mu); }
 .acc2-consol-arr { color: var(--a-txt); font-weight: 800; font-size: 17px; flex: 0 0 auto; }
 
+/* ═══ « Revenons sur ta leçon » — le débrief SANS note ni agenda ═══
+   Deux choix équivalents (consolider n'est jamais un échec), un report
+   discret. Ton chaleureux, jamais culpabilisant. */
+.acc2-debrief {
+  width: calc(100% - 32px);
+  margin: 12px 16px 0;
+  padding: 15px 16px 13px;
+  border: 1px solid color-mix(in srgb, var(--a) 22%, var(--bo));
+  border-radius: 18px;
+  background: linear-gradient(150deg,
+    color-mix(in srgb, var(--a) 8%, var(--su)) 0%,
+    var(--su) 70%);
+  box-shadow: 0 8px 22px -14px color-mix(in srgb, var(--a) 40%, transparent);
+}
+.acc2-debrief-k {
+  font: 800 11px/1 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--a-txt);
+  margin: 0 0 7px;
+}
+.acc2-debrief-t {
+  font: 800 15.5px/1.3 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  margin: 0 0 4px;
+}
+.acc2-debrief-s {
+  font: 600 12px/1.45 'Plus Jakarta Sans', sans-serif;
+  color: var(--mu);
+  margin: 0 0 12px;
+}
+.acc2-debrief-row { display: flex; gap: 8px; }
+.acc2-debrief-btn {
+  flex: 1;
+  min-height: 44px;
+  border-radius: 13px;
+  padding: 11px 8px;
+  font: 800 13px/1.2 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.acc2-debrief-btn:active { transform: scale(.97); }
+.acc2-debrief-btn.keep {
+  border: 1.5px solid color-mix(in srgb, var(--a) 40%, var(--bo));
+  background: var(--su);
+  color: var(--a-txt);
+}
+.acc2-debrief-btn.next {
+  border: 0;
+  color: #fff;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--a) 88%, #fff) 0%,
+    var(--a) 50%,
+    var(--adk) 100%);
+  box-shadow: 0 3px 0 var(--adk);
+}
+.acc2-debrief-later {
+  display: block;
+  width: 100%;
+  margin-top: 9px;
+  padding: 7px;
+  border: 0;
+  background: none;
+  font: 700 11.5px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--mu);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Pointeur « retrouve ce cours dans Réviser » : l'onglet pulse 2 fois */
+@keyframes prepTabPulse {
+  0%, 100% { transform: none; }
+  35%      { transform: scale(1.22) translateY(-2px); }
+}
+.bn-tab.prep-pulse { animation: prepTabPulse .65s ease-in-out 2; }
+@media (prefers-reduced-motion: reduce) {
+  .bn-tab.prep-pulse { animation: none; }
+}
+
 /* ═══ Feuille de choix du thème (pastille 🎯 du hero) ═══ */
 .prep-sheet-ov {
   position: fixed;
@@ -1147,6 +1228,36 @@ const EXAM_UNLOCK_WORLD2_DONE = 6;
 // planning (charte : pas de réservation dans PermiGo).
 const PREP_THEME_KEY = "pg-prep-theme";
 
+// Cycle de préparation (lot 2 de la boucle : Préparer → Conduire → Débriefer
+// → Consolider ou passer à la suite). Un cycle = un thème + un angle de
+// travail qui TOURNE à chaque prep — on ne re-sert jamais deux fois le même
+// plat : fiche (0) → questions (1) → mise en situation (2) → questions…
+// `startedAt` = dernière prep lancée (sert au bloc « Revenons sur ta leçon »
+// ~4 h plus tard — heuristique sans agenda, charte : pas de planning).
+const PREP_CYCLE_KEY = "pg-prep-cycle";
+const PREP_DEBRIEF_AFTER_MS = 4 * 3600 * 1000;
+const PREP_HINT_MIN_MS = 60 * 1000;
+
+function loadPrepCycle() {
+  try {
+    return JSON.parse(localStorage.getItem(PREP_CYCLE_KEY)) || null;
+  } catch {
+    return null;
+  }
+}
+function savePrepCycle(c) {
+  try {
+    localStorage.setItem(PREP_CYCLE_KEY, JSON.stringify(c));
+  } catch {
+    /* stockage indispo → la rotation retombe sur la fiche, pas grave */
+  }
+}
+function prepHrefFor(code, step) {
+  if (step === 1) return `#/revision-conduite/${code}:quiz`;
+  if (step === 2) return "#/en-situation";
+  return `#/revision-conduite/${code}`;
+}
+
 // Salutation contextuelle. Revisite dans la même journée → message chaleureux.
 const LS_LAST_VISIT = "pg-last-visit";
 function _greeting(awayDays) {
@@ -1365,7 +1476,10 @@ export async function mount(root) {
       } catch {
         /* stockage indispo → choix auto */
       }
-      if (!code || !getFiche(code) || validated.has(code)) {
+      // Le choix DÉCLARÉ est toujours respecté — même sur une compétence
+      // déjà acquise (« je consolide encore » doit survivre au rechargement).
+      // L'avancée automatique passe par « Leçon suivante », pas par un reset.
+      if (!code || !getFiche(code)) {
         code = prepSuggestions[0]?.code || null;
       }
       const fiche = code ? getFiche(code) : null;
@@ -1412,6 +1526,34 @@ export async function mount(root) {
       todayQuests,
       pendingNotif,
     });
+
+    // Pointeur « retrouve ce cours dans Réviser » : au retour d'une prep
+    // (entre 1 min et 4 h après le lancement), UNE fois par cycle. L'onglet
+    // Réviser pulse 2 fois — l'élève apprend où retrouver le cours sans
+    // notification (l'infra push attend, décision Rayan : plan B d'abord).
+    try {
+      const cyc = loadPrepCycle();
+      if (
+        prep &&
+        cyc &&
+        cyc.code === prep.code &&
+        cyc.startedAt &&
+        !cyc.hinted &&
+        Date.now() - cyc.startedAt > PREP_HINT_MIN_MS &&
+        Date.now() - cyc.startedAt < PREP_DEBRIEF_AFTER_MS
+      ) {
+        savePrepCycle({ ...cyc, hinted: true });
+        toast("Retrouve ce cours quand tu veux dans « Réviser » 📚", "info");
+        const tab = document.querySelector('.bn-tab[data-id="reviser"]');
+        if (tab) {
+          tab.classList.add("prep-pulse");
+          setTimeout(() => tab.classList.remove("prep-pulse"), 2200);
+        }
+        track("prep.reviser_hint_shown", { code: prep.code });
+      }
+    } catch {
+      /* best-effort — jamais bloquant pour l'accueil */
+    }
 
     const accDiv = root.querySelector(".acc2");
 
@@ -1630,9 +1772,40 @@ function render({
   // ── Hero « Prépare ta prochaine leçon » (maquette A validée 17/07) ──
   // Toujours le même message : l'élève prépare sa vraie leçon de conduite.
   // Le CTA king garde l'id action-cta-btn (tour guidé + wire inchangés).
+  // La DESTINATION tourne selon le cycle (fiche → questions → situation) :
+  // variété invisible, zéro encombrement du hero.
   // Repli sans fiche (données indisponibles) : le hub Réviser.
   const _heroTitle = prep?.titre || "Prépare ta prochaine leçon";
-  const _heroHref = prep ? `#/revision-conduite/${prep.code}` : "#/reviser";
+  const _prepCycle = prep ? loadPrepCycle() : null;
+  const _prepStep =
+    _prepCycle && _prepCycle.code === prep?.code
+      ? (_prepCycle.step || 0) % 3
+      : 0;
+  const _heroHref = prep ? prepHrefFor(prep.code, _prepStep) : "#/reviser";
+
+  // Bloc « Revenons sur ta leçon » : la prep a été lancée il y a > 4 h →
+  // la leçon a plausiblement eu lieu. Jamais de note, jamais « échec » :
+  // consolider est un choix aussi valorisé que passer à la suite.
+  const _debriefDue =
+    prep &&
+    _prepCycle &&
+    _prepCycle.code === prep.code &&
+    _prepCycle.startedAt &&
+    !_prepCycle.answered &&
+    Date.now() - _prepCycle.startedAt > PREP_DEBRIEF_AFTER_MS;
+  const debriefCard = _debriefDue
+    ? `
+  <section class="acc2-debrief" id="acc-debrief" aria-label="Revenons sur ta leçon">
+    <p class="acc2-debrief-k">🚗 Revenons sur ta leçon</p>
+    <p class="acc2-debrief-t">Tu as revu « ${esc(prep.titre)} » avec ton enseignant ?</p>
+    <p class="acc2-debrief-s">Certaines compétences demandent plusieurs leçons — c'est normal. On continue ensemble.</p>
+    <div class="acc2-debrief-row">
+      <button class="acc2-debrief-btn keep" id="debrief-keep" type="button">Je consolide encore</button>
+      <button class="acc2-debrief-btn next" id="debrief-next" type="button">Leçon suivante →</button>
+    </div>
+    <button class="acc2-debrief-later" id="debrief-later" type="button">Pas encore eu ma leçon</button>
+  </section>`
+    : "";
 
   // La série d'activité se sauve avec un QUIZ (quiz_attempts) : le bandeau
   // SOS pointe donc toujours vers un quiz, pas vers la fiche du hero.
@@ -1697,6 +1870,7 @@ function render({
           id="action-cta-btn" type="button" data-href="${esc(_heroHref)}">
     Je me prépare <span class="acc2-cta-arr" aria-hidden="true">→</span>
   </button>
+  ${debriefCard}
   ${consolCard}
 
   <!-- Ancre pour les quêtes du jour (mountDailyQuests) -->
@@ -2021,14 +2195,84 @@ function wire(
       navigate(`#/sessions/${sessionId}`);
     });
 
-  // CTA king (hero v2) — même id que l'ancien action-cta-btn, comportement identique
+  // CTA king (hero prep) — enregistre le cycle AVANT de naviguer : l'angle
+  // tourne pour la prochaine prep (fiche → questions → situation → questions…)
+  // et `startedAt` arme le bloc « Revenons sur ta leçon » (~4 h plus tard).
   root.querySelector("#action-cta-btn")?.addEventListener("click", (e) => {
     const href = e.currentTarget.dataset.href;
     if (href) {
       haptic("select");
       track("cta.clicked", { cta_type: "action_btn" });
+      if (prep && href !== "#/reviser") {
+        const cyc = loadPrepCycle();
+        const same = cyc && cyc.code === prep.code;
+        const step = same ? (cyc.step || 0) % 3 : 0;
+        savePrepCycle({
+          code: prep.code,
+          // Après la mise en situation (2), on repart sur les questions (1) —
+          // la fiche (0) ne revient que sur un NOUVEAU thème.
+          step: step === 2 ? 1 : step + 1,
+          startedAt: Date.now(),
+          hinted: same ? cyc.hinted || false : false,
+          answered: false,
+        });
+        track("prep.step_started", { code: prep.code, step });
+      }
       navigate(href);
     }
+  });
+
+  // ── Bloc « Revenons sur ta leçon » (débrief sans note) ──
+  const _closeDebrief = () => root.querySelector("#acc-debrief")?.remove();
+  root.querySelector("#debrief-keep")?.addEventListener("click", () => {
+    haptic("select");
+    track("prep.debrief_keep", { code: prep?.code });
+    const cyc = loadPrepCycle();
+    if (cyc) savePrepCycle({ ...cyc, answered: true });
+    _closeDebrief();
+    toast("On consolide — c'est comme ça qu'on progresse 💪", "success");
+  });
+  root.querySelector("#debrief-next")?.addEventListener("click", () => {
+    haptic("select");
+    track("prep.debrief_next", { code: prep?.code });
+    // Thème suivant = première suggestion différente du thème courant
+    const next =
+      (prepSuggestions || []).find((s) => s.code !== prep?.code) || null;
+    if (next) {
+      try {
+        localStorage.setItem(PREP_THEME_KEY, next.code);
+      } catch {
+        /* stockage indispo → le hero changera au prochain rendu */
+      }
+      savePrepCycle({
+        code: next.code,
+        step: 0,
+        startedAt: null,
+        hinted: false,
+        answered: false,
+      });
+      const h1 = root.querySelector("#prep-hero-title");
+      if (h1) h1.textContent = next.titre;
+      const cta = root.querySelector("#action-cta-btn");
+      if (cta) cta.dataset.href = prepHrefFor(next.code, 0);
+      if (prep) {
+        prep.code = next.code;
+        prep.titre = next.titre;
+      }
+      toast(`Nouvelle leçon à préparer : ${next.titre}`, "success");
+    } else {
+      const cyc = loadPrepCycle();
+      if (cyc) savePrepCycle({ ...cyc, answered: true });
+    }
+    _closeDebrief();
+  });
+  root.querySelector("#debrief-later")?.addEventListener("click", () => {
+    haptic("tap");
+    track("prep.debrief_later", { code: prep?.code });
+    // Report discret : on redemandera ~4 h plus tard, jamais de relance lourde
+    const cyc = loadPrepCycle();
+    if (cyc) savePrepCycle({ ...cyc, startedAt: Date.now() });
+    _closeDebrief();
   });
 }
 
@@ -2120,12 +2364,23 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
       } catch {
         /* stockage indispo → le choix vaut pour cette visite via le DOM */
       }
+      // Nouveau thème = nouveau cycle : on repart sur la fiche (angle 0)
+      savePrepCycle({
+        code,
+        step: 0,
+        startedAt: null,
+        hinted: false,
+        answered: false,
+      });
       // Mise à jour du hero en place
       const h1 = root.querySelector("#prep-hero-title");
       if (h1) h1.textContent = titre;
       const cta = root.querySelector("#action-cta-btn");
-      if (cta) cta.dataset.href = `#/revision-conduite/${code}`;
-      if (prep) prep.code = code;
+      if (cta) cta.dataset.href = prepHrefFor(code, 0);
+      if (prep) {
+        prep.code = code;
+        prep.titre = titre;
+      }
       haptic("select");
       track("prep.theme_changed", { code });
       close();
