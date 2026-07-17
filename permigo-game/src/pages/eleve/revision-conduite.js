@@ -181,91 +181,6 @@ const STYLE = `<style>
 .rvcb-frow-st { flex:none; width:22px; height:22px; display:grid; place-items:center; }
 .rvcb-frow-st .pg-med { width:22px; height:22px; }
 
-/* ═══ Refonte « simple » de la home (mockup validé) : une seule action,
-      progression calme, liste des fiches repliée, entraînement optionnel en bas.
-      Theme-aware : suit l'accent du compte (--a). ═══ */
-.rvs-head { display:flex; align-items:flex-start; gap:12px; padding:16px 0 4px; }
-.rvs-head .rvc-back { margin-top:2px; }
-.rvs-h1 { font:800 24px/1.05 'Plus Jakarta Sans',sans-serif; letter-spacing:-.025em; margin:0; color:var(--ink); }
-.rvs-p { margin:5px 0 0; font:600 13px/1.5 'Inter',sans-serif; color:var(--mu,#64748b); }
-.rvs-p b { color:var(--a-txt,var(--a,#4f46e5)); }
-
-.rvs-now { position:relative; overflow:hidden; display:block; width:100%; text-align:left; cursor:pointer;
-  margin:16px 0 0; border:1px solid var(--bo3,#e6eaf2); border-radius:22px; padding:17px;
-  background:var(--su,#fff); color:var(--ink); box-shadow:0 12px 26px -16px rgba(30,40,80,.4);
-  -webkit-tap-highlight-color:transparent; transition:transform .12s ease; }
-.rvs-now:active { transform:scale(.99); }
-.rvs-now::before { content:""; position:absolute; right:-40px; top:-40px; width:150px; height:150px; border-radius:50%;
-  background:radial-gradient(circle, color-mix(in srgb,var(--a,#6c63ff) 18%,transparent), transparent 70%); }
-.rvs-now-k { position:relative; display:inline-flex; align-items:center; gap:7px; font:800 11px/1 'Inter',sans-serif;
-  letter-spacing:.09em; text-transform:uppercase; color:var(--a-txt,var(--a));
-  background:color-mix(in srgb,var(--a,#6c63ff) 12%,transparent); padding:6px 10px; border-radius:999px; }
-.rvs-dot { width:7px; height:7px; border-radius:50%; background:var(--a,#6c63ff);
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--a,#6c63ff) 25%,transparent); }
-.rvs-now-t { position:relative; display:block; margin:11px 0 4px; font:800 20px/1.15 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; }
-.rvs-now-meta { position:relative; display:flex; align-items:center; gap:7px; font:600 13px/1 'Inter',sans-serif; color:var(--mu,#64748b); }
-.rvs-chipm { background:var(--bg,#eef1f7); border-radius:6px; padding:3px 7px; font:800 11.5px/1 'Inter',sans-serif; color:var(--mu,#57617c); }
-.rvs-cta { position:relative; margin-top:14px; width:100%; height:54px; border-radius:16px;
-  /* Dégradé MÊME TEINTE (reflet clair → accent → foncé) : avec un skin
-     d'accent, --a-lt peut diverger de --a et le bouton devenait bicolore. */
-  background:linear-gradient(180deg,
-    color-mix(in srgb, var(--a) 88%, #fff) 0%,
-    var(--a) 50%,
-    var(--adk) 100%); color:#fff;
-  box-shadow:0 5px 0 var(--adk), 0 10px 20px -6px color-mix(in srgb, var(--a) 50%, transparent);
-  font:800 16px/1 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:9px; }
-.rvs-cta-ic { width:26px; height:26px; border-radius:8px; background:var(--adk); display:grid; place-items:center; }
-.rvs-cta-ic svg { width:14px; height:14px; color:#fff; }
-.rvs-done { cursor:default; } .rvs-done:active { transform:none; }
-
-.rvs-prog { margin:20px 2px 0; }
-.rvs-prog-h { display:flex; align-items:center; justify-content:space-between; font:800 13px/1 'Inter',sans-serif; color:var(--ink); }
-.rvs-prog-x { color:var(--mu,#64748b); }
-.rvs-bar { margin-top:9px; height:9px; border-radius:99px; background:var(--bo3,#e2e7f1); overflow:hidden; }
-.rvs-bar > i { display:block; height:100%; border-radius:99px;
-  background:linear-gradient(90deg,var(--a,#6c63ff),color-mix(in srgb,var(--a,#6c63ff) 55%,#fff)); transition:width .5s ease; }
-
-.rvs-sec { margin:22px 2px 8px; font:800 12px/1 'Inter',sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--mu2,#9aa3ba); }
-.rvs-list { display:flex; flex-direction:column; gap:10px; }
-.rvs-grp { display:flex; align-items:center; gap:12px; width:100%; text-align:left; cursor:pointer;
-  background:var(--su,#fff); border:1px solid var(--bo3,#e6eaf2); border-radius:16px; padding:13px 14px; color:var(--ink);
-  -webkit-tap-highlight-color:transparent; transition:transform .12s ease; }
-.rvs-grp:active { transform:scale(.99); }
-.rvs-num { width:34px; height:34px; border-radius:10px; flex:none; display:grid; place-items:center; color:#fff;
-  font:800 15px/1 'Plus Jakarta Sans',sans-serif; box-shadow:inset 0 -2px 0 rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.35); }
-.rvs-grp-t { flex:1; min-width:0; }
-.rvs-grp-t b { display:block; font:800 14.5px/1.15 'Plus Jakarta Sans',sans-serif; }
-.rvs-grp-t span { font:600 12px/1 'Inter',sans-serif; color:var(--mu,#64748b); }
-.rvs-grp-c { font:800 12.5px/1 'Inter',sans-serif; color:var(--mu2,#9aa3ba); flex:none; }
-.rvs-chev { width:20px; height:20px; flex:none; color:var(--mu2,#9aa3ba); }
-
-/* Les 4 mondes différenciés : chaque ligne a le rail de couleur de SON monde,
-   et le monde EN COURS ressort (teinte + ombre + pastille « Reprendre ») pour
-   que le regard s'y pose direct — fini les 4 lignes identiques. */
-.rvs-grp { border-left:5px solid var(--mc,#6366f1); }
-.rvs-grp.is-current { padding:15px 14px;
-  border:1.5px solid color-mix(in srgb, var(--mc,#6366f1) 45%, var(--bo3,#e6eaf2));
-  border-left:5px solid var(--mc,#6366f1);
-  background:color-mix(in srgb, var(--mc,#6366f1) 9%, var(--su,#fff));
-  box-shadow:0 14px 30px -16px var(--mc,#6366f1); }
-.rvs-grp.is-current .rvs-grp-t b { color:var(--ink); }
-.rvs-grp-badge { flex:none; font:800 11px/1 'Inter',sans-serif; color:#fff;
-  background:var(--mc,#6366f1); border-radius:999px; padding:6px 11px; white-space:nowrap; }
-.rvs-grp.is-done { opacity:.9; }
-.rvs-grp.is-done .rvs-grp-c { color:var(--gr-txt,#16a34a); }
-
-.rvs-extra { margin:22px 0 0; background:color-mix(in srgb,var(--ink,#141c30) 3%,var(--su,#fff));
-  border:1px dashed var(--bo3,#d9dfec); border-radius:14px; padding:13px 14px; }
-.rvs-extra > p { margin:0 0 9px; font:700 12.5px/1 'Inter',sans-serif; color:var(--mu,#64748b); }
-.rvs-extra-row { display:flex; gap:9px; }
-.rvs-mini { flex:1; display:flex; align-items:center; gap:9px; cursor:pointer; background:var(--su,#fff);
-  border:1px solid var(--bo3,#e6eaf2); border-radius:11px; padding:9px 10px; color:var(--ink);
-  font:800 12.5px/1.1 'Inter',sans-serif; text-align:left; -webkit-tap-highlight-color:transparent; }
-.rvs-mini-ic { width:26px; height:26px; border-radius:8px; flex:none; display:grid; place-items:center; color:#fff; font-weight:900; }
-.rvs-mini-ic svg { width:15px; height:15px; }
-
-.rvs-foot { text-align:center; margin:20px 0 0; font:600 12px/1.4 'Inter',sans-serif; color:var(--mu2,#9aa3ba); }
-
 @media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before { transition:none !important; animation:none !important; } }
 </style>`;
 
@@ -401,6 +316,100 @@ function saveGestes(codeK, arr) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Hub « Révise ta conduite » — « Carte des mondes » indigo (choix Rayan 2026-07-18).
+// Décombré : fini le doublon (hero « reprends » + ligne 1 identique), les 6 blocs
+// du même poids. UN seul focus : les 4 mondes REMC en cartes « sélection de niveau »,
+// le monde EN COURS agrandi porte l'unique bouton or « Continuer » (pas de carte
+// dupliquée). Même DA indigo que la fiche « Deck ». CSS auto-contenu scopé .hub.
+// ═══════════════════════════════════════════════════════════════
+const HUB_STYLE = `<style>
+.hub{ position:relative; max-width:480px; margin:0 auto; min-height:100dvh;
+  font-family:'Inter',sans-serif; color:#ded7ff; overflow-x:hidden;
+  padding:0 0 calc(96px + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(120% 46% at 50% -8%, rgba(255,223,150,.18) 0%, rgba(255,223,150,0) 55%),
+    radial-gradient(120% 52% at 84% 8%, rgba(150,120,235,.32) 0%, rgba(150,120,235,0) 60%),
+    linear-gradient(#5a4fc0 0%, #4a3fa4 60%, #423a96 100%); }
+.hub *{ box-sizing:border-box; }
+.hub-gold{ background:linear-gradient(180deg,#fff2cf 0%,#ffe093 38%,#f4b24a 72%,#e0921f 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+
+.hub-hero{ display:flex; align-items:center; gap:10px; padding:16px 18px 6px; }
+.hub-back{ flex:0 0 38px; width:38px; height:38px; border-radius:12px; cursor:pointer;
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; }
+.hub-back:active{ transform:scale(.95); }
+.hub-back svg{ display:block; }
+.hub-title{ flex:1; min-width:0; font-family:'Baloo 2',cursive; font-weight:800; font-size:22px; line-height:1; letter-spacing:-.01em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; filter:drop-shadow(0 2px 0 rgba(90,52,6,.35)); }
+.hub-gauge{ flex:0 0 auto; display:flex; align-items:center; gap:8px; padding:6px 11px 6px 7px; border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04)); border:1px solid rgba(255,223,150,.45);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2); }
+.hub-ring{ position:relative; width:24px; height:24px; flex:0 0 24px; border-radius:50%; box-shadow:inset 0 1px 1px rgba(255,255,255,.3); }
+.hub-ring::after{ content:""; position:absolute; inset:4px; border-radius:50%; background:linear-gradient(180deg,#5346b6,#453b9c); }
+.hub-gauge b{ position:relative; z-index:1; font-family:'Baloo 2',cursive; font-weight:800; font-size:15px; line-height:1; }
+.hub-gauge small{ font-family:'Inter',sans-serif; font-weight:700; font-size:11px; color:#bcb0f0; }
+
+.hub-kick{ padding:6px 20px 14px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#b6a8ec; }
+
+.hub-worlds{ padding:0 16px; display:flex; flex-direction:column; gap:13px; }
+.hub-world{ position:relative; display:flex; align-items:center; gap:13px; width:100%; text-align:left; cursor:pointer;
+  padding:14px 16px; border-radius:20px; background:linear-gradient(180deg,#faf8ff 0%,#efeafc 100%);
+  border:1px solid #e6e2fb; border-top-color:#fff; box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 #fff;
+  -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
+.hub-world:active{ transform:scale(.99); }
+.hub-med{ position:relative; flex:0 0 58px; width:58px; height:58px; border-radius:50%;
+  background:radial-gradient(circle at 38% 30%,#fff6df,#f6ead0 62%,#e6d6b4); border:1px solid #e6dcc4;
+  box-shadow:inset 0 -3px 5px rgba(150,110,40,.22), inset 0 2px 2px rgba(255,255,255,.9), 0 3px 6px rgba(20,12,60,.14);
+  display:flex; align-items:center; justify-content:center; }
+.hub-med img{ width:46px; height:46px; object-fit:contain; display:block; filter:drop-shadow(0 2px 2px rgba(80,50,10,.28)); }
+.hub-wbody{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.hub-wname{ font-family:'Baloo 2',cursive; font-weight:800; font-size:17px; line-height:1.05; color:#241a45; letter-spacing:-.01em; }
+.hub-wsub{ font-family:'Inter',sans-serif; font-weight:600; font-size:11.5px; color:#7c71a6; margin:2px 0 9px; }
+.hub-wprog{ display:flex; align-items:center; gap:9px; }
+.hub-mbar{ position:relative; flex:1; height:9px; border-radius:999px; background:#e2ddf2; border:1px solid rgba(20,12,60,.06); box-shadow:inset 0 1px 2px rgba(20,12,60,.14); overflow:hidden; }
+.hub-mf{ position:absolute; top:1px; bottom:1px; left:1px; border-radius:999px; background:linear-gradient(180deg,#ffe9b0,#f4b24a 60%,#dd921f); box-shadow:inset 0 1px 0 rgba(255,255,255,.75); }
+.hub-wxn{ flex:0 0 auto; font-family:'Baloo 2',cursive; font-weight:800; font-size:13px; color:#8a7fb5; }
+.hub-wxn b{ color:#e0921f; }
+.hub-arw{ flex:0 0 auto; display:flex; align-items:center; }
+
+.hub-world.active{ display:block; padding:16px 18px 18px;
+  background:linear-gradient(180deg,#fff9ec 0%,#fdefcf 100%); border:1.5px solid #f4c463; border-top-color:#fff3d0;
+  box-shadow:0 5px 0 rgba(150,100,20,.4), inset 0 1px 0 #fff, 0 0 0 4px rgba(255,223,150,.22); }
+.hub-flag{ position:absolute; top:-10px; left:18px; display:inline-flex; align-items:center; gap:5px;
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:10px; letter-spacing:.1em; color:#5a3406; text-transform:uppercase;
+  padding:3px 10px 3px 8px; border-radius:999px; background:linear-gradient(180deg,#ffe9b0,#f4b24a);
+  box-shadow:0 3px 6px rgba(120,70,0,.3), inset 0 1px 0 rgba(255,255,255,.6); }
+.hub-pulse{ width:7px; height:7px; border-radius:50%; background:#5a3406; box-shadow:0 0 0 3px rgba(90,52,6,.18); }
+.hub-ahead{ display:flex; align-items:center; gap:14px; width:100%; text-align:left; cursor:pointer; background:none; border:0; padding:0;
+  -webkit-tap-highlight-color:transparent; }
+.hub-world.active .hub-med{ flex:0 0 66px; width:66px; height:66px; }
+.hub-world.active .hub-med img{ width:54px; height:54px; }
+.hub-world.active .hub-wname{ font-size:19px; }
+.hub-world.active .hub-wsub{ margin:2px 0 10px; }
+.hub-world.active .hub-wxn b{ color:#c9791a; }
+.hub-resume{ display:flex; align-items:center; gap:12px; width:100%; margin-top:15px; padding:11px 14px; border:none; border-radius:16px; cursor:pointer; text-align:left;
+  background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 38%,#f0a93f 72%,#e2951f 100%);
+  box-shadow:0 5px 0 #b46a10, 0 10px 18px rgba(180,106,16,.32), inset 0 2px 0 rgba(255,255,255,.7); transition:transform .1s ease, box-shadow .1s ease; }
+.hub-resume:active{ transform:translateY(3px); box-shadow:0 2px 0 #b46a10,0 5px 10px rgba(180,106,16,.28),inset 0 2px 0 rgba(255,255,255,.7); }
+.hub-play{ flex:0 0 38px; width:38px; height:38px; border-radius:12px; background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.15)); border:1px solid rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 0 rgba(255,255,255,.7); }
+.hub-rtxt{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.hub-rlab{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#8a5410; }
+.hub-rttl{ font-family:'Baloo 2',cursive; font-weight:800; font-size:15.5px; color:#5a3406; line-height:1.05; text-shadow:0 1px 0 rgba(255,255,255,.4); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.hub-extra{ display:flex; gap:10px; padding:20px 16px 0; }
+.hub-chip{ flex:1; min-width:0; display:flex; align-items:center; gap:9px; cursor:pointer; padding:11px 12px; border-radius:14px;
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14); box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+  -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
+.hub-chip:active{ transform:scale(.98); }
+.hub-ci{ flex:0 0 30px; width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; background:rgba(255,223,150,.14); border:1px solid rgba(255,223,150,.3); }
+.hub-ct{ min-width:0; display:flex; flex-direction:column; text-align:left; }
+.hub-ct b{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:12.5px; color:#efe9ff; line-height:1.1; }
+.hub-ct span{ font-family:'Inter',sans-serif; font-weight:600; font-size:10px; color:#a99ddb; }
+@media (prefers-reduced-motion: reduce){ .hub *{ transition:none!important; } }
+</style>`;
+
 export async function mount(root, param) {
   track("page_view", { page: "revision-conduite" });
 
@@ -516,10 +525,10 @@ export async function mount(root, param) {
     );
   }
 
-  // Home « Bento » (style validé sur maquette) : tuiles modulaires premium —
-  // défi du jour dominant, progression chiffrée, prochaine fiche, Trouve la
-  // faute, ciblage moniteur, et les 4 mondes en mosaïque. Donne envie d'entrer
-  // dans les fiches « Coach ». Theme-aware (suit l'accent du compte).
+  // Hub « Carte des mondes » indigo (choix Rayan 2026-07-18) : les 4 mondes REMC
+  // en cartes « sélection de niveau ». Le monde EN COURS est agrandi et porte
+  // l'UNIQUE bouton or « Continuer » (fini le doublon hero + ligne 1). Défi/faute
+  // en petites puces discrètes. CSS auto-contenu (.hub), cohérent avec la fiche Deck.
   function renderHome() {
     const read = loadRead();
     const revised = loadRevised();
@@ -529,82 +538,79 @@ export async function mount(root, param) {
     const pf = pointFaible(revised);
     const nextF = FICHES.find((f) => !read[f.code]) || pf;
     const firstEver = lues === 0;
-
-    const chev = `<svg class="rvs-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>`;
-    const play = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5l12 7-12 7V5z"/></svg>`;
-    const eclair = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>`;
-
-    // ── UNE seule action : reprendre (ou commencer) la lecture ──
-    const primary = nextF
-      ? `<button class="rvs-now" ${firstEver ? "data-first" : "data-next"} data-code="${esc(nextF.code)}">
-          <span class="rvs-now-k"><span class="rvs-dot"></span>${firstEver ? "Commence ta révision" : "Reprends ta lecture"}</span>
-          <span class="rvs-now-t">${esc(nextF.titre)}</span>
-          <span class="rvs-now-meta"><span class="rvs-chipm">Monde ${nextF.monde}</span>Fiche ${esc(nextF.code)}</span>
-          <span class="rvs-cta"><span class="rvs-cta-ic">${play}</span>${read[nextF.code] ? "Relire la fiche" : "Lire la fiche"}</span>
-        </button>`
-      : `<div class="rvs-now rvs-done">
-          <span class="rvs-now-k"><span class="rvs-dot"></span>Bien joué</span>
-          <span class="rvs-now-t">Tu as lu les ${totalF} fiches</span>
-          <span class="rvs-now-meta">Reviens avant chaque leçon.</span>
-        </div>`;
-
-    // ── Les 4 mondes : liste calme, une ligne = un monde, ouvre ses fiches ──
-    // Pivot 17/07 (Rayan, capture à l'appui : « ça surstimule mon cerveau ») :
-    // une SEULE teinte — l'accent du compte. La hiérarchie passe par le
-    // numéro, le monde EN COURS mis en avant et l'état ✓, pas par 4 couleurs.
-    const MCOLOR_ALL =
-      "linear-gradient(160deg, color-mix(in srgb, var(--a) 78%, #fff), var(--a))";
     const curMonde = nextF ? Number(nextF.monde) : null;
-    const mondeRows = MONDES.map((m) => {
+
+    // Un badge 3D par monde (public/art/reviser/). Repli : cible.
+    const BADGE_MONDE = { 1: "voiture", 2: "feu", 3: "eclair", 4: "toque" };
+    const arw = (c) =>
+      `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="${c}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+    const worlds = MONDES.map((m) => {
       const fm = fichesByMonde(m.n);
       const done = fm.filter((f) => read[f.code]).length;
-      const isCurrent = curMonde === m.n;
-      const complete = fm.length > 0 && done === fm.length;
-      const cls = `rvs-grp pg-loupe${isCurrent ? " is-current" : ""}${complete ? " is-done" : ""}`;
-      return `<button class="${cls}" data-monde="${m.n}" style="--mc:var(--a)">
-        <span class="rvs-num" style="background:${MCOLOR_ALL}">${complete ? "✓" : m.n}</span>
-        <span class="rvs-grp-t"><b>${esc(m.sous)}</b><span>${esc(m.nom)}</span></span>
-        ${isCurrent ? `<span class="rvs-grp-badge">Reprendre</span>` : `<span class="rvs-grp-c">${done}/${fm.length}</span>`}
-        ${chev}
+      const mpct = fm.length ? Math.round((done / fm.length) * 100) : 0;
+      const badge = `/art/reviser/${BADGE_MONDE[m.n] || "cible"}.png`;
+      const bar = `<span class="hub-mbar"><span class="hub-mf" style="width:${done ? Math.max(mpct, 5) : 0}%"></span></span>`;
+      const xn = `<span class="hub-wxn">${done ? `<b>${done}</b>/` : "0/"}${fm.length}</span>`;
+
+      if (curMonde === m.n && nextF) {
+        // Monde en cours : agrandi, porte le bouton « Continuer ».
+        return `<div class="hub-world active">
+          <span class="hub-flag"><span class="hub-pulse"></span>${firstEver ? "À commencer" : "En cours"}</span>
+          <button class="hub-ahead" data-monde="${m.n}" aria-label="Voir toutes les fiches — ${escAttr(m.nom)}">
+            <span class="hub-med"><img src="${badge}" alt="" loading="lazy"></span>
+            <span class="hub-wbody">
+              <span class="hub-wname">${esc(m.nom)}</span>
+              <span class="hub-wsub">${esc(m.sous)}</span>
+              <span class="hub-wprog">${bar}${xn}</span>
+            </span>
+          </button>
+          <button class="hub-resume" ${firstEver ? "data-first" : "data-next"} data-code="${escAttr(nextF.code)}">
+            <span class="hub-play"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="#5a3406"/></svg></span>
+            <span class="hub-rtxt"><span class="hub-rlab">${firstEver ? "Commencer" : read[nextF.code] ? "Relire" : "Continuer"}</span><span class="hub-rttl">${esc(nextF.titre)}</span></span>
+            <span class="hub-arw">${arw("#5a3406")}</span>
+          </button>
+        </div>`;
+      }
+      // Monde normal : la carte entière ouvre la liste de ses fiches.
+      return `<button class="hub-world" data-monde="${m.n}">
+        <span class="hub-med"><img src="${badge}" alt="" loading="lazy"></span>
+        <span class="hub-wbody">
+          <span class="hub-wname">${esc(m.nom)}</span>
+          <span class="hub-wsub">${esc(m.sous)}</span>
+          <span class="hub-wprog">${bar}${xn}</span>
+        </span>
+        <span class="hub-arw">${arw("#b8afd6")}</span>
       </button>`;
     }).join("");
 
-    root.innerHTML = `${STYLE}<div class="rvc">
-      <div class="rvs-head">
-        <button class="rvc-back" aria-label="Retour à l’accueil">←</button>
-        <div class="rvs-head-tx">
-          <h1 class="rvs-h1">Révise ta conduite</h1>
-          <p class="rvs-p">Le geste, pas le code. Ici, tu prépares tes leçons de conduite, à ton rythme.</p>
+    const lightning = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#f4b24a"/></svg>`;
+    const loupe = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="#f4b24a" stroke-width="2.4"/><path d="M16 16l4.5 4.5" stroke="#f4b24a" stroke-width="2.6" stroke-linecap="round"/></svg>`;
+    const back = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#efe9ff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+    root.innerHTML = `${HUB_STYLE}<div class="hub">
+      <div class="hub-hero">
+        <button class="hub-back" aria-label="Retour à Réviser">${back}</button>
+        <h1 class="hub-title hub-gold">Révise ta conduite</h1>
+        <div class="hub-gauge">
+          <span class="hub-ring" style="background:conic-gradient(#f4b24a 0 ${pct}%, rgba(20,12,60,.5) ${pct}% 100%)"></span>
+          <span><b class="hub-gold">${lues}</b><small> / ${totalF}</small></span>
         </div>
       </div>
-
-      ${primary}
-
-      <div class="rvs-prog">
-        <div class="rvs-prog-h"><span>Ta progression</span><span class="rvs-prog-x">${lues} fiche${lues > 1 ? "s" : ""} sur ${totalF}</span></div>
-        <div class="rvs-bar"><i style="width:${Math.max(pct, lues ? 3 : 0)}%"></i></div>
+      <div class="hub-kick">Tes 4 mondes</div>
+      <div class="hub-worlds">${worlds}</div>
+      <div class="hub-extra">
+        ${pf ? `<button class="hub-chip" data-pf="${escAttr(pf.code)}"><span class="hub-ci">${lightning}</span><span class="hub-ct"><b>Défi du jour</b><span>1 min</span></span></button>` : ""}
+        <button class="hub-chip" data-faute><span class="hub-ci">${loupe}</span><span class="hub-ct"><b>Trouve la faute</b><span>Repère l’erreur</span></span></button>
       </div>
-
-      <div class="rvs-sec">Toutes les fiches</div>
-      <div class="rvs-list">${mondeRows}</div>
-
-      <div class="rvs-extra">
-        <p>Pour t’entraîner autrement · optionnel</p>
-        <div class="rvs-extra-row">
-          ${pf ? `<button class="rvs-mini" data-pf="${esc(pf.code)}"><span class="rvs-mini-ic" style="background:linear-gradient(160deg, color-mix(in srgb, var(--a) 78%, #fff), var(--a))">${eclair}</span>Défi du jour · 1 min</button>` : ""}
-          <button class="rvs-mini" data-faute><span class="rvs-mini-ic" style="background:linear-gradient(160deg,var(--a),var(--adk))">!</span>Trouve la faute</button>
-        </div>
-      </div>
-
-      <div class="rvs-foot">${totalF} fiches · le geste, pas que le code</div>
     </div>`;
     wireHome();
   }
 
   function wireHome() {
     root
-      .querySelector(".rvc-back")
-      ?.addEventListener("click", () => navigate("#/"));
+      .querySelector(".hub-back")
+      ?.addEventListener("click", () => navigate("#/reviser"));
     root.querySelector("[data-pf]")?.addEventListener("click", (e) => {
       code = e.currentTarget.getAttribute("data-pf");
       focusId = null;
@@ -615,18 +621,18 @@ export async function mount(root, param) {
       track("revision_conduite_faute_open");
       navigate("#/jeu-faute");
     });
-    root.querySelector("[data-next]")?.addEventListener("click", (e) => {
+    const openFiche = (e) => {
       code = e.currentTarget.getAttribute("data-code");
       focusId = null;
       view = "fiche";
       render();
-    });
+    };
+    root.querySelector("[data-next]")?.addEventListener("click", openFiche);
     root.querySelector("[data-first]")?.addEventListener("click", (e) => {
-      code = e.currentTarget.getAttribute("data-code");
-      focusId = null;
-      track("revision_conduite_first_fiche", { code });
-      view = "fiche";
-      render();
+      track("revision_conduite_first_fiche", {
+        code: e.currentTarget.getAttribute("data-code"),
+      });
+      openFiche(e);
     });
     root.querySelectorAll("[data-monde]").forEach((b) =>
       b.addEventListener("click", () => {

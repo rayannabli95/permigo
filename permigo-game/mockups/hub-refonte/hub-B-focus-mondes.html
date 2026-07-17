@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub Réviser — B · Focus + Mondes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{
+    background:#3d3488;
+    -webkit-font-smoothing:antialiased;
+  }
+  body{
+    width:390px;margin:0 auto;min-height:844px;
+    position:relative;
+    font-family:'Inter',sans-serif;
+    color:#ded7ff;
+    background:
+      radial-gradient(120% 46% at 50% -6%, rgba(255,214,120,.16) 0%, rgba(255,214,120,0) 55%),
+      radial-gradient(120% 52% at 84% 8%, rgba(150,120,240,.30) 0%, rgba(150,120,240,0) 60%),
+      linear-gradient(#5a4fc0 0%, #4a3fa4 60%, #423a96 100%);
+    padding:0 0 30px;
+    overflow-x:hidden;
+  }
+
+  /* gold text */
+  .gold{
+    background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 40%,#f0a93f 74%,#d98a1f 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+  }
+
+  /* ============ TOP BAR ============ */
+  .top{
+    display:flex;align-items:center;gap:12px;
+    padding:16px 18px 4px;
+  }
+  .back{
+    width:42px;height:42px;flex:0 0 42px;border-radius:14px;
+    background:linear-gradient(180deg,#5b50bd,#4a3fa0);
+    border:1px solid rgba(210,196,255,.35);
+    border-top-color:rgba(230,222,255,.55);
+    box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.18);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .top h1{
+    font-family:'Baloo 2',cursive;font-weight:800;
+    font-size:23px;line-height:1;letter-spacing:-.01em;
+    flex:1;
+    filter:drop-shadow(0 2px 0 rgba(60,30,0,.28));
+  }
+  .gcount{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:8px 12px 8px 9px;border-radius:999px;
+    background:linear-gradient(180deg,rgba(255,214,120,.20),rgba(255,214,120,.05));
+    border:1px solid rgba(255,214,120,.42);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.16);
+    white-space:nowrap;
+  }
+  .gcount .star{
+    width:17px;height:17px;flex:0 0 17px;
+    filter:drop-shadow(0 1px 0 rgba(120,60,0,.35));
+  }
+  .gcount b{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:14px;color:#ffe4a6;
+  }
+  .gcount b small{font-family:'Inter';font-weight:700;font-size:11px;color:#c9b6ff}
+
+  /* ============ HERO — CONTINUER ============ */
+  .hero{
+    margin:14px 18px 0;
+    position:relative;
+    border-radius:24px;
+    background:linear-gradient(180deg,#ffffff 0%,#f6f4ff 100%);
+    border:1px solid #e6e2fb;border-top-color:#ffffff;
+    box-shadow:0 6px 0 rgba(20,12,60,.35), 0 16px 30px rgba(20,12,60,.28), inset 0 1px 0 #fff;
+    padding:16px 16px 17px;
+  }
+  .hero .over{
+    display:inline-flex;align-items:center;gap:6px;margin-bottom:9px;
+  }
+  .hero .over .pin{
+    width:15px;height:15px;flex:0 0 15px;
+  }
+  .hero .over span{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  }
+  .hero .over span.g{
+    background:linear-gradient(180deg,#f6c85f,#e2951f);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .hero-row{display:flex;align-items:center;gap:13px}
+  .hero-medal{
+    flex:0 0 66px;width:66px;height:66px;border-radius:50%;
+    background:radial-gradient(circle at 36% 28%,#ffe9b0,#f0a93f 60%,#b46a10);
+    box-shadow:inset 0 -4px 6px rgba(120,60,0,.5), inset 0 3px 3px rgba(255,255,255,.75), 0 4px 8px rgba(120,70,0,.3);
+    display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .hero-medal img{width:50px;height:50px;filter:drop-shadow(0 2px 2px rgba(90,50,0,.35))}
+  .hero-txt{flex:1;min-width:0}
+  .hero-txt h2{
+    font-family:'Baloo 2',cursive;font-weight:800;
+    font-size:19px;line-height:1.08;color:#241a45;letter-spacing:-.01em;
+    margin-bottom:5px;
+  }
+  .hero-txt .meta{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:11.5px;color:#7a6ca8;letter-spacing:.01em;
+  }
+  /* mini gauge */
+  .hgauge{margin-top:13px}
+  .hgauge-top{
+    display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;
+  }
+  .hgauge-top .l{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:11px;
+    letter-spacing:.02em;color:#8578ad;
+  }
+  .hgauge-top .n{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:14px;color:#e2951f;
+  }
+  .hgauge-top .n small{color:#a99ccb;font-family:'Inter';font-weight:700;font-size:11px}
+  .hbar{
+    height:12px;border-radius:999px;background:#e9e4fb;
+    box-shadow:inset 0 2px 3px rgba(60,40,120,.18);
+    position:relative;overflow:hidden;
+  }
+  .hbar .fill{
+    position:absolute;inset:2px auto 2px 2px;width:33%;border-radius:999px;
+    background:linear-gradient(180deg,#ffe9b0,#f0a93f 55%,#d98a1f);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.75), inset 0 -2px 3px rgba(150,80,0,.4);
+  }
+  /* CTA */
+  .cta{
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    width:100%;height:56px;border:none;border-radius:18px;cursor:pointer;margin-top:15px;
+    background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 38%,#f0a93f 72%,#e2951f 100%);
+    box-shadow:0 6px 0 #b46a10, 0 12px 18px rgba(180,106,16,.34), inset 0 2px 0 rgba(255,255,255,.7);
+  }
+  .cta:active{transform:translateY(3px);box-shadow:0 3px 0 #b46a10,0 6px 10px rgba(180,106,16,.3),inset 0 2px 0 rgba(255,255,255,.7)}
+  .cta span{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:19px;color:#5a3406;
+    text-shadow:0 1px 0 rgba(255,255,255,.35);
+  }
+
+  /* ============ SECTION LABEL ============ */
+  .sec{
+    display:flex;align-items:center;gap:10px;
+    padding:0 18px;margin:24px 0 12px;
+  }
+  .sec h3{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#cabfef;
+    white-space:nowrap;
+  }
+  .sec .line{height:1px;flex:1;background:linear-gradient(90deg,rgba(210,191,239,.4),transparent)}
+
+  /* ============ 4 MONDES ============ */
+  .worlds{
+    padding:0 18px;
+    display:grid;grid-template-columns:1fr 1fr;gap:11px;
+  }
+  .w{
+    position:relative;border-radius:20px;
+    background:linear-gradient(180deg,#ffffff 0%,#f4f2ff 100%);
+    border:1px solid #e6e2fb;border-top-color:#fff;
+    box-shadow:0 5px 0 rgba(20,12,60,.3), inset 0 1px 0 #fff;
+    padding:13px 13px 14px;
+    display:flex;flex-direction:column;
+  }
+  /* world in progress — gold ring */
+  .w.on{
+    border-color:rgba(240,169,63,.65);
+    box-shadow:0 5px 0 rgba(120,72,10,.4), inset 0 1px 0 #fff, 0 0 0 2px rgba(240,169,63,.35);
+  }
+  .w-flag{
+    position:absolute;top:-8px;right:12px;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:9px;letter-spacing:.08em;
+    color:#5a3406;background:linear-gradient(180deg,#ffe9b0,#f0a93f);
+    padding:3px 9px;border-radius:999px;text-transform:uppercase;
+    box-shadow:0 2px 4px rgba(120,70,0,.3), inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .w-head{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+  .w-badge{
+    flex:0 0 50px;width:50px;height:50px;border-radius:15px;
+    background:radial-gradient(circle at 38% 26%,#efeaff,#e0d8fb 70%);
+    border:1px solid #e6e2fb;
+    box-shadow:inset 0 -3px 5px rgba(90,70,180,.14), inset 0 2px 2px #fff, 0 2px 4px rgba(20,12,60,.14);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .w.on .w-badge{
+    background:radial-gradient(circle at 38% 26%,#fff6e2,#ffe6b4 72%);
+    border-color:rgba(240,169,63,.5);
+    box-shadow:inset 0 -3px 5px rgba(150,90,0,.18), inset 0 2px 2px #fff, 0 2px 4px rgba(120,70,0,.2);
+  }
+  .w-badge img{width:38px;height:38px;filter:drop-shadow(0 2px 2px rgba(60,40,120,.25))}
+  .w-no{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:18px;color:#c3b8e8;
+    line-height:1;
+  }
+  .w.on .w-no{color:#f0a93f}
+  .w h4{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:14px;line-height:1.12;color:#241a45;letter-spacing:-.01em;
+    margin-bottom:2px;
+  }
+  .w .cnt{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:11px;color:#9488bb;margin-bottom:9px;
+  }
+  .w .cnt b{color:#e2951f}
+  .w-bar{
+    height:9px;border-radius:999px;background:#eae5fb;margin-top:auto;
+    box-shadow:inset 0 1px 2px rgba(60,40,120,.16);
+    position:relative;overflow:hidden;
+  }
+  .w-bar i{
+    position:absolute;inset:1.5px auto 1.5px 1.5px;border-radius:999px;
+    background:linear-gradient(180deg,#c9bdf2,#9b88e0);
+  }
+  .w.on .w-bar i{
+    background:linear-gradient(180deg,#ffe9b0,#f0a93f 60%,#d98a1f);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+  }
+
+  /* ============ SECONDAIRE ============ */
+  .extras{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    padding:0 18px;margin-top:16px;
+  }
+  .ex{
+    display:flex;align-items:center;gap:10px;
+    padding:11px 12px;border-radius:15px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(210,196,255,.22);
+    border-top-color:rgba(230,222,255,.34);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+    cursor:pointer;
+  }
+  .ex .eic{
+    width:32px;height:32px;flex:0 0 32px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
+    border:1px solid rgba(210,196,255,.3);
+  }
+  .ex .etx{min-width:0}
+  .ex .etx b{
+    display:block;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:12.5px;color:#f1ecff;line-height:1.1;
+  }
+  .ex .etx small{font-size:10px;color:#b6a8e6;font-weight:600}
+</style>
+</head>
+<body>
+
+  <!-- ===== TOP ===== -->
+  <div class="top">
+    <div class="back" aria-label="Retour">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#e6ddff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h1 class="gold">Révise ta conduite</h1>
+    <div class="gcount">
+      <svg class="star" viewBox="0 0 24 24" fill="none"><path d="M12 2.6l2.7 5.9 6.4.7-4.8 4.3 1.3 6.3L12 16.7 6.2 19.8l1.3-6.3L2.7 9.2l6.4-.7z" fill="#ffd66e" stroke="#e2951f" stroke-width="1.1" stroke-linejoin="round"/></svg>
+      <b>3<small>/31</small></b>
+    </div>
+  </div>
+
+  <!-- ===== HERO — CONTINUER ===== -->
+  <div class="hero">
+    <div class="over">
+      <svg class="pin" viewBox="0 0 24 24" fill="none"><path d="M12 2a6 6 0 0 0-6 6c0 4.2 6 12 6 12s6-7.8 6-12a6 6 0 0 0-6-6z" fill="#f0a93f"/><circle cx="12" cy="8" r="2.3" fill="#fff"/></svg>
+      <span class="g">Reprends ta révision</span>
+    </div>
+
+    <div class="hero-row">
+      <div class="hero-medal">
+        <img src="assets/voiture.png" alt="">
+      </div>
+      <div class="hero-txt">
+        <h2>S'installer au poste<br>de conduite</h2>
+        <div class="meta">Monde 1 · Maniement du véhicule</div>
+      </div>
+    </div>
+
+    <div class="hgauge">
+      <div class="hgauge-top">
+        <div class="l">Dans ce monde</div>
+        <div class="n">3<small> / 9 fiches</small></div>
+      </div>
+      <div class="hbar"><div class="fill"></div></div>
+    </div>
+
+    <button class="cta">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="#5a3406"/></svg>
+      <span>Continuer</span>
+    </button>
+  </div>
+
+  <!-- ===== 4 MONDES ===== -->
+  <div class="sec"><h3>Tes 4 mondes</h3><div class="line"></div></div>
+
+  <div class="worlds">
+
+    <!-- Monde 1 — en cours -->
+    <div class="w on">
+      <div class="w-flag">En cours</div>
+      <div class="w-head">
+        <div class="w-badge"><img src="assets/voiture.png" alt=""></div>
+        <div class="w-no">1</div>
+      </div>
+      <h4>Maniement</h4>
+      <div class="cnt"><b>3</b> / 9 fiches</div>
+      <div class="w-bar"><i style="width:33%"></i></div>
+    </div>
+
+    <!-- Monde 2 -->
+    <div class="w">
+      <div class="w-head">
+        <div class="w-badge"><img src="assets/feu.png" alt=""></div>
+        <div class="w-no">2</div>
+      </div>
+      <h4>Circulation</h4>
+      <div class="cnt">0 / 8 fiches</div>
+      <div class="w-bar"><i style="width:0%"></i></div>
+    </div>
+
+    <!-- Monde 3 -->
+    <div class="w">
+      <div class="w-head">
+        <div class="w-badge"><img src="assets/eclair.png" alt=""></div>
+        <div class="w-no">3</div>
+      </div>
+      <h4>Conditions difficiles</h4>
+      <div class="cnt">0 / 7 fiches</div>
+      <div class="w-bar"><i style="width:0%"></i></div>
+    </div>
+
+    <!-- Monde 4 -->
+    <div class="w">
+      <div class="w-head">
+        <div class="w-badge"><img src="assets/toque.png" alt=""></div>
+        <div class="w-no">4</div>
+      </div>
+      <h4>Conduite autonome</h4>
+      <div class="cnt">0 / 7 fiches</div>
+      <div class="w-bar"><i style="width:0%"></i></div>
+    </div>
+
+  </div>
+
+  <!-- ===== SECONDAIRE ===== -->
+  <div class="extras">
+    <div class="ex">
+      <div class="eic">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6z" fill="#ffd66e" stroke="#f0a93f" stroke-width="1" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="etx"><b>Défi du jour</b><small>1 min</small></div>
+    </div>
+    <div class="ex">
+      <div class="eic">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="#cabfef" stroke-width="2"/><path d="M15.5 15.5L21 21" stroke="#cabfef" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="etx"><b>Trouve la faute</b><small>Repère l'erreur</small></div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réviser — Carte des mondes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{
+    background:#3d3488;
+    -webkit-font-smoothing:antialiased;
+  }
+  body{
+    width:390px;margin:0 auto;min-height:844px;
+    position:relative;
+    font-family:'Inter',sans-serif;
+    color:#ded7ff;
+    background:
+      radial-gradient(120% 46% at 50% -8%, rgba(255,223,150,.20) 0%, rgba(255,223,150,0) 55%),
+      radial-gradient(120% 52% at 84% 8%, rgba(150,120,235,.34) 0%, rgba(150,120,235,0) 60%),
+      linear-gradient(#5a4fc0 0%, #4a3fa4 60%, #423a96 100%);
+    padding:0 0 34px;
+    overflow-x:hidden;
+  }
+
+  .gold{
+    background:linear-gradient(180deg,#fff2cf 0%,#ffe093 38%,#f4b24a 72%,#e0921f 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+  }
+
+  /* ================= HERO ================= */
+  .hero{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:20px 20px 6px;
+  }
+  .hero h1{
+    font-family:'Baloo 2',cursive;font-weight:800;
+    font-size:27px;line-height:1;letter-spacing:-.01em;
+    filter:drop-shadow(0 2px 0 rgba(90,52,6,.4));
+  }
+  /* global gauge pill */
+  .gauge{
+    flex:0 0 auto;display:flex;align-items:center;gap:9px;
+    padding:7px 12px 7px 8px;border-radius:999px;
+    background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04));
+    border:1px solid rgba(255,223,150,.45);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.2);
+  }
+  .gauge .ring{
+    position:relative;width:26px;height:26px;flex:0 0 26px;border-radius:50%;
+    background:conic-gradient(#f4b24a 0 34%, rgba(20,12,60,.5) 34% 100%);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.3);
+  }
+  .gauge .ring::after{
+    content:"";position:absolute;inset:4px;border-radius:50%;
+    background:linear-gradient(180deg,#5346b6,#453b9c);
+  }
+  .gauge b{
+    position:relative;z-index:1;
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;line-height:1;
+  }
+  .gauge small{font-family:'Inter';font-weight:700;font-size:11px;color:#bcb0f0}
+
+  .kick{
+    padding:2px 20px 16px;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#b6a8ec;
+  }
+
+  /* ================= WORLD CARDS ================= */
+  .worlds{padding:0 16px;display:flex;flex-direction:column;gap:13px}
+
+  .world{
+    position:relative;display:flex;align-items:center;gap:13px;
+    padding:14px 16px;border-radius:20px;
+    background:linear-gradient(180deg,#faf8ff 0%,#efeafc 100%);
+    border:1px solid #e6e2fb;border-top-color:#ffffff;
+    box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 #fff;
+    cursor:pointer;
+  }
+
+  /* medallion */
+  .med{
+    position:relative;flex:0 0 58px;width:58px;height:58px;border-radius:50%;
+    background:radial-gradient(circle at 38% 30%,#fff6df,#f6ead0 62%,#e6d6b4);
+    border:1px solid #e6dcc4;
+    box-shadow:inset 0 -3px 5px rgba(150,110,40,.22), inset 0 2px 2px rgba(255,255,255,.9), 0 3px 6px rgba(20,12,60,.14);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .med img{width:46px;height:46px;object-fit:contain;display:block;filter:drop-shadow(0 2px 2px rgba(80,50,10,.28))}
+
+  .wbody{flex:1;min-width:0}
+  .wname{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:17px;line-height:1.05;
+    color:#241a45;letter-spacing:-.01em;
+  }
+  .wsub{
+    font-family:'Inter';font-weight:600;font-size:11.5px;color:#7c71a6;
+    margin:2px 0 9px;
+  }
+  /* mini progress */
+  .wprog{display:flex;align-items:center;gap:9px}
+  .mbar{
+    flex:1;height:9px;border-radius:999px;
+    background:#e2ddf2;border:1px solid rgba(20,12,60,.06);
+    box-shadow:inset 0 1px 2px rgba(20,12,60,.14);
+    position:relative;overflow:hidden;
+  }
+  .mbar .mf{
+    position:absolute;inset:1px auto 1px 1px;border-radius:999px;
+    background:linear-gradient(180deg,#ffe9b0,#f4b24a 60%,#dd921f);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+  }
+  .wxn{
+    flex:0 0 auto;font-family:'Baloo 2',cursive;font-weight:800;font-size:13px;color:#8a7fb5;
+  }
+  .wxn b{color:#e0921f}
+
+  /* locked / calm state cue */
+  .lock{
+    flex:0 0 auto;width:26px;height:26px;border-radius:50%;
+    background:#e7e2f6;border:1px solid #d8d1ef;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* ---------- ACTIVE WORLD (en cours) ---------- */
+  .world.active{
+    padding:16px 18px 18px;
+    background:linear-gradient(180deg,#fff9ec 0%,#fdefcf 100%);
+    border:1.5px solid #f4c463;border-top-color:#fff3d0;
+    box-shadow:0 5px 0 rgba(150,100,20,.4), inset 0 1px 0 #fff, 0 0 0 4px rgba(255,223,150,.22);
+    display:block;
+  }
+  .world.active .flag{
+    position:absolute;top:-10px;left:18px;
+    display:inline-flex;align-items:center;gap:5px;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:10px;letter-spacing:.1em;
+    color:#5a3406;text-transform:uppercase;
+    padding:3px 10px 3px 8px;border-radius:999px;
+    background:linear-gradient(180deg,#ffe9b0,#f4b24a);
+    box-shadow:0 3px 6px rgba(120,70,0,.3), inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .flag .pulse{width:7px;height:7px;border-radius:50%;background:#5a3406;box-shadow:0 0 0 3px rgba(90,52,6,.18)}
+
+  .active-head{display:flex;align-items:center;gap:14px}
+  .world.active .med{
+    flex:0 0 66px;width:66px;height:66px;
+  }
+  .world.active .med img{width:54px;height:54px}
+  .world.active .wname{font-size:19px}
+  .world.active .wsub{margin:2px 0 10px}
+  .world.active .wxn b{color:#c9791a}
+
+  /* the ONE resume button — lives inside active world */
+  .resume{
+    display:flex;align-items:center;gap:12px;width:100%;
+    margin-top:15px;padding:11px 14px;border:none;border-radius:16px;cursor:pointer;
+    background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 38%,#f0a93f 72%,#e2951f 100%);
+    box-shadow:0 5px 0 #b46a10, 0 10px 18px rgba(180,106,16,.32), inset 0 2px 0 rgba(255,255,255,.7);
+    text-align:left;
+  }
+  .resume:active{transform:translateY(3px);box-shadow:0 2px 0 #b46a10,0 5px 10px rgba(180,106,16,.28),inset 0 2px 0 rgba(255,255,255,.7)}
+  .resume .play{
+    flex:0 0 38px;width:38px;height:38px;border-radius:12px;
+    background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.15));
+    border:1px solid rgba(255,255,255,.5);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+  }
+  .resume .rtxt{flex:1;min-width:0}
+  .resume .rlab{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:10px;
+    letter-spacing:.12em;text-transform:uppercase;color:#8a5410;
+  }
+  .resume .rttl{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:16px;color:#5a3406;line-height:1.05;
+    text-shadow:0 1px 0 rgba(255,255,255,.4);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .resume .arw{flex:0 0 auto;margin-left:4px}
+  .resume .rttl{font-size:15.5px}
+
+  /* ================= SECONDARY (discret) ================= */
+  .extra{
+    display:flex;gap:10px;padding:20px 16px 0;
+  }
+  .chip{
+    flex:1;display:flex;align-items:center;gap:9px;
+    padding:11px 12px;border-radius:14px;cursor:pointer;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+  }
+  .chip .ci{
+    flex:0 0 30px;width:30px;height:30px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,223,150,.14);border:1px solid rgba(255,223,150,.3);
+  }
+  .chip .ct{min-width:0}
+  .chip .ct b{
+    display:block;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:12.5px;color:#efe9ff;line-height:1.1;
+  }
+  .chip .ct span{font-family:'Inter';font-weight:600;font-size:10px;color:#a99ddb}
+</style>
+</head>
+<body>
+
+  <!-- ===== HERO (compact) ===== -->
+  <div class="hero">
+    <h1 class="gold">Révise ta conduite</h1>
+    <div class="gauge">
+      <div class="ring"></div>
+      <div><b class="gold">3</b><small> / 31</small></div>
+    </div>
+  </div>
+  <div class="kick">Tes 4 mondes</div>
+
+  <!-- ===== WORLDS ===== -->
+  <div class="worlds">
+
+    <!-- WORLD 1 — ACTIVE (en cours, porte le bouton de reprise) -->
+    <div class="world active">
+      <div class="flag"><span class="pulse"></span>En cours</div>
+      <div class="active-head">
+        <div class="med"><img src="assets/voiture.png" alt=""></div>
+        <div class="wbody">
+          <div class="wname">Maniement du véhicule</div>
+          <div class="wsub">Prendre en main la voiture</div>
+          <div class="wprog">
+            <div class="mbar"><div class="mf" style="width:33%"></div></div>
+            <div class="wxn"><b>3</b>/9</div>
+          </div>
+        </div>
+      </div>
+      <button class="resume">
+        <span class="play">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="#5a3406"/></svg>
+        </span>
+        <span class="rtxt">
+          <span class="rlab">Continuer</span>
+          <span class="rttl">S'installer au poste de conduite</span>
+        </span>
+        <span class="arw">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#5a3406" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+    </div>
+
+    <!-- WORLD 2 -->
+    <div class="world">
+      <div class="med"><img src="assets/feu.png" alt=""></div>
+      <div class="wbody">
+        <div class="wname">Circulation</div>
+        <div class="wsub">Rouler, tourner, s'insérer</div>
+        <div class="wprog">
+          <div class="mbar"><div class="mf" style="width:0%"></div></div>
+          <div class="wxn">0/8</div>
+        </div>
+      </div>
+      <div class="arw">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#b8afd6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+
+    <!-- WORLD 3 -->
+    <div class="world">
+      <div class="med"><img src="assets/eclair.png" alt=""></div>
+      <div class="wbody">
+        <div class="wname">Conditions difficiles</div>
+        <div class="wsub">Nuit, météo, partage de la route</div>
+        <div class="wprog">
+          <div class="mbar"><div class="mf" style="width:0%"></div></div>
+          <div class="wxn">0/7</div>
+        </div>
+      </div>
+      <div class="arw">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#b8afd6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+
+    <!-- WORLD 4 -->
+    <div class="world">
+      <div class="med"><img src="assets/toque.png" alt=""></div>
+      <div class="wbody">
+        <div class="wname">Conduite autonome</div>
+        <div class="wsub">Seul, sûr, économique</div>
+        <div class="wprog">
+          <div class="mbar"><div class="mf" style="width:0%"></div></div>
+          <div class="wxn">0/7</div>
+        </div>
+      </div>
+      <div class="lock">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M7 10V8a5 5 0 0 1 10 0v2" stroke="#a99ec9" stroke-width="2" stroke-linecap="round"/><rect x="5" y="10" width="14" height="10" rx="2.5" fill="#c3bade"/></svg>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== SECONDARY (discret) ===== -->
+  <div class="extra">
+    <div class="chip">
+      <div class="ci">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#f4b24a"/></svg>
+      </div>
+      <div class="ct"><b>Défi du jour</b><span>1 min</span></div>
+    </div>
+    <div class="chip">
+      <div class="ci">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="#f4b24a" stroke-width="2.4"/><path d="M16 16l4.5 4.5" stroke="#f4b24a" stroke-width="2.6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="ct"><b>Trouve la faute</b><span>Repère l'erreur</span></div>
+    </div>
+  </div>
+
+</body>
+</html>
