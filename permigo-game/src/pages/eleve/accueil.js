@@ -1912,31 +1912,8 @@ function render({
     }
   </button>
 
-  <!-- ══ PERMIS VIRTUEL — carte compacte maquette ══ -->
-  <div class="acc2-permis-compact" id="acc-permis" role="button" tabindex="0"
-       aria-label="Ton permis virtuel — ${totalValidated} sur 31 compétences">
-    <div class="acc2-permis-thumb">
-      <img src="/skins/trophy-permis-virtuel.webp" alt="" aria-hidden="true" loading="eager">
-    </div>
-    <div class="acc2-permis-body">
-      <div class="acc2-permis-row">
-        <span class="acc2-permis-label2">Ton permis virtuel</span>
-        <span class="acc2-permis-val">${totalValidated}/31</span>
-      </div>
-      <div class="acc2-permis-bar">
-        <span class="acc2-permis-fill" data-target="${Math.round((totalValidated / 31) * 100)}"></span>
-      </div>
-      <span class="acc2-permis-sub">${
-        totalValidated === 0
-          ? isSoloEleve(me)
-            ? "Chaque compétence que tu valides le complète."
-            : "Chaque compétence validée par ton moniteur le complète."
-          : totalValidated >= 31
-            ? "Toutes les compétences acquises. Bravo !"
-            : `Plus que ${31 - totalValidated} compétence${31 - totalValidated > 1 ? "s" : ""} avant l’examen`
-      }</span>
-    </div>
-  </div>
+  <!-- ══ PERMIS VIRTUEL — carte retirée temporairement (demande Rayan 17/07) ══
+       CSS .acc2-permis-compact + wire #acc-permis conservés pour un retour facile. -->
 
   ${pendingSession ? `<div class="acc2-ms">${renderSessionConfirm(pendingSession)}</div>` : ""}
 
@@ -2065,27 +2042,7 @@ function wire(
     });
   }
 
-  // Permis virtuel compact : barre animée + tap → parcours
-  const permisFill = root.querySelector(".acc2-permis-fill[data-target]");
-  if (permisFill)
-    setTimeout(() => {
-      permisFill.style.width = permisFill.dataset.target + "%";
-    }, 150);
-  const permisCard = root.querySelector("#acc-permis");
-  if (permisCard) {
-    const openParcours = () => {
-      haptic("tap");
-      track("cta.clicked", { cta_type: "permis_card" });
-      navigate("#/parcours");
-    };
-    permisCard.addEventListener("click", openParcours);
-    permisCard.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openParcours();
-      }
-    });
-  }
+  // Permis virtuel : carte retirée temporairement (demande Rayan 17/07) — wire désactivé.
 
   // Scène du jour → manche En situation qui démarre par cette scène
   root.querySelector("#acc-sit-day")?.addEventListener("click", () => {
