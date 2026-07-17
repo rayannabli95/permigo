@@ -783,6 +783,1188 @@ export const CENTRES_EXAMEN = [
       },
     ],
   },
+
+  {
+    slug: "lyon",
+    nom: "Lyon – Vénissieux",
+    departement: "Rhône",
+    deptNum: "69",
+    adresse: "9 rue Aristide Bruant, 69200 Vénissieux (secteur Lyon)",
+    mapsQuery: "Centre d'examen permis 9 rue Aristide Bruant 69200 Vénissieux",
+    difficulte: 3,
+    difficulteLabel: "Intermédiaire",
+    quizTags: ["rond_point", "vitesse", "priorite"],
+
+    resume:
+      "Surprise pour beaucoup de Lyonnais : il n'y a pas de centre d'examen dans Lyon même. Tu passes en périphérie, " +
+      "le plus souvent à Vénissieux ou Saint-Priest, parfois à Rillieux-la-Pape (plus corsé) ou Dardilly (plus tranquille). " +
+      "Vénissieux, le plus proche de Lyon, te plonge dans l'urbain dense dès le premier mètre : pas d'échauffement, " +
+      "des grands boulevards trompeurs et des giratoires à deux voies qui servent de juge de paix. Le Rhône tourne " +
+      "autour de 57 % de réussite, un peu sous la moyenne nationale — rien d'infranchissable, mais ça se prépare.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "Métro D — terminus Gare de Vénissieux, puis tram ou bus TCL vers le centre-ville.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "Tram T4 — plusieurs arrêts dans Vénissieux, correspondance à la Gare de Vénissieux.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : périphérique Laurent Bonnevay (sorties Vénissieux) ou D383, stationnement dans les rues autour du centre.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "refresh-cw",
+        titre: "Les giratoires à deux voies, test signature",
+        texte:
+          "C'est LE morceau attendu du secteur : des ronds-points à deux voies avec du flux en continu. " +
+          "Choisis ta voie avant d'entrer selon ta sortie, tiens ta trajectoire sans mordre sur l'autre couloir, " +
+          "et signale ta sortie au bon moment. Un changement de file improvisé sur l'anneau, et l'examinateur note.",
+      },
+      {
+        ico: "eye",
+        titre: "Un départ dans le vif, montée comprise",
+        texte:
+          "Zéro mise en jambes ici : tu démarres directement dans un environnement dense — commerces, piétons, " +
+          "arrêts de bus. Les candidats parlent aussi d'une belle montée dès le départ, avec un passage piéton très " +
+          "fréquenté en haut. Traduction : démarrage en côte propre ET œil sur les piétons en même temps. Prépare " +
+          "les deux, pas l'un après l'autre.",
+      },
+      {
+        ico: "alert-triangle",
+        titre: "Les grands boulevards, faux amis",
+        texte:
+          "Les axes larges à plusieurs voies donnent une impression de confort — et c'est exactement là que " +
+          "beaucoup d'élèves ratent. On relâche l'attention, on laisse filer la vitesse, on oublie un contrôle au " +
+          "changement de voie. Garde la même rigueur sur boulevard que dans une petite rue : c'est la constance " +
+          "qui est jugée.",
+      },
+    ],
+
+    conseils: [
+      "Roule le secteur avant le jour J : Vénissieux centre, les boulevards et les giratoires à deux voies — le terrain connu enlève la moitié du stress.",
+      "Travaille le démarrage en côte jusqu'au réflexe : frein à main ou point de patinage, mais zéro recul avec des piétons autour.",
+      "Le tram T4 traverse la ville : aux carrefours avec les voies de tram, redouble d'attention sur la signalisation dédiée.",
+      "Sur les grands boulevards, garde un œil régulier sur compteur et panneaux : le relâchement est la faute la plus fréquente ici.",
+    ],
+
+    faq: [
+      {
+        q: "Il y a un centre d'examen dans Lyon ?",
+        r: "Non — les centres du Rhône sont tous en périphérie : Vénissieux, Saint-Priest, Rillieux-la-Pape, Dardilly, Givors ou Villefranche. Depuis Lyon, Vénissieux est le plus accessible (métro D + tram T4).",
+      },
+      {
+        q: "Vénissieux, c'est un centre difficile ?",
+        r: "Intermédiaire (3/5), au même niveau que Saint-Priest ou Givors — plus accessible que Rillieux-la-Pape, plus exigeant que Dardilly. Le Rhône est un poil sous la moyenne nationale de réussite, donc prépare-toi sérieusement.",
+      },
+      {
+        q: "Quelle est la cause d'échec n°1 sur ce centre ?",
+        r: "Le relâchement sur les grands boulevards et les erreurs de voie dans les giratoires à deux voies. Deux automatismes à blinder avant de te présenter.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "L'épreuve pratique du permis B dure environ 32 minutes, dont à peu près 25 minutes de conduite. Tu es noté sur 31 points : admis dès 20 points, sans faute éliminatoire.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Pas de bachotage. Vérifie ton trajet jusqu'au centre (métro D + T4 si besoin), repasse mentalement giratoires et démarrage en côte, et dors. Le jour J, arrive 15 min en avance pour te poser.",
+      },
+    ],
+  },
+
+  {
+    slug: "marseille",
+    nom: "Marseille – Saint-Henri",
+    departement: "Bouches-du-Rhône",
+    deptNum: "13",
+    adresse: "99 chemin de la Pelouque, 13016 Marseille (quartier Saint-Henri)",
+    mapsQuery:
+      "Centre d'examen permis 99 chemin de la Pelouque 13016 Marseille",
+    difficulte: 4,
+    difficulteLabel: "Difficile",
+    quizTags: ["priorite", "rond_point", "vitesse"],
+
+    resume:
+      "Saint-Henri, dans le 16e arrondissement, c'est LE centre de Marseille : environ 70 % des candidats " +
+      "marseillais passent ici, l'alternative étant Aubagne. Le décor est posé — quartiers nord entre collines et " +
+      "littoral, l'A55 à deux pas, une circulation marseillaise qui ne fait pas de cadeau. Intersections aux " +
+      "priorités pas toujours évidentes, ronds-points, insertions sur axes chargés et limitations qui alternent " +
+      "entre 30 et 50 : tout y est. Avec un taux de réussite du département autour de 56 %, nettement sous la " +
+      "moyenne nationale, ce centre mérite son 4/5 — et une vraie préparation sur le secteur.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "Bus RTM 35, 36/36B ou 96 desservent Saint-Henri ; depuis le centre, métro 2 jusqu'à Gèze puis bus vers les quartiers nord.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "TER — gare de l'Estaque (ligne Marseille–Miramas par la Côte Bleue), à quelques minutes du chemin de la Pelouque.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : A55 toute proche (sorties du secteur Saint-Henri / l'Estaque), stationnement aux abords du centre.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "eye",
+        titre: "Les priorités à droite à la marseillaise",
+        texte:
+          "Le tissu urbain des quartiers nord multiplie les intersections où la priorité n'est pas évidente : " +
+          "marquage discret, visibilité coupée par le stationnement, usagers qui forcent le passage. La mauvaise " +
+          "gestion des priorités à droite est citée comme l'erreur classique du secteur. Ralentis avant chaque " +
+          "carrefour ambigu et ne pars jamais du principe que l'autre va céder.",
+      },
+      {
+        ico: "refresh-cw",
+        titre: "Ronds-points et insertions musclées",
+        texte:
+          "Le parcours enchaîne plusieurs giratoires et des insertions sur des axes très fréquentés — avec l'A55 " +
+          "en toile de fond du secteur. Le piège : hésiter. Observe tôt, choisis ton créneau et engage-toi " +
+          "franchement, contrôles rétro + angle mort à l'appui. Une insertion molle gêne le flux autant qu'une " +
+          "insertion forcée.",
+      },
+      {
+        ico: "alert-triangle",
+        titre: "Le yo-yo 30/50 dans un secteur vallonné",
+        texte:
+          "Les limitations alternent sans arrêt entre 30 et 50 km/h, et le relief du 16e — entre collines et " +
+          "mer — ajoute des arrêts en pente. Reste dans la bonne vitesse à chaque zone, et soigne tes démarrages " +
+          "en côte : un recul au feu ou une survitesse en zone 30, même légère, coûte très cher.",
+      },
+    ],
+
+    conseils: [
+      "Fais plusieurs heures de conduite dans les 15e et 16e arrondissements avant l'examen : la circulation du secteur ne ressemble à aucune autre, autant l'apprivoiser avant le jour J.",
+      "Blinde ta priorité à droite : à chaque intersection sans signalisation claire, pied levé et regard actif — c'est l'erreur la plus citée ici.",
+      "Travaille le démarrage en côte jusqu'au réflexe : le relief du quartier ne te laissera pas y échapper.",
+      "Garde tes distances de sécurité même quand ça bouchonne : se laisser coller au véhicule de devant est une faute que l'examinateur relève.",
+    ],
+
+    faq: [
+      {
+        q: "Saint-Henri, c'est un centre difficile ?",
+        r: "Oui, on le classe 4/5. Le taux de réussite des Bouches-du-Rhône tourne autour de 56 %, nettement sous la moyenne nationale, et la circulation marseillaise demande une vigilance de tous les instants. Bien préparé sur le secteur, ça se passe — mais pas en improvisant.",
+      },
+      {
+        q: "C'est le seul centre pour passer à Marseille ?",
+        r: "C'est le seul dans Marseille même — environ 70 % des candidats marseillais passent ici. L'autre option du secteur est le centre d'Aubagne, un peu plus loin à l'est.",
+      },
+      {
+        q: "Quelle est la cause d'échec n°1 sur ce centre ?",
+        r: "La mauvaise gestion des priorités à droite, suivie des distances de sécurité mal tenues dans le trafic dense. Deux réflexes à automatiser avant de te présenter.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "L'épreuve pratique du permis B dure environ 32 minutes, dont à peu près 25 minutes de conduite. Tu es noté sur 31 points : admis dès 20 points, sans faute éliminatoire.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Repos, pas de marathon de révisions. Vérifie ton trajet (bus RTM ou TER l'Estaque, ou A55 en voiture), prépare convocation et pièce d'identité, et arrive 15 min en avance pour souffler avant de monter dans la voiture.",
+      },
+    ],
+  },
+
+  {
+    slug: "toulouse",
+    nom: "Toulouse – Lalande",
+    departement: "Haute-Garonne",
+    deptNum: "31",
+    adresse: "2 rue de Lalande, 31200 Toulouse",
+    mapsQuery: "Centre d'examen permis 2 rue de Lalande 31200 Toulouse",
+    difficulte: 3,
+    difficulteLabel: "Intermédiaire",
+    quizTags: ["rond_point", "vitesse", "priorite"],
+
+    resume:
+      "Lalande, au nord de Toulouse, est le grand centre d'examen de la Ville rose — l'agglo compte aussi " +
+      "Darasse (31500) et Colomiers si ton auto-école t'y envoie. Le terrain de jeu : le nord toulousain, avec " +
+      "la D820 (avenue des États-Unis) en colonne vertébrale, la rocade et l'A62 aux portes du quartier, des " +
+      "giratoires en série et des communes résidentielles comme Aucamville, Launaguet ou Fenouillet juste à côté. " +
+      "La Haute-Garonne tourne autour de 60 % de réussite, dans la moyenne nationale : un centre exigeant mais " +
+      "juste, où la préparation sur le secteur paie vraiment.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "Métro B — station La Vache, puis quelques minutes de bus ou une vingtaine à pied vers la rue de Lalande.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "Linéo L10 et bus Tisséo (29, 60, 69) desservent le secteur Lalande et la Barrière de Paris.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : D820 (avenue des États-Unis) ou échangeur A62 / rocade au nord ; du stationnement est disponible à proximité immédiate du centre.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "refresh-cw",
+        titre: "Les giratoires du nord toulousain",
+        texte:
+          "Entre la D820, les abords de la rocade et les entrées des communes voisines, les ronds-points " +
+          "s'enchaînent — certains à plusieurs voies. C'est le point d'entraînement n°1 recommandé sur ce " +
+          "centre : voie choisie avant d'entrer, trajectoire tenue, clignotant de sortie au bon moment. " +
+          "L'examinateur juge la répétition propre, pas un giratoire réussi par chance.",
+      },
+      {
+        ico: "alert-triangle",
+        titre: "La rocade aux portes du quartier",
+        texte:
+          "L'échangeur A62 / rocade est tout proche du centre, et l'insertion sur voie rapide fait partie des " +
+          "situations à maîtriser ici. Accélère franchement dans la bretelle, contrôle rétro + angle mort tôt, " +
+          "et vise un créneau précis sans flotter. Une insertion hésitante sur le périphérique toulousain, " +
+          "c'est des points qui s'envolent.",
+      },
+      {
+        ico: "eye",
+        titre: "L'avenue des États-Unis, grand axe piégeux",
+        texte:
+          "Cette ancienne nationale traverse tout le quartier : commerces, concessions autos, entrées et sorties " +
+          "de parkings en continu, bus et piétons. Le trafic y est dense et les limitations alternent entre " +
+          "zones 30 et 50. Scanne les côtés en permanence et vérifie ta vitesse à chaque panneau — la survitesse " +
+          "d'inattention est le piège classique des grands axes.",
+      },
+    ],
+
+    conseils: [
+      "Roule le secteur avant le jour J : Lalande, l'avenue des États-Unis et les communes voisines (Aucamville, Launaguet, Fenouillet) — leurs rues résidentielles demandent une vigilance particulière sur les priorités.",
+      "Travaille l'insertion sur la rocade avec ton moniteur jusqu'à ce qu'elle devienne un automatisme : c'est la compétence qui fait la différence ici.",
+      "Sur la D820, lis les panneaux en avance : les passages 50 → 30 et retour s'enchaînent vite dans les zones commerçantes.",
+      "Arrive 15 min en avance avec convocation et pièce d'identité : démarrer posé, c'est déjà des points de sauvés.",
+    ],
+
+    faq: [
+      {
+        q: "Lalande, c'est un centre difficile ?",
+        r: "Intermédiaire (3/5). La Haute-Garonne est dans la moyenne nationale de réussite (autour de 60 %). Ce qui compte ici, c'est la maîtrise des giratoires, de l'insertion rocade et des grands axes — des situations qui se travaillent très bien à l'avance.",
+      },
+      {
+        q: "Il y a d'autres centres à Toulouse ?",
+        r: "Oui : Darasse, dans l'est toulousain (rue Xavier Darasse, 31500), et Colomiers dans l'ouest de l'agglo. Ton auto-école choisit le centre — la préparation reste la même : connaître le secteur où tu passes.",
+      },
+      {
+        q: "Quelle est la cause d'échec n°1 sur ce centre ?",
+        r: "Les erreurs de giratoire (voie ou clignotant mal placés) et les insertions hésitantes sur la rocade sont les points les plus travaillés par les auto-écoles du secteur. Blinde ces deux automatismes avant de te présenter.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "L'épreuve pratique du permis B dure environ 32 minutes, dont à peu près 25 minutes de conduite. Tu es noté sur 31 points : admis dès 20 points, sans faute éliminatoire.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Pas de bachotage. Repère ton trajet (métro B La Vache + bus, ou D820 en voiture), repasse mentalement giratoires et insertion rocade, et dors correctement. Un candidat reposé lit mieux la route qu'un candidat qui a révisé jusqu'à minuit.",
+      },
+    ],
+  },
+  {
+    slug: "bordeaux",
+    nom: "Bordeaux – Mérignac",
+    departement: "Gironde",
+    deptNum: "33",
+    adresse: "20 rue Thierry Sabine, 33700 Mérignac",
+    mapsQuery: "Centre d'examen permis 20 rue Thierry Sabine 33700 Mérignac",
+    difficulte: 3,
+    difficulteLabel: "Intermédiaire",
+    quizTags: ["rond_point", "vitesse", "priorite"],
+
+    resume:
+      "Surprise pour beaucoup de candidats bordelais : l'examen ne se passe pas dans Bordeaux, " +
+      "mais à Mérignac, dans la zone de l'aéroport (un second centre dessert le sud de la " +
+      "métropole à Villenave-d'Ornon). Le secteur est moderne et roulant : giratoires en " +
+      "cascade, grands axes type avenue Marcel Dassault, rocade toute proche et tram A qui " +
+      "s'invite dans le paysage. La Gironde affiche un taux de réussite au-dessus de la moyenne " +
+      "nationale — ici, la préparation paie. Connaître les réflexes du secteur te met une vraie " +
+      "longueur d'avance le jour J.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "Tram A, branche aéroport — arrêts Cadéra-Issartier, Caroline Aigle ou Aéroport, puis correspondance bus ou marche dans la zone.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "Bus TBM — arrêt Institut Evering à une dizaine de minutes à pied du centre.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : rocade A630, sortie 11b côté zone aéroportuaire ; du stationnement est disponible à proximité immédiate du centre.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "refresh-cw",
+        titre: "Les giratoires à la chaîne",
+        texte:
+          "Un parcours type dans le secteur peut aligner plus d'une dizaine de ronds-points. Ce n'est pas " +
+          "un giratoire qui pose problème, c'est la répétition : clignotant à l'approche, contrôle, " +
+          "sortie propre, et on recommence. Travaille l'automatisme jusqu'au réflexe — l'examinateur " +
+          "juge ta constance sur toute la série, pas un passage réussi par chance.",
+      },
+      {
+        ico: "alert-triangle",
+        titre: "Voies rapides au départ et à l'arrivée",
+        texte:
+          "Les parcours du centre démarrent et se terminent souvent par des voies à accès limité : " +
+          "la rocade et ses bretelles sont juste là. Insertion franche, angle mort vérifié, allure " +
+          "adaptée dès les premières minutes — tu n'as pas le temps de chauffer. Une insertion molle " +
+          "ou une hésitation à la bretelle coûte très cher.",
+      },
+      {
+        ico: "eye",
+        titre: "Le tram A dans le secteur",
+        texte:
+          "Depuis 2023, la branche aéroport du tram A traverse Mérignac jusqu'au terminus Aéroport. " +
+          "Carrefours à feux avec plateforme tram, signalisation spécifique, piétons qui traversent " +
+          "vers les stations : le tram a toujours la priorité quand les feux le disent. Ne te laisse " +
+          "jamais surprendre par une rame qui arrive dans ton dos.",
+      },
+    ],
+
+    conseils: [
+      "Va repérer la zone de l'aéroport avant le jour J : le centre n'est pas dans Bordeaux, et arriver en terrain connu enlève une grosse part du stress.",
+      "Blinde tes insertions sur la rocade avec ton moniteur : accélération franche, rétro + angle mort, prise de position sans flottement. C'est le geste qui fait la différence ici.",
+      "Sur giratoire : clignotant à droite seulement quand tu prends la sortie qui suit — jamais avant. Sur une série de dix, l'examinateur voit tout de suite si c'est un réflexe ou du hasard.",
+      "Aux carrefours avec le tram, fie-toi aux feux et à la signalisation dédiée, pas à ton instinct : une rame silencieuse arrive plus vite qu'on ne le croit.",
+    ],
+
+    faq: [
+      {
+        q: "L'examen se passe à Bordeaux ou à Mérignac ?",
+        r: "À Mérignac, rue Thierry Sabine, dans la zone de l'aéroport. C'est le centre principal de la métropole bordelaise ; un autre centre existe à Villenave-d'Ornon pour le secteur sud.",
+      },
+      {
+        q: "Bordeaux, c'est un centre difficile ?",
+        r: "Intermédiaire (3/5). La Gironde réussit au-dessus de la moyenne nationale (~62 % contre ~58 %), mais le secteur de Mérignac reste technique : rocade, séries de giratoires et tram demandent des automatismes solides.",
+      },
+      {
+        q: "Je peux connaître le parcours exact à l'avance ?",
+        r: "Non — l'examinateur choisit son itinéraire le jour même parmi plusieurs. Mais les ingrédients reviennent toujours : giratoires, grands axes de la zone aéroportuaire et passage possible par la rocade. C'est exactement ce qu'on te prépare ici.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "L'épreuve pratique du permis B dure environ 32 minutes, dont à peu près 25 minutes de conduite. Tu es noté sur 31 points : admis dès 20 points, sans faute éliminatoire. Arrive 15 min en avance pour te poser.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Pas de bachotage. Vérifie ton itinéraire jusqu'à la rue Thierry Sabine (ce n'est pas Bordeaux centre !), repasse mentalement giratoires et insertion rocade, et dors. Le jour J, c'est juste de la mise en application.",
+      },
+    ],
+  },
+
+  {
+    slug: "lille",
+    nom: "Lille – Lomme",
+    departement: "Nord",
+    deptNum: "59",
+    adresse: "57 avenue Roger Salengro, 59160 Lomme (Lille)",
+    mapsQuery: "Centre d'examen permis 57 avenue Roger Salengro 59160 Lomme",
+    difficulte: 3,
+    difficulteLabel: "Intermédiaire",
+    quizTags: ["rond_point", "vitesse", "priorite"],
+
+    resume:
+      "Pour Lille, l'examen part de Lomme, à l'ouest de la métropole (un autre centre dessert " +
+      "l'est, côté Lezennes / Villeneuve-d'Ascq). La signature du secteur, c'est le grand écart : " +
+      "un même parcours peut enchaîner boulevards urbains, giratoires de zone commerciale, " +
+      "autoroute A25 ou A22 avec sortie numérotée, puis le centre d'un village comme Pérenchies " +
+      "ou Sequedin et ses rues étroites. Le Nord réussit dans la moyenne nationale : rien " +
+      "d'injuste ici, mais le parcours teste ta capacité à changer de registre sans perdre tes " +
+      "contrôles. Prépare chaque décor et tu ne seras surpris par aucun.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "Métro ligne 2 — station Bourg (Lomme), à quelques minutes à pied du secteur Salengro / République.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "Bus Ilévia — la ligne 10 dessert l'avenue de la République toute proche, correspondances vers le reste de la métropole.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : A25 côté Lomme ou grands axes depuis Lille, stationnement dans les rues du secteur. Prévois 10 min de marge.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "alert-triangle",
+        titre: "L'autoroute au milieu de l'examen",
+        texte:
+          "Les parcours réels du centre passent par l'A25 ou l'A22, avec une sortie précise à prendre. " +
+          "Insertion à bonne allure, contrôles rétro + angle mort, maintien du 110 puis sortie anticipée : " +
+          "tout s'enchaîne vite. Une insertion hésitante ou une sortie ratée au dernier moment, et tu " +
+          "perds des points décisifs. Travaille ce bloc jusqu'à ce qu'il soit fluide.",
+      },
+      {
+        ico: "eye",
+        titre: "Les villages qui cassent le rythme",
+        texte:
+          "Pérenchies, Sequedin, Saint-André : les itinéraires quittent volontiers Lomme pour le centre " +
+          "d'un village voisin. Rues étroites, stationnement des deux côtés, intersections sans marquage " +
+          "où la priorité à droite s'applique pleinement. C'est là qu'on relâche la garde après une " +
+          "portion roulante — et c'est exactement là que ça coince.",
+      },
+      {
+        ico: "refresh-cw",
+        titre: "Giratoires et trafic de zone commerciale",
+        texte:
+          "Compte environ huit ronds-points sur un parcours type d'une douzaine de kilomètres, dont " +
+          "certains dans des secteurs commerciaux chargés. Voitures qui cherchent leur direction, " +
+          "entrées-sorties de parking, files qui se croisent : choisis ta voie tôt, signale ta sortie " +
+          "au bon moment et garde une trajectoire nette malgré l'agitation autour.",
+      },
+    ],
+
+    conseils: [
+      "Travaille le bloc autoroute avec ton moniteur : insertion sur l'A25 ou l'A22, maintien d'allure, puis sortie numérotée anticipée. C'est le passage le plus discriminant du secteur.",
+      "Dans les villages (Pérenchies, Sequedin), repasse en « mode prudence » dès l'entrée : allure réduite, regard actif, et priorité à droite considérée par défaut aux intersections sans marquage.",
+      "Roule au moins quelques heures dans le secteur de Lomme avant le jour J : connaître les giratoires et les zones commerciales à froid change tout.",
+      "Vise une conduite lisse sur tout le parcours : ici, c'est le changement de décor qui piège. Celui qui garde les mêmes contrôles en ville, sur autoroute et en village a déjà gagné.",
+    ],
+
+    faq: [
+      {
+        q: "L'examen se passe dans Lille même ?",
+        r: "Non — le centre est à Lomme, commune associée de Lille, avenue Roger Salengro. Un autre centre dessert l'est de la métropole côté Lezennes / Villeneuve-d'Ascq. Vérifie bien l'adresse sur ta convocation.",
+      },
+      {
+        q: "Lille, c'est un centre difficile ?",
+        r: "Intermédiaire (3/5). Le Nord réussit dans la moyenne nationale (~58 %). La difficulté vient de la variété : ville, autoroute et village dans le même examen. Bien préparé sur les trois registres, c'est tout à fait jouable.",
+      },
+      {
+        q: "Je peux connaître le parcours exact à l'avance ?",
+        r: "Non — l'inspecteur choisit l'itinéraire le jour J parmi plusieurs. Mais les ingrédients reviennent : giratoires de Lomme, passage possible par l'A25 ou l'A22, et détour par un village voisin. Maîtrise les types de situations plutôt qu'un tracé par cœur.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "L'épreuve pratique du permis B dure environ 32 minutes, dont à peu près 25 minutes de conduite. Tu es noté sur 31 points : admis dès 20 points, sans faute éliminatoire. Arrive 15 min en avance.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Pas de marathon de révisions. Repasse mentalement les trois décors du secteur (ville, autoroute, village), prépare convocation et pièce d'identité, et couche-toi tôt. Un candidat reposé gère dix fois mieux les changements de rythme.",
+      },
+    ],
+  },
+
+  {
+    slug: "nantes",
+    nom: "Nantes – Saint-Herblain",
+    departement: "Loire-Atlantique",
+    deptNum: "44",
+    adresse: "3 rue de la Johardière, 44800 Saint-Herblain",
+    mapsQuery:
+      "Centre d'examen permis 3 rue de la Johardière 44800 Saint-Herblain",
+    difficulte: 2,
+    difficulteLabel: "Accessible",
+    quizTags: ["rond_point", "priorite", "vitesse"],
+
+    resume:
+      "Pour Nantes, l'examen part de Saint-Herblain, dans la zone de la Lorie à l'ouest de la " +
+      "ville (un second centre dessert le sud de l'agglomération à Bouguenais). Bonne nouvelle : " +
+      "le secteur réussit au-dessus de la moyenne nationale — autour de 64 % contre ~57 %. La " +
+      "spécialité locale, ce sont les ronds-points : un parcours type en enchaîne une quinzaine, " +
+      "avec quelques doubles giratoires en prime, le long des boulevards Salvador Allende et " +
+      "Charles de Gaulle. Ajoute le tram et la possibilité d'une insertion sur voie rapide, et tu " +
+      "as un examen exigeant sur les automatismes mais vraiment juste.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "Tram ligne 1 — terminus François Mitterrand, sur le boulevard Salvador Allende, puis correspondance bus vers la zone de la Lorie.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "Bus TAN — lignes 93 et C3, arrêt Apave au plus près du centre ; les lignes 50, 71 et 91 desservent aussi le secteur.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : périphérique ouest de Nantes, sorties Porte d'Atlantis ou Porte de Saint-Herblain, direction la zone de la Lorie. Stationnement sur place.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "refresh-cw",
+        titre: "Le marathon des giratoires",
+        texte:
+          "Une quinzaine de ronds-points sur un parcours type, parfois trois sorties à enchaîner coup " +
+          "sur coup, et des doubles giratoires typiques de l'agglo nantaise. La difficulté n'est pas " +
+          "technique, elle est dans la répétition : clignotant, contrôle, trajectoire, sortie propre — " +
+          "à la quinzième fois comme à la première. L'examinateur note ta constance.",
+      },
+      {
+        ico: "eye",
+        titre: "Le tram sur le boulevard Allende",
+        texte:
+          "La ligne 1 du tram longe le boulevard Salvador Allende, en plein secteur d'examen. " +
+          "Plateforme au centre, carrefours à feux spécifiques, piétons qui coupent vers les stations : " +
+          "au moindre franchissement de la plateforme, fie-toi aux feux dédiés et vérifie qu'aucune " +
+          "rame n'arrive. Une erreur face au tram ne pardonne pas.",
+      },
+      {
+        ico: "alert-triangle",
+        titre: "Les voies rapides aux portes du secteur",
+        texte:
+          "L'ouest nantais est bordé de voies rapides — périphérique, axes vers Rennes (N137) et " +
+          "Vannes (N165). Une insertion peut s'inviter dans ton parcours : voie d'accélération utilisée " +
+          "en entier, contrôles rétro + angle mort, allure adaptée au flux. Garde aussi tes distances de " +
+          "sécurité une fois inséré — c'est un point que les inspecteurs regardent de près ici.",
+      },
+    ],
+
+    conseils: [
+      "Fais des ronds-points ta priorité d'entraînement : sur ce secteur, celui qui a l'automatisme giratoire a déjà fait 80 % du travail.",
+      "Répète les carrefours avec tram sur le boulevard Allende : feux dédiés, plateforme, piétons. Le réflexe « je vérifie la rame avant de franchir » doit être ancré.",
+      "Travaille une vraie insertion sur voie rapide avec ton moniteur : accélération franche dans la voie d'insertion, pas de timidité à 70 quand le flux est à 110.",
+      "Va rouler dans la zone de la Lorie avant le jour J : c'est une zone d'activités, pas un centre-ville — camions, entrées d'entreprises et giratoires ont leur rythme propre.",
+    ],
+
+    faq: [
+      {
+        q: "L'examen se passe à Nantes ou à Saint-Herblain ?",
+        r: "À Saint-Herblain, rue de la Johardière, dans la zone de la Lorie à l'ouest de Nantes. C'est le centre principal de l'agglo ; un autre centre existe à Bouguenais, route de Bouaye, pour le secteur sud.",
+      },
+      {
+        q: "Nantes, c'est un centre difficile ?",
+        r: "Plutôt accessible (2/5). Le taux de réussite du secteur est au-dessus de la moyenne nationale (~64 % contre ~57 %). L'examen reste exigeant sur les automatismes — giratoires et tram en tête — mais il est réputé juste.",
+      },
+      {
+        q: "Je peux connaître le parcours exact à l'avance ?",
+        r: "Non — l'inspecteur choisit son itinéraire le jour même. Mais la recette locale ne change pas : beaucoup de giratoires, les boulevards Allende et Charles de Gaulle, le tram, et une insertion possible sur voie rapide. C'est exactement ce qu'on te prépare ici.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "L'épreuve pratique du permis B dure environ 32 minutes, dont à peu près 25 minutes de conduite. Tu es noté sur 31 points : admis dès 20 points, sans faute éliminatoire. Arrive 15 min en avance pour te poser.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Pas de bachotage. Vérifie ton trajet jusqu'à la zone de la Lorie (tram 1 + bus ou périph ouest), repasse mentalement giratoires, tram et insertion, et dors bien. Sur un centre qui réussit au-dessus de la moyenne, la sérénité est ton meilleur atout.",
+      },
+    ],
+  },
+  {
+    slug: "strasbourg",
+    nom: "Strasbourg",
+    departement: "Bas-Rhin",
+    deptNum: "67",
+    adresse: "40 rue Guynemer, 67100 Strasbourg",
+    mapsQuery: "Centre d'examen permis 40 rue Guynemer 67100 Strasbourg",
+    difficulte: 3,
+    difficulteLabel: "Intermédiaire",
+    quizTags: ["cycliste", "priorite", "vitesse"],
+
+    resume:
+      "Strasbourg, c'est la capitale française du vélo — et ça se sent le jour de l'examen. " +
+      "Le centre du 40 rue Guynemer, dans le quartier de la Musau au sud de la ville, t'envoie " +
+      "dans un secteur où cyclistes, tram et zones 30 se partagent la route en permanence. " +
+      "Bonne nouvelle : le Bas-Rhin affiche un taux de réussite au-dessus de la moyenne " +
+      "nationale (autour de 63 %). L'examen est exigeant sur l'observation, mais il est " +
+      "juste : ceux qui ont blindé leurs contrôles d'angle mort passent.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "En tram + à pied : la Musau est entre Neudorf et la Meinau — compte 10 à 15 minutes à pied depuis les stations de tram du secteur.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "En bus CTS : plusieurs lignes desservent la Musau et la plaine des Bouchers, arrêts à quelques minutes du centre.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : A35 puis les quartiers sud ; le parking du centre est réservé aux voitures d'auto-école — la plupart des candidats arrivent avec leur moniteur.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "eye",
+        titre: "Cyclistes : le contrôle qui décide de tout",
+        texte:
+          "Strasbourg est la ville la plus cyclable de France : pistes partout, vélos qui " +
+          "surgissent vite, des deux côtés, à toute heure. Chaque tourne-à-droite, chaque " +
+          "insertion, chaque démarrage = rétro + angle mort, sans exception. C'est LE réflexe " +
+          "que l'examinateur juge ici — et la cause d'échec la plus bête à éviter.",
+      },
+      {
+        ico: "alert-triangle",
+        titre: "Le tram sur ta route",
+        texte:
+          "Six lignes de tram traversent la ville : voies partagées, plateformes à franchir, " +
+          "feux spécifiques. Règles d'or : ne jamais t'engager sur les voies sans être sûr de " +
+          "pouvoir dégager, arrêt impératif au feu rouge clignotant, et priorité au tram. " +
+          "Gêner une rame, c'est très cher le jour J.",
+      },
+      {
+        ico: "refresh-cw",
+        titre: "Trafic dense, vitesses en yo-yo",
+        texte:
+          "L'A35 et le tunnel de l'Étoile sont réputés souvent saturés aux heures de pointe, " +
+          "et le centre-ville multiplie zones 30 et secteurs apaisés. Le piège : rester calé " +
+          "sur la vitesse d'avant. Lis les panneaux en continu et adapte ton allure à chaque " +
+          "changement d'ambiance — c'est ce que l'examinateur regarde.",
+      },
+    ],
+
+    conseils: [
+      "Roule le secteur sud (Neudorf, Meinau, plaine des Bouchers) avec ton moniteur avant le jour J : le départ en terrain connu change tout.",
+      "Fais du contrôle cycliste un réflexe : rétro + angle mort à CHAQUE changement de direction, même quand la piste semble vide.",
+      "Apprends les règles du tram par cœur : feu rouge clignotant = arrêt absolu, jamais d'arrêt sur les voies, priorité à la rame.",
+      "Surveille les transitions 30/50 : dans les quartiers résidentiels le 30 est fréquent, et une survitesse même légère se paie cash.",
+    ],
+
+    faq: [
+      {
+        q: "Strasbourg, c'est un centre difficile ?",
+        r: "Intermédiaire (3/5). Le Bas-Rhin réussit mieux que la moyenne nationale (~63 % contre ~57-58 %), mais l'examen en ville ne pardonne pas les oublis d'observation : vélos et tram sont les juges de paix.",
+      },
+      {
+        q: "Je peux connaître le parcours exact à l'avance ?",
+        r: "Non — l'examinateur choisit son itinéraire le jour même. Mais le secteur revient toujours : quartiers sud, axes partagés avec le tram, pistes cyclables. C'est exactement ce qu'on te prépare ici.",
+      },
+      {
+        q: "Quelle est la cause d'échec n°1 sur ce centre ?",
+        r: "L'angle mort cycliste oublié, devant la mauvaise gestion du tram (engagement sur les voies, feu clignotant grillé). Deux réflexes à blinder avant de te présenter.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "L'épreuve pratique du permis B dure environ 32 minutes, dont à peu près 25 minutes de conduite. Tu es noté sur 31 points : admis dès 20 points, sans faute éliminatoire.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Pas de bachotage. Sommeil, un parcours mental des pièges de Strasbourg (vélos, tram, zones 30), documents prêts. Le jour J, arrive 15 min en avance pour te poser.",
+      },
+    ],
+  },
+
+  {
+    slug: "montpellier",
+    nom: "Montpellier",
+    departement: "Hérault",
+    deptNum: "34",
+    adresse: "500 rue Alfred Nobel, 34000 Montpellier",
+    mapsQuery: "Centre d'examen permis 500 rue Alfred Nobel 34000 Montpellier",
+    difficulte: 4,
+    difficulteLabel: "Difficile",
+    quizTags: ["rond_point", "priorite", "vitesse"],
+
+    resume:
+      "Le centre du Millénaire — la « Maison de la Sécurité Routière » — est LE centre " +
+      "d'examen de Montpellier, posé entre Port Marianne et Odysseum. Le secteur enchaîne " +
+      "giratoires, grands axes roulants et lignes de tram qui quadrillent la ville. Ajoute " +
+      "le passage en ville 30 depuis 2021 et un taux de réussite en ville nettement sous la " +
+      "moyenne nationale, et tu comprends pourquoi on le classe difficile. Rien " +
+      "d'insurmontable pour autant : ici, la préparation sur le secteur paie vraiment.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "Tram ligne 1 — arrêt Millénaire (direction Odysseum), puis quelques minutes à pied jusqu'à la rue Alfred Nobel.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "Depuis la gare Saint-Roch : tram 1 direction Odysseum, environ un quart d'heure jusqu'au Millénaire.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : autoroute sortie 29 « Montpellier Est », puis le parc du Millénaire ; stationnement possible dans le quartier.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "eye",
+        titre: "Le tram, roi de la ville",
+        texte:
+          "À Montpellier, le tram est partout et il est prioritaire. Feu rouge clignotant = " +
+          "arrêt absolu, jamais d'arrêt sur les voies, et avant de franchir une plateforme tu " +
+          "vérifies TOUJOURS qu'une rame n'arrive pas dans l'autre sens. Un tram gêné ou une " +
+          "traversée hasardeuse, c'est l'examen qui s'arrête là.",
+      },
+      {
+        ico: "refresh-cw",
+        titre: "Giratoires à la chaîne",
+        texte:
+          "Le secteur Port Marianne / Odysseum enchaîne les giratoires, et certains ronds-points " +
+          "de la ville sont réputés saturés chez les auto-écoles locales (la Lyre, Rieucoulon). " +
+          "Le piège classique : mauvaise voie à l'entrée ou clignotant de sortie oublié. Choisis " +
+          "ta file tôt, tiens-la, signale ta sortie — à chaque fois.",
+      },
+      {
+        ico: "alert-triangle",
+        titre: "Ville 30 : la vitesse au cordeau",
+        texte:
+          "Depuis août 2021, presque toute la ville est limitée à 30 km/h, sauf quelques grands " +
+          "axes restés à 50. Résultat : des transitions de vitesse permanentes, et un 30 vite " +
+          "dépassé sans s'en rendre compte en sortant d'un axe roulant. Lis les panneaux en " +
+          "continu et surveille ton compteur — la survitesse est éliminatoire.",
+      },
+    ],
+
+    conseils: [
+      "Roule le triangle Millénaire – Port Marianne – Odysseum avec ton moniteur : le départ se joue dans ce secteur.",
+      "Blinde tes règles de tram : feu clignotant, priorité à la rame, vérification des deux sens avant chaque traversée.",
+      "Aux giratoires, décide ta sortie AVANT d'entrer et garde ta voie jusqu'au bout — pas de slalom dans l'anneau.",
+      "Calibre-toi sur le 30 km/h : en ville 30, rouler « normalement » c'est déjà trop vite. Compteur, panneaux, régularité.",
+    ],
+
+    faq: [
+      {
+        q: "Montpellier, c'est un centre difficile ?",
+        r: "Oui, on le classe 4/5. L'Hérault est dans la moyenne nationale (~57 %), mais le taux de réussite en ville tourne autour de 51 % : tram omniprésent, giratoires chargés et ville 30 demandent une vraie préparation.",
+      },
+      {
+        q: "Je peux connaître le parcours exact à l'avance ?",
+        r: "Non — l'examinateur choisit l'itinéraire le jour même parmi plusieurs. Mais les ingrédients reviennent toujours : giratoires, plateformes de tram, transitions 30/50. Maîtrise-les et le tracé n'a plus d'importance.",
+      },
+      {
+        q: "Quelle est la cause d'échec n°1 sur ce centre ?",
+        r: "Les erreurs liées au tram (traversée mal vérifiée, feu clignotant) et les giratoires mal négociés. Juste derrière : la survitesse en zone 30, sournoise après un grand axe.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "L'épreuve pratique du permis B dure environ 32 minutes, dont à peu près 25 minutes de conduite. Notation sur 31 points : admis dès 20 points, sans faute éliminatoire.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Repos, documents prêts, et un parcours mental des trois pièges du centre : tram, giratoires, ville 30. Le jour J, arrive 15 min en avance — le Millénaire est facile d'accès en tram.",
+      },
+    ],
+  },
+
+  {
+    slug: "nice",
+    nom: "Nice – Les Iscles",
+    departement: "Alpes-Maritimes",
+    deptNum: "06",
+    adresse: "Avenue Pierre Léonetti, 06200 Nice",
+    mapsQuery:
+      "Centre d'examen permis avenue Pierre Léonetti Les Iscles 06200 Nice",
+    difficulte: 3,
+    difficulteLabel: "Intermédiaire",
+    quizTags: ["rond_point", "vitesse", "priorite"],
+
+    resume:
+      "Nice compte deux centres officiels : Les Iscles, le principal, dans la plaine du Var " +
+      "à Saint-Isidore (à deux pas du stade Allianz Riviera), et Vauban, au stade Vauban à " +
+      "l'est du centre-ville. Aux Iscles, le décor est clair : giratoires en série, zones " +
+      "commerciales à fort trafic, le tram 3 en plein milieu et la pénétrante du Var qui " +
+      "longe tout ça. Les Alpes-Maritimes réussissent un peu mieux que la moyenne nationale : " +
+      "bien préparé sur le secteur, tu joues à domicile.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "Tram ligne 3 — terminus Saint-Isidore, tout près du centre ; environ 30 minutes depuis le centre-ville de Nice.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "Bus Lignes d'Azur — plusieurs lignes desservent la plaine du Var et le secteur du stade Allianz Riviera.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : A8 sortie Saint-Isidore, puis route de Grenoble (M6202bis) ; stationnement aux abords du stade.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "refresh-cw",
+        titre: "Giratoires + trafic commercial",
+        texte:
+          "La plaine du Var enchaîne les giratoires qui desservent les grandes zones commerciales " +
+          "du secteur (Lingostière, Nice Valley, Ikea). Résultat : des flux qui entrent et " +
+          "sortent en permanence, souvent pressés. Position, observation, clignotant de sortie — " +
+          "l'examinateur juge ta constance sur toute la série, pas un giratoire isolé.",
+      },
+      {
+        ico: "eye",
+        titre: "Le tram 3 en plein secteur",
+        texte:
+          "La ligne 3 court le long de la plaine du Var, exactement là où tu passes l'examen : " +
+          "plateformes à franchir, feux dédiés, priorité à la rame. Avant chaque traversée, " +
+          "vérifie les deux sens et assure-toi de pouvoir dégager complètement. Une hésitation " +
+          "sur les voies ou un feu clignotant ignoré, et c'est terminé.",
+      },
+      {
+        ico: "alert-triangle",
+        titre: "La pénétrante du Var : insertion et allure",
+        texte:
+          "La route de Grenoble et la M6202bis longent le secteur : la vitesse y monte vite et " +
+          "les insertions doivent être franches. Accélère tôt, contrôle rétro + angle mort, et " +
+          "vise ton créneau sans flotter. Attention aussi au retour en zone urbaine : redescendre " +
+          "à 50 puis 30 sans traîner sur ta lancée.",
+      },
+    ],
+
+    conseils: [
+      "Roule la plaine du Var aux heures chargées : les giratoires des zones commerciales n'ont rien à voir à vide et en pleine affluence.",
+      "Automatise le giratoire : voie choisie avant l'entrée, trajectoire tenue, clignotant de sortie. C'est le pain quotidien du secteur.",
+      "Répète les règles du tram : priorité à la rame, arrêt au feu clignotant, jamais d'arrêt sur la plateforme.",
+      "Travaille l'insertion sur voie rapide avec ton moniteur : une insertion molle sur la pénétrante coûte très cher.",
+    ],
+
+    faq: [
+      {
+        q: "Nice, c'est un centre difficile ?",
+        r: "Intermédiaire (3/5). Les Alpes-Maritimes réussissent un peu au-dessus de la moyenne nationale (~61 % contre ~57-58 %), et Nice ville est dans la moyenne. Le secteur des Iscles est exigeant mais lisible : giratoires, tram, insertion.",
+      },
+      {
+        q: "Je passe aux Iscles ou à Vauban ?",
+        r: "C'est ton auto-école qui t'inscrit sur l'un des deux. Les Iscles, dans la plaine du Var, c'est giratoires et grands axes ; Vauban, en ville, c'est rues serrées, trafic dense et démarrages en côte. Demande à ton moniteur lequel te concerne et prépare le bon décor.",
+      },
+      {
+        q: "Quelle est la cause d'échec n°1 sur ce centre ?",
+        r: "Les giratoires mal négociés (voie ou clignotant de sortie) et les erreurs face au tram 3. Deux automatismes à blinder avant le jour J.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "L'épreuve pratique du permis B dure environ 32 minutes, dont à peu près 25 minutes de conduite. Notation sur 31 points : admis dès 20 points, sans faute éliminatoire.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Repos et logistique : repère ton trajet (le tram 3 dessert Saint-Isidore), prépare convocation et pièce d'identité, et refais mentalement le trio giratoires / tram / insertion. Le jour J, arrive 15 min en avance.",
+      },
+    ],
+  },
+  {
+    slug: "rennes",
+    nom: "Rennes",
+    departement: "Ille-et-Vilaine",
+    deptNum: "35",
+    adresse: "12 rue Maurice Fabre, 35000 Rennes",
+    mapsQuery: "Centre d'examen permis 12 rue Maurice Fabre 35000 Rennes",
+    difficulte: 3,
+    difficulteLabel: "Intermédiaire",
+    quizTags: ["vitesse", "cycliste", "rond_point"],
+
+    resume:
+      "Bonne nouvelle d'entrée : l'Ille-et-Vilaine réussit le permis nettement mieux que la " +
+      "moyenne nationale (environ 66 % contre ~60 %). Mais Rennes ville reste un vrai test : " +
+      "depuis septembre 2023, la quasi-totalité des rues est passée à 30 km/h, et la rocade — " +
+      "l'axe le plus chargé de Bretagne — peut s'inviter dans ton parcours. Le centre principal " +
+      "est à Villejean, dans les locaux de la DDTM ; un second centre dessert l'agglo à " +
+      "Saint-Jacques-de-la-Lande (42 allée de la Gautrais, près de l'aéroport). Bien préparé " +
+      "sur ces deux ambiances — ville apaisée et rocade rapide — tu pars avec une vraie avance.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "Métro ligne a — station J.F. Kennedy, à environ 5 minutes à pied de la rue Maurice Fabre.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "Bus C4, 53 ou 54 — arrêt Kennedy Guyenne, à 300 m du centre (bâtiment de la DDTM).",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : rocade (RN136), sortie Villejean, puis rue Maurice Fabre. Stationnement possible dans le secteur.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "alert-triangle",
+        titre: "La ville entière à 30 km/h",
+        texte:
+          "Depuis le 4 septembre 2023, environ 95 % des rues de Rennes sont limitées à 30 km/h — " +
+          "seuls les grands axes d'entrée restent à 50. Le piège : suivre le flux et rouler à 40 " +
+          "« parce que ça roule ». L'inspecteur, lui, lit les panneaux. Cale-toi sur 30 par défaut " +
+          "et guette les rares retours à 50.",
+      },
+      {
+        ico: "refresh-cw",
+        titre: "La rocade, l'axe le plus chargé de Bretagne",
+        texte:
+          "Le centre de Villejean est posé au bord de la rocade : insertion à 90 km/h dans un flux " +
+          "qui dépasse les 100 000 véhicules par jour sur la section ouest. Accélération franche " +
+          "dans la bretelle, contrôle rétro + angle mort, insertion décidée. Une hésitation molle " +
+          "coûte très cher ici.",
+      },
+      {
+        ico: "eye",
+        titre: "Vélos et couloirs partagés",
+        texte:
+          "Rennes pousse fort le vélo : aménagements cyclables en développement partout et " +
+          "cyclistes nombreux, surtout autour du campus de Villejean. Chaque tourne-à-droite et " +
+          "chaque insertion exige le coup d'œil angle mort. C'est le contrôle qu'on oublie le plus " +
+          "quand on se concentre sur la vitesse.",
+      },
+    ],
+
+    conseils: [
+      "Roule le secteur Villejean avant le jour J : le départ en terrain connu enlève une grosse part du stress.",
+      "Travaille les deux régimes du parcours : 30 km/h en ville, 90 sur rocade. C'est la transition qui piège, pas chaque zone prise séparément.",
+      "Bosse l'insertion sur la rocade avec ton moniteur aux heures creuses puis aux heures chargées : la densité change tout.",
+      "Vise une conduite lisse et régulière : dans une ville à 30, la précipitation se voit immédiatement.",
+    ],
+
+    faq: [
+      {
+        q: "Rennes, c'est un centre difficile ?",
+        r: "Intermédiaire (3/5). Le département affiche un taux de réussite au-dessus de la moyenne nationale (~66 %), mais Rennes ville ajoute deux vrais tests : la ville à 30 km/h et l'insertion sur une rocade très chargée.",
+      },
+      {
+        q: "Il y a un ou deux centres à Rennes ?",
+        r: "Deux pour l'agglo : Rennes Ouest à Villejean (12 rue Maurice Fabre, à la DDTM) et Saint-Jacques-de-la-Lande (42 allée de la Gautrais, près de l'aéroport). Ta convocation précise lequel.",
+      },
+      {
+        q: "Quelle est la cause d'échec n°1 sur ce centre ?",
+        r: "La vitesse mal calée depuis le passage de la ville à 30 km/h, et les insertions hésitantes sur la rocade. Deux points à blinder avant de te présenter.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "L'épreuve dure environ 32 minutes, dont à peu près 25 minutes de conduite effective. Elle est notée sur 31 points : admis dès 20 points, sans faute éliminatoire.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Pas de bachotage. Repasse mentalement les deux ambiances du secteur (ville à 30, rocade à 90), prépare convocation et pièce d'identité, et dors. Le jour J, arrive 15 min en avance.",
+      },
+    ],
+  },
+
+  {
+    slug: "grenoble",
+    nom: "Grenoble – La Tronche",
+    departement: "Isère",
+    deptNum: "38",
+    adresse: "17 avenue du Grand Sablon, 38700 La Tronche",
+    mapsQuery:
+      "Centre d'examen permis 17 avenue du Grand Sablon 38700 La Tronche",
+    difficulte: 3,
+    difficulteLabel: "Intermédiaire",
+    quizTags: ["cycliste", "vitesse", "priorite"],
+
+    resume:
+      "Le centre d'examen de l'agglo grenobloise est à La Tronche, avenue du Grand Sablon, " +
+      "juste à côté du CHU — et le parcours t'emmène dans les communes voisines. Deux " +
+      "particularités locales dominent : la métropole est passée à 30 km/h presque partout " +
+      "(la première grande agglo de France à l'avoir fait), et le tramway quadrille le secteur. " +
+      "Ajoute des cyclistes très nombreux et quelques rues qui grimpent vers les premières " +
+      "pentes de la Chartreuse, et tu as un examen 3/5 : rien d'extrême, mais une lecture de " +
+      "la route qui doit être permanente. L'Isère réussit d'ailleurs un peu au-dessus de la " +
+      "moyenne nationale — la préparation paie.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "Tram B — arrêt Grand Sablon (CHU), à quelques minutes à pied du centre.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "Bus 13, 16 ou 62, plus des lignes Transisère : le secteur Grand Sablon / CHU est très bien desservi.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : par les quais de l'Isère ou la rocade Sud (N87) direction CHU. Stationnement autour du Grand Sablon souvent chargé — prévois de la marge.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "eye",
+        titre: "Le tram est partout",
+        texte:
+          "Le centre est posé sur la ligne B, et le réseau traverse tout le secteur d'examen. " +
+          "Voies réservées à ne jamais couper, feux spécifiques, priorité quasi systématique au " +
+          "tram : chaque carrefour avec des rails demande une lecture calme et complète. " +
+          "S'engager sur une plateforme de tram, c'est l'éliminatoire assuré.",
+      },
+      {
+        ico: "alert-triangle",
+        titre: "La métropole apaisée : 30 km/h par défaut",
+        texte:
+          "Grenoble Alpes Métropole a généralisé le 30 km/h sur 45 de ses 49 communes — le 50 " +
+          "est devenu l'exception. Le piège est le même qu'ailleurs, en pire : de longues avenues " +
+          "droites où l'aiguille monte toute seule. Retiens la logique locale : 30 par défaut, " +
+          "50 seulement là où c'est indiqué.",
+      },
+      {
+        ico: "refresh-cw",
+        titre: "Cyclistes en continu",
+        texte:
+          "Grenoble est l'une des capitales françaises du vélo, avec ses grandes pistes " +
+          "Chronovélo et un flux de cyclistes constant, notamment vers le campus et le CHU. " +
+          "Angle mort à chaque tourne-à-droite, contrôle avant chaque insertion, et distance " +
+          "d'au moins 1 m en ville pour dépasser. C'est ici que les points s'envolent bêtement.",
+      },
+    ],
+
+    conseils: [
+      "Roule le secteur La Tronche / CHU et les communes voisines avant le jour J : le départ avenue du Grand Sablon en terrain connu, ça change tout.",
+      "Apprends à lire les carrefours à tram : feux dédiés, marquage, sens d'arrivée des rames. Un carrefour compris à l'avance est un carrefour réussi.",
+      "Si le parcours grimpe vers Corenc ou Meylan, ça monte vraiment : soigne tes démarrages en côte pour ne pas reculer.",
+      "Cale-toi sur 30 km/h par défaut en agglo et vérifie ton compteur régulièrement — la survitesse « involontaire » reste une faute.",
+    ],
+
+    faq: [
+      {
+        q: "Grenoble, c'est un centre difficile ?",
+        r: "Intermédiaire (3/5). L'Isère réussit un peu au-dessus de la moyenne nationale, mais l'agglo cumule tram, vélos et 30 km/h généralisé : c'est un examen d'attention plus que de technique pure.",
+      },
+      {
+        q: "Le centre est à Grenoble ou à La Tronche ?",
+        r: "À La Tronche, au 17 avenue du Grand Sablon, juste à côté du CHU — c'est le centre qui dessert l'agglomération grenobloise. Le parcours peut ensuite explorer les communes autour.",
+      },
+      {
+        q: "Quelle est la cause d'échec n°1 sur ce centre ?",
+        r: "Les erreurs autour du tram (voie réservée coupée, feu spécifique mal lu) et l'angle mort cycliste oublié. Deux réflexes à automatiser avant de passer.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "Environ 32 minutes, dont à peu près 25 minutes de conduite effective. L'épreuve est notée sur 31 points : admis dès 20 points, sans faute éliminatoire.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Repos, pas de marathon. Repasse mentalement les trois pièges du secteur (tram, 30 km/h, cyclistes), vérifie ton trajet jusqu'au Grand Sablon et couche-toi tôt. Arrive 15 min en avance.",
+      },
+    ],
+  },
+
+  {
+    slug: "rouen",
+    nom: "Rouen",
+    departement: "Seine-Maritime",
+    deptNum: "76",
+    adresse: "Centre Jean Texcier, 78 rue Jean Texcier, 76000 Rouen",
+    mapsQuery: "Centre Jean Texcier rue Jean Texcier 76000 Rouen permis",
+    difficulte: 3,
+    difficulteLabel: "Intermédiaire",
+    quizTags: ["priorite", "vitesse", "manoeuvre"],
+
+    resume:
+      "L'agglo de Rouen a deux centres : rive droite au centre Jean Texcier, sur le plateau " +
+      "des Hauts-de-Rouen (quartier de la Grand'Mare), et rive gauche au Grand-Quevilly " +
+      "(place Gabriel Péri, à la mairie annexe). La rive droite a une signature bien à elle : " +
+      "la ville est construite à flanc de coteaux, donc ça monte, ça descend, et les démarrages " +
+      "en côte ne sont pas une option. Ajoute la N28 avec le tunnel de la Grand'Mare juste " +
+      "sous le quartier et les couloirs réservés du TEOR, et tu comprends pourquoi ce centre " +
+      "se prépare. Côté chiffres, la Seine-Maritime réussit légèrement au-dessus de la moyenne " +
+      "nationale : bien entraîné sur le relief, tu as toutes tes chances.",
+
+    acces: [
+      {
+        ico: "map",
+        texte:
+          "TEOR T2 — la ligne dessert le plateau de la Grand'Mare (direction Tamarelle), arrêt à quelques minutes du centre Jean Texcier.",
+      },
+      {
+        ico: "compass",
+        texte:
+          "Plusieurs lignes du réseau Astuce montent sur les Hauts-de-Rouen depuis le centre-ville — compte 20 à 25 minutes depuis la rive droite.",
+      },
+      {
+        ico: "car",
+        texte:
+          "En voiture : N28 (rocade Nord-Est) sortie plateau de la Grand'Mare, parking au centre Jean Texcier.",
+      },
+    ],
+
+    pieges: [
+      {
+        ico: "refresh-cw",
+        titre: "Démarrages en côte à répétition",
+        texte:
+          "Rouen rive droite est bâtie sur des coteaux : le centre d'examen est sur le plateau, " +
+          "et beaucoup d'itinéraires montent ou descendent vers la ville. Le démarrage en côte " +
+          "doit être un réflexe : frein bien tenu, point de patinage trouvé, zéro recul. Un recul " +
+          "marqué avec un véhicule derrière, c'est l'examen qui s'arrête là.",
+      },
+      {
+        ico: "alert-triangle",
+        titre: "La N28 et le tunnel de la Grand'Mare",
+        texte:
+          "La rocade Nord-Est passe littéralement sous le quartier, dans un tunnel de plus de " +
+          "1,5 km. Si le parcours t'y emmène : insertion décidée, allure stable, distances de " +
+          "sécurité rallongées et aucun changement de voie fantaisiste sous terre. C'est un " +
+          "environnement que peu de candidats ont travaillé — sois de ceux qui l'ont fait.",
+      },
+      {
+        ico: "eye",
+        titre: "TEOR et couloirs réservés",
+        texte:
+          "Les lignes TEOR circulent en couloirs dédiés avec leurs propres feux. Le piège " +
+          "classique : couper un couloir de bus en tournant, ou repartir sur un feu qui ne " +
+          "s'adresse pas à toi. À chaque carrefour équipé, identifie d'abord quel signal te " +
+          "concerne, puis engage-toi. La précipitation ici se paie cash.",
+      },
+    ],
+
+    conseils: [
+      "Fais tes heures de conduite sur le relief rouennais, pas seulement sur le plat : les côtes de la rive droite doivent devenir banales pour toi.",
+      "Demande à ton moniteur un passage par la N28 et le tunnel de la Grand'Mare : rouler une fois sous terre enlève tout l'effet de surprise.",
+      "Aux carrefours avec TEOR, prends une seconde de plus pour lire les feux et le marquage — mieux vaut être lent et juste que rapide et faux.",
+      "Vérifie sur ta convocation quel centre te concerne : Jean Texcier (rive droite) et Grand-Quevilly (rive gauche) n'ont pas du tout le même environnement.",
+    ],
+
+    faq: [
+      {
+        q: "Rouen, c'est un centre difficile ?",
+        r: "Intermédiaire (3/5). Le département réussit légèrement au-dessus de la moyenne nationale, mais la rive droite se mérite : relief, tunnel et couloirs TEOR demandent une vraie préparation locale.",
+      },
+      {
+        q: "Il y a un ou deux centres à Rouen ?",
+        r: "Deux pour l'agglo : Rouen rive droite au centre Jean Texcier (rue Jean Texcier, sur les Hauts-de-Rouen) et Rouen rive gauche au Grand-Quevilly (place Gabriel Péri, mairie annexe). Ta convocation indique le tien.",
+      },
+      {
+        q: "Quelle est la cause d'échec n°1 sur ce centre ?",
+        r: "Le démarrage en côte raté — recul ou calage en pleine pente — et les erreurs de lecture aux carrefours TEOR. Deux points à travailler jusqu'à l'automatisme.",
+      },
+      {
+        q: "Combien de temps dure l'examen ?",
+        r: "Environ 32 minutes, dont à peu près 25 minutes de conduite effective. L'épreuve est notée sur 31 points : admis dès 20 points, sans faute éliminatoire.",
+      },
+      {
+        q: "Je fais quoi la veille ?",
+        r: "Pas de séance marathon. Repasse mentalement les pièges du plateau (côtes, tunnel, TEOR), prépare convocation et pièce d'identité, et dors correctement. Le jour J, arrive 15 min en avance pour te poser.",
+      },
+    ],
+  },
 ];
 
 // Renvoie la fiche d'un centre par son slug, ou null si inconnu.

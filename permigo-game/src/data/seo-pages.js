@@ -357,6 +357,384 @@ export const GUIDES = [
       href: "/#/signup",
     },
   },
+
+  {
+    slug: "conduite-supervisee",
+    metaTitle:
+      "Conduite supervisée : conditions, démarches et vrais avantages (2026)",
+    metaDesc:
+      "Dès 18 ans, la conduite supervisée te fait rouler avec un accompagnateur entre les leçons : moins d'heures payées, plus d'expérience. Conditions et démarches.",
+    h1: "Conduite supervisée : rouler plus, payer moins",
+    lead: "La conduite supervisée, c'est le droit de conduire avec un accompagnateur (parent, proche) en dehors des leçons, dès 18 ans. Résultat : tu engranges de l'expérience sans payer une leçon à chaque sortie, et tu arrives à l'examen avec beaucoup plus de kilomètres dans les mains. Voici comment ça marche, sans jargon.",
+    sections: [
+      {
+        h2: "C'est quoi, exactement ?",
+        blocks: [
+          {
+            type: "p",
+            text: "La conduite supervisée est une option de la formation classique au permis B, réservée aux 18 ans et plus. Après ta formation initiale en auto-école ou avec ton moniteur indépendant, tu continues à conduire au quotidien avec un accompagnateur, en attendant (ou en préparant) ton passage à l'examen.",
+          },
+          {
+            type: "callout",
+            text: "À ne pas confondre avec la conduite accompagnée (AAC) : l'AAC se commence dès 15 ans avec un minimum d'un an et de 3 000 km avant l'examen. La supervisée, elle, est accessible dès 18 ans, sans minimum de durée ni de kilomètres.",
+          },
+        ],
+      },
+      {
+        h2: "Les conditions pour s'y mettre",
+        blocks: [
+          {
+            type: "ul",
+            items: [
+              "Avoir 18 ans ou plus et le code en poche.",
+              "Avoir suivi ta formation initiale (les 20 heures minimum) et obtenu l'accord de ton moniteur : c'est lui qui valide que ton niveau est suffisant.",
+              "L'accord écrit de ton assureur : l'accompagnateur fait ajouter une extension de garantie sur le véhicule utilisé.",
+              "Un rendez-vous préalable d'au moins 2 heures avec ton accompagnateur à bord, encadré par le moniteur.",
+            ],
+          },
+          {
+            type: "p",
+            text: "L'accompagnateur doit être titulaire du permis B depuis au moins 5 ans sans interruption. Il peut y en avoir plusieurs (les deux parents, un grand frère…), tant que chacun est déclaré à l'assurance.",
+          },
+        ],
+      },
+      {
+        h2: "Pourquoi ça change tout",
+        blocks: [
+          {
+            type: "p",
+            text: "Le premier bénéfice est financier : chaque heure passée au volant avec ton accompagnateur est une heure d'expérience gratuite, là où une leçon se paie. Le second est statistique : plus tu roules dans des situations variées (pluie, nuit, ville, voie rapide), plus tes automatismes sont solides le jour J.",
+          },
+          {
+            type: "ul",
+            items: [
+              "Tu gardes le rythme entre les leçons au lieu de tout perdre d'une semaine à l'autre.",
+              "Tu peux t'y mettre aussi APRÈS un échec à l'examen, pour rester au niveau en attendant une nouvelle place.",
+              "Ton moniteur voit ta progression réelle et cible les leçons sur ce qui coince vraiment.",
+            ],
+          },
+        ],
+      },
+      {
+        h2: "Comment bien l'utiliser",
+        blocks: [
+          {
+            type: "p",
+            text: "La supervisée n'est utile que si tu roules régulièrement. Vise plusieurs sorties par semaine, même courtes : aller chercher le pain, déposer quelqu'un, un trajet de nuit de temps en temps. Varie les contextes, et note ce qui t'a mis en difficulté pour le retravailler.",
+          },
+          {
+            type: "callout",
+            text: "Entre deux sorties, révise le geste : c'est exactement le rôle de PermiGo. Tu retravailles les compétences du permis (giratoires, priorités, manœuvres…) en quiz et en situations, et tu arrives à la sortie suivante avec le réflexe déjà en tête.",
+          },
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "La conduite supervisée est-elle obligatoire ?",
+        r: "Non, c'est une option. Mais elle est fortement recommandée si tu peux avoir un accompagnateur : plus d'expérience pour moins d'argent.",
+      },
+      {
+        q: "Il faut combien de kilomètres avant l'examen ?",
+        r: "Aucun minimum n'est imposé en supervisée (contrairement à la conduite accompagnée). C'est la régularité qui compte.",
+      },
+      {
+        q: "Qui peut être accompagnateur ?",
+        r: "Une personne titulaire du permis B depuis au moins 5 ans sans interruption, déclarée à l'assurance du véhicule. Plusieurs accompagnateurs sont possibles.",
+      },
+      {
+        q: "Je peux passer en supervisée après un échec à l'examen ?",
+        r: "Oui, c'est même un cas très courant : ça permet de continuer à rouler sans multiplier les leçons en attendant une nouvelle place d'examen.",
+      },
+      {
+        q: "Est-ce que ça réduit la période probatoire ?",
+        r: "Non — c'est la conduite accompagnée (AAC) qui réduit la période probatoire à 2 ans. La supervisée garde la période normale de 3 ans.",
+      },
+    ],
+    cta: {
+      text: "Garde le niveau entre deux sorties avec PermiGo",
+      sub: "Quiz et mises en situation sur les compétences du permis. Gratuit pour commencer.",
+      href: "/#/signup",
+    },
+  },
+
+  {
+    slug: "combien-heures-de-conduite",
+    metaTitle:
+      "Combien d'heures de conduite avant l'examen ? (minimum légal vs réalité)",
+    metaDesc:
+      "20 h minimum légal, ~30-35 h en moyenne réelle : ce qui fait varier le nombre d'heures de conduite, et comment en faire moins sans bâcler.",
+    h1: "Combien d'heures de conduite faut-il vraiment ?",
+    lead: "Le minimum légal, c'est 20 heures. La réalité, c'est qu'un candidat passe l'examen après 30 à 35 heures en moyenne. Entre les deux, il y a ta régularité, ta façon de réviser entre les leçons, et quelques choix malins. On fait le tri.",
+    sections: [
+      {
+        h2: "Les chiffres de base",
+        blocks: [
+          {
+            type: "ul",
+            items: [
+              "20 heures minimum de formation pratique en boîte manuelle — c'est la loi, aucune présentation à l'examen en dessous.",
+              "13 heures minimum si tu passes le permis en boîte automatique.",
+              "Dans les faits, la moyenne nationale tourne autour de 30 à 35 heures avant la réussite.",
+            ],
+          },
+          {
+            type: "p",
+            text: "Pourquoi cet écart entre le minimum et la réalité ? Parce que le minimum est pensé comme un plancher de sécurité, pas comme une promesse. La vraie question n'est pas « combien d'heures » mais « suis-je capable de conduire seul en sécurité » — c'est ça que l'examinateur évalue.",
+          },
+        ],
+      },
+      {
+        h2: "Ce qui fait grimper (ou baisser) le compteur",
+        blocks: [
+          {
+            type: "ul",
+            items: [
+              "La fréquence : deux à trois leçons par semaine font progresser bien plus vite qu'une leçon isolée — tu ne repars pas de zéro à chaque fois.",
+              "Ce que tu fais ENTRE les leçons : réviser les compétences, revoir tes erreurs, mentaliser les parcours. Une leçon préparée vaut presque le double.",
+              "La conduite supervisée ou accompagnée : chaque heure avec un accompagnateur est une heure d'expérience non facturée.",
+              "La régularité du moniteur : un moniteur qui te suit vraiment cible les heures sur tes points faibles au lieu de dérouler un programme générique.",
+            ],
+          },
+          {
+            type: "callout",
+            text: "Le piège classique : espacer les leçons pour « étaler le budget ». Résultat, chaque leçon commence par re-dérouiller la précédente, et le total d'heures explose. Mieux vaut un rythme dense sur une période courte.",
+          },
+        ],
+      },
+      {
+        h2: "Comment faire moins d'heures sans bâcler",
+        blocks: [
+          {
+            type: "p",
+            text: "Réduire les heures, ce n'est pas rogner sur la sécurité : c'est faire en sorte que chaque heure payée serve à apprendre du neuf, pas à réviser du perdu.",
+          },
+          {
+            type: "ul",
+            items: [
+              "Arrive à ta leçon en sachant ce que tu vas travailler — et repars en sachant ce que tu dois consolider.",
+              "Travaille la théorie du geste hors voiture : giratoires, priorités, contrôles, manœuvres se comprennent très bien à tête reposée.",
+              "Si tu le peux, ajoute la conduite supervisée dès que ton moniteur te valide le niveau.",
+              "Passe en boîte automatique si la manuelle n'est pas un besoin pour toi : 13 h minimum au lieu de 20, et un apprentissage plus simple.",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "Peut-on passer l'examen avec seulement 20 heures ?",
+        r: "Légalement oui, si ton moniteur estime que tu es prêt. Dans les faits, c'est rare : la moyenne réelle est plutôt de 30 à 35 heures. L'objectif n'est pas le minimum, c'est d'être prêt.",
+      },
+      {
+        q: "Boîte automatique : c'est vraiment plus court ?",
+        r: "Oui : 13 heures minimum au lieu de 20, et moins de choses à gérer (pas d'embrayage ni de passage de vitesses). En contrepartie, ton permis est d'abord limité aux boîtes automatiques — il peut être étendu ensuite par une formation courte de 7 h.",
+      },
+      {
+        q: "Combien de leçons par semaine, idéalement ?",
+        r: "Deux à trois. En dessous, tu perds entre chaque leçon ce que tu as gagné pendant. Au-dessus, tu n'as pas le temps de digérer.",
+      },
+      {
+        q: "Comment savoir si je suis prêt pour l'examen ?",
+        r: "Quand les compétences du programme (le référentiel REMC) sont validées par ton moniteur et que tu conduis de façon autonome sans être guidé. Pas avant — présenter trop tôt, c'est payer une présentation pour rien.",
+      },
+    ],
+    cta: {
+      text: "Rentabilise chaque heure de conduite avec PermiGo",
+      sub: "Révise les compétences entre les leçons et arrive préparé. Gratuit pour commencer.",
+      href: "/#/signup",
+    },
+  },
+
+  {
+    slug: "rater-son-permis",
+    metaTitle: "Rater son permis : et maintenant ? (délais, repassage, mental)",
+    metaDesc:
+      "Échouer à l'examen du permis arrive à plus de 4 candidats sur 10. Ce qu'il faut faire dans l'ordre : lire ton bilan, garder le rythme, repasser au bon moment.",
+    h1: "Tu as raté ton permis ? Voilà le plan.",
+    lead: "D'abord, remets les choses à leur place : plus de 4 candidats sur 10 échouent à leur premier passage. Ce n'est ni rare, ni définitif, ni un jugement sur ta capacité à conduire un jour. Ce qui compte maintenant, c'est ce que tu fais des trois prochaines semaines.",
+    sections: [
+      {
+        h2: "Étape 1 : lis vraiment ton bilan",
+        blocks: [
+          {
+            type: "p",
+            text: "Ton résultat arrive en général sous 48 heures sur le site officiel, avec le bilan de l'examinateur (le CEPC) : la note sur 31, le détail par compétence, et surtout ce qui t'a coûté l'examen — une note trop basse ou une erreur éliminatoire.",
+          },
+          {
+            type: "callout",
+            text: "Le CEPC n'est pas une sanction, c'est une feuille de route : il te dit EXACTEMENT quoi retravailler. La plupart des échecs tiennent à un ou deux points précis, pas à un niveau global insuffisant.",
+          },
+        ],
+      },
+      {
+        h2: "Étape 2 : ne coupe pas le moteur",
+        blocks: [
+          {
+            type: "p",
+            text: "L'erreur classique après un échec : tout arrêter en attendant la nouvelle date. Trois semaines sans conduire ni réviser, et tu repasses moins bon qu'au premier essai. Garde un rythme, même léger.",
+          },
+          {
+            type: "ul",
+            items: [
+              "Une ou deux leçons ciblées sur les points du bilan — pas besoin de tout refaire.",
+              "La conduite supervisée si tu as un accompagnateur : rouler sans payer, exactement ce qu'il te faut.",
+              "Dix minutes de révision par jour sur les compétences qui ont pêché : giratoires, priorités, contrôles…",
+            ],
+          },
+        ],
+      },
+      {
+        h2: "Étape 3 : repasse au bon moment",
+        blocks: [
+          {
+            type: "p",
+            text: "Ton code reste valable 5 ans, dans la limite de 5 présentations à l'épreuve pratique. Pour la nouvelle date, les délais varient beaucoup selon les départements : de quelques semaines à plusieurs mois. Ton moniteur (ou la réservation en ligne pour les candidats libres) te trouvera la prochaine place.",
+          },
+          {
+            type: "p",
+            text: "Le bon moment pour repasser, c'est quand les points du bilan sont corrigés ET que tu enchaînes des conduites propres — pas juste quand une place se libère. Se représenter trop tôt, c'est risquer de griller une présentation.",
+          },
+        ],
+      },
+      {
+        h2: "Et dans la tête ?",
+        blocks: [
+          {
+            type: "p",
+            text: "Un examen note une conduite de 32 minutes un jour donné — pas ta valeur, pas ton avenir de conducteur. Le stress du premier passage est d'ailleurs souvent la vraie cause de l'échec, et il baisse naturellement au second : tu sais désormais exactement à quoi ressemble l'épreuve.",
+          },
+          {
+            type: "callout",
+            text: "Statistiquement, tes chances augmentent au deuxième passage. Prépare les points du bilan, garde le rythme, et vas-y en connaissance de cause.",
+          },
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "Combien de temps avant de pouvoir repasser ?",
+        r: "Il n'y a pas de délai légal imposé, c'est la disponibilité des places qui décide : de quelques semaines à plusieurs mois selon ton département.",
+      },
+      {
+        q: "Est-ce que je dois repayer des heures de conduite ?",
+        r: "Pas forcément un gros volume : quelques heures ciblées sur les points du bilan suffisent souvent, surtout si tu gardes le rythme en supervisée ou en révisant entre-temps.",
+      },
+      {
+        q: "Mon code est encore valable ?",
+        r: "Oui : 5 ans à partir de son obtention, dans la limite de 5 présentations à l'épreuve pratique.",
+      },
+      {
+        q: "Une faute éliminatoire, ça veut dire que je conduis mal ?",
+        r: "Non. Une éliminatoire sanctionne UNE situation où l'examinateur a dû intervenir ou a jugé un danger — souvent un réflexe précis à corriger (un contrôle oublié, une priorité). C'est ciblé, donc corrigeable.",
+      },
+      {
+        q: "Combien de candidats réussissent du premier coup ?",
+        r: "Environ un peu plus de la moitié des présentations au permis B sont des réussites. Échouer une fois te met littéralement dans la norme.",
+      },
+    ],
+    cta: {
+      text: "Corrige les points de ton bilan avec PermiGo",
+      sub: "Révise compétence par compétence et reviens plus fort au prochain passage.",
+      href: "/#/signup",
+    },
+  },
+
+  {
+    slug: "prix-permis-moniteur-independant",
+    metaTitle:
+      "Prix du permis avec un moniteur indépendant : combien ça coûte vraiment ?",
+    metaDesc:
+      "Heures à l'unité, pas de frais de structure, suivi direct : ce que coûte le permis avec un moniteur indépendant, et comment payer moins sans bâcler.",
+    h1: "Le permis avec un moniteur indépendant : combien ça coûte ?",
+    lead: "Le permis B coûte en moyenne entre 1 500 et 2 000 € en France, tout compris. Passer par un moniteur indépendant change la structure du prix : tu paies la personne qui t'apprend à conduire, pas les murs d'une agence. Voici comment lire les prix — et surtout comment faire baisser la facture intelligemment.",
+    sections: [
+      {
+        h2: "Comment se décompose le prix",
+        blocks: [
+          {
+            type: "ul",
+            items: [
+              "L'heure de conduite : le gros du budget. Selon la région et le moniteur, compte généralement entre 35 et 55 € de l'heure.",
+              "Le code : entraînement en ligne et présentation à l'examen (l'examen lui-même coûte 30 € chez les opérateurs agréés).",
+              "Les frais de présentation à l'épreuve pratique et, parfois, la location du véhicule pour le jour J.",
+            ],
+          },
+          {
+            type: "p",
+            text: "Chez un moniteur indépendant, tu paies souvent les heures à l'unité ou par petits packs, sans frais de dossier ni forfait rigide. Avantage : tu ajustes au fil de ta progression. Point de vigilance : compare bien ce qui est inclus (présentation à l'examen, voiture le jour J).",
+          },
+        ],
+      },
+      {
+        h2: "Indépendant ou agence : ce qui change vraiment",
+        blocks: [
+          {
+            type: "ul",
+            items: [
+              "Le suivi : c'est le même moniteur du début à la fin. Il connaît tes points faibles par cœur — pas besoin de re-expliquer ton niveau à chaque leçon.",
+              "La souplesse : créneaux directs avec le moniteur, sans passer par un planning d'agence.",
+              "Le prix : pas de local commercial à financer, ce qui se retrouve souvent dans le tarif horaire ou dans l'absence de frais annexes.",
+            ],
+          },
+          {
+            type: "callout",
+            text: "Le vrai levier d'économie n'est pas de trouver l'heure la moins chère, mais de faire MOINS d'heures : un élève qui révise entre les leçons progresse plus vite, et chaque heure économisée vaut 35 à 55 €.",
+          },
+        ],
+      },
+      {
+        h2: "Les aides pour financer",
+        blocks: [
+          {
+            type: "ul",
+            items: [
+              "Le permis à 1 € par jour : un prêt à taux zéro pour les 15-25 ans, remboursé à petites mensualités.",
+              "Le CPF : le permis B peut être financé par ton compte formation si son obtention sert ton projet professionnel.",
+              "Les aides locales : beaucoup de régions, départements et missions locales aident les jeunes ou les demandeurs d'emploi — renseigne-toi près de chez toi.",
+            ],
+          },
+        ],
+      },
+      {
+        h2: "Faire baisser la facture sans bâcler",
+        blocks: [
+          {
+            type: "ul",
+            items: [
+              "Révise entre les leçons (compétences, giratoires, manœuvres…) : chaque leçon sert alors à apprendre du neuf, pas à rattraper.",
+              "Ajoute la conduite supervisée dès que ton niveau le permet : de l'expérience gratuite.",
+              "Garde un rythme dense (2-3 leçons/semaine) sur une période courte plutôt que d'étaler sur un an.",
+              "Envisage la boîte automatique : 13 h minimum au lieu de 20.",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      {
+        q: "Un moniteur indépendant est-il moins cher qu'une auto-école classique ?",
+        r: "Souvent à l'heure, et presque toujours sur le total : moins de frais annexes, et un suivi personnalisé qui évite les heures « pour rien ». Mais compare toujours ce qui est inclus.",
+      },
+      {
+        q: "Le moniteur indépendant peut-il me présenter à l'examen ?",
+        r: "Oui. Les moniteurs indépendants diplômés présentent leurs élèves à l'épreuve pratique comme une auto-école, avec un véhicule à double commande le jour J.",
+      },
+      {
+        q: "Quel budget total prévoir ?",
+        r: "En moyenne nationale, entre 1 500 et 2 000 € tout compris. Avec un bon rythme, de la révision entre les leçons et éventuellement la supervisée, on peut viser nettement moins.",
+      },
+      {
+        q: "Le CPF peut-il financer mon permis ?",
+        r: "Oui si l'obtention du permis B contribue à ton projet professionnel (c'est déclaratif mais contrôlable). La demande se fait sur Mon Compte Formation.",
+      },
+    ],
+    cta: {
+      text: "Fais moins d'heures, pas moins de niveau",
+      sub: "PermiGo te fait réviser entre les leçons pour progresser plus vite. Gratuit pour commencer.",
+      href: "/#/signup",
+    },
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────
