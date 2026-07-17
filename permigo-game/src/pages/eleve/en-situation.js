@@ -14,6 +14,8 @@ import {
   THEME_WEAK_TAGS,
   SITUATIONS,
 } from "@/data/situations-conduite.js";
+import { SITU_I18N, THEME_I18N, SITU_UI } from "@/data/situations-i18n.js";
+import { getLang } from "@/utils/lang.js";
 import { recordAnswer } from "@/utils/weak-points.js";
 import { getScenesVues, marquerSceneVue } from "@/utils/situations-vues.js";
 import {
@@ -94,6 +96,18 @@ export async function mount(root, param) {
   let manquees = []; // situations ratées (pour le récap)
   let answered = false;
 
+  // ── i18n : rendu traduit + français gardé dessous (arabe RTL par span) ──
+  const lang = getLang();
+  const rtl = lang === "ar";
+  const sBi = (fr, tr) =>
+    lang === "fr" || !tr
+      ? esc(fr)
+      : `<span class="sit-tr"${rtl ? ' dir="rtl" lang="ar"' : ""}>${esc(tr)}</span><span class="sit-fr" lang="fr">${esc(fr)}</span>`;
+  const sT1 = (fr, tr) => esc(lang !== "fr" && tr ? tr : fr);
+  const sUI = (key, fr) => sT1(fr, SITU_UI[lang]?.[key]);
+  const sScene = (id) => (lang !== "fr" ? SITU_I18N[id]?.[lang] : null);
+  const sTheme = (theme) => (lang !== "fr" ? THEME_I18N[lang]?.[theme] : null);
+
   if (isJour) startRound();
   else renderIntro();
 
@@ -167,8 +181,8 @@ export async function mount(root, param) {
       </div>
       <div class="sit-scene">${renderSituationScene(s.scene, { alt: s.alt, tappable })}</div>
       <div class="sit-qwrap">
-        <div class="sit-kicker">${esc(THEME_LABELS[s.theme] || "Code de la route")}</div>
-        <h2 class="sit-q" tabindex="-1">${esc(s.question)}</h2>
+        <div class="sit-kicker">${sT1(THEME_LABELS[s.theme] || "Code de la route", sTheme(s.theme))}</div>
+        <h2 class="sit-q" tabindex="-1">${sBi(s.question, sScene(s.id)?.q)}</h2>
       </div>
       <div class="sit-cards" data-mode="${s.mode}">
         ${s.reponses
@@ -176,7 +190,7 @@ export async function mount(root, param) {
             (r) => `
           <button class="sit-card" type="button" data-rep="${esc(r.id)}">
             ${r.ico ? `<span class="sit-card-ico" aria-hidden="true">${repIco(r.ico, 26)}</span>` : ""}
-            <span>${esc(r.label)}</span>
+            <span>${sBi(r.label, sScene(s.id)?.r?.[r.id])}</span>
           </button>`,
           )
           .join("")}
@@ -270,11 +284,11 @@ export async function mount(root, param) {
     fb.innerHTML = `
       <div aria-live="polite">
         <div class="sit-expl ${ok ? "good" : "bad"}">
-          <div class="sit-expl-t">${ok ? "Bien vu !" : "La règle à retenir"}</div>
-          <p class="sit-expl-p">${esc(s.explication)}</p>
+          <div class="sit-expl-t">${ok ? sUI("good", "Bien vu !") : sUI("rule", "La règle à retenir")}</div>
+          <p class="sit-expl-p">${sBi(s.explication, sScene(s.id)?.e)}</p>
         </div>
       </div>
-      <button class="sit-cta" id="sit-next" type="button">${last ? "Voir le récap" : "Suivant"}</button>`;
+      <button class="sit-cta" id="sit-next" type="button">${last ? sUI("recap", "Voir le récap") : sUI("next", "Suivant")}</button>`;
     const nextBtn = fb.querySelector("#sit-next");
     nextBtn.addEventListener("click", () => {
       if (nextBtn.disabled) return;
@@ -417,8 +431,8 @@ export async function mount(root, param) {
                    .map(
                      (m) => `
                    <div class="sit-revoir-item">
-                     <div class="sit-revoir-th">${esc(THEME_LABELS[m.theme] || m.theme)}</div>
-                     <p>${esc(m.explication)}</p>
+                     <div class="sit-revoir-th">${sT1(THEME_LABELS[m.theme] || m.theme, sTheme(m.theme))}</div>
+                     <p>${sBi(m.explication, sScene(m.id)?.e)}</p>
                    </div>`,
                    )
                    .join("")}
@@ -562,6 +576,9 @@ body.sit-immersive #app { padding-top: 0 !important; padding-bottom: 0 !importan
 .sit-qwrap { margin-top: 10px; }
 .sit-kicker { font: 800 11px/1 'Baloo 2','Fredoka',sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #b9b3e6; }
 .sit-q { margin: 4px 0 0; font: 700 19px/1.25 'Baloo 2','Fredoka',sans-serif; color: #fff; }
+/* Bilingue : traduction (langue élève) + français gardé dessous (discret). App LTR ; texte arabe RTL par span. */
+.sit-tr { display: block; }
+.sit-fr { display: block; margin-top: 3px; font: 500 .8em/1.35 'Inter',sans-serif; opacity: .58; }
 .sit-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
 .sit-cards[data-mode="cible"] { flex-direction: row; }
 .sit-cards[data-mode="cible"] .sit-card { flex: 1; justify-content: center; text-align: center; }
