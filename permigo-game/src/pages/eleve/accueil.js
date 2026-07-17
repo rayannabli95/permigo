@@ -293,15 +293,15 @@ const STYLE = `<style>
   position: relative;
   background: var(--acc-hero-bg);
   border: 1px solid var(--acc-hero-border);
-  border-radius: 28px;
+  border-radius: 30px;
   margin: 12px 16px 0;
-  padding: 22px 20px 20px;
+  padding: 24px 22px 22px;
   overflow: visible;
   isolation: isolate;
   box-shadow:
-    0 16px 40px -16px color-mix(in srgb, var(--a) 28%, transparent),
+    0 18px 44px -18px color-mix(in srgb, var(--a) 30%, transparent),
     0 2px 0 rgba(255,255,255,.7) inset;
-  min-height: 196px;
+  min-height: 300px;
 }
 .acc2-hero-halo {
   position: absolute;
@@ -321,7 +321,7 @@ const STYLE = `<style>
 .acc2-hero-v2-txt {
   position: relative;
   z-index: 2;
-  max-width: 58%;
+  max-width: 66%;
 }
 .acc2-hero-kicker {
   font: 800 12px/1 'Plus Jakarta Sans', sans-serif;
@@ -331,10 +331,11 @@ const STYLE = `<style>
   margin-bottom: 6px;
 }
 .acc2-hero-h1 {
-  font: 700 30px/1.05 'Fredoka', 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -.01em;
+  font: 700 40px/1.0 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.015em;
   color: var(--acc-hero-ink);
   margin: 0;
+  text-wrap: balance;
 }
 .acc2-hero-meta {
   margin-top: 9px;
@@ -357,8 +358,8 @@ const STYLE = `<style>
 .acc2-hero-mascot {
   position: absolute;
   right: -14px;
-  bottom: -4px;
-  width: 188px;
+  bottom: -6px;
+  width: 156px;
   z-index: 1;
   filter:
     drop-shadow(0 3px 3px rgba(20,30,15,.18))
@@ -427,7 +428,7 @@ const STYLE = `<style>
 .acc2-hero-gloss {
   position: absolute;
   inset: 0;
-  border-radius: 28px;
+  border-radius: 30px;
   overflow: hidden;
   z-index: 1;
   pointer-events: none;
@@ -470,21 +471,46 @@ const STYLE = `<style>
 .acc2-prep-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 12px;
-  min-height: 34px;
+  gap: 9px;
+  margin-top: 16px;
+  max-width: 100%;
   background: var(--su);
-  border: 1px solid var(--bo);
+  border: 1.5px solid var(--acc-hero-border);
   border-radius: 999px;
-  padding: 7px 13px;
-  font: 800 12.5px/1 'Plus Jakarta Sans', sans-serif;
+  padding: 8px 14px 8px 10px;
   color: var(--ink);
-  box-shadow: 0 3px 10px rgba(0,0,0,.07);
+  box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--a) 40%, transparent);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.acc2-prep-pill:active { transform: scale(.96); }
-.acc2-prep-chev { color: var(--mu); font-size: 10px; }
+.acc2-prep-pill:active { transform: scale(.97); }
+.acc2-prep-pill-ic {
+  flex: 0 0 auto;
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  font-size: 15px;
+  background: color-mix(in srgb, var(--a) 14%, #fff);
+}
+.acc2-prep-pill-tl {
+  display: flex; flex-direction: column; min-width: 0;
+  line-height: 1.15; text-align: left;
+}
+.acc2-prep-pill-tl b {
+  font: 800 13.5px/1.15 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.acc2-prep-pill-tl span {
+  font: 600 10.5px/1.2 'Inter', sans-serif;
+  color: var(--acc-hero-mu);
+}
+.acc2-prep-chev { flex: 0 0 auto; color: var(--acc-hero-kicker); font-size: 15px; font-weight: 800; }
+/* CTA « Je me prépare » DANS le hero : occupe la colonne texte, au-dessus de la mascotte */
+.acc2-hero-v2-txt .acc2-cta-king { width: 100%; margin: 16px 0 0; }
 @media (prefers-reduced-motion: reduce) {
   .acc2-hero-gloss::after { animation: none; }
 }
@@ -1843,33 +1869,34 @@ function render({
 
   ${renderStreakSos({ streak, streakSt, gemmes, href: _sosHref })}
 
-  <!-- ══ HERO FOCAL — Prépare ta prochaine leçon ══ -->
-  <section class="acc2-hero-v2" aria-label="Ta prochaine leçon">
+  <!-- ══ HERO FOCAL — Prépare ta leçon (grand) ══ -->
+  <section class="acc2-hero-v2" aria-label="Prépare ta prochaine leçon">
     <div class="acc2-hero-halo" aria-hidden="true"></div>
     <div class="acc2-hero-gloss" aria-hidden="true"></div>
     <div class="acc2-hero-v2-txt">
       <p class="acc2-hero-kicker">Ta prochaine leçon</p>
-      <h1 class="acc2-hero-h1" id="prep-hero-title">${esc(_heroTitle)}</h1>
-      <p class="acc2-hero-meta">Sois prêt·e en 5 min</p>
+      <h1 class="acc2-hero-h1" id="prep-hero-title">Prépare ta leçon</h1>
       ${
         prep
           ? `<button class="acc2-prep-pill" id="prep-theme-btn" type="button"
-              aria-label="Changer le thème de ta prochaine leçon">
-              <span aria-hidden="true">🎯</span> Changer de thème
-              <span class="acc2-prep-chev" aria-hidden="true">▾</span>
+              aria-label="Thème de ta prochaine leçon : ${escAttr(prep.titre)} — appuie pour changer">
+              <span class="acc2-prep-pill-ic" aria-hidden="true">🎯</span>
+              <span class="acc2-prep-pill-tl">
+                <b id="prep-theme-name">${esc(prep.titre)}</b>
+                <span>Choisi pour ta prochaine heure</span>
+              </span>
+              <span class="acc2-prep-chev" aria-hidden="true">›</span>
             </button>`
-          : ""
+          : `<p class="acc2-hero-meta">Sois prêt·e en 5 min pour ta prochaine heure de conduite.</p>`
       }
+      <button class="acc2-cta-king"
+              id="action-cta-btn" type="button" data-href="${esc(_heroHref)}">
+        Je me prépare <span class="acc2-cta-arr" aria-hidden="true">→</span>
+      </button>
     </div>
     <div class="acc2-hero-floor" aria-hidden="true"></div>
     <img class="acc2-hero-mascot" src="/skins/mascot-point.png" alt="" aria-hidden="true" loading="eager">
   </section>
-
-  <!-- ══ CTA ROI — le seul bouton à presser ══ -->
-  <button class="acc2-cta-king"
-          id="action-cta-btn" type="button" data-href="${esc(_heroHref)}">
-    Je me prépare <span class="acc2-cta-arr" aria-hidden="true">→</span>
-  </button>
   ${debriefCard}
   ${consolCard}
 
@@ -2251,8 +2278,8 @@ function wire(
         hinted: false,
         answered: false,
       });
-      const h1 = root.querySelector("#prep-hero-title");
-      if (h1) h1.textContent = next.titre;
+      const nm = root.querySelector("#prep-theme-name");
+      if (nm) nm.textContent = next.titre;
       const cta = root.querySelector("#action-cta-btn");
       if (cta) cta.dataset.href = prepHrefFor(next.code, 0);
       if (prep) {
@@ -2372,9 +2399,9 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
         hinted: false,
         answered: false,
       });
-      // Mise à jour du hero en place
-      const h1 = root.querySelector("#prep-hero-title");
-      if (h1) h1.textContent = titre;
+      // Mise à jour du hero en place (nom du thème dans la pastille)
+      const nm = root.querySelector("#prep-theme-name");
+      if (nm) nm.textContent = titre;
       const cta = root.querySelector("#action-cta-btn");
       if (cta) cta.dataset.href = prepHrefFor(code, 0);
       if (prep) {
